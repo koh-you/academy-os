@@ -5,6 +5,19 @@ const { SolapiMessageService } = require("solapi");
 
 const DEFAULT_TEST_RECIPIENT = "01057882748";
 
+const REQUIRED_SOLAPI_ENV = [
+  "SOLAPI_API_KEY",
+  "SOLAPI_API_SECRET",
+  "SOLAPI_FROM",
+  "SOLAPI_PFID"
+];
+
+const TEMPLATE_ENV = {
+  attendance: "SOLAPI_ATTENDANCE_TEMPLATE_ID",
+  parentComment: "SOLAPI_PARENT_COMMENT_TEMPLATE_ID",
+  studentComment: "SOLAPI_STUDENT_COMMENT_TEMPLATE_ID"
+};
+
 function compactPhoneNumber(value = "") {
   return String(value).replaceAll(/[^0-9]/g, "");
 }
@@ -17,7 +30,7 @@ function envValue(name) {
 function requiredEnv(name) {
   const value = envValue(name);
   if (!value) {
-    throw new Error(`${name} environment variable is required.`);
+    throw new Error(`${name} 환경변수가 필요합니다.`);
   }
   return value;
 }
@@ -65,15 +78,41 @@ function createServiceConfig(templateEnvName) {
   };
 }
 
+function configState(name) {
+  return Boolean(envValue(name));
+}
+
+export function getNotificationStatus() {
+  const required = [
+    ...REQUIRED_SOLAPI_ENV,
+    TEMPLATE_ENV.attendance,
+    TEMPLATE_ENV.parentComment,
+    TEMPLATE_ENV.studentComment
+  ];
+
+  return {
+    dryRun: isDryRun(),
+    allowRealRecipients: process.env.ALIMTALK_ALLOW_REAL_PARENT_NUMBERS === "true",
+    testRecipient: compactPhoneNumber(process.env.ALIMTALK_TEST_RECIPIENT ?? DEFAULT_TEST_RECIPIENT),
+    solapiConfigured: REQUIRED_SOLAPI_ENV.every(configState),
+    templatesConfigured: {
+      attendance: configState(TEMPLATE_ENV.attendance),
+      parentComment: configState(TEMPLATE_ENV.parentComment),
+      studentComment: configState(TEMPLATE_ENV.studentComment)
+    },
+    missing: required.filter((name) => !configState(name))
+  };
+}
+
 async function sendKakaoAlimtalk({ payload, recipientPhone, templateEnvName, variables }) {
   const recipient = resolveRecipient(recipientPhone);
 
   if (!recipient.to) {
-    throw new Error("Recipient phone number is required.");
+    throw new Error("수신자 전화번호가 필요합니다.");
   }
 
   if (process.env.ALIMTALK_ALLOW_REAL_PARENT_NUMBERS === "true" && !recipient.requestedTo) {
-    throw new Error("Requested recipient phone number is required.");
+    throw new Error("실제 발송 모드에서는 원 수신자 전화번호가 필요합니다.");
   }
 
   if (isDryRun()) {
@@ -114,7 +153,7 @@ export async function sendAttendanceAlimtalk(payload) {
   return sendKakaoAlimtalk({
     payload,
     recipientPhone: payload.parentPhone,
-    templateEnvName: "SOLAPI_ATTENDANCE_TEMPLATE_ID",
+    templateEnvName: TEMPLATE_ENV.attendance,
     variables: {
       "#{학생명}": String(payload.studentName ?? ""),
       "#{상태}": attendanceLabel(payload.attendanceStatus),
@@ -130,9 +169,7 @@ export async function sendLessonCommentAlimtalk(payload) {
   const audience = payload.target === "student" ? "student" : "parent";
   const recipientPhone = audience === "student" ? payload.studentPhone : payload.parentPhone;
   const templateEnvName =
-    audience === "student"
-      ? "SOLAPI_STUDENT_COMMENT_TEMPLATE_ID"
-      : "SOLAPI_PARENT_COMMENT_TEMPLATE_ID";
+    audience === "student" ? TEMPLATE_ENV.studentComment : TEMPLATE_ENV.parentComment;
 
   return sendKakaoAlimtalk({
     payload,

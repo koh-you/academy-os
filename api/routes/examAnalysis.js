@@ -2,17 +2,33 @@ const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const ANTHROPIC_MESSAGES_URL = "https://api.anthropic.com/v1/messages";
 
 const fallbackModels = {
-  anthropic: "claude-sonnet-4-6",
+  anthropic: "claude-sonnet-4-5",
   mock: "local-mock",
-  openai: "gpt-5.5"
+  openai: "gpt-4.1-mini"
 };
 
-function requiredEnv(name) {
+function envValue(name) {
   const value = process.env[name];
+  return value && !value.startsWith("your_") ? value : "";
+}
+
+function requiredEnv(name) {
+  const value = envValue(name);
   if (!value) {
     throw new Error(`${name} 환경변수가 필요합니다.`);
   }
   return value;
+}
+
+export function getAiStatus() {
+  return {
+    providers: {
+      anthropic: Boolean(envValue("ANTHROPIC_API_KEY")),
+      mock: true,
+      openai: Boolean(envValue("OPENAI_API_KEY"))
+    },
+    fallbackModels
+  };
 }
 
 function selectedModel(payload) {
@@ -33,7 +49,7 @@ function buildExamAnalysisPrompt(payload) {
     `원본 링크: ${payload.sourceFileUrl ?? ""}`,
     "",
     "[시험 원본/OCR/메모]",
-    payload.rawExamText || "아직 원본 텍스트가 없습니다. 입력된 기본정보를 기준으로 분석 필드 초안을 만드세요.",
+    payload.rawExamText || "아직 원본 텍스트가 없습니다. 입력된 기본정보를 기준으로 분석 필드 초안을 만들어주세요.",
     "",
     "반드시 아래 JSON 형식만 반환하세요.",
     "{",
@@ -51,7 +67,7 @@ function buildExamAnalysisPrompt(payload) {
 function buildCommentPrompt(payload) {
   const audienceLabel = payload.audience === "student" ? "학생" : "학부모";
   return [
-    "역할: 으뜸수학학원 고태영T 수업 코멘트 편집자",
+    "역할: koh_you_math 고태영T의 수업 코멘트 편집자",
     `대상: ${audienceLabel}`,
     "목표: 강사가 대강 적은 메모를 실제 발송 가능한 자연스러운 문장으로 다듬는다.",
     "원칙:",
@@ -99,13 +115,13 @@ function createMockAnalysis(payload) {
   const school = payload.schoolName || "학교";
   const subject = payload.subject || "수학";
   return {
-    aiOverview: `${school} ${subject} 시험은 기본 개념 확인과 조건 해석을 함께 요구하는 구조로 정리됩니다. 원본 시험지를 넣으면 문항수, 난이도, 배점 흐름을 더 구체화합니다.`,
-    unitDistribution: "1. 핵심 단원: 이차방정식/이차함수 계열\n2. 보조 단원: 경우의 수 또는 계산형 문항\n3. 서술형: 조건 해석과 풀이 과정 감점 가능성이 큼",
-    killerProblems: "킬러 후보: 조건이 여러 단계로 연결되는 문항\n준킬러 후보: 계산량보다 식 세우기에서 차이가 나는 문항\n강사 확인 필요: 실제 문항 번호와 배점",
-    mistakePatterns: "조건을 끝까지 반영하지 않음, 부호 실수, 그래프/방정식 변환 과정 누락, 서술형 근거 부족이 예상됩니다.",
-    studentAnalysisDraft: `${school} 학생들은 이번 시험에서 조건 해석과 풀이 과정 정리가 중요했습니다. 다음 시험 전에는 핵심 유형을 반복하고, 서술형 근거를 쓰는 연습이 필요합니다.`,
-    blogDraft: `${school} ${subject} 시험 분석입니다. 이번 시험은 단순 계산보다 조건을 읽고 식으로 옮기는 힘이 중요했습니다. 으뜸수학에서는 학생별 오답과 학교별 출제 흐름을 연결해 다음 시험 대비 방향을 잡겠습니다.`,
-    instagramDraft: "1장 표지\n2장 한 줄 총평\n3장 출제 단원\n4장 킬러문항 포인트\n5장 학생 실수 TOP3\n6장 다음 시험 대비법\n7장 으뜸수학 안내"
+    aiOverview: `${school} ${subject} 시험은 기본 개념 확인과 조건 해석을 함께 요구하는 구조로 정리됩니다. 원본 시험지를 넣으면 문항 번호, 배점, 난이도 흐름까지 구체화합니다.`,
+    unitDistribution: "1. 핵심 단원: 조건 해석형 문항\n2. 보조 단원: 계산형 문항\n3. 서술형: 풀이 과정 감점 가능성 확인 필요",
+    killerProblems: "킬러 후보: 조건을 여러 단계로 연결하는 문항\n준킬러 후보: 계산량보다 독해와 식 변형에서 차이가 나는 문항\n강사 확인 필요: 실제 문항 번호와 배점",
+    mistakePatterns: "조건 일부 누락, 부호 실수, 식 변형 과정 누락, 서술형 근거 부족이 예상됩니다.",
+    studentAnalysisDraft: `${school} 학생들은 이번 시험에서 조건 해석과 풀이 과정 정리가 중요했습니다. 다음 시험 전에는 핵심 유형 반복과 서술형 근거 작성 훈련이 필요합니다.`,
+    blogDraft: `${school} ${subject} 시험 분석입니다. 이번 시험은 단순 계산보다 조건을 읽고 식으로 연결하는 힘이 중요했습니다. koh_you_math에서는 학생별 오답과 학교별 출제 흐름을 연결해 다음 시험 대비 방향을 잡습니다.`,
+    instagramDraft: "1장 시험 총평\n2장 출제 단원\n3장 난이도 흐름\n4장 킬러문항 포인트\n5장 학생 실수 TOP3\n6장 다음 시험 대비법\n7장 koh_you_math 안내"
   };
 }
 

@@ -3814,9 +3814,9 @@ function ExamReviewComposerModal({ onClose, onUpdateRow, row }) {
 }
 
 const aiProviderModels = {
-  anthropic: ["claude-sonnet-4-6", "claude-opus-4-8", "claude-haiku-4-5"],
+  anthropic: ["claude-sonnet-4-5", "claude-3-5-sonnet-latest", "claude-3-5-haiku-latest"],
   mock: ["local-mock"],
-  openai: ["gpt-5.5", "gpt-5.1", "gpt-4.1"]
+  openai: ["gpt-4.1-mini", "gpt-4.1", "gpt-4o-mini"]
 };
 
 function ExamAnalysisCenter({ analyses, examPrepRows, onAddAnalysis, onRunAnalysis, onUpdateAnalysis }) {

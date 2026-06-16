@@ -16,8 +16,8 @@ import {
   upsertLessonStudentRecord
 } from "./routes/coreData.js";
 import { loadEnvFile } from "./lib/loadEnv.js";
-import { polishLessonComment, runExamAnalysis } from "./routes/examAnalysis.js";
-import { sendAttendanceAlimtalk, sendLessonCommentAlimtalk } from "./routes/notifications.js";
+import { getAiStatus, polishLessonComment, runExamAnalysis } from "./routes/examAnalysis.js";
+import { getNotificationStatus, sendAttendanceAlimtalk, sendLessonCommentAlimtalk } from "./routes/notifications.js";
 
 loadEnvFile();
 
@@ -80,6 +80,17 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "GET" && requestUrl.pathname === "/api/core/status") {
     sendJson(request, response, 200, { ok: true, result: getCoreDataStatus() });
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/integrations/status") {
+    sendJson(request, response, 200, {
+      ok: true,
+      result: {
+        ai: getAiStatus(),
+        notifications: getNotificationStatus()
+      }
+    });
     return;
   }
 
