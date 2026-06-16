@@ -87,7 +87,6 @@ export function getNotificationStatus() {
     ...REQUIRED_SOLAPI_ENV,
     TEMPLATE_ENV.attendance,
     TEMPLATE_ENV.dailyReport,
-    TEMPLATE_ENV.parentComment,
     TEMPLATE_ENV.studentComment
   ];
 
@@ -168,6 +167,18 @@ export async function sendAttendanceAlimtalk(payload) {
 }
 
 export async function sendDailyReportAlimtalk(payload) {
+  const reportBody =
+    payload.reportBody ??
+    buildDailyReportBody({
+      attendanceStatus: payload.attendanceStatus,
+      incompleteHomework: payload.incompleteHomework,
+      nextHomework: payload.nextHomework,
+      previousHomework: payload.previousHomework,
+      retestSchedule: payload.retestSchedule,
+      supplementSchedule: payload.supplementSchedule,
+      teacherComment: payload.teacherComment
+    });
+
   return sendKakaoAlimtalk({
     payload,
     recipientPhone: payload.parentPhone,
@@ -176,14 +187,31 @@ export async function sendDailyReportAlimtalk(payload) {
       "#{학원명}": String(payload.academyName ?? "koh_you_math"),
       "#{학생명}": String(payload.studentName ?? ""),
       "#{수업일}": String(payload.lessonDate ?? ""),
-      "#{수업명}": String(payload.lessonName ?? ""),
-      "#{출결}": attendanceLabel(payload.attendanceStatus),
-      "#{지난숙제}": String(payload.previousHomework ?? ""),
-      "#{다음숙제}": String(payload.nextHomework ?? ""),
-      "#{미완료}": String(payload.incompleteHomework ?? ""),
-      "#{강사코멘트}": String(payload.teacherComment ?? "")
+      "#{리포트본문}": reportBody
     }
   });
+}
+
+function buildDailyReportBody({
+  attendanceStatus,
+  incompleteHomework,
+  nextHomework,
+  previousHomework,
+  retestSchedule,
+  supplementSchedule,
+  teacherComment
+}) {
+  const lines = [
+    `출결: ${attendanceLabel(attendanceStatus)}`,
+    previousHomework ? `지난 숙제: ${previousHomework}` : "",
+    nextHomework ? `다음 숙제: ${nextHomework}` : "",
+    incompleteHomework ? `미완료: ${incompleteHomework}` : "",
+    retestSchedule ? `재시험 일정: ${retestSchedule}` : "",
+    supplementSchedule ? `보충 일정: ${supplementSchedule}` : "",
+    teacherComment ? `코멘트: ${teacherComment}` : ""
+  ];
+
+  return lines.filter(Boolean).join("\n");
 }
 
 export async function sendLessonCommentAlimtalk(payload) {
