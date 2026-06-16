@@ -1,30 +1,25 @@
-# 출결/코멘트 알림톡 설정
+# 알림톡 설정
 
-academy-os는 백엔드 API 서버에서 Solapi 알림톡을 발송합니다.
-브라우저에는 Solapi API Key를 절대 저장하지 않습니다.
+academy-os의 알림톡은 백엔드 API 서버에서 Solapi를 통해 발송한다.
+브라우저에는 Solapi API Key를 저장하지 않는다.
 
-## 현재 안전장치
+## 알림톡 종류
 
-기본값은 실제 학부모 번호로 보내지 않는 테스트 모드입니다.
+현재 MVP에서 필요한 알림톡은 3종이다.
 
-```env
-ALIMTALK_DRY_RUN=true
-ALIMTALK_TEST_RECIPIENT=01057882748
-ALIMTALK_ALLOW_REAL_PARENT_NUMBERS=false
-```
+1. 출결 알림톡
+   - 학생 등원, 하원, 지각, 결석 상태를 학부모에게 보낸다.
+   - 기존 클래스업 출결 알림을 대체한다.
 
-- `ALIMTALK_DRY_RUN=true`: 실제 발송하지 않고 서버 응답만 확인합니다.
-- `ALIMTALK_ALLOW_REAL_PARENT_NUMBERS=false`: 실제 발송 모드에서도 모든 수신자를 테스트 번호로 우회합니다.
-- 실제 학부모 번호 발송은 충분히 검수한 뒤 두 값을 모두 바꿉니다.
+2. 데일리리포트 알림톡
+   - 수업일지의 강사코멘트, 지난 숙제, 다음 숙제, 미완료 숙제 등을 학부모에게 보낸다.
+   - 기존 노션-메이크-솔라피 흐름을 웹앱 안으로 옮기는 대상이다.
+   - 코드에서는 학부모 대상 `comment-alimtalk`도 이 템플릿을 사용한다.
 
-```env
-ALIMTALK_DRY_RUN=false
-ALIMTALK_ALLOW_REAL_PARENT_NUMBERS=true
-```
+3. 학생별 코멘트 알림톡
+   - 강사가 학생에게 직접 보낼 내용을 AI로 다듬은 뒤 학생 전화번호로 보낸다.
 
 ## Render 환경변수
-
-Render 백엔드 서비스의 Environment Variables에 아래 값을 넣습니다.
 
 ```env
 SOLAPI_API_KEY=
@@ -32,7 +27,7 @@ SOLAPI_API_SECRET=
 SOLAPI_FROM=
 SOLAPI_PFID=
 SOLAPI_ATTENDANCE_TEMPLATE_ID=
-SOLAPI_PARENT_COMMENT_TEMPLATE_ID=
+SOLAPI_DAILY_REPORT_TEMPLATE_ID=
 SOLAPI_STUDENT_COMMENT_TEMPLATE_ID=
 SOLAPI_DISABLE_SMS=true
 ALIMTALK_DRY_RUN=true
@@ -40,11 +35,24 @@ ALIMTALK_TEST_RECIPIENT=01057882748
 ALIMTALK_ALLOW_REAL_PARENT_NUMBERS=false
 ```
 
+## 안전 장치
+
+```env
+ALIMTALK_DRY_RUN=true
+ALIMTALK_ALLOW_REAL_PARENT_NUMBERS=false
+ALIMTALK_TEST_RECIPIENT=01057882748
+```
+
+- `ALIMTALK_DRY_RUN=true`: 실제 발송하지 않고 서버 응답으로 payload만 확인한다.
+- `ALIMTALK_ALLOW_REAL_PARENT_NUMBERS=false`: 실제 발송 모드에서도 모든 수신자를 테스트 번호로 돌린다.
+- 실제 학부모 번호 발송은 충분히 검수한 뒤 `ALIMTALK_DRY_RUN=false`, `ALIMTALK_ALLOW_REAL_PARENT_NUMBERS=true`로 변경한다.
+
 ## 템플릿 변수
 
 출결 템플릿:
 
 ```text
+#{학원명}
 #{학생명}
 #{상태}
 #{시간}
@@ -53,7 +61,21 @@ ALIMTALK_ALLOW_REAL_PARENT_NUMBERS=false
 #{사유}
 ```
 
-코멘트 템플릿:
+데일리리포트 템플릿:
+
+```text
+#{학원명}
+#{학생명}
+#{수업일}
+#{수업명}
+#{출결}
+#{지난숙제}
+#{다음숙제}
+#{미완료}
+#{강사코멘트}
+```
+
+학생별 코멘트 템플릿:
 
 ```text
 #{학원명}
@@ -65,7 +87,7 @@ ALIMTALK_ALLOW_REAL_PARENT_NUMBERS=false
 
 ## 상태 확인
 
-배포 후 아래 주소에서 설정 여부만 확인할 수 있습니다. 실제 키 값은 노출되지 않습니다.
+배포 후 아래 주소에서 설정 상태를 확인한다.
 
 ```text
 GET /api/integrations/status

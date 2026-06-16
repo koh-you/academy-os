@@ -17,7 +17,12 @@ import {
 } from "./routes/coreData.js";
 import { loadEnvFile } from "./lib/loadEnv.js";
 import { getAiStatus, polishLessonComment, runExamAnalysis } from "./routes/examAnalysis.js";
-import { getNotificationStatus, sendAttendanceAlimtalk, sendLessonCommentAlimtalk } from "./routes/notifications.js";
+import {
+  getNotificationStatus,
+  sendAttendanceAlimtalk,
+  sendDailyReportAlimtalk,
+  sendLessonCommentAlimtalk
+} from "./routes/notifications.js";
 
 loadEnvFile();
 
@@ -246,6 +251,17 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await sendLessonCommentAlimtalk(payload);
+      sendJson(request, response, 200, { ok: true, provider: "solapi", result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/notifications/daily-report-alimtalk") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await sendDailyReportAlimtalk(payload);
       sendJson(request, response, 200, { ok: true, provider: "solapi", result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
