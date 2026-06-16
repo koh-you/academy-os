@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: koh-you-math-academy-os-api
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm run api
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ALIMTALK_DRY_RUN
+        value: "true"
+      - key: ALIMTALK_ALLOW_REAL_PARENT_NUMBERS
+        value: "false"
+      - key: ALIMTALK_TEST_RECIPIENT
+        value: "01057882748"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "*"

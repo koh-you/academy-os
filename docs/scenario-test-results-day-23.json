@@ -1,0 +1,132 @@
+{
+  "executedAt": "2026-06-06T13:06:33.902Z",
+  "method": "static-code-and-sample-data-check",
+  "note": "Playwright browser execution was not available because playwright-core is missing. These checks were executed directly against the current source code and sample data.",
+  "summary": {
+    "pass": 16,
+    "fail": 3,
+    "pending": 1
+  },
+  "results": [
+    {
+      "id": "S01",
+      "title": "학생은 본인 데이터만 볼 수 있어야 한다",
+      "status": "FAIL",
+      "detail": "학생 포털에 학생 선택 드롭다운/상태가 있어 다른 학생 데이터 접근 가능"
+    },
+    {
+      "id": "S02",
+      "title": "학부모는 읽기 전용이어야 한다",
+      "status": "PENDING",
+      "detail": "학부모 전용 포털과 parent role gate가 아직 구현되지 않음"
+    },
+    {
+      "id": "S03",
+      "title": "원장/강사는 관리 화면에 접근할 수 있어야 한다",
+      "status": "PASS",
+      "detail": "검증 통과"
+    },
+    {
+      "id": "S04",
+      "title": "강사가 날짜와 수업을 선택하면 해당 수업 학생만 보여야 한다",
+      "status": "PASS",
+      "detail": "검증 통과"
+    },
+    {
+      "id": "S05",
+      "title": "강사가 수업 기록을 수정하고 저장할 수 있어야 한다",
+      "status": "PASS",
+      "detail": "검증 통과"
+    },
+    {
+      "id": "S06",
+      "title": "학생이 오늘 숙제를 완료 체크할 수 있어야 한다",
+      "status": "PASS",
+      "detail": "검증 통과"
+    },
+    {
+      "id": "S07",
+      "title": "학생이 숙제를 직접 등록할 수 있어야 한다",
+      "status": "PASS",
+      "detail": "검증 통과"
+    },
+    {
+      "id": "S08",
+      "title": "학생은 숙제를 실제 삭제할 수 없어야 한다",
+      "status": "PASS",
+      "detail": "검증 통과"
+    },
+    {
+      "id": "S09",
+      "title": "강사가 밀린 숙제를 볼 수 있어야 한다",
+      "status": "PASS",
+      "detail": "검증 통과"
+    },
+    {
+      "id": "S10",
+      "title": "강사가 숙제를 확인 처리할 수 있어야 한다",
+      "status": "PASS",
+      "detail": "검증 통과"
+    },
+    {
+      "id": "S11",
+      "title": "강사가 밀린 숙제에서 숙제보충을 생성할 수 있어야 한다",
+      "status": "PASS",
+      "detail": "검증 통과"
+    },
+    {
+      "id": "S12",
+      "title": "같은 원본으로 보충 과제가 중복 생성되면 안 된다",
+      "status": "FAIL",
+      "detail": "중복 생성 방지 로직이 없어 같은 sourceId로 MakeupTask가 여러 개 생성될 수 있음"
+    },
+    {
+      "id": "S13",
+      "title": "강사가 후속조치 일정을 배정할 수 있어야 한다",
+      "status": "PASS",
+      "detail": "검증 통과"
+    },
+    {
+      "id": "S14",
+      "title": "강사가 알림 문구 초안만 생성할 수 있어야 한다",
+      "status": "PASS",
+      "detail": "검증 통과"
+    },
+    {
+      "id": "S15",
+      "title": "강사가 모의 알림 로그를 남길 수 있어야 한다",
+      "status": "PASS",
+      "detail": "검증 통과"
+    },
+    {
+      "id": "S16",
+      "title": "강사가 데일리 리포트 초안을 열 수 있어야 한다",
+      "status": "PASS",
+      "detail": "검증 통과"
+    },
+    {
+      "id": "S17",
+      "title": "리포트 스냅샷은 원본 변경과 분리되어야 한다",
+      "status": "PASS",
+      "detail": "검증 통과"
+    },
+    {
+      "id": "S18",
+      "title": "공통 ID 링크가 존재해야 한다",
+      "status": "PASS",
+      "detail": "검증 통과"
+    },
+    {
+      "id": "S19",
+      "title": "새로고침 후 데이터가 유지되어야 한다",
+      "status": "PASS",
+      "detail": "검증 통과"
+    },
+    {
+      "id": "S20",
+      "title": "저장 실패가 사용자에게 표시되어야 한다",
+      "status": "FAIL",
+      "detail": "useStoredState 저장 effect에 try/catch 및 사용자 실패 표시가 없음"
+    }
+  ]
+}

@@ -1,0 +1,7476 @@
+﻿import { useEffect, useMemo, useRef, useState } from "react";
+import { sampleData } from "../shared/data/sampleData.js";
+
+const storageKeys = {
+  classTemplates: "academy-os.classTemplates.v1",
+  lessons: "academy-os.lessons.v8",
+  students: "academy-os.students.v12",
+  records: "academy-os.lessonStudentRecords.v7",
+  homeworks: "academy-os.homeworks.v7",
+  reportSnapshots: "academy-os.reportSnapshots.v1",
+  makeupTasks: "academy-os.makeupTasks.v1",
+  notificationLogs: "academy-os.notificationLogs.v1",
+  wrongProblems: "academy-os.wrongProblems.v1",
+  problemBooks: "academy-os.problemBooks.v1",
+  scoreRecords: "academy-os.scoreRecords.v1",
+  academyTests: "academy-os.academyTests.v1",
+  examPrepRows: "academy-os.examPrepRows.v2",
+  examAnalyses: "academy-os.examAnalyses.v1",
+  schoolEvents: "academy-os.schoolEvents.v1",
+  lessonResearchItems: "academy-os.lessonResearchItems.v1"
+};
+
+const dayLabels = {
+  mon: "월",
+  tue: "화",
+  wed: "수",
+  thu: "목",
+  fri: "금",
+  sat: "토",
+  sun: "일"
+};
+
+const attendanceLabels = {
+  pending: "대기",
+  present: "출석",
+  late: "지각",
+  absent: "결석",
+  excused: "인정결석"
+};
+
+const homeworkLabels = {
+  not_started: "미시작",
+  assigned: "배정",
+  submitted: "제출",
+  verified: "확인",
+  partial: "일부",
+  missing: "미완료",
+  overdue: "밀림"
+};
+
+const saveStateLabels = {
+  idle: "저장 전",
+  dirty: "변경됨",
+  saving: "저장 중",
+  saved: "저장 완료",
+  failed: "저장 실패"
+};
+
+function getSaveButtonLabel(saveState) {
+  if (saveState === "saving") return "저장 중";
+  if (saveState === "failed") return "다시 저장";
+  if (saveState === "saved") return "저장 완료";
+  return "저장";
+}
+
+const today = getKoreaDateString();
+const academyBrandName = "koh_you_math";
+const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8787").replace(/\/$/, "");
+
+function apiUrl(path) {
+  return `${apiBaseUrl}${path}`;
+}
+
+async function postJson(path, body) {
+  const response = await fetch(apiUrl(path), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  const result = await response.json();
+  if (!response.ok || !result.ok) {
+    throw new Error(result.error || "API 저장 실패");
+  }
+  return result;
+}
+
+const teacherAccount = {
+  loginId: "teacher",
+  password: "1234",
+  name: "고태영",
+  role: "teacher"
+};
+
+const examPrepTextbookBySchoolGrade = {
+  "용화여고_고1": "천재(홍)",
+  "상계고_고1": "천재(홍)",
+  "자운고_고1": "미래엔",
+  "정의여고_고1": "미래엔",
+  "창동고_고1": "미래엔"
+};
+
+function createParentLoginId(student) {
+  return `parent-${student.loginId}`;
+}
+
+function getDemoStudent(students) {
+  return students.find((student) => student.studentId === "student_mwf710_001") ?? students[0];
+}
+
+function createDefaultExamAnalysis(examPrepRow = {}) {
+  const schoolName = examPrepRow.schoolName || "창동고";
+  const grade = examPrepRow.grade || "1학년";
+  const subject = examPrepRow.subject || "공통수학1";
+  return {
+    examAnalysisId: `exam_analysis_${Date.now()}`,
+    examPrepId: examPrepRow.examPrepId || "",
+    schoolName,
+    grade,
+    subject,
+    examName: "2026 1학기 중간고사",
+    examDate: "2026-06-12",
+    sourceFileUrl: "",
+    rawExamText: "",
+    aiProvider: "mock",
+    aiModel: "local-mock",
+    aiStatus: "대기",
+    aiLastRunAt: "",
+    aiError: "",
+    aiPrompt: [
+      `역할: ${academyBrandName} 시험지 분석 1차 AI 가안 생성`,
+      "입력된 시험 원본을 바탕으로 아래 필드를 채운다.",
+      "1. 시험 개요: 문항수, 범위, 전반 난이도, 출제 특징",
+      "2. 단원별 출제 분포: 단원명, 문항수, 배점, 체감 난도",
+      "3. 킬러/준킬러 문항: 문항 번호, 핵심 함정, 필요한 개념",
+      "4. 학생 실수 패턴: 계산, 조건 해석, 시간 배분, 서술형 감점 요인",
+      "5. 다음 시험 학습 방향: 학생에게 실제로 안내할 문장으로 정리",
+      "주의: AI 결과는 가안이며, 강사 인사이트 4모듈이 추가되기 전에는 발행용으로 쓰지 않는다."
+    ].join("\n"),
+    aiOverview: `${schoolName} ${grade} ${subject} 시험지 원본을 넣으면 문항수, 난이도, 출제 특징이 정리됩니다.`,
+    unitDistribution: "단원별 문항수와 배점이 여기에 정리됩니다.",
+    killerProblems: "킬러/준킬러 문항 번호, 핵심 함정, 풀이 접근이 여기에 정리됩니다.",
+    mistakePatterns: "학생들이 많이 틀릴 지점과 현장 체감 오답 패턴을 정리합니다.",
+    insightSummary: "이번 시험 출제 패턴 한 줄:\n작년 대비 변화:\n학생들이 가장 많이 틀린 유형:\n다음 시험 예측 한 줄:\n\n부연:",
+    insightUnits: "단원명:\n출제 빈도: 매년 / 격년 / 신유형 / 감소\n학생 정답률 체감: 상 / 중 / 하\n핵심 키워드:\n\n부연:",
+    insightKiller: "문항 번호 / 배점:\n출제 단원:\n유형: 기존 반복 / 신유형 / 변형\n핵심 함정 한 줄:\n\n부연:",
+    insightDirection: "이 학교 학생들에게 가장 강조할 점:\n실수 줄이는 핵심 팁:\n\n부연:",
+    studentAnalysisDraft: "학생용 분석지는 A 총평 + B 단원별 인사이트 + D 학습 방향을 중심으로 생성합니다.",
+    blogDraft: "블로그 초안은 학부모가 읽기 쉬운 톤으로 시험 개요, 킬러문항, 학습 방향을 연결합니다.",
+    instagramDraft: `1장 표지\n2장 시험 한 줄 총평\n3장 출제 분포\n4장 킬러문항\n5장 학생 실수\n6장 학습 방향\n7장 ${academyBrandName} 안내`,
+    pipelineStage: "1차 AI 가안"
+  };
+}
+
+function safeIdPart(value = "") {
+  return String(value)
+    .trim()
+    .replaceAll(/\s+/g, "-")
+    .replaceAll(/[^0-9A-Za-z가-힣_-]/g, "")
+    .slice(0, 40);
+}
+
+function examCycleLabel(examCycle) {
+  return {
+    "2026-1-mid": "2026 1학기 중간",
+    "2026-1-final": "2026 1학기 기말",
+    "2026-2-mid": "2026 2학기 중간",
+    "2026-2-final": "2026 2학기 기말"
+  }[examCycle] ?? examCycle;
+}
+
+function normalizeGradeLabel(grade = "") {
+  const value = String(grade).trim();
+  if (value.includes("1")) return value.includes("중") ? "중1" : "고1";
+  if (value.includes("2")) return value.includes("중") ? "중2" : "고2";
+  if (value.includes("3")) return value.includes("중") ? "중3" : "고3";
+  return value;
+}
+
+function getTextbookFromExamPrep(student) {
+  const key = `${student.schoolName || ""}_${normalizeGradeLabel(student.grade)}`;
+  return examPrepTextbookBySchoolGrade[key] ?? student.textbook ?? "";
+}
+
+function getDefaultMathExamDate(row, index = 0) {
+  const fallbackBySchool = {
+    "용화여고": "2026-06-24",
+    "정의여고": "2026-06-25",
+    "자운고": "2026-06-26",
+    "상계고": "2026-06-27",
+    "창동고": "2026-06-29"
+  };
+  return row.mathExamDate || fallbackBySchool[row.schoolName] || `2026-06-${String(24 + (index % 5)).padStart(2, "0")}`;
+}
+
+function buildExamPrepRowsFromStudents(students, examCycle, classTemplateId = "") {
+  const classStudents = classTemplateId
+    ? students.filter((student) => student.defaultClassTemplateId === classTemplateId)
+    : students;
+  const seen = new Set();
+
+  return classStudents
+    .map((student) => {
+      const schoolName = student.schoolName || "학교 미입력";
+      const grade = student.grade || "학년 미입력";
+      const key = `${schoolName}_${grade}_${student.textbook || ""}_${examCycle}`;
+      if (seen.has(key)) return null;
+      seen.add(key);
+
+      return {
+        examPrepId: `exam_prep_${safeIdPart(examCycle)}_${safeIdPart(schoolName)}_${safeIdPart(grade)}_${safeIdPart(student.textbook || "textbook")}`,
+        examCycle,
+        schoolName,
+        grade,
+        subject: "공통수학1",
+        publisher: student.textbook || "",
+        scope: "",
+        subTextbook: "",
+        examPeriod: "",
+        mathExamDate: "",
+        review: "",
+        revisedReview: "",
+        memo: "",
+        source: "학생DB 자동생성"
+      };
+    })
+    .filter(Boolean);
+}
+
+function createDefaultSchoolEvents(rows) {
+  return rows.slice(0, 6).map((row, index) => ({
+    eventId: `event_exam_${row.examPrepId ?? index}`,
+    date: getDefaultMathExamDate(row, index),
+    schoolName: row.schoolName || "학교 미입력",
+    title: `${examCycleLabel(row.examCycle ?? "2026-1-mid")} 수학시험`,
+    type: "mathExam"
+  }));
+}
+
+function mergeById(currentItems, nextItems, idKey) {
+  const existingIds = new Set(currentItems.map((item) => item[idKey]));
+  return [...currentItems, ...nextItems.filter((item) => !existingIds.has(item[idKey]))];
+}
+
+const lessonResearchSubjects = ["공통수학1", "공통수학2", "대수", "확률과 통계", "미적분", "기하", "미적분2"];
+
+function createLessonResearchItem(subject = "공통수학1") {
+  return {
+    researchItemId: `research_${Date.now()}`,
+    subject,
+    category: "빈출 테마",
+    title: "새 연구 항목",
+    source: "",
+    problemNote: "",
+    teachingNote: "",
+    materialPlan: "",
+    priority: "중",
+    status: "수집",
+    createdAt: today,
+    updatedAt: today
+  };
+}
+
+function createDefaultLessonResearchItems() {
+  return [
+    {
+      ...createLessonResearchItem("공통수학1"),
+      researchItemId: "research_common_math_1_quadratic_theme",
+      category: "빈출 테마",
+      title: "이차함수 그래프와 부등식 연결",
+      source: "고1 내신 대비 수업 메모",
+      problemNote: "그래프의 위치 관계를 식으로 옮기는 과정에서 학생들이 자주 멈춤.",
+      teachingNote: "교점 개수, 판별식, 부호표를 한 흐름으로 설명하는 판서를 보강.",
+      materialPlan: "개념 확인 3문항 + 내신형 5문항으로 교재 후보 구성",
+      priority: "상",
+      status: "정리중"
+    },
+    {
+      ...createLessonResearchItem("대수"),
+      researchItemId: "research_algebra_sequence_note",
+      category: "설명 아쉬움",
+      title: "수열 점화식 풀이 도입",
+      source: "학생 질문 기록",
+      problemNote: "처음 보는 점화식을 등차/등비와 연결하지 못함.",
+      teachingNote: "항을 직접 4개 써보고 규칙을 찾는 단계부터 다시 설계.",
+      materialPlan: "대표 유형별 풀이 템플릿으로 정리",
+      priority: "중",
+      status: "수집"
+    },
+    {
+      ...createLessonResearchItem("미적분"),
+      researchItemId: "research_calculus_derivative_killer",
+      category: "못 푼 문제",
+      title: "접선 조건이 숨어 있는 미분 문제",
+      source: "기출 변형 후보",
+      problemNote: "조건 해석은 됐지만 식 세팅 시간이 오래 걸림.",
+      teachingNote: "접점, 기울기, 함수값 조건을 표로 먼저 분해.",
+      materialPlan: "킬러문항 해설 카드로 발전",
+      priority: "상",
+      status: "교재후보"
+    }
+  ];
+}
+
+function createDefaultProblemBooks() {
+  return [
+    {
+      problemBookId: "book_common_math_step01",
+      title: "공수1 고쟁이 STEP 01 다항식의 연산",
+      subject: "공통수학1",
+      grade: "고1",
+      unit: "다항식의 연산",
+      sourceFileName: "sample_textbook.pdf",
+      totalProblems: 28,
+      statusCounts: { first: 28, retry: 0, second: 0, wrong: 0, question: 0, outOfScope: 0, unchecked: 0 },
+      problems: Array.from({ length: 28 }, (_, index) => ({
+        problemId: `problem_step01_${index + 1}`,
+        number: index + 1,
+        status: "first",
+        cropImageUrl: "",
+        text: index === 3 ? "다항식 (x+3y-1)(2x-y+3)을 바르게 전개한 것은?" : "",
+        answer: "",
+        note: ""
+      }))
+    },
+    {
+      problemBookId: "book_common_math_step02",
+      title: "공수1 고쟁이 STEP 02 항등식과 나머지정리",
+      subject: "공통수학1",
+      grade: "고1",
+      unit: "항등식과 나머지정리",
+      sourceFileName: "sample_textbook.pdf",
+      totalProblems: 26,
+      statusCounts: { first: 4, retry: 2, second: 0, wrong: 1, question: 0, outOfScope: 0, unchecked: 19 },
+      problems: Array.from({ length: 26 }, (_, index) => ({
+        problemId: `problem_step02_${index + 78}`,
+        number: index + 78,
+        status: index === 3 ? "retry" : index === 4 ? "wrong" : index < 4 ? "first" : "unchecked",
+        cropImageUrl: "",
+        text: "",
+        answer: "",
+        note: ""
+      }))
+    }
+  ];
+}
+
+function createProblemBookFromFile(fileName) {
+  const timestamp = Date.now();
+  return {
+    problemBookId: `book_uploaded_${timestamp}`,
+    title: fileName.replace(/\.[^.]+$/, "") || "새 교재",
+    subject: "공통수학1",
+    grade: "고1",
+    unit: "단원 미지정",
+    sourceFileName: fileName,
+    uploadedAt: today,
+    totalProblems: 30,
+    problems: Array.from({ length: 30 }, (_, index) => ({
+      problemId: `problem_uploaded_${timestamp}_${index + 1}`,
+      number: index + 1,
+      status: "unchecked",
+      cropImageUrl: "",
+      text: "",
+      answer: "",
+      note: ""
+    }))
+  };
+}
+
+function createProblemBookFolder(folderName) {
+  const timestamp = Date.now();
+  return {
+    problemBookId: `book_folder_${timestamp}`,
+    title: folderName || "새 교재 폴더",
+    subject: folderName || "과목 미지정",
+    grade: "",
+    unit: "",
+    sourceFileName: "",
+    uploadedAt: today,
+    uploadedAcademy: academyBrandName,
+    numberRange: "",
+    averageMinutes: "",
+    totalProblems: 0,
+    problems: []
+  };
+}
+
+function createProblemBooksFromPageSnapJson(jsonText) {
+  let parsed;
+  try {
+    parsed = JSON.parse(jsonText);
+  } catch (error) {
+    throw new Error("JSON 형식이 올바르지 않습니다. PageSnap의 AI JSON 가져오기 형식 그대로 붙여넣어 주세요.");
+  }
+
+  const rows = Array.isArray(parsed) ? parsed : [parsed];
+  if (rows.length === 0) {
+    throw new Error("가져올 교재 항목이 없습니다.");
+  }
+
+  const timestamp = Date.now();
+  return rows.map((row, index) => {
+    const title = row.item_title || row.book_name || `PageSnap 교재 ${index + 1}`;
+    const startProblem = Number.parseInt(row.start_problem_id ?? row.startProblemId ?? 1, 10) || 1;
+    const endProblem = Number.parseInt(row.end_problem_id ?? row.endProblemId ?? startProblem, 10) || startProblem;
+    const problemCount = Math.max(0, endProblem - startProblem + 1);
+    const bookId = `book_pagesnap_${timestamp}_${index}_${safeIdPart(title)}`;
+
+    return {
+      problemBookId: bookId,
+      title,
+      subject: row.subject || "과목 미지정",
+      grade: row.grade || inferGradeFromSubject(row.subject),
+      unit: row.item_title || row.unit || title,
+      sourceFileName: row.source_file_name || row.pdf_file_name || "PageSnap",
+      sourceType: "pagesnap",
+      bookName: row.book_name || "",
+      uploadedAt: today,
+      uploadedAcademy: academyBrandName,
+      numberRange: `${startProblem}~${endProblem}`,
+      startPdfPage: row.start_pdf_page ?? "",
+      endPdfPage: row.end_pdf_page ?? "",
+      startBookPage: row.start_book_page ?? "",
+      endBookPage: row.end_book_page ?? "",
+      averageMinutes: row.estimated_minutes_per_problem ?? "",
+      confidence: row.confidence ?? "",
+      note: row.note ?? "",
+      totalProblems: problemCount,
+      problems: Array.from({ length: problemCount }, (_, problemIndex) => {
+        const number = startProblem + problemIndex;
+        return {
+          problemId: `${bookId}_problem_${number}`,
+          number,
+          status: "unchecked",
+          cropImageUrl: "",
+          text: "",
+          answer: "",
+          note: row.note ?? "",
+          sourcePdfPage: row.start_pdf_page ?? "",
+          sourceBookPage: row.start_book_page ?? ""
+        };
+      })
+    };
+  });
+}
+
+function createSsenCommonMath1PageSnapExample() {
+  return JSON.stringify(
+    [
+      {
+        item_title: "쎈 공통수학1 다항식의 연산",
+        book_name: "쎈 공통수학1 본문",
+        subject: "공통수학1",
+        source_file_name: "쎈 공통수학1 본문.pdf",
+        start_pdf_page: 1,
+        end_pdf_page: 6,
+        start_book_page: 8,
+        end_book_page: 13,
+        start_problem_id: 1,
+        end_problem_id: 28,
+        estimated_minutes_per_problem: 3,
+        confidence: 0.7,
+        note: "예시 데이터입니다. 실제 단원/페이지/문항 번호는 PageSnap에서 PDF를 보며 조정합니다."
+      },
+      {
+        item_title: "쎈 공통수학1 항등식과 나머지정리",
+        book_name: "쎈 공통수학1 본문",
+        subject: "공통수학1",
+        source_file_name: "쎈 공통수학1 본문.pdf",
+        start_pdf_page: 7,
+        end_pdf_page: 12,
+        start_book_page: 14,
+        end_book_page: 19,
+        start_problem_id: 29,
+        end_problem_id: 56,
+        estimated_minutes_per_problem: 3,
+        confidence: 0.7,
+        note: "예시 데이터입니다. 실제 단원/페이지/문항 번호는 PageSnap에서 PDF를 보며 조정합니다."
+      },
+      {
+        item_title: "쎈 공통수학1 인수분해",
+        book_name: "쎈 공통수학1 본문",
+        subject: "공통수학1",
+        source_file_name: "쎈 공통수학1 본문.pdf",
+        start_pdf_page: 13,
+        end_pdf_page: 20,
+        start_book_page: 20,
+        end_book_page: 27,
+        start_problem_id: 57,
+        end_problem_id: 97,
+        estimated_minutes_per_problem: 3,
+        confidence: 0.7,
+        note: "예시 데이터입니다. 실제 단원/페이지/문항 번호는 PageSnap에서 PDF를 보며 조정합니다."
+      }
+    ],
+    null,
+    2
+  );
+}
+
+function inferGradeFromSubject(subject = "") {
+  if (String(subject).includes("중")) return String(subject).slice(0, 2);
+  return "고1";
+}
+
+const problemStatusMeta = {
+  selected: { label: "선택", shortLabel: "선택", className: "selected" },
+  first: { label: "첫회 맞음", shortLabel: "첫회", className: "first" },
+  retry: { label: "한번 틀림", shortLabel: "한번 틀림", className: "retry" },
+  mistake: { label: "실수/확실히 앎", shortLabel: "실수", className: "mistake" },
+  second: { label: "2회차 맞음", shortLabel: "2회차", className: "second" },
+  wrong: { label: "두번 틀림", shortLabel: "두번 틀림", className: "wrong" },
+  question: { label: "질문 전", shortLabel: "질문 전", className: "question" },
+  outOfScope: { label: "범위 제외", shortLabel: "범위x", className: "outOfScope" },
+  unchecked: { label: "미체크", shortLabel: "미체크", className: "unchecked" }
+};
+
+const problemClickCycle = ["first", "retry", "wrong", "mistake"];
+
+function countProblemStatuses(problems = []) {
+  return Object.keys(problemStatusMeta).reduce((counts, status) => {
+    counts[status] = problems.filter((problem) => problem.status === status).length;
+    return counts;
+  }, {});
+}
+
+export function App() {
+  const [activeView, setActiveView] = useState("lessons");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [session, setSession] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(today);
+  const [selectedLessonId, setSelectedLessonId] = useState("");
+  const [lessonClipboard, setLessonClipboard] = useState(null);
+  const [lessonUndoStack, setLessonUndoStack] = useState([]);
+  const [classTemplates, setClassTemplates] = useStoredState(storageKeys.classTemplates, sampleData.classTemplates);
+  const [students, setStudents] = useStoredState(storageKeys.students, sampleData.students);
+  const [lessons, setLessons] = useStoredState(storageKeys.lessons, sampleData.lessons);
+  const [records, setRecords] = useStoredState(storageKeys.records, sampleData.lessonStudentRecords);
+  const [homeworks, setHomeworks] = useStoredState(storageKeys.homeworks, sampleData.homeworks);
+  const [reportSnapshots, setReportSnapshots] = useStoredState(storageKeys.reportSnapshots, []);
+  const [makeupTasks, setMakeupTasks] = useStoredState(storageKeys.makeupTasks, []);
+  const [notificationLogs, setNotificationLogs] = useStoredState(storageKeys.notificationLogs, []);
+  const [wrongProblems, setWrongProblems] = useStoredState(storageKeys.wrongProblems, sampleData.wrongProblems ?? []);
+  const [problemBooks, setProblemBooks] = useStoredState(storageKeys.problemBooks, createDefaultProblemBooks());
+  const [scoreRecords, setScoreRecords] = useStoredState(storageKeys.scoreRecords, sampleData.scoreRecords ?? []);
+  const [academyTests, setAcademyTests] = useStoredState(storageKeys.academyTests, sampleData.academyTests ?? []);
+  const [examPrepRows, setExamPrepRows] = useStoredState(storageKeys.examPrepRows, sampleData.examPrepRows ?? []);
+  const [schoolEvents, setSchoolEvents] = useStoredState(
+    storageKeys.schoolEvents,
+    createDefaultSchoolEvents(sampleData.examPrepRows ?? [])
+  );
+  const [lessonResearchItems, setLessonResearchItems] = useStoredState(
+    storageKeys.lessonResearchItems,
+    createDefaultLessonResearchItems()
+  );
+  const [examAnalyses, setExamAnalyses] = useStoredState(
+    storageKeys.examAnalyses,
+    sampleData.examAnalyses ?? [createDefaultExamAnalysis(sampleData.examPrepRows?.[0])]
+  );
+  const [saveStates, setSaveStates] = useState({});
+  const [reportModal, setReportModal] = useState(null);
+  const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
+  const [editingLesson, setEditingLesson] = useState(null);
+  const [isLessonJournalOpen, setIsLessonJournalOpen] = useState(false);
+  const [attendanceModal, setAttendanceModal] = useState(null);
+  const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
+  const [lessonDeleteModalId, setLessonDeleteModalId] = useState("");
+  const [selectedReportLessonId, setSelectedReportLessonId] = useState("lesson_2026-06-12_mwf-7-10");
+  const recordsRef = useRef(records);
+  const homeworksRef = useRef(homeworks);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadCoreDataFromApi() {
+      try {
+        const [studentsResponse, classesResponse, lessonsResponse, recordsResponse, homeworksResponse] = await Promise.all([
+          fetch(apiUrl("/api/students")),
+          fetch(apiUrl("/api/classes")),
+          fetch(apiUrl("/api/lessons")),
+          fetch(apiUrl("/api/lesson-records")),
+          fetch(apiUrl("/api/homeworks"))
+        ]);
+        const [studentsResult, classesResult, lessonsResult, recordsResult, homeworksResult] = await Promise.all([
+          studentsResponse.json(),
+          classesResponse.json(),
+          lessonsResponse.json(),
+          recordsResponse.json(),
+          homeworksResponse.json()
+        ]);
+        if (!isMounted) return;
+        if (studentsResult.ok && Array.isArray(studentsResult.students) && studentsResult.students.length > 0) {
+          setStudents(studentsResult.students);
+        }
+        if (classesResult.ok && Array.isArray(classesResult.classTemplates) && classesResult.classTemplates.length > 0) {
+          setClassTemplates(classesResult.classTemplates);
+        }
+        if (lessonsResult.ok && Array.isArray(lessonsResult.lessons) && lessonsResult.lessons.length > 0) {
+          setLessons(lessonsResult.lessons);
+        }
+        if (recordsResult.ok && Array.isArray(recordsResult.records) && recordsResult.records.length > 0) {
+          setRecords(recordsResult.records);
+        }
+        if (homeworksResult.ok && Array.isArray(homeworksResult.homeworks) && homeworksResult.homeworks.length > 0) {
+          setHomeworks(homeworksResult.homeworks);
+        }
+      } catch (error) {
+        console.info("academy-os API sync skipped:", error.message);
+      }
+    }
+
+    loadCoreDataFromApi();
+    return () => {
+      isMounted = false;
+    };
+  }, [setClassTemplates, setHomeworks, setLessons, setRecords, setStudents]);
+
+  useEffect(() => {
+    recordsRef.current = records;
+  }, [records]);
+
+  useEffect(() => {
+    homeworksRef.current = homeworks;
+  }, [homeworks]);
+
+  useEffect(() => {
+    setStudents((currentStudents) => {
+      let hasChanged = false;
+      const nextStudents = currentStudents.map((student) => {
+        const textbook = getTextbookFromExamPrep(student);
+        const normalizedGrade = normalizeGradeLabel(student.grade);
+        if ((textbook && student.textbook !== textbook) || (normalizedGrade && student.grade !== normalizedGrade)) {
+          hasChanged = true;
+          return { ...student, grade: normalizedGrade || student.grade, textbook };
+        }
+        return student;
+      });
+      return hasChanged ? nextStudents : currentStudents;
+    });
+  }, [setStudents]);
+
+  const lessonsForDate = useMemo(
+    () => lessons.filter((lesson) => lesson.date === selectedDate).sort(sortByTime),
+    [lessons, selectedDate]
+  );
+
+  const selectedLesson =
+    lessons.find((lesson) => lesson.lessonId === selectedLessonId) ?? lessonsForDate[0] ?? null;
+
+  useEffect(() => {
+    if (!selectedLessonId && lessonsForDate[0]) {
+      setSelectedLessonId(lessonsForDate[0].lessonId);
+    }
+  }, [lessonsForDate, selectedLessonId]);
+
+  const selectedRecords = selectedLesson
+    ? records.filter((record) => record.lessonId === selectedLesson.lessonId)
+    : [];
+
+  const selectedStudents = selectedLesson
+    ? selectedLesson.studentIds
+        .map((studentId) => students.find((student) => student.studentId === studentId))
+        .filter(Boolean)
+    : [];
+
+  const reportLesson = lessons.find((lesson) => lesson.lessonId === selectedReportLessonId) ?? lessons[0];
+  const reportRecords = reportLesson
+    ? records.filter((record) => record.lessonId === reportLesson.lessonId)
+    : [];
+  const pendingDeleteLesson = lessons.find((lesson) => lesson.lessonId === lessonDeleteModalId) ?? null;
+
+  function handleLogin(role, loginId, password) {
+    if (role === "teacher") {
+      if (loginId === teacherAccount.loginId && password === teacherAccount.password) {
+        setSession({ role: "teacher", actorId: "instructor_owner_001", name: teacherAccount.name });
+        setActiveView("lessons");
+        return { ok: true };
+      }
+      return { ok: false, message: "선생님 아이디 또는 비밀번호가 맞지 않습니다." };
+    }
+
+    const matchedStudent =
+      role === "student" && loginId === "student" && password === "1234"
+        ? getDemoStudent(students)
+        : role === "parent" && loginId === "parent" && password === "1234"
+          ? getDemoStudent(students)
+          : null;
+
+    if (!matchedStudent) {
+      return { ok: false, message: role === "student" ? "학생 아이디 또는 비밀번호가 맞지 않습니다." : "학부모 아이디 또는 비밀번호가 맞지 않습니다." };
+    }
+
+    setSession({
+      role,
+      actorId: role === "student" ? matchedStudent.studentId : `parent_${matchedStudent.studentId}`,
+      studentId: matchedStudent.studentId,
+      name: matchedStudent.name
+    });
+    return { ok: true };
+  }
+
+  function handleLogout() {
+    setSession(null);
+    setActiveView("lessons");
+  }
+
+  function handleAttendancePinCheck(phoneLast4) {
+    const digits = String(phoneLast4).replaceAll(/\D/g, "").slice(-4);
+    if (digits.length !== 4) {
+      return { ok: false, message: "휴대폰 번호 뒤 4자리를 입력해 주세요." };
+    }
+
+    const matchedStudents = students.filter((student) => {
+      const phone = String(student.studentPhone ?? "").replaceAll(/\D/g, "");
+      return phone.slice(-4) === digits;
+    });
+
+    if (matchedStudents.length === 0) {
+      return { ok: false, message: "해당 번호의 학생을 찾지 못했습니다." };
+    }
+    if (matchedStudents.length > 1) {
+      return { ok: false, message: "같은 뒤 4자리 학생이 2명 이상입니다. 선생님께 말씀해 주세요." };
+    }
+
+    const student = matchedStudents[0];
+    const now = new Date();
+    const todayString = getKoreaDateString(now);
+    const lesson =
+      lessons
+        .filter((item) => item.date === todayString && item.studentIds.includes(student.studentId))
+        .sort(sortByTime)[0] ??
+      lessons
+        .filter((item) => item.studentIds.includes(student.studentId))
+        .sort((a, b) => String(b.date).localeCompare(String(a.date)) || sortByTime(a, b))[0];
+
+    if (!lesson) {
+      return { ok: false, message: `${student.name} 학생의 수업 일정이 없습니다.` };
+    }
+
+    const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+    const existingRecord = recordsRef.current.find((record) => record.lessonStudentRecordId === recordId);
+    const nowIso = now.toISOString();
+    const koreaTime = new Intl.DateTimeFormat("ko-KR", {
+      timeZone: "Asia/Seoul",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    }).format(now);
+    const isCheckOut = Boolean(existingRecord?.checkInAt && !existingRecord?.checkOutAt);
+    const lateMinutes = isCheckOut ? existingRecord?.lateMinutes ?? "" : calculateLateMinutes(lesson, now);
+    const attendanceStatus = isCheckOut ? existingRecord?.attendanceStatus ?? "present" : lateMinutes > 0 ? "late" : "present";
+    const nextRecord = {
+      ...createEmptyRecord(lesson, student),
+      ...(existingRecord ?? {}),
+      lessonStudentRecordId: recordId,
+      attendanceStatus,
+      checkInAt: existingRecord?.checkInAt ?? nowIso,
+      checkInTime: existingRecord?.checkInTime ?? koreaTime,
+      checkOutAt: isCheckOut ? nowIso : existingRecord?.checkOutAt ?? "",
+      checkOutTime: isCheckOut ? koreaTime : existingRecord?.checkOutTime ?? "",
+      lateMinutes,
+      attendanceReason: existingRecord?.attendanceReason ?? "",
+      updatedBy: "attendance_kiosk",
+      updatedAt: nowIso
+    };
+
+    setRecords((currentRecords) => upsertById(currentRecords, nextRecord, "lessonStudentRecordId"));
+    setNotificationLogs((current) => [
+      {
+        notificationLogId: `attendance_kiosk_${Date.now()}_${student.studentId}`,
+        channel: "attendance_kiosk",
+        createdAt: nowIso,
+        lessonId: lesson.lessonId,
+        message: `[출결체크] ${student.name} ${isCheckOut ? "하원" : attendanceStatus === "late" ? `${lateMinutes}분 지각 등원` : "등원"} · ${koreaTime}`,
+        provider: "academy-os",
+        status: "checked_not_sent",
+        studentId: student.studentId,
+        target: "parent"
+      },
+      ...current
+    ]);
+
+    return {
+      ok: true,
+      message: `${student.name} ${isCheckOut ? "하원" : attendanceStatus === "late" ? `${lateMinutes}분 지각 등원` : "등원"} 체크 완료`,
+      student,
+      lesson,
+      mode: isCheckOut ? "checkOut" : "checkIn",
+      checkedTime: koreaTime
+    };
+  }
+
+  if (!session) {
+    return <RoleLoginScreen students={students} onAttendanceCheck={handleAttendancePinCheck} onLogin={handleLogin} />;
+  }
+
+  if (session.role === "student") {
+    return (
+      <StudentPortalV2
+        homeworks={homeworks}
+        reportSnapshots={reportSnapshots}
+        sessionStudentId={session.studentId}
+        students={students.filter((student) => student.studentId === session.studentId)}
+        onLogout={handleLogout}
+        onStudentCreateHomework={handleStudentCreateHomework}
+        onStudentCheckHomework={handleStudentCheckHomework}
+      />
+    );
+  }
+
+  if (session.role === "parent") {
+    return (
+      <ParentPortal
+        homeworks={homeworks}
+        reportSnapshots={reportSnapshots}
+        sessionStudentId={session.studentId}
+        students={students}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  function handleDateSelect(date) {
+    const nextLessons = lessons.filter((lesson) => lesson.date === date).sort(sortByTime);
+    setSelectedDate(date);
+    setSelectedLessonId(nextLessons[0]?.lessonId ?? "");
+    setIsLessonJournalOpen(false);
+  }
+
+  function handleCalendarMove(dayOffset) {
+    const nextDate = addDaysInKorea(selectedDate, dayOffset);
+    handleDateSelect(nextDate);
+  }
+
+  function handleCopySelectedLesson() {
+    const lesson = lessons.find((item) => item.lessonId === selectedLessonId);
+    if (!lesson) return;
+    setLessonClipboard({ ...lesson });
+  }
+
+  function handlePasteLessonToSelectedDate() {
+    if (!lessonClipboard) return;
+    const pastedLesson = {
+      ...lessonClipboard,
+      lessonId: createLessonId(selectedDate, lessonClipboard.className),
+      date: selectedDate,
+      dayOfWeek: getDayKey(selectedDate),
+      status: "scheduled"
+    };
+    setLessonUndoStack((current) => [{ type: "create", lesson: pastedLesson }, ...current].slice(0, 20));
+    setLessons((current) => [...current, pastedLesson]);
+    setSelectedLessonId(pastedLesson.lessonId);
+    postJson("/api/lessons", { lesson: pastedLesson }).catch((error) => console.error(error));
+  }
+
+  function handleUndoLessonAction() {
+    const [latestAction, ...restActions] = lessonUndoStack;
+    if (!latestAction) return;
+    if (latestAction.type === "create") {
+      setLessons((current) => current.filter((lesson) => lesson.lessonId !== latestAction.lesson.lessonId));
+      setSelectedLessonId("");
+    }
+    if (latestAction.type === "delete") {
+      setLessons((current) => [...current, latestAction.lesson]);
+      setSelectedDate(latestAction.lesson.date);
+      setSelectedLessonId(latestAction.lesson.lessonId);
+    }
+    setLessonUndoStack(restActions);
+  }
+
+  function handleDeleteSelectedLessonFromCalendar() {
+    const lesson = lessons.find((item) => item.lessonId === selectedLessonId);
+    if (!lesson) return;
+    setLessonDeleteModalId(lesson.lessonId);
+  }
+
+  function confirmDeleteLesson(lessonId) {
+    const lesson = lessons.find((item) => item.lessonId === lessonId);
+    if (!lesson) return;
+    const canceledLesson = { ...lesson, status: "canceled" };
+    setLessonUndoStack((current) => [{ type: "delete", lesson }, ...current].slice(0, 20));
+    setLessons((current) => current.filter((item) => item.lessonId !== lessonId));
+    setRecords((current) => current.filter((record) => record.lessonId !== lessonId));
+    setHomeworks((current) =>
+      current.map((homework) => (homework.lessonId === lessonId ? { ...homework, lessonId: "" } : homework))
+    );
+    setLessonDeleteModalId("");
+    const nextLessonForDate = lessons
+      .filter((item) => item.lessonId !== lessonId && item.date === lesson.date)
+      .sort(sortByTime)[0];
+    setSelectedLessonId(nextLessonForDate?.lessonId ?? "");
+    setIsLessonJournalOpen(false);
+    postJson("/api/lessons", { lesson: canceledLesson }).catch((error) => console.error(error));
+  }
+
+  function handleOpenLessonJournal(lessonId) {
+    const lesson = lessons.find((item) => item.lessonId === lessonId);
+    if (!lesson) return;
+    setSelectedDate(lesson.date);
+    setSelectedLessonId(lessonId);
+    setIsLessonJournalOpen(true);
+  }
+
+  function handleAddLesson(formValues) {
+    const template = classTemplates.find(
+      (item) => item.classTemplateId === formValues.classTemplateId
+    );
+    const studentIds = students
+      .filter((student) => formValues.studentIds.includes(student.studentId))
+      .map((student) => student.studentId);
+    const lesson = {
+      lessonId: createLessonId(formValues.date, formValues.name),
+      classTemplateId: template?.classTemplateId ?? "custom",
+      className: formValues.name,
+      lessonType: formValues.lessonType,
+      date: formValues.date,
+      dayOfWeek: getDayKey(formValues.date),
+      startTime: formValues.startTime,
+      endTime: formValues.endTime,
+      color: formValues.color,
+      teacherId: "instructor_owner_001",
+      studentIds,
+      status: "scheduled"
+    };
+
+    setLessons((current) => upsertById(current, lesson, "lessonId"));
+    setSelectedDate(lesson.date);
+    setSelectedLessonId(lesson.lessonId);
+    setIsLessonModalOpen(false);
+    postJson("/api/lessons", { lesson }).catch((error) => console.error(error));
+  }
+
+  function handleUpdateLesson(formValues) {
+    const template = classTemplates.find(
+      (item) => item.classTemplateId === formValues.classTemplateId
+    );
+    const studentIds = students
+      .filter((student) => formValues.studentIds.includes(student.studentId))
+      .map((student) => student.studentId);
+    const lesson = {
+      ...editingLesson,
+      classTemplateId: template?.classTemplateId ?? "custom",
+      className: formValues.name,
+      lessonType: formValues.lessonType,
+      date: formValues.date,
+      dayOfWeek: getDayKey(formValues.date),
+      startTime: formValues.startTime,
+      endTime: formValues.endTime,
+      color: formValues.color,
+      studentIds,
+      status: editingLesson?.status ?? "scheduled"
+    };
+
+    setLessons((current) => upsertById(current, lesson, "lessonId"));
+    setSelectedDate(lesson.date);
+    setSelectedLessonId(lesson.lessonId);
+    setEditingLesson(null);
+    setIsLessonModalOpen(false);
+    postJson("/api/lessons", { lesson }).catch((error) => console.error(error));
+  }
+
+  function handleDeleteLesson(lessonId) {
+    const lesson = lessons.find((item) => item.lessonId === lessonId);
+    if (!lesson) return;
+    setLessonDeleteModalId(lesson.lessonId);
+  }
+
+  function handleAddStudent(formValues) {
+    const student = {
+      studentId: `student_${Date.now()}`,
+      loginId: `04${formValues.name}`,
+      name: formValues.name,
+      pin: formValues.pin,
+      birthYear: formValues.birthYear,
+      schoolName: formValues.schoolName,
+      grade: formValues.grade,
+      studentPhone: formValues.studentPhone,
+      parentPhone: formValues.parentPhone,
+      textbook: formValues.textbook,
+      specialNote: formValues.specialNote,
+      defaultClassTemplateId: formValues.defaultClassTemplateId,
+      scheduleOverride: formValues.scheduleOverride
+    };
+
+    setStudents((current) => [...current, student]);
+    setIsStudentModalOpen(false);
+    postJson("/api/students", { student }).catch((error) => console.error(error));
+  }
+
+  function handleUpdateStudent(studentId, field, value) {
+    const currentStudent = students.find((student) => student.studentId === studentId);
+    const nextStudent = currentStudent ? { ...currentStudent, [field]: value } : null;
+    setStudents((current) =>
+      current.map((student) => (student.studentId === studentId ? { ...student, [field]: value } : student))
+    );
+    if (nextStudent) {
+      postJson("/api/students", { student: nextStudent }).catch((error) => console.error(error));
+    }
+  }
+
+  function handleUpdateClassRoster(classTemplateId, nextStudentIds) {
+    const nextStudentIdSet = new Set(nextStudentIds);
+    const previousStudents = students;
+    const nextStudents = previousStudents.map((student) => {
+        if (nextStudentIdSet.has(student.studentId)) {
+          return { ...student, defaultClassTemplateId: classTemplateId };
+        }
+        if (student.defaultClassTemplateId === classTemplateId) {
+          return { ...student, defaultClassTemplateId: "" };
+        }
+        return student;
+      });
+    setStudents(nextStudents);
+    const changedStudents = nextStudents.filter((student) => {
+      const previousStudent = previousStudents.find((item) => item.studentId === student.studentId);
+      return previousStudent && previousStudent.defaultClassTemplateId !== student.defaultClassTemplateId;
+    });
+    if (changedStudents.length > 0) {
+      postJson("/api/students/bulk", { students: changedStudents }).catch((error) => console.error(error));
+    }
+  }
+
+  function handleDeleteStudent(studentId) {
+    const removedStudent = students.find((student) => student.studentId === studentId);
+    const changedLessons = lessons
+      .filter((lesson) => (lesson.studentIds ?? []).includes(studentId))
+      .map((lesson) => ({
+        ...lesson,
+        studentIds: (lesson.studentIds ?? []).filter((id) => id !== studentId)
+      }));
+    setStudents((current) => current.filter((student) => student.studentId !== studentId));
+    setLessons((current) =>
+      current.map((lesson) => ({
+        ...lesson,
+        studentIds: (lesson.studentIds ?? []).filter((id) => id !== studentId)
+      }))
+    );
+    setRecords((current) => current.filter((record) => record.studentId !== studentId));
+    setHomeworks((current) => current.filter((homework) => homework.studentId !== studentId));
+    setWrongProblems((current) => current.filter((problem) => problem.studentId !== studentId));
+    setScoreRecords((current) => current.filter((score) => score.studentId !== studentId));
+    setAcademyTests((current) => current.filter((test) => test.studentId !== studentId));
+    setMakeupTasks((current) => current.filter((task) => task.studentId !== studentId));
+    if (removedStudent) {
+      postJson("/api/students", { student: { ...removedStudent, status: "paused" } }).catch((error) => console.error(error));
+    }
+    if (changedLessons.length > 0) {
+      postJson("/api/lessons/bulk", { lessons: changedLessons }).catch((error) => console.error(error));
+    }
+  }
+
+  function handleChangeRecord(lesson, student, field, value) {
+    const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+    setRecords((currentRecords) => {
+      const existingRecord = currentRecords.find((record) => record.lessonStudentRecordId === recordId);
+      const nextRecord = {
+        lessonStudentRecordId: recordId,
+        lessonId: lesson.lessonId,
+        studentId: student.studentId,
+        attendanceStatus: "pending",
+        homeworkStatus: "not_started",
+        behaviorTag: "",
+        teacherComment: "",
+        studentComment: "",
+        needsMakeup: false,
+        needsRetest: false,
+        ...(existingRecord ?? {}),
+        [field]: value,
+        updatedBy: "instructor_owner_001",
+        updatedAt: new Date().toISOString()
+      };
+
+      return upsertById(currentRecords, nextRecord, "lessonStudentRecordId");
+    });
+
+    setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "dirty" }));
+  }
+
+  function handleUpdateHomework(lesson, student, homeworkType, title) {
+    const existingId = `homework_${homeworkType}_${lesson.date}_${student.studentId}`;
+    setHomeworks((current) => {
+      const existing = current.find(
+        (homework) =>
+          homework.lessonId === lesson.lessonId &&
+          homework.studentId === student.studentId &&
+          homework.homeworkType === homeworkType
+      );
+      const nextHomework = {
+        ...(existing ?? {}),
+        homeworkId: existing?.homeworkId ?? existingId,
+        lessonId: lesson.lessonId,
+        studentId: student.studentId,
+        title,
+        subject: existing?.subject ?? "노션 수업 DB",
+        homeworkType,
+        totalProblems: existing?.totalProblems ?? null,
+        status: existing?.status ?? (homeworkType === "previous" ? "verified" : "assigned"),
+        studentStatus: existing?.studentStatus ?? "not_started",
+        teacherStatus: existing?.teacherStatus ?? "unverified",
+        assignedDate: lesson.date,
+        dueDate: existing?.dueDate ?? ""
+      };
+
+      return existing
+        ? current.map((homework) => (homework.homeworkId === existing.homeworkId ? nextHomework : homework))
+        : [nextHomework, ...current];
+    });
+  }
+
+  function handleApplyBulkHomework(lesson, homeworkType, title) {
+    lesson.studentIds.forEach((studentId) => {
+      const student = students.find((item) => item.studentId === studentId);
+      if (student) handleUpdateHomework(lesson, student, homeworkType, title);
+    });
+  }
+
+  async function handleSaveRecord(recordId, lessonForRecord = null, studentForRecord = null) {
+    setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "saving" }));
+
+    try {
+      const record =
+        recordsRef.current.find((item) => item.lessonStudentRecordId === recordId) ??
+        (lessonForRecord && studentForRecord ? createEmptyRecord(lessonForRecord, studentForRecord) : null);
+      if (!record) throw new Error("저장할 수업기록을 찾지 못했습니다.");
+      const relatedHomeworks = homeworksRef.current.filter(
+        (homework) => homework.lessonId === record.lessonId && homework.studentId === record.studentId
+      );
+
+      await postJson("/api/lesson-records", { record });
+      if (relatedHomeworks.length > 0) {
+        await postJson("/api/homeworks/bulk", { homeworks: relatedHomeworks });
+      }
+      if (!recordsRef.current.some((item) => item.lessonStudentRecordId === record.lessonStudentRecordId)) {
+        const nextRecords = upsertById(recordsRef.current, record, "lessonStudentRecordId");
+        recordsRef.current = nextRecords;
+        setRecords(nextRecords);
+      }
+      window.localStorage.setItem(storageKeys.records, JSON.stringify(recordsRef.current));
+      window.localStorage.setItem(storageKeys.homeworks, JSON.stringify(homeworksRef.current));
+      setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "saved" }));
+    } catch (error) {
+      console.error(error);
+      setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "failed" }));
+    }
+  }
+
+  function handleSaveReportSnapshot(snapshot) {
+    setReportSnapshots((current) => [snapshot, ...current]);
+  }
+
+  async function handleSendAttendanceAlimtalk(lesson, student, values) {
+    const payload = {
+      attendanceStatus: values.attendanceStatus,
+      checkedAt: getKoreaDateTimeString(),
+      lateMinutes: values.lateMinutes,
+      lessonId: lesson.lessonId,
+      lessonName: lesson.className,
+      parentPhone: student.parentPhone,
+      reason: values.attendanceReason,
+      studentId: student.studentId,
+      studentName: student.name
+    };
+    const logBase = {
+      notificationLogId: `attendance_notification_${Date.now()}_${student.studentId}`,
+      studentId: student.studentId,
+      lessonId: lesson.lessonId,
+      channel: "alimtalk",
+      message: createAttendanceNotificationText(payload),
+      createdAt: new Date().toISOString()
+    };
+
+    try {
+      const response = await fetch(apiUrl("/api/notifications/attendance-alimtalk"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || "알림톡 발송 실패");
+      }
+      setNotificationLogs((current) => [
+        { ...logBase, provider: "solapi", status: "sent", result },
+        ...current
+      ]);
+    } catch (error) {
+      setNotificationLogs((current) => [
+        { ...logBase, provider: "solapi", status: "failed", error: error.message },
+        ...current
+      ]);
+    }
+  }
+
+  function handleChangeView(nextView) {
+    setActiveView(nextView);
+    if (nextView === "lessons") {
+      setIsLessonJournalOpen(false);
+    }
+  }
+
+  return (
+    <main className={isSidebarCollapsed ? "appFrame sidebarCollapsed" : "appFrame"}>
+      <Sidebar
+        activeView={activeView}
+        isCollapsed={isSidebarCollapsed}
+        onChangeView={handleChangeView}
+        onLogout={handleLogout}
+        onToggle={() => setIsSidebarCollapsed((current) => !current)}
+      />
+
+      <section className="mainPanel">
+        {activeView === "lessons" ? (
+          <TeacherLessonHubV2
+            academyTests={academyTests}
+            lessons={lessons}
+            lessonsForDate={lessonsForDate}
+            records={selectedRecords}
+            saveStates={saveStates}
+            selectedDate={selectedDate}
+            selectedLesson={selectedLesson}
+            selectedLessonId={selectedLessonId}
+            students={selectedStudents}
+            homeworks={homeworks}
+            clipboardCount={lessonClipboard ? 1 : 0}
+            undoCount={lessonUndoStack.length}
+            onAddLesson={() => setIsLessonModalOpen(true)}
+            onChangeRecord={handleChangeRecord}
+            onCopyLesson={handleCopySelectedLesson}
+            onDateSelect={handleDateSelect}
+            onDeleteLesson={handleDeleteLesson}
+            onDeleteSelectedLesson={handleDeleteSelectedLessonFromCalendar}
+            onEditLesson={(lesson) => {
+              setEditingLesson(lesson);
+              setIsLessonModalOpen(true);
+            }}
+            onApplyBulkHomework={handleApplyBulkHomework}
+            onBackToCalendar={() => setIsLessonJournalOpen(false)}
+            onMoveDate={handleCalendarMove}
+            onOpenAttendance={setAttendanceModal}
+            onOpenExamPrep={() => handleChangeView("examPrep")}
+            onOpenLessonJournal={handleOpenLessonJournal}
+            onPasteLesson={handlePasteLessonToSelectedDate}
+            onOpenReport={handleOpenReport}
+            onPolishComment={handlePolishLessonComment}
+            onSaveRecord={handleSaveRecord}
+            onSendComment={handleSendLessonComment}
+            onSelectLesson={setSelectedLessonId}
+            onUndoLessonAction={handleUndoLessonAction}
+            onUpdateHomework={handleUpdateHomework}
+            isLessonJournalOpen={isLessonJournalOpen}
+          />
+        ) : null}
+
+        {activeView === "studentPortal" ? (
+          <StudentPortalV2
+            homeworks={homeworks}
+            lessons={lessons}
+            records={records}
+            reportSnapshots={reportSnapshots}
+            previewMode
+            scoreRecords={scoreRecords}
+            students={students}
+            onStudentCreateHomework={handleStudentCreateHomework}
+            onStudentCheckHomework={handleStudentCheckHomework}
+          />
+        ) : null}
+
+        {activeView === "overdue" ? (
+          <OverdueHomework
+            homeworks={homeworks}
+            students={students}
+            onTeacherVerifyHomework={handleTeacherVerifyHomework}
+          />
+        ) : null}
+
+        {activeView === "attendanceKiosk" ? (
+          <AttendanceKiosk
+            lessons={lessons}
+            records={records}
+            students={students}
+            onAttendanceCheck={handleAttendancePinCheck}
+          />
+        ) : null}
+
+        {activeView === "students" ? (
+          <StudentManager
+            academyTests={academyTests}
+            scoreRecords={scoreRecords}
+            students={students}
+            templates={classTemplates}
+            onAddAcademyTest={(studentId) =>
+              setAcademyTests((current) => [
+                {
+                  testId: `academy_test_${Date.now()}_${studentId}`,
+                  studentId,
+                  testDate: today,
+                  title: "학원 테스트",
+                  scope: "",
+                  score: "",
+                  averageScore: "",
+                  note: ""
+                },
+                ...current
+              ])
+            }
+            onAddStudent={() => setIsStudentModalOpen(true)}
+            onAddScore={(studentId) =>
+              setScoreRecords((current) => [
+                {
+                  scoreRecordId: `score_${Date.now()}_${studentId}`,
+                  studentId,
+                  examType: "내신",
+                  examDate: today,
+                  subject: "수학",
+                  score: "",
+                  grade: "",
+                  note: ""
+                },
+                ...current
+              ])
+            }
+            onUpdateAcademyTest={(testId, field, value) =>
+              setAcademyTests((current) =>
+                current.map((item) => (item.testId === testId ? { ...item, [field]: value } : item))
+              )
+            }
+            onUpdateScore={(scoreRecordId, field, value) =>
+              setScoreRecords((current) =>
+                current.map((item) => (item.scoreRecordId === scoreRecordId ? { ...item, [field]: value } : item))
+              )
+            }
+            onDeleteStudent={handleDeleteStudent}
+            onUpdateStudent={handleUpdateStudent}
+          />
+        ) : null}
+
+        {activeView === "classes" ? (
+          <ClassManager
+            students={students}
+            templates={classTemplates}
+            onUpdateClassRoster={handleUpdateClassRoster}
+          />
+        ) : null}
+
+        {activeView === "examPrep" ? (
+          <ExamPrepCenter
+            templates={classTemplates}
+            rows={examPrepRows}
+            students={students}
+            onEnsureExamCycleRows={(examCycle, classTemplateId) =>
+              setExamPrepRows((current) => mergeById(current, buildExamPrepRowsFromStudents(students, examCycle, classTemplateId), "examPrepId"))
+            }
+            onUpdateRow={(examPrepId, field, value) =>
+              setExamPrepRows((current) =>
+                current.map((row) => (row.examPrepId === examPrepId ? { ...row, [field]: value } : row))
+              )
+            }
+          />
+        ) : null}
+
+        {activeView === "examAnalysis" ? (
+          <ExamAnalysisCenter
+            analyses={examAnalyses}
+            examPrepRows={examPrepRows}
+            onAddAnalysis={() =>
+              setExamAnalyses((current) => [
+                createDefaultExamAnalysis(examPrepRows[0]),
+                ...current
+              ])
+            }
+            onUpdateAnalysis={(analysisId, field, value) =>
+              setExamAnalyses((current) =>
+                current.map((item) => (item.examAnalysisId === analysisId ? { ...item, [field]: value } : item))
+              )
+            }
+            onRunAnalysis={handleRunExamAnalysis}
+          />
+        ) : null}
+
+        {activeView === "schoolCalendar" ? (
+          <SchoolCalendarCenter
+            events={schoolEvents}
+            rows={examPrepRows}
+            onAddEvent={(event) => setSchoolEvents((current) => [{ ...event, eventId: `event_${Date.now()}` }, ...current])}
+            onDeleteEvent={(eventId) => setSchoolEvents((current) => current.filter((event) => event.eventId !== eventId))}
+            onUpdateEvent={(eventId, field, value) =>
+              setSchoolEvents((current) =>
+                current.map((event) => (event.eventId === eventId ? { ...event, [field]: value } : event))
+              )
+            }
+          />
+        ) : null}
+
+        {activeView === "lessonResearch" ? (
+          <LessonResearchCenter
+            items={lessonResearchItems}
+            onAddItem={(subject) =>
+              setLessonResearchItems((current) => [
+                createLessonResearchItem(subject),
+                ...current
+              ])
+            }
+            onDeleteItem={(researchItemId) =>
+              setLessonResearchItems((current) => current.filter((item) => item.researchItemId !== researchItemId))
+            }
+            onUpdateItem={(researchItemId, field, value) =>
+              setLessonResearchItems((current) =>
+                current.map((item) =>
+                  item.researchItemId === researchItemId ? { ...item, [field]: value, updatedAt: today } : item
+                )
+              )
+            }
+          />
+        ) : null}
+
+        {activeView === "aiVariants" ? (
+          <AIVariantProblemCenter students={students} />
+        ) : null}
+
+        {activeView === "followups" ? (
+          <FollowUpCenter
+            homeworks={homeworks}
+            lessons={lessons}
+            notificationLogs={notificationLogs}
+            problemBooks={problemBooks}
+            records={records}
+            students={students}
+            tasks={makeupTasks}
+            wrongProblems={wrongProblems}
+            onAddProblemBook={(fileName) =>
+              setProblemBooks((current) => [createProblemBookFromFile(fileName), ...current])
+            }
+            onAddWrongProblem={(studentId) =>
+              setWrongProblems((current) => [
+                {
+                  wrongProblemId: `wrong_${Date.now()}_${studentId}`,
+                  studentId,
+                  source: "",
+                  problemRange: "",
+                  status: "open",
+                  note: ""
+                },
+                ...current
+              ])
+            }
+            onAssignHomework={handleAssignHomeworkFromTask}
+            onCreateTask={handleCreateMakeupTask}
+            onLogNotification={handleLogNotification}
+            onUpdateProblemBook={(problemBookId, field, value) =>
+              setProblemBooks((current) =>
+                current.map((book) => (book.problemBookId === problemBookId ? { ...book, [field]: value } : book))
+              )
+            }
+            onUpdateProblemMeta={(problemBookId, problemId, field, value) =>
+              setProblemBooks((current) =>
+                current.map((book) =>
+                  book.problemBookId === problemBookId
+                    ? {
+                        ...book,
+                        problems: book.problems.map((problem) =>
+                          problem.problemId === problemId ? { ...problem, [field]: value } : problem
+                        )
+                      }
+                    : book
+                )
+              )
+            }
+            onUpdateTask={handleUpdateMakeupTask}
+            onUpdateWrongProblem={(wrongProblemId, field, value) =>
+              setWrongProblems((current) =>
+                current.map((item) => (item.wrongProblemId === wrongProblemId ? { ...item, [field]: value } : item))
+              )
+            }
+          />
+        ) : null}
+
+        {activeView === "supplements" ? (
+          <SupplementCenter
+            homeworks={homeworks}
+            lessons={lessons}
+            notificationLogs={notificationLogs}
+            records={records}
+            students={students}
+            tasks={makeupTasks}
+            onAssignHomework={handleAssignHomeworkFromTask}
+            onCreateTask={handleCreateMakeupTask}
+            onLogNotification={handleLogNotification}
+            onUpdateTask={handleUpdateMakeupTask}
+          />
+        ) : null}
+
+        {activeView === "materials" ? (
+          <MaterialManager
+            problemBooks={problemBooks}
+            students={students}
+            onAddFolder={(folderName) =>
+              setProblemBooks((current) => [createProblemBookFolder(folderName), ...current])
+            }
+            onAddPdf={(fileName) =>
+              setProblemBooks((current) => [createProblemBookFromFile(fileName), ...current])
+            }
+            onSyncProblemCounts={() =>
+              setProblemBooks((current) =>
+                current.map((book) => ({ ...book, totalProblems: book.problems?.length ?? book.totalProblems ?? 0 }))
+              )
+            }
+            onImportPageSnapBooks={(jsonText) => {
+              const importedBooks = createProblemBooksFromPageSnapJson(jsonText);
+              setProblemBooks((current) => [...importedBooks, ...current]);
+              return importedBooks.length;
+            }}
+            onUpdateBook={(problemBookId, field, value) =>
+              setProblemBooks((current) =>
+                current.map((book) => (book.problemBookId === problemBookId ? { ...book, [field]: value } : book))
+              )
+            }
+          />
+        ) : null}
+
+        {activeView === "reports" ? (
+          <EvaluationCenter
+            academyTests={academyTests}
+            scoreRecords={scoreRecords}
+            students={students}
+            wrongProblems={wrongProblems}
+            onAddAcademyTest={() =>
+              setAcademyTests((current) => [
+                {
+                  testId: `academy_test_${Date.now()}`,
+                  testDate: today,
+                  title: "학원 테스트",
+                  scope: "",
+                  averageScore: "",
+                  note: ""
+                },
+                ...current
+              ])
+            }
+            onAddScore={() =>
+              setScoreRecords((current) => [
+                {
+                  scoreRecordId: `score_${Date.now()}`,
+                  studentId: students[0]?.studentId ?? "",
+                  examType: "내신",
+                  examDate: today,
+                  subject: "수학",
+                  score: "",
+                  grade: "",
+                  note: ""
+                },
+                ...current
+              ])
+            }
+            onAddWrongProblem={() =>
+              setWrongProblems((current) => [
+                {
+                  wrongProblemId: `wrong_${Date.now()}`,
+                  studentId: students[0]?.studentId ?? "",
+                  source: "",
+                  problemRange: "",
+                  status: "open",
+                  note: ""
+                },
+                ...current
+              ])
+            }
+            onUpdateAcademyTest={(testId, field, value) =>
+              setAcademyTests((current) =>
+                current.map((item) => (item.testId === testId ? { ...item, [field]: value } : item))
+              )
+            }
+            onUpdateScore={(scoreRecordId, field, value) =>
+              setScoreRecords((current) =>
+                current.map((item) => (item.scoreRecordId === scoreRecordId ? { ...item, [field]: value } : item))
+              )
+            }
+            onUpdateWrongProblem={(wrongProblemId, field, value) =>
+              setWrongProblems((current) =>
+                current.map((item) => (item.wrongProblemId === wrongProblemId ? { ...item, [field]: value } : item))
+              )
+            }
+          />
+        ) : null}
+      </section>
+
+      {isLessonModalOpen ? (
+        <LessonModal
+          initialLesson={editingLesson}
+          students={students}
+          templates={classTemplates}
+          onClose={() => {
+            setEditingLesson(null);
+            setIsLessonModalOpen(false);
+          }}
+          onSubmit={editingLesson ? handleUpdateLesson : handleAddLesson}
+        />
+      ) : null}
+
+      {isStudentModalOpen ? (
+        <StudentModal
+          templates={classTemplates}
+          onClose={() => setIsStudentModalOpen(false)}
+          onSubmit={handleAddStudent}
+        />
+      ) : null}
+
+      {attendanceModal ? (
+        <AttendanceModal
+          item={attendanceModal}
+          onClose={() => setAttendanceModal(null)}
+          onSave={(lesson, student, values) => {
+            handleChangeRecord(lesson, student, "attendanceStatus", values.attendanceStatus);
+            handleChangeRecord(lesson, student, "attendanceReason", values.attendanceReason);
+            handleChangeRecord(lesson, student, "lateMinutes", values.lateMinutes);
+            handleSendAttendanceAlimtalk(lesson, student, values);
+            setAttendanceModal(null);
+          }}
+        />
+      ) : null}
+
+      {reportModal ? (
+        <ReportModal
+          report={reportModal}
+          onClose={() => setReportModal(null)}
+          onMockSend={(report) => {
+            setReportSnapshots((current) => [
+              { ...report, reportId: `report_${Date.now()}_${report.student.studentId}`, status: "mock_sent", createdAt: new Date().toISOString() },
+              ...current
+            ]);
+            setReportModal({ ...report, sendStatus: "mock_sent" });
+          }}
+          onSaveSnapshot={(report) => {
+            setReportSnapshots((current) => [
+              { ...report, reportId: `report_${Date.now()}_${report.student.studentId}`, status: "snapshot_saved", createdAt: new Date().toISOString() },
+              ...current
+            ]);
+            setReportModal({ ...report, sendStatus: "snapshot_saved" });
+          }}
+        />
+      ) : null}
+
+      {pendingDeleteLesson ? (
+        <Modal
+          className="studentDeleteModal"
+          onClose={() => setLessonDeleteModalId("")}
+          subtitle="수업을 취소 처리하면 달력과 수업일지 목록에서는 숨겨지고, DB에는 취소 상태로 보존됩니다."
+          title="수업 취소 확인"
+        >
+          <div className="deleteConfirmBody">
+            <div className="deleteConfirmStudent">
+              <span className="studentInitial">수</span>
+              <div>
+                <strong>{pendingDeleteLesson.className}</strong>
+                <p className="muted">
+                  {pendingDeleteLesson.date} · {pendingDeleteLesson.startTime}-{pendingDeleteLesson.endTime} · {pendingDeleteLesson.studentIds?.length ?? 0}명
+                </p>
+              </div>
+            </div>
+            <p className="dangerCopy">정말 이 수업을 취소 처리할까요? 실제 DB에서는 삭제하지 않고 취소 상태로 보존합니다.</p>
+          </div>
+          <div className="deleteConfirmActions">
+            <button className="softButton" onClick={() => setLessonDeleteModalId("")} type="button">취소</button>
+            <button className="dangerButton" onClick={() => confirmDeleteLesson(pendingDeleteLesson.lessonId)} type="button">수업 취소</button>
+          </div>
+        </Modal>
+      ) : null}
+    </main>
+  );
+
+  function handleOpenReport(lesson, student, record, homeworkBundle) {
+    setReportModal({
+      lesson,
+      student,
+      record,
+      homeworkBundle,
+      title: `${lesson.date} ${student.name} 데일리 리포트`,
+      body: createAiReportDraft(student, lesson, record, homeworkBundle),
+      sendStatus: "draft"
+    });
+  }
+
+  async function handleRunExamAnalysis(analysis) {
+    setExamAnalyses((current) =>
+      current.map((item) =>
+        item.examAnalysisId === analysis.examAnalysisId
+          ? { ...item, aiStatus: "분석 중", aiError: "" }
+          : item
+      )
+    );
+
+    try {
+      const response = await fetch(apiUrl("/api/ai/exam-analysis"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(analysis)
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || "시험분석 API 요청에 실패했습니다.");
+      }
+
+      setExamAnalyses((current) =>
+        current.map((item) =>
+          item.examAnalysisId === analysis.examAnalysisId
+            ? {
+                ...item,
+                ...result.result.fields,
+                aiProvider: result.result.provider,
+                aiModel: result.result.model,
+                aiStatus: "완료",
+                aiLastRunAt: new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }),
+                aiError: ""
+              }
+            : item
+        )
+      );
+    } catch (error) {
+      setExamAnalyses((current) =>
+        current.map((item) =>
+          item.examAnalysisId === analysis.examAnalysisId
+            ? { ...item, aiStatus: "실패", aiError: error.message }
+            : item
+        )
+      );
+    }
+  }
+
+  async function handlePolishLessonComment(lesson, student, record, target, aiProvider, aiModel) {
+    const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+    const sourceField = target === "student" ? "studentComment" : "teacherComment";
+    const statusField = target === "student" ? "studentCommentAiStatus" : "teacherCommentAiStatus";
+
+    setRecords((current) =>
+      upsertById(
+        current,
+        {
+          ...createEmptyRecord(lesson, student),
+          ...(record ?? {}),
+          lessonStudentRecordId: recordId,
+          [statusField]: "AI 수정 중"
+        },
+        "lessonStudentRecordId"
+      )
+    );
+
+    try {
+      const response = await fetch(apiUrl("/api/ai/comment-polish"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          aiProvider,
+          aiModel,
+          audience: target === "student" ? "student" : "parent",
+          attendanceStatus: attendanceLabels[record?.attendanceStatus ?? "pending"],
+          grade: student.grade,
+          homeworkStatus: homeworkLabels[record?.homeworkStatus ?? "not_started"],
+          lessonDate: lesson.date,
+          lessonName: lesson.className,
+          rawText: record?.[sourceField] ?? "",
+          schoolName: student.schoolName,
+          studentName: student.name
+        })
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || "코멘트 AI 수정에 실패했습니다.");
+      }
+
+      setRecords((current) =>
+        upsertById(
+          current,
+          {
+            ...createEmptyRecord(lesson, student),
+            ...(record ?? {}),
+            lessonStudentRecordId: recordId,
+            [sourceField]: result.result.polishedText,
+            [statusField]: `완료 · ${result.result.provider}`,
+            updatedAt: new Date().toISOString()
+          },
+          "lessonStudentRecordId"
+        )
+      );
+    } catch (error) {
+      setRecords((current) =>
+        upsertById(
+          current,
+          {
+            ...createEmptyRecord(lesson, student),
+            ...(record ?? {}),
+            lessonStudentRecordId: recordId,
+            [statusField]: `실패 · ${error.message}`
+          },
+          "lessonStudentRecordId"
+        )
+      );
+    }
+  }
+
+  async function handleSendLessonComment(lesson, student, record, target) {
+    const sourceField = target === "student" ? "studentComment" : "teacherComment";
+    const message = record?.[sourceField]?.trim();
+    const channel = target === "student" ? "student_alimtalk" : "parent_alimtalk";
+    const statusField = target === "student" ? "studentCommentSendStatus" : "teacherCommentSendStatus";
+    const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+    const logBase = {
+      notificationLogId: `notification_${Date.now()}_${recordId}_${target}`,
+      channel,
+      createdAt: new Date().toISOString(),
+      lessonId: lesson.lessonId,
+      message: message || "발송할 코멘트가 없습니다.",
+      provider: "solapi",
+      studentId: student.studentId,
+      target
+    };
+
+    if (!message) {
+      setNotificationLogs((current) => [
+        { ...logBase, status: "empty_message" },
+        ...current
+      ]);
+      setRecords((current) =>
+        upsertById(
+          current,
+          {
+            ...createEmptyRecord(lesson, student),
+            ...(record ?? {}),
+            lessonStudentRecordId: recordId,
+            [statusField]: "내용 없음"
+          },
+          "lessonStudentRecordId"
+        )
+      );
+      return;
+    }
+
+    setRecords((current) =>
+      upsertById(
+        current,
+        {
+          ...createEmptyRecord(lesson, student),
+          ...(record ?? {}),
+          lessonStudentRecordId: recordId,
+          [statusField]: "알림톡 발송 중"
+        },
+        "lessonStudentRecordId"
+      )
+    );
+
+    try {
+      const response = await fetch(apiUrl("/api/notifications/comment-alimtalk"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          academyName: academyBrandName,
+          lessonDate: lesson.date,
+          lessonId: lesson.lessonId,
+          lessonName: lesson.className,
+          message,
+          parentPhone: student.parentPhone,
+          studentId: student.studentId,
+          studentName: student.name,
+          studentPhone: student.studentPhone,
+          target
+        })
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || "코멘트 알림톡 발송 실패");
+      }
+
+      setNotificationLogs((current) => [
+        { ...logBase, result, status: result.result?.dryRun ? "dry_run" : "sent" },
+        ...current
+      ]);
+      setRecords((current) =>
+        upsertById(
+          current,
+          {
+            ...createEmptyRecord(lesson, student),
+            ...(record ?? {}),
+            lessonStudentRecordId: recordId,
+            [statusField]: result.result?.dryRun ? "테스트 발송 기록됨" : "알림톡 발송 완료"
+          },
+          "lessonStudentRecordId"
+        )
+      );
+    } catch (error) {
+    setNotificationLogs((current) => [
+      { ...logBase, error: error.message, status: "failed" },
+      ...current
+    ]);
+    setRecords((current) =>
+      upsertById(
+        current,
+        {
+          ...createEmptyRecord(lesson, student),
+          ...(record ?? {}),
+          lessonStudentRecordId: recordId,
+            [statusField]: `실패 · ${error.message}`
+        },
+        "lessonStudentRecordId"
+      )
+    );
+    }
+  }
+
+  function handleStudentCheckHomework(homeworkId) {
+    setHomeworks((current) =>
+      current.map((homework) => {
+        if (homework.homeworkId !== homeworkId) return homework;
+        const nextHomework = {
+          ...homework,
+          status: "submitted",
+          studentStatus: "checked_done",
+          teacherStatus: homework.teacherStatus === "verified" ? "verified" : "unverified",
+          checkedAt: new Date().toISOString()
+        };
+        postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
+        return nextHomework;
+      })
+    );
+  }
+
+  function handleStudentCreateHomework(homework) {
+    const nextHomework = {
+      homeworkId: `homework_student_${Date.now()}`,
+        lessonId: "",
+        status: "assigned",
+        studentStatus: "not_started",
+        teacherStatus: "unverified",
+        createdByRole: "student",
+        createdAt: new Date().toISOString(),
+        ...homework
+    };
+    setHomeworks((current) => [nextHomework, ...current]);
+    postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
+  }
+
+  function handleTeacherVerifyHomework(homeworkId, teacherStatus) {
+    setHomeworks((current) =>
+      current.map((homework) => {
+        if (homework.homeworkId !== homeworkId) return homework;
+        const nextHomework = {
+          ...homework,
+          status: teacherStatus === "verified" ? "verified" : teacherStatus,
+          teacherStatus,
+          verifiedAt: new Date().toISOString()
+        };
+        postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
+        return nextHomework;
+      })
+    );
+  }
+
+  function handleCreateMakeupTask(task) {
+    const taskId = `makeup_${Date.now()}_${task.studentId}`;
+    setMakeupTasks((current) => {
+      const existingTask = current.find(
+        (item) =>
+          item.studentId === task.studentId &&
+          item.sourceId === task.sourceId &&
+          item.taskType === task.taskType
+      );
+
+      if (existingTask) {
+        return current.map((item) =>
+          item.makeupTaskId === existingTask.makeupTaskId
+            ? { ...item, status: item.status === "done" ? "scheduled" : item.status, touchedAt: new Date().toISOString() }
+            : item
+        );
+      }
+
+      return [
+        {
+          makeupTaskId: taskId,
+          status: "draft",
+          scheduledDate: today,
+          scheduledTime: "",
+          notificationDraft: "",
+          attemptCount: 0,
+          childHomeworkIds: [],
+          createdAt: new Date().toISOString(),
+          ...task
+        },
+        ...current
+      ];
+    });
+  }
+
+  function handleAssignHomeworkFromTask(task) {
+    const homeworkId = `homework_makeup_${Date.now()}_${task.studentId}`;
+    const nextHomework = {
+      homeworkId,
+      studentId: task.studentId,
+      lessonId: "",
+      makeupTaskId: task.makeupTaskId,
+      sourceHomeworkId: task.sourceId,
+      title: `보충: ${task.sourceLabel}`,
+      subject: "공통수학1",
+      homeworkType: "makeup",
+      totalProblems: 10,
+      assignedDate: today,
+      dueDate: addDaysInKorea(today, 3),
+      status: "assigned",
+      studentStatus: "not_started",
+      teacherStatus: "unverified",
+      createdByRole: "teacher",
+      createdAt: new Date().toISOString()
+    };
+
+    setHomeworks((current) => [nextHomework, ...current]);
+    setMakeupTasks((current) =>
+      current.map((item) =>
+        item.makeupTaskId === task.makeupTaskId
+          ? {
+              ...item,
+              status: "scheduled",
+              lastHomeworkId: homeworkId,
+              childHomeworkIds: [...(item.childHomeworkIds ?? []), homeworkId],
+              attemptCount: (item.attemptCount ?? 0) + 1,
+              lastAssignedAt: new Date().toISOString()
+            }
+          : item
+      )
+    );
+  }
+
+  function handleUpdateMakeupTask(taskId, field, value) {
+    setMakeupTasks((current) =>
+      current.map((task) => (task.makeupTaskId === taskId ? { ...task, [field]: value } : task))
+    );
+  }
+
+  function handleLogNotification(task) {
+    setNotificationLogs((current) => [
+      {
+        notificationLogId: `notification_${Date.now()}_${task.makeupTaskId}`,
+        makeupTaskId: task.makeupTaskId,
+        studentId: task.studentId,
+        channel: "mock",
+        status: "draft_logged",
+        message: task.notificationDraft || createNotificationDraft(task, students),
+        createdAt: new Date().toISOString()
+      },
+      ...current
+    ]);
+  }
+}
+
+function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle }) {
+  const menuGroups = [
+    {
+      title: "Lesson Hub",
+      items: [
+        { id: "lessons", label: "수업일지", icon: "📓" },
+        { id: "overdue", label: "숙제현황", icon: "📊" },
+        { id: "attendanceKiosk", label: "출결체크", icon: "🟢" },
+        { id: "followups", label: "오답관리", icon: "✕" },
+        { id: "supplements", label: "보충관리", icon: "↪" },
+        { id: "materials", label: "교재관리", icon: "📚" }
+      ]
+    },
+    {
+      title: "학생",
+      items: [
+        { id: "students", label: "학생관리", icon: "👥" },
+        { id: "classes", label: "반관리", icon: "🏫" }
+      ]
+    },
+    {
+      title: "시험",
+      items: [
+        { id: "examPrep", label: "시험대비", icon: "📋" },
+        { id: "examAnalysis", label: "시험분석", icon: "🔎" },
+        { id: "schoolCalendar", label: "학사일정", icon: "🗓️" }
+      ]
+    },
+    {
+      title: "연구실",
+      items: [
+        { id: "lessonResearch", label: "수업연구", icon: "📚" },
+        { id: "aiVariants", label: "AI 변형문항", icon: "✨" }
+      ]
+    }
+  ];
+
+  return (
+    <aside className={isCollapsed ? "sidebar collapsed" : "sidebar"}>
+      <div className="brandBlock">
+        <div className="brandHeader">
+          <span className="brandMark">KYM</span>
+          <button
+            aria-label={isCollapsed ? "좌측 메뉴 펼치기" : "좌측 메뉴 접기"}
+            className="sidebarToggle"
+            onClick={onToggle}
+            type="button"
+          >
+            {isCollapsed ? "›" : "‹"}
+          </button>
+        </div>
+        <strong>{academyBrandName}</strong>
+        <span>고태영T Lesson OS</span>
+      </div>
+      <nav className="sideNav">
+        {menuGroups.map((group) => (
+          <div className="sideGroup" key={group.title}>
+            <p>{group.title}</p>
+            {group.items.map((item) => (
+              <button
+                className={activeView === item.id ? "active" : ""}
+                key={item.id}
+                onClick={() => onChangeView(item.id)}
+                title={isCollapsed ? item.label : undefined}
+                type="button"
+              >
+                <span>{item.icon}</span>
+                <b>{item.label}</b>
+              </button>
+            ))}
+          </div>
+        ))}
+      </nav>
+      <div className="sideStatus">
+        <span>접속 중 1명</span>
+        <strong>{today}</strong>
+        <button className="logoutButton" onClick={onLogout} type="button">로그아웃</button>
+      </div>
+    </aside>
+  );
+}
+
+function LoginScreen({ students, onLogin }) {
+  const [role, setRole] = useState("student");
+  const defaultStudent = students.find((student) => student.name === "TestS12") ?? students[0];
+  const [loginId, setLoginId] = useState(defaultStudent?.loginId ?? "");
+  const [password, setPassword] = useState(defaultStudent?.pin ?? "");
+  const [error, setError] = useState("");
+
+  function selectRole(nextRole) {
+    setRole(nextRole);
+    setError("");
+    if (nextRole === "teacher") {
+      setLoginId(teacherAccount.loginId);
+      setPassword(teacherAccount.password);
+    } else if (nextRole === "parent") {
+      setLoginId(defaultStudent ? createParentLoginId(defaultStudent) : "");
+      setPassword(defaultStudent?.pin ?? "");
+    } else {
+      setLoginId(defaultStudent?.loginId ?? "");
+      setPassword(defaultStudent?.pin ?? "");
+    }
+  }
+
+  function submit(event) {
+    event.preventDefault();
+    const result = onLogin(role, loginId.trim(), password.trim());
+    if (!result.ok) setError(result.message);
+  }
+
+  const roleLabels = {
+    student: "학생",
+    parent: "학부모",
+    teacher: "선생님"
+  };
+
+  return (
+    <main className="loginPage">
+      <form className="loginCard" onSubmit={submit}>
+        <button className="loginClose" type="button">×</button>
+        <p className="loginEyebrow">{academyBrandName} · 고태영T</p>
+        <h1>로그인</h1>
+        <div className="loginTabs">
+          {["student", "parent", "teacher"].map((item) => (
+            <button className={role === item ? "active" : ""} key={item} onClick={() => selectRole(item)} type="button">
+              {roleLabels[item]}
+            </button>
+          ))}
+        </div>
+        <p className="muted">
+          {role === "student" ? "학생은 학원 번호를 붙여 로그인합니다." : null}
+          {role === "parent" ? "학부모는 자녀 계정과 연결된 보호자 계정으로 로그인합니다." : null}
+          {role === "teacher" ? "선생님은 운영자 계정으로 로그인합니다." : null}
+        </p>
+        <input value={loginId} onChange={(event) => setLoginId(event.target.value)} placeholder="아이디" />
+        <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="비밀번호" />
+        {error ? <div className="loginError">{error}</div> : null}
+        <button className="primaryButton full" type="submit">{roleLabels[role]} 로그인</button>
+        <div className="loginHint">
+          <span>학생: {defaultStudent?.loginId} / {defaultStudent?.pin}</span>
+          <span>학부모: {defaultStudent ? createParentLoginId(defaultStudent) : ""} / {defaultStudent?.pin}</span>
+          <span>선생님: teacher / 1234</span>
+        </div>
+      </form>
+    </main>
+  );
+}
+
+function RoleLoginScreen({ students, onAttendanceCheck, onLogin }) {
+  const [role, setRole] = useState("student");
+  const [loginId, setLoginId] = useState("student");
+  const [password, setPassword] = useState("1234");
+  const [error, setError] = useState("");
+  const [showAttendanceKiosk, setShowAttendanceKiosk] = useState(false);
+  const demoStudent = getDemoStudent(students);
+
+  const roleLabels = {
+    student: "학생",
+    parent: "학부모",
+    teacher: "선생님"
+  };
+
+  function selectRole(nextRole) {
+    setRole(nextRole);
+    setLoginId(nextRole);
+    setPassword("1234");
+    setError("");
+  }
+
+  function submit(event) {
+    event.preventDefault();
+    const result = onLogin(role, loginId.trim(), password.trim());
+    if (!result.ok) setError(result.message);
+  }
+
+  return (
+    <main className="loginPage">
+      {showAttendanceKiosk ? (
+        <AttendanceKiosk
+          isStandalone
+          students={students}
+          onAttendanceCheck={onAttendanceCheck}
+          onBack={() => setShowAttendanceKiosk(false)}
+        />
+      ) : (
+        <form className="loginCard" onSubmit={submit}>
+          <button className="loginClose" type="button">x</button>
+          <p className="loginEyebrow">{academyBrandName} · 고태영T</p>
+          <h1>로그인</h1>
+          <div className="loginTabs">
+            {["student", "parent", "teacher"].map((item) => (
+              <button
+                className={role === item ? "active" : ""}
+                key={item}
+                onClick={() => selectRole(item)}
+                type="button"
+              >
+                {roleLabels[item]}
+              </button>
+            ))}
+          </div>
+          <p className="muted">
+            {role === "student" ? `${demoStudent?.name ?? "학생"} 학생 화면으로 입장합니다.` : null}
+            {role === "parent" ? `${demoStudent?.name ?? "학생"} 학부모 열람 화면으로 입장합니다.` : null}
+            {role === "teacher" ? "강사 운영 화면으로 입장합니다." : null}
+          </p>
+          <input value={loginId} onChange={(event) => setLoginId(event.target.value)} placeholder="아이디" />
+          <input
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="비밀번호"
+          />
+          {error ? <div className="loginError">{error}</div> : null}
+          <button className="primaryButton full" type="submit">{roleLabels[role]} 로그인</button>
+          <button className="softButton full" onClick={() => setShowAttendanceKiosk(true)} type="button">
+            출결 체크
+          </button>
+          <div className="loginHint">
+            <span>학생: student / 1234</span>
+            <span>학부모: parent / 1234</span>
+            <span>선생님: teacher / 1234</span>
+          </div>
+        </form>
+      )}
+    </main>
+  );
+}
+
+function TeacherLessonHubV2({
+  academyTests = [],
+  clipboardCount,
+  lessons,
+  records,
+  saveStates,
+  selectedDate,
+  selectedLesson,
+  selectedLessonId,
+  students,
+  homeworks,
+  onAddLesson,
+  onApplyBulkHomework,
+  onBackToCalendar,
+  onChangeRecord,
+  onCopyLesson,
+  onDateSelect,
+  onDeleteLesson,
+  onDeleteSelectedLesson,
+  onEditLesson,
+  onMoveDate,
+  onOpenAttendance,
+  onOpenExamPrep,
+  onOpenLessonJournal,
+  onOpenReport,
+  onPasteLesson,
+  onPolishComment,
+  onSaveRecord,
+  onSendComment,
+  onSelectLesson,
+  onUndoLessonAction,
+  onUpdateHomework,
+  undoCount,
+  isLessonJournalOpen
+}) {
+  useEffect(() => {
+    function isEditableTarget(target) {
+      const tagName = target?.tagName?.toLowerCase();
+      return tagName === "input" || tagName === "textarea" || tagName === "select" || target?.isContentEditable;
+    }
+
+    function handleKeyDown(event) {
+      if (isLessonJournalOpen || isEditableTarget(event.target)) return;
+      const key = event.key.toLowerCase();
+      const isControl = event.ctrlKey || event.metaKey;
+
+      if (isControl && key === "c") {
+        event.preventDefault();
+        onCopyLesson();
+        return;
+      }
+      if (isControl && key === "v") {
+        event.preventDefault();
+        onPasteLesson();
+        return;
+      }
+      if (isControl && key === "z") {
+        event.preventDefault();
+        onUndoLessonAction();
+        return;
+      }
+      if (event.key === "Delete") {
+        event.preventDefault();
+        onDeleteSelectedLesson();
+        return;
+      }
+      if (event.key === "Enter" && selectedLessonId) {
+        event.preventDefault();
+        onOpenLessonJournal(selectedLessonId);
+        return;
+      }
+      const movementMap = {
+        ArrowLeft: -1,
+        ArrowRight: 1,
+        ArrowUp: -7,
+        ArrowDown: 7
+      };
+      if (movementMap[event.key]) {
+        event.preventDefault();
+        onMoveDate(movementMap[event.key]);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [
+    isLessonJournalOpen,
+    onCopyLesson,
+    onDeleteSelectedLesson,
+    onMoveDate,
+    onOpenLessonJournal,
+    onPasteLesson,
+    onUndoLessonAction,
+    selectedLessonId
+  ]);
+
+  const lessonJournalDialog = isLessonJournalOpen && selectedLesson ? (
+    <div className="modalBackdrop lessonJournalModalBackdrop" role="dialog" aria-modal="true">
+      <div className="lessonJournalModal">
+        <LessonJournalDetail
+          academyTests={academyTests}
+          homeworks={homeworks}
+          lesson={selectedLesson}
+          lessons={lessons}
+          onApplyBulkHomework={onApplyBulkHomework}
+          onBack={onBackToCalendar}
+          onChangeRecord={onChangeRecord}
+          onDeleteLesson={onDeleteLesson}
+          onEditLesson={onEditLesson}
+          onOpenAttendance={onOpenAttendance}
+          onOpenExamPrep={onOpenExamPrep}
+          onOpenReport={onOpenReport}
+          onPolishComment={onPolishComment}
+          onSaveRecord={onSaveRecord}
+          onSendComment={onSendComment}
+          onUpdateHomework={onUpdateHomework}
+          records={records}
+          saveStates={saveStates}
+          students={students}
+        />
+      </div>
+    </div>
+  ) : null;
+
+  return (
+    <>
+      <header className="pageTop teacherCalendarTop">
+        <button className="iconButton" onClick={() => onMoveDate(-30)} type="button">‹</button>
+        <h1>{formatMonthTitle(selectedDate)}</h1>
+        <button className="iconButton" onClick={() => onMoveDate(30)} type="button">›</button>
+        <span className="shortcutHint">↑↓←→ · Enter · Del · Ctrl+C/V/Z</span>
+        <button className="primaryButton" onClick={onAddLesson} type="button">+ 수업 등록</button>
+      </header>
+
+      <section className="calendarShell teacherCalendarShell">
+        <div className="calendarGrid teacherCalendarGrid">
+          {["일", "월", "화", "수", "목", "금", "토"].map((label) => (
+            <div className="weekday" key={label}>{label}</div>
+          ))}
+          {buildMonthDays(selectedDate).map((day) => {
+            const dayLessons = lessons.filter((lesson) => lesson.date === day.date).sort(sortByTime);
+            return (
+              <div
+                className={[
+                  "monthCell",
+                  "teacherMonthCell",
+                  day.inMonth ? "" : "outside",
+                  selectedDate === day.date ? "selected" : ""
+                ].join(" ")}
+                key={day.date}
+                onClick={() => onDateSelect(day.date)}
+              >
+                <span className="dayNumber">{day.dayNumber}</span>
+                <span className="cellPlus">+</span>
+                <span className="lessonPills">
+                  {dayLessons.map((lesson) => (
+                    <button
+                      className={lesson.lessonId === selectedLessonId ? "lessonPill active" : "lessonPill"}
+                      key={lesson.lessonId}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onOpenLessonJournal(lesson.lessonId);
+                      }}
+                      style={{ background: lesson.color }}
+                      type="button"
+                    >
+                      {lesson.startTime} {lesson.className} ({lesson.studentIds.length}명)
+                    </button>
+                  ))}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+      {lessonJournalDialog}
+    </>
+  );
+}
+
+function LessonJournalDetail({
+  academyTests = [],
+  homeworks,
+  lesson,
+  lessons,
+  onApplyBulkHomework,
+  onBack,
+  onChangeRecord,
+  onDeleteLesson,
+  onEditLesson,
+  onOpenAttendance,
+  onOpenExamPrep,
+  onOpenReport,
+  onPolishComment,
+  onSaveRecord,
+  onSendComment,
+  onUpdateHomework,
+  records,
+  saveStates,
+  students
+}) {
+  const [bulkPreviousHomework, setBulkPreviousHomework] = useState("");
+  const [bulkNextHomework, setBulkNextHomework] = useState("");
+  const [commentAiProvider, setCommentAiProvider] = useState("mock");
+  const [commentAiModel, setCommentAiModel] = useState("local-mock");
+  const [commentModal, setCommentModal] = useState(null);
+  const [studentPreviewId, setStudentPreviewId] = useState("");
+  const saveSummary = students.reduce(
+    (summary, student) => {
+      const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+      const saveState = saveStates[recordId] ?? "idle";
+      return { ...summary, [saveState]: (summary[saveState] ?? 0) + 1 };
+    },
+    { idle: 0, dirty: 0, saving: 0, saved: 0, failed: 0 }
+  );
+
+  function changeCommentProvider(provider) {
+    setCommentAiProvider(provider);
+    setCommentAiModel(aiProviderModels[provider]?.[0] ?? "local-mock");
+  }
+
+  return (
+    <section className="lessonJournalPage">
+      <header className="pageTop lessonJournalHeader">
+        <button className="iconButton" onClick={onBack} type="button">‹</button>
+        <div>
+          <button className="linkTitleButton" onClick={onOpenExamPrep} type="button">{lesson.className}</button>
+          <p className="muted">{lesson.date} · {lesson.startTime}-{lesson.endTime} · {students.length}명</p>
+        </div>
+        <span className="shortcutHint">{lesson.lessonTopic || "수업일지"}</span>
+        <button className="softButton" onClick={() => onEditLesson(lesson)} type="button">수업 수정</button>
+        <button className="dangerButton" onClick={() => onDeleteLesson(lesson.lessonId)} type="button">수업 삭제</button>
+      </header>
+
+      <section className="panel bulkHomeworkPanel">
+        <label>
+          전체 지난 숙제
+          <div className="inlineInputAction">
+            <input value={bulkPreviousHomework} onChange={(event) => setBulkPreviousHomework(event.target.value)} placeholder="예: GRIP 928-957" />
+            <button className="softButton" onClick={() => onApplyBulkHomework(lesson, "previous", bulkPreviousHomework)} type="button">전체 적용</button>
+          </div>
+        </label>
+        <label>
+          전체 다음 숙제
+          <div className="inlineInputAction">
+            <input value={bulkNextHomework} onChange={(event) => setBulkNextHomework(event.target.value)} placeholder="예: 쎈 643-647" />
+            <button className="softButton" onClick={() => onApplyBulkHomework(lesson, "next", bulkNextHomework)} type="button">전체 적용</button>
+          </div>
+        </label>
+      </section>
+
+      <section className="panel commentAiToolbar">
+        <div>
+          <strong>코멘트 AI</strong>
+          <span className="muted">강사코멘트는 학부모용, 학생코멘트는 학생 화면용으로 다듬습니다.</span>
+        </div>
+        <select value={commentAiProvider} onChange={(event) => changeCommentProvider(event.target.value)}>
+          <option value="mock">모의분석</option>
+          <option value="openai">OpenAI</option>
+          <option value="anthropic">Claude</option>
+        </select>
+        <select value={commentAiModel} onChange={(event) => setCommentAiModel(event.target.value)}>
+          {(aiProviderModels[commentAiProvider] ?? aiProviderModels.mock).map((model) => (
+            <option key={model} value={model}>{model}</option>
+          ))}
+        </select>
+      </section>
+
+      <section className="panel lessonSaveSummary" aria-label="수업일지 저장 상태">
+        <div>
+          <strong>저장 상태</strong>
+          <span className="muted">변경한 줄은 반드시 저장해야 DB에 반영됩니다.</span>
+        </div>
+        <div className="saveSummaryChips">
+          <span className="saveSummaryChip save-dirty">변경됨 {saveSummary.dirty}명</span>
+          <span className="saveSummaryChip save-saving">저장중 {saveSummary.saving}명</span>
+          <span className="saveSummaryChip save-failed">실패 {saveSummary.failed}명</span>
+          <span className="saveSummaryChip save-saved">완료 {saveSummary.saved}명</span>
+        </div>
+      </section>
+
+      <section className="panel journalTablePanel">
+        <div className="journalTable">
+          <div className="journalRow journalHead">
+            <span>학생</span>
+            <span>교과서</span>
+            <span>출결</span>
+            <span>지난 숙제</span>
+            <span>다음 숙제</span>
+            <span>미완료</span>
+            <span>진도</span>
+            <span>강사코멘트</span>
+            <span>학생코멘트</span>
+            <span>저장</span>
+          </div>
+          {students.map((student) => {
+            const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+            const record = records.find((item) => item.studentId === student.studentId) ?? createEmptyRecord(lesson, student);
+            const saveState = saveStates[recordId] ?? "idle";
+            const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
+            const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
+            const attendanceText = attendanceLabels[record.attendanceStatus] ?? record.attendanceStatus ?? "대기";
+
+            return (
+              <div className="journalRow" key={student.studentId}>
+                <span className="studentCell compact">
+                  <span className="journalStudentTopLine">
+                    <strong>{student.name}</strong>
+                    <button
+                      aria-label={`${student.name} 학생 화면 보기`}
+                      className="studentPortalPreviewButton"
+                      onClick={() => setStudentPreviewId(student.studentId)}
+                      type="button"
+                    >
+                      👤
+                    </button>
+                  </span>
+                  <small>{student.grade || "고1"} · {student.schoolName || "학교 미입력"}</small>
+                </span>
+                <span className="journalTextCell">{student.textbook || student.currentTextbook || "미입력"}</span>
+                <button
+                  className={`attendanceBadge attendance-${record.attendanceStatus ?? "pending"}`}
+                  onClick={() => onOpenAttendance({ lesson, record, student })}
+                  type="button"
+                >
+                  {attendanceText}
+                </button>
+                <textarea
+                  value={previousHomework?.title ?? ""}
+                  onChange={(event) => onUpdateHomework(lesson, student, "previous", event.target.value)}
+                  placeholder="지난 숙제"
+                  rows="2"
+                />
+                <textarea
+                  value={nextHomework?.title ?? ""}
+                  onChange={(event) => onUpdateHomework(lesson, student, "next", event.target.value)}
+                  placeholder="다음 숙제"
+                  rows="2"
+                />
+                <textarea
+                  value={previousHomework?.incompleteHomework ?? record.incompleteHomework ?? ""}
+                  onChange={(event) => onChangeRecord(lesson, student, "incompleteHomework", event.target.value)}
+                  placeholder="못한 숙제"
+                  rows="2"
+                />
+                <textarea
+                  value={record.lessonProgress ?? ""}
+                  onChange={(event) => onChangeRecord(lesson, student, "lessonProgress", event.target.value)}
+                  placeholder="진도 없음"
+                  rows="2"
+                />
+                <div className="journalCommentCell">
+                  <button
+                    className={record.teacherComment ? "commentOpenButton filled" : "commentOpenButton"}
+                    onClick={() => setCommentModal({ audience: "parent", record, student })}
+                    type="button"
+                  >
+                    강사코멘트
+                  </button>
+                  <small>{record.teacherComment ? "작성됨" : "미작성"}</small>
+                </div>
+                <div className="journalCommentCell">
+                  <button
+                    className={record.studentComment ? "commentOpenButton filled" : "commentOpenButton"}
+                    onClick={() => setCommentModal({ audience: "student", record, student })}
+                    type="button"
+                  >
+                    학생코멘트
+                  </button>
+                  <small>{record.studentComment ? "작성됨" : "미작성"}</small>
+                </div>
+                <div className="journalSaveCell">
+                  <button
+                    className={`journalSaveButton journalSave-${saveState}`}
+                    disabled={saveState === "saving"}
+                    onClick={() => onSaveRecord(recordId, lesson, student)}
+                    type="button"
+                  >
+                    {getSaveButtonLabel(saveState)}
+                  </button>
+                  <small className={`saveState save-${saveState}`}>{saveStateLabels[saveState]}</small>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {commentModal ? (
+        <CommentComposerModal
+          aiModel={commentAiModel}
+          aiProvider={commentAiProvider}
+          audience={commentModal.audience}
+          lesson={lesson}
+          onChangeRecord={onChangeRecord}
+          onClose={() => setCommentModal(null)}
+          onPolishComment={onPolishComment}
+          onSendComment={onSendComment}
+          record={records.find((item) => item.studentId === commentModal.student.studentId) ?? commentModal.record}
+          student={commentModal.student}
+        />
+      ) : null}
+
+      {studentPreviewId ? (
+        <Modal
+          backdropClassName="studentPortalPreviewBackdrop"
+          className="studentPortalPreviewModal"
+          title="학생 화면 미리보기"
+          subtitle="강사가 보는 학생 포털 화면입니다."
+          onClose={() => setStudentPreviewId("")}
+        >
+          <StudentPortalV2
+            homeworks={homeworks}
+            lessons={lessons}
+            records={records}
+            reportSnapshots={[]}
+            scoreRecords={[]}
+            sessionStudentId={studentPreviewId}
+            students={students.filter((student) => student.studentId === studentPreviewId)}
+            previewMode
+            onLogout={() => setStudentPreviewId("")}
+            onStudentCheckHomework={() => {}}
+            onStudentCreateHomework={() => {}}
+          />
+        </Modal>
+      ) : null}
+    </section>
+  );
+}
+
+function CommentOpenCell({ aiStatus, comment, label, onOpen, sendStatus }) {
+  const hasComment = Boolean(comment?.trim());
+  return (
+    <div className="commentOpenCell">
+      <button className={hasComment ? "commentOpenButton filled" : "commentOpenButton"} onClick={onOpen} type="button">
+        <strong>{hasComment ? "보기/수정" : "작성"}</strong>
+        <span>{label}</span>
+      </button>
+      <small>{hasComment ? comment.slice(0, 28) : "미작성"}{hasComment && comment.length > 28 ? "..." : ""}</small>
+      <em>{aiStatus || "AI 대기"} · {sendStatus || "발송 전"}</em>
+    </div>
+  );
+}
+
+function CommentComposerModal({
+  aiModel,
+  aiProvider,
+  audience,
+  lesson,
+  onChangeRecord,
+  onClose,
+  onPolishComment,
+  onSendComment,
+  record,
+  student
+}) {
+  const isParent = audience === "parent";
+  const field = isParent ? "teacherComment" : "studentComment";
+  const comment = record?.[field] ?? "";
+  const title = isParent ? `${student.name} 학부모 코멘트` : `${student.name} 학생 코멘트`;
+  const receiverLabel = isParent ? `${student.name} 학부모님` : student.name;
+  const previewTitle = isParent ? "학부모 수신 메시지" : "학생 화면 메시지";
+  const sendLabel = isParent ? "학부모 발송" : "학생 발송";
+  const aiStatus = isParent ? record?.teacherCommentAiStatus : record?.studentCommentAiStatus;
+  const sendStatus = isParent ? record?.teacherCommentSendStatus : record?.studentCommentSendStatus;
+
+  return (
+    <Modal className="commentComposerModal" title={title} subtitle={`${lesson.date} · ${lesson.className}`} onClose={onClose}>
+      <div className="commentComposerGrid">
+        <section className="commentDraftPanel">
+          <div className="sectionHeader slim">
+            <div>
+              <p className="eyebrow">WRITE</p>
+              <h2>직접 작성</h2>
+            </div>
+            <span className="countBadge">{isParent ? "학부모용" : "학생용"}</span>
+          </div>
+          <textarea
+            className="commentComposerTextarea"
+            value={comment}
+            onChange={(event) => onChangeRecord(lesson, student, field, event.target.value)}
+            placeholder={isParent ? "학부모님께 보낼 수업 코멘트를 적어주세요." : "학생 화면에 보일 코멘트를 적어주세요."}
+          />
+          <div className="commentComposerActions">
+            <button
+              className="softButton"
+              disabled={aiStatus === "AI 수정 중"}
+              onClick={() => onPolishComment(lesson, student, record, audience, aiProvider, aiModel)}
+              type="button"
+            >
+              {aiStatus === "AI 수정 중" ? "AI 수정 중..." : "AI 수정"}
+            </button>
+            <button className="sendButton" onClick={() => onSendComment(lesson, student, record, audience)} type="button">
+              {sendLabel}
+            </button>
+          </div>
+          <small className="muted">{aiStatus || "AI 대기"} · {sendStatus || "발송 전"}</small>
+        </section>
+
+        <section className="commentPreviewPanel">
+          <div className="sectionHeader slim">
+            <div>
+              <p className="eyebrow">PREVIEW</p>
+              <h2>{previewTitle}</h2>
+            </div>
+          </div>
+          <div className={isParent ? "messagePreview parentPreview" : "messagePreview studentPreview"}>
+            <div className="messagePreviewHeader">
+              <strong>{academyBrandName} 고태영T</strong>
+              <span>{receiverLabel}</span>
+            </div>
+            <div className="messagePreviewMeta">
+              <span>{lesson.date}</span>
+              <span>{lesson.className}</span>
+              <span>{student.schoolName || "학교 미입력"} · {student.grade || "-"}</span>
+            </div>
+            <div className="messageBubble">
+              {comment.trim() ? (
+                comment.split("\n").map((line, index) => <p key={`${line}_${index}`}>{line || "\u00a0"}</p>)
+              ) : (
+                <p className="placeholderText">왼쪽에 작성한 내용이 받는 사람 화면에 이렇게 표시됩니다.</p>
+              )}
+            </div>
+            <div className="messagePreviewFooter">
+              <span>{isParent ? "학부모 알림톡/리포트 메시지 미리보기" : "학생 앱 활동 로그 메시지 미리보기"}</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </Modal>
+  );
+}
+
+function CommentActionCell({ aiStatus, onPolish, onSend, sendLabel, sendStatus }) {
+  const isRunning = aiStatus === "AI 수정 중";
+  return (
+    <div className="commentActionCell">
+      <div className="commentActionButtons">
+        <button className="softButton mini" disabled={isRunning} onClick={onPolish} type="button">
+          {isRunning ? "수정 중..." : "AI 수정"}
+        </button>
+        <button className="sendButton mini" onClick={onSend} type="button">{sendLabel}</button>
+      </div>
+      <small>{aiStatus || "AI 대기"} · {sendStatus || "발송 전"}</small>
+    </div>
+  );
+}
+
+function AttendanceModal({ item, onClose, onSave }) {
+  const { lesson, record, student } = item;
+  const [attendanceStatus, setAttendanceStatus] = useState(record.attendanceStatus ?? "present");
+  const [lateMinutes, setLateMinutes] = useState(record.lateMinutes ?? "");
+  const [attendanceReason, setAttendanceReason] = useState(record.attendanceReason ?? "");
+
+  return (
+    <Modal title={`${student.name} 출결 체크`} subtitle="지각/결석이면 시간과 사유를 남깁니다." onClose={onClose}>
+      <div className="typeTabs">
+        {[
+          ["present", "출석"],
+          ["late", "지각"],
+          ["absent", "결석"]
+        ].map(([value, label]) => (
+          <button className={attendanceStatus === value ? "active" : ""} key={value} onClick={() => setAttendanceStatus(value)} type="button">
+            {label}
+          </button>
+        ))}
+      </div>
+      <div className="fieldGrid">
+        <label>
+          얼마나 늦었나요?
+          <input value={lateMinutes} onChange={(event) => setLateMinutes(event.target.value)} placeholder="예: 10분" />
+        </label>
+        <label>
+          사유
+          <input value={attendanceReason} onChange={(event) => setAttendanceReason(event.target.value)} placeholder="예: 학교 동아리" />
+        </label>
+      </div>
+      <button className="primaryButton full" onClick={() => onSave(lesson, student, { attendanceStatus, lateMinutes, attendanceReason })} type="button">
+        출결 저장
+      </button>
+    </Modal>
+  );
+}
+
+function AttendanceKiosk({ isStandalone = false, lessons = [], records = [], students, onAttendanceCheck, onBack }) {
+  const [pin, setPin] = useState("");
+  const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    if (!result) return undefined;
+    const timerId = window.setTimeout(() => setResult(null), 3000);
+    return () => window.clearTimeout(timerId);
+  }, [result]);
+
+  function submitPin(event) {
+    event?.preventDefault();
+    const nextResult = onAttendanceCheck(pin);
+    setResult(nextResult);
+    if (nextResult.ok) setPin("");
+  }
+
+  function pressKey(value) {
+    if (value === "backspace") {
+      setPin((current) => current.slice(0, -1));
+      return;
+    }
+    if (value === "clear") {
+      setPin("");
+      return;
+    }
+    setPin((current) => `${current}${value}`.replaceAll(/\D/g, "").slice(0, 4));
+  }
+
+  const resultTitle = result?.ok ? (result.mode === "checkOut" ? "하원 체크 완료" : "등원 체크 완료") : "출결 체크 실패";
+  const resultDetail = result?.ok
+    ? `${result.student.name} · ${result.lesson.className} · ${result.checkedTime}`
+    : result?.message;
+
+  return (
+    <section className={isStandalone ? "attendanceKioskPage standalone" : "attendanceKioskPage"}>
+      <div className="attendanceKioskCard">
+        <div className="attendanceKioskHeader">
+          <div>
+            <p className="eyebrow">{academyBrandName} ATTENDANCE</p>
+            <h1>출결 체크</h1>
+            <p className="muted">휴대폰 번호 뒤 4자리를 입력하세요.</p>
+          </div>
+          {onBack ? <button className="iconButton" onClick={onBack} type="button">×</button> : null}
+        </div>
+        <form className="attendancePinForm" onSubmit={submitPin}>
+          <input
+            autoFocus
+            inputMode="numeric"
+            maxLength={4}
+            value={pin}
+            onChange={(event) => setPin(event.target.value.replaceAll(/\D/g, "").slice(0, 4))}
+            placeholder="뒤 4자리"
+          />
+          <button className="primaryButton" disabled={pin.length !== 4} type="submit">확인</button>
+        </form>
+
+        <div className="attendanceNumberPad" aria-label="출결 번호 입력 키패드">
+          {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((value) => (
+            <button key={value} onClick={() => pressKey(value)} type="button">{value}</button>
+          ))}
+          <button className="secondaryKey" onClick={() => pressKey("clear")} type="button">지움</button>
+          <button onClick={() => pressKey("0")} type="button">0</button>
+          <button className="secondaryKey" onClick={() => pressKey("backspace")} type="button">⌫</button>
+        </div>
+      </div>
+
+      {result ? (
+        <Modal
+          className={result.ok ? "attendanceResultModal success" : "attendanceResultModal error"}
+          onClose={() => setResult(null)}
+          subtitle={resultDetail}
+          title={resultTitle}
+        >
+          <div className="attendanceResultContent">
+            <strong>{result.message}</strong>
+            <p>{result.ok ? "3초 후 자동으로 닫힙니다." : "번호를 확인한 뒤 다시 입력해 주세요."}</p>
+            <button className="primaryButton" onClick={() => setResult(null)} type="button">닫기</button>
+          </div>
+        </Modal>
+      ) : null}
+    </section>
+  );
+}
+
+function TeacherLessonHub({
+  lessons,
+  records,
+  saveStates,
+  selectedDate,
+  selectedLesson,
+  selectedLessonId,
+  students,
+  homeworks,
+  onAddLesson,
+  onChangeRecord,
+  onDateSelect,
+  onDeleteLesson,
+  onEditLesson,
+  onOpenReport,
+  onSaveRecord,
+  onSelectLesson
+}) {
+  return (
+    <>
+      <header className="pageTop teacherCalendarTop">
+        <button className="iconButton" type="button">‹</button>
+        <h1>{formatMonthTitle(selectedDate)}</h1>
+        <button className="iconButton" type="button">›</button>
+        <span className="shortcutHint">↑↓←→ · Del · Ctrl+C/V/Z</span>
+        <button className="primaryButton" onClick={onAddLesson} type="button">+ 수업 등록</button>
+      </header>
+
+      <section className="calendarShell teacherCalendarShell">
+        <TeacherMonthCalendar
+          lessons={lessons}
+          selectedDate={selectedDate}
+          selectedLessonId={selectedLessonId}
+          onDateSelect={onDateSelect}
+          onSelectLesson={onSelectLesson}
+        />
+      </section>
+
+      <section className="lessonJournalArea">
+        {selectedLesson ? (
+          <>
+            <div className="panel lessonJournalToolbar">
+              <div>
+                <h2>{selectedLesson.className}</h2>
+                <p className="muted">
+                  {selectedLesson.date} · {selectedLesson.startTime}-{selectedLesson.endTime} · {students.length}명
+                </p>
+              </div>
+              <div className="lessonToolbarActions">
+                <button className="softButton" onClick={() => onEditLesson(selectedLesson)} type="button">
+                  수업 수정
+                </button>
+                <button className="dangerButton" onClick={() => onDeleteLesson(selectedLesson.lessonId)} type="button">
+                  수업 삭제
+                </button>
+              </div>
+            </div>
+            <LessonDetail
+              lesson={selectedLesson}
+              records={records}
+              saveStates={saveStates}
+              students={students}
+              homeworks={homeworks}
+              onChangeRecord={onChangeRecord}
+              onOpenReport={onOpenReport}
+              onSaveRecord={onSaveRecord}
+            />
+          </>
+        ) : (
+          <div className="panel emptyState">{selectedDate}에 등록된 수업이 없습니다.</div>
+        )}
+      </section>
+    </>
+  );
+}
+
+function TeacherMonthCalendar({ lessons, selectedDate, selectedLessonId, onDateSelect, onSelectLesson }) {
+  const days = buildMonthDays(selectedDate);
+
+  return (
+    <div className="calendarGrid teacherCalendarGrid">
+      {["일", "월", "화", "수", "목", "금", "토"].map((label) => (
+        <div className="weekday" key={label}>{label}</div>
+      ))}
+      {days.map((day) => {
+        const dayLessons = lessons.filter((lesson) => lesson.date === day.date).sort(sortByTime);
+        return (
+          <button
+            className={[
+              "monthCell",
+              "teacherMonthCell",
+              day.inMonth ? "" : "outside",
+              selectedDate === day.date ? "selected" : ""
+            ].join(" ")}
+            key={day.date}
+            onClick={() => onDateSelect(day.date)}
+            type="button"
+          >
+            <span className="dayNumber">{day.dayNumber}</span>
+            <span className="cellPlus">+</span>
+            <span className="lessonPills">
+              {dayLessons.slice(0, 4).map((lesson) => (
+                <span
+                  className={lesson.lessonId === selectedLessonId ? "lessonPill active" : "lessonPill"}
+                  key={lesson.lessonId}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onDateSelect(day.date);
+                    onSelectLesson(lesson.lessonId);
+                  }}
+                  style={{ background: lesson.color }}
+                >
+                  {lesson.startTime} {lesson.className} ({lesson.studentIds.length}명)
+                </span>
+              ))}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function LessonHub({
+  lessons,
+  lessonsForDate,
+  records,
+  saveStates,
+  selectedDate,
+  selectedLesson,
+  selectedLessonId,
+  students,
+  homeworks,
+  onAddLesson,
+  onChangeRecord,
+  onDateSelect,
+  onOpenReport,
+  onSaveRecord,
+  onSelectLesson
+}) {
+  return (
+    <>
+      <header className="pageTop">
+        <button className="iconButton" type="button">‹</button>
+        <h1>2026년 6월</h1>
+        <button className="iconButton" type="button">›</button>
+        <span className="shortcutHint">↑↓←→ · Ctrl+C/V/Z</span>
+        <button className="primaryButton" onClick={onAddLesson} type="button">+ 수업 등록</button>
+      </header>
+
+      <section className="calendarShell">
+        <MonthCalendar lessons={lessons} selectedDate={selectedDate} onDateSelect={onDateSelect} />
+      </section>
+
+      <section className="contentGrid">
+        <div className="panel">
+          <div className="sectionHeader">
+            <div>
+              <p className="eyebrow">날짜별 수업</p>
+              <h2>{selectedDate}</h2>
+            </div>
+            <span className="countBadge">{lessonsForDate.length}개</span>
+          </div>
+          <div className="lessonCards">
+            {lessonsForDate.map((lesson) => (
+              <button
+                className={lesson.lessonId === selectedLessonId ? "lessonCard active" : "lessonCard"}
+                key={lesson.lessonId}
+                onClick={() => onSelectLesson(lesson.lessonId)}
+                style={{ borderColor: lesson.lessonId === selectedLessonId ? lesson.color : undefined }}
+                type="button"
+              >
+                <span className="lessonDot" style={{ background: lesson.color }} />
+                <strong>{lesson.className}</strong>
+                <small>{lesson.startTime}-{lesson.endTime} · {lesson.studentIds.length}명</small>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {selectedLesson ? (
+          <LessonDetail
+            lesson={selectedLesson}
+            records={records}
+            saveStates={saveStates}
+            students={students}
+            homeworks={homeworks}
+            onChangeRecord={onChangeRecord}
+            onOpenReport={onOpenReport}
+            onSaveRecord={onSaveRecord}
+          />
+        ) : (
+          <div className="panel emptyState">선택한 날짜에 등록된 수업이 없습니다.</div>
+        )}
+      </section>
+    </>
+  );
+}
+
+function MonthCalendar({ lessons, selectedDate, onDateSelect }) {
+  const days = buildMonthDays();
+
+  return (
+    <div className="calendarGrid">
+      {["일", "월", "화", "수", "목", "금", "토"].map((label) => (
+        <div className="weekday" key={label}>{label}</div>
+      ))}
+      {days.map((day) => {
+        const dayLessons = lessons.filter((lesson) => lesson.date === day.date).sort(sortByTime);
+        return (
+          <button
+            className={[
+              "monthCell",
+              day.inMonth ? "" : "outside",
+              selectedDate === day.date ? "selected" : ""
+            ].join(" ")}
+            key={day.date}
+            onClick={() => onDateSelect(day.date)}
+            type="button"
+          >
+            <span className="dayNumber">{day.dayNumber}</span>
+            <span className="cellPlus">+</span>
+            <span className="lessonPills">
+              {dayLessons.slice(0, 3).map((lesson) => (
+                <span className="lessonPill" key={lesson.lessonId} style={{ background: lesson.color }}>
+                  {lesson.startTime} {lesson.className}
+                </span>
+              ))}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function LessonDetail({ lesson, records, saveStates, students, homeworks, onChangeRecord, onOpenReport, onSaveRecord }) {
+  return (
+    <section className="panel detailPanel">
+      <div className="sectionHeader">
+        <div>
+          <p className="eyebrow">수업 상세</p>
+          <h2>{lesson.className}</h2>
+        </div>
+        <div className="metaGrid">
+          <span>{lesson.date}</span>
+          <span>{lesson.startTime}-{lesson.endTime}</span>
+          <span>{lesson.status}</span>
+        </div>
+      </div>
+
+      <div className="studentTable">
+        <div className="tableRow tableHead">
+          <span>학생</span>
+          <span>행동태그</span>
+          <span>지난 숙제</span>
+          <span>오늘 숙제</span>
+          <span>데일리코멘트</span>
+          <span>등원</span>
+          <span>하원</span>
+          <span>저장</span>
+          <span>보고서</span>
+          <span>발송</span>
+        </div>
+        {students.map((student) => {
+          const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+          const record = records.find((item) => item.studentId === student.studentId) ?? createEmptyRecord(lesson, student);
+          const saveState = saveStates[recordId] ?? "idle";
+          const homeworkBundle = getHomeworkBundle(homeworks, lesson, student);
+
+          return (
+            <div className="tableRow" key={student.studentId}>
+              <span className="studentCell">
+                <strong>{student.name}</strong>
+                <small>{student.schoolName} · {student.grade}</small>
+                <small>{student.textbook ?? "교과서 미지정"}</small>
+                <small className="noteText">{student.specialNote ?? "특이사항 없음"}</small>
+              </span>
+              <select
+                value={record.behaviorTag ?? ""}
+                onChange={(event) => onChangeRecord(lesson, student, "behaviorTag", event.target.value)}
+              >
+                <option value="">태그 선택</option>
+                <option value="집중 좋음">집중 좋음</option>
+                <option value="질문 좋음">질문 좋음</option>
+                <option value="계산 실수">계산 실수</option>
+                <option value="개념 보강">개념 보강</option>
+                <option value="숙제 미흡">숙제 미흡</option>
+              </select>
+              <HomeworkCell homework={homeworkBundle.previous} emptyText="지난 숙제 없음" />
+              <HomeworkCell homework={homeworkBundle.today} emptyText="오늘 숙제 미등록" />
+              <textarea
+                value={record.teacherComment}
+                onChange={(event) => onChangeRecord(lesson, student, "teacherComment", event.target.value)}
+                placeholder="코멘트 입력..."
+                rows="2"
+              />
+              <input disabled title="추후 출결앱 연동 예정" type="time" />
+              <input disabled title="추후 출결앱 연동 예정" type="time" />
+              <span className="saveCell">
+                <button
+                  className="saveButton"
+                  disabled={saveState === "saving"}
+                  onClick={() => onSaveRecord(recordId)}
+                  type="button"
+                >
+                  저장
+                </button>
+                <small className={`saveState save-${saveState}`}>{saveStateLabels[saveState]}</small>
+              </span>
+              <button
+                className="softButton"
+                onClick={() => onOpenReport(lesson, student, record, homeworkBundle)}
+                type="button"
+              >
+                보고서
+              </button>
+              <button
+                className="sendButton"
+                onClick={() => onOpenReport(lesson, student, record, homeworkBundle)}
+                type="button"
+              >
+                발송
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function HomeworkCell({ homework, emptyText }) {
+  if (!homework) {
+    return <span className="homeworkCell muted">{emptyText}</span>;
+  }
+
+  return (
+    <span className={`homeworkCell homework-${homework.status}`}>
+      <strong>{homework.title}</strong>
+      <small>{homework.assignedDate} → {homework.dueDate}</small>
+      <small>{homeworkLabels[homework.status] ?? homework.status}</small>
+    </span>
+  );
+}
+
+function ReportModal({ report, onClose, onMockSend, onSaveSnapshot }) {
+  return (
+    <Modal title="AI 데일리 리포트" subtitle="현재는 실제 AI API/발송 대신 모의 초안과 모의 발송 상태로 검수합니다." onClose={onClose}>
+      <div className="reportMeta">
+        <span>{report.lesson.date}</span>
+        <span>{report.lesson.className}</span>
+        <span>{report.student.name}</span>
+        <span>{report.sendStatus}</span>
+      </div>
+      <label>
+        AI API 입력 데이터
+        <textarea
+          readOnly
+          rows="6"
+          value={JSON.stringify(
+            {
+              student: {
+                name: report.student.name,
+                schoolName: report.student.schoolName,
+                grade: report.student.grade,
+                textbook: report.student.textbook,
+                specialNote: report.student.specialNote
+              },
+              lesson: report.lesson,
+              record: report.record,
+              homework: report.homeworkBundle
+            },
+            null,
+            2
+          )}
+        />
+      </label>
+      <label>
+        보고서 초안
+        <textarea readOnly rows="8" value={report.body} />
+      </label>
+      <div className="modalActions">
+        <button className="softButton" onClick={() => onSaveSnapshot(report)} type="button">스냅샷 저장</button>
+        <button className="sendButton" onClick={() => onMockSend(report)} type="button">모의 발송</button>
+      </div>
+    </Modal>
+  );
+}
+
+function LessonModal({ initialLesson = null, students, templates, onClose, onSubmit }) {
+  const [lessonType, setLessonType] = useState(initialLesson?.lessonType ?? "class");
+  const [classTemplateId, setClassTemplateId] = useState(initialLesson?.classTemplateId ?? templates[0].classTemplateId);
+  const activeTemplate = templates.find((template) => template.classTemplateId === classTemplateId);
+  const [name, setName] = useState(initialLesson?.className ?? activeTemplate.name);
+  const [date, setDate] = useState(initialLesson?.date ?? today);
+  const [startTime, setStartTime] = useState(initialLesson?.startTime ?? activeTemplate.startTime);
+  const [endTime, setEndTime] = useState(initialLesson?.endTime ?? activeTemplate.endTime);
+  const [color, setColor] = useState(initialLesson?.color ?? activeTemplate.color);
+  const [studentIds, setStudentIds] = useState(initialLesson?.studentIds ?? students.map((student) => student.studentId));
+  const [studentSearch, setStudentSearch] = useState("");
+  const lessonColors = ["#17213d", "#3b82f6", "#6366f1", "#8b5cf6", "#ec4899", "#ef4444", "#f59e0b", "#10b981", "#059669", "#0891b2", "#7c3aed", "#dc2626", "#d97706", "#16a34a", "#0284c7"];
+  const filteredStudents = students.filter((student) =>
+    [student.name, student.grade, student.schoolName].join(" ").toLowerCase().includes(studentSearch.toLowerCase())
+  );
+  const groupedStudents = ["고1", "고2", "중1", "중2", "중3"].map((grade) => ({
+    grade,
+    students: filteredStudents.filter((student) => student.grade === grade)
+  })).filter((group) => group.students.length > 0);
+
+  function handleTemplateChange(nextTemplateId) {
+    const template = templates.find((item) => item.classTemplateId === nextTemplateId);
+    setClassTemplateId(nextTemplateId);
+    setName(template.name);
+    setStartTime(getTemplateStartTime(template, date));
+    setEndTime(getTemplateEndTime(template, date));
+    setColor(template.color);
+    setStudentIds(
+      students
+        .filter((student) => student.defaultClassTemplateId === nextTemplateId)
+        .map((student) => student.studentId)
+    );
+  }
+
+  function handleDateChange(nextDate) {
+    setDate(nextDate);
+    setStartTime(getTemplateStartTime(activeTemplate, nextDate));
+    setEndTime(getTemplateEndTime(activeTemplate, nextDate));
+  }
+
+  return (
+    <Modal className="lessonModal" title={initialLesson ? "수업 수정" : "수업 등록"} onClose={onClose}>
+      <div className="modalSection lessonModalSection">
+        <label>수업 유형</label>
+        <div className="typeTabs">
+          {[
+            ["class", "🏹 수업"],
+            ["exam", "📝 평가"],
+            ["makeup", "🔧 보강"]
+          ].map(([value, label]) => (
+            <button
+              className={lessonType === value ? "active" : ""}
+              key={value}
+              onClick={() => setLessonType(value)}
+              type="button"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="modalSection lessonModalSection">
+        <label>
+          큰 수업 틀
+          <select value={classTemplateId} onChange={(event) => handleTemplateChange(event.target.value)}>
+            {templates.map((template) => (
+              <option key={template.classTemplateId} value={template.classTemplateId}>
+                {template.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div className="modalSection lessonModalSection">
+        <label>달력 색상</label>
+        <div className="lessonColorPalette">
+          {lessonColors.map((item) => (
+            <button
+              aria-label={`${item} 색상 선택`}
+              className={color.toLowerCase() === item.toLowerCase() ? "active" : ""}
+              key={item}
+              onClick={() => setColor(item)}
+              style={{ background: item }}
+              type="button"
+            />
+          ))}
+          <label className="customColorInput">
+            <span style={{ background: color }} />
+            직접입력
+            <input type="color" value={color} onChange={(event) => setColor(event.target.value)} />
+          </label>
+        </div>
+      </div>
+
+      <div className="fieldGrid two lessonModalFields">
+        <label>
+          수업명
+          <input value={name} onChange={(event) => setName(event.target.value)} placeholder="예: 수학 특강" />
+        </label>
+        <label>
+          날짜
+          <input type="date" value={date} onChange={(event) => handleDateChange(event.target.value)} />
+        </label>
+        <label>
+          시작
+          <input type="time" value={startTime} onChange={(event) => setStartTime(event.target.value)} />
+        </label>
+        <label>
+          종료
+          <input type="time" value={endTime} onChange={(event) => setEndTime(event.target.value)} />
+        </label>
+      </div>
+
+      <div className="modalSection lessonModalSection">
+        <div className="sectionHeader">
+          <label>포함 학생</label>
+          <span className="muted">선택 {studentIds.length}명</span>
+        </div>
+        <div className="lessonStudentSearchRow">
+          <input
+            value={studentSearch}
+            onChange={(event) => setStudentSearch(event.target.value)}
+            placeholder="학생 이름 또는 반으로 검색"
+          />
+          <button className="softButton" onClick={() => setStudentIds(filteredStudents.map((student) => student.studentId))} type="button">
+            보이는 학생 선택
+          </button>
+        </div>
+        <small className="muted">전체 {students.length}명</small>
+        <div className="lessonStudentGroups">
+          {groupedStudents.map((group) => (
+            <div className="lessonStudentGroup" key={group.grade}>
+              <div>
+                <strong>{group.grade}</strong>
+                <button
+                  className="softButton mini"
+                  onClick={() => {
+                    const groupIds = group.students.map((student) => student.studentId);
+                    setStudentIds((current) => Array.from(new Set([...current, ...groupIds])));
+                  }}
+                  type="button"
+                >
+                  전체 선택
+                </button>
+              </div>
+              <div className="studentChips">
+                {group.students.map((student) => {
+                  const isSelected = studentIds.includes(student.studentId);
+                  return (
+                    <button
+                      className={isSelected ? "lessonStudentChip selected" : "lessonStudentChip"}
+                      key={student.studentId}
+                      onClick={() =>
+                        setStudentIds((current) =>
+                          isSelected
+                            ? current.filter((studentId) => studentId !== student.studentId)
+                            : [...current, student.studentId]
+                        )
+                      }
+                      type="button"
+                    >
+                      {student.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="lessonModalActions">
+        <button
+          className="primaryButton full"
+          onClick={() => onSubmit({ classTemplateId, color, date, endTime, lessonType, name, startTime, studentIds })}
+          type="button"
+        >
+          ✅ {initialLesson ? "수업 수정 저장" : "수업 등록"}
+        </button>
+        <button className="softButton" onClick={onClose} type="button">취소</button>
+      </div>
+    </Modal>
+  );
+}
+
+function ExamPrepCenter({ rows, students, templates, onEnsureExamCycleRows, onUpdateRow }) {
+  const [query, setQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("info");
+  const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("template_mwf_7_10");
+  const [selectedExamCycle, setSelectedExamCycle] = useState("2026-1-mid");
+  const [reviewModalRowId, setReviewModalRowId] = useState("");
+  const pastPaperArchiveUrl =
+    "https://script.google.com/macros/s/AKfycbyYi-NUHHzb9vrBl4Adj6Pq9zXIZJ9oR97g-uQyAf7up7AGVzeRdBUqfVcUZ1zjQiug/exec";
+  const classStudents = students.filter((student) => student.defaultClassTemplateId === selectedClassTemplateId);
+  const classSchools = new Set(classStudents.map((student) => student.schoolName).filter(Boolean));
+  const visibleRows = rows.filter((row) => {
+    const rowCycle = row.examCycle ?? "2026-1-mid";
+    const matchesCycle = rowCycle === selectedExamCycle;
+    const matchesClass = classSchools.size === 0 || classSchools.has(row.schoolName);
+    return matchesCycle && matchesClass;
+  });
+  const filteredRows = visibleRows.filter((row) => {
+    const haystack = [
+      row.schoolName,
+      row.grade,
+      row.subject,
+      row.publisher,
+      row.scope,
+      row.subTextbook,
+      row.examPeriod,
+      row.mathExamDate,
+      row.specialNote,
+      row.memo
+    ].join(" ");
+    return haystack.toLowerCase().includes(query.toLowerCase());
+  });
+  const selectedClass = templates.find((template) => template.classTemplateId === selectedClassTemplateId);
+  const reviewModalRow = rows.find((row) => row.examPrepId === reviewModalRowId) ?? null;
+
+  function changeExamCycle(examCycle) {
+    setSelectedExamCycle(examCycle);
+    onEnsureExamCycleRows(examCycle, selectedClassTemplateId);
+  }
+
+  function changeClassTemplate(classTemplateId) {
+    setSelectedClassTemplateId(classTemplateId);
+    onEnsureExamCycleRows(selectedExamCycle, classTemplateId);
+  }
+
+  return (
+    <section className="panel fullPanel examPrepCenter">
+      <div className="sectionHeader">
+        <div>
+          <h1>시험대비</h1>
+          <p className="muted">반별 시험정보와 Tally 제출 총평을 고사별로 관리합니다.</p>
+        </div>
+        <input
+          className="searchInput"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="학교, 과목, 출판사 검색"
+        />
+      </div>
+
+      <div className="studentManagerTabs examPrepTabs">
+        <button className={activeTab === "info" ? "active" : ""} onClick={() => setActiveTab("info")} type="button">
+          시험정보
+        </button>
+        <button className={activeTab === "tallyAi" ? "active" : ""} onClick={() => setActiveTab("tallyAi")} type="button">
+          Tally 제출 · AI 총평
+        </button>
+        <button className={activeTab === "pastPapers" ? "active" : ""} onClick={() => setActiveTab("pastPapers")} type="button">
+          기출문제
+        </button>
+      </div>
+
+      {activeTab !== "pastPapers" ? (
+        <div className="classTabList">
+          {templates.map((template) => (
+            <button
+              className={selectedClassTemplateId === template.classTemplateId ? "active" : ""}
+              key={template.classTemplateId}
+              onClick={() => changeClassTemplate(template.classTemplateId)}
+              type="button"
+            >
+              <strong>{template.name}</strong>
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      {activeTab === "info" ? (
+        <>
+          <div className="examCycleBar">
+            <strong>현재 고사</strong>
+            <select value={selectedExamCycle} onChange={(event) => changeExamCycle(event.target.value)}>
+              <option value="2026-1-mid">2026 1학기 중간</option>
+              <option value="2026-1-final">2026 1학기 기말</option>
+              <option value="2026-2-mid">2026 2학기 중간</option>
+              <option value="2026-2-final">2026 2학기 기말</option>
+            </select>
+            <span>{selectedClass?.name} · {classStudents.length}명 기준 학교/학년/교과서 정보를 표시합니다.</span>
+          </div>
+          <div className="examPrepTable">
+            <div className="examPrepRow examPrepHead">
+              <span>학교명</span>
+              <span>특이사항</span>
+              <span>학년</span>
+              <span>과목</span>
+              <span>출판사</span>
+              <span>시험기간</span>
+              <span>수학시험일</span>
+              <span>시험 범위</span>
+              <span>부교재</span>
+              <span>시험 후 총평</span>
+            </div>
+            {filteredRows.map((row) => (
+              <div className="examPrepRow" key={row.examPrepId}>
+                <input value={row.schoolName ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "schoolName", event.target.value)} />
+                <textarea
+                  value={row.specialNote ?? row.memo ?? ""}
+                  onChange={(event) => onUpdateRow(row.examPrepId, "specialNote", event.target.value)}
+                  placeholder="학교별 특이사항"
+                  rows="3"
+                />
+                <input value={row.grade ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "grade", event.target.value)} />
+                <input value={row.subject ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "subject", event.target.value)} />
+                <input value={row.publisher ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "publisher", event.target.value)} />
+                <input value={row.examPeriod ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "examPeriod", event.target.value)} placeholder="예: 2026-06-24~06-28" />
+                <input type="date" value={row.mathExamDate ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "mathExamDate", event.target.value)} />
+                <textarea value={row.scope ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "scope", event.target.value)} rows="3" />
+                <textarea value={row.subTextbook ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "subTextbook", event.target.value)} rows="3" />
+                <button className={row.review || row.revisedReview ? "examReviewOpenButton filled" : "examReviewOpenButton"} onClick={() => setReviewModalRowId(row.examPrepId)} type="button">
+                  <strong>{row.review || row.revisedReview ? "총평 보기/수정" : "총평 작성"}</strong>
+                  <span>{row.revisedReview || row.review || "시험 후 총평 미작성"}</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : null}
+
+      {activeTab === "tallyAi" ? (
+        <div className="tallyAiGrid">
+          <section className="panel tallyInboxPanel">
+            <div className="sectionHeader slim">
+              <h2>Tally 제출 수신함</h2>
+              <button className="softButton" type="button">CSV 붙여넣기</button>
+            </div>
+            {filteredRows.slice(0, 5).map((row) => (
+              <article className="tallySubmissionCard" key={`tally_${row.examPrepId}`}>
+                <strong>{row.schoolName} · {row.grade} · {row.subject}</strong>
+                <p>{row.review || "학생 제출 총평 원문이 들어오면 여기에 표시됩니다."}</p>
+                <small>원본 보관 · AI 가공 대기</small>
+              </article>
+            ))}
+          </section>
+          <section className="panel tallySummaryPanel">
+            <div className="sectionHeader slim">
+              <h2>AI 표준 총평</h2>
+              <button className="primaryButton" type="button">AI 총평 갱신</button>
+            </div>
+            {filteredRows.slice(0, 5).map((row) => (
+              <article className="tallySubmissionCard summary" key={`summary_${row.examPrepId}`}>
+                <strong>{row.schoolName}</strong>
+                <button className="examReviewOpenButton filled" onClick={() => setReviewModalRowId(row.examPrepId)} type="button">
+                  <strong>총평 모달 열기</strong>
+                  <span>{row.revisedReview || row.review || "AI 총평을 작성해주세요."}</span>
+                </button>
+              </article>
+            ))}
+          </section>
+        </div>
+      ) : null}
+
+      {activeTab === "pastPapers" ? (
+        <section className="pastPaperFramePanel">
+          <div className="pastPaperToolbar">
+            <div>
+              <h2>기출문제 아카이브</h2>
+              <p className="muted">외부 Google Apps Script 웹앱을 academy-os 안에서 엽니다.</p>
+            </div>
+            <a className="softButton" href={pastPaperArchiveUrl} rel="noreferrer" target="_blank">
+              새 창에서 열기
+            </a>
+          </div>
+          <iframe
+            className="pastPaperFrame"
+            src={pastPaperArchiveUrl}
+            title="으뜸수학 기출아카이브"
+          />
+        </section>
+      ) : null}
+
+      {reviewModalRow ? (
+        <ExamReviewComposerModal
+          row={reviewModalRow}
+          onClose={() => setReviewModalRowId("")}
+          onUpdateRow={onUpdateRow}
+        />
+      ) : null}
+    </section>
+  );
+}
+
+function ExamReviewComposerModal({ onClose, onUpdateRow, row }) {
+  async function polishReview() {
+    onUpdateRow(row.examPrepId, "reviewAiStatus", "AI 수정 중");
+    try {
+      const response = await fetch(apiUrl("/api/ai/comment-polish"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          aiProvider: "mock",
+          aiModel: "local-mock",
+          audience: "teacher",
+          grade: row.grade,
+          homeworkStatus: "시험 후 총평",
+          lessonDate: row.mathExamDate || row.examPeriod || today,
+          lessonName: `${row.schoolName} ${row.subject} 시험 총평`,
+          rawText: row.review ?? "",
+          schoolName: row.schoolName,
+          studentName: "시험대비"
+        })
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || "시험 후 총평 AI 수정에 실패했습니다.");
+      }
+      onUpdateRow(row.examPrepId, "revisedReview", result.result.polishedText);
+      onUpdateRow(row.examPrepId, "reviewAiStatus", `완료 · ${result.result.provider}`);
+    } catch (error) {
+      onUpdateRow(row.examPrepId, "reviewAiStatus", `실패 · ${error.message}`);
+    }
+  }
+
+  return (
+    <Modal
+      className="commentComposerModal"
+      title={`${row.schoolName} 시험 후 총평`}
+      subtitle={`${row.grade} · ${row.subject} · ${row.publisher || "출판사 미입력"}`}
+      onClose={onClose}
+    >
+      <div className="commentComposerGrid">
+        <section className="commentDraftPanel">
+          <div className="sectionHeader slim">
+            <div>
+              <p className="eyebrow">ORIGINAL</p>
+              <h2>시험 후 총평</h2>
+            </div>
+            <button className="softButton" onClick={polishReview} type="button">AI 수정</button>
+          </div>
+          <textarea
+            className="commentComposerTextarea"
+            value={row.review ?? ""}
+            onChange={(event) => onUpdateRow(row.examPrepId, "review", event.target.value)}
+            placeholder="탈리 제출 원문, 현장 체감, 학생 반응 등을 적어주세요."
+          />
+          <small className="muted">{row.reviewAiStatus || "AI 대기"}</small>
+        </section>
+
+        <section className="commentPreviewPanel">
+          <div className="sectionHeader slim">
+            <div>
+              <p className="eyebrow">REVISED</p>
+              <h2>시험 후 총평 수정본</h2>
+            </div>
+          </div>
+          <textarea
+            className="commentComposerTextarea"
+            value={row.revisedReview ?? ""}
+            onChange={(event) => onUpdateRow(row.examPrepId, "revisedReview", event.target.value)}
+            placeholder="AI가 다듬은 총평 또는 강사가 최종 수정한 총평이 들어갑니다."
+          />
+          <div className="messagePreview examReviewPreview">
+            <div className="messagePreviewHeader">
+              <strong>{row.schoolName} 시험 총평 미리보기</strong>
+              <span>{row.grade} · {row.subject}</span>
+            </div>
+            <div className="messagePreviewMeta">
+              <span>{row.examPeriod || "시험기간 미입력"}</span>
+              <span>{row.mathExamDate || "수학시험일 미입력"}</span>
+              <span>{row.specialNote || row.memo || "특이사항 없음"}</span>
+            </div>
+            <div className="messageBubble">
+              {(row.revisedReview || row.review || "왼쪽에 작성한 총평이 이 영역에 표시됩니다.").split("\n").map((line, index) => (
+                <p key={`${line}_${index}`}>{line || "\u00a0"}</p>
+              ))}
+            </div>
+          </div>
+        </section>
+      </div>
+    </Modal>
+  );
+}
+
+const aiProviderModels = {
+  anthropic: ["claude-sonnet-4-6", "claude-opus-4-8", "claude-haiku-4-5"],
+  mock: ["local-mock"],
+  openai: ["gpt-5.5", "gpt-5.1", "gpt-4.1"]
+};
+
+function ExamAnalysisCenter({ analyses, examPrepRows, onAddAnalysis, onRunAnalysis, onUpdateAnalysis }) {
+  const [selectedAnalysisId, setSelectedAnalysisId] = useState(analyses[0]?.examAnalysisId ?? "");
+  const [isListCollapsed, setIsListCollapsed] = useState(false);
+  const selectedAnalysis = analyses.find((item) => item.examAnalysisId === selectedAnalysisId) ?? analyses[0];
+
+  useEffect(() => {
+    if (!selectedAnalysisId && analyses[0]?.examAnalysisId) {
+      setSelectedAnalysisId(analyses[0].examAnalysisId);
+    }
+  }, [analyses, selectedAnalysisId]);
+
+  function update(field, value) {
+    if (!selectedAnalysis) return;
+    onUpdateAnalysis(selectedAnalysis.examAnalysisId, field, value);
+  }
+
+  function changeProvider(provider) {
+    update("aiProvider", provider);
+    update("aiModel", aiProviderModels[provider]?.[0] ?? "local-mock");
+  }
+
+  return (
+    <section className="examAnalysisPage">
+      <header className="pageTop examAnalysisTop">
+        <div>
+          <p className="eyebrow">EXAM ANALYSIS</p>
+          <h1>시험분석</h1>
+          <p className="muted">시험 원본을 AI로 분석하고, 강사 인사이트를 더해 블로그와 인스타 초안까지 만듭니다.</p>
+        </div>
+        <button className="primaryButton" onClick={onAddAnalysis} type="button">+ 분석 추가</button>
+      </header>
+
+      <div className={isListCollapsed ? "examAnalysisLayout listCollapsed" : "examAnalysisLayout"}>
+        <aside className={isListCollapsed ? "panel analysisListPanel collapsed" : "panel analysisListPanel"}>
+          <div className="sectionHeader slim">
+            {isListCollapsed ? null : <h2>분석 목록</h2>}
+            <button
+              aria-label={isListCollapsed ? "분석 목록 펼치기" : "분석 목록 접기"}
+              className="analysisListToggle"
+              onClick={() => setIsListCollapsed((current) => !current)}
+              type="button"
+            >
+              {isListCollapsed ? "›" : "‹"}
+            </button>
+            <span className="countBadge">{analyses.length}건</span>
+          </div>
+          {isListCollapsed ? (
+            <div className="analysisCollapsedHint">목록</div>
+          ) : (
+            <div className="analysisList">
+              {analyses.map((analysis) => (
+                <button
+                  className={selectedAnalysis?.examAnalysisId === analysis.examAnalysisId ? "analysisListItem active" : "analysisListItem"}
+                  key={analysis.examAnalysisId}
+                  onClick={() => setSelectedAnalysisId(analysis.examAnalysisId)}
+                  type="button"
+                >
+                  <strong>{analysis.schoolName} {analysis.grade}</strong>
+                  <span>{analysis.examName} · {analysis.subject}</span>
+                  <small>{analysis.pipelineStage}</small>
+                </button>
+              ))}
+            </div>
+          )}
+        </aside>
+
+        {selectedAnalysis ? (
+          <section className="analysisWorkspace">
+            <section className="panel analysisOverviewPanel">
+              <div className="sectionHeader slim">
+                <div>
+                  <h2>시험 기본정보</h2>
+                  <p className="muted">시험대비 DB와 이어지는 고사 단위 메타데이터입니다.</p>
+                </div>
+                <select value={selectedAnalysis.pipelineStage} onChange={(event) => update("pipelineStage", event.target.value)}>
+                  <option value="1차 AI 가안">1차 AI 가안</option>
+                  <option value="강사 인사이트 추가">강사 인사이트 추가</option>
+                  <option value="최종 편집">최종 편집</option>
+                  <option value="발행 완료">발행 완료</option>
+                </select>
+              </div>
+              <div className="fieldGrid">
+                <label>
+                  시험대비 DB 연결
+                  <select value={selectedAnalysis.examPrepId} onChange={(event) => update("examPrepId", event.target.value)}>
+                    {examPrepRows.map((row) => (
+                      <option key={row.examPrepId} value={row.examPrepId}>
+                        {row.schoolName} · {row.grade} · {row.subject}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  학교
+                  <input value={selectedAnalysis.schoolName} onChange={(event) => update("schoolName", event.target.value)} />
+                </label>
+                <label>
+                  학년
+                  <input value={selectedAnalysis.grade} onChange={(event) => update("grade", event.target.value)} />
+                </label>
+                <label>
+                  과목
+                  <input value={selectedAnalysis.subject} onChange={(event) => update("subject", event.target.value)} />
+                </label>
+                <label>
+                  시험명
+                  <input value={selectedAnalysis.examName} onChange={(event) => update("examName", event.target.value)} />
+                </label>
+                <label>
+                  시험일
+                  <input type="date" value={selectedAnalysis.examDate} onChange={(event) => update("examDate", event.target.value)} />
+                </label>
+                <label>
+                  AI API
+                  <select value={selectedAnalysis.aiProvider ?? "mock"} onChange={(event) => changeProvider(event.target.value)}>
+                    <option value="mock">모의분석</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="anthropic">Claude</option>
+                  </select>
+                </label>
+                <label>
+                  모델
+                  <select value={selectedAnalysis.aiModel ?? "local-mock"} onChange={(event) => update("aiModel", event.target.value)}>
+                    {(aiProviderModels[selectedAnalysis.aiProvider ?? "mock"] ?? aiProviderModels.mock).map((model) => (
+                      <option key={model} value={model}>{model}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  API 상태
+                  <input readOnly value={`${selectedAnalysis.aiStatus ?? "대기"}${selectedAnalysis.aiLastRunAt ? ` · ${selectedAnalysis.aiLastRunAt}` : ""}`} />
+                </label>
+              </div>
+              {selectedAnalysis.aiError ? <div className="apiErrorBox">{selectedAnalysis.aiError}</div> : null}
+            </section>
+
+            <section className="analysisPipeline">
+              {["1차 AI 가안", "강사 인사이트 추가", "최종 편집", "발행 완료"].map((stage, index) => (
+                <div className={selectedAnalysis.pipelineStage === stage ? "pipelineStep active" : "pipelineStep"} key={stage}>
+                  <b>{index + 1}</b>
+                  <span>{stage}</span>
+                </div>
+              ))}
+            </section>
+
+            <section className="analysisTwoColumn">
+              <div className="panel analysisInputPanel">
+                <div className="sectionHeader slim">
+                  <h2>시험 원본 · AI 입력</h2>
+                </div>
+                <label className="wideLabel">
+                  원본 파일/링크
+                  <input
+                    value={selectedAnalysis.sourceFileUrl}
+                    onChange={(event) => update("sourceFileUrl", event.target.value)}
+                    placeholder="Google Drive, Notion, PDF 링크"
+                  />
+                </label>
+                <label className="wideLabel">
+                  시험 원본 메모
+                  <textarea
+                    value={selectedAnalysis.rawExamText}
+                    onChange={(event) => update("rawExamText", event.target.value)}
+                    placeholder="시험지 OCR 텍스트, 문항 목록, 사진에서 옮긴 핵심 내용을 붙여넣습니다."
+                    rows="8"
+                  />
+                </label>
+                <label className="wideLabel">
+                  AI 분석 프롬프트
+                  <textarea
+                    value={selectedAnalysis.aiPrompt}
+                    onChange={(event) => update("aiPrompt", event.target.value)}
+                    rows="8"
+                  />
+                </label>
+              </div>
+
+              <div className="panel analysisAiPanel">
+                <div className="sectionHeader slim">
+                  <h2>AI 분석 필드</h2>
+                  <button
+                    className="softButton"
+                    disabled={selectedAnalysis.aiStatus === "분석 중"}
+                    onClick={() => onRunAnalysis(selectedAnalysis)}
+                    type="button"
+                  >
+                    {selectedAnalysis.aiStatus === "분석 중" ? "분석 중..." : "AI 분석 갱신"}
+                  </button>
+                </div>
+                <div className="analysisFieldStack">
+                  <label>
+                    시험 개요
+                    <textarea value={selectedAnalysis.aiOverview} onChange={(event) => update("aiOverview", event.target.value)} rows="4" />
+                  </label>
+                  <label>
+                    단원별 출제 분포
+                    <textarea value={selectedAnalysis.unitDistribution} onChange={(event) => update("unitDistribution", event.target.value)} rows="5" />
+                  </label>
+                  <label>
+                    킬러/준킬러 문항
+                    <textarea value={selectedAnalysis.killerProblems} onChange={(event) => update("killerProblems", event.target.value)} rows="5" />
+                  </label>
+                  <label>
+                    학생 실수 패턴
+                    <textarea value={selectedAnalysis.mistakePatterns} onChange={(event) => update("mistakePatterns", event.target.value)} rows="5" />
+                  </label>
+                </div>
+              </div>
+            </section>
+
+            <section className="panel teacherInsightPanel">
+              <div className="sectionHeader slim">
+                <div>
+                  <h2>강사 인사이트 4모듈</h2>
+                  <p className="muted">노션 마스터 기준: 인사이트 없는 분석지는 발행하지 않습니다.</p>
+                </div>
+              </div>
+              <div className="insightGrid">
+                <label>
+                  A. 총평
+                  <textarea value={selectedAnalysis.insightSummary} onChange={(event) => update("insightSummary", event.target.value)} rows="7" />
+                </label>
+                <label>
+                  B. 단원별 인사이트
+                  <textarea value={selectedAnalysis.insightUnits} onChange={(event) => update("insightUnits", event.target.value)} rows="7" />
+                </label>
+                <label>
+                  C. 킬러문항 분석
+                  <textarea value={selectedAnalysis.insightKiller} onChange={(event) => update("insightKiller", event.target.value)} rows="7" />
+                </label>
+                <label>
+                  D. 학습 방향
+                  <textarea value={selectedAnalysis.insightDirection} onChange={(event) => update("insightDirection", event.target.value)} rows="7" />
+                </label>
+              </div>
+            </section>
+
+            <section className="analysisOutputGrid">
+              <article className="panel outputCard">
+                <div className="sectionHeader slim">
+                  <h2>학생 분석지</h2>
+                  <span>A+B+D</span>
+                </div>
+                <textarea value={selectedAnalysis.studentAnalysisDraft} onChange={(event) => update("studentAnalysisDraft", event.target.value)} rows="10" />
+              </article>
+              <article className="panel outputCard">
+                <div className="sectionHeader slim">
+                  <h2>블로그 초안</h2>
+                  <span>A+B+C+D</span>
+                </div>
+                <textarea value={selectedAnalysis.blogDraft} onChange={(event) => update("blogDraft", event.target.value)} rows="10" />
+              </article>
+              <article className="panel outputCard">
+                <div className="sectionHeader slim">
+                  <h2>인스타 카드뉴스</h2>
+                  <span>7장 구성</span>
+                </div>
+                <textarea value={selectedAnalysis.instagramDraft} onChange={(event) => update("instagramDraft", event.target.value)} rows="10" />
+              </article>
+            </section>
+          </section>
+        ) : (
+          <section className="panel emptyPortalPanel">
+            <strong>아직 시험분석이 없습니다.</strong>
+            <button className="primaryButton" onClick={onAddAnalysis} type="button">첫 분석 만들기</button>
+          </section>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdateEvent }) {
+  const [selectedMonth, setSelectedMonth] = useState(today);
+  const [selectedDate, setSelectedDate] = useState(today);
+  const [schoolFilter, setSchoolFilter] = useState("전체 학교");
+  const [isFormCollapsed, setIsFormCollapsed] = useState(false);
+  const [newEvent, setNewEvent] = useState({
+    schoolName: rows[0]?.schoolName ?? "",
+    date: today,
+    endDate: "",
+    title: "",
+    type: "examPeriod",
+    examSubject: "",
+    memo: ""
+  });
+  const schools = [...new Set(rows.map((row) => row.schoolName).filter(Boolean))];
+  const eventTypeLabels = {
+    examPeriod: "시험기간",
+    mathExam: "수학시험",
+    preExam: "직전대비",
+    vacation: "방학/개학",
+    schoolEvent: "학교행사",
+    custom: "일반"
+  };
+  const examEvents = rows
+    .map((row, index) => ({
+      eventId: `derived_${row.examPrepId}`,
+      date: row.mathExamDate || getDefaultMathExamDate(row, index),
+      endDate: "",
+      schoolName: row.schoolName || "학교 미입력",
+      title: `${examCycleLabel(row.examCycle ?? "2026-1-mid")} 수학시험`,
+      examSubject: "수학",
+      memo: "시험대비 탭에서 연동된 수학시험 일정입니다.",
+      type: "mathExam",
+      derived: true
+    }))
+    .filter((event) => event.date);
+  const academicEvents = [...examEvents, ...events].sort((a, b) => a.date.localeCompare(b.date));
+  const filteredEvents = academicEvents.filter(
+    (event) => schoolFilter === "전체 학교" || event.schoolName === schoolFilter
+  );
+  const selectedDateEvents = filteredEvents.filter((event) => event.date === selectedDate);
+
+  function shiftMonth(amount) {
+    const [year, month] = selectedMonth.split("-").map(Number);
+    const next = new Date(Date.UTC(year, month - 1 + amount, 1));
+    const nextDate = `${next.getUTCFullYear()}-${String(next.getUTCMonth() + 1).padStart(2, "0")}-01`;
+    setSelectedMonth(nextDate);
+  }
+
+  function submitNewEvent() {
+    if (!newEvent.date || !newEvent.title.trim()) return;
+    onAddEvent({
+      ...newEvent,
+      schoolName: newEvent.schoolName || schools[0] || "학교 미입력",
+      title: newEvent.title.trim()
+    });
+    setSelectedDate(newEvent.date);
+    setSelectedMonth(newEvent.date);
+    setNewEvent((current) => ({ ...current, title: "", examSubject: "", memo: "" }));
+  }
+
+  return (
+    <section className="schoolCalendarPage">
+      <header className="schoolCalendarHeader">
+        <div>
+          <h1>학사일정</h1>
+          <p className="muted">학교별 시험, 행사, 방학 일정을 등록하면 수업일지와 커리큘럼 일정관리에도 표시됩니다.</p>
+        </div>
+        <select value={schoolFilter} onChange={(event) => setSchoolFilter(event.target.value)}>
+          <option value="전체 학교">전체 학교</option>
+          {schools.map((school) => (
+            <option key={school} value={school}>{school}</option>
+          ))}
+        </select>
+      </header>
+
+      <div className={isFormCollapsed ? "schoolCalendarLayout formCollapsed" : "schoolCalendarLayout"}>
+        <aside className={isFormCollapsed ? "panel schoolEventFormPanel collapsed" : "panel schoolEventFormPanel"}>
+          <div className="schoolFormHeader">
+            {isFormCollapsed ? null : <h2>일정 등록</h2>}
+            <button
+              aria-label={isFormCollapsed ? "일정 등록 펼치기" : "일정 등록 접기"}
+              className="schoolFormToggle"
+              onClick={() => setIsFormCollapsed((current) => !current)}
+              type="button"
+            >
+              {isFormCollapsed ? "›" : "‹"}
+            </button>
+          </div>
+          {isFormCollapsed ? (
+            <div className="schoolFormCollapsedHint">일정 등록</div>
+          ) : (
+            <>
+              <label>
+                학교
+                <select value={newEvent.schoolName} onChange={(event) => setNewEvent((current) => ({ ...current, schoolName: event.target.value }))}>
+                  <option value="">학교 선택</option>
+                  {schools.map((school) => (
+                    <option key={school} value={school}>{school}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                일정명
+                <input value={newEvent.title} onChange={(event) => setNewEvent((current) => ({ ...current, title: event.target.value }))} placeholder="예: 1학기 기말고사" />
+              </label>
+              <label>
+                일정 종류
+                <select value={newEvent.type} onChange={(event) => setNewEvent((current) => ({ ...current, type: event.target.value }))}>
+                  {Object.entries(eventTypeLabels).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
+              </label>
+              <div className="calendarDateGrid">
+                <label>
+                  시작일
+                  <input type="date" value={newEvent.date} onChange={(event) => setNewEvent((current) => ({ ...current, date: event.target.value }))} />
+                </label>
+                <label>
+                  종료일
+                  <input type="date" value={newEvent.endDate} onChange={(event) => setNewEvent((current) => ({ ...current, endDate: event.target.value }))} />
+                </label>
+              </div>
+              <div className="examSubjectBox">
+                <div className="sectionHeader slim">
+                  <strong>날짜별 시험 과목</strong>
+                  <span>{newEvent.date.slice(5).replace("-", ".")}</span>
+                </div>
+                <div className="examSubjectRow">
+                  <b>{newEvent.date.slice(5)} ({["일", "월", "화", "수", "목", "금", "토"][new Date(`${newEvent.date}T00:00:00+09:00`).getDay()]})</b>
+                  <input value={newEvent.examSubject} onChange={(event) => setNewEvent((current) => ({ ...current, examSubject: event.target.value }))} placeholder="예: 수학" />
+                </div>
+              </div>
+              <label>
+                메모
+                <textarea value={newEvent.memo} onChange={(event) => setNewEvent((current) => ({ ...current, memo: event.target.value }))} placeholder="필요한 메모" rows="4" />
+              </label>
+              <button className="primaryButton full" onClick={submitNewEvent} type="button">일정 등록</button>
+            </>
+          )}
+        </aside>
+
+        <section className="panel schoolCalendarMainPanel">
+          <div className="schoolMonthHeader">
+            <button className="iconButton" onClick={() => shiftMonth(-1)} type="button">‹</button>
+            <h2>{formatMonthTitle(selectedMonth)}</h2>
+            <button className="iconButton" onClick={() => shiftMonth(1)} type="button">›</button>
+          </div>
+          <div className="calendarGrid teacherCalendarGrid schoolMonthGrid">
+            {["일", "월", "화", "수", "목", "금", "토"].map((label) => (
+              <div className="weekday" key={label}>{label}</div>
+            ))}
+            {buildMonthDays(selectedMonth).map((day) => {
+              const dayEvents = filteredEvents.filter((event) => event.date === day.date);
+              return (
+                <button
+                  className={[
+                    "monthCell",
+                    "teacherMonthCell",
+                    "schoolMonthCell",
+                    day.inMonth ? "" : "outside",
+                    selectedDate === day.date ? "selected" : ""
+                  ].join(" ")}
+                  key={day.date}
+                  onClick={() => setSelectedDate(day.date)}
+                  type="button"
+                >
+                  <span className="dayNumber">{day.dayNumber}</span>
+                  <span className="lessonPills">
+                    {dayEvents.slice(0, 3).map((event) => (
+                      <span className={`schoolEventPill event-${event.type}`} key={event.eventId}>
+                        {event.schoolName} {event.examSubject || event.title}
+                      </span>
+                    ))}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <section className="selectedDateSchedule">
+            <h2>{selectedDate} 일정</h2>
+            {selectedDateEvents.length === 0 ? (
+              <div className="emptyState">선택한 날짜에 등록된 일정이 없습니다.</div>
+            ) : (
+              selectedDateEvents.map((event) => (
+                <div className="upcomingEvent editableEvent" key={event.eventId}>
+                  <input disabled={event.derived} type="date" value={event.date} onChange={(change) => onUpdateEvent(event.eventId, "date", change.target.value)} />
+                  <select disabled={event.derived} value={event.schoolName} onChange={(change) => onUpdateEvent(event.eventId, "schoolName", change.target.value)}>
+                    {[event.schoolName, ...schools].filter(Boolean).filter((school, index, array) => array.indexOf(school) === index).map((school) => (
+                      <option key={school} value={school}>{school}</option>
+                    ))}
+                  </select>
+                  <select disabled={event.derived} value={event.type} onChange={(change) => onUpdateEvent(event.eventId, "type", change.target.value)}>
+                    {Object.entries(eventTypeLabels).map(([value, label]) => (
+                      <option key={value} value={value}>{label}</option>
+                    ))}
+                  </select>
+                  <input disabled={event.derived} value={event.title} onChange={(change) => onUpdateEvent(event.eventId, "title", change.target.value)} />
+                  {event.derived ? <small>시험대비 연동</small> : <button className="dangerSoftButton" onClick={() => onDeleteEvent(event.eventId)} type="button">삭제</button>}
+                </div>
+              ))
+            )}
+          </section>
+        </section>
+      </div>
+    </section>
+  );
+}
+
+function EvaluationCenter({
+  academyTests,
+  scoreRecords,
+  wrongProblems
+}) {
+  return (
+    <section className="panel fullPanel evaluationCenter">
+      <div className="sectionHeader">
+        <div>
+          <h1>보고서 데이터</h1>
+          <p className="muted">보고서에 쓰이는 학생별 데이터 원천을 확인합니다. 입력과 수정은 학생관리의 학생 프로파일에서 진행합니다.</p>
+        </div>
+      </div>
+      <div className="reportDataSummaryGrid">
+        <article>
+          <strong>{wrongProblems.length}개</strong>
+          <span>교재오답</span>
+          <p>학생별 개인 탭으로 이동했습니다.</p>
+        </article>
+        <article>
+          <strong>{scoreRecords.length}개</strong>
+          <span>내신/모의고사</span>
+          <p>학생 프로파일의 성적 기록에서 관리합니다.</p>
+        </article>
+        <article>
+          <strong>{academyTests.length}개</strong>
+          <span>테스트 성적</span>
+          <p>학생 프로파일의 테스트 성적에서 관리합니다.</p>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function StudentSelect({ students, value, onChange }) {
+  return (
+    <select value={value} onChange={(event) => onChange(event.target.value)}>
+      {students.map((student) => (
+        <option key={student.studentId} value={student.studentId}>{student.name}</option>
+      ))}
+    </select>
+  );
+}
+
+function ClassManager({ students, templates, onUpdateClassRoster }) {
+  const [selectedTemplateId, setSelectedTemplateId] = useState(templates[1]?.classTemplateId ?? templates[0]?.classTemplateId ?? "");
+  const [isRosterModalOpen, setIsRosterModalOpen] = useState(false);
+  const [draftStudentIds, setDraftStudentIds] = useState([]);
+  const selectedTemplate = templates.find((template) => template.classTemplateId === selectedTemplateId) ?? templates[0];
+  const classStudents = students.filter((student) => student.defaultClassTemplateId === selectedTemplate?.classTemplateId);
+
+  function openRosterModal() {
+    setDraftStudentIds(classStudents.map((student) => student.studentId));
+    setIsRosterModalOpen(true);
+  }
+
+  function toggleDraftStudent(studentId) {
+    setDraftStudentIds((current) =>
+      current.includes(studentId) ? current.filter((id) => id !== studentId) : [...current, studentId]
+    );
+  }
+
+  function saveRoster() {
+    if (!selectedTemplate) return;
+    onUpdateClassRoster(selectedTemplate.classTemplateId, draftStudentIds);
+    setIsRosterModalOpen(false);
+  }
+
+  return (
+    <section className="classManagerPage">
+      <div className="pageTop classManagerTop">
+        <div>
+          <h1>반관리</h1>
+          <p className="muted">4개 기본 반을 기준으로 학생 배정과 수업 흐름을 관리합니다.</p>
+        </div>
+        <button className="primaryButton" type="button">+ 반 추가</button>
+      </div>
+
+      <div className="classBoardGrid">
+        {templates.map((template) => {
+          const count = students.filter((student) => student.defaultClassTemplateId === template.classTemplateId).length;
+          return (
+            <button
+              className={selectedTemplateId === template.classTemplateId ? "classBoardCard active" : "classBoardCard"}
+              key={template.classTemplateId}
+              onClick={() => setSelectedTemplateId(template.classTemplateId)}
+              type="button"
+            >
+              <span className="classColor" style={{ background: template.color }} />
+              <strong>{template.name}</strong>
+              <small>{template.track} · {template.timeLabel}</small>
+              <b>{count}명</b>
+            </button>
+          );
+        })}
+      </div>
+
+      <section className="panel classDetailPanel">
+        <div className="sectionHeader">
+          <div>
+            <p className="eyebrow">CLASS DETAIL</p>
+            <h2>{selectedTemplate?.name}</h2>
+            <p className="muted">{selectedTemplate?.timeLabel} · 현재 배정 {classStudents.length}명</p>
+          </div>
+          <button className="softButton" onClick={openRosterModal} type="button">명단 수정</button>
+        </div>
+        <div className="classStudentGrid">
+          {classStudents.length === 0 ? (
+            <div className="emptyState">아직 이 반에 배정된 학생이 없습니다.</div>
+          ) : (
+            classStudents.map((student) => (
+              <div className="classStudentCard" key={student.studentId}>
+                <strong>{student.name}</strong>
+                <span>{student.schoolName || "-"} · {student.grade || "-"}</span>
+                <small>{student.textbook || "교재 미입력"}</small>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+
+      {isRosterModalOpen ? (
+        <Modal
+          className="classRosterModal"
+          onClose={() => setIsRosterModalOpen(false)}
+          subtitle="학생을 체크하면 이 반으로 배정되고, 체크를 해제하면 이 반 명단에서 제외됩니다."
+          title={`${selectedTemplate?.name ?? "반"} 명단 수정`}
+        >
+          <div className="rosterSummaryBar">
+            <span>현재 {classStudents.length}명</span>
+            <strong>선택 {draftStudentIds.length}명</strong>
+          </div>
+          <div className="classRosterList">
+            {students.map((student) => {
+              const checked = draftStudentIds.includes(student.studentId);
+              const currentTemplate = templates.find((template) => template.classTemplateId === student.defaultClassTemplateId);
+              return (
+                <label className={checked ? "rosterStudentItem selected" : "rosterStudentItem"} key={student.studentId}>
+                  <input
+                    checked={checked}
+                    onChange={() => toggleDraftStudent(student.studentId)}
+                    type="checkbox"
+                  />
+                  <span className="studentInitial">{student.name?.[0] ?? "학"}</span>
+                  <span>
+                    <strong>{student.name}</strong>
+                    <small>{student.schoolName || "학교 미입력"} · {student.grade || "-"} · {student.textbook || "교재 미입력"}</small>
+                  </span>
+                  <em>{currentTemplate?.name ?? "미배정"}</em>
+                </label>
+              );
+            })}
+          </div>
+          <div className="deleteConfirmActions">
+            <button className="softButton" onClick={() => setIsRosterModalOpen(false)} type="button">취소</button>
+            <button className="primaryButton" onClick={saveRoster} type="button">명단 저장</button>
+          </div>
+        </Modal>
+      ) : null}
+    </section>
+  );
+}
+
+function LessonResearchCenter({ items, onAddItem, onDeleteItem, onUpdateItem }) {
+  const [selectedSubject, setSelectedSubject] = useState(lessonResearchSubjects[0]);
+  const [selectedItemId, setSelectedItemId] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("전체");
+  const [statusFilter, setStatusFilter] = useState("전체");
+
+  const filteredItems = useMemo(
+    () =>
+      items.filter(
+        (item) =>
+          item.subject === selectedSubject &&
+          (categoryFilter === "전체" || item.category === categoryFilter) &&
+          (statusFilter === "전체" || item.status === statusFilter)
+      ),
+    [categoryFilter, items, selectedSubject, statusFilter]
+  );
+
+  const selectedItem =
+    items.find((item) => item.researchItemId === selectedItemId) ??
+    filteredItems[0] ??
+    items.find((item) => item.subject === selectedSubject) ??
+    null;
+
+  const subjectCounts = useMemo(
+    () =>
+      lessonResearchSubjects.reduce((acc, subject) => {
+        acc[subject] = items.filter((item) => item.subject === subject).length;
+        return acc;
+      }, {}),
+    [items]
+  );
+
+  function handleAddItem() {
+    onAddItem(selectedSubject);
+  }
+
+  return (
+    <section className="lessonResearchPage">
+      <div className="pageTop lessonResearchHero">
+        <div>
+          <p className="eyebrow">LESSON RESEARCH</p>
+          <h1>수업연구</h1>
+          <p className="muted">못 푼 문제, 설명이 아쉬웠던 문제, 빈출 테마를 과목별로 모아 교재 후보로 발전시키는 공간입니다.</p>
+        </div>
+        <button className="primaryButton" onClick={handleAddItem} type="button">+ 연구 항목 추가</button>
+      </div>
+
+      <div className="researchSubjectTabs">
+        {lessonResearchSubjects.map((subject) => (
+          <button
+            className={selectedSubject === subject ? "active" : ""}
+            key={subject}
+            onClick={() => {
+              setSelectedSubject(subject);
+              setSelectedItemId("");
+            }}
+            type="button"
+          >
+            <strong>{subject}</strong>
+            <span>{subjectCounts[subject] ?? 0}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="researchMetricGrid">
+        <MetricCard label="전체 연구 항목" value={`${items.length}개`} hint="과목 전체 누적" />
+        <MetricCard label="교재화 후보" value={`${items.filter((item) => item.status === "교재후보").length}개`} hint="문항집으로 발전 가능" />
+        <MetricCard label="상 우선순위" value={`${items.filter((item) => item.priority === "상").length}개`} hint="다음 수업 전 확인" />
+      </div>
+
+      <div className="researchLayout">
+        <section className="panel researchListPanel">
+          <div className="sectionHeader">
+            <div>
+              <p className="eyebrow">COLLECT</p>
+              <h2>{selectedSubject}</h2>
+            </div>
+            <div className="researchFilters">
+              <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
+                {["전체", "못 푼 문제", "설명 아쉬움", "빈출 테마", "교재화 후보"].map((option) => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+              <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+                {["전체", "수집", "정리중", "교재후보", "완료"].map((option) => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="researchCardList">
+            {filteredItems.length === 0 ? (
+              <div className="emptyState">아직 이 과목에 정리된 연구 항목이 없습니다.</div>
+            ) : (
+              filteredItems.map((item) => (
+                <button
+                  className={selectedItem?.researchItemId === item.researchItemId ? "researchCard active" : "researchCard"}
+                  key={item.researchItemId}
+                  onClick={() => setSelectedItemId(item.researchItemId)}
+                  type="button"
+                >
+                  <div>
+                    <strong>{item.title}</strong>
+                    <span>{item.source || "출처 미입력"}</span>
+                  </div>
+                  <div className="researchBadges">
+                    <span>{item.category}</span>
+                    <span>{item.status}</span>
+                    <b>{item.priority}</b>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </section>
+
+        <section className="panel researchEditor">
+          {selectedItem ? (
+            <>
+              <div className="sectionHeader">
+                <div>
+                  <p className="eyebrow">EDIT</p>
+                  <h2>연구 항목 정리</h2>
+                  <p className="muted">마지막 수정일 {selectedItem.updatedAt || selectedItem.createdAt}</p>
+                </div>
+                <button className="ghostButton dangerText" onClick={() => onDeleteItem(selectedItem.researchItemId)} type="button">삭제</button>
+              </div>
+
+              <div className="researchMetaGrid">
+                <label>
+                  과목
+                  <select value={selectedItem.subject} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "subject", event.target.value)}>
+                    {lessonResearchSubjects.map((subject) => (
+                      <option key={subject} value={subject}>{subject}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  분류
+                  <select value={selectedItem.category} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "category", event.target.value)}>
+                    {["못 푼 문제", "설명 아쉬움", "빈출 테마", "교재화 후보"].map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  상태
+                  <select value={selectedItem.status} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "status", event.target.value)}>
+                    {["수집", "정리중", "교재후보", "완료"].map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  우선순위
+                  <select value={selectedItem.priority} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "priority", event.target.value)}>
+                    {["상", "중", "하"].map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <label className="wideLabel">
+                제목
+                <input value={selectedItem.title} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "title", event.target.value)} />
+              </label>
+              <label className="wideLabel">
+                출처 / 수업 맥락
+                <input value={selectedItem.source} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "source", event.target.value)} placeholder="예: 6/12 월수금 7-10 질문, 창동고 기출, 자체교재 p.32" />
+              </label>
+
+              <div className="researchTextareaGrid">
+                <label>
+                  문제 메모
+                  <textarea value={selectedItem.problemNote} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "problemNote", event.target.value)} placeholder="문항 조건, 학생이 막힌 지점, 다시 풀어볼 포인트" />
+                </label>
+                <label>
+                  설명 보완 메모
+                  <textarea value={selectedItem.teachingNote} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "teachingNote", event.target.value)} placeholder="다음 수업에서 어떻게 설명할지, 판서 흐름, 비유, 질문 순서" />
+                </label>
+                <label className="researchWideTextarea">
+                  교재화 아이디어
+                  <textarea value={selectedItem.materialPlan} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "materialPlan", event.target.value)} placeholder="개념 설명, 대표문항, 유제, 심화문항으로 발전시킬 방향" />
+                </label>
+              </div>
+            </>
+          ) : (
+            <div className="emptyState">왼쪽에서 항목을 추가하거나 선택해주세요.</div>
+          )}
+        </section>
+      </div>
+    </section>
+  );
+}
+
+function AIVariantProblemCenter({ students }) {
+  const [activeTab, setActiveTab] = useState("input");
+  const [sourceProblem, setSourceProblem] = useState("");
+  const [targetStudentId, setTargetStudentId] = useState(students[0]?.studentId ?? "");
+  const [variantLevel, setVariantLevel] = useState("same");
+  const selectedStudent = students.find((student) => student.studentId === targetStudentId) ?? students[0];
+  const variantCards = [
+    {
+      title: "숫자 조건 변형",
+      body: sourceProblem ? "원문 구조는 유지하고 계수와 조건을 바꾼 문항 초안입니다." : "원문 문항을 입력하면 구조 유지형 변형문항이 표시됩니다."
+    },
+    {
+      title: "개념 확인 변형",
+      body: sourceProblem ? "같은 개념을 더 짧은 풀이로 확인하는 문항 초안입니다." : "학생별 약점 확인용 짧은 변형문항이 표시됩니다."
+    },
+    {
+      title: "내신 심화 변형",
+      body: sourceProblem ? "학교 시험 대비용으로 조건을 한 단계 더 꼬은 문항 초안입니다." : "시험대비 난도 상승형 문항이 표시됩니다."
+    }
+  ];
+
+  return (
+    <section className="aiVariantPage">
+      <div className="pageTop aiVariantHero">
+        <div>
+          <p className="eyebrow">AI VARIANT</p>
+          <h1>AI 변형문항</h1>
+          <p className="muted">교재오답과 내신 대비 문항을 바탕으로 변형문항 초안을 만드는 작업대입니다.</p>
+        </div>
+        <button className="primaryButton" onClick={() => setActiveTab("drafts")} type="button">초안 보기</button>
+      </div>
+
+      <div className="studentManagerTabs aiTabs">
+        {[
+          ["input", "문항 입력"],
+          ["drafts", "변형 초안"],
+          ["saved", "저장 목록"]
+        ].map(([id, label]) => (
+          <button className={activeTab === id ? "active" : ""} key={id} onClick={() => setActiveTab(id)} type="button">
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === "input" ? (
+        <section className="panel aiInputPanel">
+          <div className="fieldGrid">
+            <label>
+              대상 학생
+              <StudentSelect students={students} value={targetStudentId} onChange={setTargetStudentId} />
+            </label>
+            <label>
+              변형 난도
+              <select value={variantLevel} onChange={(event) => setVariantLevel(event.target.value)}>
+                <option value="same">유사 난도</option>
+                <option value="up">한 단계 심화</option>
+                <option value="exam">내신 실전형</option>
+              </select>
+            </label>
+          </div>
+          <label className="wideLabel">
+            원본 문항 / 오답 메모
+            <textarea
+              value={sourceProblem}
+              onChange={(event) => setSourceProblem(event.target.value)}
+              placeholder="원본 문제, 학생 풀이 오류, 원하는 조건을 붙여넣으세요."
+              rows="8"
+            />
+          </label>
+          <button className="primaryButton" onClick={() => setActiveTab("drafts")} type="button">변형문항 초안 생성</button>
+        </section>
+      ) : null}
+
+      {activeTab === "drafts" ? (
+        <section className="variantDraftGrid">
+          <div className="panel variantContext">
+            <h2>{selectedStudent?.name ?? "학생"} 맞춤 조건</h2>
+            <p className="muted">{selectedStudent?.schoolName ?? "-"} · {selectedStudent?.grade ?? "-"} · {variantLevel === "same" ? "유사 난도" : variantLevel === "up" ? "한 단계 심화" : "내신 실전형"}</p>
+            <p>{sourceProblem || "아직 입력된 원본 문항이 없습니다. 문항 입력 탭에서 원본을 넣어주세요."}</p>
+          </div>
+          {variantCards.map((card) => (
+            <article className="panel variantCard" key={card.title}>
+              <h3>{card.title}</h3>
+              <p>{card.body}</p>
+              <div className="variantActions">
+                <button className="softButton" type="button">수정</button>
+                <button className="primaryButton" type="button">저장</button>
+              </div>
+            </article>
+          ))}
+        </section>
+      ) : null}
+
+      {activeTab === "saved" ? (
+        <section className="panel">
+          <h2>저장된 변형문항</h2>
+          <div className="emptyState">아직 저장된 변형문항이 없습니다.</div>
+        </section>
+      ) : null}
+    </section>
+  );
+}
+
+function StudentManager({
+  academyTests,
+  scoreRecords,
+  students,
+  templates,
+  onAddAcademyTest,
+  onAddScore,
+  onAddStudent,
+  onUpdateAcademyTest,
+  onUpdateScore,
+  onDeleteStudent,
+  onUpdateStudent
+}) {
+  const [activeTab, setActiveTab] = useState("all");
+  const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [deleteStudentId, setDeleteStudentId] = useState("");
+  const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("template_mwf_7_10");
+  const selectedClassTemplate = templates.find(
+    (template) => template.classTemplateId === selectedClassTemplateId
+  );
+  const selectedStudent = students.find((student) => student.studentId === selectedStudentId) ?? null;
+  const deleteStudent = students.find((student) => student.studentId === deleteStudentId) ?? null;
+  const selectedScores = scoreRecords.filter((score) => score.studentId === selectedStudent?.studentId);
+  const selectedAcademyTests = academyTests.filter((item) => item.studentId === selectedStudent?.studentId);
+  const visibleStudents =
+    activeTab === "class"
+      ? students.filter((student) => student.defaultClassTemplateId === selectedClassTemplateId)
+      : students;
+  const title = activeTab === "class" ? `${selectedClassTemplate?.name ?? "반별"} 학생 목록` : "전체 학생 목록";
+
+  useEffect(() => {
+    if (selectedStudentId && !visibleStudents.some((student) => student.studentId === selectedStudentId)) {
+      setSelectedStudentId("");
+    }
+  }, [selectedStudentId, visibleStudents]);
+
+  function confirmDeleteStudent() {
+    if (!deleteStudent) return;
+    onDeleteStudent(deleteStudent.studentId);
+    if (selectedStudentId === deleteStudent.studentId) {
+      setSelectedStudentId("");
+    }
+    setDeleteStudentId("");
+  }
+
+  return (
+    <section className="panel fullPanel">
+      <div className="sectionHeader">
+        <div>
+          <h1>학생 목록</h1>
+          <p className="muted">총 {visibleStudents.length}명</p>
+        </div>
+        <div className="studentListToolbar">
+          <button className="primaryButton" onClick={onAddStudent} type="button">+ 학생 추가</button>
+          <span className="studentStatusPill">재원 {visibleStudents.length}</span>
+          <span className="studentStatusPill mutedPill">퇴원 0</span>
+          <button className="greenButton" type="button">전체 확정</button>
+          <button className="softButton" type="button">전체 미확정</button>
+          <select aria-label="학년 필터" defaultValue="전체 학년">
+            <option>전체 학년</option>
+            <option>고1</option>
+            <option>고2</option>
+            <option>중1</option>
+            <option>중2</option>
+          </select>
+          <select aria-label="학교 필터" defaultValue="전체 학교">
+            <option>전체 학교</option>
+            {[...new Set(students.map((student) => student.schoolName).filter(Boolean))].map((school) => (
+              <option key={school}>{school}</option>
+            ))}
+          </select>
+          <select aria-label="담당 필터" defaultValue="전체 담당T">
+            <option>전체 담당T</option>
+            <option>고태영T</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="studentManagerTabs">
+        <button
+          className={activeTab === "all" ? "active" : ""}
+          onClick={() => {
+            setActiveTab("all");
+            setSelectedStudentId("");
+          }}
+          type="button"
+        >
+          전체 학생 목록
+        </button>
+        <button
+          className={activeTab === "class" ? "active" : ""}
+          onClick={() => {
+            setActiveTab("class");
+            setSelectedStudentId("");
+          }}
+          type="button"
+        >
+          반별 학생 목록
+        </button>
+      </div>
+
+      {activeTab === "class" ? (
+        <div className="classTabList">
+          {templates.map((template) => {
+            const count = students.filter((student) => student.defaultClassTemplateId === template.classTemplateId).length;
+            return (
+              <button
+                className={selectedClassTemplateId === template.classTemplateId ? "active" : ""}
+                key={template.classTemplateId}
+                onClick={() => {
+                  setSelectedClassTemplateId(template.classTemplateId);
+                  setSelectedStudentId("");
+                }}
+                type="button"
+              >
+                <strong>{template.name}</strong>
+                <span>{count}명</span>
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+
+      <div className="studentListTable">
+        <div className="studentListRow studentListHead">
+          <span>#</span>
+          <span>이름</span>
+          <span>아이디</span>
+          <span>PIN</span>
+          <span>학년</span>
+          <span>학교</span>
+          <span>학생전화번호</span>
+          <span>학부모전화번호</span>
+          <span>출생연도</span>
+          <span>현행평가</span>
+          <span>추가1평가</span>
+          <span>추가2평가</span>
+          <span>오답수정</span>
+          <span>상태</span>
+          <span>퇴원</span>
+          <span>삭제</span>
+        </div>
+        {visibleStudents.map((student, index) => (
+          <div className="studentListRow" key={student.studentId}>
+            <span>{index + 1}</span>
+            <button
+              className={selectedStudentId === student.studentId ? "studentNameButton active" : "studentNameButton"}
+              onClick={() => setSelectedStudentId(student.studentId)}
+              type="button"
+            >
+              <span className="studentInitial">{student.name?.[0] ?? "학"}</span>
+              <strong>{student.name}</strong>
+            </button>
+            <input
+              aria-label={`${student.name} 아이디`}
+              className="editableTextCell monoCell"
+              value={student.loginId ?? ""}
+              onChange={(event) => onUpdateStudent(student.studentId, "loginId", event.target.value)}
+            />
+            <input
+              aria-label={`${student.name} PIN`}
+              className="editableTextCell monoCell"
+              value={student.pin ?? ""}
+              onChange={(event) => onUpdateStudent(student.studentId, "pin", event.target.value)}
+            />
+            <input
+              aria-label={`${student.name} 학년`}
+              className="editableTextCell gradeBadgeInput"
+              value={student.grade || ""}
+              onChange={(event) => onUpdateStudent(student.studentId, "grade", event.target.value)}
+            />
+            <input
+              aria-label={`${student.name} 학교`}
+              className="editableTextCell"
+              value={student.schoolName || ""}
+              onChange={(event) => onUpdateStudent(student.studentId, "schoolName", event.target.value)}
+            />
+            <input
+              aria-label={`${student.name} 학생 전화번호`}
+              className="editableTextCell monoCell"
+              inputMode="tel"
+              value={student.studentPhone || ""}
+              onChange={(event) => onUpdateStudent(student.studentId, "studentPhone", event.target.value)}
+            />
+            <input
+              aria-label={`${student.name} 학부모 전화번호`}
+              className="editableTextCell monoCell"
+              inputMode="tel"
+              value={student.parentPhone || ""}
+              onChange={(event) => onUpdateStudent(student.studentId, "parentPhone", event.target.value)}
+            />
+            <select
+              value={student.birthYear ?? ""}
+              onChange={(event) => onUpdateStudent(student.studentId, "birthYear", event.target.value)}
+            >
+              <option value="">-</option>
+              {["2007", "2008", "2009", "2010", "2011", "2012", "2013"].map((year) => (
+                <option key={year} value={year}>{year}년</option>
+              ))}
+            </select>
+            <select
+              value={student.currentEvaluation ?? "-"}
+              onChange={(event) => onUpdateStudent(student.studentId, "currentEvaluation", event.target.value)}
+            >
+              <option>-</option>
+              <option>공수1 누적테스트</option>
+              <option>단원테스트</option>
+              <option>내신대비</option>
+            </select>
+            <select
+              value={student.extraEvaluation1 ?? "-"}
+              onChange={(event) => onUpdateStudent(student.studentId, "extraEvaluation1", event.target.value)}
+            >
+              <option>-</option>
+              <option>추가1평가</option>
+              <option>보충테스트</option>
+            </select>
+            <select
+              value={student.extraEvaluation2 ?? "-"}
+              onChange={(event) => onUpdateStudent(student.studentId, "extraEvaluation2", event.target.value)}
+            >
+              <option>-</option>
+              <option>추가2평가</option>
+              <option>심화테스트</option>
+            </select>
+            <select
+              value={student.correctionAvailable ?? "가능"}
+              onChange={(event) => onUpdateStudent(student.studentId, "correctionAvailable", event.target.value)}
+            >
+              <option>가능</option>
+              <option>보류</option>
+              <option>불가</option>
+            </select>
+            <button
+              className={student.confirmed === false ? "statusText danger" : "statusText"}
+              onClick={() => onUpdateStudent(student.studentId, "confirmed", student.confirmed === false)}
+              type="button"
+            >
+              {student.confirmed === false ? "미확정" : "확정"}
+            </button>
+            <button className="withdrawButton" type="button">퇴원</button>
+            <button
+              aria-label={`${student.name} 삭제`}
+              className="trashButton"
+              onClick={() => setDeleteStudentId(student.studentId)}
+              type="button"
+            >
+              🗑
+            </button>
+          </div>
+        ))}
+        {visibleStudents.length === 0 ? (
+          <div className="emptyState studentListEmpty">이 반에 배정된 학생이 없습니다.</div>
+        ) : null}
+      </div>
+
+      {selectedStudent ? (
+        <StudentProfileModal
+          academyTests={selectedAcademyTests}
+          className={selectedClassTemplate?.name ?? "전체"}
+          onAddAcademyTest={onAddAcademyTest}
+          onAddScore={onAddScore}
+          onClose={() => setSelectedStudentId("")}
+          onUpdateAcademyTest={onUpdateAcademyTest}
+          onUpdateScore={onUpdateScore}
+          onUpdateStudent={onUpdateStudent}
+          scores={selectedScores}
+          student={selectedStudent}
+        />
+      ) : null}
+
+      {deleteStudent ? (
+        <Modal
+          className="studentDeleteModal"
+          onClose={() => setDeleteStudentId("")}
+          subtitle="학생을 숨김 처리하면 목록과 수업 명단에서는 제외되고, DB에는 보류 상태로 보존됩니다."
+          title="학생 숨김 확인"
+        >
+          <div className="deleteConfirmBody">
+            <div className="deleteConfirmStudent">
+              <span className="studentInitial">{deleteStudent.name?.[0] ?? "학"}</span>
+              <div>
+                <strong>{deleteStudent.name}</strong>
+                <p className="muted">
+                  {[deleteStudent.grade, deleteStudent.schoolName].filter(Boolean).join(" · ") || "기본 정보 없음"}
+                </p>
+              </div>
+            </div>
+            <div className="deleteWarningBox">
+              <span>아이디</span>
+              <strong>{deleteStudent.loginId || "-"}</strong>
+              <span>PIN</span>
+              <strong>{deleteStudent.pin || "-"}</strong>
+            </div>
+            <p className="dangerCopy">정말 이 학생을 숨김 처리할까요? 실제 DB에서는 삭제하지 않고 보류 상태로 보존합니다.</p>
+          </div>
+          <div className="deleteConfirmActions">
+            <button className="softButton" onClick={() => setDeleteStudentId("")} type="button">취소</button>
+            <button className="dangerButton" onClick={confirmDeleteStudent} type="button">학생 숨김</button>
+          </div>
+        </Modal>
+      ) : null}
+    </section>
+  );
+}
+
+function StudentProfileModal({
+  academyTests,
+  className,
+  onAddAcademyTest,
+  onAddScore,
+  onClose,
+  onUpdateAcademyTest,
+  onUpdateScore,
+  onUpdateStudent,
+  scores,
+  student
+}) {
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+
+  function updateProfile(field, value) {
+    onUpdateStudent(student.studentId, field, value);
+  }
+
+  function renderProfileField(label, field, fallback = "-") {
+    return (
+      <div>
+        <small>{label}</small>
+        {isEditingProfile ? (
+          <input
+            className="profileEditInput"
+            value={student[field] ?? ""}
+            onChange={(event) => updateProfile(field, event.target.value)}
+            placeholder={fallback}
+          />
+        ) : (
+          <strong>{student[field] || fallback}</strong>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <Modal
+      className="wideModal"
+      title={`${student.name} 학생 프로파일`}
+      subtitle="기본정보와 성적 기록을 한 번에 확인합니다."
+      onClose={onClose}
+    >
+      <div className="studentProfileModalWrap">
+        <div className="sectionHeader slim">
+          <div>
+            <p className="eyebrow">STUDENT PROFILE</p>
+            <h2>{student.name}</h2>
+          </div>
+          <div className="profileHeaderActions">
+            <span className="countBadge">{className}</span>
+            <button
+              className={isEditingProfile ? "saveButton" : "softButton"}
+              onClick={() => setIsEditingProfile((current) => !current)}
+              type="button"
+            >
+              {isEditingProfile ? "수정 완료" : "수정"}
+            </button>
+          </div>
+        </div>
+        <div className="studentProfileGrid">
+          {renderProfileField("학교", "schoolName")}
+          {renderProfileField("학년", "grade")}
+          {renderProfileField("교재", "textbook", "미입력")}
+          {renderProfileField("학생 전화", "studentPhone", "미입력")}
+          {renderProfileField("학부모 전화", "parentPhone", "미입력")}
+          <div>
+            <small>로그인</small>
+            {isEditingProfile ? (
+              <div className="profileLoginEdit">
+                <input
+                  className="profileEditInput"
+                  value={student.loginId ?? ""}
+                  onChange={(event) => updateProfile("loginId", event.target.value)}
+                  placeholder="아이디"
+                />
+                <input
+                  className="profileEditInput"
+                  value={student.pin ?? ""}
+                  onChange={(event) => updateProfile("pin", event.target.value)}
+                  placeholder="PIN"
+                />
+              </div>
+            ) : (
+              <strong>{student.loginId} / {student.pin}</strong>
+            )}
+          </div>
+          <div className="wideProfileItem">
+            <small>특이사항</small>
+            {isEditingProfile ? (
+              <textarea
+                className="profileEditInput"
+                value={student.specialNote ?? ""}
+                onChange={(event) => updateProfile("specialNote", event.target.value)}
+                placeholder="없음"
+                rows="2"
+              />
+            ) : (
+              <strong>{student.specialNote || "없음"}</strong>
+            )}
+          </div>
+          <div className="wideProfileItem">
+            <small>개별 스케줄</small>
+            {isEditingProfile ? (
+              <textarea
+                className="profileEditInput"
+                value={student.scheduleOverride ?? ""}
+                onChange={(event) => updateProfile("scheduleOverride", event.target.value)}
+                placeholder="기본 반 스케줄"
+                rows="2"
+              />
+            ) : (
+              <strong>{student.scheduleOverride || "기본 반 스케줄"}</strong>
+            )}
+          </div>
+        </div>
+
+        <div className="sectionHeader slim">
+          <div>
+            <h2>성적 기록</h2>
+            <p className="muted">학교 내신 시험과 모의고사 성적을 학생별로 보관합니다.</p>
+          </div>
+          <button className="primaryButton" onClick={() => onAddScore(student.studentId)} type="button">+ 성적 추가</button>
+        </div>
+        <div className="managementTable studentScoreModalTable">
+          <div className="managementRow scoreRow managementHead">
+            <span>구분</span>
+            <span>날짜</span>
+            <span>과목</span>
+            <span>점수</span>
+            <span>등급</span>
+            <span>메모</span>
+          </div>
+          {scores.length === 0 ? (
+            <div className="emptyState">아직 입력된 성적이 없습니다.</div>
+          ) : (
+            scores.map((item) => (
+              <div className="managementRow studentScoreRow" key={item.scoreRecordId}>
+                <select value={item.examType} onChange={(event) => onUpdateScore(item.scoreRecordId, "examType", event.target.value)}>
+                  <option value="내신">내신</option>
+                  <option value="모의고사">모의고사</option>
+                </select>
+                <input type="date" value={item.examDate} onChange={(event) => onUpdateScore(item.scoreRecordId, "examDate", event.target.value)} />
+                <input value={item.subject} onChange={(event) => onUpdateScore(item.scoreRecordId, "subject", event.target.value)} />
+                <input value={item.score} onChange={(event) => onUpdateScore(item.scoreRecordId, "score", event.target.value)} />
+                <input value={item.grade} onChange={(event) => onUpdateScore(item.scoreRecordId, "grade", event.target.value)} />
+                <input value={item.note} onChange={(event) => onUpdateScore(item.scoreRecordId, "note", event.target.value)} />
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="sectionHeader slim">
+          <div>
+            <h2>테스트 성적</h2>
+            <p className="muted">학원 데일리/단원/누적 테스트 성적을 학생별로 보관합니다.</p>
+          </div>
+          <button className="primaryButton" onClick={() => onAddAcademyTest(student.studentId)} type="button">+ 테스트 추가</button>
+        </div>
+        <div className="managementTable studentProfileDataTable">
+          <div className="managementRow academyTestProfileRow managementHead">
+            <span>날짜</span>
+            <span>테스트명</span>
+            <span>범위</span>
+            <span>점수</span>
+            <span>평균</span>
+            <span>메모</span>
+          </div>
+          {academyTests.length === 0 ? (
+            <div className="emptyState">아직 입력된 테스트 성적이 없습니다.</div>
+          ) : (
+            academyTests.map((item) => (
+              <div className="managementRow academyTestProfileRow" key={item.testId}>
+                <input type="date" value={item.testDate} onChange={(event) => onUpdateAcademyTest(item.testId, "testDate", event.target.value)} />
+                <input value={item.title} onChange={(event) => onUpdateAcademyTest(item.testId, "title", event.target.value)} />
+                <input value={item.scope} onChange={(event) => onUpdateAcademyTest(item.testId, "scope", event.target.value)} />
+                <input value={item.score ?? ""} onChange={(event) => onUpdateAcademyTest(item.testId, "score", event.target.value)} placeholder="점수" />
+                <input value={item.averageScore ?? ""} onChange={(event) => onUpdateAcademyTest(item.testId, "averageScore", event.target.value)} placeholder="평균" />
+                <input value={item.note} onChange={(event) => onUpdateAcademyTest(item.testId, "note", event.target.value)} />
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function StudentPortal({ homeworks, reportSnapshots, students, onStudentCheckHomework }) {
+  const [selectedStudentId, setSelectedStudentId] = useState(
+    students.find((student) => student.name === "TestS12")?.studentId ?? students[0]?.studentId ?? ""
+  );
+  const selectedStudent = students.find((student) => student.studentId === selectedStudentId) ?? students[0];
+  const studentHomeworks = homeworks.filter((homework) => homework.studentId === selectedStudent?.studentId);
+  const todayHomeworks = studentHomeworks.filter((homework) => homework.assignedDate === today);
+  const overdueHomeworks = studentHomeworks.filter((homework) => isHomeworkOverdue(homework));
+  const studentReports = reportSnapshots.filter((snapshot) => snapshot.studentId === selectedStudent?.studentId);
+  const streakDays = calculateStreak(studentHomeworks);
+
+  return (
+    <section className="studentPortal">
+      <header className="portalHeader">
+        <div>
+          <h1>{academyBrandName} 고태영T <span>학생</span></h1>
+          <p>{selectedStudent?.name} ({selectedStudent?.grade})</p>
+        </div>
+        <div className="portalActions">
+          <button className="portalIconButton" type="button">💬</button>
+          <span className="portalDate">▦ {today}</span>
+          <button className="logoutButton" onClick={onLogout} type="button">로그아웃</button>
+          {previewMode ? (
+          <label className="compactSelect">
+            학생 선택
+            <select value={selectedStudent?.studentId ?? ""} onChange={(event) => setSelectedStudentId(event.target.value)}>
+              {students.map((student) => (
+                <option key={student.studentId} value={student.studentId}>{student.name}</option>
+              ))}
+            </select>
+          </label>
+          ) : null}
+        </div>
+      </header>
+
+      <div className="metricGrid">
+        <MetricCard icon="📖" label="오늘 할 숙제" value={`${todayHomeworks.length}개`} hint="오늘 배정된 숙제 수" />
+        <MetricCard icon="⚠️" label="밀린 숙제" value={`${overdueHomeworks.length}개`} hint="완료 못한 지난 날짜 숙제" tone="warning" />
+        <MetricCard icon="🔥" label="연속 수행일" value={`${streakDays}일`} hint="매일 체크하는 습관 지표" tone="success" />
+      </div>
+
+      <section className="panel studentWorkPanel">
+        <div className="portalTabs">
+          <button className="active" type="button">오늘</button>
+          <button type="button">등록</button>
+          <button type="button">전체</button>
+          <button type="button">커리큘럼</button>
+          <button type="button">평가</button>
+          <button type="button">마이페이지</button>
+        </div>
+        <div className="sectionHeader">
+          <div>
+            <h2>오늘 해야 할 숙제</h2>
+            <p className="muted">완료 체크하면 선생님 화면에 즉시 반영됩니다.</p>
+          </div>
+        </div>
+        <div className="homeworkStack">
+          {todayHomeworks.length === 0 ? (
+            <div className="emptyHomeworkBox">오늘 배정된 숙제가 없습니다.</div>
+          ) : null}
+          {todayHomeworks.map((homework) => (
+            <HomeworkActionCard
+              homework={homework}
+              key={homework.homeworkId}
+              onStudentCheckHomework={onStudentCheckHomework}
+            />
+          ))}
+        </div>
+        {overdueHomeworks.length ? (
+          <div className="warningBand">⚠️ 밀린 숙제가 있습니다. 오늘 카드나 전체 탭에서 확인하세요.</div>
+        ) : null}
+      </section>
+
+      <section className="panel">
+        <h2>최근 리포트</h2>
+        {studentReports.length === 0 ? <p className="muted">아직 공개된 리포트 스냅샷이 없습니다.</p> : null}
+        {studentReports.slice(0, 3).map((report) => (
+          <article className="snapshotCard" key={report.reportId}>
+            <strong>{report.title}</strong>
+            <p>{report.body}</p>
+          </article>
+        ))}
+      </section>
+    </section>
+  );
+}
+
+function MetricCard({ hint, icon, label, tone = "default", value }) {
+  return (
+    <div className={`metricCard metric-${tone}`}>
+      <div>
+        <span>{label}</span>
+        <strong>{value}</strong>
+        <small>{hint}</small>
+      </div>
+      <b>{icon}</b>
+    </div>
+  );
+}
+
+function StudentPortalV2({ homeworks, lessons = [], records = [], reportSnapshots, scoreRecords = [], students, sessionStudentId = "", previewMode = false, onLogout, onStudentCheckHomework, onStudentCreateHomework }) {
+  const [selectedStudentId, setSelectedStudentId] = useState(
+    sessionStudentId || students.find((student) => student.name === "TestS12")?.studentId || students[0]?.studentId || ""
+  );
+  const [activeTab, setActiveTab] = useState("today");
+  const [myPageTab, setMyPageTab] = useState("stats");
+  const [homeworkForm, setHomeworkForm] = useState({
+    type: "current",
+    title: "",
+    subject: "공통수학1",
+    totalProblems: "30",
+    assignedDate: today,
+    dueDate: "2026-06-17",
+    maxDailyProblems: "",
+    includeWeekend: true
+  });
+
+  const selectedStudent = students.find((student) => student.studentId === selectedStudentId) ?? students[0];
+  const studentHomeworks = homeworks.filter((homework) => homework.studentId === selectedStudent?.studentId);
+  const todayHomeworks = studentHomeworks.filter((homework) => homework.assignedDate === today);
+  const overdueHomeworks = studentHomeworks.filter((homework) => isHomeworkOverdue(homework));
+  const studentReports = reportSnapshots.filter((snapshot) => snapshot.studentId === selectedStudent?.studentId);
+  const studentLessonComments = records
+    .filter((record) => record.studentId === selectedStudent?.studentId && record.studentCommentSendStatus)
+    .map((record) => ({ ...record, lesson: lessons.find((lesson) => lesson.lessonId === record.lessonId) }))
+    .sort((a, b) => String(b.lesson?.date ?? "").localeCompare(String(a.lesson?.date ?? "")));
+  const streakDays = calculateStreak(studentHomeworks);
+  const stats = calculateHomeworkStats(studentHomeworks);
+  const studentScoreRecords = scoreRecords.filter((score) => score.studentId === selectedStudent?.studentId);
+  const latestTeacherHomework = studentHomeworks
+    .filter((homework) => homework.createdByRole !== "student")
+    .sort((a, b) => b.assignedDate.localeCompare(a.assignedDate))[0];
+
+  useEffect(() => {
+    if (sessionStudentId) setSelectedStudentId(sessionStudentId);
+  }, [sessionStudentId]);
+
+  function updateHomeworkForm(field, value) {
+    setHomeworkForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function submitHomeworkForm(event) {
+    event.preventDefault();
+    if (!selectedStudent || !homeworkForm.title.trim()) return;
+
+    onStudentCreateHomework({
+      studentId: selectedStudent.studentId,
+      title: homeworkForm.title.trim(),
+      subject: homeworkForm.subject,
+      totalProblems: Number(homeworkForm.totalProblems || 0),
+      homeworkType: homeworkForm.type,
+      assignedDate: homeworkForm.assignedDate,
+      dueDate: homeworkForm.dueDate,
+      maxDailyProblems: Number(homeworkForm.maxDailyProblems || 0),
+      includeWeekend: homeworkForm.includeWeekend
+    });
+    setHomeworkForm((current) => ({ ...current, title: "" }));
+    setActiveTab("all");
+  }
+
+  return (
+    <section className={previewMode ? "studentPortal teacherPreviewPortal" : "studentPortal"}>
+      <header className="portalHeader">
+        <div>
+          <h1>{academyBrandName} <span>학생</span></h1>
+          <p>{selectedStudent?.name} ({selectedStudent?.grade})</p>
+        </div>
+        <div className="portalActions">
+          {previewMode ? (
+            <button className="logoutButton" onClick={onLogout} type="button">관리 화면으로</button>
+          ) : null}
+          <button className="portalIconButton" type="button">💬</button>
+          <span className="portalDate">🗓 {today}</span>
+          <button className="logoutButton" onClick={onLogout} type="button">로그아웃</button>
+          {!previewMode ? (
+            <label className="compactSelect">
+              학생 선택
+              <select value={selectedStudent?.studentId ?? ""} onChange={(event) => setSelectedStudentId(event.target.value)}>
+                {students.map((student) => (
+                  <option key={student.studentId} value={student.studentId}>{student.name}</option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+        </div>
+      </header>
+
+      <div className="metricGrid">
+        <MetricCard icon="책" label="오늘 할 숙제" value={`${todayHomeworks.length}개`} hint="오늘 배정된 숙제 수" />
+        <MetricCard icon="주의" label="밀린 숙제" value={`${overdueHomeworks.length}개`} hint="완료 못한 지난 날짜 숙제" tone="warning" />
+        <MetricCard icon="불" label="연속 수행일" value={`${streakDays}일`} hint="매일 체크하는 습관 지표" tone="success" />
+      </div>
+
+      <section className="panel studentWorkPanel">
+        <div className="portalTabs">
+          {[
+            ["today", "오늘"],
+            ["register", "등록"],
+            ["all", "전체"],
+            ["curriculum", "커리큘럼"],
+            ["evaluation", "평가"],
+            ["mypage", "마이 페이지"]
+          ].map(([id, label]) => (
+            <button className={activeTab === id ? "active" : ""} key={id} onClick={() => setActiveTab(id)} type="button">
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === "today" ? (
+          <StudentTodayTab
+            overdueHomeworks={overdueHomeworks}
+            todayHomeworks={todayHomeworks}
+            onStudentCheckHomework={onStudentCheckHomework}
+          />
+        ) : null}
+
+        {activeTab === "register" ? (
+          <StudentRegisterTab
+            form={homeworkForm}
+            latestTeacherHomework={latestTeacherHomework}
+            onSubmit={submitHomeworkForm}
+            onUpdate={updateHomeworkForm}
+          />
+        ) : null}
+
+        {activeTab === "all" ? <StudentAllHomeworkTab homeworks={studentHomeworks} /> : null}
+        {activeTab === "curriculum" ? <StudentEmptyTab message="아직 커리큘럼이 설정되지 않았습니다. 선생님께 문의하세요." /> : null}
+        {activeTab === "evaluation" ? <StudentEvaluationTab /> : null}
+        {activeTab === "mypage" ? (
+          <StudentMyPageTab
+            myPageTab={myPageTab}
+            selectedStudent={selectedStudent}
+            scoreRecords={studentScoreRecords}
+            stats={stats}
+            studentLessonComments={studentLessonComments}
+            onChangeTab={setMyPageTab}
+          />
+        ) : null}
+      </section>
+
+      <section className="panel">
+        <h2>최근 리포트</h2>
+        {studentReports.length === 0 ? <p className="muted">아직 공개된 리포트 초안이 없습니다.</p> : null}
+        {studentReports.slice(0, 3).map((report) => (
+          <article className="snapshotCard" key={report.reportId}>
+            <strong>{report.title}</strong>
+            <p>{report.body}</p>
+          </article>
+        ))}
+      </section>
+    </section>
+  );
+}
+
+function StudentTodayTab({ overdueHomeworks, todayHomeworks, onStudentCheckHomework }) {
+  return (
+    <>
+      <div className="sectionHeader">
+        <div>
+          <h2>오늘 해야 할 숙제</h2>
+          <p className="muted">완료 체크하면 선생님 화면에 즉시 반영됩니다.</p>
+        </div>
+      </div>
+      <div className="homeworkStack">
+        {todayHomeworks.length === 0 ? <div className="emptyHomeworkBox">오늘 배정된 숙제가 없습니다.</div> : null}
+        {todayHomeworks.map((homework) => (
+          <HomeworkActionCard homework={homework} key={homework.homeworkId} onStudentCheckHomework={onStudentCheckHomework} />
+        ))}
+      </div>
+      {overdueHomeworks.length ? (
+        <div className="warningBand">주의 밀린 숙제가 있습니다. 오늘 카드나 전체 탭에서 재분배를 확인하세요.</div>
+      ) : null}
+    </>
+  );
+}
+
+function ParentPortal({ homeworks, reportSnapshots, sessionStudentId, students, onLogout }) {
+  const [activeTab, setActiveTab] = useState("reports");
+  const student = students.find((item) => item.studentId === sessionStudentId) ?? students[0];
+  const studentHomeworks = homeworks.filter((homework) => homework.studentId === student?.studentId);
+  const studentReports = reportSnapshots.filter((snapshot) => snapshot.studentId === student?.studentId);
+  const overdueHomeworks = studentHomeworks.filter((homework) => isHomeworkOverdue(homework));
+
+  return (
+    <section className="studentPortal parentPortal">
+      <header className="portalHeader">
+        <div>
+          <h1>{academyBrandName} 고태영T <span>학부모</span></h1>
+          <p>{student?.name} 학부모님</p>
+        </div>
+        <div className="portalActions">
+          <span className="portalDate">달력 {today}</span>
+          <button className="logoutButton" onClick={onLogout} type="button">로그아웃</button>
+        </div>
+      </header>
+
+      <section className="panel studentWorkPanel">
+        <div className="portalTabs parentTabs">
+          {[
+            ["alerts", "알림"],
+            ["reports", "보고서"],
+            ["homework", "숙제"],
+            ["attendance", "출결"],
+            ["curriculum", "커리큘럼"]
+          ].map(([id, label]) => (
+            <button className={activeTab === id ? "active" : ""} key={id} onClick={() => setActiveTab(id)} type="button">
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === "alerts" ? (
+          <div className="emptyPortalPanel">아직 새 알림이 없습니다.</div>
+        ) : null}
+
+        {activeTab === "reports" ? (
+          <div className="homeworkStack">
+            {studentReports.length === 0 ? (
+              <div className="emptyPortalPanel">아직 발송된 보고서가 없습니다. 수업 후 선생님이 보고서를 발송하면 여기에 표시됩니다.</div>
+            ) : null}
+            {studentReports.map((report) => (
+              <article className="snapshotCard" key={report.reportId}>
+                <strong>{report.title}</strong>
+                <p>{report.body}</p>
+              </article>
+            ))}
+          </div>
+        ) : null}
+
+        {activeTab === "homework" ? (
+          <div className="studentAllPanel">
+            <div>
+              <h2>숙제 현황</h2>
+              <p className="muted">학부모 화면은 열람 전용입니다. 재분배, 수정, 삭제는 표시하지 않습니다.</p>
+            </div>
+            {studentHomeworks.length === 0 ? <div className="emptyPortalPanel">등록된 숙제가 없습니다.</div> : null}
+            {studentHomeworks.map((homework) => (
+              <article className="studentHomeworkCard" key={homework.homeworkId}>
+                <div className="homeworkCardTop">
+                  <div>
+                    <strong>{homework.title}</strong>
+                    <span>{homework.subject ?? "공통수학1"}</span>
+                    <span className={isHomeworkOverdue(homework) ? "statusRed" : "statusBlue"}>
+                      {isHomeworkOverdue(homework) ? "밀림" : "진행"}
+                    </span>
+                  </div>
+                  <strong>{homework.teacherStatus ?? "unverified"}</strong>
+                </div>
+                <p>{homework.assignedDate} ~ {homework.dueDate}</p>
+              </article>
+            ))}
+            {overdueHomeworks.length ? <div className="warningBand">밀린 숙제 {overdueHomeworks.length}개가 있습니다.</div> : null}
+          </div>
+        ) : null}
+
+        {activeTab === "attendance" ? (
+          <div className="emptyPortalPanel">출결앱 연동 전입니다. 추후 등하원 시간이 표시됩니다.</div>
+        ) : null}
+
+        {activeTab === "curriculum" ? (
+          <div className="emptyPortalPanel">아직 커리큘럼이 설정되지 않았습니다.</div>
+        ) : null}
+      </section>
+    </section>
+  );
+}
+
+function StudentRegisterTab({ form, latestTeacherHomework, onSubmit, onUpdate }) {
+  const calendarDays = Array.from({ length: 30 }, (_, index) => index + 1);
+  const startDay = Number(form.assignedDate?.split("-")[2] ?? 0);
+  const endDay = Number(form.dueDate?.split("-")[2] ?? 0);
+  const selectedDays = calendarDays.filter((day) => day >= startDay && day <= endDay);
+  const dailyProblemCount =
+    selectedDays.length > 0 ? Math.ceil(Number(form.totalProblems || 0) / selectedDays.length) : 0;
+
+  return (
+    <form className="studentFormPanel studentRegisterPanel" onSubmit={onSubmit}>
+      <div>
+        <h2>숙제 직접 등록</h2>
+        <p className="muted">공지된 숙제를 입력하면 하루 분량이 자동 계산될 예정입니다.</p>
+      </div>
+
+      <div className="noticeBox teacherHomeworkNotice">
+        <strong>📌 선생님이 공지한 최신 숙제</strong>
+        <span>{latestTeacherHomework ? latestTeacherHomework.title : "아직 공지된 숙제가 없습니다."}</span>
+      </div>
+
+      <label>종류</label>
+      <div className="segmentedControl homeworkTypeControl">
+        {[
+          ["current", "현행"],
+          ["extra1", "추가1"],
+          ["extra2", "추가2"]
+        ].map(([id, label]) => (
+          <button className={form.type === id ? "active" : ""} key={id} onClick={() => onUpdate("type", id)} type="button">
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <label>
+        숙제 제목
+        <input value={form.title} onChange={(event) => onUpdate("title", event.target.value)} placeholder="예: 수학의정석" />
+      </label>
+
+      <div className="fieldGrid two">
+        <label>
+          과목
+          <select value={form.subject} onChange={(event) => onUpdate("subject", event.target.value)}>
+            <option>공통수학1</option>
+            <option>공통수학2</option>
+            <option>대수</option>
+            <option>미적분</option>
+          </select>
+        </label>
+        <label>
+          총 문제 수
+          <input inputMode="numeric" value={form.totalProblems} onChange={(event) => onUpdate("totalProblems", event.target.value)} placeholder="30" />
+        </label>
+        <label>
+          시작일
+          <input type="date" value={form.assignedDate} onChange={(event) => onUpdate("assignedDate", event.target.value)} />
+        </label>
+        <label>
+          마감일
+          <input type="date" value={form.dueDate} onChange={(event) => onUpdate("dueDate", event.target.value)} />
+        </label>
+        <label>
+          하루 최대 문제 수
+          <input
+            inputMode="numeric"
+            value={form.maxDailyProblems}
+            onChange={(event) => onUpdate("maxDailyProblems", event.target.value)}
+            placeholder="선택 입력"
+          />
+        </label>
+        <label className="weekendToggle">
+          <input
+            checked={form.includeWeekend}
+            onChange={(event) => onUpdate("includeWeekend", event.target.checked)}
+            type="checkbox"
+          />
+          <strong>주말 포함</strong>
+        </label>
+      </div>
+
+      <div className="studentDatePicker">
+        <div className="studentDatePickerTop">
+          <strong>날짜 선택 <span>(클릭으로 빼거나 추가)</span></strong>
+          <div>
+            <span><i className="dateDot included" />포함</span>
+            <span><i className="dateDot excluded" />제외</span>
+            <span><i className="dateDot outOfRange" />범위밖</span>
+          </div>
+        </div>
+        <div className="studentDateMonth">
+          <button type="button">‹</button>
+          <strong>2026년 6월</strong>
+          <button type="button">›</button>
+        </div>
+        <div className="studentDateGrid">
+          {["일", "월", "화", "수", "목", "금", "토"].map((day) => <b key={day}>{day}</b>)}
+          {calendarDays.map((day) => {
+            const isSelected = selectedDays.includes(day);
+            const isWeekend = [0, 6].includes((day + 1) % 7);
+            const isExcluded = !form.includeWeekend && isWeekend;
+            return (
+              <button
+                className={isSelected && !isExcluded ? "included" : isExcluded ? "excluded" : "outOfRange"}
+                key={day}
+                type="button"
+              >
+                <span>{day}</span>
+                {isSelected && !isExcluded ? <small>{dailyProblemCount}문제</small> : null}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="studentRegisterSummary">
+        <span>선택일 {selectedDays.length}일</span>
+        <span>하루 약 {dailyProblemCount || 0}문제</span>
+        {form.maxDailyProblems ? <span>하루 최대 {form.maxDailyProblems}문제</span> : <span>하루 최대 제한 없음</span>}
+      </div>
+
+      <button className="primaryButton full" type="submit">숙제 등록</button>
+    </form>
+  );
+}
+
+function StudentAllHomeworkTab({ homeworks }) {
+  const sortedHomeworks = [...homeworks].sort((a, b) => b.assignedDate.localeCompare(a.assignedDate));
+
+  return (
+    <div className="studentAllPanel">
+      <div>
+        <h2>등록된 숙제 전체</h2>
+        <p className="muted">밀린 숙제는 자동 재분배로 남은 날짜에 다시 나눌 수 있습니다.</p>
+      </div>
+      {sortedHomeworks.length === 0 ? <div className="emptyHomeworkBox">등록된 숙제가 없습니다.</div> : null}
+      {sortedHomeworks.map((homework) => {
+        const completed = homework.teacherStatus === "verified" ? 1 : 0;
+        const totalDays = Math.max(1, isHomeworkOverdue(homework) ? 5 : 2);
+        const progress = Math.round((completed / totalDays) * 100);
+        return (
+          <article className="studentHomeworkCard" key={homework.homeworkId}>
+            <div className="homeworkCardTop">
+              <div>
+                <strong>{homework.title}</strong>
+                <span>{homework.subject ?? "공통수학1"}</span>
+                <span className={isHomeworkOverdue(homework) ? "statusRed" : "statusBlue"}>
+                  {isHomeworkOverdue(homework) ? "밀림" : "현행"}
+                </span>
+              </div>
+              <div className="cardActions">
+                <button className="softButton" type="button">수정 준비</button>
+                <button className="dangerSoftButton" disabled type="button">삭제 잠금</button>
+              </div>
+            </div>
+            <p>{homework.assignedDate} ~ {homework.dueDate} · 총 {homework.totalProblems ?? "-"}문제</p>
+            <div className="progressRail"><span style={{ width: `${progress}%` }} /></div>
+            <small>{completed}/{totalDays}일 완료 ({progress}%)</small>
+            <div className={`dateStrip ${isHomeworkOverdue(homework) ? "danger" : "safe"}`}>
+              <span>{homework.dueDate}</span>
+              <b>{homework.title}</b>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  );
+}
+
+function StudentEmptyTab({ message }) {
+  return <div className="emptyPortalPanel">{message}</div>;
+}
+
+function StudentEvaluationTab() {
+  return (
+    <div className="evaluationPanel">
+      <strong>진단평가</strong>
+      <strong>내신기출 모의평가</strong>
+      <div className="emptyPortalPanel">배정된 시험이 없습니다.</div>
+    </div>
+  );
+}
+
+function StudentMyPageTab({ myPageTab, onChangeTab, scoreRecords = [], selectedStudent, stats, studentLessonComments = [] }) {
+  const schoolScoreSubjects = ["중1-1", "중2-1", "중3-1", "중3-2", "공통수학1", "공통수학2", "대수", "미적분1", "기하", "미적분", "확통"];
+
+  function findScore(subject, examKeyword) {
+    return scoreRecords.find((record) => {
+      const target = `${record.subject ?? ""} ${record.examType ?? ""} ${record.note ?? ""}`;
+      return target.includes(subject) && target.includes(examKeyword);
+    });
+  }
+
+  return (
+    <div className="myPagePanel">
+      <div className="subTabs">
+        {[
+          ["stats", "통계"],
+          ["log", "활동 로그"],
+          ["info", "내 정보"]
+        ].map(([id, label]) => (
+          <button className={myPageTab === id ? "active" : ""} key={id} onClick={() => onChangeTab(id)} type="button">
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {myPageTab === "stats" ? (
+        <>
+          <div className="miniMetricGrid">
+            <div><strong>{stats.completionRate}%</strong><span>전체 이행률</span></div>
+            <div><strong>{stats.perfectDays}</strong><span>완벽한 날 (30일)</span></div>
+            <div><strong>{stats.total}</strong><span>등록 숙제</span></div>
+          </div>
+          <div className="progressList">
+            <h3>숙제 이행률</h3>
+            <ProgressLine label="2026년 05월" value={25} suffix="1/4일 · 25%" />
+            <ProgressLine label="2026년 06월" value={stats.completionRate} suffix={`${stats.done}/${stats.total}개 · ${stats.completionRate}%`} />
+          </div>
+          <StudentCalendar />
+        </>
+      ) : null}
+
+      {myPageTab === "log" ? (
+        <div className="taskStack">
+          {studentLessonComments.length === 0 ? (
+            <div className="emptyPortalPanel">아직 선생님이 보낸 학생 코멘트가 없습니다.</div>
+          ) : (
+            studentLessonComments.map((record) => (
+              <article className="studentHomeworkCard" key={record.lessonStudentRecordId}>
+                <div className="homeworkCardTop">
+                  <div>
+                    <strong>{record.lesson?.date ?? "날짜 없음"} 선생님 코멘트</strong>
+                    <span>{record.lesson?.className ?? "수업"} · {record.studentCommentSendStatus}</span>
+                  </div>
+                </div>
+                <p>{record.studentComment}</p>
+              </article>
+            ))
+          )}
+        </div>
+      ) : null}
+
+      {myPageTab === "info" ? (
+        <>
+          <div className="profileCard">
+            <h2>기본 정보</h2>
+            <div className="fieldGrid four">
+              <label>이름<input readOnly value={selectedStudent?.name ?? ""} /></label>
+              <label>학교<input readOnly value={selectedStudent?.schoolName ?? ""} /></label>
+              <label>출생연도<input readOnly value={selectedStudent?.birthYear ?? ""} /></label>
+              <label>학년<input readOnly value={selectedStudent?.grade ?? ""} /></label>
+            </div>
+          </div>
+          <div className="profileCard">
+            <h2>학교 성적</h2>
+            <div className="studentGradeTableWrap">
+              <table className="gradeTable studentGradeTable">
+                <thead>
+                  <tr>
+                    <th rowSpan="2">과목</th>
+                    <th colSpan="3">중간</th>
+                    <th colSpan="3">기말</th>
+                  </tr>
+                  <tr>
+                    <th>원점수</th>
+                    <th>등수</th>
+                    <th>등급</th>
+                    <th>원점수</th>
+                    <th>등수</th>
+                    <th>등급</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {schoolScoreSubjects.map((subject) => {
+                    const midterm = findScore(subject, "중간");
+                    const finalTerm = findScore(subject, "기말");
+                    return (
+                      <tr key={subject}>
+                        <td>{subject}</td>
+                        <td>{midterm?.score || "-"}</td>
+                        <td>{midterm?.rank || "-"}</td>
+                        <td>{midterm?.grade || "-"}</td>
+                        <td>{finalTerm?.score || "-"}</td>
+                        <td>{finalTerm?.rank || "-"}</td>
+                        <td>{finalTerm?.grade || "-"}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div className="profileCard passwordPanel">
+            <h2>비밀번호 변경</h2>
+            <div className="fieldGrid three">
+              <label>현재 비밀번호<input type="password" placeholder="현재 PIN" /></label>
+              <label>새 비밀번호<input type="password" placeholder="4자리 이상" /></label>
+              <label>새 비밀번호 확인<input type="password" placeholder="다시 입력" /></label>
+            </div>
+            <button className="primaryButton" type="button">비밀번호 변경</button>
+          </div>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+function ProgressLine({ label, suffix, value }) {
+  return (
+    <div className="progressLine">
+      <div><strong>{label}</strong><span>{suffix}</span></div>
+      <div className="progressRail"><span style={{ width: `${value}%` }} /></div>
+    </div>
+  );
+}
+
+function StudentCalendar() {
+  const days = Array.from({ length: 30 }, (_, index) => index + 1);
+  return (
+    <div className="studentCalendar">
+      <h3>숙제 이행 달력</h3>
+      <strong>2026년 6월</strong>
+      <div className="miniCalendarGrid">
+        {["일", "월", "화", "수", "목", "금", "토"].map((day) => <b key={day}>{day}</b>)}
+        {days.map((day) => <span className={day <= 3 ? "marked" : ""} key={day}>{day}</span>)}
+      </div>
+    </div>
+  );
+}
+
+function HomeworkActionCard({ homework, onStudentCheckHomework }) {
+  const isChecked = homework.studentStatus === "checked_done";
+  return (
+    <article className="homeworkActionCard">
+      <div>
+        <strong>{homework.title}</strong>
+        <p>{homework.assignedDate} → {homework.dueDate}</p>
+        <small>학생: {homework.studentStatus ?? "not_started"} · 강사: {homework.teacherStatus ?? "unverified"}</small>
+      </div>
+      <button
+        className={isChecked ? "softButton" : "primaryButton"}
+        disabled={isChecked}
+        onClick={() => onStudentCheckHomework(homework.homeworkId)}
+        type="button"
+      >
+        {isChecked ? "완료 체크됨" : "완료 체크"}
+      </button>
+    </article>
+  );
+}
+
+function SupplementCenter({
+  homeworks,
+  lessons,
+  notificationLogs,
+  records,
+  students,
+  tasks,
+  onAssignHomework,
+  onCreateTask,
+  onLogNotification,
+  onUpdateTask
+}) {
+  const [selectedSupplementStudentId, setSelectedSupplementStudentId] = useState("");
+  const overdueHomeworks = homeworks.filter((homework) => isHomeworkOverdue(homework)).slice(0, 8);
+  const absentRecords = records
+    .filter((record) => record.attendanceStatus === "absent" || record.attendanceStatus === "excused")
+    .slice(0, 8);
+  const retestRecords = records
+    .filter((record) => record.needsRetest)
+    .slice(0, 8);
+
+  function studentName(studentId) {
+    return students.find((student) => student.studentId === studentId)?.name ?? "미등록 학생";
+  }
+
+  function lessonLabel(lessonId) {
+    const lesson = lessons.find((item) => item.lessonId === lessonId);
+    return lesson ? `${lesson.date} ${lesson.className}` : "연결 수업 없음";
+  }
+
+  function createSupplementTask(task) {
+    onCreateTask(task);
+    setSelectedSupplementStudentId(task.studentId);
+  }
+
+  const selectedSupplementStudent = students.find((student) => student.studentId === selectedSupplementStudentId);
+  const selectedSupplementTasks = tasks.filter((task) => task.studentId === selectedSupplementStudentId);
+  const selectedSupplementLogs = notificationLogs.filter((log) => log.studentId === selectedSupplementStudentId);
+
+  return (
+    <section className="followUpPage">
+      <div className="pageTop">
+        <div>
+          <h1>보충관리</h1>
+          <p className="muted">숙제보충, 결석보강, 재시험을 별도로 관리합니다.</p>
+        </div>
+        <span className="countBadge">{tasks.length}개 진행</span>
+      </div>
+
+      <div className="followCandidateGrid">
+        <CandidatePanel title="숙제보충" subtitle="밀린 숙제를 보충 과제로 전환합니다.">
+          {overdueHomeworks.length === 0 ? <p className="muted">밀린 숙제가 없습니다.</p> : null}
+          {overdueHomeworks.map((homework) => (
+            <article className="candidateItem" key={homework.homeworkId}>
+              <div>
+                <button className="textLinkButton" onClick={() => setSelectedSupplementStudentId(homework.studentId)} type="button">
+                  {studentName(homework.studentId)}
+                </button>
+                <span>{homework.title}</span>
+                <small>{homework.dueDate} 마감</small>
+              </div>
+              <button
+                className="softButton"
+                onClick={() =>
+                  createSupplementTask({
+                    taskType: "homework_makeup",
+                    studentId: homework.studentId,
+                    sourceId: homework.homeworkId,
+                    sourceLabel: homework.title,
+                    reason: "밀린 숙제"
+                  })
+                }
+                type="button"
+              >
+                보충 생성
+              </button>
+            </article>
+          ))}
+        </CandidatePanel>
+
+        <CandidatePanel title="결석보강" subtitle="결석 기록을 보강 일정으로 전환합니다.">
+          {absentRecords.length === 0 ? <p className="muted">결석 보강이 없습니다.</p> : null}
+          {absentRecords.map((record) => (
+            <article className="candidateItem" key={record.lessonStudentRecordId}>
+              <div>
+                <button className="textLinkButton" onClick={() => setSelectedSupplementStudentId(record.studentId)} type="button">
+                  {studentName(record.studentId)}
+                </button>
+                <span>{lessonLabel(record.lessonId)}</span>
+                <small>{attendanceLabels[record.attendanceStatus]}</small>
+              </div>
+              <button
+                className="softButton"
+                onClick={() =>
+                  createSupplementTask({
+                    taskType: "absence_makeup",
+                    studentId: record.studentId,
+                    sourceId: record.lessonStudentRecordId,
+                    sourceLabel: lessonLabel(record.lessonId),
+                    reason: "결석 보강"
+                  })
+                }
+                type="button"
+              >
+                보강 생성
+              </button>
+            </article>
+          ))}
+        </CandidatePanel>
+
+        <CandidatePanel title="재시험" subtitle="오답/평가 기준으로 재시험 일정을 잡습니다.">
+          {retestRecords.length === 0 ? <p className="muted">재시험이 없습니다.</p> : null}
+          {retestRecords.map((record) => (
+            <article className="candidateItem" key={record.lessonStudentRecordId}>
+              <div>
+                <button className="textLinkButton" onClick={() => setSelectedSupplementStudentId(record.studentId)} type="button">
+                  {studentName(record.studentId)}
+                </button>
+                <span>{lessonLabel(record.lessonId)}</span>
+                <small>재시험 필요</small>
+              </div>
+              <button
+                className="softButton"
+                onClick={() =>
+                  createSupplementTask({
+                    taskType: "retest",
+                    studentId: record.studentId,
+                    sourceId: record.lessonStudentRecordId,
+                    sourceLabel: lessonLabel(record.lessonId),
+                    reason: "재시험 필요"
+                  })
+                }
+                type="button"
+              >
+                재시험 생성
+              </button>
+            </article>
+          ))}
+        </CandidatePanel>
+      </div>
+
+      <section className="panel">
+        <h2>알림 로그</h2>
+        {notificationLogs.length === 0 ? <p className="muted">아직 모의 로그가 없습니다.</p> : null}
+        {notificationLogs.map((log) => (
+          <article className="snapshotCard" key={log.notificationLogId}>
+            <strong>{studentName(log.studentId)} · {log.status}</strong>
+            <p>{log.message}</p>
+          </article>
+        ))}
+      </section>
+
+      {selectedSupplementStudent ? (
+        <SupplementStudentModal
+          logs={selectedSupplementLogs}
+          onAssignHomework={onAssignHomework}
+          onClose={() => setSelectedSupplementStudentId("")}
+          onLogNotification={onLogNotification}
+          onUpdateTask={onUpdateTask}
+          student={selectedSupplementStudent}
+          tasks={selectedSupplementTasks}
+        />
+      ) : null}
+    </section>
+  );
+}
+
+function SupplementStudentModal({
+  logs,
+  onAssignHomework,
+  onClose,
+  onLogNotification,
+  onUpdateTask,
+  student,
+  tasks
+}) {
+  return (
+    <Modal
+      className="supplementStudentModal"
+      title={`${student.name} 보충관리`}
+      subtitle={`${student.grade ?? "-"} · ${student.schoolName ?? "학교 미입력"}`}
+      onClose={onClose}
+    >
+      <div className="supplementModalLayout">
+        <section className="supplementModalMain">
+          <div className="sectionHeader slim">
+            <div>
+              <h2>진행 항목</h2>
+              <p className="muted">학생별 보충 일정과 문구 초안을 이 화면에서 관리합니다.</p>
+            </div>
+            <span className="countBadge">{tasks.length}개</span>
+          </div>
+
+          {tasks.length === 0 ? (
+            <div className="emptyHomeworkBox">아직 생성된 보충관리 항목이 없습니다.</div>
+          ) : null}
+
+          <div className="taskStack">
+            {tasks.map((task) => {
+              const draft = task.notificationDraft || createNotificationDraft(task, [student]);
+              return (
+                <article className="taskCard" key={task.makeupTaskId}>
+                  <div className="taskCardTop">
+                    <div>
+                      <strong>{followUpTypeLabel(task.taskType)}</strong>
+                      <p>{task.sourceLabel}</p>
+                      <small>{task.reason} · 배정 {task.attemptCount ?? 0}회</small>
+                      {task.lastHomeworkId ? <small>최근 보충 숙제: {task.lastHomeworkId}</small> : null}
+                    </div>
+                    <select value={task.status} onChange={(event) => onUpdateTask(task.makeupTaskId, "status", event.target.value)}>
+                      <option value="draft">초안</option>
+                      <option value="scheduled">일정 배정</option>
+                      <option value="done">완료</option>
+                    </select>
+                  </div>
+                  <div className="fieldGrid two">
+                    <label>
+                      배정일
+                      <input type="date" value={task.scheduledDate} onChange={(event) => onUpdateTask(task.makeupTaskId, "scheduledDate", event.target.value)} />
+                    </label>
+                    <label>
+                      시간
+                      <input type="time" value={task.scheduledTime} onChange={(event) => onUpdateTask(task.makeupTaskId, "scheduledTime", event.target.value)} />
+                    </label>
+                  </div>
+                  <label>
+                    알림 문구 초안
+                    <textarea
+                      value={task.notificationDraft || draft}
+                      onChange={(event) => onUpdateTask(task.makeupTaskId, "notificationDraft", event.target.value)}
+                    />
+                  </label>
+                  <div className="modalActions">
+                    <button className="softButton" onClick={() => onUpdateTask(task.makeupTaskId, "notificationDraft", draft)} type="button">
+                      문구 생성
+                    </button>
+                    <button className="softButton" onClick={() => onAssignHomework(task)} type="button">
+                      숙제 내기
+                    </button>
+                    <button className="primaryButton" onClick={() => onLogNotification({ ...task, notificationDraft: task.notificationDraft || draft })} type="button">
+                      모의 로그
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+
+        <aside className="supplementModalAside">
+          <h2>알림 로그</h2>
+          {logs.length === 0 ? <p className="muted">이 학생의 모의 로그가 없습니다.</p> : null}
+          {logs.map((log) => (
+            <article className="snapshotCard" key={log.notificationLogId}>
+              <strong>{log.status}</strong>
+              <p>{log.message}</p>
+            </article>
+          ))}
+        </aside>
+      </div>
+    </Modal>
+  );
+}
+
+function FollowUpCenter({
+  homeworks,
+  lessons,
+  notificationLogs,
+  problemBooks,
+  records,
+  students,
+  tasks,
+  wrongProblems,
+  onAddProblemBook,
+  onAddWrongProblem,
+  onAssignHomework,
+  onCreateTask,
+  onLogNotification,
+  onUpdateProblemBook,
+  onUpdateProblemMeta,
+  onUpdateTask,
+  onUpdateWrongProblem
+}) {
+  return (
+    <section className="followUpPage">
+      <div className="pageTop">
+        <div>
+          <h1>오답관리</h1>
+          <p className="muted">교재 PDF를 원본으로 등록하고, 단원별 문항 상태와 학생별 오답 흐름을 관리합니다.</p>
+        </div>
+        <span className="countBadge">{tasks.length}개 진행</span>
+      </div>
+
+      <WrongProblemBoard
+        problemBooks={problemBooks}
+        students={students}
+        wrongProblems={wrongProblems}
+        onAddProblemBook={onAddProblemBook}
+        onAddWrongProblem={onAddWrongProblem}
+        onUpdateProblemBook={onUpdateProblemBook}
+        onUpdateProblemMeta={onUpdateProblemMeta}
+        onUpdateWrongProblem={onUpdateWrongProblem}
+      />
+    </section>
+  );
+}
+
+function WrongProblemBoard({
+  problemBooks,
+  students,
+  wrongProblems,
+  onAddProblemBook,
+  onAddWrongProblem,
+  onUpdateProblemBook,
+  onUpdateProblemMeta,
+  onUpdateWrongProblem
+}) {
+  const [activeTab, setActiveTab] = useState("current");
+  const [gradeFilter, setGradeFilter] = useState("전체");
+  const [selectedStudentId, setSelectedStudentId] = useState(students[0]?.studentId ?? "");
+  const [selectedProblemRef, setSelectedProblemRef] = useState(null);
+  const [isPickedProblemModalOpen, setIsPickedProblemModalOpen] = useState(false);
+  const [isDiagnosisOpen, setIsDiagnosisOpen] = useState(true);
+  const selectedStudent = students.find((student) => student.studentId === selectedStudentId) ?? students[0];
+  const filteredBooks = problemBooks.filter((book) => gradeFilter === "전체" || book.grade === gradeFilter);
+  const totalProblems = filteredBooks.reduce((sum, book) => sum + (book.problems?.length ?? book.totalProblems ?? 0), 0);
+  const pickedProblems = problemBooks.flatMap((book) =>
+    (book.problems ?? [])
+      .filter((problem) => problem.isPicked || problem.status === "selected")
+      .map((problem) => ({ book, problem }))
+  );
+  const selectedProblem =
+    selectedProblemRef
+      ? problemBooks
+          .find((book) => book.problemBookId === selectedProblemRef.problemBookId)
+          ?.problems.find((problem) => problem.problemId === selectedProblemRef.problemId)
+      : null;
+  const selectedBook = selectedProblemRef
+    ? problemBooks.find((book) => book.problemBookId === selectedProblemRef.problemBookId)
+    : null;
+
+  const selectedProblemsCount = pickedProblems.length;
+
+  function handleFileUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    onAddProblemBook(file.name);
+    event.target.value = "";
+  }
+
+  function handleProblemClick(book, problem, event) {
+    setSelectedProblemRef({ problemBookId: book.problemBookId, problemId: problem.problemId });
+    if (event.ctrlKey || event.metaKey) {
+      onUpdateProblemMeta(book.problemBookId, problem.problemId, "isPicked", !problem.isPicked);
+      return;
+    }
+
+    const currentStatus = problem.status === "selected" ? "first" : problem.status;
+    const currentIndex = problemClickCycle.indexOf(currentStatus);
+    const nextStatus = problemClickCycle[(currentIndex + 1) % problemClickCycle.length];
+    onUpdateProblemMeta(book.problemBookId, problem.problemId, "status", nextStatus);
+  }
+
+  return (
+    <section className="wrongProblemBoard">
+      <div className="wrongBoardTabs">
+        {[
+          ["current", "현행"],
+          ["extra1", "추가1"],
+          ["extra2", "추가2"],
+          ["bookWrong", "교재별 오답"],
+          ["studentWrong", "학생별 오답"]
+        ].map(([tab, label]) => (
+          <button
+            className={activeTab === tab ? "active" : ""}
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            type="button"
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <div className="wrongBoardFilterPanel">
+        <div className="chipRow">
+          {["전체", "고1", "고2", "중1", "중2"].map((grade) => (
+            <button
+              className={gradeFilter === grade ? "chip active" : "chip"}
+              key={grade}
+              onClick={() => setGradeFilter(grade)}
+              type="button"
+            >
+              {grade}
+            </button>
+          ))}
+        </div>
+        <div className="wrongBoardControls">
+          <select value={selectedStudent?.studentId ?? ""} onChange={(event) => setSelectedStudentId(event.target.value)}>
+            {students.map((student) => (
+              <option key={student.studentId} value={student.studentId}>
+                {student.name} ({student.grade})
+              </option>
+            ))}
+          </select>
+          <label className="pdfUploadButton">
+            PDF 교재 등록
+            <input accept="application/pdf,image/*" onChange={handleFileUpload} type="file" />
+          </label>
+        </div>
+        <div className="wrongProblemToolbar">
+          <span>연결 교재 {filteredBooks.length}개 · 총 {totalProblems}문제</span>
+          <button
+            className="softButton"
+            disabled={selectedProblemsCount === 0}
+            onClick={() => setIsPickedProblemModalOpen(true)}
+            type="button"
+          >
+            수업용 화면 ({selectedProblemsCount})
+          </button>
+          <button
+            className="primaryButton"
+            disabled={selectedProblemsCount === 0}
+            onClick={() => setIsPickedProblemModalOpen(true)}
+            type="button"
+          >
+            선택 문제 보기 ({selectedProblemsCount})
+          </button>
+        </div>
+      </div>
+
+      <button
+        className="wrongBoardDiagnosis"
+        onClick={() => setIsDiagnosisOpen((current) => !current)}
+        type="button"
+      >
+        <span>🔍 커리큘럼 진단 | 보드 {filteredBooks.length}개 · 이 학생 연결: {selectedStudent ? 1 : 0}개 · 표시 교재: {filteredBooks.length}개</span>
+        <span>{isDiagnosisOpen ? "▲ 접기" : "▼ 펼치기"}</span>
+      </button>
+
+      {isDiagnosisOpen ? (
+        <div className="wrongBoardNotice">
+          <strong>{selectedStudent?.name ?? "학생"} 기준 오답 보드</strong>
+          <p>
+            {activeTab === "studentWrong"
+              ? "학생 프로파일에 있던 교재오답 기록은 이 탭에서 별도로 관리합니다."
+              : "PDF 자동 크롭 전 단계에서는 파일명, 단원, 문항 번호, 상태, 풀이 메모를 먼저 저장합니다. 서버 크롭이 붙으면 이 미리보기 영역에 실제 문항 이미지가 표시됩니다."}
+          </p>
+        </div>
+      ) : null}
+
+      {activeTab === "studentWrong" ? (
+        <StudentWrongProblemBoard
+          selectedStudent={selectedStudent}
+          wrongProblems={wrongProblems.filter((item) => item.studentId === selectedStudent?.studentId)}
+          onAddWrongProblem={onAddWrongProblem}
+          onUpdateWrongProblem={onUpdateWrongProblem}
+        />
+      ) : (
+        <div className="wrongBookStack">
+          {filteredBooks.map((book) => (
+            <WrongBookCard
+              book={book}
+              key={book.problemBookId}
+              selectedProblemRef={selectedProblemRef}
+              onSelectProblem={(problem, event) => handleProblemClick(book, problem, event)}
+              onUpdateBook={(field, value) => onUpdateProblemBook(book.problemBookId, field, value)}
+              onUpdateProblem={(problemId, field, value) => onUpdateProblemMeta(book.problemBookId, problemId, field, value)}
+            />
+          ))}
+        </div>
+      )}
+
+      {activeTab !== "studentWrong" && selectedProblem && selectedBook ? (
+        <div className="floatingProblemInspector">
+          <div className="sectionHeader">
+            <div>
+              <h2>{selectedBook.title} · {selectedProblem.number}번</h2>
+              <p className="muted">문항 원문, 상태, 해설 메모를 계속 업데이트합니다.</p>
+            </div>
+            <button className="iconButton" onClick={() => setSelectedProblemRef(null)} type="button">×</button>
+          </div>
+          <div className="problemInspectorGrid">
+            <ProblemPreview book={selectedBook} problem={selectedProblem} />
+            <div className="problemEditPanel">
+              <label>
+                문항 상태
+                <select
+                  value={selectedProblem.status}
+                  onChange={(event) =>
+                    onUpdateProblemMeta(selectedBook.problemBookId, selectedProblem.problemId, "status", event.target.value)
+                  }
+                >
+                  {Object.entries(problemStatusMeta).map(([status, meta]) => (
+                    <option key={status} value={status}>{meta.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                문항 내용/OCR
+                <textarea
+                  value={selectedProblem.text}
+                  onChange={(event) =>
+                    onUpdateProblemMeta(selectedBook.problemBookId, selectedProblem.problemId, "text", event.target.value)
+                  }
+                  placeholder="PDF 크롭 후 OCR 또는 직접 입력"
+                />
+              </label>
+              <label>
+                해설/메모
+                <textarea
+                  value={selectedProblem.note}
+                  onChange={(event) =>
+                    onUpdateProblemMeta(selectedBook.problemBookId, selectedProblem.problemId, "note", event.target.value)
+                  }
+                  placeholder="학생이 자주 틀리는 포인트, 수업 설명 메모"
+                />
+              </label>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {isPickedProblemModalOpen ? (
+        <PickedProblemModal
+          pickedProblems={pickedProblems}
+          selectedStudent={selectedStudent}
+          onClose={() => setIsPickedProblemModalOpen(false)}
+        />
+      ) : null}
+    </section>
+  );
+}
+
+function StudentWrongProblemBoard({ selectedStudent, wrongProblems, onAddWrongProblem, onUpdateWrongProblem }) {
+  if (!selectedStudent) {
+    return <section className="panel emptyPortalPanel">학생을 선택해 주세요.</section>;
+  }
+
+  return (
+    <section className="panel studentWrongBoard">
+      <div className="sectionHeader">
+        <div>
+          <h2>{selectedStudent.name} 학생별 오답</h2>
+          <p className="muted">학생 프로파일에서 분리한 교재오답 기록입니다. 교재/범위/상태/후속 메모를 여기서 관리합니다.</p>
+        </div>
+        <button className="primaryButton" onClick={() => onAddWrongProblem(selectedStudent.studentId)} type="button">
+          + 오답 추가
+        </button>
+      </div>
+      <div className="managementTable studentWrongTable">
+        <div className="managementRow wrongProblemProfileRow managementHead">
+          <span>교재/출처</span>
+          <span>문항/범위</span>
+          <span>상태</span>
+          <span>메모</span>
+        </div>
+        {wrongProblems.length === 0 ? (
+          <div className="emptyState">아직 입력된 학생별 오답이 없습니다.</div>
+        ) : (
+          wrongProblems.map((item) => (
+            <div className="managementRow wrongProblemProfileRow" key={item.wrongProblemId}>
+              <input
+                value={item.source}
+                onChange={(event) => onUpdateWrongProblem(item.wrongProblemId, "source", event.target.value)}
+                placeholder="예: 쎈, GRIP"
+              />
+              <input
+                value={item.problemRange}
+                onChange={(event) => onUpdateWrongProblem(item.wrongProblemId, "problemRange", event.target.value)}
+                placeholder="예: 643-647"
+              />
+              <select value={item.status} onChange={(event) => onUpdateWrongProblem(item.wrongProblemId, "status", event.target.value)}>
+                <option value="open">미해결</option>
+                <option value="reviewing">재풀이중</option>
+                <option value="done">완료</option>
+              </select>
+              <input
+                value={item.note}
+                onChange={(event) => onUpdateWrongProblem(item.wrongProblemId, "note", event.target.value)}
+                placeholder="오답 원인/보충 메모"
+              />
+            </div>
+          ))
+        )}
+      </div>
+    </section>
+  );
+}
+
+function PickedProblemModal({ pickedProblems, selectedStudent, onClose }) {
+  const sortedProblems = [...pickedProblems].sort((a, b) => {
+    const bookCompare = a.book.title.localeCompare(b.book.title);
+    return bookCompare || Number(a.problem.number) - Number(b.problem.number);
+  });
+
+  return (
+    <Modal
+      className="pickedProblemModal"
+      title={`뽑은 문제 — ${sortedProblems.length}문제`}
+      subtitle={`${selectedStudent?.name ?? "학생"} 오답/보충 출력용`}
+      onClose={onClose}
+    >
+      <div className="pickedProblemActions noPrint">
+        <button className="primaryButton" onClick={() => window.print()} type="button">🖨 인쇄</button>
+        <button className="softButton" onClick={onClose} type="button">닫기</button>
+      </div>
+      <div className="printProblemSheet">
+        <div className="printSheetHeader">
+          <strong>{selectedStudent?.grade ?? ""} {selectedStudent?.name ?? "학생"}</strong>
+          <span>오답 문제 ({sortedProblems.length}문제)</span>
+        </div>
+        <div className="printProblemGrid">
+          {sortedProblems.map(({ book, problem }, index) => (
+            <article className="printProblemCard" key={`${book.problemBookId}_${problem.problemId}`}>
+              <div className="printProblemTitle">
+                <strong>{book.title} {problem.number}번</strong>
+                <span>{problemStatusMeta[problem.status]?.shortLabel ?? "미체크"}</span>
+              </div>
+              <ProblemPreview book={book} problem={problem} />
+              <small>{index + 1}/{sortedProblems.length}</small>
+            </article>
+          ))}
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function WrongBookCard({ book, selectedProblemRef, onSelectProblem, onUpdateBook, onUpdateProblem }) {
+  const counts = countProblemStatuses(book.problems ?? []);
+  const selectedProblem =
+    selectedProblemRef?.problemBookId === book.problemBookId
+      ? book.problems.find((problem) => problem.problemId === selectedProblemRef.problemId)
+      : null;
+
+  return (
+    <article className="wrongBookCard">
+      <div className="wrongBookHeader">
+        <div>
+          <div className="wrongBookTitleRow">
+            <input
+              aria-label="교재명"
+              value={book.title}
+              onChange={(event) => onUpdateBook("title", event.target.value)}
+            />
+            <span>전체 {book.problems?.length ?? book.totalProblems ?? 0}개</span>
+          </div>
+          <small>{book.sourceFileName} · {book.grade} · {book.subject} · {book.unit}</small>
+        </div>
+        <div className="problemLegend">
+          {["first", "retry", "wrong", "mistake", "second", "question", "outOfScope", "unchecked"].map((status) => (
+            <span key={status}>
+              <i className={`legendDot ${problemStatusMeta[status].className}`} />
+              {problemStatusMeta[status].shortLabel} {counts[status] ?? 0}
+            </span>
+          ))}
+          <button className="softButton" type="button">전부 맞음</button>
+          <button className="softButton" type="button">오답수정</button>
+          <button className="softButton" type="button">기록</button>
+        </div>
+      </div>
+      <div className="wrongBookHint">클릭: 맞음→한번 틀림→두번 틀림→실수/확실히 앎 · Ctrl+클릭: 여러 문제 선택</div>
+      <div className="wrongBookBody">
+        <div className="problemNumberGrid">
+          {(book.problems ?? []).map((problem) => (
+            <button
+              className={`problemNumberButton ${problemStatusMeta[problem.status]?.className ?? "unchecked"} ${
+                selectedProblem?.problemId === problem.problemId ? "active" : ""
+              } ${problem.isPicked || problem.status === "selected" ? "picked" : ""}`}
+              key={problem.problemId}
+              onClick={(event) => onSelectProblem(problem, event)}
+              type="button"
+            >
+              {problem.number}
+            </button>
+          ))}
+        </div>
+        <div className="problemPreviewBox">
+          {selectedProblem ? (
+            <>
+              <ProblemPreview book={book} problem={selectedProblem} />
+              <select
+                value={selectedProblem.status}
+                onChange={(event) => onUpdateProblem(selectedProblem.problemId, "status", event.target.value)}
+              >
+                {Object.entries(problemStatusMeta).map(([status, meta]) => (
+                  <option key={status} value={status}>{meta.label}</option>
+                ))}
+              </select>
+            </>
+          ) : (
+            <span>문제를 클릭하면 미리보기</span>
+          )}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function ProblemPreview({ book, problem }) {
+  return (
+    <div className="problemPreviewCard">
+      <div className="problemPreviewTop">
+        <strong>{problem.number}번</strong>
+        <span>{problemStatusMeta[problem.status]?.label ?? "미체크"}</span>
+      </div>
+      {problem.cropImageUrl ? (
+        <img alt={`${book.title} ${problem.number}번`} src={problem.cropImageUrl} />
+      ) : (
+        <div className="mockProblemCrop">
+          <small>{book.unit}</small>
+          <strong>{String(problem.number).padStart(3, "0")}</strong>
+          <p>{problem.text || "PDF 크롭 이미지가 등록되면 이 영역에 문항이 표시됩니다."}</p>
+          <ol>
+            <li>보기 또는 조건 1</li>
+            <li>보기 또는 조건 2</li>
+            <li>보기 또는 조건 3</li>
+          </ol>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MaterialManager({
+  problemBooks,
+  students,
+  onAddFolder,
+  onAddPdf,
+  onImportPageSnapBooks,
+  onSyncProblemCounts,
+  onUpdateBook
+}) {
+  const [activeTab, setActiveTab] = useState("books");
+  const [folderName, setFolderName] = useState("");
+  const [isPageSnapModalOpen, setIsPageSnapModalOpen] = useState(false);
+  const [pageSnapJson, setPageSnapJson] = useState("");
+  const [pageSnapImportMessage, setPageSnapImportMessage] = useState("");
+  const textbookRows = useMemo(() => {
+    const rows = new Map();
+    students.forEach((student) => {
+      const key = `${student.grade || "학년 미입력"}_${student.textbook || "교과서 미입력"}`;
+      if (!rows.has(key)) {
+        rows.set(key, {
+          grade: student.grade || "학년 미입력",
+          textbook: student.textbook || "교과서 미입력",
+          students: []
+        });
+      }
+      rows.get(key).students.push(student.name);
+    });
+    return Array.from(rows.values());
+  }, [students]);
+
+  function handleAddFolder() {
+    if (!folderName.trim()) return;
+    onAddFolder(folderName.trim());
+    setFolderName("");
+  }
+
+  function handlePdfUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    onAddPdf(file.name);
+    event.target.value = "";
+  }
+
+  function handlePageSnapImport() {
+    try {
+      const count = onImportPageSnapBooks(pageSnapJson);
+      setPageSnapImportMessage(`${count}개 PageSnap 교재 항목을 가져왔습니다.`);
+      setPageSnapJson("");
+    } catch (error) {
+      setPageSnapImportMessage(error.message);
+    }
+  }
+
+  return (
+    <section className="materialManagerPage">
+      <div className="localTabs materialTabs">
+        <button className={activeTab === "books" ? "active" : ""} onClick={() => setActiveTab("books")} type="button">
+          📚 교재 관리
+        </button>
+        <button className={activeTab === "textbooks" ? "active" : ""} onClick={() => setActiveTab("textbooks")} type="button">
+          📖 교과서 관리
+        </button>
+      </div>
+
+      {activeTab === "books" ? (
+        <section className="panel materialPanel">
+          <div className="sectionHeader">
+            <div>
+              <h1>교재 폴더</h1>
+              <p className="muted">교재 원본 PDF, PageSnap 단원 JSON, 문항 수를 관리합니다. 여기서 등록한 교재는 오답관리에서 사용됩니다.</p>
+            </div>
+            <div className="materialHeaderActions">
+              <button className="softButton" onClick={() => setIsPageSnapModalOpen(true)} type="button">
+                PageSnap JSON 가져오기
+              </button>
+              <label className="pdfUploadButton">
+                PDF 업로드
+                <input accept="application/pdf,image/*" onChange={handlePdfUpload} type="file" />
+              </label>
+            </div>
+          </div>
+
+          <div className="materialFolderBar">
+            <input
+              value={folderName}
+              onChange={(event) => setFolderName(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") handleAddFolder();
+              }}
+              placeholder="새 폴더명 입력 (예: 공통수학1, 중2 추가)"
+            />
+            <button className="primaryButton" onClick={handleAddFolder} type="button">+ 폴더 추가</button>
+            <button className="orangeButton" onClick={onSyncProblemCounts} type="button">문제수 동기화</button>
+          </div>
+
+          <div className="materialTable">
+            <div className="materialRow materialHead">
+              <span>이름</span>
+              <span>과목</span>
+              <span>문제수</span>
+              <span>번호범위</span>
+              <span>PDF쪽</span>
+              <span>이미지</span>
+              <span>평균(분)</span>
+              <span>업로드학원</span>
+            </div>
+            {problemBooks.map((book) => (
+              <div className="materialRow" key={book.problemBookId}>
+                <label className="folderNameCell">
+                  <span>📁</span>
+                  <input value={book.title} onChange={(event) => onUpdateBook(book.problemBookId, "title", event.target.value)} />
+                </label>
+                <input value={book.subject ?? ""} onChange={(event) => onUpdateBook(book.problemBookId, "subject", event.target.value)} placeholder="과목" />
+                <input
+                  type="number"
+                  value={book.problems?.length ?? book.totalProblems ?? 0}
+                  onChange={(event) => onUpdateBook(book.problemBookId, "totalProblems", Number(event.target.value))}
+                />
+                <input value={book.numberRange ?? ""} onChange={(event) => onUpdateBook(book.problemBookId, "numberRange", event.target.value)} placeholder="예: 1~895" />
+                <span className="muted">{book.startPdfPage && book.endPdfPage ? `${book.startPdfPage}~${book.endPdfPage}` : "-"}</span>
+                <span className="muted">{book.problems?.some((problem) => problem.cropImageUrl) ? "있음" : "대기"}</span>
+                <input value={book.averageMinutes ?? ""} onChange={(event) => onUpdateBook(book.problemBookId, "averageMinutes", event.target.value)} placeholder="분" />
+                <input
+                  value={book.uploadedAcademy ?? academyBrandName}
+                  onChange={(event) => onUpdateBook(book.problemBookId, "uploadedAcademy", event.target.value)}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {isPageSnapModalOpen ? (
+        <Modal
+          className="pageSnapImportModal"
+          title="PageSnap JSON 가져오기"
+          subtitle="PageSnap의 GPT 프롬프트 결과 JSON을 붙여넣으면 교재 단원과 문항 번호가 오답관리 교재로 저장됩니다."
+          onClose={() => setIsPageSnapModalOpen(false)}
+        >
+          <div className="pageSnapImportLayout">
+            <label>
+              JSON 붙여넣기
+              <textarea
+                rows="14"
+                value={pageSnapJson}
+                onChange={(event) => setPageSnapJson(event.target.value)}
+                placeholder='[{"item_title":"공수1 고쟁이 STEP 01 다항식의 연산","book_name":"고쟁이","subject":"공통수학1","start_pdf_page":1,"end_pdf_page":4,"start_problem_id":1,"end_problem_id":28,"estimated_minutes_per_problem":3}]'
+              />
+            </label>
+            <aside className="pageSnapImportGuide">
+              <button className="softButton" onClick={() => setPageSnapJson(createSsenCommonMath1PageSnapExample())} type="button">
+                쎈 공통수학1 예시 채우기
+              </button>
+              <strong>가져오는 값</strong>
+              <span>교재명 / 단원명</span>
+              <span>과목</span>
+              <span>PDF 페이지 범위</span>
+              <span>문항 시작-끝 번호</span>
+              <span>문항당 예상 시간</span>
+              <p className="muted">
+                예시 PDF: C:\Users\force\Desktop\쎈 공통수학1 본문.pdf · 192쪽.
+                이미지 크롭 파일은 다음 단계에서 export 폴더를 연결하면 붙일 수 있습니다.
+              </p>
+            </aside>
+          </div>
+          {pageSnapImportMessage ? <p className="importMessage">{pageSnapImportMessage}</p> : null}
+          <div className="modalActionRow">
+            <button className="primaryButton" onClick={handlePageSnapImport} type="button">가져오기</button>
+            <button className="softButton" onClick={() => setIsPageSnapModalOpen(false)} type="button">닫기</button>
+          </div>
+        </Modal>
+      ) : null}
+
+      {activeTab === "textbooks" ? (
+        <section className="panel materialPanel">
+          <div className="sectionHeader">
+            <div>
+              <h1>교과서 관리</h1>
+              <p className="muted">학생 정보에 입력된 학교/학년/교과서를 기준으로 교과서 사용 현황을 모읍니다.</p>
+            </div>
+          </div>
+          <div className="materialTable textbookTable">
+            <div className="materialRow materialHead">
+              <span>학년</span>
+              <span>교과서</span>
+              <span>연결 학생</span>
+            </div>
+            {textbookRows.map((row) => (
+              <div className="materialRow" key={`${row.grade}_${row.textbook}`}>
+                <strong>{row.grade}</strong>
+                <span>{row.textbook}</span>
+                <span>{row.students.join(", ")}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+    </section>
+  );
+}
+
+function CandidatePanel({ children, subtitle, title }) {
+  return (
+    <section className="panel candidatePanel">
+      <h2>{title}</h2>
+      <p className="muted">{subtitle}</p>
+      <div className="candidateStack">{children}</div>
+    </section>
+  );
+}
+
+function OverdueHomework({ homeworks, students, onTeacherVerifyHomework }) {
+  const unresolvedHomeworks = homeworks
+    .filter((homework) => homework.title && (isHomeworkOverdue(homework) || (homework.teacherStatus ?? "unverified") !== "verified"))
+    .sort((a, b) => String(a.assignedDate ?? "").localeCompare(String(b.assignedDate ?? "")));
+  const [gradeFilter, setGradeFilter] = useState("전체");
+  const [selectedStudentId, setSelectedStudentId] = useState(students[0]?.studentId ?? "");
+  const filteredStudents =
+    gradeFilter === "전체" ? students : students.filter((student) => (student.grade || "미입력") === gradeFilter);
+  const selectedStudent = students.find((student) => student.studentId === selectedStudentId) ?? filteredStudents[0] ?? students[0];
+  const selectedHomeworks = selectedStudent
+    ? unresolvedHomeworks.filter((homework) => homework.studentId === selectedStudent.studentId)
+    : [];
+  const registeredStudentCount = students.filter((student) => homeworks.some((homework) => homework.studentId === student.studentId)).length;
+  const todayIncompleteCount = unresolvedHomeworks.filter((homework) => homework.dueDate === today).length;
+  const overdueStudentCount = new Set(unresolvedHomeworks.filter((homework) => isHomeworkOverdue(homework)).map((homework) => homework.studentId)).size;
+
+  function getStudentHomeworkSummary(student) {
+    const studentHomeworks = homeworks.filter((homework) => homework.studentId === student.studentId);
+    const unresolvedCount = unresolvedHomeworks.filter((homework) => homework.studentId === student.studentId).length;
+    const doneCount = studentHomeworks.filter(
+      (homework) => homework.teacherStatus === "verified" || homework.studentStatus === "checked_done"
+    ).length;
+    const progress = studentHomeworks.length ? Math.round((doneCount / studentHomeworks.length) * 100) : 0;
+    return {
+      hasRegisteredHomework: studentHomeworks.length > 0,
+      progress,
+      unresolvedCount
+    };
+  }
+
+  return (
+    <section className="homeworkStatusDashboard">
+      <div className="homeworkStatusMetrics">
+        <MetricCard icon="👥" label="전체 학생" value={`${students.length}명`} hint="등록된 학생 수" />
+        <MetricCard icon="📖" label="숙제 등록 학생" value={`${registeredStudentCount}명`} hint="숙제 플래너 등록 기준" />
+        <MetricCard icon="⏰" label="오늘 미완료" value={`${todayIncompleteCount}명`} hint="오늘 할 양 미체크" tone="warning" />
+        <MetricCard icon="⚠️" label="밀린 학생" value={`${overdueStudentCount}명`} hint="클릭해서 목록 보기" tone="warning" />
+      </div>
+
+      <div className="homeworkStatusContent">
+        <section className="panel homeworkProgressPanel">
+          <div className="sectionHeader compact">
+            <div>
+              <h2>학생별 진행 현황</h2>
+              <p className="muted">학년</p>
+            </div>
+          </div>
+          <div className="homeworkGradeFilters">
+            {["전체", "중1", "중2", "중3", "고1", "고2", "고3"].map((grade) => (
+              <button
+                className={gradeFilter === grade ? "active" : ""}
+                key={grade}
+                onClick={() => setGradeFilter(grade)}
+                type="button"
+              >
+                {grade}
+              </button>
+            ))}
+          </div>
+          <div className="homeworkStudentGrid">
+            {filteredStudents.map((student) => {
+              const summary = getStudentHomeworkSummary(student);
+              const isSelected = selectedStudent?.studentId === student.studentId;
+              return (
+                <button
+                  className={isSelected ? "homeworkStudentTile active" : "homeworkStudentTile"}
+                  key={student.studentId}
+                  onClick={() => setSelectedStudentId(student.studentId)}
+                  type="button"
+                >
+                  <span className="homeworkStudentTop">
+                    <strong>{student.name}</strong>
+                    <small>{student.grade || "미입력"}</small>
+                    <em>{summary.hasRegisteredHomework ? "등록" : "미등록"}</em>
+                    <b>{summary.progress}%</b>
+                  </span>
+                  <span className="homeworkProgressTrack">
+                    <i style={{ width: `${summary.progress}%` }} />
+                  </span>
+                  <span className="homeworkStudentMeta">
+                    오늘 미완료 0 · 밀림 {summary.unresolvedCount ? `${summary.unresolvedCount}건` : "없음"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="panel homeworkDetailPanel">
+          <div className="sectionHeader compact">
+            <div>
+              <h2>상세 보기</h2>
+              <p className="muted">{selectedStudent ? `${selectedStudent.name} 학생의 숙제 목록` : "학생을 선택하세요"}</p>
+            </div>
+            <div className="detailActions">
+              {selectedStudent ? <button className="softButton" type="button">👤 학생화면</button> : null}
+              <button className="softButton" type="button">전체</button>
+            </div>
+          </div>
+          {selectedHomeworks.length === 0 ? (
+            <div className="emptyHomeworkBox">아직 숙제가 없습니다.</div>
+          ) : null}
+          <div className="homeworkDetailList">
+            {selectedHomeworks.map((homework) => (
+              <article className="homeworkDetailCard" key={homework.homeworkId}>
+                <div>
+                  <strong>{homework.title}</strong>
+                  <small>{homework.assignedDate} 배정 · {homework.dueDate || "-"} 마감</small>
+                  <span className="homeworkProgressTrack">
+                    <i style={{ width: homework.studentStatus === "checked_done" ? "100%" : "0%" }} />
+                  </span>
+                  <small>{homework.studentStatus === "checked_done" ? "학생 체크 완료" : "학생 체크 대기"}</small>
+                </div>
+                <div className="homeworkDetailControls">
+                  <select
+                    value={homework.teacherStatus ?? "unverified"}
+                    onChange={(event) => onTeacherVerifyHomework(homework.homeworkId, event.target.value)}
+                  >
+                    <option value="unverified">확인 대기</option>
+                    <option value="verified">확인 완료</option>
+                    <option value="partial">일부 완료</option>
+                    <option value="missing">미완료</option>
+                  </select>
+                  <span className="actionHint">{getHomeworkAction(homework)}</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      </div>
+
+    </section>
+  );
+}
+
+function StudentModal({ templates, onClose, onSubmit }) {
+  const [form, setForm] = useState({
+    name: "",
+    birthYear: "",
+    schoolName: "",
+    studentPhone: "",
+    parentPhone: "",
+    pin: "",
+    grade: "고1",
+    textbook: "",
+    specialNote: "",
+    defaultClassTemplateId: templates[0].classTemplateId,
+    scheduleOverride: ""
+  });
+
+  function update(field, value) {
+    setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  return (
+    <Modal title="학생 추가" subtitle="한 명씩 등록하거나 이후 엑셀 일괄 등록으로 확장합니다." onClose={onClose}>
+      <div className="fieldGrid two">
+        <label>이름<input value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="홍길동" /></label>
+        <label>출생연도<input value={form.birthYear} onChange={(event) => update("birthYear", event.target.value)} placeholder="예: 2010" /></label>
+        <label>학교<input value={form.schoolName} onChange={(event) => update("schoolName", event.target.value)} placeholder="OO중학교" /></label>
+        <label>PIN<input value={form.pin} onChange={(event) => update("pin", event.target.value)} placeholder="4자리 이상" /></label>
+        <label>학생전화번호<input value={form.studentPhone} onChange={(event) => update("studentPhone", event.target.value)} placeholder="01012345678" /></label>
+        <label>학부모전화번호<input value={form.parentPhone} onChange={(event) => update("parentPhone", event.target.value)} placeholder="01012345678" /></label>
+        <label>교과서<input value={form.textbook} onChange={(event) => update("textbook", event.target.value)} placeholder="예: 수학의 정석" /></label>
+        <label>특이사항<input value={form.specialNote} onChange={(event) => update("specialNote", event.target.value)} placeholder="예: 계산 실수 반복" /></label>
+        <label>학년
+          <select value={form.grade} onChange={(event) => update("grade", event.target.value)}>
+            {["중1", "중2", "중3", "고1", "고2", "고3"].map((grade) => <option key={grade}>{grade}</option>)}
+          </select>
+        </label>
+        <label>기본 수업 틀
+          <select value={form.defaultClassTemplateId} onChange={(event) => update("defaultClassTemplateId", event.target.value)}>
+            {templates.map((template) => <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>)}
+          </select>
+        </label>
+      </div>
+      <label className="wideLabel">개별 스케줄 메모
+        <input value={form.scheduleOverride} onChange={(event) => update("scheduleOverride", event.target.value)} placeholder="예: 월요일만 7-10반" />
+      </label>
+      <button className="primaryButton full" onClick={() => onSubmit(form)} type="button">+ 학생 추가</button>
+    </Modal>
+  );
+}
+
+function ReportCenter({ lessons, records, reportLesson, selectedReportLessonId, snapshots, students, onSaveSnapshot, onSelectLesson }) {
+  const [selectedStudentId, setSelectedStudentId] = useState("");
+  const lessonStudents = reportLesson
+    ? reportLesson.studentIds.map((studentId) => students.find((student) => student.studentId === studentId)).filter(Boolean)
+    : [];
+  const activeStudent = lessonStudents.find((student) => student.studentId === selectedStudentId) ?? lessonStudents[0];
+  const activeRecord = activeStudent ? records.find((record) => record.studentId === activeStudent.studentId) : null;
+  const reportBody = activeStudent && reportLesson
+    ? createReportBody(activeStudent, reportLesson, activeRecord)
+    : "";
+
+  useEffect(() => {
+    if (lessonStudents[0] && !lessonStudents.some((student) => student.studentId === selectedStudentId)) {
+      setSelectedStudentId(lessonStudents[0].studentId);
+    }
+  }, [lessonStudents, selectedStudentId]);
+
+  function saveSnapshot() {
+    if (!activeStudent || !reportLesson) return;
+
+    onSaveSnapshot({
+      reportId: `report_${Date.now()}_${activeStudent.studentId}`,
+      studentId: activeStudent.studentId,
+      lessonId: reportLesson.lessonId,
+      title: `${reportLesson.date} ${activeStudent.name} 리포트`,
+      body: reportBody,
+      status: "snapshot_saved",
+      createdAt: new Date().toISOString()
+    });
+  }
+
+  return (
+    <section className="reportGrid">
+      <div className="panel">
+        <div className="sectionHeader">
+          <div>
+            <h1>보고서 생성</h1>
+            <p className="muted">Day 10-12: 템플릿, 초안, 스냅샷 저장</p>
+          </div>
+        </div>
+        <label>수업 선택
+          <select value={selectedReportLessonId} onChange={(event) => onSelectLesson(event.target.value)}>
+            {lessons.map((lesson) => (
+              <option key={lesson.lessonId} value={lesson.lessonId}>{lesson.date} · {lesson.className}</option>
+            ))}
+          </select>
+        </label>
+        <label>학생 선택
+          <select value={activeStudent?.studentId ?? ""} onChange={(event) => setSelectedStudentId(event.target.value)}>
+            {lessonStudents.map((student) => <option key={student.studentId} value={student.studentId}>{student.name}</option>)}
+          </select>
+        </label>
+        <label>리포트 템플릿
+          <textarea readOnly rows="4" value={sampleData.reportTemplates[0].body} />
+        </label>
+      </div>
+
+      <div className="panel">
+        <div className="sectionHeader">
+          <div>
+            <p className="eyebrow">Draft</p>
+            <h2>리포트 초안</h2>
+          </div>
+          <button className="primaryButton" onClick={saveSnapshot} type="button">스냅샷 저장</button>
+        </div>
+        <textarea className="reportDraft" readOnly rows="12" value={reportBody} />
+      </div>
+
+      <div className="panel snapshotsPanel">
+        <h2>저장된 스냅샷</h2>
+        {snapshots.length === 0 ? <p className="muted">아직 저장된 스냅샷이 없습니다.</p> : null}
+        {snapshots.map((snapshot) => (
+          <article className="snapshotCard" key={snapshot.reportId}>
+            <strong>{snapshot.title}</strong>
+            <small>{snapshot.status} · {snapshot.createdAt}</small>
+            <p>{snapshot.body}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Modal({ backdropClassName = "", children, className = "", onClose, subtitle, title }) {
+  return (
+    <div className={`modalBackdrop ${backdropClassName}`}>
+      <section className={`modalCard ${className}`}>
+        <div className="modalHeader">
+          <div>
+            <h2>{title}</h2>
+            {subtitle ? <p className="muted">{subtitle}</p> : null}
+          </div>
+          <button className="iconButton" onClick={onClose} type="button">×</button>
+        </div>
+        {children}
+      </section>
+    </div>
+  );
+}
+
+function useStoredState(key, fallbackValue) {
+  const [value, setValue] = useState(() => {
+    if (typeof window === "undefined") return fallbackValue;
+    try {
+      const storedValue = window.localStorage.getItem(key);
+      return storedValue ? JSON.parse(storedValue) : fallbackValue;
+    } catch (error) {
+      return fallbackValue;
+    }
+  });
+
+  useEffect(() => {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  }, [key, value]);
+
+  return [value, setValue];
+}
+
+function buildMonthDays(referenceDate = today) {
+  const days = [];
+  const [year, month] = referenceDate.split("-").map(Number);
+  const firstDay = new Date(Date.UTC(year, month - 1, 1));
+  const startOffset = firstDay.getUTCDay();
+  const calendarStart = new Date(firstDay);
+  calendarStart.setUTCDate(firstDay.getUTCDate() - startOffset);
+
+  for (let index = 0; index < 42; index += 1) {
+    const date = new Date(calendarStart);
+    date.setUTCDate(calendarStart.getUTCDate() + index);
+    const dateMonth = date.getUTCMonth() + 1;
+    const dayNumber = String(date.getUTCDate());
+    const dateString = [
+      date.getUTCFullYear(),
+      String(dateMonth).padStart(2, "0"),
+      dayNumber.padStart(2, "0")
+    ].join("-");
+    days.push({
+      date: dateString,
+      dayNumber,
+      inMonth: dateMonth === month
+    });
+  }
+  return days;
+}
+
+function formatMonthTitle(dateString) {
+  const [year, month] = dateString.split("-");
+  return `${year}년 ${Number(month)}월`;
+}
+
+function sortByTime(a, b) {
+  return a.startTime.localeCompare(b.startTime);
+}
+
+function createLessonId(date, name) {
+  return `lesson_${date}_${name.replaceAll(" ", "-").replaceAll("/", "-")}_${Date.now()}`;
+}
+
+function getDayKey(date) {
+  return ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][new Date(`${date}T00:00:00+09:00`).getDay()];
+}
+
+function getKoreaDateString(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function getKoreaDateTimeString(date = new Date()) {
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(date);
+}
+
+function addDaysInKorea(dateString, days) {
+  const base = new Date(`${dateString}T00:00:00+09:00`);
+  base.setUTCDate(base.getUTCDate() + days);
+  return getKoreaDateString(base);
+}
+
+function getTemplateStartTime(template, date) {
+  return getDayKey(date) === "sat" && template.saturdayStartTime ? template.saturdayStartTime : template.startTime;
+}
+
+function getTemplateEndTime(template, date) {
+  return getDayKey(date) === "sat" && template.saturdayEndTime ? template.saturdayEndTime : template.endTime;
+}
+
+function calculateLateMinutes(lesson, now = new Date()) {
+  if (!lesson?.date || !lesson?.startTime) return 0;
+  const start = new Date(`${lesson.date}T${lesson.startTime}:00+09:00`);
+  const diff = Math.floor((now.getTime() - start.getTime()) / 60000);
+  return Math.max(0, diff);
+}
+
+function createLessonStudentRecordId(lessonId, studentId) {
+  return `lsr_${lessonId.replace("lesson_", "")}_${studentId}`;
+}
+
+function createEmptyRecord(lesson, student) {
+  return {
+    lessonStudentRecordId: createLessonStudentRecordId(lesson.lessonId, student.studentId),
+    lessonId: lesson.lessonId,
+    studentId: student.studentId,
+    attendanceStatus: "pending",
+    behaviorTag: "",
+    homeworkStatus: "not_started",
+    teacherComment: "",
+    studentComment: "",
+    needsMakeup: false,
+    needsRetest: false
+  };
+}
+
+function upsertById(items, nextItem, idKey) {
+  return items.some((item) => item[idKey] === nextItem[idKey])
+    ? items.map((item) => (item[idKey] === nextItem[idKey] ? nextItem : item))
+    : [...items, nextItem];
+}
+
+function createReportBody(student, lesson, record) {
+  return sampleData.reportTemplates[0].body
+    .replace("{studentName}", student.name)
+    .replace("{lessonDate}", lesson.date)
+    .replace("{className}", lesson.className)
+    .replace("{attendance}", attendanceLabels[record?.attendanceStatus ?? "pending"])
+    .replace("{homework}", homeworkLabels[record?.homeworkStatus ?? "not_started"])
+    .replace("{teacherComment}", record?.teacherComment || "아직 강사 코멘트가 입력되지 않았습니다.");
+}
+
+function getHomeworkBundle(homeworks, lesson, student) {
+  const studentHomeworks = homeworks
+    .filter((homework) => homework.studentId === student.studentId)
+    .sort((a, b) => a.assignedDate.localeCompare(b.assignedDate));
+
+  const previous =
+    getLessonHomework(homeworks, lesson, student, "previous") ??
+    studentHomeworks
+      .filter((homework) => homework.assignedDate < lesson.date)
+      .at(-1) ?? null;
+  const today =
+    getLessonHomework(homeworks, lesson, student, "next") ??
+    studentHomeworks.find((homework) => homework.assignedDate === lesson.date || homework.lessonId === lesson.lessonId) ??
+    null;
+
+  return { previous, today };
+}
+
+function getLessonHomework(homeworks, lesson, student, homeworkType, lessons = []) {
+  const directHomework =
+    homeworks.find(
+      (homework) =>
+        homework.lessonId === lesson.lessonId &&
+        homework.studentId === student.studentId &&
+        homework.homeworkType === homeworkType
+    ) ?? null;
+
+  if (directHomework || homeworkType !== "previous") {
+    return directHomework;
+  }
+
+  const previousLesson = [...lessons]
+    .filter(
+      (item) =>
+        item.lessonId !== lesson.lessonId &&
+        item.date < lesson.date &&
+        item.studentIds?.includes(student.studentId) &&
+        (!lesson.classTemplateId || !item.classTemplateId || item.classTemplateId === lesson.classTemplateId)
+    )
+    .sort((a, b) => b.date.localeCompare(a.date) || b.startTime.localeCompare(a.startTime))[0];
+
+  if (!previousLesson) return null;
+
+  const linkedHomework =
+    homeworks.find(
+      (homework) =>
+        homework.lessonId === previousLesson.lessonId &&
+        homework.studentId === student.studentId &&
+        homework.homeworkType === "next"
+    ) ?? null;
+
+  return linkedHomework
+    ? {
+        ...linkedHomework,
+        linkedFromLessonId: previousLesson.lessonId,
+        linkedFromDate: previousLesson.date,
+        homeworkType: "previous"
+      }
+    : null;
+}
+
+function createAiReportDraft(student, lesson, record, homeworkBundle) {
+  const attendance = attendanceLabels[record?.attendanceStatus ?? "pending"];
+  const previousHomework = homeworkBundle.previous
+    ? `${homeworkBundle.previous.title} (${homeworkLabels[homeworkBundle.previous.status] ?? homeworkBundle.previous.status})`
+    : "지난 숙제 기록 없음";
+  const todayHomework = homeworkBundle.today
+    ? `${homeworkBundle.today.title} (${homeworkLabels[homeworkBundle.today.status] ?? homeworkBundle.today.status})`
+    : "오늘 배정 숙제 없음";
+  const comment = record?.teacherComment || "아직 데일리 코멘트가 입력되지 않았습니다.";
+
+  return [
+    `${student.name} 학생 데일리 리포트 초안입니다.`,
+    `학교/학년: ${student.schoolName} ${student.grade}`,
+    `교과서: ${student.textbook ?? "미지정"}`,
+    `특이사항: ${student.specialNote ?? "없음"}`,
+    `수업: ${lesson.date} ${lesson.className} (${lesson.startTime}-${lesson.endTime})`,
+    `출결: ${attendance}`,
+    `지난 숙제: ${previousHomework}`,
+    `오늘 나간 숙제: ${todayHomework}`,
+    `행동태그: ${record?.behaviorTag || "선택 없음"}`,
+    `수업 코멘트: ${comment}`,
+    "위 내용은 AI API 호출을 붙이기 전의 모의 초안입니다. 실제 발송 전 원장 검수가 필요합니다."
+  ].join("\n");
+}
+
+function isHomeworkOverdue(homework) {
+  return (
+    homework.dueDate < today &&
+    homework.teacherStatus !== "verified" &&
+    homework.status !== "verified"
+  );
+}
+
+function calculateStreak(homeworks) {
+  return homeworks.filter((homework) => homework.teacherStatus === "verified").length;
+}
+
+function calculateHomeworkStats(homeworks) {
+  const total = homeworks.length;
+  const done = homeworks.filter((homework) => homework.teacherStatus === "verified" || homework.studentStatus === "checked_done").length;
+  return {
+    total,
+    done,
+    completionRate: total ? Math.round((done / total) * 100) : 0,
+    perfectDays: homeworks.filter((homework) => homework.teacherStatus === "verified").length
+  };
+}
+
+function followUpTypeLabel(taskType) {
+  const labels = {
+    homework_makeup: "숙제보충",
+    absence_makeup: "결석 보강",
+    retest: "재시험"
+  };
+  return labels[taskType] ?? "보충관리";
+}
+
+function createNotificationDraft(task, students) {
+  const student = students.find((item) => item.studentId === task.studentId);
+  const timeText = task.scheduledTime ? ` ${task.scheduledTime}` : "";
+  return `${student?.name ?? "학생"} ${followUpTypeLabel(task.taskType)} 안내입니다. ${task.scheduledDate}${timeText}에 ${task.sourceLabel} 관련 보충을 진행할 예정입니다.`;
+}
+
+function createAttendanceNotificationText(payload) {
+  const status = attendanceLabels[payload.attendanceStatus] ?? payload.attendanceStatus ?? "출석";
+  const lateText = payload.attendanceStatus === "late" ? ` (${payload.lateMinutes || 0}분 지각)` : "";
+  const reasonText = payload.reason ? `\n사유: ${payload.reason}` : "";
+  return `[${academyBrandName} 고태영T 출결 안내]\n${payload.studentName} 학생이 ${payload.checkedAt}에 ${status}${lateText} 처리되었습니다.\n수업: ${payload.lessonName}${reasonText}`;
+}
+
+function getHomeworkAction(homework) {
+  if (homework.teacherStatus === "verified") return "해결됨";
+  if (homework.studentStatus === "checked_done") return "강사 확인 필요";
+  if (isHomeworkOverdue(homework)) return "숙제보충 필요";
+  return "학생 체크 대기";
+}
