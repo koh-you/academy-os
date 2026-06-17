@@ -55,6 +55,33 @@ function attendanceLabel(status) {
   }[status] ?? status ?? "출석";
 }
 
+const assignmentStatusMessageMap = {
+  complete_thorough: "과제를 성실하게 완료했습니다.",
+  complete_easy: "오늘 과제는 학생에게 비교적 수월하게 진행되었습니다.",
+  partial_80: "과제를 대부분 수행했으며, 남은 부분은 이어서 확인하겠습니다.",
+  known_only: "아는 문항 위주로 풀이했으며, 어려웠던 문항은 추가 확인이 필요합니다.",
+  too_hard: "과제 난도가 다소 높아 보충 설명과 분량 조정이 필요합니다.",
+  answer_suspected: "풀이 과정을 한 번 더 확인할 필요가 있어 다음 수업에서 점검하겠습니다.",
+  not_done: "과제가 충분히 완료되지 않아 보충 관리가 필요합니다.",
+  not_checked: "과제 확인이 아직 완료되지 않았습니다."
+};
+
+function assignmentStatusText(value, fallback = "") {
+  return assignmentStatusMessageMap[value] ?? fallback ?? value ?? "";
+}
+
+function buildLessonCommentBody(payload, audience) {
+  const assignmentStatus = payload.assignmentStatusMessage || assignmentStatusText(payload.assignmentStatus);
+  const lines = [
+    payload.lessonMaterial ? `강의 교재: ${payload.lessonMaterial}` : "",
+    payload.lessonContent ? `강의 내용: ${payload.lessonContent}` : "",
+    audience === "parent" && assignmentStatus ? `과제 상태: ${assignmentStatus}` : "",
+    payload.message ? `코멘트: ${payload.message}` : ""
+  ];
+
+  return lines.filter(Boolean).join("\n");
+}
+
 function resolveRecipient(phone) {
   const requestedTo = compactPhoneNumber(phone);
   const allowRealRecipients = process.env.ALIMTALK_ALLOW_REAL_PARENT_NUMBERS === "true";
@@ -269,13 +296,14 @@ function buildDailyReportBody({
   teacherComment
 }) {
   const incompleteList = normalizeList(incompleteHomeworks);
+  const assignmentStatusMessage = assignmentStatusText(assignmentStatus, assignmentStatus);
   const lines = [
     `출결: ${attendanceLabel(attendanceStatus)}`,
     lessonMaterial ? `강의 교재: ${lessonMaterial}` : "",
     lessonContent ? `강의 내용: ${lessonContent}` : "",
     previousHomework ? `지난 숙제: ${previousHomework}` : "",
     nextHomework ? `다음 숙제: ${nextHomework}` : "",
-    assignmentStatus ? `과제 상태: ${assignmentStatus}` : "",
+    assignmentStatusMessage ? `과제 상태: ${assignmentStatusMessage}` : "",
     incompleteList.length ? `미완료 숙제:\n${incompleteList.map((item) => `- ${item}`).join("\n")}` : "",
     retestSchedule ? `[중요] 재시험 일정: ${retestSchedule}` : "",
     supplementSchedule ? `[중요] 보충 일정: ${supplementSchedule}` : "",
@@ -290,6 +318,7 @@ export async function sendLessonCommentAlimtalk(payload) {
   const recipientPhone = audience === "student" ? payload.studentPhone : payload.parentPhone;
   const templateEnvName =
     audience === "student" ? TEMPLATE_ENV.studentComment : TEMPLATE_ENV.dailyReport;
+  const commentBody = buildLessonCommentBody(payload, audience);
 
   return sendKakaoAlimtalk({
     payload,
@@ -300,7 +329,8 @@ export async function sendLessonCommentAlimtalk(payload) {
       "#{학생명}": String(payload.studentName ?? ""),
       "#{수업명}": String(payload.lessonName ?? ""),
       "#{수업일}": String(payload.lessonDate ?? ""),
-      "#{코멘트}": String(payload.message ?? "")
+      "#{리포트본문}": commentBody,
+      "#{코멘트}": commentBody
     }
   });
 }

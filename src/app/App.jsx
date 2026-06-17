@@ -64,6 +64,43 @@ const assignmentStatusLabels = Object.fromEntries(
   assignmentStatusOptions.map((option) => [option.value, option.label])
 );
 
+const assignmentStatusParentMessages = {
+  complete_thorough: "과제를 성실하게 완료했습니다.",
+  complete_easy: "오늘 과제는 학생에게 비교적 수월하게 진행되었습니다.",
+  partial_80: "과제를 대부분 수행했으며, 남은 부분은 이어서 확인하겠습니다.",
+  known_only: "아는 문항 위주로 풀이했으며, 어려웠던 문항은 추가 확인이 필요합니다.",
+  too_hard: "과제 난도가 다소 높아 보충 설명과 분량 조정이 필요합니다.",
+  answer_suspected: "풀이 과정을 한 번 더 확인할 필요가 있어 다음 수업에서 점검하겠습니다.",
+  not_done: "과제가 충분히 완료되지 않아 보충 관리가 필요합니다.",
+  not_checked: "과제 확인이 아직 완료되지 않았습니다."
+};
+
+function getAssignmentStatusParentMessage(value) {
+  return assignmentStatusParentMessages[value] ?? assignmentStatusLabels[value] ?? "";
+}
+
+function getLessonMaterial(record, student) {
+  return record?.lessonMaterial?.trim() || student?.textbook?.trim() || student?.currentTextbook?.trim() || "";
+}
+
+function getLessonContent(record) {
+  return record?.lessonProgress?.trim() || record?.progress?.trim() || "";
+}
+
+function buildCommentPreviewLines({ audience, comment, record, student }) {
+  const lessonMaterial = getLessonMaterial(record, student);
+  const lessonContent = getLessonContent(record);
+  const assignmentStatus = record?.assignmentStatus ?? record?.incompleteHomework ?? "";
+  const lines = [
+    lessonMaterial ? `강의 교재: ${lessonMaterial}` : "",
+    lessonContent ? `강의 내용: ${lessonContent}` : "",
+    audience === "parent" && assignmentStatus ? `과제 상태: ${getAssignmentStatusParentMessage(assignmentStatus)}` : "",
+    comment?.trim() ? `코멘트: ${comment.trim()}` : ""
+  ];
+
+  return lines.filter(Boolean);
+}
+
 const saveStateLabels = {
   idle: "저장 전",
   dirty: "변경됨",
@@ -1771,9 +1808,12 @@ export function App() {
           aiModel,
           audience: target === "student" ? "student" : "parent",
           attendanceStatus: attendanceLabels[record?.attendanceStatus ?? "pending"],
+          assignmentStatus: getAssignmentStatusParentMessage(record?.assignmentStatus ?? record?.incompleteHomework ?? ""),
           grade: student.grade,
           homeworkStatus: homeworkLabels[record?.homeworkStatus ?? "not_started"],
           lessonDate: lesson.date,
+          lessonContent: getLessonContent(record),
+          lessonMaterial: getLessonMaterial(record, student),
           lessonName: lesson.className,
           rawText: record?.[sourceField] ?? "",
           schoolName: student.schoolName,
@@ -1866,13 +1906,20 @@ export function App() {
     );
 
     try {
+      const lessonMaterial = getLessonMaterial(record, student);
+      const lessonContent = getLessonContent(record);
+      const assignmentStatus = record?.assignmentStatus ?? record?.incompleteHomework ?? "";
       const response = await fetch(apiUrl("/api/notifications/comment-alimtalk"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           academyName: academyBrandName,
+          assignmentStatus,
+          assignmentStatusMessage: getAssignmentStatusParentMessage(assignmentStatus),
           lessonDate: lesson.date,
+          lessonContent,
           lessonId: lesson.lessonId,
+          lessonMaterial,
           lessonName: lesson.className,
           message,
           parentPhone: student.parentPhone,
@@ -2634,7 +2681,13 @@ function LessonJournalDetail({
                   </span>
                   <small>{student.grade || "고1"} · {student.schoolName || "학교 미입력"}</small>
                 </span>
-                <span className="journalTextCell">{student.textbook || student.currentTextbook || "미입력"}</span>
+                <textarea
+                  className="journalCompactInput"
+                  value={record.lessonMaterial ?? ""}
+                  onChange={(event) => onChangeRecord(lesson, student, "lessonMaterial", event.target.value)}
+                  placeholder={student.textbook || student.currentTextbook || "강의 교재"}
+                  rows="2"
+                />
                 <textarea
                   value={record.lessonProgress ?? record.progress ?? ""}
                   onChange={(event) => onChangeRecord(lesson, student, "lessonProgress", event.target.value)}
@@ -2783,6 +2836,12 @@ function CommentComposerModal({
   const sendLabel = isParent ? "학부모 알림톡 발송" : "학생 알림톡 발송";
   const aiStatus = isParent ? record?.teacherCommentAiStatus : record?.studentCommentAiStatus;
   const sendStatus = isParent ? record?.teacherCommentSendStatus : record?.studentCommentSendStatus;
+  const previewLines = buildCommentPreviewLines({
+    audience,
+    comment,
+    record,
+    student
+  });
 
   return (
     <Modal className="commentComposerModal" title={title} subtitle={`${lesson.date} · ${lesson.className}`} onClose={onClose}>
@@ -2835,8 +2894,12 @@ function CommentComposerModal({
               <span>{student.schoolName || "학교 미입력"} · {student.grade || "-"}</span>
             </div>
             <div className="messageBubble">
-              {comment.trim() ? (
-                comment.split("\n").map((line, index) => <p key={`${line}_${index}`}>{line || "\u00a0"}</p>)
+              {previewLines.length ? (
+                previewLines.flatMap((line, index) =>
+                  line.split("\n").map((part, partIndex) => (
+                    <p key={`${index}_${partIndex}_${part}`}>{part || "\u00a0"}</p>
+                  ))
+                )
               ) : (
                 <p className="placeholderText">왼쪽에 작성한 내용이 받는 사람 화면에 이렇게 표시됩니다.</p>
               )}
@@ -7528,6 +7591,8 @@ function createEmptyRecord(lesson, student) {
     attendanceStatus: "pending",
     behaviorTag: "",
     homeworkStatus: "not_started",
+    lessonMaterial: "",
+    lessonProgress: "",
     teacherComment: "",
     studentComment: "",
     assignmentStatus: "",
@@ -7632,7 +7697,7 @@ function createAiReportDraft(student, lesson, record, homeworkBundle) {
     `출결: ${attendance}`,
     `지난 숙제: ${previousHomework}`,
     `오늘 나간 숙제: ${todayHomework}`,
-    `과제 상태: ${assignmentStatusLabels[record?.assignmentStatus ?? record?.incompleteHomework ?? ""] ?? "선택 없음"}`,
+    `과제 상태: ${getAssignmentStatusParentMessage(record?.assignmentStatus ?? record?.incompleteHomework ?? "") || "선택 없음"}`,
     `수업 코멘트: ${comment}`,
     "위 내용은 AI API 호출을 붙이기 전의 모의 초안입니다. 실제 발송 전 원장 검수가 필요합니다."
   ].join("\n");

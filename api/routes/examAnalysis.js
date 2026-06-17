@@ -82,8 +82,11 @@ function buildCommentPrompt(payload) {
     `학교/학년: ${payload.schoolName ?? ""} ${payload.grade ?? ""}`,
     `수업: ${payload.lessonName ?? ""}`,
     `날짜: ${payload.lessonDate ?? ""}`,
+    `강의 교재: ${payload.lessonMaterial ?? ""}`,
+    `강의 내용: ${payload.lessonContent ?? ""}`,
     `출결: ${payload.attendanceStatus ?? ""}`,
     `숙제 상태: ${payload.homeworkStatus ?? ""}`,
+    `과제 상태 안내: ${payload.assignmentStatus ?? ""}`,
     "",
     "[강사 원문]",
     payload.rawText || "원문 없음"
