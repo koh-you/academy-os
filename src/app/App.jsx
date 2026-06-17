@@ -5467,9 +5467,9 @@ function StudentPortalV2({ homeworks, lessons = [], records = [], reportSnapshot
       </header>
 
       <div className="metricGrid">
-        <MetricCard icon="책" label="오늘 할 숙제" value={`${todayHomeworks.length}개`} hint="오늘 배정된 숙제 수" />
-        <MetricCard icon="주의" label="밀린 숙제" value={`${overdueHomeworks.length}개`} hint="완료 못한 지난 날짜 숙제" tone="warning" />
-        <MetricCard icon="불" label="연속 수행일" value={`${streakDays}일`} hint="매일 체크하는 습관 지표" tone="success" />
+        <MetricCard icon="📖" label="오늘 할 숙제" value={`${todayHomeworks.length}개`} hint="오늘 배정된 숙제 수" />
+        <MetricCard icon="⚠️" label="밀린 숙제" value={`${overdueHomeworks.length}개`} hint="완료 못한 지난 날짜 숙제" tone="warning" />
+        <MetricCard icon="🔥" label="연속 수행일" value={`${streakDays}일`} hint="매일 체크하는 습관 지표" tone="success" />
       </div>
 
       <section className="panel studentWorkPanel">
@@ -5550,7 +5550,7 @@ function StudentTodayTab({ overdueHomeworks, todayHomeworks, onStudentCheckHomew
         ))}
       </div>
       {overdueHomeworks.length ? (
-        <div className="warningBand">주의 밀린 숙제가 있습니다. 오늘 카드나 전체 탭에서 재분배를 확인하세요.</div>
+        <div className="warningBand">⚠️ 밀린 숙제가 있습니다. 오늘 카드나 전체 탭에서 재분배를 확인하세요.</div>
       ) : null}
     </>
   );
