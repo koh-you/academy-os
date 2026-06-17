@@ -101,8 +101,8 @@ function fromLessonRow(row) {
   };
 }
 
-function toLessonRecordRow(record) {
-  return {
+function toLessonRecordRow(record, { includeExtendedFields = true } = {}) {
+  const baseRow = {
     lesson_student_record_id: record.lessonStudentRecordId,
     lesson_id: record.lessonId,
     student_id: record.studentId,
@@ -121,6 +121,21 @@ function toLessonRecordRow(record) {
     student_comment_send_status: compact(record.studentCommentSendStatus),
     updated_at: new Date().toISOString()
   };
+
+  if (!includeExtendedFields) return baseRow;
+
+  return {
+    ...baseRow,
+    lesson_material: compact(record.lessonMaterial),
+    lesson_content: compact(record.lessonContent),
+    assignment_status: compact(record.assignmentStatus),
+    preparation_memo: compact(record.preparationMemo),
+    prep_student_notice: compact(record.prepStudentNotice),
+    prep_parent_visible: Boolean(record.prepParentVisible),
+    prep_parent_notice: compact(record.prepParentNotice),
+    prep_student_ai_status: compact(record.prepStudentAiStatus),
+    prep_parent_ai_status: compact(record.prepParentAiStatus)
+  };
 }
 
 function fromLessonRecordRow(row) {
@@ -134,6 +149,15 @@ function fromLessonRecordRow(row) {
     previousHomework: row.previous_homework ?? "",
     nextHomework: row.next_homework ?? "",
     incompleteHomework: row.incomplete_homework ?? "",
+    lessonMaterial: row.lesson_material ?? "",
+    lessonContent: row.lesson_content ?? "",
+    assignmentStatus: row.assignment_status ?? "",
+    preparationMemo: row.preparation_memo ?? "",
+    prepStudentNotice: row.prep_student_notice ?? "",
+    prepParentVisible: Boolean(row.prep_parent_visible),
+    prepParentNotice: row.prep_parent_notice ?? "",
+    prepStudentAiStatus: row.prep_student_ai_status ?? "",
+    prepParentAiStatus: row.prep_parent_ai_status ?? "",
     progress: row.progress_note ?? "",
     teacherComment: row.teacher_comment ?? "",
     studentComment: row.student_comment ?? "",
@@ -296,7 +320,20 @@ export async function upsertLessonStudentRecord(record) {
   const stableRecord = existingRows[0]
     ? { ...record, lessonStudentRecordId: existingRows[0].lesson_student_record_id }
     : record;
-  const [row] = await upsertRows("lesson_student_records", [toLessonRecordRow(stableRecord)]);
+  let row;
+  try {
+    [row] = await upsertRows("lesson_student_records", [toLessonRecordRow(stableRecord)]);
+  } catch (error) {
+    const message = String(error?.message ?? "");
+    const isPendingMigration =
+      message.includes("lesson_material") ||
+      message.includes("lesson_content") ||
+      message.includes("assignment_status") ||
+      message.includes("preparation_memo") ||
+      message.includes("prep_student_notice");
+    if (!isPendingMigration) throw error;
+    [row] = await upsertRows("lesson_student_records", [toLessonRecordRow(stableRecord, { includeExtendedFields: false })]);
+  }
   return { source: databaseSource, record: fromLessonRecordRow(row) };
 }
 

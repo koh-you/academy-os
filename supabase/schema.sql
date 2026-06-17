@@ -58,6 +58,15 @@ create table if not exists lesson_student_records (
   previous_homework text,
   next_homework text,
   incomplete_homework text,
+  lesson_material text,
+  lesson_content text,
+  assignment_status text,
+  preparation_memo text,
+  prep_student_notice text,
+  prep_parent_visible boolean not null default false,
+  prep_parent_notice text,
+  prep_student_ai_status text,
+  prep_parent_ai_status text,
   progress_note text,
   teacher_comment text,
   student_comment text,
@@ -186,6 +195,43 @@ create table if not exists notification_logs (
   created_at timestamptz not null default now()
 );
 
+create table if not exists resource_materials (
+  resource_material_id text primary key,
+  title text not null,
+  material_type text not null default 'file' check (material_type in ('file', 'link', 'text')),
+  subject text,
+  description text,
+  url text,
+  content text,
+  student_ids text[] not null default '{}',
+  class_template_ids text[] not null default '{}',
+  visibility text not null default 'teacher' check (visibility in ('teacher', 'student', 'parent', 'student_parent')),
+  notify_by_alimtalk boolean not null default false,
+  created_by text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists notification_jobs (
+  notification_job_id text primary key,
+  notification_type text not null check (notification_type in ('attendance', 'parent_comment', 'student_comment', 'schedule_reminder', 'slack_daily_summary')),
+  student_id text references students(student_id) on delete set null,
+  lesson_id text references lessons(lesson_id) on delete set null,
+  lesson_student_record_id text references lesson_student_records(lesson_student_record_id) on delete set null,
+  target text not null check (target in ('student', 'parent', 'teacher', 'slack')),
+  recipient text,
+  scheduled_at timestamptz,
+  payload jsonb not null default '{}'::jsonb,
+  preview_body text,
+  status text not null default 'draft' check (status in ('draft', 'scheduled', 'sent', 'failed', 'canceled')),
+  provider text,
+  provider_message_id text,
+  result jsonb,
+  error text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create index if not exists idx_lessons_date on lessons(lesson_date);
 create index if not exists idx_lesson_records_lesson on lesson_student_records(lesson_id);
 create index if not exists idx_homeworks_student on homeworks(student_id);
@@ -193,4 +239,6 @@ create index if not exists idx_makeup_tasks_student_status on makeup_tasks(stude
 create index if not exists idx_wrong_problem_student on wrong_problem_statuses(student_id);
 create index if not exists idx_exam_prep_school_grade on exam_prep_rows(school_name, grade);
 create index if not exists idx_school_events_school_date on school_events(school_name, start_date);
-
+create index if not exists idx_resource_materials_visibility on resource_materials(visibility);
+create index if not exists idx_notification_jobs_status_schedule on notification_jobs(status, scheduled_at);
+create index if not exists idx_notification_jobs_student on notification_jobs(student_id);
