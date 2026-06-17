@@ -183,8 +183,8 @@ function createDefaultExamAnalysis(examPrepRow = {}) {
     examDate: "2026-06-12",
     sourceFileUrl: "",
     rawExamText: "",
-    aiProvider: "mock",
-    aiModel: "local-mock",
+    aiProvider: "auto",
+    aiModel: "server-default",
     aiStatus: "대기",
     aiLastRunAt: "",
     aiError: "",
@@ -2595,8 +2595,8 @@ function LessonJournalDetail({
 }) {
   const [bulkPreviousHomework, setBulkPreviousHomework] = useState("");
   const [bulkNextHomework, setBulkNextHomework] = useState("");
-  const [commentAiProvider, setCommentAiProvider] = useState("mock");
-  const [commentAiModel, setCommentAiModel] = useState("local-mock");
+  const [commentAiProvider, setCommentAiProvider] = useState("auto");
+  const [commentAiModel, setCommentAiModel] = useState("server-default");
   const [commentModal, setCommentModal] = useState(null);
   const [studentPreviewId, setStudentPreviewId] = useState("");
   const saveSummary = students.reduce(
@@ -2610,7 +2610,7 @@ function LessonJournalDetail({
 
   function changeCommentProvider(provider) {
     setCommentAiProvider(provider);
-    setCommentAiModel(aiProviderModels[provider]?.[0] ?? "local-mock");
+    setCommentAiModel(aiProviderModels[provider]?.[0] ?? "server-default");
   }
 
   return (
@@ -2630,14 +2630,14 @@ function LessonJournalDetail({
         <label>
           전체 지난 숙제
           <div className="inlineInputAction">
-            <input value={bulkPreviousHomework} onChange={(event) => setBulkPreviousHomework(event.target.value)} placeholder="예: GRIP 928-957" />
+            <input value={bulkPreviousHomework} onChange={(event) => setBulkPreviousHomework(event.target.value)} placeholder="전체 지난 과제 입력" />
             <button className="softButton" onClick={() => onApplyBulkHomework(lesson, "previous", bulkPreviousHomework)} type="button">전체 적용</button>
           </div>
         </label>
         <label>
           전체 다음 숙제
           <div className="inlineInputAction">
-            <input value={bulkNextHomework} onChange={(event) => setBulkNextHomework(event.target.value)} placeholder="예: 쎈 643-647" />
+            <input value={bulkNextHomework} onChange={(event) => setBulkNextHomework(event.target.value)} placeholder="전체 다음 과제 입력" />
             <button className="softButton" onClick={() => onApplyBulkHomework(lesson, "next", bulkNextHomework)} type="button">전체 적용</button>
           </div>
         </label>
@@ -2649,13 +2649,14 @@ function LessonJournalDetail({
           <span className="muted">학부모 알림톡과 학생 알림톡 문구를 AI로 다듬습니다.</span>
         </div>
         <select value={commentAiProvider} onChange={(event) => changeCommentProvider(event.target.value)}>
-          <option value="mock">모의분석</option>
+          <option value="auto">자동 선택</option>
           <option value="openai">OpenAI</option>
           <option value="anthropic">Claude</option>
+          <option value="mock">테스트 모드</option>
         </select>
         <select value={commentAiModel} onChange={(event) => setCommentAiModel(event.target.value)}>
           {(aiProviderModels[commentAiProvider] ?? aiProviderModels.mock).map((model) => (
-            <option key={model} value={model}>{model}</option>
+            <option key={model} value={model}>{getAiModelLabel(model)}</option>
           ))}
         </select>
       </section>
@@ -3871,8 +3872,8 @@ function ExamReviewComposerModal({ onClose, onUpdateRow, row }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          aiProvider: "mock",
-          aiModel: "local-mock",
+          aiProvider: "auto",
+          aiModel: "server-default",
           audience: "teacher",
           grade: row.grade,
           homeworkStatus: "시험 후 총평",
@@ -3957,8 +3958,15 @@ function ExamReviewComposerModal({ onClose, onUpdateRow, row }) {
 const aiProviderModels = {
   anthropic: ["claude-sonnet-4-5", "claude-3-5-sonnet-latest", "claude-3-5-haiku-latest"],
   mock: ["local-mock"],
+  auto: ["server-default"],
   openai: ["gpt-4.1-mini", "gpt-4.1", "gpt-4o-mini"]
 };
+
+function getAiModelLabel(model) {
+  if (model === "server-default") return "서버 기본값";
+  if (model === "local-mock") return "테스트 응답";
+  return model;
+}
 
 function ExamAnalysisCenter({ analyses, examPrepRows, onAddAnalysis, onRunAnalysis, onUpdateAnalysis }) {
   const [selectedAnalysisId, setSelectedAnalysisId] = useState(analyses[0]?.examAnalysisId ?? "");
@@ -3978,7 +3986,7 @@ function ExamAnalysisCenter({ analyses, examPrepRows, onAddAnalysis, onRunAnalys
 
   function changeProvider(provider) {
     update("aiProvider", provider);
-    update("aiModel", aiProviderModels[provider]?.[0] ?? "local-mock");
+    update("aiModel", aiProviderModels[provider]?.[0] ?? "server-default");
   }
 
   return (
@@ -4074,17 +4082,18 @@ function ExamAnalysisCenter({ analyses, examPrepRows, onAddAnalysis, onRunAnalys
                 </label>
                 <label>
                   AI API
-                  <select value={selectedAnalysis.aiProvider ?? "mock"} onChange={(event) => changeProvider(event.target.value)}>
-                    <option value="mock">모의분석</option>
+                  <select value={selectedAnalysis.aiProvider ?? "auto"} onChange={(event) => changeProvider(event.target.value)}>
+                    <option value="auto">자동 선택</option>
                     <option value="openai">OpenAI</option>
                     <option value="anthropic">Claude</option>
+                    <option value="mock">테스트 모드</option>
                   </select>
                 </label>
                 <label>
                   모델
-                  <select value={selectedAnalysis.aiModel ?? "local-mock"} onChange={(event) => update("aiModel", event.target.value)}>
-                    {(aiProviderModels[selectedAnalysis.aiProvider ?? "mock"] ?? aiProviderModels.mock).map((model) => (
-                      <option key={model} value={model}>{model}</option>
+                  <select value={selectedAnalysis.aiModel ?? "server-default"} onChange={(event) => update("aiModel", event.target.value)}>
+                    {(aiProviderModels[selectedAnalysis.aiProvider ?? "auto"] ?? aiProviderModels.auto).map((model) => (
+                      <option key={model} value={model}>{getAiModelLabel(model)}</option>
                     ))}
                   </select>
                 </label>

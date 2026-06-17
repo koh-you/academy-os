@@ -2,9 +2,9 @@ const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const ANTHROPIC_MESSAGES_URL = "https://api.anthropic.com/v1/messages";
 
 const fallbackModels = {
-  anthropic: "claude-sonnet-4-5",
+  anthropic: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5",
   mock: "local-mock",
-  openai: "gpt-4.1-mini"
+  openai: process.env.OPENAI_MODEL || "gpt-4.1-mini"
 };
 
 function envValue(name) {
@@ -21,7 +21,10 @@ function requiredEnv(name) {
 }
 
 export function getAiStatus() {
+  const defaultProviderName = defaultProvider();
   return {
+    defaultProvider: defaultProviderName,
+    defaultModel: fallbackModels[defaultProviderName] || fallbackModels.mock,
     providers: {
       anthropic: Boolean(envValue("ANTHROPIC_API_KEY")),
       mock: true,
@@ -31,9 +34,26 @@ export function getAiStatus() {
   };
 }
 
+function defaultProvider() {
+  const requested = (process.env.AI_DEFAULT_PROVIDER || "").toLowerCase();
+  if (["anthropic", "mock", "openai"].includes(requested)) return requested;
+  if (envValue("OPENAI_API_KEY")) return "openai";
+  if (envValue("ANTHROPIC_API_KEY")) return "anthropic";
+  return "mock";
+}
+
+function selectedProvider(payload) {
+  const provider = (payload.aiProvider || "auto").toLowerCase();
+  return provider === "auto" ? defaultProvider() : provider;
+}
+
 function selectedModel(payload) {
-  const provider = payload.aiProvider || "mock";
-  return payload.aiModel || fallbackModels[provider] || fallbackModels.mock;
+  const provider = selectedProvider(payload);
+  const requestedModel = payload.aiModel;
+  if (!requestedModel || requestedModel === "server-default") {
+    return fallbackModels[provider] || fallbackModels.mock;
+  }
+  return requestedModel;
 }
 
 function buildExamAnalysisPrompt(payload) {
@@ -184,7 +204,7 @@ async function runAnthropicText(prompt, model) {
 }
 
 export async function runExamAnalysis(payload) {
-  const provider = payload.aiProvider || "mock";
+  const provider = selectedProvider(payload);
   const model = selectedModel(payload);
 
   if (provider === "mock") {
@@ -203,7 +223,7 @@ export async function runExamAnalysis(payload) {
 }
 
 export async function polishLessonComment(payload) {
-  const provider = payload.aiProvider || "mock";
+  const provider = selectedProvider(payload);
   const model = selectedModel(payload);
 
   if (provider === "mock") {
