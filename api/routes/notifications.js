@@ -42,6 +42,8 @@ function isDryRun() {
 function attendanceLabel(status) {
   return {
     absent: "결석",
+    checkin: "등원",
+    checkout: "하원",
     excused: "인정결석",
     late: "지각",
     pending: "대기",
@@ -80,6 +82,19 @@ function createServiceConfig(templateEnvName) {
 
 function configState(name) {
   return Boolean(envValue(name));
+}
+
+function normalizeList(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item).trim()).filter(Boolean);
+  }
+
+  if (!value) return [];
+
+  return String(value)
+    .split(/\r?\n|,\s*/g)
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
 export function getNotificationStatus() {
@@ -150,6 +165,16 @@ async function sendKakaoAlimtalk({ payload, recipientPhone, templateEnvName, var
 }
 
 export async function sendAttendanceAlimtalk(payload) {
+  const attendanceBody =
+    payload.attendanceBody ??
+    buildAttendanceBody({
+      attendanceStatus: payload.attendanceStatus,
+      checkedAt: payload.checkedAt,
+      lessonName: payload.lessonName,
+      lateMinutes: payload.lateMinutes,
+      reason: payload.reason
+    });
+
   return sendKakaoAlimtalk({
     payload,
     recipientPhone: payload.parentPhone,
@@ -157,13 +182,27 @@ export async function sendAttendanceAlimtalk(payload) {
     variables: {
       "#{학원명}": String(payload.academyName ?? "koh_you_math"),
       "#{학생명}": String(payload.studentName ?? ""),
-      "#{상태}": attendanceLabel(payload.attendanceStatus),
-      "#{시간}": String(payload.checkedAt ?? ""),
-      "#{수업명}": String(payload.lessonName ?? ""),
-      "#{지각분}": String(payload.lateMinutes ?? "0"),
-      "#{사유}": String(payload.reason ?? "")
+      "#{출결본문}": attendanceBody
     }
   });
+}
+
+function buildAttendanceBody({ attendanceStatus, checkedAt, lessonName, lateMinutes, reason }) {
+  const status = attendanceLabel(attendanceStatus);
+  const lines = [
+    `${checkedAt ? `${checkedAt}에 ` : ""}${status} 처리되었습니다.`,
+    lessonName ? `수업: ${lessonName}` : ""
+  ];
+
+  if (status === "지각" && lateMinutes) {
+    lines.push(`지각: ${lateMinutes}분`);
+  }
+
+  if ((status === "지각" || status === "결석" || status === "인정결석") && reason) {
+    lines.push(`사유: ${reason}`);
+  }
+
+  return lines.filter(Boolean).join("\n");
 }
 
 export async function sendDailyReportAlimtalk(payload) {
@@ -171,7 +210,7 @@ export async function sendDailyReportAlimtalk(payload) {
     payload.reportBody ??
     buildDailyReportBody({
       attendanceStatus: payload.attendanceStatus,
-      incompleteHomework: payload.incompleteHomework,
+      incompleteHomeworks: payload.incompleteHomeworks ?? payload.incompleteHomework,
       nextHomework: payload.nextHomework,
       previousHomework: payload.previousHomework,
       retestSchedule: payload.retestSchedule,
@@ -194,18 +233,19 @@ export async function sendDailyReportAlimtalk(payload) {
 
 function buildDailyReportBody({
   attendanceStatus,
-  incompleteHomework,
+  incompleteHomeworks,
   nextHomework,
   previousHomework,
   retestSchedule,
   supplementSchedule,
   teacherComment
 }) {
+  const incompleteList = normalizeList(incompleteHomeworks);
   const lines = [
     `출결: ${attendanceLabel(attendanceStatus)}`,
     previousHomework ? `지난 숙제: ${previousHomework}` : "",
     nextHomework ? `다음 숙제: ${nextHomework}` : "",
-    incompleteHomework ? `미완료: ${incompleteHomework}` : "",
+    incompleteList.length ? `미완료 숙제:\n${incompleteList.map((item) => `- ${item}`).join("\n")}` : "",
     retestSchedule ? `재시험 일정: ${retestSchedule}` : "",
     supplementSchedule ? `보충 일정: ${supplementSchedule}` : "",
     teacherComment ? `코멘트: ${teacherComment}` : ""
