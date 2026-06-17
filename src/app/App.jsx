@@ -1279,6 +1279,8 @@ export function App() {
             students={students}
             onStudentCreateHomework={handleStudentCreateHomework}
             onStudentCheckHomework={handleStudentCheckHomework}
+            onStudentDeleteHomework={handleStudentDeleteHomework}
+            onStudentUpdateHomework={handleStudentUpdateHomework}
           />
         ) : null}
 
@@ -1951,6 +1953,26 @@ export function App() {
     };
     setHomeworks((current) => [nextHomework, ...current]);
     postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
+  }
+
+  function handleStudentUpdateHomework(homeworkId, updates) {
+    setHomeworks((current) =>
+      current.map((homework) => {
+        if (homework.homeworkId !== homeworkId) return homework;
+        const nextHomework = {
+          ...homework,
+          ...updates,
+          totalProblems: Number(updates.totalProblems || homework.totalProblems || 0),
+          updatedAt: new Date().toISOString()
+        };
+        postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
+        return nextHomework;
+      })
+    );
+  }
+
+  function handleStudentDeleteHomework(homeworkId) {
+    setHomeworks((current) => current.filter((homework) => homework.homeworkId !== homeworkId));
   }
 
   function handleTeacherVerifyHomework(homeworkId, teacherStatus) {
@@ -5379,12 +5401,28 @@ function MetricCard({ hint, icon, label, tone = "default", value }) {
   );
 }
 
-function StudentPortalV2({ homeworks, lessons = [], records = [], reportSnapshots, scoreRecords = [], students, sessionStudentId = "", previewMode = false, onLogout, onStudentCheckHomework, onStudentCreateHomework }) {
+function StudentPortalV2({
+  homeworks,
+  lessons = [],
+  records = [],
+  reportSnapshots,
+  scoreRecords = [],
+  students,
+  sessionStudentId = "",
+  previewMode = false,
+  onLogout,
+  onStudentCheckHomework,
+  onStudentCreateHomework,
+  onStudentDeleteHomework,
+  onStudentUpdateHomework
+}) {
   const [selectedStudentId, setSelectedStudentId] = useState(
     sessionStudentId || students.find((student) => student.name === "TestS12")?.studentId || students[0]?.studentId || ""
   );
   const [activeTab, setActiveTab] = useState("today");
   const [myPageTab, setMyPageTab] = useState("stats");
+  const [editingHomeworkId, setEditingHomeworkId] = useState("");
+  const [deleteHomeworkTarget, setDeleteHomeworkTarget] = useState(null);
   const [homeworkForm, setHomeworkForm] = useState({
     type: "current",
     title: "",
@@ -5424,7 +5462,7 @@ function StudentPortalV2({ homeworks, lessons = [], records = [], reportSnapshot
     event.preventDefault();
     if (!selectedStudent || !homeworkForm.title.trim()) return;
 
-    onStudentCreateHomework({
+    const homeworkValues = {
       studentId: selectedStudent.studentId,
       title: homeworkForm.title.trim(),
       subject: homeworkForm.subject,
@@ -5434,9 +5472,37 @@ function StudentPortalV2({ homeworks, lessons = [], records = [], reportSnapshot
       dueDate: homeworkForm.dueDate,
       maxDailyProblems: Number(homeworkForm.maxDailyProblems || 0),
       includeWeekend: homeworkForm.includeWeekend
-    });
+    };
+
+    if (editingHomeworkId) {
+      onStudentUpdateHomework(editingHomeworkId, homeworkValues);
+      setEditingHomeworkId("");
+    } else {
+      onStudentCreateHomework(homeworkValues);
+    }
     setHomeworkForm((current) => ({ ...current, title: "" }));
     setActiveTab("all");
+  }
+
+  function handleEditHomework(homework) {
+    setEditingHomeworkId(homework.homeworkId);
+    setHomeworkForm({
+      type: homework.homeworkType ?? "current",
+      title: homework.title ?? "",
+      subject: homework.subject || "공통수학1",
+      totalProblems: String(homework.totalProblems ?? "30"),
+      assignedDate: homework.assignedDate || today,
+      dueDate: homework.dueDate || today,
+      maxDailyProblems: String(homework.maxDailyProblems ?? ""),
+      includeWeekend: homework.includeWeekend ?? true
+    });
+    setActiveTab("register");
+  }
+
+  function handleDeleteHomework() {
+    if (!deleteHomeworkTarget) return;
+    onStudentDeleteHomework(deleteHomeworkTarget.homeworkId);
+    setDeleteHomeworkTarget(null);
   }
 
   return (
@@ -5498,14 +5564,25 @@ function StudentPortalV2({ homeworks, lessons = [], records = [], reportSnapshot
 
         {activeTab === "register" ? (
           <StudentRegisterTab
+            editingHomeworkId={editingHomeworkId}
             form={homeworkForm}
             latestTeacherHomework={latestTeacherHomework}
+            onCancelEdit={() => {
+              setEditingHomeworkId("");
+              setHomeworkForm((current) => ({ ...current, title: "" }));
+            }}
             onSubmit={submitHomeworkForm}
             onUpdate={updateHomeworkForm}
           />
         ) : null}
 
-        {activeTab === "all" ? <StudentAllHomeworkTab homeworks={studentHomeworks} /> : null}
+        {activeTab === "all" ? (
+          <StudentAllHomeworkTab
+            homeworks={studentHomeworks}
+            onDeleteHomework={setDeleteHomeworkTarget}
+            onEditHomework={handleEditHomework}
+          />
+        ) : null}
         {activeTab === "curriculum" ? <StudentEmptyTab message="아직 커리큘럼이 설정되지 않았습니다. 선생님께 문의하세요." /> : null}
         {activeTab === "evaluation" ? <StudentEvaluationTab /> : null}
         {activeTab === "mypage" ? (
@@ -5530,6 +5607,26 @@ function StudentPortalV2({ homeworks, lessons = [], records = [], reportSnapshot
           </article>
         ))}
       </section>
+      {deleteHomeworkTarget ? (
+        <Modal
+          className="homeworkDeleteModal"
+          onClose={() => setDeleteHomeworkTarget(null)}
+          subtitle="삭제하면 학생 화면의 숙제 목록에서 사라집니다."
+          title="숙제를 삭제할까요?"
+        >
+          <div className="deleteConfirmBody">
+            <div className="deleteConfirmStudent">
+              <strong>{deleteHomeworkTarget.title}</strong>
+              <span>{deleteHomeworkTarget.assignedDate} ~ {deleteHomeworkTarget.dueDate}</span>
+            </div>
+            <p className="dangerCopy">삭제 후에는 화면에서 바로 복구할 수 없습니다.</p>
+            <div className="deleteConfirmActions">
+              <button className="softButton" onClick={() => setDeleteHomeworkTarget(null)} type="button">취소</button>
+              <button className="dangerButton" onClick={handleDeleteHomework} type="button">삭제</button>
+            </div>
+          </div>
+        </Modal>
+      ) : null}
     </section>
   );
 }
@@ -5647,7 +5744,7 @@ function ParentPortal({ homeworks, reportSnapshots, sessionStudentId, students, 
   );
 }
 
-function StudentRegisterTab({ form, latestTeacherHomework, onSubmit, onUpdate }) {
+function StudentRegisterTab({ editingHomeworkId = "", form, latestTeacherHomework, onCancelEdit, onSubmit, onUpdate }) {
   const calendarDays = Array.from({ length: 30 }, (_, index) => index + 1);
   const startDay = Number(form.assignedDate?.split("-")[2] ?? 0);
   const endDay = Number(form.dueDate?.split("-")[2] ?? 0);
@@ -5766,12 +5863,17 @@ function StudentRegisterTab({ form, latestTeacherHomework, onSubmit, onUpdate })
         {form.maxDailyProblems ? <span>하루 최대 {form.maxDailyProblems}문제</span> : <span>하루 최대 제한 없음</span>}
       </div>
 
-      <button className="primaryButton full" type="submit">숙제 등록</button>
+      <div className="studentRegisterActions">
+        <button className="primaryButton full" type="submit">{editingHomeworkId ? "숙제 수정" : "숙제 등록"}</button>
+        {editingHomeworkId ? (
+          <button className="softButton" onClick={onCancelEdit} type="button">수정 취소</button>
+        ) : null}
+      </div>
     </form>
   );
 }
 
-function StudentAllHomeworkTab({ homeworks }) {
+function StudentAllHomeworkTab({ homeworks, onDeleteHomework, onEditHomework }) {
   const sortedHomeworks = [...homeworks].sort((a, b) => b.assignedDate.localeCompare(a.assignedDate));
 
   return (
@@ -5796,8 +5898,8 @@ function StudentAllHomeworkTab({ homeworks }) {
                 </span>
               </div>
               <div className="cardActions">
-                <button className="softButton" type="button">수정 준비</button>
-                <button className="dangerSoftButton" disabled type="button">삭제 잠금</button>
+                <button className="softButton" onClick={() => onEditHomework(homework)} type="button">수정</button>
+                <button className="dangerSoftButton" onClick={() => onDeleteHomework(homework)} type="button">삭제</button>
               </div>
             </div>
             <p>{homework.assignedDate} ~ {homework.dueDate} · 총 {homework.totalProblems ?? "-"}문제</p>

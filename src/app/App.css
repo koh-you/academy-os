@@ -4141,6 +4141,20 @@ textarea.profileEditInput {
   padding: 0 14px;
 }
 
+.studentRegisterActions {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.studentRegisterActions .primaryButton.full {
+  width: 100%;
+}
+
+.homeworkDeleteModal {
+  max-width: 520px;
+}
+
 .orangeButton {
   background: #f59e0b;
   border: 1px solid #f59e0b;
