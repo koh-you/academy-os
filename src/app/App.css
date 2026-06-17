@@ -4141,10 +4141,43 @@ textarea.profileEditInput {
   padding: 0 14px;
 }
 
+.studentHomeworkCard.editing {
+  gap: 14px;
+}
+
+.inlineHomeworkEditor {
+  border-top: 1px solid #dbe6f7;
+  display: grid;
+  gap: 14px;
+  padding-top: 14px;
+}
+
+.inlineHomeworkEditor label {
+  color: #17213a;
+  display: grid;
+  font-weight: 800;
+  gap: 8px;
+}
+
+.inlineHomeworkEditor input,
+.inlineHomeworkEditor select {
+  background: #ffffff;
+  border: 1px solid #cbd8ee;
+  border-radius: 8px;
+  color: #0f172a;
+  font: inherit;
+  min-height: 48px;
+  padding: 0 14px;
+}
+
+.primaryButton.compact {
+  min-height: 38px;
+  padding: 0 16px;
+}
+
 .studentRegisterActions {
   display: grid;
   gap: 10px;
-  grid-template-columns: minmax(0, 1fr) auto;
 }
 
 .studentRegisterActions .primaryButton.full {

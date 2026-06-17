@@ -5421,7 +5421,6 @@ function StudentPortalV2({
   );
   const [activeTab, setActiveTab] = useState("today");
   const [myPageTab, setMyPageTab] = useState("stats");
-  const [editingHomeworkId, setEditingHomeworkId] = useState("");
   const [deleteHomeworkTarget, setDeleteHomeworkTarget] = useState(null);
   const [homeworkForm, setHomeworkForm] = useState({
     type: "current",
@@ -5474,29 +5473,9 @@ function StudentPortalV2({
       includeWeekend: homeworkForm.includeWeekend
     };
 
-    if (editingHomeworkId) {
-      onStudentUpdateHomework(editingHomeworkId, homeworkValues);
-      setEditingHomeworkId("");
-    } else {
-      onStudentCreateHomework(homeworkValues);
-    }
+    onStudentCreateHomework(homeworkValues);
     setHomeworkForm((current) => ({ ...current, title: "" }));
     setActiveTab("all");
-  }
-
-  function handleEditHomework(homework) {
-    setEditingHomeworkId(homework.homeworkId);
-    setHomeworkForm({
-      type: homework.homeworkType ?? "current",
-      title: homework.title ?? "",
-      subject: homework.subject || "공통수학1",
-      totalProblems: String(homework.totalProblems ?? "30"),
-      assignedDate: homework.assignedDate || today,
-      dueDate: homework.dueDate || today,
-      maxDailyProblems: String(homework.maxDailyProblems ?? ""),
-      includeWeekend: homework.includeWeekend ?? true
-    });
-    setActiveTab("register");
   }
 
   function handleDeleteHomework() {
@@ -5564,13 +5543,8 @@ function StudentPortalV2({
 
         {activeTab === "register" ? (
           <StudentRegisterTab
-            editingHomeworkId={editingHomeworkId}
             form={homeworkForm}
             latestTeacherHomework={latestTeacherHomework}
-            onCancelEdit={() => {
-              setEditingHomeworkId("");
-              setHomeworkForm((current) => ({ ...current, title: "" }));
-            }}
             onSubmit={submitHomeworkForm}
             onUpdate={updateHomeworkForm}
           />
@@ -5580,7 +5554,7 @@ function StudentPortalV2({
           <StudentAllHomeworkTab
             homeworks={studentHomeworks}
             onDeleteHomework={setDeleteHomeworkTarget}
-            onEditHomework={handleEditHomework}
+            onUpdateHomework={onStudentUpdateHomework}
           />
         ) : null}
         {activeTab === "curriculum" ? <StudentEmptyTab message="아직 커리큘럼이 설정되지 않았습니다. 선생님께 문의하세요." /> : null}
@@ -5744,7 +5718,7 @@ function ParentPortal({ homeworks, reportSnapshots, sessionStudentId, students, 
   );
 }
 
-function StudentRegisterTab({ editingHomeworkId = "", form, latestTeacherHomework, onCancelEdit, onSubmit, onUpdate }) {
+function StudentRegisterTab({ form, latestTeacherHomework, onSubmit, onUpdate }) {
   const calendarDays = Array.from({ length: 30 }, (_, index) => index + 1);
   const startDay = Number(form.assignedDate?.split("-")[2] ?? 0);
   const endDay = Number(form.dueDate?.split("-")[2] ?? 0);
@@ -5864,17 +5838,52 @@ function StudentRegisterTab({ editingHomeworkId = "", form, latestTeacherHomewor
       </div>
 
       <div className="studentRegisterActions">
-        <button className="primaryButton full" type="submit">{editingHomeworkId ? "숙제 수정" : "숙제 등록"}</button>
-        {editingHomeworkId ? (
-          <button className="softButton" onClick={onCancelEdit} type="button">수정 취소</button>
-        ) : null}
+        <button className="primaryButton full" type="submit">숙제 등록</button>
       </div>
     </form>
   );
 }
 
-function StudentAllHomeworkTab({ homeworks, onDeleteHomework, onEditHomework }) {
+function StudentAllHomeworkTab({ homeworks, onDeleteHomework, onUpdateHomework }) {
+  const [editingHomeworkId, setEditingHomeworkId] = useState("");
+  const [editForm, setEditForm] = useState(null);
   const sortedHomeworks = [...homeworks].sort((a, b) => b.assignedDate.localeCompare(a.assignedDate));
+
+  function startEdit(homework) {
+    setEditingHomeworkId(homework.homeworkId);
+    setEditForm({
+      title: homework.title ?? "",
+      subject: homework.subject || "공통수학1",
+      totalProblems: String(homework.totalProblems ?? ""),
+      assignedDate: homework.assignedDate || today,
+      dueDate: homework.dueDate || today,
+      maxDailyProblems: String(homework.maxDailyProblems ?? ""),
+      includeWeekend: homework.includeWeekend ?? true
+    });
+  }
+
+  function updateEditForm(field, value) {
+    setEditForm((current) => ({ ...(current ?? {}), [field]: value }));
+  }
+
+  function cancelEdit() {
+    setEditingHomeworkId("");
+    setEditForm(null);
+  }
+
+  function saveEdit(homework) {
+    if (!editForm?.title?.trim()) return;
+    onUpdateHomework(homework.homeworkId, {
+      title: editForm.title.trim(),
+      subject: editForm.subject,
+      totalProblems: Number(editForm.totalProblems || 0),
+      assignedDate: editForm.assignedDate,
+      dueDate: editForm.dueDate,
+      maxDailyProblems: Number(editForm.maxDailyProblems || 0),
+      includeWeekend: editForm.includeWeekend
+    });
+    cancelEdit();
+  }
 
   return (
     <div className="studentAllPanel">
@@ -5887,8 +5896,9 @@ function StudentAllHomeworkTab({ homeworks, onDeleteHomework, onEditHomework }) 
         const completed = homework.teacherStatus === "verified" ? 1 : 0;
         const totalDays = Math.max(1, isHomeworkOverdue(homework) ? 5 : 2);
         const progress = Math.round((completed / totalDays) * 100);
+        const isEditing = editingHomeworkId === homework.homeworkId;
         return (
-          <article className="studentHomeworkCard" key={homework.homeworkId}>
+          <article className={isEditing ? "studentHomeworkCard editing" : "studentHomeworkCard"} key={homework.homeworkId}>
             <div className="homeworkCardTop">
               <div>
                 <strong>{homework.title}</strong>
@@ -5898,17 +5908,70 @@ function StudentAllHomeworkTab({ homeworks, onDeleteHomework, onEditHomework }) 
                 </span>
               </div>
               <div className="cardActions">
-                <button className="softButton" onClick={() => onEditHomework(homework)} type="button">수정</button>
-                <button className="dangerSoftButton" onClick={() => onDeleteHomework(homework)} type="button">삭제</button>
+                {isEditing ? (
+                  <>
+                    <button className="primaryButton compact" onClick={() => saveEdit(homework)} type="button">저장</button>
+                    <button className="softButton" onClick={cancelEdit} type="button">취소</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="softButton" onClick={() => startEdit(homework)} type="button">수정</button>
+                    <button className="dangerSoftButton" onClick={() => onDeleteHomework(homework)} type="button">삭제</button>
+                  </>
+                )}
               </div>
             </div>
             <p>{homework.assignedDate} ~ {homework.dueDate} · 총 {homework.totalProblems ?? "-"}문제</p>
             <div className="progressRail"><span style={{ width: `${progress}%` }} /></div>
             <small>{completed}/{totalDays}일 완료 ({progress}%)</small>
-            <div className={`dateStrip ${isHomeworkOverdue(homework) ? "danger" : "safe"}`}>
-              <span>{homework.dueDate}</span>
-              <b>{homework.title}</b>
-            </div>
+            {isEditing ? (
+              <div className="inlineHomeworkEditor">
+                <label>
+                  숙제명
+                  <input value={editForm?.title ?? ""} onChange={(event) => updateEditForm("title", event.target.value)} />
+                </label>
+                <div className="fieldGrid two">
+                  <label>
+                    과목
+                    <select value={editForm?.subject ?? "공통수학1"} onChange={(event) => updateEditForm("subject", event.target.value)}>
+                      <option>공통수학1</option>
+                      <option>공통수학2</option>
+                      <option>대수</option>
+                      <option>미적분</option>
+                    </select>
+                  </label>
+                  <label>
+                    총 문제 수
+                    <input inputMode="numeric" value={editForm?.totalProblems ?? ""} onChange={(event) => updateEditForm("totalProblems", event.target.value)} />
+                  </label>
+                  <label>
+                    시작일
+                    <input type="date" value={editForm?.assignedDate ?? today} onChange={(event) => updateEditForm("assignedDate", event.target.value)} />
+                  </label>
+                  <label>
+                    마감일
+                    <input type="date" value={editForm?.dueDate ?? today} onChange={(event) => updateEditForm("dueDate", event.target.value)} />
+                  </label>
+                  <label>
+                    하루 최대 문제 수
+                    <input inputMode="numeric" placeholder="선택" value={editForm?.maxDailyProblems ?? ""} onChange={(event) => updateEditForm("maxDailyProblems", event.target.value)} />
+                  </label>
+                  <label className="weekendToggle">
+                    <input
+                      checked={editForm?.includeWeekend ?? true}
+                      onChange={(event) => updateEditForm("includeWeekend", event.target.checked)}
+                      type="checkbox"
+                    />
+                    <strong>주말 포함</strong>
+                  </label>
+                </div>
+              </div>
+            ) : (
+              <div className={`dateStrip ${isHomeworkOverdue(homework) ? "danger" : "safe"}`}>
+                <span>{homework.dueDate}</span>
+                <b>{homework.title}</b>
+              </div>
+            )}
           </article>
         );
       })}
