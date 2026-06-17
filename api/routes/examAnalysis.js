@@ -86,27 +86,33 @@ function buildExamAnalysisPrompt(payload) {
 
 function buildCommentPrompt(payload) {
   const audienceLabel = payload.audience === "student" ? "학생" : "학부모";
+  const audienceRule =
+    payload.audience === "student"
+      ? "학생이 직접 읽는 짧고 분명한 안내문으로 작성한다. 존댓말을 쓰되 과하게 딱딱하지 않게 한다."
+      : "학부모님께 보내는 정중한 알림톡 문장으로 작성한다. 과장하지 않고 구체적인 관찰과 다음 행동을 담는다.";
+
   return [
     "역할: koh_you_math 고태영T의 수업 코멘트 편집자",
-    `대상: ${audienceLabel}`,
+    "대상: " + audienceLabel,
     "목표: 강사가 대강 적은 메모를 실제 발송 가능한 자연스러운 문장으로 다듬는다.",
-    "원칙:",
-    "- 과장하지 않는다.",
-    "- 없는 사실을 만들지 않는다.",
-    "- 학부모용은 공손하고 구체적으로 쓴다.",
-    "- 학생용은 짧고 행동이 분명하게 보이게 쓴다.",
-    "- 발송 전 강사가 수정할 수 있도록 완성문만 반환한다.",
+    "작성 원칙:",
+    "- 입력된 사실만 사용하고 없는 내용을 만들지 않는다.",
+    "- 학생의 부족한 점은 단정하거나 비난하지 않고, 다음 행동 중심으로 쓴다.",
+    "- 알림톡에 바로 붙여 넣을 수 있게 최종 문장만 반환한다.",
+    "- 제목, 마크다운, 구분선, 설명 문구는 쓰지 않는다.",
+    "- 2~5문장 안에서 간결하게 작성한다.",
+    "- " + audienceRule,
     "",
     "[수업 정보]",
-    `학생: ${payload.studentName ?? ""}`,
-    `학교/학년: ${payload.schoolName ?? ""} ${payload.grade ?? ""}`,
-    `수업: ${payload.lessonName ?? ""}`,
-    `날짜: ${payload.lessonDate ?? ""}`,
-    `강의 교재: ${payload.lessonMaterial ?? ""}`,
-    `강의 내용: ${payload.lessonContent ?? ""}`,
-    `출결: ${payload.attendanceStatus ?? ""}`,
-    `숙제 상태: ${payload.homeworkStatus ?? ""}`,
-    `과제 상태 안내: ${payload.assignmentStatus ?? ""}`,
+    "학생: " + (payload.studentName ?? ""),
+    "학교/학년: " + (payload.schoolName ?? "") + " " + (payload.grade ?? ""),
+    "수업: " + (payload.lessonName ?? ""),
+    "날짜: " + (payload.lessonDate ?? ""),
+    "강의 교재: " + (payload.lessonMaterial ?? ""),
+    "강의 내용: " + (payload.lessonContent ?? ""),
+    "출결: " + (payload.attendanceStatus ?? ""),
+    "숙제 상태: " + (payload.homeworkStatus ?? ""),
+    "과제 상태 안내: " + (payload.assignmentStatus ?? ""),
     "",
     "[강사 원문]",
     payload.rawText || "원문 없음"
@@ -153,13 +159,13 @@ function createMockComment(payload) {
   const rawText = payload.rawText?.trim();
   if (payload.audience === "student") {
     return rawText
-      ? `${name}, 오늘 수업에서 확인한 부분은 다음 시간 전까지 다시 정리해 주세요. 특히 ${rawText} 부분을 우선 점검하면 좋겠습니다.`
-      : `${name}, 오늘 배운 내용을 짧게 복습하고 다음 숙제를 계획대로 진행해 주세요.`;
+      ? name + ", 오늘 확인한 내용은 다음 시간에 이어서 점검하겠습니다. " + rawText
+      : name + ", 오늘 배운 내용을 차분히 복습하고 다음 과제를 계획대로 진행해 주세요.";
   }
 
   return rawText
-    ? `${name} 학생은 오늘 수업에서 ${rawText} 부분을 중심으로 확인했습니다. 다음 수업 전까지 해당 내용을 다시 점검할 수 있도록 지도하겠습니다.`
-    : `${name} 학생은 오늘 수업에 참여했습니다. 숙제와 수업 내용을 이어서 확인하며 다음 수업에서 보완하겠습니다.`;
+    ? name + " 학생은 오늘 수업에서 " + rawText + " 부분을 중심으로 확인했습니다. 다음 수업까지 해당 내용을 다시 점검할 수 있도록 지도하겠습니다."
+    : name + " 학생은 오늘 수업에 참여했습니다. 과제와 수업 내용을 이어서 확인하며 다음 수업에서 보완하겠습니다.";
 }
 
 async function runOpenAiText(prompt, model) {
