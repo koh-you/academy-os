@@ -87,13 +87,17 @@ function getLessonContent(record) {
   return record?.lessonProgress?.trim() || record?.progress?.trim() || "";
 }
 
-function buildCommentPreviewLines({ audience, comment, record, student }) {
+function buildCommentPreviewLines({ audience, comment, nextHomework, previousHomework, record, student }) {
   const lessonMaterial = getLessonMaterial(record, student);
   const lessonContent = getLessonContent(record);
   const assignmentStatus = record?.assignmentStatus ?? record?.incompleteHomework ?? "";
+  const attendance = attendanceLabels[record?.attendanceStatus ?? "pending"] ?? "";
   const lines = [
+    attendance ? `출결: ${attendance}` : "",
     lessonMaterial ? `강의 교재: ${lessonMaterial}` : "",
     lessonContent ? `강의 내용: ${lessonContent}` : "",
+    previousHomework?.title ? `지난 과제: ${previousHomework.title}` : "",
+    nextHomework?.title ? `다음 과제: ${nextHomework.title}` : "",
     audience === "parent" && assignmentStatus ? `과제 상태: ${getAssignmentStatusParentMessage(assignmentStatus)}` : "",
     comment?.trim() ? `코멘트: ${comment.trim()}` : ""
   ];
@@ -1909,6 +1913,8 @@ export function App() {
       const lessonMaterial = getLessonMaterial(record, student);
       const lessonContent = getLessonContent(record);
       const assignmentStatus = record?.assignmentStatus ?? record?.incompleteHomework ?? "";
+      const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
+      const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
       const response = await fetch(apiUrl("/api/notifications/comment-alimtalk"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1916,13 +1922,16 @@ export function App() {
           academyName: academyBrandName,
           assignmentStatus,
           assignmentStatusMessage: getAssignmentStatusParentMessage(assignmentStatus),
+          attendanceStatus: record?.attendanceStatus ?? "pending",
           lessonDate: lesson.date,
           lessonContent,
           lessonId: lesson.lessonId,
           lessonMaterial,
           lessonName: lesson.className,
           message,
+          nextHomework: nextHomework?.title ?? "",
           parentPhone: student.parentPhone,
+          previousHomework: previousHomework?.title ?? "",
           studentId: student.studentId,
           studentName: student.name,
           studentPhone: student.studentPhone,
@@ -2725,7 +2734,7 @@ function LessonJournalDetail({
                 <div className="journalCommentCell">
                   <button
                     className={record.teacherComment ? "commentOpenButton filled" : "commentOpenButton"}
-                    onClick={() => setCommentModal({ audience: "parent", record, student })}
+                    onClick={() => setCommentModal({ audience: "parent", nextHomework, previousHomework, record, student })}
                     type="button"
                   >
                     학부모 알림톡
@@ -2735,7 +2744,7 @@ function LessonJournalDetail({
                 <div className="journalCommentCell">
                   <button
                     className={record.studentComment ? "commentOpenButton filled" : "commentOpenButton"}
-                    onClick={() => setCommentModal({ audience: "student", record, student })}
+                    onClick={() => setCommentModal({ audience: "student", nextHomework, previousHomework, record, student })}
                     type="button"
                   >
                     학생 알림톡
@@ -2770,6 +2779,8 @@ function LessonJournalDetail({
           onPolishComment={onPolishComment}
           onSendComment={onSendComment}
           record={records.find((item) => item.studentId === commentModal.student.studentId) ?? commentModal.record}
+          nextHomework={commentModal.nextHomework}
+          previousHomework={commentModal.previousHomework}
           student={commentModal.student}
         />
       ) : null}
@@ -2820,10 +2831,12 @@ function CommentComposerModal({
   aiProvider,
   audience,
   lesson,
+  nextHomework,
   onChangeRecord,
   onClose,
   onPolishComment,
   onSendComment,
+  previousHomework,
   record,
   student
 }) {
@@ -2839,6 +2852,8 @@ function CommentComposerModal({
   const previewLines = buildCommentPreviewLines({
     audience,
     comment,
+    nextHomework,
+    previousHomework,
     record,
     student
   });

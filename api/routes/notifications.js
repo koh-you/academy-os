@@ -72,9 +72,13 @@ function assignmentStatusText(value, fallback = "") {
 
 function buildLessonCommentBody(payload, audience) {
   const assignmentStatus = payload.assignmentStatusMessage || assignmentStatusText(payload.assignmentStatus);
+  const attendance = attendanceLabel(payload.attendanceStatus);
   const lines = [
+    attendance ? `출결: ${attendance}` : "",
     payload.lessonMaterial ? `강의 교재: ${payload.lessonMaterial}` : "",
     payload.lessonContent ? `강의 내용: ${payload.lessonContent}` : "",
+    payload.previousHomework ? `지난 과제: ${payload.previousHomework}` : "",
+    payload.nextHomework ? `다음 과제: ${payload.nextHomework}` : "",
     audience === "parent" && assignmentStatus ? `과제 상태: ${assignmentStatus}` : "",
     payload.message ? `코멘트: ${payload.message}` : ""
   ];
@@ -301,8 +305,8 @@ function buildDailyReportBody({
     `출결: ${attendanceLabel(attendanceStatus)}`,
     lessonMaterial ? `강의 교재: ${lessonMaterial}` : "",
     lessonContent ? `강의 내용: ${lessonContent}` : "",
-    previousHomework ? `지난 숙제: ${previousHomework}` : "",
-    nextHomework ? `다음 숙제: ${nextHomework}` : "",
+    previousHomework ? `지난 과제: ${previousHomework}` : "",
+    nextHomework ? `다음 과제: ${nextHomework}` : "",
     assignmentStatusMessage ? `과제 상태: ${assignmentStatusMessage}` : "",
     incompleteList.length ? `미완료 숙제:\n${incompleteList.map((item) => `- ${item}`).join("\n")}` : "",
     retestSchedule ? `[중요] 재시험 일정: ${retestSchedule}` : "",
