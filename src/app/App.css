@@ -5036,7 +5036,14 @@ textarea.profileEditInput {
 }
 
 .attendanceKioskPage.standalone {
+  background: #eef4ff;
   min-height: 100vh;
+  padding: 24px;
+  width: 100vw;
+}
+
+.attendanceKioskPage.standalone .attendanceKioskCard {
+  justify-self: center;
   width: min(760px, 94vw);
 }
 

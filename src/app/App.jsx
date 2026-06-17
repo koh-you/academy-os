@@ -128,6 +128,11 @@ function apiUrl(path) {
   return `${apiBaseUrl}${path}`;
 }
 
+function isAttendanceOnlyRoute() {
+  if (typeof window === "undefined") return false;
+  return window.location.pathname === "/attendance" || window.location.hash === "#attendance";
+}
+
 async function postJson(path, body) {
   const response = await fetch(apiUrl(path), {
     method: "POST",
@@ -725,6 +730,7 @@ export function App() {
     ? records.filter((record) => record.lessonId === reportLesson.lessonId)
     : [];
   const pendingDeleteLesson = lessons.find((lesson) => lesson.lessonId === lessonDeleteModalId) ?? null;
+  const attendanceOnlyMode = isAttendanceOnlyRoute();
 
   function handleLogin(role, loginId, password) {
     if (role === "teacher") {
@@ -737,11 +743,20 @@ export function App() {
     }
 
     const matchedStudent =
-      role === "student" && loginId === "student" && password === "1234"
+      students.find((student) => {
+        if (role === "student") {
+          return student.loginId === loginId && student.pin === password;
+        }
+        if (role === "parent") {
+          return createParentLoginId(student) === loginId && student.pin === password;
+        }
+        return false;
+      }) ??
+      (role === "student" && loginId === "student" && password === "1234"
         ? getDemoStudent(students)
         : role === "parent" && loginId === "parent" && password === "1234"
           ? getDemoStudent(students)
-          : null;
+          : null);
 
     if (!matchedStudent) {
       return { ok: false, message: role === "student" ? "학생 아이디 또는 비밀번호가 맞지 않습니다." : "학부모 아이디 또는 비밀번호가 맞지 않습니다." };
@@ -845,6 +860,18 @@ export function App() {
       mode: isCheckOut ? "checkOut" : "checkIn",
       checkedTime: koreaTime
     };
+  }
+
+  if (attendanceOnlyMode) {
+    return (
+      <AttendanceKiosk
+        isStandalone
+        lessons={lessons}
+        records={records}
+        students={students}
+        onAttendanceCheck={handleAttendancePinCheck}
+      />
+    );
   }
 
   if (!session) {
@@ -2296,7 +2323,6 @@ function RoleLoginScreen({ students, onAttendanceCheck, onLogin }) {
   const [password, setPassword] = useState("1234");
   const [error, setError] = useState("");
   const [showAttendanceKiosk, setShowAttendanceKiosk] = useState(false);
-  const demoStudent = getDemoStudent(students);
 
   const roleLabels = {
     student: "학생",
@@ -2344,8 +2370,8 @@ function RoleLoginScreen({ students, onAttendanceCheck, onLogin }) {
             ))}
           </div>
           <p className="muted">
-            {role === "student" ? `${demoStudent?.name ?? "학생"} 학생 화면으로 입장합니다.` : null}
-            {role === "parent" ? `${demoStudent?.name ?? "학생"} 학부모 열람 화면으로 입장합니다.` : null}
+            {role === "student" ? "학생 본인 계정으로 입장합니다." : null}
+            {role === "parent" ? "학부모 열람 계정으로 입장합니다." : null}
             {role === "teacher" ? "강사 운영 화면으로 입장합니다." : null}
           </p>
           <input value={loginId} onChange={(event) => setLoginId(event.target.value)} placeholder="아이디" />
@@ -2360,11 +2386,6 @@ function RoleLoginScreen({ students, onAttendanceCheck, onLogin }) {
           <button className="softButton full" onClick={() => setShowAttendanceKiosk(true)} type="button">
             출결 체크
           </button>
-          <div className="loginHint">
-            <span>학생: student / 1234</span>
-            <span>학부모: parent / 1234</span>
-            <span>선생님: teacher / 1234</span>
-          </div>
         </form>
       )}
     </main>
