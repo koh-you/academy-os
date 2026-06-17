@@ -21,10 +21,10 @@ const TEMPLATE_ENV = {
 const assignmentStatusMessageMap = {
   complete_thorough: "과제를 성실하게 완료했습니다.",
   complete_easy: "오늘 과제는 학생에게 비교적 수월하게 진행되었습니다.",
-  partial_80: "과제를 대부분 수행했으며, 남은 부분은 이어서 확인하겠습니다.",
-  known_only: "아는 문항 위주로 풀이했으며, 어려웠던 문항은 추가 확인이 필요합니다.",
+  partial_80: "과제를 대부분 수행했으며, 남은 부분은 다음 수업에서 확인하겠습니다.",
+  known_only: "아는 문항 위주로 풀어왔고, 어려웠던 문항은 추가 확인이 필요합니다.",
   too_hard: "과제 난도가 다소 높아 보충 설명과 분량 조정이 필요합니다.",
-  answer_suspected: "풀이 과정을 한 번 더 확인할 필요가 있어 다음 수업에서 점검하겠습니다.",
+  answer_suspected: "풀이 과정 확인이 필요한 문항이 있어 다음 수업에서 점검하겠습니다.",
   not_done: "과제가 충분히 완료되지 않아 보충 관리가 필요합니다.",
   not_checked: "과제 확인이 아직 완료되지 않았습니다."
 };
