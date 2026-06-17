@@ -238,10 +238,14 @@ export function getNotificationStatus() {
 
 async function sendKakaoAlimtalk({ payload, recipientPhone, templateEnvName, variables }) {
   const recipient = resolveRecipient(recipientPhone);
+  const scheduledDate = payload.scheduledDate ? new Date(payload.scheduledDate) : null;
 
   if (!recipient.to) throw new Error("A recipient phone number is required.");
   if (process.env.ALIMTALK_ALLOW_REAL_PARENT_NUMBERS === "true" && !recipient.requestedTo) {
     throw new Error("A real recipient phone number is required in live-send mode.");
+  }
+  if (scheduledDate && Number.isNaN(scheduledDate.getTime())) {
+    throw new Error("scheduledDate must be a valid date string.");
   }
 
   if (isDryRun()) {
@@ -251,6 +255,7 @@ async function sendKakaoAlimtalk({ payload, recipientPhone, templateEnvName, var
       requestedTo: recipient.requestedTo,
       sentTo: recipient.to,
       isTestRedirected: recipient.isTestRedirected,
+      scheduledDate: scheduledDate ? scheduledDate.toISOString() : "",
       templateEnvName,
       variables
     };
@@ -258,7 +263,7 @@ async function sendKakaoAlimtalk({ payload, recipientPhone, templateEnvName, var
 
   const config = createServiceConfig(templateEnvName);
   const service = new SolapiMessageService(config.apiKey, config.apiSecret);
-  const response = await service.send({
+  const message = {
     to: recipient.to,
     from: config.from,
     kakaoOptions: {
@@ -267,13 +272,16 @@ async function sendKakaoAlimtalk({ payload, recipientPhone, templateEnvName, var
       variables,
       disableSms: process.env.SOLAPI_DISABLE_SMS === "true"
     }
-  });
+  };
+  const requestConfig = scheduledDate ? { scheduledDate } : undefined;
+  const response = await service.send(message, requestConfig);
 
   return {
     response,
     requestedTo: recipient.requestedTo,
     sentTo: recipient.to,
     isTestRedirected: recipient.isTestRedirected,
+    scheduledDate: scheduledDate ? scheduledDate.toISOString() : "",
     dryRun: false
   };
 }

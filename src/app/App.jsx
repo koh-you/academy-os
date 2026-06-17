@@ -2007,7 +2007,7 @@ export function App() {
     }
   }
 
-  async function handleSendLessonComment(lesson, student, record, target) {
+  async function handleSendLessonComment(lesson, student, record, target, options = {}) {
     const sourceField = target === "student" ? "studentComment" : "teacherComment";
     const prepMessage =
       target === "student"
@@ -2020,6 +2020,8 @@ export function App() {
     const channel = target === "student" ? "student_alimtalk" : "parent_alimtalk";
     const statusField = target === "student" ? "studentCommentSendStatus" : "teacherCommentSendStatus";
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+    const scheduledDate = options.sendTiming === "now" ? "" : getLessonAlimtalkScheduledDate(lesson, options.delayMinutes ?? 0);
+    const scheduledLabel = scheduledDate ? formatKoreaTimeLabel(scheduledDate) : "";
     const logBase = {
       notificationLogId: `notification_${Date.now()}_${recordId}_${target}`,
       channel,
@@ -2027,6 +2029,8 @@ export function App() {
       lessonId: lesson.lessonId,
       message: [prepMessage, message].filter(Boolean).join("\n") || "발송할 코멘트가 없습니다.",
       provider: "solapi",
+      scheduledDate,
+      scheduledLabel,
       studentId: student.studentId,
       target
     };
@@ -2058,7 +2062,7 @@ export function App() {
           ...createEmptyRecord(lesson, student),
           ...(record ?? {}),
           lessonStudentRecordId: recordId,
-          [statusField]: "알림톡 발송 중"
+          [statusField]: scheduledDate ? `예약 중 · ${scheduledLabel}` : "알림톡 발송 중"
         },
         "lessonStudentRecordId"
       )
@@ -2088,6 +2092,7 @@ export function App() {
           preparationNotice: prepMessage,
           parentPhone: student.parentPhone,
           previousHomework: previousHomework?.title ?? "",
+          scheduledDate,
           studentId: student.studentId,
           studentName: student.name,
           studentPhone: student.studentPhone,
@@ -2100,9 +2105,14 @@ export function App() {
       }
 
       setNotificationLogs((current) => [
-        { ...logBase, result, status: result.result?.dryRun ? "dry_run" : "sent" },
+        { ...logBase, result, status: scheduledDate ? "scheduled" : result.result?.dryRun ? "dry_run" : "sent" },
         ...current
       ]);
+      const completeStatus = scheduledDate
+        ? `예약 완료 · ${scheduledLabel}`
+        : result.result?.dryRun
+          ? "테스트 발송 기록됨"
+          : "알림톡 발송 완료";
       setRecords((current) =>
         upsertById(
           current,
@@ -2110,7 +2120,7 @@ export function App() {
             ...createEmptyRecord(lesson, student),
             ...(record ?? {}),
             lessonStudentRecordId: recordId,
-            [statusField]: result.result?.dryRun ? "테스트 발송 기록됨" : "알림톡 발송 완료"
+            [statusField]: completeStatus
           },
           "lessonStudentRecordId"
         )
@@ -3167,6 +3177,7 @@ function CommentComposerModal({
   record,
   student
 }) {
+  const [sendTiming, setSendTiming] = useState("default");
   const isParent = audience === "parent";
   const field = isParent ? "teacherComment" : "studentComment";
   const comment = record?.[field] ?? "";
@@ -3176,6 +3187,11 @@ function CommentComposerModal({
   const sendLabel = isParent ? "학부모 알림톡 발송" : "학생 알림톡 발송";
   const aiStatus = isParent ? record?.teacherCommentAiStatus : record?.studentCommentAiStatus;
   const sendStatus = isParent ? record?.teacherCommentSendStatus : record?.studentCommentSendStatus;
+  const defaultScheduledDate = getLessonAlimtalkScheduledDate(lesson, 0);
+  const delayedScheduledDate = getLessonAlimtalkScheduledDate(lesson, 30);
+  const selectedDelayMinutes = sendTiming === "delay30" ? 30 : 0;
+  const selectedScheduledDate = sendTiming === "now" ? "" : getLessonAlimtalkScheduledDate(lesson, selectedDelayMinutes);
+  const selectedScheduleLabel = selectedScheduledDate ? formatKoreaTimeLabel(selectedScheduledDate) : "즉시";
   const previewLines = buildCommentPreviewLines({
     audience,
     comment,
@@ -3211,10 +3227,29 @@ function CommentComposerModal({
             >
               {aiStatus === "AI 수정 중" ? "AI 수정 중..." : "AI 수정"}
             </button>
-            <button className="sendButton" onClick={() => onSendComment(lesson, student, record, audience)} type="button">
+            <button
+              className="sendButton"
+              onClick={() => onSendComment(lesson, student, record, audience, { delayMinutes: selectedDelayMinutes, sendTiming })}
+              type="button"
+            >
               {sendLabel}
             </button>
           </div>
+          <div className="sendScheduleOptions" role="group" aria-label="알림톡 발송 시각">
+            <button className={sendTiming === "default" ? "active" : ""} onClick={() => setSendTiming("default")} type="button">
+              기본 예약
+              <span>{formatKoreaTimeLabel(defaultScheduledDate)}</span>
+            </button>
+            <button className={sendTiming === "delay30" ? "active" : ""} onClick={() => setSendTiming("delay30")} type="button">
+              30분 지연
+              <span>{formatKoreaTimeLabel(delayedScheduledDate)}</span>
+            </button>
+            <button className={sendTiming === "now" ? "active" : ""} onClick={() => setSendTiming("now")} type="button">
+              지금 발송
+              <span>검수용</span>
+            </button>
+          </div>
+          <small className="muted">선택된 발송 시각: {selectedScheduleLabel}</small>
           <small className="muted">{aiStatus || "AI 대기"} · {sendStatus || "발송 전"}</small>
         </section>
 
@@ -8115,6 +8150,25 @@ function getKoreaDateTimeString(date = new Date()) {
     hour: "2-digit",
     minute: "2-digit"
   }).format(date);
+}
+
+function getLessonAlimtalkScheduledDate(lesson, delayMinutes = 0) {
+  const baseTime = getDayKey(lesson?.date) === "sat" ? "18:00" : "22:30";
+  const baseDate = new Date(`${lesson?.date ?? getKoreaDateString()}T${baseTime}:00+09:00`);
+  baseDate.setMinutes(baseDate.getMinutes() + delayMinutes);
+  return baseDate.toISOString();
+}
+
+function formatKoreaTimeLabel(dateString) {
+  if (!dateString) return "";
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  }).format(new Date(dateString));
 }
 
 function addDaysInKorea(dateString, days) {
