@@ -815,7 +815,7 @@ button {
 }
 
 .journalTable {
-  min-width: 1460px;
+  min-width: 1560px;
 }
 
 .journalRow {
@@ -823,7 +823,7 @@ button {
   border-top: 1px solid #e2e8f0;
   display: grid;
   gap: 8px;
-  grid-template-columns: 160px 150px 170px 92px 180px 180px 150px 126px 126px 110px;
+  grid-template-columns: 150px 130px 150px 170px 92px 180px 180px 150px 126px 126px 110px;
   min-height: 72px;
   padding: 8px 10px;
 }
@@ -2878,8 +2878,225 @@ textarea {
   margin-bottom: 0;
 }
 
+.messageBubble.compact {
+  min-height: 120px;
+  padding: 14px;
+}
+
 .placeholderText {
   color: #94a3b8;
+}
+
+.journalPrepCell {
+  align-content: center;
+  display: grid;
+  gap: 6px;
+}
+
+.journalPrepCell small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.prepMemoButton {
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #d8e3f8;
+  border-radius: 6px;
+  color: #334155;
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 900;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 10px;
+}
+
+.prepMemoButton.filled {
+  background: #eef2ff;
+  border-color: #a5b4fc;
+  color: #3730a3;
+}
+
+.modalCard.preparationMemoModal {
+  max-width: 1180px;
+}
+
+.prepMemoGrid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.9fr);
+}
+
+.prepMemoDraft,
+.prepMemoPreview {
+  display: grid;
+  gap: 14px;
+}
+
+.prepMemoDraft label {
+  color: #334155;
+  display: grid;
+  font-weight: 900;
+  gap: 8px;
+}
+
+.prepMemoDraft textarea {
+  border-radius: 6px;
+  min-height: 112px;
+}
+
+.prepMemoActions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.prepMemoActions small {
+  color: #64748b;
+  font-weight: 800;
+}
+
+.checkboxLine {
+  align-items: center;
+  display: flex !important;
+  flex-direction: row;
+  gap: 10px !important;
+}
+
+.checkboxLine input {
+  height: 18px;
+  width: 18px;
+}
+
+.prepMemoPreview h3 {
+  font-size: 18px;
+  margin: 0 0 10px;
+}
+
+.portalNoticeStack,
+.portalMaterialsList {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.portalNoticeStack h2 {
+  margin: 0;
+}
+
+.portalNoticeCard,
+.portalMaterialCard {
+  background: #f8fafc;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 16px 18px;
+}
+
+.portalNoticeCard p,
+.portalMaterialCard p {
+  color: #334155;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.portalMaterialCard {
+  align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.portalMaterialCard span,
+.portalMaterialCard small {
+  color: #64748b;
+  display: block;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.resourceLibraryPage {
+  display: grid;
+  gap: 18px;
+}
+
+.resourceLibraryLayout {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(360px, 0.8fr) minmax(0, 1.2fr);
+}
+
+.resourceForm,
+.resourceList {
+  align-content: start;
+  display: grid;
+  gap: 14px;
+}
+
+.resourceForm label {
+  color: #334155;
+  display: grid;
+  font-weight: 900;
+  gap: 8px;
+}
+
+.resourceForm input,
+.resourceForm select,
+.resourceForm textarea {
+  border-radius: 6px;
+}
+
+.resourceForm textarea {
+  min-height: 96px;
+}
+
+.resourceStudentPicker {
+  display: grid;
+  gap: 8px;
+}
+
+.resourceStudentPicker > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.resourceStudentPicker button {
+  background: #f8fafc;
+  border: 1px solid #d8e3f8;
+  border-radius: 6px;
+  color: #334155;
+  cursor: pointer;
+  font-weight: 900;
+  padding: 8px 12px;
+}
+
+.resourceStudentPicker button.active {
+  background: #17213b;
+  border-color: #17213b;
+  color: #ffffff;
+}
+
+.resourceListItem {
+  align-items: center;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 14px;
+}
+
+.resourceListItem p {
+  color: #475569;
+  margin: 6px 0;
+}
+
+.resourceListItem small {
+  color: #64748b;
+  font-weight: 800;
 }
 
 .studentScoreModalTable {

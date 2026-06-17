@@ -17,6 +17,7 @@ const storageKeys = {
   examPrepRows: "academy-os.examPrepRows.v2",
   examAnalyses: "academy-os.examAnalyses.v1",
   schoolEvents: "academy-os.schoolEvents.v1",
+  resourceMaterials: "academy-os.resourceMaterials.v1",
   lessonResearchItems: "academy-os.lessonResearchItems.v1"
 };
 
@@ -92,6 +93,12 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, previousHom
   const lessonContent = getLessonContent(record);
   const assignmentStatus = record?.assignmentStatus ?? record?.incompleteHomework ?? "";
   const attendance = attendanceLabels[record?.attendanceStatus ?? "pending"] ?? "";
+  const prepNotice =
+    audience === "student"
+      ? record?.prepStudentNotice?.trim()
+      : record?.prepParentVisible
+        ? record?.prepParentNotice?.trim()
+        : "";
   const lines = [
     attendance ? `출결: ${attendance}` : "",
     lessonMaterial ? `강의 교재: ${lessonMaterial}` : "",
@@ -99,6 +106,7 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, previousHom
     previousHomework?.title ? `지난 과제: ${previousHomework.title}` : "",
     nextHomework?.title ? `다음 과제: ${nextHomework.title}` : "",
     audience === "parent" && assignmentStatus ? `과제 상태: ${getAssignmentStatusParentMessage(assignmentStatus)}` : "",
+    prepNotice ? `수업 준비: ${prepNotice}` : "",
     comment?.trim() ? `코멘트: ${comment.trim()}` : ""
   ];
 
@@ -619,6 +627,7 @@ export function App() {
     storageKeys.examAnalyses,
     sampleData.examAnalyses ?? [createDefaultExamAnalysis(sampleData.examPrepRows?.[0])]
   );
+  const [resourceMaterials, setResourceMaterials] = useStoredState(storageKeys.resourceMaterials, []);
   const [saveStates, setSaveStates] = useState({});
   const [reportModal, setReportModal] = useState(null);
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
@@ -882,6 +891,9 @@ export function App() {
     return (
       <StudentPortalV2
         homeworks={homeworks}
+        lessons={lessons}
+        materials={resourceMaterials}
+        records={records}
         reportSnapshots={reportSnapshots}
         sessionStudentId={session.studentId}
         students={students.filter((student) => student.studentId === session.studentId)}
@@ -896,6 +908,9 @@ export function App() {
     return (
       <ParentPortal
         homeworks={homeworks}
+        lessons={lessons}
+        materials={resourceMaterials}
+        records={records}
         reportSnapshots={reportSnapshots}
         sessionStudentId={session.studentId}
         students={students}
@@ -1299,6 +1314,7 @@ export function App() {
             academyTests={academyTests}
             lessons={lessons}
             lessonsForDate={lessonsForDate}
+            materials={resourceMaterials}
             records={selectedRecords}
             saveStates={saveStates}
             selectedDate={selectedDate}
@@ -1327,6 +1343,7 @@ export function App() {
             onPasteLesson={handlePasteLessonToSelectedDate}
             onOpenReport={handleOpenReport}
             onPolishComment={handlePolishLessonComment}
+            onPolishPreparationNotice={handlePolishPreparationNotice}
             onSaveRecord={handleSaveRecord}
             onSendComment={handleSendLessonComment}
             onSelectLesson={setSelectedLessonId}
@@ -1340,6 +1357,7 @@ export function App() {
           <StudentPortalV2
             homeworks={homeworks}
             lessons={lessons}
+            materials={resourceMaterials}
             records={records}
             reportSnapshots={reportSnapshots}
             previewMode
@@ -1601,6 +1619,16 @@ export function App() {
                 current.map((book) => (book.problemBookId === problemBookId ? { ...book, [field]: value } : book))
               )
             }
+          />
+        ) : null}
+
+        {activeView === "resources" ? (
+          <ResourceLibraryCenter
+            materials={resourceMaterials}
+            students={students}
+            templates={classTemplates}
+            onAddMaterial={handleAddResourceMaterial}
+            onDeleteMaterial={handleDeleteResourceMaterial}
           />
         ) : null}
 
@@ -1886,9 +1914,109 @@ export function App() {
     }
   }
 
+  async function handlePolishPreparationNotice(lesson, student, record, target, aiProvider, aiModel) {
+    const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+    const statusField = target === "student" ? "prepStudentAiStatus" : "prepParentAiStatus";
+    const resultField = target === "student" ? "prepStudentNotice" : "prepParentNotice";
+    const audienceLabel = target === "student" ? "학생" : "학부모";
+    const rawText = record?.preparationMemo?.trim() || record?.[resultField]?.trim() || "";
+
+    setRecords((current) =>
+      upsertById(
+        current,
+        {
+          ...createEmptyRecord(lesson, student),
+          ...(record ?? {}),
+          lessonStudentRecordId: recordId,
+          [statusField]: "AI 정제 중"
+        },
+        "lessonStudentRecordId"
+      )
+    );
+
+    if (!rawText) {
+      setRecords((current) =>
+        upsertById(
+          current,
+          {
+            ...createEmptyRecord(lesson, student),
+            ...(record ?? {}),
+            lessonStudentRecordId: recordId,
+            [statusField]: "메모 없음"
+          },
+          "lessonStudentRecordId"
+        )
+      );
+      return;
+    }
+
+    try {
+      const response = await fetch(apiUrl("/api/ai/comment-polish"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          aiProvider,
+          aiModel,
+          audience: target === "student" ? "student" : "parent",
+          attendanceStatus: attendanceLabels[record?.attendanceStatus ?? "pending"],
+          assignmentStatus: getAssignmentStatusParentMessage(record?.assignmentStatus ?? record?.incompleteHomework ?? ""),
+          grade: student.grade,
+          homeworkStatus: "수업 준비 안내",
+          lessonDate: lesson.date,
+          lessonContent: getLessonContent(record),
+          lessonMaterial: getLessonMaterial(record, student),
+          lessonName: lesson.className,
+          rawText: `${audienceLabel}에게 안내할 수업 준비 메모입니다. 짧고 정중하게 다듬어 주세요.\n${rawText}`,
+          schoolName: student.schoolName,
+          studentName: student.name
+        })
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || "수업준비메모 AI 정제에 실패했습니다.");
+      }
+
+      setRecords((current) =>
+        upsertById(
+          current,
+          {
+            ...createEmptyRecord(lesson, student),
+            ...(record ?? {}),
+            lessonStudentRecordId: recordId,
+            [resultField]: result.result.polishedText,
+            [statusField]: `완료 · ${result.result.provider}`,
+            updatedAt: new Date().toISOString()
+          },
+          "lessonStudentRecordId"
+        )
+      );
+      setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "dirty" }));
+    } catch (error) {
+      setRecords((current) =>
+        upsertById(
+          current,
+          {
+            ...createEmptyRecord(lesson, student),
+            ...(record ?? {}),
+            lessonStudentRecordId: recordId,
+            [statusField]: `실패 · ${error.message}`
+          },
+          "lessonStudentRecordId"
+        )
+      );
+    }
+  }
+
   async function handleSendLessonComment(lesson, student, record, target) {
     const sourceField = target === "student" ? "studentComment" : "teacherComment";
-    const message = record?.[sourceField]?.trim();
+    const prepMessage =
+      target === "student"
+        ? record?.prepStudentNotice?.trim()
+        : record?.prepParentVisible
+          ? record?.prepParentNotice?.trim()
+          : "";
+    const message = record?.[sourceField]?.trim() ?? "";
+    const hasSendContent = Boolean(message || prepMessage);
     const channel = target === "student" ? "student_alimtalk" : "parent_alimtalk";
     const statusField = target === "student" ? "studentCommentSendStatus" : "teacherCommentSendStatus";
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
@@ -1897,13 +2025,13 @@ export function App() {
       channel,
       createdAt: new Date().toISOString(),
       lessonId: lesson.lessonId,
-      message: message || "발송할 코멘트가 없습니다.",
+      message: [prepMessage, message].filter(Boolean).join("\n") || "발송할 코멘트가 없습니다.",
       provider: "solapi",
       studentId: student.studentId,
       target
     };
 
-    if (!message) {
+    if (!hasSendContent) {
       setNotificationLogs((current) => [
         { ...logBase, status: "empty_message" },
         ...current
@@ -1957,6 +2085,7 @@ export function App() {
           lessonName: lesson.className,
           message,
           nextHomework: nextHomework?.title ?? "",
+          preparationNotice: prepMessage,
           parentPhone: student.parentPhone,
           previousHomework: previousHomework?.title ?? "",
           studentId: student.studentId,
@@ -2074,6 +2203,28 @@ export function App() {
     );
   }
 
+  function handleAddResourceMaterial(material) {
+    setResourceMaterials((current) => [
+      {
+        materialId: `resource_${Date.now()}`,
+        createdAt: new Date().toISOString(),
+        title: material.title.trim(),
+        description: material.description.trim(),
+        fileName: material.fileName.trim(),
+        fileUrl: material.fileUrl.trim(),
+        visibility: material.visibility,
+        classTemplateId: material.classTemplateId,
+        studentIds: material.studentIds,
+        notifyByAlimtalk: material.notifyByAlimtalk
+      },
+      ...current
+    ]);
+  }
+
+  function handleDeleteResourceMaterial(materialId) {
+    setResourceMaterials((current) => current.filter((material) => material.materialId !== materialId));
+  }
+
   function handleCreateMakeupTask(task) {
     const taskId = `makeup_${Date.now()}_${task.studentId}`;
     setMakeupTasks((current) => {
@@ -2179,7 +2330,8 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle }) 
         { id: "attendanceKiosk", label: "출결체크", icon: "🟢" },
         { id: "followups", label: "오답관리", icon: "✕" },
         { id: "supplements", label: "보충관리", icon: "↪" },
-        { id: "materials", label: "교재관리", icon: "📚" }
+        { id: "materials", label: "교재관리", icon: "📚" },
+        { id: "resources", label: "자료함", icon: "📁" }
       ]
     },
     {
@@ -2396,6 +2548,7 @@ function TeacherLessonHubV2({
   academyTests = [],
   clipboardCount,
   lessons,
+  materials = [],
   records,
   saveStates,
   selectedDate,
@@ -2419,6 +2572,7 @@ function TeacherLessonHubV2({
   onOpenReport,
   onPasteLesson,
   onPolishComment,
+  onPolishPreparationNotice,
   onSaveRecord,
   onSendComment,
   onSelectLesson,
@@ -2496,6 +2650,7 @@ function TeacherLessonHubV2({
           homeworks={homeworks}
           lesson={selectedLesson}
           lessons={lessons}
+          materials={materials}
           onApplyBulkHomework={onApplyBulkHomework}
           onBack={onBackToCalendar}
           onChangeRecord={onChangeRecord}
@@ -2505,6 +2660,7 @@ function TeacherLessonHubV2({
           onOpenExamPrep={onOpenExamPrep}
           onOpenReport={onOpenReport}
           onPolishComment={onPolishComment}
+          onPolishPreparationNotice={onPolishPreparationNotice}
           onSaveRecord={onSaveRecord}
           onSendComment={onSendComment}
           onUpdateHomework={onUpdateHomework}
@@ -2577,6 +2733,7 @@ function LessonJournalDetail({
   homeworks,
   lesson,
   lessons,
+  materials = [],
   onApplyBulkHomework,
   onBack,
   onChangeRecord,
@@ -2586,6 +2743,7 @@ function LessonJournalDetail({
   onOpenExamPrep,
   onOpenReport,
   onPolishComment,
+  onPolishPreparationNotice,
   onSaveRecord,
   onSendComment,
   onUpdateHomework,
@@ -2598,6 +2756,7 @@ function LessonJournalDetail({
   const [commentAiProvider, setCommentAiProvider] = useState("auto");
   const [commentAiModel, setCommentAiModel] = useState("server-default");
   const [commentModal, setCommentModal] = useState(null);
+  const [prepMemoModal, setPrepMemoModal] = useState(null);
   const [studentPreviewId, setStudentPreviewId] = useState("");
   const saveSummary = students.reduce(
     (summary, student) => {
@@ -2678,6 +2837,7 @@ function LessonJournalDetail({
         <div className="journalTable">
           <div className="journalRow journalHead">
             <span>학생</span>
+            <span>수업준비</span>
             <span>강의 교재</span>
             <span>강의 내용</span>
             <span>출결</span>
@@ -2712,6 +2872,19 @@ function LessonJournalDetail({
                   </span>
                   <small>{student.grade || "고1"} · {student.schoolName || "학교 미입력"}</small>
                 </span>
+                <div className="journalPrepCell">
+                  <button
+                    className={record.preparationMemo || record.prepStudentNotice || record.prepParentNotice ? "prepMemoButton filled" : "prepMemoButton"}
+                    onClick={() => setPrepMemoModal({ nextHomework, previousHomework, record, student })}
+                    type="button"
+                  >
+                    준비 메모
+                  </button>
+                  <small>
+                    {record.prepStudentNotice ? "학생 표시" : "학생 미작성"}
+                    {record.prepParentVisible ? " · 학부모 공개" : ""}
+                  </small>
+                </div>
                 <textarea
                   className="journalCompactInput"
                   value={record.lessonMaterial ?? ""}
@@ -2807,6 +2980,21 @@ function LessonJournalDetail({
         />
       ) : null}
 
+      {prepMemoModal ? (
+        <PreparationMemoModal
+          aiModel={commentAiModel}
+          aiProvider={commentAiProvider}
+          lesson={lesson}
+          nextHomework={prepMemoModal.nextHomework}
+          onChangeRecord={onChangeRecord}
+          onClose={() => setPrepMemoModal(null)}
+          onPolishPreparationNotice={onPolishPreparationNotice}
+          previousHomework={prepMemoModal.previousHomework}
+          record={records.find((item) => item.studentId === prepMemoModal.student.studentId) ?? prepMemoModal.record}
+          student={prepMemoModal.student}
+        />
+      ) : null}
+
       {studentPreviewId ? (
         <Modal
           backdropClassName="studentPortalPreviewBackdrop"
@@ -2818,6 +3006,7 @@ function LessonJournalDetail({
           <StudentPortalV2
             homeworks={homeworks}
             lessons={lessons}
+            materials={materials}
             records={records}
             reportSnapshots={[]}
             scoreRecords={[]}
@@ -2845,6 +3034,122 @@ function CommentOpenCell({ aiStatus, comment, label, onOpen, sendStatus }) {
       <small>{hasComment ? comment.slice(0, 28) : "미작성"}{hasComment && comment.length > 28 ? "..." : ""}</small>
       <em>{aiStatus || "AI 대기"} · {sendStatus || "발송 전"}</em>
     </div>
+  );
+}
+
+function PreparationMemoModal({
+  aiModel,
+  aiProvider,
+  lesson,
+  nextHomework,
+  onChangeRecord,
+  onClose,
+  onPolishPreparationNotice,
+  previousHomework,
+  record,
+  student
+}) {
+  const studentLines = buildCommentPreviewLines({
+    audience: "student",
+    comment: record?.studentComment ?? "",
+    nextHomework,
+    previousHomework,
+    record,
+    student
+  });
+  const parentLines = buildCommentPreviewLines({
+    audience: "parent",
+    comment: record?.teacherComment ?? "",
+    nextHomework,
+    previousHomework,
+    record,
+    student
+  });
+
+  return (
+    <Modal
+      className="preparationMemoModal"
+      title={`${student.name} 수업준비메모`}
+      subtitle={`${lesson.date} · ${lesson.className}`}
+      onClose={onClose}
+    >
+      <div className="prepMemoGrid">
+        <section className="prepMemoDraft">
+          <label>
+            강사용 메모
+            <textarea
+              value={record?.preparationMemo ?? ""}
+              onChange={(event) => onChangeRecord(lesson, student, "preparationMemo", event.target.value)}
+              placeholder="다음 시간에 꼭 기억해야 할 내용, 질문, 자료, 보충 포인트를 적어주세요."
+            />
+          </label>
+          <label>
+            학생 알림문구
+            <textarea
+              value={record?.prepStudentNotice ?? ""}
+              onChange={(event) => onChangeRecord(lesson, student, "prepStudentNotice", event.target.value)}
+              placeholder="학생 화면과 학생 알림톡에 표시될 문구입니다."
+            />
+          </label>
+          <div className="prepMemoActions">
+            <button
+              className="softButton"
+              disabled={record?.prepStudentAiStatus === "AI 정제 중"}
+              onClick={() => onPolishPreparationNotice(lesson, student, record, "student", aiProvider, aiModel)}
+              type="button"
+            >
+              {record?.prepStudentAiStatus === "AI 정제 중" ? "학생 문구 정제 중..." : "학생 문구 AI 정제"}
+            </button>
+            <small>{record?.prepStudentAiStatus || "AI 대기"}</small>
+          </div>
+          <label className="checkboxLine">
+            <input
+              checked={Boolean(record?.prepParentVisible)}
+              onChange={(event) => onChangeRecord(lesson, student, "prepParentVisible", event.target.checked)}
+              type="checkbox"
+            />
+            학부모 화면과 학부모 알림톡에도 공개
+          </label>
+          <label>
+            학부모 공개 문구
+            <textarea
+              disabled={!record?.prepParentVisible}
+              value={record?.prepParentNotice ?? ""}
+              onChange={(event) => onChangeRecord(lesson, student, "prepParentNotice", event.target.value)}
+              placeholder="학부모님께 공개할 때만 작성합니다."
+            />
+          </label>
+          <div className="prepMemoActions">
+            <button
+              className="softButton"
+              disabled={!record?.prepParentVisible || record?.prepParentAiStatus === "AI 정제 중"}
+              onClick={() => onPolishPreparationNotice(lesson, student, record, "parent", aiProvider, aiModel)}
+              type="button"
+            >
+              {record?.prepParentAiStatus === "AI 정제 중" ? "학부모 문구 정제 중..." : "학부모 문구 AI 정제"}
+            </button>
+            <small>{record?.prepParentAiStatus || "AI 대기"}</small>
+          </div>
+        </section>
+
+        <section className="prepMemoPreview">
+          <div>
+            <p className="eyebrow">STUDENT</p>
+            <h3>학생 화면/알림톡 미리보기</h3>
+            <div className="messageBubble compact">
+              {studentLines.length ? studentLines.map((line) => <p key={`student_${line}`}>{line}</p>) : <p className="placeholderText">학생 알림문구가 여기에 표시됩니다.</p>}
+            </div>
+          </div>
+          <div>
+            <p className="eyebrow">PARENT</p>
+            <h3>학부모 화면/알림톡 미리보기</h3>
+            <div className="messageBubble compact">
+              {parentLines.length ? parentLines.map((line) => <p key={`parent_${line}`}>{line}</p>) : <p className="placeholderText">학부모 공개를 켜면 여기에 표시됩니다.</p>}
+            </div>
+          </div>
+        </section>
+      </div>
+    </Modal>
   );
 }
 
@@ -5512,6 +5817,7 @@ function MetricCard({ hint, icon, label, tone = "default", value }) {
 function StudentPortalV2({
   homeworks,
   lessons = [],
+  materials = [],
   records = [],
   reportSnapshots,
   scoreRecords = [],
@@ -5550,6 +5856,11 @@ function StudentPortalV2({
     .filter((record) => record.studentId === selectedStudent?.studentId && record.studentCommentSendStatus)
     .map((record) => ({ ...record, lesson: lessons.find((lesson) => lesson.lessonId === record.lessonId) }))
     .sort((a, b) => String(b.lesson?.date ?? "").localeCompare(String(a.lesson?.date ?? "")));
+  const studentPrepNotices = records
+    .filter((record) => record.studentId === selectedStudent?.studentId && record.prepStudentNotice?.trim())
+    .map((record) => ({ ...record, lesson: lessons.find((lesson) => lesson.lessonId === record.lessonId) }))
+    .sort((a, b) => String(b.lesson?.date ?? "").localeCompare(String(a.lesson?.date ?? "")));
+  const studentMaterials = filterVisibleMaterials(materials, selectedStudent, "student");
   const streakDays = calculateStreak(studentHomeworks);
   const stats = calculateHomeworkStats(studentHomeworks);
   const studentScoreRecords = scoreRecords.filter((score) => score.studentId === selectedStudent?.studentId);
@@ -5631,6 +5942,7 @@ function StudentPortalV2({
             ["today", "오늘"],
             ["register", "등록"],
             ["all", "전체"],
+            ["materials", "자료함"],
             ["curriculum", "커리큘럼"],
             ["evaluation", "평가"],
             ["mypage", "마이 페이지"]
@@ -5644,6 +5956,7 @@ function StudentPortalV2({
         {activeTab === "today" ? (
           <StudentTodayTab
             overdueHomeworks={overdueHomeworks}
+            prepNotices={studentPrepNotices}
             todayHomeworks={todayHomeworks}
             onStudentCheckHomework={onStudentCheckHomework}
           />
@@ -5665,6 +5978,7 @@ function StudentPortalV2({
             onUpdateHomework={onStudentUpdateHomework}
           />
         ) : null}
+        {activeTab === "materials" ? <PortalMaterialsTab materials={studentMaterials} emptyMessage="아직 공개된 자료가 없습니다." /> : null}
         {activeTab === "curriculum" ? <StudentEmptyTab message="아직 커리큘럼이 설정되지 않았습니다. 선생님께 문의하세요." /> : null}
         {activeTab === "evaluation" ? <StudentEvaluationTab /> : null}
         {activeTab === "mypage" ? (
@@ -5713,9 +6027,20 @@ function StudentPortalV2({
   );
 }
 
-function StudentTodayTab({ overdueHomeworks, todayHomeworks, onStudentCheckHomework }) {
+function StudentTodayTab({ overdueHomeworks, prepNotices = [], todayHomeworks, onStudentCheckHomework }) {
   return (
     <>
+      {prepNotices.length ? (
+        <div className="portalNoticeStack">
+          <h2>수업 준비 안내</h2>
+          {prepNotices.slice(0, 3).map((notice) => (
+            <article className="portalNoticeCard" key={`prep_${notice.lessonStudentRecordId}`}>
+              <strong>{notice.lesson?.date ?? "수업"} · {notice.lesson?.className ?? "수업 준비"}</strong>
+              <p>{notice.prepStudentNotice}</p>
+            </article>
+          ))}
+        </div>
+      ) : null}
       <div className="sectionHeader">
         <div>
           <h2>오늘 해야 할 숙제</h2>
@@ -5735,12 +6060,17 @@ function StudentTodayTab({ overdueHomeworks, todayHomeworks, onStudentCheckHomew
   );
 }
 
-function ParentPortal({ homeworks, reportSnapshots, sessionStudentId, students, onLogout }) {
+function ParentPortal({ homeworks, lessons = [], materials = [], records = [], reportSnapshots, sessionStudentId, students, onLogout }) {
   const [activeTab, setActiveTab] = useState("reports");
   const student = students.find((item) => item.studentId === sessionStudentId) ?? students[0];
   const studentHomeworks = homeworks.filter((homework) => homework.studentId === student?.studentId);
   const studentReports = reportSnapshots.filter((snapshot) => snapshot.studentId === student?.studentId);
   const overdueHomeworks = studentHomeworks.filter((homework) => isHomeworkOverdue(homework));
+  const parentPrepNotices = records
+    .filter((record) => record.studentId === student?.studentId && record.prepParentVisible && record.prepParentNotice?.trim())
+    .map((record) => ({ ...record, lesson: lessons.find((lesson) => lesson.lessonId === record.lessonId) }))
+    .sort((a, b) => String(b.lesson?.date ?? "").localeCompare(String(a.lesson?.date ?? "")));
+  const parentMaterials = filterVisibleMaterials(materials, student, "parent");
 
   return (
     <section className="studentPortal parentPortal">
@@ -5761,6 +6091,7 @@ function ParentPortal({ homeworks, reportSnapshots, sessionStudentId, students, 
             ["alerts", "알림"],
             ["reports", "보고서"],
             ["homework", "숙제"],
+            ["materials", "자료함"],
             ["attendance", "출결"],
             ["curriculum", "커리큘럼"]
           ].map(([id, label]) => (
@@ -5771,7 +6102,15 @@ function ParentPortal({ homeworks, reportSnapshots, sessionStudentId, students, 
         </div>
 
         {activeTab === "alerts" ? (
-          <div className="emptyPortalPanel">아직 새 알림이 없습니다.</div>
+          <div className="portalNoticeStack">
+            {parentPrepNotices.length === 0 ? <div className="emptyPortalPanel">아직 새 알림이 없습니다.</div> : null}
+            {parentPrepNotices.map((notice) => (
+              <article className="portalNoticeCard" key={`parent_prep_${notice.lessonStudentRecordId}`}>
+                <strong>{notice.lesson?.date ?? "수업"} · {notice.lesson?.className ?? "수업 준비"}</strong>
+                <p>{notice.prepParentNotice}</p>
+              </article>
+            ))}
+          </div>
         ) : null}
 
         {activeTab === "reports" ? (
@@ -5813,6 +6152,8 @@ function ParentPortal({ homeworks, reportSnapshots, sessionStudentId, students, 
             {overdueHomeworks.length ? <div className="warningBand">밀린 숙제 {overdueHomeworks.length}개가 있습니다.</div> : null}
           </div>
         ) : null}
+
+        {activeTab === "materials" ? <PortalMaterialsTab materials={parentMaterials} emptyMessage="아직 공개된 자료가 없습니다." /> : null}
 
         {activeTab === "attendance" ? (
           <div className="emptyPortalPanel">출결앱 연동 전입니다. 추후 등하원 시간이 표시됩니다.</div>
@@ -6089,6 +6430,43 @@ function StudentAllHomeworkTab({ homeworks, onDeleteHomework, onUpdateHomework }
 
 function StudentEmptyTab({ message }) {
   return <div className="emptyPortalPanel">{message}</div>;
+}
+
+function filterVisibleMaterials(materials = [], student, audience) {
+  if (!student) return [];
+  return materials.filter((material) => {
+    const visibility = material.visibility ?? "student";
+    const audienceAllowed =
+      visibility === "both" ||
+      (audience === "student" && visibility === "student") ||
+      (audience === "parent" && visibility === "parent");
+    const studentAllowed =
+      !material.studentIds?.length ||
+      material.studentIds.includes(student.studentId) ||
+      (material.classTemplateId && material.classTemplateId === student.defaultClassTemplateId);
+
+    return audienceAllowed && studentAllowed;
+  });
+}
+
+function PortalMaterialsTab({ emptyMessage, materials = [] }) {
+  return (
+    <div className="portalMaterialsList">
+      {materials.length === 0 ? <div className="emptyPortalPanel">{emptyMessage}</div> : null}
+      {materials.map((material) => (
+        <article className="portalMaterialCard" key={material.materialId}>
+          <div>
+            <strong>{material.title}</strong>
+            <span>{material.description || "자료 설명 없음"}</span>
+            <small>{material.fileName || material.fileUrl || "파일/링크 미입력"}</small>
+          </div>
+          {material.fileUrl ? (
+            <a className="softButton" href={material.fileUrl} rel="noreferrer" target="_blank">열기</a>
+          ) : null}
+        </article>
+      ))}
+    </div>
+  );
 }
 
 function StudentEvaluationTab() {
@@ -6992,6 +7370,142 @@ function ProblemPreview({ book, problem }) {
         </div>
       )}
     </div>
+  );
+}
+
+function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteMaterial, students = [], templates = [] }) {
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    fileName: "",
+    fileUrl: "",
+    visibility: "student",
+    classTemplateId: "",
+    studentIds: [],
+    notifyByAlimtalk: false
+  });
+
+  function updateForm(field, value) {
+    setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function toggleStudent(studentId) {
+    setForm((current) => ({
+      ...current,
+      studentIds: current.studentIds.includes(studentId)
+        ? current.studentIds.filter((id) => id !== studentId)
+        : [...current.studentIds, studentId]
+    }));
+  }
+
+  function submitMaterial(event) {
+    event.preventDefault();
+    if (!form.title.trim()) return;
+    onAddMaterial(form);
+    setForm((current) => ({
+      ...current,
+      title: "",
+      description: "",
+      fileName: "",
+      fileUrl: "",
+      studentIds: [],
+      notifyByAlimtalk: false
+    }));
+  }
+
+  return (
+    <section className="resourceLibraryPage">
+      <header className="pageTop">
+        <div>
+          <p className="eyebrow">RESOURCE LIBRARY</p>
+          <h1>자료함</h1>
+          <p className="muted">학생별 자료, 반별 자료, 학부모 공개 자료를 한 곳에서 관리합니다.</p>
+        </div>
+        <span className="countBadge">{materials.length}건</span>
+      </header>
+
+      <div className="resourceLibraryLayout">
+        <form className="panel resourceForm" onSubmit={submitMaterial}>
+          <h2>자료 등록</h2>
+          <label>
+            자료명
+            <input value={form.title} onChange={(event) => updateForm("title", event.target.value)} placeholder="예: 정의여고 직전대비 프린트" />
+          </label>
+          <label>
+            설명
+            <textarea value={form.description} onChange={(event) => updateForm("description", event.target.value)} placeholder="학생이 자료를 받을 때 함께 볼 안내문" />
+          </label>
+          <div className="fieldGrid two">
+            <label>
+              파일명
+              <input value={form.fileName} onChange={(event) => updateForm("fileName", event.target.value)} placeholder="파일명 또는 카톡에서 보낸 자료명" />
+            </label>
+            <label>
+              링크
+              <input value={form.fileUrl} onChange={(event) => updateForm("fileUrl", event.target.value)} placeholder="https://..." />
+            </label>
+          </div>
+          <div className="fieldGrid two">
+            <label>
+              공개범위
+              <select value={form.visibility} onChange={(event) => updateForm("visibility", event.target.value)}>
+                <option value="student">학생만</option>
+                <option value="parent">학부모만</option>
+                <option value="both">학생+학부모</option>
+              </select>
+            </label>
+            <label>
+              반
+              <select value={form.classTemplateId} onChange={(event) => updateForm("classTemplateId", event.target.value)}>
+                <option value="">전체 반</option>
+                {templates.map((template) => (
+                  <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className="resourceStudentPicker">
+            <strong>개별 학생</strong>
+            <div>
+              {students.map((student) => (
+                <button
+                  className={form.studentIds.includes(student.studentId) ? "active" : ""}
+                  key={student.studentId}
+                  onClick={() => toggleStudent(student.studentId)}
+                  type="button"
+                >
+                  {student.name}
+                </button>
+              ))}
+            </div>
+          </div>
+          <label className="checkboxLine">
+            <input checked={form.notifyByAlimtalk} onChange={(event) => updateForm("notifyByAlimtalk", event.target.checked)} type="checkbox" />
+            등록 후 알림톡 안내 대상으로 표시
+          </label>
+          <button className="primaryButton full" type="submit">자료 등록</button>
+        </form>
+
+        <section className="panel resourceList">
+          <h2>등록 자료</h2>
+          {materials.length === 0 ? <div className="emptyPortalPanel">등록된 자료가 없습니다.</div> : null}
+          {materials.map((material) => (
+            <article className="resourceListItem" key={material.materialId}>
+              <div>
+                <strong>{material.title}</strong>
+                <p>{material.description || "설명 없음"}</p>
+                <small>
+                  {material.visibility === "both" ? "학생+학부모" : material.visibility === "parent" ? "학부모" : "학생"}
+                  {" · "}
+                  {material.fileName || material.fileUrl || "파일/링크 미입력"}
+                </small>
+              </div>
+              <button className="dangerButton mini" onClick={() => onDeleteMaterial(material.materialId)} type="button">삭제</button>
+            </article>
+          ))}
+        </section>
+      </div>
+    </section>
   );
 }
 

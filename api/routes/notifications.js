@@ -18,6 +18,17 @@ const TEMPLATE_ENV = {
   studentComment: "SOLAPI_STUDENT_COMMENT_TEMPLATE_ID"
 };
 
+const assignmentStatusMessageMap = {
+  complete_thorough: "과제를 성실하게 완료했습니다.",
+  complete_easy: "오늘 과제는 학생에게 비교적 수월하게 진행되었습니다.",
+  partial_80: "과제를 대부분 수행했으며, 남은 부분은 이어서 확인하겠습니다.",
+  known_only: "아는 문항 위주로 풀이했으며, 어려웠던 문항은 추가 확인이 필요합니다.",
+  too_hard: "과제 난도가 다소 높아 보충 설명과 분량 조정이 필요합니다.",
+  answer_suspected: "풀이 과정을 한 번 더 확인할 필요가 있어 다음 수업에서 점검하겠습니다.",
+  not_done: "과제가 충분히 완료되지 않아 보충 관리가 필요합니다.",
+  not_checked: "과제 확인이 아직 완료되지 않았습니다."
+};
+
 function compactPhoneNumber(value = "") {
   return String(value).replaceAll(/[^0-9]/g, "");
 }
@@ -29,9 +40,7 @@ function envValue(name) {
 
 function requiredEnv(name) {
   const value = envValue(name);
-  if (!value) {
-    throw new Error(`${name} environment variable is required.`);
-  }
+  if (!value) throw new Error(`${name} environment variable is required.`);
   return value;
 }
 
@@ -55,35 +64,23 @@ function attendanceLabel(status) {
   }[status] ?? status ?? "출석";
 }
 
-const assignmentStatusMessageMap = {
-  complete_thorough: "과제를 성실하게 완료했습니다.",
-  complete_easy: "오늘 과제는 학생에게 비교적 수월하게 진행되었습니다.",
-  partial_80: "과제를 대부분 수행했으며, 남은 부분은 이어서 확인하겠습니다.",
-  known_only: "아는 문항 위주로 풀이했으며, 어려웠던 문항은 추가 확인이 필요합니다.",
-  too_hard: "과제 난도가 다소 높아 보충 설명과 분량 조정이 필요합니다.",
-  answer_suspected: "풀이 과정을 한 번 더 확인할 필요가 있어 다음 수업에서 점검하겠습니다.",
-  not_done: "과제가 충분히 완료되지 않아 보충 관리가 필요합니다.",
-  not_checked: "과제 확인이 아직 완료되지 않았습니다."
-};
-
 function assignmentStatusText(value, fallback = "") {
   return assignmentStatusMessageMap[value] ?? fallback ?? value ?? "";
 }
 
-function buildLessonCommentBody(payload, audience) {
-  const assignmentStatus = payload.assignmentStatusMessage || assignmentStatusText(payload.assignmentStatus);
-  const attendance = attendanceLabel(payload.attendanceStatus);
-  const lines = [
-    attendance ? `출결: ${attendance}` : "",
-    payload.lessonMaterial ? `강의 교재: ${payload.lessonMaterial}` : "",
-    payload.lessonContent ? `강의 내용: ${payload.lessonContent}` : "",
-    payload.previousHomework ? `지난 과제: ${payload.previousHomework}` : "",
-    payload.nextHomework ? `다음 과제: ${payload.nextHomework}` : "",
-    audience === "parent" && assignmentStatus ? `과제 상태: ${assignmentStatus}` : "",
-    payload.message ? `코멘트: ${payload.message}` : ""
-  ];
+function normalizeList(value) {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => (typeof item === "string" ? item.trim() : item))
+      .filter(Boolean);
+  }
 
-  return lines.filter(Boolean).join("\n");
+  if (!value) return [];
+
+  return String(value)
+    .split(/\r?\n|,\s*/g)
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
 function resolveRecipient(phone) {
@@ -91,11 +88,7 @@ function resolveRecipient(phone) {
   const allowRealRecipients = process.env.ALIMTALK_ALLOW_REAL_PARENT_NUMBERS === "true";
 
   if (allowRealRecipients) {
-    return {
-      requestedTo,
-      to: requestedTo,
-      isTestRedirected: false
-    };
+    return { requestedTo, to: requestedTo, isTestRedirected: false };
   }
 
   return {
@@ -119,21 +112,6 @@ function configState(name) {
   return Boolean(envValue(name));
 }
 
-function normalizeList(value) {
-  if (Array.isArray(value)) {
-    return value
-      .map((item) => (typeof item === "string" ? item.trim() : item))
-      .filter(Boolean);
-  }
-
-  if (!value) return [];
-
-  return String(value)
-    .split(/\r?\n|,\s*/g)
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
 function formatScheduleItem(item) {
   if (typeof item === "string") return item;
 
@@ -147,6 +125,92 @@ function formatScheduleItem(item) {
   ];
 
   return parts.filter(Boolean).join(" · ");
+}
+
+function buildAttendanceBody({ attendanceStatus, checkedAt, lessonName, lateMinutes, reason }) {
+  const status = attendanceLabel(attendanceStatus);
+  const lines = [
+    `${checkedAt ? `${checkedAt} ` : ""}${status} 처리되었습니다.`,
+    lessonName ? `수업: ${lessonName}` : ""
+  ];
+
+  if (status === "지각" && lateMinutes) lines.push(`지각: ${lateMinutes}분`);
+  if ((status === "지각" || status === "결석" || status === "인정결석") && reason) {
+    lines.push(`사유: ${reason}`);
+  }
+
+  return lines.filter(Boolean).join("\n");
+}
+
+function buildDailyReportBody({
+  attendanceStatus,
+  assignmentStatus,
+  incompleteHomeworks,
+  lessonContent,
+  lessonMaterial,
+  nextHomework,
+  previousHomework,
+  preparationNotice,
+  retestSchedule,
+  supplementSchedule,
+  teacherComment
+}) {
+  const incompleteList = normalizeList(incompleteHomeworks);
+  const assignmentStatusMessage = assignmentStatusText(assignmentStatus, assignmentStatus);
+  const lines = [
+    `출결: ${attendanceLabel(attendanceStatus)}`,
+    lessonMaterial ? `강의 교재: ${lessonMaterial}` : "",
+    lessonContent ? `강의 내용: ${lessonContent}` : "",
+    previousHomework ? `지난 과제: ${previousHomework}` : "",
+    nextHomework ? `다음 과제: ${nextHomework}` : "",
+    assignmentStatusMessage ? `과제 상태: ${assignmentStatusMessage}` : "",
+    preparationNotice ? `수업 준비: ${preparationNotice}` : "",
+    incompleteList.length ? `미완료 과제:\n${incompleteList.map((item) => `- ${item}`).join("\n")}` : "",
+    retestSchedule ? `[중요] 재시험 일정: ${retestSchedule}` : "",
+    supplementSchedule ? `[중요] 보충 일정: ${supplementSchedule}` : "",
+    teacherComment ? `코멘트: ${teacherComment}` : ""
+  ];
+
+  return lines.filter(Boolean).join("\n");
+}
+
+function buildLessonCommentBody(payload, audience) {
+  return buildDailyReportBody({
+    attendanceStatus: payload.attendanceStatus,
+    assignmentStatus: audience === "parent" ? payload.assignmentStatusMessage || payload.assignmentStatus : "",
+    lessonContent: payload.lessonContent,
+    lessonMaterial: payload.lessonMaterial,
+    nextHomework: payload.nextHomework,
+    previousHomework: payload.previousHomework,
+    preparationNotice: payload.preparationNotice,
+    teacherComment: payload.message
+  });
+}
+
+function buildStudentScheduleReminderBody({ scheduleType, scheduleTitle, scheduleDate, scheduleTime, lessonName, memo }) {
+  const type = scheduleType === "retest" ? "재시험" : scheduleType === "supplement" ? "보충" : "일정";
+  const lines = [
+    `[중요] 오늘 ${type} 일정이 있습니다.`,
+    scheduleTitle ? `내용: ${scheduleTitle}` : "",
+    scheduleDate || scheduleTime ? `일시: ${[scheduleDate, scheduleTime].filter(Boolean).join(" ")}` : "",
+    lessonName ? `수업: ${lessonName}` : "",
+    memo ? `메모: ${memo}` : ""
+  ];
+
+  return lines.filter(Boolean).join("\n");
+}
+
+function buildSlackDailyScheduleSummary({ date, retests, supplements }) {
+  const retestItems = normalizeList(retests).map(formatScheduleItem);
+  const supplementItems = normalizeList(supplements).map(formatScheduleItem);
+  const lines = [`[koh_you_math] ${date ?? "오늘"} 보충/재시험 일정`];
+
+  lines.push("");
+  lines.push(retestItems.length ? `재시험\n${retestItems.map((item) => `- ${item}`).join("\n")}` : "재시험: 없음");
+  lines.push("");
+  lines.push(supplementItems.length ? `보충\n${supplementItems.map((item) => `- ${item}`).join("\n")}` : "보충: 없음");
+
+  return lines.join("\n");
 }
 
 export function getNotificationStatus() {
@@ -175,10 +239,7 @@ export function getNotificationStatus() {
 async function sendKakaoAlimtalk({ payload, recipientPhone, templateEnvName, variables }) {
   const recipient = resolveRecipient(recipientPhone);
 
-  if (!recipient.to) {
-    throw new Error("A recipient phone number is required.");
-  }
-
+  if (!recipient.to) throw new Error("A recipient phone number is required.");
   if (process.env.ALIMTALK_ALLOW_REAL_PARENT_NUMBERS === "true" && !recipient.requestedTo) {
     throw new Error("A real recipient phone number is required in live-send mode.");
   }
@@ -240,24 +301,6 @@ export async function sendAttendanceAlimtalk(payload) {
   });
 }
 
-function buildAttendanceBody({ attendanceStatus, checkedAt, lessonName, lateMinutes, reason }) {
-  const status = attendanceLabel(attendanceStatus);
-  const lines = [
-    `${checkedAt ? `${checkedAt}에 ` : ""}${status} 처리되었습니다.`,
-    lessonName ? `수업: ${lessonName}` : ""
-  ];
-
-  if (status === "지각" && lateMinutes) {
-    lines.push(`지각: ${lateMinutes}분`);
-  }
-
-  if ((status === "지각" || status === "결석" || status === "인정결석") && reason) {
-    lines.push(`사유: ${reason}`);
-  }
-
-  return lines.filter(Boolean).join("\n");
-}
-
 export async function sendDailyReportAlimtalk(payload) {
   const reportBody =
     payload.reportBody ??
@@ -269,6 +312,7 @@ export async function sendDailyReportAlimtalk(payload) {
       lessonMaterial: payload.lessonMaterial ?? payload.textbook,
       nextHomework: payload.nextHomework,
       previousHomework: payload.previousHomework,
+      preparationNotice: payload.preparationNotice,
       retestSchedule: payload.retestSchedule,
       supplementSchedule: payload.supplementSchedule,
       teacherComment: payload.teacherComment
@@ -287,41 +331,10 @@ export async function sendDailyReportAlimtalk(payload) {
   });
 }
 
-function buildDailyReportBody({
-  attendanceStatus,
-  assignmentStatus,
-  incompleteHomeworks,
-  lessonContent,
-  lessonMaterial,
-  nextHomework,
-  previousHomework,
-  retestSchedule,
-  supplementSchedule,
-  teacherComment
-}) {
-  const incompleteList = normalizeList(incompleteHomeworks);
-  const assignmentStatusMessage = assignmentStatusText(assignmentStatus, assignmentStatus);
-  const lines = [
-    `출결: ${attendanceLabel(attendanceStatus)}`,
-    lessonMaterial ? `강의 교재: ${lessonMaterial}` : "",
-    lessonContent ? `강의 내용: ${lessonContent}` : "",
-    previousHomework ? `지난 과제: ${previousHomework}` : "",
-    nextHomework ? `다음 과제: ${nextHomework}` : "",
-    assignmentStatusMessage ? `과제 상태: ${assignmentStatusMessage}` : "",
-    incompleteList.length ? `미완료 숙제:\n${incompleteList.map((item) => `- ${item}`).join("\n")}` : "",
-    retestSchedule ? `[중요] 재시험 일정: ${retestSchedule}` : "",
-    supplementSchedule ? `[중요] 보충 일정: ${supplementSchedule}` : "",
-    teacherComment ? `코멘트: ${teacherComment}` : ""
-  ];
-
-  return lines.filter(Boolean).join("\n");
-}
-
 export async function sendLessonCommentAlimtalk(payload) {
   const audience = payload.target === "student" ? "student" : "parent";
   const recipientPhone = audience === "student" ? payload.studentPhone : payload.parentPhone;
-  const templateEnvName =
-    audience === "student" ? TEMPLATE_ENV.studentComment : TEMPLATE_ENV.dailyReport;
+  const templateEnvName = audience === "student" ? TEMPLATE_ENV.studentComment : TEMPLATE_ENV.dailyReport;
   const commentBody = buildLessonCommentBody(payload, audience);
 
   return sendKakaoAlimtalk({
@@ -365,26 +378,6 @@ export async function sendStudentScheduleReminderAlimtalk(payload) {
   });
 }
 
-function buildStudentScheduleReminderBody({
-  scheduleType,
-  scheduleTitle,
-  scheduleDate,
-  scheduleTime,
-  lessonName,
-  memo
-}) {
-  const type = scheduleType === "retest" ? "재시험" : scheduleType === "supplement" ? "보충" : "일정";
-  const lines = [
-    `[중요] 오늘 ${type} 일정이 있습니다.`,
-    scheduleTitle ? `내용: ${scheduleTitle}` : "",
-    scheduleDate || scheduleTime ? `일시: ${[scheduleDate, scheduleTime].filter(Boolean).join(" ")}` : "",
-    lessonName ? `수업: ${lessonName}` : "",
-    memo ? `메모: ${memo}` : ""
-  ];
-
-  return lines.filter(Boolean).join("\n");
-}
-
 export async function sendSlackDailyScheduleSummary(payload) {
   const text =
     payload.text ??
@@ -394,12 +387,7 @@ export async function sendSlackDailyScheduleSummary(payload) {
       supplements: payload.supplements
     });
 
-  if (isSlackDryRun()) {
-    return {
-      dryRun: true,
-      text
-    };
-  }
+  if (isSlackDryRun()) return { dryRun: true, text };
 
   const webhookUrl = requiredEnv("SLACK_WEBHOOK_URL");
   const response = await fetch(webhookUrl, {
@@ -408,30 +396,7 @@ export async function sendSlackDailyScheduleSummary(payload) {
     body: JSON.stringify({ text })
   });
 
-  if (!response.ok) {
-    throw new Error(`Slack webhook failed: ${response.status} ${response.statusText}`);
-  }
+  if (!response.ok) throw new Error(`Slack webhook failed: ${response.status} ${response.statusText}`);
 
-  return {
-    dryRun: false,
-    status: response.status,
-    text
-  };
-}
-
-function buildSlackDailyScheduleSummary({ date, retests, supplements }) {
-  const retestItems = normalizeList(retests).map(formatScheduleItem);
-  const supplementItems = normalizeList(supplements).map(formatScheduleItem);
-  const lines = [`[koh_you_math] ${date ?? "오늘"} 보충/재시험 일정`];
-
-  lines.push("");
-  lines.push(retestItems.length ? `재시험\n${retestItems.map((item) => `- ${item}`).join("\n")}` : "재시험: 없음");
-  lines.push("");
-  lines.push(
-    supplementItems.length
-      ? `보충\n${supplementItems.map((item) => `- ${item}`).join("\n")}`
-      : "보충: 없음"
-  );
-
-  return lines.join("\n");
+  return { dryRun: false, status: response.status, text };
 }
