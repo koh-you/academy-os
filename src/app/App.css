@@ -2075,6 +2075,98 @@ button:disabled {
   max-width: 820px;
 }
 
+.modalCard.studentAddModal {
+  border-radius: 24px;
+  gap: 26px;
+  max-width: 960px;
+  padding: 28px 30px 26px;
+}
+
+.studentAddModal .modalHeader {
+  align-items: start;
+}
+
+.studentAddModal .modalHeader h2 {
+  font-size: 26px;
+}
+
+.studentAddTabs {
+  background: #eef2f7;
+  border-radius: 18px;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 5px;
+}
+
+.studentAddTabs button {
+  background: transparent;
+  border: 0;
+  border-radius: 14px;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 17px;
+  font-weight: 900;
+  min-height: 52px;
+}
+
+.studentAddTabs button.active {
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  color: #0f172a;
+}
+
+.studentAddGrid {
+  display: grid;
+  gap: 18px 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.studentAddGrid label,
+.studentBulkPlaceholder {
+  color: #334155;
+  display: grid;
+  font-weight: 900;
+  gap: 8px;
+}
+
+.studentAddGrid input,
+.studentBulkPlaceholder textarea {
+  background: #ffffff;
+  border: 1px solid #cfdbef;
+  border-radius: 16px;
+  color: #0f172a;
+  font-size: 17px;
+  min-height: 48px;
+  padding: 0 16px;
+}
+
+.studentBulkPlaceholder textarea {
+  min-height: 150px;
+  padding: 14px 16px;
+}
+
+.birthYearWithGrade {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.birthYearWithGrade span {
+  background: #eef2f7;
+  border-radius: 10px;
+  color: #475569;
+  font-weight: 900;
+  padding: 8px 12px;
+}
+
+.studentAddSubmit {
+  border-radius: 16px;
+  font-size: 18px;
+  min-height: 48px;
+}
+
 .deleteConfirmBody {
   display: grid;
   gap: 14px;

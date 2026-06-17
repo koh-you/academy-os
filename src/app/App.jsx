@@ -7069,6 +7069,7 @@ function OverdueHomework({ homeworks, students, onTeacherVerifyHomework }) {
 }
 
 function StudentModal({ templates, onClose, onSubmit }) {
+  const [mode, setMode] = useState("single");
   const [form, setForm] = useState({
     name: "",
     birthYear: "",
@@ -7084,37 +7085,65 @@ function StudentModal({ templates, onClose, onSubmit }) {
   });
 
   function update(field, value) {
-    setForm((current) => ({ ...current, [field]: value }));
+    setForm((current) => {
+      const next = { ...current, [field]: value };
+      if (field === "birthYear") {
+        next.grade = inferGradeFromBirthYear(value);
+      }
+      return next;
+    });
   }
 
   return (
-    <Modal title="학생 추가" subtitle="한 명씩 등록하거나 이후 엑셀 일괄 등록으로 확장합니다." onClose={onClose}>
-      <div className="fieldGrid two">
-        <label>이름<input value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="홍길동" /></label>
-        <label>출생연도<input value={form.birthYear} onChange={(event) => update("birthYear", event.target.value)} placeholder="예: 2010" /></label>
-        <label>학교<input value={form.schoolName} onChange={(event) => update("schoolName", event.target.value)} placeholder="OO중학교" /></label>
-        <label>PIN<input value={form.pin} onChange={(event) => update("pin", event.target.value)} placeholder="4자리 이상" /></label>
-        <label>학생전화번호<input value={form.studentPhone} onChange={(event) => update("studentPhone", event.target.value)} placeholder="01012345678" /></label>
-        <label>학부모전화번호<input value={form.parentPhone} onChange={(event) => update("parentPhone", event.target.value)} placeholder="01012345678" /></label>
-        <label>교과서<input value={form.textbook} onChange={(event) => update("textbook", event.target.value)} placeholder="예: 수학의 정석" /></label>
-        <label>특이사항<input value={form.specialNote} onChange={(event) => update("specialNote", event.target.value)} placeholder="예: 계산 실수 반복" /></label>
-        <label>학년
-          <select value={form.grade} onChange={(event) => update("grade", event.target.value)}>
-            {["중1", "중2", "중3", "고1", "고2", "고3"].map((grade) => <option key={grade}>{grade}</option>)}
-          </select>
-        </label>
-        <label>기본 수업 틀
-          <select value={form.defaultClassTemplateId} onChange={(event) => update("defaultClassTemplateId", event.target.value)}>
-            {templates.map((template) => <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>)}
-          </select>
-        </label>
+    <Modal
+      className="studentAddModal"
+      title="학생 추가"
+      subtitle="한 명씩 등록하거나 엑셀에서 복사한 목록을 일괄 등록합니다."
+      onClose={onClose}
+    >
+      <div className="studentAddTabs" role="tablist" aria-label="학생 추가 방식">
+        <button className={mode === "single" ? "active" : ""} onClick={() => setMode("single")} type="button">한 명씩</button>
+        <button className={mode === "bulk" ? "active" : ""} onClick={() => setMode("bulk")} type="button">엑셀 일괄 등록</button>
       </div>
-      <label className="wideLabel">개별 스케줄 메모
-        <input value={form.scheduleOverride} onChange={(event) => update("scheduleOverride", event.target.value)} placeholder="예: 월요일만 7-10반" />
-      </label>
-      <button className="primaryButton full" onClick={() => onSubmit(form)} type="button">+ 학생 추가</button>
+
+      {mode === "single" ? (
+        <>
+          <div className="studentAddGrid">
+            <label>이름<input value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="박수빈" /></label>
+            <label>
+              출생연도
+              <div className="birthYearWithGrade">
+                <input value={form.birthYear} onChange={(event) => update("birthYear", event.target.value)} placeholder="2010" />
+                <span>{form.grade || "학년"}</span>
+              </div>
+            </label>
+            <label>학교<input value={form.schoolName} onChange={(event) => update("schoolName", event.target.value)} placeholder="자운고등학교" /></label>
+            <label>PIN<input value={form.pin} onChange={(event) => update("pin", event.target.value)} placeholder="1234" /></label>
+          </div>
+          <button className="primaryButton full studentAddSubmit" onClick={() => onSubmit(form)} type="button">+ 학생 추가</button>
+        </>
+      ) : (
+        <div className="studentBulkPlaceholder">
+          <strong>엑셀 일괄 등록</strong>
+          <p className="muted">이름, 출생연도, 학교, PIN 순서로 복사한 목록을 붙여넣는 기능으로 확장 예정입니다.</p>
+          <textarea placeholder={"박수빈\t2010\t자운고등학교\t1234"} rows="6" />
+          <button className="primaryButton full" disabled type="button">일괄 등록 준비 중</button>
+        </div>
+      )}
     </Modal>
   );
+}
+
+function inferGradeFromBirthYear(birthYear) {
+  const year = Number(String(birthYear).replace(/[^0-9]/g, ""));
+  if (!year) return "고1";
+  const ageGrade = new Date(`${today}T00:00:00+09:00`).getFullYear() - year - 15;
+  if (ageGrade <= -2) return "중1";
+  if (ageGrade === -1) return "중2";
+  if (ageGrade === 0) return "중3";
+  if (ageGrade === 1) return "고1";
+  if (ageGrade === 2) return "고2";
+  return "고3";
 }
 
 function ReportCenter({ lessons, records, reportLesson, selectedReportLessonId, snapshots, students, onSaveSnapshot, onSelectLesson }) {
