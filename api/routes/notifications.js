@@ -39,6 +39,10 @@ function isDryRun() {
   return process.env.ALIMTALK_DRY_RUN !== "false";
 }
 
+function isSlackDryRun() {
+  return process.env.SLACK_DRY_RUN !== "false";
+}
+
 function attendanceLabel(status) {
   return {
     absent: "결석",
@@ -86,7 +90,9 @@ function configState(name) {
 
 function normalizeList(value) {
   if (Array.isArray(value)) {
-    return value.map((item) => String(item).trim()).filter(Boolean);
+    return value
+      .map((item) => (typeof item === "string" ? item.trim() : item))
+      .filter(Boolean);
   }
 
   if (!value) return [];
@@ -95,6 +101,21 @@ function normalizeList(value) {
     .split(/\r?\n|,\s*/g)
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function formatScheduleItem(item) {
+  if (typeof item === "string") return item;
+
+  const parts = [
+    item.studentName,
+    item.title ?? item.type,
+    item.date,
+    item.time,
+    item.lessonName ? `수업: ${item.lessonName}` : "",
+    item.memo
+  ];
+
+  return parts.filter(Boolean).join(" · ");
 }
 
 export function getNotificationStatus() {
@@ -110,6 +131,7 @@ export function getNotificationStatus() {
     allowRealRecipients: process.env.ALIMTALK_ALLOW_REAL_PARENT_NUMBERS === "true",
     testRecipient: compactPhoneNumber(process.env.ALIMTALK_TEST_RECIPIENT ?? DEFAULT_TEST_RECIPIENT),
     solapiConfigured: REQUIRED_SOLAPI_ENV.every(configState),
+    slackConfigured: configState("SLACK_WEBHOOK_URL"),
     templatesConfigured: {
       attendance: configState(TEMPLATE_ENV.attendance),
       dailyReport: configState(TEMPLATE_ENV.dailyReport),
@@ -246,8 +268,8 @@ function buildDailyReportBody({
     previousHomework ? `지난 숙제: ${previousHomework}` : "",
     nextHomework ? `다음 숙제: ${nextHomework}` : "",
     incompleteList.length ? `미완료 숙제:\n${incompleteList.map((item) => `- ${item}`).join("\n")}` : "",
-    retestSchedule ? `재시험 일정: ${retestSchedule}` : "",
-    supplementSchedule ? `보충 일정: ${supplementSchedule}` : "",
+    retestSchedule ? `[중요] 재시험 일정: ${retestSchedule}` : "",
+    supplementSchedule ? `[중요] 보충 일정: ${supplementSchedule}` : "",
     teacherComment ? `코멘트: ${teacherComment}` : ""
   ];
 
@@ -272,4 +294,101 @@ export async function sendLessonCommentAlimtalk(payload) {
       "#{코멘트}": String(payload.message ?? "")
     }
   });
+}
+
+export async function sendStudentScheduleReminderAlimtalk(payload) {
+  const reminderBody =
+    payload.reminderBody ??
+    buildStudentScheduleReminderBody({
+      scheduleType: payload.scheduleType,
+      scheduleTitle: payload.scheduleTitle,
+      scheduleDate: payload.scheduleDate,
+      scheduleTime: payload.scheduleTime,
+      lessonName: payload.lessonName,
+      memo: payload.memo
+    });
+
+  return sendKakaoAlimtalk({
+    payload,
+    recipientPhone: payload.studentPhone,
+    templateEnvName: TEMPLATE_ENV.studentComment,
+    variables: {
+      "#{학원명}": String(payload.academyName ?? "koh_you_math"),
+      "#{학생명}": String(payload.studentName ?? ""),
+      "#{수업명}": String(payload.lessonName ?? payload.scheduleTitle ?? ""),
+      "#{수업일}": String(payload.scheduleDate ?? ""),
+      "#{코멘트}": reminderBody
+    }
+  });
+}
+
+function buildStudentScheduleReminderBody({
+  scheduleType,
+  scheduleTitle,
+  scheduleDate,
+  scheduleTime,
+  lessonName,
+  memo
+}) {
+  const type = scheduleType === "retest" ? "재시험" : scheduleType === "supplement" ? "보충" : "일정";
+  const lines = [
+    `[중요] 오늘 ${type} 일정이 있습니다.`,
+    scheduleTitle ? `내용: ${scheduleTitle}` : "",
+    scheduleDate || scheduleTime ? `일시: ${[scheduleDate, scheduleTime].filter(Boolean).join(" ")}` : "",
+    lessonName ? `수업: ${lessonName}` : "",
+    memo ? `메모: ${memo}` : ""
+  ];
+
+  return lines.filter(Boolean).join("\n");
+}
+
+export async function sendSlackDailyScheduleSummary(payload) {
+  const text =
+    payload.text ??
+    buildSlackDailyScheduleSummary({
+      date: payload.date,
+      retests: payload.retests,
+      supplements: payload.supplements
+    });
+
+  if (isSlackDryRun()) {
+    return {
+      dryRun: true,
+      text
+    };
+  }
+
+  const webhookUrl = requiredEnv("SLACK_WEBHOOK_URL");
+  const response = await fetch(webhookUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Slack webhook failed: ${response.status} ${response.statusText}`);
+  }
+
+  return {
+    dryRun: false,
+    status: response.status,
+    text
+  };
+}
+
+function buildSlackDailyScheduleSummary({ date, retests, supplements }) {
+  const retestItems = normalizeList(retests).map(formatScheduleItem);
+  const supplementItems = normalizeList(supplements).map(formatScheduleItem);
+  const lines = [`[koh_you_math] ${date ?? "오늘"} 보충/재시험 일정`];
+
+  lines.push("");
+  lines.push(retestItems.length ? `재시험\n${retestItems.map((item) => `- ${item}`).join("\n")}` : "재시험: 없음");
+  lines.push("");
+  lines.push(
+    supplementItems.length
+      ? `보충\n${supplementItems.map((item) => `- ${item}`).join("\n")}`
+      : "보충: 없음"
+  );
+
+  return lines.join("\n");
 }

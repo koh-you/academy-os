@@ -21,7 +21,9 @@ import {
   getNotificationStatus,
   sendAttendanceAlimtalk,
   sendDailyReportAlimtalk,
-  sendLessonCommentAlimtalk
+  sendLessonCommentAlimtalk,
+  sendSlackDailyScheduleSummary,
+  sendStudentScheduleReminderAlimtalk
 } from "./routes/notifications.js";
 
 loadEnvFile();
@@ -263,6 +265,28 @@ const server = http.createServer(async (request, response) => {
       const payload = await readJsonBody(request);
       const result = await sendDailyReportAlimtalk(payload);
       sendJson(request, response, 200, { ok: true, provider: "solapi", result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/notifications/student-schedule-reminder") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await sendStudentScheduleReminderAlimtalk(payload);
+      sendJson(request, response, 200, { ok: true, provider: "solapi", result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/notifications/slack-daily-schedule") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await sendSlackDailyScheduleSummary(payload);
+      sendJson(request, response, 200, { ok: true, provider: "slack", result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
     }
