@@ -815,7 +815,7 @@ button {
 }
 
 .journalTable {
-  min-width: 1360px;
+  min-width: 1460px;
 }
 
 .journalRow {
@@ -823,7 +823,7 @@ button {
   border-top: 1px solid #e2e8f0;
   display: grid;
   gap: 8px;
-  grid-template-columns: 160px 180px 92px 180px 180px 140px 170px 116px 116px 110px;
+  grid-template-columns: 160px 150px 170px 92px 180px 180px 150px 126px 126px 110px;
   min-height: 72px;
   padding: 8px 10px;
 }
@@ -1874,6 +1874,16 @@ textarea {
 .journalTable input,
 .journalTable button {
   font-size: 14px;
+}
+
+.assignmentStatusSelect {
+  align-self: center;
+  border: 1px solid #cbd8ee;
+  border-radius: 8px;
+  color: #0f172a;
+  font-weight: 800;
+  min-height: 42px;
+  padding: 0 10px;
 }
 
 .managementTable input,

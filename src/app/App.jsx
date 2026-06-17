@@ -48,6 +48,22 @@ const homeworkLabels = {
   overdue: "밀림"
 };
 
+const assignmentStatusOptions = [
+  { value: "", label: "선택" },
+  { value: "complete_thorough", label: "성실 완료" },
+  { value: "complete_easy", label: "쉬움" },
+  { value: "partial_80", label: "80% 완료" },
+  { value: "known_only", label: "아는 것만 풂" },
+  { value: "too_hard", label: "난이도 과함" },
+  { value: "answer_suspected", label: "풀이 확인 필요" },
+  { value: "not_done", label: "미완료" },
+  { value: "not_checked", label: "미검사" }
+];
+
+const assignmentStatusLabels = Object.fromEntries(
+  assignmentStatusOptions.map((option) => [option.value, option.label])
+);
+
 const saveStateLabels = {
   idle: "저장 전",
   dirty: "변경됨",
@@ -1066,6 +1082,7 @@ export function App() {
         needsRetest: false,
         ...(existingRecord ?? {}),
         [field]: value,
+        ...(field === "assignmentStatus" ? { incompleteHomework: value } : {}),
         updatedBy: "instructor_owner_001",
         updatedAt: new Date().toISOString()
       };
@@ -2530,7 +2547,7 @@ function LessonJournalDetail({
       <section className="panel commentAiToolbar">
         <div>
           <strong>코멘트 AI</strong>
-          <span className="muted">강사코멘트는 학부모용, 학생코멘트는 학생 화면용으로 다듬습니다.</span>
+          <span className="muted">학부모 알림톡과 학생 알림톡 문구를 AI로 다듬습니다.</span>
         </div>
         <select value={commentAiProvider} onChange={(event) => changeCommentProvider(event.target.value)}>
           <option value="mock">모의분석</option>
@@ -2561,14 +2578,14 @@ function LessonJournalDetail({
         <div className="journalTable">
           <div className="journalRow journalHead">
             <span>학생</span>
-            <span>교과서</span>
+            <span>강의 교재</span>
+            <span>강의 내용</span>
             <span>출결</span>
             <span>지난 숙제</span>
             <span>다음 숙제</span>
-            <span>미완료</span>
-            <span>진도</span>
-            <span>강사코멘트</span>
-            <span>학생코멘트</span>
+            <span>과제 상태</span>
+            <span>학부모 알림톡</span>
+            <span>학생 알림톡</span>
             <span>저장</span>
           </div>
           {students.map((student) => {
@@ -2596,6 +2613,12 @@ function LessonJournalDetail({
                   <small>{student.grade || "고1"} · {student.schoolName || "학교 미입력"}</small>
                 </span>
                 <span className="journalTextCell">{student.textbook || student.currentTextbook || "미입력"}</span>
+                <textarea
+                  value={record.lessonProgress ?? record.progress ?? ""}
+                  onChange={(event) => onChangeRecord(lesson, student, "lessonProgress", event.target.value)}
+                  placeholder="오늘 강의 내용"
+                  rows="2"
+                />
                 <button
                   className={`attendanceBadge attendance-${record.attendanceStatus ?? "pending"}`}
                   onClick={() => onOpenAttendance({ lesson, record, student })}
@@ -2615,25 +2638,22 @@ function LessonJournalDetail({
                   placeholder="다음 숙제"
                   rows="2"
                 />
-                <textarea
-                  value={previousHomework?.incompleteHomework ?? record.incompleteHomework ?? ""}
-                  onChange={(event) => onChangeRecord(lesson, student, "incompleteHomework", event.target.value)}
-                  placeholder="못한 숙제"
-                  rows="2"
-                />
-                <textarea
-                  value={record.lessonProgress ?? ""}
-                  onChange={(event) => onChangeRecord(lesson, student, "lessonProgress", event.target.value)}
-                  placeholder="진도 없음"
-                  rows="2"
-                />
+                <select
+                  className="assignmentStatusSelect"
+                  value={record.assignmentStatus ?? record.incompleteHomework ?? ""}
+                  onChange={(event) => onChangeRecord(lesson, student, "assignmentStatus", event.target.value)}
+                >
+                  {assignmentStatusOptions.map((option) => (
+                    <option key={option.value || "empty"} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
                 <div className="journalCommentCell">
                   <button
                     className={record.teacherComment ? "commentOpenButton filled" : "commentOpenButton"}
                     onClick={() => setCommentModal({ audience: "parent", record, student })}
                     type="button"
                   >
-                    강사코멘트
+                    학부모 알림톡
                   </button>
                   <small>{record.teacherComment ? "작성됨" : "미작성"}</small>
                 </div>
@@ -2643,7 +2663,7 @@ function LessonJournalDetail({
                     onClick={() => setCommentModal({ audience: "student", record, student })}
                     type="button"
                   >
-                    학생코멘트
+                    학생 알림톡
                   </button>
                   <small>{record.studentComment ? "작성됨" : "미작성"}</small>
                 </div>
@@ -2735,10 +2755,10 @@ function CommentComposerModal({
   const isParent = audience === "parent";
   const field = isParent ? "teacherComment" : "studentComment";
   const comment = record?.[field] ?? "";
-  const title = isParent ? `${student.name} 학부모 코멘트` : `${student.name} 학생 코멘트`;
+  const title = isParent ? `${student.name} 학부모 알림톡` : `${student.name} 학생 알림톡`;
   const receiverLabel = isParent ? `${student.name} 학부모님` : student.name;
-  const previewTitle = isParent ? "학부모 수신 메시지" : "학생 화면 메시지";
-  const sendLabel = isParent ? "학부모 발송" : "학생 발송";
+  const previewTitle = isParent ? "학부모 알림톡 미리보기" : "학생 알림톡 미리보기";
+  const sendLabel = isParent ? "학부모 알림톡 발송" : "학생 알림톡 발송";
   const aiStatus = isParent ? record?.teacherCommentAiStatus : record?.studentCommentAiStatus;
   const sendStatus = isParent ? record?.teacherCommentSendStatus : record?.studentCommentSendStatus;
 
@@ -2757,7 +2777,7 @@ function CommentComposerModal({
             className="commentComposerTextarea"
             value={comment}
             onChange={(event) => onChangeRecord(lesson, student, field, event.target.value)}
-            placeholder={isParent ? "학부모님께 보낼 수업 코멘트를 적어주세요." : "학생 화면에 보일 코멘트를 적어주세요."}
+            placeholder={isParent ? "학부모님께 보낼 알림톡 문구를 적어주세요." : "학생에게 보낼 알림톡 문구를 적어주세요."}
           />
           <div className="commentComposerActions">
             <button
@@ -2800,7 +2820,7 @@ function CommentComposerModal({
               )}
             </div>
             <div className="messagePreviewFooter">
-              <span>{isParent ? "학부모 알림톡/리포트 메시지 미리보기" : "학생 앱 활동 로그 메시지 미리보기"}</span>
+              <span>{previewTitle}</span>
             </div>
           </div>
         </section>
@@ -7316,6 +7336,7 @@ function createEmptyRecord(lesson, student) {
     homeworkStatus: "not_started",
     teacherComment: "",
     studentComment: "",
+    assignmentStatus: "",
     needsMakeup: false,
     needsRetest: false
   };
@@ -7411,13 +7432,13 @@ function createAiReportDraft(student, lesson, record, homeworkBundle) {
   return [
     `${student.name} 학생 데일리 리포트 초안입니다.`,
     `학교/학년: ${student.schoolName} ${student.grade}`,
-    `교과서: ${student.textbook ?? "미지정"}`,
+    `강의 교재: ${student.textbook ?? "미지정"}`,
     `특이사항: ${student.specialNote ?? "없음"}`,
     `수업: ${lesson.date} ${lesson.className} (${lesson.startTime}-${lesson.endTime})`,
     `출결: ${attendance}`,
     `지난 숙제: ${previousHomework}`,
     `오늘 나간 숙제: ${todayHomework}`,
-    `행동태그: ${record?.behaviorTag || "선택 없음"}`,
+    `과제 상태: ${assignmentStatusLabels[record?.assignmentStatus ?? record?.incompleteHomework ?? ""] ?? "선택 없음"}`,
     `수업 코멘트: ${comment}`,
     "위 내용은 AI API 호출을 붙이기 전의 모의 초안입니다. 실제 발송 전 원장 검수가 필요합니다."
   ].join("\n");

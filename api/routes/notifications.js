@@ -233,6 +233,9 @@ export async function sendDailyReportAlimtalk(payload) {
     buildDailyReportBody({
       attendanceStatus: payload.attendanceStatus,
       incompleteHomeworks: payload.incompleteHomeworks ?? payload.incompleteHomework,
+      assignmentStatus: payload.assignmentStatus,
+      lessonContent: payload.lessonContent ?? payload.progress,
+      lessonMaterial: payload.lessonMaterial ?? payload.textbook,
       nextHomework: payload.nextHomework,
       previousHomework: payload.previousHomework,
       retestSchedule: payload.retestSchedule,
@@ -255,7 +258,10 @@ export async function sendDailyReportAlimtalk(payload) {
 
 function buildDailyReportBody({
   attendanceStatus,
+  assignmentStatus,
   incompleteHomeworks,
+  lessonContent,
+  lessonMaterial,
   nextHomework,
   previousHomework,
   retestSchedule,
@@ -265,8 +271,11 @@ function buildDailyReportBody({
   const incompleteList = normalizeList(incompleteHomeworks);
   const lines = [
     `출결: ${attendanceLabel(attendanceStatus)}`,
+    lessonMaterial ? `강의 교재: ${lessonMaterial}` : "",
+    lessonContent ? `강의 내용: ${lessonContent}` : "",
     previousHomework ? `지난 숙제: ${previousHomework}` : "",
     nextHomework ? `다음 숙제: ${nextHomework}` : "",
+    assignmentStatus ? `과제 상태: ${assignmentStatus}` : "",
     incompleteList.length ? `미완료 숙제:\n${incompleteList.map((item) => `- ${item}`).join("\n")}` : "",
     retestSchedule ? `[중요] 재시험 일정: ${retestSchedule}` : "",
     supplementSchedule ? `[중요] 보충 일정: ${supplementSchedule}` : "",
