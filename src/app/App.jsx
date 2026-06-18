@@ -329,7 +329,36 @@ function getDefaultMathExamDate(row, index = 0) {
   return row.mathExamDate || fallbackBySchool[row.schoolName] || `2026-06-${String(24 + (index % 5)).padStart(2, "0")}`;
 }
 
-function buildExamPrepRowsFromStudents(students, examCycle, classTemplateId = "") {
+function examCycleTermKey(examCycle = "") {
+  const [year, semester] = String(examCycle).split("-");
+  return [year || "", semester || ""].join("-");
+}
+
+function examPublisherLinkKey(row) {
+  return [
+    examCycleTermKey(row.examCycle),
+    row.schoolName || "학교 미입력",
+    row.grade || "학년 미입력",
+    row.subject || "공통수학1"
+  ].join("_");
+}
+
+function findLinkedPublisher(existingRows, draftRow) {
+  const linkKey = examPublisherLinkKey(draftRow);
+  return existingRows.find((row) => examPublisherLinkKey(row) === linkKey && row.publisher)?.publisher ?? "";
+}
+
+function syncPublisherAcrossExamTerm(rows, sourceRow) {
+  if (!sourceRow?.publisher) return rows;
+  const linkKey = examPublisherLinkKey(sourceRow);
+  return rows.map((row) =>
+    row.examPrepId !== sourceRow.examPrepId && examPublisherLinkKey(row) === linkKey
+      ? { ...row, publisher: sourceRow.publisher }
+      : row
+  );
+}
+
+function buildExamPrepRowsFromStudents(students, examCycle, classTemplateId = "", existingRows = []) {
   const classStudents = classTemplateId
     ? students.filter((student) => student.defaultClassTemplateId === classTemplateId)
     : students;
@@ -339,7 +368,9 @@ function buildExamPrepRowsFromStudents(students, examCycle, classTemplateId = ""
     .map((student) => {
       const schoolName = student.schoolName || "학교 미입력";
       const grade = student.grade || "학년 미입력";
-      const key = `${schoolName}_${grade}_${student.textbook || ""}_${examCycle}`;
+      const subject = "공통수학1";
+      const draftRow = { examCycle, schoolName, grade, subject };
+      const key = examPublisherLinkKey(draftRow);
       if (seen.has(key)) return null;
       seen.add(key);
 
@@ -348,8 +379,8 @@ function buildExamPrepRowsFromStudents(students, examCycle, classTemplateId = ""
         examCycle,
         schoolName,
         grade,
-        subject: "공통수학1",
-        publisher: student.textbook || "",
+        subject,
+        publisher: findLinkedPublisher(existingRows, draftRow) || student.textbook || "",
         scope: "",
         subTextbook: "",
         examPeriod: "",
@@ -1635,14 +1666,18 @@ export function App() {
             rows={examPrepRows}
             students={students}
             onEnsureExamCycleRows={(examCycle, classTemplateId) =>
-              setExamPrepRows((current) => mergeById(current, buildExamPrepRowsFromStudents(students, examCycle, classTemplateId), "examPrepId"))
+              setExamPrepRows((current) =>
+                mergeById(current, buildExamPrepRowsFromStudents(students, examCycle, classTemplateId, current), "examPrepId")
+              )
             }
             onUpdateRow={(examPrepId, field, value) => {
               const existingExamRow = examPrepRows.find((row) => row.examPrepId === examPrepId);
               const updatedExamRow = existingExamRow ? { ...existingExamRow, [field]: value } : null;
-              setExamPrepRows((current) =>
-                current.map((row) => (row.examPrepId === examPrepId ? { ...row, [field]: value } : row))
-              );
+              const shouldSyncPublisher = ["publisher", "examCycle", "schoolName", "grade", "subject"].includes(field);
+              setExamPrepRows((current) => {
+                const updatedRows = current.map((row) => (row.examPrepId === examPrepId ? { ...row, [field]: value } : row));
+                return shouldSyncPublisher && updatedExamRow ? syncPublisherAcrossExamTerm(updatedRows, updatedExamRow) : updatedRows;
+              });
               if (updatedExamRow && ["examCycle", "mathExamDate", "schoolName", "subject"].includes(field)) {
                 setSchoolEvents((current) => {
                   const eventId = `event_exam_${examPrepId}`;
