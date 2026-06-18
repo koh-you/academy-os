@@ -1778,7 +1778,6 @@ export function App() {
           <SupplementCenter
             homeworks={homeworks}
             lessons={lessons}
-            notificationLogs={notificationLogs}
             records={records}
             students={students}
             tasks={makeupTasks}
@@ -7428,7 +7427,6 @@ function HomeworkActionCard({ homework, onStudentCheckHomework }) {
 function SupplementCenter({
   homeworks,
   lessons,
-  notificationLogs,
   records,
   students,
   tasks,
@@ -7438,6 +7436,7 @@ function SupplementCenter({
   onUpdateTask
 }) {
   const [selectedSupplementStudentId, setSelectedSupplementStudentId] = useState("");
+  const [activeSupplementTab, setActiveSupplementTab] = useState("homework_makeup");
   const overdueHomeworks = homeworks.filter((homework) => isHomeworkOverdue(homework)).slice(0, 8);
   const absentRecords = records
     .filter((record) => record.attendanceStatus === "absent" || record.attendanceStatus === "excused")
@@ -7462,7 +7461,72 @@ function SupplementCenter({
 
   const selectedSupplementStudent = students.find((student) => student.studentId === selectedSupplementStudentId);
   const selectedSupplementTasks = tasks.filter((task) => task.studentId === selectedSupplementStudentId);
-  const selectedSupplementLogs = notificationLogs.filter((log) => log.studentId === selectedSupplementStudentId);
+  const supplementTabs = [
+    {
+      id: "homework_makeup",
+      title: "숙제보충",
+      subtitle: "밀린 숙제를 보충 과제로 전환합니다.",
+      count: overdueHomeworks.length,
+      emptyText: "밀린 숙제가 없습니다.",
+      items: overdueHomeworks.map((homework) => ({
+        id: homework.homeworkId,
+        studentId: homework.studentId,
+        title: homework.title,
+        meta: `${homework.dueDate} 마감`,
+        actionLabel: "보충 생성",
+        task: {
+          taskType: "homework_makeup",
+          studentId: homework.studentId,
+          sourceId: homework.homeworkId,
+          sourceLabel: homework.title,
+          reason: "밀린 숙제"
+        }
+      }))
+    },
+    {
+      id: "absence_makeup",
+      title: "결석보강",
+      subtitle: "결석 기록을 보강 일정으로 전환합니다.",
+      count: absentRecords.length,
+      emptyText: "결석 보강이 없습니다.",
+      items: absentRecords.map((record) => ({
+        id: record.lessonStudentRecordId,
+        studentId: record.studentId,
+        title: lessonLabel(record.lessonId),
+        meta: attendanceLabels[record.attendanceStatus],
+        actionLabel: "보강 생성",
+        task: {
+          taskType: "absence_makeup",
+          studentId: record.studentId,
+          sourceId: record.lessonStudentRecordId,
+          sourceLabel: lessonLabel(record.lessonId),
+          reason: "결석 보강"
+        }
+      }))
+    },
+    {
+      id: "retest",
+      title: "재시험",
+      subtitle: "오답/평가 기준으로 재시험 일정을 잡습니다.",
+      count: retestRecords.length,
+      emptyText: "재시험이 없습니다.",
+      items: retestRecords.map((record) => ({
+        id: record.lessonStudentRecordId,
+        studentId: record.studentId,
+        title: lessonLabel(record.lessonId),
+        meta: "재시험 필요",
+        actionLabel: "재시험 생성",
+        task: {
+          taskType: "retest",
+          studentId: record.studentId,
+          sourceId: record.lessonStudentRecordId,
+          sourceLabel: lessonLabel(record.lessonId),
+          reason: "재시험 필요"
+        }
+      }))
+    }
+  ];
+  const activeTabData = supplementTabs.find((tab) => tab.id === activeSupplementTab) ?? supplementTabs[0];
 
   return (
     <section className="followUpPage">
@@ -7474,112 +7538,52 @@ function SupplementCenter({
         <span className="countBadge">{tasks.length}개 진행</span>
       </div>
 
-      <div className="followCandidateGrid">
-        <CandidatePanel title="숙제보충" subtitle="밀린 숙제를 보충 과제로 전환합니다.">
-          {overdueHomeworks.length === 0 ? <p className="muted">밀린 숙제가 없습니다.</p> : null}
-          {overdueHomeworks.map((homework) => (
-            <article className="candidateItem" key={homework.homeworkId}>
-              <div>
-                <button className="textLinkButton" onClick={() => setSelectedSupplementStudentId(homework.studentId)} type="button">
-                  {studentName(homework.studentId)}
-                </button>
-                <span>{homework.title}</span>
-                <small>{homework.dueDate} 마감</small>
-              </div>
-              <button
-                className="softButton"
-                onClick={() =>
-                  createSupplementTask({
-                    taskType: "homework_makeup",
-                    studentId: homework.studentId,
-                    sourceId: homework.homeworkId,
-                    sourceLabel: homework.title,
-                    reason: "밀린 숙제"
-                  })
-                }
-                type="button"
-              >
-                보충 생성
-              </button>
-            </article>
-          ))}
-        </CandidatePanel>
-
-        <CandidatePanel title="결석보강" subtitle="결석 기록을 보강 일정으로 전환합니다.">
-          {absentRecords.length === 0 ? <p className="muted">결석 보강이 없습니다.</p> : null}
-          {absentRecords.map((record) => (
-            <article className="candidateItem" key={record.lessonStudentRecordId}>
-              <div>
-                <button className="textLinkButton" onClick={() => setSelectedSupplementStudentId(record.studentId)} type="button">
-                  {studentName(record.studentId)}
-                </button>
-                <span>{lessonLabel(record.lessonId)}</span>
-                <small>{attendanceLabels[record.attendanceStatus]}</small>
-              </div>
-              <button
-                className="softButton"
-                onClick={() =>
-                  createSupplementTask({
-                    taskType: "absence_makeup",
-                    studentId: record.studentId,
-                    sourceId: record.lessonStudentRecordId,
-                    sourceLabel: lessonLabel(record.lessonId),
-                    reason: "결석 보강"
-                  })
-                }
-                type="button"
-              >
-                보강 생성
-              </button>
-            </article>
-          ))}
-        </CandidatePanel>
-
-        <CandidatePanel title="재시험" subtitle="오답/평가 기준으로 재시험 일정을 잡습니다.">
-          {retestRecords.length === 0 ? <p className="muted">재시험이 없습니다.</p> : null}
-          {retestRecords.map((record) => (
-            <article className="candidateItem" key={record.lessonStudentRecordId}>
-              <div>
-                <button className="textLinkButton" onClick={() => setSelectedSupplementStudentId(record.studentId)} type="button">
-                  {studentName(record.studentId)}
-                </button>
-                <span>{lessonLabel(record.lessonId)}</span>
-                <small>재시험 필요</small>
-              </div>
-              <button
-                className="softButton"
-                onClick={() =>
-                  createSupplementTask({
-                    taskType: "retest",
-                    studentId: record.studentId,
-                    sourceId: record.lessonStudentRecordId,
-                    sourceLabel: lessonLabel(record.lessonId),
-                    reason: "재시험 필요"
-                  })
-                }
-                type="button"
-              >
-                재시험 생성
-              </button>
-            </article>
-          ))}
-        </CandidatePanel>
+      <div className="supplementOverviewGrid">
+        {supplementTabs.map((tab) => (
+          <button
+            className={activeSupplementTab === tab.id ? "supplementMetric active" : "supplementMetric"}
+            key={tab.id}
+            onClick={() => setActiveSupplementTab(tab.id)}
+            type="button"
+          >
+            <span>{tab.title}</span>
+            <strong>{tab.count}건</strong>
+            <small>{tab.subtitle}</small>
+          </button>
+        ))}
       </div>
 
-      <section className="panel">
-        <h2>알림 로그</h2>
-        {notificationLogs.length === 0 ? <p className="muted">아직 모의 로그가 없습니다.</p> : null}
-        {notificationLogs.map((log) => (
-          <article className="snapshotCard" key={log.notificationLogId}>
-            <strong>{studentName(log.studentId)} · {log.status}</strong>
-            <p>{log.message}</p>
-          </article>
-        ))}
+      <section className="supplementTabPanel">
+        <div className="sectionHeader slim">
+          <div>
+            <h2>{activeTabData.title}</h2>
+            <p className="muted">{activeTabData.subtitle}</p>
+          </div>
+          <span className="countBadge">{activeTabData.count}건</span>
+        </div>
+
+        {activeTabData.items.length === 0 ? <div className="emptyHomeworkBox">{activeTabData.emptyText}</div> : null}
+
+        <div className="supplementItemList">
+          {activeTabData.items.map((item) => (
+            <article className="candidateItem supplementRowItem" key={item.id}>
+              <div>
+                <button className="textLinkButton" onClick={() => setSelectedSupplementStudentId(item.studentId)} type="button">
+                  {studentName(item.studentId)}
+                </button>
+                <span>{item.title}</span>
+                <small>{item.meta}</small>
+              </div>
+              <button className="softButton" onClick={() => createSupplementTask(item.task)} type="button">
+                {item.actionLabel}
+              </button>
+            </article>
+          ))}
+        </div>
       </section>
 
       {selectedSupplementStudent ? (
         <SupplementStudentModal
-          logs={selectedSupplementLogs}
           onAssignHomework={onAssignHomework}
           onClose={() => setSelectedSupplementStudentId("")}
           onLogNotification={onLogNotification}
@@ -7593,7 +7597,6 @@ function SupplementCenter({
 }
 
 function SupplementStudentModal({
-  logs,
   onAssignHomework,
   onClose,
   onLogNotification,
@@ -7608,7 +7611,7 @@ function SupplementStudentModal({
       subtitle={`${student.grade ?? "-"} · ${student.schoolName ?? "학교 미입력"}`}
       onClose={onClose}
     >
-      <div className="supplementModalLayout">
+      <div className="supplementModalLayout single">
         <section className="supplementModalMain">
           <div className="sectionHeader slim">
             <div>
@@ -7673,17 +7676,6 @@ function SupplementStudentModal({
             })}
           </div>
         </section>
-
-        <aside className="supplementModalAside">
-          <h2>알림 로그</h2>
-          {logs.length === 0 ? <p className="muted">이 학생의 모의 로그가 없습니다.</p> : null}
-          {logs.map((log) => (
-            <article className="snapshotCard" key={log.notificationLogId}>
-              <strong>{log.status}</strong>
-              <p>{log.message}</p>
-            </article>
-          ))}
-        </aside>
       </div>
     </Modal>
   );
