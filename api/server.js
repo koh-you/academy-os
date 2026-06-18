@@ -41,6 +41,7 @@ const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS ?? "*")
   .filter(Boolean);
 
 const dispatchableNotificationStatuses = new Set(["queued", "pending_send"]);
+const readinessCheckStatuses = new Set(["queued", "pending_send", "scheduled"]);
 
 function readJsonBody(request) {
   return new Promise((resolve, reject) => {
@@ -89,6 +90,99 @@ function getProviderMessageId(result) {
     result?.response?.[0]?.message_id ??
     ""
   );
+}
+
+function hasText(value) {
+  return Boolean(String(value ?? "").trim());
+}
+
+function getReadinessMissingFields(job) {
+  const payload = job.payload ?? {};
+  const missing = [];
+  const recipient = job.recipient || (job.target === "student" ? payload.studentPhone : payload.parentPhone);
+
+  if (!hasText(payload.studentName)) missing.push("학생명");
+  if (!hasText(recipient)) missing.push("수신번호");
+
+  if (job.notificationType === "attendance") {
+    if (!hasText(payload.attendanceStatus)) missing.push("출결상태");
+    if (!hasText(payload.lessonName)) missing.push("수업명");
+    return missing;
+  }
+
+  if (job.notificationType === "student_reminder") {
+    if (!hasText(payload.scheduleTitle) && !hasText(payload.lessonName)) missing.push("일정명");
+    if (!hasText(payload.scheduleDate) && !hasText(job.scheduledAt)) missing.push("일정일");
+    return missing;
+  }
+
+  if (!hasText(payload.lessonDate) && !hasText(job.scheduledAt)) missing.push("수업일");
+
+  const hasMessage = hasText(payload.message) || hasText(payload.reportBody) || hasText(payload.preparationNotice);
+  if (!hasMessage) missing.push("본문/코멘트");
+
+  if (job.notificationType === "daily_report" || job.notificationType === "parent_comment") {
+    if (!hasText(payload.lessonMaterial)) missing.push("강의 교재");
+    if (!hasText(payload.lessonContent)) missing.push("강의 내용");
+    if (!hasText(payload.assignmentStatus) && !hasText(payload.assignmentStatusMessage)) missing.push("과제 상태");
+  }
+
+  return missing;
+}
+
+function buildReadinessSlackText({ issues, windowMinutes }) {
+  const lines = [
+    `[koh_you_math] 알림톡 발송 전 누락 점검`,
+    `대상: 앞으로 ${windowMinutes}분 이내 발송 예정`,
+    "",
+    issues.length ? "확인이 필요한 항목:" : "확인이 필요한 항목이 없습니다."
+  ];
+
+  for (const issue of issues) {
+    lines.push(`- ${issue.studentName} · ${issue.notificationType} · ${issue.scheduledAt || "즉시/미지정"} · 누락: ${issue.missing.join(", ")}`);
+  }
+
+  return lines.join("\n");
+}
+
+async function checkNotificationReadiness({ notifySlack = false, now = new Date().toISOString(), windowMinutes = 15 } = {}) {
+  const listed = await listNotificationJobs();
+  const nowTime = new Date(now).getTime();
+  const windowTime = nowTime + Math.max(1, Number(windowMinutes) || 15) * 60_000;
+  if (Number.isNaN(nowTime)) throw new Error("now must be a valid date string.");
+
+  const dueSoonJobs = (listed.notificationJobs ?? []).filter((job) => {
+    if (!readinessCheckStatuses.has(job.status)) return false;
+    if (!job.scheduledAt) return true;
+    const scheduledTime = new Date(job.scheduledAt).getTime();
+    return !Number.isNaN(scheduledTime) && scheduledTime >= nowTime && scheduledTime <= windowTime;
+  });
+
+  const issues = dueSoonJobs
+    .map((job) => ({
+      notificationJobId: job.notificationJobId,
+      notificationType: job.notificationType,
+      scheduledAt: job.scheduledAt,
+      studentName: job.payload?.studentName || job.studentId || "학생",
+      missing: getReadinessMissingFields(job)
+    }))
+    .filter((issue) => issue.missing.length > 0);
+
+  let slack = null;
+  if (notifySlack && issues.length > 0) {
+    slack = await sendSlackDailyScheduleSummary({
+      text: buildReadinessSlackText({ issues, windowMinutes })
+    });
+  }
+
+  return {
+    checkedCount: dueSoonJobs.length,
+    issueCount: issues.length,
+    issues,
+    slack,
+    source: listed.source,
+    windowMinutes: Math.max(1, Number(windowMinutes) || 15)
+  };
 }
 
 async function sendNotificationJob(job, { forceDryRun = false } = {}) {
@@ -378,6 +472,21 @@ const server = http.createServer(async (request, response) => {
         forceDryRun: Boolean(payload.forceDryRun),
         limit: payload.limit,
         now: payload.now
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/readiness-check") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await checkNotificationReadiness({
+        notifySlack: Boolean(payload.notifySlack),
+        now: payload.now,
+        windowMinutes: payload.windowMinutes
       });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {

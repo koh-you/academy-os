@@ -2549,6 +2549,7 @@ function getNotificationStatusLabel(status) {
 function NotificationCenter({ integrationStatus, notificationJobs, notificationLogs, students, onRefresh }) {
   const [dispatchMessage, setDispatchMessage] = useState("");
   const [isDispatching, setIsDispatching] = useState(false);
+  const [isCheckingReadiness, setIsCheckingReadiness] = useState(false);
   const notificationStatus = integrationStatus?.notifications;
   const safetyTone = getAlimtalkSafetyTone(notificationStatus, false);
   const safetyText = getAlimtalkSafetyText(notificationStatus, false);
@@ -2585,6 +2586,26 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
     }
   }
 
+  async function handleReadinessCheck() {
+    setIsCheckingReadiness(true);
+    setDispatchMessage("");
+    try {
+      const result = await postJson("/api/notification-jobs/readiness-check", {
+        notifySlack: Boolean(notificationStatus?.slackConfigured),
+        windowMinutes: 15
+      });
+      setDispatchMessage(
+        result.issueCount
+          ? `누락 점검 완료: ${result.checkedCount}건 중 ${result.issueCount}건 확인 필요${result.slack ? " · 슬랙 알림 기록" : ""}`
+          : `누락 점검 완료: ${result.checkedCount}건 모두 발송 가능`
+      );
+    } catch (error) {
+      setDispatchMessage(`누락 점검 실패: ${error.message}`);
+    } finally {
+      setIsCheckingReadiness(false);
+    }
+  }
+
   return (
     <section className="notificationCenterPage">
       <div className="pageTop">
@@ -2593,6 +2614,9 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
           <p className="muted">학부모 알림톡, 학생 알림톡, 출결 알림톡의 예약과 테스트 기록을 확인합니다.</p>
         </div>
         <div className="pageActions">
+          <button className="softButton" onClick={handleReadinessCheck} type="button" disabled={isCheckingReadiness}>
+            {isCheckingReadiness ? "점검 중" : "누락 점검"}
+          </button>
           <button className="softButton" onClick={handleDispatchDue} type="button" disabled={isDispatching}>
             {isDispatching ? "점검 중" : "예약 발송 점검"}
           </button>
