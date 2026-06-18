@@ -68,6 +68,11 @@ check("39 school calendar avoids legacy exam duplicates", hasAll(app, ["manualEv
 check("40 test send forces teacher recipient without dry-run", hasAll(app, ["forceTestRecipient", "내 번호로 즉시"]) && notificationRoute.includes("payload.forceTestRecipient"));
 check("41 comment alimtalk preview uses template format", hasAll(app, ["commentTemplatePreview", "#{리포트본문}:", "#{코멘트}:"]) && css.includes(".commentTemplatePreview"));
 
+check("42 exam date range uses date inputs", hasAll(app, ["examDateRangeInputs", "updateDateRangeField", "getDateRangeField"]));
+check("43 school calendar can edit derived exam dates", hasAll(app, ["onUpdateExamPrepRow", "updateAcademicEvent", "mathExamDate"]));
+check("44 exam period is rendered as compact calendar bar", hasAll(app, ["periodBar", "isPeriodBar"]) && css.includes(".schoolEventPill.periodBar"));
+check("45 math exam calendar label includes school grade and cycle", hasAll(app, ['eventId: `derived_math_${row.examPrepId}`', 'row.schoolName || "학교 미입력"', "row.grade || \"\"", "examCycleLabel(row.examCycle ??"]));
+
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));
 
