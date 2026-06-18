@@ -154,6 +154,53 @@ function getAlimtalkSafetyText(notificationStatus, forceDryRun = false) {
   return "실발송 가능: 등록된 실제 번호로 발송될 수 있습니다.";
 }
 
+function buildNotificationTemplatePreview(type) {
+  const base = {
+    academyName: academyBrandName,
+    assignmentStatus: "complete_thorough",
+    attendanceStatus: "present",
+    checkedAt: "19:00",
+    lessonContent: "개별 진도 점검",
+    lessonDate: getKoreaDateString(new Date()),
+    lessonMaterial: "공통수학1",
+    lessonName: "월수금 7-10반",
+    message: "오늘 수업에서 확인한 내용을 바탕으로 다음 과제를 안내드립니다.",
+    nextHomework: "쎈 - 경우의 수",
+    previousHomework: "rpm 순열과 조합",
+    studentName: "테스트학생"
+  };
+
+  if (type === "attendance") {
+    return [
+      `#{학원명}: ${base.academyName}`,
+      `#{학생명}: ${base.studentName}`,
+      "#{출결본문}:",
+      `🏫 출결: ${attendanceLabels[base.attendanceStatus]}`,
+      `📚 수업: ${base.lessonName}`,
+      `🕒 시간: ${base.checkedAt}`
+    ].join("\n");
+  }
+
+  const commonBody = [
+    `🏫 출결: ${attendanceLabels[base.attendanceStatus]}`,
+    `📚 강의 교재: ${base.lessonMaterial}`,
+    `🧭 강의 내용: ${base.lessonContent}`,
+    `📖 지난 과제: ${base.previousHomework}`,
+    `➡️ 다음 과제: ${base.nextHomework}`,
+    type === "parent" ? `✅ 과제 상태: ${getAssignmentStatusParentMessage(base.assignmentStatus)}` : "",
+    `💬 코멘트: ${base.message}`
+  ].filter(Boolean).join("\n");
+
+  return [
+    `#{학원명}: ${base.academyName}`,
+    `#{학생명}: ${base.studentName}`,
+    `#{수업명}: ${base.lessonName}`,
+    `#{수업일}: ${base.lessonDate}`,
+    type === "parent" ? "#{리포트본문}:" : "#{코멘트}:",
+    commonBody
+  ].join("\n");
+}
+
 function isAttendanceOnlyRoute() {
   if (typeof window === "undefined") return false;
   return window.location.pathname === "/attendance" || window.location.hash === "#attendance";
@@ -2751,6 +2798,7 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
           <article>
             <strong>출결 알림톡</strong>
             <p>등원/출석 안내 템플릿을 점검합니다.</p>
+            <pre className="templatePreviewText">{buildNotificationTemplatePreview("attendance")}</pre>
             <button className="softButton" disabled={testingTemplate === "attendance"} onClick={() => handleTemplateTest("attendance")} type="button">
               {testingTemplate === "attendance" ? "테스트 중" : "출결 테스트"}
             </button>
@@ -2758,6 +2806,7 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
           <article>
             <strong>학부모 알림톡</strong>
             <p>강의 교재, 강의 내용, 과제 상태, 코멘트 구조를 점검합니다.</p>
+            <pre className="templatePreviewText">{buildNotificationTemplatePreview("parent")}</pre>
             <button className="softButton" disabled={testingTemplate === "parent"} onClick={() => handleTemplateTest("parent")} type="button">
               {testingTemplate === "parent" ? "테스트 중" : "학부모 테스트"}
             </button>
@@ -2765,6 +2814,7 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
           <article>
             <strong>학생 알림톡</strong>
             <p>학생에게 보낼 안내문과 다음 과제 문구를 점검합니다.</p>
+            <pre className="templatePreviewText">{buildNotificationTemplatePreview("student")}</pre>
             <button className="softButton" disabled={testingTemplate === "student"} onClick={() => handleTemplateTest("student")} type="button">
               {testingTemplate === "student" ? "테스트 중" : "학생 테스트"}
             </button>

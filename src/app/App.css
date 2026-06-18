@@ -2243,6 +2243,22 @@ button:disabled {
   margin: 0;
 }
 
+.templatePreviewText {
+  background: #ffffff;
+  border: 1px solid #dbe6f8;
+  border-radius: 8px;
+  color: #1e293b;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.55;
+  margin: 0;
+  max-height: 180px;
+  overflow: auto;
+  padding: 12px;
+  white-space: pre-wrap;
+}
+
 .integrationStatusGrid span {
   align-items: center;
   color: #475569;
