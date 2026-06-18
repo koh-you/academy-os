@@ -19,7 +19,8 @@ const storageKeys = {
   schoolEvents: "academy-os.schoolEvents.v1",
   resourceMaterials: "academy-os.resourceMaterials.v1",
   lessonResearchItems: "academy-os.lessonResearchItems.v1",
-  aiSettings: "academy-os.aiSettings.v1"
+  aiSettings: "academy-os.aiSettings.v1",
+  attendanceSettings: "academy-os.attendanceSettings.v1"
 };
 
 const dayLabels = {
@@ -597,6 +598,10 @@ const defaultAiSettings = {
   variantModel: "server-default"
 };
 
+const defaultAttendanceSettings = {
+  lateGraceMinutes: 0
+};
+
 function countProblemStatuses(problems = []) {
   return Object.keys(problemStatusMeta).reduce((counts, status) => {
     counts[status] = problems.filter((problem) => problem.status === status).length;
@@ -639,6 +644,10 @@ export function App() {
   );
   const [resourceMaterials, setResourceMaterials] = useStoredState(storageKeys.resourceMaterials, []);
   const [aiSettings, setAiSettings] = useStoredState(storageKeys.aiSettings, defaultAiSettings);
+  const [attendanceSettings, setAttendanceSettings] = useStoredState(
+    storageKeys.attendanceSettings,
+    defaultAttendanceSettings
+  );
   const [saveStates, setSaveStates] = useState({});
   const [reportModal, setReportModal] = useState(null);
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
@@ -851,7 +860,9 @@ export function App() {
       hour12: false
     }).format(now);
     const isCheckOut = Boolean(existingRecord?.checkInAt && !existingRecord?.checkOutAt);
-    const lateMinutes = isCheckOut ? existingRecord?.lateMinutes ?? "" : calculateLateMinutes(lesson, now);
+    const lateMinutes = isCheckOut
+      ? existingRecord?.lateMinutes ?? ""
+      : calculateLateMinutes(lesson, now, attendanceSettings.lateGraceMinutes);
     const attendanceStatus = isCheckOut ? existingRecord?.attendanceStatus ?? "present" : lateMinutes > 0 ? "late" : "present";
     const nextRecord = {
       ...createEmptyRecord(lesson, student),
@@ -1583,7 +1594,12 @@ export function App() {
         ) : null}
 
         {activeView === "settings" ? (
-          <SettingsCenter aiSettings={aiSettings} onUpdateAiSettings={setAiSettings} />
+          <SettingsCenter
+            aiSettings={aiSettings}
+            attendanceSettings={attendanceSettings}
+            onUpdateAiSettings={setAiSettings}
+            onUpdateAttendanceSettings={setAttendanceSettings}
+          />
         ) : null}
 
         {activeView === "followups" ? (
@@ -4414,8 +4430,18 @@ function getAiProviderLabel(provider) {
   return "자동 선택";
 }
 
-function SettingsCenter({ aiSettings, onUpdateAiSettings }) {
+function SettingsCenter({
+  aiSettings,
+  attendanceSettings = defaultAttendanceSettings,
+  onUpdateAiSettings,
+  onUpdateAttendanceSettings
+}) {
   const settings = { ...defaultAiSettings, ...aiSettings };
+  const attendance = { ...defaultAttendanceSettings, ...attendanceSettings };
+  const attendanceUrl =
+    typeof window === "undefined"
+      ? "/attendance"
+      : `${window.location.origin}/attendance`;
   const aiRows = [
     {
       description: "강사코멘트, 학생 알림문구, 학부모 알림톡 문장을 다듬습니다.",
@@ -4451,6 +4477,14 @@ function SettingsCenter({ aiSettings, onUpdateAiSettings }) {
       ...defaultAiSettings,
       ...current,
       [row.modelKey]: model
+    }));
+  }
+
+  function updateAttendanceSetting(field, value) {
+    onUpdateAttendanceSettings((current) => ({
+      ...defaultAttendanceSettings,
+      ...current,
+      [field]: value
     }));
   }
 
@@ -4496,6 +4530,43 @@ function SettingsCenter({ aiSettings, onUpdateAiSettings }) {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      <section className="panel settingsCard">
+        <div className="sectionTitle">
+          <div>
+            <h2>출결 설정</h2>
+            <p>태블릿 출결 전용 화면과 자동 지각 판정 기준을 관리합니다.</p>
+          </div>
+        </div>
+        <div className="settingsRows">
+          <div className="settingsRow">
+            <div>
+              <strong>태블릿 전용 화면</strong>
+              <span className="muted">학생이 휴대폰 번호 뒤 4자리만 입력하는 출결 화면입니다.</span>
+            </div>
+            <input readOnly value={attendanceUrl} />
+            <a className="softButton linkButton" href={attendanceUrl} target="_blank" rel="noreferrer">
+              새 창 열기
+            </a>
+          </div>
+          <div className="settingsRow compact">
+            <div>
+              <strong>지각 유예시간</strong>
+              <span className="muted">수업 정각 이후 이 시간까지는 출석으로 처리합니다.</span>
+            </div>
+            <input
+              inputMode="numeric"
+              min="0"
+              type="number"
+              value={attendance.lateGraceMinutes}
+              onChange={(event) =>
+                updateAttendanceSetting("lateGraceMinutes", Math.max(0, Number(event.target.value) || 0))
+              }
+            />
+            <span className="aiSettingBadge fieldBadge">분 단위</span>
+          </div>
         </div>
       </section>
     </section>
@@ -8485,11 +8556,11 @@ function getTemplateEndTime(template, date) {
   return getDayKey(date) === "sat" && template.saturdayEndTime ? template.saturdayEndTime : template.endTime;
 }
 
-function calculateLateMinutes(lesson, now = new Date()) {
+function calculateLateMinutes(lesson, now = new Date(), graceMinutes = 0) {
   if (!lesson?.date || !lesson?.startTime) return 0;
   const start = new Date(`${lesson.date}T${lesson.startTime}:00+09:00`);
   const diff = Math.floor((now.getTime() - start.getTime()) / 60000);
-  return Math.max(0, diff);
+  return Math.max(0, diff - (Number(graceMinutes) || 0));
 }
 
 function createLessonStudentRecordId(lessonId, studentId) {

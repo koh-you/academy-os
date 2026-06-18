@@ -3306,6 +3306,10 @@ textarea.profileEditInput {
   padding: 14px 16px;
 }
 
+.settingsRow.compact {
+  grid-template-columns: minmax(240px, 1fr) 180px 120px;
+}
+
 .settingsRow + .settingsRow {
   border-top: 1px solid #e2e8f0;
 }
@@ -3317,6 +3321,13 @@ textarea.profileEditInput {
 
 .settingsRow strong {
   font-size: 16px;
+}
+
+.linkButton {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  text-decoration: none;
 }
 
 .aiVariantHeroActions {
