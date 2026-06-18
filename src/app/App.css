@@ -5122,9 +5122,48 @@ textarea.profileEditInput {
   color: #64748b;
 }
 
-.taskCard small.taskLinkedLesson {
-  color: #2563eb;
+.taskLinkedLesson {
+  align-items: center;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  color: #1d4ed8;
+  display: inline-flex;
+  flex-wrap: wrap;
+  font-size: 13px;
+  font-weight: 900;
+  gap: 6px;
+  padding: 7px 10px;
+  width: fit-content;
+}
+
+.taskLinkedLesson b {
+  color: #17213d;
+  font-size: 12px;
+}
+
+.taskStatusControl {
+  color: #64748b;
+  display: grid;
+  font-size: 13px;
   font-weight: 800;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.taskStatusControl select {
+  min-height: 46px;
+}
+
+.notificationDraftField {
+  display: grid;
+  gap: 7px;
+}
+
+.notificationDraftField span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .statusBlue,

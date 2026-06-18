@@ -7971,16 +7971,20 @@ function SupplementStudentModal({
                       <small>{task.reason} · 배정 {task.attemptCount ?? 0}회</small>
                       {task.lastHomeworkId ? <small>최근 보충 숙제: {task.lastHomeworkId}</small> : null}
                       {task.linkedLessonId ? (
-                        <small className="taskLinkedLesson">
-                          수업일지 반영됨 · {task.linkedLessonDate} {task.linkedLessonTime}
-                        </small>
+                        <span className="taskLinkedLesson">
+                          수업일지 반영 완료
+                          <b>{task.linkedLessonDate} {task.linkedLessonTime}</b>
+                        </span>
                       ) : null}
                     </div>
-                    <select value={task.status} onChange={(event) => onUpdateTask(task.makeupTaskId, "status", event.target.value)}>
-                      <option value="draft">초안</option>
-                      <option value="scheduled">일정 배정</option>
-                      <option value="done">완료</option>
-                    </select>
+                    <label className="taskStatusControl">
+                      일정 상태
+                      <select value={task.status} onChange={(event) => onUpdateTask(task.makeupTaskId, "status", event.target.value)}>
+                        <option value="draft">일정 미확정</option>
+                        <option value="scheduled">일정 확정</option>
+                        <option value="done">보충 완료</option>
+                      </select>
+                    </label>
                   </div>
                   <div className="fieldGrid two">
                     <label>
@@ -7992,8 +7996,9 @@ function SupplementStudentModal({
                       <input type="time" value={task.scheduledTime} onChange={(event) => onUpdateTask(task.makeupTaskId, "scheduledTime", event.target.value)} />
                     </label>
                   </div>
-                  <label>
-                    알림 문구 초안
+                  <label className="notificationDraftField">
+                    알림톡 문구
+                    <span>아래 문구가 보충 일정 알림톡 초안에 반영됩니다. 발송은 별도 확정 단계에서 진행합니다.</span>
                     <textarea
                       value={visibleDraft}
                       onChange={(event) => onUpdateTask(task.makeupTaskId, "notificationDraft", event.target.value)}
@@ -8001,7 +8006,7 @@ function SupplementStudentModal({
                   </label>
                   <div className="modalActions">
                     <button className="softButton" onClick={() => onUpdateTask(task.makeupTaskId, "notificationDraft", freshDraft)} type="button">
-                      문구 생성
+                      알림톡 문구 작성
                     </button>
                     <button
                       className="softButton"
