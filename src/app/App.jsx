@@ -18,7 +18,8 @@ const storageKeys = {
   examAnalyses: "academy-os.examAnalyses.v1",
   schoolEvents: "academy-os.schoolEvents.v1",
   resourceMaterials: "academy-os.resourceMaterials.v1",
-  lessonResearchItems: "academy-os.lessonResearchItems.v1"
+  lessonResearchItems: "academy-os.lessonResearchItems.v1",
+  aiSettings: "academy-os.aiSettings.v1"
 };
 
 const dayLabels = {
@@ -587,6 +588,15 @@ const problemStatusMeta = {
 
 const problemClickCycle = ["first", "retry", "wrong", "mistake"];
 
+const defaultAiSettings = {
+  commentProvider: "auto",
+  commentModel: "server-default",
+  examAnalysisProvider: "auto",
+  examAnalysisModel: "server-default",
+  variantProvider: "auto",
+  variantModel: "server-default"
+};
+
 function countProblemStatuses(problems = []) {
   return Object.keys(problemStatusMeta).reduce((counts, status) => {
     counts[status] = problems.filter((problem) => problem.status === status).length;
@@ -628,6 +638,7 @@ export function App() {
     sampleData.examAnalyses ?? [createDefaultExamAnalysis(sampleData.examPrepRows?.[0])]
   );
   const [resourceMaterials, setResourceMaterials] = useStoredState(storageKeys.resourceMaterials, []);
+  const [aiSettings, setAiSettings] = useStoredState(storageKeys.aiSettings, defaultAiSettings);
   const [saveStates, setSaveStates] = useState({});
   const [reportModal, setReportModal] = useState(null);
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
@@ -1359,6 +1370,7 @@ export function App() {
         {activeView === "lessons" ? (
           <TeacherLessonHubV2
             academyTests={academyTests}
+            aiSettings={aiSettings}
             lessons={lessons}
             lessonsForDate={lessonsForDate}
             materials={resourceMaterials}
@@ -1567,6 +1579,10 @@ export function App() {
 
         {activeView === "aiVariants" ? (
           <AIVariantProblemCenter students={students} />
+        ) : null}
+
+        {activeView === "settings" ? (
+          <SettingsCenter aiSettings={aiSettings} onUpdateAiSettings={setAiSettings} />
         ) : null}
 
         {activeView === "followups" ? (
@@ -2446,6 +2462,12 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle }) 
         { id: "lessonResearch", label: "수업연구", icon: "📚" },
         { id: "aiVariants", label: "AI 변형문항", icon: "✨" }
       ]
+    },
+    {
+      title: "시스템",
+      items: [
+        { id: "settings", label: "설정", icon: "⚙️" }
+      ]
     }
   ];
 
@@ -2637,6 +2659,7 @@ function RoleLoginScreen({ students, onAttendanceCheck, onLogin }) {
 
 function TeacherLessonHubV2({
   academyTests = [],
+  aiSettings,
   clipboardCount,
   lessons,
   materials = [],
@@ -2738,6 +2761,7 @@ function TeacherLessonHubV2({
       <div className="lessonJournalModal">
         <LessonJournalDetail
           academyTests={academyTests}
+          aiSettings={aiSettings}
           homeworks={homeworks}
           lesson={selectedLesson}
           lessons={lessons}
@@ -2821,6 +2845,7 @@ function TeacherLessonHubV2({
 
 function LessonJournalDetail({
   academyTests = [],
+  aiSettings = defaultAiSettings,
   homeworks,
   lesson,
   lessons,
@@ -2844,11 +2869,11 @@ function LessonJournalDetail({
 }) {
   const [bulkPreviousHomework, setBulkPreviousHomework] = useState("");
   const [bulkNextHomework, setBulkNextHomework] = useState("");
-  const [commentAiProvider, setCommentAiProvider] = useState("auto");
-  const [commentAiModel, setCommentAiModel] = useState("server-default");
   const [commentModal, setCommentModal] = useState(null);
   const [prepMemoModal, setPrepMemoModal] = useState(null);
   const [studentPreviewId, setStudentPreviewId] = useState("");
+  const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
+  const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
   const saveSummary = students.reduce(
     (summary, student) => {
       const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
@@ -2857,11 +2882,6 @@ function LessonJournalDetail({
     },
     { idle: 0, dirty: 0, saving: 0, saved: 0, failed: 0 }
   );
-
-  function changeCommentProvider(provider) {
-    setCommentAiProvider(provider);
-    setCommentAiModel(aiProviderModels[provider]?.[0] ?? "server-default");
-  }
 
   return (
     <section className="lessonJournalPage">
@@ -2898,17 +2918,9 @@ function LessonJournalDetail({
           <strong>코멘트 AI</strong>
           <span className="muted">학부모 알림톡과 학생 알림톡 문구를 AI로 다듬습니다.</span>
         </div>
-        <select value={commentAiProvider} onChange={(event) => changeCommentProvider(event.target.value)}>
-          <option value="auto">자동 선택</option>
-          <option value="openai">OpenAI</option>
-          <option value="anthropic">Claude</option>
-          <option value="mock">테스트 모드</option>
-        </select>
-        <select value={commentAiModel} onChange={(event) => setCommentAiModel(event.target.value)}>
-          {(aiProviderModels[commentAiProvider] ?? aiProviderModels.mock).map((model) => (
-            <option key={model} value={model}>{getAiModelLabel(model)}</option>
-          ))}
-        </select>
+        <span className="aiSettingBadge">
+          {getAiProviderLabel(commentAiProvider)} · {getAiModelLabel(commentAiModel)}
+        </span>
       </section>
 
       <section className="panel lessonSaveSummary" aria-label="수업일지 저장 상태">
@@ -4387,6 +4399,101 @@ function getAiModelLabel(model) {
   if (model === "server-default") return "서버 기본값";
   if (model === "local-mock") return "테스트 응답";
   return model;
+}
+
+function getAiProviderLabel(provider) {
+  if (provider === "openai") return "OpenAI";
+  if (provider === "anthropic") return "Claude";
+  if (provider === "mock") return "테스트 모드";
+  return "자동 선택";
+}
+
+function SettingsCenter({ aiSettings, onUpdateAiSettings }) {
+  const settings = { ...defaultAiSettings, ...aiSettings };
+  const aiRows = [
+    {
+      description: "강사코멘트, 학생 알림문구, 학부모 알림톡 문장을 다듬습니다.",
+      modelKey: "commentModel",
+      providerKey: "commentProvider",
+      title: "코멘트 AI"
+    },
+    {
+      description: "시험 원본 분석, 총평 수정본, 블로그/인스타용 초안을 만듭니다.",
+      modelKey: "examAnalysisModel",
+      providerKey: "examAnalysisProvider",
+      title: "시험분석 AI"
+    },
+    {
+      description: "원문 문제를 난도와 조건에 맞춰 변형하는 작업에 사용합니다.",
+      modelKey: "variantModel",
+      providerKey: "variantProvider",
+      title: "AI 변형문항"
+    }
+  ];
+
+  function updateProvider(row, provider) {
+    onUpdateAiSettings((current) => ({
+      ...defaultAiSettings,
+      ...current,
+      [row.providerKey]: provider,
+      [row.modelKey]: aiProviderModels[provider]?.[0] ?? "server-default"
+    }));
+  }
+
+  function updateModel(row, model) {
+    onUpdateAiSettings((current) => ({
+      ...defaultAiSettings,
+      ...current,
+      [row.modelKey]: model
+    }));
+  }
+
+  return (
+    <section className="settingsPage">
+      <header className="pageTop settingsHero">
+        <div>
+          <span className="eyebrow">SETTINGS</span>
+          <h1>설정</h1>
+          <p>AI 사용 모드는 이곳에서 한 번 정해두고 각 기능에서 그대로 사용합니다.</p>
+        </div>
+      </header>
+
+      <section className="panel settingsCard">
+        <div className="sectionTitle">
+          <div>
+            <h2>AI 설정</h2>
+            <p>기능별 기본 AI 제공자와 모델을 관리합니다.</p>
+          </div>
+        </div>
+        <div className="settingsRows">
+          {aiRows.map((row) => {
+            const provider = settings[row.providerKey] ?? "auto";
+            const models = aiProviderModels[provider] ?? aiProviderModels.auto;
+            const model = models.includes(settings[row.modelKey]) ? settings[row.modelKey] : models[0];
+            return (
+              <div className="settingsRow" key={row.providerKey}>
+                <div>
+                  <strong>{row.title}</strong>
+                  <span className="muted">{row.description}</span>
+                </div>
+                <select value={provider} onChange={(event) => updateProvider(row, event.target.value)}>
+                  <option value="auto">자동 선택</option>
+                  <option value="openai">OpenAI</option>
+                  <option value="anthropic">Claude</option>
+                  <option value="mock">테스트 모드</option>
+                </select>
+                <select value={model} onChange={(event) => updateModel(row, event.target.value)}>
+                  {models.map((item) => (
+                    <option key={item} value={item}>{getAiModelLabel(item)}</option>
+                  ))}
+                </select>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    </section>
+  );
 }
 
 function ExamAnalysisCenter({ analyses, examPrepRows, onAddAnalysis, onRunAnalysis, onUpdateAnalysis }) {
