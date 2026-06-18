@@ -15,6 +15,8 @@ const storageKeys = {
   scoreRecords: "academy-os.scoreRecords.v1",
   academyTests: "academy-os.academyTests.v1",
   examPrepRows: "academy-os.examPrepRows.v2",
+  tallySubmissions: "academy-os.tallySubmissions.v1",
+  tallySummaries: "academy-os.tallySummaries.v1",
   examAnalyses: "academy-os.examAnalyses.v1",
   schoolEvents: "academy-os.schoolEvents.v1",
   resourceMaterials: "academy-os.resourceMaterials.v1",
@@ -361,15 +363,19 @@ function buildExamPrepRowsFromStudents(students, examCycle, classTemplateId = ""
     .filter(Boolean);
 }
 
-function createDefaultSchoolEvents(rows) {
-  return rows.slice(0, 6).map((row, index) => ({
+function createSchoolEventFromExamPrepRow(row, index = 0) {
+  return {
     eventId: `event_exam_${row.examPrepId ?? index}`,
     date: getDefaultMathExamDate(row, index),
     schoolName: row.schoolName || "학교 미입력",
     title: `${examCycleLabel(row.examCycle ?? "2026-1-mid")} 수학시험`,
     type: "mathExam",
     color: "#dc2626"
-  }));
+  };
+}
+
+function createDefaultSchoolEvents(rows) {
+  return rows.map((row, index) => createSchoolEventFromExamPrepRow(row, index));
 }
 
 function mergeById(currentItems, nextItems, idKey) {
@@ -1631,11 +1637,24 @@ export function App() {
             onEnsureExamCycleRows={(examCycle, classTemplateId) =>
               setExamPrepRows((current) => mergeById(current, buildExamPrepRowsFromStudents(students, examCycle, classTemplateId), "examPrepId"))
             }
-            onUpdateRow={(examPrepId, field, value) =>
+            onUpdateRow={(examPrepId, field, value) => {
+              const existingExamRow = examPrepRows.find((row) => row.examPrepId === examPrepId);
+              const updatedExamRow = existingExamRow ? { ...existingExamRow, [field]: value } : null;
               setExamPrepRows((current) =>
                 current.map((row) => (row.examPrepId === examPrepId ? { ...row, [field]: value } : row))
-              )
-            }
+              );
+              if (updatedExamRow && ["examCycle", "mathExamDate", "schoolName", "subject"].includes(field)) {
+                setSchoolEvents((current) => {
+                  const eventId = `event_exam_${examPrepId}`;
+                  const nextEvent = createSchoolEventFromExamPrepRow(updatedExamRow);
+                  const hasEvent = current.some((event) => event.eventId === eventId);
+                  if (hasEvent) {
+                    return current.map((event) => (event.eventId === eventId ? { ...event, ...nextEvent } : event));
+                  }
+                  return [nextEvent, ...current];
+                });
+              }
+            }}
           />
         ) : null}
 
@@ -4637,6 +4656,117 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
   );
 }
 
+function parseCsvRows(text) {
+  const rows = [];
+  let current = "";
+  let row = [];
+  let inQuotes = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    const nextChar = text[index + 1];
+
+    if (char === '"' && nextChar === '"' && inQuotes) {
+      current += '"';
+      index += 1;
+      continue;
+    }
+
+    if (char === '"') {
+      inQuotes = !inQuotes;
+      continue;
+    }
+
+    if (char === "," && !inQuotes) {
+      row.push(current);
+      current = "";
+      continue;
+    }
+
+    if ((char === "\n" || char === "\r") && !inQuotes) {
+      if (char === "\r" && nextChar === "\n") index += 1;
+      row.push(current);
+      if (row.some((cell) => cell.trim())) rows.push(row);
+      row = [];
+      current = "";
+      continue;
+    }
+
+    current += char;
+  }
+
+  row.push(current);
+  if (row.some((cell) => cell.trim())) rows.push(row);
+
+  if (rows.length < 2) return [];
+  const headers = rows[0].map((header) => header.replace(/^\uFEFF/, "").trim());
+  return rows.slice(1).map((cells, index) => {
+    const result = { csvRowNumber: index + 2 };
+    headers.forEach((header, headerIndex) => {
+      result[header] = (cells[headerIndex] ?? "").trim();
+    });
+    return result;
+  });
+}
+
+function csvValue(row, candidates) {
+  const normalizedEntries = Object.entries(row).map(([key, value]) => [key.replace(/\s+/g, "").toLowerCase(), value]);
+  for (const candidate of candidates) {
+    const normalizedCandidate = candidate.replace(/\s+/g, "").toLowerCase();
+    const found = normalizedEntries.find(([key]) => key.includes(normalizedCandidate) || normalizedCandidate.includes(key));
+    if (found?.[1]) return found[1];
+  }
+  return "";
+}
+
+function numberFromText(value) {
+  const match = String(value ?? "").match(/\d+/);
+  return match ? Number(match[0]) : null;
+}
+
+function buildTallySubmission(row, index, { examCycle, classTemplateId, students }) {
+  const studentName = csvValue(row, ["학생명", "이름", "성명", "name"]) || `제출 ${index + 1}`;
+  const matchedStudent = students.find((student) => student.name === studentName || student.loginId === studentName);
+  return {
+    submissionId: `tally_${safeIdPart(examCycle)}_${safeIdPart(studentName)}_${Date.now()}_${index}`,
+    classTemplateId,
+    examCycle,
+    studentId: matchedStudent?.studentId ?? "",
+    studentName,
+    schoolName: matchedStudent?.schoolName || csvValue(row, ["학교", "학교명"]),
+    grade: matchedStudent?.grade || csvValue(row, ["학년"]),
+    difficulty: numberFromText(csvValue(row, ["시험 난이도", "난이도", "difficulty"])),
+    preparation: numberFromText(csvValue(row, ["준비 충분도", "준비충분도", "준비", "preparation"])),
+    academyHelp: csvValue(row, ["학원 도움", "도움", "academy"]),
+    nextGoal: csvValue(row, ["다음 목표", "목표"]),
+    goodPart: csvValue(row, ["잘 준비한 부분", "잘한 부분"]),
+    regretReason: csvValue(row, ["아쉬웠던 이유", "아쉬운 이유"]),
+    needMore: csvValue(row, ["더 준비할 부분", "보완할 부분"]),
+    wantedHelp: csvValue(row, ["도움받고 싶은 것", "도움 받고 싶은 것"]),
+    freeComment: csvValue(row, ["학생 코멘트", "하고 싶은 말", "의견", "comment"]),
+    raw: row,
+    importedAt: new Date().toISOString()
+  };
+}
+
+function summarizeTallySubmissions(submissions) {
+  if (!submissions.length) return "아직 생성된 AI 총평 초안이 없습니다.";
+  const difficultyValues = submissions.map((item) => item.difficulty).filter((value) => Number.isFinite(value));
+  const preparationValues = submissions.map((item) => item.preparation).filter((value) => Number.isFinite(value));
+  const average = (values) => values.length ? (values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(1) : "-";
+  const goals = submissions.map((item) => item.nextGoal).filter(Boolean).slice(0, 5);
+  const needs = submissions.map((item) => item.needMore || item.wantedHelp).filter(Boolean).slice(0, 5);
+
+  return [
+    `제출 ${submissions.length}명 기준 요약입니다.`,
+    `시험 난이도 평균: ${average(difficultyValues)}`,
+    `준비 충분도 평균: ${average(preparationValues)}`,
+    goals.length ? `다음 목표: ${goals.join(" / ")}` : "",
+    needs.length ? `보완 필요: ${needs.join(" / ")}` : "",
+    "학생별 세부 응답은 왼쪽 카드에서 확인하고, 최종 총평은 학교별 총평 모달에 반영하세요."
+  ].filter(Boolean).join("\n");
+}
+
 function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templates, onEnsureExamCycleRows, onUpdateRow }) {
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState("info");
@@ -4644,6 +4774,11 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
   const [selectedExamCycle, setSelectedExamCycle] = useState("2026-1-mid");
   const [editingExamPrepId, setEditingExamPrepId] = useState("");
   const [reviewModalRowId, setReviewModalRowId] = useState("");
+  const [tallySubmissions, setTallySubmissions] = useStoredState(storageKeys.tallySubmissions, []);
+  const [tallySummaries, setTallySummaries] = useStoredState(storageKeys.tallySummaries, {});
+  const [tallyImportStatus, setTallyImportStatus] = useState("");
+  const [pastPaperFrameKey, setPastPaperFrameKey] = useState(0);
+  const [pastPaperLoadState, setPastPaperLoadState] = useState("loading");
   const pastPaperArchiveUrl =
     "https://script.google.com/macros/s/AKfycbyYi-NUHHzb9vrBl4Adj6Pq9zXIZJ9oR97g-uQyAf7up7AGVzeRdBUqfVcUZ1zjQiug/exec";
   const classStudents = students.filter((student) => student.defaultClassTemplateId === selectedClassTemplateId);
@@ -4671,6 +4806,17 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
   });
   const selectedClass = templates.find((template) => template.classTemplateId === selectedClassTemplateId);
   const reviewModalRow = rows.find((row) => row.examPrepId === reviewModalRowId) ?? null;
+  const visibleTallySubmissions = tallySubmissions.filter(
+    (submission) => submission.examCycle === selectedExamCycle && submission.classTemplateId === selectedClassTemplateId
+  );
+  const tallyDifficultyValues = visibleTallySubmissions.map((item) => item.difficulty).filter(Number.isFinite);
+  const tallyPreparationValues = visibleTallySubmissions.map((item) => item.preparation).filter(Number.isFinite);
+  const tallyAverageLabel = (values) => {
+    if (!values.length) return "-";
+    return (values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(1);
+  };
+  const tallySummaryKey = `${selectedClassTemplateId}_${selectedExamCycle}`;
+  const tallySummary = tallySummaries[tallySummaryKey] ?? summarizeTallySubmissions(visibleTallySubmissions);
   const examManagementTabs = [
     {
       description: "학교, 학년, 교과서, 시험범위와 수학시험일을 관리합니다.",
@@ -4699,6 +4845,43 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
   function changeClassTemplate(classTemplateId) {
     setSelectedClassTemplateId(classTemplateId);
     onEnsureExamCycleRows(selectedExamCycle, classTemplateId);
+  }
+
+  async function importTallyCsv(file) {
+    if (!file) return;
+    setTallyImportStatus("파일을 읽는 중입니다.");
+    try {
+      const text = await file.text();
+      const parsedRows = parseCsvRows(text);
+      const nextSubmissions = parsedRows.map((row, index) =>
+        buildTallySubmission(row, index, {
+          classTemplateId: selectedClassTemplateId,
+          examCycle: selectedExamCycle,
+          students
+        })
+      );
+      setTallySubmissions((current) => [
+        ...nextSubmissions,
+        ...current.filter(
+          (submission) =>
+            !(submission.examCycle === selectedExamCycle && submission.classTemplateId === selectedClassTemplateId)
+        )
+      ]);
+      setTallySummaries((current) => ({
+        ...current,
+        [tallySummaryKey]: summarizeTallySubmissions(nextSubmissions)
+      }));
+      setTallyImportStatus(`${file.name} · ${nextSubmissions.length}명 제출을 불러왔습니다.`);
+    } catch (error) {
+      setTallyImportStatus(`CSV 읽기 실패 · ${error.message}`);
+    }
+  }
+
+  function refreshTallySummary() {
+    setTallySummaries((current) => ({
+      ...current,
+      [tallySummaryKey]: summarizeTallySubmissions(visibleTallySubmissions)
+    }));
   }
 
   return (
@@ -4834,31 +5017,99 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
         <div className="tallyAiGrid">
           <section className="panel tallyInboxPanel">
             <div className="sectionHeader slim">
-              <h2>Self-check 제출 수신함</h2>
-              <button className="softButton" type="button">제출 데이터 가져오기</button>
+              <div>
+                <h2>Self-check 제출 수신함</h2>
+                <p className="muted">{selectedClass?.name} · {examCycleLabel(selectedExamCycle)} · {visibleTallySubmissions.length}명 제출</p>
+              </div>
+              <label className="softButton fileImportButton">
+                CSV 가져오기
+                <input
+                  accept=".csv,text/csv"
+                  onChange={(event) => importTallyCsv(event.target.files?.[0])}
+                  type="file"
+                />
+              </label>
             </div>
-            {filteredRows.slice(0, 5).map((row) => (
-              <article className="tallySubmissionCard" key={`tally_${row.examPrepId}`}>
-                <strong>{row.schoolName} · {row.grade} · {row.subject}</strong>
-                <p>{row.review || "학생이 웹앱에서 제출한 시험 후 self-check 원문이 들어오면 여기에 표시됩니다."}</p>
-                <small>학생 제출 원본 보관 · AI 가공 대기</small>
+            <div
+              className="tallyDropZone"
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={(event) => {
+                event.preventDefault();
+                importTallyCsv(event.dataTransfer.files?.[0]);
+              }}
+            >
+              <strong>탈리 CSV 파일을 여기로 끌어오세요.</strong>
+              <span>{tallyImportStatus || "학생 self-check 제출 파일을 업로드하면 학생별 카드와 총평 초안이 생성됩니다."}</span>
+            </div>
+            <div className="tallyStats">
+              <article>
+                <span>제출</span>
+                <strong>{visibleTallySubmissions.length}명</strong>
               </article>
-            ))}
+              <article>
+                <span>평균 난이도</span>
+                <strong>{tallyAverageLabel(tallyDifficultyValues)}</strong>
+              </article>
+              <article>
+                <span>준비 평균</span>
+                <strong>{tallyAverageLabel(tallyPreparationValues)}</strong>
+              </article>
+            </div>
+            {visibleTallySubmissions.length ? (
+              <div className="tallyCardList">
+                {visibleTallySubmissions.map((submission) => (
+                  <article className="tallySubmissionCard studentSelfCheckCard" key={submission.submissionId}>
+                    <div className="tallyStudentHeader">
+                      <strong>{submission.studentName}</strong>
+                      <span>{submission.schoolName || "학교 미입력"} · {submission.grade || "학년 미입력"}</span>
+                    </div>
+                    <div className="tallyMetricLine">
+                      <span>난이도 <b>{submission.difficulty ?? "-"}</b></span>
+                      <span>준비 <b>{submission.preparation ?? "-"}</b></span>
+                      <span>학원 도움 <b>{submission.academyHelp || "-"}</b></span>
+                      <span>다음 목표 <b>{submission.nextGoal || "-"}</b></span>
+                    </div>
+                    <div className="tallyReviewGrid">
+                      <p><b>시험 리뷰</b>{submission.goodPart || submission.regretReason || "응답 없음"}</p>
+                      <p><b>다음을 위해</b>{submission.needMore || submission.wantedHelp || "응답 없음"}</p>
+                      {submission.freeComment ? <p><b>학생 코멘트</b>{submission.freeComment}</p> : null}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="emptyState">아직 불러온 self-check 제출이 없습니다.</div>
+            )}
           </section>
           <section className="panel tallySummaryPanel">
             <div className="sectionHeader slim">
-              <h2>AI 표준 총평</h2>
-              <button className="primaryButton" type="button">AI 총평 갱신</button>
+              <div>
+                <h2>AI 표준 총평</h2>
+                <p className="muted">CSV 제출을 바탕으로 강사용 누적 총평을 정리합니다.</p>
+              </div>
+              <button className="primaryButton" onClick={refreshTallySummary} type="button">총평 갱신</button>
             </div>
-            {filteredRows.slice(0, 5).map((row) => (
-              <article className="tallySubmissionCard summary" key={`summary_${row.examPrepId}`}>
-                <strong>{row.schoolName}</strong>
-                <button className="examReviewOpenButton filled" onClick={() => setReviewModalRowId(row.examPrepId)} type="button">
-                  <strong>총평 모달 열기</strong>
-                  <span>{row.revisedReview || row.review || "AI 총평을 작성해주세요."}</span>
+            <article className="tallySubmissionCard summary">
+              <strong>{selectedClass?.name} 총평 초안</strong>
+              <textarea
+                value={tallySummary}
+                onChange={(event) =>
+                  setTallySummaries((current) => ({
+                    ...current,
+                    [tallySummaryKey]: event.target.value
+                  }))
+                }
+              />
+              <small>학교별 시험 후 총평 모달에 옮겨 최종 편집할 수 있습니다.</small>
+            </article>
+            <div className="tallySchoolSummaryList">
+              {filteredRows.map((row) => (
+                <button className="examReviewOpenButton filled" key={`summary_${row.examPrepId}`} onClick={() => setReviewModalRowId(row.examPrepId)} type="button">
+                  <strong>{row.schoolName} 총평 작성</strong>
+                  <span>{row.revisedReview || row.review || "학교별 총평을 열어 편집합니다."}</span>
                 </button>
-              </article>
-            ))}
+              ))}
+            </div>
           </section>
         </div>
       ) : null}
@@ -4870,15 +5121,37 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
               <h2>기출문제 아카이브</h2>
               <p className="muted">외부 Google Apps Script 웹앱을 academy-os 안에서 엽니다.</p>
             </div>
-            <a className="softButton" href={pastPaperArchiveUrl} rel="noreferrer" target="_blank">
-              새 창에서 열기
-            </a>
+            <div className="pastPaperActions">
+              <button
+                className="softButton"
+                onClick={() => {
+                  setPastPaperLoadState("loading");
+                  setPastPaperFrameKey((current) => current + 1);
+                }}
+                type="button"
+              >
+                다시 불러오기
+              </button>
+              <a className="softButton" href={pastPaperArchiveUrl} rel="noreferrer" target="_blank">
+                새 창에서 열기
+              </a>
+            </div>
           </div>
-          <iframe
-            className="pastPaperFrame"
-            src={pastPaperArchiveUrl}
-            title="으뜸수학 기출아카이브"
-          />
+          <div className="pastPaperFrameWrap">
+            {pastPaperLoadState === "loading" ? (
+              <div className="pastPaperLoading">기출문제 아카이브를 불러오는 중입니다.</div>
+            ) : null}
+            <iframe
+              className="pastPaperFrame"
+              key={pastPaperFrameKey}
+              onLoad={() => setPastPaperLoadState("loaded")}
+              src={pastPaperArchiveUrl}
+              title="으뜸수학 기출아카이브"
+            />
+          </div>
+          <p className="pastPaperHelp">
+            화면이 비어 있으면 Google Apps Script가 iframe 표시를 제한한 상태일 수 있습니다. 이 경우 새 창에서 열기를 사용하세요.
+          </p>
         </section>
       ) : null}
 

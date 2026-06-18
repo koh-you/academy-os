@@ -1294,6 +1294,64 @@ button {
   gap: 12px;
 }
 
+.fileImportButton {
+  cursor: pointer;
+  display: inline-flex;
+  position: relative;
+}
+
+.fileImportButton input {
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  width: 1px;
+}
+
+.tallyDropZone {
+  background: #f8fbff;
+  border: 1px dashed #b9c9e8;
+  border-radius: 8px;
+  color: #64748b;
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+}
+
+.tallyDropZone strong {
+  color: #17213d;
+}
+
+.tallyStats {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.tallyStats article {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+}
+
+.tallyStats span {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.tallyStats strong {
+  font-size: 24px;
+}
+
+.tallyCardList,
+.tallySchoolSummaryList {
+  display: grid;
+  gap: 10px;
+}
+
 .tallySubmissionCard {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
@@ -1311,6 +1369,59 @@ button {
 
 .tallySubmissionCard small {
   color: #64748b;
+}
+
+.tallyStudentHeader {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.tallyStudentHeader span {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.tallyMetricLine {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.tallyMetricLine span {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #64748b;
+  display: grid;
+  gap: 3px;
+  padding: 8px;
+}
+
+.tallyMetricLine b {
+  color: #17213d;
+}
+
+.tallyReviewGrid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.tallyReviewGrid p {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  min-height: 72px;
+  padding: 10px;
+}
+
+.tallyReviewGrid p:last-child:nth-child(3) {
+  grid-column: 1 / -1;
 }
 
 .tallySubmissionCard.summary textarea {
@@ -1335,9 +1446,36 @@ button {
   justify-content: space-between;
 }
 
+.pastPaperActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .pastPaperToolbar h2,
 .pastPaperToolbar p {
   margin: 0;
+}
+
+.pastPaperFrameWrap {
+  display: grid;
+  min-height: calc(100vh - 330px);
+  position: relative;
+}
+
+.pastPaperLoading {
+  align-self: start;
+  background: #eef6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  color: #1d4ed8;
+  font-weight: 900;
+  justify-self: start;
+  margin: 12px;
+  padding: 10px 12px;
+  position: absolute;
+  z-index: 1;
 }
 
 .pastPaperFrame {
@@ -1345,6 +1483,12 @@ button {
   border-radius: 8px;
   min-height: calc(100vh - 330px);
   width: 100%;
+}
+
+.pastPaperHelp {
+  color: #64748b;
+  font-size: 13px;
+  margin: -2px 0 0;
 }
 
 .examAnalysisPage {
@@ -6713,7 +6857,8 @@ textarea.profileEditInput {
   .analysisTwoColumn,
   .aiVariantWorkspace,
   .insightGrid,
-  .analysisOutputGrid {
+  .analysisOutputGrid,
+  .tallyAiGrid {
     grid-template-columns: 1fr;
   }
 
@@ -6769,6 +6914,22 @@ textarea.profileEditInput {
 
   .wideProfileItem {
     grid-column: auto;
+  }
+
+  .examManagementTabs,
+  .tallyStats,
+  .tallyMetricLine,
+  .tallyReviewGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pastPaperToolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pastPaperActions {
+    justify-content: flex-start;
   }
 }
 
