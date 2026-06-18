@@ -3055,11 +3055,7 @@ function RoleLoginScreen({ students, onAttendanceCheck, onLogin }) {
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loginAttempts, setLoginAttempts] = useState(0);
-  const [lockedUntil, setLockedUntil] = useState(0);
   const [showAttendanceKiosk, setShowAttendanceKiosk] = useState(false);
-  const isLoginLocked = lockedUntil > Date.now();
-  const lockRemainingSeconds = Math.max(0, Math.ceil((lockedUntil - Date.now()) / 1000));
 
   const roleLabels = {
     student: "학생",
@@ -3076,24 +3072,11 @@ function RoleLoginScreen({ students, onAttendanceCheck, onLogin }) {
 
   function submit(event) {
     event.preventDefault();
-    if (isLoginLocked) {
-      setError(`로그인 시도가 잠시 제한되었습니다. ${lockRemainingSeconds}초 후 다시 시도해주세요.`);
-      return;
-    }
     const result = onLogin(role, loginId.trim(), password.trim());
     if (!result.ok) {
-      const nextAttempts = loginAttempts + 1;
-      setLoginAttempts(nextAttempts);
-      if (nextAttempts >= 5) {
-        setLockedUntil(Date.now() + 5 * 60 * 1000);
-        setError("로그인 실패가 반복되어 5분 동안 로그인이 제한됩니다.");
-        return;
-      }
-      setError(`${result.message} (${nextAttempts}/5)`);
+      setError(result.message);
       return;
     }
-    setLoginAttempts(0);
-    setLockedUntil(0);
   }
 
   return (
@@ -3135,8 +3118,7 @@ function RoleLoginScreen({ students, onAttendanceCheck, onLogin }) {
             placeholder="비밀번호"
           />
           {error ? <div className="loginError">{error}</div> : null}
-          {isLoginLocked ? <div className="loginSecurityNotice">보호 잠금: {lockRemainingSeconds}초 후 다시 시도할 수 있습니다.</div> : null}
-          <button className="primaryButton full" disabled={isLoginLocked} type="submit">{roleLabels[role]} 로그인</button>
+          <button className="primaryButton full" type="submit">{roleLabels[role]} 로그인</button>
           <button className="softButton full" onClick={() => setShowAttendanceKiosk(true)} type="button">
             출결 체크
           </button>

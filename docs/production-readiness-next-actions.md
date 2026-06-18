@@ -22,7 +22,7 @@ Overall MVP readiness: about 70%.
 ## Immediate AI Work Completed
 
 - Removed default visible login values from the main role login screen.
-- Added login attempt protection: 5 failed attempts trigger a 5-minute local lock.
+- Kept login behavior simple for MVP; no temporary lockout is applied.
 - Added notification template previews for attendance, parent, and student messages.
 - Added notification test response details so dry-run/send mode, recipient, template env name, and variables are visible.
 - Added `npm run test:production` for 20 production readiness checks.
