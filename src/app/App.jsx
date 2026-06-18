@@ -2602,6 +2602,7 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
   const [isDispatching, setIsDispatching] = useState(false);
   const [isCheckingReadiness, setIsCheckingReadiness] = useState(false);
   const [testSendResult, setTestSendResult] = useState("");
+  const [testSendDetail, setTestSendDetail] = useState(null);
   const [testingTemplate, setTestingTemplate] = useState("");
   const notificationStatus = integrationStatus?.notifications;
   const safetyTone = getAlimtalkSafetyTone(notificationStatus, false);
@@ -2662,6 +2663,7 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
   async function handleTemplateTest(testType) {
     setTestingTemplate(testType);
     setTestSendResult("");
+    setTestSendDetail(null);
     const todayKey = getKoreaDateString(new Date());
     const basePayload = {
       academyName: academyBrandName,
@@ -2689,8 +2691,18 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
       const result = await postJson(endpoint, basePayload);
       const modeText = result.result?.dryRun ? "테스트 기록 완료 · 실제 발송 없음" : "테스트 번호로 발송 요청 완료";
       setTestSendResult(`${getNotificationJobLabel(testType === "attendance" ? "attendance" : testType === "student" ? "student_comment" : "parent_comment")}: ${modeText}`);
+      setTestSendDetail({
+        label: getNotificationJobLabel(testType === "attendance" ? "attendance" : testType === "student" ? "student_comment" : "parent_comment"),
+        provider: result.provider ?? "-",
+        dryRun: Boolean(result.result?.dryRun),
+        sentTo: result.result?.sentTo || "-",
+        requestedTo: result.result?.requestedTo || "-",
+        templateEnvName: result.result?.templateEnvName || "-",
+        variables: result.result?.variables ?? {}
+      });
     } catch (error) {
       setTestSendResult(`테스트 실패: ${error.message}`);
+      setTestSendDetail(null);
     } finally {
       setTestingTemplate("");
     }
@@ -2821,6 +2833,22 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
           </article>
         </div>
         {testSendResult ? <p className="inlineNotice">{testSendResult}</p> : null}
+        {testSendDetail ? (
+          <div className="templateResultCard">
+            <div className="templateResultMeta">
+              <span>{testSendDetail.label}</span>
+              <span>{testSendDetail.dryRun ? "DRY RUN" : "SEND REQUESTED"}</span>
+              <span>수신: {testSendDetail.sentTo}</span>
+              <span>요청번호: {testSendDetail.requestedTo}</span>
+              <span>템플릿: {testSendDetail.templateEnvName}</span>
+            </div>
+            <pre className="templatePreviewText">
+              {Object.entries(testSendDetail.variables)
+                .map(([key, value]) => `${key}\n${value}`)
+                .join("\n\n")}
+            </pre>
+          </div>
+        ) : null}
       </section>
 
       <section className="notificationPanel">

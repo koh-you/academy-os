@@ -2259,6 +2259,31 @@ button:disabled {
   white-space: pre-wrap;
 }
 
+.templateResultCard {
+  background: #f8fafc;
+  border: 1px solid #dbe6f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.templateResultMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.templateResultMeta span {
+  background: #ffffff;
+  border: 1px solid #dbe6f8;
+  border-radius: 999px;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 10px;
+}
+
 .integrationStatusGrid span {
   align-items: center;
   color: #475569;
