@@ -5932,12 +5932,84 @@ function AIVariantProblemCenter({ aiSettings = defaultAiSettings }) {
   const [toneStyle, setToneStyle] = useState("auto");
   const [teacherPrompt, setTeacherPrompt] = useState("");
   const [isGenerated, setIsGenerated] = useState(false);
+  const [selectedVariantIds, setSelectedVariantIds] = useState([]);
+  const [isHwpxExportOpen, setIsHwpxExportOpen] = useState(false);
+  const [hwpxExportForm, setHwpxExportForm] = useState({
+    includeAnswerSheet: false,
+    includeInlineNotes: true,
+    includeSolution: true,
+    layout: "b4_2col",
+    subject: "",
+    title: "변형문항 시험지",
+    typography: "compact"
+  });
   const variantAiProvider = aiSettings.variantProvider ?? defaultAiSettings.variantProvider;
   const variantAiModel = aiSettings.variantModel ?? defaultAiSettings.variantModel;
   const totalVariantCount = Number(basicCount || 0) + Number(similarCount || 0) + Number(advancedCount || 0);
+  const generatedVariantCount = Math.max(1, Math.min(totalVariantCount || 1, 10));
+  const generatedVariants = isGenerated
+    ? Array.from({ length: generatedVariantCount }, (_, index) => {
+        const variantNumber = index + 1;
+        const type =
+          index < Number(basicCount || 0)
+            ? "숫자/조건 변형"
+            : index < Number(basicCount || 0) + Number(similarCount || 0)
+              ? "표현 변형"
+              : "고난도 변형";
+        return {
+          id: `variant_${variantNumber}`,
+          label: `변형 ${variantNumber}`,
+          level: variantLevel === "same" ? "유사 난도" : variantLevel === "up" ? "심화" : "내신 실전",
+          source: sourceProblem || "원본 문항을 입력하면 이 영역에 변형문항 결과가 표시됩니다.",
+          type
+        };
+      })
+    : [];
+  const selectedVariantCount = selectedVariantIds.filter((id) =>
+    generatedVariants.some((variant) => variant.id === id)
+  ).length;
 
   function handleGenerateVariant() {
     setIsGenerated(true);
+    setSelectedVariantIds(
+      Array.from({ length: Math.min(generatedVariantCount, 2) }, (_, index) => `variant_${index + 1}`)
+    );
+  }
+
+  function handleToggleVariantSelection(variantId) {
+    setSelectedVariantIds((current) =>
+      current.includes(variantId)
+        ? current.filter((id) => id !== variantId)
+        : [...current, variantId]
+    );
+  }
+
+  function updateHwpxExportForm(field, value) {
+    setHwpxExportForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function handleDownloadHwpx() {
+    const selectedVariants = generatedVariants.filter((variant) => selectedVariantIds.includes(variant.id));
+    const exportPayload = {
+      createdAt: new Date().toISOString(),
+      exportType: "hwpx-draft",
+      note: "This is a frontend export draft. Backend HWPX packaging will replace this payload with a valid HWPX archive.",
+      options: hwpxExportForm,
+      variants: selectedVariants
+    };
+    const fileName = `${(hwpxExportForm.title || "variant-test").replace(/[\\/:*?"<>|]/g, "_")}.hwpx`;
+    const blob = new Blob([JSON.stringify(exportPayload, null, 2)], {
+      type: "application/vnd.hancom.hwpx"
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    setIsHwpxExportOpen(false);
   }
 
   return (
@@ -6091,25 +6163,46 @@ function AIVariantProblemCenter({ aiSettings = defaultAiSettings }) {
                 <div className="variantResultToolbar">
                   <button className="softButton" type="button">별표</button>
                   <button className="softButton" type="button">전체 저장</button>
+                  <button
+                    className="primaryButton compact"
+                    disabled={selectedVariantCount === 0}
+                    onClick={() => setIsHwpxExportOpen(true)}
+                    type="button"
+                  >
+                    HWPX 내보내기 ({selectedVariantCount})
+                  </button>
                   <button className="softButton" onClick={handleGenerateVariant} type="button">다시 생성</button>
                 </div>
-                <article className="variantResultCard">
-                  <div className="variantResultMeta">
-                    <span>변형 1</span>
-                    <b>{variantLevel === "same" ? "유사 난도" : variantLevel === "up" ? "심화" : "내신 실전"}</b>
-                    <em>{totalVariantCount}문항 요청</em>
-                  </div>
-                  <strong>원본 문항의 핵심 조건을 유지한 변형 초안</strong>
-                  <p>{sourceProblem || "원본 문항을 입력하면 이 영역에 변형문항 결과가 표시됩니다."}</p>
-                  <div className="variantAnswerBox">
-                    <span>정답</span>
-                    <strong>AI 생성 후 표시</strong>
-                  </div>
-                  <div className="variantSolutionBox">
-                    <span>해설</span>
-                    <p>선택한 해설 형식과 풀이 스타일에 맞춰 풀이가 표시됩니다.</p>
-                  </div>
-                </article>
+                {generatedVariants.map((variant) => (
+                  <article
+                    className={selectedVariantIds.includes(variant.id) ? "variantResultCard selected" : "variantResultCard"}
+                    key={variant.id}
+                  >
+                    <div className="variantResultMeta">
+                      <label className="variantSelectCheck">
+                        <input
+                          checked={selectedVariantIds.includes(variant.id)}
+                          onChange={() => handleToggleVariantSelection(variant.id)}
+                          type="checkbox"
+                        />
+                        선택
+                      </label>
+                      <span>{variant.label}</span>
+                      <b>{variant.level}</b>
+                      <em>{variant.type}</em>
+                    </div>
+                    <strong>원본 문항의 핵심 조건을 유지한 변형 초안</strong>
+                    <p>{variant.source}</p>
+                    <div className="variantAnswerBox">
+                      <span>정답</span>
+                      <strong>AI 생성 후 표시</strong>
+                    </div>
+                    <div className="variantSolutionBox">
+                      <span>해설</span>
+                      <p>선택한 해설 형식과 풀이 스타일에 맞춰 풀이가 표시됩니다.</p>
+                    </div>
+                  </article>
+                ))}
               </>
             ) : (
               <div className="variantResultEmpty">
@@ -6120,6 +6213,107 @@ function AIVariantProblemCenter({ aiSettings = defaultAiSettings }) {
             )}
           </section>
         </section>
+      ) : null}
+
+      {isHwpxExportOpen ? (
+        <Modal
+          className="hwpxExportModal"
+          title="HWPX 시험지 내보내기"
+          subtitle={`선택한 ${selectedVariantCount}개 문항을 한글 파일(.hwpx)로 다운로드합니다.`}
+          onClose={() => setIsHwpxExportOpen(false)}
+        >
+          <div className="hwpxExportForm">
+            <section className="hwpxExportSection">
+              <div className="sectionHeader slim">
+                <div>
+                  <h3>시험지 정보</h3>
+                  <p className="muted">다운로드 파일에 들어갈 기본 정보를 정합니다.</p>
+                </div>
+              </div>
+              <label className="wideLabel">
+                시험지 제목
+                <input
+                  value={hwpxExportForm.title}
+                  onChange={(event) => updateHwpxExportForm("title", event.target.value)}
+                  placeholder="예: 6월 3주차 변형문항"
+                />
+              </label>
+              <label className="wideLabel">
+                과목
+                <input
+                  value={hwpxExportForm.subject}
+                  onChange={(event) => updateHwpxExportForm("subject", event.target.value)}
+                  placeholder="예: 공통수학1, 미적분"
+                />
+              </label>
+            </section>
+
+            <section className="hwpxExportSection">
+              <div className="sectionHeader slim">
+                <div>
+                  <h3>정답 · 풀이</h3>
+                  <p className="muted">수업용, 배부용, 해설용 시험지 형식을 나눠 저장할 수 있게 둡니다.</p>
+                </div>
+              </div>
+              <div className="hwpxCheckboxGrid">
+                <label>
+                  <input
+                    checked={hwpxExportForm.includeAnswerSheet}
+                    onChange={(event) => updateHwpxExportForm("includeAnswerSheet", event.target.checked)}
+                    type="checkbox"
+                  />
+                  정답 포함
+                </label>
+                <label>
+                  <input
+                    checked={hwpxExportForm.includeSolution}
+                    onChange={(event) => updateHwpxExportForm("includeSolution", event.target.checked)}
+                    type="checkbox"
+                  />
+                  풀이 / 해설 포함
+                </label>
+                <label>
+                  <input
+                    checked={hwpxExportForm.includeInlineNotes}
+                    onChange={(event) => updateHwpxExportForm("includeInlineNotes", event.target.checked)}
+                    type="checkbox"
+                  />
+                  인라인 노트 포함
+                </label>
+              </div>
+            </section>
+
+            <section className="hwpxExportSection">
+              <div className="hwpxExportGrid">
+                <label>
+                  페이지 레이아웃
+                  <select value={hwpxExportForm.layout} onChange={(event) => updateHwpxExportForm("layout", event.target.value)}>
+                    <option value="b4_2col">B4 · 2단</option>
+                    <option value="a4_1col">A4 · 1단</option>
+                    <option value="a4_2col">A4 · 2단</option>
+                  </select>
+                </label>
+                <label>
+                  타이포그래피
+                  <select value={hwpxExportForm.typography} onChange={(event) => updateHwpxExportForm("typography", event.target.value)}>
+                    <option value="compact">예비 · 본문 · 여백</option>
+                    <option value="exam">시험지형</option>
+                    <option value="solution">해설지형</option>
+                  </select>
+                </label>
+              </div>
+            </section>
+
+            <p className="hwpxExportNote">
+              현재 다운로드는 HWPX 내보내기 연결을 검수하기 위한 초안입니다. 한컴에서 바로 열리는 정식 HWPX 패키징은 백엔드 변환 모듈에서 완성합니다.
+            </p>
+
+            <div className="hwpxExportActions">
+              <button className="softButton" onClick={() => setIsHwpxExportOpen(false)} type="button">취소</button>
+              <button className="primaryButton" disabled={selectedVariantCount === 0} onClick={handleDownloadHwpx} type="button">다운로드</button>
+            </div>
+          </div>
+        </Modal>
       ) : null}
     </section>
   );

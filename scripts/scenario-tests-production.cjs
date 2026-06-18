@@ -52,6 +52,8 @@ check("24 responsive layout principles doc exists", fs.existsSync(path.join(root
 check("25 ai tools menu replaces ai variant label", app.includes('label: "AI 도구"') && !app.includes('label: "AI 변형문항"'));
 check("26 ai variant draft shortcut is removed", !app.includes(">초안 보기</button>") && app.includes("AI 처리 시작"));
 check("27 ai variant workspace is two column", css.includes(".aiVariantWorkspace") && css.includes(".aiVariantResultPanel"));
+check("28 ai variant hwpx export modal exists", hasAll(app, ["HWPX 시험지 내보내기", "handleDownloadHwpx", ".hwpx"]));
+check("29 ai variant selected export flow exists", hasAll(app, ["selectedVariantIds", "selectedVariantCount", "HWPX 내보내기"]));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));
