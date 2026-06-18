@@ -4642,6 +4642,7 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
   const [activeTab, setActiveTab] = useState("info");
   const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("template_mwf_7_10");
   const [selectedExamCycle, setSelectedExamCycle] = useState("2026-1-mid");
+  const [editingExamPrepId, setEditingExamPrepId] = useState("");
   const [reviewModalRowId, setReviewModalRowId] = useState("");
   const pastPaperArchiveUrl =
     "https://script.google.com/macros/s/AKfycbyYi-NUHHzb9vrBl4Adj6Pq9zXIZJ9oR97g-uQyAf7up7AGVzeRdBUqfVcUZ1zjQiug/exec";
@@ -4769,29 +4770,62 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
               <span>시험 범위</span>
               <span>부교재</span>
               <span>시험 후 총평</span>
+              <span>관리</span>
             </div>
-            {filteredRows.map((row) => (
-              <div className="examPrepRow" key={row.examPrepId}>
-                <input value={row.schoolName ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "schoolName", event.target.value)} />
-                <textarea
-                  value={row.specialNote ?? row.memo ?? ""}
-                  onChange={(event) => onUpdateRow(row.examPrepId, "specialNote", event.target.value)}
-                  placeholder="학교별 특이사항"
-                  rows="3"
-                />
-                <input value={row.grade ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "grade", event.target.value)} />
-                <input value={row.subject ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "subject", event.target.value)} />
-                <input value={row.publisher ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "publisher", event.target.value)} />
-                <input value={row.examPeriod ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "examPeriod", event.target.value)} placeholder="예: 2026-06-24~06-28" />
-                <input type="date" value={row.mathExamDate ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "mathExamDate", event.target.value)} />
-                <textarea value={row.scope ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "scope", event.target.value)} rows="3" />
-                <textarea value={row.subTextbook ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "subTextbook", event.target.value)} rows="3" />
-                <button className={row.review || row.revisedReview ? "examReviewOpenButton filled" : "examReviewOpenButton"} onClick={() => setReviewModalRowId(row.examPrepId)} type="button">
-                  <strong>{row.review || row.revisedReview ? "총평 보기/수정" : "총평 작성"}</strong>
-                  <span>{row.revisedReview || row.review || "시험 후 총평 미작성"}</span>
-                </button>
-              </div>
-            ))}
+            {filteredRows.map((row) => {
+              const isEditing = editingExamPrepId === row.examPrepId;
+              const specialNote = row.specialNote ?? row.memo ?? "";
+              const reviewSummary = row.revisedReview || row.review || "시험 후 총평 미작성";
+
+              return (
+                <div className={isEditing ? "examPrepRow editing" : "examPrepRow"} key={row.examPrepId}>
+                  {isEditing ? (
+                    <>
+                      <input value={row.schoolName ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "schoolName", event.target.value)} />
+                      <textarea
+                        value={specialNote}
+                        onChange={(event) => onUpdateRow(row.examPrepId, "specialNote", event.target.value)}
+                        placeholder="학교별 특이사항"
+                        rows="3"
+                      />
+                      <input value={row.grade ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "grade", event.target.value)} />
+                      <input value={row.subject ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "subject", event.target.value)} />
+                      <input value={row.publisher ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "publisher", event.target.value)} />
+                      <input value={row.examPeriod ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "examPeriod", event.target.value)} placeholder="예: 2026-06-24~06-28" />
+                      <input type="date" value={row.mathExamDate ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "mathExamDate", event.target.value)} />
+                      <textarea value={row.scope ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "scope", event.target.value)} rows="3" />
+                      <textarea value={row.subTextbook ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "subTextbook", event.target.value)} rows="3" />
+                    </>
+                  ) : (
+                    <>
+                      <div className="examReadCell strong">{row.schoolName || "-"}</div>
+                      <div className="examReadCell multiline">{specialNote || "특이사항 없음"}</div>
+                      <div className="examReadCell">{row.grade || "-"}</div>
+                      <div className="examReadCell">{row.subject || "-"}</div>
+                      <div className="examReadCell">{row.publisher || "-"}</div>
+                      <div className="examReadCell">{row.examPeriod || "미입력"}</div>
+                      <div className="examReadCell">{row.mathExamDate || "미입력"}</div>
+                      <div className="examReadCell multiline">{row.scope || "미입력"}</div>
+                      <div className="examReadCell multiline">{row.subTextbook || "미입력"}</div>
+                    </>
+                  )}
+                  <button className={row.review || row.revisedReview ? "examReviewOpenButton filled" : "examReviewOpenButton"} onClick={() => setReviewModalRowId(row.examPrepId)} type="button">
+                    <strong>{row.review || row.revisedReview ? "총평 보기/수정" : "총평 작성"}</strong>
+                    <span>{reviewSummary}</span>
+                  </button>
+                  <div className="examPrepRowActions">
+                    {isEditing ? (
+                      <>
+                        <button className="primaryButton compact" onClick={() => setEditingExamPrepId("")} type="button">저장</button>
+                        <button className="softButton compact" onClick={() => setEditingExamPrepId("")} type="button">닫기</button>
+                      </>
+                    ) : (
+                      <button className="softButton compact" onClick={() => setEditingExamPrepId(row.examPrepId)} type="button">수정</button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </>
       ) : null}

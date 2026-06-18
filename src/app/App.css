@@ -1119,13 +1119,18 @@ button {
   border-top: 1px solid #e2e8f0;
   display: grid;
   gap: 8px;
-  grid-template-columns: 120px 220px 90px 120px 120px 180px 145px 240px 210px 190px;
-  min-width: 1635px;
+  grid-template-columns: 120px 220px 90px 120px 120px 180px 145px 240px 210px 190px 86px;
+  min-width: 1728px;
   padding: 8px 10px;
 }
 
 .examPrepRow:first-child {
   border-top: 0;
+}
+
+.examPrepRow.editing {
+  background: #f8fbff;
+  box-shadow: inset 3px 0 0 #3b82f6;
 }
 
 .examPrepHead {
@@ -1139,6 +1144,46 @@ button {
 .examPrepRow textarea {
   min-height: 64px;
   resize: vertical;
+}
+
+.examReadCell {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: #17213d;
+  display: flex;
+  font-size: 15px;
+  line-height: 1.45;
+  min-height: 58px;
+  overflow: hidden;
+  padding: 8px 10px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.examReadCell.strong {
+  font-weight: 900;
+}
+
+.examReadCell.multiline {
+  align-items: flex-start;
+  display: -webkit-box;
+  overflow: hidden;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.examPrepRowActions {
+  align-content: center;
+  display: grid;
+  gap: 6px;
+}
+
+.examPrepRowActions .compact {
+  min-height: 34px;
+  padding: 7px 10px;
 }
 
 .examReviewOpenButton {
