@@ -1519,6 +1519,7 @@ export function App() {
 
         {activeView === "examPrep" ? (
           <ExamPrepCenter
+            aiSettings={aiSettings}
             templates={classTemplates}
             rows={examPrepRows}
             students={students}
@@ -4119,7 +4120,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
   );
 }
 
-function ExamPrepCenter({ rows, students, templates, onEnsureExamCycleRows, onUpdateRow }) {
+function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templates, onEnsureExamCycleRows, onUpdateRow }) {
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState("info");
   const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("template_mwf_7_10");
@@ -4310,6 +4311,7 @@ function ExamPrepCenter({ rows, students, templates, onEnsureExamCycleRows, onUp
 
       {reviewModalRow ? (
         <ExamReviewComposerModal
+          aiSettings={aiSettings}
           row={reviewModalRow}
           onClose={() => setReviewModalRowId("")}
           onUpdateRow={onUpdateRow}
@@ -4319,7 +4321,10 @@ function ExamPrepCenter({ rows, students, templates, onEnsureExamCycleRows, onUp
   );
 }
 
-function ExamReviewComposerModal({ onClose, onUpdateRow, row }) {
+function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUpdateRow, row }) {
+  const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
+  const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
+
   async function polishReview() {
     onUpdateRow(row.examPrepId, "reviewAiStatus", "AI 수정 중");
     try {
@@ -4327,8 +4332,8 @@ function ExamReviewComposerModal({ onClose, onUpdateRow, row }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          aiProvider: "auto",
-          aiModel: "server-default",
+          aiProvider: commentAiProvider,
+          aiModel: commentAiModel,
           audience: "teacher",
           grade: row.grade,
           homeworkStatus: "시험 후 총평",
@@ -4363,6 +4368,7 @@ function ExamReviewComposerModal({ onClose, onUpdateRow, row }) {
             <div>
               <p className="eyebrow">ORIGINAL</p>
               <h2>시험 후 총평</h2>
+              <small className="muted">{getAiProviderLabel(commentAiProvider)} · {getAiModelLabel(commentAiModel)}</small>
             </div>
             <button className="softButton" onClick={polishReview} type="button">AI 수정</button>
           </div>

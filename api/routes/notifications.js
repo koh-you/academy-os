@@ -21,7 +21,7 @@ const assignmentStatusMessageMap = {
   complete_thorough: "과제를 성실하게 완료했습니다.",
   complete_easy: "오늘 과제는 학생에게 비교적 수월하게 진행되었습니다.",
   partial_80: "과제를 대부분 수행했으며, 남은 부분은 다음 수업에서 확인하겠습니다.",
-  known_only: "아는 문항 위주로 풀어왔고, 어려웠던 문항은 추가 확인이 필요합니다.",
+  known_only: "아는 문항 위주로 진행되어 어려웠던 문항은 추가 확인이 필요합니다.",
   too_hard: "과제 난도가 다소 높아 보충 설명과 분량 조정이 필요합니다.",
   answer_suspected: "풀이 과정 확인이 필요한 문항이 있어 다음 수업에서 점검하겠습니다.",
   not_done: "과제가 충분히 완료되지 않아 보충 관리가 필요합니다.",
@@ -131,7 +131,7 @@ function buildAttendanceBody({ attendanceStatus, checkedAt, lessonName, lateMinu
   const status = attendanceLabel(attendanceStatus);
   const lines = [
     `🏫 출결: ${status}`,
-    lessonName ? `📘 수업: ${lessonName}` : "",
+    lessonName ? `📚 수업: ${lessonName}` : "",
     checkedAt ? `🕒 시간: ${checkedAt}` : ""
   ];
 
@@ -160,15 +160,15 @@ function buildDailyReportBody({
   const assignmentStatusMessage = assignmentStatusText(assignmentStatus, assignmentStatus);
   const lines = [
     `🏫 출결: ${attendanceLabel(attendanceStatus)}`,
-    lessonMaterial ? `📘 강의 교재: ${lessonMaterial}` : "",
-    lessonContent ? `✏️ 강의 내용: ${lessonContent}` : "",
-    previousHomework ? `📚 지난 과제: ${previousHomework}` : "",
+    lessonMaterial ? `📚 강의 교재: ${lessonMaterial}` : "",
+    lessonContent ? `🧭 강의 내용: ${lessonContent}` : "",
+    previousHomework ? `📖 지난 과제: ${previousHomework}` : "",
     nextHomework ? `➡️ 다음 과제: ${nextHomework}` : "",
     assignmentStatusMessage ? `✅ 과제 상태: ${assignmentStatusMessage}` : "",
-    preparationNotice ? `🧭 수업 준비: ${preparationNotice}` : "",
+    preparationNotice ? `📝 수업 준비: ${preparationNotice}` : "",
     incompleteList.length ? `⚠️ 미완료 과제:\n${incompleteList.map((item) => `- ${item}`).join("\n")}` : "",
-    retestSchedule ? `🔴 중요 · 재시험 일정: ${retestSchedule}` : "",
-    supplementSchedule ? `🟡 중요 · 보충 일정: ${supplementSchedule}` : "",
+    retestSchedule ? `⭐ 중요 · 재시험 일정: ${retestSchedule}` : "",
+    supplementSchedule ? `⭐ 중요 · 보충 일정: ${supplementSchedule}` : "",
     teacherComment ? `💬 코멘트: ${teacherComment}` : ""
   ];
 
@@ -191,10 +191,10 @@ function buildLessonCommentBody(payload, audience) {
 function buildStudentScheduleReminderBody({ scheduleType, scheduleTitle, scheduleDate, scheduleTime, lessonName, memo }) {
   const type = scheduleType === "retest" ? "재시험" : scheduleType === "supplement" ? "보충" : "일정";
   const lines = [
-    `🔴 중요 · 오늘 ${type} 일정이 있습니다.`,
+    `⭐ 중요 · 오늘 ${type} 일정이 있습니다.`,
     scheduleTitle ? `📌 내용: ${scheduleTitle}` : "",
     scheduleDate || scheduleTime ? `🕒 일시: ${[scheduleDate, scheduleTime].filter(Boolean).join(" ")}` : "",
-    lessonName ? `📘 수업: ${lessonName}` : "",
+    lessonName ? `📚 수업: ${lessonName}` : "",
     memo ? `💬 메모: ${memo}` : ""
   ];
 
@@ -207,9 +207,9 @@ function buildSlackDailyScheduleSummary({ date, retests, supplements }) {
   const lines = [`[koh_you_math] ${date ?? "오늘"} 보충/재시험 일정`];
 
   lines.push("");
-  lines.push(retestItems.length ? `🔴 재시험\n${retestItems.map((item) => `- ${item}`).join("\n")}` : "🔴 재시험: 없음");
+  lines.push(retestItems.length ? `⭐ 재시험\n${retestItems.map((item) => `- ${item}`).join("\n")}` : "⭐ 재시험: 없음");
   lines.push("");
-  lines.push(supplementItems.length ? `🟡 보충\n${supplementItems.map((item) => `- ${item}`).join("\n")}` : "🟡 보충: 없음");
+  lines.push(supplementItems.length ? `📌 보충\n${supplementItems.map((item) => `- ${item}`).join("\n")}` : "📌 보충: 없음");
 
   return lines.join("\n");
 }
