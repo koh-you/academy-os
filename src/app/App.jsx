@@ -1782,7 +1782,6 @@ export function App() {
             students={students}
             tasks={makeupTasks}
             onCreateTask={handleCreateMakeupTask}
-            onLogNotification={handleLogNotification}
             onScheduleTask={handleScheduleSupplementTask}
             onUpdateTask={handleUpdateMakeupTask}
           />
@@ -7476,7 +7475,6 @@ function SupplementCenter({
   students,
   tasks,
   onCreateTask,
-  onLogNotification,
   onScheduleTask,
   onUpdateTask
 }) {
@@ -7630,7 +7628,6 @@ function SupplementCenter({
       {selectedSupplementStudent ? (
         <SupplementStudentModal
           onClose={() => setSelectedSupplementStudentId("")}
-          onLogNotification={onLogNotification}
           onScheduleTask={onScheduleTask}
           onUpdateTask={onUpdateTask}
           student={selectedSupplementStudent}
@@ -7643,7 +7640,6 @@ function SupplementCenter({
 
 function SupplementStudentModal({
   onClose,
-  onLogNotification,
   onScheduleTask,
   onUpdateTask,
   student,
@@ -7672,7 +7668,8 @@ function SupplementStudentModal({
 
           <div className="taskStack">
             {tasks.map((task) => {
-              const draft = task.notificationDraft || createNotificationDraft(task, [student]);
+              const freshDraft = createNotificationDraft(task, [student]);
+              const visibleDraft = task.notificationDraft || freshDraft;
               return (
                 <article className="taskCard" key={task.makeupTaskId}>
                   <div className="taskCardTop">
@@ -7706,12 +7703,12 @@ function SupplementStudentModal({
                   <label>
                     알림 문구 초안
                     <textarea
-                      value={task.notificationDraft || draft}
+                      value={visibleDraft}
                       onChange={(event) => onUpdateTask(task.makeupTaskId, "notificationDraft", event.target.value)}
                     />
                   </label>
                   <div className="modalActions">
-                    <button className="softButton" onClick={() => onUpdateTask(task.makeupTaskId, "notificationDraft", draft)} type="button">
+                    <button className="softButton" onClick={() => onUpdateTask(task.makeupTaskId, "notificationDraft", freshDraft)} type="button">
                       문구 생성
                     </button>
                     <button
@@ -7722,9 +7719,6 @@ function SupplementStudentModal({
                       type="button"
                     >
                       일정 확정
-                    </button>
-                    <button className="primaryButton" onClick={() => onLogNotification({ ...task, notificationDraft: task.notificationDraft || draft })} type="button">
-                      모의 로그
                     </button>
                   </div>
                 </article>
