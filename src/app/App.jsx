@@ -140,16 +140,18 @@ function apiUrl(path) {
   return `${apiBaseUrl}${path}`;
 }
 
-function getAlimtalkSafetyTone(notificationStatus, forceDryRun = false) {
+function getAlimtalkSafetyTone(notificationStatus, forceDryRun = false, forceTestRecipient = false) {
   if (forceDryRun || notificationStatus?.dryRun) return "safe";
+  if (forceTestRecipient) return "safe";
   if (!notificationStatus) return "warning";
   if (!notificationStatus.allowRealRecipients) return "warning";
   return "danger";
 }
 
-function getAlimtalkSafetyText(notificationStatus, forceDryRun = false) {
+function getAlimtalkSafetyText(notificationStatus, forceDryRun = false, forceTestRecipient = false) {
   const testRecipient = notificationStatus?.testRecipient || "테스트 번호";
   if (forceDryRun) return "테스트 발송: 실제 번호로 보내지 않고 서버에서 dry-run으로만 기록합니다.";
+  if (forceTestRecipient) return `테스트 발송: 실제 Solapi로 보내되 수신번호는 ${testRecipient}로 고정합니다.`;
   if (!notificationStatus) return "서버 발송 설정을 확인 중입니다. 실제 발송 전 Render 환경변수를 확인하세요.";
   if (notificationStatus.dryRun) return `테스트 보호 ON: 실제 발송 없이 ${testRecipient}로만 기록됩니다.`;
   if (!notificationStatus.allowRealRecipients) return `실제 번호 잠금: 등록 번호 대신 ${testRecipient}로 전환됩니다.`;
@@ -2381,13 +2383,14 @@ export function App() {
         lessonMaterial,
         lessonName: lesson.className,
         forceDryRun: Boolean(options.forceDryRun),
+        forceTestRecipient: Boolean(options.forceTestRecipient),
         message,
         nextHomework: nextHomework?.title ?? "",
         preparationNotice: prepMessage,
         parentPhone: student.parentPhone,
         previousHomework: previousHomework?.title ?? "",
         scheduledDate,
-        sendMode: options.forceDryRun ? "test" : scheduledDate ? "scheduled" : "immediate",
+        sendMode: options.forceDryRun || options.forceTestRecipient ? "test" : scheduledDate ? "scheduled" : "immediate",
         studentId: student.studentId,
         studentName: student.name,
         studentPhone: student.studentPhone,
@@ -3902,9 +3905,10 @@ function CommentComposerModal({
   const sendStatus = isParent ? record?.teacherCommentSendStatus : record?.studentCommentSendStatus;
   const notificationStatus = integrationStatus?.notifications;
   const recipientPhone = isParent ? student.parentPhone : student.studentPhone;
-  const forceDryRun = sendTiming === "now";
-  const safetyTone = getAlimtalkSafetyTone(notificationStatus, forceDryRun);
-  const safetyText = getAlimtalkSafetyText(notificationStatus, forceDryRun);
+  const forceDryRun = false;
+  const forceTestRecipient = sendTiming === "now";
+  const safetyTone = getAlimtalkSafetyTone(notificationStatus, forceDryRun, forceTestRecipient);
+  const safetyText = getAlimtalkSafetyText(notificationStatus, forceDryRun, forceTestRecipient);
   const missingNotificationEnv = notificationStatus?.missing ?? [];
   const defaultScheduledDate = getLessonAlimtalkScheduledDate(lesson, 0);
   const delayedScheduledDate = getLessonAlimtalkScheduledDate(lesson, 30);
@@ -3952,6 +3956,7 @@ function CommentComposerModal({
                 onSendComment(lesson, student, record, audience, {
                   delayMinutes: selectedDelayMinutes,
                   forceDryRun,
+                  forceTestRecipient,
                   sendTiming
                 })
               }
@@ -3971,7 +3976,7 @@ function CommentComposerModal({
             </button>
             <button className={sendTiming === "now" ? "active" : ""} onClick={() => setSendTiming("now")} type="button">
               테스트 발송
-              <span>실제 발송 없음</span>
+              <span>내 번호로 즉시</span>
             </button>
           </div>
           <div className={`alimtalkSafetyBox ${safetyTone}`}>
@@ -3990,31 +3995,15 @@ function CommentComposerModal({
               <h2>{previewTitle}</h2>
             </div>
           </div>
-          <div className={isParent ? "messagePreview parentPreview" : "messagePreview studentPreview"}>
-            <div className="messagePreviewHeader">
-              <strong>{academyBrandName} 고태영T</strong>
-              <span>{receiverLabel}</span>
-            </div>
-            <div className="messagePreviewMeta">
-              <span>{lesson.date}</span>
-              <span>{lesson.className}</span>
-              <span>{student.schoolName || "학교 미입력"} · {student.grade || "-"}</span>
-            </div>
-            <div className="messageBubble">
-              {previewLines.length ? (
-                previewLines.flatMap((line, index) =>
-                  line.split("\n").map((part, partIndex) => (
-                    <p key={`${index}_${partIndex}_${part}`}>{part || "\u00a0"}</p>
-                  ))
-                )
-              ) : (
-                <p className="placeholderText">왼쪽에 작성한 내용이 받는 사람 화면에 이렇게 표시됩니다.</p>
-              )}
-            </div>
-            <div className="messagePreviewFooter">
-              <span>{previewTitle}</span>
-            </div>
-          </div>
+          <pre className="templatePreviewText commentTemplatePreview">
+            {[
+              `#{학원명}: ${academyBrandName}`,
+              `#{학생명}: ${student.name}`,
+              isParent ? `#{수업일}: ${lesson.date}` : `#{수업명}: ${lesson.className}`,
+              isParent ? "#{리포트본문}:" : "#{코멘트}:",
+              ...(previewLines.length ? previewLines.map((line) => `- ${line}`) : ["- 왼쪽에 작성한 내용이 받는 사람 화면에 이렇게 표시됩니다."])
+            ].join("\n")}
+          </pre>
         </section>
       </div>
     </Modal>

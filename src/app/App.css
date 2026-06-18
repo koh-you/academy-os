@@ -2589,6 +2589,12 @@ button:disabled {
   white-space: pre-wrap;
 }
 
+.commentTemplatePreview {
+  min-height: 360px;
+  max-height: 520px;
+  overflow: auto;
+}
+
 .templateResultCard {
   background: #f8fafc;
   border: 1px solid #dbe6f8;

@@ -82,19 +82,20 @@ function normalizeList(value) {
     .filter(Boolean);
 }
 
-function resolveRecipient(phone) {
+function resolveRecipient(phone, payload = {}) {
   const requestedTo = compactPhoneNumber(phone);
   const allowRealRecipients = process.env.ALIMTALK_ALLOW_REAL_PARENT_NUMBERS === "true";
+  const testRecipient = compactPhoneNumber(process.env.ALIMTALK_TEST_RECIPIENT ?? DEFAULT_TEST_RECIPIENT);
 
-  if (allowRealRecipients) {
-    return { requestedTo, to: requestedTo, isTestRedirected: false };
+  if (payload.forceTestRecipient || !allowRealRecipients) {
+    return {
+      requestedTo,
+      to: testRecipient,
+      isTestRedirected: true
+    };
   }
 
-  return {
-    requestedTo,
-    to: compactPhoneNumber(process.env.ALIMTALK_TEST_RECIPIENT ?? DEFAULT_TEST_RECIPIENT),
-    isTestRedirected: true
-  };
+  return { requestedTo, to: requestedTo, isTestRedirected: false };
 }
 
 function createServiceConfig(templateEnvName) {
@@ -238,7 +239,7 @@ export function getNotificationStatus() {
 }
 
 async function sendKakaoAlimtalk({ payload, recipientPhone, templateEnvName, variables }) {
-  const recipient = resolveRecipient(recipientPhone);
+  const recipient = resolveRecipient(recipientPhone, payload);
   const scheduledDate = payload.scheduledDate ? new Date(payload.scheduledDate) : null;
 
   if (!recipient.to) throw new Error("A recipient phone number is required.");
