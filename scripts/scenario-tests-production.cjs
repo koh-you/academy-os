@@ -57,6 +57,7 @@ check("29 ai variant selected export flow exists", hasAll(app, ["selectedVariant
 check("30 homework status metric cards are clickable", hasAll(app, ["activeMetric", "handleMetricClick", "metricButton"]));
 check("31 supplement task progress is visible", hasAll(app, ["getSupplementTaskProgress", "needsLessonResync", "supplementProgressBadge"]));
 check("32 resource upload and grouped student picker exist", hasAll(app, ["resourceDropZone", "resourceStudentGroups", "selectAllResourceStudents", "clearAllResourceStudents"]));
+check("33 school calendar date modal and color editor exist", hasAll(app, ["SchoolDateScheduleModal", "calendarColorPicker", "openDateModal", "eventColorOptions"]));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));

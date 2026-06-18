@@ -367,7 +367,8 @@ function createDefaultSchoolEvents(rows) {
     date: getDefaultMathExamDate(row, index),
     schoolName: row.schoolName || "학교 미입력",
     title: `${examCycleLabel(row.examCycle ?? "2026-1-mid")} 수학시험`,
-    type: "mathExam"
+    type: "mathExam",
+    color: "#dc2626"
   }));
 }
 
@@ -5364,6 +5365,7 @@ function ExamAnalysisCenter({
 function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdateEvent }) {
   const [selectedMonth, setSelectedMonth] = useState(today);
   const [selectedDate, setSelectedDate] = useState(today);
+  const [isDateModalOpen, setIsDateModalOpen] = useState(false);
   const [schoolFilter, setSchoolFilter] = useState("전체 학교");
   const [isFormCollapsed, setIsFormCollapsed] = useState(false);
   const [newEvent, setNewEvent] = useState({
@@ -5372,6 +5374,7 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
     endDate: "",
     title: "",
     type: "examPeriod",
+    color: "#dc2626",
     examSubject: "",
     memo: ""
   });
@@ -5384,6 +5387,7 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
     schoolEvent: "학교행사",
     custom: "일반"
   };
+  const eventColorOptions = ["#dc2626", "#2563eb", "#16a34a", "#7c3aed", "#ea580c", "#0891b2", "#17213d"];
   const examEvents = rows
     .map((row, index) => ({
       eventId: `derived_${row.examPrepId}`,
@@ -5394,6 +5398,7 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
       examSubject: "수학",
       memo: "시험대비 탭에서 연동된 수학시험 일정입니다.",
       type: "mathExam",
+      color: "#dc2626",
       derived: true
     }))
     .filter((event) => event.date);
@@ -5420,6 +5425,11 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
     setSelectedDate(newEvent.date);
     setSelectedMonth(newEvent.date);
     setNewEvent((current) => ({ ...current, title: "", examSubject: "", memo: "" }));
+  }
+
+  function openDateModal(date) {
+    setSelectedDate(date);
+    setIsDateModalOpen(true);
   }
 
   return (
@@ -5475,6 +5485,21 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
                   ))}
                 </select>
               </label>
+              <label>
+                일정 색상
+                <div className="calendarColorPicker">
+                  {eventColorOptions.map((color) => (
+                    <button
+                      aria-label={`색상 ${color}`}
+                      className={newEvent.color === color ? "active" : ""}
+                      key={color}
+                      onClick={() => setNewEvent((current) => ({ ...current, color }))}
+                      style={{ backgroundColor: color }}
+                      type="button"
+                    />
+                  ))}
+                </div>
+              </label>
               <div className="calendarDateGrid">
                 <label>
                   시작일
@@ -5526,13 +5551,13 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
                     selectedDate === day.date ? "selected" : ""
                   ].join(" ")}
                   key={day.date}
-                  onClick={() => setSelectedDate(day.date)}
+                  onClick={() => openDateModal(day.date)}
                   type="button"
                 >
                   <span className="dayNumber">{day.dayNumber}</span>
                   <span className="lessonPills">
                     {dayEvents.slice(0, 3).map((event) => (
-                      <span className={`schoolEventPill event-${event.type}`} key={event.eventId}>
+                      <span className={`schoolEventPill event-${event.type}`} key={event.eventId} style={{ backgroundColor: event.color ?? undefined }}>
                         {event.schoolName} {event.examSubject || event.title}
                       </span>
                     ))}
@@ -5541,34 +5566,97 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
               );
             })}
           </div>
+        </section>
+      </div>
+      {isDateModalOpen ? (
+        <SchoolDateScheduleModal
+          eventColorOptions={eventColorOptions}
+          eventTypeLabels={eventTypeLabels}
+          events={selectedDateEvents}
+          onClose={() => setIsDateModalOpen(false)}
+          onDeleteEvent={onDeleteEvent}
+          onUpdateEvent={onUpdateEvent}
+          schools={schools}
+          selectedDate={selectedDate}
+        />
+      ) : null}
+    </section>
+  );
+}
 
-          <section className="selectedDateSchedule">
-            <h2>{selectedDate} 일정</h2>
-            {selectedDateEvents.length === 0 ? (
-              <div className="emptyState">선택한 날짜에 등록된 일정이 없습니다.</div>
-            ) : (
-              selectedDateEvents.map((event) => (
-                <div className="upcomingEvent editableEvent" key={event.eventId}>
+function SchoolDateScheduleModal({
+  eventColorOptions,
+  eventTypeLabels,
+  events,
+  onClose,
+  onDeleteEvent,
+  onUpdateEvent,
+  schools,
+  selectedDate
+}) {
+  return (
+    <Modal className="schoolDateScheduleModal" title={`${selectedDate} 일정`} subtitle="일정 내용과 색상을 확인하고 수정합니다." onClose={onClose}>
+      {events.length === 0 ? (
+        <div className="emptyState">선택한 날짜에 등록된 일정이 없습니다.</div>
+      ) : (
+        <div className="schoolDateEventStack">
+          {events.map((event) => (
+            <article className="schoolDateEventEditor" key={event.eventId}>
+              <div className="schoolDateEventEditorTop">
+                <strong>{event.title}</strong>
+                {event.derived ? <span>시험대비 연동</span> : <button className="dangerSoftButton" onClick={() => onDeleteEvent(event.eventId)} type="button">삭제</button>}
+              </div>
+              <div className="fieldGrid two">
+                <label>
+                  날짜
                   <input disabled={event.derived} type="date" value={event.date} onChange={(change) => onUpdateEvent(event.eventId, "date", change.target.value)} />
+                </label>
+                <label>
+                  학교
                   <select disabled={event.derived} value={event.schoolName} onChange={(change) => onUpdateEvent(event.eventId, "schoolName", change.target.value)}>
                     {[event.schoolName, ...schools].filter(Boolean).filter((school, index, array) => array.indexOf(school) === index).map((school) => (
                       <option key={school} value={school}>{school}</option>
                     ))}
                   </select>
+                </label>
+                <label>
+                  일정 종류
                   <select disabled={event.derived} value={event.type} onChange={(change) => onUpdateEvent(event.eventId, "type", change.target.value)}>
                     {Object.entries(eventTypeLabels).map(([value, label]) => (
                       <option key={value} value={value}>{label}</option>
                     ))}
                   </select>
+                </label>
+                <label>
+                  일정명
                   <input disabled={event.derived} value={event.title} onChange={(change) => onUpdateEvent(event.eventId, "title", change.target.value)} />
-                  {event.derived ? <small>시험대비 연동</small> : <button className="dangerSoftButton" onClick={() => onDeleteEvent(event.eventId)} type="button">삭제</button>}
+                </label>
+              </div>
+              <label>
+                메모
+                <textarea disabled={event.derived} value={event.memo ?? ""} onChange={(change) => onUpdateEvent(event.eventId, "memo", change.target.value)} rows="3" />
+              </label>
+              <label>
+                일정 색상
+                <div className="calendarColorPicker">
+                  {eventColorOptions.map((color) => (
+                    <button
+                      aria-label={`색상 ${color}`}
+                      className={(event.color ?? "#dc2626") === color ? "active" : ""}
+                      disabled={event.derived}
+                      key={color}
+                      onClick={() => onUpdateEvent(event.eventId, "color", color)}
+                      style={{ backgroundColor: color }}
+                      type="button"
+                    />
+                  ))}
                 </div>
-              ))
-            )}
-          </section>
-        </section>
-      </div>
-    </section>
+              </label>
+            </article>
+          ))}
+        </div>
+      )}
+    </Modal>
   );
 }
 
