@@ -1,16 +1,21 @@
 ﻿import http from "node:http";
 import {
+  deleteResourceMaterial,
   getCoreDataStatus,
   listClassTemplates,
   listHomeworks,
   listLessons,
   listLessonStudentRecords,
+  listNotificationJobs,
+  listResourceMaterials,
   listStudents,
   seedCoreData,
   upsertHomework,
   upsertHomeworks,
   upsertLesson,
   upsertLessons,
+  upsertNotificationJob,
+  upsertResourceMaterial,
   upsertStudent,
   upsertStudents,
   upsertLessonStudentRecord
@@ -65,7 +70,7 @@ function getCorsOrigin(request) {
 function sendJson(request, response, statusCode, data) {
   response.writeHead(statusCode, {
     "Access-Control-Allow-Headers": "Content-Type",
-    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS",
     "Access-Control-Allow-Origin": getCorsOrigin(request),
     "Content-Type": "application/json; charset=utf-8"
   });
@@ -221,6 +226,60 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await upsertHomeworks(payload.homeworks ?? []);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/resource-materials") {
+    try {
+      const result = await listResourceMaterials();
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/resource-materials") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await upsertResourceMaterial(payload.material ?? payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "DELETE" && requestUrl.pathname === "/api/resource-materials") {
+    try {
+      const materialId = requestUrl.searchParams.get("id");
+      if (!materialId) throw new Error("삭제할 자료 ID가 필요합니다.");
+      const result = await deleteResourceMaterial(materialId);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/notification-jobs") {
+    try {
+      const result = await listNotificationJobs();
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await upsertNotificationJob(payload.notificationJob ?? payload);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });

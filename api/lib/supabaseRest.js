@@ -74,3 +74,11 @@ export async function upsertRows(table, rows) {
     requireServiceRole: true
   });
 }
+
+export async function deleteRows(table, query) {
+  return supabaseRestRequest(`${table}?${query}`, {
+    method: "DELETE",
+    prefer: "return=representation",
+    requireServiceRole: true
+  });
+}

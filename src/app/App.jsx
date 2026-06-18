@@ -645,19 +645,28 @@ export function App() {
 
     async function loadCoreDataFromApi() {
       try {
-        const [studentsResponse, classesResponse, lessonsResponse, recordsResponse, homeworksResponse] = await Promise.all([
+        const [
+          studentsResponse,
+          classesResponse,
+          lessonsResponse,
+          recordsResponse,
+          homeworksResponse,
+          resourceMaterialsResponse
+        ] = await Promise.all([
           fetch(apiUrl("/api/students")),
           fetch(apiUrl("/api/classes")),
           fetch(apiUrl("/api/lessons")),
           fetch(apiUrl("/api/lesson-records")),
-          fetch(apiUrl("/api/homeworks"))
+          fetch(apiUrl("/api/homeworks")),
+          fetch(apiUrl("/api/resource-materials"))
         ]);
-        const [studentsResult, classesResult, lessonsResult, recordsResult, homeworksResult] = await Promise.all([
+        const [studentsResult, classesResult, lessonsResult, recordsResult, homeworksResult, resourceMaterialsResult] = await Promise.all([
           studentsResponse.json(),
           classesResponse.json(),
           lessonsResponse.json(),
           recordsResponse.json(),
-          homeworksResponse.json()
+          homeworksResponse.json(),
+          resourceMaterialsResponse.json()
         ]);
         if (!isMounted) return;
         if (studentsResult.ok && Array.isArray(studentsResult.students) && studentsResult.students.length > 0) {
@@ -675,6 +684,9 @@ export function App() {
         if (homeworksResult.ok && Array.isArray(homeworksResult.homeworks) && homeworksResult.homeworks.length > 0) {
           setHomeworks(homeworksResult.homeworks);
         }
+        if (resourceMaterialsResult.ok && Array.isArray(resourceMaterialsResult.materials)) {
+          setResourceMaterials(resourceMaterialsResult.materials);
+        }
       } catch (error) {
         console.info("academy-os API sync skipped:", error.message);
       }
@@ -684,7 +696,7 @@ export function App() {
     return () => {
       isMounted = false;
     };
-  }, [setClassTemplates, setHomeworks, setLessons, setRecords, setStudents]);
+  }, [setClassTemplates, setHomeworks, setLessons, setRecords, setResourceMaterials, setStudents]);
 
   useEffect(() => {
     recordsRef.current = records;
@@ -2074,40 +2086,53 @@ export function App() {
       const assignmentStatus = record?.assignmentStatus ?? record?.incompleteHomework ?? "";
       const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
       const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
+      const notificationPayload = {
+        academyName: academyBrandName,
+        assignmentStatus,
+        assignmentStatusMessage: getAssignmentStatusParentMessage(assignmentStatus),
+        attendanceStatus: record?.attendanceStatus ?? "pending",
+        lessonDate: lesson.date,
+        lessonContent,
+        lessonId: lesson.lessonId,
+        lessonMaterial,
+        lessonName: lesson.className,
+        message,
+        nextHomework: nextHomework?.title ?? "",
+        preparationNotice: prepMessage,
+        parentPhone: student.parentPhone,
+        previousHomework: previousHomework?.title ?? "",
+        scheduledDate,
+        studentId: student.studentId,
+        studentName: student.name,
+        studentPhone: student.studentPhone,
+        target
+      };
       const response = await fetch(apiUrl("/api/notifications/comment-alimtalk"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          academyName: academyBrandName,
-          assignmentStatus,
-          assignmentStatusMessage: getAssignmentStatusParentMessage(assignmentStatus),
-          attendanceStatus: record?.attendanceStatus ?? "pending",
-          lessonDate: lesson.date,
-          lessonContent,
-          lessonId: lesson.lessonId,
-          lessonMaterial,
-          lessonName: lesson.className,
-          message,
-          nextHomework: nextHomework?.title ?? "",
-          preparationNotice: prepMessage,
-          parentPhone: student.parentPhone,
-          previousHomework: previousHomework?.title ?? "",
-          scheduledDate,
-          studentId: student.studentId,
-          studentName: student.name,
-          studentPhone: student.studentPhone,
-          target
-        })
+        body: JSON.stringify(notificationPayload)
       });
       const result = await response.json();
       if (!response.ok || !result.ok) {
         throw new Error(result.error || "코멘트 알림톡 발송 실패");
       }
 
-      setNotificationLogs((current) => [
-        { ...logBase, result, status: scheduledDate ? "scheduled" : result.result?.dryRun ? "dry_run" : "sent" },
-        ...current
-      ]);
+      const logStatus = scheduledDate ? "scheduled" : result.result?.dryRun ? "dry_run" : "sent";
+      const notificationLog = { ...logBase, result, status: logStatus };
+      setNotificationLogs((current) => [notificationLog, ...current]);
+      postJson("/api/notification-jobs", {
+        notificationJob: {
+          ...notificationLog,
+          notificationJobId: notificationLog.notificationLogId,
+          notificationType: target === "student" ? "student_comment" : "parent_comment",
+          lessonStudentRecordId: recordId,
+          payload: notificationPayload,
+          previewBody: logBase.message,
+          recipient: target === "student" ? student.studentPhone : student.parentPhone,
+          scheduledAt: scheduledDate,
+          status: logStatus === "dry_run" ? "draft" : logStatus
+        }
+      }).catch((error) => console.error(error));
       const completeStatus = scheduledDate
         ? `예약 완료 · ${scheduledLabel}`
         : result.result?.dryRun
@@ -2126,10 +2151,19 @@ export function App() {
         )
       );
     } catch (error) {
-    setNotificationLogs((current) => [
-      { ...logBase, error: error.message, status: "failed" },
-      ...current
-    ]);
+    const failedLog = { ...logBase, error: error.message, status: "failed" };
+    setNotificationLogs((current) => [failedLog, ...current]);
+    postJson("/api/notification-jobs", {
+      notificationJob: {
+        ...failedLog,
+        notificationJobId: failedLog.notificationLogId,
+        notificationType: target === "student" ? "student_comment" : "parent_comment",
+        lessonStudentRecordId: recordId,
+        previewBody: logBase.message,
+        recipient: target === "student" ? student.studentPhone : student.parentPhone,
+        scheduledAt: scheduledDate
+      }
+    }).catch((persistError) => console.error(persistError));
     setRecords((current) =>
       upsertById(
         current,
@@ -2214,25 +2248,37 @@ export function App() {
   }
 
   function handleAddResourceMaterial(material) {
-    setResourceMaterials((current) => [
-      {
-        materialId: `resource_${Date.now()}`,
-        createdAt: new Date().toISOString(),
-        title: material.title.trim(),
-        description: material.description.trim(),
-        fileName: material.fileName.trim(),
-        fileUrl: material.fileUrl.trim(),
-        visibility: material.visibility,
-        classTemplateId: material.classTemplateId,
-        studentIds: material.studentIds,
-        notifyByAlimtalk: material.notifyByAlimtalk
-      },
-      ...current
-    ]);
+    const nextMaterial = {
+      materialId: `resource_${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      title: material.title.trim(),
+      description: material.description.trim(),
+      fileName: material.fileName.trim(),
+      fileUrl: material.fileUrl.trim(),
+      visibility: material.visibility,
+      classTemplateId: material.classTemplateId,
+      studentIds: material.studentIds,
+      notifyByAlimtalk: material.notifyByAlimtalk
+    };
+    setResourceMaterials((current) => [nextMaterial, ...current]);
+    postJson("/api/resource-materials", { material: nextMaterial })
+      .then((result) => {
+        if (!result.ok || !result.material) return;
+        setResourceMaterials((current) =>
+          current.map((item) => (item.materialId === nextMaterial.materialId ? result.material : item))
+        );
+      })
+      .catch((error) => console.error(error));
   }
 
   function handleDeleteResourceMaterial(materialId) {
     setResourceMaterials((current) => current.filter((material) => material.materialId !== materialId));
+    fetch(apiUrl(`/api/resource-materials?id=${encodeURIComponent(materialId)}`), { method: "DELETE" })
+      .then((response) => response.json())
+      .then((result) => {
+        if (!result.ok) throw new Error(result.error || "자료 삭제 저장 실패");
+      })
+      .catch((error) => console.error(error));
   }
 
   function handleCreateMakeupTask(task) {
