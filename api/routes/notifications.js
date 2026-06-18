@@ -8,7 +8,6 @@ const DEFAULT_TEST_RECIPIENT = "01057882748";
 const REQUIRED_SOLAPI_ENV = [
   "SOLAPI_API_KEY",
   "SOLAPI_API_SECRET",
-  "SOLAPI_FROM",
   "SOLAPI_PFID"
 ];
 
@@ -99,10 +98,11 @@ function resolveRecipient(phone) {
 }
 
 function createServiceConfig(templateEnvName) {
+  const from = compactPhoneNumber(envValue("SOLAPI_FROM"));
   return {
     apiKey: requiredEnv("SOLAPI_API_KEY"),
     apiSecret: requiredEnv("SOLAPI_API_SECRET"),
-    from: compactPhoneNumber(requiredEnv("SOLAPI_FROM")),
+    from,
     pfId: requiredEnv("SOLAPI_PFID"),
     templateId: requiredEnv(templateEnvName)
   };
@@ -130,13 +130,14 @@ function formatScheduleItem(item) {
 function buildAttendanceBody({ attendanceStatus, checkedAt, lessonName, lateMinutes, reason }) {
   const status = attendanceLabel(attendanceStatus);
   const lines = [
-    `${checkedAt ? `${checkedAt} ` : ""}${status} 처리되었습니다.`,
-    lessonName ? `수업: ${lessonName}` : ""
+    `🏫 출결: ${status}`,
+    lessonName ? `📘 수업: ${lessonName}` : "",
+    checkedAt ? `🕒 시간: ${checkedAt}` : ""
   ];
 
-  if (status === "지각" && lateMinutes) lines.push(`지각: ${lateMinutes}분`);
+  if (status === "지각" && lateMinutes) lines.push(`⏱️ 지각: ${lateMinutes}분`);
   if ((status === "지각" || status === "결석" || status === "인정결석") && reason) {
-    lines.push(`사유: ${reason}`);
+    lines.push(`📝 사유: ${reason}`);
   }
 
   return lines.filter(Boolean).join("\n");
@@ -158,17 +159,17 @@ function buildDailyReportBody({
   const incompleteList = normalizeList(incompleteHomeworks);
   const assignmentStatusMessage = assignmentStatusText(assignmentStatus, assignmentStatus);
   const lines = [
-    `출결: ${attendanceLabel(attendanceStatus)}`,
-    lessonMaterial ? `강의 교재: ${lessonMaterial}` : "",
-    lessonContent ? `강의 내용: ${lessonContent}` : "",
-    previousHomework ? `지난 과제: ${previousHomework}` : "",
-    nextHomework ? `다음 과제: ${nextHomework}` : "",
-    assignmentStatusMessage ? `과제 상태: ${assignmentStatusMessage}` : "",
-    preparationNotice ? `수업 준비: ${preparationNotice}` : "",
-    incompleteList.length ? `미완료 과제:\n${incompleteList.map((item) => `- ${item}`).join("\n")}` : "",
-    retestSchedule ? `[중요] 재시험 일정: ${retestSchedule}` : "",
-    supplementSchedule ? `[중요] 보충 일정: ${supplementSchedule}` : "",
-    teacherComment ? `코멘트: ${teacherComment}` : ""
+    `🏫 출결: ${attendanceLabel(attendanceStatus)}`,
+    lessonMaterial ? `📘 강의 교재: ${lessonMaterial}` : "",
+    lessonContent ? `✏️ 강의 내용: ${lessonContent}` : "",
+    previousHomework ? `📚 지난 과제: ${previousHomework}` : "",
+    nextHomework ? `➡️ 다음 과제: ${nextHomework}` : "",
+    assignmentStatusMessage ? `✅ 과제 상태: ${assignmentStatusMessage}` : "",
+    preparationNotice ? `🧭 수업 준비: ${preparationNotice}` : "",
+    incompleteList.length ? `⚠️ 미완료 과제:\n${incompleteList.map((item) => `- ${item}`).join("\n")}` : "",
+    retestSchedule ? `🔴 중요 · 재시험 일정: ${retestSchedule}` : "",
+    supplementSchedule ? `🟡 중요 · 보충 일정: ${supplementSchedule}` : "",
+    teacherComment ? `💬 코멘트: ${teacherComment}` : ""
   ];
 
   return lines.filter(Boolean).join("\n");
@@ -190,11 +191,11 @@ function buildLessonCommentBody(payload, audience) {
 function buildStudentScheduleReminderBody({ scheduleType, scheduleTitle, scheduleDate, scheduleTime, lessonName, memo }) {
   const type = scheduleType === "retest" ? "재시험" : scheduleType === "supplement" ? "보충" : "일정";
   const lines = [
-    `[중요] 오늘 ${type} 일정이 있습니다.`,
-    scheduleTitle ? `내용: ${scheduleTitle}` : "",
-    scheduleDate || scheduleTime ? `일시: ${[scheduleDate, scheduleTime].filter(Boolean).join(" ")}` : "",
-    lessonName ? `수업: ${lessonName}` : "",
-    memo ? `메모: ${memo}` : ""
+    `🔴 중요 · 오늘 ${type} 일정이 있습니다.`,
+    scheduleTitle ? `📌 내용: ${scheduleTitle}` : "",
+    scheduleDate || scheduleTime ? `🕒 일시: ${[scheduleDate, scheduleTime].filter(Boolean).join(" ")}` : "",
+    lessonName ? `📘 수업: ${lessonName}` : "",
+    memo ? `💬 메모: ${memo}` : ""
   ];
 
   return lines.filter(Boolean).join("\n");
@@ -206,9 +207,9 @@ function buildSlackDailyScheduleSummary({ date, retests, supplements }) {
   const lines = [`[koh_you_math] ${date ?? "오늘"} 보충/재시험 일정`];
 
   lines.push("");
-  lines.push(retestItems.length ? `재시험\n${retestItems.map((item) => `- ${item}`).join("\n")}` : "재시험: 없음");
+  lines.push(retestItems.length ? `🔴 재시험\n${retestItems.map((item) => `- ${item}`).join("\n")}` : "🔴 재시험: 없음");
   lines.push("");
-  lines.push(supplementItems.length ? `보충\n${supplementItems.map((item) => `- ${item}`).join("\n")}` : "보충: 없음");
+  lines.push(supplementItems.length ? `🟡 보충\n${supplementItems.map((item) => `- ${item}`).join("\n")}` : "🟡 보충: 없음");
 
   return lines.join("\n");
 }
@@ -265,7 +266,6 @@ async function sendKakaoAlimtalk({ payload, recipientPhone, templateEnvName, var
   const service = new SolapiMessageService(config.apiKey, config.apiSecret);
   const message = {
     to: recipient.to,
-    from: config.from,
     kakaoOptions: {
       pfId: config.pfId,
       templateId: config.templateId,
@@ -273,6 +273,9 @@ async function sendKakaoAlimtalk({ payload, recipientPhone, templateEnvName, var
       disableSms: process.env.SOLAPI_DISABLE_SMS === "true"
     }
   };
+  if (config.from) {
+    message.from = config.from;
+  }
   const requestConfig = scheduledDate ? { scheduledDate } : undefined;
   const response = await service.send(message, requestConfig);
 
