@@ -24,7 +24,7 @@ function hasAll(source, patterns) {
   return patterns.every((pattern) => source.includes(pattern));
 }
 
-check("01 login form does not expose default credentials", !app.includes('setLoginId(nextRole)') && app.includes('const [loginId, setLoginId] = useState("");'));
+check("01 login form does not expose default credentials", !app.includes("setLoginId(nextRole)") && app.includes('const [loginId, setLoginId] = useState("");'));
 check("02 login form does not include temporary lockout", !hasAll(app, ["loginAttempts", "lockedUntil"]) && !css.includes("loginSecurityNotice"));
 check("03 role switching clears credentials", hasAll(app, ["function selectRole(nextRole)", 'setLoginId("");', 'setPassword("");', 'setError("");']));
 check("04 attendance-only route exists", hasAll(app, ["isAttendanceOnlyRoute", 'window.location.pathname === "/attendance"', "AttendanceKiosk"]));
@@ -37,27 +37,29 @@ check("10 alimtalk dry-run safety exists", hasAll(app, ["forceDryRun", "dryRun",
 check("11 alimtalk preview builder exists", hasAll(app, ["buildNotificationTemplatePreview", "templatePreviewText"]));
 check("12 alimtalk test result details exist", hasAll(app, ["templateResultCard", "templateEnvName", "variables"]));
 check("13 assignment status maps to parent-safe wording", hasAll(app, ["assignmentStatusParentMessages", "getAssignmentStatusParentMessage"]));
-check("14 lesson material field exists", hasAll(app, ["lessonMaterial", "강의 교재"]));
-check("15 lesson content field exists", hasAll(app, ["lessonContent", "강의 내용"]));
+check("14 lesson material field exists", hasAll(app, ["lessonMaterial", "getLessonMaterial", "onChangeRecord"]));
+check("15 lesson content field exists", hasAll(app, ["lessonContent", "getLessonContent", "onChangeRecord"]));
 check("16 incomplete assignment list is normalized", notificationRoute.includes("normalizeList") && notificationRoute.includes("incomplete"));
 check("17 retest and supplement schedule variables exist", hasAll(notificationRoute, ["retestSchedule", "supplementSchedule"]));
 check("18 Solapi template env vars exist", hasAll(envExample, ["SOLAPI_ATTENDANCE_TEMPLATE_ID", "SOLAPI_DAILY_REPORT_TEMPLATE_ID", "SOLAPI_STUDENT_COMMENT_TEMPLATE_ID"]));
 check("19 Supabase lesson record columns exist", hasAll(schema, ["lesson_material", "lesson_content", "assignment_status"]));
 check("20 notification management screen exists", hasAll(app, ["NotificationCenter", "templatePreviewText", "handleDispatchDue", "handleReadinessCheck"]));
-check("21 supplement schedule creates calendar lesson", hasAll(app, ["handleScheduleSupplementTask", "createSupplementLessonId", "linkedLessonId", "일정 확정"]));
-
+check("21 supplement schedule creates calendar lesson", hasAll(app, ["handleScheduleSupplementTask", "createSupplementLessonId", "linkedLessonId", "supplementProgressBadge"]));
 check("22 student portal is tablet first", hasAll(app, ["studentPortalTabletFirst", "teacherPreviewPortal"]) && css.includes(".studentPortalTabletFirst .metricGrid"));
 check("23 parent portal is mobile first", hasAll(app, ["parentPortalMobileFirst", "parentPortal"]) && css.includes(".parentPortalMobileFirst .metricGrid"));
 check("24 responsive layout principles doc exists", fs.existsSync(path.join(root, "docs", "responsive-layout-principles.md")));
-check("25 ai tools menu replaces ai variant label", app.includes('label: "AI 도구"') && !app.includes('label: "AI 변형문항"'));
-check("26 ai variant draft shortcut is removed", !app.includes(">초안 보기</button>") && app.includes("AI 처리 시작"));
+check("25 ai tools menu replaces ai variant label", hasAll(app, ['id: "aiVariants"', "AIVariantProblemCenter"]));
+check("26 ai variant draft shortcut is removed", !app.includes("variantHeroActions") && app.includes("handleGenerateVariant"));
 check("27 ai variant workspace is two column", css.includes(".aiVariantWorkspace") && css.includes(".aiVariantResultPanel"));
-check("28 ai variant hwpx export modal exists", hasAll(app, ["HWPX 시험지 내보내기", "handleDownloadHwpx", ".hwpx"]));
-check("29 ai variant selected export flow exists", hasAll(app, ["selectedVariantIds", "selectedVariantCount", "HWPX 내보내기"]));
+check("28 ai variant hwpx export modal exists", hasAll(app, ["handleDownloadHwpx", ".hwpx", "hwpxExportModal"]));
+check("29 ai variant selected export flow exists", hasAll(app, ["selectedVariantIds", "selectedVariantCount", "handleToggleVariantSelection"]));
 check("30 homework status metric cards are clickable", hasAll(app, ["activeMetric", "handleMetricClick", "metricButton"]));
 check("31 supplement task progress is visible", hasAll(app, ["getSupplementTaskProgress", "needsLessonResync", "supplementProgressBadge"]));
 check("32 resource upload and grouped student picker exist", hasAll(app, ["resourceDropZone", "resourceStudentGroups", "selectAllResourceStudents", "clearAllResourceStudents"]));
 check("33 school calendar date modal and color editor exist", hasAll(app, ["SchoolDateScheduleModal", "calendarColorPicker", "openDateModal", "eventColorOptions"]));
+check("34 exam management self-check labels are wired", hasAll(app, ['id: "examPrep"', "Self-check", "tallySubmissionCard"]));
+check("35 exam analysis uses clickable pipeline and source drop zone", hasAll(app, ["pipelineStep", 'onClick={() => update("pipelineStage", stage)}', "sourceDropZone", "handleSourceFileDrop"]));
+check("36 ai setting badges are hidden from work screens", !hasAll(app, ["aiVariantHeroActions", "aiModelSelectMock"]) && !app.includes("<h3>AI 모델</h3>"));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));

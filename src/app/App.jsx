@@ -2988,7 +2988,7 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle }) 
     {
       title: "시험",
       items: [
-        { id: "examPrep", label: "시험대비", icon: "📋" },
+        { id: "examPrep", label: "시험관리", icon: "📋" },
         { id: "examAnalysis", label: "시험분석", icon: "🔎" },
         { id: "schoolCalendar", label: "학사일정", icon: "🗓️" }
       ]
@@ -4685,8 +4685,8 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
     <section className="panel fullPanel examPrepCenter">
       <div className="sectionHeader">
         <div>
-          <h1>시험대비</h1>
-          <p className="muted">반별 시험정보와 Tally 제출 총평을 고사별로 관리합니다.</p>
+          <h1>시험관리</h1>
+          <p className="muted">반별 시험정보와 학생 self-check 총평을 고사별로 관리합니다.</p>
         </div>
         <input
           className="searchInput"
@@ -4701,7 +4701,7 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
           시험정보
         </button>
         <button className={activeTab === "tallyAi" ? "active" : ""} onClick={() => setActiveTab("tallyAi")} type="button">
-          Tally 제출 · AI 총평
+          Self-check · AI 총평
         </button>
         <button className={activeTab === "pastPapers" ? "active" : ""} onClick={() => setActiveTab("pastPapers")} type="button">
           기출문제
@@ -4778,14 +4778,14 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
         <div className="tallyAiGrid">
           <section className="panel tallyInboxPanel">
             <div className="sectionHeader slim">
-              <h2>Tally 제출 수신함</h2>
-              <button className="softButton" type="button">CSV 붙여넣기</button>
+              <h2>Self-check 제출 수신함</h2>
+              <button className="softButton" type="button">제출 데이터 가져오기</button>
             </div>
             {filteredRows.slice(0, 5).map((row) => (
               <article className="tallySubmissionCard" key={`tally_${row.examPrepId}`}>
                 <strong>{row.schoolName} · {row.grade} · {row.subject}</strong>
-                <p>{row.review || "학생 제출 총평 원문이 들어오면 여기에 표시됩니다."}</p>
-                <small>원본 보관 · AI 가공 대기</small>
+                <p>{row.review || "학생이 웹앱에서 제출한 시험 후 self-check 원문이 들어오면 여기에 표시됩니다."}</p>
+                <small>학생 제출 원본 보관 · AI 가공 대기</small>
               </article>
             ))}
           </section>
@@ -4858,7 +4858,7 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
           lessonName: `${row.schoolName} ${row.subject} 시험 총평`,
           rawText: row.review ?? "",
           schoolName: row.schoolName,
-          studentName: "시험대비"
+          studentName: "시험관리"
         })
       });
       const result = await response.json();
@@ -4885,7 +4885,6 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
             <div>
               <p className="eyebrow">ORIGINAL</p>
               <h2>시험 후 총평</h2>
-              <small className="muted">{getAiProviderLabel(commentAiProvider)} · {getAiModelLabel(commentAiModel)}</small>
             </div>
             <button className="softButton" onClick={polishReview} type="button">AI 수정</button>
           </div>
@@ -5107,9 +5106,6 @@ function ExamAnalysisCenter({
   const [selectedAnalysisId, setSelectedAnalysisId] = useState(analyses[0]?.examAnalysisId ?? "");
   const [isListCollapsed, setIsListCollapsed] = useState(false);
   const selectedAnalysis = analyses.find((item) => item.examAnalysisId === selectedAnalysisId) ?? analyses[0];
-  const examAiProvider = aiSettings.examAnalysisProvider ?? defaultAiSettings.examAnalysisProvider;
-  const examAiModel = aiSettings.examAnalysisModel ?? defaultAiSettings.examAnalysisModel;
-
   useEffect(() => {
     if (!selectedAnalysisId && analyses[0]?.examAnalysisId) {
       setSelectedAnalysisId(analyses[0].examAnalysisId);
@@ -5119,6 +5115,20 @@ function ExamAnalysisCenter({
   function update(field, value) {
     if (!selectedAnalysis) return;
     onUpdateAnalysis(selectedAnalysis.examAnalysisId, field, value);
+  }
+
+  function handleSourceFileDrop(event) {
+    event.preventDefault();
+    if (!selectedAnalysis) return;
+    const file = event.dataTransfer?.files?.[0];
+    if (!file) return;
+    update("sourceFileUrl", file.name);
+    update(
+      "rawExamText",
+      [selectedAnalysis.rawExamText, `[첨부 파일] ${file.name} (${Math.round(file.size / 1024)}KB)`]
+        .filter(Boolean)
+        .join("\n")
+    );
   }
 
   return (
@@ -5172,18 +5182,12 @@ function ExamAnalysisCenter({
               <div className="sectionHeader slim">
                 <div>
                   <h2>시험 기본정보</h2>
-                  <p className="muted">시험대비 DB와 이어지는 고사 단위 메타데이터입니다.</p>
+                  <p className="muted">시험관리 DB와 이어지는 고사 단위 메타데이터입니다.</p>
                 </div>
-                <select value={selectedAnalysis.pipelineStage} onChange={(event) => update("pipelineStage", event.target.value)}>
-                  <option value="1차 AI 가안">1차 AI 가안</option>
-                  <option value="강사 인사이트 추가">강사 인사이트 추가</option>
-                  <option value="최종 편집">최종 편집</option>
-                  <option value="발행 완료">발행 완료</option>
-                </select>
               </div>
               <div className="fieldGrid">
                 <label>
-                  시험대비 DB 연결
+                  시험관리 DB 연결
                   <select value={selectedAnalysis.examPrepId} onChange={(event) => update("examPrepId", event.target.value)}>
                     {examPrepRows.map((row) => (
                       <option key={row.examPrepId} value={row.examPrepId}>
@@ -5212,26 +5216,21 @@ function ExamAnalysisCenter({
                   시험일
                   <input type="date" value={selectedAnalysis.examDate} onChange={(event) => update("examDate", event.target.value)} />
                 </label>
-                <label>
-                  AI 설정
-                  <span className="aiSettingBadge fieldBadge">
-                    {getAiProviderLabel(examAiProvider)} · {getAiModelLabel(examAiModel)}
-                  </span>
-                </label>
-                <label>
-                  API 상태
-                  <input readOnly value={`${selectedAnalysis.aiStatus ?? "대기"}${selectedAnalysis.aiLastRunAt ? ` · ${selectedAnalysis.aiLastRunAt}` : ""}`} />
-                </label>
               </div>
               {selectedAnalysis.aiError ? <div className="apiErrorBox">{selectedAnalysis.aiError}</div> : null}
             </section>
 
             <section className="analysisPipeline">
               {["1차 AI 가안", "강사 인사이트 추가", "최종 편집", "발행 완료"].map((stage, index) => (
-                <div className={selectedAnalysis.pipelineStage === stage ? "pipelineStep active" : "pipelineStep"} key={stage}>
+                <button
+                  className={selectedAnalysis.pipelineStage === stage ? "pipelineStep active" : "pipelineStep"}
+                  key={stage}
+                  onClick={() => update("pipelineStage", stage)}
+                  type="button"
+                >
                   <b>{index + 1}</b>
                   <span>{stage}</span>
-                </div>
+                </button>
               ))}
             </section>
 
@@ -5239,6 +5238,16 @@ function ExamAnalysisCenter({
               <div className="panel analysisInputPanel">
                 <div className="sectionHeader slim">
                   <h2>시험 원본 · AI 입력</h2>
+                </div>
+                <div
+                  className="sourceDropZone"
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={handleSourceFileDrop}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <strong>원본 파일 드래그 앤 드롭</strong>
+                  <span>PDF, 이미지, OCR 텍스트 파일명을 기록하고 메모에 첨부 흔적을 남깁니다.</span>
                 </div>
                 <label className="wideLabel">
                   원본 파일/링크
@@ -5396,7 +5405,7 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
       schoolName: row.schoolName || "학교 미입력",
       title: `${examCycleLabel(row.examCycle ?? "2026-1-mid")} 수학시험`,
       examSubject: "수학",
-      memo: "시험대비 탭에서 연동된 수학시험 일정입니다.",
+      memo: "시험관리 탭에서 연동된 수학시험 일정입니다.",
       type: "mathExam",
       color: "#dc2626",
       derived: true
@@ -5604,7 +5613,7 @@ function SchoolDateScheduleModal({
             <article className="schoolDateEventEditor" key={event.eventId}>
               <div className="schoolDateEventEditorTop">
                 <strong>{event.title}</strong>
-                {event.derived ? <span>시험대비 연동</span> : <button className="dangerSoftButton" onClick={() => onDeleteEvent(event.eventId)} type="button">삭제</button>}
+                {event.derived ? <span>시험관리 연동</span> : <button className="dangerSoftButton" onClick={() => onDeleteEvent(event.eventId)} type="button">삭제</button>}
               </div>
               <div className="fieldGrid two">
                 <label>
@@ -6120,11 +6129,6 @@ function AIVariantProblemCenter({ aiSettings = defaultAiSettings }) {
           <h1>AI 도구</h1>
           <p className="muted">학원 수업자료 분석, 문제 변형, 문항 정리 작업을 한 곳에서 관리합니다.</p>
         </div>
-        <div className="aiVariantHeroActions">
-          <span className="aiSettingBadge">
-            {getAiProviderLabel(variantAiProvider)} · {getAiModelLabel(variantAiModel)}
-          </span>
-        </div>
       </div>
 
       <div className="studentManagerTabs aiTabs">
@@ -6146,17 +6150,6 @@ function AIVariantProblemCenter({ aiSettings = defaultAiSettings }) {
                 <p className="muted">PDF, 이미지, 텍스트로 받은 원본 문항을 바탕으로 새 변형문항을 만듭니다.</p>
               </div>
               <span className="readyPill">준비 완료</span>
-            </section>
-
-            <section className="panel aiToolCard">
-              <div className="aiToolSectionHeader">
-                <h3>AI 모델</h3>
-                <button className="textButton" type="button">새로고침</button>
-              </div>
-              <div className="aiModelSelectMock">
-                <strong>{getAiModelLabel(variantAiModel)}</strong>
-                <span>{getAiProviderLabel(variantAiProvider)}</span>
-              </div>
             </section>
 
             <section className="panel aiToolCard">
