@@ -46,6 +46,10 @@ check("19 Supabase lesson record columns exist", hasAll(schema, ["lesson_materia
 check("20 notification management screen exists", hasAll(app, ["NotificationCenter", "templatePreviewText", "handleDispatchDue", "handleReadinessCheck"]));
 check("21 supplement schedule creates calendar lesson", hasAll(app, ["handleScheduleSupplementTask", "createSupplementLessonId", "linkedLessonId", "일정 확정"]));
 
+check("22 student portal is tablet first", hasAll(app, ["studentPortalTabletFirst", "teacherPreviewPortal"]) && css.includes(".studentPortalTabletFirst .metricGrid"));
+check("23 parent portal is mobile first", hasAll(app, ["parentPortalMobileFirst", "parentPortal"]) && css.includes(".parentPortalMobileFirst .metricGrid"));
+check("24 responsive layout principles doc exists", fs.existsSync(path.join(root, "docs", "responsive-layout-principles.md")));
+
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));
 

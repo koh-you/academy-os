@@ -6724,7 +6724,7 @@ function StudentPortalV2({
   }
 
   return (
-    <section className={previewMode ? "studentPortal teacherPreviewPortal" : "studentPortal"}>
+    <section className={previewMode ? "studentPortal studentPortalTabletFirst teacherPreviewPortal" : "studentPortal studentPortalTabletFirst"}>
       <header className="portalHeader">
         <div>
           <h1>{academyBrandName} <span>학생</span></h1>
@@ -6893,7 +6893,7 @@ function ParentPortal({ homeworks, lessons = [], materials = [], records = [], r
   const parentMaterials = filterVisibleMaterials(materials, student, "parent");
 
   return (
-    <section className="studentPortal parentPortal">
+    <section className="studentPortal parentPortal parentPortalMobileFirst">
       <header className="portalHeader">
         <div>
           <h1>{academyBrandName} 고태영T <span>학부모</span></h1>
