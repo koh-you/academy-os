@@ -3000,24 +3000,15 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle }) 
 
 function LoginScreen({ students, onLogin }) {
   const [role, setRole] = useState("student");
-  const defaultStudent = students.find((student) => student.name === "TestS12") ?? students[0];
-  const [loginId, setLoginId] = useState(defaultStudent?.loginId ?? "");
-  const [password, setPassword] = useState(defaultStudent?.pin ?? "");
+  const [loginId, setLoginId] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   function selectRole(nextRole) {
     setRole(nextRole);
     setError("");
-    if (nextRole === "teacher") {
-      setLoginId(teacherAccount.loginId);
-      setPassword(teacherAccount.password);
-    } else if (nextRole === "parent") {
-      setLoginId(defaultStudent ? createParentLoginId(defaultStudent) : "");
-      setPassword(defaultStudent?.pin ?? "");
-    } else {
-      setLoginId(defaultStudent?.loginId ?? "");
-      setPassword(defaultStudent?.pin ?? "");
-    }
+    setLoginId("");
+    setPassword("");
   }
 
   function submit(event) {
@@ -3054,11 +3045,6 @@ function LoginScreen({ students, onLogin }) {
         <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="비밀번호" />
         {error ? <div className="loginError">{error}</div> : null}
         <button className="primaryButton full" type="submit">{roleLabels[role]} 로그인</button>
-        <div className="loginHint">
-          <span>학생: {defaultStudent?.loginId} / {defaultStudent?.pin}</span>
-          <span>학부모: {defaultStudent ? createParentLoginId(defaultStudent) : ""} / {defaultStudent?.pin}</span>
-          <span>선생님: teacher / 1234</span>
-        </div>
       </form>
     </main>
   );
@@ -3066,10 +3052,14 @@ function LoginScreen({ students, onLogin }) {
 
 function RoleLoginScreen({ students, onAttendanceCheck, onLogin }) {
   const [role, setRole] = useState("student");
-  const [loginId, setLoginId] = useState("student");
-  const [password, setPassword] = useState("1234");
+  const [loginId, setLoginId] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState(0);
   const [showAttendanceKiosk, setShowAttendanceKiosk] = useState(false);
+  const isLoginLocked = lockedUntil > Date.now();
+  const lockRemainingSeconds = Math.max(0, Math.ceil((lockedUntil - Date.now()) / 1000));
 
   const roleLabels = {
     student: "학생",
@@ -3079,15 +3069,31 @@ function RoleLoginScreen({ students, onAttendanceCheck, onLogin }) {
 
   function selectRole(nextRole) {
     setRole(nextRole);
-    setLoginId(nextRole);
-    setPassword("1234");
+    setLoginId("");
+    setPassword("");
     setError("");
   }
 
   function submit(event) {
     event.preventDefault();
+    if (isLoginLocked) {
+      setError(`로그인 시도가 잠시 제한되었습니다. ${lockRemainingSeconds}초 후 다시 시도해주세요.`);
+      return;
+    }
     const result = onLogin(role, loginId.trim(), password.trim());
-    if (!result.ok) setError(result.message);
+    if (!result.ok) {
+      const nextAttempts = loginAttempts + 1;
+      setLoginAttempts(nextAttempts);
+      if (nextAttempts >= 5) {
+        setLockedUntil(Date.now() + 5 * 60 * 1000);
+        setError("로그인 실패가 반복되어 5분 동안 로그인이 제한됩니다.");
+        return;
+      }
+      setError(`${result.message} (${nextAttempts}/5)`);
+      return;
+    }
+    setLoginAttempts(0);
+    setLockedUntil(0);
   }
 
   return (
@@ -3129,7 +3135,8 @@ function RoleLoginScreen({ students, onAttendanceCheck, onLogin }) {
             placeholder="비밀번호"
           />
           {error ? <div className="loginError">{error}</div> : null}
-          <button className="primaryButton full" type="submit">{roleLabels[role]} 로그인</button>
+          {isLoginLocked ? <div className="loginSecurityNotice">보호 잠금: {lockRemainingSeconds}초 후 다시 시도할 수 있습니다.</div> : null}
+          <button className="primaryButton full" disabled={isLoginLocked} type="submit">{roleLabels[role]} 로그인</button>
           <button className="softButton full" onClick={() => setShowAttendanceKiosk(true)} type="button">
             출결 체크
           </button>

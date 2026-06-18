@@ -11,7 +11,8 @@
     "start": "node api/server.js",
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
-    "preview": "vite preview --host 127.0.0.1"
+    "preview": "vite preview --host 127.0.0.1",
+    "test:production": "node scripts/scenario-tests-production.cjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.0",
