@@ -407,6 +407,24 @@ button {
   margin: 0;
 }
 
+.pageActions {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.inlineNotice {
+  background: #eef4ff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 800;
+  margin: 0;
+  padding: 10px 12px;
+}
+
 .shortcutHint {
   color: #94a3b8;
   font-size: 13px;
@@ -2104,7 +2122,7 @@ button:disabled {
 .notificationStatsGrid {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .notificationStatsGrid article,
@@ -5717,6 +5735,7 @@ textarea.profileEditInput {
   .reportGrid,
   .metricGrid,
   .miniMetricGrid,
+  .notificationStatsGrid,
   .reportDataSummaryGrid,
   .researchMetricGrid,
   .researchLayout,

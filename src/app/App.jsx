@@ -2537,6 +2537,8 @@ function getNotificationStatusLabel(status) {
   return {
     draft: "테스트/초안",
     dry_run: "테스트 기록",
+    pending_send: "발송 대기",
+    queued: "내부 대기",
     scheduled: "예약됨",
     sent: "발송 완료",
     failed: "실패",
@@ -2545,10 +2547,13 @@ function getNotificationStatusLabel(status) {
 }
 
 function NotificationCenter({ integrationStatus, notificationJobs, notificationLogs, students, onRefresh }) {
+  const [dispatchMessage, setDispatchMessage] = useState("");
+  const [isDispatching, setIsDispatching] = useState(false);
   const notificationStatus = integrationStatus?.notifications;
   const safetyTone = getAlimtalkSafetyTone(notificationStatus, false);
   const safetyText = getAlimtalkSafetyText(notificationStatus, false);
   const scheduledJobs = notificationJobs.filter((job) => job.status === "scheduled");
+  const queuedJobs = notificationJobs.filter((job) => job.status === "queued" || job.status === "pending_send");
   const draftJobs = notificationJobs.filter((job) => job.status === "draft" || job.status === "dry_run");
   const failedJobs = notificationJobs.filter((job) => job.status === "failed");
   const recentJobs = notificationJobs.slice(0, 30);
@@ -2558,6 +2563,28 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
     return payload?.studentName || students.find((student) => student.studentId === studentId)?.name || "학생";
   }
 
+  async function handleDispatchDue() {
+    setIsDispatching(true);
+    setDispatchMessage("");
+    try {
+      const result = await postJson("/api/notification-jobs/dispatch-due", {
+        forceDryRun: Boolean(notificationStatus?.dryRun),
+        limit: 20
+      });
+      const processedCount = result.processedCount ?? result.processed?.length ?? 0;
+      setDispatchMessage(
+        processedCount
+          ? `예약 발송 점검 완료: ${processedCount}건 처리`
+          : "예약 발송 점검 완료: 지금 처리할 내부 대기 건이 없습니다."
+      );
+      await onRefresh?.();
+    } catch (error) {
+      setDispatchMessage(`예약 발송 점검 실패: ${error.message}`);
+    } finally {
+      setIsDispatching(false);
+    }
+  }
+
   return (
     <section className="notificationCenterPage">
       <div className="pageTop">
@@ -2565,14 +2592,25 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
           <h1>알림관리</h1>
           <p className="muted">학부모 알림톡, 학생 알림톡, 출결 알림톡의 예약과 테스트 기록을 확인합니다.</p>
         </div>
-        <button className="softButton" onClick={onRefresh} type="button">새로고침</button>
+        <div className="pageActions">
+          <button className="softButton" onClick={handleDispatchDue} type="button" disabled={isDispatching}>
+            {isDispatching ? "점검 중" : "예약 발송 점검"}
+          </button>
+          <button className="softButton" onClick={onRefresh} type="button">새로고침</button>
+        </div>
       </div>
+      {dispatchMessage ? <p className="inlineNotice">{dispatchMessage}</p> : null}
 
       <div className="notificationStatsGrid">
         <article>
           <span>예약 대기</span>
           <strong>{scheduledJobs.length}건</strong>
-          <small>정해진 발송시각 대기</small>
+          <small>솔라피 예약 등록 건</small>
+        </article>
+        <article>
+          <span>내부 대기</span>
+          <strong>{queuedJobs.length}건</strong>
+          <small>점검 버튼이나 자동화로 처리</small>
         </article>
         <article>
           <span>테스트/초안</span>

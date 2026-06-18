@@ -40,6 +40,8 @@ const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS ?? "*")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+const dispatchableNotificationStatuses = new Set(["queued", "pending_send"]);
+
 function readJsonBody(request) {
   return new Promise((resolve, reject) => {
     let body = "";
@@ -75,6 +77,88 @@ function sendJson(request, response, statusCode, data) {
     "Content-Type": "application/json; charset=utf-8"
   });
   response.end(JSON.stringify(data));
+}
+
+function getProviderMessageId(result) {
+  return (
+    result?.response?.messageId ??
+    result?.response?.message_id ??
+    result?.response?.groupId ??
+    result?.response?.group_id ??
+    result?.response?.[0]?.messageId ??
+    result?.response?.[0]?.message_id ??
+    ""
+  );
+}
+
+async function sendNotificationJob(job, { forceDryRun = false } = {}) {
+  const payload = {
+    ...(job.payload ?? {}),
+    forceDryRun: forceDryRun || Boolean(job.payload?.forceDryRun),
+    scheduledDate: ""
+  };
+
+  if (job.notificationType === "attendance") {
+    return sendAttendanceAlimtalk(payload);
+  }
+  if (job.notificationType === "daily_report") {
+    return sendDailyReportAlimtalk(payload);
+  }
+  if (job.notificationType === "student_reminder") {
+    return sendStudentScheduleReminderAlimtalk(payload);
+  }
+  return sendLessonCommentAlimtalk({
+    ...payload,
+    target: job.notificationType === "student_comment" ? "student" : payload.target ?? "parent"
+  });
+}
+
+async function dispatchDueNotificationJobs({ forceDryRun = false, limit = 20, now = new Date().toISOString() } = {}) {
+  const listed = await listNotificationJobs();
+  const nowTime = new Date(now).getTime();
+  if (Number.isNaN(nowTime)) throw new Error("now must be a valid date string.");
+
+  const jobs = (listed.notificationJobs ?? [])
+    .filter((job) => dispatchableNotificationStatuses.has(job.status))
+    .filter((job) => {
+      if (!job.scheduledAt) return true;
+      const scheduledTime = new Date(job.scheduledAt).getTime();
+      return !Number.isNaN(scheduledTime) && scheduledTime <= nowTime;
+    })
+    .slice(0, Math.max(1, Number(limit) || 20));
+
+  const processed = [];
+  for (const job of jobs) {
+    try {
+      const result = await sendNotificationJob(job, { forceDryRun });
+      const status = result?.dryRun ? "dry_run" : "sent";
+      const updatedJob = {
+        ...job,
+        status,
+        result,
+        provider: "solapi",
+        providerMessageId: getProviderMessageId(result),
+        error: ""
+      };
+      await upsertNotificationJob(updatedJob);
+      processed.push({ notificationJobId: job.notificationJobId, status, result });
+    } catch (error) {
+      const failedJob = {
+        ...job,
+        status: "failed",
+        error: error.message
+      };
+      await upsertNotificationJob(failedJob);
+      processed.push({ error: error.message, notificationJobId: job.notificationJobId, status: "failed" });
+    }
+  }
+
+  return {
+    dryRun: forceDryRun || getNotificationStatus().dryRun,
+    processed,
+    processedCount: processed.length,
+    source: listed.source
+  };
 }
 
 const server = http.createServer(async (request, response) => {
@@ -280,6 +364,21 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await upsertNotificationJob(payload.notificationJob ?? payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/dispatch-due") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await dispatchDueNotificationJobs({
+        forceDryRun: Boolean(payload.forceDryRun),
+        limit: payload.limit,
+        now: payload.now
+      });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
