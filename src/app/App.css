@@ -3411,18 +3411,67 @@ textarea {
   min-height: 96px;
 }
 
+.resourceDropZone {
+  align-items: center;
+  background: #f8fbff;
+  border: 1px dashed #9fb7e8;
+  border-radius: 8px;
+  color: #334155;
+  cursor: pointer;
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+  min-height: 82px;
+  padding: 16px;
+  text-align: left;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+
+.resourceDropZone:hover {
+  background: #eff6ff;
+  border-color: #2563eb;
+}
+
+.resourceDropZone strong {
+  color: #17213d;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.resourceDropZone span {
+  color: #64748b;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
 .resourceStudentPicker {
   display: grid;
   gap: 8px;
 }
 
-.resourceStudentPicker > div {
+.resourceStudentPickerTop,
+.resourceBulkActions,
+.resourceGroupActions,
+.resourceStudentButtons {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.resourceStudentPicker button {
+.resourceStudentPickerTop {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.resourceStudentPickerTop span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.resourceBulkActions button,
+.resourceGroupActions button,
+.resourceStudentButtons button {
   background: #f8fafc;
   border: 1px solid #d8e3f8;
   border-radius: 6px;
@@ -3432,7 +3481,55 @@ textarea {
   padding: 8px 12px;
 }
 
-.resourceStudentPicker button.active {
+.resourceBulkActions button,
+.resourceGroupActions button {
+  color: #2563eb;
+  font-size: 13px;
+  padding: 7px 10px;
+}
+
+.resourceClassGroups {
+  display: grid;
+  gap: 8px;
+}
+
+.resourceClassGroup {
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.resourceClassGroupHeader {
+  align-items: center;
+  background: #ffffff;
+  border: 0;
+  color: #17213d;
+  cursor: pointer;
+  display: flex;
+  font-weight: 900;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 0 12px;
+  width: 100%;
+}
+
+.resourceClassGroupHeader b {
+  background: #eef2ff;
+  border-radius: 999px;
+  color: #3730a3;
+  font-size: 12px;
+  padding: 4px 8px;
+}
+
+.resourceClassGroupBody {
+  background: #fbfdff;
+  border-top: 1px solid #e2e8f0;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
+.resourceStudentButtons button.active {
   background: #17213b;
   border-color: #17213b;
   color: #ffffff;

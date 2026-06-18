@@ -8529,6 +8529,7 @@ function ProblemPreview({ book, problem }) {
 }
 
 function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteMaterial, students = [], templates = [] }) {
+  const fileInputRef = useRef(null);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -8539,9 +8540,31 @@ function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteMaterial
     studentIds: [],
     notifyByAlimtalk: false
   });
+  const [openResourceClassIds, setOpenResourceClassIds] = useState(() =>
+    templates.slice(0, 1).map((template) => template.classTemplateId)
+  );
+  const resourceStudentGroups = useMemo(() => {
+    const groups = templates.map((template) => ({
+      id: template.classTemplateId,
+      name: template.name,
+      students: students.filter((student) => student.defaultClassTemplateId === template.classTemplateId)
+    }));
+    const assignedTemplateIds = new Set(templates.map((template) => template.classTemplateId));
+    const unassignedStudents = students.filter((student) => !assignedTemplateIds.has(student.defaultClassTemplateId));
+    if (unassignedStudents.length > 0) {
+      groups.push({ id: "unassigned", name: "미배정", students: unassignedStudents });
+    }
+    return groups.filter((group) => group.students.length > 0);
+  }, [students, templates]);
 
   function updateForm(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function attachFiles(files) {
+    const selectedFiles = Array.from(files ?? []);
+    if (selectedFiles.length === 0) return;
+    updateForm("fileName", selectedFiles.map((file) => file.name).join(", "));
   }
 
   function toggleStudent(studentId) {
@@ -8551,6 +8574,29 @@ function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteMaterial
         ? current.studentIds.filter((id) => id !== studentId)
         : [...current.studentIds, studentId]
     }));
+  }
+
+  function toggleResourceGroup(groupId) {
+    setOpenResourceClassIds((current) =>
+      current.includes(groupId) ? current.filter((id) => id !== groupId) : [...current, groupId]
+    );
+  }
+
+  function selectResourceGroup(studentIds) {
+    setForm((current) => ({ ...current, studentIds: Array.from(new Set([...current.studentIds, ...studentIds])) }));
+  }
+
+  function clearResourceGroup(studentIds) {
+    const studentIdSet = new Set(studentIds);
+    setForm((current) => ({ ...current, studentIds: current.studentIds.filter((studentId) => !studentIdSet.has(studentId)) }));
+  }
+
+  function selectAllResourceStudents() {
+    setForm((current) => ({ ...current, studentIds: students.map((student) => student.studentId) }));
+  }
+
+  function clearAllResourceStudents() {
+    setForm((current) => ({ ...current, studentIds: [] }));
   }
 
   function submitMaterial(event) {
@@ -8590,6 +8636,26 @@ function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteMaterial
             설명
             <textarea value={form.description} onChange={(event) => updateForm("description", event.target.value)} placeholder="학생이 자료를 받을 때 함께 볼 안내문" />
           </label>
+          <button
+            className="resourceDropZone"
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={(event) => {
+              event.preventDefault();
+              attachFiles(event.dataTransfer.files);
+            }}
+            type="button"
+          >
+            <strong>자료 파일 드래그 앤 드롭</strong>
+            <span>{form.fileName || "파일을 여기에 놓거나 클릭해서 선택하세요."}</span>
+          </button>
+          <input
+            hidden
+            multiple
+            onChange={(event) => attachFiles(event.target.files)}
+            ref={fileInputRef}
+            type="file"
+          />
           <div className="fieldGrid two">
             <label>
               파일명
@@ -8620,18 +8686,48 @@ function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteMaterial
             </label>
           </div>
           <div className="resourceStudentPicker">
-            <strong>개별 학생</strong>
-            <div>
-              {students.map((student) => (
-                <button
-                  className={form.studentIds.includes(student.studentId) ? "active" : ""}
-                  key={student.studentId}
-                  onClick={() => toggleStudent(student.studentId)}
-                  type="button"
-                >
-                  {student.name}
-                </button>
-              ))}
+            <div className="resourceStudentPickerTop">
+              <strong>개별 학생</strong>
+              <span>선택 {form.studentIds.length}명</span>
+            </div>
+            <div className="resourceBulkActions">
+              <button onClick={selectAllResourceStudents} type="button">전체 선택</button>
+              <button onClick={clearAllResourceStudents} type="button">전체 해제</button>
+            </div>
+            <div className="resourceClassGroups">
+              {resourceStudentGroups.map((group) => {
+                const groupStudentIds = group.students.map((student) => student.studentId);
+                const selectedCount = groupStudentIds.filter((studentId) => form.studentIds.includes(studentId)).length;
+                const isOpen = openResourceClassIds.includes(group.id);
+                return (
+                  <section className="resourceClassGroup" key={group.id}>
+                    <button className="resourceClassGroupHeader" onClick={() => toggleResourceGroup(group.id)} type="button">
+                      <span>{isOpen ? "⌄" : "›"} {group.name}</span>
+                      <b>{selectedCount}/{group.students.length}명</b>
+                    </button>
+                    {isOpen ? (
+                      <div className="resourceClassGroupBody">
+                        <div className="resourceGroupActions">
+                          <button onClick={() => selectResourceGroup(groupStudentIds)} type="button">반 전체 선택</button>
+                          <button onClick={() => clearResourceGroup(groupStudentIds)} type="button">반 선택 해제</button>
+                        </div>
+                        <div className="resourceStudentButtons">
+                          {group.students.map((student) => (
+                            <button
+                              className={form.studentIds.includes(student.studentId) ? "active" : ""}
+                              key={student.studentId}
+                              onClick={() => toggleStudent(student.studentId)}
+                              type="button"
+                            >
+                              {student.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                  </section>
+                );
+              })}
             </div>
           </div>
           <label className="checkboxLine">
