@@ -2868,6 +2868,41 @@ textarea {
   color: #dfe7ff;
 }
 
+.alimtalkSafetyBox {
+  background: #f8fafc;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  color: #17223f;
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+}
+
+.alimtalkSafetyBox strong {
+  font-size: 14px;
+}
+
+.alimtalkSafetyBox span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.alimtalkSafetyBox.safe {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.alimtalkSafetyBox.warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.alimtalkSafetyBox.danger {
+  background: #fff1f2;
+  border-color: #fecaca;
+}
+
 .messagePreview {
   background: #f8fafc;
   border: 1px solid #d8e3f8;

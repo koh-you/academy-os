@@ -138,6 +138,22 @@ function apiUrl(path) {
   return `${apiBaseUrl}${path}`;
 }
 
+function getAlimtalkSafetyTone(notificationStatus, forceDryRun = false) {
+  if (forceDryRun || notificationStatus?.dryRun) return "safe";
+  if (!notificationStatus) return "warning";
+  if (!notificationStatus.allowRealRecipients) return "warning";
+  return "danger";
+}
+
+function getAlimtalkSafetyText(notificationStatus, forceDryRun = false) {
+  const testRecipient = notificationStatus?.testRecipient || "테스트 번호";
+  if (forceDryRun) return "테스트 발송: 실제 번호로 보내지 않고 서버에서 dry-run으로만 기록합니다.";
+  if (!notificationStatus) return "서버 발송 설정을 확인 중입니다. 실제 발송 전 Render 환경변수를 확인하세요.";
+  if (notificationStatus.dryRun) return `테스트 보호 ON: 실제 발송 없이 ${testRecipient}로만 기록됩니다.`;
+  if (!notificationStatus.allowRealRecipients) return `실제 번호 잠금: 등록 번호 대신 ${testRecipient}로 전환됩니다.`;
+  return "실발송 가능: 등록된 실제 번호로 발송될 수 있습니다.";
+}
+
 function isAttendanceOnlyRoute() {
   if (typeof window === "undefined") return false;
   return window.location.pathname === "/attendance" || window.location.hash === "#attendance";
@@ -648,6 +664,7 @@ export function App() {
     storageKeys.attendanceSettings,
     defaultAttendanceSettings
   );
+  const [integrationStatus, setIntegrationStatus] = useState(null);
   const [saveStates, setSaveStates] = useState({});
   const [reportModal, setReportModal] = useState(null);
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
@@ -717,6 +734,28 @@ export function App() {
       isMounted = false;
     };
   }, [setClassTemplates, setHomeworks, setLessons, setRecords, setResourceMaterials, setStudents]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadIntegrationStatus() {
+      try {
+        const response = await fetch(apiUrl("/api/integrations/status"));
+        const result = await response.json();
+        if (isMounted && result.ok) {
+          setIntegrationStatus(result.result);
+        }
+      } catch (error) {
+        if (isMounted) setIntegrationStatus(null);
+        console.info("academy-os integration status skipped:", error.message);
+      }
+    }
+
+    loadIntegrationStatus();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     recordsRef.current = records;
@@ -1382,6 +1421,7 @@ export function App() {
           <TeacherLessonHubV2
             academyTests={academyTests}
             aiSettings={aiSettings}
+            integrationStatus={integrationStatus}
             lessons={lessons}
             lessonsForDate={lessonsForDate}
             materials={resourceMaterials}
@@ -2170,12 +2210,14 @@ export function App() {
         lessonId: lesson.lessonId,
         lessonMaterial,
         lessonName: lesson.className,
+        forceDryRun: Boolean(options.forceDryRun),
         message,
         nextHomework: nextHomework?.title ?? "",
         preparationNotice: prepMessage,
         parentPhone: student.parentPhone,
         previousHomework: previousHomework?.title ?? "",
         scheduledDate,
+        sendMode: options.forceDryRun ? "test" : scheduledDate ? "scheduled" : "immediate",
         studentId: student.studentId,
         studentName: student.name,
         studentPhone: student.studentPhone,
@@ -2191,7 +2233,7 @@ export function App() {
         throw new Error(result.error || "코멘트 알림톡 발송 실패");
       }
 
-      const logStatus = scheduledDate ? "scheduled" : result.result?.dryRun ? "dry_run" : "sent";
+      const logStatus = result.result?.dryRun ? "dry_run" : scheduledDate ? "scheduled" : "sent";
       const notificationLog = { ...logBase, result, status: logStatus };
       setNotificationLogs((current) => [notificationLog, ...current]);
       postJson("/api/notification-jobs", {
@@ -2207,11 +2249,11 @@ export function App() {
           status: logStatus === "dry_run" ? "draft" : logStatus
         }
       }).catch((error) => console.error(error));
-      const completeStatus = scheduledDate
-        ? `예약 완료 · ${scheduledLabel}`
-        : result.result?.dryRun
+      const completeStatus = result.result?.dryRun
           ? "테스트 발송 기록됨"
-          : "알림톡 발송 완료";
+          : scheduledDate
+            ? `예약 완료 · ${scheduledLabel}`
+            : "알림톡 발송 완료";
       setRecords((current) =>
         upsertById(
           current,
@@ -2683,6 +2725,7 @@ function RoleLoginScreen({ students, onAttendanceCheck, onLogin }) {
 function TeacherLessonHubV2({
   academyTests = [],
   aiSettings,
+  integrationStatus,
   clipboardCount,
   lessons,
   materials = [],
@@ -2785,6 +2828,7 @@ function TeacherLessonHubV2({
         <LessonJournalDetail
           academyTests={academyTests}
           aiSettings={aiSettings}
+          integrationStatus={integrationStatus}
           homeworks={homeworks}
           lesson={selectedLesson}
           lessons={lessons}
@@ -2869,6 +2913,7 @@ function TeacherLessonHubV2({
 function LessonJournalDetail({
   academyTests = [],
   aiSettings = defaultAiSettings,
+  integrationStatus,
   homeworks,
   lesson,
   lessons,
@@ -3094,6 +3139,7 @@ function LessonJournalDetail({
           aiModel={commentAiModel}
           aiProvider={commentAiProvider}
           audience={commentModal.audience}
+          integrationStatus={integrationStatus}
           lesson={lesson}
           onChangeRecord={onChangeRecord}
           onClose={() => setCommentModal(null)}
@@ -3283,6 +3329,7 @@ function CommentComposerModal({
   aiModel,
   aiProvider,
   audience,
+  integrationStatus,
   lesson,
   nextHomework,
   onChangeRecord,
@@ -3301,8 +3348,15 @@ function CommentComposerModal({
   const receiverLabel = isParent ? `${student.name} 학부모님` : student.name;
   const previewTitle = isParent ? "학부모 알림톡 미리보기" : "학생 알림톡 미리보기";
   const sendLabel = isParent ? "학부모 알림톡 발송" : "학생 알림톡 발송";
+  const actionLabel = sendTiming === "now" ? "테스트 발송" : sendLabel.replace("발송", "예약");
   const aiStatus = isParent ? record?.teacherCommentAiStatus : record?.studentCommentAiStatus;
   const sendStatus = isParent ? record?.teacherCommentSendStatus : record?.studentCommentSendStatus;
+  const notificationStatus = integrationStatus?.notifications;
+  const recipientPhone = isParent ? student.parentPhone : student.studentPhone;
+  const forceDryRun = sendTiming === "now";
+  const safetyTone = getAlimtalkSafetyTone(notificationStatus, forceDryRun);
+  const safetyText = getAlimtalkSafetyText(notificationStatus, forceDryRun);
+  const missingNotificationEnv = notificationStatus?.missing ?? [];
   const defaultScheduledDate = getLessonAlimtalkScheduledDate(lesson, 0);
   const delayedScheduledDate = getLessonAlimtalkScheduledDate(lesson, 30);
   const selectedDelayMinutes = sendTiming === "delay30" ? 30 : 0;
@@ -3345,10 +3399,16 @@ function CommentComposerModal({
             </button>
             <button
               className="sendButton"
-              onClick={() => onSendComment(lesson, student, record, audience, { delayMinutes: selectedDelayMinutes, sendTiming })}
+              onClick={() =>
+                onSendComment(lesson, student, record, audience, {
+                  delayMinutes: selectedDelayMinutes,
+                  forceDryRun,
+                  sendTiming
+                })
+              }
               type="button"
             >
-              {sendLabel}
+              {actionLabel}
             </button>
           </div>
           <div className="sendScheduleOptions" role="group" aria-label="알림톡 발송 시각">
@@ -3361,9 +3421,14 @@ function CommentComposerModal({
               <span>{formatKoreaTimeLabel(delayedScheduledDate)}</span>
             </button>
             <button className={sendTiming === "now" ? "active" : ""} onClick={() => setSendTiming("now")} type="button">
-              지금 발송
-              <span>검수용</span>
+              테스트 발송
+              <span>실제 발송 없음</span>
             </button>
+          </div>
+          <div className={`alimtalkSafetyBox ${safetyTone}`}>
+            <strong>{safetyText}</strong>
+            <span>수신 대상: {receiverLabel} · 등록 번호: {recipientPhone || "번호 없음"}</span>
+            {missingNotificationEnv.length ? <span>미입력 환경변수: {missingNotificationEnv.join(", ")}</span> : null}
           </div>
           <small className="muted">선택된 발송 시각: {selectedScheduleLabel}</small>
           <small className="muted">{aiStatus || "AI 대기"} · {sendStatus || "발송 전"}</small>

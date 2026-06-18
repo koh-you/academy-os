@@ -43,8 +43,8 @@ function requiredEnv(name) {
   return value;
 }
 
-function isDryRun() {
-  return process.env.ALIMTALK_DRY_RUN !== "false";
+function isDryRun(payload = {}) {
+  return Boolean(payload.forceDryRun) || process.env.ALIMTALK_DRY_RUN !== "false";
 }
 
 function isSlackDryRun() {
@@ -249,7 +249,7 @@ async function sendKakaoAlimtalk({ payload, recipientPhone, templateEnvName, var
     throw new Error("scheduledDate must be a valid date string.");
   }
 
-  if (isDryRun()) {
+  if (isDryRun(payload)) {
     return {
       dryRun: true,
       payload,
