@@ -2984,7 +2984,7 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle }) 
       title: "연구실",
       items: [
         { id: "lessonResearch", label: "수업연구", icon: "📚" },
-        { id: "aiVariants", label: "AI 변형문항", icon: "✨" }
+        { id: "aiVariants", label: "AI 도구", icon: "✨" }
       ]
     },
     {
@@ -5920,50 +5920,44 @@ function LessonResearchCenter({ items, onAddItem, onDeleteItem, onUpdateItem }) 
   );
 }
 
-function AIVariantProblemCenter({ aiSettings = defaultAiSettings, students }) {
-  const [activeTab, setActiveTab] = useState("input");
+function AIVariantProblemCenter({ aiSettings = defaultAiSettings }) {
+  const [activeTab, setActiveTab] = useState("variant");
   const [sourceProblem, setSourceProblem] = useState("");
-  const [targetStudentId, setTargetStudentId] = useState(students[0]?.studentId ?? "");
   const [variantLevel, setVariantLevel] = useState("same");
-  const selectedStudent = students.find((student) => student.studentId === targetStudentId) ?? students[0];
+  const [basicCount, setBasicCount] = useState("1");
+  const [similarCount, setSimilarCount] = useState("1");
+  const [advancedCount, setAdvancedCount] = useState("0");
+  const [answerStyle, setAnswerStyle] = useState("fiveChoice");
+  const [solutionStyle, setSolutionStyle] = useState("short");
+  const [toneStyle, setToneStyle] = useState("auto");
+  const [teacherPrompt, setTeacherPrompt] = useState("");
+  const [isGenerated, setIsGenerated] = useState(false);
   const variantAiProvider = aiSettings.variantProvider ?? defaultAiSettings.variantProvider;
   const variantAiModel = aiSettings.variantModel ?? defaultAiSettings.variantModel;
-  const variantCards = [
-    {
-      title: "숫자 조건 변형",
-      body: sourceProblem ? "원문 구조는 유지하고 계수와 조건을 바꾼 문항 초안입니다." : "원문 문항을 입력하면 구조 유지형 변형문항이 표시됩니다."
-    },
-    {
-      title: "개념 확인 변형",
-      body: sourceProblem ? "같은 개념을 더 짧은 풀이로 확인하는 문항 초안입니다." : "학생별 약점 확인용 짧은 변형문항이 표시됩니다."
-    },
-    {
-      title: "내신 심화 변형",
-      body: sourceProblem ? "학교 시험 대비용으로 조건을 한 단계 더 꼬은 문항 초안입니다." : "시험대비 난도 상승형 문항이 표시됩니다."
-    }
-  ];
+  const totalVariantCount = Number(basicCount || 0) + Number(similarCount || 0) + Number(advancedCount || 0);
+
+  function handleGenerateVariant() {
+    setIsGenerated(true);
+  }
 
   return (
     <section className="aiVariantPage">
       <div className="pageTop aiVariantHero">
         <div>
-          <p className="eyebrow">AI VARIANT</p>
-          <h1>AI 변형문항</h1>
-          <p className="muted">교재오답과 내신 대비 문항을 바탕으로 변형문항 초안을 만드는 작업대입니다.</p>
+          <p className="eyebrow">AI TOOLS</p>
+          <h1>AI 도구</h1>
+          <p className="muted">학원 수업자료 분석, 문제 변형, 문항 정리 작업을 한 곳에서 관리합니다.</p>
         </div>
         <div className="aiVariantHeroActions">
           <span className="aiSettingBadge">
             {getAiProviderLabel(variantAiProvider)} · {getAiModelLabel(variantAiModel)}
           </span>
-          <button className="primaryButton" onClick={() => setActiveTab("drafts")} type="button">초안 보기</button>
         </div>
       </div>
 
       <div className="studentManagerTabs aiTabs">
         {[
-          ["input", "문항 입력"],
-          ["drafts", "변형 초안"],
-          ["saved", "저장 목록"]
+          ["variant", "변형문항"]
         ].map(([id, label]) => (
           <button className={activeTab === id ? "active" : ""} key={id} onClick={() => setActiveTab(id)} type="button">
             {label}
@@ -5971,59 +5965,160 @@ function AIVariantProblemCenter({ aiSettings = defaultAiSettings, students }) {
         ))}
       </div>
 
-      {activeTab === "input" ? (
-        <section className="panel aiInputPanel">
-          <div className="fieldGrid">
-            <label>
-              대상 학생
-              <StudentSelect students={students} value={targetStudentId} onChange={setTargetStudentId} />
-            </label>
-            <label>
-              변형 난도
-              <select value={variantLevel} onChange={(event) => setVariantLevel(event.target.value)}>
-                <option value="same">유사 난도</option>
-                <option value="up">한 단계 심화</option>
-                <option value="exam">내신 실전형</option>
-              </select>
-            </label>
-          </div>
-          <label className="wideLabel">
-            원본 문항 / 오답 메모
-            <textarea
-              value={sourceProblem}
-              onChange={(event) => setSourceProblem(event.target.value)}
-              placeholder="원본 문제, 학생 풀이 오류, 원하는 조건을 붙여넣으세요."
-              rows="8"
-            />
-          </label>
-          <button className="primaryButton" onClick={() => setActiveTab("drafts")} type="button">변형문항 초안 생성</button>
-        </section>
-      ) : null}
-
-      {activeTab === "drafts" ? (
-        <section className="variantDraftGrid">
-          <div className="panel variantContext">
-            <h2>{selectedStudent?.name ?? "학생"} 맞춤 조건</h2>
-            <p className="muted">{selectedStudent?.schoolName ?? "-"} · {selectedStudent?.grade ?? "-"} · {variantLevel === "same" ? "유사 난도" : variantLevel === "up" ? "한 단계 심화" : "내신 실전형"}</p>
-            <p>{sourceProblem || "아직 입력된 원본 문항이 없습니다. 문항 입력 탭에서 원본을 넣어주세요."}</p>
-          </div>
-          {variantCards.map((card) => (
-            <article className="panel variantCard" key={card.title}>
-              <h3>{card.title}</h3>
-              <p>{card.body}</p>
-              <div className="variantActions">
-                <button className="softButton" type="button">수정</button>
-                <button className="primaryButton" type="button">저장</button>
+      {activeTab === "variant" ? (
+        <section className="aiVariantWorkspace">
+          <div className="aiVariantWorkbench">
+            <section className="panel aiToolCard aiToolCardHeader">
+              <div>
+                <h2>변형 문제 생성</h2>
+                <p className="muted">PDF, 이미지, 텍스트로 받은 원본 문항을 바탕으로 새 변형문항을 만듭니다.</p>
               </div>
-            </article>
-          ))}
-        </section>
-      ) : null}
+              <span className="readyPill">준비 완료</span>
+            </section>
 
-      {activeTab === "saved" ? (
-        <section className="panel">
-          <h2>저장된 변형문항</h2>
-          <div className="emptyState">아직 저장된 변형문항이 없습니다.</div>
+            <section className="panel aiToolCard">
+              <div className="aiToolSectionHeader">
+                <h3>AI 모델</h3>
+                <button className="textButton" type="button">새로고침</button>
+              </div>
+              <div className="aiModelSelectMock">
+                <strong>{getAiModelLabel(variantAiModel)}</strong>
+                <span>{getAiProviderLabel(variantAiProvider)}</span>
+              </div>
+            </section>
+
+            <section className="panel aiToolCard">
+              <h3>입력 파일</h3>
+              <div className="aiUploadBox">
+                <strong>파일 선택 또는 드래그</strong>
+                <span>파일 1개 · 최대 50MB · Ctrl+V 붙여넣기</span>
+                <button className="softButton" type="button">파일 업로드</button>
+              </div>
+              <label className="wideLabel">
+                원본 문항 / 오답 메모
+                <textarea
+                  value={sourceProblem}
+                  onChange={(event) => setSourceProblem(event.target.value)}
+                  placeholder="원본 문제, 학생 풀이 오류, 원하는 조건을 붙여넣으세요."
+                  rows="6"
+                />
+              </label>
+            </section>
+
+            <section className="panel aiToolCard">
+              <h3>옵션</h3>
+              <div className="variantOptionGroup">
+                <strong>변형 종류 · 개수</strong>
+                <div className="variantCountGrid">
+                  <label>
+                    숫자/조건 변형
+                    <input min="0" type="number" value={basicCount} onChange={(event) => setBasicCount(event.target.value)} />
+                  </label>
+                  <label>
+                    표현 변형
+                    <input min="0" type="number" value={similarCount} onChange={(event) => setSimilarCount(event.target.value)} />
+                  </label>
+                  <label>
+                    고난도 변형
+                    <input min="0" type="number" value={advancedCount} onChange={(event) => setAdvancedCount(event.target.value)} />
+                  </label>
+                </div>
+                <small className="muted">총 1~10문항 사이 권장. AI 호출 비용을 고려해 필요한 만큼만 만든다.</small>
+              </div>
+
+              <div className="variantSelectGrid">
+                <label>
+                  변형 난도
+                  <select value={variantLevel} onChange={(event) => setVariantLevel(event.target.value)}>
+                    <option value="same">유사 난도</option>
+                    <option value="up">한 단계 심화</option>
+                    <option value="exam">내신 실전형</option>
+                  </select>
+                </label>
+                <label>
+                  답안 형식
+                  <select value={answerStyle} onChange={(event) => setAnswerStyle(event.target.value)}>
+                    <option value="auto">자동</option>
+                    <option value="fiveChoice">5지선다 객관식</option>
+                    <option value="shortAnswer">단답형</option>
+                    <option value="fillBlank">빈칸 채우기</option>
+                    <option value="stepProof">단계별 서술형</option>
+                    <option value="mixed">혼합 서술형</option>
+                  </select>
+                </label>
+                <label>
+                  해설 형식
+                  <select value={solutionStyle} onChange={(event) => setSolutionStyle(event.target.value)}>
+                    <option value="short">일반 해설 한 단락</option>
+                    <option value="step">단계별 해설</option>
+                    <option value="auto">자동</option>
+                  </select>
+                </label>
+                <label>
+                  풀이 스타일
+                  <select value={toneStyle} onChange={(event) => setToneStyle(event.target.value)}>
+                    <option value="auto">자동</option>
+                    <option value="standard">표준 정석</option>
+                    <option value="quick">빠른 풀이</option>
+                    <option value="concept">학생 친절형</option>
+                    <option value="exam">시험 실전형</option>
+                    <option value="reverse">반례 체크형</option>
+                  </select>
+                </label>
+              </div>
+
+              <label className="wideLabel">
+                강사 코멘트
+                <textarea
+                  value={teacherPrompt}
+                  onChange={(event) => setTeacherPrompt(event.target.value)}
+                  placeholder="예: 계산은 쉽게, 조건 해석은 조금 더 꼬아서 / 창동고 스타일 / 학생들이 자주 틀리는 포인트 반영"
+                  rows="4"
+                />
+              </label>
+            </section>
+
+            <button className="primaryButton aiRunButton" onClick={handleGenerateVariant} type="button">AI 처리 시작</button>
+          </div>
+
+          <section className="panel aiVariantResultPanel">
+            {isGenerated ? (
+              <>
+                <div className="resultStatus success">
+                  <strong>완료</strong>
+                  <span>변형 문제 생성 완료</span>
+                </div>
+                <div className="variantResultToolbar">
+                  <button className="softButton" type="button">별표</button>
+                  <button className="softButton" type="button">전체 저장</button>
+                  <button className="softButton" onClick={handleGenerateVariant} type="button">다시 생성</button>
+                </div>
+                <article className="variantResultCard">
+                  <div className="variantResultMeta">
+                    <span>변형 1</span>
+                    <b>{variantLevel === "same" ? "유사 난도" : variantLevel === "up" ? "심화" : "내신 실전"}</b>
+                    <em>{totalVariantCount}문항 요청</em>
+                  </div>
+                  <strong>원본 문항의 핵심 조건을 유지한 변형 초안</strong>
+                  <p>{sourceProblem || "원본 문항을 입력하면 이 영역에 변형문항 결과가 표시됩니다."}</p>
+                  <div className="variantAnswerBox">
+                    <span>정답</span>
+                    <strong>AI 생성 후 표시</strong>
+                  </div>
+                  <div className="variantSolutionBox">
+                    <span>해설</span>
+                    <p>선택한 해설 형식과 풀이 스타일에 맞춰 풀이가 표시됩니다.</p>
+                  </div>
+                </article>
+              </>
+            ) : (
+              <div className="variantResultEmpty">
+                <span>✨</span>
+                <strong>결과 대기 중</strong>
+                <p>왼쪽 패널에서 파일 또는 문항을 입력하고 옵션을 설정한 후 AI 처리를 시작하세요.</p>
+              </div>
+            )}
+          </section>
         </section>
       ) : null}
     </section>

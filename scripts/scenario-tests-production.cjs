@@ -49,6 +49,9 @@ check("21 supplement schedule creates calendar lesson", hasAll(app, ["handleSche
 check("22 student portal is tablet first", hasAll(app, ["studentPortalTabletFirst", "teacherPreviewPortal"]) && css.includes(".studentPortalTabletFirst .metricGrid"));
 check("23 parent portal is mobile first", hasAll(app, ["parentPortalMobileFirst", "parentPortal"]) && css.includes(".parentPortalMobileFirst .metricGrid"));
 check("24 responsive layout principles doc exists", fs.existsSync(path.join(root, "docs", "responsive-layout-principles.md")));
+check("25 ai tools menu replaces ai variant label", app.includes('label: "AI 도구"') && !app.includes('label: "AI 변형문항"'));
+check("26 ai variant draft shortcut is removed", !app.includes(">초안 보기</button>") && app.includes("AI 처리 시작"));
+check("27 ai variant workspace is two column", css.includes(".aiVariantWorkspace") && css.includes(".aiVariantResultPanel"));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));

@@ -3875,8 +3875,8 @@ textarea.profileEditInput {
 }
 
 .aiTabs {
-  max-width: 680px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 360px;
+  grid-template-columns: 1fr;
 }
 
 .aiInputPanel {
@@ -3889,6 +3889,226 @@ textarea.profileEditInput {
   display: grid;
   font-weight: 900;
   gap: 8px;
+}
+
+.aiVariantWorkspace {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(420px, 0.85fr) minmax(520px, 1.15fr);
+}
+
+.aiVariantWorkbench,
+.aiToolCard {
+  align-content: start;
+  display: grid;
+  gap: 14px;
+}
+
+.aiToolCardHeader {
+  align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.aiToolCard h2,
+.aiToolCard h3 {
+  margin: 0;
+}
+
+.aiToolSectionHeader {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.readyPill {
+  align-items: center;
+  color: #059669;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 900;
+  gap: 6px;
+}
+
+.readyPill::before {
+  background: #10b981;
+  border-radius: 999px;
+  content: "";
+  height: 8px;
+  width: 8px;
+}
+
+.aiModelSelectMock {
+  align-items: center;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  min-height: 48px;
+  padding: 0 14px;
+}
+
+.aiModelSelectMock span {
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.aiUploadBox {
+  align-items: center;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  min-height: 92px;
+  padding: 16px;
+  text-align: center;
+}
+
+.aiUploadBox span {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.variantOptionGroup {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.variantCountGrid,
+.variantSelectGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.variantCountGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.variantSelectGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.variantCountGrid label,
+.variantSelectGrid label {
+  color: #17213d;
+  display: grid;
+  font-weight: 900;
+  gap: 8px;
+}
+
+.aiRunButton {
+  min-height: 52px;
+  width: 100%;
+}
+
+.aiVariantResultPanel {
+  align-content: start;
+  display: grid;
+  gap: 14px;
+  min-height: 520px;
+}
+
+.variantResultEmpty {
+  align-content: center;
+  color: #94a3b8;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  min-height: 460px;
+  text-align: center;
+}
+
+.variantResultEmpty span {
+  font-size: 42px;
+}
+
+.variantResultEmpty strong {
+  color: #64748b;
+  font-size: 18px;
+}
+
+.resultStatus {
+  align-items: center;
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  padding: 14px;
+}
+
+.resultStatus.success {
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
+  color: #047857;
+}
+
+.variantResultToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.variantResultCard {
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.variantResultMeta {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.variantResultMeta span,
+.variantResultMeta b,
+.variantResultMeta em {
+  border-radius: 999px;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+  padding: 5px 8px;
+}
+
+.variantResultMeta span {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.variantResultMeta b {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.variantResultMeta em {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.variantAnswerBox,
+.variantSolutionBox {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.variantAnswerBox span,
+.variantSolutionBox span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
 }
 
 .variantDraftGrid {
@@ -5966,6 +6186,7 @@ textarea.profileEditInput {
   .examAnalysisLayout.listCollapsed,
   .commentComposerGrid,
   .analysisTwoColumn,
+  .aiVariantWorkspace,
   .insightGrid,
   .analysisOutputGrid {
     grid-template-columns: 1fr;
