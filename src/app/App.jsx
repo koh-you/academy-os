@@ -2546,6 +2546,10 @@ function getNotificationStatusLabel(status) {
   }[status] ?? status ?? "대기";
 }
 
+function StatusDot({ active }) {
+  return <span className={active ? "statusDot active" : "statusDot inactive"} />;
+}
+
 function NotificationCenter({ integrationStatus, notificationJobs, notificationLogs, students, onRefresh }) {
   const [dispatchMessage, setDispatchMessage] = useState("");
   const [isDispatching, setIsDispatching] = useState(false);
@@ -2652,6 +2656,49 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
           <small>{safetyText}</small>
         </article>
       </div>
+
+      <section className="notificationPanel integrationStatusPanel">
+        <div className="sectionHeader slim">
+          <div>
+            <p className="eyebrow">LIVE SETTINGS</p>
+            <h2>발송/AI 연동 상태</h2>
+          </div>
+          <span className={notificationStatus?.missing?.length ? "statusPill status-failed" : "statusPill status-sent"}>
+            {notificationStatus?.missing?.length ? "확인 필요" : "준비됨"}
+          </span>
+        </div>
+        <div className="integrationStatusGrid">
+          <article>
+            <strong>솔라피 기본</strong>
+            <span><StatusDot active={notificationStatus?.solapiConfigured} /> API/PFID 설정</span>
+            <span><StatusDot active={notificationStatus?.templatesConfigured?.attendance} /> 출결 알림톡 템플릿</span>
+            <span><StatusDot active={notificationStatus?.templatesConfigured?.dailyReport} /> 학부모 알림톡 템플릿</span>
+            <span><StatusDot active={notificationStatus?.templatesConfigured?.studentComment} /> 학생 알림톡 템플릿</span>
+          </article>
+          <article>
+            <strong>발송 안전장치</strong>
+            <span><StatusDot active={notificationStatus?.dryRun} /> 테스트 보호 {notificationStatus?.dryRun ? "ON" : "OFF"}</span>
+            <span><StatusDot active={!notificationStatus?.allowRealRecipients} /> 실제 번호 잠금 {notificationStatus?.allowRealRecipients ? "OFF" : "ON"}</span>
+            <span>테스트 수신번호: {notificationStatus?.testRecipient || "미설정"}</span>
+          </article>
+          <article>
+            <strong>AI API</strong>
+            <span><StatusDot active={integrationStatus?.ai?.providers?.openai} /> OpenAI</span>
+            <span><StatusDot active={integrationStatus?.ai?.providers?.anthropic} /> Claude</span>
+            <span>기본값: {integrationStatus?.ai?.defaultProvider || "미설정"}</span>
+          </article>
+          <article>
+            <strong>다음 테스트 순서</strong>
+            <span>1. 누락 점검</span>
+            <span>2. 테스트 발송</span>
+            <span>3. 선생님 번호 수신 확인</span>
+            <span>4. 실발송 잠금 해제는 마지막</span>
+          </article>
+        </div>
+        {notificationStatus?.missing?.length ? (
+          <p className="inlineNotice danger">미입력 환경변수: {notificationStatus.missing.join(", ")}</p>
+        ) : null}
+      </section>
 
       <section className="notificationPanel">
         <div className="sectionHeader slim">

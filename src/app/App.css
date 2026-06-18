@@ -425,6 +425,29 @@ button {
   padding: 10px 12px;
 }
 
+.inlineNotice.danger {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  color: #be123c;
+}
+
+.statusDot {
+  border-radius: 999px;
+  display: inline-block;
+  height: 9px;
+  margin-right: 8px;
+  width: 9px;
+}
+
+.statusDot.active {
+  background: #22c55e;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12);
+}
+
+.statusDot.inactive {
+  background: #cbd5e1;
+}
+
 .shortcutHint {
   color: #94a3b8;
   font-size: 13px;
@@ -2170,6 +2193,35 @@ button:disabled {
   display: grid;
   gap: 14px;
   padding: 18px;
+}
+
+.integrationStatusGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.integrationStatusGrid article {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.integrationStatusGrid strong {
+  color: #071226;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.integrationStatusGrid span {
+  align-items: center;
+  color: #475569;
+  display: flex;
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .notificationTable {
@@ -5736,6 +5788,7 @@ textarea.profileEditInput {
   .metricGrid,
   .miniMetricGrid,
   .notificationStatsGrid,
+  .integrationStatusGrid,
   .reportDataSummaryGrid,
   .researchMetricGrid,
   .researchLayout,
