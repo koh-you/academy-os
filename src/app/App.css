@@ -2096,6 +2096,148 @@ button:disabled {
   display: none;
 }
 
+.notificationCenterPage {
+  display: grid;
+  gap: 18px;
+}
+
+.notificationStatsGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.notificationStatsGrid article,
+.notificationPanel {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  box-shadow: 0 10px 26px rgba(31, 45, 78, 0.05);
+}
+
+.notificationStatsGrid article {
+  display: grid;
+  gap: 8px;
+  min-height: 118px;
+  padding: 18px;
+}
+
+.notificationStatsGrid span,
+.notificationStatsGrid small {
+  color: #64748b;
+  font-weight: 800;
+}
+
+.notificationStatsGrid strong {
+  color: #071226;
+  font-size: 30px;
+}
+
+.notificationSafetyCard.safe {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.notificationSafetyCard.warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.notificationSafetyCard.danger {
+  background: #fff1f2;
+  border-color: #fecaca;
+}
+
+.notificationPanel {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.notificationTable {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.notificationTableHead,
+.notificationTableRow {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 110px 140px 100px 160px 130px minmax(260px, 1fr);
+  padding: 12px 14px;
+}
+
+.notificationTableHead {
+  background: #f8fafc;
+  color: #64748b;
+  font-weight: 900;
+}
+
+.notificationTableRow {
+  align-items: start;
+  border-top: 1px solid #e2e8f0;
+}
+
+.notificationTableRow p,
+.notificationLogList p {
+  color: #475569;
+  line-height: 1.5;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.statusPill {
+  align-self: start;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  color: #4f46e5;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 900;
+  justify-content: center;
+  padding: 5px 8px;
+}
+
+.status-scheduled {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #2563eb;
+}
+
+.status-sent {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #15803d;
+}
+
+.status-failed {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
+.notificationLogList {
+  display: grid;
+  gap: 10px;
+}
+
+.notificationLogList article {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+}
+
+.notificationLogList span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .modalCard.lessonModal {
   gap: 18px;
   max-width: 640px;

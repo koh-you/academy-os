@@ -641,6 +641,7 @@ export function App() {
   const [reportSnapshots, setReportSnapshots] = useStoredState(storageKeys.reportSnapshots, []);
   const [makeupTasks, setMakeupTasks] = useStoredState(storageKeys.makeupTasks, []);
   const [notificationLogs, setNotificationLogs] = useStoredState(storageKeys.notificationLogs, []);
+  const [notificationJobs, setNotificationJobs] = useState([]);
   const [wrongProblems, setWrongProblems] = useStoredState(storageKeys.wrongProblems, sampleData.wrongProblems ?? []);
   const [problemBooks, setProblemBooks] = useStoredState(storageKeys.problemBooks, createDefaultProblemBooks());
   const [scoreRecords, setScoreRecords] = useStoredState(storageKeys.scoreRecords, sampleData.scoreRecords ?? []);
@@ -735,6 +736,18 @@ export function App() {
     };
   }, [setClassTemplates, setHomeworks, setLessons, setRecords, setResourceMaterials, setStudents]);
 
+  async function refreshNotificationJobs() {
+    try {
+      const response = await fetch(apiUrl("/api/notification-jobs"));
+      const result = await response.json();
+      if (result.ok && Array.isArray(result.notificationJobs)) {
+        setNotificationJobs(result.notificationJobs);
+      }
+    } catch (error) {
+      console.info("academy-os notification jobs skipped:", error.message);
+    }
+  }
+
   useEffect(() => {
     let isMounted = true;
 
@@ -755,6 +768,10 @@ export function App() {
     return () => {
       isMounted = false;
     };
+  }, []);
+
+  useEffect(() => {
+    refreshNotificationJobs();
   }, []);
 
   useEffect(() => {
@@ -1643,6 +1660,16 @@ export function App() {
           />
         ) : null}
 
+        {activeView === "notifications" ? (
+          <NotificationCenter
+            integrationStatus={integrationStatus}
+            notificationJobs={notificationJobs}
+            notificationLogs={notificationLogs}
+            students={students}
+            onRefresh={refreshNotificationJobs}
+          />
+        ) : null}
+
         {activeView === "followups" ? (
           <FollowUpCenter
             homeworks={homeworks}
@@ -2236,18 +2263,20 @@ export function App() {
       const logStatus = result.result?.dryRun ? "dry_run" : scheduledDate ? "scheduled" : "sent";
       const notificationLog = { ...logBase, result, status: logStatus };
       setNotificationLogs((current) => [notificationLog, ...current]);
+      const notificationJob = {
+        ...notificationLog,
+        notificationJobId: notificationLog.notificationLogId,
+        notificationType: target === "student" ? "student_comment" : "parent_comment",
+        lessonStudentRecordId: recordId,
+        payload: notificationPayload,
+        previewBody: logBase.message,
+        recipient: target === "student" ? student.studentPhone : student.parentPhone,
+        scheduledAt: scheduledDate,
+        status: logStatus === "dry_run" ? "draft" : logStatus
+      };
+      setNotificationJobs((current) => [notificationJob, ...current.filter((job) => job.notificationJobId !== notificationJob.notificationJobId)]);
       postJson("/api/notification-jobs", {
-        notificationJob: {
-          ...notificationLog,
-          notificationJobId: notificationLog.notificationLogId,
-          notificationType: target === "student" ? "student_comment" : "parent_comment",
-          lessonStudentRecordId: recordId,
-          payload: notificationPayload,
-          previewBody: logBase.message,
-          recipient: target === "student" ? student.studentPhone : student.parentPhone,
-          scheduledAt: scheduledDate,
-          status: logStatus === "dry_run" ? "draft" : logStatus
-        }
+        notificationJob
       }).catch((error) => console.error(error));
       const completeStatus = result.result?.dryRun
           ? "테스트 발송 기록됨"
@@ -2269,16 +2298,18 @@ export function App() {
     } catch (error) {
     const failedLog = { ...logBase, error: error.message, status: "failed" };
     setNotificationLogs((current) => [failedLog, ...current]);
+    const failedJob = {
+      ...failedLog,
+      notificationJobId: failedLog.notificationLogId,
+      notificationType: target === "student" ? "student_comment" : "parent_comment",
+      lessonStudentRecordId: recordId,
+      previewBody: logBase.message,
+      recipient: target === "student" ? student.studentPhone : student.parentPhone,
+      scheduledAt: scheduledDate
+    };
+    setNotificationJobs((current) => [failedJob, ...current.filter((job) => job.notificationJobId !== failedJob.notificationJobId)]);
     postJson("/api/notification-jobs", {
-      notificationJob: {
-        ...failedLog,
-        notificationJobId: failedLog.notificationLogId,
-        notificationType: target === "student" ? "student_comment" : "parent_comment",
-        lessonStudentRecordId: recordId,
-        previewBody: logBase.message,
-        recipient: target === "student" ? student.studentPhone : student.parentPhone,
-        scheduledAt: scheduledDate
-      }
+      notificationJob: failedJob
     }).catch((persistError) => console.error(persistError));
     setRecords((current) =>
       upsertById(
@@ -2492,6 +2523,131 @@ export function App() {
   }
 }
 
+function getNotificationJobLabel(type) {
+  return {
+    attendance: "출결 알림톡",
+    daily_report: "학부모 알림톡",
+    parent_comment: "학부모 알림톡",
+    student_comment: "학생 알림톡",
+    student_reminder: "학생 일정 알림톡"
+  }[type] ?? type ?? "알림톡";
+}
+
+function getNotificationStatusLabel(status) {
+  return {
+    draft: "테스트/초안",
+    dry_run: "테스트 기록",
+    scheduled: "예약됨",
+    sent: "발송 완료",
+    failed: "실패",
+    empty_message: "내용 없음"
+  }[status] ?? status ?? "대기";
+}
+
+function NotificationCenter({ integrationStatus, notificationJobs, notificationLogs, students, onRefresh }) {
+  const notificationStatus = integrationStatus?.notifications;
+  const safetyTone = getAlimtalkSafetyTone(notificationStatus, false);
+  const safetyText = getAlimtalkSafetyText(notificationStatus, false);
+  const scheduledJobs = notificationJobs.filter((job) => job.status === "scheduled");
+  const draftJobs = notificationJobs.filter((job) => job.status === "draft" || job.status === "dry_run");
+  const failedJobs = notificationJobs.filter((job) => job.status === "failed");
+  const recentJobs = notificationJobs.slice(0, 30);
+  const recentLogs = notificationLogs.slice(0, 8);
+
+  function studentName(studentId, payload) {
+    return payload?.studentName || students.find((student) => student.studentId === studentId)?.name || "학생";
+  }
+
+  return (
+    <section className="notificationCenterPage">
+      <div className="pageTop">
+        <div>
+          <h1>알림관리</h1>
+          <p className="muted">학부모 알림톡, 학생 알림톡, 출결 알림톡의 예약과 테스트 기록을 확인합니다.</p>
+        </div>
+        <button className="softButton" onClick={onRefresh} type="button">새로고침</button>
+      </div>
+
+      <div className="notificationStatsGrid">
+        <article>
+          <span>예약 대기</span>
+          <strong>{scheduledJobs.length}건</strong>
+          <small>정해진 발송시각 대기</small>
+        </article>
+        <article>
+          <span>테스트/초안</span>
+          <strong>{draftJobs.length}건</strong>
+          <small>실제 발송 전 점검</small>
+        </article>
+        <article>
+          <span>실패</span>
+          <strong>{failedJobs.length}건</strong>
+          <small>재확인 필요</small>
+        </article>
+        <article className={`notificationSafetyCard ${safetyTone}`}>
+          <span>발송 보호</span>
+          <strong>{notificationStatus?.dryRun ? "테스트 보호" : notificationStatus?.allowRealRecipients ? "실발송 가능" : "번호 잠금"}</strong>
+          <small>{safetyText}</small>
+        </article>
+      </div>
+
+      <section className="notificationPanel">
+        <div className="sectionHeader slim">
+          <div>
+            <p className="eyebrow">QUEUE</p>
+            <h2>알림톡 예약/기록</h2>
+          </div>
+          <span className="countBadge">{notificationJobs.length}건</span>
+        </div>
+        <div className="notificationTable">
+          <div className="notificationTableHead">
+            <span>상태</span>
+            <span>종류</span>
+            <span>학생</span>
+            <span>발송시각</span>
+            <span>수신번호</span>
+            <span>미리보기</span>
+          </div>
+          {recentJobs.length === 0 ? (
+            <p className="emptyState">아직 저장된 알림톡 예약/기록이 없습니다.</p>
+          ) : (
+            recentJobs.map((job) => (
+              <article className="notificationTableRow" key={job.notificationJobId}>
+                <span className={`statusPill status-${job.status || "draft"}`}>{getNotificationStatusLabel(job.status)}</span>
+                <strong>{getNotificationJobLabel(job.notificationType)}</strong>
+                <span>{studentName(job.studentId, job.payload)}</span>
+                <span>{job.scheduledAt ? formatKoreaTimeLabel(job.scheduledAt) : "-"}</span>
+                <span>{job.recipient || "번호 없음"}</span>
+                <p>{job.previewBody || job.payload?.message || "미리보기 없음"}</p>
+              </article>
+            ))
+          )}
+        </div>
+      </section>
+
+      <section className="notificationPanel">
+        <div className="sectionHeader slim">
+          <div>
+            <p className="eyebrow">LOCAL LOG</p>
+            <h2>최근 화면 로그</h2>
+          </div>
+          <span className="countBadge">{notificationLogs.length}건</span>
+        </div>
+        <div className="notificationLogList">
+          {recentLogs.length === 0 ? <p className="emptyState">아직 화면 로그가 없습니다.</p> : null}
+          {recentLogs.map((log) => (
+            <article key={log.notificationLogId}>
+              <strong>{getNotificationJobLabel(log.channel)} · {getNotificationStatusLabel(log.status)}</strong>
+              <span>{log.createdAt ? formatKoreaTimeLabel(log.createdAt) : ""}</span>
+              <p>{log.message}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    </section>
+  );
+}
+
 function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle }) {
   const menuGroups = [
     {
@@ -2531,6 +2687,7 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle }) 
     {
       title: "시스템",
       items: [
+        { id: "notifications", label: "알림관리", icon: "📣" },
         { id: "settings", label: "설정", icon: "⚙️" }
       ]
     }
