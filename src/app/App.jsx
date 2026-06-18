@@ -97,12 +97,11 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, previousHom
   const lessonContent = getLessonContent(record);
   const assignmentStatus = record?.assignmentStatus ?? record?.incompleteHomework ?? "";
   const attendance = attendanceLabels[record?.attendanceStatus ?? "pending"] ?? "";
-  const prepNotice =
-    audience === "student"
-      ? record?.prepStudentNotice?.trim()
-      : record?.prepParentVisible
-        ? record?.prepParentNotice?.trim()
-        : "";
+  const commentText = comment?.trim() ?? "";
+  const shouldIncludePrepMemo =
+    audience === "student" ? Boolean(record?.prepStudentVisible) : Boolean(record?.prepParentVisible);
+  const prepMemo = record?.preparationMemo?.trim() ?? "";
+  const prepNotice = shouldIncludePrepMemo && prepMemo && !commentText.includes(prepMemo) ? prepMemo : "";
   const lines = [
     attendance ? `출결: ${attendance}` : "",
     lessonMaterial ? `강의 교재: ${lessonMaterial}` : "",
@@ -110,8 +109,8 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, previousHom
     previousHomework?.title ? `지난 과제: ${previousHomework.title}` : "",
     nextHomework?.title ? `다음 과제: ${nextHomework.title}` : "",
     audience === "parent" && assignmentStatus ? `과제 상태: ${getAssignmentStatusParentMessage(assignmentStatus)}` : "",
-    prepNotice ? `수업 준비: ${prepNotice}` : "",
-    comment?.trim() ? `코멘트: ${comment.trim()}` : ""
+    prepNotice ? `수업메모: ${prepNotice}` : "",
+    commentText ? `코멘트: ${commentText}` : ""
   ];
 
   return lines.filter(Boolean);
@@ -2264,14 +2263,14 @@ export function App() {
           lessonContent: getLessonContent(record),
           lessonMaterial: getLessonMaterial(record, student),
           lessonName: lesson.className,
-          rawText: `${audienceLabel}에게 안내할 수업 준비 메모입니다. 짧고 정중하게 다듬어 주세요.\n${rawText}`,
+          rawText: `${audienceLabel}에게 안내할 수업메모입니다. 짧고 정중하게 다듬어 주세요.\n${rawText}`,
           schoolName: student.schoolName,
           studentName: student.name
         })
       });
       const result = await response.json();
       if (!response.ok || !result.ok) {
-        throw new Error(result.error || "수업준비메모 AI 정제에 실패했습니다.");
+        throw new Error(result.error || "수업메모 AI 정제에 실패했습니다.");
       }
 
       setRecords((current) =>
@@ -2307,13 +2306,11 @@ export function App() {
 
   async function handleSendLessonComment(lesson, student, record, target, options = {}) {
     const sourceField = target === "student" ? "studentComment" : "teacherComment";
-    const prepMessage =
-      target === "student"
-        ? record?.prepStudentNotice?.trim()
-        : record?.prepParentVisible
-          ? record?.prepParentNotice?.trim()
-          : "";
     const message = record?.[sourceField]?.trim() ?? "";
+    const prepMemo = record?.preparationMemo?.trim() ?? "";
+    const shouldIncludePrepMemo =
+      target === "student" ? Boolean(record?.prepStudentVisible) : Boolean(record?.prepParentVisible);
+    const prepMessage = shouldIncludePrepMemo && prepMemo && !message.includes(prepMemo) ? prepMemo : "";
     const hasSendContent = Boolean(message || prepMessage);
     const channel = target === "student" ? "student_alimtalk" : "parent_alimtalk";
     const statusField = target === "student" ? "studentCommentSendStatus" : "teacherCommentSendStatus";
@@ -3513,6 +3510,33 @@ function LessonJournalDetail({
     { idle: 0, dirty: 0, saving: 0, saved: 0, failed: 0 }
   );
 
+  function openCommentComposer(audience, targetStudent, baseRecord, previousHomework, nextHomework) {
+    const field = audience === "student" ? "studentComment" : "teacherComment";
+    const shouldIncludeMemo = audience === "student"
+      ? Boolean(baseRecord?.prepStudentVisible)
+      : Boolean(baseRecord?.prepParentVisible);
+    const memo = baseRecord?.preparationMemo?.trim() ?? "";
+    const shouldSeedMemo = shouldIncludeMemo && memo && !baseRecord?.[field]?.trim();
+    const nextRecord = shouldSeedMemo ? { ...baseRecord, [field]: memo } : baseRecord;
+
+    if (shouldSeedMemo) {
+      onChangeRecord(lesson, targetStudent, field, memo);
+    }
+
+    setCommentModal({ audience, nextHomework, previousHomework, record: nextRecord, student: targetStudent });
+  }
+
+  function getCommentModalRecord() {
+    if (!commentModal) return null;
+    const latestRecord = records.find((item) => item.studentId === commentModal.student.studentId) ?? commentModal.record;
+    const field = commentModal.audience === "student" ? "studentComment" : "teacherComment";
+
+    return {
+      ...(latestRecord ?? {}),
+      [field]: latestRecord?.[field]?.trim() ? latestRecord[field] : commentModal.record?.[field] ?? latestRecord?.[field] ?? ""
+    };
+  }
+
   return (
     <section className="lessonJournalPage">
       <header className="pageTop lessonJournalHeader">
@@ -3560,7 +3584,7 @@ function LessonJournalDetail({
         <div className="journalTable">
           <div className="journalRow journalHead">
             <span>학생</span>
-            <span>수업준비</span>
+            <span>수업메모</span>
             <span>강의 교재</span>
             <span>강의 내용</span>
             <span>출결</span>
@@ -3597,15 +3621,17 @@ function LessonJournalDetail({
                 </span>
                 <div className="journalPrepCell">
                   <button
-                    className={record.preparationMemo || record.prepStudentNotice || record.prepParentNotice ? "prepMemoButton filled" : "prepMemoButton"}
+                    className={record.preparationMemo || record.prepStudentVisible || record.prepParentVisible ? "prepMemoButton filled" : "prepMemoButton"}
                     onClick={() => setPrepMemoModal({ nextHomework, previousHomework, record, student })}
                     type="button"
                   >
-                    준비 메모
+                    수업메모
                   </button>
                   <small>
-                    {record.prepStudentNotice ? "학생 표시" : "학생 미작성"}
-                    {record.prepParentVisible ? " · 학부모 공개" : ""}
+                    {[
+                      record.prepStudentVisible ? "학생 알림톡 포함" : "",
+                      record.prepParentVisible ? "학부모 알림톡 포함" : ""
+                    ].filter(Boolean).join(" · ") || "알림톡 미포함"}
                   </small>
                 </div>
                 <textarea
@@ -3652,7 +3678,7 @@ function LessonJournalDetail({
                 <div className="journalCommentCell">
                   <button
                     className={record.teacherComment ? "commentOpenButton filled" : "commentOpenButton"}
-                    onClick={() => setCommentModal({ audience: "parent", nextHomework, previousHomework, record, student })}
+                    onClick={() => openCommentComposer("parent", student, record, previousHomework, nextHomework)}
                     type="button"
                   >
                     학부모 알림톡
@@ -3662,7 +3688,7 @@ function LessonJournalDetail({
                 <div className="journalCommentCell">
                   <button
                     className={record.studentComment ? "commentOpenButton filled" : "commentOpenButton"}
-                    onClick={() => setCommentModal({ audience: "student", nextHomework, previousHomework, record, student })}
+                    onClick={() => openCommentComposer("student", student, record, previousHomework, nextHomework)}
                     type="button"
                   >
                     학생 알림톡
@@ -3697,7 +3723,7 @@ function LessonJournalDetail({
           onClose={() => setCommentModal(null)}
           onPolishComment={onPolishComment}
           onSendComment={onSendComment}
-          record={records.find((item) => item.studentId === commentModal.student.studentId) ?? commentModal.record}
+          record={getCommentModalRecord()}
           nextHomework={commentModal.nextHomework}
           previousHomework={commentModal.previousHomework}
           student={commentModal.student}
@@ -3706,14 +3732,9 @@ function LessonJournalDetail({
 
       {prepMemoModal ? (
         <PreparationMemoModal
-          aiModel={commentAiModel}
-          aiProvider={commentAiProvider}
           lesson={lesson}
-          nextHomework={prepMemoModal.nextHomework}
           onChangeRecord={onChangeRecord}
           onClose={() => setPrepMemoModal(null)}
-          onPolishPreparationNotice={onPolishPreparationNotice}
-          previousHomework={prepMemoModal.previousHomework}
           record={records.find((item) => item.studentId === prepMemoModal.student.studentId) ?? prepMemoModal.record}
           student={prepMemoModal.student}
         />
@@ -3761,43 +3782,15 @@ function CommentOpenCell({ aiStatus, comment, label, onOpen, sendStatus }) {
   );
 }
 
-function PreparationMemoModal({
-  aiModel,
-  aiProvider,
-  lesson,
-  nextHomework,
-  onChangeRecord,
-  onClose,
-  onPolishPreparationNotice,
-  previousHomework,
-  record,
-  student
-}) {
-  const studentLines = buildCommentPreviewLines({
-    audience: "student",
-    comment: record?.studentComment ?? "",
-    nextHomework,
-    previousHomework,
-    record,
-    student
-  });
-  const parentLines = buildCommentPreviewLines({
-    audience: "parent",
-    comment: record?.teacherComment ?? "",
-    nextHomework,
-    previousHomework,
-    record,
-    student
-  });
-
+function PreparationMemoModal({ lesson, onChangeRecord, onClose, record, student }) {
   return (
     <Modal
       className="preparationMemoModal"
-      title={`${student.name} 수업준비메모`}
+      title={`${student.name} 수업메모`}
       subtitle={`${lesson.date} · ${lesson.className}`}
       onClose={onClose}
     >
-      <div className="prepMemoGrid">
+      <div className="prepMemoSingle">
         <section className="prepMemoDraft">
           <label>
             강사용 메모
@@ -3807,69 +3800,27 @@ function PreparationMemoModal({
               placeholder="다음 시간에 꼭 기억해야 할 내용, 질문, 자료, 보충 포인트를 적어주세요."
             />
           </label>
-          <label>
-            학생 알림문구
-            <textarea
-              value={record?.prepStudentNotice ?? ""}
-              onChange={(event) => onChangeRecord(lesson, student, "prepStudentNotice", event.target.value)}
-              placeholder="학생 화면과 학생 알림톡에 표시될 문구입니다."
-            />
-          </label>
-          <div className="prepMemoActions">
-            <button
-              className="softButton"
-              disabled={record?.prepStudentAiStatus === "AI 정제 중"}
-              onClick={() => onPolishPreparationNotice(lesson, student, record, "student", aiProvider, aiModel)}
-              type="button"
-            >
-              {record?.prepStudentAiStatus === "AI 정제 중" ? "학생 문구 정제 중..." : "학생 문구 AI 정제"}
-            </button>
-            <small>{record?.prepStudentAiStatus || "AI 대기"}</small>
-          </div>
-          <label className="checkboxLine">
-            <input
-              checked={Boolean(record?.prepParentVisible)}
-              onChange={(event) => onChangeRecord(lesson, student, "prepParentVisible", event.target.checked)}
-              type="checkbox"
-            />
-            학부모 화면과 학부모 알림톡에도 공개
-          </label>
-          <label>
-            학부모 공개 문구
-            <textarea
-              disabled={!record?.prepParentVisible}
-              value={record?.prepParentNotice ?? ""}
-              onChange={(event) => onChangeRecord(lesson, student, "prepParentNotice", event.target.value)}
-              placeholder="학부모님께 공개할 때만 작성합니다."
-            />
-          </label>
-          <div className="prepMemoActions">
-            <button
-              className="softButton"
-              disabled={!record?.prepParentVisible || record?.prepParentAiStatus === "AI 정제 중"}
-              onClick={() => onPolishPreparationNotice(lesson, student, record, "parent", aiProvider, aiModel)}
-              type="button"
-            >
-              {record?.prepParentAiStatus === "AI 정제 중" ? "학부모 문구 정제 중..." : "학부모 문구 AI 정제"}
-            </button>
-            <small>{record?.prepParentAiStatus || "AI 대기"}</small>
-          </div>
-        </section>
-
-        <section className="prepMemoPreview">
-          <div>
-            <p className="eyebrow">STUDENT</p>
-            <h3>학생 화면/알림톡 미리보기</h3>
-            <div className="messageBubble compact">
-              {studentLines.length ? studentLines.map((line) => <p key={`student_${line}`}>{line}</p>) : <p className="placeholderText">학생 알림문구가 여기에 표시됩니다.</p>}
-            </div>
-          </div>
-          <div>
-            <p className="eyebrow">PARENT</p>
-            <h3>학부모 화면/알림톡 미리보기</h3>
-            <div className="messageBubble compact">
-              {parentLines.length ? parentLines.map((line) => <p key={`parent_${line}`}>{line}</p>) : <p className="placeholderText">학부모 공개를 켜면 여기에 표시됩니다.</p>}
-            </div>
+          <div className="prepMemoIncludeBox">
+            <strong>알림톡 포함 여부</strong>
+            <label className="checkboxLine">
+              <input
+                checked={Boolean(record?.prepStudentVisible)}
+                onChange={(event) => onChangeRecord(lesson, student, "prepStudentVisible", event.target.checked)}
+                type="checkbox"
+              />
+              학생 알림톡에 포함
+            </label>
+            <label className="checkboxLine">
+              <input
+                checked={Boolean(record?.prepParentVisible)}
+                onChange={(event) => onChangeRecord(lesson, student, "prepParentVisible", event.target.checked)}
+                type="checkbox"
+              />
+              학부모 알림톡에 포함
+            </label>
+            <p className="muted">
+              체크한 대상의 알림톡 작성 화면을 열면 강사용 메모가 직접 작성 칸에 그대로 들어갑니다. AI 수정은 알림톡 작성 화면에서 수신인에 맞게 실행합니다.
+            </p>
           </div>
         </section>
       </div>
@@ -10042,6 +9993,11 @@ function createEmptyRecord(lesson, student) {
     homeworkStatus: "not_started",
     lessonMaterial: "",
     lessonProgress: "",
+    preparationMemo: "",
+    prepStudentVisible: false,
+    prepParentVisible: false,
+    prepStudentNotice: "",
+    prepParentNotice: "",
     teacherComment: "",
     studentComment: "",
     assignmentStatus: "",

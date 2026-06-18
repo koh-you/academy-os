@@ -3628,13 +3628,18 @@ textarea {
 }
 
 .modalCard.preparationMemoModal {
-  max-width: 1180px;
+  max-width: 860px;
 }
 
 .prepMemoGrid {
   display: grid;
-  gap: 20px;
-  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.9fr);
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.prepMemoSingle {
+  display: grid;
+  gap: 16px;
 }
 
 .prepMemoDraft,
@@ -3665,6 +3670,20 @@ textarea {
 .prepMemoActions small {
   color: #64748b;
   font-weight: 800;
+}
+
+.prepMemoIncludeBox {
+  background: #f8fafc;
+  border: 1px solid #dbe5f6;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.prepMemoIncludeBox strong {
+  color: #0f172a;
+  font-size: 16px;
 }
 
 .checkboxLine {
