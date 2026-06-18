@@ -4762,6 +4762,11 @@ textarea.profileEditInput {
   color: #64748b;
 }
 
+.taskCard small.taskLinkedLesson {
+  color: #2563eb;
+  font-weight: 800;
+}
+
 .statusBlue,
 .statusRed {
   border-radius: 999px;

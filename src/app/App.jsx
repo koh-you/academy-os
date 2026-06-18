@@ -1781,9 +1781,9 @@ export function App() {
             records={records}
             students={students}
             tasks={makeupTasks}
-            onAssignHomework={handleAssignHomeworkFromTask}
             onCreateTask={handleCreateMakeupTask}
             onLogNotification={handleLogNotification}
+            onScheduleTask={handleScheduleSupplementTask}
             onUpdateTask={handleUpdateMakeupTask}
           />
         ) : null}
@@ -2545,6 +2545,51 @@ export function App() {
           : item
       )
     );
+  }
+
+  function handleScheduleSupplementTask(task) {
+    const student = students.find((item) => item.studentId === task.studentId);
+    if (!student || !task.scheduledDate || !task.scheduledTime) return;
+
+    const lessonId = task.linkedLessonId || createSupplementLessonId(task);
+    const className = createSupplementLessonName(task, student);
+    const lesson = {
+      lessonId,
+      classTemplateId: "supplement",
+      className,
+      lessonType: "makeup",
+      date: task.scheduledDate,
+      dayOfWeek: getDayKey(task.scheduledDate),
+      startTime: task.scheduledTime,
+      endTime: addMinutesToTime(task.scheduledTime, 60),
+      color: task.taskType === "retest" ? "#ef4444" : "#7c3aed",
+      teacherId: "instructor_owner_001",
+      studentIds: [student.studentId],
+      status: "scheduled",
+      lessonTopic: `${followUpTypeLabel(task.taskType)} 일정`,
+      sourceMakeupTaskId: task.makeupTaskId,
+      sourceLabel: task.sourceLabel
+    };
+
+    setLessons((current) => upsertById(current, lesson, "lessonId"));
+    setMakeupTasks((current) =>
+      current.map((item) =>
+        item.makeupTaskId === task.makeupTaskId
+          ? {
+              ...item,
+              status: "scheduled",
+              linkedLessonId: lessonId,
+              linkedLessonDate: lesson.date,
+              linkedLessonTime: lesson.startTime,
+              lastScheduledAt: new Date().toISOString()
+            }
+          : item
+      )
+    );
+    setSelectedDate(lesson.date);
+    setSelectedLessonId(lesson.lessonId);
+    setIsLessonJournalOpen(false);
+    postJson("/api/lessons", { lesson }).catch((error) => console.error(error));
   }
 
   function handleUpdateMakeupTask(taskId, field, value) {
@@ -7430,9 +7475,9 @@ function SupplementCenter({
   records,
   students,
   tasks,
-  onAssignHomework,
   onCreateTask,
   onLogNotification,
+  onScheduleTask,
   onUpdateTask
 }) {
   const [selectedSupplementStudentId, setSelectedSupplementStudentId] = useState("");
@@ -7584,9 +7629,9 @@ function SupplementCenter({
 
       {selectedSupplementStudent ? (
         <SupplementStudentModal
-          onAssignHomework={onAssignHomework}
           onClose={() => setSelectedSupplementStudentId("")}
           onLogNotification={onLogNotification}
+          onScheduleTask={onScheduleTask}
           onUpdateTask={onUpdateTask}
           student={selectedSupplementStudent}
           tasks={selectedSupplementTasks}
@@ -7597,9 +7642,9 @@ function SupplementCenter({
 }
 
 function SupplementStudentModal({
-  onAssignHomework,
   onClose,
   onLogNotification,
+  onScheduleTask,
   onUpdateTask,
   student,
   tasks
@@ -7636,6 +7681,11 @@ function SupplementStudentModal({
                       <p>{task.sourceLabel}</p>
                       <small>{task.reason} · 배정 {task.attemptCount ?? 0}회</small>
                       {task.lastHomeworkId ? <small>최근 보충 숙제: {task.lastHomeworkId}</small> : null}
+                      {task.linkedLessonId ? (
+                        <small className="taskLinkedLesson">
+                          수업일지 반영됨 · {task.linkedLessonDate} {task.linkedLessonTime}
+                        </small>
+                      ) : null}
                     </div>
                     <select value={task.status} onChange={(event) => onUpdateTask(task.makeupTaskId, "status", event.target.value)}>
                       <option value="draft">초안</option>
@@ -7664,8 +7714,14 @@ function SupplementStudentModal({
                     <button className="softButton" onClick={() => onUpdateTask(task.makeupTaskId, "notificationDraft", draft)} type="button">
                       문구 생성
                     </button>
-                    <button className="softButton" onClick={() => onAssignHomework(task)} type="button">
-                      숙제 내기
+                    <button
+                      className="softButton"
+                      disabled={!task.scheduledDate || !task.scheduledTime}
+                      onClick={() => onScheduleTask(task)}
+                      title={!task.scheduledDate || !task.scheduledTime ? "배정일과 시간을 먼저 입력하세요." : "수업일지 캘린더에 반영합니다."}
+                      type="button"
+                    >
+                      일정 확정
                     </button>
                     <button className="primaryButton" onClick={() => onLogNotification({ ...task, notificationDraft: task.notificationDraft || draft })} type="button">
                       모의 로그
@@ -8964,6 +9020,21 @@ function createPreviousHomeworksFromPriorLesson(homeworks, lessons, lesson) {
 
 function createLessonId(date, name) {
   return `lesson_${date}_${name.replaceAll(" ", "-").replaceAll("/", "-")}_${Date.now()}`;
+}
+
+function createSupplementLessonId(task) {
+  return `lesson_supplement_${task.makeupTaskId}`;
+}
+
+function createSupplementLessonName(task, student) {
+  return `${followUpTypeLabel(task.taskType)} · ${student.name}`;
+}
+
+function addMinutesToTime(time, minutes) {
+  const [hour = "0", minute = "0"] = String(time || "00:00").split(":");
+  const base = new Date(`2026-01-01T${hour.padStart(2, "0")}:${minute.padStart(2, "0")}:00+09:00`);
+  base.setMinutes(base.getMinutes() + minutes);
+  return `${String(base.getHours()).padStart(2, "0")}:${String(base.getMinutes()).padStart(2, "0")}`;
 }
 
 function getDayKey(date) {
