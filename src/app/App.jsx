@@ -960,6 +960,11 @@ export function App() {
     };
     setLessonUndoStack((current) => [{ type: "create", lesson: pastedLesson }, ...current].slice(0, 20));
     setLessons((current) => [...current, pastedLesson]);
+    const linkedPreviousHomeworks = createPreviousHomeworksFromPriorLesson(homeworks, lessons, pastedLesson);
+    if (linkedPreviousHomeworks.length > 0) {
+      setHomeworks((current) => [...linkedPreviousHomeworks, ...current]);
+      postJson("/api/homeworks/bulk", { homeworks: linkedPreviousHomeworks }).catch((error) => console.error(error));
+    }
     setSelectedLessonId(pastedLesson.lessonId);
     postJson("/api/lessons", { lesson: pastedLesson }).catch((error) => console.error(error));
   }
@@ -1213,9 +1218,39 @@ export function App() {
         dueDate: existing?.dueDate ?? ""
       };
 
-      return existing
+      const updatedHomeworks = existing
         ? current.map((homework) => (homework.homeworkId === existing.homeworkId ? nextHomework : homework))
         : [nextHomework, ...current];
+
+      if (homeworkType !== "next") {
+        postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
+        return updatedHomeworks;
+      }
+
+      const linkedPreviousHomework = createLinkedPreviousHomework(
+        updatedHomeworks,
+        lessons,
+        lesson,
+        student,
+        nextHomework
+      );
+
+      if (!linkedPreviousHomework) {
+        postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
+        return updatedHomeworks;
+      }
+
+      const withLinkedPrevious = updatedHomeworks.some((homework) => homework.homeworkId === linkedPreviousHomework.homeworkId)
+        ? updatedHomeworks.map((homework) =>
+            homework.homeworkId === linkedPreviousHomework.homeworkId ? linkedPreviousHomework : homework
+          )
+        : [linkedPreviousHomework, ...updatedHomeworks];
+
+      postJson("/api/homeworks/bulk", { homeworks: [nextHomework, linkedPreviousHomework] }).catch((error) =>
+        console.error(error)
+      );
+
+      return withLinkedPrevious;
     });
   }
 
@@ -8166,6 +8201,112 @@ function formatMonthTitle(dateString) {
 
 function sortByTime(a, b) {
   return a.startTime.localeCompare(b.startTime);
+}
+
+function getLessonSortValue(lesson) {
+  return `${lesson.date ?? ""}T${lesson.startTime || "00:00"}`;
+}
+
+function isSameLessonGroup(lesson, candidate) {
+  if (lesson.classTemplateId && candidate.classTemplateId) {
+    return lesson.classTemplateId === candidate.classTemplateId;
+  }
+  return lesson.className === candidate.className;
+}
+
+function findNextLessonForStudent(lessons, lesson, studentId) {
+  const currentSortValue = getLessonSortValue(lesson);
+  return [...lessons]
+    .filter((candidate) => candidate.lessonId !== lesson.lessonId)
+    .filter((candidate) => isSameLessonGroup(lesson, candidate))
+    .filter((candidate) => candidate.studentIds?.includes(studentId))
+    .filter((candidate) => getLessonSortValue(candidate) > currentSortValue)
+    .sort((a, b) => getLessonSortValue(a).localeCompare(getLessonSortValue(b)))[0];
+}
+
+function findPreviousLessonForStudent(lessons, lesson, studentId) {
+  const currentSortValue = getLessonSortValue(lesson);
+  return [...lessons]
+    .filter((candidate) => candidate.lessonId !== lesson.lessonId)
+    .filter((candidate) => isSameLessonGroup(lesson, candidate))
+    .filter((candidate) => candidate.studentIds?.includes(studentId))
+    .filter((candidate) => getLessonSortValue(candidate) < currentSortValue)
+    .sort((a, b) => getLessonSortValue(b).localeCompare(getLessonSortValue(a)))[0];
+}
+
+function createLinkedPreviousHomework(homeworks, lessons, lesson, student, sourceHomework) {
+  const nextLesson = findNextLessonForStudent(lessons, lesson, student.studentId);
+  if (!nextLesson) return null;
+
+  const existing = homeworks.find(
+    (homework) =>
+      homework.lessonId === nextLesson.lessonId &&
+      homework.studentId === student.studentId &&
+      homework.homeworkType === "previous"
+  );
+  const title = sourceHomework.title ?? "";
+
+  if (!title.trim() && !existing) return null;
+
+  return {
+    ...(existing ?? {}),
+    homeworkId: existing?.homeworkId ?? `homework_previous_${nextLesson.date}_${student.studentId}`,
+    lessonId: nextLesson.lessonId,
+    studentId: student.studentId,
+    title,
+    subject: existing?.subject ?? sourceHomework.subject ?? "노션 수업 DB",
+    homeworkType: "previous",
+    totalProblems: existing?.totalProblems ?? sourceHomework.totalProblems ?? null,
+    status: existing?.status ?? "verified",
+    studentStatus: existing?.studentStatus ?? "not_started",
+    teacherStatus: existing?.teacherStatus ?? "unverified",
+    assignedDate: lesson.date,
+    dueDate: existing?.dueDate ?? nextLesson.date,
+    linkedFromLessonId: lesson.lessonId,
+    linkedFromDate: lesson.date
+  };
+}
+
+function createPreviousHomeworksFromPriorLesson(homeworks, lessons, lesson) {
+  return (lesson.studentIds ?? [])
+    .map((studentId) => {
+      const previousLesson = findPreviousLessonForStudent(lessons, lesson, studentId);
+      if (!previousLesson) return null;
+
+      const sourceHomework = homeworks.find(
+        (homework) =>
+          homework.lessonId === previousLesson.lessonId &&
+          homework.studentId === studentId &&
+          homework.homeworkType === "next"
+      );
+      if (!sourceHomework?.title?.trim()) return null;
+
+      const existing = homeworks.find(
+        (homework) =>
+          homework.lessonId === lesson.lessonId &&
+          homework.studentId === studentId &&
+          homework.homeworkType === "previous"
+      );
+
+      return {
+        ...(existing ?? {}),
+        homeworkId: existing?.homeworkId ?? `homework_previous_${lesson.date}_${studentId}`,
+        lessonId: lesson.lessonId,
+        studentId,
+        title: sourceHomework.title,
+        subject: existing?.subject ?? sourceHomework.subject ?? "노션 수업 DB",
+        homeworkType: "previous",
+        totalProblems: existing?.totalProblems ?? sourceHomework.totalProblems ?? null,
+        status: existing?.status ?? "verified",
+        studentStatus: existing?.studentStatus ?? "not_started",
+        teacherStatus: existing?.teacherStatus ?? "unverified",
+        assignedDate: previousLesson.date,
+        dueDate: existing?.dueDate ?? lesson.date,
+        linkedFromLessonId: previousLesson.lessonId,
+        linkedFromDate: previousLesson.date
+      };
+    })
+    .filter(Boolean);
 }
 
 function createLessonId(date, name) {
