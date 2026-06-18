@@ -2201,6 +2201,12 @@ button:disabled {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.templateTestGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .integrationStatusGrid article {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
@@ -2210,10 +2216,31 @@ button:disabled {
   padding: 14px;
 }
 
+.templateTestGrid article {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
 .integrationStatusGrid strong {
   color: #071226;
   font-size: 15px;
   font-weight: 900;
+}
+
+.templateTestGrid strong {
+  color: #071226;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.templateTestGrid p {
+  color: #64748b;
+  line-height: 1.45;
+  margin: 0;
 }
 
 .integrationStatusGrid span {
@@ -5789,6 +5816,7 @@ textarea.profileEditInput {
   .miniMetricGrid,
   .notificationStatsGrid,
   .integrationStatusGrid,
+  .templateTestGrid,
   .reportDataSummaryGrid,
   .researchMetricGrid,
   .researchLayout,

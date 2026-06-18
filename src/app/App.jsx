@@ -2554,6 +2554,8 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
   const [dispatchMessage, setDispatchMessage] = useState("");
   const [isDispatching, setIsDispatching] = useState(false);
   const [isCheckingReadiness, setIsCheckingReadiness] = useState(false);
+  const [testSendResult, setTestSendResult] = useState("");
+  const [testingTemplate, setTestingTemplate] = useState("");
   const notificationStatus = integrationStatus?.notifications;
   const safetyTone = getAlimtalkSafetyTone(notificationStatus, false);
   const safetyText = getAlimtalkSafetyText(notificationStatus, false);
@@ -2607,6 +2609,43 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
       setDispatchMessage(`누락 점검 실패: ${error.message}`);
     } finally {
       setIsCheckingReadiness(false);
+    }
+  }
+
+  async function handleTemplateTest(testType) {
+    setTestingTemplate(testType);
+    setTestSendResult("");
+    const todayKey = getKoreaDateString(new Date());
+    const basePayload = {
+      academyName: academyBrandName,
+      assignmentStatus: "complete_thorough",
+      attendanceStatus: "present",
+      checkedAt: "19:00",
+      forceDryRun: Boolean(notificationStatus?.dryRun),
+      lessonContent: "개별 진도 점검",
+      lessonDate: todayKey,
+      lessonMaterial: "공통수학1",
+      lessonName: "월수금 7-10반",
+      message: "오늘 수업에서 확인한 내용을 바탕으로 다음 과제를 안내드립니다.",
+      nextHomework: "쎈 - 경우의 수",
+      parentPhone: notificationStatus?.testRecipient,
+      previousHomework: "rpm 순열과 조합",
+      studentName: "테스트학생",
+      studentPhone: notificationStatus?.testRecipient,
+      target: testType === "student" ? "student" : "parent"
+    };
+    const endpoint =
+      testType === "attendance"
+        ? "/api/notifications/attendance-alimtalk"
+        : "/api/notifications/comment-alimtalk";
+    try {
+      const result = await postJson(endpoint, basePayload);
+      const modeText = result.result?.dryRun ? "테스트 기록 완료 · 실제 발송 없음" : "테스트 번호로 발송 요청 완료";
+      setTestSendResult(`${getNotificationJobLabel(testType === "attendance" ? "attendance" : testType === "student" ? "student_comment" : "parent_comment")}: ${modeText}`);
+    } catch (error) {
+      setTestSendResult(`테스트 실패: ${error.message}`);
+    } finally {
+      setTestingTemplate("");
     }
   }
 
@@ -2698,6 +2737,40 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
         {notificationStatus?.missing?.length ? (
           <p className="inlineNotice danger">미입력 환경변수: {notificationStatus.missing.join(", ")}</p>
         ) : null}
+      </section>
+
+      <section className="notificationPanel templateTestPanel">
+        <div className="sectionHeader slim">
+          <div>
+            <p className="eyebrow">TEMPLATE TEST</p>
+            <h2>알림톡 템플릿 테스트</h2>
+          </div>
+          <span className="countBadge">{notificationStatus?.dryRun ? "실제 발송 없음" : "테스트 번호 발송"}</span>
+        </div>
+        <div className="templateTestGrid">
+          <article>
+            <strong>출결 알림톡</strong>
+            <p>등원/출석 안내 템플릿을 점검합니다.</p>
+            <button className="softButton" disabled={testingTemplate === "attendance"} onClick={() => handleTemplateTest("attendance")} type="button">
+              {testingTemplate === "attendance" ? "테스트 중" : "출결 테스트"}
+            </button>
+          </article>
+          <article>
+            <strong>학부모 알림톡</strong>
+            <p>강의 교재, 강의 내용, 과제 상태, 코멘트 구조를 점검합니다.</p>
+            <button className="softButton" disabled={testingTemplate === "parent"} onClick={() => handleTemplateTest("parent")} type="button">
+              {testingTemplate === "parent" ? "테스트 중" : "학부모 테스트"}
+            </button>
+          </article>
+          <article>
+            <strong>학생 알림톡</strong>
+            <p>학생에게 보낼 안내문과 다음 과제 문구를 점검합니다.</p>
+            <button className="softButton" disabled={testingTemplate === "student"} onClick={() => handleTemplateTest("student")} type="button">
+              {testingTemplate === "student" ? "테스트 중" : "학생 테스트"}
+            </button>
+          </article>
+        </div>
+        {testSendResult ? <p className="inlineNotice">{testSendResult}</p> : null}
       </section>
 
       <section className="notificationPanel">
