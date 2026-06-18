@@ -5634,11 +5634,56 @@ textarea.profileEditInput {
   font-size: 13px;
   font-weight: 800;
   gap: 6px;
-  min-width: 180px;
+  min-width: 300px;
 }
 
-.taskStatusControl select {
-  min-height: 46px;
+.taskStatusControl > span {
+  color: #52647f;
+}
+
+.taskStepControl,
+.taskChoiceGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.taskStepControl button,
+.taskChoiceGrid button {
+  background: #f8fafc;
+  border: 1px solid #d5e1f3;
+  border-radius: 999px;
+  color: #475569;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  min-height: 36px;
+  padding: 0 13px;
+}
+
+.taskStepControl button.active,
+.taskChoiceGrid button.active {
+  background: #17213d;
+  border-color: #17213d;
+  color: #ffffff;
+}
+
+.taskOptionBlock {
+  color: #17213a;
+  display: grid;
+  font-weight: 900;
+  gap: 8px;
+}
+
+.taskReasonLine {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  color: #9a3412 !important;
+  font-weight: 900;
+  padding: 7px 10px;
+  width: fit-content;
 }
 
 .notificationDraftField {

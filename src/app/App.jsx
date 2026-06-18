@@ -8252,7 +8252,8 @@ function SupplementCenter({
           studentId: homework.studentId,
           sourceId: homework.homeworkId,
           sourceLabel: homework.title,
-          reason: "밀린 숙제"
+          reason: "밀린 숙제",
+          supplementMethod: "next_lesson"
         }
       }))
     },
@@ -8266,14 +8267,16 @@ function SupplementCenter({
         id: record.lessonStudentRecordId,
         studentId: record.studentId,
         title: lessonLabel(record.lessonId),
-        meta: attendanceLabels[record.attendanceStatus],
+        meta: `${attendanceLabels[record.attendanceStatus]} · ${record.attendanceReason || "사유 미입력"}`,
         actionLabel: "보강 생성",
         task: {
           taskType: "absence_makeup",
           studentId: record.studentId,
           sourceId: record.lessonStudentRecordId,
           sourceLabel: lessonLabel(record.lessonId),
-          reason: "결석 보강"
+          reason: "결석 보강",
+          absenceReason: record.attendanceReason || "사유 미입력",
+          supplementMethod: "recorded_lecture"
         }
       }))
     },
@@ -8424,7 +8427,10 @@ function SupplementStudentModal({
                     <div>
                       <strong>{followUpTypeLabel(task.taskType)}</strong>
                       <p>{task.sourceLabel}</p>
-                      <small>{task.reason} · 배정 {task.attemptCount ?? 0}회</small>
+                      <small>{task.reason} · {supplementMethodLabel(task)} · 배정 {task.attemptCount ?? 0}회</small>
+                      {task.taskType === "absence_makeup" ? (
+                        <small className="taskReasonLine">결석사유: {task.absenceReason || "사유 미입력"}</small>
+                      ) : null}
                       {task.lastHomeworkId ? <small>최근 보충 숙제: {task.lastHomeworkId}</small> : null}
                       {task.linkedLessonId ? (
                         <span className="taskLinkedLesson">
@@ -8433,15 +8439,37 @@ function SupplementStudentModal({
                         </span>
                       ) : null}
                     </div>
-                    <label className="taskStatusControl">
-                      일정 상태
-                      <select value={task.status} onChange={(event) => onUpdateTask(task.makeupTaskId, "status", event.target.value)}>
-                        <option value="draft">일정 미확정</option>
-                        <option value="scheduled">일정 확정</option>
-                        <option value="done">보충 완료</option>
-                      </select>
-                    </label>
+                    <div className="taskStatusControl">
+                      <span>진행 상태</span>
+                      <div className="taskStepControl">
+                        {supplementStatusSteps.map((step) => (
+                          <button
+                            className={task.status === step.id ? "active" : ""}
+                            key={step.id}
+                            onClick={() => onUpdateTask(task.makeupTaskId, "status", step.id)}
+                            type="button"
+                          >
+                            {step.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
+                  <label className="taskOptionBlock">
+                    보충 방식
+                    <div className="taskChoiceGrid">
+                      {supplementMethodOptions(task.taskType).map((option) => (
+                        <button
+                          className={(task.supplementMethod || supplementDefaultMethod(task.taskType)) === option.id ? "active" : ""}
+                          key={option.id}
+                          onClick={() => onUpdateTask(task.makeupTaskId, "supplementMethod", option.id)}
+                          type="button"
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </label>
                   <div className="fieldGrid two">
                     <label>
                       배정일
@@ -10140,10 +10168,46 @@ function followUpTypeLabel(taskType) {
   return labels[taskType] ?? "보충관리";
 }
 
+const supplementStatusSteps = [
+  { id: "draft", label: "일정 미확정" },
+  { id: "scheduled", label: "일정 확정" },
+  { id: "done", label: "보충 완료" }
+];
+
+const supplementMethodsByType = {
+  homework_makeup: [
+    { id: "next_lesson", label: "다음시간까지" },
+    { id: "arrival_makeup", label: "등원보충" },
+    { id: "stay_after", label: "남아서 하고 가기" }
+  ],
+  absence_makeup: [
+    { id: "recorded_lecture", label: "녹강보강" },
+    { id: "onsite_makeup", label: "현장보강" }
+  ],
+  retest: [
+    { id: "onsite_retest", label: "현장 재시험" }
+  ]
+};
+
+function supplementMethodOptions(taskType) {
+  return supplementMethodsByType[taskType] ?? [];
+}
+
+function supplementDefaultMethod(taskType) {
+  return supplementMethodOptions(taskType)[0]?.id ?? "";
+}
+
+function supplementMethodLabel(task) {
+  const methodId = task?.supplementMethod || supplementDefaultMethod(task?.taskType);
+  return supplementMethodOptions(task?.taskType).find((option) => option.id === methodId)?.label ?? "방식 미정";
+}
+
 function createNotificationDraft(task, students) {
   const student = students.find((item) => item.studentId === task.studentId);
   const timeText = task.scheduledTime ? ` ${task.scheduledTime}` : "";
-  return `${student?.name ?? "학생"} ${followUpTypeLabel(task.taskType)} 안내입니다. ${task.scheduledDate}${timeText}에 ${task.sourceLabel} 관련 보충을 진행할 예정입니다.`;
+  const methodText = supplementMethodLabel(task);
+  const absenceText = task.taskType === "absence_makeup" && task.absenceReason ? ` 결석사유는 ${task.absenceReason}입니다.` : "";
+  return `${student?.name ?? "학생"} ${followUpTypeLabel(task.taskType)} 안내입니다. ${task.scheduledDate}${timeText}에 ${task.sourceLabel} 관련 보충을 ${methodText} 방식으로 진행할 예정입니다.${absenceText}`;
 }
 
 function getSupplementTaskProgress(task, lessons = []) {
