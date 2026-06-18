@@ -2580,6 +2580,7 @@ export function App() {
               linkedLessonId: lessonId,
               linkedLessonDate: lesson.date,
               linkedLessonTime: lesson.startTime,
+              needsLessonResync: false,
               lastScheduledAt: new Date().toISOString()
             }
           : item
@@ -2593,7 +2594,18 @@ export function App() {
 
   function handleUpdateMakeupTask(taskId, field, value) {
     setMakeupTasks((current) =>
-      current.map((task) => (task.makeupTaskId === taskId ? { ...task, [field]: value } : task))
+      current.map((task) => {
+        if (task.makeupTaskId !== taskId) return task;
+        const nextTask = { ...task, [field]: value, updatedAt: new Date().toISOString() };
+        if (
+          task.linkedLessonId &&
+          ((field === "scheduledDate" && value !== task.linkedLessonDate) ||
+            (field === "scheduledTime" && value !== task.linkedLessonTime))
+        ) {
+          nextTask.needsLessonResync = true;
+        }
+        return nextTask;
+      })
     );
   }
 
@@ -7794,9 +7806,18 @@ function SupplementCenter({
     setSelectedSupplementStudentId(task.studentId);
   }
 
+  function findTaskForCandidate(candidateTask) {
+    return tasks.find(
+      (task) =>
+        task.studentId === candidateTask.studentId &&
+        task.sourceId === candidateTask.sourceId &&
+        task.taskType === candidateTask.taskType
+    );
+  }
+
   const selectedSupplementStudent = students.find((student) => student.studentId === selectedSupplementStudentId);
   const selectedSupplementTasks = tasks.filter((task) => task.studentId === selectedSupplementStudentId);
-  const supplementTabs = [
+  const supplementTabDefinitions = [
     {
       id: "homework_makeup",
       title: "숙제보충",
@@ -7861,6 +7882,10 @@ function SupplementCenter({
       }))
     }
   ];
+  const supplementTabs = supplementTabDefinitions.map((tab) => {
+    const items = tab.items.filter((item) => findTaskForCandidate(item.task)?.status !== "done");
+    return { ...tab, count: items.length, items };
+  });
   const activeTabData = supplementTabs.find((tab) => tab.id === activeSupplementTab) ?? supplementTabs[0];
 
   return (
@@ -7900,20 +7925,34 @@ function SupplementCenter({
         {activeTabData.items.length === 0 ? <div className="emptyHomeworkBox">{activeTabData.emptyText}</div> : null}
 
         <div className="supplementItemList">
-          {activeTabData.items.map((item) => (
-            <article className="candidateItem supplementRowItem" key={item.id}>
-              <div>
-                <button className="textLinkButton" onClick={() => setSelectedSupplementStudentId(item.studentId)} type="button">
-                  {studentName(item.studentId)}
+          {activeTabData.items.map((item) => {
+            const existingTask = findTaskForCandidate(item.task);
+            const taskProgress = getSupplementTaskProgress(existingTask, lessons);
+            return (
+              <article className="candidateItem supplementRowItem" key={item.id}>
+                <div>
+                  <button className="textLinkButton" onClick={() => setSelectedSupplementStudentId(item.studentId)} type="button">
+                    {studentName(item.studentId)}
+                  </button>
+                  <span>{item.title}</span>
+                  <small>{item.meta}</small>
+                  {existingTask ? (
+                    <span className={`supplementProgressBadge ${taskProgress.tone}`}>
+                      {taskProgress.label}
+                      {taskProgress.detail ? <b>{taskProgress.detail}</b> : null}
+                    </span>
+                  ) : null}
+                </div>
+                <button
+                  className={existingTask ? "softButton subtle" : "softButton"}
+                  onClick={() => (existingTask ? setSelectedSupplementStudentId(item.studentId) : createSupplementTask(item.task))}
+                  type="button"
+                >
+                  {existingTask ? "일정 관리" : item.actionLabel}
                 </button>
-                <span>{item.title}</span>
-                <small>{item.meta}</small>
-              </div>
-              <button className="softButton" onClick={() => createSupplementTask(item.task)} type="button">
-                {item.actionLabel}
-              </button>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       </section>
 
@@ -9587,6 +9626,31 @@ function createNotificationDraft(task, students) {
   const student = students.find((item) => item.studentId === task.studentId);
   const timeText = task.scheduledTime ? ` ${task.scheduledTime}` : "";
   return `${student?.name ?? "학생"} ${followUpTypeLabel(task.taskType)} 안내입니다. ${task.scheduledDate}${timeText}에 ${task.sourceLabel} 관련 보충을 진행할 예정입니다.`;
+}
+
+function getSupplementTaskProgress(task, lessons = []) {
+  if (!task) return { label: "미생성", tone: "muted", detail: "" };
+  if (task.status === "done") return { label: "보충 완료", tone: "done", detail: "" };
+  if (task.needsLessonResync) {
+    return {
+      label: "수업일지 재반영 필요",
+      tone: "warning",
+      detail: `${task.scheduledDate || "-"} ${task.scheduledTime || ""}`.trim()
+    };
+  }
+  if (task.linkedLessonId) {
+    const linkedLesson = lessons.find((lesson) => lesson.lessonId === task.linkedLessonId);
+    if (linkedLesson?.status === "completed") return { label: "보충 완료", tone: "done", detail: linkedLesson.date };
+    return {
+      label: "수업일지 반영 완료",
+      tone: "linked",
+      detail: `${task.linkedLessonDate || linkedLesson?.date || "-"} ${task.linkedLessonTime || linkedLesson?.startTime || ""}`.trim()
+    };
+  }
+  if (task.scheduledDate && task.scheduledTime) {
+    return { label: "일정 입력됨", tone: "scheduled", detail: `${task.scheduledDate} ${task.scheduledTime}` };
+  }
+  return { label: "일정 미확정", tone: "draft", detail: "" };
 }
 
 function createAttendanceNotificationText(payload) {

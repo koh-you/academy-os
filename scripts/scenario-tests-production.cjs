@@ -55,6 +55,7 @@ check("27 ai variant workspace is two column", css.includes(".aiVariantWorkspace
 check("28 ai variant hwpx export modal exists", hasAll(app, ["HWPX 시험지 내보내기", "handleDownloadHwpx", ".hwpx"]));
 check("29 ai variant selected export flow exists", hasAll(app, ["selectedVariantIds", "selectedVariantCount", "HWPX 내보내기"]));
 check("30 homework status metric cards are clickable", hasAll(app, ["activeMetric", "handleMetricClick", "metricButton"]));
+check("31 supplement task progress is visible", hasAll(app, ["getSupplementTaskProgress", "needsLessonResync", "supplementProgressBadge"]));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));

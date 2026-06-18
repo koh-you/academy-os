@@ -5202,6 +5202,54 @@ textarea.profileEditInput {
   padding: 0 14px;
 }
 
+.softButton.subtle {
+  background: #ffffff;
+  color: #334155;
+}
+
+.supplementProgressBadge {
+  align-items: center;
+  border-radius: 8px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 6px;
+  padding: 6px 9px;
+  width: fit-content;
+}
+
+.supplementProgressBadge b {
+  color: inherit;
+  font-size: 12px;
+  opacity: 0.78;
+}
+
+.supplementProgressBadge.draft {
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.supplementProgressBadge.scheduled {
+  background: #fefce8;
+  color: #a16207;
+}
+
+.supplementProgressBadge.linked {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.supplementProgressBadge.warning {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.supplementProgressBadge.done {
+  background: #ecfdf5;
+  color: #047857;
+}
+
 .studentHomeworkCard.editing {
   gap: 14px;
 }
