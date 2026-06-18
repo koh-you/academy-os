@@ -1524,6 +1524,7 @@ export function App() {
 
         {activeView === "examAnalysis" ? (
           <ExamAnalysisCenter
+            aiSettings={aiSettings}
             analyses={examAnalyses}
             examPrepRows={examPrepRows}
             onAddAnalysis={() =>
@@ -1578,7 +1579,7 @@ export function App() {
         ) : null}
 
         {activeView === "aiVariants" ? (
-          <AIVariantProblemCenter students={students} />
+          <AIVariantProblemCenter aiSettings={aiSettings} students={students} />
         ) : null}
 
         {activeView === "settings" ? (
@@ -1857,11 +1858,16 @@ export function App() {
     });
   }
 
-  async function handleRunExamAnalysis(analysis) {
+  async function handleRunExamAnalysis(analysis, overrideAiSettings = null) {
+    const nextAnalysis = {
+      ...analysis,
+      aiProvider: overrideAiSettings?.examAnalysisProvider ?? analysis.aiProvider ?? defaultAiSettings.examAnalysisProvider,
+      aiModel: overrideAiSettings?.examAnalysisModel ?? analysis.aiModel ?? defaultAiSettings.examAnalysisModel
+    };
     setExamAnalyses((current) =>
       current.map((item) =>
         item.examAnalysisId === analysis.examAnalysisId
-          ? { ...item, aiStatus: "분석 중", aiError: "" }
+          ? { ...item, aiProvider: nextAnalysis.aiProvider, aiModel: nextAnalysis.aiModel, aiStatus: "분석 중", aiError: "" }
           : item
       )
     );
@@ -1870,7 +1876,7 @@ export function App() {
       const response = await fetch(apiUrl("/api/ai/exam-analysis"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(analysis)
+        body: JSON.stringify(nextAnalysis)
       });
       const result = await response.json();
       if (!response.ok || !result.ok) {
@@ -4496,10 +4502,19 @@ function SettingsCenter({ aiSettings, onUpdateAiSettings }) {
   );
 }
 
-function ExamAnalysisCenter({ analyses, examPrepRows, onAddAnalysis, onRunAnalysis, onUpdateAnalysis }) {
+function ExamAnalysisCenter({
+  aiSettings = defaultAiSettings,
+  analyses,
+  examPrepRows,
+  onAddAnalysis,
+  onRunAnalysis,
+  onUpdateAnalysis
+}) {
   const [selectedAnalysisId, setSelectedAnalysisId] = useState(analyses[0]?.examAnalysisId ?? "");
   const [isListCollapsed, setIsListCollapsed] = useState(false);
   const selectedAnalysis = analyses.find((item) => item.examAnalysisId === selectedAnalysisId) ?? analyses[0];
+  const examAiProvider = aiSettings.examAnalysisProvider ?? defaultAiSettings.examAnalysisProvider;
+  const examAiModel = aiSettings.examAnalysisModel ?? defaultAiSettings.examAnalysisModel;
 
   useEffect(() => {
     if (!selectedAnalysisId && analyses[0]?.examAnalysisId) {
@@ -4510,11 +4525,6 @@ function ExamAnalysisCenter({ analyses, examPrepRows, onAddAnalysis, onRunAnalys
   function update(field, value) {
     if (!selectedAnalysis) return;
     onUpdateAnalysis(selectedAnalysis.examAnalysisId, field, value);
-  }
-
-  function changeProvider(provider) {
-    update("aiProvider", provider);
-    update("aiModel", aiProviderModels[provider]?.[0] ?? "server-default");
   }
 
   return (
@@ -4609,21 +4619,10 @@ function ExamAnalysisCenter({ analyses, examPrepRows, onAddAnalysis, onRunAnalys
                   <input type="date" value={selectedAnalysis.examDate} onChange={(event) => update("examDate", event.target.value)} />
                 </label>
                 <label>
-                  AI API
-                  <select value={selectedAnalysis.aiProvider ?? "auto"} onChange={(event) => changeProvider(event.target.value)}>
-                    <option value="auto">자동 선택</option>
-                    <option value="openai">OpenAI</option>
-                    <option value="anthropic">Claude</option>
-                    <option value="mock">테스트 모드</option>
-                  </select>
-                </label>
-                <label>
-                  모델
-                  <select value={selectedAnalysis.aiModel ?? "server-default"} onChange={(event) => update("aiModel", event.target.value)}>
-                    {(aiProviderModels[selectedAnalysis.aiProvider ?? "auto"] ?? aiProviderModels.auto).map((model) => (
-                      <option key={model} value={model}>{getAiModelLabel(model)}</option>
-                    ))}
-                  </select>
+                  AI 설정
+                  <span className="aiSettingBadge fieldBadge">
+                    {getAiProviderLabel(examAiProvider)} · {getAiModelLabel(examAiModel)}
+                  </span>
                 </label>
                 <label>
                   API 상태
@@ -4680,7 +4679,7 @@ function ExamAnalysisCenter({ analyses, examPrepRows, onAddAnalysis, onRunAnalys
                   <button
                     className="softButton"
                     disabled={selectedAnalysis.aiStatus === "분석 중"}
-                    onClick={() => onRunAnalysis(selectedAnalysis)}
+                    onClick={() => onRunAnalysis(selectedAnalysis, aiSettings)}
                     type="button"
                   >
                     {selectedAnalysis.aiStatus === "분석 중" ? "분석 중..." : "AI 분석 갱신"}
@@ -5340,12 +5339,14 @@ function LessonResearchCenter({ items, onAddItem, onDeleteItem, onUpdateItem }) 
   );
 }
 
-function AIVariantProblemCenter({ students }) {
+function AIVariantProblemCenter({ aiSettings = defaultAiSettings, students }) {
   const [activeTab, setActiveTab] = useState("input");
   const [sourceProblem, setSourceProblem] = useState("");
   const [targetStudentId, setTargetStudentId] = useState(students[0]?.studentId ?? "");
   const [variantLevel, setVariantLevel] = useState("same");
   const selectedStudent = students.find((student) => student.studentId === targetStudentId) ?? students[0];
+  const variantAiProvider = aiSettings.variantProvider ?? defaultAiSettings.variantProvider;
+  const variantAiModel = aiSettings.variantModel ?? defaultAiSettings.variantModel;
   const variantCards = [
     {
       title: "숫자 조건 변형",
@@ -5369,7 +5370,12 @@ function AIVariantProblemCenter({ students }) {
           <h1>AI 변형문항</h1>
           <p className="muted">교재오답과 내신 대비 문항을 바탕으로 변형문항 초안을 만드는 작업대입니다.</p>
         </div>
-        <button className="primaryButton" onClick={() => setActiveTab("drafts")} type="button">초안 보기</button>
+        <div className="aiVariantHeroActions">
+          <span className="aiSettingBadge">
+            {getAiProviderLabel(variantAiProvider)} · {getAiModelLabel(variantAiModel)}
+          </span>
+          <button className="primaryButton" onClick={() => setActiveTab("drafts")} type="button">초안 보기</button>
+        </div>
       </div>
 
       <div className="studentManagerTabs aiTabs">

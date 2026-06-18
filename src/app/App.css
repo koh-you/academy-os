@@ -702,14 +702,24 @@ button {
 }
 
 .aiSettingBadge {
+  align-items: center;
   background: #eef2ff;
   border: 1px solid #dbe4ff;
   border-radius: 999px;
   color: #3730a3;
+  display: inline-flex;
   font-size: 13px;
   font-weight: 900;
+  min-height: 38px;
   padding: 8px 12px;
   white-space: nowrap;
+}
+
+.aiSettingBadge.fieldBadge {
+  border-radius: 8px;
+  justify-content: center;
+  min-height: 46px;
+  width: 100%;
 }
 
 .lessonSaveSummary {
@@ -3307,6 +3317,14 @@ textarea.profileEditInput {
 
 .settingsRow strong {
   font-size: 16px;
+}
+
+.aiVariantHeroActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
 }
 
 .classBoardGrid {
