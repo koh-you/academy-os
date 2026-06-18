@@ -6900,15 +6900,28 @@ function StudentPortal({ homeworks, reportSnapshots, students, onStudentCheckHom
   );
 }
 
-function MetricCard({ hint, icon, label, tone = "default", value }) {
-  return (
-    <div className={`metricCard metric-${tone}`}>
+function MetricCard({ active = false, hint, icon, label, onClick, tone = "default", value }) {
+  const className = `${onClick ? "metricCard metricButton" : "metricCard"} metric-${tone}${active ? " active" : ""}`;
+  const content = (
+    <>
       <div>
         <span>{label}</span>
         <strong>{value}</strong>
         <small>{hint}</small>
       </div>
       <b>{icon}</b>
+    </>
+  );
+  if (onClick) {
+    return (
+      <button className={className} onClick={onClick} type="button">
+        {content}
+      </button>
+    );
+  }
+  return (
+    <div className={className}>
+      {content}
     </div>
   );
 }
@@ -8823,16 +8836,33 @@ function OverdueHomework({ homeworks, students, onTeacherVerifyHomework }) {
     .filter((homework) => homework.title && (isHomeworkOverdue(homework) || (homework.teacherStatus ?? "unverified") !== "verified"))
     .sort((a, b) => String(a.assignedDate ?? "").localeCompare(String(b.assignedDate ?? "")));
   const [gradeFilter, setGradeFilter] = useState("전체");
+  const [activeMetric, setActiveMetric] = useState("all");
   const [selectedStudentId, setSelectedStudentId] = useState(students[0]?.studentId ?? "");
   const filteredStudents =
     gradeFilter === "전체" ? students : students.filter((student) => (student.grade || "미입력") === gradeFilter);
-  const selectedStudent = students.find((student) => student.studentId === selectedStudentId) ?? filteredStudents[0] ?? students[0];
+  const registeredStudentIds = new Set(homeworks.filter((homework) => homework.title).map((homework) => homework.studentId));
+  const todayIncompleteStudentIds = new Set(unresolvedHomeworks.filter((homework) => homework.dueDate === today).map((homework) => homework.studentId));
+  const overdueStudentIds = new Set(unresolvedHomeworks.filter((homework) => isHomeworkOverdue(homework)).map((homework) => homework.studentId));
+  const metricLabels = {
+    all: "전체 학생",
+    overdue: "밀린 학생",
+    registered: "숙제 등록 학생",
+    today: "오늘 미완료"
+  };
+  const visibleStudents = filteredStudents.filter((student) => {
+    if (activeMetric === "registered") return registeredStudentIds.has(student.studentId);
+    if (activeMetric === "today") return todayIncompleteStudentIds.has(student.studentId);
+    if (activeMetric === "overdue") return overdueStudentIds.has(student.studentId);
+    return true;
+  });
+  const selectedStudent =
+    visibleStudents.find((student) => student.studentId === selectedStudentId) ?? visibleStudents[0] ?? null;
   const selectedHomeworks = selectedStudent
     ? unresolvedHomeworks.filter((homework) => homework.studentId === selectedStudent.studentId)
     : [];
-  const registeredStudentCount = students.filter((student) => homeworks.some((homework) => homework.studentId === student.studentId)).length;
-  const todayIncompleteCount = unresolvedHomeworks.filter((homework) => homework.dueDate === today).length;
-  const overdueStudentCount = new Set(unresolvedHomeworks.filter((homework) => isHomeworkOverdue(homework)).map((homework) => homework.studentId)).size;
+  const registeredStudentCount = registeredStudentIds.size;
+  const todayIncompleteCount = todayIncompleteStudentIds.size;
+  const overdueStudentCount = overdueStudentIds.size;
 
   function getStudentHomeworkSummary(student) {
     const studentHomeworks = homeworks.filter((homework) => homework.studentId === student.studentId);
@@ -8848,13 +8878,26 @@ function OverdueHomework({ homeworks, students, onTeacherVerifyHomework }) {
     };
   }
 
+  function handleMetricClick(metric) {
+    setActiveMetric(metric);
+    const nextStudent = filteredStudents.find((student) => {
+      if (metric === "registered") return registeredStudentIds.has(student.studentId);
+      if (metric === "today") return todayIncompleteStudentIds.has(student.studentId);
+      if (metric === "overdue") return overdueStudentIds.has(student.studentId);
+      return true;
+    });
+    if (nextStudent) {
+      setSelectedStudentId(nextStudent.studentId);
+    }
+  }
+
   return (
     <section className="homeworkStatusDashboard">
       <div className="homeworkStatusMetrics">
-        <MetricCard icon="👥" label="전체 학생" value={`${students.length}명`} hint="등록된 학생 수" />
-        <MetricCard icon="📖" label="숙제 등록 학생" value={`${registeredStudentCount}명`} hint="숙제 플래너 등록 기준" />
-        <MetricCard icon="⏰" label="오늘 미완료" value={`${todayIncompleteCount}명`} hint="오늘 할 양 미체크" tone="warning" />
-        <MetricCard icon="⚠️" label="밀린 학생" value={`${overdueStudentCount}명`} hint="클릭해서 목록 보기" tone="warning" />
+        <MetricCard active={activeMetric === "all"} icon="👥" label="전체 학생" value={`${students.length}명`} hint="등록된 학생 수" onClick={() => handleMetricClick("all")} />
+        <MetricCard active={activeMetric === "registered"} icon="📖" label="숙제 등록 학생" value={`${registeredStudentCount}명`} hint="숙제 플래너 등록 기준" onClick={() => handleMetricClick("registered")} />
+        <MetricCard active={activeMetric === "today"} icon="⏰" label="오늘 미완료" value={`${todayIncompleteCount}명`} hint="오늘 할 양 미체크" onClick={() => handleMetricClick("today")} tone="warning" />
+        <MetricCard active={activeMetric === "overdue"} icon="⚠️" label="밀린 학생" value={`${overdueStudentCount}명`} hint="클릭해서 목록 보기" onClick={() => handleMetricClick("overdue")} tone="warning" />
       </div>
 
       <div className="homeworkStatusContent">
@@ -8862,7 +8905,7 @@ function OverdueHomework({ homeworks, students, onTeacherVerifyHomework }) {
           <div className="sectionHeader compact">
             <div>
               <h2>학생별 진행 현황</h2>
-              <p className="muted">학년</p>
+              <p className="muted">{metricLabels[activeMetric]} · 학년</p>
             </div>
           </div>
           <div className="homeworkGradeFilters">
@@ -8878,7 +8921,10 @@ function OverdueHomework({ homeworks, students, onTeacherVerifyHomework }) {
             ))}
           </div>
           <div className="homeworkStudentGrid">
-            {filteredStudents.map((student) => {
+            {visibleStudents.length === 0 ? (
+              <div className="emptyHomeworkBox compact">해당 조건의 학생이 없습니다.</div>
+            ) : null}
+            {visibleStudents.map((student) => {
               const summary = getStudentHomeworkSummary(student);
               const isSelected = selectedStudent?.studentId === student.studentId;
               return (

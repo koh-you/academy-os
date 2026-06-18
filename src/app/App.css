@@ -4428,6 +4428,25 @@ textarea.profileEditInput {
   padding: 26px 30px;
 }
 
+.metricButton {
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+  width: 100%;
+}
+
+.metricButton:hover,
+.metricButton.active {
+  border-color: #2563eb;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.12);
+  transform: translateY(-1px);
+}
+
+.metricButton.active {
+  background: #f8fbff;
+}
+
 .teacherPreviewPortal .metricCard {
   min-height: 150px;
 }
@@ -4508,6 +4527,11 @@ textarea.profileEditInput {
   display: flex;
   justify-content: center;
   min-height: 88px;
+}
+
+.emptyHomeworkBox.compact {
+  grid-column: 1 / -1;
+  min-height: 72px;
 }
 
 .homeworkActionCard {
