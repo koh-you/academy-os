@@ -3430,16 +3430,6 @@ function LessonJournalDetail({
         </label>
       </section>
 
-      <section className="panel commentAiToolbar">
-        <div>
-          <strong>코멘트 AI</strong>
-          <span className="muted">학부모 알림톡과 학생 알림톡 문구를 AI로 다듬습니다.</span>
-        </div>
-        <span className="aiSettingBadge">
-          {getAiProviderLabel(commentAiProvider)} · {getAiModelLabel(commentAiModel)}
-        </span>
-      </section>
-
       <section className="panel lessonSaveSummary" aria-label="수업일지 저장 상태">
         <div>
           <strong>저장 상태</strong>
