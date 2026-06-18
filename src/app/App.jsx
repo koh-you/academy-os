@@ -4670,6 +4670,25 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
   });
   const selectedClass = templates.find((template) => template.classTemplateId === selectedClassTemplateId);
   const reviewModalRow = rows.find((row) => row.examPrepId === reviewModalRowId) ?? null;
+  const examManagementTabs = [
+    {
+      description: "학교, 학년, 교과서, 시험범위와 수학시험일을 관리합니다.",
+      id: "info",
+      label: "시험정보"
+    },
+    {
+      description: "학생 제출 원문을 모으고 AI 총평으로 정리합니다.",
+      id: "tallyAi",
+      label: "탈리"
+    },
+    {
+      description: "외부 기출문제 아카이브를 웹앱 안에서 확인합니다.",
+      id: "pastPapers",
+      label: "기출문제"
+    }
+  ];
+  const activeExamManagementTab =
+    examManagementTabs.find((tab) => tab.id === activeTab) ?? examManagementTabs[0];
 
   function changeExamCycle(examCycle) {
     setSelectedExamCycle(examCycle);
@@ -4696,17 +4715,20 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
         />
       </div>
 
-      <div className="studentManagerTabs examPrepTabs">
-        <button className={activeTab === "info" ? "active" : ""} onClick={() => setActiveTab("info")} type="button">
-          시험정보
-        </button>
-        <button className={activeTab === "tallyAi" ? "active" : ""} onClick={() => setActiveTab("tallyAi")} type="button">
-          Self-check · AI 총평
-        </button>
-        <button className={activeTab === "pastPapers" ? "active" : ""} onClick={() => setActiveTab("pastPapers")} type="button">
-          기출문제
-        </button>
+      <div className="examManagementTabs" aria-label="시험관리 하위 탭">
+        {examManagementTabs.map((tab) => (
+          <button
+            className={activeTab === tab.id ? "active" : ""}
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            type="button"
+          >
+            <strong>{tab.label}</strong>
+            <span>{tab.description}</span>
+          </button>
+        ))}
       </div>
+      <p className="examTabCaption">{activeExamManagementTab.description}</p>
 
       {activeTab !== "pastPapers" ? (
         <div className="classTabList">

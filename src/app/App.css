@@ -1173,9 +1173,50 @@ button {
   -webkit-line-clamp: 2;
 }
 
-.examPrepTabs {
+.examManagementTabs {
+  align-items: stretch;
+  display: grid;
+  gap: 10px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  max-width: 720px;
+  max-width: 920px;
+}
+
+.examManagementTabs button {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+  color: #475569;
+  display: grid;
+  gap: 5px;
+  min-height: 76px;
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.examManagementTabs button.active {
+  background: #17213d;
+  border-color: #17213d;
+  box-shadow: 0 14px 24px rgba(23, 33, 61, 0.16);
+  color: #ffffff;
+}
+
+.examManagementTabs strong {
+  font-size: 17px;
+  font-weight: 950;
+}
+
+.examManagementTabs span {
+  color: inherit;
+  font-size: 13px;
+  line-height: 1.35;
+  opacity: 0.78;
+}
+
+.examTabCaption {
+  color: #64748b;
+  font-size: 14px;
+  margin: -6px 0 2px;
 }
 
 .examCycleBar {
