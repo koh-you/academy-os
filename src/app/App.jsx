@@ -409,6 +409,60 @@ function createDefaultSchoolEvents(rows) {
   return rows.map((row, index) => createSchoolEventFromExamPrepRow(row, index));
 }
 
+function parseDateRangeText(value = "") {
+  const text = String(value).trim();
+  if (!text) return null;
+  const match = text.match(/(\d{4})-(\d{2})-(\d{2})\s*[~\-–]\s*(?:(\d{4})-)?(\d{2})-(\d{2})/);
+  if (!match) return null;
+  const [, startYear, startMonth, startDay, endYear, endMonth, endDay] = match;
+  return {
+    date: `${startYear}-${startMonth}-${startDay}`,
+    endDate: `${endYear || startYear}-${endMonth}-${endDay}`
+  };
+}
+
+function isDateWithinEvent(date, event) {
+  if (!event.endDate) return event.date === date;
+  return event.date <= date && date <= event.endDate;
+}
+
+function buildExamCalendarEvents(rows) {
+  return rows.flatMap((row) => {
+    const base = {
+      schoolName: row.schoolName || "학교 미입력",
+      examSubject: "수학",
+      memo: "시험관리 탭에서 연동된 일정입니다.",
+      derived: true,
+      examPrepId: row.examPrepId
+    };
+    const events = [];
+    const period = parseDateRangeText(row.examPeriod);
+    if (period) {
+      events.push({
+        ...base,
+        eventId: `derived_period_${row.examPrepId}`,
+        date: period.date,
+        endDate: period.endDate,
+        title: `${examCycleLabel(row.examCycle ?? "2026-1-mid")} 시험기간`,
+        type: "examPeriod",
+        color: "#ea580c"
+      });
+    }
+    if (row.mathExamDate) {
+      events.push({
+        ...base,
+        eventId: `derived_math_${row.examPrepId}`,
+        date: row.mathExamDate,
+        endDate: "",
+        title: `${examCycleLabel(row.examCycle ?? "2026-1-mid")} 수학시험`,
+        type: "mathExam",
+        color: "#dc2626"
+      });
+    }
+    return events;
+  });
+}
+
 function mergeById(currentItems, nextItems, idKey) {
   const existingIds = new Set(currentItems.map((item) => item[idKey]));
   return [...currentItems, ...nextItems.filter((item) => !existingIds.has(item[idKey]))];
@@ -1678,17 +1732,6 @@ export function App() {
                 const updatedRows = current.map((row) => (row.examPrepId === examPrepId ? { ...row, [field]: value } : row));
                 return shouldSyncPublisher && updatedExamRow ? syncPublisherAcrossExamTerm(updatedRows, updatedExamRow) : updatedRows;
               });
-              if (updatedExamRow && ["examCycle", "mathExamDate", "schoolName", "subject"].includes(field)) {
-                setSchoolEvents((current) => {
-                  const eventId = `event_exam_${examPrepId}`;
-                  const nextEvent = createSchoolEventFromExamPrepRow(updatedExamRow);
-                  const hasEvent = current.some((event) => event.eventId === eventId);
-                  if (hasEvent) {
-                    return current.map((event) => (event.eventId === eventId ? { ...event, ...nextEvent } : event));
-                  }
-                  return [nextEvent, ...current];
-                });
-              }
             }}
           />
         ) : null}
@@ -5761,25 +5804,13 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
     custom: "일반"
   };
   const eventColorOptions = ["#dc2626", "#2563eb", "#16a34a", "#7c3aed", "#ea580c", "#0891b2", "#17213d"];
-  const examEvents = rows
-    .map((row, index) => ({
-      eventId: `derived_${row.examPrepId}`,
-      date: row.mathExamDate || getDefaultMathExamDate(row, index),
-      endDate: "",
-      schoolName: row.schoolName || "학교 미입력",
-      title: `${examCycleLabel(row.examCycle ?? "2026-1-mid")} 수학시험`,
-      examSubject: "수학",
-      memo: "시험관리 탭에서 연동된 수학시험 일정입니다.",
-      type: "mathExam",
-      color: "#dc2626",
-      derived: true
-    }))
-    .filter((event) => event.date);
-  const academicEvents = [...examEvents, ...events].sort((a, b) => a.date.localeCompare(b.date));
+  const examEvents = buildExamCalendarEvents(rows);
+  const manualEvents = events.filter((event) => !String(event.eventId ?? "").startsWith("event_exam_"));
+  const academicEvents = [...examEvents, ...manualEvents].sort((a, b) => a.date.localeCompare(b.date));
   const filteredEvents = academicEvents.filter(
     (event) => schoolFilter === "전체 학교" || event.schoolName === schoolFilter
   );
-  const selectedDateEvents = filteredEvents.filter((event) => event.date === selectedDate);
+  const selectedDateEvents = filteredEvents.filter((event) => isDateWithinEvent(selectedDate, event));
 
   function shiftMonth(amount) {
     const [year, month] = selectedMonth.split("-").map(Number);
@@ -5913,7 +5944,7 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
               <div className="weekday" key={label}>{label}</div>
             ))}
             {buildMonthDays(selectedMonth).map((day) => {
-              const dayEvents = filteredEvents.filter((event) => event.date === day.date);
+              const dayEvents = filteredEvents.filter((event) => isDateWithinEvent(day.date, event));
               return (
                 <button
                   className={[

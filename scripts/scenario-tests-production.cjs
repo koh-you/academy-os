@@ -63,6 +63,9 @@ check("36 ai setting badges are hidden from work screens", !hasAll(app, ["aiVari
 
 check("37 exam publisher syncs across same term", hasAll(app, ["examCycleTermKey", "examPublisherLinkKey", "findLinkedPublisher", "syncPublisherAcrossExamTerm"]));
 
+check("38 school calendar derives exam period ranges", hasAll(app, ["parseDateRangeText", "buildExamCalendarEvents", "derived_period_", "isDateWithinEvent"]));
+check("39 school calendar avoids legacy exam duplicates", hasAll(app, ["manualEvents", 'startsWith("event_exam_")']));
+
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));
 
