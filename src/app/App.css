@@ -4096,7 +4096,7 @@ textarea.profileEditInput {
 .aiVariantWorkspace {
   display: grid;
   gap: 18px;
-  grid-template-columns: minmax(420px, 0.85fr) minmax(520px, 1.15fr);
+  grid-template-columns: minmax(640px, 1fr) minmax(480px, 0.9fr);
 }
 
 .aiVariantWorkbench,
@@ -4114,6 +4114,34 @@ textarea.profileEditInput {
 .aiToolCard h2,
 .aiToolCard h3 {
   margin: 0;
+}
+
+.aiVariantInputCard {
+  gap: 16px;
+}
+
+.aiToolCardTitle {
+  align-items: start;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.aiToolCardTitle .muted {
+  margin-top: 6px;
+}
+
+.aiVariantTopGrid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(280px, 1fr) minmax(280px, 0.95fr);
+}
+
+.aiVariantInputColumn,
+.aiVariantOptionColumn {
+  align-content: start;
+  display: grid;
+  gap: 14px;
 }
 
 .aiToolSectionHeader {
@@ -4151,6 +4179,11 @@ textarea.profileEditInput {
   text-align: center;
 }
 
+.aiUploadBox.compact {
+  min-height: 74px;
+  padding: 12px;
+}
+
 .aiUploadBox span {
   color: #64748b;
   font-size: 13px;
@@ -4165,6 +4198,11 @@ textarea.profileEditInput {
   padding: 14px;
 }
 
+.variantOptionGroup.compact {
+  gap: 8px;
+  padding: 12px;
+}
+
 .variantCountGrid,
 .variantSelectGrid {
   display: grid;
@@ -4177,6 +4215,14 @@ textarea.profileEditInput {
 
 .variantSelectGrid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.variantSelectGrid.compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.variantCountGrid.compact {
+  gap: 8px;
 }
 
 .variantCountGrid label,

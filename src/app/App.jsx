@@ -6144,103 +6144,104 @@ function AIVariantProblemCenter({ aiSettings = defaultAiSettings }) {
       {activeTab === "variant" ? (
         <section className="aiVariantWorkspace">
           <div className="aiVariantWorkbench">
-            <section className="panel aiToolCard aiToolCardHeader">
-              <div>
-                <h2>변형 문제 생성</h2>
-                <p className="muted">PDF, 이미지, 텍스트로 받은 원본 문항을 바탕으로 새 변형문항을 만듭니다.</p>
+            <section className="panel aiToolCard aiVariantInputCard">
+              <div className="aiToolCardTitle">
+                <div>
+                  <h2>문항 입력</h2>
+                  <p className="muted">파일, 이미지, 텍스트로 받은 원본을 넣고 바로 변형 조건을 정합니다.</p>
+                </div>
+                <span className="readyPill">준비 완료</span>
               </div>
-              <span className="readyPill">준비 완료</span>
-            </section>
 
-            <section className="panel aiToolCard">
-              <h3>입력 파일</h3>
-              <div className="aiUploadBox">
-                <strong>파일 선택 또는 드래그</strong>
-                <span>파일 1개 · 최대 50MB · Ctrl+V 붙여넣기</span>
-                <button className="softButton" type="button">파일 업로드</button>
-              </div>
-              <label className="wideLabel">
-                원본 문항 / 오답 메모
-                <textarea
-                  value={sourceProblem}
-                  onChange={(event) => setSourceProblem(event.target.value)}
-                  placeholder="원본 문제, 학생 풀이 오류, 원하는 조건을 붙여넣으세요."
-                  rows="6"
-                />
-              </label>
-            </section>
-
-            <section className="panel aiToolCard">
-              <h3>옵션</h3>
-              <div className="variantOptionGroup">
-                <strong>변형 종류 · 개수</strong>
-                <div className="variantCountGrid">
-                  <label>
-                    숫자/조건 변형
-                    <input min="0" type="number" value={basicCount} onChange={(event) => setBasicCount(event.target.value)} />
-                  </label>
-                  <label>
-                    표현 변형
-                    <input min="0" type="number" value={similarCount} onChange={(event) => setSimilarCount(event.target.value)} />
-                  </label>
-                  <label>
-                    고난도 변형
-                    <input min="0" type="number" value={advancedCount} onChange={(event) => setAdvancedCount(event.target.value)} />
+              <div className="aiVariantTopGrid">
+                <div className="aiVariantInputColumn">
+                  <div className="aiUploadBox compact">
+                    <strong>파일 선택 또는 드래그</strong>
+                    <span>파일 1개 · 최대 50MB · Ctrl+V 붙여넣기</span>
+                    <button className="softButton" type="button">파일 업로드</button>
+                  </div>
+                  <label className="wideLabel">
+                    원본 문항 / 오답 메모
+                    <textarea
+                      value={sourceProblem}
+                      onChange={(event) => setSourceProblem(event.target.value)}
+                      placeholder="원본 문제, 학생 풀이 오류, 원하는 조건을 붙여넣으세요."
+                      rows="8"
+                    />
                   </label>
                 </div>
-                <small className="muted">총 1~10문항 사이 권장. AI 호출 비용을 고려해 필요한 만큼만 만든다.</small>
-              </div>
 
-              <div className="variantSelectGrid">
-                <label>
-                  변형 난도
-                  <select value={variantLevel} onChange={(event) => setVariantLevel(event.target.value)}>
-                    <option value="same">유사 난도</option>
-                    <option value="up">한 단계 심화</option>
-                    <option value="exam">내신 실전형</option>
-                  </select>
-                </label>
-                <label>
-                  답안 형식
-                  <select value={answerStyle} onChange={(event) => setAnswerStyle(event.target.value)}>
-                    <option value="auto">자동</option>
-                    <option value="fiveChoice">5지선다 객관식</option>
-                    <option value="shortAnswer">단답형</option>
-                    <option value="fillBlank">빈칸 채우기</option>
-                    <option value="stepProof">단계별 서술형</option>
-                    <option value="mixed">혼합 서술형</option>
-                  </select>
-                </label>
-                <label>
-                  해설 형식
-                  <select value={solutionStyle} onChange={(event) => setSolutionStyle(event.target.value)}>
-                    <option value="short">일반 해설 한 단락</option>
-                    <option value="step">단계별 해설</option>
-                    <option value="auto">자동</option>
-                  </select>
-                </label>
-                <label>
-                  풀이 스타일
-                  <select value={toneStyle} onChange={(event) => setToneStyle(event.target.value)}>
-                    <option value="auto">자동</option>
-                    <option value="standard">표준 정석</option>
-                    <option value="quick">빠른 풀이</option>
-                    <option value="concept">학생 친절형</option>
-                    <option value="exam">시험 실전형</option>
-                    <option value="reverse">반례 체크형</option>
-                  </select>
-                </label>
-              </div>
+                <div className="aiVariantOptionColumn">
+                  <div className="variantOptionGroup compact">
+                    <strong>변형 종류 · 개수</strong>
+                    <div className="variantCountGrid compact">
+                      <label>
+                        숫자/조건
+                        <input min="0" type="number" value={basicCount} onChange={(event) => setBasicCount(event.target.value)} />
+                      </label>
+                      <label>
+                        표현
+                        <input min="0" type="number" value={similarCount} onChange={(event) => setSimilarCount(event.target.value)} />
+                      </label>
+                      <label>
+                        고난도
+                        <input min="0" type="number" value={advancedCount} onChange={(event) => setAdvancedCount(event.target.value)} />
+                      </label>
+                    </div>
+                  </div>
 
-              <label className="wideLabel">
-                강사 코멘트
-                <textarea
-                  value={teacherPrompt}
-                  onChange={(event) => setTeacherPrompt(event.target.value)}
-                  placeholder="예: 계산은 쉽게, 조건 해석은 조금 더 꼬아서 / 창동고 스타일 / 학생들이 자주 틀리는 포인트 반영"
-                  rows="4"
-                />
-              </label>
+                  <div className="variantSelectGrid compact">
+                    <label>
+                      변형 난도
+                      <select value={variantLevel} onChange={(event) => setVariantLevel(event.target.value)}>
+                        <option value="same">유사 난도</option>
+                        <option value="up">한 단계 심화</option>
+                        <option value="exam">내신 실전형</option>
+                      </select>
+                    </label>
+                    <label>
+                      답안 형식
+                      <select value={answerStyle} onChange={(event) => setAnswerStyle(event.target.value)}>
+                        <option value="auto">자동</option>
+                        <option value="fiveChoice">5지선다 객관식</option>
+                        <option value="shortAnswer">단답형</option>
+                        <option value="fillBlank">빈칸 채우기</option>
+                        <option value="stepProof">단계별 서술형</option>
+                        <option value="mixed">혼합 서술형</option>
+                      </select>
+                    </label>
+                    <label>
+                      해설 형식
+                      <select value={solutionStyle} onChange={(event) => setSolutionStyle(event.target.value)}>
+                        <option value="short">일반 해설 한 단락</option>
+                        <option value="step">단계별 해설</option>
+                        <option value="auto">자동</option>
+                      </select>
+                    </label>
+                    <label>
+                      풀이 스타일
+                      <select value={toneStyle} onChange={(event) => setToneStyle(event.target.value)}>
+                        <option value="auto">자동</option>
+                        <option value="standard">표준 정석</option>
+                        <option value="quick">빠른 풀이</option>
+                        <option value="concept">학생 친절형</option>
+                        <option value="exam">시험 실전형</option>
+                        <option value="reverse">반례 체크형</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  <label className="wideLabel">
+                    강사 코멘트
+                    <textarea
+                      value={teacherPrompt}
+                      onChange={(event) => setTeacherPrompt(event.target.value)}
+                      placeholder="예: 계산은 쉽게, 조건 해석은 조금 더 꼬아서 / 창동고 스타일 / 학생들이 자주 틀리는 포인트 반영"
+                      rows="4"
+                    />
+                  </label>
+                </div>
+              </div>
             </section>
 
             <button className="primaryButton aiRunButton" onClick={handleGenerateVariant} type="button">AI 처리 시작</button>
