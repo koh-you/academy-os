@@ -6498,6 +6498,9 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
                 ...dayEvents.filter((event) => event.type === "examPeriod" || event.type === "mathExam"),
                 ...dayEvents.filter((event) => event.type !== "examPeriod" && event.type !== "mathExam").slice(0, 2)
               ];
+              const periodEvents = visibleDayEvents.filter((event) => event.type === "examPeriod");
+              const mathExamEvents = visibleDayEvents.filter((event) => event.type === "mathExam");
+              const regularEvents = visibleDayEvents.filter((event) => event.type !== "examPeriod" && event.type !== "mathExam");
               return (
                 <button
                   className={[
@@ -6513,27 +6516,52 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
                 >
                   <span className="dayNumber">{day.dayNumber}</span>
                   <span className="lessonPills">
-                    {visibleDayEvents.map((event, eventIndex) => {
-                      const isPeriodBar = event.type === "examPeriod";
-                      const isMathExamTab = event.type === "mathExam";
-                      const mathTabIndex = visibleDayEvents
-                        .slice(0, eventIndex)
-                        .filter((visibleEvent) => visibleEvent.type === "mathExam").length;
-                      const eventLabel = formatCalendarEventLabel(event);
-                      return (
-                        <span
-                          className={`schoolEventPill event-${event.type}${isPeriodBar ? ` periodBar ${getPeriodBarClass(day.date, event)}` : ""}${isMathExamTab ? " mathExamTab" : ""}`}
-                          key={event.eventId}
-                          style={{
-                            backgroundColor: event.color ?? undefined,
-                            ...(isMathExamTab ? { "--math-tab-index": mathTabIndex } : {})
-                          }}
-                          title={event.title}
-                        >
-                          {isPeriodBar ? "" : eventLabel}
-                        </span>
-                      );
-                    })}
+                    <span className="schoolPeriodLayer" aria-hidden="true">
+                      {periodEvents.map((event) => {
+                        const isPeriodBar = true;
+                        return (
+                          <span
+                            className={`schoolEventPill event-${event.type}${isPeriodBar ? ` periodBar ${getPeriodBarClass(day.date, event)}` : ""}`}
+                            key={event.eventId}
+                            style={{ backgroundColor: event.color ?? undefined }}
+                            title={event.title}
+                          />
+                        );
+                      })}
+                    </span>
+                    <span className="schoolMathExamLayer">
+                      {mathExamEvents.map((event, mathTabIndex) => {
+                        const eventLabel = formatCalendarEventLabel(event);
+                        return (
+                          <span
+                            className={`schoolEventPill event-${event.type} mathExamTab`}
+                            key={event.eventId}
+                            style={{
+                              backgroundColor: event.color ?? undefined,
+                              "--math-tab-index": mathTabIndex
+                            }}
+                            title={event.title}
+                          >
+                            {eventLabel}
+                          </span>
+                        );
+                      })}
+                    </span>
+                    <span className="schoolRegularEventLayer">
+                      {regularEvents.map((event) => {
+                        const eventLabel = formatCalendarEventLabel(event);
+                        return (
+                          <span
+                            className={`schoolEventPill event-${event.type}`}
+                            key={event.eventId}
+                            style={{ backgroundColor: event.color ?? undefined }}
+                            title={event.title}
+                          >
+                            {eventLabel}
+                          </span>
+                        );
+                      })}
+                    </span>
                   </span>
                 </button>
               );

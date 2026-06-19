@@ -2021,8 +2021,8 @@ button {
   padding: 0;
   position: absolute;
   right: 14px;
-  top: 78px;
-  z-index: 1;
+  top: 86px;
+  z-index: 2;
 }
 
 .schoolEventPill.periodBar.periodStart {
@@ -2051,37 +2051,46 @@ button {
   right: 14px;
 }
 
+.schoolPeriodLayer,
+.schoolMathExamLayer {
+  display: contents;
+}
+
 .schoolEventPill.mathExamTab {
   border-radius: 10px 10px 4px 4px;
   box-shadow: 0 8px 18px rgba(234, 88, 12, 0.22);
+  box-sizing: border-box;
   display: block;
   font-size: 12px;
-  left: 20px;
+  height: 34px;
+  left: calc(14px + (var(--math-tab-index, 0) * 86px));
   line-height: 1.15;
   margin: 0;
-  max-width: none;
-  min-height: 30px;
-  overflow: visible;
+  max-width: calc(100% - 28px);
+  overflow: hidden;
   padding: 7px 9px 8px;
   position: absolute;
   right: auto;
   text-align: center;
   text-overflow: ellipsis;
-  top: calc(43px + (var(--math-tab-index, 0) * 35px));
+  top: 52px;
   white-space: nowrap;
-  width: min(128px, calc(100% - 40px));
+  width: 84px;
   z-index: 4;
 }
 
 .schoolEventPill.mathExamTab::after {
-  background: inherit;
-  bottom: -8px;
-  content: "";
-  display: block;
-  height: 8px;
-  left: 0;
+  display: none;
+}
+
+.schoolRegularEventLayer {
+  display: grid;
+  gap: 4px;
+  left: 10px;
   position: absolute;
-  right: 0;
+  right: 10px;
+  top: 102px;
+  z-index: 3;
 }
 
 .event-preExam {
