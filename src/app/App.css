@@ -6227,6 +6227,12 @@ textarea.profileEditInput {
   width: fit-content;
 }
 
+.taskLinkedLesson.draftReady {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #047857;
+}
+
 .taskLinkedLesson b {
   color: #17213d;
   font-size: 12px;
@@ -6697,6 +6703,31 @@ textarea.profileEditInput {
   display: grid;
   gap: 14px;
   min-width: 0;
+}
+
+.supplementFeedbackPopup {
+  align-items: start;
+  background: #ecfdf5;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  color: #064e3b;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 14px 16px;
+}
+
+.supplementFeedbackPopup strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+
+.supplementFeedbackPopup p {
+  color: #047857;
+  font-weight: 800;
+  margin: 0;
 }
 
 .supplementModalAside {

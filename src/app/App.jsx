@@ -9351,6 +9351,25 @@ function SupplementStudentModal({
   tabTitle,
   tasks
 }) {
+  const [feedback, setFeedback] = useState(null);
+
+  function showFeedback(title, message) {
+    setFeedback({ title, message });
+  }
+
+  function handleCreateNotificationDraft(task, draft) {
+    onUpdateTask(task.makeupTaskId, "notificationDraft", draft);
+    showFeedback("알림톡 초안 반영 완료", "작성한 문구가 보충 일정 알림톡 초안에 반영되었습니다.");
+  }
+
+  function handleScheduleTask(task) {
+    onScheduleTask(task);
+    showFeedback(
+      task.linkedLessonId ? "수업일지 수정 반영 완료" : "수업일지 반영 완료",
+      `${task.scheduledDate} ${task.scheduledTime} 보충 일정이 수업일지 캘린더에 반영되었습니다.`
+    );
+  }
+
   return (
     <Modal
       className="supplementStudentModal"
@@ -9358,6 +9377,15 @@ function SupplementStudentModal({
       subtitle={`${student.grade ?? "-"} · ${student.schoolName ?? "학교 미입력"}`}
       onClose={onClose}
     >
+      {feedback ? (
+        <div className="supplementFeedbackPopup" role="status" aria-live="polite">
+          <div>
+            <strong>{feedback.title}</strong>
+            <p>{feedback.message}</p>
+          </div>
+          <button className="iconButton" onClick={() => setFeedback(null)} type="button">×</button>
+        </div>
+      ) : null}
       <div className="supplementModalLayout single">
         <section className="supplementModalMain">
           <div className="sectionHeader slim">
@@ -9383,6 +9411,11 @@ function SupplementStudentModal({
                       <strong>{followUpTypeLabel(task.taskType)}</strong>
                       <p>{task.sourceLabel}</p>
                       <small>{task.reason} · {supplementMethodLabel(task)} · 배정 {task.attemptCount ?? 0}회</small>
+                      {task.notificationDraft?.trim() ? (
+                        <span className="taskLinkedLesson draftReady">
+                          알림톡 초안 반영 완료
+                        </span>
+                      ) : null}
                       {task.taskType === "absence_makeup" ? (
                         <small className="taskReasonLine">결석사유: {task.absenceReason || "사유 미입력"}</small>
                       ) : null}
@@ -9444,13 +9477,13 @@ function SupplementStudentModal({
                     />
                   </label>
                   <div className="modalActions">
-                    <button className="softButton" onClick={() => onUpdateTask(task.makeupTaskId, "notificationDraft", freshDraft)} type="button">
+                    <button className="softButton" onClick={() => handleCreateNotificationDraft(task, freshDraft)} type="button">
                       알림톡 문구 작성
                     </button>
                     <button
                       className="softButton"
                       disabled={!task.scheduledDate || !task.scheduledTime}
-                      onClick={() => onScheduleTask(task)}
+                      onClick={() => handleScheduleTask(task)}
                       title={!task.scheduledDate || !task.scheduledTime ? "배정일과 시간을 먼저 입력하세요." : "수업일지 캘린더에 반영합니다."}
                       type="button"
                     >
