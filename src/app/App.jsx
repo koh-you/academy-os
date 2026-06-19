@@ -10775,10 +10775,36 @@ function supplementMethodLabel(task) {
 
 function createNotificationDraft(task, students) {
   const student = students.find((item) => item.studentId === task.studentId);
-  const timeText = task.scheduledTime ? ` ${task.scheduledTime}` : "";
-  const methodText = supplementMethodLabel(task);
+  const studentName = student?.name ?? "학생";
+  const scheduleText = [task.scheduledDate, task.scheduledTime].filter(Boolean).join(" ");
+  const sourceText = task.sourceLabel ? `${task.sourceLabel} ` : "";
+  const methodId = task.supplementMethod || supplementDefaultMethod(task.taskType);
   const absenceText = task.taskType === "absence_makeup" && task.absenceReason ? ` 결석사유는 ${task.absenceReason}입니다.` : "";
-  return `${student?.name ?? "학생"} ${followUpTypeLabel(task.taskType)} 안내입니다. ${task.scheduledDate}${timeText}에 ${task.sourceLabel} 관련 보충을 ${methodText} 방식으로 진행할 예정입니다.${absenceText}`;
+
+  if (task.taskType === "homework_makeup") {
+    if (methodId === "next_lesson") {
+      return `${studentName} 학생 숙제 보충 안내드립니다.\n\n다음 수업 전까지 ${sourceText}보충을 마무리할 수 있도록 안내하겠습니다.`;
+    }
+    if (methodId === "arrival_makeup") {
+      return `${studentName} 학생 숙제 보충 안내드립니다.\n\n${scheduleText} 등원 후 ${sourceText}보충을 진행하겠습니다.`;
+    }
+    if (methodId === "stay_after") {
+      return `${studentName} 학생 숙제 보충 안내드립니다.\n\n${scheduleText} 수업 후 남아서 ${sourceText}보충을 마무리하겠습니다.`;
+    }
+  }
+
+  if (task.taskType === "absence_makeup") {
+    if (methodId === "recorded_lecture") {
+      return `${studentName} 학생 결석 보강 안내드립니다.\n\n${scheduleText}에 ${sourceText}결석 보강을 녹화 강의로 진행하겠습니다.${absenceText}`;
+    }
+    return `${studentName} 학생 결석 보강 안내드립니다.\n\n${scheduleText}에 ${sourceText}결석 보강을 현장에서 진행하겠습니다.${absenceText}`;
+  }
+
+  if (task.taskType === "retest") {
+    return `${studentName} 학생 재시험 안내드립니다.\n\n${scheduleText}에 ${sourceText}재시험을 진행하겠습니다.`;
+  }
+
+  return `${studentName} 학생 ${followUpTypeLabel(task.taskType)} 안내드립니다.\n\n${scheduleText}에 ${sourceText}관련 일정을 진행하겠습니다.`;
 }
 
 function getSupplementTaskProgress(task, lessons = []) {
