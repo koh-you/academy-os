@@ -421,15 +421,30 @@ function compactCalendarLabel(value = "") {
   return String(value ?? "").replace(/\s+/g, "");
 }
 
+function escapeRegExp(value = "") {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function normalizeRepeatedSchoolPrefix(value = "", schoolName = "") {
+  const cleanSchool = String(schoolName || "").trim();
+  let label = String(value || "").trim().replace(/\s+/g, " ");
+  if (!cleanSchool || !label) return label;
+  const duplicatePrefix = new RegExp(`^${escapeRegExp(cleanSchool)}\\s+${escapeRegExp(cleanSchool)}`);
+  while (duplicatePrefix.test(label)) {
+    label = label.replace(duplicatePrefix, cleanSchool);
+  }
+  return label;
+}
+
 function joinCalendarLabel(schoolName = "", detail = "", fallback = "") {
   const cleanSchool = String(schoolName || "").trim();
-  const cleanDetail = String(detail || fallback || "").trim();
+  const cleanDetail = normalizeRepeatedSchoolPrefix(String(detail || fallback || "").trim(), cleanSchool);
   if (!cleanDetail) return cleanSchool || "학교 미입력";
   if (!cleanSchool) return cleanDetail;
   if (compactCalendarLabel(cleanDetail).startsWith(compactCalendarLabel(cleanSchool))) {
     return cleanDetail;
   }
-  return `${cleanSchool} ${cleanDetail}`;
+  return normalizeRepeatedSchoolPrefix(`${cleanSchool} ${cleanDetail}`, cleanSchool);
 }
 
 function formatMathExamEntryLabel(row = {}, entry = {}) {
@@ -439,6 +454,24 @@ function formatMathExamEntryLabel(row = {}, entry = {}) {
   const grade = entry.grade || row.grade || "";
   const detail = [grade, subject].filter(Boolean).join(" ").trim();
   return joinCalendarLabel(row.schoolName || "학교 미입력", detail, row.examName || "수학시험");
+}
+
+function getSchoolCalendarFilterGroup(event = {}) {
+  if (event.type === "examPeriod") return "examPeriod";
+  if (event.type === "mathExam") return "mathExam";
+  if (event.type === "preExam") return "preExam";
+  if (event.type === "vacation") return "vacation";
+  return "custom";
+}
+
+function formatCalendarEventLabel(event = {}) {
+  if (event.type === "mathExam") {
+    return joinCalendarLabel(event.schoolName, event.title || event.examSubject || "수학시험");
+  }
+  if (event.type === "examPeriod") {
+    return joinCalendarLabel(event.schoolName, event.title || "시험기간");
+  }
+  return joinCalendarLabel(event.schoolName, event.title || event.examSubject || "일정");
 }
 
 function syncPrimaryMathExamDate(entries = []) {
@@ -610,8 +643,13 @@ function buildExamCalendarEvents(rows) {
         });
       }
     }
-    normalizeMathExamEntries(row).forEach((entry, index) => {
+    const mathEntries = normalizeMathExamEntries(row);
+    const emittedMathKeys = new Set();
+    const addMathExamEvent = (entry, index) => {
       if (!entry.date) return;
+      const mathKey = `${entry.date}:${compactCalendarLabel(entry.label || entry.subject || "")}`;
+      if (emittedMathKeys.has(mathKey)) return;
+      emittedMathKeys.add(mathKey);
       events.push({
         ...base,
         eventId: `derived_math_${row.examPrepId}_${entry.id || index}`,
@@ -623,7 +661,11 @@ function buildExamCalendarEvents(rows) {
         mathExamEntryIndex: index,
         color: "#dc2626"
       });
-    });
+    };
+    mathEntries.forEach(addMathExamEvent);
+    if (!emittedMathKeys.size && row.mathExamDate) {
+      addMathExamEvent(createMathExamEntry(row, 0), 0);
+    }
     return events;
   });
 }
@@ -6050,6 +6092,7 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
   const [selectedDate, setSelectedDate] = useState(today);
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
   const [schoolFilter, setSchoolFilter] = useState("전체 학교");
+  const [calendarFilter, setCalendarFilter] = useState("all");
   const [isFormCollapsed, setIsFormCollapsed] = useState(false);
   const [newEvent, setNewEvent] = useState({
     schoolName: rows[0]?.schoolName ?? "",
@@ -6070,6 +6113,13 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
     schoolEvent: "학교행사",
     custom: "일반"
   };
+  const calendarFilters = [
+    { id: "all", label: "전체" },
+    { id: "examPeriod", label: "내신기간" },
+    { id: "mathExam", label: "수학시험날짜" },
+    { id: "vacation", label: "방학/개학" },
+    { id: "preExam", label: "직전일정" }
+  ];
   const eventColorOptions = ["#dc2626", "#2563eb", "#16a34a", "#7c3aed", "#ea580c", "#0891b2", "#17213d"];
   const examEvents = buildExamCalendarEvents(rows);
   const manualEvents = events.filter((event) => !String(event.eventId ?? "").startsWith("event_exam_"));
@@ -6077,7 +6127,10 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
   const filteredEvents = academicEvents.filter(
     (event) => schoolFilter === "전체 학교" || event.schoolName === schoolFilter
   );
-  const selectedDateEvents = filteredEvents.filter((event) => isDateWithinEvent(selectedDate, event));
+  const calendarDisplayEvents = filteredEvents.filter((event) => (
+    calendarFilter === "all" ? true : getSchoolCalendarFilterGroup(event) === calendarFilter
+  ));
+  const selectedDateEvents = calendarDisplayEvents.filter((event) => isDateWithinEvent(selectedDate, event));
 
   function shiftMonth(amount) {
     const [year, month] = selectedMonth.split("-").map(Number);
@@ -6258,17 +6311,29 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
             <h2>{formatMonthTitle(selectedMonth)}</h2>
             <button className="iconButton" onClick={() => shiftMonth(1)} type="button">›</button>
           </div>
+          <div className="schoolCalendarFilterBar" aria-label="학사일정 표시 항목">
+            {calendarFilters.map((filter) => (
+              <button
+                className={`schoolCalendarFilterButton${calendarFilter === filter.id ? " active" : ""}`}
+                key={filter.id}
+                onClick={() => setCalendarFilter(filter.id)}
+                type="button"
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
           <div className="calendarGrid teacherCalendarGrid schoolMonthGrid">
             {["일", "월", "화", "수", "목", "금", "토"].map((label) => (
               <div className="weekday" key={label}>{label}</div>
             ))}
             {buildMonthDays(selectedMonth).map((day) => {
-              const eventPriority = { examPeriod: 0, mathExam: 1 };
-              const dayEvents = filteredEvents
+              const eventPriority = { examPeriod: 0, mathExam: 1, preExam: 2, vacation: 3 };
+              const dayEvents = calendarDisplayEvents
                 .filter((event) => isDateWithinEvent(day.date, event))
                 .sort((eventA, eventB) => (
-                  (eventPriority[eventA.type] ?? 2) - (eventPriority[eventB.type] ?? 2)
-                  || eventA.title.localeCompare(eventB.title)
+                  (eventPriority[eventA.type] ?? 4) - (eventPriority[eventB.type] ?? 4)
+                  || formatCalendarEventLabel(eventA).localeCompare(formatCalendarEventLabel(eventB))
                 ));
               const visibleDayEvents = [
                 ...dayEvents.filter((event) => event.type === "examPeriod" || event.type === "mathExam"),
@@ -6295,9 +6360,7 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
                       const mathTabIndex = visibleDayEvents
                         .slice(0, eventIndex)
                         .filter((visibleEvent) => visibleEvent.type === "mathExam").length;
-                      const eventLabel = event.type === "mathExam"
-                        ? joinCalendarLabel(event.schoolName, event.title)
-                        : joinCalendarLabel(event.schoolName, event.examSubject || event.title);
+                      const eventLabel = formatCalendarEventLabel(event);
                       return (
                         <span
                           className={`schoolEventPill event-${event.type}${isPeriodBar ? ` periodBar ${getPeriodBarClass(day.date, event)}` : ""}${isMathExamTab ? " mathExamTab" : ""}`}
