@@ -370,7 +370,7 @@ export async function sendLessonCommentAlimtalk(payload) {
   const audience = payload.target === "student" ? "student" : "parent";
   const recipientPhone = audience === "student" ? payload.studentPhone : payload.parentPhone;
   const templateEnvName = audience === "student" ? TEMPLATE_ENV.studentComment : TEMPLATE_ENV.dailyReport;
-  const commentBody = buildLessonCommentBody(payload, audience);
+  const commentBody = compact(payload.commentBodyOverride) || buildLessonCommentBody(payload, audience);
 
   return sendKakaoAlimtalk({
     payload,

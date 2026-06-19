@@ -3190,6 +3190,12 @@ button:disabled {
   overflow: auto;
 }
 
+.editableCommentPreview {
+  min-height: 520px;
+  resize: vertical;
+  width: 100%;
+}
+
 .templateResultCard {
   background: #f8fafc;
   border: 1px solid #dbe6f8;

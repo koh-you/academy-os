@@ -183,6 +183,33 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, previousHom
   return lines.filter(Boolean);
 }
 
+function buildCommentPreviewText({ audience, comment, lesson, nextHomework, previousHomework, record, student }) {
+  const isParent = audience === "parent";
+  const previewLines = buildCommentPreviewLines({
+    audience,
+    comment,
+    nextHomework,
+    previousHomework,
+    record,
+    student
+  });
+
+  return joinMessageBlocks([
+    `#{학원명}: ${academyBrandName}`,
+    `#{학생명}: ${student.name}`,
+    isParent ? `#{수업일}: ${lesson.date}` : `#{수업명}: ${lesson.className}`,
+    isParent ? "#{리포트본문}:" : "#{코멘트}:",
+    ...(previewLines.length ? previewLines : ["왼쪽에 작성한 내용이 받는 사람 화면에 이렇게 표시됩니다."])
+  ]);
+}
+
+function extractCommentBodyFromPreview(previewText, audience) {
+  const marker = audience === "parent" ? "#{리포트본문}:" : "#{코멘트}:";
+  const markerIndex = previewText.indexOf(marker);
+  if (markerIndex < 0) return normalizeMessageText(previewText);
+  return normalizeMessageText(previewText.slice(markerIndex + marker.length));
+}
+
 const saveStateLabels = {
   idle: "저장 전",
   dirty: "변경됨",
@@ -2691,7 +2718,10 @@ export function App() {
       target === "student" ? Boolean(record?.prepStudentVisible) : Boolean(record?.prepParentVisible);
     const prepMessage = shouldIncludePrepMemo && prepMemo && !message.includes(prepMemo) ? prepMemo : "";
     const composedMessage = joinMessageBlocks([prepMessage, message]);
-    const hasSendContent = Boolean(message || prepMessage);
+    const manualCommentBody = normalizeMessageText(options.manualCommentBody);
+    const manualPreviewBody = normalizeMessageText(options.manualPreviewBody);
+    const finalMessage = manualCommentBody || composedMessage;
+    const hasSendContent = Boolean(finalMessage);
     const channel = target === "student" ? "student_alimtalk" : "parent_alimtalk";
     const statusField = target === "student" ? "studentCommentSendStatus" : "teacherCommentSendStatus";
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
@@ -2702,7 +2732,7 @@ export function App() {
       channel,
       createdAt: new Date().toISOString(),
       lessonId: lesson.lessonId,
-      message: composedMessage || "발송할 코멘트가 없습니다.",
+      message: manualPreviewBody || finalMessage || "발송할 코멘트가 없습니다.",
       provider: "solapi",
       scheduledDate,
       scheduledLabel,
@@ -2761,9 +2791,10 @@ export function App() {
         lessonName: lesson.className,
         forceDryRun: Boolean(options.forceDryRun),
         forceTestRecipient: Boolean(options.forceTestRecipient),
-        message,
+        commentBodyOverride: manualCommentBody,
+        message: manualCommentBody || message,
         nextHomework: nextHomework?.title ?? "",
-        preparationNotice: prepMessage,
+        preparationNotice: manualCommentBody ? "" : prepMessage,
         parentPhone: student.parentPhone,
         previousHomework: previousHomework?.title ?? "",
         scheduledDate,
@@ -4569,14 +4600,24 @@ function CommentComposerModal({
   const selectedDelayMinutes = sendTiming === "delay30" ? 30 : 0;
   const selectedScheduledDate = sendTiming === "now" ? "" : getLessonAlimtalkScheduledDate(lesson, selectedDelayMinutes);
   const selectedScheduleLabel = selectedScheduledDate ? formatKoreaTimeLabel(selectedScheduledDate) : "즉시";
-  const previewLines = buildCommentPreviewLines({
+  const generatedPreviewText = buildCommentPreviewText({
     audience,
     comment,
+    lesson,
     nextHomework,
     previousHomework,
     record,
     student
   });
+  const [editablePreviewText, setEditablePreviewText] = useState(generatedPreviewText);
+  const [isPreviewEdited, setIsPreviewEdited] = useState(false);
+
+  useEffect(() => {
+    if (!isPreviewEdited) {
+      setEditablePreviewText(generatedPreviewText);
+    }
+  }, [generatedPreviewText, isPreviewEdited]);
+  const manualCommentBody = isPreviewEdited ? extractCommentBodyFromPreview(editablePreviewText, audience) : "";
 
   return (
     <Modal className="commentComposerModal" title={title} subtitle={`${lesson.date} · ${lesson.className}`} onClose={onClose}>
@@ -4611,6 +4652,8 @@ function CommentComposerModal({
                   delayMinutes: selectedDelayMinutes,
                   forceDryRun,
                   forceTestRecipient,
+                  manualCommentBody,
+                  manualPreviewBody: isPreviewEdited ? editablePreviewText : "",
                   sendTiming
                 })
               }
@@ -4648,16 +4691,27 @@ function CommentComposerModal({
               <p className="eyebrow">PREVIEW</p>
               <h2>{previewTitle}</h2>
             </div>
+            {isPreviewEdited ? (
+              <button
+                className="softButton mini"
+                onClick={() => {
+                  setEditablePreviewText(generatedPreviewText);
+                  setIsPreviewEdited(false);
+                }}
+                type="button"
+              >
+                원문 복원
+              </button>
+            ) : null}
           </div>
-          <pre className="templatePreviewText commentTemplatePreview">
-            {joinMessageBlocks([
-              `#{학원명}: ${academyBrandName}`,
-              `#{학생명}: ${student.name}`,
-              isParent ? `#{수업일}: ${lesson.date}` : `#{수업명}: ${lesson.className}`,
-              isParent ? "#{리포트본문}:" : "#{코멘트}:",
-              ...(previewLines.length ? previewLines : ["왼쪽에 작성한 내용이 받는 사람 화면에 이렇게 표시됩니다."])
-            ])}
-          </pre>
+          <textarea
+            className="templatePreviewText commentTemplatePreview editableCommentPreview"
+            value={editablePreviewText}
+            onChange={(event) => {
+              setEditablePreviewText(event.target.value);
+              setIsPreviewEdited(event.target.value !== generatedPreviewText);
+            }}
+          />
         </section>
       </div>
     </Modal>

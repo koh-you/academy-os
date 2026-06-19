@@ -81,6 +81,8 @@ check("51 supplement center includes teacher-marked incomplete homework", hasAll
 check("52 school calendar registration uses modal-first type input", hasAll(app, ["schoolEventFormModal", "inputTypeField", "입력 유형", "setIsFormModalOpen"]) && css.includes(".modalCard.schoolEventFormModal"));
 check("53 lesson journal assignment status syncs homework makeup source", hasAll(app, ["syncPreviousHomeworkStatusFromAssignment", "getHomeworkStatusFromAssignmentStatus", 'teacherStatus: "missing"', 'teacherStatus: "partial"', 'dueDate: existing.dueDate || lesson.date']));
 
+check("54 comment preview is editable before sending", hasAll(app, ["editablePreviewText", "extractCommentBodyFromPreview", "manualCommentBody", "commentBodyOverride"]) && css.includes(".editableCommentPreview") && notificationRoute.includes("payload.commentBodyOverride"));
+
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));
 
