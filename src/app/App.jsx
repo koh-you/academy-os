@@ -4553,20 +4553,6 @@ function LessonJournalDetail({
   );
 }
 
-function CommentOpenCell({ aiStatus, comment, label, onOpen, sendStatus }) {
-  const hasComment = Boolean(comment?.trim());
-  return (
-    <div className="commentOpenCell">
-      <button className={hasComment ? "commentOpenButton filled" : "commentOpenButton"} onClick={onOpen} type="button">
-        <strong>{hasComment ? "보기/수정" : "작성"}</strong>
-        <span>{label}</span>
-      </button>
-      <small>{hasComment ? comment.slice(0, 28) : "미작성"}{hasComment && comment.length > 28 ? "..." : ""}</small>
-      <em>{aiStatus || "AI 대기"} · {sendStatus || "발송 전"}</em>
-    </div>
-  );
-}
-
 function PreparationMemoModal({ lesson, onChangeRecord, onClose, onSaveRecord, record, saveState = "idle", student }) {
   const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
   const currentRecord = {
@@ -4791,21 +4777,6 @@ function CommentComposerModal({
         </section>
       </div>
     </Modal>
-  );
-}
-
-function CommentActionCell({ aiStatus, onPolish, onSend, sendLabel, sendStatus }) {
-  const isRunning = aiStatus === "AI 수정 중";
-  return (
-    <div className="commentActionCell">
-      <div className="commentActionButtons">
-        <button className="softButton mini" disabled={isRunning} onClick={onPolish} type="button">
-          {isRunning ? "수정 중..." : "AI 수정"}
-        </button>
-        <button className="sendButton mini" onClick={onSend} type="button">{sendLabel}</button>
-      </div>
-      <small>{aiStatus || "AI 대기"} · {sendStatus || "발송 전"}</small>
-    </div>
   );
 }
 

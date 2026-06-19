@@ -1019,36 +1019,7 @@ button {
   font-size: 14px;
 }
 
-.commentOpenButton span,
-.commentOpenCell small,
-.commentOpenCell em {
-  font-size: 12px;
-}
-
-.commentOpenCell small {
-  color: #475569;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.commentOpenCell em {
-  color: #94a3b8;
-  font-style: normal;
-}
-
-.commentActionCell {
-  display: grid;
-  gap: 3px;
-}
-
-.commentActionButtons {
-  display: flex;
-  gap: 6px;
-}
-
-.commentActionCell small {
-  color: #64748b;
+.commentOpenButton span {
   font-size: 12px;
 }
 
@@ -4272,19 +4243,12 @@ textarea {
   max-width: 860px;
 }
 
-.prepMemoGrid {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: minmax(0, 1fr);
-}
-
 .prepMemoSingle {
   display: grid;
   gap: 16px;
 }
 
-.prepMemoDraft,
-.prepMemoPreview {
+.prepMemoDraft {
   display: grid;
   gap: 14px;
 }
@@ -4299,18 +4263,6 @@ textarea {
 .prepMemoDraft textarea {
   border-radius: 6px;
   min-height: 112px;
-}
-
-.prepMemoActions {
-  align-items: center;
-  display: flex;
-  gap: 10px;
-  justify-content: space-between;
-}
-
-.prepMemoActions small {
-  color: #64748b;
-  font-weight: 800;
 }
 
 .prepMemoSaveBar {
@@ -4346,11 +4298,6 @@ textarea {
 .checkboxLine input {
   height: 18px;
   width: 18px;
-}
-
-.prepMemoPreview h3 {
-  font-size: 18px;
-  margin: 0 0 10px;
 }
 
 .portalNoticeStack,

@@ -25,6 +25,50 @@
 
 ## 현재 핵심 작업
 
+### 다음 세션 인수인계 프롬프트
+
+새 대화세션에서는 아래 문장으로 시작하면 된다.
+
+```text
+이 프로젝트는 academy-os입니다.
+먼저 AGENTS.md, docs/current-worklog.md, docs/home-codex-setup.md를 읽고 현재 작업 큐를 확인해주세요.
+
+작업 방식:
+1. 구현 전에 docs/current-worklog.md의 작업 큐를 갱신합니다.
+2. 한 번에 하나의 작업만 진행합니다.
+3. 구현 후 npm run build로 확인합니다.
+4. 운영 흐름에 영향을 주는 변경이면 npm run test:production도 실행합니다.
+5. 완료한 내용과 남은 작업을 docs/current-worklog.md에 반영합니다.
+6. 필요한 경우 GitHub main에 commit/push합니다.
+
+현재 상태:
+- 2026-06-20 작업분은 main에 push되어 있습니다.
+- 마지막 검수는 npm run build 통과, npm run test:production 60개 통과입니다.
+- 학원명 표시는 으뜸수학 고태영T입니다.
+- koh_you_math는 내부 식별자/URL/환경변수에만 남길 수 있습니다.
+
+내일 우선순위:
+1. 실제 배포 환경에서 수업메모 저장이 Supabase에 남는지 확인합니다. 저장 실패가 뜨면 Supabase SQL Editor에서 supabase/20260617_lesson_prep_resources_notifications.sql migration이 적용됐는지 확인합니다.
+2. 학사일정 -> 시험관리 -> 수업일지 직전수업 자동 생성 흐름을 실제 데이터로 end-to-end 점검합니다.
+3. 보충관리 숙제보충 후보가 6월 19일 기준 실제 미완료/일부완료 지난 숙제만 남는지 재확인합니다.
+4. 알림톡 작성 화면에서 원본 메모 -> AI 수정 -> 최종 문구 -> preview -> 예약/테스트 발송까지 문구 중복이 없는지 확인합니다.
+```
+
+### 오늘 작업 요약 및 최종 확인
+
+- 상태: 완료
+- 오늘 완료: 숙제보충 후보 기준 보정, 알림톡 최종 문구 편집 구조, 6월 19일 이전 수업/숙제 삭제 및 undo 보관, 보충 방식 옵션 정리, 학사일정 등록/수정 UX 및 시험관리 연동, 수업메모 직접 저장 흐름을 처리했다.
+- 코드 정리: 더 이상 사용하지 않는 `CommentOpenCell`, `CommentActionCell` 컴포넌트와 예전 수업메모/코멘트 UI 잔여 CSS를 제거했다.
+- 최종 검수: `npm run build` 통과, `npm run test:production` 60개 통과.
+- 남은 주의점: 수업메모/강의내용 저장은 Supabase `lesson_student_records` 확장 컬럼이 필요하다. 운영 DB에 migration이 빠져 있으면 저장 실패로 표시되므로 `supabase/20260617_lesson_prep_resources_notifications.sql` 적용 여부를 확인해야 한다.
+
+### P1. 내일 실제 데이터 운영 검수
+
+- 상태: 대기
+- 목표: 오늘 수정한 핵심 흐름이 로컬 코드 검수뿐 아니라 실제 배포/DB 데이터에서도 같은 결과로 동작하는지 확인한다.
+- 확인 항목: 수업메모 저장, 강의 내용 저장, 학사일정 수학시험 수정 후 시험관리 연동, 직전수업 자동 생성, 보충관리 후보 수, 알림톡 최종 문구 중복 여부.
+- 검수 기준: 실제 데이터 1개 반/학생 1~2명으로 입력-저장-새로고침-재조회까지 확인한다.
+
 ### P1. 수업메모 저장 누락 점검
 
 - 상태: 완료
