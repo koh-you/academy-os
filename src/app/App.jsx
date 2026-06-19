@@ -8332,6 +8332,7 @@ function SupplementCenter({
 
   function createSupplementTask(task) {
     onCreateTask(task);
+    setActiveSupplementTab(task.taskType);
     setSelectedSupplementStudentId(task.studentId);
   }
 
@@ -8345,7 +8346,9 @@ function SupplementCenter({
   }
 
   const selectedSupplementStudent = students.find((student) => student.studentId === selectedSupplementStudentId);
-  const selectedSupplementTasks = tasks.filter((task) => task.studentId === selectedSupplementStudentId);
+  const selectedSupplementTasks = tasks.filter(
+    (task) => task.studentId === selectedSupplementStudentId && task.taskType === activeSupplementTab
+  );
   const supplementTabDefinitions = [
     {
       id: "homework_makeup",
@@ -8494,6 +8497,7 @@ function SupplementCenter({
           onScheduleTask={onScheduleTask}
           onUpdateTask={onUpdateTask}
           student={selectedSupplementStudent}
+          tabTitle={activeTabData.title}
           tasks={selectedSupplementTasks}
         />
       ) : null}
@@ -8506,12 +8510,13 @@ function SupplementStudentModal({
   onScheduleTask,
   onUpdateTask,
   student,
+  tabTitle,
   tasks
 }) {
   return (
     <Modal
       className="supplementStudentModal"
-      title={`${student.name} 보충관리`}
+      title={`${student.name} ${tabTitle}`}
       subtitle={`${student.grade ?? "-"} · ${student.schoolName ?? "학교 미입력"}`}
       onClose={onClose}
     >
@@ -8611,7 +8616,7 @@ function SupplementStudentModal({
                       title={!task.scheduledDate || !task.scheduledTime ? "배정일과 시간을 먼저 입력하세요." : "수업일지 캘린더에 반영합니다."}
                       type="button"
                     >
-                      일정 확정
+                      {task.linkedLessonId ? "수업일지 수정 반영" : "수업일지 반영"}
                     </button>
                   </div>
                 </article>
