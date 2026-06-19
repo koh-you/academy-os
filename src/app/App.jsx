@@ -10330,8 +10330,9 @@ function OverdueHomework({
   students,
   onTeacherVerifyHomework
 }) {
-  const unresolvedHomeworks = homeworks
-    .filter((homework) => homework.title && (isHomeworkOverdue(homework) || (homework.teacherStatus ?? "unverified") !== "verified"))
+  const actionableHomeworks = dedupeActionableHomeworks(homeworks);
+  const unresolvedHomeworks = actionableHomeworks
+    .filter((homework) => homework.title && isHomeworkActionRequired(homework))
     .sort((a, b) => String(a.assignedDate ?? "").localeCompare(String(b.assignedDate ?? "")));
   const [gradeFilter, setGradeFilter] = useState("전체");
   const [activeMetric, setActiveMetric] = useState("all");
@@ -10340,7 +10341,7 @@ function OverdueHomework({
   const [selectedStudentId, setSelectedStudentId] = useState(students[0]?.studentId ?? "");
   const filteredStudents =
     gradeFilter === "전체" ? students : students.filter((student) => (student.grade || "미입력") === gradeFilter);
-  const registeredStudentIds = new Set(homeworks.filter((homework) => homework.title).map((homework) => homework.studentId));
+  const registeredStudentIds = new Set(actionableHomeworks.filter((homework) => homework.title).map((homework) => homework.studentId));
   const todayIncompleteStudentIds = new Set(unresolvedHomeworks.filter((homework) => homework.dueDate === today).map((homework) => homework.studentId));
   const overdueStudentIds = new Set(unresolvedHomeworks.filter((homework) => isHomeworkOverdue(homework)).map((homework) => homework.studentId));
   const metricLabels = {
@@ -10435,11 +10436,11 @@ function OverdueHomework({
         unresolvedHomeworks.filter((homework) => targetIds.has(homework.studentId) && isHomeworkOverdue(homework))
       );
     }
-    return sortByAssignedDate(homeworks.filter((homework) => targetIds.has(homework.studentId) && homework.title));
+    return sortByAssignedDate(actionableHomeworks.filter((homework) => targetIds.has(homework.studentId) && homework.title));
   }
 
   function getStudentHomeworkSummary(student) {
-    const studentHomeworks = homeworks.filter((homework) => homework.studentId === student.studentId);
+    const studentHomeworks = actionableHomeworks.filter((homework) => homework.studentId === student.studentId);
     const unresolvedCount = unresolvedHomeworks.filter((homework) => homework.studentId === student.studentId).length;
     const todayCount = unresolvedHomeworks.filter(
       (homework) => homework.studentId === student.studentId && homework.dueDate === today
@@ -11202,10 +11203,47 @@ function createAiReportDraft(student, lesson, record, homeworkBundle) {
 
 function isHomeworkOverdue(homework) {
   return (
+    Boolean(homework.dueDate) &&
     homework.dueDate < today &&
-    homework.teacherStatus !== "verified" &&
-    homework.status !== "verified"
+    isHomeworkActionRequired(homework)
   );
+}
+
+function isHomeworkResolved(homework) {
+  return (
+    homework.teacherStatus === "verified" ||
+    homework.status === "verified" ||
+    homework.studentStatus === "checked_done"
+  );
+}
+
+function isHomeworkActionRequired(homework) {
+  return Boolean(homework?.title?.trim()) && !isHomeworkResolved(homework);
+}
+
+function getHomeworkDedupeKey(homework) {
+  return [
+    homework.studentId ?? "",
+    homework.assignedDate ?? "",
+    String(homework.title ?? "").trim().replace(/\s+/g, " ")
+  ].join("|");
+}
+
+function compareHomeworkDisplayPriority(current, candidate) {
+  if (!current) return candidate;
+  if (!current.dueDate && candidate.dueDate) return candidate;
+  if (current.dueDate && !candidate.dueDate) return current;
+  if ((candidate.dueDate ?? "") > (current.dueDate ?? "")) return candidate;
+  return current;
+}
+
+function dedupeActionableHomeworks(homeworks) {
+  const byKey = new Map();
+  homeworks.filter(isHomeworkActionRequired).forEach((homework) => {
+    const key = getHomeworkDedupeKey(homework);
+    byKey.set(key, compareHomeworkDisplayPriority(byKey.get(key), homework));
+  });
+  return [...byKey.values()];
 }
 
 function calculateStreak(homeworks) {
@@ -11214,7 +11252,7 @@ function calculateStreak(homeworks) {
 
 function calculateHomeworkStats(homeworks) {
   const total = homeworks.length;
-  const done = homeworks.filter((homework) => homework.teacherStatus === "verified" || homework.studentStatus === "checked_done").length;
+  const done = homeworks.filter(isHomeworkResolved).length;
   return {
     total,
     done,
@@ -11337,8 +11375,7 @@ function createAttendanceNotificationText(payload) {
 }
 
 function getHomeworkAction(homework) {
-  if (homework.teacherStatus === "verified") return "해결됨";
-  if (homework.studentStatus === "checked_done") return "강사 확인 필요";
+  if (isHomeworkResolved(homework)) return "해결됨";
   if (isHomeworkOverdue(homework)) return "숙제보충 필요";
   return "학생 체크 대기";
 }
