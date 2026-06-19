@@ -9546,33 +9546,112 @@ function OverdueHomework({ homeworks, students, onTeacherVerifyHomework }) {
     registered: "숙제 등록 학생",
     today: "오늘 미완료"
   };
+  const metricMeta = {
+    all: {
+      detailHint: "전체 숙제 기록",
+      detailTitle: "전체 숙제",
+      emptyHomeworks: "선택한 학생의 숙제 기록이 없습니다.",
+      emptyStudents: "등록된 학생이 없습니다.",
+      studentHint: "등록된 전체 학생을 확인합니다.",
+      studentTitle: "전체 학생"
+    },
+    overdue: {
+      detailHint: "기한이 지난 미확인 숙제",
+      detailTitle: "밀린 숙제",
+      emptyHomeworks: "선택한 학생의 밀린 숙제가 없습니다.",
+      emptyStudents: "밀린 숙제가 있는 학생이 없습니다.",
+      studentHint: "기한이 지난 숙제가 있는 학생만 봅니다.",
+      studentTitle: "밀린 학생"
+    },
+    registered: {
+      detailHint: "등록된 숙제 전체",
+      detailTitle: "등록 숙제",
+      emptyHomeworks: "선택한 학생의 등록 숙제가 없습니다.",
+      emptyStudents: "숙제가 등록된 학생이 없습니다.",
+      studentHint: "숙제 플래너에 숙제가 등록된 학생만 봅니다.",
+      studentTitle: "숙제 등록 학생"
+    },
+    today: {
+      detailHint: "오늘 기한이지만 아직 확인되지 않은 숙제",
+      detailTitle: "오늘 미완료 숙제",
+      emptyHomeworks: "선택한 학생의 오늘 미완료 숙제가 없습니다.",
+      emptyStudents: "오늘 미완료 숙제가 있는 학생이 없습니다.",
+      studentHint: "오늘 처리해야 하는 미완료 숙제가 있는 학생만 봅니다.",
+      studentTitle: "오늘 미완료"
+    }
+  };
+  const activeMetricMeta = metricMeta[activeMetric] ?? metricMeta.all;
   const visibleStudents = filteredStudents.filter((student) => {
     if (activeMetric === "registered") return registeredStudentIds.has(student.studentId);
     if (activeMetric === "today") return todayIncompleteStudentIds.has(student.studentId);
     if (activeMetric === "overdue") return overdueStudentIds.has(student.studentId);
     return true;
   });
+  const visibleStudentIds = visibleStudents.map((student) => student.studentId).join("|");
+  const firstVisibleStudentId = visibleStudents[0]?.studentId ?? "";
   const selectedStudent =
     visibleStudents.find((student) => student.studentId === selectedStudentId) ?? visibleStudents[0] ?? null;
-  const selectedHomeworks = selectedStudent
-    ? unresolvedHomeworks.filter((homework) => homework.studentId === selectedStudent.studentId)
-    : [];
+  const selectedHomeworks = selectedStudent ? getStudentHomeworksByMetric(selectedStudent.studentId) : [];
   const registeredStudentCount = registeredStudentIds.size;
   const todayIncompleteCount = todayIncompleteStudentIds.size;
   const overdueStudentCount = overdueStudentIds.size;
 
+  useEffect(() => {
+    if (!visibleStudentIds) {
+      if (selectedStudentId) setSelectedStudentId("");
+      return;
+    }
+    if (!visibleStudentIds.split("|").includes(selectedStudentId)) {
+      setSelectedStudentId(firstVisibleStudentId);
+    }
+  }, [firstVisibleStudentId, selectedStudentId, visibleStudentIds]);
+
+  function getStudentHomeworksByMetric(studentId) {
+    const sortByAssignedDate = (items) =>
+      [...items].sort((a, b) =>
+        String(a.assignedDate ?? a.dueDate ?? "").localeCompare(String(b.assignedDate ?? b.dueDate ?? ""))
+      );
+    if (activeMetric === "today") {
+      return sortByAssignedDate(
+        unresolvedHomeworks.filter((homework) => homework.studentId === studentId && homework.dueDate === today)
+      );
+    }
+    if (activeMetric === "overdue") {
+      return sortByAssignedDate(
+        unresolvedHomeworks.filter((homework) => homework.studentId === studentId && isHomeworkOverdue(homework))
+      );
+    }
+    return sortByAssignedDate(homeworks.filter((homework) => homework.studentId === studentId && homework.title));
+  }
+
   function getStudentHomeworkSummary(student) {
     const studentHomeworks = homeworks.filter((homework) => homework.studentId === student.studentId);
     const unresolvedCount = unresolvedHomeworks.filter((homework) => homework.studentId === student.studentId).length;
+    const todayCount = unresolvedHomeworks.filter(
+      (homework) => homework.studentId === student.studentId && homework.dueDate === today
+    ).length;
+    const overdueCount = unresolvedHomeworks.filter(
+      (homework) => homework.studentId === student.studentId && isHomeworkOverdue(homework)
+    ).length;
     const doneCount = studentHomeworks.filter(
       (homework) => homework.teacherStatus === "verified" || homework.studentStatus === "checked_done"
     ).length;
     const progress = studentHomeworks.length ? Math.round((doneCount / studentHomeworks.length) * 100) : 0;
     return {
       hasRegisteredHomework: studentHomeworks.length > 0,
+      overdueCount,
       progress,
+      registeredCount: studentHomeworks.length,
+      todayCount,
       unresolvedCount
     };
+  }
+
+  function getStudentMetricLine(summary) {
+    if (activeMetric === "registered") return `등록 숙제 ${summary.registeredCount}건 · 진행 ${summary.progress}%`;
+    if (activeMetric === "today") return `오늘 미완료 ${summary.todayCount}건`;
+    if (activeMetric === "overdue") return `밀린 숙제 ${summary.overdueCount}건`;
+    return `오늘 미완료 ${summary.todayCount}건 · 밀림 ${summary.overdueCount}건`;
   }
 
   function handleMetricClick(metric) {
@@ -9601,9 +9680,13 @@ function OverdueHomework({ homeworks, students, onTeacherVerifyHomework }) {
         <section className="panel homeworkProgressPanel">
           <div className="sectionHeader compact">
             <div>
-              <h2>학생별 진행 현황</h2>
-              <p className="muted">{metricLabels[activeMetric]} · 학년</p>
+              <h2>{activeMetricMeta.studentTitle}</h2>
+              <p className="muted">{activeMetricMeta.studentHint}</p>
             </div>
+          </div>
+          <div className="homeworkMetricNotice">
+            <strong>{metricLabels[activeMetric]}</strong>
+            <span>{visibleStudents.length}명 표시 중</span>
           </div>
           <div className="homeworkGradeFilters">
             {["전체", "중1", "중2", "중3", "고1", "고2", "고3"].map((grade) => (
@@ -9619,7 +9702,7 @@ function OverdueHomework({ homeworks, students, onTeacherVerifyHomework }) {
           </div>
           <div className="homeworkStudentGrid">
             {visibleStudents.length === 0 ? (
-              <div className="emptyHomeworkBox compact">해당 조건의 학생이 없습니다.</div>
+              <div className="emptyHomeworkBox compact">{activeMetricMeta.emptyStudents}</div>
             ) : null}
             {visibleStudents.map((student) => {
               const summary = getStudentHomeworkSummary(student);
@@ -9641,7 +9724,7 @@ function OverdueHomework({ homeworks, students, onTeacherVerifyHomework }) {
                     <i style={{ width: `${summary.progress}%` }} />
                   </span>
                   <span className="homeworkStudentMeta">
-                    오늘 미완료 0 · 밀림 {summary.unresolvedCount ? `${summary.unresolvedCount}건` : "없음"}
+                    {getStudentMetricLine(summary)}
                   </span>
                 </button>
               );
@@ -9652,16 +9735,18 @@ function OverdueHomework({ homeworks, students, onTeacherVerifyHomework }) {
         <section className="panel homeworkDetailPanel">
           <div className="sectionHeader compact">
             <div>
-              <h2>상세 보기</h2>
-              <p className="muted">{selectedStudent ? `${selectedStudent.name} 학생의 숙제 목록` : "학생을 선택하세요"}</p>
+              <h2>{activeMetricMeta.detailTitle}</h2>
+              <p className="muted">
+                {selectedStudent ? `${selectedStudent.name} · ${activeMetricMeta.detailHint}` : "학생을 선택하세요"}
+              </p>
             </div>
             <div className="detailActions">
               {selectedStudent ? <button className="softButton" type="button">👤 학생화면</button> : null}
-              <button className="softButton" type="button">전체</button>
+              <button className="softButton" onClick={() => handleMetricClick("all")} type="button">전체 학생</button>
             </div>
           </div>
           {selectedHomeworks.length === 0 ? (
-            <div className="emptyHomeworkBox">아직 숙제가 없습니다.</div>
+            <div className="emptyHomeworkBox">{activeMetricMeta.emptyHomeworks}</div>
           ) : null}
           <div className="homeworkDetailList">
             {selectedHomeworks.map((homework) => (

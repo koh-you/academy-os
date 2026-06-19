@@ -4934,6 +4934,7 @@ textarea.profileEditInput {
 .metricButton {
   cursor: pointer;
   font: inherit;
+  position: relative;
   text-align: left;
   transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
   width: 100%;
@@ -4948,6 +4949,25 @@ textarea.profileEditInput {
 
 .metricButton.active {
   background: #f8fbff;
+}
+
+.homeworkStatusMetrics .metricButton.active {
+  border-color: #172554;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.16);
+  outline: 2px solid rgba(37, 99, 235, 0.13);
+}
+
+.homeworkStatusMetrics .metricButton.active::after {
+  background: #172554;
+  border-radius: 999px;
+  bottom: 16px;
+  color: #ffffff;
+  content: "선택됨";
+  font-size: 12px;
+  font-weight: 900;
+  padding: 5px 9px;
+  position: absolute;
+  right: 18px;
 }
 
 .teacherPreviewPortal .metricCard {
@@ -5229,6 +5249,25 @@ textarea.profileEditInput {
   color: #ffffff;
 }
 
+.homeworkMetricNotice {
+  align-items: center;
+  background: #f6f9fd;
+  border: 1px solid #dbe5f5;
+  border-radius: 8px;
+  color: #546681;
+  display: flex;
+  font-size: 14px;
+  gap: 10px;
+  justify-content: space-between;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+}
+
+.homeworkMetricNotice strong {
+  color: #172554;
+  font-size: 15px;
+}
+
 .homeworkStudentGrid {
   display: grid;
   gap: 12px 18px;
@@ -5240,15 +5279,23 @@ textarea.profileEditInput {
   border: 1px solid transparent;
   border-radius: 8px;
   color: #0f172a;
+  cursor: pointer;
   display: grid;
   gap: 8px;
   padding: 12px 14px;
   text-align: left;
+  transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.homeworkStudentTile:hover {
+  background: #f8fbff;
+  border-color: #d8e3f8;
 }
 
 .homeworkStudentTile.active {
   background: #f3f7fc;
   border-color: #cbd7ec;
+  box-shadow: inset 3px 0 0 #2563eb;
 }
 
 .homeworkStudentTop {
