@@ -3662,38 +3662,66 @@ function TeacherLessonHubV2({
     selectedLessonId
   ]);
 
+  const selectedMakeupTask = selectedLesson
+    ? makeupTasks.find((task) => task.makeupTaskId === selectedLesson.sourceMakeupTaskId)
+    : null;
+  const isHomeworkMakeupLesson =
+    selectedLesson?.lessonType === "makeup" &&
+    (selectedMakeupTask?.taskType === "homework_makeup" ||
+      selectedLesson.lessonTopic?.includes("숙제보충") ||
+      selectedLesson.className?.includes("숙제보충"));
   const lessonJournalDialog = isLessonJournalOpen && selectedLesson ? (
-    <div className="modalBackdrop lessonJournalModalBackdrop" role="dialog" aria-modal="true">
-      <div className="lessonJournalModal">
-        <LessonJournalDetail
-          academyTests={academyTests}
-          aiSettings={aiSettings}
-          allRecords={allRecords}
-          integrationStatus={integrationStatus}
+    isHomeworkMakeupLesson ? (
+      <Modal
+        backdropClassName="homeworkMakeupModalBackdrop"
+        className="homeworkMakeupScheduleModal"
+        title="숙제보충 일정"
+        subtitle="일반 수업일지가 아니라, 미완료 숙제 보충 정보를 확인하는 전용 화면입니다."
+        onClose={onBackToCalendar}
+      >
+        <HomeworkMakeupLessonDetail
           homeworks={homeworks}
           lesson={selectedLesson}
           lessons={lessons}
-        materials={materials}
-        makeupTasks={makeupTasks}
-        onApplyBulkHomework={onApplyBulkHomework}
-        onBack={onBackToCalendar}
-        onChangeRecord={onChangeRecord}
           onDeleteLesson={onDeleteLesson}
           onEditLesson={onEditLesson}
-          onOpenAttendance={onOpenAttendance}
-          onOpenExamPrep={onOpenExamPrep}
-          onOpenReport={onOpenReport}
-          onPolishComment={onPolishComment}
-          onPolishPreparationNotice={onPolishPreparationNotice}
-          onSaveRecord={onSaveRecord}
-          onSendComment={onSendComment}
-          onUpdateHomework={onUpdateHomework}
-          records={records}
-          saveStates={saveStates}
           students={students}
+          task={selectedMakeupTask}
         />
+      </Modal>
+    ) : (
+      <div className="modalBackdrop lessonJournalModalBackdrop" role="dialog" aria-modal="true">
+        <div className="lessonJournalModal">
+          <LessonJournalDetail
+            academyTests={academyTests}
+            aiSettings={aiSettings}
+            allRecords={allRecords}
+            integrationStatus={integrationStatus}
+            homeworks={homeworks}
+            lesson={selectedLesson}
+            lessons={lessons}
+            materials={materials}
+            makeupTasks={makeupTasks}
+            onApplyBulkHomework={onApplyBulkHomework}
+            onBack={onBackToCalendar}
+            onChangeRecord={onChangeRecord}
+            onDeleteLesson={onDeleteLesson}
+            onEditLesson={onEditLesson}
+            onOpenAttendance={onOpenAttendance}
+            onOpenExamPrep={onOpenExamPrep}
+            onOpenReport={onOpenReport}
+            onPolishComment={onPolishComment}
+            onPolishPreparationNotice={onPolishPreparationNotice}
+            onSaveRecord={onSaveRecord}
+            onSendComment={onSendComment}
+            onUpdateHomework={onUpdateHomework}
+            records={records}
+            saveStates={saveStates}
+            students={students}
+          />
+        </div>
       </div>
-    </div>
+    )
   ) : null;
 
   return (
@@ -3729,7 +3757,11 @@ function TeacherLessonHubV2({
                 <span className="lessonPills">
                   {dayLessons.map((lesson) => (
                     <button
-                      className={lesson.lessonId === selectedLessonId ? "lessonPill active" : "lessonPill"}
+                      className={[
+                        "lessonPill",
+                        lesson.lessonId === selectedLessonId ? "active" : "",
+                        lesson.lessonType === "makeup" ? "makeupLessonPill" : ""
+                      ].filter(Boolean).join(" ")}
                       key={lesson.lessonId}
                       onClick={(event) => {
                         event.stopPropagation();
@@ -3756,7 +3788,6 @@ function HomeworkMakeupLessonDetail({
   homeworks = [],
   lesson,
   lessons = [],
-  onBack,
   onDeleteLesson,
   onEditLesson,
   students = [],
@@ -3789,23 +3820,37 @@ function HomeworkMakeupLessonDetail({
     task?.status === "done" ? "보충 완료" : task?.status === "scheduled" ? "일정 확정" : "일정 미확정";
   const sourceLessonLabel = sourceLesson?.className ?? sourceLesson?.lessonTopic ?? "원 수업 기록";
   const assignmentCount = task?.assignmentCount ?? task?.attemptCount ?? 0;
-  const lessonTime = [lesson.startTime, lesson.endTime].filter(Boolean).join("-") || "시간 미정";
+  const scheduledText = `${lesson.date} ${lesson.startTime || ""}`.trim();
+  const confirmedText = task?.lastScheduledAt ? formatKoreanDateTime(task.lastScheduledAt) : "확정 기록 없음";
 
   return (
-    <div className="lessonJournalPage homeworkMakeupPage">
-      <div className="lessonJournalHeader homeworkMakeupHeader">
-        <button className="iconButton" type="button" onClick={onBack}>
-          ‹
-        </button>
+    <div className="homeworkMakeupModalBody">
+      <div className="homeworkMakeupSummary">
         <div>
-          <span className="eyebrow">HOMEWORK MAKEUP</span>
-          <h1>{lesson.className}</h1>
-          <p>
-            {lesson.date} · {lessonTime} · {lessonStudents.length}명
-          </p>
+          <span>대상 학생</span>
+          <strong>{student?.name ?? "미확인"}</strong>
+          <small>{student?.grade ?? "-"} · {student?.schoolName ?? student?.school ?? "학교 미입력"}</small>
         </div>
-        <div className="lessonJournalHeaderActions">
-          <span className="muted">숙제보충 일정</span>
+        <div>
+          <span>해야 했던 날짜</span>
+          <strong>{dueDate}</strong>
+          <small>{sourceDate} 배정</small>
+        </div>
+        <div>
+          <span>안 한 숙제 내용</span>
+          <strong>{targetTitle}</strong>
+          <small>{sourceLessonLabel}</small>
+        </div>
+        <div>
+          <span>보충 확정 일정</span>
+          <strong>{scheduledText}</strong>
+          <small>확정 처리: {confirmedText}</small>
+        </div>
+      </div>
+
+      <div className="homeworkMakeupModalActions">
+        <span className="statusPill">{statusLabel}</span>
+        <div>
           <button className="ghostButton" type="button" onClick={() => onEditLesson(lesson)}>
             일정 수정
           </button>
@@ -3820,9 +3865,11 @@ function HomeworkMakeupLessonDetail({
           <div>
             <span className="eyebrow">보충 대상 숙제</span>
             <h2>{targetTitle}</h2>
-            <p>{student?.name ?? "학생 미확인"} 학생이 보충해야 하는 숙제와 원 수업 기록입니다.</p>
+            <p>
+              {student?.name ?? "학생 미확인"} 학생이 {dueDate}까지 끝냈어야 하는 숙제입니다.
+              보충은 {scheduledText}에 진행됩니다.
+            </p>
           </div>
-          <span className="statusPill">{statusLabel}</span>
         </div>
         <div className="makeupInfoGrid">
           <div className="makeupInfoTile">
@@ -3843,6 +3890,11 @@ function HomeworkMakeupLessonDetail({
             <small>{assignmentCount ? `배정 ${assignmentCount}회` : "배정 기록 확인"}</small>
           </div>
           <div className="makeupInfoTile">
+            <span>보충 확정일</span>
+            <strong>{scheduledText}</strong>
+            <small>확정 처리: {confirmedText}</small>
+          </div>
+          <div className="makeupInfoTile">
             <span>보충 방식</span>
             <strong>{methodLabel}</strong>
             <small>{task?.reason ?? "숙제보충"}</small>
@@ -3860,7 +3912,7 @@ function HomeworkMakeupLessonDetail({
           <div className="makeupLinkedBox">
             <span>보충 대상</span>
             <strong>{targetTitle}</strong>
-            <small>원 수업일자: {sourceDate}</small>
+            <small>원 수업일자: {sourceDate} · 마감일: {dueDate}</small>
           </div>
         </section>
         <section className="panel homeworkMakeupChecklist">
@@ -3986,7 +4038,6 @@ function LessonJournalDetail({
         homeworks={homeworks}
         lesson={lesson}
         lessons={lessons}
-        onBack={onBack}
         onDeleteLesson={onDeleteLesson}
         onEditLesson={onEditLesson}
         students={students}
@@ -10997,6 +11048,17 @@ function createSupplementLessonId(task) {
 
 function createSupplementLessonName(task, student) {
   return `${followUpTypeLabel(task.taskType)} · ${student.name}`;
+}
+
+function formatKoreanDateTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "확정 기록 없음";
+  return date.toLocaleString("ko-KR", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
 }
 
 function addMinutesToTime(time, minutes) {
