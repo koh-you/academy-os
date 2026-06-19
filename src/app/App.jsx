@@ -9412,7 +9412,7 @@ function SupplementCenter({
 }) {
   const [selectedSupplementStudentId, setSelectedSupplementStudentId] = useState("");
   const [activeSupplementTab, setActiveSupplementTab] = useState("homework_makeup");
-  const overdueHomeworks = homeworks.filter((homework) => isHomeworkOverdue(homework)).slice(0, 8);
+  const overdueHomeworks = homeworks.filter((homework) => isHomeworkMakeupCandidate(homework)).slice(0, 8);
   const absentRecords = records
     .filter((record) => record.attendanceStatus === "absent" || record.attendanceStatus === "excused")
     .slice(0, 8);
@@ -9452,21 +9452,21 @@ function SupplementCenter({
     {
       id: "homework_makeup",
       title: "숙제보충",
-      subtitle: "밀린 숙제를 보충 과제로 전환합니다.",
+      subtitle: "미완료 숙제를 보충 과제로 전환합니다.",
       count: overdueHomeworks.length,
-      emptyText: "밀린 숙제가 없습니다.",
+      emptyText: "미완료 숙제가 없습니다.",
       items: overdueHomeworks.map((homework) => ({
         id: homework.homeworkId,
         studentId: homework.studentId,
         title: homework.title,
-        meta: `${homework.dueDate} 마감`,
+        meta: `${homework.dueDate || homework.assignedDate || "-"} 기준 · ${getHomeworkAction(homework)}`,
         actionLabel: "보충 생성",
         task: {
           taskType: "homework_makeup",
           studentId: homework.studentId,
           sourceId: homework.homeworkId,
           sourceLabel: homework.title,
-          reason: "밀린 숙제",
+          reason: isHomeworkOverdue(homework) ? "밀린 숙제" : "미완료 숙제",
           supplementMethod: "next_lesson"
         }
       }))
@@ -11598,6 +11598,13 @@ function isHomeworkOverdue(homework) {
     Boolean(homework.dueDate) &&
     homework.dueDate < today &&
     isHomeworkActionRequired(homework)
+  );
+}
+
+function isHomeworkMakeupCandidate(homework) {
+  return (
+    isHomeworkActionRequired(homework) &&
+    (isHomeworkOverdue(homework) || ["missing", "partial"].includes(homework.teacherStatus))
   );
 }
 
