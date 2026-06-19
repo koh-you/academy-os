@@ -596,10 +596,15 @@ function updateDateRangeField(value = "", field, nextValue = "") {
 
 function getSchoolCalendarTargetRows(rows = [], event = {}) {
   const eventGrade = normalizeGradeLabel(event.grade || "");
+  const eventSubject = normalizeMathSubject(event.examSubject || event.subject || "");
+  const hasSpecificSubject = event.type === "mathExam" && eventSubject && !["수학", "수학시험"].includes(eventSubject);
   return rows.filter((row) => {
     if ((row.schoolName || "") !== (event.schoolName || "")) return false;
+    if (event.examCycle && row.examCycle !== event.examCycle) return false;
     if (!eventGrade) return true;
-    return normalizeGradeLabel(row.grade || "") === eventGrade;
+    if (normalizeGradeLabel(row.grade || "") !== eventGrade) return false;
+    if (hasSpecificSubject && normalizeMathSubject(row.subject || "") !== eventSubject) return false;
+    return true;
   });
 }
 
@@ -1647,6 +1652,13 @@ export function App() {
     });
   }
 
+  function handleSyncPreExamLessonFromSchoolEvent(event) {
+    const lesson = createPreExamLessonFromSchoolEvent(event, students);
+    if (!lesson) return;
+    setLessons((current) => upsertById(current, lesson, "lessonId"));
+    postJson("/api/lessons", { lesson }).catch((error) => console.error(error));
+  }
+
   function handleUpdateClassRoster(classTemplateId, nextStudentIds) {
     const nextStudentIdSet = new Set(nextStudentIds);
     const previousStudents = students;
@@ -2082,6 +2094,7 @@ export function App() {
               ])
             }
             onDeleteEvent={(eventId) => setSchoolEvents((current) => current.filter((event) => event.eventId !== eventId))}
+            onSyncPreExamLesson={handleSyncPreExamLessonFromSchoolEvent}
             onUpdateExamPrepRow={handleUpdateExamPrepRow}
             onUpdateEvent={(eventId, field, value) =>
               setSchoolEvents((current) =>
@@ -3648,6 +3661,7 @@ function TeacherLessonHubV2({
   undoCount,
   isLessonJournalOpen
 }) {
+  const [lessonTypeFilter, setLessonTypeFilter] = useState("all");
   useEffect(() => {
     function isEditableTarget(target) {
       const tagName = target?.tagName?.toLowerCase();
@@ -3770,6 +3784,18 @@ function TeacherLessonHubV2({
       </div>
     )
   ) : null;
+  const lessonTypeFilterOptions = [
+    { id: "all", label: "전체" },
+    { id: "regular", label: "정규수업" },
+    { id: "preExam", label: "직전수업" },
+    { id: "makeup", label: "보충수업" }
+  ];
+  const visibleLessons = lessons.filter((lesson) => {
+    if (lessonTypeFilter === "all") return true;
+    if (lessonTypeFilter === "regular") return !["preExam", "makeup"].includes(lesson.lessonType);
+    return lesson.lessonType === lessonTypeFilter;
+  });
+  const visibleLessonCount = visibleLessons.filter((lesson) => lesson.date.slice(0, 7) === selectedDate.slice(0, 7)).length;
 
   return (
     <>
@@ -3778,6 +3804,19 @@ function TeacherLessonHubV2({
         <h1>{formatMonthTitle(selectedDate)}</h1>
         <button className="iconButton" onClick={() => onMoveDate(30)} type="button">›</button>
         <span className="shortcutHint">↑↓←→ · Enter · Del · Ctrl+C/V/Z</span>
+        <div className="lessonTypeFilterBar" aria-label="수업일지 일정 종류 필터">
+          {lessonTypeFilterOptions.map((option) => (
+            <button
+              className={lessonTypeFilter === option.id ? "active" : ""}
+              key={option.id}
+              onClick={() => setLessonTypeFilter(option.id)}
+              type="button"
+            >
+              {option.label}
+            </button>
+          ))}
+          <span>{visibleLessonCount}개</span>
+        </div>
         <button className="primaryButton" onClick={onAddLesson} type="button">+ 수업 등록</button>
       </header>
 
@@ -3787,7 +3826,7 @@ function TeacherLessonHubV2({
             <div className="weekday" key={label}>{label}</div>
           ))}
           {buildMonthDays(selectedDate).map((day) => {
-            const dayLessons = lessons.filter((lesson) => lesson.date === day.date).sort(sortByTime);
+            const dayLessons = visibleLessons.filter((lesson) => lesson.date === day.date).sort(sortByTime);
             return (
               <div
                 className={[
@@ -3807,6 +3846,7 @@ function TeacherLessonHubV2({
                       className={[
                         "lessonPill",
                         lesson.lessonId === selectedLessonId ? "active" : "",
+                        lesson.lessonType === "preExam" ? "preExamLessonPill" : "",
                         lesson.lessonType === "makeup" ? "makeupLessonPill" : ""
                       ].filter(Boolean).join(" ")}
                       key={lesson.lessonId}
@@ -5154,6 +5194,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
         <div className="typeTabs">
           {[
             ["class", "🏹 수업"],
+            ["preExam", "📌 직전수업"],
             ["exam", "📝 평가"],
             ["makeup", "🔧 보강"]
           ].map(([value, label]) => (
@@ -6575,7 +6616,7 @@ function ExamAnalysisCenter({
   );
 }
 
-function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdateExamPrepRow, onUpdateEvent }) {
+function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncPreExamLesson, onUpdateExamPrepRow, onUpdateEvent }) {
   const [selectedMonth, setSelectedMonth] = useState(today);
   const [selectedDate, setSelectedDate] = useState(today);
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
@@ -6585,20 +6626,42 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
   const [newEvent, setNewEvent] = useState({
     schoolName: rows[0]?.schoolName ?? "",
     grade: rows[0]?.grade ?? "",
+    examCycle: rows[0]?.examCycle ?? "2026-1-mid",
     date: today,
     endDate: "",
     title: "",
     type: "examPeriod",
     color: "#dc2626",
     examSubject: "",
-    memo: ""
+    memo: "",
+    mathExamItems: [
+      {
+        id: `math_item_${Date.now()}`,
+        grade: rows[0]?.grade ?? "",
+        subject: rows[0]?.subject ?? "",
+        date: today,
+        memo: ""
+      }
+    ]
   });
   const schools = [...new Set(rows.map((row) => row.schoolName).filter(Boolean))];
+  const examCycleOptions = [...new Set(rows.map((row) => row.examCycle).filter(Boolean))];
+  const safeExamCycleOptions = examCycleOptions.length
+    ? examCycleOptions
+    : ["2026-1-mid", "2026-1-final", "2026-2-mid", "2026-2-final"];
   const gradesForSelectedSchool = [
     ...new Set(
       rows
         .filter((row) => !newEvent.schoolName || row.schoolName === newEvent.schoolName)
         .map((row) => row.grade)
+        .filter(Boolean)
+    )
+  ];
+  const subjectsForSelectedSchool = [
+    ...new Set(
+      rows
+        .filter((row) => !newEvent.schoolName || row.schoolName === newEvent.schoolName)
+        .map((row) => row.subject)
         .filter(Boolean)
     )
   ];
@@ -6639,12 +6702,14 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
   function submitNewEvent() {
     const schoolName = newEvent.schoolName || schools[0] || "학교 미입력";
     const subjectTitle = newEvent.examSubject.trim() || (newEvent.type === "mathExam" ? "수학시험" : "");
-    const fallbackTitle = joinCalendarLabel(schoolName, subjectTitle);
+    const fallbackTitle = newEvent.type === "examPeriod"
+      ? joinCalendarLabel(schoolName, examCycleLabel(newEvent.examCycle), "시험기간")
+      : joinCalendarLabel(schoolName, subjectTitle);
     const title = newEvent.title.trim() || fallbackTitle;
     if (!newEvent.date || !title) return;
-    const createsMathExamMarker = newEvent.type !== "mathExam" && Boolean(subjectTitle);
     const nextEvent = {
       ...newEvent,
+      mathExamItems: undefined,
       eventId: `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       schoolName,
       title,
@@ -6652,9 +6717,35 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
     };
     onAddEvent(nextEvent);
     syncSchoolCalendarEventToExamPrepRows(rows, nextEvent, onUpdateExamPrepRow);
-    if (createsMathExamMarker) {
+    if (nextEvent.type === "mathExam") onSyncPreExamLesson?.(nextEvent);
+    if (newEvent.type === "examPeriod") {
+      newEvent.mathExamItems
+        .filter((item) => item.date && (item.grade || item.subject))
+        .forEach((item) => {
+          const itemSubject = item.subject || "수학시험";
+          const itemDetail = [item.grade, itemSubject].filter(Boolean).join(" ");
+          const mathEvent = {
+            ...newEvent,
+            mathExamItems: undefined,
+            eventId: `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+            type: "mathExam",
+            date: item.date,
+            endDate: "",
+            grade: item.grade,
+            schoolName,
+            title: joinCalendarLabel(schoolName, itemDetail, "수학시험"),
+            examSubject: itemSubject,
+            memo: item.memo || newEvent.memo,
+            color: "#dc2626"
+          };
+          onAddEvent(mathEvent);
+          syncSchoolCalendarEventToExamPrepRows(rows, mathEvent, onUpdateExamPrepRow);
+          onSyncPreExamLesson?.(mathEvent);
+        });
+    } else if (newEvent.type !== "mathExam" && Boolean(subjectTitle)) {
       const mathEvent = {
         ...newEvent,
+        mathExamItems: undefined,
         eventId: `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
         type: "mathExam",
         endDate: "",
@@ -6665,10 +6756,49 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
       };
       onAddEvent(mathEvent);
       syncSchoolCalendarEventToExamPrepRows(rows, mathEvent, onUpdateExamPrepRow);
+      onSyncPreExamLesson?.(mathEvent);
     }
     setSelectedDate(newEvent.date);
     setSelectedMonth(newEvent.date);
-    setNewEvent((current) => ({ ...current, title: "", examSubject: "", memo: "" }));
+    setNewEvent((current) => ({
+      ...current,
+      title: "",
+      examSubject: "",
+      memo: "",
+      mathExamItems: [{ id: `math_item_${Date.now()}`, grade: current.grade, subject: current.examSubject || "", date: current.date, memo: "" }]
+    }));
+  }
+
+  function updateMathExamItem(itemId, field, value) {
+    setNewEvent((current) => ({
+      ...current,
+      mathExamItems: current.mathExamItems.map((item) => (item.id === itemId ? { ...item, [field]: value } : item))
+    }));
+  }
+
+  function addMathExamItem() {
+    setNewEvent((current) => ({
+      ...current,
+      mathExamItems: [
+        ...current.mathExamItems,
+        {
+          id: `math_item_${Date.now()}_${current.mathExamItems.length}`,
+          grade: current.grade,
+          subject: current.examSubject || "",
+          date: current.date,
+          memo: ""
+        }
+      ]
+    }));
+  }
+
+  function removeMathExamItem(itemId) {
+    setNewEvent((current) => ({
+      ...current,
+      mathExamItems: current.mathExamItems.length > 1
+        ? current.mathExamItems.filter((item) => item.id !== itemId)
+        : current.mathExamItems
+    }));
   }
 
   function openDateModal(date) {
@@ -6704,12 +6834,14 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
         ));
         onUpdateExamPrepRow?.(event.examPrepId, "mathExamDates", nextEntries);
         onUpdateExamPrepRow?.(event.examPrepId, "mathExamDate", syncPrimaryMathExamDate(nextEntries));
+        onSyncPreExamLesson?.({ ...event, date: value });
         return;
       }
     }
     const nextEvent = { ...event, [field]: value };
     onUpdateEvent(event.eventId, field, value);
     syncSchoolCalendarEventToExamPrepRows(rows, nextEvent, onUpdateExamPrepRow);
+    if (nextEvent.type === "mathExam") onSyncPreExamLesson?.(nextEvent);
   }
 
   return (
@@ -6750,6 +6882,14 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
                   <option value="">학교 선택</option>
                   {schools.map((school) => (
                     <option key={school} value={school}>{school}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                시험 구분
+                <select value={newEvent.examCycle} onChange={(event) => setNewEvent((current) => ({ ...current, examCycle: event.target.value }))}>
+                  {safeExamCycleOptions.map((cycle) => (
+                    <option key={cycle} value={cycle}>{examCycleLabel(cycle)}</option>
                   ))}
                 </select>
               </label>
@@ -6799,7 +6939,55 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
                   <input type="date" value={newEvent.endDate} onChange={(event) => setNewEvent((current) => ({ ...current, endDate: event.target.value }))} />
                 </label>
               </div>
-              <div className="examSubjectBox">
+              {newEvent.type === "examPeriod" ? (
+                <div className="examSubjectBox schoolExamBundleBox">
+                  <div className="sectionHeader slim">
+                    <strong>수학시험 날짜</strong>
+                    <button className="softButton small" onClick={addMathExamItem} type="button">+ 수학시험 추가</button>
+                  </div>
+                  <div className="mathExamItemStack">
+                    {newEvent.mathExamItems.map((item, index) => (
+                      <div className="mathExamItemRow" key={item.id}>
+                        <label>
+                          학년
+                          <select value={item.grade} onChange={(event) => updateMathExamItem(item.id, "grade", event.target.value)}>
+                            <option value="">학년 선택</option>
+                            {gradesForSelectedSchool.map((grade) => (
+                              <option key={grade} value={grade}>{grade}</option>
+                            ))}
+                          </select>
+                        </label>
+                        <label>
+                          과목
+                          <input
+                            list="school-calendar-subjects"
+                            value={item.subject}
+                            onChange={(event) => updateMathExamItem(item.id, "subject", event.target.value)}
+                            placeholder="예: 공통수학1, 대수, 미적분1"
+                          />
+                        </label>
+                        <label>
+                          시험 날짜
+                          <input type="date" value={item.date} onChange={(event) => updateMathExamItem(item.id, "date", event.target.value)} />
+                        </label>
+                        <button className="iconButton" disabled={newEvent.mathExamItems.length === 1} onClick={() => removeMathExamItem(item.id)} type="button">
+                          ×
+                        </button>
+                        <label className="mathExamItemMemo">
+                          메모
+                          <input value={item.memo} onChange={(event) => updateMathExamItem(item.id, "memo", event.target.value)} placeholder={`${index + 1}번째 수학시험 메모`} />
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                  <datalist id="school-calendar-subjects">
+                    {subjectsForSelectedSchool.map((subject) => (
+                      <option key={subject} value={subject} />
+                    ))}
+                  </datalist>
+                </div>
+              ) : (
+                <div className="examSubjectBox">
                 <div className="sectionHeader slim">
                   <strong>날짜별 시험 과목</strong>
                   <span>{newEvent.date.slice(5).replace("-", ".")}</span>
@@ -6809,11 +6997,14 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
                   <input value={newEvent.examSubject} onChange={(event) => setNewEvent((current) => ({ ...current, examSubject: event.target.value }))} placeholder="예: 수학" />
                 </div>
               </div>
+              )}
               <label>
                 메모
                 <textarea value={newEvent.memo} onChange={(event) => setNewEvent((current) => ({ ...current, memo: event.target.value }))} placeholder="필요한 메모" rows="4" />
               </label>
-              <button className="primaryButton full" onClick={submitNewEvent} type="button">일정 등록</button>
+              <button className="primaryButton full" onClick={submitNewEvent} type="button">
+                {newEvent.type === "examPeriod" ? "시험일정 묶음 등록" : "일정 등록"}
+              </button>
             </>
           )}
         </aside>
@@ -11176,6 +11367,42 @@ function createSupplementLessonId(task) {
 
 function createSupplementLessonName(task, student) {
   return `${followUpTypeLabel(task.taskType)} · ${student.name}`;
+}
+
+function getStudentsForSchoolCalendarEvent(students = [], event = {}) {
+  const eventGrade = normalizeGradeLabel(event.grade || "");
+  return students.filter((student) => {
+    if ((student.schoolName || "") !== (event.schoolName || "")) return false;
+    if (!eventGrade) return true;
+    return normalizeGradeLabel(student.grade || "") === eventGrade;
+  });
+}
+
+function createPreExamLessonFromSchoolEvent(event = {}, students = []) {
+  if (event.type !== "mathExam" || !event.date) return null;
+  const lessonStudents = getStudentsForSchoolCalendarEvent(students, event);
+  if (lessonStudents.length === 0) return null;
+  const subject = event.examSubject || event.subject || "수학";
+  const gradeLabel = event.grade ? `${event.grade} ` : "";
+  const sourceId = event.eventId || `${event.schoolName}_${event.grade}_${subject}_${event.date}`;
+  return {
+    lessonId: `lesson_pre_exam_${safeIdPart(sourceId)}`,
+    classTemplateId: "pre_exam",
+    className: `${event.schoolName || "학교 미입력"} ${gradeLabel}${subject} 직전수업`,
+    lessonType: "preExam",
+    lessonTopic: "직전대비",
+    sourceSchoolEventId: sourceId,
+    sourceExamDate: event.date,
+    examCycle: event.examCycle || "",
+    date: addDaysInKorea(event.date, -1),
+    dayOfWeek: getDayKey(addDaysInKorea(event.date, -1)),
+    startTime: "19:00",
+    endTime: "21:00",
+    color: "#7c3aed",
+    teacherId: "instructor_owner_001",
+    studentIds: lessonStudents.map((student) => student.studentId),
+    status: "scheduled"
+  };
 }
 
 function formatKoreanDateTime(value) {

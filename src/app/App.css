@@ -653,6 +653,45 @@ button {
   border-left: 4px solid #facc15;
 }
 
+.lessonPill.preExamLessonPill {
+  background: #6d28d9 !important;
+  border-left: 4px solid #f0abfc;
+}
+
+.lessonTypeFilterBar {
+  align-items: center;
+  background: #eef2f7;
+  border-radius: 8px;
+  display: flex;
+  gap: 6px;
+  padding: 5px;
+}
+
+.lessonTypeFilterBar button {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 900;
+  min-height: 34px;
+  padding: 6px 10px;
+}
+
+.lessonTypeFilterBar button.active {
+  background: #17213d;
+  border-color: #17213d;
+  color: #ffffff;
+}
+
+.lessonTypeFilterBar span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 0 6px;
+  white-space: nowrap;
+}
+
 .lessonJournalArea {
   display: grid;
   gap: 14px;
@@ -2265,6 +2304,39 @@ button {
 
 .examSubjectRow input {
   background: #ffffff;
+}
+
+.schoolExamBundleBox {
+  background: #f8fbff;
+  border-color: #bfdbfe;
+}
+
+.mathExamItemStack {
+  display: grid;
+  gap: 10px;
+}
+
+.mathExamItemRow {
+  align-items: end;
+  background: #ffffff;
+  border: 1px solid #dbe5f5;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(82px, 0.7fr) minmax(120px, 1.1fr) minmax(132px, 1fr) 38px;
+  padding: 10px;
+}
+
+.mathExamItemRow label {
+  margin: 0;
+}
+
+.mathExamItemMemo {
+  grid-column: 1 / -1;
+}
+
+.mathExamItemRow .iconButton:disabled {
+  opacity: 0.35;
 }
 
 .schoolMonthHeader {
@@ -7603,9 +7675,14 @@ textarea.profileEditInput {
   .editableEvent,
   .calendarDateGrid,
   .examSubjectRow,
+  .mathExamItemRow,
   .researchMetaGrid,
   .researchTextareaGrid {
     grid-template-columns: 1fr;
+  }
+
+  .mathExamItemMemo {
+    grid-column: auto;
   }
 
   .schoolCalendarHeader {
