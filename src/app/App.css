@@ -1608,6 +1608,7 @@ button {
 .analysisInputPanel,
 .analysisAiPanel,
 .teacherInsightPanel,
+.analysisPublishPanel,
 .outputCard {
   display: grid;
   gap: 14px;
@@ -1735,6 +1736,44 @@ button {
   font-size: 12px;
   font-weight: 900;
   padding: 5px 9px;
+}
+
+.publishSummaryGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.publishSummaryGrid article {
+  background: #f8fbff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+}
+
+.publishSummaryGrid strong {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.publishSummaryGrid span {
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.publishSummaryGrid small {
+  color: #64748b;
+  font-weight: 800;
+}
+
+.publishPreviewList {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .schoolCalendarPage {
@@ -7020,6 +7059,8 @@ textarea.profileEditInput {
   .aiVariantWorkspace,
   .insightGrid,
   .analysisOutputGrid,
+  .publishSummaryGrid,
+  .publishPreviewList,
   .tallyAiGrid {
     grid-template-columns: 1fr;
   }

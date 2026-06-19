@@ -5554,6 +5554,10 @@ function ExamAnalysisCenter({
   const [selectedAnalysisId, setSelectedAnalysisId] = useState(analyses[0]?.examAnalysisId ?? "");
   const [isListCollapsed, setIsListCollapsed] = useState(false);
   const selectedAnalysis = analyses.find((item) => item.examAnalysisId === selectedAnalysisId) ?? analyses[0];
+  const pipelineStages = ["1차 AI 가안", "강사 인사이트 추가", "최종 편집", "발행 완료"];
+  const currentStage = pipelineStages.includes(selectedAnalysis?.pipelineStage)
+    ? selectedAnalysis.pipelineStage
+    : pipelineStages[0];
   useEffect(() => {
     if (!selectedAnalysisId && analyses[0]?.examAnalysisId) {
       setSelectedAnalysisId(analyses[0].examAnalysisId);
@@ -5669,9 +5673,9 @@ function ExamAnalysisCenter({
             </section>
 
             <section className="analysisPipeline">
-              {["1차 AI 가안", "강사 인사이트 추가", "최종 편집", "발행 완료"].map((stage, index) => (
+              {pipelineStages.map((stage, index) => (
                 <button
-                  className={selectedAnalysis.pipelineStage === stage ? "pipelineStep active" : "pipelineStep"}
+                  className={currentStage === stage ? "pipelineStep active" : "pipelineStep"}
                   key={stage}
                   onClick={() => update("pipelineStage", stage)}
                   type="button"
@@ -5682,6 +5686,7 @@ function ExamAnalysisCenter({
               ))}
             </section>
 
+            {currentStage === "1차 AI 가안" ? (
             <section className="analysisTwoColumn">
               <div className="panel analysisInputPanel">
                 <div className="sectionHeader slim">
@@ -5756,7 +5761,9 @@ function ExamAnalysisCenter({
                 </div>
               </div>
             </section>
+            ) : null}
 
+            {currentStage === "강사 인사이트 추가" ? (
             <section className="panel teacherInsightPanel">
               <div className="sectionHeader slim">
                 <div>
@@ -5783,7 +5790,9 @@ function ExamAnalysisCenter({
                 </label>
               </div>
             </section>
+            ) : null}
 
+            {currentStage === "최종 편집" ? (
             <section className="analysisOutputGrid">
               <article className="panel outputCard">
                 <div className="sectionHeader slim">
@@ -5807,6 +5816,50 @@ function ExamAnalysisCenter({
                 <textarea value={selectedAnalysis.instagramDraft} onChange={(event) => update("instagramDraft", event.target.value)} rows="10" />
               </article>
             </section>
+            ) : null}
+
+            {currentStage === "발행 완료" ? (
+            <section className="panel analysisPublishPanel">
+              <div className="sectionHeader slim">
+                <div>
+                  <h2>발행 완료 확인</h2>
+                  <p className="muted">학생 분석지, 블로그 초안, 인스타 카드뉴스를 최종 발행 전에 한 번에 확인합니다.</p>
+                </div>
+                <span className="countBadge">{selectedAnalysis.aiStatus || "대기"}</span>
+              </div>
+              <div className="publishSummaryGrid">
+                <article>
+                  <strong>시험</strong>
+                  <span>{selectedAnalysis.schoolName} {selectedAnalysis.grade}</span>
+                  <small>{selectedAnalysis.examName} · {selectedAnalysis.subject}</small>
+                </article>
+                <article>
+                  <strong>AI 상태</strong>
+                  <span>{selectedAnalysis.aiStatus || "대기"}</span>
+                  <small>{selectedAnalysis.aiLastRunAt || "아직 실행 전"}</small>
+                </article>
+                <article>
+                  <strong>발행물</strong>
+                  <span>3종</span>
+                  <small>학생 분석지 · 블로그 · 인스타</small>
+                </article>
+              </div>
+              <div className="publishPreviewList">
+                <label>
+                  학생 분석지
+                  <textarea value={selectedAnalysis.studentAnalysisDraft} onChange={(event) => update("studentAnalysisDraft", event.target.value)} rows="7" />
+                </label>
+                <label>
+                  블로그 초안
+                  <textarea value={selectedAnalysis.blogDraft} onChange={(event) => update("blogDraft", event.target.value)} rows="7" />
+                </label>
+                <label>
+                  인스타 카드뉴스
+                  <textarea value={selectedAnalysis.instagramDraft} onChange={(event) => update("instagramDraft", event.target.value)} rows="7" />
+                </label>
+              </div>
+            </section>
+            ) : null}
           </section>
         ) : (
           <section className="panel emptyPortalPanel">

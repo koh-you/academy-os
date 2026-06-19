@@ -136,6 +136,34 @@ function parseJsonText(text) {
   }
 }
 
+function safeParseJsonText(text) {
+  const trimmed = String(text ?? "").trim();
+  if (!trimmed) return null;
+
+  try {
+    return JSON.parse(trimmed);
+  } catch (error) {
+    const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    if (fenced?.[1]) {
+      try {
+        return JSON.parse(fenced[1].trim());
+      } catch (fencedError) {
+        // Continue to broad object extraction.
+      }
+    }
+
+    const start = trimmed.indexOf("{");
+    const end = trimmed.lastIndexOf("}");
+    if (start === -1 || end === -1 || end <= start) return null;
+
+    try {
+      return JSON.parse(trimmed.slice(start, end + 1));
+    } catch (jsonError) {
+      return null;
+    }
+  }
+}
+
 function outputTextFromOpenAi(data) {
   return data.output_text ?? data.output?.[0]?.content?.[0]?.text ?? "";
 }
@@ -155,6 +183,22 @@ function createMockAnalysis(payload) {
     studentAnalysisDraft: `${school} 학생들은 이번 시험에서 조건 해석과 풀이 과정 정리가 중요했습니다. 다음 시험 전에는 핵심 유형 반복과 서술형 근거 작성 훈련이 필요합니다.`,
     blogDraft: `${school} ${subject} 시험 분석입니다. 이번 시험은 단순 계산보다 조건을 읽고 식으로 연결하는 힘이 중요했습니다. 으뜸수학 고태영T에서는 학생별 오답과 학교별 출제 흐름을 연결해 다음 시험 대비 방향을 잡습니다.`,
     instagramDraft: "1장 시험 총평\n2장 출제 단원\n3장 난이도 흐름\n4장 킬러문항 포인트\n5장 학생 실수 TOP3\n6장 다음 시험 대비법\n7장 으뜸수학 고태영T 안내"
+  };
+}
+
+function normalizeAnalysisFields(fields, payload, rawText = "") {
+  const fallback = createMockAnalysis(payload);
+  const parsed = fields && typeof fields === "object" ? fields : {};
+  const cleanText = String(rawText ?? "").trim();
+
+  return {
+    aiOverview: parsed.aiOverview || cleanText || fallback.aiOverview,
+    unitDistribution: parsed.unitDistribution || fallback.unitDistribution,
+    killerProblems: parsed.killerProblems || fallback.killerProblems,
+    mistakePatterns: parsed.mistakePatterns || fallback.mistakePatterns,
+    studentAnalysisDraft: parsed.studentAnalysisDraft || fallback.studentAnalysisDraft,
+    blogDraft: parsed.blogDraft || fallback.blogDraft,
+    instagramDraft: parsed.instagramDraft || fallback.instagramDraft
   };
 }
 
@@ -228,11 +272,13 @@ export async function runExamAnalysis(payload) {
   }
 
   if (provider === "openai") {
-    return { provider, model, fields: parseJsonText(await runOpenAiText(buildExamAnalysisPrompt(payload), model)) };
+    const text = await runOpenAiText(buildExamAnalysisPrompt(payload), model);
+    return { provider, model, fields: normalizeAnalysisFields(safeParseJsonText(text), payload, text), rawText: text };
   }
 
   if (provider === "anthropic") {
-    return { provider, model, fields: parseJsonText(await runAnthropicText(buildExamAnalysisPrompt(payload), model)) };
+    const text = await runAnthropicText(buildExamAnalysisPrompt(payload), model);
+    return { provider, model, fields: normalizeAnalysisFields(safeParseJsonText(text), payload, text), rawText: text };
   }
 
   throw new Error(`지원하지 않는 AI 제공자입니다: ${provider}`);
