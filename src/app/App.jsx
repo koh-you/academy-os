@@ -11773,6 +11773,7 @@ function getHomeworkLesson(homework, lessons = []) {
 
 function isHomeworkMakeupCandidate(homework, records = [], lessons = []) {
   if (!getHomeworkLesson(homework, lessons)) return false;
+  if (homework.homeworkType !== "previous") return false;
   const record = getHomeworkRecord(homework, records);
   const assignmentStatus = record?.assignmentStatus ?? record?.incompleteHomework ?? "";
   const recordRequiresMakeup = assignmentStatus ? isAssignmentStatusHomeworkMakeupCandidate(assignmentStatus) : false;
