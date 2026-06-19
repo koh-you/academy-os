@@ -3,6 +3,7 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const { SolapiMessageService } = require("solapi");
 
+const ACADEMY_NAME = "으뜸수학 고태영T";
 const DEFAULT_TEST_RECIPIENT = "01057882748";
 
 const REQUIRED_SOLAPI_ENV = [
@@ -20,7 +21,7 @@ const TEMPLATE_ENV = {
 const assignmentStatusMessageMap = {
   complete_thorough: "과제를 성실하게 완료했습니다.",
   complete_easy: "오늘 과제는 학생에게 비교적 수월하게 진행되었습니다.",
-  partial_80: "과제를 대부분 수행했으며, 남은 부분은 다음 수업에서 확인하겠습니다.",
+  partial_80: "과제의 대부분을 수행했으며, 남은 부분은 다음 수업에서 확인하겠습니다.",
   known_only: "아는 문항 위주로 진행되어 어려웠던 문항은 추가 확인이 필요합니다.",
   too_hard: "과제 난도가 다소 높아 보충 설명과 분량 조정이 필요합니다.",
   answer_suspected: "풀이 과정 확인이 필요한 문항이 있어 다음 수업에서 점검하겠습니다.",
@@ -69,6 +70,15 @@ function assignmentStatusText(value, fallback = "") {
   return assignmentStatusMessageMap[value] ?? fallback ?? value ?? "";
 }
 
+function normalizeText(value) {
+  return String(value ?? "")
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join("\n");
+}
+
 function normalizeList(value) {
   if (Array.isArray(value)) {
     return value
@@ -82,6 +92,15 @@ function normalizeList(value) {
     .split(/\r?\n|,\s*/g)
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function messageBlock(label, value) {
+  const text = normalizeText(value);
+  return text ? `${label}\n${text}` : "";
+}
+
+function joinMessageBlocks(blocks) {
+  return blocks.map(normalizeText).filter(Boolean).join("\n\n");
 }
 
 function resolveRecipient(phone, payload = {}) {
@@ -133,17 +152,17 @@ function formatScheduleItem(item) {
 function buildAttendanceBody({ attendanceStatus, checkedAt, lessonName, lateMinutes, reason }) {
   const status = attendanceLabel(attendanceStatus);
   const lines = [
-    `🏫 출결: ${status}`,
-    lessonName ? `📚 수업: ${lessonName}` : "",
-    checkedAt ? `🕒 시간: ${checkedAt}` : ""
+    messageBlock("🏫 출결", status),
+    lessonName ? messageBlock("📘 수업", lessonName) : "",
+    checkedAt ? messageBlock("🕒 시간", checkedAt) : ""
   ];
 
-  if (status === "지각" && lateMinutes) lines.push(`⏱️ 지각: ${lateMinutes}분`);
+  if (status === "지각" && lateMinutes) lines.push(messageBlock("⏱️ 지각", `${lateMinutes}분`));
   if ((status === "지각" || status === "결석" || status === "인정결석") && reason) {
-    lines.push(`📝 사유: ${reason}`);
+    lines.push(messageBlock("📝 사유", reason));
   }
 
-  return lines.filter(Boolean).join("\n");
+  return joinMessageBlocks(lines);
 }
 
 function buildDailyReportBody({
@@ -161,21 +180,20 @@ function buildDailyReportBody({
 }) {
   const incompleteList = normalizeList(incompleteHomeworks);
   const assignmentStatusMessage = assignmentStatusText(assignmentStatus, assignmentStatus);
-  const lines = [
-    `🏫 출결: ${attendanceLabel(attendanceStatus)}`,
-    lessonMaterial ? `📚 강의 교재: ${lessonMaterial}` : "",
-    lessonContent ? `🧭 강의 내용: ${lessonContent}` : "",
-    previousHomework ? `📖 지난 과제: ${previousHomework}` : "",
-    nextHomework ? `➡️ 다음 과제: ${nextHomework}` : "",
-    assignmentStatusMessage ? `✅ 과제 상태: ${assignmentStatusMessage}` : "",
-    preparationNotice ? `📝 수업 준비: ${preparationNotice}` : "",
-    incompleteList.length ? `⚠️ 미완료 과제:\n${incompleteList.map((item) => `- ${item}`).join("\n")}` : "",
-    retestSchedule ? `⭐ 중요 · 재시험 일정: ${retestSchedule}` : "",
-    supplementSchedule ? `⭐ 중요 · 보충 일정: ${supplementSchedule}` : "",
-    teacherComment ? `💬 코멘트: ${teacherComment}` : ""
-  ];
 
-  return lines.filter(Boolean).join("\n");
+  return joinMessageBlocks([
+    messageBlock("🏫 출결", attendanceLabel(attendanceStatus)),
+    messageBlock("📚 강의 교재", lessonMaterial),
+    messageBlock("🧭 강의 내용", lessonContent),
+    messageBlock("📘 지난 과제", previousHomework),
+    messageBlock("➡️ 다음 과제", nextHomework),
+    messageBlock("✅ 과제 상태", assignmentStatusMessage),
+    messageBlock("📝 수업메모", preparationNotice),
+    incompleteList.length ? messageBlock("⚠️ 미완료 과제", incompleteList.map((item) => `- ${item}`).join("\n")) : "",
+    messageBlock("⭐ 중요 · 재시험 일정", retestSchedule),
+    messageBlock("⭐ 중요 · 보충 일정", supplementSchedule),
+    messageBlock("💬 코멘트", teacherComment)
+  ]);
 }
 
 function buildLessonCommentBody(payload, audience) {
@@ -193,28 +211,25 @@ function buildLessonCommentBody(payload, audience) {
 
 function buildStudentScheduleReminderBody({ scheduleType, scheduleTitle, scheduleDate, scheduleTime, lessonName, memo }) {
   const type = scheduleType === "retest" ? "재시험" : scheduleType === "supplement" ? "보충" : "일정";
-  const lines = [
-    `⭐ 중요 · 오늘 ${type} 일정이 있습니다.`,
-    scheduleTitle ? `📌 내용: ${scheduleTitle}` : "",
-    scheduleDate || scheduleTime ? `🕒 일시: ${[scheduleDate, scheduleTime].filter(Boolean).join(" ")}` : "",
-    lessonName ? `📚 수업: ${lessonName}` : "",
-    memo ? `💬 메모: ${memo}` : ""
-  ];
 
-  return lines.filter(Boolean).join("\n");
+  return joinMessageBlocks([
+    `⭐ 중요\n오늘 ${type} 일정이 있습니다.`,
+    messageBlock("📌 내용", scheduleTitle),
+    messageBlock("🕒 일시", [scheduleDate, scheduleTime].filter(Boolean).join(" ")),
+    messageBlock("📘 수업", lessonName),
+    messageBlock("💬 메모", memo)
+  ]);
 }
 
 function buildSlackDailyScheduleSummary({ date, retests, supplements }) {
   const retestItems = normalizeList(retests).map(formatScheduleItem);
   const supplementItems = normalizeList(supplements).map(formatScheduleItem);
-  const lines = [`[koh_you_math] ${date ?? "오늘"} 보충/재시험 일정`];
 
-  lines.push("");
-  lines.push(retestItems.length ? `⭐ 재시험\n${retestItems.map((item) => `- ${item}`).join("\n")}` : "⭐ 재시험: 없음");
-  lines.push("");
-  lines.push(supplementItems.length ? `📌 보충\n${supplementItems.map((item) => `- ${item}`).join("\n")}` : "📌 보충: 없음");
-
-  return lines.join("\n");
+  return joinMessageBlocks([
+    `[${ACADEMY_NAME}] ${date ?? "오늘"} 보충/재시험 일정`,
+    retestItems.length ? messageBlock("⭐ 재시험", retestItems.map((item) => `- ${item}`).join("\n")) : "⭐ 재시험\n없음",
+    supplementItems.length ? messageBlock("📌 보충", supplementItems.map((item) => `- ${item}`).join("\n")) : "📌 보충\n없음"
+  ]);
 }
 
 export function getNotificationStatus() {
@@ -309,7 +324,7 @@ export async function sendAttendanceAlimtalk(payload) {
     recipientPhone: payload.parentPhone,
     templateEnvName: TEMPLATE_ENV.attendance,
     variables: {
-      "#{학원명}": String(payload.academyName ?? "koh_you_math"),
+      "#{학원명}": String(payload.academyName ?? ACADEMY_NAME),
       "#{학생명}": String(payload.studentName ?? ""),
       "#{출결본문}": attendanceBody
     }
@@ -338,7 +353,7 @@ export async function sendDailyReportAlimtalk(payload) {
     recipientPhone: payload.parentPhone,
     templateEnvName: TEMPLATE_ENV.dailyReport,
     variables: {
-      "#{학원명}": String(payload.academyName ?? "koh_you_math"),
+      "#{학원명}": String(payload.academyName ?? ACADEMY_NAME),
       "#{학생명}": String(payload.studentName ?? ""),
       "#{수업일}": String(payload.lessonDate ?? ""),
       "#{리포트본문}": reportBody
@@ -357,7 +372,7 @@ export async function sendLessonCommentAlimtalk(payload) {
     recipientPhone,
     templateEnvName,
     variables: {
-      "#{학원명}": String(payload.academyName ?? "koh_you_math"),
+      "#{학원명}": String(payload.academyName ?? ACADEMY_NAME),
       "#{학생명}": String(payload.studentName ?? ""),
       "#{수업명}": String(payload.lessonName ?? ""),
       "#{수업일}": String(payload.lessonDate ?? ""),
@@ -384,7 +399,7 @@ export async function sendStudentScheduleReminderAlimtalk(payload) {
     recipientPhone: payload.studentPhone,
     templateEnvName: TEMPLATE_ENV.studentComment,
     variables: {
-      "#{학원명}": String(payload.academyName ?? "koh_you_math"),
+      "#{학원명}": String(payload.academyName ?? ACADEMY_NAME),
       "#{학생명}": String(payload.studentName ?? ""),
       "#{수업명}": String(payload.lessonName ?? payload.scheduleTitle ?? ""),
       "#{수업일}": String(payload.scheduleDate ?? ""),

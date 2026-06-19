@@ -119,15 +119,34 @@ function getLessonContent(record) {
   return record?.lessonProgress?.trim() || record?.progress?.trim() || "";
 }
 
+function normalizeMessageText(value) {
+  return (value ?? "")
+    .toString()
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join("\n");
+}
+
+function createMessageBlock(label, value) {
+  const text = normalizeMessageText(value);
+  return text ? `${label}\n${text}` : "";
+}
+
+function joinMessageBlocks(blocks) {
+  return blocks.map(normalizeMessageText).filter(Boolean).join("\n\n");
+}
+
 function buildCommentPreviewLines({ audience, comment, nextHomework, previousHomework, record, student }) {
   const lessonMaterial = getLessonMaterial(record, student);
   const lessonContent = getLessonContent(record);
   const assignmentStatus = record?.assignmentStatus ?? record?.incompleteHomework ?? "";
   const attendance = attendanceLabels[record?.attendanceStatus ?? "pending"] ?? "";
-  const commentText = comment?.trim() ?? "";
+  const commentText = normalizeMessageText(comment);
   const shouldIncludePrepMemo =
     audience === "student" ? Boolean(record?.prepStudentVisible) : Boolean(record?.prepParentVisible);
-  const prepMemo = record?.preparationMemo?.trim() ?? "";
+  const prepMemo = normalizeMessageText(record?.preparationMemo);
   const prepNotice = shouldIncludePrepMemo && prepMemo && !commentText.includes(prepMemo) ? prepMemo : "";
   const lines = [
     attendance ? `출결: ${attendance}` : "",
@@ -136,8 +155,8 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, previousHom
     previousHomework?.title ? `지난 과제: ${previousHomework.title}` : "",
     nextHomework?.title ? `다음 과제: ${nextHomework.title}` : "",
     audience === "parent" && assignmentStatus ? `과제 상태: ${getAssignmentStatusParentMessage(assignmentStatus)}` : "",
-    prepNotice ? `수업메모: ${prepNotice}` : "",
-    commentText ? `코멘트: ${commentText}` : ""
+    prepNotice ? createMessageBlock("수업메모", prepNotice) : "",
+    commentText ? createMessageBlock("코멘트", commentText) : ""
   ];
 
   return lines.filter(Boolean);
@@ -159,7 +178,7 @@ function getSaveButtonLabel(saveState) {
 }
 
 const today = getKoreaDateString();
-const academyBrandName = "koh_you_math";
+const academyBrandName = "으뜸수학 고태영T";
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8787").replace(/\/$/, "");
 
 function apiUrl(path) {
@@ -204,34 +223,34 @@ function buildNotificationTemplatePreview(type) {
   };
 
   if (type === "attendance") {
-    return [
+    return joinMessageBlocks([
       `#{학원명}: ${base.academyName}`,
       `#{학생명}: ${base.studentName}`,
       "#{출결본문}:",
       `🏫 출결: ${attendanceLabels[base.attendanceStatus]}`,
       `📚 수업: ${base.lessonName}`,
       `🕒 시간: ${base.checkedAt}`
-    ].join("\n");
+    ]);
   }
 
-  const commonBody = [
+  const commonBody = joinMessageBlocks([
     `🏫 출결: ${attendanceLabels[base.attendanceStatus]}`,
     `📚 강의 교재: ${base.lessonMaterial}`,
     `🧭 강의 내용: ${base.lessonContent}`,
     `📖 지난 과제: ${base.previousHomework}`,
     `➡️ 다음 과제: ${base.nextHomework}`,
     type === "parent" ? `✅ 과제 상태: ${getAssignmentStatusParentMessage(base.assignmentStatus)}` : "",
-    `💬 코멘트: ${base.message}`
-  ].filter(Boolean).join("\n");
+    createMessageBlock("💬 코멘트", base.message)
+  ]);
 
-  return [
+  return joinMessageBlocks([
     `#{학원명}: ${base.academyName}`,
     `#{학생명}: ${base.studentName}`,
     `#{수업명}: ${base.lessonName}`,
     `#{수업일}: ${base.lessonDate}`,
     type === "parent" ? "#{리포트본문}:" : "#{코멘트}:",
     commonBody
-  ].join("\n");
+  ]);
 }
 
 function isAttendanceOnlyRoute() {
@@ -2357,11 +2376,12 @@ export function App() {
 
   async function handleSendLessonComment(lesson, student, record, target, options = {}) {
     const sourceField = target === "student" ? "studentComment" : "teacherComment";
-    const message = record?.[sourceField]?.trim() ?? "";
-    const prepMemo = record?.preparationMemo?.trim() ?? "";
+    const message = normalizeMessageText(record?.[sourceField]);
+    const prepMemo = normalizeMessageText(record?.preparationMemo);
     const shouldIncludePrepMemo =
       target === "student" ? Boolean(record?.prepStudentVisible) : Boolean(record?.prepParentVisible);
     const prepMessage = shouldIncludePrepMemo && prepMemo && !message.includes(prepMemo) ? prepMemo : "";
+    const composedMessage = joinMessageBlocks([prepMessage, message]);
     const hasSendContent = Boolean(message || prepMessage);
     const channel = target === "student" ? "student_alimtalk" : "parent_alimtalk";
     const statusField = target === "student" ? "studentCommentSendStatus" : "teacherCommentSendStatus";
@@ -2373,7 +2393,7 @@ export function App() {
       channel,
       createdAt: new Date().toISOString(),
       lessonId: lesson.lessonId,
-      message: [prepMessage, message].filter(Boolean).join("\n") || "발송할 코멘트가 없습니다.",
+      message: composedMessage || "발송할 코멘트가 없습니다.",
       provider: "solapi",
       scheduledDate,
       scheduledLabel,
@@ -3233,7 +3253,7 @@ function LoginScreen({ students, onLogin }) {
     <main className="loginPage">
       <form className="loginCard" onSubmit={submit}>
         <button className="loginClose" type="button">×</button>
-        <p className="loginEyebrow">{academyBrandName} · 고태영T</p>
+        <p className="loginEyebrow">{academyBrandName}</p>
         <h1>로그인</h1>
         <div className="loginTabs">
           {["student", "parent", "teacher"].map((item) => (
@@ -3297,7 +3317,7 @@ function RoleLoginScreen({ students, onAttendanceCheck, onLogin }) {
       ) : (
         <form className="loginCard" onSubmit={submit}>
           <button className="loginClose" type="button">x</button>
-          <p className="loginEyebrow">{academyBrandName} · 고태영T</p>
+          <p className="loginEyebrow">{academyBrandName}</p>
           <h1>로그인</h1>
           <div className="loginTabs">
             {["student", "parent", "teacher"].map((item) => (
@@ -4000,13 +4020,13 @@ function CommentComposerModal({
             </div>
           </div>
           <pre className="templatePreviewText commentTemplatePreview">
-            {[
+            {joinMessageBlocks([
               `#{학원명}: ${academyBrandName}`,
               `#{학생명}: ${student.name}`,
               isParent ? `#{수업일}: ${lesson.date}` : `#{수업명}: ${lesson.className}`,
               isParent ? "#{리포트본문}:" : "#{코멘트}:",
-              ...(previewLines.length ? previewLines.map((line) => `- ${line}`) : ["- 왼쪽에 작성한 내용이 받는 사람 화면에 이렇게 표시됩니다."])
-            ].join("\n")}
+              ...(previewLines.length ? previewLines : ["왼쪽에 작성한 내용이 받는 사람 화면에 이렇게 표시됩니다."])
+            ])}
           </pre>
         </section>
       </div>
@@ -7369,7 +7389,7 @@ function StudentPortal({ homeworks, reportSnapshots, students, onStudentCheckHom
     <section className="studentPortal">
       <header className="portalHeader">
         <div>
-          <h1>{academyBrandName} 고태영T <span>학생</span></h1>
+          <h1>{academyBrandName} <span>학생</span></h1>
           <p>{selectedStudent?.name} ({selectedStudent?.grade})</p>
         </div>
         <div className="portalActions">
@@ -7729,7 +7749,7 @@ function ParentPortal({ homeworks, lessons = [], materials = [], records = [], r
     <section className="studentPortal parentPortal parentPortalMobileFirst">
       <header className="portalHeader">
         <div>
-          <h1>{academyBrandName} 고태영T <span>학부모</span></h1>
+          <h1>{academyBrandName} <span>학부모</span></h1>
           <p>{student?.name} 학부모님</p>
         </div>
         <div className="portalActions">
@@ -10441,7 +10461,11 @@ function createAttendanceNotificationText(payload) {
   const status = attendanceLabels[payload.attendanceStatus] ?? payload.attendanceStatus ?? "출석";
   const lateText = payload.attendanceStatus === "late" ? ` (${payload.lateMinutes || 0}분 지각)` : "";
   const reasonText = payload.reason ? `\n사유: ${payload.reason}` : "";
-  return `[${academyBrandName} 고태영T 출결 안내]\n${payload.studentName} 학생이 ${payload.checkedAt}에 ${status}${lateText} 처리되었습니다.\n수업: ${payload.lessonName}${reasonText}`;
+  return joinMessageBlocks([
+    `[${academyBrandName} 출결 안내]`,
+    `${payload.studentName} 학생이 ${payload.checkedAt}에 ${status}${lateText} 처리되었습니다.`,
+    `수업: ${payload.lessonName}${reasonText}`
+  ]);
 }
 
 function getHomeworkAction(homework) {

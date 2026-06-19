@@ -139,7 +139,7 @@ const results = [];
 
 results.push(assert("01. production build artifact exists", fs.existsSync(path.join(root, "dist", "index.html"))));
 results.push(assert("02. legacy browser confirm/alert removed", !/window\.confirm|alert\(/.test(app)));
-results.push(assert("03. academy brand is centralized as koh_you_math", app.includes('const academyBrandName = "koh_you_math"')));
+results.push(assert("03. academy brand is centralized as 으뜸수학 고태영T", app.includes('const academyBrandName = "으뜸수학 고태영T"')));
 results.push(assert("04. student table exposes student and parent phone fields", includesAll(app, ["studentPhone", "parentPhone", "onUpdateStudent(student.studentId, \"studentPhone\"", "onUpdateStudent(student.studentId, \"parentPhone\""])));
 results.push(assert("05. student delete uses modal confirmation", includesAll(app, ["deleteStudentId", "setDeleteStudentId", "onDeleteStudent(deleteStudent.studentId)", "studentDeleteModal"])));
 results.push(assert("06. lesson delete uses modal confirmation", includesAll(app, ["lessonDeleteModalId", "setLessonDeleteModalId", "confirmDeleteLesson", "pendingDeleteLesson"])));
@@ -164,7 +164,7 @@ results.push(assert("09. student deletion clears linked state", (() => {
 results.push(assert("10. attendance kiosk has tablet number pad", includesAll(app, ["attendanceNumberPad", "pressKey", "submitPin", "attendanceKiosk"])));
 results.push(assert("11. attendance result modal auto closes", includesAll(app, ["attendanceResultModal", "window.setTimeout(() => setResult(null), 3000)"])));
 results.push(assert("12. lesson journal comment buttons restored", includesAll(app, ["journalCommentCell", "commentOpenButton", "teacherComment", "studentComment"])));
-results.push(assert("13. parent/student comment composer stays connected", includesAll(app, ["audience: \"parent\"", "audience: \"student\"", "teacherComment", "studentComment"])));
+results.push(assert("13. parent/student comment composer stays connected", includesAll(app, ["openCommentComposer(\"parent\"", "openCommentComposer(\"student\"", "teacherComment", "studentComment"])));
 results.push(assert("14. student profile edit mode exists", includesAll(app, ["isEditingProfile", "profileEditInput", "onUpdateStudent", "setIsEditingProfile"])));
 results.push(assert("15. next homework links to next lesson previous homework", (() => {
   const homeworks = updateHomework([], fixture.lessons[0], fixture.students[0], "next", "쎈 643-647");
@@ -184,7 +184,7 @@ results.push(assert("20. school calendar supports add/update/delete", includesAl
 results.push(assert("21. sample data keeps 8 pilot student identifiers", (data.match(/student_mwf710_/g) ?? []).length >= 8));
 results.push(assert("22. lesson comments send through comment Alimtalk API", includesAll(app, ["/api/notifications/comment-alimtalk", "student_alimtalk", "parent_alimtalk", "알림톡 발송 중"])));
 results.push(assert("23. API exposes Solapi comment Alimtalk route", includesAll(apiServer, ["sendLessonCommentAlimtalk", "/api/notifications/comment-alimtalk"])));
-results.push(assert("24. notification route keeps dry-run and test redirect safety", includesAll(notificationRoute, ["ALIMTALK_DRY_RUN", "ALIMTALK_TEST_RECIPIENT", "SOLAPI_PARENT_COMMENT_TEMPLATE_ID", "SOLAPI_STUDENT_COMMENT_TEMPLATE_ID"])));
+results.push(assert("24. notification route keeps dry-run and test redirect safety", includesAll(notificationRoute, ["ALIMTALK_DRY_RUN", "ALIMTALK_TEST_RECIPIENT", "SOLAPI_DAILY_REPORT_TEMPLATE_ID", "SOLAPI_STUDENT_COMMENT_TEMPLATE_ID"])));
 results.push(assert("25. frontend API base URL is configurable for hosting", includesAll(app, ["VITE_API_BASE_URL", "apiUrl("]) && !app.includes('fetch("http://127.0.0.1:8787')));
 results.push(assert("26. env template includes deployment and Supabase variables", includesAll(envExample, ["VITE_API_BASE_URL", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "RENDER_API_URL", "VERCEL_FRONTEND_URL"])));
 results.push(assert("27. Supabase schema covers MVP core tables", includesAll(schema, ["create table if not exists students", "create table if not exists lessons", "create table if not exists lesson_student_records", "create table if not exists homeworks", "create table if not exists notification_logs"])));

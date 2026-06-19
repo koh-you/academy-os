@@ -132,7 +132,7 @@ function getReadinessMissingFields(job) {
 
 function buildReadinessSlackText({ issues, windowMinutes }) {
   const lines = [
-    `[koh_you_math] 알림톡 발송 전 누락 점검`,
+    `[으뜸수학 고태영T] 알림톡 발송 전 누락 점검`,
     `대상: 앞으로 ${windowMinutes}분 이내 발송 예정`,
     "",
     issues.length ? "확인이 필요한 항목:" : "확인이 필요한 항목이 없습니다."
