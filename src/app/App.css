@@ -1797,9 +1797,33 @@ button {
 .schoolEventPill.periodBar {
   border-radius: 999px;
   height: 6px;
+  margin-left: -12px;
+  margin-right: -12px;
   min-height: 6px;
   opacity: 0.72;
   padding: 0;
+}
+
+.schoolEventPill.periodBar.periodStart {
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+  margin-right: -13px;
+}
+
+.schoolEventPill.periodBar.periodMiddle {
+  border-radius: 0;
+  margin-left: -13px;
+  margin-right: -13px;
+}
+
+.schoolEventPill.periodBar.periodEnd {
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+  margin-left: -13px;
+}
+
+.schoolEventPill.periodBar.periodSingle {
+  border-radius: 999px;
 }
 
 .event-preExam {
@@ -1919,6 +1943,10 @@ button {
   display: grid;
   gap: 12px;
   grid-template-columns: 110px minmax(0, 1fr);
+}
+
+.examSubjectRow input {
+  background: #ffffff;
 }
 
 .schoolMonthHeader {

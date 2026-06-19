@@ -493,6 +493,17 @@ function isDateWithinEvent(date, event) {
   return event.date <= date && date <= event.endDate;
 }
 
+function getPeriodBarClass(date, event) {
+  if (!event.endDate) return "periodSingle";
+  const dayOfWeek = new Date(`${date}T00:00:00+09:00`).getDay();
+  const startsHere = date === event.date || dayOfWeek === 0;
+  const endsHere = date === event.endDate || dayOfWeek === 6;
+  if (startsHere && endsHere) return "periodSingle";
+  if (startsHere) return "periodStart";
+  if (endsHere) return "periodEnd";
+  return "periodMiddle";
+}
+
 function buildExamCalendarEvents(rows) {
   return rows.flatMap((row) => {
     const base = {
@@ -5850,11 +5861,19 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
   }
 
   function submitNewEvent() {
-    if (!newEvent.date || !newEvent.title.trim()) return;
+    const schoolName = newEvent.schoolName || schools[0] || "학교 미입력";
+    const subjectTitle = newEvent.examSubject.trim();
+    const fallbackTitle = subjectTitle
+      ? `${schoolName} ${subjectTitle}`
+      : newEvent.type === "mathExam"
+        ? `${schoolName} 수학시험`
+        : "";
+    const title = newEvent.title.trim() || fallbackTitle;
+    if (!newEvent.date || !title) return;
     onAddEvent({
       ...newEvent,
-      schoolName: newEvent.schoolName || schools[0] || "학교 미입력",
-      title: newEvent.title.trim(),
+      schoolName,
+      title,
       examSubject: newEvent.type === "mathExam" ? "수학" : newEvent.examSubject
     });
     setSelectedDate(newEvent.date);
@@ -6017,7 +6036,7 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
                         : `${event.schoolName} ${event.examSubject || event.title}`;
                       return (
                         <span
-                          className={`schoolEventPill event-${event.type}${isPeriodBar ? " periodBar" : ""}`}
+                          className={`schoolEventPill event-${event.type}${isPeriodBar ? ` periodBar ${getPeriodBarClass(day.date, event)}` : ""}`}
                           key={event.eventId}
                           style={{ backgroundColor: event.color ?? undefined }}
                           title={event.title}
