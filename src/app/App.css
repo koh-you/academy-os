@@ -3190,12 +3190,6 @@ button:disabled {
   overflow: auto;
 }
 
-.editableCommentPreview {
-  min-height: 520px;
-  resize: vertical;
-  width: 100%;
-}
-
 .templateResultCard {
   background: #f8fafc;
   border: 1px solid #dbe6f8;
@@ -4041,6 +4035,23 @@ textarea {
 
 .commentComposerTextarea {
   min-height: 360px;
+}
+
+.commentSourceToggle {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.commentSourceToggle span {
+  color: #6b7c9d;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.commentSourcePreview {
+  max-height: 180px;
 }
 
 .commentComposerActions {

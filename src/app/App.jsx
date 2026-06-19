@@ -211,11 +211,18 @@ function buildCommentPreviewText({ audience, comment, lesson, nextHomework, prev
   ]);
 }
 
-function extractCommentBodyFromPreview(previewText, audience) {
-  const marker = audience === "parent" ? "#{리포트본문}:" : "#{코멘트}:";
-  const markerIndex = previewText.indexOf(marker);
-  if (markerIndex < 0) return normalizeMessageText(previewText);
-  return normalizeMessageText(previewText.slice(markerIndex + marker.length));
+function buildCommentSourceText({ lesson, nextHomework, previousHomework, record, student }) {
+  return joinMessageBlocks([
+    createMessageLine("수신 학생", student.name),
+    createMessageLine("수업", `${lesson.date} ${lesson.className}`),
+    createMessageLine("출결", attendanceLabels[record?.attendanceStatus ?? "pending"] ?? ""),
+    createMessageLine("강의 교재", getLessonMaterial(record, student)),
+    createMessageLine("강의 내용", getLessonContent(record)),
+    createMessageLine("지난 과제", previousHomework?.title),
+    createMessageLine("다음 과제", nextHomework?.title),
+    createMessageLine("과제 상태", getAssignmentStatusParentMessage(record?.assignmentStatus ?? record?.incompleteHomework ?? "")),
+    createMessageBlock("수업메모", record?.preparationMemo)
+  ]) || "알림톡에 참고할 원본 정보가 아직 없습니다.";
 }
 
 const saveStateLabels = {
@@ -2758,7 +2765,7 @@ export function App() {
     const prepMemo = normalizeMessageText(record?.preparationMemo);
     const shouldIncludePrepMemo =
       target === "student" ? Boolean(record?.prepStudentVisible) : Boolean(record?.prepParentVisible);
-    const prepMessage = shouldIncludePrepMemo && prepMemo && !message.includes(prepMemo) ? prepMemo : "";
+    const prepMessage = !message && shouldIncludePrepMemo && prepMemo ? prepMemo : "";
     const composedMessage = joinMessageBlocks([prepMessage, message]);
     const manualCommentBody = normalizeMessageText(options.manualCommentBody);
     const manualPreviewBody = normalizeMessageText(options.manualPreviewBody);
@@ -4620,6 +4627,7 @@ function CommentComposerModal({
   student
 }) {
   const [sendTiming, setSendTiming] = useState("default");
+  const [isSourceOpen, setIsSourceOpen] = useState(false);
   const isParent = audience === "parent";
   const field = isParent ? "teacherComment" : "studentComment";
   const comment = record?.[field] ?? "";
@@ -4642,6 +4650,13 @@ function CommentComposerModal({
   const selectedDelayMinutes = sendTiming === "delay30" ? 30 : 0;
   const selectedScheduledDate = sendTiming === "now" ? "" : getLessonAlimtalkScheduledDate(lesson, selectedDelayMinutes);
   const selectedScheduleLabel = selectedScheduledDate ? formatKoreaTimeLabel(selectedScheduledDate) : "즉시";
+  const sourceText = buildCommentSourceText({
+    lesson,
+    nextHomework,
+    previousHomework,
+    record,
+    student
+  });
   const generatedPreviewText = buildCommentPreviewText({
     audience,
     comment,
@@ -4651,15 +4666,6 @@ function CommentComposerModal({
     record,
     student
   });
-  const [editablePreviewText, setEditablePreviewText] = useState(generatedPreviewText);
-  const [isPreviewEdited, setIsPreviewEdited] = useState(false);
-
-  useEffect(() => {
-    if (!isPreviewEdited) {
-      setEditablePreviewText(generatedPreviewText);
-    }
-  }, [generatedPreviewText, isPreviewEdited]);
-  const manualCommentBody = isPreviewEdited ? extractCommentBodyFromPreview(editablePreviewText, audience) : "";
 
   return (
     <Modal className="commentComposerModal" title={title} subtitle={`${lesson.date} · ${lesson.className}`} onClose={onClose}>
@@ -4667,16 +4673,25 @@ function CommentComposerModal({
         <section className="commentDraftPanel">
           <div className="sectionHeader slim">
             <div>
-              <p className="eyebrow">WRITE</p>
-              <h2>직접 작성</h2>
+              <p className="eyebrow">FINAL</p>
+              <h2>최종 알림톡 문구</h2>
             </div>
             <span className="countBadge">{isParent ? "학부모용" : "학생용"}</span>
           </div>
+          <div className="commentSourceToggle">
+            <button className="softButton mini" onClick={() => setIsSourceOpen((current) => !current)} type="button">
+              {isSourceOpen ? "원본 메모 접기" : "원본 메모 보기"}
+            </button>
+            <span>수업메모와 일정 정보는 AI 수정 참고용으로 보관됩니다.</span>
+          </div>
+          {isSourceOpen ? (
+            <pre className="templatePreviewText commentSourcePreview">{sourceText}</pre>
+          ) : null}
           <textarea
             className="commentComposerTextarea"
             value={comment}
             onChange={(event) => onChangeRecord(lesson, student, field, event.target.value)}
-            placeholder={isParent ? "학부모님께 보낼 알림톡 문구를 적어주세요." : "학생에게 보낼 알림톡 문구를 적어주세요."}
+            placeholder={isParent ? "학부모님께 실제로 보낼 최종 문구를 적어주세요." : "학생에게 실제로 보낼 최종 문구를 적어주세요."}
           />
           <div className="commentComposerActions">
             <button
@@ -4694,8 +4709,6 @@ function CommentComposerModal({
                   delayMinutes: selectedDelayMinutes,
                   forceDryRun,
                   forceTestRecipient,
-                  manualCommentBody,
-                  manualPreviewBody: isPreviewEdited ? editablePreviewText : "",
                   sendTiming
                 })
               }
@@ -4733,27 +4746,8 @@ function CommentComposerModal({
               <p className="eyebrow">PREVIEW</p>
               <h2>{previewTitle}</h2>
             </div>
-            {isPreviewEdited ? (
-              <button
-                className="softButton mini"
-                onClick={() => {
-                  setEditablePreviewText(generatedPreviewText);
-                  setIsPreviewEdited(false);
-                }}
-                type="button"
-              >
-                원문 복원
-              </button>
-            ) : null}
           </div>
-          <textarea
-            className="templatePreviewText commentTemplatePreview editableCommentPreview"
-            value={editablePreviewText}
-            onChange={(event) => {
-              setEditablePreviewText(event.target.value);
-              setIsPreviewEdited(event.target.value !== generatedPreviewText);
-            }}
-          />
+          <pre className="templatePreviewText commentTemplatePreview">{generatedPreviewText}</pre>
         </section>
       </div>
     </Modal>
