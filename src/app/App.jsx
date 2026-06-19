@@ -9566,7 +9566,7 @@ function SupplementCenter({
           sourceId: homework.homeworkId,
           sourceLabel: homework.title,
           reason: getHomeworkMakeupReason(homework, records),
-          supplementMethod: "next_lesson"
+          supplementMethod: "stay_after"
         }
       }))
     },
@@ -9589,7 +9589,7 @@ function SupplementCenter({
           sourceLabel: lessonLabel(record.lessonId),
           reason: "결석 보강",
           absenceReason: record.attendanceReason || "사유 미입력",
-          supplementMethod: "recorded_lecture"
+          supplementMethod: "onsite_makeup"
         }
       }))
     },
@@ -11799,13 +11799,13 @@ const supplementStatusSteps = [
 
 const supplementMethodsByType = {
   homework_makeup: [
-    { id: "next_lesson", label: "다음시간까지" },
+    { id: "stay_after", label: "남아서 하고가기" },
     { id: "arrival_makeup", label: "등원보충" },
-    { id: "stay_after", label: "남아서 하고 가기" }
+    { id: "next_lesson", label: "다음시간까지" }
   ],
   absence_makeup: [
-    { id: "recorded_lecture", label: "녹강보강" },
-    { id: "onsite_makeup", label: "현장보강" }
+    { id: "onsite_makeup", label: "현장보강" },
+    { id: "recorded_lecture", label: "녹강보강" }
   ],
   retest: [
     { id: "onsite_retest", label: "현장 재시험" }
