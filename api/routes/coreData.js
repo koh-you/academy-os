@@ -112,7 +112,7 @@ function toLessonRecordRow(record, { includeExtendedFields = true } = {}) {
     previous_homework: compact(record.previousHomework),
     next_homework: compact(record.nextHomework),
     incomplete_homework: compact(record.incompleteHomework),
-    progress_note: compact(record.progress),
+    progress_note: compact(record.lessonProgress ?? record.progress),
     teacher_comment: compact(record.teacherComment),
     student_comment: compact(record.studentComment),
     teacher_comment_ai_status: compact(record.teacherCommentAiStatus),
@@ -158,6 +158,7 @@ function fromLessonRecordRow(row) {
     prepParentNotice: row.prep_parent_notice ?? "",
     prepStudentAiStatus: row.prep_student_ai_status ?? "",
     prepParentAiStatus: row.prep_parent_ai_status ?? "",
+    lessonProgress: row.progress_note ?? "",
     progress: row.progress_note ?? "",
     teacherComment: row.teacher_comment ?? "",
     studentComment: row.student_comment ?? "",
@@ -499,7 +500,24 @@ export async function upsertLessonStudentRecord(record) {
       message.includes("assignment_status") ||
       message.includes("preparation_memo") ||
       message.includes("prep_student_notice");
+    const hasExtendedValues = [
+      stableRecord.lessonMaterial,
+      stableRecord.lessonContent,
+      stableRecord.assignmentStatus,
+      stableRecord.preparationMemo,
+      stableRecord.prepStudentNotice,
+      stableRecord.prepParentNotice,
+      stableRecord.prepStudentAiStatus,
+      stableRecord.prepParentAiStatus,
+      stableRecord.prepStudentVisible,
+      stableRecord.prepParentVisible
+    ].some((value) => (typeof value === "boolean" ? value : Boolean(String(value ?? "").trim())));
     if (!isPendingMigration) throw error;
+    if (hasExtendedValues) {
+      throw new Error(
+        "Supabase lesson_student_records 확장 컬럼 migration이 필요합니다. supabase/20260617_lesson_prep_resources_notifications.sql을 실행한 뒤 다시 저장하세요."
+      );
+    }
     [row] = await upsertRows("lesson_student_records", [toLessonRecordRow(stableRecord, { includeExtendedFields: false })]);
   }
   return { source: databaseSource, record: fromLessonRecordRow(row) };

@@ -1926,11 +1926,12 @@ export function App() {
     });
   }
 
-  async function handleSaveRecord(recordId, lessonForRecord = null, studentForRecord = null) {
+  async function handleSaveRecord(recordId, lessonForRecord = null, studentForRecord = null, recordOverride = null) {
     setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "saving" }));
 
     try {
       const record =
+        recordOverride ??
         recordsRef.current.find((item) => item.lessonStudentRecordId === recordId) ??
         (lessonForRecord && studentForRecord ? createEmptyRecord(lessonForRecord, studentForRecord) : null);
       if (!record) throw new Error("저장할 수업기록을 찾지 못했습니다.");
@@ -1942,11 +1943,9 @@ export function App() {
       if (relatedHomeworks.length > 0) {
         await postJson("/api/homeworks/bulk", { homeworks: relatedHomeworks });
       }
-      if (!recordsRef.current.some((item) => item.lessonStudentRecordId === record.lessonStudentRecordId)) {
-        const nextRecords = upsertById(recordsRef.current, record, "lessonStudentRecordId");
-        recordsRef.current = nextRecords;
-        setRecords(nextRecords);
-      }
+      const nextRecords = upsertById(recordsRef.current, record, "lessonStudentRecordId");
+      recordsRef.current = nextRecords;
+      setRecords(nextRecords);
       window.localStorage.setItem(storageKeys.records, JSON.stringify(recordsRef.current));
       window.localStorage.setItem(storageKeys.homeworks, JSON.stringify(homeworksRef.current));
       setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "saved" }));
@@ -4519,7 +4518,9 @@ function LessonJournalDetail({
           lesson={lesson}
           onChangeRecord={onChangeRecord}
           onClose={() => setPrepMemoModal(null)}
+          onSaveRecord={onSaveRecord}
           record={records.find((item) => item.studentId === prepMemoModal.student.studentId) ?? prepMemoModal.record}
+          saveState={saveStates[createLessonStudentRecordId(lesson.lessonId, prepMemoModal.student.studentId)] ?? "idle"}
           student={prepMemoModal.student}
         />
       ) : null}
@@ -4566,7 +4567,34 @@ function CommentOpenCell({ aiStatus, comment, label, onOpen, sendStatus }) {
   );
 }
 
-function PreparationMemoModal({ lesson, onChangeRecord, onClose, record, student }) {
+function PreparationMemoModal({ lesson, onChangeRecord, onClose, onSaveRecord, record, saveState = "idle", student }) {
+  const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+  const currentRecord = {
+    ...createEmptyRecord(lesson, student),
+    ...(record ?? {})
+  };
+  const [draftMemo, setDraftMemo] = useState(currentRecord.preparationMemo ?? "");
+  const [draftStudentVisible, setDraftStudentVisible] = useState(Boolean(currentRecord.prepStudentVisible));
+  const [draftParentVisible, setDraftParentVisible] = useState(Boolean(currentRecord.prepParentVisible));
+
+  function updateDraft(field, value) {
+    if (field === "preparationMemo") setDraftMemo(value);
+    if (field === "prepStudentVisible") setDraftStudentVisible(Boolean(value));
+    if (field === "prepParentVisible") setDraftParentVisible(Boolean(value));
+    onChangeRecord(lesson, student, field, value);
+  }
+
+  function saveMemo() {
+    onSaveRecord(recordId, lesson, student, {
+      ...currentRecord,
+      preparationMemo: draftMemo,
+      prepStudentVisible: draftStudentVisible,
+      prepParentVisible: draftParentVisible,
+      updatedBy: "instructor_owner_001",
+      updatedAt: new Date().toISOString()
+    });
+  }
+
   return (
     <Modal
       className="preparationMemoModal"
@@ -4579,8 +4607,8 @@ function PreparationMemoModal({ lesson, onChangeRecord, onClose, record, student
           <label>
             강사용 메모
             <textarea
-              value={record?.preparationMemo ?? ""}
-              onChange={(event) => onChangeRecord(lesson, student, "preparationMemo", event.target.value)}
+              value={draftMemo}
+              onChange={(event) => updateDraft("preparationMemo", event.target.value)}
               placeholder="다음 시간에 꼭 기억해야 할 내용, 질문, 자료, 보충 포인트를 적어주세요."
             />
           </label>
@@ -4588,16 +4616,16 @@ function PreparationMemoModal({ lesson, onChangeRecord, onClose, record, student
             <strong>알림톡 포함 여부</strong>
             <label className="checkboxLine">
               <input
-                checked={Boolean(record?.prepStudentVisible)}
-                onChange={(event) => onChangeRecord(lesson, student, "prepStudentVisible", event.target.checked)}
+                checked={draftStudentVisible}
+                onChange={(event) => updateDraft("prepStudentVisible", event.target.checked)}
                 type="checkbox"
               />
               학생 알림톡에 포함
             </label>
             <label className="checkboxLine">
               <input
-                checked={Boolean(record?.prepParentVisible)}
-                onChange={(event) => onChangeRecord(lesson, student, "prepParentVisible", event.target.checked)}
+                checked={draftParentVisible}
+                onChange={(event) => updateDraft("prepParentVisible", event.target.checked)}
                 type="checkbox"
               />
               학부모 알림톡에 포함
@@ -4605,6 +4633,17 @@ function PreparationMemoModal({ lesson, onChangeRecord, onClose, record, student
             <p className="muted">
               체크한 대상의 알림톡 작성 화면을 열면 강사용 메모가 직접 작성 칸에 그대로 들어갑니다. AI 수정은 알림톡 작성 화면에서 수신인에 맞게 실행합니다.
             </p>
+          </div>
+          <div className="prepMemoSaveBar">
+            <span className={`saveState save-${saveState}`}>{saveStateLabels[saveState] ?? saveStateLabels.idle}</span>
+            <button
+              className={`journalSaveButton journalSave-${saveState}`}
+              disabled={saveState === "saving"}
+              onClick={saveMemo}
+              type="button"
+            >
+              {getSaveButtonLabel(saveState)}
+            </button>
           </div>
         </section>
       </div>
