@@ -1,0 +1,49 @@
+# Academy OS Agent Guide
+
+이 파일은 Codex 새 세션이 이 저장소에서 작업할 때 가장 먼저 읽는 프로젝트 지침입니다.
+
+## Read First
+
+1. `docs/current-worklog.md`
+2. `docs/home-codex-setup.md`
+3. 관련 화면 코드와 데이터 파일
+
+## Workflow
+
+1. 작업 전 `docs/current-worklog.md`의 작업 큐를 확인하고 필요하면 갱신한다.
+2. 한 번에 하나의 우선순위 작업만 구현한다.
+3. 변경 범위는 요청된 화면과 데이터 흐름에 맞게 제한한다.
+4. 구현 후 `npm run build`를 실행한다.
+5. 운영 흐름에 영향을 주는 변경이면 `npm run test:production`도 검토한다.
+6. 완료 후 작업 결과와 남은 이슈를 `docs/current-worklog.md`에 반영한다.
+
+## Product Rules
+
+- 중심 화면은 Lesson Hub / 수업일지이다.
+- 학원명 표시 원칙은 `으뜸수학 고태영T`이다.
+- `koh_you_math`는 내부 식별자, URL, 환경변수 이름에만 남길 수 있다.
+- 학생 화면은 태블릿 우선, 그다음 모바일이다.
+- 학부모 화면은 모바일 우선이다.
+- 알림톡 미리보기 문구는 실제 발송 문구와 최대한 같은 구조로 보여준다.
+- API 모델 선택은 각 기능 화면에 반복 노출하지 말고 설정 화면에서 관리한다.
+
+## Engineering Rules
+
+- 비밀값은 절대 commit하지 않는다.
+- `.env`, PDF, HWP, HWPX, ZIP, 대용량 자료는 Git에 올리지 않는다.
+- PowerShell 출력에서 한글이 깨질 수 있으므로 검수 테스트 이름은 가능하면 ASCII로 작성한다.
+- 큰 파일 하나에 기능이 몰려 있어도, 이번 요청과 무관한 대규모 리팩터링은 피한다.
+- 사용자가 "검수"를 요청하면 버그/권한/저장 실패/데이터 원천 혼동/테스트 부족을 먼저 본다.
+
+## Deployment
+
+- GitHub: https://github.com/koh-you/academy-os
+- Frontend: https://academy-os-blue.vercel.app
+- Backend API: https://koh-you-math-academy-os-api.onrender.com
+
+## Local Notes
+
+- 학원 컴퓨터 로컬에만 있는 파일은 집 컴퓨터에서 보이지 않는다.
+- 현재 확인된 미추적 로컬 파일:
+  - `tools/update-render-ai-env.ps1`
+- 이 파일은 민감 정보 포함 여부를 확인하기 전까지 commit하지 않는다.
