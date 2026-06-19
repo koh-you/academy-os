@@ -78,6 +78,7 @@ check("48 school calendar creates pre-exam lessons", hasAll(app, ["createPreExam
 check("49 lesson journal filters by lesson type", hasAll(app, ["lessonTypeFilterBar", "lessonTypeFilterOptions", "visibleLessons", "preExamLessonPill"]) && css.includes(".lessonTypeFilterBar"));
 check("50 school calendar uses fixed grade and subject options", hasAll(app, ["schoolCalendarGradeOptions", "중3", "고3", "schoolCalendarMathSubjectOptions", "확률과통계", "기하"]));
 check("51 supplement center includes teacher-marked incomplete homework", hasAll(app, ["isHomeworkMakeupCandidate", '["missing", "partial"].includes(homework.teacherStatus)', "미완료 숙제"]));
+check("52 school calendar registration uses modal-first type input", hasAll(app, ["schoolEventFormModal", "inputTypeField", "입력 유형", "setIsFormModalOpen"]) && css.includes(".modalCard.schoolEventFormModal"));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));

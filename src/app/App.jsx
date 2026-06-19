@@ -357,10 +357,10 @@ function safeIdPart(value = "") {
 
 function examCycleLabel(examCycle) {
   return {
-    "2026-1-mid": "2026 1학기 중간",
-    "2026-1-final": "2026 1학기 기말",
-    "2026-2-mid": "2026 2학기 중간",
-    "2026-2-final": "2026 2학기 기말"
+    "2026-1-mid": "1학기 중간고사",
+    "2026-1-final": "1학기 기말고사",
+    "2026-2-mid": "2학기 중간고사",
+    "2026-2-final": "2학기 기말고사"
   }[examCycle] ?? examCycle;
 }
 
@@ -6625,7 +6625,7 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
   const [schoolFilter, setSchoolFilter] = useState("전체 학교");
   const [calendarFilter, setCalendarFilter] = useState("all");
-  const [isFormCollapsed, setIsFormCollapsed] = useState(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [newEvent, setNewEvent] = useState({
     schoolName: rows[0]?.schoolName ?? "",
     grade: schoolCalendarGradeOptions.includes(rows[0]?.grade) ? rows[0]?.grade : "고1",
@@ -6754,6 +6754,7 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
       memo: "",
       mathExamItems: [{ id: `math_item_${Date.now()}`, grade: current.grade, subject: current.examSubject || "", date: current.date, memo: "" }]
     }));
+    setIsFormModalOpen(false);
   }
 
   function updateMathExamItem(itemId, field, value) {
@@ -6838,31 +6839,34 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
           <h1>학사일정</h1>
           <p className="muted">학교별 시험, 행사, 방학 일정을 등록하면 수업일지와 커리큘럼 일정관리에도 표시됩니다.</p>
         </div>
-        <select value={schoolFilter} onChange={(event) => setSchoolFilter(event.target.value)}>
-          <option value="전체 학교">전체 학교</option>
-          {schools.map((school) => (
-            <option key={school} value={school}>{school}</option>
-          ))}
-        </select>
+        <div className="schoolCalendarHeaderActions">
+          <select value={schoolFilter} onChange={(event) => setSchoolFilter(event.target.value)}>
+            <option value="전체 학교">전체 학교</option>
+            {schools.map((school) => (
+              <option key={school} value={school}>{school}</option>
+            ))}
+          </select>
+          <button className="primaryButton" onClick={() => setIsFormModalOpen(true)} type="button">+ 일정 등록</button>
+        </div>
       </header>
 
-      <div className={isFormCollapsed ? "schoolCalendarLayout formCollapsed" : "schoolCalendarLayout"}>
-        <aside className={isFormCollapsed ? "panel schoolEventFormPanel collapsed" : "panel schoolEventFormPanel"}>
-          <div className="schoolFormHeader">
-            {isFormCollapsed ? null : <h2>일정 등록</h2>}
-            <button
-              aria-label={isFormCollapsed ? "일정 등록 펼치기" : "일정 등록 접기"}
-              className="schoolFormToggle"
-              onClick={() => setIsFormCollapsed((current) => !current)}
-              type="button"
-            >
-              {isFormCollapsed ? "›" : "‹"}
-            </button>
-          </div>
-          {isFormCollapsed ? (
-            <div className="schoolFormCollapsedHint">일정 등록</div>
-          ) : (
-            <>
+      <div className="schoolCalendarLayout">
+        {isFormModalOpen ? (
+          <Modal
+            className="schoolEventFormModal"
+            title="일정 등록"
+            subtitle="입력 유형을 먼저 고른 뒤 필요한 정보만 입력합니다."
+            onClose={() => setIsFormModalOpen(false)}
+          >
+            <div className="schoolEventFormPanel modalForm">
+              <label className="inputTypeField">
+                입력 유형
+                <select value={newEvent.type} onChange={(event) => setNewEvent((current) => ({ ...current, type: event.target.value }))}>
+                  {Object.entries(eventTypeLabels).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
+              </label>
               <label>
                 학교
                 <select value={newEvent.schoolName} onChange={(event) => setNewEvent((current) => ({ ...current, schoolName: event.target.value, grade: "" }))}>
@@ -6872,34 +6876,30 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
                   ))}
                 </select>
               </label>
-              <label>
-                시험 구분
-                <select value={newEvent.examCycle} onChange={(event) => setNewEvent((current) => ({ ...current, examCycle: event.target.value }))}>
-                  {safeExamCycleOptions.map((cycle) => (
-                    <option key={cycle} value={cycle}>{examCycleLabel(cycle)}</option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                학년
-                <select value={newEvent.grade} onChange={(event) => setNewEvent((current) => ({ ...current, grade: event.target.value }))}>
-                  <option value="">전체 학년</option>
-                  {schoolCalendarGradeOptions.map((grade) => (
-                    <option key={grade} value={grade}>{grade}</option>
-                  ))}
-                </select>
-              </label>
+              {newEvent.type !== "examPeriod" ? (
+                <>
+                  <label>
+                    시험 구분
+                    <select value={newEvent.examCycle} onChange={(event) => setNewEvent((current) => ({ ...current, examCycle: event.target.value }))}>
+                      {safeExamCycleOptions.map((cycle) => (
+                        <option key={cycle} value={cycle}>{examCycleLabel(cycle)}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    학년
+                    <select value={newEvent.grade} onChange={(event) => setNewEvent((current) => ({ ...current, grade: event.target.value }))}>
+                      <option value="">전체 학년</option>
+                      {schoolCalendarGradeOptions.map((grade) => (
+                        <option key={grade} value={grade}>{grade}</option>
+                      ))}
+                    </select>
+                  </label>
+                </>
+              ) : null}
               <label>
                 일정명
                 <input value={newEvent.title} onChange={(event) => setNewEvent((current) => ({ ...current, title: event.target.value }))} placeholder="예: 1학기 기말고사" />
-              </label>
-              <label>
-                일정 종류
-                <select value={newEvent.type} onChange={(event) => setNewEvent((current) => ({ ...current, type: event.target.value }))}>
-                  {Object.entries(eventTypeLabels).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
               </label>
               <label>
                 일정 색상
@@ -6986,9 +6986,9 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
               <button className="primaryButton full" onClick={submitNewEvent} type="button">
                 {newEvent.type === "examPeriod" ? "시험일정 묶음 등록" : "일정 등록"}
               </button>
-            </>
-          )}
-        </aside>
+            </div>
+          </Modal>
+        ) : null}
 
         <section className="panel schoolCalendarMainPanel">
           <div className="schoolMonthHeader">
