@@ -723,6 +723,123 @@ button {
   margin: 0;
 }
 
+.homeworkMakeupPage {
+  gap: 16px;
+}
+
+.homeworkMakeupHeader {
+  align-items: center;
+}
+
+.homeworkMakeupTarget {
+  background: #f8fbff;
+}
+
+.homeworkMakeupTarget h2 {
+  color: #0f172a;
+  font-size: 26px;
+  margin: 4px 0 14px;
+}
+
+.makeupInfoGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+}
+
+.makeupInfoTile {
+  background: #fff;
+  border: 1px solid #dbe5f5;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.makeupInfoTile span,
+.makeupInfoTile small {
+  color: #64748b;
+  display: block;
+}
+
+.makeupInfoTile strong {
+  color: #0f172a;
+  display: block;
+  font-size: 18px;
+  margin: 6px 0 4px;
+}
+
+.homeworkMakeupHero {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+}
+
+.homeworkMakeupNotice,
+.homeworkMakeupChecklist {
+  border-radius: 8px;
+}
+
+.homeworkMakeupNotice h3,
+.homeworkMakeupChecklist h3 {
+  font-size: 22px;
+  margin: 4px 0 10px;
+}
+
+.homeworkMakeupNotice p {
+  color: #475569;
+  line-height: 1.7;
+}
+
+.makeupLinkedBox {
+  background: #f8fafc;
+  border: 1px solid #dbe5f5;
+  border-radius: 8px;
+  margin-top: 16px;
+  padding: 14px;
+}
+
+.makeupLinkedBox span,
+.makeupLinkedBox small {
+  color: #64748b;
+  display: block;
+}
+
+.makeupLinkedBox strong {
+  display: block;
+  font-size: 18px;
+  margin: 5px 0;
+}
+
+.makeupChecklistGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.checkCard {
+  background: #fff;
+  border: 1px solid #dbe5f5;
+  border-radius: 8px;
+  cursor: pointer;
+  display: grid;
+  gap: 4px 10px;
+  grid-template-columns: auto 1fr;
+  padding: 14px;
+}
+
+.checkCard input {
+  grid-row: span 2;
+  margin-top: 4px;
+}
+
+.checkCard span {
+  font-weight: 800;
+}
+
+.checkCard small {
+  color: #64748b;
+}
+
 .bulkHomeworkPanel {
   display: grid;
   gap: 10px;
@@ -7313,6 +7430,14 @@ textarea.profileEditInput {
 
   .studentPortalTabletFirst .portalTabs {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .homeworkMakeupHero,
+  .makeupInfoGrid,
+  .makeupChecklistGrid {
+    grid-template-columns: 1fr;
   }
 }
 
