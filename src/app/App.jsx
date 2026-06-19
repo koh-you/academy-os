@@ -55,12 +55,12 @@ const homeworkLabels = {
 
 const assignmentStatusOptions = [
   { value: "", label: "선택" },
-  { value: "complete_thorough", label: "성실 완료" },
-  { value: "complete_easy", label: "쉬움" },
-  { value: "partial_80", label: "80% 완료" },
+  { value: "complete_thorough", label: "완료" },
+  { value: "partial_80", label: "80%완료" },
+  { value: "partial_50", label: "50%완료" },
   { value: "known_only", label: "아는 것만 풂" },
-  { value: "too_hard", label: "난이도 과함" },
-  { value: "answer_suspected", label: "풀이 확인 필요" },
+  { value: "too_hard", label: "난이도 높음" },
+  { value: "answer_suspected", label: "풀이 재확인" },
   { value: "not_done", label: "미완료" },
   { value: "not_checked", label: "미검사" }
 ];
@@ -69,19 +69,46 @@ const assignmentStatusLabels = Object.fromEntries(
   assignmentStatusOptions.map((option) => [option.value, option.label])
 );
 
-const assignmentStatusParentMessages = {
-  complete_thorough: "과제를 성실하게 완료했습니다.",
-  complete_easy: "오늘 과제는 학생에게 비교적 수월하게 진행되었습니다.",
-  partial_80: "과제를 대부분 수행했으며, 남은 부분은 이어서 확인하겠습니다.",
-  known_only: "아는 문항 위주로 풀이했으며, 어려웠던 문항은 추가 확인이 필요합니다.",
-  too_hard: "과제 난도가 다소 높아 보충 설명과 분량 조정이 필요합니다.",
-  answer_suspected: "풀이 과정을 한 번 더 확인할 필요가 있어 다음 수업에서 점검하겠습니다.",
-  not_done: "과제가 충분히 완료되지 않아 보충 관리가 필요합니다.",
-  not_checked: "과제 확인이 아직 완료되지 않았습니다."
+const assignmentStatusAliases = {
+  "성실 완료": "complete_thorough",
+  "완료": "complete_thorough",
+  complete_easy: "complete_thorough",
+  "쉬움": "complete_thorough",
+  "80% 완료": "partial_80",
+  "80%완료": "partial_80",
+  "50% 완료": "partial_50",
+  "50%완료": "partial_50",
+  "아는것만품": "known_only",
+  "아는 것만 품": "known_only",
+  "아는 것만 풂": "known_only",
+  "숙제난이도가높아 해결하지못함": "too_hard",
+  "난이도 과함": "too_hard",
+  "난이도 높음": "too_hard",
+  "풀이가 없어서 다시확인 또는 테스트가 필요": "answer_suspected",
+  "풀이 확인 필요": "answer_suspected",
+  "풀이 재확인": "answer_suspected",
+  "미완료": "not_done",
+  "미검사": "not_checked"
 };
 
+const assignmentStatusParentMessages = {
+  complete_thorough: "과제를 성실하게 완료했습니다.",
+  partial_80: "과제의 약 80%를 수행했습니다. 남은 부분은 다음 확인 때 이어서 점검하겠습니다.",
+  partial_50: "과제의 약 절반 정도를 수행했습니다. 수행량을 조금 더 끌어올릴 수 있도록 지도하겠습니다.",
+  known_only: "스스로 해결 가능한 문항 위주로 풀어왔습니다. 어려워한 문항은 수업에서 다시 확인하겠습니다.",
+  too_hard: "과제 난이도가 높아 충분히 해결하지 못한 부분이 있었습니다. 필요한 개념을 보충해 다시 풀 수 있도록 지도하겠습니다.",
+  answer_suspected: "풀이 과정이 충분히 남아 있지 않아 이해 여부를 다시 확인하거나 간단한 테스트로 점검할 예정입니다.",
+  not_done: "과제가 완료되지 않았습니다. 미완료된 부분은 보충 또는 다음 확인 때 이어서 점검하겠습니다.",
+  not_checked: "오늘은 과제 검사가 아직 완료되지 않았습니다. 확인 후 필요한 내용을 다시 안내드리겠습니다."
+};
+
+function normalizeAssignmentStatusValue(value) {
+  return assignmentStatusAliases[value] ?? value ?? "";
+}
+
 function getAssignmentStatusParentMessage(value) {
-  return assignmentStatusParentMessages[value] ?? assignmentStatusLabels[value] ?? "";
+  const normalizedValue = normalizeAssignmentStatusValue(value);
+  return assignmentStatusParentMessages[normalizedValue] ?? assignmentStatusLabels[normalizedValue] ?? "";
 }
 
 function getLessonMaterial(record, student) {
@@ -3611,9 +3638,9 @@ function LessonJournalDetail({
           <div className="journalRow journalHead">
             <span>학생</span>
             <span>수업메모</span>
+            <span>출결</span>
             <span>강의 교재</span>
             <span>강의 내용</span>
-            <span>출결</span>
             <span>지난 숙제</span>
             <span>다음 숙제</span>
             <span>과제 상태</span>
@@ -3660,6 +3687,13 @@ function LessonJournalDetail({
                     ].filter(Boolean).join(" · ") || "알림톡 미포함"}
                   </small>
                 </div>
+                <button
+                  className={`attendanceBadge attendance-${record.attendanceStatus ?? "pending"}`}
+                  onClick={() => onOpenAttendance({ lesson, record, student })}
+                  type="button"
+                >
+                  {attendanceText}
+                </button>
                 <textarea
                   className="journalCompactInput"
                   value={record.lessonMaterial ?? ""}
@@ -3673,13 +3707,6 @@ function LessonJournalDetail({
                   placeholder="오늘 강의 내용"
                   rows="2"
                 />
-                <button
-                  className={`attendanceBadge attendance-${record.attendanceStatus ?? "pending"}`}
-                  onClick={() => onOpenAttendance({ lesson, record, student })}
-                  type="button"
-                >
-                  {attendanceText}
-                </button>
                 <textarea
                   value={previousHomework?.title ?? ""}
                   onChange={(event) => onUpdateHomework(lesson, student, "previous", event.target.value)}
@@ -3694,7 +3721,7 @@ function LessonJournalDetail({
                 />
                 <select
                   className="assignmentStatusSelect"
-                  value={record.assignmentStatus ?? record.incompleteHomework ?? ""}
+                  value={normalizeAssignmentStatusValue(record.assignmentStatus ?? record.incompleteHomework ?? "")}
                   onChange={(event) => onChangeRecord(lesson, student, "assignmentStatus", event.target.value)}
                 >
                   {assignmentStatusOptions.map((option) => (

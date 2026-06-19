@@ -872,7 +872,7 @@ button {
   border-top: 1px solid #e2e8f0;
   display: grid;
   gap: 8px;
-  grid-template-columns: 150px 130px 150px 170px 92px 180px 180px 150px 126px 126px 110px;
+  grid-template-columns: 150px 130px 92px 150px 170px 180px 180px 150px 126px 126px 110px;
   min-height: 72px;
   padding: 8px 10px;
 }
