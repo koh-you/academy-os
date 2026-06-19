@@ -2642,9 +2642,12 @@ textarea {
   color: #0b1220;
   font-size: 15px;
   font-weight: 650;
+  height: auto;
   line-height: 1.42;
+  min-height: 66px;
+  overflow: hidden;
   padding: 12px 12px;
-  resize: vertical;
+  resize: none;
   text-align: left;
 }
 
@@ -2663,6 +2666,42 @@ textarea {
 .journalTable .journalMemoCardInput::placeholder {
   color: #94a3b8;
   font-weight: 700;
+}
+
+.journalTable .journalMemoCardRead {
+  align-items: flex-start;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid #c9d8ee;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  color: #0b1220;
+  cursor: text;
+  display: block;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.42;
+  min-height: 66px;
+  padding: 12px;
+  text-align: left;
+  white-space: pre-wrap;
+  width: 100%;
+}
+
+.journalTable .journalMemoCardRead.empty {
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.journalTable .journalMemoCardRead:hover {
+  background: #ffffff;
+  border-color: #a9bdd9;
+}
+
+.journalTable .journalMemoCardRead:focus {
+  background: #ffffff;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16), 0 4px 12px rgba(15, 23, 42, 0.07);
+  outline: none;
 }
 
 .commentEditorCell textarea {

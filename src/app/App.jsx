@@ -3825,6 +3825,56 @@ function HomeworkMakeupLessonDetail({
   );
 }
 
+function EditableMemoCard({ className = "", editKey, editingKey, onChange, onEdit, placeholder, value }) {
+  const textareaRef = useRef(null);
+  const isEditing = editingKey === editKey;
+  const displayValue = value?.trim() ? value : "";
+
+  useEffect(() => {
+    if (!isEditing || !textareaRef.current) return;
+    const textarea = textareaRef.current;
+    textarea.focus();
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }, [isEditing, value]);
+
+  function handleChange(event) {
+    const textarea = event.target;
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+    onChange(textarea.value);
+  }
+
+  if (isEditing) {
+    return (
+      <textarea
+        className={`journalMemoCardInput ${className}`.trim()}
+        onBlur={() => onEdit("")}
+        onChange={handleChange}
+        onKeyDown={(event) => {
+          if (event.key === "Escape" || (event.key === "Enter" && (event.ctrlKey || event.metaKey))) {
+            event.currentTarget.blur();
+          }
+        }}
+        placeholder={placeholder}
+        ref={textareaRef}
+        rows="1"
+        value={value ?? ""}
+      />
+    );
+  }
+
+  return (
+    <button
+      className={`journalMemoCardRead ${displayValue ? "" : "empty"} ${className}`.trim()}
+      onClick={() => onEdit(editKey)}
+      type="button"
+    >
+      {displayValue || placeholder}
+    </button>
+  );
+}
+
 function LessonJournalDetail({
   academyTests = [],
   aiSettings = defaultAiSettings,
@@ -3855,6 +3905,7 @@ function LessonJournalDetail({
   const [bulkNextHomework, setBulkNextHomework] = useState("");
   const [commentModal, setCommentModal] = useState(null);
   const [prepMemoModal, setPrepMemoModal] = useState(null);
+  const [editingMemoKey, setEditingMemoKey] = useState("");
   const [studentPreviewId, setStudentPreviewId] = useState("");
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
@@ -4019,33 +4070,37 @@ function LessonJournalDetail({
                 >
                   {attendanceText}
                 </button>
-                <textarea
-                  className="journalMemoCardInput"
-                  value={record.lessonMaterial ?? ""}
-                  onChange={(event) => onChangeRecord(lesson, student, "lessonMaterial", event.target.value)}
+                <EditableMemoCard
+                  editKey={`${recordId}:lessonMaterial`}
+                  editingKey={editingMemoKey}
+                  onChange={(value) => onChangeRecord(lesson, student, "lessonMaterial", value)}
+                  onEdit={setEditingMemoKey}
                   placeholder={student.textbook || student.currentTextbook || "강의 교재"}
-                  rows="2"
+                  value={record.lessonMaterial ?? ""}
                 />
-                <textarea
-                  className="journalMemoCardInput"
-                  value={record.lessonProgress ?? record.progress ?? ""}
-                  onChange={(event) => onChangeRecord(lesson, student, "lessonProgress", event.target.value)}
+                <EditableMemoCard
+                  editKey={`${recordId}:lessonProgress`}
+                  editingKey={editingMemoKey}
+                  onChange={(value) => onChangeRecord(lesson, student, "lessonProgress", value)}
+                  onEdit={setEditingMemoKey}
                   placeholder="오늘 강의 내용"
-                  rows="2"
+                  value={record.lessonProgress ?? record.progress ?? ""}
                 />
-                <textarea
-                  className="journalMemoCardInput"
-                  value={previousHomework?.title ?? ""}
-                  onChange={(event) => onUpdateHomework(lesson, student, "previous", event.target.value)}
+                <EditableMemoCard
+                  editKey={`${recordId}:previousHomework`}
+                  editingKey={editingMemoKey}
+                  onChange={(value) => onUpdateHomework(lesson, student, "previous", value)}
+                  onEdit={setEditingMemoKey}
                   placeholder="지난 숙제"
-                  rows="2"
+                  value={previousHomework?.title ?? ""}
                 />
-                <textarea
-                  className="journalMemoCardInput"
-                  value={nextHomework?.title ?? ""}
-                  onChange={(event) => onUpdateHomework(lesson, student, "next", event.target.value)}
+                <EditableMemoCard
+                  editKey={`${recordId}:nextHomework`}
+                  editingKey={editingMemoKey}
+                  onChange={(value) => onUpdateHomework(lesson, student, "next", value)}
+                  onEdit={setEditingMemoKey}
                   placeholder="다음 숙제"
-                  rows="2"
+                  value={nextHomework?.title ?? ""}
                 />
                 <select
                   className="assignmentStatusSelect"
