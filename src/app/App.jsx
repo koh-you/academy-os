@@ -1910,6 +1910,11 @@ export function App() {
         {activeView === "overdue" ? (
           <OverdueHomework
             homeworks={homeworks}
+            lessons={lessons}
+            materials={resourceMaterials}
+            records={records}
+            reportSnapshots={reportSnapshots}
+            scoreRecords={scoreRecords}
             students={students}
             onTeacherVerifyHomework={handleTeacherVerifyHomework}
           />
@@ -10315,12 +10320,23 @@ function CandidatePanel({ children, subtitle, title }) {
   );
 }
 
-function OverdueHomework({ homeworks, students, onTeacherVerifyHomework }) {
+function OverdueHomework({
+  homeworks,
+  lessons = [],
+  materials = [],
+  records = [],
+  reportSnapshots = [],
+  scoreRecords = [],
+  students,
+  onTeacherVerifyHomework
+}) {
   const unresolvedHomeworks = homeworks
     .filter((homework) => homework.title && (isHomeworkOverdue(homework) || (homework.teacherStatus ?? "unverified") !== "verified"))
     .sort((a, b) => String(a.assignedDate ?? "").localeCompare(String(b.assignedDate ?? "")));
   const [gradeFilter, setGradeFilter] = useState("전체");
   const [activeMetric, setActiveMetric] = useState("all");
+  const [detailScope, setDetailScope] = useState("all");
+  const [studentPreviewId, setStudentPreviewId] = useState("");
   const [selectedStudentId, setSelectedStudentId] = useState(students[0]?.studentId ?? "");
   const filteredStudents =
     gradeFilter === "전체" ? students : students.filter((student) => (student.grade || "미입력") === gradeFilter);
@@ -10377,8 +10393,13 @@ function OverdueHomework({ homeworks, students, onTeacherVerifyHomework }) {
   const visibleStudentIds = visibleStudents.map((student) => student.studentId).join("|");
   const firstVisibleStudentId = visibleStudents[0]?.studentId ?? "";
   const selectedStudent =
-    visibleStudents.find((student) => student.studentId === selectedStudentId) ?? visibleStudents[0] ?? null;
-  const selectedHomeworks = selectedStudent ? getStudentHomeworksByMetric(selectedStudent.studentId) : [];
+    detailScope === "student"
+      ? visibleStudents.find((student) => student.studentId === selectedStudentId) ?? visibleStudents[0] ?? null
+      : null;
+  const selectedHomeworks =
+    detailScope === "all"
+      ? getHomeworksByMetricForStudents(visibleStudents.map((student) => student.studentId))
+      : selectedStudent ? getStudentHomeworksByMetric(selectedStudent.studentId) : [];
   const registeredStudentCount = registeredStudentIds.size;
   const todayIncompleteCount = todayIncompleteStudentIds.size;
   const overdueStudentCount = overdueStudentIds.size;
@@ -10388,27 +10409,33 @@ function OverdueHomework({ homeworks, students, onTeacherVerifyHomework }) {
       if (selectedStudentId) setSelectedStudentId("");
       return;
     }
+    if (detailScope === "all") return;
     if (!visibleStudentIds.split("|").includes(selectedStudentId)) {
       setSelectedStudentId(firstVisibleStudentId);
     }
-  }, [firstVisibleStudentId, selectedStudentId, visibleStudentIds]);
+  }, [detailScope, firstVisibleStudentId, selectedStudentId, visibleStudentIds]);
 
   function getStudentHomeworksByMetric(studentId) {
+    return getHomeworksByMetricForStudents([studentId]);
+  }
+
+  function getHomeworksByMetricForStudents(studentIds) {
+    const targetIds = new Set(studentIds);
     const sortByAssignedDate = (items) =>
       [...items].sort((a, b) =>
         String(a.assignedDate ?? a.dueDate ?? "").localeCompare(String(b.assignedDate ?? b.dueDate ?? ""))
       );
     if (activeMetric === "today") {
       return sortByAssignedDate(
-        unresolvedHomeworks.filter((homework) => homework.studentId === studentId && homework.dueDate === today)
+        unresolvedHomeworks.filter((homework) => targetIds.has(homework.studentId) && homework.dueDate === today)
       );
     }
     if (activeMetric === "overdue") {
       return sortByAssignedDate(
-        unresolvedHomeworks.filter((homework) => homework.studentId === studentId && isHomeworkOverdue(homework))
+        unresolvedHomeworks.filter((homework) => targetIds.has(homework.studentId) && isHomeworkOverdue(homework))
       );
     }
-    return sortByAssignedDate(homeworks.filter((homework) => homework.studentId === studentId && homework.title));
+    return sortByAssignedDate(homeworks.filter((homework) => targetIds.has(homework.studentId) && homework.title));
   }
 
   function getStudentHomeworkSummary(student) {
@@ -10443,6 +10470,12 @@ function OverdueHomework({ homeworks, students, onTeacherVerifyHomework }) {
 
   function handleMetricClick(metric) {
     setActiveMetric(metric);
+    if (metric === "all") {
+      setDetailScope("all");
+      setSelectedStudentId("");
+      return;
+    }
+    setDetailScope("student");
     const nextStudent = filteredStudents.find((student) => {
       if (metric === "registered") return registeredStudentIds.has(student.studentId);
       if (metric === "today") return todayIncompleteStudentIds.has(student.studentId);
@@ -10452,6 +10485,21 @@ function OverdueHomework({ homeworks, students, onTeacherVerifyHomework }) {
     if (nextStudent) {
       setSelectedStudentId(nextStudent.studentId);
     }
+  }
+
+  function handleSelectStudent(studentId) {
+    setDetailScope("student");
+    setSelectedStudentId(studentId);
+  }
+
+  function handleShowAllStudents() {
+    setActiveMetric("all");
+    setDetailScope("all");
+    setSelectedStudentId("");
+  }
+
+  function getHomeworkStudentName(homework) {
+    return students.find((student) => student.studentId === homework.studentId)?.name ?? "학생 미입력";
   }
 
   return (
@@ -10498,7 +10546,7 @@ function OverdueHomework({ homeworks, students, onTeacherVerifyHomework }) {
                 <button
                   className={isSelected ? "homeworkStudentTile active" : "homeworkStudentTile"}
                   key={student.studentId}
-                  onClick={() => setSelectedStudentId(student.studentId)}
+                  onClick={() => handleSelectStudent(student.studentId)}
                   type="button"
                 >
                   <span className="homeworkStudentTop">
@@ -10524,12 +10572,18 @@ function OverdueHomework({ homeworks, students, onTeacherVerifyHomework }) {
             <div>
               <h2>{activeMetricMeta.detailTitle}</h2>
               <p className="muted">
-                {selectedStudent ? `${selectedStudent.name} · ${activeMetricMeta.detailHint}` : "학생을 선택하세요"}
+                {detailScope === "all"
+                  ? `${visibleStudents.length}명 · ${activeMetricMeta.detailHint}`
+                  : selectedStudent ? `${selectedStudent.name} · ${activeMetricMeta.detailHint}` : "학생을 선택하세요"}
               </p>
             </div>
             <div className="detailActions">
-              {selectedStudent ? <button className="softButton" type="button">👤 학생화면</button> : null}
-              <button className="softButton" onClick={() => handleMetricClick("all")} type="button">전체 학생</button>
+              {selectedStudent ? (
+                <button className="softButton" onClick={() => setStudentPreviewId(selectedStudent.studentId)} type="button">
+                  👤 학생화면
+                </button>
+              ) : null}
+              <button className="softButton" onClick={handleShowAllStudents} type="button">전체 학생</button>
             </div>
           </div>
           {selectedHomeworks.length === 0 ? (
@@ -10539,7 +10593,7 @@ function OverdueHomework({ homeworks, students, onTeacherVerifyHomework }) {
             {selectedHomeworks.map((homework) => (
               <article className="homeworkDetailCard" key={homework.homeworkId}>
                 <div>
-                  <strong>{homework.title}</strong>
+                  <strong>{detailScope === "all" ? `${getHomeworkStudentName(homework)} · ${homework.title}` : homework.title}</strong>
                   <small>{homework.assignedDate} 배정 · {homework.dueDate || "-"} 마감</small>
                   <span className="homeworkProgressTrack">
                     <i style={{ width: homework.studentStatus === "checked_done" ? "100%" : "0%" }} />
@@ -10564,6 +10618,32 @@ function OverdueHomework({ homeworks, students, onTeacherVerifyHomework }) {
         </section>
       </div>
 
+      {studentPreviewId ? (
+        <Modal
+          backdropClassName="studentPortalPreviewBackdrop"
+          className="studentPortalPreviewModal"
+          title="학생 화면 미리보기"
+          subtitle="숙제현황에서 선택한 학생 포털 화면입니다."
+          onClose={() => setStudentPreviewId("")}
+        >
+          <StudentPortalV2
+            homeworks={homeworks}
+            lessons={lessons}
+            materials={materials}
+            records={records}
+            reportSnapshots={reportSnapshots}
+            scoreRecords={scoreRecords}
+            sessionStudentId={studentPreviewId}
+            students={students.filter((student) => student.studentId === studentPreviewId)}
+            previewMode
+            onLogout={() => setStudentPreviewId("")}
+            onStudentCheckHomework={() => {}}
+            onStudentCreateHomework={() => {}}
+            onStudentDeleteHomework={() => {}}
+            onStudentUpdateHomework={() => {}}
+          />
+        </Modal>
+      ) : null}
     </section>
   );
 }
