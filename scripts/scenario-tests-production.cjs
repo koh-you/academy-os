@@ -82,8 +82,9 @@ check("52 school calendar registration uses modal-first type input", hasAll(app,
 check("53 lesson journal assignment status syncs homework makeup source", hasAll(app, ["syncPreviousHomeworkStatusFromAssignment", "getHomeworkStatusFromAssignmentStatus", 'teacherStatus: "missing"', 'teacherStatus: "partial"', 'dueDate: existing.dueDate || lesson.date']));
 
 check("54 comment preview is editable before sending", hasAll(app, ["editablePreviewText", "extractCommentBodyFromPreview", "manualCommentBody", "commentBodyOverride"]) && css.includes(".editableCommentPreview") && notificationRoute.includes("payload.commentBodyOverride"));
-check("55 supplement center filters homework makeup by checked assignment result", hasAll(app, ["makeupHomeworks", "isHomeworkMakeupCandidate(homework, records)", "isAssignmentStatusHomeworkMakeupCandidate", "getHomeworkMakeupReason"]) && !app.includes("const overdueHomeworks = homeworks.filter"));
+check("55 supplement center filters homework makeup by checked assignment result", hasAll(app, ["makeupHomeworks", "isHomeworkMakeupCandidate(homework, records, lessons)", "isAssignmentStatusHomeworkMakeupCandidate", "getHomeworkMakeupReason", "getHomeworkLesson"]) && !app.includes("const overdueHomeworks = homeworks.filter"));
 check("56 supplement methods match task type", hasAll(app, ['supplementMethod: "stay_after"', 'supplementMethod: "onsite_makeup"', 'label: "남아서 하고가기"', 'label: "등원보충"', 'label: "다음시간까지"', 'label: "현장보강"', 'label: "녹강보강"']));
+check("57 lesson delete removes linked records and homeworks with undo bin", hasAll(app, ["deletedLessonBundles", "lessonDeleteRetentionMs", "filterHomeworksForLessons", "pruneExpiredLessonDeletes", 'method: "DELETE"']) && hasAll(notificationRoute + fs.readFileSync(path.join(root, "api", "server.js"), "utf8"), ["deleteLesson", "deleteLessonsBefore"]));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));

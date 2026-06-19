@@ -22,10 +22,13 @@ const storageKeys = {
   resourceMaterials: "academy-os.resourceMaterials.v1",
   lessonResearchItems: "academy-os.lessonResearchItems.v1",
   aiSettings: "academy-os.aiSettings.v1",
-  attendanceSettings: "academy-os.attendanceSettings.v1"
+  attendanceSettings: "academy-os.attendanceSettings.v1",
+  deletedLessonBundles: "academy-os.deletedLessonBundles.v1"
 };
 
 const academyBrandName = "으뜸수학 고태영T";
+const academyOperationalStartDate = "2026-06-19";
+const lessonDeleteRetentionMs = 24 * 60 * 60 * 1000;
 
 const dayLabels = {
   mon: "월",
@@ -1132,6 +1135,7 @@ export function App() {
   const [selectedLessonId, setSelectedLessonId] = useState("");
   const [lessonClipboard, setLessonClipboard] = useState(null);
   const [lessonUndoStack, setLessonUndoStack] = useState([]);
+  const [deletedLessonBundles, setDeletedLessonBundles] = useStoredState(storageKeys.deletedLessonBundles, []);
   const [classTemplates, setClassTemplates] = useStoredState(storageKeys.classTemplates, sampleData.classTemplates);
   const [students, setStudents] = useStoredState(storageKeys.students, sampleData.students);
   const [lessons, setLessons] = useStoredState(storageKeys.lessons, sampleData.lessons);
@@ -1173,7 +1177,7 @@ export function App() {
   const [attendanceModal, setAttendanceModal] = useState(null);
   const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
   const [lessonDeleteModalId, setLessonDeleteModalId] = useState("");
-  const [selectedReportLessonId, setSelectedReportLessonId] = useState("lesson_2026-06-12_mwf-7-10");
+  const [selectedReportLessonId, setSelectedReportLessonId] = useState("");
   const recordsRef = useRef(records);
   const homeworksRef = useRef(homeworks);
 
@@ -1213,17 +1217,21 @@ export function App() {
           setClassTemplates(classesResult.classTemplates);
         }
         if (lessonsResult.ok && Array.isArray(lessonsResult.lessons) && lessonsResult.lessons.length > 0) {
-          setLessons(lessonsResult.lessons);
+          setLessons(filterActiveLessons(lessonsResult.lessons));
         }
         if (recordsResult.ok && Array.isArray(recordsResult.records) && recordsResult.records.length > 0) {
-          setRecords(recordsResult.records);
+          const sourceLessons = lessonsResult.ok && Array.isArray(lessonsResult.lessons) ? lessonsResult.lessons : lessons;
+          setRecords(filterRecordsForLessons(recordsResult.records, sourceLessons));
         }
         if (homeworksResult.ok && Array.isArray(homeworksResult.homeworks) && homeworksResult.homeworks.length > 0) {
-          setHomeworks(homeworksResult.homeworks);
+          const sourceLessons = lessonsResult.ok && Array.isArray(lessonsResult.lessons) ? lessonsResult.lessons : lessons;
+          setHomeworks(filterHomeworksForLessons(homeworksResult.homeworks, sourceLessons));
         }
         if (resourceMaterialsResult.ok && Array.isArray(resourceMaterialsResult.materials)) {
           setResourceMaterials(resourceMaterialsResult.materials);
         }
+        fetch(apiUrl(`/api/lessons?before=${encodeURIComponent(academyOperationalStartDate)}`), { method: "DELETE" })
+          .catch((error) => console.info("academy-os legacy lesson cleanup skipped:", error.message));
       } catch (error) {
         console.info("academy-os API sync skipped:", error.message);
       }
@@ -1234,6 +1242,16 @@ export function App() {
       isMounted = false;
     };
   }, [setClassTemplates, setHomeworks, setLessons, setRecords, setResourceMaterials, setStudents]);
+
+  useEffect(() => {
+    setDeletedLessonBundles((current) => pruneExpiredLessonDeletes(current));
+    setLessons((currentLessons) => filterActiveLessons(currentLessons));
+  }, [setDeletedLessonBundles, setLessons]);
+
+  useEffect(() => {
+    setRecords((currentRecords) => filterRecordsForLessons(currentRecords, lessons));
+    setHomeworks((currentHomeworks) => filterHomeworksForLessons(currentHomeworks, lessons));
+  }, [lessons, setHomeworks, setRecords]);
 
   async function refreshNotificationJobs() {
     try {
@@ -1554,9 +1572,21 @@ export function App() {
       setSelectedLessonId("");
     }
     if (latestAction.type === "delete") {
-      setLessons((current) => [...current, latestAction.lesson]);
-      setSelectedDate(latestAction.lesson.date);
-      setSelectedLessonId(latestAction.lesson.lessonId);
+      const bundle = latestAction.bundle ?? { lesson: latestAction.lesson, records: [], homeworks: [] };
+      if (!bundle.lesson) return;
+      setLessons((current) => upsertById(current, bundle.lesson, "lessonId"));
+      setRecords((current) => [...(bundle.records ?? []), ...current.filter((record) => record.lessonId !== bundle.lesson.lessonId)]);
+      setHomeworks((current) => [...(bundle.homeworks ?? []), ...current.filter((homework) => homework.lessonId !== bundle.lesson.lessonId)]);
+      setDeletedLessonBundles((current) => current.filter((item) => item.bundleId !== bundle.bundleId));
+      setSelectedDate(bundle.lesson.date);
+      setSelectedLessonId(bundle.lesson.lessonId);
+      postJson("/api/lessons", { lesson: bundle.lesson }).catch((error) => console.error(error));
+      if (bundle.records?.length) {
+        bundle.records.forEach((record) => postJson("/api/lesson-records", { record }).catch((error) => console.error(error)));
+      }
+      if (bundle.homeworks?.length) {
+        postJson("/api/homeworks/bulk", { homeworks: bundle.homeworks }).catch((error) => console.error(error));
+      }
     }
     setLessonUndoStack(restActions);
   }
@@ -1570,20 +1600,27 @@ export function App() {
   function confirmDeleteLesson(lessonId) {
     const lesson = lessons.find((item) => item.lessonId === lessonId);
     if (!lesson) return;
-    const canceledLesson = { ...lesson, status: "canceled" };
-    setLessonUndoStack((current) => [{ type: "delete", lesson }, ...current].slice(0, 20));
+    const deletedAt = new Date().toISOString();
+    const bundle = {
+      bundleId: `deleted_${lessonId}_${Date.now()}`,
+      lesson,
+      records: recordsRef.current.filter((record) => record.lessonId === lessonId),
+      homeworks: homeworksRef.current.filter((homework) => homework.lessonId === lessonId),
+      deletedAt,
+      expiresAt: new Date(Date.now() + lessonDeleteRetentionMs).toISOString()
+    };
+    setDeletedLessonBundles((current) => pruneExpiredLessonDeletes([bundle, ...current]));
+    setLessonUndoStack((current) => [{ type: "delete", bundle }, ...current].slice(0, 20));
     setLessons((current) => current.filter((item) => item.lessonId !== lessonId));
     setRecords((current) => current.filter((record) => record.lessonId !== lessonId));
-    setHomeworks((current) =>
-      current.map((homework) => (homework.lessonId === lessonId ? { ...homework, lessonId: "" } : homework))
-    );
+    setHomeworks((current) => current.filter((homework) => homework.lessonId !== lessonId));
     setLessonDeleteModalId("");
     const nextLessonForDate = lessons
       .filter((item) => item.lessonId !== lessonId && item.date === lesson.date)
       .sort(sortByTime)[0];
     setSelectedLessonId(nextLessonForDate?.lessonId ?? "");
     setIsLessonJournalOpen(false);
-    postJson("/api/lessons", { lesson: canceledLesson }).catch((error) => console.error(error));
+    fetch(apiUrl(`/api/lessons?id=${encodeURIComponent(lessonId)}`), { method: "DELETE" }).catch((error) => console.error(error));
   }
 
   function handleOpenLessonJournal(lessonId) {
@@ -9511,7 +9548,7 @@ function SupplementCenter({
 }) {
   const [selectedSupplementStudentId, setSelectedSupplementStudentId] = useState("");
   const [activeSupplementTab, setActiveSupplementTab] = useState("homework_makeup");
-  const makeupHomeworks = homeworks.filter((homework) => isHomeworkMakeupCandidate(homework, records)).slice(0, 8);
+  const makeupHomeworks = homeworks.filter((homework) => isHomeworkMakeupCandidate(homework, records, lessons)).slice(0, 8);
   const absentRecords = records
     .filter((record) => record.attendanceStatus === "absent" || record.attendanceStatus === "excused")
     .slice(0, 8);
@@ -11325,6 +11362,36 @@ function sortByTime(a, b) {
   return a.startTime.localeCompare(b.startTime);
 }
 
+function isActiveLesson(lesson) {
+  return (
+    lesson?.date >= academyOperationalStartDate &&
+    !["canceled", "deleted"].includes(lesson?.status ?? "scheduled")
+  );
+}
+
+function activeLessonIdSet(lessons = []) {
+  return new Set(lessons.filter(isActiveLesson).map((lesson) => lesson.lessonId));
+}
+
+function filterActiveLessons(lessons = []) {
+  return lessons.filter(isActiveLesson);
+}
+
+function filterRecordsForLessons(records = [], lessons = []) {
+  const lessonIds = activeLessonIdSet(lessons);
+  return records.filter((record) => lessonIds.has(record.lessonId));
+}
+
+function filterHomeworksForLessons(homeworks = [], lessons = []) {
+  const lessonIds = activeLessonIdSet(lessons);
+  return homeworks.filter((homework) => homework.lessonId && lessonIds.has(homework.lessonId));
+}
+
+function pruneExpiredLessonDeletes(bundles = []) {
+  const now = Date.now();
+  return bundles.filter((bundle) => !bundle.expiresAt || Date.parse(bundle.expiresAt) > now);
+}
+
 function getLessonSortValue(lesson) {
   return `${lesson.date ?? ""}T${lesson.startTime || "00:00"}`;
 }
@@ -11706,7 +11773,12 @@ function getHomeworkRecord(homework, records = []) {
   ) ?? null;
 }
 
-function isHomeworkMakeupCandidate(homework, records = []) {
+function getHomeworkLesson(homework, lessons = []) {
+  return lessons.find((lesson) => lesson.lessonId === homework.lessonId && isActiveLesson(lesson)) ?? null;
+}
+
+function isHomeworkMakeupCandidate(homework, records = [], lessons = []) {
+  if (!getHomeworkLesson(homework, lessons)) return false;
   const record = getHomeworkRecord(homework, records);
   const assignmentStatus = record?.assignmentStatus ?? record?.incompleteHomework ?? "";
   const recordRequiresMakeup = assignmentStatus ? isAssignmentStatusHomeworkMakeupCandidate(assignmentStatus) : false;

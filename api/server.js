@@ -1,5 +1,7 @@
 ﻿import http from "node:http";
 import {
+  deleteLesson,
+  deleteLessonsBefore,
   deleteResourceMaterial,
   getCoreDataStatus,
   listClassTemplates,
@@ -351,6 +353,18 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await upsertLessons(payload.lessons ?? []);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "DELETE" && requestUrl.pathname === "/api/lessons") {
+    try {
+      const lessonId = requestUrl.searchParams.get("id");
+      const beforeDate = requestUrl.searchParams.get("before");
+      const result = beforeDate ? await deleteLessonsBefore(beforeDate) : await deleteLesson(lessonId);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });

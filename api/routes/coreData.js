@@ -381,6 +381,37 @@ export async function upsertLessons(lessons) {
   return { source: databaseSource, lessons: rows.map(fromLessonRow) };
 }
 
+export async function deleteLesson(lessonId) {
+  if (!lessonId) throw new Error("삭제할 수업 ID가 필요합니다.");
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, lessonId };
+  }
+
+  const encodedLessonId = encodeURIComponent(lessonId);
+  await deleteRows("homeworks", `lesson_id=eq.${encodedLessonId}`);
+  await deleteRows("lesson_student_records", `lesson_id=eq.${encodedLessonId}`);
+  await deleteRows("lessons", `lesson_id=eq.${encodedLessonId}`);
+  return { source: databaseSource, lessonId };
+}
+
+export async function deleteLessonsBefore(cutoffDate) {
+  if (!cutoffDate) throw new Error("삭제 기준일이 필요합니다.");
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, cutoffDate, deletedLessonIds: [] };
+  }
+
+  const lessonRows = await listRows(
+    "lessons",
+    `select=lesson_id&lesson_date=lt.${encodeURIComponent(cutoffDate)}`,
+    { requireServiceRole: true }
+  );
+  const deletedLessonIds = lessonRows.map((row) => row.lesson_id).filter(Boolean);
+  for (const lessonId of deletedLessonIds) {
+    await deleteLesson(lessonId);
+  }
+  return { source: databaseSource, cutoffDate, deletedLessonIds };
+}
+
 export async function listLessonStudentRecords() {
   if (!isSupabaseConfigured()) {
     return { source: fallbackSource, records: sampleData.lessonStudentRecords };
