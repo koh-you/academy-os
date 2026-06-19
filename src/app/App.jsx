@@ -1797,6 +1797,7 @@ export function App() {
             integrationStatus={integrationStatus}
             lessons={lessons}
             lessonsForDate={lessonsForDate}
+            makeupTasks={makeupTasks}
             materials={resourceMaterials}
             records={selectedRecords}
             saveStates={saveStates}
@@ -3504,6 +3505,7 @@ function TeacherLessonHubV2({
   integrationStatus,
   clipboardCount,
   lessons,
+  makeupTasks = [],
   materials = [],
   records,
   saveStates,
