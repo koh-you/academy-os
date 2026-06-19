@@ -25,6 +25,8 @@ const storageKeys = {
   attendanceSettings: "academy-os.attendanceSettings.v1"
 };
 
+const academyBrandName = "으뜸수학 고태영T";
+
 const dayLabels = {
   mon: "월",
   tue: "화",
@@ -183,7 +185,6 @@ function getSaveButtonLabel(saveState) {
 }
 
 const today = getKoreaDateString();
-const academyBrandName = "으뜸수학 고태영T";
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8787").replace(/\/$/, "");
 
 function apiUrl(path) {
@@ -956,18 +957,64 @@ const problemStatusMeta = {
 
 const problemClickCycle = ["first", "retry", "wrong", "mistake"];
 
+const defaultAiPrompts = {
+  commentPolish: [
+    "역할: 으뜸수학 고태영T의 수업 코멘트 편집자",
+    "목표: 강사가 대강 적은 메모를 실제 발송 가능한 자연스러운 문장으로 다듬는다.",
+    "작성 원칙:",
+    "- 입력된 사실만 사용하고 없는 내용은 만들지 않는다.",
+    "- 강사 원문의 핵심 의도와 표현의 사실은 반드시 반영한다.",
+    "- 학생을 비난하거나 단정하지 않고, 다음 행동 중심으로 쓴다.",
+    "- 알림톡에 바로 붙여 넣을 수 있게 최종 문장만 반환한다.",
+    "- 제목, 마크다운, 구분선, 설명 문구는 쓰지 않는다.",
+    "- 2~5문장 안에서 간결하게 작성한다."
+  ].join("\n"),
+  preparationNotice: [
+    "역할: 으뜸수학 고태영T의 수업메모 알림톡 편집자",
+    "목표: 강사용 수업메모를 학생 또는 학부모에게 보낼 짧고 정중한 안내문으로 다듬는다.",
+    "작성 원칙:",
+    "- 메모에 없는 사실을 만들지 않는다.",
+    "- 수신자가 바로 이해할 수 있게 한두 문단으로 정리한다.",
+    "- 학생용은 분명하고 부담 없는 말투, 학부모용은 정중한 말투를 사용한다.",
+    "- 최종 문장만 반환한다."
+  ].join("\n"),
+  examAnalysis: [
+    `역할: ${academyBrandName} 시험지 분석 1차 AI 가안 생성`,
+    "목표: 시험 원본/OCR/강사 메모를 바탕으로 시험분석 화면의 필드 초안을 작성한다.",
+    "작성 원칙:",
+    "- 원본에 없는 문항 번호나 배점은 단정하지 않는다.",
+    "- 단원별 분포, 킬러/준킬러, 실수 패턴을 구분해서 쓴다.",
+    "- 학생용 총평과 블로그/인스타 초안은 학원 공개 문구로 다듬어 쓴다.",
+    "- 반드시 요청된 JSON 필드 형식에 맞춰 반환한다."
+  ].join("\n"),
+  variantProblem: [
+    "역할: 으뜸수학 고태영T의 내신 수학 변형문항 제작 보조",
+    "목표: 원본 문항의 핵심 개념과 풀이 구조를 유지하면서 조건, 숫자, 표현, 난도를 조절한 변형문항을 만든다.",
+    "작성 원칙:",
+    "- 원본의 핵심 학습 목표를 유지한다.",
+    "- 학교 내신에서 나올 법한 조건 변화와 함정을 반영한다.",
+    "- 정답과 해설은 선택한 형식에 맞춰 제공한다.",
+    "- 지나치게 새로운 개념을 추가하지 않는다."
+  ].join("\n")
+};
+
 const defaultAiSettings = {
   commentProvider: "auto",
   commentModel: "server-default",
   examAnalysisProvider: "auto",
   examAnalysisModel: "server-default",
   variantProvider: "auto",
-  variantModel: "server-default"
+  variantModel: "server-default",
+  prompts: defaultAiPrompts
 };
 
 const defaultAttendanceSettings = {
   lateGraceMinutes: 0
 };
+
+function getAiPrompt(settings = {}, promptKey) {
+  return settings?.prompts?.[promptKey] ?? defaultAiPrompts[promptKey] ?? "";
+}
 
 function countProblemStatuses(problems = []) {
   return Object.keys(problemStatusMeta).reduce((counts, status) => {
@@ -2310,7 +2357,8 @@ export function App() {
     const nextAnalysis = {
       ...analysis,
       aiProvider: overrideAiSettings?.examAnalysisProvider ?? analysis.aiProvider ?? defaultAiSettings.examAnalysisProvider,
-      aiModel: overrideAiSettings?.examAnalysisModel ?? analysis.aiModel ?? defaultAiSettings.examAnalysisModel
+      aiModel: overrideAiSettings?.examAnalysisModel ?? analysis.aiModel ?? defaultAiSettings.examAnalysisModel,
+      aiPrompt: getAiPrompt(overrideAiSettings ?? aiSettings, "examAnalysis") || analysis.aiPrompt
     };
     setExamAnalyses((current) =>
       current.map((item) =>
@@ -2382,6 +2430,7 @@ export function App() {
         body: JSON.stringify({
           aiProvider,
           aiModel,
+          aiPrompt: getAiPrompt(aiSettings, "commentPolish"),
           audience: target === "student" ? "student" : "parent",
           attendanceStatus: attendanceLabels[record?.attendanceStatus ?? "pending"],
           assignmentStatus: getAssignmentStatusParentMessage(record?.assignmentStatus ?? record?.incompleteHomework ?? ""),
@@ -2474,6 +2523,7 @@ export function App() {
         body: JSON.stringify({
           aiProvider,
           aiModel,
+          aiPrompt: getAiPrompt(aiSettings, "preparationNotice"),
           audience: target === "student" ? "student" : "parent",
           attendanceStatus: attendanceLabels[record?.attendanceStatus ?? "pending"],
           assignmentStatus: getAssignmentStatusParentMessage(record?.assignmentStatus ?? record?.incompleteHomework ?? ""),
@@ -5738,6 +5788,7 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
         body: JSON.stringify({
           aiProvider: commentAiProvider,
           aiModel: commentAiModel,
+          aiPrompt: getAiPrompt(aiSettings, "commentPolish"),
           audience: "teacher",
           grade: row.grade,
           homeworkStatus: "시험 후 총평",
@@ -5845,7 +5896,12 @@ function SettingsCenter({
   onUpdateAiSettings,
   onUpdateAttendanceSettings
 }) {
-  const settings = { ...defaultAiSettings, ...aiSettings };
+  const [activePromptKey, setActivePromptKey] = useState("commentPolish");
+  const settings = {
+    ...defaultAiSettings,
+    ...aiSettings,
+    prompts: { ...defaultAiPrompts, ...(aiSettings?.prompts ?? {}) }
+  };
   const attendance = { ...defaultAttendanceSettings, ...attendanceSettings };
   const attendanceUrl =
     typeof window === "undefined"
@@ -5871,11 +5927,35 @@ function SettingsCenter({
       title: "AI 변형문항"
     }
   ];
+  const promptRows = [
+    {
+      description: "학부모/학생 알림톡 코멘트와 시험 후 총평을 다듬을 때 사용합니다.",
+      key: "commentPolish",
+      title: "코멘트 AI"
+    },
+    {
+      description: "수업메모를 학생/학부모 안내문으로 바꿀 때 사용합니다.",
+      key: "preparationNotice",
+      title: "수업메모 AI"
+    },
+    {
+      description: "시험분석 화면에서 시험지 분석 1차 가안을 만들 때 사용합니다.",
+      key: "examAnalysis",
+      title: "시험분석 AI"
+    },
+    {
+      description: "AI 도구의 변형문항 생성 흐름에서 사용할 기본 지시문입니다.",
+      key: "variantProblem",
+      title: "AI 변형문항"
+    }
+  ];
+  const activePrompt = promptRows.find((row) => row.key === activePromptKey) ?? promptRows[0];
 
   function updateProvider(row, provider) {
     onUpdateAiSettings((current) => ({
       ...defaultAiSettings,
       ...current,
+      prompts: { ...defaultAiPrompts, ...(current?.prompts ?? {}) },
       [row.providerKey]: provider,
       [row.modelKey]: aiProviderModels[provider]?.[0] ?? "server-default"
     }));
@@ -5885,8 +5965,25 @@ function SettingsCenter({
     onUpdateAiSettings((current) => ({
       ...defaultAiSettings,
       ...current,
+      prompts: { ...defaultAiPrompts, ...(current?.prompts ?? {}) },
       [row.modelKey]: model
     }));
+  }
+
+  function updatePrompt(promptKey, value) {
+    onUpdateAiSettings((current) => ({
+      ...defaultAiSettings,
+      ...current,
+      prompts: {
+        ...defaultAiPrompts,
+        ...(current?.prompts ?? {}),
+        [promptKey]: value
+      }
+    }));
+  }
+
+  function resetPrompt(promptKey) {
+    updatePrompt(promptKey, defaultAiPrompts[promptKey] ?? "");
   }
 
   function updateAttendanceSetting(field, value) {
@@ -5939,6 +6036,44 @@ function SettingsCenter({
               </div>
             );
           })}
+        </div>
+      </section>
+
+      <section className="panel settingsCard">
+        <div className="sectionTitle">
+          <div>
+            <h2>AI 프롬프트</h2>
+            <p>웹앱에서 AI 호출이 있는 기능의 기본 지시문을 확인하고 수정합니다.</p>
+          </div>
+          <button className="softButton" onClick={() => resetPrompt(activePrompt.key)} type="button">
+            기본값 복원
+          </button>
+        </div>
+        <div className="promptSettingsLayout">
+          <div className="promptTabList" role="tablist" aria-label="AI 프롬프트 기능 선택">
+            {promptRows.map((row) => (
+              <button
+                className={activePromptKey === row.key ? "active" : ""}
+                key={row.key}
+                onClick={() => setActivePromptKey(row.key)}
+                type="button"
+              >
+                <strong>{row.title}</strong>
+                <span>{row.description}</span>
+              </button>
+            ))}
+          </div>
+          <label className="promptEditor">
+            <span>{activePrompt.title} 프롬프트</span>
+            <textarea
+              value={settings.prompts[activePrompt.key] ?? ""}
+              onChange={(event) => updatePrompt(activePrompt.key, event.target.value)}
+              rows="14"
+            />
+            <small className="muted">
+              수업 정보, 학생명, 출결, 과제 상태 같은 실제 데이터는 AI 호출 시 별도로 함께 전달됩니다.
+            </small>
+          </label>
         </div>
       </section>
 

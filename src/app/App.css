@@ -4521,6 +4521,77 @@ textarea.profileEditInput {
   font-size: 16px;
 }
 
+.promptSettingsLayout {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 300px minmax(0, 1fr);
+}
+
+.promptTabList {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  overflow: hidden;
+}
+
+.promptTabList button {
+  background: #ffffff;
+  border: 0;
+  border-top: 1px solid #e2e8f0;
+  color: #334155;
+  cursor: pointer;
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+  text-align: left;
+}
+
+.promptTabList button:first-child {
+  border-top: 0;
+}
+
+.promptTabList button.active {
+  background: #eef6ff;
+  box-shadow: inset 3px 0 0 #2563eb;
+  color: #0f172a;
+}
+
+.promptTabList strong {
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.promptTabList span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.promptEditor {
+  align-content: start;
+  background: #f8fbff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.promptEditor > span {
+  color: #0f172a;
+  font-weight: 900;
+}
+
+.promptEditor textarea {
+  background: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.55;
+  min-height: 330px;
+  resize: vertical;
+}
+
 .linkButton {
   align-items: center;
   display: inline-flex;
@@ -7408,6 +7479,7 @@ textarea.profileEditInput {
   .analysisOutputGrid,
   .publishSummaryGrid,
   .publishPreviewList,
+  .promptSettingsLayout,
   .tallyAiGrid {
     grid-template-columns: 1fr;
   }

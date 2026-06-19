@@ -93,10 +93,8 @@ function buildCommentPrompt(payload) {
       : payload.audience === "teacher"
         ? "강사가 수정해서 사용할 수 있는 명료한 총평 문장으로 작성한다."
         : "학부모님께 보내는 정중한 알림톡 문장으로 작성한다. 과장하지 않고 구체적인 관찰과 다음 행동을 담는다.";
-
-  return [
+  const basePrompt = String(payload.aiPrompt ?? "").trim() || [
     "역할: 으뜸수학 고태영T의 수업 코멘트 편집자",
-    `대상: ${audienceLabel}`,
     "목표: 강사가 대강 적은 메모를 실제 발송 가능한 자연스러운 문장으로 다듬는다.",
     "작성 원칙:",
     "- 입력된 사실만 사용하고 없는 내용은 만들지 않는다.",
@@ -104,8 +102,13 @@ function buildCommentPrompt(payload) {
     "- 학생을 비난하거나 단정하지 않고, 다음 행동 중심으로 쓴다.",
     "- 알림톡에 바로 붙여 넣을 수 있게 최종 문장만 반환한다.",
     "- 제목, 마크다운, 구분선, 설명 문구는 쓰지 않는다.",
-    "- 2~5문장 안에서 간결하게 작성한다.",
-    `- ${audienceRule}`,
+    "- 2~5문장 안에서 간결하게 작성한다."
+  ].join("\n");
+
+  return [
+    basePrompt,
+    `대상: ${audienceLabel}`,
+    `대상별 추가 원칙: ${audienceRule}`,
     "",
     "[수업 정보]",
     `학생: ${payload.studentName ?? ""}`,
