@@ -113,6 +113,20 @@ function getAssignmentStatusParentMessage(value) {
   return assignmentStatusParentMessages[normalizedValue] ?? assignmentStatusLabels[normalizedValue] ?? "";
 }
 
+function getHomeworkStatusFromAssignmentStatus(value) {
+  const normalizedValue = normalizeAssignmentStatusValue(value);
+  if (normalizedValue === "complete_thorough") {
+    return { status: "verified", teacherStatus: "verified" };
+  }
+  if (normalizedValue === "not_done") {
+    return { status: "missing", teacherStatus: "missing" };
+  }
+  if (["partial_80", "partial_50", "known_only", "too_hard", "answer_suspected"].includes(normalizedValue)) {
+    return { status: "partial", teacherStatus: "partial" };
+  }
+  return { status: "assigned", teacherStatus: "unverified" };
+}
+
 function getLessonMaterial(record, student) {
   return record?.lessonMaterial?.trim() || student?.textbook?.trim() || student?.currentTextbook?.trim() || "";
 }
@@ -1738,7 +1752,33 @@ export function App() {
       return upsertById(currentRecords, nextRecord, "lessonStudentRecordId");
     });
 
+    if (field === "assignmentStatus") {
+      syncPreviousHomeworkStatusFromAssignment(lesson, student, value);
+    }
+
     setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "dirty" }));
+  }
+
+  function syncPreviousHomeworkStatusFromAssignment(lesson, student, assignmentStatus) {
+    const homeworkStatus = getHomeworkStatusFromAssignmentStatus(assignmentStatus);
+    setHomeworks((current) => {
+      const previousHomework = getLessonHomework(current, lesson, student, "previous", lessons);
+      if (!previousHomework?.homeworkId || !previousHomework.title?.trim()) return current;
+
+      const existing = current.find((homework) => homework.homeworkId === previousHomework.homeworkId);
+      if (!existing) return current;
+
+      const nextHomework = {
+        ...existing,
+        status: homeworkStatus.status,
+        teacherStatus: homeworkStatus.teacherStatus,
+        dueDate: existing.dueDate || lesson.date,
+        updatedAt: new Date().toISOString()
+      };
+
+      postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
+      return current.map((homework) => (homework.homeworkId === nextHomework.homeworkId ? nextHomework : homework));
+    });
   }
 
   function handleUpdateHomework(lesson, student, homeworkType, title) {
