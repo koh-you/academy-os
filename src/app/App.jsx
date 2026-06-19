@@ -127,6 +127,11 @@ function getHomeworkStatusFromAssignmentStatus(value) {
   return { status: "assigned", teacherStatus: "unverified" };
 }
 
+function isAssignmentStatusHomeworkMakeupCandidate(value) {
+  const normalizedValue = normalizeAssignmentStatusValue(value);
+  return ["not_done", "partial_80", "partial_50", "known_only", "too_hard", "answer_suspected"].includes(normalizedValue);
+}
+
 function getLessonMaterial(record, student) {
   return record?.lessonMaterial?.trim() || student?.textbook?.trim() || student?.currentTextbook?.trim() || "";
 }
@@ -9506,7 +9511,7 @@ function SupplementCenter({
 }) {
   const [selectedSupplementStudentId, setSelectedSupplementStudentId] = useState("");
   const [activeSupplementTab, setActiveSupplementTab] = useState("homework_makeup");
-  const overdueHomeworks = homeworks.filter((homework) => isHomeworkMakeupCandidate(homework)).slice(0, 8);
+  const makeupHomeworks = homeworks.filter((homework) => isHomeworkMakeupCandidate(homework, records)).slice(0, 8);
   const absentRecords = records
     .filter((record) => record.attendanceStatus === "absent" || record.attendanceStatus === "excused")
     .slice(0, 8);
@@ -9547,20 +9552,20 @@ function SupplementCenter({
       id: "homework_makeup",
       title: "숙제보충",
       subtitle: "미완료 숙제를 보충 과제로 전환합니다.",
-      count: overdueHomeworks.length,
+      count: makeupHomeworks.length,
       emptyText: "미완료 숙제가 없습니다.",
-      items: overdueHomeworks.map((homework) => ({
+      items: makeupHomeworks.map((homework) => ({
         id: homework.homeworkId,
         studentId: homework.studentId,
         title: homework.title,
-        meta: `${homework.dueDate || homework.assignedDate || "-"} 기준 · ${getHomeworkAction(homework)}`,
+        meta: `${homework.dueDate || homework.assignedDate || "-"} 기준 · ${getHomeworkMakeupReason(homework, records)}`,
         actionLabel: "보충 생성",
         task: {
           taskType: "homework_makeup",
           studentId: homework.studentId,
           sourceId: homework.homeworkId,
           sourceLabel: homework.title,
-          reason: isHomeworkOverdue(homework) ? "밀린 숙제" : "미완료 숙제",
+          reason: getHomeworkMakeupReason(homework, records),
           supplementMethod: "next_lesson"
         }
       }))
@@ -11695,11 +11700,34 @@ function isHomeworkOverdue(homework) {
   );
 }
 
-function isHomeworkMakeupCandidate(homework) {
+function getHomeworkRecord(homework, records = []) {
+  return records.find(
+    (record) => record.lessonId === homework.lessonId && record.studentId === homework.studentId
+  ) ?? null;
+}
+
+function isHomeworkMakeupCandidate(homework, records = []) {
+  const record = getHomeworkRecord(homework, records);
+  const assignmentStatus = record?.assignmentStatus ?? record?.incompleteHomework ?? "";
+  const recordRequiresMakeup = assignmentStatus ? isAssignmentStatusHomeworkMakeupCandidate(assignmentStatus) : false;
+  if (assignmentStatus) {
+    return isHomeworkActionRequired(homework) && recordRequiresMakeup;
+  }
   return (
     isHomeworkActionRequired(homework) &&
-    (isHomeworkOverdue(homework) || ["missing", "partial"].includes(homework.teacherStatus))
+    ["missing", "partial"].includes(homework.teacherStatus)
   );
+}
+
+function getHomeworkMakeupReason(homework, records = []) {
+  const record = getHomeworkRecord(homework, records);
+  const assignmentStatus = record?.assignmentStatus ?? record?.incompleteHomework ?? "";
+  if (assignmentStatus) {
+    return normalizeAssignmentStatusValue(assignmentStatus) === "not_done" ? "미완료 숙제" : "일부 완료 숙제";
+  }
+  if (homework.teacherStatus === "missing") return "미완료 숙제";
+  if (homework.teacherStatus === "partial") return "일부 완료 숙제";
+  return "숙제보충 필요";
 }
 
 function isHomeworkResolved(homework) {
