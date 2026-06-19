@@ -986,12 +986,12 @@ button {
 
 .journalRow {
   align-items: stretch;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #e5edf8;
   display: grid;
-  gap: 8px;
+  gap: 9px;
   grid-template-columns: 150px 130px 92px 150px 170px 180px 180px 150px 126px 126px 110px;
-  min-height: 72px;
-  padding: 8px 10px;
+  min-height: 78px;
+  padding: 10px;
 }
 
 .journalCommentCell {
@@ -2614,9 +2614,9 @@ textarea {
 
 .journalTable textarea,
 .examPrepRow textarea {
-  height: 64px;
-  min-height: 52px;
-  padding: 8px 10px;
+  height: 66px;
+  min-height: 56px;
+  padding: 9px 11px;
 }
 
 .journalTable textarea,
@@ -2632,6 +2632,37 @@ textarea {
 .journalTable input:focus {
   border-color: #60a5fa;
   box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.18);
+}
+
+.journalTable .journalMemoCardInput {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid #c9d8ee;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  color: #0b1220;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.42;
+  padding: 12px 12px;
+  resize: vertical;
+  text-align: left;
+}
+
+.journalTable .journalMemoCardInput:hover {
+  background: #ffffff;
+  border-color: #a9bdd9;
+}
+
+.journalTable .journalMemoCardInput:focus {
+  background: #ffffff;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16), 0 4px 12px rgba(15, 23, 42, 0.07);
+  outline: none;
+}
+
+.journalTable .journalMemoCardInput::placeholder {
+  color: #94a3b8;
+  font-weight: 700;
 }
 
 .commentEditorCell textarea {

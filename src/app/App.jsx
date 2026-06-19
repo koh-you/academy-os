@@ -4020,25 +4020,28 @@ function LessonJournalDetail({
                   {attendanceText}
                 </button>
                 <textarea
-                  className="journalCompactInput"
+                  className="journalMemoCardInput"
                   value={record.lessonMaterial ?? ""}
                   onChange={(event) => onChangeRecord(lesson, student, "lessonMaterial", event.target.value)}
                   placeholder={student.textbook || student.currentTextbook || "강의 교재"}
                   rows="2"
                 />
                 <textarea
+                  className="journalMemoCardInput"
                   value={record.lessonProgress ?? record.progress ?? ""}
                   onChange={(event) => onChangeRecord(lesson, student, "lessonProgress", event.target.value)}
                   placeholder="오늘 강의 내용"
                   rows="2"
                 />
                 <textarea
+                  className="journalMemoCardInput"
                   value={previousHomework?.title ?? ""}
                   onChange={(event) => onUpdateHomework(lesson, student, "previous", event.target.value)}
                   placeholder="지난 숙제"
                   rows="2"
                 />
                 <textarea
+                  className="journalMemoCardInput"
                   value={nextHomework?.title ?? ""}
                   onChange={(event) => onUpdateHomework(lesson, student, "next", event.target.value)}
                   placeholder="다음 숙제"
