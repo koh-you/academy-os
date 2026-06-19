@@ -1,6 +1,7 @@
 .env
 .env.*
 !.env.example
+render-env-input-template.txt
 
 node_modules/
 dist/
