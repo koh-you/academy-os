@@ -85,6 +85,7 @@ check("54 comment composer uses final draft editor with source toggle", hasAll(a
 check("55 supplement center filters homework makeup by checked assignment result", hasAll(app, ["makeupHomeworks", "isHomeworkMakeupCandidate(homework, records, lessons)", "isAssignmentStatusHomeworkMakeupCandidate", "getHomeworkMakeupReason", "getHomeworkLesson", 'homework.homeworkType !== "previous"']) && !app.includes("const overdueHomeworks = homeworks.filter"));
 check("56 supplement methods match task type", hasAll(app, ['supplementMethod: "stay_after"', 'supplementMethod: "onsite_makeup"', 'label: "남아서 하고가기"', 'label: "등원보충"', 'label: "다음시간까지"', 'label: "현장보강"', 'label: "녹강보강"']));
 check("57 lesson delete removes linked records and homeworks with undo bin", hasAll(app, ["deletedLessonBundles", "lessonDeleteRetentionMs", "filterHomeworksForLessons", "pruneExpiredLessonDeletes", 'method: "DELETE"']) && hasAll(notificationRoute + fs.readFileSync(path.join(root, "api", "server.js"), "utf8"), ["deleteLesson", "deleteLessonsBefore"]));
+check("58 school calendar date modal supports create and linked math exam edits", hasAll(app, ["openEventForm", "이 날짜에 일정 등록", "canEditDerivedSubject", 'field === "examSubject"', "schoolMonthAddButton"]) && css.includes(".schoolDateModalToolbar") && css.includes(".schoolMonthAddButton"));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));

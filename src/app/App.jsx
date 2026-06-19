@@ -769,6 +769,7 @@ function buildExamCalendarEvents(rows) {
       emittedMathKeys.add(mathKey);
       events.push({
         ...base,
+        examSubject: entry.subject || row.subject || "수학",
         eventId: `derived_math_${row.examPrepId}_${entry.id || index}`,
         date: entry.date,
         endDate: "",
@@ -6924,6 +6925,24 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
     setIsDateModalOpen(true);
   }
 
+  function openEventForm(date = selectedDate) {
+    setSelectedDate(date);
+    setSelectedMonth(date);
+    setNewEvent((current) => ({
+      ...current,
+      date,
+      endDate: date,
+      schoolName: schoolFilter === "전체 학교" ? current.schoolName : schoolFilter,
+      mathExamItems: current.mathExamItems.map((item, index) => ({
+        ...item,
+        id: item.id || `math_item_${Date.now()}_${index}`,
+        date
+      }))
+    }));
+    setIsDateModalOpen(false);
+    setIsFormModalOpen(true);
+  }
+
   function updateAcademicEvent(event, field, value) {
     if (event.derived && event.examPrepId) {
       const sourceRow = rows.find((row) => row.examPrepId === event.examPrepId);
@@ -6940,7 +6959,7 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
         });
         return;
       }
-      if (event.type === "mathExam" && field === "date") {
+      if (event.type === "mathExam" && ["date", "examSubject"].includes(field)) {
         const entries = normalizeMathExamEntries(sourceRow ?? {});
         const fallbackEntries = entries.length ? entries : [createMathExamEntry(sourceRow ?? {}, 0)];
         const targetIndex = typeof event.mathExamEntryIndex === "number"
@@ -6948,11 +6967,17 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
           : fallbackEntries.findIndex((entry) => entry.id === event.mathExamEntryId);
         const safeIndex = targetIndex >= 0 ? targetIndex : 0;
         const nextEntries = fallbackEntries.map((entry, index) => (
-          index === safeIndex ? { ...entry, date: value } : entry
+          index === safeIndex
+            ? {
+                ...entry,
+                [field === "examSubject" ? "subject" : "date"]: value,
+                label: field === "examSubject" ? value : entry.label
+              }
+            : entry
         ));
         onUpdateExamPrepRow?.(event.examPrepId, "mathExamDates", nextEntries);
         onUpdateExamPrepRow?.(event.examPrepId, "mathExamDate", syncPrimaryMathExamDate(nextEntries));
-        onSyncPreExamLesson?.({ ...event, date: value });
+        onSyncPreExamLesson?.({ ...event, [field]: value });
         return;
       }
     }
@@ -6976,7 +7001,7 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
               <option key={school} value={school}>{school}</option>
             ))}
           </select>
-          <button className="primaryButton" onClick={() => setIsFormModalOpen(true)} type="button">+ 일정 등록</button>
+          <button className="primaryButton" onClick={() => openEventForm(selectedDate)} type="button">+ 일정 등록</button>
         </div>
       </header>
 
@@ -7123,7 +7148,12 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
         <section className="panel schoolCalendarMainPanel">
           <div className="schoolMonthHeader">
             <button className="iconButton" onClick={() => shiftMonth(-1)} type="button">‹</button>
-            <h2>{formatMonthTitle(selectedMonth)}</h2>
+            <div className="schoolMonthTitleBlock">
+              <h2>{formatMonthTitle(selectedMonth)}</h2>
+              <button className="primaryButton compact schoolMonthAddButton" onClick={() => openEventForm(selectedDate)} type="button">
+                + 일정 등록
+              </button>
+            </div>
             <button className="iconButton" onClick={() => shiftMonth(1)} type="button">›</button>
           </div>
           <div className="schoolCalendarFilterBar" aria-label="학사일정 표시 항목">
@@ -7232,6 +7262,7 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
           events={selectedDateEvents}
           onClose={() => setIsDateModalOpen(false)}
           onDeleteEvent={onDeleteEvent}
+          onCreateEvent={openEventForm}
           onUpdateEvent={updateAcademicEvent}
           schools={schools}
           selectedDate={selectedDate}
@@ -7246,6 +7277,7 @@ function SchoolDateScheduleModal({
   eventTypeLabels,
   events,
   onClose,
+  onCreateEvent,
   onDeleteEvent,
   onUpdateEvent,
   schools,
@@ -7253,18 +7285,28 @@ function SchoolDateScheduleModal({
 }) {
   return (
     <Modal className="schoolDateScheduleModal" title={`${selectedDate} 일정`} subtitle="일정 내용과 색상을 확인하고 수정합니다." onClose={onClose}>
+      <div className="schoolDateModalToolbar">
+        <button className="primaryButton compact" onClick={() => onCreateEvent(selectedDate)} type="button">
+          이 날짜에 일정 등록
+        </button>
+      </div>
       {events.length === 0 ? (
-        <div className="emptyState">선택한 날짜에 등록된 일정이 없습니다.</div>
+        <div className="emptyState schoolDateEmptyState">선택한 날짜에 등록된 일정이 없습니다.</div>
       ) : (
         <div className="schoolDateEventStack">
           {events.map((event) => {
             const canEditDerivedDate = event.derived && ["examPeriod", "mathExam"].includes(event.type);
+            const canEditDerivedSubject = event.derived && event.type === "mathExam";
             const canEditEventDetails = !event.derived;
             return (
               <article className="schoolDateEventEditor" key={event.eventId}>
                 <div className="schoolDateEventEditorTop">
                   <strong>{event.title}</strong>
-                  {event.derived ? <span>시험관리 연동</span> : <button className="dangerSoftButton" onClick={() => onDeleteEvent(event.eventId)} type="button">삭제</button>}
+                  {event.derived ? (
+                    <span>시험관리 연동 · 수정 즉시 반영</span>
+                  ) : (
+                    <button className="dangerSoftButton" onClick={() => onDeleteEvent(event.eventId)} type="button">삭제</button>
+                  )}
                 </div>
                 <div className="fieldGrid two">
                   <label>
@@ -7279,7 +7321,7 @@ function SchoolDateScheduleModal({
                   ) : (
                     <label>
                       과목
-                      <select disabled={!canEditEventDetails} value={event.examSubject ?? "공통수학1"} onChange={(change) => onUpdateEvent(event, "examSubject", change.target.value)}>
+                      <select disabled={!canEditEventDetails && !canEditDerivedSubject} value={normalizeMathSubject(event.examSubject ?? "공통수학1")} onChange={(change) => onUpdateEvent(event, "examSubject", change.target.value)}>
                         {schoolCalendarMathSubjectOptions.map((subject) => (
                           <option key={subject} value={subject}>{subject}</option>
                         ))}

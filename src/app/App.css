@@ -2076,6 +2076,11 @@ button {
   gap: 10px;
 }
 
+.schoolCalendarHeaderActions .primaryButton {
+  min-height: 54px;
+  min-width: 132px;
+}
+
 .schoolCalendarLayout {
   display: block;
 }
@@ -2382,11 +2387,22 @@ button {
   grid-template-columns: 48px minmax(0, 1fr) 48px;
 }
 
+.schoolMonthTitleBlock {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+
 .schoolMonthHeader h2 {
   font-size: 24px;
   font-weight: 900;
   margin: 0;
   text-align: center;
+}
+
+.schoolMonthAddButton {
+  box-shadow: 0 10px 22px rgba(23, 33, 61, 0.16);
 }
 
 .schoolCalendarFilterBar {
@@ -2430,12 +2446,13 @@ button {
 }
 
 .schoolMonthCell.selected {
-  box-shadow: inset 0 0 0 2px #2563eb;
+  background: #f8fbff;
+  box-shadow: inset 0 0 0 1px #bfdbfe;
 }
 
 .schoolMonthCell .dayNumber {
   position: relative;
-  z-index: 4;
+  z-index: 5;
 }
 
 .schoolMonthCell .lessonPills {
@@ -2479,6 +2496,18 @@ button {
 
 .modalCard.schoolDateScheduleModal {
   max-width: 920px;
+}
+
+.schoolDateModalToolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.schoolDateEmptyState {
+  border: 1px dashed #cfe0f6;
+  border-radius: 8px;
+  padding: 28px 12px;
 }
 
 .schoolDateEventStack {
