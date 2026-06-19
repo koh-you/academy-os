@@ -1119,8 +1119,8 @@ button {
   border-top: 1px solid #e2e8f0;
   display: grid;
   gap: 8px;
-  grid-template-columns: 120px 220px 90px 120px 120px 180px 145px 240px 210px 190px 86px;
-  min-width: 1728px;
+  grid-template-columns: 120px 220px 90px 120px 120px 180px 360px 240px 210px 190px 86px;
+  min-width: 1943px;
   padding: 8px 10px;
 }
 
@@ -1153,6 +1153,67 @@ button {
 
 .examDateRangeInputs input {
   min-height: 34px;
+}
+
+.mathExamEntryEditor {
+  display: grid;
+  gap: 8px;
+  min-width: 340px;
+}
+
+.mathExamEntryRow {
+  align-items: center;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: minmax(120px, 1fr) minmax(70px, 0.6fr) minmax(90px, 0.75fr) minmax(130px, 1fr) auto;
+}
+
+.mathExamEntryRow input {
+  min-height: 34px;
+}
+
+.mathExamEntryList {
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-start;
+  white-space: normal;
+}
+
+.mathExamEntryChip {
+  align-items: center;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 999px;
+  color: #b91c1c;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 6px;
+  padding: 5px 8px;
+}
+
+.mathExamEntryChip strong {
+  color: #111827;
+}
+
+.tinySoftButton,
+.iconTinyButton {
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 10px;
+  color: #4f46e5;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  min-height: 32px;
+  padding: 6px 10px;
+}
+
+.iconTinyButton {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  color: #ef4444;
 }
 
 .examReadCell {
@@ -1841,6 +1902,8 @@ button {
   min-height: 6px;
   opacity: 0.72;
   padding: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .schoolEventPill.periodBar.periodStart {
@@ -1863,6 +1926,28 @@ button {
 
 .schoolEventPill.periodBar.periodSingle {
   border-radius: 999px;
+}
+
+.schoolEventPill.mathExamTab {
+  border-radius: 9px 9px 6px 6px;
+  box-shadow: 0 6px 12px rgba(220, 38, 38, 0.18);
+  display: inline-block;
+  margin: 0 0 -3px 6px;
+  max-width: calc(100% - 12px);
+  padding: 6px 9px 7px;
+  position: relative;
+  z-index: 2;
+}
+
+.schoolEventPill.mathExamTab::after {
+  background: inherit;
+  border-radius: 0 0 4px 4px;
+  bottom: -4px;
+  content: "";
+  height: 5px;
+  left: 12px;
+  position: absolute;
+  width: 24px;
 }
 
 .event-preExam {

@@ -379,6 +379,54 @@ function getDefaultMathExamDate(row, index = 0) {
   return row.mathExamDate || fallbackBySchool[row.schoolName] || `2026-06-${String(24 + (index % 5)).padStart(2, "0")}`;
 }
 
+function normalizeMathSubject(subject = "") {
+  const value = String(subject || "").trim();
+  if (!value) return "수학";
+  if (value === "공통수학1" || value === "공통수학2") return "수학";
+  return value;
+}
+
+function createMathExamEntry(row = {}, index = 0) {
+  const baseId = safeIdPart(row.examPrepId || `${row.schoolName}_${row.grade}_${row.subject}`);
+  return {
+    id: `math_${baseId}_${index}`,
+    date: row.mathExamDate || "",
+    grade: row.grade || "",
+    subject: normalizeMathSubject(row.subject),
+    label: ""
+  };
+}
+
+function normalizeMathExamEntries(row = {}) {
+  const entries = Array.isArray(row.mathExamDates) ? row.mathExamDates : [];
+  const normalized = entries
+    .map((entry, index) => ({
+      id: entry.id || `math_${safeIdPart(row.examPrepId || row.schoolName || "exam")}_${index}`,
+      date: entry.date || "",
+      grade: entry.grade || row.grade || "",
+      subject: entry.subject || normalizeMathSubject(row.subject),
+      label: entry.label || ""
+    }))
+    .filter((entry) => entry.date || entry.label);
+  if (normalized.length) return normalized;
+  if (row.mathExamDate) return [createMathExamEntry(row, 0)];
+  return [];
+}
+
+function formatShortDate(date = "") {
+  return date ? date.slice(5).replace("-", ".") : "날짜 미입력";
+}
+
+function formatMathExamEntryLabel(row = {}, entry = {}) {
+  const subject = entry.subject || normalizeMathSubject(row.subject);
+  const grade = entry.grade || row.grade || "";
+  return (entry.label || `${row.schoolName || "학교 미입력"} ${grade} ${subject}`.trim()).trim();
+}
+
+function syncPrimaryMathExamDate(entries = []) {
+  return entries.find((entry) => entry.date)?.date || "";
+}
+
 function examCycleTermKey(examCycle = "") {
   const [year, semester] = String(examCycle).split("-");
   return [year || "", semester || ""].join("-");
@@ -435,6 +483,7 @@ function buildExamPrepRowsFromStudents(students, examCycle, classTemplateId = ""
         subTextbook: "",
         examPeriod: "",
         mathExamDate: "",
+        mathExamDates: [],
         review: "",
         revisedReview: "",
         memo: "",
@@ -488,6 +537,16 @@ function updateDateRangeField(value = "", field, nextValue = "") {
   return formatDateRangeText(nextRange.date, nextRange.endDate);
 }
 
+function getExamPeriodGroupKey(row = {}) {
+  const period = parseDateRangeText(row.examPeriod);
+  return [
+    row.schoolName || "학교 미입력",
+    row.examCycle || "2026-1-mid",
+    period?.date || "",
+    period?.endDate || ""
+  ].join("|");
+}
+
 function isDateWithinEvent(date, event) {
   if (!event.endDate) return event.date === date;
   return event.date <= date && date <= event.endDate;
@@ -505,6 +564,7 @@ function getPeriodBarClass(date, event) {
 }
 
 function buildExamCalendarEvents(rows) {
+  const periodKeys = new Set();
   return rows.flatMap((row) => {
     const base = {
       schoolName: row.schoolName || "학교 미입력",
@@ -517,27 +577,35 @@ function buildExamCalendarEvents(rows) {
     const events = [];
     const period = parseDateRangeText(row.examPeriod);
     if (period) {
-      events.push({
-        ...base,
-        eventId: `derived_period_${row.examPrepId}`,
-        date: period.date,
-        endDate: period.endDate,
-        title: `${examCycleLabel(row.examCycle ?? "2026-1-mid")} 시험기간`,
-        type: "examPeriod",
-        color: "#ef4444"
-      });
+      const periodKey = getExamPeriodGroupKey(row);
+      if (!periodKeys.has(periodKey)) {
+        periodKeys.add(periodKey);
+        events.push({
+          ...base,
+          eventId: `derived_period_${safeIdPart(periodKey)}`,
+          examPeriodGroupKey: periodKey,
+          date: period.date,
+          endDate: period.endDate,
+          title: `${row.schoolName || "학교 미입력"} ${examCycleLabel(row.examCycle ?? "2026-1-mid")} 시험기간`,
+          type: "examPeriod",
+          color: "#ef4444"
+        });
+      }
     }
-    if (row.mathExamDate) {
+    normalizeMathExamEntries(row).forEach((entry, index) => {
+      if (!entry.date) return;
       events.push({
         ...base,
-        eventId: `derived_math_${row.examPrepId}`,
-        date: row.mathExamDate,
+        eventId: `derived_math_${row.examPrepId}_${entry.id || index}`,
+        date: entry.date,
         endDate: "",
-        title: `${row.schoolName || "학교 미입력"} ${row.grade || ""} ${examCycleLabel(row.examCycle ?? "2026-1-mid")}`.trim(),
+        title: formatMathExamEntryLabel(row, entry),
         type: "mathExam",
+        mathExamEntryId: entry.id,
+        mathExamEntryIndex: index,
         color: "#dc2626"
       });
-    }
+    });
     return events;
   });
 }
@@ -4900,6 +4968,7 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
       row.scope,
       row.subTextbook,
       row.examPeriod,
+      normalizeMathExamEntries(row).map((entry) => `${entry.date} ${entry.grade} ${entry.subject} ${entry.label}`).join(" "),
       row.mathExamDate,
       row.specialNote,
       row.memo
@@ -4986,6 +5055,41 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
     }));
   }
 
+  function getEditableMathExamEntries(row) {
+    const entries = normalizeMathExamEntries(row);
+    return entries.length ? entries : [{ ...createMathExamEntry(row, 0), date: "" }];
+  }
+
+  function commitMathExamEntries(row, entries) {
+    onUpdateRow(row.examPrepId, "mathExamDates", entries);
+    onUpdateRow(row.examPrepId, "mathExamDate", syncPrimaryMathExamDate(entries));
+  }
+
+  function updateMathExamEntry(row, entryIndex, field, value) {
+    const entries = getEditableMathExamEntries(row).map((entry, index) =>
+      index === entryIndex ? { ...entry, [field]: value } : entry
+    );
+    commitMathExamEntries(row, entries);
+  }
+
+  function addMathExamEntry(row) {
+    const entries = getEditableMathExamEntries(row);
+    const uniqueIndex = Date.now();
+    commitMathExamEntries(row, [
+      ...entries,
+      {
+        ...createMathExamEntry(row, uniqueIndex),
+        id: `math_${safeIdPart(row.examPrepId || "exam")}_${uniqueIndex}`,
+        date: ""
+      }
+    ]);
+  }
+
+  function removeMathExamEntry(row, entryIndex) {
+    const entries = getEditableMathExamEntries(row).filter((_, index) => index !== entryIndex);
+    commitMathExamEntries(row, entries);
+  }
+
   return (
     <section className="panel fullPanel examPrepCenter">
       <div className="sectionHeader">
@@ -5051,7 +5155,7 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
               <span>과목</span>
               <span>출판사</span>
               <span>시험기간</span>
-              <span>수학시험일</span>
+              <span>수학 시험 일정</span>
               <span>시험 범위</span>
               <span>부교재</span>
               <span>시험 후 총평</span>
@@ -5094,7 +5198,42 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
                           }
                         />
                       </div>
-                      <input type="date" value={row.mathExamDate ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "mathExamDate", event.target.value)} />
+                      <div className="mathExamEntryEditor">
+                        {getEditableMathExamEntries(row).map((entry, entryIndex) => (
+                          <div className="mathExamEntryRow" key={entry.id || entryIndex}>
+                            <input
+                              aria-label="수학시험 날짜"
+                              type="date"
+                              value={entry.date ?? ""}
+                              onChange={(event) => updateMathExamEntry(row, entryIndex, "date", event.target.value)}
+                            />
+                            <input
+                              aria-label="수학시험 학년"
+                              value={entry.grade ?? ""}
+                              placeholder="예: 고3"
+                              onChange={(event) => updateMathExamEntry(row, entryIndex, "grade", event.target.value)}
+                            />
+                            <input
+                              aria-label="수학시험 과목"
+                              value={entry.subject ?? ""}
+                              placeholder="예: 미적"
+                              onChange={(event) => updateMathExamEntry(row, entryIndex, "subject", event.target.value)}
+                            />
+                            <input
+                              aria-label="수학시험 표시명"
+                              value={entry.label ?? ""}
+                              placeholder="표시명 선택"
+                              onChange={(event) => updateMathExamEntry(row, entryIndex, "label", event.target.value)}
+                            />
+                            <button className="iconTinyButton" type="button" onClick={() => removeMathExamEntry(row, entryIndex)}>
+                              삭제
+                            </button>
+                          </div>
+                        ))}
+                        <button className="tinySoftButton" type="button" onClick={() => addMathExamEntry(row)}>
+                          + 수학시험 추가
+                        </button>
+                      </div>
                       <textarea value={row.scope ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "scope", event.target.value)} rows="3" />
                       <textarea value={row.subTextbook ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "subTextbook", event.target.value)} rows="3" />
                     </>
@@ -5106,7 +5245,18 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
                       <div className="examReadCell">{row.subject || "-"}</div>
                       <div className="examReadCell">{row.publisher || "-"}</div>
                       <div className="examReadCell">{row.examPeriod || "미입력"}</div>
-                      <div className="examReadCell">{row.mathExamDate || "미입력"}</div>
+                      <div className="examReadCell mathExamEntryList">
+                        {normalizeMathExamEntries(row).length ? (
+                          normalizeMathExamEntries(row).map((entry, index) => (
+                            <span className="mathExamEntryChip" key={entry.id || index}>
+                              <strong>{formatShortDate(entry.date)}</strong>
+                              {formatMathExamEntryLabel(row, entry)}
+                            </span>
+                          ))
+                        ) : (
+                          "미입력"
+                        )}
+                      </div>
                       <div className="examReadCell multiline">{row.scope || "미입력"}</div>
                       <div className="examReadCell multiline">{row.subTextbook || "미입력"}</div>
                     </>
@@ -5943,15 +6093,30 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
     if (event.derived && event.examPrepId) {
       const sourceRow = rows.find((row) => row.examPrepId === event.examPrepId);
       if (event.type === "examPeriod" && ["date", "endDate"].includes(field)) {
-        onUpdateExamPrepRow?.(
-          event.examPrepId,
-          "examPeriod",
-          updateDateRangeField(sourceRow?.examPeriod ?? "", field, value)
-        );
+        const targetRows = event.examPeriodGroupKey
+          ? rows.filter((row) => getExamPeriodGroupKey(row) === event.examPeriodGroupKey)
+          : sourceRow ? [sourceRow] : [];
+        targetRows.forEach((row) => {
+          onUpdateExamPrepRow?.(
+            row.examPrepId,
+            "examPeriod",
+            updateDateRangeField(row.examPeriod ?? "", field, value)
+          );
+        });
         return;
       }
       if (event.type === "mathExam" && field === "date") {
-        onUpdateExamPrepRow?.(event.examPrepId, "mathExamDate", value);
+        const entries = normalizeMathExamEntries(sourceRow ?? {});
+        const fallbackEntries = entries.length ? entries : [createMathExamEntry(sourceRow ?? {}, 0)];
+        const targetIndex = typeof event.mathExamEntryIndex === "number"
+          ? event.mathExamEntryIndex
+          : fallbackEntries.findIndex((entry) => entry.id === event.mathExamEntryId);
+        const safeIndex = targetIndex >= 0 ? targetIndex : 0;
+        const nextEntries = fallbackEntries.map((entry, index) => (
+          index === safeIndex ? { ...entry, date: value } : entry
+        ));
+        onUpdateExamPrepRow?.(event.examPrepId, "mathExamDates", nextEntries);
+        onUpdateExamPrepRow?.(event.examPrepId, "mathExamDate", syncPrimaryMathExamDate(nextEntries));
         return;
       }
     }
@@ -6066,7 +6231,13 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
               <div className="weekday" key={label}>{label}</div>
             ))}
             {buildMonthDays(selectedMonth).map((day) => {
-              const dayEvents = filteredEvents.filter((event) => isDateWithinEvent(day.date, event));
+              const eventPriority = { mathExam: 0, examPeriod: 1 };
+              const dayEvents = filteredEvents
+                .filter((event) => isDateWithinEvent(day.date, event))
+                .sort((eventA, eventB) => (
+                  (eventPriority[eventA.type] ?? 2) - (eventPriority[eventB.type] ?? 2)
+                  || eventA.title.localeCompare(eventB.title)
+                ));
               return (
                 <button
                   className={[
@@ -6084,12 +6255,13 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
                   <span className="lessonPills">
                     {dayEvents.slice(0, 3).map((event) => {
                       const isPeriodBar = event.type === "examPeriod";
+                      const isMathExamTab = event.type === "mathExam";
                       const eventLabel = event.type === "mathExam"
                         ? event.title
                         : `${event.schoolName} ${event.examSubject || event.title}`;
                       return (
                         <span
-                          className={`schoolEventPill event-${event.type}${isPeriodBar ? ` periodBar ${getPeriodBarClass(day.date, event)}` : ""}`}
+                          className={`schoolEventPill event-${event.type}${isPeriodBar ? ` periodBar ${getPeriodBarClass(day.date, event)}` : ""}${isMathExamTab ? " mathExamTab" : ""}`}
                           key={event.eventId}
                           style={{ backgroundColor: event.color ?? undefined }}
                           title={event.title}

@@ -69,9 +69,9 @@ check("40 live Solapi test send is gated to test recipient", hasAll(app, ["force
 check("41 comment alimtalk preview uses template format", hasAll(app, ["commentTemplatePreview", "#{리포트본문}:", "#{코멘트}:"]) && css.includes(".commentTemplatePreview"));
 
 check("42 exam date range uses date inputs", hasAll(app, ["examDateRangeInputs", "updateDateRangeField", "getDateRangeField"]));
-check("43 school calendar can edit derived exam dates", hasAll(app, ["onUpdateExamPrepRow", "updateAcademicEvent", "mathExamDate"]));
+check("43 school calendar can edit derived exam dates", hasAll(app, ["onUpdateExamPrepRow", "updateAcademicEvent", "mathExamDates"]));
 check("44 exam period is rendered as compact calendar bar", hasAll(app, ["periodBar", "isPeriodBar"]) && css.includes(".schoolEventPill.periodBar"));
-check("45 math exam calendar label includes school grade and cycle", hasAll(app, ['eventId: `derived_math_${row.examPrepId}`', 'row.schoolName || "학교 미입력"', "row.grade || \"\"", "examCycleLabel(row.examCycle ??"]));
+check("45 math exam calendar supports index tabs", hasAll(app, ["normalizeMathExamEntries", "mathExamTab", "mathExamEntryChip", "mathExamEntryEditor"]) && css.includes(".schoolEventPill.mathExamTab"));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));
