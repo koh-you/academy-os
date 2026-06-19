@@ -6231,13 +6231,17 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
               <div className="weekday" key={label}>{label}</div>
             ))}
             {buildMonthDays(selectedMonth).map((day) => {
-              const eventPriority = { mathExam: 0, examPeriod: 1 };
+              const eventPriority = { examPeriod: 0, mathExam: 1 };
               const dayEvents = filteredEvents
                 .filter((event) => isDateWithinEvent(day.date, event))
                 .sort((eventA, eventB) => (
                   (eventPriority[eventA.type] ?? 2) - (eventPriority[eventB.type] ?? 2)
                   || eventA.title.localeCompare(eventB.title)
                 ));
+              const visibleDayEvents = [
+                ...dayEvents.filter((event) => event.type === "examPeriod" || event.type === "mathExam"),
+                ...dayEvents.filter((event) => event.type !== "examPeriod" && event.type !== "mathExam").slice(0, 2)
+              ];
               return (
                 <button
                   className={[
@@ -6253,9 +6257,12 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
                 >
                   <span className="dayNumber">{day.dayNumber}</span>
                   <span className="lessonPills">
-                    {dayEvents.slice(0, 3).map((event) => {
+                    {visibleDayEvents.map((event, eventIndex) => {
                       const isPeriodBar = event.type === "examPeriod";
                       const isMathExamTab = event.type === "mathExam";
+                      const mathTabIndex = visibleDayEvents
+                        .slice(0, eventIndex)
+                        .filter((visibleEvent) => visibleEvent.type === "mathExam").length;
                       const eventLabel = event.type === "mathExam"
                         ? event.title
                         : `${event.schoolName} ${event.examSubject || event.title}`;
@@ -6263,7 +6270,10 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
                         <span
                           className={`schoolEventPill event-${event.type}${isPeriodBar ? ` periodBar ${getPeriodBarClass(day.date, event)}` : ""}${isMathExamTab ? " mathExamTab" : ""}`}
                           key={event.eventId}
-                          style={{ backgroundColor: event.color ?? undefined }}
+                          style={{
+                            backgroundColor: event.color ?? undefined,
+                            ...(isMathExamTab ? { "--math-tab-index": mathTabIndex } : {})
+                          }}
                           title={event.title}
                         >
                           {isPeriodBar ? "" : eventLabel}
