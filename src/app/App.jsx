@@ -150,7 +150,10 @@ function getAlimtalkSafetyTone(notificationStatus, forceDryRun = false, forceTes
 function getAlimtalkSafetyText(notificationStatus, forceDryRun = false, forceTestRecipient = false) {
   const testRecipient = notificationStatus?.testRecipient || "테스트 번호";
   if (forceDryRun) return "테스트 발송: 실제 번호로 보내지 않고 서버에서 dry-run으로만 기록합니다.";
-  if (forceTestRecipient) return `테스트 발송: 실제 Solapi로 보내되 수신번호는 ${testRecipient}로 고정합니다.`;
+  if (forceTestRecipient && notificationStatus?.liveTestSendEnabled) {
+    return `테스트 실발송: 실제 Solapi로 보내되 수신번호는 ${testRecipient}로 고정합니다.`;
+  }
+  if (forceTestRecipient) return `테스트 발송 준비: 수신번호는 ${testRecipient}로 고정되지만, Render의 테스트 실발송 스위치가 꺼져 있으면 dry-run으로만 기록됩니다.`;
   if (!notificationStatus) return "서버 발송 설정을 확인 중입니다. 실제 발송 전 Render 환경변수를 확인하세요.";
   if (notificationStatus.dryRun) return `테스트 보호 ON: 실제 발송 없이 ${testRecipient}로만 기록됩니다.`;
   if (!notificationStatus.allowRealRecipients) return `실제 번호 잠금: 등록 번호 대신 ${testRecipient}로 전환됩니다.`;
@@ -2844,7 +2847,8 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
       assignmentStatus: "complete_thorough",
       attendanceStatus: "present",
       checkedAt: "19:00",
-      forceDryRun: Boolean(notificationStatus?.dryRun),
+      forceDryRun: false,
+      forceTestRecipient: true,
       lessonContent: "개별 진도 점검",
       lessonDate: todayKey,
       lessonMaterial: "공통수학1",
@@ -2950,6 +2954,7 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
           <article>
             <strong>발송 안전장치</strong>
             <span><StatusDot active={notificationStatus?.dryRun} /> 테스트 보호 {notificationStatus?.dryRun ? "ON" : "OFF"}</span>
+            <span><StatusDot active={notificationStatus?.liveTestSendEnabled} /> 테스트 실발송 {notificationStatus?.liveTestSendEnabled ? "ON" : "OFF"}</span>
             <span><StatusDot active={!notificationStatus?.allowRealRecipients} /> 실제 번호 잠금 {notificationStatus?.allowRealRecipients ? "OFF" : "ON"}</span>
             <span>테스트 수신번호: {notificationStatus?.testRecipient || "미설정"}</span>
           </article>
@@ -2978,7 +2983,7 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
             <p className="eyebrow">TEMPLATE TEST</p>
             <h2>알림톡 템플릿 테스트</h2>
           </div>
-          <span className="countBadge">{notificationStatus?.dryRun ? "실제 발송 없음" : "테스트 번호 발송"}</span>
+          <span className="countBadge">{notificationStatus?.liveTestSendEnabled ? "테스트 번호 실발송" : "dry-run 기록"}</span>
         </div>
         <div className="templateTestGrid">
           <article>

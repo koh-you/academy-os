@@ -44,7 +44,9 @@ function requiredEnv(name) {
 }
 
 function isDryRun(payload = {}) {
-  return Boolean(payload.forceDryRun) || process.env.ALIMTALK_DRY_RUN !== "false";
+  if (Boolean(payload.forceDryRun)) return true;
+  if (payload.forceTestRecipient && process.env.ALIMTALK_ALLOW_LIVE_TEST_SEND === "true") return false;
+  return process.env.ALIMTALK_DRY_RUN !== "false";
 }
 
 function isSlackDryRun() {
@@ -226,6 +228,7 @@ export function getNotificationStatus() {
   return {
     dryRun: isDryRun(),
     allowRealRecipients: process.env.ALIMTALK_ALLOW_REAL_PARENT_NUMBERS === "true",
+    liveTestSendEnabled: process.env.ALIMTALK_ALLOW_LIVE_TEST_SEND === "true",
     testRecipient: compactPhoneNumber(process.env.ALIMTALK_TEST_RECIPIENT ?? DEFAULT_TEST_RECIPIENT),
     solapiConfigured: REQUIRED_SOLAPI_ENV.every(configState),
     slackConfigured: configState("SLACK_WEBHOOK_URL"),
