@@ -1935,7 +1935,7 @@ button {
 }
 
 .schoolEventPill.mathExamTab {
-  border-radius: 9px 9px 4px 4px;
+  border-radius: 9px 9px 0 0;
   box-shadow: 0 4px 10px rgba(220, 38, 38, 0.18);
   display: block;
   font-size: 12px;
@@ -1944,18 +1944,26 @@ button {
   margin: 0;
   max-width: none;
   min-height: 27px;
-  overflow: hidden;
+  overflow: visible;
   padding: 6px 8px 7px;
   position: absolute;
   right: 14px;
   text-align: center;
   text-overflow: ellipsis;
   top: calc(39px + (var(--math-tab-index, 0) * 32px));
+  white-space: nowrap;
   z-index: 3;
 }
 
 .schoolEventPill.mathExamTab::after {
-  display: none;
+  background: inherit;
+  bottom: -5px;
+  content: "";
+  display: block;
+  height: 5px;
+  left: 0;
+  position: absolute;
+  right: 0;
 }
 
 .event-preExam {

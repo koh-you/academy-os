@@ -417,10 +417,28 @@ function formatShortDate(date = "") {
   return date ? date.slice(5).replace("-", ".") : "날짜 미입력";
 }
 
+function compactCalendarLabel(value = "") {
+  return String(value ?? "").replace(/\s+/g, "");
+}
+
+function joinCalendarLabel(schoolName = "", detail = "", fallback = "") {
+  const cleanSchool = String(schoolName || "").trim();
+  const cleanDetail = String(detail || fallback || "").trim();
+  if (!cleanDetail) return cleanSchool || "학교 미입력";
+  if (!cleanSchool) return cleanDetail;
+  if (compactCalendarLabel(cleanDetail).startsWith(compactCalendarLabel(cleanSchool))) {
+    return cleanDetail;
+  }
+  return `${cleanSchool} ${cleanDetail}`;
+}
+
 function formatMathExamEntryLabel(row = {}, entry = {}) {
+  const explicitLabel = String(entry.label || "").trim();
+  if (explicitLabel) return joinCalendarLabel(row.schoolName, explicitLabel);
   const subject = entry.subject || normalizeMathSubject(row.subject);
   const grade = entry.grade || row.grade || "";
-  return (entry.label || `${row.schoolName || "학교 미입력"} ${grade} ${subject}`.trim()).trim();
+  const detail = [grade, subject].filter(Boolean).join(" ").trim();
+  return joinCalendarLabel(row.schoolName || "학교 미입력", detail, row.examName || "수학시험");
 }
 
 function syncPrimaryMathExamDate(entries = []) {
@@ -1909,7 +1927,12 @@ export function App() {
           <SchoolCalendarCenter
             events={schoolEvents}
             rows={examPrepRows}
-            onAddEvent={(event) => setSchoolEvents((current) => [{ ...event, eventId: `event_${Date.now()}` }, ...current])}
+            onAddEvent={(event) =>
+              setSchoolEvents((current) => [
+                { ...event, eventId: event.eventId || `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}` },
+                ...current
+              ])
+            }
             onDeleteEvent={(eventId) => setSchoolEvents((current) => current.filter((event) => event.eventId !== eventId))}
             onUpdateExamPrepRow={handleUpdateExamPrepRow}
             onUpdateEvent={(eventId, field, value) =>
@@ -6065,20 +6088,29 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
 
   function submitNewEvent() {
     const schoolName = newEvent.schoolName || schools[0] || "학교 미입력";
-    const subjectTitle = newEvent.examSubject.trim();
-    const fallbackTitle = subjectTitle
-      ? `${schoolName} ${subjectTitle}`
-      : newEvent.type === "mathExam"
-        ? `${schoolName} 수학시험`
-        : "";
+    const subjectTitle = newEvent.examSubject.trim() || (newEvent.type === "mathExam" ? "수학시험" : "");
+    const fallbackTitle = joinCalendarLabel(schoolName, subjectTitle);
     const title = newEvent.title.trim() || fallbackTitle;
     if (!newEvent.date || !title) return;
+    const createsMathExamMarker = newEvent.type !== "mathExam" && Boolean(subjectTitle);
     onAddEvent({
       ...newEvent,
       schoolName,
       title,
-      examSubject: newEvent.type === "mathExam" ? "수학" : newEvent.examSubject
+      examSubject: subjectTitle
     });
+    if (createsMathExamMarker) {
+      onAddEvent({
+        ...newEvent,
+        eventId: `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        type: "mathExam",
+        endDate: "",
+        schoolName,
+        title: joinCalendarLabel(schoolName, subjectTitle),
+        examSubject: subjectTitle,
+        color: "#dc2626"
+      });
+    }
     setSelectedDate(newEvent.date);
     setSelectedMonth(newEvent.date);
     setNewEvent((current) => ({ ...current, title: "", examSubject: "", memo: "" }));
@@ -6264,8 +6296,8 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onUpdat
                         .slice(0, eventIndex)
                         .filter((visibleEvent) => visibleEvent.type === "mathExam").length;
                       const eventLabel = event.type === "mathExam"
-                        ? event.title
-                        : `${event.schoolName} ${event.examSubject || event.title}`;
+                        ? joinCalendarLabel(event.schoolName, event.title)
+                        : joinCalendarLabel(event.schoolName, event.examSubject || event.title);
                       return (
                         <span
                           className={`schoolEventPill event-${event.type}${isPeriodBar ? ` periodBar ${getPeriodBarClass(day.date, event)}` : ""}${isMathExamTab ? " mathExamTab" : ""}`}
