@@ -99,6 +99,11 @@ function messageBlock(label, value) {
   return text ? `${label}\n${text}` : "";
 }
 
+function messageLine(label, value) {
+  const text = normalizeText(value);
+  return text ? `${label} : ${text}` : "";
+}
+
 function joinMessageBlocks(blocks) {
   return blocks.map(normalizeText).filter(Boolean).join("\n\n");
 }
@@ -152,14 +157,14 @@ function formatScheduleItem(item) {
 function buildAttendanceBody({ attendanceStatus, checkedAt, lessonName, lateMinutes, reason }) {
   const status = attendanceLabel(attendanceStatus);
   const lines = [
-    messageBlock("🏫 출결", status),
-    lessonName ? messageBlock("📘 수업", lessonName) : "",
-    checkedAt ? messageBlock("🕒 시간", checkedAt) : ""
+    messageLine("🏫 출결", status),
+    lessonName ? messageLine("📘 수업", lessonName) : "",
+    checkedAt ? messageLine("🕒 시간", checkedAt) : ""
   ];
 
-  if (status === "지각" && lateMinutes) lines.push(messageBlock("⏱️ 지각", `${lateMinutes}분`));
+  if (status === "지각" && lateMinutes) lines.push(messageLine("⏱️ 지각", `${lateMinutes}분`));
   if ((status === "지각" || status === "결석" || status === "인정결석") && reason) {
-    lines.push(messageBlock("📝 사유", reason));
+    lines.push(messageLine("📝 사유", reason));
   }
 
   return joinMessageBlocks(lines);
@@ -182,12 +187,12 @@ function buildDailyReportBody({
   const assignmentStatusMessage = assignmentStatusText(assignmentStatus, assignmentStatus);
 
   return joinMessageBlocks([
-    messageBlock("🏫 출결", attendanceLabel(attendanceStatus)),
-    messageBlock("📚 강의 교재", lessonMaterial),
-    messageBlock("🧭 강의 내용", lessonContent),
-    messageBlock("📘 지난 과제", previousHomework),
-    messageBlock("➡️ 다음 과제", nextHomework),
-    messageBlock("✅ 과제 상태", assignmentStatusMessage),
+    messageLine("🏫 출결", attendanceLabel(attendanceStatus)),
+    messageLine("📚 강의 교재", lessonMaterial),
+    messageLine("🧭 강의 내용", lessonContent),
+    messageLine("📘 지난 과제", previousHomework),
+    messageLine("➡️ 다음 과제", nextHomework),
+    messageLine("✅ 과제 상태", assignmentStatusMessage),
     messageBlock("📝 수업메모", preparationNotice),
     incompleteList.length ? messageBlock("⚠️ 미완료 과제", incompleteList.map((item) => `- ${item}`).join("\n")) : "",
     messageBlock("⭐ 중요 · 재시험 일정", retestSchedule),

@@ -134,6 +134,11 @@ function createMessageBlock(label, value) {
   return text ? `${label}\n${text}` : "";
 }
 
+function createMessageLine(label, value) {
+  const text = normalizeMessageText(value);
+  return text ? `${label} : ${text}` : "";
+}
+
 function joinMessageBlocks(blocks) {
   return blocks.map(normalizeMessageText).filter(Boolean).join("\n\n");
 }
@@ -149,14 +154,14 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, previousHom
   const prepMemo = normalizeMessageText(record?.preparationMemo);
   const prepNotice = shouldIncludePrepMemo && prepMemo && !commentText.includes(prepMemo) ? prepMemo : "";
   const lines = [
-    attendance ? `출결: ${attendance}` : "",
-    lessonMaterial ? `강의 교재: ${lessonMaterial}` : "",
-    lessonContent ? `강의 내용: ${lessonContent}` : "",
-    previousHomework?.title ? `지난 과제: ${previousHomework.title}` : "",
-    nextHomework?.title ? `다음 과제: ${nextHomework.title}` : "",
-    audience === "parent" && assignmentStatus ? `과제 상태: ${getAssignmentStatusParentMessage(assignmentStatus)}` : "",
-    prepNotice ? createMessageBlock("수업메모", prepNotice) : "",
-    commentText ? createMessageBlock("코멘트", commentText) : ""
+    createMessageLine("🏫 출결", attendance),
+    createMessageLine("📚 강의 교재", lessonMaterial),
+    createMessageLine("🧭 강의 내용", lessonContent),
+    createMessageLine("📘 지난 과제", previousHomework?.title),
+    createMessageLine("➡️ 다음 과제", nextHomework?.title),
+    audience === "parent" && assignmentStatus ? createMessageLine("✅ 과제 상태", getAssignmentStatusParentMessage(assignmentStatus)) : "",
+    prepNotice ? createMessageBlock("📝 수업메모", prepNotice) : "",
+    commentText ? createMessageBlock("💬 코멘트", commentText) : ""
   ];
 
   return lines.filter(Boolean);
@@ -227,19 +232,19 @@ function buildNotificationTemplatePreview(type) {
       `#{학원명}: ${base.academyName}`,
       `#{학생명}: ${base.studentName}`,
       "#{출결본문}:",
-      `🏫 출결: ${attendanceLabels[base.attendanceStatus]}`,
-      `📚 수업: ${base.lessonName}`,
-      `🕒 시간: ${base.checkedAt}`
+      createMessageLine("🏫 출결", attendanceLabels[base.attendanceStatus]),
+      createMessageLine("📚 수업", base.lessonName),
+      createMessageLine("🕒 시간", base.checkedAt)
     ]);
   }
 
   const commonBody = joinMessageBlocks([
-    `🏫 출결: ${attendanceLabels[base.attendanceStatus]}`,
-    `📚 강의 교재: ${base.lessonMaterial}`,
-    `🧭 강의 내용: ${base.lessonContent}`,
-    `📖 지난 과제: ${base.previousHomework}`,
-    `➡️ 다음 과제: ${base.nextHomework}`,
-    type === "parent" ? `✅ 과제 상태: ${getAssignmentStatusParentMessage(base.assignmentStatus)}` : "",
+    createMessageLine("🏫 출결", attendanceLabels[base.attendanceStatus]),
+    createMessageLine("📚 강의 교재", base.lessonMaterial),
+    createMessageLine("🧭 강의 내용", base.lessonContent),
+    createMessageLine("📘 지난 과제", base.previousHomework),
+    createMessageLine("➡️ 다음 과제", base.nextHomework),
+    type === "parent" ? createMessageLine("✅ 과제 상태", getAssignmentStatusParentMessage(base.assignmentStatus)) : "",
     createMessageBlock("💬 코멘트", base.message)
   ]);
 
