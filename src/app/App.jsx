@@ -1846,6 +1846,7 @@ export function App() {
           <TeacherLessonHubV2
             academyTests={academyTests}
             aiSettings={aiSettings}
+            allRecords={records}
             integrationStatus={integrationStatus}
             lessons={lessons}
             lessonsForDate={lessonsForDate}
@@ -3557,6 +3558,7 @@ function RoleLoginScreen({ students, onAttendanceCheck, onLogin }) {
 function TeacherLessonHubV2({
   academyTests = [],
   aiSettings,
+  allRecords = [],
   integrationStatus,
   clipboardCount,
   lessons,
@@ -3661,6 +3663,7 @@ function TeacherLessonHubV2({
         <LessonJournalDetail
           academyTests={academyTests}
           aiSettings={aiSettings}
+          allRecords={allRecords}
           integrationStatus={integrationStatus}
           homeworks={homeworks}
           lesson={selectedLesson}
@@ -3933,6 +3936,7 @@ function EditableMemoCard({ className = "", editKey, editingKey, onChange, onEdi
 function LessonJournalDetail({
   academyTests = [],
   aiSettings = defaultAiSettings,
+  allRecords = [],
   integrationStatus,
   homeworks = [],
   lesson,
@@ -4021,6 +4025,25 @@ function LessonJournalDetail({
     };
   }
 
+  function getPreviousLessonReminderRecord(student) {
+    const sourceRecords = allRecords.length ? allRecords : records;
+    const previousLesson = lessons
+      .filter((item) =>
+        item.lessonId !== lesson.lessonId &&
+        item.date < lesson.date &&
+        item.status !== "canceled" &&
+        item.studentIds?.includes(student.studentId)
+      )
+      .sort((lessonA, lessonB) => (
+        `${lessonB.date} ${lessonB.startTime ?? ""}`.localeCompare(`${lessonA.date} ${lessonA.startTime ?? ""}`)
+      ))[0];
+
+    if (!previousLesson) return null;
+    return sourceRecords.find((item) =>
+      item.lessonId === previousLesson.lessonId && item.studentId === student.studentId
+    ) ?? null;
+  }
+
   return (
     <section className="lessonJournalPage">
       <header className="pageTop lessonJournalHeader">
@@ -4086,6 +4109,9 @@ function LessonJournalDetail({
             const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
             const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
             const attendanceText = attendanceLabels[record.attendanceStatus] ?? record.attendanceStatus ?? "대기";
+            const previousRecord = getPreviousLessonReminderRecord(student);
+            const previousLessonMaterial = previousRecord?.lessonMaterial?.trim() ?? "";
+            const previousLessonContent = getLessonContent(previousRecord);
 
             return (
               <div className="journalRow" key={student.studentId}>
@@ -4130,7 +4156,7 @@ function LessonJournalDetail({
                   editingKey={editingMemoKey}
                   onChange={(value) => onChangeRecord(lesson, student, "lessonMaterial", value)}
                   onEdit={setEditingMemoKey}
-                  placeholder={student.textbook || student.currentTextbook || "강의 교재"}
+                  placeholder={previousLessonMaterial || student.textbook || student.currentTextbook || "강의 교재"}
                   value={record.lessonMaterial ?? ""}
                 />
                 <EditableMemoCard
@@ -4138,7 +4164,7 @@ function LessonJournalDetail({
                   editingKey={editingMemoKey}
                   onChange={(value) => onChangeRecord(lesson, student, "lessonProgress", value)}
                   onEdit={setEditingMemoKey}
-                  placeholder="오늘 강의 내용"
+                  placeholder={previousLessonContent || "오늘 강의 내용"}
                   value={record.lessonProgress ?? record.progress ?? ""}
                 />
                 <EditableMemoCard
