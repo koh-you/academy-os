@@ -2073,7 +2073,7 @@ button {
 .schoolCalendarLayout {
   display: grid;
   gap: 14px;
-  grid-template-columns: 390px minmax(0, 1fr);
+  grid-template-columns: minmax(420px, 480px) minmax(0, 1fr);
   align-items: start;
 }
 
@@ -2208,7 +2208,8 @@ button {
 
 .schoolEventFormPanel {
   justify-self: start;
-  padding: 14px;
+  gap: 12px;
+  padding: 18px;
   width: 100%;
 }
 
@@ -2267,6 +2268,23 @@ button {
   margin: 0;
 }
 
+.schoolEventFormPanel label {
+  gap: 6px;
+}
+
+.schoolEventFormPanel input,
+.schoolEventFormPanel select,
+.schoolEventFormPanel textarea {
+  font-size: 15px;
+  font-weight: 800;
+  min-height: 44px;
+  padding: 9px 12px;
+}
+
+.schoolEventFormPanel textarea {
+  min-height: 92px;
+}
+
 .calendarDateGrid {
   display: grid;
   gap: 10px;
@@ -2322,9 +2340,9 @@ button {
   border: 1px solid #dbe5f5;
   border-radius: 8px;
   display: grid;
-  gap: 8px;
-  grid-template-columns: minmax(82px, 0.7fr) minmax(120px, 1.1fr) minmax(132px, 1fr) 38px;
-  padding: 10px;
+  gap: 10px;
+  grid-template-columns: minmax(82px, 0.7fr) minmax(132px, 1.1fr) minmax(132px, 1fr) 36px;
+  padding: 12px;
 }
 
 .mathExamItemRow label {
@@ -2333,6 +2351,10 @@ button {
 
 .mathExamItemMemo {
   grid-column: 1 / -1;
+}
+
+.mathExamItemMemo input {
+  min-height: 40px;
 }
 
 .mathExamItemRow .iconButton:disabled {

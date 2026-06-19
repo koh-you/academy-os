@@ -72,10 +72,11 @@ check("42 exam date range uses date inputs", hasAll(app, ["examDateRangeInputs",
 check("43 school calendar can edit derived exam dates", hasAll(app, ["onUpdateExamPrepRow", "updateAcademicEvent", "mathExamDates"]));
 check("44 exam period is rendered as compact calendar bar", hasAll(app, ["periodBar", "isPeriodBar"]) && css.includes(".schoolEventPill.periodBar"));
 check("45 math exam calendar supports index tabs", hasAll(app, ["normalizeMathExamEntries", "mathExamTab", "mathExamEntryChip", "mathExamEntryEditor"]) && css.includes(".schoolEventPill.mathExamTab"));
-check("46 school calendar syncs manual exam inputs to exam prep", hasAll(app, ["syncSchoolCalendarEventToExamPrepRows", "getSchoolCalendarTargetRows", "upsertMathExamEntryFromSchoolEvent", "grade: rows[0]?.grade"]));
+check("46 school calendar syncs manual exam inputs to exam prep", hasAll(app, ["syncSchoolCalendarEventToExamPrepRows", "getSchoolCalendarTargetRows", "upsertMathExamEntryFromSchoolEvent", "schoolCalendarGradeOptions"]));
 check("47 school calendar supports bundled math exam inputs", hasAll(app, ["mathExamItems", "addMathExamItem", "removeMathExamItem", "시험일정 묶음 등록"]) && css.includes(".mathExamItemRow"));
 check("48 school calendar creates pre-exam lessons", hasAll(app, ["createPreExamLessonFromSchoolEvent", "onSyncPreExamLesson", "sourceSchoolEventId", "preExam"]));
 check("49 lesson journal filters by lesson type", hasAll(app, ["lessonTypeFilterBar", "lessonTypeFilterOptions", "visibleLessons", "preExamLessonPill"]) && css.includes(".lessonTypeFilterBar"));
+check("50 school calendar uses fixed grade and subject options", hasAll(app, ["schoolCalendarGradeOptions", "중3", "고3", "schoolCalendarMathSubjectOptions", "확률과통계", "기하"]));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));

@@ -292,6 +292,9 @@ const examPrepTextbookBySchoolGrade = {
   "창동고_고1": "미래엔"
 };
 
+const schoolCalendarGradeOptions = ["중3", "고1", "고2", "고3"];
+const schoolCalendarMathSubjectOptions = ["공통수학1", "공통수학2", "대수", "미적분1", "확률과통계", "미적분2", "기하"];
+
 function createParentLoginId(student) {
   return `parent-${student.loginId}`;
 }
@@ -6625,7 +6628,7 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
   const [isFormCollapsed, setIsFormCollapsed] = useState(false);
   const [newEvent, setNewEvent] = useState({
     schoolName: rows[0]?.schoolName ?? "",
-    grade: rows[0]?.grade ?? "",
+    grade: schoolCalendarGradeOptions.includes(rows[0]?.grade) ? rows[0]?.grade : "고1",
     examCycle: rows[0]?.examCycle ?? "2026-1-mid",
     date: today,
     endDate: "",
@@ -6637,8 +6640,8 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
     mathExamItems: [
       {
         id: `math_item_${Date.now()}`,
-        grade: rows[0]?.grade ?? "",
-        subject: rows[0]?.subject ?? "",
+        grade: schoolCalendarGradeOptions.includes(rows[0]?.grade) ? rows[0]?.grade : "고1",
+        subject: schoolCalendarMathSubjectOptions.includes(rows[0]?.subject) ? rows[0]?.subject : "공통수학1",
         date: today,
         memo: ""
       }
@@ -6649,22 +6652,6 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
   const safeExamCycleOptions = examCycleOptions.length
     ? examCycleOptions
     : ["2026-1-mid", "2026-1-final", "2026-2-mid", "2026-2-final"];
-  const gradesForSelectedSchool = [
-    ...new Set(
-      rows
-        .filter((row) => !newEvent.schoolName || row.schoolName === newEvent.schoolName)
-        .map((row) => row.grade)
-        .filter(Boolean)
-    )
-  ];
-  const subjectsForSelectedSchool = [
-    ...new Set(
-      rows
-        .filter((row) => !newEvent.schoolName || row.schoolName === newEvent.schoolName)
-        .map((row) => row.subject)
-        .filter(Boolean)
-    )
-  ];
   const eventTypeLabels = {
     examPeriod: "시험기간",
     mathExam: "수학시험",
@@ -6783,8 +6770,8 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
         ...current.mathExamItems,
         {
           id: `math_item_${Date.now()}_${current.mathExamItems.length}`,
-          grade: current.grade,
-          subject: current.examSubject || "",
+          grade: current.grade || "고1",
+          subject: current.examSubject || "공통수학1",
           date: current.date,
           memo: ""
         }
@@ -6897,7 +6884,7 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
                 학년
                 <select value={newEvent.grade} onChange={(event) => setNewEvent((current) => ({ ...current, grade: event.target.value }))}>
                   <option value="">전체 학년</option>
-                  {gradesForSelectedSchool.map((grade) => (
+                  {schoolCalendarGradeOptions.map((grade) => (
                     <option key={grade} value={grade}>{grade}</option>
                   ))}
                 </select>
@@ -6952,19 +6939,18 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
                           학년
                           <select value={item.grade} onChange={(event) => updateMathExamItem(item.id, "grade", event.target.value)}>
                             <option value="">학년 선택</option>
-                            {gradesForSelectedSchool.map((grade) => (
+                            {schoolCalendarGradeOptions.map((grade) => (
                               <option key={grade} value={grade}>{grade}</option>
                             ))}
                           </select>
                         </label>
                         <label>
                           과목
-                          <input
-                            list="school-calendar-subjects"
-                            value={item.subject}
-                            onChange={(event) => updateMathExamItem(item.id, "subject", event.target.value)}
-                            placeholder="예: 공통수학1, 대수, 미적분1"
-                          />
+                          <select value={item.subject} onChange={(event) => updateMathExamItem(item.id, "subject", event.target.value)}>
+                            {schoolCalendarMathSubjectOptions.map((subject) => (
+                              <option key={subject} value={subject}>{subject}</option>
+                            ))}
+                          </select>
                         </label>
                         <label>
                           시험 날짜
@@ -6980,11 +6966,6 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
                       </div>
                     ))}
                   </div>
-                  <datalist id="school-calendar-subjects">
-                    {subjectsForSelectedSchool.map((subject) => (
-                      <option key={subject} value={subject} />
-                    ))}
-                  </datalist>
                 </div>
               ) : (
                 <div className="examSubjectBox">
@@ -7122,7 +7103,6 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
           onClose={() => setIsDateModalOpen(false)}
           onDeleteEvent={onDeleteEvent}
           onUpdateEvent={updateAcademicEvent}
-          rows={rows}
           schools={schools}
           selectedDate={selectedDate}
         />
@@ -7138,7 +7118,6 @@ function SchoolDateScheduleModal({
   onClose,
   onDeleteEvent,
   onUpdateEvent,
-  rows = [],
   schools,
   selectedDate
 }) {
@@ -7151,14 +7130,6 @@ function SchoolDateScheduleModal({
           {events.map((event) => {
             const canEditDerivedDate = event.derived && ["examPeriod", "mathExam"].includes(event.type);
             const canEditEventDetails = !event.derived;
-            const eventGradeOptions = [
-              ...new Set(
-                rows
-                  .filter((row) => !event.schoolName || row.schoolName === event.schoolName)
-                  .map((row) => row.grade)
-                  .filter(Boolean)
-              )
-            ];
             return (
               <article className="schoolDateEventEditor" key={event.eventId}>
                 <div className="schoolDateEventEditorTop">
@@ -7178,7 +7149,11 @@ function SchoolDateScheduleModal({
                   ) : (
                     <label>
                       과목
-                      <input disabled={!canEditEventDetails} value={event.examSubject ?? ""} onChange={(change) => onUpdateEvent(event, "examSubject", change.target.value)} placeholder="예: 수학" />
+                      <select disabled={!canEditEventDetails} value={event.examSubject ?? "공통수학1"} onChange={(change) => onUpdateEvent(event, "examSubject", change.target.value)}>
+                        {schoolCalendarMathSubjectOptions.map((subject) => (
+                          <option key={subject} value={subject}>{subject}</option>
+                        ))}
+                      </select>
                     </label>
                   )}
                   <label>
@@ -7193,7 +7168,7 @@ function SchoolDateScheduleModal({
                     학년
                     <select disabled={!canEditEventDetails} value={event.grade ?? ""} onChange={(change) => onUpdateEvent(event, "grade", change.target.value)}>
                       <option value="">전체 학년</option>
-                      {[event.grade, ...eventGradeOptions].filter(Boolean).filter((grade, index, array) => array.indexOf(grade) === index).map((grade) => (
+                      {schoolCalendarGradeOptions.map((grade) => (
                         <option key={grade} value={grade}>{grade}</option>
                       ))}
                     </select>
