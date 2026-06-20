@@ -2393,6 +2393,8 @@ export function App() {
         ...(existingRecord ?? {}),
         [field]: value,
         ...(field === "assignmentStatus" ? { incompleteHomework: value } : {}),
+        ...(field === "teacherComment" ? { teacherCommentSendStatus: "" } : {}),
+        ...(field === "studentComment" ? { studentCommentSendStatus: "" } : {}),
         updatedBy: "instructor_owner_001",
         updatedAt: new Date().toISOString()
       };
