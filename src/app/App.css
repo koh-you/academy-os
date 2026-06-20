@@ -903,7 +903,7 @@ button {
   border-bottom: 1px solid #e2e8f0;
   display: grid;
   gap: 12px;
-  grid-template-columns: 220px minmax(0, 1fr) auto;
+  grid-template-columns: 280px minmax(0, 1fr) auto;
   padding: 14px 16px;
 }
 
@@ -929,7 +929,7 @@ button {
 .examSundayBlockTimeFields > div {
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(132px, 1fr));
 }
 
 .examSundayBlockTimeFields input,
@@ -943,6 +943,11 @@ button {
   min-width: 0;
   padding: 10px 12px;
   width: 100%;
+}
+
+.examSundayBlockTimeFields input[type="date"],
+.examSundayBlockTimeFields input[type="time"] {
+  min-height: 58px;
 }
 
 .examSundayBlockItem textarea {

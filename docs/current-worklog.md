@@ -724,3 +724,9 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - 운영 처리: Supabase의 `lesson_exam_sunday_makeup_2026-06-21` sourceLabel에서 1학기 중간고사 문구를 제거하고, 현재 남은 1학기 기말고사 학교 목록만 남기도록 갱신했다.
 - SQL 주의: 기존 lessons/exam_prep_rows API를 사용하므로 Supabase SQL Editor 작업 필요 없음.
 - 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 76개 통과.
+### 2026-06-20 P1. 일요보강 학교별 블록 시간 입력칸 확대
+- 상태: 완료
+- 사용자 요청: 일요보강에서 창동고 블록만 토요일로 옮기려는데 시간 입력칸이 작아 값이 제대로 보이지 않는다.
+- 이번 작업 결과: 일요보강 학교별 블록 편집 영역의 왼쪽 날짜/시간 칸을 넓히고, 시작/종료 시간 input 최소폭과 높이를 늘렸다. 모바일/좁은 화면에서는 기존처럼 세로 배치가 유지된다.
+- SQL 주의: CSS 변경만 있으므로 Supabase SQL Editor 작업 필요 없음.
+- 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 77개 통과.
