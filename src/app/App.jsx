@@ -4371,11 +4371,18 @@ function HomeworkMakeupLessonDetail({
     targetHomework?.date ??
     "기록 없음";
   const dueDate = targetHomework?.dueDate ?? targetHomework?.endDate ?? "기록 없음";
-  const targetTitle = targetHomework?.title ?? task?.sourceLabel ?? lesson.sourceLabel ?? "보충 대상 숙제";
+  const sourceLessonLabel = sourceLesson?.className ?? sourceLesson?.lessonTopic ?? "원 수업 기록";
+  const targetTitle =
+    getSupplementTaskSourceLabel(task) ||
+    targetHomework?.title ||
+    lesson.sourceLabel ||
+    "보충 대상 숙제";
+  const originalHomeworkTitle = targetHomework?.title || task?.sourceLabel || lesson.sourceLabel || "";
+  const originalHomeworkHint =
+    originalHomeworkTitle && originalHomeworkTitle !== targetTitle ? `원본 숙제명: ${originalHomeworkTitle}` : sourceLessonLabel;
   const methodLabel = task ? supplementMethodLabel(task) : "방식 미정";
   const statusLabel =
     task?.status === "done" ? "보충 완료" : task?.status === "scheduled" ? "일정 확정" : "일정 미확정";
-  const sourceLessonLabel = sourceLesson?.className ?? sourceLesson?.lessonTopic ?? "원 수업 기록";
   const assignmentCount = task?.assignmentCount ?? task?.attemptCount ?? 0;
   const scheduledText = `${lesson.date} ${lesson.startTime || ""}`.trim();
   const confirmedText = task?.lastScheduledAt ? formatKoreanDateTime(task.lastScheduledAt) : "확정 기록 없음";
@@ -4396,7 +4403,7 @@ function HomeworkMakeupLessonDetail({
         <div>
           <span>안 한 숙제 내용</span>
           <strong>{targetTitle}</strong>
-          <small>{sourceLessonLabel}</small>
+          <small>{originalHomeworkHint}</small>
         </div>
         <div>
           <span>보충 확정 일정</span>
@@ -4426,6 +4433,9 @@ function HomeworkMakeupLessonDetail({
               {student?.name ?? "학생 미확인"} 학생이 {dueDate}까지 끝냈어야 하는 숙제입니다.
               보충은 {scheduledText}에 진행됩니다.
             </p>
+            {originalHomeworkTitle && originalHomeworkTitle !== targetTitle ? (
+              <small className="makeupOriginalHomework">수업일지 원본 숙제명: {originalHomeworkTitle}</small>
+            ) : null}
           </div>
         </div>
         <div className="makeupInfoGrid">

@@ -831,6 +831,13 @@ button {
   margin: 4px 0 14px;
 }
 
+.makeupOriginalHomework {
+  color: #64748b;
+  display: block;
+  font-weight: 800;
+  margin-top: 8px;
+}
+
 .makeupInfoGrid {
   display: grid;
   gap: 10px;
