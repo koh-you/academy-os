@@ -1377,20 +1377,14 @@ export function App() {
           const sourceLessons = lessonsResult.ok && Array.isArray(lessonsResult.lessons) ? lessonsResult.lessons : lessons;
           setHomeworks(filterHomeworksForLessons(homeworksResult.homeworks, sourceLessons));
         }
-        if (makeupTasksResult.ok && Array.isArray(makeupTasksResult.makeupTasks) && makeupTasksResult.makeupTasks.length > 0) {
+        if (makeupTasksResult.ok && Array.isArray(makeupTasksResult.makeupTasks)) {
           setMakeupTasks(makeupTasksResult.makeupTasks);
-        } else if (makeupTasksResult.ok && initialMakeupTasksRef.current.length > 0) {
-          postMakeupTasks(initialMakeupTasksRef.current).catch((error) => console.error(error));
         }
-        if (examPrepRowsResult.ok && Array.isArray(examPrepRowsResult.examPrepRows) && examPrepRowsResult.examPrepRows.length > 0) {
+        if (examPrepRowsResult.ok && Array.isArray(examPrepRowsResult.examPrepRows)) {
           setExamPrepRows(examPrepRowsResult.examPrepRows);
-        } else if (examPrepRowsResult.ok && initialExamPrepRowsRef.current.length > 0) {
-          postExamPrepRows(initialExamPrepRowsRef.current).catch((error) => console.error(error));
         }
-        if (schoolEventsResult.ok && Array.isArray(schoolEventsResult.schoolEvents) && schoolEventsResult.schoolEvents.length > 0) {
+        if (schoolEventsResult.ok && Array.isArray(schoolEventsResult.schoolEvents)) {
           setSchoolEvents(schoolEventsResult.schoolEvents);
-        } else if (schoolEventsResult.ok && initialSchoolEventsRef.current.length > 0) {
-          postSchoolEvents(initialSchoolEventsRef.current).catch((error) => console.error(error));
         }
         if (appStateResult.ok && appStateResult.states && Object.keys(appStateResult.states).length > 0) {
           const states = appStateResult.states;

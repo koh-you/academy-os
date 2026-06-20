@@ -679,6 +679,41 @@ export async function upsertMakeupTasks(makeupTasks) {
   return { source: databaseSource, makeupTasks: rows.map(fromMakeupTaskRow) };
 }
 
+export async function deleteMakeupTask(makeupTaskId) {
+  if (!makeupTaskId) throw new Error("삭제할 보충관리 ID가 필요합니다.");
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, makeupTaskId };
+  }
+
+  const rows = await listRows(
+    "makeup_tasks",
+    `select=*&makeup_task_id=eq.${encodeURIComponent(makeupTaskId)}&limit=1`,
+    { requireServiceRole: true }
+  );
+  const task = rows[0] ? fromMakeupTaskRow(rows[0]) : null;
+  if (task?.linkedLessonId) {
+    await deleteLesson(task.linkedLessonId);
+  }
+  await deleteRows("makeup_tasks", `makeup_task_id=eq.${encodeURIComponent(makeupTaskId)}`);
+  return { source: databaseSource, makeupTaskId };
+}
+
+export async function deleteAllMakeupTasks() {
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, deletedMakeupTaskIds: [] };
+  }
+
+  const rows = await listRows("makeup_tasks", "select=makeup_task_id,note", { requireServiceRole: true });
+  const tasks = rows.map(fromMakeupTaskRow);
+  for (const task of tasks) {
+    if (task.linkedLessonId) {
+      await deleteLesson(task.linkedLessonId);
+    }
+    await deleteRows("makeup_tasks", `makeup_task_id=eq.${encodeURIComponent(task.makeupTaskId)}`);
+  }
+  return { source: databaseSource, deletedMakeupTaskIds: tasks.map((task) => task.makeupTaskId) };
+}
+
 export async function listExamPrepRows() {
   if (!isSupabaseConfigured()) {
     return { source: fallbackSource, examPrepRows: sampleData.examPrepRows ?? [] };

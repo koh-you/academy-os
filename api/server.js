@@ -2,6 +2,8 @@
 import {
   deleteLesson,
   deleteLessonsBefore,
+  deleteAllMakeupTasks,
+  deleteMakeupTask,
   deleteResourceMaterial,
   deleteSchoolEvent,
   getCoreDataStatus,
@@ -546,6 +548,18 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await upsertMakeupTasks(payload.makeupTasks ?? payload.tasks ?? []);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "DELETE" && requestUrl.pathname === "/api/makeup-tasks") {
+    try {
+      const taskId = requestUrl.searchParams.get("id");
+      const deleteAll = requestUrl.searchParams.get("all") === "true";
+      const result = deleteAll ? await deleteAllMakeupTasks() : await deleteMakeupTask(taskId);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });

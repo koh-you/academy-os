@@ -118,6 +118,14 @@
 - SQL 주의: 운영 Supabase에 `supabase/20260620_app_state_store.sql` 적용이 필요하다. SQL 적용 전에는 기존 localStorage fallback으로 동작하지만, 공용 app state 저장은 실패할 수 있다.
 - 검증: `node --check api/routes/coreData.js` 통과, `node --check api/server.js` 통과, `npm run build` 통과, `npm run test:production` 60개 통과.
 
+### 2026-06-20 P1. 보충관리/학사일정 초기화 준비
+
+- 상태: 완료
+- 사용자 요청: 수업일지-보충관리 내역부터 다시 확인하기 위해 보충/결석이 필요한 관리 항목과 학사일정에 저장된 내용을 모두 삭제하고, 이후 보충일정은 6월 19일 숙제가 안 된 사항부터 다시 진행한다.
+- 이번 작업 결과: Supabase가 빈 배열을 반환할 때 브라우저 localStorage의 예전 보충관리/시험관리/학사일정 데이터가 다시 업로드되지 않도록 앱 초기 동기화 로직을 수정했다. 보충관리 항목을 운영 API에서 삭제할 수 있도록 `DELETE /api/makeup-tasks?id=...`와 `DELETE /api/makeup-tasks?all=true`를 추가했다.
+- SQL 주의: 새 SQL Editor 적용은 필요 없다.
+- 검증: `node --check api/routes/coreData.js` 통과, `node --check api/server.js` 통과, `npm run build` 통과, `npm run test:production` 60개 통과.
+
 ### 오늘 작업 요약 및 최종 확인
 
 - 상태: 완료
