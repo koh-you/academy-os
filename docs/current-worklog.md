@@ -710,3 +710,10 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - 사용자 정정: 6/19 이전 시험수업을 별도로 표시한다/안 한다는 코드가 필요 없다. 6/19 이전 수업은 운영 DB에서 삭제하면 된다.
 - 이번 작업 결과: 직전 변경에서 넣었던 6/19 이전 시험수업 예외 표시/후보 제한 코드를 제거했다. 운영 Supabase에는 `DELETE /api/lessons?before=2026-06-19`를 직접 실행해 6/7, 6/14 일요보강 2건을 삭제했다.
 - SQL 주의: 기존 DELETE API 호출과 프론트 코드 정리만 있으므로 Supabase SQL Editor 작업 필요 없음.
+### 2026-06-20 P1. 시험관리 행 삭제와 수정 레이아웃 보강
+- 상태: 완료
+- 사용자 요청: 중간고사 시험일정을 시험관리 탭에서 삭제할 수 있어야 하며, 시험관리 수정 CSS가 1학기 기말고사뿐 아니라 1학기 중간/2학기 고사에서도 동일하게 맞아야 한다.
+- 이번 작업 결과: 시험관리 행의 관리 칸에 `삭제` 버튼을 추가했다. 삭제 전 확인창을 띄우고, 확인 시 `DELETE /api/exam-prep-rows?id=...&confirm=true`로 Supabase 행을 삭제한다. 실패하면 로컬 행을 복구하고 화면 alert로 오류를 표시한다.
+- 수정 레이아웃: 시험관리 표 컬럼 폭과 전체 min-width를 늘리고, 수학시험 일정 입력 grid 폭을 넓혀 고사 구분과 무관하게 같은 수정 UI가 적용되도록 보강했다.
+- SQL 주의: 기존 삭제 API와 `exam_prep_rows` 테이블을 사용하므로 Supabase SQL Editor 작업 필요 없음.
+- 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 75개 통과.

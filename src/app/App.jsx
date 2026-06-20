@@ -380,6 +380,15 @@ function postExamPrepRows(examPrepRows) {
   return postJson("/api/exam-prep-rows/bulk", { examPrepRows });
 }
 
+function deleteExamPrepRowRequest(examPrepId) {
+  return fetch(apiUrl(`/api/exam-prep-rows?id=${encodeURIComponent(examPrepId)}&confirm=true`), { method: "DELETE" })
+    .then(async (response) => {
+      const result = await response.json();
+      if (!response.ok || !result.ok) throw new Error(result.error || "시험정보 삭제 실패");
+      return result;
+    });
+}
+
 function postSchoolEvent(schoolEvent) {
   return postJson("/api/school-events", { schoolEvent });
 }
@@ -2224,6 +2233,19 @@ export function App() {
     });
   }
 
+  function handleDeleteExamPrepRow(examPrepId) {
+    const row = examPrepRows.find((item) => item.examPrepId === examPrepId);
+    if (!row) return;
+    const label = [row.schoolName, row.grade, row.subject, examCycleLabel(row.examCycle)].filter(Boolean).join(" · ");
+    if (typeof window !== "undefined" && !window.confirm(`${label || "이 시험정보"} 행을 삭제할까요?`)) return;
+    setExamPrepRows((current) => current.filter((item) => item.examPrepId !== examPrepId));
+    deleteExamPrepRowRequest(examPrepId).catch((error) => {
+      console.error(error);
+      setExamPrepRows((current) => upsertById(current, row, "examPrepId"));
+      if (typeof window !== "undefined") window.alert(`시험정보 삭제 실패: ${error.message}`);
+    });
+  }
+
   function handleSyncPreExamLessonFromSchoolEvent(event) {
     const lesson = createPreExamLessonFromSchoolEvent(event, students);
     if (!lesson) return;
@@ -2670,6 +2692,7 @@ export function App() {
               })
             }
             onUpdateRow={handleUpdateExamPrepRow}
+            onDeleteRow={handleDeleteExamPrepRow}
           />
         ) : null}
 
@@ -6570,7 +6593,7 @@ function summarizeTallySubmissions(submissions) {
   ].filter(Boolean).join("\n");
 }
 
-function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templates, onEnsureExamCycleRows, onUpdateRow }) {
+function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templates, onEnsureExamCycleRows, onUpdateRow, onDeleteRow }) {
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState("info");
   const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("template_mwf_7_10");
@@ -6901,7 +6924,10 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
                         <button className="softButton compact" onClick={() => setEditingExamPrepId("")} type="button">닫기</button>
                       </>
                     ) : (
-                      <button className="softButton compact" onClick={() => setEditingExamPrepId(row.examPrepId)} type="button">수정</button>
+                      <>
+                        <button className="softButton compact" onClick={() => setEditingExamPrepId(row.examPrepId)} type="button">수정</button>
+                        <button className="dangerSoftButton compact" onClick={() => onDeleteRow?.(row.examPrepId)} type="button">삭제</button>
+                      </>
                     )}
                   </div>
                 </div>

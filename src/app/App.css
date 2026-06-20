@@ -1507,8 +1507,8 @@ button {
   border-top: 1px solid #e2e8f0;
   display: grid;
   gap: 6px;
-  grid-template-columns: 132px 220px 78px 116px 136px 196px 410px 250px 240px 190px 88px;
-  min-width: 2116px;
+  grid-template-columns: 140px 240px 90px 136px 156px 236px 540px 320px 270px 220px 132px;
+  min-width: 2480px;
   padding: 8px 10px;
 }
 
@@ -1612,7 +1612,7 @@ button {
 .mathExamEntryEditor {
   display: grid;
   gap: 8px;
-  min-width: 340px;
+  min-width: 0;
 }
 
 .mathExamEntryRow {
@@ -1623,7 +1623,7 @@ button {
 }
 
 .examPrepRow.editing .mathExamEntryRow {
-  grid-template-columns: 138px 64px 84px minmax(90px, 1fr) 52px;
+  grid-template-columns: 158px 74px 96px minmax(130px, 1fr) 58px;
 }
 
 .mathExamEntryRow input {
