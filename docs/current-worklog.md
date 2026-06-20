@@ -613,3 +613,9 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - 이번 작업 결과: `generatedLessonControls.sundayMakeupBlocks`에 저장된 학교별 블록 수정값을 읽어, 원래 일요시험보강 날짜/시간과 달라진 블록을 달력 표시용 가상 수업으로 파생한다. 원본 자동 수업은 그대로 두고, 이동된 블록은 달력에서 별도 pill로 표시되며 클릭 시 같은 일요시험보강 모달을 열고 해당 블록을 강조한다. 수정/삭제 동작은 원본 일요시험보강 수업을 기준으로 처리해 실제 `lessons` 중복 저장을 피한다.
 - SQL 주의: 기존 `app_state` JSON(`generatedLessonControls.sundayMakeupBlocks`)만 사용하는 UI/파생 표시 변경이라 Supabase SQL Editor 적용은 필요 없다.
 - 검증: `npm run build` 통과, `npm run test:production` 60개 통과.
+### 2026-06-20 P1. 일요시험보강 이동 블록 회귀 시나리오 테스트 추가
+- 상태: 완료
+- 사용자 요청: 위에서 우려했던 부분들이 잘 통과됐는지 시나리오 테스트로 확인한다.
+- 이번 작업 결과: 운영 시나리오 테스트에 61~64번 체크를 추가했다. 이동된 일요시험보강 학교별 블록이 달력용 수업으로 파생되는지, 원본 수업과 `sourceLessonId`로 연결되는지, 클릭 시 원본 모달과 `focusBlockId`로 이어지는지, 이동 블록 pill/강조 CSS가 존재하는지를 확인한다.
+- SQL 주의: 테스트 스크립트와 작업 기록만 변경했으므로 Supabase SQL Editor 적용은 필요 없다.
+- 검증: `npm run test:production` 64개 통과, `npm run build` 통과.
