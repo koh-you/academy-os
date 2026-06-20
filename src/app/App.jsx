@@ -230,7 +230,7 @@ function buildCommentSourceText({ lesson, nextHomework, previousHomework, record
 function formatSupplementScheduleLine(task = {}) {
   const schedule = [task.scheduledDate, task.scheduledTime].filter(Boolean).join(" ");
   const method = supplementMethodLabel(task);
-  const source = task.sourceLabel || followUpTypeLabel(task.taskType);
+  const source = getSupplementTaskSourceLabel(task) || followUpTypeLabel(task.taskType);
   const status = task.status === "done" ? "보충 완료" : task.status === "scheduled" ? "일정 확정" : "일정 미확정";
   return [schedule || "일정 미정", source, method, status].filter(Boolean).join(" · ");
 }
@@ -238,7 +238,7 @@ function formatSupplementScheduleLine(task = {}) {
 function getStudentSupplementSchedules(makeupTasks = [], studentId = "") {
   return makeupTasks
     .filter((task) => task.studentId === studentId && task.status !== "done")
-    .filter((task) => task.scheduledDate || task.scheduledTime || task.notificationDraft || task.sourceLabel)
+    .filter((task) => task.scheduledDate || task.scheduledTime || task.notificationDraft || task.supplementHomeworkNote || task.sourceLabel)
     .sort((a, b) => `${a.scheduledDate || "9999-99-99"} ${a.scheduledTime || ""}`.localeCompare(`${b.scheduledDate || "9999-99-99"} ${b.scheduledTime || ""}`))
     .map(formatSupplementScheduleLine);
 }
@@ -10296,7 +10296,8 @@ function SupplementStudentModal({
     setFeedback({ title, message });
   }
 
-  function handleCreateNotificationDraft(task, draft) {
+  function handleCreateNotificationDraft(task) {
+    const draft = createNotificationDraft(task, [student]);
     onUpdateTask(task.makeupTaskId, "notificationDraft", draft);
     showFeedback("알림톡 초안 반영 완료", "작성한 문구가 보충 일정 알림톡 초안에 반영되었습니다.");
   }
@@ -10439,7 +10440,7 @@ function SupplementStudentModal({
                     />
                   </label>
                   <div className="modalActions">
-                    <button className="softButton" onClick={() => handleCreateNotificationDraft(task, freshDraft)} type="button">
+                    <button className="softButton" onClick={() => handleCreateNotificationDraft(task)} type="button">
                       알림톡 문구 작성
                     </button>
                     <button

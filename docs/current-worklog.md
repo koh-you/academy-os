@@ -522,3 +522,10 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - 이번 작업 결과: 숙제보충 task에 `supplementHomeworkNote` 보충 전용 필드를 추가했다. 새 보충 생성 시 지난 숙제명을 기본값으로 가져오고, 보충관리 상세 모달에서 수정할 수 있다. 수정값은 보충일지 표시와 알림톡 초안 생성에만 사용하며 수업일지 원본 숙제명/완료 여부에는 반영하지 않는다.
 - SQL 주의: 기존 `makeup_tasks.note` JSON 메타데이터에 저장되는 프론트 필드 추가이므로 Supabase SQL Editor 적용은 필요 없다.
 - 검증: `npm run build` 통과, `npm run test:production` 60개 통과.
+
+### 2026-06-20 P1. 보충 알림톡 초안의 미완료숙제 반영
+- 상태: 완료
+- 사용자 요청: 숙제보충 모달에서 작성한 미완료숙제 내용을 바탕으로 알림톡 초안을 만든다.
+- 이번 작업 결과: 보충 알림톡 초안 작성 버튼이 클릭 시점의 보충 task에서 초안을 직접 생성하도록 정리했다. 수업메모/학생·학부모 알림톡의 보충일정 요약도 `supplementHomeworkNote`를 우선 사용하도록 바꿔, 보충모달에서 수정한 미완료숙제 내역이 알림톡 재료에 반영된다.
+- SQL 주의: 기존 `makeup_tasks.note` JSON 메타데이터를 사용하는 로직 변경이므로 Supabase SQL Editor 적용은 필요 없다.
+- 검증: `npm run build` 통과, `npm run test:production` 60개 통과.
