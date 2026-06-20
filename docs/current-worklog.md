@@ -889,3 +889,10 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - 이번 작업 결과: `docs/session-handoff-2026-06-21.md`를 추가했다. 문서에는 오늘 오류가 많았던 수업메모/알림톡/보충관리/시험관리-일요보강 흐름, 내일 작업 큐, 배포 및 SQL Editor 유의점을 정리했다.
 - 내일 우선 확인: Render/Vercel 배포 반영, 알림톡 `compact is not defined` 재발 여부, 보충관리 통합 저장, 알림톡 상태 색상, 수업메모 중복 반영, 직전 수업메모 표시, 일요보강 블록 이동/삭제 지속성.
 - SQL 주의: 문서 정리만 했으므로 Supabase SQL Editor 작업 필요 없음.
+
+### 2026-06-20 P2. UI/UX 안정화 전체 작업 계획 문서화
+- 상태: 완료
+- 사용자 요청: 내일 우선작업 외에 전체 맥락에서 추가로 해야 할 UI/UX 안정화 작업을 Markdown과 PDF로 정리한다.
+- 이번 작업 결과: `docs/ui-ux-stabilization-plan-2026-06-21.md`를 추가했다. 같은 내용을 로컬 산출물 `output/pdf/ui-ux-stabilization-plan-2026-06-21.pdf`로 생성하고 PDF 렌더링 PNG를 확인했다.
+- Git 주의: repo 규칙상 PDF는 commit하지 않고 로컬 산출물로만 보관한다.
+- SQL 주의: 문서 생성만 했으므로 Supabase SQL Editor 작업 필요 없음.
