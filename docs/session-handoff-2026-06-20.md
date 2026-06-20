@@ -138,7 +138,7 @@
 
 ## 6. 다음 세션 권장 순서
 
-1. `AGENTS.md`, `docs/current-worklog.md`, `docs/home-codex-setup.md`, 이 파일을 먼저 읽는다.
+1. `AGENTS.md`, `docs/current-worklog.md`, `docs/home-codex-setup.md`, `docs/deployment-handoff-prompt.md`, 이 파일을 먼저 읽는다.
 2. `git status --short --branch`로 작업트리가 깨끗한지 확인한다.
 3. `npm run test:production`으로 64개 테스트가 유지되는지 확인한다.
 4. 사용자가 실제 화면에서 보이는 문제를 말하면, 먼저 다음 세 영역 중 어디인지 분류한다.
@@ -146,4 +146,3 @@
    - 시험관리 입력 원천
    - 학사일정 표시/자동생성 수업
 5. SQL이 필요해 보이면 코딩 전에 먼저 사용자에게 적용 필요성을 안내한다.
-
