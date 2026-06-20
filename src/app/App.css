@@ -1507,8 +1507,8 @@ button {
   border-top: 1px solid #e2e8f0;
   display: grid;
   gap: 8px;
-  grid-template-columns: 120px 220px 90px 120px 120px 180px 360px 240px 210px 190px 86px;
-  min-width: 1943px;
+  grid-template-columns: 150px 260px 90px 130px 170px 240px 560px 360px 360px 220px 100px;
+  min-width: 2640px;
   padding: 8px 10px;
 }
 
@@ -1517,20 +1517,19 @@ button {
 }
 
 .examPrepRow.editing {
+  align-items: start;
   background: #f8fbff;
   box-shadow: inset 3px 0 0 #3b82f6;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  min-width: 1280px;
 }
 
 .examPrepRow.editing > :nth-child(1) {
-  grid-column: 1 / span 2;
+  grid-column: 1;
   grid-row: 1;
 }
 
 .examPrepRow.editing > :nth-child(2) {
-  grid-column: 1 / span 3;
-  grid-row: 2 / span 2;
+  grid-column: 2;
+  grid-row: 1;
 }
 
 .examPrepRow.editing > :nth-child(3) {
@@ -1544,37 +1543,37 @@ button {
 }
 
 .examPrepRow.editing > :nth-child(5) {
-  grid-column: 5 / span 2;
+  grid-column: 5;
   grid-row: 1;
 }
 
 .examPrepRow.editing > :nth-child(6) {
-  grid-column: 7 / span 2;
+  grid-column: 6;
   grid-row: 1;
 }
 
 .examPrepRow.editing > :nth-child(7) {
-  grid-column: 4 / span 6;
-  grid-row: 2 / span 2;
+  grid-column: 7;
+  grid-row: 1;
 }
 
 .examPrepRow.editing > :nth-child(8) {
-  grid-column: 10 / span 3;
-  grid-row: 2;
+  grid-column: 8;
+  grid-row: 1;
 }
 
 .examPrepRow.editing > :nth-child(9) {
-  grid-column: 10 / span 3;
-  grid-row: 3;
+  grid-column: 9;
+  grid-row: 1;
 }
 
 .examPrepRow.editing > :nth-child(10) {
-  grid-column: 9 / span 3;
+  grid-column: 10;
   grid-row: 1;
 }
 
 .examPrepRow.editing > :nth-child(11) {
-  grid-column: 12;
+  grid-column: 11;
   grid-row: 1;
 }
 
@@ -1584,7 +1583,7 @@ button {
 }
 
 .examPrepRow.editing > input {
-  min-height: 44px;
+  min-height: 56px;
   padding: 0 12px;
 }
 
@@ -1624,7 +1623,7 @@ button {
 }
 
 .examPrepRow.editing .mathExamEntryRow {
-  grid-template-columns: minmax(132px, 1fr) 72px 92px minmax(116px, 1fr) 56px;
+  grid-template-columns: 170px 72px 92px minmax(130px, 1fr) 56px;
 }
 
 .mathExamEntryRow input {
