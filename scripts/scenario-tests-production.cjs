@@ -111,6 +111,7 @@ check("69 exam prep row delete is wired to guarded API", hasAll(app, ["deleteExa
 check("70 exam prep edit grid has room for all cycles", hasAll(css, ["grid-template-columns: 140px 240px 90px 136px 156px 236px 540px 320px 270px 220px 132px", "min-width: 2480px", "grid-template-columns: 158px 74px 96px minmax(130px, 1fr) 58px"]));
 check("71 exam prep delete reconciles persisted Sunday makeup lessons", hasAll(app, ["reconcilePersistedSundayMakeupLessons", "buildSundayMakeupCandidates(nextExamPrepRows)", "existingSundayLessons", "lessonIdsToDelete", 'postJson("/api/lessons/bulk", { lessons: lessonsToSave })', 'fetch(apiUrl(`/api/lessons?id=${encodeURIComponent(lessonId)}`), { method: "DELETE" })']));
 check("72 Sunday makeup block time editors have enough width", hasAll(css, ["grid-template-columns: 280px minmax(0, 1fr) auto", "grid-template-columns: repeat(2, minmax(132px, 1fr))", '.examSundayBlockTimeFields input[type="time"]', "min-height: 58px"]));
+check("73 Sunday makeup blocks can be removed inside lesson", hasAll(app, ["function deleteBlock(blockId)", "마지막 블록은 삭제할 수 없습니다", "current.filter((block) => block.blockId !== blockId)", "블록 삭제", "getExamSundayMakeupVisibleSourceLabel"]) && hasAll(css, [".examSundayBlockActions", ".examSundayBlockActions > span"]));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));

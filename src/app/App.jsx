@@ -4670,32 +4670,35 @@ function TeacherLessonHubV2({
                 <span className="dayNumber">{day.dayNumber}</span>
                 <span className="cellPlus">+</span>
                 <span className="lessonPills">
-                  {dayLessons.map((lesson) => (
-                    <button
-                      className={[
-                        "lessonPill",
-                        lesson.lessonId === selectedLessonId ? "active" : "",
-                        lesson.lessonType === "preExam" ? "preExamLessonPill" : "",
-                        lesson.lessonType === "makeup" ? "makeupLessonPill" : "",
-                        lesson.lessonType === "examSundayMakeup" ? "sundayMakeupLessonPill" : "",
-                        lesson.isVirtualSundayMakeupBlock ? "blockMoved" : ""
-                      ].filter(Boolean).join(" ")}
-                      key={lesson.lessonId}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        onOpenLessonJournal(lesson.lessonId);
-                      }}
-                      style={{ background: lesson.color }}
-                      type="button"
-                    >
-                      {lesson.startTime} {lesson.isVirtualSundayMakeupBlock ? lesson.virtualBlockLabel || lesson.lessonTopic : lesson.className}
-                      {lesson.isVirtualSundayMakeupBlock
-                        ? lesson.virtualBlockMemo ? ` · ${lesson.virtualBlockMemo}` : " · 이동"
-                        : lesson.lessonType === "examSundayMakeup"
-                        ? lesson.sourceLabel ? ` · ${lesson.sourceLabel}` : ""
-                        : ` (${lesson.studentIds.length}명)`}
-                    </button>
-                  ))}
+                  {dayLessons.map((lesson) => {
+                    const sundayMakeupSourceLabel = getExamSundayMakeupVisibleSourceLabel(lesson, generatedLessonControls);
+                    return (
+                      <button
+                        className={[
+                          "lessonPill",
+                          lesson.lessonId === selectedLessonId ? "active" : "",
+                          lesson.lessonType === "preExam" ? "preExamLessonPill" : "",
+                          lesson.lessonType === "makeup" ? "makeupLessonPill" : "",
+                          lesson.lessonType === "examSundayMakeup" ? "sundayMakeupLessonPill" : "",
+                          lesson.isVirtualSundayMakeupBlock ? "blockMoved" : ""
+                        ].filter(Boolean).join(" ")}
+                        key={lesson.lessonId}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onOpenLessonJournal(lesson.lessonId);
+                        }}
+                        style={{ background: lesson.color }}
+                        type="button"
+                      >
+                        {lesson.startTime} {lesson.isVirtualSundayMakeupBlock ? lesson.virtualBlockLabel || lesson.lessonTopic : lesson.className}
+                        {lesson.isVirtualSundayMakeupBlock
+                          ? lesson.virtualBlockMemo ? ` · ${lesson.virtualBlockMemo}` : " · 이동"
+                          : lesson.lessonType === "examSundayMakeup"
+                          ? sundayMakeupSourceLabel ? ` · ${sundayMakeupSourceLabel}` : ""
+                          : ` (${lesson.studentIds.length}명)`}
+                      </button>
+                    );
+                  })}
                 </span>
               </div>
             );
@@ -4734,6 +4737,23 @@ function parseExamSundayMakeupBlocks(lesson, blocksOverride = null) {
     memo: "",
     startTime: addMinutesToTime(startTime, index * blockMinutes)
   }));
+}
+
+function getExamSundayMakeupVisibleSourceLabel(lesson, controls = defaultGeneratedLessonControls) {
+  if (lesson?.lessonType !== "examSundayMakeup" || lesson.isVirtualSundayMakeupBlock) {
+    return lesson?.sourceLabel || "";
+  }
+  const safeControls = normalizeGeneratedLessonControls(controls);
+  const generatedKey = getGeneratedLessonKey(lesson);
+  const blocksOverride = safeControls.sundayMakeupBlocks?.[generatedKey];
+  if (!Array.isArray(blocksOverride) || blocksOverride.length === 0) {
+    return lesson.sourceLabel || "";
+  }
+  return parseExamSundayMakeupBlocks(lesson, blocksOverride)
+    .filter((block) => (block.date || lesson.date) === lesson.date)
+    .map((block) => block.label)
+    .filter(Boolean)
+    .join(" · ");
 }
 
 function createExamSundayMakeupBlockLessons(lessons = [], controls = defaultGeneratedLessonControls) {
@@ -4791,6 +4811,16 @@ function ExamSundayMakeupLessonDetail({
 
   function updateBlock(blockId, field, value) {
     setDraftBlocks((current) => current.map((block) => (block.blockId === blockId ? { ...block, [field]: value } : block)));
+  }
+
+  function deleteBlock(blockId) {
+    setDraftBlocks((current) => {
+      if (current.length <= 1) {
+        window.alert("마지막 블록은 삭제할 수 없습니다. 전체 일정을 삭제하려면 일정 삭제를 사용하세요.");
+        return current;
+      }
+      return current.filter((block) => block.blockId !== blockId);
+    });
   }
 
   function resetBlocks() {
@@ -4894,7 +4924,12 @@ function ExamSundayMakeupLessonDetail({
                 />
                 <small>{scheduledTime}</small>
               </div>
-              <span>시험 대비</span>
+              <div className="examSundayBlockActions">
+                <span>시험 대비</span>
+                <button className="dangerSoftButton compact" onClick={() => deleteBlock(block.blockId)} type="button">
+                  블록 삭제
+                </button>
+              </div>
             </div>
           ))}
         </div>

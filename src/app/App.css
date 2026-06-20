@@ -973,7 +973,14 @@ button {
   margin-top: 4px;
 }
 
-.examSundayBlockItem > span {
+.examSundayBlockActions {
+  align-items: end;
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+
+.examSundayBlockActions > span {
   background: #eef2ff;
   border-radius: 999px;
   color: #3730a3;
@@ -981,6 +988,11 @@ button {
   font-weight: 900;
   padding: 7px 10px;
   white-space: nowrap;
+}
+
+.examSundayBlockActions .dangerSoftButton {
+  min-height: 34px;
+  padding: 6px 10px;
 }
 
 .homeworkMakeupTarget {
@@ -8570,8 +8582,8 @@ textarea.profileEditInput {
     grid-template-columns: 1fr;
   }
 
-  .examSundayBlockItem > span {
-    justify-self: start;
+  .examSundayBlockActions {
+    justify-items: start;
   }
 }
 
