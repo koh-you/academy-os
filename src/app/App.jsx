@@ -6411,23 +6411,18 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
   const tallySummary = tallySummaries[tallySummaryKey] ?? summarizeTallySubmissions(visibleTallySubmissions);
   const examManagementTabs = [
     {
-      description: "학교, 학년, 교과서, 시험범위와 수학시험일을 관리합니다.",
       id: "info",
       label: "시험정보"
     },
     {
-      description: "학생 제출 원문을 모으고 AI 총평으로 정리합니다.",
       id: "tallyAi",
       label: "탈리"
     },
     {
-      description: "외부 기출문제 아카이브를 웹앱 안에서 확인합니다.",
       id: "pastPapers",
       label: "기출문제"
     }
   ];
-  const activeExamManagementTab =
-    examManagementTabs.find((tab) => tab.id === activeTab) ?? examManagementTabs[0];
 
   function changeExamCycle(examCycle) {
     setSelectedExamCycle(examCycle);
@@ -6516,14 +6511,16 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
       <div className="sectionHeader">
         <div>
           <h1>시험관리</h1>
-          <p className="muted">반별 시험정보와 학생 self-check 총평을 고사별로 관리합니다.</p>
+          <p className="muted">{selectedClass?.name} · {examCycleLabel(selectedExamCycle)}</p>
         </div>
-        <input
-          className="searchInput"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="학교, 과목, 출판사 검색"
-        />
+        {activeTab === "info" ? (
+          <input
+            className="searchInput"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="학교, 과목, 출판사 검색"
+          />
+        ) : null}
       </div>
 
       <div className="examManagementTabs" aria-label="시험관리 하위 탭">
@@ -6534,12 +6531,10 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
             onClick={() => setActiveTab(tab.id)}
             type="button"
           >
-            <strong>{tab.label}</strong>
-            <span>{tab.description}</span>
+            {tab.label}
           </button>
         ))}
       </div>
-      <p className="examTabCaption">{activeExamManagementTab.description}</p>
 
       {activeTab !== "pastPapers" ? (
         <div className="classTabList">
@@ -6566,7 +6561,7 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
               <option value="2026-2-mid">2026 2학기 중간</option>
               <option value="2026-2-final">2026 2학기 기말</option>
             </select>
-            <span>{selectedClass?.name} · {classStudents.length}명 기준 학교/학년/교과서 정보를 표시합니다.</span>
+            <span>{filteredRows.length}개 시험정보 · {classStudents.length}명</span>
           </div>
           <div className="examPrepTable">
             <div className="examPrepRow examPrepHead">
@@ -6699,6 +6694,12 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
                 </div>
               );
             })}
+            {filteredRows.length === 0 ? (
+              <div className="examPrepEmptyState">
+                <strong>표시할 시험정보가 없습니다.</strong>
+                <span>반 또는 고사를 바꾸면 해당 조건의 시험정보가 표시됩니다.</span>
+              </div>
+            ) : null}
           </div>
         </>
       ) : null}
@@ -7210,6 +7211,9 @@ function ExamAnalysisCenter({
   const [selectedAnalysisId, setSelectedAnalysisId] = useState(analyses[0]?.examAnalysisId ?? "");
   const [isListCollapsed, setIsListCollapsed] = useState(false);
   const selectedAnalysis = analyses.find((item) => item.examAnalysisId === selectedAnalysisId) ?? analyses[0];
+  const linkedExamPrepRow = selectedAnalysis
+    ? examPrepRows.find((row) => row.examPrepId === selectedAnalysis.examPrepId)
+    : null;
   const pipelineStages = ["1차 AI 가안", "강사 인사이트 추가", "최종 편집", "발행 완료"];
   const currentStage = pipelineStages.includes(selectedAnalysis?.pipelineStage)
     ? selectedAnalysis.pipelineStage
@@ -7294,16 +7298,14 @@ function ExamAnalysisCenter({
                 </div>
               </div>
               <div className="fieldGrid">
-                <label>
-                  시험관리 DB 연결
-                  <select value={selectedAnalysis.examPrepId} onChange={(event) => update("examPrepId", event.target.value)}>
-                    {examPrepRows.map((row) => (
-                      <option key={row.examPrepId} value={row.examPrepId}>
-                        {row.schoolName} · {row.grade} · {row.subject}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <div className="linkedExamInfoBox">
+                  <span>연결된 시험정보</span>
+                  <strong>
+                    {linkedExamPrepRow
+                      ? `${linkedExamPrepRow.schoolName} · ${linkedExamPrepRow.grade} · ${linkedExamPrepRow.subject}`
+                      : "직접 입력"}
+                  </strong>
+                </div>
                 <label>
                   학교
                   <input value={selectedAnalysis.schoolName} onChange={(event) => update("schoolName", event.target.value)} />
