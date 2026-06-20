@@ -22,6 +22,7 @@
 7. `.env`, PDF, HWPX, HWP, ZIP, 대용량 원본 자료는 로컬 또는 별도 스토리지로 관리한다.
 8. 동작 변경 후에는 최소 `npm run build`를 실행한다.
 9. 시나리오 검수 로그는 PowerShell 한글 깨짐을 줄이기 위해 테스트 이름을 ASCII로 둔다.
+10. Supabase SQL migration이 필요한 작업은 사용자에게 별도로 알리고, 적용해야 할 SQL 파일명과 순서를 이 문서에 반드시 남긴다. 자동 배포는 GitHub main push 기준이지만 SQL Editor 적용은 사용자가 수동으로 진행해야 하므로, 완료 후 운영 API로 적용 여부를 확인한다.
 
 ## 현재 핵심 작업
 
@@ -46,6 +47,7 @@
 - 마지막 검수는 npm run build 통과, npm run test:production 60개 통과입니다.
 - 학원명 표시는 으뜸수학 고태영T입니다.
 - koh_you_math는 내부 식별자/URL/환경변수에만 남길 수 있습니다.
+- Supabase SQL migration이 필요한 작업은 반드시 사용자에게 SQL Editor 수동 적용 파일과 순서를 안내하고, worklog에도 남깁니다.
 
 내일 우선순위:
 1. 실제 배포 환경에서 수업메모 저장이 Supabase에 남는지 확인합니다. 저장 실패가 뜨면 Supabase SQL Editor에서 supabase/20260617_lesson_prep_resources_notifications.sql migration이 적용됐는지 확인합니다.
