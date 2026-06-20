@@ -13184,13 +13184,13 @@ const supplementStatusSteps = [
 
 const supplementMethodsByType = {
   homework_makeup: [
-    { id: "stay_after", label: "남아서 하고가기" },
+    { id: "next_lesson", label: "다음시간까지" },
     { id: "arrival_makeup", label: "등원보충" },
-    { id: "next_lesson", label: "다음시간까지" }
+    { id: "stay_after", label: "남아서 하고 가기" }
   ],
   absence_makeup: [
-    { id: "onsite_makeup", label: "현장보강" },
-    { id: "recorded_lecture", label: "녹강보강" }
+    { id: "recorded_lecture", label: "녹강보강" },
+    { id: "onsite_makeup", label: "현장보강" }
   ],
   retest: [
     { id: "onsite_retest", label: "현장 재시험" }
@@ -13202,6 +13202,8 @@ function supplementMethodOptions(taskType) {
 }
 
 function supplementDefaultMethod(taskType) {
+  if (taskType === "homework_makeup") return "stay_after";
+  if (taskType === "absence_makeup") return "onsite_makeup";
   return supplementMethodOptions(taskType)[0]?.id ?? "";
 }
 
