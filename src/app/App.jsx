@@ -3319,6 +3319,7 @@ export function App() {
         status: "draft",
         scheduledDate: today,
         scheduledTime: "",
+        supplementHomeworkNote: task.supplementHomeworkNote || task.sourceLabel || "",
         notificationDraft: "",
         attemptCount: 0,
         childHomeworkIds: [],
@@ -10060,6 +10061,7 @@ function SupplementCenter({
           studentId: homework.studentId,
           sourceId: homework.homeworkId,
           sourceLabel: homework.title,
+          supplementHomeworkNote: homework.title,
           reason: getHomeworkMakeupReason(homework, records),
           supplementMethod: "stay_after"
         }
@@ -10237,6 +10239,9 @@ function SupplementCenter({
 }
 
 function SupplementPassConfirmModal({ onCancel, onConfirm, studentName, task }) {
+  const targetLabel = task.taskType === "homework_makeup"
+    ? task.supplementHomeworkNote || task.sourceLabel || task.reason || "보충 항목"
+    : task.sourceLabel || task.reason || "보충 항목";
   return (
     <Modal
       className="supplementPassConfirmModal"
@@ -10255,7 +10260,7 @@ function SupplementPassConfirmModal({ onCancel, onConfirm, studentName, task }) 
           </div>
           <div>
             <dt>항목</dt>
-            <dd>{task.sourceLabel || task.reason || "보충 항목"}</dd>
+            <dd>{targetLabel}</dd>
           </div>
           <div>
             <dt>일정</dt>
@@ -10349,12 +10354,13 @@ function SupplementStudentModal({
             {tasks.map((task) => {
               const freshDraft = createNotificationDraft(task, [student]);
               const visibleDraft = task.notificationDraft || freshDraft;
+              const supplementHomeworkNote = task.supplementHomeworkNote ?? task.sourceLabel ?? "";
               return (
                 <article className="taskCard" key={task.makeupTaskId}>
                   <div className="taskCardTop">
                     <div>
                       <strong>{followUpTypeLabel(task.taskType)}</strong>
-                      <p>{task.sourceLabel}</p>
+                      <p>{task.taskType === "homework_makeup" ? supplementHomeworkNote : task.sourceLabel}</p>
                       <small>{task.reason} · {supplementMethodLabel(task)} · 배정 {task.attemptCount ?? 0}회</small>
                       {task.notificationDraft?.trim() ? (
                         <span className="taskLinkedLesson draftReady">
@@ -10388,6 +10394,17 @@ function SupplementStudentModal({
                       </div>
                     </div>
                   </div>
+                  {task.taskType === "homework_makeup" ? (
+                    <label className="supplementHomeworkField">
+                      보충할 숙제 내역
+                      <span>수업일지의 완료 여부와 별도로, 보충일지와 알림톡 문구에만 반영됩니다.</span>
+                      <textarea
+                        value={supplementHomeworkNote}
+                        onChange={(event) => onUpdateTask(task.makeupTaskId, "supplementHomeworkNote", event.target.value)}
+                        placeholder="예: 교과서 프린트, 지난 시간 미완료 숙제"
+                      />
+                    </label>
+                  ) : null}
                   <label className="taskOptionBlock">
                     보충 방식
                     <div className="taskChoiceGrid">
@@ -12548,11 +12565,19 @@ function supplementMethodLabel(task) {
   return supplementMethodOptions(task?.taskType).find((option) => option.id === methodId)?.label ?? "방식 미정";
 }
 
+function getSupplementTaskSourceLabel(task) {
+  if (task?.taskType === "homework_makeup") {
+    return task.supplementHomeworkNote || task.sourceLabel || "";
+  }
+  return task?.sourceLabel || "";
+}
+
 function createNotificationDraft(task, students) {
   const student = students.find((item) => item.studentId === task.studentId);
   const studentName = student?.name ?? "학생";
   const scheduleText = [task.scheduledDate, task.scheduledTime].filter(Boolean).join(" ");
-  const sourceText = task.sourceLabel ? `${task.sourceLabel} ` : "";
+  const sourceLabel = getSupplementTaskSourceLabel(task);
+  const sourceText = sourceLabel ? `${sourceLabel} ` : "";
   const methodId = task.supplementMethod || supplementDefaultMethod(task.taskType);
   const absenceText = task.taskType === "absence_makeup" && task.absenceReason ? ` 결석사유는 ${task.absenceReason}입니다.` : "";
 

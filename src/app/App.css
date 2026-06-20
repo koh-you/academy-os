@@ -6361,6 +6361,38 @@ textarea.profileEditInput {
   font-size: 12px;
 }
 
+.supplementHomeworkField {
+  color: #17213a;
+  display: grid;
+  font-weight: 900;
+  gap: 8px;
+}
+
+.supplementHomeworkField span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.supplementHomeworkField textarea {
+  background: #ffffff;
+  border: 1px solid #cbd8ee;
+  border-radius: 8px;
+  color: #0f172a;
+  font: inherit;
+  font-weight: 800;
+  line-height: 1.5;
+  min-height: 78px;
+  padding: 12px 14px;
+  resize: vertical;
+}
+
+.supplementHomeworkField textarea:focus {
+  border-color: #7c9cff;
+  box-shadow: 0 0 0 3px rgba(124, 156, 255, 0.16);
+  outline: none;
+}
+
 .taskStatusControl {
   color: #64748b;
   display: grid;
