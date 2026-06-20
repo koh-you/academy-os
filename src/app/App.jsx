@@ -12804,9 +12804,8 @@ function sortByTime(a, b) {
 }
 
 function isActiveLesson(lesson) {
-  const isGeneratedExamLesson = ["preExam", "examSundayMakeup"].includes(lesson?.lessonType);
   return (
-    (lesson?.date >= academyOperationalStartDate || isGeneratedExamLesson) &&
+    lesson?.date >= academyOperationalStartDate &&
     !["canceled", "deleted"].includes(lesson?.status ?? "scheduled")
   );
 }

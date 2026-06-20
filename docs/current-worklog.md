@@ -705,3 +705,8 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - 이번 작업 결과: 앱 시작 시 과거 수업 hard delete 호출을 제거했다. `preExam`, `examSundayMakeup` 자동 시험 수업은 6/19 이전 날짜여도 활성 수업으로 표시되도록 보정했다.
 - SQL 주의: 프론트 삭제 호출/필터 변경만 있으므로 Supabase SQL Editor 작업 필요 없음.
 - 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 74개 통과.
+### 2026-06-20 P1. 6/19 이전 시험수업 처리 정정
+- 상태: 완료
+- 사용자 정정: 6/19 이전 시험수업을 별도로 표시한다/안 한다는 코드가 필요 없다. 6/19 이전 수업은 운영 DB에서 삭제하면 된다.
+- 이번 작업 결과: 직전 변경에서 넣었던 6/19 이전 시험수업 예외 표시/후보 제한 코드를 제거했다. 운영 Supabase에는 `DELETE /api/lessons?before=2026-06-19`를 직접 실행해 6/7, 6/14 일요보강 2건을 삭제했다.
+- SQL 주의: 기존 DELETE API 호출과 프론트 코드 정리만 있으므로 Supabase SQL Editor 작업 필요 없음.
