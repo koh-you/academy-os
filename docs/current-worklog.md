@@ -607,3 +607,9 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - 이번 작업 결과: 767px 이하 화면에서 학생/학부모 포털의 헤더, 액션 버튼, 탭, 지표 카드가 한 줄에 억지로 끼지 않도록 정리했다. 모바일에서는 헤더 액션이 1열로 내려가고, 탭은 2열로 접히며, 지표 카드는 높이와 글자 크기를 낮춰 태블릿/모바일에서 겹침을 줄였다. 숙제현황 활성 카드의 배지 문구도 `선택`으로 간결하게 정리했다.
 - SQL 주의: CSS 반응형 보강만 있어 Supabase SQL Editor 적용은 필요 없다.
 - 검증: `npm run build` 통과, `npm run test:production` 60개 통과.
+### 2026-06-20 P1. 일요시험보강 학교별 블록 달력 분리 표시
+- 상태: 완료
+- 사용자 요청: 시험기간 기반 일요시험보강에서 학교별 블록을 세부 수정했을 때, 특정 학교 블록을 다른 날짜/시간으로 옮기면 수업일지 달력에서도 그 이동된 날짜에 확인할 수 있게 한다.
+- 이번 작업 결과: `generatedLessonControls.sundayMakeupBlocks`에 저장된 학교별 블록 수정값을 읽어, 원래 일요시험보강 날짜/시간과 달라진 블록을 달력 표시용 가상 수업으로 파생한다. 원본 자동 수업은 그대로 두고, 이동된 블록은 달력에서 별도 pill로 표시되며 클릭 시 같은 일요시험보강 모달을 열고 해당 블록을 강조한다. 수정/삭제 동작은 원본 일요시험보강 수업을 기준으로 처리해 실제 `lessons` 중복 저장을 피한다.
+- SQL 주의: 기존 `app_state` JSON(`generatedLessonControls.sundayMakeupBlocks`)만 사용하는 UI/파생 표시 변경이라 Supabase SQL Editor 적용은 필요 없다.
+- 검증: `npm run build` 통과, `npm run test:production` 60개 통과.

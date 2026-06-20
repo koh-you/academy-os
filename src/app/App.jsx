@@ -1641,13 +1641,21 @@ export function App() {
     });
   }, [setExamPrepRows]);
 
+  const examSundayMakeupBlockLessons = useMemo(
+    () => createExamSundayMakeupBlockLessons(lessons, generatedLessonControls),
+    [generatedLessonControls, lessons]
+  );
+  const calendarLessons = useMemo(
+    () => [...lessons, ...examSundayMakeupBlockLessons],
+    [examSundayMakeupBlockLessons, lessons]
+  );
   const lessonsForDate = useMemo(
-    () => lessons.filter((lesson) => lesson.date === selectedDate).sort(sortByTime),
-    [lessons, selectedDate]
+    () => calendarLessons.filter((lesson) => lesson.date === selectedDate).sort(sortByTime),
+    [calendarLessons, selectedDate]
   );
 
   const selectedLesson =
-    lessons.find((lesson) => lesson.lessonId === selectedLessonId) ?? lessonsForDate[0] ?? null;
+    calendarLessons.find((lesson) => lesson.lessonId === selectedLessonId) ?? lessonsForDate[0] ?? null;
 
   useEffect(() => {
     if (!selectedLessonId && lessonsForDate[0]) {
@@ -1853,7 +1861,7 @@ export function App() {
   }
 
   function handleDateSelect(date) {
-    const nextLessons = lessons.filter((lesson) => lesson.date === date).sort(sortByTime);
+    const nextLessons = calendarLessons.filter((lesson) => lesson.date === date).sort(sortByTime);
     setSelectedDate(date);
     setSelectedLessonId(nextLessons[0]?.lessonId ?? "");
     setIsLessonJournalOpen(false);
@@ -1952,7 +1960,7 @@ export function App() {
   }
 
   function handleOpenLessonJournal(lessonId) {
-    const lesson = lessons.find((item) => item.lessonId === lessonId);
+    const lesson = calendarLessons.find((item) => item.lessonId === lessonId);
     if (!lesson) return;
     setSelectedDate(lesson.date);
     setSelectedLessonId(lessonId);
@@ -2359,7 +2367,7 @@ export function App() {
             allRecords={records}
             generatedLessonControls={generatedLessonControls}
             integrationStatus={integrationStatus}
-            lessons={lessons}
+            lessons={calendarLessons}
             lessonsForDate={lessonsForDate}
             makeupTasks={makeupTasks}
             materials={resourceMaterials}
@@ -4310,6 +4318,9 @@ function TeacherLessonHubV2({
   const selectedMakeupTask = selectedLesson
     ? makeupTasks.find((task) => task.makeupTaskId === selectedLesson.sourceMakeupTaskId)
     : null;
+  const selectedSourceLesson = selectedLesson?.sourceLessonId
+    ? lessons.find((lesson) => lesson.lessonId === selectedLesson.sourceLessonId) ?? selectedLesson
+    : selectedLesson;
   const isHomeworkMakeupLesson =
     selectedLesson?.lessonType === "makeup" &&
     (selectedMakeupTask?.taskType === "homework_makeup" ||
@@ -4346,11 +4357,13 @@ function TeacherLessonHubV2({
         onClose={onBackToCalendar}
       >
         <ExamSundayMakeupLessonDetail
-          lesson={selectedLesson}
-          blocksOverride={generatedLessonControls.sundayMakeupBlocks?.[getGeneratedLessonKey(selectedLesson)]}
+          lesson={selectedSourceLesson}
+          blocksOverride={generatedLessonControls.sundayMakeupBlocks?.[getGeneratedLessonKey(selectedSourceLesson)]}
+          displayLesson={selectedLesson}
+          focusBlockId={selectedLesson?.virtualBlockId}
           onDeleteLesson={onDeleteLesson}
           onEditLesson={onEditLesson}
-          onUpdateBlocks={(blocks) => onUpdateExamSundayMakeupBlocks?.(getGeneratedLessonKey(selectedLesson), blocks)}
+          onUpdateBlocks={(blocks) => onUpdateExamSundayMakeupBlocks?.(getGeneratedLessonKey(selectedSourceLesson), blocks)}
         />
       </Modal>
     ) : (
@@ -4360,6 +4373,7 @@ function TeacherLessonHubV2({
             academyTests={academyTests}
             aiSettings={aiSettings}
             allRecords={allRecords}
+            generatedLessonControls={generatedLessonControls}
             integrationStatus={integrationStatus}
             homeworks={homeworks}
             lesson={selectedLesson}
@@ -4455,7 +4469,8 @@ function TeacherLessonHubV2({
                         lesson.lessonId === selectedLessonId ? "active" : "",
                         lesson.lessonType === "preExam" ? "preExamLessonPill" : "",
                         lesson.lessonType === "makeup" ? "makeupLessonPill" : "",
-                        lesson.lessonType === "examSundayMakeup" ? "sundayMakeupLessonPill" : ""
+                        lesson.lessonType === "examSundayMakeup" ? "sundayMakeupLessonPill" : "",
+                        lesson.isVirtualSundayMakeupBlock ? "blockMoved" : ""
                       ].filter(Boolean).join(" ")}
                       key={lesson.lessonId}
                       onClick={(event) => {
@@ -4465,8 +4480,10 @@ function TeacherLessonHubV2({
                       style={{ background: lesson.color }}
                       type="button"
                     >
-                      {lesson.startTime} {lesson.className}
-                      {lesson.lessonType === "examSundayMakeup"
+                      {lesson.startTime} {lesson.isVirtualSundayMakeupBlock ? lesson.virtualBlockLabel || lesson.lessonTopic : lesson.className}
+                      {lesson.isVirtualSundayMakeupBlock
+                        ? lesson.virtualBlockMemo ? ` · ${lesson.virtualBlockMemo}` : " · 이동"
+                        : lesson.lessonType === "examSundayMakeup"
                         ? lesson.sourceLabel ? ` · ${lesson.sourceLabel}` : ""
                         : ` (${lesson.studentIds.length}명)`}
                     </button>
@@ -4511,10 +4528,59 @@ function parseExamSundayMakeupBlocks(lesson, blocksOverride = null) {
   }));
 }
 
-function ExamSundayMakeupLessonDetail({ blocksOverride, lesson, onDeleteLesson, onEditLesson, onUpdateBlocks }) {
+function createExamSundayMakeupBlockLessons(lessons = [], controls = defaultGeneratedLessonControls) {
+  const safeControls = normalizeGeneratedLessonControls(controls);
+  return lessons
+    .filter((lesson) => lesson.lessonType === "examSundayMakeup")
+    .flatMap((lesson) => {
+      const generatedKey = getGeneratedLessonKey(lesson);
+      const blocksOverride = safeControls.sundayMakeupBlocks?.[generatedKey];
+      if (!Array.isArray(blocksOverride) || blocksOverride.length === 0) return [];
+      return parseExamSundayMakeupBlocks(lesson, blocksOverride)
+        .filter((block) => {
+          const blockDate = block.date || lesson.date;
+          const blockStartTime = block.startTime || lesson.startTime || "13:00";
+          const blockEndTime = block.endTime || lesson.endTime || "";
+          return blockDate !== lesson.date || blockStartTime !== (lesson.startTime || "13:00") || blockEndTime !== (lesson.endTime || "");
+        })
+        .map((block) => ({
+          ...lesson,
+          className: "일요시험보강",
+          date: block.date || lesson.date,
+          dayOfWeek: getDayKey(block.date || lesson.date),
+          endTime: block.endTime || lesson.endTime,
+          isVirtualSundayMakeupBlock: true,
+          lessonId: `${lesson.lessonId || safeIdPart(generatedKey)}__block_${safeIdPart(block.blockId)}`,
+          lessonTopic: block.label || lesson.lessonTopic || "일요시험보강",
+          sourceLessonId: lesson.lessonId,
+          sourceLabel: block.label || lesson.sourceLabel,
+          startTime: block.startTime || lesson.startTime,
+          virtualBlockId: block.blockId,
+          virtualBlockLabel: block.label || "",
+          virtualBlockMemo: block.memo || ""
+        }));
+    });
+}
+
+function ExamSundayMakeupLessonDetail({
+  blocksOverride,
+  displayLesson,
+  focusBlockId = "",
+  lesson,
+  onDeleteLesson,
+  onEditLesson,
+  onUpdateBlocks
+}) {
   const [draftBlocks, setDraftBlocks] = useState(() => parseExamSundayMakeupBlocks(lesson, blocksOverride));
+  useEffect(() => {
+    setDraftBlocks(parseExamSundayMakeupBlocks(lesson, blocksOverride));
+  }, [blocksOverride, lesson]);
   const blocks = draftBlocks;
+  const currentBlock = focusBlockId ? blocks.find((block) => block.blockId === focusBlockId) : null;
   const scheduledTime = `${lesson.date} ${lesson.startTime || ""}${lesson.endTime ? `-${lesson.endTime}` : ""}`.trim();
+  const displayedTime = displayLesson && displayLesson.lessonId !== lesson.lessonId
+    ? `${displayLesson.date} ${displayLesson.startTime || ""}${displayLesson.endTime ? `-${displayLesson.endTime}` : ""}`.trim()
+    : "";
   const hasBlockSave = Boolean(onUpdateBlocks);
 
   function updateBlock(blockId, field, value) {
@@ -4535,13 +4601,13 @@ function ExamSundayMakeupLessonDetail({ blocksOverride, lesson, onDeleteLesson, 
       <div className="examSundaySummaryGrid">
         <div>
           <span>수업일</span>
-          <strong>{lesson.date}</strong>
-          <small>일요시험보강</small>
+          <strong>{currentBlock?.date || displayLesson?.date || lesson.date}</strong>
+          <small>{displayedTime ? "이동된 학교별 블록" : "일요시험보강"}</small>
         </div>
         <div>
           <span>전체 시간</span>
-          <strong>{lesson.startTime || "미정"}-{lesson.endTime || "미정"}</strong>
-          <small>학교별 블록은 아래에서 확인</small>
+          <strong>{currentBlock ? `${currentBlock.startTime}-${currentBlock.endTime}` : `${lesson.startTime || "미정"}-${lesson.endTime || "미정"}`}</strong>
+          <small>{displayedTime || "학교별 블록은 아래에서 확인"}</small>
         </div>
         <div>
           <span>보강 학교</span>
@@ -4581,7 +4647,10 @@ function ExamSundayMakeupLessonDetail({ blocksOverride, lesson, onDeleteLesson, 
 
         <div className="examSundayBlockList" aria-label="학교별 일요시험보강 블록">
           {blocks.map((block) => (
-            <div className="examSundayBlockItem" key={block.blockId}>
+            <div
+              className={["examSundayBlockItem", block.blockId === focusBlockId ? "focused" : ""].filter(Boolean).join(" ")}
+              key={block.blockId}
+            >
               <div className="examSundayBlockTimeFields">
                 <input
                   aria-label="블록 날짜"
@@ -4948,6 +5017,7 @@ function LessonJournalDetail({
   academyTests = [],
   aiSettings = defaultAiSettings,
   allRecords = [],
+  generatedLessonControls = defaultGeneratedLessonControls,
   integrationStatus,
   homeworks = [],
   lesson,
@@ -5009,6 +5079,7 @@ function LessonJournalDetail({
     return (
       <ExamSundayMakeupLessonDetail
         lesson={lesson}
+        blocksOverride={generatedLessonControls.sundayMakeupBlocks?.[getGeneratedLessonKey(lesson)]}
         onDeleteLesson={onDeleteLesson}
         onEditLesson={onEditLesson}
         onUpdateBlocks={(blocks) => onUpdateExamSundayMakeupBlocks?.(getGeneratedLessonKey(lesson), blocks)}

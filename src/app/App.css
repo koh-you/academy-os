@@ -672,6 +672,11 @@ button {
   border-left: 4px solid #67e8f9;
 }
 
+.lessonPill.sundayMakeupLessonPill.blockMoved {
+  background: #155e75 !important;
+  border-left-color: #fbbf24;
+}
+
 .lessonTypeFilterBar {
   align-items: center;
   background: #eef2f7;
@@ -904,6 +909,11 @@ button {
 
 .examSundayBlockItem:last-child {
   border-bottom: 0;
+}
+
+.examSundayBlockItem.focused {
+  background: #fffbeb;
+  box-shadow: inset 4px 0 0 #f59e0b;
 }
 
 .examSundayBlockItem time {
