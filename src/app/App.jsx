@@ -9990,6 +9990,7 @@ function SupplementCenter({
   const [activeSupplementTab, setActiveSupplementTab] = useState("homework_makeup");
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [historyQuery, setHistoryQuery] = useState("");
+  const [passConfirmTask, setPassConfirmTask] = useState(null);
   const makeupHomeworks = homeworks.filter((homework) => isHomeworkMakeupCandidate(homework, records, lessons)).slice(0, 8);
   const absentRecords = records
     .filter((record) => record.attendanceStatus === "absent" || record.attendanceStatus === "excused")
@@ -10020,6 +10021,21 @@ function SupplementCenter({
         task.sourceId === candidateTask.sourceId &&
         task.taskType === candidateTask.taskType
     );
+  }
+
+  function openPassConfirm(existingTask, item) {
+    const task = existingTask ?? item.task;
+    setPassConfirmTask({
+      ...task,
+      studentId: item.studentId,
+      sourceLabel: task.sourceLabel || item.title
+    });
+  }
+
+  function confirmPassTask() {
+    if (!passConfirmTask) return;
+    onPassTask(passConfirmTask);
+    setPassConfirmTask(null);
   }
 
   const selectedSupplementStudent = students.find((student) => student.studentId === selectedSupplementStudentId);
@@ -10176,7 +10192,7 @@ function SupplementCenter({
                 </button>
                 <button
                   className="passButton"
-                  onClick={() => onPassTask(existingTask ?? item.task)}
+                  onClick={() => openPassConfirm(existingTask, item)}
                   type="button"
                 >
                   보충 통과
@@ -10208,7 +10224,54 @@ function SupplementCenter({
           tasks={recentSupplementTasks}
         />
       ) : null}
+      {passConfirmTask ? (
+        <SupplementPassConfirmModal
+          onCancel={() => setPassConfirmTask(null)}
+          onConfirm={confirmPassTask}
+          studentName={studentName(passConfirmTask.studentId)}
+          task={passConfirmTask}
+        />
+      ) : null}
     </section>
+  );
+}
+
+function SupplementPassConfirmModal({ onCancel, onConfirm, studentName, task }) {
+  return (
+    <Modal
+      className="supplementPassConfirmModal"
+      title="보충 통과 확인"
+      subtitle="통과 처리하면 보충관리 후보에서 제외됩니다."
+      onClose={onCancel}
+    >
+      <div className="supplementPassConfirmBody">
+        <p>
+          <strong>{studentName}</strong> 학생의 보충 항목을 통과 처리할까요?
+        </p>
+        <dl className="supplementPassConfirmSummary">
+          <div>
+            <dt>구분</dt>
+            <dd>{followUpTypeLabel(task.taskType)}</dd>
+          </div>
+          <div>
+            <dt>항목</dt>
+            <dd>{task.sourceLabel || task.reason || "보충 항목"}</dd>
+          </div>
+          <div>
+            <dt>일정</dt>
+            <dd>{task.scheduledDate || "미확정"} {task.scheduledTime || ""}</dd>
+          </div>
+        </dl>
+      </div>
+      <div className="modalActions confirmActions">
+        <button className="softButton" onClick={onCancel} type="button">
+          취소
+        </button>
+        <button className="passButton" onClick={onConfirm} type="button">
+          보충 통과 처리
+        </button>
+      </div>
+    </Modal>
   );
 }
 
@@ -10222,6 +10285,7 @@ function SupplementStudentModal({
   tasks
 }) {
   const [feedback, setFeedback] = useState(null);
+  const [passConfirmTask, setPassConfirmTask] = useState(null);
 
   function showFeedback(title, message) {
     setFeedback({ title, message });
@@ -10243,6 +10307,12 @@ function SupplementStudentModal({
   function handlePassTask(task) {
     onPassTask(task);
     showFeedback("보충 통과 처리 완료", `${student.name} 학생의 보충 항목을 통과 처리했습니다.`);
+  }
+
+  function confirmPassTask() {
+    if (!passConfirmTask) return;
+    handlePassTask(passConfirmTask);
+    setPassConfirmTask(null);
   }
 
   return (
@@ -10364,7 +10434,7 @@ function SupplementStudentModal({
                     >
                       {task.linkedLessonId ? "수업일지 수정 반영" : "수업일지 반영"}
                     </button>
-                    <button className="passButton" onClick={() => handlePassTask(task)} type="button">
+                    <button className="passButton" onClick={() => setPassConfirmTask(task)} type="button">
                       보충 통과
                     </button>
                   </div>
@@ -10374,6 +10444,14 @@ function SupplementStudentModal({
           </div>
         </section>
       </div>
+      {passConfirmTask ? (
+        <SupplementPassConfirmModal
+          onCancel={() => setPassConfirmTask(null)}
+          onConfirm={confirmPassTask}
+          studentName={student.name}
+          task={passConfirmTask}
+        />
+      ) : null}
     </Modal>
   );
 }
