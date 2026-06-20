@@ -882,3 +882,10 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - 이번 작업 결과: `createExamSundayMakeupBlockLessons`의 파생 조건을 날짜 변경 기준으로 단순화했다. 같은 날짜에서 시간/메모만 수정한 블록은 별도 캘린더 pill로 만들지 않고 원본 일요시험보강 pill 안에 남긴다. 날짜가 다른 블록만 별도 가상 lesson으로 파생 표시된다.
 - SQL 주의: 프론트 파생 표시 조건 변경만 있으므로 Supabase SQL Editor 작업 필요 없음.
 - 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 78개 통과.
+
+### 2026-06-20 P0. 다음 세션 인수인계 문서 생성
+- 상태: 완료
+- 사용자 요청: 오늘까지 작업한 내용을 검토하고, 내일 할 작업 목록과 다음 대화세션에 추가할 md 파일을 만든다.
+- 이번 작업 결과: `docs/session-handoff-2026-06-21.md`를 추가했다. 문서에는 오늘 오류가 많았던 수업메모/알림톡/보충관리/시험관리-일요보강 흐름, 내일 작업 큐, 배포 및 SQL Editor 유의점을 정리했다.
+- 내일 우선 확인: Render/Vercel 배포 반영, 알림톡 `compact is not defined` 재발 여부, 보충관리 통합 저장, 알림톡 상태 색상, 수업메모 중복 반영, 직전 수업메모 표시, 일요보강 블록 이동/삭제 지속성.
+- SQL 주의: 문서 정리만 했으므로 Supabase SQL Editor 작업 필요 없음.
