@@ -119,6 +119,8 @@ check("77 lesson modal includes high school senior student group", hasAll(app, [
 check("78 lesson journal does not show keyboard shortcut hint text", !app.includes("↑↓←→") && !app.includes("Ctrl+C/V/Z"));
 check("79 lesson prep memo shows previous memo separately", hasAll(app, ["previousRecord={prepMemoModal.previousRecord}", "previousLesson={prepMemoModal.previousRecord", "const previousMemo = previousRecord?.preparationMemo", "prepMemoColumns", "직전 수업메모"]) && hasAll(css, [".prepMemoColumns", ".prepMemoPrevious", ".prepMemoButton.hasPrevious"]));
 check("80 lesson prep student visibility persists", hasAll(coreDataRoute, ["prep_student_visible: Boolean(record.prepStudentVisible)", "prepStudentVisible: Boolean(row.prep_student_visible)"]) && hasAll(schema, ["prep_student_visible boolean not null default false"]) && fs.existsSync(path.join(root, "supabase", "20260620_lesson_prep_student_visible.sql")));
+check("81 lesson prep previous memo falls back to prior saved student memo", hasAll(app, ["const lessonById = new Map(lessons.map((item) => [item.lessonId, item]))", "const previousMemoRecord = sourceRecords", "item.preparationMemo?.trim()", "getRecordLessonDate(item) < lesson.date", "previousMemoRecord ?? previousLessonRecord ?? null"]));
+check("82 lesson prep modal uses exact current lesson record", hasAll(app, ["const recordId = createLessonStudentRecordId(lesson.lessonId, commentModal.student.studentId)", "item.lessonStudentRecordId === recordId", "item.lessonStudentRecordId === createLessonStudentRecordId(lesson.lessonId, prepMemoModal.student.studentId)"]));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));

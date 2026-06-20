@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-06-20 P1. 6월 22일 직전 수업메모 표시 보강
+
+- 상태: 완료
+- 사용자 보고: 6월 19일 김룡기 수업메모를 남겼지만 6월 22일 수업메모 모달에 직전 메모로 나타나지 않았다.
+- 확인 결과: 운영 API 기준 김룡기 6월 19일 수업메모는 Supabase `lesson_student_records.preparation_memo`에 저장되어 있었다. 따라서 저장 실패가 아니라 6월 22일 화면에서 직전 기록을 찾는 프론트 연결 로직 문제로 판단했다.
+- 원인 보강: 수업메모/알림톡 모달의 현재 기록 조회를 `studentId`만으로 찾던 부분을 `lessonStudentRecordId` 기준으로 고정했다. 또한 직전 수업 명단/수업 연결이 어긋나도 같은 학생의 이전 저장 메모를 날짜순으로 fallback 검색해 보여주도록 했다.
+- 검증: `npm run build` 통과, `npm run test:production` 88개 통과.
+- SQL Editor 작업 필요 없음: 기존 `preparation_memo` 저장 컬럼과 API 데이터를 그대로 사용하며 DB 스키마 변경은 없다.
+
 ## 2026-06-20 P1. 수업메모 저장 완료 중복 문구 제거
 
 - 상태: 완료

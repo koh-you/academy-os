@@ -5387,7 +5387,8 @@ function LessonJournalDetail({
 
   function getCommentModalRecord() {
     if (!commentModal) return null;
-    const latestRecord = records.find((item) => item.studentId === commentModal.student.studentId) ?? commentModal.record;
+    const recordId = createLessonStudentRecordId(lesson.lessonId, commentModal.student.studentId);
+    const latestRecord = records.find((item) => item.lessonStudentRecordId === recordId) ?? commentModal.record;
     const field = commentModal.audience === "student" ? "studentComment" : "teacherComment";
 
     return {
@@ -5398,7 +5399,17 @@ function LessonJournalDetail({
 
   function getPreviousLessonReminderRecord(student) {
     const sourceRecords = allRecords.length ? allRecords : records;
-    const previousLesson = lessons
+    const lessonById = new Map(lessons.map((item) => [item.lessonId, item]));
+    const getRecordLessonDate = (record) => {
+      const sourceLesson = lessonById.get(record.lessonId);
+      if (sourceLesson?.date) return sourceLesson.date;
+      return String(record.lessonStudentRecordId ?? "").match(/\d{4}-\d{2}-\d{2}/)?.[0] ?? "";
+    };
+    const getRecordLessonSortValue = (record) => {
+      const sourceLesson = lessonById.get(record.lessonId);
+      return `${getRecordLessonDate(record)} ${sourceLesson?.startTime ?? ""}`;
+    };
+    const previousLessons = lessons
       .filter((item) =>
         item.lessonId !== lesson.lessonId &&
         item.date < lesson.date &&
@@ -5407,12 +5418,26 @@ function LessonJournalDetail({
       )
       .sort((lessonA, lessonB) => (
         `${lessonB.date} ${lessonB.startTime ?? ""}`.localeCompare(`${lessonA.date} ${lessonA.startTime ?? ""}`)
-      ))[0];
+      ));
 
-    if (!previousLesson) return null;
-    return sourceRecords.find((item) =>
-      item.lessonId === previousLesson.lessonId && item.studentId === student.studentId
-    ) ?? null;
+    const previousLessonRecord = previousLessons
+      .map((previousLesson) =>
+        sourceRecords.find((item) => item.lessonId === previousLesson.lessonId && item.studentId === student.studentId)
+      )
+      .find(Boolean);
+
+    if (previousLessonRecord?.preparationMemo?.trim()) return previousLessonRecord;
+
+    const previousMemoRecord = sourceRecords
+      .filter((item) =>
+        item.lessonId !== lesson.lessonId &&
+        item.studentId === student.studentId &&
+        item.preparationMemo?.trim() &&
+        getRecordLessonDate(item) < lesson.date
+      )
+      .sort((recordA, recordB) => getRecordLessonSortValue(recordB).localeCompare(getRecordLessonSortValue(recordA)))[0];
+
+    return previousMemoRecord ?? previousLessonRecord ?? null;
   }
 
   return (
@@ -5631,7 +5656,11 @@ function LessonJournalDetail({
           onChangeRecord={onChangeRecord}
           onClose={() => setPrepMemoModal(null)}
           onSaveRecord={onSaveRecord}
-          record={records.find((item) => item.studentId === prepMemoModal.student.studentId) ?? prepMemoModal.record}
+          record={
+            records.find((item) =>
+              item.lessonStudentRecordId === createLessonStudentRecordId(lesson.lessonId, prepMemoModal.student.studentId)
+            ) ?? prepMemoModal.record
+          }
           saveState={saveStates[createLessonStudentRecordId(lesson.lessonId, prepMemoModal.student.studentId)] ?? "idle"}
           student={prepMemoModal.student}
           previousRecord={prepMemoModal.previousRecord}
