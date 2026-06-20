@@ -3758,6 +3758,7 @@ export function App() {
         if (item.makeupTaskId !== task.makeupTaskId) return item;
         const nextTask = {
           ...item,
+          ...task,
           status: "scheduled",
           scheduledDate: lesson.date,
           scheduledTime: lesson.startTime,
@@ -11293,18 +11294,21 @@ function SupplementStudentModal({
     setFeedback({ title, message });
   }
 
-  function handleCreateNotificationDraft(task) {
+  function handleSaveTask(task) {
     const draft = createNotificationDraft(task, [student]);
+    const taskWithDraft = { ...task, notificationDraft: draft };
     onUpdateTask(task.makeupTaskId, "notificationDraft", draft);
-    showFeedback("알림톡 초안 반영 완료", "작성한 문구가 보충 일정 알림톡 초안에 반영되었습니다.");
-  }
 
-  function handleScheduleTask(task) {
-    onScheduleTask(task);
-    showFeedback(
-      task.linkedLessonId ? "수업일지 수정 반영 완료" : "수업일지 반영 완료",
-      `${task.scheduledDate} ${task.scheduledTime} 보충 일정이 수업일지 캘린더에 반영되었습니다.`
-    );
+    if (task.scheduledDate && task.scheduledTime) {
+      onScheduleTask(taskWithDraft);
+      showFeedback(
+        task.linkedLessonId ? "보충 내용 저장 및 수업일지 수정 완료" : "보충 내용 저장 및 수업일지 반영 완료",
+        `${task.scheduledDate} ${task.scheduledTime} 보충 일정과 알림톡 초안이 함께 반영되었습니다.`
+      );
+      return;
+    }
+
+    showFeedback("보충 내용 저장 완료", "알림톡 초안은 갱신되었습니다. 배정일과 시간을 입력하면 수업일지에도 함께 반영할 수 있습니다.");
   }
 
   function handlePassTask(task) {
@@ -11451,17 +11455,10 @@ function SupplementStudentModal({
                     />
                   </label>
                   <div className="modalActions">
-                    <button className="softButton" onClick={() => handleCreateNotificationDraft(task)} type="button">
-                      알림톡 문구 작성
-                    </button>
-                    <button
-                      className="softButton"
-                      disabled={!task.scheduledDate || !task.scheduledTime}
-                      onClick={() => handleScheduleTask(task)}
-                      title={!task.scheduledDate || !task.scheduledTime ? "배정일과 시간을 먼저 입력하세요." : "수업일지 캘린더에 반영합니다."}
-                      type="button"
-                    >
-                      {task.linkedLessonId ? "수업일지 수정 반영" : "수업일지 반영"}
+                    <button className="softButton primarySoft" onClick={() => handleSaveTask(task)} type="button">
+                      {task.scheduledDate && task.scheduledTime
+                        ? task.linkedLessonId ? "수정 저장 및 수업일지 반영" : "저장 및 수업일지 반영"
+                        : "보충 내용 저장"}
                     </button>
                     <button className="passButton" onClick={() => setPassConfirmTask(task)} type="button">
                       보충 통과
@@ -13739,33 +13736,35 @@ function createNotificationDraft(task, students) {
   const scheduleText = [task.scheduledDate, task.scheduledTime].filter(Boolean).join(" ");
   const sourceLabel = getSupplementTaskSourceLabel(task);
   const sourceText = sourceLabel ? `${sourceLabel} ` : "";
+  const progressMemo = normalizeMessageText(task.supplementProgressMemo);
+  const progressMemoBlock = progressMemo ? `\n\n보충 메모:\n${progressMemo}` : "";
   const methodId = task.supplementMethod || supplementDefaultMethod(task.taskType);
   const absenceText = task.taskType === "absence_makeup" && task.absenceReason ? ` 결석사유는 ${task.absenceReason}입니다.` : "";
 
   if (task.taskType === "homework_makeup") {
     if (methodId === "next_lesson") {
-      return `${studentName} 학생 숙제 보충 안내드립니다.\n\n다음 수업 전까지 ${sourceText}보충을 마무리할 수 있도록 안내하겠습니다.`;
+      return `${studentName} 학생 숙제 보충 안내드립니다.\n\n다음 수업 전까지 ${sourceText}보충을 마무리할 수 있도록 안내하겠습니다.${progressMemoBlock}`;
     }
     if (methodId === "arrival_makeup") {
-      return `${studentName} 학생 숙제 보충 안내드립니다.\n\n${scheduleText} 등원 후 ${sourceText}보충을 진행하겠습니다.`;
+      return `${studentName} 학생 숙제 보충 안내드립니다.\n\n${scheduleText} 등원 후 ${sourceText}보충을 진행하겠습니다.${progressMemoBlock}`;
     }
     if (methodId === "stay_after") {
-      return `${studentName} 학생 숙제 보충 안내드립니다.\n\n${scheduleText} 수업 후 남아서 ${sourceText}보충을 마무리하겠습니다.`;
+      return `${studentName} 학생 숙제 보충 안내드립니다.\n\n${scheduleText} 수업 후 남아서 ${sourceText}보충을 마무리하겠습니다.${progressMemoBlock}`;
     }
   }
 
   if (task.taskType === "absence_makeup") {
     if (methodId === "recorded_lecture") {
-      return `${studentName} 학생 결석 보강 안내드립니다.\n\n${scheduleText}에 ${sourceText}결석 보강을 녹화 강의로 진행하겠습니다.${absenceText}`;
+      return `${studentName} 학생 결석 보강 안내드립니다.\n\n${scheduleText}에 ${sourceText}결석 보강을 녹화 강의로 진행하겠습니다.${absenceText}${progressMemoBlock}`;
     }
-    return `${studentName} 학생 결석 보강 안내드립니다.\n\n${scheduleText}에 ${sourceText}결석 보강을 현장에서 진행하겠습니다.${absenceText}`;
+    return `${studentName} 학생 결석 보강 안내드립니다.\n\n${scheduleText}에 ${sourceText}결석 보강을 현장에서 진행하겠습니다.${absenceText}${progressMemoBlock}`;
   }
 
   if (task.taskType === "retest") {
-    return `${studentName} 학생 재시험 안내드립니다.\n\n${scheduleText}에 ${sourceText}재시험을 진행하겠습니다.`;
+    return `${studentName} 학생 재시험 안내드립니다.\n\n${scheduleText}에 ${sourceText}재시험을 진행하겠습니다.${progressMemoBlock}`;
   }
 
-  return `${studentName} 학생 ${followUpTypeLabel(task.taskType)} 안내드립니다.\n\n${scheduleText}에 ${sourceText}관련 일정을 진행하겠습니다.`;
+  return `${studentName} 학생 ${followUpTypeLabel(task.taskType)} 안내드립니다.\n\n${scheduleText}에 ${sourceText}관련 일정을 진행하겠습니다.${progressMemoBlock}`;
 }
 
 function getSupplementTaskProgress(task, lessons = []) {
