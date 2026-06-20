@@ -1213,6 +1213,7 @@ const defaultAttendanceSettings = {
 
 const defaultGeneratedLessonControls = {
   manualOverrideKeys: [],
+  sundayMakeupBlocks: {},
   suppressedKeys: []
 };
 
@@ -1499,8 +1500,35 @@ export function App() {
     }));
   }
 
-  function handleApplyGeneratedLessons() {
-    const lessonsToSave = generatedLessonPlan
+  function unsuppressGeneratedLessonKey(generatedKey) {
+    if (!generatedKey) return;
+    updateGeneratedLessonControls((current) => ({
+      ...current,
+      suppressedKeys: (current.suppressedKeys ?? []).filter((key) => key !== generatedKey)
+    }));
+  }
+
+  function clearGeneratedLessonManualOverride(generatedKey) {
+    if (!generatedKey) return;
+    updateGeneratedLessonControls((current) => ({
+      ...current,
+      manualOverrideKeys: (current.manualOverrideKeys ?? []).filter((key) => key !== generatedKey)
+    }));
+  }
+
+  function updateExamSundayMakeupBlocks(generatedKey, blocks) {
+    if (!generatedKey) return;
+    updateGeneratedLessonControls((current) => ({
+      ...current,
+      sundayMakeupBlocks: {
+        ...(current.sundayMakeupBlocks ?? {}),
+        [generatedKey]: blocks
+      }
+    }));
+  }
+
+  function saveGeneratedLessonsFromPlan(planItems) {
+    const lessonsToSave = planItems
       .filter((item) => item.status === "create" || item.status === "update")
       .map((item) => item.lesson);
     if (lessonsToSave.length === 0) return;
@@ -1514,6 +1542,14 @@ export function App() {
       return next;
     });
     postJson("/api/lessons/bulk", { lessons: lessonsToSave }).catch((error) => console.error(error));
+  }
+
+  function handleApplyGeneratedLessons() {
+    saveGeneratedLessonsFromPlan(generatedLessonPlan);
+  }
+
+  function handleApplyGeneratedLesson(generatedKey) {
+    saveGeneratedLessonsFromPlan(generatedLessonPlan.filter((item) => item.generatedKey === generatedKey));
   }
 
   async function refreshNotificationJobs() {
@@ -2321,6 +2357,7 @@ export function App() {
             academyTests={academyTests}
             aiSettings={aiSettings}
             allRecords={records}
+            generatedLessonControls={generatedLessonControls}
             integrationStatus={integrationStatus}
             lessons={lessons}
             lessonsForDate={lessonsForDate}
@@ -2361,6 +2398,7 @@ export function App() {
             onSelectLesson={setSelectedLessonId}
             onUndoLessonAction={handleUndoLessonAction}
             onUpdateHomework={handleUpdateHomework}
+            onUpdateExamSundayMakeupBlocks={updateExamSundayMakeupBlocks}
             onUpdateMakeupTask={handleUpdateMakeupTask}
             isLessonJournalOpen={isLessonJournalOpen}
           />
@@ -2511,7 +2549,9 @@ export function App() {
             generatedLessonPlan={generatedLessonPlan}
             events={schoolEvents}
             rows={examPrepRows}
+            onApplyGeneratedLesson={handleApplyGeneratedLesson}
             onApplyGeneratedLessons={handleApplyGeneratedLessons}
+            onClearGeneratedLessonManualOverride={clearGeneratedLessonManualOverride}
             onAddEvent={(event) => {
               const nextEvent = { ...event, eventId: event.eventId || `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}` };
               setSchoolEvents((current) => [nextEvent, ...current]);
@@ -2522,6 +2562,7 @@ export function App() {
               deleteSchoolEventFromApi(eventId).catch((error) => console.error(error));
             }}
             onSuppressGeneratedLesson={suppressGeneratedLessonKey}
+            onUnsuppressGeneratedLesson={unsuppressGeneratedLessonKey}
             onSyncPreExamLesson={handleSyncPreExamLessonFromSchoolEvent}
             onUpdateExamPrepRow={handleUpdateExamPrepRow}
             onUpdateEvent={(eventId, field, value) =>
@@ -4163,6 +4204,7 @@ function TeacherLessonHubV2({
   academyTests = [],
   aiSettings,
   allRecords = [],
+  generatedLessonControls = defaultGeneratedLessonControls,
   integrationStatus,
   clipboardCount,
   lessons,
@@ -4197,6 +4239,7 @@ function TeacherLessonHubV2({
   onSendComment,
   onSelectLesson,
   onUndoLessonAction,
+  onUpdateExamSundayMakeupBlocks,
   onUpdateHomework,
   onUpdateMakeupTask,
   undoCount,
@@ -4272,6 +4315,7 @@ function TeacherLessonHubV2({
     (selectedMakeupTask?.taskType === "homework_makeup" ||
       selectedLesson.lessonTopic?.includes("숙제보충") ||
       selectedLesson.className?.includes("숙제보충"));
+  const isExamSundayMakeupLesson = selectedLesson?.lessonType === "examSundayMakeup";
   const lessonJournalDialog = isLessonJournalOpen && selectedLesson ? (
     isHomeworkMakeupLesson ? (
       <Modal
@@ -4291,6 +4335,22 @@ function TeacherLessonHubV2({
           onUpdateTask={onUpdateMakeupTask}
           students={students}
           task={selectedMakeupTask}
+        />
+      </Modal>
+    ) : isExamSundayMakeupLesson ? (
+      <Modal
+        backdropClassName="homeworkMakeupModalBackdrop"
+        className="homeworkMakeupScheduleModal examSundayMakeupModal"
+        title="일요시험보강"
+        subtitle="시험기간 전 학교별 보강 타임테이블을 한 수업 안에서 확인합니다."
+        onClose={onBackToCalendar}
+      >
+        <ExamSundayMakeupLessonDetail
+          lesson={selectedLesson}
+          blocksOverride={generatedLessonControls.sundayMakeupBlocks?.[getGeneratedLessonKey(selectedLesson)]}
+          onDeleteLesson={onDeleteLesson}
+          onEditLesson={onEditLesson}
+          onUpdateBlocks={(blocks) => onUpdateExamSundayMakeupBlocks?.(getGeneratedLessonKey(selectedLesson), blocks)}
         />
       </Modal>
     ) : (
@@ -4319,6 +4379,7 @@ function TeacherLessonHubV2({
             onPolishPreparationNotice={onPolishPreparationNotice}
             onSaveRecord={onSaveRecord}
             onSendComment={onSendComment}
+            onUpdateExamSundayMakeupBlocks={onUpdateExamSundayMakeupBlocks}
             onUpdateHomework={onUpdateHomework}
             onUpdateMakeupTask={onUpdateMakeupTask}
             records={records}
@@ -4418,6 +4479,152 @@ function TeacherLessonHubV2({
       </section>
       {lessonJournalDialog}
     </>
+  );
+}
+
+function parseExamSundayMakeupBlocks(lesson, blocksOverride = null) {
+  if (Array.isArray(blocksOverride) && blocksOverride.length > 0) {
+    return blocksOverride.map((block, index) => ({
+      blockId: block.blockId || `${lesson.lessonId || lesson.sourceSchoolEventId || lesson.date}_block_${index}`,
+      date: block.date || lesson.date,
+      endTime: block.endTime || addMinutesToTime(block.startTime || lesson.startTime || "13:00", 90),
+      label: block.label || "학교별 보강 타임테이블 미입력",
+      memo: block.memo || "",
+      startTime: block.startTime || lesson.startTime || "13:00"
+    }));
+  }
+  const labels = String(lesson.sourceLabel || "")
+    .split("·")
+    .map((label) => label.trim())
+    .filter(Boolean);
+  const startTime = lesson.startTime || "13:00";
+  const blockMinutes = labels.length > 3 ? 60 : 90;
+  const blockLabels = labels.length ? labels : ["학교별 보강 타임테이블 미입력"];
+
+  return blockLabels.map((label, index) => ({
+    blockId: `${lesson.lessonId || lesson.sourceSchoolEventId || lesson.date}_block_${index}`,
+    date: lesson.date,
+    endTime: addMinutesToTime(startTime, (index + 1) * blockMinutes),
+    label,
+    memo: "",
+    startTime: addMinutesToTime(startTime, index * blockMinutes)
+  }));
+}
+
+function ExamSundayMakeupLessonDetail({ blocksOverride, lesson, onDeleteLesson, onEditLesson, onUpdateBlocks }) {
+  const [draftBlocks, setDraftBlocks] = useState(() => parseExamSundayMakeupBlocks(lesson, blocksOverride));
+  const blocks = draftBlocks;
+  const scheduledTime = `${lesson.date} ${lesson.startTime || ""}${lesson.endTime ? `-${lesson.endTime}` : ""}`.trim();
+  const hasBlockSave = Boolean(onUpdateBlocks);
+
+  function updateBlock(blockId, field, value) {
+    setDraftBlocks((current) => current.map((block) => (block.blockId === blockId ? { ...block, [field]: value } : block)));
+  }
+
+  function resetBlocks() {
+    setDraftBlocks(parseExamSundayMakeupBlocks(lesson));
+    onUpdateBlocks?.(parseExamSundayMakeupBlocks(lesson));
+  }
+
+  function saveBlocks() {
+    onUpdateBlocks?.(draftBlocks);
+  }
+
+  return (
+    <div className="examSundayMakeupBody">
+      <div className="examSundaySummaryGrid">
+        <div>
+          <span>수업일</span>
+          <strong>{lesson.date}</strong>
+          <small>일요시험보강</small>
+        </div>
+        <div>
+          <span>전체 시간</span>
+          <strong>{lesson.startTime || "미정"}-{lesson.endTime || "미정"}</strong>
+          <small>학교별 블록은 아래에서 확인</small>
+        </div>
+        <div>
+          <span>보강 학교</span>
+          <strong>{blocks.length}개</strong>
+          <small>{lesson.status === "canceled" ? "취소됨" : "진행 예정"}</small>
+        </div>
+      </div>
+
+      <section className="panel examSundayPanel">
+        <div className="sectionHeader slim">
+          <div>
+            <span className="eyebrow">자동 생성 수업</span>
+            <h3>{lesson.lessonTopic || lesson.className || "일요시험보강"}</h3>
+            <p className="muted">
+              시험기간 기준으로 자동 생성된 후보입니다. 실제 시간표가 다르면 일정 수정에서 날짜와 전체 시간을 먼저 조정합니다.
+            </p>
+          </div>
+          <div className="examSundayActions">
+            {hasBlockSave ? (
+              <>
+                <button className="softButton" onClick={resetBlocks} type="button">
+                  자동값 복구
+                </button>
+                <button className="primaryButton" onClick={saveBlocks} type="button">
+                  블록 저장
+                </button>
+              </>
+            ) : null}
+            <button className="ghostButton" onClick={() => onEditLesson(lesson)} type="button">
+              일정 수정
+            </button>
+            <button className="dangerButton" onClick={() => onDeleteLesson(lesson.lessonId)} type="button">
+              일정 삭제
+            </button>
+          </div>
+        </div>
+
+        <div className="examSundayBlockList" aria-label="학교별 일요시험보강 블록">
+          {blocks.map((block) => (
+            <div className="examSundayBlockItem" key={block.blockId}>
+              <div className="examSundayBlockTimeFields">
+                <input
+                  aria-label="블록 날짜"
+                  onChange={(event) => updateBlock(block.blockId, "date", event.target.value)}
+                  type="date"
+                  value={block.date || lesson.date}
+                />
+                <div>
+                  <input
+                    aria-label="블록 시작 시간"
+                    onChange={(event) => updateBlock(block.blockId, "startTime", event.target.value)}
+                    type="time"
+                    value={block.startTime}
+                  />
+                  <input
+                    aria-label="블록 종료 시간"
+                    onChange={(event) => updateBlock(block.blockId, "endTime", event.target.value)}
+                    type="time"
+                    value={block.endTime}
+                  />
+                </div>
+              </div>
+              <div>
+                <input
+                  aria-label="학교별 보강명"
+                  className="examSundayBlockTitleInput"
+                  onChange={(event) => updateBlock(block.blockId, "label", event.target.value)}
+                  value={block.label}
+                />
+                <textarea
+                  aria-label="보강 메모"
+                  onChange={(event) => updateBlock(block.blockId, "memo", event.target.value)}
+                  placeholder="예: 창동고1 대수 집중, 정의여고는 오답 20문항 점검"
+                  value={block.memo}
+                />
+                <small>{scheduledTime}</small>
+              </div>
+              <span>시험 대비</span>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -4760,6 +4967,7 @@ function LessonJournalDetail({
   onPolishPreparationNotice,
   onSaveRecord,
   onSendComment,
+  onUpdateExamSundayMakeupBlocks,
   onUpdateHomework,
   onUpdateMakeupTask,
   records,
@@ -4780,6 +4988,7 @@ function LessonJournalDetail({
     (linkedMakeupTask?.taskType === "homework_makeup" ||
       lesson.lessonTopic?.includes("숙제보충") ||
       lesson.className?.includes("숙제보충"));
+  const isExamSundayMakeupLesson = lesson.lessonType === "examSundayMakeup";
 
   if (isHomeworkMakeupLesson) {
     return (
@@ -4793,6 +5002,16 @@ function LessonJournalDetail({
         onUpdateTask={onUpdateMakeupTask}
         students={students}
         task={linkedMakeupTask}
+      />
+    );
+  }
+  if (isExamSundayMakeupLesson) {
+    return (
+      <ExamSundayMakeupLessonDetail
+        lesson={lesson}
+        onDeleteLesson={onDeleteLesson}
+        onEditLesson={onEditLesson}
+        onUpdateBlocks={(blocks) => onUpdateExamSundayMakeupBlocks?.(getGeneratedLessonKey(lesson), blocks)}
       />
     );
   }
@@ -7314,9 +7533,12 @@ function SchoolCalendarCenter({
   generatedLessonPlan = [],
   rows,
   onAddEvent,
+  onApplyGeneratedLesson,
   onApplyGeneratedLessons,
+  onClearGeneratedLessonManualOverride,
   onDeleteEvent,
   onSuppressGeneratedLesson,
+  onUnsuppressGeneratedLesson,
   onSyncPreExamLesson,
   onUpdateExamPrepRow,
   onUpdateEvent
@@ -7789,11 +8011,28 @@ function SchoolCalendarCenter({
                   <span className="generatedStatusBadge">
                     {item.status === "create" ? "생성 예정" : item.status === "update" ? "갱신 예정" : item.status === "protected" ? "수동수정 보호" : "삭제로 건너뜀"}
                   </span>
-                  {(item.status === "create" || item.status === "update") ? (
-                    <button className="softButton subtle" onClick={() => onSuppressGeneratedLesson?.(item.generatedKey)} type="button">
-                      자동생성 제외
-                    </button>
-                  ) : null}
+                  <div className="generatedLessonActions">
+                    {(item.status === "create" || item.status === "update") ? (
+                      <>
+                        <button className="softButton subtle" onClick={() => onApplyGeneratedLesson?.(item.generatedKey)} type="button">
+                          이 항목 반영
+                        </button>
+                        <button className="softButton subtle" onClick={() => onSuppressGeneratedLesson?.(item.generatedKey)} type="button">
+                          자동생성 제외
+                        </button>
+                      </>
+                    ) : null}
+                    {item.status === "protected" ? (
+                      <button className="softButton subtle" onClick={() => onClearGeneratedLessonManualOverride?.(item.generatedKey)} type="button">
+                        보호 해제
+                      </button>
+                    ) : null}
+                    {item.status === "skipped" ? (
+                      <button className="softButton subtle" onClick={() => onUnsuppressGeneratedLesson?.(item.generatedKey)} type="button">
+                        제외 해제
+                      </button>
+                    ) : null}
+                  </div>
                 </article>
               ))}
             </div>
@@ -12443,6 +12682,11 @@ function createSupplementLessonName(task, student) {
 function normalizeGeneratedLessonControls(value = {}) {
   return {
     manualOverrideKeys: Array.isArray(value.manualOverrideKeys) ? [...new Set(value.manualOverrideKeys)] : [],
+    sundayMakeupBlocks: value.sundayMakeupBlocks && typeof value.sundayMakeupBlocks === "object" && !Array.isArray(value.sundayMakeupBlocks)
+      ? Object.fromEntries(
+          Object.entries(value.sundayMakeupBlocks).filter(([, blocks]) => Array.isArray(blocks))
+        )
+      : {},
     suppressedKeys: Array.isArray(value.suppressedKeys) ? [...new Set(value.suppressedKeys)] : []
   };
 }

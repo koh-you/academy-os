@@ -826,6 +826,139 @@ button {
   gap: 8px;
 }
 
+.examSundayMakeupBody {
+  display: grid;
+  gap: 14px;
+}
+
+.examSundaySummaryGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.examSundaySummaryGrid > div {
+  background: #f8fafc;
+  border: 1px solid #dbe5f5;
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 14px;
+}
+
+.examSundaySummaryGrid span,
+.examSundaySummaryGrid small {
+  color: #64748b;
+  font-weight: 800;
+}
+
+.examSundaySummaryGrid strong {
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.examSundayPanel {
+  background: #f8fbff;
+}
+
+.examSundayPanel h3 {
+  font-size: 22px;
+  margin: 4px 0 8px;
+}
+
+.examSundayActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.examSundayBlockList {
+  border: 1px solid #dbe5f5;
+  border-radius: 8px;
+  display: grid;
+  overflow: hidden;
+}
+
+.examSundayBlockItem {
+  align-items: start;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 220px minmax(0, 1fr) auto;
+  padding: 14px 16px;
+}
+
+.examSundayBlockItem:last-child {
+  border-bottom: 0;
+}
+
+.examSundayBlockItem time {
+  color: #1d4ed8;
+  font-weight: 900;
+}
+
+.examSundayBlockTimeFields {
+  display: grid;
+  gap: 8px;
+}
+
+.examSundayBlockTimeFields > div {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.examSundayBlockTimeFields input,
+.examSundayBlockTitleInput,
+.examSundayBlockItem textarea {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #0f172a;
+  font: inherit;
+  font-weight: 800;
+  min-width: 0;
+  padding: 10px 12px;
+  width: 100%;
+}
+
+.examSundayBlockItem textarea {
+  min-height: 72px;
+  resize: vertical;
+}
+
+.examSundayBlockTitleInput {
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.examSundayBlockItem strong {
+  color: #0f172a;
+  display: block;
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+
+.examSundayBlockItem small {
+  color: #64748b;
+  display: block;
+  margin-top: 4px;
+}
+
+.examSundayBlockItem > span {
+  background: #eef2ff;
+  border-radius: 999px;
+  color: #3730a3;
+  font-size: 13px;
+  font-weight: 900;
+  padding: 7px 10px;
+  white-space: nowrap;
+}
+
 .homeworkMakeupTarget {
   background: #f8fbff;
 }
@@ -2303,7 +2436,7 @@ button {
   border-bottom: 1px solid #e2e8f0;
   display: grid;
   gap: 12px;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto minmax(180px, auto);
   padding: 12px 14px;
 }
 
@@ -2349,6 +2482,18 @@ button {
   background: #f8fafc;
   border-color: #e2e8f0;
   color: #64748b;
+}
+
+.generatedLessonActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.generatedLessonActions .softButton {
+  min-height: 34px;
+  padding: 0 10px;
 }
 
 .schoolEventFormPanel.collapsed {
@@ -8212,9 +8357,23 @@ textarea.profileEditInput {
   .homeworkMakeupHero,
   .makeupInfoGrid,
   .homeworkMakeupSummary,
+  .examSundaySummaryGrid,
   .makeupProcessFormGrid,
   .makeupProcessStatusGrid {
     grid-template-columns: 1fr;
+  }
+
+  .examSundayBlockItem {
+    align-items: start;
+    grid-template-columns: 1fr;
+  }
+
+  .examSundayBlockTimeFields > div {
+    grid-template-columns: 1fr;
+  }
+
+  .examSundayBlockItem > span {
+    justify-self: start;
   }
 }
 
