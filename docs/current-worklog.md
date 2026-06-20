@@ -681,3 +681,11 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - 이번 작업 결과: 직전수업과 일요시험보강 같은 특수 자동수업은 실제 반 템플릿 ID를 넣지 않고 `classTemplateId`를 비워 저장하도록 변경했다. 저장 시 DB에는 `class_template_id = null`로 들어가 외래키 오류를 피한다.
 - SQL 주의: 기존 `lessons.class_template_id` nullable 구조를 그대로 사용하므로 Supabase SQL Editor 작업 필요 없음.
 - 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 69개 통과.
+
+### 2026-06-20 P1. 자동 수업 후보 전체 표시와 시험기간 내 일요보강 포함
+- 상태: 완료
+- 사용자 요청: 자동 수업 후보가 8개까지만 보여 6/28 일요보강을 개별 반영할 수 없으므로 전체 후보를 확인할 수 있게 하고, 시험기간이 주말을 끼면 그 주말 일요일까지 일요보강 후보에 포함한다.
+- 이번 작업 결과: `generatedLessonPlan.slice(0, 8)` 표시 제한을 제거하고, 후보 목록은 패널 내부 스크롤 영역으로 바꿨다. 이제 후보가 8개를 넘어도 모든 항목의 `이 항목 반영`/`자동생성 제외` 버튼을 확인할 수 있다.
+- 일요보강 생성 변경: 기존 시험 종료일 기준 직전 4개 일요일에 더해, 시험기간 시작일~종료일 사이에 포함된 일요일도 후보에 합친다. 정의여고처럼 시험기간이 6/30~7/7이면 6/14, 6/21, 6/28, 7/5 후보가 유지되고, 다른 학교의 6/7 후보와 함께 화면에서 총 5회까지 확인/반영할 수 있다.
+- SQL 주의: UI 표시와 프론트 후보 계산 로직 변경만 있으므로 Supabase SQL Editor 작업 필요 없음.
+- 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 71개 통과.
