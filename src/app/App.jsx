@@ -11393,54 +11393,58 @@ function SupplementStudentModal({
                       </div>
                     </div>
                   </div>
-                  {task.taskType === "homework_makeup" ? (
-                    <label className="supplementHomeworkField">
-                      보충할 숙제 내역
-                      <span>수업일지의 완료 여부와 별도로, 보충일지와 알림톡 문구에만 반영됩니다.</span>
+                  <div className="supplementReadableGrid">
+                    {task.taskType === "homework_makeup" ? (
+                    <label className="supplementHomeworkField supplementReadableField">
+                      <strong>보충할 숙제 내역</strong>
+                      <span>보충일지와 알림톡 문구에 반영되는 핵심 내용입니다.</span>
                       <textarea
                         value={supplementHomeworkNote}
                         onChange={(event) => onUpdateTask(task.makeupTaskId, "supplementHomeworkNote", event.target.value)}
                         placeholder="예: 교과서 프린트, 지난 시간 미완료 숙제"
                       />
                     </label>
-                  ) : null}
-                  <label className="supplementMemoField">
-                    보충 메모
-                    <span>보충 중 처리한 내용, 남은 문항, 다음에 확인할 내용을 기록합니다.</span>
+                    ) : null}
+                  <label className="supplementMemoField supplementReadableField">
+                    <strong>보충 메모</strong>
+                    <span>진행한 내용, 남은 문항, 다음 확인 사항을 남깁니다.</span>
                     <textarea
                       value={supplementMemo}
                       onChange={(event) => onUpdateTask(task.makeupTaskId, "supplementProgressMemo", event.target.value)}
                       placeholder="예: 오답 30문제 중 18번까지 확인, 남은 12문제는 다음 보충 때 마무리"
                     />
                   </label>
-                  <label className="taskOptionBlock">
-                    보충 방식
-                    <div className="taskChoiceGrid">
-                      {supplementMethodOptions(task.taskType).map((option) => (
-                        <button
-                          className={(task.supplementMethod || supplementDefaultMethod(task.taskType)) === option.id ? "active" : ""}
-                          key={option.id}
-                          onClick={() => onUpdateTask(task.makeupTaskId, "supplementMethod", option.id)}
-                          type="button"
-                        >
-                          {option.label}
-                        </button>
-                      ))}
                     </div>
-                  </label>
-                  <div className="fieldGrid two">
-                    <label>
-                      배정일
-                      <input type="date" value={task.scheduledDate} onChange={(event) => onUpdateTask(task.makeupTaskId, "scheduledDate", event.target.value)} />
+                  <div className="supplementSchedulePanel">
+                    <label className="taskOptionBlock">
+                      <strong>보충 방식</strong>
+                      <div className="taskChoiceGrid">
+                        {supplementMethodOptions(task.taskType).map((option) => (
+                          <button
+                            className={(task.supplementMethod || supplementDefaultMethod(task.taskType)) === option.id ? "active" : ""}
+                            key={option.id}
+                            onClick={() => onUpdateTask(task.makeupTaskId, "supplementMethod", option.id)}
+                            type="button"
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
                     </label>
-                    <label>
-                      시간
-                      <input type="time" value={task.scheduledTime} onChange={(event) => onUpdateTask(task.makeupTaskId, "scheduledTime", event.target.value)} />
-                    </label>
+                    <div className="fieldGrid two supplementDateGrid">
+                      <label>
+                        <strong>배정일</strong>
+                        <input type="date" value={task.scheduledDate} onChange={(event) => onUpdateTask(task.makeupTaskId, "scheduledDate", event.target.value)} />
+                      </label>
+                      <label>
+                        <strong>시간</strong>
+                        <input type="time" value={task.scheduledTime} onChange={(event) => onUpdateTask(task.makeupTaskId, "scheduledTime", event.target.value)} />
+                      </label>
+                    </div>
                   </div>
-                  <label className="notificationDraftField">
-                    알림톡 문구
-                    <span>아래 문구가 보충 일정 알림톡 초안에 반영됩니다. 발송은 별도 확정 단계에서 진행합니다.</span>
+                  <label className="notificationDraftField supplementReadableField">
+                    <strong>알림톡 문구</strong>
+                    <span>보충 일정 안내 초안입니다. 실제 발송은 별도 확정 단계에서 진행합니다.</span>
                     <textarea
                       value={visibleDraft}
                       onChange={(event) => onUpdateTask(task.makeupTaskId, "notificationDraft", event.target.value)}

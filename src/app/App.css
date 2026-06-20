@@ -6922,6 +6922,11 @@ textarea.profileEditInput {
   padding: 18px;
 }
 
+.taskCard {
+  display: grid;
+  gap: 16px;
+}
+
 .homeworkCardTop,
 .taskCardTop,
 .candidateItem {
@@ -6978,33 +6983,69 @@ textarea.profileEditInput {
   gap: 8px;
 }
 
+.supplementReadableGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.supplementReadableGrid .supplementHomeworkField {
+  grid-column: 1 / -1;
+}
+
+.supplementReadableField,
+.supplementSchedulePanel {
+  background: #f8fafc;
+  border: 1px solid #dbe5f6;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.supplementReadableField > strong,
+.supplementSchedulePanel strong,
+.taskOptionBlock > strong,
+.supplementDateGrid strong {
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 900;
+}
+
 .supplementHomeworkField span,
-.supplementMemoField span {
+.supplementMemoField span,
+.notificationDraftField span {
   color: #64748b;
   font-size: 13px;
   font-weight: 700;
+  line-height: 1.45;
 }
 
 .supplementHomeworkField textarea,
-.supplementMemoField textarea {
+.supplementMemoField textarea,
+.notificationDraftField textarea {
   background: #ffffff;
   border: 1px solid #cbd8ee;
   border-radius: 8px;
   color: #0f172a;
   font: inherit;
-  font-weight: 800;
-  line-height: 1.5;
+  font-size: 15px;
+  font-weight: 750;
+  line-height: 1.65;
   min-height: 78px;
   padding: 12px 14px;
   resize: vertical;
 }
 
+.supplementHomeworkField textarea {
+  min-height: 112px;
+}
+
 .supplementMemoField textarea {
-  min-height: 72px;
+  min-height: 112px;
 }
 
 .supplementHomeworkField textarea:focus,
-.supplementMemoField textarea:focus {
+.supplementMemoField textarea:focus,
+.notificationDraftField textarea:focus {
   border-color: #7c9cff;
   box-shadow: 0 0 0 3px rgba(124, 156, 255, 0.16);
   outline: none;
@@ -7055,7 +7096,23 @@ textarea.profileEditInput {
   color: #17213a;
   display: grid;
   font-weight: 900;
-  gap: 8px;
+  gap: 10px;
+}
+
+.supplementSchedulePanel {
+  display: grid;
+  gap: 14px;
+}
+
+.supplementDateGrid {
+  gap: 10px;
+}
+
+.supplementDateGrid label {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px;
 }
 
 .taskReasonLine {
@@ -7069,14 +7126,16 @@ textarea.profileEditInput {
 }
 
 .notificationDraftField {
+  background: #f8fafc;
+  border: 1px solid #dbe5f6;
+  border-radius: 8px;
   display: grid;
-  gap: 7px;
+  gap: 8px;
+  padding: 14px;
 }
 
-.notificationDraftField span {
-  color: #64748b;
-  font-size: 13px;
-  font-weight: 700;
+.notificationDraftField textarea {
+  min-height: 180px;
 }
 
 .statusBlue,
@@ -8507,6 +8566,15 @@ textarea.profileEditInput {
   min-height: 88px;
 }
 
+.taskCard .supplementHomeworkField textarea,
+.taskCard .supplementMemoField textarea {
+  min-height: 112px;
+}
+
+.taskCard .notificationDraftField textarea {
+  min-height: 180px;
+}
+
 @media (max-width: 1100px) {
   .appFrame {
     grid-template-columns: 1fr;
@@ -8538,6 +8606,7 @@ textarea.profileEditInput {
   .examAnalysisLayout,
   .examAnalysisLayout.listCollapsed,
   .commentComposerGrid,
+  .supplementReadableGrid,
   .analysisTwoColumn,
   .aiVariantWorkspace,
   .insightGrid,
