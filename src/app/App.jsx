@@ -10200,7 +10200,7 @@ function SupplementCenter({
                   onClick={() => (existingTask ? setSelectedSupplementStudentId(item.studentId) : createSupplementTask(item.task))}
                   type="button"
                 >
-                  {existingTask ? "일정 관리" : item.actionLabel}
+                  {existingTask ? "보충 관리" : item.actionLabel}
                 </button>
                 <button
                   className="passButton"
