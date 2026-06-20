@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-06-20 P1. 알림톡 발송 오류 복구 및 상태 색상 분리
+
+- 상태: 완료
+- 사용자 보고: 알림톡 테스트 발송이 `compact is not defined` 오류로 실패했다. 또한 `저장 완료`와 `알림톡 작성됨`이 모두 초록색이라 상태 구분이 어렵다.
+- 원인: `api/routes/notifications.js`의 코멘트 알림톡 발송 경로에서 존재하지 않는 `compact()` 헬퍼를 호출했다. 이 때문에 수업 알림톡 발송 API가 본문 override 처리 단계에서 실패했다.
+- 작업 결과: 코멘트 알림톡 본문 override는 기존 `normalizeText()`로 정리하도록 수정했다. 수업일지 알림톡 버튼은 `작성됨 · 발송 전` 파란색, `발송/예약 중` 주황색, `발송 완료/테스트 기록됨` 초록색, `발송 실패` 빨간색으로 구분했다. 발송 성공/실패 상태는 `lesson_student_records`에도 저장해 새로고침 후 상태가 유지되도록 보강했다.
+- 검증: `npm run build` 통과, `npm run test:production` 91개 통과, `node --check api/routes/notifications.js`, `node --check api/server.js` 통과, `sendLessonCommentAlimtalk` dry-run 직접 호출 통과.
+- SQL Editor 작업 필요 없음: 기존 `teacher_comment_send_status`, `student_comment_send_status` 컬럼을 사용하며 DB 스키마 변경은 없다.
+
 ## 2026-06-20 P1. 직전 수업메모 좌측 읽기 영역 확대
 
 - 상태: 완료

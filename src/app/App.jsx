@@ -271,6 +271,30 @@ function getSaveButtonLabel(saveState) {
   return "저장";
 }
 
+function getCommentSendState(sendStatus = "") {
+  const normalizedStatus = normalizeMessageText(sendStatus);
+  if (!normalizedStatus) return "";
+  if (normalizedStatus === "내용 없음") return "";
+  if (normalizedStatus.includes("실패")) return "failed";
+  if (normalizedStatus.includes("발송 중") || normalizedStatus.includes("예약 중")) return "pending";
+  if (normalizedStatus.includes("완료") || normalizedStatus.includes("기록됨")) return "sent";
+  return "draft";
+}
+
+function getCommentButtonState(comment = "", sendStatus = "") {
+  const sendState = getCommentSendState(sendStatus);
+  if (sendState) return sendState;
+  return normalizeMessageText(comment) ? "draft" : "empty";
+}
+
+function getCommentStatusLabel(comment = "", sendStatus = "") {
+  const sendState = getCommentSendState(sendStatus);
+  if (sendState === "failed") return "발송 실패";
+  if (sendState === "pending") return sendStatus;
+  if (sendState === "sent") return sendStatus;
+  return normalizeMessageText(comment) ? "작성됨 · 발송 전" : "미작성";
+}
+
 const today = getKoreaDateString();
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8787").replace(/\/$/, "");
 
@@ -3369,39 +3393,29 @@ export function App() {
       studentId: student.studentId,
       target
     };
+    const applySendStatus = (statusText, { persist = false } = {}) => {
+      const nextRecord = {
+        ...createEmptyRecord(lesson, student),
+        ...(record ?? {}),
+        lessonStudentRecordId: recordId,
+        [statusField]: statusText
+      };
+      setRecords((current) => upsertById(current, nextRecord, "lessonStudentRecordId"));
+      if (persist) {
+        postJson("/api/lesson-records", { record: nextRecord }).catch((error) => console.error(error));
+      }
+    };
 
     if (!hasSendContent) {
       setNotificationLogs((current) => [
         { ...logBase, status: "empty_message" },
         ...current
       ]);
-      setRecords((current) =>
-        upsertById(
-          current,
-          {
-            ...createEmptyRecord(lesson, student),
-            ...(record ?? {}),
-            lessonStudentRecordId: recordId,
-            [statusField]: "내용 없음"
-          },
-          "lessonStudentRecordId"
-        )
-      );
+      applySendStatus("내용 없음", { persist: true });
       return;
     }
 
-    setRecords((current) =>
-      upsertById(
-        current,
-        {
-          ...createEmptyRecord(lesson, student),
-          ...(record ?? {}),
-          lessonStudentRecordId: recordId,
-          [statusField]: scheduledDate ? `예약 중 · ${scheduledLabel}` : "알림톡 발송 중"
-        },
-        "lessonStudentRecordId"
-      )
-    );
+    applySendStatus(scheduledDate ? `예약 중 · ${scheduledLabel}` : "알림톡 발송 중");
 
     try {
       const lessonMaterial = getLessonMaterial(record, student);
@@ -3469,46 +3483,24 @@ export function App() {
           : scheduledDate
             ? `예약 완료 · ${scheduledLabel}`
             : "알림톡 발송 완료";
-      setRecords((current) =>
-        upsertById(
-          current,
-          {
-            ...createEmptyRecord(lesson, student),
-            ...(record ?? {}),
-            lessonStudentRecordId: recordId,
-            [statusField]: completeStatus
-          },
-          "lessonStudentRecordId"
-        )
-      );
+      applySendStatus(completeStatus, { persist: true });
     } catch (error) {
-    const failedLog = { ...logBase, error: error.message, status: "failed" };
-    setNotificationLogs((current) => [failedLog, ...current]);
-    const failedJob = {
-      ...failedLog,
-      notificationJobId: failedLog.notificationLogId,
-      notificationType: target === "student" ? "student_comment" : "parent_comment",
-      lessonStudentRecordId: recordId,
-      previewBody: logBase.message,
-      recipient: target === "student" ? student.studentPhone : student.parentPhone,
-      scheduledAt: scheduledDate
-    };
-    setNotificationJobs((current) => [failedJob, ...current.filter((job) => job.notificationJobId !== failedJob.notificationJobId)]);
-    postJson("/api/notification-jobs", {
-      notificationJob: failedJob
-    }).catch((persistError) => console.error(persistError));
-    setRecords((current) =>
-      upsertById(
-        current,
-        {
-          ...createEmptyRecord(lesson, student),
-          ...(record ?? {}),
-          lessonStudentRecordId: recordId,
-            [statusField]: `실패 · ${error.message}`
-        },
-        "lessonStudentRecordId"
-      )
-    );
+      const failedLog = { ...logBase, error: error.message, status: "failed" };
+      setNotificationLogs((current) => [failedLog, ...current]);
+      const failedJob = {
+        ...failedLog,
+        notificationJobId: failedLog.notificationLogId,
+        notificationType: target === "student" ? "student_comment" : "parent_comment",
+        lessonStudentRecordId: recordId,
+        previewBody: logBase.message,
+        recipient: target === "student" ? student.studentPhone : student.parentPhone,
+        scheduledAt: scheduledDate
+      };
+      setNotificationJobs((current) => [failedJob, ...current.filter((job) => job.notificationJobId !== failedJob.notificationJobId)]);
+      postJson("/api/notification-jobs", {
+        notificationJob: failedJob
+      }).catch((persistError) => console.error(persistError));
+      applySendStatus(`실패 · ${error.message}`, { persist: true });
     }
   }
 
@@ -5509,6 +5501,8 @@ function LessonJournalDetail({
             const previousLessonMaterial = previousRecord?.lessonMaterial?.trim() ?? "";
             const previousLessonContent = getLessonContent(previousRecord);
             const previousPreparationMemo = previousRecord?.preparationMemo?.trim() ?? "";
+            const parentCommentState = getCommentButtonState(record.teacherComment, record.teacherCommentSendStatus);
+            const studentCommentState = getCommentButtonState(record.studentComment, record.studentCommentSendStatus);
 
             return (
               <div className="journalRow" key={student.studentId}>
@@ -5596,23 +5590,27 @@ function LessonJournalDetail({
                 </select>
                 <div className="journalCommentCell">
                   <button
-                    className={record.teacherComment ? "commentOpenButton filled" : "commentOpenButton"}
+                    className={`commentOpenButton comment-${parentCommentState}`}
                     onClick={() => openCommentComposer("parent", student, record, previousHomework, nextHomework)}
                     type="button"
                   >
                     학부모 알림톡
                   </button>
-                  <small>{record.teacherComment ? "작성됨" : "미작성"}</small>
+                  <small className={`commentStatusText comment-${parentCommentState}`}>
+                    {getCommentStatusLabel(record.teacherComment, record.teacherCommentSendStatus)}
+                  </small>
                 </div>
                 <div className="journalCommentCell">
                   <button
-                    className={record.studentComment ? "commentOpenButton filled" : "commentOpenButton"}
+                    className={`commentOpenButton comment-${studentCommentState}`}
                     onClick={() => openCommentComposer("student", student, record, previousHomework, nextHomework)}
                     type="button"
                   >
                     학생 알림톡
                   </button>
-                  <small>{record.studentComment ? "작성됨" : "미작성"}</small>
+                  <small className={`commentStatusText comment-${studentCommentState}`}>
+                    {getCommentStatusLabel(record.studentComment, record.studentCommentSendStatus)}
+                  </small>
                 </div>
                 <div className="journalSaveCell">
                   <button

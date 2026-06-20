@@ -1355,11 +1355,57 @@ button {
   color: #15803d;
 }
 
+.commentOpenButton.comment-empty {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+  color: #4f46e5;
+}
+
+.commentOpenButton.comment-draft {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+.commentOpenButton.comment-pending {
+  background: #fff7ed;
+  border-color: #fdba74;
+  color: #c2410c;
+}
+
+.commentOpenButton.comment-sent {
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #15803d;
+}
+
+.commentOpenButton.comment-failed {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
 .journalCommentCell small {
   color: #94a3b8;
   font-size: 12px;
   font-weight: 800;
   text-align: center;
+}
+
+.journalCommentCell small.comment-draft {
+  color: #1d4ed8;
+}
+
+.journalCommentCell small.comment-pending {
+  color: #c2410c;
+}
+
+.journalCommentCell small.comment-sent {
+  color: #15803d;
+}
+
+.journalCommentCell small.comment-failed {
+  color: #b91c1c;
 }
 
 .journalSaveCell {

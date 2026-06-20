@@ -36,6 +36,7 @@ check("05 tablet attendance URL setting exists", hasAll(app, ["attendanceUrl", "
 check("06 attendance late grace logic exists", hasAll(app, ["lateGraceMinutes", "calculateLateMinutes"]));
 check("07 attendance alimtalk API is connected", hasAll(app, ["/api/notifications/attendance-alimtalk", "handleSendAttendanceAlimtalk"]));
 check("08 parent alimtalk API is connected", hasAll(app, ["/api/notifications/comment-alimtalk", "parentPhone"]));
+check("08b comment alimtalk body override does not call missing compact helper", notificationRoute.includes("const commentBody = normalizeText(payload.commentBodyOverride)") && !notificationRoute.includes("compact(payload.commentBodyOverride)"));
 check("09 student alimtalk branch exists", hasAll(app, ['target: testType === "student"', "studentPhone"]));
 check("10 alimtalk dry-run safety exists", hasAll(app, ["forceDryRun", "dryRun", "allowRealRecipients"]));
 check("11 alimtalk preview builder exists", hasAll(app, ["buildNotificationTemplatePreview", "templatePreviewText"]));
@@ -122,6 +123,7 @@ check("80 lesson prep student visibility persists", hasAll(coreDataRoute, ["prep
 check("81 lesson prep previous memo falls back to prior saved student memo", hasAll(app, ["const lessonById = new Map(lessons.map((item) => [item.lessonId, item]))", "const previousMemoRecord = sourceRecords", "item.preparationMemo?.trim()", "getRecordLessonDate(item) < lesson.date", "previousMemoRecord ?? previousLessonRecord ?? null"]));
 check("82 lesson prep modal uses exact current lesson record", hasAll(app, ["const recordId = createLessonStudentRecordId(lesson.lessonId, commentModal.student.studentId)", "item.lessonStudentRecordId === recordId", "item.lessonStudentRecordId === createLessonStudentRecordId(lesson.lessonId, prepMemoModal.student.studentId)"]));
 check("83 lesson prep previous memo panel has larger reading area", hasAll(css, ["grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr)", "grid-template-rows: auto auto minmax(300px, 1fr)", "min-height: 560px", "min-height: 300px"]));
+check("84 lesson comment buttons distinguish draft sent and failed states", hasAll(app, ["getCommentButtonState", "getCommentSendState", "comment-${parentCommentState}", "comment-${studentCommentState}", "발송 실패", "작성됨 · 발송 전", 'postJson("/api/lesson-records", { record: nextRecord })']) && hasAll(css, [".commentOpenButton.comment-draft", ".commentOpenButton.comment-sent", ".commentOpenButton.comment-failed", ".journalCommentCell small.comment-failed"]));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));
