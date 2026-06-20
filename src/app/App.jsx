@@ -4546,22 +4546,24 @@ function HomeworkMakeupLessonDetail({
               </button>
             ))}
           </div>
-          <label className="makeupProcessField">
-            보충 진행 메모
-            <textarea
-              value={processMemo}
-              onChange={(event) => updateTaskField("supplementProgressMemo", event.target.value)}
-              placeholder="예: 쎈 오답 5문항 중 3문항 풀이 완료. 나머지 2문항은 계산 실수 반복으로 추가 확인 필요."
-            />
-          </label>
-          <label className="makeupProcessField">
-            추가 보충 내용
-            <textarea
-              value={nextSupplementPlan}
-              onChange={(event) => updateTaskField("nextSupplementPlan", event.target.value)}
-              placeholder="추가 보충이 필요할 때 다음에 진행할 숙제/문항/범위를 적어주세요."
-            />
-          </label>
+          <div className="makeupProcessFormGrid">
+            <label className="makeupProcessField">
+              보충 진행 메모
+              <textarea
+                value={processMemo}
+                onChange={(event) => updateTaskField("supplementProgressMemo", event.target.value)}
+                placeholder="예: 쎈 오답 5문항 중 3문항 풀이 완료. 나머지 2문항은 계산 실수 반복으로 추가 확인 필요."
+              />
+            </label>
+            <label className="makeupProcessField">
+              추가 보충 내용
+              <textarea
+                value={nextSupplementPlan}
+                onChange={(event) => updateTaskField("nextSupplementPlan", event.target.value)}
+                placeholder="추가 보충이 필요할 때 다음에 진행할 숙제/문항/범위를 적어주세요."
+              />
+            </label>
+          </div>
           <div className="makeupProcessActions">
             <button className="softButton" onClick={() => setPassConfirmMode("needs_more")} type="button">
               추가 보충 필요로 기록
@@ -10306,13 +10308,16 @@ function SupplementCenter({
                       {taskProgress.detail ? <b>{taskProgress.detail}</b> : null}
                     </span>
                   ) : null}
+                  {existingTask?.supplementProgressMemo?.trim() ? (
+                    <small className="supplementMemoPreview">메모: {existingTask.supplementProgressMemo}</small>
+                  ) : null}
                 </div>
                 <button
                   className={existingTask ? "softButton subtle" : "softButton"}
                   onClick={() => (existingTask ? setSelectedSupplementStudentId(item.studentId) : createSupplementTask(item.task))}
                   type="button"
                 >
-                  {existingTask ? "보충 관리" : item.actionLabel}
+                  {existingTask ? "보충 메모" : item.actionLabel}
                 </button>
                 <button
                   className="passButton"
@@ -10478,6 +10483,7 @@ function SupplementStudentModal({
               const freshDraft = createNotificationDraft(task, [student]);
               const visibleDraft = task.notificationDraft || freshDraft;
               const supplementHomeworkNote = task.supplementHomeworkNote ?? task.sourceLabel ?? "";
+              const supplementMemo = task.supplementProgressMemo ?? "";
               return (
                 <article className="taskCard" key={task.makeupTaskId}>
                   <div className="taskCardTop">
@@ -10528,6 +10534,15 @@ function SupplementStudentModal({
                       />
                     </label>
                   ) : null}
+                  <label className="supplementMemoField">
+                    보충 메모
+                    <span>보충 중 처리한 내용, 남은 문항, 다음에 확인할 내용을 기록합니다.</span>
+                    <textarea
+                      value={supplementMemo}
+                      onChange={(event) => onUpdateTask(task.makeupTaskId, "supplementProgressMemo", event.target.value)}
+                      placeholder="예: 오답 30문제 중 18번까지 확인, 남은 12문제는 다음 보충 때 마무리"
+                    />
+                  </label>
                   <label className="taskOptionBlock">
                     보충 방식
                     <div className="taskChoiceGrid">

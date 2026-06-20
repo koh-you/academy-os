@@ -866,8 +866,8 @@ button {
 
 .homeworkMakeupHero {
   display: grid;
-  gap: 16px;
-  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+  gap: 12px;
+  grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.15fr);
 }
 
 .homeworkMakeupNotice,
@@ -908,9 +908,9 @@ button {
 
 .makeupProcessStatusGrid {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: 14px;
+  margin-top: 6px;
 }
 
 .makeupProcessStatusGrid button {
@@ -919,8 +919,9 @@ button {
   border-radius: 8px;
   cursor: pointer;
   display: grid;
-  gap: 6px;
-  padding: 14px;
+  gap: 4px;
+  min-height: 76px;
+  padding: 10px;
   text-align: left;
 }
 
@@ -931,7 +932,7 @@ button {
 
 .makeupProcessStatusGrid strong {
   color: #17213d;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 900;
 }
 
@@ -942,12 +943,18 @@ button {
   line-height: 1.4;
 }
 
+.makeupProcessFormGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  margin-top: 10px;
+}
+
 .makeupProcessField {
   color: #17213a;
   display: grid;
   font-weight: 900;
   gap: 8px;
-  margin-top: 14px;
 }
 
 .makeupProcessField textarea {
@@ -957,7 +964,7 @@ button {
   color: #0f172a;
   font: inherit;
   line-height: 1.5;
-  min-height: 92px;
+  min-height: 78px;
   padding: 12px 14px;
   resize: vertical;
 }
@@ -973,7 +980,7 @@ button {
   flex-wrap: wrap;
   gap: 10px;
   justify-content: flex-end;
-  margin-top: 14px;
+  margin-top: 10px;
 }
 
 .bulkHomeworkPanel {
@@ -6407,20 +6414,23 @@ textarea.profileEditInput {
   font-size: 12px;
 }
 
-.supplementHomeworkField {
+.supplementHomeworkField,
+.supplementMemoField {
   color: #17213a;
   display: grid;
   font-weight: 900;
   gap: 8px;
 }
 
-.supplementHomeworkField span {
+.supplementHomeworkField span,
+.supplementMemoField span {
   color: #64748b;
   font-size: 13px;
   font-weight: 700;
 }
 
-.supplementHomeworkField textarea {
+.supplementHomeworkField textarea,
+.supplementMemoField textarea {
   background: #ffffff;
   border: 1px solid #cbd8ee;
   border-radius: 8px;
@@ -6433,7 +6443,12 @@ textarea.profileEditInput {
   resize: vertical;
 }
 
-.supplementHomeworkField textarea:focus {
+.supplementMemoField textarea {
+  min-height: 72px;
+}
+
+.supplementHomeworkField textarea:focus,
+.supplementMemoField textarea:focus {
   border-color: #7c9cff;
   box-shadow: 0 0 0 3px rgba(124, 156, 255, 0.16);
   outline: none;
@@ -6926,6 +6941,20 @@ textarea.profileEditInput {
 .supplementRowItem small {
   color: #52647f;
   line-height: 1.4;
+}
+
+.supplementMemoPreview {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #475569;
+  display: block;
+  font-weight: 800;
+  max-width: min(720px, 100%);
+  overflow: hidden;
+  padding: 7px 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .supplementRowItem .softButton,
@@ -8094,6 +8123,7 @@ textarea.profileEditInput {
   .homeworkMakeupHero,
   .makeupInfoGrid,
   .homeworkMakeupSummary,
+  .makeupProcessFormGrid,
   .makeupProcessStatusGrid {
     grid-template-columns: 1fr;
   }
