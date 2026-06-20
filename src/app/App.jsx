@@ -1573,9 +1573,13 @@ export function App() {
     setHomeworks((currentHomeworks) => filterHomeworksForLessons(currentHomeworks, lessons));
   }, [lessons, setHomeworks, setRecords]);
 
+  const generatedLessonPlanRows = useMemo(
+    () => examPrepRows.filter((row) => (row.examCycle || currentExamCycle) === currentExamCycle),
+    [examPrepRows]
+  );
   const generatedLessonPlan = useMemo(
-    () => buildGeneratedLessonPlan({ rows: examPrepRows, lessons, students, controls: generatedLessonControls }),
-    [examPrepRows, generatedLessonControls, lessons, students]
+    () => buildGeneratedLessonPlan({ rows: generatedLessonPlanRows, lessons, students, controls: generatedLessonControls }),
+    [generatedLessonControls, generatedLessonPlanRows, lessons, students]
   );
 
   function updateGeneratedLessonControls(updater) {
@@ -1640,7 +1644,25 @@ export function App() {
       });
       return next;
     });
-    postJson("/api/lessons/bulk", { lessons: lessonsToSave }).catch((error) => console.error(error));
+    postJson("/api/lessons/bulk", { lessons: lessonsToSave })
+      .then((result) => {
+        if (!Array.isArray(result.lessons) || result.lessons.length === 0) return;
+        setLessons((current) => {
+          const next = [...current];
+          result.lessons.forEach((lesson) => {
+            const index = next.findIndex((item) => item.lessonId === lesson.lessonId);
+            if (index >= 0) next[index] = { ...next[index], ...lesson };
+            else next.push(lesson);
+          });
+          return next;
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+        if (typeof window !== "undefined") {
+          window.alert(`자동 수업 저장 실패: ${error.message}`);
+        }
+      });
   }
 
   function handleApplyGeneratedLessons() {

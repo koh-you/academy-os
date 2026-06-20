@@ -689,3 +689,11 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - 일요보강 생성 변경: 기존 시험 종료일 기준 직전 4개 일요일에 더해, 시험기간 시작일~종료일 사이에 포함된 일요일도 후보에 합친다. 정의여고처럼 시험기간이 6/30~7/7이면 6/14, 6/21, 6/28, 7/5 후보가 유지되고, 다른 학교의 6/7 후보와 함께 화면에서 총 5회까지 확인/반영할 수 있다.
 - SQL 주의: UI 표시와 프론트 후보 계산 로직 변경만 있으므로 Supabase SQL Editor 작업 필요 없음.
 - 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 71개 통과.
+
+### 2026-06-20 P1. 일요보강 후보 현재 고사 필터와 저장 실패 표시
+- 상태: 완료
+- 사용자 요청: 일요보강 데이터가 Supabase에 저장되지 않고 다시 사라지는 것 같으며, 자동 수업 후보에 표시되는 4월 중간고사 일요보강 4항목은 없어야 한다.
+- 원인: 자동 수업 후보가 전체 `examPrepRows`를 입력으로 사용해 현재 고사인 `2026-1-final`뿐 아니라 `2026-1-mid` 행까지 함께 계산했다. 그래서 4/12, 4/19, 4/26, 5/3 중간고사 일요보강 후보가 기말고사 작업 중에도 노출됐다.
+- 이번 작업 결과: 자동 수업 후보 생성 입력을 현재 고사(`currentExamCycle`) 행으로 제한했다. 기말고사 기간에는 1학기 기말 행만 직전수업/일요보강 후보로 계산된다. 또한 자동 수업 bulk 저장 실패가 콘솔에만 남지 않고 화면 alert로 표시되도록 해, 저장 실패 후 새로고침 때 사라지는 상황을 바로 알 수 있게 했다.
+- SQL 주의: 프론트 후보 필터와 저장 실패 표시 변경만 있으므로 Supabase SQL Editor 작업 필요 없음.
+- 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 73개 통과.
