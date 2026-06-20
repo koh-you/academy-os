@@ -108,6 +108,7 @@ check("67 exam prep dedupes display and groups calendar detail", hasAll(app, ["d
 check("68 duplicate exam prep cleanup API is guarded", hasAll(coreDataRoute, ["deleteDuplicateExamPrepRows", "findDuplicateExamPrepRows", "deleteExamPrepRow"]) && hasAll(fs.readFileSync(path.join(root, "api", "server.js"), "utf8"), ['request.method === "DELETE"', 'requestUrl.pathname === "/api/exam-prep-rows"', 'confirm") === "true"']));
 check("69 exam prep row delete is wired to guarded API", hasAll(app, ["deleteExamPrepRowRequest", "handleDeleteExamPrepRow", "onDeleteRow={handleDeleteExamPrepRow}", "시험정보 삭제 실패", "dangerSoftButton compact"]) && hasAll(fs.readFileSync(path.join(root, "api", "server.js"), "utf8"), ['requestUrl.pathname === "/api/exam-prep-rows"', 'confirm") === "true"']));
 check("70 exam prep edit grid has room for all cycles", hasAll(css, ["grid-template-columns: 140px 240px 90px 136px 156px 236px 540px 320px 270px 220px 132px", "min-width: 2480px", "grid-template-columns: 158px 74px 96px minmax(130px, 1fr) 58px"]));
+check("71 exam prep delete reconciles persisted Sunday makeup lessons", hasAll(app, ["reconcilePersistedSundayMakeupLessons", "buildSundayMakeupCandidates(nextExamPrepRows)", "existingSundayLessons", "lessonIdsToDelete", 'postJson("/api/lessons/bulk", { lessons: lessonsToSave })', 'fetch(apiUrl(`/api/lessons?id=${encodeURIComponent(lessonId)}`), { method: "DELETE" })']));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));

@@ -717,3 +717,10 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - 수정 레이아웃: 시험관리 표 컬럼 폭과 전체 min-width를 늘리고, 수학시험 일정 입력 grid 폭을 넓혀 고사 구분과 무관하게 같은 수정 UI가 적용되도록 보강했다.
 - SQL 주의: 기존 삭제 API와 `exam_prep_rows` 테이블을 사용하므로 Supabase SQL Editor 작업 필요 없음.
 - 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 75개 통과.
+### 2026-06-20 P1. 시험관리 삭제와 저장된 일요보강 연동
+- 상태: 완료
+- 사용자 요청: 시험관리에서 중간고사 일정을 삭제했는데, 기존 저장된 6/21 일요보강에 중간고사 데이터가 남아 있다. 시험관리 행 삭제 시 저장된 일요보강 일정도 함께 정리되어야 한다.
+- 이번 작업 결과: 시험관리 행 삭제 후 남은 시험관리 행 기준으로 기존 `examSundayMakeup` lesson을 재계산한다. 같은 날짜의 일요보강 근거가 남아 있으면 `sourceLabel`을 갱신하고, 더 이상 근거가 없으면 해당 일요보강 lesson을 삭제한다.
+- 운영 처리: Supabase의 `lesson_exam_sunday_makeup_2026-06-21` sourceLabel에서 1학기 중간고사 문구를 제거하고, 현재 남은 1학기 기말고사 학교 목록만 남기도록 갱신했다.
+- SQL 주의: 기존 lessons/exam_prep_rows API를 사용하므로 Supabase SQL Editor 작업 필요 없음.
+- 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 76개 통과.

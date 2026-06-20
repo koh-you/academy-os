@@ -2233,15 +2233,59 @@ export function App() {
     });
   }
 
+  function reconcilePersistedSundayMakeupLessons(nextExamPrepRows) {
+    const sundayCandidates = buildSundayMakeupCandidates(nextExamPrepRows);
+    const candidateByLessonId = new Map(sundayCandidates.map((item) => [item.lesson.lessonId, item.lesson]));
+    const existingSundayLessons = lessons.filter((lesson) => lesson.lessonType === "examSundayMakeup");
+    const lessonsToSave = [];
+    const lessonIdsToDelete = [];
+
+    existingSundayLessons.forEach((lesson) => {
+      const nextLesson = candidateByLessonId.get(lesson.lessonId);
+      if (!nextLesson) {
+        lessonIdsToDelete.push(lesson.lessonId);
+        return;
+      }
+      const mergedLesson = { ...lesson, ...nextLesson, lessonId: lesson.lessonId };
+      if (JSON.stringify(mergedLesson) !== JSON.stringify(lesson)) {
+        lessonsToSave.push(mergedLesson);
+      }
+    });
+
+    if (lessonsToSave.length === 0 && lessonIdsToDelete.length === 0) return;
+
+    setLessons((current) => {
+      const deletedIds = new Set(lessonIdsToDelete);
+      const next = current.filter((lesson) => !deletedIds.has(lesson.lessonId));
+      lessonsToSave.forEach((lesson) => {
+        const index = next.findIndex((item) => item.lessonId === lesson.lessonId);
+        if (index >= 0) next[index] = { ...next[index], ...lesson };
+        else next.push(lesson);
+      });
+      return next;
+    });
+
+    if (lessonsToSave.length > 0) {
+      postJson("/api/lessons/bulk", { lessons: lessonsToSave }).catch((error) => console.error(error));
+    }
+    lessonIdsToDelete.forEach((lessonId) => {
+      fetch(apiUrl(`/api/lessons?id=${encodeURIComponent(lessonId)}`), { method: "DELETE" })
+        .catch((error) => console.error(error));
+    });
+  }
+
   function handleDeleteExamPrepRow(examPrepId) {
     const row = examPrepRows.find((item) => item.examPrepId === examPrepId);
     if (!row) return;
     const label = [row.schoolName, row.grade, row.subject, examCycleLabel(row.examCycle)].filter(Boolean).join(" · ");
     if (typeof window !== "undefined" && !window.confirm(`${label || "이 시험정보"} 행을 삭제할까요?`)) return;
-    setExamPrepRows((current) => current.filter((item) => item.examPrepId !== examPrepId));
+    const nextExamPrepRows = examPrepRows.filter((item) => item.examPrepId !== examPrepId);
+    setExamPrepRows(nextExamPrepRows);
+    reconcilePersistedSundayMakeupLessons(nextExamPrepRows);
     deleteExamPrepRowRequest(examPrepId).catch((error) => {
       console.error(error);
       setExamPrepRows((current) => upsertById(current, row, "examPrepId"));
+      reconcilePersistedSundayMakeupLessons(examPrepRows);
       if (typeof window !== "undefined") window.alert(`시험정보 삭제 실패: ${error.message}`);
     });
   }
