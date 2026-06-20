@@ -13184,9 +13184,9 @@ const supplementStatusSteps = [
 
 const supplementMethodsByType = {
   homework_makeup: [
+    { id: "stay_after", label: "남아서 하고 가기" },
     { id: "next_lesson", label: "다음시간까지" },
-    { id: "arrival_makeup", label: "등원보충" },
-    { id: "stay_after", label: "남아서 하고 가기" }
+    { id: "arrival_makeup", label: "등원보충" }
   ],
   absence_makeup: [
     { id: "recorded_lecture", label: "녹강보강" },
