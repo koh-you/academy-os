@@ -4633,7 +4633,6 @@ function TeacherLessonHubV2({
         <button className="iconButton" onClick={() => onMoveDate(-30)} type="button">‹</button>
         <h1>{formatMonthTitle(selectedDate)}</h1>
         <button className="iconButton" onClick={() => onMoveDate(30)} type="button">›</button>
-        <span className="shortcutHint">↑↓←→ · Enter · Del · Ctrl+C/V/Z</span>
         <div className="lessonTypeFilterBar" aria-label="수업일지 일정 종류 필터">
           {lessonTypeFilterOptions.map((option) => (
             <button
@@ -6018,7 +6017,6 @@ function TeacherLessonHub({
         <button className="iconButton" type="button">‹</button>
         <h1>{formatMonthTitle(selectedDate)}</h1>
         <button className="iconButton" type="button">›</button>
-        <span className="shortcutHint">↑↓←→ · Del · Ctrl+C/V/Z</span>
         <button className="primaryButton" onClick={onAddLesson} type="button">+ 수업 등록</button>
       </header>
 
@@ -6140,7 +6138,6 @@ function LessonHub({
         <button className="iconButton" type="button">‹</button>
         <h1>2026년 6월</h1>
         <button className="iconButton" type="button">›</button>
-        <span className="shortcutHint">↑↓←→ · Ctrl+C/V/Z</span>
         <button className="primaryButton" onClick={onAddLesson} type="button">+ 수업 등록</button>
       </header>
 

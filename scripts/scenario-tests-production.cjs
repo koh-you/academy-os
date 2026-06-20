@@ -115,6 +115,7 @@ check("73 Sunday makeup blocks can be removed inside lesson", hasAll(app, ["func
 check("74 Sunday makeup source pill shows only blocks that remain on source date", hasAll(app, ["shouldDisplayExamSundayMakeupSourceLesson", "getExamSundayMakeupVisibleSourceLabel", "(block.date || lesson.date) === lesson.date", "!shouldDisplayExamSundayMakeupSourceLesson(lesson, generatedLessonControls)"]));
 check("75 Sunday makeup detail shows only blocks for selected date", hasAll(app, ["const displayedBlocks = isFocusedMovedBlock", "? [currentBlock]", "blocks.filter((block) => (block.date || lesson.date) === lesson.date)", "{displayedBlocks.length}개", "displayedBlocks.map((block)"]));
 check("76 lesson modal includes high school senior student group", hasAll(app, ['const lessonStudentGradeOrder = ["고3", "고2", "고1", "중3", "중2", "중1"]', "orderedStudentGrades", 'student.grade || "학년 미입력"']));
+check("77 lesson journal does not show keyboard shortcut hint text", !app.includes("↑↓←→") && !app.includes("Ctrl+C/V/Z"));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));
