@@ -5753,7 +5753,6 @@ function PreparationMemoModal({ lesson, onChangeRecord, onClose, onSaveRecord, p
             </p>
           </div>
           <div className="prepMemoSaveBar">
-            <span className={`saveState save-${saveState}`}>{saveStateLabels[saveState] ?? saveStateLabels.idle}</span>
             <button
               className={`journalSaveButton journalSave-${saveState}`}
               disabled={saveState === "saving"}
