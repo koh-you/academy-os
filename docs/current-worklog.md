@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-06-20 P1. 일요시험보강 블록 저장 상태 및 버튼 정리
+
+- 상태: 완료
+- 사용자 요청: 일요시험보강 블록 메모를 작성했을 때 저장 여부를 알기 어렵고, 버튼별 색/크기가 달라 조잡해 보인다. 해당 데이터가 로컬이 아니라 Supabase에 안전하게 저장되는지도 확인한다.
+- 저장 흐름 확인: 일요시험보강 학교별 블록 메모/날짜/시간은 `generatedLessonControls.sundayMakeupBlocks`에 저장되고, `sharedAppState` 변경 감지 후 `/api/app-state`를 통해 Supabase `app_state`에 저장된다. 로컬 전용 데이터가 아니다.
+- 작업 결과: 블록을 수정/삭제하면 하단 저장 바에 `변경됨 · 블록 저장 필요`가 표시된다. `블록 저장`을 누르면 `저장됨 · Supabase 자동 반영` 상태가 보인다. 자동값 복구/블록 저장은 하단 저장 바에 모으고, 일정 수정/일정 삭제는 상단 일정 관리 버튼으로 분리했다. 일요보강 모달 내부 버튼 높이/라운드/간격을 통일했다.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과, `npm run build` 통과, `npm run test:production` 86개 통과.
+- SQL Editor 작업 필요 없음: 기존 Supabase `app_state` 저장 구조를 사용한다.
+
 ## 2026-06-20 P1. 직전 수업메모 2열 표시 및 학생 알림톡 포함값 저장
 
 - 상태: 완료

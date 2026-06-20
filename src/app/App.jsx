@@ -4807,8 +4807,10 @@ function ExamSundayMakeupLessonDetail({
   onUpdateBlocks
 }) {
   const [draftBlocks, setDraftBlocks] = useState(() => parseExamSundayMakeupBlocks(lesson, blocksOverride));
+  const [blockSaveState, setBlockSaveState] = useState("saved");
   useEffect(() => {
     setDraftBlocks(parseExamSundayMakeupBlocks(lesson, blocksOverride));
+    setBlockSaveState("saved");
   }, [blocksOverride, lesson]);
   const blocks = draftBlocks;
   const currentBlock = focusBlockId ? blocks.find((block) => block.blockId === focusBlockId) : null;
@@ -4821,9 +4823,15 @@ function ExamSundayMakeupLessonDetail({
     ? `${displayLesson.date} ${displayLesson.startTime || ""}${displayLesson.endTime ? `-${displayLesson.endTime}` : ""}`.trim()
     : "";
   const hasBlockSave = Boolean(onUpdateBlocks);
+  const blockSaveLabel = {
+    dirty: "변경됨 · 블록 저장 필요",
+    saved: "저장됨 · Supabase 자동 반영",
+    saving: "저장 중"
+  }[blockSaveState] ?? "저장 전";
 
   function updateBlock(blockId, field, value) {
     setDraftBlocks((current) => current.map((block) => (block.blockId === blockId ? { ...block, [field]: value } : block)));
+    setBlockSaveState("dirty");
   }
 
   function deleteBlock(blockId) {
@@ -4832,17 +4840,23 @@ function ExamSundayMakeupLessonDetail({
         window.alert("마지막 블록은 삭제할 수 없습니다. 전체 일정을 삭제하려면 일정 삭제를 사용하세요.");
         return current;
       }
+      setBlockSaveState("dirty");
       return current.filter((block) => block.blockId !== blockId);
     });
   }
 
   function resetBlocks() {
-    setDraftBlocks(parseExamSundayMakeupBlocks(lesson));
-    onUpdateBlocks?.(parseExamSundayMakeupBlocks(lesson));
+    const defaultBlocks = parseExamSundayMakeupBlocks(lesson);
+    setDraftBlocks(defaultBlocks);
+    setBlockSaveState("saving");
+    onUpdateBlocks?.(defaultBlocks);
+    setBlockSaveState("saved");
   }
 
   function saveBlocks() {
+    setBlockSaveState("saving");
     onUpdateBlocks?.(draftBlocks);
+    setBlockSaveState("saved");
   }
 
   return (
@@ -4875,16 +4889,6 @@ function ExamSundayMakeupLessonDetail({
             </p>
           </div>
           <div className="examSundayActions">
-            {hasBlockSave ? (
-              <>
-                <button className="softButton" onClick={resetBlocks} type="button">
-                  자동값 복구
-                </button>
-                <button className="primaryButton" onClick={saveBlocks} type="button">
-                  블록 저장
-                </button>
-              </>
-            ) : null}
             <button className="ghostButton" onClick={() => onEditLesson(lesson)} type="button">
               일정 수정
             </button>
@@ -4946,6 +4950,19 @@ function ExamSundayMakeupLessonDetail({
             </div>
           ))}
         </div>
+        {hasBlockSave ? (
+          <div className={`examSundaySaveBar ${blockSaveState}`}>
+            <span>{blockSaveLabel}</span>
+            <div>
+              <button className="softButton compact" onClick={resetBlocks} type="button">
+                자동값 복구
+              </button>
+              <button className="primaryButton compact" onClick={saveBlocks} type="button">
+                블록 저장
+              </button>
+            </div>
+          </div>
+        ) : null}
       </section>
     </div>
   );
