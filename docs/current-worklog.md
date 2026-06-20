@@ -661,6 +661,7 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - 상태: 완료
 - 사용자 요청: 숨김 처리된 시험관리 중복 데이터를 삭제하고, 시험관리 화면 칸 간격이 너무 넓은 문제를 줄인다. 학사일정 6/30 창동고1 시험 데이터 2개 원인은 분석만 한다.
 - 이번 작업 결과: 시험정보 중복 삭제용 `DELETE /api/exam-prep-rows?duplicates=true&confirm=true` API를 추가했다. 서버가 화면 표시와 같은 대표 행 선택 기준으로 삭제 후보를 계산하며, `confirm=true` 없이는 동작하지 않는다. 시험관리 표 컬럼 폭과 gap을 줄여 과하게 넓어진 간격을 낮췄다.
+- 운영 처리: 배포 후 삭제 API를 호출해 숨김 중복 행 10개를 삭제했다. 삭제된 행은 상계고/용화여고/자운고/정의여고/창동고 기말의 빈 자동생성 중복 후보이며, 사용자가 입력한 수학시험 날짜가 있는 대표 행은 남겼다.
 - 원인 분석: 운영 API 기준 창동고 6/30은 수동 학사일정이 아니라 시험관리 파생 중복이다. `2026-1-final_창동고_고1_textbook` 행과 `2026-1-mid_창동고_고1_textbook` 행이 모두 `mathExamDate: 2026-06-30`을 가지고 있고, 학사일정은 전체 시험관리 행에서 파생 이벤트를 만들기 때문에 같은 날짜에 두 개가 표시됐다.
 - SQL 주의: 기존 `exam_prep_rows` 테이블의 행 삭제 API만 추가했으며 DB 스키마 변경은 없으므로 Supabase SQL Editor 적용은 필요 없다.
 - 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `npm run build`, `npm run test:production` 68개 통과.
