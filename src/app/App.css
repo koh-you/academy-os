@@ -6863,7 +6863,7 @@ textarea.profileEditInput {
   border-bottom: 1px solid #e6edf7;
   display: grid;
   gap: 12px;
-  grid-template-columns: 180px minmax(0, 1fr) 150px auto;
+  grid-template-columns: 180px minmax(0, 1fr) 150px auto auto;
   padding: 14px 16px;
 }
 
@@ -6888,6 +6888,18 @@ textarea.profileEditInput {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.supplementHistoryActions {
+  display: flex;
+  justify-content: flex-end;
+  min-width: 92px;
+}
+
+.historyActionHint {
+  color: #94a3b8;
+  font-size: 0.82rem;
+  font-weight: 800;
 }
 
 .supplementModalLayout {

@@ -2407,6 +2407,7 @@ export function App() {
             onCreateTask={handleCreateMakeupTask}
             onPassTask={handlePassSupplementTask}
             onScheduleTask={handleScheduleSupplementTask}
+            onUndoPassTask={handleUndoPassSupplementTask}
             onUpdateTask={handleUpdateMakeupTask}
           />
         ) : null}
@@ -3263,6 +3264,43 @@ export function App() {
             status: "verified",
             teacherStatus: "verified",
             verifiedAt: completedAt
+          };
+          postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
+          return nextHomework;
+        })
+      );
+    }
+  }
+
+  function handleUndoPassSupplementTask(task) {
+    if (!task?.makeupTaskId) return;
+    const updatedAt = new Date().toISOString();
+    const restoredStatus = task.linkedLessonId || task.scheduledDate ? "scheduled" : "draft";
+    setMakeupTasks((current) =>
+      current.map((item) =>
+        item.makeupTaskId === task.makeupTaskId
+          ? {
+              ...item,
+              status: restoredStatus,
+              completedAt: "",
+              passedAt: "",
+              touchedAt: updatedAt,
+              updatedAt
+            }
+          : item
+      )
+    );
+
+    if (task.taskType === "homework_makeup" && task.sourceId) {
+      setHomeworks((current) =>
+        current.map((homework) => {
+          if (homework.homeworkId !== task.sourceId) return homework;
+          const nextTeacherStatus = task.reason?.includes("미완료") ? "missing" : "partial";
+          const nextHomework = {
+            ...homework,
+            status: nextTeacherStatus,
+            teacherStatus: nextTeacherStatus,
+            verifiedAt: ""
           };
           postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
           return nextHomework;
@@ -9758,6 +9796,7 @@ function SupplementCenter({
   onCreateTask,
   onPassTask,
   onScheduleTask,
+  onUndoPassTask,
   onUpdateTask
 }) {
   const [selectedSupplementStudentId, setSelectedSupplementStudentId] = useState("");
@@ -9976,6 +10015,7 @@ function SupplementCenter({
         <SupplementHistoryModal
           onChangeQuery={setHistoryQuery}
           onClose={() => setIsHistoryModalOpen(false)}
+          onUndoPassTask={onUndoPassTask}
           query={historyQuery}
           students={students}
           tasks={recentSupplementTasks}
@@ -10151,7 +10191,7 @@ function SupplementStudentModal({
   );
 }
 
-function SupplementHistoryModal({ onChangeQuery, onClose, query, students, tasks }) {
+function SupplementHistoryModal({ onChangeQuery, onClose, onUndoPassTask, query, students, tasks }) {
   const normalizedQuery = query.trim().toLowerCase();
   const filteredTasks = tasks.filter((task) => {
     const student = students.find((item) => item.studentId === task.studentId);
@@ -10221,6 +10261,15 @@ function SupplementHistoryModal({ onChangeQuery, onClose, query, students, tasks
                 <span className={`supplementProgressBadge ${task.status === "done" ? "done" : task.status === "scheduled" ? "scheduled" : "draft"}`}>
                   {statusLabel(task)}
                 </span>
+                <div className="supplementHistoryActions">
+                  {task.status === "done" ? (
+                    <button className="softButton subtle" onClick={() => onUndoPassTask(task)} type="button">
+                      통과 취소
+                    </button>
+                  ) : (
+                    <span className="historyActionHint">관리 중</span>
+                  )}
+                </div>
               </article>
             );
           })}
