@@ -374,6 +374,63 @@ function getKoreaDateString(date = new Date()) {
   }).format(date);
 }
 
+function compactExamPrepKeyPart(value = "") {
+  return String(value || "").replace(/\s+/g, "");
+}
+
+function normalizeExamEntries(row = {}) {
+  return Array.isArray(row.mathExamDates) ? row.mathExamDates : [];
+}
+
+function getExamPrepLogicalKey(row = {}) {
+  return [
+    row.examCycle || getDefaultExamCycleForDate(),
+    compactExamPrepKeyPart(row.schoolName || "학교 미입력"),
+    compactExamPrepKeyPart(row.grade || "학년 미입력"),
+    compactExamPrepKeyPart(row.subject || "공통수학1")
+  ].join("|");
+}
+
+function getExamPrepRowCompleteness(row = {}) {
+  return [
+    row.publisher,
+    row.examPeriod,
+    row.mathExamDate,
+    row.scope,
+    row.subTextbook,
+    row.review,
+    row.revisedReview,
+    row.specialNote,
+    row.memo,
+    ...normalizeExamEntries(row).flatMap((entry) => [entry.date, entry.subject, entry.label])
+  ].filter((value) => String(value ?? "").trim()).length;
+}
+
+function isPlaceholderExamPrepRow(row = {}) {
+  return String(row.examPrepId || "").endsWith("_textbook") || !String(row.publisher || "").trim();
+}
+
+function chooseRepresentativeExamPrepRow(currentRow, candidateRow) {
+  const currentScore = getExamPrepRowCompleteness(currentRow);
+  const candidateScore = getExamPrepRowCompleteness(candidateRow);
+  if (candidateScore !== currentScore) return candidateScore > currentScore ? candidateRow : currentRow;
+  const currentPlaceholder = isPlaceholderExamPrepRow(currentRow);
+  const candidatePlaceholder = isPlaceholderExamPrepRow(candidateRow);
+  if (currentPlaceholder !== candidatePlaceholder) return candidatePlaceholder ? currentRow : candidateRow;
+  return String(candidateRow.updatedAt || "") > String(currentRow.updatedAt || "") ? candidateRow : currentRow;
+}
+
+function findDuplicateExamPrepRows(rows = []) {
+  const grouped = new Map();
+  rows.forEach((row) => {
+    const key = getExamPrepLogicalKey(row);
+    const previous = grouped.get(key);
+    grouped.set(key, previous ? chooseRepresentativeExamPrepRow(previous, row) : row);
+  });
+  const representativeIds = new Set([...grouped.values()].map((row) => row.examPrepId));
+  return rows.filter((row) => !representativeIds.has(row.examPrepId));
+}
+
 function toSchoolEventType(value = "event") {
   return {
     examPeriod: "exam_period",
@@ -755,6 +812,30 @@ export async function listExamPrepRows() {
 
   const rows = await listRows("exam_prep_rows", "select=*&order=school_name.asc,grade.asc,subject.asc", { requireServiceRole: true });
   return { source: databaseSource, examPrepRows: rows.map(fromExamPrepRow) };
+}
+
+export async function deleteExamPrepRow(examPrepId) {
+  if (!examPrepId) throw new Error("삭제할 시험정보 ID가 필요합니다.");
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, deletedExamPrepRowIds: [examPrepId] };
+  }
+
+  await deleteRows("exam_prep_rows", `exam_prep_id=eq.${encodeURIComponent(examPrepId)}`);
+  return { source: databaseSource, deletedExamPrepRowIds: [examPrepId] };
+}
+
+export async function deleteDuplicateExamPrepRows() {
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, deletedExamPrepRowIds: [] };
+  }
+
+  const rows = await listRows("exam_prep_rows", "select=*&order=school_name.asc,grade.asc,subject.asc", { requireServiceRole: true });
+  const examPrepRows = rows.map(fromExamPrepRow);
+  const duplicateRows = findDuplicateExamPrepRows(examPrepRows);
+  for (const row of duplicateRows) {
+    await deleteRows("exam_prep_rows", `exam_prep_id=eq.${encodeURIComponent(row.examPrepId)}`);
+  }
+  return { source: databaseSource, deletedExamPrepRowIds: duplicateRows.map((row) => row.examPrepId) };
 }
 
 export async function upsertExamPrepRow(row) {

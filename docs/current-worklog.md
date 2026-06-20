@@ -656,3 +656,11 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - 이번 작업 결과: 새 시험정보 자동생성 ID를 `고사+학교+학년+과목` 기준으로 고정해 교재/출판사 변경으로 새 행이 생기지 않게 했다. 기존 중복 데이터는 삭제하지 않고, 화면 표시와 학사일정 파생 이벤트에서 같은 `examCycle/schoolName/grade/subject` 묶음의 대표 행만 사용한다. 대표 행은 입력값이 더 많은 행, 비어 있는 `_textbook` placeholder가 아닌 행, 최신 수정 행 순서로 고른다. 월간 캘린더 pill 라벨은 학교/학년/과목 요약으로 표시하고, 날짜 상세 모달은 학교별 그룹으로 묶어 시험기간과 수학시험을 구분해 보여준다.
 - SQL 주의: 기존 데이터는 삭제/병합하지 않고 앱 표시/파생 로직만 바꾸므로 Supabase SQL Editor 적용은 필요 없다.
 - 검증: `npm run build`, `npm run test:production` 67개 통과.
+
+### 2026-06-20 P1. 숨김 시험관리 중복 데이터 삭제 준비와 표 간격 축소
+- 상태: 완료
+- 사용자 요청: 숨김 처리된 시험관리 중복 데이터를 삭제하고, 시험관리 화면 칸 간격이 너무 넓은 문제를 줄인다. 학사일정 6/30 창동고1 시험 데이터 2개 원인은 분석만 한다.
+- 이번 작업 결과: 시험정보 중복 삭제용 `DELETE /api/exam-prep-rows?duplicates=true&confirm=true` API를 추가했다. 서버가 화면 표시와 같은 대표 행 선택 기준으로 삭제 후보를 계산하며, `confirm=true` 없이는 동작하지 않는다. 시험관리 표 컬럼 폭과 gap을 줄여 과하게 넓어진 간격을 낮췄다.
+- 원인 분석: 운영 API 기준 창동고 6/30은 수동 학사일정이 아니라 시험관리 파생 중복이다. `2026-1-final_창동고_고1_textbook` 행과 `2026-1-mid_창동고_고1_textbook` 행이 모두 `mathExamDate: 2026-06-30`을 가지고 있고, 학사일정은 전체 시험관리 행에서 파생 이벤트를 만들기 때문에 같은 날짜에 두 개가 표시됐다.
+- SQL 주의: 기존 `exam_prep_rows` 테이블의 행 삭제 API만 추가했으며 DB 스키마 변경은 없으므로 Supabase SQL Editor 적용은 필요 없다.
+- 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `npm run build`, `npm run test:production` 68개 통과.

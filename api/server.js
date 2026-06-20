@@ -2,6 +2,8 @@
 import {
   deleteLesson,
   deleteLessonsBefore,
+  deleteDuplicateExamPrepRows,
+  deleteExamPrepRow,
   deleteAllMakeupTasks,
   deleteMakeupTask,
   deleteResourceMaterial,
@@ -592,6 +594,20 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await upsertExamPrepRows(payload.examPrepRows ?? payload.rows ?? []);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "DELETE" && requestUrl.pathname === "/api/exam-prep-rows") {
+    try {
+      const deleteDuplicates = requestUrl.searchParams.get("duplicates") === "true";
+      const confirmed = requestUrl.searchParams.get("confirm") === "true";
+      const examPrepId = requestUrl.searchParams.get("id");
+      if (!confirmed) throw new Error("시험정보 삭제는 confirm=true가 필요합니다.");
+      const result = deleteDuplicates ? await deleteDuplicateExamPrepRows() : await deleteExamPrepRow(examPrepId);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
