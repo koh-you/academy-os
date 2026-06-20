@@ -124,7 +124,7 @@ function getHomeworkStatusFromAssignmentStatus(value) {
   if (normalizedValue === "not_done") {
     return { status: "missing", teacherStatus: "missing" };
   }
-  if (["partial_80", "partial_50", "known_only", "too_hard", "answer_suspected"].includes(normalizedValue)) {
+  if (["partial_80", "partial_50"].includes(normalizedValue)) {
     return { status: "partial", teacherStatus: "partial" };
   }
   return { status: "assigned", teacherStatus: "unverified" };
@@ -132,7 +132,7 @@ function getHomeworkStatusFromAssignmentStatus(value) {
 
 function isAssignmentStatusHomeworkMakeupCandidate(value) {
   const normalizedValue = normalizeAssignmentStatusValue(value);
-  return ["not_done", "partial_80", "partial_50", "known_only", "too_hard", "answer_suspected"].includes(normalizedValue);
+  return ["not_done", "partial_80", "partial_50", "not_checked"].includes(normalizedValue);
 }
 
 function getLessonMaterial(record, student) {
@@ -167,16 +167,16 @@ function joinMessageBlocks(blocks) {
   return blocks.map(normalizeMessageText).filter(Boolean).join("\n\n");
 }
 
-function buildCommentPreviewLines({ audience, comment, nextHomework, previousHomework, record, student }) {
+function buildCommentPreviewLines({ audience, comment, nextHomework, previousHomework, record, student, supplementSchedules = [] }) {
   const lessonMaterial = getLessonMaterial(record, student);
   const lessonContent = getLessonContent(record);
   const assignmentStatus = record?.assignmentStatus ?? record?.incompleteHomework ?? "";
   const attendance = attendanceLabels[record?.attendanceStatus ?? "pending"] ?? "";
   const commentText = normalizeMessageText(comment);
-  const shouldIncludePrepMemo =
-    audience === "student" ? Boolean(record?.prepStudentVisible) : Boolean(record?.prepParentVisible);
-  const prepMemo = normalizeMessageText(record?.preparationMemo);
-  const prepNotice = shouldIncludePrepMemo && prepMemo && !commentText.includes(prepMemo) ? prepMemo : "";
+  const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
+  const supplementNotice = supplementText && !commentText.includes("보충일정") && !supplementSchedules.some((item) => commentText.includes(item))
+    ? supplementText
+    : "";
   const lines = [
     createMessageLine("🏫 출결", attendance),
     createMessageLine("📚 강의 교재", lessonMaterial),
@@ -184,14 +184,14 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, previousHom
     createMessageLine("📘 지난 과제", previousHomework?.title),
     createMessageLine("➡️ 다음 과제", nextHomework?.title),
     audience === "parent" && assignmentStatus ? createMessageLine("✅ 과제 상태", getAssignmentStatusParentMessage(assignmentStatus)) : "",
-    prepNotice ? createMessageBlock("📝 수업메모", prepNotice) : "",
+    supplementNotice ? createMessageBlock("⭐ 보충 일정", supplementNotice) : "",
     commentText ? createMessageBlock("💬 코멘트", commentText) : ""
   ];
 
   return lines.filter(Boolean);
 }
 
-function buildCommentPreviewText({ audience, comment, lesson, nextHomework, previousHomework, record, student }) {
+function buildCommentPreviewText({ audience, comment, lesson, nextHomework, previousHomework, record, student, supplementSchedules = [] }) {
   const isParent = audience === "parent";
   const previewLines = buildCommentPreviewLines({
     audience,
@@ -199,7 +199,8 @@ function buildCommentPreviewText({ audience, comment, lesson, nextHomework, prev
     nextHomework,
     previousHomework,
     record,
-    student
+    student,
+    supplementSchedules
   });
 
   return joinMessageBlocks([
@@ -211,7 +212,7 @@ function buildCommentPreviewText({ audience, comment, lesson, nextHomework, prev
   ]);
 }
 
-function buildCommentSourceText({ lesson, nextHomework, previousHomework, record, student }) {
+function buildCommentSourceText({ lesson, nextHomework, previousHomework, record, student, supplementSchedules = [] }) {
   return joinMessageBlocks([
     createMessageLine("수신 학생", student.name),
     createMessageLine("수업", `${lesson.date} ${lesson.className}`),
@@ -221,8 +222,38 @@ function buildCommentSourceText({ lesson, nextHomework, previousHomework, record
     createMessageLine("지난 과제", previousHomework?.title),
     createMessageLine("다음 과제", nextHomework?.title),
     createMessageLine("과제 상태", getAssignmentStatusParentMessage(record?.assignmentStatus ?? record?.incompleteHomework ?? "")),
+    supplementSchedules.length ? createMessageBlock("보충일정", supplementSchedules.map((item) => `- ${item}`).join("\n")) : "",
     createMessageBlock("수업메모", record?.preparationMemo)
   ]) || "알림톡에 참고할 원본 정보가 아직 없습니다.";
+}
+
+function formatSupplementScheduleLine(task = {}) {
+  const schedule = [task.scheduledDate, task.scheduledTime].filter(Boolean).join(" ");
+  const method = supplementMethodLabel(task);
+  const source = task.sourceLabel || followUpTypeLabel(task.taskType);
+  const status = task.status === "done" ? "보충 완료" : task.status === "scheduled" ? "일정 확정" : "일정 미확정";
+  return [schedule || "일정 미정", source, method, status].filter(Boolean).join(" · ");
+}
+
+function getStudentSupplementSchedules(makeupTasks = [], studentId = "") {
+  return makeupTasks
+    .filter((task) => task.studentId === studentId && task.status !== "done")
+    .filter((task) => task.scheduledDate || task.scheduledTime || task.notificationDraft || task.sourceLabel)
+    .sort((a, b) => `${a.scheduledDate || "9999-99-99"} ${a.scheduledTime || ""}`.localeCompare(`${b.scheduledDate || "9999-99-99"} ${b.scheduledTime || ""}`))
+    .map(formatSupplementScheduleLine);
+}
+
+function buildInitialCommentDraft({ audience, existingComment, record, supplementSchedules }) {
+  const commentText = normalizeMessageText(existingComment);
+  const shouldIncludePrepMemo =
+    audience === "student" ? Boolean(record?.prepStudentVisible) : Boolean(record?.prepParentVisible);
+  const prepMemo = shouldIncludePrepMemo ? normalizeMessageText(record?.preparationMemo) : "";
+  const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
+  return joinMessageBlocks([
+    prepMemo,
+    supplementText ? `보충 일정:\n${supplementText}` : "",
+    commentText
+  ]);
 }
 
 const saveStateLabels = {
@@ -350,6 +381,7 @@ const examPrepTextbookBySchoolGrade = {
 
 const schoolCalendarGradeOptions = ["중3", "고1", "고2", "고3"];
 const schoolCalendarMathSubjectOptions = ["공통수학1", "공통수학2", "대수", "미적분1", "확률과통계", "미적분2", "기하"];
+const currentExamCycle = "2026-1-final";
 
 function createParentLoginId(student) {
   return `parent-${student.loginId}`;
@@ -369,7 +401,7 @@ function createDefaultExamAnalysis(examPrepRow = {}) {
     schoolName,
     grade,
     subject,
-    examName: "2026 1학기 중간고사",
+    examName: "2026 1학기 기말고사",
     examDate: "2026-06-12",
     sourceFileUrl: "",
     rawExamText: "",
@@ -418,6 +450,20 @@ function examCycleLabel(examCycle) {
     "2026-2-mid": "2학기 중간고사",
     "2026-2-final": "2학기 기말고사"
   }[examCycle] ?? examCycle;
+}
+
+function getDefaultExamPeriodRange(examCycle = currentExamCycle) {
+  return {
+    "2026-1-mid": { date: "2026-04-27", endDate: "2026-05-08" },
+    "2026-1-final": { date: "2026-06-29", endDate: "2026-07-03" },
+    "2026-2-mid": { date: "2026-09-28", endDate: "2026-10-02" },
+    "2026-2-final": { date: "2026-12-14", endDate: "2026-12-24" }
+  }[examCycle] ?? { date: today, endDate: today };
+}
+
+function getDefaultExamPeriodText(examCycle = currentExamCycle) {
+  const range = getDefaultExamPeriodRange(examCycle);
+  return formatDateRangeText(range.date, range.endDate);
 }
 
 function normalizeGradeLabel(grade = "") {
@@ -597,7 +643,7 @@ function buildExamPrepRowsFromStudents(students, examCycle, classTemplateId = ""
         publisher: findLinkedPublisher(existingRows, draftRow) || student.textbook || "",
         scope: "",
         subTextbook: "",
-        examPeriod: "",
+        examPeriod: getDefaultExamPeriodText(examCycle),
         mathExamDate: "",
         mathExamDates: [],
         review: "",
@@ -614,7 +660,7 @@ function createSchoolEventFromExamPrepRow(row, index = 0) {
     eventId: `event_exam_${row.examPrepId ?? index}`,
     date: getDefaultMathExamDate(row, index),
     schoolName: row.schoolName || "학교 미입력",
-    title: `${examCycleLabel(row.examCycle ?? "2026-1-mid")} 수학시험`,
+    title: `${examCycleLabel(row.examCycle ?? currentExamCycle)} 수학시험`,
     type: "mathExam",
     color: "#dc2626"
   };
@@ -705,11 +751,15 @@ function syncSchoolCalendarEventToExamPrepRows(rows = [], event = {}, onUpdateEx
   });
 }
 
+function isExamLinkedCalendarEvent(event = {}) {
+  return event.type === "examPeriod" || event.type === "mathExam";
+}
+
 function getExamPeriodGroupKey(row = {}) {
   const period = parseDateRangeText(row.examPeriod);
   return [
     row.schoolName || "학교 미입력",
-    row.examCycle || "2026-1-mid",
+    row.examCycle || currentExamCycle,
     period?.date || "",
     period?.endDate || ""
   ].join("|");
@@ -754,7 +804,7 @@ function buildExamCalendarEvents(rows) {
           examPeriodGroupKey: periodKey,
           date: period.date,
           endDate: period.endDate,
-          title: `${row.schoolName || "학교 미입력"} ${examCycleLabel(row.examCycle ?? "2026-1-mid")} 시험기간`,
+          title: `${row.schoolName || "학교 미입력"} ${examCycleLabel(row.examCycle ?? currentExamCycle)} 시험기간`,
           type: "examPeriod",
           color: "#ef4444"
         });
@@ -1322,6 +1372,28 @@ export function App() {
       return hasChanged ? nextStudents : currentStudents;
     });
   }, [setStudents]);
+
+  useEffect(() => {
+    setExamPrepRows((current) =>
+      mergeById(
+        current,
+        buildExamPrepRowsFromStudents(students, currentExamCycle, "template_mwf_7_10", current),
+        "examPrepId"
+      )
+    );
+  }, [setExamPrepRows, students]);
+
+  useEffect(() => {
+    setExamPrepRows((current) => {
+      let hasChanged = false;
+      const nextRows = current.map((row) => {
+        if (row.examPeriod || !row.examCycle) return row;
+        hasChanged = true;
+        return { ...row, examPeriod: getDefaultExamPeriodText(row.examCycle) };
+      });
+      return hasChanged ? nextRows : current;
+    });
+  }, [setExamPrepRows]);
 
   const lessonsForDate = useMemo(
     () => lessons.filter((lesson) => lesson.date === selectedDate).sort(sortByTime),
@@ -2333,6 +2405,7 @@ export function App() {
             students={students}
             tasks={makeupTasks}
             onCreateTask={handleCreateMakeupTask}
+            onPassTask={handlePassSupplementTask}
             onScheduleTask={handleScheduleSupplementTask}
             onUpdateTask={handleUpdateMakeupTask}
           />
@@ -2594,6 +2667,13 @@ export function App() {
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
     const sourceField = target === "student" ? "studentComment" : "teacherComment";
     const statusField = target === "student" ? "studentCommentAiStatus" : "teacherCommentAiStatus";
+    const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId);
+    const sourceDraft = buildInitialCommentDraft({
+      audience: target === "student" ? "student" : "parent",
+      existingComment: record?.[sourceField] ?? "",
+      record,
+      supplementSchedules
+    });
 
     setRecords((current) =>
       upsertById(
@@ -2625,9 +2705,10 @@ export function App() {
           lessonContent: getLessonContent(record),
           lessonMaterial: getLessonMaterial(record, student),
           lessonName: lesson.className,
-          rawText: record?.[sourceField] ?? "",
+          rawText: sourceDraft || (record?.[sourceField] ?? ""),
           schoolName: student.schoolName,
-          studentName: student.name
+          studentName: student.name,
+          supplementSchedule: supplementSchedules.join("\n")
         })
       });
       const result = await response.json();
@@ -2828,6 +2909,7 @@ export function App() {
       const assignmentStatus = record?.assignmentStatus ?? record?.incompleteHomework ?? "";
       const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
       const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
+      const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId);
       const notificationPayload = {
         academyName: academyBrandName,
         assignmentStatus,
@@ -2841,9 +2923,9 @@ export function App() {
         forceDryRun: Boolean(options.forceDryRun),
         forceTestRecipient: Boolean(options.forceTestRecipient),
         commentBodyOverride: manualCommentBody,
-        message: manualCommentBody || message,
+        message: finalMessage,
         nextHomework: nextHomework?.title ?? "",
-        preparationNotice: manualCommentBody ? "" : prepMessage,
+        preparationNotice: "",
         parentPhone: student.parentPhone,
         previousHomework: previousHomework?.title ?? "",
         scheduledDate,
@@ -2851,6 +2933,7 @@ export function App() {
         studentId: student.studentId,
         studentName: student.name,
         studentPhone: student.studentPhone,
+        supplementSchedule: supplementSchedules.join("\n"),
         target
       };
       const response = await fetch(apiUrl("/api/notifications/comment-alimtalk"), {
@@ -3148,6 +3231,44 @@ export function App() {
     setSelectedLessonId(lesson.lessonId);
     setIsLessonJournalOpen(false);
     postJson("/api/lessons", { lesson }).catch((error) => console.error(error));
+  }
+
+  function handlePassSupplementTask(task) {
+    if (!task?.studentId || !task?.sourceId) return;
+    const completedAt = new Date().toISOString();
+    const makeupTaskId = task.makeupTaskId || `makeup_pass_${Date.now()}_${task.studentId}`;
+    const nextTask = {
+      scheduledDate: task.scheduledDate || today,
+      scheduledTime: task.scheduledTime || "",
+      notificationDraft: task.notificationDraft || "",
+      attemptCount: task.attemptCount ?? 0,
+      childHomeworkIds: task.childHomeworkIds ?? [],
+      createdAt: task.createdAt || completedAt,
+      ...task,
+      makeupTaskId,
+      completedAt,
+      passedAt: completedAt,
+      status: "done",
+      touchedAt: completedAt
+    };
+
+    setMakeupTasks((current) => upsertById(current, nextTask, "makeupTaskId"));
+
+    if (task.taskType === "homework_makeup") {
+      setHomeworks((current) =>
+        current.map((homework) => {
+          if (homework.homeworkId !== task.sourceId) return homework;
+          const nextHomework = {
+            ...homework,
+            status: "verified",
+            teacherStatus: "verified",
+            verifiedAt: completedAt
+          };
+          postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
+          return nextHomework;
+        })
+      );
+    }
   }
 
   function handleUpdateMakeupTask(taskId, field, value) {
@@ -4266,18 +4387,21 @@ function LessonJournalDetail({
 
   function openCommentComposer(audience, targetStudent, baseRecord, previousHomework, nextHomework) {
     const field = audience === "student" ? "studentComment" : "teacherComment";
-    const shouldIncludeMemo = audience === "student"
-      ? Boolean(baseRecord?.prepStudentVisible)
-      : Boolean(baseRecord?.prepParentVisible);
-    const memo = baseRecord?.preparationMemo?.trim() ?? "";
-    const shouldSeedMemo = shouldIncludeMemo && memo && !baseRecord?.[field]?.trim();
-    const nextRecord = shouldSeedMemo ? { ...baseRecord, [field]: memo } : baseRecord;
+    const supplementSchedules = getStudentSupplementSchedules(makeupTasks, targetStudent.studentId);
+    const draft = buildInitialCommentDraft({
+      audience,
+      existingComment: baseRecord?.[field] ?? "",
+      record: baseRecord,
+      supplementSchedules
+    });
+    const shouldSeedDraft = draft && draft !== normalizeMessageText(baseRecord?.[field] ?? "");
+    const nextRecord = shouldSeedDraft ? { ...baseRecord, [field]: draft } : baseRecord;
 
-    if (shouldSeedMemo) {
-      onChangeRecord(lesson, targetStudent, field, memo);
+    if (shouldSeedDraft) {
+      onChangeRecord(lesson, targetStudent, field, draft);
     }
 
-    setCommentModal({ audience, nextHomework, previousHomework, record: nextRecord, student: targetStudent });
+    setCommentModal({ audience, nextHomework, previousHomework, record: nextRecord, student: targetStudent, supplementSchedules });
   }
 
   function getCommentModalRecord() {
@@ -4510,6 +4634,7 @@ function LessonJournalDetail({
           nextHomework={commentModal.nextHomework}
           previousHomework={commentModal.previousHomework}
           student={commentModal.student}
+          supplementSchedules={commentModal.supplementSchedules}
         />
       ) : null}
 
@@ -4650,7 +4775,8 @@ function CommentComposerModal({
   onSendComment,
   previousHomework,
   record,
-  student
+  student,
+  supplementSchedules = []
 }) {
   const [sendTiming, setSendTiming] = useState("default");
   const [isSourceOpen, setIsSourceOpen] = useState(false);
@@ -4681,7 +4807,8 @@ function CommentComposerModal({
     nextHomework,
     previousHomework,
     record,
-    student
+    student,
+    supplementSchedules
   });
   const generatedPreviewText = buildCommentPreviewText({
     audience,
@@ -4690,7 +4817,8 @@ function CommentComposerModal({
     nextHomework,
     previousHomework,
     record,
-    student
+    student,
+    supplementSchedules
   });
 
   return (
@@ -5594,7 +5722,7 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState("info");
   const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("template_mwf_7_10");
-  const [selectedExamCycle, setSelectedExamCycle] = useState("2026-1-mid");
+  const [selectedExamCycle, setSelectedExamCycle] = useState(currentExamCycle);
   const [editingExamPrepId, setEditingExamPrepId] = useState("");
   const [reviewModalRowId, setReviewModalRowId] = useState("");
   const [tallySubmissions, setTallySubmissions] = useStoredState(storageKeys.tallySubmissions, []);
@@ -5607,7 +5735,7 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
   const classStudents = students.filter((student) => student.defaultClassTemplateId === selectedClassTemplateId);
   const classSchools = new Set(classStudents.map((student) => student.schoolName).filter(Boolean));
   const visibleRows = rows.filter((row) => {
-    const rowCycle = row.examCycle ?? "2026-1-mid";
+    const rowCycle = row.examCycle ?? currentExamCycle;
     const matchesCycle = rowCycle === selectedExamCycle;
     const matchesClass = classSchools.size === 0 || classSchools.has(row.schoolName);
     return matchesCycle && matchesClass;
@@ -6770,7 +6898,7 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
   const [newEvent, setNewEvent] = useState({
     schoolName: rows[0]?.schoolName ?? "",
     grade: schoolCalendarGradeOptions.includes(rows[0]?.grade) ? rows[0]?.grade : "고1",
-    examCycle: rows[0]?.examCycle ?? "2026-1-mid",
+    examCycle: currentExamCycle,
     date: today,
     endDate: "",
     title: "",
@@ -6791,8 +6919,8 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
   const schools = [...new Set(rows.map((row) => row.schoolName).filter(Boolean))];
   const examCycleOptions = [...new Set(rows.map((row) => row.examCycle).filter(Boolean))];
   const safeExamCycleOptions = examCycleOptions.length
-    ? examCycleOptions
-    : ["2026-1-mid", "2026-1-final", "2026-2-mid", "2026-2-final"];
+    ? [currentExamCycle, ...examCycleOptions.filter((cycle) => cycle !== currentExamCycle)]
+    : [currentExamCycle, "2026-1-mid", "2026-2-mid", "2026-2-final"];
   const eventTypeLabels = {
     examPeriod: "시험기간",
     mathExam: "수학시험",
@@ -6810,7 +6938,10 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
   ];
   const eventColorOptions = ["#dc2626", "#2563eb", "#16a34a", "#7c3aed", "#ea580c", "#0891b2", "#17213d"];
   const examEvents = buildExamCalendarEvents(rows);
-  const manualEvents = events.filter((event) => !String(event.eventId ?? "").startsWith("event_exam_"));
+  const manualEvents = events.filter((event) =>
+    !String(event.eventId ?? "").startsWith("event_exam_") &&
+    !isExamLinkedCalendarEvent(event)
+  );
   const academicEvents = [...examEvents, ...manualEvents].sort((a, b) => a.date.localeCompare(b.date));
   const filteredEvents = academicEvents.filter(
     (event) => schoolFilter === "전체 학교" || event.schoolName === schoolFilter
@@ -6843,9 +6974,11 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
       title,
       examSubject: subjectTitle
     };
-    onAddEvent(nextEvent);
     syncSchoolCalendarEventToExamPrepRows(rows, nextEvent, onUpdateExamPrepRow);
     if (nextEvent.type === "mathExam") onSyncPreExamLesson?.(nextEvent);
+    if (!isExamLinkedCalendarEvent(nextEvent)) {
+      onAddEvent(nextEvent);
+    }
     if (newEvent.type === "examPeriod") {
       newEvent.mathExamItems
         .filter((item) => item.date && (item.grade || item.subject))
@@ -6866,7 +6999,6 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
             memo: item.memo || newEvent.memo,
             color: "#dc2626"
           };
-          onAddEvent(mathEvent);
           syncSchoolCalendarEventToExamPrepRows(rows, mathEvent, onUpdateExamPrepRow);
           onSyncPreExamLesson?.(mathEvent);
         });
@@ -6882,7 +7014,6 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
         examSubject: subjectTitle,
         color: "#dc2626"
       };
-      onAddEvent(mathEvent);
       syncSchoolCalendarEventToExamPrepRows(rows, mathEvent, onUpdateExamPrepRow);
       onSyncPreExamLesson?.(mathEvent);
     }
@@ -6930,6 +7061,33 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
     }));
   }
 
+  function changeNewEventType(type) {
+    setNewEvent((current) => {
+      if (type !== "examPeriod") return { ...current, type };
+      const range = getDefaultExamPeriodRange(current.examCycle);
+      return {
+        ...current,
+        type,
+        date: range.date,
+        endDate: range.endDate,
+        title: examCycleLabel(current.examCycle)
+      };
+    });
+  }
+
+  function changeNewEventExamCycle(examCycle) {
+    setNewEvent((current) => {
+      const range = getDefaultExamPeriodRange(examCycle);
+      return {
+        ...current,
+        examCycle,
+        date: current.type === "examPeriod" ? range.date : current.date,
+        endDate: current.type === "examPeriod" ? range.endDate : current.endDate,
+        title: current.type === "examPeriod" ? examCycleLabel(examCycle) : current.title
+      };
+    });
+  }
+
   function openDateModal(date) {
     setSelectedDate(date);
     setIsDateModalOpen(true);
@@ -6940,8 +7098,10 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
     setSelectedMonth(date);
     setNewEvent((current) => ({
       ...current,
-      date,
-      endDate: date,
+      date: current.type === "examPeriod" ? getDefaultExamPeriodRange(current.examCycle || currentExamCycle).date : date,
+      endDate: current.type === "examPeriod" ? getDefaultExamPeriodRange(current.examCycle || currentExamCycle).endDate : date,
+      examCycle: current.examCycle || currentExamCycle,
+      title: current.type === "examPeriod" && !current.title ? examCycleLabel(current.examCycle || currentExamCycle) : current.title,
       schoolName: schoolFilter === "전체 학교" ? current.schoolName : schoolFilter,
       mathExamItems: current.mathExamItems.map((item, index) => ({
         ...item,
@@ -7026,7 +7186,7 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
             <div className="schoolEventFormPanel modalForm">
               <label className="inputTypeField">
                 입력 유형
-                <select value={newEvent.type} onChange={(event) => setNewEvent((current) => ({ ...current, type: event.target.value }))}>
+                <select value={newEvent.type} onChange={(event) => changeNewEventType(event.target.value)}>
                   {Object.entries(eventTypeLabels).map(([value, label]) => (
                     <option key={value} value={value}>{label}</option>
                   ))}
@@ -7041,16 +7201,16 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
                   ))}
                 </select>
               </label>
+              <label>
+                시험 구분
+                <select value={newEvent.examCycle} onChange={(event) => changeNewEventExamCycle(event.target.value)}>
+                  {safeExamCycleOptions.map((cycle) => (
+                    <option key={cycle} value={cycle}>{examCycleLabel(cycle)}</option>
+                  ))}
+                </select>
+              </label>
               {newEvent.type !== "examPeriod" ? (
                 <>
-                  <label>
-                    시험 구분
-                    <select value={newEvent.examCycle} onChange={(event) => setNewEvent((current) => ({ ...current, examCycle: event.target.value }))}>
-                      {safeExamCycleOptions.map((cycle) => (
-                        <option key={cycle} value={cycle}>{examCycleLabel(cycle)}</option>
-                      ))}
-                    </select>
-                  </label>
                   <label>
                     학년
                     <select value={newEvent.grade} onChange={(event) => setNewEvent((current) => ({ ...current, grade: event.target.value }))}>
@@ -7081,68 +7241,75 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
                   ))}
                 </div>
               </label>
-              <div className="calendarDateGrid">
-                <label>
-                  시작일
-                  <input type="date" value={newEvent.date} onChange={(event) => setNewEvent((current) => ({ ...current, date: event.target.value }))} />
-                </label>
-                <label>
-                  종료일
-                  <input type="date" value={newEvent.endDate} onChange={(event) => setNewEvent((current) => ({ ...current, endDate: event.target.value }))} />
-                </label>
-              </div>
               {newEvent.type === "examPeriod" ? (
-                <div className="examSubjectBox schoolExamBundleBox">
-                  <div className="sectionHeader slim">
-                    <strong>수학시험 날짜</strong>
-                    <button className="softButton small" onClick={addMathExamItem} type="button">+ 수학시험 추가</button>
+                <>
+                  <div className="calendarDateGrid">
+                    <label>
+                      시작일
+                      <input type="date" value={newEvent.date} onChange={(event) => setNewEvent((current) => ({ ...current, date: event.target.value }))} />
+                    </label>
+                    <label>
+                      종료일
+                      <input type="date" value={newEvent.endDate} onChange={(event) => setNewEvent((current) => ({ ...current, endDate: event.target.value }))} />
+                    </label>
                   </div>
-                  <div className="mathExamItemStack">
-                    {newEvent.mathExamItems.map((item, index) => (
-                      <div className="mathExamItemRow" key={item.id}>
-                        <label>
-                          학년
-                          <select value={item.grade} onChange={(event) => updateMathExamItem(item.id, "grade", event.target.value)}>
-                            <option value="">학년 선택</option>
-                            {schoolCalendarGradeOptions.map((grade) => (
-                              <option key={grade} value={grade}>{grade}</option>
-                            ))}
-                          </select>
-                        </label>
-                        <label>
-                          과목
-                          <select value={item.subject} onChange={(event) => updateMathExamItem(item.id, "subject", event.target.value)}>
-                            {schoolCalendarMathSubjectOptions.map((subject) => (
-                              <option key={subject} value={subject}>{subject}</option>
-                            ))}
-                          </select>
-                        </label>
-                        <label>
-                          시험 날짜
-                          <input type="date" value={item.date} onChange={(event) => updateMathExamItem(item.id, "date", event.target.value)} />
-                        </label>
-                        <button className="iconButton" disabled={newEvent.mathExamItems.length === 1} onClick={() => removeMathExamItem(item.id)} type="button">
-                          ×
-                        </button>
-                        <label className="mathExamItemMemo">
-                          메모
-                          <input value={item.memo} onChange={(event) => updateMathExamItem(item.id, "memo", event.target.value)} placeholder={`${index + 1}번째 수학시험 메모`} />
-                        </label>
-                      </div>
-                    ))}
+                  <div className="examSubjectBox schoolExamBundleBox">
+                    <div className="sectionHeader slim">
+                      <strong>수학시험 날짜</strong>
+                      <button className="softButton small" onClick={addMathExamItem} type="button">+ 수학시험 추가</button>
+                    </div>
+                    <div className="mathExamItemStack">
+                      {newEvent.mathExamItems.map((item, index) => (
+                        <div className="mathExamItemRow" key={item.id}>
+                          <label>
+                            학년
+                            <select value={item.grade} onChange={(event) => updateMathExamItem(item.id, "grade", event.target.value)}>
+                              <option value="">학년 선택</option>
+                              {schoolCalendarGradeOptions.map((grade) => (
+                                <option key={grade} value={grade}>{grade}</option>
+                              ))}
+                            </select>
+                          </label>
+                          <label>
+                            과목
+                            <select value={item.subject} onChange={(event) => updateMathExamItem(item.id, "subject", event.target.value)}>
+                              {schoolCalendarMathSubjectOptions.map((subject) => (
+                                <option key={subject} value={subject}>{subject}</option>
+                              ))}
+                            </select>
+                          </label>
+                          <label>
+                            시험 날짜
+                            <input type="date" value={item.date} onChange={(event) => updateMathExamItem(item.id, "date", event.target.value)} />
+                          </label>
+                          <button className="iconButton" disabled={newEvent.mathExamItems.length === 1} onClick={() => removeMathExamItem(item.id)} type="button">
+                            ×
+                          </button>
+                          <label className="mathExamItemMemo">
+                            메모
+                            <input value={item.memo} onChange={(event) => updateMathExamItem(item.id, "memo", event.target.value)} placeholder={`${index + 1}번째 수학시험 메모`} />
+                          </label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                </>
               ) : (
                 <div className="examSubjectBox">
-                <div className="sectionHeader slim">
-                  <strong>날짜별 시험 과목</strong>
-                  <span>{newEvent.date.slice(5).replace("-", ".")}</span>
+                  <div className="sectionHeader slim">
+                    <strong>날짜별 시험 과목</strong>
+                  </div>
+                  <div className="examSubjectRow singleDate">
+                    <label>
+                      시험 날짜
+                      <input type="date" value={newEvent.date} onChange={(event) => setNewEvent((current) => ({ ...current, date: event.target.value, endDate: event.target.value }))} />
+                    </label>
+                    <label>
+                      과목
+                      <input value={newEvent.examSubject} onChange={(event) => setNewEvent((current) => ({ ...current, examSubject: event.target.value }))} placeholder="예: 수학" />
+                    </label>
+                  </div>
                 </div>
-                <div className="examSubjectRow">
-                  <b>{newEvent.date.slice(5)} ({["일", "월", "화", "수", "목", "금", "토"][new Date(`${newEvent.date}T00:00:00+09:00`).getDay()]})</b>
-                  <input value={newEvent.examSubject} onChange={(event) => setNewEvent((current) => ({ ...current, examSubject: event.target.value }))} placeholder="예: 수학" />
-                </div>
-              </div>
               )}
               <label>
                 메모
@@ -9589,11 +9756,14 @@ function SupplementCenter({
   students,
   tasks,
   onCreateTask,
+  onPassTask,
   onScheduleTask,
   onUpdateTask
 }) {
   const [selectedSupplementStudentId, setSelectedSupplementStudentId] = useState("");
   const [activeSupplementTab, setActiveSupplementTab] = useState("homework_makeup");
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [historyQuery, setHistoryQuery] = useState("");
   const makeupHomeworks = homeworks.filter((homework) => isHomeworkMakeupCandidate(homework, records, lessons)).slice(0, 8);
   const absentRecords = records
     .filter((record) => record.attendanceStatus === "absent" || record.attendanceStatus === "excused")
@@ -9703,6 +9873,16 @@ function SupplementCenter({
     return { ...tab, count: items.length, items };
   });
   const activeTabData = supplementTabs.find((tab) => tab.id === activeSupplementTab) ?? supplementTabs[0];
+  const historyCutoffDate = addDaysInKorea(today, -30);
+  const recentSupplementTasks = tasks
+    .filter((task) => {
+      const baseDate = String(task.completedAt || task.passedAt || task.lastScheduledAt || task.touchedAt || task.scheduledDate || task.createdAt || "").slice(0, 10);
+      return baseDate >= historyCutoffDate;
+    })
+    .sort((a, b) =>
+      String(b.completedAt || b.passedAt || b.lastScheduledAt || b.touchedAt || b.scheduledDate || b.createdAt || "")
+        .localeCompare(String(a.completedAt || a.passedAt || a.lastScheduledAt || a.touchedAt || a.scheduledDate || a.createdAt || ""))
+    );
 
   return (
     <section className="followUpPage">
@@ -9711,7 +9891,9 @@ function SupplementCenter({
           <h1>보충관리</h1>
           <p className="muted">숙제보충, 결석보강, 재시험을 별도로 관리합니다.</p>
         </div>
-        <span className="countBadge">{tasks.length}개 진행</span>
+        <button className="primaryButton compact" onClick={() => setIsHistoryModalOpen(true)} type="button">
+          최근 한 달 보충 내역
+        </button>
       </div>
 
       <div className="supplementOverviewGrid">
@@ -9766,6 +9948,13 @@ function SupplementCenter({
                 >
                   {existingTask ? "일정 관리" : item.actionLabel}
                 </button>
+                <button
+                  className="passButton"
+                  onClick={() => onPassTask(existingTask ?? item.task)}
+                  type="button"
+                >
+                  보충 통과
+                </button>
               </article>
             );
           })}
@@ -9775,11 +9964,21 @@ function SupplementCenter({
       {selectedSupplementStudent ? (
         <SupplementStudentModal
           onClose={() => setSelectedSupplementStudentId("")}
+          onPassTask={onPassTask}
           onScheduleTask={onScheduleTask}
           onUpdateTask={onUpdateTask}
           student={selectedSupplementStudent}
           tabTitle={activeTabData.title}
           tasks={selectedSupplementTasks}
+        />
+      ) : null}
+      {isHistoryModalOpen ? (
+        <SupplementHistoryModal
+          onChangeQuery={setHistoryQuery}
+          onClose={() => setIsHistoryModalOpen(false)}
+          query={historyQuery}
+          students={students}
+          tasks={recentSupplementTasks}
         />
       ) : null}
     </section>
@@ -9788,6 +9987,7 @@ function SupplementCenter({
 
 function SupplementStudentModal({
   onClose,
+  onPassTask,
   onScheduleTask,
   onUpdateTask,
   student,
@@ -9811,6 +10011,11 @@ function SupplementStudentModal({
       task.linkedLessonId ? "수업일지 수정 반영 완료" : "수업일지 반영 완료",
       `${task.scheduledDate} ${task.scheduledTime} 보충 일정이 수업일지 캘린더에 반영되었습니다.`
     );
+  }
+
+  function handlePassTask(task) {
+    onPassTask(task);
+    showFeedback("보충 통과 처리 완료", `${student.name} 학생의 보충 항목을 통과 처리했습니다.`);
   }
 
   return (
@@ -9932,6 +10137,9 @@ function SupplementStudentModal({
                     >
                       {task.linkedLessonId ? "수업일지 수정 반영" : "수업일지 반영"}
                     </button>
+                    <button className="passButton" onClick={() => handlePassTask(task)} type="button">
+                      보충 통과
+                    </button>
                   </div>
                 </article>
               );
@@ -9939,6 +10147,85 @@ function SupplementStudentModal({
           </div>
         </section>
       </div>
+    </Modal>
+  );
+}
+
+function SupplementHistoryModal({ onChangeQuery, onClose, query, students, tasks }) {
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredTasks = tasks.filter((task) => {
+    const student = students.find((item) => item.studentId === task.studentId);
+    const haystack = [
+      student?.name,
+      student?.schoolName,
+      student?.grade,
+      followUpTypeLabel(task.taskType),
+      task.sourceLabel,
+      task.reason,
+      supplementMethodLabel(task),
+      task.status
+    ].join(" ").toLowerCase();
+    return !normalizedQuery || haystack.includes(normalizedQuery);
+  });
+
+  function statusLabel(task) {
+    if (task.status === "done") return "보충 통과";
+    if (task.status === "scheduled") return "일정 확정";
+    return "진행 중";
+  }
+
+  function historyDate(task) {
+    return String(task.completedAt || task.passedAt || task.lastScheduledAt || task.touchedAt || task.scheduledDate || task.createdAt || "").slice(0, 10) || "-";
+  }
+
+  return (
+    <Modal
+      className="supplementHistoryModal"
+      title="최근 한 달 보충관리 내역"
+      subtitle="보충 통과, 일정 확정, 진행 중 항목을 학생별로 확인합니다."
+      onClose={onClose}
+    >
+      <div className="supplementHistoryToolbar">
+        <label>
+          학생/학교/항목 검색
+          <input
+            autoFocus
+            value={query}
+            onChange={(event) => onChangeQuery(event.target.value)}
+            placeholder="예: 최선호, 창동고, 숙제보충"
+          />
+        </label>
+        <span className="countBadge">{filteredTasks.length}건</span>
+      </div>
+
+      {filteredTasks.length === 0 ? (
+        <div className="emptyHomeworkBox">조건에 맞는 보충관리 내역이 없습니다.</div>
+      ) : (
+        <div className="supplementHistoryList">
+          {filteredTasks.map((task) => {
+            const student = students.find((item) => item.studentId === task.studentId);
+            return (
+              <article className="supplementHistoryItem" key={task.makeupTaskId}>
+                <div>
+                  <strong>{student?.name ?? "미등록 학생"}</strong>
+                  <span>{student?.schoolName || "학교 미입력"} · {student?.grade || "-"}</span>
+                </div>
+                <div>
+                  <b>{followUpTypeLabel(task.taskType)}</b>
+                  <span>{task.sourceLabel || task.reason || "보충 항목"}</span>
+                </div>
+                <div>
+                  <span>{historyDate(task)}</span>
+                  <small>{task.scheduledDate || "-"} {task.scheduledTime || ""}</small>
+                </div>
+                <span className={`supplementProgressBadge ${task.status === "done" ? "done" : task.status === "scheduled" ? "scheduled" : "draft"}`}>
+                  {statusLabel(task)}
+                </span>
+              </article>
+            );
+          })}
+        </div>
+      )}
     </Modal>
   );
 }
@@ -11842,7 +12129,10 @@ function getHomeworkMakeupReason(homework, records = []) {
   const record = getHomeworkRecord(homework, records);
   const assignmentStatus = record?.assignmentStatus ?? record?.incompleteHomework ?? "";
   if (assignmentStatus) {
-    return normalizeAssignmentStatusValue(assignmentStatus) === "not_done" ? "미완료 숙제" : "일부 완료 숙제";
+    const normalizedStatus = normalizeAssignmentStatusValue(assignmentStatus);
+    if (normalizedStatus === "not_done") return "미완료 숙제";
+    if (normalizedStatus === "not_checked") return "미검사 숙제";
+    return "일부 완료 숙제";
   }
   if (homework.teacherStatus === "missing") return "미완료 숙제";
   if (homework.teacherStatus === "partial") return "일부 완료 숙제";

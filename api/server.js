@@ -257,6 +257,69 @@ async function dispatchDueNotificationJobs({ forceDryRun = false, limit = 20, no
   };
 }
 
+function getKoreaDateString(value = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "Asia/Seoul",
+    year: "numeric"
+  }).formatToParts(new Date(value));
+  const dateParts = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${dateParts.year}-${dateParts.month}-${dateParts.day}`;
+}
+
+function isSupplementLesson(lesson = {}) {
+  return (
+    lesson.lessonType === "makeup" ||
+    lesson.classTemplateId === "supplement" ||
+    String(lesson.className ?? "").includes("보충") ||
+    String(lesson.lessonTopic ?? "").includes("보충")
+  );
+}
+
+function isRetestLesson(lesson = {}) {
+  return (
+    String(lesson.className ?? "").includes("재시험") ||
+    String(lesson.lessonTopic ?? "").includes("재시험")
+  );
+}
+
+function formatTeacherScheduleItem(lesson = {}, students = []) {
+  const names = (lesson.studentIds ?? [])
+    .map((studentId) => students.find((student) => student.studentId === studentId)?.name)
+    .filter(Boolean)
+    .join(", ");
+  return {
+    studentName: names || "학생 미지정",
+    title: lesson.sourceLabel || lesson.lessonTopic || lesson.className,
+    date: lesson.date,
+    time: [lesson.startTime, lesson.endTime].filter(Boolean).join("-"),
+    lessonName: lesson.className
+  };
+}
+
+async function sendTodayTeacherScheduleSlack({ date = getKoreaDateString(), notifyEmpty = true } = {}) {
+  const [{ lessons }, { students }] = await Promise.all([
+    listLessons({ date }),
+    listStudents()
+  ]);
+  const activeLessons = (lessons ?? []).filter((lesson) => !["canceled", "deleted"].includes(lesson.status));
+  const supplements = activeLessons
+    .filter(isSupplementLesson)
+    .filter((lesson) => !isRetestLesson(lesson))
+    .map((lesson) => formatTeacherScheduleItem(lesson, students ?? []));
+  const retests = activeLessons
+    .filter(isRetestLesson)
+    .map((lesson) => formatTeacherScheduleItem(lesson, students ?? []));
+
+  if (!notifyEmpty && supplements.length === 0 && retests.length === 0) {
+    return { skipped: true, date, supplements, retests };
+  }
+
+  const result = await sendSlackDailyScheduleSummary({ date, retests, supplements });
+  return { date, result, retests, supplements };
+}
+
 const server = http.createServer(async (request, response) => {
   const requestUrl = new URL(request.url, "http://127.0.0.1");
 
@@ -567,6 +630,20 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await sendSlackDailyScheduleSummary(payload);
+      sendJson(request, response, 200, { ok: true, provider: "slack", result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/notifications/slack-today-schedule") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await sendTodayTeacherScheduleSlack({
+        date: payload.date || getKoreaDateString(payload.now || new Date()),
+        notifyEmpty: payload.notifyEmpty !== false
+      });
       sendJson(request, response, 200, { ok: true, provider: "slack", result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });

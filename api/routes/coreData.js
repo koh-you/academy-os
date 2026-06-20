@@ -82,6 +82,11 @@ function toLessonRow(lesson) {
     end_time: lesson.endTime,
     color: lesson.color ?? "#17213a",
     student_ids: lesson.studentIds ?? [],
+    lesson_type: compact(lesson.lessonType),
+    lesson_topic: compact(lesson.lessonTopic),
+    source_makeup_task_id: compact(lesson.sourceMakeupTaskId),
+    source_school_event_id: compact(lesson.sourceSchoolEventId),
+    source_label: compact(lesson.sourceLabel),
     status: lesson.status ?? "scheduled",
     updated_at: new Date().toISOString()
   };
@@ -97,6 +102,11 @@ function fromLessonRow(row) {
     endTime: row.end_time,
     color: row.color,
     studentIds: row.student_ids ?? [],
+    lessonType: row.lesson_type ?? "",
+    lessonTopic: row.lesson_topic ?? "",
+    sourceMakeupTaskId: row.source_makeup_task_id ?? "",
+    sourceSchoolEventId: row.source_school_event_id ?? "",
+    sourceLabel: row.source_label ?? "",
     status: row.status
   };
 }

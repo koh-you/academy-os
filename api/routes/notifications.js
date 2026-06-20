@@ -210,6 +210,7 @@ function buildLessonCommentBody(payload, audience) {
     nextHomework: payload.nextHomework,
     previousHomework: payload.previousHomework,
     preparationNotice: payload.preparationNotice,
+    supplementSchedule: payload.supplementSchedule,
     teacherComment: payload.message
   });
 }

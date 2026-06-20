@@ -18,3 +18,12 @@ services:
         value: "01057882748"
       - key: CORS_ALLOWED_ORIGINS
         value: "*"
+  - type: cron
+    name: koh-you-math-academy-os-slack-daily-schedule
+    env: node
+    schedule: "0 1 * * *"
+    buildCommand: npm install
+    startCommand: npm run slack:daily-schedule
+    envVars:
+      - key: ACADEMY_API_URL
+        value: https://koh-you-math-academy-os-api.onrender.com

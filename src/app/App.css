@@ -2315,6 +2315,18 @@ button {
   background: #ffffff;
 }
 
+.examSubjectRow.singleDate {
+  align-items: end;
+  grid-template-columns: 150px minmax(0, 1fr);
+}
+
+.examSubjectRow.singleDate label {
+  color: #17213a;
+  display: grid;
+  font-weight: 900;
+  gap: 8px;
+}
+
 .schoolExamBundleBox {
   background: #f8fbff;
   border-color: #bfdbfe;
@@ -6454,6 +6466,16 @@ textarea.profileEditInput {
   padding: 0 14px;
 }
 
+.passButton {
+  background: #ecfdf5;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  color: #047857;
+  font-weight: 900;
+  min-height: 38px;
+  padding: 0 14px;
+}
+
 .softButton.subtle {
   background: #ffffff;
   color: #334155;
@@ -6797,6 +6819,75 @@ textarea.profileEditInput {
 
 .supplementRowItem:last-child {
   border-bottom: 0;
+}
+
+.supplementHistoryModal {
+  max-width: 980px;
+}
+
+.supplementHistoryToolbar {
+  align-items: end;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-bottom: 14px;
+}
+
+.supplementHistoryToolbar label {
+  color: #17213a;
+  display: grid;
+  font-weight: 900;
+  gap: 8px;
+}
+
+.supplementHistoryToolbar input {
+  background: #ffffff;
+  border: 1px solid #cbd8ee;
+  border-radius: 8px;
+  color: #0f172a;
+  font: inherit;
+  min-height: 46px;
+  padding: 0 14px;
+}
+
+.supplementHistoryList {
+  border: 1px solid #e6edf7;
+  border-radius: 8px;
+  max-height: min(560px, 60vh);
+  overflow: auto;
+}
+
+.supplementHistoryItem {
+  align-items: center;
+  background: #ffffff;
+  border-bottom: 1px solid #e6edf7;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 180px minmax(0, 1fr) 150px auto;
+  padding: 14px 16px;
+}
+
+.supplementHistoryItem:last-child {
+  border-bottom: 0;
+}
+
+.supplementHistoryItem > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.supplementHistoryItem strong,
+.supplementHistoryItem b {
+  color: #17213a;
+}
+
+.supplementHistoryItem span,
+.supplementHistoryItem small {
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .supplementModalLayout {

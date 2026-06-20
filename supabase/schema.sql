@@ -43,6 +43,11 @@ create table if not exists lessons (
   end_time time not null,
   color text not null default '#17213a',
   student_ids text[] not null default '{}',
+  lesson_type text,
+  lesson_topic text,
+  source_makeup_task_id text,
+  source_school_event_id text,
+  source_label text,
   status text not null default 'scheduled' check (status in ('scheduled', 'completed', 'canceled')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -233,6 +238,7 @@ create table if not exists notification_jobs (
 );
 
 create index if not exists idx_lessons_date on lessons(lesson_date);
+create index if not exists idx_lessons_type_date on lessons(lesson_type, lesson_date);
 create index if not exists idx_lesson_records_lesson on lesson_student_records(lesson_id);
 create index if not exists idx_homeworks_student on homeworks(student_id);
 create index if not exists idx_makeup_tasks_student_status on makeup_tasks(student_id, status);
