@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-06-20 P1. 일요시험보강 이동 블록 원위치 표시 보정
+
+- 상태: 완료
+- 사용자 요청: 창동고 블록을 6월 20일 토요일로 빼내면 토요일에는 창동고만 있어야 하고, 6월 21일 일요일 원래 일요보강 자리에는 창동고를 제외한 나머지만 보여야 한다.
+- 작업 결과: 일요시험보강 원본 pill은 `sundayMakeupBlocks` override 기준으로 원래 날짜에 남아 있는 블록만 표시한다. 원래 날짜에 남은 블록이 0개이면 빈 원본 pill을 숨긴다. 날짜가 달라진 블록은 기존처럼 해당 날짜에 가상 lesson으로 단독 표시된다.
+- 검증: `npm run build` 통과, `npm run test:production` 80개 통과.
+- SQL Editor 작업 필요 없음: 기존 `app_state.generatedLessonControls.sundayMakeupBlocks` 표시 로직만 보정했다.
+
 ## 2026-06-20 P1. 일요시험보강 내부 블록 삭제
 
 - 상태: 완료

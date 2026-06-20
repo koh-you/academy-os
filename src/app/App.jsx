@@ -4620,6 +4620,7 @@ function TeacherLessonHubV2({
     { id: "examSundayMakeup", label: "일요보강" }
   ];
   const visibleLessons = lessons.filter((lesson) => {
+    if (!shouldDisplayExamSundayMakeupSourceLesson(lesson, generatedLessonControls)) return false;
     if (lessonTypeFilter === "all") return true;
     if (lessonTypeFilter === "regular") return !["preExam", "makeup", "examSundayMakeup"].includes(lesson.lessonType);
     return lesson.lessonType === lessonTypeFilter;
@@ -4754,6 +4755,15 @@ function getExamSundayMakeupVisibleSourceLabel(lesson, controls = defaultGenerat
     .map((block) => block.label)
     .filter(Boolean)
     .join(" · ");
+}
+
+function shouldDisplayExamSundayMakeupSourceLesson(lesson, controls = defaultGeneratedLessonControls) {
+  if (lesson?.lessonType !== "examSundayMakeup" || lesson.isVirtualSundayMakeupBlock) return true;
+  const safeControls = normalizeGeneratedLessonControls(controls);
+  const generatedKey = getGeneratedLessonKey(lesson);
+  const blocksOverride = safeControls.sundayMakeupBlocks?.[generatedKey];
+  if (!Array.isArray(blocksOverride) || blocksOverride.length === 0) return true;
+  return parseExamSundayMakeupBlocks(lesson, blocksOverride).some((block) => (block.date || lesson.date) === lesson.date);
 }
 
 function createExamSundayMakeupBlockLessons(lessons = [], controls = defaultGeneratedLessonControls) {
