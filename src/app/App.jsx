@@ -1211,6 +1211,11 @@ const defaultAttendanceSettings = {
   lateGraceMinutes: 0
 };
 
+const defaultGeneratedLessonControls = {
+  manualOverrideKeys: [],
+  suppressedKeys: []
+};
+
 function getAiPrompt(settings = {}, promptKey) {
   return settings?.prompts?.[promptKey] ?? defaultAiPrompts[promptKey] ?? "";
 }
@@ -1263,6 +1268,10 @@ export function App() {
     storageKeys.attendanceSettings,
     defaultAttendanceSettings
   );
+  const [generatedLessonControls, setGeneratedLessonControls] = useStoredState(
+    "academy-os.generatedLessonControls.v1",
+    defaultGeneratedLessonControls
+  );
   const [integrationStatus, setIntegrationStatus] = useState(null);
   const [isAppStateReady, setIsAppStateReady] = useState(false);
   const [saveStates, setSaveStates] = useState({});
@@ -1287,6 +1296,7 @@ export function App() {
     attendanceSettings,
     deletedLessonBundles,
     examAnalyses,
+    generatedLessonControls,
     lessonResearchItems,
     notificationLogs,
     problemBooks,
@@ -1299,6 +1309,7 @@ export function App() {
     attendanceSettings,
     deletedLessonBundles,
     examAnalyses,
+    generatedLessonControls,
     lessonResearchItems,
     notificationLogs,
     problemBooks,
@@ -1394,6 +1405,7 @@ export function App() {
           if (states.attendanceSettings) setAttendanceSettings(states.attendanceSettings);
           if (Array.isArray(states.deletedLessonBundles)) setDeletedLessonBundles(states.deletedLessonBundles);
           if (Array.isArray(states.examAnalyses)) setExamAnalyses(states.examAnalyses);
+          if (states.generatedLessonControls) setGeneratedLessonControls(normalizeGeneratedLessonControls(states.generatedLessonControls));
           if (Array.isArray(states.lessonResearchItems)) setLessonResearchItems(states.lessonResearchItems);
           if (Array.isArray(states.notificationLogs)) setNotificationLogs(states.notificationLogs);
           if (Array.isArray(states.problemBooks)) setProblemBooks(states.problemBooks);
@@ -1430,6 +1442,7 @@ export function App() {
     setDeletedLessonBundles,
     setExamAnalyses,
     setExamPrepRows,
+    setGeneratedLessonControls,
     setHomeworks,
     setLessonResearchItems,
     setLessons,
@@ -1459,6 +1472,49 @@ export function App() {
     setRecords((currentRecords) => filterRecordsForLessons(currentRecords, lessons));
     setHomeworks((currentHomeworks) => filterHomeworksForLessons(currentHomeworks, lessons));
   }, [lessons, setHomeworks, setRecords]);
+
+  const generatedLessonPlan = useMemo(
+    () => buildGeneratedLessonPlan({ rows: examPrepRows, lessons, students, controls: generatedLessonControls }),
+    [examPrepRows, generatedLessonControls, lessons, students]
+  );
+
+  function updateGeneratedLessonControls(updater) {
+    setGeneratedLessonControls((current) => normalizeGeneratedLessonControls(updater(normalizeGeneratedLessonControls(current))));
+  }
+
+  function markGeneratedLessonManualOverride(lesson) {
+    const generatedKey = getGeneratedLessonKey(lesson);
+    if (!generatedKey) return;
+    updateGeneratedLessonControls((current) => ({
+      ...current,
+      manualOverrideKeys: [...new Set([...(current.manualOverrideKeys ?? []), generatedKey])]
+    }));
+  }
+
+  function suppressGeneratedLessonKey(generatedKey) {
+    if (!generatedKey) return;
+    updateGeneratedLessonControls((current) => ({
+      ...current,
+      suppressedKeys: [...new Set([...(current.suppressedKeys ?? []), generatedKey])]
+    }));
+  }
+
+  function handleApplyGeneratedLessons() {
+    const lessonsToSave = generatedLessonPlan
+      .filter((item) => item.status === "create" || item.status === "update")
+      .map((item) => item.lesson);
+    if (lessonsToSave.length === 0) return;
+    setLessons((current) => {
+      const next = [...current];
+      lessonsToSave.forEach((lesson) => {
+        const index = next.findIndex((item) => item.lessonId === lesson.lessonId);
+        if (index >= 0) next[index] = { ...next[index], ...lesson };
+        else next.push(lesson);
+      });
+      return next;
+    });
+    postJson("/api/lessons/bulk", { lessons: lessonsToSave }).catch((error) => console.error(error));
+  }
 
   async function refreshNotificationJobs() {
     try {
@@ -1845,6 +1901,8 @@ export function App() {
     };
     setDeletedLessonBundles((current) => pruneExpiredLessonDeletes([bundle, ...current]));
     setLessonUndoStack((current) => [{ type: "delete", bundle }, ...current].slice(0, 20));
+    const generatedKey = getGeneratedLessonKey(lesson);
+    if (generatedKey) suppressGeneratedLessonKey(generatedKey);
     setLessons((current) => current.filter((item) => item.lessonId !== lessonId));
     setRecords((current) => current.filter((record) => record.lessonId !== lessonId));
     setHomeworks((current) => current.filter((homework) => homework.lessonId !== lessonId));
@@ -1915,6 +1973,7 @@ export function App() {
       status: editingLesson?.status ?? "scheduled"
     };
 
+    markGeneratedLessonManualOverride(editingLesson);
     setLessons((current) => upsertById(current, lesson, "lessonId"));
     setSelectedDate(lesson.date);
     setSelectedLessonId(lesson.lessonId);
@@ -1983,6 +2042,9 @@ export function App() {
   function handleSyncPreExamLessonFromSchoolEvent(event) {
     const lesson = createPreExamLessonFromSchoolEvent(event, students);
     if (!lesson) return;
+    const generatedKey = getGeneratedLessonKey(lesson);
+    const controls = normalizeGeneratedLessonControls(generatedLessonControls);
+    if (controls.suppressedKeys.includes(generatedKey) || controls.manualOverrideKeys.includes(generatedKey)) return;
     setLessons((current) => upsertById(current, lesson, "lessonId"));
     postJson("/api/lessons", { lesson }).catch((error) => console.error(error));
   }
@@ -2446,8 +2508,10 @@ export function App() {
 
         {activeView === "schoolCalendar" ? (
           <SchoolCalendarCenter
+            generatedLessonPlan={generatedLessonPlan}
             events={schoolEvents}
             rows={examPrepRows}
+            onApplyGeneratedLessons={handleApplyGeneratedLessons}
             onAddEvent={(event) => {
               const nextEvent = { ...event, eventId: event.eventId || `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}` };
               setSchoolEvents((current) => [nextEvent, ...current]);
@@ -2457,6 +2521,7 @@ export function App() {
               setSchoolEvents((current) => current.filter((event) => event.eventId !== eventId));
               deleteSchoolEventFromApi(eventId).catch((error) => console.error(error));
             }}
+            onSuppressGeneratedLesson={suppressGeneratedLessonKey}
             onSyncPreExamLesson={handleSyncPreExamLessonFromSchoolEvent}
             onUpdateExamPrepRow={handleUpdateExamPrepRow}
             onUpdateEvent={(eventId, field, value) =>
@@ -4268,11 +4333,12 @@ function TeacherLessonHubV2({
     { id: "all", label: "전체" },
     { id: "regular", label: "정규수업" },
     { id: "preExam", label: "직전수업" },
-    { id: "makeup", label: "보충수업" }
+    { id: "makeup", label: "보충수업" },
+    { id: "examSundayMakeup", label: "일요보강" }
   ];
   const visibleLessons = lessons.filter((lesson) => {
     if (lessonTypeFilter === "all") return true;
-    if (lessonTypeFilter === "regular") return !["preExam", "makeup"].includes(lesson.lessonType);
+    if (lessonTypeFilter === "regular") return !["preExam", "makeup", "examSundayMakeup"].includes(lesson.lessonType);
     return lesson.lessonType === lessonTypeFilter;
   });
   const visibleLessonCount = visibleLessons.filter((lesson) => lesson.date.slice(0, 7) === selectedDate.slice(0, 7)).length;
@@ -4327,7 +4393,8 @@ function TeacherLessonHubV2({
                         "lessonPill",
                         lesson.lessonId === selectedLessonId ? "active" : "",
                         lesson.lessonType === "preExam" ? "preExamLessonPill" : "",
-                        lesson.lessonType === "makeup" ? "makeupLessonPill" : ""
+                        lesson.lessonType === "makeup" ? "makeupLessonPill" : "",
+                        lesson.lessonType === "examSundayMakeup" ? "sundayMakeupLessonPill" : ""
                       ].filter(Boolean).join(" ")}
                       key={lesson.lessonId}
                       onClick={(event) => {
@@ -4337,7 +4404,10 @@ function TeacherLessonHubV2({
                       style={{ background: lesson.color }}
                       type="button"
                     >
-                      {lesson.startTime} {lesson.className} ({lesson.studentIds.length}명)
+                      {lesson.startTime} {lesson.className}
+                      {lesson.lessonType === "examSundayMakeup"
+                        ? lesson.sourceLabel ? ` · ${lesson.sourceLabel}` : ""
+                        : ` (${lesson.studentIds.length}명)`}
                     </button>
                   ))}
                 </span>
@@ -5818,7 +5888,8 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
             ["class", "🏹 수업"],
             ["preExam", "📌 직전수업"],
             ["exam", "📝 평가"],
-            ["makeup", "🔧 보강"]
+            ["makeup", "🔧 보강"],
+            ["examSundayMakeup", "🗓 일요보강"]
           ].map(([value, label]) => (
             <button
               className={lessonType === value ? "active" : ""}
@@ -7238,7 +7309,18 @@ function ExamAnalysisCenter({
   );
 }
 
-function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncPreExamLesson, onUpdateExamPrepRow, onUpdateEvent }) {
+function SchoolCalendarCenter({
+  events,
+  generatedLessonPlan = [],
+  rows,
+  onAddEvent,
+  onApplyGeneratedLessons,
+  onDeleteEvent,
+  onSuppressGeneratedLesson,
+  onSyncPreExamLesson,
+  onUpdateExamPrepRow,
+  onUpdateEvent
+}) {
   const [selectedMonth, setSelectedMonth] = useState(today);
   const [selectedDate, setSelectedDate] = useState(today);
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
@@ -7300,6 +7382,11 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
     calendarFilter === "all" ? true : getSchoolCalendarFilterGroup(event) === calendarFilter
   ));
   const selectedDateEvents = calendarDisplayEvents.filter((event) => isDateWithinEvent(selectedDate, event));
+  const generatedPlanCounts = generatedLessonPlan.reduce((counts, item) => {
+    counts[item.status] = (counts[item.status] ?? 0) + 1;
+    return counts;
+  }, {});
+  const applyableGeneratedCount = (generatedPlanCounts.create ?? 0) + (generatedPlanCounts.update ?? 0);
 
   function shiftMonth(amount) {
     const [year, month] = selectedMonth.split("-").map(Number);
@@ -7671,6 +7758,47 @@ function SchoolCalendarCenter({ events, rows, onAddEvent, onDeleteEvent, onSyncP
             </div>
           </Modal>
         ) : null}
+
+        <section className="panel generatedLessonPreviewPanel">
+          <div className="sectionHeader slim">
+            <div>
+              <h2>자동 수업 후보</h2>
+              <p className="muted">시험관리 원본에서 직전수업과 일요시험보강을 계산합니다. 수동 수정/삭제한 항목은 자동 반영에서 보호됩니다.</p>
+            </div>
+            <button className="primaryButton compact" disabled={applyableGeneratedCount === 0} onClick={onApplyGeneratedLessons} type="button">
+              후보 반영 {applyableGeneratedCount}건
+            </button>
+          </div>
+          <div className="generatedLessonSummary">
+            <span>생성 {generatedPlanCounts.create ?? 0}</span>
+            <span>갱신 {generatedPlanCounts.update ?? 0}</span>
+            <span>수동보호 {generatedPlanCounts.protected ?? 0}</span>
+            <span>삭제건너뜀 {generatedPlanCounts.skipped ?? 0}</span>
+          </div>
+          {generatedLessonPlan.length === 0 ? (
+            <div className="emptyHomeworkBox">시험기간 또는 수학시험 날짜를 입력하면 자동 수업 후보가 표시됩니다.</div>
+          ) : (
+            <div className="generatedLessonList">
+              {generatedLessonPlan.slice(0, 8).map((item) => (
+                <article className={`generatedLessonItem ${item.status}`} key={item.generatedKey}>
+                  <div>
+                    <strong>{item.label}</strong>
+                    <span>{item.reason}</span>
+                    <small>{item.lesson.date} {item.lesson.startTime}-{item.lesson.endTime}</small>
+                  </div>
+                  <span className="generatedStatusBadge">
+                    {item.status === "create" ? "생성 예정" : item.status === "update" ? "갱신 예정" : item.status === "protected" ? "수동수정 보호" : "삭제로 건너뜀"}
+                  </span>
+                  {(item.status === "create" || item.status === "update") ? (
+                    <button className="softButton subtle" onClick={() => onSuppressGeneratedLesson?.(item.generatedKey)} type="button">
+                      자동생성 제외
+                    </button>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
 
         <section className="panel schoolCalendarMainPanel">
           <div className="schoolMonthHeader">
@@ -12312,6 +12440,29 @@ function createSupplementLessonName(task, student) {
   return `${followUpTypeLabel(task.taskType)} · ${student.name}`;
 }
 
+function normalizeGeneratedLessonControls(value = {}) {
+  return {
+    manualOverrideKeys: Array.isArray(value.manualOverrideKeys) ? [...new Set(value.manualOverrideKeys)] : [],
+    suppressedKeys: Array.isArray(value.suppressedKeys) ? [...new Set(value.suppressedKeys)] : []
+  };
+}
+
+function getGeneratedLessonKey(lesson = {}) {
+  const sourceId = lesson.sourceSchoolEventId || "";
+  if (sourceId.startsWith("generated:")) return sourceId;
+  if (lesson.lessonType === "preExam" && sourceId) return `generated:pre_exam:${sourceId}`;
+  return "";
+}
+
+function getGeneratedLessonPlanItemKey(item = {}) {
+  return item.generatedKey || getGeneratedLessonKey(item.lesson);
+}
+
+function createPreExamGeneratedKey(event = {}) {
+  const sourceId = event.eventId || `${event.schoolName}_${event.grade}_${event.examSubject || event.subject || "math"}_${event.date}`;
+  return `generated:pre_exam:${sourceId}`;
+}
+
 function getStudentsForSchoolCalendarEvent(students = [], event = {}) {
   const eventGrade = normalizeGradeLabel(event.grade || "");
   return students.filter((student) => {
@@ -12328,6 +12479,7 @@ function createPreExamLessonFromSchoolEvent(event = {}, students = []) {
   const subject = event.examSubject || event.subject || "수학";
   const gradeLabel = event.grade ? `${event.grade} ` : "";
   const sourceId = event.eventId || `${event.schoolName}_${event.grade}_${subject}_${event.date}`;
+  const generatedKey = createPreExamGeneratedKey({ ...event, eventId: sourceId });
   return {
     lessonId: `lesson_pre_exam_${safeIdPart(sourceId)}`,
     classTemplateId: "pre_exam",
@@ -12344,8 +12496,117 @@ function createPreExamLessonFromSchoolEvent(event = {}, students = []) {
     color: "#7c3aed",
     teacherId: "instructor_owner_001",
     studentIds: lessonStudents.map((student) => student.studentId),
-    status: "scheduled"
+    status: "scheduled",
+    generatedKey
   };
+}
+
+function getSundayDatesForExamPeriod(period = {}) {
+  if (!period.endDate && !period.date) return [];
+  const endDate = period.endDate || period.date;
+  const end = new Date(`${endDate}T00:00:00+09:00`);
+  if (Number.isNaN(end.getTime())) return [];
+  const day = end.getDay();
+  const lastSunday = new Date(end);
+  lastSunday.setDate(end.getDate() - day);
+  return [3, 2, 1, 0].map((offset) => {
+    const date = new Date(lastSunday);
+    date.setDate(lastSunday.getDate() - offset * 7);
+    return toKoreaDateString(date);
+  });
+}
+
+function toKoreaDateString(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function buildSundayMakeupCandidates(rows = []) {
+  const dateMap = new Map();
+  rows.forEach((row) => {
+    const period = parseDateRangeText(row.examPeriod);
+    if (!period.date) return;
+    getSundayDatesForExamPeriod(period).forEach((date) => {
+      const key = `generated:sunday_makeup:${date}`;
+      const block = {
+        schoolName: row.schoolName || "학교 미입력",
+        examCycle: row.examCycle || "",
+        examPrepId: row.examPrepId,
+        periodText: row.examPeriod
+      };
+      if (!dateMap.has(key)) dateMap.set(key, { date, key, blocks: [] });
+      const entry = dateMap.get(key);
+      if (!entry.blocks.some((item) => item.schoolName === block.schoolName && item.examCycle === block.examCycle)) {
+        entry.blocks.push(block);
+      }
+    });
+  });
+  return [...dateMap.values()].map((entry) => {
+    const schoolNames = entry.blocks.map((block) => block.schoolName).join(", ");
+    return {
+      generatedKey: entry.key,
+      label: `${entry.date} 일요시험보강`,
+      reason: `${schoolNames} 시험기간 전 일요보강`,
+      lesson: {
+        lessonId: `lesson_exam_sunday_makeup_${entry.date}`,
+        classTemplateId: "exam_sunday_makeup",
+        className: "일요시험보강",
+        lessonType: "examSundayMakeup",
+        lessonTopic: "일요시험보강",
+        sourceSchoolEventId: entry.key,
+        sourceLabel: entry.blocks.map((block) => `${block.schoolName} ${examCycleLabel(block.examCycle)}`).join(" · "),
+        date: entry.date,
+        dayOfWeek: "sun",
+        startTime: "13:00",
+        endTime: "18:00",
+        color: "#0891b2",
+        teacherId: "instructor_owner_001",
+        studentIds: [],
+        status: "scheduled",
+        generatedKey: entry.key
+      }
+    };
+  });
+}
+
+function buildGeneratedLessonPlan({ rows = [], lessons = [], students = [], controls = {} }) {
+  const safeControls = normalizeGeneratedLessonControls(controls);
+  const candidates = [];
+  buildExamCalendarEvents(rows)
+    .filter((event) => event.type === "mathExam")
+    .forEach((event) => {
+      const lesson = createPreExamLessonFromSchoolEvent(event, students);
+      if (!lesson) return;
+      const generatedKey = createPreExamGeneratedKey(event);
+      candidates.push({
+        generatedKey,
+        label: `${event.schoolName || "학교 미입력"} ${event.grade || ""} ${event.examSubject || "수학"} 직전수업`,
+        reason: `${event.date} 수학시험 전날`,
+        lesson: { ...lesson, generatedKey }
+      });
+    });
+  candidates.push(...buildSundayMakeupCandidates(rows));
+
+  return candidates.map((candidate) => {
+    const existing = lessons.find((lesson) =>
+      getGeneratedLessonKey(lesson) === candidate.generatedKey ||
+      lesson.sourceSchoolEventId === candidate.lesson.sourceSchoolEventId ||
+      lesson.lessonId === candidate.lesson.lessonId
+    );
+    const suppressed = safeControls.suppressedKeys.includes(candidate.generatedKey);
+    const manualOverride = existing && safeControls.manualOverrideKeys.includes(candidate.generatedKey);
+    const status = suppressed ? "skipped" : manualOverride ? "protected" : existing ? "update" : "create";
+    return {
+      ...candidate,
+      existingLesson: existing,
+      status,
+      lesson: existing && status === "update"
+        ? {
+            ...candidate.lesson,
+            lessonId: existing.lessonId
+          }
+        : candidate.lesson
+    };
+  });
 }
 
 function formatKoreanDateTime(value) {

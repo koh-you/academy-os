@@ -557,3 +557,10 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - 이번 작업 결과: 보충관리 상세 카드에 `보충 메모` 입력란을 추가하고 기존 수업일지 보충 처리의 `supplementProgressMemo`와 같은 필드로 저장되게 했다. 보충관리 목록 버튼명을 `보충 메모`로 바꾸고, 저장된 메모가 있으면 목록 행에 한 줄 미리보기로 표시한다. 수업일지 숙제보충 상세 창은 보충 대상/보충 처리 영역 비율과 textarea 높이를 줄이고, 보충 진행 메모와 추가 보충 내용을 가로 배치했다.
 - SQL 주의: 기존 `makeup_tasks.note` JSON 메타데이터 필드를 사용하는 UI/저장 흐름 변경이므로 Supabase SQL Editor 적용은 필요 없다.
 - 검증: `npm run build` 통과, `npm run test:production` 60개 통과.
+
+### 2026-06-20 P1. 시험 일정 기반 자동 수업 후보와 중복 방지
+- 상태: 완료
+- 사용자 요청: 시험관리/학사일정에서 파생되는 직전수업과 일요시험보강 자동생성에 대해 generatedKey, 수동수정 보호, 삭제 후 재생성 방지, 자동 반영 미리보기 구조를 구현한다.
+- 이번 작업 결과: 학사일정 화면에 `자동 수업 후보` 패널을 추가해 시험관리 원본 기준의 직전수업/일요시험보강 후보를 생성, 갱신, 수동보호, 삭제건너뜀 상태로 보여준다. 후보 반영 버튼은 생성/갱신 대상만 수업일지에 저장한다. 자동 파생 수업에는 sourceSchoolEventId 기반 generatedKey를 사용해 중복 생성을 막고, 사용자가 수업을 수정하면 manualOverrideKeys로 보호하며, 삭제하면 suppressedKeys에 기록해 다시 생성되지 않게 했다. 일요시험보강은 날짜별 단일 수업으로 생성되며 sourceLabel에 해당 학교 시험기간 묶음을 표시한다.
+- SQL 주의: 기존 lessons 컬럼과 app_state JSON을 사용하는 방식이라 Supabase SQL Editor 적용은 필요 없다.
+- 검증: `npm run build` 통과, `npm run test:production` 60개 통과.

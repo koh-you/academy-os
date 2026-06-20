@@ -658,6 +658,11 @@ button {
   border-left: 4px solid #f0abfc;
 }
 
+.lessonPill.sundayMakeupLessonPill {
+  background: #0e7490 !important;
+  border-left: 4px solid #67e8f9;
+}
+
 .lessonTypeFilterBar {
   align-items: center;
   background: #eef2f7;
@@ -2260,6 +2265,90 @@ button {
 .schoolCalendarMainPanel {
   min-width: 0;
   padding: 14px;
+}
+
+.generatedLessonPreviewPanel {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 16px;
+}
+
+.generatedLessonSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.generatedLessonSummary span,
+.generatedStatusBadge {
+  background: #f1f5f9;
+  border: 1px solid #dbe5f5;
+  border-radius: 8px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 900;
+  padding: 7px 10px;
+}
+
+.generatedLessonList {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.generatedLessonItem {
+  align-items: center;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  padding: 12px 14px;
+}
+
+.generatedLessonItem:last-child {
+  border-bottom: 0;
+}
+
+.generatedLessonItem > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.generatedLessonItem strong {
+  color: #0f172a;
+}
+
+.generatedLessonItem span,
+.generatedLessonItem small {
+  color: #64748b;
+  font-weight: 800;
+}
+
+.generatedLessonItem.create .generatedStatusBadge {
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+  color: #047857;
+}
+
+.generatedLessonItem.update .generatedStatusBadge {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.generatedLessonItem.protected .generatedStatusBadge {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #c2410c;
+}
+
+.generatedLessonItem.skipped .generatedStatusBadge {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #64748b;
 }
 
 .schoolEventFormPanel.collapsed {
