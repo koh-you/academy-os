@@ -6395,9 +6395,15 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
   const filteredStudents = students.filter((student) =>
     [student.name, student.grade, student.schoolName].join(" ").toLowerCase().includes(studentSearch.toLowerCase())
   );
-  const groupedStudents = ["고1", "고2", "중1", "중2", "중3"].map((grade) => ({
+  const lessonStudentGradeOrder = ["고3", "고2", "고1", "중3", "중2", "중1"];
+  const studentGrades = Array.from(new Set(filteredStudents.map((student) => student.grade || "학년 미입력")));
+  const orderedStudentGrades = [
+    ...lessonStudentGradeOrder.filter((grade) => studentGrades.includes(grade)),
+    ...studentGrades.filter((grade) => !lessonStudentGradeOrder.includes(grade)).sort()
+  ];
+  const groupedStudents = orderedStudentGrades.map((grade) => ({
     grade,
-    students: filteredStudents.filter((student) => student.grade === grade)
+    students: filteredStudents.filter((student) => (student.grade || "학년 미입력") === grade)
   })).filter((group) => group.students.length > 0);
 
   function handleTemplateChange(nextTemplateId) {
