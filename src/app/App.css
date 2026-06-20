@@ -1523,9 +1523,9 @@ button {
   align-items: stretch;
   border-top: 1px solid #e2e8f0;
   display: grid;
-  gap: 6px;
-  grid-template-columns: 140px 240px 90px 136px 156px 236px 540px 320px 270px 220px 132px;
-  min-width: 2480px;
+  gap: 4px;
+  grid-template-columns: 96px 132px 64px 92px 112px 168px 250px 280px 190px 180px 112px;
+  min-width: 1720px;
   padding: 8px 10px;
 }
 
@@ -1537,6 +1537,9 @@ button {
   align-items: start;
   background: #f8fbff;
   box-shadow: inset 3px 0 0 #3b82f6;
+  gap: 6px;
+  grid-template-columns: 140px 240px 90px 136px 156px 236px 540px 320px 270px 220px 132px;
+  min-width: 2480px;
 }
 
 .examPrepRow.editing > :nth-child(1) {
