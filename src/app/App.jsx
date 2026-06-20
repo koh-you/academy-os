@@ -5466,6 +5466,7 @@ function LessonJournalDetail({
             const previousRecord = getPreviousLessonReminderRecord(student);
             const previousLessonMaterial = previousRecord?.lessonMaterial?.trim() ?? "";
             const previousLessonContent = getLessonContent(previousRecord);
+            const previousPreparationMemo = previousRecord?.preparationMemo?.trim() ?? "";
 
             return (
               <div className="journalRow" key={student.studentId}>
@@ -5485,14 +5486,19 @@ function LessonJournalDetail({
                 </span>
                 <div className="journalPrepCell">
                   <button
-                    className={record.preparationMemo || record.prepStudentVisible || record.prepParentVisible ? "prepMemoButton filled" : "prepMemoButton"}
-                    onClick={() => setPrepMemoModal({ nextHomework, previousHomework, record, student })}
+                    className={[
+                      "prepMemoButton",
+                      record.preparationMemo || record.prepStudentVisible || record.prepParentVisible ? "filled" : "",
+                      previousPreparationMemo ? "hasPrevious" : ""
+                    ].filter(Boolean).join(" ")}
+                    onClick={() => setPrepMemoModal({ nextHomework, previousHomework, previousRecord, record, student })}
                     type="button"
                   >
                     수업메모
                   </button>
                   <small>
                     {[
+                      previousPreparationMemo ? "직전 메모 있음" : "",
                       record.prepStudentVisible ? "학생 알림톡 포함" : "",
                       record.prepParentVisible ? "학부모 알림톡 포함" : ""
                     ].filter(Boolean).join(" · ") || "알림톡 미포함"}
@@ -5611,6 +5617,8 @@ function LessonJournalDetail({
           record={records.find((item) => item.studentId === prepMemoModal.student.studentId) ?? prepMemoModal.record}
           saveState={saveStates[createLessonStudentRecordId(lesson.lessonId, prepMemoModal.student.studentId)] ?? "idle"}
           student={prepMemoModal.student}
+          previousRecord={prepMemoModal.previousRecord}
+          previousLesson={prepMemoModal.previousRecord ? lessons.find((item) => item.lessonId === prepMemoModal.previousRecord.lessonId) : null}
         />
       ) : null}
 
@@ -5642,7 +5650,7 @@ function LessonJournalDetail({
   );
 }
 
-function PreparationMemoModal({ lesson, onChangeRecord, onClose, onSaveRecord, record, saveState = "idle", student }) {
+function PreparationMemoModal({ lesson, onChangeRecord, onClose, onSaveRecord, previousLesson = null, previousRecord = null, record, saveState = "idle", student }) {
   const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
   const currentRecord = {
     ...createEmptyRecord(lesson, student),
@@ -5651,6 +5659,10 @@ function PreparationMemoModal({ lesson, onChangeRecord, onClose, onSaveRecord, r
   const [draftMemo, setDraftMemo] = useState(currentRecord.preparationMemo ?? "");
   const [draftStudentVisible, setDraftStudentVisible] = useState(Boolean(currentRecord.prepStudentVisible));
   const [draftParentVisible, setDraftParentVisible] = useState(Boolean(currentRecord.prepParentVisible));
+  const previousMemo = previousRecord?.preparationMemo?.trim() ?? "";
+  const previousLessonLabel = previousLesson
+    ? `${previousLesson.date} · ${previousLesson.className}`
+    : "직전 수업";
 
   function updateDraft(field, value) {
     if (field === "preparationMemo") setDraftMemo(value);
@@ -5677,7 +5689,21 @@ function PreparationMemoModal({ lesson, onChangeRecord, onClose, onSaveRecord, r
       subtitle={`${lesson.date} · ${lesson.className}`}
       onClose={onClose}
     >
-      <div className="prepMemoSingle">
+      <div className="prepMemoColumns">
+        <section className="prepMemoPrevious">
+          <div className="sectionHeader slim">
+            <div>
+              <p className="eyebrow">PREVIOUS</p>
+              <h2>직전 수업메모</h2>
+            </div>
+          </div>
+          <span>{previousLessonLabel}</span>
+          {previousMemo ? (
+            <pre>{previousMemo}</pre>
+          ) : (
+            <div className="emptyState compact">직전 수업메모가 없습니다.</div>
+          )}
+        </section>
         <section className="prepMemoDraft">
           <label>
             강사용 메모

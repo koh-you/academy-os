@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-06-20 P1. 직전 수업메모 2열 표시 및 학생 알림톡 포함값 저장
+
+- 상태: 완료
+- 사용자 요청: 수업메모가 길어질 수 있으므로 강의교재/강의내용처럼 placeholder로 넣지 말고, 수업메모 모달을 2열로 나눠 직전 수업메모를 보여준다. 다음 수업시간에 직전 수업메모가 있으면 수업메모 버튼 색을 다르게 표시한다. 학생 알림톡 포함 여부도 DB에 안전하게 저장한다.
+- 작업 결과: 수업일지 학생별 `수업메모` 버튼에서 직전 수업메모가 있으면 주황 계열로 표시하고 `직전 메모 있음` 안내를 붙였다. 수업메모 모달은 왼쪽 `직전 수업메모`, 오른쪽 `오늘 강사용 메모` 2열 구조로 바뀌었다. 직전 메모는 읽기 전용이며 오늘 메모와 섞이지 않는다.
+- 저장 보강: `lesson_student_records.prep_student_visible` 컬럼을 추가하는 SQL을 만들고, API 저장/읽기 매핑에 `prepStudentVisible`을 연결했다. 이제 `학생 알림톡에 포함` 체크도 Supabase에 저장된다.
+- SQL Editor 작업 필요: Supabase SQL Editor에서 `supabase/20260620_lesson_prep_student_visible.sql`을 실행해야 한다. 이미 기존 migration을 다시 실행하는 대신 이 파일 하나만 실행하면 된다. 실행 후 학생별 수업메모 저장을 다시 테스트한다.
+- 검증: `node --check api/routes/coreData.js` 통과, `node --check scripts/scenario-tests-production.cjs` 통과, `npm run build` 통과, `npm run test:production` 85개 통과.
+
 ## 2026-06-20 P1. 수업일지 단축키 안내 표시 제거
 
 - 상태: 완료

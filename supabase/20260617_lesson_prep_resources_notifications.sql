@@ -8,6 +8,7 @@ alter table if exists lesson_student_records
   add column if not exists assignment_status text,
   add column if not exists preparation_memo text,
   add column if not exists prep_student_notice text,
+  add column if not exists prep_student_visible boolean not null default false,
   add column if not exists prep_parent_visible boolean not null default false,
   add column if not exists prep_parent_notice text,
   add column if not exists prep_student_ai_status text,

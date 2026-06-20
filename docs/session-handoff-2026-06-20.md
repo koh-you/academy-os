@@ -8,10 +8,17 @@
 - 원격 반영: GitHub `origin/main`까지 push 완료
 - 마지막 확인:
   - `npm run build` 통과
-  - `npm run test:production` 79개 통과
+  - `npm run test:production` 85개 통과
 - 마지막 커밋:
-  - `4c3c45a Add Sunday makeup block deletion`
+  - `ba68c6e Show previous lesson prep memo`
 - 직전 주요 커밋:
+  - `8955284 Remove lesson shortcut hint text`
+  - `85d398c Scope Sunday makeup detail blocks by date`
+  - `9379f26 Show grade 3 students in lesson modal`
+  - `9d2693c Compact exam prep info table`
+  - `e9ab1f1 Show remaining Sunday blocks on source date`
+  - `3a82d0b Update final handoff notes`
+  - `4c3c45a Add Sunday makeup block deletion`
   - `53acd7e Derive Sunday blocks only when date changes`
   - `285bb9e Widen Sunday makeup block time editors`
   - `26c4e7b Reconcile Sunday makeup after exam prep deletion`
@@ -38,13 +45,19 @@
 
 현재 repo의 SQL 파일:
 
+- `supabase/20260620_lesson_prep_student_visible.sql`
 - `supabase/20260617_lesson_prep_resources_notifications.sql`
 - `supabase/20260620_lesson_schedule_metadata.sql`
 - `supabase/20260620_exam_calendar_supabase_state.sql`
 - `supabase/20260620_app_state_store.sql`
 - `supabase/schema.sql`
 
-오늘 후반 일요보강/시험관리 UI 수정은 새 SQL이 필요 없었다. 기존 `lessons`, `exam_prep_rows`, `school_events`, `app_state` 저장 흐름을 사용했다.
+최신 SQL 주의:
+
+- 수업메모의 `학생 알림톡에 포함` 체크값을 Supabase에 저장하려면 `supabase/20260620_lesson_prep_student_visible.sql`을 Supabase SQL Editor에서 실행해야 한다.
+- 이 파일은 `lesson_student_records.prep_student_visible boolean not null default false` 컬럼만 추가하며, 여러 번 실행해도 안전하다.
+
+오늘 후반 일요보강/시험관리 UI 수정은 새 SQL이 필요 없었다. 다만 이후 수업메모의 `학생 알림톡에 포함` 체크값 저장을 보강하면서 `supabase/20260620_lesson_prep_student_visible.sql` 적용이 새로 필요해졌다.
 
 ## 3. 오늘 오류가 많이 났던 지점과 현재 결론
 

@@ -46,7 +46,7 @@ check("15 lesson content field exists", hasAll(app, ["lessonContent", "getLesson
 check("16 incomplete assignment list is normalized", notificationRoute.includes("normalizeList") && notificationRoute.includes("incomplete"));
 check("17 retest and supplement schedule variables exist", hasAll(notificationRoute, ["retestSchedule", "supplementSchedule"]));
 check("18 Solapi template env vars exist", hasAll(envExample, ["SOLAPI_ATTENDANCE_TEMPLATE_ID", "SOLAPI_DAILY_REPORT_TEMPLATE_ID", "SOLAPI_STUDENT_COMMENT_TEMPLATE_ID"]));
-check("19 Supabase lesson record columns exist", hasAll(schema, ["lesson_material", "lesson_content", "assignment_status", "preparation_memo", "prep_student_notice", "prep_parent_visible"]));
+check("19 Supabase lesson record columns exist", hasAll(schema, ["lesson_material", "lesson_content", "assignment_status", "preparation_memo", "prep_student_notice", "prep_student_visible", "prep_parent_visible"]));
 check("20 notification management screen exists", hasAll(app, ["NotificationCenter", "templatePreviewText", "handleDispatchDue", "handleReadinessCheck"]));
 check("21 supplement schedule creates calendar lesson", hasAll(app, ["handleScheduleSupplementTask", "createSupplementLessonId", "linkedLessonId", "supplementProgressBadge"]));
 check("22 student portal is tablet first", hasAll(app, ["studentPortalTabletFirst", "teacherPreviewPortal"]) && css.includes(".studentPortalTabletFirst .metricGrid"));
@@ -116,6 +116,8 @@ check("74 Sunday makeup source pill shows only blocks that remain on source date
 check("75 Sunday makeup detail shows only blocks for selected date", hasAll(app, ["const displayedBlocks = isFocusedMovedBlock", "? [currentBlock]", "blocks.filter((block) => (block.date || lesson.date) === lesson.date)", "{displayedBlocks.length}개", "displayedBlocks.map((block)"]));
 check("76 lesson modal includes high school senior student group", hasAll(app, ['const lessonStudentGradeOrder = ["고3", "고2", "고1", "중3", "중2", "중1"]', "orderedStudentGrades", 'student.grade || "학년 미입력"']));
 check("77 lesson journal does not show keyboard shortcut hint text", !app.includes("↑↓←→") && !app.includes("Ctrl+C/V/Z"));
+check("78 lesson prep memo shows previous memo separately", hasAll(app, ["previousRecord={prepMemoModal.previousRecord}", "previousLesson={prepMemoModal.previousRecord", "const previousMemo = previousRecord?.preparationMemo", "prepMemoColumns", "직전 수업메모"]) && hasAll(css, [".prepMemoColumns", ".prepMemoPrevious", ".prepMemoButton.hasPrevious"]));
+check("79 lesson prep student visibility persists", hasAll(coreDataRoute, ["prep_student_visible: Boolean(record.prepStudentVisible)", "prepStudentVisible: Boolean(row.prep_student_visible)"]) && hasAll(schema, ["prep_student_visible boolean not null default false"]) && fs.existsSync(path.join(root, "supabase", "20260620_lesson_prep_student_visible.sql")));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));

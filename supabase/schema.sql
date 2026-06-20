@@ -68,6 +68,7 @@ create table if not exists lesson_student_records (
   assignment_status text,
   preparation_memo text,
   prep_student_notice text,
+  prep_student_visible boolean not null default false,
   prep_parent_visible boolean not null default false,
   prep_parent_notice text,
   prep_student_ai_status text,

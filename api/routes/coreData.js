@@ -142,6 +142,7 @@ function toLessonRecordRow(record, { includeExtendedFields = true } = {}) {
     assignment_status: compact(record.assignmentStatus),
     preparation_memo: compact(record.preparationMemo),
     prep_student_notice: compact(record.prepStudentNotice),
+    prep_student_visible: Boolean(record.prepStudentVisible),
     prep_parent_visible: Boolean(record.prepParentVisible),
     prep_parent_notice: compact(record.prepParentNotice),
     prep_student_ai_status: compact(record.prepStudentAiStatus),
@@ -165,6 +166,7 @@ function fromLessonRecordRow(row) {
     assignmentStatus: row.assignment_status ?? "",
     preparationMemo: row.preparation_memo ?? "",
     prepStudentNotice: row.prep_student_notice ?? "",
+    prepStudentVisible: Boolean(row.prep_student_visible),
     prepParentVisible: Boolean(row.prep_parent_visible),
     prepParentNotice: row.prep_parent_notice ?? "",
     prepStudentAiStatus: row.prep_student_ai_status ?? "",
@@ -1017,7 +1019,8 @@ export async function upsertLessonStudentRecord(record) {
       message.includes("lesson_content") ||
       message.includes("assignment_status") ||
       message.includes("preparation_memo") ||
-      message.includes("prep_student_notice");
+      message.includes("prep_student_notice") ||
+      message.includes("prep_student_visible");
     const hasExtendedValues = [
       stableRecord.lessonMaterial,
       stableRecord.lessonContent,
