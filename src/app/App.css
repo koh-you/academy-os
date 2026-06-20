@@ -4775,7 +4775,7 @@ textarea {
 .prepMemoColumns {
   display: grid;
   gap: 16px;
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
 }
 
 .prepMemoPrevious {
@@ -4784,6 +4784,8 @@ textarea {
   border-radius: 8px;
   display: grid;
   gap: 10px;
+  grid-template-rows: auto auto minmax(300px, 1fr);
+  min-height: 560px;
   padding: 14px;
 }
 
@@ -4809,6 +4811,7 @@ textarea {
   line-height: 1.55;
   margin: 0;
   max-height: 360px;
+  min-height: 300px;
   overflow: auto;
   padding: 12px;
   white-space: pre-wrap;
