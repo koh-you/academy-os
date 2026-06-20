@@ -288,6 +288,129 @@ function fromMakeupTaskRow(row) {
   };
 }
 
+function toExamPrepRow(row) {
+  return {
+    exam_prep_id: row.examPrepId,
+    school_name: row.schoolName || "학교 미입력",
+    grade: row.grade || "학년 미입력",
+    subject: row.subject || "수학",
+    textbook: compact(row.textbook),
+    publisher: compact(row.publisher),
+    exam_term: row.examCycle ?? row.examTerm ?? "2026-1-final",
+    exam_period: compact(row.examPeriod),
+    math_exam_date: compact(row.mathExamDate),
+    scope: compact(row.scope),
+    sub_materials: compact(row.subTextbook ?? row.subMaterials),
+    review: compact(row.review),
+    revised_review: compact(row.revisedReview),
+    memo: compact(row.memo),
+    exam_cycle: row.examCycle ?? row.examTerm ?? "2026-1-final",
+    math_exam_dates: row.mathExamDates ?? [],
+    special_note: compact(row.specialNote),
+    source: compact(row.source),
+    review_ai_status: compact(row.reviewAiStatus),
+    updated_at: new Date().toISOString()
+  };
+}
+
+function fromExamPrepRow(row) {
+  return {
+    examPrepId: row.exam_prep_id,
+    schoolName: row.school_name,
+    grade: row.grade,
+    subject: row.subject,
+    textbook: row.textbook ?? "",
+    publisher: row.publisher ?? "",
+    examCycle: row.exam_cycle ?? row.exam_term ?? "",
+    examTerm: row.exam_term ?? row.exam_cycle ?? "",
+    examPeriod: row.exam_period ?? "",
+    mathExamDate: row.math_exam_date ?? "",
+    mathExamDates: row.math_exam_dates ?? [],
+    scope: row.scope ?? "",
+    subTextbook: row.sub_textbook ?? row.sub_materials ?? "",
+    subMaterials: row.sub_materials ?? "",
+    review: row.review ?? "",
+    revisedReview: row.revised_review ?? "",
+    memo: row.memo ?? "",
+    specialNote: row.special_note ?? "",
+    source: row.source ?? "",
+    reviewAiStatus: row.review_ai_status ?? "",
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
+function toSchoolEventType(value = "event") {
+  return {
+    examPeriod: "exam_period",
+    mathExam: "math_exam",
+    vacation: "vacation",
+    opening: "opening",
+    schoolEvent: "event",
+    custom: "event",
+    preExam: "event"
+  }[value] ?? value;
+}
+
+function fromSchoolEventType(value = "event") {
+  return {
+    exam_period: "examPeriod",
+    math_exam: "mathExam",
+    vacation: "vacation",
+    opening: "opening",
+    event: "schoolEvent"
+  }[value] ?? value;
+}
+
+function toSchoolEventRow(event) {
+  const payload = {
+    ...event,
+    type: event.type ?? fromSchoolEventType(event.eventType)
+  };
+  return {
+    school_event_id: event.eventId ?? event.schoolEventId,
+    school_name: event.schoolName || "학교 미입력",
+    title: event.title,
+    event_type: toSchoolEventType(payload.type),
+    start_date: event.date ?? event.startDate,
+    end_date: compact(event.endDate),
+    math_subject_by_date: event.mathSubjectByDate ?? {},
+    memo: compact(event.memo),
+    app_event_type: payload.type,
+    color: compact(event.color),
+    grade: compact(event.grade),
+    exam_cycle: compact(event.examCycle),
+    exam_subject: compact(event.examSubject),
+    event_payload: payload,
+    updated_at: new Date().toISOString()
+  };
+}
+
+function fromSchoolEventRow(row) {
+  const payload = row.event_payload ?? {};
+  const type = payload.type ?? row.app_event_type ?? fromSchoolEventType(row.event_type);
+  return {
+    ...payload,
+    eventId: row.school_event_id,
+    schoolEventId: row.school_event_id,
+    schoolName: row.school_name,
+    title: row.title,
+    type,
+    eventType: row.event_type,
+    date: payload.date ?? row.start_date,
+    startDate: row.start_date,
+    endDate: payload.endDate ?? row.end_date ?? "",
+    memo: payload.memo ?? row.memo ?? "",
+    color: payload.color ?? row.color ?? "",
+    grade: payload.grade ?? row.grade ?? "",
+    examCycle: payload.examCycle ?? row.exam_cycle ?? "",
+    examSubject: payload.examSubject ?? row.exam_subject ?? "",
+    mathSubjectByDate: row.math_subject_by_date ?? {},
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
 function normalizeMaterialVisibility(value) {
   return value === "both" ? "student_parent" : value || "teacher";
 }
@@ -538,6 +661,75 @@ export async function upsertMakeupTasks(makeupTasks) {
 
   const rows = await upsertRows("makeup_tasks", makeupTasks.map(toMakeupTaskRow));
   return { source: databaseSource, makeupTasks: rows.map(fromMakeupTaskRow) };
+}
+
+export async function listExamPrepRows() {
+  if (!isSupabaseConfigured()) {
+    return { source: fallbackSource, examPrepRows: sampleData.examPrepRows ?? [] };
+  }
+
+  const rows = await listRows("exam_prep_rows", "select=*&order=school_name.asc,grade.asc,subject.asc", { requireServiceRole: true });
+  return { source: databaseSource, examPrepRows: rows.map(fromExamPrepRow) };
+}
+
+export async function upsertExamPrepRow(row) {
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, examPrepRow: row };
+  }
+
+  const [savedRow] = await upsertRows("exam_prep_rows", [toExamPrepRow(row)]);
+  return { source: databaseSource, examPrepRow: fromExamPrepRow(savedRow) };
+}
+
+export async function upsertExamPrepRows(rows) {
+  if (!Array.isArray(rows) || rows.length === 0) {
+    return { source: isSupabaseConfigured() ? databaseSource : fallbackSource, examPrepRows: [] };
+  }
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, examPrepRows: rows };
+  }
+
+  const savedRows = await upsertRows("exam_prep_rows", rows.map(toExamPrepRow));
+  return { source: databaseSource, examPrepRows: savedRows.map(fromExamPrepRow) };
+}
+
+export async function listSchoolEvents() {
+  if (!isSupabaseConfigured()) {
+    return { source: fallbackSource, schoolEvents: [] };
+  }
+
+  const rows = await listRows("school_events", "select=*&order=start_date.asc,title.asc", { requireServiceRole: true });
+  return { source: databaseSource, schoolEvents: rows.map(fromSchoolEventRow) };
+}
+
+export async function upsertSchoolEvent(event) {
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, schoolEvent: event };
+  }
+
+  const [row] = await upsertRows("school_events", [toSchoolEventRow(event)]);
+  return { source: databaseSource, schoolEvent: fromSchoolEventRow(row) };
+}
+
+export async function upsertSchoolEvents(events) {
+  if (!Array.isArray(events) || events.length === 0) {
+    return { source: isSupabaseConfigured() ? databaseSource : fallbackSource, schoolEvents: [] };
+  }
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, schoolEvents: events };
+  }
+
+  const rows = await upsertRows("school_events", events.map(toSchoolEventRow));
+  return { source: databaseSource, schoolEvents: rows.map(fromSchoolEventRow) };
+}
+
+export async function deleteSchoolEvent(eventId) {
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, schoolEventId: eventId };
+  }
+
+  await deleteRows("school_events", `school_event_id=eq.${encodeURIComponent(eventId)}`);
+  return { source: databaseSource, schoolEventId: eventId };
 }
 
 export async function listResourceMaterials() {

@@ -372,6 +372,31 @@ function postMakeupTasks(makeupTasks) {
   return postJson("/api/makeup-tasks/bulk", { makeupTasks });
 }
 
+function postExamPrepRow(examPrepRow) {
+  return postJson("/api/exam-prep-rows", { examPrepRow });
+}
+
+function postExamPrepRows(examPrepRows) {
+  return postJson("/api/exam-prep-rows/bulk", { examPrepRows });
+}
+
+function postSchoolEvent(schoolEvent) {
+  return postJson("/api/school-events", { schoolEvent });
+}
+
+function postSchoolEvents(schoolEvents) {
+  return postJson("/api/school-events/bulk", { schoolEvents });
+}
+
+function deleteSchoolEventFromApi(eventId) {
+  return fetch(apiUrl(`/api/school-events?id=${encodeURIComponent(eventId)}`), { method: "DELETE" })
+    .then((response) => response.json())
+    .then((result) => {
+      if (!result.ok) throw new Error(result.error || "학사일정 삭제 저장 실패");
+      return result;
+    });
+}
+
 const teacherAccount = {
   loginId: "teacher",
   password: "1234",
@@ -1247,6 +1272,8 @@ export function App() {
   const recordsRef = useRef(records);
   const homeworksRef = useRef(homeworks);
   const initialMakeupTasksRef = useRef(makeupTasks);
+  const initialExamPrepRowsRef = useRef(examPrepRows);
+  const initialSchoolEventsRef = useRef(schoolEvents);
 
   useEffect(() => {
     let isMounted = true;
@@ -1260,6 +1287,8 @@ export function App() {
           recordsResponse,
           homeworksResponse,
           makeupTasksResponse,
+          examPrepRowsResponse,
+          schoolEventsResponse,
           resourceMaterialsResponse
         ] = await Promise.all([
           fetch(apiUrl("/api/students")),
@@ -1268,15 +1297,29 @@ export function App() {
           fetch(apiUrl("/api/lesson-records")),
           fetch(apiUrl("/api/homeworks")),
           fetch(apiUrl("/api/makeup-tasks")),
+          fetch(apiUrl("/api/exam-prep-rows")),
+          fetch(apiUrl("/api/school-events")),
           fetch(apiUrl("/api/resource-materials"))
         ]);
-        const [studentsResult, classesResult, lessonsResult, recordsResult, homeworksResult, makeupTasksResult, resourceMaterialsResult] = await Promise.all([
+        const [
+          studentsResult,
+          classesResult,
+          lessonsResult,
+          recordsResult,
+          homeworksResult,
+          makeupTasksResult,
+          examPrepRowsResult,
+          schoolEventsResult,
+          resourceMaterialsResult
+        ] = await Promise.all([
           studentsResponse.json(),
           classesResponse.json(),
           lessonsResponse.json(),
           recordsResponse.json(),
           homeworksResponse.json(),
           makeupTasksResponse.json(),
+          examPrepRowsResponse.json(),
+          schoolEventsResponse.json(),
           resourceMaterialsResponse.json()
         ]);
         if (!isMounted) return;
@@ -1302,6 +1345,16 @@ export function App() {
         } else if (makeupTasksResult.ok && initialMakeupTasksRef.current.length > 0) {
           postMakeupTasks(initialMakeupTasksRef.current).catch((error) => console.error(error));
         }
+        if (examPrepRowsResult.ok && Array.isArray(examPrepRowsResult.examPrepRows) && examPrepRowsResult.examPrepRows.length > 0) {
+          setExamPrepRows(examPrepRowsResult.examPrepRows);
+        } else if (examPrepRowsResult.ok && initialExamPrepRowsRef.current.length > 0) {
+          postExamPrepRows(initialExamPrepRowsRef.current).catch((error) => console.error(error));
+        }
+        if (schoolEventsResult.ok && Array.isArray(schoolEventsResult.schoolEvents) && schoolEventsResult.schoolEvents.length > 0) {
+          setSchoolEvents(schoolEventsResult.schoolEvents);
+        } else if (schoolEventsResult.ok && initialSchoolEventsRef.current.length > 0) {
+          postSchoolEvents(initialSchoolEventsRef.current).catch((error) => console.error(error));
+        }
         if (resourceMaterialsResult.ok && Array.isArray(resourceMaterialsResult.materials)) {
           setResourceMaterials(resourceMaterialsResult.materials);
         }
@@ -1316,7 +1369,17 @@ export function App() {
     return () => {
       isMounted = false;
     };
-  }, [setClassTemplates, setHomeworks, setLessons, setMakeupTasks, setRecords, setResourceMaterials, setStudents]);
+  }, [
+    setClassTemplates,
+    setExamPrepRows,
+    setHomeworks,
+    setLessons,
+    setMakeupTasks,
+    setRecords,
+    setResourceMaterials,
+    setSchoolEvents,
+    setStudents
+  ]);
 
   useEffect(() => {
     setDeletedLessonBundles((current) => pruneExpiredLessonDeletes(current));
@@ -1391,13 +1454,15 @@ export function App() {
   }, [setStudents]);
 
   useEffect(() => {
-    setExamPrepRows((current) =>
-      mergeById(
-        current,
-        buildExamPrepRowsFromStudents(students, currentExamCycle, "template_mwf_7_10", current),
-        "examPrepId"
-      )
-    );
+    setExamPrepRows((current) => {
+      const nextRowsToAdd = buildExamPrepRowsFromStudents(students, currentExamCycle, "template_mwf_7_10", current);
+      const nextRows = mergeById(current, nextRowsToAdd, "examPrepId");
+      const addedRows = nextRows.filter((row) => !current.some((item) => item.examPrepId === row.examPrepId));
+      if (addedRows.length > 0) {
+        postExamPrepRows(addedRows).catch((error) => console.error(error));
+      }
+      return nextRows;
+    });
   }, [setExamPrepRows, students]);
 
   useEffect(() => {
@@ -1408,6 +1473,9 @@ export function App() {
         hasChanged = true;
         return { ...row, examPeriod: getDefaultExamPeriodText(row.examCycle) };
       });
+      if (hasChanged) {
+        postExamPrepRows(nextRows.filter((row, index) => row !== current[index])).catch((error) => console.error(error));
+      }
       return hasChanged ? nextRows : current;
     });
   }, [setExamPrepRows]);
@@ -1831,7 +1899,15 @@ export function App() {
       const updatedExamRow = existingExamRow ? { ...existingExamRow, [field]: value } : null;
       const shouldSyncPublisher = ["publisher", "examCycle", "schoolName", "grade", "subject"].includes(field);
       const updatedRows = current.map((row) => (row.examPrepId === examPrepId ? { ...row, [field]: value } : row));
-      return shouldSyncPublisher && updatedExamRow ? syncPublisherAcrossExamTerm(updatedRows, updatedExamRow) : updatedRows;
+      const nextRows = shouldSyncPublisher && updatedExamRow ? syncPublisherAcrossExamTerm(updatedRows, updatedExamRow) : updatedRows;
+      const changedRows = nextRows.filter((row) => {
+        const previousRow = current.find((item) => item.examPrepId === row.examPrepId);
+        return previousRow && JSON.stringify(previousRow) !== JSON.stringify(row);
+      });
+      if (changedRows.length > 0) {
+        postExamPrepRows(changedRows).catch((error) => console.error(error));
+      }
+      return nextRows;
     });
   }
 
@@ -2263,9 +2339,15 @@ export function App() {
             rows={examPrepRows}
             students={students}
             onEnsureExamCycleRows={(examCycle, classTemplateId) =>
-              setExamPrepRows((current) =>
-                mergeById(current, buildExamPrepRowsFromStudents(students, examCycle, classTemplateId, current), "examPrepId")
-              )
+              setExamPrepRows((current) => {
+                const nextRowsToAdd = buildExamPrepRowsFromStudents(students, examCycle, classTemplateId, current);
+                const nextRows = mergeById(current, nextRowsToAdd, "examPrepId");
+                const addedRows = nextRows.filter((row) => !current.some((item) => item.examPrepId === row.examPrepId));
+                if (addedRows.length > 0) {
+                  postExamPrepRows(addedRows).catch((error) => console.error(error));
+                }
+                return nextRows;
+              })
             }
             onUpdateRow={handleUpdateExamPrepRow}
           />
@@ -2295,18 +2377,25 @@ export function App() {
           <SchoolCalendarCenter
             events={schoolEvents}
             rows={examPrepRows}
-            onAddEvent={(event) =>
-              setSchoolEvents((current) => [
-                { ...event, eventId: event.eventId || `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}` },
-                ...current
-              ])
-            }
-            onDeleteEvent={(eventId) => setSchoolEvents((current) => current.filter((event) => event.eventId !== eventId))}
+            onAddEvent={(event) => {
+              const nextEvent = { ...event, eventId: event.eventId || `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}` };
+              setSchoolEvents((current) => [nextEvent, ...current]);
+              postSchoolEvent(nextEvent).catch((error) => console.error(error));
+            }}
+            onDeleteEvent={(eventId) => {
+              setSchoolEvents((current) => current.filter((event) => event.eventId !== eventId));
+              deleteSchoolEventFromApi(eventId).catch((error) => console.error(error));
+            }}
             onSyncPreExamLesson={handleSyncPreExamLessonFromSchoolEvent}
             onUpdateExamPrepRow={handleUpdateExamPrepRow}
             onUpdateEvent={(eventId, field, value) =>
               setSchoolEvents((current) =>
-                current.map((event) => (event.eventId === eventId ? { ...event, [field]: value } : event))
+                current.map((event) => {
+                  if (event.eventId !== eventId) return event;
+                  const nextEvent = { ...event, [field]: value };
+                  postSchoolEvent(nextEvent).catch((error) => console.error(error));
+                  return nextEvent;
+                })
               )
             }
           />

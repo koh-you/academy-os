@@ -3,24 +3,31 @@ import {
   deleteLesson,
   deleteLessonsBefore,
   deleteResourceMaterial,
+  deleteSchoolEvent,
   getCoreDataStatus,
   listClassTemplates,
+  listExamPrepRows,
   listHomeworks,
   listLessons,
   listLessonStudentRecords,
   listMakeupTasks,
   listNotificationJobs,
   listResourceMaterials,
+  listSchoolEvents,
   listStudents,
   seedCoreData,
   upsertHomework,
   upsertHomeworks,
+  upsertExamPrepRow,
+  upsertExamPrepRows,
   upsertLesson,
   upsertLessons,
   upsertNotificationJob,
   upsertMakeupTask,
   upsertMakeupTasks,
   upsertResourceMaterial,
+  upsertSchoolEvent,
+  upsertSchoolEvents,
   upsertStudent,
   upsertStudents,
   upsertLessonStudentRecord
@@ -516,6 +523,82 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await upsertMakeupTasks(payload.makeupTasks ?? payload.tasks ?? []);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/exam-prep-rows") {
+    try {
+      const result = await listExamPrepRows();
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/exam-prep-rows") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await upsertExamPrepRow(payload.examPrepRow ?? payload.row ?? payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/exam-prep-rows/bulk") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await upsertExamPrepRows(payload.examPrepRows ?? payload.rows ?? []);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/school-events") {
+    try {
+      const result = await listSchoolEvents();
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/school-events") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await upsertSchoolEvent(payload.schoolEvent ?? payload.event ?? payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/school-events/bulk") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await upsertSchoolEvents(payload.schoolEvents ?? payload.events ?? []);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "DELETE" && requestUrl.pathname === "/api/school-events") {
+    try {
+      const eventId = requestUrl.searchParams.get("id");
+      if (!eventId) throw new Error("삭제할 학사일정 ID가 필요합니다.");
+      const result = await deleteSchoolEvent(eventId);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });

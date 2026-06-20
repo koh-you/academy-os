@@ -100,6 +100,14 @@
 - SQL 주의: 이번 1차는 기존 `makeup_tasks` 테이블을 사용하므로 새 SQL Editor 적용은 필요 없다.
 - 검증: `node --check api/routes/coreData.js` 통과, `node --check api/server.js` 통과, `npm run build` 통과, `npm run test:production` 60개 통과.
 
+### 2026-06-20 P1. 운영 데이터 Supabase 전환 2차 - 시험관리/학사일정
+
+- 상태: 완료
+- 사용자 요청: 시험관리와 학사일정도 localStorage 중심이라 오류가 반복되므로 Supabase로 옮긴다.
+- 이번 작업 결과: `/api/exam-prep-rows`, `/api/school-events` API를 추가하고, 앱 시작 시 Supabase 시험관리/학사일정 데이터를 불러오도록 연결했다. 서버가 비어 있고 브라우저에 기존 데이터가 있으면 bulk 저장으로 이전한다. 시험관리 행 생성/수정, 학사일정 수동 이벤트 생성/수정/삭제도 Supabase 저장을 호출한다.
+- SQL 주의: 운영 Supabase에 `supabase/20260620_exam_calendar_supabase_state.sql` 적용이 필요하다. 이 파일은 시험관리의 `math_exam_dates`, `exam_cycle` 등 앱 필드와 학사일정의 `event_payload`, `color`, `grade`, `exam_subject` 등을 저장하기 위한 컬럼을 추가한다. SQL 적용 전에는 화면이 localStorage fallback으로 버티지만, 새 API 저장은 실패할 수 있다.
+- 검증: `node --check api/routes/coreData.js` 통과, `node --check api/server.js` 통과, `npm run build` 통과, `npm run test:production` 60개 통과.
+
 ### 오늘 작업 요약 및 최종 확인
 
 - 상태: 완료
