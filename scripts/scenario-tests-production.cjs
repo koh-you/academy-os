@@ -94,6 +94,7 @@ check("59 lesson prep memo modal saves directly", hasAll(app, ["prepMemoSaveBar"
 check("60 lesson progress and prep memo persist through core data", hasAll(coreDataRoute, ["progress_note: compact(record.lessonProgress ?? record.progress)", "preparation_memo: compact(record.preparationMemo)", "lessonProgress: row.progress_note", "Supabase lesson_student_records 확장 컬럼 migration"]));
 
 check("61 moved Sunday makeup blocks derive calendar lessons", hasAll(app, ["createExamSundayMakeupBlockLessons", "generatedLessonControls", "sundayMakeupBlocks", "calendarLessons"]));
+check("61b Sunday makeup blocks derive only when date changes", hasAll(app, ["const blockDate = block.date || lesson.date", "return blockDate !== lesson.date"]) && !app.includes("blockStartTime !== (lesson.startTime"));
 check("62 moved Sunday makeup blocks keep original lesson linkage", hasAll(app, ["isVirtualSundayMakeupBlock: true", "sourceLessonId: lesson.lessonId", "virtualBlockId: block.blockId", "virtualBlockLabel: block.label"]));
 check("63 moved Sunday makeup blocks open focused source modal", hasAll(app, ["selectedSourceLesson", "displayLesson={selectedLesson}", "focusBlockId={selectedLesson?.virtualBlockId}", "getGeneratedLessonKey(selectedSourceLesson)"]));
 check("64 moved Sunday makeup blocks are visually distinct", hasAll(app, ["blockMoved", "lesson.isVirtualSundayMakeupBlock", "lesson.virtualBlockMemo"]) && hasAll(css, [".lessonPill.sundayMakeupLessonPill.blockMoved", ".examSundayBlockItem.focused"]));

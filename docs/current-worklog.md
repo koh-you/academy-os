@@ -730,3 +730,9 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - 이번 작업 결과: 일요보강 학교별 블록 편집 영역의 왼쪽 날짜/시간 칸을 넓히고, 시작/종료 시간 input 최소폭과 높이를 늘렸다. 모바일/좁은 화면에서는 기존처럼 세로 배치가 유지된다.
 - SQL 주의: CSS 변경만 있으므로 Supabase SQL Editor 작업 필요 없음.
 - 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 77개 통과.
+### 2026-06-20 P1. 일요보강 블록 캘린더 파생 표시 조건 정리
+- 상태: 완료
+- 사용자 요청: 블록 저장 후 날짜가 달라진 학교 블록만 별도 캘린더 일정으로 표시하고, 나머지 같은 날짜 블록은 기존 일요시험보강 하나의 행으로 표현한다.
+- 이번 작업 결과: `createExamSundayMakeupBlockLessons`의 파생 조건을 날짜 변경 기준으로 단순화했다. 같은 날짜에서 시간/메모만 수정한 블록은 별도 캘린더 pill로 만들지 않고 원본 일요시험보강 pill 안에 남긴다. 날짜가 다른 블록만 별도 가상 lesson으로 파생 표시된다.
+- SQL 주의: 프론트 파생 표시 조건 변경만 있으므로 Supabase SQL Editor 작업 필요 없음.
+- 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 78개 통과.

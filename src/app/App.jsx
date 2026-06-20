@@ -4747,9 +4747,7 @@ function createExamSundayMakeupBlockLessons(lessons = [], controls = defaultGene
       return parseExamSundayMakeupBlocks(lesson, blocksOverride)
         .filter((block) => {
           const blockDate = block.date || lesson.date;
-          const blockStartTime = block.startTime || lesson.startTime || "13:00";
-          const blockEndTime = block.endTime || lesson.endTime || "";
-          return blockDate !== lesson.date || blockStartTime !== (lesson.startTime || "13:00") || blockEndTime !== (lesson.endTime || "");
+          return blockDate !== lesson.date;
         })
         .map((block) => ({
           ...lesson,
