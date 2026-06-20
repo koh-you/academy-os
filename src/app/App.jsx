@@ -1523,8 +1523,6 @@ export function App() {
         if (resourceMaterialsResult.ok && Array.isArray(resourceMaterialsResult.materials)) {
           setResourceMaterials(resourceMaterialsResult.materials);
         }
-        fetch(apiUrl(`/api/lessons?before=${encodeURIComponent(academyOperationalStartDate)}`), { method: "DELETE" })
-          .catch((error) => console.info("academy-os legacy lesson cleanup skipped:", error.message));
       } catch (error) {
         console.info("academy-os API sync skipped:", error.message);
       }
@@ -12806,8 +12804,9 @@ function sortByTime(a, b) {
 }
 
 function isActiveLesson(lesson) {
+  const isGeneratedExamLesson = ["preExam", "examSundayMakeup"].includes(lesson?.lessonType);
   return (
-    lesson?.date >= academyOperationalStartDate &&
+    (lesson?.date >= academyOperationalStartDate || isGeneratedExamLesson) &&
     !["canceled", "deleted"].includes(lesson?.status ?? "scheduled")
   );
 }

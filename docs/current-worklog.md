@@ -697,3 +697,11 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - 이번 작업 결과: 자동 수업 후보 생성 입력을 현재 고사(`currentExamCycle`) 행으로 제한했다. 기말고사 기간에는 1학기 기말 행만 직전수업/일요보강 후보로 계산된다. 또한 자동 수업 bulk 저장 실패가 콘솔에만 남지 않고 화면 alert로 표시되도록 해, 저장 실패 후 새로고침 때 사라지는 상황을 바로 알 수 있게 했다.
 - SQL 주의: 프론트 후보 필터와 저장 실패 표시 변경만 있으므로 Supabase SQL Editor 작업 필요 없음.
 - 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 73개 통과.
+
+### 2026-06-20 P1. 6/7·6/14 일요보강 삭제 원인 제거
+- 상태: 완료
+- 사용자 제보: 6/7, 6/14 일요보강 데이터가 다시 삭제됐다.
+- 원인: 앱 시작 시 남아 있던 레거시 정리 코드가 `/api/lessons?before=2026-06-19` DELETE를 호출해 6/19 이전 수업을 hard delete했다. 6/7, 6/14 일요보강은 정상 시험대비 수업이지만 날짜가 6/19 이전이라 이 정리 로직에 걸려 삭제됐다. 또한 화면 필터도 `academyOperationalStartDate` 이전 수업을 숨기는 조건이 있어, 저장돼도 일요보강이 숨겨질 수 있었다.
+- 이번 작업 결과: 앱 시작 시 과거 수업 hard delete 호출을 제거했다. `preExam`, `examSundayMakeup` 자동 시험 수업은 6/19 이전 날짜여도 활성 수업으로 표시되도록 보정했다.
+- SQL 주의: 프론트 삭제 호출/필터 변경만 있으므로 Supabase SQL Editor 작업 필요 없음.
+- 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 74개 통과.
