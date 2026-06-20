@@ -8657,6 +8657,7 @@ function AIVariantProblemCenter({ aiSettings = defaultAiSettings }) {
   const [isGenerated, setIsGenerated] = useState(false);
   const [selectedVariantIds, setSelectedVariantIds] = useState([]);
   const [isHwpxExportOpen, setIsHwpxExportOpen] = useState(false);
+  const variantFileInputRef = useRef(null);
   const [hwpxExportForm, setHwpxExportForm] = useState({
     includeAnswerSheet: false,
     includeInlineNotes: true,
@@ -8691,6 +8692,30 @@ function AIVariantProblemCenter({ aiSettings = defaultAiSettings }) {
   const selectedVariantCount = selectedVariantIds.filter((id) =>
     generatedVariants.some((variant) => variant.id === id)
   ).length;
+
+  async function appendVariantSourceFile(file) {
+    if (!file) return;
+    const header = `[첨부 파일] ${file.name} (${Math.round(file.size / 1024)}KB)`;
+    let fileText = "";
+    if (file.type.startsWith("text/") || /\.(txt|csv|md|json)$/i.test(file.name)) {
+      try {
+        fileText = await file.text();
+      } catch (error) {
+        fileText = `파일 내용을 읽지 못했습니다: ${error.message}`;
+      }
+    }
+    setSourceProblem((current) => [current, header, fileText].filter(Boolean).join("\n\n"));
+  }
+
+  function handleVariantFileInput(event) {
+    appendVariantSourceFile(event.target.files?.[0]);
+    event.target.value = "";
+  }
+
+  function handleVariantFileDrop(event) {
+    event.preventDefault();
+    appendVariantSourceFile(event.dataTransfer.files?.[0]);
+  }
 
   function handleGenerateVariant() {
     setIsGenerated(true);
@@ -8769,10 +8794,23 @@ function AIVariantProblemCenter({ aiSettings = defaultAiSettings }) {
 
               <div className="aiVariantTopGrid">
                 <div className="aiVariantInputColumn">
-                  <div className="aiUploadBox compact">
+                  <div
+                    className="aiUploadBox compact"
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={handleVariantFileDrop}
+                  >
                     <strong>파일 선택 또는 드래그</strong>
                     <span>파일 1개 · 최대 50MB · Ctrl+V 붙여넣기</span>
-                    <button className="softButton" type="button">파일 업로드</button>
+                    <input
+                      accept=".txt,.csv,.md,.json,image/*,.pdf"
+                      className="visuallyHiddenInput"
+                      onChange={handleVariantFileInput}
+                      ref={variantFileInputRef}
+                      type="file"
+                    />
+                    <button className="softButton" onClick={() => variantFileInputRef.current?.click()} type="button">
+                      파일 업로드
+                    </button>
                   </div>
                   <label className="wideLabel">
                     원본 문항 / 오답 메모
