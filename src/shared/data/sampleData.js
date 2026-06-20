@@ -684,6 +684,7 @@ sampleData.lessons = sampleData.lessons.map((lesson) => ({
 sampleData.examPrepRows = [
   {
     examPrepId: "exam_prep_yonghwa_2026_mid_1",
+    examCycle: "2026-1-mid",
     schoolName: "용화여고",
     grade: "1학년",
     subject: "공통수학1",
@@ -697,6 +698,7 @@ sampleData.examPrepRows = [
   },
   {
     examPrepId: "exam_prep_sanggye_2026_mid_1",
+    examCycle: "2026-1-mid",
     schoolName: "상계고",
     grade: "1학년",
     subject: "공통수학1",
@@ -710,6 +712,7 @@ sampleData.examPrepRows = [
   },
   {
     examPrepId: "exam_prep_jaun_2026_mid_1",
+    examCycle: "2026-1-mid",
     schoolName: "자운고",
     grade: "1학년",
     subject: "공통수학1",
@@ -723,6 +726,7 @@ sampleData.examPrepRows = [
   },
   {
     examPrepId: "exam_prep_jeongui_2026_mid_1",
+    examCycle: "2026-1-mid",
     schoolName: "정의여고",
     grade: "1학년",
     subject: "공통수학1",
@@ -736,6 +740,7 @@ sampleData.examPrepRows = [
   },
   {
     examPrepId: "exam_prep_changdong_2026_mid_1",
+    examCycle: "2026-1-mid",
     schoolName: "창동고",
     grade: "1학년",
     subject: "공통수학1",
@@ -749,6 +754,7 @@ sampleData.examPrepRows = [
   },
   {
     examPrepId: "exam_prep_jeongui_2026_mid_geo",
+    examCycle: "2026-1-mid",
     schoolName: "정의여고",
     grade: "3학년",
     subject: "기하",
@@ -762,6 +768,7 @@ sampleData.examPrepRows = [
   },
   {
     examPrepId: "exam_prep_sanggye_2026_mid_probability",
+    examCycle: "2026-1-mid",
     schoolName: "상계고",
     grade: "3학년",
     subject: "확통",
@@ -775,6 +782,7 @@ sampleData.examPrepRows = [
   },
   {
     examPrepId: "exam_prep_jaun_2026_mid_probability",
+    examCycle: "2026-1-mid",
     schoolName: "자운고",
     grade: "3학년",
     subject: "확통",

@@ -418,7 +418,45 @@ const examPrepTextbookBySchoolGrade = {
 
 const schoolCalendarGradeOptions = ["중3", "고1", "고2", "고3"];
 const schoolCalendarMathSubjectOptions = ["공통수학1", "공통수학2", "대수", "미적분1", "확률과통계", "미적분2", "기하"];
-const currentExamCycle = "2026-1-final";
+const currentExamCycle = getDefaultExamCycleForDate(today);
+
+function inferExamCycleFromPrepId(examPrepId = "") {
+  const id = String(examPrepId);
+  const explicitCycle = id.match(/(20\d{2})[-_](1|2)[-_](mid|final)/);
+  if (explicitCycle) return `${explicitCycle[1]}-${explicitCycle[2]}-${explicitCycle[3]}`;
+  const legacyYear = id.match(/(20\d{2})/);
+  const year = legacyYear?.[1] ?? String(new Date(`${today}T00:00:00+09:00`).getFullYear());
+  if (id.includes("_mid_") || id.endsWith("_mid") || id.includes("_mid")) return `${year}-1-mid`;
+  if (id.includes("_final_") || id.endsWith("_final") || id.includes("_final")) return `${year}-1-final`;
+  return "";
+}
+
+function getDefaultExamCycleForDate(dateString = today) {
+  const [yearText, monthText] = String(dateString).split("-");
+  const year = Number(yearText) || new Date().getFullYear();
+  const month = Number(monthText) || 1;
+  if (month <= 5) return `${year}-1-mid`;
+  if (month <= 7) return `${year}-1-final`;
+  if (month <= 10) return `${year}-2-mid`;
+  return `${year}-2-final`;
+}
+
+function normalizeExamPrepRowCycle(row = {}) {
+  const inferredCycle = inferExamCycleFromPrepId(row.examPrepId);
+  if (inferredCycle && row.examCycle !== inferredCycle) {
+    return { ...row, examCycle: inferredCycle, examTerm: inferredCycle };
+  }
+  if (!row.examCycle && !row.examTerm) {
+    return { ...row, examCycle: currentExamCycle, examTerm: currentExamCycle };
+  }
+  if (!row.examCycle && row.examTerm) return { ...row, examCycle: row.examTerm };
+  if (!row.examTerm && row.examCycle) return { ...row, examTerm: row.examCycle };
+  return row;
+}
+
+function normalizeExamPrepRows(rows = []) {
+  return rows.map(normalizeExamPrepRowCycle);
+}
 
 function createParentLoginId(student) {
   return `parent-${student.loginId}`;
@@ -481,21 +519,21 @@ function safeIdPart(value = "") {
 }
 
 function examCycleLabel(examCycle) {
-  return {
-    "2026-1-mid": "1학기 중간고사",
-    "2026-1-final": "1학기 기말고사",
-    "2026-2-mid": "2학기 중간고사",
-    "2026-2-final": "2학기 기말고사"
-  }[examCycle] ?? examCycle;
+  const [, semester, phase] = String(examCycle).match(/^20\d{2}-(1|2)-(mid|final)$/) ?? [];
+  if (!semester || !phase) return examCycle;
+  return `${semester}학기 ${phase === "mid" ? "중간고사" : "기말고사"}`;
 }
 
 function getDefaultExamPeriodRange(examCycle = currentExamCycle) {
-  return {
-    "2026-1-mid": { date: "2026-04-27", endDate: "2026-05-08" },
-    "2026-1-final": { date: "2026-06-29", endDate: "2026-07-03" },
-    "2026-2-mid": { date: "2026-09-28", endDate: "2026-10-02" },
-    "2026-2-final": { date: "2026-12-14", endDate: "2026-12-24" }
-  }[examCycle] ?? { date: today, endDate: today };
+  const [yearText, semester, phase] = String(examCycle).split("-");
+  const year = Number(yearText) || new Date(`${today}T00:00:00+09:00`).getFullYear();
+  const ranges = {
+    "1-mid": { date: `${year}-04-27`, endDate: `${year}-05-08` },
+    "1-final": { date: `${year}-06-29`, endDate: `${year}-07-03` },
+    "2-mid": { date: `${year}-09-28`, endDate: `${year}-10-02` },
+    "2-final": { date: `${year}-12-14`, endDate: `${year}-12-24` }
+  };
+  return ranges[`${semester}-${phase}`] ?? { date: today, endDate: today };
 }
 
 function getDefaultExamPeriodText(examCycle = currentExamCycle) {
@@ -1250,7 +1288,7 @@ export function App() {
   const [problemBooks, setProblemBooks] = useStoredState(storageKeys.problemBooks, createDefaultProblemBooks());
   const [scoreRecords, setScoreRecords] = useStoredState(storageKeys.scoreRecords, sampleData.scoreRecords ?? []);
   const [academyTests, setAcademyTests] = useStoredState(storageKeys.academyTests, sampleData.academyTests ?? []);
-  const [examPrepRows, setExamPrepRows] = useStoredState(storageKeys.examPrepRows, sampleData.examPrepRows ?? []);
+  const [examPrepRows, setExamPrepRows] = useStoredState(storageKeys.examPrepRows, normalizeExamPrepRows(sampleData.examPrepRows ?? []));
   const [schoolEvents, setSchoolEvents] = useStoredState(
     storageKeys.schoolEvents,
     createDefaultSchoolEvents(sampleData.examPrepRows ?? [])
@@ -1393,7 +1431,12 @@ export function App() {
           setMakeupTasks(makeupTasksResult.makeupTasks);
         }
         if (examPrepRowsResult.ok && Array.isArray(examPrepRowsResult.examPrepRows)) {
-          setExamPrepRows(examPrepRowsResult.examPrepRows);
+          const normalizedRows = normalizeExamPrepRows(examPrepRowsResult.examPrepRows);
+          const changedRows = normalizedRows.filter((row, index) => JSON.stringify(row) !== JSON.stringify(examPrepRowsResult.examPrepRows[index]));
+          setExamPrepRows(normalizedRows);
+          if (changedRows.length > 0) {
+            postExamPrepRows(changedRows).catch((error) => console.error(error));
+          }
         }
         if (schoolEventsResult.ok && Array.isArray(schoolEventsResult.schoolEvents)) {
           setSchoolEvents(schoolEventsResult.schoolEvents);
@@ -1597,6 +1640,17 @@ export function App() {
   useEffect(() => {
     homeworksRef.current = homeworks;
   }, [homeworks]);
+
+  useEffect(() => {
+    setExamPrepRows((current) => {
+      const normalizedRows = normalizeExamPrepRows(current);
+      const changedRows = normalizedRows.filter((row, index) => JSON.stringify(row) !== JSON.stringify(current[index]));
+      if (changedRows.length > 0) {
+        postExamPrepRows(changedRows).catch((error) => console.error(error));
+      }
+      return changedRows.length > 0 ? normalizedRows : current;
+    });
+  }, [setExamPrepRows]);
 
   useEffect(() => {
     setStudents((currentStudents) => {

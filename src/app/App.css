@@ -1519,6 +1519,73 @@ button {
 .examPrepRow.editing {
   background: #f8fbff;
   box-shadow: inset 3px 0 0 #3b82f6;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  min-width: 1280px;
+}
+
+.examPrepRow.editing > :nth-child(1) {
+  grid-column: 1 / span 2;
+  grid-row: 1;
+}
+
+.examPrepRow.editing > :nth-child(2) {
+  grid-column: 1 / span 3;
+  grid-row: 2 / span 2;
+}
+
+.examPrepRow.editing > :nth-child(3) {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.examPrepRow.editing > :nth-child(4) {
+  grid-column: 4;
+  grid-row: 1;
+}
+
+.examPrepRow.editing > :nth-child(5) {
+  grid-column: 5 / span 2;
+  grid-row: 1;
+}
+
+.examPrepRow.editing > :nth-child(6) {
+  grid-column: 7 / span 2;
+  grid-row: 1;
+}
+
+.examPrepRow.editing > :nth-child(7) {
+  grid-column: 4 / span 6;
+  grid-row: 2 / span 2;
+}
+
+.examPrepRow.editing > :nth-child(8) {
+  grid-column: 10 / span 3;
+  grid-row: 2;
+}
+
+.examPrepRow.editing > :nth-child(9) {
+  grid-column: 10 / span 3;
+  grid-row: 3;
+}
+
+.examPrepRow.editing > :nth-child(10) {
+  grid-column: 9 / span 3;
+  grid-row: 1;
+}
+
+.examPrepRow.editing > :nth-child(11) {
+  grid-column: 12;
+  grid-row: 1;
+}
+
+.examPrepRow.editing input,
+.examPrepRow.editing textarea {
+  min-width: 0;
+}
+
+.examPrepRow.editing > input {
+  min-height: 44px;
+  padding: 0 12px;
 }
 
 .examPrepHead {
@@ -1554,6 +1621,10 @@ button {
   display: grid;
   gap: 6px;
   grid-template-columns: minmax(120px, 1fr) minmax(70px, 0.6fr) minmax(90px, 0.75fr) minmax(130px, 1fr) auto;
+}
+
+.examPrepRow.editing .mathExamEntryRow {
+  grid-template-columns: minmax(132px, 1fr) 72px 92px minmax(116px, 1fr) 56px;
 }
 
 .mathExamEntryRow input {

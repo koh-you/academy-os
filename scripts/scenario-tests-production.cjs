@@ -6,6 +6,7 @@ const appPath = path.join(root, "src", "app", "App.jsx");
 const cssPath = path.join(root, "src", "app", "App.css");
 const notificationRoutePath = path.join(root, "api", "routes", "notifications.js");
 const coreDataRoutePath = path.join(root, "api", "routes", "coreData.js");
+const sampleDataPath = path.join(root, "src", "shared", "data", "sampleData.js");
 const schemaPath = path.join(root, "supabase", "schema.sql");
 const envExamplePath = path.join(root, ".env.example");
 
@@ -13,6 +14,7 @@ const app = fs.readFileSync(appPath, "utf8");
 const css = fs.readFileSync(cssPath, "utf8");
 const notificationRoute = fs.readFileSync(notificationRoutePath, "utf8");
 const coreDataRoute = fs.readFileSync(coreDataRoutePath, "utf8");
+const sampleDataSource = fs.readFileSync(sampleDataPath, "utf8");
 const schema = fs.existsSync(schemaPath) ? fs.readFileSync(schemaPath, "utf8") : "";
 const envExample = fs.readFileSync(envExamplePath, "utf8");
 
@@ -95,6 +97,8 @@ check("61 moved Sunday makeup blocks derive calendar lessons", hasAll(app, ["cre
 check("62 moved Sunday makeup blocks keep original lesson linkage", hasAll(app, ["isVirtualSundayMakeupBlock: true", "sourceLessonId: lesson.lessonId", "virtualBlockId: block.blockId", "virtualBlockLabel: block.label"]));
 check("63 moved Sunday makeup blocks open focused source modal", hasAll(app, ["selectedSourceLesson", "displayLesson={selectedLesson}", "focusBlockId={selectedLesson?.virtualBlockId}", "getGeneratedLessonKey(selectedSourceLesson)"]));
 check("64 moved Sunday makeup blocks are visually distinct", hasAll(app, ["blockMoved", "lesson.isVirtualSundayMakeupBlock", "lesson.virtualBlockMemo"]) && hasAll(css, [".lessonPill.sundayMakeupLessonPill.blockMoved", ".examSundayBlockItem.focused"]));
+check("65 final exam prep does not inherit midterm seed data", hasAll(app, ["normalizeExamPrepRows", "inferExamCycleFromPrepId", "getDefaultExamCycleForDate"]) && hasAll(coreDataRoute, ["inferExamCycleFromPrepId", "getDefaultExamCycleForDate", "exam_cycle: examCycle"]) && hasAll(sampleDataSource, ['examPrepId: "exam_prep_sanggye_2026_mid_1"', 'examCycle: "2026-1-mid"']));
+check("66 exam cycle defaults follow seasonal exam windows", hasAll(app, ['if (month <= 5) return `${year}-1-mid`', 'if (month <= 7) return `${year}-1-final`', 'if (month <= 10) return `${year}-2-mid`', 'return `${year}-2-final`']) && hasAll(coreDataRoute, ['if (month <= 5) return `${year}-1-mid`', 'if (month <= 7) return `${year}-1-final`', 'if (month <= 10) return `${year}-2-mid`', 'return `${year}-2-final`']));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));

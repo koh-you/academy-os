@@ -289,6 +289,8 @@ function fromMakeupTaskRow(row) {
 }
 
 function toExamPrepRow(row) {
+  const inferredExamCycle = inferExamCycleFromPrepId(row.examPrepId);
+  const examCycle = inferredExamCycle || row.examCycle || row.examTerm || getDefaultExamCycleForDate();
   return {
     exam_prep_id: row.examPrepId,
     school_name: row.schoolName || "학교 미입력",
@@ -296,7 +298,7 @@ function toExamPrepRow(row) {
     subject: row.subject || "수학",
     textbook: compact(row.textbook),
     publisher: compact(row.publisher),
-    exam_term: row.examCycle ?? row.examTerm ?? "2026-1-final",
+    exam_term: examCycle,
     exam_period: compact(row.examPeriod),
     math_exam_date: compact(row.mathExamDate),
     scope: compact(row.scope),
@@ -304,7 +306,7 @@ function toExamPrepRow(row) {
     review: compact(row.review),
     revised_review: compact(row.revisedReview),
     memo: compact(row.memo),
-    exam_cycle: row.examCycle ?? row.examTerm ?? "2026-1-final",
+    exam_cycle: examCycle,
     math_exam_dates: row.mathExamDates ?? [],
     special_note: compact(row.specialNote),
     source: compact(row.source),
@@ -314,6 +316,8 @@ function toExamPrepRow(row) {
 }
 
 function fromExamPrepRow(row) {
+  const inferredExamCycle = inferExamCycleFromPrepId(row.exam_prep_id);
+  const examCycle = inferredExamCycle || row.exam_cycle || row.exam_term || getDefaultExamCycleForDate();
   return {
     examPrepId: row.exam_prep_id,
     schoolName: row.school_name,
@@ -321,8 +325,8 @@ function fromExamPrepRow(row) {
     subject: row.subject,
     textbook: row.textbook ?? "",
     publisher: row.publisher ?? "",
-    examCycle: row.exam_cycle ?? row.exam_term ?? "",
-    examTerm: row.exam_term ?? row.exam_cycle ?? "",
+    examCycle,
+    examTerm: examCycle,
     examPeriod: row.exam_period ?? "",
     mathExamDate: row.math_exam_date ?? "",
     mathExamDates: row.math_exam_dates ?? [],
@@ -338,6 +342,36 @@ function fromExamPrepRow(row) {
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
+}
+
+function inferExamCycleFromPrepId(examPrepId = "") {
+  const id = String(examPrepId);
+  const explicitCycle = id.match(/(20\d{2})[-_](1|2)[-_](mid|final)/);
+  if (explicitCycle) return `${explicitCycle[1]}-${explicitCycle[2]}-${explicitCycle[3]}`;
+  const legacyYear = id.match(/(20\d{2})/);
+  const year = legacyYear?.[1] ?? getKoreaDateString().slice(0, 4);
+  if (id.includes("_mid_") || id.endsWith("_mid") || id.includes("_mid")) return `${year}-1-mid`;
+  if (id.includes("_final_") || id.endsWith("_final") || id.includes("_final")) return `${year}-1-final`;
+  return "";
+}
+
+function getDefaultExamCycleForDate(dateString = getKoreaDateString()) {
+  const [yearText, monthText] = String(dateString).split("-");
+  const year = Number(yearText) || new Date().getFullYear();
+  const month = Number(monthText) || 1;
+  if (month <= 5) return `${year}-1-mid`;
+  if (month <= 7) return `${year}-1-final`;
+  if (month <= 10) return `${year}-2-mid`;
+  return `${year}-2-final`;
+}
+
+function getKoreaDateString(date = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "Asia/Seoul",
+    year: "numeric"
+  }).format(date);
 }
 
 function toSchoolEventType(value = "event") {

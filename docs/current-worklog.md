@@ -619,3 +619,24 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - 이번 작업 결과: 운영 시나리오 테스트에 61~64번 체크를 추가했다. 이동된 일요시험보강 학교별 블록이 달력용 수업으로 파생되는지, 원본 수업과 `sourceLessonId`로 연결되는지, 클릭 시 원본 모달과 `focusBlockId`로 이어지는지, 이동 블록 pill/강조 CSS가 존재하는지를 확인한다.
 - SQL 주의: 테스트 스크립트와 작업 기록만 변경했으므로 Supabase SQL Editor 적용은 필요 없다.
 - 검증: `npm run test:production` 64개 통과, `npm run build` 통과.
+
+### 2026-06-20 P1. 시험관리 수정 행 CSS 보정
+- 상태: 완료
+- 사용자 요청: 시험관리에서 시험정보 수정 모드의 CSS가 맞지 않아 날짜/수학시험/총평/저장 버튼 영역이 한 줄에서 어색하게 밀리는 문제를 수정한다.
+- 이번 작업 결과: 시험관리 수정 행에만 별도 12컬럼 grid를 적용해 기본정보, 시험기간, 총평, 저장/닫기 버튼을 첫 줄에 정리하고 특이사항, 수학시험 항목, 시험범위/부교재 입력을 아래 줄로 안정적으로 배치했다. 수학시험 항목 내부 입력 grid도 부모 폭 안에 들어오도록 조정했다.
+- SQL 주의: CSS 레이아웃 변경만 있으므로 Supabase SQL Editor 적용은 필요 없다.
+- 검증: `npm run build` 통과, `npm run test:production` 64개 통과.
+
+### 2026-06-20 P1. 1학기 기말고사 시험관리 데이터 초기화 보정
+- 상태: 완료
+- 사용자 요청: `2026 1학기 기말` 시험관리 화면에 1학기 중간고사 범위/총평 데이터가 들어와 있으므로, 기말고사는 앞으로 입력할 수 있게 깨끗해야 한다.
+- 이번 작업 결과: 중간고사 seed 행에 `examCycle: "2026-1-mid"`를 명시했다. 앱과 API 모두 `exam_prep_*_2026_mid_*` 형태의 레거시 행을 중간고사로 정규화하므로, 이미 잘못 `2026-1-final`로 저장된 중간고사 행도 로드 시 중간고사로 되돌아가고 기말 탭에서는 빠진다. 새 기말 행은 학생 DB 기반으로 생성되며 시험범위/부교재/총평은 빈 상태로 시작한다.
+- SQL 주의: 기존 컬럼만 쓰는 데이터 정규화 로직이므로 Supabase SQL Editor 적용은 필요 없다.
+- 검증: `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 65개 통과.
+
+### 2026-06-20 P1. 시험관리 API 기본 고사 자동 전환
+- 상태: 완료
+- 사용자 요청: API 매핑 기본값을 시기별 고사 흐름에 따라 자동으로 바뀌게 한다. 4월말~5월초는 1학기 중간, 6월말~7월초는 1학기 기말, 9월말~10월초는 2학기 중간, 12월 중순은 2학기 기말 기준이다.
+- 이번 작업 결과: 앱과 API에 `getDefaultExamCycleForDate`를 추가해 현재 날짜 기준 기본 고사를 계산한다. 1~5월은 `YYYY-1-mid`, 6~7월은 `YYYY-1-final`, 8~10월은 `YYYY-2-mid`, 11~12월은 `YYYY-2-final`로 기본값이 바뀐다. 기본 시험기간도 같은 연도 기준으로 4/27~5/8, 6/29~7/3, 9/28~10/2, 12/14~12/24를 자동 생성한다.
+- SQL 주의: API/프론트 기본값 계산 로직 변경만 있으므로 Supabase SQL Editor 적용은 필요 없다.
+- 검증: `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 66개 통과.
