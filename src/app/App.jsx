@@ -3502,7 +3502,7 @@ export function App() {
         throw new Error(result.error || "코멘트 알림톡 발송 실패");
       }
 
-      const logStatus = result.result?.dryRun ? "dry_run" : scheduledDate ? "scheduled" : "sent";
+      const logStatus = scheduledDate ? "scheduled" : result.result?.dryRun ? "dry_run" : "sent";
       const notificationLog = { ...logBase, result, status: logStatus };
       setNotificationLogs((current) => [notificationLog, ...current]);
       const notificationJob = {
@@ -3520,11 +3520,11 @@ export function App() {
       postJson("/api/notification-jobs", {
         notificationJob
       }).catch((error) => console.error(error));
-      const completeStatus = result.result?.dryRun
+      const completeStatus = scheduledDate
+        ? `예약 중 · ${scheduledLabel}`
+        : result.result?.dryRun
           ? "테스트 발송 기록됨"
-          : scheduledDate
-            ? `예약 완료 · ${scheduledLabel}`
-            : "알림톡 발송 완료";
+          : "알림톡 발송 완료";
       applySendStatus(completeStatus, { persist: true });
     } catch (error) {
       const failedLog = { ...logBase, error: error.message, status: "failed" };
