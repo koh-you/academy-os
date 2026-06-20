@@ -113,7 +113,8 @@ check("71 exam prep delete reconciles persisted Sunday makeup lessons", hasAll(a
 check("72 Sunday makeup block time editors have enough width", hasAll(css, ["grid-template-columns: 280px minmax(0, 1fr) auto", "grid-template-columns: repeat(2, minmax(132px, 1fr))", '.examSundayBlockTimeFields input[type="time"]', "min-height: 58px"]));
 check("73 Sunday makeup blocks can be removed inside lesson", hasAll(app, ["function deleteBlock(blockId)", "마지막 블록은 삭제할 수 없습니다", "current.filter((block) => block.blockId !== blockId)", "블록 삭제", "getExamSundayMakeupVisibleSourceLabel"]) && hasAll(css, [".examSundayBlockActions", ".examSundayBlockActions > span"]));
 check("74 Sunday makeup source pill shows only blocks that remain on source date", hasAll(app, ["shouldDisplayExamSundayMakeupSourceLesson", "getExamSundayMakeupVisibleSourceLabel", "(block.date || lesson.date) === lesson.date", "!shouldDisplayExamSundayMakeupSourceLesson(lesson, generatedLessonControls)"]));
-check("75 lesson modal includes high school senior student group", hasAll(app, ['const lessonStudentGradeOrder = ["고3", "고2", "고1", "중3", "중2", "중1"]', "orderedStudentGrades", 'student.grade || "학년 미입력"']));
+check("75 Sunday makeup detail shows only blocks for selected date", hasAll(app, ["const displayedBlocks = isFocusedMovedBlock", "? [currentBlock]", "blocks.filter((block) => (block.date || lesson.date) === lesson.date)", "{displayedBlocks.length}개", "displayedBlocks.map((block)"]));
+check("76 lesson modal includes high school senior student group", hasAll(app, ['const lessonStudentGradeOrder = ["고3", "고2", "고1", "중3", "중2", "중1"]', "orderedStudentGrades", 'student.grade || "학년 미입력"']));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));

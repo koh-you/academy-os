@@ -4813,6 +4813,10 @@ function ExamSundayMakeupLessonDetail({
   }, [blocksOverride, lesson]);
   const blocks = draftBlocks;
   const currentBlock = focusBlockId ? blocks.find((block) => block.blockId === focusBlockId) : null;
+  const isFocusedMovedBlock = Boolean(displayLesson?.isVirtualSundayMakeupBlock && currentBlock);
+  const displayedBlocks = isFocusedMovedBlock
+    ? [currentBlock]
+    : blocks.filter((block) => (block.date || lesson.date) === lesson.date);
   const scheduledTime = `${lesson.date} ${lesson.startTime || ""}${lesson.endTime ? `-${lesson.endTime}` : ""}`.trim();
   const displayedTime = displayLesson && displayLesson.lessonId !== lesson.lessonId
     ? `${displayLesson.date} ${displayLesson.startTime || ""}${displayLesson.endTime ? `-${displayLesson.endTime}` : ""}`.trim()
@@ -4857,7 +4861,7 @@ function ExamSundayMakeupLessonDetail({
         </div>
         <div>
           <span>보강 학교</span>
-          <strong>{blocks.length}개</strong>
+          <strong>{displayedBlocks.length}개</strong>
           <small>{lesson.status === "canceled" ? "취소됨" : "진행 예정"}</small>
         </div>
       </div>
@@ -4892,7 +4896,7 @@ function ExamSundayMakeupLessonDetail({
         </div>
 
         <div className="examSundayBlockList" aria-label="학교별 일요시험보강 블록">
-          {blocks.map((block) => (
+          {displayedBlocks.map((block) => (
             <div
               className={["examSundayBlockItem", block.blockId === focusBlockId ? "focused" : ""].filter(Boolean).join(" ")}
               key={block.blockId}
