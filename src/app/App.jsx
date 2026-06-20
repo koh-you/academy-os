@@ -429,17 +429,17 @@ function getDemoStudent(students) {
 }
 
 function createDefaultExamAnalysis(examPrepRow = {}) {
-  const schoolName = examPrepRow.schoolName || "창동고";
-  const grade = examPrepRow.grade || "1학년";
-  const subject = examPrepRow.subject || "공통수학1";
+  const schoolName = examPrepRow.schoolName || "";
+  const grade = examPrepRow.grade || "";
+  const subject = examPrepRow.subject || "";
   return {
     examAnalysisId: `exam_analysis_${Date.now()}`,
     examPrepId: examPrepRow.examPrepId || "",
     schoolName,
     grade,
     subject,
-    examName: "2026 1학기 기말고사",
-    examDate: "2026-06-12",
+    examName: examPrepRow.examCycle ? examCycleLabel(examPrepRow.examCycle) : "",
+    examDate: "",
     sourceFileUrl: "",
     rawExamText: "",
     aiProvider: "auto",
@@ -457,7 +457,7 @@ function createDefaultExamAnalysis(examPrepRow = {}) {
       "5. 다음 시험 학습 방향: 학생에게 실제로 안내할 문장으로 정리",
       "주의: AI 결과는 가안이며, 강사 인사이트 4모듈이 추가되기 전에는 발행용으로 쓰지 않는다."
     ].join("\n"),
-    aiOverview: `${schoolName} ${grade} ${subject} 시험지 원본을 넣으면 문항수, 난이도, 출제 특징이 정리됩니다.`,
+    aiOverview: "시험지 원본을 넣으면 문항수, 난이도, 출제 특징이 정리됩니다.",
     unitDistribution: "단원별 문항수와 배점이 여기에 정리됩니다.",
     killerProblems: "킬러/준킬러 문항 번호, 핵심 함정, 풀이 접근이 여기에 정리됩니다.",
     mistakePatterns: "학생들이 많이 틀릴 지점과 현장 체감 오답 패턴을 정리합니다.",
@@ -1261,7 +1261,7 @@ export function App() {
   );
   const [examAnalyses, setExamAnalyses] = useStoredState(
     storageKeys.examAnalyses,
-    sampleData.examAnalyses ?? [createDefaultExamAnalysis(sampleData.examPrepRows?.[0])]
+    sampleData.examAnalyses ?? [createDefaultExamAnalysis()]
   );
   const [resourceMaterials, setResourceMaterials] = useStoredState(storageKeys.resourceMaterials, []);
   const [aiSettings, setAiSettings] = useStoredState(storageKeys.aiSettings, defaultAiSettings);
@@ -2531,7 +2531,7 @@ export function App() {
             examPrepRows={examPrepRows}
             onAddAnalysis={() =>
               setExamAnalyses((current) => [
-                createDefaultExamAnalysis(examPrepRows[0]),
+                createDefaultExamAnalysis(),
                 ...current
               ])
             }
@@ -7279,8 +7279,8 @@ function ExamAnalysisCenter({
                   onClick={() => setSelectedAnalysisId(analysis.examAnalysisId)}
                   type="button"
                 >
-                  <strong>{analysis.schoolName} {analysis.grade}</strong>
-                  <span>{analysis.examName} · {analysis.subject}</span>
+                  <strong>{[analysis.schoolName, analysis.grade].filter(Boolean).join(" ") || "새 분석"}</strong>
+                  <span>{[analysis.examName, analysis.subject].filter(Boolean).join(" · ") || "기본정보 미입력"}</span>
                   <small>{analysis.pipelineStage}</small>
                 </button>
               ))}
