@@ -672,3 +672,12 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - 자동삭제: API가 lessons 목록을 조회할 때 `status=canceled`이고 `updated_at`이 7일보다 오래된 수업을 실제 삭제한다. 이때 기존 hard delete 함수가 연결된 lesson records/homeworks까지 함께 정리한다.
 - SQL 주의: 기존 `lessons.status`, `updated_at` 컬럼을 사용하므로 Supabase SQL Editor 작업 필요 없음.
 - 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 68개 통과.
+
+### 2026-06-20 P1. 직전수업 Supabase 저장 실패 원인 보정
+- 상태: 완료
+- 사용자 확인 요청: 직전수업 4개를 추가했는데 Supabase에 잘 저장됐는지 확인한다.
+- 확인 결과: 운영 API `/api/lessons` 기준 총 수업 7개 중 `lessonType: "preExam"` 직전수업은 0개였다. 시험관리 원본의 수학시험 날짜와 학생 매칭은 정상이라 후보 생성 조건은 살아 있었다.
+- 원인: 직전수업 생성 payload가 `classTemplateId: "pre_exam"`을 사용했지만, Supabase `lessons.class_template_id`는 `class_templates` 외래키를 가진다. 운영 반 목록에는 `pre_exam` 템플릿이 없어 upsert가 실패할 수 있었다. 일요시험보강도 같은 특수 템플릿 ID를 쓰고 있어 함께 보정했다.
+- 이번 작업 결과: 직전수업과 일요시험보강 같은 특수 자동수업은 실제 반 템플릿 ID를 넣지 않고 `classTemplateId`를 비워 저장하도록 변경했다. 저장 시 DB에는 `class_template_id = null`로 들어가 외래키 오류를 피한다.
+- SQL 주의: 기존 `lessons.class_template_id` nullable 구조를 그대로 사용하므로 Supabase SQL Editor 작업 필요 없음.
+- 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 69개 통과.

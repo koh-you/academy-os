@@ -12978,7 +12978,7 @@ function createPreExamLessonFromSchoolEvent(event = {}, students = []) {
   const generatedKey = createPreExamGeneratedKey({ ...event, eventId: sourceId });
   return {
     lessonId: `lesson_pre_exam_${safeIdPart(sourceId)}`,
-    classTemplateId: "pre_exam",
+    classTemplateId: "",
     className: `${event.schoolName || "학교 미입력"} ${gradeLabel}${subject} 직전수업`,
     lessonType: "preExam",
     lessonTopic: "직전대비",
@@ -13044,7 +13044,7 @@ function buildSundayMakeupCandidates(rows = []) {
       reason: `${schoolNames} 시험기간 전 일요보강`,
       lesson: {
         lessonId: `lesson_exam_sunday_makeup_${entry.date}`,
-        classTemplateId: "exam_sunday_makeup",
+        classTemplateId: "",
         className: "일요시험보강",
         lessonType: "examSundayMakeup",
         lessonTopic: "일요시험보강",
