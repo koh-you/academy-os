@@ -3,6 +3,7 @@ import { deleteRows, getSupabaseStatus, isSupabaseConfigured, listRows, upsertRo
 
 const fallbackSource = "local_sample";
 const databaseSource = "supabase";
+const canceledLessonRetentionMs = 30 * 24 * 60 * 60 * 1000;
 
 function compact(value) {
   return value === undefined || value === "" ? null : value;
@@ -642,6 +643,7 @@ export async function listLessons({ date } = {}) {
     return { source: fallbackSource, lessons };
   }
 
+  await deleteExpiredCanceledLessons();
   const query = date
     ? `select=*&status=neq.canceled&lesson_date=eq.${encodeURIComponent(date)}&order=lesson_date.asc,start_time.asc`
     : "select=*&status=neq.canceled&order=lesson_date.asc,start_time.asc";
@@ -720,6 +722,24 @@ export async function deleteLessonsBefore(cutoffDate) {
     await deleteLesson(lessonId);
   }
   return { source: databaseSource, cutoffDate, deletedLessonIds };
+}
+
+export async function deleteExpiredCanceledLessons() {
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, deletedLessonIds: [] };
+  }
+
+  const cutoff = new Date(Date.now() - canceledLessonRetentionMs).toISOString();
+  const lessonRows = await listRows(
+    "lessons",
+    `select=lesson_id&status=eq.canceled&updated_at=lt.${encodeURIComponent(cutoff)}`,
+    { requireServiceRole: true }
+  );
+  const deletedLessonIds = lessonRows.map((row) => row.lesson_id).filter(Boolean);
+  for (const lessonId of deletedLessonIds) {
+    await deleteLesson(lessonId);
+  }
+  return { source: databaseSource, cutoff, deletedLessonIds };
 }
 
 export async function listLessonStudentRecords() {

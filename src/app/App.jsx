@@ -28,7 +28,7 @@ const storageKeys = {
 
 const academyBrandName = "으뜸수학 고태영T";
 const academyOperationalStartDate = "2026-06-19";
-const lessonDeleteRetentionMs = 24 * 60 * 60 * 1000;
+const lessonDeleteRetentionMs = 30 * 24 * 60 * 60 * 1000;
 
 const dayLabels = {
   mon: "월",
@@ -1329,6 +1329,7 @@ export function App() {
   const [selectedLessonId, setSelectedLessonId] = useState("");
   const [lessonClipboard, setLessonClipboard] = useState(null);
   const [lessonUndoStack, setLessonUndoStack] = useState([]);
+  const lessonCancelRequestsRef = useRef(new Map());
   const [deletedLessonBundles, setDeletedLessonBundles] = useStoredState(storageKeys.deletedLessonBundles, []);
   const [classTemplates, setClassTemplates] = useStoredState(storageKeys.classTemplates, sampleData.classTemplates);
   const [students, setStudents] = useStoredState(storageKeys.students, sampleData.students);
@@ -2017,13 +2018,21 @@ export function App() {
     if (latestAction.type === "delete") {
       const bundle = latestAction.bundle ?? { lesson: latestAction.lesson, records: [], homeworks: [] };
       if (!bundle.lesson) return;
-      setLessons((current) => upsertById(current, bundle.lesson, "lessonId"));
+      const restoredLesson = {
+        ...bundle.lesson,
+        status: ["canceled", "deleted"].includes(bundle.lesson.status) ? "scheduled" : (bundle.lesson.status ?? "scheduled")
+      };
+      setLessons((current) => upsertById(current, restoredLesson, "lessonId"));
       setRecords((current) => [...(bundle.records ?? []), ...current.filter((record) => record.lessonId !== bundle.lesson.lessonId)]);
       setHomeworks((current) => [...(bundle.homeworks ?? []), ...current.filter((homework) => homework.lessonId !== bundle.lesson.lessonId)]);
       setDeletedLessonBundles((current) => current.filter((item) => item.bundleId !== bundle.bundleId));
-      setSelectedDate(bundle.lesson.date);
-      setSelectedLessonId(bundle.lesson.lessonId);
-      postJson("/api/lessons", { lesson: bundle.lesson }).catch((error) => console.error(error));
+      setSelectedDate(restoredLesson.date);
+      setSelectedLessonId(restoredLesson.lessonId);
+      const pendingCancelRequest = lessonCancelRequestsRef.current.get(restoredLesson.lessonId) ?? Promise.resolve();
+      pendingCancelRequest
+        .catch(() => null)
+        .then(() => postJson("/api/lessons", { lesson: restoredLesson }))
+        .catch((error) => console.error(error));
       if (bundle.records?.length) {
         bundle.records.forEach((record) => postJson("/api/lesson-records", { record }).catch((error) => console.error(error)));
       }
@@ -2052,6 +2061,7 @@ export function App() {
       deletedAt,
       expiresAt: new Date(Date.now() + lessonDeleteRetentionMs).toISOString()
     };
+    const canceledLesson = { ...lesson, status: "canceled" };
     setDeletedLessonBundles((current) => pruneExpiredLessonDeletes([bundle, ...current]));
     setLessonUndoStack((current) => [{ type: "delete", bundle }, ...current].slice(0, 20));
     const generatedKey = getGeneratedLessonKey(lesson);
@@ -2065,7 +2075,9 @@ export function App() {
       .sort(sortByTime)[0];
     setSelectedLessonId(nextLessonForDate?.lessonId ?? "");
     setIsLessonJournalOpen(false);
-    fetch(apiUrl(`/api/lessons?id=${encodeURIComponent(lessonId)}`), { method: "DELETE" }).catch((error) => console.error(error));
+    const cancelRequest = postJson("/api/lessons", { lesson: canceledLesson }).catch((error) => console.error(error));
+    lessonCancelRequestsRef.current.set(lessonId, cancelRequest);
+    cancelRequest.finally(() => lessonCancelRequestsRef.current.delete(lessonId));
   }
 
   function handleOpenLessonJournal(lessonId) {
@@ -2976,7 +2988,7 @@ export function App() {
         <Modal
           className="studentDeleteModal"
           onClose={() => setLessonDeleteModalId("")}
-          subtitle="수업을 취소 처리하면 달력과 수업일지 목록에서는 숨겨지고, DB에는 취소 상태로 보존됩니다."
+          subtitle="수업을 취소 처리하면 달력과 수업일지 목록에서는 숨겨지고, DB에는 약 30일 동안 취소 상태로 보관됩니다."
           title="수업 취소 확인"
         >
           <div className="deleteConfirmBody">
@@ -2989,7 +3001,7 @@ export function App() {
                 </p>
               </div>
             </div>
-            <p className="dangerCopy">정말 이 수업을 취소 처리할까요? 실제 DB에서는 삭제하지 않고 취소 상태로 보존합니다.</p>
+            <p className="dangerCopy">정말 이 수업을 취소 처리할까요? 30일 안에는 되돌릴 수 있고, 이후에는 자동 삭제됩니다.</p>
           </div>
           <div className="deleteConfirmActions">
             <button className="softButton" onClick={() => setLessonDeleteModalId("")} type="button">취소</button>
