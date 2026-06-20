@@ -3,7 +3,7 @@ import { deleteRows, getSupabaseStatus, isSupabaseConfigured, listRows, upsertRo
 
 const fallbackSource = "local_sample";
 const databaseSource = "supabase";
-const canceledLessonRetentionMs = 30 * 24 * 60 * 60 * 1000;
+const canceledLessonRetentionMs = 7 * 24 * 60 * 60 * 1000;
 
 function compact(value) {
   return value === undefined || value === "" ? null : value;

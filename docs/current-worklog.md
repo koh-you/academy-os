@@ -665,10 +665,10 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - 원인 분석: 운영 API 기준 창동고 6/30은 수동 학사일정이 아니라 시험관리 파생 중복이다. `2026-1-final_창동고_고1_textbook` 행과 `2026-1-mid_창동고_고1_textbook` 행이 모두 `mathExamDate: 2026-06-30`을 가지고 있고, 학사일정은 전체 시험관리 행에서 파생 이벤트를 만들기 때문에 같은 날짜에 두 개가 표시됐다.
 - SQL 주의: 기존 `exam_prep_rows` 테이블의 행 삭제 API만 추가했으며 DB 스키마 변경은 없으므로 Supabase SQL Editor 적용은 필요 없다.
 - 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `npm run build`, `npm run test:production` 68개 통과.
-### 2026-06-20 P1. 수업 취소 30일 보관과 undo 복구
+### 2026-06-20 P1. 수업 취소 7일 보관과 undo 복구
 - 상태: 완료
-- 사용자 요청: 수업 취소가 DB에서 단순 숨김으로 끝나지 않고 약 30일 보관 후 자동 삭제되게 하고, undo 기능이 동작해야 한다.
+- 사용자 요청: 수업 취소가 DB에서 단순 숨김으로 끝나지 않고 7일 보관 후 자동 삭제되게 하고, undo 기능이 동작해야 한다.
 - 이번 작업 결과: 수업 취소 버튼은 더 이상 `/api/lessons` hard delete를 호출하지 않고, 해당 lesson을 `status: "canceled"`로 저장한다. 달력과 수업일지 목록에서는 기존처럼 취소 수업을 숨기되, DB에는 취소 상태로 남아 undo가 가능하다. undo 시 같은 수업의 취소 저장 요청이 먼저 끝난 뒤 복구 저장을 보내도록 보강해 빠른 취소/되돌리기에서도 순서가 꼬이지 않게 했다.
-- 자동삭제: API가 lessons 목록을 조회할 때 `status=canceled`이고 `updated_at`이 30일보다 오래된 수업을 실제 삭제한다. 이때 기존 hard delete 함수가 연결된 lesson records/homeworks까지 함께 정리한다.
+- 자동삭제: API가 lessons 목록을 조회할 때 `status=canceled`이고 `updated_at`이 7일보다 오래된 수업을 실제 삭제한다. 이때 기존 hard delete 함수가 연결된 lesson records/homeworks까지 함께 정리한다.
 - SQL 주의: 기존 `lessons.status`, `updated_at` 컬럼을 사용하므로 Supabase SQL Editor 작업 필요 없음.
 - 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 68개 통과.

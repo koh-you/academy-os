@@ -28,7 +28,7 @@ const storageKeys = {
 
 const academyBrandName = "으뜸수학 고태영T";
 const academyOperationalStartDate = "2026-06-19";
-const lessonDeleteRetentionMs = 30 * 24 * 60 * 60 * 1000;
+const lessonDeleteRetentionMs = 7 * 24 * 60 * 60 * 1000;
 
 const dayLabels = {
   mon: "월",
@@ -2988,7 +2988,7 @@ export function App() {
         <Modal
           className="studentDeleteModal"
           onClose={() => setLessonDeleteModalId("")}
-          subtitle="수업을 취소 처리하면 달력과 수업일지 목록에서는 숨겨지고, DB에는 약 30일 동안 취소 상태로 보관됩니다."
+          subtitle="수업을 취소 처리하면 달력과 수업일지 목록에서는 숨겨지고, DB에는 7일 동안 취소 상태로 보관됩니다."
           title="수업 취소 확인"
         >
           <div className="deleteConfirmBody">
@@ -3001,7 +3001,7 @@ export function App() {
                 </p>
               </div>
             </div>
-            <p className="dangerCopy">정말 이 수업을 취소 처리할까요? 30일 안에는 되돌릴 수 있고, 이후에는 자동 삭제됩니다.</p>
+            <p className="dangerCopy">정말 이 수업을 취소 처리할까요? 7일 안에는 되돌릴 수 있고, 이후에는 자동 삭제됩니다.</p>
           </div>
           <div className="deleteConfirmActions">
             <button className="softButton" onClick={() => setLessonDeleteModalId("")} type="button">취소</button>
