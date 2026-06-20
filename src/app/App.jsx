@@ -397,6 +397,10 @@ function deleteSchoolEventFromApi(eventId) {
     });
 }
 
+function postAppState(states) {
+  return postJson("/api/app-state", { states });
+}
+
 const teacherAccount = {
   loginId: "teacher",
   password: "1234",
@@ -1260,6 +1264,7 @@ export function App() {
     defaultAttendanceSettings
   );
   const [integrationStatus, setIntegrationStatus] = useState(null);
+  const [isAppStateReady, setIsAppStateReady] = useState(false);
   const [saveStates, setSaveStates] = useState({});
   const [reportModal, setReportModal] = useState(null);
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
@@ -1274,6 +1279,34 @@ export function App() {
   const initialMakeupTasksRef = useRef(makeupTasks);
   const initialExamPrepRowsRef = useRef(examPrepRows);
   const initialSchoolEventsRef = useRef(schoolEvents);
+  const isApplyingRemoteAppStateRef = useRef(false);
+
+  const sharedAppState = useMemo(() => ({
+    academyTests,
+    aiSettings,
+    attendanceSettings,
+    deletedLessonBundles,
+    examAnalyses,
+    lessonResearchItems,
+    notificationLogs,
+    problemBooks,
+    reportSnapshots,
+    scoreRecords,
+    wrongProblems
+  }), [
+    academyTests,
+    aiSettings,
+    attendanceSettings,
+    deletedLessonBundles,
+    examAnalyses,
+    lessonResearchItems,
+    notificationLogs,
+    problemBooks,
+    reportSnapshots,
+    scoreRecords,
+    wrongProblems
+  ]);
+  const initialSharedAppStateRef = useRef(sharedAppState);
 
   useEffect(() => {
     let isMounted = true;
@@ -1289,6 +1322,7 @@ export function App() {
           makeupTasksResponse,
           examPrepRowsResponse,
           schoolEventsResponse,
+          appStateResponse,
           resourceMaterialsResponse
         ] = await Promise.all([
           fetch(apiUrl("/api/students")),
@@ -1299,6 +1333,7 @@ export function App() {
           fetch(apiUrl("/api/makeup-tasks")),
           fetch(apiUrl("/api/exam-prep-rows")),
           fetch(apiUrl("/api/school-events")),
+          fetch(apiUrl("/api/app-state")),
           fetch(apiUrl("/api/resource-materials"))
         ]);
         const [
@@ -1310,6 +1345,7 @@ export function App() {
           makeupTasksResult,
           examPrepRowsResult,
           schoolEventsResult,
+          appStateResult,
           resourceMaterialsResult
         ] = await Promise.all([
           studentsResponse.json(),
@@ -1320,6 +1356,7 @@ export function App() {
           makeupTasksResponse.json(),
           examPrepRowsResponse.json(),
           schoolEventsResponse.json(),
+          appStateResponse.json(),
           resourceMaterialsResponse.json()
         ]);
         if (!isMounted) return;
@@ -1355,6 +1392,28 @@ export function App() {
         } else if (schoolEventsResult.ok && initialSchoolEventsRef.current.length > 0) {
           postSchoolEvents(initialSchoolEventsRef.current).catch((error) => console.error(error));
         }
+        if (appStateResult.ok && appStateResult.states && Object.keys(appStateResult.states).length > 0) {
+          const states = appStateResult.states;
+          isApplyingRemoteAppStateRef.current = true;
+          if (Array.isArray(states.academyTests)) setAcademyTests(states.academyTests);
+          if (states.aiSettings) setAiSettings(states.aiSettings);
+          if (states.attendanceSettings) setAttendanceSettings(states.attendanceSettings);
+          if (Array.isArray(states.deletedLessonBundles)) setDeletedLessonBundles(states.deletedLessonBundles);
+          if (Array.isArray(states.examAnalyses)) setExamAnalyses(states.examAnalyses);
+          if (Array.isArray(states.lessonResearchItems)) setLessonResearchItems(states.lessonResearchItems);
+          if (Array.isArray(states.notificationLogs)) setNotificationLogs(states.notificationLogs);
+          if (Array.isArray(states.problemBooks)) setProblemBooks(states.problemBooks);
+          if (Array.isArray(states.reportSnapshots)) setReportSnapshots(states.reportSnapshots);
+          if (Array.isArray(states.scoreRecords)) setScoreRecords(states.scoreRecords);
+          if (Array.isArray(states.wrongProblems)) setWrongProblems(states.wrongProblems);
+          window.setTimeout(() => {
+            isApplyingRemoteAppStateRef.current = false;
+            setIsAppStateReady(true);
+          }, 0);
+        } else if (appStateResult.ok) {
+          postAppState(initialSharedAppStateRef.current).catch((error) => console.error(error));
+          setIsAppStateReady(true);
+        }
         if (resourceMaterialsResult.ok && Array.isArray(resourceMaterialsResult.materials)) {
           setResourceMaterials(resourceMaterialsResult.materials);
         }
@@ -1371,15 +1430,31 @@ export function App() {
     };
   }, [
     setClassTemplates,
+    setAcademyTests,
+    setAiSettings,
+    setAttendanceSettings,
+    setDeletedLessonBundles,
+    setExamAnalyses,
     setExamPrepRows,
     setHomeworks,
+    setLessonResearchItems,
     setLessons,
     setMakeupTasks,
+    setNotificationLogs,
+    setProblemBooks,
     setRecords,
+    setReportSnapshots,
     setResourceMaterials,
+    setScoreRecords,
     setSchoolEvents,
-    setStudents
+    setStudents,
+    setWrongProblems
   ]);
+
+  useEffect(() => {
+    if (!isAppStateReady || isApplyingRemoteAppStateRef.current) return;
+    postAppState(sharedAppState).catch((error) => console.error(error));
+  }, [isAppStateReady, sharedAppState]);
 
   useEffect(() => {
     setDeletedLessonBundles((current) => pruneExpiredLessonDeletes(current));

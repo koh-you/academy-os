@@ -108,6 +108,14 @@
 - SQL 주의: 운영 Supabase에 `supabase/20260620_exam_calendar_supabase_state.sql` 적용이 필요하다. 이 파일은 시험관리의 `math_exam_dates`, `exam_cycle` 등 앱 필드와 학사일정의 `event_payload`, `color`, `grade`, `exam_subject` 등을 저장하기 위한 컬럼을 추가한다. SQL 적용 전에는 화면이 localStorage fallback으로 버티지만, 새 API 저장은 실패할 수 있다.
 - 검증: `node --check api/routes/coreData.js` 통과, `node --check api/server.js` 통과, `npm run build` 통과, `npm run test:production` 60개 통과.
 
+### 2026-06-20 P1. 운영 데이터 Supabase 전환 3차 - 공용 app state
+
+- 상태: 완료
+- 사용자 요청: 남은 운영 데이터도 브라우저 localStorage에만 남지 않도록 Supabase로 옮긴다.
+- 이번 작업 결과: `app_state` 공용 JSON 저장소와 `/api/app-state` API를 추가했다. 앱 시작 시 `academyTests`, `scoreRecords`, `wrongProblems`, `problemBooks`, `examAnalyses`, `lessonResearchItems`, `notificationLogs`, `reportSnapshots`, `aiSettings`, `attendanceSettings`, `deletedLessonBundles`를 Supabase에서 불러오고, 서버가 비어 있으면 현재 브라우저 데이터를 초기 저장한다. 이후 해당 상태가 바뀌면 Supabase `app_state`에 저장한다.
+- SQL 주의: 운영 Supabase에 `supabase/20260620_app_state_store.sql` 적용이 필요하다. SQL 적용 전에는 기존 localStorage fallback으로 동작하지만, 공용 app state 저장은 실패할 수 있다.
+- 검증: `node --check api/routes/coreData.js` 통과, `node --check api/server.js` 통과, `npm run build` 통과, `npm run test:production` 60개 통과.
+
 ### 오늘 작업 요약 및 최종 확인
 
 - 상태: 완료

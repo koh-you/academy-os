@@ -411,6 +411,22 @@ function fromSchoolEventRow(row) {
   };
 }
 
+function toAppStateRow(key, value) {
+  return {
+    state_key: key,
+    state_value: value ?? null,
+    updated_at: new Date().toISOString()
+  };
+}
+
+function fromAppStateRow(row) {
+  return {
+    key: row.state_key,
+    value: row.state_value,
+    updatedAt: row.updated_at
+  };
+}
+
 function normalizeMaterialVisibility(value) {
   return value === "both" ? "student_parent" : value || "teacher";
 }
@@ -730,6 +746,37 @@ export async function deleteSchoolEvent(eventId) {
 
   await deleteRows("school_events", `school_event_id=eq.${encodeURIComponent(eventId)}`);
   return { source: databaseSource, schoolEventId: eventId };
+}
+
+export async function listAppState() {
+  if (!isSupabaseConfigured()) {
+    return { source: fallbackSource, states: {} };
+  }
+
+  const rows = await listRows("app_state", "select=*&order=state_key.asc", { requireServiceRole: true });
+  return {
+    source: databaseSource,
+    states: Object.fromEntries(rows.map((row) => [row.state_key, row.state_value])),
+    stateRows: rows.map(fromAppStateRow)
+  };
+}
+
+export async function upsertAppState(states) {
+  if (!states || typeof states !== "object" || Array.isArray(states)) {
+    return { source: isSupabaseConfigured() ? databaseSource : fallbackSource, states: {} };
+  }
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, states };
+  }
+
+  const rows = Object.entries(states).map(([key, value]) => toAppStateRow(key, value));
+  if (rows.length === 0) return { source: databaseSource, states: {} };
+  const savedRows = await upsertRows("app_state", rows);
+  return {
+    source: databaseSource,
+    states: Object.fromEntries(savedRows.map((row) => [row.state_key, row.state_value])),
+    stateRows: savedRows.map(fromAppStateRow)
+  };
 }
 
 export async function listResourceMaterials() {

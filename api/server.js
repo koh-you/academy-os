@@ -5,6 +5,7 @@ import {
   deleteResourceMaterial,
   deleteSchoolEvent,
   getCoreDataStatus,
+  listAppState,
   listClassTemplates,
   listExamPrepRows,
   listHomeworks,
@@ -16,6 +17,7 @@ import {
   listSchoolEvents,
   listStudents,
   seedCoreData,
+  upsertAppState,
   upsertHomework,
   upsertHomeworks,
   upsertExamPrepRow,
@@ -345,6 +347,27 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "GET" && requestUrl.pathname === "/api/core/status") {
     sendJson(request, response, 200, { ok: true, result: getCoreDataStatus() });
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/app-state") {
+    try {
+      const result = await listAppState();
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/app-state") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await upsertAppState(payload.states ?? payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
     return;
   }
 
