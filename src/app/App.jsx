@@ -2293,11 +2293,13 @@ export function App() {
             onOpenReport={handleOpenReport}
             onPolishComment={handlePolishLessonComment}
             onPolishPreparationNotice={handlePolishPreparationNotice}
+            onPassMakeupTask={handlePassSupplementTask}
             onSaveRecord={handleSaveRecord}
             onSendComment={handleSendLessonComment}
             onSelectLesson={setSelectedLessonId}
             onUndoLessonAction={handleUndoLessonAction}
             onUpdateHomework={handleUpdateHomework}
+            onUpdateMakeupTask={handleUpdateMakeupTask}
             isLessonJournalOpen={isLessonJournalOpen}
           />
         ) : null}
@@ -3423,6 +3425,7 @@ export function App() {
     if (!task?.studentId || !task?.sourceId) return;
     const completedAt = new Date().toISOString();
     const makeupTaskId = task.makeupTaskId || `makeup_pass_${Date.now()}_${task.studentId}`;
+    const needsMoreSupplement = task.completionDecision === "needs_more" || task.supplementProcessStatus === "needs_more";
     const nextTask = {
       scheduledDate: task.scheduledDate || today,
       scheduledTime: task.scheduledTime || "",
@@ -3432,16 +3435,17 @@ export function App() {
       createdAt: task.createdAt || completedAt,
       ...task,
       makeupTaskId,
-      completedAt,
-      passedAt: completedAt,
-      status: "done",
+      completedAt: needsMoreSupplement ? task.completedAt || "" : completedAt,
+      passedAt: needsMoreSupplement ? task.passedAt || "" : completedAt,
+      status: needsMoreSupplement ? "scheduled" : "done",
+      supplementProcessStatus: needsMoreSupplement ? "needs_more" : "completed",
       touchedAt: completedAt
     };
 
     setMakeupTasks((current) => upsertById(current, nextTask, "makeupTaskId"));
     postMakeupTask(nextTask).catch((error) => console.error(error));
 
-    if (task.taskType === "homework_makeup") {
+    if (!needsMoreSupplement && task.taskType === "homework_makeup") {
       setHomeworks((current) =>
         current.map((homework) => {
           if (homework.homeworkId !== task.sourceId) return homework;
@@ -4121,6 +4125,7 @@ function TeacherLessonHubV2({
   onOpenLessonJournal,
   onOpenReport,
   onPasteLesson,
+  onPassMakeupTask,
   onPolishComment,
   onPolishPreparationNotice,
   onSaveRecord,
@@ -4128,6 +4133,7 @@ function TeacherLessonHubV2({
   onSelectLesson,
   onUndoLessonAction,
   onUpdateHomework,
+  onUpdateMakeupTask,
   undoCount,
   isLessonJournalOpen
 }) {
@@ -4216,6 +4222,8 @@ function TeacherLessonHubV2({
           lessons={lessons}
           onDeleteLesson={onDeleteLesson}
           onEditLesson={onEditLesson}
+          onPassTask={onPassMakeupTask}
+          onUpdateTask={onUpdateMakeupTask}
           students={students}
           task={selectedMakeupTask}
         />
@@ -4241,11 +4249,13 @@ function TeacherLessonHubV2({
             onOpenAttendance={onOpenAttendance}
             onOpenExamPrep={onOpenExamPrep}
             onOpenReport={onOpenReport}
+            onPassMakeupTask={onPassMakeupTask}
             onPolishComment={onPolishComment}
             onPolishPreparationNotice={onPolishPreparationNotice}
             onSaveRecord={onSaveRecord}
             onSendComment={onSendComment}
             onUpdateHomework={onUpdateHomework}
+            onUpdateMakeupTask={onUpdateMakeupTask}
             records={records}
             saveStates={saveStates}
             students={students}
@@ -4347,9 +4357,12 @@ function HomeworkMakeupLessonDetail({
   lessons = [],
   onDeleteLesson,
   onEditLesson,
+  onPassTask,
+  onUpdateTask,
   students = [],
   task
 }) {
+  const [passConfirmMode, setPassConfirmMode] = useState("");
   const lessonStudents = (lesson.studentIds ?? [])
     .map((studentId) => students.find((student) => student.studentId === studentId))
     .filter(Boolean);
@@ -4386,6 +4399,37 @@ function HomeworkMakeupLessonDetail({
   const assignmentCount = task?.assignmentCount ?? task?.attemptCount ?? 0;
   const scheduledText = `${lesson.date} ${lesson.startTime || ""}`.trim();
   const confirmedText = task?.lastScheduledAt ? formatKoreanDateTime(task.lastScheduledAt) : "확정 기록 없음";
+  const processStatus = task?.supplementProcessStatus || (task?.status === "done" ? "completed" : "in_progress");
+  const processMemo = task?.supplementProgressMemo || "";
+  const nextSupplementPlan = task?.nextSupplementPlan || "";
+
+  function updateTaskField(field, value) {
+    if (!task?.makeupTaskId || !onUpdateTask) return;
+    onUpdateTask(task.makeupTaskId, field, value);
+  }
+
+  function handleProcessStatusChange(nextStatus) {
+    updateTaskField("supplementProcessStatus", nextStatus);
+    if (nextStatus === "needs_more") {
+      updateTaskField("status", "scheduled");
+    }
+  }
+
+  function confirmPassTask() {
+    if (!task || !onPassTask) return;
+    const completedMemo = [
+      processMemo,
+      passConfirmMode === "needs_more" && nextSupplementPlan ? `추가 보충 필요: ${nextSupplementPlan}` : ""
+    ].filter(Boolean).join("\n");
+    onPassTask({
+      ...task,
+      supplementProcessStatus: passConfirmMode === "needs_more" ? "needs_more" : "completed",
+      supplementProgressMemo: completedMemo,
+      nextSupplementPlan: passConfirmMode === "needs_more" ? nextSupplementPlan : task.nextSupplementPlan || "",
+      completionDecision: passConfirmMode === "needs_more" ? "needs_more" : "completed"
+    });
+    setPassConfirmMode("");
+  }
 
   return (
     <div className="homeworkMakeupModalBody">
@@ -4471,38 +4515,102 @@ function HomeworkMakeupLessonDetail({
 
       <div className="homeworkMakeupHero">
         <section className="panel homeworkMakeupNotice">
-          <h3>일정 메모</h3>
-          <p>
-            이 화면은 일반 수업일지가 아니라 숙제보충 전용 일정입니다. 오늘 새 숙제를 내는 화면이
-            아니라, 기존에 밀린 숙제를 언제 어떤 방식으로 보충할지 확인하는 용도입니다.
-          </p>
+          <h3>보충 대상</h3>
           <div className="makeupLinkedBox">
             <span>보충 대상</span>
             <strong>{targetTitle}</strong>
             <small>원 수업일자: {sourceDate} · 마감일: {dueDate}</small>
           </div>
         </section>
-        <section className="panel homeworkMakeupChecklist">
-          <h3>보충 진행 체크</h3>
-          <div className="makeupChecklistGrid">
-            <label className="checkCard">
-              <input type="checkbox" />
-              <span>대상 숙제 확인</span>
-              <small>학생이 어떤 숙제를 해야 하는지 확인</small>
-            </label>
-            <label className="checkCard">
-              <input type="checkbox" />
-              <span>보충 진행</span>
-              <small>정해진 방식으로 보충 진행</small>
-            </label>
-            <label className="checkCard">
-              <input type="checkbox" />
-              <span>완료 확인</span>
-              <small>완료 여부를 숙제현황에 반영</small>
-            </label>
+        <section className="panel homeworkMakeupProcess">
+          <div className="sectionHeader slim">
+            <div>
+              <h3>보충 처리</h3>
+              <p className="muted">오늘 무엇을 보충했고, 남은 보충이 있는지 기록합니다.</p>
+            </div>
+          </div>
+          <div className="makeupProcessStatusGrid">
+            {[
+              { id: "in_progress", label: "진행 중", description: "보충을 진행했지만 아직 완료 판단 전" },
+              { id: "needs_more", label: "추가 보충 필요", description: "오늘 다 끝나지 않아 다음 보충이 필요" },
+              { id: "completed", label: "보충 완료", description: "이번 보충 항목을 통과 처리 가능" }
+            ].map((option) => (
+              <button
+                className={processStatus === option.id ? "active" : ""}
+                key={option.id}
+                onClick={() => handleProcessStatusChange(option.id)}
+                type="button"
+              >
+                <strong>{option.label}</strong>
+                <span>{option.description}</span>
+              </button>
+            ))}
+          </div>
+          <label className="makeupProcessField">
+            보충 진행 메모
+            <textarea
+              value={processMemo}
+              onChange={(event) => updateTaskField("supplementProgressMemo", event.target.value)}
+              placeholder="예: 쎈 오답 5문항 중 3문항 풀이 완료. 나머지 2문항은 계산 실수 반복으로 추가 확인 필요."
+            />
+          </label>
+          <label className="makeupProcessField">
+            추가 보충 내용
+            <textarea
+              value={nextSupplementPlan}
+              onChange={(event) => updateTaskField("nextSupplementPlan", event.target.value)}
+              placeholder="추가 보충이 필요할 때 다음에 진행할 숙제/문항/범위를 적어주세요."
+            />
+          </label>
+          <div className="makeupProcessActions">
+            <button className="softButton" onClick={() => setPassConfirmMode("needs_more")} type="button">
+              추가 보충 필요로 기록
+            </button>
+            <button className="passButton" disabled={!task || task.status === "done"} onClick={() => setPassConfirmMode("completed")} type="button">
+              보충 완료 처리
+            </button>
           </div>
         </section>
       </div>
+      {passConfirmMode ? (
+        <Modal
+          className="supplementPassConfirmModal"
+          title={passConfirmMode === "needs_more" ? "추가 보충 필요 기록" : "보충 통과 처리"}
+          subtitle="처리 내용은 보충관리 이력에 남습니다."
+          onClose={() => setPassConfirmMode("")}
+        >
+          <div className="supplementPassConfirmBody">
+            <p>
+              <strong>{student?.name ?? "학생"}</strong> 학생의 보충을
+              {passConfirmMode === "needs_more" ? " 추가 보충 필요 상태로 기록할까요?" : " 완료 처리할까요?"}
+            </p>
+            <dl className="supplementPassConfirmSummary">
+              <div>
+                <dt>보충 대상</dt>
+                <dd>{targetTitle}</dd>
+              </div>
+              <div>
+                <dt>진행 메모</dt>
+                <dd>{processMemo || "메모 없음"}</dd>
+              </div>
+              {passConfirmMode === "needs_more" ? (
+                <div>
+                  <dt>추가 내용</dt>
+                  <dd>{nextSupplementPlan || "추가 보충 내용을 입력하지 않았습니다."}</dd>
+                </div>
+              ) : null}
+            </dl>
+          </div>
+          <div className="modalActions confirmActions">
+            <button className="softButton" onClick={() => setPassConfirmMode("")} type="button">
+              취소
+            </button>
+            <button className="passButton" onClick={confirmPassTask} type="button">
+              {passConfirmMode === "needs_more" ? "추가 보충 필요 기록" : "보충 완료 처리"}
+            </button>
+          </div>
+        </Modal>
+      ) : null}
     </div>
   );
 }
@@ -4575,11 +4683,13 @@ function LessonJournalDetail({
   onOpenAttendance,
   onOpenExamPrep,
   onOpenReport,
+  onPassMakeupTask,
   onPolishComment,
   onPolishPreparationNotice,
   onSaveRecord,
   onSendComment,
   onUpdateHomework,
+  onUpdateMakeupTask,
   records,
   saveStates,
   students
@@ -4607,6 +4717,8 @@ function LessonJournalDetail({
         lessons={lessons}
         onDeleteLesson={onDeleteLesson}
         onEditLesson={onEditLesson}
+        onPassTask={onPassMakeupTask}
+        onUpdateTask={onUpdateMakeupTask}
         students={students}
         task={linkedMakeupTask}
       />

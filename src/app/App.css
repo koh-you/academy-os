@@ -871,12 +871,12 @@ button {
 }
 
 .homeworkMakeupNotice,
-.homeworkMakeupChecklist {
+.homeworkMakeupProcess {
   border-radius: 8px;
 }
 
 .homeworkMakeupNotice h3,
-.homeworkMakeupChecklist h3 {
+.homeworkMakeupProcess h3 {
   font-size: 22px;
   margin: 4px 0 10px;
 }
@@ -906,35 +906,74 @@ button {
   margin: 5px 0;
 }
 
-.makeupChecklistGrid {
+.makeupProcessStatusGrid {
   display: grid;
   gap: 10px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin-top: 14px;
 }
 
-.checkCard {
+.makeupProcessStatusGrid button {
   background: #fff;
   border: 1px solid #dbe5f5;
   border-radius: 8px;
   cursor: pointer;
   display: grid;
-  gap: 4px 10px;
-  grid-template-columns: auto 1fr;
+  gap: 6px;
   padding: 14px;
+  text-align: left;
 }
 
-.checkCard input {
-  grid-row: span 2;
-  margin-top: 4px;
+.makeupProcessStatusGrid button.active {
+  background: #eef2ff;
+  border-color: #a5b4fc;
 }
 
-.checkCard span {
-  font-weight: 800;
+.makeupProcessStatusGrid strong {
+  color: #17213d;
+  font-size: 15px;
+  font-weight: 900;
 }
 
-.checkCard small {
+.makeupProcessStatusGrid span {
   color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.makeupProcessField {
+  color: #17213a;
+  display: grid;
+  font-weight: 900;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.makeupProcessField textarea {
+  background: #ffffff;
+  border: 1px solid #cbd8ee;
+  border-radius: 8px;
+  color: #0f172a;
+  font: inherit;
+  line-height: 1.5;
+  min-height: 92px;
+  padding: 12px 14px;
+  resize: vertical;
+}
+
+.makeupProcessField textarea:focus {
+  border-color: #7c9cff;
+  box-shadow: 0 0 0 3px rgba(124, 156, 255, 0.16);
+  outline: none;
+}
+
+.makeupProcessActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 14px;
 }
 
 .bulkHomeworkPanel {
@@ -8055,7 +8094,7 @@ textarea.profileEditInput {
   .homeworkMakeupHero,
   .makeupInfoGrid,
   .homeworkMakeupSummary,
-  .makeupChecklistGrid {
+  .makeupProcessStatusGrid {
     grid-template-columns: 1fr;
   }
 }
