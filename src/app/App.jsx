@@ -167,6 +167,40 @@ function joinMessageBlocks(blocks) {
   return blocks.map(normalizeMessageText).filter(Boolean).join("\n\n");
 }
 
+function getMessageDedupeKey(value = "") {
+  return normalizeMessageText(value).replace(/\s+/g, " ");
+}
+
+function compactDuplicateMessageBlocks(value = "") {
+  const seen = new Set();
+  return String(value ?? "")
+    .replace(/\r\n/g, "\n")
+    .split(/\n\s*\n+/g)
+    .map(normalizeMessageText)
+    .filter(Boolean)
+    .filter((block) => {
+      const key = getMessageDedupeKey(block);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .join("\n\n");
+}
+
+function textIncludesMessageBlock(text = "", block = "") {
+  const textKey = getMessageDedupeKey(text);
+  const blockKey = getMessageDedupeKey(block);
+  return Boolean(blockKey && textKey.includes(blockKey));
+}
+
+function textIncludesEveryLine(text = "", lines = []) {
+  const textKey = getMessageDedupeKey(text);
+  return lines.every((line) => {
+    const lineKey = getMessageDedupeKey(line);
+    return !lineKey || textKey.includes(lineKey);
+  });
+}
+
 function buildCommentPreviewLines({ audience, comment, nextHomework, previousHomework, record, student, supplementSchedules = [] }) {
   const lessonMaterial = getLessonMaterial(record, student);
   const lessonContent = getLessonContent(record);
@@ -244,14 +278,20 @@ function getStudentSupplementSchedules(makeupTasks = [], studentId = "") {
 }
 
 function buildInitialCommentDraft({ audience, existingComment, record, supplementSchedules }) {
-  const commentText = normalizeMessageText(existingComment);
+  const commentText = compactDuplicateMessageBlocks(existingComment);
   const shouldIncludePrepMemo =
     audience === "student" ? Boolean(record?.prepStudentVisible) : Boolean(record?.prepParentVisible);
   const prepMemo = shouldIncludePrepMemo ? normalizeMessageText(record?.preparationMemo) : "";
   const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
+  const supplementBlock = supplementText ? `보충 일정:\n${supplementText}` : "";
+  const shouldAddPrepMemo = prepMemo && !textIncludesMessageBlock(commentText, prepMemo);
+  const shouldAddSupplement =
+    supplementBlock &&
+    !textIncludesMessageBlock(commentText, supplementBlock) &&
+    !textIncludesEveryLine(commentText, supplementSchedules);
   return joinMessageBlocks([
-    prepMemo,
-    supplementText ? `보충 일정:\n${supplementText}` : "",
+    shouldAddPrepMemo ? prepMemo : "",
+    shouldAddSupplement ? supplementBlock : "",
     commentText
   ]);
 }
