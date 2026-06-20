@@ -5947,7 +5947,7 @@ textarea.profileEditInput {
   border-radius: 999px;
   bottom: 16px;
   color: #ffffff;
-  content: "선택됨";
+  content: "선택";
   font-size: 12px;
   font-weight: 900;
   padding: 5px 9px;
@@ -8362,12 +8362,58 @@ textarea.profileEditInput {
 }
 
 @media (max-width: 767px) {
+  .studentPortal,
+  .parentPortalMobileFirst {
+    padding: 16px;
+  }
+
+  .studentPortalTabletFirst .portalHeader,
+  .parentPortalMobileFirst .portalHeader {
+    gap: 14px;
+    min-height: auto;
+    padding: 18px;
+  }
+
+  .studentPortalTabletFirst .portalHeader h1,
+  .parentPortalMobileFirst .portalHeader h1 {
+    font-size: 24px;
+  }
+
+  .studentPortalTabletFirst .portalActions,
+  .parentPortalMobileFirst .portalActions {
+    align-items: stretch;
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .studentPortalTabletFirst .portalActions > *,
+  .parentPortalMobileFirst .portalActions > * {
+    justify-content: center;
+    width: 100%;
+  }
+
   .studentPortalTabletFirst .metricGrid {
     grid-template-columns: 1fr;
   }
 
-  .studentPortalTabletFirst .portalTabs {
+  .studentPortalTabletFirst .portalTabs,
+  .parentPortalMobileFirst .parentTabs {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .studentPortalTabletFirst .portalTabs button,
+  .parentPortalMobileFirst .portalTabs button {
+    min-height: 46px;
+  }
+
+  .metricCard {
+    min-height: 112px;
+    padding: 18px;
+  }
+
+  .metricCard strong {
+    font-size: 26px;
   }
 
   .supplementRowItem {
