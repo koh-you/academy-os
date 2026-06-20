@@ -219,6 +219,75 @@ function fromHomeworkRow(row) {
   };
 }
 
+function parseJsonNote(value) {
+  if (!value) return {};
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function normalizeMakeupTaskStatusForDb(status = "draft") {
+  if (status === "done" || status === "resolved") return "resolved";
+  if (status === "scheduled") return "scheduled";
+  if (status === "canceled") return "canceled";
+  return "open";
+}
+
+function normalizeMakeupTaskStatusFromDb(status = "open") {
+  if (status === "resolved") return "done";
+  if (status === "scheduled") return "scheduled";
+  if (status === "canceled") return "canceled";
+  return "draft";
+}
+
+function toMakeupTaskRow(task) {
+  const metadata = {
+    ...task,
+    taskType: task.taskType ?? task.type,
+    sourceId: task.sourceId ?? task.sourceHomeworkId ?? task.sourceLessonId,
+    sourceLabel: task.sourceLabel ?? task.title,
+    scheduledDate: task.scheduledDate ?? task.dueDate,
+    scheduledTime: task.scheduledTime ?? "",
+    status: task.status ?? "draft"
+  };
+  return {
+    makeup_task_id: task.makeupTaskId,
+    type: metadata.taskType ?? "homework_makeup",
+    student_id: task.studentId,
+    source_lesson_id: compact(task.sourceLessonId),
+    source_homework_id: compact(task.sourceHomeworkId ?? (metadata.taskType === "homework_makeup" ? metadata.sourceId : "")),
+    title: metadata.sourceLabel ?? metadata.reason ?? "보충관리",
+    due_date: compact(metadata.scheduledDate),
+    status: normalizeMakeupTaskStatusForDb(metadata.status),
+    note: JSON.stringify(metadata),
+    updated_at: new Date().toISOString()
+  };
+}
+
+function fromMakeupTaskRow(row) {
+  const metadata = parseJsonNote(row.note);
+  const taskType = metadata.taskType ?? row.type;
+  return {
+    ...metadata,
+    makeupTaskId: row.makeup_task_id,
+    taskType,
+    studentId: row.student_id,
+    sourceId: metadata.sourceId ?? row.source_homework_id ?? row.source_lesson_id ?? "",
+    sourceHomeworkId: metadata.sourceHomeworkId ?? row.source_homework_id ?? "",
+    sourceLessonId: metadata.sourceLessonId ?? row.source_lesson_id ?? "",
+    sourceLabel: metadata.sourceLabel ?? row.title ?? "",
+    title: metadata.title ?? row.title ?? "",
+    scheduledDate: metadata.scheduledDate ?? row.due_date ?? "",
+    dueDate: metadata.dueDate ?? row.due_date ?? "",
+    status: normalizeMakeupTaskStatusFromDb(row.status),
+    createdAt: metadata.createdAt ?? row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
 function normalizeMaterialVisibility(value) {
   return value === "both" ? "student_parent" : value || "teacher";
 }
@@ -439,6 +508,36 @@ export async function listHomeworks() {
 
   const rows = await listRows("homeworks", "select=*&order=assigned_date.asc", { requireServiceRole: true });
   return { source: databaseSource, homeworks: rows.map(fromHomeworkRow) };
+}
+
+export async function listMakeupTasks() {
+  if (!isSupabaseConfigured()) {
+    return { source: fallbackSource, makeupTasks: [] };
+  }
+
+  const rows = await listRows("makeup_tasks", "select=*&order=updated_at.desc", { requireServiceRole: true });
+  return { source: databaseSource, makeupTasks: rows.map(fromMakeupTaskRow) };
+}
+
+export async function upsertMakeupTask(task) {
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, makeupTask: task };
+  }
+
+  const [row] = await upsertRows("makeup_tasks", [toMakeupTaskRow(task)]);
+  return { source: databaseSource, makeupTask: fromMakeupTaskRow(row) };
+}
+
+export async function upsertMakeupTasks(makeupTasks) {
+  if (!Array.isArray(makeupTasks) || makeupTasks.length === 0) {
+    return { source: isSupabaseConfigured() ? databaseSource : fallbackSource, makeupTasks: [] };
+  }
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, makeupTasks };
+  }
+
+  const rows = await upsertRows("makeup_tasks", makeupTasks.map(toMakeupTaskRow));
+  return { source: databaseSource, makeupTasks: rows.map(fromMakeupTaskRow) };
 }
 
 export async function listResourceMaterials() {

@@ -92,6 +92,14 @@
 - 이번 작업 결과: 최근 한 달 보충관리 내역 모달의 완료 항목에 `통과 취소` 버튼을 추가했다. 취소하면 보충 task의 `done` 상태와 완료 시각을 해제하고, 일정이 있으면 `scheduled`, 없으면 `draft`로 되돌린다. 숙제보충 항목은 원본 숙제의 `verified` 상태도 다시 `missing` 또는 `partial`로 되돌려 보충관리 후보 목록에 재등장하도록 했다.
 - 검증: `npm run build` 통과, `npm run test:production` 60개 통과.
 
+### 2026-06-20 P1. 운영 데이터 Supabase 전환 1차 - 보충관리
+
+- 상태: 완료
+- 사용자 요청: 운영 데이터가 localStorage와 Supabase에 섞여 있어 반복 오류가 나므로 운영 데이터는 순서대로 모두 Supabase로 옮긴다.
+- 이번 작업 결과: 보충관리 `makeupTasks`를 Supabase `makeup_tasks` 테이블로 읽고 쓰는 API를 추가했다. 앱 시작 시 Supabase 보충 task를 불러오고, 서버가 비어 있고 브라우저에 기존 보충 task가 있으면 bulk 저장으로 한 번 이전한다. 보충 생성, 보충 숙제 배정, 일정 반영, 통과, 통과 취소, 상태/시간/문구 수정은 모두 `/api/makeup-tasks`에 즉시 저장한다. 보충수업 lesson 저장 실패 원인이던 없는 반 ID `supplement` 참조도 제거해 `classTemplateId`를 비워 저장하도록 했다.
+- SQL 주의: 이번 1차는 기존 `makeup_tasks` 테이블을 사용하므로 새 SQL Editor 적용은 필요 없다.
+- 검증: `node --check api/routes/coreData.js` 통과, `node --check api/server.js` 통과, `npm run build` 통과, `npm run test:production` 60개 통과.
+
 ### 오늘 작업 요약 및 최종 확인
 
 - 상태: 완료

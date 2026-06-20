@@ -8,6 +8,7 @@ import {
   listHomeworks,
   listLessons,
   listLessonStudentRecords,
+  listMakeupTasks,
   listNotificationJobs,
   listResourceMaterials,
   listStudents,
@@ -17,6 +18,8 @@ import {
   upsertLesson,
   upsertLessons,
   upsertNotificationJob,
+  upsertMakeupTask,
+  upsertMakeupTasks,
   upsertResourceMaterial,
   upsertStudent,
   upsertStudents,
@@ -481,6 +484,38 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await upsertHomeworks(payload.homeworks ?? []);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/makeup-tasks") {
+    try {
+      const result = await listMakeupTasks();
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/makeup-tasks") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await upsertMakeupTask(payload.makeupTask ?? payload.task ?? payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/makeup-tasks/bulk") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await upsertMakeupTasks(payload.makeupTasks ?? payload.tasks ?? []);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });

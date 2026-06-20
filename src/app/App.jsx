@@ -364,6 +364,14 @@ async function postJson(path, body) {
   return result;
 }
 
+function postMakeupTask(makeupTask) {
+  return postJson("/api/makeup-tasks", { makeupTask });
+}
+
+function postMakeupTasks(makeupTasks) {
+  return postJson("/api/makeup-tasks/bulk", { makeupTasks });
+}
+
 const teacherAccount = {
   loginId: "teacher",
   password: "1234",
@@ -1238,6 +1246,7 @@ export function App() {
   const [selectedReportLessonId, setSelectedReportLessonId] = useState("");
   const recordsRef = useRef(records);
   const homeworksRef = useRef(homeworks);
+  const initialMakeupTasksRef = useRef(makeupTasks);
 
   useEffect(() => {
     let isMounted = true;
@@ -1250,6 +1259,7 @@ export function App() {
           lessonsResponse,
           recordsResponse,
           homeworksResponse,
+          makeupTasksResponse,
           resourceMaterialsResponse
         ] = await Promise.all([
           fetch(apiUrl("/api/students")),
@@ -1257,14 +1267,16 @@ export function App() {
           fetch(apiUrl("/api/lessons")),
           fetch(apiUrl("/api/lesson-records")),
           fetch(apiUrl("/api/homeworks")),
+          fetch(apiUrl("/api/makeup-tasks")),
           fetch(apiUrl("/api/resource-materials"))
         ]);
-        const [studentsResult, classesResult, lessonsResult, recordsResult, homeworksResult, resourceMaterialsResult] = await Promise.all([
+        const [studentsResult, classesResult, lessonsResult, recordsResult, homeworksResult, makeupTasksResult, resourceMaterialsResult] = await Promise.all([
           studentsResponse.json(),
           classesResponse.json(),
           lessonsResponse.json(),
           recordsResponse.json(),
           homeworksResponse.json(),
+          makeupTasksResponse.json(),
           resourceMaterialsResponse.json()
         ]);
         if (!isMounted) return;
@@ -1285,6 +1297,11 @@ export function App() {
           const sourceLessons = lessonsResult.ok && Array.isArray(lessonsResult.lessons) ? lessonsResult.lessons : lessons;
           setHomeworks(filterHomeworksForLessons(homeworksResult.homeworks, sourceLessons));
         }
+        if (makeupTasksResult.ok && Array.isArray(makeupTasksResult.makeupTasks) && makeupTasksResult.makeupTasks.length > 0) {
+          setMakeupTasks(makeupTasksResult.makeupTasks);
+        } else if (makeupTasksResult.ok && initialMakeupTasksRef.current.length > 0) {
+          postMakeupTasks(initialMakeupTasksRef.current).catch((error) => console.error(error));
+        }
         if (resourceMaterialsResult.ok && Array.isArray(resourceMaterialsResult.materials)) {
           setResourceMaterials(resourceMaterialsResult.materials);
         }
@@ -1299,7 +1316,7 @@ export function App() {
     return () => {
       isMounted = false;
     };
-  }, [setClassTemplates, setHomeworks, setLessons, setRecords, setResourceMaterials, setStudents]);
+  }, [setClassTemplates, setHomeworks, setLessons, setMakeupTasks, setRecords, setResourceMaterials, setStudents]);
 
   useEffect(() => {
     setDeletedLessonBundles((current) => pruneExpiredLessonDeletes(current));
@@ -3126,27 +3143,32 @@ export function App() {
       );
 
       if (existingTask) {
+        const nextTask = {
+          ...existingTask,
+          status: existingTask.status === "done" ? "scheduled" : existingTask.status,
+          touchedAt: new Date().toISOString()
+        };
+        postMakeupTask(nextTask).catch((error) => console.error(error));
         return current.map((item) =>
           item.makeupTaskId === existingTask.makeupTaskId
-            ? { ...item, status: item.status === "done" ? "scheduled" : item.status, touchedAt: new Date().toISOString() }
+            ? nextTask
             : item
         );
       }
 
-      return [
-        {
-          makeupTaskId: taskId,
-          status: "draft",
-          scheduledDate: today,
-          scheduledTime: "",
-          notificationDraft: "",
-          attemptCount: 0,
-          childHomeworkIds: [],
-          createdAt: new Date().toISOString(),
-          ...task
-        },
-        ...current
-      ];
+      const nextTask = {
+        makeupTaskId: taskId,
+        status: "draft",
+        scheduledDate: today,
+        scheduledTime: "",
+        notificationDraft: "",
+        attemptCount: 0,
+        childHomeworkIds: [],
+        createdAt: new Date().toISOString(),
+        ...task
+      };
+      postMakeupTask(nextTask).catch((error) => console.error(error));
+      return [nextTask, ...current];
     });
   }
 
@@ -3173,18 +3195,19 @@ export function App() {
 
     setHomeworks((current) => [nextHomework, ...current]);
     setMakeupTasks((current) =>
-      current.map((item) =>
-        item.makeupTaskId === task.makeupTaskId
-          ? {
-              ...item,
-              status: "scheduled",
-              lastHomeworkId: homeworkId,
-              childHomeworkIds: [...(item.childHomeworkIds ?? []), homeworkId],
-              attemptCount: (item.attemptCount ?? 0) + 1,
-              lastAssignedAt: new Date().toISOString()
-            }
-          : item
-      )
+      current.map((item) => {
+        if (item.makeupTaskId !== task.makeupTaskId) return item;
+        const nextTask = {
+          ...item,
+          status: "scheduled",
+          lastHomeworkId: homeworkId,
+          childHomeworkIds: [...(item.childHomeworkIds ?? []), homeworkId],
+          attemptCount: (item.attemptCount ?? 0) + 1,
+          lastAssignedAt: new Date().toISOString()
+        };
+        postMakeupTask(nextTask).catch((error) => console.error(error));
+        return nextTask;
+      })
     );
   }
 
@@ -3196,7 +3219,7 @@ export function App() {
     const className = createSupplementLessonName(task, student);
     const lesson = {
       lessonId,
-      classTemplateId: "supplement",
+      classTemplateId: "",
       className,
       lessonType: "makeup",
       date: task.scheduledDate,
@@ -3214,19 +3237,22 @@ export function App() {
 
     setLessons((current) => upsertById(current, lesson, "lessonId"));
     setMakeupTasks((current) =>
-      current.map((item) =>
-        item.makeupTaskId === task.makeupTaskId
-          ? {
-              ...item,
-              status: "scheduled",
-              linkedLessonId: lessonId,
-              linkedLessonDate: lesson.date,
-              linkedLessonTime: lesson.startTime,
-              needsLessonResync: false,
-              lastScheduledAt: new Date().toISOString()
-            }
-          : item
-      )
+      current.map((item) => {
+        if (item.makeupTaskId !== task.makeupTaskId) return item;
+        const nextTask = {
+          ...item,
+          status: "scheduled",
+          scheduledDate: lesson.date,
+          scheduledTime: lesson.startTime,
+          linkedLessonId: lessonId,
+          linkedLessonDate: lesson.date,
+          linkedLessonTime: lesson.startTime,
+          needsLessonResync: false,
+          lastScheduledAt: new Date().toISOString()
+        };
+        postMakeupTask(nextTask).catch((error) => console.error(error));
+        return nextTask;
+      })
     );
     setSelectedDate(lesson.date);
     setSelectedLessonId(lesson.lessonId);
@@ -3254,6 +3280,7 @@ export function App() {
     };
 
     setMakeupTasks((current) => upsertById(current, nextTask, "makeupTaskId"));
+    postMakeupTask(nextTask).catch((error) => console.error(error));
 
     if (task.taskType === "homework_makeup") {
       setHomeworks((current) =>
@@ -3277,18 +3304,19 @@ export function App() {
     const updatedAt = new Date().toISOString();
     const restoredStatus = task.linkedLessonId || task.scheduledDate ? "scheduled" : "draft";
     setMakeupTasks((current) =>
-      current.map((item) =>
-        item.makeupTaskId === task.makeupTaskId
-          ? {
-              ...item,
-              status: restoredStatus,
-              completedAt: "",
-              passedAt: "",
-              touchedAt: updatedAt,
-              updatedAt
-            }
-          : item
-      )
+      current.map((item) => {
+        if (item.makeupTaskId !== task.makeupTaskId) return item;
+        const nextTask = {
+          ...item,
+          status: restoredStatus,
+          completedAt: "",
+          passedAt: "",
+          touchedAt: updatedAt,
+          updatedAt
+        };
+        postMakeupTask(nextTask).catch((error) => console.error(error));
+        return nextTask;
+      })
     );
 
     if (task.taskType === "homework_makeup" && task.sourceId) {
@@ -3321,6 +3349,7 @@ export function App() {
         ) {
           nextTask.needsLessonResync = true;
         }
+        postMakeupTask(nextTask).catch((error) => console.error(error));
         return nextTask;
       })
     );
