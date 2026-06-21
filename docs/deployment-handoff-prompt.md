@@ -11,23 +11,31 @@
 - docs/home-codex-setup.md
 - docs/session-handoff-2026-06-20.md
 - docs/deployment-handoff-prompt.md
+- docs/ai-deployment-responsibility-2026-06-21.md
 
 중요 원칙:
-1. 코드를 수정한 뒤에는 로컬 확인에서 끝내지 말고, 가능한 자동 배포 흐름까지 완료하세요.
-2. GitHub main push 기준으로 Vercel/Render가 자동 배포되는 구조입니다.
-3. 따라서 변경 완료 후 반드시 다음을 수행하세요.
+1. AI가 할 수 있는 일은 AI가 끝까지 합니다. 사용자가 명시적으로 막지 않았다면 로컬 수정/검증에서 멈추지 말고 commit과 push까지 진행하세요.
+2. 사람이 해야 하는 일은 Supabase SQL Editor 실행, GitHub/Vercel/Render/Supabase 비밀값 입력, 대시보드 권한이 필요한 수동 승인뿐입니다.
+3. 코드를 수정한 뒤에는 로컬 확인에서 끝내지 말고, 가능한 자동 배포 흐름까지 완료하세요.
+4. GitHub main push 기준으로 Vercel/Render가 자동 배포되는 구조입니다.
+5. 따라서 변경 완료 후 반드시 다음을 수행하세요.
    - npm run build
    - 운영 흐름에 영향이 있으면 npm run test:production
    - git status 확인
    - 변경 파일 stage
    - 의미 있는 commit 생성
    - git push origin main
-4. push가 성공해야 GitHub/Vercel/Render 자동 배포 흐름에 올라갑니다.
-5. 작업 결과 보고에는 다음을 포함하세요.
+6. push가 성공해야 GitHub/Vercel/Render 자동 배포 흐름에 올라갑니다.
+7. push 후 가능한 범위에서 운영 URL을 확인하세요.
+   - Frontend: https://academy-os-blue.vercel.app
+   - Backend health: https://koh-you-math-academy-os-api.onrender.com/health
+8. Vercel/Render 대시보드 권한이나 로그 접근 권한이 없으면 “대시보드 내부 배포 성공까지 확인했다”고 말하지 마세요. 대신 “origin/main push 완료, 자동 배포 트리거 완료, 운영 URL 응답 확인/미확인”처럼 정확히 보고하세요.
+9. 작업 결과 보고에는 다음을 포함하세요.
    - 무엇을 수정했는지
    - 어떤 검증을 통과했는지
    - commit hash
    - push 완료 여부
+   - 운영 URL 확인 여부
    - SQL Editor 작업 필요 여부
 
 Supabase SQL Editor 원칙:
@@ -86,9 +94,9 @@ SQL 자동화 가능 여부:
 ## 짧은 버전
 
 ```text
-academy-os 작업입니다. AGENTS.md, docs/current-worklog.md, docs/home-codex-setup.md, docs/session-handoff-2026-06-20.md를 먼저 읽으세요.
+academy-os 작업입니다. AGENTS.md, docs/current-worklog.md, docs/home-codex-setup.md, docs/session-handoff-2026-06-20.md, docs/ai-deployment-responsibility-2026-06-21.md를 먼저 읽으세요.
 
-코드 수정 후에는 반드시 npm run build, 필요 시 npm run test:production을 실행하고, git commit 후 git push origin main까지 완료하세요. GitHub main push가 Vercel/Render 자동 배포 트리거입니다.
+AI가 할 수 있는 일은 AI가 끝까지 해주세요. 코드 수정 후에는 반드시 npm run build, 필요 시 npm run test:production을 실행하고, git commit 후 git push origin main까지 완료하세요. GitHub main push가 Vercel/Render 자동 배포 트리거입니다. push 후 가능한 범위에서 운영 URL도 확인하세요.
 
 Supabase SQL migration은 자동 적용된다고 가정하지 마세요. DB 컬럼/테이블 변경이 필요하면 SQL Editor에서 사람이 실행해야 할 파일명과 순서를 초보자 기준으로 안내하고 docs/current-worklog.md에도 남기세요. SQL이 필요 없으면 “SQL Editor 작업 필요 없음”이라고 명확히 말하세요.
 
