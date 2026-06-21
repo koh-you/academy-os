@@ -1545,15 +1545,21 @@ export function App() {
         if (classesResult.ok && Array.isArray(classesResult.classTemplates) && classesResult.classTemplates.length > 0) {
           setClassTemplates(classesResult.classTemplates);
         }
-        if (lessonsResult.ok && Array.isArray(lessonsResult.lessons) && lessonsResult.lessons.length > 0) {
-          setLessons(filterActiveLessons(lessonsResult.lessons));
+        const normalizedLessons = lessonsResult.ok && Array.isArray(lessonsResult.lessons)
+          ? normalizeHomeworkMakeupLessonColors(lessonsResult.lessons, makeupTasksResult.makeupTasks ?? [])
+          : [];
+        if (normalizedLessons.length > 0) {
+          setLessons(filterActiveLessons(normalizedLessons));
+          normalizedLessons
+            .filter((lesson, index) => lesson.color !== lessonsResult.lessons[index]?.color)
+            .forEach((lesson) => postJson("/api/lessons", { lesson }).catch((error) => console.error(error)));
         }
         if (recordsResult.ok && Array.isArray(recordsResult.records) && recordsResult.records.length > 0) {
-          const sourceLessons = lessonsResult.ok && Array.isArray(lessonsResult.lessons) ? lessonsResult.lessons : lessons;
+          const sourceLessons = normalizedLessons.length > 0 ? normalizedLessons : lessons;
           setRecords(filterRecordsForLessons(recordsResult.records, sourceLessons));
         }
         if (homeworksResult.ok && Array.isArray(homeworksResult.homeworks) && homeworksResult.homeworks.length > 0) {
-          const sourceLessons = lessonsResult.ok && Array.isArray(lessonsResult.lessons) ? lessonsResult.lessons : lessons;
+          const sourceLessons = normalizedLessons.length > 0 ? normalizedLessons : lessons;
           setHomeworks(filterHomeworksForLessons(homeworksResult.homeworks, sourceLessons));
         }
         if (makeupTasksResult.ok && Array.isArray(makeupTasksResult.makeupTasks)) {
@@ -2185,12 +2191,13 @@ export function App() {
     const template = classTemplates.find(
       (item) => item.classTemplateId === formValues.classTemplateId
     );
+    const classTemplateId = formValues.classTemplateId && template ? template.classTemplateId : "";
     const studentIds = students
       .filter((student) => formValues.studentIds.includes(student.studentId))
       .map((student) => student.studentId);
     const lesson = {
       lessonId: createLessonId(formValues.date, formValues.name),
-      classTemplateId: template?.classTemplateId ?? "custom",
+      classTemplateId,
       className: formValues.name,
       lessonType: formValues.lessonType,
       date: formValues.date,
@@ -2214,12 +2221,13 @@ export function App() {
     const template = classTemplates.find(
       (item) => item.classTemplateId === formValues.classTemplateId
     );
+    const classTemplateId = formValues.classTemplateId && template ? template.classTemplateId : "";
     const studentIds = students
       .filter((student) => formValues.studentIds.includes(student.studentId))
       .map((student) => student.studentId);
     const lesson = {
       ...editingLesson,
-      classTemplateId: template?.classTemplateId ?? "custom",
+      classTemplateId,
       className: formValues.name,
       lessonType: formValues.lessonType,
       date: formValues.date,
@@ -6494,9 +6502,10 @@ function ReportModal({ report, onClose, onMockSend, onSaveSnapshot }) {
 }
 
 function LessonModal({ initialLesson = null, students, templates, onClose, onSubmit }) {
+  const fallbackTemplate = templates[0] ?? { name: "", startTime: "16:00", endTime: "17:00", color: "#17213d" };
   const [lessonType, setLessonType] = useState(initialLesson?.lessonType ?? "class");
-  const [classTemplateId, setClassTemplateId] = useState(initialLesson?.classTemplateId ?? templates[0].classTemplateId);
-  const activeTemplate = templates.find((template) => template.classTemplateId === classTemplateId);
+  const [classTemplateId, setClassTemplateId] = useState(initialLesson ? initialLesson.classTemplateId || "" : templates[0]?.classTemplateId || "");
+  const activeTemplate = templates.find((template) => template.classTemplateId === classTemplateId) ?? fallbackTemplate;
   const [name, setName] = useState(initialLesson?.className ?? activeTemplate.name);
   const [date, setDate] = useState(initialLesson?.date ?? today);
   const [startTime, setStartTime] = useState(initialLesson?.startTime ?? activeTemplate.startTime);
@@ -6522,6 +6531,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
   function handleTemplateChange(nextTemplateId) {
     const template = templates.find((item) => item.classTemplateId === nextTemplateId);
     setClassTemplateId(nextTemplateId);
+    if (!template) return;
     setName(template.name);
     setStartTime(getTemplateStartTime(template, date));
     setEndTime(getTemplateEndTime(template, date));
@@ -6567,6 +6577,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
         <label>
           큰 수업 틀
           <select value={classTemplateId} onChange={(event) => handleTemplateChange(event.target.value)}>
+            <option value="">직접 입력 일정</option>
             {templates.map((template) => (
               <option key={template.classTemplateId} value={template.classTemplateId}>
                 {template.name}
@@ -13187,6 +13198,22 @@ function getSupplementLessonColor(taskType) {
   if (taskType === "homework_makeup") return "#172554";
   if (taskType === "retest") return "#ef4444";
   return "#7c3aed";
+}
+
+function normalizeHomeworkMakeupLessonColors(lessons = [], makeupTasks = []) {
+  const homeworkMakeupLessonIds = new Set(
+    makeupTasks
+      .filter((task) => task.taskType === "homework_makeup" && task.linkedLessonId)
+      .map((task) => task.linkedLessonId)
+  );
+  return lessons.map((lesson) => {
+    const isHomeworkMakeupLesson =
+      homeworkMakeupLessonIds.has(lesson.lessonId) ||
+      (lesson.lessonType === "makeup" &&
+        (lesson.lessonTopic?.includes("숙제보충") || lesson.className?.includes("숙제보충")));
+    if (!isHomeworkMakeupLesson || lesson.color === getSupplementLessonColor("homework_makeup")) return lesson;
+    return { ...lesson, color: getSupplementLessonColor("homework_makeup") };
+  });
 }
 
 function normalizeGeneratedLessonControls(value = {}) {

@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-06-21 수업 일정 색상 저장/숙제보충 기존 색상 보정
+
+- 상태: 완료
+- 사용자 제보: 숙제보충 일정이 남색으로 바뀌지 않았고, 다른 수업 일정 색상을 바꿔도 저장되지 않는 것처럼 보인다.
+- 원인 확인: 운영 프론트 asset에는 `homework_makeup` + `#172554` 코드가 반영되어 있어 배포 누락은 아니었다. 다만 운영 DB의 기존 숙제보충 lesson 2건은 여전히 `#7c3aed`로 저장되어 있었다. 또한 수업 수정 저장 시 빈/특수 템플릿 일정에서 `classTemplateId: "custom"`이 들어가면 Supabase `class_templates` FK에 걸려 저장 실패 후 로컬 상태만 바뀐 것처럼 보일 수 있었다.
+- 작업 내용: 앱 로딩 시 기존 숙제보충 linked lesson 색상을 `#172554`로 보정하고 API로 다시 저장하도록 했다. 수업 등록/수정 payload는 실제 존재하는 class template일 때만 `classTemplateId`를 보내고, 직접 입력/보충/자동생성 일정은 빈 값으로 보내 DB에는 `null`로 저장되게 했다. 수업 수정 모달에 `직접 입력 일정` 옵션을 추가했다.
+- 운영 데이터 보정: 운영 API로 기존 숙제보충 lesson 2건의 `color`를 `#172554`로 갱신했고 재조회로 확인했다.
+- 검증: `npm run build` 통과, `npm run test:production` 100개 통과.
+- SQL Editor 작업 필요 없음: 기존 `lessons.color`/`class_template_id` 컬럼을 사용하며 DB 스키마 변경은 없다.
+
 ## 2026-06-21 숙제보충 일정 색상 기본값 복원
 
 - 상태: 완료
