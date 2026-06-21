@@ -1,4 +1,22 @@
 :root {
+  --status-neutral-bg: #f8fafc;
+  --status-neutral-border: #e2e8f0;
+  --status-neutral-text: #64748b;
+  --status-info-bg: #eff6ff;
+  --status-info-border: #bfdbfe;
+  --status-info-text: #1d4ed8;
+  --status-pending-bg: #fff7ed;
+  --status-pending-border: #fed7aa;
+  --status-pending-text: #c2410c;
+  --status-success-bg: #ecfdf5;
+  --status-success-border: #86efac;
+  --status-success-text: #047857;
+  --status-danger-bg: #fef2f2;
+  --status-danger-border: #fecaca;
+  --status-danger-text: #b91c1c;
+  --status-destructive-bg: #fff1f2;
+  --status-destructive-border: #fecdd3;
+  --status-destructive-text: #dc2626;
   background: #edf4ff;
   color: #0f172a;
   font-family:
@@ -658,22 +676,18 @@ button {
 }
 
 .lessonPill.makeupLessonPill {
-  background: #172554 !important;
   border-left: 4px solid #facc15;
 }
 
 .lessonPill.preExamLessonPill {
-  background: #6d28d9 !important;
   border-left: 4px solid #f0abfc;
 }
 
 .lessonPill.sundayMakeupLessonPill {
-  background: #0e7490 !important;
   border-left: 4px solid #67e8f9;
 }
 
 .lessonPill.sundayMakeupLessonPill.blockMoved {
-  background: #155e75 !important;
   border-left-color: #fbbf24;
 }
 
@@ -1356,33 +1370,33 @@ button {
 }
 
 .commentOpenButton.comment-empty {
-  background: #eef2ff;
-  border-color: #c7d2fe;
-  color: #4f46e5;
+  background: var(--status-neutral-bg);
+  border-color: var(--status-neutral-border);
+  color: var(--status-neutral-text);
 }
 
 .commentOpenButton.comment-draft {
-  background: #eff6ff;
-  border-color: #93c5fd;
-  color: #1d4ed8;
+  background: var(--status-info-bg);
+  border-color: var(--status-info-border);
+  color: var(--status-info-text);
 }
 
 .commentOpenButton.comment-pending {
-  background: #fff7ed;
-  border-color: #fdba74;
-  color: #c2410c;
+  background: var(--status-pending-bg);
+  border-color: var(--status-pending-border);
+  color: var(--status-pending-text);
 }
 
 .commentOpenButton.comment-sent {
-  background: #dcfce7;
-  border-color: #86efac;
-  color: #15803d;
+  background: var(--status-success-bg);
+  border-color: var(--status-success-border);
+  color: var(--status-success-text);
 }
 
 .commentOpenButton.comment-failed {
-  background: #fef2f2;
-  border-color: #fca5a5;
-  color: #b91c1c;
+  background: var(--status-danger-bg);
+  border-color: var(--status-danger-border);
+  color: var(--status-danger-text);
 }
 
 .journalCommentCell small {
@@ -1393,19 +1407,19 @@ button {
 }
 
 .journalCommentCell small.comment-draft {
-  color: #1d4ed8;
+  color: var(--status-info-text);
 }
 
 .journalCommentCell small.comment-pending {
-  color: #c2410c;
+  color: var(--status-pending-text);
 }
 
 .journalCommentCell small.comment-sent {
-  color: #15803d;
+  color: var(--status-success-text);
 }
 
 .journalCommentCell small.comment-failed {
-  color: #b91c1c;
+  color: var(--status-danger-text);
 }
 
 .journalSaveCell {
@@ -1431,27 +1445,27 @@ button {
 }
 
 .journalSave-dirty {
-  background: #fff7ed;
-  border-color: #fed7aa;
-  color: #9a3412;
+  background: var(--status-pending-bg);
+  border-color: var(--status-pending-border);
+  color: var(--status-pending-text);
 }
 
 .journalSave-saving {
-  background: #eff6ff;
-  border-color: #bfdbfe;
-  color: #1d4ed8;
+  background: var(--status-info-bg);
+  border-color: var(--status-info-border);
+  color: var(--status-info-text);
 }
 
 .journalSave-saved {
-  background: #ecfdf5;
-  border-color: #86efac;
-  color: #047857;
+  background: var(--status-success-bg);
+  border-color: var(--status-success-border);
+  color: var(--status-success-text);
 }
 
 .journalSave-failed {
-  background: #fef2f2;
-  border-color: #fecaca;
-  color: #b91c1c;
+  background: var(--status-danger-bg);
+  border-color: var(--status-danger-border);
+  color: var(--status-danger-text);
 }
 
 .journalSaveCell .saveState {
@@ -2694,27 +2708,27 @@ button {
 }
 
 .generatedLessonItem.create .generatedStatusBadge {
-  background: #ecfdf5;
-  border-color: #bbf7d0;
-  color: #047857;
+  background: var(--status-success-bg);
+  border-color: var(--status-success-border);
+  color: var(--status-success-text);
 }
 
 .generatedLessonItem.update .generatedStatusBadge {
-  background: #eff6ff;
-  border-color: #bfdbfe;
-  color: #1d4ed8;
+  background: var(--status-info-bg);
+  border-color: var(--status-info-border);
+  color: var(--status-info-text);
 }
 
 .generatedLessonItem.protected .generatedStatusBadge {
-  background: #fff7ed;
-  border-color: #fed7aa;
-  color: #c2410c;
+  background: var(--status-pending-bg);
+  border-color: var(--status-pending-border);
+  color: var(--status-pending-text);
 }
 
 .generatedLessonItem.skipped .generatedStatusBadge {
-  background: #f8fafc;
-  border-color: #e2e8f0;
-  color: #64748b;
+  background: var(--status-neutral-bg);
+  border-color: var(--status-neutral-border);
+  color: var(--status-neutral-text);
 }
 
 .generatedLessonActions {
@@ -3549,19 +3563,19 @@ button:disabled {
 }
 
 .save-dirty {
-  color: #92400e;
+  color: var(--status-pending-text);
 }
 
 .save-saving {
-  color: #2563eb;
+  color: var(--status-info-text);
 }
 
 .save-saved {
-  color: #166534;
+  color: var(--status-success-text);
 }
 
 .save-failed {
-  color: #991b1b;
+  color: var(--status-danger-text);
 }
 
 .modalBackdrop {
@@ -3663,18 +3677,18 @@ button:disabled {
 }
 
 .notificationSafetyCard.safe {
-  background: #f0fdf4;
-  border-color: #bbf7d0;
+  background: var(--status-success-bg);
+  border-color: var(--status-success-border);
 }
 
 .notificationSafetyCard.warning {
-  background: #fffbeb;
-  border-color: #fde68a;
+  background: var(--status-pending-bg);
+  border-color: var(--status-pending-border);
 }
 
 .notificationSafetyCard.danger {
-  background: #fff1f2;
-  border-color: #fecaca;
+  background: var(--status-destructive-bg);
+  border-color: var(--status-destructive-border);
 }
 
 .notificationPanel {
@@ -3821,10 +3835,10 @@ button:disabled {
 
 .statusPill {
   align-self: start;
-  background: #eef2ff;
-  border: 1px solid #c7d2fe;
+  background: var(--status-neutral-bg);
+  border: 1px solid var(--status-neutral-border);
   border-radius: 999px;
-  color: #4f46e5;
+  color: var(--status-neutral-text);
   display: inline-flex;
   font-size: 13px;
   font-weight: 900;
@@ -3833,21 +3847,21 @@ button:disabled {
 }
 
 .status-scheduled {
-  background: #eff6ff;
-  border-color: #bfdbfe;
-  color: #2563eb;
+  background: var(--status-pending-bg);
+  border-color: var(--status-pending-border);
+  color: var(--status-pending-text);
 }
 
 .status-sent {
-  background: #f0fdf4;
-  border-color: #bbf7d0;
-  color: #15803d;
+  background: var(--status-success-bg);
+  border-color: var(--status-success-border);
+  color: var(--status-success-text);
 }
 
 .status-failed {
-  background: #fef2f2;
-  border-color: #fecaca;
-  color: #dc2626;
+  background: var(--status-danger-bg);
+  border-color: var(--status-danger-border);
+  color: var(--status-danger-text);
 }
 
 .notificationLogList {
@@ -4680,18 +4694,18 @@ textarea {
 }
 
 .alimtalkSafetyBox.safe {
-  background: #f0fdf4;
-  border-color: #bbf7d0;
+  background: var(--status-success-bg);
+  border-color: var(--status-success-border);
 }
 
 .alimtalkSafetyBox.warning {
-  background: #fffbeb;
-  border-color: #fde68a;
+  background: var(--status-pending-bg);
+  border-color: var(--status-pending-border);
 }
 
 .alimtalkSafetyBox.danger {
-  background: #fff1f2;
-  border-color: #fecaca;
+  background: var(--status-destructive-bg);
+  border-color: var(--status-destructive-border);
 }
 
 .messagePreview {
@@ -7148,13 +7162,13 @@ textarea.profileEditInput {
 }
 
 .statusBlue {
-  background: #eff6ff;
-  color: #2563eb;
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
 }
 
 .statusRed {
-  background: #fee2e2;
-  color: #dc2626;
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
 }
 
 .cardActions,
@@ -7165,20 +7179,20 @@ textarea.profileEditInput {
 }
 
 .dangerSoftButton {
-  background: #fff7f7;
-  border: 1px solid #fecaca;
+  background: var(--status-destructive-bg);
+  border: 1px solid var(--status-destructive-border);
   border-radius: 8px;
-  color: #dc2626;
+  color: var(--status-destructive-text);
   font-weight: 900;
   min-height: 38px;
   padding: 0 14px;
 }
 
 .passButton {
-  background: #ecfdf5;
-  border: 1px solid #86efac;
+  background: var(--status-success-bg);
+  border: 1px solid var(--status-success-border);
   border-radius: 8px;
-  color: #047857;
+  color: var(--status-success-text);
   font-weight: 900;
   min-height: 38px;
   padding: 0 14px;
@@ -7190,9 +7204,9 @@ textarea.profileEditInput {
 }
 
 .softButton.primarySoft {
-  background: #eef2ff;
-  border-color: #c7d2fe;
-  color: #3730a3;
+  background: var(--status-info-bg);
+  border-color: var(--status-info-border);
+  color: var(--status-info-text);
 }
 
 .supplementProgressBadge {
@@ -7214,28 +7228,28 @@ textarea.profileEditInput {
 }
 
 .supplementProgressBadge.draft {
-  background: #f8fafc;
-  color: #64748b;
+  background: var(--status-neutral-bg);
+  color: var(--status-neutral-text);
 }
 
 .supplementProgressBadge.scheduled {
-  background: #fefce8;
-  color: #a16207;
+  background: var(--status-pending-bg);
+  color: var(--status-pending-text);
 }
 
 .supplementProgressBadge.linked {
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
 }
 
 .supplementProgressBadge.warning {
-  background: #fff7ed;
-  color: #c2410c;
+  background: var(--status-pending-bg);
+  color: var(--status-pending-text);
 }
 
 .supplementProgressBadge.done {
-  background: #ecfdf5;
-  color: #047857;
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
 }
 
 .studentHomeworkCard.editing {

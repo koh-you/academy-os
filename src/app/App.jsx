@@ -3158,7 +3158,7 @@ export function App() {
           </div>
           <div className="deleteConfirmActions">
             <button className="softButton" onClick={() => setLessonDeleteModalId("")} type="button">취소</button>
-            <button className="dangerButton" onClick={() => confirmDeleteLesson(pendingDeleteLesson.lessonId)} type="button">수업 취소</button>
+            <button className="dangerButton" onClick={() => confirmDeleteLesson(pendingDeleteLesson.lessonId)} type="button">수업 취소 처리</button>
           </div>
         </Modal>
       ) : null}
@@ -5229,7 +5229,7 @@ function HomeworkMakeupLessonDetail({
       {passConfirmMode ? (
         <Modal
           className="supplementPassConfirmModal"
-          title={passConfirmMode === "needs_more" ? "추가 보충 필요 기록" : "보충 통과 처리"}
+          title={passConfirmMode === "needs_more" ? "추가 보충 필요 기록" : "보충 완료 처리"}
           subtitle="처리 내용은 보충관리 이력에 남습니다."
           onClose={() => setPassConfirmMode("")}
         >
@@ -5485,7 +5485,7 @@ function LessonJournalDetail({
         </div>
         <span className="shortcutHint">{lesson.lessonTopic || "수업일지"}</span>
         <button className="softButton" onClick={() => onEditLesson(lesson)} type="button">수업 수정</button>
-        <button className="dangerButton" onClick={() => onDeleteLesson(lesson.lessonId)} type="button">수업 삭제</button>
+        <button className="dangerButton" onClick={() => onDeleteLesson(lesson.lessonId)} type="button">수업 취소 처리</button>
       </header>
 
       <section className="panel bulkHomeworkPanel">
@@ -5801,14 +5801,14 @@ function PreparationMemoModal({ lesson, onChangeRecord, onClose, onSaveRecord, p
             />
           </label>
           <div className="prepMemoIncludeBox">
-            <strong>알림톡 포함 여부</strong>
+            <strong>알림톡 초안 포함</strong>
             <label className="checkboxLine">
               <input
                 checked={draftStudentVisible}
                 onChange={(event) => updateDraft("prepStudentVisible", event.target.checked)}
                 type="checkbox"
               />
-              학생 알림톡에 포함
+              학생 알림톡 초안에 포함
             </label>
             <label className="checkboxLine">
               <input
@@ -5816,10 +5816,10 @@ function PreparationMemoModal({ lesson, onChangeRecord, onClose, onSaveRecord, p
                 onChange={(event) => updateDraft("prepParentVisible", event.target.checked)}
                 type="checkbox"
               />
-              학부모 알림톡에 포함
+              학부모 알림톡 초안에 포함
             </label>
             <p className="muted">
-              체크한 대상의 알림톡 작성 화면을 열면 강사용 메모가 직접 작성 칸에 그대로 들어갑니다. AI 수정은 알림톡 작성 화면에서 수신인에 맞게 실행합니다.
+              체크한 대상의 알림톡 초안을 열 때 이 메모가 한 번만 반영됩니다. AI 수정은 알림톡 작성 화면에서 수신인에 맞게 실행합니다.
             </p>
           </div>
           <div className="prepMemoSaveBar">
@@ -6157,7 +6157,7 @@ function TeacherLessonHub({
                   수업 수정
                 </button>
                 <button className="dangerButton" onClick={() => onDeleteLesson(selectedLesson.lessonId)} type="button">
-                  수업 삭제
+                  수업 취소 처리
                 </button>
               </div>
             </div>
@@ -8442,7 +8442,7 @@ function SchoolCalendarCenter({
             <span>생성 {generatedPlanCounts.create ?? 0}</span>
             <span>갱신 {generatedPlanCounts.update ?? 0}</span>
             <span>수동보호 {generatedPlanCounts.protected ?? 0}</span>
-            <span>삭제건너뜀 {generatedPlanCounts.skipped ?? 0}</span>
+            <span>자동제외 {generatedPlanCounts.skipped ?? 0}</span>
           </div>
           {generatedLessonPlan.length === 0 ? (
             <div className="emptyHomeworkBox">시험기간 또는 수학시험 날짜를 입력하면 자동 수업 후보가 표시됩니다.</div>
@@ -8456,7 +8456,7 @@ function SchoolCalendarCenter({
                     <small>{item.lesson.date} {item.lesson.startTime}-{item.lesson.endTime}</small>
                   </div>
                   <span className="generatedStatusBadge">
-                    {item.status === "create" ? "생성 예정" : item.status === "update" ? "갱신 예정" : item.status === "protected" ? "수동수정 보호" : "삭제로 건너뜀"}
+                    {item.status === "create" ? "생성 예정" : item.status === "update" ? "갱신 예정" : item.status === "protected" ? "수동수정 보호" : "자동생성 제외됨"}
                   </span>
                   <div className="generatedLessonActions">
                     {(item.status === "create" || item.status === "update") ? (
@@ -8471,12 +8471,12 @@ function SchoolCalendarCenter({
                     ) : null}
                     {item.status === "protected" ? (
                       <button className="softButton subtle" onClick={() => onClearGeneratedLessonManualOverride?.(item.generatedKey)} type="button">
-                        보호 해제
+                        수동수정 보호 해제
                       </button>
                     ) : null}
                     {item.status === "skipped" ? (
                       <button className="softButton subtle" onClick={() => onUnsuppressGeneratedLesson?.(item.generatedKey)} type="button">
-                        제외 해제
+                        자동생성 제외 해제
                       </button>
                     ) : null}
                   </div>
@@ -11195,7 +11195,7 @@ function SupplementCenter({
                   onClick={() => openPassConfirm(existingTask, item)}
                   type="button"
                 >
-                  보충 통과
+                  보충 완료 처리
                 </button>
               </article>
             );
@@ -11243,13 +11243,13 @@ function SupplementPassConfirmModal({ onCancel, onConfirm, studentName, task }) 
   return (
     <Modal
       className="supplementPassConfirmModal"
-      title="보충 통과 확인"
-      subtitle="통과 처리하면 보충관리 후보에서 제외됩니다."
+      title="보충 완료 처리 확인"
+      subtitle="완료 처리하면 보충관리 후보에서 제외되고, 최근 보충내역에서 다시 복귀할 수 있습니다."
       onClose={onCancel}
     >
       <div className="supplementPassConfirmBody">
         <p>
-          <strong>{studentName}</strong> 학생의 보충 항목을 통과 처리할까요?
+          <strong>{studentName}</strong> 학생의 보충 항목을 완료 처리할까요?
         </p>
         <dl className="supplementPassConfirmSummary">
           <div>
@@ -11271,7 +11271,7 @@ function SupplementPassConfirmModal({ onCancel, onConfirm, studentName, task }) 
           취소
         </button>
         <button className="passButton" onClick={onConfirm} type="button">
-          보충 통과 처리
+          보충 완료 처리
         </button>
       </div>
     </Modal>
@@ -11302,18 +11302,18 @@ function SupplementStudentModal({
     if (task.scheduledDate && task.scheduledTime) {
       onScheduleTask(taskWithDraft);
       showFeedback(
-        task.linkedLessonId ? "보충 내용 저장 및 수업일지 수정 완료" : "보충 내용 저장 및 수업일지 반영 완료",
+        task.linkedLessonId ? "보충 내용 저장 및 일정 수정 완료" : "보충 내용 저장 및 일정 반영 완료",
         `${task.scheduledDate} ${task.scheduledTime} 보충 일정과 알림톡 초안이 함께 반영되었습니다.`
       );
       return;
     }
 
-    showFeedback("보충 내용 저장 완료", "알림톡 초안은 갱신되었습니다. 배정일과 시간을 입력하면 수업일지에도 함께 반영할 수 있습니다.");
+    showFeedback("보충 내용만 저장 완료", "알림톡 초안은 갱신되었습니다. 배정일과 시간을 입력하면 수업일지 일정에도 함께 반영할 수 있습니다.");
   }
 
   function handlePassTask(task) {
     onPassTask(task);
-    showFeedback("보충 통과 처리 완료", `${student.name} 학생의 보충 항목을 통과 처리했습니다.`);
+    showFeedback("보충 완료 처리 완료", `${student.name} 학생의 보충 항목을 완료 처리했습니다.`);
   }
 
   function confirmPassTask() {
@@ -11457,11 +11457,11 @@ function SupplementStudentModal({
                   <div className="modalActions">
                     <button className="softButton primarySoft" onClick={() => handleSaveTask(task)} type="button">
                       {task.scheduledDate && task.scheduledTime
-                        ? task.linkedLessonId ? "수정 저장 및 수업일지 반영" : "저장 및 수업일지 반영"
-                        : "보충 내용 저장"}
+                        ? task.linkedLessonId ? "수정 저장하고 일정 반영" : "저장하고 일정 반영"
+                        : "내용만 저장"}
                     </button>
                     <button className="passButton" onClick={() => setPassConfirmTask(task)} type="button">
-                      보충 통과
+                      보충 완료 처리
                     </button>
                   </div>
                 </article>
@@ -11500,7 +11500,7 @@ function SupplementHistoryModal({ onChangeQuery, onClose, onUndoPassTask, query,
   });
 
   function statusLabel(task) {
-    if (task.status === "done") return "보충 통과";
+    if (task.status === "done") return "보충 완료";
     if (task.status === "scheduled") return "일정 확정";
     return "진행 중";
   }
@@ -11513,7 +11513,7 @@ function SupplementHistoryModal({ onChangeQuery, onClose, onUndoPassTask, query,
     <Modal
       className="supplementHistoryModal"
       title="최근 한 달 보충관리 내역"
-      subtitle="보충 통과, 일정 확정, 진행 중 항목을 학생별로 확인합니다."
+      subtitle="보충 완료, 일정 확정, 진행 중 항목을 학생별로 확인합니다."
       onClose={onClose}
     >
       <div className="supplementHistoryToolbar">
@@ -11555,7 +11555,7 @@ function SupplementHistoryModal({ onChangeQuery, onClose, onUndoPassTask, query,
                 <div className="supplementHistoryActions">
                   {task.status === "done" ? (
                     <button className="softButton subtle" onClick={() => onUndoPassTask(task)} type="button">
-                      통과 취소
+                      보충관리로 복귀
                     </button>
                   ) : (
                     <span className="historyActionHint">관리 중</span>
