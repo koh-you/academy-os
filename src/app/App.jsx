@@ -3743,7 +3743,7 @@ export function App() {
       dayOfWeek: getDayKey(task.scheduledDate),
       startTime: task.scheduledTime,
       endTime: addMinutesToTime(task.scheduledTime, 60),
-      color: task.taskType === "retest" ? "#ef4444" : "#7c3aed",
+      color: getSupplementLessonColor(task.taskType),
       teacherId: "instructor_owner_001",
       studentIds: [student.studentId],
       status: "scheduled",
@@ -13181,6 +13181,12 @@ function createSupplementLessonId(task) {
 
 function createSupplementLessonName(task, student) {
   return `${followUpTypeLabel(task.taskType)} · ${student.name}`;
+}
+
+function getSupplementLessonColor(taskType) {
+  if (taskType === "homework_makeup") return "#172554";
+  if (taskType === "retest") return "#ef4444";
+  return "#7c3aed";
 }
 
 function normalizeGeneratedLessonControls(value = {}) {
