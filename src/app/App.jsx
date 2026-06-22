@@ -5371,6 +5371,7 @@ function LessonJournalDetail({
   const [commentModal, setCommentModal] = useState(null);
   const [prepMemoModal, setPrepMemoModal] = useState(null);
   const [editingMemoKey, setEditingMemoKey] = useState("");
+  const [showPreSendCheck, setShowPreSendCheck] = useState(false);
   const [studentPreviewId, setStudentPreviewId] = useState("");
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
@@ -5408,14 +5409,18 @@ function LessonJournalDetail({
       />
     );
   }
-  const saveSummary = students.reduce(
-    (summary, student) => {
-      const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
-      const saveState = saveStates[recordId] ?? "idle";
-      return { ...summary, [saveState]: (summary[saveState] ?? 0) + 1 };
-    },
-    { idle: 0, dirty: 0, saving: 0, saved: 0, failed: 0 }
-  );
+  function hasPreSendMissingRequiredData(record, previousHomework, nextHomework) {
+    const attendanceStatus = record?.attendanceStatus ?? "pending";
+    return (
+      !attendanceStatus ||
+      attendanceStatus === "pending" ||
+      !String(record?.lessonMaterial ?? "").trim() ||
+      !String(getLessonContent(record) ?? "").trim() ||
+      !String(previousHomework?.title ?? "").trim() ||
+      !String(nextHomework?.title ?? "").trim() ||
+      !normalizeAssignmentStatusValue(record?.assignmentStatus ?? record?.incompleteHomework ?? "")
+    );
+  }
 
   function openCommentComposer(audience, targetStudent, baseRecord, previousHomework, nextHomework) {
     const field = audience === "student" ? "studentComment" : "teacherComment";
@@ -5521,17 +5526,10 @@ function LessonJournalDetail({
         </label>
       </section>
 
-      <section className="panel lessonSaveSummary" aria-label="수업일지 저장 상태">
-        <div>
-          <strong>저장 상태</strong>
-          <span className="muted">변경한 줄은 반드시 저장해야 DB에 반영됩니다.</span>
-        </div>
-        <div className="saveSummaryChips">
-          <span className="saveSummaryChip save-dirty">변경됨 {saveSummary.dirty}명</span>
-          <span className="saveSummaryChip save-saving">저장중 {saveSummary.saving}명</span>
-          <span className="saveSummaryChip save-failed">실패 {saveSummary.failed}명</span>
-          <span className="saveSummaryChip save-saved">완료 {saveSummary.saved}명</span>
-        </div>
+      <section className="panel lessonSaveSummary" aria-label="발송 전 점검">
+        <button className={showPreSendCheck ? "preSendCheckButton active" : "preSendCheckButton"} onClick={() => setShowPreSendCheck((current) => !current)} type="button">
+          {showPreSendCheck ? "점검 표시 해제" : "발송 전 점검"}
+        </button>
       </section>
 
       <section className="panel journalTablePanel">
@@ -5562,9 +5560,10 @@ function LessonJournalDetail({
             const previousPreparationMemo = previousRecord?.preparationMemo?.trim() ?? "";
             const parentCommentState = getCommentButtonState(record.teacherComment, record.teacherCommentSendStatus);
             const studentCommentState = getCommentButtonState(record.studentComment, record.studentCommentSendStatus);
+            const hasMissingPreSendData = hasPreSendMissingRequiredData(record, previousHomework, nextHomework);
 
             return (
-              <div className="journalRow" key={student.studentId}>
+              <div className={["journalRow", showPreSendCheck && hasMissingPreSendData ? "preSendMissing" : ""].filter(Boolean).join(" ")} key={student.studentId}>
                 <span className="studentCell compact">
                   <span className="journalStudentTopLine">
                     <strong>{student.name}</strong>

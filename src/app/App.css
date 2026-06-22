@@ -1278,6 +1278,23 @@ button {
   padding: 6px 10px;
 }
 
+.preSendCheckButton {
+  background: #17213d;
+  border: 1px solid #17213d;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 900;
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+.preSendCheckButton.active {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e;
+}
+
 .commentEditorCell {
   display: grid;
   gap: 6px;
@@ -3038,6 +3055,11 @@ button {
   display: grid;
   gap: 10px;
   padding: 10px;
+}
+
+.journalRow.preSendMissing {
+  background: #fffbeb;
+  box-shadow: inset 4px 0 0 #f59e0b;
 }
 
 .schoolDateGroupHeader {
