@@ -6,7 +6,8 @@
 - 사용자 요청: 학생 전화번호가 있는 8명만 실제 학생용 알림톡 발송을 진행한다.
 - 작업 내용: Render Blueprint `render.yaml`에서 `ALIMTALK_DRY_RUN=false`, `ALIMTALK_ALLOW_REAL_STUDENT_NUMBERS=true`, `ALIMTALK_ALLOW_REAL_PARENT_NUMBERS=false`로 설정했다. 학부모/출결 계열 실제번호 발송은 계속 잠그고, 학생 코멘트/학생 일정 리마인더만 `studentPhone` 실제번호를 사용한다.
 - 적용 방식: Render API 토큰/CLI 로그인은 현재 세션에 없으므로 대시보드 직접 변경은 불가하다. 대신 GitHub `main` push로 Render 자동 배포/Blueprint 반영 경로를 사용한다.
-- 검증: `npm run build` 통과, `npm run test:production` 101개 통과. push 후 운영 `/api/integrations/status`에서 `dryRun=false`, `allowRealStudentRecipients=true`, `allowRealParentRecipients=false` 확인 예정.
+- 검증: `npm run build` 통과, `npm run test:production` 101개 통과. `render.yaml` 변경 후 `main`에 push했지만 운영 `/api/integrations/status`는 약 4분간 재확인해도 `dryRun=true`, `allowRealStudentRecipients=false`, `allowRealParentRecipients=false`로 유지됐다.
+- 남은 조치: 현재 Render API 토큰/CLI 로그인이 없어 대시보드 환경변수를 직접 변경하지 못했다. Render 대시보드에서 `ALIMTALK_DRY_RUN=false`, `ALIMTALK_ALLOW_REAL_STUDENT_NUMBERS=true`, `ALIMTALK_ALLOW_REAL_PARENT_NUMBERS=false`를 직접 저장해야 실제 발송이 열린다.
 - SQL Editor 작업 필요 없음: 환경 스위치 변경이며 DB 스키마 변경은 없다.
 
 ## 2026-06-22 학생용 알림톡 실제번호 활성화 준비
