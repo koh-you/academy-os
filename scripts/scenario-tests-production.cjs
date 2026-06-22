@@ -38,7 +38,7 @@ check("07 attendance alimtalk API is connected", hasAll(app, ["/api/notification
 check("08 parent alimtalk API is connected", hasAll(app, ["/api/notifications/comment-alimtalk", "parentPhone"]));
 check("08b comment alimtalk body override does not call missing compact helper", notificationRoute.includes("const commentBody = normalizeText(payload.commentBodyOverride)") && !notificationRoute.includes("compact(payload.commentBodyOverride)"));
 check("09 student alimtalk branch exists", hasAll(app, ['target: testType === "student"', "studentPhone"]));
-check("10 alimtalk dry-run safety exists", hasAll(app, ["forceDryRun", "dryRun", "allowRealRecipients"]));
+check("10 alimtalk dry-run safety exists", hasAll(app, ["forceDryRun", "dryRun", "allowRealRecipients", "allowRealStudentRecipients", "allowRealParentRecipients"]));
 check("11 alimtalk preview builder exists", hasAll(app, ["buildNotificationTemplatePreview", "templatePreviewText"]));
 check("12 alimtalk test result details exist", hasAll(app, ["templateResultCard", "templateEnvName", "variables"]));
 check("13 assignment status maps to parent-safe wording", hasAll(app, ["assignmentStatusParentMessages", "getAssignmentStatusParentMessage"]));
@@ -71,6 +71,7 @@ check("37 exam publisher syncs across same term", hasAll(app, ["examCycleTermKey
 check("38 school calendar derives exam period ranges", hasAll(app, ["parseDateRangeText", "buildExamCalendarEvents", "derived_period_", "isDateWithinEvent"]));
 check("39 school calendar avoids legacy exam duplicates", hasAll(app, ["manualEvents", 'startsWith("event_exam_")']));
 check("40 live Solapi test send is gated to test recipient", hasAll(app, ["forceTestRecipient", "liveTestSendEnabled"]) && notificationRoute.includes("ALIMTALK_ALLOW_LIVE_TEST_SEND"));
+check("40b student real-recipient Alimtalk can be enabled without parent real-recipient send", hasAll(notificationRoute, ["ALIMTALK_ALLOW_REAL_STUDENT_NUMBERS", "recipientType: \"student\"", "recipientType: \"parent\"", "allowRealStudentRecipients", "allowRealParentRecipients"]) && hasAll(envExample, ["ALIMTALK_ALLOW_REAL_STUDENT_NUMBERS=false", "ALIMTALK_ALLOW_REAL_PARENT_NUMBERS=false"]));
 check("41 comment alimtalk preview uses template format", hasAll(app, ["commentTemplatePreview", "#{리포트본문}:", "#{코멘트}:"]) && css.includes(".commentTemplatePreview"));
 
 check("42 exam date range uses date inputs", hasAll(app, ["examDateRangeInputs", "updateDateRangeField", "getDateRangeField"]));

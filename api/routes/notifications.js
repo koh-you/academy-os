@@ -108,9 +108,14 @@ function joinMessageBlocks(blocks) {
   return blocks.map(normalizeText).filter(Boolean).join("\n\n");
 }
 
-function resolveRecipient(phone, payload = {}) {
+function canUseRealRecipient(recipientType = "parent") {
+  if (recipientType === "student") return process.env.ALIMTALK_ALLOW_REAL_STUDENT_NUMBERS === "true";
+  return process.env.ALIMTALK_ALLOW_REAL_PARENT_NUMBERS === "true";
+}
+
+function resolveRecipient(phone, payload = {}, recipientType = "parent") {
   const requestedTo = compactPhoneNumber(phone);
-  const allowRealRecipients = process.env.ALIMTALK_ALLOW_REAL_PARENT_NUMBERS === "true";
+  const allowRealRecipients = canUseRealRecipient(recipientType);
   const testRecipient = compactPhoneNumber(process.env.ALIMTALK_TEST_RECIPIENT ?? DEFAULT_TEST_RECIPIENT);
 
   if (payload.forceTestRecipient || !allowRealRecipients) {
@@ -248,7 +253,11 @@ export function getNotificationStatus() {
 
   return {
     dryRun: isDryRun(),
-    allowRealRecipients: process.env.ALIMTALK_ALLOW_REAL_PARENT_NUMBERS === "true",
+    allowRealRecipients:
+      process.env.ALIMTALK_ALLOW_REAL_PARENT_NUMBERS === "true" ||
+      process.env.ALIMTALK_ALLOW_REAL_STUDENT_NUMBERS === "true",
+    allowRealParentRecipients: process.env.ALIMTALK_ALLOW_REAL_PARENT_NUMBERS === "true",
+    allowRealStudentRecipients: process.env.ALIMTALK_ALLOW_REAL_STUDENT_NUMBERS === "true",
     liveTestSendEnabled: process.env.ALIMTALK_ALLOW_LIVE_TEST_SEND === "true",
     testRecipient: compactPhoneNumber(process.env.ALIMTALK_TEST_RECIPIENT ?? DEFAULT_TEST_RECIPIENT),
     solapiConfigured: REQUIRED_SOLAPI_ENV.every(configState),
@@ -262,12 +271,12 @@ export function getNotificationStatus() {
   };
 }
 
-async function sendKakaoAlimtalk({ payload, recipientPhone, templateEnvName, variables }) {
-  const recipient = resolveRecipient(recipientPhone, payload);
+async function sendKakaoAlimtalk({ payload, recipientPhone, recipientType = "parent", templateEnvName, variables }) {
+  const recipient = resolveRecipient(recipientPhone, payload, recipientType);
   const scheduledDate = payload.scheduledDate ? new Date(payload.scheduledDate) : null;
 
   if (!recipient.to) throw new Error("A recipient phone number is required.");
-  if (process.env.ALIMTALK_ALLOW_REAL_PARENT_NUMBERS === "true" && !recipient.requestedTo) {
+  if (canUseRealRecipient(recipientType) && !recipient.requestedTo) {
     throw new Error("A real recipient phone number is required in live-send mode.");
   }
   if (scheduledDate && Number.isNaN(scheduledDate.getTime())) {
@@ -328,6 +337,7 @@ export async function sendAttendanceAlimtalk(payload) {
   return sendKakaoAlimtalk({
     payload,
     recipientPhone: payload.parentPhone,
+    recipientType: "parent",
     templateEnvName: TEMPLATE_ENV.attendance,
     variables: {
       "#{학원명}": String(payload.academyName ?? ACADEMY_NAME),
@@ -357,6 +367,7 @@ export async function sendDailyReportAlimtalk(payload) {
   return sendKakaoAlimtalk({
     payload,
     recipientPhone: payload.parentPhone,
+    recipientType: "parent",
     templateEnvName: TEMPLATE_ENV.dailyReport,
     variables: {
       "#{학원명}": String(payload.academyName ?? ACADEMY_NAME),
@@ -376,6 +387,7 @@ export async function sendLessonCommentAlimtalk(payload) {
   return sendKakaoAlimtalk({
     payload,
     recipientPhone,
+    recipientType: audience,
     templateEnvName,
     variables: {
       "#{학원명}": String(payload.academyName ?? ACADEMY_NAME),
@@ -403,6 +415,7 @@ export async function sendStudentScheduleReminderAlimtalk(payload) {
   return sendKakaoAlimtalk({
     payload,
     recipientPhone: payload.studentPhone,
+    recipientType: "student",
     templateEnvName: TEMPLATE_ENV.studentComment,
     variables: {
       "#{학원명}": String(payload.academyName ?? ACADEMY_NAME),

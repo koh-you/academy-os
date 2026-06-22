@@ -1,5 +1,16 @@
 # Academy OS Current Worklog
 
+## 2026-06-22 학생용 알림톡 실제번호 활성화 준비
+
+- 상태: 완료
+- 사용자 요청: 학생용 알림톡을 실제 학생에게 보내도록 활성화하고, 실제 학생 번호로 매칭한다.
+- 현재 운영 상태 확인: `/api/integrations/status` 기준 `dryRun: true`, `allowRealRecipients: false`, `liveTestSendEnabled: true`, Solapi/API/PFID/학생 템플릿 설정은 준비됨. 따라서 현재는 실제 학생 번호로 발송되지 않는다.
+- 학생 번호 매칭 확인: 운영 Supabase 학생 12명 중 학생 전화번호가 있는 학생은 8명, 학생 전화번호가 비어 있는 학생은 4명이다. 학생용 알림톡 payload는 `student.studentPhone`을 `studentPhone`으로 보내고, 학생 대상이면 이 번호를 수신번호로 사용한다.
+- 작업 내용: 학생 실제번호 허용과 학부모 실제번호 허용을 분리했다. 새 환경변수 `ALIMTALK_ALLOW_REAL_STUDENT_NUMBERS`를 추가하고, 학생 코멘트/학생 일정 리마인더는 학생 허용값을, 출결/학부모 리포트/학부모 코멘트는 학부모 허용값을 보게 했다. 프론트 알림톡 모달과 알림관리 화면도 학생/학부모 실제번호 잠금을 따로 표시한다.
+- 검증: `npm run build` 통과, `npm run test:production` 101개 통과, `node --check api/routes/notifications.js`, `node --check api/server.js` 통과.
+- 사람이 해야 할 Render 환경변수 변경 예정: 학생 실제 발송 전 Render에서 `ALIMTALK_DRY_RUN=false`, `ALIMTALK_ALLOW_REAL_STUDENT_NUMBERS=true`, `ALIMTALK_ALLOW_REAL_PARENT_NUMBERS=false`를 설정해야 한다. `ALIMTALK_ALLOW_REAL_PARENT_NUMBERS=false`를 유지하면 학부모 번호는 계속 잠긴다.
+- SQL Editor 작업 필요 없음: 기존 학생 `studentPhone` 필드와 알림톡 환경변수만 사용하며 DB 스키마 변경은 없다.
+
 ## 2026-06-21 수업 일정 색상 저장/숙제보충 기존 색상 보정
 
 - 상태: 완료

@@ -363,6 +363,13 @@ function getAlimtalkSafetyText(notificationStatus, forceDryRun = false, forceTes
   return "실발송 가능: 등록된 실제 번호로 발송될 수 있습니다.";
 }
 
+function getAlimtalkAudienceStatus(notificationStatus, audience = "parent") {
+  const allowRealRecipients = audience === "student"
+    ? Boolean(notificationStatus?.allowRealStudentRecipients)
+    : Boolean(notificationStatus?.allowRealParentRecipients ?? notificationStatus?.allowRealRecipients);
+  return { ...(notificationStatus ?? {}), allowRealRecipients };
+}
+
 function buildNotificationTemplatePreview(type) {
   const base = {
     academyName: academyBrandName,
@@ -4107,7 +4114,8 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
             <strong>발송 안전장치</strong>
             <span><StatusDot active={notificationStatus?.dryRun} /> 테스트 보호 {notificationStatus?.dryRun ? "ON" : "OFF"}</span>
             <span><StatusDot active={notificationStatus?.liveTestSendEnabled} /> 테스트 실발송 {notificationStatus?.liveTestSendEnabled ? "ON" : "OFF"}</span>
-            <span><StatusDot active={!notificationStatus?.allowRealRecipients} /> 실제 번호 잠금 {notificationStatus?.allowRealRecipients ? "OFF" : "ON"}</span>
+            <span><StatusDot active={!notificationStatus?.allowRealStudentRecipients} /> 학생 실제번호 잠금 {notificationStatus?.allowRealStudentRecipients ? "OFF" : "ON"}</span>
+            <span><StatusDot active={!notificationStatus?.allowRealParentRecipients} /> 학부모 실제번호 잠금 {notificationStatus?.allowRealParentRecipients ? "OFF" : "ON"}</span>
             <span>테스트 수신번호: {notificationStatus?.testRecipient || "미설정"}</span>
           </article>
           <article>
@@ -5871,15 +5879,21 @@ function CommentComposerModal({
   const receiverLabel = isParent ? `${student.name} 학부모님` : student.name;
   const previewTitle = isParent ? "학부모 알림톡 미리보기" : "학생 알림톡 미리보기";
   const sendLabel = isParent ? "학부모 알림톡 발송" : "학생 알림톡 발송";
-  const actionLabel = sendTiming === "now" ? "테스트 발송" : sendLabel.replace("발송", "예약");
   const aiStatus = isParent ? record?.teacherCommentAiStatus : record?.studentCommentAiStatus;
   const sendStatus = isParent ? record?.teacherCommentSendStatus : record?.studentCommentSendStatus;
   const notificationStatus = integrationStatus?.notifications;
+  const audienceNotificationStatus = getAlimtalkAudienceStatus(notificationStatus, audience);
   const recipientPhone = isParent ? student.parentPhone : student.studentPhone;
   const forceDryRun = false;
-  const forceTestRecipient = sendTiming === "now";
-  const safetyTone = getAlimtalkSafetyTone(notificationStatus, forceDryRun, forceTestRecipient);
-  const safetyText = getAlimtalkSafetyText(notificationStatus, forceDryRun, forceTestRecipient);
+  const canSendNowToRealStudent =
+    !isParent &&
+    sendTiming === "now" &&
+    !audienceNotificationStatus?.dryRun &&
+    audienceNotificationStatus?.allowRealRecipients;
+  const forceTestRecipient = sendTiming === "now" && !canSendNowToRealStudent;
+  const actionLabel = sendTiming === "now" ? canSendNowToRealStudent ? "학생 즉시 발송" : "테스트 발송" : sendLabel.replace("발송", "예약");
+  const safetyTone = getAlimtalkSafetyTone(audienceNotificationStatus, forceDryRun, forceTestRecipient);
+  const safetyText = getAlimtalkSafetyText(audienceNotificationStatus, forceDryRun, forceTestRecipient);
   const missingNotificationEnv = notificationStatus?.missing ?? [];
   const defaultScheduledDate = getLessonAlimtalkScheduledDate(lesson, 0);
   const delayedScheduledDate = getLessonAlimtalkScheduledDate(lesson, 30);
@@ -5965,8 +5979,8 @@ function CommentComposerModal({
               <span>{formatKoreaTimeLabel(delayedScheduledDate)}</span>
             </button>
             <button className={sendTiming === "now" ? "active" : ""} onClick={() => setSendTiming("now")} type="button">
-              테스트 발송
-              <span>내 번호로 즉시</span>
+              {canSendNowToRealStudent ? "즉시 발송" : "테스트 발송"}
+              <span>{canSendNowToRealStudent ? "학생 번호로 즉시" : "내 번호로 즉시"}</span>
             </button>
           </div>
           <div className={`alimtalkSafetyBox ${safetyTone}`}>
