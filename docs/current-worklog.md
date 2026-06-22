@@ -1,5 +1,16 @@
 # Academy OS Current Worklog
 
+## 2026-06-22 실제발송 전환 후 추가 시나리오 검수
+
+- 상태: 완료
+- 사용자 요청: 오늘 실제 알림톡 발송 연결이 큰 변경이므로 시나리오를 충분히 돌린다.
+- 검증 통과: `npm run build`, `npm run test:production` 106개 통과, `node --check api/routes/notifications.js`, `node --check api/server.js`, `node --check api/routes/coreData.js`.
+- 운영 데이터 확인: `/api/integrations/status` 기준 `dryRun:false`, 학생/학부모 실제번호 허용 `true`, Solapi 설정 정상, 누락 환경변수 0건. `/api/students` 기준 활성 학생 12명, 학생/학부모 번호 누락 0건, 테스트 학부모 번호 잔존 0건.
+- 알림톡 API 안전 호출: 운영 `/api/notifications/comment-alimtalk`를 학생/학부모 각각 `forceDryRun:true`, `forceTestRecipient:true`로 호출해 성공 응답을 확인했다. 두 호출 모두 `dryRun:true`, 테스트 수신자 redirect, 템플릿 변수 생성 정상으로 실제 학생/학부모 번호 발송 없이 검수했다.
+- 추가 시나리오 결과: `node scripts/scenario-tests-day23.cjs`는 기존 미해결 3건/보류 1건을 다시 확인했다. `node scripts/scenario-tests-stability.cjs`는 기존 `window.alert/confirm` 잔존 기준에서 실패했다. 오늘 알림톡 실제발송 연결과 직접 관련된 실패는 아니다.
+- 후속 권장: 내일 안정화 큐에 레거시 `alert/confirm` 제거, 학생 포털 타인 데이터 접근 가능성, 저장 실패 사용자 표시를 넣는다.
+- SQL Editor 작업 필요 없음: 검수와 문서 기록만 수행했으며 DB 스키마 변경은 없다.
+
 ## 2026-06-22 오늘 작업 검수 및 다음 세션 handoff
 
 - 상태: 완료
