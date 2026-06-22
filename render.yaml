@@ -11,6 +11,8 @@ services:
       - key: NODE_ENV
         value: production
       - key: ALIMTALK_DRY_RUN
+        value: "false"
+      - key: ALIMTALK_ALLOW_REAL_STUDENT_NUMBERS
         value: "true"
       - key: ALIMTALK_ALLOW_REAL_PARENT_NUMBERS
         value: "false"
