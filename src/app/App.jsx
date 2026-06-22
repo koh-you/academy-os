@@ -23,6 +23,7 @@ const storageKeys = {
   lessonResearchItems: "academy-os.lessonResearchItems.v1",
   aiSettings: "academy-os.aiSettings.v1",
   attendanceSettings: "academy-os.attendanceSettings.v1",
+  lessonNotificationPlans: "academy-os.lessonNotificationPlans.v1",
   deletedLessonBundles: "academy-os.deletedLessonBundles.v1"
 };
 
@@ -1443,6 +1444,7 @@ export function App() {
     storageKeys.attendanceSettings,
     defaultAttendanceSettings
   );
+  const [lessonNotificationPlans, setLessonNotificationPlans] = useStoredState(storageKeys.lessonNotificationPlans, {});
   const [generatedLessonControls, setGeneratedLessonControls] = useStoredState(
     "academy-os.generatedLessonControls.v1",
     defaultGeneratedLessonControls
@@ -1473,6 +1475,7 @@ export function App() {
     deletedLessonBundles,
     examAnalyses,
     generatedLessonControls,
+    lessonNotificationPlans,
     lessonResearchItems,
     notificationLogs,
     problemBooks,
@@ -1486,6 +1489,7 @@ export function App() {
     deletedLessonBundles,
     examAnalyses,
     generatedLessonControls,
+    lessonNotificationPlans,
     lessonResearchItems,
     notificationLogs,
     problemBooks,
@@ -1593,6 +1597,9 @@ export function App() {
           if (Array.isArray(states.deletedLessonBundles)) setDeletedLessonBundles(states.deletedLessonBundles);
           if (Array.isArray(states.examAnalyses)) setExamAnalyses(states.examAnalyses);
           if (states.generatedLessonControls) setGeneratedLessonControls(normalizeGeneratedLessonControls(states.generatedLessonControls));
+          if (states.lessonNotificationPlans && typeof states.lessonNotificationPlans === "object" && !Array.isArray(states.lessonNotificationPlans)) {
+            setLessonNotificationPlans(states.lessonNotificationPlans);
+          }
           if (Array.isArray(states.lessonResearchItems)) setLessonResearchItems(states.lessonResearchItems);
           if (Array.isArray(states.notificationLogs)) setNotificationLogs(states.notificationLogs);
           if (Array.isArray(states.problemBooks)) setProblemBooks(states.problemBooks);
@@ -2482,6 +2489,19 @@ export function App() {
     scheduleRecordAutoSave(nextRecord);
   }
 
+  function handleUpdateLessonNotificationPlan(lessonId, mode) {
+    if (!lessonId) return;
+    setLessonNotificationPlans((current) => {
+      const next = { ...current };
+      if (!mode || mode === "default") {
+        delete next[lessonId];
+      } else {
+        next[lessonId] = { mode, updatedAt: new Date().toISOString() };
+      }
+      return next;
+    });
+  }
+
   function syncPreviousHomeworkStatusFromAssignment(lesson, student, assignmentStatus) {
     const homeworkStatus = getHomeworkStatusFromAssignmentStatus(assignmentStatus);
     setHomeworks((current) => {
@@ -2684,6 +2704,7 @@ export function App() {
             allRecords={records}
             generatedLessonControls={generatedLessonControls}
             integrationStatus={integrationStatus}
+            lessonNotificationPlans={lessonNotificationPlans}
             lessons={calendarLessons}
             lessonsForDate={lessonsForDate}
             makeupTasks={makeupTasks}
@@ -2723,6 +2744,7 @@ export function App() {
             onSelectLesson={setSelectedLessonId}
             onUndoLessonAction={handleUndoLessonAction}
             onUpdateHomework={handleUpdateHomework}
+            onUpdateLessonNotificationPlan={handleUpdateLessonNotificationPlan}
             onUpdateExamSundayMakeupBlocks={updateExamSundayMakeupBlocks}
             onUpdateMakeupTask={handleUpdateMakeupTask}
             isLessonJournalOpen={isLessonJournalOpen}
@@ -3451,6 +3473,7 @@ export function App() {
   }
 
   async function handleSendLessonComment(lesson, student, record, target, options = {}) {
+    if (options.sendTiming === "none") return;
     const sourceField = target === "student" ? "studentComment" : "teacherComment";
     const message = normalizeMessageText(record?.[sourceField]);
     const prepMemo = normalizeMessageText(record?.preparationMemo);
@@ -4502,6 +4525,7 @@ function TeacherLessonHubV2({
   allRecords = [],
   generatedLessonControls = defaultGeneratedLessonControls,
   integrationStatus,
+  lessonNotificationPlans = {},
   clipboardCount,
   lessons,
   makeupTasks = [],
@@ -4537,6 +4561,7 @@ function TeacherLessonHubV2({
   onUndoLessonAction,
   onUpdateExamSundayMakeupBlocks,
   onUpdateHomework,
+  onUpdateLessonNotificationPlan,
   onUpdateMakeupTask,
   undoCount,
   isLessonJournalOpen
@@ -4663,6 +4688,7 @@ function TeacherLessonHubV2({
             allRecords={allRecords}
             generatedLessonControls={generatedLessonControls}
             integrationStatus={integrationStatus}
+            lessonNotificationPlan={lessonNotificationPlans[selectedLesson.lessonId] ?? { mode: "default" }}
             homeworks={homeworks}
             lesson={selectedLesson}
             lessons={lessons}
@@ -4683,6 +4709,7 @@ function TeacherLessonHubV2({
             onSendComment={onSendComment}
             onUpdateExamSundayMakeupBlocks={onUpdateExamSundayMakeupBlocks}
             onUpdateHomework={onUpdateHomework}
+            onUpdateLessonNotificationPlan={onUpdateLessonNotificationPlan}
             onUpdateMakeupTask={onUpdateMakeupTask}
             records={records}
             saveStates={saveStates}
@@ -5372,6 +5399,7 @@ function LessonJournalDetail({
   integrationStatus,
   homeworks = [],
   lesson,
+  lessonNotificationPlan = { mode: "default" },
   lessons,
   materials = [],
   makeupTasks = [],
@@ -5390,6 +5418,7 @@ function LessonJournalDetail({
   onSendComment,
   onUpdateExamSundayMakeupBlocks,
   onUpdateHomework,
+  onUpdateLessonNotificationPlan,
   onUpdateMakeupTask,
   records,
   saveStates,
@@ -5405,6 +5434,8 @@ function LessonJournalDetail({
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
   const linkedMakeupTask = makeupTasks.find((task) => task.makeupTaskId === lesson.sourceMakeupTaskId);
+  const notificationPlanMode = lessonNotificationPlan?.mode || "default";
+  const defaultAlimtalkTimeLabel = formatKoreaTimeLabel(getLessonAlimtalkScheduledDate(lesson, 0));
   const isHomeworkMakeupLesson =
     lesson.lessonType === "makeup" &&
     (linkedMakeupTask?.taskType === "homework_makeup" ||
@@ -5559,6 +5590,28 @@ function LessonJournalDetail({
         <button className={showPreSendCheck ? "preSendCheckButton active" : "preSendCheckButton"} onClick={() => setShowPreSendCheck((current) => !current)} type="button">
           {showPreSendCheck ? "점검 표시 해제" : "발송 전 점검"}
         </button>
+        <span className="defaultScheduleHint">기본 예약 {defaultAlimtalkTimeLabel}</span>
+        <button
+          className={notificationPlanMode === "default" ? "schedulePlanButton active" : "schedulePlanButton"}
+          onClick={() => onUpdateLessonNotificationPlan?.(lesson.lessonId, "default")}
+          type="button"
+        >
+          기본 예약
+        </button>
+        <button
+          className={notificationPlanMode === "delay30" ? "schedulePlanButton active" : "schedulePlanButton"}
+          onClick={() => onUpdateLessonNotificationPlan?.(lesson.lessonId, "delay30")}
+          type="button"
+        >
+          30분 지연
+        </button>
+        <button
+          className={notificationPlanMode === "none" ? "schedulePlanButton noSend active" : "schedulePlanButton noSend"}
+          onClick={() => onUpdateLessonNotificationPlan?.(lesson.lessonId, "none")}
+          type="button"
+        >
+          알림톡 없음
+        </button>
       </section>
 
       <section className="panel journalTablePanel">
@@ -5709,6 +5762,7 @@ function LessonJournalDetail({
           aiProvider={commentAiProvider}
           audience={commentModal.audience}
           integrationStatus={integrationStatus}
+          initialSendTiming={notificationPlanMode}
           lesson={lesson}
           onChangeRecord={onChangeRecord}
           onClose={() => setCommentModal(null)}
@@ -5874,6 +5928,7 @@ function CommentComposerModal({
   aiProvider,
   audience,
   integrationStatus,
+  initialSendTiming = "default",
   lesson,
   nextHomework,
   onChangeRecord,
@@ -5885,8 +5940,13 @@ function CommentComposerModal({
   student,
   supplementSchedules = []
 }) {
-  const [sendTiming, setSendTiming] = useState("default");
+  const [sendTiming, setSendTiming] = useState(["default", "delay30", "none"].includes(initialSendTiming) ? initialSendTiming : "default");
   const [isSourceOpen, setIsSourceOpen] = useState(false);
+  useEffect(() => {
+    if (["default", "delay30", "none"].includes(initialSendTiming)) {
+      setSendTiming((current) => (current === "now" ? current : initialSendTiming));
+    }
+  }, [initialSendTiming]);
   const isParent = audience === "parent";
   const field = isParent ? "teacherComment" : "studentComment";
   const comment = record?.[field] ?? "";
@@ -5906,15 +5966,16 @@ function CommentComposerModal({
     !audienceNotificationStatus?.dryRun &&
     audienceNotificationStatus?.allowRealRecipients;
   const forceTestRecipient = sendTiming === "now" && !canSendNowToRealStudent;
-  const actionLabel = sendTiming === "now" ? canSendNowToRealStudent ? "학생 즉시 발송" : "테스트 발송" : sendLabel.replace("발송", "예약");
+  const isNoSendMode = sendTiming === "none";
+  const actionLabel = isNoSendMode ? "알림톡 없음" : sendTiming === "now" ? "즉시 발송" : sendLabel.replace("발송", "예약");
   const safetyTone = getAlimtalkSafetyTone(audienceNotificationStatus, forceDryRun, forceTestRecipient);
   const safetyText = getAlimtalkSafetyText(audienceNotificationStatus, forceDryRun, forceTestRecipient);
   const missingNotificationEnv = notificationStatus?.missing ?? [];
   const defaultScheduledDate = getLessonAlimtalkScheduledDate(lesson, 0);
   const delayedScheduledDate = getLessonAlimtalkScheduledDate(lesson, 30);
   const selectedDelayMinutes = sendTiming === "delay30" ? 30 : 0;
-  const selectedScheduledDate = sendTiming === "now" ? "" : getLessonAlimtalkScheduledDate(lesson, selectedDelayMinutes);
-  const selectedScheduleLabel = selectedScheduledDate ? formatKoreaTimeLabel(selectedScheduledDate) : "즉시";
+  const selectedScheduledDate = sendTiming === "now" || isNoSendMode ? "" : getLessonAlimtalkScheduledDate(lesson, selectedDelayMinutes);
+  const selectedScheduleLabel = isNoSendMode ? "알림톡 없음" : selectedScheduledDate ? formatKoreaTimeLabel(selectedScheduledDate) : "즉시";
   const sourceText = buildCommentSourceText({
     lesson,
     nextHomework,
@@ -5971,6 +6032,7 @@ function CommentComposerModal({
             </button>
             <button
               className="sendButton"
+              disabled={isNoSendMode}
               onClick={() =>
                 onSendComment(lesson, student, record, audience, {
                   delayMinutes: selectedDelayMinutes,
@@ -5994,8 +6056,12 @@ function CommentComposerModal({
               <span>{formatKoreaTimeLabel(delayedScheduledDate)}</span>
             </button>
             <button className={sendTiming === "now" ? "active" : ""} onClick={() => setSendTiming("now")} type="button">
-              {canSendNowToRealStudent ? "즉시 발송" : "테스트 발송"}
-              <span>{canSendNowToRealStudent ? "학생 번호로 즉시" : "내 번호로 즉시"}</span>
+              즉시 발송
+              <span>{canSendNowToRealStudent ? "학생 번호로 즉시" : "수동 즉시"}</span>
+            </button>
+            <button className={sendTiming === "none" ? "active" : ""} onClick={() => setSendTiming("none")} type="button">
+              알림톡 없음
+              <span>예약하지 않음</span>
             </button>
           </div>
           <div className={`alimtalkSafetyBox ${safetyTone}`}>
@@ -13473,7 +13539,7 @@ function getKoreaDateTimeString(date = new Date()) {
 }
 
 function getLessonAlimtalkScheduledDate(lesson, delayMinutes = 0) {
-  const baseTime = getDayKey(lesson?.date) === "sat" ? "18:00" : "22:30";
+  const baseTime = getDayKey(lesson?.date) === "sat" ? "18:30" : "22:30";
   const baseDate = new Date(`${lesson?.date ?? getKoreaDateString()}T${baseTime}:00+09:00`);
   baseDate.setMinutes(baseDate.getMinutes() + delayMinutes);
   return baseDate.toISOString();

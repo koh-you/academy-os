@@ -1253,7 +1253,7 @@ button {
   align-items: center;
   display: flex;
   gap: 12px;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: 10px 14px;
 }
 
@@ -1293,6 +1293,35 @@ button {
   background: #fef3c7;
   border-color: #f59e0b;
   color: #92400e;
+}
+
+.defaultScheduleHint {
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.schedulePlanButton {
+  background: #f8fafc;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 900;
+  min-height: 38px;
+  padding: 0 12px;
+}
+
+.schedulePlanButton.active {
+  background: #eef2ff;
+  border-color: #a5b4fc;
+  color: #3730a3;
+}
+
+.schedulePlanButton.noSend.active {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #334155;
 }
 
 .commentEditorCell {
@@ -4661,7 +4690,7 @@ textarea {
 
 .sendScheduleOptions {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 
