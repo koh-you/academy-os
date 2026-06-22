@@ -1460,6 +1460,7 @@ export function App() {
   const [selectedReportLessonId, setSelectedReportLessonId] = useState("");
   const recordsRef = useRef(records);
   const homeworksRef = useRef(homeworks);
+  const autoSaveTimersRef = useRef(new Map());
   const initialMakeupTasksRef = useRef(makeupTasks);
   const initialExamPrepRowsRef = useRef(examPrepRows);
   const initialSchoolEventsRef = useRef(schoolEvents);
@@ -1802,6 +1803,11 @@ export function App() {
   useEffect(() => {
     homeworksRef.current = homeworks;
   }, [homeworks]);
+
+  useEffect(() => () => {
+    autoSaveTimersRef.current.forEach((timerId) => clearTimeout(timerId));
+    autoSaveTimersRef.current.clear();
+  }, []);
 
   useEffect(() => {
     setExamPrepRows((current) => {
@@ -2430,38 +2436,50 @@ export function App() {
     }
   }
 
+  function scheduleRecordAutoSave(record) {
+    if (!record?.lessonStudentRecordId) return;
+    const recordId = record.lessonStudentRecordId;
+    const existingTimerId = autoSaveTimersRef.current.get(recordId);
+    if (existingTimerId) clearTimeout(existingTimerId);
+    setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "dirty" }));
+    const timerId = setTimeout(() => {
+      autoSaveTimersRef.current.delete(recordId);
+      handleSaveRecord(recordId, null, null, record);
+    }, 1000);
+    autoSaveTimersRef.current.set(recordId, timerId);
+  }
+
   function handleChangeRecord(lesson, student, field, value) {
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
-    setRecords((currentRecords) => {
-      const existingRecord = currentRecords.find((record) => record.lessonStudentRecordId === recordId);
-      const nextRecord = {
-        lessonStudentRecordId: recordId,
-        lessonId: lesson.lessonId,
-        studentId: student.studentId,
-        attendanceStatus: "pending",
-        homeworkStatus: "not_started",
-        behaviorTag: "",
-        teacherComment: "",
-        studentComment: "",
-        needsMakeup: false,
-        needsRetest: false,
-        ...(existingRecord ?? {}),
-        [field]: value,
-        ...(field === "assignmentStatus" ? { incompleteHomework: value } : {}),
-        ...(field === "teacherComment" ? { teacherCommentSendStatus: "" } : {}),
-        ...(field === "studentComment" ? { studentCommentSendStatus: "" } : {}),
-        updatedBy: "instructor_owner_001",
-        updatedAt: new Date().toISOString()
-      };
-
-      return upsertById(currentRecords, nextRecord, "lessonStudentRecordId");
-    });
+    const existingRecord = recordsRef.current.find((record) => record.lessonStudentRecordId === recordId);
+    const nextRecord = {
+      lessonStudentRecordId: recordId,
+      lessonId: lesson.lessonId,
+      studentId: student.studentId,
+      attendanceStatus: "pending",
+      homeworkStatus: "not_started",
+      behaviorTag: "",
+      teacherComment: "",
+      studentComment: "",
+      needsMakeup: false,
+      needsRetest: false,
+      ...(existingRecord ?? {}),
+      [field]: value,
+      ...(field === "assignmentStatus" ? { incompleteHomework: value } : {}),
+      ...(field === "teacherComment" ? { teacherCommentSendStatus: "" } : {}),
+      ...(field === "studentComment" ? { studentCommentSendStatus: "" } : {}),
+      updatedBy: "instructor_owner_001",
+      updatedAt: new Date().toISOString()
+    };
+    const nextRecords = upsertById(recordsRef.current, nextRecord, "lessonStudentRecordId");
+    recordsRef.current = nextRecords;
+    setRecords(nextRecords);
 
     if (field === "assignmentStatus") {
       syncPreviousHomeworkStatusFromAssignment(lesson, student, value);
     }
 
-    setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "dirty" }));
+    scheduleRecordAutoSave(nextRecord);
   }
 
   function syncPreviousHomeworkStatusFromAssignment(lesson, student, assignmentStatus) {
@@ -2555,6 +2573,11 @@ export function App() {
   }
 
   async function handleSaveRecord(recordId, lessonForRecord = null, studentForRecord = null, recordOverride = null) {
+    const existingTimerId = autoSaveTimersRef.current.get(recordId);
+    if (existingTimerId) {
+      clearTimeout(existingTimerId);
+      autoSaveTimersRef.current.delete(recordId);
+    }
     setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "saving" }));
 
     try {
@@ -2571,12 +2594,18 @@ export function App() {
       if (relatedHomeworks.length > 0) {
         await postJson("/api/homeworks/bulk", { homeworks: relatedHomeworks });
       }
-      const nextRecords = upsertById(recordsRef.current, record, "lessonStudentRecordId");
-      recordsRef.current = nextRecords;
-      setRecords(nextRecords);
+      const latestRecord = recordsRef.current.find((item) => item.lessonStudentRecordId === recordId);
+      const isLatestRecord = !recordOverride || latestRecord?.updatedAt === record.updatedAt;
+      if (isLatestRecord) {
+        const nextRecords = upsertById(recordsRef.current, record, "lessonStudentRecordId");
+        recordsRef.current = nextRecords;
+        setRecords(nextRecords);
+      }
       window.localStorage.setItem(storageKeys.records, JSON.stringify(recordsRef.current));
       window.localStorage.setItem(storageKeys.homeworks, JSON.stringify(homeworksRef.current));
-      setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "saved" }));
+      if (isLatestRecord) {
+        setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "saved" }));
+      }
     } catch (error) {
       console.error(error);
       setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "failed" }));
@@ -5545,12 +5574,10 @@ function LessonJournalDetail({
             <span>과제 상태</span>
             <span>학부모 알림톡</span>
             <span>학생 알림톡</span>
-            <span>저장</span>
           </div>
           {students.map((student) => {
             const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
             const record = records.find((item) => item.studentId === student.studentId) ?? createEmptyRecord(lesson, student);
-            const saveState = saveStates[recordId] ?? "idle";
             const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
             const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
             const attendanceText = attendanceLabels[record.attendanceStatus] ?? record.attendanceStatus ?? "대기";
@@ -5669,17 +5696,6 @@ function LessonJournalDetail({
                   <small className={`commentStatusText comment-${studentCommentState}`}>
                     {getCommentStatusLabel(record.studentComment, record.studentCommentSendStatus)}
                   </small>
-                </div>
-                <div className="journalSaveCell">
-                  <button
-                    className={`journalSaveButton journalSave-${saveState}`}
-                    disabled={saveState === "saving"}
-                    onClick={() => onSaveRecord(recordId, lesson, student)}
-                    type="button"
-                  >
-                    {getSaveButtonLabel(saveState)}
-                  </button>
-                  <small className={`saveState save-${saveState}`}>{saveStateLabels[saveState]}</small>
                 </div>
               </div>
             );
