@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-06-22 알림톡 모달 즉시발송 단순화 및 학부모 실발송 연결
+
+- 상태: 완료
+- 사용자 요청: 학생 알림톡 모달에서는 예약/지연/알림톡 없음 버튼을 제거하고 즉시발송만 남긴다. 추천 변경안처럼 현재 수업 발송 계획은 읽기 전용으로 보여준다. 학부모 알림톡도 실제발송으로 연결한다.
+- 작업 내용: 알림톡 모달의 발송 시각 선택 버튼 묶음을 제거하고 `현재 수업 발송 계획` 표시 영역으로 바꿨다. 모달 발송 버튼은 수동 `즉시 발송`만 수행한다.
+- 학부모 실발송: 즉시발송 안전판을 학생 전용 기준이 아니라 현재 대상(학생/학부모)의 실제번호 허용값으로 판단하도록 수정했다. Render Blueprint의 `ALIMTALK_ALLOW_REAL_PARENT_NUMBERS` 기본값을 `true`로 변경했다.
+- 검증: `npm run build` 통과, `npm run test:production` 104개 통과.
+- 운영 확인: 프론트 새 asset 반영은 확인했다. 운영 API `/api/integrations/status`는 `dryRun:false`, `allowRealStudentRecipients:true`, `allowRealParentRecipients:false`로 응답해 아직 학부모 실제번호 발송은 열리지 않았다. Render 대시보드 환경변수에서 `ALIMTALK_ALLOW_REAL_PARENT_NUMBERS=true` 저장/재배포가 필요하다.
+- SQL Editor 작업 필요 없음: UI와 환경 스위치 변경이며 DB 스키마 변경은 없다.
+
 ## 2026-06-22 수업별 알림톡 발송 계획 버튼
 
 - 상태: 완료

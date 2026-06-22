@@ -15,7 +15,7 @@ services:
       - key: ALIMTALK_ALLOW_REAL_STUDENT_NUMBERS
         value: "true"
       - key: ALIMTALK_ALLOW_REAL_PARENT_NUMBERS
-        value: "false"
+        value: "true"
       - key: ALIMTALK_TEST_RECIPIENT
         value: "01057882748"
       - key: CORS_ALLOWED_ORIGINS

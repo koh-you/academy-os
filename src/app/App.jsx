@@ -5940,42 +5940,37 @@ function CommentComposerModal({
   student,
   supplementSchedules = []
 }) {
-  const [sendTiming, setSendTiming] = useState(["default", "delay30", "none"].includes(initialSendTiming) ? initialSendTiming : "default");
   const [isSourceOpen, setIsSourceOpen] = useState(false);
-  useEffect(() => {
-    if (["default", "delay30", "none"].includes(initialSendTiming)) {
-      setSendTiming((current) => (current === "now" ? current : initialSendTiming));
-    }
-  }, [initialSendTiming]);
+  const sendTiming = "now";
+  const planMode = ["default", "delay30", "none"].includes(initialSendTiming) ? initialSendTiming : "default";
   const isParent = audience === "parent";
   const field = isParent ? "teacherComment" : "studentComment";
   const comment = record?.[field] ?? "";
   const title = isParent ? `${student.name} 학부모 알림톡` : `${student.name} 학생 알림톡`;
   const receiverLabel = isParent ? `${student.name} 학부모님` : student.name;
   const previewTitle = isParent ? "학부모 알림톡 미리보기" : "학생 알림톡 미리보기";
-  const sendLabel = isParent ? "학부모 알림톡 발송" : "학생 알림톡 발송";
   const aiStatus = isParent ? record?.teacherCommentAiStatus : record?.studentCommentAiStatus;
   const sendStatus = isParent ? record?.teacherCommentSendStatus : record?.studentCommentSendStatus;
   const notificationStatus = integrationStatus?.notifications;
   const audienceNotificationStatus = getAlimtalkAudienceStatus(notificationStatus, audience);
   const recipientPhone = isParent ? student.parentPhone : student.studentPhone;
   const forceDryRun = false;
-  const canSendNowToRealStudent =
-    !isParent &&
-    sendTiming === "now" &&
+  const canSendNowToRealRecipient =
     !audienceNotificationStatus?.dryRun &&
     audienceNotificationStatus?.allowRealRecipients;
-  const forceTestRecipient = sendTiming === "now" && !canSendNowToRealStudent;
-  const isNoSendMode = sendTiming === "none";
-  const actionLabel = isNoSendMode ? "알림톡 없음" : sendTiming === "now" ? "즉시 발송" : sendLabel.replace("발송", "예약");
+  const forceTestRecipient = !canSendNowToRealRecipient;
+  const actionLabel = "즉시 발송";
   const safetyTone = getAlimtalkSafetyTone(audienceNotificationStatus, forceDryRun, forceTestRecipient);
   const safetyText = getAlimtalkSafetyText(audienceNotificationStatus, forceDryRun, forceTestRecipient);
   const missingNotificationEnv = notificationStatus?.missing ?? [];
   const defaultScheduledDate = getLessonAlimtalkScheduledDate(lesson, 0);
   const delayedScheduledDate = getLessonAlimtalkScheduledDate(lesson, 30);
-  const selectedDelayMinutes = sendTiming === "delay30" ? 30 : 0;
-  const selectedScheduledDate = sendTiming === "now" || isNoSendMode ? "" : getLessonAlimtalkScheduledDate(lesson, selectedDelayMinutes);
-  const selectedScheduleLabel = isNoSendMode ? "알림톡 없음" : selectedScheduledDate ? formatKoreaTimeLabel(selectedScheduledDate) : "즉시";
+  const currentPlanLabel =
+    planMode === "none"
+      ? "알림톡 없음"
+      : planMode === "delay30"
+        ? `30분 지연 ${formatKoreaTimeLabel(delayedScheduledDate)}`
+        : `기본 예약 ${formatKoreaTimeLabel(defaultScheduledDate)}`;
   const sourceText = buildCommentSourceText({
     lesson,
     nextHomework,
@@ -6032,10 +6027,9 @@ function CommentComposerModal({
             </button>
             <button
               className="sendButton"
-              disabled={isNoSendMode}
               onClick={() =>
                 onSendComment(lesson, student, record, audience, {
-                  delayMinutes: selectedDelayMinutes,
+                  delayMinutes: 0,
                   forceDryRun,
                   forceTestRecipient,
                   sendTiming
@@ -6046,30 +6040,17 @@ function CommentComposerModal({
               {actionLabel}
             </button>
           </div>
-          <div className="sendScheduleOptions" role="group" aria-label="알림톡 발송 시각">
-            <button className={sendTiming === "default" ? "active" : ""} onClick={() => setSendTiming("default")} type="button">
-              기본 예약
-              <span>{formatKoreaTimeLabel(defaultScheduledDate)}</span>
-            </button>
-            <button className={sendTiming === "delay30" ? "active" : ""} onClick={() => setSendTiming("delay30")} type="button">
-              30분 지연
-              <span>{formatKoreaTimeLabel(delayedScheduledDate)}</span>
-            </button>
-            <button className={sendTiming === "now" ? "active" : ""} onClick={() => setSendTiming("now")} type="button">
-              즉시 발송
-              <span>{canSendNowToRealStudent ? "학생 번호로 즉시" : "수동 즉시"}</span>
-            </button>
-            <button className={sendTiming === "none" ? "active" : ""} onClick={() => setSendTiming("none")} type="button">
-              알림톡 없음
-              <span>예약하지 않음</span>
-            </button>
+          <div className="currentSchedulePlan" aria-label="현재 수업 발송 계획">
+            <span>현재 수업 발송 계획</span>
+            <strong>{currentPlanLabel}</strong>
+            <small>이 모달에서는 문구 확인과 수동 즉시발송만 합니다.</small>
           </div>
           <div className={`alimtalkSafetyBox ${safetyTone}`}>
             <strong>{safetyText}</strong>
             <span>수신 대상: {receiverLabel} · 등록 번호: {recipientPhone || "번호 없음"}</span>
             {missingNotificationEnv.length ? <span>미입력 환경변수: {missingNotificationEnv.join(", ")}</span> : null}
           </div>
-          <small className="muted">선택된 발송 시각: {selectedScheduleLabel}</small>
+          <small className="muted">즉시 발송 수신 기준: {canSendNowToRealRecipient ? "등록된 실제 번호" : "테스트 번호 또는 dry-run"}</small>
           <small className="muted">{aiStatus || "AI 대기"} · {sendStatus || "발송 전"}</small>
         </section>
 

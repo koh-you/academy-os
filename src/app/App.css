@@ -4688,40 +4688,27 @@ textarea {
   justify-content: flex-end;
 }
 
-.sendScheduleOptions {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.sendScheduleOptions button {
-  align-items: flex-start;
+.currentSchedulePlan {
   background: #f8fafc;
   border: 1px solid #d8e3f8;
   border-radius: 8px;
   color: #253858;
-  cursor: pointer;
   display: grid;
   font-weight: 800;
   gap: 4px;
   padding: 10px 12px;
-  text-align: left;
 }
 
-.sendScheduleOptions button span {
+.currentSchedulePlan span,
+.currentSchedulePlan small {
   color: #6b7c9d;
   font-size: 12px;
   font-weight: 700;
 }
 
-.sendScheduleOptions button.active {
-  background: #17223f;
-  border-color: #17223f;
-  color: #ffffff;
-}
-
-.sendScheduleOptions button.active span {
-  color: #dfe7ff;
+.currentSchedulePlan strong {
+  color: #17223f;
+  font-size: 14px;
 }
 
 .alimtalkSafetyBox {
