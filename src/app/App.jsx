@@ -13052,6 +13052,18 @@ function ReportCenter({ lessons, records, reportLesson, selectedReportLessonId, 
 }
 
 function Modal({ backdropClassName = "", children, className = "", onClose, subtitle, title }) {
+  useEffect(() => {
+    function handleEscapeKey(event) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose?.();
+      }
+    }
+
+    window.addEventListener("keydown", handleEscapeKey);
+    return () => window.removeEventListener("keydown", handleEscapeKey);
+  }, [onClose]);
+
   return (
     <div className={`modalBackdrop ${backdropClassName}`}>
       <section className={`modalCard ${className}`}>

@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-06-22 모달 ESC 닫기 지원
+
+- 상태: 완료
+- 사용자 요청: 모달이 열렸을 때 ESC 키를 눌러 모달을 닫을 수 있게 한다.
+- 작업 내용: 공통 `Modal` 컴포넌트에 `keydown` 이벤트 리스너를 추가해 `Escape` 입력 시 `onClose`를 호출하도록 했다.
+- 검증: `npm run build` 통과, `npm run test:production` 105개 통과.
+- SQL Editor 작업 필요 없음: 프론트 UI 동작 변경이며 DB 스키마 변경은 없다.
+
 ## 2026-06-22 노션 학생/학부모 번호 운영 반영
 
 - 상태: 완료
