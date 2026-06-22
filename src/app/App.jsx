@@ -23,6 +23,7 @@ const storageKeys = {
   lessonResearchItems: "academy-os.lessonResearchItems.v1",
   aiSettings: "academy-os.aiSettings.v1",
   attendanceSettings: "academy-os.attendanceSettings.v1",
+  teacherAccountSettings: "academy-os.teacherAccountSettings.v1",
   lessonNotificationPlans: "academy-os.lessonNotificationPlans.v1",
   deletedLessonBundles: "academy-os.deletedLessonBundles.v1"
 };
@@ -487,6 +488,12 @@ const teacherAccount = {
   password: "1234",
   name: "고태영",
   role: "teacher"
+};
+
+const defaultTeacherAccountSettings = {
+  loginId: teacherAccount.loginId,
+  password: teacherAccount.password,
+  name: teacherAccount.name
 };
 
 const examPrepTextbookBySchoolGrade = {
@@ -1444,6 +1451,10 @@ export function App() {
     storageKeys.attendanceSettings,
     defaultAttendanceSettings
   );
+  const [teacherAccountSettings, setTeacherAccountSettings] = useStoredState(
+    storageKeys.teacherAccountSettings,
+    defaultTeacherAccountSettings
+  );
   const [lessonNotificationPlans, setLessonNotificationPlans] = useStoredState(storageKeys.lessonNotificationPlans, {});
   const [generatedLessonControls, setGeneratedLessonControls] = useStoredState(
     "academy-os.generatedLessonControls.v1",
@@ -1481,6 +1492,7 @@ export function App() {
     problemBooks,
     reportSnapshots,
     scoreRecords,
+    teacherAccountSettings,
     wrongProblems
   }), [
     academyTests,
@@ -1495,6 +1507,7 @@ export function App() {
     problemBooks,
     reportSnapshots,
     scoreRecords,
+    teacherAccountSettings,
     wrongProblems
   ]);
   const initialSharedAppStateRef = useRef(sharedAppState);
@@ -1597,6 +1610,12 @@ export function App() {
           if (Array.isArray(states.deletedLessonBundles)) setDeletedLessonBundles(states.deletedLessonBundles);
           if (Array.isArray(states.examAnalyses)) setExamAnalyses(states.examAnalyses);
           if (states.generatedLessonControls) setGeneratedLessonControls(normalizeGeneratedLessonControls(states.generatedLessonControls));
+          if (states.teacherAccountSettings && typeof states.teacherAccountSettings === "object" && !Array.isArray(states.teacherAccountSettings)) {
+            setTeacherAccountSettings({
+              ...defaultTeacherAccountSettings,
+              ...states.teacherAccountSettings
+            });
+          }
           if (states.lessonNotificationPlans && typeof states.lessonNotificationPlans === "object" && !Array.isArray(states.lessonNotificationPlans)) {
             setLessonNotificationPlans(states.lessonNotificationPlans);
           }
@@ -1911,8 +1930,9 @@ export function App() {
 
   function handleLogin(role, loginId, password) {
     if (role === "teacher") {
-      if (loginId === teacherAccount.loginId && password === teacherAccount.password) {
-        setSession({ role: "teacher", actorId: "instructor_owner_001", name: teacherAccount.name });
+      const account = { ...defaultTeacherAccountSettings, ...teacherAccountSettings };
+      if (loginId === account.loginId && password === account.password) {
+        setSession({ role: "teacher", actorId: "instructor_owner_001", name: account.name || teacherAccount.name });
         setActiveView("lessons");
         return { ok: true };
       }
@@ -2958,6 +2978,8 @@ export function App() {
             attendanceSettings={attendanceSettings}
             onUpdateAiSettings={setAiSettings}
             onUpdateAttendanceSettings={setAttendanceSettings}
+            teacherAccountSettings={teacherAccountSettings}
+            onUpdateTeacherAccountSettings={setTeacherAccountSettings}
           />
         ) : null}
 
@@ -7509,9 +7531,19 @@ function SettingsCenter({
   aiSettings,
   attendanceSettings = defaultAttendanceSettings,
   onUpdateAiSettings,
-  onUpdateAttendanceSettings
+  onUpdateAttendanceSettings,
+  teacherAccountSettings = defaultTeacherAccountSettings,
+  onUpdateTeacherAccountSettings
 }) {
   const [activePromptKey, setActivePromptKey] = useState("commentPolish");
+  const account = { ...defaultTeacherAccountSettings, ...teacherAccountSettings };
+  const [accountForm, setAccountForm] = useState({
+    confirmPassword: "",
+    currentPassword: "",
+    loginId: account.loginId,
+    newPassword: ""
+  });
+  const [accountMessage, setAccountMessage] = useState("");
   const settings = {
     ...defaultAiSettings,
     ...aiSettings,
@@ -7566,6 +7598,13 @@ function SettingsCenter({
   ];
   const activePrompt = promptRows.find((row) => row.key === activePromptKey) ?? promptRows[0];
 
+  useEffect(() => {
+    setAccountForm((current) => ({
+      ...current,
+      loginId: account.loginId
+    }));
+  }, [account.loginId]);
+
   function updateProvider(row, provider) {
     onUpdateAiSettings((current) => ({
       ...defaultAiSettings,
@@ -7609,6 +7648,50 @@ function SettingsCenter({
     }));
   }
 
+  function updateAccountForm(field, value) {
+    setAccountForm((current) => ({ ...current, [field]: value }));
+    setAccountMessage("");
+  }
+
+  function saveTeacherAccount(event) {
+    event.preventDefault();
+    const nextLoginId = accountForm.loginId.trim();
+    const nextPassword = accountForm.newPassword.trim();
+    const currentPassword = accountForm.currentPassword.trim();
+    const confirmPassword = accountForm.confirmPassword.trim();
+
+    if (currentPassword !== account.password) {
+      setAccountMessage("현재 비밀번호가 맞지 않습니다.");
+      return;
+    }
+    if (!nextLoginId) {
+      setAccountMessage("아이디를 입력해주세요.");
+      return;
+    }
+    if (nextPassword && nextPassword.length < 4) {
+      setAccountMessage("새 비밀번호는 4자리 이상이어야 합니다.");
+      return;
+    }
+    if (nextPassword && nextPassword !== confirmPassword) {
+      setAccountMessage("새 비밀번호 확인이 맞지 않습니다.");
+      return;
+    }
+
+    onUpdateTeacherAccountSettings?.((current) => ({
+      ...defaultTeacherAccountSettings,
+      ...current,
+      loginId: nextLoginId,
+      password: nextPassword || current?.password || defaultTeacherAccountSettings.password
+    }));
+    setAccountForm({
+      confirmPassword: "",
+      currentPassword: "",
+      loginId: nextLoginId,
+      newPassword: ""
+    });
+    setAccountMessage("계정 정보가 저장되었습니다.");
+  }
+
   return (
     <section className="settingsPage">
       <header className="pageTop settingsHero">
@@ -7618,6 +7701,52 @@ function SettingsCenter({
           <p>AI 사용 모드는 이곳에서 한 번 정해두고 각 기능에서 그대로 사용합니다.</p>
         </div>
       </header>
+
+      <section className="panel settingsCard">
+        <div className="sectionTitle">
+          <div>
+            <h2>계정 설정</h2>
+            <p>선생님 로그인 아이디와 비밀번호를 관리합니다.</p>
+          </div>
+        </div>
+        <form className="accountSettingsGrid" onSubmit={saveTeacherAccount}>
+          <label>
+            <span>아이디</span>
+            <input value={accountForm.loginId} onChange={(event) => updateAccountForm("loginId", event.target.value)} />
+          </label>
+          <label>
+            <span>현재 비밀번호</span>
+            <input
+              autoComplete="current-password"
+              type="password"
+              value={accountForm.currentPassword}
+              onChange={(event) => updateAccountForm("currentPassword", event.target.value)}
+            />
+          </label>
+          <label>
+            <span>새 비밀번호</span>
+            <input
+              autoComplete="new-password"
+              type="password"
+              value={accountForm.newPassword}
+              onChange={(event) => updateAccountForm("newPassword", event.target.value)}
+            />
+          </label>
+          <label>
+            <span>새 비밀번호 확인</span>
+            <input
+              autoComplete="new-password"
+              type="password"
+              value={accountForm.confirmPassword}
+              onChange={(event) => updateAccountForm("confirmPassword", event.target.value)}
+            />
+          </label>
+          <div className="accountSettingsActions">
+            <button className="primaryButton" type="submit">계정 저장</button>
+            {accountMessage ? <span className="muted">{accountMessage}</span> : null}
+          </div>
+        </form>
+      </section>
 
       <section className="panel settingsCard">
         <div className="sectionTitle">

@@ -31,6 +31,7 @@ function hasAll(source, patterns) {
 check("01 login form does not expose default credentials", !app.includes("setLoginId(nextRole)") && app.includes('const [loginId, setLoginId] = useState("");'));
 check("02 login form does not include temporary lockout", !hasAll(app, ["loginAttempts", "lockedUntil"]) && !css.includes("loginSecurityNotice"));
 check("03 role switching clears credentials", hasAll(app, ["function selectRole(nextRole)", 'setLoginId("");', 'setPassword("");', 'setError("");']));
+check("03b teacher account can be changed from settings", hasAll(app, ["teacherAccountSettings", "defaultTeacherAccountSettings", "onUpdateTeacherAccountSettings", "function saveTeacherAccount(event)", "currentPassword !== account.password", "password: nextPassword || current?.password || defaultTeacherAccountSettings.password", "계정 설정", "계정 저장"]) && hasAll(css, [".accountSettingsGrid", ".accountSettingsActions"]));
 check("04 attendance-only route exists", hasAll(app, ["isAttendanceOnlyRoute", 'window.location.pathname === "/attendance"', "AttendanceKiosk"]));
 check("05 tablet attendance URL setting exists", hasAll(app, ["attendanceUrl", "lateGraceMinutes"]));
 check("06 attendance late grace logic exists", hasAll(app, ["lateGraceMinutes", "calculateLateMinutes"]));
