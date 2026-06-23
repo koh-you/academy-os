@@ -19,6 +19,7 @@ const storageKeys = {
   tallySummaries: "academy-os.tallySummaries.v1",
   examAnalyses: "academy-os.examAnalyses.v1",
   schoolEvents: "academy-os.schoolEvents.v1",
+  studentQuestions: "academy-os.studentQuestions.v1",
   resourceMaterials: "academy-os.resourceMaterials.v1",
   lessonResearchItems: "academy-os.lessonResearchItems.v1",
   aiSettings: "academy-os.aiSettings.v1",
@@ -1389,6 +1390,7 @@ const defaultAiSettings = {
 };
 
 const defaultAttendanceSettings = {
+  adminPin: "2748",
   lateGraceMinutes: 0
 };
 
@@ -1433,6 +1435,7 @@ export function App() {
   const [scoreRecords, setScoreRecords] = useStoredState(storageKeys.scoreRecords, sampleData.scoreRecords ?? []);
   const [academyTests, setAcademyTests] = useStoredState(storageKeys.academyTests, sampleData.academyTests ?? []);
   const [examPrepRows, setExamPrepRows] = useStoredState(storageKeys.examPrepRows, normalizeExamPrepRows(sampleData.examPrepRows ?? []));
+  const [studentQuestions, setStudentQuestions] = useStoredState(storageKeys.studentQuestions, []);
   const [schoolEvents, setSchoolEvents] = useStoredState(
     storageKeys.schoolEvents,
     createDefaultSchoolEvents(sampleData.examPrepRows ?? [])
@@ -1462,6 +1465,7 @@ export function App() {
   );
   const [integrationStatus, setIntegrationStatus] = useState(null);
   const [isAppStateReady, setIsAppStateReady] = useState(false);
+  const [attendanceOnlyUnlocked, setAttendanceOnlyUnlocked] = useState(false);
   const [saveStates, setSaveStates] = useState({});
   const [reportModal, setReportModal] = useState(null);
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
@@ -1492,6 +1496,7 @@ export function App() {
     problemBooks,
     reportSnapshots,
     scoreRecords,
+    studentQuestions,
     teacherAccountSettings,
     wrongProblems
   }), [
@@ -1507,6 +1512,7 @@ export function App() {
     problemBooks,
     reportSnapshots,
     scoreRecords,
+    studentQuestions,
     teacherAccountSettings,
     wrongProblems
   ]);
@@ -1624,6 +1630,7 @@ export function App() {
           if (Array.isArray(states.problemBooks)) setProblemBooks(states.problemBooks);
           if (Array.isArray(states.reportSnapshots)) setReportSnapshots(states.reportSnapshots);
           if (Array.isArray(states.scoreRecords)) setScoreRecords(states.scoreRecords);
+          if (Array.isArray(states.studentQuestions)) setStudentQuestions(states.studentQuestions);
           if (Array.isArray(states.wrongProblems)) setWrongProblems(states.wrongProblems);
           window.setTimeout(() => {
             isApplyingRemoteAppStateRef.current = false;
@@ -1928,13 +1935,29 @@ export function App() {
   const pendingDeleteLesson = lessons.find((lesson) => lesson.lessonId === lessonDeleteModalId) ?? null;
   const attendanceOnlyMode = isAttendanceOnlyRoute();
 
-  function handleLogin(role, loginId, password) {
+  useEffect(() => {
+    if (!attendanceOnlyMode) return undefined;
+    document.body.classList.add("attendanceOnlyBody");
+    return () => document.body.classList.remove("attendanceOnlyBody");
+  }, [attendanceOnlyMode]);
+
+  async function handleLogin(role, loginId, password) {
     if (role === "teacher") {
       const account = { ...defaultTeacherAccountSettings, ...teacherAccountSettings };
-      if (loginId === account.loginId && password === account.password) {
-        setSession({ role: "teacher", actorId: "instructor_owner_001", name: account.name || teacherAccount.name });
-        setActiveView("lessons");
-        return { ok: true };
+      try {
+        const result = await postJson("/api/auth/login", { role, loginId, password });
+        if (result.authenticated) {
+          setSession({ role: "teacher", actorId: "instructor_owner_001", name: result.account?.name || account.name || teacherAccount.name });
+          setActiveView("lessons");
+          return { ok: true };
+        }
+      } catch (error) {
+        console.warn("Server teacher auth failed; falling back to local settings.", error);
+        if (loginId === account.loginId && password === account.password) {
+          setSession({ role: "teacher", actorId: "instructor_owner_001", name: account.name || teacherAccount.name });
+          setActiveView("lessons");
+          return { ok: true };
+        }
       }
       return { ok: false, message: "선생님 아이디 또는 비밀번호가 맞지 않습니다." };
     }
@@ -2061,35 +2084,52 @@ export function App() {
     };
   }
 
-  if (attendanceOnlyMode) {
+  if (attendanceOnlyMode && !attendanceOnlyUnlocked) {
     return (
       <AttendanceKiosk
+        adminPin={attendanceSettings.adminPin}
         isStandalone
         lessons={lessons}
         records={records}
         students={students}
+        onAdminExit={() => setAttendanceOnlyUnlocked(true)}
         onAttendanceCheck={handleAttendancePinCheck}
       />
     );
   }
 
   if (!session) {
-    return <RoleLoginScreen students={students} onAttendanceCheck={handleAttendancePinCheck} onLogin={handleLogin} />;
+    return (
+      <RoleLoginScreen
+        initialRole={attendanceOnlyUnlocked ? "teacher" : "student"}
+        students={students}
+        attendanceSettings={attendanceSettings}
+        onAttendanceCheck={handleAttendancePinCheck}
+        onLogin={handleLogin}
+      />
+    );
   }
 
   if (session.role === "student") {
     return (
       <StudentPortalV2
+        examPrepRows={examPrepRows}
         homeworks={homeworks}
         lessons={lessons}
         materials={resourceMaterials}
+        makeupTasks={makeupTasks}
         records={records}
         reportSnapshots={reportSnapshots}
+        schoolEvents={schoolEvents}
         sessionStudentId={session.studentId}
+        studentQuestions={studentQuestions}
         students={students.filter((student) => student.studentId === session.studentId)}
         onLogout={handleLogout}
+        onStudentAddQuestion={handleStudentAddQuestion}
         onStudentCreateHomework={handleStudentCreateHomework}
         onStudentCheckHomework={handleStudentCheckHomework}
+        onStudentDeleteQuestion={handleStudentDeleteQuestion}
+        onStudentUpdateQuestion={handleStudentUpdateQuestion}
       />
     );
   }
@@ -2773,17 +2813,24 @@ export function App() {
 
         {activeView === "studentPortal" ? (
           <StudentPortalV2
+            examPrepRows={examPrepRows}
             homeworks={homeworks}
             lessons={lessons}
             materials={resourceMaterials}
+            makeupTasks={makeupTasks}
             records={records}
             reportSnapshots={reportSnapshots}
+            schoolEvents={schoolEvents}
             previewMode
             scoreRecords={scoreRecords}
+            studentQuestions={studentQuestions}
             students={students}
+            onStudentAddQuestion={handleStudentAddQuestion}
             onStudentCreateHomework={handleStudentCreateHomework}
             onStudentCheckHomework={handleStudentCheckHomework}
             onStudentDeleteHomework={handleStudentDeleteHomework}
+            onStudentDeleteQuestion={handleStudentDeleteQuestion}
+            onStudentUpdateQuestion={handleStudentUpdateQuestion}
             onStudentUpdateHomework={handleStudentUpdateHomework}
           />
         ) : null}
@@ -3667,6 +3714,35 @@ export function App() {
     postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
   }
 
+  function handleStudentAddQuestion(question) {
+    const text = String(question?.text ?? "").trim();
+    if (!text || !question?.studentId) return;
+    const nextQuestion = {
+      questionId: `student_question_${Date.now()}`,
+      studentId: question.studentId,
+      text,
+      source: question.source ?? "student",
+      status: "ready",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    setStudentQuestions((current) => [nextQuestion, ...current]);
+  }
+
+  function handleStudentUpdateQuestion(questionId, updates) {
+    setStudentQuestions((current) =>
+      current.map((question) =>
+        question.questionId === questionId
+          ? { ...question, ...updates, updatedAt: new Date().toISOString() }
+          : question
+      )
+    );
+  }
+
+  function handleStudentDeleteQuestion(questionId) {
+    setStudentQuestions((current) => current.filter((question) => question.questionId !== questionId));
+  }
+
   function handleStudentUpdateHomework(homeworkId, updates) {
     setHomeworks((current) =>
       current.map((homework) => {
@@ -4424,9 +4500,9 @@ function LoginScreen({ students, onLogin }) {
     setPassword("");
   }
 
-  function submit(event) {
+  async function submit(event) {
     event.preventDefault();
-    const result = onLogin(role, loginId.trim(), password.trim());
+    const result = await onLogin(role, loginId.trim(), password.trim());
     if (!result.ok) setError(result.message);
   }
 
@@ -4463,11 +4539,12 @@ function LoginScreen({ students, onLogin }) {
   );
 }
 
-function RoleLoginScreen({ students, onAttendanceCheck, onLogin }) {
-  const [role, setRole] = useState("student");
+function RoleLoginScreen({ attendanceSettings = defaultAttendanceSettings, initialRole = "student", students, onAttendanceCheck, onLogin }) {
+  const [role, setRole] = useState(initialRole);
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAttendanceKiosk, setShowAttendanceKiosk] = useState(false);
 
   const roleLabels = {
@@ -4483,9 +4560,11 @@ function RoleLoginScreen({ students, onAttendanceCheck, onLogin }) {
     setError("");
   }
 
-  function submit(event) {
+  async function submit(event) {
     event.preventDefault();
-    const result = onLogin(role, loginId.trim(), password.trim());
+    setIsSubmitting(true);
+    const result = await onLogin(role, loginId.trim(), password.trim());
+    setIsSubmitting(false);
     if (!result.ok) {
       setError(result.message);
       return;
@@ -4496,6 +4575,7 @@ function RoleLoginScreen({ students, onAttendanceCheck, onLogin }) {
     <main className="loginPage">
       {showAttendanceKiosk ? (
         <AttendanceKiosk
+          adminPin={attendanceSettings.adminPin}
           isStandalone
           students={students}
           onAttendanceCheck={onAttendanceCheck}
@@ -4531,7 +4611,9 @@ function RoleLoginScreen({ students, onAttendanceCheck, onLogin }) {
             placeholder="비밀번호"
           />
           {error ? <div className="loginError">{error}</div> : null}
-          <button className="primaryButton full" type="submit">{roleLabels[role]} 로그인</button>
+          <button className="primaryButton full" disabled={isSubmitting} type="submit">
+            {isSubmitting ? "확인 중" : `${roleLabels[role]} 로그인`}
+          </button>
           <button className="softButton full" onClick={() => setShowAttendanceKiosk(true)} type="button">
             출결 체크
           </button>
@@ -6126,7 +6208,16 @@ function AttendanceModal({ item, onClose, onSave }) {
   );
 }
 
-function AttendanceKiosk({ isStandalone = false, lessons = [], records = [], students, onAttendanceCheck, onBack }) {
+function AttendanceKiosk({
+  adminPin = defaultAttendanceSettings.adminPin,
+  isStandalone = false,
+  lessons = [],
+  records = [],
+  students,
+  onAdminExit,
+  onAttendanceCheck,
+  onBack
+}) {
   const [pin, setPin] = useState("");
   const [result, setResult] = useState(null);
 
@@ -6138,6 +6229,17 @@ function AttendanceKiosk({ isStandalone = false, lessons = [], records = [], stu
 
   function submitPin(event) {
     event?.preventDefault();
+    if (pin === String(adminPin ?? "").replaceAll(/\D/g, "").slice(0, 4)) {
+      setPin("");
+      setResult({
+        ok: true,
+        isAdminExit: true,
+        message: "관리자 모드로 이동합니다.",
+        mode: "adminExit"
+      });
+      window.setTimeout(() => onAdminExit?.(), 250);
+      return;
+    }
     const nextResult = onAttendanceCheck(pin);
     setResult(nextResult);
     if (nextResult.ok) setPin("");
@@ -6155,9 +6257,15 @@ function AttendanceKiosk({ isStandalone = false, lessons = [], records = [], stu
     setPin((current) => `${current}${value}`.replaceAll(/\D/g, "").slice(0, 4));
   }
 
-  const resultTitle = result?.ok ? (result.mode === "checkOut" ? "하원 체크 완료" : "등원 체크 완료") : "출결 체크 실패";
+  const resultTitle = result?.isAdminExit
+    ? "관리자 확인"
+    : result?.ok
+      ? (result.mode === "checkOut" ? "하원 체크 완료" : "등원 체크 완료")
+      : "출결 체크 실패";
   const resultDetail = result?.ok
-    ? `${result.student.name} · ${result.lesson.className} · ${result.checkedTime}`
+    ? result.isAdminExit
+      ? "선생님 로그인 화면으로 이동합니다."
+      : `${result.student.name} · ${result.lesson.className} · ${result.checkedTime}`
     : result?.message;
 
   return (
@@ -6202,7 +6310,7 @@ function AttendanceKiosk({ isStandalone = false, lessons = [], records = [], stu
         >
           <div className="attendanceResultContent">
             <strong>{result.message}</strong>
-            <p>{result.ok ? "3초 후 자동으로 닫힙니다." : "번호를 확인한 뒤 다시 입력해 주세요."}</p>
+            <p>{result.isAdminExit ? "관리자 번호는 출결로 기록되지 않습니다." : result.ok ? "3초 후 자동으로 닫힙니다." : "번호를 확인한 뒤 다시 입력해 주세요."}</p>
             <button className="primaryButton" onClick={() => setResult(null)} type="button">닫기</button>
           </div>
         </Modal>
@@ -7653,14 +7761,14 @@ function SettingsCenter({
     setAccountMessage("");
   }
 
-  function saveTeacherAccount(event) {
+  async function saveTeacherAccount(event) {
     event.preventDefault();
     const nextLoginId = accountForm.loginId.trim();
     const nextPassword = accountForm.newPassword.trim();
     const currentPassword = accountForm.currentPassword.trim();
     const confirmPassword = accountForm.confirmPassword.trim();
 
-    if (currentPassword !== account.password) {
+    if (account.password && currentPassword !== account.password) {
       setAccountMessage("현재 비밀번호가 맞지 않습니다.");
       return;
     }
@@ -7677,19 +7785,41 @@ function SettingsCenter({
       return;
     }
 
-    onUpdateTeacherAccountSettings?.((current) => ({
-      ...defaultTeacherAccountSettings,
-      ...current,
-      loginId: nextLoginId,
-      password: nextPassword || current?.password || defaultTeacherAccountSettings.password
-    }));
-    setAccountForm({
-      confirmPassword: "",
-      currentPassword: "",
-      loginId: nextLoginId,
-      newPassword: ""
-    });
-    setAccountMessage("계정 정보가 저장되었습니다.");
+    try {
+      const result = await postJson("/api/auth/teacher-account", {
+        currentLoginId: account.loginId,
+        currentPassword,
+        loginId: nextLoginId,
+        newPassword
+      });
+      onUpdateTeacherAccountSettings?.((current) => ({
+        ...defaultTeacherAccountSettings,
+        ...current,
+        loginId: result.account?.loginId ?? nextLoginId,
+        password: current?.password ?? ""
+      }));
+      setAccountForm({
+        confirmPassword: "",
+        currentPassword: "",
+        loginId: result.account?.loginId ?? nextLoginId,
+        newPassword: ""
+      });
+      setAccountMessage("서버 인증 계정이 저장되었습니다.");
+    } catch (error) {
+      onUpdateTeacherAccountSettings?.((current) => ({
+        ...defaultTeacherAccountSettings,
+        ...current,
+        loginId: nextLoginId,
+        password: nextPassword || current?.password || defaultTeacherAccountSettings.password
+      }));
+      setAccountForm({
+        confirmPassword: "",
+        currentPassword: "",
+        loginId: nextLoginId,
+        newPassword: ""
+      });
+      setAccountMessage(`서버 저장 실패: ${error.message}. 임시 로컬 설정으로 저장했습니다.`);
+    }
   }
 
   return (
@@ -7854,6 +7984,21 @@ function SettingsCenter({
               }
             />
             <span className="aiSettingBadge fieldBadge">분 단위</span>
+          </div>
+          <div className="settingsRow compact">
+            <div>
+              <strong>출결 관리자 번호</strong>
+              <span className="muted">출결 화면에서 이 번호를 입력하면 출결 기록 없이 선생님 로그인으로 이동합니다.</span>
+            </div>
+            <input
+              inputMode="numeric"
+              maxLength={4}
+              value={attendance.adminPin}
+              onChange={(event) =>
+                updateAttendanceSetting("adminPin", event.target.value.replaceAll(/\D/g, "").slice(0, 4))
+              }
+            />
+            <span className="aiSettingBadge fieldBadge">4자리</span>
           </div>
         </div>
       </section>
@@ -10353,18 +10498,25 @@ function MetricCard({ active = false, hint, icon, label, onClick, tone = "defaul
 }
 
 function StudentPortalV2({
+  examPrepRows = [],
   homeworks,
   lessons = [],
   materials = [],
+  makeupTasks = [],
   records = [],
   reportSnapshots,
+  schoolEvents = [],
   scoreRecords = [],
+  studentQuestions = [],
   students,
   sessionStudentId = "",
   previewMode = false,
   onLogout,
+  onStudentAddQuestion,
   onStudentCheckHomework,
   onStudentCreateHomework,
+  onStudentDeleteQuestion,
+  onStudentUpdateQuestion,
   onStudentDeleteHomework,
   onStudentUpdateHomework
 }) {
@@ -10401,10 +10553,25 @@ function StudentPortalV2({
   const studentMaterials = filterVisibleMaterials(materials, selectedStudent, "student");
   const streakDays = calculateStreak(studentHomeworks);
   const stats = calculateHomeworkStats(studentHomeworks);
+  const attendanceStats = calculateAttendanceStats(
+    records
+      .filter((record) => record.studentId === selectedStudent?.studentId)
+      .map((record) => ({ ...record, lesson: lessons.find((lesson) => lesson.lessonId === record.lessonId) }))
+  );
   const studentScoreRecords = scoreRecords.filter((score) => score.studentId === selectedStudent?.studentId);
   const latestTeacherHomework = studentHomeworks
     .filter((homework) => homework.createdByRole !== "student")
     .sort((a, b) => b.assignedDate.localeCompare(a.assignedDate))[0];
+  const studentRecordsWithLessons = records
+    .filter((record) => record.studentId === selectedStudent?.studentId)
+    .map((record) => ({ ...record, lesson: lessons.find((lesson) => lesson.lessonId === record.lessonId) }))
+    .filter((record) => record.lesson && record.lesson.status !== "canceled")
+    .sort((a, b) => String(b.lesson?.date ?? "").localeCompare(String(a.lesson?.date ?? "")));
+  const upcomingStudentNotice = getStudentTopNotice(selectedStudent, examPrepRows, schoolEvents, makeupTasks);
+  const studentSupplementSchedules = getStudentSupplementSchedules(makeupTasks, selectedStudent?.studentId);
+  const selectedStudentQuestions = studentQuestions
+    .filter((question) => question.studentId === selectedStudent?.studentId)
+    .sort((a, b) => String(b.updatedAt ?? b.createdAt ?? "").localeCompare(String(a.updatedAt ?? a.createdAt ?? "")));
 
   useEffect(() => {
     if (sessionStudentId) setSelectedStudentId(sessionStudentId);
@@ -10478,12 +10645,12 @@ function StudentPortalV2({
         <div className="portalTabs">
           {[
             ["today", "오늘"],
-            ["register", "등록"],
             ["all", "전체"],
             ["materials", "자료함"],
-            ["curriculum", "커리큘럼"],
             ["evaluation", "평가"],
-            ["mypage", "마이 페이지"]
+            ["mypage", "마이 페이지"],
+            ["register", "등록"],
+            ["curriculum", "커리큘럼"]
           ].map(([id, label]) => (
             <button className={activeTab === id ? "active" : ""} key={id} onClick={() => setActiveTab(id)} type="button">
               {label}
@@ -10495,7 +10662,15 @@ function StudentPortalV2({
           <StudentTodayTab
             overdueHomeworks={overdueHomeworks}
             prepNotices={studentPrepNotices}
+            questions={selectedStudentQuestions}
+            recordsWithLessons={studentRecordsWithLessons}
+            selectedStudent={selectedStudent}
+            studentNotice={upcomingStudentNotice}
+            supplementSchedules={studentSupplementSchedules}
             todayHomeworks={todayHomeworks}
+            onAddQuestion={onStudentAddQuestion}
+            onDeleteQuestion={onStudentDeleteQuestion}
+            onUpdateQuestion={onStudentUpdateQuestion}
             onStudentCheckHomework={onStudentCheckHomework}
           />
         ) : null}
@@ -10525,6 +10700,7 @@ function StudentPortalV2({
             selectedStudent={selectedStudent}
             scoreRecords={studentScoreRecords}
             stats={stats}
+            attendanceStats={attendanceStats}
             studentLessonComments={studentLessonComments}
             onChangeTab={setMyPageTab}
           />
@@ -10565,9 +10741,39 @@ function StudentPortalV2({
   );
 }
 
-function StudentTodayTab({ overdueHomeworks, prepNotices = [], todayHomeworks, onStudentCheckHomework }) {
+function StudentTodayTab({
+  overdueHomeworks,
+  prepNotices = [],
+  questions = [],
+  recordsWithLessons = [],
+  selectedStudent,
+  studentNotice,
+  supplementSchedules = [],
+  todayHomeworks,
+  onAddQuestion,
+  onDeleteQuestion,
+  onUpdateQuestion,
+  onStudentCheckHomework
+}) {
+  const [questionText, setQuestionText] = useState("");
+
+  function submitQuestion(event) {
+    event.preventDefault();
+    const text = questionText.trim();
+    if (!text || !selectedStudent) return;
+    onAddQuestion?.({ studentId: selectedStudent.studentId, text });
+    setQuestionText("");
+  }
+
   return (
     <>
+      {studentNotice ? (
+        <div className={`studentTopNotice ${studentNotice.tone}`}>
+          <strong>{studentNotice.title}</strong>
+          <span>{studentNotice.detail}</span>
+        </div>
+      ) : null}
+
       {prepNotices.length ? (
         <div className="portalNoticeStack">
           <h2>수업 준비 안내</h2>
@@ -10579,6 +10785,62 @@ function StudentTodayTab({ overdueHomeworks, prepNotices = [], todayHomeworks, o
           ))}
         </div>
       ) : null}
+
+      <StudentLessonHistoryCalendar recordsWithLessons={recordsWithLessons} />
+
+      <section className="studentQuestionPanel">
+        <div className="sectionHeader compact">
+          <div>
+            <h2>수업 전에 정리할 질문</h2>
+            <p className="muted">막힌 문제나 헷갈린 개념을 짧게 적어두면 수업 시작이 훨씬 빨라집니다.</p>
+          </div>
+        </div>
+        <form className="studentQuestionForm" onSubmit={submitQuestion}>
+          <input
+            value={questionText}
+            onChange={(event) => setQuestionText(event.target.value)}
+            placeholder="예: 2차함수 최대최소에서 범위가 있을 때가 헷갈려요"
+          />
+          <button className="primaryButton" type="submit">질문 추가</button>
+        </form>
+        <div className="studentQuestionList">
+          {questions.length === 0 ? <div className="emptyHomeworkBox compact">아직 정리한 질문이 없습니다.</div> : null}
+          {questions.slice(0, 6).map((question) => (
+            <article className={`studentQuestionItem ${question.status === "resolved" ? "resolved" : ""}`} key={question.questionId}>
+              <div>
+                <strong>{question.text}</strong>
+                <small>{question.status === "resolved" ? "해결됨" : "수업 질문 준비"}</small>
+              </div>
+              <div>
+                <button
+                  className="softButton"
+                  onClick={() => onUpdateQuestion?.(question.questionId, { status: question.status === "resolved" ? "ready" : "resolved" })}
+                  type="button"
+                >
+                  {question.status === "resolved" ? "다시 질문" : "해결 체크"}
+                </button>
+                <button className="dangerSoftButton" onClick={() => onDeleteQuestion?.(question.questionId)} type="button">삭제</button>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {supplementSchedules.length ? (
+        <section className="studentSpecialSchedule">
+          <h2>보충/재시험 일정</h2>
+          <div className="studentSpecialList">
+            {supplementSchedules.slice(0, 3).map((task) => (
+              <article key={task.makeupTaskId}>
+                <strong>{followUpTypeLabel(task.taskType)}</strong>
+                <span>{task.scheduledDate || "일정 미정"} {task.scheduledTime || ""}</span>
+                <small>{task.sourceLabel || task.reason || "선생님과 확인 예정"}</small>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <div className="sectionHeader">
         <div>
           <h2>오늘 해야 할 숙제</h2>
@@ -10595,6 +10857,84 @@ function StudentTodayTab({ overdueHomeworks, prepNotices = [], todayHomeworks, o
         <div className="warningBand">⚠️ 밀린 숙제가 있습니다. 오늘 카드나 전체 탭에서 재분배를 확인하세요.</div>
       ) : null}
     </>
+  );
+}
+
+function StudentLessonHistoryCalendar({ recordsWithLessons = [] }) {
+  const recordsByDate = recordsWithLessons.reduce((map, record) => {
+    const date = record.lesson?.date;
+    if (!date) return map;
+    map.set(date, [...(map.get(date) ?? []), record]);
+    return map;
+  }, new Map());
+  const initialDate = recordsWithLessons[0]?.lesson?.date ?? today;
+  const [selectedDate, setSelectedDate] = useState(initialDate);
+  const selectedRecords = recordsByDate.get(selectedDate) ?? [];
+  const selectedRecord = selectedRecords[0] ?? null;
+  const calendarDays = buildMonthDays(today);
+
+  useEffect(() => {
+    if (!recordsByDate.has(selectedDate) && initialDate) setSelectedDate(initialDate);
+  }, [initialDate, recordsByDate, selectedDate]);
+
+  return (
+    <section className="studentLessonHistory">
+      <div className="sectionHeader compact">
+        <div>
+          <h2>수업 기록 캘린더</h2>
+          <p className="muted">날짜를 눌러 그날 수업에서 무엇을 했는지 확인합니다.</p>
+        </div>
+      </div>
+      <div className="studentLessonHistoryGrid">
+        <div className="studentLessonMiniCalendar">
+          {["일", "월", "화", "수", "목", "금", "토"].map((day) => <b key={day}>{day}</b>)}
+          {calendarDays.map((day) => {
+            const hasRecord = recordsByDate.has(day.date);
+            return (
+              <button
+                className={[
+                  day.inMonth ? "" : "outside",
+                  hasRecord ? "hasRecord" : "",
+                  selectedDate === day.date ? "selected" : ""
+                ].join(" ")}
+                disabled={!hasRecord}
+                key={day.date}
+                onClick={() => setSelectedDate(day.date)}
+                type="button"
+              >
+                <span>{Number(day.date.slice(-2))}</span>
+              </button>
+            );
+          })}
+        </div>
+        <article className="studentLessonRecordCard">
+          {selectedRecord ? (
+            <>
+              <div>
+                <strong>{selectedRecord.lesson.date} · {selectedRecord.lesson.className}</strong>
+                <span>{selectedRecord.lesson.startTime}-{selectedRecord.lesson.endTime}</span>
+              </div>
+              <dl>
+                <div><dt>출결</dt><dd>{attendanceLabels[selectedRecord.attendanceStatus] ?? "대기"}</dd></div>
+                <div><dt>강의 교재</dt><dd>{selectedRecord.lessonMaterial || "기록 전"}</dd></div>
+                <div><dt>강의 내용</dt><dd>{selectedRecord.lessonContent || "기록 전"}</dd></div>
+                <div><dt>지난 숙제</dt><dd>{selectedRecord.previousHomework || "기록 전"}</dd></div>
+                <div><dt>다음 숙제</dt><dd>{selectedRecord.nextHomework || "기록 전"}</dd></div>
+                <div><dt>과제 상태</dt><dd>{assignmentStatusLabels[normalizeAssignmentStatusValue(selectedRecord.assignmentStatus)] ?? selectedRecord.incompleteHomework ?? "선택 전"}</dd></div>
+                {selectedRecord.studentComment?.trim() ? (
+                  <div><dt>선생님 코멘트</dt><dd>{selectedRecord.studentComment}</dd></div>
+                ) : null}
+                {selectedRecord.prepStudentVisible && selectedRecord.prepStudentNotice?.trim() ? (
+                  <div><dt>준비 메모</dt><dd>{selectedRecord.prepStudentNotice}</dd></div>
+                ) : null}
+              </dl>
+            </>
+          ) : (
+            <div className="emptyHomeworkBox">아직 확인할 수업 기록이 없습니다.</div>
+          )}
+        </article>
+      </div>
+    </section>
   );
 }
 
@@ -11017,7 +11357,16 @@ function StudentEvaluationTab() {
   );
 }
 
-function StudentMyPageTab({ myPageTab, onChangeTab, scoreRecords = [], selectedStudent, stats, studentLessonComments = [] }) {
+function StudentMyPageTab({
+  attendanceStats = calculateAttendanceStats([]),
+  myPageTab,
+  onChangeTab,
+  scoreRecords = [],
+  selectedStudent,
+  stats,
+  studentLessonComments = []
+}) {
+  const [statsTab, setStatsTab] = useState("homework");
   const schoolScoreSubjects = ["중1-1", "중2-1", "중3-1", "중3-2", "공통수학1", "공통수학2", "대수", "미적분1", "기하", "미적분", "확통"];
 
   function findScore(subject, examKeyword) {
@@ -11043,17 +11392,67 @@ function StudentMyPageTab({ myPageTab, onChangeTab, scoreRecords = [], selectedS
 
       {myPageTab === "stats" ? (
         <>
-          <div className="miniMetricGrid">
-            <div><strong>{stats.completionRate}%</strong><span>전체 이행률</span></div>
-            <div><strong>{stats.perfectDays}</strong><span>완벽한 날 (30일)</span></div>
-            <div><strong>{stats.total}</strong><span>등록 숙제</span></div>
+          <div className="subTabs compactSubTabs">
+            {[
+              ["homework", "숙제통계"],
+              ["attendance", "출결통계"]
+            ].map(([id, label]) => (
+              <button className={statsTab === id ? "active" : ""} key={id} onClick={() => setStatsTab(id)} type="button">
+                {label}
+              </button>
+            ))}
           </div>
-          <div className="progressList">
-            <h3>숙제 이행률</h3>
-            <ProgressLine label="2026년 05월" value={25} suffix="1/4일 · 25%" />
-            <ProgressLine label="2026년 06월" value={stats.completionRate} suffix={`${stats.done}/${stats.total}개 · ${stats.completionRate}%`} />
-          </div>
-          <StudentCalendar />
+          {statsTab === "homework" ? (
+            <>
+              <div className="miniMetricGrid">
+                <div><strong>{stats.completionRate}%</strong><span>전체 이행률</span></div>
+                <div><strong>{stats.perfectDays}</strong><span>완벽한 날 (30일)</span></div>
+                <div><strong>{stats.total}</strong><span>등록 숙제</span></div>
+              </div>
+              <div className="progressList">
+                <h3>숙제 이행률</h3>
+                <ProgressLine label="2026년 06월" value={stats.completionRate} suffix={`${stats.done}/${stats.total}개 · ${stats.completionRate}%`} />
+              </div>
+              <StudentCalendar
+                title="숙제 이행 달력"
+                legend={[
+                  ["done", "이행"],
+                  ["missed", "미이행"]
+                ]}
+                markedDays={stats.calendarDays}
+              />
+            </>
+          ) : null}
+          {statsTab === "attendance" ? (
+            <>
+              <div className="attendanceMetricGrid">
+                <div className="present"><strong>{attendanceStats.present}</strong><span>출석</span></div>
+                <div className="late"><strong>{attendanceStats.late}</strong><span>지각</span></div>
+                <div className="absent"><strong>{attendanceStats.absent}</strong><span>결석</span></div>
+                <div className="unexcused"><strong>{attendanceStats.unexcused}</strong><span>무단결석</span></div>
+              </div>
+              <div className="progressList">
+                <div className="attendanceRateBox">
+                  <strong>{attendanceStats.total ? `${attendanceStats.attendanceRate}%` : "-"}</strong>
+                  <span>출석률 (출석 + 지각)</span>
+                </div>
+                <ProgressLine label="출석" value={attendanceStats.presentRate} suffix={`${attendanceStats.present}회 · ${attendanceStats.presentRate}%`} />
+                <ProgressLine label="지각" value={attendanceStats.lateRate} suffix={`${attendanceStats.late}회 · ${attendanceStats.lateRate}%`} />
+                <ProgressLine label="결석" value={attendanceStats.absentRate} suffix={`${attendanceStats.absent}회 · ${attendanceStats.absentRate}%`} />
+                <ProgressLine label="무단결석" value={attendanceStats.unexcusedRate} suffix={`${attendanceStats.unexcused}회 · ${attendanceStats.unexcusedRate}%`} />
+              </div>
+              <StudentCalendar
+                title={`${selectedStudent?.name ?? "학생"} · 출결 달력`}
+                legend={[
+                  ["present", "출석"],
+                  ["late", "지각"],
+                  ["absent", "결석"],
+                  ["unexcused", "무단"]
+                ]}
+                markedDays={attendanceStats.calendarDays}
+              />
+            </>
+          ) : null}
         </>
       ) : null}
 
@@ -11151,16 +11550,26 @@ function ProgressLine({ label, suffix, value }) {
   );
 }
 
-function StudentCalendar() {
+function StudentCalendar({ legend = [], markedDays = {}, title = "숙제 이행 달력" }) {
   const days = Array.from({ length: 30 }, (_, index) => index + 1);
   return (
     <div className="studentCalendar">
-      <h3>숙제 이행 달력</h3>
+      <h3>{title}</h3>
       <strong>2026년 6월</strong>
       <div className="miniCalendarGrid">
         {["일", "월", "화", "수", "목", "금", "토"].map((day) => <b key={day}>{day}</b>)}
-        {days.map((day) => <span className={day <= 3 ? "marked" : ""} key={day}>{day}</span>)}
+        {days.map((day) => {
+          const dayState = markedDays[day] ?? "";
+          return <span className={dayState ? `marked ${dayState}` : ""} key={day}>{day}</span>;
+        })}
       </div>
+      {legend.length ? (
+        <div className="calendarLegend">
+          {legend.map(([state, label]) => (
+            <span key={state}><i className={state} />{label}</span>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -13685,6 +14094,81 @@ function addDaysInKorea(dateString, days) {
   return getKoreaDateString(base);
 }
 
+function getDateDiffInDays(fromDate, toDate) {
+  const from = new Date(`${fromDate}T00:00:00+09:00`);
+  const to = new Date(`${toDate}T00:00:00+09:00`);
+  return Math.ceil((to.getTime() - from.getTime()) / (24 * 60 * 60 * 1000));
+}
+
+function formatDdayLabel(days) {
+  if (days === 0) return "D-Day";
+  return days > 0 ? `D-${days}` : `D+${Math.abs(days)}`;
+}
+
+function gradeMatchesStudent(rowGrade = "", studentGrade = "") {
+  if (!rowGrade || !studentGrade) return true;
+  const rowText = String(rowGrade).replace(/\s/g, "");
+  const studentText = String(studentGrade).replace(/\s/g, "");
+  const rowNumber = rowText.match(/\d/)?.[0] ?? "";
+  const studentNumber = studentText.match(/\d/)?.[0] ?? "";
+  return rowText.includes(studentText) || (rowNumber && studentNumber && rowNumber === studentNumber);
+}
+
+function getStudentTopNotice(student, examPrepRows = [], schoolEvents = [], makeupTasks = []) {
+  if (!student) return null;
+  const examCandidates = examPrepRows
+    .filter((row) => row.mathExamDate)
+    .filter((row) => !row.schoolName || row.schoolName === student.schoolName)
+    .filter((row) => gradeMatchesStudent(row.grade, student.grade))
+    .map((row) => ({
+      date: row.mathExamDate,
+      detail: [row.schoolName, row.grade, row.subject || row.examSubject, examCycleLabel(row.examCycle)].filter(Boolean).join(" · "),
+      title: "내신 수학시험",
+      tone: "exam"
+    }))
+    .filter((item) => getDateDiffInDays(today, item.date) >= 0)
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  if (examCandidates[0]) {
+    const days = getDateDiffInDays(today, examCandidates[0].date);
+    return {
+      ...examCandidates[0],
+      title: `${examCandidates[0].title} ${formatDdayLabel(days)}`,
+      detail: `${examCandidates[0].detail} · ${examCandidates[0].date}`
+    };
+  }
+
+  const task = makeupTasks
+    .filter((item) => item.studentId === student.studentId && item.scheduledDate)
+    .filter((item) => getDateDiffInDays(today, item.scheduledDate) >= 0)
+    .sort((a, b) => String(a.scheduledDate).localeCompare(String(b.scheduledDate)))[0];
+  if (task) {
+    const days = getDateDiffInDays(today, task.scheduledDate);
+    return {
+      title: `${followUpTypeLabel(task.taskType)} ${formatDdayLabel(days)}`,
+      detail: `${task.scheduledDate} ${task.scheduledTime || ""} · ${task.sourceLabel || task.reason || "일정 확인"}`,
+      tone: "followup"
+    };
+  }
+
+  const event = schoolEvents
+    .filter((item) => item.date)
+    .filter((item) => !item.schoolName || item.schoolName === student.schoolName)
+    .filter((item) => getDateDiffInDays(today, item.date) >= 0)
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)))[0];
+  if (event) {
+    const days = getDateDiffInDays(today, event.date);
+    const title = event.title || event.type || "다가오는 일정";
+    return {
+      title: `${title} ${formatDdayLabel(days)}`,
+      detail: [event.schoolName, event.grade, event.date].filter(Boolean).join(" · "),
+      tone: event.type === "vacation" ? "vacation" : "event"
+    };
+  }
+
+  return null;
+}
+
 function getTemplateStartTime(template, date) {
   return getDayKey(date) === "sat" && template.saturdayStartTime ? template.saturdayStartTime : template.startTime;
 }
@@ -13920,11 +14404,53 @@ function calculateStreak(homeworks) {
 function calculateHomeworkStats(homeworks) {
   const total = homeworks.length;
   const done = homeworks.filter(isHomeworkResolved).length;
+  const calendarDays = {};
+  homeworks.forEach((homework) => {
+    const day = Number(String(homework.dueDate || homework.assignedDate || "").split("-")[2]);
+    if (!day) return;
+    calendarDays[day] = isHomeworkResolved(homework) ? "done" : "missed";
+  });
   return {
     total,
     done,
     completionRate: total ? Math.round((done / total) * 100) : 0,
-    perfectDays: homeworks.filter((homework) => homework.teacherStatus === "verified").length
+    perfectDays: homeworks.filter((homework) => homework.teacherStatus === "verified").length,
+    calendarDays
+  };
+}
+
+function calculateAttendanceStats(records = []) {
+  const counts = records.reduce(
+    (acc, record) => {
+      const status = record.attendanceStatus || "pending";
+      if (status === "present") acc.present += 1;
+      if (status === "late") acc.late += 1;
+      if (status === "absent") acc.absent += 1;
+      if (status === "unexcused") acc.unexcused += 1;
+      return acc;
+    },
+    { present: 0, late: 0, absent: 0, unexcused: 0 }
+  );
+  const total = counts.present + counts.late + counts.absent + counts.unexcused;
+  const rate = (value) => (total ? Math.round((value / total) * 100) : 0);
+  const calendarDays = {};
+  records.forEach((record) => {
+    const day = Number(String(record.lesson?.date || "").split("-")[2]);
+    if (!day) return;
+    if (record.attendanceStatus === "present") calendarDays[day] = "present";
+    if (record.attendanceStatus === "late") calendarDays[day] = "late";
+    if (record.attendanceStatus === "absent") calendarDays[day] = "absent";
+    if (record.attendanceStatus === "unexcused") calendarDays[day] = "unexcused";
+  });
+  return {
+    ...counts,
+    total,
+    attendanceRate: rate(counts.present + counts.late),
+    presentRate: rate(counts.present),
+    lateRate: rate(counts.late),
+    absentRate: rate(counts.absent),
+    unexcusedRate: rate(counts.unexcused),
+    calendarDays
   };
 }
 

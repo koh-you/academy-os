@@ -6359,7 +6359,7 @@ textarea.profileEditInput {
   border-radius: 8px;
   display: grid;
   gap: 6px;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   margin-bottom: 26px;
   padding: 6px;
 }
@@ -6389,6 +6389,227 @@ textarea.profileEditInput {
 .homeworkStack {
   display: grid;
   gap: 12px;
+}
+
+.studentTopNotice {
+  align-items: center;
+  background: #eef6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  color: #17213d;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  min-height: 56px;
+  padding: 14px 18px;
+}
+
+.studentTopNotice strong {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.studentTopNotice span {
+  color: #475569;
+  font-weight: 800;
+}
+
+.studentTopNotice.exam {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.studentTopNotice.followup {
+  background: #f5f3ff;
+  border-color: #ddd6fe;
+}
+
+.studentTopNotice.vacation,
+.studentTopNotice.event {
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+}
+
+.studentLessonHistory,
+.studentQuestionPanel,
+.studentSpecialSchedule {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.studentLessonHistoryGrid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(320px, 0.8fr) minmax(0, 1.2fr);
+}
+
+.studentLessonMiniCalendar {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  padding: 14px;
+}
+
+.studentLessonMiniCalendar b,
+.studentLessonMiniCalendar button {
+  align-items: center;
+  border-radius: 8px;
+  display: inline-flex;
+  justify-content: center;
+  min-height: 38px;
+}
+
+.studentLessonMiniCalendar b {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.studentLessonMiniCalendar button {
+  background: #ffffff;
+  border: 1px solid transparent;
+  color: #cbd5e1;
+  font: inherit;
+  font-weight: 900;
+}
+
+.studentLessonMiniCalendar button.hasRecord {
+  background: #f8fafc;
+  border-color: #dbe5f6;
+  color: #17213d;
+  cursor: pointer;
+}
+
+.studentLessonMiniCalendar button.selected {
+  background: #17213d;
+  border-color: #17213d;
+  color: #ffffff;
+}
+
+.studentLessonMiniCalendar button.outside {
+  opacity: 0.42;
+}
+
+.studentLessonRecordCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.studentLessonRecordCard > div:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.studentLessonRecordCard > div:first-child strong {
+  color: #0f172a;
+  font-size: 18px;
+}
+
+.studentLessonRecordCard > div:first-child span {
+  color: #64748b;
+  font-weight: 800;
+}
+
+.studentLessonRecordCard dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.studentLessonRecordCard dl div {
+  background: #f8fafc;
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  padding: 11px 12px;
+}
+
+.studentLessonRecordCard dt {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.studentLessonRecordCard dd {
+  color: #0f172a;
+  font-weight: 850;
+  margin: 0;
+}
+
+.studentQuestionForm {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.studentQuestionForm input {
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  color: #0f172a;
+  font: inherit;
+  font-weight: 800;
+  min-height: 46px;
+  padding: 0 14px;
+}
+
+.studentQuestionList,
+.studentSpecialList {
+  display: grid;
+  gap: 10px;
+}
+
+.studentQuestionItem,
+.studentSpecialList article {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 14px 16px;
+}
+
+.studentQuestionItem > div:first-child,
+.studentSpecialList article {
+  display: grid;
+  gap: 5px;
+}
+
+.studentQuestionItem strong,
+.studentSpecialList strong {
+  color: #0f172a;
+}
+
+.studentQuestionItem small,
+.studentSpecialList small,
+.studentSpecialList span {
+  color: #64748b;
+  font-weight: 800;
+}
+
+.studentQuestionItem > div:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.studentQuestionItem.resolved {
+  background: #f8fafc;
+}
+
+.studentQuestionItem.resolved strong {
+  color: #64748b;
+  text-decoration: line-through;
 }
 
 .emptyHomeworkBox {
@@ -6987,6 +7208,75 @@ textarea.profileEditInput {
   color: #ffffff;
 }
 
+.compactSubTabs {
+  grid-template-columns: repeat(2, minmax(0, 150px));
+  justify-content: flex-start;
+  margin-bottom: 18px;
+  width: fit-content;
+}
+
+.attendanceMetricGrid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.attendanceMetricGrid > div,
+.attendanceRateBox {
+  align-items: center;
+  background: #f8fafc;
+  border-radius: 8px;
+  display: grid;
+  justify-items: center;
+  min-height: 94px;
+  padding: 18px;
+}
+
+.attendanceMetricGrid strong,
+.attendanceRateBox strong {
+  color: #0f172a;
+  font-size: 30px;
+  font-weight: 900;
+}
+
+.attendanceMetricGrid span,
+.attendanceRateBox span {
+  color: #475569;
+  font-weight: 800;
+}
+
+.attendanceMetricGrid .present {
+  background: #e8f8ef;
+}
+
+.attendanceMetricGrid .present strong {
+  color: #059669;
+}
+
+.attendanceMetricGrid .late {
+  background: #fff8e7;
+}
+
+.attendanceMetricGrid .late strong {
+  color: #b45309;
+}
+
+.attendanceMetricGrid .absent {
+  background: #fff0f0;
+}
+
+.attendanceMetricGrid .absent strong {
+  color: #b91c1c;
+}
+
+.attendanceMetricGrid .unexcused {
+  background: #fdf2f8;
+}
+
+.attendanceMetricGrid .unexcused strong {
+  color: #be185d;
+}
+
 .studentHomeworkCard,
 .taskCard,
 .candidateItem,
@@ -7465,6 +7755,69 @@ textarea.profileEditInput {
 .miniCalendarGrid .marked {
   background: #fef2f2;
   color: #2563eb;
+}
+
+.miniCalendarGrid .marked.done,
+.miniCalendarGrid .marked.present {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.miniCalendarGrid .marked.missed,
+.miniCalendarGrid .marked.absent {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.miniCalendarGrid .marked.late {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.miniCalendarGrid .marked.unexcused {
+  background: #fdf2f8;
+  color: #be185d;
+}
+
+.calendarLegend {
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 10px;
+}
+
+.calendarLegend span {
+  align-items: center;
+  color: #64748b;
+  display: inline-flex;
+  font-weight: 800;
+  gap: 5px;
+}
+
+.calendarLegend i {
+  border-radius: 999px;
+  display: inline-block;
+  height: 9px;
+  width: 9px;
+}
+
+.calendarLegend .done,
+.calendarLegend .present {
+  background: #10b981;
+}
+
+.calendarLegend .missed,
+.calendarLegend .absent {
+  background: #ef4444;
+}
+
+.calendarLegend .late {
+  background: #f59e0b;
+}
+
+.calendarLegend .unexcused {
+  background: #db2777;
 }
 
 .profileSummary {
@@ -8488,9 +8841,24 @@ textarea.profileEditInput {
   place-items: center;
 }
 
+body.attendanceOnlyBody,
+body.attendanceOnlyBody #root {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body.attendanceOnlyBody {
+  position: fixed;
+  width: 100%;
+}
+
 .attendanceKioskPage.standalone {
   background: #eef4ff;
-  min-height: 100vh;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
   padding: 24px;
   width: 100vw;
 }
@@ -8663,6 +9031,14 @@ textarea.profileEditInput {
     grid-template-columns: 1fr;
   }
 
+  .attendanceMetricGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .studentLessonHistoryGrid {
+    grid-template-columns: 1fr;
+  }
+
   .sidebar {
     position: static;
   }
@@ -8797,7 +9173,7 @@ textarea.profileEditInput {
   }
 
   .studentPortalTabletFirst .portalTabs {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(0, 1fr));
   }
 }
 
@@ -8835,6 +9211,25 @@ textarea.profileEditInput {
 
   .studentPortalTabletFirst .metricGrid {
     grid-template-columns: 1fr;
+  }
+
+  .attendanceMetricGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .studentQuestionForm,
+  .studentQuestionItem {
+    grid-template-columns: 1fr;
+  }
+
+  .studentQuestionForm,
+  .studentQuestionItem,
+  .studentTopNotice {
+    align-items: stretch;
+  }
+
+  .studentQuestionItem {
+    display: grid;
   }
 
   .studentPortalTabletFirst .portalTabs,

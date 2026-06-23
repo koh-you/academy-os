@@ -38,7 +38,9 @@ import {
   upsertStudents,
   upsertLessonStudentRecord
 } from "./routes/coreData.js";
+import crypto from "node:crypto";
 import { loadEnvFile } from "./lib/loadEnv.js";
+import { isSupabaseConfigured, listRows, upsertRows } from "./lib/supabaseRest.js";
 import { getAiStatus, polishLessonComment, runExamAnalysis } from "./routes/examAnalysis.js";
 import {
   getNotificationStatus,
@@ -60,6 +62,73 @@ const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS ?? "*")
 
 const dispatchableNotificationStatuses = new Set(["queued", "pending_send"]);
 const readinessCheckStatuses = new Set(["queued", "pending_send", "scheduled"]);
+const teacherAccountTable = "teacher_accounts";
+const defaultTeacherAccount = {
+  teacherId: "instructor_owner_001",
+  loginId: process.env.TEACHER_LOGIN_ID ?? "teacher",
+  name: "고태영T",
+  password: process.env.TEACHER_PASSWORD ?? "1234"
+};
+
+function hashPassword(password, salt = crypto.randomBytes(16).toString("hex")) {
+  const hash = crypto.pbkdf2Sync(String(password), salt, 120_000, 32, "sha256").toString("hex");
+  return `pbkdf2_sha256$120000$${salt}$${hash}`;
+}
+
+function verifyPassword(password, passwordHash) {
+  if (!passwordHash?.startsWith("pbkdf2_sha256$")) return false;
+  const [, iterationsText, salt, expectedHash] = passwordHash.split("$");
+  const iterations = Number(iterationsText);
+  if (!iterations || !salt || !expectedHash) return false;
+  const actualHash = crypto.pbkdf2Sync(String(password), salt, iterations, 32, "sha256").toString("hex");
+  return crypto.timingSafeEqual(Buffer.from(actualHash, "hex"), Buffer.from(expectedHash, "hex"));
+}
+
+function toTeacherAccount(row) {
+  return {
+    teacherId: row.teacher_id,
+    loginId: row.login_id,
+    name: row.name ?? defaultTeacherAccount.name
+  };
+}
+
+async function getTeacherAccountRow(loginId = "") {
+  if (!isSupabaseConfigured({ requireServiceRole: true })) return null;
+  const rows = await listRows(
+    teacherAccountTable,
+    `select=*&login_id=eq.${encodeURIComponent(loginId)}&is_active=eq.true&limit=1`,
+    { requireServiceRole: true }
+  );
+  return rows[0] ?? null;
+}
+
+async function saveTeacherAccount({ teacherId, loginId, name, password }) {
+  const row = {
+    teacher_id: teacherId || defaultTeacherAccount.teacherId,
+    login_id: loginId,
+    name: name || defaultTeacherAccount.name,
+    password_hash: hashPassword(password),
+    is_active: true,
+    updated_at: new Date().toISOString()
+  };
+  const [saved] = await upsertRows(teacherAccountTable, [row]);
+  return saved;
+}
+
+async function authenticateTeacher(loginId, password) {
+  const row = await getTeacherAccountRow(loginId);
+  if (row) {
+    return verifyPassword(password, row.password_hash) ? toTeacherAccount(row) : null;
+  }
+  if (loginId === defaultTeacherAccount.loginId && password === defaultTeacherAccount.password) {
+    return {
+      teacherId: defaultTeacherAccount.teacherId,
+      loginId: defaultTeacherAccount.loginId,
+      name: defaultTeacherAccount.name
+    };
+  }
+  return null;
+}
 
 function readJsonBody(request) {
   return new Promise((resolve, reject) => {
@@ -351,6 +420,61 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "GET" && requestUrl.pathname === "/api/core/status") {
     sendJson(request, response, 200, { ok: true, result: getCoreDataStatus() });
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/auth/login") {
+    try {
+      const payload = await readJsonBody(request);
+      if (payload.role !== "teacher") {
+        sendJson(request, response, 403, { ok: false, error: "지원하지 않는 로그인 역할입니다." });
+        return;
+      }
+      const account = await authenticateTeacher(String(payload.loginId ?? "").trim(), String(payload.password ?? ""));
+      sendJson(request, response, 200, {
+        ok: true,
+        authenticated: Boolean(account),
+        account: account ? { loginId: account.loginId, name: account.name, teacherId: account.teacherId } : null
+      });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/auth/teacher-account") {
+    try {
+      if (!isSupabaseConfigured({ requireServiceRole: true })) {
+        sendJson(request, response, 503, {
+          ok: false,
+          error: "Supabase service role 또는 teacher_accounts 테이블 설정이 필요합니다."
+        });
+        return;
+      }
+      const payload = await readJsonBody(request);
+      const currentLoginId = String(payload.currentLoginId ?? "").trim();
+      const currentPassword = String(payload.currentPassword ?? "");
+      const nextLoginId = String(payload.loginId ?? "").trim();
+      const nextPassword = String(payload.newPassword ?? "");
+      if (!nextLoginId) throw new Error("아이디를 입력해주세요.");
+      if (nextPassword && nextPassword.length < 4) throw new Error("새 비밀번호는 4자리 이상이어야 합니다.");
+
+      const account = await authenticateTeacher(currentLoginId, currentPassword);
+      if (!account) {
+        sendJson(request, response, 401, { ok: false, error: "현재 아이디 또는 비밀번호가 맞지 않습니다." });
+        return;
+      }
+
+      const saved = await saveTeacherAccount({
+        teacherId: account.teacherId,
+        loginId: nextLoginId,
+        name: payload.name ?? account.name,
+        password: nextPassword || currentPassword
+      });
+      sendJson(request, response, 200, { ok: true, account: toTeacherAccount(saved) });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
     return;
   }
 
