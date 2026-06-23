@@ -1671,6 +1671,7 @@ export function App() {
   const initialExamPrepRowsRef = useRef(examPrepRows);
   const initialSchoolEventsRef = useRef(schoolEvents);
   const isApplyingRemoteAppStateRef = useRef(false);
+  const attendanceOnlyMode = isAttendanceOnlyRoute();
 
   const sharedAppState = useMemo(() => ({
     academyTests,
@@ -2154,8 +2155,6 @@ export function App() {
     ? records.filter((record) => record.lessonId === reportLesson.lessonId)
     : [];
   const pendingDeleteLesson = lessons.find((lesson) => lesson.lessonId === lessonDeleteModalId) ?? null;
-  const attendanceOnlyMode = isAttendanceOnlyRoute();
-
   useEffect(() => {
     legacySensitiveStorageKeys.forEach((key) => window.localStorage.removeItem(key));
   }, []);

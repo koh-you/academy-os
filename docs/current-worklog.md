@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-06-24 웹앱 로그인 화면 차단 보정
+
+- 상태: 완료
+- 사용자 보고: 웹앱 로그인 화면 자체가 막혔다고 보고했다.
+- 원인: `/attendance` 출결 전용 화면 보정 과정에서 `attendanceOnlyMode` 값을 선언하기 전에 첫 데이터 로딩 `useEffect`의 조건과 의존성에서 먼저 참조하는 구조가 되었다. 이 경우 앱 첫 렌더링 중 `Cannot access 'attendanceOnlyMode' before initialization` 런타임 오류가 발생해 로그인 카드까지 렌더링되지 않을 수 있었다.
+- 조치: `attendanceOnlyMode` 선언을 앱 상태/훅 흐름의 첫 사용보다 앞으로 이동해 로그인 화면 렌더링 전에 값이 항상 준비되도록 했다.
+- 회귀 방지: 운영 시나리오 테스트에 `attendanceOnlyMode` 선언이 훅 사용보다 앞에 있는지 확인하는 항목을 추가했다.
+- 검증: `npm run test:production` 144개 통과, `npm run build` 통과.
+
 ## 2026-06-23 태블릿 출결 관리자 PIN 종료 보정
 
 - 상태: 완료
