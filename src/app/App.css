@@ -4381,6 +4381,11 @@ button:disabled {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.attendanceModalActions {
+  display: grid;
+  gap: 10px;
+}
+
 .lessonModalFields {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }

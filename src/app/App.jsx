@@ -2272,7 +2272,10 @@ export function App() {
       updatedAt: nowIso
     };
 
-    setRecords((currentRecords) => upsertById(currentRecords, nextRecord, "lessonStudentRecordId"));
+    const nextRecords = upsertById(recordsRef.current, nextRecord, "lessonStudentRecordId");
+    recordsRef.current = nextRecords;
+    setRecords(nextRecords);
+    handleSaveRecord(recordId, lesson, student, nextRecord);
     setNotificationLogs((current) => [
       {
         notificationLogId: `attendance_kiosk_${Date.now()}_${student.studentId}`,
@@ -2729,6 +2732,26 @@ export function App() {
       handleSaveRecord(recordId, null, null, record);
     }, 1000);
     autoSaveTimersRef.current.set(recordId, timerId);
+  }
+
+  function saveAttendanceRecord(lesson, student, values, updatedBy = "instructor_owner_001") {
+    const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+    const existingRecord = recordsRef.current.find((record) => record.lessonStudentRecordId === recordId);
+    const nextRecord = {
+      ...createEmptyRecord(lesson, student),
+      ...(existingRecord ?? {}),
+      ...values,
+      lessonStudentRecordId: recordId,
+      lessonId: lesson.lessonId,
+      studentId: student.studentId,
+      updatedBy,
+      updatedAt: new Date().toISOString()
+    };
+    const nextRecords = upsertById(recordsRef.current, nextRecord, "lessonStudentRecordId");
+    recordsRef.current = nextRecords;
+    setRecords(nextRecords);
+    handleSaveRecord(recordId, lesson, student, nextRecord);
+    return nextRecord;
   }
 
   function handleChangeRecord(lesson, student, field, value) {
@@ -3624,10 +3647,11 @@ export function App() {
         <AttendanceModal
           item={attendanceModal}
           onClose={() => setAttendanceModal(null)}
-          onSave={(lesson, student, values) => {
-            handleChangeRecord(lesson, student, "attendanceStatus", values.attendanceStatus);
-            handleChangeRecord(lesson, student, "attendanceReason", values.attendanceReason);
-            handleChangeRecord(lesson, student, "lateMinutes", values.lateMinutes);
+          onSave={(lesson, student, values, options = {}) => {
+            saveAttendanceRecord(lesson, student, values, "instructor_owner_001");
+            if (options.sendAlimtalk) {
+              handleSendAttendanceAlimtalk(lesson, student, values);
+            }
             setAttendanceModal(null);
           }}
         />
@@ -4525,19 +4549,21 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
     const basePayload = {
       academyName: academyBrandName,
       assignmentStatus: "complete_thorough",
-      attendanceStatus: "present",
-      checkedAt: "19:00",
+      attendanceStatus: testType === "attendance" ? "late" : "present",
+      checkedAt: testType === "attendance" ? "태블릿/수기 출결 테스트" : "19:00",
       forceDryRun: false,
       forceTestRecipient: true,
       lessonContent: "개별 진도 점검",
       lessonDate: todayKey,
       lessonMaterial: "공통수학1",
-      lessonName: "월수금 7-10반",
+      lessonName: testType === "attendance" ? "출결 테스트 더미 수업" : "월수금 7-10반",
+      lateMinutes: testType === "attendance" ? 5 : "",
       message: "오늘 수업에서 확인한 내용을 바탕으로 다음 과제를 안내드립니다.",
       nextHomework: "쎈 - 경우의 수",
       parentPhone: notificationStatus?.testRecipient,
       previousHomework: "rpm 순열과 조합",
-      studentName: "테스트학생",
+      reason: testType === "attendance" ? "태블릿/수기 출결 연결 점검" : "",
+      studentName: testType === "attendance" ? "출결테스트 더미학생" : "테스트학생",
       studentPhone: notificationStatus?.testRecipient,
       target: testType === "student" ? "student" : "parent"
     };
@@ -4669,10 +4695,10 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
         <div className="templateTestGrid">
           <article>
             <strong>출결 알림톡</strong>
-            <p>등원/출석 안내 템플릿을 점검합니다.</p>
+            <p>출결테스트 더미학생으로 선생님 테스트 수신번호에만 보냅니다.</p>
             <pre className="templatePreviewText">{buildNotificationTemplatePreview("attendance")}</pre>
             <button className="softButton" disabled={testingTemplate === "attendance"} onClick={() => handleTemplateTest("attendance")} type="button">
-              {testingTemplate === "attendance" ? "테스트 중" : "출결 테스트"}
+              {testingTemplate === "attendance" ? "테스트 중" : "출결 더미 테스트"}
             </button>
           </article>
           <article>
@@ -6569,6 +6595,7 @@ function AttendanceModal({ item, onClose, onSave }) {
   const [attendanceStatus, setAttendanceStatus] = useState(record.attendanceStatus ?? "present");
   const [lateMinutes, setLateMinutes] = useState(record.lateMinutes ?? "");
   const [attendanceReason, setAttendanceReason] = useState(record.attendanceReason ?? "");
+  const values = { attendanceStatus, lateMinutes, attendanceReason };
 
   return (
     <Modal title={`${student.name} 출결 체크`} subtitle="지각/결석이면 시간과 사유를 남깁니다." onClose={onClose}>
@@ -6593,9 +6620,14 @@ function AttendanceModal({ item, onClose, onSave }) {
           <input value={attendanceReason} onChange={(event) => setAttendanceReason(event.target.value)} placeholder="예: 학교 동아리" />
         </label>
       </div>
-      <button className="primaryButton full" onClick={() => onSave(lesson, student, { attendanceStatus, lateMinutes, attendanceReason })} type="button">
-        출결 저장
-      </button>
+      <div className="attendanceModalActions">
+        <button className="primaryButton full" onClick={() => onSave(lesson, student, values)} type="button">
+          출결 저장
+        </button>
+        <button className="softButton full" onClick={() => onSave(lesson, student, values, { sendAlimtalk: true })} type="button">
+          저장 후 출결 알림톡 발송
+        </button>
+      </div>
     </Modal>
   );
 }
