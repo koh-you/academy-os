@@ -56,6 +56,7 @@ check("19 Supabase lesson record columns exist", hasAll(schema, ["lesson_materia
 check("20 notification management screen exists", hasAll(app, ["NotificationCenter", "templatePreviewText", "handleDispatchDue", "handleReadinessCheck"]));
 check("21 supplement schedule creates calendar lesson", hasAll(app, ["handleScheduleSupplementTask", "createSupplementLessonId", "linkedLessonId", "supplementProgressBadge"]));
 check("22 student portal is tablet first", hasAll(app, ["studentPortalTabletFirst", "teacherPreviewPortal"]) && css.includes(".studentPortalTabletFirst .metricGrid"));
+check("22b student lesson briefing maps journal content and homework", hasAll(app, ["function StudentLessonHistoryCalendar({ homeworks = [], lessons = [], recordsWithLessons = [], selectedStudent })", "const lessonContent = selectedRecord ? getLessonContent(selectedRecord) : \"\"", "getLessonHomework(homeworks, selectedLesson, selectedStudent, \"previous\", lessons)", "getLessonHomework(homeworks, selectedLesson, selectedStudent, \"next\", lessons)", "previousHomeworkText || \"기록 전\"", "nextHomeworkText || \"기록 전\""]));
 check("23 parent portal is mobile first", hasAll(app, ["parentPortalMobileFirst", "parentPortal"]) && css.includes(".parentPortalMobileFirst .metricGrid"));
 check("24 responsive layout principles doc exists", fs.existsSync(path.join(root, "docs", "responsive-layout-principles.md")));
 check("25 ai tools menu replaces ai variant label", hasAll(app, ['id: "aiVariants"', "AIVariantProblemCenter"]));

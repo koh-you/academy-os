@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-06-23 학생 수업 브리핑 수업일지 매핑 보정
+
+- 상태: 완료
+- 사용자 요청: 박수빈 학생의 2026-06-22 수업 브리핑에서 수업일지에 적은 정보들이 제대로 매핑되지 않는 것 같다고 했다.
+- 원인: 학생 `오늘` 탭의 수업 기록 캘린더가 `lesson_student_records`의 직접 필드만 읽고 있었다. 실제 수업일지 화면은 강의 내용을 `lessonProgress/progress`로 다루고, 지난 숙제/다음 숙제는 별도 `homeworks` 데이터에서 `getLessonHomework()`로 계산해 표시한다. 그래서 학생 브리핑에서 강의 내용, 지난 숙제, 다음 숙제가 `기록 전`으로 보일 수 있었다.
+- 조치: 학생 수업 기록 캘린더에도 수업일지와 동일한 매핑을 적용했다. 강의 내용은 `getLessonContent()`를 사용하고, 이 함수가 `lessonContent` 필드도 fallback으로 읽도록 보완했다. 지난 숙제/다음 숙제는 `getLessonHomework(homeworks, lesson, selectedStudent, ...)`로 계산해 표시한다.
+- 회귀 방지: `scripts/scenario-tests-production.cjs`에 학생 수업 브리핑이 수업일지 강의 내용과 숙제 데이터를 매핑하는지 확인하는 체크를 추가했다.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과, `npm run build` 통과, `npm run test:production` 109개 통과.
+- SQL Editor 작업 필요 없음: 기존 `lesson_student_records`와 `homeworks` 데이터를 읽는 프론트 매핑 보정이다.
+
 ## 2026-06-23 교사 계정 변경 후 로그인 실패 복구
 
 - 상태: 완료

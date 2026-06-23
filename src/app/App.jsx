@@ -143,7 +143,7 @@ function getLessonMaterial(record, student) {
 }
 
 function getLessonContent(record) {
-  return record?.lessonProgress?.trim() || record?.progress?.trim() || "";
+  return record?.lessonProgress?.trim() || record?.progress?.trim() || record?.lessonContent?.trim() || "";
 }
 
 function normalizeMessageText(value) {
@@ -10669,6 +10669,8 @@ function StudentPortalV2({
 
         {activeTab === "today" ? (
           <StudentTodayTab
+            homeworks={homeworks}
+            lessons={lessons}
             overdueHomeworks={overdueHomeworks}
             prepNotices={studentPrepNotices}
             questions={selectedStudentQuestions}
@@ -10751,6 +10753,8 @@ function StudentPortalV2({
 }
 
 function StudentTodayTab({
+  homeworks = [],
+  lessons = [],
   overdueHomeworks,
   prepNotices = [],
   questions = [],
@@ -10795,7 +10799,12 @@ function StudentTodayTab({
         </div>
       ) : null}
 
-      <StudentLessonHistoryCalendar recordsWithLessons={recordsWithLessons} />
+      <StudentLessonHistoryCalendar
+        homeworks={homeworks}
+        lessons={lessons}
+        recordsWithLessons={recordsWithLessons}
+        selectedStudent={selectedStudent}
+      />
 
       <section className="studentQuestionPanel">
         <div className="sectionHeader compact">
@@ -10869,7 +10878,7 @@ function StudentTodayTab({
   );
 }
 
-function StudentLessonHistoryCalendar({ recordsWithLessons = [] }) {
+function StudentLessonHistoryCalendar({ homeworks = [], lessons = [], recordsWithLessons = [], selectedStudent }) {
   const recordsByDate = recordsWithLessons.reduce((map, record) => {
     const date = record.lesson?.date;
     if (!date) return map;
@@ -10880,6 +10889,19 @@ function StudentLessonHistoryCalendar({ recordsWithLessons = [] }) {
   const [selectedDate, setSelectedDate] = useState(initialDate);
   const selectedRecords = recordsByDate.get(selectedDate) ?? [];
   const selectedRecord = selectedRecords[0] ?? null;
+  const selectedLesson = selectedRecord?.lesson ?? null;
+  const lessonMaterial = selectedRecord ? getLessonMaterial(selectedRecord, selectedStudent) : "";
+  const lessonContent = selectedRecord ? getLessonContent(selectedRecord) : "";
+  const previousHomework =
+    selectedRecord && selectedLesson && selectedStudent
+      ? getLessonHomework(homeworks, selectedLesson, selectedStudent, "previous", lessons)
+      : null;
+  const nextHomework =
+    selectedRecord && selectedLesson && selectedStudent
+      ? getLessonHomework(homeworks, selectedLesson, selectedStudent, "next", lessons)
+      : null;
+  const previousHomeworkText = previousHomework?.title || selectedRecord?.previousHomework || "";
+  const nextHomeworkText = nextHomework?.title || selectedRecord?.nextHomework || "";
   const calendarDays = buildMonthDays(today);
 
   useEffect(() => {
@@ -10925,10 +10947,10 @@ function StudentLessonHistoryCalendar({ recordsWithLessons = [] }) {
               </div>
               <dl>
                 <div><dt>출결</dt><dd>{attendanceLabels[selectedRecord.attendanceStatus] ?? "대기"}</dd></div>
-                <div><dt>강의 교재</dt><dd>{selectedRecord.lessonMaterial || "기록 전"}</dd></div>
-                <div><dt>강의 내용</dt><dd>{selectedRecord.lessonContent || "기록 전"}</dd></div>
-                <div><dt>지난 숙제</dt><dd>{selectedRecord.previousHomework || "기록 전"}</dd></div>
-                <div><dt>다음 숙제</dt><dd>{selectedRecord.nextHomework || "기록 전"}</dd></div>
+                <div><dt>강의 교재</dt><dd>{lessonMaterial || "기록 전"}</dd></div>
+                <div><dt>강의 내용</dt><dd>{lessonContent || "기록 전"}</dd></div>
+                <div><dt>지난 숙제</dt><dd>{previousHomeworkText || "기록 전"}</dd></div>
+                <div><dt>다음 숙제</dt><dd>{nextHomeworkText || "기록 전"}</dd></div>
                 <div><dt>과제 상태</dt><dd>{assignmentStatusLabels[normalizeAssignmentStatusValue(selectedRecord.assignmentStatus)] ?? selectedRecord.incompleteHomework ?? "선택 전"}</dd></div>
                 {selectedRecord.studentComment?.trim() ? (
                   <div><dt>선생님 코멘트</dt><dd>{selectedRecord.studentComment}</dd></div>
