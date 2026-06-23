@@ -441,7 +441,7 @@ function getAlimtalkSafetyText(notificationStatus, forceDryRun = false, forceTes
   if (!notificationStatus) return "서버 발송 설정을 확인 중입니다. 실제 발송 전 Render 환경변수를 확인하세요.";
   if (notificationStatus.dryRun) return `테스트 보호 ON: 실제 발송 없이 ${testRecipient}로만 기록됩니다.`;
   if (!notificationStatus.allowRealRecipients) return `실제 번호 잠금: 등록 번호 대신 ${testRecipient}로 전환됩니다.`;
-  return "실발송 가능: 등록된 실제 번호로 발송될 수 있습니다.";
+  return "실발송 모드: 등록된 실제 번호로 발송됩니다.";
 }
 
 function getAlimtalkAudienceStatus(notificationStatus, audience = "parent") {
@@ -4409,7 +4409,7 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
         </article>
         <article className={`notificationSafetyCard ${safetyTone}`}>
           <span>발송 보호</span>
-          <strong>{notificationStatus?.dryRun ? "테스트 보호" : notificationStatus?.allowRealRecipients ? "실발송 가능" : "번호 잠금"}</strong>
+          <strong>{notificationStatus?.dryRun ? "테스트 보호" : notificationStatus?.allowRealRecipients ? "실발송 모드" : "번호 잠금"}</strong>
           <small>{safetyText}</small>
         </article>
       </div>
@@ -6331,7 +6331,7 @@ function CommentComposerModal({
             <span>수신 대상: {receiverLabel} · 등록 번호: {recipientPhone || "번호 없음"}</span>
             {missingNotificationEnv.length ? <span>미입력 환경변수: {missingNotificationEnv.join(", ")}</span> : null}
           </div>
-          <small className="muted">즉시 발송 수신 기준: {canSendNowToRealRecipient ? "등록된 실제 번호" : "테스트 번호 또는 dry-run"}</small>
+          <small className="muted">즉시 발송 수신: {canSendNowToRealRecipient ? "등록된 실제 번호" : "테스트 번호 또는 dry-run"}</small>
           <small className="muted">{aiStatus || "AI 대기"} · {sendStatus || "발송 전"}</small>
         </section>
 

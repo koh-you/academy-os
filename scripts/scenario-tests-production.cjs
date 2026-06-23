@@ -94,6 +94,7 @@ check("38 school calendar derives exam period ranges", hasAll(app, ["parseDateRa
 check("39 school calendar avoids legacy exam duplicates", hasAll(app, ["manualEvents", 'startsWith("event_exam_")']));
 check("40 live Solapi test send is gated to test recipient", hasAll(app, ["forceTestRecipient", "liveTestSendEnabled"]) && notificationRoute.includes("ALIMTALK_ALLOW_LIVE_TEST_SEND"));
 check("40b student real-recipient Alimtalk can be enabled without parent real-recipient send", hasAll(notificationRoute, ["ALIMTALK_ALLOW_REAL_STUDENT_NUMBERS", "recipientType: \"student\"", "recipientType: \"parent\"", "allowRealStudentRecipients", "allowRealParentRecipients"]) && hasAll(envExample, ["ALIMTALK_ALLOW_REAL_STUDENT_NUMBERS=false", "ALIMTALK_ALLOW_REAL_PARENT_NUMBERS=false"]));
+check("40c real Alimtalk mode copy is explicit", hasAll(app, ["실발송 모드: 등록된 실제 번호로 발송됩니다.", "즉시 발송 수신:"]) && !app.includes("발송될 수 있습니다"));
 check("41 comment alimtalk preview uses template format", hasAll(app, ["commentTemplatePreview", "#{리포트본문}:", "#{코멘트}:"]) && css.includes(".commentTemplatePreview"));
 
 check("42 exam date range uses date inputs", hasAll(app, ["examDateRangeInputs", "updateDateRangeField", "getDateRangeField"]));
