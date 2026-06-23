@@ -1944,6 +1944,14 @@ export function App() {
   async function handleLogin(role, loginId, password) {
     if (role === "teacher") {
       const account = { ...defaultTeacherAccountSettings, ...teacherAccountSettings };
+      const loginWithLocalTeacherAccount = () => {
+        if (loginId === account.loginId && password === account.password) {
+          setSession({ role: "teacher", actorId: "instructor_owner_001", name: account.name || teacherAccount.name });
+          setActiveView("lessons");
+          return true;
+        }
+        return false;
+      };
       try {
         const result = await postJson("/api/auth/login", { role, loginId, password });
         if (result.authenticated) {
@@ -1951,11 +1959,12 @@ export function App() {
           setActiveView("lessons");
           return { ok: true };
         }
+        if (loginWithLocalTeacherAccount()) {
+          return { ok: true };
+        }
       } catch (error) {
         console.warn("Server teacher auth failed; falling back to local settings.", error);
-        if (loginId === account.loginId && password === account.password) {
-          setSession({ role: "teacher", actorId: "instructor_owner_001", name: account.name || teacherAccount.name });
-          setActiveView("lessons");
+        if (loginWithLocalTeacherAccount()) {
           return { ok: true };
         }
       }
@@ -7796,7 +7805,7 @@ function SettingsCenter({
         ...defaultTeacherAccountSettings,
         ...current,
         loginId: result.account?.loginId ?? nextLoginId,
-        password: current?.password ?? ""
+        password: nextPassword || currentPassword || current?.password || defaultTeacherAccountSettings.password
       }));
       setAccountForm({
         confirmPassword: "",

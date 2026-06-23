@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-06-23 교사 계정 변경 후 로그인 실패 복구
+
+- 상태: 완료
+- 사용자 요청: SQL Editor 실행 후 설정에서 아이디/비밀번호를 바꿨는데 로그인이 되지 않는다.
+- 원인: 서버 계정 저장 성공 후 프론트의 로컬 fallback 계정 비밀번호가 새 비밀번호로 갱신되지 않고 이전 값 또는 빈 값으로 남을 수 있었다. 또한 서버 `/api/auth/login`이 정상 응답이지만 `authenticated:false`를 반환하는 경우에는 로컬 fallback 검증을 시도하지 않아, SQL/서버 인증 전환 과정에서 계정이 잠기는 상황이 생길 수 있었다.
+- 조치: 선생님 로그인에서 서버 인증이 실패 응답을 돌려도 기존 앱 설정 계정과 일치하면 임시 로컬 fallback으로 로그인되게 했다. 서버 계정 저장 성공 후에도 로컬 fallback 계정을 새 아이디와 새 비밀번호 기준으로 동기화하도록 수정했다.
+- 회귀 방지: `scripts/scenario-tests-production.cjs`에 서버 인증 전환 중 로컬 fallback 로그인과 계정 저장 후 비밀번호 동기화 체크를 추가했다.
+- 검증: `node --check api/server.js` 통과, `node --check scripts/scenario-tests-production.cjs` 통과, `npm run build` 통과, `npm run test:production` 108개 통과.
+- SQL Editor 추가 작업 필요 없음: 기존 `teacher_accounts` 테이블을 그대로 사용한다.
+
 ## 2026-06-23 SQL Editor 실행 후 서버 인증 종합검토
 
 - 상태: 완료
