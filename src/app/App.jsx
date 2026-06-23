@@ -2790,16 +2790,13 @@ export function App() {
   function handleUpdateLessonNotificationPlan(lessonId, mode) {
     if (!lessonId) return;
     const nextMode = mode || "default";
-    const currentMode = lessonNotificationPlans[lessonId]?.mode || "default";
-    if (currentMode === nextMode) return;
+    const currentPlan = lessonNotificationPlans[lessonId];
+    const currentMode = currentPlan?.mode || "default";
+    if (currentPlan && currentMode === nextMode) return;
 
     setLessonNotificationPlans((current) => {
       const next = { ...current };
-      if (nextMode === "default") {
-        delete next[lessonId];
-      } else {
-        next[lessonId] = { mode: nextMode, updatedAt: new Date().toISOString() };
-      }
+      next[lessonId] = { mode: nextMode, updatedAt: new Date().toISOString() };
       return next;
     });
     applyLessonNotificationPlan(lessonId, nextMode);
@@ -5942,6 +5939,7 @@ function LessonJournalDetail({
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
   const linkedMakeupTask = makeupTasks.find((task) => task.makeupTaskId === lesson.sourceMakeupTaskId);
   const notificationPlanMode = lessonNotificationPlan?.mode || "default";
+  const hasAppliedNotificationPlan = Boolean(lessonNotificationPlan?.updatedAt);
   const defaultAlimtalkTimeLabel = formatKoreaTimeLabel(getLessonAlimtalkScheduledDate(lesson, 0));
   const isHomeworkMakeupLesson =
     lesson.lessonType === "makeup" &&
@@ -6101,7 +6099,7 @@ function LessonJournalDetail({
         <button
           className={notificationPlanMode === "default" ? "schedulePlanButton active" : "schedulePlanButton"}
           onClick={() => onUpdateLessonNotificationPlan?.(lesson.lessonId, "default")}
-          disabled={notificationPlanMode === "default"}
+          disabled={hasAppliedNotificationPlan && notificationPlanMode === "default"}
           type="button"
         >
           기본 예약
@@ -6109,7 +6107,7 @@ function LessonJournalDetail({
         <button
           className={notificationPlanMode === "delay30" ? "schedulePlanButton active" : "schedulePlanButton"}
           onClick={() => onUpdateLessonNotificationPlan?.(lesson.lessonId, "delay30")}
-          disabled={notificationPlanMode === "delay30"}
+          disabled={hasAppliedNotificationPlan && notificationPlanMode === "delay30"}
           type="button"
         >
           30분 지연
@@ -6117,7 +6115,7 @@ function LessonJournalDetail({
         <button
           className={notificationPlanMode === "none" ? "schedulePlanButton noSend active" : "schedulePlanButton noSend"}
           onClick={() => onUpdateLessonNotificationPlan?.(lesson.lessonId, "none")}
-          disabled={notificationPlanMode === "none"}
+          disabled={hasAppliedNotificationPlan && notificationPlanMode === "none"}
           type="button"
         >
           알림톡 없음
