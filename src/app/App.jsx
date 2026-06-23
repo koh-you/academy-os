@@ -4496,6 +4496,7 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
   const [dispatchMessage, setDispatchMessage] = useState("");
   const [isDispatching, setIsDispatching] = useState(false);
   const [isCheckingReadiness, setIsCheckingReadiness] = useState(false);
+  const [jobFilter, setJobFilter] = useState("all");
   const [testSendResult, setTestSendResult] = useState("");
   const [testSendDetail, setTestSendDetail] = useState(null);
   const [testingTemplate, setTestingTemplate] = useState("");
@@ -4507,10 +4508,35 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
   const draftJobs = notificationJobs.filter((job) => job.status === "draft" || job.status === "dry_run");
   const failedJobs = notificationJobs.filter((job) => job.status === "failed");
   const recentJobs = notificationJobs.slice(0, 30);
+  const filteredJobs = {
+    all: recentJobs,
+    scheduled: scheduledJobs,
+    queued: queuedJobs,
+    draft: draftJobs,
+    failed: failedJobs
+  }[jobFilter] ?? recentJobs;
+  const filterLabels = {
+    all: "최근 기록",
+    scheduled: "예약 대기",
+    queued: "내부 대기",
+    draft: "테스트/초안",
+    failed: "실패"
+  };
   const recentLogs = notificationLogs.slice(0, 8);
 
   function studentName(studentId, payload) {
     return payload?.studentName || students.find((student) => student.studentId === studentId)?.name || "학생";
+  }
+
+  function selectJobFilter(nextFilter) {
+    setJobFilter(nextFilter);
+    window.setTimeout(() => {
+      document.querySelector(".notificationQueuePanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 0);
+  }
+
+  function showSafetySettings() {
+    document.querySelector(".integrationStatusPanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   async function handleDispatchDue() {
@@ -4626,31 +4652,47 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
       {dispatchMessage ? <p className="inlineNotice">{dispatchMessage}</p> : null}
 
       <div className="notificationStatsGrid">
-        <article>
+        <button
+          className={jobFilter === "scheduled" ? "active" : ""}
+          onClick={() => selectJobFilter("scheduled")}
+          type="button"
+        >
           <span>예약 대기</span>
           <strong>{scheduledJobs.length}건</strong>
           <small>솔라피 예약 등록 건</small>
-        </article>
-        <article>
+        </button>
+        <button
+          className={jobFilter === "queued" ? "active" : ""}
+          onClick={() => selectJobFilter("queued")}
+          type="button"
+        >
           <span>내부 대기</span>
           <strong>{queuedJobs.length}건</strong>
           <small>점검 버튼이나 자동화로 처리</small>
-        </article>
-        <article>
+        </button>
+        <button
+          className={jobFilter === "draft" ? "active" : ""}
+          onClick={() => selectJobFilter("draft")}
+          type="button"
+        >
           <span>테스트/초안</span>
           <strong>{draftJobs.length}건</strong>
           <small>실제 발송 전 점검</small>
-        </article>
-        <article>
+        </button>
+        <button
+          className={jobFilter === "failed" ? "active" : ""}
+          onClick={() => selectJobFilter("failed")}
+          type="button"
+        >
           <span>실패</span>
           <strong>{failedJobs.length}건</strong>
           <small>재확인 필요</small>
-        </article>
-        <article className={`notificationSafetyCard ${safetyTone}`}>
+        </button>
+        <button className={`notificationSafetyCard ${safetyTone}`} onClick={showSafetySettings} type="button">
           <span>발송 보호</span>
           <strong>{notificationStatus?.dryRun ? "테스트 보호" : notificationStatus?.allowRealRecipients ? "실발송 모드" : "번호 잠금"}</strong>
           <small>{safetyText}</small>
-        </article>
+        </button>
       </div>
 
       <section className="notificationPanel integrationStatusPanel">
@@ -4751,13 +4793,18 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
         ) : null}
       </section>
 
-      <section className="notificationPanel">
+      <section className="notificationPanel notificationQueuePanel">
         <div className="sectionHeader slim">
           <div>
             <p className="eyebrow">QUEUE</p>
-            <h2>알림톡 예약/기록</h2>
+            <h2>알림톡 예약/기록 · {filterLabels[jobFilter]}</h2>
           </div>
-          <span className="countBadge">{notificationJobs.length}건</span>
+          <div className="notificationQueueActions">
+            {jobFilter !== "all" ? (
+              <button className="softButton compact" onClick={() => setJobFilter("all")} type="button">전체 보기</button>
+            ) : null}
+            <span className="countBadge">{filteredJobs.length}건</span>
+          </div>
         </div>
         <div className="notificationTable">
           <div className="notificationTableHead">
@@ -4768,10 +4815,10 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
             <span>수신번호</span>
             <span>미리보기</span>
           </div>
-          {recentJobs.length === 0 ? (
-            <p className="emptyState">아직 저장된 알림톡 예약/기록이 없습니다.</p>
+          {filteredJobs.length === 0 ? (
+            <p className="emptyState">{jobFilter === "all" ? "아직 저장된 알림톡 예약/기록이 없습니다." : `${filterLabels[jobFilter]} 알림톡이 없습니다.`}</p>
           ) : (
-            recentJobs.map((job) => (
+            filteredJobs.map((job) => (
               <article className="notificationTableRow" key={job.notificationJobId}>
                 <span className={`statusPill status-${job.status || "draft"}`}>{getNotificationStatusLabel(job.status)}</span>
                 <strong>{getNotificationJobLabel(job.notificationType)}</strong>
