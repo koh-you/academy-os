@@ -47,6 +47,7 @@ check("03g student portal state writes are scoped by session token", hasAll(serv
 check("03h login submit clears loading state on failure", hasAll(app, ["setIsSubmitting(true)", "try {", "finally {", "setIsSubmitting(false)"]));
 check("04 attendance-only route exists", hasAll(app, ["isAttendanceOnlyRoute", 'window.location.pathname === "/attendance"', "AttendanceKiosk"]));
 check("04b attendance-only route loads server data before accepting pins", hasAll(app, ["if (!session && !attendanceOnlyMode)", "if (attendanceOnlyMode) setIsAppStateReady(false)", "isLoading={!isAppStateReady}", "disabled={isLoading}", "출결 데이터를 불러오는 중입니다.", "attendanceNumberPad disabled"]));
+check("04c attendance admin pin exits standalone route immediately", hasAll(app, ["window.history.replaceState(null, \"\", \"/\")", "setAttendanceOnlyUnlocked(true)", "onAdminExit?.();"]) && !app.includes("window.setTimeout(() => onAdminExit?.(), 250)"));
 check("05 tablet attendance URL setting exists", hasAll(app, ["attendanceUrl", "lateGraceMinutes"]));
 check("06 attendance late grace logic exists", hasAll(app, ["lateGraceMinutes", "calculateLateMinutes"]));
 check("07 attendance alimtalk API is connected", hasAll(app, ["/api/notifications/attendance-alimtalk", "handleSendAttendanceAlimtalk"]));

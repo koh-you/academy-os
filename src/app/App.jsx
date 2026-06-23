@@ -2324,7 +2324,10 @@ export function App() {
         isLoading={!isAppStateReady}
         records={records}
         students={students}
-        onAdminExit={() => setAttendanceOnlyUnlocked(true)}
+        onAdminExit={() => {
+          window.history.replaceState(null, "", "/");
+          setAttendanceOnlyUnlocked(true);
+        }}
         onAttendanceCheck={handleAttendancePinCheck}
       />
     );
@@ -6670,13 +6673,7 @@ function AttendanceKiosk({
     if (isLoading) return;
     if (pin === String(adminPin ?? "").replaceAll(/\D/g, "").slice(0, 4)) {
       setPin("");
-      setResult({
-        ok: true,
-        isAdminExit: true,
-        message: "관리자 모드로 이동합니다.",
-        mode: "adminExit"
-      });
-      window.setTimeout(() => onAdminExit?.(), 250);
+      onAdminExit?.();
       return;
     }
     const nextResult = onAttendanceCheck(pin);
