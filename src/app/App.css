@@ -6690,16 +6690,22 @@ textarea.profileEditInput {
 
 .studentExamPostForm {
   display: grid;
-  gap: 12px;
+  gap: 14px;
 }
 
-.studentExamPostForm label {
+.studentExamPostForm > label,
+.studentExamPostForm .fieldGrid label {
+  background: #ffffff;
+  border: 1px solid #dbe7fb;
+  border-left: 4px solid #172554;
+  border-radius: 8px;
   color: #0f172a;
   display: grid;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 900;
-  gap: 6px;
-  line-height: 1.35;
+  gap: 10px;
+  line-height: 1.45;
+  padding: 14px;
 }
 
 .examPostAutoInfo {
@@ -6707,9 +6713,9 @@ textarea.profileEditInput {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   display: grid;
-  gap: 8px;
+  gap: 10px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  padding: 12px;
+  padding: 14px;
 }
 
 .examPostAutoInfo span {
@@ -6722,21 +6728,24 @@ textarea.profileEditInput {
 .examPostAutoInfo b {
   color: #0f172a;
   font-size: 14px;
+  line-height: 1.35;
 }
 
 .examPostChoiceGroup {
-  border: 1px solid #d8e3f8;
+  background: #ffffff;
+  border: 1px solid #dbe7fb;
+  border-left: 4px solid #172554;
   border-radius: 8px;
   display: grid;
-  gap: 10px;
-  padding: 12px;
+  gap: 12px;
+  padding: 14px;
 }
 
 .examPostChoiceGroup > strong {
   color: #0f172a;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 900;
-  line-height: 1.35;
+  line-height: 1.45;
 }
 
 .examPostChoiceGroup > div {
@@ -6749,15 +6758,15 @@ textarea.profileEditInput {
   align-items: center;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 999px;
+  border-radius: 8px;
   color: #334155;
   display: inline-flex;
   flex-direction: row;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
   gap: 6px;
   line-height: 1.2;
-  padding: 6px 8px;
+  padding: 8px 10px;
 }
 
 .examPostChoiceGroup input[type="checkbox"] {
@@ -6774,7 +6783,23 @@ textarea.profileEditInput {
 .studentExamPostForm textarea {
   border: 1px solid #d8e3f8;
   border-radius: 8px;
+  color: #0f172a;
+  font-size: 15px;
+  line-height: 1.45;
   padding: 10px 12px;
+}
+
+.studentExamPostForm textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.studentExamPostForm input:focus,
+.studentExamPostForm select:focus,
+.studentExamPostForm textarea:focus {
+  border-color: #172554;
+  box-shadow: 0 0 0 3px rgba(23, 37, 84, 0.1);
+  outline: none;
 }
 
 .examPostUploadBox {
@@ -9413,6 +9438,16 @@ body.attendanceOnlyBody {
   .studentPortalTabletFirst .portalTabs {
     grid-template-columns: repeat(7, minmax(0, 1fr));
   }
+
+  .studentPortalTabletFirst .studentExamPostPanel,
+  .studentPortalTabletFirst .studentExamPostForm {
+    gap: 16px;
+  }
+
+  .studentPortalTabletFirst .studentExamPostForm .fieldGrid.two,
+  .studentPortalTabletFirst .examPostAutoInfo {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 767px) {
@@ -9478,6 +9513,37 @@ body.attendanceOnlyBody {
   .studentPortalTabletFirst .portalTabs button,
   .parentPortalMobileFirst .portalTabs button {
     min-height: 46px;
+  }
+
+  .studentPortalTabletFirst .studentPortalPanel,
+  .parentPortalMobileFirst .studentPortalPanel,
+  .studentPortalTabletFirst .summaryCard,
+  .parentPortalMobileFirst .summaryCard {
+    padding: 16px;
+  }
+
+  .studentPortalTabletFirst .studentExamPostForm {
+    gap: 16px;
+  }
+
+  .studentPortalTabletFirst .studentExamPostForm .fieldGrid.two,
+  .studentPortalTabletFirst .examPostAutoInfo {
+    grid-template-columns: 1fr;
+  }
+
+  .studentPortalTabletFirst .studentExamPostForm > label,
+  .studentPortalTabletFirst .studentExamPostForm .fieldGrid label,
+  .studentPortalTabletFirst .examPostChoiceGroup {
+    padding: 16px;
+  }
+
+  .studentPortalTabletFirst .examPostChoiceGroup > div {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .studentPortalTabletFirst .examPostChoiceGroup label {
+    min-height: 44px;
   }
 
   .metricCard {
