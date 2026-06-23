@@ -6286,8 +6286,9 @@ function CommentComposerModal({
   supplementSchedules = []
 }) {
   const [isSourceOpen, setIsSourceOpen] = useState(false);
-  const sendTiming = "now";
   const planMode = ["default", "delay30", "none"].includes(initialSendTiming) ? initialSendTiming : "default";
+  const sendTiming = planMode === "none" ? "none" : "scheduled";
+  const sendDelayMinutes = planMode === "delay30" ? 30 : 0;
   const isParent = audience === "parent";
   const field = isParent ? "teacherComment" : "studentComment";
   const comment = record?.[field] ?? "";
@@ -6304,7 +6305,12 @@ function CommentComposerModal({
     !audienceNotificationStatus?.dryRun &&
     audienceNotificationStatus?.allowRealRecipients;
   const forceTestRecipient = !canSendNowToRealRecipient;
-  const actionLabel = "즉시 발송";
+  const actionLabel =
+    planMode === "none"
+      ? "발송 안 함"
+      : planMode === "delay30"
+        ? "30분 지연 예약"
+        : "예약 발송";
   const safetyTone = getAlimtalkSafetyTone(audienceNotificationStatus, forceDryRun, forceTestRecipient);
   const safetyText = getAlimtalkSafetyText(audienceNotificationStatus, forceDryRun, forceTestRecipient);
   const missingNotificationEnv = notificationStatus?.missing ?? [];
@@ -6373,9 +6379,10 @@ function CommentComposerModal({
             </button>
             <button
               className="sendButton"
+              disabled={planMode === "none"}
               onClick={() =>
                 onSendComment(lesson, student, record, audience, {
-                  delayMinutes: 0,
+                  delayMinutes: sendDelayMinutes,
                   forceDryRun,
                   forceTestRecipient,
                   sendTiming
@@ -6389,14 +6396,14 @@ function CommentComposerModal({
           <div className="currentSchedulePlan" aria-label="현재 수업 발송 계획">
             <span>현재 수업 발송 계획</span>
             <strong>{currentPlanLabel}</strong>
-            <small>이 모달에서는 문구 확인과 수동 즉시발송만 합니다.</small>
+            <small>발송 버튼은 현재 수업 발송 계획대로 예약합니다.</small>
           </div>
           <div className={`alimtalkSafetyBox ${safetyTone}`}>
             <strong>{safetyText}</strong>
             <span>수신 대상: {receiverLabel} · 등록 번호: {recipientPhone || "번호 없음"}</span>
             {missingNotificationEnv.length ? <span>미입력 환경변수: {missingNotificationEnv.join(", ")}</span> : null}
           </div>
-          <small className="muted">즉시 발송 수신: {canSendNowToRealRecipient ? "등록된 실제 번호" : "테스트 번호 또는 dry-run"}</small>
+          <small className="muted">발송 수신 기준: {canSendNowToRealRecipient ? "등록된 실제 번호" : "테스트 번호 또는 dry-run"}</small>
           <small className="muted">{aiStatus || "AI 대기"} · {sendStatus || "발송 전"}</small>
         </section>
 
@@ -14580,6 +14587,10 @@ function getLessonAlimtalkScheduledDate(lesson, delayMinutes = 0) {
   const baseTime = getDayKey(lesson?.date) === "sat" ? "18:30" : "22:30";
   const baseDate = new Date(`${lesson?.date ?? getKoreaDateString()}T${baseTime}:00+09:00`);
   baseDate.setMinutes(baseDate.getMinutes() + delayMinutes);
+  const now = new Date();
+  if (baseDate.getTime() <= now.getTime()) {
+    baseDate.setTime(now.getTime() + Math.max(1, delayMinutes) * 60 * 1000);
+  }
   return baseDate.toISOString();
 }
 

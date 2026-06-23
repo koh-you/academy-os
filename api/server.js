@@ -1271,6 +1271,9 @@ const server = http.createServer(async (request, response) => {
   if (request.method === "POST" && requestUrl.pathname === "/api/notifications/comment-alimtalk") {
     try {
       const payload = await readJsonBody(request);
+      if (payload.sendMode === "scheduled" && !payload.scheduledDate) {
+        throw new Error("scheduledDate is required for scheduled comment Alimtalk sends.");
+      }
       const result = await sendLessonCommentAlimtalk(payload);
       sendJson(request, response, 200, { ok: true, provider: "solapi", result });
     } catch (error) {

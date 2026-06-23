@@ -1,5 +1,17 @@
 # Academy OS Current Worklog
 
+## 2026-06-23 알림톡 30분 지연 예약 발송 누락 보정
+
+- 상태: 완료
+- 사용자 요청: 수업일지에서 `30분 지연` 버튼을 누르고 알림톡 문구를 수정했는데, 실제 발송 내역이 즉시 발송처럼 처리된 문제를 제보했다.
+- 원인: 수업 화면의 발송 계획은 `기본 예약/30분 지연/알림톡 없음`으로 저장됐지만, 알림톡 작성 모달 내부의 발송 옵션이 `sendTiming = "now"`로 고정돼 있었다. 그래서 모달에서 발송 버튼을 누르면 현재 수업 발송 계획과 무관하게 `scheduledDate`가 빈 값으로 전달되어 즉시 발송될 수 있었다.
+- 조치: 알림톡 작성 모달의 발송 버튼이 현재 수업 발송 계획을 그대로 따르도록 변경했다. `기본 예약`은 예약 발송, `30분 지연`은 30분 지연 예약, `알림톡 없음`은 발송 버튼 비활성화로 처리한다.
+- 안전 보정: 예약 시간이 이미 지난 경우 즉시 발송으로 밀리지 않도록 `getLessonAlimtalkScheduledDate()`가 최소 미래 시각으로 보정하게 했다.
+- 서버 방어: `/api/notifications/comment-alimtalk`에 `sendMode: "scheduled"`인데 `scheduledDate`가 비어 있으면 발송 전에 오류를 내도록 검사를 추가했다.
+- 화면 문구: 모달 안내 문구를 `이 모달에서는 문구 확인과 수동 즉시발송만 합니다`에서 `발송 버튼은 현재 수업 발송 계획대로 예약합니다`로 바꿨고, 버튼 라벨도 `예약 발송`/`30분 지연 예약`으로 조정했다.
+- 회귀 방지: `scripts/scenario-tests-production.cjs`에 고정 즉시발송 값이 다시 들어오지 않도록 검사하고, 예약 요청에 `scheduledDate`가 필수인지 확인하는 항목을 추가했다.
+- 검증: `node --check api/server.js` 통과, `node --check scripts/scenario-tests-production.cjs` 통과, `npm run build` 통과, `npm run test:production` 134개 통과.
+
 ## 2026-06-23 시험관리 수정 입력 모달 분리
 
 - 상태: 완료
