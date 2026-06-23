@@ -2276,6 +2276,17 @@ export function App() {
     recordsRef.current = nextRecords;
     setRecords(nextRecords);
     handleSaveRecord(recordId, lesson, student, nextRecord);
+    const isAttendanceTestDummy =
+      student.studentId === "student_attendance_test_20260623" ||
+      lesson.lessonId === "lesson_attendance_test_2026-06-23" ||
+      lesson.lessonType === "attendanceTest";
+    if (isAttendanceTestDummy) {
+      handleSendAttendanceAlimtalk(lesson, student, {
+        attendanceStatus,
+        attendanceReason: nextRecord.attendanceReason,
+        lateMinutes
+      });
+    }
     setNotificationLogs((current) => [
       {
         notificationLogId: `attendance_kiosk_${Date.now()}_${student.studentId}`,
@@ -2284,7 +2295,7 @@ export function App() {
         lessonId: lesson.lessonId,
         message: `[출결체크] ${student.name} ${isCheckOut ? "하원" : attendanceStatus === "late" ? `${lateMinutes}분 지각 등원` : "등원"} · ${koreaTime}`,
         provider: "academy-os",
-        status: "checked_not_sent",
+        status: isAttendanceTestDummy ? "checked_and_sent_test" : "checked_not_sent",
         studentId: student.studentId,
         target: "parent"
       },
@@ -2293,7 +2304,7 @@ export function App() {
 
     return {
       ok: true,
-      message: `${student.name} ${isCheckOut ? "하원" : attendanceStatus === "late" ? `${lateMinutes}분 지각 등원` : "등원"} 체크 완료`,
+      message: `${student.name} ${isCheckOut ? "하원" : attendanceStatus === "late" ? `${lateMinutes}분 지각 등원` : "등원"} 체크 완료${isAttendanceTestDummy ? " · 테스트 알림톡 발송 요청" : ""}`,
       student,
       lesson,
       mode: isCheckOut ? "checkOut" : "checkIn",
