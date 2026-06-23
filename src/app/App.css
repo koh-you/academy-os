@@ -9332,6 +9332,14 @@ body.attendanceOnlyBody {
   transform: translateY(1px);
 }
 
+.attendanceNumberPad.disabled {
+  opacity: 0.55;
+}
+
+.attendanceNumberPad button:disabled {
+  cursor: wait;
+}
+
 .attendanceNumberPad .secondaryKey {
   background: #eef2ff;
   color: #64748b;

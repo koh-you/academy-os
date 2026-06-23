@@ -1711,13 +1711,14 @@ export function App() {
     let isMounted = true;
 
     async function loadCoreDataFromApi() {
-      if (!session) {
+      if (!session && !attendanceOnlyMode) {
         setIsAppStateReady(false);
         setIsPortalDataReady(false);
         return;
       }
+      if (attendanceOnlyMode) setIsAppStateReady(false);
       try {
-        if (["student", "parent"].includes(session.role)) {
+        if (session && ["student", "parent"].includes(session.role)) {
           const portalData = await fetchPortalData(session.sessionToken);
           if (!isMounted) return;
           setStudents(portalData.students ?? []);
@@ -1854,6 +1855,7 @@ export function App() {
         }
       } catch (error) {
         console.info("academy-os API sync skipped:", error.message);
+        if (attendanceOnlyMode) setIsAppStateReady(true);
       }
     }
 
@@ -1883,7 +1885,8 @@ export function App() {
     setSchoolEvents,
     setStudents,
     setWrongProblems,
-    session
+    session,
+    attendanceOnlyMode
   ]);
 
   useEffect(() => {
@@ -2318,6 +2321,7 @@ export function App() {
         adminPin={attendanceSettings.adminPin}
         isStandalone
         lessons={lessons}
+        isLoading={!isAppStateReady}
         records={records}
         students={students}
         onAdminExit={() => setAttendanceOnlyUnlocked(true)}
@@ -6643,6 +6647,7 @@ function AttendanceModal({ item, onClose, onSave }) {
 
 function AttendanceKiosk({
   adminPin = defaultAttendanceSettings.adminPin,
+  isLoading = false,
   isStandalone = false,
   lessons = [],
   records = [],
@@ -6662,6 +6667,7 @@ function AttendanceKiosk({
 
   function submitPin(event) {
     event?.preventDefault();
+    if (isLoading) return;
     if (pin === String(adminPin ?? "").replaceAll(/\D/g, "").slice(0, 4)) {
       setPin("");
       setResult({
@@ -6679,6 +6685,7 @@ function AttendanceKiosk({
   }
 
   function pressKey(value) {
+    if (isLoading) return;
     if (value === "backspace") {
       setPin((current) => current.slice(0, -1));
       return;
@@ -6708,7 +6715,7 @@ function AttendanceKiosk({
           <div>
             <p className="eyebrow">{academyBrandName} ATTENDANCE</p>
             <h1>출결 체크</h1>
-            <p className="muted">휴대폰 번호 뒤 4자리를 입력하세요.</p>
+            <p className="muted">{isLoading ? "출결 데이터를 불러오는 중입니다." : "휴대폰 번호 뒤 4자리를 입력하세요."}</p>
           </div>
           {onBack ? <button className="iconButton" onClick={onBack} type="button">×</button> : null}
         </div>
@@ -6717,20 +6724,21 @@ function AttendanceKiosk({
             autoFocus
             inputMode="numeric"
             maxLength={4}
+            disabled={isLoading}
             value={pin}
             onChange={(event) => setPin(event.target.value.replaceAll(/\D/g, "").slice(0, 4))}
-            placeholder="뒤 4자리"
+            placeholder={isLoading ? "대기" : "뒤 4자리"}
           />
-          <button className="primaryButton" disabled={pin.length !== 4} type="submit">확인</button>
+          <button className="primaryButton" disabled={isLoading || pin.length !== 4} type="submit">확인</button>
         </form>
 
-        <div className="attendanceNumberPad" aria-label="출결 번호 입력 키패드">
+        <div className={isLoading ? "attendanceNumberPad disabled" : "attendanceNumberPad"} aria-label="출결 번호 입력 키패드">
           {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((value) => (
-            <button key={value} onClick={() => pressKey(value)} type="button">{value}</button>
+            <button disabled={isLoading} key={value} onClick={() => pressKey(value)} type="button">{value}</button>
           ))}
-          <button className="secondaryKey" onClick={() => pressKey("clear")} type="button">지움</button>
-          <button onClick={() => pressKey("0")} type="button">0</button>
-          <button className="secondaryKey" onClick={() => pressKey("backspace")} type="button">⌫</button>
+          <button className="secondaryKey" disabled={isLoading} onClick={() => pressKey("clear")} type="button">지움</button>
+          <button disabled={isLoading} onClick={() => pressKey("0")} type="button">0</button>
+          <button className="secondaryKey" disabled={isLoading} onClick={() => pressKey("backspace")} type="button">⌫</button>
         </div>
       </div>
 
