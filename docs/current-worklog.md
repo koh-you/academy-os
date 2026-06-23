@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-06-23 과제상태 알림문구 최종안 반영
+
+- 상태: 완료
+- 사용자 요청: 과제상태 드롭다운별 학부모/학생 알림문구 최종안을 확정해 반영해달라고 요청했다.
+- 학부모 문구: `80%완료`, `50%완료`, `아는 것만 풂`, `미완료`, `미검사`의 표현을 사용자가 제시한 말투에 맞춰 수정했다. `추가 등원보충` 대신 학부모 문구에서는 `추가 보충`으로 정리했다.
+- 학생 문구: `완료`는 칭찬 톤으로 `과제를 꼼꼼하게 잘 해왔어. 열심히 하느라 수고했어~!`로 변경했다. `80%완료`, `아는 것만 풂`, `난이도 높음`, `풀이 재확인`, `미완료`도 최종 합의 문구로 반영했다.
+- 서버 발송: 프론트 미리보기와 실제 `/api/notifications/comment-alimtalk` 서버 fallback 문구를 동일한 최종안으로 맞췄다.
+- 회귀 방지: `scripts/scenario-tests-production.cjs`의 과제상태 문구 검사를 최종 문구 기준으로 업데이트했다.
+- 검증: `node --check api/routes/notifications.js` 통과, `node --check scripts/scenario-tests-production.cjs` 통과, `npm run build` 통과, `npm run test:production` 132개 통과.
+
 ## 2026-06-23 과제상태 학생/학부모 알림문구 분리 및 톤 수정
 
 - 상태: 완료
