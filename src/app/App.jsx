@@ -595,6 +595,30 @@ function postAppState(states) {
   return postJson("/api/app-state", { states });
 }
 
+async function fetchPortalData(sessionToken) {
+  const response = await fetch(apiUrl("/api/portal-data"), {
+    headers: { Authorization: `Bearer ${sessionToken}` }
+  });
+  const result = await response.json();
+  if (!response.ok || result.ok === false) throw new Error(result.error || "학생 데이터를 불러오지 못했습니다.");
+  return result;
+}
+
+function postPortalState(sessionToken, states) {
+  return postJsonWithHeaders("/api/portal-state", { states }, { Authorization: `Bearer ${sessionToken}` });
+}
+
+async function postJsonWithHeaders(path, body, headers = {}) {
+  const response = await fetch(apiUrl(path), {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...headers },
+    body: JSON.stringify(body)
+  });
+  const result = await response.json();
+  if (!response.ok || result.ok === false) throw new Error(result.error || "요청에 실패했습니다.");
+  return result;
+}
+
 const teacherAccount = {
   loginId: "teacher",
   name: "고태영",
@@ -1572,6 +1596,7 @@ export function App() {
   );
   const [integrationStatus, setIntegrationStatus] = useState(null);
   const [isAppStateReady, setIsAppStateReady] = useState(false);
+  const [isPortalDataReady, setIsPortalDataReady] = useState(false);
   const [attendanceOnlyUnlocked, setAttendanceOnlyUnlocked] = useState(false);
   const [saveStates, setSaveStates] = useState({});
   const [reportModal, setReportModal] = useState(null);
@@ -1629,7 +1654,32 @@ export function App() {
     let isMounted = true;
 
     async function loadCoreDataFromApi() {
+      if (!session) {
+        setIsAppStateReady(false);
+        setIsPortalDataReady(false);
+        return;
+      }
       try {
+        if (["student", "parent"].includes(session.role)) {
+          const portalData = await fetchPortalData(session.sessionToken);
+          if (!isMounted) return;
+          setStudents(portalData.students ?? []);
+          setLessons(portalData.lessons ?? []);
+          setRecords(portalData.records ?? []);
+          setHomeworks(portalData.homeworks ?? []);
+          setMakeupTasks(portalData.makeupTasks ?? []);
+          setExamPrepRows(portalData.examPrepRows ?? []);
+          setSchoolEvents(portalData.schoolEvents ?? []);
+          setResourceMaterials(portalData.materials ?? []);
+          setReportSnapshots(portalData.reportSnapshots ?? []);
+          setScoreRecords(portalData.scoreRecords ?? []);
+          setExamPostSubmissions(portalData.examPostSubmissions ?? []);
+          setStudentQuestions(portalData.studentQuestions ?? []);
+          setIsAppStateReady(false);
+          setIsPortalDataReady(true);
+          return;
+        }
+        setIsPortalDataReady(false);
         const [
           studentsResponse,
           classesResponse,
@@ -1775,13 +1825,22 @@ export function App() {
     setScoreRecords,
     setSchoolEvents,
     setStudents,
-    setWrongProblems
+    setWrongProblems,
+    session
   ]);
 
   useEffect(() => {
-    if (!isAppStateReady || isApplyingRemoteAppStateRef.current) return;
+    if (session?.role !== "teacher" || !isAppStateReady || isApplyingRemoteAppStateRef.current) return;
     postAppState(sharedAppState).catch((error) => console.error(error));
-  }, [isAppStateReady, sharedAppState]);
+  }, [isAppStateReady, sharedAppState, session?.role]);
+
+  useEffect(() => {
+    if (!isPortalDataReady || !["student", "parent"].includes(session?.role) || !session?.sessionToken) return;
+    postPortalState(session.sessionToken, {
+      examPostSubmissions,
+      studentQuestions
+    }).catch((error) => console.error(error));
+  }, [examPostSubmissions, isPortalDataReady, session?.role, session?.sessionToken, studentQuestions]);
 
   useEffect(() => {
     setDeletedLessonBundles((current) => pruneExpiredLessonDeletes(current));
@@ -2053,6 +2112,7 @@ export function App() {
       try {
         const result = await postJson("/api/auth/login", { role, loginId, password });
         if (result.authenticated) {
+          setIsPortalDataReady(false);
           setSession({ role: "teacher", actorId: "instructor_owner_001", name: result.account?.name || account.name || teacherAccount.name });
           setActiveView("lessons");
           return { ok: true };
@@ -2066,11 +2126,13 @@ export function App() {
     try {
       const result = await postJson("/api/auth/login", { role, loginId, password });
       if (result.authenticated && result.account?.studentId) {
+        setIsPortalDataReady(false);
         setSession({
           role,
           actorId: result.account.actorId,
           studentId: result.account.studentId,
-          name: result.account.name
+          name: result.account.name,
+          sessionToken: result.account.sessionToken
         });
         return { ok: true };
       }
@@ -2086,6 +2148,7 @@ export function App() {
   }
 
   function handleLogout() {
+    setIsPortalDataReady(false);
     setSession(null);
     setActiveView("lessons");
   }
@@ -4672,11 +4735,14 @@ function RoleLoginScreen({ attendanceSettings = defaultAttendanceSettings, initi
   async function submit(event) {
     event.preventDefault();
     setIsSubmitting(true);
-    const result = await onLogin(role, loginId.trim(), password.trim());
-    setIsSubmitting(false);
-    if (!result.ok) {
-      setError(result.message);
-      return;
+    try {
+      const result = await onLogin(role, loginId.trim(), password.trim());
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   }
 

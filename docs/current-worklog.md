@@ -1,5 +1,16 @@
 # Academy OS Current Worklog
 
+## 2026-06-23 학생/학부모 포털 데이터 스코프 분리 및 로그인 로딩 보정
+
+- 상태: 완료
+- 사용자 요청: 비밀번호가 틀렸을 때 로그인 로딩이 계속 도는 문제를 고치고, 학생 로그인 후 자기 데이터만 내려받는 API 스코프 분리를 진행해달라고 요청했다.
+- 로그인 보정: 학생/학부모/교사 로그인 제출 함수에 `try/finally`를 적용해 인증 실패 또는 서버 오류가 나도 `확인 중` 상태가 반드시 해제되게 했다.
+- 읽기 스코프: 서버에 학생/학부모 세션 토큰을 발급하는 흐름과 `/api/portal-data`를 추가했다. 학생/학부모는 토큰의 `studentId` 기준으로 학생 1명, 해당 수업/수업기록/숙제/보충/시험정보/학교일정/성적/시험 후 제출/질문만 내려받는다.
+- 저장 스코프: `/api/portal-state`를 추가해 학생 질문과 시험 후 제출 기록을 토큰의 `studentId` 범위 안에서만 `app_state`에 병합 저장하게 했다.
+- 프론트 동기화: 로그인 전에는 전체 API 동기화를 하지 않고, 교사는 기존 전체 동기화, 학생/학부모는 `/api/portal-data`만 사용하도록 분리했다. 교사용 전체 `app_state` 저장은 교사 세션에서만 동작한다.
+- 회귀 방지: `scripts/scenario-tests-production.cjs`에 포털 데이터 스코프, 포털 상태 저장 스코프, 로그인 실패 로딩 해제 검수 항목을 추가했다.
+- 검증: `node --check api/server.js` 통과, `node --check api/routes/coreData.js` 통과, `node --check scripts/scenario-tests-production.cjs` 통과, `npm run build` 통과, `npm run test:production` 125개 통과.
+
 ## 2026-06-23 계정 정보 저장 정리 및 학생 계정 서버 인증 전환
 
 - 상태: 완료

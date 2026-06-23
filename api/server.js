@@ -143,6 +143,40 @@ function createParentLoginId(student) {
   return `parent-${student.loginId}`;
 }
 
+function getSessionSecret() {
+  return process.env.APP_SESSION_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || "academy-os-dev-session-secret";
+}
+
+function encodeBase64Url(value) {
+  return Buffer.from(JSON.stringify(value)).toString("base64url");
+}
+
+function signSessionPayload(payload) {
+  return crypto.createHmac("sha256", getSessionSecret()).update(payload).digest("base64url");
+}
+
+function createPortalSessionToken(account) {
+  const payload = encodeBase64Url({
+    role: account.role,
+    studentId: account.studentId,
+    name: account.name,
+    exp: Date.now() + 1000 * 60 * 60 * 24 * 14
+  });
+  return `${payload}.${signSessionPayload(payload)}`;
+}
+
+function verifyPortalSessionToken(token = "") {
+  const [payload, signature] = String(token).split(".");
+  if (!payload || !signature || signSessionPayload(payload) !== signature) return null;
+  try {
+    const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+    if (!session.studentId || !["student", "parent"].includes(session.role) || Number(session.exp) < Date.now()) return null;
+    return session;
+  } catch {
+    return null;
+  }
+}
+
 async function authenticateStudentOrParent(role, loginId, password) {
   if (!isSupabaseConfigured({ requireServiceRole: true })) return null;
   const rows = await listRows(
@@ -157,10 +191,76 @@ async function authenticateStudentOrParent(role, loginId, password) {
   });
   if (!student) return null;
   return {
+    role,
     studentId: student.student_id,
     loginId: student.login_id,
     name: student.name
   };
+}
+
+async function getPortalData(session) {
+  const [
+    studentsResult,
+    lessonsResult,
+    recordsResult,
+    homeworksResult,
+    makeupTasksResult,
+    examPrepRowsResult,
+    schoolEventsResult,
+    appStateResult,
+    materialsResult
+  ] = await Promise.all([
+    listStudents(),
+    listLessons(),
+    listLessonStudentRecords(),
+    listHomeworks(),
+    listMakeupTasks(),
+    listExamPrepRows(),
+    listSchoolEvents(),
+    listAppState(),
+    listResourceMaterials()
+  ]);
+  const student = (studentsResult.students ?? []).find((item) => item.studentId === session.studentId);
+  if (!student) return null;
+  const lessons = (lessonsResult.lessons ?? []).filter((lesson) => lesson.studentIds?.includes(session.studentId));
+  const lessonIds = new Set(lessons.map((lesson) => lesson.lessonId));
+  const states = appStateResult.states ?? {};
+  return {
+    source: studentsResult.source,
+    students: [student],
+    lessons,
+    records: (recordsResult.records ?? []).filter((record) => record.studentId === session.studentId && lessonIds.has(record.lessonId)),
+    homeworks: (homeworksResult.homeworks ?? []).filter((homework) => homework.studentId === session.studentId),
+    makeupTasks: (makeupTasksResult.makeupTasks ?? []).filter((task) => task.studentId === session.studentId),
+    examPrepRows: (examPrepRowsResult.examPrepRows ?? []).filter((row) =>
+      (!row.schoolName || row.schoolName === student.schoolName) && (!row.grade || row.grade === student.grade)
+    ),
+    schoolEvents: (schoolEventsResult.schoolEvents ?? []).filter((event) =>
+      !event.schoolName || event.schoolName === student.schoolName
+    ),
+    materials: materialsResult.materials ?? [],
+    reportSnapshots: (states.reportSnapshots ?? []).filter((item) => item.studentId === session.studentId),
+    scoreRecords: (states.scoreRecords ?? []).filter((item) => item.studentId === session.studentId),
+    examPostSubmissions: (states.examPostSubmissions ?? []).filter((item) => item.studentId === session.studentId),
+    studentQuestions: (states.studentQuestions ?? []).filter((item) => item.studentId === session.studentId)
+  };
+}
+
+async function upsertPortalState(session, scopedStates = {}) {
+  const appState = await listAppState();
+  const currentStates = appState.states ?? {};
+  const nextStates = {};
+  for (const key of ["studentQuestions", "examPostSubmissions"]) {
+    if (!Array.isArray(scopedStates[key])) continue;
+    const currentRows = Array.isArray(currentStates[key]) ? currentStates[key] : [];
+    const scopedRows = scopedStates[key].filter((item) => item.studentId === session.studentId);
+    nextStates[key] = [
+      ...scopedRows,
+      ...currentRows.filter((item) => item.studentId !== session.studentId)
+    ];
+  }
+  if (Object.keys(nextStates).length === 0) return { states: {} };
+  return upsertAppState(nextStates);
 }
 
 function readJsonBody(request, options = {}) {
@@ -604,7 +704,8 @@ const server = http.createServer(async (request, response) => {
                 actorId: payload.role === "student" ? student.studentId : `parent_${student.studentId}`,
                 studentId: student.studentId,
                 loginId: student.loginId,
-                name: student.name
+                name: student.name,
+                sessionToken: createPortalSessionToken({ ...student, role: payload.role })
               }
             : null
         });
@@ -616,6 +717,43 @@ const server = http.createServer(async (request, response) => {
         authenticated: Boolean(account),
         account: account ? { loginId: account.loginId, name: account.name, teacherId: account.teacherId } : null
       });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/portal-data") {
+    try {
+      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
+      const portalSession = verifyPortalSessionToken(token);
+      if (!portalSession) {
+        sendJson(request, response, 401, { ok: false, error: "학생 세션 인증이 필요합니다." });
+        return;
+      }
+      const data = await getPortalData(portalSession);
+      if (!data) {
+        sendJson(request, response, 404, { ok: false, error: "학생 정보를 찾지 못했습니다." });
+        return;
+      }
+      sendJson(request, response, 200, { ok: true, role: portalSession.role, ...data });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/portal-state") {
+    try {
+      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
+      const portalSession = verifyPortalSessionToken(token);
+      if (!portalSession) {
+        sendJson(request, response, 401, { ok: false, error: "학생 세션 인증이 필요합니다." });
+        return;
+      }
+      const payload = await readJsonBody(request);
+      const result = await upsertPortalState(portalSession, payload.states ?? payload);
+      sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
     }

@@ -38,6 +38,9 @@ check("03b-2 teacher login does not fall back to local password storage", !app.i
 check("03c server teacher auth disables default fallback after bootstrap", hasAll(serverSource, ["function hasAnyTeacherAccount", "const needsBootstrap = !(await hasAnyTeacherAccount())", "needsBootstrap && loginId === defaultTeacherAccount.loginId"]));
 check("03d student and parent auth use server students table", hasAll(serverSource, ["function authenticateStudentOrParent", "createParentLoginId", '"students"', 'payload.role !== "teacher"', "student_id,name,login_id,pin,status"]));
 check("03e app_state filters teacher account settings", hasAll(coreDataRoute, ["sensitiveAppStateKeys", "teacherAccountSettings", "deleteRows(\"app_state\"", "!sensitiveAppStateKeys.has"]));
+check("03f student portal data is scoped by session token", hasAll(serverSource, ["createPortalSessionToken", "verifyPortalSessionToken", 'requestUrl.pathname === "/api/portal-data"', "getPortalData(portalSession)", "record.studentId === session.studentId", "homework.studentId === session.studentId"]));
+check("03g student portal state writes are scoped by session token", hasAll(serverSource, ['requestUrl.pathname === "/api/portal-state"', "upsertPortalState(portalSession", "item.studentId === session.studentId"]) && hasAll(app, ["fetchPortalData(session.sessionToken)", "postPortalState(session.sessionToken", "isPortalDataReady"]));
+check("03h login submit clears loading state on failure", hasAll(app, ["setIsSubmitting(true)", "try {", "finally {", "setIsSubmitting(false)"]));
 check("04 attendance-only route exists", hasAll(app, ["isAttendanceOnlyRoute", 'window.location.pathname === "/attendance"', "AttendanceKiosk"]));
 check("05 tablet attendance URL setting exists", hasAll(app, ["attendanceUrl", "lateGraceMinutes"]));
 check("06 attendance late grace logic exists", hasAll(app, ["lateGraceMinutes", "calculateLateMinutes"]));
