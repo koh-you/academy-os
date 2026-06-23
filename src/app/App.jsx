@@ -20,6 +20,7 @@ const storageKeys = {
   examAnalyses: "academy-os.examAnalyses.v1",
   schoolEvents: "academy-os.schoolEvents.v1",
   studentQuestions: "academy-os.studentQuestions.v1",
+  examPostSubmissions: "academy-os.examPostSubmissions.v1",
   resourceMaterials: "academy-os.resourceMaterials.v1",
   lessonResearchItems: "academy-os.lessonResearchItems.v1",
   aiSettings: "academy-os.aiSettings.v1",
@@ -148,6 +149,10 @@ function getLessonContent(record) {
 
 function isStudentVisibleHomework(homework) {
   return homework?.homeworkType !== "previous";
+}
+
+function isHomeworkCompletedForStudent(homework) {
+  return isHomeworkResolved(homework);
 }
 
 function normalizeMessageText(value) {
@@ -1440,6 +1445,7 @@ export function App() {
   const [academyTests, setAcademyTests] = useStoredState(storageKeys.academyTests, sampleData.academyTests ?? []);
   const [examPrepRows, setExamPrepRows] = useStoredState(storageKeys.examPrepRows, normalizeExamPrepRows(sampleData.examPrepRows ?? []));
   const [studentQuestions, setStudentQuestions] = useStoredState(storageKeys.studentQuestions, []);
+  const [examPostSubmissions, setExamPostSubmissions] = useStoredState(storageKeys.examPostSubmissions, []);
   const [schoolEvents, setSchoolEvents] = useStoredState(
     storageKeys.schoolEvents,
     createDefaultSchoolEvents(sampleData.examPrepRows ?? [])
@@ -1500,6 +1506,7 @@ export function App() {
     problemBooks,
     reportSnapshots,
     scoreRecords,
+    examPostSubmissions,
     studentQuestions,
     teacherAccountSettings,
     wrongProblems
@@ -1516,6 +1523,7 @@ export function App() {
     problemBooks,
     reportSnapshots,
     scoreRecords,
+    examPostSubmissions,
     studentQuestions,
     teacherAccountSettings,
     wrongProblems
@@ -1634,6 +1642,7 @@ export function App() {
           if (Array.isArray(states.problemBooks)) setProblemBooks(states.problemBooks);
           if (Array.isArray(states.reportSnapshots)) setReportSnapshots(states.reportSnapshots);
           if (Array.isArray(states.scoreRecords)) setScoreRecords(states.scoreRecords);
+          if (Array.isArray(states.examPostSubmissions)) setExamPostSubmissions(states.examPostSubmissions);
           if (Array.isArray(states.studentQuestions)) setStudentQuestions(states.studentQuestions);
           if (Array.isArray(states.wrongProblems)) setWrongProblems(states.wrongProblems);
           window.setTimeout(() => {
@@ -2127,6 +2136,7 @@ export function App() {
     return (
       <StudentPortalV2
         examPrepRows={examPrepRows}
+        examPostSubmissions={examPostSubmissions}
         homeworks={homeworks}
         lessons={lessons}
         materials={resourceMaterials}
@@ -2139,9 +2149,9 @@ export function App() {
         students={students.filter((student) => student.studentId === session.studentId)}
         onLogout={handleLogout}
         onStudentAddQuestion={handleStudentAddQuestion}
-        onStudentCreateHomework={handleStudentCreateHomework}
         onStudentCheckHomework={handleStudentCheckHomework}
         onStudentDeleteQuestion={handleStudentDeleteQuestion}
+        onSubmitExamPostSubmission={handleSubmitExamPostSubmission}
         onStudentUpdateQuestion={handleStudentUpdateQuestion}
       />
     );
@@ -2827,6 +2837,7 @@ export function App() {
         {activeView === "studentPortal" ? (
           <StudentPortalV2
             examPrepRows={examPrepRows}
+            examPostSubmissions={examPostSubmissions}
             homeworks={homeworks}
             lessons={lessons}
             materials={resourceMaterials}
@@ -2839,12 +2850,10 @@ export function App() {
             studentQuestions={studentQuestions}
             students={students}
             onStudentAddQuestion={handleStudentAddQuestion}
-            onStudentCreateHomework={handleStudentCreateHomework}
             onStudentCheckHomework={handleStudentCheckHomework}
-            onStudentDeleteHomework={handleStudentDeleteHomework}
             onStudentDeleteQuestion={handleStudentDeleteQuestion}
+            onSubmitExamPostSubmission={handleSubmitExamPostSubmission}
             onStudentUpdateQuestion={handleStudentUpdateQuestion}
-            onStudentUpdateHomework={handleStudentUpdateHomework}
           />
         ) : null}
 
@@ -2933,9 +2942,11 @@ export function App() {
         {activeView === "examPrep" ? (
           <ExamPrepCenter
             aiSettings={aiSettings}
+            examPostSubmissions={examPostSubmissions}
             templates={classTemplates}
             rows={examPrepRows}
             students={students}
+            onConfirmExamPostSubmission={handleConfirmExamPostSubmission}
             onEnsureExamCycleRows={(examCycle, classTemplateId) =>
               setExamPrepRows((current) => {
                 const nextRowsToAdd = buildExamPrepRowsFromStudents(students, examCycle, classTemplateId, current);
@@ -3712,21 +3723,6 @@ export function App() {
     );
   }
 
-  function handleStudentCreateHomework(homework) {
-    const nextHomework = {
-      homeworkId: `homework_student_${Date.now()}`,
-        lessonId: "",
-        status: "assigned",
-        studentStatus: "not_started",
-        teacherStatus: "unverified",
-        createdByRole: "student",
-        createdAt: new Date().toISOString(),
-        ...homework
-    };
-    setHomeworks((current) => [nextHomework, ...current]);
-    postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
-  }
-
   function handleStudentAddQuestion(question) {
     const text = String(question?.text ?? "").trim();
     if (!text || !question?.studentId) return;
@@ -3756,24 +3752,26 @@ export function App() {
     setStudentQuestions((current) => current.filter((question) => question.questionId !== questionId));
   }
 
-  function handleStudentUpdateHomework(homeworkId, updates) {
-    setHomeworks((current) =>
-      current.map((homework) => {
-        if (homework.homeworkId !== homeworkId) return homework;
-        const nextHomework = {
-          ...homework,
-          ...updates,
-          totalProblems: Number(updates.totalProblems || homework.totalProblems || 0),
-          updatedAt: new Date().toISOString()
-        };
-        postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
-        return nextHomework;
-      })
-    );
+  function handleSubmitExamPostSubmission(target, student, values) {
+    const nextSubmission = createExamPostSubmissionPayload(target, student, {
+      ...target.submission,
+      ...values,
+      submissionId: target.submission?.submissionId
+    });
+    setExamPostSubmissions((current) => [
+      nextSubmission,
+      ...current.filter((submission) => submission.submissionId !== nextSubmission.submissionId && submission.targetId !== nextSubmission.targetId)
+    ]);
   }
 
-  function handleStudentDeleteHomework(homeworkId) {
-    setHomeworks((current) => current.filter((homework) => homework.homeworkId !== homeworkId));
+  function handleConfirmExamPostSubmission(submissionId, teacherConfirmed) {
+    setExamPostSubmissions((current) =>
+      current.map((submission) =>
+        submission.submissionId === submissionId
+          ? { ...submission, teacherConfirmed, updatedAt: new Date().toISOString() }
+          : submission
+      )
+    );
   }
 
   function handleTeacherVerifyHomework(homeworkId, teacherStatus) {
@@ -5931,7 +5929,6 @@ function LessonJournalDetail({
             previewMode
             onLogout={() => setStudentPreviewId("")}
             onStudentCheckHomework={() => {}}
-            onStudentCreateHomework={() => {}}
           />
         </Modal>
       ) : null}
@@ -7029,7 +7026,17 @@ function summarizeTallySubmissions(submissions) {
   ].filter(Boolean).join("\n");
 }
 
-function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templates, onEnsureExamCycleRows, onUpdateRow, onDeleteRow }) {
+function ExamPrepCenter({
+  aiSettings = defaultAiSettings,
+  examPostSubmissions = [],
+  rows,
+  students,
+  templates,
+  onConfirmExamPostSubmission,
+  onEnsureExamCycleRows,
+  onUpdateRow,
+  onDeleteRow
+}) {
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState("info");
   const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("template_mwf_7_10");
@@ -7089,6 +7096,10 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
     {
       id: "tallyAi",
       label: "탈리"
+    },
+    {
+      id: "postSubmit",
+      label: "시험 후 제출"
     },
     {
       id: "pastPapers",
@@ -7480,6 +7491,17 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
         </div>
       ) : null}
 
+      {activeTab === "postSubmit" ? (
+        <ExamPostSubmissionManager
+          rows={filteredRows}
+          selectedClass={selectedClass}
+          selectedExamCycle={selectedExamCycle}
+          submissions={examPostSubmissions}
+          students={classStudents}
+          onConfirmExamPostSubmission={onConfirmExamPostSubmission}
+        />
+      ) : null}
+
       {activeTab === "pastPapers" ? (
         <section className="pastPaperFramePanel">
           <div className="pastPaperToolbar">
@@ -7529,6 +7551,78 @@ function ExamPrepCenter({ aiSettings = defaultAiSettings, rows, students, templa
           onUpdateRow={onUpdateRow}
         />
       ) : null}
+    </section>
+  );
+}
+
+function ExamPostSubmissionManager({ rows = [], selectedClass, selectedExamCycle, students = [], submissions = [], onConfirmExamPostSubmission }) {
+  const targets = students.flatMap((student) => buildExamPostTargetsForStudent(student, rows, submissions));
+  const submittedTargets = targets.filter((target) => target.submission?.submittedAt);
+  const missingTargets = targets.filter((target) => !target.submission?.submittedAt);
+  const confirmedTargets = submittedTargets.filter((target) => target.submission?.teacherConfirmed);
+
+  return (
+    <section className="examPostManager">
+      <div className="sectionHeader slim">
+        <div>
+          <h2>시험 후 제출 관리</h2>
+          <p className="muted">{selectedClass?.name ?? "반 미선택"} · {examCycleLabel(selectedExamCycle)} · 학생 앱 제출 현황</p>
+        </div>
+      </div>
+      <div className="tallyStats examPostStats">
+        <article>
+          <span>대상</span>
+          <strong>{targets.length}명</strong>
+        </article>
+        <article>
+          <span>제출 완료</span>
+          <strong>{submittedTargets.length}명</strong>
+        </article>
+        <article>
+          <span>미제출</span>
+          <strong>{missingTargets.length}명</strong>
+        </article>
+        <article>
+          <span>확인 완료</span>
+          <strong>{confirmedTargets.length}명</strong>
+        </article>
+      </div>
+      <div className="examPostList">
+        {targets.length === 0 ? (
+          <div className="emptyState">시험일이 지난 제출 대상이 없습니다. 시험관리에서 수학 시험일을 입력하면 자동으로 대상이 생깁니다.</div>
+        ) : null}
+        {targets.map((target) => {
+          const submission = target.submission;
+          return (
+            <article className={submission ? "examPostItem submitted" : "examPostItem missing"} key={target.targetId}>
+              <div>
+                <strong>{submission?.studentName || target.studentName || "학생"}</strong>
+                <span>{target.schoolName} · {target.grade} · {target.subject} · {target.examDate}</span>
+                <small>{submission ? `제출 ${formatKoreanDateTime(submission.submittedAt)}` : `미제출 · 마감 ${target.dueDate} 23:59`}</small>
+              </div>
+              {submission ? (
+                <div className="examPostDetail">
+                  <span>점수 <b>{submission.score || "-"}</b></span>
+                  <span>난이도 <b>{submission.difficulty || "-"}</b></span>
+                  <span>준비 <b>{submission.preparation || "-"}</b></span>
+                  <p>{submission.goodPart || submission.regretReason || submission.wantedHelp || "학생 메모 없음"}</p>
+                </div>
+              ) : (
+                <div className="examPostDetail muted">학생 앱에 제출 카드가 표시됩니다.</div>
+              )}
+              {submission ? (
+                <button
+                  className={submission.teacherConfirmed ? "softButton" : "primaryButton compact"}
+                  onClick={() => onConfirmExamPostSubmission?.(submission.submissionId, !submission.teacherConfirmed)}
+                  type="button"
+                >
+                  {submission.teacherConfirmed ? "확인 완료" : "확인 처리"}
+                </button>
+              ) : null}
+            </article>
+          );
+        })}
+      </div>
     </section>
   );
 }
@@ -10514,6 +10608,7 @@ function MetricCard({ active = false, hint, icon, label, onClick, tone = "defaul
 
 function StudentPortalV2({
   examPrepRows = [],
+  examPostSubmissions = [],
   homeworks,
   lessons = [],
   materials = [],
@@ -10529,28 +10624,15 @@ function StudentPortalV2({
   onLogout,
   onStudentAddQuestion,
   onStudentCheckHomework,
-  onStudentCreateHomework,
   onStudentDeleteQuestion,
+  onSubmitExamPostSubmission,
   onStudentUpdateQuestion,
-  onStudentDeleteHomework,
-  onStudentUpdateHomework
 }) {
   const [selectedStudentId, setSelectedStudentId] = useState(
     sessionStudentId || students.find((student) => student.name === "TestS12")?.studentId || students[0]?.studentId || ""
   );
   const [activeTab, setActiveTab] = useState("today");
   const [myPageTab, setMyPageTab] = useState("stats");
-  const [deleteHomeworkTarget, setDeleteHomeworkTarget] = useState(null);
-  const [homeworkForm, setHomeworkForm] = useState({
-    type: "current",
-    title: "",
-    subject: "공통수학1",
-    totalProblems: "30",
-    assignedDate: today,
-    dueDate: "2026-06-17",
-    maxDailyProblems: "",
-    includeWeekend: true
-  });
 
   const selectedStudent = students.find((student) => student.studentId === selectedStudentId) ?? students[0];
   const studentHomeworks = homeworks
@@ -10576,9 +10658,6 @@ function StudentPortalV2({
       .map((record) => ({ ...record, lesson: lessons.find((lesson) => lesson.lessonId === record.lessonId) }))
   );
   const studentScoreRecords = scoreRecords.filter((score) => score.studentId === selectedStudent?.studentId);
-  const latestTeacherHomework = studentHomeworks
-    .filter((homework) => homework.createdByRole !== "student")
-    .sort((a, b) => b.assignedDate.localeCompare(a.assignedDate))[0];
   const studentRecordsWithLessons = records
     .filter((record) => record.studentId === selectedStudent?.studentId)
     .map((record) => ({ ...record, lesson: lessons.find((lesson) => lesson.lessonId === record.lessonId) }))
@@ -10589,41 +10668,11 @@ function StudentPortalV2({
   const selectedStudentQuestions = studentQuestions
     .filter((question) => question.studentId === selectedStudent?.studentId)
     .sort((a, b) => String(b.updatedAt ?? b.createdAt ?? "").localeCompare(String(a.updatedAt ?? a.createdAt ?? "")));
+  const examPostTargets = buildExamPostTargetsForStudent(selectedStudent, examPrepRows, examPostSubmissions);
 
   useEffect(() => {
     if (sessionStudentId) setSelectedStudentId(sessionStudentId);
   }, [sessionStudentId]);
-
-  function updateHomeworkForm(field, value) {
-    setHomeworkForm((current) => ({ ...current, [field]: value }));
-  }
-
-  function submitHomeworkForm(event) {
-    event.preventDefault();
-    if (!selectedStudent || !homeworkForm.title.trim()) return;
-
-    const homeworkValues = {
-      studentId: selectedStudent.studentId,
-      title: homeworkForm.title.trim(),
-      subject: homeworkForm.subject,
-      totalProblems: Number(homeworkForm.totalProblems || 0),
-      homeworkType: homeworkForm.type,
-      assignedDate: homeworkForm.assignedDate,
-      dueDate: homeworkForm.dueDate,
-      maxDailyProblems: Number(homeworkForm.maxDailyProblems || 0),
-      includeWeekend: homeworkForm.includeWeekend
-    };
-
-    onStudentCreateHomework(homeworkValues);
-    setHomeworkForm((current) => ({ ...current, title: "" }));
-    setActiveTab("all");
-  }
-
-  function handleDeleteHomework() {
-    if (!deleteHomeworkTarget) return;
-    onStudentDeleteHomework(deleteHomeworkTarget.homeworkId);
-    setDeleteHomeworkTarget(null);
-  }
 
   return (
     <section className={previewMode ? "studentPortal studentPortalTabletFirst teacherPreviewPortal" : "studentPortal studentPortalTabletFirst"}>
@@ -10666,7 +10715,6 @@ function StudentPortalV2({
             ["materials", "자료함"],
             ["evaluation", "평가"],
             ["mypage", "마이 페이지"],
-            ["register", "등록"],
             ["curriculum", "커리큘럼"]
           ].map(([id, label]) => (
             <button className={activeTab === id ? "active" : ""} key={id} onClick={() => setActiveTab(id)} type="button">
@@ -10689,25 +10737,16 @@ function StudentPortalV2({
             todayHomeworks={todayHomeworks}
             onAddQuestion={onStudentAddQuestion}
             onDeleteQuestion={onStudentDeleteQuestion}
+            examPostTargets={examPostTargets}
+            onSubmitExamPostSubmission={onSubmitExamPostSubmission}
             onUpdateQuestion={onStudentUpdateQuestion}
             onStudentCheckHomework={onStudentCheckHomework}
-          />
-        ) : null}
-
-        {activeTab === "register" ? (
-          <StudentRegisterTab
-            form={homeworkForm}
-            latestTeacherHomework={latestTeacherHomework}
-            onSubmit={submitHomeworkForm}
-            onUpdate={updateHomeworkForm}
           />
         ) : null}
 
         {activeTab === "all" ? (
           <StudentAllHomeworkTab
             homeworks={studentHomeworks}
-            onDeleteHomework={setDeleteHomeworkTarget}
-            onUpdateHomework={onStudentUpdateHomework}
           />
         ) : null}
         {activeTab === "materials" ? <PortalMaterialsTab materials={studentMaterials} emptyMessage="아직 공개된 자료가 없습니다." /> : null}
@@ -10736,26 +10775,6 @@ function StudentPortalV2({
           </article>
         ))}
       </section>
-      {deleteHomeworkTarget ? (
-        <Modal
-          className="homeworkDeleteModal"
-          onClose={() => setDeleteHomeworkTarget(null)}
-          subtitle="삭제하면 학생 화면의 숙제 목록에서 사라집니다."
-          title="숙제를 삭제할까요?"
-        >
-          <div className="deleteConfirmBody">
-            <div className="deleteConfirmStudent">
-              <strong>{deleteHomeworkTarget.title}</strong>
-              <span>{deleteHomeworkTarget.assignedDate} ~ {deleteHomeworkTarget.dueDate}</span>
-            </div>
-            <p className="dangerCopy">삭제 후에는 화면에서 바로 복구할 수 없습니다.</p>
-            <div className="deleteConfirmActions">
-              <button className="softButton" onClick={() => setDeleteHomeworkTarget(null)} type="button">취소</button>
-              <button className="dangerButton" onClick={handleDeleteHomework} type="button">삭제</button>
-            </div>
-          </div>
-        </Modal>
-      ) : null}
     </section>
   );
 }
@@ -10766,6 +10785,7 @@ function StudentTodayTab({
   overdueHomeworks,
   prepNotices = [],
   questions = [],
+  examPostTargets = [],
   recordsWithLessons = [],
   selectedStudent,
   studentNotice,
@@ -10773,6 +10793,7 @@ function StudentTodayTab({
   todayHomeworks,
   onAddQuestion,
   onDeleteQuestion,
+  onSubmitExamPostSubmission,
   onUpdateQuestion,
   onStudentCheckHomework
 }) {
@@ -10794,6 +10815,12 @@ function StudentTodayTab({
           <span>{studentNotice.detail}</span>
         </div>
       ) : null}
+
+      <StudentExamPostSubmissionPanel
+        targets={examPostTargets}
+        selectedStudent={selectedStudent}
+        onSubmitExamPostSubmission={onSubmitExamPostSubmission}
+      />
 
       {prepNotices.length ? (
         <div className="portalNoticeStack">
@@ -10880,9 +10907,127 @@ function StudentTodayTab({
         ))}
       </div>
       {overdueHomeworks.length ? (
-        <div className="warningBand">⚠️ 밀린 숙제가 있습니다. 오늘 카드나 전체 탭에서 재분배를 확인하세요.</div>
+        <div className="warningBand">⚠️ 확인이 필요한 숙제가 있습니다. 선생님과 수업 시간에 확인하세요.</div>
       ) : null}
     </>
+  );
+}
+
+function StudentExamPostSubmissionPanel({ targets = [], selectedStudent, onSubmitExamPostSubmission }) {
+  const activeTargets = targets.filter((target) => !target.submission?.submittedAt);
+  const completedTargets = targets.filter((target) => target.submission?.submittedAt);
+  const [drafts, setDrafts] = useState({});
+  const target = activeTargets[0] ?? completedTargets[0] ?? null;
+
+  if (!target) return null;
+
+  const draft = {
+    score: target.submission?.score ?? "",
+    feeling: target.submission?.feeling ?? "",
+    difficulty: target.submission?.difficulty ?? "5",
+    preparation: target.submission?.preparation ?? "5",
+    goodPart: target.submission?.goodPart ?? "",
+    regretReason: target.submission?.regretReason ?? "",
+    neededMore: target.submission?.neededMore ?? "",
+    nextGoal: target.submission?.nextGoal ?? "",
+    wantedHelp: target.submission?.wantedHelp ?? "",
+    freeComment: target.submission?.freeComment ?? "",
+    fileMemo: target.submission?.fileMemo ?? "",
+    ...(drafts[target.targetId] ?? {})
+  };
+  const isSubmitted = Boolean(target.submission?.submittedAt);
+
+  function updateDraft(field, value) {
+    setDrafts((current) => ({
+      ...current,
+      [target.targetId]: {
+        ...(current[target.targetId] ?? {}),
+        [field]: value
+      }
+    }));
+  }
+
+  function submit(event) {
+    event.preventDefault();
+    if (!selectedStudent || !onSubmitExamPostSubmission) return;
+    onSubmitExamPostSubmission(target, selectedStudent, draft);
+    setDrafts((current) => {
+      const next = { ...current };
+      delete next[target.targetId];
+      return next;
+    });
+  }
+
+  return (
+    <section className={`studentExamPostPanel ${target.isOverdue && !isSubmitted ? "overdue" : ""}`}>
+      <div className="sectionHeader compact">
+        <div>
+          <h2>{isSubmitted ? "시험 후 제출 완료" : "시험 후 제출 필요"}</h2>
+          <p className="muted">
+            {target.schoolName} · {target.grade} · {target.subject} · {target.examDate}
+            {isSubmitted ? ` · 제출 ${formatKoreanDateTime(target.submission.submittedAt)}` : ` · 마감 ${target.dueDate} 23:59`}
+          </p>
+        </div>
+      </div>
+      {isSubmitted ? (
+        <div className="studentExamPostDone">
+          <strong>{target.submission.score || "점수 미입력"}</strong>
+          <span>{target.submission.feeling || "셀프체크 제출됨"}</span>
+          <small>{target.submission.teacherConfirmed ? "선생님 확인 완료" : "선생님 확인 전"}</small>
+        </div>
+      ) : (
+        <form className="studentExamPostForm" onSubmit={submit}>
+          <div className="fieldGrid two">
+            <label>
+              점수/등급
+              <input value={draft.score} onChange={(event) => updateDraft("score", event.target.value)} placeholder="예: 86점 또는 2등급" />
+            </label>
+            <label>
+              전체 소감
+              <select value={draft.feeling} onChange={(event) => updateDraft("feeling", event.target.value)}>
+                <option value="">선택</option>
+                <option>기대보다 잘 봤다</option>
+                <option>비슷했다</option>
+                <option>기대에 못 미쳤다</option>
+                <option>모르겠다</option>
+              </select>
+            </label>
+            <label>
+              난이도 0~10
+              <input inputMode="numeric" value={draft.difficulty} onChange={(event) => updateDraft("difficulty", event.target.value)} />
+            </label>
+            <label>
+              준비 충분도 0~10
+              <input inputMode="numeric" value={draft.preparation} onChange={(event) => updateDraft("preparation", event.target.value)} />
+            </label>
+          </div>
+          <label>
+            잘된 점
+            <textarea value={draft.goodPart} onChange={(event) => updateDraft("goodPart", event.target.value)} rows="2" />
+          </label>
+          <label>
+            아쉬웠던 이유
+            <textarea value={draft.regretReason} onChange={(event) => updateDraft("regretReason", event.target.value)} rows="2" />
+          </label>
+          <label>
+            다음 시험 목표 / 선생님께 도움받고 싶은 부분
+            <textarea
+              value={draft.wantedHelp || draft.nextGoal}
+              onChange={(event) => {
+                updateDraft("wantedHelp", event.target.value);
+                updateDraft("nextGoal", event.target.value);
+              }}
+              rows="2"
+            />
+          </label>
+          <label>
+            시험지 제출 메모
+            <input value={draft.fileMemo} onChange={(event) => updateDraft("fileMemo", event.target.value)} placeholder="예: 종이 시험지 직접 제출, 사진은 수업 때 전달" />
+          </label>
+          <button className="primaryButton" type="submit">시험 후 제출</button>
+        </form>
+      )}
+    </section>
   );
 }
 
@@ -11048,7 +11193,7 @@ function ParentPortal({ homeworks, lessons = [], materials = [], records = [], r
           <div className="studentAllPanel">
             <div>
               <h2>숙제 현황</h2>
-              <p className="muted">학부모 화면은 열람 전용입니다. 재분배, 수정, 삭제는 표시하지 않습니다.</p>
+              <p className="muted">학부모 화면은 열람 전용입니다. 숙제 수정과 삭제는 선생님 화면에서만 가능합니다.</p>
             </div>
             {studentHomeworks.length === 0 ? <div className="emptyPortalPanel">등록된 숙제가 없습니다.</div> : null}
             {studentHomeworks.map((homework) => (
@@ -11084,187 +11229,22 @@ function ParentPortal({ homeworks, lessons = [], materials = [], records = [], r
   );
 }
 
-function StudentRegisterTab({ form, latestTeacherHomework, onSubmit, onUpdate }) {
-  const calendarDays = Array.from({ length: 30 }, (_, index) => index + 1);
-  const startDay = Number(form.assignedDate?.split("-")[2] ?? 0);
-  const endDay = Number(form.dueDate?.split("-")[2] ?? 0);
-  const selectedDays = calendarDays.filter((day) => day >= startDay && day <= endDay);
-  const dailyProblemCount =
-    selectedDays.length > 0 ? Math.ceil(Number(form.totalProblems || 0) / selectedDays.length) : 0;
-
-  return (
-    <form className="studentFormPanel studentRegisterPanel" onSubmit={onSubmit}>
-      <div>
-        <h2>숙제 직접 등록</h2>
-        <p className="muted">공지된 숙제를 입력하면 하루 분량이 자동 계산될 예정입니다.</p>
-      </div>
-
-      <div className="noticeBox teacherHomeworkNotice">
-        <strong>📌 선생님이 공지한 최신 숙제</strong>
-        <span>{latestTeacherHomework ? latestTeacherHomework.title : "아직 공지된 숙제가 없습니다."}</span>
-      </div>
-
-      <label>종류</label>
-      <div className="segmentedControl homeworkTypeControl">
-        {[
-          ["current", "현행"],
-          ["extra1", "추가1"],
-          ["extra2", "추가2"]
-        ].map(([id, label]) => (
-          <button className={form.type === id ? "active" : ""} key={id} onClick={() => onUpdate("type", id)} type="button">
-            {label}
-          </button>
-        ))}
-      </div>
-
-      <label>
-        숙제 제목
-        <input value={form.title} onChange={(event) => onUpdate("title", event.target.value)} placeholder="예: 수학의정석" />
-      </label>
-
-      <div className="fieldGrid two">
-        <label>
-          과목
-          <select value={form.subject} onChange={(event) => onUpdate("subject", event.target.value)}>
-            <option>공통수학1</option>
-            <option>공통수학2</option>
-            <option>대수</option>
-            <option>미적분</option>
-          </select>
-        </label>
-        <label>
-          총 문제 수
-          <input inputMode="numeric" value={form.totalProblems} onChange={(event) => onUpdate("totalProblems", event.target.value)} placeholder="30" />
-        </label>
-        <label>
-          시작일
-          <input type="date" value={form.assignedDate} onChange={(event) => onUpdate("assignedDate", event.target.value)} />
-        </label>
-        <label>
-          마감일
-          <input type="date" value={form.dueDate} onChange={(event) => onUpdate("dueDate", event.target.value)} />
-        </label>
-        <label>
-          하루 최대 문제 수
-          <input
-            inputMode="numeric"
-            value={form.maxDailyProblems}
-            onChange={(event) => onUpdate("maxDailyProblems", event.target.value)}
-            placeholder="선택 입력"
-          />
-        </label>
-        <label className="weekendToggle">
-          <input
-            checked={form.includeWeekend}
-            onChange={(event) => onUpdate("includeWeekend", event.target.checked)}
-            type="checkbox"
-          />
-          <strong>주말 포함</strong>
-        </label>
-      </div>
-
-      <div className="studentDatePicker">
-        <div className="studentDatePickerTop">
-          <strong>날짜 선택 <span>(클릭으로 빼거나 추가)</span></strong>
-          <div>
-            <span><i className="dateDot included" />포함</span>
-            <span><i className="dateDot excluded" />제외</span>
-            <span><i className="dateDot outOfRange" />범위밖</span>
-          </div>
-        </div>
-        <div className="studentDateMonth">
-          <button type="button">‹</button>
-          <strong>2026년 6월</strong>
-          <button type="button">›</button>
-        </div>
-        <div className="studentDateGrid">
-          {["일", "월", "화", "수", "목", "금", "토"].map((day) => <b key={day}>{day}</b>)}
-          {calendarDays.map((day) => {
-            const isSelected = selectedDays.includes(day);
-            const isWeekend = [0, 6].includes((day + 1) % 7);
-            const isExcluded = !form.includeWeekend && isWeekend;
-            return (
-              <button
-                className={isSelected && !isExcluded ? "included" : isExcluded ? "excluded" : "outOfRange"}
-                key={day}
-                type="button"
-              >
-                <span>{day}</span>
-                {isSelected && !isExcluded ? <small>{dailyProblemCount}문제</small> : null}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="studentRegisterSummary">
-        <span>선택일 {selectedDays.length}일</span>
-        <span>하루 약 {dailyProblemCount || 0}문제</span>
-        {form.maxDailyProblems ? <span>하루 최대 {form.maxDailyProblems}문제</span> : <span>하루 최대 제한 없음</span>}
-      </div>
-
-      <div className="studentRegisterActions">
-        <button className="primaryButton full" type="submit">숙제 등록</button>
-      </div>
-    </form>
-  );
-}
-
-function StudentAllHomeworkTab({ homeworks, onDeleteHomework, onUpdateHomework }) {
-  const [editingHomeworkId, setEditingHomeworkId] = useState("");
-  const [editForm, setEditForm] = useState(null);
+function StudentAllHomeworkTab({ homeworks }) {
   const sortedHomeworks = [...homeworks].sort((a, b) => b.assignedDate.localeCompare(a.assignedDate));
-
-  function startEdit(homework) {
-    setEditingHomeworkId(homework.homeworkId);
-    setEditForm({
-      title: homework.title ?? "",
-      subject: homework.subject || "공통수학1",
-      totalProblems: String(homework.totalProblems ?? ""),
-      assignedDate: homework.assignedDate || today,
-      dueDate: homework.dueDate || today,
-      maxDailyProblems: String(homework.maxDailyProblems ?? ""),
-      includeWeekend: homework.includeWeekend ?? true
-    });
-  }
-
-  function updateEditForm(field, value) {
-    setEditForm((current) => ({ ...(current ?? {}), [field]: value }));
-  }
-
-  function cancelEdit() {
-    setEditingHomeworkId("");
-    setEditForm(null);
-  }
-
-  function saveEdit(homework) {
-    if (!editForm?.title?.trim()) return;
-    onUpdateHomework(homework.homeworkId, {
-      title: editForm.title.trim(),
-      subject: editForm.subject,
-      totalProblems: Number(editForm.totalProblems || 0),
-      assignedDate: editForm.assignedDate,
-      dueDate: editForm.dueDate,
-      maxDailyProblems: Number(editForm.maxDailyProblems || 0),
-      includeWeekend: editForm.includeWeekend
-    });
-    cancelEdit();
-  }
 
   return (
     <div className="studentAllPanel">
       <div>
         <h2>등록된 숙제 전체</h2>
-        <p className="muted">밀린 숙제는 자동 재분배로 남은 날짜에 다시 나눌 수 있습니다.</p>
+        <p className="muted">선생님이 등록한 숙제를 확인합니다. 수정과 삭제는 선생님 화면에서만 가능합니다.</p>
       </div>
       {sortedHomeworks.length === 0 ? <div className="emptyHomeworkBox">등록된 숙제가 없습니다.</div> : null}
       {sortedHomeworks.map((homework) => {
-        const completed = homework.teacherStatus === "verified" ? 1 : 0;
+        const completed = isHomeworkCompletedForStudent(homework) ? 1 : 0;
         const totalDays = Math.max(1, isHomeworkOverdue(homework) ? 5 : 2);
         const progress = Math.round((completed / totalDays) * 100);
-        const isEditing = editingHomeworkId === homework.homeworkId;
         return (
-          <article className={isEditing ? "studentHomeworkCard editing" : "studentHomeworkCard"} key={homework.homeworkId}>
+          <article className="studentHomeworkCard" key={homework.homeworkId}>
             <div className="homeworkCardTop">
               <div>
                 <strong>{homework.title}</strong>
@@ -11273,71 +11253,14 @@ function StudentAllHomeworkTab({ homeworks, onDeleteHomework, onUpdateHomework }
                   {isHomeworkOverdue(homework) ? "밀림" : "현행"}
                 </span>
               </div>
-              <div className="cardActions">
-                {isEditing ? (
-                  <>
-                    <button className="primaryButton compact" onClick={() => saveEdit(homework)} type="button">저장</button>
-                    <button className="softButton" onClick={cancelEdit} type="button">취소</button>
-                  </>
-                ) : (
-                  <>
-                    <button className="softButton" onClick={() => startEdit(homework)} type="button">수정</button>
-                    <button className="dangerSoftButton" onClick={() => onDeleteHomework(homework)} type="button">삭제</button>
-                  </>
-                )}
-              </div>
             </div>
             <p>{homework.assignedDate} ~ {homework.dueDate} · 총 {homework.totalProblems ?? "-"}문제</p>
             <div className="progressRail"><span style={{ width: `${progress}%` }} /></div>
             <small>{completed}/{totalDays}일 완료 ({progress}%)</small>
-            {isEditing ? (
-              <div className="inlineHomeworkEditor">
-                <label>
-                  숙제명
-                  <input value={editForm?.title ?? ""} onChange={(event) => updateEditForm("title", event.target.value)} />
-                </label>
-                <div className="fieldGrid two">
-                  <label>
-                    과목
-                    <select value={editForm?.subject ?? "공통수학1"} onChange={(event) => updateEditForm("subject", event.target.value)}>
-                      <option>공통수학1</option>
-                      <option>공통수학2</option>
-                      <option>대수</option>
-                      <option>미적분</option>
-                    </select>
-                  </label>
-                  <label>
-                    총 문제 수
-                    <input inputMode="numeric" value={editForm?.totalProblems ?? ""} onChange={(event) => updateEditForm("totalProblems", event.target.value)} />
-                  </label>
-                  <label>
-                    시작일
-                    <input type="date" value={editForm?.assignedDate ?? today} onChange={(event) => updateEditForm("assignedDate", event.target.value)} />
-                  </label>
-                  <label>
-                    마감일
-                    <input type="date" value={editForm?.dueDate ?? today} onChange={(event) => updateEditForm("dueDate", event.target.value)} />
-                  </label>
-                  <label>
-                    하루 최대 문제 수
-                    <input inputMode="numeric" placeholder="선택" value={editForm?.maxDailyProblems ?? ""} onChange={(event) => updateEditForm("maxDailyProblems", event.target.value)} />
-                  </label>
-                  <label className="weekendToggle">
-                    <input
-                      checked={editForm?.includeWeekend ?? true}
-                      onChange={(event) => updateEditForm("includeWeekend", event.target.checked)}
-                      type="checkbox"
-                    />
-                    <strong>주말 포함</strong>
-                  </label>
-                </div>
-              </div>
-            ) : (
-              <div className={`dateStrip ${isHomeworkOverdue(homework) ? "danger" : "safe"}`}>
-                <span>{homework.dueDate}</span>
-                <b>{homework.title}</b>
-              </div>
-            )}
+            <div className={`dateStrip ${isHomeworkOverdue(homework) ? "danger" : "safe"}`}>
+              <span>{homework.dueDate}</span>
+              <b>{isHomeworkCompletedForStudent(homework) ? "완료" : homework.title}</b>
+            </div>
           </article>
         );
       })}
@@ -11614,13 +11537,13 @@ function StudentCalendar({ legend = [], markedDays = {}, title = "숙제 이행 
 }
 
 function HomeworkActionCard({ homework, onStudentCheckHomework }) {
-  const isChecked = homework.studentStatus === "checked_done";
+  const isChecked = isHomeworkCompletedForStudent(homework);
   return (
     <article className="homeworkActionCard">
       <div>
         <strong>{homework.title}</strong>
         <p>{homework.assignedDate} → {homework.dueDate}</p>
-        <small>학생: {homework.studentStatus ?? "not_started"} · 강사: {homework.teacherStatus ?? "unverified"}</small>
+        <small>{isChecked ? "완료 처리됨" : "완료 전"} · 강사 확인: {homework.teacherStatus ?? "unverified"}</small>
       </div>
       <button
         className={isChecked ? "softButton" : "primaryButton"}
@@ -13457,9 +13380,6 @@ function OverdueHomework({
             previewMode
             onLogout={() => setStudentPreviewId("")}
             onStudentCheckHomework={() => {}}
-            onStudentCreateHomework={() => {}}
-            onStudentDeleteHomework={() => {}}
-            onStudentUpdateHomework={() => {}}
           />
         </Modal>
       ) : null}
@@ -14206,6 +14126,84 @@ function getStudentTopNotice(student, examPrepRows = [], schoolEvents = [], make
   }
 
   return null;
+}
+
+function buildExamPostTargetsForStudent(student, examPrepRows = [], submissions = []) {
+  if (!student) return [];
+  return dedupeExamPrepRowsForDisplay(examPrepRows)
+    .filter((row) => !row.schoolName || row.schoolName === student.schoolName)
+    .filter((row) => gradeMatchesStudent(row.grade, student.grade))
+    .flatMap((row) => {
+      const entries = normalizeMathExamEntries(row).filter((entry) => entry.date);
+      const fallbackEntries = entries.length
+        ? entries
+        : row.mathExamDate
+          ? [createMathExamEntry(row, 0)]
+          : [];
+      return fallbackEntries
+        .filter((entry) => getDateDiffInDays(entry.date, today) >= 0)
+        .map((entry, index) => {
+          const targetId = `exam_post_${row.examPrepId}_${entry.id || index}_${student.studentId}`;
+          const submission =
+            submissions.find((item) => item.targetId === targetId) ??
+            submissions.find(
+              (item) =>
+                item.studentId === student.studentId &&
+                item.examPrepId === row.examPrepId &&
+                item.examDate === entry.date &&
+                (item.subject || "") === (entry.subject || row.subject || "")
+            ) ??
+            null;
+          const dueDate = addDaysInKorea(entry.date, 1);
+          const isOverdue = getDateDiffInDays(dueDate, today) > 0 && !submission?.submittedAt;
+          return {
+            dueDate,
+            examDate: entry.date,
+            examPrepId: row.examPrepId,
+            examCycle: row.examCycle || currentExamCycle,
+            grade: entry.grade || row.grade || student.grade,
+            isOverdue,
+            label: entry.label || examCycleLabel(row.examCycle || currentExamCycle),
+            schoolName: row.schoolName || student.schoolName,
+            studentId: student.studentId,
+            studentName: student.name,
+            subject: entry.subject || row.subject || "수학",
+            submission,
+            targetId
+          };
+        });
+    })
+    .sort((a, b) => String(a.submission?.submittedAt ? "1" : "0").localeCompare(String(b.submission?.submittedAt ? "1" : "0")) || b.examDate.localeCompare(a.examDate));
+}
+
+function createExamPostSubmissionPayload(target, student, values = {}) {
+  return {
+    targetId: target.targetId,
+    submissionId: values.submissionId || `exam_post_submission_${Date.now()}_${student.studentId}`,
+    studentId: student.studentId,
+    studentName: student.name,
+    grade: student.grade,
+    schoolName: target.schoolName,
+    examPrepId: target.examPrepId,
+    examCycle: target.examCycle,
+    examDate: target.examDate,
+    dueDate: target.dueDate,
+    subject: target.subject,
+    score: values.score ?? "",
+    feeling: values.feeling ?? "",
+    difficulty: values.difficulty ?? "",
+    preparation: values.preparation ?? "",
+    goodPart: values.goodPart ?? "",
+    regretReason: values.regretReason ?? "",
+    neededMore: values.neededMore ?? "",
+    nextGoal: values.nextGoal ?? "",
+    wantedHelp: values.wantedHelp ?? "",
+    freeComment: values.freeComment ?? "",
+    fileMemo: values.fileMemo ?? "",
+    teacherConfirmed: Boolean(values.teacherConfirmed),
+    submittedAt: values.submittedAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
 }
 
 function getTemplateStartTime(template, date) {

@@ -6642,6 +6642,91 @@ textarea.profileEditInput {
   margin: 5px 0;
 }
 
+.studentExamPostPanel,
+.examPostManager {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.studentExamPostPanel.overdue {
+  border-color: #fecaca;
+}
+
+.studentExamPostForm {
+  display: grid;
+  gap: 12px;
+}
+
+.studentExamPostForm label {
+  color: #475569;
+  display: grid;
+  font-weight: 800;
+  gap: 6px;
+}
+
+.studentExamPostForm input,
+.studentExamPostForm select,
+.studentExamPostForm textarea {
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.studentExamPostDone,
+.examPostItem {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.studentExamPostDone strong {
+  font-size: 22px;
+}
+
+.examPostStats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.examPostList {
+  display: grid;
+  gap: 10px;
+}
+
+.examPostItem {
+  align-items: start;
+  grid-template-columns: minmax(180px, 1fr) minmax(220px, 2fr) auto;
+}
+
+.examPostItem.missing {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.examPostItem.submitted {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.examPostItem strong,
+.examPostItem span,
+.examPostItem small,
+.examPostDetail {
+  display: block;
+}
+
+.examPostDetail {
+  color: #475569;
+  display: grid;
+  gap: 4px;
+}
+
 .warningBand {
   background: #fff7ed;
   border-radius: 8px;
