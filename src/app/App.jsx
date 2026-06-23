@@ -10592,6 +10592,10 @@ function StudentManager({
       : students;
   const title = activeTab === "class" ? `${selectedClassTemplate?.name ?? "반별"} 학생 목록` : "전체 학생 목록";
 
+  function getStudentClassName(student) {
+    return templates.find((template) => template.classTemplateId === student.defaultClassTemplateId)?.name ?? "미배정";
+  }
+
   useEffect(() => {
     if (selectedStudentId && !visibleStudents.some((student) => student.studentId === selectedStudentId)) {
       setSelectedStudentId("");
@@ -10616,27 +10620,8 @@ function StudentManager({
         </div>
         <div className="studentListToolbar">
           <button className="primaryButton" onClick={onAddStudent} type="button">+ 학생 추가</button>
-          <span className="studentStatusPill">재원 {visibleStudents.length}</span>
-          <span className="studentStatusPill mutedPill">퇴원 0</span>
-          <button className="greenButton" type="button">전체 확정</button>
-          <button className="softButton" type="button">전체 미확정</button>
-          <select aria-label="학년 필터" defaultValue="전체 학년">
-            <option>전체 학년</option>
-            <option>고1</option>
-            <option>고2</option>
-            <option>중1</option>
-            <option>중2</option>
-          </select>
-          <select aria-label="학교 필터" defaultValue="전체 학교">
-            <option>전체 학교</option>
-            {[...new Set(students.map((student) => student.schoolName).filter(Boolean))].map((school) => (
-              <option key={school}>{school}</option>
-            ))}
-          </select>
-          <select aria-label="담당 필터" defaultValue="전체 담당T">
-            <option>전체 담당T</option>
-            <option>고태영T</option>
-          </select>
+          <span className="studentStatusPill">표시 중 {visibleStudents.length}명</span>
+          <span className="studentStatusPill mutedPill">숨김은 DB 보류 상태로 보존</span>
         </div>
       </div>
 
@@ -10689,6 +10674,7 @@ function StudentManager({
         <div className="studentListRow studentListHead">
           <span>#</span>
           <span>이름</span>
+          <span>반</span>
           <span>아이디</span>
           <span>PIN</span>
           <span>학년</span>
@@ -10696,13 +10682,8 @@ function StudentManager({
           <span>학생전화번호</span>
           <span>학부모전화번호</span>
           <span>출생연도</span>
-          <span>현행평가</span>
-          <span>추가1평가</span>
-          <span>추가2평가</span>
-          <span>오답수정</span>
-          <span>상태</span>
-          <span>퇴원</span>
-          <span>삭제</span>
+          <span>정보확정</span>
+          <span>숨김</span>
         </div>
         {visibleStudents.map((student, index) => (
           <div className="studentListRow" key={student.studentId}>
@@ -10715,6 +10696,17 @@ function StudentManager({
               <span className="studentInitial">{student.name?.[0] ?? "학"}</span>
               <strong>{student.name}</strong>
             </button>
+            <select
+              aria-label={`${student.name} 반`}
+              className="studentClassSelect"
+              value={student.defaultClassTemplateId ?? ""}
+              onChange={(event) => onUpdateStudent(student.studentId, "defaultClassTemplateId", event.target.value)}
+            >
+              <option value="">미배정</option>
+              {templates.map((template) => (
+                <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
+              ))}
+            </select>
             <input
               aria-label={`${student.name} 아이디`}
               className="editableTextCell monoCell"
@@ -10762,39 +10754,6 @@ function StudentManager({
                 <option key={year} value={year}>{year}년</option>
               ))}
             </select>
-            <select
-              value={student.currentEvaluation ?? "-"}
-              onChange={(event) => onUpdateStudent(student.studentId, "currentEvaluation", event.target.value)}
-            >
-              <option>-</option>
-              <option>공수1 누적테스트</option>
-              <option>단원테스트</option>
-              <option>내신대비</option>
-            </select>
-            <select
-              value={student.extraEvaluation1 ?? "-"}
-              onChange={(event) => onUpdateStudent(student.studentId, "extraEvaluation1", event.target.value)}
-            >
-              <option>-</option>
-              <option>추가1평가</option>
-              <option>보충테스트</option>
-            </select>
-            <select
-              value={student.extraEvaluation2 ?? "-"}
-              onChange={(event) => onUpdateStudent(student.studentId, "extraEvaluation2", event.target.value)}
-            >
-              <option>-</option>
-              <option>추가2평가</option>
-              <option>심화테스트</option>
-            </select>
-            <select
-              value={student.correctionAvailable ?? "가능"}
-              onChange={(event) => onUpdateStudent(student.studentId, "correctionAvailable", event.target.value)}
-            >
-              <option>가능</option>
-              <option>보류</option>
-              <option>불가</option>
-            </select>
             <button
               className={student.confirmed === false ? "statusText danger" : "statusText"}
               onClick={() => onUpdateStudent(student.studentId, "confirmed", student.confirmed === false)}
@@ -10802,14 +10761,13 @@ function StudentManager({
             >
               {student.confirmed === false ? "미확정" : "확정"}
             </button>
-            <button className="withdrawButton" type="button">퇴원</button>
             <button
-              aria-label={`${student.name} 삭제`}
+              aria-label={`${student.name} 숨김`}
               className="trashButton"
               onClick={() => setDeleteStudentId(student.studentId)}
               type="button"
             >
-              🗑
+              숨김
             </button>
           </div>
         ))}
@@ -10821,7 +10779,7 @@ function StudentManager({
       {selectedStudent ? (
         <StudentProfileModal
           academyTests={selectedAcademyTests}
-          className={selectedClassTemplate?.name ?? "전체"}
+          className={getStudentClassName(selectedStudent)}
           onAddAcademyTest={onAddAcademyTest}
           onAddScore={onAddScore}
           onClose={() => setSelectedStudentId("")}
