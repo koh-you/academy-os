@@ -115,6 +115,12 @@ const assignmentStatusParentMessages = {
   not_checked: "오늘은 과제 검사가 아직 완료되지 않았습니다. 확인 후 필요한 내용을 다시 안내드리겠습니다."
 };
 
+const examPostFeelingOptions = ["기대보다 잘 봤다", "비슷했다", "기대에 못 미쳤다", "모르겠다"];
+const examPostScaleOptions = Array.from({ length: 11 }, (_, index) => String(index));
+const examPostRegretReasonOptions = ["아는데 실수했다", "준비가 부족했다", "시간이 부족했다", "멘탈이 흔들렸다", "컨디션 문제", "기타"];
+const examPostStudyDifficultyOptions = ["개념이 헷갈린다", "문제가 안풀린다", "공부 의지가 안 생긴다", "시간이 없다", "기타"];
+const examPostAcademyHelpOptions = ["많이 도움됐다", "어느 정도 됐다", "잘 모르겠다", "별로 도움이 안 됐다"];
+
 function normalizeAssignmentStatusValue(value) {
   const trimmedValue = String(value ?? "").trim();
   return assignmentStatusAliases[trimmedValue] ?? trimmedValue;
@@ -7727,7 +7733,19 @@ function ExamPostSubmissionManager({ rows = [], selectedClass, selectedExamCycle
                   <span>점수 <b>{submission.score || "-"}</b></span>
                   <span>난이도 <b>{submission.difficulty || "-"}</b></span>
                   <span>준비 <b>{submission.preparation || "-"}</b></span>
-                  <p>{submission.goodPart || submission.regretReason || submission.wantedHelp || "학생 메모 없음"}</p>
+                  <span>전체 소감 <b>{submission.feeling || "-"}</b></span>
+                  <span>학원 도움 <b>{submission.academyHelp || "-"}</b></span>
+                  <p><b>잘 준비한 부분</b>{submission.goodPart || "-"}</p>
+                  <p><b>실력 발휘 단원/유형</b>{submission.strongUnit || "-"}</p>
+                  <p><b>아쉬웠던 이유</b>{submission.regretReason || "-"}</p>
+                  <p><b>더 준비할 부분</b>{submission.neededMore || "-"}</p>
+                  <p><b>시험장 아쉬운 순간</b>{submission.regretMoment || "-"}</p>
+                  <p><b>공부 과정 어려움</b>{[...(submission.studyDifficulties ?? []), submission.studyDifficultyOther].filter(Boolean).join(", ") || "-"}</p>
+                  <p><b>수업/자료 피드백</b>{submission.academyFeedback || "-"}</p>
+                  <p><b>다음 목표</b>{submission.nextGoal || "-"}</p>
+                  <p><b>바꾸고 싶은 것</b>{submission.changeForNextExam || "-"}</p>
+                  <p><b>도움 요청</b>{submission.wantedHelp || "-"}</p>
+                  <p><b>건의사항</b>{submission.freeComment || "-"}</p>
                   {submission.fileAttachments?.length ? (
                     <div className="examPostFileList">
                       {submission.fileAttachments.map((file, index) => (
@@ -11076,9 +11094,18 @@ function StudentExamPostSubmissionPanel({ targets = [], selectedStudent, onSubmi
     difficulty: target.submission?.difficulty ?? "5",
     preparation: target.submission?.preparation ?? "5",
     goodPart: target.submission?.goodPart ?? "",
+    strongUnit: target.submission?.strongUnit ?? "",
     regretReason: target.submission?.regretReason ?? "",
+    regretReasons: target.submission?.regretReasons ?? [],
+    regretReasonOther: target.submission?.regretReasonOther ?? "",
+    regretMoment: target.submission?.regretMoment ?? "",
+    studyDifficulties: target.submission?.studyDifficulties ?? [],
+    studyDifficultyOther: target.submission?.studyDifficultyOther ?? "",
     neededMore: target.submission?.neededMore ?? "",
+    academyHelp: target.submission?.academyHelp ?? "",
+    academyFeedback: target.submission?.academyFeedback ?? "",
     nextGoal: target.submission?.nextGoal ?? "",
+    changeForNextExam: target.submission?.changeForNextExam ?? "",
     wantedHelp: target.submission?.wantedHelp ?? "",
     freeComment: target.submission?.freeComment ?? "",
     fileMemo: target.submission?.fileMemo ?? "",
@@ -11097,6 +11124,16 @@ function StudentExamPostSubmissionPanel({ targets = [], selectedStudent, onSubmi
         [field]: value
       }
     }));
+  }
+
+  function toggleDraftList(field, value) {
+    const currentValues = Array.isArray(draft[field]) ? draft[field] : [];
+    updateDraft(
+      field,
+      currentValues.includes(value)
+        ? currentValues.filter((item) => item !== value)
+        : [...currentValues, value]
+    );
   }
 
   function updateFiles(fileList) {
@@ -11134,6 +11171,7 @@ function StudentExamPostSubmissionPanel({ targets = [], selectedStudent, onSubmi
     }
     onSubmitExamPostSubmission(target, selectedStudent, {
       ...draft,
+      regretReason: [...(draft.regretReasons ?? []), draft.regretReasonOther].filter(Boolean).join(", "),
       fileAttachments
     });
     setDrafts((current) => {
@@ -11182,6 +11220,14 @@ function StudentExamPostSubmissionPanel({ targets = [], selectedStudent, onSubmi
         </div>
       ) : (
         <form className="studentExamPostForm" onSubmit={submit}>
+          <div className="examPostAutoInfo">
+            <span>이름 <b>{selectedStudent?.name ?? "-"}</b></span>
+            <span>학년 <b>{selectedStudent?.grade ?? target.grade ?? "-"}</b></span>
+            <span>학교 <b>{target.schoolName || selectedStudent?.schoolName || "-"}</b></span>
+            <span>시험 <b>{target.label || examCycleLabel(target.examCycle)}</b></span>
+            <span>과목 <b>{target.subject}</b></span>
+            <span>시험일 <b>{target.examDate}</b></span>
+          </div>
           <div className="fieldGrid two">
             <label>
               점수/등급
@@ -11191,39 +11237,102 @@ function StudentExamPostSubmissionPanel({ targets = [], selectedStudent, onSubmi
               전체 소감
               <select value={draft.feeling} onChange={(event) => updateDraft("feeling", event.target.value)}>
                 <option value="">선택</option>
-                <option>기대보다 잘 봤다</option>
-                <option>비슷했다</option>
-                <option>기대에 못 미쳤다</option>
-                <option>모르겠다</option>
+                {examPostFeelingOptions.map((option) => <option key={option}>{option}</option>)}
               </select>
             </label>
             <label>
               난이도 0~10
-              <input inputMode="numeric" value={draft.difficulty} onChange={(event) => updateDraft("difficulty", event.target.value)} />
+              <select value={draft.difficulty} onChange={(event) => updateDraft("difficulty", event.target.value)}>
+                {examPostScaleOptions.map((option) => <option key={option}>{option}</option>)}
+              </select>
             </label>
             <label>
               준비 충분도 0~10
-              <input inputMode="numeric" value={draft.preparation} onChange={(event) => updateDraft("preparation", event.target.value)} />
+              <select value={draft.preparation} onChange={(event) => updateDraft("preparation", event.target.value)}>
+                {examPostScaleOptions.map((option) => <option key={option}>{option}</option>)}
+              </select>
             </label>
           </div>
           <label>
-            잘된 점
+            스스로 잘 준비했다고 느낀 부분이 있다면?
             <textarea value={draft.goodPart} onChange={(event) => updateDraft("goodPart", event.target.value)} rows="2" />
           </label>
           <label>
-            아쉬웠던 이유
-            <textarea value={draft.regretReason} onChange={(event) => updateDraft("regretReason", event.target.value)} rows="2" />
+            실력을 발휘할 수 있었던 문제 유형이나 단원은?
+            <textarea value={draft.strongUnit} onChange={(event) => updateDraft("strongUnit", event.target.value)} rows="2" />
+          </label>
+          <div className="examPostChoiceGroup">
+            <strong>아쉬웠던 이유가 있다면? (해당 모두 선택)</strong>
+            <div>
+              {examPostRegretReasonOptions.map((option) => (
+                <label key={option}>
+                  <input
+                    checked={(Array.isArray(draft.regretReasons) ? draft.regretReasons : []).includes(option)}
+                    onChange={() => toggleDraftList("regretReasons", option)}
+                    type="checkbox"
+                  />
+                  {option}
+                </label>
+              ))}
+            </div>
+          </div>
+          <label>
+            다른 이유가 있다면?
+            <textarea value={draft.regretReasonOther} onChange={(event) => updateDraft("regretReasonOther", event.target.value)} rows="2" />
           </label>
           <label>
-            다음 시험 목표 / 선생님께 도움받고 싶은 부분
-            <textarea
-              value={draft.wantedHelp || draft.nextGoal}
-              onChange={(event) => {
-                updateDraft("wantedHelp", event.target.value);
-                updateDraft("nextGoal", event.target.value);
-              }}
-              rows="2"
-            />
+            더 준비할걸 했던 부분이 있다면?
+            <textarea value={draft.neededMore} onChange={(event) => updateDraft("neededMore", event.target.value)} rows="2" />
+          </label>
+          <label>
+            시험장에서 가장 아쉬웠던 순간은?
+            <textarea value={draft.regretMoment} onChange={(event) => updateDraft("regretMoment", event.target.value)} rows="2" />
+          </label>
+          <div className="examPostChoiceGroup">
+            <strong>수학 공부과정에서 가장 힘들었던 것은?</strong>
+            <div>
+              {examPostStudyDifficultyOptions.map((option) => (
+                <label key={option}>
+                  <input
+                    checked={(Array.isArray(draft.studyDifficulties) ? draft.studyDifficulties : []).includes(option)}
+                    onChange={() => toggleDraftList("studyDifficulties", option)}
+                    type="checkbox"
+                  />
+                  {option}
+                </label>
+              ))}
+            </div>
+          </div>
+          <label>
+            다른 이유가 있다면? (2)
+            <textarea value={draft.studyDifficultyOther} onChange={(event) => updateDraft("studyDifficultyOther", event.target.value)} rows="2" />
+          </label>
+          <label>
+            학원 수업과 자료가 도움이 됐나요?
+            <select value={draft.academyHelp} onChange={(event) => updateDraft("academyHelp", event.target.value)}>
+              <option value="">선택</option>
+              {examPostAcademyHelpOptions.map((option) => <option key={option}>{option}</option>)}
+            </select>
+          </label>
+          <label>
+            수업이나 자료에서 좋았던 점 / 아쉬운 점이 있다면?
+            <textarea value={draft.academyFeedback} onChange={(event) => updateDraft("academyFeedback", event.target.value)} rows="2" />
+          </label>
+          <label>
+            다음 시험 목표 점수 또는 등급은?
+            <input value={draft.nextGoal} onChange={(event) => updateDraft("nextGoal", event.target.value)} placeholder="예: 90점, 1등급" />
+          </label>
+          <label>
+            다음 시험을 위해 가장 바꾸고 싶은 것 한 가지는?
+            <textarea value={draft.changeForNextExam} onChange={(event) => updateDraft("changeForNextExam", event.target.value)} rows="2" />
+          </label>
+          <label>
+            선생님께 꼭 도움받고 싶은 부분이 있다면?
+            <textarea value={draft.wantedHelp} onChange={(event) => updateDraft("wantedHelp", event.target.value)} rows="2" />
+          </label>
+          <label>
+            선생님한테 하고 싶은 말, 건의사항, 뭐든 OK
+            <textarea value={draft.freeComment} onChange={(event) => updateDraft("freeComment", event.target.value)} rows="2" />
           </label>
           <label>
             시험지 제출 메모
@@ -14429,9 +14538,18 @@ function createExamPostSubmissionPayload(target, student, values = {}) {
     difficulty: values.difficulty ?? "",
     preparation: values.preparation ?? "",
     goodPart: values.goodPart ?? "",
+    strongUnit: values.strongUnit ?? "",
     regretReason: values.regretReason ?? "",
+    regretReasons: Array.isArray(values.regretReasons) ? values.regretReasons : [],
+    regretReasonOther: values.regretReasonOther ?? "",
+    regretMoment: values.regretMoment ?? "",
+    studyDifficulties: Array.isArray(values.studyDifficulties) ? values.studyDifficulties : [],
+    studyDifficultyOther: values.studyDifficultyOther ?? "",
     neededMore: values.neededMore ?? "",
+    academyHelp: values.academyHelp ?? "",
+    academyFeedback: values.academyFeedback ?? "",
     nextGoal: values.nextGoal ?? "",
+    changeForNextExam: values.changeForNextExam ?? "",
     wantedHelp: values.wantedHelp ?? "",
     freeComment: values.freeComment ?? "",
     fileMemo: values.fileMemo ?? "",
