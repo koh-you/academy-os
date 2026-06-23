@@ -6802,6 +6802,18 @@ textarea.profileEditInput {
   outline: none;
 }
 
+.examPostValidationMessage {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-left: 4px solid #dc2626;
+  border-radius: 8px;
+  color: #991b1b;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.45;
+  padding: 12px 14px;
+}
+
 .examPostUploadBox {
   background: #f8fafc;
   border: 1px dashed #bfdbfe;
