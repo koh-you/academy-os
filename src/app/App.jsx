@@ -146,6 +146,10 @@ function getLessonContent(record) {
   return record?.lessonProgress?.trim() || record?.progress?.trim() || record?.lessonContent?.trim() || "";
 }
 
+function isStudentVisibleHomework(homework) {
+  return homework?.homeworkType !== "previous";
+}
+
 function normalizeMessageText(value) {
   return (value ?? "")
     .toString()
@@ -10398,7 +10402,9 @@ function StudentPortal({ homeworks, reportSnapshots, students, onStudentCheckHom
     students.find((student) => student.name === "TestS12")?.studentId ?? students[0]?.studentId ?? ""
   );
   const selectedStudent = students.find((student) => student.studentId === selectedStudentId) ?? students[0];
-  const studentHomeworks = homeworks.filter((homework) => homework.studentId === selectedStudent?.studentId);
+  const studentHomeworks = homeworks
+    .filter((homework) => homework.studentId === selectedStudent?.studentId)
+    .filter(isStudentVisibleHomework);
   const todayHomeworks = studentHomeworks.filter((homework) => homework.assignedDate === today);
   const overdueHomeworks = studentHomeworks.filter((homework) => isHomeworkOverdue(homework));
   const studentReports = reportSnapshots.filter((snapshot) => snapshot.studentId === selectedStudent?.studentId);
@@ -10547,7 +10553,9 @@ function StudentPortalV2({
   });
 
   const selectedStudent = students.find((student) => student.studentId === selectedStudentId) ?? students[0];
-  const studentHomeworks = homeworks.filter((homework) => homework.studentId === selectedStudent?.studentId);
+  const studentHomeworks = homeworks
+    .filter((homework) => homework.studentId === selectedStudent?.studentId)
+    .filter(isStudentVisibleHomework);
   const todayHomeworks = studentHomeworks.filter((homework) => homework.assignedDate === today);
   const overdueHomeworks = studentHomeworks.filter((homework) => isHomeworkOverdue(homework));
   const studentReports = reportSnapshots.filter((snapshot) => snapshot.studentId === selectedStudent?.studentId);

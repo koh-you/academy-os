@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-06-23 학생 숙제 탭 중복 표시 보정
+
+- 상태: 완료
+- 사용자 요청: 학생 탭에 같은 숙제가 2개씩 등록되어 보인다.
+- 원인: 수업일지에서 `다음 숙제`를 저장하면 다음 수업의 확인용 `previous` 숙제가 자동 생성된다. 이 연결용 `previous` 레코드는 수업일지/수업 브리핑에서 지난 숙제를 보여주기 위한 데이터인데, 학생 `전체 숙제` 탭도 모든 숙제를 그대로 보여줘 같은 제목이 두 장으로 보였다.
+- 조치: 학생 화면에서 실제 수행 대상 숙제만 보이도록 `homeworkType: "previous"` 레코드를 숨기는 `isStudentVisibleHomework()` 필터를 추가했다. 이제 학생 `오늘 할 숙제`, `밀린 숙제`, `전체 숙제`, 숙제 통계는 연결용 지난 숙제를 제외하고 표시한다. 수업 브리핑의 지난 숙제 매핑에는 기존 `previous` 레코드를 계속 사용한다.
+- 회귀 방지: `scripts/scenario-tests-production.cjs`에 학생 숙제 목록이 연결용 지난 숙제 중복을 숨기는지 확인하는 체크를 추가했다.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과, `npm run build` 통과, `npm run test:production` 110개 통과.
+- SQL Editor 작업 필요 없음: 기존 homework 데이터를 삭제하지 않고 학생 화면 표시 필터만 보정했다.
+
 ## 2026-06-23 학생 수업 브리핑 수업일지 매핑 보정
 
 - 상태: 완료

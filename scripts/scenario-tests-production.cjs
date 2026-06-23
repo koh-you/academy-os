@@ -57,6 +57,7 @@ check("20 notification management screen exists", hasAll(app, ["NotificationCent
 check("21 supplement schedule creates calendar lesson", hasAll(app, ["handleScheduleSupplementTask", "createSupplementLessonId", "linkedLessonId", "supplementProgressBadge"]));
 check("22 student portal is tablet first", hasAll(app, ["studentPortalTabletFirst", "teacherPreviewPortal"]) && css.includes(".studentPortalTabletFirst .metricGrid"));
 check("22b student lesson briefing maps journal content and homework", hasAll(app, ["function StudentLessonHistoryCalendar({ homeworks = [], lessons = [], recordsWithLessons = [], selectedStudent })", "const lessonContent = selectedRecord ? getLessonContent(selectedRecord) : \"\"", "getLessonHomework(homeworks, selectedLesson, selectedStudent, \"previous\", lessons)", "getLessonHomework(homeworks, selectedLesson, selectedStudent, \"next\", lessons)", "previousHomeworkText || \"기록 전\"", "nextHomeworkText || \"기록 전\""]));
+check("22c student homework list hides linked previous homework duplicates", hasAll(app, ["function isStudentVisibleHomework(homework)", "homework?.homeworkType !== \"previous\"", ".filter(isStudentVisibleHomework)"]));
 check("23 parent portal is mobile first", hasAll(app, ["parentPortalMobileFirst", "parentPortal"]) && css.includes(".parentPortalMobileFirst .metricGrid"));
 check("24 responsive layout principles doc exists", fs.existsSync(path.join(root, "docs", "responsive-layout-principles.md")));
 check("25 ai tools menu replaces ai variant label", hasAll(app, ['id: "aiVariants"', "AIVariantProblemCenter"]));
