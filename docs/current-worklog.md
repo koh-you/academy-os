@@ -1,5 +1,16 @@
 # Academy OS Current Worklog
 
+## 2026-06-23 시험관리 학교명 매핑 정규화 보정
+
+- 상태: 완료
+- 사용자 요청: 시험 관리 탭에 가져온 학교별 정보가 Notion 쪽 정보와 잘 매핑되지 않는 것 같다고 확인을 요청했다.
+- 원인 추정: 현재 코드에는 직접적인 Notion API 동기화 흐름은 없고, Notion/수동 입력/학생DB에서 넘어온 학교별 정보가 `exam_prep_rows`, `school_events`, 학생 정보와 매칭된다. 이때 일부 경로가 `학교명 === 학교명`으로 비교해 `자운고`와 `자운고등학교`, `정의여고`와 `정의여자고등학교`처럼 표기가 다르면 시험관리/학사일정/학생 포털 매칭이 빠질 수 있었다.
+- 조치: 프론트에 `normalizeSchoolName()`과 `schoolNamesMatch()`를 추가해 공백, 구분기호, `고등학교/여자고등학교/남자고등학교/중학교` 표기를 비교용으로 정규화했다. 시험관리 논리키, 출판사 동기화 키, 학사일정 수동 입력 → 시험관리 행 동기화, 직전수업 학생 매칭, 학생 상단 D-day/시험 후 제출 대상 매칭에 적용했다.
+- 서버 스코프: `/api/portal-data`에서도 같은 학교명/학년 정규화를 사용해 학생 로그인 후 내려받는 시험정보와 학교일정이 긴 학교명 표기 때문에 누락되지 않게 했다.
+- DB 중복 정리: `api/routes/coreData.js`의 시험관리 중복 논리키에도 학교명 정규화를 적용해 같은 학교가 표기 차이로 별도 행처럼 취급되는 위험을 줄였다.
+- 회귀 방지: `scripts/scenario-tests-production.cjs`에 Notion식 학교명 표기 정규화 매칭 검사를 추가했다.
+- 검증: `node --check api/server.js` 통과, `node --check api/routes/coreData.js` 통과, `node --check scripts/scenario-tests-production.cjs` 통과, `npm run build` 통과, `npm run test:production` 133개 통과. `node --check src/app/App.jsx`는 Node 24가 `.jsx` 확장자를 직접 문법 검사하지 못해 `ERR_UNKNOWN_FILE_EXTENSION`으로 실행 불가였고, 프론트 문법은 Vite 빌드로 확인했다.
+
 ## 2026-06-23 과제상태 알림문구 최종안 반영
 
 - 상태: 완료

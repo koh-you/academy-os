@@ -70,6 +70,40 @@ const defaultTeacherAccount = {
   password: process.env.TEACHER_PASSWORD ?? "1234"
 };
 
+function normalizeGradeLabel(grade = "") {
+  const value = String(grade || "").trim();
+  if (value.includes("1")) return value.includes("중") ? "중1" : "고1";
+  if (value.includes("2")) return value.includes("중") ? "중2" : "고2";
+  if (value.includes("3")) return value.includes("중") ? "중3" : "고3";
+  return value;
+}
+
+function normalizeSchoolName(value = "") {
+  return String(value || "")
+    .trim()
+    .replace(/\s+/g, "")
+    .replace(/[·ㆍ.,_/\\-]/g, "")
+    .replace(/여자고등학교/g, "여고")
+    .replace(/여자고/g, "여고")
+    .replace(/남자고등학교/g, "남고")
+    .replace(/남자고/g, "남고")
+    .replace(/고등학교/g, "고")
+    .replace(/중학교/g, "중");
+}
+
+function schoolNamesMatch(firstSchool = "", secondSchool = "", { allowBlank = true } = {}) {
+  if (!firstSchool || !secondSchool) return allowBlank;
+  const firstText = normalizeSchoolName(firstSchool);
+  const secondText = normalizeSchoolName(secondSchool);
+  if (!firstText || !secondText) return allowBlank;
+  return firstText === secondText || firstText.includes(secondText) || secondText.includes(firstText);
+}
+
+function gradesMatch(firstGrade = "", secondGrade = "") {
+  if (!firstGrade || !secondGrade) return true;
+  return normalizeGradeLabel(firstGrade) === normalizeGradeLabel(secondGrade);
+}
+
 function hashPassword(password, salt = crypto.randomBytes(16).toString("hex")) {
   const hash = crypto.pbkdf2Sync(String(password), salt, 120_000, 32, "sha256").toString("hex");
   return `pbkdf2_sha256$120000$${salt}$${hash}`;
@@ -233,10 +267,10 @@ async function getPortalData(session) {
     homeworks: (homeworksResult.homeworks ?? []).filter((homework) => homework.studentId === session.studentId),
     makeupTasks: (makeupTasksResult.makeupTasks ?? []).filter((task) => task.studentId === session.studentId),
     examPrepRows: (examPrepRowsResult.examPrepRows ?? []).filter((row) =>
-      (!row.schoolName || row.schoolName === student.schoolName) && (!row.grade || row.grade === student.grade)
+      schoolNamesMatch(row.schoolName, student.schoolName) && gradesMatch(row.grade, student.grade)
     ),
     schoolEvents: (schoolEventsResult.schoolEvents ?? []).filter((event) =>
-      !event.schoolName || event.schoolName === student.schoolName
+      schoolNamesMatch(event.schoolName, student.schoolName)
     ),
     materials: materialsResult.materials ?? [],
     reportSnapshots: (states.reportSnapshots ?? []).filter((item) => item.studentId === session.studentId),

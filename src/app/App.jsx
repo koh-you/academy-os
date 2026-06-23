@@ -805,6 +805,27 @@ function normalizeGradeLabel(grade = "") {
   return value;
 }
 
+function normalizeSchoolName(value = "") {
+  return String(value || "")
+    .trim()
+    .replace(/\s+/g, "")
+    .replace(/[·ㆍ.,_/\\-]/g, "")
+    .replace(/여자고등학교/g, "여고")
+    .replace(/여자고/g, "여고")
+    .replace(/남자고등학교/g, "남고")
+    .replace(/남자고/g, "남고")
+    .replace(/고등학교/g, "고")
+    .replace(/중학교/g, "중");
+}
+
+function schoolNamesMatch(firstSchool = "", secondSchool = "", { allowBlank = true } = {}) {
+  if (!firstSchool || !secondSchool) return allowBlank;
+  const firstText = normalizeSchoolName(firstSchool);
+  const secondText = normalizeSchoolName(secondSchool);
+  if (!firstText || !secondText) return allowBlank;
+  return firstText === secondText || firstText.includes(secondText) || secondText.includes(firstText);
+}
+
 function getTextbookFromExamPrep(student) {
   const key = `${student.schoolName || ""}_${normalizeGradeLabel(student.grade)}`;
   return examPrepTextbookBySchoolGrade[key] ?? student.textbook ?? "";
@@ -908,7 +929,7 @@ function formatCalendarSummaryLabel(event = {}) {
 function getExamPrepLogicalKey(row = {}) {
   return [
     row.examCycle || currentExamCycle,
-    compactCalendarLabel(row.schoolName || "학교 미입력"),
+    normalizeSchoolName(row.schoolName || "") || compactCalendarLabel(row.schoolName || "학교 미입력"),
     compactCalendarLabel(row.grade || "학년 미입력"),
     compactCalendarLabel(row.subject || "공통수학1")
   ].join("|");
@@ -983,9 +1004,9 @@ function examCycleTermKey(examCycle = "") {
 function examPublisherLinkKey(row) {
   return [
     examCycleTermKey(row.examCycle),
-    row.schoolName || "학교 미입력",
-    row.grade || "학년 미입력",
-    row.subject || "공통수학1"
+    normalizeSchoolName(row.schoolName || "") || "학교미입력",
+    compactCalendarLabel(normalizeGradeLabel(row.grade || "")) || "학년미입력",
+    compactCalendarLabel(row.subject || "공통수학1")
   ].join("_");
 }
 
@@ -1090,7 +1111,9 @@ function getSchoolCalendarTargetRows(rows = [], event = {}) {
   const eventSubject = normalizeMathSubject(event.examSubject || event.subject || "");
   const hasSpecificSubject = event.type === "mathExam" && eventSubject && !["수학", "수학시험"].includes(eventSubject);
   return rows.filter((row) => {
-    if ((row.schoolName || "") !== (event.schoolName || "")) return false;
+    const rowSchool = row.schoolName || "";
+    const eventSchool = event.schoolName || "";
+    if ((rowSchool || eventSchool) && !schoolNamesMatch(rowSchool, eventSchool, { allowBlank: false })) return false;
     if (event.examCycle && row.examCycle !== event.examCycle) return false;
     if (!eventGrade) return true;
     if (normalizeGradeLabel(row.grade || "") !== eventGrade) return false;
@@ -14285,7 +14308,9 @@ function createPreExamGeneratedKey(event = {}) {
 function getStudentsForSchoolCalendarEvent(students = [], event = {}) {
   const eventGrade = normalizeGradeLabel(event.grade || "");
   return students.filter((student) => {
-    if ((student.schoolName || "") !== (event.schoolName || "")) return false;
+    const studentSchool = student.schoolName || "";
+    const eventSchool = event.schoolName || "";
+    if ((studentSchool || eventSchool) && !schoolNamesMatch(studentSchool, eventSchool, { allowBlank: false })) return false;
     if (!eventGrade) return true;
     return normalizeGradeLabel(student.grade || "") === eventGrade;
   });
@@ -14527,18 +14552,14 @@ function gradeMatchesStudent(rowGrade = "", studentGrade = "") {
 }
 
 function schoolMatchesStudent(rowSchool = "", studentSchool = "") {
-  if (!rowSchool || !studentSchool) return true;
-  const normalize = (value) => String(value).replace(/\s/g, "").replace(/고등학교/g, "고").trim();
-  const rowText = normalize(rowSchool);
-  const studentText = normalize(studentSchool);
-  return rowText === studentText || rowText.includes(studentText) || studentText.includes(rowText);
+  return schoolNamesMatch(rowSchool, studentSchool);
 }
 
 function getStudentTopNotice(student, examPrepRows = [], schoolEvents = [], makeupTasks = []) {
   if (!student) return null;
   const examCandidates = examPrepRows
     .filter((row) => row.mathExamDate)
-    .filter((row) => !row.schoolName || row.schoolName === student.schoolName)
+    .filter((row) => schoolNamesMatch(row.schoolName, student.schoolName))
     .filter((row) => gradeMatchesStudent(row.grade, student.grade))
     .map((row) => ({
       date: row.mathExamDate,
@@ -14573,7 +14594,7 @@ function getStudentTopNotice(student, examPrepRows = [], schoolEvents = [], make
 
   const event = schoolEvents
     .filter((item) => item.date)
-    .filter((item) => !item.schoolName || item.schoolName === student.schoolName)
+    .filter((item) => schoolNamesMatch(item.schoolName, student.schoolName))
     .filter((item) => getDateDiffInDays(today, item.date) >= 0)
     .sort((a, b) => String(a.date).localeCompare(String(b.date)))[0];
   if (event) {
