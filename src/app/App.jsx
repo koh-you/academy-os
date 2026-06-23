@@ -11085,6 +11085,7 @@ function StudentExamPostSubmissionPanel({ targets = [], selectedStudent, onSubmi
     ...(drafts[target.targetId] ?? {})
   };
   const isSubmitted = Boolean(target.submission?.submittedAt);
+  const isOpen = target.isOpen ?? getDateDiffInDays(today, target.examDate) <= 0;
   const selectedFiles = filesByTarget[target.targetId] ?? [];
   const submittedFiles = target.submission?.fileAttachments ?? [];
 
@@ -11151,10 +11152,10 @@ function StudentExamPostSubmissionPanel({ targets = [], selectedStudent, onSubmi
     <section className={`studentExamPostPanel ${target.isOverdue && !isSubmitted ? "overdue" : ""}`}>
       <div className="sectionHeader compact">
         <div>
-          <h2>{isSubmitted ? "시험 후 제출 완료" : "시험 후 제출 필요"}</h2>
+          <h2>{isSubmitted ? "시험 후 제출 완료" : isOpen ? "시험 후 제출 필요" : "시험 후 제출 예정"}</h2>
           <p className="muted">
             {target.schoolName} · {target.grade} · {target.subject} · {target.examDate}
-            {isSubmitted ? ` · 제출 ${formatKoreanDateTime(target.submission.submittedAt)}` : ` · 마감 ${target.dueDate} 23:59`}
+            {isSubmitted ? ` · 제출 ${formatKoreanDateTime(target.submission.submittedAt)}` : isOpen ? ` · 마감 ${target.dueDate} 23:59` : ` · 시험 후 마감 ${target.dueDate} 23:59`}
           </p>
         </div>
       </div>
@@ -11594,7 +11595,7 @@ function StudentMyPageTab({
               </div>
               <div className="progressList">
                 <h3>숙제 이행률</h3>
-                <ProgressLine label="2026년 06월" value={stats.completionRate} suffix={`${stats.done}/${stats.total}개 · ${stats.completionRate}%`} />
+                <ProgressLine label="2026년 06월" value={stats.completionRate} suffix={`${formatHomeworkDoneCount(stats.done)}/${stats.total}개 · ${stats.completionRate}%`} />
               </div>
               <StudentCalendar
                 title="숙제 이행 달력"
@@ -14297,6 +14298,14 @@ function gradeMatchesStudent(rowGrade = "", studentGrade = "") {
   return rowText.includes(studentText) || (rowNumber && studentNumber && rowNumber === studentNumber);
 }
 
+function schoolMatchesStudent(rowSchool = "", studentSchool = "") {
+  if (!rowSchool || !studentSchool) return true;
+  const normalize = (value) => String(value).replace(/\s/g, "").replace(/고등학교/g, "고").trim();
+  const rowText = normalize(rowSchool);
+  const studentText = normalize(studentSchool);
+  return rowText === studentText || rowText.includes(studentText) || studentText.includes(rowText);
+}
+
 function getStudentTopNotice(student, examPrepRows = [], schoolEvents = [], makeupTasks = []) {
   if (!student) return null;
   const examCandidates = examPrepRows
@@ -14355,7 +14364,7 @@ function getStudentTopNotice(student, examPrepRows = [], schoolEvents = [], make
 function buildExamPostTargetsForStudent(student, examPrepRows = [], submissions = []) {
   if (!student) return [];
   return dedupeExamPrepRowsForDisplay(examPrepRows)
-    .filter((row) => !row.schoolName || row.schoolName === student.schoolName)
+    .filter((row) => schoolMatchesStudent(row.schoolName, student.schoolName))
     .filter((row) => gradeMatchesStudent(row.grade, student.grade))
     .flatMap((row) => {
       const entries = normalizeMathExamEntries(row).filter((entry) => entry.date);
@@ -14365,7 +14374,10 @@ function buildExamPostTargetsForStudent(student, examPrepRows = [], submissions 
           ? [createMathExamEntry(row, 0)]
           : [];
       return fallbackEntries
-        .filter((entry) => getDateDiffInDays(entry.date, today) >= 0)
+        .filter((entry) => {
+          const daysFromTodayToExam = getDateDiffInDays(today, entry.date);
+          return daysFromTodayToExam <= 7;
+        })
         .map((entry, index) => {
           const targetId = `exam_post_${row.examPrepId}_${entry.id || index}_${student.studentId}`;
           const submission =
@@ -14379,14 +14391,17 @@ function buildExamPostTargetsForStudent(student, examPrepRows = [], submissions 
             ) ??
             null;
           const dueDate = addDaysInKorea(entry.date, 1);
+          const daysFromTodayToExam = getDateDiffInDays(today, entry.date);
           const isOverdue = getDateDiffInDays(dueDate, today) > 0 && !submission?.submittedAt;
           return {
             dueDate,
+            daysFromTodayToExam,
             examDate: entry.date,
             examPrepId: row.examPrepId,
             examCycle: row.examCycle || currentExamCycle,
             grade: entry.grade || row.grade || student.grade,
             isOverdue,
+            isOpen: daysFromTodayToExam <= 0,
             label: entry.label || examCycleLabel(row.examCycle || currentExamCycle),
             schoolName: row.schoolName || student.schoolName,
             studentId: student.studentId,
@@ -14660,23 +14675,42 @@ function dedupeActionableHomeworks(homeworks) {
 }
 
 function calculateStreak(homeworks) {
-  return homeworks.filter((homework) => homework.teacherStatus === "verified").length;
+  return homeworks.filter((homework) => getHomeworkCompletionCredit(homework) >= 1).length;
+}
+
+function getHomeworkCompletionCredit(homework) {
+  const normalizedStatus = normalizeAssignmentStatusValue(homework?.assignmentStatus ?? homework?.incompleteHomework ?? "");
+  if (normalizedStatus === "complete_thorough") return 1;
+  if (normalizedStatus === "partial_80") return 0.8;
+  if (normalizedStatus === "partial_50") return 0.5;
+  if (["known_only", "too_hard", "answer_suspected"].includes(normalizedStatus)) return 0.5;
+  if (["not_done", "not_checked"].includes(normalizedStatus)) return 0;
+  if (homework?.teacherStatus === "verified" || homework?.status === "verified") return 1;
+  if (homework?.teacherStatus === "partial") return 0.5;
+  if (homework?.teacherStatus === "missing") return 0;
+  if (homework?.studentStatus === "checked_done") return 1;
+  return 0;
+}
+
+function formatHomeworkDoneCount(value) {
+  if (Number.isInteger(value)) return String(value);
+  return value.toFixed(1).replace(/\.0$/, "");
 }
 
 function calculateHomeworkStats(homeworks) {
   const total = homeworks.length;
-  const done = homeworks.filter(isHomeworkResolved).length;
+  const done = homeworks.reduce((sum, homework) => sum + getHomeworkCompletionCredit(homework), 0);
   const calendarDays = {};
   homeworks.forEach((homework) => {
     const day = Number(String(homework.dueDate || homework.assignedDate || "").split("-")[2]);
     if (!day) return;
-    calendarDays[day] = isHomeworkResolved(homework) ? "done" : "missed";
+    calendarDays[day] = getHomeworkCompletionCredit(homework) > 0 ? "done" : "missed";
   });
   return {
     total,
     done,
     completionRate: total ? Math.round((done / total) * 100) : 0,
-    perfectDays: homeworks.filter((homework) => homework.teacherStatus === "verified").length,
+    perfectDays: homeworks.filter((homework) => getHomeworkCompletionCredit(homework) >= 1).length,
     calendarDays
   };
 }
