@@ -10,6 +10,8 @@ const serverPath = path.join(root, "api", "server.js");
 const sampleDataPath = path.join(root, "src", "shared", "data", "sampleData.js");
 const schemaPath = path.join(root, "supabase", "schema.sql");
 const envExamplePath = path.join(root, ".env.example");
+const packageJsonPath = path.join(root, "package.json");
+const renderYamlPath = path.join(root, "render.yaml");
 
 const app = fs.readFileSync(appPath, "utf8");
 const css = fs.readFileSync(cssPath, "utf8");
@@ -19,6 +21,8 @@ const serverSource = fs.readFileSync(serverPath, "utf8");
 const sampleDataSource = fs.readFileSync(sampleDataPath, "utf8");
 const schema = fs.existsSync(schemaPath) ? fs.readFileSync(schemaPath, "utf8") : "";
 const envExample = fs.readFileSync(envExamplePath, "utf8");
+const packageJson = fs.readFileSync(packageJsonPath, "utf8");
+const renderYaml = fs.readFileSync(renderYamlPath, "utf8");
 
 const checks = [];
 
@@ -45,6 +49,7 @@ check("04 attendance-only route exists", hasAll(app, ["isAttendanceOnlyRoute", '
 check("05 tablet attendance URL setting exists", hasAll(app, ["attendanceUrl", "lateGraceMinutes"]));
 check("06 attendance late grace logic exists", hasAll(app, ["lateGraceMinutes", "calculateLateMinutes"]));
 check("07 attendance alimtalk API is connected", hasAll(app, ["/api/notifications/attendance-alimtalk", "handleSendAttendanceAlimtalk"]));
+check("07b manual journal attendance save does not auto-send attendance alimtalk", hasAll(app, ["function handleSendAttendanceAlimtalk", "handleChangeRecord(lesson, student, \"attendanceStatus\", values.attendanceStatus)", "handleChangeRecord(lesson, student, \"attendanceReason\", values.attendanceReason)", "handleChangeRecord(lesson, student, \"lateMinutes\", values.lateMinutes)"]) && !app.includes("handleSendAttendanceAlimtalk(lesson, student, values);"));
 check("08 parent alimtalk API is connected", hasAll(app, ["/api/notifications/comment-alimtalk", "parentPhone"]));
 check("08b comment alimtalk body override does not call missing compact helper", notificationRoute.includes("const commentBody = normalizeText(payload.commentBodyOverride)") && !notificationRoute.includes("compact(payload.commentBodyOverride)"));
 check("09 student alimtalk branch exists", hasAll(app, ['target: testType === "student"', "studentPhone"]));
@@ -157,6 +162,7 @@ check("84b pre-send check highlights rows with missing required lesson data", ha
 check("84c lesson journal rows auto-save records after editing", hasAll(app, ["autoSaveTimersRef", "function scheduleRecordAutoSave(record)", "setTimeout(() =>", "handleSaveRecord(recordId, null, null, record)", "scheduleRecordAutoSave(nextRecord)", "const isLatestRecord = !recordOverride || latestRecord?.updatedAt === record.updatedAt"]) && !hasAll(app, ["<span>저장</span>", "onClick={() => onSaveRecord(recordId, lesson, student)}"]));
 check("84d lesson notification plan controls default delay and no-send modes", hasAll(app, ["lessonNotificationPlans", "handleUpdateLessonNotificationPlan", "lessonNotificationPlan={lessonNotificationPlans[selectedLesson.lessonId] ?? { mode: \"default\" }}", "기본 예약", "30분 지연", "알림톡 없음", "initialSendTiming", "const sendTiming = planMode === \"none\" ? \"none\" : \"scheduled\"", "const sendDelayMinutes = planMode === \"delay30\" ? 30 : 0", "currentPlanLabel", "현재 수업 발송 계획", "30분 지연 예약", "발송 버튼은 현재 수업 발송 계획대로 예약합니다.", "canSendNowToRealRecipient", "const baseTime = getDayKey(lesson?.date) === \"sat\" ? \"18:30\" : \"22:30\"", "baseDate.getTime() <= now.getTime()"]) && !app.includes("const sendTiming = \"now\"") && hasAll(css, [".defaultScheduleHint", ".schedulePlanButton", ".currentSchedulePlan"]));
 check("84d-2 scheduled comment alimtalk requires scheduledDate", hasAll(serverSource, ['payload.sendMode === "scheduled"', "!payload.scheduledDate", "scheduledDate is required for scheduled comment Alimtalk sends."]));
+check("84d-3 lesson notification plan bulk-schedules parent and student jobs", hasAll(app, ["function applyLessonNotificationPlan", "buildLessonNotificationJob(lesson, student, \"parent\"", "buildLessonNotificationJob(lesson, student, \"student\"", "osScheduled: true", "status: \"scheduled\"", "getLessonNotificationJobId", "postJson(\"/api/notification-jobs\", { notificationJob })", "updateLessonNotificationRecordStatuses(lesson, `예약 중 · ${scheduledLabel}`)", "status: \"canceled\"", "updateLessonNotificationRecordStatuses(lesson, \"알림톡 없음\")"]) && hasAll(serverSource, ["job.status === \"scheduled\" && job.payload?.osScheduled === true"]) && hasAll(packageJson, ["dispatch:notifications"]) && hasAll(renderYaml, ["koh-you-math-academy-os-notification-dispatch", "npm run dispatch:notifications"]));
 check("84e shared modal closes with Escape key", hasAll(app, ["function Modal({ backdropClassName = \"\", children, className = \"\", hideHeader = false, onClose, subtitle, title })", "function handleEscapeKey(event)", "event.key === \"Escape\"", "onClose?.()", "window.addEventListener(\"keydown\", handleEscapeKey)", "window.removeEventListener(\"keydown\", handleEscapeKey)"]));
 check("84f lesson journal modal uses shared Escape-close modal", hasAll(app, ["backdropClassName=\"lessonJournalModalBackdrop\"", "className=\"lessonJournalModal\"", "hideHeader", "onClose={onBackToCalendar}"]) && !app.includes("<div className=\"modalBackdrop lessonJournalModalBackdrop\" role=\"dialog\" aria-modal=\"true\">"));
 check("84g lesson calendar hover states are visible for copy paste selection", hasAll(app, ["aria-label={`${lesson.className} 수업 선택`", "title={`${lesson.className} · ${lesson.startTime}-${lesson.endTime}`"]) && hasAll(css, [".lessonPill:hover", ".lessonPill:focus-visible", ".lessonCard:hover", ".lessonCard:focus-visible", "cursor: pointer"]));

@@ -595,7 +595,10 @@ async function dispatchDueNotificationJobs({ forceDryRun = false, limit = 20, no
   if (Number.isNaN(nowTime)) throw new Error("now must be a valid date string.");
 
   const jobs = (listed.notificationJobs ?? [])
-    .filter((job) => dispatchableNotificationStatuses.has(job.status))
+    .filter((job) =>
+      dispatchableNotificationStatuses.has(job.status) ||
+      (job.status === "scheduled" && job.payload?.osScheduled === true)
+    )
     .filter((job) => {
       if (!job.scheduledAt) return true;
       const scheduledTime = new Date(job.scheduledAt).getTime();

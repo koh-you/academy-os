@@ -1,5 +1,18 @@
 # Academy OS Current Worklog
 
+## 2026-06-23 수업 알림톡 전체 예약 및 출결 자동발송 분리
+
+- 상태: 완료
+- 사용자 요청: `기본 예약`, `30분 지연`, `알림톡 없음` 7가지 구현을 진행해달라고 요청했다. 버튼 문구는 변경하지 않기로 했다.
+- 원인 정리: `30분 지연`은 선생님 운영 의도상 해당 수업의 학부모+학생 알림톡 전체를 30분 늦춰 일괄 예약하고 자동 발송하는 버튼이어야 했다. 기존 구현은 수업별 계획 상태만 저장하고, 개별 알림톡 모달 발송에 의존했다.
+- 전체 예약: `기본 예약` 또는 `30분 지연`을 누르면 해당 수업 학생 전체에 대해 학부모 알림톡 1건 + 학생 알림톡 1건씩 `notification_jobs`에 예약 생성한다. 같은 수업/학생/대상 조합은 결정적 ID로 upsert해 중복 생성하지 않고 업데이트한다.
+- 예약 시간: 평일 기본은 `22:30`, 토요일 기본은 `18:30`을 사용하고, `30분 지연`은 각각 30분 뒤로 예약한다. 시간이 이미 지난 경우 최소 미래 시각으로 보정한다.
+- 알림톡 없음: `알림톡 없음`을 누르면 아직 발송 전인 해당 수업의 학생/학부모 예약 작업을 `canceled`로 바꾸고, 수업일지 상태도 `알림톡 없음`으로 표시한다.
+- 출결 분리: 수업일지에서 출결을 수기로 저장해도 더 이상 출결 알림톡을 자동 발송하지 않는다. 출결 알림톡 API와 수동 발송 함수는 남겨두되, 수업일지 저장 흐름에서는 호출하지 않는다.
+- 자동 발송: Academy OS가 만든 예약에는 `payload.osScheduled: true`를 붙이고, 서버 디스패처가 해당 예약만 due 시점에 발송하도록 했다. Render cron `koh-you-math-academy-os-notification-dispatch`를 추가해 5분마다 `/api/notification-jobs/dispatch-due`를 호출한다.
+- 회귀 방지: `scripts/scenario-tests-production.cjs`에 수기 출결 저장 자동발송 차단, 전체 학생 학부모+학생 예약 job 생성, 예약 취소, Render cron 연결 검사를 추가했다.
+- 검증: `node --check api/server.js` 통과, `node --check scripts/dispatch-due-notifications.cjs` 통과, `node --check scripts/scenario-tests-production.cjs` 통과, `npm run build` 통과, `npm run test:production` 136개 통과.
+
 ## 2026-06-23 알림톡 30분 지연 예약 발송 누락 보정
 
 - 상태: 완료

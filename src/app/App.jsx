@@ -2775,6 +2775,143 @@ export function App() {
       }
       return next;
     });
+    applyLessonNotificationPlan(lessonId, mode || "default");
+  }
+
+  function getLessonNotificationJobId(lessonId, studentId, target) {
+    return `lesson_comment_${lessonId}_${studentId}_${target}`;
+  }
+
+  function buildLessonNotificationJob(lesson, student, target, scheduledDate, mode) {
+    const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+    const record = recordsRef.current.find((item) => item.lessonStudentRecordId === recordId) ?? createEmptyRecord(lesson, student);
+    const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
+    const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
+    const audience = target === "student" ? "student" : "parent";
+    const sourceField = audience === "student" ? "studentComment" : "teacherComment";
+    const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId);
+    const commentBody = buildInitialCommentDraft({
+      audience,
+      existingComment: record?.[sourceField] ?? "",
+      record,
+      supplementSchedules
+    });
+    const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
+    const payload = {
+      academyName: academyBrandName,
+      assignmentStatus,
+      assignmentStatusMessage: getAssignmentStatusMessage(audience, assignmentStatus),
+      assignmentStatusParentMessage: getAssignmentStatusParentMessage(assignmentStatus),
+      assignmentStatusStudentMessage: getAssignmentStatusStudentMessage(assignmentStatus),
+      attendanceStatus: record?.attendanceStatus ?? "pending",
+      commentBodyOverride: commentBody,
+      lessonContent: getLessonContent(record),
+      lessonDate: lesson.date,
+      lessonId: lesson.lessonId,
+      lessonMaterial: getLessonMaterial(record, student),
+      lessonName: lesson.className,
+      message: commentBody,
+      nextHomework: nextHomework?.title ?? "",
+      osScheduled: true,
+      parentPhone: student.parentPhone,
+      previousHomework: previousHomework?.title ?? "",
+      scheduledDate,
+      scheduleMode: mode,
+      sendMode: "scheduled",
+      studentId: student.studentId,
+      studentName: student.name,
+      studentPhone: student.studentPhone,
+      supplementSchedule: supplementSchedules.join("\n"),
+      target: audience
+    };
+    return {
+      notificationJobId: getLessonNotificationJobId(lesson.lessonId, student.studentId, audience),
+      notificationType: audience === "student" ? "student_comment" : "parent_comment",
+      studentId: student.studentId,
+      lessonId: lesson.lessonId,
+      lessonStudentRecordId: recordId,
+      target: audience,
+      recipient: audience === "student" ? student.studentPhone : student.parentPhone,
+      scheduledAt: scheduledDate,
+      payload,
+      previewBody: buildCommentPreviewText({
+        audience,
+        comment: commentBody,
+        lesson,
+        nextHomework,
+        previousHomework,
+        record,
+        student,
+        supplementSchedules
+      }),
+      status: "scheduled",
+      provider: "academy-os",
+      error: "",
+      createdAt: new Date().toISOString()
+    };
+  }
+
+  function updateLessonNotificationRecordStatuses(lesson, statusText) {
+    const lessonStudentIds = new Set(lesson.studentIds ?? []);
+    const nextRecords = recordsRef.current.map((record) => {
+      if (record.lessonId !== lesson.lessonId || !lessonStudentIds.has(record.studentId)) return record;
+      return {
+        ...record,
+        teacherCommentSendStatus: statusText,
+        studentCommentSendStatus: statusText,
+        updatedAt: new Date().toISOString()
+      };
+    });
+    recordsRef.current = nextRecords;
+    setRecords(nextRecords);
+    nextRecords
+      .filter((record) => record.lessonId === lesson.lessonId && lessonStudentIds.has(record.studentId))
+      .forEach((record) => postJson("/api/lesson-records", { record }).catch((error) => console.error(error)));
+  }
+
+  function applyLessonNotificationPlan(lessonId, mode) {
+    const lesson = lessons.find((item) => item.lessonId === lessonId);
+    if (!lesson) return;
+    const lessonStudents = students.filter((student) => lesson.studentIds?.includes(student.studentId));
+    const jobIds = new Set(
+      lessonStudents.flatMap((student) => [
+        getLessonNotificationJobId(lesson.lessonId, student.studentId, "parent"),
+        getLessonNotificationJobId(lesson.lessonId, student.studentId, "student")
+      ])
+    );
+
+    if (mode === "none") {
+      const canceledJobs = notificationJobs
+        .filter((job) => jobIds.has(job.notificationJobId))
+        .filter((job) => !["sent", "dry_run", "failed"].includes(job.status))
+        .map((job) => ({ ...job, status: "canceled", error: "", updatedAt: new Date().toISOString() }));
+      if (canceledJobs.length) {
+        setNotificationJobs((current) =>
+          current.map((job) => canceledJobs.find((canceledJob) => canceledJob.notificationJobId === job.notificationJobId) ?? job)
+        );
+        canceledJobs.forEach((notificationJob) =>
+          postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
+        );
+      }
+      updateLessonNotificationRecordStatuses(lesson, "알림톡 없음");
+      return;
+    }
+
+    const delayMinutes = mode === "delay30" ? 30 : 0;
+    const scheduledDate = getLessonAlimtalkScheduledDate(lesson, delayMinutes);
+    const scheduledLabel = formatKoreaTimeLabel(scheduledDate);
+    const nextJobs = lessonStudents.flatMap((student) => [
+      buildLessonNotificationJob(lesson, student, "parent", scheduledDate, mode),
+      buildLessonNotificationJob(lesson, student, "student", scheduledDate, mode)
+    ]);
+    setNotificationJobs((current) => [
+      ...nextJobs,
+      ...current.filter((job) => !jobIds.has(job.notificationJobId))
+    ]);
+    nextJobs.forEach((notificationJob) =>
+      postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
+    );
+    updateLessonNotificationRecordStatuses(lesson, `예약 중 · ${scheduledLabel}`);
   }
 
   function syncPreviousHomeworkStatusFromAssignment(lesson, student, assignmentStatus) {
@@ -3487,7 +3624,6 @@ export function App() {
             handleChangeRecord(lesson, student, "attendanceStatus", values.attendanceStatus);
             handleChangeRecord(lesson, student, "attendanceReason", values.attendanceReason);
             handleChangeRecord(lesson, student, "lateMinutes", values.lateMinutes);
-            handleSendAttendanceAlimtalk(lesson, student, values);
             setAttendanceModal(null);
           }}
         />
