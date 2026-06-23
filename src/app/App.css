@@ -6642,6 +6642,38 @@ textarea.profileEditInput {
   margin: 5px 0;
 }
 
+.homeworkStatusBadge {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 900;
+  justify-content: center;
+  justify-self: start;
+  line-height: 1;
+  padding: 8px 10px;
+}
+
+.homeworkStatusBadge.done {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.homeworkStatusBadge.partial {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.homeworkStatusBadge.danger {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.homeworkStatusBadge.pending {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
 .studentExamPostPanel,
 .examPostManager {
   background: #ffffff;

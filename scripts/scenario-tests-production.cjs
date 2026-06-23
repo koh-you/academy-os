@@ -61,6 +61,7 @@ check("22c student homework list hides linked previous homework duplicates", has
 check("22d student homework registration and edit controls are removed", !app.includes("function StudentRegisterTab") && !app.includes('["register", "등록"]') && !app.includes("자동 재분배로"));
 check("22e student homework completed state respects teacher verification", hasAll(app, ["function isHomeworkCompletedForStudent(homework)", "return isHomeworkResolved(homework)", "const isChecked = isHomeworkCompletedForStudent(homework)"]));
 check("22f exam post submission MVP exists", hasAll(app, ["examPostSubmissions", "buildExamPostTargetsForStudent", "StudentExamPostSubmissionPanel", "ExamPostSubmissionManager", 'id: "postSubmit"', "시험 후 제출 관리"]) && hasAll(css, [".studentExamPostPanel", ".examPostManager", ".examPostItem"]));
+check("22g student homework cards show teacher assignment check labels", hasAll(app, ["function getHomeworkStatusLabel(homework, records = [])", "mergeHomeworkStatusFromLinkedPrevious", "checkedLessonId", "homeworkStatusBadge", "80프로"]) && hasAll(css, [".homeworkStatusBadge.partial", ".homeworkStatusBadge.pending"]));
 check("23 parent portal is mobile first", hasAll(app, ["parentPortalMobileFirst", "parentPortal"]) && css.includes(".parentPortalMobileFirst .metricGrid"));
 check("24 responsive layout principles doc exists", fs.existsSync(path.join(root, "docs", "responsive-layout-principles.md")));
 check("25 ai tools menu replaces ai variant label", hasAll(app, ['id: "aiVariants"', "AIVariantProblemCenter"]));

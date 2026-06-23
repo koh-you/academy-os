@@ -83,8 +83,12 @@ const assignmentStatusAliases = {
   "완료": "complete_thorough",
   complete_easy: "complete_thorough",
   "쉬움": "complete_thorough",
+  "80%": "partial_80",
+  "80프로": "partial_80",
   "80% 완료": "partial_80",
   "80%완료": "partial_80",
+  "50%": "partial_50",
+  "50프로": "partial_50",
   "50% 완료": "partial_50",
   "50%완료": "partial_50",
   "아는것만품": "known_only",
@@ -112,7 +116,8 @@ const assignmentStatusParentMessages = {
 };
 
 function normalizeAssignmentStatusValue(value) {
-  return assignmentStatusAliases[value] ?? value ?? "";
+  const trimmedValue = String(value ?? "").trim();
+  return assignmentStatusAliases[trimmedValue] ?? trimmedValue;
 }
 
 function getAssignmentStatusParentMessage(value) {
@@ -153,6 +158,64 @@ function isStudentVisibleHomework(homework) {
 
 function isHomeworkCompletedForStudent(homework) {
   return isHomeworkResolved(homework);
+}
+
+function getHomeworkStatusLabel(homework, records = []) {
+  const assignmentStatus = getHomeworkAssignmentStatus(homework, records);
+  const normalizedStatus = normalizeAssignmentStatusValue(assignmentStatus);
+  if (assignmentStatus) return assignmentStatusLabels[normalizedStatus] ?? assignmentStatus;
+  if (homework?.teacherStatus === "verified" || homework?.status === "verified") return "완료";
+  if (homework?.teacherStatus === "partial") return "일부 완료";
+  if (homework?.teacherStatus === "missing") return "미완료";
+  if (homework?.teacherStatus === "unverified") return "미검사";
+  return homeworkLabels[homework?.status] ?? "검사 전";
+}
+
+function getHomeworkStatusTone(homework, records = []) {
+  const normalizedStatus = normalizeAssignmentStatusValue(getHomeworkAssignmentStatus(homework, records));
+  if (normalizedStatus === "complete_thorough" || homework?.teacherStatus === "verified" || homework?.status === "verified") return "done";
+  if (["partial_80", "partial_50", "known_only", "too_hard", "answer_suspected"].includes(normalizedStatus) || homework?.teacherStatus === "partial") return "partial";
+  if (normalizedStatus === "not_done" || homework?.teacherStatus === "missing") return "danger";
+  return "pending";
+}
+
+function getHomeworkAssignmentStatus(homework, records = []) {
+  const ownStatus = homework?.assignmentStatus ?? homework?.incompleteHomework ?? "";
+  if (ownStatus) return ownStatus;
+  const record = records.find(
+    (item) => item.lessonId === (homework?.checkedLessonId ?? homework?.lessonId) && item.studentId === homework?.studentId
+  );
+  return record?.assignmentStatus ?? record?.incompleteHomework ?? "";
+}
+
+function getLinkedPreviousHomework(homework, homeworks = []) {
+  if (homework?.homeworkType !== "next") return null;
+  return homeworks.find(
+    (candidate) =>
+      candidate.homeworkType === "previous" &&
+      candidate.studentId === homework.studentId &&
+      candidate.linkedFromLessonId === homework.lessonId &&
+      String(candidate.title ?? "").trim() === String(homework.title ?? "").trim()
+  ) ?? null;
+}
+
+function mergeHomeworkStatusFromLinkedPrevious(homework, homeworks = [], records = []) {
+  const linkedPreviousHomework = getLinkedPreviousHomework(homework, homeworks);
+  if (!linkedPreviousHomework) return homework;
+  const linkedHasTeacherStatus = linkedPreviousHomework.teacherStatus && linkedPreviousHomework.teacherStatus !== "unverified";
+  const linkedRecordStatus = getHomeworkAssignmentStatus(linkedPreviousHomework, records);
+  const linkedHasAssignmentStatus = linkedPreviousHomework.assignmentStatus || linkedPreviousHomework.incompleteHomework || linkedRecordStatus;
+  if (!linkedHasTeacherStatus && !linkedHasAssignmentStatus) return homework;
+  return {
+    ...homework,
+    status: linkedHasTeacherStatus ? linkedPreviousHomework.status : homework.status,
+    teacherStatus: linkedHasTeacherStatus ? linkedPreviousHomework.teacherStatus : homework.teacherStatus,
+    checkedLessonId: linkedPreviousHomework.lessonId,
+    assignmentStatus: linkedPreviousHomework.assignmentStatus ?? linkedPreviousHomework.incompleteHomework ?? linkedRecordStatus ?? homework.assignmentStatus,
+    incompleteHomework: linkedPreviousHomework.incompleteHomework ?? linkedPreviousHomework.assignmentStatus ?? linkedRecordStatus ?? homework.incompleteHomework,
+    verifiedAt: linkedPreviousHomework.verifiedAt ?? homework.verifiedAt,
+    checkedAt: linkedPreviousHomework.checkedAt ?? homework.checkedAt
+  };
 }
 
 function normalizeMessageText(value) {
@@ -2587,6 +2650,7 @@ export function App() {
 
   function syncPreviousHomeworkStatusFromAssignment(lesson, student, assignmentStatus) {
     const homeworkStatus = getHomeworkStatusFromAssignmentStatus(assignmentStatus);
+    const normalizedAssignmentStatus = normalizeAssignmentStatusValue(assignmentStatus);
     setHomeworks((current) => {
       const previousHomework = getLessonHomework(current, lesson, student, "previous", lessons);
       if (!previousHomework?.homeworkId || !previousHomework.title?.trim()) return current;
@@ -2594,16 +2658,41 @@ export function App() {
       const existing = current.find((homework) => homework.homeworkId === previousHomework.homeworkId);
       if (!existing) return current;
 
-      const nextHomework = {
-        ...existing,
+      const checkedFields = {
         status: homeworkStatus.status,
         teacherStatus: homeworkStatus.teacherStatus,
-        dueDate: existing.dueDate || lesson.date,
+        assignmentStatus: normalizedAssignmentStatus,
+        incompleteHomework: normalizedAssignmentStatus,
+        checkedAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
+      const nextHomework = {
+        ...existing,
+        ...checkedFields,
+        dueDate: existing.dueDate || lesson.date,
+      };
+      const sourceHomework = current.find(
+        (homework) =>
+          homework.homeworkType === "next" &&
+          homework.studentId === student.studentId &&
+          homework.lessonId === (existing.linkedFromLessonId || previousHomework.linkedFromLessonId) &&
+          String(homework.title ?? "").trim() === String(existing.title ?? "").trim()
+      );
+      const updatedSourceHomework = sourceHomework
+        ? {
+            ...sourceHomework,
+            ...checkedFields,
+            dueDate: sourceHomework.dueDate || lesson.date
+          }
+        : null;
 
-      postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
-      return current.map((homework) => (homework.homeworkId === nextHomework.homeworkId ? nextHomework : homework));
+      const changedHomeworks = updatedSourceHomework ? [nextHomework, updatedSourceHomework] : [nextHomework];
+      postJson("/api/homeworks/bulk", { homeworks: changedHomeworks }).catch((error) => console.error(error));
+      return current.map((homework) => {
+        if (homework.homeworkId === nextHomework.homeworkId) return nextHomework;
+        if (updatedSourceHomework && homework.homeworkId === updatedSourceHomework.homeworkId) return updatedSourceHomework;
+        return homework;
+      });
     });
   }
 
@@ -10496,9 +10585,10 @@ function StudentPortal({ homeworks, reportSnapshots, students, onStudentCheckHom
     students.find((student) => student.name === "TestS12")?.studentId ?? students[0]?.studentId ?? ""
   );
   const selectedStudent = students.find((student) => student.studentId === selectedStudentId) ?? students[0];
-  const studentHomeworks = homeworks
-    .filter((homework) => homework.studentId === selectedStudent?.studentId)
-    .filter(isStudentVisibleHomework);
+  const selectedStudentHomeworks = homeworks.filter((homework) => homework.studentId === selectedStudent?.studentId);
+  const studentHomeworks = selectedStudentHomeworks
+    .filter(isStudentVisibleHomework)
+    .map((homework) => mergeHomeworkStatusFromLinkedPrevious(homework, selectedStudentHomeworks));
   const todayHomeworks = studentHomeworks.filter((homework) => homework.assignedDate === today);
   const overdueHomeworks = studentHomeworks.filter((homework) => isHomeworkOverdue(homework));
   const studentReports = reportSnapshots.filter((snapshot) => snapshot.studentId === selectedStudent?.studentId);
@@ -10635,9 +10725,15 @@ function StudentPortalV2({
   const [myPageTab, setMyPageTab] = useState("stats");
 
   const selectedStudent = students.find((student) => student.studentId === selectedStudentId) ?? students[0];
-  const studentHomeworks = homeworks
-    .filter((homework) => homework.studentId === selectedStudent?.studentId)
-    .filter(isStudentVisibleHomework);
+  const studentRecordsWithLessons = records
+    .filter((record) => record.studentId === selectedStudent?.studentId)
+    .map((record) => ({ ...record, lesson: lessons.find((lesson) => lesson.lessonId === record.lessonId) }))
+    .filter((record) => record.lesson && record.lesson.status !== "canceled")
+    .sort((a, b) => String(b.lesson?.date ?? "").localeCompare(String(a.lesson?.date ?? "")));
+  const selectedStudentHomeworks = homeworks.filter((homework) => homework.studentId === selectedStudent?.studentId);
+  const studentHomeworks = selectedStudentHomeworks
+    .filter(isStudentVisibleHomework)
+    .map((homework) => mergeHomeworkStatusFromLinkedPrevious(homework, selectedStudentHomeworks, studentRecordsWithLessons));
   const todayHomeworks = studentHomeworks.filter((homework) => homework.assignedDate === today);
   const overdueHomeworks = studentHomeworks.filter((homework) => isHomeworkOverdue(homework));
   const studentReports = reportSnapshots.filter((snapshot) => snapshot.studentId === selectedStudent?.studentId);
@@ -10658,11 +10754,6 @@ function StudentPortalV2({
       .map((record) => ({ ...record, lesson: lessons.find((lesson) => lesson.lessonId === record.lessonId) }))
   );
   const studentScoreRecords = scoreRecords.filter((score) => score.studentId === selectedStudent?.studentId);
-  const studentRecordsWithLessons = records
-    .filter((record) => record.studentId === selectedStudent?.studentId)
-    .map((record) => ({ ...record, lesson: lessons.find((lesson) => lesson.lessonId === record.lessonId) }))
-    .filter((record) => record.lesson && record.lesson.status !== "canceled")
-    .sort((a, b) => String(b.lesson?.date ?? "").localeCompare(String(a.lesson?.date ?? "")));
   const upcomingStudentNotice = getStudentTopNotice(selectedStudent, examPrepRows, schoolEvents, makeupTasks);
   const studentSupplementSchedules = getStudentSupplementSchedules(makeupTasks, selectedStudent?.studentId);
   const selectedStudentQuestions = studentQuestions
@@ -10747,6 +10838,7 @@ function StudentPortalV2({
         {activeTab === "all" ? (
           <StudentAllHomeworkTab
             homeworks={studentHomeworks}
+            records={studentRecordsWithLessons}
           />
         ) : null}
         {activeTab === "materials" ? <PortalMaterialsTab materials={studentMaterials} emptyMessage="아직 공개된 자료가 없습니다." /> : null}
@@ -10903,7 +10995,12 @@ function StudentTodayTab({
       <div className="homeworkStack">
         {todayHomeworks.length === 0 ? <div className="emptyHomeworkBox">오늘 배정된 숙제가 없습니다.</div> : null}
         {todayHomeworks.map((homework) => (
-          <HomeworkActionCard homework={homework} key={homework.homeworkId} onStudentCheckHomework={onStudentCheckHomework} />
+          <HomeworkActionCard
+            homework={homework}
+            key={homework.homeworkId}
+            records={recordsWithLessons}
+            onStudentCheckHomework={onStudentCheckHomework}
+          />
         ))}
       </div>
       {overdueHomeworks.length ? (
@@ -11206,7 +11303,9 @@ function ParentPortal({ homeworks, lessons = [], materials = [], records = [], r
                       {isHomeworkOverdue(homework) ? "밀림" : "진행"}
                     </span>
                   </div>
-                  <strong>{homework.teacherStatus ?? "unverified"}</strong>
+                  <strong className={`homeworkStatusBadge ${getHomeworkStatusTone(homework, records)}`}>
+                    {getHomeworkStatusLabel(homework, records)}
+                  </strong>
                 </div>
                 <p>{homework.assignedDate} ~ {homework.dueDate}</p>
               </article>
@@ -11229,7 +11328,7 @@ function ParentPortal({ homeworks, lessons = [], materials = [], records = [], r
   );
 }
 
-function StudentAllHomeworkTab({ homeworks }) {
+function StudentAllHomeworkTab({ homeworks, records = [] }) {
   const sortedHomeworks = [...homeworks].sort((a, b) => b.assignedDate.localeCompare(a.assignedDate));
 
   return (
@@ -11255,11 +11354,14 @@ function StudentAllHomeworkTab({ homeworks }) {
               </div>
             </div>
             <p>{homework.assignedDate} ~ {homework.dueDate} · 총 {homework.totalProblems ?? "-"}문제</p>
+            <div className={`homeworkStatusBadge ${getHomeworkStatusTone(homework, records)}`}>
+              {getHomeworkStatusLabel(homework, records)}
+            </div>
             <div className="progressRail"><span style={{ width: `${progress}%` }} /></div>
             <small>{completed}/{totalDays}일 완료 ({progress}%)</small>
             <div className={`dateStrip ${isHomeworkOverdue(homework) ? "danger" : "safe"}`}>
               <span>{homework.dueDate}</span>
-              <b>{isHomeworkCompletedForStudent(homework) ? "완료" : homework.title}</b>
+              <b>{getHomeworkStatusLabel(homework, records)}</b>
             </div>
           </article>
         );
@@ -11536,14 +11638,17 @@ function StudentCalendar({ legend = [], markedDays = {}, title = "숙제 이행 
   );
 }
 
-function HomeworkActionCard({ homework, onStudentCheckHomework }) {
+function HomeworkActionCard({ homework, records = [], onStudentCheckHomework }) {
   const isChecked = isHomeworkCompletedForStudent(homework);
   return (
     <article className="homeworkActionCard">
       <div>
         <strong>{homework.title}</strong>
         <p>{homework.assignedDate} → {homework.dueDate}</p>
-        <small>{isChecked ? "완료 처리됨" : "완료 전"} · 강사 확인: {homework.teacherStatus ?? "unverified"}</small>
+        <small>{isChecked ? "완료 처리됨" : "완료 전"}</small>
+        <span className={`homeworkStatusBadge ${getHomeworkStatusTone(homework, records)}`}>
+          {getHomeworkStatusLabel(homework, records)}
+        </span>
       </div>
       <button
         className={isChecked ? "softButton" : "primaryButton"}
