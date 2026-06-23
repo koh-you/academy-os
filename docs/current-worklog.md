@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-06-23 수업일지 hover 표시 및 ESC 모달 닫기 보정
+
+- 상태: 완료
+- 사용자 요청: 수업일지 화면에서 각 수업 위에 마우스를 올렸을 때 표시가 약해 복사/붙여넣기 작업이 불편하고, 일반 수업일지 모달에서 `Esc`로 뒤로가기가 되지 않는 문제를 수정해달라고 요청했다. `Esc` 동작은 모든 모달에 적용되기를 원했다.
+- 조치: 일반 수업일지 상세 화면을 직접 만든 modal backdrop 대신 공통 `Modal` 컴포넌트로 연결했다. 기존 화면 구조를 유지하기 위해 `hideHeader` 옵션을 추가했고, 이 경로도 공통 `Escape` 키 닫기 로직을 타도록 했다.
+- 표시 개선: 월간 캘린더 수업 pill과 날짜별 수업 카드에 hover/focus 표시를 강화했다. 선택 대상이 더 잘 보이도록 outline, shadow, 밝기, 살짝 올라오는 효과를 넣고, title/aria-label을 추가해 수업 이름과 시간을 더 쉽게 확인할 수 있게 했다.
+- 회귀 방지: `scripts/scenario-tests-production.cjs`에 일반 수업일지 모달이 공통 ESC 닫기 모달을 쓰는지, 수업 pill/card hover/focus 스타일이 유지되는지 확인하는 검사를 추가했다.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과, `npm run build` 통과, `npm run test:production` 127개 통과.
+
 ## 2026-06-23 학생/학부모 포털 데이터 스코프 분리 및 로그인 로딩 보정
 
 - 상태: 완료

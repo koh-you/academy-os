@@ -4959,43 +4959,46 @@ function TeacherLessonHubV2({
         />
       </Modal>
     ) : (
-      <div className="modalBackdrop lessonJournalModalBackdrop" role="dialog" aria-modal="true">
-        <div className="lessonJournalModal">
-          <LessonJournalDetail
-            academyTests={academyTests}
-            aiSettings={aiSettings}
-            allRecords={allRecords}
-            generatedLessonControls={generatedLessonControls}
-            integrationStatus={integrationStatus}
-            lessonNotificationPlan={lessonNotificationPlans[selectedLesson.lessonId] ?? { mode: "default" }}
-            homeworks={homeworks}
-            lesson={selectedLesson}
-            lessons={lessons}
-            materials={materials}
-            makeupTasks={makeupTasks}
-            onApplyBulkHomework={onApplyBulkHomework}
-            onBack={onBackToCalendar}
-            onChangeRecord={onChangeRecord}
-            onDeleteLesson={onDeleteLesson}
-            onEditLesson={onEditLesson}
-            onOpenAttendance={onOpenAttendance}
-            onOpenExamPrep={onOpenExamPrep}
-            onOpenReport={onOpenReport}
-            onPassMakeupTask={onPassMakeupTask}
-            onPolishComment={onPolishComment}
-            onPolishPreparationNotice={onPolishPreparationNotice}
-            onSaveRecord={onSaveRecord}
-            onSendComment={onSendComment}
-            onUpdateExamSundayMakeupBlocks={onUpdateExamSundayMakeupBlocks}
-            onUpdateHomework={onUpdateHomework}
-            onUpdateLessonNotificationPlan={onUpdateLessonNotificationPlan}
-            onUpdateMakeupTask={onUpdateMakeupTask}
-            records={records}
-            saveStates={saveStates}
-            students={students}
-          />
-        </div>
-      </div>
+      <Modal
+        backdropClassName="lessonJournalModalBackdrop"
+        className="lessonJournalModal"
+        hideHeader
+        onClose={onBackToCalendar}
+      >
+        <LessonJournalDetail
+          academyTests={academyTests}
+          aiSettings={aiSettings}
+          allRecords={allRecords}
+          generatedLessonControls={generatedLessonControls}
+          integrationStatus={integrationStatus}
+          lessonNotificationPlan={lessonNotificationPlans[selectedLesson.lessonId] ?? { mode: "default" }}
+          homeworks={homeworks}
+          lesson={selectedLesson}
+          lessons={lessons}
+          materials={materials}
+          makeupTasks={makeupTasks}
+          onApplyBulkHomework={onApplyBulkHomework}
+          onBack={onBackToCalendar}
+          onChangeRecord={onChangeRecord}
+          onDeleteLesson={onDeleteLesson}
+          onEditLesson={onEditLesson}
+          onOpenAttendance={onOpenAttendance}
+          onOpenExamPrep={onOpenExamPrep}
+          onOpenReport={onOpenReport}
+          onPassMakeupTask={onPassMakeupTask}
+          onPolishComment={onPolishComment}
+          onPolishPreparationNotice={onPolishPreparationNotice}
+          onSaveRecord={onSaveRecord}
+          onSendComment={onSendComment}
+          onUpdateExamSundayMakeupBlocks={onUpdateExamSundayMakeupBlocks}
+          onUpdateHomework={onUpdateHomework}
+          onUpdateLessonNotificationPlan={onUpdateLessonNotificationPlan}
+          onUpdateMakeupTask={onUpdateMakeupTask}
+          records={records}
+          saveStates={saveStates}
+          students={students}
+        />
+      </Modal>
     )
   ) : null;
   const lessonTypeFilterOptions = [
@@ -6657,10 +6660,12 @@ function LessonHub({
           <div className="lessonCards">
             {lessonsForDate.map((lesson) => (
               <button
+                aria-label={`${lesson.className} 수업 선택`}
                 className={lesson.lessonId === selectedLessonId ? "lessonCard active" : "lessonCard"}
                 key={lesson.lessonId}
                 onClick={() => onSelectLesson(lesson.lessonId)}
                 style={{ borderColor: lesson.lessonId === selectedLessonId ? lesson.color : undefined }}
+                title={`${lesson.className} · ${lesson.startTime}-${lesson.endTime}`}
                 type="button"
               >
                 <span className="lessonDot" style={{ background: lesson.color }} />
@@ -6715,7 +6720,13 @@ function MonthCalendar({ lessons, selectedDate, onDateSelect }) {
             <span className="cellPlus">+</span>
             <span className="lessonPills">
               {dayLessons.slice(0, 3).map((lesson) => (
-                <span className="lessonPill" key={lesson.lessonId} style={{ background: lesson.color }}>
+                <span
+                  aria-label={`${lesson.className} 수업 표시`}
+                  className="lessonPill"
+                  key={lesson.lessonId}
+                  style={{ background: lesson.color }}
+                  title={`${lesson.className} · ${lesson.startTime}-${lesson.endTime}`}
+                >
                   {lesson.startTime} {lesson.className}
                 </span>
               ))}
@@ -13946,7 +13957,7 @@ function ReportCenter({ lessons, records, reportLesson, selectedReportLessonId, 
   );
 }
 
-function Modal({ backdropClassName = "", children, className = "", onClose, subtitle, title }) {
+function Modal({ backdropClassName = "", children, className = "", hideHeader = false, onClose, subtitle, title }) {
   useEffect(() => {
     function handleEscapeKey(event) {
       if (event.key === "Escape") {
@@ -13962,13 +13973,15 @@ function Modal({ backdropClassName = "", children, className = "", onClose, subt
   return (
     <div className={`modalBackdrop ${backdropClassName}`}>
       <section className={`modalCard ${className}`}>
-        <div className="modalHeader">
-          <div>
-            <h2>{title}</h2>
-            {subtitle ? <p className="muted">{subtitle}</p> : null}
+        {hideHeader ? null : (
+          <div className="modalHeader">
+            <div>
+              <h2>{title}</h2>
+              {subtitle ? <p className="muted">{subtitle}</p> : null}
+            </div>
+            <button className="iconButton" onClick={onClose} type="button">×</button>
           </div>
-          <button className="iconButton" onClick={onClose} type="button">×</button>
-        </div>
+        )}
         {children}
       </section>
     </div>
