@@ -510,6 +510,39 @@ async function postJson(path, body) {
   return result;
 }
 
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error("파일을 읽지 못했습니다."));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadExamPostSubmissionFile(file, target, student) {
+  const dataUrl = await readFileAsDataUrl(file);
+  const result = await postJson("/api/exam-post-files", {
+    dataUrl,
+    fileName: file.name,
+    fileType: file.type,
+    targetId: target.targetId,
+    examCycle: target.examCycle,
+    schoolName: target.schoolName,
+    grade: target.grade,
+    subject: target.subject,
+    examDate: target.examDate,
+    studentId: student?.studentId,
+    studentName: student?.name
+  });
+  return result.file;
+}
+
+function getExamPostFileOpenUrl(file) {
+  if (file?.signedUrl) return file.signedUrl;
+  if (!file?.storagePath) return "";
+  return apiUrl(`/api/exam-post-files/open?bucket=${encodeURIComponent(file.bucketId || "exam-submissions")}&path=${encodeURIComponent(file.storagePath)}`);
+}
+
 function postMakeupTask(makeupTask) {
   return postJson("/api/makeup-tasks", { makeupTask });
 }
@@ -7695,6 +7728,23 @@ function ExamPostSubmissionManager({ rows = [], selectedClass, selectedExamCycle
                   <span>난이도 <b>{submission.difficulty || "-"}</b></span>
                   <span>준비 <b>{submission.preparation || "-"}</b></span>
                   <p>{submission.goodPart || submission.regretReason || submission.wantedHelp || "학생 메모 없음"}</p>
+                  {submission.fileAttachments?.length ? (
+                    <div className="examPostFileList">
+                      {submission.fileAttachments.map((file, index) => (
+                        <a
+                          className={file.uploadStatus === "failed" ? "examPostFile failed" : "examPostFile"}
+                          href={file.uploadStatus === "failed" ? undefined : getExamPostFileOpenUrl(file)}
+                          key={`${submission.submissionId}_${file.fileName}_${index}`}
+                          rel="noreferrer"
+                          target="_blank"
+                        >
+                          {file.uploadStatus === "failed" ? "업로드 실패" : "파일 보기"} · {file.fileName}
+                        </a>
+                      ))}
+                    </div>
+                  ) : (
+                    <small>첨부 파일 없음</small>
+                  )}
                 </div>
               ) : (
                 <div className="examPostDetail muted">학생 앱에 제출 카드가 표시됩니다.</div>
@@ -11014,6 +11064,8 @@ function StudentExamPostSubmissionPanel({ targets = [], selectedStudent, onSubmi
   const activeTargets = targets.filter((target) => !target.submission?.submittedAt);
   const completedTargets = targets.filter((target) => target.submission?.submittedAt);
   const [drafts, setDrafts] = useState({});
+  const [filesByTarget, setFilesByTarget] = useState({});
+  const [uploadStatus, setUploadStatus] = useState("");
   const target = activeTargets[0] ?? completedTargets[0] ?? null;
 
   if (!target) return null;
@@ -11033,6 +11085,8 @@ function StudentExamPostSubmissionPanel({ targets = [], selectedStudent, onSubmi
     ...(drafts[target.targetId] ?? {})
   };
   const isSubmitted = Boolean(target.submission?.submittedAt);
+  const selectedFiles = filesByTarget[target.targetId] ?? [];
+  const submittedFiles = target.submission?.fileAttachments ?? [];
 
   function updateDraft(field, value) {
     setDrafts((current) => ({
@@ -11044,11 +11098,49 @@ function StudentExamPostSubmissionPanel({ targets = [], selectedStudent, onSubmi
     }));
   }
 
-  function submit(event) {
+  function updateFiles(fileList) {
+    const nextFiles = Array.from(fileList ?? []).slice(0, 8);
+    setFilesByTarget((current) => ({ ...current, [target.targetId]: nextFiles }));
+    setUploadStatus(nextFiles.length ? `${nextFiles.length}개 파일 선택됨` : "");
+  }
+
+  async function submit(event) {
     event.preventDefault();
     if (!selectedStudent || !onSubmitExamPostSubmission) return;
-    onSubmitExamPostSubmission(target, selectedStudent, draft);
+    let fileAttachments = [];
+    if (selectedFiles.length) {
+      setUploadStatus("시험지 사진을 업로드하는 중입니다...");
+      fileAttachments = await Promise.all(
+        selectedFiles.map(async (file) => {
+          try {
+            const uploadedFile = await uploadExamPostSubmissionFile(file, target, selectedStudent);
+            return { ...uploadedFile, uploadStatus: "uploaded" };
+          } catch (error) {
+            return {
+              fileName: file.name,
+              fileType: file.type,
+              fileSize: file.size,
+              uploadedAt: new Date().toISOString(),
+              uploadStatus: "failed",
+              uploadError: error.message,
+              source: "student_camera"
+            };
+          }
+        })
+      );
+      const failedCount = fileAttachments.filter((file) => file.uploadStatus === "failed").length;
+      setUploadStatus(failedCount ? `${failedCount}개 파일 업로드 실패 · 제출 기록에 남겼습니다.` : `${fileAttachments.length}개 파일 업로드 완료`);
+    }
+    onSubmitExamPostSubmission(target, selectedStudent, {
+      ...draft,
+      fileAttachments
+    });
     setDrafts((current) => {
+      const next = { ...current };
+      delete next[target.targetId];
+      return next;
+    });
+    setFilesByTarget((current) => {
       const next = { ...current };
       delete next[target.targetId];
       return next;
@@ -11071,6 +11163,21 @@ function StudentExamPostSubmissionPanel({ targets = [], selectedStudent, onSubmi
           <strong>{target.submission.score || "점수 미입력"}</strong>
           <span>{target.submission.feeling || "셀프체크 제출됨"}</span>
           <small>{target.submission.teacherConfirmed ? "선생님 확인 완료" : "선생님 확인 전"}</small>
+          {submittedFiles.length ? (
+            <div className="examPostFileList">
+              {submittedFiles.map((file, index) => (
+                <a
+                  className={file.uploadStatus === "failed" ? "examPostFile failed" : "examPostFile"}
+                  href={file.uploadStatus === "failed" ? undefined : getExamPostFileOpenUrl(file)}
+                  key={`${file.fileName}_${index}`}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  {file.uploadStatus === "failed" ? "업로드 실패" : "파일 보기"} · {file.fileName}
+                </a>
+              ))}
+            </div>
+          ) : null}
         </div>
       ) : (
         <form className="studentExamPostForm" onSubmit={submit}>
@@ -11121,6 +11228,18 @@ function StudentExamPostSubmissionPanel({ targets = [], selectedStudent, onSubmi
             시험지 제출 메모
             <input value={draft.fileMemo} onChange={(event) => updateDraft("fileMemo", event.target.value)} placeholder="예: 종이 시험지 직접 제출, 사진은 수업 때 전달" />
           </label>
+          <label className="examPostUploadBox">
+            시험지 사진/PDF
+            <input
+              accept="image/*,application/pdf"
+              capture="environment"
+              multiple
+              onChange={(event) => updateFiles(event.target.files)}
+              type="file"
+            />
+            <span>{selectedFiles.length ? selectedFiles.map((file) => file.name).join(", ") : "사진을 찍거나 파일을 선택하세요."}</span>
+          </label>
+          {uploadStatus ? <small className="examPostUploadStatus">{uploadStatus}</small> : null}
           <button className="primaryButton" type="submit">시험 후 제출</button>
         </form>
       )}
@@ -14305,6 +14424,7 @@ function createExamPostSubmissionPayload(target, student, values = {}) {
     wantedHelp: values.wantedHelp ?? "",
     freeComment: values.freeComment ?? "",
     fileMemo: values.fileMemo ?? "",
+    fileAttachments: Array.isArray(values.fileAttachments) ? values.fileAttachments : [],
     teacherConfirmed: Boolean(values.teacherConfirmed),
     submittedAt: values.submittedAt || new Date().toISOString(),
     updatedAt: new Date().toISOString()

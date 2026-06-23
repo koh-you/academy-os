@@ -1,5 +1,17 @@
 # Academy OS Current Worklog
 
+## 2026-06-23 P1 시험 후 제출 사진 업로드 및 스캐너 확장 설계
+
+- 상태: 완료
+- 사용자 요청: P1 다음 단계로 당장은 학생이 시험지를 사진으로 찍어 제출하고, 나중에는 고속스캐너로 스캔한 파일을 학생 이름 기준으로 자동 분류해 학생 스토리지에 저장하고 OS에 기록/표시되게 하고 싶다고 요청했다.
+- 학생 제출 조치: 학생 `시험 후 제출` 폼에 사진/PDF 파일 선택을 추가했다. 모바일에서는 카메라 촬영 흐름을 유도하고, 여러 장 첨부를 지원한다.
+- 서버 업로드 조치: `/api/exam-post-files` 업로드 API를 추가했다. 서버가 Supabase service role로 `exam-submissions` 비공개 Storage 버킷을 확인/생성하고, 파일을 `exam-post/{examCycle}/{school}/{grade}/{student}/{targetId}/...` 경로에 저장한다.
+- 파일 열람 조치: 제출 기록에는 파일 원본이 아니라 `bucketId`, `storagePath`, `fileName`, `fileType`, `fileSize`, `source` 메타데이터만 저장한다. 학생/강사 화면의 `파일 보기`는 `/api/exam-post-files/open`을 통해 signed URL을 받아 연다.
+- 실패 안전장치: Storage 업로드가 실패해도 시험 후 제출 자체는 사라지지 않고, 해당 파일은 `업로드 실패` 상태로 제출 기록에 남아 강사가 확인할 수 있다.
+- 고속스캐너 확장 설계: `supabase/20260623_exam_submission_files.sql`을 추가했다. 향후 스캐너 자동화에서는 스캔 배치 ID, 감지된 학생명, 매칭 상태(`matched/needs_review/unmatched`)를 기록하고 같은 Storage 경로 체계를 사용한다.
+- SQL Editor 참고: 현재 사진 업로드 MVP는 서버가 Storage 버킷을 자동 생성하므로 새 SQL 실행 없이도 시도 가능하다. 다만 스캐너 자동분류/파일 메타데이터 정규 테이블까지 운영 DB에 올릴 때는 `supabase/20260623_exam_submission_files.sql` 실행이 필요하다.
+- 검증: `node --check api/server.js` 통과, `node --check scripts/scenario-tests-production.cjs` 통과, `npm run build` 통과, `npm run test:production` 115개 통과.
+
 ## 2026-06-23 학생 숙제 검사 결과 라벨 표시
 
 - 상태: 완료

@@ -6708,6 +6708,27 @@ textarea.profileEditInput {
   padding: 10px 12px;
 }
 
+.examPostUploadBox {
+  background: #f8fafc;
+  border: 1px dashed #bfdbfe;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 12px;
+}
+
+.examPostUploadBox input {
+  margin-top: 8px;
+}
+
+.examPostUploadBox span,
+.examPostUploadStatus {
+  color: #475569;
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  margin-top: 8px;
+}
+
 .studentExamPostDone,
 .examPostItem {
   background: #f8fafc;
@@ -6757,6 +6778,31 @@ textarea.profileEditInput {
   color: #475569;
   display: grid;
   gap: 4px;
+}
+
+.examPostFileList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.examPostFile {
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
+  border-radius: 999px;
+  color: #047857;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 7px 10px;
+  text-decoration: none;
+}
+
+.examPostFile.failed {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+  pointer-events: none;
 }
 
 .warningBand {

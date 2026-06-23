@@ -139,12 +139,13 @@ async function authenticateTeacher(loginId, password) {
   return null;
 }
 
-function readJsonBody(request) {
+function readJsonBody(request, options = {}) {
+  const limitBytes = options.limitBytes ?? 2_000_000;
   return new Promise((resolve, reject) => {
     let body = "";
     request.on("data", (chunk) => {
       body += chunk;
-      if (body.length > 2_000_000) {
+      if (Buffer.byteLength(body) > limitBytes) {
         reject(new Error("요청 본문이 너무 큽니다."));
         request.destroy();
       }
@@ -301,6 +302,133 @@ async function sendNotificationJob(job, { forceDryRun = false } = {}) {
     ...payload,
     target: job.notificationType === "student_comment" ? "student" : payload.target ?? "parent"
   });
+}
+
+function getSupabaseEnv(name) {
+  return process.env[name]?.trim() ?? "";
+}
+
+function getSupabaseStorageBaseUrl() {
+  const supabaseUrl = getSupabaseEnv("SUPABASE_URL").replace(/\/$/, "");
+  if (!supabaseUrl) throw new Error("SUPABASE_URL이 설정되지 않았습니다.");
+  return `${supabaseUrl}/storage/v1`;
+}
+
+function getSupabaseServiceRoleKey() {
+  const key = getSupabaseEnv("SUPABASE_SERVICE_ROLE_KEY");
+  if (!key) throw new Error("SUPABASE_SERVICE_ROLE_KEY가 설정되지 않았습니다.");
+  return key;
+}
+
+async function supabaseStorageRequest(path, options = {}) {
+  const serviceRoleKey = getSupabaseServiceRoleKey();
+  const response = await fetch(`${getSupabaseStorageBaseUrl()}/${path.replace(/^\//, "")}`, {
+    method: options.method ?? "GET",
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+      ...(options.contentType ? { "Content-Type": options.contentType } : {}),
+      ...(options.headers ?? {})
+    },
+    body: options.body
+  });
+  const text = await response.text();
+  const data = text ? JSON.parse(text) : null;
+  if (!response.ok) {
+    const message = data?.message || data?.error || response.statusText;
+    const error = new Error(message);
+    error.statusCode = response.status;
+    throw error;
+  }
+  return data;
+}
+
+async function ensureExamSubmissionBucket(bucketId) {
+  try {
+    await supabaseStorageRequest(`bucket/${encodeURIComponent(bucketId)}`);
+  } catch (error) {
+    if (error.statusCode !== 404) throw error;
+    await supabaseStorageRequest("bucket", {
+      method: "POST",
+      contentType: "application/json",
+      body: JSON.stringify({
+        id: bucketId,
+        name: bucketId,
+        public: false,
+        file_size_limit: 20 * 1024 * 1024,
+        allowed_mime_types: ["image/jpeg", "image/png", "image/webp", "image/heic", "application/pdf"]
+      })
+    });
+  }
+}
+
+function sanitizeStorageSegment(value, fallback = "unknown") {
+  const sanitized = String(value ?? "")
+    .trim()
+    .replace(/[\\/:*?"<>|#%{}^~[\]`]/g, "-")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+  return sanitized || fallback;
+}
+
+function parseDataUrl(dataUrl) {
+  const match = String(dataUrl ?? "").match(/^data:([^;,]+)?(;base64)?,(.*)$/);
+  if (!match) throw new Error("파일 데이터 형식이 올바르지 않습니다.");
+  return {
+    mimeType: match[1] || "application/octet-stream",
+    buffer: Buffer.from(match[3], match[2] ? "base64" : "utf8")
+  };
+}
+
+async function createSignedStorageUrl(bucketId, storagePath, expiresIn = 60 * 60 * 24 * 7) {
+  const result = await supabaseStorageRequest(`object/sign/${bucketId}/${storagePath}`, {
+    method: "POST",
+    contentType: "application/json",
+    body: JSON.stringify({ expiresIn })
+  });
+  if (!result?.signedURL) return "";
+  if (/^https?:\/\//.test(result.signedURL)) return result.signedURL;
+  return `${getSupabaseStorageBaseUrl()}${result.signedURL}`;
+}
+
+async function uploadExamPostFile(payload) {
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    throw new Error("Supabase Storage 업로드에는 service role 설정이 필요합니다.");
+  }
+  const bucketId = "exam-submissions";
+  await ensureExamSubmissionBucket(bucketId);
+  const { mimeType, buffer } = parseDataUrl(payload.dataUrl);
+  if (buffer.length > 20 * 1024 * 1024) throw new Error("파일은 20MB 이하만 업로드할 수 있습니다.");
+  const fileName = sanitizeStorageSegment(payload.fileName || `submission-${Date.now()}`);
+  const extension = fileName.includes(".") ? "" : (mimeType.split("/")[1] ? `.${mimeType.split("/")[1]}` : "");
+  const storagePath = [
+    "exam-post",
+    sanitizeStorageSegment(payload.examCycle, "cycle"),
+    sanitizeStorageSegment(payload.schoolName, "school"),
+    sanitizeStorageSegment(payload.grade, "grade"),
+    sanitizeStorageSegment(payload.studentName, payload.studentId || "student"),
+    sanitizeStorageSegment(payload.targetId, "target"),
+    `${Date.now()}-${fileName}${extension}`
+  ].join("/");
+
+  await supabaseStorageRequest(`object/${bucketId}/${storagePath}`, {
+    method: "PUT",
+    contentType: mimeType,
+    headers: { "x-upsert": "true" },
+    body: buffer
+  });
+
+  return {
+    bucketId,
+    storagePath,
+    fileName,
+    fileType: mimeType,
+    fileSize: buffer.length,
+    signedUrl: await createSignedStorageUrl(bucketId, storagePath),
+    uploadedAt: new Date().toISOString(),
+    source: "student_camera"
+  };
 }
 
 async function dispatchDueNotificationJobs({ forceDryRun = false, limit = 20, now = new Date().toISOString() } = {}) {
@@ -516,6 +644,34 @@ const server = http.createServer(async (request, response) => {
         notifications: getNotificationStatus()
       }
     });
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/exam-post-files") {
+    try {
+      const payload = await readJsonBody(request, { limitBytes: 28 * 1024 * 1024 });
+      const file = await uploadExamPostFile(payload);
+      sendJson(request, response, 200, { ok: true, file });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/exam-post-files/open") {
+    try {
+      const bucketId = requestUrl.searchParams.get("bucket") || "exam-submissions";
+      const storagePath = requestUrl.searchParams.get("path") || "";
+      if (!storagePath) throw new Error("파일 경로가 없습니다.");
+      const signedUrl = await createSignedStorageUrl(bucketId, storagePath);
+      response.writeHead(302, {
+        "Access-Control-Allow-Origin": getCorsOrigin(request),
+        Location: signedUrl
+      });
+      response.end();
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
     return;
   }
 
