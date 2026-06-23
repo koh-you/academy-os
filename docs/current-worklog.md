@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-06-23 수업메모 모달 닫기 시 즉시 저장 보강
+
+- 상태: 완료
+- 사용자 요청: 수업메모를 작성하고 `학생 알림톡 초안에 포함` 체크 후 저장 완료를 기다려야 하는지, 모달을 바로 닫아도 자동 저장되는지 문의했다.
+- 확인: 기존에도 체크/입력 변경 시 부모 수업일지 상태가 즉시 바뀌고 1초 뒤 자동저장이 예약되며, 모달을 닫는 것만으로 예약 타이머가 취소되지는 않는다. 다만 저장 완료 전에 새로고침/탭 종료를 하면 위험할 수 있었다.
+- 조치: `PreparationMemoModal`의 닫기 동작을 보강해 닫기 버튼 또는 `Esc`로 모달을 닫을 때 `saveMemo()`를 한 번 즉시 호출한 뒤 닫히게 했다. 이제 체크하고 바로 닫아도 저장 요청이 즉시 들어간다.
+- 회귀 방지: `scripts/scenario-tests-production.cjs`에 수업메모 모달 닫기 시 저장이 호출되는지 확인하는 항목을 추가했다.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과, `npm run build` 통과, `npm run test:production` 130개 통과.
+
 ## 2026-06-23 학부모 알림톡 과제 완료 여부 fallback 보정
 
 - 상태: 완료

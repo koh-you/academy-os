@@ -6139,7 +6139,7 @@ function PreparationMemoModal({ lesson, onChangeRecord, onClose, onSaveRecord, p
   }
 
   function saveMemo() {
-    onSaveRecord(recordId, lesson, student, {
+    return onSaveRecord(recordId, lesson, student, {
       ...currentRecord,
       preparationMemo: draftMemo,
       prepStudentVisible: draftStudentVisible,
@@ -6149,12 +6149,17 @@ function PreparationMemoModal({ lesson, onChangeRecord, onClose, onSaveRecord, p
     });
   }
 
+  function closeMemo() {
+    saveMemo();
+    onClose();
+  }
+
   return (
     <Modal
       className="preparationMemoModal"
       title={`${student.name} 수업메모`}
       subtitle={`${lesson.date} · ${lesson.className}`}
-      onClose={onClose}
+      onClose={closeMemo}
     >
       <div className="prepMemoColumns">
         <section className="prepMemoPrevious">
