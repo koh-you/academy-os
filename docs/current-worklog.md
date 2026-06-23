@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-06-24 출결 태블릿 고정 모드 및 더미 데이터 제거
+
+- 상태: 완료
+- 사용자 정정: 실제 학생의 학부모 전화번호를 임시로 선생님 번호로 바꿔 태블릿 출결 알림톡을 확인할 예정이므로, 더미 데이터 관련 흐름은 모두 지우고 `2748` 관리자 화면 복귀도 삭제해달라고 요청했다. 태블릿은 출결모드 고정으로 운영한다.
+- 조치: `/attendance` 전용 화면에서 관리자 PIN/관리자 탈출 흐름을 제거했다. `attendanceOnlyUnlocked`, `adminPin`, `onAdminExit` 경로와 설정 화면의 `출결 관리자 번호` 입력을 삭제했다.
+- 데이터 로딩 보정: 출결 전용 화면은 더 이상 큰 `/api/app-state` 전체를 기다리지 않고 `/api/students`, `/api/lessons`, `/api/lesson-records`만 불러온 뒤 바로 키패드를 활성화한다.
+- 알림톡 흐름: 태블릿에서 실제 학생 출결을 체크하면 출결 기록을 Supabase에 저장하고 `handleSendAttendanceAlimtalk()`을 호출해 학부모 번호 기준 출결 알림톡 발송 요청을 남긴다.
+- 더미 제거: 운영 Supabase에서 `student_attendance_test_20260623` 더미 학생과 `lesson_attendance_test_2026-06-23` 더미 수업을 hard delete했고, 남은 건 0건임을 확인했다.
+- 검증: `npm run test:production` 146개 통과, `npm run build` 통과.
+
 ## 2026-06-24 학생 목록 표 레이아웃 및 반 수정 보정
 
 - 상태: 완료

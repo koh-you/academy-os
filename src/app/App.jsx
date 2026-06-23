@@ -1580,9 +1580,16 @@ const defaultAiSettings = {
 };
 
 const defaultAttendanceSettings = {
-  adminPin: "2748",
   lateGraceMinutes: 0
 };
+
+function normalizeAttendanceSettings(settings = {}) {
+  return {
+    ...defaultAttendanceSettings,
+    ...(settings ?? {}),
+    lateGraceMinutes: Number(settings?.lateGraceMinutes ?? defaultAttendanceSettings.lateGraceMinutes) || 0
+  };
+}
 
 const defaultGeneratedLessonControls = {
   manualOverrideKeys: [],
@@ -1654,7 +1661,6 @@ export function App() {
   const [integrationStatus, setIntegrationStatus] = useState(null);
   const [isAppStateReady, setIsAppStateReady] = useState(false);
   const [isPortalDataReady, setIsPortalDataReady] = useState(false);
-  const [attendanceOnlyUnlocked, setAttendanceOnlyUnlocked] = useState(false);
   const [saveStates, setSaveStates] = useState({});
   const [reportModal, setReportModal] = useState(null);
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
@@ -1719,6 +1725,35 @@ export function App() {
       }
       if (attendanceOnlyMode) setIsAppStateReady(false);
       try {
+        if (attendanceOnlyMode) {
+          const [studentsResponse, lessonsResponse, recordsResponse] = await Promise.all([
+            fetch(apiUrl("/api/students")),
+            fetch(apiUrl("/api/lessons")),
+            fetch(apiUrl("/api/lesson-records"))
+          ]);
+          const [studentsResult, lessonsResult, recordsResult] = await Promise.all([
+            studentsResponse.json(),
+            lessonsResponse.json(),
+            recordsResponse.json()
+          ]);
+          if (!isMounted) return;
+          const nextLessons = lessonsResult.ok && Array.isArray(lessonsResult.lessons)
+            ? filterActiveLessons(lessonsResult.lessons)
+            : [];
+          if (studentsResult.ok && Array.isArray(studentsResult.students)) {
+            setStudents(studentsResult.students);
+          }
+          if (nextLessons.length > 0) {
+            setLessons(nextLessons);
+          }
+          if (recordsResult.ok && Array.isArray(recordsResult.records)) {
+            setRecords(nextLessons.length > 0 ? filterRecordsForLessons(recordsResult.records, nextLessons) : recordsResult.records);
+          }
+          setAttendanceSettings((current) => normalizeAttendanceSettings(current));
+          setIsPortalDataReady(false);
+          setIsAppStateReady(true);
+          return;
+        }
         if (session && ["student", "parent"].includes(session.role)) {
           const portalData = await fetchPortalData(session.sessionToken);
           if (!isMounted) return;
@@ -1828,7 +1863,7 @@ export function App() {
           isApplyingRemoteAppStateRef.current = true;
           if (Array.isArray(states.academyTests)) setAcademyTests(states.academyTests);
           if (states.aiSettings) setAiSettings(states.aiSettings);
-          if (states.attendanceSettings) setAttendanceSettings(states.attendanceSettings);
+          if (states.attendanceSettings) setAttendanceSettings(normalizeAttendanceSettings(states.attendanceSettings));
           if (Array.isArray(states.deletedLessonBundles)) setDeletedLessonBundles(states.deletedLessonBundles);
           if (Array.isArray(states.examAnalyses)) setExamAnalyses(states.examAnalyses);
           if (states.generatedLessonControls) setGeneratedLessonControls(normalizeGeneratedLessonControls(states.generatedLessonControls));
@@ -2278,17 +2313,11 @@ export function App() {
     recordsRef.current = nextRecords;
     setRecords(nextRecords);
     handleSaveRecord(recordId, lesson, student, nextRecord);
-    const isAttendanceTestDummy =
-      student.studentId === "student_attendance_test_20260623" ||
-      lesson.lessonId === "lesson_attendance_test_2026-06-23" ||
-      lesson.lessonType === "attendanceTest";
-    if (isAttendanceTestDummy) {
-      handleSendAttendanceAlimtalk(lesson, student, {
-        attendanceStatus,
-        attendanceReason: nextRecord.attendanceReason,
-        lateMinutes
-      });
-    }
+    handleSendAttendanceAlimtalk(lesson, student, {
+      attendanceStatus,
+      attendanceReason: nextRecord.attendanceReason,
+      lateMinutes
+    });
     setNotificationLogs((current) => [
       {
         notificationLogId: `attendance_kiosk_${Date.now()}_${student.studentId}`,
@@ -2297,7 +2326,7 @@ export function App() {
         lessonId: lesson.lessonId,
         message: `[출결체크] ${student.name} ${isCheckOut ? "하원" : attendanceStatus === "late" ? `${lateMinutes}분 지각 등원` : "등원"} · ${koreaTime}`,
         provider: "academy-os",
-        status: isAttendanceTestDummy ? "checked_and_sent_test" : "checked_not_sent",
+        status: "checked_and_sent",
         studentId: student.studentId,
         target: "parent"
       },
@@ -2306,7 +2335,7 @@ export function App() {
 
     return {
       ok: true,
-      message: `${student.name} ${isCheckOut ? "하원" : attendanceStatus === "late" ? `${lateMinutes}분 지각 등원` : "등원"} 체크 완료${isAttendanceTestDummy ? " · 테스트 알림톡 발송 요청" : ""}`,
+      message: `${student.name} ${isCheckOut ? "하원" : attendanceStatus === "late" ? `${lateMinutes}분 지각 등원` : "등원"} 체크 완료 · 출결 알림톡 발송 요청`,
       student,
       lesson,
       mode: isCheckOut ? "checkOut" : "checkIn",
@@ -2314,19 +2343,14 @@ export function App() {
     };
   }
 
-  if (attendanceOnlyMode && !attendanceOnlyUnlocked) {
+  if (attendanceOnlyMode) {
     return (
       <AttendanceKiosk
-        adminPin={attendanceSettings.adminPin}
         isStandalone
         lessons={lessons}
         isLoading={!isAppStateReady}
         records={records}
         students={students}
-        onAdminExit={() => {
-          window.history.replaceState(null, "", "/");
-          setAttendanceOnlyUnlocked(true);
-        }}
         onAttendanceCheck={handleAttendancePinCheck}
       />
     );
@@ -2335,7 +2359,6 @@ export function App() {
   if (!session) {
     return (
       <RoleLoginScreen
-        initialRole={attendanceOnlyUnlocked ? "teacher" : "student"}
         students={students}
         attendanceSettings={attendanceSettings}
         onAttendanceCheck={handleAttendancePinCheck}
@@ -4596,14 +4619,14 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
       lessonContent: "개별 진도 점검",
       lessonDate: todayKey,
       lessonMaterial: "공통수학1",
-      lessonName: testType === "attendance" ? "출결 테스트 더미 수업" : "월수금 7-10반",
+      lessonName: testType === "attendance" ? "출결 테스트 수업" : "월수금 7-10반",
       lateMinutes: testType === "attendance" ? 5 : "",
       message: "오늘 수업에서 확인한 내용을 바탕으로 다음 과제를 안내드립니다.",
       nextHomework: "쎈 - 경우의 수",
       parentPhone: notificationStatus?.testRecipient,
       previousHomework: "rpm 순열과 조합",
       reason: testType === "attendance" ? "태블릿/수기 출결 연결 점검" : "",
-      studentName: testType === "attendance" ? "출결테스트 더미학생" : "테스트학생",
+      studentName: "테스트학생",
       studentPhone: notificationStatus?.testRecipient,
       target: testType === "student" ? "student" : "parent"
     };
@@ -4751,10 +4774,10 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
         <div className="templateTestGrid">
           <article>
             <strong>출결 알림톡</strong>
-            <p>출결테스트 더미학생으로 선생님 테스트 수신번호에만 보냅니다.</p>
+            <p>선생님 테스트 수신번호로 출결 알림톡 형식을 점검합니다.</p>
             <pre className="templatePreviewText">{buildNotificationTemplatePreview("attendance")}</pre>
             <button className="softButton" disabled={testingTemplate === "attendance"} onClick={() => handleTemplateTest("attendance")} type="button">
-              {testingTemplate === "attendance" ? "테스트 중" : "출결 더미 테스트"}
+              {testingTemplate === "attendance" ? "테스트 중" : "출결 테스트"}
             </button>
           </article>
           <article>
@@ -5036,7 +5059,6 @@ function RoleLoginScreen({ attendanceSettings = defaultAttendanceSettings, initi
     <main className="loginPage">
       {showAttendanceKiosk ? (
         <AttendanceKiosk
-          adminPin={attendanceSettings.adminPin}
           isStandalone
           students={students}
           onAttendanceCheck={onAttendanceCheck}
@@ -6695,13 +6717,11 @@ function AttendanceModal({ item, onClose, onSave }) {
 }
 
 function AttendanceKiosk({
-  adminPin = defaultAttendanceSettings.adminPin,
   isLoading = false,
   isStandalone = false,
   lessons = [],
   records = [],
   students,
-  onAdminExit,
   onAttendanceCheck,
   onBack
 }) {
@@ -6717,11 +6737,6 @@ function AttendanceKiosk({
   function submitPin(event) {
     event?.preventDefault();
     if (isLoading) return;
-    if (pin === String(adminPin ?? "").replaceAll(/\D/g, "").slice(0, 4)) {
-      setPin("");
-      onAdminExit?.();
-      return;
-    }
     const nextResult = onAttendanceCheck(pin);
     setResult(nextResult);
     if (nextResult.ok) setPin("");
@@ -6740,15 +6755,11 @@ function AttendanceKiosk({
     setPin((current) => `${current}${value}`.replaceAll(/\D/g, "").slice(0, 4));
   }
 
-  const resultTitle = result?.isAdminExit
-    ? "관리자 확인"
-    : result?.ok
+  const resultTitle = result?.ok
       ? (result.mode === "checkOut" ? "하원 체크 완료" : "등원 체크 완료")
       : "출결 체크 실패";
   const resultDetail = result?.ok
-    ? result.isAdminExit
-      ? "선생님 로그인 화면으로 이동합니다."
-      : `${result.student.name} · ${result.lesson.className} · ${result.checkedTime}`
+    ? `${result.student.name} · ${result.lesson.className} · ${result.checkedTime}`
     : result?.message;
 
   return (
@@ -6794,7 +6805,7 @@ function AttendanceKiosk({
         >
           <div className="attendanceResultContent">
             <strong>{result.message}</strong>
-            <p>{result.isAdminExit ? "관리자 번호는 출결로 기록되지 않습니다." : result.ok ? "3초 후 자동으로 닫힙니다." : "번호를 확인한 뒤 다시 입력해 주세요."}</p>
+            <p>{result.ok ? "3초 후 자동으로 닫힙니다." : "번호를 확인한 뒤 다시 입력해 주세요."}</p>
             <button className="primaryButton" onClick={() => setResult(null)} type="button">닫기</button>
           </div>
         </Modal>
@@ -8656,21 +8667,6 @@ function SettingsCenter({
               }
             />
             <span className="aiSettingBadge fieldBadge">분 단위</span>
-          </div>
-          <div className="settingsRow compact">
-            <div>
-              <strong>출결 관리자 번호</strong>
-              <span className="muted">출결 화면에서 이 번호를 입력하면 출결 기록 없이 선생님 로그인으로 이동합니다.</span>
-            </div>
-            <input
-              inputMode="numeric"
-              maxLength={4}
-              value={attendance.adminPin}
-              onChange={(event) =>
-                updateAttendanceSetting("adminPin", event.target.value.replaceAll(/\D/g, "").slice(0, 4))
-              }
-            />
-            <span className="aiSettingBadge fieldBadge">4자리</span>
           </div>
         </div>
       </section>
