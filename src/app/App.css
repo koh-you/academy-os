@@ -1332,6 +1332,11 @@ button {
   color: #334155;
 }
 
+.schedulePlanButton:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
 .commentEditorCell {
   display: grid;
   gap: 6px;
