@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-06-23 학생/학부모 알림톡 과제 상태 위치 통일
+
+- 상태: 완료
+- 사용자 요청: 학부모 알림톡에서 `출결` 다음에 `과제 상태`를 보여주고, 학생 알림톡에도 `과제 상태`를 보여달라고 요청했다.
+- 조치: 알림톡 미리보기 본문 순서를 `출결 → 과제 상태 → 강의 교재 → 강의 내용 → 지난 과제 → 다음 과제 → 코멘트`로 정리했다. 기존에는 학부모에게만 과제 상태가 보였지만, 학생 알림톡 미리보기와 템플릿 미리보기에도 같은 과제 상태 줄이 나오도록 바꿨다.
+- 서버 발송: `/api/notifications/comment-alimtalk` 실제 발송 본문 생성에서도 학생/학부모 모두 `assignmentStatusMessage`를 사용하게 하고, 과제 상태 줄을 출결 바로 아래에 배치했다.
+- 회귀 방지: `scripts/scenario-tests-production.cjs`에 학생/학부모 알림톡 모두 과제 상태가 포함되고 서버 본문에서도 출결 다음에 과제 상태가 오는지 확인하는 항목을 추가했다.
+- 검증: `node --check api/routes/notifications.js` 통과, `node --check scripts/scenario-tests-production.cjs` 통과, `npm run build` 통과, `npm run test:production` 131개 통과.
+
 ## 2026-06-23 수업메모 모달 닫기 시 즉시 저장 보강
 
 - 상태: 완료

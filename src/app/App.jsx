@@ -308,11 +308,11 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, previousHom
     : "";
   const lines = [
     createMessageLine("🏫 출결", attendance),
+    assignmentStatus ? createMessageLine("✅ 과제 상태", getAssignmentStatusParentMessage(assignmentStatus)) : "",
     createMessageLine("📚 강의 교재", lessonMaterial),
     createMessageLine("🧭 강의 내용", lessonContent),
     createMessageLine("📘 지난 과제", previousHomework?.title),
     createMessageLine("➡️ 다음 과제", nextHomework?.title),
-    audience === "parent" && assignmentStatus ? createMessageLine("✅ 과제 상태", getAssignmentStatusParentMessage(assignmentStatus)) : "",
     supplementNotice ? createMessageBlock("⭐ 보충 일정", supplementNotice) : "",
     commentText ? createMessageBlock("💬 코멘트", commentText) : ""
   ];
@@ -346,11 +346,11 @@ function buildCommentSourceText({ lesson, nextHomework, previousHomework, record
     createMessageLine("수신 학생", student.name),
     createMessageLine("수업", `${lesson.date} ${lesson.className}`),
     createMessageLine("출결", attendanceLabels[record?.attendanceStatus ?? "pending"] ?? ""),
+    createMessageLine("과제 상태", getAssignmentStatusParentMessage(getAssignmentStatusForMessage(record, previousHomework))),
     createMessageLine("강의 교재", getLessonMaterial(record, student)),
     createMessageLine("강의 내용", getLessonContent(record)),
     createMessageLine("지난 과제", previousHomework?.title),
     createMessageLine("다음 과제", nextHomework?.title),
-    createMessageLine("과제 상태", getAssignmentStatusParentMessage(getAssignmentStatusForMessage(record, previousHomework))),
     supplementSchedules.length ? createMessageBlock("보충일정", supplementSchedules.map((item) => `- ${item}`).join("\n")) : "",
     createMessageBlock("수업메모", record?.preparationMemo)
   ]) || "알림톡에 참고할 원본 정보가 아직 없습니다.";
@@ -494,11 +494,11 @@ function buildNotificationTemplatePreview(type) {
 
   const commonBody = joinMessageBlocks([
     createMessageLine("🏫 출결", attendanceLabels[base.attendanceStatus]),
+    createMessageLine("✅ 과제 상태", getAssignmentStatusParentMessage(base.assignmentStatus)),
     createMessageLine("📚 강의 교재", base.lessonMaterial),
     createMessageLine("🧭 강의 내용", base.lessonContent),
     createMessageLine("📘 지난 과제", base.previousHomework),
     createMessageLine("➡️ 다음 과제", base.nextHomework),
-    type === "parent" ? createMessageLine("✅ 과제 상태", getAssignmentStatusParentMessage(base.assignmentStatus)) : "",
     createMessageBlock("💬 코멘트", base.message)
   ]);
 
@@ -4492,7 +4492,7 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
           </article>
           <article>
             <strong>학부모 알림톡</strong>
-            <p>강의 교재, 강의 내용, 과제 상태, 코멘트 구조를 점검합니다.</p>
+            <p>출결, 과제 상태, 강의 교재, 강의 내용, 코멘트 구조를 점검합니다.</p>
             <pre className="templatePreviewText">{buildNotificationTemplatePreview("parent")}</pre>
             <button className="softButton" disabled={testingTemplate === "parent"} onClick={() => handleTemplateTest("parent")} type="button">
               {testingTemplate === "parent" ? "테스트 중" : "학부모 테스트"}

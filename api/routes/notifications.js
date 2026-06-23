@@ -193,11 +193,11 @@ function buildDailyReportBody({
 
   return joinMessageBlocks([
     messageLine("🏫 출결", attendanceLabel(attendanceStatus)),
+    messageLine("✅ 과제 상태", assignmentStatusMessage),
     messageLine("📚 강의 교재", lessonMaterial),
     messageLine("🧭 강의 내용", lessonContent),
     messageLine("📘 지난 과제", previousHomework),
     messageLine("➡️ 다음 과제", nextHomework),
-    messageLine("✅ 과제 상태", assignmentStatusMessage),
     messageBlock("📝 수업메모", preparationNotice),
     incompleteList.length ? messageBlock("⚠️ 미완료 과제", incompleteList.map((item) => `- ${item}`).join("\n")) : "",
     messageBlock("⭐ 중요 · 재시험 일정", retestSchedule),
@@ -209,7 +209,7 @@ function buildDailyReportBody({
 function buildLessonCommentBody(payload, audience) {
   return buildDailyReportBody({
     attendanceStatus: payload.attendanceStatus,
-    assignmentStatus: audience === "parent" ? payload.assignmentStatusMessage || payload.assignmentStatus : "",
+    assignmentStatus: payload.assignmentStatusMessage || payload.assignmentStatus,
     lessonContent: payload.lessonContent,
     lessonMaterial: payload.lessonMaterial,
     nextHomework: payload.nextHomework,
