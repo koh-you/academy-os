@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-06-23 세션 자동 커밋/푸시 원칙 문서화
+
+- 상태: 완료
+- 사용자 요청: 매 대화세션마다 AI가 커밋/푸시할 수 있는 것은 알아서 하라고 요청했는데 반복적으로 누락되므로, 오늘 md 파일에 반드시 남겨달라고 했다.
+- 작업 내용: `docs/session-handoff-2026-06-23.md`에 세션 운영 원칙을 별도 섹션으로 추가했다. 사용자가 명시적으로 막지 않으면 Codex/AI가 구현, 검증, `docs/current-worklog.md` 갱신, `git add`, `git commit`, `git push origin main`, 운영 URL 확인까지 진행해야 한다고 명확히 적었다.
+- 다음 세션 프롬프트에도 같은 원칙을 강화했다. "계획만", "검토만", "커밋하지 마세요"처럼 사용자가 범위를 제한한 경우가 아니면 질문으로 멈추지 말고 가능한 범위의 커밋/푸시까지 자동 진행하도록 남겼다.
+- 최신 상태 반영: `87067ec Build student portal briefing MVP`가 `origin/main`에 push되었고, 학생 포털 오늘 MVP/마이페이지 통계/출결 키오스크/서버 인증 1차 전환이 반영된 상태임을 handoff에 추가했다.
+- SQL Editor 주의: `supabase/20260623_teacher_accounts.sql`은 AI가 자동 적용했다고 가정하지 않고, 사용자가 Supabase SQL Editor에서 실행해야 하는 작업으로 계속 표시한다.
+- 검증: 문서 변경만 수행했으므로 앱 빌드는 생략한다. 변경 후 git commit/push는 진행한다.
+
 ## 2026-06-23 학생 홈 오늘 MVP 구현
 
 - 상태: 완료
