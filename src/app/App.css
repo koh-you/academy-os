@@ -1931,6 +1931,87 @@ button {
   -webkit-line-clamp: 2;
 }
 
+.examPrepEditForm {
+  display: grid;
+  gap: 18px;
+}
+
+.examPrepEditSection {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.examPrepEditSection h2 {
+  color: #0f172a;
+  font-size: 17px;
+  margin: 0;
+}
+
+.examPrepEditGrid,
+.examPrepDateGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.examPrepTextareaGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.examPrepEditForm label,
+.modalMathExamEntryEditor label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.examPrepEditForm label span,
+.modalMathExamEntryEditor label span {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.examPrepEditForm input,
+.examPrepEditForm textarea {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font: inherit;
+  min-height: 42px;
+  padding: 9px 11px;
+  width: 100%;
+}
+
+.examPrepEditForm textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.modalMathExamEntryEditor {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.modalMathExamEntryEditor .mathExamEntryRow {
+  align-items: end;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  grid-template-columns: minmax(150px, 1fr) minmax(80px, 0.6fr) minmax(120px, 0.8fr) minmax(150px, 1fr) auto;
+  padding: 10px;
+}
+
+.modalActionBar {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .examManagementTabs {
   align-items: center;
   background: #f8fafc;
@@ -3685,6 +3766,10 @@ button:disabled {
 
 .modalCard.commentComposerModal {
   max-width: 1180px;
+}
+
+.modalCard.examPrepEditModal {
+  max-width: 1040px;
 }
 
 .modalCard.supplementStudentModal {
@@ -9486,6 +9571,12 @@ body.attendanceOnlyBody {
   .studentPortal,
   .parentPortalMobileFirst {
     padding: 16px;
+  }
+
+  .examPrepEditGrid,
+  .examPrepDateGrid,
+  .modalMathExamEntryEditor .mathExamEntryRow {
+    grid-template-columns: 1fr;
   }
 
   .studentPortalTabletFirst .portalHeader,

@@ -7316,6 +7316,7 @@ function ExamPrepCenter({
     return haystack.toLowerCase().includes(query.toLowerCase());
   });
   const selectedClass = templates.find((template) => template.classTemplateId === selectedClassTemplateId);
+  const editingExamPrepRow = rows.find((row) => row.examPrepId === editingExamPrepId) ?? null;
   const reviewModalRow = rows.find((row) => row.examPrepId === reviewModalRowId) ?? null;
   const visibleTallySubmissions = tallySubmissions.filter(
     (submission) => submission.examCycle === selectedExamCycle && submission.classTemplateId === selectedClassTemplateId
@@ -7501,121 +7502,38 @@ function ExamPrepCenter({
               <span>관리</span>
             </div>
             {filteredRows.map((row) => {
-              const isEditing = editingExamPrepId === row.examPrepId;
               const specialNote = row.specialNote ?? row.memo ?? "";
               const reviewSummary = row.revisedReview || row.review || "시험 후 총평 미작성";
 
               return (
-                <div className={isEditing ? "examPrepRow editing" : "examPrepRow"} key={row.examPrepId}>
-                  {isEditing ? (
-                    <>
-                      <input value={row.schoolName ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "schoolName", event.target.value)} />
-                      <textarea
-                        value={specialNote}
-                        onChange={(event) => onUpdateRow(row.examPrepId, "specialNote", event.target.value)}
-                        placeholder="학교별 특이사항"
-                        rows="3"
-                      />
-                      <input value={row.grade ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "grade", event.target.value)} />
-                      <input value={row.subject ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "subject", event.target.value)} />
-                      <input value={row.publisher ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "publisher", event.target.value)} />
-                      <div className="examDateRangeInputs">
-                        <input
-                          aria-label="시험기간 시작일"
-                          type="date"
-                          value={getDateRangeField(row.examPeriod, "date")}
-                          onChange={(event) =>
-                            onUpdateRow(row.examPrepId, "examPeriod", updateDateRangeField(row.examPeriod, "date", event.target.value))
-                          }
-                        />
-                        <input
-                          aria-label="시험기간 종료일"
-                          type="date"
-                          value={getDateRangeField(row.examPeriod, "endDate")}
-                          onChange={(event) =>
-                            onUpdateRow(row.examPrepId, "examPeriod", updateDateRangeField(row.examPeriod, "endDate", event.target.value))
-                          }
-                        />
-                      </div>
-                      <div className="mathExamEntryEditor">
-                        {getEditableMathExamEntries(row).map((entry, entryIndex) => (
-                          <div className="mathExamEntryRow" key={entry.id || entryIndex}>
-                            <input
-                              aria-label="수학시험 날짜"
-                              type="date"
-                              value={entry.date ?? ""}
-                              onChange={(event) => updateMathExamEntry(row, entryIndex, "date", event.target.value)}
-                            />
-                            <input
-                              aria-label="수학시험 학년"
-                              value={entry.grade ?? ""}
-                              placeholder="예: 고3"
-                              onChange={(event) => updateMathExamEntry(row, entryIndex, "grade", event.target.value)}
-                            />
-                            <input
-                              aria-label="수학시험 과목"
-                              value={entry.subject ?? ""}
-                              placeholder="예: 미적"
-                              onChange={(event) => updateMathExamEntry(row, entryIndex, "subject", event.target.value)}
-                            />
-                            <input
-                              aria-label="수학시험 표시명"
-                              value={entry.label ?? ""}
-                              placeholder="표시명 선택"
-                              onChange={(event) => updateMathExamEntry(row, entryIndex, "label", event.target.value)}
-                            />
-                            <button className="iconTinyButton" type="button" onClick={() => removeMathExamEntry(row, entryIndex)}>
-                              삭제
-                            </button>
-                          </div>
-                        ))}
-                        <button className="tinySoftButton" type="button" onClick={() => addMathExamEntry(row)}>
-                          + 수학시험 추가
-                        </button>
-                      </div>
-                      <textarea value={row.scope ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "scope", event.target.value)} rows="3" />
-                      <textarea value={row.subTextbook ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "subTextbook", event.target.value)} rows="3" />
-                    </>
-                  ) : (
-                    <>
-                      <div className="examReadCell strong">{row.schoolName || "-"}</div>
-                      <div className="examReadCell multiline">{specialNote || "특이사항 없음"}</div>
-                      <div className="examReadCell">{row.grade || "-"}</div>
-                      <div className="examReadCell">{row.subject || "-"}</div>
-                      <div className="examReadCell">{row.publisher || "-"}</div>
-                      <div className="examReadCell">{row.examPeriod || "미입력"}</div>
-                      <div className="examReadCell mathExamEntryList">
-                        {normalizeMathExamEntries(row).length ? (
-                          normalizeMathExamEntries(row).map((entry, index) => (
-                            <span className="mathExamEntryChip" key={entry.id || index}>
-                              <strong>{formatShortDate(entry.date)}</strong>
-                              {formatMathExamEntryLabel(row, entry)}
-                            </span>
-                          ))
-                        ) : (
-                          "미입력"
-                        )}
-                      </div>
-                      <div className="examReadCell multiline">{row.scope || "미입력"}</div>
-                      <div className="examReadCell multiline">{row.subTextbook || "미입력"}</div>
-                    </>
-                  )}
+                <div className="examPrepRow" key={row.examPrepId}>
+                  <div className="examReadCell strong">{row.schoolName || "-"}</div>
+                  <div className="examReadCell multiline">{specialNote || "특이사항 없음"}</div>
+                  <div className="examReadCell">{row.grade || "-"}</div>
+                  <div className="examReadCell">{row.subject || "-"}</div>
+                  <div className="examReadCell">{row.publisher || "-"}</div>
+                  <div className="examReadCell">{row.examPeriod || "미입력"}</div>
+                  <div className="examReadCell mathExamEntryList">
+                    {normalizeMathExamEntries(row).length ? (
+                      normalizeMathExamEntries(row).map((entry, index) => (
+                        <span className="mathExamEntryChip" key={entry.id || index}>
+                          <strong>{formatShortDate(entry.date)}</strong>
+                          {formatMathExamEntryLabel(row, entry)}
+                        </span>
+                      ))
+                    ) : (
+                      "미입력"
+                    )}
+                  </div>
+                  <div className="examReadCell multiline">{row.scope || "미입력"}</div>
+                  <div className="examReadCell multiline">{row.subTextbook || "미입력"}</div>
                   <button className={row.review || row.revisedReview ? "examReviewOpenButton filled" : "examReviewOpenButton"} onClick={() => setReviewModalRowId(row.examPrepId)} type="button">
                     <strong>{row.review || row.revisedReview ? "총평 보기/수정" : "총평 작성"}</strong>
                     <span>{reviewSummary}</span>
                   </button>
                   <div className="examPrepRowActions">
-                    {isEditing ? (
-                      <>
-                        <button className="primaryButton compact" onClick={() => setEditingExamPrepId("")} type="button">저장</button>
-                        <button className="softButton compact" onClick={() => setEditingExamPrepId("")} type="button">닫기</button>
-                      </>
-                    ) : (
-                      <>
-                        <button className="softButton compact" onClick={() => setEditingExamPrepId(row.examPrepId)} type="button">수정</button>
-                        <button className="dangerSoftButton compact" onClick={() => onDeleteRow?.(row.examPrepId)} type="button">삭제</button>
-                      </>
-                    )}
+                    <button className="softButton compact" onClick={() => setEditingExamPrepId(row.examPrepId)} type="button">수정</button>
+                    <button className="dangerSoftButton compact" onClick={() => onDeleteRow?.(row.examPrepId)} type="button">삭제</button>
                   </div>
                 </div>
               );
@@ -7791,7 +7709,159 @@ function ExamPrepCenter({
           onUpdateRow={onUpdateRow}
         />
       ) : null}
+      {editingExamPrepRow ? (
+        <ExamPrepEditModal
+          row={editingExamPrepRow}
+          getEditableMathExamEntries={getEditableMathExamEntries}
+          onAddMathExamEntry={addMathExamEntry}
+          onClose={() => setEditingExamPrepId("")}
+          onRemoveMathExamEntry={removeMathExamEntry}
+          onUpdateMathExamEntry={updateMathExamEntry}
+          onUpdateRow={onUpdateRow}
+        />
+      ) : null}
     </section>
+  );
+}
+
+function ExamPrepEditModal({
+  getEditableMathExamEntries,
+  onAddMathExamEntry,
+  onClose,
+  onRemoveMathExamEntry,
+  onUpdateMathExamEntry,
+  onUpdateRow,
+  row
+}) {
+  const specialNote = row.specialNote ?? row.memo ?? "";
+
+  return (
+    <Modal
+      className="examPrepEditModal"
+      title={`${row.schoolName || "학교 미입력"} 시험정보 수정`}
+      subtitle={[row.grade, row.subject, row.publisher].filter(Boolean).join(" · ") || "시험관리 상세 입력"}
+      onClose={onClose}
+    >
+      <div className="examPrepEditForm">
+        <section className="examPrepEditSection">
+          <h2>기본 정보</h2>
+          <div className="examPrepEditGrid">
+            <label>
+              <span>학교명</span>
+              <input value={row.schoolName ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "schoolName", event.target.value)} />
+            </label>
+            <label>
+              <span>학년</span>
+              <input value={row.grade ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "grade", event.target.value)} />
+            </label>
+            <label>
+              <span>과목</span>
+              <input value={row.subject ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "subject", event.target.value)} />
+            </label>
+            <label>
+              <span>출판사</span>
+              <input value={row.publisher ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "publisher", event.target.value)} />
+            </label>
+          </div>
+        </section>
+
+        <section className="examPrepEditSection">
+          <h2>시험 일정</h2>
+          <div className="examPrepDateGrid examDateRangeInputs">
+            <label>
+              <span>시험기간 시작일</span>
+              <input
+                type="date"
+                value={getDateRangeField(row.examPeriod, "date")}
+                onChange={(event) =>
+                  onUpdateRow(row.examPrepId, "examPeriod", updateDateRangeField(row.examPeriod, "date", event.target.value))
+                }
+              />
+            </label>
+            <label>
+              <span>시험기간 종료일</span>
+              <input
+                type="date"
+                value={getDateRangeField(row.examPeriod, "endDate")}
+                onChange={(event) =>
+                  onUpdateRow(row.examPrepId, "examPeriod", updateDateRangeField(row.examPeriod, "endDate", event.target.value))
+                }
+              />
+            </label>
+          </div>
+          <div className="mathExamEntryEditor modalMathExamEntryEditor">
+            {getEditableMathExamEntries(row).map((entry, entryIndex) => (
+              <div className="mathExamEntryRow" key={entry.id || entryIndex}>
+                <label>
+                  <span>수학시험 날짜</span>
+                  <input
+                    type="date"
+                    value={entry.date ?? ""}
+                    onChange={(event) => onUpdateMathExamEntry(row, entryIndex, "date", event.target.value)}
+                  />
+                </label>
+                <label>
+                  <span>학년</span>
+                  <input
+                    value={entry.grade ?? ""}
+                    placeholder="예: 고3"
+                    onChange={(event) => onUpdateMathExamEntry(row, entryIndex, "grade", event.target.value)}
+                  />
+                </label>
+                <label>
+                  <span>과목</span>
+                  <input
+                    value={entry.subject ?? ""}
+                    placeholder="예: 미적분"
+                    onChange={(event) => onUpdateMathExamEntry(row, entryIndex, "subject", event.target.value)}
+                  />
+                </label>
+                <label>
+                  <span>표시명</span>
+                  <input
+                    value={entry.label ?? ""}
+                    placeholder="표시명 선택"
+                    onChange={(event) => onUpdateMathExamEntry(row, entryIndex, "label", event.target.value)}
+                  />
+                </label>
+                <button className="iconTinyButton" type="button" onClick={() => onRemoveMathExamEntry(row, entryIndex)}>
+                  삭제
+                </button>
+              </div>
+            ))}
+            <button className="tinySoftButton" type="button" onClick={() => onAddMathExamEntry(row)}>
+              + 수학시험 추가
+            </button>
+          </div>
+        </section>
+
+        <section className="examPrepEditSection">
+          <h2>시험 내용</h2>
+          <div className="examPrepTextareaGrid">
+            <label>
+              <span>특이사항</span>
+              <textarea
+                value={specialNote}
+                onChange={(event) => onUpdateRow(row.examPrepId, "specialNote", event.target.value)}
+                placeholder="학교별 특이사항"
+              />
+            </label>
+            <label>
+              <span>시험 범위</span>
+              <textarea value={row.scope ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "scope", event.target.value)} />
+            </label>
+            <label>
+              <span>부교재</span>
+              <textarea value={row.subTextbook ?? ""} onChange={(event) => onUpdateRow(row.examPrepId, "subTextbook", event.target.value)} />
+            </label>
+          </div>
+        </section>
+
+        <div className="modalActionBar">
+          <button className="primaryButton" onClick={onClose} type="button">저장 완료</button>
+        </div>
+      </div>
+    </Modal>
   );
 }
 
