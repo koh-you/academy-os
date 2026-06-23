@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-06-23 계정 정보 저장 정리 및 학생 계정 서버 인증 전환
+
+- 상태: 완료
+- 사용자 요청: `app_state`에 남은 계정 정보를 정리하고, 학생들에게 아이디를 부여해 웹앱을 나눠줄 준비를 요청했다.
+- 보안 조치: 교사 계정 설정을 더 이상 `app_state`에 저장하거나 복원하지 않도록 제거했다. 브라우저 로컬에 남아 있을 수 있는 기존 `academy-os.teacherAccountSettings.v1` 키도 앱 시작 시 삭제한다.
+- 서버 조치: `/api/app-state` 읽기/쓰기에서 `teacherAccountSettings`를 민감 키로 필터링하고, 저장 시 기존 행을 삭제하도록 했다. 교사 로그인은 서버 `teacher_accounts` 인증만 사용하고 로컬 비밀번호 fallback을 제거했다.
+- 학생/학부모 로그인: `/api/auth/login`이 `student`, `parent`, `teacher` 역할을 모두 처리하게 확장했다. 학생은 `students.login_id + pin`, 학부모는 `parent-{student.login_id} + pin`으로 서버에서 인증한다.
+- 운영 메모: 학생에게 배포할 기본 계정은 학생 관리 화면의 `아이디`, `PIN` 값을 기준으로 안내하면 된다. 학부모 계정은 같은 PIN을 사용하되 아이디 앞에 `parent-`를 붙인다.
+- 검증: `node --check api/server.js` 통과, `node --check api/routes/coreData.js` 통과, `node --check scripts/scenario-tests-production.cjs` 통과, `npm run build` 통과, `npm run test:production` 122개 통과.
+
 ## 2026-06-23 시험 후 제출 빈칸 제출 차단
 
 - 상태: 완료

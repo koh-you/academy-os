@@ -139,6 +139,30 @@ async function authenticateTeacher(loginId, password) {
   return null;
 }
 
+function createParentLoginId(student) {
+  return `parent-${student.loginId}`;
+}
+
+async function authenticateStudentOrParent(role, loginId, password) {
+  if (!isSupabaseConfigured({ requireServiceRole: true })) return null;
+  const rows = await listRows(
+    "students",
+    `select=student_id,name,login_id,pin,status&status=eq.active&limit=1000`,
+    { requireServiceRole: true }
+  );
+  const student = rows.find((row) => {
+    if (role === "student") return row.login_id === loginId && row.pin === password;
+    if (role === "parent") return createParentLoginId({ loginId: row.login_id }) === loginId && row.pin === password;
+    return false;
+  });
+  if (!student) return null;
+  return {
+    studentId: student.student_id,
+    loginId: student.login_id,
+    name: student.name
+  };
+}
+
 function readJsonBody(request, options = {}) {
   const limitBytes = options.limitBytes ?? 2_000_000;
   return new Promise((resolve, reject) => {
@@ -563,11 +587,30 @@ const server = http.createServer(async (request, response) => {
   if (request.method === "POST" && requestUrl.pathname === "/api/auth/login") {
     try {
       const payload = await readJsonBody(request);
-      if (payload.role !== "teacher") {
+      if (!["teacher", "student", "parent"].includes(payload.role)) {
         sendJson(request, response, 403, { ok: false, error: "지원하지 않는 로그인 역할입니다." });
         return;
       }
-      const account = await authenticateTeacher(String(payload.loginId ?? "").trim(), String(payload.password ?? ""));
+      const loginId = String(payload.loginId ?? "").trim();
+      const password = String(payload.password ?? "");
+      if (payload.role !== "teacher") {
+        const student = await authenticateStudentOrParent(payload.role, loginId, password);
+        sendJson(request, response, 200, {
+          ok: true,
+          authenticated: Boolean(student),
+          account: student
+            ? {
+                role: payload.role,
+                actorId: payload.role === "student" ? student.studentId : `parent_${student.studentId}`,
+                studentId: student.studentId,
+                loginId: student.loginId,
+                name: student.name
+              }
+            : null
+        });
+        return;
+      }
+      const account = await authenticateTeacher(loginId, password);
       sendJson(request, response, 200, {
         ok: true,
         authenticated: Boolean(account),

@@ -25,10 +25,10 @@ const storageKeys = {
   lessonResearchItems: "academy-os.lessonResearchItems.v1",
   aiSettings: "academy-os.aiSettings.v1",
   attendanceSettings: "academy-os.attendanceSettings.v1",
-  teacherAccountSettings: "academy-os.teacherAccountSettings.v1",
   lessonNotificationPlans: "academy-os.lessonNotificationPlans.v1",
   deletedLessonBundles: "academy-os.deletedLessonBundles.v1"
 };
+const legacySensitiveStorageKeys = ["academy-os.teacherAccountSettings.v1"];
 
 const academyBrandName = "으뜸수학 고태영T";
 const academyOperationalStartDate = "2026-06-19";
@@ -597,14 +597,12 @@ function postAppState(states) {
 
 const teacherAccount = {
   loginId: "teacher",
-  password: "1234",
   name: "고태영",
   role: "teacher"
 };
 
 const defaultTeacherAccountSettings = {
   loginId: teacherAccount.loginId,
-  password: teacherAccount.password,
   name: teacherAccount.name
 };
 
@@ -1566,10 +1564,7 @@ export function App() {
     storageKeys.attendanceSettings,
     defaultAttendanceSettings
   );
-  const [teacherAccountSettings, setTeacherAccountSettings] = useStoredState(
-    storageKeys.teacherAccountSettings,
-    defaultTeacherAccountSettings
-  );
+  const [teacherAccountSettings, setTeacherAccountSettings] = useState(defaultTeacherAccountSettings);
   const [lessonNotificationPlans, setLessonNotificationPlans] = useStoredState(storageKeys.lessonNotificationPlans, {});
   const [generatedLessonControls, setGeneratedLessonControls] = useStoredState(
     "academy-os.generatedLessonControls.v1",
@@ -1610,7 +1605,6 @@ export function App() {
     scoreRecords,
     examPostSubmissions,
     studentQuestions,
-    teacherAccountSettings,
     wrongProblems
   }), [
     academyTests,
@@ -1627,7 +1621,6 @@ export function App() {
     scoreRecords,
     examPostSubmissions,
     studentQuestions,
-    teacherAccountSettings,
     wrongProblems
   ]);
   const initialSharedAppStateRef = useRef(sharedAppState);
@@ -1730,12 +1723,6 @@ export function App() {
           if (Array.isArray(states.deletedLessonBundles)) setDeletedLessonBundles(states.deletedLessonBundles);
           if (Array.isArray(states.examAnalyses)) setExamAnalyses(states.examAnalyses);
           if (states.generatedLessonControls) setGeneratedLessonControls(normalizeGeneratedLessonControls(states.generatedLessonControls));
-          if (states.teacherAccountSettings && typeof states.teacherAccountSettings === "object" && !Array.isArray(states.teacherAccountSettings)) {
-            setTeacherAccountSettings({
-              ...defaultTeacherAccountSettings,
-              ...states.teacherAccountSettings
-            });
-          }
           if (states.lessonNotificationPlans && typeof states.lessonNotificationPlans === "object" && !Array.isArray(states.lessonNotificationPlans)) {
             setLessonNotificationPlans(states.lessonNotificationPlans);
           }
@@ -2051,6 +2038,10 @@ export function App() {
   const attendanceOnlyMode = isAttendanceOnlyRoute();
 
   useEffect(() => {
+    legacySensitiveStorageKeys.forEach((key) => window.localStorage.removeItem(key));
+  }, []);
+
+  useEffect(() => {
     if (!attendanceOnlyMode) return undefined;
     document.body.classList.add("attendanceOnlyBody");
     return () => document.body.classList.remove("attendanceOnlyBody");
@@ -2059,14 +2050,6 @@ export function App() {
   async function handleLogin(role, loginId, password) {
     if (role === "teacher") {
       const account = { ...defaultTeacherAccountSettings, ...teacherAccountSettings };
-      const loginWithLocalTeacherAccount = () => {
-        if (loginId === account.loginId && password === account.password) {
-          setSession({ role: "teacher", actorId: "instructor_owner_001", name: account.name || teacherAccount.name });
-          setActiveView("lessons");
-          return true;
-        }
-        return false;
-      };
       try {
         const result = await postJson("/api/auth/login", { role, loginId, password });
         if (result.authenticated) {
@@ -2074,45 +2057,32 @@ export function App() {
           setActiveView("lessons");
           return { ok: true };
         }
-        if (loginWithLocalTeacherAccount()) {
-          return { ok: true };
-        }
       } catch (error) {
-        console.warn("Server teacher auth failed; falling back to local settings.", error);
-        if (loginWithLocalTeacherAccount()) {
-          return { ok: true };
-        }
+        console.warn("Server teacher auth failed.", error);
       }
       return { ok: false, message: "선생님 아이디 또는 비밀번호가 맞지 않습니다." };
     }
 
-    const matchedStudent =
-      students.find((student) => {
-        if (role === "student") {
-          return student.loginId === loginId && student.pin === password;
-        }
-        if (role === "parent") {
-          return createParentLoginId(student) === loginId && student.pin === password;
-        }
-        return false;
-      }) ??
-      (role === "student" && loginId === "student" && password === "1234"
-        ? getDemoStudent(students)
-        : role === "parent" && loginId === "parent" && password === "1234"
-          ? getDemoStudent(students)
-          : null);
+    try {
+      const result = await postJson("/api/auth/login", { role, loginId, password });
+      if (result.authenticated && result.account?.studentId) {
+        setSession({
+          role,
+          actorId: result.account.actorId,
+          studentId: result.account.studentId,
+          name: result.account.name
+        });
+        return { ok: true };
+      }
+    } catch (error) {
+      console.warn("Server student auth failed.", error);
+    }
 
-    if (!matchedStudent) {
+    if (role === "student" || role === "parent") {
       return { ok: false, message: role === "student" ? "학생 아이디 또는 비밀번호가 맞지 않습니다." : "학부모 아이디 또는 비밀번호가 맞지 않습니다." };
     }
 
-    setSession({
-      role,
-      actorId: role === "student" ? matchedStudent.studentId : `parent_${matchedStudent.studentId}`,
-      studentId: matchedStudent.studentId,
-      name: matchedStudent.name
-    });
-    return { ok: true };
+    return { ok: false, message: "지원하지 않는 로그인 역할입니다." };
   }
 
   function handleLogout() {
@@ -8032,10 +8002,6 @@ function SettingsCenter({
     const currentPassword = accountForm.currentPassword.trim();
     const confirmPassword = accountForm.confirmPassword.trim();
 
-    if (account.password && currentPassword !== account.password) {
-      setAccountMessage("현재 비밀번호가 맞지 않습니다.");
-      return;
-    }
     if (!nextLoginId) {
       setAccountMessage("아이디를 입력해주세요.");
       return;
@@ -8060,7 +8026,7 @@ function SettingsCenter({
         ...defaultTeacherAccountSettings,
         ...current,
         loginId: result.account?.loginId ?? nextLoginId,
-        password: nextPassword || currentPassword || current?.password || defaultTeacherAccountSettings.password
+        name: result.account?.name ?? current?.name ?? defaultTeacherAccountSettings.name
       }));
       setAccountForm({
         confirmPassword: "",
@@ -8070,19 +8036,7 @@ function SettingsCenter({
       });
       setAccountMessage("서버 인증 계정이 저장되었습니다.");
     } catch (error) {
-      onUpdateTeacherAccountSettings?.((current) => ({
-        ...defaultTeacherAccountSettings,
-        ...current,
-        loginId: nextLoginId,
-        password: nextPassword || current?.password || defaultTeacherAccountSettings.password
-      }));
-      setAccountForm({
-        confirmPassword: "",
-        currentPassword: "",
-        loginId: nextLoginId,
-        newPassword: ""
-      });
-      setAccountMessage(`서버 저장 실패: ${error.message}. 임시 로컬 설정으로 저장했습니다.`);
+      setAccountMessage(`서버 저장 실패: ${error.message}`);
     }
   }
 
