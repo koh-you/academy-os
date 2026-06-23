@@ -102,6 +102,14 @@ async function getTeacherAccountRow(loginId = "") {
   return rows[0] ?? null;
 }
 
+async function hasAnyTeacherAccount() {
+  if (!isSupabaseConfigured({ requireServiceRole: true })) return false;
+  const rows = await listRows(teacherAccountTable, "select=teacher_id&is_active=eq.true&limit=1", {
+    requireServiceRole: true
+  });
+  return rows.length > 0;
+}
+
 async function saveTeacherAccount({ teacherId, loginId, name, password }) {
   const row = {
     teacher_id: teacherId || defaultTeacherAccount.teacherId,
@@ -120,7 +128,8 @@ async function authenticateTeacher(loginId, password) {
   if (row) {
     return verifyPassword(password, row.password_hash) ? toTeacherAccount(row) : null;
   }
-  if (loginId === defaultTeacherAccount.loginId && password === defaultTeacherAccount.password) {
+  const needsBootstrap = !(await hasAnyTeacherAccount());
+  if (needsBootstrap && loginId === defaultTeacherAccount.loginId && password === defaultTeacherAccount.password) {
     return {
       teacherId: defaultTeacherAccount.teacherId,
       loginId: defaultTeacherAccount.loginId,

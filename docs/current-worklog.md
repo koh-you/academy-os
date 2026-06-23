@@ -1,5 +1,16 @@
 # Academy OS Current Worklog
 
+## 2026-06-23 SQL Editor 실행 후 서버 인증 종합검토
+
+- 상태: 완료
+- 사용자 요청: `supabase/20260623_teacher_accounts.sql`을 SQL Editor에서 실행했으므로 종합검토한다.
+- 확인 내용: 운영 `/api/auth/login`에 잘못된 선생님 로그인 요청을 보내 테이블/권한 오류 없이 `authenticated:false`가 반환되는 것을 확인했다. 운영 `/api/auth/teacher-account`도 잘못된 현재 계정에 대해 401을 반환해 Supabase service role 접근과 `teacher_accounts` 테이블 연결은 정상으로 판단했다.
+- 발견 이슈: 운영 서버에서 기본 계정 `teacher / 1234`가 아직 인증되었다. 기존 코드가 `teacher_accounts`에서 해당 login_id를 찾지 못하면 기본 계정 fallback을 허용했기 때문에, 서버 계정을 새로 저장한 뒤에도 `teacher` login_id가 없으면 기본 계정이 계속 살아남을 수 있었다.
+- 조치: `api/server.js`에 활성 `teacher_accounts` 존재 여부 확인을 추가했다. 이제 서버 계정이 1개라도 있으면 기본 계정 fallback은 더 이상 허용되지 않고, 기본 계정은 최초 서버 계정 bootstrap 전용으로만 동작한다.
+- 운영 절차: 배포 반영 후 설정 화면에서 선생님 계정을 한 번 저장해야 `teacher_accounts`에 활성 계정이 생긴다. 그 이후 기본 계정 fallback은 차단된다.
+- 검증: `node --check api/server.js` 통과, `node --check scripts/scenario-tests-production.cjs` 통과, `npm run build` 통과, `npm run test:production` 107개 통과.
+- SQL Editor 추가 작업 필요 없음: 이미 실행한 `supabase/20260623_teacher_accounts.sql` 테이블을 그대로 사용하며 추가 SQL은 없다.
+
 ## 2026-06-23 세션 자동 커밋/푸시 원칙 문서화
 
 - 상태: 완료
