@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-06-23 시험 후 제출 폼 가독성 보정
+
+- 상태: 완료
+- 사용자 요청: 시험 후 제출 폼의 체크박스가 너무 크고, 질문을 볼드체로 해서 가독성을 높여달라고 요청했다.
+- 조치: 시험 후 제출 폼 질문 라벨의 색상/굵기/행간을 강화하고, 복수 선택 그룹 질문도 굵게 표시했다. 체크박스는 14px 크기로 고정하고 선택지 pill의 패딩과 글자 굵기를 줄여 과하게 커 보이지 않게 조정했다.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과, `npm run build` 통과, `npm run test:production` 118개 통과.
+
 ## 2026-06-23 시험 후 제출 Tally 전체 문항 반영
 
 - 상태: 완료

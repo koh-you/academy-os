@@ -6694,10 +6694,12 @@ textarea.profileEditInput {
 }
 
 .studentExamPostForm label {
-  color: #475569;
+  color: #0f172a;
   display: grid;
-  font-weight: 800;
+  font-size: 14px;
+  font-weight: 900;
   gap: 6px;
+  line-height: 1.35;
 }
 
 .examPostAutoInfo {
@@ -6731,8 +6733,10 @@ textarea.profileEditInput {
 }
 
 .examPostChoiceGroup > strong {
-  color: #475569;
+  color: #0f172a;
   font-size: 14px;
+  font-weight: 900;
+  line-height: 1.35;
 }
 
 .examPostChoiceGroup > div {
@@ -6746,16 +6750,23 @@ textarea.profileEditInput {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 999px;
+  color: #334155;
   display: inline-flex;
   flex-direction: row;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 800;
   gap: 6px;
-  padding: 8px 10px;
+  line-height: 1.2;
+  padding: 6px 8px;
 }
 
-.examPostChoiceGroup input {
+.examPostChoiceGroup input[type="checkbox"] {
+  accent-color: #172554;
+  flex: 0 0 14px;
+  height: 14px;
   margin: 0;
+  padding: 0;
+  width: 14px;
 }
 
 .studentExamPostForm input,
