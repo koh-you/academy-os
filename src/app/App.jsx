@@ -14374,10 +14374,6 @@ function buildExamPostTargetsForStudent(student, examPrepRows = [], submissions 
           ? [createMathExamEntry(row, 0)]
           : [];
       return fallbackEntries
-        .filter((entry) => {
-          const daysFromTodayToExam = getDateDiffInDays(today, entry.date);
-          return daysFromTodayToExam <= 7;
-        })
         .map((entry, index) => {
           const targetId = `exam_post_${row.examPrepId}_${entry.id || index}_${student.studentId}`;
           const submission =
@@ -14401,7 +14397,7 @@ function buildExamPostTargetsForStudent(student, examPrepRows = [], submissions 
             examCycle: row.examCycle || currentExamCycle,
             grade: entry.grade || row.grade || student.grade,
             isOverdue,
-            isOpen: daysFromTodayToExam <= 0,
+            isOpen: true,
             label: entry.label || examCycleLabel(row.examCycle || currentExamCycle),
             schoolName: row.schoolName || student.schoolName,
             studentId: student.studentId,
