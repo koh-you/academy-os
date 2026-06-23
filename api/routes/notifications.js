@@ -18,15 +18,28 @@ const TEMPLATE_ENV = {
   studentComment: "SOLAPI_STUDENT_COMMENT_TEMPLATE_ID"
 };
 
-const assignmentStatusMessageMap = {
+const assignmentStatusParentMessageMap = {
   complete_thorough: "과제를 성실하게 완료했습니다.",
-  complete_easy: "오늘 과제는 학생에게 비교적 수월하게 진행되었습니다.",
-  partial_80: "과제의 대부분을 수행했으며, 남은 부분은 다음 수업에서 확인하겠습니다.",
-  known_only: "아는 문항 위주로 진행되어 어려웠던 문항은 추가 확인이 필요합니다.",
-  too_hard: "과제 난도가 다소 높아 보충 설명과 분량 조정이 필요합니다.",
+  complete_easy: "과제를 성실하게 완료했습니다.",
+  partial_80: "과제의 약 80%를 수행했습니다. 남은 부분은 다음 시간에 함께 확인하도록 하겠습니다.",
+  partial_50: "숙제를 많이 진행하지 못했습니다. 남은 부분은 다음 시간에 함께 확인하고, 필요하면 추가 등원보충으로 관리하겠습니다.",
+  known_only: "쉬운 문항 위주로 풀어온 것으로 보입니다. 어려운 문항은 수업에서 다시 확인하겠습니다.",
+  too_hard: "과제 난이도가 높아 해결하지 못한 부분이 있었습니다. 과제 난이도를 조정해보도록 하겠습니다.",
   answer_suspected: "풀이 과정 확인이 필요한 문항이 있어 다음 수업에서 점검하겠습니다.",
-  not_done: "과제가 충분히 완료되지 않아 보충 관리가 필요합니다.",
-  not_checked: "과제 확인이 아직 완료되지 않았습니다."
+  not_done: "과제를 해오지 못했습니다. 필요하면 추가 등원보충으로 관리하겠습니다.",
+  not_checked: "오늘은 과제 검사가 아직 완료되지 않았습니다. 확인 후 필요한 내용을 다시 안내드리겠습니다."
+};
+
+const assignmentStatusStudentMessageMap = {
+  complete_thorough: "과제를 성실하게 완료했어.",
+  complete_easy: "과제를 성실하게 완료했어.",
+  partial_80: "과제의 약 80%를 해왔어. 남은 부분은 다음 시간에 같이 확인하자.",
+  partial_50: "숙제를 많이 못 해왔어. 남은 부분은 다음 시간에 같이 확인하고, 필요하면 추가 등원보충으로 마무리하자.",
+  known_only: "쉬운 문항 위주로 풀어온 것 같아. 어려운 문항도 조금씩 시도해보자.",
+  too_hard: "이번 과제 난이도가 높아서 해결하지 못한 부분이 있었어. 과제 난이도는 조정해볼게.",
+  answer_suspected: "풀이 과정이 충분히 남아 있지 않아 이해 여부를 다시 확인할게.",
+  not_done: "과제를 못 해왔어. 필요하면 추가 등원보충으로 마무리하자.",
+  not_checked: "오늘은 아직 과제 검사가 완료되지 않았어. 확인 후 필요한 부분을 다시 안내할게."
 };
 
 function compactPhoneNumber(value = "") {
@@ -66,8 +79,9 @@ function attendanceLabel(status) {
   }[status] ?? status ?? "출석";
 }
 
-function assignmentStatusText(value, fallback = "") {
-  return assignmentStatusMessageMap[value] ?? fallback ?? value ?? "";
+function assignmentStatusText(value, fallback = "", audience = "parent") {
+  const messageMap = audience === "student" ? assignmentStatusStudentMessageMap : assignmentStatusParentMessageMap;
+  return messageMap[value] ?? fallback ?? value ?? "";
 }
 
 function normalizeText(value) {
@@ -185,11 +199,12 @@ function buildDailyReportBody({
   previousHomework,
   preparationNotice,
   retestSchedule,
+  audience = "parent",
   supplementSchedule,
   teacherComment
 }) {
   const incompleteList = normalizeList(incompleteHomeworks);
-  const assignmentStatusMessage = assignmentStatusText(assignmentStatus, assignmentStatus);
+  const assignmentStatusMessage = assignmentStatusText(assignmentStatus, assignmentStatus, audience);
 
   return joinMessageBlocks([
     messageLine("🏫 출결", attendanceLabel(attendanceStatus)),
@@ -209,7 +224,11 @@ function buildDailyReportBody({
 function buildLessonCommentBody(payload, audience) {
   return buildDailyReportBody({
     attendanceStatus: payload.attendanceStatus,
-    assignmentStatus: payload.assignmentStatusMessage || payload.assignmentStatus,
+    assignmentStatus:
+      audience === "student"
+        ? payload.assignmentStatusStudentMessage || payload.assignmentStatusMessage || payload.assignmentStatus
+        : payload.assignmentStatusParentMessage || payload.assignmentStatusMessage || payload.assignmentStatus,
+    audience,
     lessonContent: payload.lessonContent,
     lessonMaterial: payload.lessonMaterial,
     nextHomework: payload.nextHomework,

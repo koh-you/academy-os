@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-06-23 과제상태 학생/학부모 알림문구 분리 및 톤 수정
+
+- 상태: 완료
+- 사용자 요청: 과제상태 드롭다운에 따른 학부모 알림말과 학생 알림말을 나눠 정리하고, `80%`, `50%`, `아는 것만 풂`, `난이도 높음`, `미완료`의 학부모 문구 뉘앙스를 수정해달라고 요청했다. 학생 문구도 그에 맞춰 조정하길 원했다.
+- 학부모 문구: `80%완료`는 남은 부분을 다음 시간에 함께 확인, `50%완료`와 `미완료`는 필요 시 추가 등원보충 관리, `아는 것만 풂`은 쉬운 문항 위주로 풀어온 상태, `난이도 높음`은 과제 난이도 조정으로 안내하도록 바꿨다.
+- 학생 문구: 학부모 문구와 같은 의미를 유지하되 학생에게 직접 전달되는 말투로 분리했다. 예를 들어 `80%완료`는 `남은 부분은 다음 시간에 같이 확인하자`, `50%완료/미완료`는 필요 시 추가 등원보충으로 마무리하자는 톤으로 정리했다.
+- 구현: 프론트에는 `assignmentStatusParentMessages`, `assignmentStatusStudentMessages`, `getAssignmentStatusMessage()`를 두고, 미리보기/AI 수정 payload/실제 발송 payload가 대상별 문구를 쓰도록 했다. 서버 `/api/notifications/comment-alimtalk`에도 학부모/학생 문구 맵을 분리해 direct API fallback도 대상별로 맞췄다.
+- 회귀 방지: `scripts/scenario-tests-production.cjs`에 학부모/학생 과제상태 문구 분리, 출결 다음 과제상태 표시, 최신 문구 톤을 확인하는 항목을 추가했다.
+- 검증: `node --check api/routes/notifications.js` 통과, `node --check scripts/scenario-tests-production.cjs` 통과, `npm run build` 통과, `npm run test:production` 132개 통과.
+
 ## 2026-06-23 학생/학부모 알림톡 과제 상태 위치 통일
 
 - 상태: 완료

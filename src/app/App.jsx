@@ -106,13 +106,24 @@ const assignmentStatusAliases = {
 
 const assignmentStatusParentMessages = {
   complete_thorough: "과제를 성실하게 완료했습니다.",
-  partial_80: "과제의 약 80%를 수행했습니다. 남은 부분은 다음 확인 때 이어서 점검하겠습니다.",
-  partial_50: "과제의 약 절반 정도를 수행했습니다. 수행량을 조금 더 끌어올릴 수 있도록 지도하겠습니다.",
-  known_only: "스스로 해결 가능한 문항 위주로 풀어왔습니다. 어려워한 문항은 수업에서 다시 확인하겠습니다.",
-  too_hard: "과제 난이도가 높아 충분히 해결하지 못한 부분이 있었습니다. 필요한 개념을 보충해 다시 풀 수 있도록 지도하겠습니다.",
+  partial_80: "과제의 약 80%를 수행했습니다. 남은 부분은 다음 시간에 함께 확인하도록 하겠습니다.",
+  partial_50: "숙제를 많이 진행하지 못했습니다. 남은 부분은 다음 시간에 함께 확인하고, 필요하면 추가 등원보충으로 관리하겠습니다.",
+  known_only: "쉬운 문항 위주로 풀어온 것으로 보입니다. 어려운 문항은 수업에서 다시 확인하겠습니다.",
+  too_hard: "과제 난이도가 높아 해결하지 못한 부분이 있었습니다. 과제 난이도를 조정해보도록 하겠습니다.",
   answer_suspected: "풀이 과정이 충분히 남아 있지 않아 이해 여부를 다시 확인하거나 간단한 테스트로 점검할 예정입니다.",
-  not_done: "과제가 완료되지 않았습니다. 미완료된 부분은 보충 또는 다음 확인 때 이어서 점검하겠습니다.",
+  not_done: "과제를 해오지 못했습니다. 필요하면 추가 등원보충으로 관리하겠습니다.",
   not_checked: "오늘은 과제 검사가 아직 완료되지 않았습니다. 확인 후 필요한 내용을 다시 안내드리겠습니다."
+};
+
+const assignmentStatusStudentMessages = {
+  complete_thorough: "과제를 성실하게 완료했어.",
+  partial_80: "과제의 약 80%를 해왔어. 남은 부분은 다음 시간에 같이 확인하자.",
+  partial_50: "숙제를 많이 못 해왔어. 남은 부분은 다음 시간에 같이 확인하고, 필요하면 추가 등원보충으로 마무리하자.",
+  known_only: "쉬운 문항 위주로 풀어온 것 같아. 어려운 문항도 조금씩 시도해보자.",
+  too_hard: "이번 과제 난이도가 높아서 해결하지 못한 부분이 있었어. 과제 난이도는 조정해볼게.",
+  answer_suspected: "풀이 과정이 충분히 남아 있지 않아 이해 여부를 다시 확인할게.",
+  not_done: "과제를 못 해왔어. 필요하면 추가 등원보충으로 마무리하자.",
+  not_checked: "오늘은 아직 과제 검사가 완료되지 않았어. 확인 후 필요한 부분을 다시 안내할게."
 };
 
 const examPostFeelingOptions = ["기대보다 잘 봤다", "비슷했다", "기대에 못 미쳤다", "모르겠다"];
@@ -129,6 +140,15 @@ function normalizeAssignmentStatusValue(value) {
 function getAssignmentStatusParentMessage(value) {
   const normalizedValue = normalizeAssignmentStatusValue(value);
   return assignmentStatusParentMessages[normalizedValue] ?? assignmentStatusLabels[normalizedValue] ?? "";
+}
+
+function getAssignmentStatusStudentMessage(value) {
+  const normalizedValue = normalizeAssignmentStatusValue(value);
+  return assignmentStatusStudentMessages[normalizedValue] ?? assignmentStatusLabels[normalizedValue] ?? "";
+}
+
+function getAssignmentStatusMessage(audience, value) {
+  return audience === "student" ? getAssignmentStatusStudentMessage(value) : getAssignmentStatusParentMessage(value);
 }
 
 function getAssignmentStatusForMessage(record, previousHomework) {
@@ -308,7 +328,7 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, previousHom
     : "";
   const lines = [
     createMessageLine("🏫 출결", attendance),
-    assignmentStatus ? createMessageLine("✅ 과제 상태", getAssignmentStatusParentMessage(assignmentStatus)) : "",
+    assignmentStatus ? createMessageLine("✅ 과제 상태", getAssignmentStatusMessage(audience, assignmentStatus)) : "",
     createMessageLine("📚 강의 교재", lessonMaterial),
     createMessageLine("🧭 강의 내용", lessonContent),
     createMessageLine("📘 지난 과제", previousHomework?.title),
@@ -341,12 +361,12 @@ function buildCommentPreviewText({ audience, comment, lesson, nextHomework, prev
   ]);
 }
 
-function buildCommentSourceText({ lesson, nextHomework, previousHomework, record, student, supplementSchedules = [] }) {
+function buildCommentSourceText({ audience = "parent", lesson, nextHomework, previousHomework, record, student, supplementSchedules = [] }) {
   return joinMessageBlocks([
     createMessageLine("수신 학생", student.name),
     createMessageLine("수업", `${lesson.date} ${lesson.className}`),
     createMessageLine("출결", attendanceLabels[record?.attendanceStatus ?? "pending"] ?? ""),
-    createMessageLine("과제 상태", getAssignmentStatusParentMessage(getAssignmentStatusForMessage(record, previousHomework))),
+    createMessageLine("과제 상태", getAssignmentStatusMessage(audience, getAssignmentStatusForMessage(record, previousHomework))),
     createMessageLine("강의 교재", getLessonMaterial(record, student)),
     createMessageLine("강의 내용", getLessonContent(record)),
     createMessageLine("지난 과제", previousHomework?.title),
@@ -494,7 +514,7 @@ function buildNotificationTemplatePreview(type) {
 
   const commonBody = joinMessageBlocks([
     createMessageLine("🏫 출결", attendanceLabels[base.attendanceStatus]),
-    createMessageLine("✅ 과제 상태", getAssignmentStatusParentMessage(base.assignmentStatus)),
+    createMessageLine("✅ 과제 상태", getAssignmentStatusMessage(type, base.assignmentStatus)),
     createMessageLine("📚 강의 교재", base.lessonMaterial),
     createMessageLine("🧭 강의 내용", base.lessonContent),
     createMessageLine("📘 지난 과제", base.previousHomework),
@@ -3598,7 +3618,7 @@ export function App() {
           aiPrompt: getAiPrompt(aiSettings, "commentPolish"),
           audience: target === "student" ? "student" : "parent",
           attendanceStatus: attendanceLabels[record?.attendanceStatus ?? "pending"],
-          assignmentStatus: getAssignmentStatusParentMessage(record?.assignmentStatus ?? record?.incompleteHomework ?? ""),
+          assignmentStatus: getAssignmentStatusMessage(target === "student" ? "student" : "parent", record?.assignmentStatus ?? record?.incompleteHomework ?? ""),
           grade: student.grade,
           homeworkStatus: homeworkLabels[record?.homeworkStatus ?? "not_started"],
           lessonDate: lesson.date,
@@ -3692,7 +3712,7 @@ export function App() {
           aiPrompt: getAiPrompt(aiSettings, "preparationNotice"),
           audience: target === "student" ? "student" : "parent",
           attendanceStatus: attendanceLabels[record?.attendanceStatus ?? "pending"],
-          assignmentStatus: getAssignmentStatusParentMessage(record?.assignmentStatus ?? record?.incompleteHomework ?? ""),
+          assignmentStatus: getAssignmentStatusMessage(target === "student" ? "student" : "parent", record?.assignmentStatus ?? record?.incompleteHomework ?? ""),
           grade: student.grade,
           homeworkStatus: "수업 준비 안내",
           lessonDate: lesson.date,
@@ -3804,7 +3824,9 @@ export function App() {
       const notificationPayload = {
         academyName: academyBrandName,
         assignmentStatus,
-        assignmentStatusMessage: getAssignmentStatusParentMessage(assignmentStatus),
+        assignmentStatusMessage: getAssignmentStatusMessage(target === "student" ? "student" : "parent", assignmentStatus),
+        assignmentStatusParentMessage: getAssignmentStatusParentMessage(assignmentStatus),
+        assignmentStatusStudentMessage: getAssignmentStatusStudentMessage(assignmentStatus),
         attendanceStatus: record?.attendanceStatus ?? "pending",
         lessonDate: lesson.date,
         lessonContent,
@@ -6272,6 +6294,7 @@ function CommentComposerModal({
         ? `30분 지연 ${formatKoreaTimeLabel(delayedScheduledDate)}`
         : `기본 예약 ${formatKoreaTimeLabel(defaultScheduledDate)}`;
   const sourceText = buildCommentSourceText({
+    audience,
     lesson,
     nextHomework,
     previousHomework,
