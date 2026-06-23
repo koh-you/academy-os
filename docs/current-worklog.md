@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-06-23 학부모 알림톡 과제 완료 여부 fallback 보정
+
+- 상태: 완료
+- 사용자 요청: 오늘 수업일지에 등록한 `화목 4-7 / 토 10-1반` 학부모 알림톡 미리보기에서 숙제완료여부가 나타나지 않는 이유를 문의했다.
+- 원인: 알림톡 미리보기의 `과제 상태` 줄은 학부모용에서만 표시되며, 기존에는 현재 수업일지 학생별 기록의 `assignmentStatus`만 기준으로 삼았다. 그래서 지난 과제 제목은 연결된 숙제 데이터에서 잘 가져오더라도, 수업일지 record 쪽 과제 상태가 비어 있으면 `과제 상태` 줄이 통째로 생략될 수 있었다.
+- 조치: 메시지용 과제 상태 계산 함수를 추가해 `수업일지 record 상태 → 연결된 지난 숙제 assignmentStatus/incompleteHomework → 숙제 teacherStatus/status` 순서로 fallback 하도록 했다. 미리보기, 원본 메모 보기, 실제 알림톡 발송 payload, 발송 전 점검 모두 같은 기준을 쓰게 맞췄다.
+- 회귀 방지: `scripts/scenario-tests-production.cjs`에 학부모 알림톡 과제 상태가 연결된 지난 숙제 검사 결과로 fallback 되는지 확인하는 항목을 추가했다.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과, `npm run build` 통과, `npm run test:production` 129개 통과.
+
 ## 2026-06-23 알림톡 실발송 문구 확정형 보정
 
 - 상태: 완료

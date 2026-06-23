@@ -131,6 +131,20 @@ function getAssignmentStatusParentMessage(value) {
   return assignmentStatusParentMessages[normalizedValue] ?? assignmentStatusLabels[normalizedValue] ?? "";
 }
 
+function getAssignmentStatusForMessage(record, previousHomework) {
+  const recordStatus = normalizeAssignmentStatusValue(record?.assignmentStatus ?? record?.incompleteHomework ?? "");
+  if (recordStatus) return recordStatus;
+
+  const homeworkStatus = normalizeAssignmentStatusValue(getHomeworkAssignmentStatus(previousHomework, record ? [record] : []));
+  if (homeworkStatus) return homeworkStatus;
+
+  if (previousHomework?.teacherStatus === "verified" || previousHomework?.status === "verified") return "complete_thorough";
+  if (previousHomework?.teacherStatus === "missing") return "not_done";
+  if (previousHomework?.teacherStatus === "unverified") return "not_checked";
+  if (previousHomework?.teacherStatus === "partial") return "partial_50";
+  return "";
+}
+
 function getHomeworkStatusFromAssignmentStatus(value) {
   const normalizedValue = normalizeAssignmentStatusValue(value);
   if (normalizedValue === "complete_thorough") {
@@ -285,7 +299,7 @@ function textIncludesEveryLine(text = "", lines = []) {
 function buildCommentPreviewLines({ audience, comment, nextHomework, previousHomework, record, student, supplementSchedules = [] }) {
   const lessonMaterial = getLessonMaterial(record, student);
   const lessonContent = getLessonContent(record);
-  const assignmentStatus = record?.assignmentStatus ?? record?.incompleteHomework ?? "";
+  const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
   const attendance = attendanceLabels[record?.attendanceStatus ?? "pending"] ?? "";
   const commentText = normalizeMessageText(comment);
   const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
@@ -336,7 +350,7 @@ function buildCommentSourceText({ lesson, nextHomework, previousHomework, record
     createMessageLine("강의 내용", getLessonContent(record)),
     createMessageLine("지난 과제", previousHomework?.title),
     createMessageLine("다음 과제", nextHomework?.title),
-    createMessageLine("과제 상태", getAssignmentStatusParentMessage(record?.assignmentStatus ?? record?.incompleteHomework ?? "")),
+    createMessageLine("과제 상태", getAssignmentStatusParentMessage(getAssignmentStatusForMessage(record, previousHomework))),
     supplementSchedules.length ? createMessageBlock("보충일정", supplementSchedules.map((item) => `- ${item}`).join("\n")) : "",
     createMessageBlock("수업메모", record?.preparationMemo)
   ]) || "알림톡에 참고할 원본 정보가 아직 없습니다.";
@@ -3783,9 +3797,9 @@ export function App() {
     try {
       const lessonMaterial = getLessonMaterial(record, student);
       const lessonContent = getLessonContent(record);
-      const assignmentStatus = record?.assignmentStatus ?? record?.incompleteHomework ?? "";
       const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
       const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
+      const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
       const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId);
       const notificationPayload = {
         academyName: academyBrandName,
@@ -5760,7 +5774,7 @@ function LessonJournalDetail({
       !String(getLessonContent(record) ?? "").trim() ||
       !String(previousHomework?.title ?? "").trim() ||
       !String(nextHomework?.title ?? "").trim() ||
-      !normalizeAssignmentStatusValue(record?.assignmentStatus ?? record?.incompleteHomework ?? "")
+      !normalizeAssignmentStatusValue(getAssignmentStatusForMessage(record, previousHomework))
     );
   }
 
