@@ -2264,15 +2264,17 @@ export function App() {
     }
 
     const matchedStudents = students.filter((student) => {
-      const phone = String(student.studentPhone ?? "").replaceAll(/\D/g, "");
-      return phone.slice(-4) === digits;
+      if ((student.status ?? "active") !== "active") return false;
+      const studentPhone = String(student.studentPhone ?? "").replaceAll(/\D/g, "");
+      const parentPhone = String(student.parentPhone ?? "").replaceAll(/\D/g, "");
+      return [studentPhone, parentPhone].some((phone) => phone.slice(-4) === digits);
     });
 
     if (matchedStudents.length === 0) {
-      return { ok: false, message: "해당 번호의 학생을 찾지 못했습니다." };
+      return { ok: false, message: "해당 학생/학부모 전화번호를 찾지 못했습니다." };
     }
     if (matchedStudents.length > 1) {
-      return { ok: false, message: "같은 뒤 4자리 학생이 2명 이상입니다. 선생님께 말씀해 주세요." };
+      return { ok: false, message: "같은 뒤 4자리 학생/학부모 번호가 2명 이상입니다. 선생님께 말씀해 주세요." };
     }
 
     const student = matchedStudents[0];
@@ -6871,12 +6873,22 @@ function AttendanceKiosk({
     return () => window.clearTimeout(timerId);
   }, [result]);
 
+  useEffect(() => {
+    if (isLoading || result || pin.length !== 4) return undefined;
+    const timerId = window.setTimeout(() => runAttendanceCheck(pin), 160);
+    return () => window.clearTimeout(timerId);
+  }, [isLoading, pin, result]);
+
+  function runAttendanceCheck(nextPin) {
+    const nextResult = onAttendanceCheck(nextPin);
+    setResult(nextResult);
+    setPin("");
+  }
+
   function submitPin(event) {
     event?.preventDefault();
     if (isLoading) return;
-    const nextResult = onAttendanceCheck(pin);
-    setResult(nextResult);
-    if (nextResult.ok) setPin("");
+    runAttendanceCheck(pin);
   }
 
   function pressKey(value) {
@@ -6906,7 +6918,7 @@ function AttendanceKiosk({
           <div>
             <p className="eyebrow">{academyBrandName} ATTENDANCE</p>
             <h1>출결 체크</h1>
-            <p className="muted">{isLoading ? "출결 데이터를 불러오는 중입니다." : "휴대폰 번호 뒤 4자리를 입력하세요."}</p>
+            <p className="muted">{isLoading ? "출결 데이터를 불러오는 중입니다." : "학생/학부모 휴대폰 번호 뒤 4자리를 입력하세요."}</p>
           </div>
           {onBack ? <button className="iconButton" onClick={onBack} type="button">×</button> : null}
         </div>
