@@ -6,6 +6,15 @@
 - Supabase 저장 최우선: 새 기능이나 화면 수정 전후로 데이터가 Supabase 테이블 또는 `app_state`에 저장되는지 먼저 확인한다. 새로고침, 재로그인, 다른 기기 접속 후 사라질 수 있는 프론트-only/localStorage-only 운영 데이터가 있으면 기능 확장보다 저장 경로를 우선 보강한다.
 - 검수 기본값: 운영 흐름에 영향이 있으면 `npm run test:production`과 `npm run build`를 실행하고, 통과 후 커밋/푸시한다. 비밀값과 `.env`는 절대 커밋하지 않는다.
 
+## 현재 로컬 작업 경로 - 2026-06-24 갱신
+
+- 상태: 완료
+- 사용자 요청: 기존 바탕화면 `academy-os` 폴더를 `E:\academy-os`로 옮겼고, 이후 작업 기준을 확인해달라고 요청했다.
+- 확인: `E:\academy-os`는 정상 Git 저장소이며 `main`과 `origin/main`이 최신 커밋 `993bbbb Add downloadable Tally QR photo`로 동기화되어 있다.
+- 조치: 누락된 QR JPG 파일을 새 위치에서 Git 기준으로 복원했고, 작업트리가 깨끗한 상태임을 확인했다.
+- 정리: 기존 `C:\Users\force\Desktop\academy-os` 폴더는 삭제 완료했다. 앞으로 Codex와 터미널 작업 기준 폴더는 `E:\academy-os`다.
+- 주의: `.env`, `node_modules`, QR 산출물은 새 위치에 존재한다. 새 세션에서는 `E:\academy-os`를 작업 폴더로 열어야 한다.
+
 ## 현재 다음 작업 큐 - 2026-06-24 정리
 
 ### P0. 배포 반영 및 로그인 유지 운영 확인
