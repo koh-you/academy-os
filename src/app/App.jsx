@@ -1352,7 +1352,8 @@ function buildExamCalendarEvents(rows) {
       emittedMathKeys.add(mathKey);
       events.push({
         ...base,
-        examSubject: entry.subject || row.subject || "수학",
+        grade: entry.grade || row.grade || "",
+        examSubject: entry.label || entry.subject || row.subject || "수학",
         eventId: `derived_math_${row.examPrepId}_${entry.id || index}`,
         date: entry.date,
         endDate: "",
