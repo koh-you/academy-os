@@ -2381,9 +2381,6 @@ export function App() {
   if (!session) {
     return (
       <RoleLoginScreen
-        students={students}
-        attendanceSettings={attendanceSettings}
-        onAttendanceCheck={handleAttendancePinCheck}
         onLogin={handleLogin}
       />
     );
@@ -5169,13 +5166,12 @@ function LoginScreen({ students, onLogin }) {
   );
 }
 
-function RoleLoginScreen({ attendanceSettings = defaultAttendanceSettings, initialRole = "student", students, onAttendanceCheck, onLogin }) {
+function RoleLoginScreen({ initialRole = "student", onLogin }) {
   const [role, setRole] = useState(initialRole);
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showAttendanceKiosk, setShowAttendanceKiosk] = useState(false);
 
   const roleLabels = {
     student: "학생",
@@ -5206,51 +5202,39 @@ function RoleLoginScreen({ attendanceSettings = defaultAttendanceSettings, initi
 
   return (
     <main className="loginPage">
-      {showAttendanceKiosk ? (
-        <AttendanceKiosk
-          isStandalone
-          students={students}
-          onAttendanceCheck={onAttendanceCheck}
-          onBack={() => setShowAttendanceKiosk(false)}
+      <form className="loginCard" onSubmit={submit}>
+        <button className="loginClose" type="button">x</button>
+        <p className="loginEyebrow">{academyBrandName}</p>
+        <h1>로그인</h1>
+        <div className="loginTabs">
+          {["student", "parent", "teacher"].map((item) => (
+            <button
+              className={role === item ? "active" : ""}
+              key={item}
+              onClick={() => selectRole(item)}
+              type="button"
+            >
+              {roleLabels[item]}
+            </button>
+          ))}
+        </div>
+        <p className="muted">
+          {role === "student" ? "학생 본인 계정으로 입장합니다." : null}
+          {role === "parent" ? "학부모 열람 계정으로 입장합니다." : null}
+          {role === "teacher" ? "강사 운영 화면으로 입장합니다." : null}
+        </p>
+        <input value={loginId} onChange={(event) => setLoginId(event.target.value)} placeholder="아이디" />
+        <input
+          type="password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          placeholder="비밀번호"
         />
-      ) : (
-        <form className="loginCard" onSubmit={submit}>
-          <button className="loginClose" type="button">x</button>
-          <p className="loginEyebrow">{academyBrandName}</p>
-          <h1>로그인</h1>
-          <div className="loginTabs">
-            {["student", "parent", "teacher"].map((item) => (
-              <button
-                className={role === item ? "active" : ""}
-                key={item}
-                onClick={() => selectRole(item)}
-                type="button"
-              >
-                {roleLabels[item]}
-              </button>
-            ))}
-          </div>
-          <p className="muted">
-            {role === "student" ? "학생 본인 계정으로 입장합니다." : null}
-            {role === "parent" ? "학부모 열람 계정으로 입장합니다." : null}
-            {role === "teacher" ? "강사 운영 화면으로 입장합니다." : null}
-          </p>
-          <input value={loginId} onChange={(event) => setLoginId(event.target.value)} placeholder="아이디" />
-          <input
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="비밀번호"
-          />
-          {error ? <div className="loginError">{error}</div> : null}
-          <button className="primaryButton full" disabled={isSubmitting} type="submit">
-            {isSubmitting ? "확인 중" : `${roleLabels[role]} 로그인`}
-          </button>
-          <button className="softButton full" onClick={() => setShowAttendanceKiosk(true)} type="button">
-            출결 체크
-          </button>
-        </form>
-      )}
+        {error ? <div className="loginError">{error}</div> : null}
+        <button className="primaryButton full" disabled={isSubmitting} type="submit">
+          {isSubmitting ? "확인 중" : `${roleLabels[role]} 로그인`}
+        </button>
+      </form>
     </main>
   );
 }
