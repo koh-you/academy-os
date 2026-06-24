@@ -4141,6 +4141,7 @@ button:disabled {
 }
 
 .studentAddGrid input,
+.studentAddGrid select,
 .studentBulkPlaceholder textarea {
   background: #ffffff;
   border: 1px solid #cfdbef;

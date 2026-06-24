@@ -10714,8 +10714,7 @@ function StudentManager({
     if (saveState === "saving") return "저장 중";
     if (saveState === "saved") return "저장됨";
     if (saveState === "failed") return "재시도";
-    if (dirtyStudentIds.has(studentId)) return "저장";
-    return "저장됨";
+    return "저장";
   }
 
   return (
@@ -14344,8 +14343,20 @@ function StudentModal({
             </label>
             <label>학교<input value={form.schoolName} onChange={(event) => update("schoolName", event.target.value)} placeholder="자운고등학교" /></label>
             <label>PIN<input value={form.pin} onChange={(event) => update("pin", event.target.value)} placeholder="1234" /></label>
+            <label>학생전화번호<input inputMode="tel" value={form.studentPhone} onChange={(event) => update("studentPhone", event.target.value)} placeholder="01012345678" /></label>
+            <label>학부모전화번호<input inputMode="tel" value={form.parentPhone} onChange={(event) => update("parentPhone", event.target.value)} placeholder="01012345678" /></label>
+            <label>
+              반
+              <select value={form.defaultClassTemplateId} onChange={(event) => update("defaultClassTemplateId", event.target.value)}>
+                <option value="">미배정</option>
+                {templates.map((template) => (
+                  <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
+                ))}
+              </select>
+            </label>
+            <label>특이사항<input value={form.specialNote} onChange={(event) => update("specialNote", event.target.value)} placeholder="상담 메모 또는 주의사항" /></label>
           </div>
-          <button className="primaryButton full studentAddSubmit" onClick={() => onSubmit(form)} type="button">+ 학생 추가</button>
+          <button className="primaryButton full studentAddSubmit" onClick={() => onSubmit(form)} type="button">학생 저장</button>
         </>
       ) : mode === "bulk" ? (
         <div className="studentBulkPlaceholder">
