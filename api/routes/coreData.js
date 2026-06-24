@@ -49,6 +49,50 @@ function fromStudentRow(row) {
   };
 }
 
+function toStudentIntakeApplicantRow(applicant) {
+  return {
+    applicant_id: applicant.applicantId,
+    source: applicant.source ?? "manual",
+    source_submission_id: compact(applicant.sourceSubmissionId),
+    form_id: compact(applicant.formId),
+    form_name: compact(applicant.formName),
+    status: applicant.status ?? "received",
+    name: applicant.name,
+    birth_year: applicant.birthYear ? Number(applicant.birthYear) : null,
+    grade: compact(applicant.grade),
+    school_name: compact(applicant.schoolName),
+    student_phone: compact(applicant.studentPhone),
+    parent_phone: compact(applicant.parentPhone),
+    desired_class: compact(applicant.desiredClass),
+    memo: compact(applicant.memo),
+    raw_payload: applicant.rawPayload ?? null,
+    created_at: applicant.createdAt ?? new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+}
+
+function fromStudentIntakeApplicantRow(row) {
+  return {
+    applicantId: row.applicant_id,
+    source: row.source ?? "manual",
+    sourceSubmissionId: row.source_submission_id ?? "",
+    formId: row.form_id ?? "",
+    formName: row.form_name ?? "",
+    status: row.status ?? "received",
+    name: row.name ?? "",
+    birthYear: row.birth_year ?? "",
+    grade: row.grade ?? "",
+    schoolName: row.school_name ?? "",
+    studentPhone: row.student_phone ?? "",
+    parentPhone: row.parent_phone ?? "",
+    desiredClass: row.desired_class ?? "",
+    memo: row.memo ?? "",
+    rawPayload: row.raw_payload ?? null,
+    createdAt: row.created_at ?? "",
+    updatedAt: row.updated_at ?? ""
+  };
+}
+
 function toClassTemplateRow(classTemplate) {
   return {
     class_template_id: classTemplate.classTemplateId,
@@ -643,6 +687,24 @@ export async function listStudents() {
   return { source: databaseSource, students: rows.map(fromStudentRow) };
 }
 
+export async function listStudentIntakeApplicants() {
+  if (!isSupabaseConfigured()) {
+    return { source: fallbackSource, applicants: [] };
+  }
+
+  try {
+    const rows = await listRows("student_intake_applicants", "select=*&order=created_at.desc", {
+      requireServiceRole: true
+    });
+    return { source: databaseSource, applicants: rows.map(fromStudentIntakeApplicantRow) };
+  } catch (error) {
+    if (String(error?.message ?? "").includes("student_intake_applicants")) {
+      return { source: databaseSource, applicants: [], warning: "student_intake_applicants table is not ready" };
+    }
+    throw error;
+  }
+}
+
 export async function listClassTemplates() {
   if (!isSupabaseConfigured()) {
     return { source: fallbackSource, classTemplates: sampleData.classTemplates };
@@ -686,6 +748,23 @@ export async function upsertStudents(students) {
 
   const rows = await upsertRows("students", students.map(toStudentRow));
   return { source: databaseSource, students: rows.map(fromStudentRow) };
+}
+
+export async function upsertStudentIntakeApplicant(applicant) {
+  const now = new Date().toISOString();
+  const normalizedApplicant = {
+    ...applicant,
+    applicantId: applicant.applicantId || `intake_${Date.now()}`,
+    status: applicant.status || "received",
+    createdAt: applicant.createdAt || now,
+    updatedAt: now
+  };
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, applicant: normalizedApplicant };
+  }
+
+  const [row] = await upsertRows("student_intake_applicants", [toStudentIntakeApplicantRow(normalizedApplicant)]);
+  return { source: databaseSource, applicant: fromStudentIntakeApplicantRow(row) };
 }
 
 export async function upsertLesson(lesson) {

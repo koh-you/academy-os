@@ -19,6 +19,7 @@ import {
   listNotificationJobs,
   listResourceMaterials,
   listSchoolEvents,
+  listStudentIntakeApplicants,
   listStudents,
   seedCoreData,
   upsertAppState,
@@ -34,6 +35,7 @@ import {
   upsertResourceMaterial,
   upsertSchoolEvent,
   upsertSchoolEvents,
+  upsertStudentIntakeApplicant,
   upsertStudent,
   upsertStudents,
   upsertLessonStudentRecord
@@ -97,6 +99,71 @@ function schoolNamesMatch(firstSchool = "", secondSchool = "", { allowBlank = tr
   const secondText = normalizeSchoolName(secondSchool);
   if (!firstText || !secondText) return allowBlank;
   return firstText === secondText || firstText.includes(secondText) || secondText.includes(firstText);
+}
+
+function compactText(value = "") {
+  return String(value ?? "").trim();
+}
+
+function normalizePhone(value = "") {
+  return compactText(value).replace(/[^\d+]/g, "");
+}
+
+function getTallyFieldText(field) {
+  if (!field) return "";
+  if (Array.isArray(field.value)) {
+    const optionById = new Map((field.options ?? []).map((option) => [option.id, option.text]));
+    return field.value.map((value) => optionById.get(value) ?? value).filter(Boolean).join(", ");
+  }
+  if (field.value && typeof field.value === "object") return JSON.stringify(field.value);
+  return compactText(field.value);
+}
+
+function findTallyField(fields, patterns) {
+  return fields.find((field) => patterns.some((pattern) => pattern.test(compactText(field.label))));
+}
+
+function normalizeTallyApplicantPayload(payload = {}) {
+  const data = payload.data ?? payload;
+  const fields = Array.isArray(data.fields) ? data.fields : [];
+  const getValue = (patterns) => getTallyFieldText(findTallyField(fields, patterns));
+  const name = getValue([/학생.*이름/i, /^이름$/i, /성명/i, /student.*name/i, /name/i]);
+  const birthYear = getValue([/출생/i, /생년/i, /birth/i, /태어난/i]).replace(/[^0-9]/g, "").slice(0, 4);
+  const grade = normalizeGradeLabel(getValue([/학년/i, /grade/i]));
+  const schoolName = getValue([/학교/i, /school/i]);
+  const studentPhone = normalizePhone(getValue([/학생.*전화/i, /학생.*휴대/i, /student.*phone/i]));
+  const parentPhone = normalizePhone(getValue([/학부모.*전화/i, /보호자.*전화/i, /부모.*전화/i, /parent.*phone/i, /guardian.*phone/i]));
+  const desiredClass = getValue([/희망.*반/i, /희망.*시간/i, /수업.*시간/i, /class/i]);
+  const memo = getValue([/메모/i, /상담/i, /요청/i, /문의/i, /note/i]);
+  const submissionId = compactText(data.submissionId ?? data.responseId ?? payload.eventId);
+  return {
+    applicantId: submissionId ? `tally_${submissionId}` : `tally_${Date.now()}`,
+    source: "tally",
+    sourceSubmissionId: submissionId,
+    formId: compactText(data.formId),
+    formName: compactText(data.formName),
+    status: "received",
+    name,
+    birthYear,
+    grade: grade || "",
+    schoolName,
+    studentPhone,
+    parentPhone,
+    desiredClass,
+    memo,
+    rawPayload: payload,
+    createdAt: compactText(data.createdAt ?? payload.createdAt) || new Date().toISOString()
+  };
+}
+
+function verifyTallyWebhookSignature(payload, signature) {
+  const secret = process.env.TALLY_WEBHOOK_SIGNING_SECRET;
+  if (!secret) return true;
+  if (!signature) return false;
+  const calculatedSignature = crypto.createHmac("sha256", secret).update(JSON.stringify(payload)).digest("base64");
+  const received = Buffer.from(signature);
+  const expected = Buffer.from(calculatedSignature);
+  return received.length === expected.length && crypto.timingSafeEqual(received, expected);
 }
 
 function gradesMatch(firstGrade = "", secondGrade = "") {
@@ -918,6 +985,44 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await upsertStudents(payload.students ?? []);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/student-intake-applicants") {
+    try {
+      const result = await listStudentIntakeApplicants();
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/student-intake-applicants") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await upsertStudentIntakeApplicant(payload.applicant ?? payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/intake/tally") {
+    try {
+      const payload = await readJsonBody(request);
+      const signature = request.headers["tally-signature"];
+      if (!verifyTallyWebhookSignature(payload, Array.isArray(signature) ? signature[0] : signature)) {
+        sendJson(request, response, 401, { ok: false, error: "Invalid Tally signature." });
+        return;
+      }
+      const applicant = normalizeTallyApplicantPayload(payload);
+      const result = await upsertStudentIntakeApplicant(applicant);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });

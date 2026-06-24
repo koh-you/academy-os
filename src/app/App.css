@@ -4105,7 +4105,7 @@ button:disabled {
   border-radius: 18px;
   display: grid;
   gap: 6px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   padding: 5px;
 }
 
@@ -4175,6 +4175,108 @@ button:disabled {
   border-radius: 16px;
   font-size: 18px;
   min-height: 48px;
+}
+
+.studentIntakePanel {
+  display: grid;
+  gap: 14px;
+}
+
+.intakeEndpointBox {
+  background: #f8fafc;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.intakeEndpointBox code {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #0f172a;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+  padding: 10px 12px;
+}
+
+.studentIntakeSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.studentIntakeSummary span {
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  color: #3730a3;
+  font-weight: 900;
+  padding: 8px 12px;
+}
+
+.studentIntakeList {
+  display: grid;
+  gap: 12px;
+  max-height: 520px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.studentIntakeCard {
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+}
+
+.studentIntakeCardHeader,
+.studentIntakeActions {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.studentIntakeCardHeader strong {
+  color: #0f172a;
+  display: block;
+  font-size: 18px;
+}
+
+.studentIntakeCardHeader span,
+.studentIntakeActions small {
+  color: #64748b;
+  font-weight: 800;
+}
+
+.studentIntakeCardHeader select {
+  max-width: 140px;
+}
+
+.studentIntakeGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.studentIntakeGrid label {
+  color: #334155;
+  display: grid;
+  font-weight: 900;
+  gap: 6px;
+}
+
+.studentIntakeGrid input,
+.studentIntakeGrid select {
+  background: #ffffff;
+  border: 1px solid #cfdbef;
+  border-radius: 8px;
+  color: #0f172a;
+  min-height: 40px;
+  padding: 0 12px;
 }
 
 .deleteConfirmBody {
@@ -4611,13 +4713,17 @@ textarea {
   border-top: 1px solid #e2e8f0;
   display: grid;
   gap: 10px;
-  grid-template-columns: 34px 190px 180px 120px 70px 80px 150px 150px 150px 104px 96px 76px;
-  min-width: 1410px;
+  grid-template-columns: 34px 190px 180px 120px 70px 80px 150px 150px 150px 104px 86px 96px 76px;
+  min-width: 1506px;
   padding: 10px 12px;
 }
 
 .studentListRow:not(.studentListHead):hover {
   background: #f8fbff;
+}
+
+.studentListRow.dirtyStudentRow {
+  background: #fffbeb;
 }
 
 .studentListRow select {
@@ -4800,6 +4906,33 @@ textarea {
 .trashButton {
   border: 1px solid #d8e3f8;
   color: #64748b;
+}
+
+.studentSaveButton {
+  background: #0f172a;
+  border: 1px solid #0f172a;
+  border-radius: 999px;
+  color: #ffffff;
+  font-weight: 900;
+  min-height: 32px;
+  padding: 0 12px;
+}
+
+.studentSaveButton:disabled {
+  background: #f8fafc;
+  border-color: #d8e3f8;
+  color: #94a3b8;
+  cursor: default;
+}
+
+.studentSaveButton.failed {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+.studentSaveButton.dirty {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
 }
 
 .trashButton:hover,

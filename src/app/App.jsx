@@ -5,6 +5,7 @@ const storageKeys = {
   classTemplates: "academy-os.classTemplates.v1",
   lessons: "academy-os.lessons.v8",
   students: "academy-os.students.v12",
+  studentIntakeApplicants: "academy-os.studentIntakeApplicants.v1",
   records: "academy-os.lessonStudentRecords.v7",
   homeworks: "academy-os.homeworks.v7",
   reportSnapshots: "academy-os.reportSnapshots.v1",
@@ -1620,6 +1621,7 @@ export function App() {
   const [deletedLessonBundles, setDeletedLessonBundles] = useStoredState(storageKeys.deletedLessonBundles, []);
   const [classTemplates, setClassTemplates] = useStoredState(storageKeys.classTemplates, sampleData.classTemplates);
   const [students, setStudents] = useStoredState(storageKeys.students, sampleData.students);
+  const [studentIntakeApplicants, setStudentIntakeApplicants] = useStoredState(storageKeys.studentIntakeApplicants, []);
   const [lessons, setLessons] = useStoredState(storageKeys.lessons, sampleData.lessons);
   const [records, setRecords] = useStoredState(storageKeys.records, sampleData.lessonStudentRecords);
   const [homeworks, setHomeworks] = useStoredState(storageKeys.homeworks, sampleData.homeworks);
@@ -1776,6 +1778,7 @@ export function App() {
         setIsPortalDataReady(false);
         const [
           studentsResponse,
+          studentIntakeApplicantsResponse,
           classesResponse,
           lessonsResponse,
           recordsResponse,
@@ -1787,6 +1790,7 @@ export function App() {
           resourceMaterialsResponse
         ] = await Promise.all([
           fetch(apiUrl("/api/students")),
+          fetch(apiUrl("/api/student-intake-applicants")),
           fetch(apiUrl("/api/classes")),
           fetch(apiUrl("/api/lessons")),
           fetch(apiUrl("/api/lesson-records")),
@@ -1799,6 +1803,7 @@ export function App() {
         ]);
         const [
           studentsResult,
+          studentIntakeApplicantsResult,
           classesResult,
           lessonsResult,
           recordsResult,
@@ -1810,6 +1815,7 @@ export function App() {
           resourceMaterialsResult
         ] = await Promise.all([
           studentsResponse.json(),
+          studentIntakeApplicantsResponse.json(),
           classesResponse.json(),
           lessonsResponse.json(),
           recordsResponse.json(),
@@ -1823,6 +1829,9 @@ export function App() {
         if (!isMounted) return;
         if (studentsResult.ok && Array.isArray(studentsResult.students) && studentsResult.students.length > 0) {
           setStudents(studentsResult.students);
+        }
+        if (studentIntakeApplicantsResult.ok && Array.isArray(studentIntakeApplicantsResult.applicants)) {
+          setStudentIntakeApplicants(studentIntakeApplicantsResult.applicants);
         }
         if (classesResult.ok && Array.isArray(classesResult.classTemplates) && classesResult.classTemplates.length > 0) {
           setClassTemplates(classesResult.classTemplates);
@@ -1920,6 +1929,7 @@ export function App() {
     setScoreRecords,
     setSchoolEvents,
     setStudents,
+    setStudentIntakeApplicants,
     setWrongProblems,
     session,
     attendanceOnlyMode
@@ -2592,37 +2602,100 @@ export function App() {
     setLessonDeleteModalId(lesson.lessonId);
   }
 
-  function handleAddStudent(formValues) {
-    const student = {
-      studentId: `student_${Date.now()}`,
-      loginId: `04${formValues.name}`,
+  function createUniqueStudentLoginId(name = "") {
+    const baseLoginId = `04${String(name || "student").replace(/\s+/g, "")}`;
+    const existingLoginIds = new Set(students.map((student) => student.loginId).filter(Boolean));
+    if (!existingLoginIds.has(baseLoginId)) return baseLoginId;
+    let suffix = 2;
+    while (existingLoginIds.has(`${baseLoginId}-${suffix}`)) suffix += 1;
+    return `${baseLoginId}-${suffix}`;
+  }
+
+  function createStudentFromFormValues(formValues) {
+    return {
+      studentId: formValues.studentId || `student_${Date.now()}`,
+      loginId: formValues.loginId || createUniqueStudentLoginId(formValues.name),
       name: formValues.name,
-      pin: formValues.pin,
+      pin: formValues.pin || "1234",
       birthYear: formValues.birthYear,
       schoolName: formValues.schoolName,
-      grade: formValues.grade,
+      grade: formValues.grade || inferGradeFromBirthYear(formValues.birthYear),
       studentPhone: formValues.studentPhone,
       parentPhone: formValues.parentPhone,
-      textbook: formValues.textbook,
-      specialNote: formValues.specialNote,
-      defaultClassTemplateId: formValues.defaultClassTemplateId,
-      scheduleOverride: formValues.scheduleOverride
+      textbook: formValues.textbook ?? "",
+      specialNote: formValues.specialNote ?? "",
+      defaultClassTemplateId: formValues.defaultClassTemplateId ?? "",
+      scheduleOverride: formValues.scheduleOverride ?? "",
+      status: "active"
     };
+  }
+
+  function handleAddStudent(formValues) {
+    const student = createStudentFromFormValues(formValues);
 
     setStudents((current) => [...current, student]);
     setIsStudentModalOpen(false);
     postJson("/api/students", { student }).catch((error) => console.error(error));
   }
 
-  function handleUpdateStudent(studentId, field, value) {
+  function handleUpdateStudentIntakeApplicant(applicantId, updates) {
+    const nextApplicant = {
+      ...studentIntakeApplicants.find((applicant) => applicant.applicantId === applicantId),
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+    if (!nextApplicant.applicantId) return;
+    setStudentIntakeApplicants((current) =>
+      current.map((applicant) => (applicant.applicantId === applicantId ? nextApplicant : applicant))
+    );
+    postJson("/api/student-intake-applicants", { applicant: nextApplicant }).catch((error) => console.error(error));
+  }
+
+  function handleRegisterStudentIntakeApplicant(applicantId, values) {
+    const applicant = studentIntakeApplicants.find((item) => item.applicantId === applicantId);
+    if (!applicant) return;
+    const student = createStudentFromFormValues({
+      ...values,
+      name: values.name || applicant.name,
+      birthYear: values.birthYear || applicant.birthYear,
+      grade: values.grade || applicant.grade,
+      schoolName: values.schoolName || applicant.schoolName,
+      studentPhone: values.studentPhone || applicant.studentPhone,
+      parentPhone: values.parentPhone || applicant.parentPhone,
+      specialNote: values.specialNote || applicant.memo,
+      defaultClassTemplateId: values.defaultClassTemplateId ?? ""
+    });
+    const registeredApplicant = {
+      ...applicant,
+      ...values,
+      status: "registered",
+      memo: [applicant.memo, `정식 학생 등록: ${student.loginId}`].filter(Boolean).join("\n"),
+      updatedAt: new Date().toISOString()
+    };
+    setStudents((current) => [...current, student]);
+    setStudentIntakeApplicants((current) =>
+      current.map((item) => (item.applicantId === applicantId ? registeredApplicant : item))
+    );
+    postJson("/api/students", { student }).catch((error) => console.error(error));
+    postJson("/api/student-intake-applicants", { applicant: registeredApplicant }).catch((error) => console.error(error));
+  }
+
+  function handleUpdateStudent(studentId, field, value, options = {}) {
+    const shouldPersist = options.persist !== false;
     const currentStudent = students.find((student) => student.studentId === studentId);
     const nextStudent = currentStudent ? { ...currentStudent, [field]: value } : null;
     setStudents((current) =>
       current.map((student) => (student.studentId === studentId ? { ...student, [field]: value } : student))
     );
-    if (nextStudent) {
+    if (shouldPersist && nextStudent) {
       postJson("/api/students", { student: nextStudent }).catch((error) => console.error(error));
     }
+  }
+
+  async function handleSaveStudent(studentId) {
+    const student = students.find((item) => item.studentId === studentId);
+    if (!student) throw new Error("저장할 학생을 찾지 못했습니다.");
+    await postJson("/api/students", { student });
   }
 
   function handleUpdateExamPrepRow(examPrepId, field, value) {
@@ -3346,6 +3419,7 @@ export function App() {
               )
             }
             onDeleteStudent={handleDeleteStudent}
+            onSaveStudent={handleSaveStudent}
             onUpdateStudent={handleUpdateStudent}
           />
         ) : null}
@@ -3674,9 +3748,12 @@ export function App() {
 
       {isStudentModalOpen ? (
         <StudentModal
+          intakeApplicants={studentIntakeApplicants}
           templates={classTemplates}
           onClose={() => setIsStudentModalOpen(false)}
+          onRegisterApplicant={handleRegisterStudentIntakeApplicant}
           onSubmit={handleAddStudent}
+          onUpdateApplicant={handleUpdateStudentIntakeApplicant}
         />
       ) : null}
 
@@ -10569,12 +10646,15 @@ function StudentManager({
   onUpdateAcademyTest,
   onUpdateScore,
   onDeleteStudent,
+  onSaveStudent,
   onUpdateStudent
 }) {
   const [activeTab, setActiveTab] = useState("all");
   const [selectedStudentId, setSelectedStudentId] = useState("");
   const [deleteStudentId, setDeleteStudentId] = useState("");
   const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("template_mwf_7_10");
+  const [dirtyStudentIds, setDirtyStudentIds] = useState(() => new Set());
+  const [studentSaveStates, setStudentSaveStates] = useState({});
   const selectedClassTemplate = templates.find(
     (template) => template.classTemplateId === selectedClassTemplateId
   );
@@ -10605,6 +10685,37 @@ function StudentManager({
       setSelectedStudentId("");
     }
     setDeleteStudentId("");
+  }
+
+  function updateStudentField(studentId, field, value) {
+    onUpdateStudent(studentId, field, value, { persist: false });
+    setDirtyStudentIds((current) => new Set(current).add(studentId));
+    setStudentSaveStates((current) => ({ ...current, [studentId]: "dirty" }));
+  }
+
+  async function saveStudentRow(studentId) {
+    setStudentSaveStates((current) => ({ ...current, [studentId]: "saving" }));
+    try {
+      await onSaveStudent(studentId);
+      setDirtyStudentIds((current) => {
+        const next = new Set(current);
+        next.delete(studentId);
+        return next;
+      });
+      setStudentSaveStates((current) => ({ ...current, [studentId]: "saved" }));
+    } catch (error) {
+      console.error(error);
+      setStudentSaveStates((current) => ({ ...current, [studentId]: "failed" }));
+    }
+  }
+
+  function getStudentSaveLabel(studentId) {
+    const saveState = studentSaveStates[studentId];
+    if (saveState === "saving") return "저장 중";
+    if (saveState === "saved") return "저장됨";
+    if (saveState === "failed") return "재시도";
+    if (dirtyStudentIds.has(studentId)) return "저장";
+    return "저장됨";
   }
 
   return (
@@ -10678,11 +10789,17 @@ function StudentManager({
           <span>학생전화번호</span>
           <span>학부모전화번호</span>
           <span>출생연도</span>
+          <span>저장</span>
           <span>정보확정</span>
           <span>숨김</span>
         </div>
-        {visibleStudents.map((student, index) => (
-          <div className="studentListRow" key={student.studentId}>
+        {visibleStudents.map((student, index) => {
+          const saveState = studentSaveStates[student.studentId];
+          const isDirty = dirtyStudentIds.has(student.studentId);
+          const isSaving = saveState === "saving";
+          const isSaveDisabled = !isDirty || isSaving;
+          return (
+          <div className={isDirty ? "studentListRow dirtyStudentRow" : "studentListRow"} key={student.studentId}>
             <span>{index + 1}</span>
             <button
               className={selectedStudentId === student.studentId ? "studentNameButton active" : "studentNameButton"}
@@ -10696,7 +10813,7 @@ function StudentManager({
               aria-label={`${student.name} 반`}
               className="studentClassSelect"
               value={student.defaultClassTemplateId ?? ""}
-              onChange={(event) => onUpdateStudent(student.studentId, "defaultClassTemplateId", event.target.value)}
+              onChange={(event) => updateStudentField(student.studentId, "defaultClassTemplateId", event.target.value)}
             >
               <option value="">미배정</option>
               {templates.map((template) => (
@@ -10707,43 +10824,43 @@ function StudentManager({
               aria-label={`${student.name} 아이디`}
               className="editableTextCell monoCell"
               value={student.loginId ?? ""}
-              onChange={(event) => onUpdateStudent(student.studentId, "loginId", event.target.value)}
+              onChange={(event) => updateStudentField(student.studentId, "loginId", event.target.value)}
             />
             <input
               aria-label={`${student.name} PIN`}
               className="editableTextCell monoCell"
               value={student.pin ?? ""}
-              onChange={(event) => onUpdateStudent(student.studentId, "pin", event.target.value)}
+              onChange={(event) => updateStudentField(student.studentId, "pin", event.target.value)}
             />
             <input
               aria-label={`${student.name} 학년`}
               className="editableTextCell gradeBadgeInput"
               value={student.grade || ""}
-              onChange={(event) => onUpdateStudent(student.studentId, "grade", event.target.value)}
+              onChange={(event) => updateStudentField(student.studentId, "grade", event.target.value)}
             />
             <input
               aria-label={`${student.name} 학교`}
               className="editableTextCell"
               value={student.schoolName || ""}
-              onChange={(event) => onUpdateStudent(student.studentId, "schoolName", event.target.value)}
+              onChange={(event) => updateStudentField(student.studentId, "schoolName", event.target.value)}
             />
             <input
               aria-label={`${student.name} 학생 전화번호`}
               className="editableTextCell monoCell"
               inputMode="tel"
               value={student.studentPhone || ""}
-              onChange={(event) => onUpdateStudent(student.studentId, "studentPhone", event.target.value)}
+              onChange={(event) => updateStudentField(student.studentId, "studentPhone", event.target.value)}
             />
             <input
               aria-label={`${student.name} 학부모 전화번호`}
               className="editableTextCell monoCell"
               inputMode="tel"
               value={student.parentPhone || ""}
-              onChange={(event) => onUpdateStudent(student.studentId, "parentPhone", event.target.value)}
+              onChange={(event) => updateStudentField(student.studentId, "parentPhone", event.target.value)}
             />
             <select
               value={student.birthYear ?? ""}
-              onChange={(event) => onUpdateStudent(student.studentId, "birthYear", event.target.value)}
+              onChange={(event) => updateStudentField(student.studentId, "birthYear", event.target.value)}
             >
               <option value="">-</option>
               {["2007", "2008", "2009", "2010", "2011", "2012", "2013"].map((year) => (
@@ -10751,8 +10868,16 @@ function StudentManager({
               ))}
             </select>
             <button
+              className={`studentSaveButton ${saveState ?? "clean"}`}
+              disabled={isSaveDisabled}
+              onClick={() => saveStudentRow(student.studentId)}
+              type="button"
+            >
+              {getStudentSaveLabel(student.studentId)}
+            </button>
+            <button
               className={student.confirmed === false ? "statusText danger" : "statusText"}
-              onClick={() => onUpdateStudent(student.studentId, "confirmed", student.confirmed === false)}
+              onClick={() => updateStudentField(student.studentId, "confirmed", student.confirmed === false)}
               type="button"
             >
               {student.confirmed === false ? "미확정" : "확정"}
@@ -10766,7 +10891,8 @@ function StudentManager({
               숨김
             </button>
           </div>
-        ))}
+          );
+        })}
         {visibleStudents.length === 0 ? (
           <div className="emptyState studentListEmpty">이 반에 배정된 학생이 없습니다.</div>
         ) : null}
@@ -14127,7 +14253,24 @@ function OverdueHomework({
   );
 }
 
-function StudentModal({ templates, onClose, onSubmit }) {
+const intakeStatusOptions = [
+  { value: "received", label: "문의접수" },
+  { value: "consulting", label: "상담중" },
+  { value: "trial", label: "체험예정" },
+  { value: "registered", label: "등록확정" },
+  { value: "canceled", label: "등록취소" },
+  { value: "paused", label: "보류" },
+  { value: "lost", label: "연락두절" }
+];
+
+function StudentModal({
+  intakeApplicants = [],
+  templates,
+  onClose,
+  onRegisterApplicant,
+  onSubmit,
+  onUpdateApplicant
+}) {
   const [mode, setMode] = useState("single");
   const [form, setForm] = useState({
     name: "",
@@ -14142,6 +14285,8 @@ function StudentModal({ templates, onClose, onSubmit }) {
     defaultClassTemplateId: templates[0].classTemplateId,
     scheduleOverride: ""
   });
+  const activeApplicants = intakeApplicants.filter((applicant) => applicant.status !== "registered");
+  const registeredApplicants = intakeApplicants.filter((applicant) => applicant.status === "registered");
 
   function update(field, value) {
     setForm((current) => {
@@ -14151,6 +14296,26 @@ function StudentModal({ templates, onClose, onSubmit }) {
       }
       return next;
     });
+  }
+
+  function updateApplicant(applicantId, field, value) {
+    onUpdateApplicant(applicantId, { [field]: value });
+  }
+
+  function getApplicantRegisterValues(applicant) {
+    return {
+      name: applicant.name,
+      birthYear: applicant.birthYear,
+      schoolName: applicant.schoolName,
+      studentPhone: applicant.studentPhone,
+      parentPhone: applicant.parentPhone,
+      pin: applicant.pin || "1234",
+      grade: applicant.grade || inferGradeFromBirthYear(applicant.birthYear),
+      textbook: "",
+      specialNote: applicant.memo || "",
+      defaultClassTemplateId: applicant.defaultClassTemplateId || "",
+      scheduleOverride: ""
+    };
   }
 
   return (
@@ -14163,6 +14328,7 @@ function StudentModal({ templates, onClose, onSubmit }) {
       <div className="studentAddTabs" role="tablist" aria-label="학생 추가 방식">
         <button className={mode === "single" ? "active" : ""} onClick={() => setMode("single")} type="button">한 명씩</button>
         <button className={mode === "bulk" ? "active" : ""} onClick={() => setMode("bulk")} type="button">엑셀 일괄 등록</button>
+        <button className={mode === "intake" ? "active" : ""} onClick={() => setMode("intake")} type="button">Tally 접수</button>
       </div>
 
       {mode === "single" ? (
@@ -14181,12 +14347,76 @@ function StudentModal({ templates, onClose, onSubmit }) {
           </div>
           <button className="primaryButton full studentAddSubmit" onClick={() => onSubmit(form)} type="button">+ 학생 추가</button>
         </>
-      ) : (
+      ) : mode === "bulk" ? (
         <div className="studentBulkPlaceholder">
           <strong>엑셀 일괄 등록</strong>
           <p className="muted">이름, 출생연도, 학교, PIN 순서로 복사한 목록을 붙여넣는 기능으로 확장 예정입니다.</p>
           <textarea placeholder={"박수빈\t2010\t자운고등학교\t1234"} rows="6" />
           <button className="primaryButton full" disabled type="button">일괄 등록 준비 중</button>
+        </div>
+      ) : (
+        <div className="studentIntakePanel">
+          <div className="intakeEndpointBox">
+            <strong>Tally 웹훅 연결 주소</strong>
+            <code>https://koh-you-math-academy-os-api.onrender.com/api/intake/tally</code>
+            <p className="muted">Tally 제출은 정식 학생이 아니라 입학 후보로 먼저 저장됩니다. 확인 후 정식 등록하세요.</p>
+          </div>
+          <div className="studentIntakeSummary">
+            <span>확인 필요 {activeApplicants.length}명</span>
+            <span>등록 완료 {registeredApplicants.length}명</span>
+          </div>
+          {activeApplicants.length === 0 ? (
+            <div className="emptyState">아직 확인할 Tally 접수 후보가 없습니다.</div>
+          ) : null}
+          <div className="studentIntakeList">
+            {activeApplicants.map((applicant) => (
+              <article className="studentIntakeCard" key={applicant.applicantId}>
+                <div className="studentIntakeCardHeader">
+                  <div>
+                    <strong>{applicant.name || "이름 미입력"}</strong>
+                    <span>{[applicant.grade || inferGradeFromBirthYear(applicant.birthYear), applicant.schoolName].filter(Boolean).join(" · ") || "기본 정보 미입력"}</span>
+                  </div>
+                  <select
+                    value={applicant.status ?? "received"}
+                    onChange={(event) => updateApplicant(applicant.applicantId, "status", event.target.value)}
+                  >
+                    {intakeStatusOptions.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="studentIntakeGrid">
+                  <label>이름<input value={applicant.name ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "name", event.target.value)} /></label>
+                  <label>출생연도<input value={applicant.birthYear ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "birthYear", event.target.value)} /></label>
+                  <label>학교<input value={applicant.schoolName ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "schoolName", event.target.value)} /></label>
+                  <label>학년<input value={applicant.grade ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "grade", event.target.value)} /></label>
+                  <label>학생전화<input value={applicant.studentPhone ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "studentPhone", event.target.value)} /></label>
+                  <label>학부모전화<input value={applicant.parentPhone ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "parentPhone", event.target.value)} /></label>
+                  <label>
+                    배정 반
+                    <select value={applicant.defaultClassTemplateId ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "defaultClassTemplateId", event.target.value)}>
+                      <option value="">미배정</option>
+                      {templates.map((template) => (
+                        <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>희망/메모<input value={applicant.memo || applicant.desiredClass || ""} onChange={(event) => updateApplicant(applicant.applicantId, "memo", event.target.value)} /></label>
+                </div>
+                <div className="studentIntakeActions">
+                  <small>{applicant.formName || "Tally"} · {applicant.createdAt ? new Date(applicant.createdAt).toLocaleString("ko-KR") : "접수일 미확인"}</small>
+                  <button
+                    className="primaryButton"
+                    disabled={!applicant.name}
+                    onClick={() => onRegisterApplicant(applicant.applicantId, getApplicantRegisterValues(applicant))}
+                    type="button"
+                  >
+                    정식 학생 등록
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       )}
     </Modal>

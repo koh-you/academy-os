@@ -1,5 +1,25 @@
 # Academy OS Current Worklog
 
+## 2026-06-24 Tally 신입생 접수 후보 연동
+
+- 상태: 완료
+- 사용자 요청: 신입생에게 바로 웹앱 가입을 요구하기 어렵기 때문에 기존 Tally 폼으로 받은 정보를 Academy OS와 연결하고, 다니겠다고 했다가 안 다니는 경우도 관리할 수 있게 해달라고 요청했다.
+- 설계: Tally 제출을 바로 정식 학생으로 넣지 않고 `입학 후보`로 먼저 저장한 뒤, 학생 추가 모달의 `Tally 접수` 탭에서 상태를 확인하고 `정식 학생 등록`을 눌러 학생 목록으로 승격하는 흐름으로 정리했다.
+- 서버 조치: `POST /api/intake/tally` 웹훅 수신 API를 추가했다. Tally 제출 JSON에서 이름/출생연도/학년/학교/학생전화/학부모전화/희망반/메모를 최대한 매핑하고, `TALLY_WEBHOOK_SIGNING_SECRET`이 설정되어 있으면 `Tally-Signature`를 검증한다. 후보 목록/저장은 `/api/student-intake-applicants`에서 처리한다.
+- 화면 조치: 학생 추가 모달에 `Tally 접수` 탭을 추가했다. 후보 상태는 `문의접수`, `상담중`, `체험예정`, `등록확정`, `등록취소`, `보류`, `연락두절`로 관리할 수 있고, 정식 등록 시 기존 학생 생성 흐름을 사용한다.
+- DB 준비: `supabase/20260624_student_intake_applicants.sql`을 추가했다. 운영 반영 전 Supabase SQL Editor에서 실행해야 한다.
+- Tally 설정: Tally 폼 Integrations > Webhooks에 `https://koh-you-math-academy-os-api.onrender.com/api/intake/tally`를 연결한다.
+- 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs` 통과. `npm run test:production` 147개 통과, `npm run build` 통과.
+
+## 2026-06-24 학생 목록 명시 저장 버튼 추가
+
+- 상태: 완료
+- 사용자 요청: 학생 목록에서 반, 아이디, PIN, 학년, 학교, 전화번호, 출생연도 등 데이터를 수정했을 때 저장 버튼이 있어야 한다고 요청했다.
+- 원인: 기존 학생 목록 표 입력은 값 변경 즉시 `/api/students` 저장 요청을 보내는 구조라 저장 시점이 화면에 보이지 않았다.
+- 조치: 학생 목록 행 편집은 우선 화면 상태만 바꾸고, 해당 행의 `저장` 버튼을 눌러야 `/api/students`에 반영되도록 분리했다. 변경된 행은 배경으로 표시하고, 저장 버튼은 `저장`, `저장 중`, `저장됨`, `재시도` 상태를 보여준다.
+- 범위: 학생 목록 표의 명시 저장 흐름만 바꿨고, 학생 프로필 모달 등 기존 편집 흐름은 영향이 커지지 않도록 유지했다.
+- 검증: `npm run test:production` 146개 통과, `npm run build` 통과.
+
 ## 2026-06-24 세션 검토 및 내일 작업 큐 문서화
 
 - 상태: 완료
