@@ -983,7 +983,7 @@ function createMathExamEntry(row = {}, index = 0) {
   };
 }
 
-function normalizeMathExamEntries(row = {}) {
+function normalizeMathExamEntries(row = {}, { includeBlank = false } = {}) {
   const entries = Array.isArray(row.mathExamDates) ? row.mathExamDates : [];
   const normalized = entries
     .map((entry, index) => ({
@@ -991,9 +991,10 @@ function normalizeMathExamEntries(row = {}) {
       date: entry.date || "",
       grade: entry.grade || row.grade || "",
       subject: entry.subject || normalizeMathSubject(row.subject),
-      label: entry.label || ""
+      label: entry.label || "",
+      sourceSchoolEventId: entry.sourceSchoolEventId || ""
     }))
-    .filter((entry) => entry.date || entry.label);
+    .filter((entry) => includeBlank || entry.date || entry.label);
   if (normalized.length) return normalized;
   if (row.mathExamDate) return [createMathExamEntry(row, 0)];
   return [];
@@ -8028,7 +8029,7 @@ function ExamPrepCenter({
   }
 
   function getEditableMathExamEntries(row) {
-    const entries = normalizeMathExamEntries(row);
+    const entries = normalizeMathExamEntries(row, { includeBlank: true });
     return entries.length ? entries : [{ ...createMathExamEntry(row, 0), date: "" }];
   }
 
