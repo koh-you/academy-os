@@ -2478,7 +2478,7 @@ export function App() {
         channel: "attendance_kiosk",
         createdAt: nowIso,
         lessonId: lesson.lessonId,
-        message: `[출결체크] ${student.name} ${isCheckOut ? "하원" : attendanceStatus === "late" ? `${lateMinutes}분 지각` : "등원"} · ${koreaTime}`,
+        message: `[출결체크] ${student.name} ${isCheckOut ? "하원" : "등원"} · ${koreaTime}`,
         provider: "academy-os",
         status: "checked_and_sent",
         studentId: student.studentId,
@@ -2489,7 +2489,7 @@ export function App() {
 
     return {
       ok: true,
-      message: `${student.name} ${isCheckOut ? "하원" : attendanceStatus === "late" ? `${lateMinutes}분 지각` : "등원"} 체크 완료 · 출결 알림톡 발송 요청`,
+      message: `${student.name} ${isCheckOut ? "하원" : "등원"}`,
       student,
       lesson,
       mode: isCheckOut ? "checkOut" : "checkIn",
@@ -7114,7 +7114,7 @@ function AttendanceKiosk({
   }
 
   const resultTitle = result?.ok
-      ? (result.mode === "completed" ? "이미 하원 처리됨" : result.mode === "checkOut" ? "하원 체크 완료" : "등원 체크 완료")
+      ? (result.mode === "completed" ? "하원" : result.mode === "checkOut" ? "하원" : "등원")
       : "출결 체크 실패";
   const resultDetail = result?.ok
     ? `${result.student.name} · ${result.lesson.className} · ${result.checkedTime}`
