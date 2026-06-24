@@ -10,12 +10,16 @@
 
 ## Workflow
 
+0. 커밋/푸시는 최우선이다. AI가 할 수 있는 변경 검수, 커밋, 푸시는 사용자가 따로 말하지 않아도 작업 완료 즉시 자동으로 진행한다.
 1. 작업 전 `docs/current-worklog.md`의 작업 큐를 확인하고 필요하면 갱신한다.
-2. 한 번에 하나의 우선순위 작업만 구현한다.
-3. 변경 범위는 요청된 화면과 데이터 흐름에 맞게 제한한다.
-4. 구현 후 `npm run build`를 실행한다.
-5. 운영 흐름에 영향을 주는 변경이면 `npm run test:production`도 검토한다.
-6. 완료 후 작업 결과와 남은 이슈를 `docs/current-worklog.md`에 반영한다.
+2. Supabase 저장은 최우선이다. 새 기능이나 화면 수정 전후로 데이터가 Supabase 테이블 또는 `app_state`에 저장되는지 먼저 확인한다.
+3. 새로고침, 재로그인, 다른 기기 접속 후 사라질 수 있는 프론트-only/localStorage-only 운영 데이터가 있으면 기능 확장보다 저장 경로를 우선 보강한다.
+4. 한 번에 하나의 우선순위 작업만 구현한다.
+5. 변경 범위는 요청된 화면과 데이터 흐름에 맞게 제한한다.
+6. 구현 후 `npm run build`를 실행한다.
+7. 운영 흐름에 영향을 주는 변경이면 `npm run test:production`도 실행한다.
+8. 완료 후 작업 결과와 남은 이슈를 `docs/current-worklog.md`에 반영한다.
+9. 검수 통과 후 GitHub `main`에 커밋/푸시해서 Vercel/Render 자동 배포가 이어지게 한다.
 
 ## Product Rules
 
