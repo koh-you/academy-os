@@ -53,6 +53,7 @@
 - 상태: 완료
 - 사용자 요청: 학생이 QR을 찍고 Tally 접수 폼에 바로 들어갈 수 있도록 QR 연결 작업을 직접 해달라고 요청했다.
 - 조치: Tally 접수 링크 `https://tally.so/r/dWNk2A`를 가리키는 QR 이미지를 `output/qr/tally-intake-qr.png`로 생성했다. 인쇄용 안내 HTML `output/qr/tally-intake-qr-print.html`도 함께 추가했다.
+- 추가 조치: 휴대폰 사진/카톡 공유용 JPG 파일 `output/qr/tally-intake-qr-photo.jpg`도 생성했다.
 - 검증: QR PNG가 1024x1024 이미지로 생성됐고, 로컬에서 이미지를 열어 육안 확인했다.
 - SQL 주의: QR/인쇄물 산출물만 추가했으므로 Supabase SQL Editor 작업은 필요 없다.
 
