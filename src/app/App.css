@@ -5265,6 +5265,12 @@ textarea {
   color: #9a3412;
 }
 
+.prepMemoButton.hasReference {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
 .prepMemoButton.filled.hasPrevious {
   background: #fef3c7;
   border-color: #f59e0b;
@@ -5318,6 +5324,32 @@ textarea {
   overflow: auto;
   padding: 12px;
   white-space: pre-wrap;
+}
+
+.prepMemoReference {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.prepMemoReference h2 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.prepMemoReference > span {
+  color: #1d4ed8;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.prepMemoReference pre {
+  border-color: #bfdbfe;
+  max-height: 180px;
+  min-height: 120px;
 }
 
 .prepMemoDraft {
