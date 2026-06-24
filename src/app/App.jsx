@@ -934,6 +934,21 @@ function schoolNamesMatch(firstSchool = "", secondSchool = "", { allowBlank = tr
   return firstText === secondText || firstText.includes(secondText) || secondText.includes(firstText);
 }
 
+function getSchoolGradeKey(schoolName = "", grade = "") {
+  const schoolKey = normalizeSchoolName(schoolName);
+  const gradeKey = compactCalendarLabel(normalizeGradeLabel(grade));
+  if (!schoolKey || !gradeKey) return "";
+  return `${schoolKey}_${gradeKey}`;
+}
+
+function getStudentSchoolGradeKey(student = {}) {
+  return getSchoolGradeKey(student.schoolName, student.grade);
+}
+
+function getExamPrepSchoolGradeKey(row = {}) {
+  return getSchoolGradeKey(row.schoolName, row.grade);
+}
+
 function getTextbookFromExamPrep(student) {
   const key = `${student.schoolName || ""}_${normalizeGradeLabel(student.grade)}`;
   return examPrepTextbookBySchoolGrade[key] ?? student.textbook ?? "";
@@ -1135,8 +1150,8 @@ function syncPublisherAcrossExamTerm(rows, sourceRow) {
 
 function buildExamPrepRowsFromStudents(students, examCycle, classTemplateId = "", existingRows = []) {
   const classStudents = classTemplateId
-    ? students.filter((student) => student.defaultClassTemplateId === classTemplateId)
-    : students;
+    ? students.filter((student) => (student.status ?? "active") === "active" && student.defaultClassTemplateId === classTemplateId)
+    : students.filter((student) => (student.status ?? "active") === "active");
   const seen = new Set();
 
   return classStudents
@@ -7905,13 +7920,15 @@ function ExamPrepCenter({
   const setTallySummaries = onSetTallySummaries ?? (() => {});
   const pastPaperArchiveUrl =
     "https://script.google.com/macros/s/AKfycbyYi-NUHHzb9vrBl4Adj6Pq9zXIZJ9oR97g-uQyAf7up7AGVzeRdBUqfVcUZ1zjQiug/exec";
-  const classStudents = students.filter((student) => student.defaultClassTemplateId === selectedClassTemplateId);
-  const classSchools = new Set(classStudents.map((student) => student.schoolName).filter(Boolean));
+  const classStudents = students.filter(
+    (student) => (student.status ?? "active") === "active" && student.defaultClassTemplateId === selectedClassTemplateId
+  );
+  const classSchoolGradeKeys = new Set(classStudents.map(getStudentSchoolGradeKey).filter(Boolean));
   const displayRows = dedupeExamPrepRowsForDisplay(rows);
   const visibleRows = displayRows.filter((row) => {
     const rowCycle = row.examCycle ?? currentExamCycle;
     const matchesCycle = rowCycle === selectedExamCycle;
-    const matchesClass = classSchools.size === 0 || classSchools.has(row.schoolName);
+    const matchesClass = classSchoolGradeKeys.has(getExamPrepSchoolGradeKey(row));
     return matchesCycle && matchesClass;
   });
   const filteredRows = visibleRows.filter((row) => {
@@ -7931,8 +7948,8 @@ function ExamPrepCenter({
     return haystack.toLowerCase().includes(query.toLowerCase());
   });
   const selectedClass = templates.find((template) => template.classTemplateId === selectedClassTemplateId);
-  const editingExamPrepRow = rows.find((row) => row.examPrepId === editingExamPrepId) ?? null;
-  const reviewModalRow = rows.find((row) => row.examPrepId === reviewModalRowId) ?? null;
+  const editingExamPrepRow = visibleRows.find((row) => row.examPrepId === editingExamPrepId) ?? null;
+  const reviewModalRow = visibleRows.find((row) => row.examPrepId === reviewModalRowId) ?? null;
   const visibleTallySubmissions = tallySubmissions.filter(
     (submission) => submission.examCycle === selectedExamCycle && submission.classTemplateId === selectedClassTemplateId
   );
