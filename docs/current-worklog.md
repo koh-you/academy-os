@@ -3,8 +3,8 @@
 ## 2026-06-24 링크 미리보기 제목 분리
 
 - 상태: 완료
-- 사용자 요청: 카카오톡/메신저 링크 미리보기 제목만 기본 앱은 `koh_you_math os`, 출결 전용 링크는 `koh_you_math_attendence`로 바꿔달라고 요청했다.
-- 조치: 기본 `index.html`의 title/OG/Twitter title을 `koh_you_math os`로 바꿨다. 출결 전용 `attendance.html`을 추가하고 title/OG/Twitter title을 `koh_you_math_attendence`로 지정했다.
+- 사용자 요청: 카카오톡/메신저 링크 미리보기 제목만 기본 앱은 `koh_you_math os`, 출결 전용 링크는 `koh_you_math_attendance`로 바꿔달라고 요청했다.
+- 조치: 기본 `index.html`의 title/OG/Twitter title을 `koh_you_math os`로 바꿨다. 출결 전용 `attendance.html`을 추가하고 title/OG/Twitter title을 `koh_you_math_attendance`로 지정했다.
 - 배포 설정: Vercel rewrite에서 `/attendance`를 `/attendance.html`로 먼저 보내고, 나머지 경로는 기존처럼 `/index.html`로 보내게 했다. Vite 빌드 입력에 `attendance.html`을 추가해 실제 배포 산출물에 포함되도록 했다.
 - 검증: `npm run build`에서 `dist/attendance.html` 생성 확인, `npm run test:production` 151개 통과.
 
