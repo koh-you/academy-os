@@ -157,7 +157,7 @@ function fromLessonRow(row) {
   };
 }
 
-function toLessonRecordRow(record, { includeExtendedFields = true } = {}) {
+function toLessonRecordRow(record, { includeExtendedFields = true, includeAttendanceTimeFields = true } = {}) {
   const baseRow = {
     lesson_student_record_id: record.lessonStudentRecordId,
     lesson_id: record.lessonId,
@@ -180,7 +180,7 @@ function toLessonRecordRow(record, { includeExtendedFields = true } = {}) {
 
   if (!includeExtendedFields) return baseRow;
 
-  return {
+  const extendedRow = {
     ...baseRow,
     lesson_material: compact(record.lessonMaterial),
     lesson_content: compact(record.lessonContent),
@@ -193,6 +193,16 @@ function toLessonRecordRow(record, { includeExtendedFields = true } = {}) {
     prep_student_ai_status: compact(record.prepStudentAiStatus),
     prep_parent_ai_status: compact(record.prepParentAiStatus)
   };
+
+  if (!includeAttendanceTimeFields) return extendedRow;
+
+  return {
+    ...extendedRow,
+    check_in_at: compact(record.checkInAt),
+    check_in_time: compact(record.checkInTime),
+    check_out_at: compact(record.checkOutAt),
+    check_out_time: compact(record.checkOutTime)
+  };
 }
 
 function fromLessonRecordRow(row) {
@@ -203,6 +213,10 @@ function fromLessonRecordRow(row) {
     attendanceStatus: row.attendance_status ?? "pending",
     attendanceReason: row.attendance_reason ?? "",
     lateMinutes: row.late_minutes ?? "",
+    checkInAt: row.check_in_at ?? "",
+    checkInTime: row.check_in_time ?? "",
+    checkOutAt: row.check_out_at ?? "",
+    checkOutTime: row.check_out_time ?? "",
     previousHomework: row.previous_homework ?? "",
     nextHomework: row.next_homework ?? "",
     incompleteHomework: row.incomplete_homework ?? "",
@@ -1113,13 +1127,19 @@ export async function upsertLessonStudentRecord(record) {
     [row] = await upsertRows("lesson_student_records", [toLessonRecordRow(stableRecord)]);
   } catch (error) {
     const message = String(error?.message ?? "");
+    const isAttendanceTimeMigration =
+      message.includes("check_in_at") ||
+      message.includes("check_in_time") ||
+      message.includes("check_out_at") ||
+      message.includes("check_out_time");
     const isPendingMigration =
       message.includes("lesson_material") ||
       message.includes("lesson_content") ||
       message.includes("assignment_status") ||
       message.includes("preparation_memo") ||
       message.includes("prep_student_notice") ||
-      message.includes("prep_student_visible");
+      message.includes("prep_student_visible") ||
+      isAttendanceTimeMigration;
     const hasExtendedValues = [
       stableRecord.lessonMaterial,
       stableRecord.lessonContent,
@@ -1133,6 +1153,10 @@ export async function upsertLessonStudentRecord(record) {
       stableRecord.prepParentVisible
     ].some((value) => (typeof value === "boolean" ? value : Boolean(String(value ?? "").trim())));
     if (!isPendingMigration) throw error;
+    if (isAttendanceTimeMigration) {
+      [row] = await upsertRows("lesson_student_records", [toLessonRecordRow(stableRecord, { includeAttendanceTimeFields: false })]);
+      return { source: databaseSource, record: fromLessonRecordRow(row) };
+    }
     if (hasExtendedValues) {
       throw new Error(
         "Supabase lesson_student_records 확장 컬럼 migration이 필요합니다. supabase/20260617_lesson_prep_resources_notifications.sql을 실행한 뒤 다시 저장하세요."

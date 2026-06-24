@@ -6372,7 +6372,7 @@ function LessonJournalDetail({
             const record = records.find((item) => item.studentId === student.studentId) ?? createEmptyRecord(lesson, student);
             const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
             const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
-            const attendanceText = attendanceLabels[record.attendanceStatus] ?? record.attendanceStatus ?? "대기";
+            const attendanceDisplay = getAttendanceDisplay(record);
             const previousRecord = getPreviousLessonReminderRecord(student);
             const previousLessonMaterial = previousRecord?.lessonMaterial?.trim() ?? "";
             const previousLessonContent = getLessonContent(previousRecord);
@@ -6422,7 +6422,8 @@ function LessonJournalDetail({
                   onClick={() => onOpenAttendance({ lesson, record, student })}
                   type="button"
                 >
-                  {attendanceText}
+                  <span>{attendanceDisplay.label}</span>
+                  {attendanceDisplay.detail ? <small>{attendanceDisplay.detail}</small> : null}
                 </button>
                 <EditableMemoCard
                   editKey={`${recordId}:lessonMaterial`}
@@ -12009,6 +12010,7 @@ function StudentLessonHistoryCalendar({ homeworks = [], lessons = [], recordsWit
       : null;
   const previousHomeworkText = previousHomework?.title || selectedRecord?.previousHomework || "";
   const nextHomeworkText = nextHomework?.title || selectedRecord?.nextHomework || "";
+  const selectedAttendanceDisplay = getAttendanceDisplay(selectedRecord ?? {});
   const calendarDays = buildMonthDays(today);
 
   useEffect(() => {
@@ -12053,7 +12055,13 @@ function StudentLessonHistoryCalendar({ homeworks = [], lessons = [], recordsWit
                 <span>{selectedRecord.lesson.startTime}-{selectedRecord.lesson.endTime}</span>
               </div>
               <dl>
-                <div><dt>출결</dt><dd>{attendanceLabels[selectedRecord.attendanceStatus] ?? "대기"}</dd></div>
+                <div>
+                  <dt>출결</dt>
+                  <dd>
+                    {selectedAttendanceDisplay.label}
+                    {selectedAttendanceDisplay.detail ? ` · ${selectedAttendanceDisplay.detail}` : ""}
+                  </dd>
+                </div>
                 <div><dt>강의 교재</dt><dd>{lessonMaterial || "기록 전"}</dd></div>
                 <div><dt>강의 내용</dt><dd>{lessonContent || "기록 전"}</dd></div>
                 <div><dt>지난 숙제</dt><dd>{previousHomeworkText || "기록 전"}</dd></div>
@@ -15323,6 +15331,30 @@ function calculateLateMinutes(lesson, now = new Date(), graceMinutes = 0) {
   return Math.max(0, diff - (Number(graceMinutes) || 0));
 }
 
+function formatKoreaTimeFromIso(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  }).format(date);
+}
+
+function getAttendanceDisplay(record = {}) {
+  const status = record.attendanceStatus ?? "pending";
+  const label = attendanceLabels[status] ?? status ?? "대기";
+  const checkInTime = record.checkInTime || formatKoreaTimeFromIso(record.checkInAt);
+  const checkOutTime = record.checkOutTime || formatKoreaTimeFromIso(record.checkOutAt);
+  const detail = [
+    checkInTime ? `등원 ${checkInTime}` : "",
+    checkOutTime ? `하원 ${checkOutTime}` : ""
+  ].filter(Boolean).join(" · ");
+  return { label, detail };
+}
+
 function createLessonStudentRecordId(lessonId, studentId) {
   return `lsr_${lessonId.replace("lesson_", "")}_${studentId}`;
 }
@@ -15334,6 +15366,10 @@ function createEmptyRecord(lesson, student) {
     studentId: student.studentId,
     attendanceStatus: "pending",
     behaviorTag: "",
+    checkInAt: "",
+    checkInTime: "",
+    checkOutAt: "",
+    checkOutTime: "",
     homeworkStatus: "not_started",
     lessonMaterial: "",
     lessonProgress: "",

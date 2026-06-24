@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-06-24 수업일지 등하원 시각 표시
+
+- 상태: 완료
+- 사용자 요청: 수업일지 출결 칸이 `출석`만 보여서 실제 몇 분에 등원했는지 알 수 없고, 하원 시에도 몇 분에 찍고 하원했는지 보이게 해달라고 요청했다.
+- 조치: 수업일지 출결 뱃지에 상태 라벨과 함께 `등원 HH:MM`, `하원 HH:MM`을 표시하도록 했다. 학생 수업 기록 카드의 출결 정보에도 같은 등하원 시각을 함께 표시한다.
+- 저장 보정: 태블릿 출결에서 생성되는 `checkInAt/checkInTime/checkOutAt/checkOutTime`을 `lesson_student_records` API 매핑에 추가했다. Supabase 컬럼이 아직 없는 운영 상태에서도 저장 실패가 나지 않도록 fallback을 넣었다.
+- DB 준비: 새 컬럼 영구 저장을 위해 `supabase/20260624_lesson_attendance_times.sql`을 추가했다. Supabase SQL Editor에서 실행해야 새로고침 뒤에도 등하원 시간이 유지된다.
+- 검증: `node --check api/routes/coreData.js`, `npm run test:production` 153개 통과, `npm run build` 통과.
+
 ## 2026-06-24 태블릿 출결 하원 알림톡 및 카운트다운 보정
 
 - 상태: 완료
