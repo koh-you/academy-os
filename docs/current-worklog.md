@@ -14,6 +14,7 @@
 - 조치: 누락된 QR JPG 파일을 새 위치에서 Git 기준으로 복원했고, 작업트리가 깨끗한 상태임을 확인했다.
 - 정리: 기존 `C:\Users\force\Desktop\academy-os` 폴더는 삭제 완료했다. 앞으로 Codex와 터미널 작업 기준 폴더는 `E:\academy-os`다.
 - 주의: `.env`, `node_modules`, QR 산출물은 새 위치에 존재한다. 새 세션에서는 `E:\academy-os`를 작업 폴더로 열어야 한다.
+- 추가 조치: 새 Codex 세션에 붙여넣을 프롬프트와 작업 경로 이전 안내를 `docs/session-handoff-2026-06-24-workspace-move.md`에 작성했다.
 
 ## 현재 다음 작업 큐 - 2026-06-24 정리
 
