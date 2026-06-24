@@ -2266,30 +2266,40 @@ export function App() {
     const matchedStudents = students.filter((student) => {
       if ((student.status ?? "active") !== "active") return false;
       const studentPhone = String(student.studentPhone ?? "").replaceAll(/\D/g, "");
-      const parentPhone = String(student.parentPhone ?? "").replaceAll(/\D/g, "");
-      return [studentPhone, parentPhone].some((phone) => phone.slice(-4) === digits);
+      return studentPhone.slice(-4) === digits;
     });
 
     if (matchedStudents.length === 0) {
-      return { ok: false, message: "해당 학생/학부모 전화번호를 찾지 못했습니다." };
+      return { ok: false, message: "해당 학생 전화번호를 찾지 못했습니다." };
     }
     if (matchedStudents.length > 1) {
-      return { ok: false, message: "같은 뒤 4자리 학생/학부모 번호가 2명 이상입니다. 선생님께 말씀해 주세요." };
+      return { ok: false, message: "같은 뒤 4자리 학생 전화번호가 2명 이상입니다. 선생님께 말씀해 주세요." };
     }
 
     const student = matchedStudents[0];
     const now = new Date();
     const todayString = getKoreaDateString(now);
-    const lesson =
-      lessons
-        .filter((item) => item.date === todayString && item.studentIds.includes(student.studentId))
-        .sort(sortByTime)[0] ??
-      lessons
-        .filter((item) => item.studentIds.includes(student.studentId))
-        .sort((a, b) => String(b.date).localeCompare(String(a.date)) || sortByTime(a, b))[0];
+    const todayStudentLesson = lessons
+      .filter((item) => item.date === todayString && (item.studentIds ?? []).includes(student.studentId))
+      .sort(sortByTime)[0];
+    const todayClassLesson = lessons
+      .filter((item) => item.date === todayString && item.classTemplateId === student.defaultClassTemplateId)
+      .sort(sortByTime)[0];
+    const recentStudentLesson = lessons
+      .filter((item) => (item.studentIds ?? []).includes(student.studentId))
+      .sort((a, b) => String(b.date).localeCompare(String(a.date)) || sortByTime(a, b))[0];
+    let lesson = todayStudentLesson ?? todayClassLesson ?? recentStudentLesson;
 
     if (!lesson) {
       return { ok: false, message: `${student.name} 학생의 수업 일정이 없습니다.` };
+    }
+    if (!(lesson.studentIds ?? []).includes(student.studentId)) {
+      lesson = {
+        ...lesson,
+        studentIds: [...(lesson.studentIds ?? []), student.studentId]
+      };
+      setLessons((current) => current.map((item) => (item.lessonId === lesson.lessonId ? lesson : item)));
+      postJson("/api/lessons/bulk", { lessons: [lesson] }).catch((error) => console.error(error));
     }
 
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
@@ -6873,12 +6883,6 @@ function AttendanceKiosk({
     return () => window.clearTimeout(timerId);
   }, [result]);
 
-  useEffect(() => {
-    if (isLoading || result || pin.length !== 4) return undefined;
-    const timerId = window.setTimeout(() => runAttendanceCheck(pin), 160);
-    return () => window.clearTimeout(timerId);
-  }, [isLoading, pin, result]);
-
   function runAttendanceCheck(nextPin) {
     const nextResult = onAttendanceCheck(nextPin);
     setResult(nextResult);
@@ -6918,7 +6922,7 @@ function AttendanceKiosk({
           <div>
             <p className="eyebrow">{academyBrandName} ATTENDANCE</p>
             <h1>출결 체크</h1>
-            <p className="muted">{isLoading ? "출결 데이터를 불러오는 중입니다." : "학생/학부모 휴대폰 번호 뒤 4자리를 입력하세요."}</p>
+            <p className="muted">{isLoading ? "출결 데이터를 불러오는 중입니다." : "학생 휴대폰 번호 뒤 4자리를 입력하세요."}</p>
           </div>
           {onBack ? <button className="iconButton" onClick={onBack} type="button">×</button> : null}
         </div>
