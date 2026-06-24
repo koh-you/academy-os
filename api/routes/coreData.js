@@ -683,7 +683,7 @@ export async function listStudents() {
     return { source: fallbackSource, students: sampleData.students.filter((student) => (student.status ?? "active") === "active") };
   }
 
-  const rows = await listRows("students", "select=*&status=eq.active&order=name.asc", { requireServiceRole: true });
+  const rows = await listRows("students", "select=*&order=name.asc", { requireServiceRole: true });
   return { source: databaseSource, students: rows.map(fromStudentRow) };
 }
 

@@ -2630,10 +2630,81 @@ export function App() {
     };
   }
 
+  function isActiveLessonForRosterSync(lesson) {
+    return (lesson.status ?? "scheduled") !== "canceled" && !lesson.isVirtualSundayMakeupBlock;
+  }
+
+  function applyLessonRosterChanges(changedLessons) {
+    if (!changedLessons.length) return;
+    const changedById = new Map(changedLessons.map((lesson) => [lesson.lessonId, lesson]));
+    setLessons((current) => current.map((lesson) => changedById.get(lesson.lessonId) ?? lesson));
+    postJson("/api/lessons/bulk", { lessons: changedLessons }).catch((error) => console.error(error));
+  }
+
+  function addStudentToFutureClassLessons(student, fromDate = today) {
+    if (!student.defaultClassTemplateId) return [];
+    const changedLessons = lessons
+      .filter((lesson) =>
+        isActiveLessonForRosterSync(lesson) &&
+        lesson.classTemplateId === student.defaultClassTemplateId &&
+        String(lesson.date) >= fromDate &&
+        !(lesson.studentIds ?? []).includes(student.studentId)
+      )
+      .map((lesson) => ({
+        ...lesson,
+        studentIds: [...(lesson.studentIds ?? []), student.studentId]
+      }));
+    applyLessonRosterChanges(changedLessons);
+    return changedLessons;
+  }
+
+  function reconcileStudentFutureClassLessons(student, previousClassTemplateId = "", fromDate = today) {
+    const nextClassTemplateId = student.defaultClassTemplateId ?? "";
+    if (!previousClassTemplateId && !nextClassTemplateId) return [];
+    const changedLessons = lessons.flatMap((lesson) => {
+      if (!isActiveLessonForRosterSync(lesson) || String(lesson.date) < fromDate) return [];
+      const studentIds = lesson.studentIds ?? [];
+      const shouldRemoveFromPrevious =
+        previousClassTemplateId &&
+        previousClassTemplateId !== nextClassTemplateId &&
+        lesson.classTemplateId === previousClassTemplateId &&
+        studentIds.includes(student.studentId);
+      const shouldAddToNext =
+        nextClassTemplateId &&
+        lesson.classTemplateId === nextClassTemplateId &&
+        !studentIds.includes(student.studentId);
+      if (!shouldRemoveFromPrevious && !shouldAddToNext) return [];
+      return [{
+        ...lesson,
+        studentIds: shouldAddToNext
+          ? [...studentIds, student.studentId]
+          : studentIds.filter((id) => id !== student.studentId)
+      }];
+    });
+    applyLessonRosterChanges(changedLessons);
+    return changedLessons;
+  }
+
+  function removeStudentFromLessonsAfterDate(studentId, cutoffDate = today) {
+    const changedLessons = lessons
+      .filter((lesson) =>
+        isActiveLessonForRosterSync(lesson) &&
+        String(lesson.date) > cutoffDate &&
+        (lesson.studentIds ?? []).includes(studentId)
+      )
+      .map((lesson) => ({
+        ...lesson,
+        studentIds: (lesson.studentIds ?? []).filter((id) => id !== studentId)
+      }));
+    applyLessonRosterChanges(changedLessons);
+    return changedLessons;
+  }
+
   function handleAddStudent(formValues) {
     const student = createStudentFromFormValues(formValues);
 
     setStudents((current) => [...current, student]);
+    addStudentToFutureClassLessons(student, today);
     setIsStudentModalOpen(false);
     postJson("/api/students", { student }).catch((error) => console.error(error));
   }
@@ -2673,6 +2744,7 @@ export function App() {
       updatedAt: new Date().toISOString()
     };
     setStudents((current) => [...current, student]);
+    addStudentToFutureClassLessons(student, today);
     setStudentIntakeApplicants((current) =>
       current.map((item) => (item.applicantId === applicantId ? registeredApplicant : item))
     );
@@ -2692,10 +2764,16 @@ export function App() {
     }
   }
 
-  async function handleSaveStudent(studentId) {
+  async function handleSaveStudent(studentId, options = {}) {
     const student = students.find((item) => item.studentId === studentId);
     if (!student) throw new Error("저장할 학생을 찾지 못했습니다.");
     await postJson("/api/students", { student });
+    if (
+      Object.prototype.hasOwnProperty.call(options, "previousClassTemplateId") &&
+      options.previousClassTemplateId !== student.defaultClassTemplateId
+    ) {
+      reconcileStudentFutureClassLessons(student, options.previousClassTemplateId, today);
+    }
   }
 
   function handleUpdateExamPrepRow(examPrepId, field, value) {
@@ -2807,30 +2885,12 @@ export function App() {
 
   function handleDeleteStudent(studentId) {
     const removedStudent = students.find((student) => student.studentId === studentId);
-    const changedLessons = lessons
-      .filter((lesson) => (lesson.studentIds ?? []).includes(studentId))
-      .map((lesson) => ({
-        ...lesson,
-        studentIds: (lesson.studentIds ?? []).filter((id) => id !== studentId)
-      }));
-    setStudents((current) => current.filter((student) => student.studentId !== studentId));
-    setLessons((current) =>
-      current.map((lesson) => ({
-        ...lesson,
-        studentIds: (lesson.studentIds ?? []).filter((id) => id !== studentId)
-      }))
-    );
-    setRecords((current) => current.filter((record) => record.studentId !== studentId));
-    setHomeworks((current) => current.filter((homework) => homework.studentId !== studentId));
-    setWrongProblems((current) => current.filter((problem) => problem.studentId !== studentId));
-    setScoreRecords((current) => current.filter((score) => score.studentId !== studentId));
-    setAcademyTests((current) => current.filter((test) => test.studentId !== studentId));
-    setMakeupTasks((current) => current.filter((task) => task.studentId !== studentId));
+    if (!removedStudent) return;
+    const pausedStudent = { ...removedStudent, status: "paused", withdrawnAt: new Date().toISOString() };
+    setStudents((current) => current.map((student) => (student.studentId === studentId ? pausedStudent : student)));
+    removeStudentFromLessonsAfterDate(studentId, today);
     if (removedStudent) {
-      postJson("/api/students", { student: { ...removedStudent, status: "paused" } }).catch((error) => console.error(error));
-    }
-    if (changedLessons.length > 0) {
-      postJson("/api/lessons/bulk", { lessons: changedLessons }).catch((error) => console.error(error));
+      postJson("/api/students", { student: pausedStudent }).catch((error) => console.error(error));
     }
   }
 
@@ -10654,6 +10714,7 @@ function StudentManager({
   const [deleteStudentId, setDeleteStudentId] = useState("");
   const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("template_mwf_7_10");
   const [dirtyStudentIds, setDirtyStudentIds] = useState(() => new Set());
+  const [originalClassTemplateIds, setOriginalClassTemplateIds] = useState({});
   const [studentSaveStates, setStudentSaveStates] = useState({});
   const selectedClassTemplate = templates.find(
     (template) => template.classTemplateId === selectedClassTemplateId
@@ -10662,10 +10723,11 @@ function StudentManager({
   const deleteStudent = students.find((student) => student.studentId === deleteStudentId) ?? null;
   const selectedScores = scoreRecords.filter((score) => score.studentId === selectedStudent?.studentId);
   const selectedAcademyTests = academyTests.filter((item) => item.studentId === selectedStudent?.studentId);
+  const activeStudents = students.filter((student) => (student.status ?? "active") === "active");
   const visibleStudents =
     activeTab === "class"
-      ? students.filter((student) => student.defaultClassTemplateId === selectedClassTemplateId)
-      : students;
+      ? activeStudents.filter((student) => student.defaultClassTemplateId === selectedClassTemplateId)
+      : activeStudents;
   const title = activeTab === "class" ? `${selectedClassTemplate?.name ?? "반별"} 학생 목록` : "전체 학생 목록";
 
   function getStudentClassName(student) {
@@ -10688,6 +10750,13 @@ function StudentManager({
   }
 
   function updateStudentField(studentId, field, value) {
+    if (field === "defaultClassTemplateId" && !Object.prototype.hasOwnProperty.call(originalClassTemplateIds, studentId)) {
+      const currentStudent = students.find((student) => student.studentId === studentId);
+      setOriginalClassTemplateIds((current) => ({
+        ...current,
+        [studentId]: currentStudent?.defaultClassTemplateId ?? ""
+      }));
+    }
     onUpdateStudent(studentId, field, value, { persist: false });
     setDirtyStudentIds((current) => new Set(current).add(studentId));
     setStudentSaveStates((current) => ({ ...current, [studentId]: "dirty" }));
@@ -10696,10 +10765,18 @@ function StudentManager({
   async function saveStudentRow(studentId) {
     setStudentSaveStates((current) => ({ ...current, [studentId]: "saving" }));
     try {
-      await onSaveStudent(studentId);
+      const saveOptions = Object.prototype.hasOwnProperty.call(originalClassTemplateIds, studentId)
+        ? { previousClassTemplateId: originalClassTemplateIds[studentId] }
+        : {};
+      await onSaveStudent(studentId, saveOptions);
       setDirtyStudentIds((current) => {
         const next = new Set(current);
         next.delete(studentId);
+        return next;
+      });
+      setOriginalClassTemplateIds((current) => {
+        const next = { ...current };
+        delete next[studentId];
         return next;
       });
       setStudentSaveStates((current) => ({ ...current, [studentId]: "saved" }));
@@ -10727,7 +10804,7 @@ function StudentManager({
         <div className="studentListToolbar">
           <button className="primaryButton" onClick={onAddStudent} type="button">+ 학생 추가</button>
           <span className="studentStatusPill">표시 중 {visibleStudents.length}명</span>
-          <span className="studentStatusPill mutedPill">숨김은 DB 보류 상태로 보존</span>
+          <span className="studentStatusPill mutedPill">퇴원생은 과거 기록 보존</span>
         </div>
       </div>
 
@@ -10757,7 +10834,7 @@ function StudentManager({
       {activeTab === "class" ? (
         <div className="classTabList">
           {templates.map((template) => {
-            const count = students.filter((student) => student.defaultClassTemplateId === template.classTemplateId).length;
+            const count = activeStudents.filter((student) => student.defaultClassTemplateId === template.classTemplateId).length;
             return (
               <button
                 className={selectedClassTemplateId === template.classTemplateId ? "active" : ""}
@@ -10790,7 +10867,7 @@ function StudentManager({
           <span>출생연도</span>
           <span>저장</span>
           <span>정보확정</span>
-          <span>숨김</span>
+          <span>퇴원</span>
         </div>
         {visibleStudents.map((student, index) => {
           const saveState = studentSaveStates[student.studentId];
@@ -10882,12 +10959,12 @@ function StudentManager({
               {student.confirmed === false ? "미확정" : "확정"}
             </button>
             <button
-              aria-label={`${student.name} 숨김`}
+              aria-label={`${student.name} 퇴원 처리`}
               className="trashButton"
               onClick={() => setDeleteStudentId(student.studentId)}
               type="button"
             >
-              숨김
+              퇴원
             </button>
           </div>
           );
@@ -10916,8 +10993,8 @@ function StudentManager({
         <Modal
           className="studentDeleteModal"
           onClose={() => setDeleteStudentId("")}
-          subtitle="학생을 숨김 처리하면 목록과 수업 명단에서는 제외되고, DB에는 보류 상태로 보존됩니다."
-          title="학생 숨김 확인"
+          subtitle="퇴원 처리하면 학생 목록과 내일 이후 수업 명단에서는 제외되고, 오늘까지의 수업기록은 보존됩니다."
+          title="학생 퇴원 처리 확인"
         >
           <div className="deleteConfirmBody">
             <div className="deleteConfirmStudent">
@@ -10935,11 +11012,11 @@ function StudentManager({
               <span>PIN</span>
               <strong>{deleteStudent.pin || "-"}</strong>
             </div>
-            <p className="dangerCopy">정말 이 학생을 숨김 처리할까요? 실제 DB에서는 삭제하지 않고 보류 상태로 보존합니다.</p>
+            <p className="dangerCopy">정말 이 학생을 퇴원 처리할까요? 오늘까지의 수업기록은 보존하고, 내일 이후 수업 명단에서만 제외합니다.</p>
           </div>
           <div className="deleteConfirmActions">
             <button className="softButton" onClick={() => setDeleteStudentId("")} type="button">취소</button>
-            <button className="dangerButton" onClick={confirmDeleteStudent} type="button">학생 숨김</button>
+            <button className="dangerButton" onClick={confirmDeleteStudent} type="button">퇴원 처리</button>
           </div>
         </Modal>
       ) : null}
