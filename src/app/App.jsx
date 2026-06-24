@@ -15345,9 +15345,13 @@ function formatKoreaTimeFromIso(value) {
 
 function getAttendanceDisplay(record = {}) {
   const status = record.attendanceStatus ?? "pending";
-  const label = attendanceLabels[status] ?? status ?? "대기";
   const checkInTime = record.checkInTime || formatKoreaTimeFromIso(record.checkInAt);
   const checkOutTime = record.checkOutTime || formatKoreaTimeFromIso(record.checkOutAt);
+  const label = checkOutTime
+    ? "하원"
+    : checkInTime
+      ? "등원"
+      : attendanceLabels[status] ?? status ?? "대기";
   const detail = [
     checkInTime ? `등원 ${checkInTime}` : "",
     checkOutTime ? `하원 ${checkOutTime}` : ""
