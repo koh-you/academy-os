@@ -2316,7 +2316,7 @@ export function App() {
     if (existingRecord?.checkInAt && existingRecord?.checkOutAt) {
       return {
         ok: true,
-        message: `${student.name} 이미 하원 처리됨 · 추가 알림톡은 보내지 않았습니다.`,
+        message: `${student.name} 이미 하원 처리되었습니다. 추가 확인이 필요하면 담당 선생님께 따로 말씀해 주세요.`,
         student,
         lesson,
         mode: "completed",
