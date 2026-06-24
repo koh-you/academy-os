@@ -1314,6 +1314,43 @@ function getPeriodBarClass(date, event) {
   return "periodMiddle";
 }
 
+function groupExamPeriodEventsForMonth(events = []) {
+  const grouped = new Map();
+  events.forEach((event) => {
+    if (event.type !== "examPeriod") return;
+    const key = [
+      event.examCycle || currentExamCycle,
+      event.date || "",
+      event.endDate || event.date || ""
+    ].join("|");
+    const existing = grouped.get(key) ?? {
+      ...event,
+      eventId: `month_period_${safeIdPart(key)}`,
+      title: "",
+      schoolNames: new Set(),
+      type: "examPeriod"
+    };
+    if (event.schoolName) existing.schoolNames.add(event.schoolName);
+    existing.title = `${examCycleLabel(event.examCycle || currentExamCycle)} 시험기간 · ${existing.schoolNames.size}개 학교`;
+    grouped.set(key, existing);
+  });
+  return [...grouped.values()].map((event) => ({
+    ...event,
+    schoolNames: [...event.schoolNames]
+  }));
+}
+
+function getMonthCellDisplayEvents(dayEvents = []) {
+  const periodSummaries = groupExamPeriodEventsForMonth(dayEvents).slice(0, 1);
+  const mathExamEvents = dayEvents.filter((event) => event.type === "mathExam").slice(0, 2);
+  const regularEvents = dayEvents.filter((event) => event.type !== "examPeriod" && event.type !== "mathExam").slice(0, 2);
+  const hiddenCount =
+    Math.max(0, groupExamPeriodEventsForMonth(dayEvents).length - periodSummaries.length) +
+    Math.max(0, dayEvents.filter((event) => event.type === "mathExam").length - mathExamEvents.length) +
+    Math.max(0, dayEvents.filter((event) => event.type !== "examPeriod" && event.type !== "mathExam").length - regularEvents.length);
+  return { hiddenCount, mathExamEvents, periodSummaries, regularEvents };
+}
+
 function buildExamCalendarEvents(rows) {
   const periodKeys = new Set();
   return dedupeExamPrepRowsForDisplay(rows).flatMap((row) => {
@@ -9931,13 +9968,7 @@ function SchoolCalendarCenter({
                   (eventPriority[eventA.type] ?? 4) - (eventPriority[eventB.type] ?? 4)
                   || formatCalendarEventLabel(eventA).localeCompare(formatCalendarEventLabel(eventB))
                 ));
-              const visibleDayEvents = [
-                ...dayEvents.filter((event) => event.type === "examPeriod" || event.type === "mathExam"),
-                ...dayEvents.filter((event) => event.type !== "examPeriod" && event.type !== "mathExam").slice(0, 2)
-              ];
-              const periodEvents = visibleDayEvents.filter((event) => event.type === "examPeriod");
-              const mathExamEvents = visibleDayEvents.filter((event) => event.type === "mathExam");
-              const regularEvents = visibleDayEvents.filter((event) => event.type !== "examPeriod" && event.type !== "mathExam");
+              const { hiddenCount, mathExamEvents, periodSummaries, regularEvents } = getMonthCellDisplayEvents(dayEvents);
               return (
                 <button
                   className={[
@@ -9954,15 +9985,18 @@ function SchoolCalendarCenter({
                   <span className="dayNumber">{day.dayNumber}</span>
                   <span className="lessonPills">
                     <span className="schoolPeriodLayer" aria-hidden="true">
-                      {periodEvents.map((event) => {
-                        const isPeriodBar = true;
+                      {periodSummaries.map((event) => {
+                        const periodBarClass = getPeriodBarClass(day.date, event);
+                        const showPeriodLabel = periodBarClass === "periodStart" || periodBarClass === "periodSingle";
                         return (
                           <span
-                            className={`schoolEventPill event-${event.type}${isPeriodBar ? ` periodBar ${getPeriodBarClass(day.date, event)}` : ""}`}
+                            className={`schoolEventPill event-${event.type} periodBar ${periodBarClass}`}
                             key={event.eventId}
                             style={{ backgroundColor: event.color ?? undefined }}
                             title={event.title}
-                          />
+                          >
+                            {showPeriodLabel ? event.title : ""}
+                          </span>
                         );
                       })}
                     </span>
@@ -9998,6 +10032,9 @@ function SchoolCalendarCenter({
                           </span>
                         );
                       })}
+                      {hiddenCount > 0 ? (
+                        <span className="schoolEventMorePill">+{hiddenCount}</span>
+                      ) : null}
                     </span>
                   </span>
                 </button>
