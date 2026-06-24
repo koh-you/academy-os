@@ -47,6 +47,8 @@ const dayLabels = {
 
 const attendanceLabels = {
   pending: "대기",
+  checkin: "등원",
+  checkout: "하원",
   present: "출석",
   late: "지각",
   absent: "결석",
@@ -2311,6 +2313,16 @@ export function App() {
       minute: "2-digit",
       hour12: false
     }).format(now);
+    if (existingRecord?.checkInAt && existingRecord?.checkOutAt) {
+      return {
+        ok: true,
+        message: `${student.name} 이미 하원 처리됨 · 추가 알림톡은 보내지 않았습니다.`,
+        student,
+        lesson,
+        mode: "completed",
+        checkedTime: koreaTime
+      };
+    }
     const isCheckOut = Boolean(existingRecord?.checkInAt && !existingRecord?.checkOutAt);
     const lateMinutes = isCheckOut
       ? existingRecord?.lateMinutes ?? ""
@@ -2336,7 +2348,7 @@ export function App() {
     setRecords(nextRecords);
     handleSaveRecord(recordId, lesson, student, nextRecord);
     handleSendAttendanceAlimtalk(lesson, student, {
-      attendanceStatus,
+      attendanceStatus: isCheckOut ? "checkout" : attendanceStatus === "late" ? "late" : "checkin",
       attendanceReason: nextRecord.attendanceReason,
       lateMinutes
     });
@@ -6860,11 +6872,19 @@ function AttendanceKiosk({
 }) {
   const [pin, setPin] = useState("");
   const [result, setResult] = useState(null);
+  const [remainingSeconds, setRemainingSeconds] = useState(3);
 
   useEffect(() => {
     if (!result) return undefined;
+    setRemainingSeconds(3);
+    const intervalId = window.setInterval(() => {
+      setRemainingSeconds((current) => Math.max(1, current - 1));
+    }, 1000);
     const timerId = window.setTimeout(() => setResult(null), 3000);
-    return () => window.clearTimeout(timerId);
+    return () => {
+      window.clearInterval(intervalId);
+      window.clearTimeout(timerId);
+    };
   }, [result]);
 
   function runAttendanceCheck(nextPin) {
@@ -6893,7 +6913,7 @@ function AttendanceKiosk({
   }
 
   const resultTitle = result?.ok
-      ? (result.mode === "checkOut" ? "하원 체크 완료" : "등원 체크 완료")
+      ? (result.mode === "completed" ? "이미 하원 처리됨" : result.mode === "checkOut" ? "하원 체크 완료" : "등원 체크 완료")
       : "출결 체크 실패";
   const resultDetail = result?.ok
     ? `${result.student.name} · ${result.lesson.className} · ${result.checkedTime}`
@@ -6942,7 +6962,7 @@ function AttendanceKiosk({
         >
           <div className="attendanceResultContent">
             <strong>{result.message}</strong>
-            <p>{result.ok ? "3초 후 자동으로 닫힙니다." : "번호를 확인한 뒤 다시 입력해 주세요."}</p>
+            <p>{result.ok ? `${remainingSeconds}초 후 자동으로 닫힙니다.` : "번호를 확인한 뒤 다시 입력해 주세요."}</p>
             <button className="primaryButton" onClick={() => setResult(null)} type="button">닫기</button>
           </div>
         </Modal>
