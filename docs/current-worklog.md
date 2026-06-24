@@ -6,6 +6,48 @@
 - Supabase 저장 최우선: 새 기능이나 화면 수정 전후로 데이터가 Supabase 테이블 또는 `app_state`에 저장되는지 먼저 확인한다. 새로고침, 재로그인, 다른 기기 접속 후 사라질 수 있는 프론트-only/localStorage-only 운영 데이터가 있으면 기능 확장보다 저장 경로를 우선 보강한다.
 - 검수 기본값: 운영 흐름에 영향이 있으면 `npm run test:production`과 `npm run build`를 실행하고, 통과 후 커밋/푸시한다. 비밀값과 `.env`는 절대 커밋하지 않는다.
 
+## 현재 다음 작업 큐 - 2026-06-24 정리
+
+### P0. 배포 반영 및 로그인 유지 운영 확인
+
+- 목표: 마지막 푸시 커밋 `a03e154 Use late label in attendance messages`가 Vercel/Render 운영에 반영됐는지 먼저 확인한다.
+- 확인 순서: 운영 프론트 `https://academy-os-blue.vercel.app` 접속 → 선생님 로그인 → 새로고침 → 로그인 상태 유지 여부 확인.
+- 추가 확인: 계속 재로그인이 발생하면 배포 최신 여부, 브라우저 `localStorage/sessionStorage/cookie`의 `academy-os.teacherSession.v1` 저장 여부, 쿠키 차단/시크릿 모드 여부를 먼저 본다.
+- 판단: 배포가 아직 과거 커밋이면 코드 수정 전에 자동배포 상태를 먼저 해결한다.
+
+### P0. 출결 태블릿 실제 운영 검수
+
+- 목표: `/attendance` 전용 화면에서 실제 학생 전화번호 뒤 4자리 기준 등원/하원 흐름이 수업일지와 Supabase에 안정적으로 남는지 확인한다.
+- 확인 순서: 첫 스캔 등원 → 수업일지 출결 칸 `등원 HH:MM` 표시 → 두 번째 스캔 하원 → `하원 HH:MM` 표시 → 세 번째 이후 스캔은 안내만 표시되고 알림톡 미발송 확인.
+- DB 확인: `lesson_student_records`의 `attendance_status`, `check_in_time/check_in_at`, `check_out_time/check_out_at`, `attendance_source`가 의도대로 들어가는지 본다.
+- 문구 확인: 화면과 알림톡에서 `출석` 대신 `등원`, 지각 등원은 `지각`, 하원은 `하원` 기준으로 보이는지 확인한다.
+
+### P0. 새 기능 전 Supabase 저장 누락 검토
+
+- 목표: 다음 기능 확장 전에 해당 화면의 입력/수정/확인 데이터가 Supabase 테이블 또는 `app_state`에 저장되는지 먼저 확인한다.
+- 우선 기준: 새로고침, 재로그인, 다른 기기 접속 후 사라질 수 있는 `localStorage` 전용 데이터나 컴포넌트 state 전용 운영 데이터를 찾으면 기능 확장보다 저장 경로를 먼저 보강한다.
+- 최근 보강 필드: `students.withdrawn_at`, `lesson_student_records.behavior_tag/homework_status/needs_makeup/needs_retest/check_in_time/check_out_time`, `homeworks` 보조 필드, `tallySubmissions/tallySummaries`, `student_intake_applicants`.
+- SQL 확인: 2026-06-24 기준 사용자가 관련 SQL을 운영 Supabase에 실행했고 컬럼 조회까지 확인했으므로, 문제 발생 시 코드 매핑/배포/저장 payload를 먼저 본다.
+
+### P1. Tally 접수 운영 재확인
+
+- 목표: 새 Tally 제출이 `student_intake_applicants`에 들어오고, 학생 추가 화면에서 질문별 답변이 분리되어 보이는지 확인한다.
+- 확인 순서: 공개 Tally 폼 제출 → 웹훅 수신 → 학생 추가 > Tally 접수 카드 확인 → 반 미배정 정식 등록 → 학생 목록 `미배정` 탭 노출 확인.
+- 등록 완료 확인: 등록 완료된 후보도 `등록 완료 후보` 목록에 이름과 주요 답변이 남는지 본다.
+- 주의: 실제 Tally 폼에 없는 `희망반` 필드는 다시 매핑하지 않는다.
+
+### P1. 수업일지 수동 출결 변경 검수
+
+- 목표: 태블릿으로 들어온 출결을 수업일지에서 사람이 바꿀 때 실수 방지 모달과 알림톡 재발송 선택이 안정적으로 동작하는지 확인한다.
+- 확인 순서: 태블릿 기록이 있는 학생 출결 변경 → `변경하시겠습니까?` 확인 → `저장만` 선택 저장 확인 → 다시 변경 후 `저장 후 재발송` 선택 → 알림톡 문구와 기록 확인.
+- 저장 확인: 수동으로 `등원` 또는 `지각` 저장 시 기존 등원 시간이 없으면 현재 시간이 저장되고, `결석/대기`는 등하원 시간이 비워지는지 본다.
+
+### P2. 운영 안정화 후 기능 후보
+
+- 학생/학부모 화면의 태블릿·모바일 실제 기기 QA를 이어서 진행한다.
+- 시험 후 제출 사진 업로드는 Supabase Storage 버킷/정책/파일 메타데이터 설계를 먼저 확정한 뒤 구현한다.
+- 학생 오늘 탭, 숙제현황, 알림톡 미리보기는 실제 운영 데이터 기준으로 저장 누락과 문구 불일치를 우선 점검한다.
+
 ## 2026-06-24 태블릿 결과 메시지 단순화
 
 - 상태: 완료
