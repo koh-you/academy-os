@@ -75,8 +75,8 @@ function attendanceLabel(status) {
     excused: "인정결석",
     late: "지각",
     pending: "대기",
-    present: "출석"
-  }[status] ?? status ?? "출석";
+    present: "등원"
+  }[status] ?? status ?? "등원";
 }
 
 function assignmentStatusText(value, fallback = "", audience = "parent") {

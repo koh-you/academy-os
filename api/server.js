@@ -119,22 +119,28 @@ function getTallyFieldText(field) {
   return compactText(field.value);
 }
 
+function getTallyFieldLabel(field = {}) {
+  return compactText(field.label ?? field.title ?? field.question ?? field.key ?? field.name);
+}
+
 function findTallyField(fields, patterns) {
-  return fields.find((field) => patterns.some((pattern) => pattern.test(compactText(field.label))));
+  return fields.find((field) => patterns.some((pattern) => pattern.test(getTallyFieldLabel(field))));
 }
 
 function normalizeTallyApplicantPayload(payload = {}) {
   const data = payload.data ?? payload;
   const fields = Array.isArray(data.fields) ? data.fields : [];
   const getValue = (patterns) => getTallyFieldText(findTallyField(fields, patterns));
+  const enrollmentStatus = getValue([/^재원생\s*여부$/i, /재원생/i, /반이동/i]);
   const name = getValue([/학생.*이름/i, /^이름$/i, /성명/i, /student.*name/i, /name/i]);
   const birthYear = getValue([/출생/i, /생년/i, /birth/i, /태어난/i]).replace(/[^0-9]/g, "").slice(0, 4);
-  const grade = normalizeGradeLabel(getValue([/학년/i, /grade/i]));
-  const schoolName = getValue([/학교/i, /school/i]);
-  const studentPhone = normalizePhone(getValue([/학생.*전화/i, /학생.*휴대/i, /student.*phone/i]));
-  const parentPhone = normalizePhone(getValue([/학부모.*전화/i, /보호자.*전화/i, /부모.*전화/i, /parent.*phone/i, /guardian.*phone/i]));
-  const desiredClass = getValue([/희망.*반/i, /희망.*시간/i, /수업.*시간/i, /class/i]);
-  const memo = getValue([/메모/i, /상담/i, /요청/i, /문의/i, /note/i]);
+  const grade = normalizeGradeLabel(getValue([/^학생\s*학년$/i, /학년/i, /grade/i]));
+  const schoolName = getValue([/^학교\s*이름$/i, /학교/i, /school/i]);
+  const studentPhone = normalizePhone(getValue([/^학생\s*전화번호$/i, /학생.*전화/i, /학생.*휴대/i, /student.*phone/i]));
+  const parentPhone = normalizePhone(getValue([/^학부모님\s*전화번호$/i, /학부모.*전화/i, /보호자.*전화/i, /부모.*전화/i, /parent.*phone/i, /guardian.*phone/i]));
+  const currentLearningProcess = getValue([/^현재\s*학습하고\s*있는\s*과정/i, /선행\s*정도/i, /학습.*과정/i]);
+  const previousSemesterScore = getValue([/^직전학기\s*내신\s*성적/i, /내신\s*성적/i, /등급.*점수/i]);
+  const specialNote = getValue([/^특이사항/i, /특이사항/i, /자세하게/i]);
   const submissionId = compactText(data.submissionId ?? data.responseId ?? payload.eventId);
   return {
     applicantId: submissionId ? `tally_${submissionId}` : `tally_${Date.now()}`,
@@ -149,8 +155,12 @@ function normalizeTallyApplicantPayload(payload = {}) {
     schoolName,
     studentPhone,
     parentPhone,
-    desiredClass,
-    memo,
+    desiredClass: "",
+    enrollmentStatus,
+    currentLearningProcess,
+    previousSemesterScore,
+    specialNote,
+    memo: "",
     rawPayload: payload,
     createdAt: compactText(data.createdAt ?? payload.createdAt) || new Date().toISOString()
   };

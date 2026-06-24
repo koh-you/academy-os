@@ -12,6 +12,10 @@ create table if not exists public.student_intake_applicants (
   student_phone text,
   parent_phone text,
   desired_class text,
+  enrollment_status text,
+  current_learning_process text,
+  previous_semester_score text,
+  special_note text,
   memo text,
   raw_payload jsonb,
   created_at timestamptz not null default now(),
@@ -23,3 +27,9 @@ create index if not exists student_intake_applicants_status_idx
 
 create index if not exists student_intake_applicants_created_at_idx
   on public.student_intake_applicants (created_at desc);
+
+alter table if exists public.student_intake_applicants
+  add column if not exists enrollment_status text,
+  add column if not exists current_learning_process text,
+  add column if not exists previous_semester_score text,
+  add column if not exists special_note text;

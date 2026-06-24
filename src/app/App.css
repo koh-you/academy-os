@@ -4242,6 +4242,29 @@ button:disabled {
   padding: 14px;
 }
 
+.studentIntakeCard.registered {
+  background: #f8fafc;
+}
+
+.studentIntakeRegisteredList {
+  border-top: 1px solid #e2e8f0;
+  display: grid;
+  gap: 12px;
+  padding-top: 14px;
+}
+
+.studentIntakeAnswerList {
+  display: grid;
+  gap: 6px;
+}
+
+.studentIntakeAnswerList span {
+  color: #334155;
+  display: grid;
+  font-size: 14px;
+  gap: 2px;
+}
+
 .studentIntakeCardHeader,
 .studentIntakeActions {
   align-items: center;
@@ -4521,6 +4544,41 @@ button:disabled {
 .attendanceModalActions {
   display: grid;
   gap: 10px;
+}
+
+.attendanceSourceNotice {
+  background: var(--status-info-bg);
+  border: 1px solid var(--status-info-border);
+  border-radius: 8px;
+  color: var(--status-info-text);
+  font-size: 14px;
+  font-weight: 800;
+  padding: 12px 14px;
+}
+
+.attendanceConfirmPanel {
+  background: var(--status-pending-bg);
+  border: 1px solid var(--status-pending-border);
+  border-radius: 8px;
+  color: #7c2d12;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.attendanceConfirmPanel strong {
+  color: var(--status-pending-text);
+  font-size: 16px;
+}
+
+.attendanceConfirmPanel p {
+  margin: 0;
+}
+
+.attendanceConfirmActions {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .lessonModalFields {

@@ -1,5 +1,92 @@
 # Academy OS Current Worklog
 
+## 2026-06-24 출결 등원/하원 라벨 및 시간 표시 보강
+
+- 상태: 완료
+- 사용자 보고: 태블릿 출결 또는 수동 출결 후 수업일지 출결 칸에 등하원 시간이 보이지 않고, `출석` 표기가 남아 있다고 보고했다.
+- 확인: 운영 DB의 최근 `present/late` 수업기록 다수에서 `check_in_time/check_in_at`이 비어 있었다. 기존 배포/수동 저장 기록은 상태만 저장되고 시간 필드가 비어 있어 화면에 시간이 표시되지 않았다.
+- 조치: 전역 출결 라벨의 `present`를 `등원`, `late`를 `지각`으로 바꿨다. 수업일지 출결 표시가 `checkIn/checkOut` 시간이 없을 때도 `updatedAt`을 fallback으로 사용해 `등원 HH:MM`을 작게 표시하도록 했다.
+- 조치: 수업일지에서 수동으로 `등원/지각`을 저장할 때 기존 등원 시간이 없으면 현재 시각을 `checkInAt/checkInTime`에 기록하게 했다. 결석/대기는 등하원 시간을 비워 상태와 시간이 충돌하지 않게 했다.
+- 조치: API가 `lesson_student_records.updated_at`을 프론트 `updatedAt`으로 반환하도록 했다.
+- 검증: `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check api/server.js`, `npm run test:production` 165개 통과, `npm run build` 통과. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
+
+## 2026-06-24 선생님 세션 새로고침 복원 보강
+
+- 상태: 완료
+- 사용자 보고: 새로고침할 때마다 다시 로그인해야 한다고 보고했다.
+- 조치: 선생님 로그인 세션 저장을 `localStorage`만 보지 않고 쿠키에도 함께 저장/복원하도록 보강했다. 저장 값은 기존과 같이 `role/actorId/name`만 포함하며 비밀번호는 저장하지 않는다. 로그아웃 시 `localStorage`와 쿠키를 모두 삭제한다.
+- 추가 보강: 사용 환경에 따라 `localStorage` 접근이 실패하면 쿠키 저장까지 건너뛰는 문제가 생길 수 있어, `localStorage`/`sessionStorage`/쿠키를 각각 독립적으로 저장·복원하도록 바꿨다. 세 저장소 중 하나만 살아 있어도 새로고침 후 선생님 세션을 복원한다.
+- 검증: `npm run test:production` 165개 통과, `npm run build` 통과. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
+
+## 2026-06-24 시험대비 일정 수정 Supabase 저장 확인
+
+- 상태: 완료
+- 사용자 요청: `OS > 시험대비 > 일정 수정`에서 수정한 정보가 새로고침하면 사라지는 것 같으니 Supabase 저장 여부를 확인해달라고 요청했다.
+- 확인: 시험대비 화면의 시험기간/수학시험 날짜 수정은 `handleUpdateExamPrepRow`를 통해 `/api/exam-prep-rows/bulk`로 저장되며, API는 `exam_prep_rows.exam_period`, `math_exam_date`, `math_exam_dates`, `exam_cycle`에 매핑한다. 학교일정 달력의 수동 일정 수정은 `school_events`로 저장되고, 시험대비에서 파생된 일정 수정은 다시 `exam_prep_rows`로 반영된다.
+- 보강: 기준 스키마 `supabase/schema.sql`에 기존 마이그레이션 `supabase/20260620_exam_calendar_supabase_state.sql`의 시험대비/학교일정 확장 컬럼을 반영했다. 운영 Supabase에 해당 마이그레이션이 빠져 있으면 `math_exam_dates` 등 확장 일정 정보가 저장되지 않을 수 있다.
+- 검증: `npm run test:production` 165개 통과, `npm run build` 통과. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
+
+## 2026-06-24 선생님 로그인 세션 새로고침 유지
+
+- 상태: 완료
+- 사용자 요청: 배포 확인이나 Tally 접수 확인을 위해 새로고침할 때마다 다시 로그인하지 않도록, 선생님 로그인 성공 시 세션을 localStorage에 저장하고 앱 시작 시 복원하며 로그아웃 시 삭제하는 방식으로 구현해달라고 요청했다.
+- 조치: 선생님 세션만 `academy-os.teacherSession.v1`에 저장/복원하도록 했다. 저장 값은 `role/actorId/name`만 포함하고 비밀번호는 저장하지 않는다. 학생/학부모 세션은 우선 보존하지 않는다.
+- 검증: `npm run test:production` 163개 통과, `npm run build` 통과.
+
+## 2026-06-24 Tally 질문별 접수 정보 분리 저장
+
+- 상태: 완료
+- 사용자 요청: `재원생 여부`, `현재 학습하고 있는 과정`, `직전학기 내신 성적`, `특이사항`을 접수 메모 한 칸으로 합치지 말고 Tally에 있는 모든 질문을 따로 기록해 달라고 요청했다.
+- 조치: Tally 웹훅 파서가 `enrollmentStatus/currentLearningProcess/previousSemesterScore/specialNote`를 별도 필드로 만들도록 바꿨다. `student_intake_applicants` 테이블 매핑과 SQL에 `enrollment_status/current_learning_process/previous_semester_score/special_note` 컬럼을 추가했다.
+- 화면 조치: 학생 추가 > Tally 접수 카드에서 해당 질문들을 각각 별도 입력으로 보여주고, 등록 완료 후보 카드에도 질문별 답변 목록을 분리 표시한다. `rawPayload` 원본은 계속 보존한다.
+- DB 준비: `supabase/20260624_student_intake_applicants.sql`에 새 컬럼 `alter table`을 추가했다. 운영 Supabase SQL Editor에서 실행해야 기존 테이블에도 컬럼이 생긴다.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `npm run test:production` 162개 통과, `npm run build` 통과.
+
+## 2026-06-24 Tally 반 미배정 등록 표시 보정
+
+- 상태: 완료
+- 사용자 보고: Tally 후보를 반배정 없이 등록완료 처리했을 때 학생명단에 포함되지 않는 것처럼 보이고, 등록완료 버튼을 눌러도 누가 등록 완료됐는지 화면에서 보이지 않는다고 보고했다.
+- 원인: Tally 후보가 `registered` 상태가 되면 확인 필요 목록에서 빠지지만 등록 완료 목록은 카운트만 보여주고 실제 카드가 없었다. 또한 학생 목록의 반별 탭에는 기존 반 탭만 있고 `미배정` 탭이 없어 반 없이 등록된 학생이 반별 보기에서 보이지 않았다.
+- 조치: Tally 접수 탭에 `등록 완료 후보` 목록을 추가해 등록 완료된 후보의 이름/학교/학년/미배정 여부를 계속 볼 수 있게 했다. 학생 목록의 반별 탭에는 `미배정` 탭을 추가해 반 없이 등록된 active 학생도 확인할 수 있게 했다. 정식 학생 등록 후에는 학생 추가 모달을 닫아 학생 목록에서 바로 확인되게 했다.
+- 검증: `npm run test:production` 162개 통과, `npm run build` 통과.
+
+## 운영 우선순위: 새로고침 후 데이터 보존
+
+- 최우선 원칙: 다음 개발부터 새 기능/화면을 만들기 전에 데이터 흐름을 먼저 확인한다. 프론트 상태, localStorage, 컴포넌트 내부 state에만 저장되고 Supabase 테이블 또는 `app_state`에 저장되지 않는 값이 있으면 기능 확장보다 먼저 저장 경로를 보강한다.
+- 검토 기준: 사용자가 입력/수정/업로드/확인한 운영 데이터는 새로고침, 재로그인, 다른 기기 접속 후에도 유지되어야 한다.
+- 우선 조치 대상: `homeworks` 보조 필드, `lesson_student_records.behaviorTag/needsRetest`, `students.withdrawnAt`, `tallySubmissions/tallySummaries`.
+
+## 2026-06-24 프론트 전용 상태 Supabase 저장 보강
+
+- 상태: 완료
+- 사용자 요청: 기존 전수조사에서 나온 `homeworks` 보조 필드, `lesson_student_records.behaviorTag/needsRetest`, `students.withdrawnAt`, `tallySubmissions/tallySummaries`를 모두 보강하고, 앞으로 새로고침 시 자료가 날아가지 않도록 Supabase 저장 누락 검토를 우선순위에 기록해달라고 요청했다.
+- 조치: `students.withdrawnAt`을 `students.withdrawn_at`에 매핑했다. `lesson_student_records`에는 `behavior_tag/homework_status/needs_makeup/needs_retest`를 매핑했다. `homeworks`에는 `status/total_problems/assignment_status/incomplete_homework/checked_at/verified_at/linked_from_lesson_id/linked_from_date`를 매핑했다.
+- 조치: 시험관리 Tally CSV import 상태인 `tallySubmissions/tallySummaries`를 App 최상위 상태로 올리고 Supabase `app_state` 저장/복원 흐름에 포함했다.
+- DB 준비: `supabase/20260624_persist_frontend_fields.sql`을 추가했다. 운영 Supabase SQL Editor에서 실행해야 새 컬럼에 영구 저장된다.
+- 검증: `node --check api/routes/coreData.js`, `npm run test:production` 160개 통과, `npm run build` 통과.
+
+## 2026-06-24 출결 알림톡 등원/하원 라벨 보정
+
+- 상태: 완료
+- 사용자 요청: 화면의 출결 표기처럼 출결 알림톡에서도 `출석` 대신 `등원`/`하원`으로 나오게 해달라고 요청했다.
+- 조치: 서버 알림톡 라벨에서 `present`를 `출석`이 아니라 `등원`으로 변환하도록 바꿨다. 프론트의 출결 알림톡 로그/미리보기 문구도 `present`를 `등원`으로 표시하도록 맞췄다. 태블릿 하원은 기존처럼 `checkout -> 하원`으로 유지된다.
+- 검증: `node --check api/routes/notifications.js`, `npm run test:production` 156개 통과, `npm run build` 통과.
+
+## 2026-06-24 Tally 실제 질문명 기반 신입생 매핑 보정
+
+- 상태: 완료
+- 사용자 요청: Tally 웹훅 URL은 기존 주소로 연결되어 있으나, 실제 Tally 본문에는 `희망반` 같은 질문이 없으므로 실제 질문명을 확인해서 매핑을 수정해 달라고 요청했다.
+- 확인: 공개 Tally 폼의 실제 질문은 `재원생 여부`, `학생 이름`, `학교 이름`, `학생 학년`, `학생 전화번호`, `학부모님 전화번호`, `현재 학습하고 있는 과정 (선행 정도)`, `직전학기 내신 성적(등급과 점수를 함께 적어주세요)`, `특이사항...`이었다.
+- 조치: 웹훅 파서에서 없는 `희망반` 매핑을 제거하고, 재원생 여부/현재 학습 과정/직전학기 내신 성적/특이사항을 접수 메모에 줄 단위로 보존하도록 했다. 학생 추가 모달의 Tally 후보 입력 라벨도 `접수 메모`로 정리했다.
+- 검증: `node --check api/server.js`, `npm run test:production` 155개 통과, `npm run build` 통과.
+
+## 2026-06-24 태블릿 출결 수동 수정 확인 모달
+
+- 상태: 완료
+- 사용자 요청: 태블릿/출결 모달로 들어온 출결 정보를 수업일지에서 수동 변경할 때 실수 방지를 위해 `변경하시겠습니까` 확인 모달을 띄우고, 변경 후에는 출결 알림톡을 재발송할지 다시 물어봐 달라고 요청했다.
+- 조치: 태블릿 등하원 시각 또는 `attendance_kiosk` 기록이 있는 수업일지 출결을 수동으로 바꾸면 저장 전에 변경 확인 단계를 보여주고, 확인 후 `저장만` 또는 `저장 후 재발송`을 선택하도록 했다.
+- 검증: `npm run test:production` 154개 통과, `npm run build` 통과.
+
 ## 2026-06-24 수업일지 등하원 시각 표시
 
 - 상태: 완료

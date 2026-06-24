@@ -10,8 +10,18 @@ function compact(value) {
   return value === undefined || value === "" ? null : value;
 }
 
-function toStudentRow(student) {
-  return {
+function errorMentionsAnyColumn(error, columns = []) {
+  const message = String(error?.message ?? "");
+  return columns.some((column) => message.includes(column));
+}
+
+function hasMeaningfulValue(value) {
+  if (typeof value === "boolean") return value;
+  return Boolean(String(value ?? "").trim());
+}
+
+function toStudentRow(student, { includeWithdrawnAt = true } = {}) {
+  const row = {
     student_id: student.studentId,
     name: student.name,
     login_id: student.loginId,
@@ -27,6 +37,13 @@ function toStudentRow(student) {
     special_note: compact(student.specialNote),
     schedule_override: compact(student.scheduleOverride),
     updated_at: new Date().toISOString()
+  };
+
+  if (!includeWithdrawnAt) return row;
+
+  return {
+    ...row,
+    withdrawn_at: compact(student.withdrawnAt)
   };
 }
 
@@ -45,7 +62,8 @@ function fromStudentRow(row) {
     defaultClassTemplateId: row.default_class_template_id ?? "",
     textbook: row.textbook ?? "",
     specialNote: row.special_note ?? "",
-    scheduleOverride: row.schedule_override ?? ""
+    scheduleOverride: row.schedule_override ?? "",
+    withdrawnAt: row.withdrawn_at ?? ""
   };
 }
 
@@ -64,6 +82,10 @@ function toStudentIntakeApplicantRow(applicant) {
     student_phone: compact(applicant.studentPhone),
     parent_phone: compact(applicant.parentPhone),
     desired_class: compact(applicant.desiredClass),
+    enrollment_status: compact(applicant.enrollmentStatus),
+    current_learning_process: compact(applicant.currentLearningProcess),
+    previous_semester_score: compact(applicant.previousSemesterScore),
+    special_note: compact(applicant.specialNote),
     memo: compact(applicant.memo),
     raw_payload: applicant.rawPayload ?? null,
     created_at: applicant.createdAt ?? new Date().toISOString(),
@@ -86,6 +108,10 @@ function fromStudentIntakeApplicantRow(row) {
     studentPhone: row.student_phone ?? "",
     parentPhone: row.parent_phone ?? "",
     desiredClass: row.desired_class ?? "",
+    enrollmentStatus: row.enrollment_status ?? "",
+    currentLearningProcess: row.current_learning_process ?? "",
+    previousSemesterScore: row.previous_semester_score ?? "",
+    specialNote: row.special_note ?? "",
     memo: row.memo ?? "",
     rawPayload: row.raw_payload ?? null,
     createdAt: row.created_at ?? "",
@@ -191,7 +217,11 @@ function toLessonRecordRow(record, { includeExtendedFields = true, includeAttend
     prep_parent_visible: Boolean(record.prepParentVisible),
     prep_parent_notice: compact(record.prepParentNotice),
     prep_student_ai_status: compact(record.prepStudentAiStatus),
-    prep_parent_ai_status: compact(record.prepParentAiStatus)
+    prep_parent_ai_status: compact(record.prepParentAiStatus),
+    behavior_tag: compact(record.behaviorTag),
+    homework_status: compact(record.homeworkStatus),
+    needs_makeup: Boolean(record.needsMakeup),
+    needs_retest: Boolean(record.needsRetest)
   };
 
   if (!includeAttendanceTimeFields) return extendedRow;
@@ -230,6 +260,10 @@ function fromLessonRecordRow(row) {
     prepParentNotice: row.prep_parent_notice ?? "",
     prepStudentAiStatus: row.prep_student_ai_status ?? "",
     prepParentAiStatus: row.prep_parent_ai_status ?? "",
+    behaviorTag: row.behavior_tag ?? "",
+    homeworkStatus: row.homework_status ?? "not_started",
+    needsMakeup: Boolean(row.needs_makeup),
+    needsRetest: Boolean(row.needs_retest),
     lessonProgress: row.progress_note ?? "",
     progress: row.progress_note ?? "",
     teacherComment: row.teacher_comment ?? "",
@@ -237,11 +271,12 @@ function fromLessonRecordRow(row) {
     teacherCommentAiStatus: row.teacher_comment_ai_status ?? "",
     studentCommentAiStatus: row.student_comment_ai_status ?? "",
     teacherCommentSendStatus: row.teacher_comment_send_status ?? "",
-    studentCommentSendStatus: row.student_comment_send_status ?? ""
+    studentCommentSendStatus: row.student_comment_send_status ?? "",
+    updatedAt: row.updated_at ?? ""
   };
 }
 
-function toHomeworkRow(homework) {
+function toHomeworkRow(homework, { includeExtendedFields = true } = {}) {
   const teacherStatusMap = {
     assigned: "unverified",
     overdue: "missing",
@@ -251,7 +286,7 @@ function toHomeworkRow(homework) {
     unverified: "unverified"
   };
 
-  return {
+  const row = {
     homework_id: homework.homeworkId,
     lesson_id: compact(homework.lessonId),
     student_id: homework.studentId,
@@ -263,6 +298,20 @@ function toHomeworkRow(homework) {
     student_status: homework.studentStatus ?? "not_started",
     teacher_status: teacherStatusMap[homework.teacherStatus] ?? "unverified",
     updated_at: new Date().toISOString()
+  };
+
+  if (!includeExtendedFields) return row;
+
+  return {
+    ...row,
+    status: compact(homework.status),
+    total_problems: homework.totalProblems === null || homework.totalProblems === undefined || homework.totalProblems === "" ? null : Number(homework.totalProblems),
+    assignment_status: compact(homework.assignmentStatus),
+    incomplete_homework: compact(homework.incompleteHomework),
+    checked_at: compact(homework.checkedAt),
+    verified_at: compact(homework.verifiedAt),
+    linked_from_lesson_id: compact(homework.linkedFromLessonId),
+    linked_from_date: compact(homework.linkedFromDate)
   };
 }
 
@@ -277,7 +326,15 @@ function fromHomeworkRow(row) {
     assignedDate: row.assigned_date ?? "",
     dueDate: row.due_date ?? "",
     studentStatus: row.student_status ?? "not_started",
-    teacherStatus: row.teacher_status ?? "unverified"
+    teacherStatus: row.teacher_status ?? "unverified",
+    status: row.status ?? (row.teacher_status === "verified" ? "verified" : "assigned"),
+    totalProblems: row.total_problems ?? null,
+    assignmentStatus: row.assignment_status ?? "",
+    incompleteHomework: row.incomplete_homework ?? "",
+    checkedAt: row.checked_at ?? "",
+    verifiedAt: row.verified_at ?? "",
+    linkedFromLessonId: row.linked_from_lesson_id ?? "",
+    linkedFromDate: row.linked_from_date ?? ""
   };
 }
 
@@ -748,7 +805,19 @@ export async function upsertStudent(student) {
     return { source: fallbackSource, student };
   }
 
-  const [row] = await upsertRows("students", [toStudentRow(student)]);
+  let row;
+  try {
+    [row] = await upsertRows("students", [toStudentRow(student)]);
+  } catch (error) {
+    if (errorMentionsAnyColumn(error, ["withdrawn_at"])) {
+      if (student.withdrawnAt) {
+        throw new Error("Supabase students.withdrawn_at migration이 필요합니다. supabase/20260624_persist_frontend_fields.sql을 실행한 뒤 다시 저장하세요.");
+      }
+      [row] = await upsertRows("students", [toStudentRow(student, { includeWithdrawnAt: false })]);
+    } else {
+      throw error;
+    }
+  }
   return { source: databaseSource, student: fromStudentRow(row) };
 }
 
@@ -760,7 +829,19 @@ export async function upsertStudents(students) {
     return { source: fallbackSource, students };
   }
 
-  const rows = await upsertRows("students", students.map(toStudentRow));
+  let rows;
+  try {
+    rows = await upsertRows("students", students.map(toStudentRow));
+  } catch (error) {
+    if (errorMentionsAnyColumn(error, ["withdrawn_at"])) {
+      if (students.some((student) => student.withdrawnAt)) {
+        throw new Error("Supabase students.withdrawn_at migration이 필요합니다. supabase/20260624_persist_frontend_fields.sql을 실행한 뒤 다시 저장하세요.");
+      }
+      rows = await upsertRows("students", students.map((student) => toStudentRow(student, { includeWithdrawnAt: false })));
+    } else {
+      throw error;
+    }
+  }
   return { source: databaseSource, students: rows.map(fromStudentRow) };
 }
 
@@ -1136,6 +1217,10 @@ export async function upsertLessonStudentRecord(record) {
       message.includes("lesson_material") ||
       message.includes("lesson_content") ||
       message.includes("assignment_status") ||
+      message.includes("behavior_tag") ||
+      message.includes("homework_status") ||
+      message.includes("needs_makeup") ||
+      message.includes("needs_retest") ||
       message.includes("preparation_memo") ||
       message.includes("prep_student_notice") ||
       message.includes("prep_student_visible") ||
@@ -1149,6 +1234,10 @@ export async function upsertLessonStudentRecord(record) {
       stableRecord.prepParentNotice,
       stableRecord.prepStudentAiStatus,
       stableRecord.prepParentAiStatus,
+      stableRecord.behaviorTag,
+      stableRecord.homeworkStatus && stableRecord.homeworkStatus !== "not_started" ? stableRecord.homeworkStatus : "",
+      Boolean(stableRecord.needsMakeup),
+      Boolean(stableRecord.needsRetest),
       stableRecord.prepStudentVisible,
       stableRecord.prepParentVisible
     ].some((value) => (typeof value === "boolean" ? value : Boolean(String(value ?? "").trim())));
@@ -1159,7 +1248,7 @@ export async function upsertLessonStudentRecord(record) {
     }
     if (hasExtendedValues) {
       throw new Error(
-        "Supabase lesson_student_records 확장 컬럼 migration이 필요합니다. supabase/20260617_lesson_prep_resources_notifications.sql을 실행한 뒤 다시 저장하세요."
+        "Supabase lesson_student_records 확장 컬럼 migration이 필요합니다. supabase/20260617_lesson_prep_resources_notifications.sql 또는 supabase/20260624_persist_frontend_fields.sql을 실행한 뒤 다시 저장하세요."
       );
     }
     [row] = await upsertRows("lesson_student_records", [toLessonRecordRow(stableRecord, { includeExtendedFields: false })]);
@@ -1172,7 +1261,38 @@ export async function upsertHomework(homework) {
     return { source: fallbackSource, homework };
   }
 
-  const [row] = await upsertRows("homeworks", [toHomeworkRow(homework)]);
+  let row;
+  try {
+    [row] = await upsertRows("homeworks", [toHomeworkRow(homework)]);
+  } catch (error) {
+    if (errorMentionsAnyColumn(error, [
+      "status",
+      "total_problems",
+      "assignment_status",
+      "incomplete_homework",
+      "checked_at",
+      "verified_at",
+      "linked_from_lesson_id",
+      "linked_from_date"
+    ])) {
+      const hasExtendedHomeworkValues = [
+        homework.status,
+        homework.totalProblems,
+        homework.assignmentStatus,
+        homework.incompleteHomework,
+        homework.checkedAt,
+        homework.verifiedAt,
+        homework.linkedFromLessonId,
+        homework.linkedFromDate
+      ].some(hasMeaningfulValue);
+      if (hasExtendedHomeworkValues) {
+        throw new Error("Supabase homeworks 확장 컬럼 migration이 필요합니다. supabase/20260624_persist_frontend_fields.sql을 실행한 뒤 다시 저장하세요.");
+      }
+      [row] = await upsertRows("homeworks", [toHomeworkRow(homework, { includeExtendedFields: false })]);
+    } else {
+      throw error;
+    }
+  }
   return { source: databaseSource, homework: fromHomeworkRow(row) };
 }
 
@@ -1184,7 +1304,38 @@ export async function upsertHomeworks(homeworks) {
     return { source: fallbackSource, homeworks };
   }
 
-  const rows = await upsertRows("homeworks", homeworks.map(toHomeworkRow));
+  let rows;
+  try {
+    rows = await upsertRows("homeworks", homeworks.map(toHomeworkRow));
+  } catch (error) {
+    if (errorMentionsAnyColumn(error, [
+      "status",
+      "total_problems",
+      "assignment_status",
+      "incomplete_homework",
+      "checked_at",
+      "verified_at",
+      "linked_from_lesson_id",
+      "linked_from_date"
+    ])) {
+      const hasExtendedHomeworkValues = homeworks.some((homework) => [
+        homework.status,
+        homework.totalProblems,
+        homework.assignmentStatus,
+        homework.incompleteHomework,
+        homework.checkedAt,
+        homework.verifiedAt,
+        homework.linkedFromLessonId,
+        homework.linkedFromDate
+      ].some(hasMeaningfulValue));
+      if (hasExtendedHomeworkValues) {
+        throw new Error("Supabase homeworks 확장 컬럼 migration이 필요합니다. supabase/20260624_persist_frontend_fields.sql을 실행한 뒤 다시 저장하세요.");
+      }
+      rows = await upsertRows("homeworks", homeworks.map((homework) => toHomeworkRow(homework, { includeExtendedFields: false })));
+    } else {
+      throw error;
+    }
+  }
   return { source: databaseSource, homeworks: rows.map(fromHomeworkRow) };
 }
 

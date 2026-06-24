@@ -27,7 +27,8 @@ const storageKeys = {
   aiSettings: "academy-os.aiSettings.v1",
   attendanceSettings: "academy-os.attendanceSettings.v1",
   lessonNotificationPlans: "academy-os.lessonNotificationPlans.v1",
-  deletedLessonBundles: "academy-os.deletedLessonBundles.v1"
+  deletedLessonBundles: "academy-os.deletedLessonBundles.v1",
+  teacherSession: "academy-os.teacherSession.v1"
 };
 const legacySensitiveStorageKeys = ["academy-os.teacherAccountSettings.v1"];
 
@@ -49,7 +50,7 @@ const attendanceLabels = {
   pending: "대기",
   checkin: "등원",
   checkout: "하원",
-  present: "출석",
+  present: "등원",
   late: "지각",
   absent: "결석",
   excused: "인정결석"
@@ -538,6 +539,110 @@ function buildNotificationTemplatePreview(type) {
 function isAttendanceOnlyRoute() {
   if (typeof window === "undefined") return false;
   return window.location.pathname === "/attendance" || window.location.hash === "#attendance";
+}
+
+function readStoredTeacherSession() {
+  if (typeof window === "undefined") return null;
+  return (
+    parseTeacherSession(readStorageValue(window.localStorage, storageKeys.teacherSession)) ||
+    parseTeacherSession(readStorageValue(window.sessionStorage, storageKeys.teacherSession)) ||
+    parseTeacherSession(readCookieValue(storageKeys.teacherSession))
+  );
+}
+
+function readCookieValue(name) {
+  if (typeof document === "undefined") return "";
+  const encodedName = `${encodeURIComponent(name)}=`;
+  return document.cookie
+    .split(";")
+    .map((item) => item.trim())
+    .find((item) => item.startsWith(encodedName))
+    ?.slice(encodedName.length) ?? "";
+}
+
+function writeCookieValue(name, value) {
+  if (typeof document === "undefined") return;
+  document.cookie = `${encodeURIComponent(name)}=${value}; max-age=${60 * 60 * 24 * 30}; path=/; samesite=lax`;
+}
+
+function removeCookieValue(name) {
+  if (typeof document === "undefined") return;
+  document.cookie = `${encodeURIComponent(name)}=; max-age=0; path=/; samesite=lax`;
+}
+
+function normalizeTeacherSessionForStorage(session) {
+  if (session?.role !== "teacher") return null;
+  const { actorId, name, role } = session;
+  return { actorId, name, role };
+}
+
+function encodeTeacherSession(session) {
+  try {
+    const safeSession = normalizeTeacherSessionForStorage(session);
+    return safeSession ? JSON.stringify(safeSession) : "";
+  } catch {
+    return "";
+  }
+}
+
+function parseTeacherSession(rawValue) {
+  if (!rawValue) return null;
+  for (const candidate of [rawValue, safeDecodeURIComponent(rawValue)]) {
+    if (!candidate) continue;
+    try {
+      const parsed = JSON.parse(candidate);
+      if (parsed?.role === "teacher") return parsed;
+    } catch {
+      // Try the next representation.
+    }
+  }
+  return null;
+}
+
+function readStorageValue(storage, key) {
+  try {
+    return storage?.getItem(key) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function writeStorageValue(storage, key, value) {
+  try {
+    storage?.setItem(key, value);
+  } catch {
+    // Ignore storage failures and keep the other persistence channels available.
+  }
+}
+
+function removeStorageValue(storage, key) {
+  try {
+    storage?.removeItem(key);
+  } catch {
+    // Ignore storage failures and keep logout usable.
+  }
+}
+
+function safeDecodeURIComponent(value) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return "";
+  }
+}
+
+function persistTeacherSession(session) {
+  if (typeof window === "undefined") return;
+  const storedValue = encodeTeacherSession(session);
+  if (storedValue) {
+    writeStorageValue(window.localStorage, storageKeys.teacherSession, storedValue);
+    writeStorageValue(window.sessionStorage, storageKeys.teacherSession, storedValue);
+    writeCookieValue(storageKeys.teacherSession, encodeURIComponent(storedValue));
+    return;
+  }
+  removeStorageValue(window.localStorage, storageKeys.teacherSession);
+  removeStorageValue(window.sessionStorage, storageKeys.teacherSession);
+  removeCookieValue(storageKeys.teacherSession);
 }
 
 async function postJson(path, body) {
@@ -1614,7 +1719,7 @@ function countProblemStatuses(problems = []) {
 export function App() {
   const [activeView, setActiveView] = useState("lessons");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState(() => readStoredTeacherSession());
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedLessonId, setSelectedLessonId] = useState("");
   const [lessonClipboard, setLessonClipboard] = useState(null);
@@ -1636,6 +1741,8 @@ export function App() {
   const [scoreRecords, setScoreRecords] = useStoredState(storageKeys.scoreRecords, sampleData.scoreRecords ?? []);
   const [academyTests, setAcademyTests] = useStoredState(storageKeys.academyTests, sampleData.academyTests ?? []);
   const [examPrepRows, setExamPrepRows] = useStoredState(storageKeys.examPrepRows, normalizeExamPrepRows(sampleData.examPrepRows ?? []));
+  const [tallySubmissions, setTallySubmissions] = useStoredState(storageKeys.tallySubmissions, []);
+  const [tallySummaries, setTallySummaries] = useStoredState(storageKeys.tallySummaries, {});
   const [studentQuestions, setStudentQuestions] = useStoredState(storageKeys.studentQuestions, []);
   const [examPostSubmissions, setExamPostSubmissions] = useStoredState(storageKeys.examPostSubmissions, []);
   const [schoolEvents, setSchoolEvents] = useStoredState(
@@ -1698,6 +1805,8 @@ export function App() {
     scoreRecords,
     examPostSubmissions,
     studentQuestions,
+    tallySubmissions,
+    tallySummaries,
     wrongProblems
   }), [
     academyTests,
@@ -1714,6 +1823,8 @@ export function App() {
     scoreRecords,
     examPostSubmissions,
     studentQuestions,
+    tallySubmissions,
+    tallySummaries,
     wrongProblems
   ]);
   const initialSharedAppStateRef = useRef(sharedAppState);
@@ -1888,6 +1999,10 @@ export function App() {
           if (Array.isArray(states.scoreRecords)) setScoreRecords(states.scoreRecords);
           if (Array.isArray(states.examPostSubmissions)) setExamPostSubmissions(states.examPostSubmissions);
           if (Array.isArray(states.studentQuestions)) setStudentQuestions(states.studentQuestions);
+          if (Array.isArray(states.tallySubmissions)) setTallySubmissions(states.tallySubmissions);
+          if (states.tallySummaries && typeof states.tallySummaries === "object" && !Array.isArray(states.tallySummaries)) {
+            setTallySummaries(states.tallySummaries);
+          }
           if (Array.isArray(states.wrongProblems)) setWrongProblems(states.wrongProblems);
           window.setTimeout(() => {
             isApplyingRemoteAppStateRef.current = false;
@@ -1932,6 +2047,8 @@ export function App() {
     setSchoolEvents,
     setStudents,
     setStudentIntakeApplicants,
+    setTallySubmissions,
+    setTallySummaries,
     setWrongProblems,
     session,
     attendanceOnlyMode
@@ -2219,7 +2336,9 @@ export function App() {
         const result = await postJson("/api/auth/login", { role, loginId, password });
         if (result.authenticated) {
           setIsPortalDataReady(false);
-          setSession({ role: "teacher", actorId: "instructor_owner_001", name: result.account?.name || account.name || teacherAccount.name });
+          const teacherSession = { role: "teacher", actorId: "instructor_owner_001", name: result.account?.name || account.name || teacherAccount.name };
+          setSession(teacherSession);
+          persistTeacherSession(teacherSession);
           setActiveView("lessons");
           return { ok: true };
         }
@@ -2255,6 +2374,7 @@ export function App() {
 
   function handleLogout() {
     setIsPortalDataReady(false);
+    persistTeacherSession(null);
     setSession(null);
     setActiveView("lessons");
   }
@@ -2769,6 +2889,7 @@ export function App() {
     setStudentIntakeApplicants((current) =>
       current.map((item) => (item.applicantId === applicantId ? registeredApplicant : item))
     );
+    setIsStudentModalOpen(false);
     postJson("/api/students", { student }).catch((error) => console.error(error));
     postJson("/api/student-intake-applicants", { applicant: registeredApplicant }).catch((error) => console.error(error));
   }
@@ -2931,15 +3052,17 @@ export function App() {
   function saveAttendanceRecord(lesson, student, values, updatedBy = "instructor_owner_001") {
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
     const existingRecord = recordsRef.current.find((record) => record.lessonStudentRecordId === recordId);
+    const nowIso = new Date().toISOString();
+    const timedValues = applyManualAttendanceTimeFields(existingRecord, values, nowIso);
     const nextRecord = {
       ...createEmptyRecord(lesson, student),
       ...(existingRecord ?? {}),
-      ...values,
+      ...timedValues,
       lessonStudentRecordId: recordId,
       lessonId: lesson.lessonId,
       studentId: student.studentId,
       updatedBy,
-      updatedAt: new Date().toISOString()
+      updatedAt: nowIso
     };
     const nextRecords = upsertById(recordsRef.current, nextRecord, "lessonStudentRecordId");
     recordsRef.current = nextRecords;
@@ -3517,6 +3640,8 @@ export function App() {
           <ExamPrepCenter
             aiSettings={aiSettings}
             examPostSubmissions={examPostSubmissions}
+            tallySubmissions={tallySubmissions}
+            tallySummaries={tallySummaries}
             templates={classTemplates}
             rows={examPrepRows}
             students={students}
@@ -3532,6 +3657,8 @@ export function App() {
                 return nextRows;
               })
             }
+            onSetTallySubmissions={setTallySubmissions}
+            onSetTallySummaries={setTallySummaries}
             onUpdateRow={handleUpdateExamPrepRow}
             onDeleteRow={handleDeleteExamPrepRow}
           />
@@ -6825,13 +6952,35 @@ function AttendanceModal({ item, onClose, onSave }) {
   const [attendanceStatus, setAttendanceStatus] = useState(record.attendanceStatus ?? "present");
   const [lateMinutes, setLateMinutes] = useState(record.lateMinutes ?? "");
   const [attendanceReason, setAttendanceReason] = useState(record.attendanceReason ?? "");
+  const [pendingSave, setPendingSave] = useState(null);
+  const [confirmStep, setConfirmStep] = useState("");
   const values = { attendanceStatus, lateMinutes, attendanceReason };
+  const hasKioskRecord = hasTabletAttendanceRecord(record);
+  const hasChanged = hasAttendanceModalChanges(record, values);
+
+  function requestSave(options = {}) {
+    if (hasKioskRecord && hasChanged) {
+      setPendingSave({ values, options });
+      setConfirmStep("change");
+      return;
+    }
+    onSave(lesson, student, values, options);
+  }
+
+  function confirmManualChange() {
+    setConfirmStep("resend");
+  }
+
+  function finishConfirmedSave(sendAlimtalk) {
+    const nextSave = pendingSave ?? { values, options: {} };
+    onSave(lesson, student, nextSave.values, { ...nextSave.options, sendAlimtalk });
+  }
 
   return (
     <Modal title={`${student.name} 출결 체크`} subtitle="지각/결석이면 시간과 사유를 남깁니다." onClose={onClose}>
       <div className="typeTabs">
         {[
-          ["present", "출석"],
+          ["present", "등원"],
           ["late", "지각"],
           ["absent", "결석"]
         ].map(([value, label]) => (
@@ -6850,15 +6999,66 @@ function AttendanceModal({ item, onClose, onSave }) {
           <input value={attendanceReason} onChange={(event) => setAttendanceReason(event.target.value)} placeholder="예: 학교 동아리" />
         </label>
       </div>
-      <div className="attendanceModalActions">
-        <button className="primaryButton full" onClick={() => onSave(lesson, student, values)} type="button">
-          출결 저장
-        </button>
-        <button className="softButton full" onClick={() => onSave(lesson, student, values, { sendAlimtalk: true })} type="button">
-          저장 후 출결 알림톡 발송
-        </button>
-      </div>
+      {hasKioskRecord ? (
+        <div className="attendanceSourceNotice">
+          태블릿에서 기록된 출결입니다. 수동으로 바꾸면 확인 후 저장됩니다.
+        </div>
+      ) : null}
+      {confirmStep === "change" ? (
+        <div className="attendanceConfirmPanel">
+          <strong>태블릿 출결 기록을 변경하시겠습니까?</strong>
+          <p>실수 방지를 위해 한 번 더 확인합니다. 저장하면 현재 화면의 출결 상태와 사유로 덮어씁니다.</p>
+          <div className="attendanceConfirmActions">
+            <button className="softButton" onClick={() => setConfirmStep("")} type="button">
+              취소
+            </button>
+            <button className="primaryButton" onClick={confirmManualChange} type="button">
+              변경하기
+            </button>
+          </div>
+        </div>
+      ) : null}
+      {confirmStep === "resend" ? (
+        <div className="attendanceConfirmPanel">
+          <strong>출결 알림톡을 재발송하시겠습니까?</strong>
+          <p>수정된 출결 내용으로 학부모에게 다시 보낼지 선택해 주세요.</p>
+          <div className="attendanceConfirmActions">
+            <button className="softButton" onClick={() => finishConfirmedSave(false)} type="button">
+              저장만
+            </button>
+            <button className="primaryButton" onClick={() => finishConfirmedSave(true)} type="button">
+              저장 후 재발송
+            </button>
+          </div>
+        </div>
+      ) : null}
+      {!confirmStep ? (
+        <div className="attendanceModalActions">
+          <button className="primaryButton full" onClick={() => requestSave()} type="button">
+            출결 저장
+          </button>
+          <button className="softButton full" onClick={() => requestSave({ sendAlimtalk: true })} type="button">
+            저장 후 출결 알림톡 발송
+          </button>
+        </div>
+      ) : null}
     </Modal>
+  );
+}
+
+function hasTabletAttendanceRecord(record = {}) {
+  return Boolean(record.checkInAt || record.checkInTime || record.checkOutAt || record.checkOutTime || record.updatedBy === "attendance_kiosk");
+}
+
+function normalizeAttendanceField(value) {
+  return String(value ?? "").trim();
+}
+
+function hasAttendanceModalChanges(record = {}, values = {}) {
+  return (
+    normalizeAttendanceField(record.attendanceStatus ?? "present") !== normalizeAttendanceField(values.attendanceStatus ?? "present") ||
+    normalizeAttendanceField(record.lateMinutes) !== normalizeAttendanceField(values.lateMinutes) ||
+    normalizeAttendanceField(record.attendanceReason) !== normalizeAttendanceField(values.attendanceReason)
   );
 }
 
@@ -7680,11 +7880,15 @@ function summarizeTallySubmissions(submissions) {
 function ExamPrepCenter({
   aiSettings = defaultAiSettings,
   examPostSubmissions = [],
+  tallySubmissions = [],
+  tallySummaries = {},
   rows,
   students,
   templates,
   onConfirmExamPostSubmission,
   onEnsureExamCycleRows,
+  onSetTallySubmissions,
+  onSetTallySummaries,
   onUpdateRow,
   onDeleteRow
 }) {
@@ -7694,11 +7898,11 @@ function ExamPrepCenter({
   const [selectedExamCycle, setSelectedExamCycle] = useState(currentExamCycle);
   const [editingExamPrepId, setEditingExamPrepId] = useState("");
   const [reviewModalRowId, setReviewModalRowId] = useState("");
-  const [tallySubmissions, setTallySubmissions] = useStoredState(storageKeys.tallySubmissions, []);
-  const [tallySummaries, setTallySummaries] = useStoredState(storageKeys.tallySummaries, {});
   const [tallyImportStatus, setTallyImportStatus] = useState("");
   const [pastPaperFrameKey, setPastPaperFrameKey] = useState(0);
   const [pastPaperLoadState, setPastPaperLoadState] = useState("loading");
+  const setTallySubmissions = onSetTallySubmissions ?? (() => {});
+  const setTallySummaries = onSetTallySummaries ?? (() => {});
   const pastPaperArchiveUrl =
     "https://script.google.com/macros/s/AKfycbyYi-NUHHzb9vrBl4Adj6Pq9zXIZJ9oR97g-uQyAf7up7AGVzeRdBUqfVcUZ1zjQiug/exec";
   const classStudents = students.filter((student) => student.defaultClassTemplateId === selectedClassTemplateId);
@@ -8813,7 +9017,7 @@ function SettingsCenter({
           <div className="settingsRow compact">
             <div>
               <strong>지각 유예시간</strong>
-              <span className="muted">수업 정각 이후 이 시간까지는 출석으로 처리합니다.</span>
+              <span className="muted">수업 정각 이후 이 시간까지는 등원으로 처리합니다.</span>
             </div>
             <input
               inputMode="numeric"
@@ -10747,9 +10951,11 @@ function StudentManager({
   const activeStudents = students.filter((student) => (student.status ?? "active") === "active");
   const visibleStudents =
     activeTab === "class"
-      ? activeStudents.filter((student) => student.defaultClassTemplateId === selectedClassTemplateId)
+      ? selectedClassTemplateId === "unassigned"
+        ? activeStudents.filter((student) => !student.defaultClassTemplateId)
+        : activeStudents.filter((student) => student.defaultClassTemplateId === selectedClassTemplateId)
       : activeStudents;
-  const title = activeTab === "class" ? `${selectedClassTemplate?.name ?? "반별"} 학생 목록` : "전체 학생 목록";
+  const title = activeTab === "class" ? `${selectedClassTemplateId === "unassigned" ? "미배정" : selectedClassTemplate?.name ?? "반별"} 학생 목록` : "전체 학생 목록";
 
   function getStudentClassName(student) {
     return templates.find((template) => template.classTemplateId === student.defaultClassTemplateId)?.name ?? "미배정";
@@ -10871,6 +11077,17 @@ function StudentManager({
               </button>
             );
           })}
+          <button
+            className={selectedClassTemplateId === "unassigned" ? "active" : ""}
+            onClick={() => {
+              setSelectedClassTemplateId("unassigned");
+              setSelectedStudentId("");
+            }}
+            type="button"
+          >
+            <strong>미배정</strong>
+            <span>{activeStudents.filter((student) => !student.defaultClassTemplateId).length}명</span>
+          </button>
         </div>
       ) : null}
 
@@ -12355,7 +12572,7 @@ function StudentMyPageTab({
           {statsTab === "attendance" ? (
             <>
               <div className="attendanceMetricGrid">
-                <div className="present"><strong>{attendanceStats.present}</strong><span>출석</span></div>
+                <div className="present"><strong>{attendanceStats.present}</strong><span>등원</span></div>
                 <div className="late"><strong>{attendanceStats.late}</strong><span>지각</span></div>
                 <div className="absent"><strong>{attendanceStats.absent}</strong><span>결석</span></div>
                 <div className="unexcused"><strong>{attendanceStats.unexcused}</strong><span>무단결석</span></div>
@@ -12363,9 +12580,9 @@ function StudentMyPageTab({
               <div className="progressList">
                 <div className="attendanceRateBox">
                   <strong>{attendanceStats.total ? `${attendanceStats.attendanceRate}%` : "-"}</strong>
-                  <span>출석률 (출석 + 지각)</span>
+                  <span>등원률 (등원 + 지각)</span>
                 </div>
-                <ProgressLine label="출석" value={attendanceStats.presentRate} suffix={`${attendanceStats.present}회 · ${attendanceStats.presentRate}%`} />
+                <ProgressLine label="등원" value={attendanceStats.presentRate} suffix={`${attendanceStats.present}회 · ${attendanceStats.presentRate}%`} />
                 <ProgressLine label="지각" value={attendanceStats.lateRate} suffix={`${attendanceStats.late}회 · ${attendanceStats.lateRate}%`} />
                 <ProgressLine label="결석" value={attendanceStats.absentRate} suffix={`${attendanceStats.absent}회 · ${attendanceStats.absentRate}%`} />
                 <ProgressLine label="무단결석" value={attendanceStats.unexcusedRate} suffix={`${attendanceStats.unexcused}회 · ${attendanceStats.unexcusedRate}%`} />
@@ -12373,7 +12590,7 @@ function StudentMyPageTab({
               <StudentCalendar
                 title={`${selectedStudent?.name ?? "학생"} · 출결 달력`}
                 legend={[
-                  ["present", "출석"],
+                  ["present", "등원"],
                   ["late", "지각"],
                   ["absent", "결석"],
                   ["unexcused", "무단"]
@@ -14416,10 +14633,22 @@ function StudentModal({
       pin: applicant.pin || "1234",
       grade: applicant.grade || inferGradeFromBirthYear(applicant.birthYear),
       textbook: "",
-      specialNote: applicant.memo || "",
+      specialNote: applicant.specialNote || applicant.memo || "",
       defaultClassTemplateId: applicant.defaultClassTemplateId || "",
       scheduleOverride: ""
     };
+  }
+
+  function renderTallyQuestionFields(applicant) {
+    return (
+      <>
+        <label>재원생 여부<input value={applicant.enrollmentStatus ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "enrollmentStatus", event.target.value)} /></label>
+        <label>현재 학습 과정<input value={applicant.currentLearningProcess ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "currentLearningProcess", event.target.value)} /></label>
+        <label>직전학기 내신 성적<input value={applicant.previousSemesterScore ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "previousSemesterScore", event.target.value)} /></label>
+        <label>특이사항<input value={applicant.specialNote ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "specialNote", event.target.value)} /></label>
+        <label>추가 메모<input value={applicant.memo || applicant.desiredClass || ""} onChange={(event) => updateApplicant(applicant.applicantId, "memo", event.target.value)} /></label>
+      </>
+    );
   }
 
   return (
@@ -14517,7 +14746,7 @@ function StudentModal({
                       ))}
                     </select>
                   </label>
-                  <label>희망/메모<input value={applicant.memo || applicant.desiredClass || ""} onChange={(event) => updateApplicant(applicant.applicantId, "memo", event.target.value)} /></label>
+                  {renderTallyQuestionFields(applicant)}
                 </div>
                 <div className="studentIntakeActions">
                   <small>{applicant.formName || "Tally"} · {applicant.createdAt ? new Date(applicant.createdAt).toLocaleString("ko-KR") : "접수일 미확인"}</small>
@@ -14532,6 +14761,33 @@ function StudentModal({
                 </div>
               </article>
             ))}
+            {registeredApplicants.length > 0 ? (
+              <div className="studentIntakeRegisteredList">
+                <strong>등록 완료 후보</strong>
+                {registeredApplicants.map((applicant) => (
+                  <article className="studentIntakeCard registered" key={applicant.applicantId}>
+                    <div className="studentIntakeCardHeader">
+                      <div>
+                        <strong>{applicant.name || "이름 미입력"}</strong>
+                        <span>{[applicant.grade || inferGradeFromBirthYear(applicant.birthYear), applicant.schoolName, applicant.defaultClassTemplateId ? templates.find((template) => template.classTemplateId === applicant.defaultClassTemplateId)?.name : "미배정"].filter(Boolean).join(" · ") || "기본 정보 미입력"}</span>
+                      </div>
+                      <span className="statusPill status-sent">등록완료</span>
+                    </div>
+                    <div className="studentIntakeAnswerList">
+                      {[
+                        ["재원생 여부", applicant.enrollmentStatus],
+                        ["현재 학습 과정", applicant.currentLearningProcess],
+                        ["직전학기 내신 성적", applicant.previousSemesterScore],
+                        ["특이사항", applicant.specialNote],
+                        ["추가 메모", applicant.memo]
+                      ].filter(([, value]) => value).map(([label, value]) => (
+                        <span key={label}><b>{label}</b>{value}</span>
+                      ))}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : null}
           </div>
         </div>
       )}
@@ -15345,18 +15601,53 @@ function formatKoreaTimeFromIso(value) {
 
 function getAttendanceDisplay(record = {}) {
   const status = record.attendanceStatus ?? "pending";
-  const checkInTime = record.checkInTime || formatKoreaTimeFromIso(record.checkInAt);
-  const checkOutTime = record.checkOutTime || formatKoreaTimeFromIso(record.checkOutAt);
-  const label = checkOutTime
+  const updatedTime = formatKoreaTimeFromIso(record.updatedAt);
+  const isArrivalStatus = ["checkin", "present", "late"].includes(status);
+  const isCheckoutStatus = status === "checkout";
+  const checkInTime = record.checkInTime || formatKoreaTimeFromIso(record.checkInAt) || (isArrivalStatus ? updatedTime : "");
+  const checkOutTime = record.checkOutTime || formatKoreaTimeFromIso(record.checkOutAt) || (isCheckoutStatus ? updatedTime : "");
+  const label = checkOutTime && !["absent", "excused", "pending"].includes(status)
     ? "하원"
-    : checkInTime
-      ? "등원"
+    : isArrivalStatus || checkInTime
+      ? status === "late" ? "지각" : "등원"
       : attendanceLabels[status] ?? status ?? "대기";
   const detail = [
     checkInTime ? `등원 ${checkInTime}` : "",
     checkOutTime ? `하원 ${checkOutTime}` : ""
   ].filter(Boolean).join(" · ");
   return { label, detail };
+}
+
+function applyManualAttendanceTimeFields(existingRecord = {}, values = {}, nowIso = new Date().toISOString()) {
+  const nowTime = formatKoreaTimeFromIso(nowIso);
+  if (["present", "late", "checkin"].includes(values.attendanceStatus)) {
+    return {
+      ...values,
+      checkInAt: existingRecord.checkInAt || nowIso,
+      checkInTime: existingRecord.checkInTime || nowTime,
+      checkOutAt: "",
+      checkOutTime: ""
+    };
+  }
+  if (values.attendanceStatus === "checkout") {
+    return {
+      ...values,
+      checkInAt: existingRecord.checkInAt || nowIso,
+      checkInTime: existingRecord.checkInTime || nowTime,
+      checkOutAt: existingRecord.checkOutAt || nowIso,
+      checkOutTime: existingRecord.checkOutTime || nowTime
+    };
+  }
+  if (["absent", "excused", "pending"].includes(values.attendanceStatus)) {
+    return {
+      ...values,
+      checkInAt: "",
+      checkInTime: "",
+      checkOutAt: "",
+      checkOutTime: ""
+    };
+  }
+  return values;
 }
 
 function createLessonStudentRecordId(lessonId, studentId) {
@@ -15767,7 +16058,8 @@ function getSupplementTaskProgress(task, lessons = []) {
 }
 
 function createAttendanceNotificationText(payload) {
-  const status = attendanceLabels[payload.attendanceStatus] ?? payload.attendanceStatus ?? "출석";
+  const attendanceNotificationLabels = { ...attendanceLabels, present: "등원" };
+  const status = attendanceNotificationLabels[payload.attendanceStatus] ?? payload.attendanceStatus ?? "등원";
   const lateText = payload.attendanceStatus === "late" ? ` (${payload.lateMinutes || 0}분 지각)` : "";
   const reasonText = payload.reason ? `\n사유: ${payload.reason}` : "";
   return joinMessageBlocks([

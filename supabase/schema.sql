@@ -18,6 +18,7 @@ create table if not exists students (
   textbook text,
   special_note text,
   schedule_override text,
+  withdrawn_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -77,6 +78,10 @@ create table if not exists lesson_student_records (
   prep_parent_notice text,
   prep_student_ai_status text,
   prep_parent_ai_status text,
+  behavior_tag text,
+  homework_status text,
+  needs_makeup boolean not null default false,
+  needs_retest boolean not null default false,
   progress_note text,
   teacher_comment text,
   student_comment text,
@@ -101,6 +106,14 @@ create table if not exists homeworks (
   due_date date,
   student_status text not null default 'not_started' check (student_status in ('not_started', 'checked_done', 'need_help')),
   teacher_status text not null default 'unverified' check (teacher_status in ('unverified', 'verified', 'partial', 'missing')),
+  status text,
+  total_problems integer,
+  assignment_status text,
+  incomplete_homework text,
+  checked_at text,
+  verified_at text,
+  linked_from_lesson_id text,
+  linked_from_date date,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -151,13 +164,19 @@ create table if not exists exam_prep_rows (
   textbook text,
   publisher text,
   exam_term text not null,
+  exam_cycle text,
   exam_period text,
   math_exam_date date,
+  math_exam_dates jsonb not null default '[]'::jsonb,
   scope text,
+  sub_textbook text,
   sub_materials text,
   review text,
   revised_review text,
   memo text,
+  special_note text,
+  source text,
+  review_ai_status text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -186,6 +205,12 @@ create table if not exists school_events (
   end_date date,
   math_subject_by_date jsonb not null default '{}'::jsonb,
   memo text,
+  app_event_type text,
+  color text,
+  grade text,
+  exam_cycle text,
+  exam_subject text,
+  event_payload jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
