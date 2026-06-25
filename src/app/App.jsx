@@ -3891,15 +3891,6 @@ export function App() {
           />
         ) : null}
 
-        {activeView === "attendanceKiosk" ? (
-          <AttendanceKiosk
-            lessons={lessons}
-            records={records}
-            students={students}
-            onAttendanceCheck={handleAttendancePinCheck}
-          />
-        ) : null}
-
         {activeView === "students" ? (
           <StudentManager
             academyTests={academyTests}
@@ -5673,7 +5664,6 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle }) 
       items: [
         { id: "lessons", label: "수업일지", icon: "📓" },
         { id: "overdue", label: "숙제현황", icon: "📊" },
-        { id: "attendanceKiosk", label: "출결체크", icon: "🟢" },
         { id: "followups", label: "오답관리", icon: "✕" },
         { id: "supplements", label: "보충관리", icon: "↪" },
         { id: "materials", label: "교재관리", icon: "📚" },

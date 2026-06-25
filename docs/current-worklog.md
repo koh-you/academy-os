@@ -88,6 +88,15 @@
 - SQL 적용 시도: `npm run db:apply -- supabase/20260625_clear_inactive_student_class_assignment.sql` 실행했으나 현재 세션에 linked Supabase project ref 또는 `SUPABASE_DB_URL`이 없어 `Cannot find project ref. Have you run supabase link?`로 실패했다. 적용하려면 로컬 `.env`에 `SUPABASE_DB_URL`을 두거나 `SUPABASE_PROJECT_REF`/`SUPABASE_DB_PASSWORD`로 link 가능 상태를 만들어야 한다.
 - 검증: `npm run test:production` 179개 통과, `npm run build` 통과. `node --check src/app/App.jsx`는 Node가 `.jsx` 확장자를 직접 처리하지 못해 실패했고, Vite build로 JSX 문법 검증을 대체했다. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
 
+## 2026-06-25 좌측 출결체크 탭 제거
+
+- 상태: 완료
+- 사용자 요청: 출결 태블릿은 `/attendance` 전용 화면으로 별도 관리하므로 좌측 `출결체크` 탭을 삭제해달라고 했다.
+- 조치: 사이드바의 `출결체크` 메뉴 항목과 교사용 앱 내부 `attendanceKiosk` 화면 렌더링을 제거했다.
+- 유지: `/attendance` 전용 태블릿 출결 화면, 수업일지 학생별 수동 출결 수정 모달, 출결 알림톡 API, 설정 화면의 출결 URL/지각 기준 설정은 그대로 유지했다.
+- 저장 확인: 메뉴/렌더링 정리만 있으므로 Supabase SQL 변경은 필요 없다.
+- 검증: `npm run test:production` 180개 통과, `npm run build` 통과. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
+
 ## 2026-06-25 SQL edit 직접 실행 원칙 반영
 
 - 상태: 완료
