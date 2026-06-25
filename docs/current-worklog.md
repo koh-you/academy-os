@@ -6,6 +6,16 @@
 - Supabase 저장 최우선: 새 기능이나 화면 수정 전후로 데이터가 Supabase 테이블 또는 `app_state`에 저장되는지 먼저 확인한다. 새로고침, 재로그인, 다른 기기 접속 후 사라질 수 있는 프론트-only/localStorage-only 운영 데이터가 있으면 기능 확장보다 저장 경로를 우선 보강한다.
 - 검수 기본값: 운영 흐름에 영향이 있으면 `npm run test:production`과 `npm run build`를 실행하고, 통과 후 커밋/푸시한다. 비밀값과 `.env`는 절대 커밋하지 않는다.
 
+## 2026-06-25 Supabase CLI SQL 적용 자동화
+
+- 상태: 완료
+- 사용자 요청: 로컬에 Supabase CLI를 설치해서 SQL edit도 자동화하겠다고 했다.
+- 조치: `supabase` CLI를 로컬 `devDependencies`에 추가했다. 전역 설치 없이 `npm run supabase -- ...`로 실행한다.
+- 조치: `scripts/apply-supabase-sql.cjs`를 추가했다. `supabase/` 폴더 안의 `.sql` 파일만 실행하도록 제한하고, `SUPABASE_DB_URL`이 있으면 직접 DB URL로, 없으면 linked project(`--linked`)로 적용한다.
+- 조치: `npm run db:apply -- supabase/<file>.sql`과 `npm run db:apply:notification-muting` 스크립트를 추가했다. Supabase CLI가 만드는 `supabase/.temp/`는 `.gitignore`에 추가했다.
+- 문서: `docs/supabase-cli-sql.md`에 최초 로그인/프로젝트 링크/SQL 적용 방법을 정리했다.
+- 검증: `npx supabase --version` 2.107.0 확인, `node --check scripts/apply-supabase-sql.cjs`, `npm run test:production` 178개 통과, `npm run build` 통과. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
+
 ## 2026-06-25 수업일지 학생별 알림톡 제외
 
 - 상태: 완료
