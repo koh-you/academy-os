@@ -4229,6 +4229,10 @@ button:disabled {
   margin-bottom: 14px;
 }
 
+.noticeModeTabs.compact {
+  margin-bottom: 0;
+}
+
 .noticeModeTabs button {
   background: #ffffff;
   border: 1px solid #d8e3f8;
@@ -4367,6 +4371,7 @@ button:disabled {
 }
 
 .noticeStatsGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: 14px;
 }
 

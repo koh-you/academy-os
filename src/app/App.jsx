@@ -1750,6 +1750,16 @@ const defaultAiPrompts = {
     "- 학교 내신에서 나올 법한 조건 변화와 함정을 반영한다.",
     "- 정답과 해설은 선택한 형식에 맞춰 제공한다.",
     "- 지나치게 새로운 개념을 추가하지 않는다."
+  ].join("\n"),
+  noticeMessage: [
+    "역할: 으뜸수학 고태영T의 알림톡 공지문 편집자",
+    "목표: 강사가 입력한 교재/보강/공지 초안을 실제 발송 가능한 짧고 명료한 알림톡 문장으로 다듬는다.",
+    "작성 원칙:",
+    "- 입력된 사실만 사용하고 없는 날짜, 금액, 준비물, 일정은 만들지 않는다.",
+    "- 학부모와 학생이 모두 읽어도 어색하지 않은 정중하고 분명한 말투를 사용한다.",
+    "- 핵심 일정, 해야 할 행동, 문의가 필요한 지점을 빠르게 알 수 있게 쓴다.",
+    "- 제목, 마크다운, 구분선, 설명 문구는 쓰지 않는다.",
+    "- 알림톡 본문으로 바로 보낼 수 있게 최종 문장만 반환한다."
   ].join("\n")
 };
 
@@ -3987,6 +3997,7 @@ export function App() {
 
         {activeView === "notifications" ? (
           <NotificationCenter
+            aiSettings={aiSettings}
             classTemplates={classTemplates}
             integrationStatus={integrationStatus}
             lessons={calendarLessons}
@@ -5036,26 +5047,51 @@ function StatusDot({ active }) {
   return <span className={active ? "statusDot active" : "statusDot inactive"} />;
 }
 
+const noticeMessageTemplates = [
+  {
+    id: "material",
+    label: "교재문자",
+    title: "교재 안내",
+    body: "안녕하세요. 으뜸수학 고태영T입니다.\n\n다음 수업부터 사용할 교재를 안내드립니다.\n학생이 수업에 필요한 교재와 필기구를 준비할 수 있도록 확인 부탁드립니다.\n\n감사합니다."
+  },
+  {
+    id: "makeup",
+    label: "보강문자",
+    title: "보강 안내",
+    body: "안녕하세요. 으뜸수학 고태영T입니다.\n\n보강 수업 일정을 안내드립니다.\n가능한 시간 확인 후 회신 부탁드립니다.\n\n감사합니다."
+  },
+  {
+    id: "notice",
+    label: "공지문자",
+    title: "공지 안내",
+    body: "안녕하세요. 으뜸수학 고태영T입니다.\n\n학원 공지사항을 안내드립니다.\n내용 확인 부탁드립니다.\n\n감사합니다."
+  }
+];
+
 function NotificationCenter({
+  aiSettings = defaultAiSettings,
   classTemplates = [],
   integrationStatus,
   notificationJobs,
   onRefresh,
   students
 }) {
-  const [activeNoticeMode, setActiveNoticeMode] = useState("both");
   const [classFilter, setClassFilter] = useState("all");
   const [deletingJobId, setDeletingJobId] = useState("");
   const [dispatchMessage, setDispatchMessage] = useState("");
-  const [individualAudience, setIndividualAudience] = useState("both");
+  const [isPolishingNotice, setIsPolishingNotice] = useState(false);
   const [isSendingNotice, setIsSendingNotice] = useState(false);
   const [jobFilter, setJobFilter] = useState("all");
   const [noticeBody, setNoticeBody] = useState("");
+  const [noticeRecipientMode, setNoticeRecipientMode] = useState("selected");
+  const [noticeTemplateId, setNoticeTemplateId] = useState("notice");
   const [noticeTitle, setNoticeTitle] = useState("");
   const [scheduleDate, setScheduleDate] = useState(today);
   const [scheduleTime, setScheduleTime] = useState("18:00");
   const [searchText, setSearchText] = useState("");
   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
+  const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
+  const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
   const notificationStatus = integrationStatus?.notifications;
   const noticeJobs = notificationJobs.filter((job) => String(job.notificationType ?? "").startsWith("notice_"));
   const scheduledNoticeJobs = noticeJobs.filter((job) => job.status === "scheduled");
@@ -5076,11 +5112,11 @@ function NotificationCenter({
     failed: "실패",
     draft: "정리함"
   };
-  const noticeModes = [
-    { id: "both", label: "전체", description: "학부모와 학생 모두" },
-    { id: "parent", label: "학부모", description: "학부모에게만 공지" },
-    { id: "student", label: "학생", description: "학생에게만 공지" },
-    { id: "individual", label: "개별", description: "선택 학생만" }
+  const noticeRecipientModes = [
+    { id: "selected", label: "선택", description: "체크한 학생에게 발송" },
+    { id: "all", label: "전체", description: "학부모+학생 전체" },
+    { id: "parent", label: "학부모", description: "학부모에게만" },
+    { id: "student", label: "학생", description: "학생에게만" }
   ];
   const activeStudents = useMemo(
     () => students.filter((student) => !["paused", "withdrawn"].includes(student.status ?? "active")),
@@ -5095,16 +5131,13 @@ function NotificationCenter({
         .some((value) => String(value ?? "").toLowerCase().includes(keyword));
     return matchesClass && matchesSearch;
   }), [activeStudents, classFilter, searchText]);
-  const targetStudents =
-    activeNoticeMode === "individual"
-      ? searchableStudents.filter((student) => selectedStudentIds.includes(student.studentId))
-      : searchableStudents;
+  const targetStudents = noticeRecipientMode === "selected"
+    ? searchableStudents.filter((student) => selectedStudentIds.includes(student.studentId))
+    : searchableStudents;
   const targetAudiences =
-    activeNoticeMode === "both"
+    noticeRecipientMode === "all" || noticeRecipientMode === "selected"
       ? ["parent", "student"]
-      : activeNoticeMode === "individual"
-        ? individualAudience === "both" ? ["parent", "student"] : [individualAudience]
-        : [activeNoticeMode];
+      : [noticeRecipientMode];
   const noticeRecipients = targetStudents.flatMap((student) =>
     targetAudiences
       .map((audience) => ({
@@ -5141,6 +5174,14 @@ function NotificationCenter({
 
   function clearSelectedStudents() {
     setSelectedStudentIds([]);
+  }
+
+  function applyNoticeTemplate(templateId) {
+    const template = noticeMessageTemplates.find((item) => item.id === templateId);
+    setNoticeTemplateId(templateId);
+    if (!template) return;
+    setNoticeTitle(template.title);
+    setNoticeBody(template.body);
   }
 
   function selectJobFilter(nextFilter) {
@@ -5251,7 +5292,7 @@ function NotificationCenter({
     setDispatchMessage("");
     const fallbackStudent = noticeRecipients[0]?.student ?? searchableStudents[0] ?? students[0] ?? { name: "테스트학생", studentId: "test" };
     const testRecipient = {
-      audience: activeNoticeMode === "student" ? "student" : "parent",
+      audience: noticeRecipientMode === "student" ? "student" : "parent",
       phone: notificationStatus?.testRecipient,
       student: fallbackStudent
     };
@@ -5265,6 +5306,45 @@ function NotificationCenter({
       setDispatchMessage(`공지 테스트 실패: ${error.message}`);
     } finally {
       setIsSendingNotice(false);
+    }
+  }
+
+  async function polishNoticeMessage() {
+    if (!noticeBody.trim() || isPolishingNotice) return;
+    setIsPolishingNotice(true);
+    setDispatchMessage("");
+    try {
+      const response = await fetch(apiUrl("/api/ai/comment-polish"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          aiProvider: commentAiProvider,
+          aiModel: commentAiModel,
+          aiPrompt: getAiPrompt(aiSettings, "noticeMessage"),
+          audience: "parent",
+          lessonName: noticeTitle.trim() || "알림관리 공지",
+          lessonDate: today,
+          rawText: noticeBody,
+          studentName: "수신자",
+          schoolName: "",
+          grade: "",
+          lessonMaterial: "",
+          lessonContent: "",
+          attendanceStatus: "",
+          homeworkStatus: "",
+          assignmentStatus: ""
+        })
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || "공지 AI 수정에 실패했습니다.");
+      }
+      setNoticeBody(result.polishedText ?? noticeBody);
+      setDispatchMessage("공지 문구를 AI로 다듬었습니다.");
+    } catch (error) {
+      setDispatchMessage(`AI 수정 실패: ${error.message}`);
+    } finally {
+      setIsPolishingNotice(false);
     }
   }
 
@@ -5294,7 +5374,7 @@ function NotificationCenter({
       <div className="pageTop">
         <div>
           <h1>알림관리</h1>
-          <p className="muted">수업일지 밖에서 필요한 전체 공지, 학부모 공지, 학생 공지, 개별 연락을 보냅니다.</p>
+          <p className="muted">수업일지 밖에서 필요한 연락을 한 화면에서 작성하고, 수신 범위만 선택해 발송합니다.</p>
         </div>
         <div className="pageActions">
           <button className="softButton" onClick={onRefresh} type="button">새로고침</button>
@@ -5302,31 +5382,30 @@ function NotificationCenter({
       </div>
       {dispatchMessage ? <p className="inlineNotice">{dispatchMessage}</p> : null}
 
-      <div className="noticeModeTabs">
-        {noticeModes.map((mode) => (
-          <button
-            className={activeNoticeMode === mode.id ? "active" : ""}
-            key={mode.id}
-            onClick={() => setActiveNoticeMode(mode.id)}
-            type="button"
-          >
-            <strong>{mode.label}</strong>
-            <span>{mode.description}</span>
-          </button>
-        ))}
-      </div>
-
       <section className="notificationPanel noticeComposerPanel">
         <div className="sectionHeader slim">
           <div>
             <p className="eyebrow">MESSAGE CENTER</p>
-            <h2>공지 발송</h2>
+            <h2>개별 발송</h2>
           </div>
           <span className="countBadge">수신 {noticeRecipients.length}건</span>
         </div>
 
         <div className="noticeComposerGrid">
           <div className="noticeTargetPanel">
+            <div className="noticeModeTabs compact">
+              {noticeRecipientModes.map((mode) => (
+                <button
+                  className={noticeRecipientMode === mode.id ? "active" : ""}
+                  key={mode.id}
+                  onClick={() => setNoticeRecipientMode(mode.id)}
+                  type="button"
+                >
+                  <strong>{mode.label}</strong>
+                  <span>{mode.description}</span>
+                </button>
+              ))}
+            </div>
             <div className="noticeFilterGrid">
               <label>
                 반
@@ -5341,16 +5420,6 @@ function NotificationCenter({
                 학생 검색
                 <input value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder="이름, 학교, 전화번호" />
               </label>
-              {activeNoticeMode === "individual" ? (
-                <label>
-                  개별 수신자
-                  <select value={individualAudience} onChange={(event) => setIndividualAudience(event.target.value)}>
-                    <option value="both">학부모+학생</option>
-                    <option value="parent">학부모만</option>
-                    <option value="student">학생만</option>
-                  </select>
-                </label>
-              ) : null}
             </div>
 
             <div className="noticeTargetSummary">
@@ -5368,7 +5437,7 @@ function NotificationCenter({
               </div>
             </div>
 
-            {activeNoticeMode === "individual" ? (
+            {noticeRecipientMode === "selected" ? (
               <div className="noticeStudentPicker">
                 <div className="noticePickerActions">
                   <button className="softButton compact" onClick={selectAllVisibleStudents} type="button">보이는 학생 전체</button>
@@ -5392,6 +5461,15 @@ function NotificationCenter({
 
           <div className="noticeWritePanel">
             <label>
+              템플릿
+              <select value={noticeTemplateId} onChange={(event) => applyNoticeTemplate(event.target.value)}>
+                <option value="">직접 작성</option>
+                {noticeMessageTemplates.map((template) => (
+                  <option key={template.id} value={template.id}>{template.label}</option>
+                ))}
+              </select>
+            </label>
+            <label>
               제목
               <input value={noticeTitle} onChange={(event) => setNoticeTitle(event.target.value)} placeholder="예: 휴원 안내, 보강 안내" />
             </label>
@@ -5414,6 +5492,9 @@ function NotificationCenter({
               <p>{noticeText || "제목과 본문을 입력하면 이곳에 발송 문구가 표시됩니다."}</p>
             </div>
             <div className="noticeSendActions">
+              <button className="softButton" disabled={!noticeBody.trim() || isPolishingNotice} onClick={polishNoticeMessage} type="button">
+                {isPolishingNotice ? "AI 수정 중" : "AI 수정"}
+              </button>
               <button className="softButton" disabled={!noticeText || isSendingNotice} onClick={sendTestNotice} type="button">테스트 발송</button>
               <button className="softButton" disabled={!noticeText || !noticeRecipients.length || !scheduledAt || isSendingNotice} onClick={scheduleNotice} type="button">예약 발송</button>
               <button className="sendButton" disabled={!noticeText || !noticeRecipients.length || isSendingNotice} onClick={sendNoticeNow} type="button">
@@ -9314,6 +9395,11 @@ function SettingsCenter({
       description: "수업메모를 학생/학부모 안내문으로 바꿀 때 사용합니다.",
       key: "preparationNotice",
       title: "수업메모 AI"
+    },
+    {
+      description: "알림관리의 교재/보강/공지 문자 초안을 다듬을 때 사용합니다.",
+      key: "noticeMessage",
+      title: "알림관리 공지 AI"
     },
     {
       description: "시험분석 화면에서 시험지 분석 1차 가안을 만들 때 사용합니다.",
