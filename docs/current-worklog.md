@@ -76,6 +76,17 @@
 - 저장 확인: CSS 표시 변경만 있으므로 Supabase 저장 경로 또는 SQL 변경은 필요 없다.
 - 검증: `npm run build` 통과. 기존 Vite 청크 크기 경고만 확인됨.
 
+## 2026-06-25 학생 삭제 후 반관리 잔존 보정
+
+- 상태: 완료
+- 사용자 보고: 학생관리에서 테스트용 `고태영` 학생을 삭제했는데 반관리 `월수금 4-7반` 명단에는 계속 남아 있었다.
+- 원인: 학생 삭제는 과거 기록 보존을 위해 DB hard delete가 아니라 `status: "paused"`로 저장하는 방식이다. 그런데 반관리 화면은 `defaultClassTemplateId`만 보고 학생을 집계/표시해, `paused` 학생도 반 명단에 남아 보였다.
+- 조치: 학생 삭제 처리 시 `defaultClassTemplateId`를 함께 비워 앞으로 삭제/퇴원 학생이 반 배정값을 유지하지 않게 했다.
+- 조치: 반관리 카드 인원수, 상세 명단, 명단 수정 모달은 `status === "active"` 학생만 기준으로 표시하게 했다. 이미 운영 DB에 `paused + defaultClassTemplateId`로 남아 있는 학생도 화면에는 더 이상 나오지 않는다.
+- SQL 파일: 기존 운영 데이터 정리용 `supabase/20260625_clear_inactive_student_class_assignment.sql`을 추가했다. 이 SQL은 `paused` 또는 `withdrawn` 학생의 `default_class_template_id`를 `null`로 비운다.
+- SQL 적용 시도: `npm run db:apply -- supabase/20260625_clear_inactive_student_class_assignment.sql` 실행했으나 현재 세션에 linked Supabase project ref 또는 `SUPABASE_DB_URL`이 없어 `Cannot find project ref. Have you run supabase link?`로 실패했다. 적용하려면 로컬 `.env`에 `SUPABASE_DB_URL`을 두거나 `SUPABASE_PROJECT_REF`/`SUPABASE_DB_PASSWORD`로 link 가능 상태를 만들어야 한다.
+- 검증: `npm run test:production` 179개 통과, `npm run build` 통과. `node --check src/app/App.jsx`는 Node가 `.jsx` 확장자를 직접 처리하지 못해 실패했고, Vite build로 JSX 문법 검증을 대체했다. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
+
 ## 2026-06-25 SQL edit 직접 실행 원칙 반영
 
 - 상태: 완료

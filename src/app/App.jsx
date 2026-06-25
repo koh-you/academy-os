@@ -3194,7 +3194,12 @@ export function App() {
   function handleDeleteStudent(studentId) {
     const removedStudent = students.find((student) => student.studentId === studentId);
     if (!removedStudent) return;
-    const pausedStudent = { ...removedStudent, status: "paused", withdrawnAt: new Date().toISOString() };
+    const pausedStudent = {
+      ...removedStudent,
+      defaultClassTemplateId: "",
+      status: "paused",
+      withdrawnAt: new Date().toISOString()
+    };
     setStudents((current) => current.map((student) => (student.studentId === studentId ? pausedStudent : student)));
     removeStudentFromLessonsAfterDate(studentId, today);
     if (removedStudent) {
@@ -10901,7 +10906,8 @@ function ClassManager({ students, templates, onUpdateClassRoster }) {
   const [isRosterModalOpen, setIsRosterModalOpen] = useState(false);
   const [draftStudentIds, setDraftStudentIds] = useState([]);
   const selectedTemplate = templates.find((template) => template.classTemplateId === selectedTemplateId) ?? templates[0];
-  const classStudents = students.filter((student) => student.defaultClassTemplateId === selectedTemplate?.classTemplateId);
+  const activeStudents = students.filter((student) => (student.status ?? "active") === "active");
+  const classStudents = activeStudents.filter((student) => student.defaultClassTemplateId === selectedTemplate?.classTemplateId);
 
   function openRosterModal() {
     setDraftStudentIds(classStudents.map((student) => student.studentId));
@@ -10932,7 +10938,7 @@ function ClassManager({ students, templates, onUpdateClassRoster }) {
 
       <div className="classBoardGrid">
         {templates.map((template) => {
-          const count = students.filter((student) => student.defaultClassTemplateId === template.classTemplateId).length;
+          const count = activeStudents.filter((student) => student.defaultClassTemplateId === template.classTemplateId).length;
           return (
             <button
               className={selectedTemplateId === template.classTemplateId ? "classBoardCard active" : "classBoardCard"}
@@ -10985,7 +10991,7 @@ function ClassManager({ students, templates, onUpdateClassRoster }) {
             <strong>선택 {draftStudentIds.length}명</strong>
           </div>
           <div className="classRosterList">
-            {students.map((student) => {
+            {activeStudents.map((student) => {
               const checked = draftStudentIds.includes(student.studentId);
               const currentTemplate = templates.find((template) => template.classTemplateId === student.defaultClassTemplateId);
               return (
