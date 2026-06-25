@@ -354,6 +354,7 @@ async function getPortalData(session) {
     reportSnapshots: (states.reportSnapshots ?? []).filter((item) => item.studentId === session.studentId),
     scoreRecords: (states.scoreRecords ?? []).filter((item) => item.studentId === session.studentId),
     examPostSubmissions: (states.examPostSubmissions ?? []).filter((item) => item.studentId === session.studentId),
+    examPostTargetStudentIds: states.examPostTargetStudentIds ?? {},
     studentQuestions: (states.studentQuestions ?? []).filter((item) => item.studentId === session.studentId)
   };
 }

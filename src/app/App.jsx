@@ -18,6 +18,7 @@ const storageKeys = {
   examPrepRows: "academy-os.examPrepRows.v2",
   tallySubmissions: "academy-os.tallySubmissions.v1",
   tallySummaries: "academy-os.tallySummaries.v1",
+  examPostTargetStudentIds: "academy-os.examPostTargetStudentIds.v1",
   examAnalyses: "academy-os.examAnalyses.v1",
   schoolEvents: "academy-os.schoolEvents.v1",
   studentQuestions: "academy-os.studentQuestions.v1",
@@ -1820,6 +1821,7 @@ export function App() {
   const [tallySummaries, setTallySummaries] = useStoredState(storageKeys.tallySummaries, {});
   const [studentQuestions, setStudentQuestions] = useStoredState(storageKeys.studentQuestions, []);
   const [examPostSubmissions, setExamPostSubmissions] = useStoredState(storageKeys.examPostSubmissions, []);
+  const [examPostTargetStudentIds, setExamPostTargetStudentIds] = useStoredState(storageKeys.examPostTargetStudentIds, {});
   const [schoolEvents, setSchoolEvents] = useStoredState(
     storageKeys.schoolEvents,
     createDefaultSchoolEvents(sampleData.examPrepRows ?? [])
@@ -1879,6 +1881,7 @@ export function App() {
     reportSnapshots,
     scoreRecords,
     examPostSubmissions,
+    examPostTargetStudentIds,
     studentQuestions,
     tallySubmissions,
     tallySummaries,
@@ -1897,6 +1900,7 @@ export function App() {
     reportSnapshots,
     scoreRecords,
     examPostSubmissions,
+    examPostTargetStudentIds,
     studentQuestions,
     tallySubmissions,
     tallySummaries,
@@ -1958,6 +1962,9 @@ export function App() {
           setReportSnapshots(portalData.reportSnapshots ?? []);
           setScoreRecords(portalData.scoreRecords ?? []);
           setExamPostSubmissions(portalData.examPostSubmissions ?? []);
+          if (portalData.examPostTargetStudentIds && typeof portalData.examPostTargetStudentIds === "object") {
+            setExamPostTargetStudentIds(portalData.examPostTargetStudentIds);
+          }
           setStudentQuestions(portalData.studentQuestions ?? []);
           setIsAppStateReady(false);
           setIsPortalDataReady(true);
@@ -2073,6 +2080,9 @@ export function App() {
           if (Array.isArray(states.reportSnapshots)) setReportSnapshots(states.reportSnapshots);
           if (Array.isArray(states.scoreRecords)) setScoreRecords(states.scoreRecords);
           if (Array.isArray(states.examPostSubmissions)) setExamPostSubmissions(states.examPostSubmissions);
+          if (states.examPostTargetStudentIds && typeof states.examPostTargetStudentIds === "object" && !Array.isArray(states.examPostTargetStudentIds)) {
+            setExamPostTargetStudentIds(states.examPostTargetStudentIds);
+          }
           if (Array.isArray(states.studentQuestions)) setStudentQuestions(states.studentQuestions);
           if (Array.isArray(states.tallySubmissions)) setTallySubmissions(states.tallySubmissions);
           if (states.tallySummaries && typeof states.tallySummaries === "object" && !Array.isArray(states.tallySummaries)) {
@@ -2644,6 +2654,7 @@ export function App() {
       <StudentPortalV2
         examPrepRows={examPrepRows}
         examPostSubmissions={examPostSubmissions}
+        examPostTargetStudentIds={examPostTargetStudentIds}
         homeworks={homeworks}
         lessons={lessons}
         materials={resourceMaterials}
@@ -3749,6 +3760,7 @@ export function App() {
           <StudentPortalV2
             examPrepRows={examPrepRows}
             examPostSubmissions={examPostSubmissions}
+            examPostTargetStudentIds={examPostTargetStudentIds}
             homeworks={homeworks}
             lessons={lessons}
             materials={resourceMaterials}
@@ -3855,6 +3867,7 @@ export function App() {
           <ExamPrepCenter
             aiSettings={aiSettings}
             examPostSubmissions={examPostSubmissions}
+            examPostTargetStudentIds={examPostTargetStudentIds}
             tallySubmissions={tallySubmissions}
             tallySummaries={tallySummaries}
             templates={classTemplates}
@@ -3874,6 +3887,7 @@ export function App() {
             }
             onSetTallySubmissions={setTallySubmissions}
             onSetTallySummaries={setTallySummaries}
+            onSetExamPostTargetStudentIds={setExamPostTargetStudentIds}
             onUpdateRow={handleUpdateExamPrepRow}
             onDeleteRow={handleDeleteExamPrepRow}
           />
@@ -8321,6 +8335,7 @@ function summarizeTallySubmissions(submissions) {
 function ExamPrepCenter({
   aiSettings = defaultAiSettings,
   examPostSubmissions = [],
+  examPostTargetStudentIds = {},
   tallySubmissions = [],
   tallySummaries = {},
   rows,
@@ -8328,6 +8343,7 @@ function ExamPrepCenter({
   templates,
   onConfirmExamPostSubmission,
   onEnsureExamCycleRows,
+  onSetExamPostTargetStudentIds,
   onSetTallySubmissions,
   onSetTallySummaries,
   onUpdateRow,
@@ -8391,10 +8407,6 @@ function ExamPrepCenter({
     {
       id: "info",
       label: "시험정보"
-    },
-    {
-      id: "tallyAi",
-      label: "탈리"
     },
     {
       id: "postSubmit",
@@ -8606,115 +8618,17 @@ function ExamPrepCenter({
         </>
       ) : null}
 
-      {activeTab === "tallyAi" ? (
-        <div className="tallyAiGrid">
-          <section className="panel tallyInboxPanel">
-            <div className="sectionHeader slim">
-              <div>
-                <h2>Self-check 제출 수신함</h2>
-                <p className="muted">{selectedClass?.name} · {examCycleLabel(selectedExamCycle)} · {visibleTallySubmissions.length}명 제출</p>
-              </div>
-              <label className="softButton fileImportButton">
-                CSV 가져오기
-                <input
-                  accept=".csv,text/csv"
-                  onChange={(event) => importTallyCsv(event.target.files?.[0])}
-                  type="file"
-                />
-              </label>
-            </div>
-            <div
-              className="tallyDropZone"
-              onDragOver={(event) => event.preventDefault()}
-              onDrop={(event) => {
-                event.preventDefault();
-                importTallyCsv(event.dataTransfer.files?.[0]);
-              }}
-            >
-              <strong>탈리 CSV 파일을 여기로 끌어오세요.</strong>
-              <span>{tallyImportStatus || "학생 self-check 제출 파일을 업로드하면 학생별 카드와 총평 초안이 생성됩니다."}</span>
-            </div>
-            <div className="tallyStats">
-              <article>
-                <span>제출</span>
-                <strong>{visibleTallySubmissions.length}명</strong>
-              </article>
-              <article>
-                <span>평균 난이도</span>
-                <strong>{tallyAverageLabel(tallyDifficultyValues)}</strong>
-              </article>
-              <article>
-                <span>준비 평균</span>
-                <strong>{tallyAverageLabel(tallyPreparationValues)}</strong>
-              </article>
-            </div>
-            {visibleTallySubmissions.length ? (
-              <div className="tallyCardList">
-                {visibleTallySubmissions.map((submission) => (
-                  <article className="tallySubmissionCard studentSelfCheckCard" key={submission.submissionId}>
-                    <div className="tallyStudentHeader">
-                      <strong>{submission.studentName}</strong>
-                      <span>{submission.schoolName || "학교 미입력"} · {submission.grade || "학년 미입력"}</span>
-                    </div>
-                    <div className="tallyMetricLine">
-                      <span>난이도 <b>{submission.difficulty ?? "-"}</b></span>
-                      <span>준비 <b>{submission.preparation ?? "-"}</b></span>
-                      <span>학원 도움 <b>{submission.academyHelp || "-"}</b></span>
-                      <span>다음 목표 <b>{submission.nextGoal || "-"}</b></span>
-                    </div>
-                    <div className="tallyReviewGrid">
-                      <p><b>시험 리뷰</b>{submission.goodPart || submission.regretReason || "응답 없음"}</p>
-                      <p><b>다음을 위해</b>{submission.needMore || submission.wantedHelp || "응답 없음"}</p>
-                      {submission.freeComment ? <p><b>학생 코멘트</b>{submission.freeComment}</p> : null}
-                    </div>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <div className="emptyState">아직 불러온 self-check 제출이 없습니다.</div>
-            )}
-          </section>
-          <section className="panel tallySummaryPanel">
-            <div className="sectionHeader slim">
-              <div>
-                <h2>AI 표준 총평</h2>
-                <p className="muted">CSV 제출을 바탕으로 강사용 누적 총평을 정리합니다.</p>
-              </div>
-              <button className="primaryButton" onClick={refreshTallySummary} type="button">총평 갱신</button>
-            </div>
-            <article className="tallySubmissionCard summary">
-              <strong>{selectedClass?.name} 총평 초안</strong>
-              <textarea
-                value={tallySummary}
-                onChange={(event) =>
-                  setTallySummaries((current) => ({
-                    ...current,
-                    [tallySummaryKey]: event.target.value
-                  }))
-                }
-              />
-              <small>학교별 시험 후 총평 모달에 옮겨 최종 편집할 수 있습니다.</small>
-            </article>
-            <div className="tallySchoolSummaryList">
-              {filteredRows.map((row) => (
-                <button className="examReviewOpenButton filled" key={`summary_${row.examPrepId}`} onClick={() => setReviewModalRowId(row.examPrepId)} type="button">
-                  <strong>{row.schoolName} 총평 작성</strong>
-                  <span>{row.revisedReview || row.review || "학교별 총평을 열어 편집합니다."}</span>
-                </button>
-              ))}
-            </div>
-          </section>
-        </div>
-      ) : null}
-
       {activeTab === "postSubmit" ? (
         <ExamPostSubmissionManager
+          examPostTargetStudentIds={examPostTargetStudentIds}
+          onUpdateRow={onUpdateRow}
           rows={filteredRows}
           selectedClass={selectedClass}
           selectedExamCycle={selectedExamCycle}
           submissions={examPostSubmissions}
           students={classStudents}
           onConfirmExamPostSubmission={onConfirmExamPostSubmission}
+          onSetExamPostTargetStudentIds={onSetExamPostTargetStudentIds}
         />
       ) : null}
 
@@ -8923,11 +8837,45 @@ function ExamPrepEditModal({
   );
 }
 
-function ExamPostSubmissionManager({ rows = [], selectedClass, selectedExamCycle, students = [], submissions = [], onConfirmExamPostSubmission }) {
-  const targets = students.flatMap((student) => buildExamPostTargetsForStudent(student, rows, submissions));
+function ExamPostSubmissionManager({
+  examPostTargetStudentIds = {},
+  rows = [],
+  selectedClass,
+  selectedExamCycle,
+  students = [],
+  submissions = [],
+  onConfirmExamPostSubmission,
+  onSetExamPostTargetStudentIds
+}) {
+  const targets = students.flatMap((student) => buildExamPostTargetsForStudent(student, rows, submissions, examPostTargetStudentIds));
   const submittedTargets = targets.filter((target) => target.submission?.submittedAt);
   const missingTargets = targets.filter((target) => !target.submission?.submittedAt);
   const confirmedTargets = submittedTargets.filter((target) => target.submission?.teacherConfirmed);
+
+  function getRowCandidateStudents(row) {
+    return students.filter((student) => schoolMatchesStudent(row.schoolName, student.schoolName) && gradeMatchesStudent(row.grade, student.grade));
+  }
+
+  function getRowTargetStudentIds(row) {
+    return Array.isArray(examPostTargetStudentIds[row.examPrepId]) ? examPostTargetStudentIds[row.examPrepId] : [];
+  }
+
+  function updateRowTargetStudentIds(row, nextIds) {
+    onSetExamPostTargetStudentIds?.((current) => ({
+      ...(current ?? {}),
+      [row.examPrepId]: Array.from(new Set(nextIds))
+    }));
+  }
+
+  function toggleRowTargetStudent(row, studentId) {
+    const currentIds = getRowTargetStudentIds(row);
+    updateRowTargetStudentIds(
+      row,
+      currentIds.includes(studentId)
+        ? currentIds.filter((id) => id !== studentId)
+        : [...currentIds, studentId]
+    );
+  }
 
   return (
     <section className="examPostManager">
@@ -8955,9 +8903,48 @@ function ExamPostSubmissionManager({ rows = [], selectedClass, selectedExamCycle
           <strong>{confirmedTargets.length}명</strong>
         </article>
       </div>
+
+      <div className="examPostTargetList">
+        {rows.length === 0 ? (
+          <div className="emptyState">현재 반에 연결된 시험정보가 없습니다.</div>
+        ) : null}
+        {rows.map((row) => {
+          const candidates = getRowCandidateStudents(row);
+          const selectedIds = getRowTargetStudentIds(row);
+          const mathEntries = normalizeMathExamEntries(row).filter((entry) => entry.date);
+          const mathLabel = mathEntries.length
+            ? mathEntries.map((entry) => formatMathExamEntryLabel(row, entry)).join(", ")
+            : row.subject || "수학";
+          return (
+            <article className="examPostTargetGroup" key={`targets_${row.examPrepId}`}>
+              <div>
+                <strong>{row.schoolName} {row.grade} 셀프체크 대상</strong>
+                <span>{mathLabel} · 선택 {selectedIds.length}명 / 후보 {candidates.length}명</span>
+              </div>
+              <div className="examPostTargetActions">
+                <button className="softButton compact" onClick={() => updateRowTargetStudentIds(row, candidates.map((student) => student.studentId))} type="button">전체 선택</button>
+                <button className="softButton compact subtle" onClick={() => updateRowTargetStudentIds(row, [])} type="button">전체 해제</button>
+              </div>
+              <div className="examPostTargetStudents">
+                {candidates.length === 0 ? <span className="muted">해당 학교/학년 학생이 없습니다.</span> : null}
+                {candidates.map((student) => {
+                  const checked = selectedIds.includes(student.studentId);
+                  return (
+                    <label className={checked ? "examPostTargetStudent active" : "examPostTargetStudent"} key={`${row.examPrepId}_${student.studentId}`}>
+                      <input checked={checked} onChange={() => toggleRowTargetStudent(row, student.studentId)} type="checkbox" />
+                      <span>{student.name}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+
       <div className="examPostList">
         {targets.length === 0 ? (
-          <div className="emptyState">시험일이 지난 제출 대상이 없습니다. 시험관리에서 수학 시험일을 입력하면 자동으로 대상이 생깁니다.</div>
+          <div className="emptyState">선택된 셀프체크 대상이 없습니다. 위에서 제출 받을 학생을 체크하세요.</div>
         ) : null}
         {targets.map((target) => {
           const submission = target.submission;
@@ -12105,6 +12092,7 @@ function MetricCard({ active = false, hint, icon, label, onClick, tone = "defaul
 function StudentPortalV2({
   examPrepRows = [],
   examPostSubmissions = [],
+  examPostTargetStudentIds = {},
   homeworks,
   lessons = [],
   materials = [],
@@ -12165,7 +12153,7 @@ function StudentPortalV2({
   const selectedStudentQuestions = studentQuestions
     .filter((question) => question.studentId === selectedStudent?.studentId)
     .sort((a, b) => String(b.updatedAt ?? b.createdAt ?? "").localeCompare(String(a.updatedAt ?? a.createdAt ?? "")));
-  const examPostTargets = buildExamPostTargetsForStudent(selectedStudent, examPrepRows, examPostSubmissions);
+  const examPostTargets = buildExamPostTargetsForStudent(selectedStudent, examPrepRows, examPostSubmissions, examPostTargetStudentIds);
 
   useEffect(() => {
     if (sessionStudentId) setSelectedStudentId(sessionStudentId);
@@ -16045,52 +16033,54 @@ function getStudentTopNotice(student, examPrepRows = [], schoolEvents = [], make
   return null;
 }
 
-function buildExamPostTargetsForStudent(student, examPrepRows = [], submissions = []) {
+function buildExamPostTargetsForStudent(student, examPrepRows = [], submissions = [], examPostTargetStudentIds = {}) {
   if (!student) return [];
   return dedupeExamPrepRowsForDisplay(examPrepRows)
     .filter((row) => schoolMatchesStudent(row.schoolName, student.schoolName))
     .filter((row) => gradeMatchesStudent(row.grade, student.grade))
-    .flatMap((row) => {
+    .filter((row) => {
+      const selectedStudentIds = examPostTargetStudentIds[row.examPrepId];
+      return Array.isArray(selectedStudentIds) && selectedStudentIds.includes(student.studentId);
+    })
+    .map((row) => {
       const entries = normalizeMathExamEntries(row).filter((entry) => entry.date);
       const fallbackEntries = entries.length
         ? entries
         : row.mathExamDate
           ? [createMathExamEntry(row, 0)]
           : [];
-      return fallbackEntries
-        .map((entry, index) => {
-          const targetId = `exam_post_${row.examPrepId}_${entry.id || index}_${student.studentId}`;
-          const submission =
-            submissions.find((item) => item.targetId === targetId) ??
-            submissions.find(
-              (item) =>
-                item.studentId === student.studentId &&
-                item.examPrepId === row.examPrepId &&
-                item.examDate === entry.date &&
-                (item.subject || "") === (entry.subject || row.subject || "")
-            ) ??
-            null;
-          const dueDate = addDaysInKorea(entry.date, 1);
-          const daysFromTodayToExam = getDateDiffInDays(today, entry.date);
-          const isOverdue = getDateDiffInDays(dueDate, today) > 0 && !submission?.submittedAt;
-          return {
-            dueDate,
-            daysFromTodayToExam,
-            examDate: entry.date,
-            examPrepId: row.examPrepId,
-            examCycle: row.examCycle || currentExamCycle,
-            grade: entry.grade || row.grade || student.grade,
-            isOverdue,
-            isOpen: true,
-            label: entry.label || examCycleLabel(row.examCycle || currentExamCycle),
-            schoolName: row.schoolName || student.schoolName,
-            studentId: student.studentId,
-            studentName: student.name,
-            subject: entry.subject || row.subject || "수학",
-            submission,
-            targetId
-          };
-        });
+      const sortedEntries = fallbackEntries.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+      const lastEntry = sortedEntries[sortedEntries.length - 1] ?? null;
+      const firstEntry = sortedEntries[0] ?? null;
+      const examDate = lastEntry?.date || row.mathExamDate || "";
+      const targetId = `exam_post_${row.examPrepId}_${student.studentId}`;
+      const subject = sortedEntries.length
+        ? Array.from(new Set(sortedEntries.map((entry) => formatMathExamEntryLabel(row, entry)).filter(Boolean))).join(", ")
+        : row.subject || "수학";
+      const submission =
+        submissions.find((item) => item.targetId === targetId) ??
+        submissions.find((item) => item.studentId === student.studentId && item.examPrepId === row.examPrepId) ??
+        null;
+      const dueDate = examDate ? addDaysInKorea(examDate, 1) : "";
+      const daysFromTodayToExam = examDate ? getDateDiffInDays(today, examDate) : 0;
+      const isOverdue = dueDate ? getDateDiffInDays(dueDate, today) > 0 && !submission?.submittedAt : false;
+      return {
+        dueDate,
+        daysFromTodayToExam,
+        examDate,
+        examPrepId: row.examPrepId,
+        examCycle: row.examCycle || currentExamCycle,
+        grade: firstEntry?.grade || row.grade || student.grade,
+        isOverdue,
+        isOpen: Boolean(examDate),
+        label: examCycleLabel(row.examCycle || currentExamCycle),
+        schoolName: row.schoolName || student.schoolName,
+        studentId: student.studentId,
+        studentName: student.name,
+        subject,
+        submission,
+        targetId
+      };
     })
     .sort((a, b) => String(a.submission?.submittedAt ? "1" : "0").localeCompare(String(b.submission?.submittedAt ? "1" : "0")) || b.examDate.localeCompare(a.examDate));
 }
