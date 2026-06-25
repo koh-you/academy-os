@@ -7680,13 +7680,30 @@ textarea.profileEditInput {
   align-items: center;
   background: #ffffff;
   border: 1px solid #d8e3f8;
-  border-radius: 999px;
+  border-radius: 8px;
   color: #334155;
   display: inline-flex;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 900;
-  gap: 6px;
-  padding: 7px 10px;
+  gap: 8px;
+  line-height: 1.2;
+  min-width: 94px;
+  padding: 7px 11px;
+  white-space: nowrap;
+}
+
+.examPostTargetStudent input[type="checkbox"] {
+  flex: 0 0 auto;
+  height: 16px;
+  margin: 0;
+  width: 16px;
+}
+
+.examPostTargetStudent span {
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  min-width: 0;
 }
 
 .examPostTargetStudent.active {
