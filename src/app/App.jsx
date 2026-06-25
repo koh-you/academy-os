@@ -3345,6 +3345,10 @@ export function App() {
     }
 
     const delayMinutes = mode === "delay30" ? 30 : 0;
+    if (isLessonAlimtalkScheduleExpired(lesson, delayMinutes)) {
+      updateLessonNotificationRecordStatuses(lesson, "예약 시간 지남");
+      return;
+    }
     const scheduledDate = getLessonAlimtalkScheduledDate(lesson, delayMinutes);
     const scheduledLabel = formatKoreaTimeLabel(scheduledDate);
     const nextJobs = lessonStudents.flatMap((student) => [
@@ -6407,7 +6411,9 @@ function LessonJournalDetail({
   const linkedMakeupTask = makeupTasks.find((task) => task.makeupTaskId === lesson.sourceMakeupTaskId);
   const notificationPlanMode = lessonNotificationPlan?.mode || "default";
   const hasAppliedNotificationPlan = Boolean(lessonNotificationPlan?.updatedAt);
-  const defaultAlimtalkTimeLabel = formatKoreaTimeLabel(getLessonAlimtalkScheduledDate(lesson, 0));
+  const defaultAlimtalkTimeLabel = formatKoreaTimeLabel(getLessonAlimtalkScheduledDate(lesson, 0, { allowPastFallback: false }));
+  const isDefaultScheduleExpired = isLessonAlimtalkScheduleExpired(lesson, 0);
+  const isDelayedScheduleExpired = isLessonAlimtalkScheduleExpired(lesson, 30);
   const isHomeworkMakeupLesson =
     lesson.lessonType === "makeup" &&
     (linkedMakeupTask?.taskType === "homework_makeup" ||
@@ -6564,11 +6570,11 @@ function LessonJournalDetail({
         <button className={showPreSendCheck ? "preSendCheckButton active" : "preSendCheckButton"} onClick={() => setShowPreSendCheck((current) => !current)} type="button">
           {showPreSendCheck ? "점검 표시 해제" : "발송 전 점검"}
         </button>
-        <span className="defaultScheduleHint">기본 예약 {defaultAlimtalkTimeLabel}</span>
+        <span className="defaultScheduleHint">{isDefaultScheduleExpired ? `기본 예약 시간 지남 · ${defaultAlimtalkTimeLabel}` : `기본 예약 ${defaultAlimtalkTimeLabel}`}</span>
         <button
           className={notificationPlanMode === "default" ? "schedulePlanButton active" : "schedulePlanButton"}
           onClick={() => onUpdateLessonNotificationPlan?.(lesson.lessonId, "default")}
-          disabled={hasAppliedNotificationPlan && notificationPlanMode === "default"}
+          disabled={isDefaultScheduleExpired || (hasAppliedNotificationPlan && notificationPlanMode === "default")}
           type="button"
         >
           기본 예약
@@ -6576,7 +6582,7 @@ function LessonJournalDetail({
         <button
           className={notificationPlanMode === "delay30" ? "schedulePlanButton active" : "schedulePlanButton"}
           onClick={() => onUpdateLessonNotificationPlan?.(lesson.lessonId, "delay30")}
-          disabled={hasAppliedNotificationPlan && notificationPlanMode === "delay30"}
+          disabled={isDelayedScheduleExpired || (hasAppliedNotificationPlan && notificationPlanMode === "delay30")}
           type="button"
         >
           30분 지연
@@ -6959,8 +6965,9 @@ function CommentComposerModal({
 }) {
   const [isSourceOpen, setIsSourceOpen] = useState(false);
   const planMode = ["default", "delay30", "none"].includes(initialSendTiming) ? initialSendTiming : "default";
-  const sendTiming = planMode === "none" ? "none" : "scheduled";
   const sendDelayMinutes = planMode === "delay30" ? 30 : 0;
+  const isScheduleExpired = planMode !== "none" && isLessonAlimtalkScheduleExpired(lesson, sendDelayMinutes);
+  const sendTiming = planMode === "none" || isScheduleExpired ? "none" : "scheduled";
   const isParent = audience === "parent";
   const field = isParent ? "teacherComment" : "studentComment";
   const comment = record?.[field] ?? "";
@@ -6986,11 +6993,13 @@ function CommentComposerModal({
   const safetyTone = getAlimtalkSafetyTone(audienceNotificationStatus, forceDryRun, forceTestRecipient);
   const safetyText = getAlimtalkSafetyText(audienceNotificationStatus, forceDryRun, forceTestRecipient);
   const missingNotificationEnv = notificationStatus?.missing ?? [];
-  const defaultScheduledDate = getLessonAlimtalkScheduledDate(lesson, 0);
-  const delayedScheduledDate = getLessonAlimtalkScheduledDate(lesson, 30);
+  const defaultScheduledDate = getLessonAlimtalkScheduledDate(lesson, 0, { allowPastFallback: false });
+  const delayedScheduledDate = getLessonAlimtalkScheduledDate(lesson, 30, { allowPastFallback: false });
   const currentPlanLabel =
     planMode === "none"
       ? "알림톡 없음"
+      : isScheduleExpired
+        ? `${planMode === "delay30" ? "30분 지연" : "기본 예약"} 시간 지남 · ${formatKoreaTimeLabel(planMode === "delay30" ? delayedScheduledDate : defaultScheduledDate)}`
       : planMode === "delay30"
         ? `30분 지연 ${formatKoreaTimeLabel(delayedScheduledDate)}`
         : `기본 예약 ${formatKoreaTimeLabel(defaultScheduledDate)}`;
@@ -7051,7 +7060,7 @@ function CommentComposerModal({
             </button>
             <button
               className="sendButton"
-              disabled={planMode === "none"}
+              disabled={planMode === "none" || isScheduleExpired}
               onClick={() =>
                 onSendComment(lesson, student, record, audience, {
                   delayMinutes: sendDelayMinutes,
@@ -7062,7 +7071,7 @@ function CommentComposerModal({
               }
               type="button"
             >
-              {actionLabel}
+              {isScheduleExpired ? "예약 시간 지남" : actionLabel}
             </button>
           </div>
           <div className="currentSchedulePlan" aria-label="현재 수업 발송 계획">
@@ -15499,12 +15508,22 @@ function getKoreaDateTimeString(date = new Date()) {
   }).format(date);
 }
 
-function getLessonAlimtalkScheduledDate(lesson, delayMinutes = 0) {
+function getLessonAlimtalkBaseScheduledDate(lesson, delayMinutes = 0) {
   const baseTime = getDayKey(lesson?.date) === "sat" ? "18:30" : "22:30";
   const baseDate = new Date(`${lesson?.date ?? getKoreaDateString()}T${baseTime}:00+09:00`);
   baseDate.setMinutes(baseDate.getMinutes() + delayMinutes);
+  return baseDate;
+}
+
+function isLessonAlimtalkScheduleExpired(lesson, delayMinutes = 0, now = new Date()) {
+  return getLessonAlimtalkBaseScheduledDate(lesson, delayMinutes).getTime() <= now.getTime();
+}
+
+function getLessonAlimtalkScheduledDate(lesson, delayMinutes = 0, options = {}) {
+  const { allowPastFallback = true } = options;
+  const baseDate = getLessonAlimtalkBaseScheduledDate(lesson, delayMinutes);
   const now = new Date();
-  if (baseDate.getTime() <= now.getTime()) {
+  if (allowPastFallback && baseDate.getTime() <= now.getTime()) {
     baseDate.setTime(now.getTime() + Math.max(1, delayMinutes) * 60 * 1000);
   }
   return baseDate.toISOString();
