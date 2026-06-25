@@ -2,9 +2,19 @@
 
 ## 상시 최우선 운영 원칙
 
-- 커밋/푸시 최우선: AI가 할 수 있는 변경 검수, 커밋, 푸시는 사용자가 따로 말하지 않아도 작업 완료 즉시 자동으로 진행한다. GitHub `main` 푸시로 Vercel/Render 자동 배포가 이어지는 흐름을 기본값으로 둔다.
+- 커밋/푸시 최우선: AI가 할 수 있는 변경 검수, Supabase SQL 적용, 커밋, 푸시는 사용자가 따로 말하지 않아도 작업 완료 즉시 자동으로 진행한다. GitHub `main` 푸시로 Vercel/Render 자동 배포가 이어지는 흐름을 기본값으로 둔다.
 - Supabase 저장 최우선: 새 기능이나 화면 수정 전후로 데이터가 Supabase 테이블 또는 `app_state`에 저장되는지 먼저 확인한다. 새로고침, 재로그인, 다른 기기 접속 후 사라질 수 있는 프론트-only/localStorage-only 운영 데이터가 있으면 기능 확장보다 저장 경로를 우선 보강한다.
+- SQL 적용 기본값: DB 스키마 변경이 필요하면 SQL 파일을 만들고 `npm run db:apply -- supabase/<file>.sql`로 직접 적용한다. CLI link 또는 DB URL 자격이 없어 적용하지 못하면 시도한 명령과 필요한 환경변수를 남긴다.
 - 검수 기본값: 운영 흐름에 영향이 있으면 `npm run test:production`과 `npm run build`를 실행하고, 통과 후 커밋/푸시한다. 비밀값과 `.env`는 절대 커밋하지 않는다.
+
+## 2026-06-25 SQL edit 직접 실행 원칙 반영
+
+- 상태: 완료
+- 사용자 요청: SQL edit이 필요한 작업은 직접 실행하고, 커밋/배포처럼 AI가 할 수 있는 일에 SQL edit도 포함해달라고 했다.
+- 조치: `AGENTS.md`와 `docs/current-worklog.md`의 운영 원칙에 Supabase SQL 직접 적용을 추가했다.
+- 조치: `scripts/apply-supabase-sql.cjs`가 `.env`를 읽어 `SUPABASE_DB_URL`이 있으면 직접 DB URL로 실행하고, 없으면 `SUPABASE_PROJECT_REF` 또는 `SUPABASE_URL`에서 project ref를 잡아 `SUPABASE_DB_PASSWORD`로 link를 시도하도록 보강했다.
+- 실행 시도: `npm run db:apply:notification-muting`을 실행했으나 현재 로컬은 Supabase CLI project link가 없고 `SUPABASE_DB_URL`, `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`가 없어 SQL 적용은 실패했다. `.env`에는 `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`만 존재한다.
+- 필요 조치: 운영 SQL 자동 적용을 위해 `SUPABASE_DB_URL` 또는 `SUPABASE_DB_PASSWORD`/CLI 로그인 상태가 필요하다. 값이 준비되면 같은 명령으로 SQL 적용 가능하다.
 
 ## 2026-06-25 Supabase CLI SQL 적용 자동화
 
