@@ -8,8 +8,7 @@
 먼저 아래 파일을 읽어주세요.
 1. AGENTS.md
 2. docs/current-worklog.md
-3. docs/supabase-cli-sql.md
-4. docs/session-handoff-2026-06-25-final.md
+3. docs/session-handoff-2026-06-25-final.md
 
 오늘 주요 완료 사항:
 - 시험관리 탈리 탭 제거
@@ -18,12 +17,11 @@
 - 알림관리는 개별 발송 화면 하나로 단순화
 - 교재/보강/공지 문자 템플릿과 AI 수정 추가
 - 수업일지 학생별 학부모/학생 알림톡 제외 기능 추가
-- Supabase SQL edit 자동화 추가
 - 운영 DB에 notification_muted_* 컬럼 SQL 적용 완료
 
 최신 커밋은 27df4a3 Apply notification mute SQL and harden SQL runner 입니다.
 작업 전 git status, npm run test:production, npm run build 기준으로 상태를 확인해주세요.
-DB 스키마 변경이 있으면 SQL 파일 작성 후 가능한 경우 npm run db:apply -- supabase/<file>.sql 로 직접 적용해주세요.
+DB 스키마 변경이 있으면 SQL 파일을 작성하고, 운영 Supabase SQL edit 적용은 사용자가 직접 진행합니다.
 작업 완료 후 문서 갱신, 커밋, 푸시까지 자동 진행해주세요.
 ```
 
@@ -36,7 +34,7 @@ DB 스키마 변경이 있으면 SQL 파일 작성 후 가능한 경우 npm run 
 - 작업트리 clean 확인
 
 주의:
-- 오늘 DB password가 채팅/이미지로 노출되었으므로, 장기적으로는 Supabase에서 DB password를 reset하고 로컬 `.env`에만 `SUPABASE_DB_URL`로 저장하는 편이 안전하다.
+- 오늘 DB password가 채팅/이미지로 노출되었으므로, 장기적으로는 Supabase에서 DB password를 reset하는 편이 안전하다.
 
 ## Completed Work
 
@@ -93,40 +91,17 @@ supabase/20260625_lesson_notification_muting.sql
 - `notification_muted_student`
 - `notification_muted_reason`
 
-### 4. SQL Edit 자동화
-
-- Supabase CLI 로컬 dev dependency 설치
-- 전역 설치 없이 실행 가능:
-
-```powershell
-npm run supabase -- --version
-```
-
-- SQL 적용 명령 추가:
-
-```powershell
-npm run db:apply -- supabase/<file>.sql
-npm run db:apply:notification-muting
-```
-
-- `scripts/apply-supabase-sql.cjs` 추가 및 보강
-- `supabase/.temp/` gitignore 처리
-- `docs/supabase-cli-sql.md` 작성
-- 여러 SQL 문장이 있는 파일도 문장별 임시 `.sql` 파일로 나눠 순차 실행되도록 보강
-
 ## Verification
 
 최근 검증 기준:
 
 ```powershell
-node --check scripts/apply-supabase-sql.cjs
 npm run test:production
 npm run build
 ```
 
 결과:
 
-- `node --check scripts/apply-supabase-sql.cjs` 통과
 - `npm run test:production` 178개 통과
 - `npm run build` 통과
 - 기존 Vite chunk size 경고만 있음
@@ -152,4 +127,3 @@ ee39afc Simplify notification center composer
 3. `예약 확인` 모달에서 해당 학생이 `알림 제외`로 보이는지 확인
 4. 기본예약/30분지연을 다시 눌러도 제외 학생의 해당 알림톡이 재생성되지 않는지 확인
 5. 제외 해제 후 현재 수업 발송 계획에 맞춰 예약이 다시 생기는지 확인
-

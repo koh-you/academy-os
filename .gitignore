@@ -6,7 +6,6 @@ render-env-input-template.txt
 node_modules/
 dist/
 .vite/
-supabase/.temp/
 
 *.log
 *.err.log

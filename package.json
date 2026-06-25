@@ -14,9 +14,6 @@
     "preview": "vite preview --host 127.0.0.1",
     "dispatch:notifications": "node scripts/dispatch-due-notifications.cjs",
     "slack:daily-schedule": "node scripts/send-slack-daily-schedule.cjs",
-    "supabase": "supabase",
-    "db:apply": "node scripts/apply-supabase-sql.cjs",
-    "db:apply:notification-muting": "node scripts/apply-supabase-sql.cjs supabase/20260625_lesson_notification_muting.sql",
     "check:encoding": "node scripts/check-encoding.cjs",
     "test:production": "node scripts/scenario-tests-production.cjs"
   },
@@ -27,8 +24,5 @@
     "solapi": "^6.0.1",
     "typescript": "^5.8.0",
     "vite": "^7.0.0"
-  },
-  "devDependencies": {
-    "supabase": "^2.107.0"
   }
 }

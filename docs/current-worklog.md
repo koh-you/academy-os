@@ -2,11 +2,10 @@
 
 ## 상시 최우선 운영 원칙
 
-- 커밋/푸시 최우선: AI가 할 수 있는 변경 검수, Supabase SQL 적용, 커밋, 푸시는 사용자가 따로 말하지 않아도 작업 완료 즉시 자동으로 진행한다. GitHub `main` 푸시로 Vercel/Render 자동 배포가 이어지는 흐름을 기본값으로 둔다.
+- 커밋/푸시 최우선: AI가 할 수 있는 변경 검수, 커밋, 푸시는 사용자가 따로 말하지 않아도 작업 완료 즉시 자동으로 진행한다. GitHub `main` 푸시로 Vercel/Render 자동 배포가 이어지는 흐름을 기본값으로 둔다.
 - Supabase 저장 최우선: 새 기능이나 화면 수정 전후로 데이터가 Supabase 테이블 또는 `app_state`에 저장되는지 먼저 확인한다. 새로고침, 재로그인, 다른 기기 접속 후 사라질 수 있는 프론트-only/localStorage-only 운영 데이터가 있으면 기능 확장보다 저장 경로를 우선 보강한다.
-- SQL 적용 기본값: DB 스키마 변경이 필요하면 SQL 파일을 만들고 `npm run db:apply -- supabase/<file>.sql`로 직접 적용한다. CLI link 또는 DB URL 자격이 없어 적용하지 못하면 시도한 명령과 필요한 환경변수를 남긴다.
-- SQL 자동 적용 자격: 가장 안정적인 방식은 로컬 `.env`에 운영 DB 연결 문자열 `SUPABASE_DB_URL=postgresql://...`을 저장하는 것이다. 대안은 `.env`에 `SUPABASE_PROJECT_REF=<project-ref>` 또는 `SUPABASE_URL=https://<project-ref>.supabase.co`, `SUPABASE_DB_PASSWORD=<db-password>`를 저장하고, Supabase CLI가 로그인된 상태이거나 `SUPABASE_ACCESS_TOKEN=<access-token>`이 환경변수로 있는 것이다. 이 값들은 모두 비밀값이므로 채팅/문서/커밋에 원문을 남기지 않는다.
-- 현재 집 PC SQL 자격 상태: 이전 세션에서 받은 Supabase direct DB URL과 DB password는 로컬 `.env`에 저장해 두었다. 다음 세션에서 같은 DB URL/password를 다시 묻지 않는다. 다만 direct DB host가 IPv6만 반환해 현재 환경에서는 `hostname resolving error`로 직접 연결이 실패할 수 있다. 이 경우 새로 물어볼 정보는 기존 DB URL이 아니라 Supabase Dashboard의 Session pooler connection string 또는 `SUPABASE_ACCESS_TOKEN`이다.
+- SQL 적용 기본값: DB 스키마 변경이 필요하면 `supabase/<file>.sql` 파일을 만들고, 적용이 필요한 SQL 파일명과 목적을 작업 결과에 명확히 남긴다. 운영 Supabase SQL edit 적용은 사용자가 직접 한다.
+- SQL 자동화 철회: SQL edit 자동화는 사용하지 않는다. 이전에 로컬에 저장했던 SQL 자동 적용 자격은 제거했다. 다음 세션에서 SQL 자동화를 위해 DB URL, DB password, access token을 다시 묻지 않는다.
 - 검수 기본값: 운영 흐름에 영향이 있으면 `npm run test:production`과 `npm run build`를 실행하고, 통과 후 커밋/푸시한다. 비밀값과 `.env`는 절대 커밋하지 않는다.
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
@@ -31,7 +30,7 @@
   - 운영 프론트엔드 `https://academy-os-blue.vercel.app`에서 로그인 후 수업일지, 알림관리, 시험관리 화면이 최신 UI로 보이는지 확인한다.
   - Render API가 최신 커밋 기준으로 동작하는지 알림 제외/시험 후 제출 대상 조회/공지 발송 화면에서 확인한다.
   - 운영 테스트가 필요하면 `npm run test:production`을 먼저 실행하고, 화면 수정이 있으면 `npm run build`도 실행한다.
-- 주의: 오늘 DB password가 채팅/이미지로 노출된 이력이 있으므로 장기적으로 Supabase DB password reset 후 로컬 `.env`에만 `SUPABASE_DB_URL`로 보관하는 것이 좋다.
+- 주의: 오늘 DB password가 채팅/이미지로 노출된 이력이 있으므로 장기적으로 Supabase DB password reset을 권장한다.
 
 ### P1. 시험 후 제출 실제 운영 검수
 
@@ -86,7 +85,7 @@
 - 조치: 학생 삭제 처리 시 `defaultClassTemplateId`를 함께 비워 앞으로 삭제/퇴원 학생이 반 배정값을 유지하지 않게 했다.
 - 조치: 반관리 카드 인원수, 상세 명단, 명단 수정 모달은 `status === "active"` 학생만 기준으로 표시하게 했다. 이미 운영 DB에 `paused + defaultClassTemplateId`로 남아 있는 학생도 화면에는 더 이상 나오지 않는다.
 - SQL 파일: 기존 운영 데이터 정리용 `supabase/20260625_clear_inactive_student_class_assignment.sql`을 추가했다. 이 SQL은 `paused` 또는 `withdrawn` 학생의 `default_class_template_id`를 `null`로 비운다.
-- SQL 적용 시도: `npm run db:apply -- supabase/20260625_clear_inactive_student_class_assignment.sql` 실행했으나 현재 세션에 linked Supabase project ref 또는 `SUPABASE_DB_URL`이 없어 `Cannot find project ref. Have you run supabase link?`로 실패했다. 적용하려면 로컬 `.env`에 `SUPABASE_DB_URL`을 두거나 `SUPABASE_PROJECT_REF`/`SUPABASE_DB_PASSWORD`로 link 가능 상태를 만들어야 한다.
+- SQL 적용: 운영 Supabase SQL edit은 사용자가 직접 진행한다.
 - 검증: `npm run test:production` 179개 통과, `npm run build` 통과. `node --check src/app/App.jsx`는 Node가 `.jsx` 확장자를 직접 처리하지 못해 실패했고, Vite build로 JSX 문법 검증을 대체했다. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
 
 ## 2026-06-25 좌측 출결체크 탭 제거
@@ -98,25 +97,14 @@
 - 저장 확인: 메뉴/렌더링 정리만 있으므로 Supabase SQL 변경은 필요 없다.
 - 검증: `npm run test:production` 180개 통과, `npm run build` 통과. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
 
-## 2026-06-25 SQL edit 직접 실행 원칙 반영
+## 2026-06-25 SQL edit 자동화 철회
 
 - 상태: 완료
-- 사용자 요청: SQL edit이 필요한 작업은 직접 실행하고, 커밋/배포처럼 AI가 할 수 있는 일에 SQL edit도 포함해달라고 했다.
-- 조치: `AGENTS.md`와 `docs/current-worklog.md`의 운영 원칙에 Supabase SQL 직접 적용을 추가했다.
-- 조치: `scripts/apply-supabase-sql.cjs`가 `.env`를 읽어 `SUPABASE_DB_URL`이 있으면 직접 DB URL로 실행하고, 없으면 `SUPABASE_PROJECT_REF` 또는 `SUPABASE_URL`에서 project ref를 잡아 `SUPABASE_DB_PASSWORD`로 link를 시도하도록 보강했다.
-- 조치: Supabase CLI `db query --file`이 여러 SQL 문장을 한 번에 처리하지 못하는 문제를 발견해, SQL 파일을 문장별 임시 `.sql` 파일로 나누어 순차 실행하도록 스크립트를 보강했다.
-- 실행: 사용자가 제공한 운영 DB password로 pooler session connection을 구성해 `npm run db:apply:notification-muting`을 실행했고, `supabase/20260625_lesson_notification_muting.sql`의 `ALTER TABLE` 및 `COMMENT` 문장을 운영 DB에 적용했다. `notification_muted_parent`, `notification_muted_student`, `notification_muted_reason` 컬럼 존재 확인 완료.
-- 검증: `node --check scripts/apply-supabase-sql.cjs`, `npm run test:production` 178개 통과, `npm run build` 통과. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
-
-## 2026-06-25 Supabase CLI SQL 적용 자동화
-
-- 상태: 완료
-- 사용자 요청: 로컬에 Supabase CLI를 설치해서 SQL edit도 자동화하겠다고 했다.
-- 조치: `supabase` CLI를 로컬 `devDependencies`에 추가했다. 전역 설치 없이 `npm run supabase -- ...`로 실행한다.
-- 조치: `scripts/apply-supabase-sql.cjs`를 추가했다. `supabase/` 폴더 안의 `.sql` 파일만 실행하도록 제한하고, `SUPABASE_DB_URL`이 있으면 직접 DB URL로, 없으면 linked project(`--linked`)로 적용한다.
-- 조치: `npm run db:apply -- supabase/<file>.sql`과 `npm run db:apply:notification-muting` 스크립트를 추가했다. Supabase CLI가 만드는 `supabase/.temp/`는 `.gitignore`에 추가했다.
-- 문서: `docs/supabase-cli-sql.md`에 최초 로그인/프로젝트 링크/SQL 적용 방법을 정리했다.
-- 검증: `npx supabase --version` 2.107.0 확인, `node --check scripts/apply-supabase-sql.cjs`, `npm run test:production` 178개 통과, `npm run build` 통과. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
+- 사용자 요청: SQL edit은 사용자가 직접 하며 자동화하지 않겠다고 했다. SQL 자동화 관련 정보와 도구를 모두 삭제하고, 커밋/푸시/배포 등 AI가 할 수 있는 나머지 작업은 이전처럼 자동 진행하라고 했다.
+- 조치: 로컬 `.env`에서 SQL 자동 적용 자격을 제거했다.
+- 조치: `scripts/apply-supabase-sql.cjs`, `docs/supabase-cli-sql.md`, npm SQL 적용 스크립트, 로컬 Supabase CLI dev dependency를 제거했다.
+- 조치: `AGENTS.md`와 `docs/current-worklog.md`의 운영 원칙을 “SQL 파일 작성 및 안내는 AI가 하고, 운영 Supabase SQL edit 적용은 사용자가 직접 한다”로 되돌렸다.
+- 유지: 검수, 문서 갱신, 커밋, 푸시는 사용자가 따로 말하지 않아도 AI가 자동 진행한다.
 
 ## 2026-06-25 수업일지 학생별 알림톡 제외
 

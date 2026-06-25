@@ -51,17 +51,11 @@ Supabase SQL Editor 원칙:
 5. SQL이 필요 없는 경우에도 “SQL Editor 작업 필요 없음”이라고 명확히 말하세요.
 6. 비밀키, .env 값, Supabase service role key, Render/Vercel/GitHub 토큰은 절대 출력하거나 commit하지 마세요.
 
-SQL 자동화 가능 여부:
-1. SQL Editor 수동 작업도 기술적으로는 자동화할 수 있습니다.
-2. 일반적인 방식은 GitHub Actions에서 Supabase CLI를 설치하고, GitHub Secrets에 저장한 `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD` 등을 사용해 migration을 적용하는 구조입니다.
-3. 다만 이 repo에는 현재 `.github` workflow나 Supabase CLI 자동 migration 설정이 없으므로, “이미 자동화되어 있다”고 말하면 안 됩니다.
-4. 자동화를 만들려면 먼저 다음을 확인해야 합니다.
-   - 기존 운영 DB와 `supabase/*.sql` 파일의 적용 이력이 일치하는지
-   - 이미 수동 적용한 SQL을 다시 실행해도 안전한지
-   - 실패 시 롤백/복구 방법이 있는지
-   - GitHub Secrets를 누가 설정할지
-5. 자동화 전까지는 SQL이 필요한 변경마다 사람이 Supabase SQL Editor에서 적용하는 방식으로 안내하세요.
-6. 사용자가 명시적으로 SQL 자동화를 요청하면, 먼저 구현하지 말고 위험/필요 secrets/권한/롤백 계획을 설명한 뒤 진행하세요.
+SQL 적용 원칙:
+1. SQL edit 자동화는 사용하지 않습니다.
+2. SQL이 필요한 변경마다 `supabase/*.sql` 파일을 만들고, 사용자가 Supabase SQL Editor에서 직접 적용하도록 안내하세요.
+3. SQL 파일명, 목적, 적용 순서를 작업 결과와 `docs/current-worklog.md`에 남기세요.
+4. SQL 자동 적용을 위해 DB URL, DB password, access token을 다시 묻지 마세요.
 
 이 프로젝트에서 특히 주의할 영역:
 1. 수업일지 - 보충관리/결석보강
