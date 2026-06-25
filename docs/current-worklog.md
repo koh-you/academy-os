@@ -97,6 +97,16 @@
 - 저장 확인: 메뉴/렌더링 정리만 있으므로 Supabase SQL 변경은 필요 없다.
 - 검증: `npm run test:production` 180개 통과, `npm run build` 통과. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
 
+## 2026-06-25 직전수업 가상 명단 inactive 학생 제외
+
+- 상태: 완료
+- 사용자 보고: 학생관리/반관리에서는 삭제한 테스트용 `고태영` 학생이 빠졌지만, `창동고 고1 수학 직전수업` 수업일지에는 계속 보였다.
+- 확인: 운영 API 기준 `students` 테이블에는 `고태영` row가 과거 기록 보존용 `status: "paused"` 상태로 남아 있다. `lessons` 테이블의 2026-06-29 저장 수업 row에는 고태영 studentId가 없고 3명만 저장되어 있었다.
+- 원인: 시험관리/학사일정 기반으로 프론트에서 만든 가상 직전수업 명단 생성 함수가 학교/학년만 보고 학생을 매칭하면서 `paused` 학생을 제외하지 않았다.
+- 조치: `getStudentsForSchoolCalendarEvent`에서 `status !== "active"` 학생을 제외했다. 저장된 수업의 `studentIds`에 비활성 학생 ID가 남아 있는 경우에도 수업일지 표시 명단과 알림톡 예약 대상에서 제외하도록 보강했다.
+- 저장 확인: 화면/예약 대상 필터 로직 변경이며 새 SQL은 필요 없다. `고태영` row 자체는 과거 기록 보존을 위해 `students` 테이블에 `paused` 상태로 남는다.
+- 검증: `npm run test:production` 182개 통과, `npm run build` 통과. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
+
 ## 2026-06-25 SQL edit 자동화 철회
 
 - 상태: 완료

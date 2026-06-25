@@ -2421,7 +2421,7 @@ export function App() {
   const selectedStudents = selectedLesson
     ? selectedLesson.studentIds
         .map((studentId) => students.find((student) => student.studentId === studentId))
-        .filter(Boolean)
+        .filter((student) => student && (student.status ?? "active") === "active")
     : [];
 
   useEffect(() => {
@@ -3440,7 +3440,9 @@ export function App() {
   function applyLessonNotificationPlan(lessonId, mode) {
     const lesson = lessons.find((item) => item.lessonId === lessonId);
     if (!lesson) return;
-    const lessonStudents = students.filter((student) => lesson.studentIds?.includes(student.studentId));
+    const lessonStudents = students.filter(
+      (student) => (student.status ?? "active") === "active" && lesson.studentIds?.includes(student.studentId)
+    );
     const jobIds = new Set(
       lessonStudents.flatMap((student) => [
         getLessonNotificationJobId(lesson.lessonId, student.studentId, "parent"),
@@ -3494,7 +3496,9 @@ export function App() {
 
   function scheduleLessonNotificationsAt(lesson, scheduledDate, mode = "manual") {
     if (!lesson?.lessonId || !scheduledDate) return;
-    const lessonStudents = students.filter((student) => lesson.studentIds?.includes(student.studentId));
+    const lessonStudents = students.filter(
+      (student) => (student.status ?? "active") === "active" && lesson.studentIds?.includes(student.studentId)
+    );
     const jobIds = new Set(
       lessonStudents.flatMap((student) => [
         getLessonNotificationJobId(lesson.lessonId, student.studentId, "parent"),
@@ -15903,6 +15907,7 @@ function createPreExamGeneratedKey(event = {}) {
 function getStudentsForSchoolCalendarEvent(students = [], event = {}) {
   const eventGrade = normalizeGradeLabel(event.grade || "");
   return students.filter((student) => {
+    if ((student.status ?? "active") !== "active") return false;
     const studentSchool = student.schoolName || "";
     const eventSchool = event.schoolName || "";
     if ((studentSchool || eventSchool) && !schoolNamesMatch(studentSchool, eventSchool, { allowBlank: false })) return false;
