@@ -10026,18 +10026,12 @@ function ExamAnalysisCenter({
             </section>
 
             {currentStage === "원본 입력" ? (
-            <section className="analysisTwoColumn">
-              <div className="panel analysisInputPanel">
+            <section className="panel analysisSourcePanel">
                 <div className="sectionHeader slim">
                   <div>
                     <h2>원본 입력</h2>
-                    <p className="muted">PDF 원본, OCR 텍스트, 강사 메모를 한 분석 문서에 모읍니다.</p>
+                    <p className="muted">기출 PDF를 올리고 AI 분석을 시작합니다. 세부 원문은 필요할 때만 열어 확인합니다.</p>
                   </div>
-                </div>
-                <div className="analysisWorkflowHint">
-                  <span><b>1</b> PDF Storage 저장</span>
-                  <span><b>2</b> PDF 텍스트 추출</span>
-                  <span><b>3</b> AI 1차 분석</span>
                 </div>
                 <div
                   className="sourceDropZone"
@@ -10053,8 +10047,8 @@ function ExamAnalysisCenter({
                   role="button"
                   tabIndex={0}
                 >
-                  <strong>기출 PDF 드래그 앤 드롭 / 선택 업로드</strong>
-                  <span>PDF를 올리면 Storage 저장과 텍스트 추출을 바로 시작합니다.</span>
+                  <strong>PDF 업로드</strong>
+                  <span>기출 PDF를 올리면 Storage 저장과 텍스트 추출을 바로 시작합니다.</span>
                   <span className="sourceDropAction">PDF 파일 선택</span>
                   <input
                     accept="application/pdf"
@@ -10088,67 +10082,50 @@ function ExamAnalysisCenter({
                     ))}
                   </div>
                 ) : null}
-                <label className="wideLabel">
-                  PDF 원본 파일/링크
-                  <input
-                    value={selectedAnalysis.sourceFileUrl}
-                    onChange={(event) => update("sourceFileUrl", event.target.value)}
-                    placeholder="Google Drive, Supabase Storage, PDF 링크"
-                  />
-                </label>
-                <label className="wideLabel">
-                  OCR 텍스트 / 문항 메모
-                  <textarea
-                    value={selectedAnalysis.rawExamText}
-                    onChange={(event) => update("rawExamText", event.target.value)}
-                    placeholder="문항 번호, 배점, 객관식/서술형, OCR 텍스트, 강사 메모를 붙여넣습니다."
-                    rows="8"
-                  />
-                </label>
-                <label className="wideLabel">
-                  AI 분석 프롬프트
-                  <textarea
-                    value={selectedAnalysis.aiPrompt}
-                    onChange={(event) => update("aiPrompt", event.target.value)}
-                    rows="8"
-                  />
-                </label>
-              </div>
 
-              <div className="panel analysisAiPanel">
-                <div className="sectionHeader slim">
+                <div className="sourcePrimaryAction">
                   <div>
-                    <h2>AI 1차 분석</h2>
-                    <p className="muted">AI 결과는 가안입니다. 다음 단계에서 강사 검토를 거쳐 확정합니다.</p>
+                    <strong>다음 단계</strong>
+                    <span>PDF 업로드 후 AI 분석을 시작하면 결과는 분석 검토 단계에서 확인합니다.</span>
                   </div>
                   <button
-                    className="softButton"
+                    className="primaryButton"
                     disabled={selectedAnalysis.aiStatus === "분석 중"}
                     onClick={() => onRunAnalysis(selectedAnalysis, aiSettings)}
                     type="button"
                   >
-                    {selectedAnalysis.aiStatus === "분석 중" ? "분석 중..." : "AI 분석 갱신"}
+                    {selectedAnalysis.aiStatus === "분석 중" ? "분석 중..." : "AI 분석 시작"}
                   </button>
                 </div>
-                <div className="analysisFieldStack">
-                  <label>
-                    시험 개요
-                    <textarea value={selectedAnalysis.aiOverview} onChange={(event) => update("aiOverview", event.target.value)} rows="4" />
+
+                <details className="sourceAdvancedDetails">
+                  <summary>원본 링크 · OCR 원문 · 프롬프트 보기</summary>
+                  <label className="wideLabel">
+                    PDF 원본 파일/링크
+                    <input
+                      value={selectedAnalysis.sourceFileUrl}
+                      onChange={(event) => update("sourceFileUrl", event.target.value)}
+                      placeholder="Google Drive, Supabase Storage, PDF 링크"
+                    />
                   </label>
-                  <label>
-                    단원별 출제 분포
-                    <textarea value={selectedAnalysis.unitDistribution} onChange={(event) => update("unitDistribution", event.target.value)} rows="5" />
+                  <label className="wideLabel">
+                    OCR 텍스트 / 문항 메모
+                    <textarea
+                      value={selectedAnalysis.rawExamText}
+                      onChange={(event) => update("rawExamText", event.target.value)}
+                      placeholder="문항 번호, 배점, 객관식/서술형, OCR 텍스트, 강사 메모를 붙여넣습니다."
+                      rows="8"
+                    />
                   </label>
-                  <label>
-                    킬러/준킬러 문항
-                    <textarea value={selectedAnalysis.killerProblems} onChange={(event) => update("killerProblems", event.target.value)} rows="5" />
+                  <label className="wideLabel">
+                    AI 분석 프롬프트
+                    <textarea
+                      value={selectedAnalysis.aiPrompt}
+                      onChange={(event) => update("aiPrompt", event.target.value)}
+                      rows="8"
+                    />
                   </label>
-                  <label>
-                    학생 실수 패턴
-                    <textarea value={selectedAnalysis.mistakePatterns} onChange={(event) => update("mistakePatterns", event.target.value)} rows="5" />
-                  </label>
-                </div>
-              </div>
+                </details>
             </section>
             ) : null}
 

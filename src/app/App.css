@@ -2715,6 +2715,16 @@ button {
   font-weight: 800;
 }
 
+.analysisSourcePanel {
+  display: grid;
+  gap: 16px;
+  max-width: 760px;
+}
+
+.analysisSourcePanel .sectionHeader {
+  margin-bottom: 0;
+}
+
 .sourceDropAction {
   background: #17213d;
   border-radius: 8px;
@@ -2781,6 +2791,51 @@ button {
   color: #64748b;
   font-size: 12px;
   font-weight: 800;
+}
+
+.sourcePrimaryAction {
+  align-items: center;
+  background: #f8fbff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 16px;
+}
+
+.sourcePrimaryAction div {
+  display: grid;
+  gap: 4px;
+}
+
+.sourcePrimaryAction strong {
+  color: #17213d;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.sourcePrimaryAction span {
+  color: #64748b;
+  font-weight: 800;
+}
+
+.sourceAdvancedDetails {
+  border-top: 1px solid #d8e3f8;
+  display: grid;
+  gap: 12px;
+  padding-top: 12px;
+}
+
+.sourceAdvancedDetails summary {
+  color: #34456b;
+  cursor: pointer;
+  font-weight: 900;
+  list-style-position: inside;
+}
+
+.sourceAdvancedDetails[open] summary {
+  margin-bottom: 12px;
 }
 
 .analysisWorkflowHint {
@@ -10352,7 +10407,8 @@ body.attendanceOnlyBody {
   }
 
   .portalHeader,
-  .homeworkActionCard {
+  .homeworkActionCard,
+  .sourcePrimaryAction {
     align-items: stretch;
     flex-direction: column;
   }

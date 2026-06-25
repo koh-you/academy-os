@@ -105,6 +105,15 @@
 - 저장 확인: UI 발견성 보강만이며 기존 `exam-analysis-sources` Storage 업로드와 `app_state.examAnalyses` 저장 흐름은 그대로 유지한다. SQL 변경은 없다.
 - 검증: `npm run test:production` 184개 통과, `npm run build` 통과. 기존 Vite 청크 크기 경고만 확인됨.
 
+## 2026-06-25 시험분석 원본 입력 레이아웃 단순화
+
+- 상태: 완료
+- 사용자 요청: 시험분석 원본 입력 화면이 여전히 복잡하므로 더 단순한 운영 흐름으로 정리해달라고 했다.
+- 조치: `원본 입력` 단계에서 오른쪽 AI 결과 편집 패널을 제거하고, PDF 업로드 박스와 `AI 분석 시작` 액션만 보이게 정리했다. AI 결과 확인/수정은 `분석 검토` 단계에서만 하도록 화면 역할을 분리했다.
+- 조치: `PDF 원본 파일/링크`, `OCR 텍스트 / 문항 메모`, `AI 분석 프롬프트`는 기본 노출하지 않고 `원본 링크 · OCR 원문 · 프롬프트 보기` 접이식 영역으로 이동했다.
+- 저장 확인: 기존 `exam-analysis-sources` Storage 업로드와 `app_state.examAnalyses` 저장 흐름을 그대로 사용한다. SQL 변경은 없다.
+- 검증: `npm run test:production` 184개 통과, `npm run build` 통과. 기존 Vite 청크 크기 경고만 확인됨.
+
 ## 2026-06-25 학생 삭제 후 반관리 잔존 보정
 
 - 상태: 완료
