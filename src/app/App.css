@@ -1309,6 +1309,16 @@ button {
   font-weight: 900;
 }
 
+.checkoutMissingSummary {
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  border-radius: 999px;
+  color: #9a3412;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 10px;
+}
+
 .schedulePlanButton {
   background: #f8fafc;
   border: 1px solid #d8e3f8;
@@ -1779,6 +1789,11 @@ button {
   font-size: 11px;
   font-weight: 700;
   line-height: 1.2;
+}
+
+.attendanceBadge .checkoutMissingText {
+  color: #c2410c;
+  font-weight: 900;
 }
 
 .attendance-present {

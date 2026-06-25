@@ -6931,6 +6931,10 @@ function LessonJournalDetail({
   const failedJobCount = lessonNotificationJobs.filter((job) => job.status === "failed").length;
   const todayTwoPmIso = new Date(`${today}T14:00:00+09:00`).toISOString();
   const canScheduleTodayTwoPm = lesson.date < today && Boolean(onScheduleLessonNotificationsAt);
+  const checkoutMissingStudents = students.filter((student) => {
+    const record = records.find((item) => item.studentId === student.studentId);
+    return hasMissingCheckOut(record);
+  });
   const isHomeworkMakeupLesson =
     lesson.lessonType === "makeup" &&
     (linkedMakeupTask?.taskType === "homework_makeup" ||
@@ -7093,6 +7097,11 @@ function LessonJournalDetail({
           {showPreSendCheck ? "점검 표시 해제" : "발송 전 점검"}
         </button>
         <span className="defaultScheduleHint">{isDefaultScheduleExpired ? `기본 예약 시간 지남 · ${defaultAlimtalkTimeLabel}` : `기본 예약 ${defaultAlimtalkTimeLabel}`}</span>
+        {checkoutMissingStudents.length > 0 ? (
+          <span className="checkoutMissingSummary" title={checkoutMissingStudents.map((student) => student.name).join(", ")}>
+            하원 미체크 {checkoutMissingStudents.length}명
+          </span>
+        ) : null}
         <button className="schedulePlanButton check" onClick={() => setReservationModalOpen(true)} type="button">
           예약 확인
         </button>
@@ -7200,6 +7209,7 @@ function LessonJournalDetail({
             const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
             const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
             const attendanceDisplay = getAttendanceDisplay(record);
+            const checkoutMissing = hasMissingCheckOut(record);
             const previousMemoContext = getPreviousLessonMemoContext(student);
             const previousRecord = previousMemoContext.previousRecord;
             const referenceRecord = previousMemoContext.referenceRecord;
@@ -7256,6 +7266,7 @@ function LessonJournalDetail({
                 >
                   <span>{attendanceDisplay.label}</span>
                   {attendanceDisplay.detail ? <small>{attendanceDisplay.detail}</small> : null}
+                  {checkoutMissing ? <small className="checkoutMissingText">하원 미체크</small> : null}
                 </button>
                 <EditableMemoCard
                   editKey={`${recordId}:lessonMaterial`}
@@ -16585,6 +16596,13 @@ function getAttendanceDisplay(record = {}) {
     checkOutTime ? `하원 ${checkOutTime}` : ""
   ].filter(Boolean).join(" · ");
   return { label, detail };
+}
+
+function hasMissingCheckOut(record = {}) {
+  const status = record.attendanceStatus ?? "pending";
+  const hasCheckIn = Boolean(record.checkInAt || record.checkInTime);
+  const hasCheckOut = Boolean(record.checkOutAt || record.checkOutTime);
+  return hasCheckIn && !hasCheckOut && ["checkin", "present", "late"].includes(status);
 }
 
 function applyManualAttendanceTimeFields(existingRecord = {}, values = {}, nowIso = new Date().toISOString()) {

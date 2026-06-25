@@ -86,6 +86,15 @@
 - 저장 확인: 기존 `lesson_student_records.attendance_reason`, `check_in_time`, `late_minutes`, `updated_at` 값을 사용하는 표시 변경이다. SQL 변경은 없다.
 - 검증: `npm run test:production` 통과, `npm run build` 통과. 기존 Vite 청크 크기 경고만 확인됨.
 
+## 2026-06-25 수업일지 하원 미체크 표시
+
+- 상태: 완료
+- 사용자 요청: 태블릿에서 하원을 찍지 않고 귀가한 학생을 어디에 표시하면 좋을지 논의한 뒤, 수업일지에 표시해달라고 했다.
+- 조치: `checkInAt/checkInTime`은 있지만 `checkOutAt/checkOutTime`이 없고 출결 상태가 `present`, `late`, `checkin`인 기록을 `하원 미체크`로 파생 판정하는 `hasMissingCheckOut`을 추가했다.
+- 조치: 수업일지 상단 발송 전 점검 영역에 `하원 미체크 n명` 요약을 표시하고, 학생별 출결 배지에도 `하원 미체크` 문구를 붙였다. 요약 chip의 title에는 대상 학생 이름 목록이 보인다.
+- 저장 확인: 기존 `lesson_student_records.check_in_at`, `check_in_time`, `check_out_at`, `check_out_time`, `attendance_status`를 읽어 표시만 추가했다. SQL 변경은 없다.
+- 검증: `npm run test:production` 통과, `npm run build` 통과. 기존 Vite 청크 크기 경고만 확인됨.
+
 ## 2026-06-25 학사일정 월간 캘린더 표현 개선
 
 - 상태: 완료
