@@ -117,6 +117,15 @@
 - 저장 확인: 프론트 생성 ID 보정만 있으므로 Supabase SQL edit은 필요 없다.
 - 검증: `npm run test:production` 183개 통과, `npm run build` 통과. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
 
+## 2026-06-25 테스트 학생 고태영 운영 데이터 hard delete
+
+- 상태: 완료
+- 사용자 요청: 테스트용 학생 `고태영` 데이터를 soft delete/paused 보존이 아니라 hard delete 처리한다.
+- 삭제 대상 확인: 운영 Supabase 기준 `students`에 `student_1782278942831`, 이름 `고태영`, 창동고 고1, `status: "paused"` 1건이 남아 있었다.
+- 연결 데이터 확인: 같은 studentId가 `lesson_student_records` 1건(`lsr_2026-06-24_월수금-4-7반_1781949067465_student_1782278942831`)에만 남아 있었고, `homeworks`, `makeup_tasks`, `notification_jobs`, `lessons.student_ids`, `resource_materials.student_ids`, `app_state`에는 남아 있지 않았다.
+- 조치: Supabase REST service role 경로로 `lesson_student_records`의 해당 1건을 먼저 삭제한 뒤 `students`의 해당 1건을 hard delete했다. SQL edit 자동화는 사용하지 않았다.
+- 검증: 삭제 후 `students`를 studentId/name 기준으로 재조회했고 0건, 연결 테이블 및 JSON 상태 조회도 모두 0건 또는 미포함으로 확인했다.
+
 ## 2026-06-25 SQL edit 자동화 철회
 
 - 상태: 완료
