@@ -2638,7 +2638,7 @@ button {
 .analysisPipeline {
   display: grid;
   gap: 10px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .pipelineStep {
@@ -2715,10 +2715,46 @@ button {
   font-weight: 800;
 }
 
+.analysisWorkflowHint {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.analysisWorkflowHint span {
+  align-items: center;
+  background: #f8fbff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  color: #475569;
+  display: flex;
+  font-size: 13px;
+  font-weight: 900;
+  gap: 8px;
+  padding: 10px;
+}
+
+.analysisWorkflowHint b {
+  align-items: center;
+  background: #17213d;
+  border-radius: 999px;
+  color: #ffffff;
+  display: inline-flex;
+  height: 22px;
+  justify-content: center;
+  width: 22px;
+}
+
 .analysisTwoColumn {
   display: grid;
   gap: 16px;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.analysisReviewGrid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
 }
 
 .analysisFieldStack {
@@ -2734,7 +2770,7 @@ button {
 }
 
 .analysisOutputGrid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .outputCard .sectionHeader span {
@@ -10223,6 +10259,7 @@ body.attendanceOnlyBody {
   .commentComposerGrid,
   .supplementReadableGrid,
   .analysisTwoColumn,
+  .analysisReviewGrid,
   .aiVariantWorkspace,
   .insightGrid,
   .analysisOutputGrid,
@@ -10241,8 +10278,9 @@ body.attendanceOnlyBody {
     grid-template-columns: 1fr;
   }
 
-  .analysisPipeline {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .analysisPipeline,
+  .analysisWorkflowHint {
+    grid-template-columns: 1fr;
   }
 
   .portalHeader,

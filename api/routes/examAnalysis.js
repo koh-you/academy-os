@@ -79,6 +79,7 @@ function buildExamAnalysisPrompt(payload) {
     '  "killerProblems": "킬러/준킬러 문항 분석",',
     '  "mistakePatterns": "학생 실수 패턴",',
     '  "studentAnalysisDraft": "학생 분석지 초안",',
+    '  "parentNoticeDraft": "학부모 안내문 초안",',
     '  "blogDraft": "블로그 초안",',
     '  "instagramDraft": "인스타 카드뉴스 7장 초안"',
     "}"
@@ -184,6 +185,7 @@ function createMockAnalysis(payload) {
     killerProblems: "킬러 후보: 조건을 여러 단계로 연결하는 문항\n준킬러 후보: 계산보다 이해와 식 변형에서 차이가 나는 문항\n강사 확인 필요: 실제 문항 번호와 배점",
     mistakePatterns: "조건 일부 누락, 부호 실수, 식 변형 과정 누락, 서술형 근거 부족이 예상됩니다.",
     studentAnalysisDraft: `${school} 학생들은 이번 시험에서 조건 해석과 풀이 과정 정리가 중요했습니다. 다음 시험 전에는 핵심 유형 반복과 서술형 근거 작성 훈련이 필요합니다.`,
+    parentNoticeDraft: `${school} ${subject} 시험은 조건 해석과 서술형 과정 정리가 중요한 시험으로 보입니다. 다음 시험 대비에서는 학생별 오답 원인과 학교별 출제 흐름을 함께 확인해 보완하겠습니다.`,
     blogDraft: `${school} ${subject} 시험 분석입니다. 이번 시험은 단순 계산보다 조건을 읽고 식으로 연결하는 힘이 중요했습니다. 으뜸수학 고태영T에서는 학생별 오답과 학교별 출제 흐름을 연결해 다음 시험 대비 방향을 잡습니다.`,
     instagramDraft: "1장 시험 총평\n2장 출제 단원\n3장 난이도 흐름\n4장 킬러문항 포인트\n5장 학생 실수 TOP3\n6장 다음 시험 대비법\n7장 으뜸수학 고태영T 안내"
   };
@@ -200,6 +202,7 @@ function normalizeAnalysisFields(fields, payload, rawText = "") {
     killerProblems: parsed.killerProblems || fallback.killerProblems,
     mistakePatterns: parsed.mistakePatterns || fallback.mistakePatterns,
     studentAnalysisDraft: parsed.studentAnalysisDraft || fallback.studentAnalysisDraft,
+    parentNoticeDraft: parsed.parentNoticeDraft || fallback.parentNoticeDraft,
     blogDraft: parsed.blogDraft || fallback.blogDraft,
     instagramDraft: parsed.instagramDraft || fallback.instagramDraft
   };

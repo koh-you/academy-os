@@ -890,9 +890,10 @@ function createDefaultExamAnalysis(examPrepRow = {}) {
     insightKiller: "문항 번호 / 배점:\n출제 단원:\n유형: 기존 반복 / 신유형 / 변형\n핵심 함정 한 줄:\n\n부연:",
     insightDirection: "이 학교 학생들에게 가장 강조할 점:\n실수 줄이는 핵심 팁:\n\n부연:",
     studentAnalysisDraft: "학생용 분석지는 A 총평 + B 단원별 인사이트 + D 학습 방향을 중심으로 생성합니다.",
+    parentNoticeDraft: "학부모 안내문은 시험 특징, 학생들이 조심할 점, 다음 대비 방향을 정중한 문장으로 정리합니다.",
     blogDraft: "블로그 초안은 학부모가 읽기 쉬운 톤으로 시험 개요, 킬러문항, 학습 방향을 연결합니다.",
     instagramDraft: `1장 표지\n2장 시험 한 줄 총평\n3장 출제 분포\n4장 킬러문항\n5장 학생 실수\n6장 학습 방향\n7장 ${academyBrandName} 안내`,
-    pipelineStage: "1차 AI 가안"
+    pipelineStage: "원본 입력"
   };
 }
 
@@ -9832,10 +9833,15 @@ function ExamAnalysisCenter({
   const linkedExamPrepRow = selectedAnalysis
     ? examPrepRows.find((row) => row.examPrepId === selectedAnalysis.examPrepId)
     : null;
-  const pipelineStages = ["1차 AI 가안", "강사 인사이트 추가", "최종 편집", "발행 완료"];
-  const currentStage = pipelineStages.includes(selectedAnalysis?.pipelineStage)
-    ? selectedAnalysis.pipelineStage
-    : pipelineStages[0];
+  const pipelineStages = ["원본 입력", "분석 검토", "산출물 작성"];
+  const stageAlias = {
+    "1차 AI 가안": "원본 입력",
+    "강사 인사이트 추가": "분석 검토",
+    "최종 편집": "산출물 작성",
+    "발행 완료": "산출물 작성"
+  };
+  const currentStage = stageAlias[selectedAnalysis?.pipelineStage] ??
+    (pipelineStages.includes(selectedAnalysis?.pipelineStage) ? selectedAnalysis.pipelineStage : pipelineStages[0]);
   useEffect(() => {
     if (!selectedAnalysisId && analyses[0]?.examAnalysisId) {
       setSelectedAnalysisId(analyses[0].examAnalysisId);
@@ -9867,9 +9873,9 @@ function ExamAnalysisCenter({
         <div>
           <p className="eyebrow">EXAM ANALYSIS</p>
           <h1>시험분석</h1>
-          <p className="muted">시험 원본을 AI로 분석하고, 강사 인사이트를 더해 블로그와 인스타 초안까지 만듭니다.</p>
+          <p className="muted">기출 PDF와 OCR 메모를 학교별 시험분석 DB로 구조화하고, 검토된 분석으로 학생/학부모 산출물을 만듭니다.</p>
         </div>
-        <button className="primaryButton" onClick={onAddAnalysis} type="button">+ 분석 추가</button>
+        <button className="primaryButton" onClick={onAddAnalysis} type="button">+ 분석 문서</button>
       </header>
 
       <div className={isListCollapsed ? "examAnalysisLayout listCollapsed" : "examAnalysisLayout"}>
@@ -9899,7 +9905,7 @@ function ExamAnalysisCenter({
                 >
                   <strong>{[analysis.schoolName, analysis.grade].filter(Boolean).join(" ") || "새 분석"}</strong>
                   <span>{[analysis.examName, analysis.subject].filter(Boolean).join(" · ") || "기본정보 미입력"}</span>
-                  <small>{analysis.pipelineStage}</small>
+                  <small>{stageAlias[analysis.pipelineStage] ?? analysis.pipelineStage}</small>
                 </button>
               ))}
             </div>
@@ -9962,11 +9968,19 @@ function ExamAnalysisCenter({
               ))}
             </section>
 
-            {currentStage === "1차 AI 가안" ? (
+            {currentStage === "원본 입력" ? (
             <section className="analysisTwoColumn">
               <div className="panel analysisInputPanel">
                 <div className="sectionHeader slim">
-                  <h2>시험 원본 · AI 입력</h2>
+                  <div>
+                    <h2>원본 입력</h2>
+                    <p className="muted">PDF 원본, OCR 텍스트, 강사 메모를 한 분석 문서에 모읍니다.</p>
+                  </div>
+                </div>
+                <div className="analysisWorkflowHint">
+                  <span><b>1</b> PDF/링크 기록</span>
+                  <span><b>2</b> OCR/문항 메모 입력</span>
+                  <span><b>3</b> AI 1차 분석</span>
                 </div>
                 <div
                   className="sourceDropZone"
@@ -9975,23 +9989,23 @@ function ExamAnalysisCenter({
                   role="button"
                   tabIndex={0}
                 >
-                  <strong>원본 파일 드래그 앤 드롭</strong>
-                  <span>PDF, 이미지, OCR 텍스트 파일명을 기록하고 메모에 첨부 흔적을 남깁니다.</span>
+                  <strong>기출 PDF 드래그 앤 드롭</strong>
+                  <span>현재는 파일명과 첨부 흔적을 기록합니다. OCR 텍스트는 아래 메모에 붙여 넣습니다.</span>
                 </div>
                 <label className="wideLabel">
-                  원본 파일/링크
+                  PDF 원본 파일/링크
                   <input
                     value={selectedAnalysis.sourceFileUrl}
                     onChange={(event) => update("sourceFileUrl", event.target.value)}
-                    placeholder="Google Drive, Notion, PDF 링크"
+                    placeholder="Google Drive, Supabase Storage, PDF 링크"
                   />
                 </label>
                 <label className="wideLabel">
-                  시험 원본 메모
+                  OCR 텍스트 / 문항 메모
                   <textarea
                     value={selectedAnalysis.rawExamText}
                     onChange={(event) => update("rawExamText", event.target.value)}
-                    placeholder="시험지 OCR 텍스트, 문항 목록, 사진에서 옮긴 핵심 내용을 붙여넣습니다."
+                    placeholder="문항 번호, 배점, 객관식/서술형, OCR 텍스트, 강사 메모를 붙여넣습니다."
                     rows="8"
                   />
                 </label>
@@ -10007,7 +10021,10 @@ function ExamAnalysisCenter({
 
               <div className="panel analysisAiPanel">
                 <div className="sectionHeader slim">
-                  <h2>AI 분석 필드</h2>
+                  <div>
+                    <h2>AI 1차 분석</h2>
+                    <p className="muted">AI 결과는 가안입니다. 다음 단계에서 강사 검토를 거쳐 확정합니다.</p>
+                  </div>
                   <button
                     className="softButton"
                     disabled={selectedAnalysis.aiStatus === "분석 중"}
@@ -10039,36 +10056,65 @@ function ExamAnalysisCenter({
             </section>
             ) : null}
 
-            {currentStage === "강사 인사이트 추가" ? (
-            <section className="panel teacherInsightPanel">
-              <div className="sectionHeader slim">
-                <div>
-                  <h2>강사 인사이트 4모듈</h2>
-                  <p className="muted">노션 마스터 기준: 인사이트 없는 분석지는 발행하지 않습니다.</p>
+            {currentStage === "분석 검토" ? (
+            <section className="analysisReviewGrid">
+              <div className="panel analysisAiPanel">
+                <div className="sectionHeader slim">
+                  <div>
+                    <h2>AI 구조화 필드</h2>
+                    <p className="muted">시험 원본에서 뽑은 1차 분석입니다. 틀린 추론은 바로 수정합니다.</p>
+                  </div>
+                </div>
+                <div className="analysisFieldStack">
+                  <label>
+                    시험 개요
+                    <textarea value={selectedAnalysis.aiOverview} onChange={(event) => update("aiOverview", event.target.value)} rows="4" />
+                  </label>
+                  <label>
+                    단원별 출제 분포
+                    <textarea value={selectedAnalysis.unitDistribution} onChange={(event) => update("unitDistribution", event.target.value)} rows="5" />
+                  </label>
+                  <label>
+                    킬러/준킬러 문항
+                    <textarea value={selectedAnalysis.killerProblems} onChange={(event) => update("killerProblems", event.target.value)} rows="5" />
+                  </label>
+                  <label>
+                    학생 실수 패턴
+                    <textarea value={selectedAnalysis.mistakePatterns} onChange={(event) => update("mistakePatterns", event.target.value)} rows="5" />
+                  </label>
                 </div>
               </div>
-              <div className="insightGrid">
-                <label>
-                  A. 총평
-                  <textarea value={selectedAnalysis.insightSummary} onChange={(event) => update("insightSummary", event.target.value)} rows="7" />
-                </label>
-                <label>
-                  B. 단원별 인사이트
-                  <textarea value={selectedAnalysis.insightUnits} onChange={(event) => update("insightUnits", event.target.value)} rows="7" />
-                </label>
-                <label>
-                  C. 킬러문항 분석
-                  <textarea value={selectedAnalysis.insightKiller} onChange={(event) => update("insightKiller", event.target.value)} rows="7" />
-                </label>
-                <label>
-                  D. 학습 방향
-                  <textarea value={selectedAnalysis.insightDirection} onChange={(event) => update("insightDirection", event.target.value)} rows="7" />
-                </label>
+
+              <div className="panel teacherInsightPanel">
+                <div className="sectionHeader slim">
+                  <div>
+                    <h2>강사 검토</h2>
+                    <p className="muted">강사 인사이트 없는 분석지는 확정하지 않습니다.</p>
+                  </div>
+                </div>
+                <div className="insightGrid">
+                  <label>
+                    A. 총평
+                    <textarea value={selectedAnalysis.insightSummary} onChange={(event) => update("insightSummary", event.target.value)} rows="7" />
+                  </label>
+                  <label>
+                    B. 단원별 인사이트
+                    <textarea value={selectedAnalysis.insightUnits} onChange={(event) => update("insightUnits", event.target.value)} rows="7" />
+                  </label>
+                  <label>
+                    C. 킬러문항 분석
+                    <textarea value={selectedAnalysis.insightKiller} onChange={(event) => update("insightKiller", event.target.value)} rows="7" />
+                  </label>
+                  <label>
+                    D. 학습 방향
+                    <textarea value={selectedAnalysis.insightDirection} onChange={(event) => update("insightDirection", event.target.value)} rows="7" />
+                  </label>
+                </div>
               </div>
             </section>
             ) : null}
 
-            {currentStage === "최종 편집" ? (
+            {currentStage === "산출물 작성" ? (
             <section className="analysisOutputGrid">
               <article className="panel outputCard">
                 <div className="sectionHeader slim">
@@ -10076,6 +10122,13 @@ function ExamAnalysisCenter({
                   <span>A+B+D</span>
                 </div>
                 <textarea value={selectedAnalysis.studentAnalysisDraft} onChange={(event) => update("studentAnalysisDraft", event.target.value)} rows="10" />
+              </article>
+              <article className="panel outputCard">
+                <div className="sectionHeader slim">
+                  <h2>학부모 안내문</h2>
+                  <span>A+D</span>
+                </div>
+                <textarea value={selectedAnalysis.parentNoticeDraft ?? ""} onChange={(event) => update("parentNoticeDraft", event.target.value)} rows="10" />
               </article>
               <article className="panel outputCard">
                 <div className="sectionHeader slim">
@@ -10091,49 +10144,6 @@ function ExamAnalysisCenter({
                 </div>
                 <textarea value={selectedAnalysis.instagramDraft} onChange={(event) => update("instagramDraft", event.target.value)} rows="10" />
               </article>
-            </section>
-            ) : null}
-
-            {currentStage === "발행 완료" ? (
-            <section className="panel analysisPublishPanel">
-              <div className="sectionHeader slim">
-                <div>
-                  <h2>발행 완료 확인</h2>
-                  <p className="muted">학생 분석지, 블로그 초안, 인스타 카드뉴스를 최종 발행 전에 한 번에 확인합니다.</p>
-                </div>
-                <span className="countBadge">{selectedAnalysis.aiStatus || "대기"}</span>
-              </div>
-              <div className="publishSummaryGrid">
-                <article>
-                  <strong>시험</strong>
-                  <span>{selectedAnalysis.schoolName} {selectedAnalysis.grade}</span>
-                  <small>{selectedAnalysis.examName} · {selectedAnalysis.subject}</small>
-                </article>
-                <article>
-                  <strong>AI 상태</strong>
-                  <span>{selectedAnalysis.aiStatus || "대기"}</span>
-                  <small>{selectedAnalysis.aiLastRunAt || "아직 실행 전"}</small>
-                </article>
-                <article>
-                  <strong>발행물</strong>
-                  <span>3종</span>
-                  <small>학생 분석지 · 블로그 · 인스타</small>
-                </article>
-              </div>
-              <div className="publishPreviewList">
-                <label>
-                  학생 분석지
-                  <textarea value={selectedAnalysis.studentAnalysisDraft} onChange={(event) => update("studentAnalysisDraft", event.target.value)} rows="7" />
-                </label>
-                <label>
-                  블로그 초안
-                  <textarea value={selectedAnalysis.blogDraft} onChange={(event) => update("blogDraft", event.target.value)} rows="7" />
-                </label>
-                <label>
-                  인스타 카드뉴스
-                  <textarea value={selectedAnalysis.instagramDraft} onChange={(event) => update("instagramDraft", event.target.value)} rows="7" />
-                </label>
-              </div>
             </section>
             ) : null}
           </section>
