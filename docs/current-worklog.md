@@ -84,8 +84,18 @@
 - 조치: 시험분석 파이프라인을 `원본 입력`, `분석 검토`, `산출물 작성` 3단계로 재구성했다. 원본 입력 단계에는 PDF/링크 기록, OCR/문항 메모 입력, AI 1차 분석 흐름을 명시했다. 분석 검토 단계에는 AI 구조화 필드와 강사 검토 필드를 같은 화면에서 비교/수정할 수 있게 배치했다. 산출물 작성 단계에는 학생 분석지, 학부모 안내문, 블로그 초안, 인스타 카드뉴스를 한 흐름으로 정리했다.
 - 데이터 확인: 시험분석 데이터는 기존 `app_state.examAnalyses` 문서 구조로 저장된다. `parentNoticeDraft` 필드를 기본값과 AI/mock 응답 정규화에 추가했으며, DB 스키마 변경은 필요 없다.
 - 호환성: 기존 저장 데이터의 `1차 AI 가안`, `강사 인사이트 추가`, `최종 편집`, `발행 완료` 단계명은 새 단계명으로 표시되도록 alias 처리했다.
-- 남은 과제: 현재 PDF 드래그 앤 드롭은 파일명/첨부 흔적과 OCR 메모를 기록하는 수준이다. 실제 PDF 파일 업로드, Supabase Storage 저장, OCR 자동 추출은 별도 구현 과제로 남긴다.
+- 후속 반영: 아래 `시험분석 PDF Storage 저장 및 텍스트 추출` 작업에서 실제 PDF 업로드와 텍스트형 PDF 자동 추출을 추가했다.
 - 검증: `npm run test:production` 183개 통과, `npm run build` 통과. 기존 Vite 청크 크기 경고만 확인됨.
+
+## 2026-06-25 시험분석 PDF Storage 저장 및 텍스트 추출
+
+- 상태: 완료
+- 사용자 요청: 위 워크플로우의 남은 과제였던 실제 PDF OCR/Storage 작업도 진행해달라고 했다.
+- 조치: 시험분석 원본 입력 드롭존을 실제 파일 선택/드롭 업로드로 연결했다. PDF는 서버 `/api/exam-analysis-sources`를 통해 Supabase Storage `exam-analysis-sources` 버킷에 저장되고, 저장된 파일은 서명 URL로 다시 열 수 있다. 업로드 결과는 `sourceFiles`, `sourceFileUrl`, `sourceUploadStatus`, `rawExamText`에 반영된다.
+- 텍스트 추출: 서버에 `pdf-parse` 기반 PDF 텍스트 추출을 추가했다. 텍스트형 PDF는 추출 결과가 `rawExamText`에 자동으로 붙고, 이미지 스캔형 PDF처럼 추출 텍스트가 없는 경우에는 수동 OCR/메모 입력 안내를 남긴다.
+- 저장 확인: 분석 문서 자체는 기존처럼 `app_state.examAnalyses`에 저장된다. 파일 원본은 Supabase Storage에 저장된다. DB 스키마 변경은 없으며 SQL edit은 필요 없다.
+- 주의: 이번 구현은 텍스트 레이어가 있는 PDF 자동 추출이다. 완전한 이미지 OCR, 페이지별 이미지 렌더링, 문항 단위 자동 분리는 별도 고도화 과제다.
+- 검증: `node --check api/server.js` 통과, `pdf-parse/lib/pdf-parse.js` import 확인, `npm run test:production` 184개 통과, `npm run build` 통과. 기존 Vite 청크 크기 경고만 확인됨.
 
 ## 2026-06-25 학생 삭제 후 반관리 잔존 보정
 

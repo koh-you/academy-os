@@ -1,4 +1,5 @@
 ﻿import http from "node:http";
+import pdfParse from "pdf-parse/lib/pdf-parse.js";
 import {
   deleteLesson,
   deleteLessonsBefore,
@@ -673,6 +674,59 @@ async function uploadExamPostFile(payload) {
   };
 }
 
+async function extractPdfText(buffer) {
+  try {
+    const result = await pdfParse(buffer);
+    return String(result.text ?? "").trim();
+  } catch {
+    return "";
+  }
+}
+
+async function uploadExamAnalysisSourceFile(payload) {
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    throw new Error("Supabase Storage 업로드에는 service role 설정이 필요합니다.");
+  }
+  const bucketId = "exam-analysis-sources";
+  await ensureExamSubmissionBucket(bucketId);
+  const { mimeType, buffer } = parseDataUrl(payload.dataUrl);
+  if (buffer.length > 20 * 1024 * 1024) throw new Error("파일은 20MB 이하만 업로드할 수 있습니다.");
+  const fileName = sanitizeStorageSegment(payload.fileName || `exam-source-${Date.now()}`);
+  const extension = fileName.includes(".") ? "" : (mimeType === "application/pdf" ? ".pdf" : "");
+  const storagePath = [
+    "exam-analysis",
+    sanitizeStorageSegment(payload.schoolName, "school"),
+    sanitizeStorageSegment(payload.grade, "grade"),
+    sanitizeStorageSegment(payload.examName, "exam"),
+    sanitizeStorageSegment(payload.analysisId, "analysis"),
+    `${Date.now()}-${fileName}${extension}`
+  ].join("/");
+
+  await supabaseStorageRequest(`object/${bucketId}/${storagePath}`, {
+    method: "PUT",
+    contentType: mimeType,
+    headers: { "x-upsert": "true" },
+    body: buffer
+  });
+
+  const extractedText = mimeType === "application/pdf" || /\.pdf$/i.test(fileName)
+    ? await extractPdfText(buffer)
+    : "";
+
+  return {
+    bucketId,
+    storagePath,
+    fileName,
+    fileType: mimeType,
+    fileSize: buffer.length,
+    signedUrl: await createSignedStorageUrl(bucketId, storagePath),
+    extractedText,
+    extractionStatus: extractedText ? "텍스트 추출 완료" : "텍스트 추출 없음",
+    uploadedAt: new Date().toISOString(),
+    source: "exam_analysis_source"
+  };
+}
+
 async function dispatchDueNotificationJobs({ forceDryRun = false, limit = 20, now = new Date().toISOString() } = {}) {
   const listed = await listNotificationJobs();
   const nowTime = new Date(now).getTime();
@@ -963,6 +1017,34 @@ const server = http.createServer(async (request, response) => {
   if (request.method === "GET" && requestUrl.pathname === "/api/exam-post-files/open") {
     try {
       const bucketId = requestUrl.searchParams.get("bucket") || "exam-submissions";
+      const storagePath = requestUrl.searchParams.get("path") || "";
+      if (!storagePath) throw new Error("파일 경로가 없습니다.");
+      const signedUrl = await createSignedStorageUrl(bucketId, storagePath);
+      response.writeHead(302, {
+        "Access-Control-Allow-Origin": getCorsOrigin(request),
+        Location: signedUrl
+      });
+      response.end();
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-sources") {
+    try {
+      const payload = await readJsonBody(request, { limitBytes: 28 * 1024 * 1024 });
+      const file = await uploadExamAnalysisSourceFile(payload);
+      sendJson(request, response, 200, { ok: true, file });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/exam-analysis-sources/open") {
+    try {
+      const bucketId = requestUrl.searchParams.get("bucket") || "exam-analysis-sources";
       const storagePath = requestUrl.searchParams.get("path") || "";
       if (!storagePath) throw new Error("파일 경로가 없습니다.");
       const signedUrl = await createSignedStorageUrl(bucketId, storagePath);

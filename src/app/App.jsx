@@ -707,10 +707,32 @@ async function uploadExamPostSubmissionFile(file, target, student) {
   return result.file;
 }
 
+async function uploadExamAnalysisSourceFile(file, analysis) {
+  const dataUrl = await readFileAsDataUrl(file);
+  const result = await postJson("/api/exam-analysis-sources", {
+    dataUrl,
+    fileName: file.name,
+    fileType: file.type,
+    analysisId: analysis.examAnalysisId,
+    schoolName: analysis.schoolName,
+    grade: analysis.grade,
+    subject: analysis.subject,
+    examName: analysis.examName,
+    examDate: analysis.examDate
+  });
+  return result.file;
+}
+
 function getExamPostFileOpenUrl(file) {
   if (file?.signedUrl) return file.signedUrl;
   if (!file?.storagePath) return "";
   return apiUrl(`/api/exam-post-files/open?bucket=${encodeURIComponent(file.bucketId || "exam-submissions")}&path=${encodeURIComponent(file.storagePath)}`);
+}
+
+function getExamAnalysisSourceOpenUrl(file) {
+  if (file?.signedUrl) return file.signedUrl;
+  if (!file?.storagePath) return "";
+  return apiUrl(`/api/exam-analysis-sources/open?bucket=${encodeURIComponent(file.bucketId || "exam-analysis-sources")}&path=${encodeURIComponent(file.storagePath)}`);
 }
 
 function postMakeupTask(makeupTask) {
@@ -865,6 +887,8 @@ function createDefaultExamAnalysis(examPrepRow = {}) {
     examName: examPrepRow.examCycle ? examCycleLabel(examPrepRow.examCycle) : "",
     examDate: "",
     sourceFileUrl: "",
+    sourceFiles: [],
+    sourceUploadStatus: "",
     rawExamText: "",
     aiProvider: "auto",
     aiModel: "server-default",
@@ -9829,6 +9853,7 @@ function ExamAnalysisCenter({
 }) {
   const [selectedAnalysisId, setSelectedAnalysisId] = useState(analyses[0]?.examAnalysisId ?? "");
   const [isListCollapsed, setIsListCollapsed] = useState(false);
+  const sourceFileInputRef = useRef(null);
   const selectedAnalysis = analyses.find((item) => item.examAnalysisId === selectedAnalysisId) ?? analyses[0];
   const linkedExamPrepRow = selectedAnalysis
     ? examPrepRows.find((row) => row.examPrepId === selectedAnalysis.examPrepId)
@@ -9853,18 +9878,50 @@ function ExamAnalysisCenter({
     onUpdateAnalysis(selectedAnalysis.examAnalysisId, field, value);
   }
 
+  async function attachSourceFile(file) {
+    if (!selectedAnalysis) return;
+    if (!file) return;
+    update("sourceUploadStatus", "PDF 원본을 Supabase Storage에 업로드하고 텍스트를 추출하는 중입니다...");
+    try {
+      const uploadedFile = await uploadExamAnalysisSourceFile(file, selectedAnalysis);
+      const openUrl = getExamAnalysisSourceOpenUrl(uploadedFile);
+      const extractionNote = uploadedFile.extractedText
+        ? `[PDF 텍스트 추출] ${uploadedFile.fileName}\n${uploadedFile.extractedText}`
+        : `[PDF 텍스트 추출 없음] ${uploadedFile.fileName}\n스캔 이미지형 PDF일 수 있습니다. OCR 텍스트를 아래에 직접 붙여 넣어 주세요.`;
+      onUpdateAnalysis(selectedAnalysis.examAnalysisId, "sourceFiles", [
+        uploadedFile,
+        ...(Array.isArray(selectedAnalysis.sourceFiles) ? selectedAnalysis.sourceFiles : [])
+      ]);
+      onUpdateAnalysis(selectedAnalysis.examAnalysisId, "sourceFileUrl", openUrl || uploadedFile.storagePath || uploadedFile.fileName);
+      onUpdateAnalysis(
+        selectedAnalysis.examAnalysisId,
+        "rawExamText",
+        [selectedAnalysis.rawExamText, extractionNote].filter(Boolean).join("\n\n")
+      );
+      onUpdateAnalysis(
+        selectedAnalysis.examAnalysisId,
+        "sourceUploadStatus",
+        uploadedFile.extractedText ? "업로드 완료 · PDF 텍스트 추출 완료" : "업로드 완료 · 자동 추출 텍스트 없음"
+      );
+    } catch (error) {
+      const fallbackNote = `[첨부 실패] ${file.name} (${Math.round(file.size / 1024)}KB)\n${error.message}`;
+      onUpdateAnalysis(
+        selectedAnalysis.examAnalysisId,
+        "rawExamText",
+        [selectedAnalysis.rawExamText, fallbackNote].filter(Boolean).join("\n\n")
+      );
+      onUpdateAnalysis(selectedAnalysis.examAnalysisId, "sourceUploadStatus", `업로드 실패 · ${error.message}`);
+    }
+  }
+
   function handleSourceFileDrop(event) {
     event.preventDefault();
-    if (!selectedAnalysis) return;
-    const file = event.dataTransfer?.files?.[0];
-    if (!file) return;
-    update("sourceFileUrl", file.name);
-    update(
-      "rawExamText",
-      [selectedAnalysis.rawExamText, `[첨부 파일] ${file.name} (${Math.round(file.size / 1024)}KB)`]
-        .filter(Boolean)
-        .join("\n")
-    );
+    attachSourceFile(event.dataTransfer?.files?.[0]);
+  }
+
+  function handleSourceFileSelect(event) {
+    attachSourceFile(event.target.files?.[0]);
+    event.target.value = "";
   }
 
   return (
@@ -9978,20 +10035,48 @@ function ExamAnalysisCenter({
                   </div>
                 </div>
                 <div className="analysisWorkflowHint">
-                  <span><b>1</b> PDF/링크 기록</span>
-                  <span><b>2</b> OCR/문항 메모 입력</span>
+                  <span><b>1</b> PDF Storage 저장</span>
+                  <span><b>2</b> PDF 텍스트 추출</span>
                   <span><b>3</b> AI 1차 분석</span>
                 </div>
                 <div
                   className="sourceDropZone"
+                  onClick={() => sourceFileInputRef.current?.click()}
                   onDragOver={(event) => event.preventDefault()}
                   onDrop={handleSourceFileDrop}
                   role="button"
                   tabIndex={0}
                 >
                   <strong>기출 PDF 드래그 앤 드롭</strong>
-                  <span>현재는 파일명과 첨부 흔적을 기록합니다. OCR 텍스트는 아래 메모에 붙여 넣습니다.</span>
+                  <span>PDF를 Storage에 저장하고, 추출 가능한 텍스트를 OCR 메모에 자동으로 붙입니다.</span>
+                  <input
+                    accept="application/pdf"
+                    className="hiddenFileInput"
+                    onChange={handleSourceFileSelect}
+                    ref={sourceFileInputRef}
+                    type="file"
+                  />
                 </div>
+                {selectedAnalysis.sourceUploadStatus ? (
+                  <small className={String(selectedAnalysis.sourceUploadStatus).includes("실패") ? "sourceUploadStatus failed" : "sourceUploadStatus"}>
+                    {selectedAnalysis.sourceUploadStatus}
+                  </small>
+                ) : null}
+                {Array.isArray(selectedAnalysis.sourceFiles) && selectedAnalysis.sourceFiles.length ? (
+                  <div className="sourceFileList">
+                    {selectedAnalysis.sourceFiles.map((file, index) => (
+                      <a
+                        href={getExamAnalysisSourceOpenUrl(file)}
+                        key={`${file.storagePath || file.fileName}_${index}`}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        <strong>{file.fileName}</strong>
+                        <span>{file.extractionStatus || "업로드됨"} · {Math.round((file.fileSize ?? 0) / 1024)}KB</span>
+                      </a>
+                    ))}
+                  </div>
+                ) : null}
                 <label className="wideLabel">
                   PDF 원본 파일/링크
                   <input

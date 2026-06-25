@@ -2715,6 +2715,57 @@ button {
   font-weight: 800;
 }
 
+.hiddenFileInput {
+  display: none;
+}
+
+.sourceUploadStatus {
+  color: #2563eb;
+  display: block;
+  font-weight: 900;
+  margin: -4px 0 12px;
+}
+
+.sourceUploadStatus.failed {
+  color: #dc2626;
+}
+
+.sourceFileList {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.sourceFileList a {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  color: #17213d;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  text-decoration: none;
+}
+
+.sourceFileList a:hover {
+  border-color: #2563eb;
+}
+
+.sourceFileList strong,
+.sourceFileList span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sourceFileList span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .analysisWorkflowHint {
   display: grid;
   gap: 8px;

@@ -116,6 +116,7 @@ check("32 resource upload and grouped student picker exist", hasAll(app, ["resou
 check("33 school calendar date modal and color editor exist", hasAll(app, ["SchoolDateScheduleModal", "calendarColorPicker", "openDateModal", "eventColorOptions"]));
 check("34 exam management self-check labels are wired", hasAll(app, ['id: "examPrep"', 'id: "postSubmit"', "셀프체크 대상", "examPostTargetStudent", "onSetExamPostTargetStudentIds"]) && !app.includes('id: "tallyAi"'));
 check("35 exam analysis uses source-review-output workflow", hasAll(app, ["pipelineStep", 'onClick={() => update("pipelineStage", stage)}', "sourceDropZone", "handleSourceFileDrop", "원본 입력", "분석 검토", "산출물 작성", "기출 PDF 드래그 앤 드롭", "parentNoticeDraft"]));
+check("35b exam analysis source PDF uploads to storage and extracts text", hasAll(app, ["uploadExamAnalysisSourceFile", "/api/exam-analysis-sources", "sourceFiles", "sourceUploadStatus", "PDF Storage 저장", "PDF 텍스트 추출", "getExamAnalysisSourceOpenUrl"]) && hasAll(serverSource, ["pdfParse", "uploadExamAnalysisSourceFile", "exam-analysis-sources", "/api/exam-analysis-sources/open"]));
 check("36 ai setting badges are hidden from work screens", !hasAll(app, ["aiVariantHeroActions", "aiModelSelectMock"]) && !app.includes("<h3>AI 모델</h3>"));
 
 check("37 exam publisher syncs across same term", hasAll(app, ["examCycleTermKey", "examPublisherLinkKey", "findLinkedPublisher", "syncPublisherAcrossExamTerm"]));
