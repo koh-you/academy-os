@@ -904,6 +904,18 @@ function safeIdPart(value = "") {
     .slice(0, 40);
 }
 
+function shortStableHash(value = "") {
+  let hash = 0;
+  for (const char of String(value)) {
+    hash = ((hash << 5) - hash + char.charCodeAt(0)) | 0;
+  }
+  return Math.abs(hash).toString(36).slice(0, 6);
+}
+
+function createPreExamLessonId(sourceId = "") {
+  return `lesson_pre_exam_${safeIdPart(sourceId)}_${shortStableHash(sourceId)}`;
+}
+
 function examCycleLabel(examCycle) {
   const [, semester, phase] = String(examCycle).match(/^20\d{2}-(1|2)-(mid|final)$/) ?? [];
   if (!semester || !phase) return examCycle;
@@ -15925,7 +15937,7 @@ function createPreExamLessonFromSchoolEvent(event = {}, students = []) {
   const sourceId = event.eventId || `${event.schoolName}_${event.grade}_${subject}_${event.date}`;
   const generatedKey = createPreExamGeneratedKey({ ...event, eventId: sourceId });
   return {
-    lessonId: `lesson_pre_exam_${safeIdPart(sourceId)}`,
+    lessonId: createPreExamLessonId(sourceId),
     classTemplateId: "",
     className: `${event.schoolName || "학교 미입력"} ${gradeLabel}${subject} 직전수업`,
     lessonType: "preExam",

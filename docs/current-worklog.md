@@ -107,6 +107,16 @@
 - 저장 확인: 화면/예약 대상 필터 로직 변경이며 새 SQL은 필요 없다. `고태영` row 자체는 과거 기록 보존을 위해 `students` 테이블에 `paused` 상태로 남는다.
 - 검증: `npm run test:production` 182개 통과, `npm run build` 통과. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
 
+## 2026-06-25 정의여고 직전수업 클릭 ID 충돌 보정
+
+- 상태: 완료
+- 사용자 보고: 수업일지에서 2026-06-30 `정의여고 고3 직전수업` pill을 누르면 2026-07-06 `정의여고 고1 직전수업` 일지가 열렸다.
+- 확인: 2026-06-30 정의여고 고3 직전수업은 시험관리 데이터에서 만든 가상 lesson이고, 2026-07-05/07-06 정의여고 고1 직전수업은 이미 저장된 lesson이다.
+- 원인: 가상 직전수업 `lessonId`가 `sourceId` 앞 40자만 사용했다. 정의여고 고1/고3 시험관리 source id가 긴 공통 prefix를 공유해 둘 다 `lesson_pre_exam_derived_math_exam_prep_2026-1-final_정의여고`로 잘렸고, 클릭 시 같은 ID를 가진 기존 저장 수업이 먼저 선택됐다.
+- 조치: 직전수업 생성 ID에 `sourceId` 전체값 기반의 짧은 안정 해시를 suffix로 붙였다. 기존 저장 lesson은 `sourceSchoolEventId`/호환 key로 계속 매칭하고, 새 가상 lesson끼리는 잘린 prefix가 같아도 서로 다른 ID를 가진다.
+- 저장 확인: 프론트 생성 ID 보정만 있으므로 Supabase SQL edit은 필요 없다.
+- 검증: `npm run test:production` 183개 통과, `npm run build` 통과. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
+
 ## 2026-06-25 SQL edit 자동화 철회
 
 - 상태: 완료
