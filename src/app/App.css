@@ -1332,9 +1332,90 @@ button {
   color: #334155;
 }
 
+.schedulePlanButton.check {
+  background: #ffffff;
+  border-color: #17213d;
+  color: #17213d;
+}
+
 .schedulePlanButton:disabled {
   cursor: default;
   opacity: 1;
+}
+
+.reservationStatusModal {
+  max-width: 760px;
+}
+
+.reservationSummaryGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 14px;
+}
+
+.reservationSummaryGrid div {
+  background: #f8fafc;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+}
+
+.reservationSummaryGrid span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.reservationSummaryGrid strong {
+  color: #0f172a;
+  font-size: 22px;
+}
+
+.reservationModalActions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.reservationModalActions span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.reservationStatusTable {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.reservationStatusRow {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr 1.2fr 1.2fr;
+  padding: 10px 12px;
+}
+
+.reservationStatusRow + .reservationStatusRow {
+  border-top: 1px solid #e2e8f0;
+}
+
+.reservationStatusRow.head {
+  background: #f8fafc;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.reservationStatusRow span {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .commentEditorCell {

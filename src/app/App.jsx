@@ -454,6 +454,17 @@ function getCommentStatusLabel(comment = "", sendStatus = "") {
   return normalizeMessageText(comment) ? "작성됨 · 발송 전" : "미작성";
 }
 
+function formatNotificationJobStatus(job) {
+  if (!job) return "없음";
+  if (job.status === "scheduled") return `예약 중 · ${formatKoreaTimeLabel(job.scheduledAt)}`;
+  if (job.status === "sent") return "발송 완료";
+  if (job.status === "dry_run") return "테스트 기록";
+  if (job.status === "failed") return `실패${job.error ? ` · ${job.error}` : ""}`;
+  if (job.status === "canceled") return "취소";
+  if (job.status === "draft") return "초안";
+  return job.status || "확인 필요";
+}
+
 const today = getKoreaDateString();
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8787").replace(/\/$/, "");
 
@@ -3405,6 +3416,44 @@ export function App() {
     updateLessonNotificationRecordStatuses(lesson, `예약 중 · ${scheduledLabel}`);
   }
 
+  function scheduleLessonNotificationsAt(lesson, scheduledDate, mode = "manual") {
+    if (!lesson?.lessonId || !scheduledDate) return;
+    const lessonStudents = students.filter((student) => lesson.studentIds?.includes(student.studentId));
+    const jobIds = new Set(
+      lessonStudents.flatMap((student) => [
+        getLessonNotificationJobId(lesson.lessonId, student.studentId, "parent"),
+        getLessonNotificationJobId(lesson.lessonId, student.studentId, "student")
+      ])
+    );
+    const nextJobs = lessonStudents.flatMap((student) => [
+      buildLessonNotificationJob(lesson, student, "parent", scheduledDate, mode),
+      buildLessonNotificationJob(lesson, student, "student", scheduledDate, mode)
+    ]);
+    const scheduledLabel = formatKoreaTimeLabel(scheduledDate);
+    setNotificationJobs((current) => [
+      ...nextJobs,
+      ...current.filter((job) => !jobIds.has(job.notificationJobId))
+    ]);
+    nextJobs.forEach((notificationJob) =>
+      postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
+    );
+    updateLessonNotificationRecordStatuses(lesson, `예약 중 · ${scheduledLabel}`);
+  }
+
+  function handleScheduleLessonNotificationsAt(lessonId, scheduledDate) {
+    const lesson = calendarLessons.find((item) => item.lessonId === lessonId) ?? lessons.find((item) => item.lessonId === lessonId);
+    if (!lesson) return;
+    setLessonNotificationPlans((current) => ({
+      ...current,
+      [lesson.lessonId]: {
+        mode: "manual",
+        scheduledAt: scheduledDate,
+        updatedAt: new Date().toISOString()
+      }
+    }));
+    scheduleLessonNotificationsAt(lesson, scheduledDate, "manual");
+  }
+
   function syncPreviousHomeworkStatusFromAssignment(lesson, student, assignmentStatus) {
     const homeworkStatus = getHomeworkStatusFromAssignmentStatus(assignmentStatus);
     const normalizedAssignmentStatus = normalizeAssignmentStatusValue(assignmentStatus);
@@ -3638,6 +3687,7 @@ export function App() {
             generatedLessonControls={generatedLessonControls}
             integrationStatus={integrationStatus}
             lessonNotificationPlans={lessonNotificationPlans}
+            notificationJobs={notificationJobs}
             lessons={calendarLessons}
             lessonsForDate={lessonsForDate}
             makeupTasks={makeupTasks}
@@ -3675,6 +3725,7 @@ export function App() {
             onSaveRecord={handleSaveRecord}
             onSendComment={handleSendLessonComment}
             onSelectLesson={setSelectedLessonId}
+            onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
             onUndoLessonAction={handleUndoLessonAction}
             onUpdateHomework={handleUpdateHomework}
             onUpdateLessonNotificationPlan={handleUpdateLessonNotificationPlan}
@@ -5543,6 +5594,7 @@ function TeacherLessonHubV2({
   lessons,
   makeupTasks = [],
   materials = [],
+  notificationJobs = [],
   records,
   saveStates,
   selectedDate,
@@ -5569,6 +5621,7 @@ function TeacherLessonHubV2({
   onPolishComment,
   onPolishPreparationNotice,
   onSaveRecord,
+  onScheduleLessonNotificationsAt,
   onSendComment,
   onSelectLesson,
   onUndoLessonAction,
@@ -5706,6 +5759,7 @@ function TeacherLessonHubV2({
           generatedLessonControls={generatedLessonControls}
           integrationStatus={integrationStatus}
           lessonNotificationPlan={lessonNotificationPlans[selectedLesson.lessonId] ?? { mode: "default" }}
+          notificationJobs={notificationJobs}
           homeworks={homeworks}
           lesson={selectedLesson}
           lessons={lessons}
@@ -5723,6 +5777,7 @@ function TeacherLessonHubV2({
           onPolishComment={onPolishComment}
           onPolishPreparationNotice={onPolishPreparationNotice}
           onSaveRecord={onSaveRecord}
+          onScheduleLessonNotificationsAt={onScheduleLessonNotificationsAt}
           onSendComment={onSendComment}
           onUpdateExamSundayMakeupBlocks={onUpdateExamSundayMakeupBlocks}
           onUpdateHomework={onUpdateHomework}
@@ -6431,11 +6486,13 @@ function LessonJournalDetail({
   onPolishComment,
   onPolishPreparationNotice,
   onSaveRecord,
+  onScheduleLessonNotificationsAt,
   onSendComment,
   onUpdateExamSundayMakeupBlocks,
   onUpdateHomework,
   onUpdateLessonNotificationPlan,
   onUpdateMakeupTask,
+  notificationJobs = [],
   records,
   saveStates,
   students
@@ -6444,6 +6501,7 @@ function LessonJournalDetail({
   const [bulkNextHomework, setBulkNextHomework] = useState("");
   const [commentModal, setCommentModal] = useState(null);
   const [prepMemoModal, setPrepMemoModal] = useState(null);
+  const [reservationModalOpen, setReservationModalOpen] = useState(false);
   const [editingMemoKey, setEditingMemoKey] = useState("");
   const [showPreSendCheck, setShowPreSendCheck] = useState(false);
   const [studentPreviewId, setStudentPreviewId] = useState("");
@@ -6454,6 +6512,15 @@ function LessonJournalDetail({
   const defaultAlimtalkTimeLabel = formatKoreaTimeLabel(getLessonAlimtalkScheduledDate(lesson, 0, { allowPastFallback: false }));
   const isDefaultScheduleExpired = isLessonAlimtalkScheduleExpired(lesson, 0);
   const isDelayedScheduleExpired = isLessonAlimtalkScheduleExpired(lesson, 30);
+  const lessonNotificationJobs = notificationJobs.filter((job) => job.lessonId === lesson.lessonId);
+  const scheduledParentCount = lessonNotificationJobs.filter((job) => job.notificationType === "parent_comment" && job.status === "scheduled").length;
+  const scheduledStudentCount = lessonNotificationJobs.filter((job) => job.notificationType === "student_comment" && job.status === "scheduled").length;
+  const sentParentCount = lessonNotificationJobs.filter((job) => job.notificationType === "parent_comment" && job.status === "sent").length;
+  const sentStudentCount = lessonNotificationJobs.filter((job) => job.notificationType === "student_comment" && job.status === "sent").length;
+  const canceledJobCount = lessonNotificationJobs.filter((job) => job.status === "canceled").length;
+  const failedJobCount = lessonNotificationJobs.filter((job) => job.status === "failed").length;
+  const todayTwoPmIso = new Date(`${today}T14:00:00+09:00`).toISOString();
+  const canScheduleTodayTwoPm = lesson.date < today && Boolean(onScheduleLessonNotificationsAt);
   const isHomeworkMakeupLesson =
     lesson.lessonType === "makeup" &&
     (linkedMakeupTask?.taskType === "homework_makeup" ||
@@ -6576,6 +6643,11 @@ function LessonJournalDetail({
     };
   }
 
+  function getStudentReservationStatus(student, target) {
+    const notificationType = target === "student" ? "student_comment" : "parent_comment";
+    return lessonNotificationJobs.find((job) => job.studentId === student.studentId && job.notificationType === notificationType) ?? null;
+  }
+
   return (
     <section className="lessonJournalPage">
       <header className="pageTop lessonJournalHeader">
@@ -6611,6 +6683,9 @@ function LessonJournalDetail({
           {showPreSendCheck ? "점검 표시 해제" : "발송 전 점검"}
         </button>
         <span className="defaultScheduleHint">{isDefaultScheduleExpired ? `기본 예약 시간 지남 · ${defaultAlimtalkTimeLabel}` : `기본 예약 ${defaultAlimtalkTimeLabel}`}</span>
+        <button className="schedulePlanButton check" onClick={() => setReservationModalOpen(true)} type="button">
+          예약 확인
+        </button>
         <button
           className={notificationPlanMode === "default" ? "schedulePlanButton active" : "schedulePlanButton"}
           onClick={() => onUpdateLessonNotificationPlan?.(lesson.lessonId, "default")}
@@ -6635,6 +6710,64 @@ function LessonJournalDetail({
           알림톡 없음
         </button>
       </section>
+
+      {reservationModalOpen ? (
+        <Modal
+          className="reservationStatusModal"
+          title="알림톡 예약 확인"
+          subtitle={`${lesson.date} · ${lesson.className}`}
+          onClose={() => setReservationModalOpen(false)}
+        >
+          <div className="reservationSummaryGrid">
+            <div>
+              <span>학부모 예약</span>
+              <strong>{scheduledParentCount}건</strong>
+            </div>
+            <div>
+              <span>학생 예약</span>
+              <strong>{scheduledStudentCount}건</strong>
+            </div>
+            <div>
+              <span>발송 완료</span>
+              <strong>{sentParentCount + sentStudentCount}건</strong>
+            </div>
+            <div>
+              <span>취소/실패</span>
+              <strong>{canceledJobCount + failedJobCount}건</strong>
+            </div>
+          </div>
+          <div className="reservationModalActions">
+            <span>예약 기준: 실제 서버 발송 대기열</span>
+            {canScheduleTodayTwoPm ? (
+              <button
+                className="sendButton"
+                onClick={() => onScheduleLessonNotificationsAt?.(lesson.lessonId, todayTwoPmIso)}
+                type="button"
+              >
+                오늘 14:00 일괄예약
+              </button>
+            ) : null}
+          </div>
+          <div className="reservationStatusTable">
+            <div className="reservationStatusRow head">
+              <span>학생</span>
+              <span>학부모</span>
+              <span>학생</span>
+            </div>
+            {students.map((student) => {
+              const parentJob = getStudentReservationStatus(student, "parent");
+              const studentJob = getStudentReservationStatus(student, "student");
+              return (
+                <div className="reservationStatusRow" key={student.studentId}>
+                  <strong>{student.name}</strong>
+                  <span>{formatNotificationJobStatus(parentJob)}</span>
+                  <span>{formatNotificationJobStatus(studentJob)}</span>
+                </div>
+              );
+            })}
+          </div>
+        </Modal>
+      ) : null}
 
       <section className="panel journalTablePanel">
         <div className="journalTable">
