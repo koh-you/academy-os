@@ -100,3 +100,18 @@ $env:SUPABASE_ACCESS_TOKEN="<supabase-access-token>"
 - `.env`는 Git에 올리지 않는다.
 - DB password/access token/DB URL은 작업 문서에 원문을 쓰지 않는다.
 - DB password가 채팅이나 이미지로 노출되면 Supabase에서 password reset 후 새 값을 로컬 `.env`에만 저장한다.
+
+## 5. 현재 로컬 자격 상태
+
+2026-06-25 기준, 이전 대화세션에서 받은 direct DB URL과 DB password는 이 PC의 로컬 `.env`에 저장되어 있다. 다음 세션에서 같은 DB URL 또는 DB password를 다시 묻지 않는다.
+
+현재 확인된 제약:
+
+- `SUPABASE_DB_URL` direct host는 `db.<project-ref>.supabase.co` 형식이다.
+- 이 host가 현재 DNS에서 IPv6 주소만 반환해, 로컬 Supabase CLI 연결이 `hostname resolving error`로 실패할 수 있다.
+- `SUPABASE_PROJECT_REF`와 `SUPABASE_DB_PASSWORD`도 `.env`에 저장되어 있지만, linked project 방식은 Supabase CLI 로그인 또는 `SUPABASE_ACCESS_TOKEN`이 추가로 필요하다.
+
+따라서 SQL 적용이 또 실패하면 같은 DB URL을 다시 묻지 말고 아래 둘 중 하나만 요청한다.
+
+- Supabase Dashboard의 Session pooler connection string
+- `SUPABASE_ACCESS_TOKEN`

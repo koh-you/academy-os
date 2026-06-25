@@ -6,6 +6,7 @@
 - Supabase 저장 최우선: 새 기능이나 화면 수정 전후로 데이터가 Supabase 테이블 또는 `app_state`에 저장되는지 먼저 확인한다. 새로고침, 재로그인, 다른 기기 접속 후 사라질 수 있는 프론트-only/localStorage-only 운영 데이터가 있으면 기능 확장보다 저장 경로를 우선 보강한다.
 - SQL 적용 기본값: DB 스키마 변경이 필요하면 SQL 파일을 만들고 `npm run db:apply -- supabase/<file>.sql`로 직접 적용한다. CLI link 또는 DB URL 자격이 없어 적용하지 못하면 시도한 명령과 필요한 환경변수를 남긴다.
 - SQL 자동 적용 자격: 가장 안정적인 방식은 로컬 `.env`에 운영 DB 연결 문자열 `SUPABASE_DB_URL=postgresql://...`을 저장하는 것이다. 대안은 `.env`에 `SUPABASE_PROJECT_REF=<project-ref>` 또는 `SUPABASE_URL=https://<project-ref>.supabase.co`, `SUPABASE_DB_PASSWORD=<db-password>`를 저장하고, Supabase CLI가 로그인된 상태이거나 `SUPABASE_ACCESS_TOKEN=<access-token>`이 환경변수로 있는 것이다. 이 값들은 모두 비밀값이므로 채팅/문서/커밋에 원문을 남기지 않는다.
+- 현재 집 PC SQL 자격 상태: 이전 세션에서 받은 Supabase direct DB URL과 DB password는 로컬 `.env`에 저장해 두었다. 다음 세션에서 같은 DB URL/password를 다시 묻지 않는다. 다만 direct DB host가 IPv6만 반환해 현재 환경에서는 `hostname resolving error`로 직접 연결이 실패할 수 있다. 이 경우 새로 물어볼 정보는 기존 DB URL이 아니라 Supabase Dashboard의 Session pooler connection string 또는 `SUPABASE_ACCESS_TOKEN`이다.
 - 검수 기본값: 운영 흐름에 영향이 있으면 `npm run test:production`과 `npm run build`를 실행하고, 통과 후 커밋/푸시한다. 비밀값과 `.env`는 절대 커밋하지 않는다.
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
