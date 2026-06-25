@@ -1190,6 +1190,23 @@ export async function upsertNotificationJob(job) {
   return { source: databaseSource, notificationJob: fromNotificationJobRow(row) };
 }
 
+export async function deleteNotificationJob(notificationJobId) {
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, deletedNotificationJobIds: [notificationJobId] };
+  }
+
+  const encodedId = encodeURIComponent(notificationJobId);
+  const deletableStatuses = "failed,draft,dry_run,canceled";
+  const rows = await deleteRows(
+    "notification_jobs",
+    `notification_job_id=eq.${encodedId}&status=in.(${deletableStatuses})`
+  );
+  return {
+    source: databaseSource,
+    deletedNotificationJobIds: rows.map((row) => row.notification_job_id).filter(Boolean)
+  };
+}
+
 export async function upsertLessonStudentRecord(record) {
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
     return { source: fallbackSource, record };

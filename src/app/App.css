@@ -4187,7 +4187,7 @@ button:disabled {
 .notificationTableRow {
   display: grid;
   gap: 12px;
-  grid-template-columns: 110px 140px 100px 160px 130px minmax(260px, 1fr);
+  grid-template-columns: 110px 140px 100px 160px 130px minmax(260px, 1fr) 84px;
   padding: 12px 14px;
 }
 
@@ -4208,6 +4208,18 @@ button:disabled {
   line-height: 1.5;
   margin: 0;
   white-space: pre-wrap;
+}
+
+.notificationJobActions {
+  align-items: start;
+  display: grid;
+  justify-items: start;
+}
+
+.notificationJobActions small {
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 900;
 }
 
 .statusPill {

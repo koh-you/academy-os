@@ -6,6 +6,15 @@
 - Supabase 저장 최우선: 새 기능이나 화면 수정 전후로 데이터가 Supabase 테이블 또는 `app_state`에 저장되는지 먼저 확인한다. 새로고침, 재로그인, 다른 기기 접속 후 사라질 수 있는 프론트-only/localStorage-only 운영 데이터가 있으면 기능 확장보다 저장 경로를 우선 보강한다.
 - 검수 기본값: 운영 흐름에 영향이 있으면 `npm run test:production`과 `npm run build`를 실행하고, 통과 후 커밋/푸시한다. 비밀값과 `.env`는 절대 커밋하지 않는다.
 
+## 2026-06-25 알림관리 미발송 기록 삭제
+
+- 상태: 완료
+- 사용자 요청: 알림관리의 실패, 테스트/초안 등 실제 문자를 보내지 않은 기록을 삭제할 수 있게 해달라고 했다.
+- 조치: 알림관리 대기열 표에 `관리` 열을 추가하고, `failed`, `draft`, `dry_run`, `canceled` 상태 기록에만 `삭제` 버튼을 표시하게 했다. `sent`, `scheduled` 등 실제 발송 완료/예약 기록은 보관으로 표시하고 삭제 버튼을 숨긴다.
+- 조치: `DELETE /api/notification-jobs?id=...` API를 추가했다. 서버에서도 `failed,draft,dry_run,canceled` 상태만 삭제하도록 제한해, 프론트 실수나 직접 호출로도 발송 완료 기록은 삭제되지 않게 했다.
+- 저장 확인: 기존 Supabase `notification_jobs` 행 삭제 흐름을 사용한다. 새 SQL은 필요 없다.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `npm run test:production` 174개 통과, `npm run build` 통과. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
+
 ## 2026-06-25 알림관리 운영 화면 정리 및 설정 이동
 
 - 상태: 완료

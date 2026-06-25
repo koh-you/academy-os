@@ -465,6 +465,12 @@ function formatNotificationJobStatus(job) {
   return job.status || "확인 필요";
 }
 
+const deletableNotificationJobStatuses = new Set(["failed", "draft", "dry_run", "canceled"]);
+
+function canDeleteNotificationJob(job) {
+  return deletableNotificationJobStatuses.has(job?.status);
+}
+
 const today = getKoreaDateString();
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8787").replace(/\/$/, "");
 
@@ -5023,6 +5029,7 @@ function NotificationCenter({
   const [isDispatching, setIsDispatching] = useState(false);
   const [isCheckingReadiness, setIsCheckingReadiness] = useState(false);
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+  const [deletingJobId, setDeletingJobId] = useState("");
   const [jobFilter, setJobFilter] = useState("all");
   const [selectedNotificationDate, setSelectedNotificationDate] = useState(today);
   const [selectedLessonIds, setSelectedLessonIds] = useState([]);
@@ -5172,6 +5179,32 @@ function NotificationCenter({
       window.setTimeout(() => onRefresh?.(), 700);
     } finally {
       window.setTimeout(() => setIsBulkUpdating(false), 800);
+    }
+  }
+
+  async function deleteNotificationJob(job) {
+    if (!canDeleteNotificationJob(job) || deletingJobId) return;
+    setDeletingJobId(job.notificationJobId);
+    setDispatchMessage("");
+    try {
+      const response = await fetch(apiUrl(`/api/notification-jobs?id=${encodeURIComponent(job.notificationJobId)}`), {
+        method: "DELETE"
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || `삭제 실패: ${response.status}`);
+      }
+      const deletedCount = result.deletedNotificationJobIds?.length ?? 0;
+      setDispatchMessage(
+        deletedCount
+          ? "발송하지 않은 알림톡 기록 1건을 삭제했습니다."
+          : "삭제 가능한 상태가 아니라 기록을 삭제하지 않았습니다."
+      );
+      await onRefresh?.();
+    } catch (error) {
+      setDispatchMessage(`알림톡 기록 삭제 실패: ${error.message}`);
+    } finally {
+      setDeletingJobId("");
     }
   }
 
@@ -5342,6 +5375,7 @@ function NotificationCenter({
             <span>발송시각</span>
             <span>수신번호</span>
             <span>미리보기</span>
+            <span>관리</span>
           </div>
           {filteredJobs.length === 0 ? (
             <p className="emptyState">{jobFilter === "all" ? "아직 저장된 알림톡 예약/기록이 없습니다." : `${filterLabels[jobFilter]} 알림톡이 없습니다.`}</p>
@@ -5354,6 +5388,20 @@ function NotificationCenter({
                 <span>{job.scheduledAt ? formatKoreaTimeLabel(job.scheduledAt) : "-"}</span>
                 <span>{job.recipient || "번호 없음"}</span>
                 <p>{job.previewBody || job.payload?.message || "미리보기 없음"}</p>
+                <span className="notificationJobActions">
+                  {canDeleteNotificationJob(job) ? (
+                    <button
+                      className="dangerSoftButton compact"
+                      disabled={deletingJobId === job.notificationJobId}
+                      onClick={() => deleteNotificationJob(job)}
+                      type="button"
+                    >
+                      {deletingJobId === job.notificationJobId ? "삭제 중" : "삭제"}
+                    </button>
+                  ) : (
+                    <small>보관</small>
+                  )}
+                </span>
               </article>
             ))
           )}
