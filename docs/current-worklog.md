@@ -13,8 +13,9 @@
 - 사용자 요청: SQL edit이 필요한 작업은 직접 실행하고, 커밋/배포처럼 AI가 할 수 있는 일에 SQL edit도 포함해달라고 했다.
 - 조치: `AGENTS.md`와 `docs/current-worklog.md`의 운영 원칙에 Supabase SQL 직접 적용을 추가했다.
 - 조치: `scripts/apply-supabase-sql.cjs`가 `.env`를 읽어 `SUPABASE_DB_URL`이 있으면 직접 DB URL로 실행하고, 없으면 `SUPABASE_PROJECT_REF` 또는 `SUPABASE_URL`에서 project ref를 잡아 `SUPABASE_DB_PASSWORD`로 link를 시도하도록 보강했다.
-- 실행 시도: `npm run db:apply:notification-muting`을 실행했으나 현재 로컬은 Supabase CLI project link가 없고 `SUPABASE_DB_URL`, `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`가 없어 SQL 적용은 실패했다. `.env`에는 `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`만 존재한다.
-- 필요 조치: 운영 SQL 자동 적용을 위해 `SUPABASE_DB_URL` 또는 `SUPABASE_DB_PASSWORD`/CLI 로그인 상태가 필요하다. 값이 준비되면 같은 명령으로 SQL 적용 가능하다.
+- 조치: Supabase CLI `db query --file`이 여러 SQL 문장을 한 번에 처리하지 못하는 문제를 발견해, SQL 파일을 문장별 임시 `.sql` 파일로 나누어 순차 실행하도록 스크립트를 보강했다.
+- 실행: 사용자가 제공한 운영 DB password로 pooler session connection을 구성해 `npm run db:apply:notification-muting`을 실행했고, `supabase/20260625_lesson_notification_muting.sql`의 `ALTER TABLE` 및 `COMMENT` 문장을 운영 DB에 적용했다. `notification_muted_parent`, `notification_muted_student`, `notification_muted_reason` 컬럼 존재 확인 완료.
+- 검증: `node --check scripts/apply-supabase-sql.cjs`, `npm run test:production` 178개 통과, `npm run build` 통과. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
 
 ## 2026-06-25 Supabase CLI SQL 적용 자동화
 

@@ -1,5 +1,6 @@
 const { spawnSync } = require("node:child_process");
 const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
 
 const workspaceRoot = path.resolve(__dirname, "..");
@@ -27,12 +28,63 @@ function fail(message) {
 
 function run(command, args, options = {}) {
   return spawnSync(command, args, {
-    cwd: workspaceRoot,
+    cwd: options.cwd ?? workspaceRoot,
     env: process.env,
     shell: process.platform === "win32",
     stdio: "inherit",
     ...options
   });
+}
+
+function getSupabaseBin() {
+  return path.join(workspaceRoot, "node_modules", ".bin", process.platform === "win32" ? "supabase.cmd" : "supabase");
+}
+
+function splitSqlStatements(sql) {
+  const statements = [];
+  let current = "";
+  let inSingleQuote = false;
+  let inDoubleQuote = false;
+  let inLineComment = false;
+
+  for (let index = 0; index < sql.length; index += 1) {
+    const char = sql[index];
+    const next = sql[index + 1];
+
+    if (inLineComment) {
+      current += char;
+      if (char === "\n") inLineComment = false;
+      continue;
+    }
+
+    if (!inSingleQuote && !inDoubleQuote && char === "-" && next === "-") {
+      inLineComment = true;
+      current += char;
+      continue;
+    }
+
+    if (!inDoubleQuote && char === "'" && next === "'" && inSingleQuote) {
+      current += char + next;
+      index += 1;
+      continue;
+    }
+
+    if (!inDoubleQuote && char === "'") inSingleQuote = !inSingleQuote;
+    if (!inSingleQuote && char === '"') inDoubleQuote = !inDoubleQuote;
+
+    if (!inSingleQuote && !inDoubleQuote && char === ";") {
+      const statement = current.trim();
+      if (statement) statements.push(statement);
+      current = "";
+      continue;
+    }
+
+    current += char;
+  }
+
+  const tail = current.trim();
+  if (tail) statements.push(tail);
+  return statements;
 }
 
 function getProjectRefFromUrl() {
@@ -68,19 +120,31 @@ if (path.extname(sqlPath).toLowerCase() !== ".sql") {
   fail(`Only .sql files can be applied: ${sqlArg}`);
 }
 
-const cliArgs = ["supabase", "db", "query", "--file", sqlPath];
+const sqlStatements = splitSqlStatements(fs.readFileSync(sqlPath, "utf8"));
+if (!sqlStatements.length) fail(`No SQL statements found in ${sqlArg}`);
+
+function buildQueryArgs(statementFile) {
+  const cliArgs = ["db", "query"];
+  if (process.env.SUPABASE_DB_URL) {
+    cliArgs.push("--db-url", process.env.SUPABASE_DB_URL);
+  } else {
+    cliArgs.push("--linked", "--workdir", workspaceRoot);
+  }
+  cliArgs.push("--file", statementFile);
+  return cliArgs;
+}
+
 if (process.env.SUPABASE_DB_URL) {
-  cliArgs.push("--db-url", process.env.SUPABASE_DB_URL);
+  // Ready to apply using the direct connection string.
 } else {
   const projectRef = process.env.SUPABASE_PROJECT_REF || getProjectRefFromUrl();
   if (projectRef && process.env.SUPABASE_DB_PASSWORD) {
-    const linkArgs = ["supabase", "link", "--project-ref", projectRef, "--password", process.env.SUPABASE_DB_PASSWORD];
-    const linkResult = run("npx", linkArgs);
+    const linkArgs = ["link", "--project-ref", projectRef, "--password", process.env.SUPABASE_DB_PASSWORD, "--workdir", workspaceRoot];
+    const linkResult = run(getSupabaseBin(), linkArgs, { cwd: os.tmpdir() });
     if ((linkResult.status ?? 1) !== 0) {
       fail("Supabase project link failed. Check SUPABASE_ACCESS_TOKEN/SUPABASE_DB_PASSWORD or run `npm run supabase -- login`.");
     }
   }
-  cliArgs.push("--linked");
 }
 
 console.log(`Applying SQL: ${path.relative(workspaceRoot, sqlPath)}`);
@@ -90,6 +154,13 @@ if (process.env.SUPABASE_DB_URL) {
   console.log("Using linked Supabase project.");
 }
 
-const result = run("npx", cliArgs);
+for (const [index, statement] of sqlStatements.entries()) {
+  console.log(`Running statement ${index + 1}/${sqlStatements.length}`);
+  const statementFile = path.join(os.tmpdir(), `academy-os-supabase-${process.pid}-${index}.sql`);
+  fs.writeFileSync(statementFile, `${statement};\n`, "utf8");
+  const result = run(getSupabaseBin(), buildQueryArgs(statementFile), { cwd: os.tmpdir() });
+  fs.rmSync(statementFile, { force: true });
+  if ((result.status ?? 1) !== 0) process.exit(result.status ?? 1);
+}
 
-process.exit(result.status ?? 1);
+process.exit(0);
