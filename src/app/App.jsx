@@ -2383,6 +2383,37 @@ export function App() {
         .filter(Boolean)
     : [];
 
+  useEffect(() => {
+    if (!isLessonJournalOpen || !selectedLesson?.lessonId || !isAppStateReady || session?.role !== "teacher") return;
+    const currentPlan = lessonNotificationPlans[selectedLesson.lessonId];
+    const currentMode = currentPlan?.mode || "default";
+    if (currentMode === "none") return;
+    const delayMinutes = currentMode === "delay30" ? 30 : 0;
+    if (isLessonAlimtalkScheduleExpired(selectedLesson, delayMinutes)) return;
+
+    const expectedJobIds = new Set(
+      (selectedLesson.studentIds ?? []).flatMap((studentId) => [
+        getLessonNotificationJobId(selectedLesson.lessonId, studentId, "parent"),
+        getLessonNotificationJobId(selectedLesson.lessonId, studentId, "student")
+      ])
+    );
+    const scheduledJobCount = notificationJobs.filter((job) =>
+      expectedJobIds.has(job.notificationJobId) && job.status === "scheduled"
+    ).length;
+    if (expectedJobIds.size > 0 && scheduledJobCount >= expectedJobIds.size) return;
+
+    if (!currentPlan) {
+      setLessonNotificationPlans((current) => {
+        if (current[selectedLesson.lessonId]) return current;
+        return {
+          ...current,
+          [selectedLesson.lessonId]: { mode: "default", updatedAt: new Date().toISOString() }
+        };
+      });
+    }
+    applyLessonNotificationPlan(selectedLesson.lessonId, currentMode);
+  }, [isAppStateReady, isLessonJournalOpen, lessonNotificationPlans, notificationJobs, selectedLesson, session?.role]);
+
   const reportLesson = lessons.find((lesson) => lesson.lessonId === selectedReportLessonId) ?? lessons[0];
   const reportRecords = reportLesson
     ? records.filter((record) => record.lessonId === reportLesson.lessonId)
@@ -3215,13 +3246,14 @@ export function App() {
     const nextMode = mode || "default";
     const currentPlan = lessonNotificationPlans[lessonId];
     const currentMode = currentPlan?.mode || "default";
-    if (currentPlan && currentMode === nextMode) return;
 
-    setLessonNotificationPlans((current) => {
-      const next = { ...current };
-      next[lessonId] = { mode: nextMode, updatedAt: new Date().toISOString() };
-      return next;
-    });
+    if (!currentPlan || currentMode !== nextMode) {
+      setLessonNotificationPlans((current) => {
+        const next = { ...current };
+        next[lessonId] = { mode: nextMode, updatedAt: new Date().toISOString() };
+        return next;
+      });
+    }
     applyLessonNotificationPlan(lessonId, nextMode);
   }
 
@@ -3314,6 +3346,14 @@ export function App() {
     nextRecords
       .filter((record) => record.lessonId === lesson.lessonId && lessonStudentIds.has(record.studentId))
       .forEach((record) => postJson("/api/lesson-records", { record }).catch((error) => console.error(error)));
+  }
+
+  function refreshLessonNotificationJobsForRecord(record, lessonForRecord = null) {
+    const lesson = lessonForRecord ?? lessons.find((item) => item.lessonId === record?.lessonId);
+    if (!lesson?.lessonId) return;
+    const planMode = lessonNotificationPlans[lesson.lessonId]?.mode || "default";
+    if (planMode === "none") return;
+    applyLessonNotificationPlan(lesson.lessonId, planMode);
   }
 
   function applyLessonNotificationPlan(lessonId, mode) {
@@ -3518,6 +3558,7 @@ export function App() {
       if (isLatestRecord) {
         setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "saved" }));
       }
+      refreshLessonNotificationJobsForRecord(record, lessonForRecord);
     } catch (error) {
       console.error(error);
       setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "failed" }));
@@ -6410,7 +6451,6 @@ function LessonJournalDetail({
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
   const linkedMakeupTask = makeupTasks.find((task) => task.makeupTaskId === lesson.sourceMakeupTaskId);
   const notificationPlanMode = lessonNotificationPlan?.mode || "default";
-  const hasAppliedNotificationPlan = Boolean(lessonNotificationPlan?.updatedAt);
   const defaultAlimtalkTimeLabel = formatKoreaTimeLabel(getLessonAlimtalkScheduledDate(lesson, 0, { allowPastFallback: false }));
   const isDefaultScheduleExpired = isLessonAlimtalkScheduleExpired(lesson, 0);
   const isDelayedScheduleExpired = isLessonAlimtalkScheduleExpired(lesson, 30);
@@ -6574,7 +6614,7 @@ function LessonJournalDetail({
         <button
           className={notificationPlanMode === "default" ? "schedulePlanButton active" : "schedulePlanButton"}
           onClick={() => onUpdateLessonNotificationPlan?.(lesson.lessonId, "default")}
-          disabled={isDefaultScheduleExpired || (hasAppliedNotificationPlan && notificationPlanMode === "default")}
+          disabled={isDefaultScheduleExpired}
           type="button"
         >
           기본 예약
@@ -6582,7 +6622,7 @@ function LessonJournalDetail({
         <button
           className={notificationPlanMode === "delay30" ? "schedulePlanButton active" : "schedulePlanButton"}
           onClick={() => onUpdateLessonNotificationPlan?.(lesson.lessonId, "delay30")}
-          disabled={isDelayedScheduleExpired || (hasAppliedNotificationPlan && notificationPlanMode === "delay30")}
+          disabled={isDelayedScheduleExpired}
           type="button"
         >
           30분 지연
@@ -6590,7 +6630,6 @@ function LessonJournalDetail({
         <button
           className={notificationPlanMode === "none" ? "schedulePlanButton noSend active" : "schedulePlanButton noSend"}
           onClick={() => onUpdateLessonNotificationPlan?.(lesson.lessonId, "none")}
-          disabled={hasAppliedNotificationPlan && notificationPlanMode === "none"}
           type="button"
         >
           알림톡 없음
