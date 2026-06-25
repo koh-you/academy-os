@@ -1399,9 +1399,16 @@ function groupExamPeriodEventsForMonth(events = []) {
   }));
 }
 
+function formatPeriodSummaryLabel(event = {}) {
+  const schools = Array.isArray(event.schoolNames) ? event.schoolNames.filter(Boolean) : [];
+  if (!schools.length) return event.schoolName || "시험기간";
+  if (schools.length <= 2) return schools.join(", ");
+  return `${schools.slice(0, 2).join(", ")} 외 ${schools.length - 2}`;
+}
+
 function getMonthCellDisplayEvents(dayEvents = []) {
-  const periodSummaries = groupExamPeriodEventsForMonth(dayEvents).slice(0, 1);
-  const mathExamEvents = dayEvents.filter((event) => event.type === "mathExam").slice(0, 2);
+  const periodSummaries = groupExamPeriodEventsForMonth(dayEvents).slice(0, 3);
+  const mathExamEvents = dayEvents.filter((event) => event.type === "mathExam").slice(0, 5);
   const regularEvents = dayEvents.filter((event) => event.type !== "examPeriod" && event.type !== "mathExam").slice(0, 2);
   const hiddenCount =
     Math.max(0, groupExamPeriodEventsForMonth(dayEvents).length - periodSummaries.length) +
@@ -10755,17 +10762,20 @@ function SchoolCalendarCenter({
                   <span className="dayNumber">{day.dayNumber}</span>
                   <span className="lessonPills">
                     <span className="schoolPeriodLayer" aria-hidden="true">
-                      {periodSummaries.map((event) => {
+                      {periodSummaries.map((event, periodIndex) => {
                         const periodBarClass = getPeriodBarClass(day.date, event);
                         const showPeriodLabel = periodBarClass === "periodStart" || periodBarClass === "periodSingle";
                         return (
                           <span
                             className={`schoolEventPill event-${event.type} periodBar ${periodBarClass}`}
                             key={event.eventId}
-                            style={{ backgroundColor: event.color ?? undefined }}
+                            style={{
+                              "--period-color": event.color ?? "#f472b6",
+                              "--period-index": periodIndex
+                            }}
                             title={event.title}
                           >
-                            {showPeriodLabel ? "시험기간" : ""}
+                            {showPeriodLabel ? formatPeriodSummaryLabel(event) : ""}
                           </span>
                         );
                       })}
