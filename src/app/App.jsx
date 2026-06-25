@@ -15003,7 +15003,8 @@ function OverdueHomework({
   students,
   onTeacherVerifyHomework
 }) {
-  const actionableHomeworks = dedupeActionableHomeworks(homeworks);
+  const makeupCandidateHomeworks = homeworks.filter((homework) => isHomeworkMakeupCandidate(homework, records, lessons));
+  const actionableHomeworks = dedupeActionableHomeworks(makeupCandidateHomeworks);
   const unresolvedHomeworks = actionableHomeworks
     .filter((homework) => homework.title && isHomeworkActionRequired(homework))
     .sort((a, b) => String(a.assignedDate ?? "").localeCompare(String(b.assignedDate ?? "")));
@@ -15018,43 +15019,43 @@ function OverdueHomework({
   const todayIncompleteStudentIds = new Set(unresolvedHomeworks.filter((homework) => homework.dueDate === today).map((homework) => homework.studentId));
   const overdueStudentIds = new Set(unresolvedHomeworks.filter((homework) => isHomeworkOverdue(homework)).map((homework) => homework.studentId));
   const metricLabels = {
-    all: "전체 학생",
-    overdue: "밀린 학생",
-    registered: "숙제 등록 학생",
-    today: "오늘 미완료"
+    all: "보충 대상 전체",
+    overdue: "지연 보충 학생",
+    registered: "보충 대상 학생",
+    today: "오늘 기준 보충"
   };
   const metricMeta = {
     all: {
-      detailHint: "전체 숙제 기록",
-      detailTitle: "전체 숙제",
-      emptyHomeworks: "선택한 학생의 숙제 기록이 없습니다.",
-      emptyStudents: "등록된 학생이 없습니다.",
-      studentHint: "등록된 전체 학생을 확인합니다.",
-      studentTitle: "전체 학생"
+      detailHint: "보충관리와 같은 기준의 숙제보충 대상",
+      detailTitle: "보충 대상 숙제",
+      emptyHomeworks: "보충 대상 숙제가 없습니다.",
+      emptyStudents: "보충 대상 학생이 없습니다.",
+      studentHint: "숙제보충이 필요한 학생을 확인합니다.",
+      studentTitle: "보충 대상 전체"
     },
     overdue: {
-      detailHint: "기한이 지난 미확인 숙제",
-      detailTitle: "밀린 숙제",
-      emptyHomeworks: "선택한 학생의 밀린 숙제가 없습니다.",
-      emptyStudents: "밀린 숙제가 있는 학생이 없습니다.",
-      studentHint: "기한이 지난 숙제가 있는 학생만 봅니다.",
-      studentTitle: "밀린 학생"
+      detailHint: "기준일이 지난 숙제보충 대상",
+      detailTitle: "지연 보충 숙제",
+      emptyHomeworks: "선택한 학생의 지연 보충 숙제가 없습니다.",
+      emptyStudents: "지연 보충 학생이 없습니다.",
+      studentHint: "기준일이 지난 숙제보충 대상 학생만 봅니다.",
+      studentTitle: "지연 보충 학생"
     },
     registered: {
-      detailHint: "등록된 숙제 전체",
-      detailTitle: "등록 숙제",
-      emptyHomeworks: "선택한 학생의 등록 숙제가 없습니다.",
-      emptyStudents: "숙제가 등록된 학생이 없습니다.",
-      studentHint: "숙제 플래너에 숙제가 등록된 학생만 봅니다.",
-      studentTitle: "숙제 등록 학생"
+      detailHint: "수업일지 검사 결과 보충이 필요한 숙제",
+      detailTitle: "보충 대상 숙제",
+      emptyHomeworks: "선택한 학생의 보충 대상 숙제가 없습니다.",
+      emptyStudents: "보충 대상 학생이 없습니다.",
+      studentHint: "수업일지 검사 결과 숙제보충이 필요한 학생만 봅니다.",
+      studentTitle: "보충 대상 학생"
     },
     today: {
-      detailHint: "오늘 기한이지만 아직 확인되지 않은 숙제",
-      detailTitle: "오늘 미완료 숙제",
-      emptyHomeworks: "선택한 학생의 오늘 미완료 숙제가 없습니다.",
-      emptyStudents: "오늘 미완료 숙제가 있는 학생이 없습니다.",
-      studentHint: "오늘 처리해야 하는 미완료 숙제가 있는 학생만 봅니다.",
-      studentTitle: "오늘 미완료"
+      detailHint: "오늘 기준으로 처리해야 하는 숙제보충 대상",
+      detailTitle: "오늘 기준 보충 숙제",
+      emptyHomeworks: "선택한 학생의 오늘 기준 보충 숙제가 없습니다.",
+      emptyStudents: "오늘 기준 보충 학생이 없습니다.",
+      studentHint: "오늘 기준으로 처리해야 하는 숙제보충 학생만 봅니다.",
+      studentTitle: "오늘 기준 보충"
     }
   };
   const activeMetricMeta = metricMeta[activeMetric] ?? metricMeta.all;
@@ -15062,7 +15063,7 @@ function OverdueHomework({
     if (activeMetric === "registered") return registeredStudentIds.has(student.studentId);
     if (activeMetric === "today") return todayIncompleteStudentIds.has(student.studentId);
     if (activeMetric === "overdue") return overdueStudentIds.has(student.studentId);
-    return true;
+    return registeredStudentIds.has(student.studentId);
   });
   const visibleStudentIds = visibleStudents.map((student) => student.studentId).join("|");
   const firstVisibleStudentId = visibleStudents[0]?.studentId ?? "";
@@ -15136,10 +15137,10 @@ function OverdueHomework({
   }
 
   function getStudentMetricLine(summary) {
-    if (activeMetric === "registered") return `등록 숙제 ${summary.registeredCount}건 · 진행 ${summary.progress}%`;
-    if (activeMetric === "today") return `오늘 미완료 ${summary.todayCount}건`;
-    if (activeMetric === "overdue") return `밀린 숙제 ${summary.overdueCount}건`;
-    return `오늘 미완료 ${summary.todayCount}건 · 밀림 ${summary.overdueCount}건`;
+    if (activeMetric === "registered") return `보충 대상 ${summary.registeredCount}건 · 처리 ${summary.progress}%`;
+    if (activeMetric === "today") return `오늘 기준 보충 ${summary.todayCount}건`;
+    if (activeMetric === "overdue") return `지연 보충 ${summary.overdueCount}건`;
+    return `오늘 기준 ${summary.todayCount}건 · 지연 ${summary.overdueCount}건`;
   }
 
   function handleMetricClick(metric) {
@@ -15179,10 +15180,10 @@ function OverdueHomework({
   return (
     <section className="homeworkStatusDashboard">
       <div className="homeworkStatusMetrics">
-        <MetricCard active={activeMetric === "all"} icon="👥" label="전체 학생" value={`${students.length}명`} hint="등록된 학생 수" onClick={() => handleMetricClick("all")} />
-        <MetricCard active={activeMetric === "registered"} icon="📖" label="숙제 등록 학생" value={`${registeredStudentCount}명`} hint="숙제 플래너 등록 기준" onClick={() => handleMetricClick("registered")} />
-        <MetricCard active={activeMetric === "today"} icon="⏰" label="오늘 미완료" value={`${todayIncompleteCount}명`} hint="오늘 할 양 미체크" onClick={() => handleMetricClick("today")} tone="warning" />
-        <MetricCard active={activeMetric === "overdue"} icon="⚠️" label="밀린 학생" value={`${overdueStudentCount}명`} hint="클릭해서 목록 보기" onClick={() => handleMetricClick("overdue")} tone="warning" />
+        <MetricCard active={activeMetric === "all"} icon="👥" label="보충 대상 전체" value={`${registeredStudentCount}명`} hint="보충관리 기준" onClick={() => handleMetricClick("all")} />
+        <MetricCard active={activeMetric === "registered"} icon="📖" label="보충 대상 학생" value={`${registeredStudentCount}명`} hint="검사 결과 기준" onClick={() => handleMetricClick("registered")} />
+        <MetricCard active={activeMetric === "today"} icon="⏰" label="오늘 기준 보충" value={`${todayIncompleteCount}명`} hint="오늘 처리 대상" onClick={() => handleMetricClick("today")} tone="warning" />
+        <MetricCard active={activeMetric === "overdue"} icon="⚠️" label="지연 보충 학생" value={`${overdueStudentCount}명`} hint="클릭해서 목록 보기" onClick={() => handleMetricClick("overdue")} tone="warning" />
       </div>
 
       <div className="homeworkStatusContent">
@@ -15226,7 +15227,7 @@ function OverdueHomework({
                   <span className="homeworkStudentTop">
                     <strong>{student.name}</strong>
                     <small>{student.grade || "미입력"}</small>
-                    <em>{summary.hasRegisteredHomework ? "등록" : "미등록"}</em>
+                    <em>{summary.hasRegisteredHomework ? "대상" : "없음"}</em>
                     <b>{summary.progress}%</b>
                   </span>
                   <span className="homeworkProgressTrack">
@@ -15257,7 +15258,7 @@ function OverdueHomework({
                   👤 학생화면
                 </button>
               ) : null}
-              <button className="softButton" onClick={handleShowAllStudents} type="button">전체 학생</button>
+              <button className="softButton" onClick={handleShowAllStudents} type="button">전체 대상</button>
             </div>
           </div>
           {selectedHomeworks.length === 0 ? (

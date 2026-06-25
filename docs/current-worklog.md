@@ -137,6 +137,16 @@
 - 저장 확인: 기존 `lessons` 테이블을 사용하며 새 SQL edit은 필요 없다.
 - 검증: `npm run test:production` 183개 통과, `npm run build` 통과. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
 
+## 2026-06-25 숙제현황 기준을 보충관리 데이터로 통일
+
+- 상태: 완료
+- 사용자 판단: 보충관리 데이터가 맞고, 숙제현황 데이터는 맞지 않는다. 숙제현황도 보충관리의 데이터만 보이게 한다.
+- 원인 정리: 숙제현황은 `dedupeActionableHomeworks(homeworks)`를 바로 사용해 `homeworkType: "next"` 다음숙제 원본까지 미완료/밀림에 포함했다. 보충관리는 `isHomeworkMakeupCandidate(homework, records, lessons)`로 수업일지 검사 결과 보충이 필요한 `previous` 숙제만 보므로 숫자가 달랐다.
+- 조치: 숙제현황의 원천을 `homeworks.filter((homework) => isHomeworkMakeupCandidate(homework, records, lessons))`로 좁힌 뒤 중복 제거하도록 변경했다. 전체 탭도 전체 학생이 아니라 보충 대상 학생만 보여준다.
+- 조치: 화면 문구를 `전체 학생/숙제 등록 학생/오늘 미완료/밀린 학생`에서 `보충 대상 전체/보충 대상 학생/오늘 기준 보충/지연 보충 학생`으로 바꿔 운영 의미를 명확히 했다.
+- 저장 확인: 화면 필터/집계 로직 변경만 있으므로 Supabase SQL edit은 필요 없다.
+- 검증: `npm run test:production` 183개 통과, `npm run build` 통과. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
+
 ## 2026-06-25 SQL edit 자동화 철회
 
 - 상태: 완료
