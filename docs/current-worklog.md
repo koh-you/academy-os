@@ -96,6 +96,16 @@
 - 후속 반영: 아래 `시험분석 PDF Storage 저장 및 텍스트 추출` 작업에서 실제 PDF 업로드와 텍스트형 PDF 자동 추출을 추가했다.
 - 검증: `npm run test:production` 183개 통과, `npm run build` 통과. 기존 Vite 청크 크기 경고만 확인됨.
 
+## 2026-06-25 시험분석 목록 저장 위치 및 삭제 보강
+
+- 상태: 완료
+- 사용자 요청: 시험분석 `분석 목록`의 데이터가 어디 저장되는지 물었고, 수정/삭제가 되지 않는다고 했다.
+- 확인: 분석 문서 목록은 별도 DB 테이블이 아니라 공용 `app_state.examAnalyses`에 저장된다. PDF 원본 파일만 Supabase Storage `exam-analysis-sources`에 저장된다.
+- 조치: 분석 목록 카드에 `삭제` 버튼을 추가했다. 삭제 시 확인창을 띄우고, 삭제된 분석 문서는 `examAnalyses` 배열에서 제거되어 다음 `postAppState(sharedAppState)` 자동 저장 주기에 `app_state`에 반영된다.
+- 조치: 삭제한 문서가 현재 선택 문서였을 때 남은 첫 분석 문서로 선택이 보정되도록 처리했다. 기본정보 수정은 기존처럼 오른쪽 `시험 기본정보` 필드에서 즉시 수정되고 `app_state.examAnalyses`에 자동 저장된다.
+- SQL: `app_state` 문서 배열 변경이므로 SQL edit은 필요 없다.
+- 검증: `npm run test:production` 185개 통과, `npm run build` 통과. 기존 Vite 청크 크기 경고만 확인됨.
+
 ## 2026-06-25 시험분석 PDF Storage 저장 및 텍스트 추출
 
 - 상태: 완료

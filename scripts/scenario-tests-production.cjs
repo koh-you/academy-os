@@ -117,6 +117,7 @@ check("33 school calendar date modal and color editor exist", hasAll(app, ["Scho
 check("34 exam management self-check labels are wired", hasAll(app, ['id: "examPrep"', 'id: "postSubmit"', "셀프체크 대상", "examPostTargetStudent", "onSetExamPostTargetStudentIds"]) && !app.includes('id: "tallyAi"'));
 check("35 exam analysis uses source-review-output workflow", hasAll(app, ["pipelineStep", 'onClick={() => update("pipelineStage", stage)}', "sourceDropZone", "handleSourceFileDrop", "원본 입력", "분석 검토", "산출물 작성", "PDF 업로드", "AI 분석 시작", "parentNoticeDraft"]));
 check("35b exam analysis source PDF uploads to storage and extracts text", hasAll(app, ["uploadExamAnalysisSourceFile", "/api/exam-analysis-sources", "sourceFiles", "sourceUploadStatus", "원본 링크 · OCR 원문 · 프롬프트 보기", "PDF 파일 선택", "getExamAnalysisSourceOpenUrl"]) && hasAll(serverSource, ["pdfParse", "uploadExamAnalysisSourceFile", "exam-analysis-sources", "/api/exam-analysis-sources/open"]));
+check("35c exam analysis list can delete app_state documents", hasAll(app, ["onDeleteAnalysis", "analysisDeleteButton", "삭제 후 app_state 저장에 반영됩니다", "setExamAnalyses((current) => current.filter((item) => item.examAnalysisId !== analysisId))"]) && css.includes(".analysisDeleteButton"));
 check("36 ai setting badges are hidden from work screens", !hasAll(app, ["aiVariantHeroActions", "aiModelSelectMock"]) && !app.includes("<h3>AI 모델</h3>"));
 
 check("37 exam publisher syncs across same term", hasAll(app, ["examCycleTermKey", "examPublisherLinkKey", "findLinkedPublisher", "syncPublisherAcrossExamTerm"]));

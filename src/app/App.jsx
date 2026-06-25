@@ -4063,6 +4063,9 @@ export function App() {
                 current.map((item) => (item.examAnalysisId === analysisId ? { ...item, [field]: value } : item))
               )
             }
+            onDeleteAnalysis={(analysisId) =>
+              setExamAnalyses((current) => current.filter((item) => item.examAnalysisId !== analysisId))
+            }
             onRunAnalysis={handleRunExamAnalysis}
           />
         ) : null}
@@ -9855,6 +9858,7 @@ function ExamAnalysisCenter({
   analyses,
   examPrepRows,
   onAddAnalysis,
+  onDeleteAnalysis,
   onRunAnalysis,
   onUpdateAnalysis
 }) {
@@ -9878,11 +9882,21 @@ function ExamAnalysisCenter({
     if (!selectedAnalysisId && analyses[0]?.examAnalysisId) {
       setSelectedAnalysisId(analyses[0].examAnalysisId);
     }
+    if (selectedAnalysisId && analyses.length && !analyses.some((analysis) => analysis.examAnalysisId === selectedAnalysisId)) {
+      setSelectedAnalysisId(analyses[0].examAnalysisId);
+    }
   }, [analyses, selectedAnalysisId]);
 
   function update(field, value) {
     if (!selectedAnalysis) return;
     onUpdateAnalysis(selectedAnalysis.examAnalysisId, field, value);
+  }
+
+  function deleteAnalysis(analysis) {
+    if (!analysis || !onDeleteAnalysis) return;
+    const label = [analysis.schoolName, analysis.grade, analysis.examName].filter(Boolean).join(" · ") || "이 분석 문서";
+    if (!window.confirm(`${label}을 삭제할까요? 삭제 후 app_state 저장에 반영됩니다.`)) return;
+    onDeleteAnalysis(analysis.examAnalysisId);
   }
 
   async function attachSourceFile(file) {
@@ -9961,16 +9975,27 @@ function ExamAnalysisCenter({
           ) : (
             <div className="analysisList">
               {analyses.map((analysis) => (
-                <button
+                <div
                   className={selectedAnalysis?.examAnalysisId === analysis.examAnalysisId ? "analysisListItem active" : "analysisListItem"}
                   key={analysis.examAnalysisId}
-                  onClick={() => setSelectedAnalysisId(analysis.examAnalysisId)}
-                  type="button"
                 >
-                  <strong>{[analysis.schoolName, analysis.grade].filter(Boolean).join(" ") || "새 분석"}</strong>
-                  <span>{[analysis.examName, analysis.subject].filter(Boolean).join(" · ") || "기본정보 미입력"}</span>
-                  <small>{stageAlias[analysis.pipelineStage] ?? analysis.pipelineStage}</small>
-                </button>
+                  <button
+                    className="analysisListSelect"
+                    onClick={() => setSelectedAnalysisId(analysis.examAnalysisId)}
+                    type="button"
+                  >
+                    <strong>{[analysis.schoolName, analysis.grade].filter(Boolean).join(" ") || "새 분석"}</strong>
+                    <span>{[analysis.examName, analysis.subject].filter(Boolean).join(" · ") || "기본정보 미입력"}</span>
+                    <small>{stageAlias[analysis.pipelineStage] ?? analysis.pipelineStage}</small>
+                  </button>
+                  <button
+                    className="analysisDeleteButton"
+                    onClick={() => deleteAnalysis(analysis)}
+                    type="button"
+                  >
+                    삭제
+                  </button>
+                </div>
               ))}
             </div>
           )}

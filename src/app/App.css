@@ -2585,13 +2585,25 @@ button {
   color: #0f172a;
   display: grid;
   gap: 6px;
-  min-height: 94px;
   padding: 14px;
   text-align: left;
 }
 
-.analysisListItem span,
-.analysisListItem small {
+.analysisListSelect {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 6px;
+  min-height: 76px;
+  padding: 0;
+  text-align: left;
+}
+
+.analysisListSelect span,
+.analysisListSelect small {
   color: #64748b;
 }
 
@@ -2601,9 +2613,28 @@ button {
   color: #ffffff;
 }
 
-.analysisListItem.active span,
-.analysisListItem.active small {
+.analysisListItem.active .analysisListSelect span,
+.analysisListItem.active .analysisListSelect small {
   color: #dbeafe;
+}
+
+.analysisDeleteButton {
+  align-self: end;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 8px;
+  color: #dc2626;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 900;
+  justify-self: start;
+  padding: 5px 9px;
+}
+
+.analysisListItem.active .analysisDeleteButton {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.34);
+  color: #fecdd3;
 }
 
 .analysisWorkspace {
