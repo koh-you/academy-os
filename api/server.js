@@ -23,6 +23,7 @@ import {
   listSchoolEvents,
   listStudentIntakeApplicants,
   listStudents,
+  claimNotificationJob,
   seedCoreData,
   upsertAppState,
   upsertHomework,
@@ -93,6 +94,43 @@ function normalizeSchoolName(value = "") {
     .replace(/남자고/g, "남고")
     .replace(/고등학교/g, "고")
     .replace(/중학교/g, "중");
+}
+
+function getRequestHeader(request, name) {
+  return request.headers[name.toLowerCase()] ?? request.headers[name] ?? "";
+}
+
+function timingSafeEqualText(left = "", right = "") {
+  const leftBuffer = Buffer.from(String(left));
+  const rightBuffer = Buffer.from(String(right));
+  return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+}
+
+function getDispatchTokenFromRequest(request, payload = {}) {
+  const authorization = String(getRequestHeader(request, "authorization") || "");
+  const bearerToken = authorization.match(/^Bearer\s+(.+)$/i)?.[1] ?? "";
+  return String(
+    getRequestHeader(request, "x-dispatch-token") ||
+    bearerToken ||
+    payload.dispatchToken ||
+    ""
+  ).trim();
+}
+
+function getDispatchAuthState(request, payload = {}) {
+  const expectedToken = String(process.env.NOTIFICATION_DISPATCH_TOKEN || "").trim();
+  if (!expectedToken) return { configured: false, ok: false };
+  const requestToken = getDispatchTokenFromRequest(request, payload);
+  return {
+    configured: true,
+    ok: Boolean(requestToken) && timingSafeEqualText(requestToken, expectedToken)
+  };
+}
+
+function isStaleDispatchClaim(job, nowTime) {
+  if (job.provider !== "academy-os-dispatching") return false;
+  const updatedTime = new Date(job.updatedAt || job.createdAt || 0).getTime();
+  return Number.isFinite(updatedTime) && nowTime - updatedTime > 10 * 60 * 1000;
 }
 
 function schoolNamesMatch(firstSchool = "", secondSchool = "", { allowBlank = true } = {}) {
@@ -727,16 +765,22 @@ async function uploadExamAnalysisSourceFile(payload) {
   };
 }
 
-async function dispatchDueNotificationJobs({ forceDryRun = false, limit = 20, now = new Date().toISOString() } = {}) {
+async function dispatchDueNotificationJobs({
+  allowManualStatuses = false,
+  forceDryRun = false,
+  limit = 20,
+  now = new Date().toISOString()
+} = {}) {
   const listed = await listNotificationJobs();
   const nowTime = new Date(now).getTime();
   if (Number.isNaN(nowTime)) throw new Error("now must be a valid date string.");
 
   const jobs = (listed.notificationJobs ?? [])
-    .filter((job) =>
-      dispatchableNotificationStatuses.has(job.status) ||
-      (job.status === "scheduled" && job.payload?.osScheduled === true)
-    )
+    .filter((job) => {
+      if (allowManualStatuses && dispatchableNotificationStatuses.has(job.status)) return true;
+      if (job.status !== "scheduled" || job.payload?.osScheduled !== true) return false;
+      return job.provider !== "academy-os-dispatching" || isStaleDispatchClaim(job, nowTime);
+    })
     .filter((job) => {
       if (!job.scheduledAt) return true;
       const scheduledTime = new Date(job.scheduledAt).getTime();
@@ -746,11 +790,20 @@ async function dispatchDueNotificationJobs({ forceDryRun = false, limit = 20, no
 
   const processed = [];
   for (const job of jobs) {
+    const shouldClaim = job.status === "scheduled" && job.payload?.osScheduled === true;
+    const claimId = `dispatch_${Date.now()}_${crypto.randomBytes(6).toString("hex")}`;
+    const claim = shouldClaim ? await claimNotificationJob(job, claimId) : { notificationJob: job };
+    const claimedJob = claim.notificationJob;
+    if (!claimedJob) {
+      processed.push({ notificationJobId: job.notificationJobId, status: "skipped_claimed" });
+      continue;
+    }
+
     try {
-      const result = await sendNotificationJob(job, { forceDryRun });
+      const result = await sendNotificationJob(claimedJob, { forceDryRun });
       const status = result?.dryRun ? "dry_run" : "sent";
       const updatedJob = {
-        ...job,
+        ...claimedJob,
         status,
         result,
         provider: "solapi",
@@ -758,15 +811,15 @@ async function dispatchDueNotificationJobs({ forceDryRun = false, limit = 20, no
         error: ""
       };
       await upsertNotificationJob(updatedJob);
-      processed.push({ notificationJobId: job.notificationJobId, status, result });
+      processed.push({ notificationJobId: claimedJob.notificationJobId, status, result });
     } catch (error) {
       const failedJob = {
-        ...job,
+        ...claimedJob,
         status: "failed",
         error: error.message
       };
       await upsertNotificationJob(failedJob);
-      processed.push({ error: error.message, notificationJobId: job.notificationJobId, status: "failed" });
+      processed.push({ error: error.message, notificationJobId: claimedJob.notificationJobId, status: "failed" });
     }
   }
 
@@ -1439,10 +1492,17 @@ const server = http.createServer(async (request, response) => {
   if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/dispatch-due") {
     try {
       const payload = await readJsonBody(request);
+      const dispatchAuth = getDispatchAuthState(request, payload);
+      const hasSensitiveOverride = Boolean(payload.now || payload.dispatchToken || payload.forceDryRun);
+      if (dispatchAuth.configured && hasSensitiveOverride && !dispatchAuth.ok) {
+        sendJson(request, response, 401, { ok: false, error: "Invalid notification dispatch token." });
+        return;
+      }
       const result = await dispatchDueNotificationJobs({
-        forceDryRun: Boolean(payload.forceDryRun),
+        allowManualStatuses: dispatchAuth.ok,
+        forceDryRun: dispatchAuth.ok ? Boolean(payload.forceDryRun) : false,
         limit: payload.limit,
-        now: payload.now
+        now: dispatchAuth.ok && payload.now ? payload.now : new Date().toISOString()
       });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {

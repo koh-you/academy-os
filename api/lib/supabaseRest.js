@@ -75,6 +75,15 @@ export async function upsertRows(table, rows) {
   });
 }
 
+export async function patchRows(table, query, values) {
+  return supabaseRestRequest(`${table}?${query}`, {
+    method: "PATCH",
+    body: values,
+    prefer: "return=representation",
+    requireServiceRole: true
+  });
+}
+
 export async function deleteRows(table, query) {
   return supabaseRestRequest(`${table}?${query}`, {
     method: "DELETE",

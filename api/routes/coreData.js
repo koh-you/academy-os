@@ -1,5 +1,5 @@
 import { sampleData } from "../../src/shared/data/sampleData.js";
-import { deleteRows, getSupabaseStatus, isSupabaseConfigured, listRows, upsertRows } from "../lib/supabaseRest.js";
+import { deleteRows, getSupabaseStatus, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
 
 const fallbackSource = "local_sample";
 const databaseSource = "supabase";
@@ -1194,6 +1194,31 @@ export async function upsertNotificationJob(job) {
 
   const [row] = await upsertRows("notification_jobs", [toNotificationJobRow(job)]);
   return { source: databaseSource, notificationJob: fromNotificationJobRow(row) };
+}
+
+export async function claimNotificationJob(job, claimId) {
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, notificationJob: job };
+  }
+
+  const encodedId = encodeURIComponent(job.notificationJobId);
+  const provider = job.provider || "";
+  const providerFilter = provider ? `provider=eq.${encodeURIComponent(provider)}` : "provider=is.null";
+  const result = {
+    ...(job.result && typeof job.result === "object" ? job.result : {}),
+    dispatchClaimedAt: new Date().toISOString(),
+    dispatchClaimId: claimId
+  };
+  const rows = await patchRows(
+    "notification_jobs",
+    `notification_job_id=eq.${encodedId}&status=eq.scheduled&${providerFilter}`,
+    {
+      provider: "academy-os-dispatching",
+      result
+    }
+  );
+  const [row] = rows;
+  return { source: databaseSource, notificationJob: row ? fromNotificationJobRow(row) : null };
 }
 
 export async function deleteNotificationJob(notificationJobId) {

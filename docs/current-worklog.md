@@ -95,6 +95,18 @@
 - 저장 확인: 기존 `lesson_student_records.check_in_at`, `check_in_time`, `check_out_at`, `check_out_time`, `attendance_status`를 읽어 표시만 추가했다. SQL 변경은 없다.
 - 검증: `npm run test:production` 통과, `npm run build` 통과. 기존 Vite 청크 크기 경고만 확인됨.
 
+## 2026-06-25 알림톡 예약 자동발송 안정화
+
+- 상태: 완료
+- 장애 확인: 2026-06-25 22:30 기본예약 30건이 `scheduled`로 남아 있었다. 수동으로 `/api/notification-jobs/dispatch-due`를 실행해 오늘 전체 56건을 `sent`로 처리했다.
+- 원인: `render.yaml`에는 `koh-you-math-academy-os-notification-dispatch` cron 정의가 있었지만, Render 실제 서비스 목록에는 웹 서비스만 존재했다. Render API로 cron 생성을 시도했으나 `402 Payment information is required`로 실패했다. 즉 코드 문제가 아니라 Render 계정 결제 정보가 없어 cron 서비스 생성이 막힌 상태다.
+- 조치: Render 웹 서비스에 `NOTIFICATION_DISPATCH_TOKEN` 환경변수를 설정했다. 값은 저장소에 남기지 않는다.
+- 조치: `/api/notification-jobs/dispatch-due`는 토큰이 맞을 때만 `now`/dry-run 같은 민감 override를 허용한다. 토큰 없는 호출은 서버 현재시각 기준 due job만 처리한다.
+- 조치: dispatch 전에 `notification_jobs.provider`를 `academy-os-dispatching`으로 조건부 선점해, Render cron/GitHub Actions/수동 호출이 겹쳐도 같은 예약을 중복 발송할 위험을 줄였다. 오래된 선점은 10분 후 재시도 가능하다.
+- 조치: Render cron 등록이 결제 정보 때문에 막힌 동안의 백업으로 GitHub Actions `.github/workflows/dispatch-notifications.yml`을 추가했다. 5분마다 운영 API를 호출하며, `NOTIFICATION_DISPATCH_TOKEN` secret이 있으면 토큰을 전송한다.
+- 남은 운영 조건: Render 자체 cron 서비스를 반드시 쓰려면 Render Billing에 결제 정보를 추가해야 한다. 결제 정보가 추가되면 기존 `render.yaml`의 cron 정의 또는 Render API로 `koh-you-math-academy-os-notification-dispatch`를 생성하면 된다.
+- 검증: `node --check api/server.js`, `node --check scripts/dispatch-due-notifications.cjs`, `npm run test:production`, `npm run build` 통과. 기존 Vite 청크 크기 경고만 확인됨.
+
 ## 2026-06-25 학사일정 월간 캘린더 표현 개선
 
 - 상태: 완료

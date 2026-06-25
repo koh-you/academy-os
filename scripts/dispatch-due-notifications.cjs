@@ -3,7 +3,10 @@ const apiBaseUrl = (process.env.ACADEMY_API_URL || "https://koh-you-math-academy
 async function main() {
   const response = await fetch(`${apiBaseUrl}/api/notification-jobs/dispatch-due`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(process.env.NOTIFICATION_DISPATCH_TOKEN ? { "X-Dispatch-Token": process.env.NOTIFICATION_DISPATCH_TOKEN } : {})
+    },
     body: JSON.stringify({
       forceDryRun: process.env.ALIMTALK_DRY_RUN !== "false",
       limit: Number(process.env.NOTIFICATION_DISPATCH_LIMIT || 50)

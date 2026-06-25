@@ -1,0 +1,33 @@
+name: Dispatch due Alimtalk notifications
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: dispatch-due-notifications
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Dispatch due notification jobs
+        env:
+          ACADEMY_API_URL: https://koh-you-math-academy-os-api.onrender.com
+          DISPATCH_TOKEN: ${{ secrets.NOTIFICATION_DISPATCH_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          headers=(-H "Content-Type: application/json")
+          if [ -n "${DISPATCH_TOKEN}" ]; then
+            headers+=(-H "X-Dispatch-Token: ${DISPATCH_TOKEN}")
+          fi
+
+          curl --fail-with-body \
+            -X POST \
+            "${headers[@]}" \
+            -d '{"forceDryRun":false,"limit":50}' \
+            "${ACADEMY_API_URL%/}/api/notification-jobs/dispatch-due"
