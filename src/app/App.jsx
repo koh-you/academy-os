@@ -3953,6 +3953,7 @@ export function App() {
           <SettingsCenter
             aiSettings={aiSettings}
             attendanceSettings={attendanceSettings}
+            integrationStatus={integrationStatus}
             onUpdateAiSettings={setAiSettings}
             onUpdateAttendanceSettings={setAttendanceSettings}
             teacherAccountSettings={teacherAccountSettings}
@@ -3963,8 +3964,11 @@ export function App() {
         {activeView === "notifications" ? (
           <NotificationCenter
             integrationStatus={integrationStatus}
+            lessons={calendarLessons}
             notificationJobs={notificationJobs}
             notificationLogs={notificationLogs}
+            onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
+            onUpdateLessonNotificationPlan={handleUpdateLessonNotificationPlan}
             students={students}
             onRefresh={refreshNotificationJobs}
           />
@@ -5005,40 +5009,95 @@ function StatusDot({ active }) {
   return <span className={active ? "statusDot active" : "statusDot inactive"} />;
 }
 
-function NotificationCenter({ integrationStatus, notificationJobs, notificationLogs, students, onRefresh }) {
+function NotificationCenter({
+  integrationStatus,
+  lessons = [],
+  notificationJobs,
+  notificationLogs,
+  onRefresh,
+  onScheduleLessonNotificationsAt,
+  onUpdateLessonNotificationPlan,
+  students
+}) {
   const [dispatchMessage, setDispatchMessage] = useState("");
   const [isDispatching, setIsDispatching] = useState(false);
   const [isCheckingReadiness, setIsCheckingReadiness] = useState(false);
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
   const [jobFilter, setJobFilter] = useState("all");
-  const [testSendResult, setTestSendResult] = useState("");
-  const [testSendDetail, setTestSendDetail] = useState(null);
-  const [testingTemplate, setTestingTemplate] = useState("");
+  const [selectedNotificationDate, setSelectedNotificationDate] = useState(today);
+  const [selectedLessonIds, setSelectedLessonIds] = useState([]);
+  const [manualScheduleDate, setManualScheduleDate] = useState(today);
+  const [manualScheduleTime, setManualScheduleTime] = useState("22:30");
   const notificationStatus = integrationStatus?.notifications;
-  const safetyTone = getAlimtalkSafetyTone(notificationStatus, false);
-  const safetyText = getAlimtalkSafetyText(notificationStatus, false);
   const scheduledJobs = notificationJobs.filter((job) => job.status === "scheduled");
   const queuedJobs = notificationJobs.filter((job) => job.status === "queued" || job.status === "pending_send");
   const draftJobs = notificationJobs.filter((job) => job.status === "draft" || job.status === "dry_run");
   const failedJobs = notificationJobs.filter((job) => job.status === "failed");
+  const canceledJobs = notificationJobs.filter((job) => job.status === "canceled");
   const recentJobs = notificationJobs.slice(0, 30);
   const filteredJobs = {
     all: recentJobs,
     scheduled: scheduledJobs,
     queued: queuedJobs,
     draft: draftJobs,
-    failed: failedJobs
+    failed: failedJobs,
+    canceled: canceledJobs
   }[jobFilter] ?? recentJobs;
   const filterLabels = {
     all: "최근 기록",
     scheduled: "예약 대기",
     queued: "내부 대기",
     draft: "테스트/초안",
-    failed: "실패"
+    failed: "실패",
+    canceled: "취소"
   };
   const recentLogs = notificationLogs.slice(0, 8);
+  const lessonsForNotificationDate = lessons
+    .filter((lesson) => lesson.date === selectedNotificationDate)
+    .sort(sortByTime);
+  const selectedJobs = notificationJobs.filter((job) => selectedLessonIds.includes(job.lessonId));
+  const selectedScheduledParentCount = selectedJobs.filter((job) => job.notificationType === "parent_comment" && job.status === "scheduled").length;
+  const selectedScheduledStudentCount = selectedJobs.filter((job) => job.notificationType === "student_comment" && job.status === "scheduled").length;
+  const selectedSentCount = selectedJobs.filter((job) => job.status === "sent").length;
+  const selectedCanceledFailedCount = selectedJobs.filter((job) => job.status === "canceled" || job.status === "failed").length;
+  const manualScheduledAt =
+    manualScheduleDate && manualScheduleTime
+      ? new Date(`${manualScheduleDate}T${manualScheduleTime}:00+09:00`).toISOString()
+      : "";
+
+  useEffect(() => {
+    setSelectedLessonIds([]);
+  }, [selectedNotificationDate]);
 
   function studentName(studentId, payload) {
     return payload?.studentName || students.find((student) => student.studentId === studentId)?.name || "학생";
+  }
+
+  function getLessonNotificationCounts(lesson) {
+    const lessonJobs = notificationJobs.filter((job) => job.lessonId === lesson.lessonId);
+    return {
+      canceled: lessonJobs.filter((job) => job.status === "canceled").length,
+      failed: lessonJobs.filter((job) => job.status === "failed").length,
+      parent: lessonJobs.filter((job) => job.notificationType === "parent_comment" && job.status === "scheduled").length,
+      sent: lessonJobs.filter((job) => job.status === "sent").length,
+      student: lessonJobs.filter((job) => job.notificationType === "student_comment" && job.status === "scheduled").length
+    };
+  }
+
+  function toggleLessonSelection(lessonId) {
+    setSelectedLessonIds((current) =>
+      current.includes(lessonId)
+        ? current.filter((item) => item !== lessonId)
+        : [...current, lessonId]
+    );
+  }
+
+  function selectAllLessonsForDate() {
+    setSelectedLessonIds(lessonsForNotificationDate.map((lesson) => lesson.lessonId));
+  }
+
+  function clearSelectedLessons() {
+    setSelectedLessonIds([]);
   }
 
   function selectJobFilter(nextFilter) {
@@ -5046,10 +5105,6 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
     window.setTimeout(() => {
       document.querySelector(".notificationQueuePanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 0);
-  }
-
-  function showSafetySettings() {
-    document.querySelector(".integrationStatusPanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   async function handleDispatchDue() {
@@ -5094,54 +5149,29 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
     }
   }
 
-  async function handleTemplateTest(testType) {
-    setTestingTemplate(testType);
-    setTestSendResult("");
-    setTestSendDetail(null);
-    const todayKey = getKoreaDateString(new Date());
-    const basePayload = {
-      academyName: academyBrandName,
-      assignmentStatus: "complete_thorough",
-      attendanceStatus: testType === "attendance" ? "late" : "present",
-      checkedAt: testType === "attendance" ? "태블릿/수기 출결 테스트" : "19:00",
-      forceDryRun: false,
-      forceTestRecipient: true,
-      lessonContent: "개별 진도 점검",
-      lessonDate: todayKey,
-      lessonMaterial: "공통수학1",
-      lessonName: testType === "attendance" ? "출결 테스트 수업" : "월수금 7-10반",
-      lateMinutes: testType === "attendance" ? 5 : "",
-      message: "오늘 수업에서 확인한 내용을 바탕으로 다음 과제를 안내드립니다.",
-      nextHomework: "쎈 - 경우의 수",
-      parentPhone: notificationStatus?.testRecipient,
-      previousHomework: "rpm 순열과 조합",
-      reason: testType === "attendance" ? "태블릿/수기 출결 연결 점검" : "",
-      studentName: "테스트학생",
-      studentPhone: notificationStatus?.testRecipient,
-      target: testType === "student" ? "student" : "parent"
-    };
-    const endpoint =
-      testType === "attendance"
-        ? "/api/notifications/attendance-alimtalk"
-        : "/api/notifications/comment-alimtalk";
+  async function scheduleSelectedLessons() {
+    if (!manualScheduledAt || selectedLessonIds.length === 0 || isBulkUpdating) return;
+    setIsBulkUpdating(true);
+    setDispatchMessage("");
     try {
-      const result = await postJson(endpoint, basePayload);
-      const modeText = result.result?.dryRun ? "테스트 기록 완료 · 실제 발송 없음" : "테스트 번호로 발송 요청 완료";
-      setTestSendResult(`${getNotificationJobLabel(testType === "attendance" ? "attendance" : testType === "student" ? "student_comment" : "parent_comment")}: ${modeText}`);
-      setTestSendDetail({
-        label: getNotificationJobLabel(testType === "attendance" ? "attendance" : testType === "student" ? "student_comment" : "parent_comment"),
-        provider: result.provider ?? "-",
-        dryRun: Boolean(result.result?.dryRun),
-        sentTo: result.result?.sentTo || "-",
-        requestedTo: result.result?.requestedTo || "-",
-        templateEnvName: result.result?.templateEnvName || "-",
-        variables: result.result?.variables ?? {}
-      });
-    } catch (error) {
-      setTestSendResult(`테스트 실패: ${error.message}`);
-      setTestSendDetail(null);
+      selectedLessonIds.forEach((lessonId) => onScheduleLessonNotificationsAt?.(lessonId, manualScheduledAt));
+      setDispatchMessage(`${selectedLessonIds.length}개 수업을 ${formatKoreaTimeLabel(manualScheduledAt)} 예약으로 갱신했습니다.`);
+      window.setTimeout(() => onRefresh?.(), 700);
     } finally {
-      setTestingTemplate("");
+      window.setTimeout(() => setIsBulkUpdating(false), 800);
+    }
+  }
+
+  async function disableSelectedLessons() {
+    if (selectedLessonIds.length === 0 || isBulkUpdating) return;
+    setIsBulkUpdating(true);
+    setDispatchMessage("");
+    try {
+      selectedLessonIds.forEach((lessonId) => onUpdateLessonNotificationPlan?.(lessonId, "none"));
+      setDispatchMessage(`${selectedLessonIds.length}개 수업을 알림톡 없음으로 변경했습니다.`);
+      window.setTimeout(() => onRefresh?.(), 700);
+    } finally {
+      window.setTimeout(() => setIsBulkUpdating(false), 800);
     }
   }
 
@@ -5150,7 +5180,7 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
       <div className="pageTop">
         <div>
           <h1>알림관리</h1>
-          <p className="muted">학부모 알림톡, 학생 알림톡, 출결 알림톡의 예약과 테스트 기록을 확인합니다.</p>
+          <p className="muted">수업별 알림톡 예약을 확인하고 돌발 상황에 맞춰 재예약합니다.</p>
         </div>
         <div className="pageActions">
           <button className="softButton" onClick={handleReadinessCheck} type="button" disabled={isCheckingReadiness}>
@@ -5201,109 +5231,94 @@ function NotificationCenter({ integrationStatus, notificationJobs, notificationL
           <strong>{failedJobs.length}건</strong>
           <small>재확인 필요</small>
         </button>
-        <button className={`notificationSafetyCard ${safetyTone}`} onClick={showSafetySettings} type="button">
-          <span>발송 보호</span>
-          <strong>{notificationStatus?.dryRun ? "테스트 보호" : notificationStatus?.allowRealRecipients ? "실발송 모드" : "번호 잠금"}</strong>
-          <small>{safetyText}</small>
+        <button
+          className={jobFilter === "canceled" ? "active" : ""}
+          onClick={() => selectJobFilter("canceled")}
+          type="button"
+        >
+          <span>취소</span>
+          <strong>{canceledJobs.length}건</strong>
+          <small>복구 가능 후보</small>
         </button>
       </div>
 
-      <section className="notificationPanel integrationStatusPanel">
+      <section className="notificationPanel">
         <div className="sectionHeader slim">
           <div>
-            <p className="eyebrow">LIVE SETTINGS</p>
-            <h2>발송/AI 연동 상태</h2>
+            <p className="eyebrow">LESSON RESERVATION</p>
+            <h2>수업별 예약 관리</h2>
           </div>
-          <span className={notificationStatus?.missing?.length ? "statusPill status-failed" : "statusPill status-sent"}>
-            {notificationStatus?.missing?.length ? "확인 필요" : "준비됨"}
-          </span>
+          <span className="countBadge">{selectedLessonIds.length}개 선택</span>
         </div>
-        <div className="integrationStatusGrid">
-          <article>
-            <strong>솔라피 기본</strong>
-            <span><StatusDot active={notificationStatus?.solapiConfigured} /> API/PFID 설정</span>
-            <span><StatusDot active={notificationStatus?.templatesConfigured?.attendance} /> 출결 알림톡 템플릿</span>
-            <span><StatusDot active={notificationStatus?.templatesConfigured?.dailyReport} /> 학부모 알림톡 템플릿</span>
-            <span><StatusDot active={notificationStatus?.templatesConfigured?.studentComment} /> 학생 알림톡 템플릿</span>
-          </article>
-          <article>
-            <strong>발송 안전장치</strong>
-            <span><StatusDot active={notificationStatus?.dryRun} /> 테스트 보호 {notificationStatus?.dryRun ? "ON" : "OFF"}</span>
-            <span><StatusDot active={notificationStatus?.liveTestSendEnabled} /> 테스트 실발송 {notificationStatus?.liveTestSendEnabled ? "ON" : "OFF"}</span>
-            <span><StatusDot active={!notificationStatus?.allowRealStudentRecipients} /> 학생 실제번호 잠금 {notificationStatus?.allowRealStudentRecipients ? "OFF" : "ON"}</span>
-            <span><StatusDot active={!notificationStatus?.allowRealParentRecipients} /> 학부모 실제번호 잠금 {notificationStatus?.allowRealParentRecipients ? "OFF" : "ON"}</span>
-            <span>테스트 수신번호: {notificationStatus?.testRecipient || "미설정"}</span>
-          </article>
-          <article>
-            <strong>AI API</strong>
-            <span><StatusDot active={integrationStatus?.ai?.providers?.openai} /> OpenAI</span>
-            <span><StatusDot active={integrationStatus?.ai?.providers?.anthropic} /> Claude</span>
-            <span>기본값: {integrationStatus?.ai?.defaultProvider || "미설정"}</span>
-          </article>
-          <article>
-            <strong>다음 테스트 순서</strong>
-            <span>1. 누락 점검</span>
-            <span>2. 테스트 발송</span>
-            <span>3. 선생님 번호 수신 확인</span>
-            <span>4. 실발송 잠금 해제는 마지막</span>
-          </article>
+        <div className="notificationControlGrid">
+          <label>
+            수업일
+            <input type="date" value={selectedNotificationDate} onChange={(event) => setSelectedNotificationDate(event.target.value)} />
+          </label>
+          <label>
+            예약일
+            <input type="date" value={manualScheduleDate} onChange={(event) => setManualScheduleDate(event.target.value)} />
+          </label>
+          <label>
+            예약시간
+            <input type="time" value={manualScheduleTime} onChange={(event) => setManualScheduleTime(event.target.value)} />
+          </label>
+          <div className="notificationControlActions">
+            <button className="softButton" onClick={selectAllLessonsForDate} type="button">해당일 전체 선택</button>
+            <button className="softButton subtle" onClick={clearSelectedLessons} type="button">선택 해제</button>
+          </div>
         </div>
-        {notificationStatus?.missing?.length ? (
-          <p className="inlineNotice danger">미입력 환경변수: {notificationStatus.missing.join(", ")}</p>
-        ) : null}
-      </section>
-
-      <section className="notificationPanel templateTestPanel">
-        <div className="sectionHeader slim">
+        <div className="reservationSummaryGrid notificationSelectionSummary">
           <div>
-            <p className="eyebrow">TEMPLATE TEST</p>
-            <h2>알림톡 템플릿 테스트</h2>
+            <span>학부모 예약</span>
+            <strong>{selectedScheduledParentCount}건</strong>
           </div>
-          <span className="countBadge">{notificationStatus?.liveTestSendEnabled ? "테스트 번호 실발송" : "dry-run 기록"}</span>
-        </div>
-        <div className="templateTestGrid">
-          <article>
-            <strong>출결 알림톡</strong>
-            <p>선생님 테스트 수신번호로 출결 알림톡 형식을 점검합니다.</p>
-            <pre className="templatePreviewText">{buildNotificationTemplatePreview("attendance")}</pre>
-            <button className="softButton" disabled={testingTemplate === "attendance"} onClick={() => handleTemplateTest("attendance")} type="button">
-              {testingTemplate === "attendance" ? "테스트 중" : "출결 테스트"}
-            </button>
-          </article>
-          <article>
-            <strong>학부모 알림톡</strong>
-            <p>출결, 과제 상태, 강의 교재, 강의 내용, 코멘트 구조를 점검합니다.</p>
-            <pre className="templatePreviewText">{buildNotificationTemplatePreview("parent")}</pre>
-            <button className="softButton" disabled={testingTemplate === "parent"} onClick={() => handleTemplateTest("parent")} type="button">
-              {testingTemplate === "parent" ? "테스트 중" : "학부모 테스트"}
-            </button>
-          </article>
-          <article>
-            <strong>학생 알림톡</strong>
-            <p>학생에게 보낼 안내문과 다음 과제 문구를 점검합니다.</p>
-            <pre className="templatePreviewText">{buildNotificationTemplatePreview("student")}</pre>
-            <button className="softButton" disabled={testingTemplate === "student"} onClick={() => handleTemplateTest("student")} type="button">
-              {testingTemplate === "student" ? "테스트 중" : "학생 테스트"}
-            </button>
-          </article>
-        </div>
-        {testSendResult ? <p className="inlineNotice">{testSendResult}</p> : null}
-        {testSendDetail ? (
-          <div className="templateResultCard">
-            <div className="templateResultMeta">
-              <span>{testSendDetail.label}</span>
-              <span>{testSendDetail.dryRun ? "DRY RUN" : "SEND REQUESTED"}</span>
-              <span>수신: {testSendDetail.sentTo}</span>
-              <span>요청번호: {testSendDetail.requestedTo}</span>
-              <span>템플릿: {testSendDetail.templateEnvName}</span>
-            </div>
-            <pre className="templatePreviewText">
-              {Object.entries(testSendDetail.variables)
-                .map(([key, value]) => `${key}\n${value}`)
-                .join("\n\n")}
-            </pre>
+          <div>
+            <span>학생 예약</span>
+            <strong>{selectedScheduledStudentCount}건</strong>
           </div>
-        ) : null}
+          <div>
+            <span>발송 완료</span>
+            <strong>{selectedSentCount}건</strong>
+          </div>
+          <div>
+            <span>취소/실패</span>
+            <strong>{selectedCanceledFailedCount}건</strong>
+          </div>
+        </div>
+        <div className="notificationBulkActions">
+          <button className="sendButton" disabled={!selectedLessonIds.length || !manualScheduledAt || isBulkUpdating} onClick={scheduleSelectedLessons} type="button">
+            {isBulkUpdating ? "처리 중" : "선택 수업 예약/재예약"}
+          </button>
+          <button className="dangerButton" disabled={!selectedLessonIds.length || isBulkUpdating} onClick={disableSelectedLessons} type="button">
+            선택 수업 알림톡 없음
+          </button>
+          <span>{manualScheduledAt ? `${formatKoreaTimeLabel(manualScheduledAt)} 예약` : "예약 시각을 입력하세요"}</span>
+        </div>
+        <div className="notificationLessonList">
+          {lessonsForNotificationDate.length === 0 ? <p className="emptyState">선택한 날짜의 수업이 없습니다.</p> : null}
+          {lessonsForNotificationDate.map((lesson) => {
+            const counts = getLessonNotificationCounts(lesson);
+            const checked = selectedLessonIds.includes(lesson.lessonId);
+            return (
+              <button
+                className={checked ? "notificationLessonItem active" : "notificationLessonItem"}
+                key={lesson.lessonId}
+                onClick={() => toggleLessonSelection(lesson.lessonId)}
+                type="button"
+              >
+                <span>
+                  <strong>{lesson.className}</strong>
+                  <small>{lesson.startTime}-{lesson.endTime} · {lesson.studentIds?.length ?? 0}명</small>
+                </span>
+                <span>학부모 {counts.parent}</span>
+                <span>학생 {counts.student}</span>
+                <span>완료 {counts.sent}</span>
+                <span>취소/실패 {counts.canceled + counts.failed}</span>
+              </button>
+            );
+          })}
+        </div>
       </section>
 
       <section className="notificationPanel notificationQueuePanel">
@@ -9025,9 +9040,140 @@ function getAiProviderLabel(provider) {
   return "자동 선택";
 }
 
+function NotificationSettingsSection({ integrationStatus }) {
+  const [testSendResult, setTestSendResult] = useState("");
+  const [testSendDetail, setTestSendDetail] = useState(null);
+  const [testingTemplate, setTestingTemplate] = useState("");
+  const notificationStatus = integrationStatus?.notifications;
+
+  async function handleTemplateTest(testType) {
+    setTestingTemplate(testType);
+    setTestSendResult("");
+    setTestSendDetail(null);
+    const todayKey = getKoreaDateString(new Date());
+    const basePayload = {
+      academyName: academyBrandName,
+      assignmentStatus: "complete_thorough",
+      attendanceStatus: testType === "attendance" ? "late" : "present",
+      checkedAt: testType === "attendance" ? "태블릿/수기 출결 테스트" : "19:00",
+      forceDryRun: false,
+      forceTestRecipient: true,
+      lessonContent: "개별 진도 점검",
+      lessonDate: todayKey,
+      lessonMaterial: "공통수학1",
+      lessonName: testType === "attendance" ? "출결 테스트 수업" : "월수금 7-10반",
+      lateMinutes: testType === "attendance" ? 5 : "",
+      message: "오늘 수업에서 확인한 내용을 바탕으로 다음 과제를 안내드립니다.",
+      nextHomework: "쎈 - 경우의 수",
+      parentPhone: notificationStatus?.testRecipient,
+      previousHomework: "rpm 순열과 조합",
+      reason: testType === "attendance" ? "태블릿/수기 출결 연결 점검" : "",
+      studentName: "테스트학생",
+      studentPhone: notificationStatus?.testRecipient,
+      target: testType === "student" ? "student" : "parent"
+    };
+    const endpoint =
+      testType === "attendance"
+        ? "/api/notifications/attendance-alimtalk"
+        : "/api/notifications/comment-alimtalk";
+    try {
+      const result = await postJson(endpoint, basePayload);
+      const modeText = result.result?.dryRun ? "테스트 기록 완료 · 실제 발송 없음" : "테스트 번호로 발송 요청 완료";
+      setTestSendResult(`${getNotificationJobLabel(testType === "attendance" ? "attendance" : testType === "student" ? "student_comment" : "parent_comment")}: ${modeText}`);
+      setTestSendDetail({
+        label: getNotificationJobLabel(testType === "attendance" ? "attendance" : testType === "student" ? "student_comment" : "parent_comment"),
+        dryRun: Boolean(result.result?.dryRun),
+        requestedTo: result.result?.requestedTo || "-",
+        sentTo: result.result?.sentTo || "-",
+        templateEnvName: result.result?.templateEnvName || "-",
+        variables: result.result?.variables ?? {}
+      });
+    } catch (error) {
+      setTestSendResult(`테스트 실패: ${error.message}`);
+      setTestSendDetail(null);
+    } finally {
+      setTestingTemplate("");
+    }
+  }
+
+  return (
+    <section className="panel settingsCard">
+      <div className="sectionTitle">
+        <div>
+          <h2>알림톡 설정</h2>
+          <p>솔라피 연결, 실제번호 잠금, 템플릿 테스트를 확인합니다.</p>
+        </div>
+        <span className={notificationStatus?.missing?.length ? "statusPill status-failed" : "statusPill status-sent"}>
+          {notificationStatus?.missing?.length ? "확인 필요" : "준비됨"}
+        </span>
+      </div>
+      <div className="integrationStatusGrid">
+        <article>
+          <strong>솔라피 기본</strong>
+          <span><StatusDot active={notificationStatus?.solapiConfigured} /> API/PFID 설정</span>
+          <span><StatusDot active={notificationStatus?.templatesConfigured?.attendance} /> 출결 알림톡 템플릿</span>
+          <span><StatusDot active={notificationStatus?.templatesConfigured?.dailyReport} /> 학부모 알림톡 템플릿</span>
+          <span><StatusDot active={notificationStatus?.templatesConfigured?.studentComment} /> 학생 알림톡 템플릿</span>
+        </article>
+        <article>
+          <strong>발송 안전장치</strong>
+          <span><StatusDot active={notificationStatus?.dryRun} /> 테스트 보호 {notificationStatus?.dryRun ? "ON" : "OFF"}</span>
+          <span><StatusDot active={notificationStatus?.liveTestSendEnabled} /> 테스트 실발송 {notificationStatus?.liveTestSendEnabled ? "ON" : "OFF"}</span>
+          <span><StatusDot active={!notificationStatus?.allowRealStudentRecipients} /> 학생 실제번호 잠금 {notificationStatus?.allowRealStudentRecipients ? "OFF" : "ON"}</span>
+          <span><StatusDot active={!notificationStatus?.allowRealParentRecipients} /> 학부모 실제번호 잠금 {notificationStatus?.allowRealParentRecipients ? "OFF" : "ON"}</span>
+          <span>테스트 수신번호: {notificationStatus?.testRecipient || "미설정"}</span>
+        </article>
+        <article>
+          <strong>AI API</strong>
+          <span><StatusDot active={integrationStatus?.ai?.providers?.openai} /> OpenAI</span>
+          <span><StatusDot active={integrationStatus?.ai?.providers?.anthropic} /> Claude</span>
+          <span>기본값: {integrationStatus?.ai?.defaultProvider || "미설정"}</span>
+        </article>
+      </div>
+      {notificationStatus?.missing?.length ? (
+        <p className="inlineNotice danger">미입력 환경변수: {notificationStatus.missing.join(", ")}</p>
+      ) : null}
+      <div className="templateTestGrid settingsTemplateTestGrid">
+        {[
+          ["attendance", "출결 알림톡", "선생님 테스트 수신번호로 출결 알림톡 형식을 점검합니다."],
+          ["parent", "학부모 알림톡", "출결, 과제 상태, 강의 내용, 코멘트 구조를 점검합니다."],
+          ["student", "학생 알림톡", "학생에게 보낼 안내문과 다음 과제 문구를 점검합니다."]
+        ].map(([id, title, description]) => (
+          <article key={id}>
+            <strong>{title}</strong>
+            <p>{description}</p>
+            <pre className="templatePreviewText">{buildNotificationTemplatePreview(id)}</pre>
+            <button className="softButton" disabled={testingTemplate === id} onClick={() => handleTemplateTest(id)} type="button">
+              {testingTemplate === id ? "테스트 중" : `${title.replace(" 알림톡", "")} 테스트`}
+            </button>
+          </article>
+        ))}
+      </div>
+      {testSendResult ? <p className="inlineNotice">{testSendResult}</p> : null}
+      {testSendDetail ? (
+        <div className="templateResultCard">
+          <div className="templateResultMeta">
+            <span>{testSendDetail.label}</span>
+            <span>{testSendDetail.dryRun ? "DRY RUN" : "SEND REQUESTED"}</span>
+            <span>수신: {testSendDetail.sentTo}</span>
+            <span>요청번호: {testSendDetail.requestedTo}</span>
+            <span>템플릿: {testSendDetail.templateEnvName}</span>
+          </div>
+          <pre className="templatePreviewText">
+            {Object.entries(testSendDetail.variables)
+              .map(([key, value]) => `${key}\n${value}`)
+              .join("\n\n")}
+          </pre>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 function SettingsCenter({
   aiSettings,
   attendanceSettings = defaultAttendanceSettings,
+  integrationStatus,
   onUpdateAiSettings,
   onUpdateAttendanceSettings,
   teacherAccountSettings = defaultTeacherAccountSettings,
@@ -9251,6 +9397,8 @@ function SettingsCenter({
           </div>
         </form>
       </section>
+
+      <NotificationSettingsSection integrationStatus={integrationStatus} />
 
       <section className="panel settingsCard">
         <div className="sectionTitle">
