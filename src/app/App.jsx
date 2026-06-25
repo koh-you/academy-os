@@ -10044,11 +10044,18 @@ function ExamAnalysisCenter({
                   onClick={() => sourceFileInputRef.current?.click()}
                   onDragOver={(event) => event.preventDefault()}
                   onDrop={handleSourceFileDrop}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      sourceFileInputRef.current?.click();
+                    }
+                  }}
                   role="button"
                   tabIndex={0}
                 >
-                  <strong>기출 PDF 드래그 앤 드롭</strong>
-                  <span>PDF를 Storage에 저장하고, 추출 가능한 텍스트를 OCR 메모에 자동으로 붙입니다.</span>
+                  <strong>기출 PDF 드래그 앤 드롭 / 선택 업로드</strong>
+                  <span>PDF를 올리면 Storage 저장과 텍스트 추출을 바로 시작합니다.</span>
+                  <span className="sourceDropAction">PDF 파일 선택</span>
                   <input
                     accept="application/pdf"
                     className="hiddenFileInput"
@@ -10057,11 +10064,15 @@ function ExamAnalysisCenter({
                     type="file"
                   />
                 </div>
-                {selectedAnalysis.sourceUploadStatus ? (
-                  <small className={String(selectedAnalysis.sourceUploadStatus).includes("실패") ? "sourceUploadStatus failed" : "sourceUploadStatus"}>
-                    {selectedAnalysis.sourceUploadStatus}
-                  </small>
-                ) : null}
+                <small className={
+                  selectedAnalysis.sourceUploadStatus
+                    ? String(selectedAnalysis.sourceUploadStatus).includes("실패")
+                      ? "sourceUploadStatus failed"
+                      : "sourceUploadStatus"
+                    : "sourceUploadStatus ready"
+                }>
+                  {selectedAnalysis.sourceUploadStatus || "대기 · 여기를 클릭하거나 PDF를 드롭하면 Storage 저장과 텍스트 추출을 시작합니다."}
+                </small>
                 {Array.isArray(selectedAnalysis.sourceFiles) && selectedAnalysis.sourceFiles.length ? (
                   <div className="sourceFileList">
                     {selectedAnalysis.sourceFiles.map((file, index) => (

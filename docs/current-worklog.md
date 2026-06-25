@@ -97,6 +97,14 @@
 - 주의: 이번 구현은 텍스트 레이어가 있는 PDF 자동 추출이다. 완전한 이미지 OCR, 페이지별 이미지 렌더링, 문항 단위 자동 분리는 별도 고도화 과제다.
 - 검증: `node --check api/server.js` 통과, `pdf-parse/lib/pdf-parse.js` import 확인, `npm run test:production` 184개 통과, `npm run build` 통과. 기존 Vite 청크 크기 경고만 확인됨.
 
+## 2026-06-25 시험분석 PDF 업로드 UI 발견성 보강
+
+- 상태: 완료
+- 사용자 요청: 배포 화면을 봤을 때 이전 화면과 거의 같아 보여 실제 PDF 업로드 기능이 추가된 것이 잘 드러나지 않는다고 했다.
+- 조치: 시험분석 원본 입력 드롭존을 더 큰 파란 점선 영역으로 바꾸고, `기출 PDF 드래그 앤 드롭 / 선택 업로드`, `PDF 파일 선택` 액션을 명확히 표시했다. 업로드 전에도 `대기 · 여기를 클릭하거나 PDF를 드롭하면 Storage 저장과 텍스트 추출을 시작합니다.` 상태 문구가 보이도록 했다.
+- 저장 확인: UI 발견성 보강만이며 기존 `exam-analysis-sources` Storage 업로드와 `app_state.examAnalyses` 저장 흐름은 그대로 유지한다. SQL 변경은 없다.
+- 검증: `npm run test:production` 184개 통과, `npm run build` 통과. 기존 Vite 청크 크기 경고만 확인됨.
+
 ## 2026-06-25 학생 삭제 후 반관리 잔존 보정
 
 - 상태: 완료
