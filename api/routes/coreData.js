@@ -221,7 +221,10 @@ function toLessonRecordRow(record, { includeExtendedFields = true, includeAttend
     behavior_tag: compact(record.behaviorTag),
     homework_status: compact(record.homeworkStatus),
     needs_makeup: Boolean(record.needsMakeup),
-    needs_retest: Boolean(record.needsRetest)
+    needs_retest: Boolean(record.needsRetest),
+    notification_muted_parent: Boolean(record.notificationMutedParent),
+    notification_muted_student: Boolean(record.notificationMutedStudent),
+    notification_muted_reason: compact(record.notificationMutedReason)
   };
 
   if (!includeAttendanceTimeFields) return extendedRow;
@@ -272,6 +275,9 @@ function fromLessonRecordRow(row) {
     studentCommentAiStatus: row.student_comment_ai_status ?? "",
     teacherCommentSendStatus: row.teacher_comment_send_status ?? "",
     studentCommentSendStatus: row.student_comment_send_status ?? "",
+    notificationMutedParent: Boolean(row.notification_muted_parent),
+    notificationMutedStudent: Boolean(row.notification_muted_student),
+    notificationMutedReason: row.notification_muted_reason ?? "",
     updatedAt: row.updated_at ?? ""
   };
 }
@@ -1238,6 +1244,9 @@ export async function upsertLessonStudentRecord(record) {
       message.includes("homework_status") ||
       message.includes("needs_makeup") ||
       message.includes("needs_retest") ||
+      message.includes("notification_muted_parent") ||
+      message.includes("notification_muted_student") ||
+      message.includes("notification_muted_reason") ||
       message.includes("preparation_memo") ||
       message.includes("prep_student_notice") ||
       message.includes("prep_student_visible") ||
@@ -1255,6 +1264,9 @@ export async function upsertLessonStudentRecord(record) {
       stableRecord.homeworkStatus && stableRecord.homeworkStatus !== "not_started" ? stableRecord.homeworkStatus : "",
       Boolean(stableRecord.needsMakeup),
       Boolean(stableRecord.needsRetest),
+      Boolean(stableRecord.notificationMutedParent),
+      Boolean(stableRecord.notificationMutedStudent),
+      stableRecord.notificationMutedReason,
       stableRecord.prepStudentVisible,
       stableRecord.prepParentVisible
     ].some((value) => (typeof value === "boolean" ? value : Boolean(String(value ?? "").trim())));

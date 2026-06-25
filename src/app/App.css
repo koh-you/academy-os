@@ -1639,6 +1639,31 @@ button {
   color: var(--status-danger-text);
 }
 
+.notificationMuteButton {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 900;
+  min-height: 28px;
+  padding: 4px 8px;
+}
+
+.notificationMuteButton.active {
+  background: #fff7ed;
+  border-color: #fdba74;
+  color: #c2410c;
+}
+
+.notificationMuteButton:hover,
+.notificationMuteButton:focus-visible {
+  border-color: #f59e0b;
+  color: #9a3412;
+  outline: none;
+}
+
 .journalSaveCell {
   align-content: center;
   display: grid;

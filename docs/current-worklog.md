@@ -6,6 +6,17 @@
 - Supabase 저장 최우선: 새 기능이나 화면 수정 전후로 데이터가 Supabase 테이블 또는 `app_state`에 저장되는지 먼저 확인한다. 새로고침, 재로그인, 다른 기기 접속 후 사라질 수 있는 프론트-only/localStorage-only 운영 데이터가 있으면 기능 확장보다 저장 경로를 우선 보강한다.
 - 검수 기본값: 운영 흐름에 영향이 있으면 `npm run test:production`과 `npm run build`를 실행하고, 통과 후 커밋/푸시한다. 비밀값과 `.env`는 절대 커밋하지 않는다.
 
+## 2026-06-25 수업일지 학생별 알림톡 제외
+
+- 상태: 완료
+- 사용자 요청: 조모상 등으로 결석을 미리 알린 학생은 수업일지에 결석은 체크하되, 해당 학생에게는 학부모/학생 알림톡을 보내지 않도록 특정 개인 알림톡 취소 기능을 구현해달라고 했다. SQL 변경이 더 깔끔하면 SQL edit을 해도 된다고 했다.
+- 조치: `lesson_student_records`에 `notification_muted_parent`, `notification_muted_student`, `notification_muted_reason` 컬럼을 추가하는 migration `supabase/20260625_lesson_notification_muting.sql`을 만들고, 기준 스키마와 API 저장/조회 매핑을 갱신했다.
+- 조치: 수업일지 학생 행의 학부모/학생 알림톡 영역에 `알림 제외`/`제외 해제` 버튼을 추가했다. 학부모와 학생을 각각 따로 제외할 수 있다.
+- 조치: 개별 제외를 누르면 해당 수업+학생+대상자의 아직 발송 전 `notification_jobs`를 `canceled`로 바꾸고, 수업기록의 발송 상태를 `알림 제외`로 저장한다. 다시 해제하면 현재 수업 발송 계획에 맞춰 예약을 재생성한다.
+- 조치: 기본예약, 30분 지연, 수동 재예약을 다시 실행해도 제외된 학생/대상자는 예약 작업을 만들지 않게 했다. 수동 알림톡 작성 모달에서도 제외 상태면 발송 버튼이 막힌다.
+- 저장 확인: 학생별 제외 상태는 Supabase `lesson_student_records` 컬럼에 저장된다. 예약/취소 상태는 기존 `notification_jobs`를 사용한다.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 178개 통과, `npm run build` 통과. 빌드 시 기존 Vite 청크 크기 경고만 확인됨.
+
 ## 2026-06-25 알림관리 단일 개별 발송 화면 정리
 
 - 상태: 완료

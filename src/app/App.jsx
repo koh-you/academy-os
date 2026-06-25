@@ -3303,9 +3303,19 @@ export function App() {
     return `lesson_comment_${lessonId}_${studentId}_${target}`;
   }
 
+  function isRecordNotificationMuted(record, target) {
+    return target === "student" ? Boolean(record?.notificationMutedStudent) : Boolean(record?.notificationMutedParent);
+  }
+
+  function getLessonStudentRecord(lesson, student) {
+    const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+    return recordsRef.current.find((item) => item.lessonStudentRecordId === recordId) ?? createEmptyRecord(lesson, student);
+  }
+
   function buildLessonNotificationJob(lesson, student, target, scheduledDate, mode) {
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
-    const record = recordsRef.current.find((item) => item.lessonStudentRecordId === recordId) ?? createEmptyRecord(lesson, student);
+    const record = getLessonStudentRecord(lesson, student);
+    if (isRecordNotificationMuted(record, target)) return null;
     const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
     const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
     const audience = target === "student" ? "student" : "parent";
@@ -3378,8 +3388,8 @@ export function App() {
       if (record.lessonId !== lesson.lessonId || !lessonStudentIds.has(record.studentId)) return record;
       return {
         ...record,
-        teacherCommentSendStatus: statusText,
-        studentCommentSendStatus: statusText,
+        teacherCommentSendStatus: record.notificationMutedParent ? "알림 제외" : statusText,
+        studentCommentSendStatus: record.notificationMutedStudent ? "알림 제외" : statusText,
         updatedAt: new Date().toISOString()
       };
     });
@@ -3396,6 +3406,30 @@ export function App() {
     const planMode = lessonNotificationPlans[lesson.lessonId]?.mode || "default";
     if (planMode === "none") return;
     applyLessonNotificationPlan(lesson.lessonId, planMode);
+  }
+
+  function cancelNotificationJobs(jobIds, reason = "알림 제외") {
+    const canceledJobs = notificationJobs
+      .filter((job) => jobIds.has(job.notificationJobId))
+      .filter((job) => !["sent", "dry_run", "failed", "canceled"].includes(job.status))
+      .map((job) => ({ ...job, status: "canceled", error: reason, updatedAt: new Date().toISOString() }));
+    if (!canceledJobs.length) return [];
+    setNotificationJobs((current) =>
+      current.map((job) => canceledJobs.find((canceledJob) => canceledJob.notificationJobId === job.notificationJobId) ?? job)
+    );
+    canceledJobs.forEach((notificationJob) =>
+      postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
+    );
+    return canceledJobs;
+  }
+
+  function buildLessonNotificationJobs(lesson, lessonStudents, scheduledDate, mode) {
+    return lessonStudents
+      .flatMap((student) => [
+        buildLessonNotificationJob(lesson, student, "parent", scheduledDate, mode),
+        buildLessonNotificationJob(lesson, student, "student", scheduledDate, mode)
+      ])
+      .filter(Boolean);
   }
 
   function applyLessonNotificationPlan(lessonId, mode) {
@@ -3433,15 +3467,21 @@ export function App() {
     }
     const scheduledDate = getLessonAlimtalkScheduledDate(lesson, delayMinutes);
     const scheduledLabel = formatKoreaTimeLabel(scheduledDate);
-    const nextJobs = lessonStudents.flatMap((student) => [
-      buildLessonNotificationJob(lesson, student, "parent", scheduledDate, mode),
-      buildLessonNotificationJob(lesson, student, "student", scheduledDate, mode)
-    ]);
+    const nextJobs = buildLessonNotificationJobs(lesson, lessonStudents, scheduledDate, mode);
+    const nextJobIds = new Set(nextJobs.map((job) => job.notificationJobId));
+    const canceledJobs = notificationJobs
+      .filter((job) => jobIds.has(job.notificationJobId) && !nextJobIds.has(job.notificationJobId))
+      .filter((job) => !["sent", "dry_run", "failed", "canceled"].includes(job.status))
+      .map((job) => ({ ...job, status: "canceled", error: "알림 제외", updatedAt: new Date().toISOString() }));
     setNotificationJobs((current) => [
       ...nextJobs,
+      ...canceledJobs,
       ...current.filter((job) => !jobIds.has(job.notificationJobId))
     ]);
     nextJobs.forEach((notificationJob) =>
+      postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
+    );
+    canceledJobs.forEach((notificationJob) =>
       postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
     );
     updateLessonNotificationRecordStatuses(lesson, `예약 중 · ${scheduledLabel}`);
@@ -3456,16 +3496,22 @@ export function App() {
         getLessonNotificationJobId(lesson.lessonId, student.studentId, "student")
       ])
     );
-    const nextJobs = lessonStudents.flatMap((student) => [
-      buildLessonNotificationJob(lesson, student, "parent", scheduledDate, mode),
-      buildLessonNotificationJob(lesson, student, "student", scheduledDate, mode)
-    ]);
+    const nextJobs = buildLessonNotificationJobs(lesson, lessonStudents, scheduledDate, mode);
+    const nextJobIds = new Set(nextJobs.map((job) => job.notificationJobId));
+    const canceledJobs = notificationJobs
+      .filter((job) => jobIds.has(job.notificationJobId) && !nextJobIds.has(job.notificationJobId))
+      .filter((job) => !["sent", "dry_run", "failed", "canceled"].includes(job.status))
+      .map((job) => ({ ...job, status: "canceled", error: "알림 제외", updatedAt: new Date().toISOString() }));
     const scheduledLabel = formatKoreaTimeLabel(scheduledDate);
     setNotificationJobs((current) => [
       ...nextJobs,
+      ...canceledJobs,
       ...current.filter((job) => !jobIds.has(job.notificationJobId))
     ]);
     nextJobs.forEach((notificationJob) =>
+      postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
+    );
+    canceledJobs.forEach((notificationJob) =>
       postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
     );
     updateLessonNotificationRecordStatuses(lesson, `예약 중 · ${scheduledLabel}`);
@@ -3483,6 +3529,42 @@ export function App() {
       }
     }));
     scheduleLessonNotificationsAt(lesson, scheduledDate, "manual");
+  }
+
+  function handleToggleStudentNotificationMute(lesson, student, target, reason = "") {
+    if (!lesson?.lessonId || !student?.studentId) return;
+    const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+    const existingRecord = getLessonStudentRecord(lesson, student);
+    const field = target === "student" ? "notificationMutedStudent" : "notificationMutedParent";
+    const statusField = target === "student" ? "studentCommentSendStatus" : "teacherCommentSendStatus";
+    const nextMuted = !Boolean(existingRecord?.[field]);
+    const nextRecord = {
+      ...createEmptyRecord(lesson, student),
+      ...(existingRecord ?? {}),
+      lessonStudentRecordId: recordId,
+      lessonId: lesson.lessonId,
+      studentId: student.studentId,
+      [field]: nextMuted,
+      notificationMutedReason: nextMuted ? (reason || existingRecord.notificationMutedReason || "개별 알림 제외") : existingRecord.notificationMutedReason,
+      [statusField]: nextMuted ? "알림 제외" : "",
+      updatedBy: "instructor_owner_001",
+      updatedAt: new Date().toISOString()
+    };
+    const nextRecords = upsertById(recordsRef.current, nextRecord, "lessonStudentRecordId");
+    recordsRef.current = nextRecords;
+    setRecords(nextRecords);
+    handleSaveRecord(recordId, lesson, student, nextRecord);
+
+    const jobId = getLessonNotificationJobId(lesson.lessonId, student.studentId, target);
+    if (nextMuted) {
+      cancelNotificationJobs(new Set([jobId]), "개별 알림 제외");
+      return;
+    }
+
+    const planMode = lessonNotificationPlans[lesson.lessonId]?.mode || "default";
+    if (planMode !== "none") {
+      applyLessonNotificationPlan(lesson.lessonId, planMode);
+    }
   }
 
   function syncPreviousHomeworkStatusFromAssignment(lesson, student, assignmentStatus) {
@@ -3762,6 +3844,7 @@ export function App() {
             onUpdateLessonNotificationPlan={handleUpdateLessonNotificationPlan}
             onUpdateExamSundayMakeupBlocks={updateExamSundayMakeupBlocks}
             onUpdateMakeupTask={handleUpdateMakeupTask}
+            onToggleStudentNotificationMute={handleToggleStudentNotificationMute}
             isLessonJournalOpen={isLessonJournalOpen}
           />
         ) : null}
@@ -4516,6 +4599,7 @@ export function App() {
 
   async function handleSendLessonComment(lesson, student, record, target, options = {}) {
     if (options.sendTiming === "none") return;
+    if (isRecordNotificationMuted(record, target)) return;
     const sourceField = target === "student" ? "studentComment" : "teacherComment";
     const message = normalizeMessageText(record?.[sourceField]);
     const prepMemo = normalizeMessageText(record?.preparationMemo);
@@ -5838,6 +5922,7 @@ function TeacherLessonHubV2({
   onUpdateHomework,
   onUpdateLessonNotificationPlan,
   onUpdateMakeupTask,
+  onToggleStudentNotificationMute,
   undoCount,
   isLessonJournalOpen
 }) {
@@ -5992,6 +6077,7 @@ function TeacherLessonHubV2({
           onUpdateHomework={onUpdateHomework}
           onUpdateLessonNotificationPlan={onUpdateLessonNotificationPlan}
           onUpdateMakeupTask={onUpdateMakeupTask}
+          onToggleStudentNotificationMute={onToggleStudentNotificationMute}
           records={records}
           saveStates={saveStates}
           students={students}
@@ -6701,6 +6787,7 @@ function LessonJournalDetail({
   onUpdateHomework,
   onUpdateLessonNotificationPlan,
   onUpdateMakeupTask,
+  onToggleStudentNotificationMute,
   notificationJobs = [],
   records,
   saveStates,
@@ -6964,13 +7051,14 @@ function LessonJournalDetail({
               <span>학생</span>
             </div>
             {students.map((student) => {
+              const record = records.find((item) => item.studentId === student.studentId) ?? createEmptyRecord(lesson, student);
               const parentJob = getStudentReservationStatus(student, "parent");
               const studentJob = getStudentReservationStatus(student, "student");
               return (
                 <div className="reservationStatusRow" key={student.studentId}>
                   <strong>{student.name}</strong>
-                  <span>{formatNotificationJobStatus(parentJob)}</span>
-                  <span>{formatNotificationJobStatus(studentJob)}</span>
+                  <span>{record.notificationMutedParent ? "알림 제외" : formatNotificationJobStatus(parentJob)}</span>
+                  <span>{record.notificationMutedStudent ? "알림 제외" : formatNotificationJobStatus(studentJob)}</span>
                 </div>
               );
             })}
@@ -7107,6 +7195,13 @@ function LessonJournalDetail({
                   <small className={`commentStatusText comment-${parentCommentState}`}>
                     {getCommentStatusLabel(record.teacherComment, record.teacherCommentSendStatus)}
                   </small>
+                  <button
+                    className={record.notificationMutedParent ? "notificationMuteButton active" : "notificationMuteButton"}
+                    onClick={() => onToggleStudentNotificationMute?.(lesson, student, "parent")}
+                    type="button"
+                  >
+                    {record.notificationMutedParent ? "제외 해제" : "알림 제외"}
+                  </button>
                 </div>
                 <div className="journalCommentCell">
                   <button
@@ -7119,6 +7214,13 @@ function LessonJournalDetail({
                   <small className={`commentStatusText comment-${studentCommentState}`}>
                     {getCommentStatusLabel(record.studentComment, record.studentCommentSendStatus)}
                   </small>
+                  <button
+                    className={record.notificationMutedStudent ? "notificationMuteButton active" : "notificationMuteButton"}
+                    onClick={() => onToggleStudentNotificationMute?.(lesson, student, "student")}
+                    type="button"
+                  >
+                    {record.notificationMutedStudent ? "제외 해제" : "알림 제외"}
+                  </button>
                 </div>
               </div>
             );
@@ -7357,6 +7459,7 @@ function CommentComposerModal({
   const previewTitle = isParent ? "학부모 알림톡 미리보기" : "학생 알림톡 미리보기";
   const aiStatus = isParent ? record?.teacherCommentAiStatus : record?.studentCommentAiStatus;
   const sendStatus = isParent ? record?.teacherCommentSendStatus : record?.studentCommentSendStatus;
+  const isNotificationMuted = isParent ? Boolean(record?.notificationMutedParent) : Boolean(record?.notificationMutedStudent);
   const notificationStatus = integrationStatus?.notifications;
   const audienceNotificationStatus = getAlimtalkAudienceStatus(notificationStatus, audience);
   const recipientPhone = isParent ? student.parentPhone : student.studentPhone;
@@ -7366,7 +7469,9 @@ function CommentComposerModal({
     audienceNotificationStatus?.allowRealRecipients;
   const forceTestRecipient = !canSendNowToRealRecipient;
   const actionLabel =
-    planMode === "none"
+    isNotificationMuted
+      ? "알림 제외"
+      : planMode === "none"
       ? "발송 안 함"
       : planMode === "delay30"
         ? "30분 지연 예약"
@@ -7441,7 +7546,7 @@ function CommentComposerModal({
             </button>
             <button
               className="sendButton"
-              disabled={planMode === "none" || isScheduleExpired}
+              disabled={isNotificationMuted || planMode === "none" || isScheduleExpired}
               onClick={() =>
                 onSendComment(lesson, student, record, audience, {
                   delayMinutes: sendDelayMinutes,
@@ -7452,13 +7557,13 @@ function CommentComposerModal({
               }
               type="button"
             >
-              {isScheduleExpired ? "예약 시간 지남" : actionLabel}
+              {isNotificationMuted ? "알림 제외" : isScheduleExpired ? "예약 시간 지남" : actionLabel}
             </button>
           </div>
           <div className="currentSchedulePlan" aria-label="현재 수업 발송 계획">
             <span>현재 수업 발송 계획</span>
             <strong>{currentPlanLabel}</strong>
-            <small>발송 버튼은 현재 수업 발송 계획대로 예약합니다.</small>
+            <small>{isNotificationMuted ? "이 학생의 해당 알림톡은 개별 제외 상태입니다." : "발송 버튼은 현재 수업 발송 계획대로 예약합니다."}</small>
           </div>
           <div className={`alimtalkSafetyBox ${safetyTone}`}>
             <strong>{safetyText}</strong>
@@ -16315,6 +16420,9 @@ function createEmptyRecord(lesson, student) {
     teacherComment: "",
     studentComment: "",
     assignmentStatus: "",
+    notificationMutedParent: false,
+    notificationMutedStudent: false,
+    notificationMutedReason: "",
     needsMakeup: false,
     needsRetest: false
   };
