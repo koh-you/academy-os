@@ -77,6 +77,15 @@
 - 저장 확인: CSS 표시 변경만 있으므로 Supabase 저장 경로 또는 SQL 변경은 필요 없다.
 - 검증: `npm run build` 통과. 기존 Vite 청크 크기 경고만 확인됨.
 
+## 2026-06-25 출결 알림톡 지각/결석 상세 문구 보강
+
+- 상태: 완료
+- 사용자 요청: 출결이 `지각` 또는 `결석`인 경우 알림톡의 `출결` 옆 괄호 안에 사유와 시간을 함께 표시해달라고 했다. 예시 확인 후 `출결: 지각 (사유: 교통 지연 · 등원 19:18)` 형식으로 진행했다.
+- 조치: 서버 실제 발송 문구(`api/routes/notifications.js`)에 `attendanceLabelWithDetail`을 추가해 지각/결석/인정결석일 때만 괄호 상세를 붙인다. 지각은 `사유`, `등원 HH:mm`, 결석/인정결석은 `사유`, `처리 HH:mm`을 표시하고 빈 값은 생략한다.
+- 조치: 프론트 미리보기/예약 payload(`src/app/App.jsx`)도 같은 규칙의 `formatAttendanceForMessage`를 사용하게 했다. 예약 알림 payload에 `attendanceReason`, `checkInTime`, `checkedAt`, `lateMinutes`를 포함해 예약 발송 시에도 같은 문구가 생성되게 했다.
+- 저장 확인: 기존 `lesson_student_records.attendance_reason`, `check_in_time`, `late_minutes`, `updated_at` 값을 사용하는 표시 변경이다. SQL 변경은 없다.
+- 검증: `npm run test:production` 통과, `npm run build` 통과. 기존 Vite 청크 크기 경고만 확인됨.
+
 ## 2026-06-25 학사일정 월간 캘린더 표현 개선
 
 - 상태: 완료

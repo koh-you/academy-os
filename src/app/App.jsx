@@ -283,6 +283,43 @@ function createMessageLine(label, value) {
   return text ? `${label} : ${text}` : "";
 }
 
+function formatAttendanceMessageTime(value) {
+  const text = String(value ?? "").trim();
+  if (!text) return "";
+  const isoTime = text.match(/T(\d{2}:\d{2})/);
+  if (isoTime?.[1]) return isoTime[1];
+  const koreanTime = text.match(/(오전|오후)\s*(\d{1,2}):(\d{2})/);
+  if (koreanTime) {
+    const period = koreanTime[1];
+    let hour = Number(koreanTime[2]);
+    if (period === "오후" && hour < 12) hour += 12;
+    if (period === "오전" && hour === 12) hour = 0;
+    return `${String(hour).padStart(2, "0")}:${koreanTime[3]}`;
+  }
+  const time = text.match(/(\d{1,2}:\d{2})/);
+  if (time?.[1]) return time[1].padStart(5, "0");
+  return text;
+}
+
+function formatAttendanceForMessage(recordOrPayload = {}) {
+  const attendanceStatus = recordOrPayload.attendanceStatus ?? "pending";
+  const label = attendanceLabels[attendanceStatus] ?? attendanceStatus ?? "";
+  if (!["지각", "결석", "인정결석"].includes(label)) return label;
+
+  const details = [];
+  const reason = normalizeMessageText(recordOrPayload.attendanceReason ?? recordOrPayload.reason ?? "");
+  const time = formatAttendanceMessageTime(
+    recordOrPayload.checkInTime ||
+    recordOrPayload.checkedAt ||
+    recordOrPayload.checkInAt
+  );
+  if (reason) details.push(`사유: ${reason}`);
+  if (label === "지각" && time) details.push(`등원 ${time}`);
+  if (label === "지각" && !time && recordOrPayload.lateMinutes) details.push(`${recordOrPayload.lateMinutes}분 지각`);
+  if ((label === "결석" || label === "인정결석") && time) details.push(`처리 ${time}`);
+  return details.length ? `${label} (${details.join(" · ")})` : label;
+}
+
 function joinMessageBlocks(blocks) {
   return blocks.map(normalizeMessageText).filter(Boolean).join("\n\n");
 }
@@ -325,7 +362,7 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, previousHom
   const lessonMaterial = getLessonMaterial(record, student);
   const lessonContent = getLessonContent(record);
   const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
-  const attendance = attendanceLabels[record?.attendanceStatus ?? "pending"] ?? "";
+  const attendance = formatAttendanceForMessage(record);
   const commentText = normalizeMessageText(comment);
   const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
   const supplementNotice = supplementText && !commentText.includes("보충일정") && !supplementSchedules.some((item) => commentText.includes(item))
@@ -370,7 +407,7 @@ function buildCommentSourceText({ audience = "parent", lesson, nextHomework, pre
   return joinMessageBlocks([
     createMessageLine("수신 학생", student.name),
     createMessageLine("수업", `${lesson.date} ${lesson.className}`),
-    createMessageLine("출결", attendanceLabels[record?.attendanceStatus ?? "pending"] ?? ""),
+    createMessageLine("출결", formatAttendanceForMessage(record)),
     createMessageLine("과제 상태", getAssignmentStatusMessage(audience, getAssignmentStatusForMessage(record, previousHomework))),
     createMessageLine("강의 교재", getLessonMaterial(record, student)),
     createMessageLine("강의 내용", getLessonContent(record)),
@@ -528,18 +565,23 @@ function buildNotificationTemplatePreview(type) {
   };
 
   if (type === "attendance") {
+    const attendanceSample = {
+      ...base,
+      attendanceReason: "교통 지연",
+      attendanceStatus: "late",
+      checkInTime: "19:18"
+    };
     return joinMessageBlocks([
       `#{학원명}: ${base.academyName}`,
       `#{학생명}: ${base.studentName}`,
       "#{출결본문}:",
-      createMessageLine("🏫 출결", attendanceLabels[base.attendanceStatus]),
-      createMessageLine("📚 수업", base.lessonName),
-      createMessageLine("🕒 시간", base.checkedAt)
+      createMessageLine("🏫 출결", formatAttendanceForMessage(attendanceSample)),
+      createMessageLine("📚 수업", base.lessonName)
     ]);
   }
 
   const commonBody = joinMessageBlocks([
-    createMessageLine("🏫 출결", attendanceLabels[base.attendanceStatus]),
+    createMessageLine("🏫 출결", formatAttendanceForMessage(base)),
     createMessageLine("✅ 과제 상태", getAssignmentStatusMessage(type, base.assignmentStatus)),
     createMessageLine("📚 강의 교재", base.lessonMaterial),
     createMessageLine("🧭 강의 내용", base.lessonContent),
@@ -3401,6 +3443,10 @@ export function App() {
       assignmentStatusParentMessage: getAssignmentStatusParentMessage(assignmentStatus),
       assignmentStatusStudentMessage: getAssignmentStatusStudentMessage(assignmentStatus),
       attendanceStatus: record?.attendanceStatus ?? "pending",
+      attendanceReason: record?.attendanceReason ?? "",
+      checkInTime: record?.checkInTime ?? "",
+      checkedAt: record?.updatedAt ?? "",
+      lateMinutes: record?.lateMinutes ?? "",
       commentBodyOverride: commentBody,
       lessonContent: getLessonContent(record),
       lessonDate: lesson.date,
@@ -3805,6 +3851,7 @@ export function App() {
     const payload = {
       attendanceStatus: values.attendanceStatus,
       checkedAt: getKoreaDateTimeString(),
+      checkInTime: values.checkInTime,
       lateMinutes: values.lateMinutes,
       lessonId: lesson.lessonId,
       lessonName: lesson.className,
@@ -4730,6 +4777,10 @@ export function App() {
         assignmentStatusParentMessage: getAssignmentStatusParentMessage(assignmentStatus),
         assignmentStatusStudentMessage: getAssignmentStatusStudentMessage(assignmentStatus),
         attendanceStatus: record?.attendanceStatus ?? "pending",
+        attendanceReason: record?.attendanceReason ?? "",
+        checkInTime: record?.checkInTime ?? "",
+        checkedAt: record?.updatedAt ?? "",
+        lateMinutes: record?.lateMinutes ?? "",
         lessonDate: lesson.date,
         lessonContent,
         lessonId: lesson.lessonId,
@@ -16680,7 +16731,7 @@ function getLessonHomework(homeworks, lesson, student, homeworkType, lessons = [
 }
 
 function createAiReportDraft(student, lesson, record, homeworkBundle) {
-  const attendance = attendanceLabels[record?.attendanceStatus ?? "pending"];
+  const attendance = formatAttendanceForMessage(record);
   const previousHomework = homeworkBundle.previous
     ? `${homeworkBundle.previous.title} (${homeworkLabels[homeworkBundle.previous.status] ?? homeworkBundle.previous.status})`
     : "지난 숙제 기록 없음";
@@ -16981,12 +17032,10 @@ function getSupplementTaskProgress(task, lessons = []) {
 function createAttendanceNotificationText(payload) {
   const attendanceNotificationLabels = { ...attendanceLabels, present: "등원" };
   const status = attendanceNotificationLabels[payload.attendanceStatus] ?? payload.attendanceStatus ?? "등원";
-  const lateText = payload.attendanceStatus === "late" ? ` (${payload.lateMinutes || 0}분 지각)` : "";
-  const reasonText = payload.reason ? `\n사유: ${payload.reason}` : "";
   return joinMessageBlocks([
     `[${academyBrandName} 출결 안내]`,
-    `${payload.studentName} 학생이 ${payload.checkedAt}에 ${status}${lateText} 처리되었습니다.`,
-    `수업: ${payload.lessonName}${reasonText}`
+    `${payload.studentName} 학생이 ${formatAttendanceForMessage(payload) || status} 처리되었습니다.`,
+    `수업: ${payload.lessonName}`
   ]);
 }
 

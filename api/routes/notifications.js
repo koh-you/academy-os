@@ -79,6 +79,38 @@ function attendanceLabel(status) {
   }[status] ?? status ?? "등원";
 }
 
+function formatAttendanceTime(value) {
+  const text = String(value ?? "").trim();
+  if (!text) return "";
+  const isoTime = text.match(/T(\d{2}:\d{2})/);
+  if (isoTime?.[1]) return isoTime[1];
+  const koreanTime = text.match(/(오전|오후)\s*(\d{1,2}):(\d{2})/);
+  if (koreanTime) {
+    const period = koreanTime[1];
+    let hour = Number(koreanTime[2]);
+    if (period === "오후" && hour < 12) hour += 12;
+    if (period === "오전" && hour === 12) hour = 0;
+    return `${String(hour).padStart(2, "0")}:${koreanTime[3]}`;
+  }
+  const time = text.match(/(\d{1,2}:\d{2})/);
+  if (time?.[1]) return time[1].padStart(5, "0");
+  return text;
+}
+
+function attendanceLabelWithDetail({ attendanceStatus, checkedAt, checkInTime, lateMinutes, reason } = {}) {
+  const label = attendanceLabel(attendanceStatus);
+  if (!["지각", "결석", "인정결석"].includes(label)) return label;
+
+  const details = [];
+  const cleanReason = normalizeText(reason);
+  const time = formatAttendanceTime(checkInTime || checkedAt);
+  if (cleanReason) details.push(`사유: ${cleanReason}`);
+  if (label === "지각" && time) details.push(`등원 ${time}`);
+  if (label === "지각" && !time && lateMinutes) details.push(`${lateMinutes}분 지각`);
+  if ((label === "결석" || label === "인정결석") && time) details.push(`처리 ${time}`);
+  return details.length ? `${label} (${details.join(" · ")})` : label;
+}
+
 function assignmentStatusText(value, fallback = "", audience = "parent") {
   const messageMap = audience === "student" ? assignmentStatusStudentMessageMap : assignmentStatusParentMessageMap;
   return messageMap[value] ?? fallback ?? value ?? "";
@@ -173,24 +205,22 @@ function formatScheduleItem(item) {
   return parts.filter(Boolean).join(" · ");
 }
 
-function buildAttendanceBody({ attendanceStatus, checkedAt, lessonName, lateMinutes, reason }) {
+function buildAttendanceBody({ attendanceStatus, checkedAt, checkInTime, lessonName, lateMinutes, reason }) {
   const status = attendanceLabel(attendanceStatus);
   const lines = [
-    messageLine("🏫 출결", status),
+    messageLine("🏫 출결", attendanceLabelWithDetail({ attendanceStatus, checkedAt, checkInTime, lateMinutes, reason })),
     lessonName ? messageLine("📘 수업", lessonName) : "",
-    checkedAt ? messageLine("🕒 시간", checkedAt) : ""
+    checkedAt && !["지각", "결석", "인정결석"].includes(status) ? messageLine("🕒 시간", checkedAt) : ""
   ];
-
-  if (status === "지각" && lateMinutes) lines.push(messageLine("⏱️ 지각", `${lateMinutes}분`));
-  if ((status === "지각" || status === "결석" || status === "인정결석") && reason) {
-    lines.push(messageLine("📝 사유", reason));
-  }
 
   return joinMessageBlocks(lines);
 }
 
 function buildDailyReportBody({
   attendanceStatus,
+  attendanceReason,
+  checkInTime,
+  checkedAt,
   assignmentStatus,
   incompleteHomeworks,
   lessonContent,
@@ -207,7 +237,7 @@ function buildDailyReportBody({
   const assignmentStatusMessage = assignmentStatusText(assignmentStatus, assignmentStatus, audience);
 
   return joinMessageBlocks([
-    messageLine("🏫 출결", attendanceLabel(attendanceStatus)),
+    messageLine("🏫 출결", attendanceLabelWithDetail({ attendanceStatus, checkedAt, checkInTime, reason: attendanceReason })),
     messageLine("✅ 과제 상태", assignmentStatusMessage),
     messageLine("📚 강의 교재", lessonMaterial),
     messageLine("🧭 강의 내용", lessonContent),
@@ -224,6 +254,9 @@ function buildDailyReportBody({
 function buildLessonCommentBody(payload, audience) {
   return buildDailyReportBody({
     attendanceStatus: payload.attendanceStatus,
+    attendanceReason: payload.attendanceReason || payload.reason,
+    checkInTime: payload.checkInTime,
+    checkedAt: payload.checkedAt,
     assignmentStatus:
       audience === "student"
         ? payload.assignmentStatusStudentMessage || payload.assignmentStatusMessage || payload.assignmentStatus
@@ -348,6 +381,7 @@ export async function sendAttendanceAlimtalk(payload) {
     buildAttendanceBody({
       attendanceStatus: payload.attendanceStatus,
       checkedAt: payload.checkedAt,
+      checkInTime: payload.checkInTime,
       lessonName: payload.lessonName,
       lateMinutes: payload.lateMinutes,
       reason: payload.reason
@@ -371,6 +405,9 @@ export async function sendDailyReportAlimtalk(payload) {
     payload.reportBody ??
     buildDailyReportBody({
       attendanceStatus: payload.attendanceStatus,
+      attendanceReason: payload.attendanceReason || payload.reason,
+      checkInTime: payload.checkInTime,
+      checkedAt: payload.checkedAt,
       incompleteHomeworks: payload.incompleteHomeworks ?? payload.incompleteHomework,
       assignmentStatus: payload.assignmentStatus,
       lessonContent: payload.lessonContent ?? payload.progress,
