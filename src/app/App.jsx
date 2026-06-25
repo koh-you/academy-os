@@ -10682,7 +10682,7 @@ function SchoolCalendarCenter({
                             style={{ backgroundColor: event.color ?? undefined }}
                             title={event.title}
                           >
-                            {showPeriodLabel ? event.title : ""}
+                            {showPeriodLabel ? "시험기간" : ""}
                           </span>
                         );
                       })}
