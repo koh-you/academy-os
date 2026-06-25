@@ -449,6 +449,11 @@ function getReadinessMissingFields(job) {
     return missing;
   }
 
+  if (job.notificationType === "notice_parent" || job.notificationType === "notice_student") {
+    if (!hasText(payload.message) && !hasText(payload.commentBodyOverride)) missing.push("공지 본문");
+    return missing;
+  }
+
   if (!hasText(payload.lessonDate) && !hasText(job.scheduledAt)) missing.push("수업일");
 
   const hasMessage = hasText(payload.message) || hasText(payload.reportBody) || hasText(payload.preparationNotice);
@@ -536,7 +541,7 @@ async function sendNotificationJob(job, { forceDryRun = false } = {}) {
   }
   return sendLessonCommentAlimtalk({
     ...payload,
-    target: job.notificationType === "student_comment" ? "student" : payload.target ?? "parent"
+    target: job.notificationType === "student_comment" || job.notificationType === "notice_student" ? "student" : payload.target ?? "parent"
   });
 }
 

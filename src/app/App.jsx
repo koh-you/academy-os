@@ -471,6 +471,10 @@ function canDeleteNotificationJob(job) {
   return deletableNotificationJobStatuses.has(job?.status);
 }
 
+function normalizePhoneNumber(value = "") {
+  return String(value ?? "").replaceAll(/\D/g, "");
+}
+
 const today = getKoreaDateString();
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8787").replace(/\/$/, "");
 
@@ -3969,6 +3973,7 @@ export function App() {
 
         {activeView === "notifications" ? (
           <NotificationCenter
+            classTemplates={classTemplates}
             integrationStatus={integrationStatus}
             lessons={calendarLessons}
             notificationJobs={notificationJobs}
@@ -4992,6 +4997,8 @@ function getNotificationJobLabel(type) {
   return {
     attendance: "출결 알림톡",
     daily_report: "학부모 알림톡",
+    notice_parent: "학부모 공지",
+    notice_student: "학생 공지",
     parent_comment: "학부모 알림톡",
     student_comment: "학생 알림톡",
     student_reminder: "학생 일정 알림톡"
@@ -5016,95 +5023,110 @@ function StatusDot({ active }) {
 }
 
 function NotificationCenter({
+  classTemplates = [],
   integrationStatus,
-  lessons = [],
   notificationJobs,
-  notificationLogs,
   onRefresh,
-  onScheduleLessonNotificationsAt,
-  onUpdateLessonNotificationPlan,
   students
 }) {
-  const [dispatchMessage, setDispatchMessage] = useState("");
-  const [isDispatching, setIsDispatching] = useState(false);
-  const [isCheckingReadiness, setIsCheckingReadiness] = useState(false);
-  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+  const [activeNoticeMode, setActiveNoticeMode] = useState("both");
+  const [classFilter, setClassFilter] = useState("all");
   const [deletingJobId, setDeletingJobId] = useState("");
+  const [dispatchMessage, setDispatchMessage] = useState("");
+  const [individualAudience, setIndividualAudience] = useState("both");
+  const [isSendingNotice, setIsSendingNotice] = useState(false);
   const [jobFilter, setJobFilter] = useState("all");
-  const [selectedNotificationDate, setSelectedNotificationDate] = useState(today);
-  const [selectedLessonIds, setSelectedLessonIds] = useState([]);
-  const [manualScheduleDate, setManualScheduleDate] = useState(today);
-  const [manualScheduleTime, setManualScheduleTime] = useState("22:30");
+  const [noticeBody, setNoticeBody] = useState("");
+  const [noticeTitle, setNoticeTitle] = useState("");
+  const [scheduleDate, setScheduleDate] = useState(today);
+  const [scheduleTime, setScheduleTime] = useState("18:00");
+  const [searchText, setSearchText] = useState("");
+  const [selectedStudentIds, setSelectedStudentIds] = useState([]);
   const notificationStatus = integrationStatus?.notifications;
-  const scheduledJobs = notificationJobs.filter((job) => job.status === "scheduled");
-  const queuedJobs = notificationJobs.filter((job) => job.status === "queued" || job.status === "pending_send");
-  const draftJobs = notificationJobs.filter((job) => job.status === "draft" || job.status === "dry_run");
-  const failedJobs = notificationJobs.filter((job) => job.status === "failed");
-  const canceledJobs = notificationJobs.filter((job) => job.status === "canceled");
-  const recentJobs = notificationJobs.slice(0, 30);
-  const filteredJobs = {
-    all: recentJobs,
-    scheduled: scheduledJobs,
-    queued: queuedJobs,
-    draft: draftJobs,
-    failed: failedJobs,
-    canceled: canceledJobs
-  }[jobFilter] ?? recentJobs;
+  const noticeJobs = notificationJobs.filter((job) => String(job.notificationType ?? "").startsWith("notice_"));
+  const scheduledNoticeJobs = noticeJobs.filter((job) => job.status === "scheduled");
+  const sentNoticeJobs = noticeJobs.filter((job) => job.status === "sent");
+  const failedNoticeJobs = noticeJobs.filter((job) => job.status === "failed");
+  const draftNoticeJobs = noticeJobs.filter((job) => job.status === "draft" || job.status === "dry_run" || job.status === "canceled");
+  const filteredNoticeJobs = {
+    all: noticeJobs.slice(0, 40),
+    scheduled: scheduledNoticeJobs,
+    sent: sentNoticeJobs,
+    failed: failedNoticeJobs,
+    draft: draftNoticeJobs
+  }[jobFilter] ?? noticeJobs.slice(0, 40);
   const filterLabels = {
-    all: "최근 기록",
-    scheduled: "예약 대기",
-    queued: "내부 대기",
-    draft: "테스트/초안",
+    all: "최근 공지",
+    scheduled: "예약",
+    sent: "발송 완료",
     failed: "실패",
-    canceled: "취소"
+    draft: "정리함"
   };
-  const recentLogs = notificationLogs.slice(0, 8);
-  const lessonsForNotificationDate = lessons
-    .filter((lesson) => lesson.date === selectedNotificationDate)
-    .sort(sortByTime);
-  const selectedJobs = notificationJobs.filter((job) => selectedLessonIds.includes(job.lessonId));
-  const selectedScheduledParentCount = selectedJobs.filter((job) => job.notificationType === "parent_comment" && job.status === "scheduled").length;
-  const selectedScheduledStudentCount = selectedJobs.filter((job) => job.notificationType === "student_comment" && job.status === "scheduled").length;
-  const selectedSentCount = selectedJobs.filter((job) => job.status === "sent").length;
-  const selectedCanceledFailedCount = selectedJobs.filter((job) => job.status === "canceled" || job.status === "failed").length;
-  const manualScheduledAt =
-    manualScheduleDate && manualScheduleTime
-      ? new Date(`${manualScheduleDate}T${manualScheduleTime}:00+09:00`).toISOString()
-      : "";
+  const noticeModes = [
+    { id: "both", label: "전체", description: "학부모와 학생 모두" },
+    { id: "parent", label: "학부모", description: "학부모에게만 공지" },
+    { id: "student", label: "학생", description: "학생에게만 공지" },
+    { id: "individual", label: "개별", description: "선택 학생만" }
+  ];
+  const activeStudents = useMemo(
+    () => students.filter((student) => !["paused", "withdrawn"].includes(student.status ?? "active")),
+    [students]
+  );
+  const searchableStudents = useMemo(() => activeStudents.filter((student) => {
+    const matchesClass = classFilter === "all" || student.classTemplateId === classFilter;
+    const keyword = normalizeMessageText(searchText).toLowerCase();
+    const matchesSearch =
+      !keyword ||
+      [student.name, student.schoolName, student.grade, student.studentPhone, student.parentPhone]
+        .some((value) => String(value ?? "").toLowerCase().includes(keyword));
+    return matchesClass && matchesSearch;
+  }), [activeStudents, classFilter, searchText]);
+  const targetStudents =
+    activeNoticeMode === "individual"
+      ? searchableStudents.filter((student) => selectedStudentIds.includes(student.studentId))
+      : searchableStudents;
+  const targetAudiences =
+    activeNoticeMode === "both"
+      ? ["parent", "student"]
+      : activeNoticeMode === "individual"
+        ? individualAudience === "both" ? ["parent", "student"] : [individualAudience]
+        : [activeNoticeMode];
+  const noticeRecipients = targetStudents.flatMap((student) =>
+    targetAudiences
+      .map((audience) => ({
+        audience,
+        phone: audience === "student" ? student.studentPhone : student.parentPhone,
+        student
+      }))
+      .filter((recipient) => normalizePhoneNumber(recipient.phone))
+  );
+  const parentRecipientCount = noticeRecipients.filter((recipient) => recipient.audience === "parent").length;
+  const studentRecipientCount = noticeRecipients.filter((recipient) => recipient.audience === "student").length;
+  const noticeText = [noticeTitle.trim() ? `[${noticeTitle.trim()}]` : "", noticeBody.trim()].filter(Boolean).join("\n\n");
+  const scheduledAt = scheduleDate && scheduleTime ? new Date(`${scheduleDate}T${scheduleTime}:00+09:00`).toISOString() : "";
 
   useEffect(() => {
-    setSelectedLessonIds([]);
-  }, [selectedNotificationDate]);
+    setSelectedStudentIds((current) => current.filter((studentId) => searchableStudents.some((student) => student.studentId === studentId)));
+  }, [searchableStudents]);
 
   function studentName(studentId, payload) {
     return payload?.studentName || students.find((student) => student.studentId === studentId)?.name || "학생";
   }
 
-  function getLessonNotificationCounts(lesson) {
-    const lessonJobs = notificationJobs.filter((job) => job.lessonId === lesson.lessonId);
-    return {
-      canceled: lessonJobs.filter((job) => job.status === "canceled").length,
-      failed: lessonJobs.filter((job) => job.status === "failed").length,
-      parent: lessonJobs.filter((job) => job.notificationType === "parent_comment" && job.status === "scheduled").length,
-      sent: lessonJobs.filter((job) => job.status === "sent").length,
-      student: lessonJobs.filter((job) => job.notificationType === "student_comment" && job.status === "scheduled").length
-    };
-  }
-
-  function toggleLessonSelection(lessonId) {
-    setSelectedLessonIds((current) =>
-      current.includes(lessonId)
-        ? current.filter((item) => item !== lessonId)
-        : [...current, lessonId]
+  function toggleStudentSelection(studentId) {
+    setSelectedStudentIds((current) =>
+      current.includes(studentId)
+        ? current.filter((item) => item !== studentId)
+        : [...current, studentId]
     );
   }
 
-  function selectAllLessonsForDate() {
-    setSelectedLessonIds(lessonsForNotificationDate.map((lesson) => lesson.lessonId));
+  function selectAllVisibleStudents() {
+    setSelectedStudentIds(searchableStudents.map((student) => student.studentId));
   }
 
-  function clearSelectedLessons() {
-    setSelectedLessonIds([]);
+  function clearSelectedStudents() {
+    setSelectedStudentIds([]);
   }
 
   function selectJobFilter(nextFilter) {
@@ -5114,71 +5136,121 @@ function NotificationCenter({
     }, 0);
   }
 
-  async function handleDispatchDue() {
-    setIsDispatching(true);
+  function buildNoticePayload(recipient, mode = "immediate") {
+    const audienceLabel = recipient.audience === "student" ? "학생" : "학부모";
+    return {
+      academyName: academyBrandName,
+      commentBodyOverride: noticeText,
+      forceDryRun: false,
+      lessonDate: today,
+      lessonName: noticeTitle.trim() || `${audienceLabel} 공지`,
+      message: noticeText,
+      noticeAudience: recipient.audience,
+      noticeBody,
+      noticeTitle,
+      parentPhone: recipient.student.parentPhone,
+      scheduledDate: mode === "scheduled" ? scheduledAt : "",
+      sendMode: mode === "scheduled" ? "scheduled" : "immediate",
+      studentId: recipient.student.studentId,
+      studentName: recipient.student.name,
+      studentPhone: recipient.student.studentPhone,
+      target: recipient.audience
+    };
+  }
+
+  function buildNoticeJob(recipient, mode = "scheduled") {
+    const payload = buildNoticePayload(recipient, mode);
+    const notificationType = recipient.audience === "student" ? "notice_student" : "notice_parent";
+    return {
+      notificationJobId: `notice_${Date.now()}_${recipient.student.studentId}_${recipient.audience}_${Math.random().toString(36).slice(2, 7)}`,
+      notificationType,
+      studentId: recipient.student.studentId,
+      target: recipient.audience,
+      recipient: recipient.phone,
+      scheduledAt: mode === "scheduled" ? scheduledAt : "",
+      payload,
+      previewBody: noticeText,
+      status: mode === "scheduled" ? "scheduled" : "draft",
+      provider: "academy-os",
+      error: "",
+      createdAt: new Date().toISOString()
+    };
+  }
+
+  async function persistNoticeJob(notificationJob) {
+    await postJson("/api/notification-jobs", { notificationJob });
+  }
+
+  async function sendNoticeNow() {
+    if (!noticeText || noticeRecipients.length === 0 || isSendingNotice) return;
+    setIsSendingNotice(true);
     setDispatchMessage("");
+    let sentCount = 0;
+    let failedCount = 0;
     try {
-      const result = await postJson("/api/notification-jobs/dispatch-due", {
-        forceDryRun: Boolean(notificationStatus?.dryRun),
-        limit: 20
-      });
-      const processedCount = result.processedCount ?? result.processed?.length ?? 0;
-      setDispatchMessage(
-        processedCount
-          ? `예약 발송 점검 완료: ${processedCount}건 처리`
-          : "예약 발송 점검 완료: 지금 처리할 내부 대기 건이 없습니다."
-      );
+      for (const recipient of noticeRecipients) {
+        const notificationJob = buildNoticeJob(recipient, "immediate");
+        try {
+          const result = await postJson("/api/notifications/comment-alimtalk", notificationJob.payload);
+          sentCount += 1;
+          await persistNoticeJob({
+            ...notificationJob,
+            status: result.result?.dryRun ? "dry_run" : "sent",
+            provider: result.provider ?? "solapi",
+            result: result.result ?? null
+          });
+        } catch (error) {
+          failedCount += 1;
+          await persistNoticeJob({
+            ...notificationJob,
+            status: "failed",
+            error: error.message
+          });
+        }
+      }
+      setDispatchMessage(`공지 발송 처리 완료: 성공 ${sentCount}건${failedCount ? `, 실패 ${failedCount}건` : ""}`);
       await onRefresh?.();
-    } catch (error) {
-      setDispatchMessage(`예약 발송 점검 실패: ${error.message}`);
     } finally {
-      setIsDispatching(false);
+      setIsSendingNotice(false);
     }
   }
 
-  async function handleReadinessCheck() {
-    setIsCheckingReadiness(true);
+  async function scheduleNotice() {
+    if (!noticeText || noticeRecipients.length === 0 || !scheduledAt || isSendingNotice) return;
+    setIsSendingNotice(true);
     setDispatchMessage("");
     try {
-      const result = await postJson("/api/notification-jobs/readiness-check", {
-        notifySlack: Boolean(notificationStatus?.slackConfigured),
-        windowMinutes: 15
+      const jobs = noticeRecipients.map((recipient) => buildNoticeJob(recipient, "scheduled"));
+      for (const notificationJob of jobs) {
+        await persistNoticeJob(notificationJob);
+      }
+      setDispatchMessage(`${formatKoreaTimeLabel(scheduledAt)} 공지 예약 ${jobs.length}건을 저장했습니다.`);
+      await onRefresh?.();
+    } finally {
+      setIsSendingNotice(false);
+    }
+  }
+
+  async function sendTestNotice() {
+    if (!noticeText || isSendingNotice) return;
+    setIsSendingNotice(true);
+    setDispatchMessage("");
+    const fallbackStudent = noticeRecipients[0]?.student ?? searchableStudents[0] ?? students[0] ?? { name: "테스트학생", studentId: "test" };
+    const testRecipient = {
+      audience: activeNoticeMode === "student" ? "student" : "parent",
+      phone: notificationStatus?.testRecipient,
+      student: fallbackStudent
+    };
+    try {
+      await postJson("/api/notifications/comment-alimtalk", {
+        ...buildNoticePayload(testRecipient),
+        forceTestRecipient: true
       });
-      setDispatchMessage(
-        result.issueCount
-          ? `누락 점검 완료: ${result.checkedCount}건 중 ${result.issueCount}건 확인 필요${result.slack ? " · 슬랙 알림 기록" : ""}`
-          : `누락 점검 완료: ${result.checkedCount}건 모두 발송 가능`
-      );
+      setDispatchMessage(`테스트 번호(${notificationStatus?.testRecipient || "설정값"})로 공지 테스트를 요청했습니다.`);
     } catch (error) {
-      setDispatchMessage(`누락 점검 실패: ${error.message}`);
+      setDispatchMessage(`공지 테스트 실패: ${error.message}`);
     } finally {
-      setIsCheckingReadiness(false);
-    }
-  }
-
-  async function scheduleSelectedLessons() {
-    if (!manualScheduledAt || selectedLessonIds.length === 0 || isBulkUpdating) return;
-    setIsBulkUpdating(true);
-    setDispatchMessage("");
-    try {
-      selectedLessonIds.forEach((lessonId) => onScheduleLessonNotificationsAt?.(lessonId, manualScheduledAt));
-      setDispatchMessage(`${selectedLessonIds.length}개 수업을 ${formatKoreaTimeLabel(manualScheduledAt)} 예약으로 갱신했습니다.`);
-      window.setTimeout(() => onRefresh?.(), 700);
-    } finally {
-      window.setTimeout(() => setIsBulkUpdating(false), 800);
-    }
-  }
-
-  async function disableSelectedLessons() {
-    if (selectedLessonIds.length === 0 || isBulkUpdating) return;
-    setIsBulkUpdating(true);
-    setDispatchMessage("");
-    try {
-      selectedLessonIds.forEach((lessonId) => onUpdateLessonNotificationPlan?.(lessonId, "none"));
-      setDispatchMessage(`${selectedLessonIds.length}개 수업을 알림톡 없음으로 변경했습니다.`);
-      window.setTimeout(() => onRefresh?.(), 700);
-    } finally {
-      window.setTimeout(() => setIsBulkUpdating(false), 800);
+      setIsSendingNotice(false);
     }
   }
 
@@ -5194,15 +5266,10 @@ function NotificationCenter({
       if (!response.ok || !result.ok) {
         throw new Error(result.error || `삭제 실패: ${response.status}`);
       }
-      const deletedCount = result.deletedNotificationJobIds?.length ?? 0;
-      setDispatchMessage(
-        deletedCount
-          ? "발송하지 않은 알림톡 기록 1건을 삭제했습니다."
-          : "삭제 가능한 상태가 아니라 기록을 삭제하지 않았습니다."
-      );
+      setDispatchMessage("발송하지 않은 공지 기록 1건을 삭제했습니다.");
       await onRefresh?.();
     } catch (error) {
-      setDispatchMessage(`알림톡 기록 삭제 실패: ${error.message}`);
+      setDispatchMessage(`공지 기록 삭제 실패: ${error.message}`);
     } finally {
       setDeletingJobId("");
     }
@@ -5213,161 +5280,165 @@ function NotificationCenter({
       <div className="pageTop">
         <div>
           <h1>알림관리</h1>
-          <p className="muted">수업별 알림톡 예약을 확인하고 돌발 상황에 맞춰 재예약합니다.</p>
+          <p className="muted">수업일지 밖에서 필요한 전체 공지, 학부모 공지, 학생 공지, 개별 연락을 보냅니다.</p>
         </div>
         <div className="pageActions">
-          <button className="softButton" onClick={handleReadinessCheck} type="button" disabled={isCheckingReadiness}>
-            {isCheckingReadiness ? "점검 중" : "누락 점검"}
-          </button>
-          <button className="softButton" onClick={handleDispatchDue} type="button" disabled={isDispatching}>
-            {isDispatching ? "점검 중" : "예약 발송 점검"}
-          </button>
           <button className="softButton" onClick={onRefresh} type="button">새로고침</button>
         </div>
       </div>
       {dispatchMessage ? <p className="inlineNotice">{dispatchMessage}</p> : null}
 
-      <div className="notificationStatsGrid">
-        <button
-          className={jobFilter === "scheduled" ? "active" : ""}
-          onClick={() => selectJobFilter("scheduled")}
-          type="button"
-        >
-          <span>예약 대기</span>
-          <strong>{scheduledJobs.length}건</strong>
-          <small>솔라피 예약 등록 건</small>
-        </button>
-        <button
-          className={jobFilter === "queued" ? "active" : ""}
-          onClick={() => selectJobFilter("queued")}
-          type="button"
-        >
-          <span>내부 대기</span>
-          <strong>{queuedJobs.length}건</strong>
-          <small>점검 버튼이나 자동화로 처리</small>
-        </button>
-        <button
-          className={jobFilter === "draft" ? "active" : ""}
-          onClick={() => selectJobFilter("draft")}
-          type="button"
-        >
-          <span>테스트/초안</span>
-          <strong>{draftJobs.length}건</strong>
-          <small>실제 발송 전 점검</small>
-        </button>
-        <button
-          className={jobFilter === "failed" ? "active" : ""}
-          onClick={() => selectJobFilter("failed")}
-          type="button"
-        >
-          <span>실패</span>
-          <strong>{failedJobs.length}건</strong>
-          <small>재확인 필요</small>
-        </button>
-        <button
-          className={jobFilter === "canceled" ? "active" : ""}
-          onClick={() => selectJobFilter("canceled")}
-          type="button"
-        >
-          <span>취소</span>
-          <strong>{canceledJobs.length}건</strong>
-          <small>복구 가능 후보</small>
-        </button>
+      <div className="noticeModeTabs">
+        {noticeModes.map((mode) => (
+          <button
+            className={activeNoticeMode === mode.id ? "active" : ""}
+            key={mode.id}
+            onClick={() => setActiveNoticeMode(mode.id)}
+            type="button"
+          >
+            <strong>{mode.label}</strong>
+            <span>{mode.description}</span>
+          </button>
+        ))}
       </div>
 
-      <section className="notificationPanel">
+      <section className="notificationPanel noticeComposerPanel">
         <div className="sectionHeader slim">
           <div>
-            <p className="eyebrow">LESSON RESERVATION</p>
-            <h2>수업별 예약 관리</h2>
+            <p className="eyebrow">MESSAGE CENTER</p>
+            <h2>공지 발송</h2>
           </div>
-          <span className="countBadge">{selectedLessonIds.length}개 선택</span>
+          <span className="countBadge">수신 {noticeRecipients.length}건</span>
         </div>
-        <div className="notificationControlGrid">
-          <label>
-            수업일
-            <input type="date" value={selectedNotificationDate} onChange={(event) => setSelectedNotificationDate(event.target.value)} />
-          </label>
-          <label>
-            예약일
-            <input type="date" value={manualScheduleDate} onChange={(event) => setManualScheduleDate(event.target.value)} />
-          </label>
-          <label>
-            예약시간
-            <input type="time" value={manualScheduleTime} onChange={(event) => setManualScheduleTime(event.target.value)} />
-          </label>
-          <div className="notificationControlActions">
-            <button className="softButton" onClick={selectAllLessonsForDate} type="button">해당일 전체 선택</button>
-            <button className="softButton subtle" onClick={clearSelectedLessons} type="button">선택 해제</button>
+
+        <div className="noticeComposerGrid">
+          <div className="noticeTargetPanel">
+            <div className="noticeFilterGrid">
+              <label>
+                반
+                <select value={classFilter} onChange={(event) => setClassFilter(event.target.value)}>
+                  <option value="all">전체 반</option>
+                  {classTemplates.map((template) => (
+                    <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                학생 검색
+                <input value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder="이름, 학교, 전화번호" />
+              </label>
+              {activeNoticeMode === "individual" ? (
+                <label>
+                  개별 수신자
+                  <select value={individualAudience} onChange={(event) => setIndividualAudience(event.target.value)}>
+                    <option value="both">학부모+학생</option>
+                    <option value="parent">학부모만</option>
+                    <option value="student">학생만</option>
+                  </select>
+                </label>
+              ) : null}
+            </div>
+
+            <div className="noticeTargetSummary">
+              <div>
+                <span>대상 학생</span>
+                <strong>{targetStudents.length}명</strong>
+              </div>
+              <div>
+                <span>학부모</span>
+                <strong>{parentRecipientCount}건</strong>
+              </div>
+              <div>
+                <span>학생</span>
+                <strong>{studentRecipientCount}건</strong>
+              </div>
+            </div>
+
+            {activeNoticeMode === "individual" ? (
+              <div className="noticeStudentPicker">
+                <div className="noticePickerActions">
+                  <button className="softButton compact" onClick={selectAllVisibleStudents} type="button">보이는 학생 전체</button>
+                  <button className="softButton compact subtle" onClick={clearSelectedStudents} type="button">선택 해제</button>
+                </div>
+                {searchableStudents.map((student) => {
+                  const checked = selectedStudentIds.includes(student.studentId);
+                  return (
+                    <label className={checked ? "noticeStudentOption active" : "noticeStudentOption"} key={student.studentId}>
+                      <input checked={checked} onChange={() => toggleStudentSelection(student.studentId)} type="checkbox" />
+                      <span>
+                        <strong>{student.name}</strong>
+                        <small>{[student.grade, student.schoolName].filter(Boolean).join(" · ") || "기본 정보 없음"}</small>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            ) : null}
           </div>
-        </div>
-        <div className="reservationSummaryGrid notificationSelectionSummary">
-          <div>
-            <span>학부모 예약</span>
-            <strong>{selectedScheduledParentCount}건</strong>
-          </div>
-          <div>
-            <span>학생 예약</span>
-            <strong>{selectedScheduledStudentCount}건</strong>
-          </div>
-          <div>
-            <span>발송 완료</span>
-            <strong>{selectedSentCount}건</strong>
-          </div>
-          <div>
-            <span>취소/실패</span>
-            <strong>{selectedCanceledFailedCount}건</strong>
-          </div>
-        </div>
-        <div className="notificationBulkActions">
-          <button className="sendButton" disabled={!selectedLessonIds.length || !manualScheduledAt || isBulkUpdating} onClick={scheduleSelectedLessons} type="button">
-            {isBulkUpdating ? "처리 중" : "선택 수업 예약/재예약"}
-          </button>
-          <button className="dangerButton" disabled={!selectedLessonIds.length || isBulkUpdating} onClick={disableSelectedLessons} type="button">
-            선택 수업 알림톡 없음
-          </button>
-          <span>{manualScheduledAt ? `${formatKoreaTimeLabel(manualScheduledAt)} 예약` : "예약 시각을 입력하세요"}</span>
-        </div>
-        <div className="notificationLessonList">
-          {lessonsForNotificationDate.length === 0 ? <p className="emptyState">선택한 날짜의 수업이 없습니다.</p> : null}
-          {lessonsForNotificationDate.map((lesson) => {
-            const counts = getLessonNotificationCounts(lesson);
-            const checked = selectedLessonIds.includes(lesson.lessonId);
-            return (
-              <button
-                className={checked ? "notificationLessonItem active" : "notificationLessonItem"}
-                key={lesson.lessonId}
-                onClick={() => toggleLessonSelection(lesson.lessonId)}
-                type="button"
-              >
-                <span>
-                  <strong>{lesson.className}</strong>
-                  <small>{lesson.startTime}-{lesson.endTime} · {lesson.studentIds?.length ?? 0}명</small>
-                </span>
-                <span>학부모 {counts.parent}</span>
-                <span>학생 {counts.student}</span>
-                <span>완료 {counts.sent}</span>
-                <span>취소/실패 {counts.canceled + counts.failed}</span>
+
+          <div className="noticeWritePanel">
+            <label>
+              제목
+              <input value={noticeTitle} onChange={(event) => setNoticeTitle(event.target.value)} placeholder="예: 휴원 안내, 보강 안내" />
+            </label>
+            <label>
+              본문
+              <textarea value={noticeBody} onChange={(event) => setNoticeBody(event.target.value)} rows="10" placeholder="보낼 공지 내용을 입력하세요." />
+            </label>
+            <div className="noticeScheduleGrid">
+              <label>
+                예약일
+                <input type="date" value={scheduleDate} onChange={(event) => setScheduleDate(event.target.value)} />
+              </label>
+              <label>
+                예약시간
+                <input type="time" value={scheduleTime} onChange={(event) => setScheduleTime(event.target.value)} />
+              </label>
+            </div>
+            <div className="noticePreviewBox">
+              <strong>미리보기</strong>
+              <p>{noticeText || "제목과 본문을 입력하면 이곳에 발송 문구가 표시됩니다."}</p>
+            </div>
+            <div className="noticeSendActions">
+              <button className="softButton" disabled={!noticeText || isSendingNotice} onClick={sendTestNotice} type="button">테스트 발송</button>
+              <button className="softButton" disabled={!noticeText || !noticeRecipients.length || !scheduledAt || isSendingNotice} onClick={scheduleNotice} type="button">예약 발송</button>
+              <button className="sendButton" disabled={!noticeText || !noticeRecipients.length || isSendingNotice} onClick={sendNoticeNow} type="button">
+                {isSendingNotice ? "처리 중" : "즉시 발송"}
               </button>
-            );
-          })}
+            </div>
+          </div>
         </div>
       </section>
+
+      <div className="notificationStatsGrid noticeStatsGrid">
+        {[
+          ["scheduled", "예약", scheduledNoticeJobs.length, "공지 예약 대기"],
+          ["sent", "발송 완료", sentNoticeJobs.length, "공지 발송 완료"],
+          ["failed", "실패", failedNoticeJobs.length, "재확인 필요"],
+          ["draft", "정리함", draftNoticeJobs.length, "테스트/취소/초안"]
+        ].map(([id, label, count, detail]) => (
+          <button className={jobFilter === id ? "active" : ""} key={id} onClick={() => selectJobFilter(id)} type="button">
+            <span>{label}</span>
+            <strong>{count}건</strong>
+            <small>{detail}</small>
+          </button>
+        ))}
+      </div>
 
       <section className="notificationPanel notificationQueuePanel">
         <div className="sectionHeader slim">
           <div>
-            <p className="eyebrow">QUEUE</p>
-            <h2>알림톡 예약/기록 · {filterLabels[jobFilter]}</h2>
+            <p className="eyebrow">NOTICE HISTORY</p>
+            <h2>공지 발송 기록 · {filterLabels[jobFilter]}</h2>
           </div>
           <div className="notificationQueueActions">
             {jobFilter !== "all" ? (
               <button className="softButton compact" onClick={() => setJobFilter("all")} type="button">전체 보기</button>
             ) : null}
-            <span className="countBadge">{filteredJobs.length}건</span>
+            <span className="countBadge">{filteredNoticeJobs.length}건</span>
           </div>
         </div>
-        <div className="notificationTable">
+        <div className="notificationTable noticeHistoryTable">
           <div className="notificationTableHead">
             <span>상태</span>
             <span>종류</span>
@@ -5377,15 +5448,15 @@ function NotificationCenter({
             <span>미리보기</span>
             <span>관리</span>
           </div>
-          {filteredJobs.length === 0 ? (
-            <p className="emptyState">{jobFilter === "all" ? "아직 저장된 알림톡 예약/기록이 없습니다." : `${filterLabels[jobFilter]} 알림톡이 없습니다.`}</p>
+          {filteredNoticeJobs.length === 0 ? (
+            <p className="emptyState">공지 발송 기록이 없습니다.</p>
           ) : (
-            filteredJobs.map((job) => (
+            filteredNoticeJobs.map((job) => (
               <article className="notificationTableRow" key={job.notificationJobId}>
                 <span className={`statusPill status-${job.status || "draft"}`}>{getNotificationStatusLabel(job.status)}</span>
                 <strong>{getNotificationJobLabel(job.notificationType)}</strong>
                 <span>{studentName(job.studentId, job.payload)}</span>
-                <span>{job.scheduledAt ? formatKoreaTimeLabel(job.scheduledAt) : "-"}</span>
+                <span>{job.scheduledAt ? formatKoreaTimeLabel(job.scheduledAt) : job.createdAt ? formatKoreaTimeLabel(job.createdAt) : "-"}</span>
                 <span>{job.recipient || "번호 없음"}</span>
                 <p>{job.previewBody || job.payload?.message || "미리보기 없음"}</p>
                 <span className="notificationJobActions">
@@ -5405,26 +5476,6 @@ function NotificationCenter({
               </article>
             ))
           )}
-        </div>
-      </section>
-
-      <section className="notificationPanel">
-        <div className="sectionHeader slim">
-          <div>
-            <p className="eyebrow">LOCAL LOG</p>
-            <h2>최근 화면 로그</h2>
-          </div>
-          <span className="countBadge">{notificationLogs.length}건</span>
-        </div>
-        <div className="notificationLogList">
-          {recentLogs.length === 0 ? <p className="emptyState">아직 화면 로그가 없습니다.</p> : null}
-          {recentLogs.map((log) => (
-            <article key={log.notificationLogId}>
-              <strong>{getNotificationJobLabel(log.channel)} · {getNotificationStatusLabel(log.status)}</strong>
-              <span>{log.createdAt ? formatKoreaTimeLabel(log.createdAt) : ""}</span>
-              <p>{log.message}</p>
-            </article>
-          ))}
         </div>
       </section>
     </section>
