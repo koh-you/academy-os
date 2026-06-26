@@ -687,11 +687,16 @@ async function supabaseStorageRequest(path, options = {}) {
   return data;
 }
 
-async function ensureExamSubmissionBucket(bucketId) {
+function isStorageBucketNotFound(error) {
+  const message = String(error?.message ?? "").toLowerCase();
+  return error?.statusCode === 404 || message.includes("bucket not found") || message.includes("bucket not exist");
+}
+
+async function ensureStorageBucket(bucketId, options = {}) {
   try {
     await supabaseStorageRequest(`bucket/${encodeURIComponent(bucketId)}`);
   } catch (error) {
-    if (error.statusCode !== 404) throw error;
+    if (!isStorageBucketNotFound(error)) throw error;
     await supabaseStorageRequest("bucket", {
       method: "POST",
       contentType: "application/json",
@@ -699,9 +704,29 @@ async function ensureExamSubmissionBucket(bucketId) {
         id: bucketId,
         name: bucketId,
         public: false,
-        file_size_limit: 20 * 1024 * 1024,
-        allowed_mime_types: ["image/jpeg", "image/png", "image/webp", "image/heic", "application/pdf"]
+        file_size_limit: options.fileSizeLimit ?? 20 * 1024 * 1024,
+        allowed_mime_types: options.allowedMimeTypes ?? ["image/jpeg", "image/png", "image/webp", "image/heic", "application/pdf"]
       })
+    });
+  }
+}
+
+async function uploadStorageObjectWithBucketRetry(bucketId, storagePath, { contentType, body }) {
+  try {
+    return await supabaseStorageRequest(`object/${bucketId}/${storagePath}`, {
+      method: "PUT",
+      contentType,
+      headers: { "x-upsert": "true" },
+      body
+    });
+  } catch (error) {
+    if (!isStorageBucketNotFound(error)) throw error;
+    await ensureStorageBucket(bucketId);
+    return supabaseStorageRequest(`object/${bucketId}/${storagePath}`, {
+      method: "PUT",
+      contentType,
+      headers: { "x-upsert": "true" },
+      body
     });
   }
 }
@@ -741,7 +766,7 @@ async function uploadExamPostFile(payload) {
     throw new Error("Supabase Storage 업로드에는 service role 설정이 필요합니다.");
   }
   const bucketId = "exam-submissions";
-  await ensureExamSubmissionBucket(bucketId);
+  await ensureStorageBucket(bucketId);
   const { mimeType, buffer } = parseDataUrl(payload.dataUrl);
   if (buffer.length > 20 * 1024 * 1024) throw new Error("파일은 20MB 이하만 업로드할 수 있습니다.");
   const fileName = sanitizeStorageSegment(payload.fileName || `submission-${Date.now()}`);
@@ -756,12 +781,7 @@ async function uploadExamPostFile(payload) {
     `${Date.now()}-${fileName}${extension}`
   ].join("/");
 
-  await supabaseStorageRequest(`object/${bucketId}/${storagePath}`, {
-    method: "PUT",
-    contentType: mimeType,
-    headers: { "x-upsert": "true" },
-    body: buffer
-  });
+  await uploadStorageObjectWithBucketRetry(bucketId, storagePath, { contentType: mimeType, body: buffer });
 
   return {
     bucketId,
@@ -789,7 +809,7 @@ async function uploadExamAnalysisSourceFile(payload) {
     throw new Error("Supabase Storage 업로드에는 service role 설정이 필요합니다.");
   }
   const bucketId = "exam-analysis-sources";
-  await ensureExamSubmissionBucket(bucketId);
+  await ensureStorageBucket(bucketId, { allowedMimeTypes: ["application/pdf"] });
   const { mimeType, buffer } = parseDataUrl(payload.dataUrl);
   if (buffer.length > 20 * 1024 * 1024) throw new Error("파일은 20MB 이하만 업로드할 수 있습니다.");
   const fileName = sanitizeStorageSegment(payload.fileName || `exam-source-${Date.now()}`);
@@ -803,12 +823,7 @@ async function uploadExamAnalysisSourceFile(payload) {
     `${Date.now()}-${fileName}${extension}`
   ].join("/");
 
-  await supabaseStorageRequest(`object/${bucketId}/${storagePath}`, {
-    method: "PUT",
-    contentType: mimeType,
-    headers: { "x-upsert": "true" },
-    body: buffer
-  });
+  await uploadStorageObjectWithBucketRetry(bucketId, storagePath, { contentType: mimeType, body: buffer });
 
   const extractedText = mimeType === "application/pdf" || /\.pdf$/i.test(fileName)
     ? await extractPdfText(buffer)
