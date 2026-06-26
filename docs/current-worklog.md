@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-26 P0. 수업메모 저장 상태/화면 반영 보정
+
+- 상태: 완료
+- 사용자 제보: 수업메모 모달에서 메모를 입력하고 저장해도 저장이 잘 되지 않고 `다시 저장` 상태가 보인다.
+- 원인: 수업메모 모달은 입력 중 자동저장을 피하기 위해 local draft를 저장 버튼에서 `recordOverride`로 넘긴다. 그런데 저장 성공 후 로컬 record의 `updatedAt`이 저장한 draft보다 오래된 경우에도 최신 record가 아니라고 오판해 화면/저장상태 반영을 건너뛸 수 있었다. 또한 실패한 저장도 마지막 저장 snapshot으로 먼저 기록될 수 있었다.
+- 이번 작업 결과: 명시 저장 record가 로컬 record보다 최신이면 저장 성공 후 로컬 records/localStorage/saveState를 갱신하도록 했다. 저장 실패 시에는 마지막 저장 snapshot을 갱신하지 않아 `다시 저장`이 같은 내용으로 정상 재시도된다.
+- SQL 주의: 기존 `lesson_student_records.preparation_memo/prep_*` 저장 경로만 사용하므로 Supabase SQL edit 필요 없음.
+- 검증: `npm run test:production` 통과(total 203, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
+
 ### 2026-06-26 P0. 시험분석 AI 최초 초안 확인 동선 보강
 
 - 상태: 완료

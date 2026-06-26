@@ -4214,7 +4214,9 @@ export function App() {
         await postJson("/api/homeworks/bulk", { homeworks: relatedHomeworks });
       }
       const latestRecord = findMatchingLessonStudentRecord(recordsRef.current, record);
-      const isLatestRecord = !recordOverride || latestRecord?.updatedAt === record.updatedAt;
+      const latestTime = latestRecord?.updatedAt ? Date.parse(latestRecord.updatedAt) : 0;
+      const savedTime = record.updatedAt ? Date.parse(record.updatedAt) : Date.now();
+      const isLatestRecord = !recordOverride || !latestRecord || !latestTime || !savedTime || latestTime <= savedTime;
       if (isLatestRecord) {
         const nextRecords = upsertLessonStudentRecord(recordsRef.current, record);
         recordsRef.current = nextRecords;
@@ -4228,9 +4230,11 @@ export function App() {
       if (!skipNotificationRefresh) {
         refreshLessonNotificationJobsForRecord(record, lessonForRecord);
       }
+      return true;
     } catch (error) {
       console.error(error);
       setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "failed" }));
+      return false;
     }
   }
 
@@ -7930,7 +7934,6 @@ function PreparationMemoModal({
     if (draftSnapshot === lastSavedSnapshotRef.current && saveState !== "failed") {
       return Promise.resolve();
     }
-    lastSavedSnapshotRef.current = draftSnapshot;
     const nowIso = new Date().toISOString();
     return onSaveRecord(recordId, lesson, student, {
       ...currentRecord,
@@ -7939,7 +7942,10 @@ function PreparationMemoModal({
       prepParentVisible: draftParentVisible,
       updatedBy: "instructor_owner_001",
       updatedAt: nowIso
-    }, { skipRelatedHomeworks: true, skipNotificationRefresh: true });
+    }, { skipRelatedHomeworks: true, skipNotificationRefresh: true }).then((saved) => {
+      if (saved !== false) lastSavedSnapshotRef.current = draftSnapshot;
+      return saved;
+    });
   }
 
   function closeMemo() {
