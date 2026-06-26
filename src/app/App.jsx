@@ -1897,6 +1897,7 @@ export function App() {
   const [lessonClipboard, setLessonClipboard] = useState(null);
   const [lessonUndoStack, setLessonUndoStack] = useState([]);
   const lessonCancelRequestsRef = useRef(new Map());
+  const attendanceNotificationLocksRef = useRef(new Set());
   const [deletedLessonBundles, setDeletedLessonBundles] = useStoredState(storageKeys.deletedLessonBundles, []);
   const [classTemplates, setClassTemplates] = useStoredState(storageKeys.classTemplates, sampleData.classTemplates);
   const [students, setStudents] = useStoredState(storageKeys.students, sampleData.students);
@@ -3848,6 +3849,17 @@ export function App() {
   }
 
   async function handleSendAttendanceAlimtalk(lesson, student, values) {
+    const lockKey = [
+      student.studentId,
+      lesson.lessonId,
+      values.attendanceStatus,
+      student.parentPhone
+    ].join("|");
+    if (attendanceNotificationLocksRef.current.has(lockKey)) {
+      return;
+    }
+    attendanceNotificationLocksRef.current.add(lockKey);
+
     const payload = {
       attendanceStatus: values.attendanceStatus,
       checkedAt: getKoreaDateTimeString(),
@@ -3879,8 +3891,9 @@ export function App() {
       if (!response.ok || !result.ok) {
         throw new Error(result.error || "알림톡 발송 실패");
       }
+      const status = result.result?.duplicateSuppressed ? "duplicate_suppressed" : "sent";
       setNotificationLogs((current) => [
-        { ...logBase, provider: "solapi", status: "sent", result },
+        { ...logBase, provider: "solapi", status, result },
         ...current
       ]);
     } catch (error) {
@@ -3888,6 +3901,8 @@ export function App() {
         { ...logBase, provider: "solapi", status: "failed", error: error.message },
         ...current
       ]);
+    } finally {
+      attendanceNotificationLocksRef.current.delete(lockKey);
     }
   }
 

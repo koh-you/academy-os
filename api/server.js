@@ -67,6 +67,8 @@ const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS ?? "*")
 
 const dispatchableNotificationStatuses = new Set(["queued", "pending_send"]);
 const readinessCheckStatuses = new Set(["queued", "pending_send", "scheduled"]);
+const attendanceAlimtalkDedupeWindowMs = 2 * 60 * 1000;
+const recentAttendanceAlimtalkSends = new Map();
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
   teacherId: "instructor_owner_001",
@@ -104,6 +106,50 @@ function timingSafeEqualText(left = "", right = "") {
   const leftBuffer = Buffer.from(String(left));
   const rightBuffer = Buffer.from(String(right));
   return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+}
+
+function compactPhoneNumber(value = "") {
+  return String(value || "").replaceAll(/[^0-9]/g, "");
+}
+
+function getAttendanceAlimtalkDedupeKey(payload = {}) {
+  return [
+    compactPhoneNumber(payload.parentPhone),
+    payload.studentId || payload.studentName || "",
+    payload.lessonId || payload.lessonName || "",
+    payload.attendanceStatus || ""
+  ].join("|");
+}
+
+function cleanupRecentAttendanceAlimtalkSends(nowTime) {
+  for (const [key, entry] of recentAttendanceAlimtalkSends.entries()) {
+    if (nowTime - entry.createdAt > attendanceAlimtalkDedupeWindowMs) {
+      recentAttendanceAlimtalkSends.delete(key);
+    }
+  }
+}
+
+async function sendAttendanceAlimtalkOnce(payload) {
+  const nowTime = Date.now();
+  cleanupRecentAttendanceAlimtalkSends(nowTime);
+  const dedupeKey = getAttendanceAlimtalkDedupeKey(payload);
+  const existing = recentAttendanceAlimtalkSends.get(dedupeKey);
+  if (existing && nowTime - existing.createdAt <= attendanceAlimtalkDedupeWindowMs) {
+    await existing.promise.catch(() => null);
+    return {
+      duplicateSuppressed: true,
+      dedupeWindowSeconds: Math.round(attendanceAlimtalkDedupeWindowMs / 1000)
+    };
+  }
+
+  const sendPromise = sendAttendanceAlimtalk(payload);
+  recentAttendanceAlimtalkSends.set(dedupeKey, { createdAt: nowTime, promise: sendPromise });
+  try {
+    return await sendPromise;
+  } catch (error) {
+    recentAttendanceAlimtalkSends.delete(dedupeKey);
+    throw error;
+  }
 }
 
 function getDispatchTokenFromRequest(request, payload = {}) {
@@ -1565,7 +1611,7 @@ const server = http.createServer(async (request, response) => {
   if (request.method === "POST" && requestUrl.pathname === "/api/notifications/attendance-alimtalk") {
     try {
       const payload = await readJsonBody(request);
-      const result = await sendAttendanceAlimtalk(payload);
+      const result = await sendAttendanceAlimtalkOnce(payload);
       sendJson(request, response, 200, { ok: true, provider: "solapi", result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
