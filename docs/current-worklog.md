@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-26 P0. 수동 출결 저장 후 화면 표시 미갱신 보정
+
+- 상태: 완료
+- 사용자 제보: 수동 출결에서 저장을 눌렀으나 수업일지 화면 표시가 바뀌지 않는다.
+- 원인: 수동 저장은 `lessonStudentRecordId` 기준으로 정상 갱신하고 있었지만, 수업일지 화면 일부는 현재 수업의 레코드가 아니라 `studentId`만으로 records 배열의 첫 번째 항목을 찾았다. 같은 학생의 다른 날짜/다른 수업 기록이 앞에 있으면 저장 후에도 화면이 이전 기록을 계속 표시할 수 있었다.
+- 이번 작업 결과: 수업일지/예약상태/하원 미체크/기존 상세 테이블의 record 조회를 `lessonStudentRecordId` 우선, `lessonId + studentId` 보조 기준으로 통일했다.
+- SQL 주의: 화면 조회 로직 보정만 있으므로 Supabase SQL edit 필요 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과. `npm run test:production` 통과(total 193, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
+
 ### 2026-06-26 P0. 수동 출결 과거 등원시각과 알림톡 시간 보정
 
 - 상태: 완료

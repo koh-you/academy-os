@@ -7053,7 +7053,7 @@ function LessonJournalDetail({
   const todayTwoPmIso = new Date(`${today}T14:00:00+09:00`).toISOString();
   const canScheduleTodayTwoPm = lesson.date < today && Boolean(onScheduleLessonNotificationsAt);
   const checkoutMissingStudents = students.filter((student) => {
-    const record = records.find((item) => item.studentId === student.studentId);
+    const record = findLessonStudentRecord(records, lesson, student);
     return hasMissingCheckOut(record);
   });
   const isHomeworkMakeupLesson =
@@ -7295,7 +7295,7 @@ function LessonJournalDetail({
               <span>학생</span>
             </div>
             {students.map((student) => {
-              const record = records.find((item) => item.studentId === student.studentId) ?? createEmptyRecord(lesson, student);
+              const record = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
               const parentJob = getStudentReservationStatus(student, "parent");
               const studentJob = getStudentReservationStatus(student, "student");
               return (
@@ -7326,7 +7326,7 @@ function LessonJournalDetail({
           </div>
           {students.map((student) => {
             const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
-            const record = records.find((item) => item.studentId === student.studentId) ?? createEmptyRecord(lesson, student);
+            const record = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
             const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
             const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
             const attendanceDisplay = getAttendanceDisplay(record);
@@ -8353,7 +8353,7 @@ function LessonDetail({ lesson, records, saveStates, students, homeworks, onChan
         </div>
         {students.map((student) => {
           const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
-          const record = records.find((item) => item.studentId === student.studentId) ?? createEmptyRecord(lesson, student);
+          const record = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
           const saveState = saveStates[recordId] ?? "idle";
           const homeworkBundle = getHomeworkBundle(homeworks, lesson, student);
 
@@ -16816,6 +16816,16 @@ function applyManualAttendanceTimeFields(existingRecord = {}, values = {}, nowIs
 
 function createLessonStudentRecordId(lessonId, studentId) {
   return `lsr_${lessonId.replace("lesson_", "")}_${studentId}`;
+}
+
+function findLessonStudentRecord(records = [], lesson, student) {
+  if (!lesson?.lessonId || !student?.studentId) return null;
+  const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+  return (
+    records.find((item) => item.lessonStudentRecordId === recordId) ??
+    records.find((item) => item.lessonId === lesson.lessonId && item.studentId === student.studentId) ??
+    null
+  );
 }
 
 function createEmptyRecord(lesson, student) {
