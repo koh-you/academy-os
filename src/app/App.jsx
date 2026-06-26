@@ -2749,7 +2749,7 @@ export function App() {
     }
 
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
-    const existingRecord = recordsRef.current.find((record) => record.lessonStudentRecordId === recordId);
+    const existingRecord = findLessonStudentRecord(recordsRef.current, lesson, student);
     const nowIso = now.toISOString();
     const koreaTime = new Intl.DateTimeFormat("ko-KR", {
       timeZone: "Asia/Seoul",
@@ -2787,7 +2787,7 @@ export function App() {
       updatedAt: nowIso
     };
 
-    const nextRecords = upsertById(recordsRef.current, nextRecord, "lessonStudentRecordId");
+    const nextRecords = upsertLessonStudentRecord(recordsRef.current, nextRecord);
     recordsRef.current = nextRecords;
     setRecords(nextRecords);
     handleSaveRecord(recordId, lesson, student, nextRecord);
@@ -3424,7 +3424,7 @@ export function App() {
 
   function saveAttendanceRecord(lesson, student, values, updatedBy = "instructor_owner_001") {
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
-    const existingRecord = recordsRef.current.find((record) => record.lessonStudentRecordId === recordId);
+    const existingRecord = findLessonStudentRecord(recordsRef.current, lesson, student);
     const nowIso = new Date().toISOString();
     const timedValues = applyManualAttendanceTimeFields(existingRecord, values, nowIso, lesson);
     const nextRecord = {
@@ -3437,7 +3437,7 @@ export function App() {
       updatedBy,
       updatedAt: nowIso
     };
-    const nextRecords = upsertById(recordsRef.current, nextRecord, "lessonStudentRecordId");
+    const nextRecords = upsertLessonStudentRecord(recordsRef.current, nextRecord);
     recordsRef.current = nextRecords;
     setRecords(nextRecords);
     handleSaveRecord(recordId, lesson, student, nextRecord);
@@ -3446,7 +3446,7 @@ export function App() {
 
   function handleChangeRecord(lesson, student, field, value) {
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
-    const existingRecord = recordsRef.current.find((record) => record.lessonStudentRecordId === recordId);
+    const existingRecord = findLessonStudentRecord(recordsRef.current, lesson, student);
     const nextRecord = {
       lessonStudentRecordId: recordId,
       lessonId: lesson.lessonId,
@@ -3466,7 +3466,7 @@ export function App() {
       updatedBy: "instructor_owner_001",
       updatedAt: new Date().toISOString()
     };
-    const nextRecords = upsertById(recordsRef.current, nextRecord, "lessonStudentRecordId");
+    const nextRecords = upsertLessonStudentRecord(recordsRef.current, nextRecord);
     recordsRef.current = nextRecords;
     setRecords(nextRecords);
 
@@ -3515,8 +3515,7 @@ export function App() {
   }
 
   function getLessonStudentRecord(lesson, student) {
-    const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
-    return recordsRef.current.find((item) => item.lessonStudentRecordId === recordId) ?? createEmptyRecord(lesson, student);
+    return findLessonStudentRecord(recordsRef.current, lesson, student) ?? createEmptyRecord(lesson, student);
   }
 
   function buildLessonNotificationJob(lesson, student, target, scheduledDate, mode) {
@@ -3765,7 +3764,7 @@ export function App() {
       updatedBy: "instructor_owner_001",
       updatedAt: new Date().toISOString()
     };
-    const nextRecords = upsertById(recordsRef.current, nextRecord, "lessonStudentRecordId");
+    const nextRecords = upsertLessonStudentRecord(recordsRef.current, nextRecord);
     recordsRef.current = nextRecords;
     setRecords(nextRecords);
     handleSaveRecord(recordId, lesson, student, nextRecord);
@@ -3912,6 +3911,7 @@ export function App() {
       }
       const record =
         recordOverride ??
+        (lessonForRecord && studentForRecord ? findLessonStudentRecord(recordsRef.current, lessonForRecord, studentForRecord) : null) ??
         recordsRef.current.find((item) => item.lessonStudentRecordId === recordId) ??
         (lessonForRecord && studentForRecord ? createEmptyRecord(lessonForRecord, studentForRecord) : null);
       if (!record) throw new Error("저장할 수업기록을 찾지 못했습니다.");
@@ -3923,10 +3923,10 @@ export function App() {
       if (relatedHomeworks.length > 0) {
         await postJson("/api/homeworks/bulk", { homeworks: relatedHomeworks });
       }
-      const latestRecord = recordsRef.current.find((item) => item.lessonStudentRecordId === recordId);
+      const latestRecord = findMatchingLessonStudentRecord(recordsRef.current, record);
       const isLatestRecord = !recordOverride || latestRecord?.updatedAt === record.updatedAt;
       if (isLatestRecord) {
-        const nextRecords = upsertById(recordsRef.current, record, "lessonStudentRecordId");
+        const nextRecords = upsertLessonStudentRecord(recordsRef.current, record);
         recordsRef.current = nextRecords;
         setRecords(nextRecords);
       }
@@ -4865,7 +4865,7 @@ export function App() {
         lessonStudentRecordId: recordId,
         [statusField]: statusText
       };
-      setRecords((current) => upsertById(current, nextRecord, "lessonStudentRecordId"));
+      setRecords((current) => upsertLessonStudentRecord(current, nextRecord));
       if (persist) {
         postJson("/api/lesson-records", { record: nextRecord }).catch((error) => console.error(error));
       }
@@ -16806,8 +16806,8 @@ function applyManualAttendanceTimeFields(existingRecord = {}, values = {}, nowIs
   if (values.attendanceStatus === "checkout") {
     return {
       ...values,
-      checkInAt: existingRecord.checkInAt || nextCheckInAt,
-      checkInTime: existingRecord.checkInTime || nextCheckInTime,
+      checkInAt: manualCheckInTime ? nextCheckInAt : existingRecord.checkInAt || nextCheckInAt,
+      checkInTime: manualCheckInTime || existingRecord.checkInTime || nextCheckInTime,
       checkOutAt: existingRecord.checkOutAt || nowIso,
       checkOutTime: existingRecord.checkOutTime || nowTime
     };
@@ -16831,11 +16831,42 @@ function createLessonStudentRecordId(lessonId, studentId) {
 function findLessonStudentRecord(records = [], lesson, student) {
   if (!lesson?.lessonId || !student?.studentId) return null;
   const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+  return findMatchingLessonStudentRecord(records, {
+    lessonStudentRecordId: recordId,
+    lessonId: lesson.lessonId,
+    studentId: student.studentId
+  });
+}
+
+function findMatchingLessonStudentRecord(records = [], record = {}) {
+  if (!record?.lessonStudentRecordId && (!record?.lessonId || !record?.studentId)) return null;
   return (
-    records.find((item) => item.lessonStudentRecordId === recordId) ??
-    records.find((item) => item.lessonId === lesson.lessonId && item.studentId === student.studentId) ??
+    records.find((item) => record.lessonStudentRecordId && item.lessonStudentRecordId === record.lessonStudentRecordId) ??
+    records.find((item) => item.lessonId === record.lessonId && item.studentId === record.studentId) ??
     null
   );
+}
+
+function upsertLessonStudentRecord(records = [], nextRecord = {}) {
+  if (!nextRecord?.lessonStudentRecordId && (!nextRecord?.lessonId || !nextRecord?.studentId)) {
+    return upsertById(records, nextRecord, "lessonStudentRecordId");
+  }
+  let didReplace = false;
+  const nextRecords = [];
+  records.forEach((record) => {
+    const isSameRecord =
+      (nextRecord.lessonStudentRecordId && record.lessonStudentRecordId === nextRecord.lessonStudentRecordId) ||
+      (record.lessonId === nextRecord.lessonId && record.studentId === nextRecord.studentId);
+    if (!isSameRecord) {
+      nextRecords.push(record);
+      return;
+    }
+    if (!didReplace) {
+      nextRecords.push(nextRecord);
+      didReplace = true;
+    }
+  });
+  return didReplace ? nextRecords : [...records, nextRecord];
 }
 
 function createEmptyRecord(lesson, student) {

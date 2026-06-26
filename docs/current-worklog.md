@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-26 P0. 수동 출결 등원시각 저장 기준 통일
+
+- 상태: 완료
+- 사용자 제보: 오늘 실제 등원 시각이 18:50이라 수업일지 출결 모달에서 해당 시각으로 바꾸고 `저장만` 하려고 했으나 화면/저장이 바뀌지 않는다.
+- 원인: 화면 표시 쪽은 현재 수업+학생 기준으로 record를 찾도록 보정했지만, 일부 수동 저장/자동저장/상태 갱신 경로는 아직 `lessonStudentRecordId` 단독 기준으로 기존 record를 찾거나 교체했다. 운영 데이터에 기존 id와 `lessonId + studentId` 기준이 어긋난 record가 있으면 수동 저장이 같은 수업 학생 record를 정확히 덮어쓰지 못할 수 있었다.
+- 이번 작업 결과: 태블릿 출결, 수동 출결, 수업일지 필드 변경, 알림 제외 상태, 저장 완료 후 record 반영을 모두 `lessonStudentRecordId` 우선 + `lessonId + studentId` 보조 기준으로 통일했다. 같은 수업/학생 record가 중복으로 붙지 않도록 전용 upsert 헬퍼로 교체한다.
+- 추가 보강: 하원 상태 등 기존 등원시각이 있는 record에서도 수동으로 입력한 `등원 시각`이 기존 `checkInTime`보다 우선 저장되도록 했다.
+- SQL 주의: 프론트 record 식별/교체 로직 보정만 있으므로 Supabase SQL edit 필요 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과. `npm run test:production` 통과(total 195, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
+
 ### 2026-06-26 P1. 수업 등록 학생 그룹 전체 해제 버튼 추가
 
 - 상태: 완료
