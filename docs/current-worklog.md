@@ -21,6 +21,16 @@
 - SQL 주의: 코드 레벨 중복 억제이므로 Supabase SQL edit 필요 없음.
 - 검증: `npm run test:production` 188개 통과, `npm run build` 통과.
 
+### 2026-06-26 P0. 학생 알림톡 코멘트 단문 발송 원인 수정
+
+- 상태: 완료
+- 사용자 확인 요청: 2026-06-25 22:30 이후 학생 알림톡 중 강사코멘트 중심 문장만 들어간 발송이 있었는지 확인하고, 로직 문제가 있으면 수정한다.
+- 확인 결과: 2026-06-25 22:30 이후 실제 Solapi 발송은 학생용 15건, 학부모용 15건이었다. 학생용 15건 중 8건은 `commentBodyOverride`가 있는 학생이라 실제 발송 본문이 출결/과제/교재/강의내용 구조 없이 코멘트 문장 중심으로 나갔다. 반면 `notification_jobs.preview_body`에는 15건 모두 구조화 항목이 있어, 미리보기와 실제 발송이 어긋난 상태였다.
+- 원인: 서버 `sendLessonCommentAlimtalk`가 `commentBodyOverride`를 “코멘트 문장”이 아니라 “전체 본문 대체값”으로 해석했다. 그래서 학생 코멘트가 입력된 경우 구조화 본문 생성을 건너뛰었다.
+- 이번 작업 결과: 수업일지 context(`lessonId`, 출결/과제/교재/숙제 등)가 있는 payload는 `commentBodyOverride`를 전체 본문 대체가 아니라 `💬 코멘트` 내용으로만 넣도록 `resolveLessonCommentBody`를 추가했다. 공지문자처럼 수업일지 context가 없는 override는 기존처럼 그대로 발송된다.
+- 검증: dry-run으로 수업일지 학생 알림톡은 `🏫 출결`~`💬 코멘트` 구조가 유지되고, 공지문자는 override 본문만 유지되는 것을 확인했다. `npm run test:production` 188개 통과, `npm run build` 통과.
+- SQL 주의: 서버 본문 조립 로직 변경만 있으므로 Supabase SQL edit 필요 없음.
+
 ### P0. 수업일지 학생별 알림톡 제외 운영 검수
 
 - 상태: 대기

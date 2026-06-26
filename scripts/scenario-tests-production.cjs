@@ -75,7 +75,7 @@ check("07c-6 lesson student notification mute fields persist", hasAll(coreDataRo
 check("07d attendance template test is generic and locked to test recipient", hasAll(app, ["출결 테스트 수업", "선생님 테스트 수신번호로 출결 알림톡 형식을 점검합니다.", "forceTestRecipient: true", "parentPhone: notificationStatus?.testRecipient", "출결 테스트"]) && !hasAll(app, ["출결테스트 더미학생", "출결 더미 테스트"]));
 check("07e lesson bulk notification reservation excludes attendance jobs", hasAll(app, ["buildLessonNotificationJob(lesson, student, \"parent\"", "buildLessonNotificationJob(lesson, student, \"student\""]) && !app.includes("buildLessonNotificationJob(lesson, student, \"attendance\""));
 check("08 parent alimtalk API is connected", hasAll(app, ["/api/notifications/comment-alimtalk", "parentPhone"]));
-check("08b comment alimtalk body override does not call missing compact helper", notificationRoute.includes("const commentBody = normalizeText(payload.commentBodyOverride)") && !notificationRoute.includes("compact(payload.commentBodyOverride)"));
+check("08b lesson comment override is embedded in structured body", hasAll(notificationRoute, ["function resolveLessonCommentBody", "function hasLessonCommentContext", "message: normalizeText(payload.message) || overrideText", "const commentBody = resolveLessonCommentBody(payload, audience)"]) && !notificationRoute.includes("compact(payload.commentBodyOverride)"));
 check("09 student alimtalk branch exists", hasAll(app, ['target: testType === "student"', "studentPhone"]));
 check("10 alimtalk dry-run safety exists", hasAll(app, ["forceDryRun", "dryRun", "allowRealRecipients", "allowRealStudentRecipients", "allowRealParentRecipients"]));
 check("11 alimtalk preview builder exists", hasAll(app, ["buildNotificationTemplatePreview", "templatePreviewText"]));

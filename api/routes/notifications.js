@@ -272,6 +272,34 @@ function buildLessonCommentBody(payload, audience) {
   });
 }
 
+function hasLessonCommentContext(payload = {}) {
+  return Boolean(
+    payload.lessonId ||
+    payload.osScheduled ||
+    payload.attendanceStatus ||
+    payload.assignmentStatus ||
+    payload.assignmentStatusMessage ||
+    payload.lessonMaterial ||
+    payload.lessonContent ||
+    payload.previousHomework ||
+    payload.nextHomework ||
+    payload.supplementSchedule ||
+    payload.preparationNotice
+  );
+}
+
+function resolveLessonCommentBody(payload, audience) {
+  const overrideText = normalizeText(payload.commentBodyOverride);
+  if (!hasLessonCommentContext(payload)) {
+    return overrideText || buildLessonCommentBody(payload, audience);
+  }
+
+  return buildLessonCommentBody({
+    ...payload,
+    message: normalizeText(payload.message) || overrideText
+  }, audience);
+}
+
 function buildStudentScheduleReminderBody({ scheduleType, scheduleTitle, scheduleDate, scheduleTime, lessonName, memo }) {
   const type = scheduleType === "retest" ? "재시험" : scheduleType === "supplement" ? "보충" : "일정";
 
@@ -438,7 +466,7 @@ export async function sendLessonCommentAlimtalk(payload) {
   const audience = payload.target === "student" ? "student" : "parent";
   const recipientPhone = audience === "student" ? payload.studentPhone : payload.parentPhone;
   const templateEnvName = audience === "student" ? TEMPLATE_ENV.studentComment : TEMPLATE_ENV.dailyReport;
-  const commentBody = normalizeText(payload.commentBodyOverride) || buildLessonCommentBody(payload, audience);
+  const commentBody = resolveLessonCommentBody(payload, audience);
 
   return sendKakaoAlimtalk({
     payload,
