@@ -18,8 +18,9 @@
 - 운영 확인: 2026-06-26 수동 보강 `lesson_2026-06-26_보강_1782472846571`은 `sourceMakeupTaskId`가 비어 있고 학생 1명(`student_mwf710_008`)이 active 상태였다. 시간은 DB time 형식으로 `16:00:00` 저장되어 있었다.
 - 이번 작업 결과: 숙제보충 전용 상세 화면은 실제 `homework_makeup` task에 연결된 보강 수업일 때만 열리게 했다. 수동 생성 보강/결석보강/재시험 보강 등은 일반 수업일지 화면으로 열린다. 수업일지 상세는 전체 학생/기록을 받은 뒤 내부에서 `lesson.studentIds` 기준으로 현재 수업 학생만 필터링한다.
 - 추가 보강: 기존 DB의 `16:00:00` 같은 time 값을 수업 수정 모달에서는 `HH:mm`으로 정규화해 입력 필드가 깨지지 않게 했다.
+- 후속 보강: 수업일지 상세 렌더 중 예외가 나도 빈 모달로 끝나지 않게 오류 경계를 추가했다. 오류가 발생해도 수업명, 시간, 학생 목록, 수업 수정 버튼과 오류 메시지가 표시된다.
 - SQL 주의: 프론트 상세 화면 분기 보정만 있으므로 Supabase SQL edit 필요 없음.
-- 검증: `node --check scripts/scenario-tests-production.cjs` 통과. `npm run test:production` 통과(total 197, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과. `npm run test:production` 통과(total 198, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
 
 ### 2026-06-26 P0. 수동 출결 등원시각 저장 기준 통일
 

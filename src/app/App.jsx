@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+﻿import { Component, useEffect, useMemo, useRef, useState } from "react";
 import { sampleData } from "../shared/data/sampleData.js";
 
 const storageKeys = {
@@ -36,6 +36,28 @@ const legacySensitiveStorageKeys = ["academy-os.teacherAccountSettings.v1"];
 const academyBrandName = "으뜸수학 고태영T";
 const academyOperationalStartDate = "2026-06-19";
 const lessonDeleteRetentionMs = 7 * 24 * 60 * 60 * 1000;
+
+class LessonJournalErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+
+  componentDidCatch(error) {
+    console.error("Lesson journal render failed", error);
+  }
+
+  render() {
+    if (this.state.error) {
+      return this.props.fallback?.(this.state.error) ?? null;
+    }
+    return this.props.children;
+  }
+}
 
 const dayLabels = {
   mon: "월",
@@ -6277,42 +6299,55 @@ function TeacherLessonHubV2({
         hideHeader
         onClose={onBackToCalendar}
       >
-        <LessonJournalDetail
-          academyTests={academyTests}
-          aiSettings={aiSettings}
-          allRecords={allRecords}
-          generatedLessonControls={generatedLessonControls}
-          integrationStatus={integrationStatus}
-          lessonNotificationPlan={lessonNotificationPlans[selectedLesson.lessonId] ?? { mode: "default" }}
-          notificationJobs={notificationJobs}
-          homeworks={homeworks}
-          lesson={selectedLesson}
-          lessons={lessons}
-          materials={materials}
-          makeupTasks={makeupTasks}
-          onApplyBulkHomework={onApplyBulkHomework}
-          onBack={onBackToCalendar}
-          onChangeRecord={onChangeRecord}
-          onDeleteLesson={onDeleteLesson}
-          onEditLesson={onEditLesson}
-          onOpenAttendance={onOpenAttendance}
-          onOpenExamPrep={onOpenExamPrep}
-          onOpenReport={onOpenReport}
-          onPassMakeupTask={onPassMakeupTask}
-          onPolishComment={onPolishComment}
-          onPolishPreparationNotice={onPolishPreparationNotice}
-          onSaveRecord={onSaveRecord}
-          onScheduleLessonNotificationsAt={onScheduleLessonNotificationsAt}
-          onSendComment={onSendComment}
-          onUpdateExamSundayMakeupBlocks={onUpdateExamSundayMakeupBlocks}
-          onUpdateHomework={onUpdateHomework}
-          onUpdateLessonNotificationPlan={onUpdateLessonNotificationPlan}
-          onUpdateMakeupTask={onUpdateMakeupTask}
-          onToggleStudentNotificationMute={onToggleStudentNotificationMute}
-          records={records}
-          saveStates={saveStates}
-          students={students}
-        />
+        <LessonJournalErrorBoundary
+          key={selectedLesson.lessonId}
+          fallback={(error) => (
+            <LessonJournalFallback
+              error={error}
+              lesson={selectedLesson}
+              onBack={onBackToCalendar}
+              onEditLesson={onEditLesson}
+              students={students}
+            />
+          )}
+        >
+          <LessonJournalDetail
+            academyTests={academyTests}
+            aiSettings={aiSettings}
+            allRecords={allRecords}
+            generatedLessonControls={generatedLessonControls}
+            integrationStatus={integrationStatus}
+            lessonNotificationPlan={lessonNotificationPlans[selectedLesson.lessonId] ?? { mode: "default" }}
+            notificationJobs={notificationJobs}
+            homeworks={homeworks}
+            lesson={selectedLesson}
+            lessons={lessons}
+            materials={materials}
+            makeupTasks={makeupTasks}
+            onApplyBulkHomework={onApplyBulkHomework}
+            onBack={onBackToCalendar}
+            onChangeRecord={onChangeRecord}
+            onDeleteLesson={onDeleteLesson}
+            onEditLesson={onEditLesson}
+            onOpenAttendance={onOpenAttendance}
+            onOpenExamPrep={onOpenExamPrep}
+            onOpenReport={onOpenReport}
+            onPassMakeupTask={onPassMakeupTask}
+            onPolishComment={onPolishComment}
+            onPolishPreparationNotice={onPolishPreparationNotice}
+            onSaveRecord={onSaveRecord}
+            onScheduleLessonNotificationsAt={onScheduleLessonNotificationsAt}
+            onSendComment={onSendComment}
+            onUpdateExamSundayMakeupBlocks={onUpdateExamSundayMakeupBlocks}
+            onUpdateHomework={onUpdateHomework}
+            onUpdateLessonNotificationPlan={onUpdateLessonNotificationPlan}
+            onUpdateMakeupTask={onUpdateMakeupTask}
+            onToggleStudentNotificationMute={onToggleStudentNotificationMute}
+            records={records}
+            saveStates={saveStates}
+            students={students}
+          />
+        </LessonJournalErrorBoundary>
       </Modal>
     )
   ) : null;
@@ -6985,6 +7020,38 @@ function EditableMemoCard({ className = "", editKey, editingKey, onChange, onEdi
     >
       {displayValue || placeholder}
     </button>
+  );
+}
+
+function LessonJournalFallback({ error, lesson, onBack, onEditLesson, students = [] }) {
+  const lessonStudents = (lesson?.studentIds ?? [])
+    .map((studentId) => students.find((student) => student.studentId === studentId))
+    .filter(Boolean);
+  return (
+    <section className="lessonJournalPage">
+      <header className="pageTop lessonJournalHeader">
+        <button className="iconButton" onClick={onBack} type="button">‹</button>
+        <div>
+          <h2>{lesson?.className || "수업일지"}</h2>
+          <p className="muted">{lesson?.date || "-"} · {lesson?.startTime || ""}-{lesson?.endTime || ""} · {lessonStudents.length}명</p>
+        </div>
+        <button className="softButton" onClick={() => onEditLesson?.(lesson)} type="button">수업 수정</button>
+      </header>
+      <section className="panel lessonJournalFallback">
+        <strong>수업일지를 여는 중 오류가 발생했습니다.</strong>
+        <p>수업 정보는 저장되어 있습니다. 수업 수정에서 학생과 시간을 확인한 뒤 다시 열어 주세요.</p>
+        {lessonStudents.length > 0 ? (
+          <div className="studentChips">
+            {lessonStudents.map((student) => (
+              <span className="lessonStudentChip selected" key={student.studentId}>{student.name}</span>
+            ))}
+          </div>
+        ) : (
+          <p className="muted">이 수업에 표시할 학생을 찾지 못했습니다.</p>
+        )}
+        <small>{String(error?.message ?? error ?? "알 수 없는 오류")}</small>
+      </section>
+    </section>
   );
 }
 

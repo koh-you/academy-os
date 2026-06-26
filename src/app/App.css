@@ -5197,6 +5197,17 @@ button:disabled {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.lessonJournalFallback {
+  display: grid;
+  gap: 12px;
+}
+
+.lessonJournalFallback small {
+  color: #64748b;
+  font-weight: 700;
+  word-break: break-word;
+}
+
 .lessonModalFields {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
