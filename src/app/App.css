@@ -2997,10 +2997,32 @@ button {
   margin: 0;
 }
 
+.analysisHeroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.analysisReviewColumns {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.analysisReviewColumn {
+  display: grid;
+  gap: 14px;
+}
+
 .analysisSummaryCards {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.analysisSummaryCards.compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .analysisSummaryCard {
@@ -3162,6 +3184,11 @@ button {
   width: min(1120px, calc(100vw - 28px));
 }
 
+.analysisInitialViewModal {
+  max-width: 1040px;
+  width: min(1040px, calc(100vw - 28px));
+}
+
 .analysisReportToolbar {
   border-bottom: 1px solid #d8e3f8;
   margin-bottom: 14px;
@@ -3279,6 +3306,45 @@ button {
 
 .examAnalysisReportOutputs {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.analysisInitialView {
+  display: grid;
+  gap: 12px;
+}
+
+.analysisInitialMeta {
+  align-items: center;
+  background: #f8fbff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 12px 14px;
+}
+
+.analysisInitialMeta strong {
+  color: #17213d;
+  font-weight: 900;
+}
+
+.analysisInitialMeta span {
+  color: #64748b;
+  font-weight: 800;
+}
+
+.analysisInitialBlock {
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.analysisInitialBlock h3 {
+  color: #17213d;
+  font-size: 16px;
+  font-weight: 900;
+  margin: 0 0 8px;
 }
 
 .publishSummaryGrid {
@@ -10795,6 +10861,7 @@ body.attendanceOnlyBody {
   .supplementReadableGrid,
   .analysisTwoColumn,
   .analysisReviewGrid,
+  .analysisReviewColumns,
   .aiVariantWorkspace,
   .insightGrid,
   .analysisFinalReportPanel,
@@ -10827,6 +10894,11 @@ body.attendanceOnlyBody {
   .sourcePrimaryAction {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .analysisSummaryHero {
+    align-items: stretch;
+    grid-template-columns: 1fr;
   }
 
   .portalActions {

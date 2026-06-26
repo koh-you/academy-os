@@ -1168,11 +1168,54 @@ function splitReportLines(value = "") {
     .filter(Boolean);
 }
 
+function getExamAnalysisInitialFields(analysis = {}) {
+  const snapshot = analysis.aiInitialFields && typeof analysis.aiInitialFields === "object"
+    ? analysis.aiInitialFields
+    : null;
+  return normalizeExamAnalysisAiFields(snapshot ?? {
+    aiOverview: analysis.aiOverview,
+    unitDistribution: analysis.unitDistribution,
+    killerProblems: analysis.killerProblems,
+    mistakePatterns: analysis.mistakePatterns,
+    studentAnalysisDraft: analysis.studentAnalysisDraft,
+    parentNoticeDraft: analysis.parentNoticeDraft,
+    blogDraft: analysis.blogDraft,
+    instagramDraft: analysis.instagramDraft
+  });
+}
+
 function hasExamAnalysisTeacherInsight(analysis = {}) {
   return ["insightSummary", "insightUnits", "insightKiller", "insightDirection"].some((field) => {
     const value = String(analysis[field] ?? "").trim();
     return value && !value.endsWith("부연:");
   });
+}
+
+function ExamAnalysisInitialView({ analysis }) {
+  const initialFields = getExamAnalysisInitialFields(analysis);
+  return (
+    <div className="analysisInitialView">
+      <div className="analysisInitialMeta">
+        <strong>AI 최초 분석 초안</strong>
+        <span>{analysis.aiInitialGeneratedAt ? `생성 시각 ${analysis.aiInitialGeneratedAt}` : "현재 AI 필드를 기준으로 표시합니다."}</span>
+      </div>
+      {[
+        ["aiOverview", "시험 개요"],
+        ["unitDistribution", "단원별 출제 분포"],
+        ["killerProblems", "킬러/준킬러 문항"],
+        ["mistakePatterns", "학생 실수 패턴"],
+        ["studentAnalysisDraft", "학생 분석지 초안"],
+        ["parentNoticeDraft", "학부모 안내문 초안"],
+        ["blogDraft", "블로그 초안"],
+        ["instagramDraft", "인스타 카드뉴스 초안"]
+      ].map(([field, title]) => (
+        <article className="analysisInitialBlock" key={field}>
+          <h3>{title}</h3>
+          <ExamAnalysisReportText value={initialFields[field]} />
+        </article>
+      ))}
+    </div>
+  );
 }
 
 function ExamAnalysisReportSection({ title, children }) {
@@ -4872,17 +4915,21 @@ export function App() {
       if (!response.ok || !result.ok) {
         throw new Error(result.error || "시험분석 API 요청에 실패했습니다.");
       }
+      const normalizedAiFields = normalizeExamAnalysisAiFields(result.result.fields);
+      const aiLastRunAt = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
 
       setExamAnalyses((current) =>
         current.map((item) =>
           item.examAnalysisId === analysis.examAnalysisId
             ? {
                 ...item,
-                ...normalizeExamAnalysisAiFields(result.result.fields),
+                ...normalizedAiFields,
+                aiInitialFields: normalizedAiFields,
+                aiInitialGeneratedAt: aiLastRunAt,
                 aiProvider: result.result.provider,
                 aiModel: result.result.model,
                 aiStatus: "완료",
-                aiLastRunAt: new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }),
+                aiLastRunAt,
                 aiError: ""
               }
             : item
@@ -10387,6 +10434,7 @@ function ExamAnalysisCenter({
   const [isListCollapsed, setIsListCollapsed] = useState(false);
   const [detailSectionId, setDetailSectionId] = useState("");
   const [isReportPreviewOpen, setIsReportPreviewOpen] = useState(false);
+  const [isAiInitialViewOpen, setIsAiInitialViewOpen] = useState(false);
   const sourceFileInputRef = useRef(null);
   const rawSelectedAnalysis = analyses.find((item) => item.examAnalysisId === selectedAnalysisId) ?? analyses[0];
   const selectedAnalysis = rawSelectedAnalysis ? normalizeExamAnalysisForDisplay(rawSelectedAnalysis) : null;
@@ -10709,22 +10757,56 @@ function ExamAnalysisCenter({
                   <h2>{[selectedAnalysis.schoolName, selectedAnalysis.grade, selectedAnalysis.subject].filter(Boolean).join(" ") || "시험분석 개요"}</h2>
                   <p>{getTextPreview(selectedAnalysis.aiOverview, "AI 분석을 시작하면 시험 개요가 표시됩니다.")}</p>
                 </div>
-                <button className="softButton" onClick={() => setDetailSectionId("ai")} type="button">AI 필드 수정</button>
+                <div className="analysisHeroActions">
+                  <button className="primaryButton" onClick={() => setIsAiInitialViewOpen(true)} type="button">AI 최초 분석 보기</button>
+                  <button className="softButton" onClick={() => setDetailSectionId("ai")} type="button">AI 필드 수정</button>
+                </div>
               </article>
-              <div className="analysisSummaryCards">
-                {[
-                  ["unitDistribution", "단원별 분포", "ai"],
-                  ["killerProblems", "킬러/준킬러", "ai"],
-                  ["mistakePatterns", "실수 패턴", "ai"],
-                  ["insightSummary", "강사 총평", "insight"],
-                  ["insightUnits", "단원 인사이트", "insight"],
-                  ["insightDirection", "학습 방향", "insight"]
-                ].map(([field, title, sectionId]) => (
-                  <button className="analysisSummaryCard" key={field} onClick={() => setDetailSectionId(sectionId)} type="button">
-                    <strong>{title}</strong>
-                    <span>{getTextPreview(selectedAnalysis[field])}</span>
-                  </button>
-                ))}
+              <div className="analysisReviewColumns">
+                <section className="panel analysisReviewColumn">
+                  <div className="sectionHeader slim">
+                    <div>
+                      <h2>AI가 먼저 본 내용</h2>
+                      <p className="muted">이 내용을 보고 선생님 현장 판단을 추가합니다.</p>
+                    </div>
+                    <button className="softButton" onClick={() => setIsAiInitialViewOpen(true)} type="button">전체 보기</button>
+                  </div>
+                  <div className="analysisSummaryCards compact">
+                    {[
+                      ["aiOverview", "시험 개요"],
+                      ["unitDistribution", "단원별 분포"],
+                      ["killerProblems", "킬러/준킬러"],
+                      ["mistakePatterns", "실수 패턴"]
+                    ].map(([field, title]) => (
+                      <button className="analysisSummaryCard" key={field} onClick={() => setDetailSectionId("ai")} type="button">
+                        <strong>{title}</strong>
+                        <span>{getTextPreview(selectedAnalysis[field])}</span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+                <section className="panel analysisReviewColumn">
+                  <div className="sectionHeader slim">
+                    <div>
+                      <h2>선생님이 추가할 내용</h2>
+                      <p className="muted">현장 체감, 실제 오답, 수업 방향을 넣는 자리입니다.</p>
+                    </div>
+                    <button className="primaryButton" onClick={() => setDetailSectionId("insight")} type="button">입력/수정</button>
+                  </div>
+                  <div className="analysisSummaryCards compact">
+                    {[
+                      ["insightSummary", "강사 총평"],
+                      ["insightUnits", "단원 인사이트"],
+                      ["insightKiller", "킬러문항 분석"],
+                      ["insightDirection", "학습 방향"]
+                    ].map(([field, title]) => (
+                      <button className="analysisSummaryCard" key={field} onClick={() => setDetailSectionId("insight")} type="button">
+                        <strong>{title}</strong>
+                        <span>{getTextPreview(selectedAnalysis[field])}</span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
               </div>
               <div className="analysisInsightRequiredBox">
                 <strong>강사 인사이트 필수</strong>
@@ -10838,6 +10920,20 @@ function ExamAnalysisCenter({
             <button className="softButton" onClick={() => setDetailSectionId("insight")} type="button">강사 인사이트 수정</button>
           </div>
           <ExamAnalysisFinalReport analysis={selectedAnalysis} />
+        </Modal>
+      ) : null}
+      {selectedAnalysis && isAiInitialViewOpen ? (
+        <Modal
+          className="analysisInitialViewModal"
+          title="AI 최초 분석 보기"
+          subtitle="이 초안을 참고해서 강사 인사이트를 추가합니다. 필요하면 AI 필드 수정에서 초안 자체도 고칠 수 있습니다."
+          onClose={() => setIsAiInitialViewOpen(false)}
+        >
+          <div className="analysisReportToolbar">
+            <button className="primaryButton" onClick={() => setDetailSectionId("insight")} type="button">강사 인사이트 입력</button>
+            <button className="softButton" onClick={() => setDetailSectionId("ai")} type="button">AI 필드 수정</button>
+          </div>
+          <ExamAnalysisInitialView analysis={selectedAnalysis} />
         </Modal>
       ) : null}
     </section>
