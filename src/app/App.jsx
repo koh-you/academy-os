@@ -7547,6 +7547,12 @@ function LessonJournalDetail({
     return lessonNotificationJobs.find((job) => job.studentId === student.studentId && job.notificationType === notificationType) ?? null;
   }
 
+  function getEffectiveCommentSendStatus(record, student, target) {
+    const jobStatus = formatNotificationJobStatus(getStudentReservationStatus(student, target));
+    if (jobStatus && jobStatus !== "없음") return jobStatus;
+    return target === "student" ? record.studentCommentSendStatus : record.teacherCommentSendStatus;
+  }
+
   return (
     <section className="lessonJournalPage">
       <header className="pageTop lessonJournalHeader">
@@ -7702,8 +7708,10 @@ function LessonJournalDetail({
             const previousLessonContent = getLessonContent(previousRecord);
             const previousPreparationMemo = previousRecord?.preparationMemo?.trim() ?? "";
             const referencePreparationMemo = referenceRecord?.preparationMemo?.trim() ?? "";
-            const parentCommentState = getCommentButtonState(record.teacherComment, record.teacherCommentSendStatus);
-            const studentCommentState = getCommentButtonState(record.studentComment, record.studentCommentSendStatus);
+            const parentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "parent");
+            const studentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "student");
+            const parentCommentState = getCommentButtonState(record.teacherComment, parentCommentSendStatus);
+            const studentCommentState = getCommentButtonState(record.studentComment, studentCommentSendStatus);
             const hasMissingPreSendData = hasPreSendMissingRequiredData(record, previousHomework, nextHomework);
 
             return (
@@ -7803,7 +7811,7 @@ function LessonJournalDetail({
                     학부모 알림톡
                   </button>
                   <small className={`commentStatusText comment-${parentCommentState}`}>
-                    {getCommentStatusLabel(record.teacherComment, record.teacherCommentSendStatus)}
+                    {getCommentStatusLabel(record.teacherComment, parentCommentSendStatus)}
                   </small>
                   <button
                     className={record.notificationMutedParent ? "notificationMuteButton active" : "notificationMuteButton"}
@@ -7822,7 +7830,7 @@ function LessonJournalDetail({
                     학생 알림톡
                   </button>
                   <small className={`commentStatusText comment-${studentCommentState}`}>
-                    {getCommentStatusLabel(record.studentComment, record.studentCommentSendStatus)}
+                    {getCommentStatusLabel(record.studentComment, studentCommentSendStatus)}
                   </small>
                   <button
                     className={record.notificationMutedStudent ? "notificationMuteButton active" : "notificationMuteButton"}

@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-26 P0. 알림톡 발송 완료 후 수업일지 버튼 색상 반영
+
+- 상태: 완료
+- 사용자 제보: `알림톡 예약 확인` 모달에서는 학부모/학생 알림톡이 `발송 완료`로 보이지만, 수업일지 우측의 학부모/학생 알림톡 버튼은 여전히 예약 중 색상으로 남아 있다.
+- 원인: 예약 확인 모달은 실제 서버 발송 대기열인 `notification_jobs.status`를 기준으로 표시했지만, 수업일지 행 버튼은 `lesson_student_records.teacherCommentSendStatus/studentCommentSendStatus` 문자열을 기준으로 표시했다. 예약 dispatch가 job 상태를 `sent`로 바꿔도 학생 record의 이전 `예약 중` 문자열이 남으면 버튼 색이 바뀌지 않았다.
+- 이번 작업 결과: 수업일지 행의 학부모/학생 알림톡 버튼 색상과 상태 문구는 같은 학생/수업의 `notification_jobs` 상태를 우선 사용한다. job이 없을 때만 기존 record 상태 문자열로 fallback 한다. 따라서 예약 확인 모달에서 `발송 완료`인 경우 우측 버튼도 성공 색상과 `발송 완료` 문구로 맞춰진다.
+- SQL 주의: 기존 `notification_jobs`와 `lesson_student_records` 조회값만 사용하므로 Supabase SQL edit 필요 없음.
+- 검증: `npm run test:production` 통과(total 205, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
+
 ### 2026-06-26 P0. 수업메모 문구 실제 알림톡 반영 확인
 
 - 상태: 완료
