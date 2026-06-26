@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-26 P0. 최종 알림톡 문구 입력 끊김 보정
+
+- 상태: 완료
+- 사용자 제보: 학부모/학생 알림톡 작성 모달의 `최종 알림톡 문구` textarea에서 글자 수정과 타이핑이 잘 되지 않는다.
+- 원인: textarea가 입력할 때마다 `onChangeRecord`를 직접 호출해 부모 records 상태와 자동저장/미리보기 갱신 흐름이 동시에 움직였다. 이 구조는 한글 조합 중간 입력이 부모 record 재계산으로 덮일 수 있어 타이핑이 끊기는 문제가 생길 수 있었다.
+- 이번 작업 결과: 알림톡 작성 모달은 입력 중에는 내부 `draftComment` state만 갱신한다. 닫기, AI 수정, 발송 버튼을 누를 때 현재 draft를 record에 반영한다. 미리보기와 발송 payload도 이 draft 기준으로 생성한다.
+- SQL 주의: 프론트 입력 상태 보정만 있으므로 Supabase SQL edit 필요 없음.
+- 검증: `npm run test:production` 통과(total 206, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
+
 ### 2026-06-26 P0. 수업메모 알림톡 반영 위치 정정
 
 - 상태: 완료

@@ -8071,10 +8071,12 @@ function CommentComposerModal({
   const isParent = audience === "parent";
   const field = isParent ? "teacherComment" : "studentComment";
   const comment = record?.[field] ?? "";
+  const aiStatus = isParent ? record?.teacherCommentAiStatus : record?.studentCommentAiStatus;
+  const [draftComment, setDraftComment] = useState(comment);
+  const previousAiStatusRef = useRef(aiStatus);
   const title = isParent ? `${student.name} 학부모 알림톡` : `${student.name} 학생 알림톡`;
   const receiverLabel = isParent ? `${student.name} 학부모님` : student.name;
   const previewTitle = isParent ? "학부모 알림톡 미리보기" : "학생 알림톡 미리보기";
-  const aiStatus = isParent ? record?.teacherCommentAiStatus : record?.studentCommentAiStatus;
   const sendStatus = isParent ? record?.teacherCommentSendStatus : record?.studentCommentSendStatus;
   const isNotificationMuted = isParent ? Boolean(record?.notificationMutedParent) : Boolean(record?.notificationMutedStudent);
   const notificationStatus = integrationStatus?.notifications;
@@ -8119,7 +8121,7 @@ function CommentComposerModal({
   });
   const generatedPreviewText = buildCommentPreviewText({
     audience,
-    comment,
+    comment: draftComment,
     lesson,
     nextHomework,
     previousHomework,
@@ -8127,9 +8129,52 @@ function CommentComposerModal({
     student,
     supplementSchedules
   });
+  useEffect(() => {
+    setDraftComment(record?.[field] ?? "");
+    previousAiStatusRef.current = aiStatus;
+  }, [audience, student.studentId]);
+
+  useEffect(() => {
+    const previousAiStatus = previousAiStatusRef.current;
+    previousAiStatusRef.current = aiStatus;
+    if (previousAiStatus === "AI 수정 중" && aiStatus && aiStatus !== "AI 수정 중") {
+      setDraftComment(record?.[field] ?? "");
+    }
+  }, [aiStatus, field, record]);
+
+  function persistDraftComment() {
+    if (draftComment !== comment) {
+      onChangeRecord(lesson, student, field, draftComment);
+    }
+  }
+
+  function handleClose() {
+    persistDraftComment();
+    onClose();
+  }
+
+  function handlePolishClick() {
+    const nextRecord = { ...(record ?? {}), [field]: draftComment };
+    persistDraftComment();
+    onPolishComment(lesson, student, nextRecord, audience, aiProvider, aiModel);
+  }
+
+  function handleSendClick() {
+    const nextRecord = { ...(record ?? {}), [field]: draftComment };
+    persistDraftComment();
+    onSendComment(lesson, student, nextRecord, audience, {
+      delayMinutes: sendDelayMinutes,
+      forceDryRun,
+      forceTestRecipient,
+      manualCommentBody: draftComment,
+      manualPreviewBody: generatedPreviewText,
+      resendReason: isManualResendAvailable ? "예약 시간 경과 후 수동 재발송" : "",
+      sendTiming
+    });
+  }
 
   return (
-    <Modal className="commentComposerModal" title={title} subtitle={`${lesson.date} · ${lesson.className}`} onClose={onClose}>
+    <Modal className="commentComposerModal" title={title} subtitle={`${lesson.date} · ${lesson.className}`} onClose={handleClose}>
       <div className="commentComposerGrid">
         <section className="commentDraftPanel">
           <div className="sectionHeader slim">
@@ -8150,15 +8195,15 @@ function CommentComposerModal({
           ) : null}
           <textarea
             className="commentComposerTextarea"
-            value={comment}
-            onChange={(event) => onChangeRecord(lesson, student, field, event.target.value)}
+            value={draftComment}
+            onChange={(event) => setDraftComment(event.target.value)}
             placeholder={isParent ? "학부모님께 실제로 보낼 최종 문구를 적어주세요." : "학생에게 실제로 보낼 최종 문구를 적어주세요."}
           />
           <div className="commentComposerActions">
             <button
               className="softButton"
               disabled={aiStatus === "AI 수정 중"}
-              onClick={() => onPolishComment(lesson, student, record, audience, aiProvider, aiModel)}
+              onClick={handlePolishClick}
               type="button"
             >
               {aiStatus === "AI 수정 중" ? "AI 수정 중..." : "AI 수정"}
@@ -8166,16 +8211,7 @@ function CommentComposerModal({
             <button
               className="sendButton"
               disabled={isNotificationMuted || (planMode === "none" && !isManualResendAvailable)}
-              onClick={() =>
-                onSendComment(lesson, student, record, audience, {
-                  delayMinutes: sendDelayMinutes,
-                  forceDryRun,
-                  forceTestRecipient,
-                  manualPreviewBody: generatedPreviewText,
-                  resendReason: isManualResendAvailable ? "예약 시간 경과 후 수동 재발송" : "",
-                  sendTiming
-                })
-              }
+              onClick={handleSendClick}
               type="button"
             >
               {actionLabel}
