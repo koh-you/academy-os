@@ -515,6 +515,24 @@ function hasText(value) {
   return Boolean(String(value ?? "").trim());
 }
 
+const lessonCommentNotificationTypes = new Set(["daily_report", "parent_comment", "student_comment"]);
+const lessonBodyFields = [
+  "attendanceStatus",
+  "assignmentStatus",
+  "assignmentStatusMessage",
+  "assignmentStatusParentMessage",
+  "assignmentStatusStudentMessage",
+  "lessonMaterial",
+  "lessonContent",
+  "previousHomework",
+  "nextHomework",
+  "preparationNotice",
+  "supplementSchedule",
+  "message",
+  "commentBodyOverride",
+  "reportBody"
+];
+
 function getReadinessMissingFields(job) {
   const payload = job.payload ?? {};
   const missing = [];
@@ -542,10 +560,9 @@ function getReadinessMissingFields(job) {
 
   if (!hasText(payload.lessonDate) && !hasText(job.scheduledAt)) missing.push("수업일");
 
-  const hasMessage = hasText(payload.message) || hasText(payload.reportBody) || hasText(payload.preparationNotice);
-  if (!hasMessage) missing.push("본문/코멘트");
-
-  if (job.notificationType === "daily_report" || job.notificationType === "parent_comment") {
+  if (lessonCommentNotificationTypes.has(job.notificationType)) {
+    if (!lessonBodyFields.some((field) => hasText(payload[field]))) missing.push("본문");
+    if (!hasText(payload.attendanceStatus)) missing.push("출결상태");
     if (!hasText(payload.lessonMaterial)) missing.push("강의 교재");
     if (!hasText(payload.lessonContent)) missing.push("강의 내용");
     if (!hasText(payload.assignmentStatus) && !hasText(payload.assignmentStatusMessage)) missing.push("과제 상태");

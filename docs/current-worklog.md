@@ -31,6 +31,19 @@
 - 검증: dry-run으로 수업일지 학생 알림톡은 `🏫 출결`~`💬 코멘트` 구조가 유지되고, 공지문자는 override 본문만 유지되는 것을 확인했다. `npm run test:production` 188개 통과, `npm run build` 통과.
 - SQL 주의: 서버 본문 조립 로직 변경만 있으므로 Supabase SQL edit 필요 없음.
 
+### 2026-06-26 P0. 알림톡 전체 로직 점검과 production dry-run
+
+- 상태: 완료
+- 사용자 요청: 알림톡 전체 로직을 검사하고 워크플로우를 요약하며, dry-run으로 실제 발송 가능 상태를 확인한다.
+- 운영 설정 확인: Render 기준 `ALIMTALK_DRY_RUN=false`, 학부모/학생 실제번호 발송 허용, Solapi API key/secret/PFID와 템플릿 3종 모두 존재, `NOTIFICATION_DISPATCH_TOKEN` 존재, production `/api/integrations/status`의 `notifications.missing=[]` 확인. Solapi `getBalance()` 조회도 성공해 인증 조합이 유효함을 확인했다.
+- production dry-run 결과: `attendance`, `parent_comment`, `student_comment`, `notice_student`, `daily_report`, `schedule_reminder` 6개 API를 `forceDryRun:true`로 호출했다. 모두 `ok=true`, `provider=solapi`, `dryRun=true`였고, 실제 발송은 하지 않았다. live 설정상 dry-run이 아니면 등록 번호로 발송될 상태이며, dry-run에서는 `requestedTo`와 `sentTo`가 실제 대상 번호로 해석되고 `isTestRedirected=false`였다.
+- 본문 검증: 수업일지 학부모/학생/데일리 리포트는 `출결 → 과제 상태 → 강의 교재 → 강의 내용 → 지난 과제 → 다음 과제 → 코멘트` 구조가 유지됐다. 공지 학생 알림톡은 공지 본문만 유지되고, 일정 리마인더는 중요 일정 안내 본문으로 조립됐다.
+- 추가 발견/수정: readiness-check가 수업일지 알림톡의 코멘트를 필수 본문처럼 판단해 `본문/코멘트` false-positive를 만들었다. 코멘트 없이도 구조화 본문이 있으면 본문 있음으로 보도록 수정했고, 학생용도 학부모용과 같이 `강의 교재`, `강의 내용`, `과제 상태` 누락을 점검하도록 보강했다.
+- 현재 예약 주의: 2026-06-26 22:30 예정 박지현 학부모/학생 알림톡 2건은 발송 실패 상태는 아니지만 `강의 내용`이 비어 있다. 수정 후 readiness-check에서는 이 항목만 정확히 누락으로 잡히는 것이 의도다.
+- 안전 주의: 운영 `dispatch-due`에 `forceDryRun`을 걸면 due job 상태를 `dry_run`으로 바꿀 수 있어 실제 예약을 훼손할 수 있다. 그래서 production에서는 직접 발송 API dry-run과 readiness-check만 실행했고, 인증 없는 dispatch dry-run은 401로 차단되는 것을 확인했다.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 189개 통과, `npm run build` 통과.
+- SQL 주의: readiness 점검 로직 변경만 있으므로 Supabase SQL edit 필요 없음.
+
 ### P0. 수업일지 학생별 알림톡 제외 운영 검수
 
 - 상태: 대기
