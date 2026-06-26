@@ -1135,6 +1135,144 @@ function getTextPreview(value = "", fallback = "아직 내용 없음") {
   return text.length > 110 ? `${text.slice(0, 110)}...` : text;
 }
 
+function getExamAnalysisReportTitle(analysis = {}) {
+  const parts = [analysis.schoolName, analysis.grade, analysis.subject, analysis.examName].filter(Boolean);
+  return parts.length ? `${parts.join(" ")} 최종 분석` : "시험분석 최종 보고서";
+}
+
+function getExamAnalysisReportSubtitle(analysis = {}) {
+  const fileYears = (analysis.sourceFiles ?? [])
+    .map((file) => String(file.fileName ?? "").match(/20\d{2}/)?.[0])
+    .filter(Boolean);
+  const uniqueYears = [...new Set(fileYears)].sort();
+  const yearRange = uniqueYears.length >= 2 ? `${uniqueYears[0]}~${uniqueYears.at(-1)}` : uniqueYears[0] || "";
+  const base = yearRange ? `${yearRange} 기출 기반` : "기출 PDF와 AI 분석 기반";
+  return `${base} · ${academyBrandName}`;
+}
+
+function getExamAnalysisReportMeta(analysis = {}) {
+  const sourceCount = Array.isArray(analysis.sourceFiles) ? analysis.sourceFiles.length : 0;
+  return [
+    analysis.examDate ? `시험일 ${analysis.examDate}` : "",
+    sourceCount ? `첨부 ${sourceCount}개` : "",
+    analysis.aiLastRunAt ? `AI 분석 ${analysis.aiLastRunAt}` : "",
+    analysis.aiStatus ? `상태 ${analysis.aiStatus}` : ""
+  ].filter(Boolean);
+}
+
+function splitReportLines(value = "") {
+  return String(value ?? "")
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function hasExamAnalysisTeacherInsight(analysis = {}) {
+  return ["insightSummary", "insightUnits", "insightKiller", "insightDirection"].some((field) => {
+    const value = String(analysis[field] ?? "").trim();
+    return value && !value.endsWith("부연:");
+  });
+}
+
+function ExamAnalysisReportSection({ title, children }) {
+  return (
+    <section className="examAnalysisReportSection">
+      <h3>{title}</h3>
+      {children}
+    </section>
+  );
+}
+
+function ExamAnalysisReportText({ value, fallback = "아직 내용이 없습니다." }) {
+  const lines = splitReportLines(value);
+  if (!lines.length) return <p className="muted">{fallback}</p>;
+  return (
+    <div className="examAnalysisReportText">
+      {lines.map((line, index) => <p key={`${line}_${index}`}>{line}</p>)}
+    </div>
+  );
+}
+
+function ExamAnalysisFinalReport({ analysis }) {
+  const meta = getExamAnalysisReportMeta(analysis);
+  const sourceFiles = Array.isArray(analysis.sourceFiles) ? analysis.sourceFiles : [];
+  const hasInsight = hasExamAnalysisTeacherInsight(analysis);
+  return (
+    <article className="examAnalysisPrintableReport">
+      <header className="examAnalysisReportCover">
+        <p>{getExamAnalysisReportSubtitle(analysis)}</p>
+        <h1>{getExamAnalysisReportTitle(analysis)}</h1>
+        <div className="examAnalysisReportMeta">
+          {meta.length ? meta.map((item) => <span key={item}>{item}</span>) : <span>최종 분석 초안</span>}
+        </div>
+      </header>
+
+      <section className="examAnalysisReportCards">
+        <article>
+          <strong>원본 범위</strong>
+          <span>{sourceFiles.length ? `${sourceFiles.length}개 PDF 기반` : "PDF 업로드 후 자동 반영"}</span>
+        </article>
+        <article>
+          <strong>강사 인사이트</strong>
+          <span>{hasInsight ? "반영됨" : "추가 필요"}</span>
+        </article>
+        <article>
+          <strong>최종 산출물</strong>
+          <span>강사용 · 학생/학부모 · 홍보용</span>
+        </article>
+      </section>
+
+      {!hasInsight ? (
+        <div className="examAnalysisReportWarning">
+          강사 인사이트가 아직 충분히 입력되지 않았습니다. 현장 체감, 학생 오답, 실제 수업 판단을 넣어야 AI 문체가 줄어듭니다.
+        </div>
+      ) : null}
+
+      <ExamAnalysisReportSection title="1. 한눈에 보는 시험 개요">
+        <ExamAnalysisReportText value={analysis.aiOverview} />
+      </ExamAnalysisReportSection>
+
+      <div className="examAnalysisReportTwoColumn">
+        <ExamAnalysisReportSection title="2. 단원별 출제 분포">
+          <ExamAnalysisReportText value={analysis.unitDistribution} />
+        </ExamAnalysisReportSection>
+        <ExamAnalysisReportSection title="3. 강사 총평">
+          <ExamAnalysisReportText value={analysis.insightSummary} />
+        </ExamAnalysisReportSection>
+      </div>
+
+      <div className="examAnalysisReportTwoColumn">
+        <ExamAnalysisReportSection title="4. 킬러/준킬러와 현장 판단">
+          <ExamAnalysisReportText value={[analysis.killerProblems, analysis.insightKiller].filter(Boolean).join("\n\n")} />
+        </ExamAnalysisReportSection>
+        <ExamAnalysisReportSection title="5. 학생 실수와 학습 방향">
+          <ExamAnalysisReportText value={[analysis.mistakePatterns, analysis.insightDirection].filter(Boolean).join("\n\n")} />
+        </ExamAnalysisReportSection>
+      </div>
+
+      <ExamAnalysisReportSection title="6. 단원별 수업 인사이트">
+        <ExamAnalysisReportText value={analysis.insightUnits} />
+      </ExamAnalysisReportSection>
+
+      <section className="examAnalysisReportOutputs">
+        <ExamAnalysisReportSection title="학생 분석지">
+          <ExamAnalysisReportText value={analysis.studentAnalysisDraft} />
+        </ExamAnalysisReportSection>
+        <ExamAnalysisReportSection title="학부모 안내문">
+          <ExamAnalysisReportText value={analysis.parentNoticeDraft} />
+        </ExamAnalysisReportSection>
+        <ExamAnalysisReportSection title="블로그 초안">
+          <ExamAnalysisReportText value={analysis.blogDraft} />
+        </ExamAnalysisReportSection>
+        <ExamAnalysisReportSection title="인스타 카드뉴스">
+          <ExamAnalysisReportText value={analysis.instagramDraft} />
+        </ExamAnalysisReportSection>
+      </section>
+    </article>
+  );
+}
+
 const examAnalysisDetailSections = [
   { id: "ai", title: "AI 구조화 필드", description: "시험 원문에서 뽑은 1차 분석입니다.", fields: [
     ["aiOverview", "시험 개요", 5],
@@ -10248,6 +10386,7 @@ function ExamAnalysisCenter({
   const [selectedAnalysisId, setSelectedAnalysisId] = useState(analyses[0]?.examAnalysisId ?? "");
   const [isListCollapsed, setIsListCollapsed] = useState(false);
   const [detailSectionId, setDetailSectionId] = useState("");
+  const [isReportPreviewOpen, setIsReportPreviewOpen] = useState(false);
   const sourceFileInputRef = useRef(null);
   const rawSelectedAnalysis = analyses.find((item) => item.examAnalysisId === selectedAnalysisId) ?? analyses[0];
   const selectedAnalysis = rawSelectedAnalysis ? normalizeExamAnalysisForDisplay(rawSelectedAnalysis) : null;
@@ -10286,37 +10425,44 @@ function ExamAnalysisCenter({
     onDeleteAnalysis(analysis.examAnalysisId);
   }
 
-  async function attachSourceFile(file) {
+  async function attachSourceFiles(fileList) {
     if (!selectedAnalysis) return;
-    if (!file) return;
-    update("sourceUploadStatus", "PDF 원본을 Supabase Storage에 업로드하고 텍스트를 추출하는 중입니다...");
+    const files = Array.from(fileList ?? []).filter((file) => file?.type === "application/pdf" || file?.name?.toLowerCase().endsWith(".pdf"));
+    if (!files.length) return;
+    update("sourceUploadStatus", files.length > 1
+      ? `${files.length}개 PDF를 Supabase Storage에 업로드하고 텍스트를 추출하는 중입니다...`
+      : "PDF 원본을 Supabase Storage에 업로드하고 텍스트를 추출하는 중입니다...");
     try {
-      const uploadedFile = await uploadExamAnalysisSourceFile(file, selectedAnalysis);
-      const openUrl = getExamAnalysisSourceOpenUrl(uploadedFile);
+      const uploadedFiles = [];
+      for (const file of files) {
+        uploadedFiles.push(await uploadExamAnalysisSourceFile(file, selectedAnalysis));
+      }
+      const firstUploadedFile = uploadedFiles[0];
+      const openUrl = getExamAnalysisSourceOpenUrl(firstUploadedFile);
       const cleanRawExamText = removeFailedAttachmentBlocks(selectedAnalysis.rawExamText);
-      const inferredMetadata = inferExamAnalysisMetadataFromFileName(uploadedFile.fileName);
-      const extractionNote = uploadedFile.extractedText
+      const inferredMetadata = inferExamAnalysisMetadataFromFileName(firstUploadedFile.fileName);
+      const extractionNotes = uploadedFiles.map((uploadedFile) => uploadedFile.extractedText
         ? `[PDF 텍스트 추출] ${uploadedFile.fileName}\n${uploadedFile.extractedText}`
-        : `[PDF 텍스트 추출 없음] ${uploadedFile.fileName}\n스캔 이미지형 PDF일 수 있습니다. OCR 텍스트를 아래에 직접 붙여 넣어 주세요.`;
+        : `[PDF 텍스트 추출 없음] ${uploadedFile.fileName}\n스캔 이미지형 PDF일 수 있습니다. OCR 텍스트를 아래에 직접 붙여 넣어 주세요.`);
       Object.entries(inferredMetadata).forEach(([field, value]) => {
         if (value && !String(selectedAnalysis[field] ?? "").trim()) {
           onUpdateAnalysis(selectedAnalysis.examAnalysisId, field, value);
         }
       });
       onUpdateAnalysis(selectedAnalysis.examAnalysisId, "sourceFiles", [
-        uploadedFile,
+        ...uploadedFiles,
         ...(Array.isArray(selectedAnalysis.sourceFiles) ? selectedAnalysis.sourceFiles : [])
       ]);
-      onUpdateAnalysis(selectedAnalysis.examAnalysisId, "sourceFileUrl", openUrl || uploadedFile.storagePath || uploadedFile.fileName);
+      onUpdateAnalysis(selectedAnalysis.examAnalysisId, "sourceFileUrl", openUrl || firstUploadedFile.storagePath || firstUploadedFile.fileName);
       onUpdateAnalysis(
         selectedAnalysis.examAnalysisId,
         "rawExamText",
-        [cleanRawExamText, extractionNote].filter(Boolean).join("\n\n")
+        [cleanRawExamText, ...extractionNotes].filter(Boolean).join("\n\n")
       );
       onUpdateAnalysis(
         selectedAnalysis.examAnalysisId,
         "sourceUploadStatus",
-        uploadedFile.extractedText ? "업로드 완료 · PDF 텍스트 추출 완료" : "업로드 완료 · 자동 추출 텍스트 없음"
+        `${uploadedFiles.length}개 업로드 완료 · ${uploadedFiles.filter((file) => file.extractedText).length}개 PDF 텍스트 추출 완료`
       );
     } catch (error) {
       onUpdateAnalysis(selectedAnalysis.examAnalysisId, "sourceUploadStatus", `업로드 실패 · ${error.message}`);
@@ -10325,11 +10471,11 @@ function ExamAnalysisCenter({
 
   function handleSourceFileDrop(event) {
     event.preventDefault();
-    attachSourceFile(event.dataTransfer?.files?.[0]);
+    attachSourceFiles(event.dataTransfer?.files);
   }
 
   function handleSourceFileSelect(event) {
-    attachSourceFile(event.target.files?.[0]);
+    attachSourceFiles(event.target.files);
     event.target.value = "";
   }
 
@@ -10339,7 +10485,7 @@ function ExamAnalysisCenter({
         <div>
           <p className="eyebrow">EXAM ANALYSIS</p>
           <h1>시험분석</h1>
-          <p className="muted">기출 PDF와 OCR 메모를 학교별 시험분석 DB로 구조화하고, 검토된 분석으로 학생/학부모 산출물을 만듭니다.</p>
+          <p className="muted">기출 PDF 1개 또는 여러 개를 구조화하고, 강사 인사이트를 더해 강사용·학생/학부모용·홍보용 산출물을 만듭니다.</p>
         </div>
         <button className="primaryButton" onClick={onAddAnalysis} type="button">+ 분석 문서</button>
       </header>
@@ -10455,7 +10601,7 @@ function ExamAnalysisCenter({
                 <div className="sectionHeader slim">
                   <div>
                     <h2>원본 입력</h2>
-                    <p className="muted">기출 PDF를 올리고 AI 분석을 시작합니다. 세부 원문은 필요할 때만 열어 확인합니다.</p>
+                    <p className="muted">PDF는 1개만 올릴 수도 있고, 같은 학교 3개년처럼 여러 개를 한 번에 올릴 수도 있습니다.</p>
                   </div>
                 </div>
                 <div
@@ -10473,11 +10619,12 @@ function ExamAnalysisCenter({
                   tabIndex={0}
                 >
                   <strong>PDF 업로드</strong>
-                  <span>기출 PDF를 올리면 Storage 저장과 텍스트 추출을 바로 시작합니다.</span>
+                  <span>단일 시험지, 3개년 기출, 기존 분석 PDF를 함께 올릴 수 있습니다.</span>
                   <span className="sourceDropAction">PDF 파일 선택</span>
                   <input
                     accept="application/pdf"
                     className="hiddenFileInput"
+                    multiple
                     onChange={handleSourceFileSelect}
                     ref={sourceFileInputRef}
                     type="file"
@@ -10490,7 +10637,7 @@ function ExamAnalysisCenter({
                       : "sourceUploadStatus"
                     : "sourceUploadStatus ready"
                 }>
-                  {selectedAnalysis.sourceUploadStatus || "대기 · 여기를 클릭하거나 PDF를 드롭하면 Storage 저장과 텍스트 추출을 시작합니다."}
+                  {selectedAnalysis.sourceUploadStatus || "대기 · 여기를 클릭하거나 PDF를 여러 개 드롭하면 Storage 저장과 텍스트 추출을 시작합니다."}
                 </small>
                 {Array.isArray(selectedAnalysis.sourceFiles) && selectedAnalysis.sourceFiles.length ? (
                   <div className="sourceFileList">
@@ -10511,7 +10658,7 @@ function ExamAnalysisCenter({
                 <div className="sourcePrimaryAction">
                   <div>
                     <strong>다음 단계</strong>
-                    <span>PDF 업로드 후 AI 분석을 시작하면 결과는 분석 검토 단계에서 확인합니다.</span>
+                    <span>PDF 업로드 후 AI 분석을 시작하고, 분석 검토 단계에서 강사 인사이트를 반드시 추가합니다.</span>
                   </div>
                   <button
                     className="primaryButton"
@@ -10579,6 +10726,10 @@ function ExamAnalysisCenter({
                   </button>
                 ))}
               </div>
+              <div className="analysisInsightRequiredBox">
+                <strong>강사 인사이트 필수</strong>
+                <span>현장 체감 난도, 실제 학생 오답, 수업 판단을 넣어야 최종 산출물이 AI 문체처럼 보이지 않습니다.</span>
+              </div>
               <div className="analysisDetailActions">
                 <button className="primaryButton" onClick={() => setDetailSectionId("insight")} type="button">강사 검토 수정</button>
                 <button className="softButton" onClick={() => setDetailSectionId("output")} type="button">산출물 초안 수정</button>
@@ -10587,35 +10738,63 @@ function ExamAnalysisCenter({
             ) : null}
 
             {currentStage === "산출물 작성" ? (
-            <section className="analysisOutputGrid">
+            <section className="analysisOutputStage">
+              <article className="panel analysisFinalReportPanel">
+                <div>
+                  <p className="eyebrow">FINAL OUTPUTS</p>
+                  <h2>최종 산출물 3종</h2>
+                  <p className="muted">강사용 분석지, 학생/학부모 전달물, 블로그/인스타 홍보물을 같은 우선순위로 편집합니다.</p>
+                </div>
+                <div className={hasExamAnalysisTeacherInsight(selectedAnalysis) ? "analysisInsightStatus done" : "analysisInsightStatus missing"}>
+                  <strong>{hasExamAnalysisTeacherInsight(selectedAnalysis) ? "강사 인사이트 반영됨" : "강사 인사이트 추가 필요"}</strong>
+                  <span>현장데이터가 들어가야 최종물이 자연스럽습니다.</span>
+                </div>
+                <div className="analysisFinalReportActions">
+                  <button className="primaryButton" onClick={() => setIsReportPreviewOpen(true)} type="button">최종 보고서 미리보기</button>
+                  <button className="softButton" onClick={() => setDetailSectionId("insight")} type="button">강사 인사이트 수정</button>
+                </div>
+              </article>
+              <div className="analysisOutputGrid">
+              <article className="panel outputCard">
+                <div className="sectionHeader slim">
+                  <h2>강사용 분석지</h2>
+                  <span>내부 수업자료</span>
+                </div>
+                <textarea
+                  value={[selectedAnalysis.aiOverview, selectedAnalysis.unitDistribution, selectedAnalysis.killerProblems, selectedAnalysis.insightSummary, selectedAnalysis.insightUnits, selectedAnalysis.insightKiller, selectedAnalysis.insightDirection].filter(Boolean).join("\n\n")}
+                  readOnly
+                  rows="10"
+                />
+              </article>
               <article className="panel outputCard">
                 <div className="sectionHeader slim">
                   <h2>학생 분석지</h2>
-                  <span>A+B+D</span>
+                  <span>학생 전달</span>
                 </div>
                 <textarea value={selectedAnalysis.studentAnalysisDraft} onChange={(event) => update("studentAnalysisDraft", event.target.value)} rows="10" />
               </article>
               <article className="panel outputCard">
                 <div className="sectionHeader slim">
                   <h2>학부모 안내문</h2>
-                  <span>A+D</span>
+                  <span>상담/알림톡</span>
                 </div>
                 <textarea value={selectedAnalysis.parentNoticeDraft ?? ""} onChange={(event) => update("parentNoticeDraft", event.target.value)} rows="10" />
               </article>
               <article className="panel outputCard">
                 <div className="sectionHeader slim">
                   <h2>블로그 초안</h2>
-                  <span>A+B+C+D</span>
+                  <span>홍보용</span>
                 </div>
                 <textarea value={selectedAnalysis.blogDraft} onChange={(event) => update("blogDraft", event.target.value)} rows="10" />
               </article>
               <article className="panel outputCard">
                 <div className="sectionHeader slim">
                   <h2>인스타 카드뉴스</h2>
-                  <span>7장 구성</span>
+                  <span>홍보용</span>
                 </div>
                 <textarea value={selectedAnalysis.instagramDraft} onChange={(event) => update("instagramDraft", event.target.value)} rows="10" />
               </article>
+              </div>
             </section>
             ) : null}
           </section>
@@ -10645,6 +10824,20 @@ function ExamAnalysisCenter({
               </label>
             ))}
           </div>
+        </Modal>
+      ) : null}
+      {selectedAnalysis && isReportPreviewOpen ? (
+        <Modal
+          className="analysisReportPreviewModal"
+          title="최종 보고서 미리보기"
+          subtitle="브라우저 인쇄에서 PDF 저장을 선택하면 현재 편집 상태 그대로 저장됩니다."
+          onClose={() => setIsReportPreviewOpen(false)}
+        >
+          <div className="analysisReportToolbar">
+            <button className="primaryButton" onClick={() => window.print()} type="button">PDF로 저장/인쇄</button>
+            <button className="softButton" onClick={() => setDetailSectionId("insight")} type="button">강사 인사이트 수정</button>
+          </div>
+          <ExamAnalysisFinalReport analysis={selectedAnalysis} />
         </Modal>
       ) : null}
     </section>

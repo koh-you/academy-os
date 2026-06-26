@@ -3042,6 +3042,30 @@ button {
   justify-content: flex-end;
 }
 
+.analysisInsightRequiredBox {
+  align-items: center;
+  background: #fff7e6;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  color: #92400e;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 12px 14px;
+}
+
+.analysisInsightRequiredBox strong {
+  color: #9a3412;
+  font-size: 15px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.analysisInsightRequiredBox span {
+  font-weight: 800;
+  line-height: 1.5;
+}
+
 .analysisDetailModal {
   max-width: 980px;
   width: min(980px, calc(100vw - 32px));
@@ -3068,6 +3092,57 @@ button {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.analysisOutputStage {
+  display: grid;
+  gap: 14px;
+}
+
+.analysisFinalReportPanel {
+  align-items: center;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.4fr) auto;
+}
+
+.analysisFinalReportPanel h2 {
+  margin: 4px 0;
+}
+
+.analysisInsightStatus {
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+}
+
+.analysisInsightStatus strong {
+  font-weight: 900;
+}
+
+.analysisInsightStatus span {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.analysisInsightStatus.done {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.analysisInsightStatus.missing {
+  background: #fff7e6;
+  color: #9a3412;
+}
+
+.analysisFinalReportActions,
+.analysisReportToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 .outputCard .sectionHeader span {
   background: #eef2ff;
   border-radius: 999px;
@@ -3075,6 +3150,135 @@ button {
   font-size: 12px;
   font-weight: 900;
   padding: 5px 9px;
+}
+
+.outputCard textarea[readonly] {
+  background: #f8fbff;
+  color: #475569;
+}
+
+.analysisReportPreviewModal {
+  max-width: 1120px;
+  width: min(1120px, calc(100vw - 28px));
+}
+
+.analysisReportToolbar {
+  border-bottom: 1px solid #d8e3f8;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+}
+
+.examAnalysisPrintableReport {
+  background: #ffffff;
+  color: #172033;
+  display: grid;
+  gap: 18px;
+  line-height: 1.58;
+  margin: 0 auto;
+  max-width: 920px;
+  padding: 22px;
+}
+
+.examAnalysisReportCover {
+  border-bottom: 4px solid #1e3a8a;
+  display: grid;
+  gap: 8px;
+  padding: 20px 0 18px;
+  text-align: center;
+}
+
+.examAnalysisReportCover p {
+  color: #64748b;
+  font-weight: 900;
+  margin: 0;
+}
+
+.examAnalysisReportCover h1 {
+  color: #101828;
+  font-size: 30px;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.examAnalysisReportMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.examAnalysisReportMeta span {
+  background: #eef2ff;
+  border-radius: 999px;
+  color: #1e3a8a;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 10px;
+}
+
+.examAnalysisReportCards,
+.examAnalysisReportOutputs {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.examAnalysisReportCards article,
+.examAnalysisReportSection {
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.examAnalysisReportCards article {
+  background: #f8fbff;
+  display: grid;
+  gap: 6px;
+}
+
+.examAnalysisReportCards strong,
+.examAnalysisReportSection h3 {
+  color: #17213d;
+  font-weight: 900;
+}
+
+.examAnalysisReportCards span {
+  color: #475569;
+  font-weight: 800;
+}
+
+.examAnalysisReportWarning {
+  background: #fff7e6;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  color: #9a3412;
+  font-weight: 900;
+  padding: 12px 14px;
+}
+
+.examAnalysisReportTwoColumn {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.examAnalysisReportSection h3 {
+  font-size: 17px;
+  margin: 0 0 10px;
+}
+
+.examAnalysisReportText {
+  display: grid;
+  gap: 6px;
+}
+
+.examAnalysisReportText p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.examAnalysisReportOutputs {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .publishSummaryGrid {
@@ -10593,7 +10797,11 @@ body.attendanceOnlyBody {
   .analysisReviewGrid,
   .aiVariantWorkspace,
   .insightGrid,
+  .analysisFinalReportPanel,
   .analysisOutputGrid,
+  .examAnalysisReportCards,
+  .examAnalysisReportTwoColumn,
+  .examAnalysisReportOutputs,
   .publishSummaryGrid,
   .publishPreviewList,
   .promptSettingsLayout,
@@ -10902,6 +11110,8 @@ body.attendanceOnlyBody {
     visibility: hidden;
   }
 
+  .analysisReportPreviewModal,
+  .analysisReportPreviewModal *,
   .pickedProblemModal,
   .pickedProblemModal * {
     visibility: visible;
@@ -10922,6 +11132,37 @@ body.attendanceOnlyBody {
     position: absolute;
     top: 0;
     width: 100%;
+  }
+
+  .analysisReportPreviewModal {
+    box-shadow: none;
+    left: 0;
+    max-width: none;
+    padding: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+  }
+
+  .analysisReportPreviewModal .modalHeader,
+  .analysisReportToolbar {
+    display: none !important;
+  }
+
+  .examAnalysisPrintableReport {
+    gap: 12px;
+    max-width: none;
+    padding: 12mm;
+  }
+
+  .examAnalysisReportSection,
+  .examAnalysisReportCards article {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .examAnalysisReportCover h1 {
+    font-size: 24px;
   }
 
   .pickedProblemModal .modalHeader {
