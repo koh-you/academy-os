@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-26 P0. 예약 시간 지난 학생/학부모 알림톡 수동 재발송
+
+- 상태: 완료
+- 사용자 요청: 2026-06-25 학생 알림톡 실제 발송 본문 오류 검수 후, 이미 예약 시간이 지난 수업일지 알림톡 모달에서도 한두 건을 수동 재발송할 수 있게 한다.
+- 이번 작업 결과: 학생/학부모 알림톡 작성 모달에서 기본/30분 지연 예약 시간이 이미 지난 경우 기존 `예약 시간 지남` 비활성 버튼 대신 `수동 재발송` 버튼을 노출하고, 클릭 시 현재 미리보기 구조 그대로 즉시 발송한다. 기존 `sent` 예약 기록은 되돌리지 않고 새 즉시 발송 기록을 남긴다.
+- 기록 보강: 수동 재발송 payload에 `manualResend`, `resendReason: "예약 시간 경과 후 수동 재발송"`을 남기고, `notification_jobs.previewBody`에는 모달 오른쪽의 구조화 미리보기 본문을 저장해 실제 발송 문구 대조가 쉬워지게 했다.
+- SQL 주의: 기존 `notification_jobs` payload/preview_body 저장 흐름만 사용하므로 Supabase SQL edit 필요 없음.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 189개 통과, `npm run build` 통과. `node --check src/app/App.jsx`는 Node가 `.jsx` 확장자를 직접 syntax-check하지 못해 적용 불가.
+
 ### 2026-06-26 P0. 김재연 출결 알림톡 중복 발송 확인 및 방지
 
 - 상태: 완료
