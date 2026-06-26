@@ -7591,8 +7591,9 @@ function CommentComposerModal({
   const [isSourceOpen, setIsSourceOpen] = useState(false);
   const planMode = ["default", "delay30", "none"].includes(initialSendTiming) ? initialSendTiming : "default";
   const sendDelayMinutes = planMode === "delay30" ? 30 : 0;
-  const isScheduleExpired = planMode !== "none" && isLessonAlimtalkScheduleExpired(lesson, sendDelayMinutes);
-  const sendTiming = planMode === "none" ? "none" : isScheduleExpired ? "now" : "scheduled";
+  const isManualResendAvailable = isLessonAlimtalkScheduleExpired(lesson, sendDelayMinutes);
+  const isScheduleExpired = planMode !== "none" && isManualResendAvailable;
+  const sendTiming = isManualResendAvailable ? "now" : planMode === "none" ? "none" : "scheduled";
   const isParent = audience === "parent";
   const field = isParent ? "teacherComment" : "studentComment";
   const comment = record?.[field] ?? "";
@@ -7613,10 +7614,10 @@ function CommentComposerModal({
   const actionLabel =
     isNotificationMuted
       ? "알림 제외"
+      : isManualResendAvailable
+        ? "수동 재발송"
       : planMode === "none"
       ? "발송 안 함"
-      : isScheduleExpired
-        ? "수동 재발송"
       : planMode === "delay30"
         ? "30분 지연 예약"
         : "예약 발송";
@@ -7690,14 +7691,14 @@ function CommentComposerModal({
             </button>
             <button
               className="sendButton"
-              disabled={isNotificationMuted || planMode === "none"}
+              disabled={isNotificationMuted || (planMode === "none" && !isManualResendAvailable)}
               onClick={() =>
                 onSendComment(lesson, student, record, audience, {
                   delayMinutes: sendDelayMinutes,
                   forceDryRun,
                   forceTestRecipient,
                   manualPreviewBody: generatedPreviewText,
-                  resendReason: isScheduleExpired ? "예약 시간 경과 후 수동 재발송" : "",
+                  resendReason: isManualResendAvailable ? "예약 시간 경과 후 수동 재발송" : "",
                   sendTiming
                 })
               }
@@ -7712,8 +7713,8 @@ function CommentComposerModal({
             <small>
               {isNotificationMuted
                 ? "이 학생의 해당 알림톡은 개별 제외 상태입니다."
-                : isScheduleExpired
-                  ? "예약 시간이 지난 건은 버튼을 누르면 즉시 수동 재발송합니다."
+                : isManualResendAvailable
+                  ? "예약 계획과 관계없이 버튼을 누르면 즉시 수동 재발송합니다."
                   : "발송 버튼은 현재 수업 발송 계획대로 예약합니다."}
             </small>
           </div>
