@@ -380,25 +380,13 @@ function textIncludesEveryLine(text = "", lines = []) {
   });
 }
 
-function removeMessageBlock(text = "", block = "") {
-  const blockKey = getMessageDedupeKey(block);
-  if (!blockKey) return normalizeMessageText(text);
-  return String(text ?? "")
-    .replace(/\r\n/g, "\n")
-    .split(/\n\s*\n+/g)
-    .map(normalizeMessageText)
-    .filter(Boolean)
-    .filter((item) => getMessageDedupeKey(item) !== blockKey)
-    .join("\n\n");
-}
-
 function getPreparationNoticeForTarget(record = {}, target = "parent") {
   const shouldIncludePrepMemo =
     target === "student" ? Boolean(record?.prepStudentVisible) : Boolean(record?.prepParentVisible);
   return shouldIncludePrepMemo ? normalizeMessageText(record?.preparationMemo) : "";
 }
 
-function buildCommentPreviewLines({ audience, comment, nextHomework, preparationNotice = "", previousHomework, record, student, supplementSchedules = [] }) {
+function buildCommentPreviewLines({ audience, comment, nextHomework, previousHomework, record, student, supplementSchedules = [] }) {
   const lessonMaterial = getLessonMaterial(record, student);
   const lessonContent = getLessonContent(record);
   const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
@@ -415,7 +403,6 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, preparation
     createMessageLine("🧭 강의 내용", lessonContent),
     createMessageLine("📘 지난 과제", previousHomework?.title),
     createMessageLine("➡️ 다음 과제", nextHomework?.title),
-    createMessageBlock("📝 수업메모", preparationNotice),
     supplementNotice ? createMessageBlock("⭐ 보충 일정", supplementNotice) : "",
     commentText ? createMessageBlock("💬 코멘트", commentText) : ""
   ];
@@ -423,13 +410,12 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, preparation
   return lines.filter(Boolean);
 }
 
-function buildCommentPreviewText({ audience, comment, lesson, nextHomework, preparationNotice = "", previousHomework, record, student, supplementSchedules = [] }) {
+function buildCommentPreviewText({ audience, comment, lesson, nextHomework, previousHomework, record, student, supplementSchedules = [] }) {
   const isParent = audience === "parent";
   const previewLines = buildCommentPreviewLines({
     audience,
     comment,
     nextHomework,
-    preparationNotice,
     previousHomework,
     record,
     student,
@@ -3832,14 +3818,12 @@ export function App() {
     const audience = target === "student" ? "student" : "parent";
     const sourceField = audience === "student" ? "studentComment" : "teacherComment";
     const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId);
-    const preparationNotice = getPreparationNoticeForTarget(record, audience);
-    const commentBodyWithPrepMemo = buildInitialCommentDraft({
+    const commentBody = buildInitialCommentDraft({
       audience,
       existingComment: record?.[sourceField] ?? "",
       record,
       supplementSchedules
     });
-    const commentBody = removeMessageBlock(commentBodyWithPrepMemo, preparationNotice);
     const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
     const payload = {
       academyName: academyBrandName,
@@ -3862,7 +3846,7 @@ export function App() {
       nextHomework: nextHomework?.title ?? "",
       osScheduled: true,
       parentPhone: student.parentPhone,
-      preparationNotice,
+      preparationNotice: "",
       previousHomework: previousHomework?.title ?? "",
       scheduledDate,
       scheduleMode: mode,
@@ -3888,7 +3872,6 @@ export function App() {
         comment: commentBody,
         lesson,
         nextHomework,
-        preparationNotice,
         previousHomework,
         record,
         student,
@@ -5154,14 +5137,12 @@ export function App() {
     if (isRecordNotificationMuted(record, target)) return;
     const sourceField = target === "student" ? "studentComment" : "teacherComment";
     const message = normalizeMessageText(record?.[sourceField]);
-    const prepMemo = normalizeMessageText(record?.preparationMemo);
     const preparationNotice = getPreparationNoticeForTarget(record, target);
-    const prepMessage = !message && preparationNotice && prepMemo ? preparationNotice : "";
+    const prepMessage = preparationNotice && !textIncludesMessageBlock(message, preparationNotice) ? preparationNotice : "";
     const composedMessage = joinMessageBlocks([prepMessage, message]);
     const manualCommentBody = normalizeMessageText(options.manualCommentBody);
     const manualPreviewBody = normalizeMessageText(options.manualPreviewBody);
     const finalMessage = manualCommentBody || composedMessage;
-    const finalCommentMessage = removeMessageBlock(finalMessage, preparationNotice);
     const hasSendContent = Boolean(finalMessage);
     const channel = target === "student" ? "student_alimtalk" : "parent_alimtalk";
     const statusField = target === "student" ? "studentCommentSendStatus" : "teacherCommentSendStatus";
@@ -5231,9 +5212,9 @@ export function App() {
         forceTestRecipient: Boolean(options.forceTestRecipient),
         commentBodyOverride: manualCommentBody,
         manualResend: Boolean(options.resendReason),
-        message: finalCommentMessage,
+        message: finalMessage,
         nextHomework: nextHomework?.title ?? "",
-        preparationNotice,
+        preparationNotice: "",
         parentPhone: student.parentPhone,
         previousHomework: previousHomework?.title ?? "",
         resendReason: options.resendReason ?? "",
@@ -8136,14 +8117,11 @@ function CommentComposerModal({
     student,
     supplementSchedules
   });
-  const preparationNotice = getPreparationNoticeForTarget(record, audience);
-  const previewComment = removeMessageBlock(comment, preparationNotice);
   const generatedPreviewText = buildCommentPreviewText({
     audience,
-    comment: previewComment,
+    comment,
     lesson,
     nextHomework,
-    preparationNotice,
     previousHomework,
     record,
     student,

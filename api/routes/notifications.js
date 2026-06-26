@@ -236,6 +236,12 @@ function buildDailyReportBody({
 }) {
   const incompleteList = normalizeList(incompleteHomeworks);
   const assignmentStatusMessage = assignmentStatusText(assignmentStatus, assignmentStatus, audience);
+  const preparationText = normalizeText(preparationNotice);
+  const teacherCommentText = normalizeText(teacherComment);
+  const commentText = joinMessageBlocks([
+    preparationText && !teacherCommentText.includes(preparationText) ? preparationText : "",
+    teacherCommentText
+  ]);
 
   return joinMessageBlocks([
     messageLine("🏫 출결", attendanceLabelWithDetail({ attendanceStatus, checkedAt, checkInTime, reason: attendanceReason })),
@@ -244,11 +250,10 @@ function buildDailyReportBody({
     messageLine("🧭 강의 내용", lessonContent),
     messageLine("📘 지난 과제", previousHomework),
     messageLine("➡️ 다음 과제", nextHomework),
-    messageBlock("📝 수업메모", preparationNotice),
     incompleteList.length ? messageBlock("⚠️ 미완료 과제", incompleteList.map((item) => `- ${item}`).join("\n")) : "",
     messageBlock("⭐ 중요 · 재시험 일정", retestSchedule),
     messageBlock("⭐ 중요 · 보충 일정", supplementSchedule),
-    messageBlock("💬 코멘트", teacherComment)
+    messageBlock("💬 코멘트", commentText)
   ]);
 }
 
