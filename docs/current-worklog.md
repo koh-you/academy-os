@@ -107,6 +107,15 @@
 - 남은 운영 조건: Render 자체 cron 서비스를 반드시 쓰려면 Render Billing에 결제 정보를 추가해야 한다. 결제 정보가 추가되면 기존 `render.yaml`의 cron 정의 또는 Render API로 `koh-you-math-academy-os-notification-dispatch`를 생성하면 된다.
 - 검증: `node --check api/server.js`, `node --check scripts/dispatch-due-notifications.cjs`, `npm run test:production`, `npm run build` 통과. 기존 Vite 청크 크기 경고만 확인됨.
 
+## 2026-06-26 알림톡 자동발송 실제성 재점검
+
+- 상태: 완료
+- 확인: GitHub Actions `Dispatch due Alimtalk notifications` workflow는 `active`이고 성공 실행 기록이 있으나, 실제 schedule 실행 간격이 5분 보장이 아니라 수십 분~수 시간까지 밀린 기록이 확인됐다. 따라서 GitHub Actions 단독으로는 `22:30 전후 자동발송` MVP 신뢰도가 부족하다.
+- 조치: 운영 API 서버 내부에 1분 주기 `runInternalNotificationDispatch` 루프를 추가했다. 서버가 깨어 있는 동안 due 된 `payload.osScheduled: true` 예약을 자체적으로 처리한다.
+- 안전장치: 기존 조건부 선점(`provider=academy-os-dispatching`)을 그대로 사용하므로 서버 내부 루프, GitHub Actions, 수동 dispatch가 겹쳐도 동일 job 중복 발송 위험을 낮춘다.
+- 운영 구조: Render 결제 등록 전에는 `서버 내부 1분 루프 + GitHub Actions 외부 깨우기`가 함께 동작한다. Render 웹 서비스가 sleep 상태면 GitHub Actions/사용자 접속이 깨우는 역할을 하고, 깨어 있는 동안은 서버가 1분마다 처리한다.
+- 검증: `node --check api/server.js`, `npm run test:production`, `npm run build` 통과. 기존 Vite 청크 크기 경고만 확인됨.
+
 ## 2026-06-25 학사일정 월간 캘린더 표현 개선
 
 - 상태: 완료

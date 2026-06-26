@@ -831,6 +831,32 @@ async function dispatchDueNotificationJobs({
   };
 }
 
+const internalDispatchEnabled = process.env.NOTIFICATION_INTERNAL_DISPATCH_LOOP !== "false";
+let internalDispatchRunning = false;
+
+async function runInternalNotificationDispatch(reason = "interval") {
+  if (!internalDispatchEnabled || internalDispatchRunning) return;
+  internalDispatchRunning = true;
+  try {
+    const result = await dispatchDueNotificationJobs({
+      forceDryRun: false,
+      limit: Number(process.env.NOTIFICATION_INTERNAL_DISPATCH_LIMIT || process.env.NOTIFICATION_DISPATCH_LIMIT || 50),
+      now: new Date().toISOString()
+    });
+    if (result.processedCount > 0) {
+      console.log(JSON.stringify({
+        event: "notification_internal_dispatch",
+        processedCount: result.processedCount,
+        reason
+      }));
+    }
+  } catch (error) {
+    console.error("[notification_internal_dispatch_failed]", error);
+  } finally {
+    internalDispatchRunning = false;
+  }
+}
+
 function getKoreaDateString(value = new Date()) {
   const parts = new Intl.DateTimeFormat("en-US", {
     day: "2-digit",
@@ -1635,5 +1661,9 @@ const server = http.createServer(async (request, response) => {
 
 server.listen(port, host, () => {
   console.log(`academy-os api server listening on http://${host}:${port}`);
+  if (internalDispatchEnabled) {
+    runInternalNotificationDispatch("startup");
+    setInterval(() => runInternalNotificationDispatch("interval"), 60 * 1000).unref?.();
+  }
 });
 
