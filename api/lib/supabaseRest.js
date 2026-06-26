@@ -35,18 +35,32 @@ export async function supabaseRestRequest(path, options = {}) {
   const serviceRoleKey = getEnv("SUPABASE_SERVICE_ROLE_KEY");
   const apiKey = requireServiceRole && serviceRoleKey ? serviceRoleKey : anonKey;
   const url = `${supabaseUrl}/rest/v1/${path.replace(/^\//, "")}`;
+  const timeoutMs = options.timeoutMs ?? 12000;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-  const response = await fetch(url, {
-    method: options.method ?? "GET",
-    headers: {
-      apikey: apiKey,
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      ...(options.prefer ? { Prefer: options.prefer } : {}),
-      ...(options.headers ?? {})
-    },
-    body: options.body === undefined ? undefined : JSON.stringify(options.body)
-  });
+  let response;
+  try {
+    response = await fetch(url, {
+      method: options.method ?? "GET",
+      headers: {
+        apikey: apiKey,
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        ...(options.prefer ? { Prefer: options.prefer } : {}),
+        ...(options.headers ?? {})
+      },
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      signal: controller.signal
+    });
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new Error(`Supabase request timed out after ${timeoutMs}ms.`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   const text = await response.text();
   const data = text ? JSON.parse(text) : null;
@@ -65,9 +79,10 @@ export async function listRows(table, query = "select=*", options = {}) {
   });
 }
 
-export async function upsertRows(table, rows) {
+export async function upsertRows(table, rows, options = {}) {
   if (!Array.isArray(rows) || rows.length === 0) return [];
-  return supabaseRestRequest(table, {
+  const conflictQuery = options.onConflict ? `?on_conflict=${encodeURIComponent(options.onConflict)}` : "";
+  return supabaseRestRequest(`${table}${conflictQuery}`, {
     method: "POST",
     body: rows,
     prefer: "resolution=merge-duplicates,return=representation",

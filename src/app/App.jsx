@@ -3043,7 +3043,10 @@ export function App() {
     setSelectedDate(lesson.date);
     setSelectedLessonId(lesson.lessonId);
     setIsLessonModalOpen(false);
-    postJson("/api/lessons", { lesson }).catch((error) => console.error(error));
+    postJson("/api/lessons", { lesson }).catch((error) => {
+      console.error(error);
+      window.alert(`수업 저장 실패: ${error.message}`);
+    });
   }
 
   function handleUpdateLesson(formValues) {
@@ -3076,7 +3079,10 @@ export function App() {
     setSelectedLessonId(lesson.lessonId);
     setEditingLesson(null);
     setIsLessonModalOpen(false);
-    postJson("/api/lessons", { lesson }).catch((error) => console.error(error));
+    postJson("/api/lessons", { lesson }).catch((error) => {
+      console.error(error);
+      window.alert(`수업 저장 실패: ${error.message}`);
+    });
   }
 
   function handleDeleteLesson(lessonId) {
@@ -3128,7 +3134,10 @@ export function App() {
     if (!changedLessons.length) return;
     const changedById = new Map(changedLessons.map((lesson) => [lesson.lessonId, lesson]));
     setLessons((current) => current.map((lesson) => changedById.get(lesson.lessonId) ?? lesson));
-    postJson("/api/lessons/bulk", { lessons: changedLessons }).catch((error) => console.error(error));
+    postJson("/api/lessons/bulk", { lessons: changedLessons }).catch((error) => {
+      console.error(error);
+      window.alert(`수업 명단 저장 실패: ${error.message}`);
+    });
   }
 
   function addStudentToFutureClassLessons(student, fromDate = today) {

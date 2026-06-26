@@ -10,6 +10,17 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-26 P0. 수업 명단/수업일지 저장 Failed to fetch 보정
+
+- 상태: 완료
+- 사용자 제보: 2026-06-26 수업에서 김예나 학생이 월수금 4-7 대신 7-10에 오기로 해서 해당 날짜 수업 명단만 조정하려고 했으나 `자동 수업 저장 실패: Failed to fetch` 알림이 뜨고 저장이 안 되는 것처럼 보인다.
+- 확인 결과: 운영 API `GET /api/lesson-records`와 `/health`는 정상이나, `POST /api/lesson-records` 등 Supabase 쓰기 경로가 10초 이상 응답하지 않아 브라우저에서 fetch 실패처럼 보일 수 있었다. 로컬에서 같은 Supabase REST에 `PATCH`를 직접 실행하면 정상 속도로 처리됐다.
+- 이번 작업 결과: Supabase REST 쓰기 요청에 12초 타임아웃을 추가해 무한 대기 대신 명확한 오류를 반환하게 했다. `lessons`, `lesson_student_records`, `homeworks` upsert에 `on_conflict` 기준을 명확히 지정해 수업 저장, 하루 명단 수정, 수업일지 자동저장, 숙제 저장의 충돌 처리를 안정화했다.
+- 프론트 보강: 수업 추가/수정과 수업 명단 일괄 저장 실패가 콘솔에만 남지 않고 `수업 저장 실패`/`수업 명단 저장 실패`로 사용자에게 보이게 했다.
+- 운영 메모: 진단용으로 생성된 `diagnostic_noop_record_20260626` 레코드는 확인 후 삭제했다. 실제 사용자 데이터는 삭제하지 않았다.
+- SQL 주의: 기존 unique 제약과 REST upsert 옵션을 활용하는 코드 변경이므로 Supabase SQL edit 필요 없음.
+- 검증: 로컬에서 운영 Supabase 대상 `upsertLesson`, `upsertLessonStudentRecord` 직접 호출 성공. `node --check api/lib/supabaseRest.js`, `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs` 통과. `npm run test:production` 191개 통과, `npm run build` 통과.
+
 ### 2026-06-26 P0. 시험분석 AI 결과 프론트 표시 보정
 
 - 상태: 완료

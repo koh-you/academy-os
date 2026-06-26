@@ -873,7 +873,7 @@ export async function upsertLesson(lesson) {
     return { source: fallbackSource, lesson };
   }
 
-  const [row] = await upsertRows("lessons", [toLessonRow(lesson)]);
+  const [row] = await upsertRows("lessons", [toLessonRow(lesson)], { onConflict: "lesson_id" });
   return { source: databaseSource, lesson: fromLessonRow(row) };
 }
 
@@ -885,7 +885,7 @@ export async function upsertLessons(lessons) {
     return { source: fallbackSource, lessons };
   }
 
-  const rows = await upsertRows("lessons", lessons.map(toLessonRow));
+  const rows = await upsertRows("lessons", lessons.map(toLessonRow), { onConflict: "lesson_id" });
   return { source: databaseSource, lessons: rows.map(fromLessonRow) };
 }
 
@@ -1253,7 +1253,7 @@ export async function upsertLessonStudentRecord(record) {
     : record;
   let row;
   try {
-    [row] = await upsertRows("lesson_student_records", [toLessonRecordRow(stableRecord)]);
+    [row] = await upsertRows("lesson_student_records", [toLessonRecordRow(stableRecord)], { onConflict: "lesson_id,student_id" });
   } catch (error) {
     const message = String(error?.message ?? "");
     const isAttendanceTimeMigration =
@@ -1297,7 +1297,11 @@ export async function upsertLessonStudentRecord(record) {
     ].some((value) => (typeof value === "boolean" ? value : Boolean(String(value ?? "").trim())));
     if (!isPendingMigration) throw error;
     if (isAttendanceTimeMigration) {
-      [row] = await upsertRows("lesson_student_records", [toLessonRecordRow(stableRecord, { includeAttendanceTimeFields: false })]);
+      [row] = await upsertRows(
+        "lesson_student_records",
+        [toLessonRecordRow(stableRecord, { includeAttendanceTimeFields: false })],
+        { onConflict: "lesson_id,student_id" }
+      );
       return { source: databaseSource, record: fromLessonRecordRow(row) };
     }
     if (hasExtendedValues) {
@@ -1305,7 +1309,11 @@ export async function upsertLessonStudentRecord(record) {
         "Supabase lesson_student_records 확장 컬럼 migration이 필요합니다. supabase/20260617_lesson_prep_resources_notifications.sql 또는 supabase/20260624_persist_frontend_fields.sql을 실행한 뒤 다시 저장하세요."
       );
     }
-    [row] = await upsertRows("lesson_student_records", [toLessonRecordRow(stableRecord, { includeExtendedFields: false })]);
+    [row] = await upsertRows(
+      "lesson_student_records",
+      [toLessonRecordRow(stableRecord, { includeExtendedFields: false })],
+      { onConflict: "lesson_id,student_id" }
+    );
   }
   return { source: databaseSource, record: fromLessonRecordRow(row) };
 }
@@ -1317,7 +1325,7 @@ export async function upsertHomework(homework) {
 
   let row;
   try {
-    [row] = await upsertRows("homeworks", [toHomeworkRow(homework)]);
+    [row] = await upsertRows("homeworks", [toHomeworkRow(homework)], { onConflict: "homework_id" });
   } catch (error) {
     if (errorMentionsAnyColumn(error, [
       "status",
@@ -1342,7 +1350,7 @@ export async function upsertHomework(homework) {
       if (hasExtendedHomeworkValues) {
         throw new Error("Supabase homeworks 확장 컬럼 migration이 필요합니다. supabase/20260624_persist_frontend_fields.sql을 실행한 뒤 다시 저장하세요.");
       }
-      [row] = await upsertRows("homeworks", [toHomeworkRow(homework, { includeExtendedFields: false })]);
+      [row] = await upsertRows("homeworks", [toHomeworkRow(homework, { includeExtendedFields: false })], { onConflict: "homework_id" });
     } else {
       throw error;
     }
@@ -1360,7 +1368,7 @@ export async function upsertHomeworks(homeworks) {
 
   let rows;
   try {
-    rows = await upsertRows("homeworks", homeworks.map(toHomeworkRow));
+    rows = await upsertRows("homeworks", homeworks.map(toHomeworkRow), { onConflict: "homework_id" });
   } catch (error) {
     if (errorMentionsAnyColumn(error, [
       "status",
@@ -1385,7 +1393,11 @@ export async function upsertHomeworks(homeworks) {
       if (hasExtendedHomeworkValues) {
         throw new Error("Supabase homeworks 확장 컬럼 migration이 필요합니다. supabase/20260624_persist_frontend_fields.sql을 실행한 뒤 다시 저장하세요.");
       }
-      rows = await upsertRows("homeworks", homeworks.map((homework) => toHomeworkRow(homework, { includeExtendedFields: false })));
+      rows = await upsertRows(
+        "homeworks",
+        homeworks.map((homework) => toHomeworkRow(homework, { includeExtendedFields: false })),
+        { onConflict: "homework_id" }
+      );
     } else {
       throw error;
     }
