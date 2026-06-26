@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-26 P0. 수동 출결 과거 등원시각과 알림톡 시간 보정
+
+- 상태: 완료
+- 사용자 제보: 학생이 태블릿 출결을 찍지 않고 등원한 경우 강사가 수동으로 출결 알림톡을 보내야 한다. 지각 15분은 월수금 7-10 수업 기준 19:15 등원으로 처리되지만, 지각이 아닌 정상 등원을 나중에 수동 체크하면 현재 시각이 알림톡에 찍힌다.
+- 원인: 수동 출결 모달에 실제 등원시각 입력 필드가 없고, 정상 등원 수동 저장은 `nowIso` 기준으로 `checkInAt/checkInTime`을 채웠다. 알림톡 발송도 저장된 출결 시간이 아니라 현재 시각을 기본값으로 사용했다.
+- 이번 작업 결과: 수동 출결 모달에 `등원 시각` 입력을 추가했다. 정상 등원/지각/등원 상태는 입력한 과거 시각을 `checkInAt/checkInTime`에 저장하고, 알림톡도 같은 시각을 사용한다. 지각은 직접 시각을 비워도 기존 운영처럼 `수업 시작시각 + 지각분`으로 등원 시각을 계산한다.
+- 알림톡 보강: 출결 알림톡의 정상 등원 `시간` 줄은 ISO/현재 문자열 대신 `HH:mm`으로 정리해 표시한다. 태블릿 출결도 저장된 등원/하원 시각을 payload에 포함한다.
+- SQL 주의: 기존 `lesson_student_records.check_in_at/check_in_time` 컬럼을 사용하므로 Supabase SQL edit 필요 없음.
+- 검증: `node --check api/routes/notifications.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs` 통과. `npm run test:production` 통과(total 192, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
+
 ### 2026-06-26 P0. 수업 명단/수업일지 저장 Failed to fetch 보정
 
 - 상태: 완료

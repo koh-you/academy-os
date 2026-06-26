@@ -2794,6 +2794,8 @@ export function App() {
     handleSendAttendanceAlimtalk(lesson, student, {
       attendanceStatus: isCheckOut ? "checkout" : attendanceStatus === "late" ? "late" : "checkin",
       attendanceReason: nextRecord.attendanceReason,
+      checkedAt: isCheckOut ? nextRecord.checkOutAt : nextRecord.checkInAt,
+      checkInTime: isCheckOut ? nextRecord.checkOutTime : nextRecord.checkInTime,
       lateMinutes
     });
     setNotificationLogs((current) => [
@@ -3424,7 +3426,7 @@ export function App() {
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
     const existingRecord = recordsRef.current.find((record) => record.lessonStudentRecordId === recordId);
     const nowIso = new Date().toISOString();
-    const timedValues = applyManualAttendanceTimeFields(existingRecord, values, nowIso);
+    const timedValues = applyManualAttendanceTimeFields(existingRecord, values, nowIso, lesson);
     const nextRecord = {
       ...createEmptyRecord(lesson, student),
       ...(existingRecord ?? {}),
@@ -3949,6 +3951,7 @@ export function App() {
       student.studentId,
       lesson.lessonId,
       values.attendanceStatus,
+      values.checkInTime || values.checkedAt || values.checkInAt || "",
       student.parentPhone
     ].join("|");
     if (attendanceNotificationLocksRef.current.has(lockKey)) {
@@ -3958,7 +3961,7 @@ export function App() {
 
     const payload = {
       attendanceStatus: values.attendanceStatus,
-      checkedAt: getKoreaDateTimeString(),
+      checkedAt: values.checkedAt || values.checkInAt || getKoreaDateTimeString(),
       checkInTime: values.checkInTime,
       lateMinutes: values.lateMinutes,
       lessonId: lesson.lessonId,
@@ -4520,9 +4523,14 @@ export function App() {
           item={attendanceModal}
           onClose={() => setAttendanceModal(null)}
           onSave={(lesson, student, values, options = {}) => {
-            saveAttendanceRecord(lesson, student, values, "instructor_owner_001");
+            const savedRecord = saveAttendanceRecord(lesson, student, values, "instructor_owner_001");
             if (options.sendAlimtalk) {
-              handleSendAttendanceAlimtalk(lesson, student, values);
+              handleSendAttendanceAlimtalk(lesson, student, {
+                ...values,
+                checkedAt: savedRecord.checkInAt || savedRecord.updatedAt,
+                checkInAt: savedRecord.checkInAt,
+                checkInTime: savedRecord.checkInTime
+              });
             }
             setAttendanceModal(null);
           }}
@@ -7841,10 +7849,11 @@ function AttendanceModal({ item, onClose, onSave }) {
   const { lesson, record, student } = item;
   const [attendanceStatus, setAttendanceStatus] = useState(record.attendanceStatus ?? "present");
   const [lateMinutes, setLateMinutes] = useState(record.lateMinutes ?? "");
+  const [checkInTime, setCheckInTime] = useState(record.checkInTime || formatKoreaTimeFromIso(record.checkInAt) || "");
   const [attendanceReason, setAttendanceReason] = useState(record.attendanceReason ?? "");
   const [pendingSave, setPendingSave] = useState(null);
   const [confirmStep, setConfirmStep] = useState("");
-  const values = { attendanceStatus, lateMinutes, attendanceReason };
+  const values = { attendanceStatus, lateMinutes, checkInTime, attendanceReason };
   const hasKioskRecord = hasTabletAttendanceRecord(record);
   const hasChanged = hasAttendanceModalChanges(record, values);
 
@@ -7880,6 +7889,15 @@ function AttendanceModal({ item, onClose, onSave }) {
         ))}
       </div>
       <div className="fieldGrid">
+        <label>
+          등원 시각
+          <input
+            type="time"
+            value={checkInTime}
+            onChange={(event) => setCheckInTime(event.target.value)}
+          />
+          <small>출결을 못 찍은 학생은 실제 등원 시각을 입력하세요.</small>
+        </label>
         <label>
           얼마나 늦었나요?
           <input value={lateMinutes} onChange={(event) => setLateMinutes(event.target.value)} placeholder="예: 10분" />
@@ -7948,6 +7966,7 @@ function hasAttendanceModalChanges(record = {}, values = {}) {
   return (
     normalizeAttendanceField(record.attendanceStatus ?? "present") !== normalizeAttendanceField(values.attendanceStatus ?? "present") ||
     normalizeAttendanceField(record.lateMinutes) !== normalizeAttendanceField(values.lateMinutes) ||
+    normalizeAttendanceField(record.checkInTime || formatKoreaTimeFromIso(record.checkInAt)) !== normalizeAttendanceField(values.checkInTime) ||
     normalizeAttendanceField(record.attendanceReason) !== normalizeAttendanceField(values.attendanceReason)
   );
 }
@@ -16705,6 +16724,31 @@ function formatKoreaTimeFromIso(value) {
   }).format(date);
 }
 
+function normalizeTimeInput(value) {
+  const text = String(value ?? "").trim();
+  const match = text.match(/(\d{1,2}):(\d{2})/);
+  if (!match) return "";
+  const hour = Math.max(0, Math.min(23, Number(match[1]) || 0));
+  const minute = Math.max(0, Math.min(59, Number(match[2]) || 0));
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
+
+function addMinutesToAttendanceTime(timeValue, minutesToAdd = 0) {
+  const time = normalizeTimeInput(timeValue);
+  if (!time) return "";
+  const [hour, minute] = time.split(":").map(Number);
+  const totalMinutes = hour * 60 + minute + (Number(minutesToAdd) || 0);
+  const normalizedMinutes = ((totalMinutes % (24 * 60)) + (24 * 60)) % (24 * 60);
+  return `${String(Math.floor(normalizedMinutes / 60)).padStart(2, "0")}:${String(normalizedMinutes % 60).padStart(2, "0")}`;
+}
+
+function createKoreaIsoFromDateAndTime(dateValue, timeValue, fallbackIso = new Date().toISOString()) {
+  const time = normalizeTimeInput(timeValue);
+  if (!dateValue || !time) return fallbackIso;
+  const date = new Date(`${dateValue}T${time}:00+09:00`);
+  return Number.isNaN(date.getTime()) ? fallbackIso : date.toISOString();
+}
+
 function getAttendanceDisplay(record = {}) {
   const status = record.attendanceStatus ?? "pending";
   const updatedTime = formatKoreaTimeFromIso(record.updatedAt);
@@ -16731,13 +16775,20 @@ function hasMissingCheckOut(record = {}) {
   return hasCheckIn && !hasCheckOut && ["checkin", "present", "late"].includes(status);
 }
 
-function applyManualAttendanceTimeFields(existingRecord = {}, values = {}, nowIso = new Date().toISOString()) {
+function applyManualAttendanceTimeFields(existingRecord = {}, values = {}, nowIso = new Date().toISOString(), lesson = null) {
   const nowTime = formatKoreaTimeFromIso(nowIso);
+  const manualCheckInTime = normalizeTimeInput(values.checkInTime);
+  const derivedLateCheckInTime =
+    values.attendanceStatus === "late" && values.lateMinutes && lesson?.startTime
+      ? addMinutesToAttendanceTime(lesson.startTime, values.lateMinutes)
+      : "";
+  const nextCheckInTime = manualCheckInTime || derivedLateCheckInTime || existingRecord.checkInTime || nowTime;
+  const nextCheckInAt = createKoreaIsoFromDateAndTime(lesson?.date, nextCheckInTime, existingRecord.checkInAt || nowIso);
   if (["present", "late", "checkin"].includes(values.attendanceStatus)) {
     return {
       ...values,
-      checkInAt: existingRecord.checkInAt || nowIso,
-      checkInTime: existingRecord.checkInTime || nowTime,
+      checkInAt: nextCheckInAt,
+      checkInTime: nextCheckInTime,
       checkOutAt: "",
       checkOutTime: ""
     };
@@ -16745,8 +16796,8 @@ function applyManualAttendanceTimeFields(existingRecord = {}, values = {}, nowIs
   if (values.attendanceStatus === "checkout") {
     return {
       ...values,
-      checkInAt: existingRecord.checkInAt || nowIso,
-      checkInTime: existingRecord.checkInTime || nowTime,
+      checkInAt: existingRecord.checkInAt || nextCheckInAt,
+      checkInTime: existingRecord.checkInTime || nextCheckInTime,
       checkOutAt: existingRecord.checkOutAt || nowIso,
       checkOutTime: existingRecord.checkOutTime || nowTime
     };

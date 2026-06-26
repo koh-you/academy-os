@@ -207,10 +207,11 @@ function formatScheduleItem(item) {
 
 function buildAttendanceBody({ attendanceStatus, checkedAt, checkInTime, lessonName, lateMinutes, reason }) {
   const status = attendanceLabel(attendanceStatus);
+  const time = formatAttendanceTime(checkInTime || checkedAt);
   const lines = [
     messageLine("🏫 출결", attendanceLabelWithDetail({ attendanceStatus, checkedAt, checkInTime, lateMinutes, reason })),
     lessonName ? messageLine("📘 수업", lessonName) : "",
-    checkedAt && !["지각", "결석", "인정결석"].includes(status) ? messageLine("🕒 시간", checkedAt) : ""
+    time && !["지각", "결석", "인정결석"].includes(status) ? messageLine("🕒 시간", time) : ""
   ];
 
   return joinMessageBlocks(lines);
