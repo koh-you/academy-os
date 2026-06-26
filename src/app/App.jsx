@@ -3919,7 +3919,8 @@ export function App() {
     });
   }
 
-  async function handleSaveRecord(recordId, lessonForRecord = null, studentForRecord = null, recordOverride = null) {
+  async function handleSaveRecord(recordId, lessonForRecord = null, studentForRecord = null, recordOverride = null, options = {}) {
+    const { skipNotificationRefresh = false, skipRelatedHomeworks = false } = options;
     const existingTimerId = autoSaveTimersRef.current.get(recordId);
     if (existingTimerId) {
       clearTimeout(existingTimerId);
@@ -3937,9 +3938,11 @@ export function App() {
         recordsRef.current.find((item) => item.lessonStudentRecordId === recordId) ??
         (lessonForRecord && studentForRecord ? createEmptyRecord(lessonForRecord, studentForRecord) : null);
       if (!record) throw new Error("저장할 수업기록을 찾지 못했습니다.");
-      const relatedHomeworks = homeworksRef.current.filter(
-        (homework) => homework.lessonId === record.lessonId && homework.studentId === record.studentId
-      );
+      const relatedHomeworks = skipRelatedHomeworks
+        ? []
+        : homeworksRef.current.filter(
+            (homework) => homework.lessonId === record.lessonId && homework.studentId === record.studentId
+          );
 
       await postJson("/api/lesson-records", { record });
       if (relatedHomeworks.length > 0) {
@@ -3957,7 +3960,9 @@ export function App() {
       if (isLatestRecord) {
         setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "saved" }));
       }
-      refreshLessonNotificationJobsForRecord(record, lessonForRecord);
+      if (!skipNotificationRefresh) {
+        refreshLessonNotificationJobsForRecord(record, lessonForRecord);
+      }
     } catch (error) {
       console.error(error);
       setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "failed" }));
@@ -7626,6 +7631,12 @@ function PreparationMemoModal({
   const [draftMemo, setDraftMemo] = useState(currentRecord.preparationMemo ?? "");
   const [draftStudentVisible, setDraftStudentVisible] = useState(Boolean(currentRecord.prepStudentVisible));
   const [draftParentVisible, setDraftParentVisible] = useState(Boolean(currentRecord.prepParentVisible));
+  const initialDraftSnapshot = JSON.stringify({
+    preparationMemo: currentRecord.preparationMemo ?? "",
+    prepStudentVisible: Boolean(currentRecord.prepStudentVisible),
+    prepParentVisible: Boolean(currentRecord.prepParentVisible)
+  });
+  const lastSavedSnapshotRef = useRef(initialDraftSnapshot);
   const previousMemo = previousRecord?.preparationMemo?.trim() ?? "";
   const previousLessonLabel = previousLesson
     ? `${previousLesson.date} · ${previousLesson.className}`
@@ -7639,18 +7650,27 @@ function PreparationMemoModal({
     if (field === "preparationMemo") setDraftMemo(value);
     if (field === "prepStudentVisible") setDraftStudentVisible(Boolean(value));
     if (field === "prepParentVisible") setDraftParentVisible(Boolean(value));
-    onChangeRecord(lesson, student, field, value);
   }
 
   function saveMemo() {
+    const draftSnapshot = JSON.stringify({
+      preparationMemo: draftMemo,
+      prepStudentVisible: draftStudentVisible,
+      prepParentVisible: draftParentVisible
+    });
+    if (draftSnapshot === lastSavedSnapshotRef.current && saveState !== "failed") {
+      return Promise.resolve();
+    }
+    lastSavedSnapshotRef.current = draftSnapshot;
+    const nowIso = new Date().toISOString();
     return onSaveRecord(recordId, lesson, student, {
       ...currentRecord,
       preparationMemo: draftMemo,
       prepStudentVisible: draftStudentVisible,
       prepParentVisible: draftParentVisible,
       updatedBy: "instructor_owner_001",
-      updatedAt: new Date().toISOString()
-    });
+      updatedAt: nowIso
+    }, { skipRelatedHomeworks: true, skipNotificationRefresh: true });
   }
 
   function closeMemo() {

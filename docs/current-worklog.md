@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-26 P0. 수업메모 저장 로딩 지연 보정
+
+- 상태: 완료
+- 사용자 제보: 수업메모 모달에서 `저장 중` 상태가 너무 오래 지속된다.
+- 원인: 수업메모 입력 중 `onChangeRecord`가 매 입력마다 자동저장을 예약하고, 저장 버튼도 다시 전체 수업기록 저장을 실행했다. 이 경로는 관련 숙제 bulk 저장과 알림 예약 갱신까지 기다려 수업메모 단일 저장에는 과했다.
+- 이번 작업 결과: 수업메모 모달은 입력 중에는 local draft만 갱신하고, 저장/닫기 때 한 번만 저장한다. 수업메모 저장은 관련 숙제 bulk 저장과 알림 예약 재생성을 건너뛰는 경량 저장 옵션을 사용한다.
+- 추가 보강: 같은 draft를 저장 버튼과 닫기에서 중복 저장하지 않도록 마지막 저장 snapshot을 기억한다.
+- SQL 주의: 기존 `lesson_student_records.preparation_memo/prep_*` 저장 경로만 사용하므로 Supabase SQL edit 필요 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과. `npm run test:production` 통과(total 199, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
+
 ### 2026-06-26 P0. 수동 보강 수업 빈 화면 보정
 
 - 상태: 완료
