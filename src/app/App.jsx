@@ -4036,12 +4036,12 @@ export function App() {
             lessonsForDate={lessonsForDate}
             makeupTasks={makeupTasks}
             materials={resourceMaterials}
-            records={selectedRecords}
+            records={records}
             saveStates={saveStates}
             selectedDate={selectedDate}
             selectedLesson={selectedLesson}
             selectedLessonId={selectedLessonId}
-            students={selectedStudents}
+            students={students}
             homeworks={homeworks}
             clipboardCount={lessonClipboard ? 1 : 0}
             undoCount={lessonUndoStack.length}
@@ -7048,7 +7048,10 @@ function LessonJournalDetail({
   const failedJobCount = lessonNotificationJobs.filter((job) => job.status === "failed").length;
   const todayTwoPmIso = new Date(`${today}T14:00:00+09:00`).toISOString();
   const canScheduleTodayTwoPm = lesson.date < today && Boolean(onScheduleLessonNotificationsAt);
-  const checkoutMissingStudents = students.filter((student) => {
+  const lessonStudents = (lesson.studentIds ?? [])
+    .map((studentId) => students.find((student) => student.studentId === studentId))
+    .filter((student) => student && (student.status ?? "active") === "active");
+  const checkoutMissingStudents = lessonStudents.filter((student) => {
     const record = findLessonStudentRecord(records, lesson, student);
     return hasMissingCheckOut(record);
   });
@@ -7181,7 +7184,7 @@ function LessonJournalDetail({
         <button className="iconButton" onClick={onBack} type="button">‹</button>
         <div>
           <button className="linkTitleButton" onClick={onOpenExamPrep} type="button">{lesson.className}</button>
-          <p className="muted">{lesson.date} · {lesson.startTime}-{lesson.endTime} · {students.length}명</p>
+          <p className="muted">{lesson.date} · {lesson.startTime}-{lesson.endTime} · {lessonStudents.length}명</p>
         </div>
         <span className="shortcutHint">{lesson.lessonTopic || "수업일지"}</span>
         <button className="softButton" onClick={() => onEditLesson(lesson)} type="button">수업 수정</button>
@@ -7286,7 +7289,7 @@ function LessonJournalDetail({
               <span>학부모</span>
               <span>학생</span>
             </div>
-            {students.map((student) => {
+            {lessonStudents.map((student) => {
               const record = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
               const parentJob = getStudentReservationStatus(student, "parent");
               const studentJob = getStudentReservationStatus(student, "student");
@@ -7316,7 +7319,7 @@ function LessonJournalDetail({
             <span>학부모 알림톡</span>
             <span>학생 알림톡</span>
           </div>
-          {students.map((student) => {
+          {lessonStudents.map((student) => {
             const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
             const record = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
             const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
@@ -8476,8 +8479,8 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
   const activeTemplate = templates.find((template) => template.classTemplateId === classTemplateId) ?? fallbackTemplate;
   const [name, setName] = useState(initialLesson?.className ?? activeTemplate.name);
   const [date, setDate] = useState(initialLesson?.date ?? today);
-  const [startTime, setStartTime] = useState(initialLesson?.startTime ?? activeTemplate.startTime);
-  const [endTime, setEndTime] = useState(initialLesson?.endTime ?? activeTemplate.endTime);
+  const [startTime, setStartTime] = useState(normalizeTimeInput(initialLesson?.startTime) || activeTemplate.startTime);
+  const [endTime, setEndTime] = useState(normalizeTimeInput(initialLesson?.endTime) || activeTemplate.endTime);
   const [color, setColor] = useState(initialLesson?.color ?? activeTemplate.color);
   const [studentIds, setStudentIds] = useState(initialLesson?.studentIds ?? students.map((student) => student.studentId));
   const [studentSearch, setStudentSearch] = useState("");
