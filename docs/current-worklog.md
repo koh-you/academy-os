@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-26 P0. 시험분석 AI 결과 프론트 표시 보정
+
+- 상태: 완료
+- 사용자 제보: 상계고1 공통수학1 2026 1학기 중간고사 PDF 업로드와 AI 산출물 생성은 확인되지만, 프론트 화면에서 AI 결과가 JSON 코드블록/깨진 원문처럼 보여 검토하기 어렵다.
+- 확인 결과: 운영 `app_state.examAnalyses`에는 PDF 업로드, Storage 경로, 텍스트 추출 약 25,004자, AI 분석 완료 상태와 산출물 초안이 저장되어 있었다. 다만 `aiOverview`에 AI JSON 코드블록 전체가 들어가고, `rawExamText` 앞부분에 이전 업로드 실패 로그(`Bucket not found`, `Invalid key`)가 누적되어 있었다. 학교/학년/과목/시험명 메타데이터도 비어 있었다.
+- 이번 작업 결과: AI 응답이 JSON 코드블록으로 들어와도 `aiOverview`, `unitDistribution`, `killerProblems`, `mistakePatterns`, 학생/학부모/블로그/인스타 초안 필드로 자동 분해해 화면에 표시한다. 기존 저장 데이터도 화면에서 읽을 때 자동 보정된다.
+- 추가 보강: PDF 업로드 실패 메시지는 더 이상 `rawExamText`에 누적하지 않고 상태 메시지로만 표시한다. 성공 업로드 시 기존 실패 로그 블록은 제거하고, 파일명에서 학교/학년/과목/시험명을 가능한 범위에서 추론해 빈 기본정보를 채운다.
+- SQL 주의: app_state 표시/정규화 로직 변경이며 스키마 변경 없음.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 190개 통과, `npm run build` 통과.
+
 ### 2026-06-26 P0. 시험분석 PDF 업로드 Bucket not found 보정
 
 - 상태: 완료

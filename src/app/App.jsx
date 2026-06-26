@@ -963,6 +963,93 @@ function createDefaultExamAnalysis(examPrepRow = {}) {
   };
 }
 
+const examAnalysisFieldKeys = [
+  "aiOverview",
+  "unitDistribution",
+  "killerProblems",
+  "mistakePatterns",
+  "studentAnalysisDraft",
+  "parentNoticeDraft",
+  "blogDraft",
+  "instagramDraft"
+];
+
+function parseStructuredAnalysisText(text) {
+  const trimmed = String(text ?? "").trim();
+  if (!trimmed) return null;
+  const candidates = [
+    trimmed,
+    trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i)?.[1]?.trim(),
+    trimmed.slice(trimmed.indexOf("{"), trimmed.lastIndexOf("}") + 1)
+  ].filter(Boolean);
+
+  for (const candidate of candidates) {
+    try {
+      const parsed = JSON.parse(candidate);
+      if (parsed && typeof parsed === "object" && examAnalysisFieldKeys.some((key) => parsed[key])) return parsed;
+    } catch {
+      // Try the next candidate.
+    }
+  }
+  return null;
+}
+
+function normalizeExamAnalysisAiFields(fields = {}) {
+  const next = { ...fields };
+  for (const key of examAnalysisFieldKeys) {
+    const parsed = parseStructuredAnalysisText(next[key]);
+    if (!parsed) continue;
+    for (const fieldKey of examAnalysisFieldKeys) {
+      if (parsed[fieldKey]) next[fieldKey] = String(parsed[fieldKey]).trim();
+    }
+  }
+  return next;
+}
+
+function removeFailedAttachmentBlocks(text) {
+  return String(text ?? "")
+    .split(/\n{2,}/)
+    .filter((block) => !block.trim().startsWith("[첨부 실패]"))
+    .join("\n\n")
+    .trim();
+}
+
+function inferExamAnalysisMetadataFromFileName(fileName = "") {
+  const baseName = String(fileName).replace(/\.[^.]+$/, "");
+  const bracketSchool = baseName.match(/\[([^\]]+)\]/)?.[1]?.trim() ?? "";
+  const schoolMatch = bracketSchool || baseName.match(/([가-힣A-Za-z0-9]+고)/)?.[1] || "";
+  const gradeMatch = baseName.match(/고\s*([123])/);
+  const subjectMatch = baseName.match(/(공통수학\s*[12]|수학\s*[ⅠⅡI1-2]|미적분|확률과\s*통계|확통|기하)/);
+  const termMatch = baseName.match(/(20\d{2})\s*[-년 ]\s*([12])\s*[-학기 ]\s*([12])?\s*(중간|기말)/);
+  const examName = termMatch
+    ? `${termMatch[1]} ${termMatch[2]}학기 ${termMatch[4]}고사`
+    : baseName.includes("중간")
+      ? "중간고사"
+      : baseName.includes("기말")
+        ? "기말고사"
+        : "";
+
+  return {
+    schoolName: schoolMatch,
+    grade: gradeMatch ? `고${gradeMatch[1]}` : "",
+    subject: subjectMatch ? subjectMatch[1].replace(/\s+/g, "") : "",
+    examName
+  };
+}
+
+function normalizeExamAnalysisForDisplay(analysis = {}) {
+  const firstSourceFile = Array.isArray(analysis.sourceFiles) ? analysis.sourceFiles[0] : null;
+  const inferredMetadata = inferExamAnalysisMetadataFromFileName(firstSourceFile?.fileName || analysis.sourceFileUrl || "");
+  return normalizeExamAnalysisAiFields({
+    ...analysis,
+    schoolName: analysis.schoolName || inferredMetadata.schoolName,
+    grade: analysis.grade || inferredMetadata.grade,
+    subject: analysis.subject || inferredMetadata.subject,
+    examName: analysis.examName || inferredMetadata.examName,
+    rawExamText: removeFailedAttachmentBlocks(analysis.rawExamText)
+  });
+}
+
 function safeIdPart(value = "") {
   return String(value)
     .trim()
@@ -4525,7 +4612,7 @@ export function App() {
           item.examAnalysisId === analysis.examAnalysisId
             ? {
                 ...item,
-                ...result.result.fields,
+                ...normalizeExamAnalysisAiFields(result.result.fields),
                 aiProvider: result.result.provider,
                 aiModel: result.result.model,
                 aiStatus: "완료",
@@ -9955,7 +10042,8 @@ function ExamAnalysisCenter({
   const [selectedAnalysisId, setSelectedAnalysisId] = useState(analyses[0]?.examAnalysisId ?? "");
   const [isListCollapsed, setIsListCollapsed] = useState(false);
   const sourceFileInputRef = useRef(null);
-  const selectedAnalysis = analyses.find((item) => item.examAnalysisId === selectedAnalysisId) ?? analyses[0];
+  const rawSelectedAnalysis = analyses.find((item) => item.examAnalysisId === selectedAnalysisId) ?? analyses[0];
+  const selectedAnalysis = rawSelectedAnalysis ? normalizeExamAnalysisForDisplay(rawSelectedAnalysis) : null;
   const linkedExamPrepRow = selectedAnalysis
     ? examPrepRows.find((row) => row.examPrepId === selectedAnalysis.examPrepId)
     : null;
@@ -9996,9 +10084,16 @@ function ExamAnalysisCenter({
     try {
       const uploadedFile = await uploadExamAnalysisSourceFile(file, selectedAnalysis);
       const openUrl = getExamAnalysisSourceOpenUrl(uploadedFile);
+      const cleanRawExamText = removeFailedAttachmentBlocks(selectedAnalysis.rawExamText);
+      const inferredMetadata = inferExamAnalysisMetadataFromFileName(uploadedFile.fileName);
       const extractionNote = uploadedFile.extractedText
         ? `[PDF 텍스트 추출] ${uploadedFile.fileName}\n${uploadedFile.extractedText}`
         : `[PDF 텍스트 추출 없음] ${uploadedFile.fileName}\n스캔 이미지형 PDF일 수 있습니다. OCR 텍스트를 아래에 직접 붙여 넣어 주세요.`;
+      Object.entries(inferredMetadata).forEach(([field, value]) => {
+        if (value && !String(selectedAnalysis[field] ?? "").trim()) {
+          onUpdateAnalysis(selectedAnalysis.examAnalysisId, field, value);
+        }
+      });
       onUpdateAnalysis(selectedAnalysis.examAnalysisId, "sourceFiles", [
         uploadedFile,
         ...(Array.isArray(selectedAnalysis.sourceFiles) ? selectedAnalysis.sourceFiles : [])
@@ -10007,7 +10102,7 @@ function ExamAnalysisCenter({
       onUpdateAnalysis(
         selectedAnalysis.examAnalysisId,
         "rawExamText",
-        [selectedAnalysis.rawExamText, extractionNote].filter(Boolean).join("\n\n")
+        [cleanRawExamText, extractionNote].filter(Boolean).join("\n\n")
       );
       onUpdateAnalysis(
         selectedAnalysis.examAnalysisId,
@@ -10015,12 +10110,6 @@ function ExamAnalysisCenter({
         uploadedFile.extractedText ? "업로드 완료 · PDF 텍스트 추출 완료" : "업로드 완료 · 자동 추출 텍스트 없음"
       );
     } catch (error) {
-      const fallbackNote = `[첨부 실패] ${file.name} (${Math.round(file.size / 1024)}KB)\n${error.message}`;
-      onUpdateAnalysis(
-        selectedAnalysis.examAnalysisId,
-        "rawExamText",
-        [selectedAnalysis.rawExamText, fallbackNote].filter(Boolean).join("\n\n")
-      );
       onUpdateAnalysis(selectedAnalysis.examAnalysisId, "sourceUploadStatus", `업로드 실패 · ${error.message}`);
     }
   }
