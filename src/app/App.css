@@ -2672,6 +2672,55 @@ button {
   max-width: 230px;
 }
 
+.analysisStatusBadge {
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 900;
+  padding: 8px 12px;
+}
+
+.analysisStatusBadge.done {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.analysisStatusBadge.running {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.analysisStatusBadge.failed {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.analysisStatusBadge.ready,
+.analysisStatusBadge.idle {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.analysisStatusStrip {
+  align-items: center;
+  background: #f8fbff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 12px 14px;
+}
+
+.analysisStatusStrip strong {
+  color: #17213d;
+  font-size: 16px;
+}
+
+.analysisStatusStrip span {
+  color: #64748b;
+  font-weight: 800;
+}
+
 .apiErrorBox {
   background: #fef2f2;
   border: 1px solid #fecaca;
@@ -2924,6 +2973,83 @@ button {
   display: grid;
   gap: 16px;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+}
+
+.analysisReviewSummary {
+  display: grid;
+  gap: 16px;
+}
+
+.analysisSummaryHero {
+  align-items: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.analysisSummaryHero h2 {
+  margin: 8px 0;
+}
+
+.analysisSummaryHero p {
+  color: #475569;
+  font-weight: 800;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.analysisSummaryCards {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.analysisSummaryCard {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  color: #17213d;
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 8px;
+  min-height: 132px;
+  padding: 14px;
+  text-align: left;
+}
+
+.analysisSummaryCard:hover,
+.analysisSummaryCard:focus-visible {
+  border-color: #2563eb;
+  box-shadow: 0 10px 24px rgba(23, 33, 61, 0.08);
+  outline: none;
+}
+
+.analysisSummaryCard strong {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.analysisSummaryCard span {
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.analysisDetailActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.analysisDetailModal {
+  max-width: 980px;
+  width: min(980px, calc(100vw - 32px));
+}
+
+.analysisDetailModalGrid {
+  display: grid;
+  gap: 16px;
 }
 
 .analysisFieldStack {

@@ -1016,14 +1016,56 @@ function parseStructuredAnalysisText(text) {
   return null;
 }
 
+function parseLooseStructuredAnalysisText(text) {
+  const source = String(text ?? "");
+  if (!source.includes('"')) return null;
+  const result = {};
+  for (const key of examAnalysisFieldKeys) {
+    const pattern = new RegExp(`"${key}"\\s*:\\s*"([\\s\\S]*?)(?:"\\s*,\\s*"${examAnalysisFieldKeys.join('"|"')}"\\s*:|"\\s*\\})`, "m");
+    const match = source.match(pattern);
+    if (!match?.[1]) continue;
+    const rawValue = match[1]
+      .replaceAll('\\"', '"')
+      .replaceAll("\\n", "\n")
+      .replaceAll("\\t", "\t")
+      .trim();
+    if (rawValue) result[key] = rawValue;
+  }
+  return Object.keys(result).length ? result : null;
+}
+
+function cleanAnalysisFieldText(key, value) {
+  let text = String(value ?? "").trim();
+  const extracted = parseLooseStructuredAnalysisText(text);
+  if (extracted?.[key]) text = extracted[key];
+  const nextFieldPattern = new RegExp(`",?\\s*"(${examAnalysisFieldKeys.filter((fieldKey) => fieldKey !== key).join("|")})"\\s*:`, "m");
+  text = text.split(nextFieldPattern)[0] ?? text;
+  return text
+    .replace(/^```(?:json)?/i, "")
+    .replace(/```$/i, "")
+    .replace(/^[{,\s"]+/, "")
+    .replace(/[}",\s]+$/, "")
+    .trim();
+}
+
 function normalizeExamAnalysisAiFields(fields = {}) {
   const next = { ...fields };
+  const combinedText = examAnalysisFieldKeys.map((key) => next[key]).filter(Boolean).join("\n\n");
+  const combinedParsed = parseStructuredAnalysisText(combinedText) ?? parseLooseStructuredAnalysisText(combinedText);
+  if (combinedParsed) {
+    for (const fieldKey of examAnalysisFieldKeys) {
+      if (combinedParsed[fieldKey]) next[fieldKey] = String(combinedParsed[fieldKey]).trim();
+    }
+  }
   for (const key of examAnalysisFieldKeys) {
-    const parsed = parseStructuredAnalysisText(next[key]);
+    const parsed = parseStructuredAnalysisText(next[key]) ?? parseLooseStructuredAnalysisText(next[key]);
     if (!parsed) continue;
     for (const fieldKey of examAnalysisFieldKeys) {
       if (parsed[fieldKey]) next[fieldKey] = String(parsed[fieldKey]).trim();
     }
+  }
+  for (const key of examAnalysisFieldKeys) {
+    next[key] = cleanAnalysisFieldText(key, next[key]);
   }
   return next;
 }
@@ -1071,6 +1113,48 @@ function normalizeExamAnalysisForDisplay(analysis = {}) {
     rawExamText: removeFailedAttachmentBlocks(analysis.rawExamText)
   });
 }
+
+function getExamAnalysisStatusMeta(analysis = {}) {
+  const status = analysis.aiStatus || "대기";
+  if (status === "완료") {
+    return { label: "분석 완료", tone: "done", detail: analysis.aiLastRunAt ? `최근 실행 ${analysis.aiLastRunAt}` : "AI 구조화 결과가 있습니다." };
+  }
+  if (status === "분석 중") {
+    return { label: "분석 중", tone: "running", detail: "AI가 시험지를 분석하고 있습니다." };
+  }
+  if (status === "실패") {
+    return { label: "분석 실패", tone: "failed", detail: analysis.aiError || "오류 내용을 확인해 주세요." };
+  }
+  const hasUpload = Array.isArray(analysis.sourceFiles) && analysis.sourceFiles.length > 0;
+  return { label: hasUpload ? "분석 전" : "원본 대기", tone: hasUpload ? "ready" : "idle", detail: hasUpload ? "PDF 업로드가 완료되었습니다. AI 분석을 시작하세요." : "PDF를 업로드해 주세요." };
+}
+
+function getTextPreview(value = "", fallback = "아직 내용 없음") {
+  const text = String(value ?? "").replace(/\s+/g, " ").trim();
+  if (!text) return fallback;
+  return text.length > 110 ? `${text.slice(0, 110)}...` : text;
+}
+
+const examAnalysisDetailSections = [
+  { id: "ai", title: "AI 구조화 필드", description: "시험 원문에서 뽑은 1차 분석입니다.", fields: [
+    ["aiOverview", "시험 개요", 5],
+    ["unitDistribution", "단원별 출제 분포", 6],
+    ["killerProblems", "킬러/준킬러 문항", 6],
+    ["mistakePatterns", "학생 실수 패턴", 6]
+  ] },
+  { id: "insight", title: "강사 검토", description: "강사 인사이트를 추가해 분석지를 확정합니다.", fields: [
+    ["insightSummary", "A. 총평", 7],
+    ["insightUnits", "B. 단원별 인사이트", 7],
+    ["insightKiller", "C. 킬러문항 분석", 7],
+    ["insightDirection", "D. 학습 방향", 7]
+  ] },
+  { id: "output", title: "산출물 초안", description: "학생/학부모/홍보용 산출물을 수정합니다.", fields: [
+    ["studentAnalysisDraft", "학생 분석지", 8],
+    ["parentNoticeDraft", "학부모 안내문", 8],
+    ["blogDraft", "블로그 초안", 8],
+    ["instagramDraft", "인스타 카드뉴스", 8]
+  ] }
+];
 
 function safeIdPart(value = "") {
   return String(value)
@@ -10163,6 +10247,7 @@ function ExamAnalysisCenter({
 }) {
   const [selectedAnalysisId, setSelectedAnalysisId] = useState(analyses[0]?.examAnalysisId ?? "");
   const [isListCollapsed, setIsListCollapsed] = useState(false);
+  const [detailSectionId, setDetailSectionId] = useState("");
   const sourceFileInputRef = useRef(null);
   const rawSelectedAnalysis = analyses.find((item) => item.examAnalysisId === selectedAnalysisId) ?? analyses[0];
   const selectedAnalysis = rawSelectedAnalysis ? normalizeExamAnalysisForDisplay(rawSelectedAnalysis) : null;
@@ -10178,6 +10263,8 @@ function ExamAnalysisCenter({
   };
   const currentStage = stageAlias[selectedAnalysis?.pipelineStage] ??
     (pipelineStages.includes(selectedAnalysis?.pipelineStage) ? selectedAnalysis.pipelineStage : pipelineStages[0]);
+  const statusMeta = selectedAnalysis ? getExamAnalysisStatusMeta(selectedAnalysis) : getExamAnalysisStatusMeta();
+  const detailSection = examAnalysisDetailSections.find((section) => section.id === detailSectionId);
   useEffect(() => {
     if (!selectedAnalysisId && analyses[0]?.examAnalysisId) {
       setSelectedAnalysisId(analyses[0].examAnalysisId);
@@ -10287,7 +10374,7 @@ function ExamAnalysisCenter({
                   >
                     <strong>{[analysis.schoolName, analysis.grade].filter(Boolean).join(" ") || "새 분석"}</strong>
                     <span>{[analysis.examName, analysis.subject].filter(Boolean).join(" · ") || "기본정보 미입력"}</span>
-                    <small>{stageAlias[analysis.pipelineStage] ?? analysis.pipelineStage}</small>
+                    <small>{getExamAnalysisStatusMeta(normalizeExamAnalysisForDisplay(analysis)).label} · {stageAlias[analysis.pipelineStage] ?? analysis.pipelineStage}</small>
                   </button>
                   <button
                     className="analysisDeleteButton"
@@ -10310,6 +10397,11 @@ function ExamAnalysisCenter({
                   <h2>시험 기본정보</h2>
                   <p className="muted">시험관리 DB와 이어지는 고사 단위 메타데이터입니다.</p>
                 </div>
+                <span className={`analysisStatusBadge ${statusMeta.tone}`}>{statusMeta.label}</span>
+              </div>
+              <div className="analysisStatusStrip">
+                <strong>{statusMeta.label}</strong>
+                <span>{statusMeta.detail}</span>
               </div>
               <div className="fieldGrid">
                 <div className="linkedExamInfoBox">
@@ -10463,59 +10555,33 @@ function ExamAnalysisCenter({
             ) : null}
 
             {currentStage === "분석 검토" ? (
-            <section className="analysisReviewGrid">
-              <div className="panel analysisAiPanel">
-                <div className="sectionHeader slim">
-                  <div>
-                    <h2>AI 구조화 필드</h2>
-                    <p className="muted">시험 원본에서 뽑은 1차 분석입니다. 틀린 추론은 바로 수정합니다.</p>
-                  </div>
+            <section className="analysisReviewSummary">
+              <article className="panel analysisSummaryHero">
+                <div>
+                  <span className={`analysisStatusBadge ${statusMeta.tone}`}>{statusMeta.label}</span>
+                  <h2>{[selectedAnalysis.schoolName, selectedAnalysis.grade, selectedAnalysis.subject].filter(Boolean).join(" ") || "시험분석 개요"}</h2>
+                  <p>{getTextPreview(selectedAnalysis.aiOverview, "AI 분석을 시작하면 시험 개요가 표시됩니다.")}</p>
                 </div>
-                <div className="analysisFieldStack">
-                  <label>
-                    시험 개요
-                    <textarea value={selectedAnalysis.aiOverview} onChange={(event) => update("aiOverview", event.target.value)} rows="4" />
-                  </label>
-                  <label>
-                    단원별 출제 분포
-                    <textarea value={selectedAnalysis.unitDistribution} onChange={(event) => update("unitDistribution", event.target.value)} rows="5" />
-                  </label>
-                  <label>
-                    킬러/준킬러 문항
-                    <textarea value={selectedAnalysis.killerProblems} onChange={(event) => update("killerProblems", event.target.value)} rows="5" />
-                  </label>
-                  <label>
-                    학생 실수 패턴
-                    <textarea value={selectedAnalysis.mistakePatterns} onChange={(event) => update("mistakePatterns", event.target.value)} rows="5" />
-                  </label>
-                </div>
+                <button className="softButton" onClick={() => setDetailSectionId("ai")} type="button">AI 필드 수정</button>
+              </article>
+              <div className="analysisSummaryCards">
+                {[
+                  ["unitDistribution", "단원별 분포", "ai"],
+                  ["killerProblems", "킬러/준킬러", "ai"],
+                  ["mistakePatterns", "실수 패턴", "ai"],
+                  ["insightSummary", "강사 총평", "insight"],
+                  ["insightUnits", "단원 인사이트", "insight"],
+                  ["insightDirection", "학습 방향", "insight"]
+                ].map(([field, title, sectionId]) => (
+                  <button className="analysisSummaryCard" key={field} onClick={() => setDetailSectionId(sectionId)} type="button">
+                    <strong>{title}</strong>
+                    <span>{getTextPreview(selectedAnalysis[field])}</span>
+                  </button>
+                ))}
               </div>
-
-              <div className="panel teacherInsightPanel">
-                <div className="sectionHeader slim">
-                  <div>
-                    <h2>강사 검토</h2>
-                    <p className="muted">강사 인사이트 없는 분석지는 확정하지 않습니다.</p>
-                  </div>
-                </div>
-                <div className="insightGrid">
-                  <label>
-                    A. 총평
-                    <textarea value={selectedAnalysis.insightSummary} onChange={(event) => update("insightSummary", event.target.value)} rows="7" />
-                  </label>
-                  <label>
-                    B. 단원별 인사이트
-                    <textarea value={selectedAnalysis.insightUnits} onChange={(event) => update("insightUnits", event.target.value)} rows="7" />
-                  </label>
-                  <label>
-                    C. 킬러문항 분석
-                    <textarea value={selectedAnalysis.insightKiller} onChange={(event) => update("insightKiller", event.target.value)} rows="7" />
-                  </label>
-                  <label>
-                    D. 학습 방향
-                    <textarea value={selectedAnalysis.insightDirection} onChange={(event) => update("insightDirection", event.target.value)} rows="7" />
-                  </label>
-                </div>
+              <div className="analysisDetailActions">
+                <button className="primaryButton" onClick={() => setDetailSectionId("insight")} type="button">강사 검토 수정</button>
+                <button className="softButton" onClick={() => setDetailSectionId("output")} type="button">산출물 초안 수정</button>
               </div>
             </section>
             ) : null}
@@ -10560,6 +10626,27 @@ function ExamAnalysisCenter({
           </section>
         )}
       </div>
+      {selectedAnalysis && detailSection ? (
+        <Modal
+          className="analysisDetailModal"
+          title={detailSection.title}
+          subtitle={detailSection.description}
+          onClose={() => setDetailSectionId("")}
+        >
+          <div className="analysisDetailModalGrid">
+            {detailSection.fields.map(([field, label, rows]) => (
+              <label className="wideLabel" key={field}>
+                {label}
+                <textarea
+                  value={selectedAnalysis[field] ?? ""}
+                  onChange={(event) => update(field, event.target.value)}
+                  rows={rows}
+                />
+              </label>
+            ))}
+          </div>
+        </Modal>
+      ) : null}
     </section>
   );
 }
