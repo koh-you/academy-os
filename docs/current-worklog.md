@@ -16,6 +16,7 @@
 - 사용자 제보: 시험분석 `원본 입력` 단계에서 PDF 업로드 시 `업로드 실패 · Bucket not found`가 표시된다.
 - 원인: 시험분석 PDF 업로드는 Supabase Storage `exam-analysis-sources` 버킷을 사용한다. 서버에 버킷 자동 생성 코드가 있었지만, Supabase Storage가 버킷 없음 오류를 404가 아니라 `Bucket not found` 메시지로 반환하는 경우를 자동 생성 대상으로 보지 못해 업로드가 실패할 수 있었다.
 - 이번 작업 결과: Storage 버킷 없음 판정을 `404`뿐 아니라 `Bucket not found`/유사 메시지까지 포함하도록 보강했다. 업로드 직전에도 같은 오류가 나오면 버킷 생성 후 한 번 재시도한다. 시험분석 버킷은 PDF 전용 `exam-analysis-sources`로 자동 생성된다.
+- 추가 보강: 버킷 생성 후 한글 파일명이 포함된 PDF에서 `Invalid key`가 발생했다. Supabase Storage object key에는 ASCII 안전 파일명을 사용하고, 화면 표시/분석 기록용 `fileName`은 원본 한글 파일명을 그대로 보존하도록 경로 생성 로직을 분리했다.
 - SQL 주의: 서버가 service role로 Storage 버킷을 자동 생성하도록 보강했으므로 Supabase SQL edit은 필요 없다. 만약 운영 Supabase 권한/정책상 자동 생성이 막히면 Supabase Dashboard Storage에서 `exam-analysis-sources` 비공개 버킷을 수동 생성하면 된다.
 - 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 189개 통과, `npm run build` 통과.
 

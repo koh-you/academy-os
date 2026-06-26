@@ -734,11 +734,27 @@ async function uploadStorageObjectWithBucketRetry(bucketId, storagePath, { conte
 function sanitizeStorageSegment(value, fallback = "unknown") {
   const sanitized = String(value ?? "")
     .trim()
-    .replace(/[\\/:*?"<>|#%{}^~[\]`]/g, "-")
-    .replace(/\s+/g, "-")
+    .replace(/[^A-Za-z0-9._-]+/g, "-")
+    .replace(/\.\.+/g, ".")
     .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
+    .replace(/^[.-]+|[.-]+$/g, "");
   return sanitized || fallback;
+}
+
+function getStorageFileExtension(fileName, mimeType) {
+  const extensionMatch = String(fileName ?? "").match(/\.([A-Za-z0-9]{1,12})$/);
+  if (extensionMatch) return `.${extensionMatch[1].toLowerCase()}`;
+  const subtype = String(mimeType ?? "").split("/")[1] ?? "";
+  return subtype ? `.${sanitizeStorageSegment(subtype, "bin")}` : "";
+}
+
+function getStorageSafeFileName(fileName, mimeType, fallbackBase = "file") {
+  const rawFileName = String(fileName ?? "").trim();
+  const extension = getStorageFileExtension(rawFileName, mimeType);
+  const baseName = extension && rawFileName.toLowerCase().endsWith(extension)
+    ? rawFileName.slice(0, -extension.length)
+    : rawFileName.replace(/\.[^.]+$/, "");
+  return `${sanitizeStorageSegment(baseName, fallbackBase)}${extension}`;
 }
 
 function parseDataUrl(dataUrl) {
@@ -769,8 +785,8 @@ async function uploadExamPostFile(payload) {
   await ensureStorageBucket(bucketId);
   const { mimeType, buffer } = parseDataUrl(payload.dataUrl);
   if (buffer.length > 20 * 1024 * 1024) throw new Error("파일은 20MB 이하만 업로드할 수 있습니다.");
-  const fileName = sanitizeStorageSegment(payload.fileName || `submission-${Date.now()}`);
-  const extension = fileName.includes(".") ? "" : (mimeType.split("/")[1] ? `.${mimeType.split("/")[1]}` : "");
+  const fileName = String(payload.fileName || `submission-${Date.now()}`).trim();
+  const storageFileName = getStorageSafeFileName(fileName, mimeType, "submission");
   const storagePath = [
     "exam-post",
     sanitizeStorageSegment(payload.examCycle, "cycle"),
@@ -778,7 +794,7 @@ async function uploadExamPostFile(payload) {
     sanitizeStorageSegment(payload.grade, "grade"),
     sanitizeStorageSegment(payload.studentName, payload.studentId || "student"),
     sanitizeStorageSegment(payload.targetId, "target"),
-    `${Date.now()}-${fileName}${extension}`
+    `${Date.now()}-${storageFileName}`
   ].join("/");
 
   await uploadStorageObjectWithBucketRetry(bucketId, storagePath, { contentType: mimeType, body: buffer });
@@ -812,15 +828,15 @@ async function uploadExamAnalysisSourceFile(payload) {
   await ensureStorageBucket(bucketId, { allowedMimeTypes: ["application/pdf"] });
   const { mimeType, buffer } = parseDataUrl(payload.dataUrl);
   if (buffer.length > 20 * 1024 * 1024) throw new Error("파일은 20MB 이하만 업로드할 수 있습니다.");
-  const fileName = sanitizeStorageSegment(payload.fileName || `exam-source-${Date.now()}`);
-  const extension = fileName.includes(".") ? "" : (mimeType === "application/pdf" ? ".pdf" : "");
+  const fileName = String(payload.fileName || `exam-source-${Date.now()}`).trim();
+  const storageFileName = getStorageSafeFileName(fileName, mimeType, "exam-source");
   const storagePath = [
     "exam-analysis",
     sanitizeStorageSegment(payload.schoolName, "school"),
     sanitizeStorageSegment(payload.grade, "grade"),
     sanitizeStorageSegment(payload.examName, "exam"),
     sanitizeStorageSegment(payload.analysisId, "analysis"),
-    `${Date.now()}-${fileName}${extension}`
+    `${Date.now()}-${storageFileName}`
   ].join("/");
 
   await uploadStorageObjectWithBucketRetry(bucketId, storagePath, { contentType: mimeType, body: buffer });
