@@ -6229,11 +6229,7 @@ function TeacherLessonHubV2({
   const selectedSourceLesson = selectedLesson?.sourceLessonId
     ? lessons.find((lesson) => lesson.lessonId === selectedLesson.sourceLessonId) ?? selectedLesson
     : selectedLesson;
-  const isHomeworkMakeupLesson =
-    selectedLesson?.lessonType === "makeup" &&
-    (selectedMakeupTask?.taskType === "homework_makeup" ||
-      selectedLesson.lessonTopic?.includes("숙제보충") ||
-      selectedLesson.className?.includes("숙제보충"));
+  const isHomeworkMakeupLesson = isHomeworkMakeupTaskLesson(selectedLesson, selectedMakeupTask);
   const isExamSundayMakeupLesson = selectedLesson?.lessonType === "examSundayMakeup";
   const lessonJournalDialog = isLessonJournalOpen && selectedLesson ? (
     isHomeworkMakeupLesson ? (
@@ -7056,11 +7052,7 @@ function LessonJournalDetail({
     const record = findLessonStudentRecord(records, lesson, student);
     return hasMissingCheckOut(record);
   });
-  const isHomeworkMakeupLesson =
-    lesson.lessonType === "makeup" &&
-    (linkedMakeupTask?.taskType === "homework_makeup" ||
-      lesson.lessonTopic?.includes("숙제보충") ||
-      lesson.className?.includes("숙제보충"));
+  const isHomeworkMakeupLesson = isHomeworkMakeupTaskLesson(lesson, linkedMakeupTask);
   const isExamSundayMakeupLesson = lesson.lessonType === "examSundayMakeup";
 
   if (isHomeworkMakeupLesson) {
@@ -16208,6 +16200,10 @@ function getSupplementLessonColor(taskType) {
   if (taskType === "homework_makeup") return "#172554";
   if (taskType === "retest") return "#ef4444";
   return "#7c3aed";
+}
+
+function isHomeworkMakeupTaskLesson(lesson, task) {
+  return lesson?.lessonType === "makeup" && task?.taskType === "homework_makeup";
 }
 
 function normalizeHomeworkMakeupLessonColors(lessons = [], makeupTasks = []) {
