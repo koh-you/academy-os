@@ -10,6 +10,14 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-26 P1. 수업 등록 학생 그룹 전체 해제 버튼 추가
+
+- 상태: 완료
+- 사용자 요청: 수업 등록/수정 모달에서 학년별 `전체 선택`은 있으나 잘못 선택했을 때 한 번에 해제하는 버튼도 필요하다.
+- 이번 작업 결과: 학년별 학생 그룹 헤더에 `전체 해제` 버튼을 추가했다. 클릭 시 해당 학년/그룹 학생만 현재 선택 목록에서 제거한다.
+- SQL 주의: 프론트 선택 UI만 변경하므로 Supabase SQL edit 필요 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과. `npm run test:production` 통과(total 194, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
+
 ### 2026-06-26 P0. 수동 출결 저장 후 화면 표시 미갱신 보정
 
 - 상태: 완료

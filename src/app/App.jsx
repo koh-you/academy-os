@@ -8634,6 +8634,16 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
                 >
                   전체 선택
                 </button>
+                <button
+                  className="softButton mini"
+                  onClick={() => {
+                    const groupIds = new Set(group.students.map((student) => student.studentId));
+                    setStudentIds((current) => current.filter((studentId) => !groupIds.has(studentId)));
+                  }}
+                  type="button"
+                >
+                  전체 해제
+                </button>
               </div>
               <div className="studentChips">
                 {group.students.map((student) => {
