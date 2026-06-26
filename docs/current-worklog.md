@@ -19,6 +19,7 @@
 - 이번 작업 결과: 숙제보충 전용 상세 화면은 실제 `homework_makeup` task에 연결된 보강 수업일 때만 열리게 했다. 수동 생성 보강/결석보강/재시험 보강 등은 일반 수업일지 화면으로 열린다. 수업일지 상세는 전체 학생/기록을 받은 뒤 내부에서 `lesson.studentIds` 기준으로 현재 수업 학생만 필터링한다.
 - 추가 보강: 기존 DB의 `16:00:00` 같은 time 값을 수업 수정 모달에서는 `HH:mm`으로 정규화해 입력 필드가 깨지지 않게 했다.
 - 후속 보강: 수업일지 상세 렌더 중 예외가 나도 빈 모달로 끝나지 않게 오류 경계를 추가했다. 오류가 발생해도 수업명, 시간, 학생 목록, 수업 수정 버튼과 오류 메시지가 표시된다.
+- 추가 제보: fallback 화면에 `Cannot read properties of null (reading 'attendanceStatus')`가 표시됐다. `hasMissingCheckOut`와 출결 표시 함수가 null record도 안전하게 처리하도록 보정하고, fallback 화면에도 `수업 취소 처리` 버튼을 추가했다.
 - SQL 주의: 프론트 상세 화면 분기 보정만 있으므로 Supabase SQL edit 필요 없음.
 - 검증: `node --check scripts/scenario-tests-production.cjs` 통과. `npm run test:production` 통과(total 198, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
 

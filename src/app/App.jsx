@@ -6306,6 +6306,7 @@ function TeacherLessonHubV2({
               error={error}
               lesson={selectedLesson}
               onBack={onBackToCalendar}
+              onDeleteLesson={onDeleteLesson}
               onEditLesson={onEditLesson}
               students={students}
             />
@@ -7023,7 +7024,7 @@ function EditableMemoCard({ className = "", editKey, editingKey, onChange, onEdi
   );
 }
 
-function LessonJournalFallback({ error, lesson, onBack, onEditLesson, students = [] }) {
+function LessonJournalFallback({ error, lesson, onBack, onDeleteLesson, onEditLesson, students = [] }) {
   const lessonStudents = (lesson?.studentIds ?? [])
     .map((studentId) => students.find((student) => student.studentId === studentId))
     .filter(Boolean);
@@ -7036,6 +7037,7 @@ function LessonJournalFallback({ error, lesson, onBack, onEditLesson, students =
           <p className="muted">{lesson?.date || "-"} · {lesson?.startTime || ""}-{lesson?.endTime || ""} · {lessonStudents.length}명</p>
         </div>
         <button className="softButton" onClick={() => onEditLesson?.(lesson)} type="button">수업 수정</button>
+        <button className="dangerButton" onClick={() => onDeleteLesson?.(lesson.lessonId)} type="button">수업 취소 처리</button>
       </header>
       <section className="panel lessonJournalFallback">
         <strong>수업일지를 여는 중 오류가 발생했습니다.</strong>
@@ -16826,6 +16828,7 @@ function createKoreaIsoFromDateAndTime(dateValue, timeValue, fallbackIso = new D
 }
 
 function getAttendanceDisplay(record = {}) {
+  record = record ?? {};
   const status = record.attendanceStatus ?? "pending";
   const updatedTime = formatKoreaTimeFromIso(record.updatedAt);
   const isArrivalStatus = ["checkin", "present", "late"].includes(status);
@@ -16845,6 +16848,7 @@ function getAttendanceDisplay(record = {}) {
 }
 
 function hasMissingCheckOut(record = {}) {
+  record = record ?? {};
   const status = record.attendanceStatus ?? "pending";
   const hasCheckIn = Boolean(record.checkInAt || record.checkInTime);
   const hasCheckOut = Boolean(record.checkOutAt || record.checkOutTime);
