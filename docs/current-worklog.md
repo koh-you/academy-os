@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-27 P1. 시험분석 PDF 문항별 렌더링·태그 보강
+
+- 상태: 완료
+- 사용자 요청: PDF를 업로드했을 때 문항별로 잘라서 렌더링할 수 있게 하고, 문항별로 `기본 문항`, `분석 필요`, `디벨럽 가능` 등 태그를 붙일 수 있게 한다.
+- 이번 작업 결과: 브라우저 PDF 렌더링용 `pdfjs-dist@4.10.38`을 추가했다. 문항 검수 화면에서 업로드된 PDF 원본을 선택하고 페이지 번호를 지정하면 해당 페이지가 캔버스로 렌더링되며, 렌더링 화면 위에서 드래그한 영역이 문항별 크롭 좌표로 저장된다.
+- API 보강: 기존 signed URL 리다이렉트와 별도로 `/api/exam-analysis-sources/file` 바이너리 프록시를 추가했다. PDF.js가 CORS 문제 없이 PDF를 가져올 수 있게 Render API가 Storage 파일을 내려준다.
+- 문항 태그: 문항별 `tags` 배열에 `기본 문항`, `분석 필요`, `디벨럽 가능`, `실수 유도`, `변별 문항`, `출처 비교`, `수업 확장` 태그를 저장한다. 문항분석표와 강사용 문항별 코멘트에도 태그가 표시된다.
+- 저장 주의: PDF 페이지, 크롭 좌표, 태그는 기존 `examAnalyses.questionItems` 안에 저장되므로 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs` 통과. `npm run build` 통과(Vite chunk size warning만 있음, PDF.js는 동적 chunk로 분리). `npm run test:production` 통과(total 218, failed 0).
+
 ### 2026-06-27 P1. 시험분석 문항별 검수·크롭·강사 코멘트 워크플로우
 
 - 상태: 완료

@@ -3556,10 +3556,21 @@ button {
   touch-action: none;
 }
 
-.questionCropCanvas img {
+.questionCropSurface {
+  max-width: 100%;
+  position: relative;
+  width: fit-content;
+}
+
+.questionCropSurface img,
+.questionCropSurface canvas {
   display: block;
   max-width: 100%;
   user-select: none;
+}
+
+.questionCropSurface canvas {
+  background: #ffffff;
 }
 
 .questionCropBox {
@@ -3569,6 +3580,30 @@ button {
   box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.28);
   pointer-events: none;
   position: absolute;
+}
+
+.analysisPdfControls {
+  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.analysisPdfControls label {
+  min-width: 116px;
+}
+
+.analysisPdfControls input,
+.analysisPdfControls select {
+  min-height: 42px;
+}
+
+.analysisPdfControls span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.4;
+  padding-bottom: 8px;
 }
 
 .analysisQuestionCropActions {
@@ -3657,6 +3692,42 @@ button {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.analysisQuestionTagGroup {
+  background: #f8fbff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
+.analysisQuestionTagGroup strong {
+  color: #17213d;
+  font-weight: 900;
+}
+
+.analysisQuestionTagGroup div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.analysisQuestionTagGroup button {
+  background: #ffffff;
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  color: #34456b;
+  cursor: pointer;
+  font-weight: 900;
+  padding: 8px 10px;
+}
+
+.analysisQuestionTagGroup button.active {
+  background: #17213d;
+  border-color: #17213d;
+  color: #ffffff;
 }
 
 .analysisQuestionQuickTags button {

@@ -1,6 +1,21 @@
 ﻿import { Component, useEffect, useMemo, useRef, useState } from "react";
 import { sampleData } from "../shared/data/sampleData.js";
 
+let pdfJsLoader = null;
+
+function loadPdfJs() {
+  if (!pdfJsLoader) {
+    pdfJsLoader = Promise.all([
+      import("pdfjs-dist"),
+      import("pdfjs-dist/build/pdf.worker.mjs?url")
+    ]).then(([pdfjsLib, workerModule]) => {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = workerModule.default;
+      return pdfjsLib;
+    });
+  }
+  return pdfJsLoader;
+}
+
 const storageKeys = {
   classTemplates: "academy-os.classTemplates.v1",
   lessons: "academy-os.lessons.v8",
@@ -799,9 +814,16 @@ function getExamPostFileOpenUrl(file) {
 }
 
 function getExamAnalysisSourceOpenUrl(file) {
+  if (file?.storagePath) {
+    return apiUrl(`/api/exam-analysis-sources/open?bucket=${encodeURIComponent(file.bucketId || "exam-analysis-sources")}&path=${encodeURIComponent(file.storagePath)}`);
+  }
   if (file?.signedUrl) return file.signedUrl;
-  if (!file?.storagePath) return "";
-  return apiUrl(`/api/exam-analysis-sources/open?bucket=${encodeURIComponent(file.bucketId || "exam-analysis-sources")}&path=${encodeURIComponent(file.storagePath)}`);
+  return "";
+}
+
+function getExamAnalysisSourceRenderUrl(file) {
+  if (!file?.storagePath) return file?.signedUrl || "";
+  return apiUrl(`/api/exam-analysis-sources/file?bucket=${encodeURIComponent(file.bucketId || "exam-analysis-sources")}&path=${encodeURIComponent(file.storagePath)}`);
 }
 
 function postMakeupTask(makeupTask) {
@@ -1031,6 +1053,15 @@ const examQuestionDifficultyOptions = ["확인 필요", "하", "중하", "중", 
 const examQuestionRoleOptions = ["기본", "실수유도", "앞번호 고난도", "준킬러", "킬러", "서술형 변별", "확인 필요"];
 const examQuestionSourceOptions = ["확인 필요", "교과서", "부교재", "학교 프린트", "모의고사", "수능/평가원", "자체 변형", "기타"];
 const examQuestionTypeOptions = ["객관식", "단답형", "서술형", "논술형", "확인 필요"];
+const examQuestionTagOptions = [
+  "기본 문항",
+  "분석 필요",
+  "디벨럽 가능",
+  "실수 유도",
+  "변별 문항",
+  "출처 비교",
+  "수업 확장"
+];
 
 function createExamQuestionItem(seed = {}, index = 0) {
   const number = seed.number || index + 1;
@@ -1082,6 +1113,12 @@ function isImageExamAnalysisSource(file = {}) {
   return type.startsWith("image/") || /\.(png|jpe?g|webp|gif)$/i.test(name);
 }
 
+function isPdfExamAnalysisSource(file = {}) {
+  const type = String(file.fileType || "").toLowerCase();
+  const name = String(file.fileName || file.storagePath || "").toLowerCase();
+  return type === "application/pdf" || /\.pdf$/i.test(name);
+}
+
 function normalizeCropBox(box = null) {
   if (!box || typeof box !== "object") return null;
   const x = Math.max(0, Math.min(100, Number(box.x) || 0));
@@ -1108,6 +1145,7 @@ function buildQuestionInsightText(questionItems = []) {
       `- ${header}`,
       item.role ? `  역할: ${item.role}` : "",
       item.difficulty ? `  난이도: ${item.difficulty}` : "",
+      item.tags?.length ? `  태그: ${item.tags.join(", ")}` : "",
       item.teacherComment ? `  강사 코멘트: ${item.teacherComment}` : "",
       item.sourceCompareComment ? `  원문항/출처: ${item.sourceCompareComment}` : "",
       item.strategyComment ? `  대비 전략: ${item.strategyComment}` : ""
@@ -1573,21 +1611,26 @@ function ExamQuestionInsightTables({ questionItems = [] }) {
   const hardItems = items.filter((item) =>
     ["중상", "상"].includes(item.difficulty) || ["앞번호 고난도", "준킬러", "킬러", "서술형 변별"].includes(item.role)
   );
+  const basicTaggedItems = items.filter((item) => item.tags?.includes("기본 문항"));
+  const analysisTaggedItems = items.filter((item) => item.tags?.includes("분석 필요"));
+  const developTaggedItems = items.filter((item) => item.tags?.includes("디벨럽 가능"));
   const strategyRows = [
     {
       level: "상위권",
-      focus: "고난도/변별 문항 재풀이",
-      detail: hardItems.length ? `${hardItems.map((item) => `${item.number}번`).join(", ")} 중심` : "킬러 후보 문항 입력 후 자동 정리"
+      focus: developTaggedItems.length ? "디벨럽 가능 문항 확장" : "고난도/변별 문항 재풀이",
+      detail: (developTaggedItems.length ? developTaggedItems : hardItems).length
+        ? `${(developTaggedItems.length ? developTaggedItems : hardItems).map((item) => `${item.number}번`).join(", ")} 중심`
+        : "킬러 후보 문항 입력 후 자동 정리"
     },
     {
       level: "중위권",
-      focus: "실수유도·앞번호 고난도 정리",
-      detail: items.filter((item) => ["실수유도", "앞번호 고난도"].includes(item.role)).map((item) => `${item.number}번`).join(", ") || "문항 역할 입력 필요"
+      focus: analysisTaggedItems.length ? "분석 필요 문항 오답 원인 정리" : "실수유도·앞번호 고난도 정리",
+      detail: (analysisTaggedItems.length ? analysisTaggedItems : items.filter((item) => ["실수유도", "앞번호 고난도"].includes(item.role))).map((item) => `${item.number}번`).join(", ") || "문항 역할 입력 필요"
     },
     {
       level: "하위권",
       focus: "기본 문항과 필수 단원 복습",
-      detail: unitRows.slice(0, 3).map((row) => row.unit).join(", ") || "단원 입력 필요"
+      detail: basicTaggedItems.length ? `${basicTaggedItems.map((item) => `${item.number}번`).join(", ")} 우선` : unitRows.slice(0, 3).map((row) => row.unit).join(", ") || "단원 입력 필요"
     }
   ];
 
@@ -1615,6 +1658,7 @@ function ExamQuestionInsightTables({ questionItems = [] }) {
                 <th>단원</th>
                 <th>난이도</th>
                 <th>역할</th>
+                <th>태그</th>
                 <th>강사 코멘트</th>
               </tr>
             </thead>
@@ -1626,6 +1670,7 @@ function ExamQuestionInsightTables({ questionItems = [] }) {
                   <td>{item.unit || "-"}</td>
                   <td>{item.difficulty || "-"}</td>
                   <td>{item.role || "-"}</td>
+                  <td>{item.tags?.length ? item.tags.join(", ") : "-"}</td>
                   <td>{item.teacherComment || item.strategyComment || "-"}</td>
                 </tr>
               ))}
@@ -11460,9 +11505,14 @@ function ExamAnalysisCenter({
   const [questionCountDraft, setQuestionCountDraft] = useState("22");
   const [cropDragStart, setCropDragStart] = useState(null);
   const [cropDraft, setCropDraft] = useState(null);
+  const [pdfPageCount, setPdfPageCount] = useState(0);
+  const [pdfRenderStatus, setPdfRenderStatus] = useState("");
+  const [pdfScale, setPdfScale] = useState(1.25);
   const sourceFileInputRef = useRef(null);
   const questionSourceInputRef = useRef(null);
-  const cropImageRef = useRef(null);
+  const cropSurfaceRef = useRef(null);
+  const pdfCanvasRef = useRef(null);
+  const pdfRenderTaskRef = useRef(null);
   const normalizedAnalyses = useMemo(
     () => analyses.map((analysis) => {
       const normalized = normalizeExamAnalysisForDisplay(analysis);
@@ -11526,11 +11576,19 @@ function ExamAnalysisCenter({
   const detailSection = examAnalysisDetailSections.find((section) => section.id === detailSectionId);
   const questionItems = normalizeExamQuestionItems(selectedAnalysis?.questionItems);
   const selectedQuestion = questionItems.find((item) => item.questionId === selectedQuestionId) ?? questionItems[0] ?? null;
-  const imageSourceFiles = (selectedAnalysis?.sourceFiles ?? []).filter(isImageExamAnalysisSource);
+  const renderSourceFiles = (selectedAnalysis?.sourceFiles ?? []).filter((file) => isImageExamAnalysisSource(file) || isPdfExamAnalysisSource(file));
   const selectedQuestionSourceFile = selectedQuestion?.cropSourceId
-    ? imageSourceFiles.find((file, index) => getExamAnalysisSourceFileId(file, index) === selectedQuestion.cropSourceId)
-    : imageSourceFiles[0];
-  const selectedQuestionSourceUrl = selectedQuestion?.cropSourceUrl || (selectedQuestionSourceFile ? getExamAnalysisSourceOpenUrl(selectedQuestionSourceFile) : "");
+    ? renderSourceFiles.find((file, index) => getExamAnalysisSourceFileId(file, index) === selectedQuestion.cropSourceId)
+    : renderSourceFiles[0];
+  const selectedQuestionSourceIsPdf = isPdfExamAnalysisSource(selectedQuestionSourceFile);
+  const selectedQuestionSourceIsImage = isImageExamAnalysisSource(selectedQuestionSourceFile);
+  const selectedQuestionSourceUrl = selectedQuestionSourceFile
+    ? getExamAnalysisSourceRenderUrl(selectedQuestionSourceFile)
+    : selectedQuestion?.cropSourceUrl || "";
+  const selectedQuestionOpenUrl = selectedQuestionSourceFile
+    ? getExamAnalysisSourceOpenUrl(selectedQuestionSourceFile)
+    : selectedQuestionSourceUrl;
+  const selectedQuestionPage = Math.max(1, Number(selectedQuestion?.page) || 1);
   const selectedQuestionCropBox = normalizeCropBox(cropDraft || selectedQuestion?.cropBox);
   const folderExamCycleOptions = useMemo(
     () => {
@@ -11630,6 +11688,58 @@ function ExamAnalysisCenter({
     }
   }, [questionItems, selectedQuestionId]);
 
+  useEffect(() => {
+    if (!selectedQuestionSourceIsPdf) {
+      setPdfPageCount(0);
+      setPdfRenderStatus("");
+      return undefined;
+    }
+    if (!isAnalysisWorkspaceOpen || currentStage !== "문항 검수" || !selectedQuestionSourceUrl || !pdfCanvasRef.current) {
+      return undefined;
+    }
+
+    let cancelled = false;
+    let loadingTask = null;
+    const canvas = pdfCanvasRef.current;
+    setPdfRenderStatus("PDF 페이지를 불러오는 중입니다...");
+    pdfRenderTaskRef.current?.cancel?.();
+
+    loadPdfJs()
+      .then(async (pdfjsLib) => {
+        if (cancelled) return;
+        loadingTask = pdfjsLib.getDocument({ url: selectedQuestionSourceUrl });
+        const pdfDocument = await loadingTask.promise;
+        if (cancelled) return;
+        setPdfPageCount(pdfDocument.numPages);
+        const pageNumber = Math.max(1, Math.min(selectedQuestionPage, pdfDocument.numPages));
+        if (pageNumber !== selectedQuestionPage) updateSelectedQuestion("page", pageNumber);
+        const page = await pdfDocument.getPage(pageNumber);
+        if (cancelled) return;
+        const viewport = page.getViewport({ scale: pdfScale });
+        const outputScale = Math.min(window.devicePixelRatio || 1, 2);
+        const context = canvas.getContext("2d");
+        canvas.width = Math.floor(viewport.width * outputScale);
+        canvas.height = Math.floor(viewport.height * outputScale);
+        canvas.style.width = `${Math.floor(viewport.width)}px`;
+        canvas.style.height = `${Math.floor(viewport.height)}px`;
+        context.setTransform(outputScale, 0, 0, outputScale, 0, 0);
+        const renderTask = page.render({ canvasContext: context, viewport });
+        pdfRenderTaskRef.current = renderTask;
+        await renderTask.promise;
+        if (!cancelled) setPdfRenderStatus(`PDF ${pageNumber}/${pdfDocument.numPages}페이지 렌더링 완료`);
+      })
+      .catch((error) => {
+        if (cancelled || error?.name === "RenderingCancelledException") return;
+        setPdfRenderStatus(`PDF 렌더링 실패 · ${error.message}`);
+      });
+
+    return () => {
+      cancelled = true;
+      pdfRenderTaskRef.current?.cancel?.();
+      loadingTask?.destroy?.();
+    };
+  }, [currentStage, isAnalysisWorkspaceOpen, pdfScale, selectedQuestionPage, selectedQuestionSourceIsPdf, selectedQuestionSourceUrl]);
+
   function update(field, value) {
     if (!selectedAnalysis) return;
     onUpdateAnalysis(selectedAnalysis.examAnalysisId, field, value);
@@ -11682,20 +11792,33 @@ function ExamAnalysisCenter({
 
   function assignSourceToSelectedQuestion(sourceId) {
     if (!selectedQuestion) return;
-    const sourceFile = imageSourceFiles.find((file, index) => getExamAnalysisSourceFileId(file, index) === sourceId);
+    const sourceFile = renderSourceFiles.find((file, index) => getExamAnalysisSourceFileId(file, index) === sourceId);
     updateQuestionItems(questionItems.map((item) =>
       item.questionId === selectedQuestion.questionId
         ? {
             ...item,
             cropSourceId: sourceId,
-            cropSourceUrl: sourceFile ? getExamAnalysisSourceOpenUrl(sourceFile) : item.cropSourceUrl
+            cropSourceUrl: sourceFile ? getExamAnalysisSourceRenderUrl(sourceFile) : item.cropSourceUrl,
+            page: isPdfExamAnalysisSource(sourceFile) ? item.page || 1 : item.page,
+            cropBox: null
           }
         : item
     ));
   }
 
+  function toggleSelectedQuestionTag(tag) {
+    if (!selectedQuestion) return;
+    const currentTags = Array.isArray(selectedQuestion.tags) ? selectedQuestion.tags : [];
+    const nextTags = currentTags.includes(tag)
+      ? currentTags.filter((item) => item !== tag)
+      : [...currentTags, tag];
+    updateQuestionItems(questionItems.map((item) =>
+      item.questionId === selectedQuestion.questionId ? { ...item, tags: nextTags } : item
+    ));
+  }
+
   function getCropPointerPercent(event) {
-    const rect = cropImageRef.current?.getBoundingClientRect();
+    const rect = cropSurfaceRef.current?.getBoundingClientRect();
     if (!rect) return null;
     const x = Math.max(0, Math.min(100, ((event.clientX - rect.left) / rect.width) * 100));
     const y = Math.max(0, Math.min(100, ((event.clientY - rect.top) / rect.height) * 100));
@@ -11739,7 +11862,8 @@ function ExamAnalysisCenter({
               ...item,
               cropBox: normalized,
               cropSourceId: selectedQuestion.cropSourceId || (selectedQuestionSourceFile ? getExamAnalysisSourceFileId(selectedQuestionSourceFile) : ""),
-              cropSourceUrl: selectedQuestionSourceUrl
+              cropSourceUrl: selectedQuestionSourceUrl,
+              page: selectedQuestionSourceIsPdf ? selectedQuestionPage : item.page
             }
           : item
       ));
@@ -11921,7 +12045,7 @@ function ExamAnalysisCenter({
         ? `[PDF 텍스트 추출] ${uploadedFile.fileName}\n${uploadedFile.extractedText}`
         : isImageExamAnalysisSource(uploadedFile)
           ? `[문항 이미지 원본] ${uploadedFile.fileName}\n문항 검수 단계에서 이 이미지를 띄우고 수동 크롭 영역을 지정할 수 있습니다.`
-          : `[PDF 텍스트 추출 없음] ${uploadedFile.fileName}\n스캔 이미지형 PDF일 수 있습니다. OCR 텍스트를 아래에 직접 붙여 넣어 주세요.`);
+          : `[PDF 텍스트 추출 없음] ${uploadedFile.fileName}\n스캔 이미지형 PDF일 수 있습니다. 문항 검수 단계에서 PDF 페이지를 렌더링해 수동 크롭하고, OCR 텍스트는 아래에 직접 붙여 넣어 주세요.`);
       Object.entries(inferredMetadata).forEach(([field, value]) => {
         if (value && !String(selectedAnalysis[field] ?? "").trim()) {
           onUpdateAnalysis(selectedAnalysis.examAnalysisId, field, value);
@@ -11940,7 +12064,7 @@ function ExamAnalysisCenter({
       onUpdateAnalysis(
         selectedAnalysis.examAnalysisId,
         "sourceUploadStatus",
-        `${uploadedFiles.length}개 업로드 완료 · ${uploadedFiles.filter((file) => file.extractedText).length}개 PDF 텍스트 추출 · ${uploadedFiles.filter(isImageExamAnalysisSource).length}개 이미지 크롭 가능`
+        `${uploadedFiles.length}개 업로드 완료 · ${uploadedFiles.filter((file) => file.extractedText).length}개 PDF 텍스트 추출 · ${uploadedFiles.filter(isPdfExamAnalysisSource).length}개 PDF 렌더 가능 · ${uploadedFiles.filter(isImageExamAnalysisSource).length}개 이미지 크롭 가능`
       );
     } catch (error) {
       onUpdateAnalysis(selectedAnalysis.examAnalysisId, "sourceUploadStatus", `업로드 실패 · ${error.message}`);
@@ -12189,7 +12313,7 @@ function ExamAnalysisCenter({
                 <div className="sectionHeader slim">
                   <div>
                     <h2>원본 입력</h2>
-                    <p className="muted">PDF는 OCR/AI 분석에, 이미지 원본은 문항별 수동 크롭과 코멘트 작성에 사용합니다.</p>
+                    <p className="muted">PDF와 이미지 원본을 업로드한 뒤 문항별로 페이지/영역을 잘라 코멘트를 붙입니다.</p>
                   </div>
                 </div>
                 <div
@@ -12333,53 +12457,90 @@ function ExamAnalysisCenter({
                     {selectedQuestionCropBox ? <span className="countBadge">크롭 저장됨</span> : <span className="countBadge mutedBadge">크롭 대기</span>}
                   </div>
 
-                  {imageSourceFiles.length ? (
+                  {renderSourceFiles.length ? (
                     <label className="wideLabel">
-                      문항 이미지 원본
+                      문항 원본
                       <select
                         value={selectedQuestion?.cropSourceId || (selectedQuestionSourceFile ? getExamAnalysisSourceFileId(selectedQuestionSourceFile) : "")}
                         onChange={(event) => assignSourceToSelectedQuestion(event.target.value)}
                       >
-                        {imageSourceFiles.map((file, index) => {
+                        {renderSourceFiles.map((file, index) => {
                           const sourceId = getExamAnalysisSourceFileId(file, index);
-                          return <option key={sourceId} value={sourceId}>{file.fileName || `이미지 ${index + 1}`}</option>;
+                          return (
+                            <option key={sourceId} value={sourceId}>
+                              {isPdfExamAnalysisSource(file) ? "PDF · " : "이미지 · "}{file.fileName || `원본 ${index + 1}`}
+                            </option>
+                          );
                         })}
                       </select>
                     </label>
                   ) : null}
 
-                  {selectedQuestionSourceUrl ? (
-                    <div
-                      className="questionCropCanvas"
-                      onPointerDown={handleCropPointerDown}
-                      onPointerMove={handleCropPointerMove}
-                      onPointerUp={commitCropDraft}
-                      onPointerCancel={commitCropDraft}
-                    >
-                      <img alt="시험지 원본" draggable={false} ref={cropImageRef} src={selectedQuestionSourceUrl} />
-                      {selectedQuestionCropBox ? (
-                        <span
-                          className="questionCropBox"
-                          style={{
-                            left: `${selectedQuestionCropBox.x}%`,
-                            top: `${selectedQuestionCropBox.y}%`,
-                            width: `${selectedQuestionCropBox.width}%`,
-                            height: `${selectedQuestionCropBox.height}%`
-                          }}
+                  {selectedQuestionSourceIsPdf ? (
+                    <div className="analysisPdfControls">
+                      <label>
+                        PDF 페이지
+                        <input
+                          min="1"
+                          max={pdfPageCount || 999}
+                          type="number"
+                          value={selectedQuestionPage}
+                          onChange={(event) => updateSelectedQuestion("page", Math.max(1, Number(event.target.value) || 1))}
                         />
-                      ) : null}
+                      </label>
+                      <label>
+                        확대
+                        <select value={pdfScale} onChange={(event) => setPdfScale(Number(event.target.value) || 1.25)}>
+                          <option value="1">100%</option>
+                          <option value="1.25">125%</option>
+                          <option value="1.5">150%</option>
+                          <option value="1.75">175%</option>
+                          <option value="2">200%</option>
+                        </select>
+                      </label>
+                      <span>{pdfRenderStatus || "PDF 페이지 렌더링 대기"}</span>
+                    </div>
+                  ) : null}
+
+                  {selectedQuestionSourceUrl ? (
+                    <div className="questionCropCanvas">
+                      <div
+                        className="questionCropSurface"
+                        onPointerCancel={commitCropDraft}
+                        onPointerDown={handleCropPointerDown}
+                        onPointerMove={handleCropPointerMove}
+                        onPointerUp={commitCropDraft}
+                        ref={cropSurfaceRef}
+                      >
+                        {selectedQuestionSourceIsPdf ? (
+                          <canvas aria-label="PDF 시험지 페이지" ref={pdfCanvasRef} />
+                        ) : selectedQuestionSourceIsImage ? (
+                          <img alt="시험지 원본" draggable={false} src={selectedQuestionSourceUrl} />
+                        ) : null}
+                        {selectedQuestionCropBox ? (
+                          <span
+                            className="questionCropBox"
+                            style={{
+                              left: `${selectedQuestionCropBox.x}%`,
+                              top: `${selectedQuestionCropBox.y}%`,
+                              width: `${selectedQuestionCropBox.width}%`,
+                              height: `${selectedQuestionCropBox.height}%`
+                            }}
+                          />
+                        ) : null}
+                      </div>
                     </div>
                   ) : (
                     <div className="analysisQuestionEmpty">
-                      PDF는 기존처럼 원본 열기와 OCR 분석에 사용됩니다. 문항을 화면에서 직접 크롭하려면 시험지 페이지를 이미지로 추가해 주세요.
+                      PDF 또는 이미지 원본을 업로드하면 이 영역에서 문항별 크롭을 지정할 수 있습니다.
                     </div>
                   )}
 
                   <div className="analysisQuestionCropActions">
                     <span>{selectedQuestion ? `${selectedQuestion.number}번 문항 영역` : "문항을 선택하세요."}</span>
                     <button className="softButton" disabled={!selectedQuestionCropBox} onClick={clearSelectedQuestionCrop} type="button">크롭 지우기</button>
-                    {selectedQuestionSourceUrl ? (
-                      <a className="softButton linkButton" href={selectedQuestionSourceUrl} rel="noreferrer" target="_blank">원본 열기</a>
+                    {selectedQuestionOpenUrl ? (
+                      <a className="softButton linkButton" href={selectedQuestionOpenUrl} rel="noreferrer" target="_blank">원본 열기</a>
                     ) : null}
                   </div>
                 </article>
@@ -12404,7 +12565,7 @@ function ExamAnalysisCenter({
                         >
                           <strong>{item.number}번</strong>
                           <span>{[item.score && `${item.score}점`, item.unit || "단원 미입력", item.role].filter(Boolean).join(" · ")}</span>
-                          <small>{item.teacherComment ? "코멘트 있음" : "코멘트 대기"} · {item.cropBox ? "크롭 있음" : "크롭 없음"}</small>
+                          <small>{item.teacherComment ? "코멘트 있음" : "코멘트 대기"} · {item.cropBox ? "크롭 있음" : "크롭 없음"} · {item.tags?.[0] || "태그 없음"}</small>
                         </button>
                       ))}
                     </div>
@@ -12467,6 +12628,21 @@ function ExamAnalysisCenter({
                           정답률/체감
                           <input value={selectedQuestion.correctRate} onChange={(event) => updateSelectedQuestion("correctRate", event.target.value)} placeholder="예: 낮음, 40%" />
                         </label>
+                      </div>
+                      <div className="analysisQuestionTagGroup">
+                        <strong>문항 태그</strong>
+                        <div>
+                          {examQuestionTagOptions.map((tag) => (
+                            <button
+                              className={selectedQuestion.tags?.includes(tag) ? "active" : ""}
+                              key={tag}
+                              onClick={() => toggleSelectedQuestionTag(tag)}
+                              type="button"
+                            >
+                              {tag}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                       <div className="analysisQuestionQuickTags">
                         {["앞번호인데 어려움", "실수 많음", "정답률 낮음", "시간 압박", "조건 해석", "서술형 감점", "변별 문항"].map((tag) => (

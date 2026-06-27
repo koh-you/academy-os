@@ -777,6 +777,19 @@ async function createSignedStorageUrl(bucketId, storagePath, expiresIn = 60 * 60
   return `${getSupabaseStorageBaseUrl()}${result.signedURL}`;
 }
 
+async function downloadSignedStorageObject(bucketId, storagePath) {
+  const signedUrl = await createSignedStorageUrl(bucketId, storagePath, 60 * 10);
+  const storageResponse = await fetch(signedUrl);
+  if (!storageResponse.ok) {
+    throw new Error(`Storage 파일 다운로드 실패: ${storageResponse.status}`);
+  }
+  const arrayBuffer = await storageResponse.arrayBuffer();
+  return {
+    buffer: Buffer.from(arrayBuffer),
+    contentType: storageResponse.headers.get("content-type") || "application/octet-stream"
+  };
+}
+
 async function uploadExamPostFile(payload) {
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
     throw new Error("Supabase Storage 업로드에는 service role 설정이 필요합니다.");
@@ -1228,6 +1241,27 @@ const server = http.createServer(async (request, response) => {
         Location: signedUrl
       });
       response.end();
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/exam-analysis-sources/file") {
+    try {
+      const bucketId = requestUrl.searchParams.get("bucket") || "exam-analysis-sources";
+      const storagePath = requestUrl.searchParams.get("path") || "";
+      if (!storagePath) throw new Error("파일 경로가 없습니다.");
+      if (bucketId !== "exam-analysis-sources") throw new Error("시험분석 원본 파일만 렌더링할 수 있습니다.");
+      const file = await downloadSignedStorageObject(bucketId, storagePath);
+      response.writeHead(200, {
+        "Access-Control-Allow-Origin": getCorsOrigin(request),
+        "Cache-Control": "private, max-age=300",
+        "Content-Length": file.buffer.length,
+        "Content-Type": file.contentType,
+        "Cross-Origin-Resource-Policy": "cross-origin"
+      });
+      response.end(file.buffer);
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
     }
