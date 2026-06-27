@@ -5,6 +5,7 @@ const root = path.resolve(__dirname, "..");
 const appPath = path.join(root, "src", "app", "App.jsx");
 const cssPath = path.join(root, "src", "app", "App.css");
 const notificationRoutePath = path.join(root, "api", "routes", "notifications.js");
+const examAnalysisRoutePath = path.join(root, "api", "routes", "examAnalysis.js");
 const coreDataRoutePath = path.join(root, "api", "routes", "coreData.js");
 const serverPath = path.join(root, "api", "server.js");
 const supabaseRestPath = path.join(root, "api", "lib", "supabaseRest.js");
@@ -20,6 +21,7 @@ const dispatchWorkflowPath = path.join(root, ".github", "workflows", "dispatch-n
 const app = fs.readFileSync(appPath, "utf8");
 const css = fs.readFileSync(cssPath, "utf8");
 const notificationRoute = fs.readFileSync(notificationRoutePath, "utf8");
+const examAnalysisRoute = fs.readFileSync(examAnalysisRoutePath, "utf8");
 const coreDataRoute = fs.readFileSync(coreDataRoutePath, "utf8");
 const serverSource = fs.readFileSync(serverPath, "utf8");
 const supabaseRest = fs.readFileSync(supabaseRestPath, "utf8");
@@ -137,6 +139,7 @@ check("35b-3 exam analysis shows status and edits details in modal", hasAll(app,
 check("35c exam analysis list can delete app_state documents", hasAll(app, ["onDeleteAnalysis", "analysisDeleteButton", "삭제 후 app_state 저장에 반영됩니다", "setExamAnalyses((current) => current.filter((item) => item.examAnalysisId !== analysisId))"]) && css.includes(".analysisDeleteButton"));
 check("35d exam analysis produces insight-driven final outputs", hasAll(app, ["attachSourceFiles", "multiple", "hasExamAnalysisTeacherInsight", "ExamAnalysisFinalReport", "최종 산출물 3종", "강사용 분석지", "학생 분석지", "학부모 안내문", "블로그 초안", "인스타 카드뉴스", "PDF로 저장/인쇄"]) && hasAll(css, [".analysisFinalReportPanel", ".analysisReportPreviewModal", ".examAnalysisPrintableReport", "@media print"]) && !css.includes(".analysisInsightRequiredBox"));
 check("35e exam analysis preserves and shows initial AI draft", hasAll(app, ["aiInitialFields", "aiInitialGeneratedAt", "getExamAnalysisInitialFields", "ExamAnalysisInitialView", "AI 분석 결과", "인사이트", "인사이트 수정"]) && hasAll(css, [".analysisReviewColumns", ".analysisInitialViewModal", ".analysisInitialBlock"]));
+check("35f exam analysis can use dedicated premium AI models", hasAll(app, ['examAnalysisProvider: "anthropic"', 'examAnalysisModel: "claude-opus-4-8"', '"claude-opus-4-8"', '"gpt-5.5"']) && hasAll(examAnalysisRoute, ["const examAnalysisModels", "ANTHROPIC_EXAM_ANALYSIS_MODEL", "OPENAI_EXAM_ANALYSIS_MODEL", 'selectedModel(payload, "examAnalysis")', 'requestedModel.startsWith("claude-")', 'requestedModel.startsWith("gpt-")']) && hasAll(envExample, ["ANTHROPIC_EXAM_ANALYSIS_MODEL=claude-opus-4-8", "OPENAI_EXAM_ANALYSIS_MODEL=gpt-5.5"]));
 check("36 ai setting badges are hidden from work screens", !hasAll(app, ["aiVariantHeroActions", "aiModelSelectMock"]) && !app.includes("<h3>AI 모델</h3>"));
 
 check("37 exam publisher syncs across same term", hasAll(app, ["examCycleTermKey", "examPublisherLinkKey", "findLinkedPublisher", "syncPublisherAcrossExamTerm"]));

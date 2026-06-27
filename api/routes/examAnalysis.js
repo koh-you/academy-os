@@ -7,6 +7,12 @@ const fallbackModels = {
   openai: process.env.OPENAI_MODEL || "gpt-4.1-mini"
 };
 
+const examAnalysisModels = {
+  anthropic: process.env.ANTHROPIC_EXAM_ANALYSIS_MODEL || "claude-opus-4-8",
+  mock: "local-mock",
+  openai: process.env.OPENAI_EXAM_ANALYSIS_MODEL || "gpt-5.5"
+};
+
 function envValue(name) {
   const value = process.env[name];
   return value && !value.startsWith("your_") ? value : "";
@@ -30,7 +36,8 @@ export function getAiStatus() {
       mock: true,
       openai: Boolean(envValue("OPENAI_API_KEY"))
     },
-    fallbackModels
+    fallbackModels,
+    examAnalysisModels
   };
 }
 
@@ -44,13 +51,18 @@ function defaultProvider() {
 
 function selectedProvider(payload) {
   const provider = (payload.aiProvider || "auto").toLowerCase();
-  return provider === "auto" ? defaultProvider() : provider;
+  if (provider !== "auto") return provider;
+  const requestedModel = String(payload.aiModel || "").toLowerCase();
+  if (requestedModel.startsWith("claude-")) return "anthropic";
+  if (requestedModel.startsWith("gpt-")) return "openai";
+  return defaultProvider();
 }
 
-function selectedModel(payload) {
+function selectedModel(payload, useCase = "default") {
   const provider = selectedProvider(payload);
   const requestedModel = payload.aiModel;
   if (!requestedModel || requestedModel === "server-default") {
+    if (useCase === "examAnalysis") return examAnalysisModels[provider] || fallbackModels[provider] || fallbackModels.mock;
     return fallbackModels[provider] || fallbackModels.mock;
   }
   return requestedModel;
@@ -282,7 +294,7 @@ async function runAnthropicText(prompt, model) {
 
 export async function runExamAnalysis(payload) {
   const provider = selectedProvider(payload);
-  const model = selectedModel(payload);
+  const model = selectedModel(payload, "examAnalysis");
 
   if (provider === "mock") {
     return { provider, model, fields: createMockAnalysis(payload) };

@@ -2236,8 +2236,8 @@ const defaultAiPrompts = {
 const defaultAiSettings = {
   commentProvider: "auto",
   commentModel: "server-default",
-  examAnalysisProvider: "auto",
-  examAnalysisModel: "server-default",
+  examAnalysisProvider: "anthropic",
+  examAnalysisModel: "claude-opus-4-8",
   variantProvider: "auto",
   variantModel: "server-default",
   prompts: defaultAiPrompts
@@ -10045,10 +10045,10 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
 }
 
 const aiProviderModels = {
-  anthropic: ["claude-sonnet-4-5", "claude-3-5-sonnet-latest", "claude-3-5-haiku-latest"],
+  anthropic: ["claude-opus-4-8", "claude-sonnet-4-5", "claude-3-5-sonnet-latest", "claude-3-5-haiku-latest"],
   mock: ["local-mock"],
   auto: ["server-default"],
-  openai: ["gpt-4.1-mini", "gpt-4.1", "gpt-4o-mini"]
+  openai: ["gpt-5.5", "gpt-4.1-mini", "gpt-4.1", "gpt-4o-mini"]
 };
 
 function getAiModelLabel(model) {

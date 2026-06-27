@@ -65,6 +65,16 @@
 - SQL 주의: 프론트 null-safe 보정만 있으므로 Supabase SQL edit 필요 없음.
 - 검증: `npm run test:production` 통과(total 210, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
 
+### 2026-06-27 P1. 시험분석 전용 고성능 AI 모델 설정
+
+- 상태: 완료
+- 사용자 요청: 현재 API는 Claude Sonnet을 호출하지만, 시험지 분석은 Claude Opus 4.8을 호출하고 싶다. 필요하면 GPT API 결제도 고려한다.
+- 원인 확인: `.env.example`에는 `ANTHROPIC_EXAM_ANALYSIS_MODEL`이 있었지만 서버 `selectedModel`은 시험분석 전용 env를 읽지 않고 공통 `ANTHROPIC_MODEL`/`OPENAI_MODEL`만 사용했다. 따라서 시험분석만 Sonnet에서 Opus로 분리하는 설정이 실제 호출에 반영되지 않았다.
+- 이번 작업 결과: 시험분석 요청은 `ANTHROPIC_EXAM_ANALYSIS_MODEL` 또는 `OPENAI_EXAM_ANALYSIS_MODEL`을 우선 사용한다. 기본 시험분석 모델은 Claude `claude-opus-4-8`로 잡고, OpenAI 전환 선택지로 `gpt-5.5`를 추가했다. `auto` 제공자 상태에서도 모델명이 `claude-`면 Claude, `gpt-`면 OpenAI로 보내도록 보호했다.
+- 운영 배포 주의: Render 환경변수에 `ANTHROPIC_EXAM_ANALYSIS_MODEL=claude-opus-4-8`을 넣으면 시험분석 server-default도 Opus를 사용한다. GPT로 전환할 경우 `OPENAI_API_KEY`와 `OPENAI_EXAM_ANALYSIS_MODEL=gpt-5.5`가 필요하다.
+- SQL 주의: API/env/UI 설정 변경만 있으므로 Supabase SQL edit 필요 없음.
+- 검증: `npm run test:production` 통과(total 211, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
+
 ### 2026-06-26 P0. 수동 하원 알림톡 발송 지원
 
 - 상태: 완료
