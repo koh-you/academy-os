@@ -103,6 +103,15 @@
 - 저장 주의: 기존 `examAnalyses` app_state 문서에 필드를 추가 저장하는 방식이므로 새 Supabase SQL edit 필요 없음.
 - 검증: `node --check api/routes/examAnalysis.js` 통과. `npm run test:production` 통과(total 213, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
 
+### 2026-06-27 P1. 시험분석 산출물 클릭 미리보기 보강
+
+- 상태: 완료
+- 사용자 제보: 산출물 작성 단계에서 `블로그 초안`이나 `인스타 카드뉴스`가 카드 형태로 보이지만 클릭해서 크게 열어볼 수 없다.
+- 원인: 산출물 카드는 문서형/카드뉴스형 미리보기와 복사/수정 버튼만 렌더링했고, 카드 본문 클릭 또는 `보기` 버튼이 연결된 산출물 전용 모달이 없었다.
+- 이번 작업 결과: 강사용 분석지, 학생 분석지, 학부모 안내문, 블로그 초안, 인스타 카드뉴스 카드에 `보기` 버튼과 본문 클릭 동작을 추가했다. 클릭하면 넓은 미리보기 모달이 열리고, 모달 안에서 바로 복사하거나 해당 산출물 수정 모달로 이동할 수 있다.
+- 저장 주의: UI 동작 보강만 있으므로 Supabase SQL edit 필요 없음.
+- 검증: `npm run test:production` 통과(total 213, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
+
 ### 2026-06-26 P0. 수동 하원 알림톡 발송 지원
 
 - 상태: 완료

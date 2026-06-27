@@ -1404,17 +1404,32 @@ function ExamAnalysisInstagramPreview({ value }) {
   );
 }
 
-function AnalysisOutputPreviewCard({ title, tone = "", value = "", onEdit, children }) {
+function AnalysisOutputPreviewCard({ title, tone = "", value = "", onEdit, onOpen, children }) {
   return (
     <article className={["panel", "outputPreviewCard", tone].filter(Boolean).join(" ")}>
       <div className="sectionHeader slim">
         <h2>{title}</h2>
         <div className="analysisPreviewActions">
+          {onOpen ? <button className="primaryButton" onClick={onOpen} type="button">보기</button> : null}
           <button className="softButton" onClick={() => copyTextToClipboard(value)} type="button">복사</button>
-          {onEdit ? <button className="primaryButton" onClick={onEdit} type="button">수정</button> : null}
+          {onEdit ? <button className="softButton" onClick={onEdit} type="button">수정</button> : null}
         </div>
       </div>
-      {children}
+      <div
+        className={onOpen ? "outputPreviewBody clickable" : "outputPreviewBody"}
+        onClick={onOpen}
+        onKeyDown={(event) => {
+          if (!onOpen) return;
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onOpen();
+          }
+        }}
+        role={onOpen ? "button" : undefined}
+        tabIndex={onOpen ? 0 : undefined}
+      >
+        {children}
+      </div>
     </article>
   );
 }
@@ -10744,6 +10759,7 @@ function ExamAnalysisCenter({
   const [detailSectionId, setDetailSectionId] = useState("");
   const [isReportPreviewOpen, setIsReportPreviewOpen] = useState(false);
   const [isAiInitialViewOpen, setIsAiInitialViewOpen] = useState(false);
+  const [outputPreviewId, setOutputPreviewId] = useState("");
   const sourceFileInputRef = useRef(null);
   const rawSelectedAnalysis = analyses.find((item) => item.examAnalysisId === selectedAnalysisId) ?? analyses[0];
   const selectedAnalysis = rawSelectedAnalysis ? normalizeExamAnalysisForDisplay(rawSelectedAnalysis) : null;
@@ -10778,6 +10794,14 @@ function ExamAnalysisCenter({
         selectedAnalysis.insightDirection ? `# 학습 방향\n${selectedAnalysis.insightDirection}` : ""
       ].filter(Boolean).join("\n\n")
     : "";
+  const outputPreviewMap = selectedAnalysis ? {
+    teacher: { title: "강사용 분석지", kind: "document", value: teacherAnalysisText, editSection: "ai" },
+    student: { title: "학생 분석지", kind: "document", value: selectedAnalysis.studentAnalysisDraft, editSection: "output" },
+    parent: { title: "학부모 안내문", kind: "document", value: selectedAnalysis.parentNoticeDraft ?? "", editSection: "output" },
+    blog: { title: "블로그 초안", kind: "document", value: selectedAnalysis.blogDraft, editSection: "output" },
+    instagram: { title: "인스타 카드뉴스", kind: "instagram", value: selectedAnalysis.instagramDraft, editSection: "output" }
+  } : {};
+  const outputPreview = outputPreviewMap[outputPreviewId] ?? null;
   useEffect(() => {
     if (!selectedAnalysisId && analyses[0]?.examAnalysisId) {
       setSelectedAnalysisId(analyses[0].examAnalysisId);
@@ -11110,21 +11134,21 @@ function ExamAnalysisCenter({
                 </div>
               </article>
               <div className="analysisOutputGrid">
-              <AnalysisOutputPreviewCard title="강사용 분석지" value={teacherAnalysisText} onEdit={() => setDetailSectionId("ai")}>
-                <ExamAnalysisReadablePreview value={teacherAnalysisText} />
-              </AnalysisOutputPreviewCard>
-              <AnalysisOutputPreviewCard title="학생 분석지" value={selectedAnalysis.studentAnalysisDraft} onEdit={() => setDetailSectionId("output")}>
-                <ExamAnalysisReadablePreview value={selectedAnalysis.studentAnalysisDraft} />
-              </AnalysisOutputPreviewCard>
-              <AnalysisOutputPreviewCard title="학부모 안내문" value={selectedAnalysis.parentNoticeDraft ?? ""} onEdit={() => setDetailSectionId("output")}>
-                <ExamAnalysisReadablePreview value={selectedAnalysis.parentNoticeDraft ?? ""} />
-              </AnalysisOutputPreviewCard>
-              <AnalysisOutputPreviewCard title="블로그 초안" tone="wide" value={selectedAnalysis.blogDraft} onEdit={() => setDetailSectionId("output")}>
-                <ExamAnalysisReadablePreview value={selectedAnalysis.blogDraft} />
-              </AnalysisOutputPreviewCard>
-              <AnalysisOutputPreviewCard title="인스타 카드뉴스" tone="wide" value={selectedAnalysis.instagramDraft} onEdit={() => setDetailSectionId("output")}>
-                <ExamAnalysisInstagramPreview value={selectedAnalysis.instagramDraft} />
-              </AnalysisOutputPreviewCard>
+                <AnalysisOutputPreviewCard title="강사용 분석지" value={teacherAnalysisText} onEdit={() => setDetailSectionId("ai")} onOpen={() => setOutputPreviewId("teacher")}>
+                  <ExamAnalysisReadablePreview value={teacherAnalysisText} />
+                </AnalysisOutputPreviewCard>
+                <AnalysisOutputPreviewCard title="학생 분석지" value={selectedAnalysis.studentAnalysisDraft} onEdit={() => setDetailSectionId("output")} onOpen={() => setOutputPreviewId("student")}>
+                  <ExamAnalysisReadablePreview value={selectedAnalysis.studentAnalysisDraft} />
+                </AnalysisOutputPreviewCard>
+                <AnalysisOutputPreviewCard title="학부모 안내문" value={selectedAnalysis.parentNoticeDraft ?? ""} onEdit={() => setDetailSectionId("output")} onOpen={() => setOutputPreviewId("parent")}>
+                  <ExamAnalysisReadablePreview value={selectedAnalysis.parentNoticeDraft ?? ""} />
+                </AnalysisOutputPreviewCard>
+                <AnalysisOutputPreviewCard title="블로그 초안" tone="wide" value={selectedAnalysis.blogDraft} onEdit={() => setDetailSectionId("output")} onOpen={() => setOutputPreviewId("blog")}>
+                  <ExamAnalysisReadablePreview value={selectedAnalysis.blogDraft} />
+                </AnalysisOutputPreviewCard>
+                <AnalysisOutputPreviewCard title="인스타 카드뉴스" tone="wide" value={selectedAnalysis.instagramDraft} onEdit={() => setDetailSectionId("output")} onOpen={() => setOutputPreviewId("instagram")}>
+                  <ExamAnalysisInstagramPreview value={selectedAnalysis.instagramDraft} />
+                </AnalysisOutputPreviewCard>
               </div>
             </section>
             ) : null}
@@ -11169,6 +11193,33 @@ function ExamAnalysisCenter({
             <button className="softButton" onClick={() => setDetailSectionId("insight")} type="button">인사이트 수정</button>
           </div>
           <ExamAnalysisFinalReport analysis={selectedAnalysis} />
+        </Modal>
+      ) : null}
+      {selectedAnalysis && outputPreview ? (
+        <Modal
+          className="analysisOutputPreviewModal"
+          title={outputPreview.title}
+          subtitle="산출물을 크게 확인하고, 바로 복사하거나 수정할 수 있습니다."
+          onClose={() => setOutputPreviewId("")}
+        >
+          <div className="analysisReportToolbar">
+            <button className="primaryButton" onClick={() => copyTextToClipboard(outputPreview.value)} type="button">복사</button>
+            <button
+              className="softButton"
+              onClick={() => {
+                setDetailSectionId(outputPreview.editSection);
+                setOutputPreviewId("");
+              }}
+              type="button"
+            >
+              수정
+            </button>
+          </div>
+          {outputPreview.kind === "instagram" ? (
+            <ExamAnalysisInstagramPreview value={outputPreview.value} />
+          ) : (
+            <ExamAnalysisReadablePreview value={outputPreview.value} />
+          )}
         </Modal>
       ) : null}
       {selectedAnalysis && isAiInitialViewOpen ? (

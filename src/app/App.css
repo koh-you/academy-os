@@ -3220,6 +3220,24 @@ button {
   justify-content: flex-end;
 }
 
+.outputPreviewBody.clickable {
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.outputPreviewBody.clickable:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 3px;
+}
+
+.outputPreviewBody.clickable:hover .analysisReadablePreview,
+.outputPreviewBody.clickable:focus-visible .analysisReadablePreview,
+.outputPreviewBody.clickable:hover .analysisInstagramSlide,
+.outputPreviewBody.clickable:focus-visible .analysisInstagramSlide {
+  border-color: #2563eb;
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.12);
+}
+
 .analysisReadablePreview {
   background: #ffffff;
   border: 1px solid #d8e3f8;
@@ -3330,6 +3348,20 @@ button {
 .analysisReportPreviewModal {
   max-width: 1120px;
   width: min(1120px, calc(100vw - 28px));
+}
+
+.analysisOutputPreviewModal {
+  max-width: 1120px;
+  width: min(1120px, calc(100vw - 28px));
+}
+
+.analysisOutputPreviewModal .analysisReadablePreview {
+  max-height: min(68vh, 760px);
+}
+
+.analysisOutputPreviewModal .analysisInstagramPreview {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  overflow-x: visible;
 }
 
 .analysisInitialViewModal {
