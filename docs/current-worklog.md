@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-27 P1. 시험분석 AI 1차 문항분석표 초안 자동 채움
+
+- 상태: 완료
+- 사용자 요청: 문항분석표의 배점, 단원분류, 난이도는 AI가 1차 초안에서 채울 수 있게 한다. 3개년 파일을 올렸을 때 3개년 분석이 문항분류 이후 작업인지 확인한다.
+- 답변/설계 결론: 3개년 분석은 AI 1차에서 반복/증감/변화 후보를 잡을 수 있지만, 정확한 비교 분석은 연도별 문항분류가 쌓인 뒤 더 강해진다. 현재 `questionItems` 표는 한 시험지의 문항 검수표이므로, 여러 해 시험지가 함께 들어오면 AI는 선택된 시험명 또는 최신 시험지 1회분의 문항표 초안을 만들고 3개년 비교는 텍스트 분석 필드에 정리한다.
+- 이번 작업 결과: 시험분석 API 프롬프트 JSON 스키마에 `questionItems` 배열을 추가하고, 문항별 `number/page/score/questionType/unit/difficulty/role/source/correctRate/ocrText/strategyComment/tags`를 반환하도록 했다.
+- 프론트 반영: AI 분석 완료 시 `questionItems`를 기존 문항 카드와 병합한다. 기존 크롭, 선생님 코멘트, 직접 입력값은 보존하고, 비어 있거나 `확인 필요`인 배점/단원/난이도/유형/역할/출처/태그 초안만 채운다.
+- 저장 주의: 기존 `examAnalyses.questionItems` app_state 구조에 저장되므로 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check api/routes/examAnalysis.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs` 통과. `npm run build` 통과(Vite chunk size warning만 있음). `npm run test:production` 통과(total 219, failed 0).
+
 ### 2026-06-27 P1. 시험분석 전체 페이지 AI 크롭 초안 적용
 
 - 상태: 완료

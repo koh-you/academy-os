@@ -83,6 +83,8 @@ function defaultExamAnalysisPromptForServer() {
     "",
     "[문항별 분석 기준]",
     "각 문항은 문항 번호, 페이지, 배점, 단원, 유형, 난이도, 역할, 태그, 출처 가능성, OCR/문항 조건 요약, 학생이 틀릴 만한 지점, 강사가 확인해야 할 점, 대비 전략 후보를 가능한 범위에서 정리한다.",
+    "AI 1차 분석 단계에서 문항별 배점, 단원, 난이도 초안을 반드시 questionItems 배열에 넣는다. 모르면 빈칸 대신 '확인 필요'를 쓴다.",
+    "여러 해 시험지가 함께 들어온 경우 questionItems는 선택된 시험명 또는 가장 최신 시험지 1회분의 문항표 초안으로 작성하고, 3개년 반복/증감/변화는 unitDistribution, typeClassification, killerProblems, sourceCheckNotes에 정리한다.",
     "문항 태그 기준: 기본 문항, 분석 필요, 디벨럽 가능, 실수 유도, 변별 문항, 출처 비교, 수업 확장.",
     "",
     "[작성 원칙]",
@@ -106,6 +108,7 @@ function buildExamAnalysisPrompt(payload) {
     `시험명: ${payload.examName ?? ""}`,
     `시험일: ${payload.examDate ?? ""}`,
     `원본 링크: ${payload.sourceFileUrl ?? ""}`,
+    `업로드 원본: ${Array.isArray(payload.sourceFiles) ? payload.sourceFiles.map((file, index) => `${index + 1}. ${file.fileName || file.storagePath || "원본"}`).join(" / ") : ""}`,
     "",
     "[시험관리 탭 입력정보]",
     examPrepContext
@@ -122,6 +125,11 @@ function buildExamAnalysisPrompt(payload) {
     "[시험 원본/OCR/메모]",
     payload.rawExamText ||
       "아직 원본 텍스트가 없습니다. 입력된 기본정보와 강사 메모를 기준으로 분석 필드 초안을 만들어 주세요.",
+    "",
+    "[현재 문항 카드]",
+    Array.isArray(payload.questionItems) && payload.questionItems.length
+      ? payload.questionItems.map((item) => `${item.number || item.questionNumber}번 · 페이지 ${item.page || 1} · 기존 배점 ${item.score || "미입력"} · 기존 단원 ${item.unit || "미입력"} · 기존 난이도 ${item.difficulty || "확인 필요"}`).join("\n")
+      : "아직 문항 카드가 없습니다. OCR에서 확인 가능한 문항번호 기준으로 questionItems 초안을 생성하세요.",
     "",
     "[작성 규칙]",
     "- 시험지를 설명하지 말고 학부모·학생·강사가 다음 행동을 결정할 수 있게 분석한다.",
@@ -140,7 +148,12 @@ function buildExamAnalysisPrompt(payload) {
     "- killerProblems는 킬러와 준킬러 후보를 나누고, 문항별 함정과 필요한 개념을 포함한다.",
     "- mistakePatterns는 학생들이 실제로 틀릴 만한 행동 단위 실수를 적는다.",
     "- 문항별 태그 후보는 기본 문항, 분석 필요, 디벨럽 가능, 실수 유도, 변별 문항, 출처 비교, 수업 확장 중에서 제안하고, 기존 JSON 필드 안에 검수 가능한 문장으로 포함한다.",
-    "- 문항 카드는 강사가 웹앱 문항 검수 단계에서 확정한다. AI는 문항 카드 자동 확정 대신 강사가 옮겨 적고 검수할 수 있는 초안을 만든다.",
+    "- questionItems는 웹앱 문항분석표에 바로 반영된다. 각 문항의 score, unit, difficulty는 가능한 범위에서 반드시 채운다.",
+    "- questionItems의 difficulty는 확인 필요, 하, 중하, 중, 중상, 상 중 하나로 쓴다.",
+    "- questionItems의 role은 기본, 실수유도, 앞번호 고난도, 준킬러, 킬러, 서술형 변별, 확인 필요 중 하나로 쓴다.",
+    "- questionItems의 questionType은 객관식, 단답형, 서술형, 논술형, 확인 필요 중 하나로 쓴다.",
+    "- 문항 카드는 강사가 웹앱 문항 검수 단계에서 확정한다. AI는 배점/단원/난이도/역할/태그/검수 포인트의 1차 초안을 만든다.",
+    "- 여러 해 시험지가 함께 있으면 questionItems에는 선택된 시험명 또는 가장 최신 시험지 1회분만 넣는다. 3개년 비교는 텍스트 분석 필드에 반복/증감/변화를 정리한다.",
     "- blogDraft는 시험 기본 정보, 올해 총평, 단원별 현황, 킬러 문항, 다음 시험 예측 TOP 5, 공부 방향, CTA 순서로 쓴다.",
     "- instagramDraft는 7장 카드뉴스 구조로 쓴다: 표지, 시험 구성, 난이도 총평, 유형 TOP3, 킬러 포인트, 다음 시험 예측, 공부 방향/CTA.",
     "- 안내문 초안은 분석 결과를 반영하되 과장하거나 없는 사실을 만들지 않는다.",
@@ -159,7 +172,23 @@ function buildExamAnalysisPrompt(payload) {
     '  "studentAnalysisDraft": "학생 분석지 초안",',
     '  "parentNoticeDraft": "학부모 안내문 초안",',
     '  "blogDraft": "블로그 초안",',
-    '  "instagramDraft": "인스타 카드뉴스 7장 초안"',
+    '  "instagramDraft": "인스타 카드뉴스 7장 초안",',
+    '  "questionItems": [',
+    '    {',
+    '      "number": 1,',
+    '      "page": 1,',
+    '      "score": "4.4점",',
+    '      "questionType": "객관식",',
+    '      "unit": "이차함수의 최대최소",',
+    '      "difficulty": "중",',
+    '      "role": "기본",',
+    '      "source": "확인 필요",',
+    '      "correctRate": "확인 필요",',
+    '      "ocrText": "문항 조건 요약",',
+    '      "strategyComment": "AI가 본 오답 가능성과 검수 포인트",',
+    '      "tags": ["기본 문항"]',
+    '    }',
+    '  ]',
     "}"
   ].join("\n");
 }
@@ -325,6 +354,9 @@ function buildQuestionCropPrompt(payload = {}) {
 function createMockAnalysis(payload) {
   const school = payload.schoolName || "학교";
   const subject = payload.subject || "수학";
+  const sourceItems = Array.isArray(payload.questionItems) && payload.questionItems.length
+    ? payload.questionItems
+    : Array.from({ length: 5 }, (_, index) => ({ number: index + 1, page: 1 }));
   return {
     oneLineSummary: `${school} ${subject} 시험은 조건 해석과 풀이 근거 정리가 점수 차이를 만들 가능성이 큽니다.`,
     examStructure: "문항수/객관식/서술형/배점은 원본 확인 필요입니다. 시험지가 들어오면 시간 압박, 고배점 문항, 작년 대비 변화 가능성을 분리해 정리합니다.",
@@ -338,7 +370,21 @@ function createMockAnalysis(payload) {
     studentAnalysisDraft: `${school} 학생들은 이번 시험에서 조건 해석과 풀이 과정 정리가 중요했습니다. 다음 시험 전에는 핵심 유형 반복과 서술형 근거 작성 훈련이 필요합니다.`,
     parentNoticeDraft: `${school} ${subject} 시험은 조건 해석과 서술형 과정 정리가 중요한 시험으로 보입니다. 다음 시험 대비에서는 학생별 오답 원인과 학교별 출제 흐름을 함께 확인해 보완하겠습니다.`,
     blogDraft: `# ${school} ${subject} 시험 분석\n\n## 1. 시험 기본 정보\n원본 확인 후 문항수와 배점 구조를 정리합니다.\n\n## 2. 올해 총평\n이번 시험은 단순 계산보다 조건을 읽고 식으로 연결하는 힘이 중요했습니다.\n\n## 3. 공부 방향\n${academyNameForServer()}에서는 학생별 오답과 학교별 출제 흐름을 연결해 다음 시험 대비 방향을 잡습니다.`,
-    instagramDraft: `1장 표지: ${school} ${subject} 시험분석\n2장 시험 구성: 문항수/배점 원문 확인 필요\n3장 난이도 총평: 조건 해석 중심\n4장 유형 TOP3: 원본 분석 후 확정\n5장 킬러 포인트: 고배점 문항 확인 필요\n6장 다음 시험 예측: 반복 유형 중심\n7장 공부 방향/CTA: ${academyNameForServer()}`
+    instagramDraft: `1장 표지: ${school} ${subject} 시험분석\n2장 시험 구성: 문항수/배점 원문 확인 필요\n3장 난이도 총평: 조건 해석 중심\n4장 유형 TOP3: 원본 분석 후 확정\n5장 킬러 포인트: 고배점 문항 확인 필요\n6장 다음 시험 예측: 반복 유형 중심\n7장 공부 방향/CTA: ${academyNameForServer()}`,
+    questionItems: sourceItems.map((item, index) => ({
+      number: Number(item.number || item.questionNumber) || index + 1,
+      page: Number(item.page) || 1,
+      score: item.score || "확인 필요",
+      questionType: item.questionType || "확인 필요",
+      unit: item.unit || "확인 필요",
+      difficulty: item.difficulty || "확인 필요",
+      role: item.role || "기본",
+      source: item.source || "확인 필요",
+      correctRate: item.correctRate || "확인 필요",
+      ocrText: item.ocrText || "AI 초안: 문항 조건 확인 필요",
+      strategyComment: item.strategyComment || "AI 초안: 배점·단원·난이도 검수 후 보완",
+      tags: Array.isArray(item.tags) && item.tags.length ? item.tags : ["분석 필요"]
+    }))
   };
 }
 
@@ -346,12 +392,51 @@ function academyNameForServer() {
   return "으뜸수학 고태영T";
 }
 
+function normalizeQuestionItemsFromAi(items = []) {
+  if (!Array.isArray(items)) return [];
+  const difficultyOptions = new Set(["확인 필요", "하", "중하", "중", "중상", "상"]);
+  const roleOptions = new Set(["기본", "실수유도", "앞번호 고난도", "준킬러", "킬러", "서술형 변별", "확인 필요"]);
+  const questionTypeOptions = new Set(["객관식", "단답형", "서술형", "논술형", "확인 필요"]);
+  const sourceOptions = new Set(["확인 필요", "교과서", "부교재", "학교 프린트", "모의고사", "수능/평가원", "자체 변형", "기타"]);
+  const tagOptions = new Set(["기본 문항", "분석 필요", "디벨럽 가능", "실수 유도", "변별 문항", "출처 비교", "수업 확장"]);
+
+  return items
+    .map((item, index) => {
+      if (!item || typeof item !== "object") return null;
+      const number = Number(item.number || item.questionNumber || item.no) || index + 1;
+      const difficulty = String(item.difficulty || "확인 필요").trim();
+      const role = String(item.role || "기본").trim();
+      const questionType = String(item.questionType || item.type || "확인 필요").trim();
+      const source = String(item.source || "확인 필요").trim();
+      const rawTags = Array.isArray(item.tags) ? item.tags : String(item.tags || "").split(/[,/·]/);
+
+      return {
+        number,
+        page: Math.max(1, Number(item.page) || 1),
+        score: String(item.score || item.points || "").trim(),
+        questionType: questionTypeOptions.has(questionType) ? questionType : "확인 필요",
+        unit: String(item.unit || item.chapter || item.topic || "").trim(),
+        difficulty: difficultyOptions.has(difficulty) ? difficulty : "확인 필요",
+        role: roleOptions.has(role) ? role : "확인 필요",
+        source: sourceOptions.has(source) ? source : "확인 필요",
+        correctRate: String(item.correctRate || item.expectedCorrectRate || "").trim(),
+        ocrText: String(item.ocrText || item.questionSummary || item.summary || "").trim(),
+        sourceCompareComment: String(item.sourceCompareComment || item.sourceNote || "").trim(),
+        strategyComment: String(item.strategyComment || item.comment || item.teacherCheckPoint || item.reviewPoint || "").trim(),
+        tags: rawTags.map((tag) => String(tag).trim()).filter((tag) => tagOptions.has(tag))
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.page - b.page || a.number - b.number);
+}
+
 function normalizeAnalysisFields(fields, payload, rawText = "") {
   const fallback = createMockAnalysis(payload);
   const parsed = fields && typeof fields === "object" ? fields : {};
   const cleanText = String(rawText ?? "").trim();
+  const questionItems = normalizeQuestionItemsFromAi(parsed.questionItems);
 
-  return {
+  const normalized = {
     oneLineSummary: parsed.oneLineSummary || fallback.oneLineSummary,
     examStructure: parsed.examStructure || fallback.examStructure,
     aiOverview: parsed.aiOverview || cleanText || fallback.aiOverview,
@@ -366,6 +451,8 @@ function normalizeAnalysisFields(fields, payload, rawText = "") {
     blogDraft: parsed.blogDraft || fallback.blogDraft,
     instagramDraft: parsed.instagramDraft || fallback.instagramDraft
   };
+  if (questionItems.length) normalized.questionItems = questionItems;
+  return normalized;
 }
 
 function createMockComment(payload) {

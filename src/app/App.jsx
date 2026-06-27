@@ -1058,6 +1058,9 @@ function createDefaultExamAnalysisPrompt() {
     "- 학생이 틀릴 만한 지점",
     "- 강사가 확인해야 할 점",
     "- 대비 전략 후보",
+    "AI 1차 분석 단계에서 배점, 단원, 난이도는 웹앱 문항분석표의 questionItems 배열에 반드시 초안으로 채운다.",
+    "단원명/배점/난이도를 원본에서 확정할 수 없으면 빈칸으로 두지 말고 '확인 필요'로 표시한다.",
+    "여러 해 시험지가 함께 들어오면 questionItems는 선택된 시험명 또는 가장 최신 시험지 1회분의 문항표 초안으로 작성하고, 3개년 반복/증감/변화는 텍스트 분석 필드에 정리한다.",
     "",
     "[문항 태그 기준]",
     "- 기본 문항: 반드시 맞혀야 하는 개념 확인 문항",
@@ -1087,7 +1090,7 @@ function createDefaultExamAnalysisPrompt() {
     "",
     "[최종 출력 방향]",
     "1. AI 분석 결과: 시험 한 줄 총평, 시험 구조, 단원별 출제, 문항 유형, 킬러/준킬러, 실수 패턴, 확인 필요 항목",
-    "2. 문항분석표 초안: 문항별 번호, 배점, 단원, 유형, 난이도, 역할, 태그, 출처 후보, 코멘트 후보",
+    "2. 문항분석표 초안: questionItems 배열로 문항별 번호, 페이지, 배점, 단원, 유형, 난이도, 역할, 태그, 출처 후보, 코멘트 후보를 반환",
     "3. 강사 인사이트 입력 가이드: 어떤 문항에 코멘트를 달아야 하는지, 어떤 문항을 크롭해서 슬라이드화하면 좋은지 제안",
     "4. 학생 대비 전략: 상위권, 중위권, 하위권으로 나누어 작성",
     "5. 재가공 핵심 메시지: 학부모가 알고 싶어할 정보, 학생에게 필요한 정보, 블로그/인스타로 쓸 수 있는 정보"
@@ -1196,6 +1199,73 @@ function normalizeExamQuestionItems(items = []) {
   return items
     .map((item, index) => createExamQuestionItem(item, index))
     .sort((a, b) => Number(a.number || 0) - Number(b.number || 0));
+}
+
+function normalizeAiQuestionDrafts(items = []) {
+  if (!Array.isArray(items)) return [];
+  return items
+    .map((item, index) => {
+      if (!item || typeof item !== "object") return null;
+      const number = Number(item.number || item.questionNumber || item.no) || index + 1;
+      return createExamQuestionItem({
+        number,
+        page: item.page || 1,
+        score: item.score || item.points || "",
+        questionType: item.questionType || item.type || "확인 필요",
+        unit: item.unit || item.chapter || item.topic || "",
+        difficulty: item.difficulty || "확인 필요",
+        role: item.role || "기본",
+        source: item.source || "확인 필요",
+        correctRate: item.correctRate || item.expectedCorrectRate || "",
+        ocrText: item.ocrText || item.questionSummary || item.summary || "",
+        sourceCompareComment: item.sourceCompareComment || item.sourceNote || "",
+        strategyComment: item.strategyComment || item.comment || item.teacherCheckPoint || item.reviewPoint || "",
+        tags: Array.isArray(item.tags) ? item.tags : String(item.tags || "").split(/[,/·]/).map((tag) => tag.trim()).filter(Boolean)
+      }, index);
+    })
+    .filter(Boolean)
+    .sort((a, b) => Number(a.page || 1) - Number(b.page || 1) || Number(a.number || 0) - Number(b.number || 0));
+}
+
+function mergeAiQuestionDrafts(existingItems = [], aiItems = []) {
+  const existing = normalizeExamQuestionItems(existingItems);
+  const drafts = normalizeAiQuestionDrafts(aiItems);
+  if (!drafts.length) return existing;
+  const isBlank = (value) => !String(value ?? "").trim() || ["-", "확인 필요", "단원 미입력"].includes(String(value ?? "").trim());
+  const mergeWhenBlank = (currentValue, draftValue, defaultValue = "") => {
+    const normalizedDraft = String(draftValue ?? "").trim();
+    if (!normalizedDraft || normalizedDraft === "확인 필요") return currentValue || defaultValue;
+    return isBlank(currentValue) ? normalizedDraft : currentValue;
+  };
+  const mergeDefaultRole = (currentValue, draftValue) => {
+    const normalizedDraft = String(draftValue ?? "").trim();
+    if (!normalizedDraft || normalizedDraft === "확인 필요") return currentValue || "기본";
+    return !currentValue || currentValue === "기본" || currentValue === "확인 필요" ? normalizedDraft : currentValue;
+  };
+  const byNumber = new Map(existing.map((item) => [Number(item.number), item]));
+  const usedDraftIds = new Set();
+  const merged = existing.map((item) => {
+    const draft = drafts.find((candidate) => Number(candidate.number) === Number(item.number) && !usedDraftIds.has(candidate.questionId));
+    if (!draft) return item;
+    usedDraftIds.add(draft.questionId);
+    return {
+      ...item,
+      page: item.page || draft.page || 1,
+      score: mergeWhenBlank(item.score, draft.score),
+      questionType: mergeWhenBlank(item.questionType, draft.questionType, "확인 필요"),
+      unit: mergeWhenBlank(item.unit, draft.unit),
+      difficulty: mergeWhenBlank(item.difficulty, draft.difficulty, "확인 필요"),
+      role: mergeDefaultRole(item.role, draft.role),
+      source: mergeWhenBlank(item.source, draft.source, "확인 필요"),
+      correctRate: mergeWhenBlank(item.correctRate, draft.correctRate),
+      ocrText: item.ocrText || draft.ocrText,
+      sourceCompareComment: item.sourceCompareComment || draft.sourceCompareComment,
+      strategyComment: item.strategyComment || draft.strategyComment,
+      tags: Array.from(new Set([...(item.tags ?? []), ...(draft.tags ?? [])]))
+    };
+  });
+  const additions = drafts.filter((draft) => !byNumber.has(Number(draft.number)) && !usedDraftIds.has(draft.questionId));
+  return normalizeExamQuestionItems([...merged, ...additions]);
 }
 
 function createExamQuestionItemsFromCount(count, existingItems = []) {
@@ -3234,11 +3304,21 @@ function isLegacyDefaultExamAnalysisPrompt(prompt = "") {
   const text = String(prompt ?? "");
   return Boolean(
     text &&
-    !text.includes("[웹앱의 목적]") &&
-    text.includes("학교별 내신 시험분석가") &&
     (
-      text.includes("5대 핵심 패턴") ||
-      text.includes("반드시 요청된 JSON 필드 형식")
+      (
+        !text.includes("[웹앱의 목적]") &&
+        text.includes("학교별 내신 시험분석가") &&
+        (
+          text.includes("5대 핵심 패턴") ||
+          text.includes("반드시 요청된 JSON 필드 형식")
+        )
+      ) ||
+      (
+        text.includes("[웹앱의 목적]") &&
+        text.includes("AI는 최종 판단자가 아니라 1차 구조화 담당자") &&
+        text.includes("문항분석표 초안: 문항별 번호") &&
+        !text.includes("questionItems 배열")
+      )
     )
   );
 }
@@ -6050,6 +6130,7 @@ export function App() {
         throw new Error(result.error || "시험분석 API 요청에 실패했습니다.");
       }
       const normalizedAiFields = normalizeExamAnalysisAiFields(result.result.fields);
+      const { questionItems: aiQuestionItems = [], ...analysisAiFields } = normalizedAiFields;
       const aiLastRunAt = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
 
       setExamAnalyses((current) =>
@@ -6057,8 +6138,12 @@ export function App() {
           item.examAnalysisId === analysis.examAnalysisId
             ? {
                 ...item,
-                ...normalizedAiFields,
-                aiInitialFields: normalizedAiFields,
+                ...analysisAiFields,
+                questionItems: mergeAiQuestionDrafts(item.questionItems, aiQuestionItems),
+                aiInitialFields: {
+                  ...analysisAiFields,
+                  questionItems: normalizeAiQuestionDrafts(aiQuestionItems)
+                },
                 aiInitialGeneratedAt: aiLastRunAt,
                 aiProvider: result.result.provider,
                 aiModel: result.result.model,
