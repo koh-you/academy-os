@@ -1033,7 +1033,7 @@ function createDefaultExamAnalysisPrompt() {
     "",
     "[분기 규칙]",
     "입력 자료가 1개년 기출이면 해당 시험 1회분을 깊게 분석한다.",
-    "- 문항분석표, 단원별 출제, 킬러·준킬러, 실수 유도 문항, 학생 대비 전략을 우선 만든다.",
+    "- 문항분석표, 단원별 출제, 킬러·준킬러, 변형·연계 문항, 학생 대비 전략을 우선 만든다.",
     "- 각 문항의 단원, 유형, 난이도, 역할, 태그, 출처 후보, 학생 오답 가능성, 강사 검수 포인트를 정리한다.",
     "- 배점은 해당 시험 안에서 어느 문항군이 점수에 영향을 주는지 문장으로 설명한다.",
     "",
@@ -1066,16 +1066,19 @@ function createDefaultExamAnalysisPrompt() {
     "AI 1차 분석 단계에서 배점, 단원, 난이도는 웹앱 문항분석표의 questionItems 배열에 반드시 초안으로 채운다.",
     "AI가 읽은 전체 문항 수는 questionComposition.total에 넣고, 근거 문구는 questionComposition.evidence에 적는다.",
     "유사문항 본문은 웹앱에 넣지 않는다. 대신 questionItems의 similarProblemNeeded, similarProblemSource, similarProblemRelation에 메타데이터만 입력한다.",
+    "유사문항 분석지나 교과서/부교재/EBS/모의고사 연계가 확인되면 숫자변형문항, 조건변형문항, 유사유형문항, 교과서 연계, 부교재 연계, EBS 연계, 모의고사 연계 태그로 기록한다.",
     "단원명/배점/난이도를 원본에서 확정할 수 없으면 빈칸으로 두지 말고 '확인 필요'로 표시한다.",
     "여러 해 시험지가 함께 들어오면 questionItems는 웹앱에서 현재 선택한 시험지/연도 1회분의 전체 문항 수만큼 작성하고, 3개년 반복/증감/변화는 텍스트 분석 필드에 정리한다.",
     "일부 페이지만 보이거나 OCR 일부만 있더라도 확인 가능한 전체 문항 수를 기준으로 questionItems를 만들고, 모르는 값은 '확인 필요'로 둔다.",
     "",
     "[문항 태그 기준]",
     "- 기본문항: 반드시 맞혀야 하는 개념 확인 문항",
-    "- 실수문항: 계산, 부호, 조건 누락, 그래프 해석 등 실수가 잘 나는 문항",
-    "- 주요문항: 수업에서 반드시 다루거나 원문항 비교, 오답 원인 정리가 필요한 문항",
+    "- 실수문항: 계산, 부호, 조건 누락, 그래프 해석 등 확인할 위험이 있는 문항",
+    "- 주요문항: 수업에서 반드시 다루거나 변형 관계 분석, 오답 원인 정리가 필요한 문항",
     "- 1등급 변별문항: 상위권 점수 차이를 만드는 고난도/킬러 문항",
     "- 2등급 변별문항: 중상위권을 가르는 준킬러 또는 조건 해석형 문항",
+    "- 숫자변형문항/조건변형문항/유사유형문항: 유사문항 분석지에서 변형 관계가 확인된 문항",
+    "- 교과서 연계/부교재 연계/EBS 연계/모의고사 연계: 출처 메타데이터가 확인된 문항",
     "",
     "[표와 다이어그램 산출 의도]",
     "AI는 웹앱에서 강사가 검수할 수 있도록 다음 표의 초안을 만든다.",
@@ -1083,10 +1086,10 @@ function createDefaultExamAnalysisPrompt() {
     "2. 단원별 출제표",
     "3. 부교재·유사문항 활용표",
     "4. 학생 대비전략표",
-    "또한 대비전략 흐름은 시험 범위 확인 → 문항별 검수 → 원문항 비교 → 변별 문항 훈련 → 학생 수준별 보강 순서로 정리한다.",
+    "또한 대비전략 흐름은 시험 범위 확인 → 문항별 검수 → 변형 관계 분석 → 변별 문항 훈련 → 학생 수준별 보강 순서로 정리한다.",
     "",
     "[작성 원칙]",
-    "- 시험지를 설명하는 데서 끝내지 말고, 학생·학부모·강사가 다음 행동을 결정할 수 있게 분석한다.",
+    "- 시험지를 설명하는 데서 끝내지 말고, 학생·강사가 다음 행동을 결정할 수 있게 분석한다.",
     "- 각 항목은 가능하면 사실 근거 → 점수에 미친 영향 → 다음 학습 행동 순서로 쓴다.",
     "- '어려웠다', '중요하다', '복습이 필요하다' 같은 추상 문장으로 끝내지 않는다.",
     "- 확인되지 않은 문항번호, 배점, 단원명, 출처를 지어내지 않는다.",
@@ -1095,11 +1098,11 @@ function createDefaultExamAnalysisPrompt() {
     "- 강사가 문항별 코멘트와 현장 체감을 추가할 수 있도록, AI 결과는 검수 가능한 초안으로 쓴다.",
     "",
     "[최종 출력 방향]",
-    "1. AI 분석 결과: 시험 한 줄 총평, 시험 구조, 단원별 출제, 문항 유형, 킬러/준킬러, 실수 패턴, 확인 필요 항목",
+    "1. AI 분석 결과: 시험 한 줄 총평, 시험 구조, 단원별 출제, 문항 유형, 킬러/준킬러, 변형·연계 분석, 확인 필요 항목",
     "2. 문항분석표 초안: questionItems 배열로 문항별 번호, 페이지, 배점, 단원, 유형, 난이도, 역할, 태그, 출처 후보, 유사문항 메타데이터, 코멘트 후보를 반환",
     "3. 강사 인사이트 입력 가이드: 어떤 문항에 코멘트를 달아야 하는지, 어떤 문항을 크롭해서 슬라이드화하면 좋은지 제안",
     "4. 학생 대비 전략: 상위권, 중위권, 하위권으로 나누어 작성",
-    "5. 재가공 핵심 메시지: 학부모가 알고 싶어할 정보, 학생에게 필요한 정보, 블로그/인스타로 쓸 수 있는 정보"
+    "5. 재가공 핵심 메시지: 학생에게 필요한 정보, 블로그/인스타로 쓸 수 있는 정보"
   ].join("\n");
 }
 
@@ -1147,7 +1150,6 @@ function createDefaultExamAnalysis(examPrepRow = {}) {
     unitDistribution: "단원별 문항수와 배점이 여기에 정리됩니다.",
     typeClassification: "기본/준킬러/킬러 유형과 점수 영향이 여기에 정리됩니다.",
     killerProblems: "킬러/준킬러 문항 번호, 핵심 함정, 풀이 접근이 여기에 정리됩니다.",
-    mistakePatterns: "학생들이 많이 틀릴 지점과 현장 체감 오답 패턴을 정리합니다.",
     fiveCorePatterns: "시험 전 확인할 5대 핵심 출제 패턴이 여기에 정리됩니다.",
     sourceCheckNotes: "OCR이 깨진 부분, 문항번호/배점 확인 필요 항목이 여기에 정리됩니다.",
     insightSummary: "이번 시험 출제 패턴 한 줄:\n작년 대비 변화:\n학생들이 가장 많이 틀린 유형:\n다음 시험 예측 한 줄:\n\n부연:",
@@ -1157,16 +1159,15 @@ function createDefaultExamAnalysis(examPrepRow = {}) {
     insightPrediction: "다음 시험에 다시 나올 가능성이 높은 유형:\n줄어들 가능성이 있는 단원:\n학부모에게 설명할 예측 한 줄:\n\n부연:",
     insightDirection: "이 학교 학생들에게 가장 강조할 점:\n실수 줄이는 핵심 팁:\n누적테스트/보충에 넣을 유형:\n\n부연:",
     studentAnalysisDraft: "학생용 분석지는 A 총평 + B 단원별 인사이트 + D 학습 방향을 중심으로 생성합니다.",
-    parentNoticeDraft: "학부모 안내문은 시험 특징, 학생들이 조심할 점, 다음 대비 방향을 정중한 문장으로 정리합니다.",
     blogDraft: "블로그 초안은 학부모가 읽기 쉬운 톤으로 시험 개요, 킬러문항, 학습 방향을 연결합니다.",
-    instagramDraft: `1장 표지\n2장 시험 한 줄 총평\n3장 출제 분포\n4장 킬러문항\n5장 학생 실수\n6장 학습 방향\n7장 ${academyBrandName} 안내`,
+    instagramDraft: `1장 표지\n2장 시험 한 줄 총평\n3장 출제 분포\n4장 킬러문항\n5장 변형·연계 분석\n6장 학습 방향\n7장 ${academyBrandName} 안내`,
     pipelineStage: "원본 입력"
   };
 }
 
 const examQuestionDifficultyOptions = ["확인 필요", "하", "중하", "중", "중상", "상"];
 const examQuestionRoleOptions = ["기본", "실수유도", "앞번호 고난도", "준킬러", "킬러", "서술형 변별", "확인 필요"];
-const examQuestionSourceOptions = ["확인 필요", "교과서", "부교재", "학교 프린트", "모의고사", "수능/평가원", "자체 변형", "기타"];
+const examQuestionSourceOptions = ["확인 필요", "교과서", "부교재", "EBS", "학교 프린트", "모의고사", "수능/평가원", "자체 변형", "기타"];
 const examQuestionTypeOptions = ["객관식", "단답형", "서술형", "논술형", "확인 필요"];
 const similarProblemNeedOptions = ["확인 필요", "필요", "불필요"];
 const similarProblemRelationOptions = ["확인 필요", "숫자변형", "조건변형", "유사유형", "기타"];
@@ -1175,7 +1176,14 @@ const examQuestionTagOptions = [
   "실수문항",
   "주요문항",
   "1등급 변별문항",
-  "2등급 변별문항"
+  "2등급 변별문항",
+  "숫자변형문항",
+  "조건변형문항",
+  "유사유형문항",
+  "교과서 연계",
+  "부교재 연계",
+  "EBS 연계",
+  "모의고사 연계"
 ];
 const examQuestionInsightTags = ["주요문항", "1등급 변별문항", "2등급 변별문항"];
 
@@ -1198,7 +1206,22 @@ function normalizeExamQuestionTag(tag = "") {
     "킬러": "1등급 변별문항",
     "1등급 변별문항": "1등급 변별문항",
     "준킬러": "2등급 변별문항",
-    "2등급 변별문항": "2등급 변별문항"
+    "2등급 변별문항": "2등급 변별문항",
+    "숫자변형": "숫자변형문항",
+    "숫자변형문항": "숫자변형문항",
+    "조건변형": "조건변형문항",
+    "조건변형문항": "조건변형문항",
+    "유사유형": "유사유형문항",
+    "유사문항": "유사유형문항",
+    "유사유형문항": "유사유형문항",
+    "교과서": "교과서 연계",
+    "교과서 연계": "교과서 연계",
+    "부교재": "부교재 연계",
+    "부교재 연계": "부교재 연계",
+    "EBS": "EBS 연계",
+    "EBS 연계": "EBS 연계",
+    "모의고사": "모의고사 연계",
+    "모의고사 연계": "모의고사 연계"
   };
   return aliases[text] || (examQuestionTagOptions.includes(text) ? text : "");
 }
@@ -1206,6 +1229,32 @@ function normalizeExamQuestionTag(tag = "") {
 function normalizeExamQuestionTags(tags = []) {
   const rawTags = Array.isArray(tags) ? tags : String(tags || "").split(/[,/·]/);
   return Array.from(new Set(rawTags.map(normalizeExamQuestionTag).filter(Boolean)));
+}
+
+function getDerivedExamQuestionMetadataTags(seed = {}) {
+  const tags = [];
+  const relationTagMap = {
+    "숫자변형": "숫자변형문항",
+    "조건변형": "조건변형문항",
+    "유사유형": "유사유형문항"
+  };
+  const sourceTagMap = {
+    "교과서": "교과서 연계",
+    "부교재": "부교재 연계",
+    "EBS": "EBS 연계",
+    "모의고사": "모의고사 연계"
+  };
+  if (relationTagMap[seed.similarProblemRelation]) tags.push(relationTagMap[seed.similarProblemRelation]);
+  if (seed.similarProblemNeeded === "필요" && !relationTagMap[seed.similarProblemRelation]) tags.push("유사유형문항");
+  if (sourceTagMap[seed.source]) tags.push(sourceTagMap[seed.source]);
+  for (const sourceText of [seed.similarProblemSource, seed.source]) {
+    const text = String(sourceText || "");
+    if (text.includes("교과서")) tags.push("교과서 연계");
+    if (text.includes("부교재")) tags.push("부교재 연계");
+    if (/EBS/i.test(text)) tags.push("EBS 연계");
+    if (text.includes("모의고사")) tags.push("모의고사 연계");
+  }
+  return tags;
 }
 
 function isExamQuestionInsightRecommended(item = {}) {
@@ -1223,7 +1272,7 @@ function hasExamQuestionDetailedInsight(item = {}) {
   const safeItem = item || {};
   return [
     safeItem.teacherComment,
-    safeItem.sourceCompareComment,
+    safeItem.variationRelationComment,
     safeItem.strategyComment,
     safeItem.similarProblemSource,
     safeItem.similarProblemRelation && safeItem.similarProblemRelation !== "확인 필요" ? safeItem.similarProblemRelation : "",
@@ -1252,9 +1301,9 @@ function createExamQuestionItem(seed = {}, index = 0) {
     cropBox: seed.cropBox || null,
     ocrText: seed.ocrText || "",
     teacherComment: seed.teacherComment || "",
-    sourceCompareComment: seed.sourceCompareComment || "",
+    variationRelationComment: seed.variationRelationComment || "",
     strategyComment: seed.strategyComment || "",
-    tags: normalizeExamQuestionTags(seed.tags)
+    tags: normalizeExamQuestionTags([...(Array.isArray(seed.tags) ? seed.tags : String(seed.tags || "").split(/[,/·]/)), ...getDerivedExamQuestionMetadataTags(seed)])
   };
 }
 
@@ -1288,7 +1337,7 @@ function normalizeAiQuestionDrafts(items = []) {
         cropSourceUrl: item.cropSourceUrl || item.sourceUrl || "",
         ocrText: item.ocrText || item.questionSummary || item.summary || "",
         teacherComment: item.teacherComment || item.instructorComment || "",
-        sourceCompareComment: item.sourceCompareComment || item.sourceNote || "",
+        variationRelationComment: item.variationRelationComment || item.sourceNote || "",
         strategyComment: item.strategyComment || item.comment || item.teacherCheckPoint || item.reviewPoint || "",
         tags: Array.isArray(item.tags) ? item.tags : String(item.tags || "").split(/[,/·]/).map((tag) => tag.trim()).filter(Boolean)
       }, index);
@@ -1456,7 +1505,7 @@ function mergeAiQuestionDrafts(existingItems = [], aiItems = [], options = {}) {
       cropSourceUrl: item.cropSourceUrl || draft.cropSourceUrl,
       ocrText: item.ocrText || draft.ocrText,
       teacherComment: item.teacherComment || draft.teacherComment,
-      sourceCompareComment: item.sourceCompareComment || draft.sourceCompareComment,
+      variationRelationComment: item.variationRelationComment || draft.variationRelationComment,
       strategyComment: item.strategyComment || draft.strategyComment,
       tags: Array.from(new Set([...(item.tags ?? []), ...(draft.tags ?? [])]))
     };
@@ -1557,8 +1606,31 @@ function buildHeuristicQuestionCropBoxes(items = [], pageNumber = 1, pageCount =
 
 function getExamQuestionCommentCount(questionItems = []) {
   return normalizeExamQuestionItems(questionItems).filter((item) =>
-    [item.teacherComment, item.sourceCompareComment, item.strategyComment].some((value) => String(value || "").trim())
+    [item.teacherComment, item.variationRelationComment, item.strategyComment].some((value) => String(value || "").trim())
   ).length;
+}
+
+function parseExamScoreValue(value = "") {
+  const numeric = Number(String(value ?? "").replace(/[^0-9.]/g, ""));
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : 0;
+}
+
+function getExamTotalScore(questionItems = [], questionComposition = null) {
+  const composition = normalizeExamQuestionComposition(questionComposition);
+  const compositionScore = parseExamScoreValue(composition?.totalScore);
+  if (compositionScore) return compositionScore;
+  const itemSum = normalizeExamQuestionItems(questionItems).reduce((sum, item) => sum + parseExamScoreValue(item.score), 0);
+  return itemSum || 100;
+}
+
+function formatQuestionScoreWithWeight(item = {}, questionItems = [], questionComposition = null) {
+  const score = parseExamScoreValue(item.score);
+  const rawScore = String(item.score || "").trim();
+  if (!score) return rawScore || "-";
+  const totalScore = getExamTotalScore(questionItems, questionComposition);
+  const percent = totalScore ? ((score / totalScore) * 100).toFixed(1).replace(/\.0$/, "") : "";
+  const scoreLabel = rawScore ? (/[점%]$/.test(rawScore) ? rawScore : `${rawScore}점`) : `${score}점`;
+  return percent ? `${scoreLabel} · ${percent}%` : scoreLabel;
 }
 
 function buildQuestionInsightText(questionItems = []) {
@@ -1567,7 +1639,7 @@ function buildQuestionInsightText(questionItems = []) {
       item.unit,
       item.role,
       item.teacherComment,
-      item.sourceCompareComment,
+      item.variationRelationComment,
       item.strategyComment,
       item.similarProblemNeeded && item.similarProblemNeeded !== "확인 필요" ? item.similarProblemNeeded : "",
       item.similarProblemSource,
@@ -1586,7 +1658,7 @@ function buildQuestionInsightText(questionItems = []) {
       item.similarProblemSource ? `  유사문항 출처: ${item.similarProblemSource}` : "",
       item.similarProblemRelation && item.similarProblemRelation !== "확인 필요" ? `  유사문항 유형: ${item.similarProblemRelation}` : "",
       item.teacherComment ? `  강사 코멘트: ${item.teacherComment}` : "",
-      item.sourceCompareComment ? `  원문항/출처: ${item.sourceCompareComment}` : "",
+      item.variationRelationComment ? `  변형 관계: ${item.variationRelationComment}` : "",
       item.strategyComment ? `  대비 전략: ${item.strategyComment}` : ""
     ].filter(Boolean).join("\n");
   }).join("\n");
@@ -1597,7 +1669,7 @@ function summarizeQuestionUnits(questionItems = []) {
   normalizeExamQuestionItems(questionItems).forEach((item) => {
     const unit = String(item.unit || "단원 미입력").trim();
     const previous = unitMap.get(unit) || { unit, count: 0, score: 0, hard: 0, questions: [] };
-    const score = Number(String(item.score || "").replace(/[^0-9.]/g, ""));
+    const score = parseExamScoreValue(item.score);
     previous.count += 1;
     previous.score += Number.isFinite(score) ? score : 0;
     if (["중상", "상"].includes(item.difficulty) || ["준킬러", "킬러", "앞번호 고난도", "서술형 변별"].includes(item.role)) {
@@ -1643,7 +1715,7 @@ function getExamStrategyFlowNodes(questionItems = []) {
   return [
     { title: "1. 시험 범위 정리", detail: "시험관리 탭 범위와 OCR 원문 확인" },
     { title: "2. 문항별 검수", detail: `${items.length || 0}문항 단원·난이도·역할 확정` },
-    { title: "3. 원문항 비교", detail: sourceCount ? `출처/유사문항 입력 ${sourceCount}문항` : "부교재/모의고사 원문항 연결" },
+    { title: "3. 변형 관계 분석", detail: sourceCount ? `출처/유사문항 입력 ${sourceCount}문항` : "교과서/부교재/EBS/모의고사 연계 확인" },
     { title: "4. 변별 문항 훈련", detail: hardCount ? `변별 후보 ${hardCount}문항` : "준킬러/킬러 후보 확정" },
     { title: "5. 코멘트 기반 보강", detail: commentCount ? `강사 코멘트 ${commentCount}개 반영` : "학생별 오답과 수업 전략 입력" }
   ];
@@ -1671,7 +1743,7 @@ function createExamFinalDocumentFromAnalysis(analysis = {}) {
     similarProblemNeeded: item.similarProblemNeeded || "확인 필요",
     similarProblemSource: item.similarProblemSource || "",
     similarProblemRelation: item.similarProblemRelation || "확인 필요",
-    comment: item.teacherComment || item.strategyComment || item.sourceCompareComment || ""
+    comment: item.teacherComment || item.strategyComment || item.variationRelationComment || ""
   }));
 
   return {
@@ -1723,7 +1795,7 @@ function createExamFinalDocumentFromAnalysis(analysis = {}) {
         columns: ["요인", "해당 문항", "비고"],
         rows: [
           ["킬러/준킬러", questionItems.filter((item) => ["준킬러", "킬러", "1등급 변별문항"].includes(item.role) || item.tags?.includes("1등급 변별문항")).map((item) => `${item.number}번`).join(", ") || "확인 필요", analysis.insightKiller || ""],
-          ["실수 유도", questionItems.filter((item) => item.role === "실수유도" || item.tags?.includes("실수문항")).map((item) => `${item.number}번`).join(", ") || "확인 필요", analysis.mistakePatterns || ""],
+          ["고배점 문항", questionItems.filter((item) => parseExamScoreValue(item.score) >= Math.max(4, getExamTotalScore(questionItems, analysis.questionComposition) * 0.05)).map((item) => `${item.number}번(${formatQuestionScoreWithWeight(item, questionItems, analysis.questionComposition)})`).join(", ") || "확인 필요", "문항 수가 달라지면 같은 배점도 전체 대비 비중이 달라집니다."],
           ["조건 해석", questionItems.filter((item) => ["앞번호 고난도", "서술형 변별"].includes(item.role)).map((item) => `${item.number}번`).join(", ") || "확인 필요", analysis.typeClassification || ""]
         ]
       },
@@ -1731,13 +1803,13 @@ function createExamFinalDocumentFromAnalysis(analysis = {}) {
         id: createFinalDocumentId("table"),
         type: "table",
         title: "부교재·유사문항 활용",
-        columns: ["문항", "출처", "유사문항", "변형 구분", "메모"],
+        columns: ["문항", "출처", "유사문항", "변형 구분", "변형 관계"],
         rows: (sourceRows.length ? sourceRows : questionItems.filter((item) => item.similarProblemNeeded === "필요")).map((item) => [
           `${item.number}번`,
           item.similarProblemSource || item.source || "확인 필요",
           item.similarProblemNeeded || "확인 필요",
           item.similarProblemRelation || "확인 필요",
-          item.sourceCompareComment || "비교 메모 입력"
+          item.variationRelationComment || "변형 관계 메모 입력"
         ])
       },
       {
@@ -1750,7 +1822,7 @@ function createExamFinalDocumentFromAnalysis(analysis = {}) {
         id: createFinalDocumentId("text"),
         type: "text",
         title: "점수 차이를 만든 결정 요인",
-        value: [analysis.killerProblems, analysis.mistakePatterns, analysis.insightStudentErrors].filter(Boolean).join("\n\n")
+        value: [analysis.killerProblems, analysis.insightStudentErrors].filter(Boolean).join("\n\n")
       },
       {
         id: createFinalDocumentId("questionSlots"),
@@ -1863,11 +1935,9 @@ const examAnalysisFieldKeys = [
   "unitDistribution",
   "typeClassification",
   "killerProblems",
-  "mistakePatterns",
   "fiveCorePatterns",
   "sourceCheckNotes",
   "studentAnalysisDraft",
-  "parentNoticeDraft",
   "blogDraft",
   "instagramDraft"
 ];
@@ -2063,11 +2133,9 @@ function getExamAnalysisInitialFields(analysis = {}) {
     unitDistribution: analysis.unitDistribution,
     typeClassification: analysis.typeClassification,
     killerProblems: analysis.killerProblems,
-    mistakePatterns: analysis.mistakePatterns,
     fiveCorePatterns: analysis.fiveCorePatterns,
     sourceCheckNotes: analysis.sourceCheckNotes,
     studentAnalysisDraft: analysis.studentAnalysisDraft,
-    parentNoticeDraft: analysis.parentNoticeDraft,
     blogDraft: analysis.blogDraft,
     instagramDraft: analysis.instagramDraft
   });
@@ -2096,11 +2164,9 @@ function ExamAnalysisInitialView({ analysis }) {
         ["unitDistribution", "단원별 출제 분포"],
         ["typeClassification", "유형 분류"],
         ["killerProblems", "킬러/준킬러 문항"],
-        ["mistakePatterns", "학생 실수 패턴"],
         ["fiveCorePatterns", "5대 핵심 패턴"],
         ["sourceCheckNotes", "확인 필요 항목"],
         ["studentAnalysisDraft", "학생 분석지 초안"],
-        ["parentNoticeDraft", "학부모 안내문 초안"],
         ["blogDraft", "블로그 초안"],
         ["instagramDraft", "인스타 카드뉴스 초안"]
       ].map(([field, title]) => (
@@ -2729,12 +2795,12 @@ function ExamFinalQuestionSlotEditor({ block, updateBlock }) {
   );
 }
 
-function ExamQuestionInsightTables({ questionItems = [] }) {
+function ExamQuestionInsightTables({ questionItems = [], questionComposition = null }) {
   const items = normalizeExamQuestionItems(questionItems);
   const commentedItems = items.filter((item) =>
     [
       item.teacherComment,
-      item.sourceCompareComment,
+      item.variationRelationComment,
       item.strategyComment,
       item.similarProblemSource,
       item.similarProblemNeeded && item.similarProblemNeeded !== "확인 필요" ? item.similarProblemNeeded : "",
@@ -2798,7 +2864,7 @@ function ExamQuestionInsightTables({ questionItems = [] }) {
             <thead>
               <tr>
                 <th>문항</th>
-                <th>배점</th>
+                <th>배점/비중</th>
                 <th>단원</th>
                 <th>난이도</th>
                 <th>역할</th>
@@ -2810,7 +2876,7 @@ function ExamQuestionInsightTables({ questionItems = [] }) {
               {items.map((item) => (
                 <tr key={item.questionId}>
                   <td>{item.number}번</td>
-                  <td>{item.score || "-"}</td>
+                  <td>{formatQuestionScoreWithWeight(item, items, questionComposition)}</td>
                   <td>{item.unit || "-"}</td>
                   <td>{item.difficulty || "-"}</td>
                   <td>{item.role || "-"}</td>
@@ -2867,7 +2933,7 @@ function ExamQuestionInsightTables({ questionItems = [] }) {
                 <th>출처</th>
                 <th>유사문항</th>
                 <th>변형 구분</th>
-                <th>원문항 비교/변형</th>
+                <th>변형 관계</th>
               </tr>
             </thead>
             <tbody>
@@ -2877,7 +2943,7 @@ function ExamQuestionInsightTables({ questionItems = [] }) {
                   <td>{item.similarProblemSource || item.source}</td>
                   <td>{item.similarProblemNeeded || "확인 필요"}</td>
                   <td>{item.similarProblemRelation || "확인 필요"}</td>
-                  <td>{item.sourceCompareComment || "비교 코멘트 입력 필요"}</td>
+                  <td>{item.variationRelationComment || "변형 관계 입력 필요"}</td>
                 </tr>
               )) : (
                 <tr><td colSpan="5">출처나 유사문항 메타데이터를 입력하면 자동으로 정리됩니다.</td></tr>
@@ -2961,7 +3027,7 @@ function ExamAnalysisFinalReport({ analysis }) {
         </article>
         <article>
           <strong>최종 산출물</strong>
-          <span>강사용 · 학생/학부모 · 홍보용</span>
+          <span>강사용 · 학생용 · 블로그 · 인스타</span>
         </article>
       </section>
 
@@ -2988,8 +3054,8 @@ function ExamAnalysisFinalReport({ analysis }) {
         <ExamAnalysisReportSection title="4. 유형 분류와 킬러/준킬러">
           <ExamAnalysisReportText value={[analysis.typeClassification, analysis.killerProblems, analysis.insightKiller].filter(Boolean).join("\n\n")} />
         </ExamAnalysisReportSection>
-        <ExamAnalysisReportSection title="5. 학생 실수와 학습 방향">
-          <ExamAnalysisReportText value={[analysis.mistakePatterns, analysis.insightStudentErrors, analysis.insightDirection].filter(Boolean).join("\n\n")} />
+        <ExamAnalysisReportSection title="5. 학생 오답과 학습 방향">
+          <ExamAnalysisReportText value={[analysis.insightStudentErrors, analysis.insightDirection].filter(Boolean).join("\n\n")} />
         </ExamAnalysisReportSection>
       </div>
 
@@ -2999,7 +3065,7 @@ function ExamAnalysisFinalReport({ analysis }) {
 
       {normalizeExamQuestionItems(analysis.questionItems).length ? (
         <ExamAnalysisReportSection title="7. 문항별 검수와 강사 코멘트">
-          <ExamQuestionInsightTables questionItems={analysis.questionItems} />
+          <ExamQuestionInsightTables questionItems={analysis.questionItems} questionComposition={analysis.questionComposition} />
           <ExamStrategyFlow questionItems={analysis.questionItems} />
         </ExamAnalysisReportSection>
       ) : null}
@@ -3007,9 +3073,6 @@ function ExamAnalysisFinalReport({ analysis }) {
       <section className="examAnalysisReportOutputs">
         <ExamAnalysisReportSection title="학생 분석지">
           <ExamAnalysisReportText value={analysis.studentAnalysisDraft} />
-        </ExamAnalysisReportSection>
-        <ExamAnalysisReportSection title="학부모 안내문">
-          <ExamAnalysisReportText value={analysis.parentNoticeDraft} />
         </ExamAnalysisReportSection>
         <ExamAnalysisReportSection title="블로그 초안">
           <ExamAnalysisReportText value={analysis.blogDraft} />
@@ -3030,7 +3093,6 @@ const examAnalysisDetailSections = [
     ["unitDistribution", "단원별 출제 분포", 6],
     ["typeClassification", "유형 분류", 6],
     ["killerProblems", "킬러/준킬러 문항", 6],
-    ["mistakePatterns", "학생 실수 패턴", 6],
     ["fiveCorePatterns", "5대 핵심 패턴", 6],
     ["sourceCheckNotes", "OCR/원문 확인 필요", 5]
   ] },
@@ -3042,9 +3104,8 @@ const examAnalysisDetailSections = [
     ["insightPrediction", "E. 다음 시험 예측", 7],
     ["insightDirection", "F. 학습 방향", 7]
   ] },
-  { id: "output", title: "산출물 초안", description: "학생/학부모/홍보용 산출물을 수정합니다.", fields: [
+  { id: "output", title: "산출물 초안", description: "학생용/블로그/인스타 산출물을 수정합니다.", fields: [
     ["studentAnalysisDraft", "학생 분석지", 8],
-    ["parentNoticeDraft", "학부모 안내문", 8],
     ["blogDraft", "블로그 초안", 8],
     ["instagramDraft", "인스타 카드뉴스", 8]
   ] }
@@ -12827,7 +12888,6 @@ function ExamAnalysisCenter({
         selectedAnalysis.unitDistribution ? `# 단원별 출제 분포\n${selectedAnalysis.unitDistribution}` : "",
         selectedAnalysis.typeClassification ? `# 유형 분류\n${selectedAnalysis.typeClassification}` : "",
         selectedAnalysis.killerProblems ? `# 킬러/준킬러\n${selectedAnalysis.killerProblems}` : "",
-        selectedAnalysis.mistakePatterns ? `# 실수 패턴\n${selectedAnalysis.mistakePatterns}` : "",
         selectedAnalysis.fiveCorePatterns ? `# 5대 핵심 패턴\n${selectedAnalysis.fiveCorePatterns}` : "",
         selectedAnalysis.insightSummary ? `# 강사 총평\n${selectedAnalysis.insightSummary}` : "",
         selectedAnalysis.insightUnits ? `# 단원별 인사이트\n${selectedAnalysis.insightUnits}` : "",
@@ -12841,7 +12901,6 @@ function ExamAnalysisCenter({
   const outputPreviewMap = selectedAnalysis ? {
     teacher: { title: "강사용 분석지", kind: "document", value: teacherAnalysisText, editSection: "ai" },
     student: { title: "학생 분석지", kind: "document", value: selectedAnalysis.studentAnalysisDraft, editSection: "output" },
-    parent: { title: "학부모 안내문", kind: "document", value: selectedAnalysis.parentNoticeDraft ?? "", editSection: "output" },
     blog: { title: "블로그 초안", kind: "document", value: selectedAnalysis.blogDraft, editSection: "output" },
     instagram: { title: "인스타 카드뉴스", kind: "instagram", value: selectedAnalysis.instagramDraft, editSection: "output" }
   } : {};
@@ -13631,7 +13690,7 @@ function ExamAnalysisCenter({
         <div>
           <p className="eyebrow">EXAM ANALYSIS</p>
           <h1>시험분석</h1>
-          <p className="muted">기출 PDF 1개 또는 여러 개를 구조화하고, 강사 인사이트를 더해 강사용·학생/학부모용·홍보용 산출물을 만듭니다.</p>
+          <p className="muted">기출 PDF 1개 또는 여러 개를 구조화하고, 강사 인사이트를 더해 강사용·학생용·블로그·인스타 산출물을 만듭니다.</p>
         </div>
         <div className="analysisTopActions">
           {isAnalysisWorkspaceOpen ? (
@@ -13963,28 +14022,28 @@ function ExamAnalysisCenter({
                 <div>
                   <p className="eyebrow">QUESTION REVIEW</p>
                   <h2>문항분석표 검수</h2>
-                  <p className="muted">AI 초안은 참고만 하고, 문항별 단원·난이도·변별 이유·강사 코멘트를 직접 확정합니다.</p>
+                  <p className="muted">AI가 첫 장 메타데이터와 문항카드 초안을 읽고, 사람은 문항별 단원·난이도·배점·태그를 확인합니다.</p>
                 </div>
                 {questionComposition ? (
                   <div className="analysisReviewSummary questionCompositionReview">
                     <div>
-                      <strong>AI 문항 구성 초안</strong>
+                      <strong>첫 장 문항 메타데이터 초안</strong>
                       <p>{formatExamQuestionComposition(questionComposition)}</p>
                       {questionComposition.evidence ? <small>근거: {questionComposition.evidence}</small> : null}
                     </div>
-                    <button className="softButton" onClick={fillQuestionCountFromAiComposition} type="button">AI 제안 입력</button>
+                    <button className="softButton" onClick={fillQuestionCountFromAiComposition} type="button">메타데이터 반영</button>
                   </div>
                 ) : (
                   <div className="analysisReviewSummary questionCompositionReview">
                     <div>
-                      <strong>AI 문항 구성 초안 없음</strong>
-                      <p>AI 분석 시작 후 첫 페이지 문항 구성표를 기준으로 문항 수 초안을 확인합니다.</p>
+                      <strong>첫 장 문항 메타데이터 없음</strong>
+                      <p>AI 분석 시작 후 첫 페이지 문항 구성표를 기준으로 문항 수, 선택/서술 구성, 배점을 확인합니다.</p>
                     </div>
                   </div>
                 )}
                 <div className="analysisQuestionSetupActions">
                   <label>
-                    문항 수
+                    첫 장 기준 문항 수
                     <input
                       min="1"
                       max="80"
@@ -13993,7 +14052,7 @@ function ExamAnalysisCenter({
                       onChange={(event) => setQuestionCountDraft(event.target.value)}
                     />
                   </label>
-                  <button className="primaryButton" onClick={() => applyQuestionCount()} type="button">문항 수 확정</button>
+                  <button className="primaryButton" onClick={() => applyQuestionCount()} type="button">확인 후 문항카드 생성</button>
                   <button
                     className="softButton"
                     disabled={selectedAnalysis.aiStatus === "분석 중"}
@@ -14314,10 +14373,10 @@ function ExamAnalysisCenter({
                             />
                           </label>
                           <label className="wideLabel">
-                            이 문항 원문항 비교
+                            이 문항 변형 관계 분석
                             <textarea
-                              value={selectedQuestion.sourceCompareComment}
-                              onChange={(event) => updateSelectedQuestion("sourceCompareComment", event.target.value)}
+                              value={selectedQuestion.variationRelationComment}
+                              onChange={(event) => updateSelectedQuestion("variationRelationComment", event.target.value)}
                               placeholder="원문항과 실제 출제 문항의 조건/숫자/아이디어 변형을 적습니다."
                               rows="3"
                             />
@@ -14345,7 +14404,7 @@ function ExamAnalysisCenter({
                     <p className="muted">문항별 카드가 채워질수록 표와 흐름도가 자동으로 정리됩니다.</p>
                   </div>
                 </div>
-                <ExamQuestionInsightTables questionItems={activeQuestionItems} />
+                <ExamQuestionInsightTables questionItems={activeQuestionItems} questionComposition={questionComposition} />
                 <ExamStrategyFlow questionItems={activeQuestionItems} />
               </article>
             </section>
@@ -14373,8 +14432,8 @@ function ExamAnalysisCenter({
               <article className="panel analysisFinalReportPanel">
                 <div>
                   <p className="eyebrow">FINAL OUTPUTS</p>
-                  <h2>최종 산출물 3종</h2>
-                  <p className="muted">강사용 분석지, 학생/학부모 전달물, 블로그/인스타 홍보물을 같은 우선순위로 편집합니다.</p>
+                  <h2>최종 산출물 4종</h2>
+                  <p className="muted">강사용 분석지, 학생 분석지, 블로그 초안, 인스타 카드뉴스를 같은 데이터 구조에서 편집합니다.</p>
                 </div>
                 <div className={hasExamAnalysisTeacherInsight(selectedAnalysis) ? "analysisInsightStatus done" : "analysisInsightStatus missing"}>
                   <strong>{hasExamAnalysisTeacherInsight(selectedAnalysis) ? "인사이트 반영됨" : "인사이트 추가 필요"}</strong>
@@ -14408,9 +14467,6 @@ function ExamAnalysisCenter({
                 </AnalysisOutputPreviewCard>
                 <AnalysisOutputPreviewCard title="학생 분석지" value={selectedAnalysis.studentAnalysisDraft} onEdit={() => setDetailSectionId("output")} onOpen={() => setOutputPreviewId("student")}>
                   <ExamAnalysisReadablePreview value={selectedAnalysis.studentAnalysisDraft} />
-                </AnalysisOutputPreviewCard>
-                <AnalysisOutputPreviewCard title="학부모 안내문" value={selectedAnalysis.parentNoticeDraft ?? ""} onEdit={() => setDetailSectionId("output")} onOpen={() => setOutputPreviewId("parent")}>
-                  <ExamAnalysisReadablePreview value={selectedAnalysis.parentNoticeDraft ?? ""} />
                 </AnalysisOutputPreviewCard>
                 <AnalysisOutputPreviewCard title="블로그 초안" tone="wide" value={selectedAnalysis.blogDraft} onEdit={() => setDetailSectionId("output")} onOpen={() => setOutputPreviewId("blog")}>
                   <ExamAnalysisReadablePreview value={selectedAnalysis.blogDraft} />

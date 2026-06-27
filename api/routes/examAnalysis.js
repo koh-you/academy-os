@@ -77,7 +77,7 @@ function defaultExamAnalysisPromptForServer() {
     "AI는 최종 판단자가 아니라 1차 구조화 담당자다. 최종 산출물은 AI 분석과 강사 인사이트가 결합된 결과여야 한다.",
     "",
     "[분기 규칙]",
-    "입력 자료가 1개년 기출이면 해당 시험 1회분을 깊게 분석한다. 문항분석표, 단원별 출제, 킬러·준킬러, 실수 유도 문항, 학생 대비 전략을 우선 만든다.",
+    "입력 자료가 1개년 기출이면 해당 시험 1회분을 깊게 분석한다. 문항분석표, 단원별 출제, 킬러·준킬러, 변형·연계 문항, 학생 대비 전략을 우선 만든다.",
     "입력 자료가 3개년 기출이면 연도별 변화와 반복 패턴을 우선 분석한다. 반복/증가/감소/변화/예외를 구분하고, 문항 수 변화 때문에 같은 배점의 의미가 달라질 수 있음을 문장으로 설명한다.",
     "22 개정교육과정 때문에 달라질 수 있는 부분은 변화 가능성 또는 추가 확인 필요로 구분한다.",
     "",
@@ -88,7 +88,7 @@ function defaultExamAnalysisPromptForServer() {
     "AI 1차 분석 단계에서 문항별 배점, 단원, 난이도 초안을 반드시 questionItems 배열에 넣는다. 모르면 빈칸 대신 '확인 필요'를 쓴다.",
     "여러 해 시험지가 함께 들어온 경우 questionItems는 웹앱에서 현재 선택한 시험지/연도 1회분의 전체 문항 수만큼 작성하고, 3개년 반복/증감/변화는 unitDistribution, typeClassification, killerProblems, sourceCheckNotes에 정리한다.",
     "일부 페이지만 보이거나 OCR 일부만 있더라도 확인 가능한 전체 문항 수를 기준으로 questionItems를 만들고, 모르는 값은 '확인 필요'로 둔다.",
-    "문항 태그 기준: 기본문항, 실수문항, 주요문항, 1등급 변별문항, 2등급 변별문항.",
+    "문항 태그 기준: 기본문항, 실수문항, 주요문항, 1등급 변별문항, 2등급 변별문항, 숫자변형문항, 조건변형문항, 유사유형문항, 교과서 연계, 부교재 연계, EBS 연계, 모의고사 연계.",
     "",
     "[작성 원칙]",
     "시험관리 탭 데이터가 있으면 특이사항, 시험 범위, 부교재, 시험 일정, 시험 후 총평을 반영한다.",
@@ -136,7 +136,7 @@ function buildExamAnalysisPrompt(payload) {
       : "아직 문항 카드가 없습니다. OCR에서 확인 가능한 문항번호 기준으로 questionItems 초안을 생성하세요.",
     "",
     "[작성 규칙]",
-    "- 시험지를 설명하지 말고 학부모·학생·강사가 다음 행동을 결정할 수 있게 분석한다.",
+    "- 시험지를 설명하지 말고 학생·강사가 다음 행동을 결정할 수 있게 분석한다.",
     "- 각 항목은 가능하면 사실 근거 → 점수에 미친 영향 → 다음 학습 행동 순서로 쓴다.",
     "- 반드시 시험 원본/OCR에 있는 사실을 우선한다.",
     "- 시험지 첫 페이지의 문항 수 및 배점 표가 보이면 questionComposition에 먼저 정리한다.",
@@ -146,15 +146,14 @@ function buildExamAnalysisPrompt(payload) {
     "- 배점은 절대 점수로만 판단하지 말고 해당 시험 안에서 어느 문항군이 중요했는지 설명한다. 별도 상대배점 차트는 만들지 않는다.",
     "- 여러 해 시험지가 있으면 문항수 변화 때문에 같은 배점의 의미가 달라질 수 있음을 반영해 중요도 변화를 문장으로 설명한다.",
     "- 부교재, 학교 프린트, 모의고사, 수능/평가원 원문항과 실제 출제 문항의 변형 관계가 보이면 반드시 sourceCheckNotes와 관련 분석에 적는다.",
-    "- 강사가 문항별 코멘트를 붙일 수 있도록 앞번호 고난도, 실수 유도, 정답률 낮음, 뒷번호 변별 이유 후보를 구체적으로 제안한다.",
+    "- 강사가 문항별 코멘트를 붙일 수 있도록 앞번호 고난도, 변별 이유, 연계 출처, 변형 관계 후보를 구체적으로 제안한다.",
     "- 원문에서 확인되지 않는 문항번호/배점/단원명은 지어내지 말고 '확인 필요'라고 쓴다.",
     "- OCR 깨짐 문자, 의미 없는 한글 조합, 특수문자 잡음은 산출물에 그대로 쓰지 말고 sourceCheckNotes에 모은다.",
     "- '어려웠다', '중요하다', '복습이 필요하다' 같은 추상 문장으로 끝내지 않는다.",
     "- unitDistribution은 단원별 문항번호/문항수/배점/난이도/대표 유형을 포함하고 문항수 합계를 자체 점검한다.",
     "- typeClassification은 기본/준킬러/킬러를 분리하고 점수 영향과 학습 순서를 포함한다.",
     "- killerProblems는 킬러와 준킬러 후보를 나누고, 문항별 함정과 필요한 개념을 포함한다.",
-    "- mistakePatterns는 학생들이 실제로 틀릴 만한 행동 단위 실수를 적는다.",
-    "- 문항별 태그 후보는 기본문항, 실수문항, 주요문항, 1등급 변별문항, 2등급 변별문항 중에서 제안한다.",
+    "- 문항별 태그 후보는 기본문항, 실수문항, 주요문항, 1등급 변별문항, 2등급 변별문항, 숫자변형문항, 조건변형문항, 유사유형문항, 교과서 연계, 부교재 연계, EBS 연계, 모의고사 연계 중에서 제안한다.",
     "- questionItems는 웹앱 문항분석표에 바로 반영된다. 각 문항의 score, unit, difficulty는 가능한 범위에서 반드시 채운다.",
     "- questionItems의 difficulty는 확인 필요, 하, 중하, 중, 중상, 상 중 하나로 쓴다.",
     "- questionItems의 role은 기본, 실수유도, 앞번호 고난도, 준킬러, 킬러, 서술형 변별, 확인 필요 중 하나로 쓴다.",
@@ -163,12 +162,12 @@ function buildExamAnalysisPrompt(payload) {
     "- questionItems의 similarProblemRelation은 확인 필요, 숫자변형, 조건변형, 유사유형, 기타 중 하나로 쓴다.",
     "- questionItems의 similarProblemSource에는 유사문항 분석지, 나만의DB, 부교재, 모의고사 등 출처 메모 후보를 쓴다.",
     "- 유사문항 본문 전체를 questionItems에 넣지 않는다. 웹앱에는 유사문항 필요 여부, 출처, 변형 구분 메타데이터만 넣는다.",
+    "- 유사문항 분석지나 교과서/부교재/EBS/모의고사 연계가 확인되면 해당 내용을 questionItems.tags에도 태그로 기록한다.",
     "- 문항 카드는 강사가 웹앱 문항 검수 단계에서 확정한다. AI는 배점/단원/난이도/역할/태그/검수 포인트의 1차 초안을 만든다.",
     "- 여러 해 시험지가 함께 있으면 questionItems에는 웹앱에서 현재 선택한 시험지/연도 1회분의 전체 문항을 넣는다. 한 페이지에 보이는 일부 문항만 반환하지 않는다.",
     "- 3개년 비교는 텍스트 분석 필드에 반복/증감/변화를 정리한다.",
     "- blogDraft는 시험 기본 정보, 올해 총평, 단원별 현황, 킬러 문항, 다음 시험 예측 TOP 5, 공부 방향, CTA 순서로 쓴다.",
     "- instagramDraft는 7장 카드뉴스 구조로 쓴다: 표지, 시험 구성, 난이도 총평, 유형 TOP3, 킬러 포인트, 다음 시험 예측, 공부 방향/CTA.",
-    "- 안내문 초안은 분석 결과를 반영하되 과장하거나 없는 사실을 만들지 않는다.",
     "",
     "반드시 아래 JSON 형식만 반환하세요.",
     "{",
@@ -188,11 +187,9 @@ function buildExamAnalysisPrompt(payload) {
     '  "unitDistribution": "단원별 출제 분포",',
     '  "typeClassification": "기본/준킬러/킬러 유형 분류",',
     '  "killerProblems": "킬러/준킬러 문항 분석",',
-    '  "mistakePatterns": "학생 실수 패턴",',
     '  "fiveCorePatterns": "시험 전 확인할 5대 핵심 패턴",',
     '  "sourceCheckNotes": "OCR/문항번호/배점 확인 필요 항목",',
     '  "studentAnalysisDraft": "학생 분석지 초안",',
-    '  "parentNoticeDraft": "학부모 안내문 초안",',
     '  "blogDraft": "블로그 초안",',
     '  "instagramDraft": "인스타 카드뉴스 7장 초안",',
     '  "questionItems": [',
@@ -209,6 +206,7 @@ function buildExamAnalysisPrompt(payload) {
     '      "similarProblemNeeded": "확인 필요",',
     '      "similarProblemSource": "",',
     '      "similarProblemRelation": "확인 필요",',
+    '      "variationRelationComment": "변형 관계 메모",',
     '      "ocrText": "문항 조건 요약",',
     '      "strategyComment": "AI가 본 오답 가능성과 검수 포인트",',
     '      "tags": ["기본문항"]',
@@ -456,11 +454,9 @@ function createMockAnalysis(payload) {
     unitDistribution: "1. 핵심 단원: 조건 해석형 문항\n2. 보조 단원: 계산형 문항\n3. 서술형 대비 과정 감점 가능성 확인 필요",
     typeClassification: "기본: 빠르게 맞혀야 할 계산/개념 확인 유형\n준킬러: 조건 2개 이상을 결합하는 유형\n킬러: 서술형 근거와 경우 분류가 필요한 유형",
     killerProblems: "킬러 후보: 조건을 여러 단계로 연결하는 문항\n준킬러 후보: 계산보다 이해와 식 변형에서 차이가 나는 문항\n강사 확인 필요: 실제 문항 번호와 배점",
-    mistakePatterns: "조건 일부 누락, 부호 실수, 식 변형 과정 누락, 서술형 근거 부족이 예상됩니다.",
     fiveCorePatterns: "1. 조건을 식으로 바꾸기\n2. 범위 제한 확인\n3. 경우 분류 누락 방지\n4. 고배점 서술형 근거 작성\n5. 시간 안배",
     sourceCheckNotes: "원본 시험지/OCR을 넣으면 깨진 문자, 문항번호, 배점 확인 필요 항목을 따로 표시합니다.",
     studentAnalysisDraft: `${school} 학생들은 이번 시험에서 조건 해석과 풀이 과정 정리가 중요했습니다. 다음 시험 전에는 핵심 유형 반복과 서술형 근거 작성 훈련이 필요합니다.`,
-    parentNoticeDraft: `${school} ${subject} 시험은 조건 해석과 서술형 과정 정리가 중요한 시험으로 보입니다. 다음 시험 대비에서는 학생별 오답 원인과 학교별 출제 흐름을 함께 확인해 보완하겠습니다.`,
     blogDraft: `# ${school} ${subject} 시험 분석\n\n## 1. 시험 기본 정보\n원본 확인 후 문항수와 배점 구조를 정리합니다.\n\n## 2. 올해 총평\n이번 시험은 단순 계산보다 조건을 읽고 식으로 연결하는 힘이 중요했습니다.\n\n## 3. 공부 방향\n${academyNameForServer()}에서는 학생별 오답과 학교별 출제 흐름을 연결해 다음 시험 대비 방향을 잡습니다.`,
     instagramDraft: `1장 표지: ${school} ${subject} 시험분석\n2장 시험 구성: 문항수/배점 원문 확인 필요\n3장 난이도 총평: 조건 해석 중심\n4장 유형 TOP3: 원본 분석 후 확정\n5장 킬러 포인트: 고배점 문항 확인 필요\n6장 다음 시험 예측: 반복 유형 중심\n7장 공부 방향/CTA: ${academyNameForServer()}`,
     questionItems: sourceItems.map((item, index) => ({
@@ -492,7 +488,7 @@ function normalizeQuestionItemsFromAi(items = []) {
   const difficultyOptions = new Set(["확인 필요", "하", "중하", "중", "중상", "상"]);
   const roleOptions = new Set(["기본", "실수유도", "앞번호 고난도", "준킬러", "킬러", "서술형 변별", "확인 필요"]);
   const questionTypeOptions = new Set(["객관식", "단답형", "서술형", "논술형", "확인 필요"]);
-  const sourceOptions = new Set(["확인 필요", "교과서", "부교재", "학교 프린트", "모의고사", "수능/평가원", "자체 변형", "기타"]);
+  const sourceOptions = new Set(["확인 필요", "교과서", "부교재", "EBS", "학교 프린트", "모의고사", "수능/평가원", "자체 변형", "기타"]);
   const similarProblemNeedOptions = new Set(["확인 필요", "필요", "불필요"]);
   const similarProblemRelationOptions = new Set(["확인 필요", "숫자변형", "조건변형", "유사유형", "기타"]);
   const tagAliases = {
@@ -510,7 +506,47 @@ function normalizeQuestionItemsFromAi(items = []) {
     "킬러": "1등급 변별문항",
     "1등급 변별문항": "1등급 변별문항",
     "준킬러": "2등급 변별문항",
-    "2등급 변별문항": "2등급 변별문항"
+    "2등급 변별문항": "2등급 변별문항",
+    "숫자변형": "숫자변형문항",
+    "숫자변형문항": "숫자변형문항",
+    "조건변형": "조건변형문항",
+    "조건변형문항": "조건변형문항",
+    "유사유형": "유사유형문항",
+    "유사문항": "유사유형문항",
+    "유사유형문항": "유사유형문항",
+    "교과서": "교과서 연계",
+    "교과서 연계": "교과서 연계",
+    "부교재": "부교재 연계",
+    "부교재 연계": "부교재 연계",
+    "EBS": "EBS 연계",
+    "EBS 연계": "EBS 연계",
+    "모의고사": "모의고사 연계",
+    "모의고사 연계": "모의고사 연계"
+  };
+  const derivedTagsFor = (source, similarProblemNeeded, similarProblemSource, similarProblemRelation) => {
+    const tags = [];
+    const relationTagMap = {
+      "숫자변형": "숫자변형문항",
+      "조건변형": "조건변형문항",
+      "유사유형": "유사유형문항"
+    };
+    const sourceTagMap = {
+      "교과서": "교과서 연계",
+      "부교재": "부교재 연계",
+      "EBS": "EBS 연계",
+      "모의고사": "모의고사 연계"
+    };
+    if (relationTagMap[similarProblemRelation]) tags.push(relationTagMap[similarProblemRelation]);
+    if (similarProblemNeeded === "필요" && !relationTagMap[similarProblemRelation]) tags.push("유사유형문항");
+    if (sourceTagMap[source]) tags.push(sourceTagMap[source]);
+    for (const sourceText of [similarProblemSource, source]) {
+      const text = String(sourceText || "");
+      if (text.includes("교과서")) tags.push("교과서 연계");
+      if (text.includes("부교재")) tags.push("부교재 연계");
+      if (/EBS/i.test(text)) tags.push("EBS 연계");
+      if (text.includes("모의고사")) tags.push("모의고사 연계");
+    }
+    return tags;
   };
 
   return items
@@ -522,6 +558,7 @@ function normalizeQuestionItemsFromAi(items = []) {
       const questionType = String(item.questionType || item.type || "확인 필요").trim();
       const source = String(item.source || "확인 필요").trim();
       const similarProblemNeeded = String(item.similarProblemNeeded || item.needsSimilarProblem || item.similarProblemRequired || "확인 필요").trim();
+      const similarProblemSource = String(item.similarProblemSource || item.similarSource || item.linkedProblemSource || "").trim();
       const similarProblemRelation = String(item.similarProblemRelation || item.similarRelation || item.variationType || "확인 필요").trim();
       const rawTags = Array.isArray(item.tags) ? item.tags : String(item.tags || "").split(/[,/·]/);
 
@@ -536,12 +573,15 @@ function normalizeQuestionItemsFromAi(items = []) {
         source: sourceOptions.has(source) ? source : "확인 필요",
         correctRate: String(item.correctRate || item.expectedCorrectRate || "").trim(),
         similarProblemNeeded: similarProblemNeedOptions.has(similarProblemNeeded) ? similarProblemNeeded : "확인 필요",
-        similarProblemSource: String(item.similarProblemSource || item.similarSource || item.linkedProblemSource || "").trim(),
+        similarProblemSource,
         similarProblemRelation: similarProblemRelationOptions.has(similarProblemRelation) ? similarProblemRelation : "확인 필요",
         ocrText: String(item.ocrText || item.questionSummary || item.summary || "").trim(),
-        sourceCompareComment: String(item.sourceCompareComment || item.sourceNote || "").trim(),
+        variationRelationComment: String(item.variationRelationComment || item.sourceNote || "").trim(),
         strategyComment: String(item.strategyComment || item.comment || item.teacherCheckPoint || item.reviewPoint || "").trim(),
-        tags: Array.from(new Set(rawTags.map((tag) => tagAliases[String(tag).trim()] || "").filter(Boolean)))
+        tags: Array.from(new Set([
+          ...rawTags.map((tag) => tagAliases[String(tag).trim()] || "").filter(Boolean),
+          ...derivedTagsFor(source, similarProblemNeeded, similarProblemSource, similarProblemRelation)
+        ]))
       };
     })
     .filter(Boolean)
@@ -562,11 +602,9 @@ function normalizeAnalysisFields(fields, payload, rawText = "") {
     unitDistribution: parsed.unitDistribution || fallback.unitDistribution,
     typeClassification: parsed.typeClassification || fallback.typeClassification,
     killerProblems: parsed.killerProblems || fallback.killerProblems,
-    mistakePatterns: parsed.mistakePatterns || fallback.mistakePatterns,
     fiveCorePatterns: parsed.fiveCorePatterns || fallback.fiveCorePatterns,
     sourceCheckNotes: parsed.sourceCheckNotes || fallback.sourceCheckNotes,
     studentAnalysisDraft: parsed.studentAnalysisDraft || fallback.studentAnalysisDraft,
-    parentNoticeDraft: parsed.parentNoticeDraft || fallback.parentNoticeDraft,
     blogDraft: parsed.blogDraft || fallback.blogDraft,
     instagramDraft: parsed.instagramDraft || fallback.instagramDraft
   };
