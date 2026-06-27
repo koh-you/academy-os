@@ -2980,6 +2980,52 @@ button {
   gap: 14px;
 }
 
+.analysisReviewLaunchPanel {
+  display: grid;
+  gap: 18px;
+  max-width: 720px;
+}
+
+.analysisReviewLaunchPanel h2 {
+  margin: 0;
+}
+
+.analysisReviewLaunchButtons {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.analysisReviewLaunchButton {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #b8c9f4;
+  border-radius: 8px;
+  color: #17213d;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-size: 20px;
+  font-weight: 900;
+  justify-content: center;
+  min-height: 112px;
+  padding: 18px;
+  text-align: center;
+}
+
+.analysisReviewLaunchButton:hover,
+.analysisReviewLaunchButton:focus-visible {
+  border-color: #2563eb;
+  box-shadow: 0 10px 24px rgba(23, 33, 61, 0.08);
+  outline: none;
+}
+
+.analysisReviewLaunchButton.primary {
+  background: #17213d;
+  border-color: #17213d;
+  color: #ffffff;
+}
+
 .analysisSummaryHero {
   align-items: center;
   display: grid;
@@ -10839,6 +10885,7 @@ body.attendanceOnlyBody {
   .analysisTwoColumn,
   .analysisReviewGrid,
   .analysisReviewColumns,
+  .analysisReviewLaunchButtons,
   .aiVariantWorkspace,
   .insightGrid,
   .analysisFinalReportPanel,

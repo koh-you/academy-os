@@ -10879,67 +10879,18 @@ function ExamAnalysisCenter({
 
             {currentStage === "분석 검토" ? (
             <section className="analysisReviewSummary">
-              <article className="panel analysisSummaryHero">
-                <div>
-                  <span className={`analysisStatusBadge ${statusMeta.tone}`}>{statusMeta.label}</span>
-                  <h2>{[selectedAnalysis.schoolName, selectedAnalysis.grade, selectedAnalysis.subject].filter(Boolean).join(" ") || "시험분석 개요"}</h2>
-                  <p>{getTextPreview(selectedAnalysis.aiOverview, "AI 분석을 시작하면 시험 개요가 표시됩니다.")}</p>
-                </div>
-                <div className="analysisHeroActions">
-                  <button className="primaryButton" onClick={() => setDetailSectionId("ai")} type="button">AI 분석 결과 수정</button>
-                  <button className="softButton" onClick={() => setIsAiInitialViewOpen(true)} type="button">전체 보기</button>
+              <article className="panel analysisReviewLaunchPanel">
+                <span className={`analysisStatusBadge ${statusMeta.tone}`}>{statusMeta.label}</span>
+                <h2>{[selectedAnalysis.schoolName, selectedAnalysis.grade, selectedAnalysis.subject].filter(Boolean).join(" ") || "시험분석 검토"}</h2>
+                <div className="analysisReviewLaunchButtons">
+                  <button className="analysisReviewLaunchButton" onClick={() => setDetailSectionId("ai")} type="button">
+                    AI 분석 결과
+                  </button>
+                  <button className="analysisReviewLaunchButton primary" onClick={() => setDetailSectionId("insight")} type="button">
+                    인사이트
+                  </button>
                 </div>
               </article>
-              <div className="analysisReviewColumns">
-                <section className="panel analysisReviewColumn">
-                  <div className="sectionHeader slim">
-                    <div>
-                      <h2>AI 분석 결과</h2>
-                      <p className="muted">시험 원본을 기준으로 AI가 구조화한 초안입니다.</p>
-                    </div>
-                    <button className="softButton" onClick={() => setIsAiInitialViewOpen(true)} type="button">전체 보기</button>
-                  </div>
-                  <div className="analysisSummaryCards compact">
-                    {[
-                      ["aiOverview", "시험 개요"],
-                      ["unitDistribution", "단원별 분포"],
-                      ["killerProblems", "킬러/준킬러"],
-                      ["mistakePatterns", "실수 패턴"]
-                    ].map(([field, title]) => (
-                      <button className="analysisSummaryCard" key={field} onClick={() => setDetailSectionId("ai")} type="button">
-                        <strong>{title}</strong>
-                        <span>{getTextPreview(selectedAnalysis[field])}</span>
-                      </button>
-                    ))}
-                  </div>
-                </section>
-                <section className="panel analysisReviewColumn">
-                  <div className="sectionHeader slim">
-                    <div>
-                      <h2>인사이트</h2>
-                      <p className="muted">현장 체감, 실제 오답, 수업 방향을 추가합니다.</p>
-                    </div>
-                    <button className="primaryButton" onClick={() => setDetailSectionId("insight")} type="button">입력/수정</button>
-                  </div>
-                  <div className="analysisSummaryCards compact">
-                    {[
-                      ["insightSummary", "강사 총평"],
-                      ["insightUnits", "단원 인사이트"],
-                      ["insightKiller", "킬러문항 분석"],
-                      ["insightDirection", "학습 방향"]
-                    ].map(([field, title]) => (
-                      <button className="analysisSummaryCard" key={field} onClick={() => setDetailSectionId("insight")} type="button">
-                        <strong>{title}</strong>
-                        <span>{getTextPreview(selectedAnalysis[field])}</span>
-                      </button>
-                    ))}
-                  </div>
-                </section>
-              </div>
-              <div className="analysisDetailActions">
-                <button className="primaryButton" onClick={() => setDetailSectionId("insight")} type="button">인사이트 수정</button>
-                <button className="softButton" onClick={() => setDetailSectionId("output")} type="button">산출물 초안 수정</button>
-              </div>
             </section>
             ) : null}
 
