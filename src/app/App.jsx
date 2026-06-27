@@ -1286,6 +1286,13 @@ function hasExamQuestionNumberSequence(items = [], count = 0) {
   return true;
 }
 
+function getMissingExamQuestionNumbers(items = [], count = 0) {
+  const safeCount = Math.max(0, Number(count) || 0);
+  if (!safeCount) return [];
+  const numbers = new Set(normalizeExamQuestionItems(items).map((item) => Number(item.number)).filter((number) => number > 0));
+  return Array.from({ length: safeCount }, (_, index) => index + 1).filter((number) => !numbers.has(number));
+}
+
 function mergeAiQuestionDrafts(existingItems = [], aiItems = [], options = {}) {
   const existing = normalizeExamQuestionItems(existingItems);
   const targetSourceId = String(options.sourceId || "").trim();
@@ -11979,9 +11986,12 @@ function ExamAnalysisCenter({
     return (item.cropSourceId || defaultQuestionSourceId) === resolvedQuestionSourceId;
   });
   const activeQuestionMaxNumber = getExamQuestionMaxNumber(activeQuestionItems);
+  const activeQuestionTargetCount = Math.max(
+    1,
+    Math.min(80, Math.max(Number(questionCountDraft) || 0, activeQuestionMaxNumber, activeQuestionItems.length || 0))
+  );
   const activeQuestionNumberKey = activeQuestionItems.map((item) => Number(item.number) || 0).join(",");
   const selectedQuestion = activeQuestionItems.find((item) => item.questionId === selectedQuestionId) ?? activeQuestionItems[0] ?? null;
-  const totalQuestionItemCount = questionItems.length;
   const selectedQuestionInsightRecommended = isExamQuestionInsightRecommended(selectedQuestion);
   const selectedQuestionHasDetailedInsight = hasExamQuestionDetailedInsight(selectedQuestion);
   const selectedQuestionInsightExpanded = Boolean(selectedQuestion && expandedQuestionInsightId === selectedQuestion.questionId);
@@ -12108,15 +12118,23 @@ function ExamAnalysisCenter({
   }, [activeQuestionItems, selectedQuestionId]);
 
   useEffect(() => {
-    if (!activeQuestionItems.length || activeQuestionMaxNumber <= 1) return;
-    if (hasExamQuestionNumberSequence(activeQuestionItems, activeQuestionMaxNumber)) return;
-    const repairedItems = createExamQuestionItemsFromCount(activeQuestionMaxNumber, activeQuestionItems).map(withActiveQuestionSource);
+    if (!activeQuestionItems.length || activeQuestionTargetCount <= 1) return;
+    if (hasExamQuestionNumberSequence(activeQuestionItems, activeQuestionTargetCount)) return;
+    const missingNumbers = new Set(getMissingExamQuestionNumbers(activeQuestionItems, activeQuestionTargetCount));
+    const reusableDetachedItems = questionItems.filter((item) =>
+      !questionBelongsToActiveSource(item) && missingNumbers.has(Number(item.number))
+    );
+    const reusedIds = new Set(reusableDetachedItems.map((item) => item.questionId));
+    const repairedItems = createExamQuestionItemsFromCount(
+      activeQuestionTargetCount,
+      [...activeQuestionItems, ...reusableDetachedItems]
+    ).map(withActiveQuestionSource);
     updateQuestionItems([
-      ...questionItems.filter((item) => !questionBelongsToActiveSource(item)),
+      ...questionItems.filter((item) => !questionBelongsToActiveSource(item) && !reusedIds.has(item.questionId)),
       ...repairedItems
     ]);
     setSelectedQuestionId((current) => current || repairedItems[0]?.questionId || "");
-  }, [activeQuestionNumberKey, activeQuestionMaxNumber, resolvedQuestionSourceId]);
+  }, [activeQuestionNumberKey, activeQuestionTargetCount, resolvedQuestionSourceId]);
 
   useEffect(() => {
     if (!expandedQuestionInsightId) return;
@@ -13328,8 +13346,7 @@ function ExamAnalysisCenter({
                       <p className="muted">현재 선택한 시험지/연도의 문항별 메모입니다. 시험지 전체 총평은 분석 검토의 인사이트에서 입력합니다.</p>
                     </div>
                     <div className="questionCountBadges">
-                      <span className="countBadge">현재 {activeQuestionItems.length}문항</span>
-                      <span className="countBadge mutedBadge">전체 {totalQuestionItemCount}문항</span>
+                      <span className="countBadge">현재 원본 {activeQuestionItems.length}/{activeQuestionTargetCount}문항</span>
                     </div>
                   </div>
 
