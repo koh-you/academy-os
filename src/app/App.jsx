@@ -964,14 +964,20 @@ function createDefaultExamAnalysis(examPrepRow = {}) {
     aiLastRunAt: "",
     aiError: "",
     aiPrompt: [
-      `역할: ${academyBrandName} 시험지 분석 1차 AI 가안 생성`,
-      "입력된 시험 원본을 바탕으로 아래 필드를 채운다.",
-      "1. 시험 개요: 문항수, 범위, 전반 난이도, 출제 특징",
-      "2. 단원별 출제 분포: 단원명, 문항수, 배점, 체감 난도",
-      "3. 킬러/준킬러 문항: 문항 번호, 핵심 함정, 필요한 개념",
-      "4. 학생 실수 패턴: 계산, 조건 해석, 시간 배분, 서술형 감점 요인",
-      "5. 다음 시험 학습 방향: 학생에게 실제로 안내할 문장으로 정리",
-      "주의: AI 결과는 가안이며, 강사 인사이트 4모듈이 추가되기 전에는 발행용으로 쓰지 않는다."
+      `역할: ${academyBrandName} 시험지 분석가`,
+      "목표: 강사가 바로 검토할 수 있는 1차 시험분석 초안을 만든다.",
+      "작성 기준:",
+      "- OCR/원문에 있는 사실을 우선 사용하고, 없는 문항번호/배점은 추정하지 말고 '확인 필요'라고 쓴다.",
+      "- 각 필드는 제목만 쓰지 말고 최소 4~6개의 구체 항목을 포함한다.",
+      "- 문항번호, 배점, 단원명, 유형, 실수 유발 포인트, 다음 수업에서 다룰 포인트를 최대한 분리해서 적는다.",
+      "- 학부모 홍보 문구보다 강사용 분석 정확도를 우선한다.",
+      "필드별 요구:",
+      "1. 시험 개요: 문항수, 객관식/서술형 구성, 범위, 난이도, 출제 특징, 작년 대비 변화 가능성",
+      "2. 단원별 출제 분포: 단원명별 문항번호/문항수/배점/난이도/대표 유형",
+      "3. 킬러/준킬러 문항: 문항번호, 배점, 단원, 핵심 함정, 필요한 개념, 풀이 접근",
+      "4. 학생 실수 패턴: 조건 해석, 계산, 그래프/식 변환, 시간 배분, 서술형 감점 포인트",
+      "5. 학생/학부모/홍보 초안: 위 분석을 바탕으로 실제 안내문처럼 작성",
+      "주의: AI 결과는 가안이며, 강사 인사이트가 추가되기 전에는 발행용으로 쓰지 않는다."
     ].join("\n"),
     aiOverview: "시험지 원본을 넣으면 문항수, 난이도, 출제 특징이 정리됩니다.",
     unitDistribution: "단원별 문항수와 배점이 여기에 정리됩니다.",
@@ -10873,16 +10879,16 @@ function ExamAnalysisCenter({
                   <p>{getTextPreview(selectedAnalysis.aiOverview, "AI 분석을 시작하면 시험 개요가 표시됩니다.")}</p>
                 </div>
                 <div className="analysisHeroActions">
-                  <button className="primaryButton" onClick={() => setIsAiInitialViewOpen(true)} type="button">AI 최초 분석 보기</button>
-                  <button className="softButton" onClick={() => setDetailSectionId("ai")} type="button">AI 필드 수정</button>
+                  <button className="primaryButton" onClick={() => setDetailSectionId("ai")} type="button">AI 분석 결과 수정</button>
+                  <button className="softButton" onClick={() => setIsAiInitialViewOpen(true)} type="button">전체 보기</button>
                 </div>
               </article>
               <div className="analysisReviewColumns">
                 <section className="panel analysisReviewColumn">
                   <div className="sectionHeader slim">
                     <div>
-                      <h2>AI가 먼저 본 내용</h2>
-                      <p className="muted">이 내용을 보고 선생님 현장 판단을 추가합니다.</p>
+                      <h2>AI 분석 결과</h2>
+                      <p className="muted">시험 원본을 기준으로 AI가 구조화한 초안입니다.</p>
                     </div>
                     <button className="softButton" onClick={() => setIsAiInitialViewOpen(true)} type="button">전체 보기</button>
                   </div>
@@ -10903,8 +10909,8 @@ function ExamAnalysisCenter({
                 <section className="panel analysisReviewColumn">
                   <div className="sectionHeader slim">
                     <div>
-                      <h2>선생님이 추가할 내용</h2>
-                      <p className="muted">현장 체감, 실제 오답, 수업 방향을 넣는 자리입니다.</p>
+                      <h2>인사이트</h2>
+                      <p className="muted">현장 체감, 실제 오답, 수업 방향을 추가합니다.</p>
                     </div>
                     <button className="primaryButton" onClick={() => setDetailSectionId("insight")} type="button">입력/수정</button>
                   </div>
@@ -10923,12 +10929,8 @@ function ExamAnalysisCenter({
                   </div>
                 </section>
               </div>
-              <div className="analysisInsightRequiredBox">
-                <strong>강사 인사이트 필수</strong>
-                <span>현장 체감 난도, 실제 학생 오답, 수업 판단을 넣어야 최종 산출물이 AI 문체처럼 보이지 않습니다.</span>
-              </div>
               <div className="analysisDetailActions">
-                <button className="primaryButton" onClick={() => setDetailSectionId("insight")} type="button">강사 검토 수정</button>
+                <button className="primaryButton" onClick={() => setDetailSectionId("insight")} type="button">인사이트 수정</button>
                 <button className="softButton" onClick={() => setDetailSectionId("output")} type="button">산출물 초안 수정</button>
               </div>
             </section>
@@ -10943,12 +10945,12 @@ function ExamAnalysisCenter({
                   <p className="muted">강사용 분석지, 학생/학부모 전달물, 블로그/인스타 홍보물을 같은 우선순위로 편집합니다.</p>
                 </div>
                 <div className={hasExamAnalysisTeacherInsight(selectedAnalysis) ? "analysisInsightStatus done" : "analysisInsightStatus missing"}>
-                  <strong>{hasExamAnalysisTeacherInsight(selectedAnalysis) ? "강사 인사이트 반영됨" : "강사 인사이트 추가 필요"}</strong>
+                  <strong>{hasExamAnalysisTeacherInsight(selectedAnalysis) ? "인사이트 반영됨" : "인사이트 추가 필요"}</strong>
                   <span>현장데이터가 들어가야 최종물이 자연스럽습니다.</span>
                 </div>
                 <div className="analysisFinalReportActions">
                   <button className="primaryButton" onClick={() => setIsReportPreviewOpen(true)} type="button">최종 보고서 미리보기</button>
-                  <button className="softButton" onClick={() => setDetailSectionId("insight")} type="button">강사 인사이트 수정</button>
+                  <button className="softButton" onClick={() => setDetailSectionId("insight")} type="button">인사이트 수정</button>
                 </div>
               </article>
               <div className="analysisOutputGrid">
@@ -11032,7 +11034,7 @@ function ExamAnalysisCenter({
         >
           <div className="analysisReportToolbar">
             <button className="primaryButton" onClick={() => window.print()} type="button">PDF로 저장/인쇄</button>
-            <button className="softButton" onClick={() => setDetailSectionId("insight")} type="button">강사 인사이트 수정</button>
+            <button className="softButton" onClick={() => setDetailSectionId("insight")} type="button">인사이트 수정</button>
           </div>
           <ExamAnalysisFinalReport analysis={selectedAnalysis} />
         </Modal>
@@ -11040,13 +11042,13 @@ function ExamAnalysisCenter({
       {selectedAnalysis && isAiInitialViewOpen ? (
         <Modal
           className="analysisInitialViewModal"
-          title="AI 최초 분석 보기"
-          subtitle="이 초안을 참고해서 강사 인사이트를 추가합니다. 필요하면 AI 필드 수정에서 초안 자체도 고칠 수 있습니다."
+          title="AI 분석 결과 전체 보기"
+          subtitle="이 초안을 참고해서 인사이트를 추가합니다. 필요하면 AI 분석 결과 수정에서 초안 자체도 고칠 수 있습니다."
           onClose={() => setIsAiInitialViewOpen(false)}
         >
           <div className="analysisReportToolbar">
-            <button className="primaryButton" onClick={() => setDetailSectionId("insight")} type="button">강사 인사이트 입력</button>
-            <button className="softButton" onClick={() => setDetailSectionId("ai")} type="button">AI 필드 수정</button>
+            <button className="primaryButton" onClick={() => setDetailSectionId("insight")} type="button">인사이트 입력</button>
+            <button className="softButton" onClick={() => setDetailSectionId("ai")} type="button">AI 분석 결과 수정</button>
           </div>
           <ExamAnalysisInitialView analysis={selectedAnalysis} />
         </Modal>
