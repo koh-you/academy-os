@@ -75,6 +75,15 @@
 - SQL 주의: API/env/UI 설정 변경만 있으므로 Supabase SQL edit 필요 없음.
 - 검증: `npm run test:production` 통과(total 211, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
 
+### 2026-06-27 P0. 대기 학생 수동 출결 저장 화면 반영 보정
+
+- 상태: 완료
+- 사용자 제보: 김민영 출결 모달에서 저장만 버튼을 누르면 1초 정도 저장 중으로 보이고 모달은 닫히지만, 수업일지 프론트 행은 `대기`에서 바뀌지 않는다.
+- 원인: 기존 출결 상태가 `pending`인 학생을 열면 모달 내부 `attendanceStatus`도 `pending`으로 유지됐다. 모달에는 `대기` 탭이 없어서 등원 저장처럼 보였지만, 저장 로직은 `pending` 상태로 보고 등원 시각을 비우며 저장했다.
+- 이번 작업 결과: 수동 출결 모달은 기존 상태가 `pending`이면 기본값을 `present`로 시작한다. 이미 하원 시간이 있는 기록은 `checkout`으로 시작하고, 결석/지각/하원 등 명시 상태는 그대로 유지한다.
+- SQL 주의: 프론트 모달 초기값 보정만 있으므로 Supabase SQL edit 필요 없음.
+- 검증: `npm run test:production` 통과(total 212, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
+
 ### 2026-06-26 P0. 수동 하원 알림톡 발송 지원
 
 - 상태: 완료

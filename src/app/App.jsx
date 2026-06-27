@@ -8294,7 +8294,7 @@ function CommentComposerModal({
 
 function AttendanceModal({ item, onClose, onSave }) {
   const { lesson, record, student } = item;
-  const [attendanceStatus, setAttendanceStatus] = useState(record.attendanceStatus ?? "present");
+  const [attendanceStatus, setAttendanceStatus] = useState(getManualAttendanceInitialStatus(record));
   const [lateMinutes, setLateMinutes] = useState(record.lateMinutes ?? "");
   const [checkInTime, setCheckInTime] = useState(record.checkInTime || formatKoreaTimeFromIso(record.checkInAt) || "");
   const [checkOutTime, setCheckOutTime] = useState(record.checkOutTime || formatKoreaTimeFromIso(record.checkOutAt) || "");
@@ -8429,6 +8429,13 @@ function AttendanceModal({ item, onClose, onSave }) {
 
 function hasTabletAttendanceRecord(record = {}) {
   return Boolean(record.checkInAt || record.checkInTime || record.checkOutAt || record.checkOutTime || record.updatedBy === "attendance_kiosk");
+}
+
+function getManualAttendanceInitialStatus(record = {}) {
+  const status = record?.attendanceStatus;
+  if (status && status !== "pending") return status;
+  if (record?.checkOutAt || record?.checkOutTime) return "checkout";
+  return "present";
 }
 
 function normalizeAttendanceField(value) {
