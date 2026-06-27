@@ -1609,6 +1609,227 @@ function summarizeQuestionUnits(questionItems = []) {
   return Array.from(unitMap.values()).sort((a, b) => b.count - a.count || a.unit.localeCompare(b.unit, "ko"));
 }
 
+function createFinalDocumentId(prefix = "block") {
+  return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function getExamStrategyFlowNodes(questionItems = []) {
+  const items = normalizeExamQuestionItems(questionItems);
+  const sourceCount = items.filter((item) =>
+    (item.source && item.source !== "확인 필요") ||
+    item.similarProblemNeeded === "필요" ||
+    item.similarProblemSource
+  ).length;
+  const commentCount = getExamQuestionCommentCount(items);
+  const hardCount = items.filter((item) => ["준킬러", "킬러", "앞번호 고난도", "서술형 변별"].includes(item.role)).length;
+  return [
+    { title: "1. 시험 범위 정리", detail: "시험관리 탭 범위와 OCR 원문 확인" },
+    { title: "2. 문항별 검수", detail: `${items.length || 0}문항 단원·난이도·역할 확정` },
+    { title: "3. 원문항 비교", detail: sourceCount ? `출처/유사문항 입력 ${sourceCount}문항` : "부교재/모의고사 원문항 연결" },
+    { title: "4. 변별 문항 훈련", detail: hardCount ? `변별 후보 ${hardCount}문항` : "준킬러/킬러 후보 확정" },
+    { title: "5. 코멘트 기반 보강", detail: commentCount ? `강사 코멘트 ${commentCount}개 반영` : "학생별 오답과 수업 전략 입력" }
+  ];
+}
+
+function createExamFinalDocumentFromAnalysis(analysis = {}) {
+  const questionItems = normalizeExamQuestionItems(analysis.questionItems);
+  const unitRows = summarizeQuestionUnits(questionItems);
+  const sourceRows = questionItems.filter((item) =>
+    (String(item.source || "").trim() && item.source !== "확인 필요") ||
+    item.similarProblemNeeded === "필요" ||
+    String(item.similarProblemSource || "").trim() ||
+    (item.similarProblemRelation && item.similarProblemRelation !== "확인 필요")
+  );
+  const questionSlotItems = questionItems
+    .filter((item) => isExamQuestionInsightRecommended(item) || hasExamQuestionDetailedInsight(item))
+    .slice(0, 12);
+  const slotItems = (questionSlotItems.length ? questionSlotItems : questionItems.slice(0, 6)).map((item) => ({
+    id: item.questionId || createFinalDocumentId("slot"),
+    number: `${item.number}번`,
+    title: [item.unit, item.role].filter(Boolean).join(" · ") || "주요 문항",
+    originalSlot: item.cropBox ? "원문항 크롭 이미지 삽입" : "원문항 삽입 영역",
+    similarSlot: item.similarProblemNeeded === "필요" ? "유사문항 삽입 영역" : "필요 시 유사문항 삽입",
+    similarProblemNeeded: item.similarProblemNeeded || "확인 필요",
+    similarProblemSource: item.similarProblemSource || "",
+    similarProblemRelation: item.similarProblemRelation || "확인 필요",
+    comment: item.teacherComment || item.strategyComment || item.sourceCompareComment || ""
+  }));
+
+  return {
+    version: 1,
+    generatedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    blocks: [
+      {
+        id: createFinalDocumentId("cover"),
+        type: "cover",
+        title: getExamAnalysisReportTitle(analysis),
+        subtitle: getExamAnalysisReportSubtitle(analysis),
+        meta: getExamAnalysisReportMeta(analysis)
+      },
+      {
+        id: createFinalDocumentId("text"),
+        type: "text",
+        title: "기말고사 출제 핵심 분석",
+        value: [analysis.oneLineSummary, analysis.examStructure, analysis.aiOverview].filter(Boolean).join("\n\n")
+      },
+      {
+        id: createFinalDocumentId("table"),
+        type: "table",
+        title: "시험 기본 정보",
+        columns: ["항목", "내용"],
+        rows: [
+          ["학교/학년", [analysis.schoolName, analysis.grade].filter(Boolean).join(" ") || "미입력"],
+          ["고사", analysis.examName || "미입력"],
+          ["과목", analysis.subject || "미입력"],
+          ["문항 구성", analysis.questionComposition?.total ? `${analysis.questionComposition.total}문항` : `${questionItems.length || 0}문항`],
+          ["난이도", analysis.oneLineSummary || "강사 검수 후 입력"]
+        ]
+      },
+      {
+        id: createFinalDocumentId("chart"),
+        type: "chart",
+        title: "단원별 출제 비율",
+        chartType: "bar",
+        rows: unitRows.slice(0, 8).map((row) => ({
+          label: row.unit,
+          value: row.count,
+          note: row.score ? `${row.score}점 · ${row.questions.map((number) => `${number}번`).join(", ")}` : row.questions.map((number) => `${number}번`).join(", ")
+        }))
+      },
+      {
+        id: createFinalDocumentId("table"),
+        type: "table",
+        title: "난이도 상승 요인 분석",
+        columns: ["요인", "해당 문항", "비고"],
+        rows: [
+          ["킬러/준킬러", questionItems.filter((item) => ["준킬러", "킬러", "1등급 변별문항"].includes(item.role) || item.tags?.includes("1등급 변별문항")).map((item) => `${item.number}번`).join(", ") || "확인 필요", analysis.insightKiller || ""],
+          ["실수 유도", questionItems.filter((item) => item.role === "실수유도" || item.tags?.includes("실수문항")).map((item) => `${item.number}번`).join(", ") || "확인 필요", analysis.mistakePatterns || ""],
+          ["조건 해석", questionItems.filter((item) => ["앞번호 고난도", "서술형 변별"].includes(item.role)).map((item) => `${item.number}번`).join(", ") || "확인 필요", analysis.typeClassification || ""]
+        ]
+      },
+      {
+        id: createFinalDocumentId("table"),
+        type: "table",
+        title: "부교재·유사문항 활용",
+        columns: ["문항", "출처", "유사문항", "변형 구분", "메모"],
+        rows: (sourceRows.length ? sourceRows : questionItems.filter((item) => item.similarProblemNeeded === "필요")).map((item) => [
+          `${item.number}번`,
+          item.similarProblemSource || item.source || "확인 필요",
+          item.similarProblemNeeded || "확인 필요",
+          item.similarProblemRelation || "확인 필요",
+          item.sourceCompareComment || "비교 메모 입력"
+        ])
+      },
+      {
+        id: createFinalDocumentId("flow"),
+        type: "flow",
+        title: "대비전략 흐름도",
+        nodes: getExamStrategyFlowNodes(questionItems)
+      },
+      {
+        id: createFinalDocumentId("text"),
+        type: "text",
+        title: "점수 차이를 만든 결정 요인",
+        value: [analysis.killerProblems, analysis.mistakePatterns, analysis.insightStudentErrors].filter(Boolean).join("\n\n")
+      },
+      {
+        id: createFinalDocumentId("questionSlots"),
+        type: "questionSlots",
+        title: "주요 문항 삽입 슬롯",
+        items: slotItems
+      },
+      {
+        id: createFinalDocumentId("text"),
+        type: "text",
+        title: "TEACHER's COMMENT",
+        value: [analysis.insightSummary, analysis.insightDirection, analysis.insightPrediction].filter(Boolean).join("\n\n")
+      }
+    ]
+  };
+}
+
+function normalizeExamFinalDocument(document = null) {
+  if (!document || typeof document !== "object" || !Array.isArray(document.blocks)) return null;
+  const blocks = document.blocks
+    .filter((block) => block && typeof block === "object")
+    .map((block, index) => {
+      const type = ["cover", "text", "table", "chart", "flow", "questionSlots"].includes(block.type) ? block.type : "text";
+      const base = {
+        id: block.id || createFinalDocumentId(type),
+        type,
+        title: String(block.title || (type === "cover" ? "최종 분석지" : "편집 블록")).trim()
+      };
+      if (type === "cover") {
+        return {
+          ...base,
+          subtitle: String(block.subtitle || "").trim(),
+          meta: Array.isArray(block.meta) ? block.meta.map((item) => String(item || "").trim()).filter(Boolean) : []
+        };
+      }
+      if (type === "table") {
+        const columns = Array.isArray(block.columns) && block.columns.length
+          ? block.columns.map((column) => String(column || "").trim() || "열")
+          : ["항목", "내용"];
+        const rows = Array.isArray(block.rows)
+          ? block.rows.map((row) => {
+            const cells = Array.isArray(row) ? row : row?.cells;
+            return columns.map((_, cellIndex) => String(cells?.[cellIndex] ?? "").trim());
+          })
+          : [];
+        return { ...base, columns, rows };
+      }
+      if (type === "chart") {
+        const rows = Array.isArray(block.rows) ? block.rows : [];
+        return {
+          ...base,
+          chartType: block.chartType || "bar",
+          rows: rows.map((row) => ({
+            id: row.id || createFinalDocumentId("chartRow"),
+            label: String(row.label || "").trim(),
+            value: Number(row.value) || 0,
+            note: String(row.note || "").trim()
+          })).filter((row) => row.label || row.value || row.note)
+        };
+      }
+      if (type === "flow") {
+        const nodes = Array.isArray(block.nodes) ? block.nodes : [];
+        return {
+          ...base,
+          nodes: nodes.map((node) => ({
+            id: node.id || createFinalDocumentId("flowNode"),
+            title: String(node.title || "").trim(),
+            detail: String(node.detail || "").trim()
+          })).filter((node) => node.title || node.detail)
+        };
+      }
+      if (type === "questionSlots") {
+        const items = Array.isArray(block.items) ? block.items : [];
+        return {
+          ...base,
+          items: items.map((item) => ({
+            id: item.id || createFinalDocumentId("slot"),
+            number: String(item.number || "").trim() || `${index + 1}번`,
+            title: String(item.title || "").trim(),
+            originalSlot: String(item.originalSlot || "원문항 삽입 영역").trim(),
+            similarSlot: String(item.similarSlot || "유사문항 삽입 영역").trim(),
+            similarProblemNeeded: String(item.similarProblemNeeded || "확인 필요").trim(),
+            similarProblemSource: String(item.similarProblemSource || "").trim(),
+            similarProblemRelation: String(item.similarProblemRelation || "확인 필요").trim(),
+            comment: String(item.comment || "").trim()
+          }))
+        };
+      }
+      return { ...base, value: String(block.value || "").trim() };
+    });
+  return {
+    version: Number(document.version) || 1,
+    generatedAt: document.generatedAt || "",
+    updatedAt: document.updatedAt || "",
+    blocks
+  };
+}
+
 const examAnalysisFieldKeys = [
   "oneLineSummary",
   "examStructure",
@@ -1746,7 +1967,8 @@ function normalizeExamAnalysisForDisplay(analysis = {}) {
       : analysis.aiPrompt || createDefaultExamAnalysisPrompt(),
     rawExamText: removeFailedAttachmentBlocks(analysis.rawExamText)
     }),
-    questionItems: normalizeExamQuestionItems(analysis.questionItems)
+    questionItems: normalizeExamQuestionItems(analysis.questionItems),
+    finalDocument: normalizeExamFinalDocument(analysis.finalDocument)
   };
 }
 
@@ -2042,6 +2264,416 @@ function AnalysisOutputPreviewCard({ title, tone = "", value = "", onEdit, onOpe
   );
 }
 
+function ExamFinalDocumentPrint({ document }) {
+  const normalizedDocument = normalizeExamFinalDocument(document);
+  if (!normalizedDocument?.blocks?.length) return null;
+  return (
+    <article className="examAnalysisPrintableReport finalDocumentPrint">
+      {normalizedDocument.blocks.map((block) => {
+        if (block.type === "cover") {
+          return (
+            <header className="examAnalysisReportCover" key={block.id}>
+              <p>{block.subtitle}</p>
+              <h1>{block.title}</h1>
+              <div className="examAnalysisReportMeta">
+                {block.meta.length ? block.meta.map((item) => <span key={item}>{item}</span>) : <span>최종 편집본</span>}
+              </div>
+            </header>
+          );
+        }
+        if (block.type === "table") {
+          return (
+            <ExamAnalysisReportSection key={block.id} title={block.title}>
+              <div className="analysisPreviewTableWrap">
+                <table className="analysisPreviewTable">
+                  <thead>
+                    <tr>{block.columns.map((column, index) => <th key={`${column}_${index}`}>{column}</th>)}</tr>
+                  </thead>
+                  <tbody>
+                    {block.rows.length ? block.rows.map((row, rowIndex) => (
+                      <tr key={`${block.id}_row_${rowIndex}`}>
+                        {block.columns.map((_, cellIndex) => <td key={`${block.id}_${rowIndex}_${cellIndex}`}>{row[cellIndex]}</td>)}
+                      </tr>
+                    )) : (
+                      <tr><td colSpan={block.columns.length}>입력된 행이 없습니다.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </ExamAnalysisReportSection>
+          );
+        }
+        if (block.type === "chart") {
+          const maxValue = Math.max(1, ...block.rows.map((row) => Number(row.value) || 0));
+          return (
+            <ExamAnalysisReportSection key={block.id} title={block.title}>
+              <div className="finalDocumentChart">
+                {block.rows.map((row) => (
+                  <div className="finalDocumentChartRow" key={row.id}>
+                    <span>{row.label}</span>
+                    <div><i style={{ width: `${Math.max(6, ((Number(row.value) || 0) / maxValue) * 100)}%` }} /></div>
+                    <strong>{row.value}</strong>
+                    {row.note ? <em>{row.note}</em> : null}
+                  </div>
+                ))}
+              </div>
+            </ExamAnalysisReportSection>
+          );
+        }
+        if (block.type === "flow") {
+          return (
+            <ExamAnalysisReportSection key={block.id} title={block.title}>
+              <div className="analysisStrategyFlow finalDocumentFlow">
+                {block.nodes.map((node, index) => (
+                  <div className="analysisStrategyNode" key={node.id}>
+                    <strong>{node.title}</strong>
+                    <span>{node.detail}</span>
+                    {index < block.nodes.length - 1 ? <i aria-hidden="true">→</i> : null}
+                  </div>
+                ))}
+              </div>
+            </ExamAnalysisReportSection>
+          );
+        }
+        if (block.type === "questionSlots") {
+          return (
+            <ExamAnalysisReportSection key={block.id} title={block.title}>
+              <div className="finalQuestionSlotGrid">
+                {block.items.map((item) => (
+                  <article className="finalQuestionSlotCard" key={item.id}>
+                    <div>
+                      <strong>{item.number}</strong>
+                      <span>{item.title || "주요 문항"}</span>
+                    </div>
+                    <div className="finalQuestionSlotBoxes">
+                      <p>{item.originalSlot}</p>
+                      <p>{item.similarSlot}</p>
+                    </div>
+                    <small>{[item.similarProblemNeeded, item.similarProblemSource, item.similarProblemRelation].filter(Boolean).join(" · ")}</small>
+                    {item.comment ? <p>{item.comment}</p> : null}
+                  </article>
+                ))}
+              </div>
+            </ExamAnalysisReportSection>
+          );
+        }
+        return (
+          <ExamAnalysisReportSection key={block.id} title={block.title}>
+            <ExamAnalysisReportText value={block.value} />
+          </ExamAnalysisReportSection>
+        );
+      })}
+    </article>
+  );
+}
+
+function ExamFinalDocumentBuilder({ analysis, document, onChange, onRegenerate }) {
+  const normalizedDocument = normalizeExamFinalDocument(document) || createExamFinalDocumentFromAnalysis(analysis);
+
+  function commit(nextDocument) {
+    onChange({
+      ...nextDocument,
+      updatedAt: new Date().toISOString()
+    });
+  }
+
+  function updateBlock(blockId, updater) {
+    commit({
+      ...normalizedDocument,
+      blocks: normalizedDocument.blocks.map((block) =>
+        block.id === blockId ? updater(block) : block
+      )
+    });
+  }
+
+  function moveBlock(blockId, direction) {
+    const index = normalizedDocument.blocks.findIndex((block) => block.id === blockId);
+    const targetIndex = index + direction;
+    if (index < 0 || targetIndex < 0 || targetIndex >= normalizedDocument.blocks.length) return;
+    const nextBlocks = [...normalizedDocument.blocks];
+    const [block] = nextBlocks.splice(index, 1);
+    nextBlocks.splice(targetIndex, 0, block);
+    commit({ ...normalizedDocument, blocks: nextBlocks });
+  }
+
+  function removeBlock(blockId) {
+    commit({
+      ...normalizedDocument,
+      blocks: normalizedDocument.blocks.filter((block) => block.id !== blockId)
+    });
+  }
+
+  function addBlock(type) {
+    const blockMap = {
+      text: { id: createFinalDocumentId("text"), type: "text", title: "새 문단", value: "" },
+      table: { id: createFinalDocumentId("table"), type: "table", title: "새 표", columns: ["항목", "내용"], rows: [["", ""]] },
+      chart: { id: createFinalDocumentId("chart"), type: "chart", title: "새 차트", chartType: "bar", rows: [{ id: createFinalDocumentId("chartRow"), label: "항목", value: 1, note: "" }] },
+      flow: { id: createFinalDocumentId("flow"), type: "flow", title: "새 흐름도", nodes: [{ id: createFinalDocumentId("flowNode"), title: "1단계", detail: "" }] },
+      questionSlots: { id: createFinalDocumentId("slotBlock"), type: "questionSlots", title: "문항 삽입 슬롯", items: [] }
+    };
+    commit({ ...normalizedDocument, blocks: [...normalizedDocument.blocks, blockMap[type]] });
+  }
+
+  return (
+    <article className="panel analysisFinalDocumentBuilder">
+      <div className="sectionHeader slim">
+        <div>
+          <p className="eyebrow">EDITABLE REPORT</p>
+          <h2>최종 편집본</h2>
+          <p className="muted">글은 바로 수정하고, 표는 셀 수정, 차트·흐름도는 원본 데이터를 고치면 렌더링이 함께 바뀝니다.</p>
+        </div>
+        <div className="analysisFinalReportActions">
+          <button
+            className="softButton"
+            onClick={() => {
+              if (window.confirm("현재 편집본을 지우고 AI/문항 데이터 기준 초안으로 다시 만들까요?")) onRegenerate();
+            }}
+            type="button"
+          >
+            현재 데이터로 다시 생성
+          </button>
+        </div>
+      </div>
+      <div className="finalDocumentAddBar">
+        <button type="button" onClick={() => addBlock("text")}>문단 추가</button>
+        <button type="button" onClick={() => addBlock("table")}>표 추가</button>
+        <button type="button" onClick={() => addBlock("chart")}>차트 추가</button>
+        <button type="button" onClick={() => addBlock("flow")}>흐름도 추가</button>
+        <button type="button" onClick={() => addBlock("questionSlots")}>문항 슬롯 추가</button>
+      </div>
+      <div className="finalDocumentBlocks">
+        {normalizedDocument.blocks.map((block, index) => (
+          <ExamFinalDocumentBlockEditor
+            block={block}
+            isFirst={index === 0}
+            isLast={index === normalizedDocument.blocks.length - 1}
+            key={block.id}
+            moveBlock={moveBlock}
+            removeBlock={removeBlock}
+            updateBlock={updateBlock}
+          />
+        ))}
+      </div>
+    </article>
+  );
+}
+
+function ExamFinalDocumentBlockEditor({ block, isFirst, isLast, updateBlock, moveBlock, removeBlock }) {
+  const updateField = (field, value) => updateBlock(block.id, (current) => ({ ...current, [field]: value }));
+  const blockLabel = {
+    cover: "표지",
+    text: "문단",
+    table: "표",
+    chart: "차트 데이터",
+    flow: "흐름도",
+    questionSlots: "문항 삽입 슬롯"
+  }[block.type] || "블록";
+
+  return (
+    <section className={`finalDocumentBlock ${block.type}`}>
+      <div className="finalDocumentBlockHeader">
+        <span>{blockLabel}</span>
+        <div>
+          <button disabled={isFirst} onClick={() => moveBlock(block.id, -1)} type="button">위</button>
+          <button disabled={isLast} onClick={() => moveBlock(block.id, 1)} type="button">아래</button>
+          <button onClick={() => removeBlock(block.id)} type="button">삭제</button>
+        </div>
+      </div>
+
+      {block.type === "cover" ? (
+        <div className="fieldGrid">
+          <label className="wideLabel">제목<input value={block.title} onChange={(event) => updateField("title", event.target.value)} /></label>
+          <label className="wideLabel">부제<input value={block.subtitle} onChange={(event) => updateField("subtitle", event.target.value)} /></label>
+          <label className="wideLabel">메타데이터<textarea rows={3} value={block.meta.join("\n")} onChange={(event) => updateField("meta", event.target.value.split("\n").map((item) => item.trim()).filter(Boolean))} /></label>
+        </div>
+      ) : null}
+
+      {block.type === "text" ? (
+        <div className="fieldGrid">
+          <label className="wideLabel">섹션 제목<input value={block.title} onChange={(event) => updateField("title", event.target.value)} /></label>
+          <label className="wideLabel">본문<textarea rows={7} value={block.value} onChange={(event) => updateField("value", event.target.value)} /></label>
+        </div>
+      ) : null}
+
+      {block.type === "table" ? (
+        <ExamFinalTableEditor block={block} updateBlock={updateBlock} />
+      ) : null}
+
+      {block.type === "chart" ? (
+        <ExamFinalChartEditor block={block} updateBlock={updateBlock} />
+      ) : null}
+
+      {block.type === "flow" ? (
+        <ExamFinalFlowEditor block={block} updateBlock={updateBlock} />
+      ) : null}
+
+      {block.type === "questionSlots" ? (
+        <ExamFinalQuestionSlotEditor block={block} updateBlock={updateBlock} />
+      ) : null}
+    </section>
+  );
+}
+
+function ExamFinalTableEditor({ block, updateBlock }) {
+  const updateTable = (patch) => updateBlock(block.id, (current) => ({ ...current, ...patch }));
+  const updateColumn = (columnIndex, value) => {
+    updateTable({ columns: block.columns.map((column, index) => index === columnIndex ? value : column) });
+  };
+  const updateCell = (rowIndex, cellIndex, value) => {
+    updateTable({
+      rows: block.rows.map((row, index) =>
+        index === rowIndex ? row.map((cell, currentCellIndex) => currentCellIndex === cellIndex ? value : cell) : row
+      )
+    });
+  };
+  return (
+    <div className="finalDocumentTableEditor">
+      <label>표 제목<input value={block.title} onChange={(event) => updateTable({ title: event.target.value })} /></label>
+      <div className="analysisPreviewTableWrap">
+        <table className="analysisPreviewTable editable">
+          <thead>
+            <tr>
+              {block.columns.map((column, columnIndex) => (
+                <th key={`${block.id}_column_${columnIndex}`}>
+                  <input value={column} onChange={(event) => updateColumn(columnIndex, event.target.value)} />
+                </th>
+              ))}
+              <th>관리</th>
+            </tr>
+          </thead>
+          <tbody>
+            {block.rows.map((row, rowIndex) => (
+              <tr key={`${block.id}_row_${rowIndex}`}>
+                {block.columns.map((_, cellIndex) => (
+                  <td key={`${block.id}_${rowIndex}_${cellIndex}`}>
+                    <textarea rows={2} value={row[cellIndex] ?? ""} onChange={(event) => updateCell(rowIndex, cellIndex, event.target.value)} />
+                  </td>
+                ))}
+                <td><button onClick={() => updateTable({ rows: block.rows.filter((_, index) => index !== rowIndex) })} type="button">행 삭제</button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="finalDocumentInlineActions">
+        <button onClick={() => updateTable({ rows: [...block.rows, block.columns.map(() => "")] })} type="button">행 추가</button>
+        <button onClick={() => updateTable({ columns: [...block.columns, "새 열"], rows: block.rows.map((row) => [...row, ""]) })} type="button">열 추가</button>
+      </div>
+    </div>
+  );
+}
+
+function ExamFinalChartEditor({ block, updateBlock }) {
+  const maxValue = Math.max(1, ...block.rows.map((row) => Number(row.value) || 0));
+  const updateChart = (patch) => updateBlock(block.id, (current) => ({ ...current, ...patch }));
+  const updateRow = (rowId, patch) => {
+    updateChart({ rows: block.rows.map((row) => row.id === rowId ? { ...row, ...patch } : row) });
+  };
+  return (
+    <div className="finalDocumentChartEditor">
+      <label>차트 제목<input value={block.title} onChange={(event) => updateChart({ title: event.target.value })} /></label>
+      <div className="finalDocumentChart">
+        {block.rows.map((row) => (
+          <div className="finalDocumentChartRow" key={row.id}>
+            <span>{row.label || "항목"}</span>
+            <div><i style={{ width: `${Math.max(6, ((Number(row.value) || 0) / maxValue) * 100)}%` }} /></div>
+            <strong>{row.value}</strong>
+          </div>
+        ))}
+      </div>
+      <div className="finalDocumentDataRows">
+        {block.rows.map((row) => (
+          <div className="finalDocumentDataRow" key={row.id}>
+            <input value={row.label} onChange={(event) => updateRow(row.id, { label: event.target.value })} placeholder="항목" />
+            <input inputMode="decimal" value={row.value} onChange={(event) => updateRow(row.id, { value: Number(event.target.value) || 0 })} placeholder="값" />
+            <input value={row.note} onChange={(event) => updateRow(row.id, { note: event.target.value })} placeholder="비고" />
+            <button onClick={() => updateChart({ rows: block.rows.filter((item) => item.id !== row.id) })} type="button">삭제</button>
+          </div>
+        ))}
+      </div>
+      <button onClick={() => updateChart({ rows: [...block.rows, { id: createFinalDocumentId("chartRow"), label: "", value: 0, note: "" }] })} type="button">데이터 추가</button>
+    </div>
+  );
+}
+
+function ExamFinalFlowEditor({ block, updateBlock }) {
+  const updateFlow = (patch) => updateBlock(block.id, (current) => ({ ...current, ...patch }));
+  const updateNode = (nodeId, patch) => {
+    updateFlow({ nodes: block.nodes.map((node) => node.id === nodeId ? { ...node, ...patch } : node) });
+  };
+  return (
+    <div className="finalDocumentFlowEditor">
+      <label>흐름도 제목<input value={block.title} onChange={(event) => updateFlow({ title: event.target.value })} /></label>
+      <div className="analysisStrategyFlow finalDocumentFlow">
+        {block.nodes.map((node, index) => (
+          <div className="analysisStrategyNode" key={node.id}>
+            <input value={node.title} onChange={(event) => updateNode(node.id, { title: event.target.value })} />
+            <textarea rows={3} value={node.detail} onChange={(event) => updateNode(node.id, { detail: event.target.value })} />
+            <button onClick={() => updateFlow({ nodes: block.nodes.filter((item) => item.id !== node.id) })} type="button">삭제</button>
+            {index < block.nodes.length - 1 ? <i aria-hidden="true">→</i> : null}
+          </div>
+        ))}
+      </div>
+      <button onClick={() => updateFlow({ nodes: [...block.nodes, { id: createFinalDocumentId("flowNode"), title: `${block.nodes.length + 1}단계`, detail: "" }] })} type="button">노드 추가</button>
+    </div>
+  );
+}
+
+function ExamFinalQuestionSlotEditor({ block, updateBlock }) {
+  const updateSlots = (patch) => updateBlock(block.id, (current) => ({ ...current, ...patch }));
+  const updateItem = (itemId, patch) => {
+    updateSlots({ items: block.items.map((item) => item.id === itemId ? { ...item, ...patch } : item) });
+  };
+  return (
+    <div className="finalQuestionSlotEditor">
+      <label>슬롯 제목<input value={block.title} onChange={(event) => updateSlots({ title: event.target.value })} /></label>
+      <div className="finalQuestionSlotGrid editable">
+        {block.items.map((item) => (
+          <article className="finalQuestionSlotCard" key={item.id}>
+            <div className="fieldGrid two">
+              <label>문항<input value={item.number} onChange={(event) => updateItem(item.id, { number: event.target.value })} /></label>
+              <label>제목<input value={item.title} onChange={(event) => updateItem(item.id, { title: event.target.value })} /></label>
+              <label>유사문항 필요
+                <select value={item.similarProblemNeeded} onChange={(event) => updateItem(item.id, { similarProblemNeeded: event.target.value })}>
+                  {similarProblemNeedOptions.map((option) => <option key={option}>{option}</option>)}
+                </select>
+              </label>
+              <label>변형 구분
+                <select value={item.similarProblemRelation} onChange={(event) => updateItem(item.id, { similarProblemRelation: event.target.value })}>
+                  {similarProblemRelationOptions.map((option) => <option key={option}>{option}</option>)}
+                </select>
+              </label>
+              <label className="wideLabel">유사문항 출처<input value={item.similarProblemSource} onChange={(event) => updateItem(item.id, { similarProblemSource: event.target.value })} /></label>
+              <label className="wideLabel">원문항 슬롯<input value={item.originalSlot} onChange={(event) => updateItem(item.id, { originalSlot: event.target.value })} /></label>
+              <label className="wideLabel">유사문항 슬롯<input value={item.similarSlot} onChange={(event) => updateItem(item.id, { similarSlot: event.target.value })} /></label>
+              <label className="wideLabel">문항 코멘트<textarea rows={4} value={item.comment} onChange={(event) => updateItem(item.id, { comment: event.target.value })} /></label>
+            </div>
+            <button onClick={() => updateSlots({ items: block.items.filter((candidate) => candidate.id !== item.id) })} type="button">슬롯 삭제</button>
+          </article>
+        ))}
+      </div>
+      <button
+        onClick={() => updateSlots({
+          items: [...block.items, {
+            id: createFinalDocumentId("slot"),
+            number: `${block.items.length + 1}번`,
+            title: "",
+            originalSlot: "원문항 삽입 영역",
+            similarSlot: "유사문항 삽입 영역",
+            similarProblemNeeded: "확인 필요",
+            similarProblemSource: "",
+            similarProblemRelation: "확인 필요",
+            comment: ""
+          }]
+        })}
+        type="button"
+      >
+        슬롯 추가
+      </button>
+    </div>
+  );
+}
+
 function ExamQuestionInsightTables({ questionItems = [] }) {
   const items = normalizeExamQuestionItems(questionItems);
   const commentedItems = items.filter((item) =>
@@ -2231,17 +2863,7 @@ function ExamQuestionInsightTables({ questionItems = [] }) {
 }
 
 function ExamStrategyFlow({ questionItems = [] }) {
-  const items = normalizeExamQuestionItems(questionItems);
-  const sourceCount = items.filter((item) => item.source && item.source !== "확인 필요").length;
-  const commentCount = getExamQuestionCommentCount(items);
-  const hardCount = items.filter((item) => ["준킬러", "킬러", "앞번호 고난도", "서술형 변별"].includes(item.role)).length;
-  const nodes = [
-    { title: "1. 시험 범위 정리", detail: "시험관리 탭 범위와 OCR 원문 확인" },
-    { title: "2. 문항별 검수", detail: `${items.length || 0}문항 단원·난이도·역할 확정` },
-    { title: "3. 원문항 비교", detail: sourceCount ? `출처 입력 ${sourceCount}문항` : "부교재/모의고사 원문항 연결" },
-    { title: "4. 변별 문항 훈련", detail: hardCount ? `변별 후보 ${hardCount}문항` : "준킬러/킬러 후보 확정" },
-    { title: "5. 코멘트 기반 보강", detail: commentCount ? `강사 코멘트 ${commentCount}개 반영` : "학생별 오답과 수업 전략 입력" }
-  ];
+  const nodes = getExamStrategyFlowNodes(questionItems);
   return (
     <div className="analysisStrategyFlow">
       {nodes.map((node, index) => (
@@ -2256,6 +2878,10 @@ function ExamStrategyFlow({ questionItems = [] }) {
 }
 
 function ExamAnalysisFinalReport({ analysis }) {
+  const finalDocument = normalizeExamFinalDocument(analysis.finalDocument);
+  if (finalDocument?.blocks?.length) {
+    return <ExamFinalDocumentPrint document={finalDocument} />;
+  }
   const meta = getExamAnalysisReportMeta(analysis);
   const sourceFiles = Array.isArray(analysis.sourceFiles) ? analysis.sourceFiles : [];
   const hasInsight = hasExamAnalysisTeacherInsight(analysis);
@@ -12330,6 +12956,15 @@ function ExamAnalysisCenter({
     update("questionItems", normalizeExamQuestionItems(nextItems));
   }
 
+  function updateFinalDocument(nextDocument) {
+    update("finalDocument", normalizeExamFinalDocument(nextDocument));
+  }
+
+  function regenerateFinalDocument() {
+    if (!selectedAnalysis) return;
+    update("finalDocument", createExamFinalDocumentFromAnalysis(selectedAnalysis));
+  }
+
   function questionBelongsToActiveSource(item) {
     if (!resolvedQuestionSourceId) return true;
     return (item.cropSourceId || defaultQuestionSourceId) === resolvedQuestionSourceId;
@@ -13691,10 +14326,27 @@ function ExamAnalysisCenter({
                   <span>현장데이터가 들어가야 최종물이 자연스럽습니다.</span>
                 </div>
                 <div className="analysisFinalReportActions">
+                  <button
+                    className="softButton"
+                    onClick={() => {
+                      if (!selectedAnalysis.finalDocument || window.confirm("현재 편집본을 지우고 AI/문항 데이터 기준 초안으로 다시 만들까요?")) {
+                        regenerateFinalDocument();
+                      }
+                    }}
+                    type="button"
+                  >
+                    {selectedAnalysis.finalDocument ? "편집본 다시 생성" : "최종 편집본 만들기"}
+                  </button>
                   <button className="primaryButton" onClick={() => setIsReportPreviewOpen(true)} type="button">최종 보고서 미리보기</button>
                   <button className="softButton" onClick={() => setDetailSectionId("insight")} type="button">인사이트 수정</button>
                 </div>
               </article>
+              <ExamFinalDocumentBuilder
+                analysis={selectedAnalysis}
+                document={selectedAnalysis.finalDocument}
+                onChange={updateFinalDocument}
+                onRegenerate={regenerateFinalDocument}
+              />
               <div className="analysisOutputGrid">
                 <AnalysisOutputPreviewCard title="강사용 분석지" value={teacherAnalysisText} onEdit={() => setDetailSectionId("ai")} onOpen={() => setOutputPreviewId("teacher")}>
                   <ExamAnalysisReadablePreview value={teacherAnalysisText} />

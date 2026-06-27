@@ -4044,6 +4044,232 @@ button {
   justify-content: flex-end;
 }
 
+.analysisFinalDocumentBuilder {
+  display: grid;
+  gap: 16px;
+}
+
+.finalDocumentAddBar {
+  background: #f8fbff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+}
+
+.finalDocumentAddBar button,
+.finalDocumentInlineActions button,
+.finalDocumentBlockHeader button,
+.finalDocumentDataRow button,
+.finalDocumentBlock button {
+  background: #eef2ff;
+  border: 1px solid #b8c9f4;
+  border-radius: 8px;
+  color: #4338ca;
+  cursor: pointer;
+  font-weight: 900;
+  padding: 8px 10px;
+}
+
+.finalDocumentBlockHeader button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.finalDocumentBlocks {
+  display: grid;
+  gap: 14px;
+}
+
+.finalDocumentBlock {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.finalDocumentBlockHeader {
+  align-items: center;
+  border-bottom: 1px solid #e5edf9;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding-bottom: 10px;
+}
+
+.finalDocumentBlockHeader span {
+  background: #17213d;
+  border-radius: 999px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 10px;
+}
+
+.finalDocumentBlockHeader div,
+.finalDocumentInlineActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.finalDocumentTableEditor,
+.finalDocumentChartEditor,
+.finalDocumentFlowEditor,
+.finalQuestionSlotEditor {
+  display: grid;
+  gap: 12px;
+}
+
+.analysisPreviewTable.editable {
+  min-width: 760px;
+}
+
+.analysisPreviewTable.editable input,
+.analysisPreviewTable.editable textarea,
+.finalDocumentBlock input,
+.finalDocumentBlock textarea,
+.finalDocumentBlock select {
+  background: #ffffff;
+  border: 1px solid #cbd7ee;
+  border-radius: 8px;
+  color: #0f172a;
+  font: inherit;
+  font-weight: 800;
+  padding: 9px 10px;
+  width: 100%;
+}
+
+.analysisPreviewTable.editable textarea {
+  min-height: 68px;
+  resize: vertical;
+}
+
+.finalDocumentChart {
+  display: grid;
+  gap: 10px;
+}
+
+.finalDocumentChartRow {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(110px, 0.28fr) minmax(120px, 1fr) auto;
+}
+
+.finalDocumentChartRow > span {
+  color: #17213d;
+  font-weight: 900;
+}
+
+.finalDocumentChartRow > div {
+  background: #eef2ff;
+  border-radius: 999px;
+  height: 18px;
+  overflow: hidden;
+}
+
+.finalDocumentChartRow i {
+  background: linear-gradient(90deg, #f97316, #fb7185);
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+}
+
+.finalDocumentChartRow strong {
+  color: #c2410c;
+  font-weight: 900;
+  min-width: 44px;
+  text-align: right;
+}
+
+.finalDocumentChartRow em {
+  color: #64748b;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+  grid-column: 2 / -1;
+}
+
+.finalDocumentDataRows {
+  display: grid;
+  gap: 8px;
+}
+
+.finalDocumentDataRow {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(120px, 0.35fr) 100px minmax(140px, 1fr) auto;
+}
+
+.finalDocumentFlow .analysisStrategyNode input,
+.finalDocumentFlow .analysisStrategyNode textarea {
+  background: rgba(255, 255, 255, 0.78);
+  border-color: #fdba74;
+}
+
+.finalQuestionSlotGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.finalQuestionSlotGrid.editable {
+  grid-template-columns: 1fr;
+}
+
+.finalQuestionSlotCard {
+  background: #fffaf3;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  color: #17213d;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.finalQuestionSlotCard > div:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.finalQuestionSlotCard strong {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.finalQuestionSlotCard span,
+.finalQuestionSlotCard small,
+.finalQuestionSlotCard p {
+  font-weight: 800;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.finalQuestionSlotBoxes {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.finalQuestionSlotBoxes p {
+  align-items: center;
+  background: #ffffff;
+  border: 1px dashed #fb923c;
+  border-radius: 8px;
+  color: #9a3412;
+  display: flex;
+  justify-content: center;
+  min-height: 118px;
+  padding: 12px;
+  text-align: center;
+}
+
 .outputCard .sectionHeader span {
   background: #eef2ff;
   border-radius: 999px;
@@ -11907,6 +12133,10 @@ body.attendanceOnlyBody {
   .insightGrid,
   .analysisFinalReportPanel,
   .analysisOutputGrid,
+  .finalDocumentChartRow,
+  .finalDocumentDataRow,
+  .finalQuestionSlotGrid,
+  .finalQuestionSlotBoxes,
   .examAnalysisReportCards,
   .examAnalysisReportTwoColumn,
   .examAnalysisReportOutputs,
@@ -12282,7 +12512,9 @@ body.attendanceOnlyBody {
   }
 
   .examAnalysisReportSection,
-  .examAnalysisReportCards article {
+  .examAnalysisReportCards article,
+  .finalQuestionSlotCard,
+  .finalDocumentChartRow {
     break-inside: avoid;
     page-break-inside: avoid;
   }
