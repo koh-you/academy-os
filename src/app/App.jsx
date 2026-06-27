@@ -1106,6 +1106,23 @@ function createDefaultExamAnalysisPrompt() {
   ].join("\n");
 }
 
+const defaultExamOutputLayoutChoices = Object.freeze({
+  teacher: "A",
+  student: "A",
+  blog: "A",
+  instagram: "A"
+});
+
+function normalizeExamOutputLayoutChoices(choices = {}) {
+  const safeChoices = choices && typeof choices === "object" && !Array.isArray(choices) ? choices : {};
+  return Object.fromEntries(
+    Object.entries(defaultExamOutputLayoutChoices).map(([key, defaultCode]) => {
+      const code = String(safeChoices[key] || defaultCode).trim().toUpperCase();
+      return [key, ["A", "B", "C"].includes(code) ? code : defaultCode];
+    })
+  );
+}
+
 function createDefaultExamAnalysis(examPrepRow = {}) {
   const schoolName = examPrepRow.schoolName || "";
   const grade = examPrepRow.grade || "";
@@ -1161,6 +1178,7 @@ function createDefaultExamAnalysis(examPrepRow = {}) {
     studentAnalysisDraft: "학생용 분석지는 A 총평 + B 단원별 인사이트 + D 학습 방향을 중심으로 생성합니다.",
     blogDraft: "블로그 초안은 학부모가 읽기 쉬운 톤으로 시험 개요, 킬러문항, 학습 방향을 연결합니다.",
     instagramDraft: `1장 표지\n2장 시험 한 줄 총평\n3장 출제 분포\n4장 킬러문항\n5장 변형·연계 분석\n6장 학습 방향\n7장 ${academyBrandName} 안내`,
+    outputLayoutChoices: normalizeExamOutputLayoutChoices(),
     pipelineStage: "원본 입력"
   };
 }
@@ -1750,6 +1768,7 @@ function createExamFinalDocumentFromAnalysis(analysis = {}) {
     version: 1,
     generatedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    outputLayoutChoices: normalizeExamOutputLayoutChoices(analysis.outputLayoutChoices),
     blocks: [
       {
         id: createFinalDocumentId("cover"),
@@ -1924,6 +1943,7 @@ function normalizeExamFinalDocument(document = null) {
     version: Number(document.version) || 1,
     generatedAt: document.generatedAt || "",
     updatedAt: document.updatedAt || "",
+    outputLayoutChoices: normalizeExamOutputLayoutChoices(document.outputLayoutChoices),
     blocks
   };
 }
@@ -2328,6 +2348,7 @@ function ExamAnalysisInstagramPreview({ value }) {
 
 const examOutputLayoutOptions = [
   {
+    key: "teacher",
     title: "강사용 분석지",
     options: [
       { code: "A", name: "대시보드형", frame: "dashboard", slots: ["meta", "table", "chart", "list"] },
@@ -2336,6 +2357,7 @@ const examOutputLayoutOptions = [
     ]
   },
   {
+    key: "student",
     title: "학생 분석지",
     options: [
       { code: "A", name: "복습 로드맵형", frame: "roadmap", slots: ["hero", "step", "step", "step", "check"] },
@@ -2344,6 +2366,7 @@ const examOutputLayoutOptions = [
     ]
   },
   {
+    key: "blog",
     title: "블로그 초안",
     options: [
       { code: "A", name: "홍보형 글 구조", frame: "article", slots: ["title", "paragraph", "section", "section", "cta"] },
@@ -2352,6 +2375,7 @@ const examOutputLayoutOptions = [
     ]
   },
   {
+    key: "instagram",
     title: "인스타 카드뉴스",
     options: [
       { code: "A", name: "5장 요약형", frame: "slides5", slots: ["slide", "slide", "slide", "slide", "slide"] },
@@ -2371,7 +2395,16 @@ function ExamOutputLayoutWireframe({ option }) {
   );
 }
 
-function ExamOutputLayoutPlanner() {
+function ExamOutputLayoutPlanner({ value, onChange }) {
+  const selectedChoices = normalizeExamOutputLayoutChoices(value);
+
+  function selectLayout(groupKey, optionCode) {
+    onChange?.(normalizeExamOutputLayoutChoices({
+      ...selectedChoices,
+      [groupKey]: optionCode
+    }));
+  }
+
   return (
     <article className="panel examOutputLayoutPlanner">
       <div className="sectionHeader slim">
@@ -2384,17 +2417,27 @@ function ExamOutputLayoutPlanner() {
       <div className="examOutputLayoutGrid">
         {examOutputLayoutOptions.map((group) => (
           <section className="examOutputLayoutGroup" key={group.title}>
-            <h3>{group.title}</h3>
+            <h3>{group.title}<span>{selectedChoices[group.key]}안</span></h3>
             <div>
-              {group.options.map((option) => (
-                <article className="examOutputLayoutOption" key={`${group.title}_${option.code}`}>
-                  <div>
-                    <strong>{option.code}안</strong>
-                    <span>{option.name}</span>
-                  </div>
-                  <ExamOutputLayoutWireframe option={option} />
-                </article>
-              ))}
+              {group.options.map((option) => {
+                const isSelected = selectedChoices[group.key] === option.code;
+                return (
+                  <button
+                    aria-pressed={isSelected}
+                    className={isSelected ? "examOutputLayoutOption selected" : "examOutputLayoutOption"}
+                    key={`${group.title}_${option.code}`}
+                    onClick={() => selectLayout(group.key, option.code)}
+                    type="button"
+                  >
+                    <div>
+                      <strong>{option.code}안</strong>
+                      <span>{option.name}</span>
+                      <i>{isSelected ? "선택됨" : "선택"}</i>
+                    </div>
+                    <ExamOutputLayoutWireframe option={option} />
+                  </button>
+                );
+              })}
             </div>
           </section>
         ))}
@@ -14140,7 +14183,7 @@ function ExamAnalysisCenter({
                   </button>
                   <button className="softButton" onClick={addQuestionItem} type="button">문항 추가</button>
                   <button className="softButton danger" disabled={!selectedQuestion} onClick={deleteSelectedQuestion} type="button">선택 문항 삭제</button>
-                  <button className="softButton" onClick={() => questionSourceInputRef.current?.click()} type="button">이미지 원본 추가</button>
+                  <button className="softButton" onClick={() => questionSourceInputRef.current?.click()} type="button">PDF·이미지 원본 추가</button>
                   <input
                     accept="application/pdf,image/*"
                     className="hiddenFileInput"
@@ -14517,42 +14560,58 @@ function ExamAnalysisCenter({
                   <span>현장데이터가 들어가야 최종물이 자연스럽습니다.</span>
                 </div>
                 <div className="analysisFinalReportActions">
-                  <button
-                    className="softButton"
-                    onClick={() => {
-                      if (!selectedAnalysis.finalDocument || window.confirm("현재 편집본을 지우고 AI/문항 데이터 기준 초안으로 다시 만들까요?")) {
-                        regenerateFinalDocument();
-                      }
-                    }}
-                    type="button"
-                  >
-                    {selectedAnalysis.finalDocument ? "편집본 다시 생성" : "최종 편집본 만들기"}
-                  </button>
+                  {!selectedAnalysis.finalDocument ? (
+                    <button className="softButton" onClick={regenerateFinalDocument} type="button">최종 편집본 만들기</button>
+                  ) : null}
                   <button className="primaryButton" onClick={() => setIsReportPreviewOpen(true)} type="button">최종 보고서 미리보기</button>
                   <button className="softButton" onClick={() => setDetailSectionId("insight")} type="button">인사이트 수정</button>
                 </div>
               </article>
-              <ExamOutputLayoutPlanner />
-              <ExamFinalDocumentBuilder
-                analysis={selectedAnalysis}
-                document={selectedAnalysis.finalDocument}
-                onChange={updateFinalDocument}
-                onRegenerate={regenerateFinalDocument}
-              />
-              <div className="analysisOutputGrid">
-                <AnalysisOutputPreviewCard title="강사용 분석지" value={teacherAnalysisText} onEdit={() => setDetailSectionId("ai")} onOpen={() => setOutputPreviewId("teacher")}>
-                  <ExamAnalysisReadablePreview value={teacherAnalysisText} />
-                </AnalysisOutputPreviewCard>
-                <AnalysisOutputPreviewCard title="학생 분석지" value={selectedAnalysis.studentAnalysisDraft} onEdit={() => setDetailSectionId("output")} onOpen={() => setOutputPreviewId("student")}>
-                  <ExamAnalysisReadablePreview value={selectedAnalysis.studentAnalysisDraft} />
-                </AnalysisOutputPreviewCard>
-                <AnalysisOutputPreviewCard title="블로그 초안" tone="wide" value={selectedAnalysis.blogDraft} onEdit={() => setDetailSectionId("output")} onOpen={() => setOutputPreviewId("blog")}>
-                  <ExamAnalysisReadablePreview value={selectedAnalysis.blogDraft} />
-                </AnalysisOutputPreviewCard>
-                <AnalysisOutputPreviewCard title="인스타 카드뉴스" tone="wide" value={selectedAnalysis.instagramDraft} onEdit={() => setDetailSectionId("output")} onOpen={() => setOutputPreviewId("instagram")}>
-                  <ExamAnalysisInstagramPreview value={selectedAnalysis.instagramDraft} />
-                </AnalysisOutputPreviewCard>
-              </div>
+              <details className="analysisOutputSection" open>
+                <summary>
+                  <span>1</span>
+                  <strong>레이아웃 선택</strong>
+                  <small>산출물별 A/B/C 형식</small>
+                </summary>
+                <ExamOutputLayoutPlanner
+                  value={selectedAnalysis.outputLayoutChoices}
+                  onChange={(nextChoices) => update("outputLayoutChoices", nextChoices)}
+                />
+              </details>
+              <details className="analysisOutputSection" open>
+                <summary>
+                  <span>2</span>
+                  <strong>최종 편집본</strong>
+                  <small>표·차트·흐름도·문항 슬롯 편집</small>
+                </summary>
+                <ExamFinalDocumentBuilder
+                  analysis={selectedAnalysis}
+                  document={selectedAnalysis.finalDocument}
+                  onChange={updateFinalDocument}
+                  onRegenerate={regenerateFinalDocument}
+                />
+              </details>
+              <details className="analysisOutputSection">
+                <summary>
+                  <span>3</span>
+                  <strong>산출물 미리보기</strong>
+                  <small>보기·복사·수정</small>
+                </summary>
+                <div className="analysisOutputGrid">
+                  <AnalysisOutputPreviewCard title="강사용 분석지" value={teacherAnalysisText} onEdit={() => setDetailSectionId("ai")} onOpen={() => setOutputPreviewId("teacher")}>
+                    <ExamAnalysisReadablePreview value={teacherAnalysisText} />
+                  </AnalysisOutputPreviewCard>
+                  <AnalysisOutputPreviewCard title="학생 분석지" value={selectedAnalysis.studentAnalysisDraft} onEdit={() => setDetailSectionId("output")} onOpen={() => setOutputPreviewId("student")}>
+                    <ExamAnalysisReadablePreview value={selectedAnalysis.studentAnalysisDraft} />
+                  </AnalysisOutputPreviewCard>
+                  <AnalysisOutputPreviewCard title="블로그 초안" tone="wide" value={selectedAnalysis.blogDraft} onEdit={() => setDetailSectionId("output")} onOpen={() => setOutputPreviewId("blog")}>
+                    <ExamAnalysisReadablePreview value={selectedAnalysis.blogDraft} />
+                  </AnalysisOutputPreviewCard>
+                  <AnalysisOutputPreviewCard title="인스타 카드뉴스" tone="wide" value={selectedAnalysis.instagramDraft} onEdit={() => setDetailSectionId("output")} onOpen={() => setOutputPreviewId("instagram")}>
+                    <ExamAnalysisInstagramPreview value={selectedAnalysis.instagramDraft} />
+                  </AnalysisOutputPreviewCard>
+                </div>
+              </details>
             </section>
             ) : null}
           </section>
