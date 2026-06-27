@@ -1272,6 +1272,20 @@ function normalizeAiQuestionDrafts(items = []) {
     .sort((a, b) => Number(a.page || 1) - Number(b.page || 1) || Number(a.number || 0) - Number(b.number || 0));
 }
 
+function getExamQuestionMaxNumber(items = []) {
+  return normalizeExamQuestionItems(items).reduce((max, item) => Math.max(max, Number(item.number) || 0), 0);
+}
+
+function hasExamQuestionNumberSequence(items = [], count = 0) {
+  const safeCount = Math.max(0, Number(count) || 0);
+  if (!safeCount) return true;
+  const numbers = new Set(normalizeExamQuestionItems(items).map((item) => Number(item.number)).filter((number) => number > 0));
+  for (let number = 1; number <= safeCount; number += 1) {
+    if (!numbers.has(number)) return false;
+  }
+  return true;
+}
+
 function mergeAiQuestionDrafts(existingItems = [], aiItems = [], options = {}) {
   const existing = normalizeExamQuestionItems(existingItems);
   const targetSourceId = String(options.sourceId || "").trim();
@@ -1292,7 +1306,7 @@ function mergeAiQuestionDrafts(existingItems = [], aiItems = [], options = {}) {
   let workingExisting = existing;
   if (targetSourceId && targetCount) {
     const targetExisting = workingExisting.filter(belongsToTargetSource);
-    if (targetExisting.length < targetCount) {
+    if (targetExisting.length < targetCount || !hasExamQuestionNumberSequence(targetExisting, targetCount)) {
       const expandedTargetItems = createExamQuestionItemsFromCount(targetCount, targetExisting).map(withTargetSource);
       workingExisting = [
         ...workingExisting.filter((item) => !belongsToTargetSource(item)),
@@ -1344,8 +1358,14 @@ function mergeAiQuestionDrafts(existingItems = [], aiItems = [], options = {}) {
 function createExamQuestionItemsFromCount(count, existingItems = []) {
   const safeCount = Math.max(1, Math.min(80, Number(count) || 20));
   const normalizedExisting = normalizeExamQuestionItems(existingItems);
+  const byQuestionNumber = new Map();
+  normalizedExisting.forEach((item) => {
+    const number = Number(item.number);
+    if (number > 0 && !byQuestionNumber.has(number)) byQuestionNumber.set(number, item);
+  });
   return Array.from({ length: safeCount }, (_, index) => {
-    const existing = normalizedExisting[index];
+    const number = index + 1;
+    const existing = byQuestionNumber.get(number);
     return createExamQuestionItem(existing || { number: index + 1 }, index);
   });
 }
@@ -11958,6 +11978,8 @@ function ExamAnalysisCenter({
     if (!resolvedQuestionSourceId) return true;
     return (item.cropSourceId || defaultQuestionSourceId) === resolvedQuestionSourceId;
   });
+  const activeQuestionMaxNumber = getExamQuestionMaxNumber(activeQuestionItems);
+  const activeQuestionNumberKey = activeQuestionItems.map((item) => Number(item.number) || 0).join(",");
   const selectedQuestion = activeQuestionItems.find((item) => item.questionId === selectedQuestionId) ?? activeQuestionItems[0] ?? null;
   const totalQuestionItemCount = questionItems.length;
   const selectedQuestionInsightRecommended = isExamQuestionInsightRecommended(selectedQuestion);
@@ -12086,6 +12108,17 @@ function ExamAnalysisCenter({
   }, [activeQuestionItems, selectedQuestionId]);
 
   useEffect(() => {
+    if (!activeQuestionItems.length || activeQuestionMaxNumber <= 1) return;
+    if (hasExamQuestionNumberSequence(activeQuestionItems, activeQuestionMaxNumber)) return;
+    const repairedItems = createExamQuestionItemsFromCount(activeQuestionMaxNumber, activeQuestionItems).map(withActiveQuestionSource);
+    updateQuestionItems([
+      ...questionItems.filter((item) => !questionBelongsToActiveSource(item)),
+      ...repairedItems
+    ]);
+    setSelectedQuestionId((current) => current || repairedItems[0]?.questionId || "");
+  }, [activeQuestionNumberKey, activeQuestionMaxNumber, resolvedQuestionSourceId]);
+
+  useEffect(() => {
     if (!expandedQuestionInsightId) return;
     if (!activeQuestionItems.some((item) => item.questionId === expandedQuestionInsightId)) {
       setExpandedQuestionInsightId("");
@@ -12181,7 +12214,13 @@ function ExamAnalysisCenter({
         ? questionItems
         : createExamQuestionItemsFromCount(questionCountDraft, []);
     const safeItems = templateItems.length ? templateItems : createExamQuestionItemsFromCount(questionCountDraft, []);
-    return safeItems.map((item, index) => createExamQuestionItem({
+    const targetCount = Math.max(
+      1,
+      Math.min(80, Number(questionCountDraft) || 0),
+      getExamQuestionMaxNumber(safeItems),
+      safeItems.length
+    );
+    return createExamQuestionItemsFromCount(targetCount, safeItems).map((item, index) => createExamQuestionItem({
       number: item.number || index + 1,
       page: item.page || 1,
       cropSourceId: sourceId,
@@ -12200,10 +12239,14 @@ function ExamAnalysisCenter({
 
   async function runAiForActiveQuestionSource() {
     if (!selectedAnalysis) return;
-    const requestedCount = Math.max(1, Math.min(80, Number(questionCountDraft) || activeQuestionItems.length || 20));
-    const targetItems = activeQuestionItems.length
-      ? activeQuestionItems.map(withActiveQuestionSource)
-      : createExamQuestionItemsFromCount(requestedCount, []).map(withActiveQuestionSource);
+    const requestedCount = Math.max(
+      1,
+      Math.min(
+        80,
+        Math.max(Number(questionCountDraft) || 0, activeQuestionMaxNumber, activeQuestionItems.length || 20)
+      )
+    );
+    const targetItems = createExamQuestionItemsFromCount(requestedCount, activeQuestionItems).map(withActiveQuestionSource);
     if (!activeQuestionItems.length) {
       updateQuestionItems([...questionItems, ...targetItems]);
       setSelectedQuestionId(targetItems[0]?.questionId || "");

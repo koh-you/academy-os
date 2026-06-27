@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-27 P1. 시험분석 문항번호 공백 자동 보정
+
+- 상태: 완료
+- 사용자 요청: 2023 창동고 데이터 테스트 중 현재 2번 문항이 문항번호순에서 빠진다.
+- 원인 정리: 문항 카드를 목표 문항 수로 다시 만들 때 기존 문항을 `문항번호`가 아니라 배열 인덱스 순서로 재사용하고 있었다. 따라서 기존 데이터가 `1, 3, 4...`처럼 2번이 빠진 상태이면 2번 빈 카드를 만들지 못하고 누락 상태가 유지될 수 있었다.
+- 이번 작업 결과: `createExamQuestionItemsFromCount`를 문항번호 기준 병합으로 바꿨다. 1번부터 목표 문항 수까지 번호별로 기존 카드를 찾아 붙이고, 없는 번호는 빈 카드로 생성한다.
+- 추가 보정: 현재 선택한 시험지/연도 안에서 내부 번호 공백이 감지되면 화면 진입 중 자동으로 빈 문항 카드를 끼워 넣는다. AI 문항정보 채우기와 AI 병합도 번호 공백을 메우도록 `hasExamQuestionNumberSequence` 검사를 추가했다.
+- 저장 주의: 기존 `examAnalyses.questionItems` 안에서 빈 문항 카드가 추가되는 방식이라 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check api/routes/examAnalysis.js`, `node --check scripts/scenario-tests-production.cjs` 통과. `npm run build` 통과(Vite chunk size warning만 있음). `npm run test:production` 통과(total 219, failed 0).
+
 ### 2026-06-27 P1. 시험분석 문항 수·AI 문항정보·주요문항 인사이트 접힘 보강
 
 - 상태: 완료
