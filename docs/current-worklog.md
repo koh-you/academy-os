@@ -130,6 +130,15 @@
 - 저장 주의: 기존 `examAnalysisFolders` app_state를 유지하되 `folderType: school`과 `folderType: exam`을 구분해 저장한다. 기존 합쳐진 폴더 데이터도 자동으로 학교 트리 안에 흡수되므로 새 Supabase SQL edit 필요 없음.
 - 검증: `npm run test:production` 통과(total 214, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
 
+### 2026-06-27 P1. 시험분석 라이브러리 전체 화면 분리
+
+- 상태: 완료
+- 사용자 정정: 좌측 트리 구조가 너무 복잡하고 우측 빈 작업영역이 크게 보인다. 트리 구조는 화면 전체에 보이고, 분석지 만들기/수정은 별도 화면으로 분리해야 한다. 분석/수정/삭제 버튼도 각 컴포넌트마다 반복하지 말고 효율적으로 모아야 한다.
+- 이번 작업 결과: 시험분석 기본 화면을 전체 폭 라이브러리로 바꿨다. 화면에는 `학교 → 학년 → 고사 → 분석지` 4열 트리만 보이고, 분석지는 선택 후 `분석 열기`로 별도 작업 화면에 들어간다. 새 분석지를 만들면 바로 분석 작업 화면으로 전환되며, 작업 화면 상단 `← 분석 목록`으로 돌아올 수 있다.
+- UI 정리: 학교/고사/분석지 카드 내부의 반복 액션 버튼을 제거하고, 생성 액션(`+ 학교`, `+ 고사`, `+ 분석지`)과 관리 액션(`학교 수정/삭제`, `고사 수정/삭제`, `분석 열기/삭제`)을 라이브러리 상단에 모았다.
+- 저장 주의: 기존 `examAnalysisFolders`/`examAnalyses` app_state 저장 구조를 그대로 사용하므로 새 Supabase SQL edit 필요 없음.
+- 검증: `npm run test:production` 통과(total 214, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
+
 ### 2026-06-26 P0. 수동 하원 알림톡 발송 지원
 
 - 상태: 완료

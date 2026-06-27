@@ -2546,8 +2546,157 @@ button {
   grid-template-columns: 340px minmax(0, 1fr);
 }
 
+.examAnalysisLayout.libraryMode,
+.examAnalysisLayout.workspaceMode {
+  grid-template-columns: 1fr;
+}
+
 .examAnalysisLayout.listCollapsed {
   grid-template-columns: 82px minmax(0, 1fr);
+}
+
+.analysisLibraryPanel {
+  display: grid;
+  gap: 16px;
+}
+
+.analysisLibraryHeader {
+  align-items: start;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.analysisLibraryHeader h2 {
+  margin: 0 0 6px;
+}
+
+.analysisLibraryActions {
+  align-items: center;
+  border-bottom: 1px solid #d8e3f8;
+  border-top: 1px solid #d8e3f8;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 0;
+}
+
+.analysisActionGroup {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.analysisActionGroup + .analysisActionGroup {
+  border-left: 1px solid #d8e3f8;
+  padding-left: 12px;
+}
+
+.analysisLibraryActions .danger {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  color: #dc2626;
+}
+
+.analysisLibraryGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(180px, 0.85fr) minmax(150px, 0.7fr) minmax(220px, 1fr) minmax(260px, 1.2fr);
+  min-height: 560px;
+}
+
+.analysisTreeColumn {
+  background: #f8fbff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+  padding: 12px;
+}
+
+.analysisTreeColumnWide {
+  background: #ffffff;
+}
+
+.analysisTreeColumnHeader {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.analysisTreeColumnHeader strong {
+  color: #17213d;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.analysisTreeColumnHeader span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.analysisTreeList {
+  align-content: start;
+  display: grid;
+  gap: 8px;
+  overflow: auto;
+}
+
+.analysisTreeItem {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  color: #17213d;
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 5px;
+  min-height: 78px;
+  padding: 12px;
+  text-align: left;
+}
+
+.analysisTreeItem:hover {
+  border-color: #93c5fd;
+}
+
+.analysisTreeItem.active {
+  background: #17213d;
+  border-color: #17213d;
+  color: #ffffff;
+}
+
+.analysisTreeItem strong {
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.analysisTreeItem span,
+.analysisTreeItem small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.analysisTreeItem.active span,
+.analysisTreeItem.active small {
+  color: #dbeafe;
+}
+
+.analysisTreeEmpty {
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.5;
+  padding: 14px;
 }
 
 .analysisListPanel {
@@ -11219,6 +11368,7 @@ body.attendanceOnlyBody {
   .profileSummary,
   .examAnalysisLayout,
   .examAnalysisLayout.listCollapsed,
+  .analysisLibraryGrid,
   .commentComposerGrid,
   .supplementReadableGrid,
   .analysisTwoColumn,

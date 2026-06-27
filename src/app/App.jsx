@@ -11127,7 +11127,7 @@ function ExamAnalysisCenter({
   const [selectedSchoolId, setSelectedSchoolId] = useState("");
   const [selectedGradeKey, setSelectedGradeKey] = useState("");
   const [selectedFolderId, setSelectedFolderId] = useState("");
-  const [isListCollapsed, setIsListCollapsed] = useState(false);
+  const [isAnalysisWorkspaceOpen, setIsAnalysisWorkspaceOpen] = useState(false);
   const [folderModalMode, setFolderModalMode] = useState("");
   const [folderDraft, setFolderDraft] = useState(null);
   const [detailSectionId, setDetailSectionId] = useState("");
@@ -11262,9 +11262,21 @@ function ExamAnalysisCenter({
     }
   }, [selectedAnalysisId, visibleAnalyses]);
 
+  useEffect(() => {
+    if (isAnalysisWorkspaceOpen && !selectedAnalysis) {
+      setIsAnalysisWorkspaceOpen(false);
+    }
+  }, [isAnalysisWorkspaceOpen, selectedAnalysis]);
+
   function update(field, value) {
     if (!selectedAnalysis) return;
     onUpdateAnalysis(selectedAnalysis.examAnalysisId, field, value);
+  }
+
+  function openAnalysisWorkspace(analysisId = selectedAnalysis?.examAnalysisId) {
+    if (!analysisId) return;
+    setSelectedAnalysisId(analysisId);
+    setIsAnalysisWorkspaceOpen(true);
   }
 
   function createAnalysisInFolder(folder = selectedFolder) {
@@ -11289,6 +11301,7 @@ function ExamAnalysisCenter({
     setSelectedGradeKey(nextAnalysis.grade || "학년 미입력");
     setSelectedFolderId(nextAnalysis.analysisFolderId);
     setSelectedAnalysisId(nextAnalysis.examAnalysisId);
+    setIsAnalysisWorkspaceOpen(true);
   }
 
   function openCreateFolder() {
@@ -11380,6 +11393,7 @@ function ExamAnalysisCenter({
     if (!analysis || !onDeleteAnalysis) return;
     const label = [analysis.schoolName, analysis.grade, analysis.examName].filter(Boolean).join(" · ") || "이 분석 문서";
     if (!window.confirm(`${label}을 삭제할까요? 삭제 후 app_state 저장에 반영됩니다.`)) return;
+    if (analysis.examAnalysisId === selectedAnalysisId) setIsAnalysisWorkspaceOpen(false);
     onDeleteAnalysis(analysis.examAnalysisId);
   }
 
@@ -11464,141 +11478,138 @@ function ExamAnalysisCenter({
           <p className="muted">기출 PDF 1개 또는 여러 개를 구조화하고, 강사 인사이트를 더해 강사용·학생/학부모용·홍보용 산출물을 만듭니다.</p>
         </div>
         <div className="analysisTopActions">
-          <button className="softButton" onClick={openCreateFolder} type="button">+ 학교</button>
-          <button className="softButton" onClick={() => openCreateExamFolder()} type="button">+ 고사</button>
-          <button className="primaryButton" onClick={() => createAnalysisInFolder()} type="button">+ 분석 문서</button>
+          {isAnalysisWorkspaceOpen ? (
+            <button className="softButton" onClick={() => setIsAnalysisWorkspaceOpen(false)} type="button">← 분석 목록</button>
+          ) : (
+            <>
+              <button className="softButton" onClick={openCreateFolder} type="button">+ 학교</button>
+              <button className="softButton" onClick={() => openCreateExamFolder()} type="button">+ 고사</button>
+              <button className="primaryButton" onClick={() => createAnalysisInFolder()} type="button">+ 분석 문서</button>
+            </>
+          )}
         </div>
       </header>
 
-      <div className={isListCollapsed ? "examAnalysisLayout listCollapsed" : "examAnalysisLayout"}>
-        <aside className={isListCollapsed ? "panel analysisListPanel collapsed" : "panel analysisListPanel"}>
-          <div className="sectionHeader slim">
-            {isListCollapsed ? null : <h2>분석 목록</h2>}
-            <button
-              aria-label={isListCollapsed ? "분석 목록 펼치기" : "분석 목록 접기"}
-              className="analysisListToggle"
-              onClick={() => setIsListCollapsed((current) => !current)}
-              type="button"
-            >
-              {isListCollapsed ? "›" : "‹"}
-            </button>
-            <span className="countBadge">{analysisSchoolTree.length}학교 · {analyses.length}건</span>
-          </div>
-          {isListCollapsed ? (
-            <div className="analysisCollapsedHint">목록</div>
-          ) : (
-            <div className="analysisFolderList">
-              <div className="analysisFolderCreateRow">
-                <button className="softButton" onClick={openCreateFolder} type="button">학교 만들기</button>
+      <div className={isAnalysisWorkspaceOpen ? "examAnalysisLayout workspaceMode" : "examAnalysisLayout libraryMode"}>
+        {!isAnalysisWorkspaceOpen ? (
+          <section className="panel analysisLibraryPanel">
+            <div className="analysisLibraryHeader">
+              <div>
+                <h2>분석 목록</h2>
+                <p className="muted">학교를 고르고, 학년과 고사를 거쳐 누적된 분석지를 엽니다.</p>
               </div>
-              {analysisSchoolTree.map((school) => (
-                <section
-                  className={selectedSchool?.folderId === school.folderId ? "analysisSchoolItem active" : "analysisSchoolItem"}
-                  key={school.folderId}
-                >
-                  <button
-                    className="analysisSchoolSelect"
-                    onClick={() => setSelectedSchoolId(school.folderId)}
-                    type="button"
-                  >
-                    <strong>{school.schoolName}</strong>
-                    <span>{school.grades.length}학년 · {school.examCount}고사 · 분석지 {school.analysisCount}건</span>
-                  </button>
-                  <div className="analysisFolderActions">
-                    <button onClick={() => openCreateExamFolder(school)} type="button">+ 고사</button>
-                    <button onClick={() => openEditSchool(school)} type="button">수정</button>
-                    <button className="danger" onClick={() => deleteSchool(school)} type="button">삭제</button>
-                  </div>
-                  {selectedSchool?.folderId === school.folderId ? (
-                    <div className="analysisGradeList">
-                      {school.grades.length ? school.grades.map((grade) => (
-                        <section className={selectedGrade?.grade === grade.grade ? "analysisGradeItem active" : "analysisGradeItem"} key={grade.grade}>
-                          <button
-                            className="analysisGradeSelect"
-                            onClick={() => setSelectedGradeKey(grade.grade)}
-                            type="button"
-                          >
-                            <strong>{grade.grade}</strong>
-                            <span>{grade.exams.length}고사 · 분석지 {grade.analysisCount}건</span>
-                          </button>
-                          {selectedGrade?.grade === grade.grade ? (
-                            <div className="analysisExamList">
-                              {grade.exams.map((folder) => (
-                                <section
-                                  className={selectedFolder?.folderId === folder.folderId ? "analysisExamItem active" : "analysisExamItem"}
-                                  key={folder.folderId}
-                                >
-                                  <button
-                                    className="analysisExamSelect"
-                                    onClick={() => setSelectedFolderId(folder.folderId)}
-                                    type="button"
-                                  >
-                                    <strong>{folder.examName || examCycleLabel(folder.examCycle) || "고사 미입력"}</strong>
-                                    <span>{folder.subject || "과목 미입력"} · 분석지 {folder.analyses.length}건</span>
-                                  </button>
-                                  <div className="analysisFolderActions compact">
-                                    <button onClick={() => createAnalysisInFolder(folder)} type="button">+ 분석</button>
-                                    <button onClick={() => openEditFolder(folder)} type="button">수정</button>
-                                    <button className="danger" onClick={() => deleteFolder(folder)} type="button">삭제</button>
-                                  </div>
-                                  {selectedFolder?.folderId === folder.folderId ? (
-                                    <div className="analysisList">
-                                      {folder.analyses.length ? folder.analyses.map((analysis) => (
-                                        <div
-                                          className={selectedAnalysis?.examAnalysisId === analysis.examAnalysisId ? "analysisListItem active" : "analysisListItem"}
-                                          key={analysis.examAnalysisId}
-                                        >
-                                          <button
-                                            className="analysisListSelect"
-                                            onClick={() => setSelectedAnalysisId(analysis.examAnalysisId)}
-                                            type="button"
-                                          >
-                                            <strong>{analysis.examName || "새 분석"}</strong>
-                                            <span>{[analysis.subject, analysis.examDate].filter(Boolean).join(" · ") || "기본정보 미입력"}</span>
-                                            <small>{getExamAnalysisStatusMeta(normalizeExamAnalysisForDisplay(analysis)).label} · {stageAlias[analysis.pipelineStage] ?? analysis.pipelineStage}</small>
-                                          </button>
-                                          <button
-                                            className="analysisDeleteButton"
-                                            onClick={() => deleteAnalysis(analysis)}
-                                            type="button"
-                                          >
-                                            삭제
-                                          </button>
-                                        </div>
-                                      )) : (
-                                        <div className="analysisFolderEmpty">
-                                          <span>아직 분석지가 없습니다.</span>
-                                          <button className="primaryButton" onClick={() => createAnalysisInFolder(folder)} type="button">첫 분석 만들기</button>
-                                        </div>
-                                      )}
-                                    </div>
-                                  ) : null}
-                                </section>
-                              ))}
-                            </div>
-                          ) : null}
-                        </section>
-                      )) : (
-                        <div className="analysisFolderEmpty">
-                          <span>아직 고사가 없습니다.</span>
-                          <button className="primaryButton" onClick={() => openCreateExamFolder(school)} type="button">첫 고사 만들기</button>
-                        </div>
-                      )}
-                    </div>
-                  ) : null}
-                </section>
-              ))}
-              {analysisSchoolTree.length === 0 ? (
-                <div className="analysisFolderEmpty">
-                  <span>학교 폴더를 먼저 만들어 주세요.</span>
-                  <button className="primaryButton" onClick={openCreateFolder} type="button">첫 학교 만들기</button>
-                </div>
-              ) : null}
+              <span className="countBadge">{analysisSchoolTree.length}학교 · {analyses.length}건</span>
             </div>
-          )}
-        </aside>
+            <div className="analysisLibraryActions">
+              <div className="analysisActionGroup">
+                <button className="primaryButton" onClick={openCreateFolder} type="button">+ 학교</button>
+                <button className="softButton" disabled={!selectedSchool} onClick={() => openCreateExamFolder()} type="button">+ 고사</button>
+                <button className="softButton" disabled={!selectedFolder} onClick={() => createAnalysisInFolder()} type="button">+ 분석지</button>
+              </div>
+              <div className="analysisActionGroup">
+                <button className="softButton" disabled={!selectedSchool} onClick={() => openEditSchool()} type="button">학교 수정</button>
+                <button className="softButton danger" disabled={!selectedSchool} onClick={() => deleteSchool()} type="button">학교 삭제</button>
+                <button className="softButton" disabled={!selectedFolder} onClick={() => openEditFolder()} type="button">고사 수정</button>
+                <button className="softButton danger" disabled={!selectedFolder} onClick={() => deleteFolder()} type="button">고사 삭제</button>
+                <button className="softButton" disabled={!selectedAnalysis} onClick={() => openAnalysisWorkspace()} type="button">분석 열기</button>
+                <button className="softButton danger" disabled={!selectedAnalysis} onClick={() => deleteAnalysis(selectedAnalysis)} type="button">분석 삭제</button>
+              </div>
+            </div>
+            <div className="analysisLibraryGrid">
+              <article className="analysisTreeColumn">
+                <div className="analysisTreeColumnHeader">
+                  <strong>학교</strong>
+                  <span>{analysisSchoolTree.length}개</span>
+                </div>
+                <div className="analysisTreeList">
+                  {analysisSchoolTree.length ? analysisSchoolTree.map((school) => (
+                    <button
+                      className={selectedSchool?.folderId === school.folderId ? "analysisTreeItem active" : "analysisTreeItem"}
+                      key={school.folderId}
+                      onClick={() => setSelectedSchoolId(school.folderId)}
+                      type="button"
+                    >
+                      <strong>{school.schoolName}</strong>
+                      <span>{school.grades.length}학년 · {school.examCount}고사 · {school.analysisCount}건</span>
+                    </button>
+                  )) : (
+                    <div className="analysisTreeEmpty">학교를 먼저 만들어 주세요.</div>
+                  )}
+                </div>
+              </article>
 
-        {selectedAnalysis ? (
+              <article className="analysisTreeColumn">
+                <div className="analysisTreeColumnHeader">
+                  <strong>학년</strong>
+                  <span>{selectedSchool?.grades.length ?? 0}개</span>
+                </div>
+                <div className="analysisTreeList">
+                  {selectedSchool?.grades.length ? selectedSchool.grades.map((grade) => (
+                    <button
+                      className={selectedGrade?.grade === grade.grade ? "analysisTreeItem active" : "analysisTreeItem"}
+                      key={grade.grade}
+                      onClick={() => setSelectedGradeKey(grade.grade)}
+                      type="button"
+                    >
+                      <strong>{grade.grade}</strong>
+                      <span>{grade.exams.length}고사 · {grade.analysisCount}건</span>
+                    </button>
+                  )) : (
+                    <div className="analysisTreeEmpty">선택한 학교에 고사를 추가해 주세요.</div>
+                  )}
+                </div>
+              </article>
+
+              <article className="analysisTreeColumn">
+                <div className="analysisTreeColumnHeader">
+                  <strong>고사</strong>
+                  <span>{selectedGrade?.exams.length ?? 0}개</span>
+                </div>
+                <div className="analysisTreeList">
+                  {selectedGrade?.exams.length ? selectedGrade.exams.map((folder) => (
+                    <button
+                      className={selectedFolder?.folderId === folder.folderId ? "analysisTreeItem active" : "analysisTreeItem"}
+                      key={folder.folderId}
+                      onClick={() => setSelectedFolderId(folder.folderId)}
+                      type="button"
+                    >
+                      <strong>{folder.examName || examCycleLabel(folder.examCycle) || "고사 미입력"}</strong>
+                      <span>{folder.subject || "과목 미입력"} · 분석지 {folder.analyses.length}건</span>
+                    </button>
+                  )) : (
+                    <div className="analysisTreeEmpty">1학기 중간/기말, 2학기 중간/기말 중 고사를 추가해 주세요.</div>
+                  )}
+                </div>
+              </article>
+
+              <article className="analysisTreeColumn analysisTreeColumnWide">
+                <div className="analysisTreeColumnHeader">
+                  <strong>분석지</strong>
+                  <span>{visibleAnalyses.length}건</span>
+                </div>
+                <div className="analysisTreeList">
+                  {visibleAnalyses.length ? visibleAnalyses.map((analysis) => (
+                    <button
+                      className={selectedAnalysis?.examAnalysisId === analysis.examAnalysisId ? "analysisTreeItem active" : "analysisTreeItem"}
+                      key={analysis.examAnalysisId}
+                      onClick={() => setSelectedAnalysisId(analysis.examAnalysisId)}
+                      onDoubleClick={() => openAnalysisWorkspace(analysis.examAnalysisId)}
+                      type="button"
+                    >
+                      <strong>{analysis.examName || "새 분석"}</strong>
+                      <span>{[analysis.subject, analysis.examDate].filter(Boolean).join(" · ") || "기본정보 미입력"}</span>
+                      <small>{getExamAnalysisStatusMeta(normalizeExamAnalysisForDisplay(analysis)).label} · {stageAlias[analysis.pipelineStage] ?? analysis.pipelineStage}</small>
+                    </button>
+                  )) : (
+                    <div className="analysisTreeEmpty">선택한 고사에 아직 분석지가 없습니다.</div>
+                  )}
+                </div>
+              </article>
+            </div>
+          </section>
+        ) : null}
+
+        {isAnalysisWorkspaceOpen && selectedAnalysis ? (
           <section className="analysisWorkspace">
             <section className="panel analysisOverviewPanel">
               <div className="sectionHeader slim">
@@ -11831,18 +11842,7 @@ function ExamAnalysisCenter({
             </section>
             ) : null}
           </section>
-        ) : (
-          <section className="panel emptyPortalPanel">
-            <strong>{selectedFolder ? "이 고사에 아직 분석지가 없습니다." : selectedSchool ? "이 학교에 아직 고사가 없습니다." : "아직 학교 폴더가 없습니다."}</strong>
-            <button
-              className="primaryButton"
-              onClick={() => (selectedFolder ? createAnalysisInFolder(selectedFolder) : selectedSchool ? openCreateExamFolder(selectedSchool) : openCreateFolder())}
-              type="button"
-            >
-              {selectedFolder ? "첫 분석 만들기" : selectedSchool ? "첫 고사 만들기" : "첫 학교 만들기"}
-            </button>
-          </section>
-        )}
+        ) : null}
       </div>
       {folderModalMode && folderDraft ? (
         <Modal
