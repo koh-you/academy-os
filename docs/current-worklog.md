@@ -56,6 +56,15 @@
 - SQL 주의: 프론트 UI와 AI 프롬프트 변경만 있으므로 Supabase SQL edit 필요 없음.
 - 검증: `npm run test:production` 통과(total 209, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
 
+### 2026-06-27 P0. 신규 수동 출결 저장 null record 오류 보정
+
+- 상태: 완료
+- 사용자 제보: 수동 출결 저장에서 `Cannot read properties of null (reading 'checkInAt')` 오류가 뜨며 저장되지 않는다.
+- 원인: 해당 수업/학생의 기존 `lesson_student_records`가 아직 없는 신규 수동 출결 케이스에서 `applyManualAttendanceTimeFields`가 `existingRecord.checkInAt`을 바로 읽었다. 기본 인자는 `{}`였지만 호출자가 `null`을 넘기면 기본 인자가 적용되지 않았다.
+- 이번 작업 결과: `applyManualAttendanceTimeFields` 시작 시 `existingRecord = existingRecord ?? {}`로 정규화해 기존 record가 없는 학생도 등원/지각/하원 수동 저장이 가능하게 했다.
+- SQL 주의: 프론트 null-safe 보정만 있으므로 Supabase SQL edit 필요 없음.
+- 검증: `npm run test:production` 통과(total 210, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
+
 ### 2026-06-26 P0. 수동 하원 알림톡 발송 지원
 
 - 상태: 완료

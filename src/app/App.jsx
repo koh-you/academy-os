@@ -17369,6 +17369,7 @@ function hasMissingCheckOut(record = {}) {
 }
 
 function applyManualAttendanceTimeFields(existingRecord = {}, values = {}, nowIso = new Date().toISOString(), lesson = null) {
+  existingRecord = existingRecord ?? {};
   const nowTime = formatKoreaTimeFromIso(nowIso);
   const manualCheckInTime = normalizeTimeInput(values.checkInTime);
   const manualCheckOutTime = normalizeTimeInput(values.checkOutTime);
