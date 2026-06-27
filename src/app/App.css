@@ -3202,6 +3202,131 @@ button {
   color: #475569;
 }
 
+.outputPreviewCard {
+  align-content: start;
+  display: grid;
+  gap: 14px;
+  min-height: 320px;
+}
+
+.outputPreviewCard.wide {
+  grid-column: 1 / -1;
+}
+
+.analysisPreviewActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.analysisReadablePreview {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  max-height: 520px;
+  overflow: auto;
+  padding: 18px;
+}
+
+.analysisReadablePreview h4 {
+  border-bottom: 1px solid #e5edf9;
+  color: #17213d;
+  font-size: 18px;
+  font-weight: 900;
+  margin: 8px 0 4px;
+  padding-bottom: 8px;
+}
+
+.analysisReadablePreview h4:first-child {
+  margin-top: 0;
+}
+
+.analysisReadablePreview p {
+  color: #334155;
+  font-size: 15px;
+  font-weight: 750;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.analysisPreviewListLine {
+  border-left: 3px solid #b8c9f4;
+  padding-left: 10px;
+}
+
+.analysisPreviewTableWrap {
+  overflow-x: auto;
+}
+
+.analysisPreviewTable {
+  border-collapse: collapse;
+  min-width: 520px;
+  width: 100%;
+}
+
+.analysisPreviewTable th,
+.analysisPreviewTable td {
+  border: 1px solid #d8e3f8;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 750;
+  padding: 9px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.analysisPreviewTable th {
+  background: #eef2ff;
+  color: #17213d;
+  font-weight: 900;
+}
+
+.analysisInstagramPreview {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(7, minmax(150px, 1fr));
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.analysisInstagramSlide {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  min-height: 240px;
+  padding: 14px;
+}
+
+.analysisInstagramSlide span {
+  background: #17213d;
+  border-radius: 999px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 900;
+  justify-self: start;
+  padding: 5px 9px;
+}
+
+.analysisInstagramSlide strong {
+  color: #17213d;
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.analysisInstagramSlide p {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.55;
+  margin: 0;
+}
+
 .analysisReportPreviewModal {
   max-width: 1120px;
   width: min(1120px, calc(100vw - 28px));

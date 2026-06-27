@@ -85,22 +85,32 @@ function buildExamAnalysisPrompt(payload) {
       "아직 원본 텍스트가 없습니다. 입력된 기본정보와 강사 메모를 기준으로 분석 필드 초안을 만들어 주세요.",
     "",
     "[작성 규칙]",
+    "- 시험지를 설명하지 말고 학부모·학생·강사가 다음 행동을 결정할 수 있게 분석한다.",
+    "- 각 항목은 가능하면 사실 근거 → 점수에 미친 영향 → 다음 학습 행동 순서로 쓴다.",
     "- 반드시 시험 원본/OCR에 있는 사실을 우선한다.",
     "- 문항번호, 배점, 단원명, 유형, 핵심 함정, 예상 오답을 가능한 한 구분해서 쓴다.",
-    "- 원문에서 확인되지 않는 문항번호/배점은 지어내지 말고 '확인 필요'라고 쓴다.",
-    "- 각 필드는 한두 문장으로 끝내지 말고 강사가 검토할 수 있는 충분한 bullet/문장량으로 작성한다.",
-    "- aiOverview는 시험 구조와 난이도 흐름을 5문장 이상으로 정리한다.",
-    "- unitDistribution은 단원별 문항번호/문항수/배점/난이도/대표 유형을 포함한다.",
+    "- 원문에서 확인되지 않는 문항번호/배점/단원명은 지어내지 말고 '확인 필요'라고 쓴다.",
+    "- OCR 깨짐 문자, 의미 없는 한글 조합, 특수문자 잡음은 산출물에 그대로 쓰지 말고 sourceCheckNotes에 모은다.",
+    "- '어려웠다', '중요하다', '복습이 필요하다' 같은 추상 문장으로 끝내지 않는다.",
+    "- unitDistribution은 단원별 문항번호/문항수/배점/난이도/대표 유형을 포함하고 문항수 합계를 자체 점검한다.",
+    "- typeClassification은 기본/준킬러/킬러를 분리하고 점수 영향과 학습 순서를 포함한다.",
     "- killerProblems는 킬러와 준킬러 후보를 나누고, 문항별 함정과 필요한 개념을 포함한다.",
     "- mistakePatterns는 학생들이 실제로 틀릴 만한 행동 단위 실수를 적는다.",
+    "- blogDraft는 시험 기본 정보, 올해 총평, 단원별 현황, 킬러 문항, 다음 시험 예측 TOP 5, 공부 방향, CTA 순서로 쓴다.",
+    "- instagramDraft는 7장 카드뉴스 구조로 쓴다: 표지, 시험 구성, 난이도 총평, 유형 TOP3, 킬러 포인트, 다음 시험 예측, 공부 방향/CTA.",
     "- 안내문 초안은 분석 결과를 반영하되 과장하거나 없는 사실을 만들지 않는다.",
     "",
     "반드시 아래 JSON 형식만 반환하세요.",
     "{",
+    '  "oneLineSummary": "이번 시험의 핵심 성격 한 문장",',
+    '  "examStructure": "문항수, 객관식/서술형, 배점, 시간 압박, 변화 포인트",',
     '  "aiOverview": "시험 개요",',
     '  "unitDistribution": "단원별 출제 분포",',
+    '  "typeClassification": "기본/준킬러/킬러 유형 분류",',
     '  "killerProblems": "킬러/준킬러 문항 분석",',
     '  "mistakePatterns": "학생 실수 패턴",',
+    '  "fiveCorePatterns": "시험 전 확인할 5대 핵심 패턴",',
+    '  "sourceCheckNotes": "OCR/문항번호/배점 확인 필요 항목",',
     '  "studentAnalysisDraft": "학생 분석지 초안",',
     '  "parentNoticeDraft": "학부모 안내문 초안",',
     '  "blogDraft": "블로그 초안",',
@@ -203,15 +213,24 @@ function createMockAnalysis(payload) {
   const school = payload.schoolName || "학교";
   const subject = payload.subject || "수학";
   return {
+    oneLineSummary: `${school} ${subject} 시험은 조건 해석과 풀이 근거 정리가 점수 차이를 만들 가능성이 큽니다.`,
+    examStructure: "문항수/객관식/서술형/배점은 원본 확인 필요입니다. 시험지가 들어오면 시간 압박, 고배점 문항, 작년 대비 변화 가능성을 분리해 정리합니다.",
     aiOverview: `${school} ${subject} 시험은 기본 개념 확인과 조건 해석을 함께 요구하는 구조로 정리됩니다. 원본 시험지를 넣으면 문항 번호, 배점, 난이도 흐름까지 구체화합니다.`,
     unitDistribution: "1. 핵심 단원: 조건 해석형 문항\n2. 보조 단원: 계산형 문항\n3. 서술형 대비 과정 감점 가능성 확인 필요",
+    typeClassification: "기본: 빠르게 맞혀야 할 계산/개념 확인 유형\n준킬러: 조건 2개 이상을 결합하는 유형\n킬러: 서술형 근거와 경우 분류가 필요한 유형",
     killerProblems: "킬러 후보: 조건을 여러 단계로 연결하는 문항\n준킬러 후보: 계산보다 이해와 식 변형에서 차이가 나는 문항\n강사 확인 필요: 실제 문항 번호와 배점",
     mistakePatterns: "조건 일부 누락, 부호 실수, 식 변형 과정 누락, 서술형 근거 부족이 예상됩니다.",
+    fiveCorePatterns: "1. 조건을 식으로 바꾸기\n2. 범위 제한 확인\n3. 경우 분류 누락 방지\n4. 고배점 서술형 근거 작성\n5. 시간 안배",
+    sourceCheckNotes: "원본 시험지/OCR을 넣으면 깨진 문자, 문항번호, 배점 확인 필요 항목을 따로 표시합니다.",
     studentAnalysisDraft: `${school} 학생들은 이번 시험에서 조건 해석과 풀이 과정 정리가 중요했습니다. 다음 시험 전에는 핵심 유형 반복과 서술형 근거 작성 훈련이 필요합니다.`,
     parentNoticeDraft: `${school} ${subject} 시험은 조건 해석과 서술형 과정 정리가 중요한 시험으로 보입니다. 다음 시험 대비에서는 학생별 오답 원인과 학교별 출제 흐름을 함께 확인해 보완하겠습니다.`,
-    blogDraft: `${school} ${subject} 시험 분석입니다. 이번 시험은 단순 계산보다 조건을 읽고 식으로 연결하는 힘이 중요했습니다. 으뜸수학 고태영T에서는 학생별 오답과 학교별 출제 흐름을 연결해 다음 시험 대비 방향을 잡습니다.`,
-    instagramDraft: "1장 시험 총평\n2장 출제 단원\n3장 난이도 흐름\n4장 킬러문항 포인트\n5장 학생 실수 TOP3\n6장 다음 시험 대비법\n7장 으뜸수학 고태영T 안내"
+    blogDraft: `# ${school} ${subject} 시험 분석\n\n## 1. 시험 기본 정보\n원본 확인 후 문항수와 배점 구조를 정리합니다.\n\n## 2. 올해 총평\n이번 시험은 단순 계산보다 조건을 읽고 식으로 연결하는 힘이 중요했습니다.\n\n## 3. 공부 방향\n${academyNameForServer()}에서는 학생별 오답과 학교별 출제 흐름을 연결해 다음 시험 대비 방향을 잡습니다.`,
+    instagramDraft: `1장 표지: ${school} ${subject} 시험분석\n2장 시험 구성: 문항수/배점 원문 확인 필요\n3장 난이도 총평: 조건 해석 중심\n4장 유형 TOP3: 원본 분석 후 확정\n5장 킬러 포인트: 고배점 문항 확인 필요\n6장 다음 시험 예측: 반복 유형 중심\n7장 공부 방향/CTA: ${academyNameForServer()}`
   };
+}
+
+function academyNameForServer() {
+  return "으뜸수학 고태영T";
 }
 
 function normalizeAnalysisFields(fields, payload, rawText = "") {
@@ -220,10 +239,15 @@ function normalizeAnalysisFields(fields, payload, rawText = "") {
   const cleanText = String(rawText ?? "").trim();
 
   return {
+    oneLineSummary: parsed.oneLineSummary || fallback.oneLineSummary,
+    examStructure: parsed.examStructure || fallback.examStructure,
     aiOverview: parsed.aiOverview || cleanText || fallback.aiOverview,
     unitDistribution: parsed.unitDistribution || fallback.unitDistribution,
+    typeClassification: parsed.typeClassification || fallback.typeClassification,
     killerProblems: parsed.killerProblems || fallback.killerProblems,
     mistakePatterns: parsed.mistakePatterns || fallback.mistakePatterns,
+    fiveCorePatterns: parsed.fiveCorePatterns || fallback.fiveCorePatterns,
+    sourceCheckNotes: parsed.sourceCheckNotes || fallback.sourceCheckNotes,
     studentAnalysisDraft: parsed.studentAnalysisDraft || fallback.studentAnalysisDraft,
     parentNoticeDraft: parsed.parentNoticeDraft || fallback.parentNoticeDraft,
     blogDraft: parsed.blogDraft || fallback.blogDraft,

@@ -93,6 +93,16 @@
 - SQL 주의: 프론트 레이아웃 변경만 있으므로 Supabase SQL edit 필요 없음.
 - 검증: `npm run test:production` 통과(total 212, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
 
+### 2026-06-27 P1. 시험분석 탭 판단형 분석·문서형 미리보기 강화
+
+- 상태: 완료
+- 사용자 요청: Notion에 정리한 시험분석 탭 방향, AI 분석 글의 독자별 니즈, 블로그/인스타 재가공 문제를 종합해 실제 웹앱에 구현한다.
+- 이번 작업 결과: 시험분석 AI 필드에 `oneLineSummary`, `examStructure`, `typeClassification`, `fiveCorePatterns`, `sourceCheckNotes`를 추가했다. 인사이트 필드도 실제 학생 오답(`insightStudentErrors`)과 다음 시험 예측(`insightPrediction`)까지 확장했다.
+- 프롬프트 보강: 기본 프롬프트와 서버 프롬프트 모두 “시험지 요약”이 아니라 “사실 근거 → 점수 영향 → 다음 학습 행동”으로 분석하도록 바꿨다. OCR 깨짐, 문항번호/배점 불확실성은 `sourceCheckNotes`에 모으고, 블로그는 7단락, 인스타는 7장 카드뉴스 구조로 쓰도록 강제했다.
+- UI 보강: 산출물 작성 단계의 긴 textarea를 문서형 미리보기로 교체했다. 블로그/학생/학부모/강사용 분석지는 제목·표·목록을 읽기 좋게 렌더링하고, 인스타 원고는 카드뉴스 장별 미리보기로 표시한다. 각 산출물에는 복사와 수정 버튼을 제공한다.
+- 저장 주의: 기존 `examAnalyses` app_state 문서에 필드를 추가 저장하는 방식이므로 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check api/routes/examAnalysis.js` 통과. `npm run test:production` 통과(total 213, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
+
 ### 2026-06-26 P0. 수동 하원 알림톡 발송 지원
 
 - 상태: 완료
