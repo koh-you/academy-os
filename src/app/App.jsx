@@ -1063,13 +1063,11 @@ function createDefaultExamAnalysisPrompt() {
     "여러 해 시험지가 함께 들어오면 questionItems는 선택된 시험명 또는 가장 최신 시험지 1회분의 문항표 초안으로 작성하고, 3개년 반복/증감/변화는 텍스트 분석 필드에 정리한다.",
     "",
     "[문항 태그 기준]",
-    "- 기본 문항: 반드시 맞혀야 하는 개념 확인 문항",
-    "- 분석 필요: 오답 원인, 조건 해석, 풀이 선택이 중요한 문항",
-    "- 디벨럽 가능: 수업에서 확장하거나 상위권 훈련으로 발전시킬 문항",
-    "- 실수 유도: 계산, 부호, 조건 누락, 그래프 해석 등 실수가 잘 나는 문항",
-    "- 변별 문항: 점수 차이를 만든 문항",
-    "- 출처 비교: 부교재, 프린트, 모의고사 원문항과 비교가 필요한 문항",
-    "- 수업 확장: 다음 수업이나 직전대비 자료로 재가공할 가치가 있는 문항",
+    "- 기본문항: 반드시 맞혀야 하는 개념 확인 문항",
+    "- 실수문항: 계산, 부호, 조건 누락, 그래프 해석 등 실수가 잘 나는 문항",
+    "- 주요문항: 수업에서 반드시 다루거나 원문항 비교, 오답 원인 정리가 필요한 문항",
+    "- 1등급 변별문항: 상위권 점수 차이를 만드는 고난도/킬러 문항",
+    "- 2등급 변별문항: 중상위권을 가르는 준킬러 또는 조건 해석형 문항",
     "",
     "[표와 다이어그램 산출 의도]",
     "AI는 웹앱에서 강사가 검수할 수 있도록 다음 표의 초안을 만든다.",
@@ -1161,14 +1159,41 @@ const examQuestionRoleOptions = ["기본", "실수유도", "앞번호 고난도"
 const examQuestionSourceOptions = ["확인 필요", "교과서", "부교재", "학교 프린트", "모의고사", "수능/평가원", "자체 변형", "기타"];
 const examQuestionTypeOptions = ["객관식", "단답형", "서술형", "논술형", "확인 필요"];
 const examQuestionTagOptions = [
-  "기본 문항",
-  "분석 필요",
-  "디벨럽 가능",
-  "실수 유도",
-  "변별 문항",
-  "출처 비교",
-  "수업 확장"
+  "기본문항",
+  "실수문항",
+  "주요문항",
+  "1등급 변별문항",
+  "2등급 변별문항"
 ];
+
+function normalizeExamQuestionTag(tag = "") {
+  const text = String(tag ?? "").trim();
+  if (!text) return "";
+  const aliases = {
+    "기본 문항": "기본문항",
+    "기본문항": "기본문항",
+    "실수 유도": "실수문항",
+    "실수유도": "실수문항",
+    "실수 많음": "실수문항",
+    "실수문항": "실수문항",
+    "분석 필요": "주요문항",
+    "디벨럽 가능": "주요문항",
+    "출처 비교": "주요문항",
+    "수업 확장": "주요문항",
+    "주요문항": "주요문항",
+    "변별 문항": "1등급 변별문항",
+    "킬러": "1등급 변별문항",
+    "1등급 변별문항": "1등급 변별문항",
+    "준킬러": "2등급 변별문항",
+    "2등급 변별문항": "2등급 변별문항"
+  };
+  return aliases[text] || (examQuestionTagOptions.includes(text) ? text : "");
+}
+
+function normalizeExamQuestionTags(tags = []) {
+  const rawTags = Array.isArray(tags) ? tags : String(tags || "").split(/[,/·]/);
+  return Array.from(new Set(rawTags.map(normalizeExamQuestionTag).filter(Boolean)));
+}
 
 function createExamQuestionItem(seed = {}, index = 0) {
   const number = seed.number || index + 1;
@@ -1190,7 +1215,7 @@ function createExamQuestionItem(seed = {}, index = 0) {
     teacherComment: seed.teacherComment || "",
     sourceCompareComment: seed.sourceCompareComment || "",
     strategyComment: seed.strategyComment || "",
-    tags: Array.isArray(seed.tags) ? seed.tags : []
+    tags: normalizeExamQuestionTags(seed.tags)
   };
 }
 
@@ -1826,25 +1851,29 @@ function ExamQuestionInsightTables({ questionItems = [] }) {
   const hardItems = items.filter((item) =>
     ["중상", "상"].includes(item.difficulty) || ["앞번호 고난도", "준킬러", "킬러", "서술형 변별"].includes(item.role)
   );
-  const basicTaggedItems = items.filter((item) => item.tags?.includes("기본 문항"));
-  const analysisTaggedItems = items.filter((item) => item.tags?.includes("분석 필요"));
-  const developTaggedItems = items.filter((item) => item.tags?.includes("디벨럽 가능"));
+  const basicTaggedItems = items.filter((item) => item.tags?.includes("기본문항"));
+  const mistakeTaggedItems = items.filter((item) => item.tags?.includes("실수문항"));
+  const importantTaggedItems = items.filter((item) => item.tags?.includes("주요문항"));
+  const firstGradeTaggedItems = items.filter((item) => item.tags?.includes("1등급 변별문항"));
+  const secondGradeTaggedItems = items.filter((item) => item.tags?.includes("2등급 변별문항"));
+  const middlePriorityItems = [...importantTaggedItems, ...secondGradeTaggedItems, ...mistakeTaggedItems]
+    .filter((item, index, array) => array.findIndex((candidate) => candidate.questionId === item.questionId) === index);
   const strategyRows = [
     {
       level: "상위권",
-      focus: developTaggedItems.length ? "디벨럽 가능 문항 확장" : "고난도/변별 문항 재풀이",
-      detail: (developTaggedItems.length ? developTaggedItems : hardItems).length
-        ? `${(developTaggedItems.length ? developTaggedItems : hardItems).map((item) => `${item.number}번`).join(", ")} 중심`
+      focus: firstGradeTaggedItems.length ? "1등급 변별문항 확장" : "고난도/변별 문항 재풀이",
+      detail: (firstGradeTaggedItems.length ? firstGradeTaggedItems : hardItems).length
+        ? `${(firstGradeTaggedItems.length ? firstGradeTaggedItems : hardItems).map((item) => `${item.number}번`).join(", ")} 중심`
         : "킬러 후보 문항 입력 후 자동 정리"
     },
     {
       level: "중위권",
-      focus: analysisTaggedItems.length ? "분석 필요 문항 오답 원인 정리" : "실수유도·앞번호 고난도 정리",
-      detail: (analysisTaggedItems.length ? analysisTaggedItems : items.filter((item) => ["실수유도", "앞번호 고난도"].includes(item.role))).map((item) => `${item.number}번`).join(", ") || "문항 역할 입력 필요"
+      focus: middlePriorityItems.length ? "주요·실수·2등급 변별문항 정리" : "실수유도·앞번호 고난도 정리",
+      detail: (middlePriorityItems.length ? middlePriorityItems : items.filter((item) => ["실수유도", "앞번호 고난도"].includes(item.role))).map((item) => `${item.number}번`).join(", ") || "문항 역할 입력 필요"
     },
     {
       level: "하위권",
-      focus: "기본 문항과 필수 단원 복습",
+      focus: "기본문항과 필수 단원 복습",
       detail: basicTaggedItems.length ? `${basicTaggedItems.map((item) => `${item.number}번`).join(", ")} 우선` : unitRows.slice(0, 3).map((row) => row.unit).join(", ") || "단원 입력 필요"
     }
   ];
@@ -11743,6 +11772,7 @@ function ExamAnalysisCenter({
   const [isAiInitialViewOpen, setIsAiInitialViewOpen] = useState(false);
   const [outputPreviewId, setOutputPreviewId] = useState("");
   const [selectedQuestionId, setSelectedQuestionId] = useState("");
+  const [activeQuestionSourceId, setActiveQuestionSourceId] = useState("");
   const [questionCountDraft, setQuestionCountDraft] = useState("22");
   const [cropDragStart, setCropDragStart] = useState(null);
   const [cropDraft, setCropDraft] = useState(null);
@@ -11819,12 +11849,23 @@ function ExamAnalysisCenter({
   const statusMeta = selectedAnalysis ? getExamAnalysisStatusMeta(selectedAnalysis) : getExamAnalysisStatusMeta();
   const detailSection = examAnalysisDetailSections.find((section) => section.id === detailSectionId);
   const questionItems = normalizeExamQuestionItems(selectedAnalysis?.questionItems);
-  const selectedQuestion = questionItems.find((item) => item.questionId === selectedQuestionId) ?? questionItems[0] ?? null;
   const renderSourceFiles = (selectedAnalysis?.sourceFiles ?? []).filter((file) => isImageExamAnalysisSource(file) || isPdfExamAnalysisSource(file));
-  const selectedQuestionSourceFile = selectedQuestion?.cropSourceId
-    ? renderSourceFiles.find((file, index) => getExamAnalysisSourceFileId(file, index) === selectedQuestion.cropSourceId)
-    : renderSourceFiles[0];
-  const selectedQuestionSourceId = selectedQuestionSourceFile ? getExamAnalysisSourceFileId(selectedQuestionSourceFile) : "";
+  const renderSourceFileOptions = renderSourceFiles.map((file, index) => ({
+    file,
+    index,
+    sourceId: getExamAnalysisSourceFileId(file, index)
+  }));
+  const renderSourceIdsKey = renderSourceFileOptions.map((option) => option.sourceId).join("\n");
+  const defaultQuestionSourceId = renderSourceFileOptions[0]?.sourceId || "";
+  const activeQuestionSourceOption = renderSourceFileOptions.find((option) => option.sourceId === activeQuestionSourceId) ?? renderSourceFileOptions[0] ?? null;
+  const resolvedQuestionSourceId = activeQuestionSourceOption?.sourceId || "";
+  const activeQuestionItems = questionItems.filter((item) => {
+    if (!resolvedQuestionSourceId) return true;
+    return (item.cropSourceId || defaultQuestionSourceId) === resolvedQuestionSourceId;
+  });
+  const selectedQuestion = activeQuestionItems.find((item) => item.questionId === selectedQuestionId) ?? activeQuestionItems[0] ?? null;
+  const selectedQuestionSourceFile = activeQuestionSourceOption?.file ?? renderSourceFiles[0];
+  const selectedQuestionSourceId = activeQuestionSourceOption?.sourceId || (selectedQuestionSourceFile ? getExamAnalysisSourceFileId(selectedQuestionSourceFile) : "");
   const selectedQuestionSourceIsPdf = isPdfExamAnalysisSource(selectedQuestionSourceFile);
   const selectedQuestionSourceIsImage = isImageExamAnalysisSource(selectedQuestionSourceFile);
   const selectedQuestionSourceUrl = selectedQuestionSourceFile
@@ -11926,14 +11967,24 @@ function ExamAnalysisCenter({
   }, [isAnalysisWorkspaceOpen, selectedAnalysis]);
 
   useEffect(() => {
-    if (!questionItems.length) {
+    if (!renderSourceFileOptions.length) {
+      if (activeQuestionSourceId) setActiveQuestionSourceId("");
+      return;
+    }
+    if (!activeQuestionSourceId || !renderSourceFileOptions.some((option) => option.sourceId === activeQuestionSourceId)) {
+      setActiveQuestionSourceId(defaultQuestionSourceId);
+    }
+  }, [activeQuestionSourceId, defaultQuestionSourceId, renderSourceIdsKey]);
+
+  useEffect(() => {
+    if (!activeQuestionItems.length) {
       if (selectedQuestionId) setSelectedQuestionId("");
       return;
     }
-    if (!selectedQuestionId || !questionItems.some((item) => item.questionId === selectedQuestionId)) {
-      setSelectedQuestionId(questionItems[0].questionId);
+    if (!selectedQuestionId || !activeQuestionItems.some((item) => item.questionId === selectedQuestionId)) {
+      setSelectedQuestionId(activeQuestionItems[0].questionId);
     }
-  }, [questionItems, selectedQuestionId]);
+  }, [activeQuestionItems, selectedQuestionId]);
 
   useEffect(() => {
     if (!selectedQuestion || !selectedQuestionSourceIsPdf) return;
@@ -12003,15 +12054,47 @@ function ExamAnalysisCenter({
     update("questionItems", normalizeExamQuestionItems(nextItems));
   }
 
+  function questionBelongsToActiveSource(item) {
+    if (!resolvedQuestionSourceId) return true;
+    return (item.cropSourceId || defaultQuestionSourceId) === resolvedQuestionSourceId;
+  }
+
+  function withActiveQuestionSource(item) {
+    return {
+      ...item,
+      cropSourceId: resolvedQuestionSourceId || item.cropSourceId,
+      cropSourceUrl: selectedQuestionSourceFile ? getExamAnalysisSourceRenderUrl(selectedQuestionSourceFile) : item.cropSourceUrl
+    };
+  }
+
+  function createBlankQuestionItemsForSource(sourceId, sourceFile) {
+    const sourceUrl = sourceFile ? getExamAnalysisSourceRenderUrl(sourceFile) : "";
+    const templateItems = activeQuestionItems.length
+      ? activeQuestionItems
+      : questionItems.length
+        ? questionItems
+        : createExamQuestionItemsFromCount(questionCountDraft, []);
+    const safeItems = templateItems.length ? templateItems : createExamQuestionItemsFromCount(questionCountDraft, []);
+    return safeItems.map((item, index) => createExamQuestionItem({
+      number: item.number || index + 1,
+      page: item.page || 1,
+      cropSourceId: sourceId,
+      cropSourceUrl: sourceUrl
+    }, questionItems.length + index));
+  }
+
   function applyQuestionCount() {
-    const nextItems = createExamQuestionItemsFromCount(questionCountDraft, questionItems);
-    updateQuestionItems(nextItems);
+    const nextItems = createExamQuestionItemsFromCount(questionCountDraft, activeQuestionItems).map(withActiveQuestionSource);
+    updateQuestionItems([
+      ...questionItems.filter((item) => !questionBelongsToActiveSource(item)),
+      ...nextItems
+    ]);
     setSelectedQuestionId(nextItems[0]?.questionId || "");
   }
 
   function addQuestionItem() {
-    const nextNumber = (questionItems.at(-1)?.number || questionItems.length) + 1;
-    const nextItem = createExamQuestionItem({ number: nextNumber }, questionItems.length);
+    const nextNumber = (activeQuestionItems.at(-1)?.number || activeQuestionItems.length) + 1;
+    const nextItem = withActiveQuestionSource(createExamQuestionItem({ number: nextNumber }, questionItems.length));
     updateQuestionItems([...questionItems, nextItem]);
     setSelectedQuestionId(nextItem.questionId);
   }
@@ -12021,7 +12104,8 @@ function ExamAnalysisCenter({
     if (!window.confirm(`${selectedQuestion.number}번 문항 카드를 삭제할까요?`)) return;
     const nextItems = questionItems.filter((item) => item.questionId !== selectedQuestion.questionId);
     updateQuestionItems(nextItems);
-    setSelectedQuestionId(nextItems[0]?.questionId || "");
+    const nextActiveItems = nextItems.filter((item) => !resolvedQuestionSourceId || (item.cropSourceId || defaultQuestionSourceId) === resolvedQuestionSourceId);
+    setSelectedQuestionId(nextActiveItems[0]?.questionId || "");
   }
 
   function updateSelectedQuestion(field, value) {
@@ -12051,7 +12135,9 @@ function ExamAnalysisCenter({
 
   function appendSelectedQuestionTag(tag) {
     if (!selectedQuestion) return;
-    const nextTags = Array.from(new Set([...(selectedQuestion.tags ?? []), tag]));
+    const normalizedTag = normalizeExamQuestionTag(tag);
+    if (!normalizedTag) return;
+    const nextTags = normalizeExamQuestionTags([...(selectedQuestion.tags ?? []), normalizedTag]);
     const joinedComment = selectedQuestion.teacherComment?.includes(tag)
       ? selectedQuestion.teacherComment
       : [selectedQuestion.teacherComment, tag].filter(Boolean).join("\n");
@@ -12063,19 +12149,20 @@ function ExamAnalysisCenter({
   }
 
   function assignSourceToSelectedQuestion(sourceId) {
-    if (!selectedQuestion) return;
-    const sourceFile = renderSourceFiles.find((file, index) => getExamAnalysisSourceFileId(file, index) === sourceId);
-    updateQuestionItems(questionItems.map((item) =>
-      item.questionId === selectedQuestion.questionId
-        ? {
-            ...item,
-            cropSourceId: sourceId,
-            cropSourceUrl: sourceFile ? getExamAnalysisSourceRenderUrl(sourceFile) : item.cropSourceUrl,
-            page: isPdfExamAnalysisSource(sourceFile) ? item.page || 1 : item.page,
-            cropBox: null
-          }
-        : item
-    ));
+    const sourceOption = renderSourceFileOptions.find((option) => option.sourceId === sourceId);
+    const nextSourceId = sourceOption?.sourceId || defaultQuestionSourceId;
+    setActiveQuestionSourceId(nextSourceId);
+    setCropDraft(null);
+    setCropDragStart(null);
+    setCropViewerPage(1);
+    const existingItems = questionItems.filter((item) => (item.cropSourceId || defaultQuestionSourceId) === nextSourceId);
+    if (existingItems.length) {
+      setSelectedQuestionId(existingItems[0].questionId);
+      return;
+    }
+    const nextItems = createBlankQuestionItemsForSource(nextSourceId, sourceOption?.file);
+    updateQuestionItems([...questionItems, ...nextItems]);
+    setSelectedQuestionId(nextItems[0]?.questionId || "");
   }
 
   function toggleSelectedQuestionTag(tag) {
@@ -12133,7 +12220,7 @@ function ExamAnalysisCenter({
           ? {
               ...item,
               cropBox: normalized,
-              cropSourceId: selectedQuestion.cropSourceId || (selectedQuestionSourceFile ? getExamAnalysisSourceFileId(selectedQuestionSourceFile) : ""),
+              cropSourceId: resolvedQuestionSourceId || selectedQuestion.cropSourceId || selectedQuestionSourceId,
               cropSourceUrl: selectedQuestionSourceUrl,
               page: selectedQuestionSourceIsPdf ? cropViewerPageNumber : item.page
             }
@@ -12152,19 +12239,19 @@ function ExamAnalysisCenter({
   }
 
   function getQuestionItemsForCropPage(pageNumber = cropViewerPageNumber, options = {}) {
-    if (!questionItems.length) return [];
+    if (!activeQuestionItems.length) return [];
     const safePageCount = Math.max(1, Number(options.pageCount ?? pdfPageCount) || 1);
     const safePage = Math.max(1, Number(pageNumber) || 1);
     const forceHeuristicDistribution = Boolean(options.forceHeuristicDistribution);
     const fallbackToSelected = options.fallbackToSelected !== false;
-    if (!selectedQuestionSourceIsPdf || safePageCount <= 1) return questionItems;
-    const hasExplicitPages = !forceHeuristicDistribution && questionItems.some((item) => Number(item.page) > 1);
+    if (!selectedQuestionSourceIsPdf || safePageCount <= 1) return activeQuestionItems;
+    const hasExplicitPages = !forceHeuristicDistribution && activeQuestionItems.some((item) => Number(item.page) > 1);
     if (hasExplicitPages) {
-      const pageItems = questionItems.filter((item) => Math.max(1, Number(item.page) || 1) === safePage);
+      const pageItems = activeQuestionItems.filter((item) => Math.max(1, Number(item.page) || 1) === safePage);
       return pageItems.length ? pageItems : (fallbackToSelected ? [selectedQuestion].filter(Boolean) : []);
     }
-    const perPage = Math.max(1, Math.ceil(questionItems.length / safePageCount));
-    return questionItems.slice((safePage - 1) * perPage, safePage * perPage);
+    const perPage = Math.max(1, Math.ceil(activeQuestionItems.length / safePageCount));
+    return activeQuestionItems.slice((safePage - 1) * perPage, safePage * perPage);
   }
 
   function getQuestionItemsForCurrentCropPage() {
@@ -12196,6 +12283,7 @@ function ExamAnalysisCenter({
     });
     const matchedIds = [];
     const nextItems = questionItems.map((item) => {
+      if (!questionBelongsToActiveSource(item)) return item;
       const draft = byQuestionId.get(item.questionId) || byQuestionNumber.get(Number(item.number));
       const cropBox = normalizeCropBox(draft?.cropBox || draft);
       if (!cropBox) return item;
@@ -12203,7 +12291,7 @@ function ExamAnalysisCenter({
       return {
         ...item,
         cropBox,
-        cropSourceId: selectedQuestionSourceId || item.cropSourceId,
+        cropSourceId: resolvedQuestionSourceId || selectedQuestionSourceId || item.cropSourceId,
         cropSourceUrl: selectedQuestionSourceUrl || item.cropSourceUrl,
         page: Math.max(1, Number(draft.page || cropViewerPageNumber) || 1)
       };
@@ -12219,7 +12307,7 @@ function ExamAnalysisCenter({
       setCropDraftStatus("PDF 또는 이미지 원본을 먼저 선택해 주세요.");
       return;
     }
-    if (!questionItems.length) {
+    if (!activeQuestionItems.length) {
       setCropDraftStatus("문항 카드를 먼저 만든 뒤 크롭 초안을 생성할 수 있습니다.");
       return;
     }
@@ -12236,7 +12324,7 @@ function ExamAnalysisCenter({
         pageCount: selectedQuestionSourceIsPdf ? pdfPageCount || 1 : 1,
         pageNumber: cropViewerPageNumber,
         questionNumbers: pageItems.map((item) => item.number),
-        totalQuestions: questionItems.length
+        totalQuestions: activeQuestionItems.length
       });
       const visionBoxes = Array.isArray(result?.boxes) ? result.boxes : [];
       if (!visionBoxes.length) throw new Error("AI가 문항 영역을 찾지 못했습니다.");
@@ -12267,7 +12355,7 @@ function ExamAnalysisCenter({
       setCropDraftStatus("전체 페이지 AI 크롭은 PDF 원본에서만 사용할 수 있습니다.");
       return;
     }
-    if (!questionItems.length) {
+    if (!activeQuestionItems.length) {
       setCropDraftStatus("문항 카드를 먼저 만든 뒤 전체 페이지 크롭 초안을 생성할 수 있습니다.");
       return;
     }
@@ -12303,7 +12391,7 @@ function ExamAnalysisCenter({
             pageCount: totalPages,
             pageNumber,
             questionNumbers: pageItems.map((item) => item.number),
-            totalQuestions: questionItems.length
+            totalQuestions: activeQuestionItems.length
           });
           const visionBoxes = Array.isArray(result?.boxes)
             ? result.boxes.map((box) => ({ ...box, page: pageNumber }))
@@ -12879,7 +12967,7 @@ function ExamAnalysisCenter({
                 <div>
                   <p className="eyebrow">QUESTION REVIEW</p>
                   <h2>문항분석표 검수</h2>
-                  <p className="muted">AI/OCR 초안은 참고만 하고, 문항별 단원·난이도·변별 이유·강사 코멘트를 직접 확정합니다.</p>
+                  <p className="muted">AI 초안은 참고만 하고, 문항별 단원·난이도·변별 이유·강사 코멘트를 직접 확정합니다.</p>
                 </div>
                 <div className="analysisQuestionSetupActions">
                   <label>
@@ -12919,13 +13007,12 @@ function ExamAnalysisCenter({
 
                   {renderSourceFiles.length ? (
                     <label className="wideLabel">
-                      문항 원본
+                      현재 시험지/연도
                       <select
-                        value={selectedQuestion?.cropSourceId || (selectedQuestionSourceFile ? getExamAnalysisSourceFileId(selectedQuestionSourceFile) : "")}
+                        value={resolvedQuestionSourceId}
                         onChange={(event) => assignSourceToSelectedQuestion(event.target.value)}
                       >
-                        {renderSourceFiles.map((file, index) => {
-                          const sourceId = getExamAnalysisSourceFileId(file, index);
+                        {renderSourceFileOptions.map(({ file, sourceId }, index) => {
                           return (
                             <option key={sourceId} value={sourceId}>
                               {isPdfExamAnalysisSource(file) ? "PDF · " : "이미지 · "}{file.fileName || `원본 ${index + 1}`}
@@ -13029,7 +13116,7 @@ function ExamAnalysisCenter({
                     <span>{selectedQuestion ? `${selectedQuestion.number}번 문항 영역` : "문항을 선택하세요."}</span>
                     <button
                       className="softButton"
-                      disabled={!selectedQuestionSourceUrl || !questionItems.length || isQuestionCropDrafting}
+                      disabled={!selectedQuestionSourceUrl || !activeQuestionItems.length || isQuestionCropDrafting}
                       onClick={handleDraftQuestionCrops}
                       type="button"
                     >
@@ -13037,7 +13124,7 @@ function ExamAnalysisCenter({
                     </button>
                     <button
                       className="softButton"
-                      disabled={!selectedQuestionSourceIsPdf || !selectedQuestionSourceUrl || !questionItems.length || isQuestionCropDrafting}
+                      disabled={!selectedQuestionSourceIsPdf || !selectedQuestionSourceUrl || !activeQuestionItems.length || isQuestionCropDrafting}
                       onClick={handleDraftAllQuestionCrops}
                       type="button"
                     >
@@ -13054,15 +13141,15 @@ function ExamAnalysisCenter({
                 <article className="panel analysisQuestionEditorPanel">
                   <div className="sectionHeader slim">
                     <div>
-                      <h2>문항별 코멘트</h2>
-                      <p className="muted">단원 분류 수정과 문항별 코멘트가 그대로 강사 인사이트로 남습니다.</p>
+                      <h2>문항별 인사이트</h2>
+                      <p className="muted">현재 선택한 시험지/연도의 문항별 메모입니다. 시험지 전체 총평은 분석 검토의 인사이트에서 입력합니다.</p>
                     </div>
-                    <span className="countBadge">{questionItems.length}문항</span>
+                    <span className="countBadge">{activeQuestionItems.length}문항</span>
                   </div>
 
-                  {questionItems.length ? (
+                  {activeQuestionItems.length ? (
                     <div className="analysisQuestionList">
-                      {questionItems.map((item) => (
+                      {activeQuestionItems.map((item) => (
                         <button
                           className={selectedQuestion?.questionId === item.questionId ? "analysisQuestionListItem active" : "analysisQuestionListItem"}
                           key={item.questionId}
@@ -13076,7 +13163,7 @@ function ExamAnalysisCenter({
                       ))}
                     </div>
                   ) : (
-                    <div className="analysisQuestionEmpty">문항 수를 입력하고 문항 카드를 먼저 만들어 주세요.</div>
+                    <div className="analysisQuestionEmpty">현재 시험지/연도의 문항 카드가 없습니다. 문항 수를 입력하고 카드를 만들어 주세요.</div>
                   )}
 
                   {selectedQuestion ? (
@@ -13150,22 +13237,8 @@ function ExamAnalysisCenter({
                           ))}
                         </div>
                       </div>
-                      <div className="analysisQuestionQuickTags">
-                        {["앞번호인데 어려움", "실수 많음", "정답률 낮음", "시간 압박", "조건 해석", "서술형 감점", "변별 문항"].map((tag) => (
-                          <button key={tag} onClick={() => appendSelectedQuestionTag(tag)} type="button">{tag}</button>
-                        ))}
-                      </div>
                       <label className="wideLabel">
-                        OCR/문항 텍스트
-                        <textarea
-                          value={selectedQuestion.ocrText}
-                          onChange={(event) => updateSelectedQuestion("ocrText", event.target.value)}
-                          placeholder="문항 OCR 텍스트나 조건을 붙여 넣습니다."
-                          rows="3"
-                        />
-                      </label>
-                      <label className="wideLabel">
-                        강사 코멘트
+                        이 문항 강사 코멘트
                         <textarea
                           value={selectedQuestion.teacherComment}
                           onChange={(event) => updateSelectedQuestion("teacherComment", event.target.value)}
@@ -13174,7 +13247,7 @@ function ExamAnalysisCenter({
                         />
                       </label>
                       <label className="wideLabel">
-                        부교재·모의고사 원문항 비교
+                        이 문항 원문항 비교
                         <textarea
                           value={selectedQuestion.sourceCompareComment}
                           onChange={(event) => updateSelectedQuestion("sourceCompareComment", event.target.value)}
@@ -13183,7 +13256,7 @@ function ExamAnalysisCenter({
                         />
                       </label>
                       <label className="wideLabel">
-                        대비 전략
+                        이 문항 대비 전략
                         <textarea
                           value={selectedQuestion.strategyComment}
                           onChange={(event) => updateSelectedQuestion("strategyComment", event.target.value)}
@@ -13203,8 +13276,8 @@ function ExamAnalysisCenter({
                     <p className="muted">문항별 카드가 채워질수록 표와 흐름도가 자동으로 정리됩니다.</p>
                   </div>
                 </div>
-                <ExamQuestionInsightTables questionItems={questionItems} />
-                <ExamStrategyFlow questionItems={questionItems} />
+                <ExamQuestionInsightTables questionItems={activeQuestionItems} />
+                <ExamStrategyFlow questionItems={activeQuestionItems} />
               </article>
             </section>
             ) : null}

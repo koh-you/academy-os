@@ -85,7 +85,7 @@ function defaultExamAnalysisPromptForServer() {
     "각 문항은 문항 번호, 페이지, 배점, 단원, 유형, 난이도, 역할, 태그, 출처 가능성, OCR/문항 조건 요약, 학생이 틀릴 만한 지점, 강사가 확인해야 할 점, 대비 전략 후보를 가능한 범위에서 정리한다.",
     "AI 1차 분석 단계에서 문항별 배점, 단원, 난이도 초안을 반드시 questionItems 배열에 넣는다. 모르면 빈칸 대신 '확인 필요'를 쓴다.",
     "여러 해 시험지가 함께 들어온 경우 questionItems는 선택된 시험명 또는 가장 최신 시험지 1회분의 문항표 초안으로 작성하고, 3개년 반복/증감/변화는 unitDistribution, typeClassification, killerProblems, sourceCheckNotes에 정리한다.",
-    "문항 태그 기준: 기본 문항, 분석 필요, 디벨럽 가능, 실수 유도, 변별 문항, 출처 비교, 수업 확장.",
+    "문항 태그 기준: 기본문항, 실수문항, 주요문항, 1등급 변별문항, 2등급 변별문항.",
     "",
     "[작성 원칙]",
     "시험관리 탭 데이터가 있으면 특이사항, 시험 범위, 부교재, 시험 일정, 시험 후 총평을 반영한다.",
@@ -147,7 +147,7 @@ function buildExamAnalysisPrompt(payload) {
     "- typeClassification은 기본/준킬러/킬러를 분리하고 점수 영향과 학습 순서를 포함한다.",
     "- killerProblems는 킬러와 준킬러 후보를 나누고, 문항별 함정과 필요한 개념을 포함한다.",
     "- mistakePatterns는 학생들이 실제로 틀릴 만한 행동 단위 실수를 적는다.",
-    "- 문항별 태그 후보는 기본 문항, 분석 필요, 디벨럽 가능, 실수 유도, 변별 문항, 출처 비교, 수업 확장 중에서 제안하고, 기존 JSON 필드 안에 검수 가능한 문장으로 포함한다.",
+    "- 문항별 태그 후보는 기본문항, 실수문항, 주요문항, 1등급 변별문항, 2등급 변별문항 중에서 제안한다.",
     "- questionItems는 웹앱 문항분석표에 바로 반영된다. 각 문항의 score, unit, difficulty는 가능한 범위에서 반드시 채운다.",
     "- questionItems의 difficulty는 확인 필요, 하, 중하, 중, 중상, 상 중 하나로 쓴다.",
     "- questionItems의 role은 기본, 실수유도, 앞번호 고난도, 준킬러, 킬러, 서술형 변별, 확인 필요 중 하나로 쓴다.",
@@ -186,7 +186,7 @@ function buildExamAnalysisPrompt(payload) {
     '      "correctRate": "확인 필요",',
     '      "ocrText": "문항 조건 요약",',
     '      "strategyComment": "AI가 본 오답 가능성과 검수 포인트",',
-    '      "tags": ["기본 문항"]',
+    '      "tags": ["기본문항"]',
     '    }',
     '  ]',
     "}"
@@ -383,7 +383,7 @@ function createMockAnalysis(payload) {
       correctRate: item.correctRate || "확인 필요",
       ocrText: item.ocrText || "AI 초안: 문항 조건 확인 필요",
       strategyComment: item.strategyComment || "AI 초안: 배점·단원·난이도 검수 후 보완",
-      tags: Array.isArray(item.tags) && item.tags.length ? item.tags : ["분석 필요"]
+      tags: Array.isArray(item.tags) && item.tags.length ? item.tags : ["주요문항"]
     }))
   };
 }
@@ -398,7 +398,23 @@ function normalizeQuestionItemsFromAi(items = []) {
   const roleOptions = new Set(["기본", "실수유도", "앞번호 고난도", "준킬러", "킬러", "서술형 변별", "확인 필요"]);
   const questionTypeOptions = new Set(["객관식", "단답형", "서술형", "논술형", "확인 필요"]);
   const sourceOptions = new Set(["확인 필요", "교과서", "부교재", "학교 프린트", "모의고사", "수능/평가원", "자체 변형", "기타"]);
-  const tagOptions = new Set(["기본 문항", "분석 필요", "디벨럽 가능", "실수 유도", "변별 문항", "출처 비교", "수업 확장"]);
+  const tagAliases = {
+    "기본 문항": "기본문항",
+    "기본문항": "기본문항",
+    "실수 유도": "실수문항",
+    "실수유도": "실수문항",
+    "실수문항": "실수문항",
+    "분석 필요": "주요문항",
+    "디벨럽 가능": "주요문항",
+    "출처 비교": "주요문항",
+    "수업 확장": "주요문항",
+    "주요문항": "주요문항",
+    "변별 문항": "1등급 변별문항",
+    "킬러": "1등급 변별문항",
+    "1등급 변별문항": "1등급 변별문항",
+    "준킬러": "2등급 변별문항",
+    "2등급 변별문항": "2등급 변별문항"
+  };
 
   return items
     .map((item, index) => {
@@ -423,7 +439,7 @@ function normalizeQuestionItemsFromAi(items = []) {
         ocrText: String(item.ocrText || item.questionSummary || item.summary || "").trim(),
         sourceCompareComment: String(item.sourceCompareComment || item.sourceNote || "").trim(),
         strategyComment: String(item.strategyComment || item.comment || item.teacherCheckPoint || item.reviewPoint || "").trim(),
-        tags: rawTags.map((tag) => String(tag).trim()).filter((tag) => tagOptions.has(tag))
+        tags: Array.from(new Set(rawTags.map((tag) => tagAliases[String(tag).trim()] || "").filter(Boolean)))
       };
     })
     .filter(Boolean)
