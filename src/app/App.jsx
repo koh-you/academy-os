@@ -965,6 +965,85 @@ function getDemoStudent(students) {
   return students.find((student) => student.studentId === "student_mwf710_001") ?? students[0];
 }
 
+function createDefaultExamAnalysisPrompt() {
+  return [
+    `역할: ${academyBrandName}의 학교별 내신 시험분석 협업 AI`,
+    "",
+    "[웹앱의 목적]",
+    "이 웹앱의 목적은 GPT 대화창에 시험지를 넣고 한 번에 글을 받는 것이 아니다.",
+    "학교별·학년별·고사별 분석지를 누적하고, AI 1차 분석 → 강사 검수 → 문항별 코멘트 → 표/다이어그램 → 최종 산출물로 이어지는 업무 흐름을 만드는 것이다.",
+    "AI는 최종 판단자가 아니라 1차 구조화 담당자다. 최종 산출물은 AI 분석과 강사 인사이트가 결합된 결과여야 한다.",
+    "",
+    "[입력 자료 우선순위]",
+    "1. 시험지 원본/OCR에서 확인되는 사실을 최우선으로 사용한다.",
+    "2. 시험관리 탭 데이터가 있으면 특이사항, 시험 범위, 부교재, 시험 일정, 시험 후 총평을 반드시 반영한다.",
+    "3. 시험관리 탭 데이터가 없거나 신규 학교이면 학교·학년·과목·시험명 메타데이터와 시험지 원본만 사용한다.",
+    "4. 시험관리 데이터와 시험지 원본이 충돌하면 단정하지 말고 '확인 필요'로 표시한다.",
+    "5. OCR이 깨진 문자, 의미 없는 조합, 불확실한 문항번호/배점/단원명은 최종 문장에 그대로 쓰지 말고 확인 필요 항목으로 모은다.",
+    "",
+    "[분기 규칙]",
+    "입력 자료가 1개년 기출이면 해당 시험 1회분을 깊게 분석한다.",
+    "- 문항분석표, 단원별 출제, 킬러·준킬러, 실수 유도 문항, 학생 대비 전략을 우선 만든다.",
+    "- 각 문항의 단원, 유형, 난이도, 역할, 태그, 출처 후보, 학생 오답 가능성, 강사 검수 포인트를 정리한다.",
+    "- 배점은 해당 시험 안에서 어느 문항군이 점수에 영향을 주는지 문장으로 설명한다.",
+    "",
+    "입력 자료가 3개년 기출이면 연도별 변화와 반복 패턴을 우선 분석한다.",
+    "- 매년 반복되는 단원, 새로 늘어난 단원, 줄어든 단원, 격년 출제 단원, 킬러 위치 변화, 서술형 변화, 부교재 반영 방식 변화를 비교한다.",
+    "- 문항 수가 달라졌다면 같은 배점이라도 시험 안에서의 비중이 달라질 수 있음을 설명한다.",
+    "- 별도 상대배점 차트는 만들지 않는다. 중요도 변화는 문장으로만 설명한다.",
+    "- 22 개정교육과정 때문에 달라질 수 있는 부분은 '변화 가능성' 또는 '추가 확인 필요'로 구분한다.",
+    "",
+    "[문항별 분석 기준]",
+    "각 문항에 대해 가능한 범위에서 다음 항목을 정리한다.",
+    "- 문항 번호",
+    "- 페이지",
+    "- 배점",
+    "- 단원",
+    "- 유형",
+    "- 난이도",
+    "- 역할",
+    "- 태그",
+    "- 출처 가능성",
+    "- OCR/문항 조건 요약",
+    "- 학생이 틀릴 만한 지점",
+    "- 강사가 확인해야 할 점",
+    "- 대비 전략 후보",
+    "",
+    "[문항 태그 기준]",
+    "- 기본 문항: 반드시 맞혀야 하는 개념 확인 문항",
+    "- 분석 필요: 오답 원인, 조건 해석, 풀이 선택이 중요한 문항",
+    "- 디벨럽 가능: 수업에서 확장하거나 상위권 훈련으로 발전시킬 문항",
+    "- 실수 유도: 계산, 부호, 조건 누락, 그래프 해석 등 실수가 잘 나는 문항",
+    "- 변별 문항: 점수 차이를 만든 문항",
+    "- 출처 비교: 부교재, 프린트, 모의고사 원문항과 비교가 필요한 문항",
+    "- 수업 확장: 다음 수업이나 직전대비 자료로 재가공할 가치가 있는 문항",
+    "",
+    "[표와 다이어그램 산출 의도]",
+    "AI는 웹앱에서 강사가 검수할 수 있도록 다음 표의 초안을 만든다.",
+    "1. 문항분석표",
+    "2. 단원별 출제표",
+    "3. 부교재·모의고사 반영표",
+    "4. 학생 대비전략표",
+    "또한 대비전략 흐름은 시험 범위 확인 → 문항별 검수 → 원문항 비교 → 변별 문항 훈련 → 학생 수준별 보강 순서로 정리한다.",
+    "",
+    "[작성 원칙]",
+    "- 시험지를 설명하는 데서 끝내지 말고, 학생·학부모·강사가 다음 행동을 결정할 수 있게 분석한다.",
+    "- 각 항목은 가능하면 사실 근거 → 점수에 미친 영향 → 다음 학습 행동 순서로 쓴다.",
+    "- '어려웠다', '중요하다', '복습이 필요하다' 같은 추상 문장으로 끝내지 않는다.",
+    "- 확인되지 않은 문항번호, 배점, 단원명, 출처를 지어내지 않는다.",
+    "- 부교재, 학교 프린트, 모의고사, 수능/평가원 원문항과 실제 출제 문항의 변형 관계가 보이면 반드시 표시한다.",
+    "- 블로그나 인스타 초안은 AI 홍보문처럼 쓰지 말고, 학교별 시험을 실제로 본 강사의 판단이 들어갈 수 있는 구조로 쓴다.",
+    "- 강사가 문항별 코멘트와 현장 체감을 추가할 수 있도록, AI 결과는 검수 가능한 초안으로 쓴다.",
+    "",
+    "[최종 출력 방향]",
+    "1. AI 분석 결과: 시험 한 줄 총평, 시험 구조, 단원별 출제, 문항 유형, 킬러/준킬러, 실수 패턴, 확인 필요 항목",
+    "2. 문항분석표 초안: 문항별 번호, 배점, 단원, 유형, 난이도, 역할, 태그, 출처 후보, 코멘트 후보",
+    "3. 강사 인사이트 입력 가이드: 어떤 문항에 코멘트를 달아야 하는지, 어떤 문항을 크롭해서 슬라이드화하면 좋은지 제안",
+    "4. 학생 대비 전략: 상위권, 중위권, 하위권으로 나누어 작성",
+    "5. 재가공 핵심 메시지: 학부모가 알고 싶어할 정보, 학생에게 필요한 정보, 블로그/인스타로 쓸 수 있는 정보"
+  ].join("\n");
+}
+
 function createDefaultExamAnalysis(examPrepRow = {}) {
   const schoolName = examPrepRow.schoolName || "";
   const grade = examPrepRow.grade || "";
@@ -1000,32 +1079,7 @@ function createDefaultExamAnalysis(examPrepRow = {}) {
     aiStatus: "대기",
     aiLastRunAt: "",
     aiError: "",
-    aiPrompt: [
-      `역할: ${academyBrandName} 학교별 내신 시험분석가`,
-      "목표: 시험지를 단순 요약하지 말고, 학부모·학생·강사가 다음 행동을 결정할 수 있는 판단형 분석 초안을 만든다.",
-      "작성 기준:",
-      "- 각 항목은 가능하면 사실 근거 → 점수에 미친 영향 → 다음 학습 행동 순서로 쓴다.",
-      "- OCR/원문에 있는 사실을 우선 사용하고, 없는 문항번호/배점/단원명은 추정하지 말고 '확인 필요'라고 쓴다.",
-      "- 깨진 문자, 의미 없는 한글 조합, OCR 잡음은 최종 문장에 그대로 쓰지 말고 sourceCheckNotes에 '원문 확인 필요'로 모은다.",
-      "- '어려웠다', '중요하다', '복습이 필요하다' 같은 추상 문장으로 끝내지 않는다.",
-      "- 문항번호, 배점, 단원명, 유형, 실수 유발 포인트, 다음 수업에서 다룰 포인트를 분리해서 적는다.",
-      "- 배점은 절대 점수만 보지 말고 해당 시험 안에서 어느 문항군이 변별에 가까운지 판단한다. 단, 별도 상대배점 차트는 만들지 않는다.",
-      "- 3개년 자료가 있으면 문항수 변화 때문에 같은 배점의 의미가 달라질 수 있음을 설명하고, 중요도 변화는 문장으로만 정리한다.",
-      "- 부교재/프린트/모의고사 원문항과 실제 출제 문항의 변형 관계를 확인할 수 있으면 반드시 별도로 적는다.",
-      "- 기본/준킬러/킬러를 반드시 구분하고, 학생 실수는 행동 단위로 쓴다.",
-      "- 학부모용 문장은 불안을 자극하지 말고 보완 방향과 수업 계획 중심으로 쓴다.",
-      "필드별 요구:",
-      "1. oneLineSummary: 이번 시험의 핵심 성격을 한 문장으로 쓴다.",
-      "2. examStructure: 문항수, 객관식/서술형, 배점, 시간 압박, 작년 대비 변화 가능성을 정리한다.",
-      "3. unitDistribution: 단원별 문항번호/문항수/배점/난이도/대표 유형을 포함한다.",
-      "4. typeClassification: 기본/준킬러/킬러 유형을 나누고 각각의 점수 영향과 학습 순서를 적는다.",
-      "5. killerProblems: 킬러와 준킬러 후보를 분리하고 문항별 함정과 필요한 개념을 포함한다.",
-      "6. mistakePatterns: 학생들이 실제로 틀릴 만한 행동 단위 실수를 적는다.",
-      "7. fiveCorePatterns: 시험 전 확인할 5대 핵심 패턴을 쓴다.",
-      "8. sourceCheckNotes: OCR 불확실, 깨진 문자, 문항번호/배점 확인 필요 항목을 모은다.",
-      "9. 학생/학부모/블로그/인스타 초안: 분석 결과를 독자별 문체로 재구성한다.",
-      "주의: AI 결과는 가안이며, 강사 인사이트가 추가되기 전에는 발행용으로 쓰지 않는다."
-    ].join("\n"),
+    aiPrompt: createDefaultExamAnalysisPrompt(),
     oneLineSummary: "AI 분석을 시작하면 이번 시험의 핵심 성격이 한 문장으로 정리됩니다.",
     examStructure: "문항수, 객관식/서술형 구성, 배점, 시간 압박, 작년 대비 변화가 정리됩니다.",
     aiOverview: "시험지 원본을 넣으면 문항수, 난이도, 출제 특징이 정리됩니다.",
@@ -1301,6 +1355,9 @@ function normalizeExamAnalysisForDisplay(analysis = {}) {
     grade: analysis.grade || inferredMetadata.grade,
     subject: analysis.subject || inferredMetadata.subject,
     examName: analysis.examName || inferredMetadata.examName,
+    aiPrompt: isLegacyDefaultExamAnalysisPrompt(analysis.aiPrompt)
+      ? createDefaultExamAnalysisPrompt()
+      : analysis.aiPrompt || createDefaultExamAnalysisPrompt(),
     rawExamText: removeFailedAttachmentBlocks(analysis.rawExamText)
     }),
     questionItems: normalizeExamQuestionItems(analysis.questionItems)
@@ -3049,17 +3106,7 @@ const defaultAiPrompts = {
     "- 학생용은 분명하고 부담 없는 말투, 학부모용은 정중한 말투를 사용한다.",
     "- 최종 문장만 반환한다."
   ].join("\n"),
-  examAnalysis: [
-    `역할: ${academyBrandName} 학교별 내신 시험분석가`,
-    "목표: 시험지를 단순 요약하지 말고 학부모·학생·강사가 다음 행동을 결정할 수 있는 판단형 분석 초안을 만든다.",
-    "작성 원칙:",
-    "- 각 항목은 사실 근거, 점수에 미친 영향, 다음 학습 행동을 연결해 쓴다.",
-    "- 원본에 없는 문항번호, 배점, 단원명은 단정하지 않고 '확인 필요'라고 쓴다.",
-    "- OCR 깨짐 문자나 의미 없는 조합은 산출물에 그대로 쓰지 않고 확인 필요 항목으로 모은다.",
-    "- 기본/준킬러/킬러 유형, 학생 실수 패턴, 5대 핵심 패턴을 구분한다.",
-    "- 블로그는 학부모용 긴 글, 인스타는 7장 카드뉴스 원고로 쓴다.",
-    "- 반드시 요청된 JSON 필드 형식에 맞춰 반환한다."
-  ].join("\n"),
+  examAnalysis: createDefaultExamAnalysisPrompt(),
   variantProblem: [
     "역할: 으뜸수학 고태영T의 내신 수학 변형문항 제작 보조",
     "목표: 원본 문항의 핵심 개념과 풀이 구조를 유지하면서 조건, 숫자, 표현, 난도를 조절한 변형문항을 만든다.",
@@ -3095,6 +3142,27 @@ const defaultAttendanceSettings = {
   lateGraceMinutes: 0
 };
 
+function isLegacyDefaultExamAnalysisPrompt(prompt = "") {
+  const text = String(prompt ?? "");
+  return Boolean(
+    text &&
+    !text.includes("[웹앱의 목적]") &&
+    text.includes("학교별 내신 시험분석가") &&
+    (
+      text.includes("5대 핵심 패턴") ||
+      text.includes("반드시 요청된 JSON 필드 형식")
+    )
+  );
+}
+
+function normalizeAiPrompts(prompts = {}) {
+  const nextPrompts = { ...defaultAiPrompts, ...(prompts ?? {}) };
+  if (isLegacyDefaultExamAnalysisPrompt(nextPrompts.examAnalysis)) {
+    nextPrompts.examAnalysis = defaultAiPrompts.examAnalysis;
+  }
+  return nextPrompts;
+}
+
 function normalizeAttendanceSettings(settings = {}) {
   return {
     ...defaultAttendanceSettings,
@@ -3110,7 +3178,8 @@ const defaultGeneratedLessonControls = {
 };
 
 function getAiPrompt(settings = {}, promptKey) {
-  return settings?.prompts?.[promptKey] ?? defaultAiPrompts[promptKey] ?? "";
+  const prompts = normalizeAiPrompts(settings?.prompts);
+  return prompts[promptKey] ?? defaultAiPrompts[promptKey] ?? "";
 }
 
 function countProblemStatuses(problems = []) {
@@ -11151,7 +11220,7 @@ function SettingsCenter({
   const settings = {
     ...defaultAiSettings,
     ...aiSettings,
-    prompts: { ...defaultAiPrompts, ...(aiSettings?.prompts ?? {}) }
+    prompts: normalizeAiPrompts(aiSettings?.prompts)
   };
   const attendance = { ...defaultAttendanceSettings, ...attendanceSettings };
   const attendanceUrl =
@@ -11218,7 +11287,7 @@ function SettingsCenter({
     onUpdateAiSettings((current) => ({
       ...defaultAiSettings,
       ...current,
-      prompts: { ...defaultAiPrompts, ...(current?.prompts ?? {}) },
+      prompts: normalizeAiPrompts(current?.prompts),
       [row.providerKey]: provider,
       [row.modelKey]: aiProviderModels[provider]?.[0] ?? "server-default"
     }));
@@ -11228,7 +11297,7 @@ function SettingsCenter({
     onUpdateAiSettings((current) => ({
       ...defaultAiSettings,
       ...current,
-      prompts: { ...defaultAiPrompts, ...(current?.prompts ?? {}) },
+      prompts: normalizeAiPrompts(current?.prompts),
       [row.modelKey]: model
     }));
   }
@@ -11238,8 +11307,7 @@ function SettingsCenter({
       ...defaultAiSettings,
       ...current,
       prompts: {
-        ...defaultAiPrompts,
-        ...(current?.prompts ?? {}),
+        ...normalizeAiPrompts(current?.prompts),
         [promptKey]: value
       }
     }));

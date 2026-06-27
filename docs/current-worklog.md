@@ -10,6 +10,17 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-27 P1. 시험분석 기본 프롬프트 1개년/3개년 분기 반영
+
+- 상태: 완료
+- 사용자 요청: 3개년 기출일 때와 1개년 기출일 때 프롬프트를 다르게 써야 하며, 오늘 논의한 의도가 선명하게 드러나는 프롬프트를 웹앱에 넣는다. 웹앱 프롬프트를 바탕으로 API가 호출되는지도 확인한다.
+- 확인 결과: 시험분석 실행 시 프론트는 `getAiPrompt(..., "examAnalysis") || analysis.aiPrompt` 값을 `/api/ai/exam-analysis` payload의 `aiPrompt`로 보낸다. 서버 `buildExamAnalysisPrompt`는 이 `payload.aiPrompt`를 맨 앞에 넣고, 시험 기본정보/시험관리 탭 데이터/OCR 원문/JSON 반환 규칙을 뒤에 추가한다. 즉 웹앱 시험분석 프롬프트가 실제 API 호출의 바탕이 맞다.
+- 이번 작업 결과: 새 분석지 기본 `aiPrompt`, 설정 화면 `시험분석 AI` 기본 프롬프트, 서버 fallback 프롬프트를 모두 1개년/3개년 분기형 워크플로우 프롬프트로 교체했다.
+- 프롬프트 의도: 웹앱의 차별점은 GPT 단발 대화가 아니라 학교별·학년별·고사별 분석 누적, AI 1차 분석, 강사 검수, 문항별 코멘트, 표/다이어그램, 최종 산출물 흐름이라는 점을 명시했다.
+- 보정: 기존 저장 설정에 예전 기본 시험분석 프롬프트가 남아 있으면 새 기본 프롬프트로 읽히도록 `normalizeAiPrompts` 보정을 추가했다. 직접 커스텀한 프롬프트는 무조건 덮어쓰지 않는다.
+- SQL 주의: 프론트 기본값/API fallback/test 변경만 있으므로 Supabase SQL edit 필요 없음.
+- 검증: `node --check api/routes/examAnalysis.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs` 통과. `npm run build` 통과(Vite chunk size warning만 있음). `npm run test:production` 통과(total 219, failed 0).
+
 ### 2026-06-27 P1. 시험분석 PDF 문항별 렌더링·태그 보강
 
 - 상태: 완료
