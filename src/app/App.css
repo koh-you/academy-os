@@ -2615,7 +2615,8 @@ button {
   width: 100%;
 }
 
-.analysisFolderItem {
+.analysisFolderItem,
+.analysisSchoolItem {
   background: #f8fbff;
   border: 1px solid #d8e3f8;
   border-radius: 8px;
@@ -2624,12 +2625,16 @@ button {
   padding: 12px;
 }
 
-.analysisFolderItem.active {
+.analysisFolderItem.active,
+.analysisSchoolItem.active {
   border-color: #93c5fd;
   box-shadow: 0 12px 24px rgba(37, 99, 235, 0.08);
 }
 
-.analysisFolderSelect {
+.analysisFolderSelect,
+.analysisSchoolSelect,
+.analysisGradeSelect,
+.analysisExamSelect {
   background: transparent;
   border: 0;
   color: #17213d;
@@ -2641,22 +2646,82 @@ button {
   text-align: left;
 }
 
-.analysisFolderSelect strong {
+.analysisFolderSelect strong,
+.analysisSchoolSelect strong,
+.analysisGradeSelect strong,
+.analysisExamSelect strong {
   font-size: 15px;
   font-weight: 900;
   line-height: 1.35;
 }
 
 .analysisFolderSelect span,
-.analysisFolderSelect small {
+.analysisFolderSelect small,
+.analysisSchoolSelect span,
+.analysisSchoolSelect small,
+.analysisGradeSelect span,
+.analysisGradeSelect small,
+.analysisExamSelect span,
+.analysisExamSelect small {
   color: #64748b;
   font-size: 12px;
   font-weight: 800;
 }
 
+.analysisGradeList,
+.analysisExamList {
+  display: grid;
+  gap: 8px;
+}
+
+.analysisGradeItem,
+.analysisExamItem {
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+}
+
+.analysisGradeItem {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  padding: 10px;
+}
+
+.analysisGradeItem.active {
+  border-color: #bfdbfe;
+}
+
+.analysisGradeSelect {
+  align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.analysisGradeSelect strong {
+  font-size: 14px;
+}
+
+.analysisExamItem {
+  background: #f8fbff;
+  border: 1px solid #e2e8f0;
+  padding: 10px;
+}
+
+.analysisExamItem.active {
+  background: #ffffff;
+  border-color: #93c5fd;
+}
+
+.analysisExamSelect strong {
+  font-size: 13px;
+}
+
 .analysisFolderActions {
   display: grid;
   gap: 6px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.analysisFolderActions.compact {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 

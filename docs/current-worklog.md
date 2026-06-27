@@ -121,6 +121,15 @@
 - 저장 주의: 새 `examAnalysisFolders` app_state 키를 추가했다. 분석지 배열 `examAnalyses`와 함께 `/api/app-state`에 자동 저장되므로 새로고침/다른 기기에서도 폴더 구조가 복원된다. 새 Supabase SQL edit 필요 없음.
 - 검증: `npm run test:production` 통과(total 214, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
 
+### 2026-06-27 P1. 시험분석 폴더 트리 학교→학년→고사 구조 정정
+
+- 상태: 완료
+- 사용자 정정: 폴더 구조는 `상계고 · 학년 · 고사`가 한 카드로 보이는 방식이 아니라, 학교를 먼저 클릭하고 그 아래 학년, 그 아래 1년에 4번 있는 고사, 그 하위에 분석지가 나타나는 구조여야 한다.
+- 이번 작업 결과: 시험분석 목록을 `학교 → 학년 → 고사 → 분석지` 트리로 바꿨다. `+ 학교`로 창동고/용화여고/정의여고 같은 학교 폴더를 만들고, 선택한 학교 아래에서 `+ 고사`로 학년과 고사 구분을 저장한다. 고사 구분은 해당 연도 1학기 중간/기말, 2학기 중간/기말 4개가 기본으로 뜬다.
+- CRUD 동작: 학교 수정/삭제, 고사 수정/삭제, 고사 하위 분석지 추가/삭제가 동작한다. 학교명을 수정하면 하위 고사와 분석지의 학교명도 같이 따라간다. 학교 삭제는 그 학교 아래 고사와 분석지를 함께 삭제한다는 확인 문구를 띄운다.
+- 저장 주의: 기존 `examAnalysisFolders` app_state를 유지하되 `folderType: school`과 `folderType: exam`을 구분해 저장한다. 기존 합쳐진 폴더 데이터도 자동으로 학교 트리 안에 흡수되므로 새 Supabase SQL edit 필요 없음.
+- 검증: `npm run test:production` 통과(total 214, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
+
 ### 2026-06-26 P0. 수동 하원 알림톡 발송 지원
 
 - 상태: 완료
