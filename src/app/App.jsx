@@ -2326,6 +2326,83 @@ function ExamAnalysisInstagramPreview({ value }) {
   );
 }
 
+const examOutputLayoutOptions = [
+  {
+    title: "강사용 분석지",
+    options: [
+      { code: "A", name: "대시보드형", frame: "dashboard", slots: ["meta", "table", "chart", "list"] },
+      { code: "B", name: "문항카드형", frame: "cardGrid", slots: ["meta", "card", "card", "card", "summary"] },
+      { code: "C", name: "리포트형", frame: "report", slots: ["cover", "section", "section", "table", "flow"] }
+    ]
+  },
+  {
+    title: "학생 분석지",
+    options: [
+      { code: "A", name: "복습 로드맵형", frame: "roadmap", slots: ["hero", "step", "step", "step", "check"] },
+      { code: "B", name: "문항 태그형", frame: "tagBoard", slots: ["meta", "tag", "tag", "tag", "task"] },
+      { code: "C", name: "한 장 피드백형", frame: "dashboard", slots: ["hero", "table", "chart", "list"] }
+    ]
+  },
+  {
+    title: "블로그 초안",
+    options: [
+      { code: "A", name: "홍보형 글 구조", frame: "article", slots: ["title", "paragraph", "section", "section", "cta"] },
+      { code: "B", name: "전문 분석형", frame: "analysisArticle", slots: ["title", "table", "chart", "section", "cta"] },
+      { code: "C", name: "카드뉴스 재활용형", frame: "articleCards", slots: ["title", "card", "card", "card", "cta"] }
+    ]
+  },
+  {
+    title: "인스타 카드뉴스",
+    options: [
+      { code: "A", name: "5장 요약형", frame: "slides5", slots: ["slide", "slide", "slide", "slide", "slide"] },
+      { code: "B", name: "7장 분석형", frame: "slides7", slots: ["slide", "slide", "slide", "slide", "slide", "slide", "slide"] },
+      { code: "C", name: "문항 중심형", frame: "slides7", slots: ["slide", "slide", "slide", "slide", "slide", "slide", "slide"] }
+    ]
+  }
+];
+
+function ExamOutputLayoutWireframe({ option }) {
+  return (
+    <div className={`examOutputWireframe ${option.frame}`} aria-label={`${option.name} 레이아웃 구조`}>
+      {option.slots.map((slot, index) => (
+        <span className={`wireSlot ${slot}`} key={`${option.code}_${slot}_${index}`} />
+      ))}
+    </div>
+  );
+}
+
+function ExamOutputLayoutPlanner() {
+  return (
+    <article className="panel examOutputLayoutPlanner">
+      <div className="sectionHeader slim">
+        <div>
+          <p className="eyebrow">LAYOUT OPTIONS</p>
+          <h2>산출물별 레이아웃 선택안</h2>
+          <p className="muted">내용 없이 영역 구조만 먼저 확인합니다. 형식을 고정한 뒤 같은 데이터로 매번 분석지를 제작합니다.</p>
+        </div>
+      </div>
+      <div className="examOutputLayoutGrid">
+        {examOutputLayoutOptions.map((group) => (
+          <section className="examOutputLayoutGroup" key={group.title}>
+            <h3>{group.title}</h3>
+            <div>
+              {group.options.map((option) => (
+                <article className="examOutputLayoutOption" key={`${group.title}_${option.code}`}>
+                  <div>
+                    <strong>{option.code}안</strong>
+                    <span>{option.name}</span>
+                  </div>
+                  <ExamOutputLayoutWireframe option={option} />
+                </article>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    </article>
+  );
+}
+
 function AnalysisOutputPreviewCard({ title, tone = "", value = "", onEdit, onOpen, children }) {
   return (
     <article className={["panel", "outputPreviewCard", tone].filter(Boolean).join(" ")}>
@@ -14455,6 +14532,7 @@ function ExamAnalysisCenter({
                   <button className="softButton" onClick={() => setDetailSectionId("insight")} type="button">인사이트 수정</button>
                 </div>
               </article>
+              <ExamOutputLayoutPlanner />
               <ExamFinalDocumentBuilder
                 analysis={selectedAnalysis}
                 document={selectedAnalysis.finalDocument}

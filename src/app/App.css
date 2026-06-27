@@ -4049,6 +4049,165 @@ button {
   gap: 16px;
 }
 
+.examOutputLayoutPlanner {
+  display: grid;
+  gap: 16px;
+}
+
+.examOutputLayoutGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.examOutputLayoutGroup {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.examOutputLayoutGroup h3 {
+  color: #17213d;
+  font-size: 16px;
+  margin: 0;
+}
+
+.examOutputLayoutGroup > div {
+  display: grid;
+  gap: 10px;
+}
+
+.examOutputLayoutOption {
+  border: 1px solid #e5edf9;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+}
+
+.examOutputLayoutOption > div:first-child {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.examOutputLayoutOption strong {
+  background: #17213d;
+  border-radius: 999px;
+  color: #ffffff;
+  font-size: 12px;
+  padding: 4px 8px;
+}
+
+.examOutputLayoutOption span {
+  color: #334155;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.examOutputWireframe {
+  background: #f8fbff;
+  border: 1px dashed #b8c9f4;
+  border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  min-height: 146px;
+  padding: 8px;
+}
+
+.examOutputWireframe .wireSlot {
+  background: #ffffff;
+  border: 1px solid #cbd7ee;
+  border-radius: 6px;
+  min-height: 20px;
+}
+
+.examOutputWireframe .meta,
+.examOutputWireframe .hero,
+.examOutputWireframe .title,
+.examOutputWireframe .cover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.examOutputWireframe .chart,
+.examOutputWireframe .flow {
+  background: #dcfce7;
+  border-color: #86efac;
+}
+
+.examOutputWireframe .table,
+.examOutputWireframe .card,
+.examOutputWireframe .tag,
+.examOutputWireframe .slide {
+  background: #fff7ed;
+  border-color: #fdba74;
+}
+
+.examOutputWireframe .list,
+.examOutputWireframe .summary,
+.examOutputWireframe .check,
+.examOutputWireframe .task,
+.examOutputWireframe .cta {
+  background: #fef9c3;
+  border-color: #fde047;
+}
+
+.examOutputWireframe.dashboard {
+  grid-template-columns: 1fr 1fr;
+}
+
+.examOutputWireframe.dashboard .meta,
+.examOutputWireframe.dashboard .hero {
+  grid-column: 1 / -1;
+}
+
+.examOutputWireframe.cardGrid,
+.examOutputWireframe.tagBoard {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.examOutputWireframe.cardGrid .meta,
+.examOutputWireframe.cardGrid .summary,
+.examOutputWireframe.tagBoard .meta,
+.examOutputWireframe.tagBoard .task {
+  grid-column: 1 / -1;
+}
+
+.examOutputWireframe.report,
+.examOutputWireframe.article,
+.examOutputWireframe.analysisArticle,
+.examOutputWireframe.articleCards {
+  grid-template-columns: 1fr;
+}
+
+.examOutputWireframe.roadmap {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.examOutputWireframe.roadmap .hero,
+.examOutputWireframe.roadmap .check {
+  grid-column: 1 / -1;
+}
+
+.examOutputWireframe.slides5,
+.examOutputWireframe.slides7 {
+  align-items: stretch;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.examOutputWireframe.slides7 {
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.examOutputWireframe .slide {
+  min-height: 96px;
+}
+
 .finalDocumentAddBar {
   background: #f8fbff;
   border: 1px solid #d8e3f8;
@@ -12161,6 +12320,7 @@ body.attendanceOnlyBody {
   .aiVariantWorkspace,
   .insightGrid,
   .analysisFinalReportPanel,
+  .examOutputLayoutGrid,
   .analysisOutputGrid,
   .finalDocumentChartRow,
   .finalDocumentDataRow,
