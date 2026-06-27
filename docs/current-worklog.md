@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-27 P1. 시험분석 PDF 페이지 넘기기 컨트롤 보강
+
+- 상태: 완료
+- 사용자 요청: 문항 검수의 원문항 화면에서 PDF 페이지를 넘기는 곳이 보이지 않는다.
+- 원인 확인: PDF 페이지는 숫자 입력으로만 바꿀 수 있었고, 선택 문항의 저장 페이지와 현재 PDF 뷰어 페이지가 같은 값으로 묶여 있어 사용자가 페이지 탐색 기능을 찾기 어려웠다.
+- 이번 작업 결과: PDF 뷰어 전용 `cropViewerPage` 상태를 추가하고, 원문항 화면 상단에 이전/다음 버튼, `현재/전체` 페이지 표시, 직접 페이지 입력을 배치했다.
+- 저장 흐름: 페이지를 넘기는 것만으로는 문항 데이터가 바뀌지 않으며, `현재 페이지를 선택 문항에 저장` 버튼 또는 크롭 저장 시에만 해당 문항의 page/cropBox가 저장된다. AI 크롭 초안도 현재 보고 있는 PDF 페이지를 기준으로 요청한다.
+- SQL 주의: 기존 `examAnalyses.questionItems` 저장 구조만 사용하므로 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check api/routes/examAnalysis.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs` 통과. `npm run build` 통과(Vite chunk size warning만 있음). `npm run test:production` 통과(total 219, failed 0).
+
 ### 2026-06-27 P1. 시험분석 AI 문항 크롭 초안·드래그 표시 보강
 
 - 상태: 완료

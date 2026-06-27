@@ -11648,6 +11648,7 @@ function ExamAnalysisCenter({
   const [pdfPageCount, setPdfPageCount] = useState(0);
   const [pdfRenderStatus, setPdfRenderStatus] = useState("");
   const [pdfScale, setPdfScale] = useState(1.25);
+  const [cropViewerPage, setCropViewerPage] = useState(1);
   const sourceFileInputRef = useRef(null);
   const questionSourceInputRef = useRef(null);
   const cropSurfaceRef = useRef(null);
@@ -11730,7 +11731,9 @@ function ExamAnalysisCenter({
     ? getExamAnalysisSourceOpenUrl(selectedQuestionSourceFile)
     : selectedQuestionSourceUrl;
   const selectedQuestionPage = Math.max(1, Number(selectedQuestion?.page) || 1);
-  const selectedQuestionCropBox = normalizeCropBox(cropDraft || selectedQuestion?.cropBox);
+  const cropViewerPageNumber = Math.max(1, Math.min(pdfPageCount || 999, Number(cropViewerPage) || selectedQuestionPage || 1));
+  const selectedQuestionCropIsVisible = !selectedQuestionSourceIsPdf || selectedQuestionPage === cropViewerPageNumber || Boolean(cropDraft);
+  const selectedQuestionCropBox = normalizeCropBox(cropDraft || (selectedQuestionCropIsVisible ? selectedQuestion?.cropBox : null));
   const folderExamCycleOptions = useMemo(
     () => {
       const year = String(currentExamCycle).split("-")[0] || String(new Date(`${today}T00:00:00+09:00`).getFullYear());
@@ -11830,6 +11833,13 @@ function ExamAnalysisCenter({
   }, [questionItems, selectedQuestionId]);
 
   useEffect(() => {
+    if (!selectedQuestion || !selectedQuestionSourceIsPdf) return;
+    setCropViewerPage(selectedQuestionPage);
+    setCropDraft(null);
+    setCropDragStart(null);
+  }, [selectedQuestion?.questionId, selectedQuestion?.cropSourceId, selectedQuestionPage, selectedQuestionSourceId, selectedQuestionSourceIsPdf]);
+
+  useEffect(() => {
     if (!selectedQuestionSourceIsPdf) {
       setPdfPageCount(0);
       setPdfRenderStatus("");
@@ -11852,8 +11862,8 @@ function ExamAnalysisCenter({
         const pdfDocument = await loadingTask.promise;
         if (cancelled) return;
         setPdfPageCount(pdfDocument.numPages);
-        const pageNumber = Math.max(1, Math.min(selectedQuestionPage, pdfDocument.numPages));
-        if (pageNumber !== selectedQuestionPage) updateSelectedQuestion("page", pageNumber);
+        const pageNumber = Math.max(1, Math.min(cropViewerPageNumber, pdfDocument.numPages));
+        if (pageNumber !== cropViewerPageNumber) setCropViewerPage(pageNumber);
         const page = await pdfDocument.getPage(pageNumber);
         if (cancelled) return;
         const viewport = page.getViewport({ scale: pdfScale });
@@ -11879,7 +11889,7 @@ function ExamAnalysisCenter({
       pdfRenderTaskRef.current?.cancel?.();
       loadingTask?.destroy?.();
     };
-  }, [currentStage, isAnalysisWorkspaceOpen, pdfScale, selectedQuestionPage, selectedQuestionSourceIsPdf, selectedQuestionSourceUrl]);
+  }, [cropViewerPageNumber, currentStage, isAnalysisWorkspaceOpen, pdfScale, selectedQuestionSourceIsPdf, selectedQuestionSourceUrl]);
 
   function update(field, value) {
     if (!selectedAnalysis) return;
@@ -11916,6 +11926,24 @@ function ExamAnalysisCenter({
     updateQuestionItems(questionItems.map((item) =>
       item.questionId === selectedQuestion.questionId ? { ...item, [field]: value } : item
     ));
+  }
+
+  function setCropViewerPageClamped(page) {
+    const maxPage = Math.max(1, Number(pdfPageCount) || 999);
+    const nextPage = Math.max(1, Math.min(maxPage, Number(page) || 1));
+    setCropViewerPage(nextPage);
+    setCropDragStart(null);
+    setCropDraft(null);
+  }
+
+  function moveCropViewerPage(delta) {
+    setCropViewerPageClamped(cropViewerPageNumber + delta);
+  }
+
+  function applyCropViewerPageToSelectedQuestion() {
+    if (!selectedQuestion) return;
+    updateSelectedQuestion("page", cropViewerPageNumber);
+    setCropDraftStatus(`${cropViewerPageNumber}페이지를 ${selectedQuestion.number}번 문항 페이지로 저장했습니다.`);
   }
 
   function appendSelectedQuestionTag(tag) {
@@ -12004,7 +12032,7 @@ function ExamAnalysisCenter({
               cropBox: normalized,
               cropSourceId: selectedQuestion.cropSourceId || (selectedQuestionSourceFile ? getExamAnalysisSourceFileId(selectedQuestionSourceFile) : ""),
               cropSourceUrl: selectedQuestionSourceUrl,
-              page: selectedQuestionSourceIsPdf ? selectedQuestionPage : item.page
+              page: selectedQuestionSourceIsPdf ? cropViewerPageNumber : item.page
             }
           : item
       ));
@@ -12025,11 +12053,11 @@ function ExamAnalysisCenter({
     if (!selectedQuestionSourceIsPdf || pdfPageCount <= 1) return questionItems;
     const hasExplicitPages = questionItems.some((item) => Number(item.page) > 1);
     if (hasExplicitPages) {
-      const pageItems = questionItems.filter((item) => Math.max(1, Number(item.page) || 1) === selectedQuestionPage);
+      const pageItems = questionItems.filter((item) => Math.max(1, Number(item.page) || 1) === cropViewerPageNumber);
       return pageItems.length ? pageItems : [selectedQuestion].filter(Boolean);
     }
     const perPage = Math.max(1, Math.ceil(questionItems.length / Math.max(1, pdfPageCount)));
-    return questionItems.slice((selectedQuestionPage - 1) * perPage, selectedQuestionPage * perPage);
+    return questionItems.slice((cropViewerPageNumber - 1) * perPage, cropViewerPageNumber * perPage);
   }
 
   function getCurrentCropVisionImageDataUrl() {
@@ -12059,7 +12087,7 @@ function ExamAnalysisCenter({
         cropBox,
         cropSourceId: selectedQuestionSourceId || item.cropSourceId,
         cropSourceUrl: selectedQuestionSourceUrl || item.cropSourceUrl,
-        page: Math.max(1, Number(draft.page || selectedQuestionPage) || 1)
+        page: Math.max(1, Number(draft.page || cropViewerPageNumber) || 1)
       };
     });
     updateQuestionItems(nextItems);
@@ -12080,7 +12108,7 @@ function ExamAnalysisCenter({
     const pageItems = getQuestionItemsForCurrentCropPage();
     const fallbackBoxes = buildHeuristicQuestionCropBoxes(
       questionItems,
-      selectedQuestionPage,
+      cropViewerPageNumber,
       selectedQuestionSourceIsPdf ? pdfPageCount || 1 : 1
     );
     setCropDraftStatus("AI vision으로 문항 영역 초안을 만드는 중입니다...");
@@ -12091,7 +12119,7 @@ function ExamAnalysisCenter({
         aiProvider: aiSettings.examAnalysisProvider,
         imageDataUrl,
         pageCount: selectedQuestionSourceIsPdf ? pdfPageCount || 1 : 1,
-        pageNumber: selectedQuestionPage,
+        pageNumber: cropViewerPageNumber,
         questionNumbers: pageItems.map((item) => item.number),
         totalQuestions: questionItems.length
       });
@@ -12716,14 +12744,35 @@ function ExamAnalysisCenter({
 
                   {selectedQuestionSourceIsPdf ? (
                     <div className="analysisPdfControls">
+                      <div aria-label="PDF 페이지 넘기기" className="pdfPageStepper">
+                        <button
+                          aria-label="이전 페이지"
+                          disabled={cropViewerPageNumber <= 1}
+                          onClick={() => moveCropViewerPage(-1)}
+                          title="이전 페이지"
+                          type="button"
+                        >
+                          ‹
+                        </button>
+                        <strong>{cropViewerPageNumber} / {pdfPageCount || "?"}</strong>
+                        <button
+                          aria-label="다음 페이지"
+                          disabled={Boolean(pdfPageCount) && cropViewerPageNumber >= pdfPageCount}
+                          onClick={() => moveCropViewerPage(1)}
+                          title="다음 페이지"
+                          type="button"
+                        >
+                          ›
+                        </button>
+                      </div>
                       <label>
                         PDF 페이지
                         <input
                           min="1"
                           max={pdfPageCount || 999}
                           type="number"
-                          value={selectedQuestionPage}
-                          onChange={(event) => updateSelectedQuestion("page", Math.max(1, Number(event.target.value) || 1))}
+                          value={cropViewerPageNumber}
+                          onChange={(event) => setCropViewerPageClamped(event.target.value)}
                         />
                       </label>
                       <label>
@@ -12736,6 +12785,14 @@ function ExamAnalysisCenter({
                           <option value="2">200%</option>
                         </select>
                       </label>
+                      <button
+                        className="softButton pdfPageApplyButton"
+                        disabled={!selectedQuestion}
+                        onClick={applyCropViewerPageToSelectedQuestion}
+                        type="button"
+                      >
+                        현재 페이지를 선택 문항에 저장
+                      </button>
                       <span>{pdfRenderStatus || "PDF 페이지 렌더링 대기"}</span>
                     </div>
                   ) : null}
