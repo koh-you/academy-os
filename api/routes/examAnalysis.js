@@ -84,7 +84,8 @@ function defaultExamAnalysisPromptForServer() {
     "[문항별 분석 기준]",
     "각 문항은 문항 번호, 페이지, 배점, 단원, 유형, 난이도, 역할, 태그, 출처 가능성, OCR/문항 조건 요약, 학생이 틀릴 만한 지점, 강사가 확인해야 할 점, 대비 전략 후보를 가능한 범위에서 정리한다.",
     "AI 1차 분석 단계에서 문항별 배점, 단원, 난이도 초안을 반드시 questionItems 배열에 넣는다. 모르면 빈칸 대신 '확인 필요'를 쓴다.",
-    "여러 해 시험지가 함께 들어온 경우 questionItems는 선택된 시험명 또는 가장 최신 시험지 1회분의 문항표 초안으로 작성하고, 3개년 반복/증감/변화는 unitDistribution, typeClassification, killerProblems, sourceCheckNotes에 정리한다.",
+    "여러 해 시험지가 함께 들어온 경우 questionItems는 웹앱에서 현재 선택한 시험지/연도 1회분의 전체 문항 수만큼 작성하고, 3개년 반복/증감/변화는 unitDistribution, typeClassification, killerProblems, sourceCheckNotes에 정리한다.",
+    "일부 페이지만 보이거나 OCR 일부만 있더라도 확인 가능한 전체 문항 수를 기준으로 questionItems를 만들고, 모르는 값은 '확인 필요'로 둔다.",
     "문항 태그 기준: 기본문항, 실수문항, 주요문항, 1등급 변별문항, 2등급 변별문항.",
     "",
     "[작성 원칙]",
@@ -127,6 +128,7 @@ function buildExamAnalysisPrompt(payload) {
       "아직 원본 텍스트가 없습니다. 입력된 기본정보와 강사 메모를 기준으로 분석 필드 초안을 만들어 주세요.",
     "",
     "[현재 문항 카드]",
+    `목표 문항 수: ${payload.questionTargetCount || "원본에서 확인"}`,
     Array.isArray(payload.questionItems) && payload.questionItems.length
       ? payload.questionItems.map((item) => `${item.number || item.questionNumber}번 · 페이지 ${item.page || 1} · 기존 배점 ${item.score || "미입력"} · 기존 단원 ${item.unit || "미입력"} · 기존 난이도 ${item.difficulty || "확인 필요"}`).join("\n")
       : "아직 문항 카드가 없습니다. OCR에서 확인 가능한 문항번호 기준으로 questionItems 초안을 생성하세요.",
@@ -153,7 +155,8 @@ function buildExamAnalysisPrompt(payload) {
     "- questionItems의 role은 기본, 실수유도, 앞번호 고난도, 준킬러, 킬러, 서술형 변별, 확인 필요 중 하나로 쓴다.",
     "- questionItems의 questionType은 객관식, 단답형, 서술형, 논술형, 확인 필요 중 하나로 쓴다.",
     "- 문항 카드는 강사가 웹앱 문항 검수 단계에서 확정한다. AI는 배점/단원/난이도/역할/태그/검수 포인트의 1차 초안을 만든다.",
-    "- 여러 해 시험지가 함께 있으면 questionItems에는 선택된 시험명 또는 가장 최신 시험지 1회분만 넣는다. 3개년 비교는 텍스트 분석 필드에 반복/증감/변화를 정리한다.",
+    "- 여러 해 시험지가 함께 있으면 questionItems에는 웹앱에서 현재 선택한 시험지/연도 1회분의 전체 문항을 넣는다. 한 페이지에 보이는 일부 문항만 반환하지 않는다.",
+    "- 3개년 비교는 텍스트 분석 필드에 반복/증감/변화를 정리한다.",
     "- blogDraft는 시험 기본 정보, 올해 총평, 단원별 현황, 킬러 문항, 다음 시험 예측 TOP 5, 공부 방향, CTA 순서로 쓴다.",
     "- instagramDraft는 7장 카드뉴스 구조로 쓴다: 표지, 시험 구성, 난이도 총평, 유형 TOP3, 킬러 포인트, 다음 시험 예측, 공부 방향/CTA.",
     "- 안내문 초안은 분석 결과를 반영하되 과장하거나 없는 사실을 만들지 않는다.",

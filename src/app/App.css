@@ -3761,6 +3761,16 @@ button {
   color: #ffffff;
 }
 
+.analysisQuestionListItem.keyQuestion {
+  border-color: #f59e0b;
+  box-shadow: inset 4px 0 0 #f59e0b;
+}
+
+.analysisQuestionListItem.active.keyQuestion {
+  border-color: #17213d;
+  box-shadow: inset 4px 0 0 #fbbf24;
+}
+
 .analysisQuestionListItem strong {
   font-size: 16px;
   font-weight: 900;
@@ -3826,6 +3836,51 @@ button {
   background: #17213d;
   border-color: #17213d;
   color: #ffffff;
+}
+
+.questionCountBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.questionInsightToggle {
+  align-items: center;
+  background: #f8fbff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 12px;
+}
+
+.questionInsightToggle.recommended {
+  background: #fffbeb;
+  border-color: #fcd34d;
+}
+
+.questionInsightToggle div {
+  display: grid;
+  gap: 4px;
+}
+
+.questionInsightToggle strong {
+  color: #17213d;
+  font-weight: 900;
+}
+
+.questionInsightToggle span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.questionInsightDetailFields {
+  display: grid;
+  gap: 12px;
 }
 
 .analysisQuestionQuickTags button {
