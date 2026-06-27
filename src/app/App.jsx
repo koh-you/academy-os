@@ -786,6 +786,23 @@ function canvasToVisionImageDataUrl(sourceCanvas, maxDimension = 1600) {
   return canvas.toDataURL("image/jpeg", 0.86);
 }
 
+async function renderPdfPageToVisionImageDataUrl(pdfDocument, pageNumber, scale = 1.35) {
+  const page = await pdfDocument.getPage(pageNumber);
+  const viewport = page.getViewport({ scale });
+  const outputScale = Math.min(window.devicePixelRatio || 1, 2);
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.floor(viewport.width * outputScale);
+  canvas.height = Math.floor(viewport.height * outputScale);
+  const context = canvas.getContext("2d");
+  context.setTransform(outputScale, 0, 0, outputScale, 0, 0);
+  const renderTask = page.render({ canvasContext: context, viewport });
+  await renderTask.promise;
+  const dataUrl = canvasToVisionImageDataUrl(canvas);
+  canvas.width = 1;
+  canvas.height = 1;
+  return dataUrl;
+}
+
 function imageElementToVisionImageDataUrl(imageElement, maxDimension = 1600) {
   const width = imageElement?.naturalWidth || imageElement?.width;
   const height = imageElement?.naturalHeight || imageElement?.height;
@@ -11645,6 +11662,7 @@ function ExamAnalysisCenter({
   const [cropDragStart, setCropDragStart] = useState(null);
   const [cropDraft, setCropDraft] = useState(null);
   const [cropDraftStatus, setCropDraftStatus] = useState("");
+  const [isQuestionCropDrafting, setIsQuestionCropDrafting] = useState(false);
   const [pdfPageCount, setPdfPageCount] = useState(0);
   const [pdfRenderStatus, setPdfRenderStatus] = useState("");
   const [pdfScale, setPdfScale] = useState(1.25);
@@ -12048,16 +12066,31 @@ function ExamAnalysisCenter({
     ));
   }
 
-  function getQuestionItemsForCurrentCropPage() {
+  function getQuestionItemsForCropPage(pageNumber = cropViewerPageNumber, options = {}) {
     if (!questionItems.length) return [];
-    if (!selectedQuestionSourceIsPdf || pdfPageCount <= 1) return questionItems;
-    const hasExplicitPages = questionItems.some((item) => Number(item.page) > 1);
+    const safePageCount = Math.max(1, Number(options.pageCount ?? pdfPageCount) || 1);
+    const safePage = Math.max(1, Number(pageNumber) || 1);
+    const forceHeuristicDistribution = Boolean(options.forceHeuristicDistribution);
+    const fallbackToSelected = options.fallbackToSelected !== false;
+    if (!selectedQuestionSourceIsPdf || safePageCount <= 1) return questionItems;
+    const hasExplicitPages = !forceHeuristicDistribution && questionItems.some((item) => Number(item.page) > 1);
     if (hasExplicitPages) {
-      const pageItems = questionItems.filter((item) => Math.max(1, Number(item.page) || 1) === cropViewerPageNumber);
-      return pageItems.length ? pageItems : [selectedQuestion].filter(Boolean);
+      const pageItems = questionItems.filter((item) => Math.max(1, Number(item.page) || 1) === safePage);
+      return pageItems.length ? pageItems : (fallbackToSelected ? [selectedQuestion].filter(Boolean) : []);
     }
-    const perPage = Math.max(1, Math.ceil(questionItems.length / Math.max(1, pdfPageCount)));
-    return questionItems.slice((cropViewerPageNumber - 1) * perPage, cropViewerPageNumber * perPage);
+    const perPage = Math.max(1, Math.ceil(questionItems.length / safePageCount));
+    return questionItems.slice((safePage - 1) * perPage, safePage * perPage);
+  }
+
+  function getQuestionItemsForCurrentCropPage() {
+    return getQuestionItemsForCropPage(cropViewerPageNumber);
+  }
+
+  function buildPageFallbackCropBoxes(pageItems = [], pageNumber = cropViewerPageNumber) {
+    return buildHeuristicQuestionCropBoxes(pageItems, 1, 1).map((box) => ({
+      ...box,
+      page: pageNumber
+    }));
   }
 
   function getCurrentCropVisionImageDataUrl() {
@@ -12106,12 +12139,9 @@ function ExamAnalysisCenter({
       return;
     }
     const pageItems = getQuestionItemsForCurrentCropPage();
-    const fallbackBoxes = buildHeuristicQuestionCropBoxes(
-      questionItems,
-      cropViewerPageNumber,
-      selectedQuestionSourceIsPdf ? pdfPageCount || 1 : 1
-    );
+    const fallbackBoxes = buildPageFallbackCropBoxes(pageItems, cropViewerPageNumber);
     setCropDraftStatus("AI vision으로 문항 영역 초안을 만드는 중입니다...");
+    setIsQuestionCropDrafting(true);
     try {
       const imageDataUrl = getCurrentCropVisionImageDataUrl();
       const result = await requestExamQuestionCropDraft({
@@ -12142,6 +12172,85 @@ function ExamAnalysisCenter({
       if (!applied) {
         setCropDraftStatus(`AI vision 실패 · 자동 배치할 문항을 찾지 못했습니다. (${error.message})`);
       }
+    } finally {
+      setIsQuestionCropDrafting(false);
+    }
+  }
+
+  async function handleDraftAllQuestionCrops() {
+    if (!selectedQuestionSourceIsPdf || !selectedQuestionSourceUrl) {
+      setCropDraftStatus("전체 페이지 AI 크롭은 PDF 원본에서만 사용할 수 있습니다.");
+      return;
+    }
+    if (!questionItems.length) {
+      setCropDraftStatus("문항 카드를 먼저 만든 뒤 전체 페이지 크롭 초안을 생성할 수 있습니다.");
+      return;
+    }
+    setIsQuestionCropDrafting(true);
+    setCropDraftStatus("전체 페이지 AI 크롭 초안을 준비하는 중입니다...");
+    let loadingTask = null;
+    try {
+      const pdfjsLib = await loadPdfJs();
+      loadingTask = pdfjsLib.getDocument({ url: selectedQuestionSourceUrl });
+      const pdfDocument = await loadingTask.promise;
+      const totalPages = Math.max(1, Number(pdfDocument.numPages) || 1);
+      setPdfPageCount(totalPages);
+      const allBoxes = [];
+      const failedPages = [];
+      let visionCount = 0;
+      let fallbackCount = 0;
+
+      for (let pageNumber = 1; pageNumber <= totalPages; pageNumber += 1) {
+        const pageItems = getQuestionItemsForCropPage(pageNumber, {
+          fallbackToSelected: false,
+          forceHeuristicDistribution: true,
+          pageCount: totalPages
+        });
+        if (!pageItems.length) continue;
+        const fallbackBoxes = buildPageFallbackCropBoxes(pageItems, pageNumber);
+        setCropDraftStatus(`전체 페이지 AI 크롭 초안 · ${pageNumber}/${totalPages}페이지 처리 중입니다...`);
+        try {
+          const imageDataUrl = await renderPdfPageToVisionImageDataUrl(pdfDocument, pageNumber);
+          const result = await requestExamQuestionCropDraft({
+            aiModel: aiSettings.examAnalysisModel,
+            aiProvider: aiSettings.examAnalysisProvider,
+            imageDataUrl,
+            pageCount: totalPages,
+            pageNumber,
+            questionNumbers: pageItems.map((item) => item.number),
+            totalQuestions: questionItems.length
+          });
+          const visionBoxes = Array.isArray(result?.boxes)
+            ? result.boxes.map((box) => ({ ...box, page: pageNumber }))
+            : [];
+          if (!visionBoxes.length) throw new Error("AI가 문항 영역을 찾지 못했습니다.");
+          const visionNumbers = new Set(visionBoxes.map((box) => Number(box.questionNumber)));
+          const supplementBoxes = fallbackBoxes.filter((box) => !visionNumbers.has(Number(box.questionNumber)));
+          allBoxes.push(...visionBoxes, ...supplementBoxes);
+          visionCount += visionBoxes.length;
+          fallbackCount += supplementBoxes.length;
+        } catch (error) {
+          failedPages.push(`${pageNumber}p`);
+          allBoxes.push(...fallbackBoxes);
+          fallbackCount += fallbackBoxes.length;
+        }
+      }
+
+      if (!allBoxes.length) {
+        setCropDraftStatus("전체 페이지에 적용할 문항 크롭 초안을 만들지 못했습니다.");
+        return;
+      }
+
+      const applied = applyQuestionCropDraftBoxes(
+        allBoxes,
+        `전체 페이지 AI 크롭 초안 적용 완료 · ${totalPages}페이지 · vision ${visionCount}개 · 자동 보완 ${fallbackCount}개${failedPages.length ? ` · 보완 페이지 ${failedPages.join(", ")}` : ""}`
+      );
+      if (applied) setCropViewerPage(1);
+    } catch (error) {
+      setCropDraftStatus(`전체 페이지 AI 크롭 초안 생성 실패 · ${error.message}`);
+    } finally {
+      loadingTask?.destroy?.();
+      setIsQuestionCropDrafting(false);
     }
   }
 
@@ -12833,7 +12942,22 @@ function ExamAnalysisCenter({
 
                   <div className="analysisQuestionCropActions">
                     <span>{selectedQuestion ? `${selectedQuestion.number}번 문항 영역` : "문항을 선택하세요."}</span>
-                    <button className="softButton" disabled={!selectedQuestionSourceUrl || !questionItems.length} onClick={handleDraftQuestionCrops} type="button">AI 크롭 초안</button>
+                    <button
+                      className="softButton"
+                      disabled={!selectedQuestionSourceUrl || !questionItems.length || isQuestionCropDrafting}
+                      onClick={handleDraftQuestionCrops}
+                      type="button"
+                    >
+                      {isQuestionCropDrafting ? "AI 크롭 중..." : "현재 페이지 AI 크롭"}
+                    </button>
+                    <button
+                      className="softButton"
+                      disabled={!selectedQuestionSourceIsPdf || !selectedQuestionSourceUrl || !questionItems.length || isQuestionCropDrafting}
+                      onClick={handleDraftAllQuestionCrops}
+                      type="button"
+                    >
+                      전체 페이지 AI 크롭
+                    </button>
                     <button className="softButton" disabled={!selectedQuestionCropBox} onClick={clearSelectedQuestionCrop} type="button">크롭 지우기</button>
                     {selectedQuestionOpenUrl ? (
                       <a className="softButton linkButton" href={selectedQuestionOpenUrl} rel="noreferrer" target="_blank">원본 열기</a>

@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-27 P1. 시험분석 전체 페이지 AI 크롭 초안 적용
+
+- 상태: 완료
+- 사용자 요청: AI 크롭 초안을 PDF의 모든 페이지에 일괄 적용할 수 없는지 확인.
+- 이번 작업 결과: 문항 검수 원문항 화면의 버튼을 `현재 페이지 AI 크롭`과 `전체 페이지 AI 크롭`으로 분리했다. 전체 페이지 버튼은 PDF 전체를 페이지별로 임시 렌더링하고 vision API를 순차 호출해 문항별 cropBox/page를 한 번에 반영한다.
+- 보완 흐름: vision이 특정 페이지에서 실패하거나 일부 문항을 찾지 못하면 해당 페이지의 문항 수 기준 자동 배치 초안으로 보완한다. 진행 중에는 버튼을 잠그고 `n/전체 페이지 처리 중` 상태 메시지를 보여준다.
+- 저장 주의: 크롭 좌표와 페이지는 기존 `examAnalyses.questionItems` 안에 저장되므로 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check api/routes/examAnalysis.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs` 통과. `npm run build` 통과(Vite chunk size warning만 있음). `npm run test:production` 통과(total 219, failed 0).
+
 ### 2026-06-27 P1. 시험분석 PDF 페이지 넘기기 컨트롤 보강
 
 - 상태: 완료
