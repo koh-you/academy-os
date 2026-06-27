@@ -112,6 +112,15 @@
 - 저장 주의: UI 동작 보강만 있으므로 Supabase SQL edit 필요 없음.
 - 검증: `npm run test:production` 통과(total 213, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
 
+### 2026-06-27 P1. 시험분석 학교·고사별 폴더 구조 보강
+
+- 상태: 완료
+- 사용자 요청: 실제 업무 활용을 위해 분석 목록에 학교별·고사별로 분석지를 누적할 수 있는 폴더 구조를 만들고, 저장/삭제/수정 기능이 동작해야 한다.
+- 이번 작업 결과: 시험분석 목록을 `폴더 목록 → 폴더 안 분석지 목록` 구조로 바꿨다. 폴더는 학교, 학년, 고사 구분, 과목, 표시 고사명을 가진다. 기존 분석지는 `analysisFolderId`가 없어도 학교·학년·고사명 기준으로 자동 폴더화되어 보인다.
+- CRUD 동작: `+ 폴더`로 빈 폴더를 저장할 수 있고, 폴더 수정 시 해당 폴더 안 분석지의 학교/학년/과목/고사명도 함께 맞춘다. 폴더 안에서 `+ 분석` 또는 상단 `+ 분석 문서`로 분석지를 누적할 수 있다. 폴더 삭제는 폴더 안 분석지까지 함께 삭제한다는 확인 문구를 띄운 뒤 처리한다.
+- 저장 주의: 새 `examAnalysisFolders` app_state 키를 추가했다. 분석지 배열 `examAnalyses`와 함께 `/api/app-state`에 자동 저장되므로 새로고침/다른 기기에서도 폴더 구조가 복원된다. 새 Supabase SQL edit 필요 없음.
+- 검증: `npm run test:production` 통과(total 214, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
+
 ### 2026-06-26 P0. 수동 하원 알림톡 발송 지원
 
 - 상태: 완료

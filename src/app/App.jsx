@@ -23,6 +23,7 @@ const storageKeys = {
   schoolEvents: "academy-os.schoolEvents.v1",
   studentQuestions: "academy-os.studentQuestions.v1",
   examPostSubmissions: "academy-os.examPostSubmissions.v1",
+  examAnalysisFolders: "academy-os.examAnalysisFolders.v1",
   resourceMaterials: "academy-os.resourceMaterials.v1",
   lessonResearchItems: "academy-os.lessonResearchItems.v1",
   aiSettings: "academy-os.aiSettings.v1",
@@ -946,13 +947,26 @@ function createDefaultExamAnalysis(examPrepRow = {}) {
   const schoolName = examPrepRow.schoolName || "";
   const grade = examPrepRow.grade || "";
   const subject = examPrepRow.subject || "";
+  const examName = examPrepRow.examName || (examPrepRow.examCycle ? examCycleLabel(examPrepRow.examCycle) : "");
+  const analysisFolderId = examPrepRow.analysisFolderId || examPrepRow.folderId || createExamAnalysisFolderId({
+    schoolName,
+    grade,
+    examName,
+    examCycle: examPrepRow.examCycle || "",
+    subject
+  });
+  const nowIso = new Date().toISOString();
   return {
-    examAnalysisId: `exam_analysis_${Date.now()}`,
+    examAnalysisId: examPrepRow.examAnalysisId || `exam_analysis_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    analysisFolderId,
+    createdAt: examPrepRow.createdAt || nowIso,
+    updatedAt: nowIso,
     examPrepId: examPrepRow.examPrepId || "",
     schoolName,
     grade,
     subject,
-    examName: examPrepRow.examCycle ? examCycleLabel(examPrepRow.examCycle) : "",
+    examCycle: examPrepRow.examCycle || "",
+    examName,
     examDate: "",
     sourceFileUrl: "",
     sourceFiles: [],
@@ -1555,6 +1569,125 @@ function shortStableHash(value = "") {
     hash = ((hash << 5) - hash + char.charCodeAt(0)) | 0;
   }
   return Math.abs(hash).toString(36).slice(0, 6);
+}
+
+function getExamAnalysisFolderMeta(source = {}) {
+  const examCycle = String(source.examCycle ?? source.folderExamCycle ?? "").trim();
+  const examName = String(source.folderExamName ?? source.examName ?? (examCycle ? examCycleLabel(examCycle) : "")).trim();
+  return {
+    schoolName: String(source.folderSchoolName ?? source.schoolName ?? "").trim(),
+    grade: String(source.folderGrade ?? source.grade ?? "").trim(),
+    subject: String(source.folderSubject ?? source.subject ?? "").trim(),
+    examCycle,
+    examName
+  };
+}
+
+function createExamAnalysisFolderId(source = {}) {
+  const meta = getExamAnalysisFolderMeta(source);
+  const key = [
+    meta.schoolName || "school",
+    meta.grade || "grade",
+    meta.examName || meta.examCycle || "exam"
+  ].join("_");
+  return `exam_folder_${safeIdPart(key) || "default"}_${shortStableHash(key)}`;
+}
+
+function getExamAnalysisFolderTitle(folder = {}) {
+  const meta = getExamAnalysisFolderMeta(folder);
+  return [
+    meta.schoolName || "학교 미입력",
+    meta.grade || "학년 미입력",
+    meta.examName || "고사 미입력"
+  ].join(" · ");
+}
+
+function normalizeExamAnalysisFolder(folder = {}) {
+  const meta = getExamAnalysisFolderMeta(folder);
+  const nowIso = new Date().toISOString();
+  const folderId = folder.folderId || folder.analysisFolderId || createExamAnalysisFolderId(meta);
+  return {
+    folderId,
+    folderName: String(folder.folderName ?? "").trim() || getExamAnalysisFolderTitle(meta),
+    schoolName: meta.schoolName,
+    grade: meta.grade,
+    subject: meta.subject,
+    examCycle: meta.examCycle,
+    examName: meta.examName,
+    createdAt: folder.createdAt || nowIso,
+    updatedAt: folder.updatedAt || nowIso
+  };
+}
+
+function createExamAnalysisFolderDraft(folder = {}) {
+  const normalized = normalizeExamAnalysisFolder({
+    examCycle: currentExamCycle,
+    examName: examCycleLabel(currentExamCycle),
+    ...folder
+  });
+  return {
+    folderId: folder.folderId || normalized.folderId,
+    schoolName: normalized.schoolName,
+    grade: normalized.grade,
+    subject: normalized.subject || "수학",
+    examCycle: normalized.examCycle || currentExamCycle,
+    examName: normalized.examName || examCycleLabel(currentExamCycle),
+    folderName: normalized.folderName
+  };
+}
+
+function applyExamAnalysisFolderToAnalysis(analysis = {}, folder = {}) {
+  const normalizedFolder = normalizeExamAnalysisFolder(folder);
+  return {
+    ...analysis,
+    analysisFolderId: normalizedFolder.folderId,
+    schoolName: normalizedFolder.schoolName,
+    grade: normalizedFolder.grade,
+    subject: normalizedFolder.subject || analysis.subject || "",
+    examCycle: normalizedFolder.examCycle || analysis.examCycle || "",
+    examName: normalizedFolder.examName,
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function getExamAnalysisFolderId(analysis = {}) {
+  return analysis.analysisFolderId || createExamAnalysisFolderId(analysis);
+}
+
+function buildExamAnalysisFolderList(analyses = [], savedFolders = []) {
+  const folderMap = new Map();
+  savedFolders.forEach((folder) => {
+    const normalized = normalizeExamAnalysisFolder(folder);
+    folderMap.set(normalized.folderId, { ...normalized, analyses: [], persisted: true });
+  });
+  analyses.forEach((analysis) => {
+    const folderId = getExamAnalysisFolderId(analysis);
+    const existing = folderMap.get(folderId) ?? {
+      ...normalizeExamAnalysisFolder({ ...analysis, folderId }),
+      analyses: [],
+      persisted: false
+    };
+    const normalizedAnalysis = {
+      ...analysis,
+      analysisFolderId: folderId
+    };
+    existing.analyses.push(normalizedAnalysis);
+    const analysisUpdatedAt = analysis.updatedAt || analysis.aiLastRunAt || analysis.createdAt || "";
+    if (analysisUpdatedAt && (!existing.latestAnalysisAt || analysisUpdatedAt > existing.latestAnalysisAt)) {
+      existing.latestAnalysisAt = analysisUpdatedAt;
+    }
+    folderMap.set(folderId, existing);
+  });
+  return [...folderMap.values()]
+    .map((folder) => ({
+      ...folder,
+      analyses: folder.analyses.sort((a, b) => String(b.updatedAt || b.aiLastRunAt || b.createdAt || "").localeCompare(String(a.updatedAt || a.aiLastRunAt || a.createdAt || "")))
+    }))
+    .sort((a, b) => {
+      const timeCompare = String(b.latestAnalysisAt || b.updatedAt || "").localeCompare(String(a.latestAnalysisAt || a.updatedAt || ""));
+      if (timeCompare !== 0) return timeCompare;
+      return getExamAnalysisFolderTitle(a).localeCompare(getExamAnalysisFolderTitle(b), "ko");
+    });
 }
 
 function createPreExamLessonId(sourceId = "") {
@@ -2512,6 +2645,7 @@ export function App() {
     storageKeys.examAnalyses,
     sampleData.examAnalyses ?? [createDefaultExamAnalysis()]
   );
+  const [examAnalysisFolders, setExamAnalysisFolders] = useStoredState(storageKeys.examAnalysisFolders, []);
   const [resourceMaterials, setResourceMaterials] = useStoredState(storageKeys.resourceMaterials, []);
   const [aiSettings, setAiSettings] = useStoredState(storageKeys.aiSettings, defaultAiSettings);
   const [attendanceSettings, setAttendanceSettings] = useStoredState(
@@ -2552,6 +2686,7 @@ export function App() {
     attendanceSettings,
     deletedLessonBundles,
     examAnalyses,
+    examAnalysisFolders,
     generatedLessonControls,
     lessonNotificationPlans,
     lessonResearchItems,
@@ -2571,6 +2706,7 @@ export function App() {
     attendanceSettings,
     deletedLessonBundles,
     examAnalyses,
+    examAnalysisFolders,
     generatedLessonControls,
     lessonNotificationPlans,
     lessonResearchItems,
@@ -2750,6 +2886,7 @@ export function App() {
           if (states.attendanceSettings) setAttendanceSettings(normalizeAttendanceSettings(states.attendanceSettings));
           if (Array.isArray(states.deletedLessonBundles)) setDeletedLessonBundles(states.deletedLessonBundles);
           if (Array.isArray(states.examAnalyses)) setExamAnalyses(states.examAnalyses);
+          if (Array.isArray(states.examAnalysisFolders)) setExamAnalysisFolders(states.examAnalysisFolders);
           if (states.generatedLessonControls) setGeneratedLessonControls(normalizeGeneratedLessonControls(states.generatedLessonControls));
           if (states.lessonNotificationPlans && typeof states.lessonNotificationPlans === "object" && !Array.isArray(states.lessonNotificationPlans)) {
             setLessonNotificationPlans(states.lessonNotificationPlans);
@@ -2797,6 +2934,7 @@ export function App() {
     setAttendanceSettings,
     setDeletedLessonBundles,
     setExamAnalyses,
+    setExamAnalysisFolders,
     setExamPrepRows,
     setGeneratedLessonControls,
     setHomeworks,
@@ -4746,22 +4884,50 @@ export function App() {
           <ExamAnalysisCenter
             aiSettings={aiSettings}
             analyses={examAnalyses}
+            analysisFolders={examAnalysisFolders}
             examPrepRows={examPrepRows}
-            onAddAnalysis={() =>
-              setExamAnalyses((current) => [
-                createDefaultExamAnalysis(),
-                ...current
-              ])
+            onAddAnalysis={(analysisSeed = {}) =>
+              setExamAnalyses((current) => {
+                const nextAnalysis = analysisSeed.examAnalysisId ? analysisSeed : createDefaultExamAnalysis(analysisSeed);
+                return [
+                  { ...nextAnalysis, updatedAt: nextAnalysis.updatedAt || new Date().toISOString() },
+                  ...current
+                ];
+              })
             }
             onUpdateAnalysis={(analysisId, field, value) =>
               setExamAnalyses((current) =>
-                current.map((item) => (item.examAnalysisId === analysisId ? { ...item, [field]: value } : item))
+                current.map((item) => (item.examAnalysisId === analysisId ? { ...item, [field]: value, updatedAt: new Date().toISOString() } : item))
               )
             }
             onDeleteAnalysis={(analysisId) =>
               setExamAnalyses((current) => current.filter((item) => item.examAnalysisId !== analysisId))
             }
+            onDeleteAnalysisFolder={(folderId) => {
+              setExamAnalysisFolders((current) => current.filter((folder) => folder.folderId !== folderId));
+              setExamAnalyses((current) => current.filter((item) => getExamAnalysisFolderId(item) !== folderId));
+            }}
             onRunAnalysis={handleRunExamAnalysis}
+            onSaveAnalysisFolder={(folder) => {
+              const normalizedFolder = normalizeExamAnalysisFolder({
+                ...folder,
+                updatedAt: new Date().toISOString()
+              });
+              setExamAnalysisFolders((current) => {
+                const exists = current.some((item) => item.folderId === normalizedFolder.folderId);
+                return exists
+                  ? current.map((item) => (item.folderId === normalizedFolder.folderId ? { ...item, ...normalizedFolder } : item))
+                  : [normalizedFolder, ...current];
+              });
+              setExamAnalyses((current) =>
+                current.map((item) => (
+                  getExamAnalysisFolderId(item) === normalizedFolder.folderId
+                    ? applyExamAnalysisFolderToAnalysis(item, normalizedFolder)
+                    : item
+                ))
+              );
+              return normalizedFolder;
+            }}
           />
         ) : null}
 
@@ -5146,7 +5312,7 @@ export function App() {
     setExamAnalyses((current) =>
       current.map((item) =>
         item.examAnalysisId === analysis.examAnalysisId
-          ? { ...item, aiProvider: nextAnalysis.aiProvider, aiModel: nextAnalysis.aiModel, aiStatus: "분석 중", aiError: "" }
+          ? { ...item, aiProvider: nextAnalysis.aiProvider, aiModel: nextAnalysis.aiModel, aiStatus: "분석 중", aiError: "", updatedAt: new Date().toISOString() }
           : item
       )
     );
@@ -5176,7 +5342,8 @@ export function App() {
                 aiModel: result.result.model,
                 aiStatus: "완료",
                 aiLastRunAt,
-                aiError: ""
+                aiError: "",
+                updatedAt: new Date().toISOString()
               }
             : item
         )
@@ -5185,7 +5352,7 @@ export function App() {
       setExamAnalyses((current) =>
         current.map((item) =>
           item.examAnalysisId === analysis.examAnalysisId
-            ? { ...item, aiStatus: "실패", aiError: error.message }
+            ? { ...item, aiStatus: "실패", aiError: error.message, updatedAt: new Date().toISOString() }
             : item
         )
       );
@@ -10748,21 +10915,51 @@ function SettingsCenter({
 function ExamAnalysisCenter({
   aiSettings = defaultAiSettings,
   analyses,
+  analysisFolders = [],
   examPrepRows,
   onAddAnalysis,
+  onDeleteAnalysisFolder,
   onDeleteAnalysis,
   onRunAnalysis,
+  onSaveAnalysisFolder,
   onUpdateAnalysis
 }) {
   const [selectedAnalysisId, setSelectedAnalysisId] = useState(analyses[0]?.examAnalysisId ?? "");
+  const [selectedFolderId, setSelectedFolderId] = useState("");
   const [isListCollapsed, setIsListCollapsed] = useState(false);
+  const [folderModalMode, setFolderModalMode] = useState("");
+  const [folderDraft, setFolderDraft] = useState(null);
   const [detailSectionId, setDetailSectionId] = useState("");
   const [isReportPreviewOpen, setIsReportPreviewOpen] = useState(false);
   const [isAiInitialViewOpen, setIsAiInitialViewOpen] = useState(false);
   const [outputPreviewId, setOutputPreviewId] = useState("");
   const sourceFileInputRef = useRef(null);
-  const rawSelectedAnalysis = analyses.find((item) => item.examAnalysisId === selectedAnalysisId) ?? analyses[0];
-  const selectedAnalysis = rawSelectedAnalysis ? normalizeExamAnalysisForDisplay(rawSelectedAnalysis) : null;
+  const normalizedAnalyses = useMemo(
+    () => analyses.map((analysis) => {
+      const normalized = normalizeExamAnalysisForDisplay(analysis);
+      return {
+        ...normalized,
+        analysisFolderId: getExamAnalysisFolderId(normalized)
+      };
+    }),
+    [analyses]
+  );
+  const analysisFolderList = useMemo(
+    () => buildExamAnalysisFolderList(normalizedAnalyses, analysisFolders),
+    [analysisFolders, normalizedAnalyses]
+  );
+  const selectedFolder = analysisFolderList.find((folder) => folder.folderId === selectedFolderId) ?? analysisFolderList[0] ?? null;
+  const visibleAnalyses = selectedFolder ? selectedFolder.analyses : normalizedAnalyses;
+  const selectedAnalysisIsVisible = visibleAnalyses.some((analysis) => analysis.examAnalysisId === selectedAnalysisId);
+  const rawSelectedAnalysis = selectedAnalysisIsVisible
+    ? analyses.find((item) => item.examAnalysisId === selectedAnalysisId) ?? visibleAnalyses.find((analysis) => analysis.examAnalysisId === selectedAnalysisId)
+    : visibleAnalyses[0] ?? null;
+  const selectedAnalysis = rawSelectedAnalysis
+    ? {
+        ...normalizeExamAnalysisForDisplay(rawSelectedAnalysis),
+        analysisFolderId: getExamAnalysisFolderId(normalizeExamAnalysisForDisplay(rawSelectedAnalysis))
+      }
+    : null;
   const linkedExamPrepRow = selectedAnalysis
     ? examPrepRows.find((row) => row.examPrepId === selectedAnalysis.examPrepId)
     : null;
@@ -10777,6 +10974,10 @@ function ExamAnalysisCenter({
     (pipelineStages.includes(selectedAnalysis?.pipelineStage) ? selectedAnalysis.pipelineStage : pipelineStages[0]);
   const statusMeta = selectedAnalysis ? getExamAnalysisStatusMeta(selectedAnalysis) : getExamAnalysisStatusMeta();
   const detailSection = examAnalysisDetailSections.find((section) => section.id === detailSectionId);
+  const folderExamCycleOptions = useMemo(
+    () => [currentExamCycle, ...new Set(examPrepRows.map((row) => row.examCycle).filter(Boolean).filter((cycle) => cycle !== currentExamCycle))],
+    [examPrepRows]
+  );
   const teacherAnalysisText = selectedAnalysis
     ? [
         selectedAnalysis.oneLineSummary ? `# 한 줄 총평\n${selectedAnalysis.oneLineSummary}` : "",
@@ -10803,17 +11004,89 @@ function ExamAnalysisCenter({
   } : {};
   const outputPreview = outputPreviewMap[outputPreviewId] ?? null;
   useEffect(() => {
-    if (!selectedAnalysisId && analyses[0]?.examAnalysisId) {
-      setSelectedAnalysisId(analyses[0].examAnalysisId);
+    if (!analysisFolderList.length) {
+      if (selectedFolderId) setSelectedFolderId("");
+      return;
     }
-    if (selectedAnalysisId && analyses.length && !analyses.some((analysis) => analysis.examAnalysisId === selectedAnalysisId)) {
-      setSelectedAnalysisId(analyses[0].examAnalysisId);
+    if (!selectedFolderId || !analysisFolderList.some((folder) => folder.folderId === selectedFolderId)) {
+      setSelectedFolderId(analysisFolderList[0].folderId);
     }
-  }, [analyses, selectedAnalysisId]);
+  }, [analysisFolderList, selectedFolderId]);
+
+  useEffect(() => {
+    if (!visibleAnalyses.length) {
+      if (selectedAnalysisId) setSelectedAnalysisId("");
+      return;
+    }
+    if (!selectedAnalysisId || !visibleAnalyses.some((analysis) => analysis.examAnalysisId === selectedAnalysisId)) {
+      setSelectedAnalysisId(visibleAnalyses[0].examAnalysisId);
+    }
+  }, [selectedAnalysisId, visibleAnalyses]);
 
   function update(field, value) {
     if (!selectedAnalysis) return;
     onUpdateAnalysis(selectedAnalysis.examAnalysisId, field, value);
+  }
+
+  function createAnalysisInFolder(folder = selectedFolder) {
+    const seed = folder
+      ? {
+          analysisFolderId: folder.folderId,
+          folderId: folder.folderId,
+          schoolName: folder.schoolName,
+          grade: folder.grade,
+          subject: folder.subject,
+          examCycle: folder.examCycle,
+          examName: folder.examName
+        }
+      : {};
+    const nextAnalysis = createDefaultExamAnalysis(seed);
+    onAddAnalysis(nextAnalysis);
+    setSelectedFolderId(nextAnalysis.analysisFolderId);
+    setSelectedAnalysisId(nextAnalysis.examAnalysisId);
+  }
+
+  function openCreateFolder() {
+    setFolderDraft({
+      ...createExamAnalysisFolderDraft({
+        subject: selectedFolder?.subject || selectedAnalysis?.subject || "수학"
+      }),
+      folderId: ""
+    });
+    setFolderModalMode("create");
+  }
+
+  function openEditFolder(folder = selectedFolder) {
+    if (!folder) return;
+    setFolderDraft(createExamAnalysisFolderDraft(folder));
+    setFolderModalMode("edit");
+  }
+
+  function persistFolderDraft() {
+    if (!folderDraft || !onSaveAnalysisFolder) return;
+    const savedFolder = onSaveAnalysisFolder({
+      ...folderDraft,
+      folderId: folderDraft.folderId || createExamAnalysisFolderId(folderDraft)
+    });
+    const normalizedFolder = normalizeExamAnalysisFolder(savedFolder || folderDraft);
+    setSelectedFolderId(normalizedFolder.folderId);
+    return normalizedFolder;
+  }
+
+  function saveFolderDraft(event) {
+    event.preventDefault();
+    const normalizedFolder = persistFolderDraft();
+    if (!normalizedFolder) return;
+    setFolderModalMode("");
+    setFolderDraft(null);
+  }
+
+  function deleteFolder(folder = selectedFolder) {
+    if (!folder || !onDeleteAnalysisFolder) return;
+    const label = getExamAnalysisFolderTitle(folder);
+    const countText = folder.analyses.length ? ` 안의 분석지 ${folder.analyses.length}건도 함께 삭제됩니다.` : " 빈 폴더만 삭제됩니다.";
+    if (!window.confirm(`${label} 폴더를 삭제할까요?${countText}`)) return;
+    onDeleteAnalysisFolder(folder.folderId);
   }
 
   function deleteAnalysis(analysis) {
@@ -10821,6 +11094,22 @@ function ExamAnalysisCenter({
     const label = [analysis.schoolName, analysis.grade, analysis.examName].filter(Boolean).join(" · ") || "이 분석 문서";
     if (!window.confirm(`${label}을 삭제할까요? 삭제 후 app_state 저장에 반영됩니다.`)) return;
     onDeleteAnalysis(analysis.examAnalysisId);
+  }
+
+  function moveSelectedAnalysisToFolder(folderId) {
+    if (!selectedAnalysis) return;
+    const folder = analysisFolderList.find((item) => item.folderId === folderId);
+    if (!folder) return;
+    const movedAnalysis = applyExamAnalysisFolderToAnalysis(selectedAnalysis, folder);
+    [
+      "analysisFolderId",
+      "schoolName",
+      "grade",
+      "subject",
+      "examCycle",
+      "examName"
+    ].forEach((field) => onUpdateAnalysis(selectedAnalysis.examAnalysisId, field, movedAnalysis[field] ?? ""));
+    setSelectedFolderId(folder.folderId);
   }
 
   async function attachSourceFiles(fileList) {
@@ -10885,7 +11174,10 @@ function ExamAnalysisCenter({
           <h1>시험분석</h1>
           <p className="muted">기출 PDF 1개 또는 여러 개를 구조화하고, 강사 인사이트를 더해 강사용·학생/학부모용·홍보용 산출물을 만듭니다.</p>
         </div>
-        <button className="primaryButton" onClick={onAddAnalysis} type="button">+ 분석 문서</button>
+        <div className="analysisTopActions">
+          <button className="softButton" onClick={openCreateFolder} type="button">+ 폴더</button>
+          <button className="primaryButton" onClick={() => createAnalysisInFolder()} type="button">+ 분석 문서</button>
+        </div>
       </header>
 
       <div className={isListCollapsed ? "examAnalysisLayout listCollapsed" : "examAnalysisLayout"}>
@@ -10900,35 +11192,74 @@ function ExamAnalysisCenter({
             >
               {isListCollapsed ? "›" : "‹"}
             </button>
-            <span className="countBadge">{analyses.length}건</span>
+            <span className="countBadge">{analysisFolderList.length}폴더 · {analyses.length}건</span>
           </div>
           {isListCollapsed ? (
             <div className="analysisCollapsedHint">목록</div>
           ) : (
-            <div className="analysisList">
-              {analyses.map((analysis) => (
-                <div
-                  className={selectedAnalysis?.examAnalysisId === analysis.examAnalysisId ? "analysisListItem active" : "analysisListItem"}
-                  key={analysis.examAnalysisId}
+            <div className="analysisFolderList">
+              <div className="analysisFolderCreateRow">
+                <button className="softButton" onClick={openCreateFolder} type="button">폴더 만들기</button>
+              </div>
+              {analysisFolderList.map((folder) => (
+                <section
+                  className={selectedFolder?.folderId === folder.folderId ? "analysisFolderItem active" : "analysisFolderItem"}
+                  key={folder.folderId}
                 >
                   <button
-                    className="analysisListSelect"
-                    onClick={() => setSelectedAnalysisId(analysis.examAnalysisId)}
+                    className="analysisFolderSelect"
+                    onClick={() => setSelectedFolderId(folder.folderId)}
                     type="button"
                   >
-                    <strong>{[analysis.schoolName, analysis.grade].filter(Boolean).join(" ") || "새 분석"}</strong>
-                    <span>{[analysis.examName, analysis.subject].filter(Boolean).join(" · ") || "기본정보 미입력"}</span>
-                    <small>{getExamAnalysisStatusMeta(normalizeExamAnalysisForDisplay(analysis)).label} · {stageAlias[analysis.pipelineStage] ?? analysis.pipelineStage}</small>
+                    <strong>{getExamAnalysisFolderTitle(folder)}</strong>
+                    <span>{folder.subject || "과목 미입력"} · 분석지 {folder.analyses.length}건</span>
+                    <small>{folder.persisted ? "저장된 폴더" : "기존 분석 자동 분류"}</small>
                   </button>
-                  <button
-                    className="analysisDeleteButton"
-                    onClick={() => deleteAnalysis(analysis)}
-                    type="button"
-                  >
-                    삭제
-                  </button>
-                </div>
+                  <div className="analysisFolderActions">
+                    <button onClick={() => createAnalysisInFolder(folder)} type="button">+ 분석</button>
+                    <button onClick={() => openEditFolder(folder)} type="button">수정</button>
+                    <button className="danger" onClick={() => deleteFolder(folder)} type="button">삭제</button>
+                  </div>
+                  {selectedFolder?.folderId === folder.folderId ? (
+                    <div className="analysisList">
+                      {folder.analyses.length ? folder.analyses.map((analysis) => (
+                        <div
+                          className={selectedAnalysis?.examAnalysisId === analysis.examAnalysisId ? "analysisListItem active" : "analysisListItem"}
+                          key={analysis.examAnalysisId}
+                        >
+                          <button
+                            className="analysisListSelect"
+                            onClick={() => setSelectedAnalysisId(analysis.examAnalysisId)}
+                            type="button"
+                          >
+                            <strong>{[analysis.schoolName, analysis.grade].filter(Boolean).join(" ") || "새 분석"}</strong>
+                            <span>{[analysis.examName, analysis.subject].filter(Boolean).join(" · ") || "기본정보 미입력"}</span>
+                            <small>{getExamAnalysisStatusMeta(normalizeExamAnalysisForDisplay(analysis)).label} · {stageAlias[analysis.pipelineStage] ?? analysis.pipelineStage}</small>
+                          </button>
+                          <button
+                            className="analysisDeleteButton"
+                            onClick={() => deleteAnalysis(analysis)}
+                            type="button"
+                          >
+                            삭제
+                          </button>
+                        </div>
+                      )) : (
+                        <div className="analysisFolderEmpty">
+                          <span>아직 분석지가 없습니다.</span>
+                          <button className="primaryButton" onClick={() => createAnalysisInFolder(folder)} type="button">첫 분석 만들기</button>
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
+                </section>
               ))}
+              {analysisFolderList.length === 0 ? (
+                <div className="analysisFolderEmpty">
+                  <span>학교·고사별 폴더를 먼저 만들어 주세요.</span>
+                  <button className="primaryButton" onClick={openCreateFolder} type="button">첫 폴더 만들기</button>
+                </div>
+              ) : null}
             </div>
           )}
         </aside>
@@ -10956,6 +11287,19 @@ function ExamAnalysisCenter({
                       : "직접 입력"}
                   </strong>
                 </div>
+                <label>
+                  저장 폴더
+                  <select
+                    value={selectedAnalysis.analysisFolderId || getExamAnalysisFolderId(selectedAnalysis)}
+                    onChange={(event) => moveSelectedAnalysisToFolder(event.target.value)}
+                  >
+                    {analysisFolderList.map((folder) => (
+                      <option key={folder.folderId} value={folder.folderId}>
+                        {getExamAnalysisFolderTitle(folder)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
                 <label>
                   학교
                   <input value={selectedAnalysis.schoolName} onChange={(event) => update("schoolName", event.target.value)} />
@@ -11155,11 +11499,99 @@ function ExamAnalysisCenter({
           </section>
         ) : (
           <section className="panel emptyPortalPanel">
-            <strong>아직 시험분석이 없습니다.</strong>
-            <button className="primaryButton" onClick={onAddAnalysis} type="button">첫 분석 만들기</button>
+            <strong>{selectedFolder ? "이 폴더에 아직 분석지가 없습니다." : "아직 시험분석 폴더가 없습니다."}</strong>
+            <button
+              className="primaryButton"
+              onClick={() => (selectedFolder ? createAnalysisInFolder(selectedFolder) : openCreateFolder())}
+              type="button"
+            >
+              {selectedFolder ? "첫 분석 만들기" : "첫 폴더 만들기"}
+            </button>
           </section>
         )}
       </div>
+      {folderModalMode && folderDraft ? (
+        <Modal
+          className="analysisFolderModal"
+          title={folderModalMode === "create" ? "분석 폴더 만들기" : "분석 폴더 수정"}
+          subtitle="학교·학년·고사별로 분석지를 누적할 폴더입니다."
+          onClose={() => {
+            setFolderModalMode("");
+            setFolderDraft(null);
+          }}
+        >
+          <form className="analysisFolderForm" onSubmit={saveFolderDraft}>
+            <div className="fieldGrid two">
+              <label>
+                학교
+                <input
+                  value={folderDraft.schoolName}
+                  onChange={(event) => setFolderDraft((current) => ({ ...current, schoolName: event.target.value }))}
+                  placeholder="예: 상계고"
+                />
+              </label>
+              <label>
+                학년
+                <input
+                  value={folderDraft.grade}
+                  onChange={(event) => setFolderDraft((current) => ({ ...current, grade: event.target.value }))}
+                  placeholder="예: 고1"
+                />
+              </label>
+              <label>
+                고사 구분
+                <select
+                  value={folderDraft.examCycle || currentExamCycle}
+                  onChange={(event) => {
+                    const examCycle = event.target.value;
+                    setFolderDraft((current) => ({
+                      ...current,
+                      examCycle,
+                      examName: examCycleLabel(examCycle)
+                    }));
+                  }}
+                >
+                  {folderExamCycleOptions.map((cycle) => (
+                    <option key={cycle} value={cycle}>{examCycleLabel(cycle)}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                과목
+                <input
+                  value={folderDraft.subject}
+                  onChange={(event) => setFolderDraft((current) => ({ ...current, subject: event.target.value }))}
+                  placeholder="예: 공통수학1"
+                />
+              </label>
+              <label className="wideLabel">
+                폴더에 표시할 고사명
+                <input
+                  value={folderDraft.examName}
+                  onChange={(event) => setFolderDraft((current) => ({ ...current, examName: event.target.value }))}
+                  placeholder="예: 2026 1학기 기말고사"
+                />
+              </label>
+            </div>
+            <div className="analysisFolderModalActions">
+              <button
+                className="softButton"
+                onClick={() => {
+                  const normalizedFolder = persistFolderDraft();
+                  if (!normalizedFolder) return;
+                  createAnalysisInFolder(normalizedFolder);
+                  setFolderModalMode("");
+                  setFolderDraft(null);
+                }}
+                type="button"
+              >
+                저장 후 분석 추가
+              </button>
+              <button className="primaryButton" type="submit">폴더 저장</button>
+            </div>
+          </form>
+        </Modal>
+      ) : null}
       {selectedAnalysis && detailSection ? (
         <Modal
           className="analysisDetailModal"

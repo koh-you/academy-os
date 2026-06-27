@@ -2529,13 +2529,21 @@ button {
 }
 
 .examAnalysisTop {
+  align-items: center;
   justify-content: space-between;
+}
+
+.analysisTopActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
 }
 
 .examAnalysisLayout {
   display: grid;
   gap: 18px;
-  grid-template-columns: 300px minmax(0, 1fr);
+  grid-template-columns: 340px minmax(0, 1fr);
 }
 
 .examAnalysisLayout.listCollapsed {
@@ -2591,6 +2599,98 @@ button {
 .analysisList {
   display: grid;
   gap: 10px;
+}
+
+.analysisFolderList {
+  display: grid;
+  gap: 12px;
+}
+
+.analysisFolderCreateRow {
+  display: flex;
+  justify-content: stretch;
+}
+
+.analysisFolderCreateRow .softButton {
+  width: 100%;
+}
+
+.analysisFolderItem {
+  background: #f8fbff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.analysisFolderItem.active {
+  border-color: #93c5fd;
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.08);
+}
+
+.analysisFolderSelect {
+  background: transparent;
+  border: 0;
+  color: #17213d;
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 5px;
+  padding: 0;
+  text-align: left;
+}
+
+.analysisFolderSelect strong {
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.analysisFolderSelect span,
+.analysisFolderSelect small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.analysisFolderActions {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.analysisFolderActions button {
+  background: #ffffff;
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  color: #3730a3;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 900;
+  min-height: 34px;
+  padding: 6px 8px;
+}
+
+.analysisFolderActions button.danger {
+  border-color: #fecdd3;
+  color: #dc2626;
+}
+
+.analysisFolderEmpty {
+  align-items: start;
+  background: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  color: #64748b;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.analysisFolderEmpty span {
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .analysisListItem {
@@ -2670,6 +2770,23 @@ button {
 
 .analysisOverviewPanel .sectionHeader select {
   max-width: 230px;
+}
+
+.analysisFolderModal {
+  max-width: 760px;
+  width: min(760px, calc(100vw - 28px));
+}
+
+.analysisFolderForm {
+  display: grid;
+  gap: 18px;
+}
+
+.analysisFolderModalActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
 }
 
 .analysisStatusBadge {
