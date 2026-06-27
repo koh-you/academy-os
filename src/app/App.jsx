@@ -8297,17 +8297,19 @@ function AttendanceModal({ item, onClose, onSave }) {
   const hasKioskRecord = hasTabletAttendanceRecord(record);
   const hasChanged = hasAttendanceModalChanges(record, values);
 
-  function requestSave(options = {}) {
+  function requestSave() {
+    const nextSave = { values, options: {} };
     if (hasKioskRecord && hasChanged) {
-      setPendingSave({ values, options });
+      setPendingSave(nextSave);
       setConfirmStep("change");
       return;
     }
-    onSave(lesson, student, values, options);
+    setPendingSave(nextSave);
+    setConfirmStep("saveMode");
   }
 
   function confirmManualChange() {
-    setConfirmStep("resend");
+    setConfirmStep("saveMode");
   }
 
   function finishConfirmedSave(sendAlimtalk) {
@@ -8376,16 +8378,16 @@ function AttendanceModal({ item, onClose, onSave }) {
           </div>
         </div>
       ) : null}
-      {confirmStep === "resend" ? (
+      {confirmStep === "saveMode" ? (
         <div className="attendanceConfirmPanel">
-          <strong>출결 알림톡을 재발송하시겠습니까?</strong>
-          <p>수정된 출결 내용으로 학부모에게 다시 보낼지 선택해 주세요.</p>
+          <strong>출결을 어떻게 저장할까요?</strong>
+          <p>출결 기록만 저장하거나, 저장 후 학부모에게 출결 알림톡까지 발송할 수 있습니다.</p>
           <div className="attendanceConfirmActions">
             <button className="softButton" onClick={() => finishConfirmedSave(false)} type="button">
               저장만
             </button>
             <button className="primaryButton" onClick={() => finishConfirmedSave(true)} type="button">
-              저장 후 재발송
+              저장 후 출결 알림톡 발송
             </button>
           </div>
         </div>
@@ -8394,9 +8396,6 @@ function AttendanceModal({ item, onClose, onSave }) {
         <div className="attendanceModalActions">
           <button className="primaryButton full" onClick={() => requestSave()} type="button">
             출결 저장
-          </button>
-          <button className="softButton full" onClick={() => requestSave({ sendAlimtalk: true })} type="button">
-            저장 후 출결 알림톡 발송
           </button>
         </div>
       ) : null}

@@ -29,6 +29,14 @@
 - SQL 주의: 프론트 출결 전용 화면 재동기화 보강만 있으므로 Supabase SQL edit 필요 없음.
 - 검증: `npm run test:production` 통과(total 208, failed 0). `npm run build` 통과(Vite chunk size warning만 있음). `node --check src/app/App.jsx`는 Node가 `.jsx` 확장자를 직접 검사하지 못해 `ERR_UNKNOWN_FILE_EXTENSION`로 실행 불가.
 
+### 2026-06-27 P0. 수동 출결 저장 버튼 단일화
+
+- 상태: 완료
+- 사용자 제보: 수동 출결 모달에 `출결 저장`과 `저장 후 출결 알림톡 발송` 버튼이 나뉘어 있는데, `출결 저장` 버튼이 잘 작동하지 않는 것처럼 보이고 버튼은 하나만 두되 눌렀을 때 저장/알림톡 발송 분기를 묻는 방식이 좋겠다.
+- 이번 작업 결과: 수동 출결 모달 하단 버튼을 `출결 저장` 하나로 줄였다. 버튼을 누르면 `저장만` 또는 `저장 후 출결 알림톡 발송`을 고르는 확인 패널이 뜬다. 태블릿 출결 기록을 수동 변경하는 경우에는 기존처럼 먼저 변경 확인을 거친 뒤 같은 저장 방식 선택 패널로 이어진다.
+- SQL 주의: 프론트 수동 출결 모달 UI/분기 변경만 있으므로 Supabase SQL edit 필요 없음.
+- 검증: `npm run test:production` 통과(total 208, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
+
 ### 2026-06-26 P0. 수동 하원 알림톡 발송 지원
 
 - 상태: 완료
