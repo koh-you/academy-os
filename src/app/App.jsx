@@ -1044,6 +1044,8 @@ function createDefaultExamAnalysisPrompt() {
     "- 22 개정교육과정 때문에 달라질 수 있는 부분은 '변화 가능성' 또는 '추가 확인 필요'로 구분한다.",
     "",
     "[문항별 분석 기준]",
+    "시험지 첫 페이지 또는 상단의 문항 구성표를 먼저 읽고 questionComposition에 총 문항 수와 선택형/서술형 구성을 정리한다.",
+    "questionComposition은 문항 카드 생성 전 강사가 확인하는 초안이다. questionItems 배열 길이와 별개로 총 문항 수의 근거를 분리해서 쓴다.",
     "각 문항에 대해 가능한 범위에서 다음 항목을 정리한다.",
     "- 문항 번호",
     "- 페이지",
@@ -1059,6 +1061,7 @@ function createDefaultExamAnalysisPrompt() {
     "- 강사가 확인해야 할 점",
     "- 대비 전략 후보",
     "AI 1차 분석 단계에서 배점, 단원, 난이도는 웹앱 문항분석표의 questionItems 배열에 반드시 초안으로 채운다.",
+    "AI가 읽은 전체 문항 수는 questionComposition.total에 넣고, 근거 문구는 questionComposition.evidence에 적는다.",
     "단원명/배점/난이도를 원본에서 확정할 수 없으면 빈칸으로 두지 말고 '확인 필요'로 표시한다.",
     "여러 해 시험지가 함께 들어오면 questionItems는 웹앱에서 현재 선택한 시험지/연도 1회분의 전체 문항 수만큼 작성하고, 3개년 반복/증감/변화는 텍스트 분석 필드에 정리한다.",
     "일부 페이지만 보이거나 OCR 일부만 있더라도 확인 가능한 전체 문항 수를 기준으로 questionItems를 만들고, 모르는 값은 '확인 필요'로 둔다.",
@@ -1126,6 +1129,8 @@ function createDefaultExamAnalysis(examPrepRow = {}) {
     sourceUploadStatus: "",
     rawExamText: "",
     questionItems: [],
+    questionTargetCount: 0,
+    questionComposition: null,
     aiProvider: "auto",
     aiModel: "server-default",
     aiStatus: "대기",
@@ -1270,6 +1275,81 @@ function normalizeAiQuestionDrafts(items = []) {
     })
     .filter(Boolean)
     .sort((a, b) => Number(a.page || 1) - Number(b.page || 1) || Number(a.number || 0) - Number(b.number || 0));
+}
+
+function normalizeExamQuestionComposition(value = null) {
+  if (!value) return null;
+  const source = typeof value === "number" || typeof value === "string" ? { total: value } : value;
+  if (!source || typeof source !== "object" || Array.isArray(source)) return null;
+  const rawSections = Array.isArray(source.sections)
+    ? source.sections
+    : [
+        Number(source.choiceCount ?? source.objectiveCount ?? source.multipleChoiceCount) > 0
+          ? {
+              label: "선택형",
+              start: source.choiceStart || 1,
+              end: source.choiceEnd || source.choiceCount || source.objectiveCount || source.multipleChoiceCount,
+              count: source.choiceCount || source.objectiveCount || source.multipleChoiceCount,
+              score: source.choiceScore || source.objectiveScore || source.multipleChoiceScore || ""
+            }
+          : null,
+        Number(source.writtenCount ?? source.subjectiveCount ?? source.descriptiveCount) > 0
+          ? {
+              label: "서술형",
+              start: source.writtenStart || 1,
+              end: source.writtenEnd || source.writtenCount || source.subjectiveCount || source.descriptiveCount,
+              count: source.writtenCount || source.subjectiveCount || source.descriptiveCount,
+              score: source.writtenScore || source.subjectiveScore || source.descriptiveScore || ""
+            }
+          : null
+      ].filter(Boolean);
+  const sections = rawSections
+    .map((section) => {
+      if (!section || typeof section !== "object") return null;
+      const count = Math.max(0, Math.min(80, Number(section.count) || 0));
+      const start = Math.max(0, Math.min(80, Number(section.start) || 0));
+      const end = Math.max(0, Math.min(80, Number(section.end) || 0));
+      const inferredCount = count || (start > 0 && end >= start ? end - start + 1 : 0);
+      if (!inferredCount) return null;
+      return {
+        label: String(section.label || section.type || "문항").trim(),
+        start: start || "",
+        end: end || "",
+        count: inferredCount,
+        score: String(section.score || section.points || "").trim()
+      };
+    })
+    .filter(Boolean);
+  const total = Math.max(0, Math.min(80, Number(
+    source.total ??
+    source.totalQuestions ??
+    source.questionCount ??
+    source.count ??
+    source.targetCount
+  ) || sections.reduce((sum, section) => sum + section.count, 0)));
+  if (!total) return null;
+  return {
+    total,
+    sections,
+    totalScore: String(source.totalScore || source.scoreTotal || "").trim(),
+    evidence: String(source.evidence || source.reason || source.note || "").trim(),
+    confidence: String(source.confidence || "").trim(),
+    confirmedAt: source.confirmedAt || "",
+    confirmedBy: source.confirmedBy || ""
+  };
+}
+
+function formatExamQuestionComposition(composition = null) {
+  const normalized = normalizeExamQuestionComposition(composition);
+  if (!normalized) return "";
+  const sectionText = normalized.sections.length
+    ? normalized.sections.map((section) => {
+        const range = section.start && section.end ? ` ${section.start}~${section.end}번` : "";
+        const score = section.score ? ` ${section.score}` : "";
+        return `${section.label}${range} ${section.count}문항${score}`;
+      }).join(" + ")
+    : `총 ${normalized.total}문항`;
+  return `${sectionText} = 총 ${normalized.total}문항`;
 }
 
 function getExamQuestionMaxNumber(items = []) {
@@ -1581,6 +1661,7 @@ function normalizeExamAnalysisAiFields(fields = {}) {
   for (const key of examAnalysisFieldKeys) {
     next[key] = cleanAnalysisFieldText(key, next[key]);
   }
+  next.questionComposition = normalizeExamQuestionComposition(next.questionComposition);
   return next;
 }
 
@@ -11880,7 +11961,7 @@ function ExamAnalysisCenter({
   const [selectedQuestionId, setSelectedQuestionId] = useState("");
   const [expandedQuestionInsightId, setExpandedQuestionInsightId] = useState("");
   const [activeQuestionSourceId, setActiveQuestionSourceId] = useState("");
-  const [questionCountDraft, setQuestionCountDraft] = useState("22");
+  const [questionCountDraft, setQuestionCountDraft] = useState("");
   const [cropDragStart, setCropDragStart] = useState(null);
   const [cropDraft, setCropDraft] = useState(null);
   const [cropDraftStatus, setCropDraftStatus] = useState("");
@@ -11955,6 +12036,7 @@ function ExamAnalysisCenter({
     (pipelineStages.includes(selectedAnalysis?.pipelineStage) ? selectedAnalysis.pipelineStage : pipelineStages[0]);
   const statusMeta = selectedAnalysis ? getExamAnalysisStatusMeta(selectedAnalysis) : getExamAnalysisStatusMeta();
   const detailSection = examAnalysisDetailSections.find((section) => section.id === detailSectionId);
+  const questionComposition = normalizeExamQuestionComposition(selectedAnalysis?.questionComposition);
   const questionItems = normalizeExamQuestionItems(selectedAnalysis?.questionItems);
   const renderSourceFiles = (selectedAnalysis?.sourceFiles ?? []).filter((file) => isImageExamAnalysisSource(file) || isPdfExamAnalysisSource(file));
   const renderSourceFileOptions = renderSourceFiles.map((file, index) => ({
@@ -11988,7 +12070,7 @@ function ExamAnalysisCenter({
   const cropViewerPageNumber = Math.max(1, Math.min(pdfPageCount || 999, Number(cropViewerPage) || selectedQuestionPage || 1));
   const selectedQuestionCropIsVisible = !selectedQuestionSourceIsPdf || selectedQuestionPage === cropViewerPageNumber || Boolean(cropDraft);
   const selectedQuestionCropBox = normalizeCropBox(cropDraft || (selectedQuestionCropIsVisible ? selectedQuestion?.cropBox : null));
-  const activeQuestionTargetCount = activeQuestionItems.length || manualQuestionCount || 0;
+  const activeQuestionTargetCount = Number(selectedAnalysis?.questionTargetCount) || activeQuestionItems.length || manualQuestionCount || questionComposition?.total || 0;
   const selectedQuestionInsightRecommended = isExamQuestionInsightRecommended(selectedQuestion);
   const selectedQuestionHasDetailedInsight = hasExamQuestionDetailedInsight(selectedQuestion);
   const selectedQuestionInsightExpanded = Boolean(selectedQuestion && expandedQuestionInsightId === selectedQuestion.questionId);
@@ -12089,6 +12171,11 @@ function ExamAnalysisCenter({
       setActiveQuestionSourceId(defaultQuestionSourceId);
     }
   }, [activeQuestionSourceId, defaultQuestionSourceId, renderSourceIdsKey]);
+
+  useEffect(() => {
+    const nextCount = Number(selectedAnalysis?.questionTargetCount) || questionComposition?.total || activeQuestionItems.length || "";
+    setQuestionCountDraft(nextCount ? String(nextCount) : "");
+  }, [selectedAnalysis?.examAnalysisId, resolvedQuestionSourceId, selectedAnalysis?.questionTargetCount, questionComposition?.total, activeQuestionItems.length]);
 
   useEffect(() => {
     if (!activeQuestionItems.length) {
@@ -12209,15 +12296,8 @@ function ExamAnalysisCenter({
 
   function createBlankQuestionItemsForSource(sourceId, sourceFile) {
     const sourceUrl = sourceFile ? getExamAnalysisSourceRenderUrl(sourceFile) : "";
-    const requestedCount = Math.max(0, Math.min(80, Number(questionCountDraft) || 0));
-    const templateItems = activeQuestionItems.length
-      ? activeQuestionItems
-      : questionItems.length
-        ? questionItems
-        : createExamQuestionItemsFromCount(questionCountDraft, []);
-    const safeItems = templateItems.length ? templateItems : createExamQuestionItemsFromCount(questionCountDraft, []);
-    const targetCount = requestedCount || getExamQuestionMaxNumber(safeItems) || safeItems.length || 20;
-    return createExamQuestionItemsFromCount(targetCount, safeItems).map((item, index) => createExamQuestionItem({
+    const targetCount = Math.max(1, Math.min(80, Number(questionCountDraft) || Number(selectedAnalysis?.questionTargetCount) || questionComposition?.total || 20));
+    return createExamQuestionItemsFromCount(targetCount, []).map((item, index) => createExamQuestionItem({
       number: item.number || index + 1,
       page: item.page || 1,
       cropSourceId: sourceId,
@@ -12225,13 +12305,24 @@ function ExamAnalysisCenter({
     }, questionItems.length + index));
   }
 
-  function applyQuestionCount() {
-    const nextItems = createExamQuestionItemsFromCount(questionCountDraft, activeQuestionItems).map(withActiveQuestionSource);
+  function applyQuestionCount(countOverride = null) {
+    const targetCount = Math.max(0, Math.min(80, Number(countOverride ?? questionCountDraft) || 0));
+    if (!targetCount) {
+      window.alert("확정할 문항 수를 입력해 주세요.");
+      return;
+    }
+    const nextItems = createExamQuestionItemsFromCount(targetCount, []).map(withActiveQuestionSource);
     updateQuestionItems([
       ...questionItems.filter((item) => !questionBelongsToActiveSource(item)),
       ...nextItems
     ]);
+    update("questionTargetCount", targetCount);
     setSelectedQuestionId(nextItems[0]?.questionId || "");
+  }
+
+  function fillQuestionCountFromAiComposition() {
+    if (!questionComposition?.total) return;
+    setQuestionCountDraft(String(questionComposition.total));
   }
 
   async function runAiForActiveQuestionSource() {
@@ -13135,6 +13226,23 @@ function ExamAnalysisCenter({
                   <h2>문항분석표 검수</h2>
                   <p className="muted">AI 초안은 참고만 하고, 문항별 단원·난이도·변별 이유·강사 코멘트를 직접 확정합니다.</p>
                 </div>
+                {questionComposition ? (
+                  <div className="analysisReviewSummary questionCompositionReview">
+                    <div>
+                      <strong>AI 문항 구성 초안</strong>
+                      <p>{formatExamQuestionComposition(questionComposition)}</p>
+                      {questionComposition.evidence ? <small>근거: {questionComposition.evidence}</small> : null}
+                    </div>
+                    <button className="softButton" onClick={fillQuestionCountFromAiComposition} type="button">AI 제안 입력</button>
+                  </div>
+                ) : (
+                  <div className="analysisReviewSummary questionCompositionReview">
+                    <div>
+                      <strong>AI 문항 구성 초안 없음</strong>
+                      <p>AI 분석 시작 후 첫 페이지 문항 구성표를 기준으로 문항 수 초안을 확인합니다.</p>
+                    </div>
+                  </div>
+                )}
                 <div className="analysisQuestionSetupActions">
                   <label>
                     문항 수
@@ -13146,7 +13254,7 @@ function ExamAnalysisCenter({
                       onChange={(event) => setQuestionCountDraft(event.target.value)}
                     />
                   </label>
-                  <button className="primaryButton" onClick={applyQuestionCount} type="button">문항 카드 만들기</button>
+                  <button className="primaryButton" onClick={() => applyQuestionCount()} type="button">문항 수 확정</button>
                   <button
                     className="softButton"
                     disabled={selectedAnalysis.aiStatus === "분석 중"}

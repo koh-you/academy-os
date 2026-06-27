@@ -3515,6 +3515,26 @@ button {
   margin: 4px 0;
 }
 
+.questionCompositionReview {
+  align-items: center;
+  background: #f7f9ff;
+  border: 1px solid #c8d7ff;
+  border-radius: 8px;
+  display: flex;
+  gap: 12px;
+  grid-column: 1 / -1;
+  justify-content: space-between;
+  padding: 12px;
+}
+
+.questionCompositionReview p {
+  margin: 4px 0;
+}
+
+.questionCompositionReview small {
+  color: #52617c;
+}
+
 .analysisQuestionSetupActions {
   align-items: end;
   display: flex;

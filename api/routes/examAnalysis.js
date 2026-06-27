@@ -82,6 +82,8 @@ function defaultExamAnalysisPromptForServer() {
     "22 개정교육과정 때문에 달라질 수 있는 부분은 변화 가능성 또는 추가 확인 필요로 구분한다.",
     "",
     "[문항별 분석 기준]",
+    "시험지 첫 페이지 또는 상단의 문항 구성표를 먼저 읽고 questionComposition에 총 문항 수와 선택형/서술형 구성을 정리한다.",
+    "questionComposition은 문항 카드 생성 전 강사가 확인하는 초안이다. questionItems 배열 길이와 별개로 총 문항 수의 근거를 분리해서 쓴다.",
     "각 문항은 문항 번호, 페이지, 배점, 단원, 유형, 난이도, 역할, 태그, 출처 가능성, OCR/문항 조건 요약, 학생이 틀릴 만한 지점, 강사가 확인해야 할 점, 대비 전략 후보를 가능한 범위에서 정리한다.",
     "AI 1차 분석 단계에서 문항별 배점, 단원, 난이도 초안을 반드시 questionItems 배열에 넣는다. 모르면 빈칸 대신 '확인 필요'를 쓴다.",
     "여러 해 시험지가 함께 들어온 경우 questionItems는 웹앱에서 현재 선택한 시험지/연도 1회분의 전체 문항 수만큼 작성하고, 3개년 반복/증감/변화는 unitDistribution, typeClassification, killerProblems, sourceCheckNotes에 정리한다.",
@@ -137,6 +139,9 @@ function buildExamAnalysisPrompt(payload) {
     "- 시험지를 설명하지 말고 학부모·학생·강사가 다음 행동을 결정할 수 있게 분석한다.",
     "- 각 항목은 가능하면 사실 근거 → 점수에 미친 영향 → 다음 학습 행동 순서로 쓴다.",
     "- 반드시 시험 원본/OCR에 있는 사실을 우선한다.",
+    "- 시험지 첫 페이지의 문항 수 및 배점 표가 보이면 questionComposition에 먼저 정리한다.",
+    "- questionComposition.total은 선택형/서술형/단답형 등 모든 문항 수를 합산한 전체 문항 수다.",
+    "- questionComposition.evidence에는 AI가 읽은 근거 문구를 짧게 적는다.",
     "- 문항번호, 배점, 단원명, 유형, 핵심 함정, 예상 오답을 가능한 한 구분해서 쓴다.",
     "- 배점은 절대 점수로만 판단하지 말고 해당 시험 안에서 어느 문항군이 중요했는지 설명한다. 별도 상대배점 차트는 만들지 않는다.",
     "- 여러 해 시험지가 있으면 문항수 변화 때문에 같은 배점의 의미가 달라질 수 있음을 반영해 중요도 변화를 문장으로 설명한다.",
@@ -164,6 +169,16 @@ function buildExamAnalysisPrompt(payload) {
     "반드시 아래 JSON 형식만 반환하세요.",
     "{",
     '  "oneLineSummary": "이번 시험의 핵심 성격 한 문장",',
+    '  "questionComposition": {',
+    '    "total": 22,',
+    '    "sections": [',
+    '      { "label": "선택형", "start": 1, "end": 18, "count": 18, "score": "80점" },',
+    '      { "label": "서술형", "start": 1, "end": 4, "count": 4, "score": "20점" }',
+    '    ],',
+    '    "totalScore": "100점",',
+    '    "evidence": "시험지 상단 문항 수 및 배점 표 기준",',
+    '    "confidence": "상"',
+    '  },',
     '  "examStructure": "문항수, 객관식/서술형, 배점, 시간 압박, 변화 포인트",',
     '  "aiOverview": "시험 개요",',
     '  "unitDistribution": "단원별 출제 분포",',
@@ -354,6 +369,66 @@ function buildQuestionCropPrompt(payload = {}) {
   ].join("\n");
 }
 
+function normalizeQuestionCompositionFromAi(value = null) {
+  if (!value) return null;
+  const source = typeof value === "number" || typeof value === "string" ? { total: value } : value;
+  if (!source || typeof source !== "object" || Array.isArray(source)) return null;
+  const rawSections = Array.isArray(source.sections)
+    ? source.sections
+    : [
+        Number(source.choiceCount ?? source.objectiveCount ?? source.multipleChoiceCount) > 0
+          ? {
+              label: "선택형",
+              start: source.choiceStart || 1,
+              end: source.choiceEnd || source.choiceCount || source.objectiveCount || source.multipleChoiceCount,
+              count: source.choiceCount || source.objectiveCount || source.multipleChoiceCount,
+              score: source.choiceScore || source.objectiveScore || source.multipleChoiceScore || ""
+            }
+          : null,
+        Number(source.writtenCount ?? source.subjectiveCount ?? source.descriptiveCount) > 0
+          ? {
+              label: "서술형",
+              start: source.writtenStart || 1,
+              end: source.writtenEnd || source.writtenCount || source.subjectiveCount || source.descriptiveCount,
+              count: source.writtenCount || source.subjectiveCount || source.descriptiveCount,
+              score: source.writtenScore || source.subjectiveScore || source.descriptiveScore || ""
+            }
+          : null
+      ].filter(Boolean);
+  const sections = rawSections
+    .map((section) => {
+      if (!section || typeof section !== "object") return null;
+      const count = Math.max(0, Math.min(80, Number(section.count) || 0));
+      const start = Math.max(0, Math.min(80, Number(section.start) || 0));
+      const end = Math.max(0, Math.min(80, Number(section.end) || 0));
+      const inferredCount = count || (start > 0 && end >= start ? end - start + 1 : 0);
+      if (!inferredCount) return null;
+      return {
+        label: String(section.label || section.type || "문항").trim(),
+        start: start || "",
+        end: end || "",
+        count: inferredCount,
+        score: String(section.score || section.points || "").trim()
+      };
+    })
+    .filter(Boolean);
+  const total = Math.max(0, Math.min(80, Number(
+    source.total ??
+    source.totalQuestions ??
+    source.questionCount ??
+    source.count ??
+    source.targetCount
+  ) || sections.reduce((sum, section) => sum + section.count, 0)));
+  if (!total) return null;
+  return {
+    total,
+    sections,
+    totalScore: String(source.totalScore || source.scoreTotal || "").trim(),
+    evidence: String(source.evidence || source.reason || source.note || "").trim(),
+    confidence: String(source.confidence || "").trim()
+  };
+}
+
 function createMockAnalysis(payload) {
   const school = payload.schoolName || "학교";
   const subject = payload.subject || "수학";
@@ -362,6 +437,13 @@ function createMockAnalysis(payload) {
     : Array.from({ length: 5 }, (_, index) => ({ number: index + 1, page: 1 }));
   return {
     oneLineSummary: `${school} ${subject} 시험은 조건 해석과 풀이 근거 정리가 점수 차이를 만들 가능성이 큽니다.`,
+    questionComposition: {
+      total: sourceItems.length,
+      sections: [{ label: "전체", start: 1, end: sourceItems.length, count: sourceItems.length, score: "" }],
+      totalScore: "",
+      evidence: "mock 분석: 현재 문항 카드 수 기준",
+      confidence: "확인 필요"
+    },
     examStructure: "문항수/객관식/서술형/배점은 원본 확인 필요입니다. 시험지가 들어오면 시간 압박, 고배점 문항, 작년 대비 변화 가능성을 분리해 정리합니다.",
     aiOverview: `${school} ${subject} 시험은 기본 개념 확인과 조건 해석을 함께 요구하는 구조로 정리됩니다. 원본 시험지를 넣으면 문항 번호, 배점, 난이도 흐름까지 구체화합니다.`,
     unitDistribution: "1. 핵심 단원: 조건 해석형 문항\n2. 보조 단원: 계산형 문항\n3. 서술형 대비 과정 감점 가능성 확인 필요",
@@ -454,6 +536,7 @@ function normalizeAnalysisFields(fields, payload, rawText = "") {
   const parsed = fields && typeof fields === "object" ? fields : {};
   const cleanText = String(rawText ?? "").trim();
   const questionItems = normalizeQuestionItemsFromAi(parsed.questionItems);
+  const questionComposition = normalizeQuestionCompositionFromAi(parsed.questionComposition);
 
   const normalized = {
     oneLineSummary: parsed.oneLineSummary || fallback.oneLineSummary,
@@ -470,6 +553,7 @@ function normalizeAnalysisFields(fields, payload, rawText = "") {
     blogDraft: parsed.blogDraft || fallback.blogDraft,
     instagramDraft: parsed.instagramDraft || fallback.instagramDraft
   };
+  normalized.questionComposition = questionComposition || normalizeQuestionCompositionFromAi(fallback.questionComposition);
   if (questionItems.length) normalized.questionItems = questionItems;
   return normalized;
 }

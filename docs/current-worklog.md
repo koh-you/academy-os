@@ -10,6 +10,17 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-27 P1. 시험분석 문항 구성 AI 초안·사람 확인 흐름 재정리
+
+- 상태: 완료
+- 사용자 요청: 문항 수 확정은 AI가 첫 페이지 문항 구성표를 읽고 사람이 확인하면 되는 단순한 작업이다. 기존 테스트 크롭 보존은 필요 없으니 처음부터 제대로 된 흐름으로 다시 만든다.
+- 이번 작업 결과: AI 시험분석 응답에 `questionComposition` 구조를 추가했다. AI는 시험지 첫 페이지/상단 문항 구성표를 읽어 총 문항 수, 선택형/서술형 구간, 배점, 총점, 근거 문구를 별도 초안으로 반환한다.
+- UI 변경: 문항 검수 단계에 `AI 문항 구성 초안` 박스를 추가했다. `AI 제안 입력`으로 문항 수 입력칸에 반영하고, 선생님이 수정한 뒤 `문항 수 확정`을 누르면 현재 원본 기준 문항 카드가 새로 생성된다.
+- 로직 정리: `questionItems` 배열 길이를 문항 수 확정값처럼 쓰지 않고, `questionComposition.total`은 AI 추천/검수값, `questionTargetCount`는 사람이 확정한 값으로 분리했다.
+- 표/다이어그램 위치: 문항 수 확정 → 문항별 배점/단원/난이도/태그 검수 → 크롭/코멘트 작업 이후, 확정된 `questionItems`를 재료로 문항분석표·단원별 출제표·대비전략 흐름도를 렌더링하는 후속 단계로 둔다.
+- 저장 주의: 기존 `examAnalyses` app_state 구조 안에 `questionComposition` 필드만 추가하므로 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check api/routes/examAnalysis.js`, `node --check scripts/scenario-tests-production.cjs` 통과. `npm run build` 통과(Vite chunk size warning만 있음). `npm run test:production` 통과(total 219, failed 0).
+
 ### 2026-06-27 P1. 시험분석 문항 수 자동 추론 제거·수동 확정 우선
 
 - 상태: 완료
