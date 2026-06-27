@@ -3744,7 +3744,7 @@ export function App() {
     autoSaveTimersRef.current.set(recordId, timerId);
   }
 
-  function saveAttendanceRecord(lesson, student, values, updatedBy = "instructor_owner_001") {
+  async function saveAttendanceRecord(lesson, student, values, updatedBy = "instructor_owner_001") {
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
     const existingRecord = findLessonStudentRecord(recordsRef.current, lesson, student);
     const nowIso = new Date().toISOString();
@@ -3762,8 +3762,8 @@ export function App() {
     const nextRecords = upsertLessonStudentRecord(recordsRef.current, nextRecord);
     recordsRef.current = nextRecords;
     setRecords(nextRecords);
-    handleSaveRecord(recordId, lesson, student, nextRecord);
-    return nextRecord;
+    const saved = await handleSaveRecord(recordId, lesson, student, nextRecord);
+    return { record: nextRecord, saved };
   }
 
   function handleChangeRecord(lesson, student, field, value) {
@@ -4854,11 +4854,12 @@ export function App() {
         <AttendanceModal
           item={attendanceModal}
           onClose={() => setAttendanceModal(null)}
-          onSave={(lesson, student, values, options = {}) => {
-            const savedRecord = saveAttendanceRecord(lesson, student, values, "instructor_owner_001");
+          onSave={async (lesson, student, values, options = {}) => {
+            const { record: savedRecord, saved } = await saveAttendanceRecord(lesson, student, values, "instructor_owner_001");
+            if (!saved) return false;
             if (options.sendAlimtalk) {
               const isCheckout = values.attendanceStatus === "checkout";
-              handleSendAttendanceAlimtalk(lesson, student, {
+              await handleSendAttendanceAlimtalk(lesson, student, {
                 ...values,
                 attendanceStatus: isCheckout ? "checkout" : values.attendanceStatus,
                 checkedAt: isCheckout ? savedRecord.checkOutAt || savedRecord.updatedAt : savedRecord.checkInAt || savedRecord.updatedAt,
@@ -4867,6 +4868,7 @@ export function App() {
               });
             }
             setAttendanceModal(null);
+            return true;
           }}
         />
       ) : null}
@@ -8293,11 +8295,14 @@ function AttendanceModal({ item, onClose, onSave }) {
   const [attendanceReason, setAttendanceReason] = useState(record.attendanceReason ?? "");
   const [pendingSave, setPendingSave] = useState(null);
   const [confirmStep, setConfirmStep] = useState("");
+  const [saveError, setSaveError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const values = { attendanceStatus, lateMinutes, checkInTime, checkOutTime, attendanceReason };
   const hasKioskRecord = hasTabletAttendanceRecord(record);
   const hasChanged = hasAttendanceModalChanges(record, values);
 
   function requestSave() {
+    setSaveError("");
     const nextSave = { values, options: {} };
     if (hasKioskRecord && hasChanged) {
       setPendingSave(nextSave);
@@ -8312,9 +8317,21 @@ function AttendanceModal({ item, onClose, onSave }) {
     setConfirmStep("saveMode");
   }
 
-  function finishConfirmedSave(sendAlimtalk) {
+  async function finishConfirmedSave(sendAlimtalk) {
+    if (isSaving) return;
     const nextSave = pendingSave ?? { values, options: {} };
-    onSave(lesson, student, nextSave.values, { ...nextSave.options, sendAlimtalk });
+    setIsSaving(true);
+    setSaveError("");
+    try {
+      const saved = await onSave(lesson, student, nextSave.values, { ...nextSave.options, sendAlimtalk });
+      if (!saved) {
+        setSaveError("출결 저장에 실패했습니다. 잠시 후 다시 눌러 주세요.");
+      }
+    } catch (error) {
+      setSaveError(`출결 저장에 실패했습니다. ${error.message}`);
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -8382,12 +8399,13 @@ function AttendanceModal({ item, onClose, onSave }) {
         <div className="attendanceConfirmPanel">
           <strong>출결을 어떻게 저장할까요?</strong>
           <p>출결 기록만 저장하거나, 저장 후 학부모에게 출결 알림톡까지 발송할 수 있습니다.</p>
+          {saveError ? <p className="apiErrorBox">{saveError}</p> : null}
           <div className="attendanceConfirmActions">
-            <button className="softButton" onClick={() => finishConfirmedSave(false)} type="button">
-              저장만
+            <button className="softButton" disabled={isSaving} onClick={() => finishConfirmedSave(false)} type="button">
+              {isSaving ? "저장 중..." : "저장만"}
             </button>
-            <button className="primaryButton" onClick={() => finishConfirmedSave(true)} type="button">
-              저장 후 출결 알림톡 발송
+            <button className="primaryButton" disabled={isSaving} onClick={() => finishConfirmedSave(true)} type="button">
+              {isSaving ? "저장 중..." : "저장 후 출결 알림톡 발송"}
             </button>
           </div>
         </div>

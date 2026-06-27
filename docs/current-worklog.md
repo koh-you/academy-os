@@ -37,6 +37,15 @@
 - SQL 주의: 프론트 수동 출결 모달 UI/분기 변경만 있으므로 Supabase SQL edit 필요 없음.
 - 검증: `npm run test:production` 통과(total 208, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
 
+### 2026-06-27 P0. 수동 출결 저장만 버튼 저장 결과 대기
+
+- 상태: 완료
+- 사용자 제보: 수동 출결 모달의 저장 방식 선택 패널에서 `저장만` 버튼이 작동하지 않는다.
+- 원인: 수동 출결 저장은 화면 state를 먼저 바꾸고 `/api/lesson-records` 저장 요청을 시작했지만, 실제 Supabase 저장 결과를 기다리지 않고 모달을 닫는 구조였다. 저장 실패/지연이 생기면 사용자 입장에서는 버튼이 반응하지 않거나 저장 여부가 불명확하게 보일 수 있었다.
+- 이번 작업 결과: 수동 출결 저장은 `handleSaveRecord` 결과를 기다린 뒤 성공할 때만 모달을 닫는다. `저장만`과 `저장 후 출결 알림톡 발송` 버튼은 저장 중 `저장 중...`으로 잠기며, 저장 실패 시 모달 안에 실패 메시지를 표시한다.
+- SQL 주의: 프론트 저장 흐름/피드백 보강만 있으므로 Supabase SQL edit 필요 없음.
+- 검증: `npm run test:production` 통과(total 209, failed 0). `npm run build` 통과(Vite chunk size warning만 있음).
+
 ### 2026-06-26 P0. 수동 하원 알림톡 발송 지원
 
 - 상태: 완료
