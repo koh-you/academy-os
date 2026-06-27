@@ -520,6 +520,42 @@ function normalizeExamEntries(row = {}) {
   return Array.isArray(row.mathExamDates) ? row.mathExamDates : [];
 }
 
+function getPrimaryMathExamDate(entries = []) {
+  return entries.find((entry) => entry?.date)?.date || "";
+}
+
+function hasDatedMathExamEntries(row = {}) {
+  return normalizeExamEntries(row).some((entry) => String(entry?.date ?? "").trim());
+}
+
+function mergeExamPrepScheduleFields(row = {}, existingRow = null) {
+  if (!existingRow) return row;
+  const nextRow = { ...row };
+  const existingEntries = normalizeExamEntries(existingRow);
+  if (!String(nextRow.examPeriod ?? "").trim() && existingRow.examPeriod) {
+    nextRow.examPeriod = existingRow.examPeriod;
+  }
+  if (!hasDatedMathExamEntries(nextRow) && hasDatedMathExamEntries(existingRow)) {
+    nextRow.mathExamDates = existingEntries;
+  }
+  if (!String(nextRow.mathExamDate ?? "").trim()) {
+    nextRow.mathExamDate = getPrimaryMathExamDate(normalizeExamEntries(nextRow)) || existingRow.mathExamDate || "";
+  }
+  return nextRow;
+}
+
+async function getExistingExamPrepRowMap(examPrepIds = []) {
+  const idSet = new Set(examPrepIds.filter(Boolean));
+  if (!idSet.size) return new Map();
+  const rows = await listRows("exam_prep_rows", "select=*", { requireServiceRole: true });
+  return new Map(
+    rows
+      .map(fromExamPrepRow)
+      .filter((row) => idSet.has(row.examPrepId))
+      .map((row) => [row.examPrepId, row])
+  );
+}
+
 function getExamPrepLogicalKey(row = {}) {
   return [
     row.examCycle || getDefaultExamCycleForDate(),
@@ -1059,7 +1095,9 @@ export async function upsertExamPrepRow(row) {
     return { source: fallbackSource, examPrepRow: row };
   }
 
-  const [savedRow] = await upsertRows("exam_prep_rows", [toExamPrepRow(row)]);
+  const existingRows = await getExistingExamPrepRowMap([row.examPrepId]);
+  const safeRow = mergeExamPrepScheduleFields(row, existingRows.get(row.examPrepId));
+  const [savedRow] = await upsertRows("exam_prep_rows", [toExamPrepRow(safeRow)]);
   return { source: databaseSource, examPrepRow: fromExamPrepRow(savedRow) };
 }
 
@@ -1071,7 +1109,9 @@ export async function upsertExamPrepRows(rows) {
     return { source: fallbackSource, examPrepRows: rows };
   }
 
-  const savedRows = await upsertRows("exam_prep_rows", rows.map(toExamPrepRow));
+  const existingRows = await getExistingExamPrepRowMap(rows.map((row) => row.examPrepId));
+  const safeRows = rows.map((row) => mergeExamPrepScheduleFields(row, existingRows.get(row.examPrepId)));
+  const savedRows = await upsertRows("exam_prep_rows", safeRows.map(toExamPrepRow));
   return { source: databaseSource, examPrepRows: savedRows.map(fromExamPrepRow) };
 }
 
