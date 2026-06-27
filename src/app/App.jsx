@@ -1613,6 +1613,24 @@ function createFinalDocumentId(prefix = "block") {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 }
 
+function getExamQuestionCropImagePayload(item = {}, analysis = {}) {
+  const cropBox = normalizeCropBox(item.cropBox);
+  if (!cropBox) return null;
+  const sourceFiles = Array.isArray(analysis.sourceFiles) ? analysis.sourceFiles : [];
+  const matchedSource = sourceFiles.find((file, index) =>
+    getExamAnalysisSourceFileId(file, index) === item.cropSourceId ||
+    getExamAnalysisSourceRenderUrl(file) === item.cropSourceUrl
+  );
+  const sourceUrl = item.cropSourceUrl || (matchedSource ? getExamAnalysisSourceRenderUrl(matchedSource) : "");
+  const isImageSource = matchedSource ? isImageExamAnalysisSource(matchedSource) : /\.(png|jpe?g|webp|gif)(\?|#|$)/i.test(sourceUrl);
+  if (!sourceUrl || !isImageSource) return null;
+  return {
+    sourceUrl,
+    cropBox,
+    alt: `${item.number || ""}번 원문항 크롭`.trim() || "원문항 크롭"
+  };
+}
+
 function getExamStrategyFlowNodes(questionItems = []) {
   const items = normalizeExamQuestionItems(questionItems);
   const sourceCount = items.filter((item) =>
@@ -1648,6 +1666,7 @@ function createExamFinalDocumentFromAnalysis(analysis = {}) {
     number: `${item.number}번`,
     title: [item.unit, item.role].filter(Boolean).join(" · ") || "주요 문항",
     originalSlot: item.cropBox ? "원문항 크롭 이미지 삽입" : "원문항 삽입 영역",
+    originalImage: getExamQuestionCropImagePayload(item, analysis),
     similarSlot: item.similarProblemNeeded === "필요" ? "유사문항 삽입 영역" : "필요 시 유사문항 삽입",
     similarProblemNeeded: item.similarProblemNeeded || "확인 필요",
     similarProblemSource: item.similarProblemSource || "",
@@ -1812,6 +1831,13 @@ function normalizeExamFinalDocument(document = null) {
             number: String(item.number || "").trim() || `${index + 1}번`,
             title: String(item.title || "").trim(),
             originalSlot: String(item.originalSlot || "원문항 삽입 영역").trim(),
+            originalImage: item.originalImage && typeof item.originalImage === "object" && String(item.originalImage.sourceUrl || "").trim() && normalizeCropBox(item.originalImage.cropBox)
+              ? {
+                  sourceUrl: String(item.originalImage.sourceUrl || "").trim(),
+                  cropBox: normalizeCropBox(item.originalImage.cropBox),
+                  alt: String(item.originalImage.alt || "원문항 크롭").trim()
+                }
+              : null,
             similarSlot: String(item.similarSlot || "유사문항 삽입 영역").trim(),
             similarProblemNeeded: String(item.similarProblemNeeded || "확인 필요").trim(),
             similarProblemSource: String(item.similarProblemSource || "").trim(),
@@ -2264,6 +2290,28 @@ function AnalysisOutputPreviewCard({ title, tone = "", value = "", onEdit, onOpe
   );
 }
 
+function FinalQuestionCropImage({ image }) {
+  const cropBox = normalizeCropBox(image?.cropBox);
+  if (!image?.sourceUrl || !cropBox) return null;
+  return (
+    <figure
+      className="finalQuestionCropImage"
+      style={{ aspectRatio: `${Math.max(1, cropBox.width)} / ${Math.max(1, cropBox.height)}` }}
+    >
+      <img
+        alt={image.alt || "원문항 크롭"}
+        src={image.sourceUrl}
+        style={{
+          height: `${10000 / cropBox.height}%`,
+          left: `-${(cropBox.x / cropBox.width) * 100}%`,
+          top: `-${(cropBox.y / cropBox.height) * 100}%`,
+          width: `${10000 / cropBox.width}%`
+        }}
+      />
+    </figure>
+  );
+}
+
 function ExamFinalDocumentPrint({ document }) {
   const normalizedDocument = normalizeExamFinalDocument(document);
   if (!normalizedDocument?.blocks?.length) return null;
@@ -2346,7 +2394,10 @@ function ExamFinalDocumentPrint({ document }) {
                       <span>{item.title || "주요 문항"}</span>
                     </div>
                     <div className="finalQuestionSlotBoxes">
-                      <p>{item.originalSlot}</p>
+                      <p>
+                        {item.originalImage ? <FinalQuestionCropImage image={item.originalImage} /> : item.originalSlot}
+                        {item.originalImage ? <span>{item.originalSlot}</span> : null}
+                      </p>
                       <p>{item.similarSlot}</p>
                     </div>
                     <small>{[item.similarProblemNeeded, item.similarProblemSource, item.similarProblemRelation].filter(Boolean).join(" · ")}</small>
@@ -2630,6 +2681,9 @@ function ExamFinalQuestionSlotEditor({ block, updateBlock }) {
       <div className="finalQuestionSlotGrid editable">
         {block.items.map((item) => (
           <article className="finalQuestionSlotCard" key={item.id}>
+            {item.originalImage ? (
+              <FinalQuestionCropImage image={item.originalImage} />
+            ) : null}
             <div className="fieldGrid two">
               <label>문항<input value={item.number} onChange={(event) => updateItem(item.id, { number: event.target.value })} /></label>
               <label>제목<input value={item.title} onChange={(event) => updateItem(item.id, { title: event.target.value })} /></label>
@@ -2659,6 +2713,7 @@ function ExamFinalQuestionSlotEditor({ block, updateBlock }) {
             number: `${block.items.length + 1}번`,
             title: "",
             originalSlot: "원문항 삽입 영역",
+            originalImage: null,
             similarSlot: "유사문항 삽입 영역",
             similarProblemNeeded: "확인 필요",
             similarProblemSource: "",

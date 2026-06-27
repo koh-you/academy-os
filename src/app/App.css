@@ -4270,6 +4270,35 @@ button {
   text-align: center;
 }
 
+.finalQuestionSlotBoxes p:has(.finalQuestionCropImage) {
+  align-items: stretch;
+  color: #475569;
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+}
+
+.finalQuestionSlotBoxes p > span {
+  font-size: 12px;
+}
+
+.finalQuestionCropImage {
+  background: #ffffff;
+  border: 1px solid #e5edf9;
+  border-radius: 8px;
+  margin: 0;
+  min-height: 118px;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.finalQuestionCropImage img {
+  max-width: none;
+  object-fit: fill;
+  position: absolute;
+}
+
 .outputCard .sectionHeader span {
   background: #eef2ff;
   border-radius: 999px;

@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-27 P1. 시험분석 최종 문항 슬롯 이미지 크롭 연결
+
+- 상태: 완료
+- 사용자 요청: 시험분석 최종 편집본 빌더 이후 작업을 이어간다.
+- 이번 작업 결과: 최종 편집본의 `questionSlots` 항목에 이미지 원본 문항 크롭 정보를 `originalImage`로 저장하고, 최종 보고서 미리보기/PDF 출력 영역에서 `questionItems.cropBox` 기반 원문항 크롭 미리보기를 렌더링하도록 연결했다. 편집 화면에서도 이미지 원본 크롭이 있는 슬롯은 미리보기를 확인할 수 있다.
+- 범위 제한: 이번 단계는 이미지 원본(`png/jpg/webp/gif`) 크롭을 우선 지원한다. PDF 원본은 기존처럼 슬롯 텍스트 fallback을 유지하며, PDF 페이지를 이미지로 렌더링해 최종 슬롯에 저장하는 작업은 후속 후보로 남긴다.
+- 저장 주의: 기존 `examAnalyses.finalDocument` app_state 문서 안의 슬롯 항목 확장이므로 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과. `npm run build` 통과(Vite chunk size warning만 있음). `npm run test:production` 통과(total 220, failed 0).
+
 ### 2026-06-27 P1. 다음 세션 단일 handoff 폴더 생성
 
 - 상태: 완료
