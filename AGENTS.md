@@ -21,6 +21,7 @@
 8. 운영 흐름에 영향을 주는 변경이면 `npm run test:production`도 실행한다.
 9. 완료 후 작업 결과와 남은 이슈를 `docs/current-worklog.md`에 반영한다.
 10. 검수 통과 후 GitHub `main`에 커밋/푸시해서 Vercel/Render 자동 배포가 이어지게 한다.
+11. 사용자가 "다음 세션에 넘길 자료", "handoff", "인수인계 자료"를 요청하면 `docs/next-session/README.md`를 현재 최신 커밋, 검증 결과, 이어받을 작업 기준으로 새로 갱신한다. 다음 세션에는 이 폴더 하나만 넘기면 되도록 유지한다.
 
 ## Product Rules
 
