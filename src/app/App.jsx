@@ -2276,6 +2276,7 @@ export function App() {
   const [lessonUndoStack, setLessonUndoStack] = useState([]);
   const lessonCancelRequestsRef = useRef(new Map());
   const attendanceNotificationLocksRef = useRef(new Set());
+  const attendanceLoadedDateRef = useRef(getKoreaDateString());
   const [deletedLessonBundles, setDeletedLessonBundles] = useStoredState(storageKeys.deletedLessonBundles, []);
   const [classTemplates, setClassTemplates] = useStoredState(storageKeys.classTemplates, sampleData.classTemplates);
   const [students, setStudents] = useStoredState(storageKeys.students, sampleData.students);
@@ -2324,6 +2325,7 @@ export function App() {
   const [integrationStatus, setIntegrationStatus] = useState(null);
   const [isAppStateReady, setIsAppStateReady] = useState(false);
   const [isPortalDataReady, setIsPortalDataReady] = useState(false);
+  const [attendanceReloadKey, setAttendanceReloadKey] = useState(0);
   const [saveStates, setSaveStates] = useState({});
   const [reportModal, setReportModal] = useState(null);
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
@@ -2419,6 +2421,7 @@ export function App() {
             setRecords(nextLessons.length > 0 ? filterRecordsForLessons(recordsResult.records, nextLessons) : recordsResult.records);
           }
           setAttendanceSettings((current) => normalizeAttendanceSettings(current));
+          attendanceLoadedDateRef.current = getKoreaDateString();
           setIsPortalDataReady(false);
           setIsAppStateReady(true);
           return;
@@ -2577,7 +2580,7 @@ export function App() {
         }
       } catch (error) {
         console.info("academy-os API sync skipped:", error.message);
-        if (attendanceOnlyMode) setIsAppStateReady(true);
+        if (attendanceOnlyMode) setIsAppStateReady(false);
       }
     }
 
@@ -2611,7 +2614,8 @@ export function App() {
     setTallySummaries,
     setWrongProblems,
     session,
-    attendanceOnlyMode
+    attendanceOnlyMode,
+    attendanceReloadKey
   ]);
 
   useEffect(() => {
@@ -2944,6 +2948,27 @@ export function App() {
     return () => document.body.classList.remove("attendanceOnlyBody");
   }, [attendanceOnlyMode]);
 
+  useEffect(() => {
+    if (!attendanceOnlyMode) return undefined;
+
+    function refreshAttendanceDataIfDateChanged() {
+      const currentDate = getKoreaDateString();
+      if (attendanceLoadedDateRef.current === currentDate && isAppStateReady) return;
+      attendanceLoadedDateRef.current = currentDate;
+      setIsAppStateReady(false);
+      setAttendanceReloadKey((current) => current + 1);
+    }
+
+    const intervalId = window.setInterval(refreshAttendanceDataIfDateChanged, 30_000);
+    window.addEventListener("focus", refreshAttendanceDataIfDateChanged);
+    document.addEventListener("visibilitychange", refreshAttendanceDataIfDateChanged);
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", refreshAttendanceDataIfDateChanged);
+      document.removeEventListener("visibilitychange", refreshAttendanceDataIfDateChanged);
+    };
+  }, [attendanceOnlyMode, isAppStateReady]);
+
   async function handleLogin(role, loginId, password) {
     if (role === "teacher") {
       const account = { ...defaultTeacherAccountSettings, ...teacherAccountSettings };
@@ -2995,6 +3020,12 @@ export function App() {
   }
 
   function handleAttendancePinCheck(phoneLast4) {
+    if (attendanceOnlyMode && attendanceLoadedDateRef.current !== getKoreaDateString()) {
+      setIsAppStateReady(false);
+      setAttendanceReloadKey((current) => current + 1);
+      return { ok: false, message: "날짜가 바뀌어 출결 데이터를 다시 불러오는 중입니다. 잠시 후 다시 입력해 주세요." };
+    }
+
     const digits = String(phoneLast4).replaceAll(/\D/g, "").slice(-4);
     if (digits.length !== 4) {
       return { ok: false, message: "휴대폰 번호 뒤 4자리를 입력해 주세요." };
