@@ -254,6 +254,74 @@ function outputTextFromAnthropic(data) {
   return data.content?.map((block) => block.text ?? "").join("\n") ?? "";
 }
 
+function parseImageDataUrl(dataUrl = "") {
+  const match = String(dataUrl).match(/^data:([^;,]+);base64,(.*)$/);
+  if (!match) throw new Error("이미지 데이터 형식이 올바르지 않습니다.");
+  return {
+    base64: match[2],
+    mediaType: match[1]
+  };
+}
+
+function normalizeVisionCropBox(box = {}) {
+  const x = Math.max(0, Math.min(100, Number(box.x) || 0));
+  const y = Math.max(0, Math.min(100, Number(box.y) || 0));
+  const width = Math.max(0, Math.min(100 - x, Number(box.width) || 0));
+  const height = Math.max(0, Math.min(100 - y, Number(box.height) || 0));
+  if (width < 1 || height < 1) return null;
+  return { x, y, width, height };
+}
+
+function normalizeQuestionCropBoxes(parsed, payload = {}) {
+  const rawBoxes = Array.isArray(parsed)
+    ? parsed
+    : Array.isArray(parsed?.boxes)
+      ? parsed.boxes
+      : [];
+  return rawBoxes
+    .map((box, index) => {
+      const cropBox = normalizeVisionCropBox(box);
+      if (!cropBox) return null;
+      return {
+        ...cropBox,
+        confidence: Math.max(0, Math.min(1, Number(box.confidence) || 0.5)),
+        note: String(box.note || "").slice(0, 160),
+        page: Math.max(1, Number(box.page || payload.pageNumber) || 1),
+        questionNumber: Number(box.questionNumber || box.number || payload.questionNumbers?.[index] || index + 1) || index + 1
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.page - b.page || a.questionNumber - b.questionNumber);
+}
+
+function buildQuestionCropPrompt(payload = {}) {
+  const numbers = Array.isArray(payload.questionNumbers) && payload.questionNumbers.length
+    ? payload.questionNumbers.join(", ")
+    : "이미지에서 보이는 문항 전체";
+  return [
+    "너는 수학 시험지 이미지에서 문항별 크롭 영역을 잡는 vision 보조 AI다.",
+    "목표는 사람이 바로 수정할 수 있는 1차 크롭 초안을 만드는 것이다.",
+    "",
+    "[작업]",
+    `현재 페이지: ${payload.pageNumber || 1}`,
+    `대상 문항 번호: ${numbers}`,
+    "이미지 안에서 각 문항의 문제 번호, 발문, 보기/선택지/조건, 풀이에 필요한 도형이나 표를 포함하는 사각형 영역을 찾는다.",
+    "상단 학교명/시험명/안내문/여백은 문항 영역에서 제외한다. 단, 특정 문항 바로 위의 조건 박스가 해당 문항에 필요하면 포함한다.",
+    "문항이 두 단으로 배치되어 있으면 왼쪽 위에서 아래로, 그다음 오른쪽 위에서 아래 순서가 아니라 실제 문항 번호를 기준으로 번호를 붙인다.",
+    "이미지에 문항이 일부만 보이면 보이는 영역 기준으로 최대한 포함하되 note에 '일부만 보임'이라고 적는다.",
+    "",
+    "[좌표 규칙]",
+    "x, y, width, height는 이미지 전체를 기준으로 한 퍼센트 값이다. 모두 0~100 사이 숫자로 반환한다.",
+    "",
+    "반드시 JSON만 반환한다.",
+    "{",
+    '  "boxes": [',
+    '    { "questionNumber": 1, "page": 1, "x": 6, "y": 18, "width": 42, "height": 24, "confidence": 0.8, "note": "선택지 포함" }',
+    "  ]",
+    "}"
+  ].join("\n");
+}
+
 function createMockAnalysis(payload) {
   const school = payload.schoolName || "학교";
   const subject = payload.subject || "수학";
@@ -338,6 +406,36 @@ async function runOpenAiText(prompt, model) {
   return outputTextFromOpenAi(data);
 }
 
+async function runOpenAiVision(prompt, imageDataUrl, model) {
+  const response = await fetch(OPENAI_RESPONSES_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${requiredEnv("OPENAI_API_KEY")}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      max_output_tokens: 1800,
+      model,
+      input: [
+        {
+          role: "user",
+          content: [
+            { type: "input_text", text: prompt },
+            { type: "input_image", image_url: imageDataUrl }
+          ]
+        }
+      ]
+    })
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error?.message || "OpenAI vision 요청에 실패했습니다.");
+  }
+
+  return outputTextFromOpenAi(data);
+}
+
 async function runAnthropicText(prompt, model) {
   const response = await fetch(ANTHROPIC_MESSAGES_URL, {
     method: "POST",
@@ -356,6 +454,45 @@ async function runAnthropicText(prompt, model) {
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error?.message || "Claude 요청에 실패했습니다.");
+  }
+
+  return outputTextFromAnthropic(data);
+}
+
+async function runAnthropicVision(prompt, imageDataUrl, model) {
+  const image = parseImageDataUrl(imageDataUrl);
+  const response = await fetch(ANTHROPIC_MESSAGES_URL, {
+    method: "POST",
+    headers: {
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+      "x-api-key": requiredEnv("ANTHROPIC_API_KEY")
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 1800,
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: prompt },
+            {
+              type: "image",
+              source: {
+                type: "base64",
+                media_type: image.mediaType,
+                data: image.base64
+              }
+            }
+          ]
+        }
+      ]
+    })
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error?.message || "Claude vision 요청에 실패했습니다.");
   }
 
   return outputTextFromAnthropic(data);
@@ -380,6 +517,35 @@ export async function runExamAnalysis(payload) {
   }
 
   throw new Error(`지원하지 않는 AI 제공자입니다: ${provider}`);
+}
+
+export async function draftQuestionCrops(payload) {
+  const provider = selectedProvider(payload);
+  const model = selectedModel(payload, "examAnalysis");
+  const imageDataUrl = String(payload.imageDataUrl || "");
+  if (!imageDataUrl.startsWith("data:image/")) {
+    throw new Error("문항 크롭 초안에는 페이지 이미지가 필요합니다.");
+  }
+  const prompt = buildQuestionCropPrompt(payload);
+
+  if (provider === "mock") {
+    return { provider, model, boxes: [], rawText: "" };
+  }
+
+  const text = provider === "openai"
+    ? await runOpenAiVision(prompt, imageDataUrl, model)
+    : provider === "anthropic"
+      ? await runAnthropicVision(prompt, imageDataUrl, model)
+      : "";
+
+  if (!text) throw new Error(`지원하지 않는 vision 제공자입니다: ${provider}`);
+  const parsed = safeParseJsonText(text);
+  return {
+    provider,
+    model,
+    boxes: normalizeQuestionCropBoxes(parsed, payload),
+    rawText: text
+  };
 }
 
 export async function polishLessonComment(payload) {

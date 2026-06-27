@@ -773,6 +773,34 @@ function readFileAsDataUrl(file) {
   });
 }
 
+function canvasToVisionImageDataUrl(sourceCanvas, maxDimension = 1600) {
+  if (!sourceCanvas?.width || !sourceCanvas?.height) {
+    throw new Error("렌더링된 페이지 이미지를 찾지 못했습니다.");
+  }
+  const scale = Math.min(1, maxDimension / Math.max(sourceCanvas.width, sourceCanvas.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(sourceCanvas.width * scale));
+  canvas.height = Math.max(1, Math.round(sourceCanvas.height * scale));
+  const context = canvas.getContext("2d");
+  context.drawImage(sourceCanvas, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/jpeg", 0.86);
+}
+
+function imageElementToVisionImageDataUrl(imageElement, maxDimension = 1600) {
+  const width = imageElement?.naturalWidth || imageElement?.width;
+  const height = imageElement?.naturalHeight || imageElement?.height;
+  if (!width || !height) {
+    throw new Error("이미지 원본을 아직 불러오지 못했습니다.");
+  }
+  const scale = Math.min(1, maxDimension / Math.max(width, height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(width * scale));
+  canvas.height = Math.max(1, Math.round(height * scale));
+  const context = canvas.getContext("2d");
+  context.drawImage(imageElement, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/jpeg", 0.86);
+}
+
 async function uploadExamPostSubmissionFile(file, target, student) {
   const dataUrl = await readFileAsDataUrl(file);
   const result = await postJson("/api/exam-post-files", {
@@ -805,6 +833,11 @@ async function uploadExamAnalysisSourceFile(file, analysis) {
     examDate: analysis.examDate
   });
   return result.file;
+}
+
+async function requestExamQuestionCropDraft(payload) {
+  const result = await postJson("/api/ai/exam-question-crops", payload);
+  return result.result;
 }
 
 function getExamPostFileOpenUrl(file) {
@@ -1180,6 +1213,44 @@ function normalizeCropBox(box = null) {
   const width = Math.max(0, Math.min(100 - x, Number(box.width) || 0));
   const height = Math.max(0, Math.min(100 - y, Number(box.height) || 0));
   return width && height ? { x, y, width, height } : null;
+}
+
+function buildHeuristicQuestionCropBoxes(items = [], pageNumber = 1, pageCount = 1) {
+  const normalizedItems = normalizeExamQuestionItems(items);
+  if (!normalizedItems.length) return [];
+  const safePage = Math.max(1, Number(pageNumber) || 1);
+  const safePageCount = Math.max(1, Number(pageCount) || 1);
+  const hasExplicitPages = normalizedItems.some((item) => Number(item.page) > 1);
+  const perPage = Math.max(1, Math.ceil(normalizedItems.length / safePageCount));
+  const pageItems = hasExplicitPages
+    ? normalizedItems.filter((item) => Math.max(1, Number(item.page) || 1) === safePage)
+    : normalizedItems.slice((safePage - 1) * perPage, safePage * perPage);
+  const targetItems = pageItems.length ? pageItems : normalizedItems.slice(0, perPage);
+  const columns = targetItems.length >= 4 ? 2 : 1;
+  const rows = Math.max(1, Math.ceil(targetItems.length / columns));
+  const gapX = 3;
+  const gapY = 3;
+  const marginX = 6;
+  const startY = 13;
+  const usableHeight = 82;
+  const width = (100 - marginX * 2 - gapX * (columns - 1)) / columns;
+  const height = (usableHeight - gapY * (rows - 1)) / rows;
+  return targetItems.map((item, index) => {
+    const column = index % columns;
+    const row = Math.floor(index / columns);
+    return {
+      cropBox: normalizeCropBox({
+        height,
+        width,
+        x: marginX + column * (width + gapX),
+        y: startY + row * (height + gapY)
+      }),
+      note: "자동 배치 초안",
+      page: safePage,
+      questionId: item.questionId,
+      questionNumber: item.number
+    };
+  }).filter((item) => item.cropBox);
 }
 
 function getExamQuestionCommentCount(questionItems = []) {
@@ -11573,6 +11644,7 @@ function ExamAnalysisCenter({
   const [questionCountDraft, setQuestionCountDraft] = useState("22");
   const [cropDragStart, setCropDragStart] = useState(null);
   const [cropDraft, setCropDraft] = useState(null);
+  const [cropDraftStatus, setCropDraftStatus] = useState("");
   const [pdfPageCount, setPdfPageCount] = useState(0);
   const [pdfRenderStatus, setPdfRenderStatus] = useState("");
   const [pdfScale, setPdfScale] = useState(1.25);
@@ -11648,6 +11720,7 @@ function ExamAnalysisCenter({
   const selectedQuestionSourceFile = selectedQuestion?.cropSourceId
     ? renderSourceFiles.find((file, index) => getExamAnalysisSourceFileId(file, index) === selectedQuestion.cropSourceId)
     : renderSourceFiles[0];
+  const selectedQuestionSourceId = selectedQuestionSourceFile ? getExamAnalysisSourceFileId(selectedQuestionSourceFile) : "";
   const selectedQuestionSourceIsPdf = isPdfExamAnalysisSource(selectedQuestionSourceFile);
   const selectedQuestionSourceIsImage = isImageExamAnalysisSource(selectedQuestionSourceFile);
   const selectedQuestionSourceUrl = selectedQuestionSourceFile
@@ -11945,6 +12018,103 @@ function ExamAnalysisCenter({
     updateQuestionItems(questionItems.map((item) =>
       item.questionId === selectedQuestion.questionId ? { ...item, cropBox: null } : item
     ));
+  }
+
+  function getQuestionItemsForCurrentCropPage() {
+    if (!questionItems.length) return [];
+    if (!selectedQuestionSourceIsPdf || pdfPageCount <= 1) return questionItems;
+    const hasExplicitPages = questionItems.some((item) => Number(item.page) > 1);
+    if (hasExplicitPages) {
+      const pageItems = questionItems.filter((item) => Math.max(1, Number(item.page) || 1) === selectedQuestionPage);
+      return pageItems.length ? pageItems : [selectedQuestion].filter(Boolean);
+    }
+    const perPage = Math.max(1, Math.ceil(questionItems.length / Math.max(1, pdfPageCount)));
+    return questionItems.slice((selectedQuestionPage - 1) * perPage, selectedQuestionPage * perPage);
+  }
+
+  function getCurrentCropVisionImageDataUrl() {
+    if (selectedQuestionSourceIsPdf) {
+      return canvasToVisionImageDataUrl(pdfCanvasRef.current);
+    }
+    const imageElement = cropSurfaceRef.current?.querySelector("img");
+    return imageElementToVisionImageDataUrl(imageElement);
+  }
+
+  function applyQuestionCropDraftBoxes(boxes = [], statusText = "") {
+    if (!boxes.length) return false;
+    const byQuestionId = new Map();
+    const byQuestionNumber = new Map();
+    boxes.forEach((box) => {
+      if (box.questionId) byQuestionId.set(box.questionId, box);
+      byQuestionNumber.set(Number(box.questionNumber), box);
+    });
+    const matchedIds = [];
+    const nextItems = questionItems.map((item) => {
+      const draft = byQuestionId.get(item.questionId) || byQuestionNumber.get(Number(item.number));
+      const cropBox = normalizeCropBox(draft?.cropBox || draft);
+      if (!cropBox) return item;
+      matchedIds.push(item.questionId);
+      return {
+        ...item,
+        cropBox,
+        cropSourceId: selectedQuestionSourceId || item.cropSourceId,
+        cropSourceUrl: selectedQuestionSourceUrl || item.cropSourceUrl,
+        page: Math.max(1, Number(draft.page || selectedQuestionPage) || 1)
+      };
+    });
+    updateQuestionItems(nextItems);
+    if (matchedIds[0]) setSelectedQuestionId(matchedIds[0]);
+    if (statusText) setCropDraftStatus(statusText);
+    return matchedIds.length > 0;
+  }
+
+  async function handleDraftQuestionCrops() {
+    if (!selectedQuestionSourceUrl) {
+      setCropDraftStatus("PDF 또는 이미지 원본을 먼저 선택해 주세요.");
+      return;
+    }
+    if (!questionItems.length) {
+      setCropDraftStatus("문항 카드를 먼저 만든 뒤 크롭 초안을 생성할 수 있습니다.");
+      return;
+    }
+    const pageItems = getQuestionItemsForCurrentCropPage();
+    const fallbackBoxes = buildHeuristicQuestionCropBoxes(
+      questionItems,
+      selectedQuestionPage,
+      selectedQuestionSourceIsPdf ? pdfPageCount || 1 : 1
+    );
+    setCropDraftStatus("AI vision으로 문항 영역 초안을 만드는 중입니다...");
+    try {
+      const imageDataUrl = getCurrentCropVisionImageDataUrl();
+      const result = await requestExamQuestionCropDraft({
+        aiModel: aiSettings.examAnalysisModel,
+        aiProvider: aiSettings.examAnalysisProvider,
+        imageDataUrl,
+        pageCount: selectedQuestionSourceIsPdf ? pdfPageCount || 1 : 1,
+        pageNumber: selectedQuestionPage,
+        questionNumbers: pageItems.map((item) => item.number),
+        totalQuestions: questionItems.length
+      });
+      const visionBoxes = Array.isArray(result?.boxes) ? result.boxes : [];
+      if (!visionBoxes.length) throw new Error("AI가 문항 영역을 찾지 못했습니다.");
+      const visionNumbers = new Set(visionBoxes.map((box) => Number(box.questionNumber)));
+      const mergedBoxes = [
+        ...visionBoxes,
+        ...fallbackBoxes.filter((box) => !visionNumbers.has(Number(box.questionNumber)))
+      ];
+      applyQuestionCropDraftBoxes(
+        mergedBoxes,
+        `AI 크롭 초안 적용 완료 · vision ${visionBoxes.length}개${mergedBoxes.length > visionBoxes.length ? ` · 자동 보완 ${mergedBoxes.length - visionBoxes.length}개` : ""}`
+      );
+    } catch (error) {
+      const applied = applyQuestionCropDraftBoxes(
+        fallbackBoxes,
+        `AI vision 실패 · 자동 배치 초안을 적용했습니다. (${error.message})`
+      );
+      if (!applied) {
+        setCropDraftStatus(`AI vision 실패 · 자동 배치할 문항을 찾지 못했습니다. (${error.message})`);
+      }
+    }
   }
 
   function openAnalysisWorkspace(analysisId = selectedAnalysis?.examAnalysisId) {
@@ -12520,7 +12690,7 @@ function ExamAnalysisCenter({
                   <div className="sectionHeader slim">
                     <div>
                       <h2>원문항 화면</h2>
-                      <p className="muted">이미지 원본 위에서 드래그하면 선택 문항의 크롭 영역이 저장됩니다.</p>
+                      <p className="muted">PDF/이미지 원본 위에서 드래그하면 선택 문항의 크롭 영역이 저장됩니다.</p>
                     </div>
                     {selectedQuestionCropBox ? <span className="countBadge">크롭 저장됨</span> : <span className="countBadge mutedBadge">크롭 대기</span>}
                   </div>
@@ -12583,11 +12753,11 @@ function ExamAnalysisCenter({
                         {selectedQuestionSourceIsPdf ? (
                           <canvas aria-label="PDF 시험지 페이지" ref={pdfCanvasRef} />
                         ) : selectedQuestionSourceIsImage ? (
-                          <img alt="시험지 원본" draggable={false} src={selectedQuestionSourceUrl} />
+                          <img alt="시험지 원본" crossOrigin="anonymous" draggable={false} src={selectedQuestionSourceUrl} />
                         ) : null}
                         {selectedQuestionCropBox ? (
                           <span
-                            className="questionCropBox"
+                            className={cropDraft ? "questionCropBox drafting" : "questionCropBox"}
                             style={{
                               left: `${selectedQuestionCropBox.x}%`,
                               top: `${selectedQuestionCropBox.y}%`,
@@ -12606,11 +12776,13 @@ function ExamAnalysisCenter({
 
                   <div className="analysisQuestionCropActions">
                     <span>{selectedQuestion ? `${selectedQuestion.number}번 문항 영역` : "문항을 선택하세요."}</span>
+                    <button className="softButton" disabled={!selectedQuestionSourceUrl || !questionItems.length} onClick={handleDraftQuestionCrops} type="button">AI 크롭 초안</button>
                     <button className="softButton" disabled={!selectedQuestionCropBox} onClick={clearSelectedQuestionCrop} type="button">크롭 지우기</button>
                     {selectedQuestionOpenUrl ? (
                       <a className="softButton linkButton" href={selectedQuestionOpenUrl} rel="noreferrer" target="_blank">원본 열기</a>
                     ) : null}
                   </div>
+                  {cropDraftStatus ? <div className="questionCropStatus">{cropDraftStatus}</div> : null}
                 </article>
 
                 <article className="panel analysisQuestionEditorPanel">

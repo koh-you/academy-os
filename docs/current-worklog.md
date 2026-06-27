@@ -10,6 +10,17 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-27 P1. 시험분석 AI 문항 크롭 초안·드래그 표시 보강
+
+- 상태: 완료
+- 사용자 요청: PDF/이미지 원본 위에서 드래그해도 크롭 영역 색이나 점선이 잘 보이지 않는다. AI가 먼저 1차적으로 크롭 영역을 만들어오고 사람이 수정만 하면 좋겠다. vision을 쓰거나 더 나은 방법이 있으면 적용한다.
+- 이번 작업 결과: 문항 검수 화면에 `AI 크롭 초안` 버튼을 추가했다. 현재 PDF 페이지 또는 이미지 원본을 vision API에 보내 문항별 crop box 초안을 받아오고, 문항 카드의 `cropBox/page/cropSourceId/cropSourceUrl`에 반영한다.
+- fallback: vision API가 실패하거나 문항 영역을 못 찾으면 문항 수와 PDF 페이지 수 기준의 자동 배치 초안을 적용한다. 운영 중 API 키/모델 문제가 있어도 크롭 작업이 멈추지 않게 했다.
+- 시각 보강: 드래그 중/저장 후 크롭 박스를 주황 점선, 반투명 영역, 어두운 외곽 마스크, `크롭` 라벨, pulse 효과로 더 확실히 보이게 했다.
+- API 보강: `/api/ai/exam-question-crops`를 추가했다. OpenAI vision 또는 Claude vision을 사용해 이미지 좌표를 퍼센트 단위 JSON으로 반환한다.
+- 저장 주의: 크롭 좌표는 기존 `examAnalyses.questionItems` 안에 저장되므로 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check api/routes/examAnalysis.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs` 통과. `npm run build` 통과(Vite chunk size warning만 있음). `npm run test:production` 통과(total 219, failed 0).
+
 ### 2026-06-27 P1. 시험분석 기본 프롬프트 1개년/3개년 분기 반영
 
 - 상태: 완료
