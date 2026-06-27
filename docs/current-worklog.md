@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-27 P1. 시험분석 문항별 유사문항 메타데이터 추가
+
+- 상태: 완료
+- 사용자 요청: 유사문항 본문을 웹앱에 넣기보다, 문항 `questionItems`에 `유사문항 필요 여부`, `유사문항 출처`, `숫자변형/조건변형/유사유형 구분` 같은 메타데이터를 넣을 수 있게 한다.
+- 이번 작업 결과: 문항별 데이터 모델에 `similarProblemNeeded`, `similarProblemSource`, `similarProblemRelation`을 추가했다. 문항별 인사이트 폼에서 선생님이 직접 수정할 수 있고, AI 문항 초안/서버 정규화/병합 로직에서도 해당 값을 받아 빈 값에 채우도록 했다.
+- 산출 반영: 문항별 강사 코멘트 텍스트와 `부교재·유사문항 활용` 표에 유사문항 필요 여부, 출처, 변형 구분이 함께 정리되게 했다. 프롬프트에는 유사문항 본문 전체가 아니라 메타데이터만 `questionItems`에 넣도록 명시했다.
+- 저장 주의: 기존 `examAnalyses.questionItems` app_state 구조 안에 필드가 추가되는 방식이므로 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check api/routes/examAnalysis.js`, `node --check scripts/scenario-tests-production.cjs` 통과. `npm run build` 통과(Vite chunk size warning만 있음). `npm run test:production` 통과(total 219, failed 0).
+
 ### 2026-06-27 P1. 시험분석 문항 구성 AI 초안·사람 확인 흐름 재정리
 
 - 상태: 완료

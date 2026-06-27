@@ -159,6 +159,10 @@ function buildExamAnalysisPrompt(payload) {
     "- questionItems의 difficulty는 확인 필요, 하, 중하, 중, 중상, 상 중 하나로 쓴다.",
     "- questionItems의 role은 기본, 실수유도, 앞번호 고난도, 준킬러, 킬러, 서술형 변별, 확인 필요 중 하나로 쓴다.",
     "- questionItems의 questionType은 객관식, 단답형, 서술형, 논술형, 확인 필요 중 하나로 쓴다.",
+    "- questionItems의 similarProblemNeeded는 확인 필요, 필요, 불필요 중 하나로 쓴다.",
+    "- questionItems의 similarProblemRelation은 확인 필요, 숫자변형, 조건변형, 유사유형, 기타 중 하나로 쓴다.",
+    "- questionItems의 similarProblemSource에는 유사문항 분석지, 나만의DB, 부교재, 모의고사 등 출처 메모 후보를 쓴다.",
+    "- 유사문항 본문 전체를 questionItems에 넣지 않는다. 웹앱에는 유사문항 필요 여부, 출처, 변형 구분 메타데이터만 넣는다.",
     "- 문항 카드는 강사가 웹앱 문항 검수 단계에서 확정한다. AI는 배점/단원/난이도/역할/태그/검수 포인트의 1차 초안을 만든다.",
     "- 여러 해 시험지가 함께 있으면 questionItems에는 웹앱에서 현재 선택한 시험지/연도 1회분의 전체 문항을 넣는다. 한 페이지에 보이는 일부 문항만 반환하지 않는다.",
     "- 3개년 비교는 텍스트 분석 필드에 반복/증감/변화를 정리한다.",
@@ -202,6 +206,9 @@ function buildExamAnalysisPrompt(payload) {
     '      "role": "기본",',
     '      "source": "확인 필요",',
     '      "correctRate": "확인 필요",',
+    '      "similarProblemNeeded": "확인 필요",',
+    '      "similarProblemSource": "",',
+    '      "similarProblemRelation": "확인 필요",',
     '      "ocrText": "문항 조건 요약",',
     '      "strategyComment": "AI가 본 오답 가능성과 검수 포인트",',
     '      "tags": ["기본문항"]',
@@ -466,6 +473,9 @@ function createMockAnalysis(payload) {
       role: item.role || "기본",
       source: item.source || "확인 필요",
       correctRate: item.correctRate || "확인 필요",
+      similarProblemNeeded: item.similarProblemNeeded || "확인 필요",
+      similarProblemSource: item.similarProblemSource || "",
+      similarProblemRelation: item.similarProblemRelation || "확인 필요",
       ocrText: item.ocrText || "AI 초안: 문항 조건 확인 필요",
       strategyComment: item.strategyComment || "AI 초안: 배점·단원·난이도 검수 후 보완",
       tags: Array.isArray(item.tags) && item.tags.length ? item.tags : ["주요문항"]
@@ -483,6 +493,8 @@ function normalizeQuestionItemsFromAi(items = []) {
   const roleOptions = new Set(["기본", "실수유도", "앞번호 고난도", "준킬러", "킬러", "서술형 변별", "확인 필요"]);
   const questionTypeOptions = new Set(["객관식", "단답형", "서술형", "논술형", "확인 필요"]);
   const sourceOptions = new Set(["확인 필요", "교과서", "부교재", "학교 프린트", "모의고사", "수능/평가원", "자체 변형", "기타"]);
+  const similarProblemNeedOptions = new Set(["확인 필요", "필요", "불필요"]);
+  const similarProblemRelationOptions = new Set(["확인 필요", "숫자변형", "조건변형", "유사유형", "기타"]);
   const tagAliases = {
     "기본 문항": "기본문항",
     "기본문항": "기본문항",
@@ -509,6 +521,8 @@ function normalizeQuestionItemsFromAi(items = []) {
       const role = String(item.role || "기본").trim();
       const questionType = String(item.questionType || item.type || "확인 필요").trim();
       const source = String(item.source || "확인 필요").trim();
+      const similarProblemNeeded = String(item.similarProblemNeeded || item.needsSimilarProblem || item.similarProblemRequired || "확인 필요").trim();
+      const similarProblemRelation = String(item.similarProblemRelation || item.similarRelation || item.variationType || "확인 필요").trim();
       const rawTags = Array.isArray(item.tags) ? item.tags : String(item.tags || "").split(/[,/·]/);
 
       return {
@@ -521,6 +535,9 @@ function normalizeQuestionItemsFromAi(items = []) {
         role: roleOptions.has(role) ? role : "확인 필요",
         source: sourceOptions.has(source) ? source : "확인 필요",
         correctRate: String(item.correctRate || item.expectedCorrectRate || "").trim(),
+        similarProblemNeeded: similarProblemNeedOptions.has(similarProblemNeeded) ? similarProblemNeeded : "확인 필요",
+        similarProblemSource: String(item.similarProblemSource || item.similarSource || item.linkedProblemSource || "").trim(),
+        similarProblemRelation: similarProblemRelationOptions.has(similarProblemRelation) ? similarProblemRelation : "확인 필요",
         ocrText: String(item.ocrText || item.questionSummary || item.summary || "").trim(),
         sourceCompareComment: String(item.sourceCompareComment || item.sourceNote || "").trim(),
         strategyComment: String(item.strategyComment || item.comment || item.teacherCheckPoint || item.reviewPoint || "").trim(),

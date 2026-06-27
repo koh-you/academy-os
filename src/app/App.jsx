@@ -1056,12 +1056,16 @@ function createDefaultExamAnalysisPrompt() {
     "- 역할",
     "- 태그",
     "- 출처 가능성",
+    "- 유사문항 필요 여부",
+    "- 유사문항 출처",
+    "- 숫자변형/조건변형/유사유형 구분",
     "- OCR/문항 조건 요약",
     "- 학생이 틀릴 만한 지점",
     "- 강사가 확인해야 할 점",
     "- 대비 전략 후보",
     "AI 1차 분석 단계에서 배점, 단원, 난이도는 웹앱 문항분석표의 questionItems 배열에 반드시 초안으로 채운다.",
     "AI가 읽은 전체 문항 수는 questionComposition.total에 넣고, 근거 문구는 questionComposition.evidence에 적는다.",
+    "유사문항 본문은 웹앱에 넣지 않는다. 대신 questionItems의 similarProblemNeeded, similarProblemSource, similarProblemRelation에 메타데이터만 입력한다.",
     "단원명/배점/난이도를 원본에서 확정할 수 없으면 빈칸으로 두지 말고 '확인 필요'로 표시한다.",
     "여러 해 시험지가 함께 들어오면 questionItems는 웹앱에서 현재 선택한 시험지/연도 1회분의 전체 문항 수만큼 작성하고, 3개년 반복/증감/변화는 텍스트 분석 필드에 정리한다.",
     "일부 페이지만 보이거나 OCR 일부만 있더라도 확인 가능한 전체 문항 수를 기준으로 questionItems를 만들고, 모르는 값은 '확인 필요'로 둔다.",
@@ -1077,7 +1081,7 @@ function createDefaultExamAnalysisPrompt() {
     "AI는 웹앱에서 강사가 검수할 수 있도록 다음 표의 초안을 만든다.",
     "1. 문항분석표",
     "2. 단원별 출제표",
-    "3. 부교재·모의고사 반영표",
+    "3. 부교재·유사문항 활용표",
     "4. 학생 대비전략표",
     "또한 대비전략 흐름은 시험 범위 확인 → 문항별 검수 → 원문항 비교 → 변별 문항 훈련 → 학생 수준별 보강 순서로 정리한다.",
     "",
@@ -1092,7 +1096,7 @@ function createDefaultExamAnalysisPrompt() {
     "",
     "[최종 출력 방향]",
     "1. AI 분석 결과: 시험 한 줄 총평, 시험 구조, 단원별 출제, 문항 유형, 킬러/준킬러, 실수 패턴, 확인 필요 항목",
-    "2. 문항분석표 초안: questionItems 배열로 문항별 번호, 페이지, 배점, 단원, 유형, 난이도, 역할, 태그, 출처 후보, 코멘트 후보를 반환",
+    "2. 문항분석표 초안: questionItems 배열로 문항별 번호, 페이지, 배점, 단원, 유형, 난이도, 역할, 태그, 출처 후보, 유사문항 메타데이터, 코멘트 후보를 반환",
     "3. 강사 인사이트 입력 가이드: 어떤 문항에 코멘트를 달아야 하는지, 어떤 문항을 크롭해서 슬라이드화하면 좋은지 제안",
     "4. 학생 대비 전략: 상위권, 중위권, 하위권으로 나누어 작성",
     "5. 재가공 핵심 메시지: 학부모가 알고 싶어할 정보, 학생에게 필요한 정보, 블로그/인스타로 쓸 수 있는 정보"
@@ -1164,6 +1168,8 @@ const examQuestionDifficultyOptions = ["확인 필요", "하", "중하", "중", 
 const examQuestionRoleOptions = ["기본", "실수유도", "앞번호 고난도", "준킬러", "킬러", "서술형 변별", "확인 필요"];
 const examQuestionSourceOptions = ["확인 필요", "교과서", "부교재", "학교 프린트", "모의고사", "수능/평가원", "자체 변형", "기타"];
 const examQuestionTypeOptions = ["객관식", "단답형", "서술형", "논술형", "확인 필요"];
+const similarProblemNeedOptions = ["확인 필요", "필요", "불필요"];
+const similarProblemRelationOptions = ["확인 필요", "숫자변형", "조건변형", "유사유형", "기타"];
 const examQuestionTagOptions = [
   "기본문항",
   "실수문항",
@@ -1207,6 +1213,7 @@ function isExamQuestionInsightRecommended(item = {}) {
   const tags = normalizeExamQuestionTags(safeItem.tags);
   return (
     tags.some((tag) => examQuestionInsightTags.includes(tag)) ||
+    safeItem.similarProblemNeeded === "필요" ||
     ["준킬러", "킬러", "앞번호 고난도", "서술형 변별"].includes(safeItem.role) ||
     ["중상", "상"].includes(safeItem.difficulty)
   );
@@ -1214,7 +1221,14 @@ function isExamQuestionInsightRecommended(item = {}) {
 
 function hasExamQuestionDetailedInsight(item = {}) {
   const safeItem = item || {};
-  return [safeItem.teacherComment, safeItem.sourceCompareComment, safeItem.strategyComment].some((value) => String(value || "").trim());
+  return [
+    safeItem.teacherComment,
+    safeItem.sourceCompareComment,
+    safeItem.strategyComment,
+    safeItem.similarProblemSource,
+    safeItem.similarProblemRelation && safeItem.similarProblemRelation !== "확인 필요" ? safeItem.similarProblemRelation : "",
+    safeItem.similarProblemNeeded && safeItem.similarProblemNeeded !== "확인 필요" ? safeItem.similarProblemNeeded : ""
+  ].some((value) => String(value || "").trim());
 }
 
 function createExamQuestionItem(seed = {}, index = 0) {
@@ -1230,6 +1244,9 @@ function createExamQuestionItem(seed = {}, index = 0) {
     role: seed.role || "기본",
     source: seed.source || "확인 필요",
     correctRate: seed.correctRate || "",
+    similarProblemNeeded: similarProblemNeedOptions.includes(seed.similarProblemNeeded) ? seed.similarProblemNeeded : "확인 필요",
+    similarProblemSource: seed.similarProblemSource || "",
+    similarProblemRelation: similarProblemRelationOptions.includes(seed.similarProblemRelation) ? seed.similarProblemRelation : "확인 필요",
     cropSourceId: seed.cropSourceId || "",
     cropSourceUrl: seed.cropSourceUrl || "",
     cropBox: seed.cropBox || null,
@@ -1264,6 +1281,9 @@ function normalizeAiQuestionDrafts(items = []) {
         role: item.role || "기본",
         source: item.source || "확인 필요",
         correctRate: item.correctRate || item.expectedCorrectRate || "",
+        similarProblemNeeded: item.similarProblemNeeded || item.needsSimilarProblem || item.similarProblemRequired || "확인 필요",
+        similarProblemSource: item.similarProblemSource || item.similarSource || item.linkedProblemSource || "",
+        similarProblemRelation: item.similarProblemRelation || item.similarRelation || item.variationType || "",
         cropSourceId: item.cropSourceId || item.sourceId || "",
         cropSourceUrl: item.cropSourceUrl || item.sourceUrl || "",
         ocrText: item.ocrText || item.questionSummary || item.summary || "",
@@ -1429,6 +1449,9 @@ function mergeAiQuestionDrafts(existingItems = [], aiItems = [], options = {}) {
       role: mergeDefaultRole(item.role, draft.role),
       source: mergeWhenBlank(item.source, draft.source, "확인 필요"),
       correctRate: mergeWhenBlank(item.correctRate, draft.correctRate),
+      similarProblemNeeded: mergeWhenBlank(item.similarProblemNeeded, draft.similarProblemNeeded, "확인 필요"),
+      similarProblemSource: mergeWhenBlank(item.similarProblemSource, draft.similarProblemSource),
+      similarProblemRelation: mergeWhenBlank(item.similarProblemRelation, draft.similarProblemRelation, "확인 필요"),
       cropSourceId: item.cropSourceId || draft.cropSourceId,
       cropSourceUrl: item.cropSourceUrl || draft.cropSourceUrl,
       ocrText: item.ocrText || draft.ocrText,
@@ -1540,7 +1563,16 @@ function getExamQuestionCommentCount(questionItems = []) {
 
 function buildQuestionInsightText(questionItems = []) {
   const items = normalizeExamQuestionItems(questionItems).filter((item) =>
-    [item.unit, item.role, item.teacherComment, item.sourceCompareComment, item.strategyComment].some((value) => String(value || "").trim())
+    [
+      item.unit,
+      item.role,
+      item.teacherComment,
+      item.sourceCompareComment,
+      item.strategyComment,
+      item.similarProblemNeeded && item.similarProblemNeeded !== "확인 필요" ? item.similarProblemNeeded : "",
+      item.similarProblemSource,
+      item.similarProblemRelation && item.similarProblemRelation !== "확인 필요" ? item.similarProblemRelation : ""
+    ].some((value) => String(value || "").trim())
   );
   if (!items.length) return "";
   return items.map((item) => {
@@ -1550,6 +1582,9 @@ function buildQuestionInsightText(questionItems = []) {
       item.role ? `  역할: ${item.role}` : "",
       item.difficulty ? `  난이도: ${item.difficulty}` : "",
       item.tags?.length ? `  태그: ${item.tags.join(", ")}` : "",
+      item.similarProblemNeeded && item.similarProblemNeeded !== "확인 필요" ? `  유사문항 필요: ${item.similarProblemNeeded}` : "",
+      item.similarProblemSource ? `  유사문항 출처: ${item.similarProblemSource}` : "",
+      item.similarProblemRelation && item.similarProblemRelation !== "확인 필요" ? `  유사문항 유형: ${item.similarProblemRelation}` : "",
       item.teacherComment ? `  강사 코멘트: ${item.teacherComment}` : "",
       item.sourceCompareComment ? `  원문항/출처: ${item.sourceCompareComment}` : "",
       item.strategyComment ? `  대비 전략: ${item.strategyComment}` : ""
@@ -2010,11 +2045,21 @@ function AnalysisOutputPreviewCard({ title, tone = "", value = "", onEdit, onOpe
 function ExamQuestionInsightTables({ questionItems = [] }) {
   const items = normalizeExamQuestionItems(questionItems);
   const commentedItems = items.filter((item) =>
-    [item.teacherComment, item.sourceCompareComment, item.strategyComment].some((value) => String(value || "").trim())
+    [
+      item.teacherComment,
+      item.sourceCompareComment,
+      item.strategyComment,
+      item.similarProblemSource,
+      item.similarProblemNeeded && item.similarProblemNeeded !== "확인 필요" ? item.similarProblemNeeded : "",
+      item.similarProblemRelation && item.similarProblemRelation !== "확인 필요" ? item.similarProblemRelation : ""
+    ].some((value) => String(value || "").trim())
   );
   const unitRows = summarizeQuestionUnits(items);
   const sourceRows = items.filter((item) =>
-    String(item.source || "").trim() && item.source !== "확인 필요"
+    (String(item.source || "").trim() && item.source !== "확인 필요") ||
+    item.similarProblemNeeded === "필요" ||
+    String(item.similarProblemSource || "").trim() ||
+    (item.similarProblemRelation && item.similarProblemRelation !== "확인 필요")
   );
   const hardItems = items.filter((item) =>
     ["중상", "상"].includes(item.difficulty) || ["앞번호 고난도", "준킬러", "킬러", "서술형 변별"].includes(item.role)
@@ -2124,7 +2169,7 @@ function ExamQuestionInsightTables({ questionItems = [] }) {
 
       <section>
         <div className="analysisQuestionTableTitle">
-          <strong>부교재·모의고사 반영</strong>
+          <strong>부교재·유사문항 활용</strong>
           <span>{sourceRows.length}문항</span>
         </div>
         <div className="analysisPreviewTableWrap">
@@ -2133,6 +2178,8 @@ function ExamQuestionInsightTables({ questionItems = [] }) {
               <tr>
                 <th>문항</th>
                 <th>출처</th>
+                <th>유사문항</th>
+                <th>변형 구분</th>
                 <th>원문항 비교/변형</th>
               </tr>
             </thead>
@@ -2140,11 +2187,13 @@ function ExamQuestionInsightTables({ questionItems = [] }) {
               {sourceRows.length ? sourceRows.map((item) => (
                 <tr key={item.questionId}>
                   <td>{item.number}번</td>
-                  <td>{item.source}</td>
+                  <td>{item.similarProblemSource || item.source}</td>
+                  <td>{item.similarProblemNeeded || "확인 필요"}</td>
+                  <td>{item.similarProblemRelation || "확인 필요"}</td>
                   <td>{item.sourceCompareComment || "비교 코멘트 입력 필요"}</td>
                 </tr>
               )) : (
-                <tr><td colSpan="3">출처를 입력하면 자동으로 정리됩니다.</td></tr>
+                <tr><td colSpan="5">출처나 유사문항 메타데이터를 입력하면 자동으로 정리됩니다.</td></tr>
               )}
             </tbody>
           </table>
@@ -13511,6 +13560,22 @@ function ExamAnalysisCenter({
                         <label>
                           정답률/체감
                           <input value={selectedQuestion.correctRate} onChange={(event) => updateSelectedQuestion("correctRate", event.target.value)} placeholder="예: 낮음, 40%" />
+                        </label>
+                        <label>
+                          유사문항 필요
+                          <select value={selectedQuestion.similarProblemNeeded || "확인 필요"} onChange={(event) => updateSelectedQuestion("similarProblemNeeded", event.target.value)}>
+                            {similarProblemNeedOptions.map((option) => <option key={option}>{option}</option>)}
+                          </select>
+                        </label>
+                        <label>
+                          변형 구분
+                          <select value={selectedQuestion.similarProblemRelation || "확인 필요"} onChange={(event) => updateSelectedQuestion("similarProblemRelation", event.target.value)}>
+                            {similarProblemRelationOptions.map((option) => <option key={option}>{option}</option>)}
+                          </select>
+                        </label>
+                        <label>
+                          유사문항 출처
+                          <input value={selectedQuestion.similarProblemSource || ""} onChange={(event) => updateSelectedQuestion("similarProblemSource", event.target.value)} placeholder="예: 나만의DB 비상 확통" />
                         </label>
                       </div>
                       <div className="analysisQuestionTagGroup">
