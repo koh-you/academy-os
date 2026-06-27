@@ -825,8 +825,10 @@ async function uploadExamAnalysisSourceFile(payload) {
     throw new Error("Supabase Storage 업로드에는 service role 설정이 필요합니다.");
   }
   const bucketId = "exam-analysis-sources";
-  await ensureStorageBucket(bucketId, { allowedMimeTypes: ["application/pdf"] });
+  await ensureStorageBucket(bucketId, { allowedMimeTypes: ["application/pdf", "image/png", "image/jpeg", "image/webp"] });
   const { mimeType, buffer } = parseDataUrl(payload.dataUrl);
+  const allowedTypes = new Set(["application/pdf", "image/png", "image/jpeg", "image/webp"]);
+  if (!allowedTypes.has(mimeType)) throw new Error("시험분석 원본은 PDF, PNG, JPG, WEBP 파일만 업로드할 수 있습니다.");
   if (buffer.length > 20 * 1024 * 1024) throw new Error("파일은 20MB 이하만 업로드할 수 있습니다.");
   const fileName = String(payload.fileName || `exam-source-${Date.now()}`).trim();
   const storageFileName = getStorageSafeFileName(fileName, mimeType, "exam-source");

@@ -3052,6 +3052,32 @@ button {
   font-weight: 800;
 }
 
+.analysisExamPrepContext {
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  color: #166534;
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+}
+
+.analysisExamPrepContext strong {
+  font-weight: 900;
+}
+
+.analysisExamPrepContext span {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.analysisExamPrepContext.muted {
+  background: #f8fbff;
+  border-color: #d8e3f8;
+  color: #64748b;
+}
+
 .apiErrorBox {
   background: #fef2f2;
   border: 1px solid #fecaca;
@@ -3471,6 +3497,261 @@ button {
 .analysisOutputStage {
   display: grid;
   gap: 14px;
+}
+
+.analysisQuestionStage {
+  display: grid;
+  gap: 14px;
+}
+
+.analysisQuestionSetupPanel {
+  align-items: end;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.analysisQuestionSetupPanel h2 {
+  margin: 4px 0;
+}
+
+.analysisQuestionSetupActions {
+  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.analysisQuestionSetupActions label {
+  min-width: 104px;
+}
+
+.analysisQuestionSetupActions input[type="number"] {
+  min-width: 88px;
+}
+
+.analysisQuestionWorkspace {
+  align-items: start;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(360px, 1.1fr) minmax(420px, 0.9fr);
+}
+
+.analysisQuestionSourcePanel,
+.analysisQuestionEditorPanel,
+.analysisQuestionSummaryPanel {
+  display: grid;
+  gap: 14px;
+}
+
+.questionCropCanvas {
+  background: #0f172a;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  cursor: crosshair;
+  max-height: 720px;
+  overflow: auto;
+  position: relative;
+  touch-action: none;
+}
+
+.questionCropCanvas img {
+  display: block;
+  max-width: 100%;
+  user-select: none;
+}
+
+.questionCropBox {
+  background: rgba(37, 99, 235, 0.18);
+  border: 3px solid #2563eb;
+  border-radius: 6px;
+  box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.28);
+  pointer-events: none;
+  position: absolute;
+}
+
+.analysisQuestionCropActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.analysisQuestionCropActions span {
+  color: #34456b;
+  font-weight: 900;
+}
+
+.linkButton {
+  text-decoration: none;
+}
+
+.mutedBadge {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.analysisQuestionList {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  max-height: 280px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.analysisQuestionListItem {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  color: #17213d;
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 4px;
+  min-height: 92px;
+  padding: 10px;
+  text-align: left;
+}
+
+.analysisQuestionListItem:hover,
+.analysisQuestionListItem:focus-visible {
+  border-color: #2563eb;
+  outline: none;
+}
+
+.analysisQuestionListItem.active {
+  background: #17213d;
+  border-color: #17213d;
+  color: #ffffff;
+}
+
+.analysisQuestionListItem strong {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.analysisQuestionListItem span,
+.analysisQuestionListItem small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.analysisQuestionListItem.active span,
+.analysisQuestionListItem.active small {
+  color: #dbeafe;
+}
+
+.analysisQuestionForm {
+  border-top: 1px solid #d8e3f8;
+  display: grid;
+  gap: 12px;
+  padding-top: 14px;
+}
+
+.analysisQuestionQuickTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.analysisQuestionQuickTags button {
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  color: #3730a3;
+  cursor: pointer;
+  font-weight: 900;
+  padding: 8px 10px;
+}
+
+.analysisQuestionQuickTags button:hover {
+  background: #e0e7ff;
+}
+
+.analysisQuestionEmpty {
+  background: #f8fbff;
+  border: 1px dashed #b8c9f4;
+  border-radius: 8px;
+  color: #64748b;
+  font-weight: 900;
+  line-height: 1.6;
+  padding: 18px;
+}
+
+.analysisQuestionTables {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.analysisQuestionTableTitle {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.analysisQuestionTableTitle strong {
+  color: #17213d;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.analysisQuestionTableTitle span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.analysisStrategyFlow {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.analysisStrategyNode {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  color: #7c2d12;
+  display: grid;
+  gap: 6px;
+  min-height: 116px;
+  padding: 12px;
+  position: relative;
+}
+
+.analysisStrategyNode strong {
+  font-weight: 900;
+}
+
+.analysisStrategyNode span {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.analysisStrategyNode i {
+  align-items: center;
+  background: #17213d;
+  border-radius: 999px;
+  color: #ffffff;
+  display: inline-flex;
+  font-style: normal;
+  height: 24px;
+  justify-content: center;
+  position: absolute;
+  right: -17px;
+  top: 42px;
+  width: 24px;
+  z-index: 1;
 }
 
 .analysisFinalReportPanel {
@@ -11375,6 +11656,9 @@ body.attendanceOnlyBody {
   .analysisReviewGrid,
   .analysisReviewColumns,
   .analysisReviewLaunchButtons,
+  .analysisQuestionWorkspace,
+  .analysisQuestionTables,
+  .analysisStrategyFlow,
   .aiVariantWorkspace,
   .insightGrid,
   .analysisFinalReportPanel,
@@ -11400,6 +11684,19 @@ body.attendanceOnlyBody {
   .analysisPipeline,
   .analysisWorkflowHint {
     grid-template-columns: 1fr;
+  }
+
+  .analysisQuestionSetupPanel {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .analysisQuestionSetupActions {
+    justify-content: flex-start;
+  }
+
+  .analysisStrategyNode i {
+    display: none;
   }
 
   .portalHeader,

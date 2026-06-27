@@ -69,6 +69,7 @@ function selectedModel(payload, useCase = "default") {
 }
 
 function buildExamAnalysisPrompt(payload) {
+  const examPrepContext = payload.examPrepContext && typeof payload.examPrepContext === "object" ? payload.examPrepContext : null;
   return [
     payload.aiPrompt || "시험지를 분석해서 정해진 필드에 맞는 초안을 작성해 주세요.",
     "",
@@ -80,6 +81,18 @@ function buildExamAnalysisPrompt(payload) {
     `시험일: ${payload.examDate ?? ""}`,
     `원본 링크: ${payload.sourceFileUrl ?? ""}`,
     "",
+    "[시험관리 탭 입력정보]",
+    examPrepContext
+      ? [
+          `시험기간: ${examPrepContext.examPeriod ?? ""}`,
+          `수학시험 일정: ${Array.isArray(examPrepContext.mathExamDates) ? examPrepContext.mathExamDates.map((entry) => [entry.date, entry.subject || entry.label].filter(Boolean).join(" ")).filter(Boolean).join(", ") : examPrepContext.mathExamDate ?? ""}`,
+          `특이사항: ${examPrepContext.specialNote ?? ""}`,
+          `시험 범위: ${examPrepContext.scope ?? ""}`,
+          `부교재: ${examPrepContext.subTextbook ?? ""}`,
+          `시험 후 총평: ${examPrepContext.review ?? ""}`
+        ].join("\n")
+      : "연결된 시험관리 데이터가 없습니다. 학교/학년/과목 메타데이터와 시험 원본만 기준으로 초안을 만드세요.",
+    "",
     "[시험 원본/OCR/메모]",
     payload.rawExamText ||
       "아직 원본 텍스트가 없습니다. 입력된 기본정보와 강사 메모를 기준으로 분석 필드 초안을 만들어 주세요.",
@@ -89,6 +102,10 @@ function buildExamAnalysisPrompt(payload) {
     "- 각 항목은 가능하면 사실 근거 → 점수에 미친 영향 → 다음 학습 행동 순서로 쓴다.",
     "- 반드시 시험 원본/OCR에 있는 사실을 우선한다.",
     "- 문항번호, 배점, 단원명, 유형, 핵심 함정, 예상 오답을 가능한 한 구분해서 쓴다.",
+    "- 배점은 절대 점수로만 판단하지 말고 해당 시험 안에서 어느 문항군이 중요했는지 설명한다. 별도 상대배점 차트는 만들지 않는다.",
+    "- 여러 해 시험지가 있으면 문항수 변화 때문에 같은 배점의 의미가 달라질 수 있음을 반영해 중요도 변화를 문장으로 설명한다.",
+    "- 부교재, 학교 프린트, 모의고사, 수능/평가원 원문항과 실제 출제 문항의 변형 관계가 보이면 반드시 sourceCheckNotes와 관련 분석에 적는다.",
+    "- 강사가 문항별 코멘트를 붙일 수 있도록 앞번호 고난도, 실수 유도, 정답률 낮음, 뒷번호 변별 이유 후보를 구체적으로 제안한다.",
     "- 원문에서 확인되지 않는 문항번호/배점/단원명은 지어내지 말고 '확인 필요'라고 쓴다.",
     "- OCR 깨짐 문자, 의미 없는 한글 조합, 특수문자 잡음은 산출물에 그대로 쓰지 말고 sourceCheckNotes에 모은다.",
     "- '어려웠다', '중요하다', '복습이 필요하다' 같은 추상 문장으로 끝내지 않는다.",

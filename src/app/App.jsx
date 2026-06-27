@@ -972,6 +972,7 @@ function createDefaultExamAnalysis(examPrepRow = {}) {
     sourceFiles: [],
     sourceUploadStatus: "",
     rawExamText: "",
+    questionItems: [],
     aiProvider: "auto",
     aiModel: "server-default",
     aiStatus: "대기",
@@ -986,6 +987,9 @@ function createDefaultExamAnalysis(examPrepRow = {}) {
       "- 깨진 문자, 의미 없는 한글 조합, OCR 잡음은 최종 문장에 그대로 쓰지 말고 sourceCheckNotes에 '원문 확인 필요'로 모은다.",
       "- '어려웠다', '중요하다', '복습이 필요하다' 같은 추상 문장으로 끝내지 않는다.",
       "- 문항번호, 배점, 단원명, 유형, 실수 유발 포인트, 다음 수업에서 다룰 포인트를 분리해서 적는다.",
+      "- 배점은 절대 점수만 보지 말고 해당 시험 안에서 어느 문항군이 변별에 가까운지 판단한다. 단, 별도 상대배점 차트는 만들지 않는다.",
+      "- 3개년 자료가 있으면 문항수 변화 때문에 같은 배점의 의미가 달라질 수 있음을 설명하고, 중요도 변화는 문장으로만 정리한다.",
+      "- 부교재/프린트/모의고사 원문항과 실제 출제 문항의 변형 관계를 확인할 수 있으면 반드시 별도로 적는다.",
       "- 기본/준킬러/킬러를 반드시 구분하고, 학생 실수는 행동 단위로 쓴다.",
       "- 학부모용 문장은 불안을 자극하지 말고 보완 방향과 수업 계획 중심으로 쓴다.",
       "필드별 요구:",
@@ -1021,6 +1025,111 @@ function createDefaultExamAnalysis(examPrepRow = {}) {
     instagramDraft: `1장 표지\n2장 시험 한 줄 총평\n3장 출제 분포\n4장 킬러문항\n5장 학생 실수\n6장 학습 방향\n7장 ${academyBrandName} 안내`,
     pipelineStage: "원본 입력"
   };
+}
+
+const examQuestionDifficultyOptions = ["확인 필요", "하", "중하", "중", "중상", "상"];
+const examQuestionRoleOptions = ["기본", "실수유도", "앞번호 고난도", "준킬러", "킬러", "서술형 변별", "확인 필요"];
+const examQuestionSourceOptions = ["확인 필요", "교과서", "부교재", "학교 프린트", "모의고사", "수능/평가원", "자체 변형", "기타"];
+const examQuestionTypeOptions = ["객관식", "단답형", "서술형", "논술형", "확인 필요"];
+
+function createExamQuestionItem(seed = {}, index = 0) {
+  const number = seed.number || index + 1;
+  return {
+    questionId: seed.questionId || `exam_question_${Date.now()}_${index + 1}_${Math.random().toString(36).slice(2, 6)}`,
+    number,
+    page: seed.page || 1,
+    score: seed.score || "",
+    questionType: seed.questionType || "확인 필요",
+    unit: seed.unit || "",
+    difficulty: seed.difficulty || "확인 필요",
+    role: seed.role || "기본",
+    source: seed.source || "확인 필요",
+    correctRate: seed.correctRate || "",
+    cropSourceId: seed.cropSourceId || "",
+    cropSourceUrl: seed.cropSourceUrl || "",
+    cropBox: seed.cropBox || null,
+    ocrText: seed.ocrText || "",
+    teacherComment: seed.teacherComment || "",
+    sourceCompareComment: seed.sourceCompareComment || "",
+    strategyComment: seed.strategyComment || "",
+    tags: Array.isArray(seed.tags) ? seed.tags : []
+  };
+}
+
+function normalizeExamQuestionItems(items = []) {
+  if (!Array.isArray(items)) return [];
+  return items
+    .map((item, index) => createExamQuestionItem(item, index))
+    .sort((a, b) => Number(a.number || 0) - Number(b.number || 0));
+}
+
+function createExamQuestionItemsFromCount(count, existingItems = []) {
+  const safeCount = Math.max(1, Math.min(80, Number(count) || 20));
+  const normalizedExisting = normalizeExamQuestionItems(existingItems);
+  return Array.from({ length: safeCount }, (_, index) => {
+    const existing = normalizedExisting[index];
+    return createExamQuestionItem(existing || { number: index + 1 }, index);
+  });
+}
+
+function getExamAnalysisSourceFileId(file = {}, index = 0) {
+  return file.storagePath || file.signedUrl || file.fileName || `source_${index}`;
+}
+
+function isImageExamAnalysisSource(file = {}) {
+  const type = String(file.fileType || "").toLowerCase();
+  const name = String(file.fileName || file.storagePath || "").toLowerCase();
+  return type.startsWith("image/") || /\.(png|jpe?g|webp|gif)$/i.test(name);
+}
+
+function normalizeCropBox(box = null) {
+  if (!box || typeof box !== "object") return null;
+  const x = Math.max(0, Math.min(100, Number(box.x) || 0));
+  const y = Math.max(0, Math.min(100, Number(box.y) || 0));
+  const width = Math.max(0, Math.min(100 - x, Number(box.width) || 0));
+  const height = Math.max(0, Math.min(100 - y, Number(box.height) || 0));
+  return width && height ? { x, y, width, height } : null;
+}
+
+function getExamQuestionCommentCount(questionItems = []) {
+  return normalizeExamQuestionItems(questionItems).filter((item) =>
+    [item.teacherComment, item.sourceCompareComment, item.strategyComment].some((value) => String(value || "").trim())
+  ).length;
+}
+
+function buildQuestionInsightText(questionItems = []) {
+  const items = normalizeExamQuestionItems(questionItems).filter((item) =>
+    [item.unit, item.role, item.teacherComment, item.sourceCompareComment, item.strategyComment].some((value) => String(value || "").trim())
+  );
+  if (!items.length) return "";
+  return items.map((item) => {
+    const header = `${item.number}번${item.score ? ` · ${item.score}점` : ""}${item.unit ? ` · ${item.unit}` : ""}`;
+    return [
+      `- ${header}`,
+      item.role ? `  역할: ${item.role}` : "",
+      item.difficulty ? `  난이도: ${item.difficulty}` : "",
+      item.teacherComment ? `  강사 코멘트: ${item.teacherComment}` : "",
+      item.sourceCompareComment ? `  원문항/출처: ${item.sourceCompareComment}` : "",
+      item.strategyComment ? `  대비 전략: ${item.strategyComment}` : ""
+    ].filter(Boolean).join("\n");
+  }).join("\n");
+}
+
+function summarizeQuestionUnits(questionItems = []) {
+  const unitMap = new Map();
+  normalizeExamQuestionItems(questionItems).forEach((item) => {
+    const unit = String(item.unit || "단원 미입력").trim();
+    const previous = unitMap.get(unit) || { unit, count: 0, score: 0, hard: 0, questions: [] };
+    const score = Number(String(item.score || "").replace(/[^0-9.]/g, ""));
+    previous.count += 1;
+    previous.score += Number.isFinite(score) ? score : 0;
+    if (["중상", "상"].includes(item.difficulty) || ["준킬러", "킬러", "앞번호 고난도", "서술형 변별"].includes(item.role)) {
+      previous.hard += 1;
+    }
+    previous.questions.push(item.number);
+    unitMap.set(unit, previous);
+  });
+  return Array.from(unitMap.values()).sort((a, b) => b.count - a.count || a.unit.localeCompare(b.unit, "ko"));
 }
 
 const examAnalysisFieldKeys = [
@@ -1147,14 +1256,17 @@ function inferExamAnalysisMetadataFromFileName(fileName = "") {
 function normalizeExamAnalysisForDisplay(analysis = {}) {
   const firstSourceFile = Array.isArray(analysis.sourceFiles) ? analysis.sourceFiles[0] : null;
   const inferredMetadata = inferExamAnalysisMetadataFromFileName(firstSourceFile?.fileName || analysis.sourceFileUrl || "");
-  return normalizeExamAnalysisAiFields({
+  return {
+    ...normalizeExamAnalysisAiFields({
     ...analysis,
     schoolName: analysis.schoolName || inferredMetadata.schoolName,
     grade: analysis.grade || inferredMetadata.grade,
     subject: analysis.subject || inferredMetadata.subject,
     examName: analysis.examName || inferredMetadata.examName,
     rawExamText: removeFailedAttachmentBlocks(analysis.rawExamText)
-  });
+    }),
+    questionItems: normalizeExamQuestionItems(analysis.questionItems)
+  };
 }
 
 function getExamAnalysisStatusMeta(analysis = {}) {
@@ -1233,6 +1345,7 @@ function getExamAnalysisInitialFields(analysis = {}) {
 }
 
 function hasExamAnalysisTeacherInsight(analysis = {}) {
+  if (getExamQuestionCommentCount(analysis.questionItems) > 0) return true;
   return ["insightSummary", "insightUnits", "insightKiller", "insightStudentErrors", "insightPrediction", "insightDirection"].some((field) => {
     const value = String(analysis[field] ?? "").trim();
     return value && !value.endsWith("부연:");
@@ -1448,6 +1561,194 @@ function AnalysisOutputPreviewCard({ title, tone = "", value = "", onEdit, onOpe
   );
 }
 
+function ExamQuestionInsightTables({ questionItems = [] }) {
+  const items = normalizeExamQuestionItems(questionItems);
+  const commentedItems = items.filter((item) =>
+    [item.teacherComment, item.sourceCompareComment, item.strategyComment].some((value) => String(value || "").trim())
+  );
+  const unitRows = summarizeQuestionUnits(items);
+  const sourceRows = items.filter((item) =>
+    String(item.source || "").trim() && item.source !== "확인 필요"
+  );
+  const hardItems = items.filter((item) =>
+    ["중상", "상"].includes(item.difficulty) || ["앞번호 고난도", "준킬러", "킬러", "서술형 변별"].includes(item.role)
+  );
+  const strategyRows = [
+    {
+      level: "상위권",
+      focus: "고난도/변별 문항 재풀이",
+      detail: hardItems.length ? `${hardItems.map((item) => `${item.number}번`).join(", ")} 중심` : "킬러 후보 문항 입력 후 자동 정리"
+    },
+    {
+      level: "중위권",
+      focus: "실수유도·앞번호 고난도 정리",
+      detail: items.filter((item) => ["실수유도", "앞번호 고난도"].includes(item.role)).map((item) => `${item.number}번`).join(", ") || "문항 역할 입력 필요"
+    },
+    {
+      level: "하위권",
+      focus: "기본 문항과 필수 단원 복습",
+      detail: unitRows.slice(0, 3).map((row) => row.unit).join(", ") || "단원 입력 필요"
+    }
+  ];
+
+  if (!items.length) {
+    return (
+      <div className="analysisQuestionEmpty">
+        문항수를 먼저 만들면 문항분석표, 단원별 출제표, 학생 대비전략표가 자동으로 정리됩니다.
+      </div>
+    );
+  }
+
+  return (
+    <div className="analysisQuestionTables">
+      <section>
+        <div className="analysisQuestionTableTitle">
+          <strong>문항분석표</strong>
+          <span>{items.length}문항 · 코멘트 {commentedItems.length}개</span>
+        </div>
+        <div className="analysisPreviewTableWrap">
+          <table className="analysisPreviewTable">
+            <thead>
+              <tr>
+                <th>문항</th>
+                <th>배점</th>
+                <th>단원</th>
+                <th>난이도</th>
+                <th>역할</th>
+                <th>강사 코멘트</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item) => (
+                <tr key={item.questionId}>
+                  <td>{item.number}번</td>
+                  <td>{item.score || "-"}</td>
+                  <td>{item.unit || "-"}</td>
+                  <td>{item.difficulty || "-"}</td>
+                  <td>{item.role || "-"}</td>
+                  <td>{item.teacherComment || item.strategyComment || "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <div className="analysisQuestionTableTitle">
+          <strong>단원별 출제</strong>
+          <span>문항수 기준</span>
+        </div>
+        <div className="analysisPreviewTableWrap">
+          <table className="analysisPreviewTable">
+            <thead>
+              <tr>
+                <th>단원</th>
+                <th>문항수</th>
+                <th>합산 배점</th>
+                <th>고난도/변별</th>
+                <th>문항</th>
+              </tr>
+            </thead>
+            <tbody>
+              {unitRows.map((row) => (
+                <tr key={row.unit}>
+                  <td>{row.unit}</td>
+                  <td>{row.count}</td>
+                  <td>{row.score || "-"}</td>
+                  <td>{row.hard}</td>
+                  <td>{row.questions.map((number) => `${number}번`).join(", ")}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <div className="analysisQuestionTableTitle">
+          <strong>부교재·모의고사 반영</strong>
+          <span>{sourceRows.length}문항</span>
+        </div>
+        <div className="analysisPreviewTableWrap">
+          <table className="analysisPreviewTable">
+            <thead>
+              <tr>
+                <th>문항</th>
+                <th>출처</th>
+                <th>원문항 비교/변형</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sourceRows.length ? sourceRows.map((item) => (
+                <tr key={item.questionId}>
+                  <td>{item.number}번</td>
+                  <td>{item.source}</td>
+                  <td>{item.sourceCompareComment || "비교 코멘트 입력 필요"}</td>
+                </tr>
+              )) : (
+                <tr><td colSpan="3">출처를 입력하면 자동으로 정리됩니다.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <div className="analysisQuestionTableTitle">
+          <strong>학생 대비전략</strong>
+          <span>문항 코멘트 기반</span>
+        </div>
+        <div className="analysisPreviewTableWrap">
+          <table className="analysisPreviewTable">
+            <thead>
+              <tr>
+                <th>대상</th>
+                <th>우선순위</th>
+                <th>적용 문항/단원</th>
+              </tr>
+            </thead>
+            <tbody>
+              {strategyRows.map((row) => (
+                <tr key={row.level}>
+                  <td>{row.level}</td>
+                  <td>{row.focus}</td>
+                  <td>{row.detail}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function ExamStrategyFlow({ questionItems = [] }) {
+  const items = normalizeExamQuestionItems(questionItems);
+  const sourceCount = items.filter((item) => item.source && item.source !== "확인 필요").length;
+  const commentCount = getExamQuestionCommentCount(items);
+  const hardCount = items.filter((item) => ["준킬러", "킬러", "앞번호 고난도", "서술형 변별"].includes(item.role)).length;
+  const nodes = [
+    { title: "1. 시험 범위 정리", detail: "시험관리 탭 범위와 OCR 원문 확인" },
+    { title: "2. 문항별 검수", detail: `${items.length || 0}문항 단원·난이도·역할 확정` },
+    { title: "3. 원문항 비교", detail: sourceCount ? `출처 입력 ${sourceCount}문항` : "부교재/모의고사 원문항 연결" },
+    { title: "4. 변별 문항 훈련", detail: hardCount ? `변별 후보 ${hardCount}문항` : "준킬러/킬러 후보 확정" },
+    { title: "5. 코멘트 기반 보강", detail: commentCount ? `강사 코멘트 ${commentCount}개 반영` : "학생별 오답과 수업 전략 입력" }
+  ];
+  return (
+    <div className="analysisStrategyFlow">
+      {nodes.map((node, index) => (
+        <div className="analysisStrategyNode" key={node.title}>
+          <strong>{node.title}</strong>
+          <span>{node.detail}</span>
+          {index < nodes.length - 1 ? <i aria-hidden="true">→</i> : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function ExamAnalysisFinalReport({ analysis }) {
   const meta = getExamAnalysisReportMeta(analysis);
   const sourceFiles = Array.isArray(analysis.sourceFiles) ? analysis.sourceFiles : [];
@@ -1508,6 +1809,13 @@ function ExamAnalysisFinalReport({ analysis }) {
       <ExamAnalysisReportSection title="6. 핵심 패턴과 다음 시험 예측">
         <ExamAnalysisReportText value={[analysis.fiveCorePatterns, analysis.insightUnits, analysis.insightPrediction, analysis.sourceCheckNotes].filter(Boolean).join("\n\n")} />
       </ExamAnalysisReportSection>
+
+      {normalizeExamQuestionItems(analysis.questionItems).length ? (
+        <ExamAnalysisReportSection title="7. 문항별 검수와 강사 코멘트">
+          <ExamQuestionInsightTables questionItems={analysis.questionItems} />
+          <ExamStrategyFlow questionItems={analysis.questionItems} />
+        </ExamAnalysisReportSection>
+      ) : null}
 
       <section className="examAnalysisReportOutputs">
         <ExamAnalysisReportSection title="학생 분석지">
@@ -5555,6 +5863,7 @@ export function App() {
                 aiStatus: "완료",
                 aiLastRunAt,
                 aiError: "",
+                pipelineStage: "문항 검수",
                 updatedAt: new Date().toISOString()
               }
             : item
@@ -11147,7 +11456,13 @@ function ExamAnalysisCenter({
   const [isReportPreviewOpen, setIsReportPreviewOpen] = useState(false);
   const [isAiInitialViewOpen, setIsAiInitialViewOpen] = useState(false);
   const [outputPreviewId, setOutputPreviewId] = useState("");
+  const [selectedQuestionId, setSelectedQuestionId] = useState("");
+  const [questionCountDraft, setQuestionCountDraft] = useState("22");
+  const [cropDragStart, setCropDragStart] = useState(null);
+  const [cropDraft, setCropDraft] = useState(null);
   const sourceFileInputRef = useRef(null);
+  const questionSourceInputRef = useRef(null);
+  const cropImageRef = useRef(null);
   const normalizedAnalyses = useMemo(
     () => analyses.map((analysis) => {
       const normalized = normalizeExamAnalysisForDisplay(analysis);
@@ -11183,9 +11498,24 @@ function ExamAnalysisCenter({
   const linkedExamPrepRow = selectedAnalysis
     ? examPrepRows.find((row) => row.examPrepId === selectedAnalysis.examPrepId)
     : null;
-  const pipelineStages = ["원본 입력", "분석 검토", "산출물 작성"];
+  const examPrepContext = linkedExamPrepRow ? {
+    schoolName: linkedExamPrepRow.schoolName,
+    grade: linkedExamPrepRow.grade,
+    subject: linkedExamPrepRow.subject,
+    publisher: linkedExamPrepRow.publisher,
+    examCycle: linkedExamPrepRow.examCycle,
+    examPeriod: linkedExamPrepRow.examPeriod,
+    mathExamDate: linkedExamPrepRow.mathExamDate,
+    mathExamDates: normalizeMathExamEntries(linkedExamPrepRow),
+    specialNote: linkedExamPrepRow.specialNote || linkedExamPrepRow.memo || "",
+    scope: linkedExamPrepRow.scope || "",
+    subTextbook: linkedExamPrepRow.subTextbook || "",
+    review: linkedExamPrepRow.revisedReview || linkedExamPrepRow.review || ""
+  } : null;
+  const pipelineStages = ["원본 입력", "문항 검수", "분석 검토", "산출물 작성"];
   const stageAlias = {
     "1차 AI 가안": "원본 입력",
+    "문항분석표 검수": "문항 검수",
     "강사 인사이트 추가": "분석 검토",
     "최종 편집": "산출물 작성",
     "발행 완료": "산출물 작성"
@@ -11194,6 +11524,14 @@ function ExamAnalysisCenter({
     (pipelineStages.includes(selectedAnalysis?.pipelineStage) ? selectedAnalysis.pipelineStage : pipelineStages[0]);
   const statusMeta = selectedAnalysis ? getExamAnalysisStatusMeta(selectedAnalysis) : getExamAnalysisStatusMeta();
   const detailSection = examAnalysisDetailSections.find((section) => section.id === detailSectionId);
+  const questionItems = normalizeExamQuestionItems(selectedAnalysis?.questionItems);
+  const selectedQuestion = questionItems.find((item) => item.questionId === selectedQuestionId) ?? questionItems[0] ?? null;
+  const imageSourceFiles = (selectedAnalysis?.sourceFiles ?? []).filter(isImageExamAnalysisSource);
+  const selectedQuestionSourceFile = selectedQuestion?.cropSourceId
+    ? imageSourceFiles.find((file, index) => getExamAnalysisSourceFileId(file, index) === selectedQuestion.cropSourceId)
+    : imageSourceFiles[0];
+  const selectedQuestionSourceUrl = selectedQuestion?.cropSourceUrl || (selectedQuestionSourceFile ? getExamAnalysisSourceOpenUrl(selectedQuestionSourceFile) : "");
+  const selectedQuestionCropBox = normalizeCropBox(cropDraft || selectedQuestion?.cropBox);
   const folderExamCycleOptions = useMemo(
     () => {
       const year = String(currentExamCycle).split("-")[0] || String(new Date(`${today}T00:00:00+09:00`).getFullYear());
@@ -11224,7 +11562,8 @@ function ExamAnalysisCenter({
         selectedAnalysis.insightKiller ? `# 킬러문항 인사이트\n${selectedAnalysis.insightKiller}` : "",
         selectedAnalysis.insightStudentErrors ? `# 실제 학생 오답\n${selectedAnalysis.insightStudentErrors}` : "",
         selectedAnalysis.insightPrediction ? `# 다음 시험 예측\n${selectedAnalysis.insightPrediction}` : "",
-        selectedAnalysis.insightDirection ? `# 학습 방향\n${selectedAnalysis.insightDirection}` : ""
+        selectedAnalysis.insightDirection ? `# 학습 방향\n${selectedAnalysis.insightDirection}` : "",
+        buildQuestionInsightText(selectedAnalysis.questionItems) ? `# 문항별 강사 코멘트\n${buildQuestionInsightText(selectedAnalysis.questionItems)}` : ""
       ].filter(Boolean).join("\n\n")
     : "";
   const outputPreviewMap = selectedAnalysis ? {
@@ -11281,9 +11620,139 @@ function ExamAnalysisCenter({
     }
   }, [isAnalysisWorkspaceOpen, selectedAnalysis]);
 
+  useEffect(() => {
+    if (!questionItems.length) {
+      if (selectedQuestionId) setSelectedQuestionId("");
+      return;
+    }
+    if (!selectedQuestionId || !questionItems.some((item) => item.questionId === selectedQuestionId)) {
+      setSelectedQuestionId(questionItems[0].questionId);
+    }
+  }, [questionItems, selectedQuestionId]);
+
   function update(field, value) {
     if (!selectedAnalysis) return;
     onUpdateAnalysis(selectedAnalysis.examAnalysisId, field, value);
+  }
+
+  function updateQuestionItems(nextItems) {
+    update("questionItems", normalizeExamQuestionItems(nextItems));
+  }
+
+  function applyQuestionCount() {
+    const nextItems = createExamQuestionItemsFromCount(questionCountDraft, questionItems);
+    updateQuestionItems(nextItems);
+    setSelectedQuestionId(nextItems[0]?.questionId || "");
+  }
+
+  function addQuestionItem() {
+    const nextNumber = (questionItems.at(-1)?.number || questionItems.length) + 1;
+    const nextItem = createExamQuestionItem({ number: nextNumber }, questionItems.length);
+    updateQuestionItems([...questionItems, nextItem]);
+    setSelectedQuestionId(nextItem.questionId);
+  }
+
+  function deleteSelectedQuestion() {
+    if (!selectedQuestion) return;
+    if (!window.confirm(`${selectedQuestion.number}번 문항 카드를 삭제할까요?`)) return;
+    const nextItems = questionItems.filter((item) => item.questionId !== selectedQuestion.questionId);
+    updateQuestionItems(nextItems);
+    setSelectedQuestionId(nextItems[0]?.questionId || "");
+  }
+
+  function updateSelectedQuestion(field, value) {
+    if (!selectedQuestion) return;
+    updateQuestionItems(questionItems.map((item) =>
+      item.questionId === selectedQuestion.questionId ? { ...item, [field]: value } : item
+    ));
+  }
+
+  function appendSelectedQuestionTag(tag) {
+    if (!selectedQuestion) return;
+    const nextTags = Array.from(new Set([...(selectedQuestion.tags ?? []), tag]));
+    const joinedComment = selectedQuestion.teacherComment?.includes(tag)
+      ? selectedQuestion.teacherComment
+      : [selectedQuestion.teacherComment, tag].filter(Boolean).join("\n");
+    updateQuestionItems(questionItems.map((item) =>
+      item.questionId === selectedQuestion.questionId
+        ? { ...item, tags: nextTags, teacherComment: joinedComment }
+        : item
+    ));
+  }
+
+  function assignSourceToSelectedQuestion(sourceId) {
+    if (!selectedQuestion) return;
+    const sourceFile = imageSourceFiles.find((file, index) => getExamAnalysisSourceFileId(file, index) === sourceId);
+    updateQuestionItems(questionItems.map((item) =>
+      item.questionId === selectedQuestion.questionId
+        ? {
+            ...item,
+            cropSourceId: sourceId,
+            cropSourceUrl: sourceFile ? getExamAnalysisSourceOpenUrl(sourceFile) : item.cropSourceUrl
+          }
+        : item
+    ));
+  }
+
+  function getCropPointerPercent(event) {
+    const rect = cropImageRef.current?.getBoundingClientRect();
+    if (!rect) return null;
+    const x = Math.max(0, Math.min(100, ((event.clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((event.clientY - rect.top) / rect.height) * 100));
+    return { x, y };
+  }
+
+  function handleCropPointerDown(event) {
+    if (!selectedQuestion || !selectedQuestionSourceUrl) return;
+    const point = getCropPointerPercent(event);
+    if (!point) return;
+    setCropDragStart(point);
+    setCropDraft({ x: point.x, y: point.y, width: 0, height: 0 });
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  }
+
+  function handleCropPointerMove(event) {
+    if (!cropDragStart) return;
+    const point = getCropPointerPercent(event);
+    if (!point) return;
+    const x = Math.min(cropDragStart.x, point.x);
+    const y = Math.min(cropDragStart.y, point.y);
+    setCropDraft({
+      x,
+      y,
+      width: Math.abs(point.x - cropDragStart.x),
+      height: Math.abs(point.y - cropDragStart.y)
+    });
+  }
+
+  function commitCropDraft() {
+    if (!selectedQuestion || !cropDraft) {
+      setCropDragStart(null);
+      setCropDraft(null);
+      return;
+    }
+    const normalized = normalizeCropBox(cropDraft);
+    if (normalized && normalized.width > 1 && normalized.height > 1) {
+      updateQuestionItems(questionItems.map((item) =>
+        item.questionId === selectedQuestion.questionId
+          ? {
+              ...item,
+              cropBox: normalized,
+              cropSourceId: selectedQuestion.cropSourceId || (selectedQuestionSourceFile ? getExamAnalysisSourceFileId(selectedQuestionSourceFile) : ""),
+              cropSourceUrl: selectedQuestionSourceUrl
+            }
+          : item
+      ));
+    }
+    setCropDragStart(null);
+    setCropDraft(null);
+  }
+
+  function clearSelectedQuestionCrop() {
+    if (!selectedQuestion) return;
+    updateQuestionItems(questionItems.map((item) =>
+      item.questionId === selectedQuestion.questionId ? { ...item, cropBox: null } : item
+    ));
   }
 
   function openAnalysisWorkspace(analysisId = selectedAnalysis?.examAnalysisId) {
@@ -11430,11 +11899,15 @@ function ExamAnalysisCenter({
 
   async function attachSourceFiles(fileList) {
     if (!selectedAnalysis) return;
-    const files = Array.from(fileList ?? []).filter((file) => file?.type === "application/pdf" || file?.name?.toLowerCase().endsWith(".pdf"));
+    const files = Array.from(fileList ?? []).filter((file) =>
+      file?.type === "application/pdf" ||
+      file?.type?.startsWith("image/") ||
+      /\.(pdf|png|jpe?g|webp)$/i.test(file?.name || "")
+    );
     if (!files.length) return;
     update("sourceUploadStatus", files.length > 1
-      ? `${files.length}개 PDF를 Supabase Storage에 업로드하고 텍스트를 추출하는 중입니다...`
-      : "PDF 원본을 Supabase Storage에 업로드하고 텍스트를 추출하는 중입니다...");
+      ? `${files.length}개 원본을 Supabase Storage에 업로드하는 중입니다...`
+      : "원본을 Supabase Storage에 업로드하는 중입니다...");
     try {
       const uploadedFiles = [];
       for (const file of files) {
@@ -11446,7 +11919,9 @@ function ExamAnalysisCenter({
       const inferredMetadata = inferExamAnalysisMetadataFromFileName(firstUploadedFile.fileName);
       const extractionNotes = uploadedFiles.map((uploadedFile) => uploadedFile.extractedText
         ? `[PDF 텍스트 추출] ${uploadedFile.fileName}\n${uploadedFile.extractedText}`
-        : `[PDF 텍스트 추출 없음] ${uploadedFile.fileName}\n스캔 이미지형 PDF일 수 있습니다. OCR 텍스트를 아래에 직접 붙여 넣어 주세요.`);
+        : isImageExamAnalysisSource(uploadedFile)
+          ? `[문항 이미지 원본] ${uploadedFile.fileName}\n문항 검수 단계에서 이 이미지를 띄우고 수동 크롭 영역을 지정할 수 있습니다.`
+          : `[PDF 텍스트 추출 없음] ${uploadedFile.fileName}\n스캔 이미지형 PDF일 수 있습니다. OCR 텍스트를 아래에 직접 붙여 넣어 주세요.`);
       Object.entries(inferredMetadata).forEach(([field, value]) => {
         if (value && !String(selectedAnalysis[field] ?? "").trim()) {
           onUpdateAnalysis(selectedAnalysis.examAnalysisId, field, value);
@@ -11465,7 +11940,7 @@ function ExamAnalysisCenter({
       onUpdateAnalysis(
         selectedAnalysis.examAnalysisId,
         "sourceUploadStatus",
-        `${uploadedFiles.length}개 업로드 완료 · ${uploadedFiles.filter((file) => file.extractedText).length}개 PDF 텍스트 추출 완료`
+        `${uploadedFiles.length}개 업로드 완료 · ${uploadedFiles.filter((file) => file.extractedText).length}개 PDF 텍스트 추출 · ${uploadedFiles.filter(isImageExamAnalysisSource).length}개 이미지 크롭 가능`
       );
     } catch (error) {
       onUpdateAnalysis(selectedAnalysis.examAnalysisId, "sourceUploadStatus", `업로드 실패 · ${error.message}`);
@@ -11636,6 +12111,19 @@ function ExamAnalysisCenter({
                 <strong>{statusMeta.label}</strong>
                 <span>{statusMeta.detail}</span>
               </div>
+              {examPrepContext ? (
+                <div className="analysisExamPrepContext">
+                  <strong>시험관리 데이터 반영</strong>
+                  <span>특이사항: {examPrepContext.specialNote || "미입력"}</span>
+                  <span>시험 범위: {examPrepContext.scope || "미입력"}</span>
+                  <span>부교재: {examPrepContext.subTextbook || "미입력"}</span>
+                </div>
+              ) : (
+                <div className="analysisExamPrepContext muted">
+                  <strong>시험관리 연결 없음</strong>
+                  <span>이 분석지는 학교·학년·과목 메타데이터와 업로드 원본만으로 진행합니다.</span>
+                </div>
+              )}
               <div className="fieldGrid">
                 <div className="linkedExamInfoBox">
                   <span>연결된 시험정보</span>
@@ -11701,7 +12189,7 @@ function ExamAnalysisCenter({
                 <div className="sectionHeader slim">
                   <div>
                     <h2>원본 입력</h2>
-                    <p className="muted">PDF는 1개만 올릴 수도 있고, 같은 학교 3개년처럼 여러 개를 한 번에 올릴 수도 있습니다.</p>
+                    <p className="muted">PDF는 OCR/AI 분석에, 이미지 원본은 문항별 수동 크롭과 코멘트 작성에 사용합니다.</p>
                   </div>
                 </div>
                 <div
@@ -11718,11 +12206,11 @@ function ExamAnalysisCenter({
                   role="button"
                   tabIndex={0}
                 >
-                  <strong>PDF 업로드</strong>
-                  <span>단일 시험지, 3개년 기출, 기존 분석 PDF를 함께 올릴 수 있습니다.</span>
-                  <span className="sourceDropAction">PDF 파일 선택</span>
+                  <strong>원본 업로드</strong>
+                  <span>시험지 PDF, 3개년 기출, 문항 크롭용 이미지 원본을 함께 올릴 수 있습니다.</span>
+                  <span className="sourceDropAction">파일 선택</span>
                   <input
-                    accept="application/pdf"
+                    accept="application/pdf,image/*"
                     className="hiddenFileInput"
                     multiple
                     onChange={handleSourceFileSelect}
@@ -11737,7 +12225,7 @@ function ExamAnalysisCenter({
                       : "sourceUploadStatus"
                     : "sourceUploadStatus ready"
                 }>
-                  {selectedAnalysis.sourceUploadStatus || "대기 · 여기를 클릭하거나 PDF를 여러 개 드롭하면 Storage 저장과 텍스트 추출을 시작합니다."}
+                  {selectedAnalysis.sourceUploadStatus || "대기 · 여기를 클릭하거나 PDF/이미지를 드롭하면 Storage 저장과 텍스트 추출을 시작합니다."}
                 </small>
                 {Array.isArray(selectedAnalysis.sourceFiles) && selectedAnalysis.sourceFiles.length ? (
                   <div className="sourceFileList">
@@ -11763,7 +12251,7 @@ function ExamAnalysisCenter({
                   <button
                     className="primaryButton"
                     disabled={selectedAnalysis.aiStatus === "분석 중"}
-                    onClick={() => onRunAnalysis(selectedAnalysis, aiSettings)}
+                    onClick={() => onRunAnalysis({ ...selectedAnalysis, examPrepContext }, aiSettings)}
                     type="button"
                   >
                     {selectedAnalysis.aiStatus === "분석 중" ? "분석 중..." : "AI 분석 시작"}
@@ -11798,6 +12286,244 @@ function ExamAnalysisCenter({
                     />
                   </label>
                 </details>
+            </section>
+            ) : null}
+
+            {currentStage === "문항 검수" ? (
+            <section className="analysisQuestionStage">
+              <article className="panel analysisQuestionSetupPanel">
+                <div>
+                  <p className="eyebrow">QUESTION REVIEW</p>
+                  <h2>문항분석표 검수</h2>
+                  <p className="muted">AI/OCR 초안은 참고만 하고, 문항별 단원·난이도·변별 이유·강사 코멘트를 직접 확정합니다.</p>
+                </div>
+                <div className="analysisQuestionSetupActions">
+                  <label>
+                    문항 수
+                    <input
+                      min="1"
+                      max="80"
+                      type="number"
+                      value={questionCountDraft}
+                      onChange={(event) => setQuestionCountDraft(event.target.value)}
+                    />
+                  </label>
+                  <button className="primaryButton" onClick={applyQuestionCount} type="button">문항 카드 만들기</button>
+                  <button className="softButton" onClick={addQuestionItem} type="button">문항 추가</button>
+                  <button className="softButton danger" disabled={!selectedQuestion} onClick={deleteSelectedQuestion} type="button">선택 문항 삭제</button>
+                  <button className="softButton" onClick={() => questionSourceInputRef.current?.click()} type="button">이미지 원본 추가</button>
+                  <input
+                    accept="application/pdf,image/*"
+                    className="hiddenFileInput"
+                    multiple
+                    onChange={handleSourceFileSelect}
+                    ref={questionSourceInputRef}
+                    type="file"
+                  />
+                </div>
+              </article>
+
+              <div className="analysisQuestionWorkspace">
+                <article className="panel analysisQuestionSourcePanel">
+                  <div className="sectionHeader slim">
+                    <div>
+                      <h2>원문항 화면</h2>
+                      <p className="muted">이미지 원본 위에서 드래그하면 선택 문항의 크롭 영역이 저장됩니다.</p>
+                    </div>
+                    {selectedQuestionCropBox ? <span className="countBadge">크롭 저장됨</span> : <span className="countBadge mutedBadge">크롭 대기</span>}
+                  </div>
+
+                  {imageSourceFiles.length ? (
+                    <label className="wideLabel">
+                      문항 이미지 원본
+                      <select
+                        value={selectedQuestion?.cropSourceId || (selectedQuestionSourceFile ? getExamAnalysisSourceFileId(selectedQuestionSourceFile) : "")}
+                        onChange={(event) => assignSourceToSelectedQuestion(event.target.value)}
+                      >
+                        {imageSourceFiles.map((file, index) => {
+                          const sourceId = getExamAnalysisSourceFileId(file, index);
+                          return <option key={sourceId} value={sourceId}>{file.fileName || `이미지 ${index + 1}`}</option>;
+                        })}
+                      </select>
+                    </label>
+                  ) : null}
+
+                  {selectedQuestionSourceUrl ? (
+                    <div
+                      className="questionCropCanvas"
+                      onPointerDown={handleCropPointerDown}
+                      onPointerMove={handleCropPointerMove}
+                      onPointerUp={commitCropDraft}
+                      onPointerCancel={commitCropDraft}
+                    >
+                      <img alt="시험지 원본" draggable={false} ref={cropImageRef} src={selectedQuestionSourceUrl} />
+                      {selectedQuestionCropBox ? (
+                        <span
+                          className="questionCropBox"
+                          style={{
+                            left: `${selectedQuestionCropBox.x}%`,
+                            top: `${selectedQuestionCropBox.y}%`,
+                            width: `${selectedQuestionCropBox.width}%`,
+                            height: `${selectedQuestionCropBox.height}%`
+                          }}
+                        />
+                      ) : null}
+                    </div>
+                  ) : (
+                    <div className="analysisQuestionEmpty">
+                      PDF는 기존처럼 원본 열기와 OCR 분석에 사용됩니다. 문항을 화면에서 직접 크롭하려면 시험지 페이지를 이미지로 추가해 주세요.
+                    </div>
+                  )}
+
+                  <div className="analysisQuestionCropActions">
+                    <span>{selectedQuestion ? `${selectedQuestion.number}번 문항 영역` : "문항을 선택하세요."}</span>
+                    <button className="softButton" disabled={!selectedQuestionCropBox} onClick={clearSelectedQuestionCrop} type="button">크롭 지우기</button>
+                    {selectedQuestionSourceUrl ? (
+                      <a className="softButton linkButton" href={selectedQuestionSourceUrl} rel="noreferrer" target="_blank">원본 열기</a>
+                    ) : null}
+                  </div>
+                </article>
+
+                <article className="panel analysisQuestionEditorPanel">
+                  <div className="sectionHeader slim">
+                    <div>
+                      <h2>문항별 코멘트</h2>
+                      <p className="muted">단원 분류 수정과 문항별 코멘트가 그대로 강사 인사이트로 남습니다.</p>
+                    </div>
+                    <span className="countBadge">{questionItems.length}문항</span>
+                  </div>
+
+                  {questionItems.length ? (
+                    <div className="analysisQuestionList">
+                      {questionItems.map((item) => (
+                        <button
+                          className={selectedQuestion?.questionId === item.questionId ? "analysisQuestionListItem active" : "analysisQuestionListItem"}
+                          key={item.questionId}
+                          onClick={() => setSelectedQuestionId(item.questionId)}
+                          type="button"
+                        >
+                          <strong>{item.number}번</strong>
+                          <span>{[item.score && `${item.score}점`, item.unit || "단원 미입력", item.role].filter(Boolean).join(" · ")}</span>
+                          <small>{item.teacherComment ? "코멘트 있음" : "코멘트 대기"} · {item.cropBox ? "크롭 있음" : "크롭 없음"}</small>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="analysisQuestionEmpty">문항 수를 입력하고 문항 카드를 먼저 만들어 주세요.</div>
+                  )}
+
+                  {selectedQuestion ? (
+                    <div className="analysisQuestionForm">
+                      <div className="fieldGrid three">
+                        <label>
+                          문항
+                          <input
+                            type="number"
+                            value={selectedQuestion.number}
+                            onChange={(event) => updateSelectedQuestion("number", Number(event.target.value) || "")}
+                          />
+                        </label>
+                        <label>
+                          페이지
+                          <input
+                            type="number"
+                            value={selectedQuestion.page}
+                            onChange={(event) => updateSelectedQuestion("page", Number(event.target.value) || "")}
+                          />
+                        </label>
+                        <label>
+                          배점
+                          <input value={selectedQuestion.score} onChange={(event) => updateSelectedQuestion("score", event.target.value)} placeholder="예: 5" />
+                        </label>
+                        <label>
+                          유형
+                          <select value={selectedQuestion.questionType} onChange={(event) => updateSelectedQuestion("questionType", event.target.value)}>
+                            {examQuestionTypeOptions.map((option) => <option key={option}>{option}</option>)}
+                          </select>
+                        </label>
+                        <label>
+                          난이도
+                          <select value={selectedQuestion.difficulty} onChange={(event) => updateSelectedQuestion("difficulty", event.target.value)}>
+                            {examQuestionDifficultyOptions.map((option) => <option key={option}>{option}</option>)}
+                          </select>
+                        </label>
+                        <label>
+                          역할
+                          <select value={selectedQuestion.role} onChange={(event) => updateSelectedQuestion("role", event.target.value)}>
+                            {examQuestionRoleOptions.map((option) => <option key={option}>{option}</option>)}
+                          </select>
+                        </label>
+                        <label>
+                          단원
+                          <input value={selectedQuestion.unit} onChange={(event) => updateSelectedQuestion("unit", event.target.value)} placeholder="예: 이차함수의 최대최소" />
+                        </label>
+                        <label>
+                          출처
+                          <select value={selectedQuestion.source} onChange={(event) => updateSelectedQuestion("source", event.target.value)}>
+                            {examQuestionSourceOptions.map((option) => <option key={option}>{option}</option>)}
+                          </select>
+                        </label>
+                        <label>
+                          정답률/체감
+                          <input value={selectedQuestion.correctRate} onChange={(event) => updateSelectedQuestion("correctRate", event.target.value)} placeholder="예: 낮음, 40%" />
+                        </label>
+                      </div>
+                      <div className="analysisQuestionQuickTags">
+                        {["앞번호인데 어려움", "실수 많음", "정답률 낮음", "시간 압박", "조건 해석", "서술형 감점", "변별 문항"].map((tag) => (
+                          <button key={tag} onClick={() => appendSelectedQuestionTag(tag)} type="button">{tag}</button>
+                        ))}
+                      </div>
+                      <label className="wideLabel">
+                        OCR/문항 텍스트
+                        <textarea
+                          value={selectedQuestion.ocrText}
+                          onChange={(event) => updateSelectedQuestion("ocrText", event.target.value)}
+                          placeholder="문항 OCR 텍스트나 조건을 붙여 넣습니다."
+                          rows="3"
+                        />
+                      </label>
+                      <label className="wideLabel">
+                        강사 코멘트
+                        <textarea
+                          value={selectedQuestion.teacherComment}
+                          onChange={(event) => updateSelectedQuestion("teacherComment", event.target.value)}
+                          placeholder="예: 앞번호지만 조건 해석 때문에 실수가 많았고, 중위권 정답률이 낮을 문항."
+                          rows="4"
+                        />
+                      </label>
+                      <label className="wideLabel">
+                        부교재·모의고사 원문항 비교
+                        <textarea
+                          value={selectedQuestion.sourceCompareComment}
+                          onChange={(event) => updateSelectedQuestion("sourceCompareComment", event.target.value)}
+                          placeholder="원문항과 실제 출제 문항의 조건/숫자/아이디어 변형을 적습니다."
+                          rows="3"
+                        />
+                      </label>
+                      <label className="wideLabel">
+                        대비 전략
+                        <textarea
+                          value={selectedQuestion.strategyComment}
+                          onChange={(event) => updateSelectedQuestion("strategyComment", event.target.value)}
+                          placeholder="다음 수업, 직전보강, 숙제에서 어떻게 다룰지 적습니다."
+                          rows="3"
+                        />
+                      </label>
+                    </div>
+                  ) : null}
+                </article>
+              </div>
+
+              <article className="panel analysisQuestionSummaryPanel">
+                <div className="sectionHeader slim">
+                  <div>
+                    <h2>표와 대비전략 흐름도</h2>
+                    <p className="muted">문항별 카드가 채워질수록 표와 흐름도가 자동으로 정리됩니다.</p>
+                  </div>
+                </div>
+                <ExamQuestionInsightTables questionItems={questionItems} />
+                <ExamStrategyFlow questionItems={questionItems} />
+              </article>
             </section>
             ) : null}
 
