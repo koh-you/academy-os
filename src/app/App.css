@@ -6580,6 +6580,19 @@ button:disabled {
   justify-content: space-between;
 }
 
+.noticeListHeader > div {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.noticeListHeader > div:first-child {
+  align-items: start;
+  display: grid;
+  gap: 2px;
+}
+
 .noticeListHeader strong {
   color: #17213d;
   font-size: 14px;
@@ -6605,25 +6618,6 @@ button:disabled {
 .noticeStudentOption.active {
   background: #eef2ff;
   border-color: #818cf8;
-}
-
-.noticeStudentOptionReadonly {
-  background: #ffffff;
-  grid-template-columns: 32px minmax(0, 1fr);
-}
-
-.noticeStudentAvatar {
-  align-items: center;
-  background: #eef2ff;
-  border: 1px solid #c7d2fe;
-  border-radius: 999px;
-  color: #312e81;
-  display: inline-flex;
-  font-size: 13px;
-  font-weight: 900;
-  height: 32px;
-  justify-content: center;
-  width: 32px;
 }
 
 .noticeRecipientBadges {
