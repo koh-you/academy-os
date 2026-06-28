@@ -706,8 +706,56 @@ function safeParseJsonText(text) {
   }
 }
 
+function normalizeQuestionInfoAiItemsFromText(text) {
+  const parsed = safeParseJsonText(text);
+  const parsedItems = normalizeQuestionItemsFromAi(extractQuestionItemsFromParsed(parsed));
+  if (parsedItems.length) return parsedItems;
+  return normalizeQuestionItemsFromAi(extractQuestionItemsFromLooseText(text));
+}
+
+function buildQuestionInfoRepairPrompt(payload, aiText) {
+  const targetCount = Math.max(1, Math.min(80, Number(payload.questionTargetCount) || (Array.isArray(payload.questionItems) ? payload.questionItems.length : 0) || 20));
+  const currentItems = Array.isArray(payload.questionItems) ? payload.questionItems : [];
+  return [
+    "아래 AI 응답을 웹앱이 읽을 수 있는 순수 JSON으로만 복구하세요.",
+    `questionItems는 반드시 1번부터 ${targetCount}번까지 포함합니다.`,
+    "추론을 새로 길게 하지 말고 기존 응답과 현재 문항카드의 값을 구조화합니다.",
+    "단원/난이도/쎈 유형을 응답에서 찾지 못한 문항은 확인 필요로 둡니다.",
+    "",
+    "[현재 문항카드]",
+    currentItems.slice(0, targetCount).map((item, index) => {
+      const number = Number(item.number || item.questionNumber || index + 1) || index + 1;
+      const snippet = String(item.ocrText || "").replace(/\s+/g, " ").trim().slice(0, 300);
+      return `${number}번 | page=${item.page || 1} | score=${item.score || ""} | questionType=${item.questionType || "확인 필요"} | ocr=${snippet}`;
+    }).join("\n") || "현재 문항카드 없음",
+    "",
+    "[복구할 AI 응답]",
+    String(aiText || "").slice(0, 12000),
+    "",
+    "반환 형식은 아래 JSON 하나뿐입니다.",
+    "{",
+    '  "questionItems": [',
+    '    { "number": 1, "page": 1, "score": "기존값 또는 확인 필요", "questionType": "객관식", "unit": "확인 필요", "difficulty": "확인 필요", "role": "기본", "source": "확인 필요", "ocrText": "짧은 요약", "strategyComment": "검수 포인트", "ssenTypeTags": [], "tags": [] }',
+    "  ]",
+    "}"
+  ].join("\n");
+}
+
 function outputTextFromOpenAi(data) {
-  return data.output_text ?? data.output?.[0]?.content?.[0]?.text ?? "";
+  if (data.output_text) return data.output_text;
+  const texts = [];
+  if (Array.isArray(data.output)) {
+    data.output.forEach((item) => {
+      if (typeof item?.content === "string") texts.push(item.content);
+      if (Array.isArray(item?.content)) {
+        item.content.forEach((block) => {
+          const text = block?.text || block?.output_text || block?.content;
+          if (typeof text === "string") texts.push(text);
+        });
+      }
+    });
+  }
+  return texts.join("\n").trim();
 }
 
 function outputTextFromAnthropic(data) {
@@ -1004,16 +1052,25 @@ function extractQuestionItemsFromParsed(parsed) {
   if (!parsed || typeof parsed !== "object") return [];
   const directCandidates = [
     parsed.questionItems,
+    parsed.question_items,
     parsed.questions,
     parsed.items,
     parsed.questionItemDrafts,
     parsed.questionCards,
+    parsed.analysis?.questionItems,
+    parsed.answer?.questionItems,
+    parsed.response?.questionItems,
+    parsed.output?.questionItems,
     parsed["문항정보"],
     parsed["문항카드"],
+    parsed["문항별정보"],
+    parsed["문항목록"],
     parsed.result?.questionItems,
     parsed.result?.questions,
+    parsed.result?.items,
     parsed.data?.questionItems,
-    parsed.data?.questions
+    parsed.data?.questions,
+    parsed.data?.items
   ];
   for (const candidate of directCandidates) {
     if (Array.isArray(candidate)) return candidate;
@@ -1024,6 +1081,55 @@ function extractQuestionItemsFromParsed(parsed) {
   }
   if (parsed.questionItem && typeof parsed.questionItem === "object") return [parsed.questionItem];
   return [];
+}
+
+function extractQuestionItemsFromLooseText(text = "") {
+  const lines = String(text ?? "")
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const itemsByNumber = new Map();
+
+  lines.forEach((line) => {
+    const numberMatch = line.match(/(?:^|[\s|,])(?:문항\s*)?(\d{1,2})\s*(?:번|[.)])/);
+    if (!numberMatch) return;
+    const number = Number(numberMatch[1]);
+    if (!number || number > 80) return;
+
+    const scoreMatch = line.match(/(?:배점|score|points)\s*[:：]?\s*([0-9]+(?:\.[0-9]+)?\s*점?)/i) || line.match(/[\[(（]\s*([0-9]+(?:\.[0-9]+)?\s*점)\s*[\])）]/);
+    const unitMatch = line.match(/(?:단원|unit|chapter|topic)\s*[:：]\s*([^|,/，]+?)(?=\s*(?:난이도|difficulty|쎈|ssen|역할|role|태그|tags|$))/i);
+    const difficultyMatch = line.match(/(?:난이도|difficulty)\s*[:：]?\s*(확인\s*필요|중상|중하|상|중|하)/i);
+    const roleMatch = line.match(/(?:역할|role)\s*[:：]?\s*(기본|실수유도|앞번호\s*고난도|준킬러|킬러|서술형\s*변별|확인\s*필요)/i);
+    const questionTypeMatch = line.match(/(?:문항\s*형식|형식|questionType|type)\s*[:：]?\s*(객관식|단답형|서술형|논술형|확인\s*필요)/i);
+    const ssenCodeMatch = line.match(/\bSSEN-[A-Z0-9-]+/i);
+    const ssenRow = ssenCodeMatch ? ssenTypeByCode.get(ssenCodeMatch[0].toUpperCase()) : null;
+
+    const nextItem = {
+      number,
+      score: scoreMatch?.[1] ? String(scoreMatch[1]).replace(/\s+/g, "") : "",
+      questionType: questionTypeMatch?.[1]?.replace(/\s+/g, " ") || "",
+      unit: unitMatch?.[1]?.trim() || ssenRow?.unitName || "",
+      difficulty: difficultyMatch?.[1]?.replace(/\s+/g, " ") || "",
+      role: roleMatch?.[1]?.replace(/\s+/g, " ") || "",
+      strategyComment: line.slice(0, 240),
+      ssenTypeTags: ssenRow
+        ? [{
+            role: "primary",
+            typeCode: ssenRow.typeCode,
+            typeName: ssenRow.typeName,
+            unitName: ssenRow.unitName,
+            confidence: "중",
+            reason: "AI 응답 텍스트의 쎈 유형 코드에서 복구"
+          }]
+        : []
+    };
+
+    if ([nextItem.unit, nextItem.difficulty, nextItem.role, nextItem.ssenTypeTags.length].some(Boolean)) {
+      itemsByNumber.set(number, { ...(itemsByNumber.get(number) || {}), ...nextItem });
+    }
+  });
+
+  return Array.from(itemsByNumber.values()).sort((a, b) => Number(a.number) - Number(b.number));
 }
 
 function normalizeAnalysisFields(fields, payload, rawText = "") {
@@ -1249,8 +1355,26 @@ export async function runExamQuestionInfoText(payload) {
       : "";
 
   if (!text) throw new Error(`지원하지 않는 AI 제공자입니다: ${provider}`);
-  const parsed = safeParseJsonText(text);
-  const questionItems = normalizeQuestionItemsFromAi(extractQuestionItemsFromParsed(parsed));
+  let questionItems = normalizeQuestionInfoAiItemsFromText(text);
+  let repairText = "";
+  let repaired = false;
+  if (!questionItems.length) {
+    try {
+      const repairPrompt = buildQuestionInfoRepairPrompt(payload, text);
+      repairText = provider === "openai"
+        ? await runOpenAiText(repairPrompt, model, 6000)
+        : provider === "anthropic"
+          ? await runAnthropicText(repairPrompt, model, 6000)
+          : "";
+      const repairedItems = normalizeQuestionInfoAiItemsFromText(repairText);
+      if (repairedItems.length) {
+        questionItems = repairedItems;
+        repaired = true;
+      }
+    } catch (repairError) {
+      repairText = `복구 요청 실패: ${repairError.message}`;
+    }
+  }
   const targetCount = Math.max(1, Math.min(80, Number(payload.questionTargetCount) || fallbackItems.length || 20));
   const warning = questionItems.length < targetCount
     ? `AI 응답 문항정보가 ${questionItems.length}/${targetCount}개라 OCR 기반 기본정보를 함께 유지했습니다.`
@@ -1260,7 +1384,9 @@ export async function runExamQuestionInfoText(payload) {
     provider,
     model,
     fields: { questionItems: questionItems.length ? questionItems : fallbackItems },
-    rawText: text,
+    rawText: repairText ? `${text}\n\n[repair]\n${repairText}` : text,
+    aiItemCount: questionItems.length,
+    repaired,
     ...(warning ? { warning } : {})
   };
 }

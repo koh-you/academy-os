@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-28 P1. 시험분석 문항정보 AI 응답 복구 보강
+
+- 상태: 완료
+- 사용자 요청: `AI 문항정보 채우기` 후 배점은 일부 채워졌지만 단원, 난이도, 쎈 유형은 그대로 비어 있고 화면에 `AI 응답 문항정보가 0/20개`로 표시된다.
+- 원인/판단: OCR 기반 기본 카드는 저장됐지만 서버가 AI 응답에서 `questionItems` JSON 배열을 파싱하지 못하면 바로 0개로 처리했다. AI가 JSON을 조금 다르게 감싸거나 표/설명 형태로 반환하면 보강 데이터가 있어도 병합되지 않을 수 있다.
+- 이번 작업 결과: AI 응답 파서를 더 넓히고, `questionItems`를 못 찾으면 같은 응답을 순수 JSON으로 복구하는 재시도를 한 번 수행한다. OpenAI 응답 텍스트 추출도 복수 output/content 블록을 모두 읽도록 보강했다. 복구 성공 여부와 실제 AI 파싱 문항 수를 프론트 상태 문구에 표시한다.
+- 저장 주의: 기존 `examAnalyses.questionItems`, `aiInitialFields.questionItems` app_state 저장 경로를 그대로 사용한다. 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check api/routes/examAnalysis.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production`, `npm run build` 통과(total 231, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-28 P1. 시험분석 문항정보 OCR 우선 하이브리드 채우기
 
 - 상태: 완료

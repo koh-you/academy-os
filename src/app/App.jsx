@@ -14124,6 +14124,7 @@ function ExamAnalysisCenter({
       update("pipelineStage", "문항 검수");
 
       const scoreCount = mergedActiveItems.filter((item) => item.score).length;
+      const aiParsedCount = Math.max(0, Number(result?.aiItemCount) || 0);
       const aiFilledCount = aiItems.filter((item) =>
         [
           item.unit,
@@ -14131,8 +14132,9 @@ function ExamAnalysisCenter({
           item.ssenTypeTags?.length
         ].some(Boolean)
       ).length;
+      const repairText = result?.repaired ? " · 응답 복구 적용" : "";
       const warningText = result?.warning ? ` · ${result.warning}` : "";
-      setCropDraftStatus(`문항정보 채우기 완료 · 카드 ${mergedActiveItems.length}개 · 배점 ${scoreCount}개 · AI 보강 ${aiFilledCount}개${warningText}`);
+      setCropDraftStatus(`문항정보 채우기 완료 · 카드 ${mergedActiveItems.length}개 · 배점 ${scoreCount}개 · AI 응답 ${aiParsedCount}개 · AI 보강 ${aiFilledCount}개${repairText}${warningText}`);
     } catch (error) {
       update("aiStatus", "완료");
       update("aiError", "");
