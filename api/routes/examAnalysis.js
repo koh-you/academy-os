@@ -79,12 +79,13 @@ function resolveSsenTypeRowsForPrompt(payload = {}) {
   const bookCodes = resolveSsenBookCodes(payload);
   if (bookCodes.length) return ssenTypeIndex.filter((row) => bookCodes.includes(row.bookCode));
   const text = normalizeCompactText(getSsenSearchText(payload));
-  if (!text) return [];
-  return ssenTypeIndex.filter((row) => {
+  if (!text) return ssenTypeIndex;
+  const matchedRows = ssenTypeIndex.filter((row) => {
     const unitName = normalizeCompactText(row.unitName);
     const partName = normalizeCompactText(row.partName);
     return (unitName && text.includes(unitName)) || (partName && text.includes(partName));
   });
+  return matchedRows.length ? matchedRows : ssenTypeIndex;
 }
 
 function buildSsenTypePromptSection(payload = {}) {
@@ -105,18 +106,20 @@ function buildSsenTypePromptSection(payload = {}) {
   if (!uniqueRows.length) {
     return [
       "[쎈 유형 기준표]",
-      "과목/범위에서 특정 쎈 교재를 확정하지 못했다. questionItems.ssenTypeTags는 무리하게 만들지 말고 빈 배열로 두며, 단원명과 유형명만 원본 기준으로 초안 작성한다.",
+      "과목/범위에서 특정 쎈 교재를 확정하지 못했다. 그래도 questionItems.ssenTypeTags는 비워두지 말고 지원 교재 범위 안에서 가장 가까운 쎈 유형 후보를 자동 매칭한다.",
       `지원 교재: ${bookSummary}`
     ].join("\n");
   }
 
   return [
     "[쎈 유형 기준표]",
-    "아래 기준표는 문항별 쎈 유형 분류에만 사용한다. 문제 원문이나 해설을 만들지 말고 typeCode, unitName, typeName 메타데이터만 참조한다.",
+    uniqueRows.length === ssenTypeIndex.length
+      ? "과목/범위를 좁히지 못해 전체 쎈 유형 기준표를 제공한다. 문항 조건, 단원명, 풀이 행동을 비교해 가장 가까운 쎈 유형을 자동 후보로 매칭한다."
+      : "아래 기준표는 문항별 쎈 유형 분류에만 사용한다. 문제 원문이나 해설을 만들지 말고 typeCode, bookTitle, unitName, typeName 메타데이터만 참조한다.",
     "questionItems.ssenTypeTags에는 반드시 아래 typeCode 중 하나를 사용한다. 단순 문항은 primary 1개, 복합 문항은 primary 1개와 secondary 1~2개까지 넣는다.",
-    "확신이 낮으면 confidence를 '중' 또는 '하'로 낮추고 reason에 강사 확인 포인트를 짧게 쓴다. 기준표와 맞지 않으면 ssenTypeTags는 빈 배열로 둔다.",
-    "형식: typeCode | unitName | typeName",
-    uniqueRows.map((row) => `${row.typeCode} | ${row.unitName} | ${row.typeName}`).join("\n")
+    "확신이 낮으면 confidence를 '중' 또는 '하'로 낮추고 reason에 강사 확인 포인트를 짧게 쓴다. 정말 판별이 불가능한 경우에만 ssenTypeTags를 빈 배열로 둔다.",
+    "형식: typeCode | bookTitle | unitName | typeName",
+    uniqueRows.map((row) => `${row.typeCode} | ${row.bookTitle} | ${row.unitName} | ${row.typeName}`).join("\n")
   ].join("\n");
 }
 
@@ -253,7 +256,8 @@ function defaultExamAnalysisPromptForServer() {
     "여러 해 시험지가 함께 들어온 경우 questionItems는 웹앱에서 현재 선택한 시험지/연도 1회분의 전체 문항 수만큼 작성하고, 3개년 반복/증감/변화는 unitDistribution, typeClassification, killerProblems, sourceCheckNotes에 정리한다.",
     "일부 페이지만 보이거나 OCR 일부만 있더라도 확인 가능한 전체 문항 수를 기준으로 questionItems를 만들고, 모르는 값은 '확인 필요'로 둔다.",
     "문항 태그 기준: 기본문항, 실수문항, 주요문항, 1등급 변별문항, 2등급 변별문항, 숫자변형문항, 조건변형문항, 유사유형문항, 교과서 연계, 부교재 연계, EBS 연계, 모의고사 연계.",
-    "쎈 유형 기준표가 제공되면 questionItems.ssenTypeTags에 주유형(primary) 1개와 필요 시 보조유형(secondary) 1~2개를 typeCode/typeName/unitName으로 넣는다.",
+    "쎈 유형은 강사가 수동 입력하기 전에 AI가 먼저 자동 매칭한다. 쎈 유형 기준표가 제공되면 문항 조건, 단원, 풀이 행동을 기준표와 비교해 questionItems.ssenTypeTags에 주유형(primary) 1개와 필요 시 보조유형(secondary) 1~2개를 typeCode/typeName/unitName으로 넣는다.",
+    "정확히 확정하기 어렵더라도 가장 가까운 후보를 confidence '중' 또는 '하'로 제안하고, 정말 판별 불가능한 경우에만 빈 배열로 둔다.",
     "",
     "[작성 원칙]",
     "시험관리 탭 데이터가 있으면 특이사항, 시험 범위, 부교재, 시험 일정, 시험 후 총평을 반영한다.",
@@ -336,9 +340,10 @@ function buildExamAnalysisPrompt(payload) {
     "- questionItems의 similarProblemNeeded는 확인 필요, 필요, 불필요 중 하나로 쓴다.",
     "- questionItems의 similarProblemRelation은 확인 필요, 숫자변형, 조건변형, 유사유형, 기타 중 하나로 쓴다.",
     "- questionItems의 similarProblemSource에는 유사문항 분석지, 나만의DB, 부교재, 모의고사 등 출처 메모 후보를 쓴다.",
+    "- 쎈 유형은 AI가 먼저 자동 매칭한다. 문항 조건, 단원명, 풀이 행동을 기준표와 비교해 가장 가까운 후보를 고른다.",
     "- questionItems의 ssenTypeTags는 쎈 유형 기준표 기반 태그 배열이다. 각 항목은 role(primary/secondary), typeCode, typeName, unitName, confidence(상/중/하/확인 필요), reason을 포함한다.",
     "- 단순 문항은 ssenTypeTags에 primary 1개만 넣고, 여러 개념이 결합된 문항은 primary 1개와 secondary 1~2개를 넣는다.",
-    "- ssenTypeTags.typeCode는 제공된 쎈 유형 기준표에 있는 코드만 사용한다. 기준표와 맞지 않으면 빈 배열로 둔다.",
+    "- ssenTypeTags.typeCode는 제공된 쎈 유형 기준표에 있는 코드만 사용한다. 확신이 낮으면 빈 배열로 두지 말고 confidence를 낮추고 reason에 확인 포인트를 적는다. 정말 판별 불가능한 경우에만 빈 배열로 둔다.",
     "- 유사문항 본문 전체를 questionItems에 넣지 않는다. 웹앱에는 유사문항 필요 여부, 출처, 변형 구분 메타데이터만 넣는다.",
     "- 유사문항 분석지나 교과서/부교재/EBS/모의고사 연계가 확인되면 해당 내용을 questionItems.tags에도 태그로 기록한다.",
     "- 문항 카드는 강사가 웹앱 문항 검수 단계에서 확정한다. AI는 배점/단원/난이도/역할/태그/검수 포인트의 1차 초안을 만든다.",

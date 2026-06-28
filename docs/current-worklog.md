@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-28 P1. 시험분석 PDF별 문항 메타데이터와 쎈 유형 자동 매칭 보강
+
+- 상태: 완료
+- 사용자 요청: PDF마다 문항 메타데이터를 다르게 가져가야 하는데 여전히 총합 문항 수로 나타난다. 쎈 유형은 사람이 고르는 것이 아니라 AI가 자동으로 찾아서 매칭해야 한다.
+- 원인: 문항 검수 화면에서 현재 PDF의 `questionCompositionsBySource`가 없으면 전체 `questionComposition`을 fallback으로 사용해, 여러 PDF 중 한 원본을 선택해도 총합 문항 수가 표시될 수 있었다. 또한 쎈 유형 기준표를 과목/범위로 좁히지 못하면 서버 프롬프트가 `ssenTypeTags`를 빈 배열로 두라고 안내할 수 있었다.
+- 이번 작업 결과: 원본이 2개 이상이면 현재 PDF의 원본별 메타데이터 또는 원본별 문항카드 수를 우선 표시하고, 전체 문항 수 fallback은 사용하지 않도록 수정했다. 현재 원본에 이미 22개 문항카드가 있으면 상단 메타데이터와 문항 수 입력도 22 기준으로 잡힌다.
+- 쎈 유형 AI 매칭: 서버가 과목/범위를 좁히지 못해도 전체 쎈 유형 기준표를 제공하고, AI가 문항 조건·단원명·풀이 행동을 비교해 `questionItems.ssenTypeTags`의 주유형/보조유형 후보를 자동 매칭하도록 프롬프트를 강화했다. 확신이 낮으면 빈칸이 아니라 confidence를 낮추고 reason에 확인 포인트를 남긴다.
+- 저장 주의: 기존 `examAnalyses` app_state 안의 `questionCompositionsBySource`, `questionTargetCountsBySource`, `questionItems.ssenTypeTags`를 사용한다. 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check api/routes/examAnalysis.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production`, `npm run build` 통과(total 224, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-28 P1. 알림관리 전체·학부모·학생 모드 명단 표시
 
 - 상태: 완료
