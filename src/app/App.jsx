@@ -7660,7 +7660,16 @@ export function App() {
     try {
       const result = await postJson("/api/ai/exam-analysis", nextAnalysis);
       const normalizedAiFields = normalizeExamAnalysisAiFields(result.result.fields);
-      const { questionItems: aiQuestionItems = [], ...analysisAiFields } = normalizedAiFields;
+      const { questionItems: aiQuestionItems = [], ...rawAnalysisAiFields } = normalizedAiFields;
+      const analysisAiFields = nextAnalysis.questionInfoOnly
+        ? {
+            ...(rawAnalysisAiFields.questionComposition ? { questionComposition: rawAnalysisAiFields.questionComposition } : {}),
+            ...(rawAnalysisAiFields.sourceCompositions ? { sourceCompositions: rawAnalysisAiFields.sourceCompositions } : {})
+          }
+        : rawAnalysisAiFields;
+      if (nextAnalysis.questionInfoOnly && aiQuestionItems.length === 0) {
+        throw new Error("AI가 문항정보를 반환하지 않았습니다. 원본 OCR 상태를 확인한 뒤 다시 실행해 주세요.");
+      }
       const aiLastRunAt = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
       const questionSourceContext = getExamAnalysisQuestionSourceContext(nextAnalysis);
       const activeAiSourceId = nextAnalysis.questionSourceId || "";
@@ -13951,6 +13960,7 @@ function ExamAnalysisCenter({
       questionSourceId: resolvedQuestionSourceId,
       questionSourceUrl: selectedQuestionSourceUrl,
       questionTargetCount: Math.max(requestedCount, targetItems.length),
+      questionInfoOnly: true,
       questionTargetCountsBySource: {
         ...questionTargetCountsBySource,
         [resolvedQuestionSourceId]: Math.max(requestedCount, targetItems.length)

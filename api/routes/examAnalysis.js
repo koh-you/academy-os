@@ -436,6 +436,112 @@ function buildExamAnalysisPrompt(payload) {
   ].join("\n");
 }
 
+function buildQuestionItemsPrompt(payload) {
+  const examPrepContext = payload.examPrepContext && typeof payload.examPrepContext === "object" ? payload.examPrepContext : null;
+  const scopedRawExamText = limitPromptText(payload.rawExamText || "");
+  const targetCount = Math.max(
+    1,
+    Math.min(
+      80,
+      Number(payload.questionTargetCount) ||
+        (Array.isArray(payload.questionItems) ? payload.questionItems.length : 0) ||
+        20
+    )
+  );
+  const sourceFileLines = Array.isArray(payload.sourceFiles)
+    ? payload.sourceFiles.map((file, index) => {
+        const sourceId = file.sourceId || file.storagePath || file.signedUrl || file.fileName || `source_${index}`;
+        return `${index + 1}. sourceId=${sourceId} · ${file.fileName || file.storagePath || "원본"}`;
+      }).join(" / ")
+    : "";
+  const currentItems = Array.isArray(payload.questionItems) && payload.questionItems.length
+    ? payload.questionItems.map((item) => `${item.number || item.questionNumber}번 · 현재 페이지 ${item.page || 1} · 현재 배점 ${item.score || "미입력"} · 현재 단원 ${item.unit || "미입력"} · 현재 난이도 ${item.difficulty || "확인 필요"} · 현재 쎈유형 ${formatSsenTypeTagsForPrompt(item.ssenTypeTags) || "미입력"}`).join("\n")
+    : "문항 카드가 아직 없습니다.";
+
+  return [
+    "역할: 으뜸수학 고태영T의 내신 시험 문항분석표 구조화 AI",
+    "",
+    "[작업 목표]",
+    "아래 현재 선택된 시험지/연도 원본만 기준으로 웹앱 questionItems 배열을 채운다.",
+    "총평, 블로그, 인스타 초안은 작성하지 말고 문항별 번호, 페이지, 배점, 문항 형식, 단원, 난이도, 역할, 쎈 유형 태그만 우선 구조화한다.",
+    "",
+    "[시험 기본정보]",
+    `학교: ${payload.schoolName ?? ""}`,
+    `학년: ${payload.grade ?? ""}`,
+    `과목: ${payload.subject ?? ""}`,
+    `시험명: ${payload.examName ?? ""}`,
+    `시험일: ${payload.examDate ?? ""}`,
+    `목표 문항 수: ${targetCount}`,
+    `업로드 원본: ${sourceFileLines}`,
+    "",
+    "[시험관리 탭 입력정보]",
+    examPrepContext
+      ? [
+          `시험범위: ${examPrepContext.scope ?? ""}`,
+          `부교재: ${examPrepContext.subTextbook ?? ""}`,
+          `특이사항: ${examPrepContext.specialNote ?? ""}`,
+          `시험 후 총평: ${examPrepContext.review ?? ""}`
+        ].join("\n")
+      : "연결된 시험관리 데이터가 없습니다.",
+    "",
+    "[현재 선택된 시험지 OCR/원문]",
+    scopedRawExamText || "OCR 원문이 없습니다. 현재 문항 카드와 시험 기본정보 기준으로 확인 가능한 값만 채우세요.",
+    "",
+    "[현재 문항 카드]",
+    currentItems,
+    "",
+    buildSsenTypePromptSection(payload),
+    "",
+    "[작성 규칙]",
+    `- questionItems는 반드시 1번부터 ${targetCount}번까지 총 ${targetCount}개를 반환한다.`,
+    "- OCR에 보이는 첫 장 문항 구성표의 배점/문항 수를 우선 반영한다.",
+    "- 한 문항의 상세 조건을 OCR에서 못 읽어도 해당 번호를 생략하지 말고, 모르는 값은 '확인 필요'로 둔다.",
+    "- page는 현재 PDF 페이지 추정값을 넣는다. 모르면 현재 카드의 page 또는 1을 쓴다.",
+    "- score는 문항 배점이다. 예: '4.2점', '5점', '확인 필요'.",
+    "- questionType은 객관식, 단답형, 서술형, 논술형, 확인 필요 중 하나다.",
+    "- difficulty는 확인 필요, 하, 중하, 중, 중상, 상 중 하나다.",
+    "- role은 기본, 실수유도, 앞번호 고난도, 준킬러, 킬러, 서술형 변별, 확인 필요 중 하나다.",
+    "- 쎈 유형 기준표가 있으면 단원명, 문항 조건, 풀이 행동을 비교해 ssenTypeTags에 primary 1개를 최대한 넣는다.",
+    "- 복합 문항이면 secondary를 1~2개 추가한다. 확신이 낮아도 빈 배열로 두기보다 confidence를 '중' 또는 '하'로 낮추고 reason에 확인 포인트를 쓴다.",
+    "- ssenTypeTags.typeCode는 제공된 기준표의 typeCode만 사용한다.",
+    "- 원문 문제 본문 전체를 저장하지 말고 ocrText에는 짧은 조건 요약만 쓴다.",
+    "",
+    "반드시 아래 JSON 형식만 반환하세요. 설명 문장, markdown, 코드블록은 쓰지 마세요.",
+    "{",
+    '  "questionComposition": {',
+    `    "total": ${targetCount},`,
+    `    "sections": [{ "label": "전체", "start": 1, "end": ${targetCount}, "count": ${targetCount}, "score": "확인 필요" }],`,
+    '    "totalScore": "100점",',
+    '    "evidence": "시험지 상단 문항 수 및 배점 표 기준",',
+    '    "confidence": "상"',
+    "  },",
+    '  "questionItems": [',
+    "    {",
+    '      "number": 1,',
+    '      "page": 1,',
+    '      "score": "확인 필요",',
+    '      "questionType": "객관식",',
+    '      "unit": "확인 필요",',
+    '      "difficulty": "확인 필요",',
+    '      "role": "기본",',
+    '      "source": "확인 필요",',
+    '      "correctRate": "확인 필요",',
+    '      "similarProblemNeeded": "확인 필요",',
+    '      "similarProblemSource": "",',
+    '      "similarProblemRelation": "확인 필요",',
+    '      "variationRelationComment": "",',
+    '      "ocrText": "문항 조건 짧은 요약",',
+    '      "strategyComment": "검수 포인트",',
+    '      "ssenTypeTags": [',
+    '        { "role": "primary", "typeCode": "SSEN-CM1-01-01", "typeName": "다항식의 덧셈과 뺄셈", "unitName": "다항식의 연산", "confidence": "중", "reason": "판단 근거" }',
+    '      ],',
+    '      "tags": ["기본문항"]',
+    "    }",
+    "  ]",
+    "}"
+  ].join("\n");
+}
+
 function buildCommentPrompt(payload) {
   const audienceLabel = payload.audience === "student" ? "학생" : payload.audience === "teacher" ? "강사" : "학부모";
   const audienceRule =
@@ -868,14 +974,18 @@ function createMockComment(payload) {
     : `${name} 학생은 오늘 수업에 참여했습니다. 과제와 수업 내용을 이어서 확인하며 다음 수업에서 보완하겠습니다.`;
 }
 
-async function runOpenAiText(prompt, model) {
+async function runOpenAiText(prompt, model, maxOutputTokens = 0) {
   const response = await fetch(OPENAI_RESPONSES_URL, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${requiredEnv("OPENAI_API_KEY")}`,
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({ model, input: prompt })
+    body: JSON.stringify({
+      model,
+      input: prompt,
+      ...(maxOutputTokens ? { max_output_tokens: maxOutputTokens } : {})
+    })
   });
 
   const data = await response.json();
@@ -916,7 +1026,7 @@ async function runOpenAiVision(prompt, imageDataUrl, model) {
   return outputTextFromOpenAi(data);
 }
 
-async function runAnthropicText(prompt, model) {
+async function runAnthropicText(prompt, model, maxTokens = 4000) {
   const response = await fetch(ANTHROPIC_MESSAGES_URL, {
     method: "POST",
     headers: {
@@ -926,7 +1036,7 @@ async function runAnthropicText(prompt, model) {
     },
     body: JSON.stringify({
       model,
-      max_tokens: 4000,
+      max_tokens: maxTokens,
       messages: [{ role: "user", content: prompt }]
     })
   });
@@ -981,19 +1091,27 @@ async function runAnthropicVision(prompt, imageDataUrl, model) {
 export async function runExamAnalysis(payload) {
   const provider = selectedProvider(payload);
   const model = selectedModel(payload, "examAnalysis");
+  const questionInfoOnly = Boolean(payload.questionInfoOnly);
 
   if (provider === "mock") {
+    if (questionInfoOnly) {
+      throw new Error("문항정보 채우기는 실제 AI 제공자가 필요합니다. 설정에서 시험분석 AI 제공자를 Anthropic 또는 OpenAI로 선택해 주세요.");
+    }
     return { provider, model, fields: createMockAnalysis(payload) };
   }
 
   if (provider === "openai") {
-    const text = await runOpenAiText(buildExamAnalysisPrompt(payload), model);
-    return { provider, model, fields: normalizeAnalysisFields(safeParseJsonText(text), payload, text), rawText: text };
+    const text = await runOpenAiText(questionInfoOnly ? buildQuestionItemsPrompt(payload) : buildExamAnalysisPrompt(payload), model, questionInfoOnly ? 8000 : 0);
+    const fields = normalizeAnalysisFields(safeParseJsonText(text), payload, text);
+    if (questionInfoOnly && !fields.questionItems?.length) throw new Error("AI 응답에 문항정보(questionItems)가 없습니다. 다시 실행하거나 원본 OCR 상태를 확인해 주세요.");
+    return { provider, model, fields, rawText: text };
   }
 
   if (provider === "anthropic") {
-    const text = await runAnthropicText(buildExamAnalysisPrompt(payload), model);
-    return { provider, model, fields: normalizeAnalysisFields(safeParseJsonText(text), payload, text), rawText: text };
+    const text = await runAnthropicText(questionInfoOnly ? buildQuestionItemsPrompt(payload) : buildExamAnalysisPrompt(payload), model, questionInfoOnly ? 8000 : 4000);
+    const fields = normalizeAnalysisFields(safeParseJsonText(text), payload, text);
+    if (questionInfoOnly && !fields.questionItems?.length) throw new Error("AI 응답에 문항정보(questionItems)가 없습니다. 다시 실행하거나 원본 OCR 상태를 확인해 주세요.");
+    return { provider, model, fields, rawText: text };
   }
 
   throw new Error(`지원하지 않는 AI 제공자입니다: ${provider}`);

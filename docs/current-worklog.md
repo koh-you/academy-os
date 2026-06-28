@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-28 P1. 시험분석 문항정보 채우기 전용 AI 프롬프트
+
+- 상태: 완료
+- 사용자 요청: `AI 문항정보 채우기`를 실행했지만 문항카드의 배점, 단원, 난이도, 쎈 유형 등이 아무것도 채워지지 않는다.
+- 원인/판단: 운영 분석 기록은 AI 요청이 `완료`로 저장됐지만 `aiInitialFields.questionItems`가 0개였다. 기존 전체 시험분석 프롬프트는 총평/전략/재가공 메시지까지 함께 요구하므로 AI가 문항 배열을 비워도 프론트가 성공 처리했고, 빈 배열 병합 결과 화면에는 아무 변화가 없었다.
+- 이번 작업 결과: `AI 문항정보 채우기`는 `questionInfoOnly` 모드로 서버에 전달하고, 서버는 문항정보 전용 프롬프트를 사용해 1번부터 목표 문항 수까지의 `questionItems` 반환을 강제한다. mock 모드에서는 조용히 빈 카드로 되돌리지 않고 실제 AI 제공자 필요 오류를 띄우며, 실제 AI가 `questionItems`를 반환하지 않으면 실패로 표시한다. 전용 실행 결과는 문항카드와 원본별 문항 구성만 반영하고 총평/블로그/인스타 같은 전체 분석 필드는 덮어쓰지 않는다.
+- 저장 주의: 기존 `examAnalyses.questionItems`, `questionCompositionsBySource`, `questionTargetCountsBySource` app_state 저장 흐름을 그대로 사용한다. 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check api/routes/examAnalysis.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production`, `npm run build` 통과(total 230, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-28 P1. 공지 예약 실패 기록 표시와 notice 타입 DB 제약 보강
 
 - 상태: 완료
