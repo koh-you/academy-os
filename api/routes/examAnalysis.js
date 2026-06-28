@@ -246,9 +246,10 @@ function defaultExamAnalysisPromptForServer() {
     "",
     "[문항별 분석 기준]",
     "시험지 첫 페이지 또는 상단의 문항 구성표를 먼저 읽고 questionComposition에 총 문항 수와 선택형/서술형 구성을 정리한다.",
+    "시험지 원본이 2개 이상이면 각 원본 첫 장 기준 문항 메타데이터를 sourceCompositions에 sourceId별로 따로 정리한다.",
     "questionComposition은 문항 카드 생성 전 강사가 확인하는 초안이다. questionItems 배열 길이와 별개로 총 문항 수의 근거를 분리해서 쓴다.",
     "각 문항은 문항 번호, 페이지, 배점, 단원, 유형, 난이도, 역할, 태그, 출처 가능성, OCR/문항 조건 요약, 학생이 틀릴 만한 지점, 강사가 확인해야 할 점, 대비 전략 후보를 가능한 범위에서 정리한다.",
-    "AI 1차 분석 단계에서 문항별 배점, 단원, 난이도 초안을 반드시 questionItems 배열에 넣는다. 모르면 빈칸 대신 '확인 필요'를 쓴다.",
+    "AI 1차 분석 단계에서 문항 번호, 페이지, 배점, 쎈 기준 유형, 난이도, 단원 초안을 반드시 questionItems 배열에 넣는다. 모르면 빈칸 대신 '확인 필요'를 쓴다.",
     "여러 해 시험지가 함께 들어온 경우 questionItems는 웹앱에서 현재 선택한 시험지/연도 1회분의 전체 문항 수만큼 작성하고, 3개년 반복/증감/변화는 unitDistribution, typeClassification, killerProblems, sourceCheckNotes에 정리한다.",
     "일부 페이지만 보이거나 OCR 일부만 있더라도 확인 가능한 전체 문항 수를 기준으로 questionItems를 만들고, 모르는 값은 '확인 필요'로 둔다.",
     "문항 태그 기준: 기본문항, 실수문항, 주요문항, 1등급 변별문항, 2등급 변별문항, 숫자변형문항, 조건변형문항, 유사유형문항, 교과서 연계, 부교재 연계, EBS 연계, 모의고사 연계.",
@@ -265,6 +266,12 @@ function defaultExamAnalysisPromptForServer() {
 
 function buildExamAnalysisPrompt(payload) {
   const examPrepContext = payload.examPrepContext && typeof payload.examPrepContext === "object" ? payload.examPrepContext : null;
+  const sourceFileLines = Array.isArray(payload.sourceFiles)
+    ? payload.sourceFiles.map((file, index) => {
+        const sourceId = file.sourceId || file.storagePath || file.signedUrl || file.fileName || `source_${index}`;
+        return `${index + 1}. sourceId=${sourceId} · ${file.fileName || file.storagePath || "원본"}`;
+      }).join(" / ")
+    : "";
   return [
     payload.aiPrompt || defaultExamAnalysisPromptForServer(),
     "",
@@ -275,7 +282,7 @@ function buildExamAnalysisPrompt(payload) {
     `시험명: ${payload.examName ?? ""}`,
     `시험일: ${payload.examDate ?? ""}`,
     `원본 링크: ${payload.sourceFileUrl ?? ""}`,
-    `업로드 원본: ${Array.isArray(payload.sourceFiles) ? payload.sourceFiles.map((file, index) => `${index + 1}. ${file.fileName || file.storagePath || "원본"}`).join(" / ") : ""}`,
+    `업로드 원본: ${sourceFileLines}`,
     "",
     "[시험관리 탭 입력정보]",
     examPrepContext
@@ -306,6 +313,8 @@ function buildExamAnalysisPrompt(payload) {
     "- 각 항목은 가능하면 사실 근거 → 점수에 미친 영향 → 다음 학습 행동 순서로 쓴다.",
     "- 반드시 시험 원본/OCR에 있는 사실을 우선한다.",
     "- 시험지 첫 페이지의 문항 수 및 배점 표가 보이면 questionComposition에 먼저 정리한다.",
+    "- 업로드 원본이 2개 이상이면 각 원본의 첫 장 문항 구성표를 sourceCompositions에 sourceId별로 따로 정리한다.",
+    "- sourceCompositions의 sourceId는 [시험 기본정보]의 업로드 원본에 적힌 sourceId를 그대로 사용한다.",
     "- questionComposition.total은 선택형/서술형/단답형 등 모든 문항 수를 합산한 전체 문항 수다.",
     "- questionComposition.evidence에는 AI가 읽은 근거 문구를 짧게 적는다.",
     "- 문항번호, 배점, 단원명, 유형, 핵심 함정, 예상 오답을 가능한 한 구분해서 쓴다.",
@@ -320,7 +329,7 @@ function buildExamAnalysisPrompt(payload) {
     "- typeClassification은 기본/준킬러/킬러를 분리하고 점수 영향과 학습 순서를 포함한다.",
     "- killerProblems는 킬러와 준킬러 후보를 나누고, 문항별 함정과 필요한 개념을 포함한다.",
     "- 문항별 태그 후보는 기본문항, 실수문항, 주요문항, 1등급 변별문항, 2등급 변별문항, 숫자변형문항, 조건변형문항, 유사유형문항, 교과서 연계, 부교재 연계, EBS 연계, 모의고사 연계 중에서 제안한다.",
-    "- questionItems는 웹앱 문항분석표에 바로 반영된다. 각 문항의 score, unit, difficulty는 가능한 범위에서 반드시 채운다.",
+    "- questionItems는 웹앱 문항분석표에 바로 반영된다. 각 문항의 number, page, score, ssenTypeTags, difficulty, unit은 가능한 범위에서 반드시 채운다.",
     "- questionItems의 difficulty는 확인 필요, 하, 중하, 중, 중상, 상 중 하나로 쓴다.",
     "- questionItems의 role은 기본, 실수유도, 앞번호 고난도, 준킬러, 킬러, 서술형 변별, 확인 필요 중 하나로 쓴다.",
     "- questionItems의 questionType은 객관식, 단답형, 서술형, 논술형, 확인 필요 중 하나로 쓴다.",
@@ -351,6 +360,9 @@ function buildExamAnalysisPrompt(payload) {
     '    "evidence": "시험지 상단 문항 수 및 배점 표 기준",',
     '    "confidence": "상"',
     '  },',
+    '  "sourceCompositions": [',
+    '    { "sourceId": "업로드 원본 sourceId", "total": 22, "sections": [{ "label": "전체", "start": 1, "end": 22, "count": 22, "score": "100점" }], "totalScore": "100점", "evidence": "해당 원본 첫 장 기준", "confidence": "상" }',
+    '  ],',
     '  "examStructure": "문항수, 객관식/서술형, 배점, 시간 압박, 변화 포인트",',
     '  "aiOverview": "시험 개요",',
     '  "unitDistribution": "단원별 출제 분포",',
@@ -784,6 +796,18 @@ function normalizeAnalysisFields(fields, payload, rawText = "") {
     instagramDraft: parsed.instagramDraft || fallback.instagramDraft
   };
   normalized.questionComposition = questionComposition || normalizeQuestionCompositionFromAi(fallback.questionComposition);
+  const rawSourceCompositions = Array.isArray(parsed.sourceCompositions)
+    ? parsed.sourceCompositions
+    : parsed.sourceCompositions && typeof parsed.sourceCompositions === "object"
+      ? Object.entries(parsed.sourceCompositions).map(([sourceId, composition]) => ({ sourceId, ...(composition || {}) }))
+      : [];
+  const sourceCompositions = rawSourceCompositions
+    .map((composition) => {
+        const normalizedComposition = normalizeQuestionCompositionFromAi(composition);
+        const sourceId = String(composition?.sourceId || composition?.fileName || composition?.sourceName || "").trim();
+        return sourceId && normalizedComposition ? { sourceId, ...normalizedComposition } : null;
+      }).filter(Boolean);
+  if (sourceCompositions.length) normalized.sourceCompositions = sourceCompositions;
   if (questionItems.length) normalized.questionItems = questionItems;
   return normalized;
 }

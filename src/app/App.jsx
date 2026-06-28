@@ -1,4 +1,5 @@
 ﻿import { Component, useEffect, useMemo, useRef, useState } from "react";
+import ssenTypeIndex from "../../api/data/ssenTypeIndex.json";
 import { sampleData } from "../shared/data/sampleData.js";
 
 let pdfJsLoader = null;
@@ -1045,6 +1046,7 @@ function createDefaultExamAnalysisPrompt() {
     "",
     "[문항별 분석 기준]",
     "시험지 첫 페이지 또는 상단의 문항 구성표를 먼저 읽고 questionComposition에 총 문항 수와 선택형/서술형 구성을 정리한다.",
+    "시험지 원본이 2개 이상이면 각 원본 첫 장 기준 문항 메타데이터를 sourceCompositions에 sourceId별로 따로 정리한다.",
     "questionComposition은 문항 카드 생성 전 강사가 확인하는 초안이다. questionItems 배열 길이와 별개로 총 문항 수의 근거를 분리해서 쓴다.",
     "각 문항에 대해 가능한 범위에서 다음 항목을 정리한다.",
     "- 문항 번호",
@@ -1064,7 +1066,7 @@ function createDefaultExamAnalysisPrompt() {
     "- 학생이 틀릴 만한 지점",
     "- 강사가 확인해야 할 점",
     "- 대비 전략 후보",
-    "AI 1차 분석 단계에서 배점, 단원, 난이도는 웹앱 문항분석표의 questionItems 배열에 반드시 초안으로 채운다.",
+    "AI 1차 분석 단계에서 문항 번호, 페이지, 배점, 쎈 기준 유형, 난이도, 단원은 웹앱 문항분석표의 questionItems 배열에 반드시 초안으로 채운다.",
     "쎈 유형 기준표가 제공되면 questionItems.ssenTypeTags에 주유형(primary) 1개와 필요 시 보조유형(secondary) 1~2개를 typeCode/typeName/unitName/confidence/reason으로 넣는다.",
     "AI가 읽은 전체 문항 수는 questionComposition.total에 넣고, 근거 문구는 questionComposition.evidence에 적는다.",
     "유사문항 본문은 웹앱에 넣지 않는다. 대신 questionItems의 similarProblemNeeded, similarProblemSource, similarProblemRelation에 메타데이터만 입력한다.",
@@ -1157,7 +1159,9 @@ function createDefaultExamAnalysis(examPrepRow = {}) {
     rawExamText: "",
     questionItems: [],
     questionTargetCount: 0,
+    questionTargetCountsBySource: {},
     questionComposition: null,
+    questionCompositionsBySource: {},
     aiProvider: "auto",
     aiModel: "server-default",
     aiStatus: "대기",
@@ -1364,6 +1368,13 @@ function formatSsenTypeTag(tag = {}) {
   return [tag.typeCode, tag.typeName].filter(Boolean).join(" ");
 }
 
+function normalizeSsenSearchText(value = "") {
+  return String(value ?? "")
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/[·ㆍ|:()[\]{}.,-]/g, "");
+}
+
 function formatSsenTypeTags(tags = []) {
   return normalizeSsenTypeTags(tags).map((tag) => {
     const prefix = tag.role === "secondary" ? "보조" : "주";
@@ -1399,6 +1410,28 @@ function updateSsenSecondaryTypeTags(tags = [], value = "", unitName = "") {
     .map((text) => createSsenTypeTagFromText(text, "secondary", unitName))
     .filter(Boolean);
   return normalizeSsenTypeTags([primary, ...secondaryTags].filter(Boolean));
+}
+
+function getSsenTypeSuggestions({ query = "", subject = "", unit = "", limit = 8 } = {}) {
+  const normalizedQuery = normalizeSsenSearchText(query);
+  const normalizedSubject = normalizeSsenSearchText(subject);
+  const normalizedUnit = normalizeSsenSearchText(unit);
+  const hasQuery = normalizedQuery.length >= 2;
+  const scored = ssenTypeIndex
+    .map((row) => {
+      const subjectText = normalizeSsenSearchText(row.subject);
+      const unitText = normalizeSsenSearchText(row.unitName);
+      const typeText = normalizeSsenSearchText(row.typeName);
+      const codeText = normalizeSsenSearchText(row.typeCode);
+      const subjectScore = normalizedSubject && subjectText.includes(normalizedSubject) ? 5 : 0;
+      const unitScore = normalizedUnit && unitText.includes(normalizedUnit) ? 4 : 0;
+      const queryScore = hasQuery && (typeText.includes(normalizedQuery) || codeText.includes(normalizedQuery) || unitText.includes(normalizedQuery)) ? 8 : 0;
+      const score = subjectScore + unitScore + queryScore;
+      return score ? { row, score } : null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.score - a.score || a.row.typeCode.localeCompare(b.row.typeCode));
+  return scored.slice(0, limit).map((item) => item.row);
 }
 
 function createExamQuestionItem(seed = {}, index = 0) {
@@ -1529,6 +1562,37 @@ function normalizeExamQuestionComposition(value = null) {
     confirmedAt: source.confirmedAt || "",
     confirmedBy: source.confirmedBy || ""
   };
+}
+
+function normalizeExamSourceCompositions(value = {}) {
+  if (!value) return {};
+  const entries = Array.isArray(value)
+    ? value.map((item) => [
+        String(item?.sourceId || item?.fileName || item?.sourceName || "").trim(),
+        item
+      ])
+    : Object.entries(value);
+  return Object.fromEntries(
+    entries
+      .map(([sourceId, composition]) => {
+        const key = String(sourceId || "").trim();
+        const normalized = normalizeExamQuestionComposition(composition);
+        return key && normalized ? [key, normalized] : null;
+      })
+      .filter(Boolean)
+  );
+}
+
+function normalizeExamSourceTargetCounts(value = {}) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(
+    Object.entries(value)
+      .map(([sourceId, count]) => {
+        const safeCount = Math.max(0, Math.min(80, Number(count) || 0));
+        return sourceId && safeCount ? [sourceId, safeCount] : null;
+      })
+      .filter(Boolean)
+  );
 }
 
 function formatExamQuestionComposition(composition = null) {
@@ -2179,6 +2243,9 @@ function normalizeExamAnalysisAiFields(fields = {}) {
     next[key] = cleanAnalysisFieldText(key, next[key]);
   }
   next.questionComposition = normalizeExamQuestionComposition(next.questionComposition);
+  next.sourceCompositions = normalizeExamSourceCompositions(next.sourceCompositions);
+  next.questionCompositionsBySource = normalizeExamSourceCompositions(next.questionCompositionsBySource);
+  next.questionTargetCountsBySource = normalizeExamSourceTargetCounts(next.questionTargetCountsBySource);
   return next;
 }
 
@@ -4613,7 +4680,7 @@ function isLegacyDefaultExamAnalysisPrompt(prompt = "") {
         text.includes("[웹앱의 목적]") &&
         text.includes("AI는 최종 판단자가 아니라 1차 구조화 담당자") &&
         text.includes("questionItems 배열") &&
-        !text.includes("ssenTypeTags")
+        (!text.includes("ssenTypeTags") || !text.includes("sourceCompositions"))
       )
     )
   );
@@ -7401,16 +7468,19 @@ export function App() {
   }
 
   async function handleRunExamAnalysis(analysis, overrideAiSettings = null) {
+    const visiblePrompt = isLegacyDefaultExamAnalysisPrompt(analysis.aiPrompt)
+      ? createDefaultExamAnalysisPrompt()
+      : analysis.aiPrompt || getAiPrompt(overrideAiSettings ?? aiSettings, "examAnalysis");
     const nextAnalysis = {
       ...analysis,
       aiProvider: overrideAiSettings?.examAnalysisProvider ?? analysis.aiProvider ?? defaultAiSettings.examAnalysisProvider,
       aiModel: overrideAiSettings?.examAnalysisModel ?? analysis.aiModel ?? defaultAiSettings.examAnalysisModel,
-      aiPrompt: getAiPrompt(overrideAiSettings ?? aiSettings, "examAnalysis") || analysis.aiPrompt
+      aiPrompt: visiblePrompt
     };
     setExamAnalyses((current) =>
       current.map((item) =>
         item.examAnalysisId === analysis.examAnalysisId
-          ? { ...item, aiProvider: nextAnalysis.aiProvider, aiModel: nextAnalysis.aiModel, aiStatus: "분석 중", aiError: "", updatedAt: new Date().toISOString() }
+          ? { ...item, aiProvider: nextAnalysis.aiProvider, aiModel: nextAnalysis.aiModel, aiPrompt: nextAnalysis.aiPrompt, aiStatus: "분석 중", aiError: "", updatedAt: new Date().toISOString() }
           : item
       )
     );
@@ -7429,6 +7499,7 @@ export function App() {
       const { questionItems: aiQuestionItems = [], ...analysisAiFields } = normalizedAiFields;
       const aiLastRunAt = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
       const questionSourceContext = getExamAnalysisQuestionSourceContext(nextAnalysis);
+      const activeAiSourceId = nextAnalysis.questionSourceId || "";
       const existingQuestionItems = normalizeExamQuestionItems(nextAnalysis.questionItems);
       const existingSourceQuestionCount = questionSourceContext.sourceId
         ? existingQuestionItems.filter((item) => (item.cropSourceId || questionSourceContext.sourceId) === questionSourceContext.sourceId).length
@@ -7442,9 +7513,31 @@ export function App() {
       setExamAnalyses((current) =>
         current.map((item) =>
           item.examAnalysisId === analysis.examAnalysisId
-            ? {
+            ? (() => {
+                const existingCompositionsBySource = normalizeExamSourceCompositions(item.questionCompositionsBySource);
+                const aiCompositionsBySource = normalizeExamSourceCompositions(analysisAiFields.sourceCompositions);
+                const questionComposition = normalizeExamQuestionComposition(analysisAiFields.questionComposition);
+                const nextCompositionsBySource = {
+                  ...existingCompositionsBySource,
+                  ...aiCompositionsBySource
+                };
+                if (activeAiSourceId && questionComposition) nextCompositionsBySource[activeAiSourceId] = questionComposition;
+                const existingTargetCountsBySource = normalizeExamSourceTargetCounts(item.questionTargetCountsBySource);
+                const nextTargetCountsBySource = {
+                  ...existingTargetCountsBySource,
+                  ...(nextAnalysis.questionTargetCountsBySource || {})
+                };
+                if (activeAiSourceId && (questionComposition?.total || questionTargetCount)) {
+                  nextTargetCountsBySource[activeAiSourceId] = questionComposition?.total || questionTargetCount;
+                }
+                return {
                 ...item,
                 ...analysisAiFields,
+                sourceCompositions: undefined,
+                aiPrompt: nextAnalysis.aiPrompt,
+                questionComposition: activeAiSourceId ? item.questionComposition || questionComposition : questionComposition || analysisAiFields.questionComposition,
+                questionCompositionsBySource: nextCompositionsBySource,
+                questionTargetCountsBySource: nextTargetCountsBySource,
                 questionItems: mergeAiQuestionDrafts(item.questionItems, aiQuestionItems, {
                   sourceId: questionSourceContext.sourceId,
                   sourceUrl: questionSourceContext.sourceUrl,
@@ -7467,7 +7560,8 @@ export function App() {
                 aiError: "",
                 pipelineStage: "문항 검수",
                 updatedAt: new Date().toISOString()
-              }
+                };
+              })()
             : item
         )
       );
@@ -13135,7 +13229,9 @@ function ExamAnalysisCenter({
     (pipelineStages.includes(selectedAnalysis?.pipelineStage) ? selectedAnalysis.pipelineStage : pipelineStages[0]);
   const statusMeta = selectedAnalysis ? getExamAnalysisStatusMeta(selectedAnalysis) : getExamAnalysisStatusMeta();
   const detailSection = examAnalysisDetailSections.find((section) => section.id === detailSectionId);
-  const questionComposition = normalizeExamQuestionComposition(selectedAnalysis?.questionComposition);
+  const globalQuestionComposition = normalizeExamQuestionComposition(selectedAnalysis?.questionComposition);
+  const questionCompositionsBySource = normalizeExamSourceCompositions(selectedAnalysis?.questionCompositionsBySource);
+  const questionTargetCountsBySource = normalizeExamSourceTargetCounts(selectedAnalysis?.questionTargetCountsBySource);
   const questionItems = normalizeExamQuestionItems(selectedAnalysis?.questionItems);
   const renderSourceFiles = (selectedAnalysis?.sourceFiles ?? []).filter((file) => isImageExamAnalysisSource(file) || isPdfExamAnalysisSource(file));
   const renderSourceFileOptions = renderSourceFiles.map((file, index) => ({
@@ -13147,6 +13243,8 @@ function ExamAnalysisCenter({
   const defaultQuestionSourceId = renderSourceFileOptions[0]?.sourceId || "";
   const activeQuestionSourceOption = renderSourceFileOptions.find((option) => option.sourceId === activeQuestionSourceId) ?? renderSourceFileOptions[0] ?? null;
   const resolvedQuestionSourceId = activeQuestionSourceOption?.sourceId || "";
+  const sourceQuestionComposition = normalizeExamQuestionComposition(questionCompositionsBySource[resolvedQuestionSourceId]);
+  const questionComposition = sourceQuestionComposition || globalQuestionComposition;
   const activeQuestionItems = questionItems.filter((item) => {
     if (!resolvedQuestionSourceId) return true;
     return (item.cropSourceId || defaultQuestionSourceId) === resolvedQuestionSourceId;
@@ -13169,10 +13267,18 @@ function ExamAnalysisCenter({
   const cropViewerPageNumber = Math.max(1, Math.min(pdfPageCount || 999, Number(cropViewerPage) || selectedQuestionPage || 1));
   const selectedQuestionCropIsVisible = !selectedQuestionSourceIsPdf || selectedQuestionPage === cropViewerPageNumber || Boolean(cropDraft);
   const selectedQuestionCropBox = normalizeCropBox(cropDraft || (selectedQuestionCropIsVisible ? selectedQuestion?.cropBox : null));
-  const activeQuestionTargetCount = Number(selectedAnalysis?.questionTargetCount) || activeQuestionItems.length || manualQuestionCount || questionComposition?.total || 0;
+  const sourceQuestionTargetCount = Number(questionTargetCountsBySource[resolvedQuestionSourceId]) || 0;
+  const activeQuestionTargetCount = sourceQuestionTargetCount || activeQuestionItems.length || manualQuestionCount || questionComposition?.total || Number(selectedAnalysis?.questionTargetCount) || 0;
   const selectedQuestionInsightRecommended = isExamQuestionInsightRecommended(selectedQuestion);
   const selectedQuestionHasDetailedInsight = hasExamQuestionDetailedInsight(selectedQuestion);
   const selectedQuestionInsightExpanded = Boolean(selectedQuestion && expandedQuestionInsightId === selectedQuestion.questionId);
+  const ssenTypeSuggestions = selectedQuestion
+    ? getSsenTypeSuggestions({
+        query: getSsenPrimaryTypeText(selectedQuestion.ssenTypeTags),
+        subject: selectedAnalysis?.subject,
+        unit: selectedQuestion.unit
+      })
+    : [];
   const folderExamCycleOptions = useMemo(
     () => {
       const year = String(currentExamCycle).split("-")[0] || String(new Date(`${today}T00:00:00+09:00`).getFullYear());
@@ -13270,9 +13376,9 @@ function ExamAnalysisCenter({
   }, [activeQuestionSourceId, defaultQuestionSourceId, renderSourceIdsKey]);
 
   useEffect(() => {
-    const nextCount = Number(selectedAnalysis?.questionTargetCount) || questionComposition?.total || activeQuestionItems.length || "";
+    const nextCount = sourceQuestionTargetCount || questionComposition?.total || activeQuestionItems.length || "";
     setQuestionCountDraft(nextCount ? String(nextCount) : "");
-  }, [selectedAnalysis?.examAnalysisId, resolvedQuestionSourceId, selectedAnalysis?.questionTargetCount, questionComposition?.total, activeQuestionItems.length]);
+  }, [selectedAnalysis?.examAnalysisId, resolvedQuestionSourceId, sourceQuestionTargetCount, questionComposition?.total, activeQuestionItems.length]);
 
   useEffect(() => {
     if (!activeQuestionItems.length) {
@@ -13402,7 +13508,7 @@ function ExamAnalysisCenter({
 
   function createBlankQuestionItemsForSource(sourceId, sourceFile) {
     const sourceUrl = sourceFile ? getExamAnalysisSourceRenderUrl(sourceFile) : "";
-    const targetCount = Math.max(1, Math.min(80, Number(questionCountDraft) || Number(selectedAnalysis?.questionTargetCount) || questionComposition?.total || 20));
+    const targetCount = Math.max(1, Math.min(80, Number(questionCountDraft) || sourceQuestionTargetCount || questionComposition?.total || 20));
     return createExamQuestionItemsFromCount(targetCount, []).map((item, index) => createExamQuestionItem({
       number: item.number || index + 1,
       page: item.page || 1,
@@ -13422,7 +13528,13 @@ function ExamAnalysisCenter({
       ...questionItems.filter((item) => !questionBelongsToActiveSource(item)),
       ...nextItems
     ]);
-    update("questionTargetCount", targetCount);
+    if (resolvedQuestionSourceId) {
+      update("questionTargetCountsBySource", {
+        ...questionTargetCountsBySource,
+        [resolvedQuestionSourceId]: targetCount
+      });
+    }
+    if (!resolvedQuestionSourceId || renderSourceFileOptions.length <= 1) update("questionTargetCount", targetCount);
     setSelectedQuestionId(nextItems[0]?.questionId || "");
   }
 
@@ -13444,13 +13556,17 @@ function ExamAnalysisCenter({
       : "";
     await onRunAnalysis({
       ...selectedAnalysis,
-      sourceFiles: selectedQuestionSourceFile ? [selectedQuestionSourceFile] : selectedAnalysis.sourceFiles,
+      sourceFiles: selectedQuestionSourceFile ? [{ ...selectedQuestionSourceFile, sourceId: resolvedQuestionSourceId }] : selectedAnalysis.sourceFiles,
       sourceFileUrl: selectedQuestionOpenUrl || selectedAnalysis.sourceFileUrl,
       rawExamText: [sourceText, selectedAnalysis.rawExamText].filter(Boolean).join("\n\n"),
       questionItems: targetItems,
       questionSourceId: resolvedQuestionSourceId,
       questionSourceUrl: selectedQuestionSourceUrl,
       questionTargetCount: Math.max(requestedCount, targetItems.length),
+      questionTargetCountsBySource: {
+        ...questionTargetCountsBySource,
+        [resolvedQuestionSourceId]: Math.max(requestedCount, targetItems.length)
+      },
       examPrepContext
     }, aiSettings);
   }
@@ -14337,6 +14453,7 @@ function ExamAnalysisCenter({
                     <div>
                       <strong>첫 장 문항 메타데이터 초안</strong>
                       <p>{formatExamQuestionComposition(questionComposition)}</p>
+                      {selectedQuestionSourceFile?.fileName ? <small>현재 원본: {selectedQuestionSourceFile.fileName}</small> : null}
                       {questionComposition.evidence ? <small>근거: {questionComposition.evidence}</small> : null}
                     </div>
                     <button className="softButton" onClick={fillQuestionCountFromAiComposition} type="button">메타데이터 반영</button>
@@ -14587,7 +14704,7 @@ function ExamAnalysisCenter({
                           <input value={selectedQuestion.score} onChange={(event) => updateSelectedQuestion("score", event.target.value)} placeholder="예: 5" />
                         </label>
                         <label>
-                          유형
+                          문항 형식
                           <select value={selectedQuestion.questionType} onChange={(event) => updateSelectedQuestion("questionType", event.target.value)}>
                             {examQuestionTypeOptions.map((option) => <option key={option}>{option}</option>)}
                           </select>
@@ -14609,7 +14726,7 @@ function ExamAnalysisCenter({
                           <input value={selectedQuestion.unit} onChange={(event) => updateSelectedQuestion("unit", event.target.value)} placeholder="예: 이차함수의 최대최소" />
                         </label>
                         <label>
-                          쎈 주유형
+                          쎈 유형 검색
                           <input
                             value={getSsenPrimaryTypeText(selectedQuestion.ssenTypeTags)}
                             onChange={(event) => updateSelectedQuestion("ssenTypeTags", updateSsenPrimaryTypeTags(selectedQuestion.ssenTypeTags, event.target.value, selectedQuestion.unit))}
@@ -14651,6 +14768,24 @@ function ExamAnalysisCenter({
                           <input value={selectedQuestion.similarProblemSource || ""} onChange={(event) => updateSelectedQuestion("similarProblemSource", event.target.value)} placeholder="예: 나만의DB 비상 확통" />
                         </label>
                       </div>
+                      {ssenTypeSuggestions.length ? (
+                        <div className="ssenTypeSuggestionPanel">
+                          <strong>쎈 유형 추천</strong>
+                          <div>
+                            {ssenTypeSuggestions.map((row) => (
+                              <button
+                                key={row.typeCode}
+                                onClick={() => updateSelectedQuestion("ssenTypeTags", updateSsenPrimaryTypeTags(selectedQuestion.ssenTypeTags, `${row.typeCode} ${row.typeName}`, row.unitName || selectedQuestion.unit))}
+                                type="button"
+                              >
+                                <span>{row.typeCode}</span>
+                                {row.typeName}
+                                <small>{row.unitName}</small>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
                       <div className="analysisQuestionTagGroup">
                         <strong>문항 태그</strong>
                         <div>

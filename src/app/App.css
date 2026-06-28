@@ -3903,6 +3903,56 @@ button {
   color: #ffffff;
 }
 
+.ssenTypeSuggestionPanel {
+  background: #f8fbff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
+.ssenTypeSuggestionPanel strong {
+  color: #17213d;
+  font-weight: 900;
+}
+
+.ssenTypeSuggestionPanel div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ssenTypeSuggestionPanel button {
+  background: #ffffff;
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  color: #34456b;
+  cursor: pointer;
+  display: grid;
+  gap: 2px;
+  max-width: 260px;
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.ssenTypeSuggestionPanel button:hover,
+.ssenTypeSuggestionPanel button:focus-visible {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.ssenTypeSuggestionPanel button span {
+  color: #4f46e5;
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.ssenTypeSuggestionPanel button small {
+  color: #64748b;
+  font-weight: 800;
+}
+
 .questionCountBadges {
   display: flex;
   flex-wrap: wrap;
