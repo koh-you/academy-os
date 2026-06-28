@@ -7468,14 +7468,12 @@ export function App() {
   }
 
   async function handleRunExamAnalysis(analysis, overrideAiSettings = null) {
-    const visiblePrompt = isLegacyDefaultExamAnalysisPrompt(analysis.aiPrompt)
-      ? createDefaultExamAnalysisPrompt()
-      : analysis.aiPrompt || getAiPrompt(overrideAiSettings ?? aiSettings, "examAnalysis");
+    const settingsPrompt = getAiPrompt(overrideAiSettings ?? aiSettings, "examAnalysis") || createDefaultExamAnalysisPrompt();
     const nextAnalysis = {
       ...analysis,
       aiProvider: overrideAiSettings?.examAnalysisProvider ?? analysis.aiProvider ?? defaultAiSettings.examAnalysisProvider,
       aiModel: overrideAiSettings?.examAnalysisModel ?? analysis.aiModel ?? defaultAiSettings.examAnalysisModel,
-      aiPrompt: visiblePrompt
+      aiPrompt: settingsPrompt
     };
     setExamAnalyses((current) =>
       current.map((item) =>
@@ -14423,34 +14421,6 @@ function ExamAnalysisCenter({
                   </button>
                 </div>
 
-                <details className="sourceAdvancedDetails">
-                  <summary>원본 링크 · OCR 원문 · 프롬프트 보기</summary>
-                  <label className="wideLabel">
-                    PDF 원본 파일/링크
-                    <input
-                      value={selectedAnalysis.sourceFileUrl}
-                      onChange={(event) => update("sourceFileUrl", event.target.value)}
-                      placeholder="Google Drive, Supabase Storage, PDF 링크"
-                    />
-                  </label>
-                  <label className="wideLabel">
-                    OCR 텍스트 / 문항 메모
-                    <textarea
-                      value={selectedAnalysis.rawExamText}
-                      onChange={(event) => update("rawExamText", event.target.value)}
-                      placeholder="문항 번호, 배점, 객관식/서술형, OCR 텍스트, 강사 메모를 붙여넣습니다."
-                      rows="8"
-                    />
-                  </label>
-                  <label className="wideLabel">
-                    AI 분석 프롬프트
-                    <textarea
-                      value={selectedAnalysis.aiPrompt}
-                      onChange={(event) => update("aiPrompt", event.target.value)}
-                      rows="8"
-                    />
-                  </label>
-                </details>
             </section>
             ) : null}
 

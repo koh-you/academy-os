@@ -3272,24 +3272,6 @@ button {
   font-weight: 800;
 }
 
-.sourceAdvancedDetails {
-  border-top: 1px solid #d8e3f8;
-  display: grid;
-  gap: 12px;
-  padding-top: 12px;
-}
-
-.sourceAdvancedDetails summary {
-  color: #34456b;
-  cursor: pointer;
-  font-weight: 900;
-  list-style-position: inside;
-}
-
-.sourceAdvancedDetails[open] summary {
-  margin-bottom: 12px;
-}
-
 .analysisWorkflowHint {
   display: grid;
   gap: 8px;

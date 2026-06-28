@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-28 P1. 시험분석 원본/OCR/프롬프트 세부 데이터 숨김
+
+- 상태: 완료
+- 사용자 요청: 시험분석 원본 입력 화면의 `원본 링크 · OCR 원문 · 프롬프트 보기` 데이터는 사람이 볼 필요가 없다. 프롬프트는 설정에서 관리한다.
+- 이번 작업 결과: 원본 입력 화면에서 원본 링크, OCR 원문, AI 분석 프롬프트를 펼쳐 보는 세부 영역을 제거했다. 업로드 드롭존, Storage 저장, OCR 추출, 원본 파일 목록, AI 분석 시작 흐름은 유지했다.
+- 프롬프트 정책: 시험분석 AI 실행 시 개별 분석지 `aiPrompt`를 우선하지 않고, 설정 화면의 `시험분석 AI` 프롬프트를 실제 요청 프롬프트로 사용하도록 되돌렸다. 실행 당시 프롬프트는 기존 호환을 위해 분석지 필드에도 저장되지만, 화면에서는 설정에서만 관리한다.
+- 저장 주의: 기존 `examAnalyses` app_state 저장 구조와 Supabase Storage 업로드 흐름을 그대로 사용한다. 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 222, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-28 P1. 알림관리 개별발송 반 필터 매칭 수정
 
 - 상태: 완료
