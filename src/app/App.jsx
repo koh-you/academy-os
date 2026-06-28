@@ -8394,6 +8394,11 @@ function NotificationCenter({
     noticeRecipientMode === "all" || noticeRecipientMode === "selected"
       ? ["parent", "student"]
       : [noticeRecipientMode];
+  const visibleNoticeStudents = noticeRecipientMode === "selected" ? searchableStudents : targetStudents;
+  const noticeAudienceLabels = {
+    parent: "학부모",
+    student: "학생"
+  };
   const noticeRecipients = targetStudents.flatMap((student) =>
     targetAudiences
       .map((audience) => ({
@@ -8430,6 +8435,10 @@ function NotificationCenter({
 
   function clearSelectedStudents() {
     setSelectedStudentIds([]);
+  }
+
+  function getNoticeAudiencePhone(student, audience) {
+    return audience === "student" ? student.studentPhone : student.parentPhone;
   }
 
   function applyNoticeTemplate(templateId) {
@@ -8693,14 +8702,43 @@ function NotificationCenter({
               </div>
             </div>
 
-            {noticeRecipientMode === "selected" ? (
-              <div className="noticeStudentPicker">
+            <div className="noticeStudentPicker">
+              {noticeRecipientMode === "selected" ? (
                 <div className="noticePickerActions">
                   <button className="softButton compact" onClick={selectAllVisibleStudents} type="button">보이는 학생 전체</button>
                   <button className="softButton compact subtle" onClick={clearSelectedStudents} type="button">선택 해제</button>
                 </div>
-                {searchableStudents.map((student) => {
+              ) : (
+                <div className="noticePickerActions noticeListHeader">
+                  <strong>수신 명단</strong>
+                  <span>{targetStudents.length}명 · {noticeRecipients.length}건</span>
+                </div>
+              )}
+              {visibleNoticeStudents.length ? (
+                visibleNoticeStudents.map((student) => {
                   const checked = selectedStudentIds.includes(student.studentId);
+                  if (noticeRecipientMode !== "selected") {
+                    return (
+                      <div className="noticeStudentOption noticeStudentOptionReadonly" key={student.studentId}>
+                        <span className="noticeStudentAvatar">{String(student.name || "학").slice(0, 1)}</span>
+                        <span>
+                          <strong>{student.name}</strong>
+                          <small>{[student.grade, student.schoolName].filter(Boolean).join(" · ") || "기본 정보 없음"}</small>
+                        </span>
+                        <span className="noticeRecipientBadges">
+                          {targetAudiences.map((audience) => {
+                            const phone = getNoticeAudiencePhone(student, audience);
+                            const hasPhone = Boolean(normalizePhoneNumber(phone));
+                            return (
+                              <small className={hasPhone ? "available" : "missing"} key={audience}>
+                                {noticeAudienceLabels[audience]} {hasPhone ? "등록" : "번호 없음"}
+                              </small>
+                            );
+                          })}
+                        </span>
+                      </div>
+                    );
+                  }
                   return (
                     <label className={checked ? "noticeStudentOption active" : "noticeStudentOption"} key={student.studentId}>
                       <input checked={checked} onChange={() => toggleStudentSelection(student.studentId)} type="checkbox" />
@@ -8710,9 +8748,11 @@ function NotificationCenter({
                       </span>
                     </label>
                   );
-                })}
-              </div>
-            ) : null}
+                })
+              ) : (
+                <div className="noticeStudentEmpty">조건에 맞는 학생이 없습니다.</div>
+              )}
+            </div>
           </div>
 
           <div className="noticeWritePanel">

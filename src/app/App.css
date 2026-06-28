@@ -6576,6 +6576,22 @@ button:disabled {
   gap: 8px;
 }
 
+.noticeListHeader {
+  justify-content: space-between;
+}
+
+.noticeListHeader strong {
+  color: #17213d;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.noticeListHeader span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
 .noticeStudentOption {
   align-items: center;
   border: 1px solid #e2e8f0;
@@ -6591,6 +6607,52 @@ button:disabled {
   border-color: #818cf8;
 }
 
+.noticeStudentOptionReadonly {
+  background: #ffffff;
+  grid-template-columns: 32px minmax(0, 1fr);
+}
+
+.noticeStudentAvatar {
+  align-items: center;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  color: #312e81;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 900;
+  height: 32px;
+  justify-content: center;
+  width: 32px;
+}
+
+.noticeRecipientBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  grid-column: 2;
+}
+
+.noticeRecipientBadges small {
+  border: 1px solid #d8e3f8;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 4px 7px;
+}
+
+.noticeRecipientBadges .available {
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+  color: #047857;
+}
+
+.noticeRecipientBadges .missing {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #94a3b8;
+}
+
 .noticeStudentOption strong,
 .noticeStudentOption small {
   display: block;
@@ -6600,6 +6662,16 @@ button:disabled {
   color: #64748b;
   font-size: 12px;
   margin-top: 2px;
+}
+
+.noticeStudentEmpty {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 900;
+  padding: 14px;
 }
 
 .noticePreviewBox p {
