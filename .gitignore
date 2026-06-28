@@ -17,6 +17,7 @@ dev-server*.log
 tmp/
 tmp-video-frames/
 .codex_deps/
+output/ssen/
 
 *.pdf
 *.zip
