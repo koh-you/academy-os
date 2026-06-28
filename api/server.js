@@ -77,6 +77,30 @@ const defaultTeacherAccount = {
   password: process.env.TEACHER_PASSWORD ?? "1234"
 };
 
+function summarizeNotificationJobResult(result) {
+  if (!result || typeof result !== "object") return result ?? null;
+  const response = result.response;
+  const groupInfo = response?.groupInfo;
+  return {
+    dryRun: Boolean(result.dryRun),
+    isTestRedirected: Boolean(result.isTestRedirected),
+    requestedTo: result.requestedTo || "",
+    sentTo: result.sentTo || "",
+    scheduledDate: result.scheduledDate || "",
+    templateEnvName: result.templateEnvName || "",
+    groupId: groupInfo?.groupId || groupInfo?._id || "",
+    solapiStatus: groupInfo?.status || "",
+    count: groupInfo?.count || null
+  };
+}
+
+function summarizeNotificationJobForList(job = {}) {
+  return {
+    ...job,
+    result: summarizeNotificationJobResult(job.result)
+  };
+}
+
 function normalizeGradeLabel(grade = "") {
   const value = String(grade || "").trim();
   if (value.includes("1")) return value.includes("중") ? "중1" : "고1";
@@ -1615,7 +1639,14 @@ const server = http.createServer(async (request, response) => {
   if (request.method === "GET" && requestUrl.pathname === "/api/notification-jobs") {
     try {
       const result = await listNotificationJobs();
-      sendJson(request, response, 200, { ok: true, ...result });
+      const includeResult = requestUrl.searchParams.get("includeResult") === "true";
+      sendJson(request, response, 200, {
+        ok: true,
+        ...result,
+        notificationJobs: includeResult
+          ? result.notificationJobs
+          : (result.notificationJobs ?? []).map(summarizeNotificationJobForList)
+      });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
     }

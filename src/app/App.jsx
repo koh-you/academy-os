@@ -560,6 +560,7 @@ function normalizePhoneNumber(value = "") {
 
 const today = getKoreaDateString();
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8787").replace(/\/$/, "");
+const appRuntimeSessionId = `runtime_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
 function apiUrl(path) {
   return `${apiBaseUrl}${path}`;
@@ -2324,12 +2325,37 @@ function inferExamAnalysisMetadataFromFileName(fileName = "") {
   };
 }
 
+function getDisconnectedExamAnalysisRunPatch(analysis = {}) {
+  if (analysis.aiStatus !== "분석 중") return null;
+  if (analysis.aiRunSessionId && analysis.aiRunSessionId === appRuntimeSessionId) return null;
+  return {
+    aiStatus: "실패",
+    aiError: "이전 브라우저 세션에서 시작한 AI 분석의 결과를 더 이상 받을 수 없어 대기 상태를 해제했습니다. 다시 실행해 주세요.",
+    aiRunRequestId: "",
+    aiRunSessionId: "",
+    aiRunStartedAt: ""
+  };
+}
+
+function repairDisconnectedExamAnalysisRuns(analyses = []) {
+  let changed = false;
+  const repaired = (Array.isArray(analyses) ? analyses : []).map((analysis) => {
+    const patch = getDisconnectedExamAnalysisRunPatch(analysis);
+    if (!patch) return analysis;
+    changed = true;
+    return { ...analysis, ...patch, updatedAt: new Date().toISOString() };
+  });
+  return { changed, analyses: repaired };
+}
+
 function normalizeExamAnalysisForDisplay(analysis = {}) {
   const firstSourceFile = Array.isArray(analysis.sourceFiles) ? analysis.sourceFiles[0] : null;
   const inferredMetadata = inferExamAnalysisMetadataFromFileName(firstSourceFile?.fileName || analysis.sourceFileUrl || "");
+  const disconnectedRunPatch = getDisconnectedExamAnalysisRunPatch(analysis) ?? {};
   return {
     ...normalizeExamAnalysisAiFields({
     ...analysis,
+    ...disconnectedRunPatch,
     schoolName: analysis.schoolName || inferredMetadata.schoolName,
     grade: analysis.grade || inferredMetadata.grade,
     subject: analysis.subject || inferredMetadata.subject,
@@ -5072,7 +5098,10 @@ export function App() {
           if (states.aiSettings) setAiSettings(states.aiSettings);
           if (states.attendanceSettings) setAttendanceSettings(normalizeAttendanceSettings(states.attendanceSettings));
           if (Array.isArray(states.deletedLessonBundles)) setDeletedLessonBundles(states.deletedLessonBundles);
-          if (Array.isArray(states.examAnalyses)) setExamAnalyses(states.examAnalyses);
+          if (Array.isArray(states.examAnalyses)) {
+            const repairedExamAnalyses = repairDisconnectedExamAnalysisRuns(states.examAnalyses);
+            setExamAnalyses(repairedExamAnalyses.analyses);
+          }
           if (Array.isArray(states.examAnalysisFolders)) setExamAnalysisFolders(states.examAnalysisFolders);
           if (states.generatedLessonControls) setGeneratedLessonControls(normalizeGeneratedLessonControls(states.generatedLessonControls));
           if (states.lessonNotificationPlans && typeof states.lessonNotificationPlans === "object" && !Array.isArray(states.lessonNotificationPlans)) {
@@ -5149,6 +5178,14 @@ export function App() {
     if (session?.role !== "teacher" || !isAppStateReady || isApplyingRemoteAppStateRef.current) return;
     postAppState(sharedAppState).catch((error) => console.error(error));
   }, [isAppStateReady, sharedAppState, session?.role]);
+
+  useEffect(() => {
+    if (session?.role !== "teacher" || !isAppStateReady || isApplyingRemoteAppStateRef.current) return;
+    setExamAnalyses((current) => {
+      const repaired = repairDisconnectedExamAnalysisRuns(current);
+      return repaired.changed ? repaired.analyses : current;
+    });
+  }, [isAppStateReady, session?.role, setExamAnalyses]);
 
   useEffect(() => {
     if (!isPortalDataReady || !["student", "parent"].includes(session?.role) || !session?.sessionToken) return;
@@ -7537,6 +7574,7 @@ export function App() {
 
   async function handleRunExamAnalysis(analysis, overrideAiSettings = null) {
     const aiRunStartedAt = new Date().toISOString();
+    const aiRunRequestId = `ai_run_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     const settingsPrompt = getAiPrompt(overrideAiSettings ?? aiSettings, "examAnalysis") || createDefaultExamAnalysisPrompt();
     const nextAnalysis = {
       ...analysis,
@@ -7547,7 +7585,7 @@ export function App() {
     setExamAnalyses((current) =>
       current.map((item) =>
         item.examAnalysisId === analysis.examAnalysisId
-          ? { ...item, aiProvider: nextAnalysis.aiProvider, aiModel: nextAnalysis.aiModel, aiPrompt: nextAnalysis.aiPrompt, aiStatus: "분석 중", aiError: "", aiRunStartedAt, updatedAt: aiRunStartedAt }
+          ? { ...item, aiProvider: nextAnalysis.aiProvider, aiModel: nextAnalysis.aiModel, aiPrompt: nextAnalysis.aiPrompt, aiStatus: "분석 중", aiError: "", aiRunRequestId, aiRunSessionId: appRuntimeSessionId, aiRunStartedAt, updatedAt: aiRunStartedAt }
           : item
       )
     );
@@ -7573,6 +7611,7 @@ export function App() {
         current.map((item) =>
           item.examAnalysisId === analysis.examAnalysisId
             ? (() => {
+                if (item.aiRunRequestId && item.aiRunRequestId !== aiRunRequestId) return item;
                 const existingCompositionsBySource = normalizeExamSourceCompositions(item.questionCompositionsBySource);
                 const aiCompositionsBySource = normalizeExamSourceCompositions(analysisAiFields.sourceCompositions);
                 const questionComposition = normalizeExamQuestionComposition(analysisAiFields.questionComposition);
@@ -7617,6 +7656,8 @@ export function App() {
                 aiStatus: "완료",
                 aiLastRunAt,
                 aiError: "",
+                aiRunRequestId: "",
+                aiRunSessionId: "",
                 aiRunStartedAt: "",
                 pipelineStage: "문항 검수",
                 updatedAt: new Date().toISOString()
@@ -7629,7 +7670,9 @@ export function App() {
       setExamAnalyses((current) =>
         current.map((item) =>
           item.examAnalysisId === analysis.examAnalysisId
-            ? { ...item, aiStatus: "실패", aiError: error.message, aiRunStartedAt: "", updatedAt: new Date().toISOString() }
+            ? item.aiRunRequestId && item.aiRunRequestId !== aiRunRequestId
+              ? item
+              : { ...item, aiStatus: "실패", aiError: error.message, aiRunRequestId: "", aiRunSessionId: "", aiRunStartedAt: "", updatedAt: new Date().toISOString() }
             : item
         )
       );

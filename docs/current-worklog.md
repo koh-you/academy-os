@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-28 P1. 재시작 후 남는 시험분석 로딩 상태 해제
+
+- 상태: 완료
+- 사용자 요청: 앱 종료 후 재시작해도 시험분석과 알림이 여전히 로딩 중이다.
+- 원인/판단: 운영 `app_state.examAnalyses`에 `aiStatus: "분석 중"`이 저장되어 있었다. 브라우저를 종료하면 기존 AI fetch 결과를 받을 경로가 사라지므로, 재시작 후 남아 있는 `분석 중`은 실제 진행 중이 아니라 끊긴 이전 세션 상태로 봐야 한다. 알림 기록 목록은 Solapi 원문 `result.response`가 커서 알림 화면 로딩을 무겁게 만들 수 있었다.
+- 이번 작업 결과: AI 분석 실행 시 현재 브라우저 세션 ID와 요청 ID를 저장하고, 앱 재시작 후 다른 세션의 `분석 중` 상태가 보이면 자동으로 실패 상태로 풀어 다시 실행할 수 있게 했다. 늦게 도착한 이전 요청 결과가 새 요청 결과를 덮어쓰지 않도록 요청 ID도 비교한다.
+- 알림 기록 경량화: `/api/notification-jobs` 목록 응답에서 무거운 Solapi 원문 응답을 요약해 내려주도록 했다. `includeResult=true`를 붙이면 원문 포함 조회도 가능하다.
+- 운영 데이터 조치: 현재 운영 app_state에 남아 있던 `exam_analysis_1782548946259_jdefc`의 `분석 중` 상태를 `실패`로 해제했다. 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production`, `npm run build` 통과(total 227, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-28 P1. 시험분석 장기 AI 대기 진단과 알림 발송 확인 상태
 
 - 상태: 완료
