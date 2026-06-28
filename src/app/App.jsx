@@ -8366,15 +8366,29 @@ function NotificationCenter({
     () => students.filter((student) => !["paused", "withdrawn"].includes(student.status ?? "active")),
     [students]
   );
+  const classTemplateById = useMemo(
+    () => new Map(classTemplates.map((template) => [template.classTemplateId, template])),
+    [classTemplates]
+  );
+  const studentMatchesNoticeClass = (student) => {
+    if (classFilter === "all") return true;
+    const template = classTemplateById.get(classFilter);
+    return (
+      student.defaultClassTemplateId === classFilter ||
+      student.classTemplateId === classFilter ||
+      student.classId === classFilter ||
+      (template?.name && [student.className, student.defaultClassName].includes(template.name))
+    );
+  };
   const searchableStudents = useMemo(() => activeStudents.filter((student) => {
-    const matchesClass = classFilter === "all" || student.classTemplateId === classFilter;
+    const matchesClass = studentMatchesNoticeClass(student);
     const keyword = normalizeMessageText(searchText).toLowerCase();
     const matchesSearch =
       !keyword ||
       [student.name, student.schoolName, student.grade, student.studentPhone, student.parentPhone]
         .some((value) => String(value ?? "").toLowerCase().includes(keyword));
     return matchesClass && matchesSearch;
-  }), [activeStudents, classFilter, searchText]);
+  }), [activeStudents, classFilter, classTemplateById, searchText]);
   const targetStudents = noticeRecipientMode === "selected"
     ? searchableStudents.filter((student) => selectedStudentIds.includes(student.studentId))
     : searchableStudents;

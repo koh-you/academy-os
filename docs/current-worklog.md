@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-28 P1. 알림관리 개별발송 반 필터 매칭 수정
+
+- 상태: 완료
+- 사용자 요청: 알림관리 `개별 발송`에서 반을 선택하면 학생들이 매칭되지 않아 대상 학생/수신 건수가 0으로 표시된다.
+- 원인: 개별발송 반 필터가 학생의 `classTemplateId`만 확인했다. 현재 학생 기본 반은 주로 `defaultClassTemplateId`에 저장되므로, 반 선택 시 실제 재원생이 필터에서 탈락했다.
+- 이번 작업 결과: 개별발송 학생 필터를 `defaultClassTemplateId`, `classTemplateId`, `classId`, 반 이름 fallback까지 확인하도록 보강했다. 선택한 반의 학생들이 다시 `대상 학생`, 학부모/학생 수신 건수, 선택 목록에 나타난다.
+- 저장 주의: 데이터 저장 구조 변경은 없고 프론트 매칭 로직만 수정했다. 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 통과(total 222, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-28 P1. 시험분석 프롬프트 단일화와 원본별 문항 메타데이터 분리
 
 - 상태: 완료
