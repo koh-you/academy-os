@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-28 P1. 쎈 5권 유형 인덱스 추가 추출
+
+- 상태: 완료
+- 사용자 요청: `22개정 쎈수학 기하.pdf`, `쎈 - 확률과 통계 - 문제.pdf`, `쎈 미적분1 학생용.pdf`, `쎈수학 대수 (2022개정).pdf`, `쎈 공통수학2.pdf` 5개 파일에서도 유형명만 추출한다. 미적분1 앞 유형은 추가로 지정한 문제 PDF에서 확인한다.
+- 이번 작업 결과: 각 PDF의 유형 모음 페이지를 렌더링/OCR한 뒤 육안 검수로 유형명 메타데이터만 정리했다. 미적분1은 기존 학생용 PDF 앞쪽에 유형 모음 페이지가 빠져 있어, 추가 확인한 미적분1 문제 PDF 7쪽의 `함수의 극한과 연속` 유형 모음으로 01~02단원을 확정했다.
+- 산출물: 로컬 산출물은 `output/ssen/ssen_geometry_2022_type_index.*`, `output/ssen/ssen_probability_statistics_type_index.*`, `output/ssen/ssen_calculus1_type_index.*`, `output/ssen/ssen_algebra_2022_type_index.*`, `output/ssen/ssen_common_math2_type_index.*`, 통합본 `output/ssen/ssen_5books_type_index.*`에 저장했다. 각 산출물은 CSV/JSON/Markdown 형식이다.
+- 검증: 책별 유형 수는 기하 102개, 확률과 통계 92개, 미적분1 148개, 대수 175개, 공통수학2 187개로 합계 704개다. 원문 문제 본문, 해설, 문항 이미지는 포함하지 않고 단원명/유형번호/유형명/확인 페이지 메타데이터만 담았다. 산출물은 `output/ssen/` 아래에 있어 저장소 커밋 대상에서 제외된다.
+- 테스트: 앱 코드 변경은 없어 `npm run build`와 `npm run test:production`은 생략했다.
+
 ### 2026-06-28 P1. 쎈 공통수학1 179개 유형 인덱스 추출
 
 - 상태: 완료
