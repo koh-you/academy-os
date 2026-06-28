@@ -540,6 +540,8 @@ function formatNotificationJobStatus(job) {
   if (job.status === "scheduled") return `예약 중 · ${formatKoreaTimeLabel(job.scheduledAt)}`;
   if (job.status === "sent") return "발송 완료";
   if (job.status === "dry_run") return "테스트 기록";
+  if (job.status === "send_unconfirmed") return `발송 확인 필요${job.error ? ` · ${job.error}` : ""}`;
+  if (job.status === "pending_send") return "발송 대기";
   if (job.status === "failed") return `실패${job.error ? ` · ${job.error}` : ""}`;
   if (job.status === "canceled") return "취소";
   if (job.status === "draft") return "초안";
@@ -763,6 +765,47 @@ async function postJson(path, body) {
     throw new Error(result.error || "API 저장 실패");
   }
   return result;
+}
+
+function createRequestTimeoutError(timeoutMs, timeoutMessage = "") {
+  const error = new Error(timeoutMessage || `요청 시간이 ${Math.round(timeoutMs / 1000)}초를 넘었습니다. 잠시 뒤 상태를 확인해 주세요.`);
+  error.name = "TimeoutError";
+  error.requestTimedOut = true;
+  return error;
+}
+
+function isRequestTimeoutError(error) {
+  return Boolean(
+    error?.requestTimedOut ||
+    error?.name === "TimeoutError" ||
+    error?.name === "AbortError" ||
+    String(error?.message ?? "").includes("시간을 넘었습니다")
+  );
+}
+
+async function postJsonWithTimeout(path, body, timeoutMs = 30000, timeoutMessage = "") {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(apiUrl(path), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: controller.signal
+    });
+    const result = await response.json();
+    if (!response.ok || !result.ok) {
+      throw new Error(result.error || "API 저장 실패");
+    }
+    return result;
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw createRequestTimeoutError(timeoutMs, timeoutMessage);
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
 }
 
 function readFileAsDataUrl(file) {
@@ -2301,13 +2344,37 @@ function normalizeExamAnalysisForDisplay(analysis = {}) {
   };
 }
 
+function getExamAnalysisRunStartedAt(analysis = {}) {
+  return analysis.aiRunStartedAt || analysis.updatedAt || "";
+}
+
+function getExamAnalysisElapsedSeconds(analysis = {}, now = Date.now()) {
+  const startedAt = getExamAnalysisRunStartedAt(analysis);
+  const startedTime = startedAt ? new Date(startedAt).getTime() : 0;
+  if (!startedTime || Number.isNaN(startedTime)) return 0;
+  return Math.max(0, Math.floor((now - startedTime) / 1000));
+}
+
+function formatElapsedSeconds(seconds = 0) {
+  const safeSeconds = Math.max(0, Number(seconds) || 0);
+  const minutes = Math.floor(safeSeconds / 60);
+  const rest = safeSeconds % 60;
+  return minutes ? `${minutes}분 ${String(rest).padStart(2, "0")}초` : `${rest}초`;
+}
+
+function getExamAnalysisWaitMessage(seconds = 0) {
+  if (seconds >= 180) return "3분 이상 응답 대기 중입니다. 서버가 응답하면 결과는 그대로 반영됩니다. 새로고침 후에도 계속 같으면 이전 요청이 끊긴 상태일 수 있습니다.";
+  if (seconds >= 60) return "1분 이상 걸리고 있습니다. PDF 원문과 쎈 유형 매칭이 길면 정상적으로 오래 걸릴 수 있습니다.";
+  return "AI가 원문과 문항 메타데이터를 분석하고 있습니다.";
+}
+
 function getExamAnalysisStatusMeta(analysis = {}) {
   const status = analysis.aiStatus || "대기";
   if (status === "완료") {
     return { label: "분석 완료", tone: "done", detail: analysis.aiLastRunAt ? `최근 실행 ${analysis.aiLastRunAt}` : "AI 구조화 결과가 있습니다." };
   }
   if (status === "분석 중") {
-    return { label: "분석 중", tone: "running", detail: "AI가 시험지를 분석하고 있습니다." };
+    return { label: "분석 중", tone: "running", detail: "AI가 시험지를 분석하고 있습니다. 오래 걸려도 응답이 오면 결과를 반영합니다." };
   }
   if (status === "실패") {
     return { label: "분석 실패", tone: "failed", detail: analysis.aiError || "오류 내용을 확인해 주세요." };
@@ -7469,6 +7536,7 @@ export function App() {
   }
 
   async function handleRunExamAnalysis(analysis, overrideAiSettings = null) {
+    const aiRunStartedAt = new Date().toISOString();
     const settingsPrompt = getAiPrompt(overrideAiSettings ?? aiSettings, "examAnalysis") || createDefaultExamAnalysisPrompt();
     const nextAnalysis = {
       ...analysis,
@@ -7479,21 +7547,13 @@ export function App() {
     setExamAnalyses((current) =>
       current.map((item) =>
         item.examAnalysisId === analysis.examAnalysisId
-          ? { ...item, aiProvider: nextAnalysis.aiProvider, aiModel: nextAnalysis.aiModel, aiPrompt: nextAnalysis.aiPrompt, aiStatus: "분석 중", aiError: "", updatedAt: new Date().toISOString() }
+          ? { ...item, aiProvider: nextAnalysis.aiProvider, aiModel: nextAnalysis.aiModel, aiPrompt: nextAnalysis.aiPrompt, aiStatus: "분석 중", aiError: "", aiRunStartedAt, updatedAt: aiRunStartedAt }
           : item
       )
     );
 
     try {
-      const response = await fetch(apiUrl("/api/ai/exam-analysis"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(nextAnalysis)
-      });
-      const result = await response.json();
-      if (!response.ok || !result.ok) {
-        throw new Error(result.error || "시험분석 API 요청에 실패했습니다.");
-      }
+      const result = await postJson("/api/ai/exam-analysis", nextAnalysis);
       const normalizedAiFields = normalizeExamAnalysisAiFields(result.result.fields);
       const { questionItems: aiQuestionItems = [], ...analysisAiFields } = normalizedAiFields;
       const aiLastRunAt = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
@@ -7557,6 +7617,7 @@ export function App() {
                 aiStatus: "완료",
                 aiLastRunAt,
                 aiError: "",
+                aiRunStartedAt: "",
                 pipelineStage: "문항 검수",
                 updatedAt: new Date().toISOString()
                 };
@@ -7568,7 +7629,7 @@ export function App() {
       setExamAnalyses((current) =>
         current.map((item) =>
           item.examAnalysisId === analysis.examAnalysisId
-            ? { ...item, aiStatus: "실패", aiError: error.message, updatedAt: new Date().toISOString() }
+            ? { ...item, aiStatus: "실패", aiError: error.message, aiRunStartedAt: "", updatedAt: new Date().toISOString() }
             : item
         )
       );
@@ -8277,6 +8338,7 @@ function getNotificationStatusLabel(status) {
   return {
     draft: "테스트/초안",
     dry_run: "테스트 기록",
+    send_unconfirmed: "확인 필요",
     pending_send: "발송 대기",
     queued: "내부 대기",
     scheduled: "예약됨",
@@ -8339,12 +8401,14 @@ function NotificationCenter({
   const noticeJobs = notificationJobs.filter((job) => String(job.notificationType ?? "").startsWith("notice_"));
   const scheduledNoticeJobs = noticeJobs.filter((job) => job.status === "scheduled");
   const sentNoticeJobs = noticeJobs.filter((job) => job.status === "sent");
+  const pendingNoticeJobs = noticeJobs.filter((job) => job.status === "send_unconfirmed");
   const failedNoticeJobs = noticeJobs.filter((job) => job.status === "failed");
   const draftNoticeJobs = noticeJobs.filter((job) => job.status === "draft" || job.status === "dry_run" || job.status === "canceled");
   const filteredNoticeJobs = {
     all: noticeJobs.slice(0, 40),
     scheduled: scheduledNoticeJobs,
     sent: sentNoticeJobs,
+    pending: pendingNoticeJobs,
     failed: failedNoticeJobs,
     draft: draftNoticeJobs
   }[jobFilter] ?? noticeJobs.slice(0, 40);
@@ -8352,6 +8416,7 @@ function NotificationCenter({
     all: "최근 공지",
     scheduled: "예약",
     sent: "발송 완료",
+    pending: "확인 필요",
     failed: "실패",
     draft: "정리함"
   };
@@ -8499,38 +8564,69 @@ function NotificationCenter({
   }
 
   async function persistNoticeJob(notificationJob) {
-    await postJson("/api/notification-jobs", { notificationJob });
+    await postJsonWithTimeout(
+      "/api/notification-jobs",
+      { notificationJob },
+      15000,
+      "발송 기록 저장 요청이 15초를 넘었습니다. 새로고침 후 기록 반영 여부를 확인해 주세요."
+    );
+  }
+
+  function refreshNoticeJobsInBackground() {
+    Promise.resolve(onRefresh?.()).catch((error) => {
+      setDispatchMessage((current) => `${current || "처리는 완료됐습니다."} 발송 기록 새로고침 실패: ${error.message}`);
+    });
   }
 
   async function sendNoticeNow() {
     if (!noticeText || noticeRecipients.length === 0 || isSendingNotice) return;
     setIsSendingNotice(true);
-    setDispatchMessage("");
+    setDispatchMessage(`공지 즉시 발송 중: 0/${noticeRecipients.length}건 요청 시작`);
     let sentCount = 0;
+    let pendingCount = 0;
     let failedCount = 0;
+    let recordFailedCount = 0;
     try {
-      for (const recipient of noticeRecipients) {
+      for (const [index, recipient] of noticeRecipients.entries()) {
         const notificationJob = buildNoticeJob(recipient, "immediate");
+        const audienceLabel = recipient.audience === "student" ? "학생" : "학부모";
+        setDispatchMessage(`공지 즉시 발송 중: ${index + 1}/${noticeRecipients.length}건 · ${recipient.student.name} ${audienceLabel}`);
         try {
-          const result = await postJson("/api/notifications/comment-alimtalk", notificationJob.payload);
+          const result = await postJsonWithTimeout(
+            "/api/notifications/comment-alimtalk",
+            notificationJob.payload,
+            45000,
+            "알림톡 발송 요청이 45초를 넘었습니다. 실제 발송 여부는 발송 기록 또는 Solapi에서 확인해 주세요."
+          );
           sentCount += 1;
-          await persistNoticeJob({
-            ...notificationJob,
-            status: result.result?.dryRun ? "dry_run" : "sent",
-            provider: result.provider ?? "solapi",
-            result: result.result ?? null
-          });
+          try {
+            await persistNoticeJob({
+              ...notificationJob,
+              status: result.result?.dryRun ? "dry_run" : "sent",
+              provider: result.provider ?? "solapi",
+              result: result.result ?? null
+            });
+          } catch (recordError) {
+            recordFailedCount += 1;
+          }
         } catch (error) {
-          failedCount += 1;
-          await persistNoticeJob({
-            ...notificationJob,
-            status: "failed",
-            error: error.message
-          });
+          const timedOut = isRequestTimeoutError(error);
+          if (timedOut) pendingCount += 1;
+          else failedCount += 1;
+          try {
+            await persistNoticeJob({
+              ...notificationJob,
+              status: timedOut ? "send_unconfirmed" : "failed",
+              error: error.message
+            });
+          } catch (recordError) {
+            recordFailedCount += 1;
+          }
         }
       }
-      setDispatchMessage(`공지 발송 처리 완료: 성공 ${sentCount}건${failedCount ? `, 실패 ${failedCount}건` : ""}`);
-      await onRefresh?.();
+      setDispatchMessage(`공지 발송 처리 완료: 성공 ${sentCount}건${pendingCount ? `, 확인 필요 ${pendingCount}건` : ""}${failedCount ? `, 실패 ${failedCount}건` : ""}${recordFailedCount ? `, 기록 저장 실패 ${recordFailedCount}건` : ""}`);
+      setJobFilter(pendingCount ? "pending" : failedCount ? "failed" : "sent");
+      refreshNoticeJobsInBackground();
     } finally {
       setIsSendingNotice(false);
     }
@@ -8539,14 +8635,23 @@ function NotificationCenter({
   async function scheduleNotice() {
     if (!noticeText || noticeRecipients.length === 0 || !scheduledAt || isSendingNotice) return;
     setIsSendingNotice(true);
-    setDispatchMessage("");
+    setDispatchMessage(`공지 예약 저장 중: 0/${noticeRecipients.length}건`);
+    let savedCount = 0;
+    let failedCount = 0;
     try {
       const jobs = noticeRecipients.map((recipient) => buildNoticeJob(recipient, "scheduled"));
-      for (const notificationJob of jobs) {
-        await persistNoticeJob(notificationJob);
+      for (const [index, notificationJob] of jobs.entries()) {
+        setDispatchMessage(`공지 예약 저장 중: ${index + 1}/${jobs.length}건`);
+        try {
+          await persistNoticeJob(notificationJob);
+          savedCount += 1;
+        } catch (error) {
+          failedCount += 1;
+        }
       }
-      setDispatchMessage(`${formatKoreaTimeLabel(scheduledAt)} 공지 예약 ${jobs.length}건을 저장했습니다.`);
-      await onRefresh?.();
+      setDispatchMessage(`${formatKoreaTimeLabel(scheduledAt)} 공지 예약 저장 완료: 성공 ${savedCount}건${failedCount ? `, 실패 ${failedCount}건` : ""}`);
+      setJobFilter(failedCount ? "failed" : "scheduled");
+      refreshNoticeJobsInBackground();
     } finally {
       setIsSendingNotice(false);
     }
@@ -8555,7 +8660,7 @@ function NotificationCenter({
   async function sendTestNotice() {
     if (!noticeText || isSendingNotice) return;
     setIsSendingNotice(true);
-    setDispatchMessage("");
+    setDispatchMessage("공지 테스트 발송을 요청하는 중입니다.");
     const fallbackStudent = noticeRecipients[0]?.student ?? searchableStudents[0] ?? students[0] ?? { name: "테스트학생", studentId: "test" };
     const testRecipient = {
       audience: noticeRecipientMode === "student" ? "student" : "parent",
@@ -8563,13 +8668,20 @@ function NotificationCenter({
       student: fallbackStudent
     };
     try {
-      await postJson("/api/notifications/comment-alimtalk", {
-        ...buildNoticePayload(testRecipient),
-        forceTestRecipient: true
-      });
+      await postJsonWithTimeout(
+        "/api/notifications/comment-alimtalk",
+        {
+          ...buildNoticePayload(testRecipient),
+          forceTestRecipient: true
+        },
+        30000,
+        "테스트 발송 요청이 30초를 넘었습니다. 실제 수신 여부를 확인해 주세요."
+      );
       setDispatchMessage(`테스트 번호(${notificationStatus?.testRecipient || "설정값"})로 공지 테스트를 요청했습니다.`);
     } catch (error) {
-      setDispatchMessage(`공지 테스트 실패: ${error.message}`);
+      setDispatchMessage(isRequestTimeoutError(error)
+        ? `공지 테스트 확인 필요: ${error.message}`
+        : `공지 테스트 실패: ${error.message}`);
     } finally {
       setIsSendingNotice(false);
     }
@@ -8783,9 +8895,10 @@ function NotificationCenter({
               <button className="softButton" disabled={!noticeText || isSendingNotice} onClick={sendTestNotice} type="button">테스트 발송</button>
               <button className="softButton" disabled={!noticeText || !noticeRecipients.length || !scheduledAt || isSendingNotice} onClick={scheduleNotice} type="button">예약 발송</button>
               <button className="sendButton" disabled={!noticeText || !noticeRecipients.length || isSendingNotice} onClick={sendNoticeNow} type="button">
-                {isSendingNotice ? "처리 중" : "즉시 발송"}
+                {isSendingNotice ? "처리 중..." : "즉시 발송"}
               </button>
             </div>
+            {dispatchMessage ? <p className="inlineNotice noticeDispatchMessage">{dispatchMessage}</p> : null}
           </div>
         </div>
       </section>
@@ -8794,6 +8907,7 @@ function NotificationCenter({
         {[
           ["scheduled", "예약", scheduledNoticeJobs.length, "공지 예약 대기"],
           ["sent", "발송 완료", sentNoticeJobs.length, "공지 발송 완료"],
+          ["pending", "확인 필요", pendingNoticeJobs.length, "응답 지연 공지"],
           ["failed", "실패", failedNoticeJobs.length, "재확인 필요"],
           ["draft", "정리함", draftNoticeJobs.length, "테스트/취소/초안"]
         ].map(([id, label, count, detail]) => (
@@ -13192,6 +13306,8 @@ function ExamAnalysisCenter({
   const [isReportPreviewOpen, setIsReportPreviewOpen] = useState(false);
   const [isAiInitialViewOpen, setIsAiInitialViewOpen] = useState(false);
   const [outputPreviewId, setOutputPreviewId] = useState("");
+  const [analysisNow, setAnalysisNow] = useState(Date.now());
+  const [analysisApiCheck, setAnalysisApiCheck] = useState({ analysisId: "", message: "", status: "idle" });
   const [selectedQuestionId, setSelectedQuestionId] = useState("");
   const [expandedQuestionInsightId, setExpandedQuestionInsightId] = useState("");
   const [activeQuestionSourceId, setActiveQuestionSourceId] = useState("");
@@ -13269,6 +13385,12 @@ function ExamAnalysisCenter({
   const currentStage = stageAlias[selectedAnalysis?.pipelineStage] ??
     (pipelineStages.includes(selectedAnalysis?.pipelineStage) ? selectedAnalysis.pipelineStage : pipelineStages[0]);
   const statusMeta = selectedAnalysis ? getExamAnalysisStatusMeta(selectedAnalysis) : getExamAnalysisStatusMeta();
+  const analysisElapsedSeconds = selectedAnalysis?.aiStatus === "분석 중"
+    ? getExamAnalysisElapsedSeconds(selectedAnalysis, analysisNow)
+    : 0;
+  const analysisWaitMessage = selectedAnalysis?.aiStatus === "분석 중"
+    ? getExamAnalysisWaitMessage(analysisElapsedSeconds)
+    : "";
   const detailSection = examAnalysisDetailSections.find((section) => section.id === detailSectionId);
   const globalQuestionComposition = normalizeExamQuestionComposition(selectedAnalysis?.questionComposition);
   const questionCompositionsBySource = normalizeExamSourceCompositions(selectedAnalysis?.questionCompositionsBySource);
@@ -13372,6 +13494,69 @@ function ExamAnalysisCenter({
     instagram: { title: "인스타 카드뉴스", kind: "instagram", value: selectedAnalysis.instagramDraft, editSection: "output" }
   } : {};
   const outputPreview = outputPreviewMap[outputPreviewId] ?? null;
+  useEffect(() => {
+    if (selectedAnalysis?.aiStatus !== "분석 중") return undefined;
+    setAnalysisNow(Date.now());
+    const intervalId = window.setInterval(() => setAnalysisNow(Date.now()), 1000);
+    return () => window.clearInterval(intervalId);
+  }, [selectedAnalysis?.examAnalysisId, selectedAnalysis?.aiRunStartedAt, selectedAnalysis?.aiStatus]);
+
+  useEffect(() => {
+    if (!selectedAnalysis || selectedAnalysis.aiStatus !== "분석 중") {
+      setAnalysisApiCheck({ analysisId: "", message: "", status: "idle" });
+      return undefined;
+    }
+
+    let cancelled = false;
+    let intervalId = null;
+    const analysisId = selectedAnalysis.examAnalysisId;
+    const elapsedMs = getExamAnalysisElapsedSeconds(selectedAnalysis) * 1000;
+    const initialDelay = Math.max(0, 90 * 1000 - elapsedMs);
+    setAnalysisApiCheck({
+      analysisId,
+      message: "90초 이상 걸리면 서버 상태를 자동 확인합니다.",
+      status: "waiting"
+    });
+
+    async function checkApiStatus() {
+      if (cancelled) return;
+      setAnalysisApiCheck({
+        analysisId,
+        message: "서버 응답 상태를 확인하는 중입니다.",
+        status: "checking"
+      });
+      try {
+        const response = await fetch(apiUrl("/api/integrations/status"), { cache: "no-store" });
+        const result = await response.json();
+        if (!response.ok || !result.ok) throw new Error(result.error || "상태 확인 실패");
+        if (cancelled) return;
+        setAnalysisApiCheck({
+          analysisId,
+          message: "서버 응답은 정상입니다. AI 제공자 응답을 기다리는 상태입니다.",
+          status: "ok"
+        });
+      } catch (error) {
+        if (cancelled) return;
+        setAnalysisApiCheck({
+          analysisId,
+          message: `서버 상태 확인 실패: ${error.message}. 네트워크 또는 API 문제가 있을 수 있습니다.`,
+          status: "failed"
+        });
+      }
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      checkApiStatus();
+      intervalId = window.setInterval(checkApiStatus, 60 * 1000);
+    }, initialDelay);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+      if (intervalId) window.clearInterval(intervalId);
+    };
+  }, [selectedAnalysis?.examAnalysisId, selectedAnalysis?.aiRunStartedAt, selectedAnalysis?.aiStatus]);
+
   useEffect(() => {
     if (!analysisSchoolTree.length) {
       if (selectedSchoolId) setSelectedSchoolId("");
@@ -14316,6 +14501,13 @@ function ExamAnalysisCenter({
                 <strong>{statusMeta.label}</strong>
                 <span>{statusMeta.detail}</span>
               </div>
+              {selectedAnalysis.aiStatus === "분석 중" ? (
+                <div className={`inlineNotice analysisRunNotice ${analysisApiCheck.status}`}>
+                  <strong>경과 {formatElapsedSeconds(analysisElapsedSeconds)}</strong>
+                  <span>{analysisWaitMessage}</span>
+                  {analysisApiCheck.message ? <small>{analysisApiCheck.message}</small> : null}
+                </div>
+              ) : null}
               {examPrepContext ? (
                 <div className="analysisExamPrepContext">
                   <strong>시험관리 데이터 반영</strong>

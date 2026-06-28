@@ -458,6 +458,32 @@ button {
   color: #be123c;
 }
 
+.inlineNotice.analysisRunNotice,
+.inlineNotice.noticeDispatchMessage {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.inlineNotice.analysisRunNotice small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.inlineNotice.analysisRunNotice.ok {
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.inlineNotice.analysisRunNotice.failed {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #9a3412;
+}
+
 .statusDot {
   border-radius: 999px;
   display: inline-block;
@@ -6677,7 +6703,7 @@ button:disabled {
 }
 
 .noticeStatsGrid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   margin-top: 14px;
 }
 
@@ -6698,6 +6724,12 @@ button:disabled {
   background: var(--status-pending-bg);
   border-color: var(--status-pending-border);
   color: var(--status-pending-text);
+}
+
+.status-send_unconfirmed {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #9a3412;
 }
 
 .status-sent {
