@@ -958,6 +958,11 @@ async function requestExamQuestionCropDraft(payload) {
   return result.result;
 }
 
+async function requestExamQuestionInfoTextDraft(payload) {
+  const result = await postJson("/api/ai/exam-question-info-text", payload);
+  return result.result;
+}
+
 function getExamPostFileOpenUrl(file) {
   if (file?.signedUrl) return file.signedUrl;
   if (!file?.storagePath) return "";
@@ -1902,6 +1907,110 @@ function getExamQuestionCommentCount(questionItems = []) {
 function parseExamScoreValue(value = "") {
   const numeric = Number(String(value ?? "").replace(/[^0-9.]/g, ""));
   return Number.isFinite(numeric) && numeric > 0 ? numeric : 0;
+}
+
+function normalizeExamOcrTextForQuestionParsing(value = "") {
+  return String(value ?? "")
+    .replace(/\r/g, "\n")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function cleanExamQuestionSnippet(value = "") {
+  return normalizeExamOcrTextForQuestionParsing(value)
+    .replace(/\n+/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim()
+    .slice(0, 900);
+}
+
+function extractExamQuestionScore(text = "") {
+  const source = String(text ?? "");
+  const bracketMatch = source.match(/[\[(（]\s*(\d+(?:\.\d+)?)\s*점\s*[\])）]/);
+  const pointMatch = bracketMatch || source.match(/(?:배점|점수)?\s*(\d+(?:\.\d+)?)\s*점/);
+  return pointMatch?.[1] ? `${pointMatch[1]}점` : "";
+}
+
+function inferExamQuestionType({ number, text = "", composition = null } = {}) {
+  const normalizedComposition = normalizeExamQuestionComposition(composition);
+  const questionNumber = Number(number) || 0;
+  const section = normalizedComposition?.sections?.find((item) =>
+    Number(item.start) && Number(item.end) && questionNumber >= Number(item.start) && questionNumber <= Number(item.end)
+  );
+  const sectionLabel = String(section?.label || "");
+  if (/서술|논술|주관/.test(sectionLabel)) return "서술형";
+  if (/선택|객관/.test(sectionLabel)) return "객관식";
+
+  const source = String(text ?? "");
+  if (/[①②③④⑤]/.test(source)) return "객관식";
+  if (/서술형|논술형/.test(source)) return "서술형";
+  if (/단답형/.test(source)) return "단답형";
+  return "";
+}
+
+function scoreExamQuestionSnippet(snippet = "", number = 0) {
+  const source = String(snippet ?? "");
+  let score = 0;
+  if (extractExamQuestionScore(source)) score += 4;
+  if (/[①②③④⑤]/.test(source)) score += 3;
+  if (/[\[(（]\s*\d+(?:\.\d+)?\s*점/.test(source)) score += 2;
+  if (/[=<>±√∑]/.test(source) || /함수|방정식|부등식|그래프|집합|확률|수열|극한|미분|적분/.test(source)) score += 2;
+  if (new RegExp(`^\\s*${Number(number) || ""}\\s*[.)]`).test(source)) score += 1;
+  return score;
+}
+
+function extractExamQuestionOcrSnippets(rawText = "", targetCount = 0) {
+  const text = normalizeExamOcrTextForQuestionParsing(rawText);
+  const safeCount = Math.max(0, Math.min(80, Number(targetCount) || 0));
+  if (!text || !safeCount) return {};
+
+  const matches = [];
+  const pattern = /(?:^|\n)\s*(\d{1,2})\s*[.)]\s*/g;
+  let match = null;
+  while ((match = pattern.exec(text))) {
+    const number = Number(match[1]);
+    if (number >= 1 && number <= safeCount) {
+      matches.push({ number, index: match.index });
+    }
+  }
+
+  const candidatesByNumber = new Map();
+  matches.forEach((entry, index) => {
+    const next = matches.slice(index + 1).find((candidate) => candidate.number !== entry.number);
+    const endIndex = next?.index ?? Math.min(text.length, entry.index + 1400);
+    const snippet = cleanExamQuestionSnippet(text.slice(entry.index, endIndex));
+    if (!snippet) return;
+    const candidates = candidatesByNumber.get(entry.number) || [];
+    candidates.push(snippet);
+    candidatesByNumber.set(entry.number, candidates);
+  });
+
+  return Object.fromEntries(
+    Array.from(candidatesByNumber.entries()).map(([number, candidates]) => {
+      const best = candidates
+        .slice()
+        .sort((a, b) => scoreExamQuestionSnippet(b, number) - scoreExamQuestionSnippet(a, number) || b.length - a.length)[0];
+      return [number, best];
+    })
+  );
+}
+
+function applyHeuristicQuestionInfoDrafts(items = [], rawText = "", composition = null) {
+  const normalizedItems = normalizeExamQuestionItems(items);
+  const targetCount = getExamQuestionMaxNumber(normalizedItems) || normalizedItems.length;
+  const snippets = extractExamQuestionOcrSnippets(rawText, targetCount);
+  return normalizedItems.map((item) => {
+    const snippet = snippets[Number(item.number)] || item.ocrText || "";
+    const score = extractExamQuestionScore(snippet);
+    const questionType = inferExamQuestionType({ number: item.number, text: snippet, composition });
+    return createExamQuestionItem({
+      ...item,
+      score: item.score || score,
+      questionType: item.questionType && item.questionType !== "확인 필요" ? item.questionType : questionType || item.questionType,
+      ocrText: item.ocrText || snippet
+    });
+  });
 }
 
 function getExamTotalScore(questionItems = [], questionComposition = null) {
@@ -13482,6 +13591,7 @@ function ExamAnalysisCenter({
   const [cropDraft, setCropDraft] = useState(null);
   const [cropDraftStatus, setCropDraftStatus] = useState("");
   const [isQuestionCropDrafting, setIsQuestionCropDrafting] = useState(false);
+  const [isQuestionInfoFilling, setIsQuestionInfoFilling] = useState(false);
   const [pdfPageCount, setPdfPageCount] = useState(0);
   const [pdfRenderStatus, setPdfRenderStatus] = useState("");
   const [pdfScale, setPdfScale] = useState(1.25);
@@ -13948,33 +14058,88 @@ function ExamAnalysisCenter({
   }
 
   async function runAiForActiveQuestionSource() {
-    if (!selectedAnalysis) return;
+    if (!selectedAnalysis || isQuestionInfoFilling) return;
     const requestedCount = Math.max(1, Math.min(80, Number(questionCountDraft) || activeQuestionItems.length || activeQuestionMaxNumber || 20));
     const targetItems = createExamQuestionItemsFromCount(requestedCount, activeQuestionItems).map(withActiveQuestionSource);
-    if (!activeQuestionItems.length) {
-      updateQuestionItems([...questionItems, ...targetItems]);
-      setSelectedQuestionId(targetItems[0]?.questionId || "");
-    }
     const sourceText = selectedQuestionSourceFile?.extractedText
       ? `[현재 시험지/연도 원문] ${selectedQuestionSourceFile.fileName}\n${selectedQuestionSourceFile.extractedText}`
       : "";
-    const scopedRawExamText = sourceText || selectedAnalysis.rawExamText;
-    await onRunAnalysis({
-      ...selectedAnalysis,
-      sourceFiles: selectedQuestionSourceFile ? [{ ...selectedQuestionSourceFile, sourceId: resolvedQuestionSourceId }] : selectedAnalysis.sourceFiles,
-      sourceFileUrl: selectedQuestionOpenUrl || selectedAnalysis.sourceFileUrl,
-      rawExamText: scopedRawExamText,
-      questionItems: targetItems,
-      questionSourceId: resolvedQuestionSourceId,
-      questionSourceUrl: selectedQuestionSourceUrl,
-      questionTargetCount: Math.max(requestedCount, targetItems.length),
-      questionInfoOnly: true,
-      questionTargetCountsBySource: {
-        ...questionTargetCountsBySource,
-        [resolvedQuestionSourceId]: Math.max(requestedCount, targetItems.length)
-      },
-      examPrepContext
-    }, aiSettings);
+    const scopedRawExamText = sourceText || selectedAnalysis.rawExamText || "";
+    const heuristicItems = applyHeuristicQuestionInfoDrafts(targetItems, scopedRawExamText, questionComposition).map(withActiveQuestionSource);
+    const nonActiveItems = questionItems.filter((item) => !questionBelongsToActiveSource(item));
+    const targetCount = Math.max(requestedCount, heuristicItems.length);
+
+    setIsQuestionInfoFilling(true);
+    setCropDraftStatus("문항카드 기본정보를 OCR에서 먼저 채우는 중입니다...");
+    updateQuestionItems([...nonActiveItems, ...heuristicItems]);
+    if (heuristicItems[0]) setSelectedQuestionId((current) => current || heuristicItems[0].questionId);
+
+    try {
+      setCropDraftStatus(`문항별 OCR 조각 기반 AI 보강 중입니다... 0/${heuristicItems.length}`);
+      const result = await requestExamQuestionInfoTextDraft({
+        aiModel: aiSettings.examAnalysisModel,
+        aiProvider: aiSettings.examAnalysisProvider,
+        schoolName: selectedAnalysis.schoolName,
+        grade: selectedAnalysis.grade,
+        subject: selectedAnalysis.subject,
+        examName: selectedAnalysis.examName,
+        examDate: selectedAnalysis.examDate,
+        sourceFiles: selectedQuestionSourceFile ? [{ ...selectedQuestionSourceFile, sourceId: resolvedQuestionSourceId }] : selectedAnalysis.sourceFiles,
+        rawExamText: scopedRawExamText,
+        questionItems: heuristicItems,
+        questionSourceId: resolvedQuestionSourceId,
+        questionSourceUrl: selectedQuestionSourceUrl,
+        questionTargetCount: targetCount,
+        examPrepContext
+      });
+      const aiItems = normalizeAiQuestionDrafts(result?.fields?.questionItems || result?.questionItems || []);
+      const mergedActiveItems = mergeAiQuestionDrafts(heuristicItems, aiItems, {
+        sourceId: resolvedQuestionSourceId,
+        sourceUrl: selectedQuestionSourceUrl,
+        defaultSourceId: resolvedQuestionSourceId,
+        targetCount
+      }).map(withActiveQuestionSource);
+      const aiLastRunAt = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
+      updateQuestionItems([...nonActiveItems, ...mergedActiveItems]);
+      if (resolvedQuestionSourceId) {
+        update("questionTargetCountsBySource", {
+          ...questionTargetCountsBySource,
+          [resolvedQuestionSourceId]: targetCount
+        });
+      }
+      if (!resolvedQuestionSourceId || renderSourceFileOptions.length <= 1) update("questionTargetCount", targetCount);
+      update("aiInitialFields", {
+        ...(selectedAnalysis.aiInitialFields || {}),
+        questionItems: normalizeAiQuestionDrafts(aiItems.length ? aiItems : heuristicItems).map((item) => ({
+          ...item,
+          cropSourceId: resolvedQuestionSourceId || item.cropSourceId,
+          cropSourceUrl: selectedQuestionSourceUrl || item.cropSourceUrl
+        }))
+      });
+      update("aiInitialGeneratedAt", aiLastRunAt);
+      update("aiProvider", result?.provider || aiSettings.examAnalysisProvider);
+      update("aiModel", result?.model || aiSettings.examAnalysisModel);
+      update("aiStatus", "완료");
+      update("aiError", "");
+      update("pipelineStage", "문항 검수");
+
+      const scoreCount = mergedActiveItems.filter((item) => item.score).length;
+      const aiFilledCount = aiItems.filter((item) =>
+        [
+          item.unit,
+          item.difficulty && item.difficulty !== "확인 필요",
+          item.ssenTypeTags?.length
+        ].some(Boolean)
+      ).length;
+      const warningText = result?.warning ? ` · ${result.warning}` : "";
+      setCropDraftStatus(`문항정보 채우기 완료 · 카드 ${mergedActiveItems.length}개 · 배점 ${scoreCount}개 · AI 보강 ${aiFilledCount}개${warningText}`);
+    } catch (error) {
+      update("aiStatus", "완료");
+      update("aiError", "");
+      setCropDraftStatus(`OCR 기반 기본정보는 저장했습니다. AI 단원/쎈유형 보강은 실패했습니다. (${error.message})`);
+    } finally {
+      setIsQuestionInfoFilling(false);
+    }
   }
 
   function addQuestionItem() {
@@ -14865,11 +15030,11 @@ function ExamAnalysisCenter({
                   <button className="primaryButton" onClick={() => applyQuestionCount()} type="button">확인 후 문항카드 생성</button>
                   <button
                     className="softButton"
-                    disabled={selectedAnalysis.aiStatus === "분석 중"}
+                    disabled={selectedAnalysis.aiStatus === "분석 중" || isQuestionInfoFilling}
                     onClick={runAiForActiveQuestionSource}
                     type="button"
                   >
-                    {selectedAnalysis.aiStatus === "분석 중" ? "AI 채우는 중..." : "AI 문항정보 채우기"}
+                    {selectedAnalysis.aiStatus === "분석 중" || isQuestionInfoFilling ? "AI 채우는 중..." : "AI 문항정보 채우기"}
                   </button>
                   <button className="softButton" onClick={addQuestionItem} type="button">문항 추가</button>
                   <button className="softButton danger" disabled={!selectedQuestion} onClick={deleteSelectedQuestion} type="button">선택 문항 삭제</button>

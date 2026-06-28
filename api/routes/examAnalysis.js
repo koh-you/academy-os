@@ -542,6 +542,88 @@ function buildQuestionItemsPrompt(payload) {
   ].join("\n");
 }
 
+function buildQuestionInfoTextPrompt(payload) {
+  const examPrepContext = payload.examPrepContext && typeof payload.examPrepContext === "object" ? payload.examPrepContext : null;
+  const targetCount = Math.max(1, Math.min(80, Number(payload.questionTargetCount) || (Array.isArray(payload.questionItems) ? payload.questionItems.length : 0) || 20));
+  const currentItems = Array.isArray(payload.questionItems) ? payload.questionItems : [];
+  const currentItemLines = currentItems
+    .slice(0, targetCount)
+    .map((item, index) => {
+      const number = Number(item.number || item.questionNumber || index + 1) || index + 1;
+      const snippet = String(item.ocrText || item.questionSummary || "").replace(/\s+/g, " ").trim().slice(0, 700);
+      return [
+        `문항 ${number}`,
+        `page=${item.page || 1}`,
+        `score=${item.score || "미입력"}`,
+        `questionType=${item.questionType || "확인 필요"}`,
+        `unit=${item.unit || "미입력"}`,
+        `difficulty=${item.difficulty || "확인 필요"}`,
+        `role=${item.role || "기본"}`,
+        `ssen=${formatSsenTypeTagsForPrompt(item.ssenTypeTags) || "미입력"}`,
+        `ocr=${snippet || "문항별 OCR 없음"}`
+      ].join(" | ");
+    })
+    .join("\n");
+
+  return [
+    "역할: 으뜸수학 고태영T의 내신 수학 문항카드 초안 작성 AI",
+    "목표: 앱이 이미 만든 문항카드 배열을 기준으로 단원, 난이도, 쎈 유형, 검수 포인트만 보강한다.",
+    "이미 앱이 추출한 배점/문항형식/OCR 조각이 있으므로 문항 번호를 새로 만들거나 생략하지 않는다.",
+    "",
+    "[시험 기본정보]",
+    `학교: ${payload.schoolName ?? ""}`,
+    `학년: ${payload.grade ?? ""}`,
+    `과목: ${payload.subject ?? ""}`,
+    `시험명: ${payload.examName ?? ""}`,
+    `목표 문항 수: ${targetCount}`,
+    "",
+    "[시험관리 탭 입력정보]",
+    examPrepContext
+      ? [
+          `시험범위: ${examPrepContext.scope ?? ""}`,
+          `부교재: ${examPrepContext.subTextbook ?? ""}`,
+          `특이사항: ${examPrepContext.specialNote ?? ""}`,
+          `시험 후 총평: ${examPrepContext.review ?? ""}`
+        ].join("\n")
+      : "연결된 시험관리 데이터가 없습니다.",
+    "",
+    "[문항별 현재 카드와 OCR 조각]",
+    currentItemLines || "문항별 OCR 조각이 없습니다.",
+    "",
+    buildSsenTypePromptSection(payload),
+    "",
+    "[작성 규칙]",
+    `- questionItems는 반드시 1번부터 ${targetCount}번까지 반환한다. 문항을 생략하지 않는다.`,
+    "- 앱이 이미 넣은 score, questionType이 있으면 그대로 유지한다. 명백히 틀린 경우에만 수정한다.",
+    "- unit은 OCR 조각과 시험범위를 보고 실제 단원명으로 짧게 쓴다.",
+    "- difficulty는 확인 필요, 하, 중하, 중, 중상, 상 중 하나다.",
+    "- role은 기본, 실수유도, 앞번호 고난도, 준킬러, 킬러, 서술형 변별, 확인 필요 중 하나다.",
+    "- 쎈 유형 기준표에서 가장 가까운 primary 1개를 우선 넣고, 복합 문항이면 secondary 1~2개를 추가한다.",
+    "- OCR 조각만으로 판별이 어려운 문항은 unit/difficulty를 '확인 필요'로 두고 tags에 'vision 필요'를 넣는다.",
+    "- 원문 문제 본문 전체를 재작성하지 말고 ocrText는 기존 짧은 요약을 유지하거나 80자 이내로 더 짧게 정리한다.",
+    "",
+    "반드시 아래 JSON 형식만 반환하세요. 설명 문장, markdown, 코드블록은 쓰지 마세요.",
+    "{",
+    '  "questionItems": [',
+    "    {",
+    '      "number": 1,',
+    '      "page": 1,',
+    '      "score": "기존값 또는 확인 필요",',
+    '      "questionType": "객관식",',
+    '      "unit": "확인 필요",',
+    '      "difficulty": "확인 필요",',
+    '      "role": "기본",',
+    '      "source": "확인 필요",',
+    '      "ocrText": "문항 조건 짧은 요약",',
+    '      "strategyComment": "검수 포인트",',
+    '      "ssenTypeTags": [],',
+    '      "tags": ["기본문항"]',
+    "    }",
+    "  ]",
+    "}"
+  ].join("\n");
+}
+
 function buildCommentPrompt(payload) {
   const audienceLabel = payload.audience === "student" ? "학생" : payload.audience === "teacher" ? "강사" : "학부모";
   const audienceRule =
@@ -917,11 +999,38 @@ function normalizeQuestionItemsFromAi(items = []) {
     .sort((a, b) => a.page - b.page || a.number - b.number);
 }
 
+function extractQuestionItemsFromParsed(parsed) {
+  if (Array.isArray(parsed)) return parsed;
+  if (!parsed || typeof parsed !== "object") return [];
+  const directCandidates = [
+    parsed.questionItems,
+    parsed.questions,
+    parsed.items,
+    parsed.questionItemDrafts,
+    parsed.questionCards,
+    parsed["문항정보"],
+    parsed["문항카드"],
+    parsed.result?.questionItems,
+    parsed.result?.questions,
+    parsed.data?.questionItems,
+    parsed.data?.questions
+  ];
+  for (const candidate of directCandidates) {
+    if (Array.isArray(candidate)) return candidate;
+    if (candidate && typeof candidate === "object" && !Array.isArray(candidate)) {
+      const values = Object.values(candidate);
+      if (values.length && values.every((value) => value && typeof value === "object")) return values;
+    }
+  }
+  if (parsed.questionItem && typeof parsed.questionItem === "object") return [parsed.questionItem];
+  return [];
+}
+
 function normalizeAnalysisFields(fields, payload, rawText = "") {
   const fallback = createMockAnalysis(payload);
   const parsed = fields && typeof fields === "object" ? fields : {};
   const cleanText = String(rawText ?? "").trim();
-  const questionItems = normalizeQuestionItemsFromAi(parsed.questionItems);
+  const questionItems = normalizeQuestionItemsFromAi(extractQuestionItemsFromParsed(parsed));
   const questionComposition = normalizeQuestionCompositionFromAi(parsed.questionComposition);
 
   const normalized = {
@@ -1115,6 +1224,45 @@ export async function runExamAnalysis(payload) {
   }
 
   throw new Error(`지원하지 않는 AI 제공자입니다: ${provider}`);
+}
+
+export async function runExamQuestionInfoText(payload) {
+  const provider = selectedProvider(payload);
+  const model = selectedModel(payload, "examAnalysis");
+  const fallbackItems = normalizeQuestionItemsFromAi(Array.isArray(payload.questionItems) ? payload.questionItems : []);
+
+  if (provider === "mock") {
+    return {
+      provider,
+      model,
+      fields: { questionItems: fallbackItems },
+      rawText: "",
+      warning: "mock AI 설정이라 OCR 기반 기본정보만 저장했습니다."
+    };
+  }
+
+  const prompt = buildQuestionInfoTextPrompt(payload);
+  const text = provider === "openai"
+    ? await runOpenAiText(prompt, model, 6000)
+    : provider === "anthropic"
+      ? await runAnthropicText(prompt, model, 6000)
+      : "";
+
+  if (!text) throw new Error(`지원하지 않는 AI 제공자입니다: ${provider}`);
+  const parsed = safeParseJsonText(text);
+  const questionItems = normalizeQuestionItemsFromAi(extractQuestionItemsFromParsed(parsed));
+  const targetCount = Math.max(1, Math.min(80, Number(payload.questionTargetCount) || fallbackItems.length || 20));
+  const warning = questionItems.length < targetCount
+    ? `AI 응답 문항정보가 ${questionItems.length}/${targetCount}개라 OCR 기반 기본정보를 함께 유지했습니다.`
+    : "";
+
+  return {
+    provider,
+    model,
+    fields: { questionItems: questionItems.length ? questionItems : fallbackItems },
+    rawText: text,
+    ...(warning ? { warning } : {})
+  };
 }
 
 export async function draftQuestionCrops(payload) {

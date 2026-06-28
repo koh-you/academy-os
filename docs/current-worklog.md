@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-28 P1. 시험분석 문항정보 OCR 우선 하이브리드 채우기
+
+- 상태: 완료
+- 사용자 요청: 문항정보 채우기를 전 문항 이미지 vision으로 처리하면 토큰이 많이 들고 비효율적일 수 있으니 다른 방법으로 진행한다.
+- 판단: 사람은 문항카드 최종 검수와 크롭 확정을 담당하므로, 앱이 문항 수에 맞춰 카드 뼈대를 만들고 OCR/첫 장 메타데이터로 배점·문항형식·문항별 짧은 텍스트 조각을 먼저 채운 뒤, AI는 짧은 텍스트 기반으로 단원·난이도·쎈 유형만 보강하는 흐름이 효율적이다. vision은 추후 OCR 판별 실패/저신뢰 문항에만 선택적으로 쓰는 것이 맞다.
+- 이번 작업 결과: `AI 문항정보 채우기` 버튼을 전체 분석 API의 `questionInfoOnly` 호출에서 분리하고, OCR 우선 로컬 기본 채움 + `/api/ai/exam-question-info-text` 텍스트 보강 API + 기존 문항카드 병합 흐름으로 바꿨다. 배점·문항형식·OCR 조각은 먼저 저장되고, AI는 짧은 OCR 조각과 쎈 기준표로 단원·난이도·쎈 유형을 보강한다. AI 응답이 비거나 일부 문항만 돌아와도 OCR 기반 기본 카드는 유지하고 경고 문구를 표시한다.
+- 저장 주의: 기존 `examAnalyses.questionItems`, `questionTargetCountsBySource`, `aiInitialFields.questionItems` app_state 저장 경로를 사용한다. 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check api/routes/examAnalysis.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production`, `npm run build` 통과(total 231, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-28 P1. 공지 21:00 예약 발송 큐 진입 누락 수정
 
 - 상태: 완료

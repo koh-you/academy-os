@@ -46,7 +46,7 @@ import {
 import crypto from "node:crypto";
 import { loadEnvFile } from "./lib/loadEnv.js";
 import { isSupabaseConfigured, listRows, upsertRows } from "./lib/supabaseRest.js";
-import { draftQuestionCrops, getAiStatus, polishLessonComment, runExamAnalysis } from "./routes/examAnalysis.js";
+import { draftQuestionCrops, getAiStatus, polishLessonComment, runExamAnalysis, runExamQuestionInfoText } from "./routes/examAnalysis.js";
 import {
   getNotificationStatus,
   sendAttendanceAlimtalk,
@@ -1823,6 +1823,17 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request, { limitBytes: 9 * 1024 * 1024 });
       const result = await draftQuestionCrops(payload);
+      sendJson(request, response, 200, { ok: true, result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/ai/exam-question-info-text") {
+    try {
+      const payload = await readJsonBody(request, { limitBytes: 2 * 1024 * 1024 });
+      const result = await runExamQuestionInfoText(payload);
       sendJson(request, response, 200, { ok: true, result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
