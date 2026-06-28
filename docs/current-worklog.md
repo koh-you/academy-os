@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-28 P1. 쎈 6권 유형 인덱스 병합 및 시험분석 AI 초안 연결
+
+- 상태: 완료
+- 사용자 요청: 공통수학1 179개 유형을 기존 쎈 통합 CSV에 병합하고, 시험분석 웹앱 AI 프롬프트에서 이 분류표를 기준으로 문항별 쎈 유형 분류 초안을 만들 수 있게 한다.
+- 이번 작업 결과: 로컬 산출물 `output/ssen/ssen_all_type_index.*`, `ssen_6books_type_index.*`, 기존 요청 파일명인 `ssen_5books_type_index.*`를 모두 6권 통합본으로 갱신했다. 통합 기준표는 공통수학1 179개, 공통수학2 187개, 대수 175개, 미적분1 148개, 확률과 통계 92개, 기하 102개로 총 883개다.
+- 앱 반영: 배포 코드에서 사용할 메타데이터 범위만 `api/data/ssenTypeIndex.json`에 추가했다. 시험분석 API는 과목/범위에 맞는 쎈 교재 유형표만 프롬프트에 넣고, `questionItems.ssenTypeTags`에 `primary` 주유형과 `secondary` 보조유형 1~2개를 반환하도록 지시한다.
+- 문항카드 반영: 문항 검수 화면에 `쎈 주유형`, `쎈 보조유형` 입력칸을 추가했다. AI 초안 병합, 기존 문항카드 정규화, 최종 편집본 생성, 문항분석표/쎈 유형별 분류표에 `ssenTypeTags`가 연결된다.
+- 저장 주의: `questionItems` 안에 필드가 추가되는 방식이므로 기존 `examAnalyses` app_state 저장 구조를 그대로 사용한다. 새 Supabase SQL edit 필요 없음. 교재 원문/해설/문항 이미지는 포함하지 않고 유형코드·교재·단원·유형명 메타데이터만 저장했다.
+- 검증: `node --check api/routes/examAnalysis.js`, `node --check scripts/scenario-tests-production.cjs`, `node -e "import('./api/routes/examAnalysis.js')"`, `npm run build`, `npm run test:production` 통과(total 221, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-28 P1. 쎈 5권 유형 인덱스 추가 추출
 
 - 상태: 완료

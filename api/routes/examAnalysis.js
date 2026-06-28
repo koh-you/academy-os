@@ -1,5 +1,11 @@
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const ANTHROPIC_MESSAGES_URL = "https://api.anthropic.com/v1/messages";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const SSEN_TYPE_INDEX_PATH = path.join(__dirname, "..", "data", "ssenTypeIndex.json");
 
 const fallbackModels = {
   anthropic: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5",
@@ -12,6 +18,163 @@ const examAnalysisModels = {
   mock: "local-mock",
   openai: process.env.OPENAI_EXAM_ANALYSIS_MODEL || "gpt-5.5"
 };
+
+function loadSsenTypeIndex() {
+  try {
+    const rows = JSON.parse(fs.readFileSync(SSEN_TYPE_INDEX_PATH, "utf8"));
+    return Array.isArray(rows)
+      ? rows.filter((row) => row && typeof row === "object" && row.typeCode && row.typeName)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+const ssenTypeIndex = loadSsenTypeIndex();
+const ssenTypeByCode = new Map(ssenTypeIndex.map((row) => [String(row.typeCode).trim().toUpperCase(), row]));
+const ssenTypeByNameKey = new Map();
+ssenTypeIndex.forEach((row) => {
+  const key = normalizeCompactText([row.subject, row.unitName, row.typeName].filter(Boolean).join(" "));
+  if (key && !ssenTypeByNameKey.has(key)) ssenTypeByNameKey.set(key, row);
+});
+
+function normalizeCompactText(value = "") {
+  return String(value ?? "")
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/[·ㆍ]/g, "")
+    .replace(/[(){}\[\],.]/g, "");
+}
+
+function getSsenSearchText(payload = {}) {
+  const examPrepContext = payload.examPrepContext && typeof payload.examPrepContext === "object" ? payload.examPrepContext : {};
+  return [
+    payload.subject,
+    payload.grade,
+    payload.examName,
+    examPrepContext.scope,
+    examPrepContext.subTextbook,
+    Array.isArray(payload.sourceFiles) ? payload.sourceFiles.map((file) => file.fileName || file.storagePath || "").join(" ") : "",
+    Array.isArray(payload.questionItems) ? payload.questionItems.map((item) => [item.unit, item.questionType].filter(Boolean).join(" ")).join(" ") : "",
+    String(payload.rawExamText || "").slice(0, 3000)
+  ].filter(Boolean).join(" ");
+}
+
+function resolveSsenBookCodes(payload = {}) {
+  const text = normalizeCompactText(getSsenSearchText(payload));
+  const candidates = [
+    { code: "SSEN-CM1", keywords: ["공통수학1", "공통수학Ⅰ", "공통수학i", "공수1"] },
+    { code: "SSEN-CM2", keywords: ["공통수학2", "공통수학Ⅱ", "공통수학ii", "공수2"] },
+    { code: "SSEN-ALG-2022", keywords: ["대수", "쎈수학대수"] },
+    { code: "SSEN-CALC1", keywords: ["미적분1", "미적분Ⅰ", "미적분i", "미적분"] },
+    { code: "SSEN-PROB-STAT", keywords: ["확률과통계", "확통", "경우의수", "통계"] },
+    { code: "SSEN-GEOM-2022", keywords: ["기하", "쎈수학기하"] }
+  ];
+  return candidates
+    .filter((candidate) => candidate.keywords.some((keyword) => text.includes(normalizeCompactText(keyword))))
+    .map((candidate) => candidate.code);
+}
+
+function resolveSsenTypeRowsForPrompt(payload = {}) {
+  const bookCodes = resolveSsenBookCodes(payload);
+  if (bookCodes.length) return ssenTypeIndex.filter((row) => bookCodes.includes(row.bookCode));
+  const text = normalizeCompactText(getSsenSearchText(payload));
+  if (!text) return [];
+  return ssenTypeIndex.filter((row) => {
+    const unitName = normalizeCompactText(row.unitName);
+    const partName = normalizeCompactText(row.partName);
+    return (unitName && text.includes(unitName)) || (partName && text.includes(partName));
+  });
+}
+
+function buildSsenTypePromptSection(payload = {}) {
+  if (!ssenTypeIndex.length) {
+    return "[쎈 유형 기준표]\n서버에 쎈 유형 기준표가 없어 이번 분석에서는 단원/유형명을 원본 기준으로만 초안 작성한다.";
+  }
+  const rows = resolveSsenTypeRowsForPrompt(payload);
+  const uniqueRows = Array.from(new Map(rows.map((row) => [row.typeCode, row])).values());
+  const bookSummary = Array.from(
+    ssenTypeIndex.reduce((map, row) => {
+      const previous = map.get(row.bookCode) || { bookTitle: row.bookTitle, count: 0 };
+      previous.count += 1;
+      map.set(row.bookCode, previous);
+      return map;
+    }, new Map())
+  ).map(([bookCode, row]) => `${bookCode} ${row.bookTitle} ${row.count}개`).join(" / ");
+
+  if (!uniqueRows.length) {
+    return [
+      "[쎈 유형 기준표]",
+      "과목/범위에서 특정 쎈 교재를 확정하지 못했다. questionItems.ssenTypeTags는 무리하게 만들지 말고 빈 배열로 두며, 단원명과 유형명만 원본 기준으로 초안 작성한다.",
+      `지원 교재: ${bookSummary}`
+    ].join("\n");
+  }
+
+  return [
+    "[쎈 유형 기준표]",
+    "아래 기준표는 문항별 쎈 유형 분류에만 사용한다. 문제 원문이나 해설을 만들지 말고 typeCode, unitName, typeName 메타데이터만 참조한다.",
+    "questionItems.ssenTypeTags에는 반드시 아래 typeCode 중 하나를 사용한다. 단순 문항은 primary 1개, 복합 문항은 primary 1개와 secondary 1~2개까지 넣는다.",
+    "확신이 낮으면 confidence를 '중' 또는 '하'로 낮추고 reason에 강사 확인 포인트를 짧게 쓴다. 기준표와 맞지 않으면 ssenTypeTags는 빈 배열로 둔다.",
+    "형식: typeCode | unitName | typeName",
+    uniqueRows.map((row) => `${row.typeCode} | ${row.unitName} | ${row.typeName}`).join("\n")
+  ].join("\n");
+}
+
+function normalizeSsenTypeRole(value = "") {
+  const text = String(value || "").trim().toLowerCase();
+  if (["secondary", "sub", "보조", "보조유형", "결합", "복합"].some((keyword) => text.includes(keyword))) return "secondary";
+  return "primary";
+}
+
+function normalizeSsenConfidence(value = "") {
+  const text = String(value || "").trim();
+  return ["상", "중", "하", "확인 필요"].includes(text) ? text : "확인 필요";
+}
+
+function normalizeSsenTypeTags(value = []) {
+  const rawItems = Array.isArray(value)
+    ? value
+    : String(value || "").split(/[,/·]/).map((text) => text.trim()).filter(Boolean);
+  const seen = new Set();
+  const tags = rawItems
+    .map((tag, index) => {
+      const source = tag && typeof tag === "object" ? tag : { typeName: String(tag || "") };
+      const rawCode = String(source.typeCode || source.code || source.ssenTypeCode || "").trim();
+      const codeFromText = rawCode || String(source.typeName || source.name || source.label || "").match(/SSEN-[A-Z0-9-]+-\d{2}-\d{2}/i)?.[0] || "";
+      const typeCode = codeFromText.toUpperCase();
+      const matchedByCode = typeCode ? ssenTypeByCode.get(typeCode) : null;
+      const rawTypeName = String(source.typeName || source.name || source.label || "").replace(/SSEN-[A-Z0-9-]+-\d{2}-\d{2}/i, "").trim();
+      const rawUnitName = String(source.unitName || source.unit || source.chapter || "").trim();
+      const matchedByName = !matchedByCode && rawTypeName
+        ? ssenTypeByNameKey.get(normalizeCompactText([source.subject, rawUnitName, rawTypeName].filter(Boolean).join(" ")))
+        : null;
+      const matched = matchedByCode || matchedByName || null;
+      const nextTypeCode = matched?.typeCode || typeCode;
+      const nextTypeName = matched?.typeName || rawTypeName;
+      if (!nextTypeCode && !nextTypeName) return null;
+      const dedupeKey = nextTypeCode || normalizeCompactText([rawUnitName, nextTypeName].join(" "));
+      if (!dedupeKey || seen.has(dedupeKey)) return null;
+      seen.add(dedupeKey);
+      return {
+        role: index === 0 ? "primary" : normalizeSsenTypeRole(source.role || source.typeRole || source.kind),
+        typeCode: nextTypeCode,
+        typeName: nextTypeName,
+        unitName: matched?.unitName || rawUnitName,
+        subject: matched?.subject || String(source.subject || "").trim(),
+        confidence: normalizeSsenConfidence(source.confidence || source.certainty),
+        reason: String(source.reason || source.note || source.comment || "").trim()
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 3);
+  if (tags.length) tags[0] = { ...tags[0], role: "primary" };
+  return tags;
+}
+
+function formatSsenTypeTagsForPrompt(tags = []) {
+  const normalized = normalizeSsenTypeTags(tags);
+  return normalized.map((tag) => [tag.role === "secondary" ? "보조" : "주", tag.typeCode, tag.typeName].filter(Boolean).join(" ")).join(", ");
+}
 
 function envValue(name) {
   const value = process.env[name];
@@ -89,6 +252,7 @@ function defaultExamAnalysisPromptForServer() {
     "여러 해 시험지가 함께 들어온 경우 questionItems는 웹앱에서 현재 선택한 시험지/연도 1회분의 전체 문항 수만큼 작성하고, 3개년 반복/증감/변화는 unitDistribution, typeClassification, killerProblems, sourceCheckNotes에 정리한다.",
     "일부 페이지만 보이거나 OCR 일부만 있더라도 확인 가능한 전체 문항 수를 기준으로 questionItems를 만들고, 모르는 값은 '확인 필요'로 둔다.",
     "문항 태그 기준: 기본문항, 실수문항, 주요문항, 1등급 변별문항, 2등급 변별문항, 숫자변형문항, 조건변형문항, 유사유형문항, 교과서 연계, 부교재 연계, EBS 연계, 모의고사 연계.",
+    "쎈 유형 기준표가 제공되면 questionItems.ssenTypeTags에 주유형(primary) 1개와 필요 시 보조유형(secondary) 1~2개를 typeCode/typeName/unitName으로 넣는다.",
     "",
     "[작성 원칙]",
     "시험관리 탭 데이터가 있으면 특이사항, 시험 범위, 부교재, 시험 일정, 시험 후 총평을 반영한다.",
@@ -132,8 +296,10 @@ function buildExamAnalysisPrompt(payload) {
     "[현재 문항 카드]",
     `목표 문항 수: ${payload.questionTargetCount || "원본에서 확인"}`,
     Array.isArray(payload.questionItems) && payload.questionItems.length
-      ? payload.questionItems.map((item) => `${item.number || item.questionNumber}번 · 페이지 ${item.page || 1} · 기존 배점 ${item.score || "미입력"} · 기존 단원 ${item.unit || "미입력"} · 기존 난이도 ${item.difficulty || "확인 필요"}`).join("\n")
+      ? payload.questionItems.map((item) => `${item.number || item.questionNumber}번 · 페이지 ${item.page || 1} · 기존 배점 ${item.score || "미입력"} · 기존 단원 ${item.unit || "미입력"} · 기존 난이도 ${item.difficulty || "확인 필요"} · 기존 쎈유형 ${formatSsenTypeTagsForPrompt(item.ssenTypeTags) || "미입력"}`).join("\n")
       : "아직 문항 카드가 없습니다. OCR에서 확인 가능한 문항번호 기준으로 questionItems 초안을 생성하세요.",
+    "",
+    buildSsenTypePromptSection(payload),
     "",
     "[작성 규칙]",
     "- 시험지를 설명하지 말고 학생·강사가 다음 행동을 결정할 수 있게 분석한다.",
@@ -161,6 +327,9 @@ function buildExamAnalysisPrompt(payload) {
     "- questionItems의 similarProblemNeeded는 확인 필요, 필요, 불필요 중 하나로 쓴다.",
     "- questionItems의 similarProblemRelation은 확인 필요, 숫자변형, 조건변형, 유사유형, 기타 중 하나로 쓴다.",
     "- questionItems의 similarProblemSource에는 유사문항 분석지, 나만의DB, 부교재, 모의고사 등 출처 메모 후보를 쓴다.",
+    "- questionItems의 ssenTypeTags는 쎈 유형 기준표 기반 태그 배열이다. 각 항목은 role(primary/secondary), typeCode, typeName, unitName, confidence(상/중/하/확인 필요), reason을 포함한다.",
+    "- 단순 문항은 ssenTypeTags에 primary 1개만 넣고, 여러 개념이 결합된 문항은 primary 1개와 secondary 1~2개를 넣는다.",
+    "- ssenTypeTags.typeCode는 제공된 쎈 유형 기준표에 있는 코드만 사용한다. 기준표와 맞지 않으면 빈 배열로 둔다.",
     "- 유사문항 본문 전체를 questionItems에 넣지 않는다. 웹앱에는 유사문항 필요 여부, 출처, 변형 구분 메타데이터만 넣는다.",
     "- 유사문항 분석지나 교과서/부교재/EBS/모의고사 연계가 확인되면 해당 내용을 questionItems.tags에도 태그로 기록한다.",
     "- 문항 카드는 강사가 웹앱 문항 검수 단계에서 확정한다. AI는 배점/단원/난이도/역할/태그/검수 포인트의 1차 초안을 만든다.",
@@ -209,6 +378,9 @@ function buildExamAnalysisPrompt(payload) {
     '      "variationRelationComment": "변형 관계 메모",',
     '      "ocrText": "문항 조건 요약",',
     '      "strategyComment": "AI가 본 오답 가능성과 검수 포인트",',
+    '      "ssenTypeTags": [',
+    '        { "role": "primary", "typeCode": "SSEN-CM1-01-01", "typeName": "다항식의 덧셈과 뺄셈", "unitName": "다항식의 연산", "confidence": "중", "reason": "조건 구조가 기준 유형과 유사함" }',
+    '      ],',
     '      "tags": ["기본문항"]',
     '    }',
     '  ]',
@@ -474,6 +646,7 @@ function createMockAnalysis(payload) {
       similarProblemRelation: item.similarProblemRelation || "확인 필요",
       ocrText: item.ocrText || "AI 초안: 문항 조건 확인 필요",
       strategyComment: item.strategyComment || "AI 초안: 배점·단원·난이도 검수 후 보완",
+      ssenTypeTags: normalizeSsenTypeTags(item.ssenTypeTags || item.ssenTypes || item.ssenType),
       tags: Array.isArray(item.tags) && item.tags.length ? item.tags : ["주요문항"]
     }))
   };
@@ -560,6 +733,7 @@ function normalizeQuestionItemsFromAi(items = []) {
       const similarProblemNeeded = String(item.similarProblemNeeded || item.needsSimilarProblem || item.similarProblemRequired || "확인 필요").trim();
       const similarProblemSource = String(item.similarProblemSource || item.similarSource || item.linkedProblemSource || "").trim();
       const similarProblemRelation = String(item.similarProblemRelation || item.similarRelation || item.variationType || "확인 필요").trim();
+      const ssenTypeTags = normalizeSsenTypeTags(item.ssenTypeTags || item.ssenTypes || item.ssenType || item.ssenTypeTag);
       const rawTags = Array.isArray(item.tags) ? item.tags : String(item.tags || "").split(/[,/·]/);
 
       return {
@@ -578,6 +752,7 @@ function normalizeQuestionItemsFromAi(items = []) {
         ocrText: String(item.ocrText || item.questionSummary || item.summary || "").trim(),
         variationRelationComment: String(item.variationRelationComment || item.sourceNote || "").trim(),
         strategyComment: String(item.strategyComment || item.comment || item.teacherCheckPoint || item.reviewPoint || "").trim(),
+        ssenTypeTags,
         tags: Array.from(new Set([
           ...rawTags.map((tag) => tagAliases[String(tag).trim()] || "").filter(Boolean),
           ...derivedTagsFor(source, similarProblemNeeded, similarProblemSource, similarProblemRelation)

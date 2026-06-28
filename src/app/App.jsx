@@ -1052,6 +1052,7 @@ function createDefaultExamAnalysisPrompt() {
     "- 배점",
     "- 단원",
     "- 유형",
+    "- 쎈 주유형/보조유형",
     "- 난이도",
     "- 역할",
     "- 태그",
@@ -1064,6 +1065,7 @@ function createDefaultExamAnalysisPrompt() {
     "- 강사가 확인해야 할 점",
     "- 대비 전략 후보",
     "AI 1차 분석 단계에서 배점, 단원, 난이도는 웹앱 문항분석표의 questionItems 배열에 반드시 초안으로 채운다.",
+    "쎈 유형 기준표가 제공되면 questionItems.ssenTypeTags에 주유형(primary) 1개와 필요 시 보조유형(secondary) 1~2개를 typeCode/typeName/unitName/confidence/reason으로 넣는다.",
     "AI가 읽은 전체 문항 수는 questionComposition.total에 넣고, 근거 문구는 questionComposition.evidence에 적는다.",
     "유사문항 본문은 웹앱에 넣지 않는다. 대신 questionItems의 similarProblemNeeded, similarProblemSource, similarProblemRelation에 메타데이터만 입력한다.",
     "유사문항 분석지나 교과서/부교재/EBS/모의고사 연계가 확인되면 숫자변형문항, 조건변형문항, 유사유형문항, 교과서 연계, 부교재 연계, EBS 연계, 모의고사 연계 태그로 기록한다.",
@@ -1084,8 +1086,9 @@ function createDefaultExamAnalysisPrompt() {
     "AI는 웹앱에서 강사가 검수할 수 있도록 다음 표의 초안을 만든다.",
     "1. 문항분석표",
     "2. 단원별 출제표",
-    "3. 부교재·유사문항 활용표",
-    "4. 학생 대비전략표",
+    "3. 쎈 유형별 분류표",
+    "4. 부교재·유사문항 활용표",
+    "5. 학생 대비전략표",
     "또한 대비전략 흐름은 시험 범위 확인 → 문항별 검수 → 변형 관계 분석 → 변별 문항 훈련 → 학생 수준별 보강 순서로 정리한다.",
     "",
     "[작성 원칙]",
@@ -1099,7 +1102,7 @@ function createDefaultExamAnalysisPrompt() {
     "",
     "[최종 출력 방향]",
     "1. AI 분석 결과: 시험 한 줄 총평, 시험 구조, 단원별 출제, 문항 유형, 킬러/준킬러, 변형·연계 분석, 확인 필요 항목",
-    "2. 문항분석표 초안: questionItems 배열로 문항별 번호, 페이지, 배점, 단원, 유형, 난이도, 역할, 태그, 출처 후보, 유사문항 메타데이터, 코멘트 후보를 반환",
+    "2. 문항분석표 초안: questionItems 배열로 문항별 번호, 페이지, 배점, 단원, 유형, 쎈 유형 태그, 난이도, 역할, 태그, 출처 후보, 유사문항 메타데이터, 코멘트 후보를 반환",
     "3. 강사 인사이트 입력 가이드: 어떤 문항에 코멘트를 달아야 하는지, 어떤 문항을 크롭해서 슬라이드화하면 좋은지 제안",
     "4. 학생 대비 전략: 상위권, 중위권, 하위권으로 나누어 작성",
     "5. 재가공 핵심 메시지: 학생에게 필요한 정보, 블로그/인스타로 쓸 수 있는 정보"
@@ -1292,10 +1295,110 @@ function hasExamQuestionDetailedInsight(item = {}) {
     safeItem.teacherComment,
     safeItem.variationRelationComment,
     safeItem.strategyComment,
+    formatSsenTypeTags(safeItem.ssenTypeTags),
     safeItem.similarProblemSource,
     safeItem.similarProblemRelation && safeItem.similarProblemRelation !== "확인 필요" ? safeItem.similarProblemRelation : "",
     safeItem.similarProblemNeeded && safeItem.similarProblemNeeded !== "확인 필요" ? safeItem.similarProblemNeeded : ""
   ].some((value) => String(value || "").trim());
+}
+
+function normalizeSsenTypeRole(value = "") {
+  const text = String(value || "").trim().toLowerCase();
+  if (["secondary", "sub", "보조", "보조유형", "결합", "복합"].some((keyword) => text.includes(keyword))) return "secondary";
+  return "primary";
+}
+
+function normalizeSsenTypeConfidence(value = "") {
+  const text = String(value || "").trim();
+  return ["상", "중", "하", "확인 필요"].includes(text) ? text : "확인 필요";
+}
+
+function createSsenTypeTagFromText(text = "", role = "primary", unitName = "") {
+  const value = String(text || "").trim();
+  if (!value) return null;
+  const code = value.match(/SSEN-[A-Z0-9-]+-\d{2}-\d{2}/i)?.[0]?.toUpperCase() || "";
+  const labelWithoutCode = value.replace(/SSEN-[A-Z0-9-]+-\d{2}-\d{2}/i, "").replace(/^[\s|:·-]+/, "").trim();
+  return {
+    role: normalizeSsenTypeRole(role),
+    typeCode: code,
+    typeName: code ? labelWithoutCode : labelWithoutCode || value,
+    unitName: String(unitName || "").trim(),
+    confidence: "확인 필요",
+    reason: ""
+  };
+}
+
+function normalizeSsenTypeTags(value = []) {
+  const rawItems = Array.isArray(value)
+    ? value
+    : String(value || "").split(/[,/·\n]/).map((text) => text.trim()).filter(Boolean);
+  const seen = new Set();
+  const tags = rawItems
+    .map((tag, index) => {
+      const source = tag && typeof tag === "object" ? tag : createSsenTypeTagFromText(tag, index === 0 ? "primary" : "secondary");
+      if (!source) return null;
+      const typeCode = String(source.typeCode || source.code || source.ssenTypeCode || "").trim().toUpperCase();
+      const typeName = String(source.typeName || source.name || source.label || "").replace(/SSEN-[A-Z0-9-]+-\d{2}-\d{2}/i, "").trim();
+      const unitName = String(source.unitName || source.unit || source.chapter || "").trim();
+      if (!typeCode && !typeName) return null;
+      const key = typeCode || [unitName, typeName].filter(Boolean).join("|");
+      if (!key || seen.has(key)) return null;
+      seen.add(key);
+      return {
+        role: index === 0 ? "primary" : normalizeSsenTypeRole(source.role || source.typeRole || source.kind),
+        typeCode,
+        typeName,
+        unitName,
+        subject: String(source.subject || "").trim(),
+        confidence: normalizeSsenTypeConfidence(source.confidence || source.certainty),
+        reason: String(source.reason || source.note || source.comment || "").trim()
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 3);
+  if (tags.length) tags[0] = { ...tags[0], role: "primary" };
+  return tags;
+}
+
+function formatSsenTypeTag(tag = {}) {
+  return [tag.typeCode, tag.typeName].filter(Boolean).join(" ");
+}
+
+function formatSsenTypeTags(tags = []) {
+  return normalizeSsenTypeTags(tags).map((tag) => {
+    const prefix = tag.role === "secondary" ? "보조" : "주";
+    return `${prefix}: ${formatSsenTypeTag(tag) || tag.unitName}`.trim();
+  }).join(", ");
+}
+
+function getSsenPrimaryTypeText(tags = []) {
+  const normalized = normalizeSsenTypeTags(tags);
+  const tag = normalized.find((item) => item.role === "primary") || normalized[0];
+  return tag ? formatSsenTypeTag(tag) : "";
+}
+
+function getSsenSecondaryTypeText(tags = []) {
+  return normalizeSsenTypeTags(tags)
+    .filter((tag, index) => tag.role === "secondary" || index > 0)
+    .map(formatSsenTypeTag)
+    .filter(Boolean)
+    .join(", ");
+}
+
+function updateSsenPrimaryTypeTags(tags = [], value = "", unitName = "") {
+  const secondaryTags = normalizeSsenTypeTags(tags).filter((tag) => tag.role === "secondary");
+  const primary = createSsenTypeTagFromText(value, "primary", unitName);
+  return normalizeSsenTypeTags(primary ? [primary, ...secondaryTags] : secondaryTags);
+}
+
+function updateSsenSecondaryTypeTags(tags = [], value = "", unitName = "") {
+  const normalized = normalizeSsenTypeTags(tags);
+  const primary = normalized.find((tag) => tag.role === "primary") || normalized[0] || null;
+  const secondaryTags = String(value || "")
+    .split(/[,/·\n]/)
+    .map((text) => createSsenTypeTagFromText(text, "secondary", unitName))
+    .filter(Boolean);
+  return normalizeSsenTypeTags([primary, ...secondaryTags].filter(Boolean));
 }
 
 function createExamQuestionItem(seed = {}, index = 0) {
@@ -1321,6 +1424,7 @@ function createExamQuestionItem(seed = {}, index = 0) {
     teacherComment: seed.teacherComment || "",
     variationRelationComment: seed.variationRelationComment || "",
     strategyComment: seed.strategyComment || "",
+    ssenTypeTags: normalizeSsenTypeTags(seed.ssenTypeTags || seed.ssenTypes || seed.ssenType),
     tags: normalizeExamQuestionTags([...(Array.isArray(seed.tags) ? seed.tags : String(seed.tags || "").split(/[,/·]/)), ...getDerivedExamQuestionMetadataTags(seed)])
   };
 }
@@ -1357,6 +1461,7 @@ function normalizeAiQuestionDrafts(items = []) {
         teacherComment: item.teacherComment || item.instructorComment || "",
         variationRelationComment: item.variationRelationComment || item.sourceNote || "",
         strategyComment: item.strategyComment || item.comment || item.teacherCheckPoint || item.reviewPoint || "",
+        ssenTypeTags: item.ssenTypeTags || item.ssenTypes || item.ssenType || item.ssenTypeTag,
         tags: Array.isArray(item.tags) ? item.tags : String(item.tags || "").split(/[,/·]/).map((tag) => tag.trim()).filter(Boolean)
       }, index);
     })
@@ -1525,6 +1630,7 @@ function mergeAiQuestionDrafts(existingItems = [], aiItems = [], options = {}) {
       teacherComment: item.teacherComment || draft.teacherComment,
       variationRelationComment: item.variationRelationComment || draft.variationRelationComment,
       strategyComment: item.strategyComment || draft.strategyComment,
+      ssenTypeTags: item.ssenTypeTags?.length ? item.ssenTypeTags : draft.ssenTypeTags,
       tags: Array.from(new Set([...(item.tags ?? []), ...(draft.tags ?? [])]))
     };
   });
@@ -1656,6 +1762,7 @@ function buildQuestionInsightText(questionItems = []) {
     [
       item.unit,
       item.role,
+      formatSsenTypeTags(item.ssenTypeTags),
       item.teacherComment,
       item.variationRelationComment,
       item.strategyComment,
@@ -1671,6 +1778,7 @@ function buildQuestionInsightText(questionItems = []) {
       `- ${header}`,
       item.role ? `  역할: ${item.role}` : "",
       item.difficulty ? `  난이도: ${item.difficulty}` : "",
+      formatSsenTypeTags(item.ssenTypeTags) ? `  쎈 유형: ${formatSsenTypeTags(item.ssenTypeTags)}` : "",
       item.tags?.length ? `  태그: ${item.tags.join(", ")}` : "",
       item.similarProblemNeeded && item.similarProblemNeeded !== "확인 필요" ? `  유사문항 필요: ${item.similarProblemNeeded}` : "",
       item.similarProblemSource ? `  유사문항 출처: ${item.similarProblemSource}` : "",
@@ -1697,6 +1805,29 @@ function summarizeQuestionUnits(questionItems = []) {
     unitMap.set(unit, previous);
   });
   return Array.from(unitMap.values()).sort((a, b) => b.count - a.count || a.unit.localeCompare(b.unit, "ko"));
+}
+
+function summarizeQuestionSsenTypes(questionItems = []) {
+  const typeMap = new Map();
+  normalizeExamQuestionItems(questionItems).forEach((item) => {
+    normalizeSsenTypeTags(item.ssenTypeTags).forEach((tag) => {
+      const label = formatSsenTypeTag(tag) || tag.unitName || "쎈 유형 미입력";
+      const previous = typeMap.get(label) || {
+        label,
+        unitName: tag.unitName || "",
+        primary: 0,
+        secondary: 0,
+        questions: []
+      };
+      if (tag.role === "secondary") previous.secondary += 1;
+      else previous.primary += 1;
+      previous.questions.push(item.number);
+      typeMap.set(label, previous);
+    });
+  });
+  return Array.from(typeMap.values()).sort((a, b) =>
+    (b.primary + b.secondary) - (a.primary + a.secondary) || a.label.localeCompare(b.label, "ko")
+  );
 }
 
 function createFinalDocumentId(prefix = "block") {
@@ -1742,6 +1873,7 @@ function getExamStrategyFlowNodes(questionItems = []) {
 function createExamFinalDocumentFromAnalysis(analysis = {}) {
   const questionItems = normalizeExamQuestionItems(analysis.questionItems);
   const unitRows = summarizeQuestionUnits(questionItems);
+  const ssenTypeRows = summarizeQuestionSsenTypes(questionItems);
   const sourceRows = questionItems.filter((item) =>
     (String(item.source || "").trim() && item.source !== "확인 필요") ||
     item.similarProblemNeeded === "필요" ||
@@ -1807,6 +1939,19 @@ function createExamFinalDocumentFromAnalysis(analysis = {}) {
           note: row.score ? `${row.score}점 · ${row.questions.map((number) => `${number}번`).join(", ")}` : row.questions.map((number) => `${number}번`).join(", ")
         }))
       },
+      ...(ssenTypeRows.length ? [{
+        id: createFinalDocumentId("table"),
+        type: "table",
+        title: "쎈 유형별 분류",
+        columns: ["쎈 유형", "단원", "주유형", "보조유형", "문항"],
+        rows: ssenTypeRows.slice(0, 12).map((row) => [
+          row.label,
+          row.unitName || "-",
+          row.primary || "-",
+          row.secondary || "-",
+          row.questions.map((number) => `${number}번`).join(", ")
+        ])
+      }] : []),
       {
         id: createFinalDocumentId("table"),
         type: "table",
@@ -2922,12 +3067,14 @@ function ExamQuestionInsightTables({ questionItems = [], questionComposition = n
       item.teacherComment,
       item.variationRelationComment,
       item.strategyComment,
+      formatSsenTypeTags(item.ssenTypeTags),
       item.similarProblemSource,
       item.similarProblemNeeded && item.similarProblemNeeded !== "확인 필요" ? item.similarProblemNeeded : "",
       item.similarProblemRelation && item.similarProblemRelation !== "확인 필요" ? item.similarProblemRelation : ""
     ].some((value) => String(value || "").trim())
   );
   const unitRows = summarizeQuestionUnits(items);
+  const ssenTypeRows = summarizeQuestionSsenTypes(items);
   const sourceRows = items.filter((item) =>
     (String(item.source || "").trim() && item.source !== "확인 필요") ||
     item.similarProblemNeeded === "필요" ||
@@ -2986,6 +3133,7 @@ function ExamQuestionInsightTables({ questionItems = [], questionComposition = n
                 <th>문항</th>
                 <th>배점/비중</th>
                 <th>단원</th>
+                <th>쎈 유형</th>
                 <th>난이도</th>
                 <th>역할</th>
                 <th>태그</th>
@@ -2998,6 +3146,7 @@ function ExamQuestionInsightTables({ questionItems = [], questionComposition = n
                   <td>{item.number}번</td>
                   <td>{formatQuestionScoreWithWeight(item, items, questionComposition)}</td>
                   <td>{item.unit || "-"}</td>
+                  <td>{formatSsenTypeTags(item.ssenTypeTags) || "-"}</td>
                   <td>{item.difficulty || "-"}</td>
                   <td>{item.role || "-"}</td>
                   <td>{item.tags?.length ? item.tags.join(", ") : "-"}</td>
@@ -3035,6 +3184,39 @@ function ExamQuestionInsightTables({ questionItems = [], questionComposition = n
                   <td>{row.questions.map((number) => `${number}번`).join(", ")}</td>
                 </tr>
               ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <div className="analysisQuestionTableTitle">
+          <strong>쎈 유형별 분류</strong>
+          <span>{ssenTypeRows.length}유형</span>
+        </div>
+        <div className="analysisPreviewTableWrap">
+          <table className="analysisPreviewTable">
+            <thead>
+              <tr>
+                <th>쎈 유형</th>
+                <th>단원</th>
+                <th>주유형</th>
+                <th>보조유형</th>
+                <th>문항</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ssenTypeRows.length ? ssenTypeRows.map((row) => (
+                <tr key={row.label}>
+                  <td>{row.label}</td>
+                  <td>{row.unitName || "-"}</td>
+                  <td>{row.primary || "-"}</td>
+                  <td>{row.secondary || "-"}</td>
+                  <td>{row.questions.map((number) => `${number}번`).join(", ")}</td>
+                </tr>
+              )) : (
+                <tr><td colSpan="5">문항카드에 쎈 유형을 입력하면 자동으로 정리됩니다.</td></tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -4426,6 +4608,12 @@ function isLegacyDefaultExamAnalysisPrompt(prompt = "") {
         text.includes("AI는 최종 판단자가 아니라 1차 구조화 담당자") &&
         text.includes("문항분석표 초안: 문항별 번호") &&
         !text.includes("questionItems 배열")
+      ) ||
+      (
+        text.includes("[웹앱의 목적]") &&
+        text.includes("AI는 최종 판단자가 아니라 1차 구조화 담당자") &&
+        text.includes("questionItems 배열") &&
+        !text.includes("ssenTypeTags")
       )
     )
   );
@@ -14366,7 +14554,7 @@ function ExamAnalysisCenter({
                           >
                             <strong>{item.number}번</strong>
                             <span>{[item.score && `${item.score}점`, item.unit || "단원 미입력", item.role].filter(Boolean).join(" · ")}</span>
-                            <small>{itemHasDetailedInsight ? "상세 있음" : itemInsightRecommended ? "상세 권장" : "기본정보"} · {item.cropBox ? "크롭 있음" : "크롭 없음"} · {item.tags?.[0] || "태그 없음"}</small>
+                            <small>{itemHasDetailedInsight ? "상세 있음" : itemInsightRecommended ? "상세 권장" : "기본정보"} · {item.cropBox ? "크롭 있음" : "크롭 없음"} · {getSsenPrimaryTypeText(item.ssenTypeTags) || "쎈유형 없음"} · {item.tags?.[0] || "태그 없음"}</small>
                           </button>
                         );
                       })}
@@ -14419,6 +14607,22 @@ function ExamAnalysisCenter({
                         <label>
                           단원
                           <input value={selectedQuestion.unit} onChange={(event) => updateSelectedQuestion("unit", event.target.value)} placeholder="예: 이차함수의 최대최소" />
+                        </label>
+                        <label>
+                          쎈 주유형
+                          <input
+                            value={getSsenPrimaryTypeText(selectedQuestion.ssenTypeTags)}
+                            onChange={(event) => updateSelectedQuestion("ssenTypeTags", updateSsenPrimaryTypeTags(selectedQuestion.ssenTypeTags, event.target.value, selectedQuestion.unit))}
+                            placeholder="예: SSEN-CM1-06-03 이차함수의 최대, 최소"
+                          />
+                        </label>
+                        <label>
+                          쎈 보조유형
+                          <input
+                            value={getSsenSecondaryTypeText(selectedQuestion.ssenTypeTags)}
+                            onChange={(event) => updateSelectedQuestion("ssenTypeTags", updateSsenSecondaryTypeTags(selectedQuestion.ssenTypeTags, event.target.value, selectedQuestion.unit))}
+                            placeholder="쉼표로 여러 개 입력"
+                          />
                         </label>
                         <label>
                           출처
