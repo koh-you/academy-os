@@ -919,6 +919,26 @@ function imageElementToVisionImageDataUrl(imageElement, maxDimension = 1600) {
   return canvas.toDataURL("image/jpeg", 0.86);
 }
 
+function imageUrlToVisionImageDataUrl(imageUrl, maxDimension = 1600) {
+  return new Promise((resolve, reject) => {
+    if (!imageUrl) {
+      reject(new Error("이미지 원본 링크가 없습니다."));
+      return;
+    }
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+    image.onload = () => {
+      try {
+        resolve(imageElementToVisionImageDataUrl(image, maxDimension));
+      } catch (error) {
+        reject(error);
+      }
+    };
+    image.onerror = () => reject(new Error("이미지 원본을 불러오지 못했습니다."));
+    image.src = imageUrl;
+  });
+}
+
 async function uploadExamPostSubmissionFile(file, target, student) {
   const dataUrl = await readFileAsDataUrl(file);
   const result = await postJson("/api/exam-post-files", {
@@ -960,6 +980,11 @@ async function requestExamQuestionCropDraft(payload) {
 
 async function requestExamQuestionInfoTextDraft(payload) {
   const result = await postJson("/api/ai/exam-question-info-text", payload);
+  return result.result;
+}
+
+async function requestExamQuestionClassificationDraft(payload) {
+  const result = await postJson("/api/ai/exam-question-classification", payload);
   return result.result;
 }
 
@@ -1264,6 +1289,7 @@ function createDefaultExamAnalysis(examPrepRow = {}) {
     sourceUploadStatus: "",
     rawExamText: "",
     questionItems: [],
+    questionClassifications: [],
     questionTargetCount: 0,
     questionTargetCountsBySource: {},
     questionComposition: null,
@@ -1566,6 +1592,122 @@ function createExamQuestionItem(seed = {}, index = 0) {
     ssenTypeTags: normalizeSsenTypeTags(seed.ssenTypeTags || seed.ssenTypes || seed.ssenType),
     tags: normalizeExamQuestionTags([...(Array.isArray(seed.tags) ? seed.tags : String(seed.tags || "").split(/[,/·]/)), ...getDerivedExamQuestionMetadataTags(seed)])
   };
+}
+
+function createExamQuestionClassificationRow(seed = {}, index = 0) {
+  const number = Number(seed.number || seed.questionNumber || seed.no) || index + 1;
+  const confidence = String(seed.confidence || "").trim();
+  const ssenTypeTags = normalizeSsenTypeTags(seed.ssenTypeTags || seed.ssenTypes || seed.ssenType || seed.ssenTypeTag);
+  const needsReview = seed.needsReview === false
+    ? false
+    : Boolean(seed.needsReview) ||
+      !String(seed.unit || "").trim() ||
+      !ssenTypeTags.length ||
+      ["", "-", "확인 필요", "하"].includes(confidence);
+  return {
+    classificationId: seed.classificationId || `exam_classification_${Date.now()}_${index + 1}_${Math.random().toString(36).slice(2, 6)}`,
+    number,
+    page: Math.max(1, Number(seed.page) || 1),
+    score: String(seed.score || seed.points || "").trim(),
+    questionType: examQuestionTypeOptions.includes(seed.questionType || seed.type) ? (seed.questionType || seed.type) : "확인 필요",
+    unit: String(seed.unit || seed.chapter || seed.topic || "").trim(),
+    detailType: String(seed.detailType || seed.subtype || seed.typeName || "").trim(),
+    difficulty: examQuestionDifficultyOptions.includes(seed.difficulty) ? seed.difficulty : "확인 필요",
+    role: examQuestionRoleOptions.includes(seed.role) ? seed.role : "기본",
+    source: examQuestionSourceOptions.includes(seed.source) ? seed.source : "확인 필요",
+    evidence: String(seed.evidence || seed.summary || seed.questionSummary || seed.ocrText || "").trim(),
+    reviewNote: String(seed.reviewNote || seed.strategyComment || seed.teacherComment || seed.comment || "").trim(),
+    ssenTypeTags,
+    tags: normalizeExamQuestionTags(Array.isArray(seed.tags) ? seed.tags : String(seed.tags || "").split(/[,/·]/)),
+    sourceId: String(seed.sourceId || seed.questionSourceId || seed.cropSourceId || "").trim(),
+    sourceUrl: String(seed.sourceUrl || seed.questionSourceUrl || seed.cropSourceUrl || "").trim(),
+    needsReview,
+    confidence: confidence || (needsReview ? "확인 필요" : "중")
+  };
+}
+
+function normalizeExamQuestionClassificationRows(rows = []) {
+  if (!Array.isArray(rows)) return [];
+  return rows
+    .map((row, index) => createExamQuestionClassificationRow(row, index))
+    .sort((a, b) => Number(a.page || 1) - Number(b.page || 1) || Number(a.number || 0) - Number(b.number || 0));
+}
+
+function createExamQuestionClassificationRowsFromCount(count, existingRows = []) {
+  const safeCount = Math.max(1, Math.min(80, Number(count) || 20));
+  const normalizedExisting = normalizeExamQuestionClassificationRows(existingRows);
+  const byNumber = new Map();
+  normalizedExisting.forEach((row) => {
+    const number = Number(row.number);
+    if (number > 0 && !byNumber.has(number)) byNumber.set(number, row);
+  });
+  return Array.from({ length: safeCount }, (_, index) => {
+    const number = index + 1;
+    return createExamQuestionClassificationRow(byNumber.get(number) || { number }, index);
+  });
+}
+
+function mergeExamQuestionClassificationDrafts(existingRows = [], aiRows = [], options = {}) {
+  const existing = normalizeExamQuestionClassificationRows(existingRows);
+  const drafts = normalizeExamQuestionClassificationRows(aiRows);
+  const targetCount = Math.max(0, Math.min(80, Number(options.targetCount) || 0));
+  const baseRows = targetCount && existing.length < targetCount
+    ? createExamQuestionClassificationRowsFromCount(targetCount, existing)
+    : existing;
+  const draftByNumber = new Map(drafts.map((row) => [Number(row.number), row]));
+  const isBlank = (value) => !String(value ?? "").trim() || ["-", "확인 필요", "단원 미입력"].includes(String(value ?? "").trim());
+  const mergeValue = (currentValue, draftValue, defaultValue = "") => {
+    const next = String(draftValue ?? "").trim();
+    if (!next || next === "확인 필요") return currentValue || defaultValue;
+    return isBlank(currentValue) ? next : currentValue;
+  };
+  const merged = baseRows.map((row) => {
+    const draft = draftByNumber.get(Number(row.number));
+    if (!draft) return row;
+    return createExamQuestionClassificationRow({
+      ...row,
+      page: row.page || draft.page || 1,
+      score: mergeValue(row.score, draft.score),
+      questionType: mergeValue(row.questionType, draft.questionType, "확인 필요"),
+      unit: mergeValue(row.unit, draft.unit),
+      detailType: mergeValue(row.detailType, draft.detailType),
+      difficulty: mergeValue(row.difficulty, draft.difficulty, "확인 필요"),
+      role: (!row.role || row.role === "기본" || row.role === "확인 필요") && draft.role && draft.role !== "확인 필요" ? draft.role : row.role,
+      source: mergeValue(row.source, draft.source, "확인 필요"),
+      evidence: row.evidence || draft.evidence,
+      reviewNote: row.reviewNote || draft.reviewNote,
+      ssenTypeTags: row.ssenTypeTags?.length ? row.ssenTypeTags : draft.ssenTypeTags,
+      tags: Array.from(new Set([...(row.tags ?? []), ...(draft.tags ?? [])])),
+      sourceId: row.sourceId || draft.sourceId || options.sourceId || "",
+      sourceUrl: row.sourceUrl || draft.sourceUrl || options.sourceUrl || "",
+      needsReview: row.needsReview || draft.needsReview,
+      confidence: draft.confidence || row.confidence
+    });
+  });
+  const existingNumbers = new Set(merged.map((row) => Number(row.number)));
+  const additions = drafts.filter((row) => {
+    const number = Number(row.number);
+    return number > 0 && (!targetCount || number <= targetCount) && !existingNumbers.has(number);
+  });
+  return normalizeExamQuestionClassificationRows([...merged, ...additions]);
+}
+
+function classificationRowsToInsightItems(rows = []) {
+  return normalizeExamQuestionClassificationRows(rows).map((row, index) => createExamQuestionItem({
+    questionId: row.classificationId,
+    number: row.number,
+    page: row.page,
+    score: row.score,
+    questionType: row.questionType,
+    unit: row.unit,
+    difficulty: row.difficulty,
+    role: row.role,
+    source: row.source,
+    ocrText: row.evidence,
+    strategyComment: row.reviewNote,
+    ssenTypeTags: row.ssenTypeTags,
+    tags: row.tags
+  }, index));
 }
 
 function normalizeExamQuestionItems(items = []) {
@@ -2145,7 +2287,8 @@ function getExamStrategyFlowNodes(questionItems = []) {
 }
 
 function createExamFinalDocumentFromAnalysis(analysis = {}) {
-  const questionItems = normalizeExamQuestionItems(analysis.questionItems);
+  const classificationItems = classificationRowsToInsightItems(analysis.questionClassifications || analysis.classificationRows);
+  const questionItems = classificationItems.length ? classificationItems : normalizeExamQuestionItems(analysis.questionItems);
   const unitRows = summarizeQuestionUnits(questionItems);
   const ssenTypeRows = summarizeQuestionSsenTypes(questionItems);
   const sourceRows = questionItems.filter((item) =>
@@ -2456,6 +2599,7 @@ function normalizeExamAnalysisAiFields(fields = {}) {
   next.sourceCompositions = normalizeExamSourceCompositions(next.sourceCompositions);
   next.questionCompositionsBySource = normalizeExamSourceCompositions(next.questionCompositionsBySource);
   next.questionTargetCountsBySource = normalizeExamSourceTargetCounts(next.questionTargetCountsBySource);
+  next.questionClassifications = normalizeExamQuestionClassificationRows(next.questionClassifications || next.classificationRows);
   return next;
 }
 
@@ -2531,6 +2675,7 @@ function normalizeExamAnalysisForDisplay(analysis = {}) {
     rawExamText: removeFailedAttachmentBlocks(analysis.rawExamText)
     }),
     questionItems: normalizeExamQuestionItems(analysis.questionItems),
+    questionClassifications: normalizeExamQuestionClassificationRows(analysis.questionClassifications || analysis.classificationRows),
     finalDocument: normalizeExamFinalDocument(analysis.finalDocument)
   };
 }
@@ -3386,8 +3531,9 @@ function ExamFinalQuestionSlotEditor({ block, updateBlock }) {
   );
 }
 
-function ExamQuestionInsightTables({ questionItems = [], questionComposition = null }) {
-  const items = normalizeExamQuestionItems(questionItems);
+function ExamQuestionInsightTables({ questionItems = [], classificationRows = [], questionComposition = null }) {
+  const classificationItems = classificationRowsToInsightItems(classificationRows);
+  const items = classificationItems.length ? classificationItems : normalizeExamQuestionItems(questionItems);
   const commentedItems = items.filter((item) =>
     [
       item.teacherComment,
@@ -3440,7 +3586,7 @@ function ExamQuestionInsightTables({ questionItems = [], questionComposition = n
   if (!items.length) {
     return (
       <div className="analysisQuestionEmpty">
-        문항수를 먼저 만들면 문항분석표, 단원별 출제표, 학생 대비전략표가 자동으로 정리됩니다.
+        문항 수를 확정하고 분류표를 생성하면 문항분석표, 단원별 출제표, 학생 대비전략표가 자동으로 정리됩니다.
       </div>
     );
   }
@@ -3541,7 +3687,7 @@ function ExamQuestionInsightTables({ questionItems = [], questionComposition = n
                   <td>{row.questions.map((number) => `${number}번`).join(", ")}</td>
                 </tr>
               )) : (
-                <tr><td colSpan="5">문항카드에 쎈 유형을 입력하면 자동으로 정리됩니다.</td></tr>
+                <tr><td colSpan="5">문항별 분류표에 쎈 유형이 들어오면 자동으로 정리됩니다.</td></tr>
               )}
             </tbody>
           </table>
@@ -3691,10 +3837,10 @@ function ExamAnalysisFinalReport({ analysis }) {
         <ExamAnalysisReportText value={[analysis.fiveCorePatterns, analysis.insightUnits, analysis.insightPrediction, analysis.sourceCheckNotes].filter(Boolean).join("\n\n")} />
       </ExamAnalysisReportSection>
 
-      {normalizeExamQuestionItems(analysis.questionItems).length ? (
+      {normalizeExamQuestionClassificationRows(analysis.questionClassifications || analysis.classificationRows).length || normalizeExamQuestionItems(analysis.questionItems).length ? (
         <ExamAnalysisReportSection title="7. 문항별 검수와 강사 코멘트">
-          <ExamQuestionInsightTables questionItems={analysis.questionItems} questionComposition={analysis.questionComposition} />
-          <ExamStrategyFlow questionItems={analysis.questionItems} />
+          <ExamQuestionInsightTables classificationRows={analysis.questionClassifications || analysis.classificationRows} questionItems={analysis.questionItems} questionComposition={analysis.questionComposition} />
+          <ExamStrategyFlow questionItems={classificationRowsToInsightItems(analysis.questionClassifications || analysis.classificationRows).length ? classificationRowsToInsightItems(analysis.questionClassifications || analysis.classificationRows) : analysis.questionItems} />
         </ExamAnalysisReportSection>
       ) : null}
 
@@ -13672,6 +13818,7 @@ function ExamAnalysisCenter({
   const questionCompositionsBySource = normalizeExamSourceCompositions(selectedAnalysis?.questionCompositionsBySource);
   const questionTargetCountsBySource = normalizeExamSourceTargetCounts(selectedAnalysis?.questionTargetCountsBySource);
   const questionItems = normalizeExamQuestionItems(selectedAnalysis?.questionItems);
+  const classificationRows = normalizeExamQuestionClassificationRows(selectedAnalysis?.questionClassifications || selectedAnalysis?.classificationRows);
   const renderSourceFiles = (selectedAnalysis?.sourceFiles ?? []).filter((file) => isImageExamAnalysisSource(file) || isPdfExamAnalysisSource(file));
   const renderSourceFileOptions = renderSourceFiles.map((file, index) => ({
     file,
@@ -13684,19 +13831,20 @@ function ExamAnalysisCenter({
   const resolvedQuestionSourceId = activeQuestionSourceOption?.sourceId || "";
   const hasMultipleQuestionSources = renderSourceFileOptions.length > 1;
   const sourceQuestionComposition = normalizeExamQuestionComposition(questionCompositionsBySource[resolvedQuestionSourceId]);
-  const activeQuestionItems = questionItems.filter((item) => {
+  const activeClassificationRows = classificationRows.filter((row) => {
     if (!resolvedQuestionSourceId) return true;
-    return (item.cropSourceId || defaultQuestionSourceId) === resolvedQuestionSourceId;
+    return (row.sourceId || defaultQuestionSourceId) === resolvedQuestionSourceId;
   });
+  const activeQuestionItems = classificationRowsToInsightItems(activeClassificationRows);
   const sourceQuestionTargetCount = Number(questionTargetCountsBySource[resolvedQuestionSourceId]) || 0;
   const sourceFallbackQuestionCount = hasMultipleQuestionSources && resolvedQuestionSourceId
-    ? sourceQuestionTargetCount || activeQuestionItems.length
+    ? sourceQuestionTargetCount || activeClassificationRows.length
     : 0;
   const sourceFallbackQuestionComposition = sourceFallbackQuestionCount
     ? normalizeExamQuestionComposition({
         total: sourceFallbackQuestionCount,
         sections: [{ label: "현재 원본", start: 1, end: sourceFallbackQuestionCount, count: sourceFallbackQuestionCount, score: "" }],
-        evidence: "현재 원본 문항 카드 수 기준",
+        evidence: "현재 원본 문항별 분류표 기준",
         confidence: "확인 필요"
       })
     : null;
@@ -13719,7 +13867,7 @@ function ExamAnalysisCenter({
   const cropViewerPageNumber = Math.max(1, Math.min(pdfPageCount || 999, Number(cropViewerPage) || selectedQuestionPage || 1));
   const selectedQuestionCropIsVisible = !selectedQuestionSourceIsPdf || selectedQuestionPage === cropViewerPageNumber || Boolean(cropDraft);
   const selectedQuestionCropBox = normalizeCropBox(cropDraft || (selectedQuestionCropIsVisible ? selectedQuestion?.cropBox : null));
-  const activeQuestionTargetCount = sourceQuestionTargetCount || activeQuestionItems.length || manualQuestionCount || questionComposition?.total || (hasMultipleQuestionSources ? 0 : Number(selectedAnalysis?.questionTargetCount)) || 0;
+  const activeQuestionTargetCount = sourceQuestionTargetCount || activeClassificationRows.length || manualQuestionCount || questionComposition?.total || (hasMultipleQuestionSources ? 0 : Number(selectedAnalysis?.questionTargetCount)) || 0;
   const selectedQuestionInsightRecommended = isExamQuestionInsightRecommended(selectedQuestion);
   const selectedQuestionHasDetailedInsight = hasExamQuestionDetailedInsight(selectedQuestion);
   const selectedQuestionInsightExpanded = Boolean(selectedQuestion && expandedQuestionInsightId === selectedQuestion.questionId);
@@ -13747,7 +13895,10 @@ function ExamAnalysisCenter({
     [examPrepRows]
   );
   const teacherAnalysisText = selectedAnalysis
-    ? [
+    ? (() => {
+      const classificationInsightItems = classificationRowsToInsightItems(selectedAnalysis.questionClassifications || selectedAnalysis.classificationRows);
+      const insightItems = classificationInsightItems.length ? classificationInsightItems : selectedAnalysis.questionItems;
+      return [
         selectedAnalysis.oneLineSummary ? `# 한 줄 총평\n${selectedAnalysis.oneLineSummary}` : "",
         selectedAnalysis.examStructure ? `# 시험 구조\n${selectedAnalysis.examStructure}` : "",
         selectedAnalysis.unitDistribution ? `# 단원별 출제 분포\n${selectedAnalysis.unitDistribution}` : "",
@@ -13760,8 +13911,9 @@ function ExamAnalysisCenter({
         selectedAnalysis.insightStudentErrors ? `# 실제 학생 오답\n${selectedAnalysis.insightStudentErrors}` : "",
         selectedAnalysis.insightPrediction ? `# 다음 시험 예측\n${selectedAnalysis.insightPrediction}` : "",
         selectedAnalysis.insightDirection ? `# 학습 방향\n${selectedAnalysis.insightDirection}` : "",
-        buildQuestionInsightText(selectedAnalysis.questionItems) ? `# 문항별 강사 코멘트\n${buildQuestionInsightText(selectedAnalysis.questionItems)}` : ""
-      ].filter(Boolean).join("\n\n")
+        buildQuestionInsightText(insightItems) ? `# 문항별 검수 메모\n${buildQuestionInsightText(insightItems)}` : ""
+      ].filter(Boolean).join("\n\n");
+    })()
     : "";
   const outputPreviewMap = selectedAnalysis ? {
     teacher: { title: "강사용 분석지", kind: "document", value: teacherAnalysisText, editSection: "ai" },
@@ -13890,9 +14042,9 @@ function ExamAnalysisCenter({
   }, [activeQuestionSourceId, defaultQuestionSourceId, renderSourceIdsKey]);
 
   useEffect(() => {
-    const nextCount = sourceQuestionTargetCount || questionComposition?.total || activeQuestionItems.length || (!hasMultipleQuestionSources ? Number(selectedAnalysis?.questionTargetCount) || 0 : 0) || "";
+    const nextCount = sourceQuestionTargetCount || questionComposition?.total || activeClassificationRows.length || (!hasMultipleQuestionSources ? Number(selectedAnalysis?.questionTargetCount) || 0 : 0) || "";
     setQuestionCountDraft(nextCount ? String(nextCount) : "");
-  }, [selectedAnalysis?.examAnalysisId, resolvedQuestionSourceId, sourceQuestionTargetCount, questionComposition?.total, activeQuestionItems.length, hasMultipleQuestionSources, selectedAnalysis?.questionTargetCount]);
+  }, [selectedAnalysis?.examAnalysisId, resolvedQuestionSourceId, sourceQuestionTargetCount, questionComposition?.total, activeClassificationRows.length, hasMultipleQuestionSources, selectedAnalysis?.questionTargetCount]);
 
   useEffect(() => {
     if (!activeQuestionItems.length) {
@@ -13998,6 +14150,10 @@ function ExamAnalysisCenter({
     update("questionItems", normalizeExamQuestionItems(nextItems));
   }
 
+  function updateQuestionClassifications(nextRows) {
+    update("questionClassifications", normalizeExamQuestionClassificationRows(nextRows));
+  }
+
   function updateFinalDocument(nextDocument) {
     update("finalDocument", normalizeExamFinalDocument(nextDocument));
   }
@@ -14020,6 +14176,19 @@ function ExamAnalysisCenter({
     };
   }
 
+  function classificationBelongsToActiveSource(row) {
+    if (!resolvedQuestionSourceId) return true;
+    return (row.sourceId || defaultQuestionSourceId) === resolvedQuestionSourceId;
+  }
+
+  function withActiveClassificationSource(row) {
+    return {
+      ...row,
+      sourceId: resolvedQuestionSourceId || row.sourceId,
+      sourceUrl: selectedQuestionSourceFile ? getExamAnalysisSourceRenderUrl(selectedQuestionSourceFile) : row.sourceUrl
+    };
+  }
+
   function createBlankQuestionItemsForSource(sourceId, sourceFile) {
     const sourceUrl = sourceFile ? getExamAnalysisSourceRenderUrl(sourceFile) : "";
     const targetCount = Math.max(1, Math.min(80, Number(questionCountDraft) || sourceQuestionTargetCount || activeQuestionItems.length || questionComposition?.total || 20));
@@ -14037,10 +14206,10 @@ function ExamAnalysisCenter({
       window.alert("확정할 문항 수를 입력해 주세요.");
       return;
     }
-    const nextItems = createExamQuestionItemsFromCount(targetCount, []).map(withActiveQuestionSource);
-    updateQuestionItems([
-      ...questionItems.filter((item) => !questionBelongsToActiveSource(item)),
-      ...nextItems
+    const nextRows = createExamQuestionClassificationRowsFromCount(targetCount, activeClassificationRows).map(withActiveClassificationSource);
+    updateQuestionClassifications([
+      ...classificationRows.filter((row) => !classificationBelongsToActiveSource(row)),
+      ...nextRows
     ]);
     if (resolvedQuestionSourceId) {
       update("questionTargetCountsBySource", {
@@ -14049,7 +14218,36 @@ function ExamAnalysisCenter({
       });
     }
     if (!resolvedQuestionSourceId || renderSourceFileOptions.length <= 1) update("questionTargetCount", targetCount);
-    setSelectedQuestionId(nextItems[0]?.questionId || "");
+    setSelectedQuestionId("");
+    setCropDraftStatus(`문항별 분류표 행 ${targetCount}개를 만들었습니다.`);
+  }
+
+  function assignClassificationSource(sourceId) {
+    setActiveQuestionSourceId(sourceId || defaultQuestionSourceId);
+    setCropDraftStatus("");
+  }
+
+  function addClassificationRow() {
+    const nextNumber = (activeClassificationRows.at(-1)?.number || activeClassificationRows.length) + 1;
+    const nextRow = withActiveClassificationSource(createExamQuestionClassificationRow({ number: nextNumber }, classificationRows.length));
+    updateQuestionClassifications([...classificationRows, nextRow]);
+    setCropDraftStatus(`${nextNumber}번 분류 행을 추가했습니다.`);
+  }
+
+  function deleteClassificationRow(classificationId) {
+    const targetRow = classificationRows.find((row) => row.classificationId === classificationId);
+    if (!targetRow) return;
+    if (!window.confirm(`${targetRow.number}번 분류 행을 삭제할까요?`)) return;
+    updateQuestionClassifications(classificationRows.filter((row) => row.classificationId !== classificationId));
+    setCropDraftStatus(`${targetRow.number}번 분류 행을 삭제했습니다.`);
+  }
+
+  function updateClassificationRow(classificationId, field, value) {
+    updateQuestionClassifications(classificationRows.map((row) =>
+      row.classificationId === classificationId
+        ? createExamQuestionClassificationRow({ ...row, [field]: value })
+        : row
+    ));
   }
 
   function fillQuestionCountFromAiComposition() {
@@ -14057,26 +14255,56 @@ function ExamAnalysisCenter({
     setQuestionCountDraft(String(questionComposition.total));
   }
 
+  async function buildClassificationPageImages() {
+    if (!selectedQuestionSourceUrl) return [];
+    if (selectedQuestionSourceIsPdf) {
+      const pdfjsLib = await loadPdfJs();
+      const loadingTask = pdfjsLib.getDocument({ url: selectedQuestionSourceUrl });
+      try {
+        const pdfDocument = await loadingTask.promise;
+        setPdfPageCount(pdfDocument.numPages);
+        const pageLimit = Math.min(pdfDocument.numPages, 8);
+        const pageImages = [];
+        for (let pageNumber = 1; pageNumber <= pageLimit; pageNumber += 1) {
+          const imageDataUrl = await renderPdfPageToVisionImageDataUrl(pdfDocument, pageNumber, 1.05);
+          pageImages.push({ pageNumber, imageDataUrl });
+        }
+        return pageImages;
+      } finally {
+        loadingTask.destroy?.();
+      }
+    }
+    if (selectedQuestionSourceIsImage) {
+      return [{ pageNumber: 1, imageDataUrl: await imageUrlToVisionImageDataUrl(selectedQuestionSourceUrl) }];
+    }
+    return [];
+  }
+
   async function runAiForActiveQuestionSource() {
     if (!selectedAnalysis || isQuestionInfoFilling) return;
-    const requestedCount = Math.max(1, Math.min(80, Number(questionCountDraft) || activeQuestionItems.length || activeQuestionMaxNumber || 20));
-    const targetItems = createExamQuestionItemsFromCount(requestedCount, activeQuestionItems).map(withActiveQuestionSource);
+    const requestedCount = Math.max(1, Math.min(80, Number(questionCountDraft) || activeClassificationRows.length || questionComposition?.total || sourceQuestionTargetCount || 20));
+    const baseRows = createExamQuestionClassificationRowsFromCount(requestedCount, activeClassificationRows).map(withActiveClassificationSource);
     const sourceText = selectedQuestionSourceFile?.extractedText
       ? `[현재 시험지/연도 원문] ${selectedQuestionSourceFile.fileName}\n${selectedQuestionSourceFile.extractedText}`
       : "";
     const scopedRawExamText = sourceText || selectedAnalysis.rawExamText || "";
-    const heuristicItems = applyHeuristicQuestionInfoDrafts(targetItems, scopedRawExamText, questionComposition).map(withActiveQuestionSource);
-    const nonActiveItems = questionItems.filter((item) => !questionBelongsToActiveSource(item));
-    const targetCount = Math.max(requestedCount, heuristicItems.length);
+    const nonActiveRows = classificationRows.filter((row) => !classificationBelongsToActiveSource(row));
+    const targetCount = Math.max(requestedCount, baseRows.length);
 
     setIsQuestionInfoFilling(true);
-    setCropDraftStatus("문항카드 기본정보를 OCR에서 먼저 채우는 중입니다...");
-    updateQuestionItems([...nonActiveItems, ...heuristicItems]);
-    if (heuristicItems[0]) setSelectedQuestionId((current) => current || heuristicItems[0].questionId);
+    setCropDraftStatus("문항별 분류표 골격을 저장하는 중입니다...");
+    updateQuestionClassifications([...nonActiveRows, ...baseRows]);
 
     try {
-      setCropDraftStatus(`문항별 OCR 조각 기반 AI 보강 중입니다... 0/${heuristicItems.length}`);
-      const result = await requestExamQuestionInfoTextDraft({
+      let pageImages = [];
+      try {
+        setCropDraftStatus("PDF/이미지 페이지를 AI 입력용으로 준비하는 중입니다...");
+        pageImages = await buildClassificationPageImages();
+      } catch (imageError) {
+        setCropDraftStatus(`페이지 이미지 준비 실패 · 텍스트/OCR 기준으로 분류합니다. (${imageError.message})`);
+      }
+      setCropDraftStatus(`AI 문항별 분류표 생성 중입니다... ${pageImages.length ? `${pageImages.length}페이지 이미지 포함` : "텍스트 기준"}`);
+      const result = await requestExamQuestionClassificationDraft({
         aiModel: aiSettings.examAnalysisModel,
         aiProvider: aiSettings.examAnalysisProvider,
         schoolName: selectedAnalysis.schoolName,
@@ -14086,21 +14314,24 @@ function ExamAnalysisCenter({
         examDate: selectedAnalysis.examDate,
         sourceFiles: selectedQuestionSourceFile ? [{ ...selectedQuestionSourceFile, sourceId: resolvedQuestionSourceId }] : selectedAnalysis.sourceFiles,
         rawExamText: scopedRawExamText,
-        questionItems: heuristicItems,
+        classificationRows: baseRows,
+        questionClassifications: baseRows,
         questionSourceId: resolvedQuestionSourceId,
         questionSourceUrl: selectedQuestionSourceUrl,
+        classificationTargetCount: targetCount,
         questionTargetCount: targetCount,
+        pageImages,
         examPrepContext
       });
-      const aiItems = normalizeAiQuestionDrafts(result?.fields?.questionItems || result?.questionItems || []);
-      const mergedActiveItems = mergeAiQuestionDrafts(heuristicItems, aiItems, {
+      const fields = result?.fields || {};
+      const aiRows = normalizeExamQuestionClassificationRows(fields.classificationRows || fields.questionClassifications || result?.classificationRows || []);
+      const mergedActiveRows = mergeExamQuestionClassificationDrafts(baseRows, aiRows, {
         sourceId: resolvedQuestionSourceId,
         sourceUrl: selectedQuestionSourceUrl,
-        defaultSourceId: resolvedQuestionSourceId,
         targetCount
-      }).map(withActiveQuestionSource);
+      }).map(withActiveClassificationSource);
       const aiLastRunAt = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
-      updateQuestionItems([...nonActiveItems, ...mergedActiveItems]);
+      updateQuestionClassifications([...nonActiveRows, ...mergedActiveRows]);
       if (resolvedQuestionSourceId) {
         update("questionTargetCountsBySource", {
           ...questionTargetCountsBySource,
@@ -14108,13 +14339,14 @@ function ExamAnalysisCenter({
         });
       }
       if (!resolvedQuestionSourceId || renderSourceFileOptions.length <= 1) update("questionTargetCount", targetCount);
+      if (fields.classificationSummary) update("aiOverview", fields.classificationSummary);
+      if (fields.unitDistribution) update("unitDistribution", fields.unitDistribution);
+      if (fields.typeClassification) update("typeClassification", fields.typeClassification);
+      if (fields.killerProblems) update("killerProblems", fields.killerProblems);
+      if (fields.sourceCheckNotes) update("sourceCheckNotes", fields.sourceCheckNotes);
       update("aiInitialFields", {
         ...(selectedAnalysis.aiInitialFields || {}),
-        questionItems: normalizeAiQuestionDrafts(aiItems.length ? aiItems : heuristicItems).map((item) => ({
-          ...item,
-          cropSourceId: resolvedQuestionSourceId || item.cropSourceId,
-          cropSourceUrl: selectedQuestionSourceUrl || item.cropSourceUrl
-        }))
+        questionClassifications: mergedActiveRows
       });
       update("aiInitialGeneratedAt", aiLastRunAt);
       update("aiProvider", result?.provider || aiSettings.examAnalysisProvider);
@@ -14123,22 +14355,21 @@ function ExamAnalysisCenter({
       update("aiError", "");
       update("pipelineStage", "문항 검수");
 
-      const scoreCount = mergedActiveItems.filter((item) => item.score).length;
-      const aiParsedCount = Math.max(0, Number(result?.aiItemCount) || 0);
-      const aiFilledCount = aiItems.filter((item) =>
+      const scoreCount = mergedActiveRows.filter((row) => row.score).length;
+      const aiParsedCount = Math.max(0, Number(result?.classificationRowCount) || 0);
+      const aiFilledCount = mergedActiveRows.filter((row) =>
         [
-          item.unit,
-          item.difficulty && item.difficulty !== "확인 필요",
-          item.ssenTypeTags?.length
+          row.unit,
+          row.difficulty && row.difficulty !== "확인 필요",
+          row.ssenTypeTags?.length
         ].some(Boolean)
       ).length;
-      const repairText = result?.repaired ? " · 응답 복구 적용" : "";
       const warningText = result?.warning ? ` · ${result.warning}` : "";
-      setCropDraftStatus(`문항정보 채우기 완료 · 카드 ${mergedActiveItems.length}개 · 배점 ${scoreCount}개 · AI 응답 ${aiParsedCount}개 · AI 보강 ${aiFilledCount}개${repairText}${warningText}`);
+      setCropDraftStatus(`문항별 분류표 생성 완료 · 행 ${mergedActiveRows.length}개 · 배점 ${scoreCount}개 · AI 응답 ${aiParsedCount}개 · 분류 ${aiFilledCount}개${warningText}`);
     } catch (error) {
       update("aiStatus", "완료");
       update("aiError", "");
-      setCropDraftStatus(`OCR 기반 기본정보는 저장했습니다. AI 단원/쎈유형 보강은 실패했습니다. (${error.message})`);
+      setCropDraftStatus(`분류표 골격은 저장했습니다. AI 분류 생성은 실패했습니다. (${error.message})`);
     } finally {
       setIsQuestionInfoFilling(false);
     }
@@ -14993,6 +15224,208 @@ function ExamAnalysisCenter({
             ) : null}
 
             {currentStage === "문항 검수" ? (
+            <section className="analysisQuestionStage">
+              <article className="panel analysisQuestionSetupPanel">
+                <div>
+                  <p className="eyebrow">QUESTION CLASSIFICATION</p>
+                  <h2>문항별 분류표 MVP</h2>
+                  <p className="muted">AI는 시험지 원본과 쎈 유형 기준표로 분류표 초안을 만들고, 사람은 표에서 단원·쎈유형·난이도·배점만 확정합니다.</p>
+                </div>
+                {questionComposition ? (
+                  <div className="analysisReviewSummary questionCompositionReview">
+                    <div>
+                      <strong>첫 장 문항 메타데이터 초안</strong>
+                      <p>{formatExamQuestionComposition(questionComposition)}</p>
+                      {selectedQuestionSourceFile?.fileName ? <small>현재 원본: {selectedQuestionSourceFile.fileName}</small> : null}
+                      {questionComposition.evidence ? <small>근거: {questionComposition.evidence}</small> : null}
+                    </div>
+                    <button className="softButton" onClick={fillQuestionCountFromAiComposition} type="button">메타데이터 반영</button>
+                  </div>
+                ) : (
+                  <div className="analysisReviewSummary questionCompositionReview">
+                    <div>
+                      <strong>첫 장 문항 메타데이터 없음</strong>
+                      <p>첫 페이지 문항 구성표를 기준으로 문항 수를 입력한 뒤 분류표 행을 만듭니다.</p>
+                    </div>
+                  </div>
+                )}
+                <div className="analysisQuestionSetupActions">
+                  {renderSourceFiles.length ? (
+                    <label>
+                      현재 시험지/연도
+                      <select
+                        value={resolvedQuestionSourceId}
+                        onChange={(event) => assignClassificationSource(event.target.value)}
+                      >
+                        {renderSourceFileOptions.map(({ file, sourceId }, index) => (
+                          <option key={sourceId} value={sourceId}>
+                            {isPdfExamAnalysisSource(file) ? "PDF · " : "이미지 · "}{file.fileName || `원본 ${index + 1}`}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ) : null}
+                  <label>
+                    첫 장 기준 문항 수
+                    <input
+                      min="1"
+                      max="80"
+                      type="number"
+                      value={questionCountDraft}
+                      onChange={(event) => setQuestionCountDraft(event.target.value)}
+                    />
+                  </label>
+                  <button className="primaryButton" onClick={() => applyQuestionCount()} type="button">확인 후 분류표 행 생성</button>
+                  <button
+                    className="softButton"
+                    disabled={selectedAnalysis.aiStatus === "분석 중" || isQuestionInfoFilling}
+                    onClick={runAiForActiveQuestionSource}
+                    type="button"
+                  >
+                    {selectedAnalysis.aiStatus === "분석 중" || isQuestionInfoFilling ? "AI 분류 중..." : "AI 분류표 생성"}
+                  </button>
+                  <button className="softButton" onClick={addClassificationRow} type="button">문항 행 추가</button>
+                  <button className="softButton" onClick={() => questionSourceInputRef.current?.click()} type="button">PDF·이미지 원본 추가</button>
+                  <input
+                    accept="application/pdf,image/*"
+                    className="hiddenFileInput"
+                    multiple
+                    onChange={handleSourceFileSelect}
+                    ref={questionSourceInputRef}
+                    type="file"
+                  />
+                </div>
+                {cropDraftStatus ? <div className="questionCropStatus">{cropDraftStatus}</div> : null}
+              </article>
+
+              <article className="panel analysisQuestionSummaryPanel">
+                <div className="sectionHeader slim">
+                  <div>
+                    <h2>문항별 분류표</h2>
+                    <p className="muted">이 표가 최종 분석지의 단원별 출제표, 쎈 유형별 분류표, 대비전략의 기준 데이터입니다.</p>
+                  </div>
+                  <span className="countBadge">현재 원본 {activeClassificationRows.length}/{activeQuestionTargetCount || questionCountDraft || "-"}문항</span>
+                </div>
+                {activeClassificationRows.length ? (
+                  <div className="analysisPreviewTableWrap">
+                    <table className="analysisPreviewTable">
+                      <thead>
+                        <tr>
+                          <th>문항</th>
+                          <th>페이지</th>
+                          <th>배점</th>
+                          <th>형식</th>
+                          <th>단원</th>
+                          <th>쎈 주유형</th>
+                          <th>쎈 보조유형</th>
+                          <th>난이도</th>
+                          <th>역할</th>
+                          <th>검수</th>
+                          <th>관리</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {activeClassificationRows.map((row) => (
+                          <tr key={row.classificationId}>
+                            <td>
+                              <input
+                                className="tableInlineInput short"
+                                type="number"
+                                value={row.number}
+                                onChange={(event) => updateClassificationRow(row.classificationId, "number", Number(event.target.value) || "")}
+                              />
+                            </td>
+                            <td>
+                              <input
+                                className="tableInlineInput short"
+                                type="number"
+                                value={row.page}
+                                onChange={(event) => updateClassificationRow(row.classificationId, "page", Number(event.target.value) || "")}
+                              />
+                            </td>
+                            <td>
+                              <input
+                                className="tableInlineInput short"
+                                value={row.score}
+                                onChange={(event) => updateClassificationRow(row.classificationId, "score", event.target.value)}
+                                placeholder="예: 4점"
+                              />
+                            </td>
+                            <td>
+                              <select value={row.questionType} onChange={(event) => updateClassificationRow(row.classificationId, "questionType", event.target.value)}>
+                                {examQuestionTypeOptions.map((option) => <option key={option}>{option}</option>)}
+                              </select>
+                            </td>
+                            <td>
+                              <input
+                                className="tableInlineInput"
+                                value={row.unit}
+                                onChange={(event) => updateClassificationRow(row.classificationId, "unit", event.target.value)}
+                                placeholder="단원"
+                              />
+                            </td>
+                            <td>
+                              <input
+                                className="tableInlineInput"
+                                value={getSsenPrimaryTypeText(row.ssenTypeTags)}
+                                onChange={(event) => updateClassificationRow(row.classificationId, "ssenTypeTags", updateSsenPrimaryTypeTags(row.ssenTypeTags, event.target.value, row.unit))}
+                                placeholder="SSEN 코드 또는 유형명"
+                              />
+                            </td>
+                            <td>
+                              <input
+                                className="tableInlineInput"
+                                value={getSsenSecondaryTypeText(row.ssenTypeTags)}
+                                onChange={(event) => updateClassificationRow(row.classificationId, "ssenTypeTags", updateSsenSecondaryTypeTags(row.ssenTypeTags, event.target.value, row.unit))}
+                                placeholder="보조유형"
+                              />
+                            </td>
+                            <td>
+                              <select value={row.difficulty} onChange={(event) => updateClassificationRow(row.classificationId, "difficulty", event.target.value)}>
+                                {examQuestionDifficultyOptions.map((option) => <option key={option}>{option}</option>)}
+                              </select>
+                            </td>
+                            <td>
+                              <select value={row.role} onChange={(event) => updateClassificationRow(row.classificationId, "role", event.target.value)}>
+                                {examQuestionRoleOptions.map((option) => <option key={option}>{option}</option>)}
+                              </select>
+                            </td>
+                            <td>
+                              <textarea
+                                className="tableInlineTextarea"
+                                value={row.reviewNote || row.evidence}
+                                onChange={(event) => updateClassificationRow(row.classificationId, "reviewNote", event.target.value)}
+                                placeholder="근거/확인 포인트"
+                                rows="2"
+                              />
+                            </td>
+                            <td>
+                              <button className="softButton danger" onClick={() => deleteClassificationRow(row.classificationId)} type="button">삭제</button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="analysisQuestionEmpty">문항 수를 입력하고 분류표 행을 만든 뒤 AI 분류표 생성을 실행하세요.</div>
+                )}
+              </article>
+
+              <article className="panel analysisQuestionSummaryPanel">
+                <div className="sectionHeader slim">
+                  <div>
+                    <h2>분류표 기반 요약</h2>
+                    <p className="muted">분류표가 채워지면 단원별 출제와 쎈 유형별 분류가 자동으로 정리됩니다.</p>
+                  </div>
+                </div>
+                <ExamQuestionInsightTables classificationRows={activeClassificationRows} questionComposition={questionComposition} />
+                <ExamStrategyFlow questionItems={activeQuestionItems} />
+              </article>
+            </section>
+            ) : null}
+
+            {false && currentStage === "문항 검수" ? (
             <section className="analysisQuestionStage">
               <article className="panel analysisQuestionSetupPanel">
                 <div>

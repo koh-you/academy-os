@@ -10,6 +10,17 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-28 P1. 시험분석 문항카드 UI 제거와 분류표 MVP 전환
+
+- 상태: 완료
+- 사용자 요청: `questionItems`와 문항카드 중심 UI를 버리고, 시험분석 MVP를 문항별 분류표 중심으로 다시 집중한다.
+- 판단: 현재 목표는 문항카드 편집이 아니라 시험지 전체 개요를 빠르게 얻고, 문항별 단원/쎈 유형/난이도/배점 분류표를 만든 뒤 강사 인사이트와 산출물로 연결하는 것이다. 따라서 보이는 문항 검수 화면은 원문 크롭/카드/상세 코멘트 UI가 아니라 `questionClassifications` 분류표를 직접 편집하는 화면이어야 한다.
+- 이번 작업 결과: 문항 검수 단계의 보이는 UI를 `문항별 분류표 MVP`로 교체했다. `확인 후 분류표 행 생성`으로 행 골격을 만들고, `AI 분류표 생성`은 PDF/이미지 앞쪽 페이지(최대 8쪽)와 현재 원본 텍스트, 쎈 유형 기준표를 함께 서버에 보내 `classificationRows`를 받는다. 화면에서는 문항번호, 페이지, 배점, 형식, 단원, 쎈 주유형/보조유형, 난이도, 역할, 검수 메모를 표에서 바로 수정한다.
+- 서버 변경: `/api/ai/exam-question-classification`을 추가했다. 새 경로의 프롬프트와 응답 파서는 `classificationRows`/`questionClassifications`만 사용하며, 새 MVP 요청에서는 `questionItems`를 보내지 않는다. AI가 분류 행을 일부만 반환하면 기존 분류표 골격을 유지하고 경고를 남긴다.
+- 저장 주의: 새 데이터는 기존 `examAnalyses` app_state 문서 안의 `questionClassifications` 배열에 저장한다. 새 Supabase SQL edit 필요 없음.
+- 남은 정리: 레거시 `questionItems` 기반 함수와 숨겨진 크롭/문항카드 JSX는 빌드 안정성을 위해 이번 커밋에서 보존했다. 다음 정리 작업에서 실제 호출 경로가 없는 레거시 코드를 단계적으로 삭제할 수 있다.
+- 검증: `node --check api/routes/examAnalysis.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production`, `npm run build` 통과(total 231, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-28 P1. 시험분석 문항정보 Claude Opus 진단과 제공자 실패 fallback
 
 - 상태: 완료

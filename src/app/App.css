@@ -4734,6 +4734,28 @@ button {
   font-weight: 900;
 }
 
+.tableInlineInput,
+.tableInlineTextarea,
+.analysisPreviewTable select {
+  width: 100%;
+  min-width: 92px;
+  border: 1px solid #cbd8f0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: #07152f;
+  background: #fff;
+  font: inherit;
+}
+
+.tableInlineInput.short {
+  min-width: 64px;
+}
+
+.tableInlineTextarea {
+  min-width: 180px;
+  resize: vertical;
+}
+
 .analysisInstagramPreview {
   display: grid;
   gap: 12px;

@@ -7,7 +7,9 @@ const ANTHROPIC_MESSAGES_URL = "https://api.anthropic.com/v1/messages";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SSEN_TYPE_INDEX_PATH = path.join(__dirname, "..", "data", "ssenTypeIndex.json");
 const EXAM_ANALYSIS_RAW_TEXT_LIMIT = 16000;
+const EXAM_QUESTION_CLASSIFICATION_TEXT_LIMIT = 24000;
 const SSEN_TYPE_PROMPT_ROW_LIMIT = 420;
+const QUESTION_CLASSIFICATION_IMAGE_LIMIT = 8;
 
 const fallbackModels = {
   anthropic: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5",
@@ -144,7 +146,7 @@ function buildSsenTypePromptSection(payload = {}) {
   if (!uniqueRows.length) {
     return [
       "[쎈 유형 기준표]",
-      "과목/범위에서 특정 쎈 교재를 확정하지 못했다. 그래도 questionItems.ssenTypeTags는 비워두지 말고 지원 교재 범위 안에서 가장 가까운 쎈 유형 후보를 자동 매칭한다.",
+      "과목/범위에서 특정 쎈 교재를 확정하지 못했다. 그래도 문항별 분류 행의 ssenTypeTags는 비워두지 말고 지원 교재 범위 안에서 가장 가까운 쎈 유형 후보를 자동 매칭한다.",
       `지원 교재: ${bookSummary}`
     ].join("\n");
   }
@@ -155,7 +157,7 @@ function buildSsenTypePromptSection(payload = {}) {
       ? "과목/범위를 좁히지 못해 전체 쎈 유형 기준표에서 후보를 선별 제공한다. 문항 조건, 단원명, 풀이 행동을 비교해 가장 가까운 쎈 유형을 자동 후보로 매칭한다."
       : "아래 기준표는 문항별 쎈 유형 분류에만 사용한다. 문제 원문이나 해설을 만들지 말고 typeCode, bookTitle, unitName, typeName 메타데이터만 참조한다.",
     truncatedCount ? `요청 속도를 위해 기준표는 상위 ${promptRows.length}개 후보만 제공한다. 제공된 후보 안에서 먼저 자동 매칭하고, 부족하면 단원/유형명은 확인 필요로 둔다.` : "",
-    "questionItems.ssenTypeTags에는 반드시 아래 typeCode 중 하나를 사용한다. 단순 문항은 primary 1개, 복합 문항은 primary 1개와 secondary 1~2개까지 넣는다.",
+    "문항별 분류 행의 ssenTypeTags에는 반드시 아래 typeCode 중 하나를 사용한다. 단순 문항은 primary 1개, 복합 문항은 primary 1개와 secondary 1~2개까지 넣는다.",
     "확신이 낮으면 confidence를 '중' 또는 '하'로 낮추고 reason에 강사 확인 포인트를 짧게 쓴다. 정말 판별이 불가능한 경우에만 ssenTypeTags를 빈 배열로 둔다.",
     "형식: typeCode | bookTitle | unitName | typeName",
     promptRows.map((row) => `${row.typeCode} | ${row.bookTitle} | ${row.unitName} | ${row.typeName}`).join("\n")
@@ -632,6 +634,121 @@ function buildQuestionInfoTextPrompt(payload) {
     '      "ocrText": "문항 조건 짧은 요약",',
     '      "strategyComment": "검수 포인트",',
     '      "ssenTypeTags": [],',
+    '      "tags": ["기본문항"]',
+    "    }",
+    "  ]",
+    "}"
+  ].join("\n");
+}
+
+function normalizeClassificationSeedRows(payload = {}) {
+  const rows = Array.isArray(payload.classificationRows)
+    ? payload.classificationRows
+    : Array.isArray(payload.questionClassifications)
+      ? payload.questionClassifications
+      : [];
+  return rows.filter((row) => row && typeof row === "object");
+}
+
+function buildQuestionClassificationPrompt(payload) {
+  const examPrepContext = payload.examPrepContext && typeof payload.examPrepContext === "object" ? payload.examPrepContext : null;
+  const seedRows = normalizeClassificationSeedRows(payload);
+  const targetCount = Math.max(1, Math.min(80, Number(payload.classificationTargetCount) || Number(payload.questionTargetCount) || seedRows.length || 20));
+  const sourceFiles = Array.isArray(payload.sourceFiles) ? payload.sourceFiles : [];
+  const sourceFileLines = sourceFiles.map((file, index) => {
+    const sourceId = file.sourceId || file.storagePath || file.signedUrl || file.fileName || `source_${index}`;
+    return `${index + 1}. sourceId=${sourceId} · ${file.fileName || file.storagePath || "원본"} · extractedText=${String(file.extractedText || "").trim() ? "있음" : "없음"}`;
+  }).join("\n");
+  const currentRows = seedRows.length
+    ? seedRows.slice(0, targetCount).map((item, index) => {
+        const number = Number(item.number || item.questionNumber || index + 1) || index + 1;
+        const snippet = String(item.evidence || item.reviewNote || item.ocrText || item.questionSummary || "").replace(/\s+/g, " ").trim().slice(0, 500);
+        return `${number}번 | page=${item.page || 1} | score=${item.score || "미입력"} | type=${item.questionType || "확인 필요"} | unit=${item.unit || ""} | note=${snippet}`;
+      }).join("\n")
+    : "아직 문항별 분류 행이 없습니다.";
+  const rawText = limitPromptText(payload.rawExamText || "", EXAM_QUESTION_CLASSIFICATION_TEXT_LIMIT);
+  const pageImageCount = Array.isArray(payload.pageImages) ? payload.pageImages.length : 0;
+
+  return [
+    "역할: 학교 내신 수학 시험지를 읽고 분석지 생성을 위한 문항별 분류표를 만드는 AI",
+    "목표: 최종 분석지의 표와 예측을 만들 수 있는 문항별 분류 데이터를 만든다.",
+    "",
+    "[입력 해석 우선순위]",
+    "1. 첨부된 PDF/이미지 페이지가 있으면 실제 문항, 수식, 보기, 도형 배치를 직접 읽는다.",
+    "2. PDF 텍스트 추출 원문이 있으면 문항번호와 수식/조건을 보조 근거로 사용한다.",
+    "3. 현재 문항별 분류 행은 번호, 배점, 페이지를 보존하기 위한 골격이며 최종 판단 근거가 아니다.",
+    "4. 단원/쎈유형을 확정할 근거가 부족한 문항도 행은 반드시 반환하고, needsReview 태그와 reason에 확인 포인트를 남긴다.",
+    "",
+    "[시험 기본정보]",
+    `학교: ${payload.schoolName ?? ""}`,
+    `학년: ${payload.grade ?? ""}`,
+    `과목: ${payload.subject ?? ""}`,
+    `시험명: ${payload.examName ?? ""}`,
+    `시험일: ${payload.examDate ?? ""}`,
+    `목표 문항 수: ${targetCount}`,
+    `첨부 페이지 이미지 수: ${pageImageCount}`,
+    "",
+    "[업로드 원본]",
+    sourceFileLines || "원본 정보 없음",
+    "",
+    "[시험관리 탭 입력정보]",
+    examPrepContext
+      ? [
+          `시험기간: ${examPrepContext.examPeriod ?? ""}`,
+          `수학시험 일정: ${Array.isArray(examPrepContext.mathExamDates) ? examPrepContext.mathExamDates.map((entry) => [entry.date, entry.subject || entry.label].filter(Boolean).join(" ")).filter(Boolean).join(", ") : examPrepContext.mathExamDate ?? ""}`,
+          `시험범위: ${examPrepContext.scope ?? ""}`,
+          `부교재: ${examPrepContext.subTextbook ?? ""}`,
+          `특이사항: ${examPrepContext.specialNote ?? ""}`,
+          `시험 후 총평: ${examPrepContext.review ?? ""}`
+        ].join("\n")
+      : "연결된 시험관리 데이터가 없습니다.",
+    "",
+    "[현재 문항별 분류 행 골격]",
+    currentRows,
+    "",
+    "[PDF 텍스트 추출 원문]",
+    rawText || "텍스트 추출 원문이 없거나 매우 부족합니다. 첨부 페이지 이미지를 우선 읽으세요.",
+    "",
+    buildSsenTypePromptSection(payload),
+    "",
+    "[분류 규칙]",
+    `- classificationRows는 1번부터 ${targetCount}번까지 가능한 한 모두 반환한다.`,
+    "- 각 문항의 number, page, score, questionType은 기존 행 값이 있으면 보존한다.",
+    "- unit은 최종 분석지에서 단원별 출제표에 바로 쓸 수 있는 단원명으로 쓴다.",
+    "- source는 교과서, 부교재, EBS, 모의고사, 확인 필요 중 하나로만 억지 선택하지 말고 근거가 없으면 확인 필요로 둔다.",
+    "- difficulty는 확인 필요, 하, 중하, 중, 중상, 상 중 하나다.",
+    "- role은 기본, 실수유도, 앞번호 고난도, 준킬러, 킬러, 서술형 변별, 확인 필요 중 하나다.",
+    "- ssenTypeTags는 쎈 유형 기준표에서 가장 가까운 primary 1개를 우선 넣고, 복합 문항이면 secondary 1~2개까지 추가한다.",
+    "- typeCode는 반드시 제공된 쎈 기준표 안의 코드만 사용한다.",
+    "- evidence에는 원문 전체가 아니라 분류 근거가 되는 조건/풀이행동 요약만 100자 이내로 쓴다.",
+    "- reviewNote에는 왜 그 단원/쎈유형으로 분류했는지 또는 사람이 확인할 포인트를 쓴다.",
+    "- 전체 분석지에 쓸 unitDistribution, typeClassification, killerProblems, sourceCheckNotes도 함께 요약한다.",
+    "",
+    "반드시 순수 JSON 하나만 반환하세요. markdown 코드블록과 설명 문장은 쓰지 마세요.",
+    "{",
+    '  "classificationSummary": "시험 전체 개요와 분류 결과 요약",',
+    '  "unitDistribution": "단원별 문항번호/문항수/배점/특징 요약",',
+    '  "typeClassification": "기본/준킬러/킬러와 반복 유형 요약",',
+    '  "killerProblems": "킬러·준킬러 후보 문항과 이유",',
+    '  "sourceCheckNotes": "OCR/이미지 판독 한계, 확인 필요 문항, 연계 출처 후보",',
+    '  "classificationRows": [',
+    "    {",
+    '      "number": 1,',
+    '      "page": 1,',
+    '      "score": "4점",',
+    '      "questionType": "객관식",',
+    '      "unit": "다항식의 연산",',
+    '      "difficulty": "중",',
+    '      "role": "기본",',
+    '      "source": "확인 필요",',
+    '      "detailType": "곱셈공식 변형",',
+    '      "evidence": "분류 근거가 되는 조건 요약",',
+    '      "reviewNote": "분류 근거와 검수 포인트",',
+    '      "needsReview": true,',
+    '      "confidence": "중",',
+    '      "ssenTypeTags": [',
+    '        { "role": "primary", "typeCode": "SSEN-CM1-01-03", "typeName": "곱셈 공식을 이용한 다항식의 전개", "unitName": "다항식의 연산", "confidence": "중", "reason": "풀이 행동이 기준 유형과 일치" }',
+    '      ],',
     '      "tags": ["기본문항"]',
     "    }",
     "  ]",
@@ -1147,11 +1264,104 @@ function extractQuestionItemsFromLooseText(text = "") {
   return Array.from(itemsByNumber.values()).sort((a, b) => Number(a.number) - Number(b.number));
 }
 
+function normalizeClassificationRowsFromAi(rows = []) {
+  if (!Array.isArray(rows)) return [];
+  const difficultyOptions = new Set(["확인 필요", "하", "중하", "중", "중상", "상"]);
+  const roleOptions = new Set(["기본", "실수유도", "앞번호 고난도", "준킬러", "킬러", "서술형 변별", "확인 필요"]);
+  const questionTypeOptions = new Set(["객관식", "단답형", "서술형", "논술형", "확인 필요"]);
+  const sourceOptions = new Set(["확인 필요", "교과서", "부교재", "EBS", "학교 프린트", "모의고사", "수능/평가원", "자체 변형", "기타"]);
+
+  return rows
+    .map((row, index) => {
+      if (!row || typeof row !== "object") return null;
+      const number = Number(row.number || row.questionNumber || row.no) || index + 1;
+      const difficulty = String(row.difficulty || "확인 필요").trim();
+      const role = String(row.role || "기본").trim();
+      const questionType = String(row.questionType || row.type || "확인 필요").trim();
+      const source = String(row.source || "확인 필요").trim();
+      const rawTags = Array.isArray(row.tags) ? row.tags : String(row.tags || "").split(/[,/·]/);
+      const needsReview = row.needsReview === false
+        ? false
+        : ["확인 필요", "", "-", "하"].includes(String(row.confidence || "").trim()) ||
+          !String(row.unit || row.chapter || row.topic || "").trim() ||
+          !normalizeSsenTypeTags(row.ssenTypeTags || row.ssenTypes || row.ssenType || row.ssenTypeTag).length;
+
+      return {
+        number,
+        page: Math.max(1, Number(row.page) || 1),
+        score: String(row.score || row.points || "").trim(),
+        questionType: questionTypeOptions.has(questionType) ? questionType : "확인 필요",
+        unit: String(row.unit || row.chapter || row.topic || "").trim(),
+        detailType: String(row.detailType || row.subtype || row.typeName || "").trim(),
+        difficulty: difficultyOptions.has(difficulty) ? difficulty : "확인 필요",
+        role: roleOptions.has(role) ? role : "확인 필요",
+        source: sourceOptions.has(source) ? source : "확인 필요",
+        evidence: String(row.evidence || row.summary || row.questionSummary || row.ocrText || "").trim().slice(0, 240),
+        reviewNote: String(row.reviewNote || row.strategyComment || row.comment || row.teacherCheckPoint || row.reason || "").trim().slice(0, 500),
+        ssenTypeTags: normalizeSsenTypeTags(row.ssenTypeTags || row.ssenTypes || row.ssenType || row.ssenTypeTag),
+        tags: rawTags.map((tag) => String(tag || "").trim()).filter(Boolean),
+        sourceId: String(row.sourceId || row.questionSourceId || row.cropSourceId || "").trim(),
+        sourceUrl: String(row.sourceUrl || row.questionSourceUrl || row.cropSourceUrl || "").trim(),
+        needsReview,
+        confidence: String(row.confidence || (needsReview ? "확인 필요" : "중")).trim()
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.page - b.page || a.number - b.number);
+}
+
+function extractClassificationRowsFromParsed(parsed) {
+  if (Array.isArray(parsed)) return parsed;
+  if (!parsed || typeof parsed !== "object") return [];
+  const candidates = [
+    parsed.classificationRows,
+    parsed.questionClassifications,
+    parsed.classifications,
+    parsed.rows,
+    parsed.items,
+    parsed.result?.classificationRows,
+    parsed.result?.questionClassifications,
+    parsed.data?.classificationRows,
+    parsed.data?.questionClassifications,
+    parsed.analysis?.classificationRows,
+    parsed.output?.classificationRows,
+    parsed["문항분류표"],
+    parsed["문항별분류"],
+    parsed["분류표"]
+  ];
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) return candidate;
+    if (candidate && typeof candidate === "object" && !Array.isArray(candidate)) {
+      const values = Object.values(candidate);
+      if (values.length && values.every((value) => value && typeof value === "object")) return values;
+    }
+  }
+  return [];
+}
+
+function normalizeQuestionClassificationResult(text = "") {
+  const parsed = safeParseJsonText(text);
+  const rows = normalizeClassificationRowsFromAi(extractClassificationRowsFromParsed(parsed));
+  return {
+    fields: {
+      classificationSummary: String(parsed?.classificationSummary || parsed?.summary || "").trim(),
+      unitDistribution: String(parsed?.unitDistribution || "").trim(),
+      typeClassification: String(parsed?.typeClassification || "").trim(),
+      killerProblems: String(parsed?.killerProblems || "").trim(),
+      sourceCheckNotes: String(parsed?.sourceCheckNotes || "").trim(),
+      classificationRows: rows,
+      questionClassifications: rows
+    },
+    rowCount: rows.length
+  };
+}
+
 function normalizeAnalysisFields(fields, payload, rawText = "") {
   const fallback = createMockAnalysis(payload);
   const parsed = fields && typeof fields === "object" ? fields : {};
   const cleanText = String(rawText ?? "").trim();
   const questionItems = normalizeQuestionItemsFromAi(extractQuestionItemsFromParsed(parsed));
+  const questionClassifications = normalizeClassificationRowsFromAi(extractClassificationRowsFromParsed(parsed));
   const questionComposition = normalizeQuestionCompositionFromAi(parsed.questionComposition);
 
   const normalized = {
@@ -1181,6 +1391,7 @@ function normalizeAnalysisFields(fields, payload, rawText = "") {
       }).filter(Boolean);
   if (sourceCompositions.length) normalized.sourceCompositions = sourceCompositions;
   if (questionItems.length) normalized.questionItems = questionItems;
+  if (questionClassifications.length) normalized.questionClassifications = questionClassifications;
   return normalized;
 }
 
@@ -1318,6 +1529,129 @@ async function runAnthropicVision(prompt, imageDataUrl, model) {
   return outputTextFromAnthropic(data);
 }
 
+function normalizeClassificationPageImages(pageImages = []) {
+  if (!Array.isArray(pageImages)) return [];
+  return pageImages
+    .map((entry, index) => ({
+      pageNumber: Math.max(1, Number(entry?.pageNumber || index + 1) || index + 1),
+      imageDataUrl: String(entry?.imageDataUrl || entry?.dataUrl || "").trim()
+    }))
+    .filter((entry) => entry.imageDataUrl.startsWith("data:image/"))
+    .slice(0, QUESTION_CLASSIFICATION_IMAGE_LIMIT);
+}
+
+async function runOpenAiQuestionClassification(prompt, pageImages, model) {
+  const content = [
+    { type: "input_text", text: prompt },
+    ...pageImages.map((entry) => ({
+      type: "input_image",
+      image_url: entry.imageDataUrl
+    }))
+  ];
+  const response = await fetch(OPENAI_RESPONSES_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${requiredEnv("OPENAI_API_KEY")}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model,
+      max_output_tokens: 9000,
+      input: [{ role: "user", content }]
+    })
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error?.message || "OpenAI 문항 분류 요청에 실패했습니다.");
+  }
+
+  return outputTextFromOpenAi(data);
+}
+
+async function runAnthropicQuestionClassification(prompt, pageImages, model) {
+  const imageBlocks = pageImages.map((entry) => {
+    const image = parseImageDataUrl(entry.imageDataUrl);
+    return {
+      type: "image",
+      source: {
+        type: "base64",
+        media_type: image.mediaType,
+        data: image.base64
+      }
+    };
+  });
+  const response = await fetch(ANTHROPIC_MESSAGES_URL, {
+    method: "POST",
+    headers: {
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+      "x-api-key": requiredEnv("ANTHROPIC_API_KEY")
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 9000,
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: prompt },
+            ...imageBlocks
+          ]
+        }
+      ]
+    })
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error?.message || "Claude 문항 분류 요청에 실패했습니다.");
+  }
+
+  return outputTextFromAnthropic(data);
+}
+
+async function runQuestionClassificationWithProvider(provider, prompt, model, pageImages = []) {
+  if (provider === "openai") {
+    return pageImages.length
+      ? runOpenAiQuestionClassification(prompt, pageImages, model)
+      : runOpenAiText(prompt, model, 9000);
+  }
+  if (provider === "anthropic") {
+    return pageImages.length
+      ? runAnthropicQuestionClassification(prompt, pageImages, model)
+      : runAnthropicText(prompt, model, 9000);
+  }
+  throw new Error(`지원하지 않는 AI 제공자입니다: ${provider}`);
+}
+
+async function runQuestionClassificationWithFallback(prompt, provider, model, pageImages = []) {
+  try {
+    return { provider, model, text: await runQuestionClassificationWithProvider(provider, prompt, model, pageImages), fallbackReason: "" };
+  } catch (error) {
+    const fallbackProvider = provider === "openai" && envValue("ANTHROPIC_API_KEY")
+      ? "anthropic"
+      : provider === "anthropic" && envValue("OPENAI_API_KEY")
+        ? "openai"
+        : "";
+    if (!fallbackProvider || !isRetryableAiProviderError(error)) throw error;
+
+    const fallbackModel = fallbackProvider === "anthropic"
+      ? examAnalysisModels.anthropic || fallbackModels.anthropic
+      : examAnalysisModels.openai || fallbackModels.openai;
+    try {
+      return {
+        provider: fallbackProvider,
+        model: fallbackModel,
+        text: await runQuestionClassificationWithProvider(fallbackProvider, prompt, fallbackModel, pageImages),
+        fallbackReason: `${provider} 실패 후 ${fallbackProvider}로 자동 전환: ${error.message}`
+      };
+    } catch (fallbackError) {
+      throw new Error(`${provider} 실패: ${error.message} / ${fallbackProvider} 재시도 실패: ${fallbackError.message}`);
+    }
+  }
+}
+
 async function runQuestionInfoTextWithProvider(provider, prompt, model) {
   if (provider === "openai") return runOpenAiText(prompt, model, 6000);
   if (provider === "anthropic") return runAnthropicText(prompt, model, 6000);
@@ -1430,6 +1764,57 @@ export async function runExamQuestionInfoText(payload) {
     rawText: repairText ? `${text}\n\n[repair]\n${repairText}` : text,
     aiItemCount: questionItems.length,
     repaired,
+    ...(runResult.fallbackReason ? { fallbackReason: runResult.fallbackReason } : {}),
+    ...(warning || runResult.fallbackReason ? { warning: [runResult.fallbackReason, warning].filter(Boolean).join(" · ") } : {})
+  };
+}
+
+export async function runExamQuestionClassification(payload) {
+  let provider = selectedProvider(payload);
+  let model = selectedModel(payload, "examAnalysis");
+  const seedRows = normalizeClassificationRowsFromAi(normalizeClassificationSeedRows(payload));
+  const targetCount = Math.max(1, Math.min(80, Number(payload.classificationTargetCount) || Number(payload.questionTargetCount) || seedRows.length || 20));
+
+  if (provider === "mock") {
+    return {
+      provider,
+      model,
+      fields: {
+        classificationRows: seedRows,
+        questionClassifications: seedRows
+      },
+      rawText: "",
+      classificationRowCount: 0,
+      warning: "mock AI 설정이라 분류표 골격만 저장했습니다. 설정에서 실제 시험분석 AI 제공자를 선택해 주세요."
+    };
+  }
+
+  const pageImages = normalizeClassificationPageImages(payload.pageImages);
+  const prompt = buildQuestionClassificationPrompt(payload);
+  const runResult = await runQuestionClassificationWithFallback(prompt, provider, model, pageImages);
+  provider = runResult.provider;
+  model = runResult.model;
+  const normalized = normalizeQuestionClassificationResult(runResult.text);
+  const parsedRows = normalized.fields.classificationRows;
+  const fallbackRows = seedRows.length ? seedRows : normalizeClassificationRowsFromAi(
+    Array.from({ length: targetCount }, (_, index) => ({ number: index + 1, page: 1 }))
+  );
+  const rows = parsedRows.length ? parsedRows : fallbackRows;
+  const warning = parsedRows.length < targetCount
+    ? `AI 응답 분류 행이 ${parsedRows.length}/${targetCount}개라 기존 분류표 골격을 함께 유지했습니다.`
+    : "";
+
+  return {
+    provider,
+    model,
+    fields: {
+      ...normalized.fields,
+      classificationRows: rows,
+      questionClassifications: rows
+    },
+    rawText: runResult.text,
+    classificationRowCount: parsedRows.length,
+    pageImageCount: pageImages.length,
     ...(runResult.fallbackReason ? { fallbackReason: runResult.fallbackReason } : {}),
     ...(warning || runResult.fallbackReason ? { warning: [runResult.fallbackReason, warning].filter(Boolean).join(" · ") } : {})
   };
