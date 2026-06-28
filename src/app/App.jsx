@@ -8498,6 +8498,7 @@ function NotificationCenter({
   const [isPolishingNotice, setIsPolishingNotice] = useState(false);
   const [isSendingNotice, setIsSendingNotice] = useState(false);
   const [jobFilter, setJobFilter] = useState("all");
+  const [localNoticeJobs, setLocalNoticeJobs] = useState([]);
   const [noticeBody, setNoticeBody] = useState("");
   const [noticeRecipientMode, setNoticeRecipientMode] = useState("selected");
   const [noticeTemplateId, setNoticeTemplateId] = useState("notice");
@@ -8513,7 +8514,12 @@ function NotificationCenter({
   const notificationJobsNoticeClass = notificationJobsStatus?.state === "failed"
     ? "inlineNotice danger"
     : "inlineNotice";
-  const noticeJobs = notificationJobs.filter((job) => String(job.notificationType ?? "").startsWith("notice_"));
+  const persistedNotificationJobIds = new Set(notificationJobs.map((job) => job.notificationJobId));
+  const mergedNotificationJobs = [
+    ...localNoticeJobs.filter((job) => !persistedNotificationJobIds.has(job.notificationJobId)),
+    ...notificationJobs
+  ];
+  const noticeJobs = mergedNotificationJobs.filter((job) => String(job.notificationType ?? "").startsWith("notice_"));
   const scheduledNoticeJobs = noticeJobs.filter((job) => job.status === "scheduled");
   const sentNoticeJobs = noticeJobs.filter((job) => job.status === "sent");
   const pendingNoticeJobs = noticeJobs.filter((job) => job.status === "send_unconfirmed");
@@ -8635,6 +8641,13 @@ function NotificationCenter({
     window.setTimeout(() => {
       document.querySelector(".notificationQueuePanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 0);
+  }
+
+  function upsertLocalNoticeJob(job) {
+    setLocalNoticeJobs((current) => [
+      job,
+      ...current.filter((item) => item.notificationJobId !== job.notificationJobId)
+    ].slice(0, 80));
   }
 
   function buildNoticePayload(recipient, mode = "immediate") {
@@ -8759,8 +8772,15 @@ function NotificationCenter({
         setDispatchMessage(`공지 예약 저장 중: ${index + 1}/${jobs.length}건`);
         try {
           await persistNoticeJob(notificationJob);
+          upsertLocalNoticeJob(notificationJob);
           savedCount += 1;
         } catch (error) {
+          upsertLocalNoticeJob({
+            ...notificationJob,
+            status: "failed",
+            error: `예약 저장 실패: ${error.message}`,
+            updatedAt: new Date().toISOString()
+          });
           failedCount += 1;
         }
       }
@@ -9077,7 +9097,9 @@ function NotificationCenter({
                 <span>{studentName(job.studentId, job.payload)}</span>
                 <span>{job.scheduledAt ? formatKoreaTimeLabel(job.scheduledAt) : job.createdAt ? formatKoreaTimeLabel(job.createdAt) : "-"}</span>
                 <span>{job.recipient || "번호 없음"}</span>
-                <p>{job.previewBody || job.payload?.message || "미리보기 없음"}</p>
+                <p>
+                  {job.error ? `오류: ${job.error}` : job.previewBody || job.payload?.message || "미리보기 없음"}
+                </p>
                 <span className="notificationJobActions">
                   {canDeleteNotificationJob(job) ? (
                     <button

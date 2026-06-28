@@ -252,7 +252,7 @@ create table if not exists resource_materials (
 
 create table if not exists notification_jobs (
   notification_job_id text primary key,
-  notification_type text not null check (notification_type in ('attendance', 'parent_comment', 'student_comment', 'schedule_reminder', 'slack_daily_summary')),
+  notification_type text not null check (notification_type in ('attendance', 'daily_report', 'parent_comment', 'student_comment', 'student_reminder', 'schedule_reminder', 'slack_daily_summary', 'notice_parent', 'notice_student')),
   student_id text references students(student_id) on delete set null,
   lesson_id text references lessons(lesson_id) on delete set null,
   lesson_student_record_id text references lesson_student_records(lesson_student_record_id) on delete set null,

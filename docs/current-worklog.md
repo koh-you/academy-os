@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-28 P1. 공지 예약 실패 기록 표시와 notice 타입 DB 제약 보강
+
+- 상태: 완료
+- 사용자 요청: 공지 예약을 눌렀더니 실패 8건이 나오고, 실패 버튼을 눌러도 실패 기록이 열리지 않는다.
+- 원인/판단: `notification_jobs.status` 제약은 풀었지만 `notification_jobs.notification_type` 체크 제약이 기존 수업 알림 타입만 허용하고 있었다. 알림관리 공지 예약은 `notice_parent`, `notice_student` 타입을 저장하므로 운영 DB에서 `notification_jobs_notification_type_check`에 막혀 8건 모두 실패했다. 프론트도 예약 저장 실패를 카운트만 하고 실패 job을 목록에 남기지 않아 실패 필터가 0건으로 보였다.
+- 이번 작업 결과: `notice_parent`, `notice_student`와 서버가 이미 처리하는 `daily_report`, `student_reminder` 타입을 schema와 migration에 추가했다. 예약 저장 실패 시에도 로컬 실패 기록을 생성해 `실패` 필터에서 즉시 오류 원인을 볼 수 있게 했다.
+- 저장 주의: `supabase/20260628_notification_job_notice_types.sql`을 운영 Supabase SQL editor에서 적용해야 공지 예약이 DB에 정상 저장된다.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production`, `npm run build` 통과(total 229, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-28 P1. 알림 과거 예약 로딩 표시 해제와 이력 조회 보호
 
 - 상태: 완료
