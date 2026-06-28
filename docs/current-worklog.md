@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-28 P1. 시험분석 AI 요청 지연 완화
+
+- 상태: 완료
+- 사용자 요청: 시험분석 AI 분석이 너무 오래 걸리고 있다.
+- 원인/판단: `AI 문항정보 채우기`에서 현재 선택한 PDF 원문에 분석지 전체 OCR 원문을 다시 덧붙여 보내고 있었다. 여러 PDF가 업로드된 상태에서는 프롬프트가 불필요하게 커졌다. 또한 쎈 유형 자동매칭 보강 후 과목/범위를 좁히지 못하면 전체 쎈 기준표 883개가 그대로 들어갈 수 있었다.
+- 이번 작업 결과: 현재 PDF 문항정보 AI 실행 시 현재 원본 텍스트만 우선 보내고, 전체 OCR은 현재 원본 텍스트가 없을 때만 fallback으로 사용한다. 서버는 OCR/원문 메모를 16,000자까지 제한하고, 쎈 기준표는 고1/학기 단서로 공통수학1/2를 먼저 좁히며, 불가피한 전체 fallback도 420개 후보로 제한한다.
+- 저장 주의: 데이터 저장 구조 변경은 없고 AI 요청 payload/프롬프트 크기만 줄였다. 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check api/routes/examAnalysis.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production`, `npm run build` 통과(total 225, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-28 P1. 알림관리 수신 모드별 학생 선택 복구
 
 - 상태: 완료

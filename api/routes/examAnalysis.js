@@ -6,6 +6,8 @@ const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const ANTHROPIC_MESSAGES_URL = "https://api.anthropic.com/v1/messages";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SSEN_TYPE_INDEX_PATH = path.join(__dirname, "..", "data", "ssenTypeIndex.json");
+const EXAM_ANALYSIS_RAW_TEXT_LIMIT = 16000;
+const SSEN_TYPE_PROMPT_ROW_LIMIT = 420;
 
 const fallbackModels = {
   anthropic: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5",
@@ -60,6 +62,24 @@ function getSsenSearchText(payload = {}) {
   ].filter(Boolean).join(" ");
 }
 
+function inferSsenBookCodesFromGradeAndTerm(payload = {}) {
+  const text = [
+    payload.grade,
+    payload.subject,
+    payload.examName,
+    payload.examDate,
+    Array.isArray(payload.sourceFiles) ? payload.sourceFiles.map((file) => file.fileName || file.storagePath || "").join(" ") : ""
+  ].filter(Boolean).join(" ");
+  const compact = normalizeCompactText(text.replace(/[-_/]/g, ""));
+  const hasHigh1 = /고\s*1|1학년/.test(text) || compact.includes("고1");
+  if (!hasHigh1) return [];
+  const hasFirstTerm = /1\s*학기|1[-_/\s]?1|중간|기말/.test(text) || compact.includes("1학기");
+  const hasSecondTerm = /2\s*학기|1[-_/\s]?2/.test(text) || compact.includes("2학기");
+  if (hasSecondTerm && !hasFirstTerm) return ["SSEN-CM2"];
+  if (hasFirstTerm && !hasSecondTerm) return ["SSEN-CM1"];
+  return ["SSEN-CM1", "SSEN-CM2"];
+}
+
 function resolveSsenBookCodes(payload = {}) {
   const text = normalizeCompactText(getSsenSearchText(payload));
   const candidates = [
@@ -70,9 +90,10 @@ function resolveSsenBookCodes(payload = {}) {
     { code: "SSEN-PROB-STAT", keywords: ["확률과통계", "확통", "경우의수", "통계"] },
     { code: "SSEN-GEOM-2022", keywords: ["기하", "쎈수학기하"] }
   ];
-  return candidates
+  const matchedCodes = candidates
     .filter((candidate) => candidate.keywords.some((keyword) => text.includes(normalizeCompactText(keyword))))
     .map((candidate) => candidate.code);
+  return matchedCodes.length ? matchedCodes : inferSsenBookCodesFromGradeAndTerm(payload);
 }
 
 function resolveSsenTypeRowsForPrompt(payload = {}) {
@@ -94,6 +115,8 @@ function buildSsenTypePromptSection(payload = {}) {
   }
   const rows = resolveSsenTypeRowsForPrompt(payload);
   const uniqueRows = Array.from(new Map(rows.map((row) => [row.typeCode, row])).values());
+  const promptRows = uniqueRows.slice(0, SSEN_TYPE_PROMPT_ROW_LIMIT);
+  const truncatedCount = Math.max(0, uniqueRows.length - promptRows.length);
   const bookSummary = Array.from(
     ssenTypeIndex.reduce((map, row) => {
       const previous = map.get(row.bookCode) || { bookTitle: row.bookTitle, count: 0 };
@@ -114,13 +137,20 @@ function buildSsenTypePromptSection(payload = {}) {
   return [
     "[쎈 유형 기준표]",
     uniqueRows.length === ssenTypeIndex.length
-      ? "과목/범위를 좁히지 못해 전체 쎈 유형 기준표를 제공한다. 문항 조건, 단원명, 풀이 행동을 비교해 가장 가까운 쎈 유형을 자동 후보로 매칭한다."
+      ? "과목/범위를 좁히지 못해 전체 쎈 유형 기준표에서 후보를 선별 제공한다. 문항 조건, 단원명, 풀이 행동을 비교해 가장 가까운 쎈 유형을 자동 후보로 매칭한다."
       : "아래 기준표는 문항별 쎈 유형 분류에만 사용한다. 문제 원문이나 해설을 만들지 말고 typeCode, bookTitle, unitName, typeName 메타데이터만 참조한다.",
+    truncatedCount ? `요청 속도를 위해 기준표는 상위 ${promptRows.length}개 후보만 제공한다. 제공된 후보 안에서 먼저 자동 매칭하고, 부족하면 단원/유형명은 확인 필요로 둔다.` : "",
     "questionItems.ssenTypeTags에는 반드시 아래 typeCode 중 하나를 사용한다. 단순 문항은 primary 1개, 복합 문항은 primary 1개와 secondary 1~2개까지 넣는다.",
     "확신이 낮으면 confidence를 '중' 또는 '하'로 낮추고 reason에 강사 확인 포인트를 짧게 쓴다. 정말 판별이 불가능한 경우에만 ssenTypeTags를 빈 배열로 둔다.",
     "형식: typeCode | bookTitle | unitName | typeName",
-    uniqueRows.map((row) => `${row.typeCode} | ${row.bookTitle} | ${row.unitName} | ${row.typeName}`).join("\n")
-  ].join("\n");
+    promptRows.map((row) => `${row.typeCode} | ${row.bookTitle} | ${row.unitName} | ${row.typeName}`).join("\n")
+  ].filter(Boolean).join("\n");
+}
+
+function limitPromptText(value = "", limit = EXAM_ANALYSIS_RAW_TEXT_LIMIT) {
+  const text = String(value ?? "").trim();
+  if (text.length <= limit) return text;
+  return `${text.slice(0, limit)}\n\n[이하 원문/OCR 생략: 요청 속도를 위해 ${text.length - limit}자를 잘랐습니다. 필요한 경우 현재 PDF를 선택해 문항별 AI 분석을 다시 실행하세요.]`;
 }
 
 function normalizeSsenTypeRole(value = "") {
@@ -270,6 +300,7 @@ function defaultExamAnalysisPromptForServer() {
 
 function buildExamAnalysisPrompt(payload) {
   const examPrepContext = payload.examPrepContext && typeof payload.examPrepContext === "object" ? payload.examPrepContext : null;
+  const scopedRawExamText = limitPromptText(payload.rawExamText || "");
   const sourceFileLines = Array.isArray(payload.sourceFiles)
     ? payload.sourceFiles.map((file, index) => {
         const sourceId = file.sourceId || file.storagePath || file.signedUrl || file.fileName || `source_${index}`;
@@ -301,7 +332,7 @@ function buildExamAnalysisPrompt(payload) {
       : "연결된 시험관리 데이터가 없습니다. 학교/학년/과목 메타데이터와 시험 원본만 기준으로 초안을 만드세요.",
     "",
     "[시험 원본/OCR/메모]",
-    payload.rawExamText ||
+    scopedRawExamText ||
       "아직 원본 텍스트가 없습니다. 입력된 기본정보와 강사 메모를 기준으로 분석 필드 초안을 만들어 주세요.",
     "",
     "[현재 문항 카드]",

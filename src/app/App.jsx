@@ -13607,11 +13607,12 @@ function ExamAnalysisCenter({
     const sourceText = selectedQuestionSourceFile?.extractedText
       ? `[현재 시험지/연도 원문] ${selectedQuestionSourceFile.fileName}\n${selectedQuestionSourceFile.extractedText}`
       : "";
+    const scopedRawExamText = sourceText || selectedAnalysis.rawExamText;
     await onRunAnalysis({
       ...selectedAnalysis,
       sourceFiles: selectedQuestionSourceFile ? [{ ...selectedQuestionSourceFile, sourceId: resolvedQuestionSourceId }] : selectedAnalysis.sourceFiles,
       sourceFileUrl: selectedQuestionOpenUrl || selectedAnalysis.sourceFileUrl,
-      rawExamText: [sourceText, selectedAnalysis.rawExamText].filter(Boolean).join("\n\n"),
+      rawExamText: scopedRawExamText,
       questionItems: targetItems,
       questionSourceId: resolvedQuestionSourceId,
       questionSourceUrl: selectedQuestionSourceUrl,
