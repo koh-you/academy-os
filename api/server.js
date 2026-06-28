@@ -1638,7 +1638,7 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "GET" && requestUrl.pathname === "/api/notification-jobs") {
     try {
-      const result = await listNotificationJobs();
+      const result = await listNotificationJobs({ limit: requestUrl.searchParams.get("limit") || 300 });
       const includeResult = requestUrl.searchParams.get("includeResult") === "true";
       sendJson(request, response, 200, {
         ok: true,

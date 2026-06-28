@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-28 P1. 알림 과거 예약 로딩 표시 해제와 이력 조회 보호
+
+- 상태: 완료
+- 사용자 요청: 앱 재시작 후에도 알림이 여전히 로딩 중으로 보인다.
+- 원인/판단: 운영 `lesson_student_records`에는 과거 수업의 `예약 중 · 06.xx 22:30/23:00` 상태가 29개 남아 있었다. 이는 현재 발송 중인 요청이 아니라 이미 예약 시각이 지난 기록인데, 프론트가 `예약 중` 문자열을 무조건 pending으로 해석해 계속 로딩처럼 보였다. 알림관리 이력 조회도 timeout/실패 표시가 없어 조회 지연과 발송 대기가 구분되지 않았다.
+- 이번 작업 결과: 예약 시각이 지난 알림톡 상태는 `예약 시각 지남 · 확인 필요`로 표시하고 pending 버튼 상태에서 제외한다. `/api/notification-jobs` 목록 조회는 최근 300건 기본 조회로 제한하고, 프론트는 12초를 넘으면 발송 UI는 그대로 두고 이력 조회만 재시도 안내를 표시한다.
+- 운영 데이터 조치: 과거 `예약 중`으로 남아 있던 lesson record 25건을 `예약 시각 지남 · 확인 필요` 문구로 바꿨다. 남은 `예약 중` 4건은 2026-06-29/2026-07-10 미래 예약이라 유지했다.
+- 저장 주의: `notification_jobs.status` 체크 제약이 `send_unconfirmed`, `dry_run`을 허용하지 않아 `supabase/20260628_notification_job_statuses.sql`을 추가했다. 운영 Supabase SQL editor에서 적용해야 응답 지연/테스트 기록 상태가 DB에 정상 저장된다.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production`, `npm run build` 통과(total 228, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-28 P1. 재시작 후 남는 시험분석 로딩 상태 해제
 
 - 상태: 완료

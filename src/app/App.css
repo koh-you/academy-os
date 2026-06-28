@@ -484,6 +484,17 @@ button {
   color: #9a3412;
 }
 
+.notificationJobsStatusNotice {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.notificationJobsStatusNotice .softButton {
+  flex: 0 0 auto;
+}
+
 .statusDot {
   border-radius: 999px;
   display: inline-block;

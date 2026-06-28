@@ -1218,12 +1218,13 @@ export async function deleteResourceMaterial(materialId) {
   return { source: databaseSource, materialId };
 }
 
-export async function listNotificationJobs() {
+export async function listNotificationJobs({ limit = 1000 } = {}) {
   if (!isSupabaseConfigured()) {
     return { source: fallbackSource, notificationJobs: [] };
   }
 
-  const rows = await listRows("notification_jobs", "select=*&order=created_at.desc", { requireServiceRole: true });
+  const safeLimit = Math.max(1, Math.min(1000, Number(limit) || 1000));
+  const rows = await listRows("notification_jobs", `select=*&order=created_at.desc&limit=${safeLimit}`, { requireServiceRole: true });
   return { source: databaseSource, notificationJobs: rows.map(fromNotificationJobRow) };
 }
 

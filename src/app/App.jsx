@@ -511,10 +511,37 @@ function getSaveButtonLabel(saveState) {
   return "저장";
 }
 
-function getCommentSendState(sendStatus = "") {
+const notificationScheduleGraceMs = 10 * 60 * 1000;
+
+function isNotificationSchedulePast(value, graceMs = notificationScheduleGraceMs) {
+  if (!value) return false;
+  const time = value instanceof Date ? value.getTime() : new Date(value).getTime();
+  return Number.isFinite(time) && Date.now() - time > graceMs;
+}
+
+function parseKoreaShortScheduleLabel(text = "") {
+  const match = String(text ?? "").match(/(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{1,2}):(\d{2})/);
+  if (!match) return null;
+  const [, month, day, hour, minute] = match;
+  const year = Number(getKoreaDateString().slice(0, 4)) || new Date().getFullYear();
+  return new Date(
+    `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T${hour.padStart(2, "0")}:${minute}:00+09:00`
+  );
+}
+
+function getDisplayCommentSendStatus(sendStatus = "") {
   const normalizedStatus = normalizeMessageText(sendStatus);
+  if (!normalizedStatus.includes("예약 중")) return normalizedStatus;
+  const scheduledDate = parseKoreaShortScheduleLabel(normalizedStatus);
+  if (!scheduledDate || !isNotificationSchedulePast(scheduledDate)) return normalizedStatus;
+  return `예약 시각 지남 · 확인 필요 · ${normalizedStatus.replace(/^예약 중\s*·\s*/, "")}`;
+}
+
+function getCommentSendState(sendStatus = "") {
+  const normalizedStatus = getDisplayCommentSendStatus(sendStatus);
   if (!normalizedStatus) return "";
   if (normalizedStatus === "내용 없음") return "";
+  if (normalizedStatus.includes("확인 필요") || normalizedStatus.includes("시각 지남")) return "failed";
   if (normalizedStatus.includes("실패")) return "failed";
   if (normalizedStatus.includes("발송 중") || normalizedStatus.includes("예약 중")) return "pending";
   if (normalizedStatus.includes("완료") || normalizedStatus.includes("기록됨")) return "sent";
@@ -528,16 +555,22 @@ function getCommentButtonState(comment = "", sendStatus = "") {
 }
 
 function getCommentStatusLabel(comment = "", sendStatus = "") {
-  const sendState = getCommentSendState(sendStatus);
-  if (sendState === "failed") return "발송 실패";
-  if (sendState === "pending") return sendStatus;
-  if (sendState === "sent") return sendStatus;
+  const displayStatus = getDisplayCommentSendStatus(sendStatus);
+  const sendState = getCommentSendState(displayStatus);
+  if (sendState === "failed") return displayStatus || "발송 실패";
+  if (sendState === "pending") return displayStatus;
+  if (sendState === "sent") return displayStatus;
   return normalizeMessageText(comment) ? "작성됨 · 발송 전" : "미작성";
 }
 
 function formatNotificationJobStatus(job) {
   if (!job) return "없음";
-  if (job.status === "scheduled") return `예약 중 · ${formatKoreaTimeLabel(job.scheduledAt)}`;
+  if (job.status === "scheduled") {
+    const scheduledLabel = formatKoreaTimeLabel(job.scheduledAt);
+    return isNotificationSchedulePast(job.scheduledAt)
+      ? `예약 시각 지남 · 확인 필요 · ${scheduledLabel || "예약시각 없음"}`
+      : `예약 중 · ${scheduledLabel}`;
+  }
   if (job.status === "sent") return "발송 완료";
   if (job.status === "dry_run") return "테스트 기록";
   if (job.status === "send_unconfirmed") return `발송 확인 필요${job.error ? ` · ${job.error}` : ""}`;
@@ -782,6 +815,29 @@ function isRequestTimeoutError(error) {
     error?.name === "AbortError" ||
     String(error?.message ?? "").includes("시간을 넘었습니다")
   );
+}
+
+async function getJsonWithTimeout(path, timeoutMs = 12000, timeoutMessage = "") {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(apiUrl(path), {
+      cache: "no-store",
+      signal: controller.signal
+    });
+    const result = await response.json();
+    if (!response.ok || !result.ok) {
+      throw new Error(result.error || `API 조회 실패: ${response.status}`);
+    }
+    return result;
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw createRequestTimeoutError(timeoutMs, timeoutMessage);
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
 }
 
 async function postJsonWithTimeout(path, body, timeoutMs = 30000, timeoutMessage = "") {
@@ -4836,6 +4892,7 @@ export function App() {
   const [makeupTasks, setMakeupTasks] = useStoredState(storageKeys.makeupTasks, []);
   const [notificationLogs, setNotificationLogs] = useStoredState(storageKeys.notificationLogs, []);
   const [notificationJobs, setNotificationJobs] = useState([]);
+  const [notificationJobsStatus, setNotificationJobsStatus] = useState({ state: "idle", message: "" });
   const [wrongProblems, setWrongProblems] = useStoredState(storageKeys.wrongProblems, sampleData.wrongProblems ?? []);
   const [problemBooks, setProblemBooks] = useStoredState(storageKeys.problemBooks, createDefaultProblemBooks());
   const [scoreRecords, setScoreRecords] = useStoredState(storageKeys.scoreRecords, sampleData.scoreRecords ?? []);
@@ -5328,13 +5385,22 @@ export function App() {
   }, [attendanceOnlyMode, generatedLessonPlan, isAppStateReady, session?.role]);
 
   async function refreshNotificationJobs() {
+    setNotificationJobsStatus({ state: "loading", message: "알림 기록을 불러오는 중입니다." });
     try {
-      const response = await fetch(apiUrl("/api/notification-jobs"));
-      const result = await response.json();
+      const result = await getJsonWithTimeout(
+        "/api/notification-jobs?limit=300",
+        12000,
+        "알림 기록 조회가 12초를 넘었습니다. 발송 기능은 사용할 수 있고, 기록만 새로고침으로 다시 확인해 주세요."
+      );
       if (result.ok && Array.isArray(result.notificationJobs)) {
         setNotificationJobs(result.notificationJobs);
+        setNotificationJobsStatus({
+          state: "ready",
+          message: `알림 기록 ${result.notificationJobs.length}건을 불러왔습니다.`
+        });
       }
     } catch (error) {
+      setNotificationJobsStatus({ state: "failed", message: error.message });
       console.info("academy-os notification jobs skipped:", error.message);
     }
   }
@@ -7280,6 +7346,7 @@ export function App() {
             integrationStatus={integrationStatus}
             lessons={calendarLessons}
             notificationJobs={notificationJobs}
+            notificationJobsStatus={notificationJobsStatus}
             notificationLogs={notificationLogs}
             onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
             onUpdateLessonNotificationPlan={handleUpdateLessonNotificationPlan}
@@ -8421,6 +8488,7 @@ function NotificationCenter({
   classTemplates = [],
   integrationStatus,
   notificationJobs,
+  notificationJobsStatus = { state: "idle", message: "" },
   onRefresh,
   students
 }) {
@@ -8441,6 +8509,10 @@ function NotificationCenter({
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
   const notificationStatus = integrationStatus?.notifications;
+  const isNotificationJobsLoading = notificationJobsStatus?.state === "loading";
+  const notificationJobsNoticeClass = notificationJobsStatus?.state === "failed"
+    ? "inlineNotice danger"
+    : "inlineNotice";
   const noticeJobs = notificationJobs.filter((job) => String(job.notificationType ?? "").startsWith("notice_"));
   const scheduledNoticeJobs = noticeJobs.filter((job) => job.status === "scheduled");
   const sentNoticeJobs = noticeJobs.filter((job) => job.status === "sent");
@@ -8798,9 +8870,19 @@ function NotificationCenter({
           <p className="muted">수업일지 밖에서 필요한 연락을 한 화면에서 작성하고, 수신 범위만 선택해 발송합니다.</p>
         </div>
         <div className="pageActions">
-          <button className="softButton" onClick={onRefresh} type="button">새로고침</button>
+          <button className="softButton" disabled={isNotificationJobsLoading} onClick={onRefresh} type="button">
+            {isNotificationJobsLoading ? "기록 불러오는 중" : "기록 새로고침"}
+          </button>
         </div>
       </div>
+      {["loading", "failed"].includes(notificationJobsStatus?.state) ? (
+        <div className={`${notificationJobsNoticeClass} notificationJobsStatusNotice`}>
+          <span>{notificationJobsStatus.message}</span>
+          {notificationJobsStatus.state === "failed" ? (
+            <button className="softButton compact" onClick={onRefresh} type="button">다시 시도</button>
+          ) : null}
+        </div>
+      ) : null}
       {dispatchMessage ? <p className="inlineNotice">{dispatchMessage}</p> : null}
 
       <section className="notificationPanel noticeComposerPanel">
@@ -10350,7 +10432,8 @@ function LessonJournalDetail({
   function getEffectiveCommentSendStatus(record, student, target) {
     const jobStatus = formatNotificationJobStatus(getStudentReservationStatus(student, target));
     if (jobStatus && jobStatus !== "없음") return jobStatus;
-    return target === "student" ? record.studentCommentSendStatus : record.teacherCommentSendStatus;
+    const persistedStatus = target === "student" ? record.studentCommentSendStatus : record.teacherCommentSendStatus;
+    return getDisplayCommentSendStatus(persistedStatus);
   }
 
   return (
@@ -10897,6 +10980,7 @@ function CommentComposerModal({
   const receiverLabel = isParent ? `${student.name} 학부모님` : student.name;
   const previewTitle = isParent ? "학부모 알림톡 미리보기" : "학생 알림톡 미리보기";
   const sendStatus = isParent ? record?.teacherCommentSendStatus : record?.studentCommentSendStatus;
+  const displaySendStatus = getDisplayCommentSendStatus(sendStatus);
   const isNotificationMuted = isParent ? Boolean(record?.notificationMutedParent) : Boolean(record?.notificationMutedStudent);
   const notificationStatus = integrationStatus?.notifications;
   const audienceNotificationStatus = getAlimtalkAudienceStatus(notificationStatus, audience);
@@ -11053,7 +11137,7 @@ function CommentComposerModal({
             {missingNotificationEnv.length ? <span>미입력 환경변수: {missingNotificationEnv.join(", ")}</span> : null}
           </div>
           <small className="muted">발송 수신 기준: {canSendNowToRealRecipient ? "등록된 실제 번호" : "테스트 번호 또는 dry-run"}</small>
-          <small className="muted">{aiStatus || "AI 대기"} · {sendStatus || "발송 전"}</small>
+          <small className="muted">{aiStatus || "AI 대기"} · {displaySendStatus || "발송 전"}</small>
         </section>
 
         <section className="commentPreviewPanel">

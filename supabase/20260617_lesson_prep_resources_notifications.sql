@@ -42,7 +42,7 @@ create table if not exists notification_jobs (
   scheduled_at timestamptz,
   payload jsonb not null default '{}'::jsonb,
   preview_body text,
-  status text not null default 'draft' check (status in ('draft', 'scheduled', 'sent', 'failed', 'canceled')),
+  status text not null default 'draft' check (status in ('draft', 'scheduled', 'sent', 'failed', 'canceled', 'dry_run', 'send_unconfirmed')),
   provider text,
   provider_message_id text,
   result jsonb,
