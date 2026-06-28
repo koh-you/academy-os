@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-28 P1. 공지 21:00 예약 발송 큐 진입 누락 수정
+
+- 상태: 완료
+- 사용자 요청: 알림관리에서 21:00 공지 예약 8건이 `예약됨` 상태로 남아 있고 발송되지 않는다.
+- 원인/판단: 운영 `notification_jobs`의 해당 공지 8건은 `scheduledAt`이 한국시간 21:00으로 저장되어 있었지만 `payload.osScheduled`가 비어 있었다. 서버 예약 발송 처리기는 기존에 `payload.osScheduled === true`인 job만 due 대상으로 처리하므로, 공지 예약은 저장만 되고 발송 큐에서 제외됐다. 수업 알림 예약은 이미 `osScheduled: true`가 들어가 정상 대상이었다.
+- 이번 작업 결과: 앞으로 공지 예약 저장 시 `payload.osScheduled: true`를 함께 저장한다. 서버 dispatch는 기존에 저장된 공지 예약처럼 `osScheduled`가 빠져 있어도 `notice_parent`/`notice_student` + `provider: academy-os` + `sendMode: scheduled`이면 발송 대상으로 인식한다. 화면의 공지 이력도 예약 시간이 지난 예약을 `예약 시각 지남 · 확인 필요`로 표시/분류한다.
+- 저장 주의: 기존 `notification_jobs.payload` JSON 필드만 사용한다. 새 Supabase SQL edit 필요 없음.
+- 운영 조치: 2026-06-28 21:00 KST 공지 예약 8건은 운영 API로 `payload.osScheduled`를 보정한 뒤 `/api/notification-jobs/dispatch-due`를 호출했다. 결과는 `processedCount: 8`, `dryRun: false`였고, 재조회 시 8건 모두 `status: sent`, `provider: solapi`, Solapi 그룹 상태 `SENDING`으로 확인했다.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production`, `npm run build` 통과(total 231, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-28 P1. 시험분석 문항정보 채우기 전용 AI 프롬프트
 
 - 상태: 완료

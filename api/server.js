@@ -203,6 +203,19 @@ function isStaleDispatchClaim(job, nowTime) {
   return Number.isFinite(updatedTime) && nowTime - updatedTime > 10 * 60 * 1000;
 }
 
+function isNoticeNotificationType(type = "") {
+  return type === "notice_parent" || type === "notice_student";
+}
+
+function isOsScheduledNotificationJob(job) {
+  if (job.payload?.osScheduled === true) return true;
+  return (
+    isNoticeNotificationType(job.notificationType) &&
+    job.provider === "academy-os" &&
+    job.payload?.sendMode === "scheduled"
+  );
+}
+
 function schoolNamesMatch(firstSchool = "", secondSchool = "", { allowBlank = true } = {}) {
   if (!firstSchool || !secondSchool) return allowBlank;
   const firstText = normalizeSchoolName(firstSchool);
@@ -911,7 +924,7 @@ async function dispatchDueNotificationJobs({
   const jobs = (listed.notificationJobs ?? [])
     .filter((job) => {
       if (allowManualStatuses && dispatchableNotificationStatuses.has(job.status)) return true;
-      if (job.status !== "scheduled" || job.payload?.osScheduled !== true) return false;
+      if (job.status !== "scheduled" || !isOsScheduledNotificationJob(job)) return false;
       return job.provider !== "academy-os-dispatching" || isStaleDispatchClaim(job, nowTime);
     })
     .filter((job) => {
@@ -923,7 +936,7 @@ async function dispatchDueNotificationJobs({
 
   const processed = [];
   for (const job of jobs) {
-    const shouldClaim = job.status === "scheduled" && job.payload?.osScheduled === true;
+    const shouldClaim = job.status === "scheduled" && isOsScheduledNotificationJob(job);
     const claimId = `dispatch_${Date.now()}_${crypto.randomBytes(6).toString("hex")}`;
     const claim = shouldClaim ? await claimNotificationJob(job, claimId) : { notificationJob: job };
     const claimedJob = claim.notificationJob;

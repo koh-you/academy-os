@@ -8467,6 +8467,12 @@ function getNotificationStatusLabel(status) {
   }[status] ?? status ?? "대기";
 }
 
+function getNotificationJobStatusClass(job) {
+  if (!job) return "draft";
+  if (job.status === "scheduled" && isNotificationSchedulePast(job.scheduledAt)) return "send_unconfirmed";
+  return job.status || "draft";
+}
+
 function StatusDot({ active }) {
   return <span className={active ? "statusDot active" : "statusDot inactive"} />;
 }
@@ -8529,9 +8535,10 @@ function NotificationCenter({
     ...notificationJobs
   ];
   const noticeJobs = mergedNotificationJobs.filter((job) => String(job.notificationType ?? "").startsWith("notice_"));
-  const scheduledNoticeJobs = noticeJobs.filter((job) => job.status === "scheduled");
+  const pastScheduledNoticeJobs = noticeJobs.filter((job) => job.status === "scheduled" && isNotificationSchedulePast(job.scheduledAt));
+  const scheduledNoticeJobs = noticeJobs.filter((job) => job.status === "scheduled" && !isNotificationSchedulePast(job.scheduledAt));
   const sentNoticeJobs = noticeJobs.filter((job) => job.status === "sent");
-  const pendingNoticeJobs = noticeJobs.filter((job) => job.status === "send_unconfirmed");
+  const pendingNoticeJobs = noticeJobs.filter((job) => job.status === "send_unconfirmed").concat(pastScheduledNoticeJobs);
   const failedNoticeJobs = noticeJobs.filter((job) => job.status === "failed");
   const draftNoticeJobs = noticeJobs.filter((job) => job.status === "draft" || job.status === "dry_run" || job.status === "canceled");
   const filteredNoticeJobs = {
@@ -8671,6 +8678,7 @@ function NotificationCenter({
       noticeAudience: recipient.audience,
       noticeBody,
       noticeTitle,
+      osScheduled: mode === "scheduled",
       parentPhone: recipient.student.parentPhone,
       scheduledDate: mode === "scheduled" ? scheduledAt : "",
       sendMode: mode === "scheduled" ? "scheduled" : "immediate",
@@ -9101,7 +9109,7 @@ function NotificationCenter({
           ) : (
             filteredNoticeJobs.map((job) => (
               <article className="notificationTableRow" key={job.notificationJobId}>
-                <span className={`statusPill status-${job.status || "draft"}`}>{getNotificationStatusLabel(job.status)}</span>
+                <span className={`statusPill status-${getNotificationJobStatusClass(job)}`}>{formatNotificationJobStatus(job) || getNotificationStatusLabel(job.status)}</span>
                 <strong>{getNotificationJobLabel(job.notificationType)}</strong>
                 <span>{studentName(job.studentId, job.payload)}</span>
                 <span>{job.scheduledAt ? formatKoreaTimeLabel(job.scheduledAt) : job.createdAt ? formatKoreaTimeLabel(job.createdAt) : "-"}</span>
