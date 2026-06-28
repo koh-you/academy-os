@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-28 P1. 시험분석 문항정보 Claude Opus 진단과 제공자 실패 fallback
+
+- 상태: 완료
+- 사용자 요청: 현재 설정은 Claude Opus(`claude-opus-4-8`)인데도 문항정보 채우기 결과가 `AI 응답 문항정보 0/20개`로 나온다.
+- 원인/판단: 운영 API에 `claude-opus-4-8`로 1문항 테스트와 20문항 synthetic OCR 테스트를 직접 보내면 각각 `aiItemCount: 1`, `aiItemCount: 20`으로 정상 반환된다. 따라서 Claude Opus 모델명/연결 자체가 원인은 아니다. 스크린샷의 화면 문구는 최신 프론트의 `AI 응답 n개` 문구가 빠진 이전 번들 형태라, 강력 새로고침 전 실행 결과일 가능성이 있다. 그래도 provider 장애/쿼터/일시 오류가 섞일 때 조용히 OCR 기본 카드만 남는 상황을 줄일 필요가 있다.
+- 이번 작업 결과: 문항정보 텍스트 보강 API에서 선택 제공자가 quota/rate limit/model/timeout류 오류를 내면 사용 가능한 다른 제공자로 한 번 자동 전환하고, 전환 사유를 warning에 남긴다. mock 경로에도 `aiItemCount: 0`, `repaired: false`를 함께 내려 프론트 상태 문구가 일관되게 보이도록 했다.
+- 저장 주의: 기존 `examAnalyses.questionItems`, `aiInitialFields.questionItems` app_state 저장 경로를 그대로 사용한다. 새 Supabase SQL edit 필요 없음.
+- 검증: 운영 API 직접 호출로 Claude Opus 1문항 `aiItemCount: 1`, 20문항 synthetic OCR `aiItemCount: 20` 확인. `node --check api/routes/examAnalysis.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production`, `npm run build` 통과(total 231, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-28 P1. 시험분석 문항정보 AI 응답 복구 보강
 
 - 상태: 완료

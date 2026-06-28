@@ -21,6 +21,21 @@ const examAnalysisModels = {
   openai: process.env.OPENAI_EXAM_ANALYSIS_MODEL || "gpt-5.5"
 };
 
+function isRetryableAiProviderError(error) {
+  const message = String(error?.message || "").toLowerCase();
+  return [
+    "quota",
+    "billing",
+    "rate limit",
+    "429",
+    "model",
+    "not found",
+    "overloaded",
+    "temporarily",
+    "timeout"
+  ].some((keyword) => message.includes(keyword));
+}
+
 function loadSsenTypeIndex() {
   try {
     const rows = JSON.parse(fs.readFileSync(SSEN_TYPE_INDEX_PATH, "utf8"));
@@ -1303,6 +1318,39 @@ async function runAnthropicVision(prompt, imageDataUrl, model) {
   return outputTextFromAnthropic(data);
 }
 
+async function runQuestionInfoTextWithProvider(provider, prompt, model) {
+  if (provider === "openai") return runOpenAiText(prompt, model, 6000);
+  if (provider === "anthropic") return runAnthropicText(prompt, model, 6000);
+  throw new Error(`지원하지 않는 AI 제공자입니다: ${provider}`);
+}
+
+async function runQuestionInfoTextWithFallback(payload, prompt, provider, model) {
+  try {
+    return { provider, model, text: await runQuestionInfoTextWithProvider(provider, prompt, model), fallbackReason: "" };
+  } catch (error) {
+    const fallbackProvider = provider === "openai" && envValue("ANTHROPIC_API_KEY")
+      ? "anthropic"
+      : provider === "anthropic" && envValue("OPENAI_API_KEY")
+        ? "openai"
+        : "";
+    if (!fallbackProvider || !isRetryableAiProviderError(error)) throw error;
+
+    const fallbackModel = fallbackProvider === "anthropic"
+      ? examAnalysisModels.anthropic || fallbackModels.anthropic
+      : examAnalysisModels.openai || fallbackModels.openai;
+    try {
+      return {
+        provider: fallbackProvider,
+        model: fallbackModel,
+        text: await runQuestionInfoTextWithProvider(fallbackProvider, prompt, fallbackModel),
+        fallbackReason: `${provider} 실패 후 ${fallbackProvider}로 자동 전환: ${error.message}`
+      };
+    } catch (fallbackError) {
+      throw new Error(`${provider} 실패: ${error.message} / ${fallbackProvider} 재시도 실패: ${fallbackError.message}`);
+    }
+  }
+}
+
 export async function runExamAnalysis(payload) {
   const provider = selectedProvider(payload);
   const model = selectedModel(payload, "examAnalysis");
@@ -1333,8 +1381,8 @@ export async function runExamAnalysis(payload) {
 }
 
 export async function runExamQuestionInfoText(payload) {
-  const provider = selectedProvider(payload);
-  const model = selectedModel(payload, "examAnalysis");
+  let provider = selectedProvider(payload);
+  let model = selectedModel(payload, "examAnalysis");
   const fallbackItems = normalizeQuestionItemsFromAi(Array.isArray(payload.questionItems) ? payload.questionItems : []);
 
   if (provider === "mock") {
@@ -1343,29 +1391,24 @@ export async function runExamQuestionInfoText(payload) {
       model,
       fields: { questionItems: fallbackItems },
       rawText: "",
+      aiItemCount: 0,
+      repaired: false,
       warning: "mock AI 설정이라 OCR 기반 기본정보만 저장했습니다."
     };
   }
 
   const prompt = buildQuestionInfoTextPrompt(payload);
-  const text = provider === "openai"
-    ? await runOpenAiText(prompt, model, 6000)
-    : provider === "anthropic"
-      ? await runAnthropicText(prompt, model, 6000)
-      : "";
-
-  if (!text) throw new Error(`지원하지 않는 AI 제공자입니다: ${provider}`);
+  const runResult = await runQuestionInfoTextWithFallback(payload, prompt, provider, model);
+  provider = runResult.provider;
+  model = runResult.model;
+  const text = runResult.text;
   let questionItems = normalizeQuestionInfoAiItemsFromText(text);
   let repairText = "";
   let repaired = false;
   if (!questionItems.length) {
     try {
       const repairPrompt = buildQuestionInfoRepairPrompt(payload, text);
-      repairText = provider === "openai"
-        ? await runOpenAiText(repairPrompt, model, 6000)
-        : provider === "anthropic"
-          ? await runAnthropicText(repairPrompt, model, 6000)
-          : "";
+      repairText = await runQuestionInfoTextWithProvider(provider, repairPrompt, model);
       const repairedItems = normalizeQuestionInfoAiItemsFromText(repairText);
       if (repairedItems.length) {
         questionItems = repairedItems;
@@ -1387,7 +1430,8 @@ export async function runExamQuestionInfoText(payload) {
     rawText: repairText ? `${text}\n\n[repair]\n${repairText}` : text,
     aiItemCount: questionItems.length,
     repaired,
-    ...(warning ? { warning } : {})
+    ...(runResult.fallbackReason ? { fallbackReason: runResult.fallbackReason } : {}),
+    ...(warning || runResult.fallbackReason ? { warning: [runResult.fallbackReason, warning].filter(Boolean).join(" · ") } : {})
   };
 }
 
