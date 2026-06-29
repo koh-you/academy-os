@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-29 P1. 시험분석 분류표 AI 요약-only 응답 원인 노출과 부분 행 복구
+
+- 상태: 완료
+- 사용자 확인: `AI 분류표 파싱 실패 · 분류 행 0/22개` 진단에서 원문 시작은 `{ "classificationSummary": ... }` 형태로 보였지만 `AI 원문: 0자`, `상위 키: 없음`, `분류 후보 경로: 없음`으로 표시되어 정확한 실패 원인이 충분히 드러나지 않았다.
+- 원인/판단: 이번 응답은 이미지 입력이 완전히 빠진 문제가 아니라, AI가 `classificationRows` 배열보다 `classificationSummary` 요약을 먼저 생성했고 표 행 배열을 누락했거나 JSON 응답이 끝까지 닫히지 않은 상태로 보인다. 기존 파서는 JSON 전체 파싱이 실패하면 top-level key와 `classificationRows` 키 존재 여부를 감지하지 못했고, 프론트는 raw preview가 있어도 `rawTextLength`가 없으면 0자로 표시했다.
+- 이번 작업 결과: 문항별 분류 프롬프트에서 `classificationRows 1~목표문항수` 전 행 반환을 최우선 조건으로 올리고, 요약만 반환하면 실패라고 명시했다. 서버 파서에는 JSON 키 감지, 중괄호/배열 balance, `classificationRows`/`questionClassifications` 키 존재 여부, 잘림 가능성 진단을 추가했다. JSON 전체가 깨져도 `classificationRows: [` 안에 완성된 row 객체가 있으면 부분 행을 복구한다. 프론트 진단에는 `행 배열 키`, `JSON 형태`, `감지 키`, `부분 행 복구`, `요약 JSON만 반환/응답 잘림` 판정을 표시한다.
+- 저장 주의: 기존 `examAnalyses[].aiInitialFields.questionClassificationDebug` 저장 경로만 사용한다. 새 Supabase SQL edit 필요 없음.
+- 다음 확인: 배포 반영 후 같은 PDF로 한 번 더 실행하면, 행이 여전히 0개일 때 `행 배열 키 없음`이면 AI가 요약만 반환한 것이고, `classificationRows 있음 + 부분 행 복구 0행 + bracket/brace 양수`이면 응답 잘림 또는 행 객체 미완성으로 볼 수 있다.
+- 검증: `node --check api/routes/examAnalysis.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 234, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-29 P1. 수업일지 출결 날짜 불일치 표시와 키오스크 미래수업 오기록 방지
 
 - 상태: 완료

@@ -671,7 +671,10 @@ function buildQuestionClassificationPrompt(payload) {
 
   return [
     "역할: 학교 내신 수학 시험지를 읽고 분석지 생성을 위한 문항별 분류표를 만드는 AI",
-    "목표: 최종 분석지의 표와 예측을 만들 수 있는 문항별 분류 데이터를 만든다.",
+    `목표: 최종 분석지의 표와 예측을 만들 수 있도록 classificationRows ${targetCount}행을 만든다.`,
+    `가장 중요한 출력 조건: classificationRows 배열을 반드시 1번부터 ${targetCount}번까지 ${targetCount}개 채운다.`,
+    "문항을 읽기 어렵거나 단원/유형을 확정할 수 없어도 행을 생략하지 말고 unit/difficulty/role/source/detailType/reviewNote를 '확인 필요' 중심으로 채운다.",
+    "classificationSummary, unitDistribution 같은 요약만 반환하면 실패다. 요약은 짧게 쓰고 classificationRows를 우선 완성한다.",
     "",
     "[입력 해석 우선순위]",
     "1. 첨부된 PDF/이미지 페이지가 있으면 실제 문항, 수식, 보기, 도형 배치를 직접 읽는다.",
@@ -712,7 +715,7 @@ function buildQuestionClassificationPrompt(payload) {
     buildSsenTypePromptSection(payload),
     "",
     "[분류 규칙]",
-    `- classificationRows는 1번부터 ${targetCount}번까지 가능한 한 모두 반환한다.`,
+    `- classificationRows는 1번부터 ${targetCount}번까지 반드시 모두 반환한다. 확신이 낮아도 행을 누락하지 않는다.`,
     "- 각 문항의 number, page, score, questionType은 기존 행 값이 있으면 보존한다.",
     "- unit은 최종 분석지에서 단원별 출제표에 바로 쓸 수 있는 단원명으로 쓴다.",
     "- source는 교과서, 부교재, EBS, 모의고사, 확인 필요 중 하나로만 억지 선택하지 말고 근거가 없으면 확인 필요로 둔다.",
@@ -722,7 +725,7 @@ function buildQuestionClassificationPrompt(payload) {
     "- typeCode는 반드시 제공된 쎈 기준표 안의 코드만 사용한다.",
     "- evidence에는 원문 전체가 아니라 분류 근거가 되는 조건/풀이행동 요약만 100자 이내로 쓴다.",
     "- reviewNote에는 왜 그 단원/쎈유형으로 분류했는지 또는 사람이 확인할 포인트를 쓴다.",
-    "- 전체 분석지에 쓸 unitDistribution, typeClassification, killerProblems, sourceCheckNotes도 함께 요약한다.",
+    "- 전체 분석지에 쓸 unitDistribution, typeClassification, killerProblems, sourceCheckNotes는 classificationRows 뒤를 보조하는 짧은 요약이다.",
     "",
     "반드시 순수 JSON 하나만 반환하세요. markdown 코드블록과 설명 문장은 쓰지 마세요.",
     "{",
@@ -866,8 +869,49 @@ function summarizeParseCandidate(value) {
   };
 }
 
+function countCharacterBalance(text = "", openChar = "{", closeChar = "}") {
+  let balance = 0;
+  let inString = false;
+  let escaped = false;
+  for (const char of String(text ?? "")) {
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (char === "\\") {
+      escaped = true;
+      continue;
+    }
+    if (char === "\"") {
+      inString = !inString;
+      continue;
+    }
+    if (inString) continue;
+    if (char === openChar) balance += 1;
+    if (char === closeChar) balance -= 1;
+  }
+  return balance;
+}
+
+function detectJsonKeysFromText(text = "") {
+  const keys = [];
+  const seen = new Set();
+  const regex = /"([^"\\]*(?:\\.[^"\\]*)*)"\s*:/g;
+  let match = regex.exec(String(text ?? ""));
+  while (match && keys.length < 40) {
+    const key = match[1].replace(/\\"/g, "\"");
+    if (!seen.has(key)) {
+      seen.add(key);
+      keys.push(key);
+    }
+    match = regex.exec(String(text ?? ""));
+  }
+  return keys;
+}
+
 function parseJsonTextWithDiagnostics(text = "") {
   const trimmed = String(text ?? "").trim();
+  const detectedKeys = detectJsonKeysFromText(trimmed);
   const diagnostics = {
     rawTextLength: trimmed.length,
     rawTextPreview: trimmed.slice(0, 900),
@@ -875,7 +919,14 @@ function parseJsonTextWithDiagnostics(text = "") {
     parseError: "",
     jsonStart: trimmed.indexOf("{"),
     jsonEnd: trimmed.lastIndexOf("}"),
-    hasFencedJson: /```(?:json)?\s*[\s\S]*?```/i.test(trimmed)
+    braceBalance: countCharacterBalance(trimmed, "{", "}"),
+    squareBracketBalance: countCharacterBalance(trimmed, "[", "]"),
+    hasFencedJson: /```(?:json)?\s*[\s\S]*?```/i.test(trimmed),
+    detectedKeys,
+    containsClassificationRowsKey: /"classificationRows"\s*:/i.test(trimmed),
+    containsQuestionClassificationsKey: /"questionClassifications"\s*:/i.test(trimmed),
+    containsClassificationSummaryKey: /"classificationSummary"\s*:/i.test(trimmed),
+    likelyTruncated: Boolean(trimmed) && (countCharacterBalance(trimmed, "{", "}") > 0 || countCharacterBalance(trimmed, "[", "]") > 0 || trimmed.lastIndexOf("}") < trimmed.indexOf("{"))
   };
   if (!trimmed) return { parsed: null, diagnostics };
 
@@ -1437,7 +1488,102 @@ const classificationRowCandidatePaths = [
   "분류표"
 ];
 
-function buildClassificationParseDiagnostics(text = "", parsed = null, rows = [], baseDiagnostics = {}) {
+function extractCompleteJsonObjectsFromArrayText(text = "", arrayStartIndex = -1) {
+  const source = String(text ?? "");
+  if (arrayStartIndex < 0 || source[arrayStartIndex] !== "[") return [];
+  const objects = [];
+  let inString = false;
+  let escaped = false;
+  let depth = 0;
+  let objectStart = -1;
+
+  for (let index = arrayStartIndex + 1; index < source.length; index += 1) {
+    const char = source[index];
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (char === "\\") {
+      escaped = true;
+      continue;
+    }
+    if (char === "\"") {
+      inString = !inString;
+      continue;
+    }
+    if (inString) continue;
+    if (char === "{") {
+      if (depth === 0) objectStart = index;
+      depth += 1;
+      continue;
+    }
+    if (char === "}") {
+      if (depth > 0) depth -= 1;
+      if (depth === 0 && objectStart >= 0) {
+        objects.push(source.slice(objectStart, index + 1));
+        objectStart = -1;
+      }
+    }
+    if (char === "]" && depth === 0) break;
+  }
+
+  return objects;
+}
+
+function extractLooseClassificationRowsFromText(text = "") {
+  const source = String(text ?? "");
+  const keys = [
+    "classificationRows",
+    "questionClassifications",
+    "classifications",
+    "rows",
+    "items",
+    "문항분류표",
+    "문항별분류",
+    "분류표"
+  ];
+  for (const key of keys) {
+    const keyRegex = new RegExp(`"${key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"\\s*:\\s*\\[`, "i");
+    const match = keyRegex.exec(source);
+    if (!match) continue;
+    const arrayStartIndex = source.indexOf("[", match.index);
+    const objectTexts = extractCompleteJsonObjectsFromArrayText(source, arrayStartIndex);
+    const rows = objectTexts.map((objectText) => {
+      try {
+        return JSON.parse(objectText);
+      } catch {
+        return null;
+      }
+    }).filter(Boolean);
+    return {
+      key,
+      arrayStartIndex,
+      objectTextCount: objectTexts.length,
+      rows
+    };
+  }
+  return {
+    key: "",
+    arrayStartIndex: -1,
+    objectTextCount: 0,
+    rows: []
+  };
+}
+
+function extractJsonStringFieldFromText(text = "", fieldName = "") {
+  if (!fieldName) return "";
+  const source = String(text ?? "");
+  const regex = new RegExp(`"${fieldName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"\\s*:\\s*"((?:\\\\.|[^"\\\\])*)`, "i");
+  const match = regex.exec(source);
+  if (!match?.[1]) return "";
+  try {
+    return JSON.parse(`"${match[1].replace(/"$/, "")}"`);
+  } catch {
+    return match[1].replace(/\\"/g, "\"").replace(/\\n/g, "\n").trim();
+  }
+}
+
+function buildClassificationParseDiagnostics(text = "", parsed = null, rows = [], baseDiagnostics = {}, looseExtraction = null) {
   const parsedObject = parsed && typeof parsed === "object" ? parsed : null;
   const candidateSummaries = classificationRowCandidatePaths.map((path) => ({
     path,
@@ -1453,6 +1599,11 @@ function buildClassificationParseDiagnostics(text = "", parsed = null, rows = []
     topLevelKeys: parsedObject ? Object.keys(parsedObject).slice(0, 20) : [],
     candidateSummaries,
     populatedCandidates,
+    detectedKeys: Array.isArray(baseDiagnostics.detectedKeys) ? baseDiagnostics.detectedKeys : detectJsonKeysFromText(text),
+    looseRowKey: looseExtraction?.key || "",
+    looseRowCount: Array.isArray(looseExtraction?.rows) ? looseExtraction.rows.length : 0,
+    looseRowObjectTextCount: Number(looseExtraction?.objectTextCount) || 0,
+    looseArrayStartIndex: Number(looseExtraction?.arrayStartIndex) || -1,
     normalizedRowCount: rows.length,
     rawTextPreview: String(text ?? "").trim().slice(0, 1200)
   };
@@ -1460,15 +1611,19 @@ function buildClassificationParseDiagnostics(text = "", parsed = null, rows = []
 
 function normalizeQuestionClassificationResult(text = "") {
   const { parsed, diagnostics: jsonDiagnostics } = parseJsonTextWithDiagnostics(text);
-  const rows = normalizeClassificationRowsFromAi(extractClassificationRowsFromParsed(parsed));
-  const parseDiagnostics = buildClassificationParseDiagnostics(text, parsed, rows, jsonDiagnostics);
+  const parsedRows = normalizeClassificationRowsFromAi(extractClassificationRowsFromParsed(parsed));
+  const looseExtraction = parsedRows.length ? null : extractLooseClassificationRowsFromText(text);
+  const looseRows = parsedRows.length ? [] : normalizeClassificationRowsFromAi(looseExtraction.rows);
+  const rows = parsedRows.length ? parsedRows : looseRows;
+  const classificationSummary = String(parsed?.classificationSummary || parsed?.summary || "").trim() || extractJsonStringFieldFromText(text, "classificationSummary");
+  const parseDiagnostics = buildClassificationParseDiagnostics(text, parsed, rows, jsonDiagnostics, looseExtraction);
   return {
     fields: {
-      classificationSummary: String(parsed?.classificationSummary || parsed?.summary || "").trim(),
-      unitDistribution: String(parsed?.unitDistribution || "").trim(),
-      typeClassification: String(parsed?.typeClassification || "").trim(),
-      killerProblems: String(parsed?.killerProblems || "").trim(),
-      sourceCheckNotes: String(parsed?.sourceCheckNotes || "").trim(),
+      classificationSummary,
+      unitDistribution: String(parsed?.unitDistribution || "").trim() || extractJsonStringFieldFromText(text, "unitDistribution"),
+      typeClassification: String(parsed?.typeClassification || "").trim() || extractJsonStringFieldFromText(text, "typeClassification"),
+      killerProblems: String(parsed?.killerProblems || "").trim() || extractJsonStringFieldFromText(text, "killerProblems"),
+      sourceCheckNotes: String(parsed?.sourceCheckNotes || "").trim() || extractJsonStringFieldFromText(text, "sourceCheckNotes"),
       classificationRows: rows,
       questionClassifications: rows
     },
