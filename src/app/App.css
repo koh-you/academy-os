@@ -1833,6 +1833,11 @@ button {
   font-weight: 900;
 }
 
+.attendanceBadge .attendanceMismatchText {
+  color: #b91c1c;
+  font-weight: 900;
+}
+
 .attendance-present {
   background: #ecfdf5;
   border: 1px solid #86efac;
@@ -1855,6 +1860,12 @@ button {
   background: #f8fafc;
   border: 1px solid #d8e3f8;
   color: #64748b;
+}
+
+.attendance-mismatch {
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  color: #c2410c;
 }
 
 .softButton.mini {
@@ -7273,6 +7284,12 @@ button:disabled {
   font-size: 14px;
   font-weight: 800;
   padding: 12px 14px;
+}
+
+.attendanceSourceNotice.warning {
+  background: var(--status-pending-bg);
+  border-color: var(--status-pending-border);
+  color: var(--status-pending-text);
 }
 
 .attendanceConfirmPanel {

@@ -6005,13 +6005,10 @@ export function App() {
     const todayClassLesson = lessons
       .filter((item) => item.date === todayString && item.classTemplateId === student.defaultClassTemplateId)
       .sort(sortByTime)[0];
-    const recentStudentLesson = lessons
-      .filter((item) => (item.studentIds ?? []).includes(student.studentId))
-      .sort((a, b) => String(b.date).localeCompare(String(a.date)) || sortByTime(a, b))[0];
-    let lesson = todayStudentLesson ?? todayClassLesson ?? recentStudentLesson;
+    let lesson = todayStudentLesson ?? todayClassLesson;
 
     if (!lesson) {
-      return { ok: false, message: `${student.name} 학생의 수업 일정이 없습니다.` };
+      return { ok: false, message: `${student.name} 학생의 오늘 수업 일정이 없습니다. 미래 수업에는 출결을 기록하지 않습니다.` };
     }
     if (!(lesson.studentIds ?? []).includes(student.studentId)) {
       lesson = {
@@ -6024,6 +6021,9 @@ export function App() {
 
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
     const existingRecord = findLessonStudentRecord(recordsRef.current, lesson, student);
+    const activeExistingRecord = getAttendanceDateMismatch(existingRecord, lesson)
+      ? clearAttendanceFields(existingRecord)
+      : existingRecord;
     const nowIso = now.toISOString();
     const koreaTime = new Intl.DateTimeFormat("ko-KR", {
       timeZone: "Asia/Seoul",
@@ -6031,7 +6031,7 @@ export function App() {
       minute: "2-digit",
       hour12: false
     }).format(now);
-    if (existingRecord?.checkInAt && existingRecord?.checkOutAt) {
+    if (activeExistingRecord?.checkInAt && activeExistingRecord?.checkOutAt) {
       return {
         ok: true,
         message: `${student.name} 이미 하원 처리되었습니다. 추가 확인이 필요하면 담당 선생님께 따로 말씀해 주세요.`,
@@ -6041,22 +6041,22 @@ export function App() {
         checkedTime: koreaTime
       };
     }
-    const isCheckOut = Boolean(existingRecord?.checkInAt && !existingRecord?.checkOutAt);
+    const isCheckOut = Boolean(activeExistingRecord?.checkInAt && !activeExistingRecord?.checkOutAt);
     const lateMinutes = isCheckOut
-      ? existingRecord?.lateMinutes ?? ""
+      ? activeExistingRecord?.lateMinutes ?? ""
       : calculateLateMinutes(lesson, now, attendanceSettings.lateGraceMinutes);
-    const attendanceStatus = isCheckOut ? existingRecord?.attendanceStatus ?? "present" : lateMinutes > 0 ? "late" : "present";
+    const attendanceStatus = isCheckOut ? activeExistingRecord?.attendanceStatus ?? "present" : lateMinutes > 0 ? "late" : "present";
     const nextRecord = {
       ...createEmptyRecord(lesson, student),
-      ...(existingRecord ?? {}),
+      ...(activeExistingRecord ?? {}),
       lessonStudentRecordId: recordId,
       attendanceStatus,
-      checkInAt: existingRecord?.checkInAt ?? nowIso,
-      checkInTime: existingRecord?.checkInTime ?? koreaTime,
-      checkOutAt: isCheckOut ? nowIso : existingRecord?.checkOutAt ?? "",
-      checkOutTime: isCheckOut ? koreaTime : existingRecord?.checkOutTime ?? "",
+      checkInAt: activeExistingRecord?.checkInAt ?? nowIso,
+      checkInTime: activeExistingRecord?.checkInTime ?? koreaTime,
+      checkOutAt: isCheckOut ? nowIso : activeExistingRecord?.checkOutAt ?? "",
+      checkOutTime: isCheckOut ? koreaTime : activeExistingRecord?.checkOutTime ?? "",
       lateMinutes,
-      attendanceReason: existingRecord?.attendanceReason ?? "",
+      attendanceReason: activeExistingRecord?.attendanceReason ?? "",
       updatedBy: "attendance_kiosk",
       updatedAt: nowIso
     };
@@ -6699,11 +6699,14 @@ export function App() {
   async function saveAttendanceRecord(lesson, student, values, updatedBy = "instructor_owner_001") {
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
     const existingRecord = findLessonStudentRecord(recordsRef.current, lesson, student);
+    const activeExistingRecord = getAttendanceDateMismatch(existingRecord, lesson)
+      ? clearAttendanceFields(existingRecord)
+      : existingRecord;
     const nowIso = new Date().toISOString();
-    const timedValues = applyManualAttendanceTimeFields(existingRecord, values, nowIso, lesson);
+    const timedValues = applyManualAttendanceTimeFields(activeExistingRecord, values, nowIso, lesson);
     const nextRecord = {
       ...createEmptyRecord(lesson, student),
-      ...(existingRecord ?? {}),
+      ...(activeExistingRecord ?? {}),
       ...timedValues,
       lessonStudentRecordId: recordId,
       lessonId: lesson.lessonId,
@@ -6721,6 +6724,9 @@ export function App() {
   function handleChangeRecord(lesson, student, field, value) {
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
     const existingRecord = findLessonStudentRecord(recordsRef.current, lesson, student);
+    const safeExistingRecord = getAttendanceDateMismatch(existingRecord, lesson)
+      ? clearAttendanceFields(existingRecord)
+      : existingRecord;
     const nextRecord = {
       lessonStudentRecordId: recordId,
       lessonId: lesson.lessonId,
@@ -6732,7 +6738,7 @@ export function App() {
       studentComment: "",
       needsMakeup: false,
       needsRetest: false,
-      ...(existingRecord ?? {}),
+      ...(safeExistingRecord ?? {}),
       [field]: value,
       ...(field === "assignmentStatus" ? { incompleteHomework: value } : {}),
       ...(field === "teacherComment" ? { teacherCommentSendStatus: "" } : {}),
@@ -7185,12 +7191,15 @@ export function App() {
       if (lessonForRecord?.isVirtualGeneratedLesson || lessonForRecord?.isExamPrepAutoLesson) {
         await ensurePersistedLesson(lessonForRecord);
       }
-      const record =
+      let record =
         recordOverride ??
         (lessonForRecord && studentForRecord ? findLessonStudentRecord(recordsRef.current, lessonForRecord, studentForRecord) : null) ??
         recordsRef.current.find((item) => item.lessonStudentRecordId === recordId) ??
         (lessonForRecord && studentForRecord ? createEmptyRecord(lessonForRecord, studentForRecord) : null);
       if (!record) throw new Error("저장할 수업기록을 찾지 못했습니다.");
+      if (lessonForRecord && getAttendanceDateMismatch(record, lessonForRecord)) {
+        record = clearAttendanceFields(record);
+      }
       const relatedHomeworks = skipRelatedHomeworks
         ? []
         : homeworksRef.current.filter(
@@ -10652,7 +10661,7 @@ function LessonJournalDetail({
     .filter((student) => student && (student.status ?? "active") === "active");
   const checkoutMissingStudents = lessonStudents.filter((student) => {
     const record = findLessonStudentRecord(records, lesson, student);
-    return hasMissingCheckOut(record);
+    return hasMissingCheckOut(record, lesson);
   });
   const isHomeworkMakeupLesson = isHomeworkMakeupTaskLesson(lesson, linkedMakeupTask);
   const isExamSundayMakeupLesson = lesson.lessonType === "examSundayMakeup";
@@ -10685,7 +10694,9 @@ function LessonJournalDetail({
   }
   function hasPreSendMissingRequiredData(record, previousHomework, nextHomework) {
     const attendanceStatus = record?.attendanceStatus ?? "pending";
+    const attendanceDateMismatch = getAttendanceDateMismatch(record, lesson);
     return (
+      attendanceDateMismatch ||
       !attendanceStatus ||
       attendanceStatus === "pending" ||
       !String(record?.lessonMaterial ?? "").trim() ||
@@ -10930,8 +10941,8 @@ function LessonJournalDetail({
             const record = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
             const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
             const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
-            const attendanceDisplay = getAttendanceDisplay(record);
-            const checkoutMissing = hasMissingCheckOut(record);
+            const attendanceDisplay = getAttendanceDisplay(record, lesson);
+            const checkoutMissing = hasMissingCheckOut(record, lesson);
             const previousMemoContext = getPreviousLessonMemoContext(student);
             const previousRecord = previousMemoContext.previousRecord;
             const referenceRecord = previousMemoContext.referenceRecord;
@@ -10984,12 +10995,13 @@ function LessonJournalDetail({
                   </small>
                 </div>
                 <button
-                  className={`attendanceBadge attendance-${record.attendanceStatus ?? "pending"}`}
+                  className={`attendanceBadge attendance-${attendanceDisplay.statusClass ?? record.attendanceStatus ?? "pending"}`}
                   onClick={() => onOpenAttendance({ lesson, record, student })}
                   type="button"
                 >
                   <span>{attendanceDisplay.label}</span>
                   {attendanceDisplay.detail ? <small>{attendanceDisplay.detail}</small> : null}
+                  {attendanceDisplay.dateMismatch ? <small className="attendanceMismatchText">확인 필요</small> : null}
                   {checkoutMissing ? <small className="checkoutMissingText">하원 미체크</small> : null}
                 </button>
                 <EditableMemoCard
@@ -11504,18 +11516,20 @@ function CommentComposerModal({
 
 function AttendanceModal({ item, onClose, onSave }) {
   const { lesson, record, student } = item;
-  const [attendanceStatus, setAttendanceStatus] = useState(getManualAttendanceInitialStatus(record));
-  const [lateMinutes, setLateMinutes] = useState(record.lateMinutes ?? "");
-  const [checkInTime, setCheckInTime] = useState(record.checkInTime || formatKoreaTimeFromIso(record.checkInAt) || "");
-  const [checkOutTime, setCheckOutTime] = useState(record.checkOutTime || formatKoreaTimeFromIso(record.checkOutAt) || "");
-  const [attendanceReason, setAttendanceReason] = useState(record.attendanceReason ?? "");
+  const attendanceDateMismatch = getAttendanceDateMismatch(record, lesson);
+  const editableRecord = attendanceDateMismatch ? clearAttendanceFields(record) : record;
+  const [attendanceStatus, setAttendanceStatus] = useState(getManualAttendanceInitialStatus(editableRecord));
+  const [lateMinutes, setLateMinutes] = useState(editableRecord.lateMinutes ?? "");
+  const [checkInTime, setCheckInTime] = useState(editableRecord.checkInTime || formatKoreaTimeFromIso(editableRecord.checkInAt) || "");
+  const [checkOutTime, setCheckOutTime] = useState(editableRecord.checkOutTime || formatKoreaTimeFromIso(editableRecord.checkOutAt) || "");
+  const [attendanceReason, setAttendanceReason] = useState(editableRecord.attendanceReason ?? "");
   const [pendingSave, setPendingSave] = useState(null);
   const [confirmStep, setConfirmStep] = useState("");
   const [saveError, setSaveError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const values = { attendanceStatus, lateMinutes, checkInTime, checkOutTime, attendanceReason };
-  const hasKioskRecord = hasTabletAttendanceRecord(record);
-  const hasChanged = hasAttendanceModalChanges(record, values);
+  const hasKioskRecord = !attendanceDateMismatch && hasTabletAttendanceRecord(record);
+  const hasChanged = hasAttendanceModalChanges(editableRecord, values);
 
   function requestSave() {
     setSaveError("");
@@ -11595,6 +11609,11 @@ function AttendanceModal({ item, onClose, onSave }) {
       {hasKioskRecord ? (
         <div className="attendanceSourceNotice">
           태블릿에서 기록된 출결입니다. 수동으로 바꾸면 확인 후 저장됩니다.
+        </div>
+      ) : null}
+      {attendanceDateMismatch ? (
+        <div className="attendanceSourceNotice warning">
+          저장된 출결 날짜가 수업 날짜와 다릅니다. 출결 {attendanceDateMismatch.mismatchedDates.map(formatShortDateLabel).join(", ")} · 수업 {formatShortDateLabel(attendanceDateMismatch.lessonDate)}. 저장하면 이 수업 날짜 기준으로 새 출결을 기록합니다.
         </div>
       ) : null}
       {confirmStep === "change" ? (
@@ -19045,7 +19064,7 @@ function StudentLessonHistoryCalendar({ homeworks = [], lessons = [], recordsWit
       : null;
   const previousHomeworkText = previousHomework?.title || selectedRecord?.previousHomework || "";
   const nextHomeworkText = nextHomework?.title || selectedRecord?.nextHomework || "";
-  const selectedAttendanceDisplay = getAttendanceDisplay(selectedRecord ?? {});
+  const selectedAttendanceDisplay = getAttendanceDisplay(selectedRecord ?? {}, selectedLesson);
   const calendarDays = buildMonthDays(today);
 
   useEffect(() => {
@@ -22558,6 +22577,18 @@ function formatKoreaTimeFromIso(value) {
   }).format(date);
 }
 
+function getKoreaDateStringFromIso(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return getKoreaDateString(date);
+}
+
+function formatShortDateLabel(dateString) {
+  const [year, month, day] = String(dateString ?? "").split("-");
+  return year && month && day ? `${month}.${day}` : String(dateString ?? "");
+}
+
 function normalizeTimeInput(value) {
   const text = String(value ?? "").trim();
   const match = text.match(/(\d{1,2}):(\d{2})/);
@@ -22583,8 +22614,47 @@ function createKoreaIsoFromDateAndTime(dateValue, timeValue, fallbackIso = new D
   return Number.isNaN(date.getTime()) ? fallbackIso : date.toISOString();
 }
 
-function getAttendanceDisplay(record = {}) {
+function getAttendanceDateMismatch(record = {}, lesson = null) {
   record = record ?? {};
+  const lessonDate = lesson?.date;
+  if (!lessonDate) return null;
+  const attendanceDates = [record.checkInAt, record.checkOutAt]
+    .map(getKoreaDateStringFromIso)
+    .filter(Boolean);
+  const mismatchedDates = [...new Set(attendanceDates.filter((date) => date !== lessonDate))];
+  if (mismatchedDates.length === 0) return null;
+  return {
+    attendanceDates: [...new Set(attendanceDates)],
+    lessonDate,
+    mismatchedDates
+  };
+}
+
+function clearAttendanceFields(record = {}) {
+  return {
+    ...(record ?? {}),
+    attendanceStatus: "pending",
+    attendanceReason: "",
+    checkInAt: "",
+    checkInTime: "",
+    checkOutAt: "",
+    checkOutTime: "",
+    lateMinutes: "",
+    updatedBy: record?.updatedBy === "attendance_kiosk" ? "" : record?.updatedBy
+  };
+}
+
+function getAttendanceDisplay(record = {}, lesson = null) {
+  record = record ?? {};
+  const dateMismatch = getAttendanceDateMismatch(record, lesson);
+  if (dateMismatch) {
+    return {
+      dateMismatch,
+      detail: `출결 ${dateMismatch.mismatchedDates.map(formatShortDateLabel).join(", ")} · 수업 ${formatShortDateLabel(dateMismatch.lessonDate)}`,
+      label: "일자 불일치",
+      statusClass: "mismatch"
+    };
+  }
   const status = record.attendanceStatus ?? "pending";
   const updatedTime = formatKoreaTimeFromIso(record.updatedAt);
   const isArrivalStatus = ["checkin", "present", "late"].includes(status);
@@ -22603,8 +22673,9 @@ function getAttendanceDisplay(record = {}) {
   return { label, detail };
 }
 
-function hasMissingCheckOut(record = {}) {
+function hasMissingCheckOut(record = {}, lesson = null) {
   record = record ?? {};
+  if (getAttendanceDateMismatch(record, lesson)) return false;
   const status = record.attendanceStatus ?? "pending";
   const hasCheckIn = Boolean(record.checkInAt || record.checkInTime);
   const hasCheckOut = Boolean(record.checkOutAt || record.checkOutTime);
