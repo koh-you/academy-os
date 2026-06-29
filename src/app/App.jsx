@@ -2350,15 +2350,14 @@ function getExamStrategyFlowNodes(questionItems = []) {
 
 function createExamFinalClassificationTableRows(classificationRows = []) {
   return normalizeExamQuestionClassificationRows(classificationRows).map((row) => [
-    `${row.number}번`,
-    `${row.page || 1}p`,
-    row.score || "-",
-    row.questionType || "확인 필요",
+    `${row.number}번${row.page ? ` (${row.page}p)` : ""}`,
+    [row.score || "-", row.questionType || "확인 필요"].filter(Boolean).join(" · "),
     row.unit || "확인 필요",
-    getSsenPrimaryTypeText(row.ssenTypeTags) || "확인 필요",
-    getSsenSecondaryTypeText(row.ssenTypeTags) || "-",
-    row.difficulty || "확인 필요",
-    row.role || "-",
+    [
+      getSsenPrimaryTypeText(row.ssenTypeTags) || "확인 필요",
+      getSsenSecondaryTypeText(row.ssenTypeTags) ? `보조: ${getSsenSecondaryTypeText(row.ssenTypeTags)}` : ""
+    ].filter(Boolean).join("\n"),
+    [row.difficulty || "확인 필요", row.role || "-"].filter(Boolean).join(" · "),
     row.reviewNote || row.evidence || (row.needsReview ? "확인 필요" : "")
   ]);
 }
@@ -2428,7 +2427,7 @@ function createExamFinalDocumentFromAnalysis(analysis = {}) {
         id: createFinalDocumentId("table"),
         type: "table",
         title: "문항별 분류표 원본",
-        columns: ["문항", "페이지", "배점", "형식", "단원", "쎈 주유형", "쎈 보조유형", "난이도", "역할", "검수 메모"],
+        columns: ["문항", "배점/형식", "단원", "쎈 유형", "난이도/역할", "검수 메모"],
         rows: classificationTableRows
       }] : []),
       {
@@ -3200,12 +3199,44 @@ function FinalQuestionCropImage({ image }) {
   );
 }
 
+function compactFinalClassificationTableBlock(block = {}) {
+  if (block?.title !== "문항별 분류표 원본" || !Array.isArray(block.columns) || block.columns.length <= 6) return block;
+  const indexOfColumn = (label) => block.columns.findIndex((column) => String(column || "").trim() === label);
+  const indexes = {
+    number: indexOfColumn("문항"),
+    page: indexOfColumn("페이지"),
+    score: indexOfColumn("배점"),
+    type: indexOfColumn("형식"),
+    unit: indexOfColumn("단원"),
+    primary: indexOfColumn("쎈 주유형"),
+    secondary: indexOfColumn("쎈 보조유형"),
+    difficulty: indexOfColumn("난이도"),
+    role: indexOfColumn("역할"),
+    note: indexOfColumn("검수 메모")
+  };
+  if (Object.values(indexes).every((index) => index < 0)) return block;
+  const cell = (row, index) => index >= 0 ? row[index] : "";
+  return {
+    ...block,
+    columns: ["문항", "배점/형식", "단원", "쎈 유형", "난이도/역할", "검수 메모"],
+    rows: (block.rows || []).map((row) => [
+      [cell(row, indexes.number), cell(row, indexes.page) ? `(${cell(row, indexes.page)})` : ""].filter(Boolean).join(" "),
+      [cell(row, indexes.score), cell(row, indexes.type)].filter(Boolean).join(" · "),
+      cell(row, indexes.unit),
+      [cell(row, indexes.primary), cell(row, indexes.secondary) && cell(row, indexes.secondary) !== "-" ? `보조: ${cell(row, indexes.secondary)}` : ""].filter(Boolean).join("\n"),
+      [cell(row, indexes.difficulty), cell(row, indexes.role)].filter(Boolean).join(" · "),
+      cell(row, indexes.note)
+    ])
+  };
+}
+
 function ExamFinalDocumentPrint({ document }) {
   const normalizedDocument = normalizeExamFinalDocument(document);
   if (!normalizedDocument?.blocks?.length) return null;
   return (
     <article className="examAnalysisPrintableReport finalDocumentPrint">
       {normalizedDocument.blocks.map((block) => {
+        const printBlock = block.type === "table" ? compactFinalClassificationTableBlock(block) : block;
         if (block.type === "cover") {
           return (
             <header className="examAnalysisReportCover" key={block.id}>
@@ -3219,19 +3250,19 @@ function ExamFinalDocumentPrint({ document }) {
         }
         if (block.type === "table") {
           return (
-            <ExamAnalysisReportSection key={block.id} title={block.title}>
+            <ExamAnalysisReportSection key={block.id} title={printBlock.title}>
               <div className="analysisPreviewTableWrap">
-                <table className="analysisPreviewTable">
+                <table className={`analysisPreviewTable ${printBlock.title === "문항별 분류표 원본" ? "finalClassificationTable" : ""}`}>
                   <thead>
-                    <tr>{block.columns.map((column, index) => <th key={`${column}_${index}`}>{column}</th>)}</tr>
+                    <tr>{printBlock.columns.map((column, index) => <th key={`${column}_${index}`}>{column}</th>)}</tr>
                   </thead>
                   <tbody>
-                    {block.rows.length ? block.rows.map((row, rowIndex) => (
+                    {printBlock.rows.length ? printBlock.rows.map((row, rowIndex) => (
                       <tr key={`${block.id}_row_${rowIndex}`}>
-                        {block.columns.map((_, cellIndex) => <td key={`${block.id}_${rowIndex}_${cellIndex}`}>{row[cellIndex]}</td>)}
+                        {printBlock.columns.map((_, cellIndex) => <td key={`${block.id}_${rowIndex}_${cellIndex}`}>{row[cellIndex]}</td>)}
                       </tr>
                     )) : (
-                      <tr><td colSpan={block.columns.length}>입력된 행이 없습니다.</td></tr>
+                      <tr><td colSpan={printBlock.columns.length}>입력된 행이 없습니다.</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -3685,30 +3716,35 @@ function ExamQuestionInsightTables({ questionItems = [], classificationRows = []
           <span>{items.length}문항 · 코멘트 {commentedItems.length}개</span>
         </div>
         <div className="analysisPreviewTableWrap">
-          <table className="analysisPreviewTable">
+          <table className="analysisPreviewTable questionInsightMainTable">
             <thead>
               <tr>
                 <th>문항</th>
-                <th>배점/비중</th>
-                <th>단원</th>
-                <th>쎈 유형</th>
-                <th>난이도</th>
-                <th>역할</th>
-                <th>태그</th>
-                <th>강사 코멘트</th>
+                <th>배점</th>
+                <th>단원 / 쎈 유형</th>
+                <th>난이도 / 역할</th>
+                <th>검수 메모</th>
               </tr>
             </thead>
             <tbody>
               {items.map((item) => (
                 <tr key={item.questionId}>
-                  <td>{item.number}번</td>
+                  <td>
+                    <strong>{item.number}번</strong>
+                    {item.page ? <small>{item.page}p</small> : null}
+                  </td>
                   <td>{formatQuestionScoreWithWeight(item, items, questionComposition)}</td>
-                  <td>{item.unit || "-"}</td>
-                  <td>{formatSsenTypeTags(item.ssenTypeTags) || "-"}</td>
-                  <td>{item.difficulty || "-"}</td>
-                  <td>{item.role || "-"}</td>
-                  <td>{item.tags?.length ? item.tags.join(", ") : "-"}</td>
-                  <td>{item.teacherComment || item.strategyComment || "-"}</td>
+                  <td>
+                    <strong>{item.unit || "-"}</strong>
+                    <small>{formatSsenTypeTags(item.ssenTypeTags) || "쎈 유형 확인 필요"}</small>
+                  </td>
+                  <td>
+                    <strong>{item.difficulty || "-"}</strong>
+                    <small>{item.role || "-"}</small>
+                  </td>
+                  <td>
+                    {[item.teacherComment || item.strategyComment || "", item.tags?.length ? item.tags.join(", ") : ""].filter(Boolean).join("\n") || "-"}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -15436,7 +15472,7 @@ function ExamAnalysisCenter({
                 </div>
                 {activeClassificationRows.length ? (
                   <div className="analysisPreviewTableWrap">
-                    <table className="analysisPreviewTable">
+                    <table className="analysisPreviewTable classificationReviewTable">
                       <thead>
                         <tr>
                           <th>문항</th>
@@ -15493,19 +15529,21 @@ function ExamAnalysisCenter({
                               />
                             </td>
                             <td>
-                              <input
-                                className="tableInlineInput"
+                              <textarea
+                                className="tableInlineTextarea compact"
                                 value={getSsenPrimaryTypeText(row.ssenTypeTags)}
                                 onChange={(event) => updateClassificationRow(row.classificationId, "ssenTypeTags", updateSsenPrimaryTypeTags(row.ssenTypeTags, event.target.value, row.unit))}
                                 placeholder="SSEN 코드 또는 유형명"
+                                rows="2"
                               />
                             </td>
                             <td>
-                              <input
-                                className="tableInlineInput"
+                              <textarea
+                                className="tableInlineTextarea compact"
                                 value={getSsenSecondaryTypeText(row.ssenTypeTags)}
                                 onChange={(event) => updateClassificationRow(row.classificationId, "ssenTypeTags", updateSsenSecondaryTypeTags(row.ssenTypeTags, event.target.value, row.unit))}
                                 placeholder="보조유형"
+                                rows="2"
                               />
                             </td>
                             <td>

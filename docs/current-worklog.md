@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-29 P1. 시험분석 분류표/문항분석표 가독성 보정
+
+- 상태: 완료
+- 사용자 확인: AI 분류표 생성은 `AI 응답 20개 · 분류 20개`까지 성공했지만, 검수표의 쎈 유형 입력칸이 잘리고 최종 문항분석표가 8~10컬럼을 좁은 폭에 넣어 글자가 한 글자씩 세로로 떨어졌다.
+- 판단: 이번 문제는 파싱 실패가 아니라 표 렌더링 문제다. 같은 `analysisPreviewTable`을 검수용 대형 입력표, 화면 요약표, 최종 보고서 표가 공용으로 쓰면서 각 사용처에 맞는 컬럼 폭과 요약 구조가 없었다.
+- 이번 작업 결과: 문항 검수표에 `classificationReviewTable` 전용 폭을 적용하고 쎈 주유형/보조유형 입력을 2줄 textarea로 바꿨다. 문항분석표는 `문항/배점/단원·쎈유형/난이도·역할/검수 메모` 5컬럼으로 압축했다. 최종 편집본의 `문항별 분류표 원본`은 새로 생성할 때 6컬럼 요약형으로 만들고, 기존 10컬럼 편집본도 출력 시 자동 압축한다. 표 셀에는 `word-break: keep-all`, `pre-line`, 전용 min-width를 적용해 한글이 세로로 찢어지지 않게 했다.
+- 저장 주의: 기존 `examAnalyses[].questionClassifications`와 `finalDocument` 구조를 사용한다. 기존에 저장된 10컬럼 최종 편집본도 출력 시 압축하므로 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 235, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-29 P1. 시험분석 분류표 AI 요약-only 응답 원인 노출과 부분 행 복구
 
 - 상태: 완료

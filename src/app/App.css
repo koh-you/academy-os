@@ -4059,6 +4059,10 @@ button {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.analysisQuestionTables > section:first-child {
+  grid-column: 1 / -1;
+}
+
 .analysisQuestionTableTitle {
   align-items: center;
   display: flex;
@@ -4735,15 +4739,33 @@ button {
   color: #334155;
   font-size: 14px;
   font-weight: 750;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
   padding: 9px 10px;
   text-align: left;
   vertical-align: top;
+  white-space: pre-line;
+  word-break: keep-all;
 }
 
 .analysisPreviewTable th {
   background: #eef2ff;
   color: #17213d;
   font-weight: 900;
+  white-space: nowrap;
+}
+
+.analysisPreviewTable td strong,
+.analysisPreviewTable td small {
+  display: block;
+}
+
+.analysisPreviewTable td small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+  margin-top: 4px;
 }
 
 .tableInlineInput,
@@ -4766,6 +4788,92 @@ button {
 .tableInlineTextarea {
   min-width: 180px;
   resize: vertical;
+}
+
+.tableInlineTextarea.compact {
+  min-height: 58px;
+}
+
+.classificationReviewTable {
+  min-width: 1540px;
+  table-layout: fixed;
+}
+
+.classificationReviewTable th:nth-child(1),
+.classificationReviewTable td:nth-child(1) {
+  width: 78px;
+}
+
+.classificationReviewTable th:nth-child(2),
+.classificationReviewTable td:nth-child(2),
+.classificationReviewTable th:nth-child(3),
+.classificationReviewTable td:nth-child(3) {
+  width: 92px;
+}
+
+.classificationReviewTable th:nth-child(4),
+.classificationReviewTable td:nth-child(4),
+.classificationReviewTable th:nth-child(8),
+.classificationReviewTable td:nth-child(8),
+.classificationReviewTable th:nth-child(9),
+.classificationReviewTable td:nth-child(9),
+.classificationReviewTable th:nth-child(11),
+.classificationReviewTable td:nth-child(11) {
+  width: 118px;
+}
+
+.classificationReviewTable th:nth-child(5),
+.classificationReviewTable td:nth-child(5),
+.classificationReviewTable th:nth-child(6),
+.classificationReviewTable td:nth-child(6),
+.classificationReviewTable th:nth-child(7),
+.classificationReviewTable td:nth-child(7) {
+  width: 180px;
+}
+
+.classificationReviewTable th:nth-child(10),
+.classificationReviewTable td:nth-child(10) {
+  width: 240px;
+}
+
+.questionInsightMainTable,
+.finalClassificationTable {
+  min-width: 860px;
+}
+
+.questionInsightMainTable th:nth-child(1),
+.questionInsightMainTable td:nth-child(1) {
+  width: 80px;
+}
+
+.questionInsightMainTable th:nth-child(2),
+.questionInsightMainTable td:nth-child(2) {
+  width: 112px;
+}
+
+.questionInsightMainTable th:nth-child(3),
+.questionInsightMainTable td:nth-child(3) {
+  width: 38%;
+}
+
+.questionInsightMainTable th:nth-child(4),
+.questionInsightMainTable td:nth-child(4) {
+  width: 130px;
+}
+
+.finalClassificationTable th:nth-child(1),
+.finalClassificationTable td:nth-child(1) {
+  width: 86px;
+}
+
+.finalClassificationTable th:nth-child(2),
+.finalClassificationTable td:nth-child(2) {
+  width: 120px;
+}
+
+.finalClassificationTable th:nth-child(4),
+.finalClassificationTable td:nth-child(4) {
+  width: 30%;
 }
 
 .analysisInstagramPreview {
