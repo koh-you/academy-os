@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-29 P1. 시험분석 AI 분류표 0행 파싱 진단 노출
+
+- 상태: 완료
+- 사용자 요청: `AI 분류표 생성`이 계속 0행으로 보이므로, AI를 다시 호출하는 복구가 아니라 현재 한 번의 호출에서 무엇이 잘못됐는지 드러나게 한다.
+- 판단: 반복 문제의 핵심은 AI 응답 파싱 결과가 0행이어도 서버가 기존 분류표 골격을 fallback으로 반환하고, 프론트가 이를 `생성 완료`처럼 표시하던 점이다. 이 상태에서는 JSON 파싱 실패, 응답 경로 불일치, 응답 잘림, 이미지 미전송 여부를 구분할 수 없다.
+- 이번 작업 결과: `/api/ai/exam-question-classification` 응답에 `parseDiagnostics`와 `rawTextPreview`를 추가했다. 진단에는 JSON 파싱 방식/오류, 원문 길이와 시작부, 상위 키, 후보 경로별 배열/객체 존재 여부, 이미지 입력 장수, seed row 수가 포함된다. 프론트는 `classificationRowCount === 0`이면 더 이상 `문항별 분류표 생성 완료`로 처리하지 않고 `AI 분류표 파싱 실패`를 표시하며, 진단 내용을 `aiInitialFields.questionClassificationDebug`에 저장한다.
+- 저장 주의: 기존 `examAnalyses[].aiInitialFields` app_state 문서 안에 짧은 진단 preview만 저장한다. 새 Supabase SQL edit 필요 없음.
+- 다음 확인: 배포 반영 후 같은 PDF로 `AI 분류표 생성`을 한 번 더 누르고, 화면에 표시되는 `JSON 파싱`, `상위 키`, `분류 후보 경로`, `원문 시작`을 확인해 실제 원인이 `fields.classificationRows` 경로 불일치인지, JSON 잘림인지, 이미지 입력 누락인지 판별한다.
+- 검증: `node --check api/routes/examAnalysis.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 233, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-29 P1. 시험분석 최종 편집본 분류표 원본 반영
 
 - 상태: 완료

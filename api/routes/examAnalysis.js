@@ -838,6 +838,82 @@ function safeParseJsonText(text) {
   }
 }
 
+function getValueAtPath(source, path = "") {
+  if (!source || typeof source !== "object" || !path) return undefined;
+  return path.split(".").reduce((current, key) => current?.[key], source);
+}
+
+function summarizeParseCandidate(value) {
+  if (Array.isArray(value)) {
+    return {
+      type: "array",
+      length: value.length,
+      firstKeys: value[0] && typeof value[0] === "object" ? Object.keys(value[0]).slice(0, 12) : []
+    };
+  }
+  if (value && typeof value === "object") {
+    const values = Object.values(value);
+    return {
+      type: "object",
+      keys: Object.keys(value).slice(0, 12),
+      objectValueCount: values.filter((item) => item && typeof item === "object").length,
+      valueCount: values.length
+    };
+  }
+  return {
+    type: value === undefined ? "missing" : typeof value,
+    valuePreview: String(value ?? "").slice(0, 120)
+  };
+}
+
+function parseJsonTextWithDiagnostics(text = "") {
+  const trimmed = String(text ?? "").trim();
+  const diagnostics = {
+    rawTextLength: trimmed.length,
+    rawTextPreview: trimmed.slice(0, 900),
+    parseMode: "empty",
+    parseError: "",
+    jsonStart: trimmed.indexOf("{"),
+    jsonEnd: trimmed.lastIndexOf("}"),
+    hasFencedJson: /```(?:json)?\s*[\s\S]*?```/i.test(trimmed)
+  };
+  if (!trimmed) return { parsed: null, diagnostics };
+
+  try {
+    return {
+      parsed: JSON.parse(trimmed),
+      diagnostics: { ...diagnostics, parseMode: "direct" }
+    };
+  } catch (directError) {
+    diagnostics.parseError = `direct: ${directError.message}`;
+  }
+
+  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fenced?.[1]) {
+    try {
+      return {
+        parsed: JSON.parse(fenced[1].trim()),
+        diagnostics: { ...diagnostics, parseMode: "fenced" }
+      };
+    } catch (fencedError) {
+      diagnostics.parseError = `${diagnostics.parseError} / fenced: ${fencedError.message}`;
+    }
+  }
+
+  if (diagnostics.jsonStart !== -1 && diagnostics.jsonEnd > diagnostics.jsonStart) {
+    try {
+      return {
+        parsed: JSON.parse(trimmed.slice(diagnostics.jsonStart, diagnostics.jsonEnd + 1)),
+        diagnostics: { ...diagnostics, parseMode: "object-slice" }
+      };
+    } catch (sliceError) {
+      diagnostics.parseError = `${diagnostics.parseError} / object-slice: ${sliceError.message}`;
+    }
+  }
+
+  return { parsed: null, diagnostics: { ...diagnostics, parseMode: "failed" } };
+}
+
 function normalizeQuestionInfoAiItemsFromText(text) {
   const parsed = safeParseJsonText(text);
   const parsedItems = normalizeQuestionItemsFromAi(extractQuestionItemsFromParsed(parsed));
@@ -1339,9 +1415,53 @@ function extractClassificationRowsFromParsed(parsed) {
   return [];
 }
 
+const classificationRowCandidatePaths = [
+  "classificationRows",
+  "questionClassifications",
+  "classifications",
+  "rows",
+  "items",
+  "fields.classificationRows",
+  "fields.questionClassifications",
+  "result.classificationRows",
+  "result.questionClassifications",
+  "result.fields.classificationRows",
+  "result.fields.questionClassifications",
+  "data.classificationRows",
+  "data.questionClassifications",
+  "data.fields.classificationRows",
+  "analysis.classificationRows",
+  "output.classificationRows",
+  "문항분류표",
+  "문항별분류",
+  "분류표"
+];
+
+function buildClassificationParseDiagnostics(text = "", parsed = null, rows = [], baseDiagnostics = {}) {
+  const parsedObject = parsed && typeof parsed === "object" ? parsed : null;
+  const candidateSummaries = classificationRowCandidatePaths.map((path) => ({
+    path,
+    ...summarizeParseCandidate(getValueAtPath(parsedObject, path))
+  }));
+  const populatedCandidates = candidateSummaries.filter((candidate) =>
+    candidate.type !== "missing" &&
+    (candidate.type !== "array" || candidate.length > 0)
+  );
+  return {
+    ...baseDiagnostics,
+    parsedType: Array.isArray(parsed) ? "array" : parsedObject ? "object" : parsed === null ? "null" : typeof parsed,
+    topLevelKeys: parsedObject ? Object.keys(parsedObject).slice(0, 20) : [],
+    candidateSummaries,
+    populatedCandidates,
+    normalizedRowCount: rows.length,
+    rawTextPreview: String(text ?? "").trim().slice(0, 1200)
+  };
+}
+
 function normalizeQuestionClassificationResult(text = "") {
-  const parsed = safeParseJsonText(text);
+  const { parsed, diagnostics: jsonDiagnostics } = parseJsonTextWithDiagnostics(text);
   const rows = normalizeClassificationRowsFromAi(extractClassificationRowsFromParsed(parsed));
+  const parseDiagnostics = buildClassificationParseDiagnostics(text, parsed, rows, jsonDiagnostics);
   return {
     fields: {
       classificationSummary: String(parsed?.classificationSummary || parsed?.summary || "").trim(),
@@ -1352,7 +1472,8 @@ function normalizeQuestionClassificationResult(text = "") {
       classificationRows: rows,
       questionClassifications: rows
     },
-    rowCount: rows.length
+    rowCount: rows.length,
+    parseDiagnostics
   };
 }
 
@@ -1796,6 +1917,16 @@ export async function runExamQuestionClassification(payload) {
   model = runResult.model;
   const normalized = normalizeQuestionClassificationResult(runResult.text);
   const parsedRows = normalized.fields.classificationRows;
+  const parseDiagnostics = {
+    ...normalized.parseDiagnostics,
+    provider,
+    model,
+    targetCount,
+    pageImageCount: pageImages.length,
+    seedRowCount: seedRows.length,
+    sourceFileCount: Array.isArray(payload.sourceFiles) ? payload.sourceFiles.length : 0,
+    rawTextLength: String(runResult.text || "").length
+  };
   const fallbackRows = seedRows.length ? seedRows : normalizeClassificationRowsFromAi(
     Array.from({ length: targetCount }, (_, index) => ({ number: index + 1, page: 1 }))
   );
@@ -1813,8 +1944,10 @@ export async function runExamQuestionClassification(payload) {
       questionClassifications: rows
     },
     rawText: runResult.text,
+    rawTextPreview: String(runResult.text || "").trim().slice(0, 4000),
     classificationRowCount: parsedRows.length,
     pageImageCount: pageImages.length,
+    parseDiagnostics,
     ...(runResult.fallbackReason ? { fallbackReason: runResult.fallbackReason } : {}),
     ...(warning || runResult.fallbackReason ? { warning: [runResult.fallbackReason, warning].filter(Boolean).join(" · ") } : {})
   };

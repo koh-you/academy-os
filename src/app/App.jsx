@@ -988,6 +988,36 @@ async function requestExamQuestionClassificationDraft(payload) {
   return result.result;
 }
 
+function formatQuestionClassificationParseDiagnostics(diagnostics = {}, rawTextPreview = "") {
+  const populatedCandidates = Array.isArray(diagnostics.populatedCandidates) ? diagnostics.populatedCandidates : [];
+  const candidateText = populatedCandidates.length
+    ? populatedCandidates.slice(0, 4).map((candidate) => {
+        const size = candidate.type === "array"
+          ? `${candidate.length}개`
+          : candidate.type === "object"
+            ? `${candidate.valueCount || candidate.objectValueCount || 0}값`
+            : candidate.type;
+        return `${candidate.path}:${size}`;
+      }).join(", ")
+    : "없음";
+  const topKeys = Array.isArray(diagnostics.topLevelKeys) && diagnostics.topLevelKeys.length
+    ? diagnostics.topLevelKeys.slice(0, 8).join(", ")
+    : "없음";
+  const preview = String(rawTextPreview || diagnostics.rawTextPreview || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 320);
+  return [
+    `JSON 파싱: ${diagnostics.parseMode || "확인 불가"}`,
+    diagnostics.parseError ? `파싱 오류: ${diagnostics.parseError}` : "",
+    `AI 원문: ${diagnostics.rawTextLength || 0}자`,
+    `이미지 입력: ${diagnostics.pageImageCount ?? "?"}장`,
+    `상위 키: ${topKeys}`,
+    `분류 후보 경로: ${candidateText}`,
+    preview ? `원문 시작: ${preview}` : ""
+  ].filter(Boolean).join("\n");
+}
+
 function getExamPostFileOpenUrl(file) {
   if (file?.signedUrl) return file.signedUrl;
   if (!file?.storagePath) return "";
@@ -14348,6 +14378,29 @@ function ExamAnalysisCenter({
         examPrepContext
       });
       const fields = result?.fields || {};
+      const parsedRowCount = Math.max(0, Number(result?.classificationRowCount) || 0);
+      if (!parsedRowCount) {
+        const diagnosticText = formatQuestionClassificationParseDiagnostics(result?.parseDiagnostics, result?.rawTextPreview || result?.rawText || "");
+        const failureText = `AI 분류표 파싱 실패 · 분류 행 0/${targetCount}개\n${diagnosticText}`;
+        update("aiInitialFields", {
+          ...(selectedAnalysis.aiInitialFields || {}),
+          questionClassifications: baseRows,
+          questionClassificationDebug: {
+            ...(result?.parseDiagnostics || {}),
+            provider: result?.provider || aiSettings.examAnalysisProvider,
+            model: result?.model || aiSettings.examAnalysisModel,
+            warning: result?.warning || "",
+            rawTextPreview: result?.rawTextPreview || String(result?.rawText || "").slice(0, 4000),
+            capturedAt: new Date().toISOString()
+          }
+        });
+        update("aiProvider", result?.provider || aiSettings.examAnalysisProvider);
+        update("aiModel", result?.model || aiSettings.examAnalysisModel);
+        update("aiStatus", "실패");
+        update("aiError", failureText);
+        setCropDraftStatus(failureText);
+        return;
+      }
       const aiRows = normalizeExamQuestionClassificationRows(fields.classificationRows || fields.questionClassifications || result?.classificationRows || []);
       const mergedActiveRows = mergeExamQuestionClassificationDrafts(baseRows, aiRows, {
         sourceId: resolvedQuestionSourceId,
@@ -14380,7 +14433,7 @@ function ExamAnalysisCenter({
       update("pipelineStage", "문항 검수");
 
       const scoreCount = mergedActiveRows.filter((row) => row.score).length;
-      const aiParsedCount = Math.max(0, Number(result?.classificationRowCount) || 0);
+      const aiParsedCount = parsedRowCount;
       const aiFilledCount = mergedActiveRows.filter((row) =>
         [
           row.unit,
