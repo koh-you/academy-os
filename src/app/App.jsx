@@ -2286,11 +2286,28 @@ function getExamStrategyFlowNodes(questionItems = []) {
   ];
 }
 
+function createExamFinalClassificationTableRows(classificationRows = []) {
+  return normalizeExamQuestionClassificationRows(classificationRows).map((row) => [
+    `${row.number}번`,
+    `${row.page || 1}p`,
+    row.score || "-",
+    row.questionType || "확인 필요",
+    row.unit || "확인 필요",
+    getSsenPrimaryTypeText(row.ssenTypeTags) || "확인 필요",
+    getSsenSecondaryTypeText(row.ssenTypeTags) || "-",
+    row.difficulty || "확인 필요",
+    row.role || "-",
+    row.reviewNote || row.evidence || (row.needsReview ? "확인 필요" : "")
+  ]);
+}
+
 function createExamFinalDocumentFromAnalysis(analysis = {}) {
-  const classificationItems = classificationRowsToInsightItems(analysis.questionClassifications || analysis.classificationRows);
+  const classificationRows = normalizeExamQuestionClassificationRows(analysis.questionClassifications || analysis.classificationRows);
+  const classificationItems = classificationRowsToInsightItems(classificationRows);
   const questionItems = classificationItems.length ? classificationItems : normalizeExamQuestionItems(analysis.questionItems);
   const unitRows = summarizeQuestionUnits(questionItems);
   const ssenTypeRows = summarizeQuestionSsenTypes(questionItems);
+  const classificationTableRows = createExamFinalClassificationTableRows(classificationRows);
   const sourceRows = questionItems.filter((item) =>
     (String(item.source || "").trim() && item.source !== "확인 필요") ||
     item.similarProblemNeeded === "필요" ||
@@ -2345,6 +2362,13 @@ function createExamFinalDocumentFromAnalysis(analysis = {}) {
           ["난이도", analysis.oneLineSummary || "강사 검수 후 입력"]
         ]
       },
+      ...(classificationTableRows.length ? [{
+        id: createFinalDocumentId("table"),
+        type: "table",
+        title: "문항별 분류표 원본",
+        columns: ["문항", "페이지", "배점", "형식", "단원", "쎈 주유형", "쎈 보조유형", "난이도", "역할", "검수 메모"],
+        rows: classificationTableRows
+      }] : []),
       {
         id: createFinalDocumentId("chart"),
         type: "chart",

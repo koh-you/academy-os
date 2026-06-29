@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-29 P1. 시험분석 최종 편집본 분류표 원본 반영
+
+- 상태: 완료
+- 사용자 요청: 시험분석 문항별 분류표 MVP 이후 작업을 이어간다.
+- 판단: 실제 PDF 클릭 검수와 운영 API 로그 확인은 시험지 원본/운영 배포 상태가 필요하므로, 코드에서 바로 이어갈 수 있고 산출물 품질에 직접 영향이 있는 `최종 편집본` 연결을 먼저 보강했다. MVP에서 사람이 확정하는 원본 데이터는 `questionClassifications` 분류표이므로, 최종 편집본에도 단원/쎈 주유형/쎈 보조유형/난이도/역할/검수 메모가 원본 표로 남아야 한다.
+- 이번 작업 결과: `createExamFinalDocumentFromAnalysis`가 `questionClassifications`를 정규화한 뒤 `문항별 분류표 원본` 표 블록을 자동 생성한다. 표 컬럼은 문항, 페이지, 배점, 형식, 단원, 쎈 주유형, 쎈 보조유형, 난이도, 역할, 검수 메모이며, 기존 단원별 출제 차트와 쎈 유형별 분류표 앞에 원본 검수표가 들어간다.
+- 저장 주의: 기존 `examAnalyses[].questionClassifications` app_state 저장 경로만 사용한다. 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 232, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-28 P1. 시험분석 문항카드 UI 제거와 분류표 MVP 전환
 
 - 상태: 완료
