@@ -82,6 +82,14 @@ import {
   repairDisconnectedExamAnalysisRuns as repairDisconnectedExamAnalysisRunsBase,
   splitReportLines
 } from "../domains/exams/analysisState.js";
+import {
+  getExamAnalysisSourceOpenUrl as getExamAnalysisSourceOpenUrlBase,
+  getExamAnalysisSourceRenderUrl as getExamAnalysisSourceRenderUrlBase,
+  requestExamQuestionClassificationDraft as requestExamQuestionClassificationDraftBase,
+  requestExamQuestionCropDraft as requestExamQuestionCropDraftBase,
+  requestExamQuestionInfoTextDraft as requestExamQuestionInfoTextDraftBase,
+  uploadExamAnalysisSourceFile as uploadExamAnalysisSourceFileBase
+} from "../domains/exams/api.js";
 import { sampleData } from "../shared/data/sampleData.js";
 import { safeIdPart, shortStableHash } from "../shared/utils/id.js";
 
@@ -1041,34 +1049,22 @@ async function uploadExamPostSubmissionFile(file, target, student) {
 }
 
 async function uploadExamAnalysisSourceFile(file, analysis) {
-  const dataUrl = await readFileAsDataUrl(file);
-  const result = await postJson("/api/exam-analysis-sources", {
-    dataUrl,
-    fileName: file.name,
-    fileType: file.type,
-    analysisId: analysis.examAnalysisId,
-    schoolName: analysis.schoolName,
-    grade: analysis.grade,
-    subject: analysis.subject,
-    examName: analysis.examName,
-    examDate: analysis.examDate
+  return uploadExamAnalysisSourceFileBase(file, analysis, {
+    postJson,
+    readFileAsDataUrl
   });
-  return result.file;
 }
 
 async function requestExamQuestionCropDraft(payload) {
-  const result = await postJson("/api/ai/exam-question-crops", payload);
-  return result.result;
+  return requestExamQuestionCropDraftBase(payload, { postJson });
 }
 
 async function requestExamQuestionInfoTextDraft(payload) {
-  const result = await postJson("/api/ai/exam-question-info-text", payload);
-  return result.result;
+  return requestExamQuestionInfoTextDraftBase(payload, { postJson });
 }
 
 async function requestExamQuestionClassificationDraft(payload) {
-  const result = await postJson("/api/ai/exam-question-classification", payload);
-  return result.result;
+  return requestExamQuestionClassificationDraftBase(payload, { postJson });
 }
 
 function getExamPostFileOpenUrl(file) {
@@ -1078,16 +1074,11 @@ function getExamPostFileOpenUrl(file) {
 }
 
 function getExamAnalysisSourceOpenUrl(file) {
-  if (file?.storagePath) {
-    return apiUrl(`/api/exam-analysis-sources/open?bucket=${encodeURIComponent(file.bucketId || "exam-analysis-sources")}&path=${encodeURIComponent(file.storagePath)}`);
-  }
-  if (file?.signedUrl) return file.signedUrl;
-  return "";
+  return getExamAnalysisSourceOpenUrlBase(file, { apiUrl });
 }
 
 function getExamAnalysisSourceRenderUrl(file) {
-  if (!file?.storagePath) return file?.signedUrl || "";
-  return apiUrl(`/api/exam-analysis-sources/file?bucket=${encodeURIComponent(file.bucketId || "exam-analysis-sources")}&path=${encodeURIComponent(file.storagePath)}`);
+  return getExamAnalysisSourceRenderUrlBase(file, { apiUrl });
 }
 
 function postMakeupTask(makeupTask) {

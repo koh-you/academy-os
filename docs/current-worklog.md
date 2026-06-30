@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 API helper 7차 모듈 분리
+
+- 상태: 완료
+- 사용자 요청: 다음 우선순위대로 구조분리를 계속 진행한다.
+- 판단: `ExamAnalysisCenter` 실행/저장 action hook을 만들기 전에 API endpoint와 payload 조립 경계를 먼저 분리해야 한다. 호출부 함수명은 유지하고 실제 시험분석 원본 업로드, 문항 크롭/문항정보/분류표 AI 요청, 원본 open/render URL 생성 helper를 도메인 API 모듈로 이동했다.
+- 이번 작업 결과: `src/domains/exams/api.js`를 추가하고 `uploadExamAnalysisSourceFile`, `requestExamQuestionCropDraft`, `requestExamQuestionInfoTextDraft`, `requestExamQuestionClassificationDraft`, `getExamAnalysisSourceOpenUrl`, `getExamAnalysisSourceRenderUrl`를 이동했다. `src/app/App.jsx`에는 기존 함수명 wrapper만 남겼고, 다음 단계에서 `useExamAnalysisActions`로 묶을 API 경계가 더 선명해졌다.
+- 테스트 보정: 구조 분리 후 정적 시나리오 테스트가 시험분석 API endpoint 문자열과 helper 이름을 새 도메인 모듈까지 함께 검사하도록 보정했다.
+- 저장 주의: API 호출 wrapper 분리만 수행했다. Supabase 저장 경로와 서버 endpoint는 기존 그대로이며 새 SQL edit 필요 없음.
+- 검증: `node --check src/domains/exams/api.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 AI 상태/파싱 helper 6차 모듈 분리
 
 - 상태: 완료
