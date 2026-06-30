@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 AI 모델 선택 설정 분리와 Opus 선택 허용
+
+- 상태: 완료
+- 사용자 요청: AI 모델 선택은 각 기능 화면이 아니라 설정에서 관리한다. 문항분류/누락보정 기본값은 Sonnet으로 두되, 서버가 Opus를 강제로 막지 않고 사용자가 설정에서 선택할 수 있게 한다. 3개년 종합 총평/최종 인사이트 단계는 Opus 기본값을 유지한다.
+- 이번 작업 결과: `defaultAiSettings`에 `questionClassificationProvider`/`questionClassificationModel`을 추가하고, 설정 화면에 `문항분류·누락보정 AI` 행을 별도로 추가했다. 이 행은 Claude Sonnet을 기본 선택으로 두며, 필요하면 Claude Opus도 직접 선택할 수 있다. 기존 `시험분석 AI` 행은 3개년 종합 총평/최종 인사이트용 Opus 기본값 설명으로 정리했다.
+- 서버 정책 변경: `api/routes/examAnalysis.js`에서 문항분류 요청의 Opus 강제 차단 로직을 제거했다. 이제 `server-default`일 때만 `ANTHROPIC_EXAM_CLASSIFICATION_MODEL`/`OPENAI_EXAM_CLASSIFICATION_MODEL` 기본값을 사용하고, 설정에서 명시 선택한 모델은 Opus 포함 그대로 통과한다.
+- 호출 경로 정리: 문항별 분류표 생성, 누락 문항 재요청, 문항 크롭 보조 호출은 새 `questionClassification` 설정값을 사용한다. 숨은 문항정보 전용 분석 분기도 전체 시험분석 Opus가 아니라 문항분류 설정 기본값을 쓰도록 보정했다.
+- 저장 주의: AI 설정은 기존 `app_state`의 `aiSettings` 저장 경로를 확장해서 사용한다. 새 Supabase SQL edit 없음.
+- 검증: `node --check api/routes/examAnalysis.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 236, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 쎈 유형별 분류 코드 오름차순 정렬
 
 - 상태: 완료

@@ -2077,6 +2077,8 @@ const defaultAiSettings = {
   commentModel: "server-default",
   examAnalysisProvider: "anthropic",
   examAnalysisModel: "claude-opus-4-8",
+  questionClassificationProvider: "anthropic",
+  questionClassificationModel: "claude-sonnet-4-5",
   variantProvider: "auto",
   variantModel: "server-default",
   prompts: defaultAiPrompts
@@ -4931,10 +4933,15 @@ export function App() {
     const aiRunStartedAt = new Date().toISOString();
     const aiRunRequestId = `ai_run_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     const settingsPrompt = getAiPrompt(overrideAiSettings ?? aiSettings, "examAnalysis") || createDefaultExamAnalysisPrompt();
+    const questionInfoOnly = Boolean(analysis.questionInfoOnly);
     const nextAnalysis = {
       ...analysis,
-      aiProvider: overrideAiSettings?.examAnalysisProvider ?? analysis.aiProvider ?? defaultAiSettings.examAnalysisProvider,
-      aiModel: overrideAiSettings?.examAnalysisModel ?? analysis.aiModel ?? defaultAiSettings.examAnalysisModel,
+      aiProvider: questionInfoOnly
+        ? overrideAiSettings?.questionClassificationProvider ?? defaultAiSettings.questionClassificationProvider
+        : overrideAiSettings?.examAnalysisProvider ?? analysis.aiProvider ?? defaultAiSettings.examAnalysisProvider,
+      aiModel: questionInfoOnly
+        ? overrideAiSettings?.questionClassificationModel ?? defaultAiSettings.questionClassificationModel
+        : overrideAiSettings?.examAnalysisModel ?? analysis.aiModel ?? defaultAiSettings.examAnalysisModel,
       aiPrompt: settingsPrompt
     };
     setExamAnalyses((current) =>
@@ -10436,10 +10443,26 @@ function SettingsCenter({
       title: "코멘트 AI"
     },
     {
-      description: "3개년 종합 총평과 최종 인사이트에 사용합니다. 문항별 분류표/누락 재요청은 서버가 Sonnet 계열로 제한합니다.",
+      description: "3개년 종합 총평과 최종 인사이트에 사용합니다. 기본값은 Claude Opus입니다.",
       modelKey: "examAnalysisModel",
       providerKey: "examAnalysisProvider",
       title: "시험분석 AI"
+    },
+    {
+      description: "문항별 분류표 생성과 누락 문항 재요청에 사용합니다. 기본값은 Claude Sonnet이고, 필요하면 Opus도 선택할 수 있습니다.",
+      modelKey: "questionClassificationModel",
+      modelOptions: {
+        anthropic: ["claude-sonnet-4-5", "claude-opus-4-8", "claude-3-5-sonnet-latest", "claude-3-5-haiku-latest"],
+        auto: ["server-default"],
+        mock: ["local-mock"],
+        openai: ["gpt-4.1-mini", "gpt-4.1", "gpt-4o-mini"]
+      },
+      preferredModels: {
+        anthropic: "claude-sonnet-4-5",
+        openai: "gpt-4.1-mini"
+      },
+      providerKey: "questionClassificationProvider",
+      title: "문항분류·누락보정 AI"
     },
     {
       description: "원문 문제를 난도와 조건에 맞춰 변형하는 작업에 사용합니다.",
@@ -10485,12 +10508,16 @@ function SettingsCenter({
   }, [account.loginId]);
 
   function updateProvider(row, provider) {
+    const models = row.modelOptions?.[provider] ?? aiProviderModels[provider] ?? aiProviderModels.auto;
+    const defaultModel = row.preferredModels?.[provider] && models.includes(row.preferredModels[provider])
+      ? row.preferredModels[provider]
+      : models[0] ?? "server-default";
     onUpdateAiSettings((current) => ({
       ...defaultAiSettings,
       ...current,
       prompts: normalizeAiPrompts(current?.prompts),
       [row.providerKey]: provider,
-      [row.modelKey]: aiProviderModels[provider]?.[0] ?? "server-default"
+      [row.modelKey]: defaultModel
     }));
   }
 
@@ -10644,7 +10671,7 @@ function SettingsCenter({
         <div className="settingsRows">
           {aiRows.map((row) => {
             const provider = settings[row.providerKey] ?? "auto";
-            const models = aiProviderModels[provider] ?? aiProviderModels.auto;
+            const models = row.modelOptions?.[provider] ?? aiProviderModels[provider] ?? aiProviderModels.auto;
             const model = models.includes(settings[row.modelKey]) ? settings[row.modelKey] : models[0];
             return (
               <div className="settingsRow" key={row.providerKey}>
@@ -10915,6 +10942,8 @@ function ExamAnalysisCenter({
   const selectedQuestionInsightRecommended = isExamQuestionInsightRecommended(selectedQuestion);
   const selectedQuestionHasDetailedInsight = hasExamQuestionDetailedInsight(selectedQuestion);
   const selectedQuestionInsightExpanded = Boolean(selectedQuestion && expandedQuestionInsightId === selectedQuestion.questionId);
+  const questionClassificationAiProvider = aiSettings.questionClassificationProvider ?? aiSettings.examAnalysisProvider ?? defaultAiSettings.questionClassificationProvider;
+  const questionClassificationAiModel = aiSettings.questionClassificationModel ?? aiSettings.examAnalysisModel ?? defaultAiSettings.questionClassificationModel;
   const ssenTypeSuggestions = selectedQuestion
     ? getSsenTypeSuggestions({
         query: getSsenPrimaryTypeText(selectedQuestion.ssenTypeTags),
@@ -11359,8 +11388,8 @@ function ExamAnalysisCenter({
       }
       setCropDraftStatus(`${repairOnly ? "AI 누락 문항 재분류 중입니다" : "AI 문항별 분류표 생성 중입니다"}... ${pageImages.length ? `${pageImages.length}페이지 이미지 포함` : "텍스트 기준"}`);
       const result = await requestExamQuestionClassificationDraft({
-        aiModel: aiSettings.examAnalysisModel,
-        aiProvider: aiSettings.examAnalysisProvider,
+        aiModel: questionClassificationAiModel,
+        aiProvider: questionClassificationAiProvider,
         schoolName: selectedAnalysis.schoolName,
         grade: selectedAnalysis.grade,
         subject: selectedAnalysis.subject,
@@ -11389,15 +11418,15 @@ function ExamAnalysisCenter({
           questionClassifications: repairOnly ? activeClassificationRows : baseRows,
           questionClassificationDebug: {
             ...(result?.parseDiagnostics || {}),
-            provider: result?.provider || aiSettings.examAnalysisProvider,
-            model: result?.model || aiSettings.examAnalysisModel,
+            provider: result?.provider || questionClassificationAiProvider,
+            model: result?.model || questionClassificationAiModel,
             warning: result?.warning || "",
             rawTextPreview: result?.rawTextPreview || String(result?.rawText || "").slice(0, 4000),
             capturedAt: new Date().toISOString()
           }
         });
-        update("aiProvider", result?.provider || aiSettings.examAnalysisProvider);
-        update("aiModel", result?.model || aiSettings.examAnalysisModel);
+        update("aiProvider", result?.provider || questionClassificationAiProvider);
+        update("aiModel", result?.model || questionClassificationAiModel);
         update("aiStatus", "실패");
         update("aiError", failureText);
         setCropDraftStatus(failureText);
@@ -11428,8 +11457,8 @@ function ExamAnalysisCenter({
         questionClassifications: mergedActiveRows
       });
       update("aiInitialGeneratedAt", aiLastRunAt);
-      update("aiProvider", result?.provider || aiSettings.examAnalysisProvider);
-      update("aiModel", result?.model || aiSettings.examAnalysisModel);
+      update("aiProvider", result?.provider || questionClassificationAiProvider);
+      update("aiModel", result?.model || questionClassificationAiModel);
       update("aiStatus", "완료");
       update("aiError", "");
       update("pipelineStage", "문항 검수");
@@ -11681,8 +11710,8 @@ function ExamAnalysisCenter({
     try {
       const imageDataUrl = getCurrentCropVisionImageDataUrl();
       const result = await requestExamQuestionCropDraft({
-        aiModel: aiSettings.examAnalysisModel,
-        aiProvider: aiSettings.examAnalysisProvider,
+        aiModel: questionClassificationAiModel,
+        aiProvider: questionClassificationAiProvider,
         imageDataUrl,
         pageCount: selectedQuestionSourceIsPdf ? pdfPageCount || 1 : 1,
         pageNumber: cropViewerPageNumber,
@@ -11748,8 +11777,8 @@ function ExamAnalysisCenter({
         try {
           const imageDataUrl = await renderPdfPageToVisionImageDataUrl(pdfDocument, pageNumber);
           const result = await requestExamQuestionCropDraft({
-            aiModel: aiSettings.examAnalysisModel,
-            aiProvider: aiSettings.examAnalysisProvider,
+            aiModel: questionClassificationAiModel,
+            aiProvider: questionClassificationAiProvider,
             imageDataUrl,
             pageCount: totalPages,
             pageNumber,

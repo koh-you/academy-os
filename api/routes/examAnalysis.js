@@ -29,10 +29,6 @@ const examQuestionClassificationModels = {
   openai: process.env.OPENAI_EXAM_CLASSIFICATION_MODEL || fallbackModels.openai
 };
 
-function isOpusModel(model = "") {
-  return String(model || "").toLowerCase().includes("opus");
-}
-
 function isRetryableAiProviderError(error) {
   const message = String(error?.message || "").toLowerCase();
   return [
@@ -289,9 +285,6 @@ function selectedModel(payload, useCase = "default") {
     if (useCase === "examAnalysis") return examAnalysisModels[provider] || fallbackModels[provider] || fallbackModels.mock;
     if (useCase === "questionClassification") return examQuestionClassificationModels[provider] || fallbackModels[provider] || fallbackModels.mock;
     return fallbackModels[provider] || fallbackModels.mock;
-  }
-  if (useCase === "questionClassification" && isOpusModel(requestedModel)) {
-    return examQuestionClassificationModels[provider] || fallbackModels[provider] || fallbackModels.mock;
   }
   return requestedModel;
 }
@@ -2018,7 +2011,7 @@ export async function runExamAnalysis(payload) {
 
   if (provider === "mock") {
     if (questionInfoOnly) {
-      throw new Error("문항정보 채우기는 실제 AI 제공자가 필요합니다. 설정에서 시험분석 AI 제공자를 Anthropic 또는 OpenAI로 선택해 주세요.");
+      throw new Error("문항정보 채우기는 실제 AI 제공자가 필요합니다. 설정에서 문항분류·누락보정 AI 제공자를 Anthropic 또는 OpenAI로 선택해 주세요.");
     }
     return { provider, model, fields: createMockAnalysis(payload) };
   }
@@ -2116,7 +2109,7 @@ export async function runExamQuestionClassification(payload) {
       rawText: "",
       classificationRowCount: 0,
       expectedQuestionNumbers,
-      warning: "mock AI 설정이라 분류표 골격만 저장했습니다. 설정에서 실제 시험분석 AI 제공자를 선택해 주세요."
+      warning: "mock AI 설정이라 분류표 골격만 저장했습니다. 설정에서 실제 문항분류·누락보정 AI 제공자를 선택해 주세요."
     };
   }
 
