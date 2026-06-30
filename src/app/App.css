@@ -3618,8 +3618,72 @@ button {
   justify-content: flex-end;
 }
 
+.classificationSetupActions {
+  align-items: stretch;
+  display: grid;
+  gap: 12px;
+  grid-column: 1 / -1;
+  grid-template-columns: 1fr;
+  justify-content: stretch;
+}
+
+.classificationSetupFields {
+  align-items: end;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(300px, 380px) 142px;
+  justify-content: center;
+}
+
+.classificationSetupFields label {
+  min-width: 0;
+}
+
+.classificationSetupFields select,
+.classificationSetupFields input {
+  width: 100%;
+}
+
+.classificationSetupButtonRow {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 232px 150px 176px 130px 176px 176px;
+  justify-content: end;
+}
+
+.classificationSetupButtonRow button,
+.questionMissingBadge {
+  box-sizing: border-box;
+  min-height: 52px;
+  width: 100%;
+}
+
+.questionMissingBadge {
+  align-items: center;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  color: #c2410c;
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 900;
+  justify-content: center;
+  line-height: 1.35;
+  padding: 8px 12px;
+  text-align: center;
+}
+
+.questionMissingBadge.placeholder {
+  visibility: hidden;
+}
+
 .analysisQuestionSetupActions label {
   min-width: 104px;
+}
+
+.classificationSetupActions .classificationSetupFields label {
+  min-width: 0;
 }
 
 .analysisQuestionSetupActions input[type="number"] {
@@ -3642,6 +3706,9 @@ button {
 
 .collapsibleAnalysisPanel > summary {
   cursor: pointer;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   list-style: none;
 }
 
@@ -3650,14 +3717,26 @@ button {
 }
 
 .collapsibleAnalysisPanel > summary::after {
-  color: #64748b;
+  align-self: center;
+  color: #1d4ed8;
   content: "접기";
-  font-size: 12px;
+  font-size: 17px;
   font-weight: 900;
+  justify-self: end;
+  min-width: 52px;
+  text-align: right;
 }
 
 .collapsibleAnalysisPanel:not([open]) > summary::after {
   content: "펼치기";
+}
+
+.collapsibleMeta {
+  align-self: center;
+  color: #52617c;
+  font-size: 14px;
+  font-weight: 900;
+  justify-self: end;
 }
 
 .collapsibleAnalysisPanel:not([open]) {
@@ -12773,6 +12852,29 @@ body.attendanceOnlyBody {
 
   .analysisQuestionSetupActions {
     justify-content: flex-start;
+  }
+
+  .classificationSetupFields {
+    grid-template-columns: minmax(0, 1fr) 142px;
+    justify-content: stretch;
+  }
+
+  .classificationSetupButtonRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: stretch;
+  }
+
+  .questionMissingBadge.placeholder {
+    display: none;
+  }
+
+  .collapsibleAnalysisPanel > summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .collapsibleMeta {
+    grid-column: 1 / -1;
+    justify-self: start;
   }
 
   .analysisOutputSection > summary {

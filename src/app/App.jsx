@@ -4934,6 +4934,7 @@ export function App() {
     const aiRunRequestId = `ai_run_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     const settingsPrompt = getAiPrompt(overrideAiSettings ?? aiSettings, "examAnalysis") || createDefaultExamAnalysisPrompt();
     const questionInfoOnly = Boolean(analysis.questionInfoOnly);
+    const reviewRegenerationOnly = Boolean(analysis.reviewRegenerationOnly);
     const nextAnalysis = {
       ...analysis,
       aiProvider: questionInfoOnly
@@ -4955,7 +4956,17 @@ export function App() {
     try {
       const result = await postJson("/api/ai/exam-analysis", nextAnalysis);
       const normalizedAiFields = normalizeExamAnalysisAiFields(result.result.fields);
-      const { questionItems: aiQuestionItems = [], ...rawAnalysisAiFields } = normalizedAiFields;
+      const {
+        questionClassifications: aiQuestionClassifications = [],
+        questionItems: aiQuestionItems = [],
+        ...rawAnalysisAiFields
+      } = normalizedAiFields;
+      const existingClassificationRows = normalizeExamQuestionClassificationRows(nextAnalysis.questionClassifications || nextAnalysis.classificationRows);
+      if (aiQuestionClassifications.length) {
+        rawAnalysisAiFields.questionClassifications = aiQuestionClassifications;
+      } else if (existingClassificationRows.length) {
+        rawAnalysisAiFields.questionClassifications = existingClassificationRows;
+      }
       const analysisAiFields = nextAnalysis.questionInfoOnly
         ? {
             ...(rawAnalysisAiFields.questionComposition ? { questionComposition: rawAnalysisAiFields.questionComposition } : {}),
@@ -4999,40 +5010,45 @@ export function App() {
                 if (activeAiSourceId && (questionComposition?.total || questionTargetCount)) {
                   nextTargetCountsBySource[activeAiSourceId] = questionComposition?.total || questionTargetCount;
                 }
-                return {
-                ...item,
-                ...analysisAiFields,
-                sourceCompositions: undefined,
-                aiPrompt: nextAnalysis.aiPrompt,
-                questionComposition: activeAiSourceId ? item.questionComposition || questionComposition : questionComposition || analysisAiFields.questionComposition,
-                questionCompositionsBySource: nextCompositionsBySource,
-                questionTargetCountsBySource: nextTargetCountsBySource,
-                questionItems: mergeAiQuestionDrafts(item.questionItems, aiQuestionItems, {
-                  sourceId: questionSourceContext.sourceId,
-                  sourceUrl: questionSourceContext.sourceUrl,
-                  defaultSourceId: questionSourceContext.sourceId,
-                  targetCount: questionTargetCount
-                }),
-                aiInitialFields: {
+                const nextAnalysisItem = {
+                  ...item,
                   ...analysisAiFields,
-                  questionItems: normalizeAiQuestionDrafts(aiQuestionItems).map((item) => ({
-                    ...item,
-                    cropSourceId: questionSourceContext.sourceId || item.cropSourceId,
-                    cropSourceUrl: questionSourceContext.sourceUrl || item.cropSourceUrl
-                  }))
-                },
-                aiInitialGeneratedAt: aiLastRunAt,
-                aiProvider: result.result.provider,
-                aiModel: result.result.model,
-                aiStatus: "완료",
-                aiLastRunAt,
-                aiError: "",
-                aiRunRequestId: "",
-                aiRunSessionId: "",
-                aiRunStartedAt: "",
-                pipelineStage: "문항 검수",
-                updatedAt: new Date().toISOString()
+                  sourceCompositions: undefined,
+                  aiPrompt: nextAnalysis.aiPrompt,
+                  questionComposition: activeAiSourceId ? item.questionComposition || questionComposition : questionComposition || analysisAiFields.questionComposition,
+                  questionCompositionsBySource: nextCompositionsBySource,
+                  questionTargetCountsBySource: nextTargetCountsBySource,
+                  questionItems: mergeAiQuestionDrafts(item.questionItems, aiQuestionItems, {
+                    sourceId: questionSourceContext.sourceId,
+                    sourceUrl: questionSourceContext.sourceUrl,
+                    defaultSourceId: questionSourceContext.sourceId,
+                    targetCount: questionTargetCount
+                  }),
+                  aiInitialFields: {
+                    ...analysisAiFields,
+                    questionItems: normalizeAiQuestionDrafts(aiQuestionItems).map((item) => ({
+                      ...item,
+                      cropSourceId: questionSourceContext.sourceId || item.cropSourceId,
+                      cropSourceUrl: questionSourceContext.sourceUrl || item.cropSourceUrl
+                    }))
+                  },
+                  aiInitialGeneratedAt: aiLastRunAt,
+                  aiProvider: result.result.provider,
+                  aiModel: result.result.model,
+                  aiStatus: "완료",
+                  aiLastRunAt,
+                  aiError: "",
+                  aiRunRequestId: "",
+                  aiRunSessionId: "",
+                  aiRunStartedAt: "",
+                  pipelineStage: "문항 검수",
+                  updatedAt: new Date().toISOString()
                 };
+                if (reviewRegenerationOnly) {
+                  nextAnalysisItem.finalDocument = null;
+                  nextAnalysisItem.pipelineStage = "분석 검토";
+                }
+                return nextAnalysisItem;
               })()
             : item
         )
@@ -10808,6 +10824,7 @@ function ExamAnalysisCenter({
   const [cropDraftStatus, setCropDraftStatus] = useState("");
   const [isQuestionCropDrafting, setIsQuestionCropDrafting] = useState(false);
   const [isQuestionInfoFilling, setIsQuestionInfoFilling] = useState(false);
+  const [isReviewRegenerating, setIsReviewRegenerating] = useState(false);
   const [pdfPageCount, setPdfPageCount] = useState(0);
   const [pdfRenderStatus, setPdfRenderStatus] = useState("");
   const [pdfScale, setPdfScale] = useState(1.25);
@@ -11481,6 +11498,33 @@ function ExamAnalysisCenter({
       setCropDraftStatus(`분류표 골격은 저장했습니다. AI 분류 생성은 실패했습니다. (${error.message})`);
     } finally {
       setIsQuestionInfoFilling(false);
+    }
+  }
+
+  async function regenerateAnalysisReviewWithOpus() {
+    if (!selectedAnalysis || isReviewRegenerating || selectedAnalysis.aiStatus === "분석 중") return;
+    const reviewedClassificationRows = normalizeExamQuestionClassificationRows(selectedAnalysis.questionClassifications || selectedAnalysis.classificationRows);
+    const reviewQuestionItems = reviewedClassificationRows.length
+      ? classificationRowsToInsightItems(reviewedClassificationRows)
+      : normalizeExamQuestionItems(selectedAnalysis.questionItems);
+    setIsReviewRegenerating(true);
+    try {
+      await onRunAnalysis({
+        ...selectedAnalysis,
+        classificationRows: reviewedClassificationRows,
+        examPrepContext,
+        questionClassifications: reviewedClassificationRows,
+        questionItems: reviewQuestionItems,
+        questionTargetCount: Math.max(
+          Number(selectedAnalysis.questionTargetCount) || 0,
+          reviewedClassificationRows.length,
+          reviewQuestionItems.length
+        ),
+        reviewRegenerationOnly: true
+      }, aiSettings);
+      setIsReportPreviewOpen(true);
+    } finally {
+      setIsReviewRegenerating(false);
     }
   }
 
@@ -12358,67 +12402,67 @@ function ExamAnalysisCenter({
                     </div>
                   </div>
                 )}
-                <div className="analysisQuestionSetupActions">
-                  {renderSourceFiles.length ? (
+                <div className="analysisQuestionSetupActions classificationSetupActions">
+                  <div className="classificationSetupFields">
+                    {renderSourceFiles.length ? (
+                      <label>
+                        현재 시험지/연도
+                        <select
+                          value={resolvedQuestionSourceId}
+                          onChange={(event) => assignClassificationSource(event.target.value)}
+                        >
+                          {renderSourceFileOptions.map(({ file, sourceId }, index) => (
+                            <option key={sourceId} value={sourceId}>
+                              {isPdfExamAnalysisSource(file) ? "PDF · " : "이미지 · "}{file.fileName || `원본 ${index + 1}`}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    ) : null}
                     <label>
-                      현재 시험지/연도
-                      <select
-                        value={resolvedQuestionSourceId}
-                        onChange={(event) => assignClassificationSource(event.target.value)}
-                      >
-                        {renderSourceFileOptions.map(({ file, sourceId }, index) => (
-                          <option key={sourceId} value={sourceId}>
-                            {isPdfExamAnalysisSource(file) ? "PDF · " : "이미지 · "}{file.fileName || `원본 ${index + 1}`}
-                          </option>
-                        ))}
-                      </select>
+                      첫 장 기준 문항 수
+                      <input
+                        min="1"
+                        max="80"
+                        type="number"
+                        value={questionCountDraft}
+                        onChange={(event) => setQuestionCountDraft(event.target.value)}
+                      />
                     </label>
-                  ) : null}
-                  <label>
-                    첫 장 기준 문항 수
-                    <input
-                      min="1"
-                      max="80"
-                      type="number"
-                      value={questionCountDraft}
-                      onChange={(event) => setQuestionCountDraft(event.target.value)}
-                    />
-                  </label>
-                  <button className="primaryButton" onClick={() => applyQuestionCount()} type="button">확인 후 분류표 행 생성</button>
-                  <button
-                    className="softButton"
-                    disabled={selectedAnalysis.aiStatus === "분석 중" || isQuestionInfoFilling}
-                    onClick={runAiForActiveQuestionSource}
-                    type="button"
-                  >
-                    {selectedAnalysis.aiStatus === "분석 중" || isQuestionInfoFilling ? "AI 분류 중..." : "AI 분류표 생성"}
-                  </button>
-                  {missingClassificationNumbers.length ? (
+                  </div>
+                  <div className="classificationSetupButtonRow">
+                    <button className="primaryButton" onClick={() => applyQuestionCount()} type="button">확인 후 분류표 행 생성</button>
                     <button
                       className="softButton"
                       disabled={selectedAnalysis.aiStatus === "분석 중" || isQuestionInfoFilling}
+                      onClick={runAiForActiveQuestionSource}
+                      type="button"
+                    >
+                      {selectedAnalysis.aiStatus === "분석 중" || isQuestionInfoFilling ? "AI 분류 중..." : "AI 분류표 생성"}
+                    </button>
+                    <button
+                      className="softButton"
+                      disabled={!missingClassificationNumbers.length || selectedAnalysis.aiStatus === "분석 중" || isQuestionInfoFilling}
                       onClick={() => runAiForActiveQuestionSource({ repairOnly: true, repairQuestionNumbers: missingClassificationNumbers })}
                       type="button"
                     >
                       누락 문항만 재요청
                     </button>
-                  ) : null}
-                  <button className="softButton" onClick={addClassificationRow} type="button">문항 행 추가</button>
-                  <button className="softButton" onClick={() => questionSourceInputRef.current?.click()} type="button">PDF·이미지 원본 추가</button>
-                  <input
-                    accept="application/pdf,image/*"
-                    className="hiddenFileInput"
-                    multiple
-                    onChange={handleSourceFileSelect}
-                    ref={questionSourceInputRef}
-                    type="file"
-                  />
-                </div>
-                {missingClassificationNumbers.length ? (
-                  <div className="questionCropStatus">
-                    누락 후보: {missingClassificationNumbers.map((number) => `${number}번`).join(", ")}
+                    <button className="softButton" onClick={addClassificationRow} type="button">문항 행 추가</button>
+                    <button className="softButton" onClick={() => questionSourceInputRef.current?.click()} type="button">PDF·이미지 원본 추가</button>
+                    <span className={missingClassificationNumbers.length ? "questionMissingBadge" : "questionMissingBadge placeholder"}>
+                      누락 후보: {missingClassificationNumbers.length ? missingClassificationNumbers.map((number) => `${number}번`).join(", ") : "없음"}
+                    </span>
+                    <input
+                      accept="application/pdf,image/*"
+                      className="hiddenFileInput"
+                      multiple
+                      onChange={handleSourceFileSelect}
+                      ref={questionSourceInputRef}
+                      type="file"
+                    />
                   </div>
-                ) : null}
+                </div>
                 {cropDraftStatus ? <div className="questionCropStatus">{cropDraftStatus}</div> : null}
               </article>
 
@@ -12428,7 +12472,6 @@ function ExamAnalysisCenter({
                     <h2>분류표 기반 요약</h2>
                     <p className="muted">분류표가 채워지면 단원별 출제와 쎈 유형별 분류가 자동으로 정리됩니다.</p>
                   </div>
-                  <span className="countBadge">요약 펼침</span>
                 </summary>
                 <ExamQuestionInsightTables classificationRows={activeClassificationRows} questionComposition={questionComposition} />
                 <ExamStrategyFlow questionItems={activeQuestionItems} />
@@ -12440,7 +12483,7 @@ function ExamAnalysisCenter({
                     <h2>문항별 분류표</h2>
                     <p className="muted">이 표가 최종 분석지의 단원별 출제표, 쎈 유형별 분류표, 대비전략의 기준 데이터입니다.</p>
                   </div>
-                  <span className="countBadge">현재 원본 {activeClassificationRows.length}/{activeQuestionTargetCount || questionCountDraft || "-"}문항</span>
+                  <span className="collapsibleMeta">현재 원본 {activeClassificationRows.length}/{activeQuestionTargetCount || questionCountDraft || "-"}문항</span>
                 </summary>
                 {activeClassificationRows.length ? (
                   <div className="analysisPreviewTableWrap">
@@ -12986,12 +13029,21 @@ function ExamAnalysisCenter({
               <article className="panel analysisReviewLaunchPanel">
                 <span className={`analysisStatusBadge ${statusMeta.tone}`}>{statusMeta.label}</span>
                 <h2>{[selectedAnalysis.schoolName, selectedAnalysis.grade, selectedAnalysis.subject].filter(Boolean).join(" ") || "시험분석 검토"}</h2>
+                <p className="muted">문항 검수표와 강사 인사이트를 합쳐 시험분석 AI(Opus 기본값)로 분석지를 다시 작성합니다.</p>
                 <div className="analysisReviewLaunchButtons">
-                  <button className="analysisReviewLaunchButton" onClick={() => setDetailSectionId("ai")} type="button">
-                    AI 분석 결과
+                  <button
+                    className="analysisReviewLaunchButton"
+                    disabled={selectedAnalysis.aiStatus === "분석 중" || isReviewRegenerating}
+                    onClick={regenerateAnalysisReviewWithOpus}
+                    type="button"
+                  >
+                    {selectedAnalysis.aiStatus === "분석 중" || isReviewRegenerating ? "재작성 중..." : "Opus로 분석 결과 재작성"}
                   </button>
                   <button className="analysisReviewLaunchButton primary" onClick={() => setDetailSectionId("insight")} type="button">
                     인사이트
+                  </button>
+                  <button className="analysisReviewLaunchButton" onClick={() => setIsReportPreviewOpen(true)} type="button">
+                    보고서 보기
                   </button>
                 </div>
               </article>

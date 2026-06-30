@@ -232,6 +232,43 @@ function formatSsenTypeTagsForPrompt(tags = []) {
   return normalized.map((tag) => [tag.role === "secondary" ? "보조" : "주", tag.typeCode, tag.typeName].filter(Boolean).join(" ")).join(", ");
 }
 
+function formatClassificationRowsForPrompt(rows = []) {
+  const normalizedRows = normalizeClassificationRowsFromAi(rows);
+  if (!normalizedRows.length) return "";
+  return normalizedRows.slice(0, 80).map((row) => {
+    const ssenText = formatSsenTypeTagsForPrompt(row.ssenTypeTags);
+    return [
+      `${row.number}번`,
+      `p.${row.page || 1}`,
+      row.score ? `배점 ${row.score}` : "",
+      row.questionType ? `형식 ${row.questionType}` : "",
+      row.unit ? `단원 ${row.unit}` : "",
+      ssenText ? `쎈 ${ssenText}` : "",
+      row.difficulty ? `난이도 ${row.difficulty}` : "",
+      row.role ? `역할 ${row.role}` : "",
+      row.evidence || row.reviewNote ? `검수 ${row.reviewNote || row.evidence}` : ""
+    ].filter(Boolean).join(" · ");
+  }).join("\n");
+}
+
+function formatTeacherInsightsForPrompt(payload = {}) {
+  const rows = [
+    ["A. 강사 총평", payload.insightSummary],
+    ["B. 단원별 인사이트", payload.insightUnits],
+    ["C. 킬러문항 분석", payload.insightKiller],
+    ["D. 실제 학생 오답", payload.insightStudentErrors],
+    ["E. 다음 시험 예측", payload.insightPrediction],
+    ["F. 학습 방향", payload.insightDirection]
+  ];
+  return rows
+    .map(([label, value]) => {
+      const text = String(value || "").trim();
+      return text ? `${label}\n${text}` : "";
+    })
+    .filter(Boolean)
+    .join("\n\n");
+}
+
 function envValue(name) {
   const value = process.env[name];
   return value && !value.startsWith("your_") ? value : "";
@@ -326,6 +363,9 @@ function defaultExamAnalysisPromptForServer() {
 function buildExamAnalysisPrompt(payload) {
   const examPrepContext = payload.examPrepContext && typeof payload.examPrepContext === "object" ? payload.examPrepContext : null;
   const scopedRawExamText = limitPromptText(payload.rawExamText || "");
+  const reviewedClassificationText = formatClassificationRowsForPrompt(payload.questionClassifications || payload.classificationRows);
+  const teacherInsightText = formatTeacherInsightsForPrompt(payload);
+  const reviewRegenerationOnly = Boolean(payload.reviewRegenerationOnly);
   const sourceFileLines = Array.isArray(payload.sourceFiles)
     ? payload.sourceFiles.map((file, index) => {
         const sourceId = file.sourceId || file.storagePath || file.signedUrl || file.fileName || `source_${index}`;
@@ -360,6 +400,14 @@ function buildExamAnalysisPrompt(payload) {
     scopedRawExamText ||
       "아직 원본 텍스트가 없습니다. 입력된 기본정보와 강사 메모를 기준으로 분석 필드 초안을 만들어 주세요.",
     "",
+    "[문항 검수 확정 데이터]",
+    reviewedClassificationText ||
+      "아직 문항별 분류표 검수 데이터가 없습니다. OCR과 현재 문항 카드를 기준으로만 작성하세요.",
+    "",
+    "[강사 인사이트]",
+    teacherInsightText ||
+      "강사 인사이트가 아직 비어 있습니다. AI 초안 문체로 단정하지 말고 확인 필요 항목을 분리하세요.",
+    "",
     "[현재 문항 카드]",
     `목표 문항 수: ${payload.questionTargetCount || "원본에서 확인"}`,
     Array.isArray(payload.questionItems) && payload.questionItems.length
@@ -368,10 +416,21 @@ function buildExamAnalysisPrompt(payload) {
     "",
     buildSsenTypePromptSection(payload),
     "",
+    reviewRegenerationOnly
+      ? [
+          "[검수 후 재작성 모드]",
+          "- 이번 요청은 초안 OCR 분석이 아니라, 강사가 검수한 문항별 분류표와 강사 인사이트를 합쳐 분석지를 다시 쓰는 단계다.",
+          "- [문항 검수 확정 데이터]를 OCR보다 우선한다. 배점/단원/쎈유형/난이도/역할은 검수표 값을 기준으로 총평, 단원 분포, 유형 분류, 킬러/준킬러, 학생 분석지를 갱신한다.",
+          "- [강사 인사이트]의 표현과 판단을 최종 분석의 중심으로 삼고, AI는 문장 구조화와 누락 연결만 보조한다.",
+          "- 출력은 웹앱의 보고서/PDF 미리보기 카드에 들어갈 문단형 JSON 필드다. textarea 편집용 내부 메모처럼 쓰지 말고 한눈에 읽히는 분석 문장으로 쓴다."
+        ].join("\n")
+      : "",
     "[작성 규칙]",
     "- 시험지를 설명하지 말고 학생·강사가 다음 행동을 결정할 수 있게 분석한다.",
     "- 각 항목은 가능하면 사실 근거 → 점수에 미친 영향 → 다음 학습 행동 순서로 쓴다.",
     "- 반드시 시험 원본/OCR에 있는 사실을 우선한다.",
+    "- 문항 검수 확정 데이터가 있으면 OCR보다 검수표를 우선하고, 분류표의 쎈 유형·단원·난이도를 요약과 산출물에 반영한다.",
+    "- 강사 인사이트가 있으면 AI 초안보다 강사 인사이트를 우선한다. 강사 인사이트와 충돌하는 AI 판단은 확인 필요로 낮춘다.",
     "- 시험지 첫 페이지의 문항 수 및 배점 표가 보이면 questionComposition에 먼저 정리한다.",
     "- 업로드 원본이 2개 이상이면 각 원본의 첫 장 문항 구성표를 sourceCompositions에 sourceId별로 따로 정리한다.",
     "- sourceCompositions의 sourceId는 [시험 기본정보]의 업로드 원본에 적힌 sourceId를 그대로 사용한다.",

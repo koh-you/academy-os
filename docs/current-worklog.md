@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 문항검수 UI 고정과 Opus 분석 재작성
+
+- 상태: 완료
+- 사용자 요청: 문항별 분류표 MVP 상단 버튼들이 누락 후보/원본 선택에 따라 움직이지 않게 고정한다. 접힘 패널의 별도 펼치기 버튼 느낌을 없애고 우측 끝 큰 `펼치기/접기` 텍스트로 열고 닫게 한다. 분석 검토 단계에서는 Opus를 이용해 문항 검수 결과와 강사 인사이트를 합쳐 AI 분석결과를 다시 API 호출로 작성하고, 결과는 textarea 모달이 아니라 PDF 저장 가능한 한눈에 보는 보고서 형식으로 보여준다.
+- 이번 작업 결과: 문항검수 상단 컨트롤을 `classificationSetupFields`와 `classificationSetupButtonRow`로 분리하고, 누락 후보 배지를 고정 슬롯으로 배치해 후보 번호가 달라져도 버튼 위치가 흔들리지 않게 했다. `details` 요약 패널은 `countBadge`식 버튼을 제거하고 우측 끝의 큰 `펼치기/접기` 텍스트와 선택적 메타 텍스트로 정리했다.
+- Opus 재작성 흐름: 분석 검토 카드에 `Opus로 분석 결과 재작성`과 `보고서 보기`를 추가했다. 재작성 버튼은 현재 문항별 분류표 검수값, 강사 인사이트, 시험관리 컨텍스트를 묶어 기존 시험분석 API를 다시 호출한다. 완료 후 textarea 편집 모달이 아니라 `최종 보고서 미리보기`를 열어 PDF 저장/인쇄 가능한 형태로 확인한다.
+- 서버 프롬프트 보강: `api/routes/examAnalysis.js`에 `formatClassificationRowsForPrompt`/`formatTeacherInsightsForPrompt`를 추가하고, 시험분석 프롬프트에 `[문항 검수 확정 데이터]`, `[강사 인사이트]`, `[검수 후 재작성 모드]`를 넣었다. 재작성 모드에서는 OCR보다 검수표와 강사 인사이트를 우선하도록 지시한다.
+- 저장 주의: 새 Supabase SQL edit 없음. 기존 `examAnalyses` app_state 저장 경로를 사용하며, 재작성 시 기존 확정 문항분류표가 빈 AI 응답으로 덮이지 않도록 보존했다. 재작성 결과는 분석 필드에 저장되고 기존 최종 편집본은 비워 보고서 미리보기가 최신 AI 재작성 내용을 보여주게 했다.
+- 검증: `node --check api/routes/examAnalysis.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 237, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다. 로컬 확인용 Vite dev server는 `http://127.0.0.1:5173`에서 실행 중이다.
+
 ### 2026-06-30 P1. 시험분석 AI 모델 선택 설정 분리와 Opus 선택 허용
 
 - 상태: 완료
