@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 배포 반영 확인과 공개 메타 브랜드명 정리
+
+- 상태: 완료
+- 사용자 요청: `AGENTS.md`와 `docs/next-session/README.md`를 읽고 시험분석 문항별 분류표와 수업일지 출결 안정화 이후 작업을 이어간다.
+- 확인 결과: 운영 프론트 `https://academy-os-blue.vercel.app`와 출결 전용 경로 `/attendance`가 200으로 응답했고, 운영 번들에 `미래 수업에는 출결을 기록하지 않습니다.`, `AI가 분류표 행 없이 요약 JSON만 반환했습니다`, `classificationReviewTable`, `단원 / 쎈 유형`, `난이도 / 역할` 등 최근 시험분석/출결 안정화 문자열이 포함되어 최신 기능 배포 반영을 확인했다. 운영 API `/health`, `/api/core/status`, `/api/integrations/status`도 정상 응답했고 AI/알림톡 설정은 구성 완료 상태였다.
+- 이번 작업 결과: 공개 HTML title/OG/Twitter title에 남아 있던 `koh_you_math os`, `koh_you_math_attendance`를 각각 `으뜸수학 고태영T Academy OS`, `으뜸수학 고태영T 출결`로 바꿨다. `koh_you_math`는 내부 식별자/URL/환경변수에만 남긴다는 제품 규칙에 맞춘 변경이다. 같은 회귀가 반복되지 않도록 `scripts/scenario-tests-production.cjs`에 공개 페이지 메타가 학원 브랜드명으로 유지되는지 검사하는 항목을 추가했다.
+- 저장 주의: HTML 메타와 테스트 변경만 있으므로 Supabase 저장 경로 또는 SQL edit 필요 없음. 시험분석 분류표는 계속 기존 `app_state.examAnalyses[].questionClassifications`, 출결은 기존 `lesson_student_records` 흐름을 사용한다.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 236, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P2. 다음 세션 인수인계 문서 최신화
 
 - 상태: 완료

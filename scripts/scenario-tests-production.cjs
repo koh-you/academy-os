@@ -4,6 +4,8 @@ const path = require("path");
 const root = path.resolve(__dirname, "..");
 const appPath = path.join(root, "src", "app", "App.jsx");
 const cssPath = path.join(root, "src", "app", "App.css");
+const indexHtmlPath = path.join(root, "index.html");
+const attendanceHtmlPath = path.join(root, "attendance.html");
 const notificationRoutePath = path.join(root, "api", "routes", "notifications.js");
 const examAnalysisRoutePath = path.join(root, "api", "routes", "examAnalysis.js");
 const coreDataRoutePath = path.join(root, "api", "routes", "coreData.js");
@@ -20,6 +22,8 @@ const dispatchWorkflowPath = path.join(root, ".github", "workflows", "dispatch-n
 
 const app = fs.readFileSync(appPath, "utf8");
 const css = fs.readFileSync(cssPath, "utf8");
+const indexHtml = fs.readFileSync(indexHtmlPath, "utf8");
+const attendanceHtml = fs.readFileSync(attendanceHtmlPath, "utf8");
 const notificationRoute = fs.readFileSync(notificationRoutePath, "utf8");
 const examAnalysisRoute = fs.readFileSync(examAnalysisRoutePath, "utf8");
 const coreDataRoute = fs.readFileSync(coreDataRoutePath, "utf8");
@@ -45,6 +49,7 @@ function hasAll(source, patterns) {
 }
 
 check("01 login form does not expose default credentials", !app.includes("setLoginId(nextRole)") && app.includes('const [loginId, setLoginId] = useState("");'));
+check("01a public page metadata uses academy brand name", hasAll(indexHtml, ["<title>으뜸수학 고태영T Academy OS</title>", 'property="og:title" content="으뜸수학 고태영T Academy OS"', 'name="twitter:title" content="으뜸수학 고태영T Academy OS"']) && hasAll(attendanceHtml, ["<title>으뜸수학 고태영T 출결</title>", 'property="og:title" content="으뜸수학 고태영T 출결"', 'name="twitter:title" content="으뜸수학 고태영T 출결"']) && !indexHtml.includes("koh_you_math") && !attendanceHtml.includes("koh_you_math"));
 check("02 login form does not include temporary lockout", !hasAll(app, ["loginAttempts", "lockedUntil"]) && !css.includes("loginSecurityNotice"));
 check("03 role switching clears credentials", hasAll(app, ["function selectRole(nextRole)", 'setLoginId("");', 'setPassword("");', 'setError("");']));
 check("03b teacher account can be changed from settings without app_state password storage", hasAll(app, ["teacherAccountSettings", "defaultTeacherAccountSettings", "onUpdateTeacherAccountSettings", "function saveTeacherAccount(event)", "postJson(\"/api/auth/teacher-account\"", "계정 설정", "계정 저장"]) && !app.includes("currentPassword !== account.password") && !app.includes("password: nextPassword || currentPassword") && hasAll(css, [".accountSettingsGrid", ".accountSettingsActions"]));
