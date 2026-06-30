@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 report preview component 13차 모듈 분리
+
+- 상태: 완료
+- 사용자 요청: 2026-06-30 오후 4시까지 구조분리 및 리팩터링을 계속 진행한다.
+- 판단: 산출물 미리보기 파서를 분리한 뒤에도 초기 AI 초안 보기, 리포트 텍스트 렌더링, 읽기용 미리보기, 인스타 카드뉴스 미리보기, 프리뷰 카드 UI가 `App.jsx`에 남아 있었다. 이 UI는 저장/AI 실행 상태와 분리되어 있어 독립 JSX 모듈로 옮겨도 위험이 낮다.
+- 이번 작업 결과: `src/domains/exams/reportPreview.jsx`를 추가하고 `ExamAnalysisInitialView`, `ExamAnalysisReportSection`, `ExamAnalysisReportText`, `ExamAnalysisReadablePreview`, `ExamAnalysisInstagramPreview`, `AnalysisOutputPreviewCard`를 이동했다. `copyTextToClipboard`는 `src/domains/exams/outputPreview.js` 공용 helper로 이동했다. `src/app/App.jsx`는 해당 컴포넌트 import만 사용하도록 정리했고, 파일 크기는 약 19,959줄에서 19,815줄로 줄었다.
+- 테스트 보정: 구조 분리 후 정적 시나리오 테스트가 시험분석 report preview JSX 모듈까지 함께 읽고, 미리보기 컴포넌트 존재 여부를 `App.jsx` 단일 파일이 아니라 시험분석 프론트 전체에서 확인하도록 보정했다.
+- 저장 주의: 순수 프론트 컴포넌트 구조 분리만 수행했다. Supabase 저장 경로와 최종 산출물 저장 구조는 기존 그대로이며 새 SQL edit 필요 없음.
+- 검증: `node --check src/domains/exams/outputPreview.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 output preview parser 12차 모듈 분리
 
 - 상태: 완료

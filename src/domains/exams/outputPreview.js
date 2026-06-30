@@ -46,3 +46,13 @@ export function parseInstagramSlides(value = "") {
 
   return slides.length ? slides : [{ number: 1, title: "카드뉴스 초안", lines: ["아직 내용이 없습니다."] }];
 }
+
+export function copyTextToClipboard(text = "") {
+  const value = String(text ?? "").trim();
+  if (!value) return;
+  if (window.navigator?.clipboard?.writeText) {
+    window.navigator.clipboard.writeText(value).catch(() => window.alert(value));
+    return;
+  }
+  window.alert(value);
+}
