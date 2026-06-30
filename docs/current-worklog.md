@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 산출물 레이아웃 기본값/최종편집본 본문 안정화
+
+- 상태: 완료
+- 사용자 요청: 산출물별 레이아웃 기본 선택을 강사 리포트형, 학생 분석지 필요 없음, 블로그 홍보형, 인스타 분석형으로 맞춘다. 최종편집본 본문이 JSON 조각처럼 복잡하게 보이지 않게 하고, 블록 `펼치기`를 누르면 바로 다시 닫히는 문제를 고친다.
+- 이번 작업 결과: `defaultExamOutputLayoutChoices`를 강사 C(리포트형), 학생 X(필요 없음), 블로그 A(홍보형 글 구조), 인스타 B(7장 분석형)로 변경했다. 기존에 모든 산출물이 A안으로 저장된 레거시 값은 새 기본값으로 보정되게 했다. 학생 분석지에는 `필요 없음` 선택지와 미사용 와이어프레임을 추가했다.
+- UI 보정: 최종편집본 블록의 `details`를 controlled `open` 상태가 아니라 `defaultOpen` 기반으로 바꿔 펼치기 직후 다시 닫히는 문제를 막았다. AI 응답이 본문에 JSON 필드를 함께 섞어 넣어도 `cleanFinalDocumentText`가 문단 본문만 남기도록 정리했다.
+- 저장 주의: 기존 `examAnalyses[].finalDocument`와 `examAnalyses[].outputLayoutChoices` app_state 저장 구조를 그대로 사용한다. 새 Supabase SQL edit 없음.
+- 검증: `node --check src/domains/exams/finalDocument.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 237, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 최종편집본 블록 접힘 보정
 
 - 상태: 완료

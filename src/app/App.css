@@ -4500,6 +4500,32 @@ button {
   min-height: 96px;
 }
 
+.examOutputWireframe.disabled {
+  align-items: center;
+  background: #f8fafc;
+  color: #64748b;
+  display: flex;
+  justify-content: center;
+}
+
+.examOutputWireframe .off {
+  background: transparent;
+  border: 2px dashed #cbd5e1;
+  border-radius: 8px;
+  height: 54px;
+  width: 72%;
+}
+
+.examOutputWireframe .off::after {
+  color: #64748b;
+  content: "미사용";
+  display: block;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 50px;
+  text-align: center;
+}
+
 .finalDocumentAddBar {
   background: #f8fbff;
   border: 1px solid #d8e3f8;

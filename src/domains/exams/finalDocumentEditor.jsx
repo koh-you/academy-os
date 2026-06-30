@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import {
   similarProblemNeedOptions,
   similarProblemRelationOptions
@@ -222,7 +220,6 @@ export function ExamFinalDocumentBuilder({
 }
 
 function ExamFinalDocumentBlockEditor({ block, defaultOpen = false, isFirst, isLast, updateBlock, moveBlock, removeBlock }) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
   const updateField = (field, value) => updateBlock(block.id, (current) => ({ ...current, [field]: value }));
   const blockLabel = {
     cover: "표지",
@@ -243,8 +240,7 @@ function ExamFinalDocumentBlockEditor({ block, defaultOpen = false, isFirst, isL
   return (
     <details
       className={`finalDocumentBlock ${block.type}`}
-      onToggle={(event) => setIsOpen(event.currentTarget.open)}
-      open={isOpen}
+      defaultOpen={defaultOpen}
     >
       <summary className="finalDocumentBlockHeader">
         <div className="finalDocumentBlockTitle">

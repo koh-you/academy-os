@@ -11,10 +11,10 @@ import {
 } from "./questionClassification.js";
 
 const defaultExamOutputLayoutChoices = Object.freeze({
-  teacher: "A",
-  student: "A",
+  teacher: "C",
+  student: "X",
   blog: "A",
-  instagram: "A"
+  instagram: "B"
 });
 
 function normalizeFinalDocumentCropBox(box = null) {
@@ -28,10 +28,15 @@ function normalizeFinalDocumentCropBox(box = null) {
 
 export function normalizeExamOutputLayoutChoices(choices = {}) {
   const safeChoices = choices && typeof choices === "object" && !Array.isArray(choices) ? choices : {};
+  const isLegacyAllA = ["teacher", "student", "blog", "instagram"].every((key) =>
+    String(safeChoices[key] || "").trim().toUpperCase() === "A"
+  );
+  const sourceChoices = isLegacyAllA ? {} : safeChoices;
   return Object.fromEntries(
     Object.entries(defaultExamOutputLayoutChoices).map(([key, defaultCode]) => {
-      const code = String(safeChoices[key] || defaultCode).trim().toUpperCase();
-      return [key, ["A", "B", "C"].includes(code) ? code : defaultCode];
+      const code = String(sourceChoices[key] || defaultCode).trim().toUpperCase();
+      const allowedCodes = key === "student" ? ["A", "B", "C", "X"] : ["A", "B", "C"];
+      return [key, allowedCodes.includes(code) ? code : defaultCode];
     })
   );
 }
@@ -186,6 +191,47 @@ export function createFinalDocumentId(prefix = "block") {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 }
 
+function cleanFinalDocumentText(value = "", fieldKey = "") {
+  let text = String(value ?? "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\\n/g, "\n")
+    .replace(/^```(?:json)?/i, "")
+    .replace(/```$/i, "")
+    .trim();
+  if (!text) return "";
+
+  const parseCandidate = (candidate) => {
+    try {
+      const parsed = JSON.parse(candidate);
+      if (fieldKey && parsed && typeof parsed === "object" && parsed[fieldKey]) return String(parsed[fieldKey] || "").trim();
+    } catch {
+      return "";
+    }
+    return "";
+  };
+  const directParsed = parseCandidate(text);
+  if (directParsed) text = directParsed;
+  else {
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+    if (start >= 0 && end > start) {
+      const extracted = parseCandidate(text.slice(start, end + 1));
+      if (extracted) text = extracted;
+    }
+  }
+
+  const jsonFieldPattern = /\n\s*"?(oneLineSummary|questionComposition|sourceCompositions|examStructure|aiOverview|unitDistribution|typeClassification|killerProblems|fiveCorePatterns|sourceCheckNotes|studentAnalysisDraft|blogDraft|instagramDraft|questionItems|questionClassifications|classificationRows)"?\s*:/i;
+  text = text.split(jsonFieldPattern)[0] ?? text;
+  return text
+    .replace(/^["'{,\s]+/, "")
+    .replace(/[",;}\s]+$/, "")
+    .trim();
+}
+
+function getFinalAnalysisText(analysis = {}, fieldKey = "") {
+  return cleanFinalDocumentText(analysis[fieldKey], fieldKey);
+}
+
 export function getExamStrategyFlowNodes(questionItems = []) {
   const items = normalizeExamQuestionItems(questionItems);
   const sourceCount = items.filter((item) =>
@@ -234,6 +280,20 @@ export function createExamFinalDocumentFromAnalysis(analysis = {}, options = {})
   const unitRows = summarizeQuestionUnits(questionItems);
   const ssenTypeRows = summarizeQuestionSsenTypes(questionItems);
   const classificationTableRows = createExamFinalClassificationTableRows(classificationRows);
+  const finalText = {
+    aiOverview: getFinalAnalysisText(analysis, "aiOverview"),
+    examStructure: getFinalAnalysisText(analysis, "examStructure"),
+    fiveCorePatterns: getFinalAnalysisText(analysis, "fiveCorePatterns"),
+    insightDirection: getFinalAnalysisText(analysis, "insightDirection"),
+    insightKiller: getFinalAnalysisText(analysis, "insightKiller"),
+    insightPrediction: getFinalAnalysisText(analysis, "insightPrediction"),
+    insightStudentErrors: getFinalAnalysisText(analysis, "insightStudentErrors"),
+    insightSummary: getFinalAnalysisText(analysis, "insightSummary"),
+    killerProblems: getFinalAnalysisText(analysis, "killerProblems"),
+    oneLineSummary: getFinalAnalysisText(analysis, "oneLineSummary"),
+    typeClassification: getFinalAnalysisText(analysis, "typeClassification"),
+    unitDistribution: getFinalAnalysisText(analysis, "unitDistribution")
+  };
   const sourceRows = questionItems.filter((item) =>
     (String(item.source || "").trim() && item.source !== "확인 필요") ||
     item.similarProblemNeeded === "필요" ||
@@ -273,7 +333,7 @@ export function createExamFinalDocumentFromAnalysis(analysis = {}, options = {})
         id: createFinalDocumentId("text"),
         type: "text",
         title: "기말고사 출제 핵심 분석",
-        value: [analysis.oneLineSummary, analysis.examStructure, analysis.aiOverview].filter(Boolean).join("\n\n")
+        value: [finalText.oneLineSummary, finalText.examStructure, finalText.aiOverview].filter(Boolean).join("\n\n")
       },
       {
         id: createFinalDocumentId("table"),
@@ -285,7 +345,7 @@ export function createExamFinalDocumentFromAnalysis(analysis = {}, options = {})
           ["고사", analysis.examName || "미입력"],
           ["과목", analysis.subject || "미입력"],
           ["문항 구성", analysis.questionComposition?.total ? `${analysis.questionComposition.total}문항` : `${questionItems.length || 0}문항`],
-          ["난이도", analysis.oneLineSummary || "강사 검수 후 입력"]
+          ["난이도", finalText.oneLineSummary || "강사 검수 후 입력"]
         ]
       },
       ...(classificationTableRows.length ? [{
@@ -325,9 +385,9 @@ export function createExamFinalDocumentFromAnalysis(analysis = {}, options = {})
         title: "난이도 상승 요인 분석",
         columns: ["요인", "해당 문항", "비고"],
         rows: [
-          ["킬러/준킬러", questionItems.filter((item) => ["준킬러", "킬러", "1등급 변별문항"].includes(item.role) || item.tags?.includes("1등급 변별문항")).map((item) => `${item.number}번`).join(", ") || "확인 필요", analysis.insightKiller || ""],
+          ["킬러/준킬러", questionItems.filter((item) => ["준킬러", "킬러", "1등급 변별문항"].includes(item.role) || item.tags?.includes("1등급 변별문항")).map((item) => `${item.number}번`).join(", ") || "확인 필요", finalText.insightKiller || ""],
           ["고배점 문항", questionItems.filter((item) => parseExamScoreValue(item.score) >= Math.max(4, getExamTotalScore(questionItems, analysis.questionComposition) * 0.05)).map((item) => `${item.number}번(${formatQuestionScoreWithWeight(item, questionItems, analysis.questionComposition)})`).join(", ") || "확인 필요", "문항 수가 달라지면 같은 배점도 전체 대비 비중이 달라집니다."],
-          ["조건 해석", questionItems.filter((item) => ["앞번호 고난도", "서술형 변별"].includes(item.role)).map((item) => `${item.number}번`).join(", ") || "확인 필요", analysis.typeClassification || ""]
+          ["조건 해석", questionItems.filter((item) => ["앞번호 고난도", "서술형 변별"].includes(item.role)).map((item) => `${item.number}번`).join(", ") || "확인 필요", finalText.typeClassification || ""]
         ]
       },
       {
@@ -353,7 +413,7 @@ export function createExamFinalDocumentFromAnalysis(analysis = {}, options = {})
         id: createFinalDocumentId("text"),
         type: "text",
         title: "점수 차이를 만든 결정 요인",
-        value: [analysis.killerProblems, analysis.insightStudentErrors].filter(Boolean).join("\n\n")
+        value: [finalText.killerProblems, finalText.insightStudentErrors].filter(Boolean).join("\n\n")
       },
       {
         id: createFinalDocumentId("questionSlots"),
@@ -365,7 +425,7 @@ export function createExamFinalDocumentFromAnalysis(analysis = {}, options = {})
         id: createFinalDocumentId("text"),
         type: "text",
         title: "TEACHER's COMMENT",
-        value: [analysis.insightSummary, analysis.insightDirection, analysis.insightPrediction].filter(Boolean).join("\n\n")
+        value: [finalText.insightSummary, finalText.insightDirection, finalText.insightPrediction].filter(Boolean).join("\n\n")
       }
     ]
   };
@@ -449,7 +509,7 @@ export function normalizeExamFinalDocument(document = null) {
           }))
         };
       }
-      return { ...base, value: String(block.value || "").trim() };
+      return { ...base, value: cleanFinalDocumentText(block.value) };
     });
   return {
     version: Number(document.version) || 1,

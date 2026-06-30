@@ -14,6 +14,7 @@ export const examOutputLayoutOptions = [
     key: "student",
     title: "학생 분석지",
     options: [
+      { code: "X", name: "필요 없음", frame: "disabled", slots: ["off"] },
       { code: "A", name: "복습 로드맵형", frame: "roadmap", slots: ["hero", "step", "step", "step", "check"] },
       { code: "B", name: "문항 태그형", frame: "tagBoard", slots: ["meta", "tag", "tag", "tag", "task"] },
       { code: "C", name: "한 장 피드백형", frame: "dashboard", slots: ["hero", "table", "chart", "list"] }
@@ -71,7 +72,7 @@ export function ExamOutputLayoutPlanner({ value, onChange }) {
       <div className="examOutputLayoutGrid">
         {examOutputLayoutOptions.map((group) => (
           <section className="examOutputLayoutGroup" key={group.title}>
-            <h3>{group.title}<span>{selectedChoices[group.key]}안</span></h3>
+            <h3>{group.title}<span>{group.options.find((option) => option.code === selectedChoices[group.key])?.name || `${selectedChoices[group.key]}안`}</span></h3>
             <div>
               {group.options.map((option) => {
                 const isSelected = selectedChoices[group.key] === option.code;
