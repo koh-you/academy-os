@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 기본값/default prompt 10차 모듈 분리
+
+- 상태: 완료
+- 사용자 요청: 2026-06-30 오후 4시까지 구조분리 및 리팩터링을 계속 진행한다.
+- 판단: 시험분석 `App.jsx` 상단에 긴 기본 프롬프트와 신규 분석 객체 생성 로직이 남아 있어, 화면 코드에서 실제 UI/상태 흐름을 읽는 데 방해가 됐다. 동작을 바꾸지 않고 학원명과 시험 주기 라벨만 주입하는 defaults 경계로 분리했다.
+- 이번 작업 결과: `src/domains/exams/defaults.js`를 추가하고 `createDefaultExamAnalysisPrompt`, `createDefaultExamAnalysis`를 이동했다. `src/app/App.jsx`에는 기존 함수명 wrapper만 남겼고, 파일 크기는 약 20,233줄에서 20,089줄로 줄었다.
+- 테스트 보정: 구조 분리 후 정적 시나리오 테스트가 시험분석 기본 프롬프트 문자열과 신규 분석 기본값을 `src/domains/exams/defaults.js`까지 함께 검사하도록 보정했다.
+- 저장 주의: 순수 프론트 코드 구조 분리만 수행했다. Supabase 저장 경로는 기존 `examAnalyses`, `examAnalysisFolders`, `app_state` 그대로이며 새 SQL edit 필요 없음.
+- 검증: `node --check src/domains/exams/defaults.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 문항정보/OCR helper 9차 모듈 분리
 
 - 상태: 완료
