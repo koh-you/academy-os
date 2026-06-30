@@ -1346,6 +1346,22 @@ button {
   font-weight: 900;
 }
 
+.journalAutoSaveStatus {
+  display: inline-flex;
+  min-width: 132px;
+  white-space: nowrap;
+}
+
+.journalAutoSaveStatus.dirty,
+.journalAutoSaveStatus.saving,
+.journalAutoSaveStatus.saved {
+  color: #94a3b8;
+}
+
+.journalAutoSaveStatus.failed {
+  color: var(--status-danger-text);
+}
+
 .checkoutMissingSummary {
   background: #fff7ed;
   border: 1px solid #fdba74;

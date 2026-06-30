@@ -7663,6 +7663,19 @@ function LessonJournalDetail({
   const lessonStudents = (lesson.studentIds ?? [])
     .map((studentId) => students.find((student) => student.studentId === studentId))
     .filter((student) => student && (student.status ?? "active") === "active");
+  const lessonRecordSaveStates = lessonStudents
+    .map((student) => saveStates[createLessonStudentRecordId(lesson.lessonId, student.studentId)])
+    .filter(Boolean);
+  const lessonJournalSaveStatus = (() => {
+    if (lessonRecordSaveStates.includes("failed")) return { label: "저장 실패", tone: "failed" };
+    if (lessonRecordSaveStates.includes("saving")) return { label: "저장 중...", tone: "saving" };
+    if (lessonRecordSaveStates.includes("dirty")) return { label: "저장 대기...", tone: "dirty" };
+    if (lessonRecordSaveStates.includes("saved")) return { label: "저장 완료", tone: "saved" };
+    return { label: "", tone: "idle" };
+  })();
+  const defaultScheduleHintText = isDefaultScheduleExpired
+    ? `기본 예약 시간 지남 · ${defaultAlimtalkTimeLabel}`
+    : `기본 예약 ${defaultAlimtalkTimeLabel}`;
   const checkoutMissingStudents = lessonStudents.filter((student) => {
     const record = findLessonStudentRecord(records, lesson, student);
     return hasMissingCheckOut(record, lesson);
@@ -7833,7 +7846,13 @@ function LessonJournalDetail({
         <button className={showPreSendCheck ? "preSendCheckButton active" : "preSendCheckButton"} onClick={() => setShowPreSendCheck((current) => !current)} type="button">
           {showPreSendCheck ? "점검 표시 해제" : "발송 전 점검"}
         </button>
-        <span className="defaultScheduleHint">{isDefaultScheduleExpired ? `기본 예약 시간 지남 · ${defaultAlimtalkTimeLabel}` : `기본 예약 ${defaultAlimtalkTimeLabel}`}</span>
+        <span
+          aria-live="polite"
+          className={`defaultScheduleHint journalAutoSaveStatus ${lessonJournalSaveStatus.tone}`}
+          title={defaultScheduleHintText}
+        >
+          {lessonJournalSaveStatus.label || defaultScheduleHintText}
+        </span>
         {checkoutMissingStudents.length > 0 ? (
           <span className="checkoutMissingSummary" title={checkoutMissingStudents.map((student) => student.name).join(", ")}>
             하원 미체크 {checkoutMissingStudents.length}명
