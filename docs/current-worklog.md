@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 자동 수업 저장 Failed to fetch 알림창 제거
+
+- 상태: 완료
+- 사용자 요청: 간헐적으로 `자동 수업 저장 실패: Failed to fetch` 브라우저 알림창이 뜬다.
+- 원인/판단: 시험관리 자동 수업 저장은 백그라운드로 `/api/lessons/bulk`를 호출하는데, 네트워크 순간 실패나 API 응답 지연 시 `window.alert`를 띄워 사용자의 작업을 막고 있었다. 자동 수업은 화면에 먼저 반영되는 낙관 저장 구조라 실패 후 재시도 버튼도 필요했다.
+- 이번 작업 결과: 자동 수업 저장 경로를 `postJsonWithTimeout`으로 바꾸고, 실패 시 브라우저 알림창 대신 `시험관리 자동 수업` 패널 안에 `자동 수업 저장 실패 · ...` 배너를 표시한다. 실패한 수업 목록을 상태에 보관해 `다시 저장` 버튼으로 같은 묶음을 재시도할 수 있게 했다. 저장 중/저장 완료 상태도 같은 패널에 표시한다.
+- 저장 주의: 기존 `lessons` 저장 API와 Supabase 스키마를 그대로 사용한다. 새 Supabase SQL edit 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 237, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 수업일지 알림톡 없음/알림 제외 상태 표시 강화
 
 - 상태: 완료

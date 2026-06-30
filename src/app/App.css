@@ -5840,6 +5840,42 @@ button {
   padding: 7px 10px;
 }
 
+.generatedLessonSaveNotice {
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #dbe5f5;
+  border-radius: 8px;
+  color: #475569;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 10px 12px;
+}
+
+.generatedLessonSaveNotice span {
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.generatedLessonSaveNotice.saving {
+  background: var(--status-info-bg);
+  border-color: var(--status-info-border);
+  color: var(--status-info-text);
+}
+
+.generatedLessonSaveNotice.saved {
+  background: var(--status-success-bg);
+  border-color: var(--status-success-border);
+  color: var(--status-success-text);
+}
+
+.generatedLessonSaveNotice.failed {
+  background: var(--status-danger-bg);
+  border-color: var(--status-danger-border);
+  color: var(--status-danger-text);
+}
+
 .generatedLessonList {
   border: 1px solid #e2e8f0;
   border-radius: 8px;

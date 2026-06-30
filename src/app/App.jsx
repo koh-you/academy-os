@@ -2209,6 +2209,11 @@ export function App() {
     "academy-os.generatedLessonControls.v1",
     defaultGeneratedLessonControls
   );
+  const [generatedLessonSaveStatus, setGeneratedLessonSaveStatus] = useState({
+    lessons: [],
+    message: "",
+    state: "idle"
+  });
   const [integrationStatus, setIntegrationStatus] = useState(null);
   const [isAppStateReady, setIsAppStateReady] = useState(false);
   const [isPortalDataReady, setIsPortalDataReady] = useState(false);
@@ -2613,11 +2618,7 @@ export function App() {
     }));
   }
 
-  function saveGeneratedLessonsFromPlan(planItems) {
-    const lessonsToSave = planItems
-      .filter((item) => item.status === "create" || item.status === "update")
-      .map((item) => item.lesson);
-    if (lessonsToSave.length === 0) return;
+  function mergeGeneratedLessonsIntoState(lessonsToSave) {
     setLessons((current) => {
       const next = [...current];
       lessonsToSave.forEach((lesson) => {
@@ -2627,25 +2628,47 @@ export function App() {
       });
       return next;
     });
-    postJson("/api/lessons/bulk", { lessons: lessonsToSave })
+  }
+
+  function saveGeneratedLessons(lessonsToSave) {
+    if (lessonsToSave.length === 0) return;
+    mergeGeneratedLessonsIntoState(lessonsToSave);
+    setGeneratedLessonSaveStatus({
+      lessons: lessonsToSave,
+      message: `자동 수업 ${lessonsToSave.length}건 저장 중...`,
+      state: "saving"
+    });
+    postJsonWithTimeout(
+      "/api/lessons/bulk",
+      { lessons: lessonsToSave },
+      20000,
+      "자동 수업 저장이 20초를 넘었습니다. 잠시 뒤 다시 시도해 주세요."
+    )
       .then((result) => {
-        if (!Array.isArray(result.lessons) || result.lessons.length === 0) return;
-        setLessons((current) => {
-          const next = [...current];
-          result.lessons.forEach((lesson) => {
-            const index = next.findIndex((item) => item.lessonId === lesson.lessonId);
-            if (index >= 0) next[index] = { ...next[index], ...lesson };
-            else next.push(lesson);
-          });
-          return next;
+        if (Array.isArray(result.lessons) && result.lessons.length > 0) {
+          mergeGeneratedLessonsIntoState(result.lessons);
+        }
+        setGeneratedLessonSaveStatus({
+          lessons: [],
+          message: `자동 수업 ${lessonsToSave.length}건 저장 완료`,
+          state: "saved"
         });
       })
       .catch((error) => {
         console.error(error);
-        if (typeof window !== "undefined") {
-          window.alert(`자동 수업 저장 실패: ${error.message}`);
-        }
+        setGeneratedLessonSaveStatus({
+          lessons: lessonsToSave,
+          message: `자동 수업 저장 실패 · ${error.message}`,
+          state: "failed"
+        });
       });
+  }
+
+  function saveGeneratedLessonsFromPlan(planItems) {
+    const lessonsToSave = planItems
+      .filter((item) => item.status === "create" || item.status === "update")
+      .map((item) => item.lesson);
+    saveGeneratedLessons(lessonsToSave);
   }
 
   function handleApplyGeneratedLessons() {
@@ -2654,6 +2677,14 @@ export function App() {
 
   function handleApplyGeneratedLesson(generatedKey) {
     saveGeneratedLessonsFromPlan(generatedLessonPlan.filter((item) => item.generatedKey === generatedKey));
+  }
+
+  function handleRetryGeneratedLessonSave() {
+    if (generatedLessonSaveStatus.lessons?.length) {
+      saveGeneratedLessons(generatedLessonSaveStatus.lessons);
+      return;
+    }
+    saveGeneratedLessonsFromPlan(generatedLessonPlan);
   }
 
   useEffect(() => {
@@ -4593,6 +4624,7 @@ export function App() {
         {activeView === "schoolCalendar" ? (
           <SchoolCalendarCenter
             generatedLessonPlan={generatedLessonPlan}
+            generatedLessonSaveStatus={generatedLessonSaveStatus}
             events={schoolEvents}
             rows={examPrepRows}
             onApplyGeneratedLesson={handleApplyGeneratedLesson}
@@ -4608,6 +4640,7 @@ export function App() {
               deleteSchoolEventFromApi(eventId).catch((error) => console.error(error));
             }}
             onSuppressGeneratedLesson={suppressGeneratedLessonKey}
+            onRetryGeneratedLessonSave={handleRetryGeneratedLessonSave}
             onUnsuppressGeneratedLesson={unsuppressGeneratedLessonKey}
             onSyncPreExamLesson={handleSyncPreExamLessonFromSchoolEvent}
             onUpdateExamPrepRow={handleUpdateExamPrepRow}
@@ -13407,12 +13440,14 @@ function ExamAnalysisCenter({
 function SchoolCalendarCenter({
   events,
   generatedLessonPlan = [],
+  generatedLessonSaveStatus = { lessons: [], message: "", state: "idle" },
   rows,
   onAddEvent,
   onApplyGeneratedLesson,
   onApplyGeneratedLessons,
   onClearGeneratedLessonManualOverride,
   onDeleteEvent,
+  onRetryGeneratedLessonSave,
   onSuppressGeneratedLesson,
   onUnsuppressGeneratedLesson,
   onSyncPreExamLesson,
@@ -13485,6 +13520,8 @@ function SchoolCalendarCenter({
     return counts;
   }, {});
   const applyableGeneratedCount = (generatedPlanCounts.create ?? 0) + (generatedPlanCounts.update ?? 0);
+  const shouldShowGeneratedLessonSaveNotice = Boolean(generatedLessonSaveStatus.message);
+  const canSaveGeneratedLessons = applyableGeneratedCount > 0 || generatedLessonSaveStatus.state === "failed";
 
   function shiftMonth(amount) {
     const [year, month] = selectedMonth.split("-").map(Number);
@@ -13871,6 +13908,23 @@ function SchoolCalendarCenter({
             <span>수정됨 {generatedPlanCounts.protected ?? 0}</span>
             <span>숨김 {generatedPlanCounts.skipped ?? 0}</span>
           </div>
+          {shouldShowGeneratedLessonSaveNotice ? (
+            <div className={`generatedLessonSaveNotice ${generatedLessonSaveStatus.state}`} role={generatedLessonSaveStatus.state === "failed" ? "alert" : "status"}>
+              <span>{generatedLessonSaveStatus.message}</span>
+              {generatedLessonSaveStatus.state === "failed" ? (
+                <button className="softButton compact" onClick={onRetryGeneratedLessonSave} type="button">
+                  다시 저장
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+          {canSaveGeneratedLessons && generatedLessonSaveStatus.state !== "failed" ? (
+            <div className="generatedLessonActions">
+              <button className="softButton compact" onClick={onApplyGeneratedLessons} type="button">
+                자동 수업 저장
+              </button>
+            </div>
+          ) : null}
           <div className="emptyHomeworkBox">
             시험관리 입력값이 본데이터입니다. 직전수업은 수업일지에 실제 수업으로 저장되며, 수업일지에서 수정하면 해당 수업은 자동 갱신 보호 상태가 됩니다.
           </div>
