@@ -442,6 +442,7 @@ export function normalizeExamFinalDocument(document = null) {
         type,
         title: String(block.title || (type === "cover" ? "최종 분석지" : "편집 블록")).trim()
       };
+      if (typeof block.collapsed === "boolean") base.collapsed = block.collapsed;
       if (type === "cover") {
         return {
           ...base,

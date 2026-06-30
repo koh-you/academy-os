@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 최종편집본 블록 버튼 단순화
+
+- 상태: 완료
+- 사용자 요청: 최종편집본 블록 헤더의 `위`/`아래` 버튼을 제거하고, 여전히 동작하지 않는 `펼치기` 버튼을 안정화한다.
+- 이번 작업 결과: 최종편집본 블록 헤더에서 순서 이동용 `위`/`아래` 버튼과 관련 `moveBlock` 로직을 제거했다. 헤더 제목은 더 이상 클릭 버튼이 아니며, 우측의 큰 `펼치기/접기` 버튼만 블록 토글을 담당한다.
+- 토글 안정화: 블록의 열림/닫힘 상태를 화면 state가 아니라 각 finalDocument block의 `collapsed` 값으로 저장/정규화한다. `normalizeExamFinalDocument`가 `collapsed`를 보존하므로 버튼 클릭 후 저장/렌더가 다시 돌아도 바로 닫히는 현상이 반복되지 않게 했다.
+- 저장 주의: 기존 `examAnalyses[].finalDocument.blocks[]`에 선택적 `collapsed` boolean만 보존한다. 새 Supabase SQL edit 없음.
+- 검증: `node --check src/domains/exams/finalDocument.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 237, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 산출물 레이아웃 접힘/최종편집본 토글 안정화
 
 - 상태: 완료

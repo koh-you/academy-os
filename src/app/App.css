@@ -4585,7 +4585,6 @@ button {
   background: transparent;
   border: 0;
   color: inherit;
-  cursor: pointer;
   display: flex;
   font: inherit;
   gap: 10px;

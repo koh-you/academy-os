@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import {
   similarProblemNeedOptions,
@@ -135,25 +135,6 @@ export function ExamFinalDocumentBuilder({
     [analysis, createDocumentFromAnalysis]
   );
   const normalizedDocument = normalizeExamFinalDocument(document) || fallbackDocument;
-  const blockIdsKey = normalizedDocument.blocks.map((block) => block.id).join("|");
-  const [blockOpenById, setBlockOpenById] = useState({});
-
-  useEffect(() => {
-    setBlockOpenById((current) => {
-      const nextOpenById = {};
-      let changed = false;
-      normalizedDocument.blocks.forEach((block, index) => {
-        if (Object.prototype.hasOwnProperty.call(current, block.id)) {
-          nextOpenById[block.id] = current[block.id];
-        } else {
-          nextOpenById[block.id] = index < 2;
-          changed = true;
-        }
-      });
-      if (Object.keys(current).length !== Object.keys(nextOpenById).length) changed = true;
-      return changed ? nextOpenById : current;
-    });
-  }, [blockIdsKey]);
 
   function commit(nextDocument) {
     onChange({
@@ -169,16 +150,6 @@ export function ExamFinalDocumentBuilder({
         block.id === blockId ? updater(block) : block
       )
     });
-  }
-
-  function moveBlock(blockId, direction) {
-    const index = normalizedDocument.blocks.findIndex((block) => block.id === blockId);
-    const targetIndex = index + direction;
-    if (index < 0 || targetIndex < 0 || targetIndex >= normalizedDocument.blocks.length) return;
-    const nextBlocks = [...normalizedDocument.blocks];
-    const [block] = nextBlocks.splice(index, 1);
-    nextBlocks.splice(targetIndex, 0, block);
-    commit({ ...normalizedDocument, blocks: nextBlocks });
   }
 
   function removeBlock(blockId) {
@@ -199,15 +170,13 @@ export function ExamFinalDocumentBuilder({
     commit({ ...normalizedDocument, blocks: [...normalizedDocument.blocks, blockMap[type]] });
   }
 
-  function isBlockOpen(blockId, defaultOpen = false) {
-    return Object.prototype.hasOwnProperty.call(blockOpenById, blockId) ? blockOpenById[blockId] : defaultOpen;
+  function isBlockOpen(block, defaultOpen = false) {
+    return typeof block.collapsed === "boolean" ? !block.collapsed : defaultOpen;
   }
 
-  function toggleBlock(blockId, defaultOpen = false) {
-    setBlockOpenById((current) => ({
-      ...current,
-      [blockId]: !(Object.prototype.hasOwnProperty.call(current, blockId) ? current[blockId] : defaultOpen)
-    }));
+  function toggleBlock(block, defaultOpen = false) {
+    const currentlyOpen = isBlockOpen(block, defaultOpen);
+    updateBlock(block.id, (current) => ({ ...current, collapsed: currentlyOpen }));
   }
 
   return (
@@ -241,12 +210,9 @@ export function ExamFinalDocumentBuilder({
         {normalizedDocument.blocks.map((block, index) => (
           <ExamFinalDocumentBlockEditor
             block={block}
-            isOpen={isBlockOpen(block.id, index < 2)}
-            isFirst={index === 0}
-            isLast={index === normalizedDocument.blocks.length - 1}
+            isOpen={isBlockOpen(block, index < 2)}
             key={block.id}
-            moveBlock={moveBlock}
-            onToggle={() => toggleBlock(block.id, index < 2)}
+            onToggle={() => toggleBlock(block, index < 2)}
             removeBlock={removeBlock}
             updateBlock={updateBlock}
           />
@@ -256,7 +222,7 @@ export function ExamFinalDocumentBuilder({
   );
 }
 
-function ExamFinalDocumentBlockEditor({ block, isOpen = false, isFirst, isLast, updateBlock, moveBlock, onToggle, removeBlock }) {
+function ExamFinalDocumentBlockEditor({ block, isOpen = false, updateBlock, onToggle, removeBlock }) {
   const updateField = (field, value) => updateBlock(block.id, (current) => ({ ...current, [field]: value }));
   const blockLabel = {
     cover: "표지",
@@ -269,7 +235,6 @@ function ExamFinalDocumentBlockEditor({ block, isOpen = false, isFirst, isLast, 
   const blockTitle = block.type === "cover" ? block.title : block.title || blockLabel;
 
   function runHeaderAction(event, action) {
-    event.preventDefault();
     event.stopPropagation();
     action();
   }
@@ -277,18 +242,11 @@ function ExamFinalDocumentBlockEditor({ block, isOpen = false, isFirst, isLast, 
   return (
     <section className={`finalDocumentBlock ${block.type}${isOpen ? " open" : ""}`}>
       <div className="finalDocumentBlockHeader">
-        <button
-          aria-expanded={isOpen}
-          className="finalDocumentBlockTitle"
-          onClick={onToggle}
-          type="button"
-        >
+        <div className="finalDocumentBlockTitle">
           <span>{blockLabel}</span>
           <strong>{blockTitle}</strong>
-        </button>
+        </div>
         <div className="finalDocumentBlockActions">
-          <button disabled={isFirst} onClick={(event) => runHeaderAction(event, () => moveBlock(block.id, -1))} type="button">위</button>
-          <button disabled={isLast} onClick={(event) => runHeaderAction(event, () => moveBlock(block.id, 1))} type="button">아래</button>
           <button onClick={(event) => runHeaderAction(event, () => removeBlock(block.id))} type="button">삭제</button>
         </div>
         <button
