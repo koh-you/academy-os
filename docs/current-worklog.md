@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 최종문서 편집/수업일지 출결 helper 21차 모듈 분리
+
+- 상태: 완료
+- 사용자 요청: 구조분리/리팩터링을 이어가되, `App.jsx`에 남은 시험분석 최종문서 편집 영역과 수업일지 주변 도메인 로직을 우선순위로 본다.
+- 판단: 시험분석 최종문서 생성/정규화 순수 로직은 이미 `src/domains/exams/finalDocument.js`에 있었지만, 최종 편집본 빌더/인쇄 JSX가 `App.jsx`에 남아 있었다. 또한 수업일지 출결 날짜 불일치 방어와 수동 출결 시간 보정 helper는 화면 JSX가 아니라 lesson 도메인 규칙이므로 분리 대상이었다.
+- 이번 작업 결과: `src/domains/exams/finalDocumentEditor.jsx`를 추가해 `ExamFinalDocumentBuilder`, `ExamFinalDocumentPrint`, 내부 block/table/chart/flow/question slot editor를 이동했다. `App.jsx`는 최종문서 생성 wrapper와 저장 콜백만 들고, 빌더에는 `createDocumentFromAnalysis` prop으로 프로젝트별 제목/메타/크롭 이미지 주입을 넘긴다. `src/domains/lessons/attendance.js`를 추가해 `getAttendanceDateMismatch`, `clearAttendanceFields`, `getAttendanceDisplay`, `hasMissingCheckOut`, 수동 등원/하원 시간 보정 helper를 이동했다. `App.jsx` 크기는 약 20,569줄에서 20,003줄로 줄었다.
+- 테스트 보정: 정적 운영 테스트가 새 `finalDocumentEditor.jsx`와 `lessons/attendance.js`를 함께 읽도록 `scripts/scenario-tests-production.cjs`를 보정했다. 출결 관련 검사는 helper 원천은 lesson 도메인 소스에서, 화면 연결은 App.jsx에서 확인하도록 나눴다.
+- 저장 주의: 순수 프론트 구조 분리만 수행했다. 시험분석은 기존 `examAnalyses[].finalDocument`/`questionClassifications` app_state 저장 경로를 그대로 쓰고, 수업일지 출결은 기존 `lesson_student_records` 저장 흐름을 그대로 사용한다. 새 Supabase SQL edit 필요 없음.
+- 검증: `node --check src/domains/lessons/attendance.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). `.jsx` 파일 직접 `node --check`는 Node가 `.jsx` 확장자를 알 수 없어 사용하지 않고 Vite 빌드로 JSX 문법을 검증했다. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 수업일지 error boundary 20차 모듈 분리
 
 - 상태: 완료
