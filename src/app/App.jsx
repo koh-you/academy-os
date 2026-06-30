@@ -3742,19 +3742,28 @@ export function App() {
     return persistedLesson;
   }
 
+  function persistLessonNotificationPlans(nextPlans) {
+    if (session?.role !== "teacher") return;
+    postAppState({
+      ...sharedAppState,
+      lessonNotificationPlans: nextPlans
+    }).catch((error) => console.error(error));
+  }
+
   function handleUpdateLessonNotificationPlan(lessonId, mode) {
     if (!lessonId) return;
     const nextMode = mode || "default";
     const currentPlan = lessonNotificationPlans[lessonId];
-    const currentMode = currentPlan?.mode || "default";
-
-    if (!currentPlan || currentMode !== nextMode) {
-      setLessonNotificationPlans((current) => {
-        const next = { ...current };
-        next[lessonId] = { mode: nextMode, updatedAt: new Date().toISOString() };
-        return next;
-      });
-    }
+    const nextPlans = {
+      ...lessonNotificationPlans,
+      [lessonId]: {
+        ...(currentPlan ?? {}),
+        mode: nextMode,
+        updatedAt: new Date().toISOString()
+      }
+    };
+    setLessonNotificationPlans(nextPlans);
+    persistLessonNotificationPlans(nextPlans);
     applyLessonNotificationPlan(lessonId, nextMode);
   }
 
@@ -3987,14 +3996,16 @@ export function App() {
   function handleScheduleLessonNotificationsAt(lessonId, scheduledDate) {
     const lesson = calendarLessons.find((item) => item.lessonId === lessonId) ?? lessons.find((item) => item.lessonId === lessonId);
     if (!lesson) return;
-    setLessonNotificationPlans((current) => ({
-      ...current,
+    const nextPlans = {
+      ...lessonNotificationPlans,
       [lesson.lessonId]: {
         mode: "manual",
         scheduledAt: scheduledDate,
         updatedAt: new Date().toISOString()
       }
-    }));
+    };
+    setLessonNotificationPlans(nextPlans);
+    persistLessonNotificationPlans(nextPlans);
     scheduleLessonNotificationsAt(lesson, scheduledDate, "manual");
   }
 

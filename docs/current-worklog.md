@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 수업일지 알림톡 없음 계획 즉시 저장
+
+- 상태: 완료
+- 사용자 요청: 수업일지에서 상단 `알림톡 없음`을 눌러도 저장되지 않는 문제를 고친다.
+- 원인/판단: 수업별 발송 계획은 `lessonNotificationPlans` app_state에 저장되는 값인데, 버튼 클릭 시 로컬 상태와 예약 job/record 상태만 즉시 바꾸고 Supabase `app_state` 저장은 자동 effect에 의존했다. 이 때문에 새로고침/화면 전환/다른 기기에서 `알림톡 없음` 계획이 사라질 수 있었다.
+- 이번 작업 결과: `handleUpdateLessonNotificationPlan`에서 `기본 예약`, `30분 지연`, `알림톡 없음` 선택 시 `lessonNotificationPlans`를 즉시 `postAppState`로 저장하도록 했다. 수동 `오늘 14:00 일괄예약`도 같은 즉시 저장 경로를 사용한다. 기존 예약 job 취소와 `lesson_student_records`의 `알림톡 없음` 상태 저장 흐름은 유지했다.
+- 저장 주의: 기존 `app_state.lessonNotificationPlans`, `notification_jobs`, `lesson_student_records` 저장 경로를 사용한다. 새 Supabase SQL edit 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 237, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 최종편집본 출처/산출물 연결 안내
 
 - 상태: 완료
