@@ -43,11 +43,15 @@ import {
 } from "../domains/exams/finalDocument.js";
 import {
   buildHeuristicQuestionCropBoxes,
+  canvasToVisionImageDataUrl,
   getExamAnalysisQuestionSourceContext as getExamAnalysisQuestionSourceContextBase,
   getExamAnalysisSourceFileId,
+  imageElementToVisionImageDataUrl,
+  imageUrlToVisionImageDataUrl,
   isImageExamAnalysisSource,
   isPdfExamAnalysisSource,
-  normalizeCropBox
+  normalizeCropBox,
+  renderPdfPageToVisionImageDataUrl
 } from "../domains/exams/sourceMedia.js";
 import {
   applyExamAnalysisFolderToAnalysis,
@@ -91,6 +95,7 @@ import {
   uploadExamAnalysisSourceFile as uploadExamAnalysisSourceFileBase
 } from "../domains/exams/api.js";
 import { sampleData } from "../shared/data/sampleData.js";
+import { readFileAsDataUrl } from "../shared/utils/file.js";
 import { safeIdPart, shortStableHash } from "../shared/utils/id.js";
 
 let pdfJsLoader = null;
@@ -954,80 +959,6 @@ async function postJsonWithTimeout(path, body, timeoutMs = 30000, timeoutMessage
   } finally {
     window.clearTimeout(timeoutId);
   }
-}
-
-function readFileAsDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () => reject(new Error("파일을 읽지 못했습니다."));
-    reader.readAsDataURL(file);
-  });
-}
-
-function canvasToVisionImageDataUrl(sourceCanvas, maxDimension = 1600) {
-  if (!sourceCanvas?.width || !sourceCanvas?.height) {
-    throw new Error("렌더링된 페이지 이미지를 찾지 못했습니다.");
-  }
-  const scale = Math.min(1, maxDimension / Math.max(sourceCanvas.width, sourceCanvas.height));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.round(sourceCanvas.width * scale));
-  canvas.height = Math.max(1, Math.round(sourceCanvas.height * scale));
-  const context = canvas.getContext("2d");
-  context.drawImage(sourceCanvas, 0, 0, canvas.width, canvas.height);
-  return canvas.toDataURL("image/jpeg", 0.86);
-}
-
-async function renderPdfPageToVisionImageDataUrl(pdfDocument, pageNumber, scale = 1.35) {
-  const page = await pdfDocument.getPage(pageNumber);
-  const viewport = page.getViewport({ scale });
-  const outputScale = Math.min(window.devicePixelRatio || 1, 2);
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.floor(viewport.width * outputScale);
-  canvas.height = Math.floor(viewport.height * outputScale);
-  const context = canvas.getContext("2d");
-  context.setTransform(outputScale, 0, 0, outputScale, 0, 0);
-  const renderTask = page.render({ canvasContext: context, viewport });
-  await renderTask.promise;
-  const dataUrl = canvasToVisionImageDataUrl(canvas);
-  canvas.width = 1;
-  canvas.height = 1;
-  return dataUrl;
-}
-
-function imageElementToVisionImageDataUrl(imageElement, maxDimension = 1600) {
-  const width = imageElement?.naturalWidth || imageElement?.width;
-  const height = imageElement?.naturalHeight || imageElement?.height;
-  if (!width || !height) {
-    throw new Error("이미지 원본을 아직 불러오지 못했습니다.");
-  }
-  const scale = Math.min(1, maxDimension / Math.max(width, height));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.round(width * scale));
-  canvas.height = Math.max(1, Math.round(height * scale));
-  const context = canvas.getContext("2d");
-  context.drawImage(imageElement, 0, 0, canvas.width, canvas.height);
-  return canvas.toDataURL("image/jpeg", 0.86);
-}
-
-function imageUrlToVisionImageDataUrl(imageUrl, maxDimension = 1600) {
-  return new Promise((resolve, reject) => {
-    if (!imageUrl) {
-      reject(new Error("이미지 원본 링크가 없습니다."));
-      return;
-    }
-    const image = new Image();
-    image.crossOrigin = "anonymous";
-    image.onload = () => {
-      try {
-        resolve(imageElementToVisionImageDataUrl(image, maxDimension));
-      } catch (error) {
-        reject(error);
-      }
-    };
-    image.onerror = () => reject(new Error("이미지 원본을 불러오지 못했습니다."));
-    image.src = imageUrl;
-  });
 }
 
 async function uploadExamPostSubmissionFile(file, target, student) {

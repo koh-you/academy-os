@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 vision media/file helper 8차 모듈 분리
+
+- 상태: 완료
+- 사용자 요청: 다음 우선순위대로 구조분리를 계속 진행한다.
+- 판단: 시험분석 분류표/크롭 실행은 PDF 페이지와 이미지 원본을 AI 입력용 JPEG data URL로 만드는 browser media helper를 공통으로 사용한다. API helper 분리 다음 단계로 이 변환 경계를 분리해 `ExamAnalysisCenter` action hook으로 옮길 준비를 했다.
+- 이번 작업 결과: `src/shared/utils/file.js`를 추가하고 `readFileAsDataUrl`을 이동했다. `src/domains/exams/sourceMedia.js`에 `canvasToVisionImageDataUrl`, `renderPdfPageToVisionImageDataUrl`, `imageElementToVisionImageDataUrl`, `imageUrlToVisionImageDataUrl`를 이동했다. `src/app/App.jsx`는 import만 사용하도록 정리했고, 파일 크기는 약 21,804줄에서 21,726줄로 줄었다.
+- 저장 주의: browser helper 위치만 변경했다. Supabase 저장 경로, API endpoint, PDF/이미지 업로드 흐름은 기존 그대로이며 새 SQL edit 필요 없음.
+- 검증: `node --check src/domains/exams/sourceMedia.js`, `node --check src/shared/utils/file.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 API helper 7차 모듈 분리
 
 - 상태: 완료
