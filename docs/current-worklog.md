@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 문항정보/OCR helper 9차 모듈 분리
+
+- 상태: 완료
+- 사용자 요청: 사용자가 자리를 비워도 구조분리를 계속 진행하고 커밋/푸시한다.
+- 판단: 시험분석 문항별 분류표 MVP 이후 오류 원인을 좁히려면 `ExamAnalysisCenter` 안에 남아 있던 문항 생성, AI 초안 병합, OCR 스니펫 기반 배점/형식 추론 로직을 화면 코드에서 분리해야 한다. AI 재호출 구조는 건드리지 않고 이미 돌아가는 프론트 보정 로직만 도메인 모듈로 옮겼다.
+- 이번 작업 결과: `src/domains/exams/questionItems.js`를 추가하고 `normalizeAiQuestionDrafts`, `mergeAiQuestionDrafts`, `createExamQuestionItemsFromCount`, 문항 번호 누락 확인 helper, OCR 텍스트 스니펫 추출/점수화, `applyHeuristicQuestionInfoDrafts`, `buildQuestionInsightText`를 이동했다. `src/app/App.jsx`는 새 모듈 import만 사용하도록 정리했고, 파일 크기는 약 21,726줄에서 20,233줄로 줄었다.
+- 테스트 보정: 구조 분리 후 정적 시나리오 테스트가 시험분석 프론트 소스를 집계할 때 `src/domains/exams/questionItems.js`도 함께 읽도록 보정했다.
+- 저장 주의: 순수 프론트 코드 구조 분리만 수행했다. Supabase 저장 경로는 기존 `examAnalyses[].questionItems`, `questionTargetCount`, `questionCompositionsBySource`, `questionClassifications` 그대로이며 새 SQL edit 필요 없음.
+- 검증: `node --check src/domains/exams/questionItems.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 vision media/file helper 8차 모듈 분리
 
 - 상태: 완료
