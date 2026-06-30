@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 question insight table component 14차 모듈 분리
+
+- 상태: 완료
+- 사용자 요청: 2026-06-30 오후 4시까지 구조분리 및 리팩터링을 계속 진행한다.
+- 판단: 문항분석표, 단원별 출제표, 쎈 유형별 분류표, 부교재·유사문항 활용표, 학생 대비전략표 렌더링은 `ExamAnalysisCenter`의 저장/AI 실행 상태와 분리된 표시 계층이다. 문항별 분류표 오류 추적 시 표 렌더링과 데이터 조립을 구분하기 위해 별도 JSX 모듈로 이동했다.
+- 이번 작업 결과: `src/domains/exams/questionInsight.jsx`를 추가하고 `ExamQuestionInsightTables`, `ExamStrategyFlow`를 이동했다. `src/app/App.jsx`는 해당 컴포넌트 import만 사용하도록 정리했고, 파일 크기는 약 19,815줄에서 19,577줄로 줄었다.
+- 테스트 보정: 구조 분리 후 정적 시나리오 테스트가 시험분석 프론트 소스를 집계할 때 `src/domains/exams/questionInsight.jsx`도 함께 읽도록 보정했다.
+- 저장 주의: 순수 프론트 컴포넌트 구조 분리만 수행했다. Supabase 저장 경로는 기존 `examAnalyses[].questionItems`, `questionClassifications`, `finalDocument` 그대로이며 새 SQL edit 필요 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 report preview component 13차 모듈 분리
 
 - 상태: 완료
