@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 수업일지 assignment status helper 18차 모듈 분리
+
+- 상태: 완료
+- 사용자 요청: 2026-06-30 오후 4시까지 구조분리 및 리팩터링을 계속 진행한다.
+- 판단: 과제 상태 옵션, 라벨, 별칭, 학부모/학생용 문구, 정규화 helper는 수업일지 화면 JSX와 직접 결합된 상태가 아니라 여러 알림/숙제 흐름에서 공유되는 도메인 규칙이다. `getAssignmentStatusForMessage`는 `getHomeworkAssignmentStatus` fallback에 의존하므로 `App.jsx`에 남기고, 순수 규칙만 먼저 분리했다.
+- 이번 작업 결과: `src/domains/lessons/assignmentStatus.js`를 추가하고 `assignmentStatusOptions`, `assignmentStatusLabels`, `assignmentStatusParentMessages`, `assignmentStatusStudentMessages`, `normalizeAssignmentStatusValue`, `getAssignmentStatusParentMessage`, `getAssignmentStatusStudentMessage`, `getAssignmentStatusMessage`, `getHomeworkStatusFromAssignmentStatus`, `isAssignmentStatusHomeworkMakeupCandidate`를 이동했다. `src/app/App.jsx`는 해당 helper import만 사용하도록 정리했고, 파일 크기는 약 20,709줄에서 20,619줄로 줄었다.
+- 테스트 보정: 구조 분리 후 정적 시나리오 테스트가 수업/과제 프론트 소스를 집계할 때 `src/domains/lessons/assignmentStatus.js`도 함께 읽도록 보정했다. `22g`, `41c`, `53` 검사는 화면 흐름과 분리된 문구/상태 helper를 함께 확인하도록 수정했다.
+- 저장 주의: 순수 프론트 도메인 helper 구조 분리만 수행했다. Supabase 저장 경로와 `lesson_student_records`, `homeworks` 저장 구조는 기존 그대로이며 새 SQL edit 필요 없음.
+- 검증: `node --check src/domains/lessons/assignmentStatus.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험 후 제출 self-check options 17차 모듈 분리
 
 - 상태: 완료
