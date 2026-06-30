@@ -9,6 +9,7 @@ import {
   examQuestionSourceOptions,
   examQuestionTagOptions,
   examQuestionTypeOptions,
+  formatQuestionClassificationParseDiagnostics,
   formatSsenTypeTags,
   getSsenPrimaryTypeText,
   getSsenSecondaryTypeText,
@@ -40,6 +41,14 @@ import {
   summarizeQuestionSsenTypes,
   summarizeQuestionUnits
 } from "../domains/exams/finalDocument.js";
+import {
+  buildHeuristicQuestionCropBoxes,
+  getExamAnalysisQuestionSourceContext as getExamAnalysisQuestionSourceContextBase,
+  getExamAnalysisSourceFileId,
+  isImageExamAnalysisSource,
+  isPdfExamAnalysisSource,
+  normalizeCropBox
+} from "../domains/exams/sourceMedia.js";
 import { sampleData } from "../shared/data/sampleData.js";
 
 let pdfJsLoader = null;
@@ -1028,68 +1037,6 @@ async function requestExamQuestionClassificationDraft(payload) {
   return result.result;
 }
 
-function formatQuestionClassificationParseDiagnostics(diagnostics = {}, rawTextPreview = "") {
-  const populatedCandidates = Array.isArray(diagnostics.populatedCandidates) ? diagnostics.populatedCandidates : [];
-  const candidateText = populatedCandidates.length
-    ? populatedCandidates.slice(0, 4).map((candidate) => {
-        const size = candidate.type === "array"
-          ? `${candidate.length}개`
-          : candidate.type === "object"
-            ? `${candidate.valueCount || candidate.objectValueCount || 0}값`
-            : candidate.type;
-        return `${candidate.path}:${size}`;
-      }).join(", ")
-    : "없음";
-  const topKeys = Array.isArray(diagnostics.topLevelKeys) && diagnostics.topLevelKeys.length
-    ? diagnostics.topLevelKeys.slice(0, 8).join(", ")
-    : "없음";
-  const detectedKeys = Array.isArray(diagnostics.detectedKeys) && diagnostics.detectedKeys.length
-    ? diagnostics.detectedKeys.slice(0, 10).join(", ")
-    : "";
-  const previewSource = String(rawTextPreview || diagnostics.rawTextPreview || "");
-  const preview = previewSource
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 320);
-  const diagnosticRawLength = Number(diagnostics.rawTextLength);
-  const rawTextLength = Number.isFinite(diagnosticRawLength) && diagnosticRawLength > 0
-    ? diagnosticRawLength
-    : previewSource.length;
-  const rowsKeyStatus = diagnostics.containsClassificationRowsKey
-    ? "classificationRows 있음"
-    : diagnostics.containsQuestionClassificationsKey
-      ? "questionClassifications 있음"
-      : "행 배열 키 없음";
-  const jsonShape = [
-    diagnostics.jsonStart !== undefined ? `start=${diagnostics.jsonStart}` : "",
-    diagnostics.jsonEnd !== undefined ? `end=${diagnostics.jsonEnd}` : "",
-    diagnostics.braceBalance !== undefined ? `brace=${diagnostics.braceBalance}` : "",
-    diagnostics.squareBracketBalance !== undefined ? `bracket=${diagnostics.squareBracketBalance}` : ""
-  ].filter(Boolean).join(", ");
-  const looseText = diagnostics.looseRowCount || diagnostics.looseRowObjectTextCount
-    ? `부분 행 복구: ${diagnostics.looseRowCount || 0}행 (${diagnostics.looseRowKey || "키 미확인"})`
-    : "";
-  const diagnosis = diagnostics.containsClassificationSummaryKey && !diagnostics.containsClassificationRowsKey && !diagnostics.containsQuestionClassificationsKey
-    ? "판정: AI가 분류표 행 없이 요약 JSON만 반환했습니다."
-    : diagnostics.likelyTruncated
-      ? "판정: AI JSON 응답이 끝까지 닫히지 않았을 가능성이 큽니다."
-      : "";
-  return [
-    `JSON 파싱: ${diagnostics.parseMode || "확인 불가"}`,
-    diagnostics.parseError ? `파싱 오류: ${diagnostics.parseError}` : "",
-    `AI 원문: ${rawTextLength}자`,
-    `이미지 입력: ${diagnostics.pageImageCount ?? "?"}장`,
-    `행 배열 키: ${rowsKeyStatus}`,
-    jsonShape ? `JSON 형태: ${jsonShape}` : "",
-    `상위 키: ${topKeys}`,
-    detectedKeys && topKeys === "없음" ? `감지 키: ${detectedKeys}` : "",
-    `분류 후보 경로: ${candidateText}`,
-    looseText,
-    diagnosis,
-    preview ? `원문 시작: ${preview}` : ""
-  ].filter(Boolean).join("\n");
-}
-
 function getExamPostFileOpenUrl(file) {
   if (file?.signedUrl) return file.signedUrl;
   if (!file?.storagePath) return "";
@@ -1596,76 +1543,10 @@ function createExamQuestionItemsFromCount(count, existingItems = []) {
   });
 }
 
-function getExamAnalysisSourceFileId(file = {}, index = 0) {
-  return file.storagePath || file.signedUrl || file.fileName || `source_${index}`;
-}
-
-function isImageExamAnalysisSource(file = {}) {
-  const type = String(file.fileType || "").toLowerCase();
-  const name = String(file.fileName || file.storagePath || "").toLowerCase();
-  return type.startsWith("image/") || /\.(png|jpe?g|webp|gif)$/i.test(name);
-}
-
-function isPdfExamAnalysisSource(file = {}) {
-  const type = String(file.fileType || "").toLowerCase();
-  const name = String(file.fileName || file.storagePath || "").toLowerCase();
-  return type === "application/pdf" || /\.pdf$/i.test(name);
-}
-
 function getExamAnalysisQuestionSourceContext(analysis = {}) {
-  const renderFiles = (analysis.sourceFiles ?? []).filter((file) => isImageExamAnalysisSource(file) || isPdfExamAnalysisSource(file));
-  const sourceFile = renderFiles.find((file, index) => getExamAnalysisSourceFileId(file, index) === analysis.questionSourceId) ?? renderFiles[0] ?? null;
-  const sourceIndex = sourceFile ? renderFiles.indexOf(sourceFile) : 0;
-  const sourceId = analysis.questionSourceId || (sourceFile ? getExamAnalysisSourceFileId(sourceFile, sourceIndex) : "");
-  const sourceUrl = analysis.questionSourceUrl || (sourceFile ? getExamAnalysisSourceRenderUrl(sourceFile) : "");
-  return { sourceFile, sourceId, sourceUrl };
-}
-
-function normalizeCropBox(box = null) {
-  if (!box || typeof box !== "object") return null;
-  const x = Math.max(0, Math.min(100, Number(box.x) || 0));
-  const y = Math.max(0, Math.min(100, Number(box.y) || 0));
-  const width = Math.max(0, Math.min(100 - x, Number(box.width) || 0));
-  const height = Math.max(0, Math.min(100 - y, Number(box.height) || 0));
-  return width && height ? { x, y, width, height } : null;
-}
-
-function buildHeuristicQuestionCropBoxes(items = [], pageNumber = 1, pageCount = 1) {
-  const normalizedItems = normalizeExamQuestionItems(items);
-  if (!normalizedItems.length) return [];
-  const safePage = Math.max(1, Number(pageNumber) || 1);
-  const safePageCount = Math.max(1, Number(pageCount) || 1);
-  const hasExplicitPages = normalizedItems.some((item) => Number(item.page) > 1);
-  const perPage = Math.max(1, Math.ceil(normalizedItems.length / safePageCount));
-  const pageItems = hasExplicitPages
-    ? normalizedItems.filter((item) => Math.max(1, Number(item.page) || 1) === safePage)
-    : normalizedItems.slice((safePage - 1) * perPage, safePage * perPage);
-  const targetItems = pageItems.length ? pageItems : normalizedItems.slice(0, perPage);
-  const columns = targetItems.length >= 4 ? 2 : 1;
-  const rows = Math.max(1, Math.ceil(targetItems.length / columns));
-  const gapX = 3;
-  const gapY = 3;
-  const marginX = 6;
-  const startY = 13;
-  const usableHeight = 82;
-  const width = (100 - marginX * 2 - gapX * (columns - 1)) / columns;
-  const height = (usableHeight - gapY * (rows - 1)) / rows;
-  return targetItems.map((item, index) => {
-    const column = index % columns;
-    const row = Math.floor(index / columns);
-    return {
-      cropBox: normalizeCropBox({
-        height,
-        width,
-        x: marginX + column * (width + gapX),
-        y: startY + row * (height + gapY)
-      }),
-      note: "자동 배치 초안",
-      page: safePage,
-      questionId: item.questionId,
-      questionNumber: item.number
-    };
-  }).filter((item) => item.cropBox);
+  return getExamAnalysisQuestionSourceContextBase(analysis, {
+    getSourceRenderUrl: getExamAnalysisSourceRenderUrl
+  });
 }
 
 function normalizeExamOcrTextForQuestionParsing(value = "") {

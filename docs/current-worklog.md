@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 원본/크롭 helper 4차 모듈 분리
+
+- 상태: 완료
+- 사용자 요청: 시험분석 구조 분리를 이어서 진행한다.
+- 판단: 최종문서 생성 분리 이후 `App.jsx`에 남아 있던 원본 파일 판별, PDF/이미지 source context, cropBox 정규화, 휴리스틱 크롭 초안 생성, 분류표 파싱 진단 formatter는 화면 이벤트보다 도메인 helper 성격이 강하다. 동작을 바꾸지 않고 작은 단위로 이동해 이후 오류 원인 추적 범위를 줄였다.
+- 이번 작업 결과: `src/domains/exams/sourceMedia.js`를 추가하고 `getExamAnalysisSourceFileId`, `isImageExamAnalysisSource`, `isPdfExamAnalysisSource`, `getExamAnalysisQuestionSourceContext`, `normalizeCropBox`, `buildHeuristicQuestionCropBoxes`를 이동했다. `formatQuestionClassificationParseDiagnostics`는 `src/domains/exams/questionClassification.js`로 이동했다. `src/app/App.jsx`는 기존 함수명을 유지하는 얇은 wrapper/import 구조로 바뀌었고, 파일 크기는 약 22,469줄에서 22,350줄로 줄었다.
+- 테스트 보정: 구조 분리 후 정적 시나리오 테스트가 원본/크롭 helper와 파싱 진단 formatter를 `App.jsx` 안에서만 찾지 않고 시험분석 도메인 모듈까지 함께 검사하도록 보정했다.
+- 저장 주의: 순수 프론트 코드 구조 분리만 수행했다. Supabase 저장 경로는 기존 `examAnalyses[].sourceFiles`, `questionClassifications`, `questionItems`, `finalDocument` 그대로이며 새 SQL edit 필요 없음.
+- 검증: `node --check src/domains/exams/sourceMedia.js`, `node --check src/domains/exams/questionClassification.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 최종문서 생성 로직 3차 모듈 분리
 
 - 상태: 완료

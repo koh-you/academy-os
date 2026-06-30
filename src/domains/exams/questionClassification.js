@@ -395,3 +395,65 @@ export function classificationRowsToInsightItems(rows = []) {
     tags: row.tags
   }, index));
 }
+
+export function formatQuestionClassificationParseDiagnostics(diagnostics = {}, rawTextPreview = "") {
+  const populatedCandidates = Array.isArray(diagnostics.populatedCandidates) ? diagnostics.populatedCandidates : [];
+  const candidateText = populatedCandidates.length
+    ? populatedCandidates.slice(0, 4).map((candidate) => {
+        const size = candidate.type === "array"
+          ? `${candidate.length}개`
+          : candidate.type === "object"
+            ? `${candidate.valueCount || candidate.objectValueCount || 0}값`
+            : candidate.type;
+        return `${candidate.path}:${size}`;
+      }).join(", ")
+    : "없음";
+  const topKeys = Array.isArray(diagnostics.topLevelKeys) && diagnostics.topLevelKeys.length
+    ? diagnostics.topLevelKeys.slice(0, 8).join(", ")
+    : "없음";
+  const detectedKeys = Array.isArray(diagnostics.detectedKeys) && diagnostics.detectedKeys.length
+    ? diagnostics.detectedKeys.slice(0, 10).join(", ")
+    : "";
+  const previewSource = String(rawTextPreview || diagnostics.rawTextPreview || "");
+  const preview = previewSource
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 320);
+  const diagnosticRawLength = Number(diagnostics.rawTextLength);
+  const rawTextLength = Number.isFinite(diagnosticRawLength) && diagnosticRawLength > 0
+    ? diagnosticRawLength
+    : previewSource.length;
+  const rowsKeyStatus = diagnostics.containsClassificationRowsKey
+    ? "classificationRows 있음"
+    : diagnostics.containsQuestionClassificationsKey
+      ? "questionClassifications 있음"
+      : "행 배열 키 없음";
+  const jsonShape = [
+    diagnostics.jsonStart !== undefined ? `start=${diagnostics.jsonStart}` : "",
+    diagnostics.jsonEnd !== undefined ? `end=${diagnostics.jsonEnd}` : "",
+    diagnostics.braceBalance !== undefined ? `brace=${diagnostics.braceBalance}` : "",
+    diagnostics.squareBracketBalance !== undefined ? `bracket=${diagnostics.squareBracketBalance}` : ""
+  ].filter(Boolean).join(", ");
+  const looseText = diagnostics.looseRowCount || diagnostics.looseRowObjectTextCount
+    ? `부분 행 복구: ${diagnostics.looseRowCount || 0}행 (${diagnostics.looseRowKey || "키 미확인"})`
+    : "";
+  const diagnosis = diagnostics.containsClassificationSummaryKey && !diagnostics.containsClassificationRowsKey && !diagnostics.containsQuestionClassificationsKey
+    ? "판정: AI가 분류표 행 없이 요약 JSON만 반환했습니다."
+    : diagnostics.likelyTruncated
+      ? "판정: AI JSON 응답이 끝까지 닫히지 않았을 가능성이 큽니다."
+      : "";
+  return [
+    `JSON 파싱: ${diagnostics.parseMode || "확인 불가"}`,
+    diagnostics.parseError ? `파싱 오류: ${diagnostics.parseError}` : "",
+    `AI 원문: ${rawTextLength}자`,
+    `이미지 입력: ${diagnostics.pageImageCount ?? "?"}장`,
+    `행 배열 키: ${rowsKeyStatus}`,
+    jsonShape ? `JSON 형태: ${jsonShape}` : "",
+    `상위 키: ${topKeys}`,
+    detectedKeys && topKeys === "없음" ? `감지 키: ${detectedKeys}` : "",
+    `분류 후보 경로: ${candidateText}`,
+    looseText,
+    diagnosis,
+    preview ? `원문 시작: ${preview}` : ""
+  ].filter(Boolean).join("\n");
+}
