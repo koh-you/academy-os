@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 최종문서 helper 2차 모듈 분리
+
+- 상태: 완료
+- 사용자 요청: 이전 구조 분리에 이어 다음 구조 분리를 진행한다.
+- 판단: `createExamFinalDocumentFromAnalysis` 전체를 바로 옮기면 원본 이미지 URL, cropBox, 리포트 제목/메타 등 화면 helper와 얽힌 범위가 커진다. 우선 동작 보존이 쉬운 순수 helper인 문항 구성 정규화, 점수 계산, 단원/쎈유형 요약, 최종문서 블록 정규화, 기존 분류표 압축 로직을 별도 모듈로 분리했다.
+- 이번 작업 결과: `src/domains/exams/finalDocument.js`를 추가하고 `normalizeExamOutputLayoutChoices`, `normalizeExamQuestionComposition`, `parseExamScoreValue`, `formatQuestionScoreWithWeight`, `summarizeQuestionUnits`, `summarizeQuestionSsenTypes`, `createFinalDocumentId`, `getExamStrategyFlowNodes`, `createExamFinalClassificationTableRows`, `normalizeExamFinalDocument`, `compactFinalClassificationTableBlock`를 이동했다. `normalizeExamQuestionItems`는 `src/domains/exams/questionClassification.js`로 이동했다. `src/app/App.jsx`는 약 22,901줄에서 22,604줄로 줄었다.
+- 테스트 보정: 구조 분리 후 정적 시나리오 테스트가 `defaultExamOutputLayoutChoices`를 `App.jsx` 안에서만 찾던 문제를 수정해 시험분석 도메인 모듈 소스까지 함께 검사하도록 했다.
+- 저장 주의: 순수 프론트 코드 구조 분리만 수행했다. Supabase 저장 경로는 기존 `examAnalyses[].questionClassifications`와 `finalDocument` 그대로이며 새 SQL edit 필요 없음.
+- 검증: `node --check src/domains/exams/finalDocument.js`, `node --check src/domains/exams/questionClassification.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 분류표 helper 1차 모듈 분리
 
 - 상태: 완료

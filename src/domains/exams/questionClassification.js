@@ -273,6 +273,13 @@ export function createExamQuestionItem(seed = {}, index = 0) {
   };
 }
 
+export function normalizeExamQuestionItems(items = []) {
+  if (!Array.isArray(items)) return [];
+  return items
+    .map((item, index) => createExamQuestionItem(item, index))
+    .sort((a, b) => Number(a.number || 0) - Number(b.number || 0));
+}
+
 export function createExamQuestionClassificationRow(seed = {}, index = 0) {
   const number = Number(seed.number || seed.questionNumber || seed.no) || index + 1;
   const confidence = String(seed.confidence || "").trim();
