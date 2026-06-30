@@ -19,6 +19,7 @@ const examQuestionCropViewPath = path.join(root, "src", "domains", "exams", "que
 const examPostSubmissionOptionsPath = path.join(root, "src", "domains", "exams", "postSubmissionOptions.js");
 const examApiPath = path.join(root, "src", "domains", "exams", "api.js");
 const lessonAssignmentStatusPath = path.join(root, "src", "domains", "lessons", "assignmentStatus.js");
+const lessonLabelsPath = path.join(root, "src", "domains", "lessons", "labels.js");
 const sharedIdPath = path.join(root, "src", "shared", "utils", "id.js");
 const cssPath = path.join(root, "src", "app", "App.css");
 const indexHtmlPath = path.join(root, "index.html");
@@ -54,9 +55,10 @@ const examQuestionCropViewSource = fs.existsSync(examQuestionCropViewPath) ? fs.
 const examPostSubmissionOptionsSource = fs.existsSync(examPostSubmissionOptionsPath) ? fs.readFileSync(examPostSubmissionOptionsPath, "utf8") : "";
 const examApiSource = fs.existsSync(examApiPath) ? fs.readFileSync(examApiPath, "utf8") : "";
 const lessonAssignmentStatusSource = fs.existsSync(lessonAssignmentStatusPath) ? fs.readFileSync(lessonAssignmentStatusPath, "utf8") : "";
+const lessonLabelsSource = fs.existsSync(lessonLabelsPath) ? fs.readFileSync(lessonLabelsPath, "utf8") : "";
 const sharedIdSource = fs.existsSync(sharedIdPath) ? fs.readFileSync(sharedIdPath, "utf8") : "";
 const examFrontendSource = [app, examQuestionClassificationSource, examQuestionItemsSource, examFinalDocumentSource, examSourceMediaSource, examLibrarySource, examAnalysisStateSource, examDefaultsSource, examDetailSectionsSource, examOutputLayoutsSource, examOutputPreviewSource, examReportPreviewSource, examQuestionInsightSource, examQuestionCropViewSource, examPostSubmissionOptionsSource, examApiSource, sharedIdSource].join("\n");
-const lessonFrontendSource = [app, lessonAssignmentStatusSource].join("\n");
+const lessonFrontendSource = [app, lessonAssignmentStatusSource, lessonLabelsSource].join("\n");
 const css = fs.readFileSync(cssPath, "utf8");
 const indexHtml = fs.readFileSync(indexHtmlPath, "utf8");
 const attendanceHtml = fs.readFileSync(attendanceHtmlPath, "utf8");
@@ -121,7 +123,7 @@ check("07c tablet attendance check persists and sends attendance alimtalk for re
 check("07c-2 attendance kiosk result modal counts down before closing", hasAll(app, ["remainingSeconds", "setRemainingSeconds(3)", "Math.max(1, current - 1)", "`${remainingSeconds}초 후 자동으로 닫힙니다.`"]));
 check("07c-3 attendance journal shows and persists check in out times", hasAll(app, ["function getAttendanceDisplay", "const updatedTime = formatKoreaTimeFromIso(record.updatedAt)", "status === \"late\" ? \"지각\" : \"등원\"", "등원 ${checkInTime}", "하원 ${checkOutTime}", "attendanceDisplay.detail", "function applyManualAttendanceTimeFields", "checkInAt: nextCheckInAt", "checkInTime: nextCheckInTime", "checkOutAt: \"\"", "getAttendanceDateMismatch(record, lesson)"]) && hasAll(css, [".attendanceBadge small", ".attendance-mismatch"]) && hasAll(coreDataRoute, ["check_in_at: compact(record.checkInAt)", "check_in_time: compact(record.checkInTime)", "checkInTime: row.check_in_time", "updatedAt: row.updated_at"]) && hasAll(schema, ["check_in_at timestamptz", "check_out_time text"]));
 check("07c-3b lesson journal reads the selected lesson student record", hasAll(app, ["function findLessonStudentRecord", "function findMatchingLessonStudentRecord", "record.lessonStudentRecordId && item.lessonStudentRecordId === record.lessonStudentRecordId", "item.lessonId === record.lessonId && item.studentId === record.studentId", "findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student)"]) && !app.includes("records.find((item) => item.studentId === student.studentId) ?? createEmptyRecord(lesson, student)"));
-check("07c-4 attendance alimtalk labels present as checkin wording", hasAll(notificationRoute, ["present: \"등원\"", "late: \"지각\"", "}[status] ?? status ?? \"등원\""]) && hasAll(app, ["present: \"등원\"", "late: \"지각\"", "attendanceNotificationLabels", "?? \"등원\""]) && !app.includes("present: \"출석\"") && !app.includes("[\"present\", \"출석\"]"));
+check("07c-4 attendance alimtalk labels present as checkin wording", hasAll(notificationRoute, ["present: \"등원\"", "late: \"지각\"", "}[status] ?? status ?? \"등원\""]) && hasAll(lessonFrontendSource, ["present: \"등원\"", "late: \"지각\"", "attendanceNotificationLabels", "?? \"등원\""]) && !lessonFrontendSource.includes("present: \"출석\"") && !app.includes("[\"present\", \"출석\"]"));
 check("07c-4b attendance alimtalk includes late absent detail inline", hasAll(notificationRoute, ["function attendanceLabelWithDetail", "사유: ${cleanReason}", "등원 ${time}", "처리 ${time}", "messageLine(\"🏫 출결\", attendanceLabelWithDetail"]) && hasAll(app, ["function formatAttendanceForMessage", "사유: ${reason}", "등원 ${time}", "처리 ${time}", "attendanceReason: record?.attendanceReason"]));
 check("07c-4c lesson journal shows checkout missing students", hasAll(app, ["function hasMissingCheckOut", "record = record ?? {}", "checkoutMissingStudents", "하원 미체크 {checkoutMissingStudents.length}명", "checkoutMissingText"]) && hasAll(css, [".checkoutMissingSummary", ".attendanceBadge .checkoutMissingText"]));
 check("07c-5 frontend record fields persist to lesson_student_records", hasAll(coreDataRoute, ["behavior_tag: compact(record.behaviorTag)", "homework_status: compact(record.homeworkStatus)", "needs_retest: Boolean(record.needsRetest)", "behaviorTag: row.behavior_tag"]) && hasAll(schema, ["behavior_tag text", "needs_retest boolean"]) && hasAll(frontendFieldPersistenceSchema, ["behavior_tag text", "needs_retest boolean"]));

@@ -139,6 +139,7 @@ import {
   isAssignmentStatusHomeworkMakeupCandidate,
   normalizeAssignmentStatusValue
 } from "../domains/lessons/assignmentStatus.js";
+import { attendanceLabels, dayLabels, homeworkLabels } from "../domains/lessons/labels.js";
 import { sampleData } from "../shared/data/sampleData.js";
 import { readFileAsDataUrl } from "../shared/utils/file.js";
 import { safeIdPart, shortStableHash } from "../shared/utils/id.js";
@@ -216,36 +217,6 @@ class LessonJournalErrorBoundary extends Component {
     return this.props.children;
   }
 }
-
-const dayLabels = {
-  mon: "월",
-  tue: "화",
-  wed: "수",
-  thu: "목",
-  fri: "금",
-  sat: "토",
-  sun: "일"
-};
-
-const attendanceLabels = {
-  pending: "대기",
-  checkin: "등원",
-  checkout: "하원",
-  present: "등원",
-  late: "지각",
-  absent: "결석",
-  excused: "인정결석"
-};
-
-const homeworkLabels = {
-  not_started: "미시작",
-  assigned: "배정",
-  submitted: "제출",
-  verified: "확인",
-  partial: "일부",
-  missing: "미완료",
-  overdue: "밀림"
-};
 
 function getAssignmentStatusForMessage(record, previousHomework) {
   const recordStatus = normalizeAssignmentStatusValue(record?.assignmentStatus ?? record?.incompleteHomework ?? "");

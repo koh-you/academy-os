@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 수업일지 basic labels 19차 모듈 분리
+
+- 상태: 완료
+- 사용자 요청: 2026-06-30 오후 4시까지 구조분리 및 리팩터링을 계속 진행한다.
+- 판단: 요일 라벨, 출결 라벨, 숙제 상태 라벨은 수업일지 화면 전역에서 쓰는 정적 표시 규칙이다. `App.jsx`에 남겨두면 출결/숙제 UI 수정 시 화면 코드와 라벨 원천을 함께 뒤져야 하므로 `lessons` 도메인 라벨 파일로 분리했다.
+- 이번 작업 결과: `src/domains/lessons/labels.js`를 추가하고 `dayLabels`, `attendanceLabels`, `homeworkLabels`를 이동했다. `src/app/App.jsx`는 해당 라벨 import만 사용하도록 정리했고, 파일 크기는 약 20,619줄에서 20,590줄로 줄었다.
+- 테스트 보정: 구조 분리 후 정적 시나리오 테스트가 수업/과제 프론트 소스를 집계할 때 `src/domains/lessons/labels.js`도 함께 읽도록 보정했다. 출결 알림톡 라벨 검사는 이동된 라벨 원천까지 확인하도록 수정했다.
+- 저장 주의: 순수 프론트 정적 라벨 구조 분리만 수행했다. Supabase 저장 경로와 출결/숙제 저장 구조는 기존 그대로이며 새 SQL edit 필요 없음.
+- 검증: `node --check src/domains/lessons/labels.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 수업일지 assignment status helper 18차 모듈 분리
 
 - 상태: 완료
