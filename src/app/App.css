@@ -4880,17 +4880,77 @@ button {
   padding: 18px;
 }
 
-.analysisReadablePreview h4 {
-  border-bottom: 1px solid #e5edf9;
-  color: #17213d;
-  font-size: 18px;
-  font-weight: 900;
-  margin: 8px 0 4px;
-  padding-bottom: 8px;
+.analysisReadablePreview.rich {
+  gap: 14px;
+  padding: 0;
 }
 
-.analysisReadablePreview h4:first-child {
-  margin-top: 0;
+.analysisReadableHero {
+  background: #f8fbff;
+  border-bottom: 1px solid #d8e3f8;
+  border-left: 5px solid #0f766e;
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+}
+
+.analysisReadableHero span {
+  color: #0f766e;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.analysisReadableHero h3 {
+  color: #17213d;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1.28;
+  margin: 0;
+}
+
+.analysisReadablePreview .analysisReadableHero p {
+  color: #475569;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.analysisReadableSectionGrid {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.analysisReadableSection {
+  background: #ffffff;
+  border: 1px solid #e0e8f7;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.analysisReadableSection h4 {
+  align-items: center;
+  color: #17213d;
+  display: flex;
+  font-size: 17px;
+  font-weight: 900;
+  gap: 8px;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.analysisReadableSection h4::before {
+  background: #22c55e;
+  border-radius: 999px;
+  content: "";
+  display: inline-block;
+  flex: 0 0 auto;
+  height: 8px;
+  width: 8px;
 }
 
 .analysisReadablePreview p {
@@ -4899,6 +4959,25 @@ button {
   font-weight: 750;
   line-height: 1.7;
   margin: 0;
+}
+
+.analysisReadableSection ul {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.analysisReadableSection li {
+  background: #f8fafc;
+  border-left: 3px solid #f59e0b;
+  border-radius: 7px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.55;
+  padding: 8px 10px;
 }
 
 .analysisPreviewListLine {
@@ -5061,30 +5140,52 @@ button {
 
 .analysisInstagramPreview {
   display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(7, minmax(150px, 1fr));
+  gap: 14px;
+  grid-template-columns: repeat(var(--slide-count, 7), minmax(178px, 1fr));
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding: 2px 2px 8px;
 }
 
 .analysisInstagramSlide {
   background: #ffffff;
   border: 1px solid #d8e3f8;
+  border-top: 5px solid #2563eb;
   border-radius: 8px;
   display: grid;
-  gap: 8px;
-  min-height: 240px;
+  gap: 12px;
+  grid-template-rows: auto auto 1fr auto;
+  min-height: 260px;
+  min-width: 178px;
   padding: 14px;
 }
 
-.analysisInstagramSlide span {
+.analysisInstagramSlide:nth-child(2n) {
+  border-top-color: #0f766e;
+}
+
+.analysisInstagramSlide:nth-child(3n) {
+  border-top-color: #f59e0b;
+}
+
+.analysisInstagramSlideTop {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.analysisInstagramSlideTop span {
   background: #17213d;
   border-radius: 999px;
   color: #ffffff;
   font-size: 12px;
   font-weight: 900;
-  justify-self: start;
   padding: 5px 9px;
+}
+
+.analysisInstagramSlideTop small {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 900;
 }
 
 .analysisInstagramSlide strong {
@@ -5094,12 +5195,28 @@ button {
   line-height: 1.35;
 }
 
+.analysisInstagramSlideBody {
+  display: grid;
+  gap: 8px;
+}
+
 .analysisInstagramSlide p {
-  color: #475569;
+  background: #f8fafc;
+  border-radius: 7px;
+  color: #334155;
   font-size: 13px;
   font-weight: 800;
   line-height: 1.55;
   margin: 0;
+  padding: 8px 9px;
+}
+
+.analysisInstagramSlide footer {
+  border-top: 1px solid #e5edf9;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 900;
+  padding-top: 8px;
 }
 
 .analysisReportPreviewModal {

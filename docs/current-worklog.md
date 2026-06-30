@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 산출물 미리보기 렌더링 보강
+
+- 상태: 완료
+- 사용자 요청: 산출물 미리보기 렌더링이 약해 보여 블로그 초안/인스타 카드뉴스가 한눈에 들어오도록 개선한다.
+- 이번 작업 결과: `outputPreview.js`에 `parseReadablePreviewDocument`를 추가해 JSON/마크다운/번호 제목/목록/표를 구조화한 뒤, `ExamAnalysisReadablePreview`가 문서 헤더와 섹션 카드로 렌더링하도록 바꿨다. 블로그 초안은 단순 줄글 대신 제목, 핵심 문단, 섹션, 목록, 표 형태로 보인다.
+- 인스타 미리보기: `parseInstagramSlides`가 JSON `slides/cards`와 느슨한 텍스트 슬라이드를 모두 처리하도록 보강했다. `ExamAnalysisInstagramPreview`는 슬라이드 번호, 표지/분석/CTA 구분, 본문 카드, 브랜드 footer를 가진 카드뉴스형 덱으로 렌더링한다.
+- 저장 주의: 렌더링/파싱 UI만 변경했다. 기존 `examAnalyses[].blogDraft`, `instagramDraft`, `studentAnalysisDraft` 저장 구조와 Supabase SQL 변경 없음.
+- 검증: `node --check src/domains/exams/outputPreview.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 237, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 최종편집본 블록 버튼 단순화
 
 - 상태: 완료

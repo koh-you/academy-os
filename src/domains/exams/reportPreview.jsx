@@ -5,10 +5,8 @@ import {
 import {
   cleanPreviewText,
   copyTextToClipboard,
-  isMarkdownTableDivider,
-  isMarkdownTableLine,
+  parseReadablePreviewDocument,
   parseInstagramSlides,
-  parseMarkdownTableRow
 } from "./outputPreview.js";
 
 export function ExamAnalysisInitialView({ analysis }) {
@@ -60,69 +58,71 @@ export function ExamAnalysisReportText({ value, fallback = "아직 내용이 없
   );
 }
 
+function PreviewTable({ rows }) {
+  return (
+    <div className="analysisPreviewTableWrap">
+      <table className="analysisPreviewTable">
+        <tbody>
+          {rows.map((row, rowIndex) => (
+            <tr key={`${row.join("_")}_${rowIndex}`}>
+              {row.map((cell, cellIndex) => rowIndex === 0 ? (
+                <th key={`${cell}_${cellIndex}`}>{cell}</th>
+              ) : (
+                <td key={`${cell}_${cellIndex}`}>{cell}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export function ExamAnalysisReadablePreview({ value, fallback = "아직 내용이 없습니다." }) {
-  const lines = String(value ?? "").replace(/\r\n/g, "\n").split("\n");
-  const nodes = [];
-  for (let index = 0; index < lines.length; index += 1) {
-    const line = cleanPreviewText(lines[index]);
-    if (!line) continue;
-
-    if (isMarkdownTableLine(line)) {
-      const tableLines = [];
-      while (index < lines.length && isMarkdownTableLine(lines[index])) {
-        if (!isMarkdownTableDivider(lines[index])) tableLines.push(lines[index]);
-        index += 1;
-      }
-      index -= 1;
-      const rows = tableLines.map(parseMarkdownTableRow).filter((row) => row.some(Boolean));
-      if (rows.length) {
-        nodes.push(
-          <div className="analysisPreviewTableWrap" key={`table_${index}`}>
-            <table className="analysisPreviewTable">
-              <tbody>
-                {rows.map((row, rowIndex) => (
-                  <tr key={`${row.join("_")}_${rowIndex}`}>
-                    {row.map((cell, cellIndex) => rowIndex === 0 ? (
-                      <th key={`${cell}_${cellIndex}`}>{cell}</th>
-                    ) : (
-                      <td key={`${cell}_${cellIndex}`}>{cell}</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        );
-      }
-      continue;
-    }
-
-    if (/^#{1,4}\s+/.test(line)) {
-      nodes.push(<h4 key={`${line}_${index}`}>{line.replace(/^#{1,4}\s+/, "")}</h4>);
-      continue;
-    }
-
-    if (/^[-*]\s+/.test(line) || /^\d+[.)]\s+/.test(line)) {
-      nodes.push(<p className="analysisPreviewListLine" key={`${line}_${index}`}>{line.replace(/^[-*]\s+/, "").replace(/^\d+[.)]\s+/, "")}</p>);
-      continue;
-    }
-
-    nodes.push(<p key={`${line}_${index}`}>{line}</p>);
-  }
-
-  if (!nodes.length) return <p className="muted">{fallback}</p>;
-  return <div className="analysisReadablePreview">{nodes}</div>;
+  const document = parseReadablePreviewDocument(value);
+  if (!document.lead && !document.sections.length && document.title === "산출물 미리보기") return <p className="muted">{fallback}</p>;
+  return (
+    <article className="analysisReadablePreview rich">
+      <header className="analysisReadableHero">
+        <span>문서 초안</span>
+        <h3>{document.title}</h3>
+        {document.lead ? <p>{document.lead}</p> : null}
+      </header>
+      {document.sections.length ? (
+        <div className="analysisReadableSectionGrid">
+          {document.sections.map((section, sectionIndex) => (
+            <section className="analysisReadableSection" key={`${section.title}_${sectionIndex}`}>
+              <h4>{section.title}</h4>
+              {section.paragraphs.map((paragraph, index) => <p key={`${paragraph}_${index}`}>{paragraph}</p>)}
+              {section.bullets.length ? (
+                <ul>
+                  {section.bullets.map((item, index) => <li key={`${item}_${index}`}>{item}</li>)}
+                </ul>
+              ) : null}
+              {section.tables.map((rows, index) => <PreviewTable key={`${section.title}_table_${index}`} rows={rows} />)}
+            </section>
+          ))}
+        </div>
+      ) : null}
+    </article>
+  );
 }
 
 export function ExamAnalysisInstagramPreview({ value }) {
   const slides = parseInstagramSlides(value);
   return (
-    <div className="analysisInstagramPreview">
-      {slides.map((slide) => (
+    <div className="analysisInstagramPreview" style={{ "--slide-count": slides.length }}>
+      {slides.map((slide, slideIndex) => (
         <article className="analysisInstagramSlide" key={`${slide.number}_${slide.title}`}>
-          <span>{slide.number}장</span>
+          <div className="analysisInstagramSlideTop">
+            <span>{String(slide.number || slideIndex + 1).padStart(2, "0")}</span>
+            <small>{slideIndex === 0 ? "표지" : slideIndex === slides.length - 1 ? "CTA" : "분석"}</small>
+          </div>
           <strong>{slide.title}</strong>
-          {slide.lines.map((line, index) => <p key={`${line}_${index}`}>{line}</p>)}
+          <div className="analysisInstagramSlideBody">
+            {slide.lines.map((line, index) => <p key={`${line}_${index}`}>{cleanPreviewText(line)}</p>)}
+          </div>
+          <footer>으뜸수학 고태영T</footer>
         </article>
       ))}
     </div>
