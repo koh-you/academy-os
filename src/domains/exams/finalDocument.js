@@ -2,6 +2,7 @@ import {
   classificationRowsToInsightItems,
   formatSsenTypeTagForDisplay,
   formatSsenTypeTagsForDisplay,
+  getSsenCompactTypeCode,
   hasExamQuestionDetailedInsight,
   isExamQuestionInsightRecommended,
   normalizeExamQuestionClassificationRows,
@@ -143,13 +144,30 @@ export function summarizeQuestionUnits(questionItems = []) {
   return Array.from(unitMap.values()).sort((a, b) => b.count - a.count || a.unit.localeCompare(b.unit, "ko"));
 }
 
+function compareSsenTypeRows(a = {}, b = {}) {
+  const parseCode = (value = "") => {
+    const match = String(value || "").match(/(\d{2})-(\d{2})/);
+    return match ? [Number(match[1]), Number(match[2])] : null;
+  };
+  const aCode = parseCode(a.sortCode || a.label);
+  const bCode = parseCode(b.sortCode || b.label);
+  if (aCode && bCode) {
+    return aCode[0] - bCode[0] || aCode[1] - bCode[1] || String(a.label || "").localeCompare(String(b.label || ""), "ko");
+  }
+  if (aCode) return -1;
+  if (bCode) return 1;
+  return String(a.label || "").localeCompare(String(b.label || ""), "ko");
+}
+
 export function summarizeQuestionSsenTypes(questionItems = []) {
   const typeMap = new Map();
   normalizeExamQuestionItems(questionItems).forEach((item) => {
     normalizeSsenTypeTags(item.ssenTypeTags).forEach((tag) => {
       const label = formatSsenTypeTagForDisplay(tag) || tag.unitName || "쎈 유형 미입력";
+      const sortCode = getSsenCompactTypeCode(tag) || label;
       const previous = typeMap.get(label) || {
         label,
+        sortCode,
         unitName: tag.unitName || "",
         primary: 0,
         secondary: 0,
@@ -161,9 +179,7 @@ export function summarizeQuestionSsenTypes(questionItems = []) {
       typeMap.set(label, previous);
     });
   });
-  return Array.from(typeMap.values()).sort((a, b) =>
-    (b.primary + b.secondary) - (a.primary + a.secondary) || a.label.localeCompare(b.label, "ko")
-  );
+  return Array.from(typeMap.values()).sort(compareSsenTypeRows);
 }
 
 export function createFinalDocumentId(prefix = "block") {

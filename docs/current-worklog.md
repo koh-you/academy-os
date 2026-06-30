@@ -10,6 +10,14 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 쎈 유형별 분류 코드 오름차순 정렬
+
+- 상태: 완료
+- 사용자 요청: `쎈 유형별 분류` 표는 출제 빈도순이 아니라 쎈 유형 기준 코드 오름차순으로 정렬한다. 예: `03-01`이 `04-09`보다 위에 와야 한다.
+- 이번 작업 결과: `summarizeQuestionSsenTypes` 정렬 기준을 기존 `출제 빈도 높은 순`에서 `쎈 유형 코드 숫자 오름차순`으로 변경했다. `SSEN-PROB-STAT-03-06`처럼 긴 코드가 들어와도 표시/정렬용 compact code인 `03-06`을 기준으로 비교한다. 코드가 없는 유형은 코드 있는 유형 뒤에서 한글 라벨순으로 정렬한다.
+- 저장 주의: 표시/정렬 로직만 변경했다. 기존 `examAnalyses[].questionClassifications` 저장값과 Supabase 스키마 변경 없음.
+- 검증: `node --check src/domains/exams/finalDocument.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 분류표 누락 재요청/모델 제한/요약 UI 보정
 
 - 상태: 완료
