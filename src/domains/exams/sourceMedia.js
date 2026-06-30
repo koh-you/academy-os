@@ -46,6 +46,20 @@ export function getQuestionClassificationPageNumbers(pageCount = 0, maxPages = 8
   return Array.from(new Set(pages)).filter((pageNumber) => pageNumber >= 1 && pageNumber <= safePageCount);
 }
 
+export function getQuestionClassificationRepairPageNumbers(pageCount = 0, preferredPages = [], maxPages = 4) {
+  const safePageCount = Math.max(0, Number(pageCount) || 0);
+  const safeMaxPages = Math.max(1, Number(maxPages) || 4);
+  if (!safePageCount) return [];
+  const normalizedPreferred = Array.isArray(preferredPages)
+    ? preferredPages.map((page) => Math.max(0, Number(page) || 0)).filter((page) => page >= 1 && page <= safePageCount)
+    : [];
+  const tailCount = Math.min(safeMaxPages, safePageCount);
+  const tailPages = Array.from({ length: tailCount }, (_, index) => safePageCount - tailCount + index + 1);
+  return Array.from(new Set([...normalizedPreferred, ...tailPages]))
+    .filter((pageNumber) => pageNumber >= 1 && pageNumber <= safePageCount)
+    .slice(-safeMaxPages);
+}
+
 export function imageElementToVisionImageDataUrl(imageElement, maxDimension = 1600) {
   const width = imageElement?.naturalWidth || imageElement?.width;
   const height = imageElement?.naturalHeight || imageElement?.height;

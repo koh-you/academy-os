@@ -11,6 +11,7 @@ import {
   examQuestionTypeOptions,
   formatQuestionClassificationParseDiagnostics,
   formatSsenTypeTags,
+  getMissingExamQuestionClassificationNumbers,
   getSsenPrimaryTypeText,
   getSsenSecondaryTypeText,
   getSsenTypeSuggestions,
@@ -44,6 +45,7 @@ import {
   getExamAnalysisQuestionSourceContext as getExamAnalysisQuestionSourceContextBase,
   getExamAnalysisSourceFileId,
   getQuestionClassificationPageNumbers,
+  getQuestionClassificationRepairPageNumbers,
   imageElementToVisionImageDataUrl,
   imageUrlToVisionImageDataUrl,
   isImageExamAnalysisSource,
@@ -10434,7 +10436,7 @@ function SettingsCenter({
       title: "코멘트 AI"
     },
     {
-      description: "시험 원본 분석, 총평 수정본, 블로그/인스타용 초안을 만듭니다.",
+      description: "3개년 종합 총평과 최종 인사이트에 사용합니다. 문항별 분류표/누락 재요청은 서버가 Sonnet 계열로 제한합니다.",
       modelKey: "examAnalysisModel",
       providerKey: "examAnalysisProvider",
       title: "시험분석 AI"
@@ -10909,6 +10911,7 @@ function ExamAnalysisCenter({
   const selectedQuestionCropIsVisible = !selectedQuestionSourceIsPdf || selectedQuestionPage === cropViewerPageNumber || Boolean(cropDraft);
   const selectedQuestionCropBox = normalizeCropBox(cropDraft || (selectedQuestionCropIsVisible ? selectedQuestion?.cropBox : null));
   const activeQuestionTargetCount = sourceQuestionTargetCount || activeClassificationRows.length || manualQuestionCount || questionComposition?.total || (hasMultipleQuestionSources ? 0 : Number(selectedAnalysis?.questionTargetCount)) || 0;
+  const missingClassificationNumbers = getMissingExamQuestionClassificationNumbers(activeClassificationRows, activeQuestionTargetCount || questionCountDraft);
   const selectedQuestionInsightRecommended = isExamQuestionInsightRecommended(selectedQuestion);
   const selectedQuestionHasDetailedInsight = hasExamQuestionDetailedInsight(selectedQuestion);
   const selectedQuestionInsightExpanded = Boolean(selectedQuestion && expandedQuestionInsightId === selectedQuestion.questionId);
@@ -11296,15 +11299,19 @@ function ExamAnalysisCenter({
     setQuestionCountDraft(String(questionComposition.total));
   }
 
-  async function buildClassificationPageImages() {
+  async function buildClassificationPageImages(options = {}) {
     if (!selectedQuestionSourceUrl) return [];
+    const repairOnly = Boolean(options.repairOnly);
+    const preferredPageNumbers = Array.isArray(options.preferredPageNumbers) ? options.preferredPageNumbers : [];
     if (selectedQuestionSourceIsPdf) {
       const pdfjsLib = await loadPdfJs();
       const loadingTask = pdfjsLib.getDocument({ url: selectedQuestionSourceUrl });
       try {
         const pdfDocument = await loadingTask.promise;
         setPdfPageCount(pdfDocument.numPages);
-        const pageNumbers = getQuestionClassificationPageNumbers(pdfDocument.numPages, 8);
+        const pageNumbers = repairOnly
+          ? getQuestionClassificationRepairPageNumbers(pdfDocument.numPages, preferredPageNumbers, 4)
+          : getQuestionClassificationPageNumbers(pdfDocument.numPages, 8);
         const pageImages = [];
         for (const pageNumber of pageNumbers) {
           const imageDataUrl = await renderPdfPageToVisionImageDataUrl(pdfDocument, pageNumber, 1.05);
@@ -11321,8 +11328,12 @@ function ExamAnalysisCenter({
     return [];
   }
 
-  async function runAiForActiveQuestionSource() {
+  async function runAiForActiveQuestionSource(options = {}) {
     if (!selectedAnalysis || isQuestionInfoFilling) return;
+    const repairQuestionNumbers = Array.isArray(options.repairQuestionNumbers)
+      ? options.repairQuestionNumbers.map((number) => Math.max(0, Number(number) || 0)).filter(Boolean)
+      : [];
+    const repairOnly = Boolean(options.repairOnly && repairQuestionNumbers.length);
     const requestedCount = Math.max(1, Math.min(80, Number(questionCountDraft) || activeClassificationRows.length || questionComposition?.total || sourceQuestionTargetCount || 20));
     const baseRows = createExamQuestionClassificationRowsFromCount(requestedCount, activeClassificationRows).map(withActiveClassificationSource);
     const sourceText = selectedQuestionSourceFile?.extractedText
@@ -11331,20 +11342,22 @@ function ExamAnalysisCenter({
     const scopedRawExamText = sourceText || selectedAnalysis.rawExamText || "";
     const nonActiveRows = classificationRows.filter((row) => !classificationBelongsToActiveSource(row));
     const targetCount = Math.max(requestedCount, baseRows.length);
+    const targetRows = repairOnly ? baseRows.filter((row) => repairQuestionNumbers.includes(Number(row.number))) : baseRows;
+    const preferredPageNumbers = targetRows.map((row) => Number(row.page)).filter((page) => page > 1);
 
     setIsQuestionInfoFilling(true);
-    setCropDraftStatus("문항별 분류표 골격을 저장하는 중입니다...");
-    updateQuestionClassifications([...nonActiveRows, ...baseRows]);
+    setCropDraftStatus(repairOnly ? `누락 문항 ${repairQuestionNumbers.map((number) => `${number}번`).join(", ")} 재요청 준비 중입니다...` : "문항별 분류표 골격을 저장하는 중입니다...");
+    if (!repairOnly) updateQuestionClassifications([...nonActiveRows, ...baseRows]);
 
     try {
       let pageImages = [];
       try {
         setCropDraftStatus("PDF/이미지 페이지를 AI 입력용으로 준비하는 중입니다...");
-        pageImages = await buildClassificationPageImages();
+        pageImages = await buildClassificationPageImages({ repairOnly, preferredPageNumbers });
       } catch (imageError) {
         setCropDraftStatus(`페이지 이미지 준비 실패 · 텍스트/OCR 기준으로 분류합니다. (${imageError.message})`);
       }
-      setCropDraftStatus(`AI 문항별 분류표 생성 중입니다... ${pageImages.length ? `${pageImages.length}페이지 이미지 포함` : "텍스트 기준"}`);
+      setCropDraftStatus(`${repairOnly ? "AI 누락 문항 재분류 중입니다" : "AI 문항별 분류표 생성 중입니다"}... ${pageImages.length ? `${pageImages.length}페이지 이미지 포함` : "텍스트 기준"}`);
       const result = await requestExamQuestionClassificationDraft({
         aiModel: aiSettings.examAnalysisModel,
         aiProvider: aiSettings.examAnalysisProvider,
@@ -11355,12 +11368,14 @@ function ExamAnalysisCenter({
         examDate: selectedAnalysis.examDate,
         sourceFiles: selectedQuestionSourceFile ? [{ ...selectedQuestionSourceFile, sourceId: resolvedQuestionSourceId }] : selectedAnalysis.sourceFiles,
         rawExamText: scopedRawExamText,
-        classificationRows: baseRows,
-        questionClassifications: baseRows,
+        classificationRows: repairOnly ? targetRows : baseRows,
+        questionClassifications: repairOnly ? targetRows : baseRows,
         questionSourceId: resolvedQuestionSourceId,
         questionSourceUrl: selectedQuestionSourceUrl,
-        classificationTargetCount: targetCount,
+        classificationTargetCount: repairOnly ? repairQuestionNumbers.length : targetCount,
         questionTargetCount: targetCount,
+        missingQuestionNumbers: repairOnly ? repairQuestionNumbers : [],
+        repairOnly,
         pageImages,
         examPrepContext
       });
@@ -11368,10 +11383,10 @@ function ExamAnalysisCenter({
       const parsedRowCount = Math.max(0, Number(result?.classificationRowCount) || 0);
       if (!parsedRowCount) {
         const diagnosticText = formatQuestionClassificationParseDiagnostics(result?.parseDiagnostics, result?.rawTextPreview || result?.rawText || "");
-        const failureText = `AI 분류표 파싱 실패 · 분류 행 0/${targetCount}개\n${diagnosticText}`;
+        const failureText = `AI 분류표 파싱 실패 · 분류 행 0/${repairOnly ? repairQuestionNumbers.length : targetCount}개\n${diagnosticText}`;
         update("aiInitialFields", {
           ...(selectedAnalysis.aiInitialFields || {}),
-          questionClassifications: baseRows,
+          questionClassifications: repairOnly ? activeClassificationRows : baseRows,
           questionClassificationDebug: {
             ...(result?.parseDiagnostics || {}),
             provider: result?.provider || aiSettings.examAnalysisProvider,
@@ -11428,8 +11443,9 @@ function ExamAnalysisCenter({
           row.ssenTypeTags?.length
         ].some(Boolean)
       ).length;
+      const afterMissingNumbers = getMissingExamQuestionClassificationNumbers(mergedActiveRows, targetCount);
       const warningText = result?.warning ? ` · ${result.warning}` : "";
-      setCropDraftStatus(`문항별 분류표 생성 완료 · 행 ${mergedActiveRows.length}개 · 배점 ${scoreCount}개 · AI 응답 ${aiParsedCount}개 · 분류 ${aiFilledCount}개${warningText}`);
+      setCropDraftStatus(`${repairOnly ? "누락 문항 재요청 완료" : "문항별 분류표 생성 완료"} · 행 ${mergedActiveRows.length}개 · 배점 ${scoreCount}개 · AI 응답 ${aiParsedCount}개 · 분류 ${aiFilledCount}개${afterMissingNumbers.length ? ` · 남은 누락 ${afterMissingNumbers.map((number) => `${number}번`).join(", ")}` : ""}${warningText}`);
     } catch (error) {
       update("aiStatus", "완료");
       update("aiError", "");
@@ -12348,6 +12364,16 @@ function ExamAnalysisCenter({
                   >
                     {selectedAnalysis.aiStatus === "분석 중" || isQuestionInfoFilling ? "AI 분류 중..." : "AI 분류표 생성"}
                   </button>
+                  {missingClassificationNumbers.length ? (
+                    <button
+                      className="softButton"
+                      disabled={selectedAnalysis.aiStatus === "분석 중" || isQuestionInfoFilling}
+                      onClick={() => runAiForActiveQuestionSource({ repairOnly: true, repairQuestionNumbers: missingClassificationNumbers })}
+                      type="button"
+                    >
+                      누락 문항만 재요청
+                    </button>
+                  ) : null}
                   <button className="softButton" onClick={addClassificationRow} type="button">문항 행 추가</button>
                   <button className="softButton" onClick={() => questionSourceInputRef.current?.click()} type="button">PDF·이미지 원본 추가</button>
                   <input
@@ -12359,17 +12385,34 @@ function ExamAnalysisCenter({
                     type="file"
                   />
                 </div>
+                {missingClassificationNumbers.length ? (
+                  <div className="questionCropStatus">
+                    누락 후보: {missingClassificationNumbers.map((number) => `${number}번`).join(", ")}
+                  </div>
+                ) : null}
                 {cropDraftStatus ? <div className="questionCropStatus">{cropDraftStatus}</div> : null}
               </article>
 
-              <article className="panel analysisQuestionSummaryPanel">
-                <div className="sectionHeader slim">
+              <details className="panel analysisQuestionSummaryPanel collapsibleAnalysisPanel" open>
+                <summary className="sectionHeader slim">
+                  <div>
+                    <h2>분류표 기반 요약</h2>
+                    <p className="muted">분류표가 채워지면 단원별 출제와 쎈 유형별 분류가 자동으로 정리됩니다.</p>
+                  </div>
+                  <span className="countBadge">요약 펼침</span>
+                </summary>
+                <ExamQuestionInsightTables classificationRows={activeClassificationRows} questionComposition={questionComposition} />
+                <ExamStrategyFlow questionItems={activeQuestionItems} />
+              </details>
+
+              <details className="panel analysisQuestionSummaryPanel collapsibleAnalysisPanel" open>
+                <summary className="sectionHeader slim">
                   <div>
                     <h2>문항별 분류표</h2>
                     <p className="muted">이 표가 최종 분석지의 단원별 출제표, 쎈 유형별 분류표, 대비전략의 기준 데이터입니다.</p>
                   </div>
                   <span className="countBadge">현재 원본 {activeClassificationRows.length}/{activeQuestionTargetCount || questionCountDraft || "-"}문항</span>
-                </div>
+                </summary>
                 {activeClassificationRows.length ? (
                   <div className="analysisPreviewTableWrap">
                     <table className="analysisPreviewTable classificationReviewTable">
@@ -12476,18 +12519,7 @@ function ExamAnalysisCenter({
                 ) : (
                   <div className="analysisQuestionEmpty">문항 수를 입력하고 분류표 행을 만든 뒤 AI 분류표 생성을 실행하세요.</div>
                 )}
-              </article>
-
-              <article className="panel analysisQuestionSummaryPanel">
-                <div className="sectionHeader slim">
-                  <div>
-                    <h2>분류표 기반 요약</h2>
-                    <p className="muted">분류표가 채워지면 단원별 출제와 쎈 유형별 분류가 자동으로 정리됩니다.</p>
-                  </div>
-                </div>
-                <ExamQuestionInsightTables classificationRows={activeClassificationRows} questionComposition={questionComposition} />
-                <ExamStrategyFlow questionItems={activeQuestionItems} />
-              </article>
+              </details>
             </section>
             ) : null}
 

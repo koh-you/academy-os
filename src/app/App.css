@@ -3640,6 +3640,41 @@ button {
   gap: 14px;
 }
 
+.collapsibleAnalysisPanel > summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.collapsibleAnalysisPanel > summary::-webkit-details-marker {
+  display: none;
+}
+
+.collapsibleAnalysisPanel > summary::after {
+  color: #64748b;
+  content: "접기";
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.collapsibleAnalysisPanel:not([open]) > summary::after {
+  content: "펼치기";
+}
+
+.collapsibleAnalysisPanel:not([open]) {
+  padding-bottom: 18px;
+}
+
+.ssenTypeDisplay {
+  line-height: 1.55;
+  white-space: pre-line;
+}
+
+.ssenTypeDisplay code {
+  color: #334155;
+  font-family: inherit;
+  font-weight: 900;
+}
+
 .questionCropCanvas {
   background: #0f172a;
   border: 1px solid #d8e3f8;

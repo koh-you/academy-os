@@ -179,6 +179,31 @@ export function formatSsenTypeTag(tag = {}) {
   return [tag.typeCode, tag.typeName].filter(Boolean).join(" ");
 }
 
+export function getSsenCompactTypeCode(tag = {}) {
+  const code = String(tag?.typeCode || tag?.code || tag?.ssenTypeCode || "").trim().toUpperCase();
+  if (!code) return "";
+  const numericTail = code.match(/(\d{2}-\d{2})$/)?.[1];
+  return numericTail || code;
+}
+
+export function formatSsenTypeTagForDisplay(tag = {}, options = {}) {
+  const compactCode = getSsenCompactTypeCode(tag);
+  const typeName = String(tag?.typeName || tag?.name || tag?.label || "").replace(/SSEN-[A-Z0-9-]+-\d{2}-\d{2}/i, "").trim();
+  const unitName = String(tag?.unitName || "").trim();
+  const label = typeName || unitName;
+  if (options.multiline && compactCode && label) return `${compactCode}\n${label}`;
+  return [compactCode, label].filter(Boolean).join(" ");
+}
+
+export function formatSsenTypeTagsForDisplay(tags = [], options = {}) {
+  const separator = options.multiline ? "\n" : ", ";
+  return normalizeSsenTypeTags(tags).map((tag) => {
+    const prefix = tag.role === "secondary" ? "보조" : "주";
+    const label = formatSsenTypeTagForDisplay(tag, options) || tag.unitName;
+    return `${prefix}: ${label}`.trim();
+  }).join(separator);
+}
+
 function normalizeSsenSearchText(value = "") {
   return String(value ?? "")
     .toLowerCase()
@@ -333,6 +358,30 @@ export function createExamQuestionClassificationRowsFromCount(count, existingRow
   });
 }
 
+export function isExamQuestionClassificationRowMissingDraft(row = {}) {
+  const safeRow = createExamQuestionClassificationRow(row);
+  const hasUnit = Boolean(String(safeRow.unit || "").trim());
+  const hasDetail = Boolean(String(safeRow.detailType || "").trim());
+  const hasEvidence = Boolean(String(safeRow.evidence || safeRow.reviewNote || "").trim());
+  const hasSsenType = normalizeSsenTypeTags(safeRow.ssenTypeTags).length > 0;
+  const hasMeaningfulDifficulty = safeRow.difficulty && safeRow.difficulty !== "확인 필요";
+  return !hasUnit && !hasDetail && !hasEvidence && !hasSsenType && !hasMeaningfulDifficulty;
+}
+
+export function getMissingExamQuestionClassificationNumbers(rows = [], targetCount = 0) {
+  const normalizedRows = normalizeExamQuestionClassificationRows(rows);
+  const count = Math.max(
+    normalizedRows.length,
+    Math.min(80, Math.max(0, Number(targetCount) || 0))
+  );
+  if (!count) return [];
+  const byNumber = new Map(normalizedRows.map((row) => [Number(row.number), row]));
+  return Array.from({ length: count }, (_, index) => index + 1).filter((number) => {
+    const row = byNumber.get(number);
+    return !row || isExamQuestionClassificationRowMissingDraft(row);
+  });
+}
+
 export function mergeExamQuestionClassificationDrafts(existingRows = [], aiRows = [], options = {}) {
   const existing = normalizeExamQuestionClassificationRows(existingRows);
   const drafts = normalizeExamQuestionClassificationRows(aiRows);
@@ -347,12 +396,18 @@ export function mergeExamQuestionClassificationDrafts(existingRows = [], aiRows 
     if (!next || next === "확인 필요") return currentValue || defaultValue;
     return isBlank(currentValue) ? next : currentValue;
   };
+  const mergePageValue = (currentValue, draftValue) => {
+    const currentPage = Math.max(1, Number(currentValue) || 1);
+    const draftPage = Math.max(0, Number(draftValue) || 0);
+    if (!draftPage) return currentPage;
+    return currentPage <= 1 && draftPage > 1 ? draftPage : currentPage;
+  };
   const merged = baseRows.map((row) => {
     const draft = draftByNumber.get(Number(row.number));
     if (!draft) return row;
     return createExamQuestionClassificationRow({
       ...row,
-      page: row.page || draft.page || 1,
+      page: mergePageValue(row.page, draft.page),
       score: mergeValue(row.score, draft.score),
       questionType: mergeValue(row.questionType, draft.questionType, "확인 필요"),
       unit: mergeValue(row.unit, draft.unit),

@@ -10,6 +10,17 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 분류표 누락 재요청/모델 제한/요약 UI 보정
+
+- 상태: 완료
+- 사용자 요청: 문항별 분류표에서 누락 문항만 재요청할 수 있게 하고, Opus는 3개년 종합 총평/최종 인사이트 단계에만 쓰게 제한한다. 모든 문항 페이지가 1p로 보이는 문제를 보정하고, 분류표 기반 요약을 상단으로 올리며, 긴 데이터는 접힘으로 볼 수 있게 한다. 쎈 유형 표시는 `SSEN-PROB-STAT-04-09`처럼 긴 공통 접두어 대신 `04-09` 중심으로 줄바꿈해 가독성을 높인다.
+- 이번 작업 결과: 문항분류 API에 `missingQuestionNumbers`/`repairOnly` 모드를 추가해 비어 있는 번호만 재요청할 수 있게 했다. 프론트에는 `누락 문항만 재요청` 버튼과 누락 후보 표시를 추가했고, 재요청 시 PDF 전체 8장이 아니라 후보/마지막 페이지 위주 최대 4장만 보낸다. AI 이미지 입력 앞에 실제 원본 페이지 번호 텍스트를 함께 넣어 page 판단 근거를 강화했다.
+- 페이지 보정: 기존 골격 행의 기본 page=1이 AI가 반환한 실제 page 값을 막는 병합 문제가 있었다. `mergeExamQuestionClassificationDrafts`에서 기존 page가 1이고 AI page가 2 이상이면 AI page를 반영하도록 수정했다.
+- 모델 제한: `ANTHROPIC_EXAM_CLASSIFICATION_MODEL`/`OPENAI_EXAM_CLASSIFICATION_MODEL` 분류 전용 환경변수를 추가하고, 문항분류/누락 재요청/문항정보/크롭 보조 작업은 Opus 요청이 들어와도 Sonnet 계열 기본 모델로 대체한다. `examAnalysisModel`의 Opus는 3개년 종합 총평과 최종 인사이트용으로만 남겼다.
+- UI 보정: 문항 검수 단계에서 `분류표 기반 요약`을 문항별 분류표 위로 올렸다. 요약과 큰 분류표는 `details` 접힘 패널로 전환했다. 쎈 유형 표시는 저장값은 유지하되 화면/최종문서에서 `04-09` + 유형명 줄바꿈 형태로 축약 표시한다.
+- 저장 주의: 새 Supabase SQL edit 없음. 기존 `examAnalyses[].questionClassifications` app_state 저장 경로를 그대로 사용한다. `.env.example`에 분류 전용 AI 모델 환경변수 예시만 추가했다.
+- 검증: `node --check src/domains/exams/questionClassification.js`, `node --check src/domains/exams/sourceMedia.js`, `node --check src/domains/exams/finalDocument.js`, `node --check api/routes/examAnalysis.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 문항별 분류표 MVP 서술형 꼬리 문항 누락 보정
 
 - 상태: 완료

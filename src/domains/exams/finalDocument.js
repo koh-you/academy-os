@@ -1,8 +1,7 @@
 import {
   classificationRowsToInsightItems,
-  formatSsenTypeTag,
-  getSsenPrimaryTypeText,
-  getSsenSecondaryTypeText,
+  formatSsenTypeTagForDisplay,
+  formatSsenTypeTagsForDisplay,
   hasExamQuestionDetailedInsight,
   isExamQuestionInsightRecommended,
   normalizeExamQuestionClassificationRows,
@@ -148,7 +147,7 @@ export function summarizeQuestionSsenTypes(questionItems = []) {
   const typeMap = new Map();
   normalizeExamQuestionItems(questionItems).forEach((item) => {
     normalizeSsenTypeTags(item.ssenTypeTags).forEach((tag) => {
-      const label = formatSsenTypeTag(tag) || tag.unitName || "쎈 유형 미입력";
+      const label = formatSsenTypeTagForDisplay(tag) || tag.unitName || "쎈 유형 미입력";
       const previous = typeMap.get(label) || {
         label,
         unitName: tag.unitName || "",
@@ -194,10 +193,7 @@ export function createExamFinalClassificationTableRows(classificationRows = []) 
     `${row.number}번${row.page ? ` (${row.page}p)` : ""}`,
     [row.score || "-", row.questionType || "확인 필요"].filter(Boolean).join(" · "),
     row.unit || "확인 필요",
-    [
-      getSsenPrimaryTypeText(row.ssenTypeTags) || "확인 필요",
-      getSsenSecondaryTypeText(row.ssenTypeTags) ? `보조: ${getSsenSecondaryTypeText(row.ssenTypeTags)}` : ""
-    ].filter(Boolean).join("\n"),
+    formatSsenTypeTagsForDisplay(row.ssenTypeTags, { multiline: true }) || "확인 필요",
     [row.difficulty || "확인 필요", row.role || "-"].filter(Boolean).join(" · "),
     row.reviewNote || row.evidence || (row.needsReview ? "확인 필요" : "")
   ]);

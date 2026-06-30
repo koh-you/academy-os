@@ -1,6 +1,7 @@
 import {
   classificationRowsToInsightItems,
   formatSsenTypeTags,
+  formatSsenTypeTagsForDisplay,
   normalizeExamQuestionItems
 } from "./questionClassification.js";
 import {
@@ -98,7 +99,7 @@ export function ExamQuestionInsightTables({ questionItems = [], classificationRo
                   <td>{formatQuestionScoreWithWeight(item, items, questionComposition)}</td>
                   <td>
                     <strong>{item.unit || "-"}</strong>
-                    <small>{formatSsenTypeTags(item.ssenTypeTags) || "쎈 유형 확인 필요"}</small>
+                    <small className="ssenTypeDisplay">{formatSsenTypeTagsForDisplay(item.ssenTypeTags, { multiline: true }) || "쎈 유형 확인 필요"}</small>
                   </td>
                   <td>
                     <strong>{item.difficulty || "-"}</strong>
@@ -164,7 +165,7 @@ export function ExamQuestionInsightTables({ questionItems = [], classificationRo
             <tbody>
               {ssenTypeRows.length ? ssenTypeRows.map((row) => (
                 <tr key={row.label}>
-                  <td>{row.label}</td>
+                  <td className="ssenTypeDisplay">{row.label}</td>
                   <td>{row.unitName || "-"}</td>
                   <td>{row.primary || "-"}</td>
                   <td>{row.secondary || "-"}</td>

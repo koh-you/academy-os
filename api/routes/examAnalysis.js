@@ -23,6 +23,16 @@ const examAnalysisModels = {
   openai: process.env.OPENAI_EXAM_ANALYSIS_MODEL || "gpt-5.5"
 };
 
+const examQuestionClassificationModels = {
+  anthropic: process.env.ANTHROPIC_EXAM_CLASSIFICATION_MODEL || fallbackModels.anthropic,
+  mock: "local-mock",
+  openai: process.env.OPENAI_EXAM_CLASSIFICATION_MODEL || fallbackModels.openai
+};
+
+function isOpusModel(model = "") {
+  return String(model || "").toLowerCase().includes("opus");
+}
+
 function isRetryableAiProviderError(error) {
   const message = String(error?.message || "").toLowerCase();
   return [
@@ -250,7 +260,8 @@ export function getAiStatus() {
       openai: Boolean(envValue("OPENAI_API_KEY"))
     },
     fallbackModels,
-    examAnalysisModels
+    examAnalysisModels,
+    examQuestionClassificationModels
   };
 }
 
@@ -276,7 +287,11 @@ function selectedModel(payload, useCase = "default") {
   const requestedModel = payload.aiModel;
   if (!requestedModel || requestedModel === "server-default") {
     if (useCase === "examAnalysis") return examAnalysisModels[provider] || fallbackModels[provider] || fallbackModels.mock;
+    if (useCase === "questionClassification") return examQuestionClassificationModels[provider] || fallbackModels[provider] || fallbackModels.mock;
     return fallbackModels[provider] || fallbackModels.mock;
+  }
+  if (useCase === "questionClassification" && isOpusModel(requestedModel)) {
+    return examQuestionClassificationModels[provider] || fallbackModels[provider] || fallbackModels.mock;
   }
   return requestedModel;
 }
@@ -650,17 +665,33 @@ function normalizeClassificationSeedRows(payload = {}) {
   return rows.filter((row) => row && typeof row === "object");
 }
 
+function normalizeClassificationRequestedNumbers(value = []) {
+  const rawNumbers = Array.isArray(value)
+    ? value
+    : String(value || "").split(/[,/\s]+/);
+  return Array.from(new Set(
+    rawNumbers
+      .map((number) => Math.max(0, Number(number) || 0))
+      .filter((number) => Number.isInteger(number) && number > 0 && number <= 80)
+  )).sort((a, b) => a - b);
+}
+
 function buildQuestionClassificationPrompt(payload) {
   const examPrepContext = payload.examPrepContext && typeof payload.examPrepContext === "object" ? payload.examPrepContext : null;
   const seedRows = normalizeClassificationSeedRows(payload);
-  const targetCount = Math.max(1, Math.min(80, Number(payload.classificationTargetCount) || Number(payload.questionTargetCount) || seedRows.length || 20));
+  const requestedNumbers = normalizeClassificationRequestedNumbers(payload.missingQuestionNumbers || payload.repairQuestionNumbers);
+  const isRepairOnly = requestedNumbers.length > 0 || Boolean(payload.repairOnly);
+  const targetCount = Math.max(1, Math.min(80, requestedNumbers.length || Number(payload.classificationTargetCount) || Number(payload.questionTargetCount) || seedRows.length || 20));
+  const targetDescription = isRepairOnly && requestedNumbers.length
+    ? `${requestedNumbers.join(", ")}번 ${requestedNumbers.length}개`
+    : `1번부터 ${targetCount}번까지 ${targetCount}개`;
   const sourceFiles = Array.isArray(payload.sourceFiles) ? payload.sourceFiles : [];
   const sourceFileLines = sourceFiles.map((file, index) => {
     const sourceId = file.sourceId || file.storagePath || file.signedUrl || file.fileName || `source_${index}`;
     return `${index + 1}. sourceId=${sourceId} · ${file.fileName || file.storagePath || "원본"} · extractedText=${String(file.extractedText || "").trim() ? "있음" : "없음"}`;
   }).join("\n");
   const currentRows = seedRows.length
-    ? seedRows.slice(0, targetCount).map((item, index) => {
+    ? seedRows.slice(0, isRepairOnly ? seedRows.length : targetCount).map((item, index) => {
         const number = Number(item.number || item.questionNumber || index + 1) || index + 1;
         const snippet = String(item.evidence || item.reviewNote || item.ocrText || item.questionSummary || "").replace(/\s+/g, " ").trim().slice(0, 500);
         return `${number}번 | page=${item.page || 1} | score=${item.score || "미입력"} | type=${item.questionType || "확인 필요"} | unit=${item.unit || ""} | note=${snippet}`;
@@ -674,10 +705,14 @@ function buildQuestionClassificationPrompt(payload) {
 
   return [
     "역할: 학교 내신 수학 시험지를 읽고 분석지 생성을 위한 문항별 분류표를 만드는 AI",
-    `목표: 최종 분석지의 표와 예측을 만들 수 있도록 classificationRows ${targetCount}행을 만든다.`,
-    `가장 중요한 출력 조건: classificationRows 배열을 반드시 1번부터 ${targetCount}번까지 ${targetCount}개 채운다.`,
+    `목표: 최종 분석지의 표와 예측을 만들 수 있도록 classificationRows ${targetDescription} 행을 만든다.`,
+    isRepairOnly && requestedNumbers.length
+      ? `가장 중요한 출력 조건: 이번 요청은 누락 문항 재요청이다. classificationRows 배열에는 반드시 ${requestedNumbers.join(", ")}번만 넣고, number를 1번부터 다시 매기지 않는다.`
+      : `가장 중요한 출력 조건: classificationRows 배열을 반드시 1번부터 ${targetCount}번까지 ${targetCount}개 채운다.`,
     "출력 예산이 부족하면 classificationSummary/unitDistribution/typeClassification/killerProblems/sourceCheckNotes는 빈 문자열로 두고, classificationRows는 절대 줄이지 않는다.",
-    "특히 마지막 2~4개 서술형/단답형 문항을 먼저 별도로 확인한 뒤 1번부터 마지막 번호까지 빠짐없이 채운다.",
+    isRepairOnly
+      ? "누락 문항만 재분류하되, page는 첨부 페이지 번호와 원문 지면 기준의 실제 페이지로 채운다. 알 수 없으면 기존 page를 유지하고 reviewNote에 확인 필요를 남긴다."
+      : "특히 마지막 2~4개 서술형/단답형 문항을 먼저 별도로 확인한 뒤 1번부터 마지막 번호까지 빠짐없이 채운다.",
     "문항을 읽기 어렵거나 단원/유형을 확정할 수 없어도 행을 생략하지 말고 unit/difficulty/role/source/detailType/reviewNote를 '확인 필요' 중심으로 채운다.",
     "classificationSummary, unitDistribution 같은 요약만 반환하면 실패다. 요약은 짧게 쓰고 classificationRows를 우선 완성한다.",
     "",
@@ -693,7 +728,8 @@ function buildQuestionClassificationPrompt(payload) {
     `과목: ${payload.subject ?? ""}`,
     `시험명: ${payload.examName ?? ""}`,
     `시험일: ${payload.examDate ?? ""}`,
-    `목표 문항 수: ${targetCount}`,
+    `목표 문항 수: ${isRepairOnly && requestedNumbers.length ? requestedNumbers.length : targetCount}`,
+    isRepairOnly && requestedNumbers.length ? `재요청 문항 번호: ${requestedNumbers.join(", ")}` : "",
     `첨부 페이지 이미지 수: ${pageImageCount}`,
     `첨부 페이지 번호: ${pageImageNumbers.length ? pageImageNumbers.join(", ") : "없음"}`,
     "",
@@ -721,7 +757,9 @@ function buildQuestionClassificationPrompt(payload) {
     buildSsenTypePromptSection(payload),
     "",
     "[분류 규칙]",
-    `- classificationRows는 1번부터 ${targetCount}번까지 반드시 모두 반환한다. 확신이 낮아도 행을 누락하지 않는다.`,
+    isRepairOnly && requestedNumbers.length
+      ? `- classificationRows는 ${requestedNumbers.join(", ")}번만 반드시 모두 반환한다. 확신이 낮아도 요청 번호 행을 누락하지 않는다.`
+      : `- classificationRows는 1번부터 ${targetCount}번까지 반드시 모두 반환한다. 확신이 낮아도 행을 누락하지 않는다.`,
     "- 각 문항의 number, page, score, questionType은 기존 행 값이 있으면 보존한다.",
     "- unit은 최종 분석지에서 단원별 출제표에 바로 쓸 수 있는 단원명으로 쓴다.",
     "- source는 교과서, 부교재, EBS, 모의고사, 확인 필요 중 하나로만 억지 선택하지 말고 근거가 없으면 확인 필요로 둔다.",
@@ -1825,10 +1863,13 @@ function normalizeClassificationPageImages(pageImages = []) {
 async function runOpenAiQuestionClassification(prompt, pageImages, model) {
   const content = [
     { type: "input_text", text: prompt },
-    ...pageImages.map((entry) => ({
-      type: "input_image",
-      image_url: entry.imageDataUrl
-    }))
+    ...pageImages.flatMap((entry) => [
+      { type: "input_text", text: `[첨부 이미지] 원본 PDF/이미지 ${entry.pageNumber}페이지` },
+      {
+        type: "input_image",
+        image_url: entry.imageDataUrl
+      }
+    ])
   ];
   const response = await fetch(OPENAI_RESPONSES_URL, {
     method: "POST",
@@ -1852,16 +1893,19 @@ async function runOpenAiQuestionClassification(prompt, pageImages, model) {
 }
 
 async function runAnthropicQuestionClassification(prompt, pageImages, model) {
-  const imageBlocks = pageImages.map((entry) => {
+  const imageBlocks = pageImages.flatMap((entry) => {
     const image = parseImageDataUrl(entry.imageDataUrl);
-    return {
-      type: "image",
-      source: {
-        type: "base64",
-        media_type: image.mediaType,
-        data: image.base64
+    return [
+      { type: "text", text: `[첨부 이미지] 원본 PDF/이미지 ${entry.pageNumber}페이지` },
+      {
+        type: "image",
+        source: {
+          type: "base64",
+          media_type: image.mediaType,
+          data: image.base64
+        }
       }
-    };
+    ];
   });
   const response = await fetch(ANTHROPIC_MESSAGES_URL, {
     method: "POST",
@@ -1919,8 +1963,8 @@ async function runQuestionClassificationWithFallback(prompt, provider, model, pa
     if (!fallbackProvider || !isRetryableAiProviderError(error)) throw error;
 
     const fallbackModel = fallbackProvider === "anthropic"
-      ? examAnalysisModels.anthropic || fallbackModels.anthropic
-      : examAnalysisModels.openai || fallbackModels.openai;
+      ? examQuestionClassificationModels.anthropic || fallbackModels.anthropic
+      : examQuestionClassificationModels.openai || fallbackModels.openai;
     try {
       return {
         provider: fallbackProvider,
@@ -1969,8 +2013,8 @@ async function runQuestionInfoTextWithFallback(payload, prompt, provider, model)
 
 export async function runExamAnalysis(payload) {
   const provider = selectedProvider(payload);
-  const model = selectedModel(payload, "examAnalysis");
   const questionInfoOnly = Boolean(payload.questionInfoOnly);
+  const model = selectedModel(payload, questionInfoOnly ? "questionClassification" : "examAnalysis");
 
   if (provider === "mock") {
     if (questionInfoOnly) {
@@ -1998,7 +2042,7 @@ export async function runExamAnalysis(payload) {
 
 export async function runExamQuestionInfoText(payload) {
   let provider = selectedProvider(payload);
-  let model = selectedModel(payload, "examAnalysis");
+  let model = selectedModel(payload, "questionClassification");
   const fallbackItems = normalizeQuestionItemsFromAi(Array.isArray(payload.questionItems) ? payload.questionItems : []);
 
   if (provider === "mock") {
@@ -2053,9 +2097,13 @@ export async function runExamQuestionInfoText(payload) {
 
 export async function runExamQuestionClassification(payload) {
   let provider = selectedProvider(payload);
-  let model = selectedModel(payload, "examAnalysis");
+  let model = selectedModel(payload, "questionClassification");
   const seedRows = normalizeClassificationRowsFromAi(normalizeClassificationSeedRows(payload));
-  const targetCount = Math.max(1, Math.min(80, Number(payload.classificationTargetCount) || Number(payload.questionTargetCount) || seedRows.length || 20));
+  const requestedNumbers = normalizeClassificationRequestedNumbers(payload.missingQuestionNumbers || payload.repairQuestionNumbers);
+  const targetCount = Math.max(1, Math.min(80, requestedNumbers.length || Number(payload.classificationTargetCount) || Number(payload.questionTargetCount) || seedRows.length || 20));
+  const expectedQuestionNumbers = requestedNumbers.length
+    ? requestedNumbers
+    : Array.from({ length: targetCount }, (_, index) => index + 1);
 
   if (provider === "mock") {
     return {
@@ -2067,6 +2115,7 @@ export async function runExamQuestionClassification(payload) {
       },
       rawText: "",
       classificationRowCount: 0,
+      expectedQuestionNumbers,
       warning: "mock AI 설정이라 분류표 골격만 저장했습니다. 설정에서 실제 시험분석 AI 제공자를 선택해 주세요."
     };
   }
@@ -2081,15 +2130,16 @@ export async function runExamQuestionClassification(payload) {
   const parsedRowNumbers = new Set(
     parsedRows
       .map((row) => Number(row.number))
-      .filter((number) => Number.isInteger(number) && number >= 1 && number <= targetCount)
+      .filter((number) => Number.isInteger(number) && expectedQuestionNumbers.includes(number))
   );
-  const missingRowNumbers = Array.from({ length: targetCount }, (_, index) => index + 1)
+  const missingRowNumbers = expectedQuestionNumbers
     .filter((number) => !parsedRowNumbers.has(number));
   const parseDiagnostics = {
     ...normalized.parseDiagnostics,
     provider,
     model,
     targetCount,
+    expectedQuestionNumbers,
     missingRowNumbers,
     pageImageCount: pageImages.length,
     seedRowCount: seedRows.length,
@@ -2118,6 +2168,7 @@ export async function runExamQuestionClassification(payload) {
     rawText: runResult.text,
     rawTextPreview: String(runResult.text || "").trim().slice(0, 4000),
     classificationRowCount: parsedRows.length,
+    expectedQuestionNumbers,
     pageImageCount: pageImages.length,
     parseDiagnostics,
     ...(runResult.fallbackReason ? { fallbackReason: runResult.fallbackReason } : {}),
@@ -2127,7 +2178,7 @@ export async function runExamQuestionClassification(payload) {
 
 export async function draftQuestionCrops(payload) {
   const provider = selectedProvider(payload);
-  const model = selectedModel(payload, "examAnalysis");
+  const model = selectedModel(payload, "questionClassification");
   const imageDataUrl = String(payload.imageDataUrl || "");
   if (!imageDataUrl.startsWith("data:image/")) {
     throw new Error("문항 크롭 초안에는 페이지 이미지가 필요합니다.");
