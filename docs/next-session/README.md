@@ -21,8 +21,9 @@ E:\academy-os 작업을 이어가겠습니다. 먼저 AGENTS.md와 docs/next-ses
 ## 현재 상태
 
 - 브랜치: `main`
-- 최신 푸시 커밋:
+- 최신 기능 푸시 커밋:
   - `6482869` - `Improve exam classification table readability`
+- 이 파일을 포함한 최신 커밋은 문서-only handoff 커밋이다. 정확한 HEAD는 `git log -1 --pretty=format:"%h %ad %s" --date=local`로 확인한다.
 - 직전 핵심 커밋:
   - `f2370ee` - `Improve exam classification parse diagnostics`
   - `5453869` - `Prevent attendance from attaching to future lessons`
