@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 최종문서 생성 로직 3차 모듈 분리
+
+- 상태: 완료
+- 사용자 요청: 시험분석 구조 분리를 계속 진행한다.
+- 판단: 2차 분리에서 남겨둔 `createExamFinalDocumentFromAnalysis`는 최종 편집본 생성의 큰 본문이지만, 원본 이미지 URL과 리포트 제목/메타는 App 쪽 helper에 의존한다. 동작을 바꾸지 않기 위해 생성 본문은 도메인 모듈로 옮기고, App에는 기존 함수명 wrapper를 남겨 필요한 helper를 옵션으로 주입했다.
+- 이번 작업 결과: `src/domains/exams/finalDocument.js`에 `createExamFinalDocumentFromAnalysis(analysis, options)`를 추가했다. `src/app/App.jsx`의 기존 함수는 `createExamFinalDocumentFromAnalysisBase`를 호출하는 얇은 wrapper로 축소했다. 구조 분리 후 정적 시나리오 테스트가 App 파일 하나만 보던 최종문서/분류표 문자열 검사를 시험분석 도메인 모듈까지 보도록 보정했다. `src/app/App.jsx`는 약 22,604줄에서 22,469줄로 줄었다.
+- 저장 주의: 순수 프론트 코드 구조 분리만 수행했다. Supabase 저장 경로는 기존 `examAnalyses[].finalDocument`, `examAnalyses[].questionClassifications` 그대로이며 새 SQL edit 필요 없음.
+- 검증: `node --check src/domains/exams/finalDocument.js`, `node --check src/domains/exams/questionClassification.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 최종문서 helper 2차 모듈 분리
 
 - 상태: 완료

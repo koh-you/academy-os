@@ -27,7 +27,7 @@ import {
 } from "../domains/exams/questionClassification.js";
 import {
   compactFinalClassificationTableBlock,
-  createExamFinalClassificationTableRows,
+  createExamFinalDocumentFromAnalysis as createExamFinalDocumentFromAnalysisBase,
   createFinalDocumentId,
   formatQuestionScoreWithWeight,
   getExamQuestionCommentCount,
@@ -1824,147 +1824,12 @@ function getExamQuestionCropImagePayload(item = {}, analysis = {}) {
 }
 
 function createExamFinalDocumentFromAnalysis(analysis = {}) {
-  const classificationRows = normalizeExamQuestionClassificationRows(analysis.questionClassifications || analysis.classificationRows);
-  const classificationItems = classificationRowsToInsightItems(classificationRows);
-  const questionItems = classificationItems.length ? classificationItems : normalizeExamQuestionItems(analysis.questionItems);
-  const unitRows = summarizeQuestionUnits(questionItems);
-  const ssenTypeRows = summarizeQuestionSsenTypes(questionItems);
-  const classificationTableRows = createExamFinalClassificationTableRows(classificationRows);
-  const sourceRows = questionItems.filter((item) =>
-    (String(item.source || "").trim() && item.source !== "확인 필요") ||
-    item.similarProblemNeeded === "필요" ||
-    String(item.similarProblemSource || "").trim() ||
-    (item.similarProblemRelation && item.similarProblemRelation !== "확인 필요")
-  );
-  const questionSlotItems = questionItems
-    .filter((item) => isExamQuestionInsightRecommended(item) || hasExamQuestionDetailedInsight(item))
-    .slice(0, 12);
-  const slotItems = (questionSlotItems.length ? questionSlotItems : questionItems.slice(0, 6)).map((item) => ({
-    id: item.questionId || createFinalDocumentId("slot"),
-    number: `${item.number}번`,
-    title: [item.unit, item.role].filter(Boolean).join(" · ") || "주요 문항",
-    originalSlot: item.cropBox ? "원문항 크롭 이미지 삽입" : "원문항 삽입 영역",
-    originalImage: getExamQuestionCropImagePayload(item, analysis),
-    similarSlot: item.similarProblemNeeded === "필요" ? "유사문항 삽입 영역" : "필요 시 유사문항 삽입",
-    similarProblemNeeded: item.similarProblemNeeded || "확인 필요",
-    similarProblemSource: item.similarProblemSource || "",
-    similarProblemRelation: item.similarProblemRelation || "확인 필요",
-    comment: item.teacherComment || item.strategyComment || item.variationRelationComment || ""
-  }));
-
-  return {
-    version: 1,
-    generatedAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    outputLayoutChoices: normalizeExamOutputLayoutChoices(analysis.outputLayoutChoices),
-    blocks: [
-      {
-        id: createFinalDocumentId("cover"),
-        type: "cover",
-        title: getExamAnalysisReportTitle(analysis),
-        subtitle: getExamAnalysisReportSubtitle(analysis),
-        meta: getExamAnalysisReportMeta(analysis)
-      },
-      {
-        id: createFinalDocumentId("text"),
-        type: "text",
-        title: "기말고사 출제 핵심 분석",
-        value: [analysis.oneLineSummary, analysis.examStructure, analysis.aiOverview].filter(Boolean).join("\n\n")
-      },
-      {
-        id: createFinalDocumentId("table"),
-        type: "table",
-        title: "시험 기본 정보",
-        columns: ["항목", "내용"],
-        rows: [
-          ["학교/학년", [analysis.schoolName, analysis.grade].filter(Boolean).join(" ") || "미입력"],
-          ["고사", analysis.examName || "미입력"],
-          ["과목", analysis.subject || "미입력"],
-          ["문항 구성", analysis.questionComposition?.total ? `${analysis.questionComposition.total}문항` : `${questionItems.length || 0}문항`],
-          ["난이도", analysis.oneLineSummary || "강사 검수 후 입력"]
-        ]
-      },
-      ...(classificationTableRows.length ? [{
-        id: createFinalDocumentId("table"),
-        type: "table",
-        title: "문항별 분류표 원본",
-        columns: ["문항", "배점/형식", "단원", "쎈 유형", "난이도/역할", "검수 메모"],
-        rows: classificationTableRows
-      }] : []),
-      {
-        id: createFinalDocumentId("chart"),
-        type: "chart",
-        title: "단원별 출제 비율",
-        chartType: "bar",
-        rows: unitRows.slice(0, 8).map((row) => ({
-          label: row.unit,
-          value: row.count,
-          note: row.score ? `${row.score}점 · ${row.questions.map((number) => `${number}번`).join(", ")}` : row.questions.map((number) => `${number}번`).join(", ")
-        }))
-      },
-      ...(ssenTypeRows.length ? [{
-        id: createFinalDocumentId("table"),
-        type: "table",
-        title: "쎈 유형별 분류",
-        columns: ["쎈 유형", "단원", "주유형", "보조유형", "문항"],
-        rows: ssenTypeRows.slice(0, 12).map((row) => [
-          row.label,
-          row.unitName || "-",
-          row.primary || "-",
-          row.secondary || "-",
-          row.questions.map((number) => `${number}번`).join(", ")
-        ])
-      }] : []),
-      {
-        id: createFinalDocumentId("table"),
-        type: "table",
-        title: "난이도 상승 요인 분석",
-        columns: ["요인", "해당 문항", "비고"],
-        rows: [
-          ["킬러/준킬러", questionItems.filter((item) => ["준킬러", "킬러", "1등급 변별문항"].includes(item.role) || item.tags?.includes("1등급 변별문항")).map((item) => `${item.number}번`).join(", ") || "확인 필요", analysis.insightKiller || ""],
-          ["고배점 문항", questionItems.filter((item) => parseExamScoreValue(item.score) >= Math.max(4, getExamTotalScore(questionItems, analysis.questionComposition) * 0.05)).map((item) => `${item.number}번(${formatQuestionScoreWithWeight(item, questionItems, analysis.questionComposition)})`).join(", ") || "확인 필요", "문항 수가 달라지면 같은 배점도 전체 대비 비중이 달라집니다."],
-          ["조건 해석", questionItems.filter((item) => ["앞번호 고난도", "서술형 변별"].includes(item.role)).map((item) => `${item.number}번`).join(", ") || "확인 필요", analysis.typeClassification || ""]
-        ]
-      },
-      {
-        id: createFinalDocumentId("table"),
-        type: "table",
-        title: "부교재·유사문항 활용",
-        columns: ["문항", "출처", "유사문항", "변형 구분", "변형 관계"],
-        rows: (sourceRows.length ? sourceRows : questionItems.filter((item) => item.similarProblemNeeded === "필요")).map((item) => [
-          `${item.number}번`,
-          item.similarProblemSource || item.source || "확인 필요",
-          item.similarProblemNeeded || "확인 필요",
-          item.similarProblemRelation || "확인 필요",
-          item.variationRelationComment || "변형 관계 메모 입력"
-        ])
-      },
-      {
-        id: createFinalDocumentId("flow"),
-        type: "flow",
-        title: "대비전략 흐름도",
-        nodes: getExamStrategyFlowNodes(questionItems)
-      },
-      {
-        id: createFinalDocumentId("text"),
-        type: "text",
-        title: "점수 차이를 만든 결정 요인",
-        value: [analysis.killerProblems, analysis.insightStudentErrors].filter(Boolean).join("\n\n")
-      },
-      {
-        id: createFinalDocumentId("questionSlots"),
-        type: "questionSlots",
-        title: "주요 문항 삽입 슬롯",
-        items: slotItems
-      },
-      {
-        id: createFinalDocumentId("text"),
-        type: "text",
-        title: "TEACHER's COMMENT",
-        value: [analysis.insightSummary, analysis.insightDirection, analysis.insightPrediction].filter(Boolean).join("\n\n")
-      }
-    ]
-  };
+  return createExamFinalDocumentFromAnalysisBase(analysis, {
+    getQuestionCropImagePayload: getExamQuestionCropImagePayload,
+    getReportMeta: getExamAnalysisReportMeta,
+    getReportSubtitle: getExamAnalysisReportSubtitle,
+    getReportTitle: getExamAnalysisReportTitle
+  });
 }
 
 const examAnalysisFieldKeys = [
