@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 AI 상태/파싱 helper 6차 모듈 분리
+
+- 상태: 완료
+- 사용자 요청: 구조분리를 사용자가 매번 지시하지 않아도, 전체 코드 우선순위를 보며 연쇄적으로 계속 진행한다.
+- 판단: 시험분석 분류표/AI 응답 문제를 추적하려면 화면 컴포넌트와 AI 응답 파싱·대기 상태·초기 필드 보존 로직이 분리되어 있어야 한다. 이번에는 `ExamAnalysisCenter` 내부 JSX를 건드리기 전에 AI 상태/파싱 helper만 도메인 모듈로 이동했다.
+- 이번 작업 결과: `src/domains/exams/analysisState.js`를 추가하고 `normalizeExamAnalysisAiFields`, `parseStructuredAnalysisText`, `parseLooseStructuredAnalysisText`, `cleanAnalysisFieldText`, `removeFailedAttachmentBlocks`, `inferExamAnalysisMetadataFromFileName`, `repairDisconnectedExamAnalysisRuns`, `normalizeExamAnalysisForDisplay`, AI 대기 상태/리포트 메타/초기 필드 helper를 이동했다. `src/app/App.jsx`에는 런타임 세션 ID와 학원명, 기본 프롬프트를 주입하는 작은 wrapper만 남겼고, 파일 크기는 약 22,071줄에서 21,804줄로 줄었다.
+- 테스트 보정: 구조 분리 후 정적 시나리오 테스트가 AI 분석 상태/파싱 helper를 새 도메인 모듈까지 함께 검사하도록 보정했다.
+- 저장 주의: 순수 프론트 코드 구조 분리만 수행했다. Supabase 저장 경로는 기존 `examAnalyses`, `aiInitialFields`, `questionClassifications`, `app_state` 그대로이며 새 SQL edit 필요 없음.
+- 검증: `node --check src/domains/exams/analysisState.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 라이브러리/ID helper 5차 모듈 분리
 
 - 상태: 완료
