@@ -13056,7 +13056,7 @@ function ExamAnalysisCenter({
                 <div>
                   <p className="eyebrow">FINAL OUTPUTS</p>
                   <h2>최종 산출물 4종</h2>
-                  <p className="muted">강사용 분석지, 학생 분석지, 블로그 초안, 인스타 카드뉴스를 같은 데이터 구조에서 편집합니다.</p>
+                  <p className="muted">최종편집본은 강사용 최종 보고서 원본이고, 학생 분석지·블로그·인스타는 아래 미리보기에서 별도 초안으로 확인합니다.</p>
                 </div>
                 <div className={hasExamAnalysisTeacherInsight(selectedAnalysis) ? "analysisInsightStatus done" : "analysisInsightStatus missing"}>
                   <strong>{hasExamAnalysisTeacherInsight(selectedAnalysis) ? "인사이트 반영됨" : "인사이트 추가 필요"}</strong>
@@ -13068,6 +13068,24 @@ function ExamAnalysisCenter({
                   ) : null}
                   <button className="primaryButton" onClick={() => setIsReportPreviewOpen(true)} type="button">최종 보고서 미리보기</button>
                   <button className="softButton" onClick={() => setDetailSectionId("insight")} type="button">인사이트 수정</button>
+                </div>
+              </article>
+              <article className="analysisOutputGuide">
+                <div>
+                  <strong>최종편집본</strong>
+                  <span>강사용 최종 보고서/PDF의 편집 원본입니다. 수정 내용은 최종 보고서 미리보기에 반영됩니다.</span>
+                </div>
+                <div>
+                  <strong>AI 초안</strong>
+                  <span>한 줄 총평, 시험 구조, 유형 분류, 킬러 문항 분석을 먼저 채웁니다.</span>
+                </div>
+                <div>
+                  <strong>강사 인사이트</strong>
+                  <span>학생 오답, 킬러 체감, 학습 방향, 다음 시험 예측이 TEACHER's COMMENT와 핵심 판단에 들어갑니다.</span>
+                </div>
+                <div>
+                  <strong>별도 산출물</strong>
+                  <span>학생 분석지, 블로그, 인스타는 아래 산출물 미리보기에서 별도 초안으로 확인합니다.</span>
                 </div>
               </article>
               <details className="analysisOutputSection">

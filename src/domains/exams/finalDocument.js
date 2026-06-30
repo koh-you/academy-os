@@ -191,6 +191,97 @@ export function createFinalDocumentId(prefix = "block") {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 }
 
+const finalDocumentBlockSourceMeta = Object.freeze({
+  ai: { label: "AI 초안", tone: "ai" },
+  classification: { label: "문항분류표", tone: "classification" },
+  computed: { label: "자동 계산", tone: "computed" },
+  hybrid: { label: "AI+강사", tone: "hybrid" },
+  insight: { label: "강사 인사이트", tone: "insight" },
+  manual: { label: "수동 편집", tone: "manual" },
+  metadata: { label: "기본정보", tone: "metadata" }
+});
+
+const finalDocumentBlockGuides = Object.freeze({
+  "기말고사 출제 핵심 분석": {
+    sourceKind: "ai",
+    description: "AI가 한 줄 총평, 시험 구조, 시험 개요를 조합해 만든 강사용 보고서 도입부입니다.",
+    outputLink: "최종 보고서/강사용 분석지"
+  },
+  "시험 기본 정보": {
+    sourceKind: "metadata",
+    description: "학교, 고사명, 과목, 문항 구성 같은 기본정보와 AI 난이도 요약이 들어갑니다.",
+    outputLink: "최종 보고서 표지/기본정보"
+  },
+  "문항별 분류표 원본": {
+    sourceKind: "classification",
+    description: "AI 문항분류 초안과 강사가 검수한 단원, 쎈 유형, 난이도, 역할 값을 그대로 보여줍니다.",
+    outputLink: "쎈 유형/단원/문항 슬롯의 기준 데이터"
+  },
+  "단원별 출제 비율": {
+    sourceKind: "computed",
+    description: "문항분류표의 단원과 배점 정보를 자동 집계해 차트 데이터로 만듭니다.",
+    outputLink: "강사용 보고서 차트"
+  },
+  "쎈 유형별 분류": {
+    sourceKind: "computed",
+    description: "문항분류표의 쎈 주유형/보조유형을 유형 코드 기준으로 묶어 보여줍니다.",
+    outputLink: "유형별 분석/복습 설계"
+  },
+  "난이도 상승 요인 분석": {
+    sourceKind: "hybrid",
+    description: "문항분류표 계산값에 AI의 유형 판단과 강사 킬러문항 인사이트를 함께 넣는 영역입니다.",
+    outputLink: "강사용 해설/학부모 설명"
+  },
+  "부교재·유사문항 활용": {
+    sourceKind: "manual",
+    description: "출처, 유사문항 필요 여부, 변형 관계처럼 강사가 현장 자료를 보고 보강하는 영역입니다.",
+    outputLink: "후속 보충/유사문항 제작"
+  },
+  "대비전략 흐름도": {
+    sourceKind: "computed",
+    description: "문항분류표의 단원, 난이도, 역할을 기반으로 다음 대비 순서를 자동 구성합니다.",
+    outputLink: "학생/강사용 학습 로드맵"
+  },
+  "점수 차이를 만든 결정 요인": {
+    sourceKind: "insight",
+    description: "AI의 킬러/준킬러 분석과 강사가 적은 실제 학생 오답 인사이트가 함께 들어갑니다.",
+    outputLink: "강사 총평/상담 포인트"
+  },
+  "주요 문항 삽입 슬롯": {
+    sourceKind: "manual",
+    description: "원문항 크롭, 유사문항 삽입, 문항 코멘트처럼 최종 자료에 넣을 문항을 강사가 확정합니다.",
+    outputLink: "PDF 편집/문항 자료 제작"
+  },
+  "TEACHER's COMMENT": {
+    sourceKind: "insight",
+    description: "강사 총평, 학습 방향, 다음 시험 예측이 들어가는 최종 코멘트 영역입니다.",
+    outputLink: "상담/최종 총평"
+  }
+});
+
+export function getExamFinalDocumentBlockGuide(block = {}) {
+  const title = String(block.title || "").trim();
+  const guide = finalDocumentBlockGuides[title] || {};
+  const sourceKind = String(block.sourceKind || guide.sourceKind || (block.type === "cover" ? "metadata" : "")).trim();
+  const sourceMeta = finalDocumentBlockSourceMeta[sourceKind] || finalDocumentBlockSourceMeta.manual;
+  if (block.type === "cover" && !guide.description) {
+    return {
+      sourceKind: "metadata",
+      sourceLabel: finalDocumentBlockSourceMeta.metadata.label,
+      sourceTone: finalDocumentBlockSourceMeta.metadata.tone,
+      description: "보고서 제목, 부제, 학교/고사 메타데이터가 들어가는 표지 영역입니다.",
+      outputLink: "최종 보고서 표지"
+    };
+  }
+  return {
+    sourceKind: sourceKind || "manual",
+    sourceLabel: String(block.sourceLabel || sourceMeta.label || "수동 편집").trim(),
+    sourceTone: sourceMeta.tone || "manual",
+    description: String(block.description || guide.description || "강사가 직접 추가하거나 수정하는 편집 블록입니다.").trim(),
+    outputLink: String(block.outputLink || guide.outputLink || "최종 보고서").trim()
+  };
+}
+
 function cleanFinalDocumentText(value = "", fieldKey = "") {
   let text = String(value ?? "")
     .replace(/\r\n/g, "\n")
@@ -325,6 +416,7 @@ export function createExamFinalDocumentFromAnalysis(analysis = {}, options = {})
       {
         id: createFinalDocumentId("cover"),
         type: "cover",
+        sourceKind: "metadata",
         title: getReportTitle(analysis),
         subtitle: getReportSubtitle(analysis),
         meta: getReportMeta(analysis)
@@ -332,12 +424,14 @@ export function createExamFinalDocumentFromAnalysis(analysis = {}, options = {})
       {
         id: createFinalDocumentId("text"),
         type: "text",
+        sourceKind: "ai",
         title: "기말고사 출제 핵심 분석",
         value: [finalText.oneLineSummary, finalText.examStructure, finalText.aiOverview].filter(Boolean).join("\n\n")
       },
       {
         id: createFinalDocumentId("table"),
         type: "table",
+        sourceKind: "metadata",
         title: "시험 기본 정보",
         columns: ["항목", "내용"],
         rows: [
@@ -351,6 +445,7 @@ export function createExamFinalDocumentFromAnalysis(analysis = {}, options = {})
       ...(classificationTableRows.length ? [{
         id: createFinalDocumentId("table"),
         type: "table",
+        sourceKind: "classification",
         title: "문항별 분류표 원본",
         columns: ["문항", "배점/형식", "단원", "쎈 유형", "난이도/역할", "검수 메모"],
         rows: classificationTableRows
@@ -358,6 +453,7 @@ export function createExamFinalDocumentFromAnalysis(analysis = {}, options = {})
       {
         id: createFinalDocumentId("chart"),
         type: "chart",
+        sourceKind: "computed",
         title: "단원별 출제 비율",
         chartType: "bar",
         rows: unitRows.slice(0, 8).map((row) => ({
@@ -369,6 +465,7 @@ export function createExamFinalDocumentFromAnalysis(analysis = {}, options = {})
       ...(ssenTypeRows.length ? [{
         id: createFinalDocumentId("table"),
         type: "table",
+        sourceKind: "computed",
         title: "쎈 유형별 분류",
         columns: ["쎈 유형", "단원", "주유형", "보조유형", "문항"],
         rows: ssenTypeRows.slice(0, 12).map((row) => [
@@ -382,6 +479,7 @@ export function createExamFinalDocumentFromAnalysis(analysis = {}, options = {})
       {
         id: createFinalDocumentId("table"),
         type: "table",
+        sourceKind: "hybrid",
         title: "난이도 상승 요인 분석",
         columns: ["요인", "해당 문항", "비고"],
         rows: [
@@ -393,6 +491,7 @@ export function createExamFinalDocumentFromAnalysis(analysis = {}, options = {})
       {
         id: createFinalDocumentId("table"),
         type: "table",
+        sourceKind: "manual",
         title: "부교재·유사문항 활용",
         columns: ["문항", "출처", "유사문항", "변형 구분", "변형 관계"],
         rows: (sourceRows.length ? sourceRows : questionItems.filter((item) => item.similarProblemNeeded === "필요")).map((item) => [
@@ -406,24 +505,28 @@ export function createExamFinalDocumentFromAnalysis(analysis = {}, options = {})
       {
         id: createFinalDocumentId("flow"),
         type: "flow",
+        sourceKind: "computed",
         title: "대비전략 흐름도",
         nodes: getExamStrategyFlowNodes(questionItems)
       },
       {
         id: createFinalDocumentId("text"),
         type: "text",
+        sourceKind: "insight",
         title: "점수 차이를 만든 결정 요인",
         value: [finalText.killerProblems, finalText.insightStudentErrors].filter(Boolean).join("\n\n")
       },
       {
         id: createFinalDocumentId("questionSlots"),
         type: "questionSlots",
+        sourceKind: "manual",
         title: "주요 문항 삽입 슬롯",
         items: slotItems
       },
       {
         id: createFinalDocumentId("text"),
         type: "text",
+        sourceKind: "insight",
         title: "TEACHER's COMMENT",
         value: [finalText.insightSummary, finalText.insightDirection, finalText.insightPrediction].filter(Boolean).join("\n\n")
       }
@@ -443,6 +546,10 @@ export function normalizeExamFinalDocument(document = null) {
         title: String(block.title || (type === "cover" ? "최종 분석지" : "편집 블록")).trim()
       };
       if (typeof block.collapsed === "boolean") base.collapsed = block.collapsed;
+      if (block.sourceKind) base.sourceKind = String(block.sourceKind || "").trim();
+      if (block.sourceLabel) base.sourceLabel = String(block.sourceLabel || "").trim();
+      if (block.description) base.description = String(block.description || "").trim();
+      if (block.outputLink) base.outputLink = String(block.outputLink || "").trim();
       if (type === "cover") {
         return {
           ...base,

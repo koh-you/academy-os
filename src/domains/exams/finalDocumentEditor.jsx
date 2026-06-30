@@ -8,6 +8,7 @@ import {
   compactFinalClassificationTableBlock,
   createExamFinalDocumentFromAnalysis as createFallbackExamFinalDocumentFromAnalysis,
   createFinalDocumentId,
+  getExamFinalDocumentBlockGuide,
   normalizeExamFinalDocument
 } from "./finalDocument.js";
 import { FinalQuestionCropImage } from "./questionCropView.jsx";
@@ -224,6 +225,7 @@ export function ExamFinalDocumentBuilder({
 
 function ExamFinalDocumentBlockEditor({ block, isOpen = false, updateBlock, onToggle, removeBlock }) {
   const updateField = (field, value) => updateBlock(block.id, (current) => ({ ...current, [field]: value }));
+  const blockGuide = getExamFinalDocumentBlockGuide(block);
   const blockLabel = {
     cover: "표지",
     text: "문단",
@@ -243,8 +245,13 @@ function ExamFinalDocumentBlockEditor({ block, isOpen = false, updateBlock, onTo
     <section className={`finalDocumentBlock ${block.type}${isOpen ? " open" : ""}`}>
       <div className="finalDocumentBlockHeader">
         <div className="finalDocumentBlockTitle">
-          <span>{blockLabel}</span>
-          <strong>{blockTitle}</strong>
+          <div className="finalDocumentBlockTitleLine">
+            <span className="finalDocumentBlockType">{blockLabel}</span>
+            <strong>{blockTitle}</strong>
+            <i className={`finalDocumentSourceBadge ${blockGuide.sourceTone}`}>{blockGuide.sourceLabel}</i>
+          </div>
+          <p>{blockGuide.description}</p>
+          <small>연결: {blockGuide.outputLink}</small>
         </div>
         <div className="finalDocumentBlockActions">
           <button onClick={(event) => runHeaderAction(event, () => removeBlock(block.id))} type="button">삭제</button>

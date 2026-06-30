@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 최종편집본 출처/산출물 연결 안내
+
+- 상태: 완료
+- 사용자 요청: 최종편집본 항목들이 산출물과 어떻게 연결되는지, AI가 채우는 부분과 강사 인사이트가 들어가는 부분이 어디인지 화면에서 알 수 있게 한다.
+- 이번 작업 결과: `getExamFinalDocumentBlockGuide`를 추가해 최종편집본 블록별 출처와 역할을 안내한다. 각 블록 헤더에 `AI 초안`, `문항분류표`, `자동 계산`, `AI+강사`, `강사 인사이트`, `수동 편집`, `기본정보` 배지를 표시하고, 블록 설명과 연결 산출물 한 줄을 함께 보여준다.
+- 산출물 연결 안내: 산출물 작성 단계 상단에 `최종편집본`, `AI 초안`, `강사 인사이트`, `별도 산출물` 관계 안내 밴드를 추가했다. 최종편집본은 강사용 최종 보고서/PDF 원본이고, 학생 분석지·블로그·인스타는 아래 산출물 미리보기의 별도 초안이라는 점을 명확히 했다.
+- 저장 주의: 새로 생성되는 finalDocument block에는 선택적 `sourceKind`를 붙이고, 기존 저장본은 제목 기반으로 안내를 추론한다. 기존 `examAnalyses[].finalDocument` app_state 저장 경로를 그대로 사용하며 새 Supabase SQL edit 없음.
+- 검증: `node --check src/domains/exams/finalDocument.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 237, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 산출물 미리보기 렌더링 보강
 
 - 상태: 완료
