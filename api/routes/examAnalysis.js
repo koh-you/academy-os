@@ -668,11 +668,16 @@ function buildQuestionClassificationPrompt(payload) {
     : "아직 문항별 분류 행이 없습니다.";
   const rawText = limitPromptText(payload.rawExamText || "", EXAM_QUESTION_CLASSIFICATION_TEXT_LIMIT);
   const pageImageCount = Array.isArray(payload.pageImages) ? payload.pageImages.length : 0;
+  const pageImageNumbers = Array.isArray(payload.pageImages)
+    ? payload.pageImages.map((entry, index) => Number(entry?.pageNumber) || index + 1).filter(Boolean)
+    : [];
 
   return [
     "역할: 학교 내신 수학 시험지를 읽고 분석지 생성을 위한 문항별 분류표를 만드는 AI",
     `목표: 최종 분석지의 표와 예측을 만들 수 있도록 classificationRows ${targetCount}행을 만든다.`,
     `가장 중요한 출력 조건: classificationRows 배열을 반드시 1번부터 ${targetCount}번까지 ${targetCount}개 채운다.`,
+    "출력 예산이 부족하면 classificationSummary/unitDistribution/typeClassification/killerProblems/sourceCheckNotes는 빈 문자열로 두고, classificationRows는 절대 줄이지 않는다.",
+    "특히 마지막 2~4개 서술형/단답형 문항을 먼저 별도로 확인한 뒤 1번부터 마지막 번호까지 빠짐없이 채운다.",
     "문항을 읽기 어렵거나 단원/유형을 확정할 수 없어도 행을 생략하지 말고 unit/difficulty/role/source/detailType/reviewNote를 '확인 필요' 중심으로 채운다.",
     "classificationSummary, unitDistribution 같은 요약만 반환하면 실패다. 요약은 짧게 쓰고 classificationRows를 우선 완성한다.",
     "",
@@ -690,6 +695,7 @@ function buildQuestionClassificationPrompt(payload) {
     `시험일: ${payload.examDate ?? ""}`,
     `목표 문항 수: ${targetCount}`,
     `첨부 페이지 이미지 수: ${pageImageCount}`,
+    `첨부 페이지 번호: ${pageImageNumbers.length ? pageImageNumbers.join(", ") : "없음"}`,
     "",
     "[업로드 원본]",
     sourceFileLines || "원본 정보 없음",
@@ -729,11 +735,6 @@ function buildQuestionClassificationPrompt(payload) {
     "",
     "반드시 순수 JSON 하나만 반환하세요. markdown 코드블록과 설명 문장은 쓰지 마세요.",
     "{",
-    '  "classificationSummary": "시험 전체 개요와 분류 결과 요약",',
-    '  "unitDistribution": "단원별 문항번호/문항수/배점/특징 요약",',
-    '  "typeClassification": "기본/준킬러/킬러와 반복 유형 요약",',
-    '  "killerProblems": "킬러·준킬러 후보 문항과 이유",',
-    '  "sourceCheckNotes": "OCR/이미지 판독 한계, 확인 필요 문항, 연계 출처 후보",',
     '  "classificationRows": [',
     "    {",
     '      "number": 1,',
@@ -754,7 +755,12 @@ function buildQuestionClassificationPrompt(payload) {
     '      ],',
     '      "tags": ["기본문항"]',
     "    }",
-    "  ]",
+    "  ],",
+    '  "classificationSummary": "시험 전체 개요와 분류 결과 요약 또는 빈 문자열",',
+    '  "unitDistribution": "단원별 문항번호/문항수/배점/특징 요약 또는 빈 문자열",',
+    '  "typeClassification": "기본/준킬러/킬러와 반복 유형 요약 또는 빈 문자열",',
+    '  "killerProblems": "킬러·준킬러 후보 문항과 이유 또는 빈 문자열",',
+    '  "sourceCheckNotes": "OCR/이미지 판독 한계, 확인 필요 문항, 연계 출처 후보 또는 빈 문자열"',
     "}"
   ].join("\n");
 }
@@ -2072,11 +2078,19 @@ export async function runExamQuestionClassification(payload) {
   model = runResult.model;
   const normalized = normalizeQuestionClassificationResult(runResult.text);
   const parsedRows = normalized.fields.classificationRows;
+  const parsedRowNumbers = new Set(
+    parsedRows
+      .map((row) => Number(row.number))
+      .filter((number) => Number.isInteger(number) && number >= 1 && number <= targetCount)
+  );
+  const missingRowNumbers = Array.from({ length: targetCount }, (_, index) => index + 1)
+    .filter((number) => !parsedRowNumbers.has(number));
   const parseDiagnostics = {
     ...normalized.parseDiagnostics,
     provider,
     model,
     targetCount,
+    missingRowNumbers,
     pageImageCount: pageImages.length,
     seedRowCount: seedRows.length,
     sourceFileCount: Array.isArray(payload.sourceFiles) ? payload.sourceFiles.length : 0,
@@ -2086,8 +2100,11 @@ export async function runExamQuestionClassification(payload) {
     Array.from({ length: targetCount }, (_, index) => ({ number: index + 1, page: 1 }))
   );
   const rows = parsedRows.length ? parsedRows : fallbackRows;
-  const warning = parsedRows.length < targetCount
-    ? `AI 응답 분류 행이 ${parsedRows.length}/${targetCount}개라 기존 분류표 골격을 함께 유지했습니다.`
+  const missingRowText = missingRowNumbers.length
+    ? ` 누락 문항: ${missingRowNumbers.slice(0, 12).map((number) => `${number}번`).join(", ")}${missingRowNumbers.length > 12 ? ` 외 ${missingRowNumbers.length - 12}개` : ""}`
+    : "";
+  const warning = parsedRows.length < targetCount || missingRowNumbers.length
+    ? `AI 응답 분류 행이 ${parsedRows.length}/${targetCount}개라 기존 분류표 골격을 함께 유지했습니다.${missingRowText}`
     : "";
 
   return {

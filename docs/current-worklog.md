@@ -10,6 +10,17 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 문항별 분류표 MVP 서술형 꼬리 문항 누락 보정
+
+- 상태: 완료
+- 사용자 요청: 문항별분류표 MVP에서 3개년 모두 마지막 서술형 2~4문항이 인식되지 않고, AI 요청 비용이 건당 약 0.32달러씩 빠지는 상황이라 Sonnet 사용 가능 여부와 추가 수정점을 확인한다.
+- 판단: 분류표 UI/파서가 완전히 깨진 것이 아니라 AI 응답이 20~21/22행처럼 마지막 문항 일부를 생략하는 패턴이었다. 원인은 PDF 분류 입력이 앞쪽 8페이지만 보내는 구조라 긴 원본의 마지막 서술형 페이지가 빠질 수 있었고, 서버 프롬프트 JSON 예시도 요약 필드를 먼저 두어 토큰 부족 시 `classificationRows` 후반부가 잘리는 쪽으로 유도될 위험이 있었다.
+- 이번 작업 결과: `src/domains/exams/sourceMedia.js`에 `getQuestionClassificationPageNumbers`를 추가해 8장 이미지 한도는 유지하되 긴 PDF에서는 앞쪽 페이지와 마지막 3페이지를 함께 보내도록 했다. `src/app/App.jsx`의 `buildClassificationPageImages`가 이 페이지 번호 선택을 사용한다. `api/routes/examAnalysis.js`의 문항분류 프롬프트는 `classificationRows`를 JSON 맨 앞에 두고, 출력 예산이 부족하면 요약 필드를 비우더라도 행 수는 줄이지 않도록 지시한다. 또한 첨부 페이지 번호와 마지막 2~4개 서술형/단답형 확인 지시를 프롬프트에 넣었다.
+- 진단 보강: AI가 일부 번호를 빠뜨리면 `missingRowNumbers`를 서버 진단과 경고 문구에 포함한다. 프론트 진단 포맷도 누락 문항 번호를 표시해, 다음 재현 시 21/22 같은 상태가 어떤 번호 누락인지 바로 확인할 수 있다.
+- 비용 판단: 문항별 분류표 MVP는 고급 추론보다 PDF/이미지 기반 구조화와 누락 없는 행 생성이 핵심이므로 Opus보다 Sonnet 계열로 운영하는 편이 적절하다. Opus는 최종 인사이트/3개년 종합 판단처럼 해석 품질이 더 중요한 단계에만 제한적으로 쓰는 방향이 좋다.
+- 저장 주의: 새 Supabase SQL edit 없음. 기존 시험분석 저장 경로인 `examAnalyses[].questionClassifications`/`classificationRows` app_state 구조를 그대로 사용한다.
+- 검증: `node --check src/domains/exams/sourceMedia.js`, `node --check src/domains/exams/questionClassification.js`, `node --check api/routes/examAnalysis.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 최종문서 편집/수업일지 출결 helper 21차 모듈 분리
 
 - 상태: 완료

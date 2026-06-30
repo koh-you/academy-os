@@ -30,6 +30,22 @@ export async function renderPdfPageToVisionImageDataUrl(pdfDocument, pageNumber,
   return dataUrl;
 }
 
+export function getQuestionClassificationPageNumbers(pageCount = 0, maxPages = 8) {
+  const safePageCount = Math.max(0, Number(pageCount) || 0);
+  const safeMaxPages = Math.max(1, Number(maxPages) || 8);
+  if (!safePageCount) return [];
+  if (safePageCount <= safeMaxPages) {
+    return Array.from({ length: safePageCount }, (_, index) => index + 1);
+  }
+  const tailCount = Math.min(3, Math.max(1, Math.floor(safeMaxPages / 3)));
+  const headCount = safeMaxPages - tailCount;
+  const pages = [
+    ...Array.from({ length: headCount }, (_, index) => index + 1),
+    ...Array.from({ length: tailCount }, (_, index) => safePageCount - tailCount + index + 1)
+  ];
+  return Array.from(new Set(pages)).filter((pageNumber) => pageNumber >= 1 && pageNumber <= safePageCount);
+}
+
 export function imageElementToVisionImageDataUrl(imageElement, maxDimension = 1600) {
   const width = imageElement?.naturalWidth || imageElement?.width;
   const height = imageElement?.naturalHeight || imageElement?.height;

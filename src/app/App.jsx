@@ -43,6 +43,7 @@ import {
   canvasToVisionImageDataUrl,
   getExamAnalysisQuestionSourceContext as getExamAnalysisQuestionSourceContextBase,
   getExamAnalysisSourceFileId,
+  getQuestionClassificationPageNumbers,
   imageElementToVisionImageDataUrl,
   imageUrlToVisionImageDataUrl,
   isImageExamAnalysisSource,
@@ -11303,9 +11304,9 @@ function ExamAnalysisCenter({
       try {
         const pdfDocument = await loadingTask.promise;
         setPdfPageCount(pdfDocument.numPages);
-        const pageLimit = Math.min(pdfDocument.numPages, 8);
+        const pageNumbers = getQuestionClassificationPageNumbers(pdfDocument.numPages, 8);
         const pageImages = [];
-        for (let pageNumber = 1; pageNumber <= pageLimit; pageNumber += 1) {
+        for (const pageNumber of pageNumbers) {
           const imageDataUrl = await renderPdfPageToVisionImageDataUrl(pdfDocument, pageNumber, 1.05);
           pageImages.push({ pageNumber, imageDataUrl });
         }

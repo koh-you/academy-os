@@ -428,6 +428,9 @@ export function formatQuestionClassificationParseDiagnostics(diagnostics = {}, r
     : diagnostics.containsQuestionClassificationsKey
       ? "questionClassifications 있음"
       : "행 배열 키 없음";
+  const missingRows = Array.isArray(diagnostics.missingRowNumbers) && diagnostics.missingRowNumbers.length
+    ? `누락 문항: ${diagnostics.missingRowNumbers.slice(0, 20).map((number) => `${number}번`).join(", ")}${diagnostics.missingRowNumbers.length > 20 ? ` 외 ${diagnostics.missingRowNumbers.length - 20}개` : ""}`
+    : "";
   const jsonShape = [
     diagnostics.jsonStart !== undefined ? `start=${diagnostics.jsonStart}` : "",
     diagnostics.jsonEnd !== undefined ? `end=${diagnostics.jsonEnd}` : "",
@@ -448,6 +451,7 @@ export function formatQuestionClassificationParseDiagnostics(diagnostics = {}, r
     `AI 원문: ${rawTextLength}자`,
     `이미지 입력: ${diagnostics.pageImageCount ?? "?"}장`,
     `행 배열 키: ${rowsKeyStatus}`,
+    missingRows,
     jsonShape ? `JSON 형태: ${jsonShape}` : "",
     `상위 키: ${topKeys}`,
     detectedKeys && topKeys === "없음" ? `감지 키: ${detectedKeys}` : "",
