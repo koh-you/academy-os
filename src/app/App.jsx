@@ -13070,18 +13070,18 @@ function ExamAnalysisCenter({
                   <button className="softButton" onClick={() => setDetailSectionId("insight")} type="button">인사이트 수정</button>
                 </div>
               </article>
-              <details className="analysisOutputSection" open>
+              <details className="analysisOutputSection">
                 <summary>
                   <span>1</span>
                   <strong>레이아웃 선택</strong>
-                  <small>산출물별 A/B/C 형식</small>
+                  <small>추후 수정용 · 기본값 확정</small>
                 </summary>
                 <ExamOutputLayoutPlanner
                   value={selectedAnalysis.outputLayoutChoices}
                   onChange={(nextChoices) => update("outputLayoutChoices", nextChoices)}
                 />
               </details>
-              <details className="analysisOutputSection" open>
+              <details className="analysisOutputSection" defaultOpen>
                 <summary>
                   <span>2</span>
                   <strong>최종 편집본</strong>

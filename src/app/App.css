@@ -4538,7 +4538,8 @@ button {
 
 .finalDocumentAddBar button,
 .finalDocumentInlineActions button,
-.finalDocumentBlockHeader button,
+.finalDocumentBlockActions button,
+.finalDocumentBlockToggle,
 .finalDocumentDataRow button,
 .finalDocumentBlock button {
   background: #eef2ff;
@@ -4550,7 +4551,7 @@ button {
   padding: 8px 10px;
 }
 
-.finalDocumentBlockHeader button:disabled {
+.finalDocumentBlockActions button:disabled {
   cursor: not-allowed;
   opacity: 0.45;
 }
@@ -4569,41 +4570,37 @@ button {
 
 .finalDocumentBlockHeader {
   align-items: center;
-  cursor: pointer;
   display: grid;
   gap: 12px;
   grid-template-columns: minmax(0, 1fr) auto auto;
-  list-style: none;
 }
 
-.finalDocumentBlockHeader::-webkit-details-marker {
-  display: none;
-}
-
-.finalDocumentBlockHeader::after {
-  color: #1d4ed8;
-  content: "펼치기";
-  font-size: 17px;
-  font-weight: 900;
-  justify-self: end;
-  min-width: 52px;
-  text-align: right;
-}
-
-.finalDocumentBlock[open] .finalDocumentBlockHeader {
+.finalDocumentBlock.open .finalDocumentBlockHeader {
   border-bottom: 1px solid #e5edf9;
   padding-bottom: 10px;
 }
 
-.finalDocumentBlock[open] .finalDocumentBlockHeader::after {
-  content: "접기";
+.finalDocumentBlock .finalDocumentBlockTitle {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  gap: 10px;
+  justify-content: flex-start;
+  min-width: 0;
+  padding: 0;
+  text-align: left;
 }
 
-.finalDocumentBlockTitle {
-  align-items: center;
-  display: flex;
-  gap: 10px;
-  min-width: 0;
+.finalDocumentBlockToggle {
+  color: #1d4ed8;
+  font-size: 17px;
+  justify-self: end;
+  min-width: 72px;
+  text-align: center;
 }
 
 .finalDocumentBlockTitle strong {
@@ -4624,14 +4621,14 @@ button {
   padding: 6px 10px;
 }
 
-.finalDocumentBlockHeader div,
+.finalDocumentBlockActions,
 .finalDocumentInlineActions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.finalDocumentBlockHeader > div:last-child {
+.finalDocumentBlockActions {
   justify-content: flex-end;
 }
 
@@ -12931,9 +12928,14 @@ body.attendanceOnlyBody {
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  .finalDocumentBlockHeader > div:last-child {
+  .finalDocumentBlockActions {
     grid-column: 1 / -1;
     justify-content: flex-start;
+  }
+
+  .finalDocumentBlockToggle {
+    grid-column: 2;
+    grid-row: 1;
   }
 
   .classificationSetupFields {

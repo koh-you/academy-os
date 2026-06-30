@@ -1,3 +1,5 @@
+import { useEffect, useMemo, useState } from "react";
+
 import {
   similarProblemNeedOptions,
   similarProblemRelationOptions
@@ -128,7 +130,30 @@ export function ExamFinalDocumentBuilder({
   onChange,
   onRegenerate
 }) {
-  const normalizedDocument = normalizeExamFinalDocument(document) || createDocumentFromAnalysis(analysis);
+  const fallbackDocument = useMemo(
+    () => createDocumentFromAnalysis(analysis),
+    [analysis, createDocumentFromAnalysis]
+  );
+  const normalizedDocument = normalizeExamFinalDocument(document) || fallbackDocument;
+  const blockIdsKey = normalizedDocument.blocks.map((block) => block.id).join("|");
+  const [blockOpenById, setBlockOpenById] = useState({});
+
+  useEffect(() => {
+    setBlockOpenById((current) => {
+      const nextOpenById = {};
+      let changed = false;
+      normalizedDocument.blocks.forEach((block, index) => {
+        if (Object.prototype.hasOwnProperty.call(current, block.id)) {
+          nextOpenById[block.id] = current[block.id];
+        } else {
+          nextOpenById[block.id] = index < 2;
+          changed = true;
+        }
+      });
+      if (Object.keys(current).length !== Object.keys(nextOpenById).length) changed = true;
+      return changed ? nextOpenById : current;
+    });
+  }, [blockIdsKey]);
 
   function commit(nextDocument) {
     onChange({
@@ -174,6 +199,17 @@ export function ExamFinalDocumentBuilder({
     commit({ ...normalizedDocument, blocks: [...normalizedDocument.blocks, blockMap[type]] });
   }
 
+  function isBlockOpen(blockId, defaultOpen = false) {
+    return Object.prototype.hasOwnProperty.call(blockOpenById, blockId) ? blockOpenById[blockId] : defaultOpen;
+  }
+
+  function toggleBlock(blockId, defaultOpen = false) {
+    setBlockOpenById((current) => ({
+      ...current,
+      [blockId]: !(Object.prototype.hasOwnProperty.call(current, blockId) ? current[blockId] : defaultOpen)
+    }));
+  }
+
   return (
     <article className="panel analysisFinalDocumentBuilder">
       <div className="sectionHeader slim">
@@ -205,11 +241,12 @@ export function ExamFinalDocumentBuilder({
         {normalizedDocument.blocks.map((block, index) => (
           <ExamFinalDocumentBlockEditor
             block={block}
-            defaultOpen={index < 2}
+            isOpen={isBlockOpen(block.id, index < 2)}
             isFirst={index === 0}
             isLast={index === normalizedDocument.blocks.length - 1}
             key={block.id}
             moveBlock={moveBlock}
+            onToggle={() => toggleBlock(block.id, index < 2)}
             removeBlock={removeBlock}
             updateBlock={updateBlock}
           />
@@ -219,7 +256,7 @@ export function ExamFinalDocumentBuilder({
   );
 }
 
-function ExamFinalDocumentBlockEditor({ block, defaultOpen = false, isFirst, isLast, updateBlock, moveBlock, removeBlock }) {
+function ExamFinalDocumentBlockEditor({ block, isOpen = false, isFirst, isLast, updateBlock, moveBlock, onToggle, removeBlock }) {
   const updateField = (field, value) => updateBlock(block.id, (current) => ({ ...current, [field]: value }));
   const blockLabel = {
     cover: "표지",
@@ -238,23 +275,33 @@ function ExamFinalDocumentBlockEditor({ block, defaultOpen = false, isFirst, isL
   }
 
   return (
-    <details
-      className={`finalDocumentBlock ${block.type}`}
-      defaultOpen={defaultOpen}
-    >
-      <summary className="finalDocumentBlockHeader">
-        <div className="finalDocumentBlockTitle">
+    <section className={`finalDocumentBlock ${block.type}${isOpen ? " open" : ""}`}>
+      <div className="finalDocumentBlockHeader">
+        <button
+          aria-expanded={isOpen}
+          className="finalDocumentBlockTitle"
+          onClick={onToggle}
+          type="button"
+        >
           <span>{blockLabel}</span>
           <strong>{blockTitle}</strong>
-        </div>
-        <div>
+        </button>
+        <div className="finalDocumentBlockActions">
           <button disabled={isFirst} onClick={(event) => runHeaderAction(event, () => moveBlock(block.id, -1))} type="button">위</button>
           <button disabled={isLast} onClick={(event) => runHeaderAction(event, () => moveBlock(block.id, 1))} type="button">아래</button>
           <button onClick={(event) => runHeaderAction(event, () => removeBlock(block.id))} type="button">삭제</button>
         </div>
-      </summary>
+        <button
+          aria-expanded={isOpen}
+          className="finalDocumentBlockToggle"
+          onClick={onToggle}
+          type="button"
+        >
+          {isOpen ? "접기" : "펼치기"}
+        </button>
+      </div>
 
-      <div className="finalDocumentBlockBody">
+      {isOpen ? <div className="finalDocumentBlockBody">
         {block.type === "cover" ? (
           <div className="fieldGrid">
             <label className="wideLabel">제목<input value={block.title} onChange={(event) => updateField("title", event.target.value)} /></label>
@@ -285,8 +332,8 @@ function ExamFinalDocumentBlockEditor({ block, defaultOpen = false, isFirst, isL
         {block.type === "questionSlots" ? (
           <ExamFinalQuestionSlotEditor block={block} updateBlock={updateBlock} />
         ) : null}
-      </div>
-    </details>
+      </div> : null}
+    </section>
   );
 }
 

@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 산출물 레이아웃 접힘/최종편집본 토글 안정화
+
+- 상태: 완료
+- 사용자 요청: 산출물별 레이아웃 선택지는 이미 결정했으니 기본 접힘으로 두고, 추후 수정용으로만 남긴다. 최종편집본에서 `펼치기`가 잘 안 되거나 열자마자 다시 닫히는 문제를 안정화한다.
+- 이번 작업 결과: 산출물 작성 단계의 `레이아웃 선택` 섹션은 기본 접힘으로 변경하고, 안내 문구를 `추후 수정용 · 기본값 확정`으로 정리했다. `최종 편집본` 큰 섹션은 `defaultOpen`으로만 초기 열림을 주어 사용자가 접거나 펼친 상태를 브라우저가 강제로 되돌리지 않게 했다.
+- 토글 안정화: 최종편집본 내부 블록은 `details/summary` 네이티브 토글에서 `section + 실제 펼치기/접기 버튼` 구조로 변경했다. 블록별 open 상태는 `blockOpenById`로 보존하고, 아직 저장된 최종문서가 없을 때 생성되는 fallback 문서는 `useMemo`로 고정해 새 id 생성으로 토글이 흔들리지 않게 했다.
+- 저장 주의: UI 토글 상태는 화면 상태이며 Supabase 저장 구조는 바꾸지 않았다. 기존 `examAnalyses[].finalDocument`와 `outputLayoutChoices` app_state 저장 경로 그대로, 새 Supabase SQL edit 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 237, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 산출물 레이아웃 기본값/최종편집본 본문 안정화
 
 - 상태: 완료
