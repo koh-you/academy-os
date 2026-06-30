@@ -19,6 +19,7 @@ const examQuestionCropViewPath = path.join(root, "src", "domains", "exams", "que
 const examPostSubmissionOptionsPath = path.join(root, "src", "domains", "exams", "postSubmissionOptions.js");
 const examApiPath = path.join(root, "src", "domains", "exams", "api.js");
 const lessonAssignmentStatusPath = path.join(root, "src", "domains", "lessons", "assignmentStatus.js");
+const lessonJournalErrorBoundaryPath = path.join(root, "src", "domains", "lessons", "LessonJournalErrorBoundary.jsx");
 const lessonLabelsPath = path.join(root, "src", "domains", "lessons", "labels.js");
 const sharedIdPath = path.join(root, "src", "shared", "utils", "id.js");
 const cssPath = path.join(root, "src", "app", "App.css");
@@ -55,10 +56,11 @@ const examQuestionCropViewSource = fs.existsSync(examQuestionCropViewPath) ? fs.
 const examPostSubmissionOptionsSource = fs.existsSync(examPostSubmissionOptionsPath) ? fs.readFileSync(examPostSubmissionOptionsPath, "utf8") : "";
 const examApiSource = fs.existsSync(examApiPath) ? fs.readFileSync(examApiPath, "utf8") : "";
 const lessonAssignmentStatusSource = fs.existsSync(lessonAssignmentStatusPath) ? fs.readFileSync(lessonAssignmentStatusPath, "utf8") : "";
+const lessonJournalErrorBoundarySource = fs.existsSync(lessonJournalErrorBoundaryPath) ? fs.readFileSync(lessonJournalErrorBoundaryPath, "utf8") : "";
 const lessonLabelsSource = fs.existsSync(lessonLabelsPath) ? fs.readFileSync(lessonLabelsPath, "utf8") : "";
 const sharedIdSource = fs.existsSync(sharedIdPath) ? fs.readFileSync(sharedIdPath, "utf8") : "";
 const examFrontendSource = [app, examQuestionClassificationSource, examQuestionItemsSource, examFinalDocumentSource, examSourceMediaSource, examLibrarySource, examAnalysisStateSource, examDefaultsSource, examDetailSectionsSource, examOutputLayoutsSource, examOutputPreviewSource, examReportPreviewSource, examQuestionInsightSource, examQuestionCropViewSource, examPostSubmissionOptionsSource, examApiSource, sharedIdSource].join("\n");
-const lessonFrontendSource = [app, lessonAssignmentStatusSource, lessonLabelsSource].join("\n");
+const lessonFrontendSource = [app, lessonAssignmentStatusSource, lessonJournalErrorBoundarySource, lessonLabelsSource].join("\n");
 const css = fs.readFileSync(cssPath, "utf8");
 const indexHtml = fs.readFileSync(indexHtmlPath, "utf8");
 const attendanceHtml = fs.readFileSync(attendanceHtmlPath, "utf8");
@@ -325,7 +327,7 @@ check("91 homework makeup schedule uses dark navy calendar color", hasAll(app, [
 check("92 existing homework makeup lessons are normalized to dark navy", hasAll(app, ["function normalizeHomeworkMakeupLessonColors(lessons = [], makeupTasks = [])", "homeworkMakeupLessonIds.has(lesson.lessonId)", "return { ...lesson, color: getSupplementLessonColor(\"homework_makeup\") }", "normalizeHomeworkMakeupLessonColors(lessonsResult.lessons, makeupTasksResult.makeupTasks ?? [])"]));
 check("92b manual makeup lessons open the regular lesson journal", hasAll(app, ["function isHomeworkMakeupTaskLesson", "return lesson?.lessonType === \"makeup\" && task?.taskType === \"homework_makeup\"", "const isHomeworkMakeupLesson = isHomeworkMakeupTaskLesson(selectedLesson, selectedMakeupTask)", "const isHomeworkMakeupLesson = isHomeworkMakeupTaskLesson(lesson, linkedMakeupTask)"]) && !app.includes("selectedLesson.lessonTopic?.includes(\"숙제보충\")") && !app.includes("selectedLesson.className?.includes(\"숙제보충\")") && !app.includes("linkedMakeupTask?.taskType === \"homework_makeup\" ||"));
 check("92c lesson journal resolves students inside the selected lesson", hasAll(app, ["records={records}", "students={students}", "const lessonStudents = (lesson.studentIds ?? [])", ".map((studentId) => students.find((student) => student.studentId === studentId))", "lessonStudents.map((student) =>", "lessonStudents.length", "normalizeTimeInput(initialLesson?.startTime)"]));
-check("92d lesson journal render errors show a fallback instead of a blank modal", hasAll(app, ["class LessonJournalErrorBoundary extends Component", "componentDidCatch(error)", "function LessonJournalFallback", "수업일지를 여는 중 오류가 발생했습니다.", "fallback={(error) => (", "<LessonJournalErrorBoundary", "onDeleteLesson={onDeleteLesson}", "수업 취소 처리"]) && hasAll(css, [".lessonJournalFallback", "word-break: break-word"]));
+check("92d lesson journal render errors show a fallback instead of a blank modal", hasAll(lessonFrontendSource, ["class LessonJournalErrorBoundary extends Component", "componentDidCatch(error)", "function LessonJournalFallback", "수업일지를 여는 중 오류가 발생했습니다.", "fallback={(error) => (", "<LessonJournalErrorBoundary", "onDeleteLesson={onDeleteLesson}", "수업 취소 처리"]) && hasAll(css, [".lessonJournalFallback", "word-break: break-word"]));
 check("93 lesson edit avoids custom class template foreign key", hasAll(app, ["<option value=\"\">직접 입력 일정</option>", "const classTemplateId = formValues.classTemplateId && template ? template.classTemplateId : \"\"", "classTemplateId,"]) && !app.includes('classTemplateId: template?.classTemplateId ?? "custom"'));
 
 const failed = checks.filter((item) => !item.ok);

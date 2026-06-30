@@ -1,4 +1,4 @@
-import { Component, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   classificationRowsToInsightItems,
   createExamQuestionClassificationRow,
@@ -139,6 +139,7 @@ import {
   isAssignmentStatusHomeworkMakeupCandidate,
   normalizeAssignmentStatusValue
 } from "../domains/lessons/assignmentStatus.js";
+import { LessonJournalErrorBoundary } from "../domains/lessons/LessonJournalErrorBoundary.jsx";
 import { attendanceLabels, dayLabels, homeworkLabels } from "../domains/lessons/labels.js";
 import { sampleData } from "../shared/data/sampleData.js";
 import { readFileAsDataUrl } from "../shared/utils/file.js";
@@ -195,28 +196,6 @@ const legacySensitiveStorageKeys = ["academy-os.teacherAccountSettings.v1"];
 const academyBrandName = "으뜸수학 고태영T";
 const academyOperationalStartDate = "2026-06-19";
 const lessonDeleteRetentionMs = 7 * 24 * 60 * 60 * 1000;
-
-class LessonJournalErrorBoundary extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { error: null };
-  }
-
-  static getDerivedStateFromError(error) {
-    return { error };
-  }
-
-  componentDidCatch(error) {
-    console.error("Lesson journal render failed", error);
-  }
-
-  render() {
-    if (this.state.error) {
-      return this.props.fallback?.(this.state.error) ?? null;
-    }
-    return this.props.children;
-  }
-}
 
 function getAssignmentStatusForMessage(record, previousHomework) {
   const recordStatus = normalizeAssignmentStatusValue(record?.assignmentStatus ?? record?.incompleteHomework ?? "");

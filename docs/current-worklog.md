@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 수업일지 error boundary 20차 모듈 분리
+
+- 상태: 완료
+- 사용자 요청: 2026-06-30 오후 4시까지 구조분리 및 리팩터링을 계속 진행한다.
+- 판단: `LessonJournalErrorBoundary`는 수업일지 렌더 오류를 잡는 독립 React class 컴포넌트이며, `App.jsx`의 상태/저장 로직과 직접 결합되어 있지 않다. 수업일지 화면 본문과 오류 경계 책임을 분리하기 위해 별도 lesson 도메인 컴포넌트로 이동했다.
+- 이번 작업 결과: `src/domains/lessons/LessonJournalErrorBoundary.jsx`를 추가하고 `LessonJournalErrorBoundary`를 이동했다. `src/app/App.jsx`는 해당 컴포넌트 import만 사용하도록 정리했고, React `Component` import를 제거했다. 파일 크기는 약 20,590줄에서 20,569줄로 줄었다.
+- 테스트 보정: 구조 분리 후 정적 시나리오 테스트가 수업/과제 프론트 소스를 집계할 때 `src/domains/lessons/LessonJournalErrorBoundary.jsx`도 함께 읽도록 보정했다. `92d lesson journal render errors show a fallback instead of a blank modal` 검사는 분리된 error boundary 파일과 기존 fallback 화면을 함께 확인한다.
+- 저장 주의: 순수 프론트 컴포넌트 구조 분리만 수행했다. Supabase 저장 경로와 수업일지 저장 구조는 기존 그대로이며 새 SQL edit 필요 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). `.jsx` 파일 직접 `node --check`는 Node가 `.jsx` 확장자를 알 수 없어 사용하지 않고 Vite 빌드로 JSX 문법을 검증했다. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 수업일지 basic labels 19차 모듈 분리
 
 - 상태: 완료
