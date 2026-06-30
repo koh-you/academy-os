@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 라이브러리/ID helper 5차 모듈 분리
+
+- 상태: 완료
+- 사용자 요청: 구조분리를 사용자가 매번 지시하지 않아도, 전체 코드 우선순위를 보며 연쇄적으로 계속 진행한다.
+- 판단: `ExamAnalysisCenter`를 직접 쪼개기 전에 학교/학년/고사 폴더 트리와 ID 생성 helper를 먼저 분리해야 화면 JSX, 저장 핸들러, 라이브러리 트리 로직의 경계가 선명해진다. `safeIdPart`, `shortStableHash`는 시험분석 외 시험대비/학교일정/문제집 ID에도 쓰이므로 공용 util로 분리했다.
+- 이번 작업 결과: `src/shared/utils/id.js`를 추가하고 `safeIdPart`, `shortStableHash`를 이동했다. `src/domains/exams/library.js`를 추가하고 시험분석 폴더/학교 트리 helper(`createExamAnalysisFolderId`, `normalizeExamAnalysisFolder`, `buildExamAnalysisFolderList`, `buildExamAnalysisLibraryTree` 등)를 이동했다. `src/app/App.jsx`에는 현재 시험 주기 라벨을 주입하는 `createExamAnalysisFolderDraft` wrapper만 남겼고, 파일 크기는 약 22,350줄에서 22,071줄로 줄었다.
+- 테스트 보정: 구조 분리 후 정적 시나리오 테스트가 시험분석 라이브러리 helper와 공용 ID helper를 새 모듈까지 함께 검사하도록 보정했다.
+- 저장 주의: 순수 프론트 코드 구조 분리만 수행했다. Supabase 저장 경로는 기존 `examAnalyses`, `examAnalysisFolders`, `app_state` 그대로이며 새 SQL edit 필요 없음.
+- 검증: `node --check src/shared/utils/id.js`, `node --check src/domains/exams/library.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 원본/크롭 helper 4차 모듈 분리
 
 - 상태: 완료
