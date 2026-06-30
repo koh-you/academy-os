@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 수업일지 알림톡 없음/알림 제외 상태 표시 강화
+
+- 상태: 완료
+- 사용자 요청: `알림톡 없음` 또는 학생별 `알림 제외`를 눌렀을 때 알림톡이 발송되지 않는 상태가 버튼색으로 분명하게 보이고, 저장 흐름도 `저장 중...` 이후 `저장 완료`로 돌아오게 한다.
+- 이번 작업 결과: 상단 `알림톡 없음` 활성 버튼을 빨강 계열로 강화했다. 수업 전체 발송 계획이 `알림톡 없음`이면 각 학생의 학부모/학생 알림톡 버튼도 무발송 상태 색으로 표시하고, 개별 `알림 제외` 버튼은 점선 빨강 계열로 표시한다. 개별 제외 상태는 기존처럼 `제외 해제` 버튼으로 구분된다.
+- 저장 보강: `기본 예약`, `30분 지연`, `알림톡 없음` 계획 변경 시 관련 학생 `lesson_student_records`의 알림 상태 저장을 `saveStates`와 연결했다. 따라서 상단 저장 표시가 `저장 중...`을 거쳐 `저장 완료` 또는 `저장 실패`로 돌아온다. 기존 `lessonNotificationPlans` app_state 즉시 저장은 유지했다.
+- 저장 주의: 기존 `app_state.lessonNotificationPlans`, `notification_jobs`, `lesson_student_records` 저장 경로를 사용한다. 새 Supabase SQL edit 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 237, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 수업일지 자동저장 상태 상단 표시
 
 - 상태: 완료

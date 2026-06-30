@@ -3856,20 +3856,42 @@ export function App() {
 
   function updateLessonNotificationRecordStatuses(lesson, statusText) {
     const lessonStudentIds = new Set(lesson.studentIds ?? []);
-    const nextRecords = recordsRef.current.map((record) => {
-      if (record.lessonId !== lesson.lessonId || !lessonStudentIds.has(record.studentId)) return record;
+    const lessonStudentsForRecords = students.filter(
+      (student) => (student.status ?? "active") === "active" && lessonStudentIds.has(student.studentId)
+    );
+    const updatedAt = new Date().toISOString();
+    const recordsToSave = lessonStudentsForRecords.map((student) => {
+      const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+      const record = findLessonStudentRecord(recordsRef.current, lesson, student) ?? createEmptyRecord(lesson, student);
       return {
         ...record,
+        lessonStudentRecordId: recordId,
+        lessonId: lesson.lessonId,
+        studentId: student.studentId,
         teacherCommentSendStatus: record.notificationMutedParent ? "알림 제외" : statusText,
         studentCommentSendStatus: record.notificationMutedStudent ? "알림 제외" : statusText,
-        updatedAt: new Date().toISOString()
+        updatedBy: "instructor_owner_001",
+        updatedAt
       };
     });
+    const nextRecords = recordsToSave.reduce(
+      (currentRecords, record) => upsertLessonStudentRecord(currentRecords, record),
+      recordsRef.current
+    );
     recordsRef.current = nextRecords;
     setRecords(nextRecords);
-    nextRecords
-      .filter((record) => record.lessonId === lesson.lessonId && lessonStudentIds.has(record.studentId))
-      .forEach((record) => postJson("/api/lesson-records", { record }).catch((error) => console.error(error)));
+    const savingStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "saving"]));
+    setSaveStates((currentStates) => ({ ...currentStates, ...savingStates }));
+    Promise.all(recordsToSave.map((record) => postJson("/api/lesson-records", { record })))
+      .then(() => {
+        const savedStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "saved"]));
+        setSaveStates((currentStates) => ({ ...currentStates, ...savedStates }));
+      })
+      .catch((error) => {
+        console.error(error);
+        const failedStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "failed"]));
+        setSaveStates((currentStates) => ({ ...currentStates, ...failedStates }));
+      });
   }
 
   function refreshLessonNotificationJobsForRecord(record, lessonForRecord = null) {
@@ -7667,15 +7689,16 @@ function LessonJournalDetail({
     .map((student) => saveStates[createLessonStudentRecordId(lesson.lessonId, student.studentId)])
     .filter(Boolean);
   const lessonJournalSaveStatus = (() => {
-    if (lessonRecordSaveStates.includes("failed")) return { label: "저장 실패", tone: "failed" };
     if (lessonRecordSaveStates.includes("saving")) return { label: "저장 중...", tone: "saving" };
     if (lessonRecordSaveStates.includes("dirty")) return { label: "저장 대기...", tone: "dirty" };
+    if (lessonRecordSaveStates.includes("failed")) return { label: "저장 실패", tone: "failed" };
     if (lessonRecordSaveStates.includes("saved")) return { label: "저장 완료", tone: "saved" };
     return { label: "", tone: "idle" };
   })();
   const defaultScheduleHintText = isDefaultScheduleExpired
     ? `기본 예약 시간 지남 · ${defaultAlimtalkTimeLabel}`
     : `기본 예약 ${defaultAlimtalkTimeLabel}`;
+  const isLessonNotificationOff = notificationPlanMode === "none";
   const checkoutMissingStudents = lessonStudents.filter((student) => {
     const record = findLessonStudentRecord(records, lesson, student);
     return hasMissingCheckOut(record, lesson);
@@ -7978,6 +8001,8 @@ function LessonJournalDetail({
             const parentCommentState = getCommentButtonState(record.teacherComment, parentCommentSendStatus);
             const studentCommentState = getCommentButtonState(record.studentComment, studentCommentSendStatus);
             const hasMissingPreSendData = hasPreSendMissingRequiredData(record, previousHomework, nextHomework);
+            const isParentNotificationOff = isLessonNotificationOff || record.notificationMutedParent;
+            const isStudentNotificationOff = isLessonNotificationOff || record.notificationMutedStudent;
 
             return (
               <div className={["journalRow", showPreSendCheck && hasMissingPreSendData ? "preSendMissing" : ""].filter(Boolean).join(" ")} key={student.studentId}>
@@ -8070,7 +8095,7 @@ function LessonJournalDetail({
                 </select>
                 <div className="journalCommentCell">
                   <button
-                    className={`commentOpenButton comment-${parentCommentState}`}
+                    className={`commentOpenButton comment-${parentCommentState}${isParentNotificationOff ? " notification-off" : ""}`}
                     onClick={() => openCommentComposer("parent", student, record, previousHomework, nextHomework)}
                     type="button"
                   >
@@ -8080,8 +8105,13 @@ function LessonJournalDetail({
                     {getCommentStatusLabel(record.teacherComment, parentCommentSendStatus)}
                   </small>
                   <button
-                    className={record.notificationMutedParent ? "notificationMuteButton active" : "notificationMuteButton"}
+                    className={[
+                      "notificationMuteButton",
+                      record.notificationMutedParent ? "active" : "",
+                      isLessonNotificationOff && !record.notificationMutedParent ? "planOff" : ""
+                    ].filter(Boolean).join(" ")}
                     onClick={() => onToggleStudentNotificationMute?.(lesson, student, "parent")}
+                    title={isLessonNotificationOff ? "현재 수업 발송 계획이 알림톡 없음입니다." : ""}
                     type="button"
                   >
                     {record.notificationMutedParent ? "제외 해제" : "알림 제외"}
@@ -8089,7 +8119,7 @@ function LessonJournalDetail({
                 </div>
                 <div className="journalCommentCell">
                   <button
-                    className={`commentOpenButton comment-${studentCommentState}`}
+                    className={`commentOpenButton comment-${studentCommentState}${isStudentNotificationOff ? " notification-off" : ""}`}
                     onClick={() => openCommentComposer("student", student, record, previousHomework, nextHomework)}
                     type="button"
                   >
@@ -8099,8 +8129,13 @@ function LessonJournalDetail({
                     {getCommentStatusLabel(record.studentComment, studentCommentSendStatus)}
                   </small>
                   <button
-                    className={record.notificationMutedStudent ? "notificationMuteButton active" : "notificationMuteButton"}
+                    className={[
+                      "notificationMuteButton",
+                      record.notificationMutedStudent ? "active" : "",
+                      isLessonNotificationOff && !record.notificationMutedStudent ? "planOff" : ""
+                    ].filter(Boolean).join(" ")}
                     onClick={() => onToggleStudentNotificationMute?.(lesson, student, "student")}
+                    title={isLessonNotificationOff ? "현재 수업 발송 계획이 알림톡 없음입니다." : ""}
                     type="button"
                   >
                     {record.notificationMutedStudent ? "제외 해제" : "알림 제외"}
