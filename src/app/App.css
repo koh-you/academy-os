@@ -4538,18 +4538,55 @@ button {
   background: #ffffff;
   border: 1px solid #d8e3f8;
   border-radius: 8px;
-  display: grid;
-  gap: 12px;
   padding: 14px;
 }
 
 .finalDocumentBlockHeader {
   align-items: center;
-  border-bottom: 1px solid #e5edf9;
-  display: flex;
+  cursor: pointer;
+  display: grid;
   gap: 12px;
-  justify-content: space-between;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  list-style: none;
+}
+
+.finalDocumentBlockHeader::-webkit-details-marker {
+  display: none;
+}
+
+.finalDocumentBlockHeader::after {
+  color: #1d4ed8;
+  content: "펼치기";
+  font-size: 17px;
+  font-weight: 900;
+  justify-self: end;
+  min-width: 52px;
+  text-align: right;
+}
+
+.finalDocumentBlock[open] .finalDocumentBlockHeader {
+  border-bottom: 1px solid #e5edf9;
   padding-bottom: 10px;
+}
+
+.finalDocumentBlock[open] .finalDocumentBlockHeader::after {
+  content: "접기";
+}
+
+.finalDocumentBlockTitle {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+}
+
+.finalDocumentBlockTitle strong {
+  color: #17213d;
+  font-size: 15px;
+  font-weight: 900;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .finalDocumentBlockHeader span {
@@ -4566,6 +4603,16 @@ button {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.finalDocumentBlockHeader > div:last-child {
+  justify-content: flex-end;
+}
+
+.finalDocumentBlockBody {
+  display: grid;
+  gap: 12px;
+  padding-top: 12px;
 }
 
 .finalDocumentTableEditor,
@@ -12851,6 +12898,15 @@ body.attendanceOnlyBody {
   }
 
   .analysisQuestionSetupActions {
+    justify-content: flex-start;
+  }
+
+  .finalDocumentBlockHeader {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .finalDocumentBlockHeader > div:last-child {
+    grid-column: 1 / -1;
     justify-content: flex-start;
   }
 

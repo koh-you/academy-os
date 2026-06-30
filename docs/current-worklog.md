@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 최종편집본 블록 접힘 보정
+
+- 상태: 완료
+- 사용자 요청: 최종편집본에서 AI가 작성하는 범위를 설명하고, 최종편집본 하단이 너무 길어지지 않게 펼치기/접기로 볼 수 있게 한다.
+- 이번 작업 결과: 최종편집본은 AI가 직접 PDF 한 장을 새로 쓰는 구조가 아니라, 저장된 AI 분석 필드(`oneLineSummary`, `examStructure`, `aiOverview`, `unitDistribution`, `typeClassification`, `killerProblems`, `studentAnalysisDraft` 등), 강사 인사이트, 문항분류표를 `createExamFinalDocumentFromAnalysis`가 표지/문단/표/차트/흐름도/문항 슬롯 블록으로 조립하는 구조임을 확인했다. 사용자는 이 블록을 최종 편집본에서 직접 수정한다.
+- UI 보정: `ExamFinalDocumentBlockEditor`를 `details/summary` 기반 접힘 블록으로 전환했다. 표지와 첫 핵심 분석 블록만 기본으로 열고, 문항별 분류표 원본, 차트 데이터, 쎈 유형별 분류, 난이도 분석, 유사문항 표, 흐름도, 문항 삽입 슬롯 등 하단 블록은 기본 접힘 상태로 둔다. 각 블록 우측에 큰 `펼치기/접기` 텍스트를 표시하고, 위/아래/삭제 버튼은 접힘 토글과 충돌하지 않게 했다.
+- 저장 주의: UI 편집 구조만 바꿨다. 기존 `examAnalyses[].finalDocument.blocks` app_state 저장 구조와 Supabase SQL 변경 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 237, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 문항검수 UI 고정과 Opus 분석 재작성
 
 - 상태: 완료

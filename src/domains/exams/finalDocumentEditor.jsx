@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import {
   similarProblemNeedOptions,
   similarProblemRelationOptions
@@ -205,6 +207,7 @@ export function ExamFinalDocumentBuilder({
         {normalizedDocument.blocks.map((block, index) => (
           <ExamFinalDocumentBlockEditor
             block={block}
+            defaultOpen={index < 2}
             isFirst={index === 0}
             isLast={index === normalizedDocument.blocks.length - 1}
             key={block.id}
@@ -218,7 +221,8 @@ export function ExamFinalDocumentBuilder({
   );
 }
 
-function ExamFinalDocumentBlockEditor({ block, isFirst, isLast, updateBlock, moveBlock, removeBlock }) {
+function ExamFinalDocumentBlockEditor({ block, defaultOpen = false, isFirst, isLast, updateBlock, moveBlock, removeBlock }) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
   const updateField = (field, value) => updateBlock(block.id, (current) => ({ ...current, [field]: value }));
   const blockLabel = {
     cover: "표지",
@@ -228,49 +232,65 @@ function ExamFinalDocumentBlockEditor({ block, isFirst, isLast, updateBlock, mov
     flow: "흐름도",
     questionSlots: "문항 삽입 슬롯"
   }[block.type] || "블록";
+  const blockTitle = block.type === "cover" ? block.title : block.title || blockLabel;
+
+  function runHeaderAction(event, action) {
+    event.preventDefault();
+    event.stopPropagation();
+    action();
+  }
 
   return (
-    <section className={`finalDocumentBlock ${block.type}`}>
-      <div className="finalDocumentBlockHeader">
-        <span>{blockLabel}</span>
+    <details
+      className={`finalDocumentBlock ${block.type}`}
+      onToggle={(event) => setIsOpen(event.currentTarget.open)}
+      open={isOpen}
+    >
+      <summary className="finalDocumentBlockHeader">
+        <div className="finalDocumentBlockTitle">
+          <span>{blockLabel}</span>
+          <strong>{blockTitle}</strong>
+        </div>
         <div>
-          <button disabled={isFirst} onClick={() => moveBlock(block.id, -1)} type="button">위</button>
-          <button disabled={isLast} onClick={() => moveBlock(block.id, 1)} type="button">아래</button>
-          <button onClick={() => removeBlock(block.id)} type="button">삭제</button>
+          <button disabled={isFirst} onClick={(event) => runHeaderAction(event, () => moveBlock(block.id, -1))} type="button">위</button>
+          <button disabled={isLast} onClick={(event) => runHeaderAction(event, () => moveBlock(block.id, 1))} type="button">아래</button>
+          <button onClick={(event) => runHeaderAction(event, () => removeBlock(block.id))} type="button">삭제</button>
         </div>
+      </summary>
+
+      <div className="finalDocumentBlockBody">
+        {block.type === "cover" ? (
+          <div className="fieldGrid">
+            <label className="wideLabel">제목<input value={block.title} onChange={(event) => updateField("title", event.target.value)} /></label>
+            <label className="wideLabel">부제<input value={block.subtitle} onChange={(event) => updateField("subtitle", event.target.value)} /></label>
+            <label className="wideLabel">메타데이터<textarea rows={3} value={block.meta.join("\n")} onChange={(event) => updateField("meta", event.target.value.split("\n").map((item) => item.trim()).filter(Boolean))} /></label>
+          </div>
+        ) : null}
+
+        {block.type === "text" ? (
+          <div className="fieldGrid">
+            <label className="wideLabel">섹션 제목<input value={block.title} onChange={(event) => updateField("title", event.target.value)} /></label>
+            <label className="wideLabel">본문<textarea rows={7} value={block.value} onChange={(event) => updateField("value", event.target.value)} /></label>
+          </div>
+        ) : null}
+
+        {block.type === "table" ? (
+          <ExamFinalTableEditor block={block} updateBlock={updateBlock} />
+        ) : null}
+
+        {block.type === "chart" ? (
+          <ExamFinalChartEditor block={block} updateBlock={updateBlock} />
+        ) : null}
+
+        {block.type === "flow" ? (
+          <ExamFinalFlowEditor block={block} updateBlock={updateBlock} />
+        ) : null}
+
+        {block.type === "questionSlots" ? (
+          <ExamFinalQuestionSlotEditor block={block} updateBlock={updateBlock} />
+        ) : null}
       </div>
-
-      {block.type === "cover" ? (
-        <div className="fieldGrid">
-          <label className="wideLabel">제목<input value={block.title} onChange={(event) => updateField("title", event.target.value)} /></label>
-          <label className="wideLabel">부제<input value={block.subtitle} onChange={(event) => updateField("subtitle", event.target.value)} /></label>
-          <label className="wideLabel">메타데이터<textarea rows={3} value={block.meta.join("\n")} onChange={(event) => updateField("meta", event.target.value.split("\n").map((item) => item.trim()).filter(Boolean))} /></label>
-        </div>
-      ) : null}
-
-      {block.type === "text" ? (
-        <div className="fieldGrid">
-          <label className="wideLabel">섹션 제목<input value={block.title} onChange={(event) => updateField("title", event.target.value)} /></label>
-          <label className="wideLabel">본문<textarea rows={7} value={block.value} onChange={(event) => updateField("value", event.target.value)} /></label>
-        </div>
-      ) : null}
-
-      {block.type === "table" ? (
-        <ExamFinalTableEditor block={block} updateBlock={updateBlock} />
-      ) : null}
-
-      {block.type === "chart" ? (
-        <ExamFinalChartEditor block={block} updateBlock={updateBlock} />
-      ) : null}
-
-      {block.type === "flow" ? (
-        <ExamFinalFlowEditor block={block} updateBlock={updateBlock} />
-      ) : null}
-
-      {block.type === "questionSlots" ? (
-        <ExamFinalQuestionSlotEditor block={block} updateBlock={updateBlock} />
-      ) : null}
-    </section>
+    </details>
   );
 }
 
