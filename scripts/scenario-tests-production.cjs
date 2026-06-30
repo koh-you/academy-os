@@ -16,6 +16,7 @@ const examOutputPreviewPath = path.join(root, "src", "domains", "exams", "output
 const examReportPreviewPath = path.join(root, "src", "domains", "exams", "reportPreview.jsx");
 const examQuestionInsightPath = path.join(root, "src", "domains", "exams", "questionInsight.jsx");
 const examQuestionCropViewPath = path.join(root, "src", "domains", "exams", "questionCropView.jsx");
+const examPostSubmissionOptionsPath = path.join(root, "src", "domains", "exams", "postSubmissionOptions.js");
 const examApiPath = path.join(root, "src", "domains", "exams", "api.js");
 const sharedIdPath = path.join(root, "src", "shared", "utils", "id.js");
 const cssPath = path.join(root, "src", "app", "App.css");
@@ -49,9 +50,10 @@ const examOutputPreviewSource = fs.existsSync(examOutputPreviewPath) ? fs.readFi
 const examReportPreviewSource = fs.existsSync(examReportPreviewPath) ? fs.readFileSync(examReportPreviewPath, "utf8") : "";
 const examQuestionInsightSource = fs.existsSync(examQuestionInsightPath) ? fs.readFileSync(examQuestionInsightPath, "utf8") : "";
 const examQuestionCropViewSource = fs.existsSync(examQuestionCropViewPath) ? fs.readFileSync(examQuestionCropViewPath, "utf8") : "";
+const examPostSubmissionOptionsSource = fs.existsSync(examPostSubmissionOptionsPath) ? fs.readFileSync(examPostSubmissionOptionsPath, "utf8") : "";
 const examApiSource = fs.existsSync(examApiPath) ? fs.readFileSync(examApiPath, "utf8") : "";
 const sharedIdSource = fs.existsSync(sharedIdPath) ? fs.readFileSync(sharedIdPath, "utf8") : "";
-const examFrontendSource = [app, examQuestionClassificationSource, examQuestionItemsSource, examFinalDocumentSource, examSourceMediaSource, examLibrarySource, examAnalysisStateSource, examDefaultsSource, examDetailSectionsSource, examOutputLayoutsSource, examOutputPreviewSource, examReportPreviewSource, examQuestionInsightSource, examQuestionCropViewSource, examApiSource, sharedIdSource].join("\n");
+const examFrontendSource = [app, examQuestionClassificationSource, examQuestionItemsSource, examFinalDocumentSource, examSourceMediaSource, examLibrarySource, examAnalysisStateSource, examDefaultsSource, examDetailSectionsSource, examOutputLayoutsSource, examOutputPreviewSource, examReportPreviewSource, examQuestionInsightSource, examQuestionCropViewSource, examPostSubmissionOptionsSource, examApiSource, sharedIdSource].join("\n");
 const css = fs.readFileSync(cssPath, "utf8");
 const indexHtml = fs.readFileSync(indexHtmlPath, "utf8");
 const attendanceHtml = fs.readFileSync(attendanceHtmlPath, "utf8");
@@ -161,7 +163,7 @@ check("22g student homework cards show teacher assignment check labels", hasAll(
 check("22h exam post photo upload is wired for student and teacher views", hasAll(app, ["uploadExamPostSubmissionFile", "/api/exam-post-files", "fileAttachments", "examPostUploadBox", "getExamPostFileOpenUrl"]) && hasAll(css, [".examPostUploadBox", ".examPostFile.failed"]) && serverSource.includes("/api/exam-post-files"));
 check("22i student homework stats include partial teacher checks", hasAll(app, ["function getHomeworkCompletionCredit(homework)", "partial_80", "return 0.8", "return 0.5", "formatHomeworkDoneCount(stats.done)"]));
 check("22j exam post target matching is teacher-selected and one per student", hasAll(app, ["function schoolMatchesStudent", "examPostTargetStudentIds[row.examPrepId]", "const targetId = `exam_post_${row.examPrepId}_${student.studentId}`", "selectedStudentIds.includes(student.studentId)", "시험 후 제출 필요"]) && !app.includes("daysFromTodayToExam <= 7"));
-check("22k exam post form includes all Tally self-check fields", hasAll(app, ["examPostFeelingOptions", "examPostScaleOptions", "examPostRegretReasonOptions", "examPostStudyDifficultyOptions", "examPostAcademyHelpOptions", "examPostAutoInfo", "strongUnit", "regretReasons", "regretMoment", "studyDifficulties", "academyHelp", "academyFeedback", "changeForNextExam", "선생님한테 하고 싶은 말, 건의사항, 뭐든 OK"]) && hasAll(css, [".examPostAutoInfo", ".examPostChoiceGroup"]));
+check("22k exam post form includes all Tally self-check fields", hasAll(examFrontendSource, ["examPostFeelingOptions", "examPostScaleOptions", "examPostRegretReasonOptions", "examPostStudyDifficultyOptions", "examPostAcademyHelpOptions", "examPostAutoInfo", "strongUnit", "regretReasons", "regretMoment", "studyDifficulties", "academyHelp", "academyFeedback", "changeForNextExam", "선생님한테 하고 싶은 말, 건의사항, 뭐든 OK"]) && hasAll(css, [".examPostAutoInfo", ".examPostChoiceGroup"]));
 check("22l exam post form is readable on mobile and tablet", hasAll(css, [".studentExamPostForm > label", "border-left: 4px solid #172554", ".studentPortalTabletFirst .studentExamPostForm .fieldGrid.two", ".studentPortalTabletFirst .examPostChoiceGroup > div", "min-height: 44px"]));
 check("22m exam post submission requires every field before submit", hasAll(app, ["validationMessage", "getMissingRequiredFields", "아직 작성하지 않은 항목이 있습니다", "!selectedFiles.length && !submittedFiles.length", "required value={draft.score}", "required value={draft.goodPart}", "required value={draft.fileMemo}"]) && css.includes(".examPostValidationMessage"));
 check("23 parent portal is mobile first", hasAll(app, ["parentPortalMobileFirst", "parentPortal"]) && css.includes(".parentPortalMobileFirst .metricGrid"));

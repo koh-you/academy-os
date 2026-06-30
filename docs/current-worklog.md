@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험 후 제출 self-check options 17차 모듈 분리
+
+- 상태: 완료
+- 사용자 요청: 2026-06-30 오후 4시까지 구조분리 및 리팩터링을 계속 진행한다.
+- 판단: 시험 후 제출 자기점검 폼의 감정/점수/아쉬운 이유/공부 어려움/학원 도움 보기 목록은 화면 상태나 저장 로직이 아니라 정적 옵션 데이터다. `App.jsx` 상단에서 제거해 학생 제출 폼 JSX와 폼 옵션 원천을 분리했다.
+- 이번 작업 결과: `src/domains/exams/postSubmissionOptions.js`를 추가하고 `examPostFeelingOptions`, `examPostScaleOptions`, `examPostRegretReasonOptions`, `examPostStudyDifficultyOptions`, `examPostAcademyHelpOptions`를 이동했다. `src/app/App.jsx`는 기존 변수명을 import해서 동일하게 사용하도록 유지했다.
+- 테스트 보정: 구조 분리 후 정적 시나리오 테스트가 시험분석/시험 제출 프론트 소스를 집계할 때 `src/domains/exams/postSubmissionOptions.js`도 함께 읽도록 보정했고, `22k exam post form includes all Tally self-check fields` 검사를 분리된 소스 기준으로 변경했다.
+- 저장 주의: 순수 프론트 정적 옵션 구조 분리만 수행했다. Supabase 저장 경로와 `examPostSubmissions` 저장 구조는 기존 그대로이며 새 SQL edit 필요 없음.
+- 검증: `node --check src/domains/exams/postSubmissionOptions.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 final question crop view 16차 모듈 분리
 
 - 상태: 완료

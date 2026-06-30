@@ -113,6 +113,13 @@ import {
 } from "../domains/exams/questionInsight.jsx";
 import { FinalQuestionCropImage } from "../domains/exams/questionCropView.jsx";
 import {
+  examPostAcademyHelpOptions,
+  examPostFeelingOptions,
+  examPostRegretReasonOptions,
+  examPostScaleOptions,
+  examPostStudyDifficultyOptions
+} from "../domains/exams/postSubmissionOptions.js";
+import {
   getExamAnalysisSourceOpenUrl as getExamAnalysisSourceOpenUrlBase,
   getExamAnalysisSourceRenderUrl as getExamAnalysisSourceRenderUrlBase,
   requestExamQuestionClassificationDraft as requestExamQuestionClassificationDraftBase,
@@ -291,12 +298,6 @@ const assignmentStatusStudentMessages = {
   not_done: "과제를 못 해왔어. 오늘 나간 과제까지 다음 시간에 같이 검사받고, 다 못 끝내면 추가 등원보충을 해야 할 수도 있어.",
   not_checked: "과제를 가져오지 못해서 검사하지 못했어. 다음 시간에 같이 확인하자."
 };
-
-const examPostFeelingOptions = ["기대보다 잘 봤다", "비슷했다", "기대에 못 미쳤다", "모르겠다"];
-const examPostScaleOptions = Array.from({ length: 11 }, (_, index) => String(index));
-const examPostRegretReasonOptions = ["아는데 실수했다", "준비가 부족했다", "시간이 부족했다", "멘탈이 흔들렸다", "컨디션 문제", "기타"];
-const examPostStudyDifficultyOptions = ["개념이 헷갈린다", "문제가 안풀린다", "공부 의지가 안 생긴다", "시간이 없다", "기타"];
-const examPostAcademyHelpOptions = ["많이 도움됐다", "어느 정도 됐다", "잘 모르겠다", "별로 도움이 안 됐다"];
 
 function normalizeAssignmentStatusValue(value) {
   const trimmedValue = String(value ?? "").trim();
