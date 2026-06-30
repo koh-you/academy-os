@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 output preview parser 12차 모듈 분리
+
+- 상태: 완료
+- 사용자 요청: 2026-06-30 오후 4시까지 구조분리 및 리팩터링을 계속 진행한다.
+- 판단: 산출물 미리보기 컴포넌트 안에 마크다운 표 파싱, 텍스트 정리, 인스타 카드뉴스 슬라이드 파싱 helper가 함께 있어 출력 화면 수정 시 파서와 JSX를 동시에 읽어야 했다. 컴포넌트 이동 전 단계로 순수 문자열 파서만 먼저 분리했다.
+- 이번 작업 결과: `src/domains/exams/outputPreview.js`를 추가하고 `cleanPreviewText`, `isMarkdownTableLine`, `isMarkdownTableDivider`, `parseMarkdownTableRow`, `parseInstagramSlides`를 이동했다. `src/app/App.jsx`는 해당 helper import만 사용하도록 정리했고, 파일 크기는 약 19,994줄에서 19,959줄로 줄었다.
+- 테스트 보정: 구조 분리 후 정적 시나리오 테스트가 시험분석 프론트 소스를 집계할 때 `src/domains/exams/outputPreview.js`도 함께 읽도록 보정했다.
+- 저장 주의: 순수 프론트 문자열 파서 구조 분리만 수행했다. Supabase 저장 경로와 최종 산출물 저장 구조는 기존 그대로이며 새 SQL edit 필요 없음.
+- 검증: `node --check src/domains/exams/outputPreview.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 시험분석 output layout component 11차 모듈 분리
 
 - 상태: 완료
