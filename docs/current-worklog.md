@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-06-30 P1. 시험분석 분류표 helper 1차 모듈 분리
+
+- 상태: 완료
+- 사용자 요청: 큰 파일 때문에 오류 원인 추적이 어려우므로 추천 순서대로 코드 분리를 진행한다.
+- 판단: 동작을 바꾸기 전에 `src/app/App.jsx`에서 시험분석 분류표의 순수 helper부터 분리하는 것이 가장 안전하다. AI 호출, 저장, 화면 이벤트는 그대로 두고, 옵션/태그/쎈 유형/분류 행 생성·정규화·병합 함수만 별도 모듈로 옮겼다.
+- 이번 작업 결과: `src/domains/exams/questionClassification.js`를 추가하고 시험문항 옵션, 태그 정규화, 쎈 유형 태그 처리, `createExamQuestionItem`, `createExamQuestionClassificationRow`, `normalizeExamQuestionClassificationRows`, `mergeExamQuestionClassificationDrafts`, `classificationRowsToInsightItems`를 이동했다. `src/app/App.jsx`는 같은 이름들을 import해서 쓰도록 바꿨고, 파일 크기는 약 23,263줄에서 22,901줄로 줄었다.
+- 저장 주의: 순수 프론트 코드 구조 분리만 수행했다. Supabase 저장 경로는 기존 `examAnalyses[].questionClassifications` 그대로이며 새 SQL edit 필요 없음.
+- 검증: `git diff --check`, `npm run build`, `npm run test:production` 통과(total 236, failed 0). Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 배포 반영 확인과 공개 메타 브랜드명 정리
 
 - 상태: 완료
