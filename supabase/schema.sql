@@ -19,6 +19,8 @@ create table if not exists students (
   special_note text,
   schedule_override text,
   withdrawn_at timestamptz,
+  withdrawal_reason text,
+  withdrawal_comment text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

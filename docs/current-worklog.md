@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-01 P1. 퇴원생 목록/퇴원 사유 관리
+
+- 상태: 완료
+- 사용자 요청: 학생 목록의 `반별 학생 목록` 옆에 `퇴원생 목록`을 추가하고, 퇴원 사유를 `졸업`, `반이동`, `기타` 드롭다운으로 남기며 옆에 코멘트 입력 칸도 둔다.
+- 이번 작업 결과: 학생 목록 탭을 `전체 학생 목록`, `반별 학생 목록`, `퇴원생 목록` 3개로 확장했다. 퇴원 처리 확인 모달에 퇴원 사유와 코멘트 입력을 추가했고, 퇴원생 목록에서는 퇴원일, 사유 드롭다운, 코멘트, 저장 버튼을 한 줄에서 수정할 수 있게 했다.
+- 저장 보강: 학생 API의 Supabase 매핑에 `withdrawal_reason`, `withdrawal_comment`를 추가했다. 기존 수동 저장 흐름(`학생 저장`)과 같은 방식으로 퇴원 사유/코멘트가 저장된다.
+- SQL 적용 필요: 운영 Supabase SQL Editor에서 `supabase/20260701_student_withdrawal_reason.sql`을 실행해야 새 필드가 영구 저장된다. 목적은 `students.withdrawal_reason`, `students.withdrawal_comment` 컬럼 추가다.
+- 검증: `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 238, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-06-30 P1. 자동 수업 저장 Failed to fetch 알림창 제거
 
 - 상태: 완료

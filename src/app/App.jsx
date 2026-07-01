@@ -501,6 +501,16 @@ const saveStateLabels = {
   failed: "저장 실패"
 };
 
+const withdrawalReasonOptions = [
+  { value: "graduation", label: "졸업" },
+  { value: "class_move", label: "반이동" },
+  { value: "other", label: "기타" }
+];
+
+function getWithdrawalReasonLabel(value = "") {
+  return withdrawalReasonOptions.find((option) => option.value === value)?.label ?? "기타";
+}
+
 function getSaveButtonLabel(saveState) {
   if (saveState === "saving") return "저장 중";
   if (saveState === "failed") return "다시 저장";
@@ -3670,13 +3680,15 @@ export function App() {
     }
   }
 
-  function handleDeleteStudent(studentId) {
+  function handleDeleteStudent(studentId, withdrawalInfo = {}) {
     const removedStudent = students.find((student) => student.studentId === studentId);
     if (!removedStudent) return;
     const pausedStudent = {
       ...removedStudent,
       defaultClassTemplateId: "",
       status: "paused",
+      withdrawalReason: withdrawalInfo.reason || removedStudent.withdrawalReason || "other",
+      withdrawalComment: withdrawalInfo.comment ?? removedStudent.withdrawalComment ?? "",
       withdrawnAt: new Date().toISOString()
     };
     setStudents((current) => current.map((student) => (student.studentId === studentId ? pausedStudent : student)));
@@ -14994,6 +15006,7 @@ function StudentManager({
   const [activeTab, setActiveTab] = useState("all");
   const [selectedStudentId, setSelectedStudentId] = useState("");
   const [deleteStudentId, setDeleteStudentId] = useState("");
+  const [withdrawalDraft, setWithdrawalDraft] = useState({ comment: "", reason: "other" });
   const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("template_mwf_7_10");
   const [dirtyStudentIds, setDirtyStudentIds] = useState(() => new Set());
   const [originalClassTemplateIds, setOriginalClassTemplateIds] = useState({});
@@ -15006,13 +15019,21 @@ function StudentManager({
   const selectedScores = scoreRecords.filter((score) => score.studentId === selectedStudent?.studentId);
   const selectedAcademyTests = academyTests.filter((item) => item.studentId === selectedStudent?.studentId);
   const activeStudents = students.filter((student) => (student.status ?? "active") === "active");
+  const withdrawnStudents = students.filter((student) => (student.status ?? "active") !== "active");
   const visibleStudents =
-    activeTab === "class"
+    activeTab === "withdrawn"
+      ? withdrawnStudents
+      : activeTab === "class"
       ? selectedClassTemplateId === "unassigned"
         ? activeStudents.filter((student) => !student.defaultClassTemplateId)
         : activeStudents.filter((student) => student.defaultClassTemplateId === selectedClassTemplateId)
       : activeStudents;
-  const title = activeTab === "class" ? `${selectedClassTemplateId === "unassigned" ? "미배정" : selectedClassTemplate?.name ?? "반별"} 학생 목록` : "전체 학생 목록";
+  const title =
+    activeTab === "withdrawn"
+      ? "퇴원생 목록"
+      : activeTab === "class"
+        ? `${selectedClassTemplateId === "unassigned" ? "미배정" : selectedClassTemplate?.name ?? "반별"} 학생 목록`
+        : "전체 학생 목록";
 
   function getStudentClassName(student) {
     return templates.find((template) => template.classTemplateId === student.defaultClassTemplateId)?.name ?? "미배정";
@@ -15026,11 +15047,12 @@ function StudentManager({
 
   function confirmDeleteStudent() {
     if (!deleteStudent) return;
-    onDeleteStudent(deleteStudent.studentId);
+    onDeleteStudent(deleteStudent.studentId, withdrawalDraft);
     if (selectedStudentId === deleteStudent.studentId) {
       setSelectedStudentId("");
     }
     setDeleteStudentId("");
+    setWithdrawalDraft({ comment: "", reason: "other" });
   }
 
   function updateStudentField(studentId, field, value) {
@@ -15078,6 +15100,14 @@ function StudentManager({
     return "저장";
   }
 
+  function openWithdrawStudentModal(student) {
+    setWithdrawalDraft({
+      comment: student.withdrawalComment ?? "",
+      reason: student.withdrawalReason || "other"
+    });
+    setDeleteStudentId(student.studentId);
+  }
+
   return (
     <section className="panel fullPanel">
       <div className="sectionHeader">
@@ -15087,7 +15117,7 @@ function StudentManager({
         </div>
         <div className="studentListToolbar">
           <button className="primaryButton" onClick={onAddStudent} type="button">+ 학생 추가</button>
-          <span className="studentStatusPill">표시 중 {visibleStudents.length}명</span>
+          <span className="studentStatusPill">{title} · {visibleStudents.length}명</span>
           <span className="studentStatusPill mutedPill">퇴원생은 과거 기록 보존</span>
         </div>
       </div>
@@ -15112,6 +15142,16 @@ function StudentManager({
           type="button"
         >
           반별 학생 목록
+        </button>
+        <button
+          className={activeTab === "withdrawn" ? "active" : ""}
+          onClick={() => {
+            setActiveTab("withdrawn");
+            setSelectedStudentId("");
+          }}
+          type="button"
+        >
+          퇴원생 목록
         </button>
       </div>
 
@@ -15148,6 +15188,72 @@ function StudentManager({
         </div>
       ) : null}
 
+      {activeTab === "withdrawn" ? (
+      <div className="studentListTable">
+        <div className="studentListRow studentListHead withdrawnStudentRow">
+          <span>#</span>
+          <span>이름</span>
+          <span>아이디</span>
+          <span>학년</span>
+          <span>학교</span>
+          <span>퇴원일</span>
+          <span>퇴원 사유</span>
+          <span>코멘트</span>
+          <span>저장</span>
+        </div>
+        {visibleStudents.map((student, index) => {
+          const saveState = studentSaveStates[student.studentId];
+          const isDirty = dirtyStudentIds.has(student.studentId);
+          const isSaving = saveState === "saving";
+          const isSaveDisabled = !isDirty || isSaving;
+          return (
+            <div className={["studentListRow", "withdrawnStudentRow", isDirty ? "dirtyStudentRow" : ""].filter(Boolean).join(" ")} key={student.studentId}>
+              <span>{index + 1}</span>
+              <button
+                className={selectedStudentId === student.studentId ? "studentNameButton active" : "studentNameButton"}
+                onClick={() => setSelectedStudentId(student.studentId)}
+                type="button"
+              >
+                <span className="studentInitial">{student.name?.[0] ?? "학"}</span>
+                <strong>{student.name}</strong>
+              </button>
+              <span className="monoCell">{student.loginId || "-"}</span>
+              <span className="gradeBadge">{student.grade || "-"}</span>
+              <span>{student.schoolName || "-"}</span>
+              <span>{student.withdrawnAt ? formatShortDate(String(student.withdrawnAt).slice(0, 10)) : "-"}</span>
+              <select
+                aria-label={`${student.name} 퇴원 사유`}
+                className="withdrawalReasonSelect"
+                value={student.withdrawalReason || "other"}
+                onChange={(event) => updateStudentField(student.studentId, "withdrawalReason", event.target.value)}
+              >
+                {withdrawalReasonOptions.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+              <input
+                aria-label={`${student.name} 퇴원 코멘트`}
+                className="editableTextCell withdrawalCommentInput"
+                value={student.withdrawalComment ?? ""}
+                onChange={(event) => updateStudentField(student.studentId, "withdrawalComment", event.target.value)}
+                placeholder="퇴원 관련 코멘트"
+              />
+              <button
+                className={`studentSaveButton ${saveState ?? "clean"}`}
+                disabled={isSaveDisabled}
+                onClick={() => saveStudentRow(student.studentId)}
+                type="button"
+              >
+                {getStudentSaveLabel(student.studentId)}
+              </button>
+            </div>
+          );
+        })}
+        {visibleStudents.length === 0 ? (
+          <div className="emptyState studentListEmpty">퇴원생이 없습니다.</div>
+        ) : null}
+      </div>
+      ) : (
       <div className="studentListTable">
         <div className="studentListRow studentListHead">
           <span>#</span>
@@ -15256,7 +15362,7 @@ function StudentManager({
             <button
               aria-label={`${student.name} 퇴원 처리`}
               className="trashButton"
-              onClick={() => setDeleteStudentId(student.studentId)}
+              onClick={() => openWithdrawStudentModal(student)}
               type="button"
             >
               퇴원
@@ -15268,6 +15374,7 @@ function StudentManager({
           <div className="emptyState studentListEmpty">이 반에 배정된 학생이 없습니다.</div>
         ) : null}
       </div>
+      )}
 
       {selectedStudent ? (
         <StudentProfileModal
@@ -15308,6 +15415,27 @@ function StudentManager({
               <strong>{deleteStudent.pin || "-"}</strong>
             </div>
             <p className="dangerCopy">정말 이 학생을 퇴원 처리할까요? 오늘까지의 수업기록은 보존하고, 내일 이후 수업 명단에서만 제외합니다.</p>
+            <div className="withdrawalReasonGrid">
+              <label>
+                퇴원 사유
+                <select
+                  value={withdrawalDraft.reason}
+                  onChange={(event) => setWithdrawalDraft((current) => ({ ...current, reason: event.target.value }))}
+                >
+                  {withdrawalReasonOptions.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                코멘트
+                <input
+                  value={withdrawalDraft.comment}
+                  onChange={(event) => setWithdrawalDraft((current) => ({ ...current, comment: event.target.value }))}
+                  placeholder="예: 보호자 요청, 시간표 조정 등"
+                />
+              </label>
+            </div>
           </div>
           <div className="deleteConfirmActions">
             <button className="softButton" onClick={() => setDeleteStudentId("")} type="button">취소</button>

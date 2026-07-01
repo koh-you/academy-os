@@ -20,7 +20,7 @@ function hasMeaningfulValue(value) {
   return Boolean(String(value ?? "").trim());
 }
 
-function toStudentRow(student, { includeWithdrawnAt = true } = {}) {
+function toStudentRow(student, { includeWithdrawalDetails = true, includeWithdrawnAt = true } = {}) {
   const row = {
     student_id: student.studentId,
     name: student.name,
@@ -39,12 +39,16 @@ function toStudentRow(student, { includeWithdrawnAt = true } = {}) {
     updated_at: new Date().toISOString()
   };
 
-  if (!includeWithdrawnAt) return row;
+  if (includeWithdrawnAt) {
+    row.withdrawn_at = compact(student.withdrawnAt);
+  }
 
-  return {
-    ...row,
-    withdrawn_at: compact(student.withdrawnAt)
-  };
+  if (includeWithdrawalDetails) {
+    row.withdrawal_reason = compact(student.withdrawalReason);
+    row.withdrawal_comment = compact(student.withdrawalComment);
+  }
+
+  return row;
 }
 
 function fromStudentRow(row) {
@@ -63,6 +67,8 @@ function fromStudentRow(row) {
     textbook: row.textbook ?? "",
     specialNote: row.special_note ?? "",
     scheduleOverride: row.schedule_override ?? "",
+    withdrawalComment: row.withdrawal_comment ?? "",
+    withdrawalReason: row.withdrawal_reason ?? "",
     withdrawnAt: row.withdrawn_at ?? ""
   };
 }
@@ -851,7 +857,12 @@ export async function upsertStudent(student) {
   try {
     [row] = await upsertRows("students", [toStudentRow(student)]);
   } catch (error) {
-    if (errorMentionsAnyColumn(error, ["withdrawn_at"])) {
+    if (errorMentionsAnyColumn(error, ["withdrawal_reason", "withdrawal_comment"])) {
+      if (student.withdrawalReason || student.withdrawalComment) {
+        throw new Error("Supabase students.withdrawal_reason/withdrawal_comment migration이 필요합니다. supabase/20260701_student_withdrawal_reason.sql을 실행한 뒤 다시 저장하세요.");
+      }
+      [row] = await upsertRows("students", [toStudentRow(student, { includeWithdrawalDetails: false })]);
+    } else if (errorMentionsAnyColumn(error, ["withdrawn_at"])) {
       if (student.withdrawnAt) {
         throw new Error("Supabase students.withdrawn_at migration이 필요합니다. supabase/20260624_persist_frontend_fields.sql을 실행한 뒤 다시 저장하세요.");
       }
@@ -875,7 +886,12 @@ export async function upsertStudents(students) {
   try {
     rows = await upsertRows("students", students.map(toStudentRow));
   } catch (error) {
-    if (errorMentionsAnyColumn(error, ["withdrawn_at"])) {
+    if (errorMentionsAnyColumn(error, ["withdrawal_reason", "withdrawal_comment"])) {
+      if (students.some((student) => student.withdrawalReason || student.withdrawalComment)) {
+        throw new Error("Supabase students.withdrawal_reason/withdrawal_comment migration이 필요합니다. supabase/20260701_student_withdrawal_reason.sql을 실행한 뒤 다시 저장하세요.");
+      }
+      rows = await upsertRows("students", students.map((student) => toStudentRow(student, { includeWithdrawalDetails: false })));
+    } else if (errorMentionsAnyColumn(error, ["withdrawn_at"])) {
       if (students.some((student) => student.withdrawnAt)) {
         throw new Error("Supabase students.withdrawn_at migration이 필요합니다. supabase/20260624_persist_frontend_fields.sql을 실행한 뒤 다시 저장하세요.");
       }

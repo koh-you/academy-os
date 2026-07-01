@@ -36,6 +36,7 @@ const sampleDataPath = path.join(root, "src", "shared", "data", "sampleData.js")
 const schemaPath = path.join(root, "supabase", "schema.sql");
 const studentIntakeSchemaPath = path.join(root, "supabase", "20260624_student_intake_applicants.sql");
 const frontendFieldPersistenceSchemaPath = path.join(root, "supabase", "20260624_persist_frontend_fields.sql");
+const studentWithdrawalSchemaPath = path.join(root, "supabase", "20260701_student_withdrawal_reason.sql");
 const envExamplePath = path.join(root, ".env.example");
 const packageJsonPath = path.join(root, "package.json");
 const renderYamlPath = path.join(root, "render.yaml");
@@ -77,6 +78,7 @@ const sampleDataSource = fs.readFileSync(sampleDataPath, "utf8");
 const schema = fs.existsSync(schemaPath) ? fs.readFileSync(schemaPath, "utf8") : "";
 const studentIntakeSchema = fs.existsSync(studentIntakeSchemaPath) ? fs.readFileSync(studentIntakeSchemaPath, "utf8") : "";
 const frontendFieldPersistenceSchema = fs.existsSync(frontendFieldPersistenceSchemaPath) ? fs.readFileSync(frontendFieldPersistenceSchemaPath, "utf8") : "";
+const studentWithdrawalSchema = fs.existsSync(studentWithdrawalSchemaPath) ? fs.readFileSync(studentWithdrawalSchemaPath, "utf8") : "";
 const envExample = fs.readFileSync(envExamplePath, "utf8");
 const packageJson = fs.readFileSync(packageJsonPath, "utf8");
 const renderYaml = fs.readFileSync(renderYamlPath, "utf8");
@@ -331,7 +333,8 @@ check("77d manual student add includes phone numbers class and explicit save", h
 check("77e student roster sync preserves history and updates future lessons", hasAll(app, ["function addStudentToFutureClassLessons", "String(lesson.date) >= fromDate", "function reconcileStudentFutureClassLessons", "previousClassTemplateId !== nextClassTemplateId", "function removeStudentFromLessonsAfterDate", "String(lesson.date) > cutoffDate", "defaultClassTemplateId: \"\"", "status: \"paused\"", "withdrawnAt", "setStudents((current) => current.map((student) => (student.studentId === studentId ? pausedStudent : student)))"]) && hasAll(coreDataRoute, ["select=*&order=name.asc"]));
 check("77e-0 class manager hides inactive students from rosters", hasAll(app, ["function ClassManager", "const activeStudents = students.filter((student) => (student.status ?? \"active\") === \"active\")", "const classStudents = activeStudents.filter((student) => student.defaultClassTemplateId === selectedTemplate?.classTemplateId)", "const count = activeStudents.filter((student) => student.defaultClassTemplateId === template.classTemplateId).length", "{activeStudents.map((student) => {"]));
 check("77e-1 unassigned students are visible in class tab", hasAll(app, ["selectedClassTemplateId === \"unassigned\"", "미배정", "activeStudents.filter((student) => !student.defaultClassTemplateId).length"]));
-check("77e-2 withdrawn student timestamp persists to Supabase", hasAll(coreDataRoute, ["withdrawn_at: compact(student.withdrawnAt)", "withdrawnAt: row.withdrawn_at"]) && hasAll(schema, ["withdrawn_at timestamptz"]) && frontendFieldPersistenceSchema.includes("withdrawn_at timestamptz"));
+check("77e-2 withdrawn student timestamp persists to Supabase", hasAll(coreDataRoute, ["row.withdrawn_at = compact(student.withdrawnAt)", "withdrawnAt: row.withdrawn_at"]) && hasAll(schema, ["withdrawn_at timestamptz"]) && frontendFieldPersistenceSchema.includes("withdrawn_at timestamptz"));
+check("77e-3 withdrawn student list stores reason and comment", hasAll(app, ["퇴원생 목록", "withdrawalReasonOptions", "withdrawalDraft", "withdrawalReason", "withdrawalComment", "withdrawalReasonGrid", "withdrawnStudentRow", "졸업", "반이동", "기타"]) && hasAll(coreDataRoute, ["row.withdrawal_reason = compact(student.withdrawalReason)", "row.withdrawal_comment = compact(student.withdrawalComment)", "withdrawalReason: row.withdrawal_reason", "withdrawalComment: row.withdrawal_comment"]) && hasAll(schema, ["withdrawal_reason text", "withdrawal_comment text"]) && hasAll(studentWithdrawalSchema, ["withdrawal_reason text", "withdrawal_comment text"]));
 check("77f homework auxiliary fields persist to Supabase", hasAll(coreDataRoute, ["total_problems", "assignment_status", "checked_at", "verified_at", "linked_from_lesson_id", "linkedFromLessonId: row.linked_from_lesson_id"]) && hasAll(schema, ["total_problems integer", "linked_from_lesson_id text"]) && hasAll(frontendFieldPersistenceSchema, ["total_problems integer", "linked_from_lesson_id text"]));
 check("77g tally CSV import persists through app_state", hasAll(app, ["tallySubmissions,", "tallySummaries,", "states.tallySubmissions", "states.tallySummaries", "onSetTallySubmissions", "onSetTallySummaries"]));
 check("78 lesson journal does not show keyboard shortcut hint text", !app.includes("↑↓←→") && !app.includes("Ctrl+C/V/Z"));

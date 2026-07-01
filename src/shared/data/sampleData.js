@@ -671,7 +671,9 @@ sampleData.students = sampleData.students.map((student) => ({
   loginId: student.studentId === "student_mwf710_001" ? "student" : student.loginId,
   pin: "1234",
   defaultClassTemplateId: "template_mwf_7_10",
-  specialNote: student.specialNote || "월수금 7-10반 실제 재원생"
+  specialNote: student.specialNote || "월수금 7-10반 실제 재원생",
+  withdrawalComment: student.withdrawalComment ?? "",
+  withdrawalReason: student.withdrawalReason ?? ""
 }));
 
 sampleData.lessons = sampleData.lessons.map((lesson) => ({
