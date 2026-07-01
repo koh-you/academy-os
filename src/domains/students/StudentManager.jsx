@@ -215,9 +215,12 @@ export function StudentManager({
           <div className="studentListRow studentListHead withdrawnStudentRow">
             <span>#</span>
             <span>이름</span>
-            <span>아이디</span>
+            <span>반</span>
             <span>학년</span>
             <span>학교</span>
+            <span>학생전화번호</span>
+            <span>학부모전화번호</span>
+            <span>출생연도</span>
             <span>퇴원일</span>
             <span>퇴원 사유</span>
             <span>코멘트</span>
@@ -239,9 +242,12 @@ export function StudentManager({
                   <span className="studentInitial">{student.name?.[0] ?? "학"}</span>
                   <strong>{student.name}</strong>
                 </button>
-                <span className="monoCell">{student.loginId || "-"}</span>
+                <span>{getStudentClassName(student)}</span>
                 <span className="gradeBadge">{student.grade || "-"}</span>
                 <span>{student.schoolName || "-"}</span>
+                <span className="monoCell">{student.studentPhone || "-"}</span>
+                <span className="monoCell">{student.parentPhone || "-"}</span>
+                <span>{student.birthYear ? `${student.birthYear}년` : "-"}</span>
                 <span>{student.withdrawnAt ? formatShortDate(String(student.withdrawnAt).slice(0, 10)) : "-"}</span>
                 <select
                   aria-label={`${student.name} 퇴원 사유`}

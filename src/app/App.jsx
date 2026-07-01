@@ -3653,14 +3653,17 @@ export function App() {
     const nextStudentIdSet = new Set(nextStudentIds);
     const previousStudents = students;
     const nextStudents = previousStudents.map((student) => {
-        if (nextStudentIdSet.has(student.studentId)) {
-          return { ...student, defaultClassTemplateId: classTemplateId };
-        }
-        if (student.defaultClassTemplateId === classTemplateId) {
-          return { ...student, defaultClassTemplateId: "" };
-        }
+      if ((student.status ?? "active") !== "active") {
         return student;
-      });
+      }
+      if (nextStudentIdSet.has(student.studentId)) {
+        return { ...student, defaultClassTemplateId: classTemplateId };
+      }
+      if (student.defaultClassTemplateId === classTemplateId) {
+        return { ...student, defaultClassTemplateId: "" };
+      }
+      return student;
+    });
     setStudents(nextStudents);
     const changedStudents = nextStudents.filter((student) => {
       const previousStudent = previousStudents.find((item) => item.studentId === student.studentId);
@@ -3676,7 +3679,6 @@ export function App() {
     if (!removedStudent) return;
     const pausedStudent = {
       ...removedStudent,
-      defaultClassTemplateId: "",
       status: "paused",
       withdrawalReason: withdrawalInfo.reason || removedStudent.withdrawalReason || "other",
       withdrawalComment: withdrawalInfo.comment ?? removedStudent.withdrawalComment ?? "",

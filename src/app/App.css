@@ -8098,8 +8098,8 @@ textarea {
 }
 
 .studentListRow.withdrawnStudentRow {
-  grid-template-columns: 34px 190px 150px 80px 150px 110px 130px minmax(260px, 1fr) 86px;
-  min-width: 1220px;
+  grid-template-columns: 34px 190px 160px 80px 150px 150px 150px 104px 110px 130px minmax(260px, 1fr) 86px;
+  min-width: 1610px;
 }
 
 .studentListRow:not(.studentListHead):hover {

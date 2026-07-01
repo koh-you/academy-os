@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-01 P1. 퇴원생 목록 연락처 표시와 정보 보관 보강
+
+- 상태: 완료
+- 사용자 요청: 퇴원한 학생의 정보는 모두 보관하고, 퇴원생 목록에서 아이디는 지우며 학생/학부모 전화번호 같은 정보는 보이게 한다.
+- 이번 작업 결과: 퇴원생 목록의 `아이디` 표시 컬럼을 제거하고 `반`, `학생전화번호`, `학부모전화번호`, `출생연도` 컬럼을 추가했다. 퇴원 사유/코멘트 저장 흐름은 유지했다.
+- 저장 보강: 퇴원 처리 시 `defaultClassTemplateId`를 비우지 않도록 바꿔 퇴원 당시 반 정보를 보존한다. 반별 명단 편집 시에도 비활성 학생의 기존 반 정보가 덮이지 않게 했다. 활성 반 명단과 미래 수업 명단에서는 기존처럼 퇴원생이 제외된다.
+- SQL 주의: 기존 `students` 컬럼만 사용하므로 새 Supabase SQL edit 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 239, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-01 P1. StudentManager 도메인 구조분리
 
 - 상태: 완료
