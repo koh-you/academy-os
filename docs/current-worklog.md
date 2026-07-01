@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-01 P1. StudentManager 도메인 구조분리
+
+- 상태: 완료
+- 사용자 요청: `App.jsx`에 남은 `StudentManager`를 우선순위로 구조분리하고, 운영 Supabase에 적용한 `supabase/20260701_student_withdrawal_reason.sql`이 맞는지도 확인한다.
+- 이번 작업 결과: `StudentManager`와 학생 프로파일 모달을 `src/domains/students/StudentManager.jsx`로 분리했다. `App.jsx`는 학생 관리 화면에서 새 도메인 컴포넌트를 import하고 공용 `Modal`만 주입하도록 정리했다.
+- 저장 경로 확인: 퇴원 사유/코멘트는 기존처럼 학생 저장 API를 통해 `students.withdrawal_reason`, `students.withdrawal_comment`에 저장된다. SQL 파일은 두 컬럼을 `add column if not exists`로 추가하는 내용이라 운영 SQL Editor에서 재실행해도 안전한 형태다.
+- SQL 확인 메모: 사용자가 운영 Supabase SQL edit를 실행했다고 보고했다. 저장소 기준으로 SQL 파일명/컬럼명/서버 매핑/시나리오 테스트는 모두 일치한다. 운영 DB에 실제 반영됐는지는 별도 쓰기 테스트 없이 직접 확인하지 않았다.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 238, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-01 P1. 퇴원생 목록/퇴원 사유 관리
 
 - 상태: 완료
