@@ -2,75 +2,90 @@
 
 이 폴더 하나만 다음 Codex 세션에 넘기면 됩니다. 새 세션은 `AGENTS.md`와 이 파일을 먼저 읽고 이어가면 됩니다.
 
-## 시작 문장
+## 시작 프롬프트
 
 ```text
-E:\academy-os 작업을 이어가겠습니다. 먼저 AGENTS.md와 docs/next-session/README.md를 읽고, 구조분리/리팩터링을 이어가주세요. 특히 App.jsx에 남은 시험분석 최종문서 편집 영역과 수업일지 주변 도메인 로직을 우선순위로 봐주세요.
+E:\academy-os 작업을 이어가겠습니다. 먼저 AGENTS.md와 docs/next-session/README.md를 읽고, git status와 최신 worklog를 확인한 뒤 이어가주세요. 운영 Supabase에는 supabase/20260701_student_withdrawal_reason.sql 적용이 필요한 상태입니다. 그다음 구조분리/리팩터링을 계속하되, App.jsx에 남은 StudentManager, 수업일지 주변 도메인 로직, 시험분석 최종문서 편집 영역을 우선순위로 봐주세요.
 ```
 
 ## 현재 기준
 
 - 브랜치: `main`
-- 최신 기능 커밋: `bf05a3b` - `Extract lesson journal error boundary`
-- 이 문서 갱신 후 HEAD는 달라질 수 있으니 `git log -1 --oneline`으로 확인한다.
+- 최신 기능 커밋: `f28f42e Add withdrawn student reason tracking`
+- 이 문서 갱신 커밋 후 HEAD는 달라질 수 있으니 새 세션 시작 시 `git log -1 --oneline`으로 확인한다.
 - 마지막 확인 시 작업트리: clean
-- 새 Supabase SQL: 없음
 - 주요 검증: `npm run build`, `npm run test:production` 통과
-- 운영 시나리오: total 236, failed 0
-- `src/app/App.jsx` 크기: 약 20,569줄까지 축소
+- 운영 시나리오: total 238, failed 0
+- Vite build: 통과, 기존 chunk size warning만 있음
+- 새 Supabase SQL 적용 필요: `supabase/20260701_student_withdrawal_reason.sql`
 
-## 최근 완료한 구조분리
+## 이번 세션 완료 요약
 
-시험분석 쪽:
+### 수업일지/알림톡 안정화
 
-- `src/domains/exams/questionItems.js`
-- `src/domains/exams/defaults.js`
-- `src/domains/exams/outputLayouts.jsx`
-- `src/domains/exams/outputPreview.js`
-- `src/domains/exams/reportPreview.jsx`
-- `src/domains/exams/questionInsight.jsx`
-- `src/domains/exams/detailSections.js`
-- `src/domains/exams/questionCropView.jsx`
-- `src/domains/exams/postSubmissionOptions.js`
+- `알림톡 없음` 계획이 즉시 `app_state.lessonNotificationPlans`에 저장되도록 보강.
+- 수업일지 상단 회색 영역에 자동저장 상태 표시:
+  `저장 대기...`, `저장 중...`, `저장 완료`, `저장 실패`.
+- `알림톡 없음`과 학생별 `알림 제외` 상태를 버튼 색으로 명확히 표시.
+- 알림 계획 변경 시 관련 `lesson_student_records` 저장 상태도 `saving/saved/failed` 흐름을 타게 함.
 
-수업일지/수업 도메인 쪽:
+### 자동 수업 저장 오류 처리
 
-- `src/domains/lessons/assignmentStatus.js`
-- `src/domains/lessons/labels.js`
-- `src/domains/lessons/LessonJournalErrorBoundary.jsx`
+- 간헐적 `자동 수업 저장 실패: Failed to fetch` 브라우저 alert 제거.
+- 시험관리 자동 수업 패널 안에 저장 상태 배너 표시:
+  `저장 중`, `저장 완료`, `저장 실패`.
+- 실패한 자동 수업 묶음을 보관하고 `다시 저장` 버튼으로 재시도 가능.
 
-정적 운영 테스트도 새 모듈들을 함께 읽도록 `scripts/scenario-tests-production.cjs`를 보정했다.
+### 학생 목록/퇴원생 관리
 
-## 꼭 기억할 문제 맥락
+- 학생 목록 탭을 `전체 학생 목록`, `반별 학생 목록`, `퇴원생 목록` 3개로 확장.
+- 퇴원 처리 모달에 퇴원 사유와 코멘트 입력 추가.
+- 퇴원 사유 옵션: `졸업`, `반이동`, `기타`.
+- 퇴원생 목록에서 퇴원일, 사유, 코멘트, 저장 버튼으로 수정 가능.
+- 서버 매핑에 `students.withdrawal_reason`, `students.withdrawal_comment` 추가.
 
-시험분석 문항별 분류표:
+### 시험분석 UI/산출물 안정화
 
-- 중심 데이터는 `questionItems`가 아니라 `examAnalyses[].questionClassifications`.
-- AI가 `classificationRows` 대신 요약 JSON만 주거나 일부 행만 반환하면 진단 박스에서 원인 확인 가능.
-- 마지막 안정화 후 0행 파싱 실패 원인은 숨기지 않고 `JSON 파싱`, `행 배열 키`, `부분 행 복구`, `원문 시작` 등으로 드러나게 되어 있다.
+- 문항별 분류표 MVP에서 누락 문항 재요청, PDF 이미지 기반 분류, 쎈 유형 표시/정렬, 접힘 UI 안정화 작업 완료.
+- 최종편집본 블록의 출처/역할 안내 추가:
+  `AI 초안`, `문항분류표`, `자동 계산`, `AI+강사`, `강사 인사이트`, `수동 편집`, `기본정보`.
+- 산출물 미리보기 렌더링 보강:
+  블로그는 구조화 문서 미리보기, 인스타는 카드뉴스형 미리보기.
+- 최종편집본 펼치기/접기 안정화 및 위/아래 버튼 제거.
 
-수업일지 출결:
+## 검수 결과
 
-- 과거/다른 날짜 출결이 오늘 수업일지에 붙어 보이는 문제를 막는 날짜 mismatch 방어가 들어가 있다.
-- 오늘 출결을 찍지 않았는데 등원/하원으로 보이면 `getAttendanceDateMismatch`, `findLessonStudentRecord`, 키오스크 오늘 수업 fallback 금지를 우선 확인한다.
+- 저장 경로 검수:
+  - 수업일지 주요 운영 데이터는 `lesson_student_records`, `notification_jobs`, `app_state.lessonNotificationPlans`에 저장된다.
+  - 퇴원생 사유/코멘트는 새 Supabase 컬럼 적용 후 `students`에 저장된다.
+- UI 상태 검수:
+  - 자동저장 상태가 상단에 보여 사용자가 저장 여부를 알 수 있다.
+  - 알림톡 미발송 상태가 버튼 색상으로 드러난다.
+  - 자동 수업 저장 실패는 alert로 작업을 막지 않고 패널 배너와 재시도 버튼으로 처리된다.
+- 남은 운영 리스크:
+  - `supabase/20260701_student_withdrawal_reason.sql`을 운영 Supabase SQL Editor에서 실행하기 전에는 퇴원 사유/코멘트 저장 시 migration 필요 오류가 날 수 있다.
+  - `src/app/App.jsx`가 여전히 매우 크다. 새 기능 추가보다 구조분리를 우선 유지하는 편이 좋다.
+  - Vite chunk size warning은 기존 경고이며 아직 해결되지 않았다.
 
 ## 다음 우선순위
 
-1. 큰 작업 전 항상 `git status --short`로 clean 확인.
-2. `App.jsx`에 남은 시험분석 최종문서 편집/인쇄 컴포넌트 분리 검토.
-   - 후보: `ExamFinalDocumentPrint`, `ExamFinalDocumentBuilder`, 관련 block/table/chart/slot editor.
-   - 주의: `createExamFinalDocumentFromAnalysis`는 App wrapper가 title/meta/crop payload를 주입하므로, 분리 시 콜백 prop으로 넘기는 편이 안전하다.
-3. 수업일지 주변에서 정적 옵션/표시 규칙/작은 helper를 계속 분리.
-4. 한 단위마다 `npm run build`, `npm run test:production` 실행.
-5. `docs/current-worklog.md` 갱신 후 커밋/푸시.
+1. 새 세션 시작 후 `git status --short`와 `git log -1 --oneline` 확인.
+2. 운영 Supabase에 `supabase/20260701_student_withdrawal_reason.sql` 적용 여부 확인.
+3. 구조분리 계속:
+   - `StudentManager`를 별도 도메인/컴포넌트로 분리.
+   - 수업일지 저장 상태, 알림톡 계획, 알림 제외 helper를 `src/domains/lessons` 쪽으로 분리.
+   - 시험분석 최종문서 편집/인쇄 컴포넌트의 남은 App.jsx 의존성 줄이기.
+4. 한 번에 하나의 우선순위 작업만 구현.
+5. 운영 흐름 변경 시 `npm run test:production`, `npm run build` 실행.
+6. 완료 후 `docs/current-worklog.md` 갱신, 커밋, 푸시.
 
 ## 자주 쓰는 명령
 
 ```powershell
 git status --short
-npm run build
-npm run test:production
 git log --oneline -8
+npm run test:production
+npm run build
 ```
 
 ## 참조 파일
@@ -79,5 +94,7 @@ git log --oneline -8
 - `docs/current-worklog.md`
 - `docs/next-session/README.md`
 - `src/app/App.jsx`
+- `src/app/App.css`
+- `api/routes/coreData.js`
 - `scripts/scenario-tests-production.cjs`
-- `api/routes/examAnalysis.js`
+- `supabase/20260701_student_withdrawal_reason.sql`
