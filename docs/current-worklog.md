@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P1. 시험 후 총평 수정본 미리보기 제거와 복사 기능
+
+- 상태: 완료
+- 사용자 요청: 시험 후 총평 모달의 미리보기는 필요 없고, 수정본을 클립보드에 복사해 붙여넣기할 수 있어야 한다.
+- 이번 작업 결과: 시험 후 총평 모달 오른쪽의 `시험 총평 미리보기` 카드를 제거했다. REVISED 헤더에 `수정본 복사` 버튼을 추가했고, 수정본 textarea에 내용이 있을 때만 활성화되도록 했다.
+- 복사 보강: 기존 `copyTextToClipboard` 공용 helper를 개선해 Clipboard API가 실패하거나 지원되지 않는 환경에서도 임시 textarea와 `document.execCommand("copy")`로 복사를 시도한다. 그래도 실패하면 기존처럼 원문 alert로 확인할 수 있게 했다.
+- 회귀 방지: 운영 시나리오 테스트에 시험 후 총평 수정본 복사 버튼, 클립보드 fallback, 미리보기 제거 조건을 추가했다.
+- 저장 주의: 기존 `exam_prep_rows.revised_review` 저장 경로를 그대로 사용한다. 새 Supabase SQL edit 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 242, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P1. 시험 후 총평 모달 상단 정렬과 맞춤법 전용 AI 수정
 
 - 상태: 완료

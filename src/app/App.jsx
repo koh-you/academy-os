@@ -10674,6 +10674,14 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
               <p className="eyebrow">REVISED</p>
               <h2>시험 후 총평 수정본</h2>
             </div>
+            <button
+              className="softButton"
+              disabled={!String(row.revisedReview ?? "").trim()}
+              onClick={() => copyTextToClipboard(row.revisedReview ?? "")}
+              type="button"
+            >
+              수정본 복사
+            </button>
           </div>
           <textarea
             className="commentComposerTextarea"
@@ -10681,22 +10689,6 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
             onChange={(event) => onUpdateRow(row.examPrepId, "revisedReview", event.target.value)}
             placeholder="AI가 다듬은 총평 또는 강사가 최종 수정한 총평이 들어갑니다."
           />
-          <div className="messagePreview examReviewPreview">
-            <div className="messagePreviewHeader">
-              <strong>{row.schoolName} 시험 총평 미리보기</strong>
-              <span>{row.grade} · {row.subject}</span>
-            </div>
-            <div className="messagePreviewMeta">
-              <span>{row.examPeriod || "시험기간 미입력"}</span>
-              <span>{row.mathExamDate || "수학시험일 미입력"}</span>
-              <span>{row.specialNote || row.memo || "특이사항 없음"}</span>
-            </div>
-            <div className="messageBubble">
-              {(row.revisedReview || reviewDraft || "왼쪽에 작성한 총평이 이 영역에 표시됩니다.").split("\n").map((line, index) => (
-                <p key={`${line}_${index}`}>{line || "\u00a0"}</p>
-              ))}
-            </div>
-          </div>
         </section>
       </div>
     </Modal>

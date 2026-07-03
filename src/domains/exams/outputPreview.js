@@ -225,9 +225,28 @@ export function parseInstagramSlides(value = "") {
 export function copyTextToClipboard(text = "") {
   const value = String(text ?? "").trim();
   if (!value) return;
+  const fallbackCopy = () => {
+    const textarea = document.createElement("textarea");
+    textarea.value = value;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "fixed";
+    textarea.style.left = "-9999px";
+    textarea.style.top = "0";
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    try {
+      document.execCommand("copy");
+    } catch (error) {
+      window.alert(value);
+    } finally {
+      document.body.removeChild(textarea);
+    }
+  };
+
   if (window.navigator?.clipboard?.writeText) {
-    window.navigator.clipboard.writeText(value).catch(() => window.alert(value));
+    window.navigator.clipboard.writeText(value).catch(fallbackCopy);
     return;
   }
-  window.alert(value);
+  fallbackCopy();
 }
