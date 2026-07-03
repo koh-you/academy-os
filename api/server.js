@@ -1810,7 +1810,7 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/ai/exam-analysis") {
     try {
-      const payload = await readJsonBody(request);
+      const payload = await readJsonBody(request, { limitBytes: 18 * 1024 * 1024 });
       const result = await runExamAnalysis(payload);
       sendJson(request, response, 200, { ok: true, result });
     } catch (error) {

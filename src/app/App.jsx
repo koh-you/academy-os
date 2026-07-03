@@ -11911,6 +11911,61 @@ function ExamAnalysisCenter({
     return [];
   }
 
+  async function buildExamAnalysisPageImages() {
+    const pageImages = [];
+    const pageImageLimit = 8;
+    for (const { file, sourceId } of renderSourceFileOptions) {
+      if (pageImages.length >= pageImageLimit) break;
+      const sourceUrl = getExamAnalysisSourceRenderUrl(file);
+      if (!sourceUrl) continue;
+      if (isPdfExamAnalysisSource(file)) {
+        const pdfjsLib = await loadPdfJs();
+        const loadingTask = pdfjsLib.getDocument({ url: sourceUrl });
+        try {
+          const pdfDocument = await loadingTask.promise;
+          setPdfPageCount(pdfDocument.numPages);
+          const remaining = Math.max(1, pageImageLimit - pageImages.length);
+          const pageNumbers = getQuestionClassificationPageNumbers(pdfDocument.numPages, remaining);
+          for (const pageNumber of pageNumbers) {
+            const imageDataUrl = await renderPdfPageToVisionImageDataUrl(pdfDocument, pageNumber, 1.05);
+            pageImages.push({ sourceId, sourceName: file.fileName || "PDF 원본", pageNumber, imageDataUrl });
+            if (pageImages.length >= pageImageLimit) break;
+          }
+        } finally {
+          loadingTask.destroy?.();
+        }
+      } else if (isImageExamAnalysisSource(file)) {
+        pageImages.push({
+          sourceId,
+          sourceName: file.fileName || "이미지 원본",
+          pageNumber: 1,
+          imageDataUrl: await imageUrlToVisionImageDataUrl(sourceUrl)
+        });
+      }
+    }
+    return pageImages;
+  }
+
+  async function runSourceExamAnalysis() {
+    if (!selectedAnalysis || selectedAnalysis.aiStatus === "분석 중") return;
+    let pageImages = [];
+    if (renderSourceFileOptions.length) {
+      try {
+        update("sourceUploadStatus", "PDF/이미지 페이지를 AI 입력용으로 준비하는 중입니다...");
+        pageImages = await buildExamAnalysisPageImages();
+        update(
+          "sourceUploadStatus",
+          pageImages.length
+            ? `AI 분석 요청 준비 완료 · ${pageImages.length}페이지 이미지 포함`
+            : "페이지 이미지는 준비하지 못해 텍스트 추출 원문으로 분석합니다."
+        );
+      } catch (error) {
+        update("sourceUploadStatus", `페이지 이미지 준비 실패 · 텍스트 추출 원문으로 분석합니다. (${error.message})`);
+      }
+    }
+    await onRunAnalysis({ ...selectedAnalysis, examPrepContext, pageImages }, aiSettings);
+  }
+
   async function runAiForActiveQuestionSource(options = {}) {
     if (!selectedAnalysis || isQuestionInfoFilling) return;
     const repairQuestionNumbers = Array.isArray(options.repairQuestionNumbers)
@@ -13126,7 +13181,7 @@ function ExamAnalysisCenter({
                   <button
                     className="primaryButton sourceAnalysisButton"
                     disabled={selectedAnalysis.aiStatus === "분석 중"}
-                    onClick={() => onRunAnalysis({ ...selectedAnalysis, examPrepContext }, aiSettings)}
+                    onClick={runSourceExamAnalysis}
                     type="button"
                   >
                     {selectedAnalysis.aiStatus === "분석 중" ? "분석 중..." : "AI 분석 시작"}

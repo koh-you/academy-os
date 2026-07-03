@@ -10,6 +10,18 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P1. 시험분석 첫 AI 호출 PDF 이미지 입력 연결
+
+- 상태: 완료
+- 사용자 제보: 텍스트로 읽을 수 있는 PDF를 올렸는데 문항별 분류표에서 `mock 분석: 현재 문항 카드 수 기준`과 5문항 응답이 나온다. 임시 문항 수 추정이 아니라, 대화 세션에 PDF를 넣었을 때처럼 API 호출에서도 AI가 PDF를 읽어야 한다.
+- 원인: 문항별 분류 API는 이미 PDF 페이지를 이미지로 렌더링해 OpenAI/Claude 멀티모달 입력에 포함했지만, 첫 `AI 분석 시작` API는 추출 텍스트 프롬프트만 전송했다. 또한 `/api/ai/exam-analysis` 요청 바디 한도가 기본 2MB라 PDF 페이지 이미지를 실어 보낼 수 없었고, 테스트 모드(mock) 설정이면 실제 PDF 분석 대신 5문항 mock 분석이 저장될 수 있었다.
+- 이번 작업 결과: 원본 입력의 `AI 분석 시작` 클릭 시 PDF/이미지 원본을 최대 8페이지까지 렌더링해 `pageImages`로 함께 전송한다. 서버는 시험분석 프롬프트와 함께 첨부 페이지 이미지를 OpenAI/Claude 멀티모달 요청에 넣고, 프롬프트에 첨부 이미지가 있으면 실제 지면의 문항번호/수식/보기/도형 배치를 OCR보다 우선하라고 명시했다. `/api/ai/exam-analysis` 바디 한도는 18MB로 확장했다.
+- mock 오작동 방지: 업로드 원본, OCR 텍스트, 페이지 이미지가 있는 시험분석 요청은 테스트 모드로 가짜 분석을 만들지 않고, Claude 또는 OpenAI 제공자를 선택하라는 명확한 오류를 반환한다.
+- 실제 PDF 확인: 제보 PDF는 로컬 추출 기준 5페이지이며 빠른 정답에서 24번까지 확인된다. 새 구조에서는 숫자만 보정하지 않고 PDF 렌더링 이미지와 추출 텍스트를 함께 AI에 전달한다.
+- 회귀 방지: 운영 시나리오 테스트에 첫 시험분석 호출의 PDF 페이지 이미지 준비, 서버 이미지 멀티모달 호출, 18MB 요청 한도, mock PDF 분석 차단 조건을 추가했다.
+- 저장 주의: API 호출 입력과 UI 요청 준비 흐름만 변경했다. 기존 `app_state.examAnalyses` 저장 구조와 Supabase SQL edit 변경 없음.
+- 검증: `node --check api/routes/examAnalysis.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 244, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P2. 시험분석 원본 입력 분석 중 버튼 크기 조정
 
 - 상태: 완료

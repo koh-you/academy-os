@@ -366,6 +366,7 @@ function buildExamAnalysisPrompt(payload) {
   const reviewedClassificationText = formatClassificationRowsForPrompt(payload.questionClassifications || payload.classificationRows);
   const teacherInsightText = formatTeacherInsightsForPrompt(payload);
   const reviewRegenerationOnly = Boolean(payload.reviewRegenerationOnly);
+  const pageImageCount = Array.isArray(payload.pageImages) ? payload.pageImages.length : 0;
   const sourceFileLines = Array.isArray(payload.sourceFiles)
     ? payload.sourceFiles.map((file, index) => {
         const sourceId = file.sourceId || file.storagePath || file.signedUrl || file.fileName || `source_${index}`;
@@ -383,6 +384,7 @@ function buildExamAnalysisPrompt(payload) {
     `시험일: ${payload.examDate ?? ""}`,
     `원본 링크: ${payload.sourceFileUrl ?? ""}`,
     `업로드 원본: ${sourceFileLines}`,
+    `첨부 PDF/이미지 페이지 수: ${pageImageCount}`,
     "",
     "[시험관리 탭 입력정보]",
     examPrepContext
@@ -429,6 +431,7 @@ function buildExamAnalysisPrompt(payload) {
     "- 시험지를 설명하지 말고 학생·강사가 다음 행동을 결정할 수 있게 분석한다.",
     "- 각 항목은 가능하면 사실 근거 → 점수에 미친 영향 → 다음 학습 행동 순서로 쓴다.",
     "- 반드시 시험 원본/OCR에 있는 사실을 우선한다.",
+    "- 첨부 PDF/이미지 페이지가 있으면 실제 지면의 문항번호, 수식, 보기, 도형 배치를 OCR 텍스트보다 우선해 읽는다.",
     "- 문항 검수 확정 데이터가 있으면 OCR보다 검수표를 우선하고, 분류표의 쎈 유형·단원·난이도를 요약과 산출물에 반영한다.",
     "- 강사 인사이트가 있으면 AI 초안보다 강사 인사이트를 우선한다. 강사 인사이트와 충돌하는 AI 판단은 확인 필요로 낮춘다.",
     "- 시험지 첫 페이지의 문항 수 및 배점 표가 보이면 questionComposition에 먼저 정리한다.",
@@ -1932,17 +1935,23 @@ function normalizeClassificationPageImages(pageImages = []) {
   return pageImages
     .map((entry, index) => ({
       pageNumber: Math.max(1, Number(entry?.pageNumber || index + 1) || index + 1),
+      sourceId: String(entry?.sourceId || "").trim(),
+      sourceName: String(entry?.sourceName || entry?.fileName || "").trim(),
       imageDataUrl: String(entry?.imageDataUrl || entry?.dataUrl || "").trim()
     }))
     .filter((entry) => entry.imageDataUrl.startsWith("data:image/"))
     .slice(0, QUESTION_CLASSIFICATION_IMAGE_LIMIT);
 }
 
-async function runOpenAiQuestionClassification(prompt, pageImages, model) {
+function formatPageImagePromptLabel(entry = {}) {
+  return `[첨부 이미지] ${entry.sourceName ? `${entry.sourceName} · ` : "원본 PDF/이미지 "}${entry.pageNumber}페이지`;
+}
+
+async function runOpenAiPromptWithPageImages(prompt, pageImages, model, maxOutputTokens, errorMessage) {
   const content = [
     { type: "input_text", text: prompt },
     ...pageImages.flatMap((entry) => [
-      { type: "input_text", text: `[첨부 이미지] 원본 PDF/이미지 ${entry.pageNumber}페이지` },
+      { type: "input_text", text: formatPageImagePromptLabel(entry) },
       {
         type: "input_image",
         image_url: entry.imageDataUrl
@@ -1957,24 +1966,24 @@ async function runOpenAiQuestionClassification(prompt, pageImages, model) {
     },
     body: JSON.stringify({
       model,
-      max_output_tokens: 9000,
+      max_output_tokens: maxOutputTokens,
       input: [{ role: "user", content }]
     })
   });
 
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.error?.message || "OpenAI 문항 분류 요청에 실패했습니다.");
+    throw new Error(data.error?.message || errorMessage);
   }
 
   return outputTextFromOpenAi(data);
 }
 
-async function runAnthropicQuestionClassification(prompt, pageImages, model) {
+async function runAnthropicPromptWithPageImages(prompt, pageImages, model, maxTokens, errorMessage) {
   const imageBlocks = pageImages.flatMap((entry) => {
     const image = parseImageDataUrl(entry.imageDataUrl);
     return [
-      { type: "text", text: `[첨부 이미지] 원본 PDF/이미지 ${entry.pageNumber}페이지` },
+      { type: "text", text: formatPageImagePromptLabel(entry) },
       {
         type: "image",
         source: {
@@ -1994,7 +2003,7 @@ async function runAnthropicQuestionClassification(prompt, pageImages, model) {
     },
     body: JSON.stringify({
       model,
-      max_tokens: 9000,
+      max_tokens: maxTokens,
       messages: [
         {
           role: "user",
@@ -2009,10 +2018,18 @@ async function runAnthropicQuestionClassification(prompt, pageImages, model) {
 
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.error?.message || "Claude 문항 분류 요청에 실패했습니다.");
+    throw new Error(data.error?.message || errorMessage);
   }
 
   return outputTextFromAnthropic(data);
+}
+
+async function runOpenAiQuestionClassification(prompt, pageImages, model) {
+  return runOpenAiPromptWithPageImages(prompt, pageImages, model, 9000, "OpenAI 문항 분류 요청에 실패했습니다.");
+}
+
+async function runAnthropicQuestionClassification(prompt, pageImages, model) {
+  return runAnthropicPromptWithPageImages(prompt, pageImages, model, 9000, "Claude 문항 분류 요청에 실패했습니다.");
 }
 
 async function runQuestionClassificationWithProvider(provider, prompt, model, pageImages = []) {
@@ -2093,8 +2110,16 @@ export async function runExamAnalysis(payload) {
   const provider = selectedProvider(payload);
   const questionInfoOnly = Boolean(payload.questionInfoOnly);
   const model = selectedModel(payload, questionInfoOnly ? "questionClassification" : "examAnalysis");
+  const pageImages = normalizeClassificationPageImages(payload.pageImages);
+  const prompt = questionInfoOnly ? buildQuestionItemsPrompt(payload) : buildExamAnalysisPrompt(payload);
+  const hasUploadedExamSource = pageImages.length ||
+    (Array.isArray(payload.sourceFiles) && payload.sourceFiles.length) ||
+    String(payload.rawExamText || "").trim();
 
   if (provider === "mock") {
+    if (hasUploadedExamSource) {
+      throw new Error("PDF/이미지 시험분석은 테스트 모드로 처리할 수 없습니다. 설정에서 시험분석 AI 제공자를 Claude 또는 OpenAI로 선택해 주세요.");
+    }
     if (questionInfoOnly) {
       throw new Error("문항정보 채우기는 실제 AI 제공자가 필요합니다. 설정에서 문항분류·누락보정 AI 제공자를 Anthropic 또는 OpenAI로 선택해 주세요.");
     }
@@ -2102,17 +2127,21 @@ export async function runExamAnalysis(payload) {
   }
 
   if (provider === "openai") {
-    const text = await runOpenAiText(questionInfoOnly ? buildQuestionItemsPrompt(payload) : buildExamAnalysisPrompt(payload), model, questionInfoOnly ? 8000 : 0);
+    const text = pageImages.length
+      ? await runOpenAiPromptWithPageImages(prompt, pageImages, model, questionInfoOnly ? 8000 : 9000, "OpenAI 시험분석 요청에 실패했습니다.")
+      : await runOpenAiText(prompt, model, questionInfoOnly ? 8000 : 0);
     const fields = normalizeAnalysisFields(safeParseJsonText(text), payload, text);
     if (questionInfoOnly && !fields.questionItems?.length) throw new Error("AI 응답에 문항정보(questionItems)가 없습니다. 다시 실행하거나 원본 OCR 상태를 확인해 주세요.");
-    return { provider, model, fields, rawText: text };
+    return { provider, model, fields, rawText: text, pageImageCount: pageImages.length };
   }
 
   if (provider === "anthropic") {
-    const text = await runAnthropicText(questionInfoOnly ? buildQuestionItemsPrompt(payload) : buildExamAnalysisPrompt(payload), model, questionInfoOnly ? 8000 : 4000);
+    const text = pageImages.length
+      ? await runAnthropicPromptWithPageImages(prompt, pageImages, model, questionInfoOnly ? 8000 : 9000, "Claude 시험분석 요청에 실패했습니다.")
+      : await runAnthropicText(prompt, model, questionInfoOnly ? 8000 : 4000);
     const fields = normalizeAnalysisFields(safeParseJsonText(text), payload, text);
     if (questionInfoOnly && !fields.questionItems?.length) throw new Error("AI 응답에 문항정보(questionItems)가 없습니다. 다시 실행하거나 원본 OCR 상태를 확인해 주세요.");
-    return { provider, model, fields, rawText: text };
+    return { provider, model, fields, rawText: text, pageImageCount: pageImages.length };
   }
 
   throw new Error(`지원하지 않는 AI 제공자입니다: ${provider}`);
