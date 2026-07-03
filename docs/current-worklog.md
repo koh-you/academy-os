@@ -22,6 +22,8 @@
 - 프롬프트 보강: v2 AI 행 채움/2차 수정 프롬프트에 실제 쎈 유형 후보를 넣고, `main_type`/`sub_types`는 후보의 `typeName`을 그대로 쓰게 했다. `방정식`, `행렬`, `부등식` 같은 대분류만 쓰면 안 된다고 명시했다. 선택한 `typeCode`는 `ai_fields` 안에 메타데이터로 저장한다.
 - 사용자 편집본 보호: AI 2차 수정은 미확정/재확인 문항을 대상으로 하며, 이미 선생님이 수정/확정한 `teacher_override`, `teacher_fields`, `final_fields`는 덮어쓰지 않는다.
 - 화면: `AI 결과 검수`를 카드형 그리드에서 엑셀식 테이블로 바꿨다. 각 문항은 한 행이며 `#`, `확정`, `단원`, `쎈 주유형`, `쎈 보조유형`, `난이도`, `검수 메모`, `상태` 열로 편집한다. 같은 패널 안에 `AI 2차 수정(과금)`, `모두 확정`, `검수 저장` 버튼과 저장/수정 상태가 보인다.
+- 사용자 검증: 실제 화면에서 AI 2차 검수를 실행했고, 새로고침 후에도 저장값이 유지되는 것을 확인했다. 테스트 단계에서는 3문항만 AI 2차 검수 상태로 두고 다음 단계로 넘어간다.
+- 테스트 데이터 주의: 3문항을 제외한 나머지 문항의 쎈 유형 반영은 아직 전체 품질 통과로 보지 않는다. 다만 현재는 테스트 중이므로 이 데이터를 보존/보정 대상으로 붙잡지 않고, 필요하면 분석을 삭제한 뒤 PDF 업로드부터 처음 다시 돌린다.
 - 저장 주의: 새 SQL edit은 필요 없다. 기존 `exam_analysis_questions`의 top-level 유형 필드와 `ai_fields`, `teacher_fields`, `final_fields`, run의 `audit_summary.rowRefine`을 사용한다.
 - 검증: `node --check api/server.js`, `node --check api/routes/examAnalysisPipeline.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 통과(total 231, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
 
