@@ -9956,7 +9956,6 @@ function ExamPrepCenter({
           <p className="muted">{selectedClass?.name} · {examCycleLabel(selectedExamCycle)}</p>
         </div>
         <div className="examPrepHeaderActions">
-          {examPrepSaveState !== "idle" ? <InlineSaveStatus label="시험정보" saveState={examPrepSaveState} /> : null}
           {activeTab === "info" ? (
             <input
               className="searchInput"
@@ -10007,6 +10006,9 @@ function ExamPrepCenter({
               <option value="2026-2-final">2026 2학기 기말</option>
             </select>
             <span>{filteredRows.length}개 시험정보 · {classStudents.length}명</span>
+            {examPrepSaveState !== "idle" ? (
+              <InlineSaveStatus className="examCycleSaveStatus" label="시험정보" saveState={examPrepSaveState} />
+            ) : null}
           </div>
           <div className="examPrepTable">
             <div className="examPrepRow examPrepHead">
