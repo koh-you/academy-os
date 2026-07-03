@@ -5,6 +5,8 @@ const fallbackSource = "local_sample";
 const databaseSource = "supabase";
 const canceledLessonRetentionMs = 7 * 24 * 60 * 60 * 1000;
 const sensitiveAppStateKeys = new Set(["teacherAccountSettings"]);
+const deprecatedAppStateKeys = new Set(["examAnalyses", "examAnalysisFolders"]);
+const hiddenAppStateKeys = new Set([...sensitiveAppStateKeys, ...deprecatedAppStateKeys]);
 
 function compact(value) {
   return value === undefined || value === "" ? null : value;
@@ -1176,7 +1178,7 @@ export async function listAppState() {
   }
 
   const rows = (await listRows("app_state", "select=*&order=state_key.asc", { requireServiceRole: true }))
-    .filter((row) => !sensitiveAppStateKeys.has(row.state_key));
+    .filter((row) => !hiddenAppStateKeys.has(row.state_key));
   return {
     source: databaseSource,
     states: Object.fromEntries(rows.map((row) => [row.state_key, row.state_value])),
@@ -1192,11 +1194,11 @@ export async function upsertAppState(states) {
     return { source: fallbackSource, states };
   }
 
-  for (const key of sensitiveAppStateKeys) {
+  for (const key of hiddenAppStateKeys) {
     await deleteRows("app_state", `state_key=eq.${encodeURIComponent(key)}`);
   }
   const rows = Object.entries(states)
-    .filter(([key]) => !sensitiveAppStateKeys.has(key))
+    .filter(([key]) => !hiddenAppStateKeys.has(key))
     .map(([key, value]) => toAppStateRow(key, value));
   if (rows.length === 0) return { source: databaseSource, states: {} };
   const savedRows = await upsertRows("app_state", rows);

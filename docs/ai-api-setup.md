@@ -7,7 +7,6 @@ academy-os의 AI 기능은 Render 백엔드에서만 API Key를 읽습니다.
 
 - 수업일지 강사코멘트 AI 수정
 - 수업일지 학생코멘트 AI 수정
-- 시험분석 AI 초안 생성
 - 시험대비 시험 후 총평 수정본 생성
 
 ## Render 환경변수
@@ -35,7 +34,7 @@ ANTHROPIC_MODEL=claude-sonnet-4-5
 
 ## 화면 사용법
 
-수업일지와 시험분석 화면의 AI API 선택값은 기본적으로 `자동 선택`입니다.
+수업일지와 시험관리 총평 화면의 AI API 선택값은 기본적으로 `자동 선택`입니다.
 이 상태에서는 Render 환경변수에 등록된 Key 기준으로 실제 API가 호출됩니다.
 
 테스트만 하고 싶을 때는 화면에서 `테스트 모드`를 선택합니다.
@@ -49,4 +48,3 @@ https://koh-you-math-academy-os-api.onrender.com/api/integrations/status
 ```
 
 응답의 `ai.providers.openai` 또는 `ai.providers.anthropic` 값이 `true`이면 해당 API Key가 서버에 정상 등록된 상태입니다.
-

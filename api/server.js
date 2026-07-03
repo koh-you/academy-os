@@ -1,5 +1,4 @@
 ﻿import http from "node:http";
-import pdfParse from "pdf-parse/lib/pdf-parse.js";
 import {
   deleteLesson,
   deleteLessonsBefore,
@@ -46,7 +45,7 @@ import {
 import crypto from "node:crypto";
 import { loadEnvFile } from "./lib/loadEnv.js";
 import { isSupabaseConfigured, listRows, upsertRows } from "./lib/supabaseRest.js";
-import { draftQuestionCrops, getAiStatus, polishLessonComment, runExamAnalysis, runExamQuestionClassification, runExamQuestionInfoText } from "./routes/examAnalysis.js";
+import { getAiStatus, polishLessonComment } from "./routes/commentPolish.js";
 import {
   getNotificationStatus,
   sendAttendanceAlimtalk,
@@ -814,19 +813,6 @@ async function createSignedStorageUrl(bucketId, storagePath, expiresIn = 60 * 60
   return `${getSupabaseStorageBaseUrl()}${result.signedURL}`;
 }
 
-async function downloadSignedStorageObject(bucketId, storagePath) {
-  const signedUrl = await createSignedStorageUrl(bucketId, storagePath, 60 * 10);
-  const storageResponse = await fetch(signedUrl);
-  if (!storageResponse.ok) {
-    throw new Error(`Storage 파일 다운로드 실패: ${storageResponse.status}`);
-  }
-  const arrayBuffer = await storageResponse.arrayBuffer();
-  return {
-    buffer: Buffer.from(arrayBuffer),
-    contentType: storageResponse.headers.get("content-type") || "application/octet-stream"
-  };
-}
-
 async function uploadExamPostFile(payload) {
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
     throw new Error("Supabase Storage 업로드에는 service role 설정이 필요합니다.");
@@ -858,56 +844,6 @@ async function uploadExamPostFile(payload) {
     signedUrl: await createSignedStorageUrl(bucketId, storagePath),
     uploadedAt: new Date().toISOString(),
     source: "student_camera"
-  };
-}
-
-async function extractPdfText(buffer) {
-  try {
-    const result = await pdfParse(buffer);
-    return String(result.text ?? "").trim();
-  } catch {
-    return "";
-  }
-}
-
-async function uploadExamAnalysisSourceFile(payload) {
-  if (!isSupabaseConfigured({ requireServiceRole: true })) {
-    throw new Error("Supabase Storage 업로드에는 service role 설정이 필요합니다.");
-  }
-  const bucketId = "exam-analysis-sources";
-  await ensureStorageBucket(bucketId, { allowedMimeTypes: ["application/pdf", "image/png", "image/jpeg", "image/webp"] });
-  const { mimeType, buffer } = parseDataUrl(payload.dataUrl);
-  const allowedTypes = new Set(["application/pdf", "image/png", "image/jpeg", "image/webp"]);
-  if (!allowedTypes.has(mimeType)) throw new Error("시험분석 원본은 PDF, PNG, JPG, WEBP 파일만 업로드할 수 있습니다.");
-  if (buffer.length > 20 * 1024 * 1024) throw new Error("파일은 20MB 이하만 업로드할 수 있습니다.");
-  const fileName = String(payload.fileName || `exam-source-${Date.now()}`).trim();
-  const storageFileName = getStorageSafeFileName(fileName, mimeType, "exam-source");
-  const storagePath = [
-    "exam-analysis",
-    sanitizeStorageSegment(payload.schoolName, "school"),
-    sanitizeStorageSegment(payload.grade, "grade"),
-    sanitizeStorageSegment(payload.examName, "exam"),
-    sanitizeStorageSegment(payload.analysisId, "analysis"),
-    `${Date.now()}-${storageFileName}`
-  ].join("/");
-
-  await uploadStorageObjectWithBucketRetry(bucketId, storagePath, { contentType: mimeType, body: buffer });
-
-  const extractedText = mimeType === "application/pdf" || /\.pdf$/i.test(fileName)
-    ? await extractPdfText(buffer)
-    : "";
-
-  return {
-    bucketId,
-    storagePath,
-    fileName,
-    fileType: mimeType,
-    fileSize: buffer.length,
-    signedUrl: await createSignedStorageUrl(bucketId, storagePath),
-    extractedText,
-    extractionStatus: extractedText ? "텍스트 추출 완료" : "텍스트 추출 없음",
-    uploadedAt: new Date().toISOString(),
-    source: "exam_analysis_source"
   };
 }
 
@@ -1250,55 +1186,6 @@ const server = http.createServer(async (request, response) => {
         Location: signedUrl
       });
       response.end();
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-sources") {
-    try {
-      const payload = await readJsonBody(request, { limitBytes: 28 * 1024 * 1024 });
-      const file = await uploadExamAnalysisSourceFile(payload);
-      sendJson(request, response, 200, { ok: true, file });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/exam-analysis-sources/open") {
-    try {
-      const bucketId = requestUrl.searchParams.get("bucket") || "exam-analysis-sources";
-      const storagePath = requestUrl.searchParams.get("path") || "";
-      if (!storagePath) throw new Error("파일 경로가 없습니다.");
-      const signedUrl = await createSignedStorageUrl(bucketId, storagePath);
-      response.writeHead(302, {
-        "Access-Control-Allow-Origin": getCorsOrigin(request),
-        Location: signedUrl
-      });
-      response.end();
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/exam-analysis-sources/file") {
-    try {
-      const bucketId = requestUrl.searchParams.get("bucket") || "exam-analysis-sources";
-      const storagePath = requestUrl.searchParams.get("path") || "";
-      if (!storagePath) throw new Error("파일 경로가 없습니다.");
-      if (bucketId !== "exam-analysis-sources") throw new Error("시험분석 원본 파일만 렌더링할 수 있습니다.");
-      const file = await downloadSignedStorageObject(bucketId, storagePath);
-      response.writeHead(200, {
-        "Access-Control-Allow-Origin": getCorsOrigin(request),
-        "Cache-Control": "private, max-age=300",
-        "Content-Length": file.buffer.length,
-        "Content-Type": file.contentType,
-        "Cross-Origin-Resource-Policy": "cross-origin"
-      });
-      response.end(file.buffer);
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
     }
@@ -1802,50 +1689,6 @@ const server = http.createServer(async (request, response) => {
         notifyEmpty: payload.notifyEmpty !== false
       });
       sendJson(request, response, 200, { ok: true, provider: "slack", result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/ai/exam-analysis") {
-    try {
-      const payload = await readJsonBody(request, { limitBytes: 18 * 1024 * 1024 });
-      const result = await runExamAnalysis(payload);
-      sendJson(request, response, 200, { ok: true, result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/ai/exam-question-crops") {
-    try {
-      const payload = await readJsonBody(request, { limitBytes: 9 * 1024 * 1024 });
-      const result = await draftQuestionCrops(payload);
-      sendJson(request, response, 200, { ok: true, result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/ai/exam-question-info-text") {
-    try {
-      const payload = await readJsonBody(request, { limitBytes: 2 * 1024 * 1024 });
-      const result = await runExamQuestionInfoText(payload);
-      sendJson(request, response, 200, { ok: true, result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/ai/exam-question-classification") {
-    try {
-      const payload = await readJsonBody(request, { limitBytes: 18 * 1024 * 1024 });
-      const result = await runExamQuestionClassification(payload);
-      sendJson(request, response, 200, { ok: true, result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
     }

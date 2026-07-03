@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P0. 시험분석 기능과 저장 데이터 경로 제거
+
+- 상태: 완료
+- 사용자 요청: 시험분석 탭뿐 아니라 데이터 삭제를 포함해 시험분석 관련 기능을 완전히 지우고, DB 연결된 저장소만 남긴다.
+- 이번 작업 결과: 사이드바 `시험분석` 진입, `ExamAnalysisCenter`, 프론트 `examAnalyses`/`examAnalysisFolders` 상태·로드·저장, 시험분석 AI/문항분류/문항크롭 API, PDF 업로드/열기 API, PDF 분석 의존성, 시험분석 전용 도메인 파일과 CSS를 제거했다. 수업일지, 시험관리, 시험 후 총평 맞춤법 AI, 시험 후 제출 자기점검 흐름은 유지했다.
+- 서버 정리: `api/routes/examAnalysis.js`를 삭제하고 수업일지/시험 후 총평 맞춤법 AI만 담당하는 `api/routes/commentPolish.js`를 남겼다. `/api/ai/comment-polish`와 `/api/integrations/status`의 AI 상태는 계속 동작한다.
+- 데이터 정리: `api/routes/coreData.js`에서 `examAnalyses`, `examAnalysisFolders`를 deprecated app_state 키로 숨기고 다음 app_state 저장 때 삭제되게 했다. 운영 Supabase에서 즉시 지우려면 `supabase/20260703_remove_exam_analysis_app_state.sql`을 SQL editor에 적용한다. 이 SQL은 제거된 시험분석 `app_state`와 `exam-analysis-sources` Storage 객체/버킷만 지우며, 시험 후 제출용 `exam-submissions` 같은 활성 Storage는 건드리지 않는다.
+- 문서 정리: 시험분석 API 문서와 env 예시의 시험분석 전용 모델 변수를 제거했고, `docs/next-session/README.md`도 시험분석 파이프라인 재개가 아니라 삭제 완료 기준으로 갱신했다.
+- 검증: `node --check api/routes/commentPolish.js`, `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 227, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P1. 문항분류가 저장된 mock 5문항에 묶이는 문제 수정
 
 - 상태: 완료
