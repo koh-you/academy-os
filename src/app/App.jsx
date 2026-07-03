@@ -502,17 +502,63 @@ const saveStateLabels = {
   failed: "저장 실패"
 };
 
-const defaultExamReviewDraft = `[시험지 총평]
+function formatExamReviewDraftLine(label, value = "") {
+  const normalizedValue = String(value ?? "").trim();
+  return normalizedValue ? `${label} ${normalizedValue}` : label;
+}
 
-1. 시험 범위 :
+function createExamReviewDraft(row = {}) {
+  const specialNote = row.specialNote ?? row.memo ?? "";
+  return `[시험지 총평]
+
+${formatExamReviewDraftLine("1. 시험 범위 :", row.scope)}
 
 2. 난이도 :
 
-3. 문항 출처  :
+${formatExamReviewDraftLine("3. 문항 출처  :", row.subTextbook)}
 
-4. 특이사항  :
+${formatExamReviewDraftLine("4. 특이사항  :", specialNote)}
 
 5. 대비 방법  :`;
+}
+
+const defaultExamReviewDraft = createExamReviewDraft();
+
+function isExamReviewDraftLike(value = "") {
+  const lines = String(value ?? "")
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  return (
+    lines[0] === "[시험지 총평]" &&
+    lines.some((line) => /^1\.\s*시험 범위\s*:/.test(line)) &&
+    lines.some((line) => /^3\.\s*문항 출처\s*:/.test(line))
+  );
+}
+
+function syncExamReviewDraftWithExamPrepRow(review = "", row = {}) {
+  const currentReview = String(review ?? "");
+  if (!currentReview.trim()) return createExamReviewDraft(row);
+  if (!isExamReviewDraftLike(currentReview)) return currentReview;
+  const nextScope = String(row.scope ?? "").trim();
+  const nextSubTextbook = String(row.subTextbook ?? "").trim();
+  if (!nextScope && !nextSubTextbook) return currentReview;
+  return currentReview
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((line) => {
+      const trimmedLine = line.trim();
+      if (nextScope && /^1\.\s*시험 범위\s*:/.test(trimmedLine)) {
+        return formatExamReviewDraftLine("1. 시험 범위 :", nextScope);
+      }
+      if (nextSubTextbook && /^3\.\s*문항 출처\s*:/.test(trimmedLine)) {
+        return formatExamReviewDraftLine("3. 문항 출처  :", nextSubTextbook);
+      }
+      return line;
+    })
+    .join("\n");
+}
 
 function normalizeSaveState(saveState) {
   return Object.prototype.hasOwnProperty.call(saveStateLabels, saveState) ? saveState : "idle";
@@ -10000,8 +10046,20 @@ function ExamPrepCenter({
                       "미입력"
                     )}
                   </div>
-                  <div className="examReadCell multiline">{row.scope || "미입력"}</div>
-                  <div className="examReadCell multiline">{row.subTextbook || "미입력"}</div>
+                  <textarea
+                    aria-label={`${row.schoolName || "학교"} 시험 범위`}
+                    className="examPrepInlineTextarea"
+                    value={row.scope ?? ""}
+                    onChange={(event) => onUpdateRow(row.examPrepId, "scope", event.target.value)}
+                    placeholder="시험 범위"
+                  />
+                  <textarea
+                    aria-label={`${row.schoolName || "학교"} 부교재`}
+                    className="examPrepInlineTextarea"
+                    value={row.subTextbook ?? ""}
+                    onChange={(event) => onUpdateRow(row.examPrepId, "subTextbook", event.target.value)}
+                    placeholder="부교재"
+                  />
                   <button className={row.review || row.revisedReview ? "examReviewOpenButton filled" : "examReviewOpenButton"} onClick={() => setReviewModalRowId(row.examPrepId)} type="button">
                     <strong>{row.review || row.revisedReview ? "총평 보기/수정" : "총평 작성"}</strong>
                     <span>{reviewSummary}</span>
@@ -10425,16 +10483,29 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
   const seededReviewRowRef = useRef("");
-  const hasReviewText = String(row.review ?? "").trim().length > 0;
-  const reviewDraft = hasReviewText || seededReviewRowRef.current === row.examPrepId
-    ? row.review ?? ""
-    : defaultExamReviewDraft;
+  const currentReview = row.review ?? "";
+  const shouldSeedReviewDraft = !String(currentReview).trim() && seededReviewRowRef.current !== row.examPrepId;
+  const reviewDraft = !String(currentReview).trim()
+    ? shouldSeedReviewDraft ? createExamReviewDraft(row) : currentReview
+    : syncExamReviewDraftWithExamPrepRow(currentReview, row);
 
   useEffect(() => {
-    if (!row.examPrepId || hasReviewText || seededReviewRowRef.current === row.examPrepId) return;
-    seededReviewRowRef.current = row.examPrepId;
-    onUpdateRow(row.examPrepId, "review", defaultExamReviewDraft);
-  }, [hasReviewText, onUpdateRow, row.examPrepId]);
+    if (!row.examPrepId) return;
+    if (!String(currentReview).trim() && !shouldSeedReviewDraft) return;
+    const nextReview = shouldSeedReviewDraft ? createExamReviewDraft(row) : syncExamReviewDraftWithExamPrepRow(currentReview, row);
+    if (nextReview === currentReview) return;
+    if (shouldSeedReviewDraft) seededReviewRowRef.current = row.examPrepId;
+    onUpdateRow(row.examPrepId, "review", nextReview);
+  }, [
+    currentReview,
+    onUpdateRow,
+    row.examPrepId,
+    row.memo,
+    row.scope,
+    row.specialNote,
+    row.subTextbook,
+    shouldSeedReviewDraft
+  ]);
 
   async function polishReview() {
     onUpdateRow(row.examPrepId, "reviewAiStatus", "AI 수정 중");
