@@ -3437,6 +3437,77 @@ button {
   white-space: nowrap;
 }
 
+.analysisProgressPanel {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.analysisProgressHeader {
+  display: grid;
+  gap: 4px;
+}
+
+.analysisProgressHeader strong {
+  color: #17213d;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.analysisProgressHeader span {
+  color: #64748b;
+  font-weight: 800;
+}
+
+.analysisProgressTimeline {
+  display: grid;
+  gap: 8px;
+}
+
+.analysisProgressItem {
+  background: #f8fbff;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #94a3b8;
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+}
+
+.analysisProgressItem b {
+  color: #17213d;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.analysisProgressItem span,
+.analysisProgressItem small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.analysisProgressItem.done {
+  border-left-color: #16a34a;
+}
+
+.analysisProgressItem.failed {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  border-left-color: #f97316;
+}
+
+.analysisProgressItem.running,
+.analysisProgressItem.live {
+  background: #eef4ff;
+  border-color: #c7d2fe;
+  border-left-color: #4f46e5;
+}
+
 .analysisWorkflowHint {
   display: grid;
   gap: 8px;

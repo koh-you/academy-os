@@ -2300,6 +2300,43 @@ function getAiPrompt(settings = {}, promptKey) {
   return prompts[promptKey] ?? defaultAiPrompts[promptKey] ?? "";
 }
 
+function createExamAnalysisProgressEntry(stage, detail, tone = "info") {
+  const safeTone = ["done", "failed", "info", "running"].includes(tone) ? tone : "info";
+  return {
+    detail: String(detail || "").trim(),
+    id: `analysis_progress_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    stage: String(stage || "진행").trim(),
+    time: new Date().toISOString(),
+    tone: safeTone
+  };
+}
+
+function normalizeExamAnalysisProgressLog(log = []) {
+  return (Array.isArray(log) ? log : [])
+    .map((entry, index) => {
+      const tone = ["done", "failed", "info", "running"].includes(entry?.tone) ? entry.tone : "info";
+      return {
+        detail: String(entry?.detail || "").trim(),
+        id: entry?.id || `analysis_progress_existing_${index}`,
+        stage: String(entry?.stage || "").trim(),
+        time: entry?.time || entry?.at || "",
+        tone
+      };
+    })
+    .filter((entry) => entry.stage || entry.detail)
+    .slice(-12);
+}
+
+function formatExamAnalysisProgressTime(value = "") {
+  const time = value ? new Date(value) : null;
+  if (!time || Number.isNaN(time.getTime())) return "";
+  return time.toLocaleTimeString("ko-KR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Seoul"
+  });
+}
+
 function countProblemStatuses(problems = []) {
   return Object.keys(problemStatusMeta).reduce((counts, status) => {
     counts[status] = problems.filter((problem) => problem.status === status).length;
@@ -5298,10 +5335,23 @@ export function App() {
         : overrideAiSettings?.examAnalysisModel ?? analysis.aiModel ?? defaultAiSettings.examAnalysisModel,
       aiPrompt: settingsPrompt
     };
+    const pageImageCount = Array.isArray(nextAnalysis.pageImages) ? nextAnalysis.pageImages.length : 0;
+    const startingProgressLog = [
+      ...normalizeExamAnalysisProgressLog(nextAnalysis.aiProgressLog),
+      createExamAnalysisProgressEntry(
+        questionInfoOnly ? "문항정보 AI 요청 전송" : reviewRegenerationOnly ? "분석 재작성 AI 요청 전송" : "시험분석 AI 요청 전송",
+        [
+          `${getAiProviderLabel(nextAnalysis.aiProvider)} · ${getAiModelLabel(nextAnalysis.aiModel)}`,
+          pageImageCount ? `${pageImageCount}페이지 이미지 포함` : "텍스트/OCR 기반 요청",
+          "요청을 끊지 않고 응답을 기다립니다."
+        ].join(" · "),
+        "running"
+      )
+    ];
     setExamAnalyses((current) =>
       current.map((item) =>
         item.examAnalysisId === analysis.examAnalysisId
-          ? { ...item, aiProvider: nextAnalysis.aiProvider, aiModel: nextAnalysis.aiModel, aiPrompt: nextAnalysis.aiPrompt, aiStatus: "분석 중", aiError: "", aiRunRequestId, aiRunSessionId: appRuntimeSessionId, aiRunStartedAt, updatedAt: aiRunStartedAt }
+          ? { ...item, aiProvider: nextAnalysis.aiProvider, aiModel: nextAnalysis.aiModel, aiPrompt: nextAnalysis.aiPrompt, aiProgressLog: startingProgressLog, aiStatus: "분석 중", aiError: "", aiRunRequestId, aiRunSessionId: appRuntimeSessionId, aiRunStartedAt, updatedAt: aiRunStartedAt }
           : item
       )
     );
@@ -5368,6 +5418,18 @@ export function App() {
                   ...analysisAiFields,
                   sourceCompositions: undefined,
                   aiPrompt: nextAnalysis.aiPrompt,
+                  aiProgressLog: [
+                    ...normalizeExamAnalysisProgressLog(item.aiProgressLog),
+                    createExamAnalysisProgressEntry(
+                      nextAnalysis.questionInfoOnly ? "문항정보 AI 응답 반영" : reviewRegenerationOnly ? "분석 재작성 AI 응답 반영" : "시험분석 AI 응답 반영",
+                      [
+                        aiQuestionItems.length ? `문항 초안 ${aiQuestionItems.length}개` : "",
+                        aiQuestionClassifications.length ? `분류 행 ${aiQuestionClassifications.length}개` : "",
+                        result.result.pageImageCount ? `이미지 ${result.result.pageImageCount}페이지 분석` : ""
+                      ].filter(Boolean).join(" · ") || "AI 응답을 화면 필드에 반영했습니다.",
+                      "done"
+                    )
+                  ],
                   questionComposition: activeAiSourceId ? item.questionComposition || questionComposition : questionComposition || analysisAiFields.questionComposition,
                   questionCompositionsBySource: nextCompositionsBySource,
                   questionTargetCountsBySource: nextTargetCountsBySource,
@@ -5412,7 +5474,19 @@ export function App() {
           item.examAnalysisId === analysis.examAnalysisId
             ? item.aiRunRequestId && item.aiRunRequestId !== aiRunRequestId
               ? item
-              : { ...item, aiStatus: "실패", aiError: error.message, aiRunRequestId: "", aiRunSessionId: "", aiRunStartedAt: "", updatedAt: new Date().toISOString() }
+              : {
+                  ...item,
+                  aiProgressLog: [
+                    ...normalizeExamAnalysisProgressLog(item.aiProgressLog),
+                    createExamAnalysisProgressEntry("AI 응답 실패", error.message, "failed")
+                  ],
+                  aiStatus: "실패",
+                  aiError: error.message,
+                  aiRunRequestId: "",
+                  aiRunSessionId: "",
+                  aiRunStartedAt: "",
+                  updatedAt: new Date().toISOString()
+                }
             : item
         )
       );
@@ -11426,6 +11500,8 @@ function ExamAnalysisCenter({
   const analysisWaitMessage = selectedAnalysis?.aiStatus === "분석 중"
     ? getExamAnalysisWaitMessage(analysisElapsedSeconds)
     : "";
+  const analysisProgressLog = normalizeExamAnalysisProgressLog(selectedAnalysis?.aiProgressLog);
+  const analysisProgressVisible = analysisProgressLog.length > 0 || selectedAnalysis?.aiStatus === "분석 중";
   const detailSection = examAnalysisDetailSections.find((section) => section.id === detailSectionId);
   const globalQuestionComposition = normalizeExamQuestionComposition(selectedAnalysis?.questionComposition);
   const questionCompositionsBySource = normalizeExamSourceCompositions(selectedAnalysis?.questionCompositionsBySource);
@@ -11983,10 +12059,28 @@ function ExamAnalysisCenter({
   async function runSourceExamAnalysis() {
     if (!selectedAnalysis || selectedAnalysis.aiStatus === "분석 중") return;
     let pageImages = [];
+    const progressLog = [
+      createExamAnalysisProgressEntry(
+        "원본 확인",
+        renderSourceFileOptions.length
+          ? `업로드 원본 ${renderSourceFileOptions.length}개를 AI 입력으로 준비합니다.`
+          : "업로드 이미지 없이 텍스트/OCR 입력으로 분석을 시작합니다.",
+        "running"
+      )
+    ];
+    update("aiProgressLog", progressLog);
     if (renderSourceFileOptions.length) {
       try {
         update("sourceUploadStatus", "PDF/이미지 페이지를 AI 입력용으로 준비하는 중입니다...");
         pageImages = await buildExamAnalysisPageImages();
+        progressLog.push(createExamAnalysisProgressEntry(
+          "PDF/이미지 준비 완료",
+          pageImages.length
+            ? `${pageImages.length}페이지를 AI가 볼 수 있는 이미지 입력으로 변환했습니다.`
+            : "페이지 이미지는 만들지 못해 텍스트 추출 원문으로 분석합니다.",
+          pageImages.length ? "done" : "info"
+        ));
+        update("aiProgressLog", [...progressLog]);
         update(
           "sourceUploadStatus",
           pageImages.length
@@ -11994,10 +12088,26 @@ function ExamAnalysisCenter({
             : "페이지 이미지는 준비하지 못해 텍스트 추출 원문으로 분석합니다."
         );
       } catch (error) {
+        progressLog.push(createExamAnalysisProgressEntry(
+          "PDF/이미지 준비 실패",
+          `이미지 변환은 실패했지만 텍스트/OCR 원문으로 분석 요청을 이어갑니다. ${error.message}`,
+          "failed"
+        ));
+        update("aiProgressLog", [...progressLog]);
         update("sourceUploadStatus", `페이지 이미지 준비 실패 · 텍스트 추출 원문으로 분석합니다. (${error.message})`);
       }
     }
-    await onRunAnalysis({ ...selectedAnalysis, examPrepContext, pageImages }, aiSettings);
+    progressLog.push(createExamAnalysisProgressEntry(
+      "서버 분석 요청",
+      [
+        `${getAiProviderLabel(aiSettings.examAnalysisProvider ?? selectedAnalysis.aiProvider ?? defaultAiSettings.examAnalysisProvider)} · ${getAiModelLabel(aiSettings.examAnalysisModel ?? selectedAnalysis.aiModel ?? defaultAiSettings.examAnalysisModel)}`,
+        pageImages.length ? `${pageImages.length}페이지 이미지 포함` : "텍스트/OCR 기반",
+        "응답이 올 때까지 요청을 유지합니다."
+      ].join(" · "),
+      "running"
+    ));
+    update("aiProgressLog", [...progressLog]);
+    await onRunAnalysis({ ...selectedAnalysis, examPrepContext, pageImages, aiProgressLog: progressLog }, aiSettings);
   }
 
   async function runAiForActiveQuestionSource(options = {}) {
@@ -13221,6 +13331,33 @@ function ExamAnalysisCenter({
                     {selectedAnalysis.aiStatus === "분석 중" ? "분석 중..." : "AI 분석 시작"}
                   </button>
                 </div>
+                {analysisProgressVisible ? (
+                  <div className="analysisProgressPanel">
+                    <div className="analysisProgressHeader">
+                      <strong>AI 분석 진행</strong>
+                      <span>요청은 끊지 않고 유지하며, 확인 가능한 단계와 서버 대기 상태를 기록합니다.</span>
+                    </div>
+                    <div className="analysisProgressTimeline">
+                      {analysisProgressLog.map((entry) => (
+                        <div className={`analysisProgressItem ${entry.tone}`} key={entry.id}>
+                          <b>{entry.stage}</b>
+                          <span>{entry.detail}</span>
+                          {entry.time ? <small>{formatExamAnalysisProgressTime(entry.time)}</small> : null}
+                        </div>
+                      ))}
+                      {selectedAnalysis.aiStatus === "분석 중" ? (
+                        <div className="analysisProgressItem running live">
+                          <b>AI 제공자 응답 대기</b>
+                          <span>{analysisWaitMessage}</span>
+                          <small>
+                            경과 {formatElapsedSeconds(analysisElapsedSeconds)}
+                            {analysisApiCheck.message ? ` · ${analysisApiCheck.message}` : ""}
+                          </small>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null}
 
             </section>
             ) : null}
