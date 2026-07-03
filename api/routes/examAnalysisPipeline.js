@@ -7,7 +7,15 @@ const databaseSource = "supabase";
 export const examAnalysisSourceBucket = "exam-analysis-pipeline-sources";
 
 function compact(value) {
-  return value === undefined || value === "" ? null : value;
+  if (value === undefined) return undefined;
+  return value === "" ? null : value;
+}
+
+function compactExamAnalysisSubject(value) {
+  if (value === undefined) return undefined;
+  const text = String(value ?? "").trim();
+  if (!text || text === "기하") return null;
+  return text;
 }
 
 function stableJson(value, fallback) {
@@ -26,7 +34,7 @@ function toRunRow(run = {}) {
     title: run.title || undefined,
     school_name: compact(run.schoolName),
     grade: compact(run.grade),
-    subject: compact(run.subject),
+    subject: compactExamAnalysisSubject(run.subject),
     exam_term: compact(run.examTerm),
     exam_cycle: compact(run.examCycle),
     workflow_status: run.workflowStatus || undefined,
@@ -91,6 +99,29 @@ function toSourceRow(source = {}) {
     page_text_ranges: stableJson(source.pageTextRanges, undefined),
     page_image_manifest: stableJson(source.pageImageManifest, undefined),
     error: compact(source.error),
+    updated_at: new Date().toISOString()
+  };
+}
+
+function toSourcePatchRow(source = {}) {
+  return {
+    source_id: source.sourceId,
+    analysis_run_id: source.analysisRunId,
+    source_order: source.sourceOrder === undefined ? undefined : Number(source.sourceOrder),
+    source_type: source.sourceType,
+    bucket_id: source.bucketId,
+    storage_path: source.storagePath === undefined ? undefined : compact(source.storagePath),
+    original_file_name: source.originalFileName === undefined && source.fileName === undefined
+      ? undefined
+      : compact(source.originalFileName || source.fileName),
+    mime_type: source.mimeType === undefined && source.fileType === undefined ? undefined : compact(source.mimeType || source.fileType),
+    size_bytes: source.sizeBytes === undefined ? undefined : Number(source.sizeBytes),
+    page_count: source.pageCount === undefined ? undefined : Number(source.pageCount),
+    extraction_status: source.extractionStatus,
+    extracted_text: source.extractedText === undefined ? undefined : compact(source.extractedText),
+    page_text_ranges: stableJson(source.pageTextRanges, undefined),
+    page_image_manifest: stableJson(source.pageImageManifest, undefined),
+    error: source.error === undefined ? undefined : compact(source.error),
     updated_at: new Date().toISOString()
   };
 }
@@ -260,6 +291,75 @@ export async function updateExamAnalysisRun(analysisRunId, patch = {}) {
     toRunRow({ ...patch, analysisRunId })
   );
   return { source: databaseSource, analysisRun: rows[0] ? fromRunRow(rows[0]) : null };
+}
+
+export async function getExamAnalysisSource(sourceId) {
+  if (!sourceId) throw new Error("sourceId가 필요합니다.");
+  requireServiceRole();
+  const rows = await listRows(
+    "exam_analysis_sources",
+    `select=*&source_id=eq.${encodeURIComponent(sourceId)}&limit=1`,
+    { requireServiceRole: true }
+  );
+  return { source: databaseSource, sourceFile: rows[0] ? fromSourceRow(rows[0]) : null };
+}
+
+export async function updateExamAnalysisSource(sourceId, patch = {}) {
+  if (!sourceId) throw new Error("sourceId가 필요합니다.");
+  requireServiceRole();
+  const rows = await patchRows(
+    "exam_analysis_sources",
+    `source_id=eq.${encodeURIComponent(sourceId)}`,
+    toSourcePatchRow({ ...patch, sourceId })
+  );
+  return { source: databaseSource, sourceFile: rows[0] ? fromSourceRow(rows[0]) : null };
+}
+
+export async function saveExamAnalysisSourceExtraction(sourceId, extraction = {}) {
+  if (!sourceId) throw new Error("sourceId가 필요합니다.");
+  requireServiceRole();
+  const { sourceFile } = await updateExamAnalysisSource(sourceId, {
+    extractionStatus: "extracted",
+    pageCount: extraction.pageCount,
+    extractedText: extraction.extractedText,
+    pageTextRanges: extraction.pageTextRanges ?? [],
+    pageImageManifest: extraction.pageImageManifest ?? [],
+    error: ""
+  });
+  if (!sourceFile?.analysisRunId) {
+    return { source: databaseSource, sourceFile, analysisRun: null };
+  }
+  const runRows = await patchRows(
+    "exam_analysis_runs",
+    `analysis_run_id=eq.${encodeURIComponent(sourceFile.analysisRunId)}`,
+    {
+      workflow_status: "source_extracted",
+      extraction_summary: {
+        sourceId,
+        pageCount: extraction.pageCount ?? null,
+        textBytes: extraction.textBytes ?? null,
+        textLength: extraction.extractedText?.length ?? 0,
+        quality: extraction.quality ?? {},
+        extractedAt: new Date().toISOString()
+      },
+      updated_at: new Date().toISOString()
+    }
+  );
+  await recordExamAnalysisEvent({
+    analysisRunId: sourceFile.analysisRunId,
+    eventType: "source_extracted",
+    message: "PDF 텍스트와 페이지 정보가 추출되었습니다.",
+    payload: {
+      sourceId,
+      pageCount: extraction.pageCount ?? null,
+      textBytes: extraction.textBytes ?? null
+    }
+  });
+  return {
+    source: databaseSource,
+    analysisRun: runRows[0] ? fromRunRow(runRows[0]) : null,
+    sourceFile
+  };
 }
 
 export async function deleteExamAnalysisRun(analysisRunId) {

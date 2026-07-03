@@ -871,6 +871,54 @@ button {
   margin-top: 4px;
 }
 
+.examAnalysisSourceItem small {
+  color: #64748b;
+  display: -webkit-box;
+  font-size: 12px;
+  line-height: 1.45;
+  margin-top: 8px;
+  max-width: 100%;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.examAnalysisSourceActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.examAnalysisExtractionCheck {
+  background: #ffffff;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  margin-top: 10px;
+  padding: 10px;
+}
+
+.examAnalysisExtractionCheck.ok {
+  background: #ecfdf5;
+  border-color: #86efac;
+}
+
+.examAnalysisExtractionCheck.needsReview {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.examAnalysisExtractionCheck strong {
+  color: #17213d;
+  font-size: 13px;
+}
+
+.examAnalysisExtractionCheck span,
+.examAnalysisExtractionCheck small {
+  white-space: normal;
+}
+
 .examAnalysisSteps {
   display: grid;
   gap: 8px;

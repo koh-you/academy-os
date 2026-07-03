@@ -1,4 +1,5 @@
 ﻿import http from "node:http";
+import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import {
   deleteLesson,
   deleteLessonsBefore,
@@ -50,8 +51,13 @@ import {
   deleteExamAnalysisRun,
   examAnalysisSourceBucket,
   getExamAnalysisRun,
+  getExamAnalysisSource,
   listExamAnalysisRuns,
+  recordExamAnalysisEvent,
   recordExamAnalysisSourceUpload,
+  saveExamAnalysisSourceExtraction,
+  updateExamAnalysisRun,
+  updateExamAnalysisSource,
   upsertExamAnalysisRun
 } from "./routes/examAnalysisPipeline.js";
 import {
@@ -75,6 +81,8 @@ const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS ?? "*")
 const dispatchableNotificationStatuses = new Set(["queued", "pending_send"]);
 const readinessCheckStatuses = new Set(["queued", "pending_send", "scheduled"]);
 const attendanceAlimtalkDedupeWindowMs = 2 * 60 * 1000;
+const openAiResponsesUrl = "https://api.openai.com/v1/responses";
+const anthropicMessagesUrl = "https://api.anthropic.com/v1/messages";
 const recentAttendanceAlimtalkSends = new Map();
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -821,6 +829,28 @@ async function createSignedStorageUrl(bucketId, storagePath, expiresIn = 60 * 60
   return `${getSupabaseStorageBaseUrl()}${result.signedURL}`;
 }
 
+async function downloadStorageObject(bucketId, storagePath) {
+  if (!bucketId || !storagePath) throw new Error("다운로드할 파일 경로가 없습니다.");
+  const serviceRoleKey = getSupabaseServiceRoleKey();
+  const response = await fetch(`${getSupabaseStorageBaseUrl()}/object/${bucketId}/${storagePath}`, {
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`
+    }
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    let data = null;
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      data = null;
+    }
+    throw new Error(data?.message || data?.error || response.statusText);
+  }
+  return Buffer.from(await response.arrayBuffer());
+}
+
 async function deleteStorageObject(bucketId, storagePath) {
   if (!bucketId || !storagePath) return false;
   try {
@@ -830,6 +860,437 @@ async function deleteStorageObject(bucketId, storagePath) {
     if (error?.statusCode === 404) return false;
     throw error;
   }
+}
+
+function inferExamAnalysisSubjectFromText(value = "") {
+  const text = String(value || "").replace(/\s+/g, "");
+  const candidates = [
+    [/공통수학1|공수1|공통수학Ⅰ|공통수학I/i, "공통수학1"],
+    [/공통수학2|공수2|공통수학Ⅱ|공통수학II/i, "공통수학2"],
+    [/미적분2|미적분Ⅱ|미적분II/i, "미적분2"],
+    [/미적분1|미적분Ⅰ|미적분I/i, "미적분1"],
+    [/확률과통계|확통/i, "확률과통계"],
+    [/대수/i, "대수"]
+  ];
+  return candidates.find(([pattern]) => pattern.test(text))?.[1] ?? "";
+}
+
+function sanitizeExamAnalysisSubject(value = "") {
+  const text = String(value || "").trim();
+  if (!text || text === "기하") return "";
+  return text;
+}
+
+function detectQuestionNumberCandidates(text = "") {
+  const candidates = new Set();
+  const pattern = /(?:^|\n)\s*(\d{1,3})\s*[.)]/g;
+  let match = pattern.exec(String(text || ""));
+  while (match) {
+    const number = Number(match[1]);
+    if (number > 0 && number <= 200) candidates.add(number);
+    match = pattern.exec(String(text || ""));
+  }
+  return [...candidates].sort((a, b) => a - b);
+}
+
+function hasLongEncodedTokenRun(line = "") {
+  let runLength = 0;
+  for (const token of String(line || "").trim().split(/\s+/).filter(Boolean)) {
+    if (/^[A-Za-z0-9+/=]{1,4}$/.test(token)) {
+      runLength += 1;
+      if (runLength >= 10) return true;
+    } else {
+      runLength = 0;
+    }
+  }
+  return false;
+}
+
+function inspectPdfTextLayerNoise(text = "") {
+  const lines = String(text || "").split(/\n+/).map((line) => line.trim()).filter(Boolean);
+  const encodedLineCount = lines.filter((line) => {
+    const compactText = line.replace(/\s+/g, "");
+    return compactText.length >= 50 && /^[A-Za-z0-9+/=]+$/.test(compactText);
+  }).length;
+  const encodedTokenRunCount = lines.filter(hasLongEncodedTokenRun).length;
+  return {
+    lineCount: lines.length,
+    encodedLineCount,
+    encodedTokenRunCount,
+    suspicious: encodedLineCount > 0 || encodedTokenRunCount > 0
+  };
+}
+
+function compactNumberList(numbers = [], limit = 60) {
+  const values = [...new Set(numbers.map(Number).filter((number) => Number.isFinite(number) && number > 0))]
+    .sort((a, b) => a - b);
+  if (!values.length) return "";
+  const shown = values.slice(0, limit).join(", ");
+  return values.length > limit ? `${shown}, ...` : shown;
+}
+
+function buildQuestionNumberDiagnosticFromText(text = "") {
+  const questionNumberCandidates = detectQuestionNumberCandidates(text);
+  const maxQuestionNumber = questionNumberCandidates.at(-1) ?? null;
+  const missingQuestionNumbers = maxQuestionNumber
+    ? Array.from({ length: maxQuestionNumber }, (_, index) => index + 1)
+        .filter((number) => !questionNumberCandidates.includes(number))
+    : [];
+  return {
+    questionNumberCandidates,
+    maxQuestionNumber,
+    missingQuestionNumbers
+  };
+}
+
+function buildTextExtractionDiagnosticForVision(sourceFile = {}) {
+  const extractedText = String(sourceFile.extractedText || "");
+  const pageRanges = Array.isArray(sourceFile.pageTextRanges) ? sourceFile.pageTextRanges : [];
+  if (!extractedText && !pageRanges.length) {
+    return "1차 텍스트 추출 결과 없음. PDF 원본 페이지를 기준으로 판단한다.";
+  }
+
+  const diagnostic = buildQuestionNumberDiagnosticFromText(extractedText);
+  const textLayerNoise = inspectPdfTextLayerNoise(extractedText);
+  const pageLengths = pageRanges
+    .map((page) => `${page.pageNumber}p:${Number(page.textLength || 0)}`)
+    .join(", ");
+  return [
+    "1차 텍스트 추출 결과는 참고용 후보이며, 최종 판단은 PDF 원본 페이지가 우선이다.",
+    `추출 상태: ${sourceFile.extractionStatus || "unknown"}`,
+    `추출 페이지: ${sourceFile.pageCount || pageRanges.length || "unknown"}`,
+    `추출 텍스트 bytes: ${Buffer.byteLength(extractedText, "utf8")}`,
+    diagnostic.questionNumberCandidates.length
+      ? `문항번호 후보: ${compactNumberList(diagnostic.questionNumberCandidates)}`
+      : "문항번호 후보: 없음",
+    diagnostic.maxQuestionNumber ? `최대 문항번호 후보: ${diagnostic.maxQuestionNumber}` : "",
+    diagnostic.missingQuestionNumbers.length
+      ? `누락 후보: ${compactNumberList(diagnostic.missingQuestionNumbers)}`
+      : "누락 후보: 없음",
+    textLayerNoise.suspicious
+      ? `텍스트 레이어 잡음 감지: encodedLine=${textLayerNoise.encodedLineCount}, encodedTokenRun=${textLayerNoise.encodedTokenRunCount}`
+      : "텍스트 레이어 잡음 감지: 없음",
+    pageLengths ? `페이지별 추출 길이: ${pageLengths}` : ""
+  ].filter(Boolean).join("\n");
+}
+
+function buildExtractionQuality(extraction = {}) {
+  const pageRanges = Array.isArray(extraction.pageTextRanges) ? extraction.pageTextRanges : [];
+  const diagnostic = buildQuestionNumberDiagnosticFromText(extraction.extractedText);
+  const questionNumberCandidates = diagnostic.questionNumberCandidates;
+  const textLayerNoise = inspectPdfTextLayerNoise(extraction.extractedText);
+  const maxQuestionNumber = diagnostic.maxQuestionNumber;
+  const missingQuestionNumbers = diagnostic.missingQuestionNumbers;
+  const emptyPageNumbers = pageRanges
+    .filter((page) => Number(page.textLength || 0) === 0)
+    .map((page) => page.pageNumber);
+  const shortPageNumbers = pageRanges
+    .filter((page) => Number(page.textLength || 0) > 0 && Number(page.textLength || 0) < 80)
+    .map((page) => page.pageNumber);
+  const warnings = [
+    extraction.extractedText ? "" : "추출된 텍스트가 없습니다.",
+    emptyPageNumbers.length ? `빈 텍스트 페이지: ${emptyPageNumbers.join(", ")}` : "",
+    shortPageNumbers.length ? `텍스트가 짧은 페이지: ${shortPageNumbers.join(", ")}` : "",
+    questionNumberCandidates.length ? "" : "문항번호 후보를 찾지 못했습니다.",
+    missingQuestionNumbers.length ? `문항번호 후보 누락: ${missingQuestionNumbers.join(", ")}` : "",
+    textLayerNoise.suspicious ? "PDF 텍스트 레이어 잡음 감지: AI 원본 검증이 필요합니다." : ""
+  ].filter(Boolean);
+  return {
+    status: warnings.length ? "needs_review" : "ok",
+    pageCount: extraction.pageCount ?? pageRanges.length,
+    textBytes: extraction.textBytes ?? Buffer.byteLength(extraction.extractedText || "", "utf8"),
+    textLength: extraction.extractedText?.length ?? 0,
+    questionNumberCandidates,
+    maxQuestionNumber,
+    missingQuestionNumbers,
+    emptyPageNumbers,
+    shortPageNumbers,
+    textLayerNoise,
+    warnings
+  };
+}
+
+function apiEnvValue(name) {
+  const value = process.env[name];
+  return value && !value.startsWith("your_") ? value : "";
+}
+
+function outputTextFromOpenAiResponse(data = {}) {
+  if (data.output_text) return data.output_text;
+  const texts = [];
+  if (Array.isArray(data.output)) {
+    data.output.forEach((item) => {
+      if (typeof item?.content === "string") texts.push(item.content);
+      if (Array.isArray(item?.content)) {
+        item.content.forEach((block) => {
+          const text = block?.text || block?.output_text || block?.content;
+          if (typeof text === "string") texts.push(text);
+        });
+      }
+    });
+  }
+  return texts.join("\n").trim();
+}
+
+function parseLooseJsonObject(text = "") {
+  const raw = String(text || "").trim();
+  try {
+    return JSON.parse(raw);
+  } catch {
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) return {};
+    try {
+      return JSON.parse(match[0]);
+    } catch {
+      return {};
+    }
+  }
+}
+
+function buildPdfVisionCheckPrompt(sourceFile = {}) {
+  return [
+    "역할: 수학 시험지 PDF 원본 검증자",
+    "목표: PDF가 시험분석 파이프라인에 들어가기 전에 모델이 실제 페이지를 읽을 수 있는지 검증한다.",
+    "중요: PDF 내부 텍스트 레이어만 믿지 말고 페이지 이미지까지 본다는 전제로 판단한다.",
+    "아래 1차 텍스트 추출 결과는 후보 체크리스트일 뿐이다. 서로 충돌하면 PDF 원본 페이지를 우선한다.",
+    "",
+    "[1차 텍스트 추출 후보]",
+    buildTextExtractionDiagnosticForVision(sourceFile),
+    "",
+    "본문 문제를 길게 옮기지 말고, 검증에 필요한 짧은 근거만 반환한다.",
+    "과목은 PDF 표지, 파일명, 시험지 상단에 명확히 보이는 경우만 반환한다. 명확하지 않으면 빈 문자열로 둔다.",
+    "반드시 JSON 객체만 반환한다.",
+    "",
+    "필드:",
+    "- readable: boolean",
+    "- page_count: number",
+    "- subject: string",
+    "- question_number_candidates: number[]",
+    "- question_count_candidate: number|null",
+    "- missing_question_numbers: number[]",
+    "- answer_key_detected: boolean",
+    "- first_page_evidence: string",
+    "- last_page_evidence: string",
+    "- warnings: string[]"
+  ].join("\n");
+}
+
+function normalizePdfVisionCheckResult({ provider, model, rawText, parsed = {} }) {
+  return {
+    provider,
+    model,
+    checkedAt: new Date().toISOString(),
+    rawText,
+    readable: Boolean(parsed.readable),
+    pageCount: Number(parsed.page_count || parsed.pageCount || 0) || null,
+    subject: sanitizeExamAnalysisSubject(parsed.subject),
+    questionNumberCandidates: Array.isArray(parsed.question_number_candidates)
+      ? parsed.question_number_candidates.map(Number).filter((number) => Number.isFinite(number) && number > 0)
+      : [],
+    questionCountCandidate: parsed.question_count_candidate === null || parsed.question_count_candidate === undefined
+      ? null
+      : Number(parsed.question_count_candidate),
+    missingQuestionNumbers: Array.isArray(parsed.missing_question_numbers)
+      ? parsed.missing_question_numbers.map(Number).filter((number) => Number.isFinite(number) && number > 0)
+      : [],
+    answerKeyDetected: Boolean(parsed.answer_key_detected),
+    firstPageEvidence: String(parsed.first_page_evidence || "").slice(0, 500),
+    lastPageEvidence: String(parsed.last_page_evidence || "").slice(0, 500),
+    warnings: Array.isArray(parsed.warnings) ? parsed.warnings.map(String).slice(0, 10) : []
+  };
+}
+
+function outputTextFromAnthropicResponse(data = {}) {
+  if (!Array.isArray(data.content)) return "";
+  return data.content
+    .map((block) => {
+      if (typeof block?.text === "string") return block.text;
+      if (typeof block?.content === "string") return block.content;
+      return "";
+    })
+    .filter(Boolean)
+    .join("\n")
+    .trim();
+}
+
+async function runAnthropicPdfVisionCheck(sourceFile, buffer) {
+  const apiKey = apiEnvValue("ANTHROPIC_API_KEY");
+  if (!apiKey) throw new Error("ANTHROPIC_API_KEY 환경변수가 필요합니다.");
+  const model = apiEnvValue("ANTHROPIC_EXAM_PDF_MODEL") || apiEnvValue("ANTHROPIC_MODEL") || "claude-sonnet-4-5";
+  const response = await fetch(anthropicMessagesUrl, {
+    method: "POST",
+    headers: {
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+      "x-api-key": apiKey
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 2000,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "document",
+              source: {
+                type: "base64",
+                media_type: "application/pdf",
+                data: buffer.toString("base64")
+              }
+            },
+            { type: "text", text: buildPdfVisionCheckPrompt(sourceFile) }
+          ]
+        }
+      ]
+    })
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error?.message || "Claude PDF 검증 요청에 실패했습니다.");
+  }
+  const rawText = outputTextFromAnthropicResponse(data);
+  return normalizePdfVisionCheckResult({
+    provider: "anthropic",
+    model,
+    rawText,
+    parsed: parseLooseJsonObject(rawText)
+  });
+}
+
+async function runOpenAiPdfVisionCheck(sourceFile, buffer) {
+  const apiKey = apiEnvValue("OPENAI_API_KEY");
+  if (!apiKey) throw new Error("OPENAI_API_KEY 환경변수가 필요합니다.");
+  const model = apiEnvValue("OPENAI_EXAM_PDF_MODEL") || apiEnvValue("OPENAI_MODEL") || "gpt-4.1-mini";
+
+  const response = await fetch(openAiResponsesUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model,
+      input: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_file",
+              filename: sourceFile.originalFileName || "exam-source.pdf",
+              file_data: `data:application/pdf;base64,${buffer.toString("base64")}`
+            },
+            { type: "input_text", text: buildPdfVisionCheckPrompt(sourceFile) }
+          ]
+        }
+      ],
+      max_output_tokens: 2000
+    })
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error?.message || "OpenAI PDF 검증 요청에 실패했습니다.");
+  }
+  const rawText = outputTextFromOpenAiResponse(data);
+  return normalizePdfVisionCheckResult({
+    provider: "openai",
+    model,
+    rawText,
+    parsed: parseLooseJsonObject(rawText)
+  });
+}
+
+async function runPdfVisionCheck(sourceFile, buffer) {
+  if (apiEnvValue("ANTHROPIC_API_KEY")) {
+    return runAnthropicPdfVisionCheck(sourceFile, buffer);
+  }
+  if (apiEnvValue("OPENAI_API_KEY")) {
+    return runOpenAiPdfVisionCheck(sourceFile, buffer);
+  }
+  throw new Error("ANTHROPIC_API_KEY 또는 OPENAI_API_KEY 환경변수가 필요합니다.");
+}
+
+function normalizePdfPageText(items = []) {
+  const lines = [];
+  let currentLine = [];
+  let currentY = null;
+
+  for (const item of items) {
+    const text = String(item?.str ?? "").replace(/\s+/g, " ").trim();
+    if (!text) continue;
+    const y = Array.isArray(item?.transform) ? Number(item.transform[5]) : null;
+    const startsNewLine = currentLine.length > 0
+      && Number.isFinite(y)
+      && Number.isFinite(currentY)
+      && Math.abs(y - currentY) > 3;
+    if (startsNewLine) {
+      lines.push(currentLine.join(" "));
+      currentLine = [];
+    }
+    currentLine.push(text);
+    if (Number.isFinite(y)) currentY = y;
+  }
+
+  if (currentLine.length > 0) lines.push(currentLine.join(" "));
+  return lines
+    .join("\n")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+async function extractPdfTextPages(buffer) {
+  const pdf = await getDocument({
+    data: new Uint8Array(buffer),
+    disableWorker: true,
+    isEvalSupported: false,
+    useSystemFonts: true
+  }).promise;
+  const pageTextRanges = [];
+  const pageImageManifest = [];
+  const pageCount = pdf.numPages;
+  let extractedText = "";
+
+  try {
+    for (let pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
+      const page = await pdf.getPage(pageNumber);
+      const viewport = page.getViewport({ scale: 1 });
+      const content = await page.getTextContent({
+        disableCombineTextItems: false,
+        normalizeWhitespace: true
+      });
+      const pageText = normalizePdfPageText(content.items);
+      if (extractedText) extractedText += "\n\n";
+      const startOffset = extractedText.length;
+      extractedText += pageText;
+      const endOffset = extractedText.length;
+      pageTextRanges.push({
+        pageNumber,
+        startOffset,
+        endOffset,
+        textLength: pageText.length,
+        itemCount: content.items.length,
+        preview: pageText.slice(0, 160)
+      });
+      pageImageManifest.push({
+        pageNumber,
+        width: Math.round(viewport.width),
+        height: Math.round(viewport.height),
+        rotation: page.rotate ?? 0
+      });
+      page.cleanup();
+    }
+  } finally {
+    await pdf.destroy();
+  }
+
+  return {
+    pageCount,
+    extractedText,
+    pageTextRanges,
+    pageImageManifest,
+    textBytes: Buffer.byteLength(extractedText, "utf8")
+  };
 }
 
 async function uploadExamPostFile(payload) {
@@ -877,6 +1338,9 @@ async function uploadExamAnalysisSourceFile(payload) {
     throw new Error("시험분석 원본은 PDF 파일만 업로드할 수 있습니다.");
   }
   if (buffer.length > 50 * 1024 * 1024) throw new Error("시험분석 PDF는 50MB 이하만 업로드할 수 있습니다.");
+  const fileName = String(payload.fileName || `exam-analysis-${Date.now()}.pdf`).trim();
+  const inferredSubject = inferExamAnalysisSubjectFromText(fileName);
+  const requestedSubject = payload.subject ?? payload.analysisRun?.subject ?? payload.run?.subject;
 
   const runInput = {
     ...(payload.analysisRun ?? payload.run ?? {}),
@@ -885,7 +1349,7 @@ async function uploadExamAnalysisSourceFile(payload) {
     title: payload.title ?? payload.analysisRun?.title ?? payload.run?.title,
     schoolName: payload.schoolName ?? payload.analysisRun?.schoolName ?? payload.run?.schoolName,
     grade: payload.grade ?? payload.analysisRun?.grade ?? payload.run?.grade,
-    subject: payload.subject ?? payload.analysisRun?.subject ?? payload.run?.subject,
+    subject: inferredSubject || sanitizeExamAnalysisSubject(requestedSubject),
     examTerm: payload.examTerm ?? payload.analysisRun?.examTerm ?? payload.run?.examTerm,
     examCycle: payload.examCycle ?? payload.analysisRun?.examCycle ?? payload.run?.examCycle,
     workflowStatus: "source_uploaded",
@@ -901,7 +1365,6 @@ async function uploadExamAnalysisSourceFile(payload) {
     allowedMimeTypes: ["application/pdf"]
   });
 
-  const fileName = String(payload.fileName || `exam-analysis-${Date.now()}.pdf`).trim();
   const storageFileName = getStorageSafeFileName(fileName, mimeType, "exam-analysis");
   const storagePath = [
     "exam-analysis-v2",
@@ -931,6 +1394,101 @@ async function uploadExamAnalysisSourceFile(payload) {
       signedUrl
     }
   };
+}
+
+async function extractExamAnalysisSourceFile(sourceId) {
+  if (!sourceId) throw new Error("sourceId가 필요합니다.");
+  const { sourceFile } = await getExamAnalysisSource(sourceId);
+  if (!sourceFile?.sourceId) throw new Error("PDF 원본 정보를 찾지 못했습니다.");
+  if (sourceFile.mimeType && sourceFile.mimeType !== "application/pdf") {
+    throw new Error("PDF 원본만 텍스트 추출할 수 있습니다.");
+  }
+
+  await updateExamAnalysisSource(sourceId, { extractionStatus: "extracting", error: "" });
+  await recordExamAnalysisEvent({
+    analysisRunId: sourceFile.analysisRunId,
+    eventType: "source_extract_started",
+    message: "PDF 텍스트 추출을 시작했습니다.",
+    payload: { sourceId }
+  });
+
+  try {
+    const buffer = await downloadStorageObject(sourceFile.bucketId || examAnalysisSourceBucket, sourceFile.storagePath);
+    const extraction = await extractPdfTextPages(buffer);
+    extraction.quality = buildExtractionQuality(extraction);
+    const inferredSubject = inferExamAnalysisSubjectFromText(`${sourceFile.originalFileName}\n${extraction.extractedText.slice(0, 2000)}`);
+    const result = await saveExamAnalysisSourceExtraction(sourceId, extraction);
+    if (inferredSubject && sourceFile.analysisRunId) {
+      const runResult = await updateExamAnalysisRun(sourceFile.analysisRunId, { subject: inferredSubject });
+      result.analysisRun = runResult.analysisRun ?? result.analysisRun;
+    }
+    return { ...result, extraction };
+  } catch (error) {
+    await updateExamAnalysisSource(sourceId, { extractionStatus: "failed", error: error.message });
+    await recordExamAnalysisEvent({
+      analysisRunId: sourceFile.analysisRunId,
+      eventType: "source_extract_failed",
+      message: "PDF 텍스트 추출에 실패했습니다.",
+      payload: { sourceId, error: error.message }
+    });
+    throw error;
+  }
+}
+
+async function verifyExamAnalysisSourceFileWithAi(sourceId) {
+  if (!sourceId) throw new Error("sourceId가 필요합니다.");
+  const { sourceFile } = await getExamAnalysisSource(sourceId);
+  if (!sourceFile?.sourceId) throw new Error("PDF 원본 정보를 찾지 못했습니다.");
+  const buffer = await downloadStorageObject(sourceFile.bucketId || examAnalysisSourceBucket, sourceFile.storagePath);
+  await recordExamAnalysisEvent({
+    analysisRunId: sourceFile.analysisRunId,
+    eventType: "source_vision_check_started",
+    message: "PDF 원본 AI 검증을 시작했습니다.",
+    payload: { sourceId }
+  });
+
+  try {
+    const visionCheck = await runPdfVisionCheck(sourceFile, buffer);
+    const detail = await getExamAnalysisRun(sourceFile.analysisRunId);
+    const previousSummary = detail.analysisRun?.extractionSummary ?? {};
+    const runResult = await updateExamAnalysisRun(sourceFile.analysisRunId, {
+      subject: visionCheck.subject || detail.analysisRun?.subject || "",
+      extractionSummary: {
+        ...previousSummary,
+        visionCheck: {
+          sourceId,
+          ...visionCheck
+        }
+      }
+    });
+    await recordExamAnalysisEvent({
+      analysisRunId: sourceFile.analysisRunId,
+      eventType: "source_vision_check_completed",
+      message: "PDF 원본 AI 검증이 완료되었습니다.",
+      payload: {
+        sourceId,
+        provider: visionCheck.provider,
+        model: visionCheck.model,
+        readable: visionCheck.readable,
+        pageCount: visionCheck.pageCount,
+        questionCountCandidate: visionCheck.questionCountCandidate
+      }
+    });
+    return {
+      source: "supabase",
+      analysisRun: runResult.analysisRun,
+      sourceFile,
+      visionCheck
+    };
+  } catch (error) {
+    await recordExamAnalysisEvent({
+      analysisRunId: sourceFile.analysisRunId,
+      eventType: "source_vision_check_failed",
+      message: "PDF 원본 AI 검증에 실패했습니다.",
+      payload: { sourceId, error: error.message }
+    });
+    throw error;
+  }
 }
 
 async function dispatchDueNotificationJobs({
@@ -1305,6 +1863,28 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request, { limitBytes: 68 * 1024 * 1024 });
       const result = await uploadExamAnalysisSourceFile(payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-source-files/extract") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await extractExamAnalysisSourceFile(payload.sourceId);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-source-files/vision-check") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await verifyExamAnalysisSourceFileWithAi(payload.sourceId);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });

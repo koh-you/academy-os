@@ -902,6 +902,74 @@ function formatBytes(sizeBytes) {
   return `${(value / 1024 / 1024).toFixed(1)}MB`;
 }
 
+function detectExamAnalysisQuestionNumberCandidates(text = "") {
+  const candidates = new Set();
+  const pattern = /(?:^|\n)\s*(\d{1,3})\s*[.)]/g;
+  let match = pattern.exec(String(text || ""));
+  while (match) {
+    const number = Number(match[1]);
+    if (number > 0 && number <= 200) candidates.add(number);
+    match = pattern.exec(String(text || ""));
+  }
+  return [...candidates].sort((a, b) => a - b);
+}
+
+function buildExamAnalysisExtractionCheck(file = {}) {
+  const pageRanges = Array.isArray(file.pageTextRanges) ? file.pageTextRanges : [];
+  const questionNumbers = detectExamAnalysisQuestionNumberCandidates(file.extractedText);
+  const maxQuestionNumber = questionNumbers.at(-1) ?? null;
+  const missingQuestionNumbers = maxQuestionNumber
+    ? Array.from({ length: maxQuestionNumber }, (_, index) => index + 1).filter((number) => !questionNumbers.includes(number))
+    : [];
+  const emptyPageNumbers = pageRanges
+    .filter((page) => Number(page.textLength || 0) === 0)
+    .map((page) => page.pageNumber);
+  const shortPageNumbers = pageRanges
+    .filter((page) => Number(page.textLength || 0) > 0 && Number(page.textLength || 0) < 80)
+    .map((page) => page.pageNumber);
+  const textBytes = file.extractedText ? new Blob([file.extractedText]).size : 0;
+  const warnings = [
+    file.extractionStatus === "extracted" && !file.extractedText ? "추출된 텍스트가 없습니다." : "",
+    emptyPageNumbers.length ? `빈 페이지 ${emptyPageNumbers.join(", ")}` : "",
+    shortPageNumbers.length ? `짧은 페이지 ${shortPageNumbers.join(", ")}` : "",
+    file.extractionStatus === "extracted" && questionNumbers.length === 0 ? "문항번호 후보 없음" : "",
+    missingQuestionNumbers.length ? `누락 후보 ${missingQuestionNumbers.join(", ")}` : ""
+  ].filter(Boolean);
+  return {
+    textBytes,
+    pageCount: file.pageCount || pageRanges.length || 0,
+    questionNumbers,
+    maxQuestionNumber,
+    missingQuestionNumbers,
+    emptyPageNumbers,
+    shortPageNumbers,
+    warnings,
+    status: warnings.length ? "needsReview" : "ok"
+  };
+}
+
+function formatExamAnalysisPageTextLengthSummary(pageRanges = []) {
+  const ranges = Array.isArray(pageRanges) ? pageRanges : [];
+  if (!ranges.length) return "";
+  const shown = ranges
+    .slice(0, 8)
+    .map((page) => `${page.pageNumber}p ${Number(page.textLength || 0).toLocaleString("ko-KR")}자`)
+    .join(" · ");
+  return ranges.length > 8 ? `${shown} · ...` : shown;
+}
+
+function getExamAnalysisVisionCheck(run = {}, sourceId = "") {
+  const check = run?.extractionSummary?.visionCheck;
+  if (!check || check.sourceId !== sourceId) return null;
+  return check;
+}
+
+function getExamAnalysisExtractionSummary(run = {}, sourceId = "") {
+  const summary = run?.extractionSummary;
+  if (!summary || summary.sourceId !== sourceId) return null;
+  return summary;
+}
+
 function workflowStatusLabel(status = "") {
   const labels = {
     draft: "초안",
@@ -939,6 +1007,28 @@ function getExamAnalysisRunTitle(run = {}) {
 const examAnalysisSchools = ["상계고", "자운고", "창동고", "용화여고", "정의여고"];
 const examAnalysisGrades = ["고1", "고2", "고3"];
 const examAnalysisExamCycles = ["1학기 중간", "1학기 기말", "2학기 중간", "2학기 기말"];
+const defaultExamAnalysisSubject = "";
+
+function inferExamAnalysisSubject(value = "") {
+  const text = String(value || "").replace(/\s+/g, "");
+  const candidates = [
+    [/공통수학1|공수1|공통수학Ⅰ|공통수학I/i, "공통수학1"],
+    [/공통수학2|공수2|공통수학Ⅱ|공통수학II/i, "공통수학2"],
+    [/미적분2|미적분Ⅱ|미적분II/i, "미적분2"],
+    [/미적분1|미적분Ⅰ|미적분I/i, "미적분1"],
+    [/확률과통계|확통/i, "확률과통계"],
+    [/대수/i, "대수"]
+  ];
+  return candidates.find(([pattern]) => pattern.test(text))?.[1] ?? "";
+}
+
+function getDefaultExamAnalysisSubject(row = {}) {
+  const detailSubject = inferExamAnalysisSubject(`${row.scope ?? ""} ${row.subTextbook ?? ""} ${row.title ?? ""}`);
+  if (detailSubject) return detailSubject;
+  const rawSubject = String(row.subject ?? "").trim();
+  if (rawSubject && rawSubject !== "기하") return rawSubject;
+  return defaultExamAnalysisSubject;
+}
 
 function normalizeExamAnalysisSchoolName(value) {
   const text = String(value || "").trim();
@@ -1005,6 +1095,24 @@ function deleteExamAnalysisRunRequest(analysisRunId) {
       if (!response.ok || !result.ok) throw new Error(result.error || "시험분석 삭제 실패");
       return result;
     });
+}
+
+function extractExamAnalysisSourceRequest(sourceId) {
+  return postJsonWithTimeout(
+    "/api/exam-analysis-source-files/extract",
+    { sourceId },
+    90000,
+    "PDF 텍스트 추출이 지연되고 있습니다."
+  );
+}
+
+function verifyExamAnalysisSourceWithAiRequest(sourceId) {
+  return postJsonWithTimeout(
+    "/api/exam-analysis-source-files/vision-check",
+    { sourceId },
+    120000,
+    "PDF 원본 AI 검증이 지연되고 있습니다."
+  );
 }
 
 function postSchoolEvent(schoolEvent) {
@@ -6278,7 +6386,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       title: buildExamAnalysisTitle({ schoolName, grade, examCycle }),
       schoolName,
       grade,
-      subject: row.subject ?? "수학",
+      subject: getDefaultExamAnalysisSubject(row),
       examTerm: row.examTerm ?? "",
       examCycle
     };
@@ -6288,6 +6396,10 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const [uploadStatus, setUploadStatus] = useState({ state: "idle", message: "" });
   const [deleteStatus, setDeleteStatus] = useState({ state: "idle", message: "" });
   const [deletingRunId, setDeletingRunId] = useState("");
+  const [extractStatus, setExtractStatus] = useState({ state: "idle", message: "" });
+  const [extractingSourceId, setExtractingSourceId] = useState("");
+  const [visionStatus, setVisionStatus] = useState({ state: "idle", message: "" });
+  const [checkingSourceId, setCheckingSourceId] = useState("");
 
   const selectedExamPrepRow = useMemo(
     () => examPrepRows.find((row) => row.examPrepId === selectedExamPrepId) ?? null,
@@ -6384,7 +6496,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       title: buildExamAnalysisTitle({ schoolName, grade, examCycle }),
       schoolName,
       grade,
-      subject: row.subject ?? "수학",
+      subject: getDefaultExamAnalysisSubject(row),
       examTerm: row.examTerm ?? "",
       examCycle
     });
@@ -6404,7 +6516,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       title: run.title || buildExamAnalysisTitle({ schoolName, grade, examCycle }),
       schoolName,
       grade,
-      subject: run.subject ?? "수학",
+      subject: getDefaultExamAnalysisSubject(run),
       examTerm: run.examTerm ?? "",
       examCycle
     });
@@ -6496,7 +6608,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       title: buildExamAnalysisTitle({ schoolName: "", grade: nextGrade, examCycle: nextExamCycle }),
       schoolName: "",
       grade: nextGrade,
-      subject: "수학",
+      subject: defaultExamAnalysisSubject,
       examTerm: "",
       examCycle: nextExamCycle
     });
@@ -6520,7 +6632,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       schoolName: targetSchoolName || current.schoolName,
       grade: targetGrade || current.grade,
       examCycle: targetExamCycle || current.examCycle,
-      subject: current.subject || "수학"
+      subject: current.subject || defaultExamAnalysisSubject
     }));
   }
 
@@ -6531,7 +6643,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       title: draft.title.trim() || "새 시험분석",
       schoolName: draft.schoolName.trim(),
       grade: draft.grade.trim(),
-      subject: draft.subject.trim() || "수학",
+      subject: draft.subject.trim() || defaultExamAnalysisSubject,
       examTerm: draft.examTerm.trim(),
       examCycle: draft.examCycle.trim()
     };
@@ -6638,6 +6750,54 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     }
   }
 
+  async function extractSourceText(sourceFile) {
+    if (!sourceFile?.sourceId) return;
+    setExtractingSourceId(sourceFile.sourceId);
+    setExtractStatus({ state: "saving", message: "시험분석 PDF · 텍스트 추출 중" });
+    try {
+      const result = await extractExamAnalysisSourceRequest(sourceFile.sourceId);
+      const textBytes = result.extraction?.textBytes ?? result.sourceFile?.extractedText?.length ?? 0;
+      setExtractStatus({
+        state: "success",
+        message: `시험분석 PDF · 텍스트 추출 완료 · ${result.sourceFile?.pageCount || result.extraction?.pageCount || 0}쪽 · ${formatBytes(textBytes)}`
+      });
+      if (result.analysisRun?.analysisRunId) {
+        await loadRuns(result.analysisRun.analysisRunId);
+      } else if (selectedRunId) {
+        await loadRunDetail(selectedRunId);
+      }
+    } catch (error) {
+      setExtractStatus({ state: "failed", message: `시험분석 PDF · 텍스트 추출 실패 · ${error.message}` });
+      if (selectedRunId) await loadRunDetail(selectedRunId);
+    } finally {
+      setExtractingSourceId("");
+    }
+  }
+
+  async function verifySourceWithAi(sourceFile) {
+    if (!sourceFile?.sourceId) return;
+    setCheckingSourceId(sourceFile.sourceId);
+    setVisionStatus({ state: "saving", message: "시험분석 PDF · AI 검증 중" });
+    try {
+      const result = await verifyExamAnalysisSourceWithAiRequest(sourceFile.sourceId);
+      const questionCount = result.visionCheck?.questionCountCandidate || result.visionCheck?.questionNumberCandidates?.length || 0;
+      const providerLabel = result.visionCheck?.provider === "anthropic" ? "Claude" : result.visionCheck?.provider === "openai" ? "OpenAI" : "AI";
+      setVisionStatus({
+        state: "success",
+        message: `시험분석 PDF · ${providerLabel} 검증 완료 · ${result.visionCheck?.pageCount || 0}쪽 · 문항 후보 ${questionCount}개`
+      });
+      if (result.analysisRun?.analysisRunId) {
+        await loadRuns(result.analysisRun.analysisRunId);
+      } else if (selectedRunId) {
+        await loadRunDetail(selectedRunId);
+      }
+    } catch (error) {
+      setVisionStatus({ state: "failed", message: `시험분석 PDF · AI 검증 실패 · ${error.message}` });
+    } finally {
+      setCheckingSourceId("");
+    }
+  }
+
   return (
     <section className="examAnalysisPipelinePage">
       <div className="pageTop">
@@ -6652,7 +6812,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       </div>
 
       <div className="examAnalysisStatusBar">
-        {[loadStatus, saveStatus, uploadStatus, deleteStatus].filter((item) => item.message).map((item, index) => (
+        {[loadStatus, saveStatus, uploadStatus, extractStatus, visionStatus, deleteStatus].filter((item) => item.message).map((item, index) => (
           <span className={`saveStateBadge ${item.state}`} key={`${item.message}-${index}`}>{item.message}</span>
         ))}
       </div>
@@ -6760,7 +6920,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                     type="button"
                   >
                     <strong>{getExamAnalysisRunTitle(run)}</strong>
-                    <span>{[run.createdAt?.slice(0, 4), workflowStatusLabel(run.workflowStatus), run.subject || "수학"].filter(Boolean).join(" · ")}</span>
+                    <span>{[run.createdAt?.slice(0, 4), workflowStatusLabel(run.workflowStatus), getDefaultExamAnalysisSubject(run)].filter(Boolean).join(" · ")}</span>
                   </button>
                 ))}
               </div>
@@ -6846,22 +7006,80 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
             <div className="examAnalysisSourceList">
               {sourceFiles.length === 0 ? (
                 <div className="emptyState compact">PDF 원본 없음</div>
-              ) : sourceFiles.map((file) => (
-                <div className="examAnalysisSourceItem" key={file.sourceId}>
-                  <div>
-                    <strong>{file.originalFileName || "PDF 원본"}</strong>
-                    <span>
-                      {examAnalysisSourceStatusLabel(file.extractionStatus)}
-                      {" · "}파일 {formatBytes(file.sizeBytes)}
-                      {" · "}{file.extractedText ? `추출 ${formatBytes(new Blob([file.extractedText]).size)}` : "텍스트 추출 전"}
-                      {" · "}{file.createdAt ? file.createdAt.slice(0, 10) : "-"}
-                    </span>
+              ) : sourceFiles.map((file) => {
+                const extractionCheck = buildExamAnalysisExtractionCheck(file);
+                const extractionSummary = getExamAnalysisExtractionSummary(activeRun, file.sourceId);
+                const extractionWarnings = extractionSummary?.quality?.warnings?.length
+                  ? extractionSummary.quality.warnings
+                  : extractionCheck.warnings;
+                const extractionStatusClass = extractionSummary?.quality?.status === "ok"
+                  ? "ok"
+                  : extractionWarnings.length
+                    ? "needsReview"
+                    : extractionCheck.status;
+                const visionCheck = getExamAnalysisVisionCheck(activeRun, file.sourceId);
+                return (
+                  <div className="examAnalysisSourceItem" key={file.sourceId}>
+                    <div>
+                      <strong>{file.originalFileName || "PDF 원본"}</strong>
+                      <span>
+                        {examAnalysisSourceStatusLabel(file.extractionStatus)}
+                        {" · "}파일 {formatBytes(file.sizeBytes)}
+                        {" · "}{file.extractedText ? `추출 ${formatBytes(extractionCheck.textBytes)}` : "텍스트 추출 전"}
+                        {file.pageCount ? ` · ${file.pageCount}쪽` : ""}
+                        {" · "}{file.createdAt ? file.createdAt.slice(0, 10) : "-"}
+                      </span>
+                      {file.extractionStatus === "extracted" ? (
+                        <div className={`examAnalysisExtractionCheck ${extractionStatusClass}`}>
+                          <strong>텍스트 검증</strong>
+                          <span>
+                            {extractionCheck.pageCount}쪽 · {formatBytes(extractionCheck.textBytes)}
+                            {extractionCheck.maxQuestionNumber
+                              ? ` · 문항번호 후보 1~${extractionCheck.maxQuestionNumber} (${extractionCheck.questionNumbers.length}개)`
+                              : " · 문항번호 후보 없음"}
+                          </span>
+                          {extractionWarnings.length ? <small>{extractionWarnings.join(" · ")}</small> : <small>빈 페이지와 번호 누락 후보 없음</small>}
+                          {formatExamAnalysisPageTextLengthSummary(file.pageTextRanges) ? (
+                            <small>{formatExamAnalysisPageTextLengthSummary(file.pageTextRanges)}</small>
+                          ) : null}
+                        </div>
+                      ) : null}
+                      {visionCheck ? (
+                        <div className={`examAnalysisExtractionCheck ${visionCheck.readable ? "ok" : "needsReview"}`}>
+                          <strong>AI 원본 검증</strong>
+                          <span>
+                            {visionCheck.pageCount || "-"}쪽 · 문항 후보 {visionCheck.questionCountCandidate || visionCheck.questionNumberCandidates?.length || 0}개
+                            {visionCheck.answerKeyDetected ? " · 빠른 정답 감지" : ""}
+                            {visionCheck.provider ? ` · ${visionCheck.provider}` : ""}
+                          </span>
+                          {visionCheck.warnings?.length ? <small>{visionCheck.warnings.join(" · ")}</small> : <small>{visionCheck.firstPageEvidence || "원본 PDF를 페이지 이미지 포함으로 검증했습니다."}</small>}
+                        </div>
+                      ) : null}
+                    </div>
+                    <div className="examAnalysisSourceActions">
+                      <button
+                        className="secondaryButton compact"
+                        disabled={extractingSourceId === file.sourceId}
+                        onClick={() => extractSourceText(file)}
+                        type="button"
+                      >
+                        {extractingSourceId === file.sourceId ? "추출 중" : file.extractionStatus === "extracted" ? "재추출" : "텍스트 추출"}
+                      </button>
+                      <button
+                        className="secondaryButton compact"
+                        disabled={checkingSourceId === file.sourceId}
+                        onClick={() => verifySourceWithAi(file)}
+                        type="button"
+                      >
+                        {checkingSourceId === file.sourceId ? "검증 중" : "AI 검증(과금)"}
+                      </button>
+                      {getExamAnalysisSourceOpenUrl(file) ? (
+                        <a className="secondaryButton linkButton" href={getExamAnalysisSourceOpenUrl(file)} rel="noreferrer" target="_blank">열기</a>
+                      ) : null}
+                    </div>
                   </div>
-                  {getExamAnalysisSourceOpenUrl(file) ? (
-                    <a className="secondaryButton linkButton" href={getExamAnalysisSourceOpenUrl(file)} rel="noreferrer" target="_blank">열기</a>
-                  ) : null}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

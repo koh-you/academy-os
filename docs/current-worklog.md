@@ -10,6 +10,20 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P0. 시험분석 v2 PDF 텍스트 후보 추출과 Claude 원본 검증
+
+- 상태: 완료
+- 사용자 질문: PDF 텍스트 추출이 안 되는 것인지, 프리뷰에만 인코딩 잡음이 보이는 것인지 확인이 필요했다. 이전 문항별 크롭/비전 분석은 비용이 높고 효율이 낮았으므로, Claude 비전 체크가 같은 방식인지도 검토했다.
+- 검증 결론: PDF 텍스트 추출은 된다. 실제 운영 source `[자운고] 2026 1-1 기말 공통수학1.pdf`에서 `5쪽`, `52,792 bytes`, 문항번호 후보 `1~24`를 추출했다. 다만 `page_text_ranges.preview`는 `extracted_text`의 앞부분과 완전히 같은 문자열이므로, 프리뷰만 깨진 것이 아니라 전체 추출 텍스트 자체에 PDF 텍스트 레이어 잡음이 섞여 있다.
+- 이번 작업 결과: `pdfjs-dist` 기반 `POST /api/exam-analysis-source-files/extract`를 추가해 PDF source의 `extracted_text`, `page_text_ranges`, `page_image_manifest`, `extraction_status`를 저장한다. 텍스트 원문을 정제 필터로 덕지덕지 고치지 않고, 문항번호 후보/누락 후보/페이지별 길이/텍스트 레이어 잡음만 품질 지표로 산출한다.
+- 화면 기준: PDF 카드에는 원문 프리뷰를 노출하지 않고 `문항번호 후보 1~N`, 누락 후보, 페이지별 추출 길이, `PDF 텍스트 레이어 잡음 감지: AI 원본 검증이 필요합니다.` 같은 검증 지표만 보여준다.
+- Claude 원본 검증: `POST /api/exam-analysis-source-files/vision-check`를 추가했다. Anthropic API key가 있으면 Claude Messages API의 PDF `document` 입력을 먼저 사용하고, Anthropic 키가 없을 때만 OpenAI Responses PDF 입력을 예비 경로로 둔다. 이 검증은 문항별 크롭/유형분류가 아니라 `읽을 수 있는가`, `쪽수`, `과목`, `문항번호 후보`, `문항 수 후보`, `누락 번호`, `빠른 정답 감지`만 확인하는 얕은 게이트다.
+- 실제 Claude 검증: 같은 운영 PDF를 Anthropic `claude-sonnet-4-5`로 확인했고 `readable=true`, `pageCount=5`, `subject=공통수학1`, `questionCountCandidate=24`, `questionNumberCandidates=1~24`, `missingQuestionNumbers=[]`, `answerKeyDetected=true`를 받았다.
+- 비용/운영 원칙: Claude/OpenAI PDF 원본 검증은 API 과금 대상이므로 자동 호출하지 않고 버튼으로 수동 실행한다. 이전처럼 문항별 크롭/문항별 비전 분석으로 바로 확장하지 않는다. 다음 단계는 문항 수 후보를 선생님 확인 화면으로 넘기고, 확인된 N 기준으로 1~N 빈 행을 고정 생성하는 것이다. 그 다음 AI 행 채움 전에 각 문항이 PDF 어느 페이지/영역에서 시작하고 끝나는지 찾는 `문항 경계 탐지` 단계를 별도로 둔다. 문항 경계 탐지는 문제 풀이/유형분류가 아니라 page/대략 위치/다음 문항 전까지의 범위만 JSON으로 받는 얕은 단계로 설계한다.
+- 데이터 보정: 시험분석 v2 저장 경계에서 과목 `기하`는 빈 값으로 정리한다. 파일명/원본 검증이 `공통수학1`을 명확히 말하면 그 값을 사용한다. 기존 운영 run은 `자운고 고1 1학기 기말고사 시험분석`, 과목 `공통수학1`로 복구/확인했다.
+- 저장 주의: 새 SQL edit은 필요 없다. 기존 `supabase/20260703_exam_analysis_pipeline.sql`의 v2 테이블과 `exam-analysis-pipeline-sources` bucket을 사용한다.
+- 검증: `node --check api/routes/examAnalysisPipeline.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 231, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P0. 시험분석 v2 PDF 저장 확인과 삭제/학교추가 보강
 
 - 상태: 완료
