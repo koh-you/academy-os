@@ -7,6 +7,8 @@
 - SQL 적용 기본값: DB 스키마 변경이 필요하면 `supabase/<file>.sql` 파일을 만들고, 적용이 필요한 SQL 파일명과 목적을 작업 결과에 명확히 남긴다. 운영 Supabase SQL edit 적용은 사용자가 직접 한다.
 - SQL 자동화 철회: SQL edit 자동화는 사용하지 않는다. 이전에 로컬에 저장했던 SQL 자동 적용 자격은 제거했다. 다음 세션에서 SQL 자동화를 위해 DB URL, DB password, access token을 다시 묻지 않는다.
 - 검수 기본값: 운영 흐름에 영향이 있으면 `npm run test:production`과 `npm run build`를 실행하고, 통과 후 커밋/푸시한다. 비밀값과 `.env`는 절대 커밋하지 않는다.
+- 자동 초안 편집 원칙: AI 초안, 템플릿 초안, DB/다른 필드 매핑값은 최초 seed 또는 명시적 재생성에서만 편집 상태로 들어와야 한다. 사용자가 입력을 시작한 뒤에는 로컬 draft/저장된 사용자 편집본이 원본이며, 렌더마다 파생값을 다시 계산해 textarea/input 값을 덮어쓰는 구조는 금지한다.
+- 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 

@@ -13,6 +13,8 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 
 
 작업을 완료할 때마다 최종 답변에는 반드시 `사람 검토 절차`를 포함해 주세요. 최신 커밋/검토 화면, 사용할 테스트 데이터, 사용자가 누를 순서, 기대 결과, 저장 원천, 실패 시 중단 조건, 다음 단계 통과 기준을 순서대로 적어야 합니다.
 
+중요: AI 초안, 템플릿 초안, DB/다른 필드 매핑값은 최초 seed 또는 명시적 재생성에서만 편집 상태로 들어오게 하세요. 사용자가 textarea/input을 한 번이라도 수정한 뒤에는 로컬 draft/저장된 사용자 편집본이 원본입니다. 렌더마다 파생값을 다시 계산해 `value`를 덮어쓰는 구조, 엔터/커서 위치를 깨뜨리는 구조, AI/템플릿 초안이 사용자 편집본을 새로고침 후 다시 덮는 구조는 금지입니다.
+
 시험분석 탭, 시험분석 API, PDF 처리, Supabase v2 테이블, 분석 저장/삭제를 건드린 작업은 시험분석 탭 전용 검토 절차도 포함해야 합니다. 최소한 `학교 -> 학년 -> 고사 -> 분석` 카드 확인, PDF 업로드, 텍스트 후보 추출, 비용 허용 시 AI 원본 검증, Supabase/Storage 저장 확인, 새로고침 유지, 테스트 분석 삭제 확인, 중단 조건을 순서대로 안내하세요.
 
 현재 새 v2 구조의 SQL, 백엔드 run/PDF 업로드/삭제 API, 첫 UI(학교/학년/고사/분석 카드형 목록, 기본정보 저장, PDF 업로드, 상태 확인), PDF 텍스트 후보 추출, Claude 우선 원본 검증, 문항 수 선생님 확인, 1~N 빈 행 생성, 문항 경계 탐지 1단계, AI 행 채움 1단계, AI 결과 검수/선생님 확정 UI까지 들어가 있습니다. 다음 작은 단계는 재확인/누락 문항만 다시 요청하는 누락 검수/재요청입니다.
@@ -65,6 +67,7 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 
 - `POST /api/exam-analysis-runs/save-question-reviews`는 선생님이 수정/확정한 검수 결과를 저장한다. 저장값은 기존 `exam_analysis_questions.teacher_fields`, `final_fields`, `teacher_override`, `manual_edit_count`, `teacher_edited_at`, `confirmed_at`, `row_status`를 사용하므로 새 SQL edit은 필요 없다.
 - 화면에는 `AI 결과 검수` 패널이 있다. 각 문항 카드에서 단원/주유형/보조유형/난이도/검수 메모를 수정하고 `확정` 체크를 할 수 있다. `모두 확정`, `검수 저장` 버튼과 `시험분석 · 검수 저장 중/완료/실패` 상태가 같은 패널 안에 표시된다.
 - 선생님이 입력한 값은 이후 화면/새로고침의 기준이다. AI 초안이나 자동 매핑이 검수본을 다시 덮어쓰면 안 된다. 모든 문항이 확정되면 `workflow_status=completed`, 일부만 확정되면 `workflow_status=teacher_review`가 된다.
+- 자동 초안 편집 UI의 기본 구조는 `seed -> local draft -> save -> persisted user/teacher fields`다. JSX 렌더 본문에서 `value={deriveDraft(...)}`처럼 파생값을 직접 연결해 사용자의 타이핑/엔터/커서 위치를 방해하지 않는다.
 - 실제 운영 PDF `[자운고] 2026 1-1 기말 공통수학1.pdf` 검증 결과: 텍스트 추출은 `5쪽`, `52,792 bytes`, 문항번호 후보 `1~24`가 잡혔지만 PDF 텍스트 레이어 잡음이 감지됐다. Claude `claude-sonnet-4-5` 원본 검증은 `readable=true`, `pageCount=5`, `subject=공통수학1`, `questionCountCandidate=24`, 누락 번호 없음, 빠른 정답 감지로 성공했다.
 - 시험분석 v2 저장 경계에서 과목 `기하`는 빈 값으로 정리한다. 파일명/원본 검증이 `공통수학1`을 명확히 말하면 그 값을 사용한다.
 - 아직 누락 검수/재요청은 붙이지 않았다. AI 초안은 `ai_fields`일 뿐이며, 선생님 검수 저장 후에는 `teacher_fields`/`final_fields`를 기준으로 다음 단계를 진행한다.
