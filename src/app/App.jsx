@@ -86,6 +86,7 @@ import {
   normalizeExamAnalysisForDisplay as normalizeExamAnalysisForDisplayBase,
   normalizeExamSourceCompositions,
   normalizeExamSourceTargetCounts,
+  removeFailedAttachmentBlocks,
   repairDisconnectedExamAnalysisRuns as repairDisconnectedExamAnalysisRunsBase
 } from "../domains/exams/analysisState.js";
 import {

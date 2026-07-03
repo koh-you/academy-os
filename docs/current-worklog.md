@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P1. 시험분석 원본 업로드 ReferenceError 수정
+
+- 상태: 완료
+- 사용자 제보: 시험분석 원본 입력에서 파일 업로드 후 `업로드 실패 · removeFailedAttachmentBlocks is not defined` 오류가 표시된다.
+- 원인: 실패 첨부 블록 제거 함수는 `analysisState.js`에 export되어 있었지만, 원본 업로드 처리 함수 `attachSourceFiles`가 있는 `App.jsx` import 목록에 빠져 있었다. 파일 업로드 후 해당 함수 호출 시점에만 런타임 ReferenceError가 발생했다.
+- 이번 작업 결과: `removeFailedAttachmentBlocks`를 `App.jsx`에 명시 import해 원본 업로드 후 기존 `[첨부 실패]` 블록을 정리하고 새 추출 노트를 붙이는 흐름이 정상 실행되도록 했다.
+- 회귀 방지: 운영 시나리오 테스트 35b-2가 함수 정의뿐 아니라 `App.jsx` import와 `attachSourceFiles` 호출부까지 확인하도록 보강했다.
+- 저장 주의: 프론트 런타임 연결 수정만 변경했다. 새 Supabase SQL edit 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 243, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P1. 시험분석 학년 추가 시 학교 선택 흔들림 수정
 
 - 상태: 완료
