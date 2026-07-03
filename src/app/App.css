@@ -9344,6 +9344,33 @@ textarea.profileEditInput {
   font-weight: 900;
 }
 
+.promptMappingCard {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.promptMappingCard div {
+  display: grid;
+  gap: 4px;
+}
+
+.promptMappingCard strong {
+  color: #17213d;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.promptMappingCard span {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
 .promptEditor textarea {
   background: #ffffff;
   font-family: inherit;

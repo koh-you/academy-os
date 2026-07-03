@@ -2208,15 +2208,6 @@ const defaultAiPrompts = {
     "- 최종 문장만 반환한다."
   ].join("\n"),
   examAnalysis: createDefaultExamAnalysisPrompt(),
-  variantProblem: [
-    "역할: 으뜸수학 고태영T의 내신 수학 변형문항 제작 보조",
-    "목표: 원본 문항의 핵심 개념과 풀이 구조를 유지하면서 조건, 숫자, 표현, 난도를 조절한 변형문항을 만든다.",
-    "작성 원칙:",
-    "- 원본의 핵심 학습 목표를 유지한다.",
-    "- 학교 내신에서 나올 법한 조건 변화와 함정을 반영한다.",
-    "- 정답과 해설은 선택한 형식에 맞춰 제공한다.",
-    "- 지나치게 새로운 개념을 추가하지 않는다."
-  ].join("\n"),
   noticeMessage: [
     "역할: 으뜸수학 고태영T의 알림톡 공지문 편집자",
     "목표: 강사가 입력한 교재/보강/공지 초안을 실제 발송 가능한 짧고 명료한 알림톡 문장으로 다듬는다.",
@@ -2236,8 +2227,6 @@ const defaultAiSettings = {
   examAnalysisModel: "claude-opus-4-8",
   questionClassificationProvider: "anthropic",
   questionClassificationModel: "claude-sonnet-4-5",
-  variantProvider: "auto",
-  variantModel: "server-default",
   prompts: defaultAiPrompts
 };
 
@@ -2274,9 +2263,19 @@ function isLegacyDefaultExamAnalysisPrompt(prompt = "") {
   );
 }
 
+function hasBrokenPromptEncoding(prompt = "") {
+  const text = String(prompt ?? "");
+  const replacementCount = (text.match(/\uFFFD/g) || []).length;
+  return replacementCount >= 6 || /����|��/.test(text);
+}
+
 function normalizeAiPrompts(prompts = {}) {
-  const nextPrompts = { ...defaultAiPrompts, ...(prompts ?? {}) };
-  if (isLegacyDefaultExamAnalysisPrompt(nextPrompts.examAnalysis)) {
+  const sourcePrompts = prompts && typeof prompts === "object" ? prompts : {};
+  const nextPrompts = Object.keys(defaultAiPrompts).reduce((normalized, promptKey) => ({
+    ...normalized,
+    [promptKey]: sourcePrompts[promptKey] ?? defaultAiPrompts[promptKey]
+  }), {});
+  if (isLegacyDefaultExamAnalysisPrompt(nextPrompts.examAnalysis) || hasBrokenPromptEncoding(nextPrompts.examAnalysis)) {
     nextPrompts.examAnalysis = defaultAiPrompts.examAnalysis;
   }
   return nextPrompts;
@@ -10957,47 +10956,58 @@ function SettingsCenter({
       },
       providerKey: "questionClassificationProvider",
       title: "문항분류·누락보정 AI"
-    },
-    {
-      description: "원문 문제를 난도와 조건에 맞춰 변형하는 작업에 사용합니다.",
-      modelKey: "variantModel",
-      providerKey: "variantProvider",
-      title: "AI 변형문항"
     }
   ];
   const promptRows = [
     {
+      appendedData: "학생/학부모 대상, 수업일, 출결, 과제 상태, 강의 교재/내용, 강사 원문",
+      callSite: "수업일지 학생별 코멘트의 AI 수정 버튼",
       description: "학부모/학생 알림톡 코멘트를 다듬을 때 사용합니다.",
+      endpoint: "/api/ai/comment-polish",
       key: "commentPolish",
+      serverPrompt: "buildCommentPrompt",
       title: "코멘트 AI"
     },
     {
+      appendedData: "시험관리 행의 학교, 학년, 과목, 시험일, 원문 총평",
+      callSite: "시험관리 시험 후 총평 모달의 AI 수정 버튼",
       description: "시험관리의 시험 후 총평 모달에서 맞춤법과 띄어쓰기만 고칠 때 사용합니다.",
+      endpoint: "/api/ai/comment-polish",
       key: "examReviewSpelling",
+      mode: "polishMode: spellingOnly",
+      serverPrompt: "buildCommentPrompt",
       title: "시험 후 총평 맞춤법 AI"
     },
     {
+      appendedData: "학생/학부모 대상, 수업일, 출결, 과제 상태, 강사용 수업메모",
+      callSite: "수업 준비 메모의 학생/학부모 안내문 AI 정제 버튼",
       description: "수업메모를 학생/학부모 안내문으로 바꿀 때 사용합니다.",
+      endpoint: "/api/ai/comment-polish",
       key: "preparationNotice",
+      serverPrompt: "buildCommentPrompt",
       title: "수업메모 AI"
     },
     {
+      appendedData: "공지 제목, 작성 날짜, 공지 본문",
+      callSite: "알림관리 공지 작성 영역의 AI 수정 버튼",
       description: "알림관리의 교재/보강/공지 문자 초안을 다듬을 때 사용합니다.",
+      endpoint: "/api/ai/comment-polish",
       key: "noticeMessage",
+      serverPrompt: "buildCommentPrompt",
       title: "알림관리 공지 AI"
     },
     {
+      appendedData: "학교/학년/과목/시험명, 시험관리 데이터, PDF OCR, PDF 렌더링 이미지, 문항검수표, 강사 인사이트, 쎈 유형 기준표",
+      callSite: "시험분석 원본 입력의 AI 분석 시작 버튼",
       description: "시험분석 화면에서 시험지 분석 1차 가안을 만들 때 사용합니다.",
+      endpoint: "/api/ai/exam-analysis",
       key: "examAnalysis",
+      serverPrompt: "buildExamAnalysisPrompt",
       title: "시험분석 AI"
-    },
-    {
-      description: "AI 도구의 변형문항 생성 흐름에서 사용할 기본 지시문입니다.",
-      key: "variantProblem",
-      title: "AI 변형문항"
     }
   ];
   const activePrompt = promptRows.find((row) => row.key === activePromptKey) ?? promptRows[0];
+  const normalizedPromptSettings = normalizeAiPrompts(settings.prompts);
 
   useEffect(() => {
     setAccountForm((current) => ({
@@ -11222,13 +11232,37 @@ function SettingsCenter({
           </div>
           <label className="promptEditor">
             <span>{activePrompt.title} 프롬프트</span>
+            <div className="promptMappingCard">
+              <div>
+                <strong>설정 키</strong>
+                <span>{activePrompt.key}</span>
+              </div>
+              <div>
+                <strong>실제 호출</strong>
+                <span>{activePrompt.callSite}</span>
+              </div>
+              <div>
+                <strong>API / 서버 빌더</strong>
+                <span>{activePrompt.endpoint} · {activePrompt.serverPrompt}</span>
+              </div>
+              <div>
+                <strong>호출 시 추가 데이터</strong>
+                <span>{activePrompt.appendedData}</span>
+              </div>
+              {activePrompt.mode ? (
+                <div>
+                  <strong>호출 모드</strong>
+                  <span>{activePrompt.mode}</span>
+                </div>
+              ) : null}
+            </div>
             <textarea
-              value={settings.prompts[activePrompt.key] ?? ""}
+              value={normalizedPromptSettings[activePrompt.key] ?? ""}
               onChange={(event) => updatePrompt(activePrompt.key, event.target.value)}
               rows="14"
             />
             <small className="muted">
-              수업 정보, 학생명, 출결, 과제 상태 같은 실제 데이터는 AI 호출 시 별도로 함께 전달됩니다.
+              위 프롬프트는 기본 지시문이고, 실제 호출 시에는 매핑된 서버 빌더가 업무 데이터와 출력 형식 지시를 함께 붙입니다.
             </small>
           </label>
         </div>
@@ -15348,8 +15382,6 @@ function AIVariantProblemCenter({ aiSettings = defaultAiSettings }) {
     title: "변형문항 시험지",
     typography: "compact"
   });
-  const variantAiProvider = aiSettings.variantProvider ?? defaultAiSettings.variantProvider;
-  const variantAiModel = aiSettings.variantModel ?? defaultAiSettings.variantModel;
   const totalVariantCount = Number(basicCount || 0) + Number(similarCount || 0) + Number(advancedCount || 0);
   const generatedVariantCount = Math.max(1, Math.min(totalVariantCount || 1, 10));
   const generatedVariants = isGenerated

@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P1. AI 프롬프트 설정과 실제 호출 매핑 정리
+
+- 상태: 완료
+- 사용자 요청: 설정에 있는 AI 프롬프트와 실제 AI 호출 시 작동되는 프롬프트가 매핑되어야 한다. 설정 화면의 시험분석 프롬프트가 깨진 문자로 보이는 문제도 확인이 필요하다.
+- 이번 작업 결과: 설정 > AI 프롬프트 목록을 실제 호출이 있는 프롬프트만 남기도록 정리했다. 각 프롬프트 편집 영역에 `설정 키`, `실제 호출`, `API / 서버 빌더`, `호출 시 추가 데이터`, 필요 시 `호출 모드`를 표시해 설정값이 어느 버튼과 서버 프롬프트 빌더로 들어가는지 바로 확인할 수 있게 했다.
+- 정리한 매핑: 코멘트 AI는 수업일지 학생별 코멘트 `AI 수정` -> `/api/ai/comment-polish` -> `buildCommentPrompt`, 시험 후 총평 맞춤법 AI는 시험관리 총평 모달 `AI 수정` -> `/api/ai/comment-polish` -> `buildCommentPrompt` + `polishMode: spellingOnly`, 수업메모 AI는 수업 준비 메모 AI 정제 -> `/api/ai/comment-polish` -> `buildCommentPrompt`, 알림관리 공지 AI는 공지 작성 AI 수정 -> `/api/ai/comment-polish` -> `buildCommentPrompt`, 시험분석 AI는 원본 입력 `AI 분석 시작` -> `/api/ai/exam-analysis` -> `buildExamAnalysisPrompt`이다.
+- 깨진 프롬프트 방지: 저장된 시험분석 프롬프트에 문자 인코딩 깨짐 흔적이 있으면 기본 시험분석 프롬프트로 자동 복구한다. 예전에 있던 미연결 `AI 변형문항` 프롬프트/모델 설정은 설정 화면과 기본 설정에서 제거했고, 저장된 오래된 프롬프트 키도 기본 키 기준 정규화 과정에서 다시 섞이지 않게 했다.
+- 저장 주의: 설정 데이터의 정규화/UI 표시만 변경했다. 기존 `app_state.aiSettings` 저장 경로를 그대로 사용하며 새 Supabase SQL edit 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 245, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P1. 시험분석 첫 AI 호출 PDF 이미지 입력 연결
 
 - 상태: 완료
