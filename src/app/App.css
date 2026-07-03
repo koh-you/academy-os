@@ -2719,6 +2719,13 @@ button {
   color: #dc2626;
 }
 
+.analysisLibraryStatus {
+  color: #15803d;
+  font-size: 13px;
+  font-weight: 900;
+  margin-left: auto;
+}
+
 .analysisLibraryGrid {
   display: grid;
   gap: 14px;
@@ -6822,7 +6829,7 @@ textarea {
 }
 
 button:disabled {
-  cursor: wait;
+  cursor: not-allowed;
   opacity: 0.65;
 }
 

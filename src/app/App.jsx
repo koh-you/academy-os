@@ -59,12 +59,16 @@ import {
   buildExamAnalysisLibraryTree,
   createExamAnalysisFolderDraft as createExamAnalysisFolderDraftBase,
   createExamAnalysisFolderId,
+  createExamAnalysisGradeDraft,
+  createExamAnalysisGradeId,
   createExamAnalysisSchoolDraft,
   createExamAnalysisSchoolId,
   getExamAnalysisFolderId,
   getExamAnalysisFolderTitle,
+  isExamAnalysisGradeFolder,
   isExamAnalysisSchoolFolder,
   normalizeExamAnalysisFolder,
+  normalizeExamAnalysisGradeFolder,
   normalizeExamAnalysisSchoolFolder
 } from "../domains/exams/library.js";
 import {
@@ -4816,6 +4820,15 @@ export function App() {
                 setExamAnalyses((current) => current.filter((item) => item.schoolName !== schoolName));
                 return;
               }
+              if (isExamAnalysisGradeFolder(folder)) {
+                const schoolName = folder.schoolName;
+                const grade = folder.grade;
+                setExamAnalysisFolders((current) =>
+                  current.filter((item) => item.folderId !== folder.folderId && !(item.schoolName === schoolName && item.grade === grade))
+                );
+                setExamAnalyses((current) => current.filter((item) => !(item.schoolName === schoolName && item.grade === grade)));
+                return;
+              }
               setExamAnalysisFolders((current) => current.filter((item) => item.folderId !== folder.folderId));
               setExamAnalyses((current) => current.filter((item) => getExamAnalysisFolderId(item) !== folder.folderId));
             }}
@@ -4824,6 +4837,12 @@ export function App() {
               const normalizedFolder = isExamAnalysisSchoolFolder(folder)
                 ? normalizeExamAnalysisSchoolFolder({
                     ...folder,
+                    updatedAt: new Date().toISOString()
+                  })
+                : isExamAnalysisGradeFolder(folder)
+                ? normalizeExamAnalysisGradeFolder({
+                    ...folder,
+                    folderType: "grade",
                     updatedAt: new Date().toISOString()
                   })
                 : normalizeExamAnalysisFolder({
@@ -4854,6 +4873,14 @@ export function App() {
                     ))
                   );
                 }
+              } else if (normalizedFolder.folderType === "grade") {
+                setExamAnalyses((current) =>
+                  current.map((item) => (
+                    item.schoolName === normalizedFolder.schoolName && item.grade === normalizedFolder.grade
+                      ? { ...item, grade: normalizedFolder.grade, updatedAt: new Date().toISOString() }
+                      : item
+                  ))
+                );
               } else {
                 setExamAnalyses((current) =>
                   current.map((item) => (
@@ -11238,6 +11265,8 @@ function SettingsCenter({
   );
 }
 
+const examAnalysisGradeOptions = ["고1", "고2", "고3", "중1", "중2", "중3"];
+
 function ExamAnalysisCenter({
   aiSettings = defaultAiSettings,
   appStateSaveState = "idle",
@@ -11258,6 +11287,7 @@ function ExamAnalysisCenter({
   const [isAnalysisWorkspaceOpen, setIsAnalysisWorkspaceOpen] = useState(false);
   const [folderModalMode, setFolderModalMode] = useState("");
   const [folderDraft, setFolderDraft] = useState(null);
+  const [analysisLibraryStatus, setAnalysisLibraryStatus] = useState("");
   const [detailSectionId, setDetailSectionId] = useState("");
   const [isReportPreviewOpen, setIsReportPreviewOpen] = useState(false);
   const [isAiInitialViewOpen, setIsAiInitialViewOpen] = useState(false);
@@ -11285,6 +11315,7 @@ function ExamAnalysisCenter({
   const pdfCanvasRef = useRef(null);
   const pdfRenderTaskRef = useRef(null);
   const outputPreviewCopyTimerRef = useRef(null);
+  const analysisLibraryStatusTimerRef = useRef(null);
   const normalizedAnalyses = useMemo(
     () => analyses.map((analysis) => {
       const normalized = normalizeExamAnalysisForDisplay(analysis);
@@ -11473,6 +11504,7 @@ function ExamAnalysisCenter({
 
   useEffect(() => () => {
     if (outputPreviewCopyTimerRef.current) clearTimeout(outputPreviewCopyTimerRef.current);
+    if (analysisLibraryStatusTimerRef.current) clearTimeout(analysisLibraryStatusTimerRef.current);
   }, []);
 
   useEffect(() => {
@@ -11709,6 +11741,20 @@ function ExamAnalysisCenter({
 
   function updateFinalDocument(nextDocument) {
     update("finalDocument", normalizeExamFinalDocument(nextDocument));
+  }
+
+  function showAnalysisLibraryStatus(message) {
+    setAnalysisLibraryStatus(message);
+    if (analysisLibraryStatusTimerRef.current) clearTimeout(analysisLibraryStatusTimerRef.current);
+    analysisLibraryStatusTimerRef.current = setTimeout(() => {
+      analysisLibraryStatusTimerRef.current = null;
+      setAnalysisLibraryStatus("");
+    }, 2400);
+  }
+
+  function getNextExamAnalysisGrade(school = selectedSchool) {
+    const usedGrades = new Set((school?.grades ?? []).map((grade) => grade.grade));
+    return examAnalysisGradeOptions.find((grade) => !usedGrades.has(grade)) || examAnalysisGradeOptions[0];
   }
 
   async function copyOutputPreviewText() {
@@ -12338,13 +12384,23 @@ function ExamAnalysisCenter({
   }
 
   function openAnalysisWorkspace(analysisId = selectedAnalysis?.examAnalysisId) {
-    if (!analysisId) return;
+    if (!analysisId) {
+      showAnalysisLibraryStatus("분석지를 먼저 선택해 주세요.");
+      return;
+    }
     setSelectedAnalysisId(analysisId);
     setIsAnalysisWorkspaceOpen(true);
+    showAnalysisLibraryStatus("분석지를 열었습니다.");
   }
 
   function createAnalysisInFolder(folder = selectedFolder) {
     if (!folder) {
+      if (!selectedGrade) {
+        showAnalysisLibraryStatus("학년을 먼저 추가해 주세요.");
+        openCreateGradeFolder();
+        return;
+      }
+      showAnalysisLibraryStatus("고사를 먼저 추가해 주세요.");
       openCreateExamFolder();
       return;
     }
@@ -12366,6 +12422,7 @@ function ExamAnalysisCenter({
     setSelectedFolderId(nextAnalysis.analysisFolderId);
     setSelectedAnalysisId(nextAnalysis.examAnalysisId);
     setIsAnalysisWorkspaceOpen(true);
+    showAnalysisLibraryStatus("분석지를 만들었습니다.");
   }
 
   function openCreateFolder() {
@@ -12377,14 +12434,41 @@ function ExamAnalysisCenter({
   }
 
   function openEditSchool(school = selectedSchool) {
-    if (!school) return;
+    if (!school) {
+      showAnalysisLibraryStatus("학교를 먼저 선택해 주세요.");
+      return;
+    }
     setFolderDraft(createExamAnalysisSchoolDraft({ ...school, previousSchoolName: school.schoolName }));
     setFolderModalMode("schoolEdit");
   }
 
+  function openCreateGradeFolder(school = selectedSchool) {
+    if (!school) {
+      showAnalysisLibraryStatus("학교를 먼저 추가해 주세요.");
+      openCreateFolder();
+      return;
+    }
+    const grade = getNextExamAnalysisGrade(school);
+    setFolderDraft({
+      ...createExamAnalysisGradeDraft({
+        schoolName: school.schoolName,
+        grade
+      }),
+      folderId: "",
+      folderType: "grade"
+    });
+    setFolderModalMode("gradeCreate");
+  }
+
   function openCreateExamFolder(school = selectedSchool) {
     if (!school) {
+      showAnalysisLibraryStatus("학교를 먼저 추가해 주세요.");
       openCreateFolder();
+      return;
+    }
+    if (!selectedGrade) {
+      showAnalysisLibraryStatus("학년을 먼저 추가해 주세요.");
+      openCreateGradeFolder(school);
       return;
     }
     setFolderDraft({
@@ -12402,7 +12486,10 @@ function ExamAnalysisCenter({
   }
 
   function openEditFolder(folder = selectedFolder) {
-    if (!folder) return;
+    if (!folder) {
+      showAnalysisLibraryStatus("고사를 먼저 선택해 주세요.");
+      return;
+    }
     setFolderDraft(createExamAnalysisFolderDraft({ ...folder, folderType: "exam" }));
     setFolderModalMode("examEdit");
   }
@@ -12410,11 +12497,18 @@ function ExamAnalysisCenter({
   function persistFolderDraft() {
     if (!folderDraft || !onSaveAnalysisFolder) return;
     const isSchoolDraft = folderDraft.folderType === "school" || folderModalMode.startsWith("school");
+    const isGradeDraft = folderDraft.folderType === "grade" || folderModalMode.startsWith("grade");
     const savedFolder = onSaveAnalysisFolder(isSchoolDraft
       ? {
           ...folderDraft,
           folderType: "school",
           folderId: folderDraft.folderId || createExamAnalysisSchoolId(folderDraft)
+        }
+      : isGradeDraft
+      ? {
+          ...folderDraft,
+          folderType: "grade",
+          folderId: folderDraft.folderId || createExamAnalysisGradeId(folderDraft)
         }
       : {
           ...folderDraft,
@@ -12425,6 +12519,14 @@ function ExamAnalysisCenter({
       const normalizedSchool = normalizeExamAnalysisSchoolFolder(savedFolder || folderDraft);
       setSelectedSchoolId(normalizedSchool.folderId);
       return normalizedSchool;
+    }
+    if (isGradeDraft) {
+      const normalizedGrade = normalizeExamAnalysisGradeFolder(savedFolder || folderDraft);
+      setSelectedSchoolId(createExamAnalysisSchoolId({ schoolName: normalizedGrade.schoolName }));
+      setSelectedGradeKey(normalizedGrade.grade || "학년 미입력");
+      setSelectedFolderId("");
+      setSelectedAnalysisId("");
+      return normalizedGrade;
     }
     const normalizedFolder = normalizeExamAnalysisFolder(savedFolder || folderDraft);
     setSelectedSchoolId(createExamAnalysisSchoolId({ schoolName: normalizedFolder.schoolName }));
@@ -12439,29 +12541,55 @@ function ExamAnalysisCenter({
     if (!normalizedFolder) return;
     setFolderModalMode("");
     setFolderDraft(null);
+    const label = normalizedFolder.folderType === "school"
+      ? `${normalizedFolder.schoolName || "학교"} 저장 완료`
+      : normalizedFolder.folderType === "grade"
+      ? `${normalizedFolder.grade || "학년"} 저장 완료`
+      : `${normalizedFolder.examName || "고사"} 저장 완료`;
+    showAnalysisLibraryStatus(label);
   }
 
   function deleteFolder(folder = selectedFolder) {
-    if (!folder || !onDeleteAnalysisFolder) return;
+    if (!folder || !onDeleteAnalysisFolder) {
+      showAnalysisLibraryStatus("고사를 먼저 선택해 주세요.");
+      return;
+    }
     const label = folder.folderType === "school" ? folder.schoolName : getExamAnalysisFolderTitle(folder);
-    const countText = folder.analyses.length ? ` 안의 분석지 ${folder.analyses.length}건도 함께 삭제됩니다.` : " 빈 폴더만 삭제됩니다.";
+    const analysisCount = folder.analyses?.length ?? 0;
+    const countText = analysisCount ? ` 안의 분석지 ${analysisCount}건도 함께 삭제됩니다.` : " 빈 폴더만 삭제됩니다.";
     if (!window.confirm(`${label} 폴더를 삭제할까요?${countText}`)) return;
     onDeleteAnalysisFolder(folder);
+    setSelectedFolderId("");
+    setSelectedAnalysisId("");
+    showAnalysisLibraryStatus(`${folder.examName || "고사"} 삭제 완료`);
   }
 
   function deleteSchool(school = selectedSchool) {
-    if (!school || !onDeleteAnalysisFolder) return;
+    if (!school || !onDeleteAnalysisFolder) {
+      showAnalysisLibraryStatus("학교를 먼저 선택해 주세요.");
+      return;
+    }
     const countText = school.analysisCount ? ` 아래 분석지 ${school.analysisCount}건도 함께 삭제됩니다.` : " 빈 학교 폴더만 삭제됩니다.";
     if (!window.confirm(`${school.schoolName} 학교 폴더를 삭제할까요?${countText}`)) return;
     onDeleteAnalysisFolder(school);
+    setSelectedSchoolId("");
+    setSelectedGradeKey("");
+    setSelectedFolderId("");
+    setSelectedAnalysisId("");
+    showAnalysisLibraryStatus(`${school.schoolName || "학교"} 삭제 완료`);
   }
 
   function deleteAnalysis(analysis) {
-    if (!analysis || !onDeleteAnalysis) return;
+    if (!analysis || !onDeleteAnalysis) {
+      showAnalysisLibraryStatus("분석지를 먼저 선택해 주세요.");
+      return;
+    }
     const label = [analysis.schoolName, analysis.grade, analysis.examName].filter(Boolean).join(" · ") || "이 분석 문서";
     if (!window.confirm(`${label}을 삭제할까요? 삭제 후 app_state 저장에 반영됩니다.`)) return;
     if (analysis.examAnalysisId === selectedAnalysisId) setIsAnalysisWorkspaceOpen(false);
     onDeleteAnalysis(analysis.examAnalysisId);
+    setSelectedAnalysisId("");
+    showAnalysisLibraryStatus("분석지 삭제 완료");
   }
 
   function moveSelectedAnalysisToFolder(folderId) {
@@ -12542,6 +12670,19 @@ function ExamAnalysisCenter({
     event.target.value = "";
   }
 
+  const isSchoolFolderModal = folderModalMode.startsWith("school");
+  const isGradeFolderModal = folderModalMode.startsWith("grade");
+  const folderModalTitle = isSchoolFolderModal
+    ? (folderModalMode === "schoolCreate" ? "학교 만들기" : "학교 수정")
+    : isGradeFolderModal
+    ? "학년 만들기"
+    : (folderModalMode === "examCreate" ? "고사 만들기" : "고사 수정");
+  const folderModalSubtitle = isSchoolFolderModal
+    ? "학교를 먼저 만들고, 그 아래 학년과 고사를 누적합니다."
+    : isGradeFolderModal
+    ? "선택한 학교 아래에 학년을 먼저 만들고, 그 학년 아래에 고사를 추가합니다."
+    : "선택한 학년 아래에 중간/기말 고사 폴더를 만듭니다.";
+
   return (
     <section className="examAnalysisPage">
       <header className="pageTop examAnalysisTop">
@@ -12557,8 +12698,9 @@ function ExamAnalysisCenter({
           ) : (
             <>
               <button className="softButton" onClick={openCreateFolder} type="button">+ 학교</button>
-              <button className="softButton" onClick={() => openCreateExamFolder()} type="button">+ 고사</button>
-              <button className="primaryButton" onClick={() => createAnalysisInFolder()} type="button">+ 분석 문서</button>
+              <button className="softButton" disabled={!selectedSchool} onClick={() => openCreateGradeFolder()} type="button">+ 학년</button>
+              <button className="softButton" disabled={!selectedGrade} onClick={() => openCreateExamFolder()} type="button">+ 고사</button>
+              <button className="primaryButton" disabled={!selectedFolder} onClick={() => createAnalysisInFolder()} type="button">+ 분석 문서</button>
             </>
           )}
         </div>
@@ -12577,7 +12719,8 @@ function ExamAnalysisCenter({
             <div className="analysisLibraryActions">
               <div className="analysisActionGroup">
                 <button className="primaryButton" onClick={openCreateFolder} type="button">+ 학교</button>
-                <button className="softButton" disabled={!selectedSchool} onClick={() => openCreateExamFolder()} type="button">+ 고사</button>
+                <button className="softButton" disabled={!selectedSchool} onClick={() => openCreateGradeFolder()} type="button">+ 학년</button>
+                <button className="softButton" disabled={!selectedGrade} onClick={() => openCreateExamFolder()} type="button">+ 고사</button>
                 <button className="softButton" disabled={!selectedFolder} onClick={() => createAnalysisInFolder()} type="button">+ 분석지</button>
               </div>
               <div className="analysisActionGroup">
@@ -12588,6 +12731,9 @@ function ExamAnalysisCenter({
                 <button className="softButton" disabled={!selectedAnalysis} onClick={() => openAnalysisWorkspace()} type="button">분석 열기</button>
                 <button className="softButton danger" disabled={!selectedAnalysis} onClick={() => deleteAnalysis(selectedAnalysis)} type="button">분석 삭제</button>
               </div>
+              {analysisLibraryStatus ? (
+                <small className="analysisLibraryStatus" role="status" aria-live="polite">{analysisLibraryStatus}</small>
+              ) : null}
             </div>
             <div className="analysisLibraryGrid">
               <article className="analysisTreeColumn">
@@ -12629,7 +12775,7 @@ function ExamAnalysisCenter({
                       <span>{grade.exams.length}고사 · {grade.analysisCount}건</span>
                     </button>
                   )) : (
-                    <div className="analysisTreeEmpty">선택한 학교에 고사를 추가해 주세요.</div>
+                    <div className="analysisTreeEmpty">선택한 학교에 학년을 추가해 주세요.</div>
                   )}
                 </div>
               </article>
@@ -13621,15 +13767,15 @@ function ExamAnalysisCenter({
       {folderModalMode && folderDraft ? (
         <Modal
           className="analysisFolderModal"
-          title={folderModalMode.startsWith("school") ? (folderModalMode === "schoolCreate" ? "학교 만들기" : "학교 수정") : (folderModalMode === "examCreate" ? "고사 만들기" : "고사 수정")}
-          subtitle={folderModalMode.startsWith("school") ? "학교를 먼저 만들고, 그 아래 학년과 고사를 누적합니다." : "선택한 학교 아래에 학년별 고사 폴더를 만듭니다."}
+          title={folderModalTitle}
+          subtitle={folderModalSubtitle}
           onClose={() => {
             setFolderModalMode("");
             setFolderDraft(null);
           }}
         >
           <form className="analysisFolderForm" onSubmit={saveFolderDraft}>
-            {folderModalMode.startsWith("school") ? (
+            {isSchoolFolderModal ? (
               <div className="fieldGrid">
                 <label className="wideLabel">
                   학교명
@@ -13639,6 +13785,29 @@ function ExamAnalysisCenter({
                     onChange={(event) => setFolderDraft((current) => ({ ...current, schoolName: event.target.value }))}
                     placeholder="예: 창동고"
                   />
+                </label>
+              </div>
+            ) : isGradeFolderModal ? (
+              <div className="fieldGrid two">
+                <div className="linkedExamInfoBox">
+                  <span>학교</span>
+                  <strong>{folderDraft.schoolName || selectedSchool?.schoolName || "학교 미선택"}</strong>
+                </div>
+                <label>
+                  학년
+                  <select
+                    autoFocus
+                    value={folderDraft.grade || "고1"}
+                    onChange={(event) => setFolderDraft((current) => ({
+                      ...current,
+                      grade: event.target.value,
+                      folderName: event.target.value
+                    }))}
+                  >
+                    {examAnalysisGradeOptions.map((grade) => (
+                      <option key={grade} value={grade}>{grade}</option>
+                    ))}
+                  </select>
                 </label>
               </div>
             ) : (
@@ -13653,7 +13822,7 @@ function ExamAnalysisCenter({
                     value={folderDraft.grade || "고1"}
                     onChange={(event) => setFolderDraft((current) => ({ ...current, grade: event.target.value }))}
                   >
-                    {["고1", "고2", "고3", "중1", "중2", "중3"].map((grade) => (
+                    {examAnalysisGradeOptions.map((grade) => (
                       <option key={grade} value={grade}>{grade}</option>
                     ))}
                   </select>
@@ -13695,17 +13864,39 @@ function ExamAnalysisCenter({
               </div>
             )}
             <div className="analysisFolderModalActions">
-              {folderModalMode.startsWith("school") ? (
+              {isSchoolFolderModal ? (
                 <button
                   className="softButton"
                   onClick={() => {
                     const normalizedSchool = persistFolderDraft();
                     if (!normalizedSchool) return;
                     setFolderDraft({
-                      ...createExamAnalysisFolderDraft({
+                      ...createExamAnalysisGradeDraft({
                         schoolName: normalizedSchool.schoolName,
-                        grade: "고1",
-                        subject: "수학",
+                        grade: selectedSchool?.schoolName === normalizedSchool.schoolName
+                          ? getNextExamAnalysisGrade(selectedSchool)
+                          : examAnalysisGradeOptions[0]
+                      }),
+                      folderId: "",
+                      folderType: "grade"
+                    });
+                    setFolderModalMode("gradeCreate");
+                  }}
+                  type="button"
+                >
+                  저장 후 학년 추가
+                </button>
+              ) : isGradeFolderModal ? (
+                <button
+                  className="softButton"
+                  onClick={() => {
+                    const normalizedGrade = persistFolderDraft();
+                    if (!normalizedGrade) return;
+                    setFolderDraft({
+                      ...createExamAnalysisFolderDraft({
+                        schoolName: normalizedGrade.schoolName,
+                        grade: normalizedGrade.grade,
+                        subject: selectedFolder?.subject || selectedAnalysis?.subject || "수학",
                         examCycle: currentExamCycle,
                         examName: examCycleLabel(currentExamCycle)
                       }),
@@ -13733,7 +13924,7 @@ function ExamAnalysisCenter({
                   저장 후 분석 추가
                 </button>
               )}
-              <button className="primaryButton" type="submit">{folderModalMode.startsWith("school") ? "학교 저장" : "고사 저장"}</button>
+              <button className="primaryButton" type="submit">{isSchoolFolderModal ? "학교 저장" : isGradeFolderModal ? "학년 저장" : "고사 저장"}</button>
             </div>
           </form>
         </Modal>

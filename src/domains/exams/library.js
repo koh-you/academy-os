@@ -33,6 +33,13 @@ export function createExamAnalysisSchoolId(source = {}) {
   return `exam_school_${safeIdPart(schoolName) || "school"}_${shortStableHash(schoolName)}`;
 }
 
+export function createExamAnalysisGradeId(source = {}) {
+  const schoolName = String(source.schoolName ?? source.folderSchoolName ?? "").trim() || "학교 미입력";
+  const grade = String(source.grade ?? source.folderGrade ?? "").trim() || "학년 미입력";
+  const key = [schoolName, grade].join("_");
+  return `exam_grade_${safeIdPart(key) || "grade"}_${shortStableHash(key)}`;
+}
+
 export function getExamAnalysisFolderTitle(folder = {}) {
   const meta = getExamAnalysisFolderMeta(folder);
   return [
@@ -74,6 +81,22 @@ export function normalizeExamAnalysisSchoolFolder(folder = {}) {
   };
 }
 
+export function normalizeExamAnalysisGradeFolder(folder = {}) {
+  const nowIso = new Date().toISOString();
+  const schoolName = String(folder.schoolName ?? folder.folderSchoolName ?? "").trim();
+  const grade = String(folder.grade ?? folder.folderGrade ?? "").trim();
+  const folderId = folder.folderId || createExamAnalysisGradeId({ schoolName, grade });
+  return {
+    folderId,
+    folderType: "grade",
+    schoolName,
+    grade,
+    folderName: String(folder.folderName ?? grade ?? "").trim() || "학년 미입력",
+    createdAt: folder.createdAt || nowIso,
+    updatedAt: folder.updatedAt || nowIso
+  };
+}
+
 export function createExamAnalysisFolderDraft(folder = {}, options = {}) {
   const defaultExamCycle = options.defaultExamCycle || folder.examCycle || "";
   const getExamCycleLabel = typeof options.getExamCycleLabel === "function" ? options.getExamCycleLabel : (value) => value || "";
@@ -106,6 +129,17 @@ export function createExamAnalysisSchoolDraft(folder = {}) {
   };
 }
 
+export function createExamAnalysisGradeDraft(folder = {}) {
+  const normalized = normalizeExamAnalysisGradeFolder(folder);
+  return {
+    folderId: folder.folderId || normalized.folderId,
+    folderType: "grade",
+    schoolName: normalized.schoolName,
+    grade: normalized.grade || "고1",
+    folderName: normalized.folderName
+  };
+}
+
 export function applyExamAnalysisFolderToAnalysis(analysis = {}, folder = {}) {
   const normalizedFolder = normalizeExamAnalysisFolder(folder);
   return {
@@ -129,10 +163,15 @@ export function isExamAnalysisSchoolFolder(folder = {}) {
   return Boolean(folder.schoolName) && !folder.grade && !folder.examName && !folder.examCycle;
 }
 
+export function isExamAnalysisGradeFolder(folder = {}) {
+  if (folder.folderType === "grade") return true;
+  return Boolean(folder.schoolName) && Boolean(folder.grade) && !folder.examName && !folder.examCycle;
+}
+
 export function buildExamAnalysisFolderList(analyses = [], savedFolders = []) {
   const folderMap = new Map();
   savedFolders.forEach((folder) => {
-    if (isExamAnalysisSchoolFolder(folder)) return;
+    if (isExamAnalysisSchoolFolder(folder) || isExamAnalysisGradeFolder(folder)) return;
     const normalized = normalizeExamAnalysisFolder(folder);
     folderMap.set(normalized.folderId, { ...normalized, analyses: [], persisted: true });
   });
@@ -211,13 +250,25 @@ export function buildExamAnalysisLibraryTree(analyses = [], savedFolders = []) {
     return existing;
   }
 
-  function ensureGrade(school, grade = "") {
+  function ensureGrade(school, grade = "", source = {}) {
     const gradeKey = String(grade || "학년 미입력").trim();
     const existing = school.grades.get(gradeKey) ?? {
+      folderId: source.folderId || createExamAnalysisGradeId({ schoolName: school.schoolName, grade: gradeKey }),
+      folderType: "grade",
+      schoolName: school.schoolName,
       grade: gradeKey,
+      folderName: source.folderName || gradeKey,
       exams: new Map(),
-      analysisCount: 0
+      analysisCount: 0,
+      persisted: false,
+      createdAt: source.createdAt || "",
+      updatedAt: source.updatedAt || ""
     };
+    existing.folderId = source.folderId || existing.folderId;
+    existing.schoolName = source.schoolName || existing.schoolName || school.schoolName;
+    existing.folderName = source.folderName || existing.folderName || gradeKey;
+    existing.persisted = existing.persisted || source.folderType === "grade" || false;
+    if (source.updatedAt && (!existing.updatedAt || source.updatedAt > existing.updatedAt)) existing.updatedAt = source.updatedAt;
     school.grades.set(gradeKey, existing);
     return existing;
   }
@@ -247,6 +298,12 @@ export function buildExamAnalysisLibraryTree(analyses = [], savedFolders = []) {
   savedFolders.forEach((folder) => {
     if (isExamAnalysisSchoolFolder(folder)) {
       ensureSchool(normalizeExamAnalysisSchoolFolder(folder));
+      return;
+    }
+    if (isExamAnalysisGradeFolder(folder)) {
+      const normalized = normalizeExamAnalysisGradeFolder(folder);
+      const school = ensureSchool({ schoolName: normalized.schoolName });
+      ensureGrade(school, normalized.grade, normalized);
       return;
     }
     const normalized = normalizeExamAnalysisFolder({ ...folder, folderType: "exam" });
