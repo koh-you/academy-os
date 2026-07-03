@@ -10544,23 +10544,54 @@ function ExamPostSubmissionManager({
 function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUpdateRow, row, saveState = "idle" }) {
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
+  const latestReviewDraftRef = useRef("");
+  const saveReviewTimerRef = useRef(null);
   const [reviewDraft, setReviewDraft] = useState(() => {
     const currentReview = String(row.review ?? "");
-    return currentReview.trim() ? normalizeExamReviewDraftText(currentReview, row) : createExamReviewDraft(row);
+    const initialReview = currentReview.trim() ? normalizeExamReviewDraftText(currentReview, row) : createExamReviewDraft(row);
+    latestReviewDraftRef.current = initialReview;
+    return initialReview;
   });
 
   useEffect(() => {
     if (!row.examPrepId) return;
     const currentReview = String(row.review ?? "");
     const nextReview = currentReview.trim() ? normalizeExamReviewDraftText(currentReview, row) : createExamReviewDraft(row);
+    latestReviewDraftRef.current = nextReview;
     setReviewDraft(nextReview);
     if (nextReview === currentReview) return;
     onUpdateRow(row.examPrepId, "review", nextReview);
   }, [row.examPrepId]);
 
+  useEffect(() => () => {
+    if (saveReviewTimerRef.current) clearTimeout(saveReviewTimerRef.current);
+  }, []);
+
+  function flushPendingReviewSave() {
+    if (saveReviewTimerRef.current) {
+      clearTimeout(saveReviewTimerRef.current);
+      saveReviewTimerRef.current = null;
+    }
+    onUpdateRow(row.examPrepId, "review", latestReviewDraftRef.current);
+  }
+
+  function scheduleReviewDraftSave(value) {
+    latestReviewDraftRef.current = value;
+    if (saveReviewTimerRef.current) clearTimeout(saveReviewTimerRef.current);
+    saveReviewTimerRef.current = setTimeout(() => {
+      saveReviewTimerRef.current = null;
+      onUpdateRow(row.examPrepId, "review", latestReviewDraftRef.current);
+    }, 500);
+  }
+
   function updateReviewDraft(value) {
     setReviewDraft(value);
-    onUpdateRow(row.examPrepId, "review", value);
+    scheduleReviewDraftSave(value);
+  }
+
+  function handleClose() {
+    flushPendingReviewSave();
+    onClose();
   }
 
   async function polishReview() {
@@ -10599,7 +10630,7 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
       className="commentComposerModal"
       title={`${row.schoolName} 시험 후 총평`}
       subtitle={`${row.grade} · ${row.subject} · ${row.publisher || "출판사 미입력"}`}
-      onClose={onClose}
+      onClose={handleClose}
     >
       {saveState !== "idle" ? (
         <div className="modalSaveStatusBar">
@@ -10618,6 +10649,7 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
           <textarea
             className="commentComposerTextarea"
             value={reviewDraft}
+            onBlur={flushPendingReviewSave}
             onChange={(event) => updateReviewDraft(event.target.value)}
             placeholder="탈리 제출 원문, 현장 체감, 학생 반응 등을 적어주세요."
           />

@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P1. 시험 후 총평 자동저장 중 Enter 입력 방해 수정
+
+- 상태: 완료
+- 사용자 제보: 자동저장된 시험 후 총평 항목에서 Enter가 먹지 않고 줄바꿈이 되지 않는다.
+- 원인: 이전 수정으로 총평 textarea는 로컬 상태를 쓰게 했지만, 입력마다 즉시 `onUpdateRow`를 호출해 부모 `exam_prep_rows` 상태와 저장 상태를 계속 갱신했다. 자동저장된 행에서는 이 부모 갱신이 입력 중 textarea를 흔들어 Enter 같은 줄바꿈 입력을 방해할 수 있었다.
+- 이번 작업 결과: 시험 후 총평 textarea 입력과 Supabase 저장 요청을 분리했다. 사용자가 입력하면 textarea 로컬 상태에는 즉시 반영하고, `exam_prep_rows.review` 저장 요청은 500ms debounce 후 실행한다. blur 또는 모달 닫기 시에는 pending 입력을 즉시 flush해 최신 내용이 저장되게 했다.
+- 회귀 방지: 운영 시나리오 테스트에 총평 composer가 수동 편집 중 즉시 부모 저장 호출을 하지 않고, debounce/blur/close flush를 사용하는지 확인하는 조건을 추가했다.
+- 저장 주의: 기존 `exam_prep_rows.review` 저장 경로를 그대로 사용한다. 새 Supabase SQL edit 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 통과(total 241, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P1. 작업지침에 수동 초안 우선/저장상태 표시 원칙 추가
 
 - 상태: 완료
