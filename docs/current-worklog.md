@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P1. 시험분석 학년 추가 시 학교 선택 흔들림 수정
+
+- 상태: 완료
+- 사용자 제보: 자운고에서 학년을 추가할 때 학교 선택이 잠깐 상계고로 바뀌는 것처럼 보인다.
+- 원인: 학년/고사 저장 후 선택 학교를 학교명으로 `createExamAnalysisSchoolId` 재계산해 지정했다. 기존 저장된 학교 folderId와 재계산 id가 순간적으로 어긋나면 트리 선택 보정 effect가 첫 학교로 fallback할 수 있었다.
+- 이번 작업 결과: 학년/고사/분석 생성 및 이동 후에는 학교명으로 id를 다시 만들지 않고, 현재 트리에 있는 실제 학교 `folderId`를 우선 사용하도록 `getAnalysisSchoolFolderIdByName`을 추가했다. 학년/고사 draft에는 현재 학교의 `schoolFolderId`를 담아 저장 후에도 같은 학교 선택을 유지한다.
+- 회귀 방지: 운영 시나리오 테스트에 `schoolFolderId`, `getAnalysisSchoolFolderIdByName`, `setSelectedSchoolId(createExamAnalysisSchoolId...)` 직접 사용 금지 조건을 추가했다.
+- 저장 주의: 선택 상태 보정만 변경했다. 기존 `app_state.examAnalysisFolders`, `app_state.examAnalyses` 저장 경로를 그대로 사용하며 새 Supabase SQL edit 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 243, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P1. 시험분석 컬럼별 추가 버튼과 통합 수정/삭제 액션
 
 - 상태: 완료

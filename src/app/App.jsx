@@ -11766,6 +11766,13 @@ function ExamAnalysisCenter({
     return examAnalysisGradeOptions.find((grade) => !usedGrades.has(grade)) || examAnalysisGradeOptions[0];
   }
 
+  function getAnalysisSchoolFolderIdByName(schoolName = "", preferredFolderId = "") {
+    if (preferredFolderId && analysisSchoolTree.some((school) => school.folderId === preferredFolderId)) {
+      return preferredFolderId;
+    }
+    return analysisSchoolTree.find((school) => school.schoolName === schoolName)?.folderId || createExamAnalysisSchoolId({ schoolName });
+  }
+
   async function copyOutputPreviewText() {
     if (!outputPreview) return;
     const copied = await copyTextToClipboard(outputPreview.value ?? "");
@@ -12426,7 +12433,7 @@ function ExamAnalysisCenter({
       : {};
     const nextAnalysis = createDefaultExamAnalysis(seed);
     onAddAnalysis(nextAnalysis);
-    setSelectedSchoolId(createExamAnalysisSchoolId({ schoolName: nextAnalysis.schoolName }));
+    setSelectedSchoolId(getAnalysisSchoolFolderIdByName(nextAnalysis.schoolName, folder?.schoolFolderId));
     setSelectedGradeKey(nextAnalysis.grade || "학년 미입력");
     setSelectedFolderId(nextAnalysis.analysisFolderId);
     setSelectedAnalysisId(nextAnalysis.examAnalysisId);
@@ -12474,7 +12481,8 @@ function ExamAnalysisCenter({
         grade
       }),
       folderId: "",
-      folderType: "grade"
+      folderType: "grade",
+      schoolFolderId: school.folderId
     });
     setFolderModalMode("gradeCreate");
   }
@@ -12499,7 +12507,8 @@ function ExamAnalysisCenter({
         examName: examCycleLabel(currentExamCycle)
       }),
       folderId: "",
-      folderType: "exam"
+      folderType: "exam",
+      schoolFolderId: school.folderId
     });
     setFolderModalMode("examCreate");
   }
@@ -12542,7 +12551,7 @@ function ExamAnalysisCenter({
     }
     if (isGradeDraft) {
       const normalizedGrade = normalizeExamAnalysisGradeFolder(savedFolder || folderDraft);
-      setSelectedSchoolId(createExamAnalysisSchoolId({ schoolName: normalizedGrade.schoolName }));
+      setSelectedSchoolId(getAnalysisSchoolFolderIdByName(normalizedGrade.schoolName, folderDraft.schoolFolderId));
       setSelectedGradeKey(normalizedGrade.grade || "학년 미입력");
       setSelectedFolderId("");
       setSelectedAnalysisId("");
@@ -12550,7 +12559,7 @@ function ExamAnalysisCenter({
       return normalizedGrade;
     }
     const normalizedFolder = normalizeExamAnalysisFolder(savedFolder || folderDraft);
-    setSelectedSchoolId(createExamAnalysisSchoolId({ schoolName: normalizedFolder.schoolName }));
+    setSelectedSchoolId(getAnalysisSchoolFolderIdByName(normalizedFolder.schoolName, folderDraft.schoolFolderId));
     setSelectedGradeKey(normalizedFolder.grade || "학년 미입력");
     setSelectedFolderId(normalizedFolder.folderId);
     setAnalysisLibraryActionTarget("folder");
@@ -12716,7 +12725,7 @@ function ExamAnalysisCenter({
       "examCycle",
       "examName"
     ].forEach((field) => onUpdateAnalysis(selectedAnalysis.examAnalysisId, field, movedAnalysis[field] ?? ""));
-    setSelectedSchoolId(createExamAnalysisSchoolId({ schoolName: folder.schoolName }));
+    setSelectedSchoolId(getAnalysisSchoolFolderIdByName(folder.schoolName, folder.schoolFolderId));
     setSelectedGradeKey(folder.grade || "학년 미입력");
     setSelectedFolderId(folder.folderId);
   }
