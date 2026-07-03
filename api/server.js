@@ -47,6 +47,13 @@ import { loadEnvFile } from "./lib/loadEnv.js";
 import { isSupabaseConfigured, listRows, upsertRows } from "./lib/supabaseRest.js";
 import { getAiStatus, polishLessonComment } from "./routes/commentPolish.js";
 import {
+  examAnalysisSourceBucket,
+  getExamAnalysisRun,
+  listExamAnalysisRuns,
+  recordExamAnalysisSourceUpload,
+  upsertExamAnalysisRun
+} from "./routes/examAnalysisPipeline.js";
+import {
   getNotificationStatus,
   sendAttendanceAlimtalk,
   sendDailyReportAlimtalk,
@@ -847,6 +854,73 @@ async function uploadExamPostFile(payload) {
   };
 }
 
+async function uploadExamAnalysisSourceFile(payload) {
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    throw new Error("시험분석 PDF 업로드에는 Supabase service role 설정이 필요합니다.");
+  }
+  if (!payload?.dataUrl) throw new Error("업로드할 PDF 데이터가 없습니다.");
+
+  const { mimeType, buffer } = parseDataUrl(payload.dataUrl);
+  if (mimeType !== "application/pdf") {
+    throw new Error("시험분석 원본은 PDF 파일만 업로드할 수 있습니다.");
+  }
+  if (buffer.length > 50 * 1024 * 1024) throw new Error("시험분석 PDF는 50MB 이하만 업로드할 수 있습니다.");
+
+  const runInput = {
+    ...(payload.analysisRun ?? payload.run ?? {}),
+    analysisRunId: payload.analysisRunId || payload.analysisRun?.analysisRunId || payload.run?.analysisRunId,
+    examPrepId: payload.examPrepId ?? payload.analysisRun?.examPrepId ?? payload.run?.examPrepId,
+    title: payload.title ?? payload.analysisRun?.title ?? payload.run?.title,
+    schoolName: payload.schoolName ?? payload.analysisRun?.schoolName ?? payload.run?.schoolName,
+    grade: payload.grade ?? payload.analysisRun?.grade ?? payload.run?.grade,
+    subject: payload.subject ?? payload.analysisRun?.subject ?? payload.run?.subject,
+    examTerm: payload.examTerm ?? payload.analysisRun?.examTerm ?? payload.run?.examTerm,
+    examCycle: payload.examCycle ?? payload.analysisRun?.examCycle ?? payload.run?.examCycle,
+    workflowStatus: "source_uploaded",
+    skipEvent: true
+  };
+  const runResult = await upsertExamAnalysisRun(runInput);
+  const analysisRun = runResult.analysisRun;
+  if (!analysisRun?.analysisRunId) throw new Error("시험분석 작업을 생성하지 못했습니다.");
+
+  const bucketId = examAnalysisSourceBucket;
+  await ensureStorageBucket(bucketId, {
+    fileSizeLimit: 50 * 1024 * 1024,
+    allowedMimeTypes: ["application/pdf"]
+  });
+
+  const fileName = String(payload.fileName || `exam-analysis-${Date.now()}.pdf`).trim();
+  const storageFileName = getStorageSafeFileName(fileName, mimeType, "exam-analysis");
+  const storagePath = [
+    "exam-analysis-v2",
+    sanitizeStorageSegment(analysisRun.schoolName || payload.schoolName, "school"),
+    sanitizeStorageSegment(analysisRun.grade || payload.grade, "grade"),
+    sanitizeStorageSegment(analysisRun.analysisRunId, "run"),
+    `${Date.now()}-${storageFileName}`
+  ].join("/");
+
+  await uploadStorageObjectWithBucketRetry(bucketId, storagePath, { contentType: mimeType, body: buffer });
+  const signedUrl = await createSignedStorageUrl(bucketId, storagePath);
+  const recorded = await recordExamAnalysisSourceUpload({
+    analysisRunId: analysisRun.analysisRunId,
+    sourceFile: {
+      bucketId,
+      storagePath,
+      originalFileName: fileName,
+      mimeType,
+      sizeBytes: buffer.length
+    }
+  });
+
+  return {
+    ...recorded,
+    sourceFile: {
+      ...recorded.sourceFile,
+      signedUrl
+    }
+  };
+}
+
 async function dispatchDueNotificationJobs({
   allowManualStatuses = false,
   forceDryRun = false,
@@ -1161,6 +1235,62 @@ const server = http.createServer(async (request, response) => {
         notifications: getNotificationStatus()
       }
     });
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/exam-analysis-runs") {
+    try {
+      const analysisRunId = requestUrl.searchParams.get("id") || requestUrl.searchParams.get("analysisRunId");
+      const result = analysisRunId
+        ? await getExamAnalysisRun(analysisRunId)
+        : await listExamAnalysisRuns({
+            examPrepId: requestUrl.searchParams.get("examPrepId"),
+            workflowStatus: requestUrl.searchParams.get("workflowStatus"),
+            limit: requestUrl.searchParams.get("limit")
+          });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await upsertExamAnalysisRun(payload.analysisRun ?? payload.run ?? payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-source-files") {
+    try {
+      const payload = await readJsonBody(request, { limitBytes: 68 * 1024 * 1024 });
+      const result = await uploadExamAnalysisSourceFile(payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/exam-analysis-source-files/open") {
+    try {
+      const bucketId = requestUrl.searchParams.get("bucket") || examAnalysisSourceBucket;
+      const storagePath = requestUrl.searchParams.get("path") || "";
+      if (!storagePath) throw new Error("파일 경로가 없습니다.");
+      const signedUrl = await createSignedStorageUrl(bucketId, storagePath);
+      response.writeHead(302, {
+        "Access-Control-Allow-Origin": getCorsOrigin(request),
+        Location: signedUrl
+      });
+      response.end();
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
     return;
   }
 

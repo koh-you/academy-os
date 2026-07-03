@@ -30,6 +30,7 @@ const indexHtmlPath = path.join(root, "index.html");
 const attendanceHtmlPath = path.join(root, "attendance.html");
 const notificationRoutePath = path.join(root, "api", "routes", "notifications.js");
 const commentPolishRoutePath = path.join(root, "api", "routes", "commentPolish.js");
+const examAnalysisPipelineRoutePath = path.join(root, "api", "routes", "examAnalysisPipeline.js");
 const coreDataRoutePath = path.join(root, "api", "routes", "coreData.js");
 const serverPath = path.join(root, "api", "server.js");
 const supabaseRestPath = path.join(root, "api", "lib", "supabaseRest.js");
@@ -74,6 +75,7 @@ const indexHtml = fs.readFileSync(indexHtmlPath, "utf8");
 const attendanceHtml = fs.readFileSync(attendanceHtmlPath, "utf8");
 const notificationRoute = fs.readFileSync(notificationRoutePath, "utf8");
 const commentPolishRoute = fs.readFileSync(commentPolishRoutePath, "utf8");
+const examAnalysisPipelineRoute = fs.readFileSync(examAnalysisPipelineRoutePath, "utf8");
 const coreDataRoute = fs.readFileSync(coreDataRoutePath, "utf8");
 const serverSource = fs.readFileSync(serverPath, "utf8");
 const supabaseRest = fs.readFileSync(supabaseRestPath, "utf8");
@@ -197,7 +199,7 @@ check("32b lesson modal grade groups can select and clear all students", hasAll(
 check("33 school calendar date modal and color editor exist", hasAll(app, ["SchoolDateScheduleModal", "calendarColorPicker", "openDateModal", "eventColorOptions"]));
 check("34 exam management self-check labels are wired", hasAll(app, ['id: "examPrep"', 'id: "postSubmit"', "셀프체크 대상", "examPostTargetStudent", "onSetExamPostTargetStudentIds"]) && !app.includes('id: "tallyAi"'));
 check("35 exam analysis feature is removed from app", !hasAll(app, ['id: "examAnalysis"', 'label: "시험분석"']) && !app.includes("ExamAnalysisCenter") && !app.includes("setExamAnalyses") && !app.includes("storageKeys.examAnalyses") && !app.includes("/api/ai/exam-analysis"));
-check("35b exam analysis API routes are removed", !serverSource.includes("/api/ai/exam-analysis") && !serverSource.includes("/api/ai/exam-question") && !serverSource.includes("/api/exam-analysis-sources") && !serverSource.includes("uploadExamAnalysisSourceFile") && !serverSource.includes("draftQuestionCrops"));
+check("35b legacy exam analysis API routes are removed", !serverSource.includes("/api/ai/exam-analysis") && !serverSource.includes("/api/ai/exam-question") && !serverSource.includes("/api/exam-analysis-sources") && !serverSource.includes("draftQuestionCrops"));
 check("35c exam analysis app_state keys are deprecated and hidden", hasAll(coreDataRoute, ["deprecatedAppStateKeys", '"examAnalyses"', '"examAnalysisFolders"', "hiddenAppStateKeys"]) && !app.includes("examAnalyses") && !app.includes("examAnalysisFolders"));
 check("35d exam analysis domain files are deleted but exam management helpers remain", [examQuestionClassificationPath, examQuestionItemsPath, examFinalDocumentPath, examFinalDocumentEditorPath, examSourceMediaPath, examLibraryPath, examAnalysisStatePath, examDefaultsPath, examDetailSectionsPath, examOutputLayoutsPath, examReportPreviewPath, examQuestionInsightPath, examQuestionCropViewPath, examApiPath].every((targetPath) => !fs.existsSync(targetPath)) && fs.existsSync(examOutputPreviewPath) && fs.existsSync(examPostSubmissionOptionsPath));
 check("35e comment polish route remains without exam analysis runners", hasAll(commentPolishRoute, ["export async function polishLessonComment", 'payload.polishMode === "spellingOnly"', "최종 교정문만 반환한다", "export function getAiStatus"]) && !commentPolishRoute.includes("runExamAnalysis") && !commentPolishRoute.includes("buildExamAnalysisPrompt") && !commentPolishRoute.includes("runExamQuestionClassification"));
@@ -205,6 +207,7 @@ check("35f pdf analysis dependencies are removed", !packageJson.includes("pdf-pa
 check("35g AI settings keep review/comment prompts and remove analysis mappings", hasAll(app, ["시험 후 총평 맞춤법 AI", "commentPolish", "promptMappingCard"]) && !app.includes("시험분석 원본 입력의 AI 분석 시작 버튼") && !app.includes("examAnalysisProvider") && !app.includes("questionClassificationProvider"));
 check("35h exam analysis pipeline v2 schema separates detection confirmation rows and jobs", hasAll(examAnalysisPipelineSchema, ["create table if not exists public.exam_analysis_runs", "create table if not exists public.exam_analysis_sources", "create table if not exists public.exam_analysis_questions", "create table if not exists public.exam_analysis_ai_jobs", "create table if not exists public.exam_analysis_events", "detected_question_count", "detected_question_evidence", "confirmed_question_count", "question_count_status", "unique (analysis_run_id, question_number)", "create or replace function public.ensure_exam_analysis_question_rows", "generate_series(1, p_question_count)", "exam-analysis-pipeline-sources"]));
 check("35i exam analysis pipeline preserves teacher edits as the new source of truth", hasAll(examAnalysisPipelineSchema, ["teacher_fields jsonb", "final_fields jsonb", "teacher_override boolean not null default false", "manual_edit_count integer not null default 0", "on conflict (analysis_run_id, question_number) do nothing"]));
+check("35j exam analysis pipeline v2 backend supports run CRUD and PDF upload without AI", hasAll(examAnalysisPipelineRoute, ["export const examAnalysisSourceBucket", "listExamAnalysisRuns", "getExamAnalysisRun", "upsertExamAnalysisRun", "recordExamAnalysisSourceUpload", "exam_analysis_runs", "exam_analysis_sources", "exam_analysis_questions", "exam_analysis_ai_jobs", "exam_analysis_events"]) && hasAll(serverSource, ["/api/exam-analysis-runs", "/api/exam-analysis-source-files", "uploadExamAnalysisSourceFile", "examAnalysisSourceBucket", "application/pdf", "source_uploaded"]) && !serverSource.includes("/api/ai/exam-analysis"));
 check("36 ai setting badges are hidden from work screens", !hasAll(app, ["aiVariantHeroActions", "aiModelSelectMock"]) && !app.includes("<h3>AI 모델</h3>"));
 
 check("37 exam publisher syncs across same term", hasAll(app, ["examCycleTermKey", "examPublisherLinkKey", "findLinkedPublisher", "syncPublisherAcrossExamTerm"]));

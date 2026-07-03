@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P0. 시험분석 v2 백엔드 run/PDF 업로드 API
+
+- 상태: 완료
+- 사용자 진행: 운영 Supabase에 `supabase/20260703_exam_analysis_pipeline.sql`을 SQL edit 적용했다.
+- 이번 작업 범위: AI 호출 없이 새 v2 저장 구조에 맞춘 백엔드 run CRUD와 PDF 업로드 API만 구현한다.
+- 이번 작업 결과: `api/routes/examAnalysisPipeline.js`를 추가해 `exam_analysis_runs`, `exam_analysis_sources`, `exam_analysis_questions`, `exam_analysis_ai_jobs`, `exam_analysis_events`를 camelCase로 조회/저장하는 route helper를 만들었다. `api/server.js`에는 `GET/POST /api/exam-analysis-runs`, `POST /api/exam-analysis-source-files`, `GET /api/exam-analysis-source-files/open`을 연결했다.
+- 저장 흐름: PDF 업로드 시 `exam-analysis-pipeline-sources` bucket에 저장하고, `exam_analysis_sources`에 source row를 만들며, run의 `workflow_status`를 `source_uploaded`로 갱신하고 `exam_analysis_events`에 `source_uploaded` 이벤트를 남긴다. 아직 텍스트 추출, 문항 수 판독, AI 호출은 수행하지 않는다.
+- 회귀 방지: 운영 시나리오 테스트에 v2 route가 run CRUD/PDF 업로드만 제공하고 `/api/ai/exam-analysis`를 되살리지 않았는지 확인하는 체크를 추가했다.
+- 검증: `node --check api/routes/examAnalysisPipeline.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 230, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P0. 시험분석 v2 저장 파이프라인 1단계
 
 - 상태: 완료

@@ -91,3 +91,15 @@
 8. 1~N 행 생성 API/UI 추가
 9. AI 행 채움 API 추가
 10. 누락 검수/재요청 추가
+
+## 현재 API
+
+아직 AI 호출은 붙이지 않는다.
+
+- `GET /api/exam-analysis-runs`: 분석 run 목록
+- `GET /api/exam-analysis-runs?id={analysisRunId}`: run 상세, source, question, AI job, event 조회
+- `POST /api/exam-analysis-runs`: 분석 run 생성/수정
+- `POST /api/exam-analysis-source-files`: PDF 업로드 후 source row와 event 저장
+- `GET /api/exam-analysis-source-files/open?bucket={bucketId}&path={storagePath}`: 저장 PDF signed URL 열기
+
+`POST /api/exam-analysis-source-files`는 PDF만 받으며, 업로드 성공 시 `workflow_status`를 `source_uploaded`로 둔다. 다음 단계는 이 상태를 입력으로 받아 텍스트/페이지 추출을 수행한다.
