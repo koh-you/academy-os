@@ -90,6 +90,16 @@ export async function upsertRows(table, rows, options = {}) {
   });
 }
 
+export async function callRpc(functionName, args = {}, options = {}) {
+  if (!functionName) throw new Error("Supabase RPC function name is required.");
+  return supabaseRestRequest(`rpc/${functionName}`, {
+    method: "POST",
+    body: args,
+    requireServiceRole: options.requireServiceRole ?? true,
+    timeoutMs: options.timeoutMs
+  });
+}
+
 export async function patchRows(table, query, values) {
   return supabaseRestRequest(`${table}?${query}`, {
     method: "PATCH",

@@ -10,6 +10,18 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P0. 시험분석 v2 문항 수 확정과 1~N 행 생성
+
+- 상태: 완료
+- 사용자 흐름: PDF 업로드, 텍스트 후보 추출, Claude 원본 검증까지 끝난 화면에서 다음 단계가 필요했다. 이번 작업은 `문항 수 판독 -> 선생님 확인 -> 1~N 행 고정` 중 선생님 확인과 행 생성을 붙였다.
+- 이번 작업 결과: `POST /api/exam-analysis-runs/confirm-question-count`를 추가했다. API는 선생님 확정 문항 수를 받아 Supabase RPC `ensure_exam_analysis_question_rows`를 호출하고, `confirmed_question_count`, `question_count_status=teacher_confirmed`, `workflow_status=rows_created`, `rows_locked=true`, `detected_question_evidence`, `missing_question_numbers`를 저장한다.
+- 행 생성 기준: 확정 N보다 큰 기존 문항 행이 비어 있으면 정리하고, 이미 AI/선생님 내용이 들어간 행을 줄이려 하면 삭제 후 재생성을 요구하는 오류를 낸다. 테스트 단계 데이터가 꼬였을 때 필터를 덧대지 않고 원천 분석 삭제/재생성을 우선하게 하기 위한 보호장치다.
+- 화면 변경: 시험분석 작업 패널에 `문항 수 확인` 카드를 추가했다. AI 원본 검증 또는 텍스트 검증에서 나온 후보 문항 수와 근거를 보여주고, `선생님 확정 문항 수` 입력 후 `n문항 확정` 버튼을 누르면 `시험분석 · 문항 수 확정 중/완료/실패` 상태가 같은 패널과 상단 상태바에 표시된다.
+- 검증 UI: 확정 후 `고정 문항 행` 영역에 `1~N번 · N행`과 번호 칩이 표시된다. 다음 단계 AI 행 채움은 이 고정 행을 기준으로만 진행해야 한다.
+- 상세 갱신 보정: PDF 업로드, 텍스트 추출, AI 원본 검증, 문항 수 확정 후 목록뿐 아니라 상세도 즉시 다시 불러오도록 했다. 이전 상세 데이터가 화면에 남아 후보/행이 늦게 보이는 흐름을 줄였다.
+- 저장 주의: 새 SQL edit은 필요 없다. 기존 `supabase/20260703_exam_analysis_pipeline.sql`의 `ensure_exam_analysis_question_rows` 함수를 사용한다.
+- 검증: `node --check api/lib/supabaseRest.js`, `node --check api/routes/examAnalysisPipeline.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 231, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-04 P0 예정. 작업 완료 후 사람 검토 절차 필수화
 
 - 상태: 예정

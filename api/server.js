@@ -48,6 +48,7 @@ import { loadEnvFile } from "./lib/loadEnv.js";
 import { isSupabaseConfigured, listRows, upsertRows } from "./lib/supabaseRest.js";
 import { getAiStatus, polishLessonComment } from "./routes/commentPolish.js";
 import {
+  confirmExamAnalysisQuestionCount,
   deleteExamAnalysisRun,
   examAnalysisSourceBucket,
   getExamAnalysisRun,
@@ -1829,6 +1830,24 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await upsertExamAnalysisRun(payload.analysisRun ?? payload.run ?? payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/confirm-question-count") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await confirmExamAnalysisQuestionCount({
+        analysisRunId: payload.analysisRunId,
+        questionCount: payload.questionCount,
+        detectedQuestionEvidence: payload.detectedQuestionEvidence,
+        detectedQuestionConfidence: payload.detectedQuestionConfidence,
+        missingQuestionNumbers: payload.missingQuestionNumbers,
+        confirmedBy: payload.confirmedBy || "teacher"
+      });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });

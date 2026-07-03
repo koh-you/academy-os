@@ -15,7 +15,7 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 
 
 시험분석 탭, 시험분석 API, PDF 처리, Supabase v2 테이블, 분석 저장/삭제를 건드린 작업은 시험분석 탭 전용 검토 절차도 포함해야 합니다. 최소한 `학교 -> 학년 -> 고사 -> 분석` 카드 확인, PDF 업로드, 텍스트 후보 추출, 비용 허용 시 AI 원본 검증, Supabase/Storage 저장 확인, 새로고침 유지, 테스트 분석 삭제 확인, 중단 조건을 순서대로 안내하세요.
 
-현재 새 v2 구조의 SQL, 백엔드 run/PDF 업로드/삭제 API, 첫 UI(학교/학년/고사/분석 카드형 목록, 기본정보 저장, PDF 업로드, 상태 확인), PDF 텍스트 후보 추출, Claude 우선 원본 검증까지 들어가 있습니다. 전수조사 후 다음 구현은 문항 수 후보를 선생님이 확인하고 1~N 빈 행을 고정 생성하는 단계입니다.
+현재 새 v2 구조의 SQL, 백엔드 run/PDF 업로드/삭제 API, 첫 UI(학교/학년/고사/분석 카드형 목록, 기본정보 저장, PDF 업로드, 상태 확인), PDF 텍스트 후보 추출, Claude 우선 원본 검증, 문항 수 선생님 확인, 1~N 빈 행 생성까지 들어가 있습니다. 전수조사 후 시험분석 다음 구현은 문항 경계 탐지 단계입니다.
 ```
 
 ## 현재 기준
@@ -29,7 +29,7 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 
   - `node --check scripts/scenario-tests-production.cjs` 통과
   - `git diff --check` 통과
   - `npm run test:production` 통과: total 231, failed 0
-  - `npm run build`는 최신 세션 마무리 기록을 확인한다. 기존 Vite chunk size warning은 무시 가능한 알려진 경고다.
+  - `npm run build` 통과. 기존 Vite chunk size warning은 무시 가능한 알려진 경고다.
 - 운영 Supabase에서 즉시 기존 시험분석 저장 데이터를 지우려면 `supabase/20260703_remove_exam_analysis_app_state.sql`을 SQL editor에 적용한다. 앱/API에서는 `examAnalyses`, `examAnalysisFolders`를 deprecated app_state 키로 숨기고 다음 app_state 저장 때 삭제한다. SQL은 제거된 시험분석 `app_state`와 `exam-analysis-sources` Storage 객체/버킷만 지우며, 시험 후 제출용 `exam-submissions` 같은 활성 Storage는 건드리지 않는다.
 - 사용자는 새 시험분석 v2 저장 구조용 `supabase/20260703_exam_analysis_pipeline.sql`을 SQL editor에 적용했다고 알려줬다. 새 bucket은 `exam-analysis-pipeline-sources`다.
 
@@ -57,9 +57,11 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 
 - `POST /api/exam-analysis-source-files/extract`는 PDF source를 Supabase Storage에서 내려받아 `exam_analysis_sources.extracted_text`, `page_text_ranges`, `page_image_manifest`, `extraction_status`를 채운다. 원문 텍스트 필터링으로 잡음을 제거하지 않고, 문항번호 후보/누락 후보/잡음 여부만 품질 지표로 저장한다.
 - `POST /api/exam-analysis-source-files/vision-check`는 Anthropic API key가 있으면 Claude Messages API PDF `document` 입력을 우선 사용한다. Anthropic 키가 없을 때만 OpenAI Responses PDF 입력을 예비 경로로 둔다. 이 버튼은 API 과금 대상이므로 자동 실행하지 않는다.
 - Claude 비전 체크는 이전 문항별 크롭/문항별 분석과 다르다. 지금 단계의 목적은 `readable`, `pageCount`, `subject`, `questionNumberCandidates`, `questionCountCandidate`, `missingQuestionNumbers`, `answerKeyDetected`만 확인하는 얕은 원본 검증이다. 문항별 본문/유형분류/크롭은 아직 붙이지 않는다.
+- `POST /api/exam-analysis-runs/confirm-question-count`는 선생님이 확정한 문항 수를 저장하고, Supabase RPC `ensure_exam_analysis_question_rows(run_id, count)`로 1~N 빈 행을 생성한다. 화면에는 `문항 수 확인` 카드, `선생님 확정 문항 수` 입력, `n문항 확정` 버튼, `시험분석 · 문항 수 확정 중/완료/실패` 상태, `고정 문항 행` 번호 칩이 있다.
+- 문항 수를 줄일 때 N보다 큰 기존 행이 비어 있으면 정리하지만, 이미 AI/선생님 내용이 들어간 행이면 오류를 내고 테스트 분석 삭제 후 재생성을 요구한다. 필터/우선순위 보정을 덧대어 화면만 맞추는 방식으로 처리하지 않는다.
 - 실제 운영 PDF `[자운고] 2026 1-1 기말 공통수학1.pdf` 검증 결과: 텍스트 추출은 `5쪽`, `52,792 bytes`, 문항번호 후보 `1~24`가 잡혔지만 PDF 텍스트 레이어 잡음이 감지됐다. Claude `claude-sonnet-4-5` 원본 검증은 `readable=true`, `pageCount=5`, `subject=공통수학1`, `questionCountCandidate=24`, 누락 번호 없음, 빠른 정답 감지로 성공했다.
 - 시험분석 v2 저장 경계에서 과목 `기하`는 빈 값으로 정리한다. 파일명/원본 검증이 `공통수학1`을 명확히 말하면 그 값을 사용한다.
-- 아직 문항 수 선생님 확인 UI, 1~N 행 생성 버튼/흐름, 문항 경계 탐지, AI 행 채움은 붙이지 않았다. AI가 각 행을 채우려면 문항번호 확정만으로는 부족하고, 각 문항이 PDF 어느 페이지/영역에서 시작하고 끝나는지 알아야 한다.
+- 아직 문항 경계 탐지, AI 행 채움, 누락 검수/재요청은 붙이지 않았다. AI가 각 행을 채우려면 문항번호 확정만으로는 부족하고, 각 문항이 PDF 어느 페이지/영역에서 시작하고 끝나는지 알아야 한다.
 
 ## 다음 세션 우선순위
 
@@ -70,10 +72,9 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 
 5. 시험분석을 건드린 작업은 시험분석 탭 전용 검토 절차를 추가로 포함한다.
 6. 기존 시험분석 기능을 복구하지 않는다.
 7. 운영 Supabase에서 새 v2 테이블과 `exam-analysis-pipeline-sources` Storage bucket이 정상인지 확인한다.
-8. 전수조사 후 시험분석 다음 구현은 문항 수 후보 확인 UI다. 텍스트 후보와 Claude 원본 검증 결과를 비교해 `detected_question_count`, `detected_question_evidence`, `missing_question_numbers`, `question_count_status`에 저장한다.
-9. 선생님이 N을 확인하면 `ensure_exam_analysis_question_rows(run_id, count)`로 1~N 빈 행을 고정 생성한다.
-10. 그 다음은 `문항 경계 탐지` 단계다. Claude에게 문제 풀이/유형분류를 시키지 말고, 1~N 각 문항의 page, 대략 위치, 다음 문항 전까지의 범위만 JSON으로 받는다. 한 문항이 두 페이지에 걸치는 경우도 표시해야 한다.
-11. AI 행 채움은 경계 탐지 후의 다음 단계다. 이전처럼 문항별 크롭/비전 분석으로 바로 가지 말고, 비용과 실패 지점을 작게 쪼개서 설계한다.
+8. 전수조사 후 시험분석 다음 구현은 `문항 경계 탐지` 단계다. Claude에게 문제 풀이/유형분류를 시키지 말고, 1~N 각 문항의 page, 대략 위치, 다음 문항 전까지의 범위만 JSON으로 받는다. 한 문항이 두 페이지에 걸치는 경우도 표시해야 한다.
+9. 경계 탐지 결과는 곧바로 유형분류 결과로 쓰지 않는다. 먼저 화면에서 누락/겹침/페이지 범위를 검수할 수 있게 하고, 문제 경계가 맞는지 사람이 확인한 뒤 AI 행 채움으로 넘어간다.
+10. AI 행 채움은 경계 탐지 후의 다음 단계다. 이전처럼 문항별 크롭/비전 분석으로 바로 가지 말고, 비용과 실패 지점을 작게 쪼개서 설계한다.
 
 ## 참조 파일
 

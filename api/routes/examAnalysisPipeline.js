@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { deleteRows, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
+import { callRpc, deleteRows, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
 
 const fallbackSource = "local_sample";
 const databaseSource = "supabase";
@@ -221,6 +221,25 @@ function requireServiceRole() {
   }
 }
 
+function normalizePositiveNumbers(numbers = []) {
+  return [...new Set((Array.isArray(numbers) ? numbers : [])
+    .map(Number)
+    .filter((number) => Number.isInteger(number) && number > 0 && number <= 200))]
+    .sort((a, b) => a - b);
+}
+
+function hasQuestionRowContent(question = {}) {
+  const hasObjectContent = (value) => Boolean(value && typeof value === "object" && Object.keys(value).length);
+  return (
+    question.rowStatus !== "empty" ||
+    Boolean(question.teacherOverride) ||
+    Number(question.manualEditCount || 0) > 0 ||
+    hasObjectContent(question.aiFields) ||
+    hasObjectContent(question.teacherFields) ||
+    hasObjectContent(question.finalFields)
+  );
+}
+
 async function nextSourceOrder(analysisRunId) {
   const rows = await listRows(
     "exam_analysis_sources",
@@ -374,6 +393,82 @@ export async function deleteExamAnalysisRun(analysisRunId) {
     source: databaseSource,
     deletedAnalysisRun: deletedRows[0] ? fromRunRow(deletedRows[0]) : detail.analysisRun,
     deletedSources: detail.sources ?? []
+  };
+}
+
+export async function confirmExamAnalysisQuestionCount({
+  analysisRunId,
+  questionCount,
+  detectedQuestionEvidence = [],
+  detectedQuestionConfidence = 1,
+  missingQuestionNumbers = [],
+  confirmedBy = "teacher"
+} = {}) {
+  if (!analysisRunId) throw new Error("analysisRunId가 필요합니다.");
+  const confirmedCount = Number(questionCount);
+  if (!Number.isInteger(confirmedCount) || confirmedCount < 1 || confirmedCount > 200) {
+    throw new Error("확정 문항 수는 1~200 사이의 정수여야 합니다.");
+  }
+  requireServiceRole();
+
+  const detail = await getExamAnalysisRun(analysisRunId);
+  if (!detail.analysisRun?.analysisRunId) throw new Error("시험분석 작업을 찾지 못했습니다.");
+
+  const rowsAboveConfirmedCount = (detail.questions ?? []).filter((question) => Number(question.questionNumber) > confirmedCount);
+  const protectedRows = rowsAboveConfirmedCount.filter(hasQuestionRowContent);
+  if (protectedRows.length) {
+    throw new Error("이미 내용이 들어간 문항 행이 있어 문항 수를 줄일 수 없습니다. 테스트 분석을 삭제하고 다시 만들어 주세요.");
+  }
+  if (rowsAboveConfirmedCount.length) {
+    await deleteRows(
+      "exam_analysis_questions",
+      `analysis_run_id=eq.${encodeURIComponent(analysisRunId)}&question_number=gt.${confirmedCount}`
+    );
+  }
+
+  const confirmedAt = new Date().toISOString();
+  const evidence = Array.isArray(detectedQuestionEvidence)
+    ? detectedQuestionEvidence.map(String).filter(Boolean).slice(0, 20)
+    : [];
+  const missingNumbers = normalizePositiveNumbers(missingQuestionNumbers);
+  const insertedQuestionCount = await callRpc(
+    "ensure_exam_analysis_question_rows",
+    {
+      p_analysis_run_id: analysisRunId,
+      p_question_count: confirmedCount
+    },
+    { timeoutMs: 20000 }
+  );
+
+  await updateExamAnalysisRun(analysisRunId, {
+    workflowStatus: "rows_created",
+    questionCountStatus: "teacher_confirmed",
+    detectedQuestionCount: confirmedCount,
+    detectedQuestionConfidence,
+    detectedQuestionEvidence: evidence,
+    confirmedQuestionCount: confirmedCount,
+    confirmedBy,
+    confirmedAt,
+    rowsLocked: true,
+    missingQuestionNumbers: missingNumbers
+  });
+
+  await recordExamAnalysisEvent({
+    analysisRunId,
+    eventType: "question_count_confirmed",
+    message: `문항 수 ${confirmedCount}개를 확정하고 1~${confirmedCount}번 빈 행을 생성했습니다.`,
+    payload: {
+      questionCount: confirmedCount,
+      insertedQuestionCount: Number(insertedQuestionCount || 0),
+      missingQuestionNumbers: missingNumbers
+    }
+  });
+
+  const nextDetail = await getExamAnalysisRun(analysisRunId);
+  return {
+    ...nextDetail,
+    source: databaseSource,
+    insertedQuestionCount: Number(insertedQuestionCount || 0)
   };
 }
 

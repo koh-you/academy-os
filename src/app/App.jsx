@@ -970,6 +970,85 @@ function getExamAnalysisExtractionSummary(run = {}, sourceId = "") {
   return summary;
 }
 
+function normalizeExamAnalysisPositiveNumbers(numbers = []) {
+  return [...new Set((Array.isArray(numbers) ? numbers : [])
+    .map(Number)
+    .filter((number) => Number.isInteger(number) && number > 0 && number <= 200))]
+    .sort((a, b) => a - b);
+}
+
+function getExamAnalysisQuestionCountCandidate(run = {}, sourceFiles = []) {
+  const files = Array.isArray(sourceFiles) ? sourceFiles : [];
+  const visionChecks = files
+    .map((file) => getExamAnalysisVisionCheck(run, file.sourceId))
+    .filter(Boolean);
+  const visionCheck = visionChecks.find((check) => (
+    Number(check.questionCountCandidate || 0) > 0 ||
+    normalizeExamAnalysisPositiveNumbers(check.questionNumberCandidates).length > 0
+  ));
+  if (visionCheck) {
+    const questionNumbers = normalizeExamAnalysisPositiveNumbers(visionCheck.questionNumberCandidates);
+    const count = Number(visionCheck.questionCountCandidate || questionNumbers.at(-1) || questionNumbers.length || 0);
+    if (count > 0) {
+      return {
+        count,
+        sourceLabel: "AI 원본 검증",
+        confidence: visionCheck.readable ? 0.95 : 0.75,
+        missingQuestionNumbers: normalizeExamAnalysisPositiveNumbers(visionCheck.missingQuestionNumbers),
+        detectedQuestionEvidence: [
+          visionCheck.firstPageEvidence,
+          visionCheck.lastPageEvidence,
+          visionCheck.provider ? `provider: ${visionCheck.provider}` : "",
+          questionNumbers.length ? `문항번호 후보 ${questionNumbers[0]}~${questionNumbers.at(-1)} (${questionNumbers.length}개)` : ""
+        ].filter(Boolean),
+        detailLabel: visionCheck.readable ? "PDF 원본 페이지 기준 후보" : "AI 검증 읽기 상태 확인 필요"
+      };
+    }
+  }
+
+  const summaryQuality = run?.extractionSummary?.quality;
+  if (Number(summaryQuality?.maxQuestionNumber || 0) > 0) {
+    return {
+      count: Number(summaryQuality.maxQuestionNumber),
+      sourceLabel: "텍스트 검증",
+      confidence: summaryQuality.status === "ok" ? 0.8 : 0.6,
+      missingQuestionNumbers: normalizeExamAnalysisPositiveNumbers(summaryQuality.missingQuestionNumbers),
+      detectedQuestionEvidence: [
+        `텍스트 추출 ${formatBytes(summaryQuality.textBytes)} · ${summaryQuality.pageCount || "-"}쪽`,
+        `문항번호 후보 1~${summaryQuality.maxQuestionNumber} (${summaryQuality.questionNumberCandidates?.length || 0}개)`
+      ],
+      detailLabel: summaryQuality.status === "ok" ? "텍스트 후보 기준" : "텍스트 후보 검토 필요"
+    };
+  }
+
+  const extractedFile = files.find((file) => file.extractionStatus === "extracted" && file.extractedText);
+  if (extractedFile) {
+    const extractionCheck = buildExamAnalysisExtractionCheck(extractedFile);
+    if (extractionCheck.maxQuestionNumber) {
+      return {
+        count: extractionCheck.maxQuestionNumber,
+        sourceLabel: "텍스트 검증",
+        confidence: extractionCheck.status === "ok" ? 0.8 : 0.6,
+        missingQuestionNumbers: extractionCheck.missingQuestionNumbers,
+        detectedQuestionEvidence: [
+          `텍스트 추출 ${formatBytes(extractionCheck.textBytes)} · ${extractionCheck.pageCount || "-"}쪽`,
+          `문항번호 후보 1~${extractionCheck.maxQuestionNumber} (${extractionCheck.questionNumbers.length}개)`
+        ],
+        detailLabel: extractionCheck.status === "ok" ? "텍스트 후보 기준" : "텍스트 후보 검토 필요"
+      };
+    }
+  }
+
+  return {
+    count: 0,
+    sourceLabel: "",
+    confidence: 0,
+    missingQuestionNumbers: [],
+    detectedQuestionEvidence: [],
+    detailLabel: "텍스트 추출 또는 AI 검증을 먼저 실행해 주세요."
+  };
+}
+
 function workflowStatusLabel(status = "") {
   const labels = {
     draft: "초안",
@@ -1112,6 +1191,15 @@ function verifyExamAnalysisSourceWithAiRequest(sourceId) {
     { sourceId },
     120000,
     "PDF 원본 AI 검증이 지연되고 있습니다."
+  );
+}
+
+function confirmExamAnalysisQuestionCountRequest(payload) {
+  return postJsonWithTimeout(
+    "/api/exam-analysis-runs/confirm-question-count",
+    payload,
+    30000,
+    "문항 수 확정 저장이 지연되고 있습니다."
   );
 }
 
@@ -6400,6 +6488,9 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const [extractingSourceId, setExtractingSourceId] = useState("");
   const [visionStatus, setVisionStatus] = useState({ state: "idle", message: "" });
   const [checkingSourceId, setCheckingSourceId] = useState("");
+  const [confirmStatus, setConfirmStatus] = useState({ state: "idle", message: "" });
+  const [questionCountDraft, setQuestionCountDraft] = useState("");
+  const [isConfirmingQuestionCount, setIsConfirmingQuestionCount] = useState(false);
 
   const selectedExamPrepRow = useMemo(
     () => examPrepRows.find((row) => row.examPrepId === selectedExamPrepId) ?? null,
@@ -6408,7 +6499,12 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const selectedDetailRun = selectedDetail?.analysisRun?.analysisRunId === selectedRunId ? selectedDetail.analysisRun : null;
   const activeRun = selectedDetailRun ?? analysisRuns.find((run) => run.analysisRunId === selectedRunId) ?? null;
   const sourceFiles = selectedDetailRun ? selectedDetail?.sources ?? [] : [];
+  const questionRows = selectedDetailRun ? selectedDetail?.questions ?? [] : [];
   const events = selectedDetailRun ? selectedDetail?.events ?? [] : [];
+  const questionCountCandidate = useMemo(
+    () => getExamAnalysisQuestionCountCandidate(activeRun, sourceFiles),
+    [activeRun, sourceFiles]
+  );
   const schoolCards = useMemo(() => {
     const customSchools = [...new Set([
       ...examPrepRows.map((row) => normalizeExamAnalysisSchoolName(row.schoolName)),
@@ -6483,6 +6579,11 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     }
     loadRunDetail(selectedRunId);
   }, [selectedRunId]);
+
+  useEffect(() => {
+    const nextCount = Number(activeRun?.confirmedQuestionCount || questionCountCandidate.count || 0);
+    setQuestionCountDraft(nextCount ? String(nextCount) : "");
+  }, [activeRun?.analysisRunId, activeRun?.confirmedQuestionCount, questionCountCandidate.count]);
 
   function applyExamPrepRow(row) {
     if (!row) return;
@@ -6742,6 +6843,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       setUploadStatus({ state: "success", message: "시험분석 PDF · 업로드 완료" });
       if (nextRunId) {
         await loadRuns(nextRunId);
+        await loadRunDetail(nextRunId);
       }
     } catch (error) {
       setUploadStatus({ state: "failed", message: `시험분석 PDF · 업로드 실패 · ${error.message}` });
@@ -6763,6 +6865,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       });
       if (result.analysisRun?.analysisRunId) {
         await loadRuns(result.analysisRun.analysisRunId);
+        await loadRunDetail(result.analysisRun.analysisRunId);
       } else if (selectedRunId) {
         await loadRunDetail(selectedRunId);
       }
@@ -6788,6 +6891,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       });
       if (result.analysisRun?.analysisRunId) {
         await loadRuns(result.analysisRun.analysisRunId);
+        await loadRunDetail(result.analysisRun.analysisRunId);
       } else if (selectedRunId) {
         await loadRunDetail(selectedRunId);
       }
@@ -6797,6 +6901,56 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       setCheckingSourceId("");
     }
   }
+
+  async function confirmQuestionCount() {
+    if (!activeRun?.analysisRunId) {
+      setConfirmStatus({ state: "failed", message: "시험분석 · 분석을 먼저 저장해 주세요." });
+      return;
+    }
+    const questionCount = Number(questionCountDraft);
+    if (!Number.isInteger(questionCount) || questionCount < 1 || questionCount > 200) {
+      setConfirmStatus({ state: "failed", message: "시험분석 · 문항 수는 1~200 사이의 정수로 입력해 주세요." });
+      return;
+    }
+
+    setIsConfirmingQuestionCount(true);
+    setConfirmStatus({ state: "saving", message: "시험분석 · 문항 수 확정 중" });
+    try {
+      const result = await confirmExamAnalysisQuestionCountRequest({
+        analysisRunId: activeRun.analysisRunId,
+        questionCount,
+        detectedQuestionConfidence: questionCountCandidate.confidence,
+        detectedQuestionEvidence: questionCountCandidate.detectedQuestionEvidence,
+        missingQuestionNumbers: questionCountCandidate.missingQuestionNumbers,
+        confirmedBy: "teacher"
+      });
+      const rowCount = result.questions?.length || questionCount;
+      setSelectedDetail(result);
+      setConfirmStatus({
+        state: "success",
+        message: `시험분석 · 문항 수 확정 완료 · ${questionCount}문항 · ${rowCount}행`
+      });
+      await loadRuns(activeRun.analysisRunId);
+      await loadRunDetail(activeRun.analysisRunId);
+    } catch (error) {
+      setConfirmStatus({ state: "failed", message: `시험분석 · 문항 수 확정 실패 · ${error.message}` });
+      if (selectedRunId) await loadRunDetail(selectedRunId);
+    } finally {
+      setIsConfirmingQuestionCount(false);
+    }
+  }
+
+  const confirmedQuestionCount = Number(activeRun?.confirmedQuestionCount || 0);
+  const questionRowNumbers = questionRows
+    .map((question) => Number(question.questionNumber))
+    .filter((number) => Number.isInteger(number) && number > 0)
+    .sort((a, b) => a - b);
+  const shownQuestionRowNumbers = questionRowNumbers.slice(0, 60);
+  const questionCountButtonLabel = isConfirmingQuestionCount
+    ? "확정 중"
+    : questionCountDraft
+      ? `${questionCountDraft}문항 확정`
+      : "문항 수 확정";
 
   return (
     <section className="examAnalysisPipelinePage">
@@ -6812,7 +6966,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       </div>
 
       <div className="examAnalysisStatusBar">
-        {[loadStatus, saveStatus, uploadStatus, extractStatus, visionStatus, deleteStatus].filter((item) => item.message).map((item, index) => (
+        {[loadStatus, saveStatus, uploadStatus, extractStatus, visionStatus, confirmStatus, deleteStatus].filter((item) => item.message).map((item, index) => (
           <span className={`saveStateBadge ${item.state}`} key={`${item.message}-${index}`}>{item.message}</span>
         ))}
       </div>
@@ -7080,6 +7234,73 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   </div>
                 );
               })}
+            </div>
+          </div>
+
+          <div className="panel examAnalysisQuestionCountPanel">
+            <div className="sectionHeader slim">
+              <div>
+                <strong>문항 수 확인</strong>
+                <span>
+                  {confirmedQuestionCount
+                    ? `${confirmedQuestionCount}문항 확정`
+                    : questionCountCandidate.count
+                      ? `${questionCountCandidate.count}문항 후보`
+                      : "대기"}
+                </span>
+              </div>
+              {confirmStatus.message ? <span className={`saveStateBadge ${confirmStatus.state}`}>{confirmStatus.message}</span> : null}
+            </div>
+            <div className="examAnalysisQuestionCountGrid">
+              <div className="examAnalysisQuestionCountCard">
+                <strong>{questionCountCandidate.count ? `${questionCountCandidate.count}문항 후보` : "문항 후보 없음"}</strong>
+                <span>{questionCountCandidate.sourceLabel || "PDF 검증 대기"}</span>
+                <small>{questionCountCandidate.detailLabel}</small>
+                {questionCountCandidate.detectedQuestionEvidence?.length ? (
+                  <small>{questionCountCandidate.detectedQuestionEvidence.slice(0, 3).join(" · ")}</small>
+                ) : null}
+                {questionCountCandidate.missingQuestionNumbers?.length ? (
+                  <small>누락 후보 {questionCountCandidate.missingQuestionNumbers.join(", ")}</small>
+                ) : null}
+              </div>
+              <div className="examAnalysisQuestionCountConfirm">
+                <label>
+                  <span>선생님 확정 문항 수</span>
+                  <input
+                    inputMode="numeric"
+                    max="200"
+                    min="1"
+                    onChange={(event) => setQuestionCountDraft(event.target.value)}
+                    placeholder="예: 24"
+                    type="number"
+                    value={questionCountDraft}
+                  />
+                </label>
+                <button
+                  className="primaryButton"
+                  disabled={!activeRun?.analysisRunId || isConfirmingQuestionCount}
+                  onClick={confirmQuestionCount}
+                  type="button"
+                >
+                  {questionCountButtonLabel}
+                </button>
+              </div>
+            </div>
+            <div className="questionRowsPreview">
+              <div>
+                <strong>고정 문항 행</strong>
+                <span>
+                  {questionRowNumbers.length
+                    ? `${questionRowNumbers[0]}~${questionRowNumbers.at(-1)}번 · ${questionRowNumbers.length}행`
+                    : "문항 수를 확정하면 1~N 빈 행이 생성됩니다."}
+                </span>
+              </div>
+              {questionRowNumbers.length ? (
+                <div className="questionRowsPreviewChips">
+                  {shownQuestionRowNumbers.map((number) => <span key={number}>{number}</span>)}
+                  {questionRowNumbers.length > shownQuestionRowNumbers.length ? <span>+{questionRowNumbers.length - shownQuestionRowNumbers.length}</span> : null}
+                </div>
+              ) : null}
             </div>
           </div>
 

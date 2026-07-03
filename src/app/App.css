@@ -663,6 +663,7 @@ button {
 .examAnalysisLibraryPanel,
 .examAnalysisFormPanel,
 .examAnalysisUploadPanel,
+.examAnalysisQuestionCountPanel,
 .examAnalysisStepPanel,
 .examAnalysisEventPanel {
   padding: 16px;
@@ -917,6 +918,83 @@ button {
 .examAnalysisExtractionCheck span,
 .examAnalysisExtractionCheck small {
   white-space: normal;
+}
+
+.examAnalysisQuestionCountGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.45fr);
+}
+
+.examAnalysisQuestionCountCard,
+.examAnalysisQuestionCountConfirm,
+.questionRowsPreview {
+  background: #f8fafc;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+}
+
+.examAnalysisQuestionCountCard strong,
+.questionRowsPreview strong {
+  color: #17213d;
+  font-size: 16px;
+  font-weight: 950;
+}
+
+.examAnalysisQuestionCountCard span,
+.examAnalysisQuestionCountCard small,
+.questionRowsPreview span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.examAnalysisQuestionCountConfirm label {
+  color: #17213d;
+  display: grid;
+  font-size: 13px;
+  font-weight: 900;
+  gap: 7px;
+}
+
+.examAnalysisQuestionCountConfirm input {
+  background: #ffffff;
+  border: 1px solid #cbd8ee;
+  border-radius: 8px;
+  color: #0f172a;
+  min-height: 44px;
+  min-width: 0;
+  padding: 0 12px;
+}
+
+.questionRowsPreview {
+  margin-top: 12px;
+}
+
+.questionRowsPreviewChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.questionRowsPreviewChips span {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 999px;
+  color: #17213d;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  height: 28px;
+  justify-content: center;
+  min-width: 32px;
+  padding: 0 9px;
 }
 
 .examAnalysisSteps {
@@ -10764,6 +10842,7 @@ body.attendanceOnlyBody {
   }
 
   .examAnalysisFormGrid,
+  .examAnalysisQuestionCountGrid,
   .examAnalysisSteps {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -10893,6 +10972,7 @@ body.attendanceOnlyBody {
 
   .examAnalysisSourceItem,
   .examAnalysisEventItem,
+  .examAnalysisQuestionCountGrid,
   .examAnalysisSteps {
     grid-template-columns: 1fr;
   }
