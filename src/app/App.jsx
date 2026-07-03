@@ -502,6 +502,18 @@ const saveStateLabels = {
   failed: "저장 실패"
 };
 
+const defaultExamReviewDraft = `[시험지 총평]
+
+1. 시험 범위 :
+
+2. 난이도 :
+
+3. 문항 출처  :
+
+4. 특이사항  :
+
+5. 대비 방법  :`;
+
 function normalizeSaveState(saveState) {
   return Object.prototype.hasOwnProperty.call(saveStateLabels, saveState) ? saveState : "idle";
 }
@@ -10412,6 +10424,17 @@ function ExamPostSubmissionManager({
 function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUpdateRow, row, saveState = "idle" }) {
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
+  const seededReviewRowRef = useRef("");
+  const hasReviewText = String(row.review ?? "").trim().length > 0;
+  const reviewDraft = hasReviewText || seededReviewRowRef.current === row.examPrepId
+    ? row.review ?? ""
+    : defaultExamReviewDraft;
+
+  useEffect(() => {
+    if (!row.examPrepId || hasReviewText || seededReviewRowRef.current === row.examPrepId) return;
+    seededReviewRowRef.current = row.examPrepId;
+    onUpdateRow(row.examPrepId, "review", defaultExamReviewDraft);
+  }, [hasReviewText, onUpdateRow, row.examPrepId]);
 
   async function polishReview() {
     onUpdateRow(row.examPrepId, "reviewAiStatus", "AI 수정 중");
@@ -10428,7 +10451,7 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
           homeworkStatus: "시험 후 총평",
           lessonDate: row.mathExamDate || row.examPeriod || today,
           lessonName: `${row.schoolName} ${row.subject} 시험 총평`,
-          rawText: row.review ?? "",
+          rawText: reviewDraft,
           schoolName: row.schoolName,
           studentName: "시험관리"
         })
@@ -10467,7 +10490,7 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
           </div>
           <textarea
             className="commentComposerTextarea"
-            value={row.review ?? ""}
+            value={reviewDraft}
             onChange={(event) => onUpdateRow(row.examPrepId, "review", event.target.value)}
             placeholder="탈리 제출 원문, 현장 체감, 학생 반응 등을 적어주세요."
           />
@@ -10498,7 +10521,7 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
               <span>{row.specialNote || row.memo || "특이사항 없음"}</span>
             </div>
             <div className="messageBubble">
-              {(row.revisedReview || row.review || "왼쪽에 작성한 총평이 이 영역에 표시됩니다.").split("\n").map((line, index) => (
+              {(row.revisedReview || reviewDraft || "왼쪽에 작성한 총평이 이 영역에 표시됩니다.").split("\n").map((line, index) => (
                 <p key={`${line}_${index}`}>{line || "\u00a0"}</p>
               ))}
             </div>
