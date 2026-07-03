@@ -597,10 +597,25 @@ function syncExamReviewDraftWithExamPrepRow(review = "", row = {}) {
   return nextLines.join("\n");
 }
 
+function normalizeExamReviewDraftText(review = "", row = {}) {
+  const currentReview = String(review ?? "");
+  if (!isExamReviewDraftLike(currentReview)) return currentReview;
+  const lines = currentReview.replace(/\r\n/g, "\n").split("\n");
+  const titleIndex = lines.findIndex(isExamReviewDraftTitleLine);
+  if (titleIndex >= 0) lines[titleIndex] = getExamReviewDraftTitle(row);
+  return lines
+    .filter((line, index) => {
+      const currentLine = String(line ?? "").trim();
+      const previousLine = String(lines[index - 1] ?? "").trim();
+      return !currentLine || currentLine !== previousLine;
+    })
+    .join("\n");
+}
+
 function normalizeExamPrepRowReviewDraft(row = {}) {
   const currentReview = String(row.review ?? "");
   if (!isExamReviewDraftLike(currentReview)) return row;
-  const nextReview = syncExamReviewDraftWithExamPrepRow(currentReview, row);
+  const nextReview = normalizeExamReviewDraftText(currentReview, row);
   return nextReview === currentReview ? row : { ...row, review: nextReview };
 }
 
@@ -10529,30 +10544,24 @@ function ExamPostSubmissionManager({
 function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUpdateRow, row, saveState = "idle" }) {
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
-  const seededReviewRowRef = useRef("");
-  const currentReview = row.review ?? "";
-  const shouldSeedReviewDraft = !String(currentReview).trim() && seededReviewRowRef.current !== row.examPrepId;
-  const reviewDraft = !String(currentReview).trim()
-    ? shouldSeedReviewDraft ? createExamReviewDraft(row) : currentReview
-    : syncExamReviewDraftWithExamPrepRow(currentReview, row);
+  const [reviewDraft, setReviewDraft] = useState(() => {
+    const currentReview = String(row.review ?? "");
+    return currentReview.trim() ? normalizeExamReviewDraftText(currentReview, row) : createExamReviewDraft(row);
+  });
 
   useEffect(() => {
     if (!row.examPrepId) return;
-    if (!String(currentReview).trim() && !shouldSeedReviewDraft) return;
-    const nextReview = shouldSeedReviewDraft ? createExamReviewDraft(row) : syncExamReviewDraftWithExamPrepRow(currentReview, row);
+    const currentReview = String(row.review ?? "");
+    const nextReview = currentReview.trim() ? normalizeExamReviewDraftText(currentReview, row) : createExamReviewDraft(row);
+    setReviewDraft(nextReview);
     if (nextReview === currentReview) return;
-    if (shouldSeedReviewDraft) seededReviewRowRef.current = row.examPrepId;
     onUpdateRow(row.examPrepId, "review", nextReview);
-  }, [
-    currentReview,
-    onUpdateRow,
-    row.examPrepId,
-    row.memo,
-    row.scope,
-    row.specialNote,
-    row.subTextbook,
-    shouldSeedReviewDraft
-  ]);
+  }, [row.examPrepId]);
+
+  function updateReviewDraft(value) {
+    setReviewDraft(value);
+    onUpdateRow(row.examPrepId, "review", value);
+  }
 
   async function polishReview() {
     onUpdateRow(row.examPrepId, "reviewAiStatus", "AI 수정 중");
@@ -10609,7 +10618,7 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
           <textarea
             className="commentComposerTextarea"
             value={reviewDraft}
-            onChange={(event) => onUpdateRow(row.examPrepId, "review", event.target.value)}
+            onChange={(event) => updateReviewDraft(event.target.value)}
             placeholder="탈리 제출 원문, 현장 체감, 학생 반응 등을 적어주세요."
           />
           <small className="muted">{row.reviewAiStatus || "AI 대기"}</small>
