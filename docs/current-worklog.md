@@ -10,6 +10,17 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P0. 시험분석 v2 AI 결과 검수/선생님 확정
+
+- 상태: 완료
+- 사용자 확인: `AI 행 채움` 결과가 24/24개로 보이고, 새로고침 후에도 저장된 행 초안이 유지되는 것을 화면에서 확인했다.
+- 이번 작업 범위: AI가 채운 `단원`, `쎈 주유형`, `보조유형`, `난이도` 초안을 선생님이 행별로 수정하고 확정할 수 있는 `AI 결과 검수` 단계를 추가했다.
+- 백엔드: `POST /api/exam-analysis-runs/save-question-reviews`를 추가했다. 저장값은 기존 `exam_analysis_questions.teacher_fields`, `final_fields`, `teacher_override`, `manual_edit_count`, `teacher_edited_at`, `confirmed_at`, `row_status`를 사용한다. 새 SQL edit은 필요 없다.
+- 저장 원칙: 선생님이 입력한 값은 top-level `unit_name`, `main_type`, `sub_types`, `difficulty`와 `teacher_fields`에 저장되어 이후 화면/새로고침의 기준이 된다. 확정 체크된 행은 `final_fields`와 `row_status=confirmed`로 저장하고, 미확정 행은 `row_status=teacher_edited`로 남긴다.
+- 화면: `AI 행 채움` 아래에 `AI 결과 검수` 패널을 추가했다. 각 문항 카드에서 단원/주유형/보조유형/난이도/검수 메모를 수정하고 `확정` 체크를 할 수 있다. `모두 확정`과 `검수 저장` 버튼을 제공하며, 같은 패널 안에 `시험분석 · 검수 저장 중/완료/실패` 상태가 표시된다.
+- 진행 상태: 모든 문항이 확정되면 run의 `workflow_status=completed`, 일부만 확정되면 `workflow_status=teacher_review`로 저장한다. `audit_summary.teacherReview`에는 확정 수, 미확정 번호, 저장 시각을 남긴다.
+- 검증: `node --check api/routes/examAnalysisPipeline.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 통과(total 231, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P0. 시험분석 v2 AI 행 채움 1단계
 
 - 상태: 완료

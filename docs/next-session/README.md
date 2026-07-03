@@ -9,13 +9,13 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 
 
 최근 작업에서 기존 시험분석 탭과 관련 AI/PDF 분석 기능, app_state 저장 데이터 경로를 제거했습니다. 이후 사용자는 시험분석을 v2 파이프라인으로 새로 만들기로 했습니다. 옛 코드를 복구하지 말고 `PDF -> 텍스트 후보 추출 -> Claude 원본 검증 -> 문항 수 판독 -> 선생님 확인 -> 1~N 행 고정 -> AI 행 채움 -> 누락 검수 -> 재요청` 순서로 이어가 주세요.
 
-단, 다음 세션의 첫 작업은 시험분석 구현을 바로 이어가기 전에 `데이터 원천 중복/덧대기 전수조사`입니다. `fallback`, `sampleData`, `mock`, `default`, `infer*`, `normalize*`, `dedupe*`, `duplicate`, `legacy`, `deprecated`, `hiddenAppState`, `app_state`, `localStorage`, `override` 키워드로 후보를 표로 만들고, 원천 삭제/마이그레이션이 필요한 구조와 정상 파생 표시를 구분해 주세요. 필터/정규화/우선순위 보정을 여러 겹 덧대어 오류를 숨기지 말고, 시험분석 테스트 데이터가 손상됐으면 삭제 후 처음부터 다시 올리는 방향을 우선 검토하세요. 보정 로직이 2겹 이상 필요해 보이면 사용자에게 확인한 뒤 진행하세요.
+사용자는 `데이터 원천 중복/덧대기 전수조사`는 내일 하겠다고 했습니다. 지금 흐름에서는 시험분석 v2 파이프라인을 계속 이어가되, 필터/정규화/우선순위 보정을 여러 겹 덧대어 오류를 숨기지 마세요. 시험분석 테스트 데이터가 손상됐으면 삭제 후 처음부터 다시 올리는 방향을 우선 검토하고, 보정 로직이 2겹 이상 필요해 보이면 사용자에게 확인한 뒤 진행하세요.
 
 작업을 완료할 때마다 최종 답변에는 반드시 `사람 검토 절차`를 포함해 주세요. 최신 커밋/검토 화면, 사용할 테스트 데이터, 사용자가 누를 순서, 기대 결과, 저장 원천, 실패 시 중단 조건, 다음 단계 통과 기준을 순서대로 적어야 합니다.
 
 시험분석 탭, 시험분석 API, PDF 처리, Supabase v2 테이블, 분석 저장/삭제를 건드린 작업은 시험분석 탭 전용 검토 절차도 포함해야 합니다. 최소한 `학교 -> 학년 -> 고사 -> 분석` 카드 확인, PDF 업로드, 텍스트 후보 추출, 비용 허용 시 AI 원본 검증, Supabase/Storage 저장 확인, 새로고침 유지, 테스트 분석 삭제 확인, 중단 조건을 순서대로 안내하세요.
 
-현재 새 v2 구조의 SQL, 백엔드 run/PDF 업로드/삭제 API, 첫 UI(학교/학년/고사/분석 카드형 목록, 기본정보 저장, PDF 업로드, 상태 확인), PDF 텍스트 후보 추출, Claude 우선 원본 검증, 문항 수 선생님 확인, 1~N 빈 행 생성, 문항 경계 탐지 1단계, AI 행 채움 1단계까지 들어가 있습니다. 다음 작은 단계는 AI 행 채움 결과 검수와 선생님 확정 UI입니다.
+현재 새 v2 구조의 SQL, 백엔드 run/PDF 업로드/삭제 API, 첫 UI(학교/학년/고사/분석 카드형 목록, 기본정보 저장, PDF 업로드, 상태 확인), PDF 텍스트 후보 추출, Claude 우선 원본 검증, 문항 수 선생님 확인, 1~N 빈 행 생성, 문항 경계 탐지 1단계, AI 행 채움 1단계, AI 결과 검수/선생님 확정 UI까지 들어가 있습니다. 다음 작은 단계는 재확인/누락 문항만 다시 요청하는 누락 검수/재요청입니다.
 ```
 
 ## 현재 기준
@@ -27,7 +27,6 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 
   - `node --check api/routes/examAnalysisPipeline.js` 통과
   - `node --check api/server.js` 통과
   - `node --check scripts/scenario-tests-production.cjs` 통과
-  - `git diff --check` 통과
   - `npm run test:production` 통과: total 231, failed 0
   - `npm run build` 통과. 기존 Vite chunk size warning은 무시 가능한 알려진 경고다.
 - 운영 Supabase에서 즉시 기존 시험분석 저장 데이터를 지우려면 `supabase/20260703_remove_exam_analysis_app_state.sql`을 SQL editor에 적용한다. 앱/API에서는 `examAnalyses`, `examAnalysisFolders`를 deprecated app_state 키로 숨기고 다음 app_state 저장 때 삭제한다. SQL은 제거된 시험분석 `app_state`와 `exam-analysis-sources` Storage 객체/버킷만 지우며, 시험 후 제출용 `exam-submissions` 같은 활성 Storage는 건드리지 않는다.
@@ -63,22 +62,24 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 
 - 화면에는 `문항 경계 탐지` 카드와 `경계 탐지(과금)` 버튼이 있다. 버튼은 자동 실행하지 않는다. 완료 후 각 문항 카드에 `1p`, `2~3p` 같은 페이지 범위와 위치 힌트가 보인다. 저장 이벤트 시간은 `MM.DD HH:mm` 한국 시간 라벨로 표시한다.
 - `POST /api/exam-analysis-runs/fill-question-rows`는 확정 행과 경계 정보를 기준으로 AI 초안을 채운다. 결과는 `exam_analysis_questions.unit_name`, `main_type`, `sub_types`, `difficulty`, `ai_fields`, `ai_provider`, `ai_model`, `ai_filled_at`에 저장한다. 선생님이 이미 수정/확정한 행은 덮어쓰지 않고, `teacher_fields`/`final_fields`는 건드리지 않는다.
 - 화면에는 `AI 행 채움` 카드와 `AI 행 채움(과금)` 버튼이 있다. 완료 후 각 문항 카드에 단원, 유형, 난이도 초안이 보인다. 확실하지 않은 문항은 `missing`/재확인 대상으로 남는다.
+- `POST /api/exam-analysis-runs/save-question-reviews`는 선생님이 수정/확정한 검수 결과를 저장한다. 저장값은 기존 `exam_analysis_questions.teacher_fields`, `final_fields`, `teacher_override`, `manual_edit_count`, `teacher_edited_at`, `confirmed_at`, `row_status`를 사용하므로 새 SQL edit은 필요 없다.
+- 화면에는 `AI 결과 검수` 패널이 있다. 각 문항 카드에서 단원/주유형/보조유형/난이도/검수 메모를 수정하고 `확정` 체크를 할 수 있다. `모두 확정`, `검수 저장` 버튼과 `시험분석 · 검수 저장 중/완료/실패` 상태가 같은 패널 안에 표시된다.
+- 선생님이 입력한 값은 이후 화면/새로고침의 기준이다. AI 초안이나 자동 매핑이 검수본을 다시 덮어쓰면 안 된다. 모든 문항이 확정되면 `workflow_status=completed`, 일부만 확정되면 `workflow_status=teacher_review`가 된다.
 - 실제 운영 PDF `[자운고] 2026 1-1 기말 공통수학1.pdf` 검증 결과: 텍스트 추출은 `5쪽`, `52,792 bytes`, 문항번호 후보 `1~24`가 잡혔지만 PDF 텍스트 레이어 잡음이 감지됐다. Claude `claude-sonnet-4-5` 원본 검증은 `readable=true`, `pageCount=5`, `subject=공통수학1`, `questionCountCandidate=24`, 누락 번호 없음, 빠른 정답 감지로 성공했다.
 - 시험분석 v2 저장 경계에서 과목 `기하`는 빈 값으로 정리한다. 파일명/원본 검증이 `공통수학1`을 명확히 말하면 그 값을 사용한다.
-- 아직 AI 행 채움 결과의 사람 검수/수정/확정 UI, 누락 검수/재요청은 붙이지 않았다. AI 초안은 `ai_fields`일 뿐이며 선생님 확정 전까지 최종값으로 보지 않는다.
+- 아직 누락 검수/재요청은 붙이지 않았다. AI 초안은 `ai_fields`일 뿐이며, 선생님 검수 저장 후에는 `teacher_fields`/`final_fields`를 기준으로 다음 단계를 진행한다.
 
 ## 다음 세션 우선순위
 
-1. 데이터 원천 중복/덧대기 전수조사를 먼저 한다. 후보를 `원천 데이터`, `파생 표시`, `일시 override`, `마이그레이션/삭제 대상`, `정상 fallback`으로 분류하고, 바로 고치기 전에 목록과 우선순위를 확정한다.
-2. 1차 스캔 후보: `api/routes/coreData.js`의 `fallbackSource`/`sampleData` 반환, `src/app/App.jsx`의 `useStoredState(... sampleData ...)` 초기값, `dedupeExamPrepRowsForDisplay`, `inferExamCycleFromPrepId`, `app_state.generatedLessonControls`, `app_state.examPostTargetStudentIds`, `deprecatedAppStateKeys`/`hiddenAppStateKeys`, 수업일지 저장 직후 `localStorage` 직접 갱신 구간, 시험관리 중복 정리 API와 화면 dedupe 관계.
-3. 필터/정규화/우선순위 보정을 여러 겹 덧대어 오류를 숨기지 않는다. 테스트 단계 데이터가 손상됐으면 삭제 후 재업로드/재분석을 우선 검토하고, 보정 로직이 2겹 이상 필요해 보이면 사용자에게 확인한다.
-4. 작업 완료 답변에는 반드시 사람 검토 절차를 포함한다. 검토 절차는 최신 커밋, 데이터 준비, 화면 조작 순서, 기대 결과, 저장 원천, 실패/중단 조건, 통과 기준을 포함해야 한다.
-5. 시험분석을 건드린 작업은 시험분석 탭 전용 검토 절차를 추가로 포함한다.
-6. 기존 시험분석 기능을 복구하지 않는다.
-7. 운영 Supabase에서 새 v2 테이블과 `exam-analysis-pipeline-sources` Storage bucket이 정상인지 확인한다.
-8. 시험분석 다음 구현은 `AI 행 채움 결과 검수/선생님 확정 UI`다. AI가 채운 단원/유형/난이도/근거를 행별로 보고 수정할 수 있게 하고, 수정 후에는 사용자의 편집본이 원본이 되게 한다.
-9. 그 다음은 누락 검수/재요청이다. `row_status=missing`, `audit_summary.rowFill.needsReviewNumbers`에 남은 문항만 다시 요청할 수 있게 한다.
-10. 이전처럼 문항별 크롭/비전 분석으로 바로 가지 말고, 비용과 실패 지점을 작게 쪼개서 설계한다.
+1. 시험분석 다음 구현은 누락 검수/재요청이다. `row_status=missing`, `audit_summary.rowFill.needsReviewNumbers`, 또는 선생님이 미확정으로 남긴 문항만 다시 요청할 수 있게 한다.
+2. 재요청은 전체 24문항을 다시 덮어쓰지 않고 대상 문항만 처리해야 한다. 단, 선생님이 이미 수정/확정한 `teacher_fields`/`final_fields`는 덮어쓰지 않는다.
+3. 이전처럼 문항별 크롭/비전 분석으로 바로 가지 말고, 비용과 실패 지점을 작게 쪼개서 설계한다.
+4. 데이터 원천 중복/덧대기 전수조사는 사용자가 다시 요청하면 진행한다. 후보를 `원천 데이터`, `파생 표시`, `일시 override`, `마이그레이션/삭제 대상`, `정상 fallback`으로 분류하고, 바로 고치기 전에 목록과 우선순위를 확정한다.
+5. 필터/정규화/우선순위 보정을 여러 겹 덧대어 오류를 숨기지 않는다. 테스트 단계 데이터가 손상됐으면 삭제 후 재업로드/재분석을 우선 검토하고, 보정 로직이 2겹 이상 필요해 보이면 사용자에게 확인한다.
+6. 작업 완료 답변에는 반드시 사람 검토 절차를 포함한다. 검토 절차는 최신 커밋, 데이터 준비, 화면 조작 순서, 기대 결과, 저장 원천, 실패/중단 조건, 통과 기준을 포함해야 한다.
+7. 시험분석을 건드린 작업은 시험분석 탭 전용 검토 절차를 추가로 포함한다.
+8. 기존 시험분석 기능을 복구하지 않는다.
+9. 운영 Supabase에서 새 v2 테이블과 `exam-analysis-pipeline-sources` Storage bucket이 정상인지 확인한다.
 
 ## 참조 파일
 

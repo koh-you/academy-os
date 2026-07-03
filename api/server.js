@@ -59,6 +59,7 @@ import {
   saveExamAnalysisSourceExtraction,
   saveExamAnalysisQuestionBoundaries,
   saveExamAnalysisQuestionRowFill,
+  saveExamAnalysisQuestionTeacherReviews,
   updateExamAnalysisRun,
   updateExamAnalysisSource,
   upsertExamAnalysisRun
@@ -2308,6 +2309,20 @@ const server = http.createServer(async (request, response) => {
       const result = await fillExamAnalysisQuestionRowsWithAi({
         analysisRunId: payload.analysisRunId,
         sourceId: payload.sourceId
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-question-reviews") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await saveExamAnalysisQuestionTeacherReviews({
+        analysisRunId: payload.analysisRunId,
+        reviews: payload.reviews
       });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {

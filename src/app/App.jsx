@@ -1005,6 +1005,39 @@ function formatExamAnalysisBoundaryPage(boundary = {}) {
   return `${boundary.pageStart}p`;
 }
 
+function createExamAnalysisReviewDraft(question = {}) {
+  const teacherFields = question.teacherFields ?? {};
+  const subTypes = Array.isArray(teacherFields.subTypes)
+    ? teacherFields.subTypes
+    : Array.isArray(question.subTypes)
+      ? question.subTypes
+      : [];
+  return {
+    unitName: teacherFields.unitName ?? question.unitName ?? "",
+    mainType: teacherFields.mainType ?? question.mainType ?? "",
+    subTypesText: subTypes.join(", "),
+    difficulty: teacherFields.difficulty ?? question.difficulty ?? "",
+    reviewNote: teacherFields.reviewNote ?? "",
+    confirmed: question.rowStatus === "confirmed" || Boolean(question.confirmedAt)
+  };
+}
+
+function buildExamAnalysisReviewDrafts(questions = []) {
+  return Object.fromEntries(
+    (Array.isArray(questions) ? questions : [])
+      .filter((question) => Number.isInteger(Number(question.questionNumber)))
+      .map((question) => [String(question.questionNumber), createExamAnalysisReviewDraft(question)])
+  );
+}
+
+function parseExamAnalysisReviewSubTypes(value = "") {
+  return String(value ?? "")
+    .split(/[,，]/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 3);
+}
+
 function getExamAnalysisQuestionCountCandidate(run = {}, sourceFiles = []) {
   const files = Array.isArray(sourceFiles) ? sourceFiles : [];
   const visionChecks = files
@@ -1246,6 +1279,15 @@ function fillExamAnalysisQuestionRowsRequest(payload) {
     payload,
     240000,
     "AI 행 채움이 지연되고 있습니다."
+  );
+}
+
+function saveExamAnalysisQuestionReviewsRequest(payload) {
+  return postJsonWithTimeout(
+    "/api/exam-analysis-runs/save-question-reviews",
+    payload,
+    30000,
+    "문항 검수 저장이 지연되고 있습니다."
   );
 }
 
@@ -6504,6 +6546,7 @@ function NotificationCenter({
 function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const fileInputRef = useRef(null);
   const didAutoSelectExamPrepRef = useRef(Boolean(examPrepRows[0]?.examPrepId));
+  const reviewDraftRunIdRef = useRef("");
   const [analysisRuns, setAnalysisRuns] = useState([]);
   const [selectedRunId, setSelectedRunId] = useState("");
   const [selectedDetail, setSelectedDetail] = useState(null);
@@ -6541,6 +6584,9 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const [isDetectingBoundaries, setIsDetectingBoundaries] = useState(false);
   const [rowFillStatus, setRowFillStatus] = useState({ state: "idle", message: "" });
   const [isFillingRows, setIsFillingRows] = useState(false);
+  const [reviewStatus, setReviewStatus] = useState({ state: "idle", message: "" });
+  const [reviewDrafts, setReviewDrafts] = useState({});
+  const [isSavingReviews, setIsSavingReviews] = useState(false);
 
   const selectedExamPrepRow = useMemo(
     () => examPrepRows.find((row) => row.examPrepId === selectedExamPrepId) ?? null,
@@ -6557,6 +6603,19 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   );
   const boundaryDetection = activeRun?.auditSummary?.boundaryDetection ?? null;
   const rowFill = activeRun?.auditSummary?.rowFill ?? null;
+  const teacherReview = activeRun?.auditSummary?.teacherReview ?? null;
+  const reviewSeedKey = useMemo(
+    () => questionRows
+      .map((question) => [
+        question.questionNumber,
+        question.rowStatus,
+        question.teacherEditedAt,
+        question.confirmedAt,
+        question.updatedAt
+      ].join(":"))
+      .join("|"),
+    [questionRows]
+  );
   const schoolCards = useMemo(() => {
     const customSchools = [...new Set([
       ...examPrepRows.map((row) => normalizeExamAnalysisSchoolName(row.schoolName)),
@@ -6636,6 +6695,31 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     const nextCount = Number(activeRun?.confirmedQuestionCount || questionCountCandidate.count || 0);
     setQuestionCountDraft(nextCount ? String(nextCount) : "");
   }, [activeRun?.analysisRunId, activeRun?.confirmedQuestionCount, questionCountCandidate.count]);
+
+  useEffect(() => {
+    const runId = activeRun?.analysisRunId || "";
+    if (!runId || !questionRows.length) {
+      reviewDraftRunIdRef.current = runId;
+      setReviewDrafts({});
+      return;
+    }
+    const seededDrafts = buildExamAnalysisReviewDrafts(questionRows);
+    if (reviewDraftRunIdRef.current !== runId) {
+      reviewDraftRunIdRef.current = runId;
+      setReviewDrafts(seededDrafts);
+      return;
+    }
+    setReviewDrafts((current) => {
+      const next = { ...current };
+      Object.keys(next).forEach((questionNumber) => {
+        if (!seededDrafts[questionNumber]) delete next[questionNumber];
+      });
+      Object.entries(seededDrafts).forEach(([questionNumber, draftValue]) => {
+        if (!next[questionNumber]) next[questionNumber] = draftValue;
+      });
+      return next;
+    });
+  }, [activeRun?.analysisRunId, questionRows.length, reviewSeedKey]);
 
   function applyExamPrepRow(row) {
     if (!row) return;
@@ -7074,6 +7158,87 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     }
   }
 
+  function updateReviewDraft(questionNumber, patch) {
+    const key = String(questionNumber);
+    setReviewDrafts((current) => ({
+      ...current,
+      [key]: {
+        ...(current[key] ?? {}),
+        ...patch
+      }
+    }));
+  }
+
+  function markAllQuestionReviewsConfirmed() {
+    setReviewDrafts((current) => {
+      const seededDrafts = buildExamAnalysisReviewDrafts(questionRows);
+      return Object.fromEntries(
+        questionRows.map((question) => {
+          const key = String(question.questionNumber);
+          return [
+            key,
+            {
+              ...(seededDrafts[key] ?? {}),
+              ...(current[key] ?? {}),
+              confirmed: true
+            }
+          ];
+        })
+      );
+    });
+  }
+
+  function buildQuestionReviewPayload() {
+    return questionRows.map((question) => {
+      const key = String(question.questionNumber);
+      const draftValue = reviewDrafts[key] ?? createExamAnalysisReviewDraft(question);
+      return {
+        questionNumber: Number(question.questionNumber),
+        unitName: draftValue.unitName ?? "",
+        mainType: draftValue.mainType ?? "",
+        subTypes: parseExamAnalysisReviewSubTypes(draftValue.subTypesText),
+        difficulty: draftValue.difficulty ?? "",
+        reviewNote: draftValue.reviewNote ?? "",
+        confirmed: Boolean(draftValue.confirmed)
+      };
+    });
+  }
+
+  async function saveQuestionReviews() {
+    if (!activeRun?.analysisRunId) {
+      setReviewStatus({ state: "failed", message: "시험분석 · 분석을 먼저 저장해 주세요." });
+      return;
+    }
+    if (!questionRows.length) {
+      setReviewStatus({ state: "failed", message: "시험분석 · 검수할 문항 행이 없습니다." });
+      return;
+    }
+
+    setIsSavingReviews(true);
+    setReviewStatus({ state: "saving", message: "시험분석 · 검수 저장 중" });
+    try {
+      const result = await saveExamAnalysisQuestionReviewsRequest({
+        analysisRunId: activeRun.analysisRunId,
+        reviews: buildQuestionReviewPayload()
+      });
+      const totalCount = result.teacherReview?.totalQuestionCount || result.questions?.length || questionRows.length;
+      const confirmedCount = result.teacherReview?.confirmedCount || result.questions?.filter((question) => question.rowStatus === "confirmed").length || 0;
+      setSelectedDetail(result);
+      setReviewDrafts(buildExamAnalysisReviewDrafts(result.questions ?? []));
+      setReviewStatus({
+        state: "success",
+        message: `시험분석 · 검수 저장 완료 · ${confirmedCount}/${totalCount}개 확정`
+      });
+      await loadRuns(activeRun.analysisRunId);
+      await loadRunDetail(activeRun.analysisRunId);
+    } catch (error) {
+      setReviewStatus({ state: "failed", message: `시험분석 · 검수 저장 실패 · ${error.message}` });
+      if (selectedRunId) await loadRunDetail(selectedRunId);
+    } finally {
+      setIsSavingReviews(false);
+    }
+  }
+
   const confirmedQuestionCount = Number(activeRun?.confirmedQuestionCount || 0);
   const questionRowNumbers = questionRows
     .map((question) => Number(question.questionNumber))
@@ -7091,6 +7256,11 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     question.aiFields?.needsReview ||
     question.aiFields?.warnings?.length
   ));
+  const reviewRowsReady = questionRows.length > 0 && (Boolean(rowFill) || aiFilledRows.length > 0 || Boolean(teacherReview));
+  const confirmedReviewCount = questionRows.filter((question) => {
+    const draftValue = reviewDrafts[String(question.questionNumber)] ?? createExamAnalysisReviewDraft(question);
+    return Boolean(draftValue.confirmed);
+  }).length;
   const questionCountButtonLabel = isConfirmingQuestionCount
     ? "확정 중"
     : questionCountDraft
@@ -7111,7 +7281,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       </div>
 
       <div className="examAnalysisStatusBar">
-        {[loadStatus, saveStatus, uploadStatus, extractStatus, visionStatus, confirmStatus, boundaryStatus, rowFillStatus, deleteStatus].filter((item) => item.message).map((item, index) => (
+        {[loadStatus, saveStatus, uploadStatus, extractStatus, visionStatus, confirmStatus, boundaryStatus, rowFillStatus, reviewStatus, deleteStatus].filter((item) => item.message).map((item, index) => (
           <span className={`saveStateBadge ${item.state}`} key={`${item.message}-${index}`}>{item.message}</span>
         ))}
       </div>
@@ -7551,6 +7721,119 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
             ) : null}
           </div>
 
+          <div className="panel examAnalysisReviewPanel">
+            <div className="sectionHeader slim">
+              <div>
+                <strong>AI 결과 검수</strong>
+                <span>{questionRows.length ? `${confirmedReviewCount}/${questionRows.length}개 확정` : "대기"}</span>
+              </div>
+              <div className="headerActions">
+                {reviewStatus.message ? <span className={`saveStateBadge ${reviewStatus.state}`}>{reviewStatus.message}</span> : null}
+                <button
+                  className="secondaryButton"
+                  disabled={!reviewRowsReady || isSavingReviews}
+                  onClick={markAllQuestionReviewsConfirmed}
+                  type="button"
+                >
+                  모두 확정
+                </button>
+                <button
+                  className="primaryButton"
+                  disabled={!reviewRowsReady || isSavingReviews}
+                  onClick={saveQuestionReviews}
+                  type="button"
+                >
+                  {isSavingReviews ? "저장 중" : "검수 저장"}
+                </button>
+              </div>
+            </div>
+            {teacherReview ? (
+              <div className={teacherReview.status === "completed" ? "examAnalysisReviewSummary ok" : "examAnalysisReviewSummary needsReview"}>
+                <strong>{teacherReview.status === "completed" ? "검수 완료" : "검수 진행 중"}</strong>
+                <span>
+                  {teacherReview.confirmedCount || 0}/{teacherReview.totalQuestionCount || questionRows.length || 0}개
+                  {teacherReview.reviewedAt ? ` · ${formatExamAnalysisEventTime(teacherReview.reviewedAt)}` : ""}
+                </span>
+                {teacherReview.unconfirmedNumbers?.length ? <small>미확정 {teacherReview.unconfirmedNumbers.join(", ")}</small> : null}
+              </div>
+            ) : null}
+            {reviewRowsReady ? (
+              <div className="examAnalysisReviewGrid">
+                {questionRows.map((question) => {
+                  const draftValue = reviewDrafts[String(question.questionNumber)] ?? createExamAnalysisReviewDraft(question);
+                  const needsReview = question.rowStatus === "missing" || question.aiFields?.needsReview || question.aiFields?.warnings?.length;
+                  const reviewClassName = [
+                    "examAnalysisReviewCard",
+                    needsReview ? "needsReview" : "",
+                    draftValue.confirmed ? "confirmed" : ""
+                  ].filter(Boolean).join(" ");
+                  return (
+                    <div className={reviewClassName} key={question.questionRowId || question.questionNumber}>
+                      <div className="examAnalysisReviewCardHeader">
+                        <strong>{question.questionNumber}</strong>
+                        <label>
+                          <input
+                            checked={Boolean(draftValue.confirmed)}
+                            onChange={(event) => updateReviewDraft(question.questionNumber, { confirmed: event.target.checked })}
+                            type="checkbox"
+                          />
+                          확정
+                        </label>
+                      </div>
+                      <label>
+                        <span>단원</span>
+                        <input
+                          value={draftValue.unitName}
+                          onChange={(event) => updateReviewDraft(question.questionNumber, { unitName: event.target.value })}
+                          placeholder="단원"
+                        />
+                      </label>
+                      <label>
+                        <span>주유형</span>
+                        <input
+                          value={draftValue.mainType}
+                          onChange={(event) => updateReviewDraft(question.questionNumber, { mainType: event.target.value })}
+                          placeholder="쎈 주유형"
+                        />
+                      </label>
+                      <label>
+                        <span>보조유형</span>
+                        <input
+                          value={draftValue.subTypesText}
+                          onChange={(event) => updateReviewDraft(question.questionNumber, { subTypesText: event.target.value })}
+                          placeholder="쉼표로 구분"
+                        />
+                      </label>
+                      <label>
+                        <span>난이도</span>
+                        <select
+                          value={draftValue.difficulty}
+                          onChange={(event) => updateReviewDraft(question.questionNumber, { difficulty: event.target.value })}
+                        >
+                          <option value="">선택</option>
+                          <option value="하">하</option>
+                          <option value="중">중</option>
+                          <option value="중상">중상</option>
+                          <option value="상">상</option>
+                        </select>
+                      </label>
+                      <label className="span2">
+                        <span>검수 메모</span>
+                        <input
+                          value={draftValue.reviewNote}
+                          onChange={(event) => updateReviewDraft(question.questionNumber, { reviewNote: event.target.value })}
+                          placeholder="재확인 근거나 수정 이유"
+                        />
+                      </label>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="emptyState compact">AI 행 채움 후 검수할 수 있습니다.</div>
+            )}
+          </div>
+
           <div className="panel examAnalysisStepPanel">
             <div className="sectionHeader slim">
               <div>
@@ -7567,13 +7850,15 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                 ["rows_created", "1~N 행 고정"],
                 ["boundary_detected", "문항 경계"],
                 ["ai_filled", "AI 행 채움"],
+                ["teacher_review", "선생님 검수"],
                 ["completed", "최종 확정"]
               ].map(([status, label]) => (
                 <span
                   className={
                     activeRun?.workflowStatus === status ||
                     (status === "boundary_detected" && boundaryDetection) ||
-                    (status === "ai_filled" && rowFill)
+                    (status === "ai_filled" && rowFill) ||
+                    (status === "teacher_review" && teacherReview)
                       ? "active"
                       : ""
                   }

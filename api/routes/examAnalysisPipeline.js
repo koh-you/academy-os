@@ -253,6 +253,26 @@ function normalizeQuestionRowFill(row = {}) {
   };
 }
 
+function normalizeQuestionTeacherReview(review = {}) {
+  const questionNumber = Number(review.questionNumber ?? review.question_number);
+  if (!Number.isInteger(questionNumber) || questionNumber < 1 || questionNumber > 200) return null;
+  const subTypesValue = review.subTypes ?? review.sub_types ?? [];
+  const subTypes = Array.isArray(subTypesValue)
+    ? subTypesValue
+    : String(subTypesValue || "").split(/[,，]/);
+  const unitName = String(review.unitName ?? review.unit_name ?? "").trim().slice(0, 120);
+  const mainType = String(review.mainType ?? review.main_type ?? "").trim().slice(0, 160);
+  return {
+    questionNumber,
+    unitName,
+    mainType,
+    subTypes: subTypes.map((item) => String(item).trim()).filter(Boolean).slice(0, 3),
+    difficulty: String(review.difficulty ?? "").trim().slice(0, 40),
+    reviewNote: String(review.reviewNote ?? review.review_note ?? "").trim().slice(0, 500),
+    confirmed: Boolean(review.confirmed) && Boolean(unitName) && Boolean(mainType)
+  };
+}
+
 function requireServiceRole() {
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
     throw new Error("시험분석 v2 저장에는 Supabase service role 설정이 필요합니다.");
@@ -708,6 +728,111 @@ export async function saveExamAnalysisQuestionRowFill({
     ...nextDetail,
     source: databaseSource,
     rowFill: nextDetail.analysisRun?.auditSummary?.rowFill ?? null
+  };
+}
+
+export async function saveExamAnalysisQuestionTeacherReviews({
+  analysisRunId,
+  reviews = []
+} = {}) {
+  if (!analysisRunId) throw new Error("analysisRunId가 필요합니다.");
+  requireServiceRole();
+
+  const detail = await getExamAnalysisRun(analysisRunId);
+  if (!detail.analysisRun?.analysisRunId) throw new Error("시험분석 작업을 찾지 못했습니다.");
+  const questions = detail.questions ?? [];
+  if (!questions.length) throw new Error("고정 문항 행을 먼저 생성해 주세요.");
+
+  const questionMap = new Map(questions.map((question) => [Number(question.questionNumber), question]));
+  const normalizedReviews = (Array.isArray(reviews) ? reviews : [])
+    .map(normalizeQuestionTeacherReview)
+    .filter((review) => review && questionMap.has(review.questionNumber));
+  if (!normalizedReviews.length) throw new Error("저장할 검수 문항이 없습니다.");
+
+  const reviewedAt = new Date().toISOString();
+  for (const review of normalizedReviews) {
+    const question = questionMap.get(review.questionNumber);
+    const teacherFields = {
+      source: "teacher_review",
+      reviewedAt,
+      unitName: review.unitName,
+      mainType: review.mainType,
+      subTypes: review.subTypes,
+      difficulty: review.difficulty,
+      reviewNote: review.reviewNote
+    };
+    const patch = {
+      row_status: review.confirmed ? "confirmed" : "teacher_edited",
+      unit_name: review.unitName || null,
+      main_type: review.mainType || null,
+      sub_types: review.subTypes,
+      difficulty: review.difficulty || null,
+      teacher_fields: teacherFields,
+      final_fields: review.confirmed ? { ...teacherFields, confirmedAt: reviewedAt } : {},
+      teacher_override: true,
+      manual_edit_count: Number(question?.manualEditCount || 0) + 1,
+      teacher_edited_at: reviewedAt,
+      confirmed_at: review.confirmed ? reviewedAt : null,
+      updated_at: reviewedAt
+    };
+    await patchRows(
+      "exam_analysis_questions",
+      `analysis_run_id=eq.${encodeURIComponent(analysisRunId)}&question_number=eq.${review.questionNumber}`,
+      patch
+    );
+  }
+
+  const rowsAfterReview = await listRows(
+    "exam_analysis_questions",
+    `select=*&analysis_run_id=eq.${encodeURIComponent(analysisRunId)}&order=question_number.asc`,
+    { requireServiceRole: true }
+  );
+  const nextQuestions = rowsAfterReview.map(fromQuestionRow);
+  const totalQuestionCount = nextQuestions.length;
+  const confirmedCount = nextQuestions.filter((question) => question.rowStatus === "confirmed").length;
+  const editedCount = nextQuestions.filter((question) => question.teacherOverride).length;
+  const unconfirmedNumbers = nextQuestions
+    .filter((question) => question.rowStatus !== "confirmed")
+    .map((question) => Number(question.questionNumber))
+    .filter((number) => Number.isInteger(number))
+    .sort((a, b) => a - b);
+  const status = confirmedCount === totalQuestionCount ? "completed" : "in_progress";
+
+  await updateExamAnalysisRun(analysisRunId, {
+    workflowStatus: status === "completed" ? "completed" : "teacher_review",
+    auditSummary: {
+      ...(detail.analysisRun.auditSummary ?? {}),
+      teacherReview: {
+        status,
+        reviewedAt,
+        reviewedCount: normalizedReviews.length,
+        editedCount,
+        confirmedCount,
+        totalQuestionCount,
+        unconfirmedNumbers
+      }
+    }
+  });
+
+  await recordExamAnalysisEvent({
+    analysisRunId,
+    eventType: "question_teacher_review_saved",
+    message: `선생님 검수 결과를 저장했습니다. 확정 ${confirmedCount}/${totalQuestionCount}개.`,
+    payload: {
+      status,
+      reviewedCount: normalizedReviews.length,
+      editedCount,
+      confirmedCount,
+      totalQuestionCount,
+      unconfirmedNumbers
+    }
+  });
+
+  const nextDetail = await getExamAnalysisRun(analysisRunId);
+  return {
+    ...nextDetail,
+    source: databaseSource,
+    teacherReview: nextDetail.analysisRun?.auditSummary?.teacherReview ?? null
   };
 }
 
