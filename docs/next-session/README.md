@@ -13,6 +13,8 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 
 
 작업을 완료할 때마다 최종 답변에는 반드시 `사람 검토 절차`를 포함해 주세요. 최신 커밋/검토 화면, 사용할 테스트 데이터, 사용자가 누를 순서, 기대 결과, 저장 원천, 실패 시 중단 조건, 다음 단계 통과 기준을 순서대로 적어야 합니다.
 
+시험분석 탭, 시험분석 API, PDF 처리, Supabase v2 테이블, 분석 저장/삭제를 건드린 작업은 시험분석 탭 전용 검토 절차도 포함해야 합니다. 최소한 `학교 -> 학년 -> 고사 -> 분석` 카드 확인, PDF 업로드, 텍스트 후보 추출, 비용 허용 시 AI 원본 검증, Supabase/Storage 저장 확인, 새로고침 유지, 테스트 분석 삭제 확인, 중단 조건을 순서대로 안내하세요.
+
 현재 새 v2 구조의 SQL, 백엔드 run/PDF 업로드/삭제 API, 첫 UI(학교/학년/고사/분석 카드형 목록, 기본정보 저장, PDF 업로드, 상태 확인), PDF 텍스트 후보 추출, Claude 우선 원본 검증까지 들어가 있습니다. 전수조사 후 다음 구현은 문항 수 후보를 선생님이 확인하고 1~N 빈 행을 고정 생성하는 단계입니다.
 ```
 
@@ -65,12 +67,13 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 
 2. 1차 스캔 후보: `api/routes/coreData.js`의 `fallbackSource`/`sampleData` 반환, `src/app/App.jsx`의 `useStoredState(... sampleData ...)` 초기값, `dedupeExamPrepRowsForDisplay`, `inferExamCycleFromPrepId`, `app_state.generatedLessonControls`, `app_state.examPostTargetStudentIds`, `deprecatedAppStateKeys`/`hiddenAppStateKeys`, 수업일지 저장 직후 `localStorage` 직접 갱신 구간, 시험관리 중복 정리 API와 화면 dedupe 관계.
 3. 필터/정규화/우선순위 보정을 여러 겹 덧대어 오류를 숨기지 않는다. 테스트 단계 데이터가 손상됐으면 삭제 후 재업로드/재분석을 우선 검토하고, 보정 로직이 2겹 이상 필요해 보이면 사용자에게 확인한다.
 4. 작업 완료 답변에는 반드시 사람 검토 절차를 포함한다. 검토 절차는 최신 커밋, 데이터 준비, 화면 조작 순서, 기대 결과, 저장 원천, 실패/중단 조건, 통과 기준을 포함해야 한다.
-5. 기존 시험분석 기능을 복구하지 않는다.
-6. 운영 Supabase에서 새 v2 테이블과 `exam-analysis-pipeline-sources` Storage bucket이 정상인지 확인한다.
-7. 전수조사 후 시험분석 다음 구현은 문항 수 후보 확인 UI다. 텍스트 후보와 Claude 원본 검증 결과를 비교해 `detected_question_count`, `detected_question_evidence`, `missing_question_numbers`, `question_count_status`에 저장한다.
-8. 선생님이 N을 확인하면 `ensure_exam_analysis_question_rows(run_id, count)`로 1~N 빈 행을 고정 생성한다.
-9. 그 다음은 `문항 경계 탐지` 단계다. Claude에게 문제 풀이/유형분류를 시키지 말고, 1~N 각 문항의 page, 대략 위치, 다음 문항 전까지의 범위만 JSON으로 받는다. 한 문항이 두 페이지에 걸치는 경우도 표시해야 한다.
-10. AI 행 채움은 경계 탐지 후의 다음 단계다. 이전처럼 문항별 크롭/비전 분석으로 바로 가지 말고, 비용과 실패 지점을 작게 쪼개서 설계한다.
+5. 시험분석을 건드린 작업은 시험분석 탭 전용 검토 절차를 추가로 포함한다.
+6. 기존 시험분석 기능을 복구하지 않는다.
+7. 운영 Supabase에서 새 v2 테이블과 `exam-analysis-pipeline-sources` Storage bucket이 정상인지 확인한다.
+8. 전수조사 후 시험분석 다음 구현은 문항 수 후보 확인 UI다. 텍스트 후보와 Claude 원본 검증 결과를 비교해 `detected_question_count`, `detected_question_evidence`, `missing_question_numbers`, `question_count_status`에 저장한다.
+9. 선생님이 N을 확인하면 `ensure_exam_analysis_question_rows(run_id, count)`로 1~N 빈 행을 고정 생성한다.
+10. 그 다음은 `문항 경계 탐지` 단계다. Claude에게 문제 풀이/유형분류를 시키지 말고, 1~N 각 문항의 page, 대략 위치, 다음 문항 전까지의 범위만 JSON으로 받는다. 한 문항이 두 페이지에 걸치는 경우도 표시해야 한다.
+11. AI 행 채움은 경계 탐지 후의 다음 단계다. 이전처럼 문항별 크롭/비전 분석으로 바로 가지 말고, 비용과 실패 지점을 작게 쪼개서 설계한다.
 
 ## 참조 파일
 
