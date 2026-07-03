@@ -518,9 +518,14 @@ function formatExamReviewDraftLine(label, value = "") {
   return [`${label} ${firstLine}`, ...restLines].join("\n");
 }
 
+function getExamReviewDraftTitle(row = {}) {
+  const schoolName = String(row.schoolName ?? "").trim();
+  return schoolName ? `[${schoolName} 시험지 총평]` : "[시험지 총평]";
+}
+
 function createExamReviewDraft(row = {}) {
   const specialNote = row.specialNote ?? row.memo ?? "";
-  return `[시험지 총평]
+  return `${getExamReviewDraftTitle(row)}
 
 ${formatExamReviewDraftLine("1. 시험 범위 :", row.scope)}
 
@@ -535,6 +540,10 @@ ${formatExamReviewDraftLine("4. 특이사항  :", specialNote)}
 
 const defaultExamReviewDraft = createExamReviewDraft();
 
+function isExamReviewDraftTitleLine(line = "") {
+  return /^\[(?:.+\s+)?시험지 총평\]$/.test(String(line).trim());
+}
+
 function isExamReviewDraftLike(value = "") {
   const lines = String(value ?? "")
     .replace(/\r\n/g, "\n")
@@ -542,7 +551,7 @@ function isExamReviewDraftLike(value = "") {
     .map((line) => line.trim())
     .filter(Boolean);
   return (
-    lines[0] === "[시험지 총평]" &&
+    isExamReviewDraftTitleLine(lines[0]) &&
     lines.some((line) => /^1\.\s*시험 범위\s*:/.test(line)) &&
     lines.some((line) => /^3\.\s*문항 출처\s*:/.test(line))
   );
@@ -579,8 +588,10 @@ function syncExamReviewDraftWithExamPrepRow(review = "", row = {}) {
   if (!isExamReviewDraftLike(currentReview)) return currentReview;
   const nextScope = normalizeExamReviewDraftValue(row.scope);
   const nextSubTextbook = normalizeExamReviewDraftValue(row.subTextbook);
-  if (!nextScope && !nextSubTextbook) return currentReview;
   let nextLines = currentReview.replace(/\r\n/g, "\n").split("\n");
+  const titleIndex = nextLines.findIndex(isExamReviewDraftTitleLine);
+  if (titleIndex >= 0) nextLines[titleIndex] = getExamReviewDraftTitle(row);
+  if (!nextScope && !nextSubTextbook) return nextLines.join("\n");
   nextLines = replaceExamReviewDraftField(nextLines, /^1\.\s*시험 범위\s*:/, "1. 시험 범위 :", nextScope);
   nextLines = replaceExamReviewDraftField(nextLines, /^3\.\s*문항 출처\s*:/, "3. 문항 출처  :", nextSubTextbook);
   return nextLines.join("\n");
