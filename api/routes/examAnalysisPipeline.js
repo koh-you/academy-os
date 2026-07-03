@@ -215,6 +215,23 @@ function fromEventRow(row = {}) {
   };
 }
 
+function normalizeQuestionBoundary(boundary = {}) {
+  const questionNumber = Number(boundary.questionNumber ?? boundary.question_number);
+  if (!Number.isInteger(questionNumber) || questionNumber < 1 || questionNumber > 200) return null;
+  const pageStart = Number(boundary.pageStart ?? boundary.page_start ?? boundary.page ?? boundary.sourcePage);
+  const pageEnd = Number(boundary.pageEnd ?? boundary.page_end ?? pageStart);
+  return {
+    questionNumber,
+    pageStart: Number.isInteger(pageStart) && pageStart > 0 ? pageStart : null,
+    pageEnd: Number.isInteger(pageEnd) && pageEnd > 0 ? pageEnd : Number.isInteger(pageStart) && pageStart > 0 ? pageStart : null,
+    positionHint: String(boundary.positionHint ?? boundary.position_hint ?? "").slice(0, 120),
+    startEvidence: String(boundary.startEvidence ?? boundary.start_evidence ?? "").slice(0, 300),
+    endEvidence: String(boundary.endEvidence ?? boundary.end_evidence ?? "").slice(0, 300),
+    needsReview: Boolean(boundary.needsReview ?? boundary.needs_review),
+    warnings: Array.isArray(boundary.warnings) ? boundary.warnings.map(String).slice(0, 5) : []
+  };
+}
+
 function requireServiceRole() {
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
     throw new Error("시험분석 v2 저장에는 Supabase service role 설정이 필요합니다.");
@@ -469,6 +486,94 @@ export async function confirmExamAnalysisQuestionCount({
     ...nextDetail,
     source: databaseSource,
     insertedQuestionCount: Number(insertedQuestionCount || 0)
+  };
+}
+
+export async function saveExamAnalysisQuestionBoundaries({
+  analysisRunId,
+  sourceId,
+  boundaryResult = {}
+} = {}) {
+  if (!analysisRunId) throw new Error("analysisRunId가 필요합니다.");
+  if (!sourceId) throw new Error("sourceId가 필요합니다.");
+  requireServiceRole();
+
+  const detail = await getExamAnalysisRun(analysisRunId);
+  if (!detail.analysisRun?.analysisRunId) throw new Error("시험분석 작업을 찾지 못했습니다.");
+  const questionNumbers = new Set((detail.questions ?? []).map((question) => Number(question.questionNumber)));
+  if (!questionNumbers.size) throw new Error("고정 문항 행을 먼저 생성해 주세요.");
+
+  const detectedAt = new Date().toISOString();
+  const boundaries = (Array.isArray(boundaryResult.questionBoundaries) ? boundaryResult.questionBoundaries : [])
+    .map(normalizeQuestionBoundary)
+    .filter((boundary) => boundary && questionNumbers.has(boundary.questionNumber));
+
+  for (const boundary of boundaries) {
+    await patchRows(
+      "exam_analysis_questions",
+      `analysis_run_id=eq.${encodeURIComponent(analysisRunId)}&question_number=eq.${boundary.questionNumber}`,
+      {
+        source_page: boundary.pageStart,
+        source_evidence: {
+          sourceId,
+          detectedAt,
+          provider: boundaryResult.provider || "",
+          model: boundaryResult.model || "",
+          boundary
+        },
+        updated_at: detectedAt
+      }
+    );
+  }
+
+  const detectedNumbers = new Set(boundaries.map((boundary) => boundary.questionNumber));
+  const missingQuestionNumbers = [...questionNumbers]
+    .filter((questionNumber) => !detectedNumbers.has(questionNumber))
+    .sort((a, b) => a - b);
+  const needsReviewNumbers = boundaries
+    .filter((boundary) => boundary.needsReview || boundary.warnings.length || !boundary.pageStart)
+    .map((boundary) => boundary.questionNumber)
+    .sort((a, b) => a - b);
+  const status = missingQuestionNumbers.length || needsReviewNumbers.length ? "needs_review" : "detected";
+
+  await updateExamAnalysisRun(analysisRunId, {
+    auditSummary: {
+      ...(detail.analysisRun.auditSummary ?? {}),
+      boundaryDetection: {
+        sourceId,
+        status,
+        detectedAt,
+        provider: boundaryResult.provider || "",
+        model: boundaryResult.model || "",
+        detectedCount: boundaries.length,
+        totalQuestionCount: questionNumbers.size,
+        missingQuestionNumbers,
+        needsReviewNumbers,
+        overlapWarnings: Array.isArray(boundaryResult.overlapWarnings) ? boundaryResult.overlapWarnings.map(String).slice(0, 20) : [],
+        summary: String(boundaryResult.summary || "").slice(0, 500)
+      }
+    }
+  });
+
+  await recordExamAnalysisEvent({
+    analysisRunId,
+    eventType: "question_boundary_detected",
+    message: `문항 경계를 ${boundaries.length}/${questionNumbers.size}개 탐지했습니다.`,
+    payload: {
+      sourceId,
+      status,
+      detectedCount: boundaries.length,
+      totalQuestionCount: questionNumbers.size,
+      missingQuestionNumbers,
+      needsReviewNumbers
+    }
+  });
+
+  const nextDetail = await getExamAnalysisRun(analysisRunId);
+  return {
+    ...nextDetail,
+    source: databaseSource,
+    boundaryDetection: nextDetail.analysisRun?.auditSummary?.boundaryDetection ?? null
   };
 }
 

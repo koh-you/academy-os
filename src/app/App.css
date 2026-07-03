@@ -664,6 +664,7 @@ button {
 .examAnalysisFormPanel,
 .examAnalysisUploadPanel,
 .examAnalysisQuestionCountPanel,
+.examAnalysisBoundaryPanel,
 .examAnalysisStepPanel,
 .examAnalysisEventPanel {
   padding: 16px;
@@ -997,10 +998,89 @@ button {
   padding: 0 9px;
 }
 
+.examAnalysisBoundarySummary {
+  background: #ecfdf5;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  display: grid;
+  gap: 5px;
+  margin-bottom: 12px;
+  padding: 12px;
+}
+
+.examAnalysisBoundarySummary.needsReview {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.examAnalysisBoundarySummary strong {
+  color: #17213d;
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.examAnalysisBoundarySummary span,
+.examAnalysisBoundarySummary small {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.examAnalysisBoundaryGrid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+}
+
+.examAnalysisBoundaryCard {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 5px;
+  min-height: 86px;
+  padding: 10px;
+}
+
+.examAnalysisBoundaryCard.needsReview {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.examAnalysisBoundaryCard strong {
+  align-items: center;
+  background: #eff6ff;
+  border: 1px solid #d8e3f8;
+  border-radius: 999px;
+  color: #17213d;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 950;
+  height: 26px;
+  justify-content: center;
+  width: 34px;
+}
+
+.examAnalysisBoundaryCard span {
+  color: #17213d;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.examAnalysisBoundaryCard small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .examAnalysisSteps {
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(8, minmax(0, 1fr));
 }
 
 .examAnalysisSteps span {

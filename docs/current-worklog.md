@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P0. 시험분석 v2 문항 경계 탐지 1단계
+
+- 상태: 완료
+- 사용자 확인: 문항 수 24문항 확정과 1~24행 생성은 화면에서 확인됐다. 우하단 저장 이벤트 시간 표시는 원문 ISO 문자열을 자르는 방식이라 어색하게 보여 한국 시간 짧은 라벨로 보정했다.
+- 이번 작업 범위: 확정된 1~N 행에 대해 PDF 원본에서 각 문항의 시작 페이지, 끝 페이지, 대략 위치만 찾는 `문항 경계 탐지` 단계를 추가했다. 문제 풀이, 정답 추론, 단원/유형 분류, 본문 대량 저장은 하지 않는다.
+- 백엔드: `POST /api/exam-analysis-runs/detect-question-boundaries`를 추가했다. Anthropic API key가 있으면 Claude PDF `document` 입력을 우선 사용하고, 없으면 OpenAI PDF 입력을 예비 경로로 둔다. 결과는 각 `exam_analysis_questions` 행의 `source_page`, `source_evidence.boundary`에 저장하고, run의 `audit_summary.boundaryDetection`에 전체 탐지 요약을 저장한다.
+- 화면: 시험분석 작업 패널에 `문항 경계 탐지` 카드를 추가했다. `경계 탐지(과금)` 버튼으로 수동 실행하며, `시험분석 · 문항 경계 탐지 중/완료/실패` 상태를 표시한다. 완료 후 각 문항 번호 카드에 `1p` 또는 `2~3p` 같은 페이지 범위와 위치 힌트가 보인다.
+- 저장 원칙: 새 SQL edit은 필요 없다. 기존 `exam_analysis_questions.source_page`, `source_evidence`, `exam_analysis_runs.audit_summary`를 사용한다. `workflow_status` 체크 제약을 바꾸지 않기 위해 DB 상태값은 `rows_created`를 유지하고, 화면 단계만 `audit_summary.boundaryDetection` 존재 여부로 `문항 경계`를 켠다.
+- 검증: `node --check api/routes/examAnalysisPipeline.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 231, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P0. 시험분석 v2 문항 수 확정과 1~N 행 생성
 
 - 상태: 완료

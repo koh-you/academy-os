@@ -970,11 +970,39 @@ function getExamAnalysisExtractionSummary(run = {}, sourceId = "") {
   return summary;
 }
 
+function formatExamAnalysisEventTime(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const parts = new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.month}.${values.day} ${values.hour}:${values.minute}`;
+}
+
 function normalizeExamAnalysisPositiveNumbers(numbers = []) {
   return [...new Set((Array.isArray(numbers) ? numbers : [])
     .map(Number)
     .filter((number) => Number.isInteger(number) && number > 0 && number <= 200))]
     .sort((a, b) => a - b);
+}
+
+function getExamAnalysisQuestionBoundary(question = {}) {
+  return question?.sourceEvidence?.boundary ?? null;
+}
+
+function formatExamAnalysisBoundaryPage(boundary = {}) {
+  if (!boundary?.pageStart) return "페이지 확인 필요";
+  if (boundary.pageEnd && boundary.pageEnd !== boundary.pageStart) {
+    return `${boundary.pageStart}~${boundary.pageEnd}p`;
+  }
+  return `${boundary.pageStart}p`;
 }
 
 function getExamAnalysisQuestionCountCandidate(run = {}, sourceFiles = []) {
@@ -1200,6 +1228,15 @@ function confirmExamAnalysisQuestionCountRequest(payload) {
     payload,
     30000,
     "문항 수 확정 저장이 지연되고 있습니다."
+  );
+}
+
+function detectExamAnalysisQuestionBoundariesRequest(payload) {
+  return postJsonWithTimeout(
+    "/api/exam-analysis-runs/detect-question-boundaries",
+    payload,
+    180000,
+    "문항 경계 탐지가 지연되고 있습니다."
   );
 }
 
@@ -6491,6 +6528,8 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const [confirmStatus, setConfirmStatus] = useState({ state: "idle", message: "" });
   const [questionCountDraft, setQuestionCountDraft] = useState("");
   const [isConfirmingQuestionCount, setIsConfirmingQuestionCount] = useState(false);
+  const [boundaryStatus, setBoundaryStatus] = useState({ state: "idle", message: "" });
+  const [isDetectingBoundaries, setIsDetectingBoundaries] = useState(false);
 
   const selectedExamPrepRow = useMemo(
     () => examPrepRows.find((row) => row.examPrepId === selectedExamPrepId) ?? null,
@@ -6505,6 +6544,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     () => getExamAnalysisQuestionCountCandidate(activeRun, sourceFiles),
     [activeRun, sourceFiles]
   );
+  const boundaryDetection = activeRun?.auditSummary?.boundaryDetection ?? null;
   const schoolCards = useMemo(() => {
     const customSchools = [...new Set([
       ...examPrepRows.map((row) => normalizeExamAnalysisSchoolName(row.schoolName)),
@@ -6940,12 +6980,56 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     }
   }
 
+  async function detectQuestionBoundaries() {
+    if (!activeRun?.analysisRunId) {
+      setBoundaryStatus({ state: "failed", message: "시험분석 · 분석을 먼저 저장해 주세요." });
+      return;
+    }
+    if (!questionRows.length) {
+      setBoundaryStatus({ state: "failed", message: "시험분석 · 문항 수를 먼저 확정해 주세요." });
+      return;
+    }
+    const sourceFile = sourceFiles[0];
+    if (!sourceFile?.sourceId) {
+      setBoundaryStatus({ state: "failed", message: "시험분석 · PDF 원본이 필요합니다." });
+      return;
+    }
+
+    setIsDetectingBoundaries(true);
+    setBoundaryStatus({ state: "saving", message: "시험분석 · 문항 경계 탐지 중" });
+    try {
+      const result = await detectExamAnalysisQuestionBoundariesRequest({
+        analysisRunId: activeRun.analysisRunId,
+        sourceId: sourceFile.sourceId
+      });
+      const detectedCount = result.boundaryDetection?.detectedCount || result.boundaryResult?.detectedCount || 0;
+      const totalCount = result.boundaryDetection?.totalQuestionCount || questionRows.length;
+      setSelectedDetail(result);
+      setBoundaryStatus({
+        state: "success",
+        message: `시험분석 · 문항 경계 탐지 완료 · ${detectedCount}/${totalCount}개`
+      });
+      await loadRuns(activeRun.analysisRunId);
+      await loadRunDetail(activeRun.analysisRunId);
+    } catch (error) {
+      setBoundaryStatus({ state: "failed", message: `시험분석 · 문항 경계 탐지 실패 · ${error.message}` });
+      if (selectedRunId) await loadRunDetail(selectedRunId);
+    } finally {
+      setIsDetectingBoundaries(false);
+    }
+  }
+
   const confirmedQuestionCount = Number(activeRun?.confirmedQuestionCount || 0);
   const questionRowNumbers = questionRows
     .map((question) => Number(question.questionNumber))
     .filter((number) => Number.isInteger(number) && number > 0)
     .sort((a, b) => a - b);
   const shownQuestionRowNumbers = questionRowNumbers.slice(0, 60);
+  const boundaryRows = questionRows.map((question) => ({
+    question,
+    boundary: getExamAnalysisQuestionBoundary(question)
+  }));
+  const boundaryDetectedCount = boundaryRows.filter(({ boundary }) => Boolean(boundary?.pageStart)).length;
   const questionCountButtonLabel = isConfirmingQuestionCount
     ? "확정 중"
     : questionCountDraft
@@ -6966,7 +7050,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       </div>
 
       <div className="examAnalysisStatusBar">
-        {[loadStatus, saveStatus, uploadStatus, extractStatus, visionStatus, confirmStatus, deleteStatus].filter((item) => item.message).map((item, index) => (
+        {[loadStatus, saveStatus, uploadStatus, extractStatus, visionStatus, confirmStatus, boundaryStatus, deleteStatus].filter((item) => item.message).map((item, index) => (
           <span className={`saveStateBadge ${item.state}`} key={`${item.message}-${index}`}>{item.message}</span>
         ))}
       </div>
@@ -7304,6 +7388,56 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
             </div>
           </div>
 
+          <div className="panel examAnalysisBoundaryPanel">
+            <div className="sectionHeader slim">
+              <div>
+                <strong>문항 경계 탐지</strong>
+                <span>
+                  {boundaryRows.length
+                    ? `${boundaryDetectedCount}/${boundaryRows.length}개`
+                    : "대기"}
+                </span>
+              </div>
+              <div className="headerActions">
+                {boundaryStatus.message ? <span className={`saveStateBadge ${boundaryStatus.state}`}>{boundaryStatus.message}</span> : null}
+                <button
+                  className="secondaryButton"
+                  disabled={!questionRows.length || !sourceFiles.length || isDetectingBoundaries}
+                  onClick={detectQuestionBoundaries}
+                  type="button"
+                >
+                  {isDetectingBoundaries ? "탐지 중" : "경계 탐지(과금)"}
+                </button>
+              </div>
+            </div>
+            {boundaryDetection ? (
+              <div className={boundaryDetection.status === "needs_review" ? "examAnalysisBoundarySummary needsReview" : "examAnalysisBoundarySummary ok"}>
+                <strong>{boundaryDetection.status === "needs_review" ? "검토 필요" : "탐지 완료"}</strong>
+                <span>
+                  {boundaryDetection.detectedCount || 0}/{boundaryDetection.totalQuestionCount || questionRows.length || 0}개
+                  {boundaryDetection.provider ? ` · ${boundaryDetection.provider}` : ""}
+                  {boundaryDetection.detectedAt ? ` · ${formatExamAnalysisEventTime(boundaryDetection.detectedAt)}` : ""}
+                </span>
+                {boundaryDetection.missingQuestionNumbers?.length ? <small>누락 {boundaryDetection.missingQuestionNumbers.join(", ")}</small> : null}
+                {boundaryDetection.needsReviewNumbers?.length ? <small>재확인 {boundaryDetection.needsReviewNumbers.join(", ")}</small> : null}
+                {boundaryDetection.overlapWarnings?.length ? <small>{boundaryDetection.overlapWarnings.join(" · ")}</small> : null}
+              </div>
+            ) : null}
+            {boundaryRows.length ? (
+              <div className="examAnalysisBoundaryGrid">
+                {boundaryRows.map(({ question, boundary }) => (
+                  <div className={boundary?.needsReview || !boundary?.pageStart ? "examAnalysisBoundaryCard needsReview" : "examAnalysisBoundaryCard"} key={question.questionRowId || question.questionNumber}>
+                    <strong>{question.questionNumber}</strong>
+                    <span>{formatExamAnalysisBoundaryPage(boundary)}</span>
+                    <small>{boundary?.positionHint || "위치 대기"}</small>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="emptyState compact">고정 문항 행 없음</div>
+            )}
+          </div>
+
           <div className="panel examAnalysisStepPanel">
             <div className="sectionHeader slim">
               <div>
@@ -7318,10 +7452,16 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                 ["question_count_detected", "문항 수 판독"],
                 ["question_count_confirmed", "선생님 확인"],
                 ["rows_created", "1~N 행 고정"],
+                ["boundary_detected", "문항 경계"],
                 ["ai_filled", "AI 행 채움"],
                 ["completed", "최종 확정"]
               ].map(([status, label]) => (
-                <span className={activeRun?.workflowStatus === status ? "active" : ""} key={status}>{label}</span>
+                <span
+                  className={activeRun?.workflowStatus === status || (status === "boundary_detected" && boundaryDetection) ? "active" : ""}
+                  key={status}
+                >
+                  {label}
+                </span>
               ))}
             </div>
           </div>
@@ -7339,7 +7479,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
               ) : events.slice(0, 8).map((event) => (
                 <div className="examAnalysisEventItem" key={event.eventId}>
                   <strong>{event.message || event.eventType}</strong>
-                  <span>{event.createdAt ? event.createdAt.replace("T", " ").slice(0, 16) : ""}</span>
+                  <span title={event.createdAt ? formatKoreaTimeLabel(event.createdAt) : ""}>{formatExamAnalysisEventTime(event.createdAt)}</span>
                 </div>
               ))}
             </div>

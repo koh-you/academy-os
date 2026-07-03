@@ -57,6 +57,7 @@ import {
   recordExamAnalysisEvent,
   recordExamAnalysisSourceUpload,
   saveExamAnalysisSourceExtraction,
+  saveExamAnalysisQuestionBoundaries,
   updateExamAnalysisRun,
   updateExamAnalysisSource,
   upsertExamAnalysisRun
@@ -1101,6 +1102,76 @@ function normalizePdfVisionCheckResult({ provider, model, rawText, parsed = {} }
   };
 }
 
+function buildPdfQuestionBoundaryPrompt({ sourceFile = {}, analysisRun = {}, questions = [] } = {}) {
+  const questionNumbers = questions
+    .map((question) => Number(question.questionNumber))
+    .filter((number) => Number.isInteger(number) && number > 0)
+    .sort((a, b) => a - b);
+  const confirmedCount = Number(analysisRun.confirmedQuestionCount || questionNumbers.at(-1) || questionNumbers.length || 0);
+  return [
+    "역할: 수학 시험지 PDF 문항 경계 검수자",
+    "목표: 확정된 문항번호별로 PDF 원본에서 시작 페이지와 끝 페이지, 대략 위치만 찾는다.",
+    "금지: 문제 풀이, 정답 추론, 단원/유형 분류, 본문 대량 복사는 하지 않는다.",
+    "중요: PDF 텍스트 레이어 후보보다 PDF 원본 페이지를 우선한다.",
+    "",
+    "[분석 대상]",
+    `파일명: ${sourceFile.originalFileName || "exam-source.pdf"}`,
+    `학교: ${analysisRun.schoolName || ""}`,
+    `학년: ${analysisRun.grade || ""}`,
+    `고사: ${analysisRun.examCycle || analysisRun.examTerm || ""}`,
+    `과목: ${analysisRun.subject || ""}`,
+    `확정 문항 수: ${confirmedCount}`,
+    questionNumbers.length ? `확정 행 번호: ${questionNumbers.join(", ")}` : "",
+    "",
+    "[반환 규칙]",
+    "반드시 JSON 객체만 반환한다.",
+    "question_boundaries는 확정 행 번호마다 하나씩 반환한다.",
+    "position_hint는 top, upper-middle, middle, lower-middle, bottom, continued 중 하나에 가깝게 짧게 쓴다.",
+    "start_evidence와 end_evidence는 사람이 위치를 확인할 수 있는 매우 짧은 근거만 쓴다.",
+    "",
+    "필드:",
+    "- readable: boolean",
+    "- question_boundaries: array of { question_number:number, page_start:number|null, page_end:number|null, position_hint:string, start_evidence:string, end_evidence:string, needs_review:boolean, warnings:string[] }",
+    "- missing_question_numbers: number[]",
+    "- overlap_warnings: string[]",
+    "- summary: string"
+  ].filter(Boolean).join("\n");
+}
+
+function normalizePdfQuestionBoundaryResult({ provider, model, rawText, parsed = {} }) {
+  const boundaries = Array.isArray(parsed.question_boundaries)
+    ? parsed.question_boundaries
+    : Array.isArray(parsed.questionBoundaries)
+      ? parsed.questionBoundaries
+      : [];
+  return {
+    provider,
+    model,
+    detectedAt: new Date().toISOString(),
+    rawText,
+    readable: Boolean(parsed.readable),
+    questionBoundaries: boundaries.map((boundary) => ({
+      questionNumber: Number(boundary.question_number ?? boundary.questionNumber),
+      pageStart: boundary.page_start === null || boundary.page_start === undefined
+        ? null
+        : Number(boundary.page_start ?? boundary.pageStart),
+      pageEnd: boundary.page_end === null || boundary.page_end === undefined
+        ? null
+        : Number(boundary.page_end ?? boundary.pageEnd),
+      positionHint: String(boundary.position_hint ?? boundary.positionHint ?? "").slice(0, 120),
+      startEvidence: String(boundary.start_evidence ?? boundary.startEvidence ?? "").slice(0, 300),
+      endEvidence: String(boundary.end_evidence ?? boundary.endEvidence ?? "").slice(0, 300),
+      needsReview: Boolean(boundary.needs_review ?? boundary.needsReview),
+      warnings: Array.isArray(boundary.warnings) ? boundary.warnings.map(String).slice(0, 5) : []
+    })).filter((boundary) => Number.isInteger(boundary.questionNumber) && boundary.questionNumber > 0),
+    missingQuestionNumbers: Array.isArray(parsed.missing_question_numbers)
+      ? parsed.missing_question_numbers.map(Number).filter((number) => Number.isFinite(number) && number > 0)
+      : [],
+    overlapWarnings: Array.isArray(parsed.overlap_warnings) ? parsed.overlap_warnings.map(String).slice(0, 20) : [],
+    summary: String(parsed.summary || "").slice(0, 500)
+  };
+}
+
 function outputTextFromAnthropicResponse(data = {}) {
   if (!Array.isArray(data.content)) return "";
   return data.content
@@ -1207,6 +1278,102 @@ async function runPdfVisionCheck(sourceFile, buffer) {
   }
   if (apiEnvValue("OPENAI_API_KEY")) {
     return runOpenAiPdfVisionCheck(sourceFile, buffer);
+  }
+  throw new Error("ANTHROPIC_API_KEY 또는 OPENAI_API_KEY 환경변수가 필요합니다.");
+}
+
+async function runAnthropicPdfQuestionBoundaryDetection(sourceFile, buffer, detail) {
+  const apiKey = apiEnvValue("ANTHROPIC_API_KEY");
+  if (!apiKey) throw new Error("ANTHROPIC_API_KEY 환경변수가 필요합니다.");
+  const model = apiEnvValue("ANTHROPIC_EXAM_PDF_MODEL") || apiEnvValue("ANTHROPIC_MODEL") || "claude-sonnet-4-5";
+  const response = await fetch(anthropicMessagesUrl, {
+    method: "POST",
+    headers: {
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+      "x-api-key": apiKey
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 6000,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "document",
+              source: {
+                type: "base64",
+                media_type: "application/pdf",
+                data: buffer.toString("base64")
+              }
+            },
+            { type: "text", text: buildPdfQuestionBoundaryPrompt({ sourceFile, analysisRun: detail.analysisRun, questions: detail.questions }) }
+          ]
+        }
+      ]
+    })
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error?.message || "Claude 문항 경계 탐지 요청에 실패했습니다.");
+  }
+  const rawText = outputTextFromAnthropicResponse(data);
+  return normalizePdfQuestionBoundaryResult({
+    provider: "anthropic",
+    model,
+    rawText,
+    parsed: parseLooseJsonObject(rawText)
+  });
+}
+
+async function runOpenAiPdfQuestionBoundaryDetection(sourceFile, buffer, detail) {
+  const apiKey = apiEnvValue("OPENAI_API_KEY");
+  if (!apiKey) throw new Error("OPENAI_API_KEY 환경변수가 필요합니다.");
+  const model = apiEnvValue("OPENAI_EXAM_PDF_MODEL") || apiEnvValue("OPENAI_MODEL") || "gpt-4.1-mini";
+  const response = await fetch(openAiResponsesUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model,
+      input: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_file",
+              filename: sourceFile.originalFileName || "exam-source.pdf",
+              file_data: `data:application/pdf;base64,${buffer.toString("base64")}`
+            },
+            { type: "input_text", text: buildPdfQuestionBoundaryPrompt({ sourceFile, analysisRun: detail.analysisRun, questions: detail.questions }) }
+          ]
+        }
+      ],
+      max_output_tokens: 6000
+    })
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error?.message || "OpenAI 문항 경계 탐지 요청에 실패했습니다.");
+  }
+  const rawText = outputTextFromOpenAiResponse(data);
+  return normalizePdfQuestionBoundaryResult({
+    provider: "openai",
+    model,
+    rawText,
+    parsed: parseLooseJsonObject(rawText)
+  });
+}
+
+async function runPdfQuestionBoundaryDetection(sourceFile, buffer, detail) {
+  if (apiEnvValue("ANTHROPIC_API_KEY")) {
+    return runAnthropicPdfQuestionBoundaryDetection(sourceFile, buffer, detail);
+  }
+  if (apiEnvValue("OPENAI_API_KEY")) {
+    return runOpenAiPdfQuestionBoundaryDetection(sourceFile, buffer, detail);
   }
   throw new Error("ANTHROPIC_API_KEY 또는 OPENAI_API_KEY 환경변수가 필요합니다.");
 }
@@ -1487,6 +1654,54 @@ async function verifyExamAnalysisSourceFileWithAi(sourceId) {
       eventType: "source_vision_check_failed",
       message: "PDF 원본 AI 검증에 실패했습니다.",
       payload: { sourceId, error: error.message }
+    });
+    throw error;
+  }
+}
+
+async function detectExamAnalysisQuestionBoundaries({ analysisRunId, sourceId } = {}) {
+  if (!analysisRunId) throw new Error("analysisRunId가 필요합니다.");
+  const detail = await getExamAnalysisRun(analysisRunId);
+  if (!detail.analysisRun?.analysisRunId) throw new Error("시험분석 작업을 찾지 못했습니다.");
+  if (!detail.questions?.length) throw new Error("고정 문항 행을 먼저 생성해 주세요.");
+  const sourceFile = sourceId
+    ? detail.sources?.find((source) => source.sourceId === sourceId)
+    : detail.sources?.[0];
+  if (!sourceFile?.sourceId) throw new Error("PDF 원본 정보를 찾지 못했습니다.");
+  const buffer = await downloadStorageObject(sourceFile.bucketId || examAnalysisSourceBucket, sourceFile.storagePath);
+
+  await recordExamAnalysisEvent({
+    analysisRunId,
+    eventType: "question_boundary_detect_started",
+    message: "문항 경계 탐지를 시작했습니다.",
+    payload: { sourceId: sourceFile.sourceId, questionCount: detail.questions.length }
+  });
+
+  try {
+    const boundaryResult = await runPdfQuestionBoundaryDetection(sourceFile, buffer, detail);
+    const saved = await saveExamAnalysisQuestionBoundaries({
+      analysisRunId,
+      sourceId: sourceFile.sourceId,
+      boundaryResult
+    });
+    return {
+      ...saved,
+      boundaryResult: {
+        provider: boundaryResult.provider,
+        model: boundaryResult.model,
+        readable: boundaryResult.readable,
+        detectedCount: boundaryResult.questionBoundaries.length,
+        missingQuestionNumbers: boundaryResult.missingQuestionNumbers,
+        overlapWarnings: boundaryResult.overlapWarnings,
+        summary: boundaryResult.summary
+      }
+    };
+  } catch (error) {
+    await recordExamAnalysisEvent({
+      analysisRunId,
+      eventType: "question_boundary_detect_failed",
+      message: "문항 경계 탐지에 실패했습니다.",
+      payload: { sourceId: sourceFile.sourceId, error: error.message }
     });
     throw error;
   }
@@ -1847,6 +2062,20 @@ const server = http.createServer(async (request, response) => {
         detectedQuestionConfidence: payload.detectedQuestionConfidence,
         missingQuestionNumbers: payload.missingQuestionNumbers,
         confirmedBy: payload.confirmedBy || "teacher"
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/detect-question-boundaries") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await detectExamAnalysisQuestionBoundaries({
+        analysisRunId: payload.analysisRunId,
+        sourceId: payload.sourceId
       });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
