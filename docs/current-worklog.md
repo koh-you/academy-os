@@ -14,6 +14,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-04 P0. 시험분석 최종 미리보기 화사한 팔레트와 난이도 수동 저장 상태
+
+- 상태: 완료
+- 사용자 요청: 최종 미리보기 색상이 마음에 들지 않아 더 화사한 광고 톤으로 바꾸고, 난이도 수정 시 차트는 바뀌지만 새로고침 후 저장되지 않는 문제를 고친다. 저장은 실시간 자동저장이 아니라 저장 버튼 또는 `저장 중/저장 완료` 같은 표현으로 처리한다.
+- 이번 작업 결과: `src/domains/exams/finalPreview.js`의 단원/난이도 팔레트를 밝은 브랜드형 색상으로 다시 조정했다. 단원은 블루, 틸, 오렌지, 핑크, 바이올렛, 그린, 옐로, 시안 계열을 쓰고, 난이도는 하늘색/초록/노랑/오렌지/빨강으로 구분한다.
+- 화면 톤: 최종 미리보기 카드, 범례, 테이블, 주요문항 후보 배경을 더 밝은 광고형 톤으로 조정했다.
+- 저장 UX: 난이도 select를 바꾸면 차트에는 즉시 반영되지만 서버에는 실시간 저장하지 않는다. 같은 패널에 `시험분석 · 수정됨 · 저장 필요` 배지를 띄우고, `난이도 수정 저장` 버튼을 누르면 `시험분석 · 검수 저장 중` -> `시험분석 · 검수 저장 완료`로 바뀐다.
+- 저장 보강: 최종 미리보기 난이도 수정 payload가 기존 `final_fields`/`teacher_fields` 값을 seed로 삼도록 보강해 단원/유형/확정 상태를 잃지 않게 했다. 저장 원천은 기존 `exam_analysis_questions.teacher_fields`/`final_fields`와 `save-question-reviews` API다. 새 SQL edit은 없다.
+- 검증: `node --check src/domains/exams/finalPreview.js`, `node --check api/routes/examAnalysisPipeline.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 232, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-04 P0. AI 초안 -> 사람 검수 -> 검수본 원본화 개발 방향
 
 - 상태: 완료

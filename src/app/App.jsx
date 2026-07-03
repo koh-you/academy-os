@@ -1010,19 +1010,17 @@ function formatExamAnalysisBoundaryPage(boundary = {}) {
 }
 
 function createExamAnalysisReviewDraft(question = {}) {
+  const finalFields = question.finalFields ?? {};
   const teacherFields = question.teacherFields ?? {};
-  const subTypes = Array.isArray(teacherFields.subTypes)
-    ? teacherFields.subTypes
-    : Array.isArray(question.subTypes)
-      ? question.subTypes
-      : [];
+  const sourceFields = { ...question, ...teacherFields, ...finalFields };
+  const subTypes = Array.isArray(sourceFields.subTypes) ? sourceFields.subTypes : [];
   return {
-    unitName: teacherFields.unitName ?? question.unitName ?? "",
-    mainType: teacherFields.mainType ?? question.mainType ?? "",
+    unitName: sourceFields.unitName ?? "",
+    mainType: sourceFields.mainType ?? "",
     subTypesText: subTypes.join(", "),
-    difficulty: teacherFields.difficulty ?? question.difficulty ?? "",
-    reviewNote: teacherFields.reviewNote ?? "",
-    confirmed: question.rowStatus === "confirmed" || Boolean(question.confirmedAt)
+    difficulty: sourceFields.difficulty ?? "",
+    reviewNote: sourceFields.reviewNote ?? "",
+    confirmed: question.rowStatus === "confirmed" || Boolean(question.confirmedAt || finalFields.confirmedAt)
   };
 }
 
@@ -1194,7 +1192,7 @@ function ExamAnalysisFinalPreviewPanel({
         <div className="headerActions">
           {reviewStatus?.message ? <span className={`saveStateBadge ${reviewStatus.state}`}>{reviewStatus.message}</span> : null}
           <button
-            className="secondaryButton"
+            className={reviewStatus?.state === "dirty" ? "primaryButton" : "secondaryButton"}
             disabled={!canSaveReviews || isSavingReviews}
             onClick={onSaveReviews}
             type="button"
@@ -1319,7 +1317,7 @@ function ExamAnalysisFinalPreviewPanel({
       </div>
 
       <div className="examAnalysisPreviewPolicy">
-        <span>난이도는 AI 초안이 틀릴 수 있어 이 표에서 바로 수정한 뒤 저장합니다.</span>
+        <span>난이도 변경은 차트에 먼저 반영되고, 난이도 수정 저장을 눌러야 새로고침 후 유지됩니다.</span>
         <span>{model.notes.formulaPolicy}</span>
         <span>{model.notes.publicOutputPolicy}</span>
       </div>
@@ -7473,13 +7471,17 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
 
   function updateReviewDraft(questionNumber, patch) {
     const key = String(questionNumber);
+    const question = questionRows.find((row) => String(row.questionNumber) === key);
+    const seededDraft = question ? createExamAnalysisReviewDraft(question) : {};
     setReviewDrafts((current) => ({
       ...current,
       [key]: {
+        ...seededDraft,
         ...(current[key] ?? {}),
         ...patch
       }
     }));
+    setReviewStatus({ state: "dirty", message: "시험분석 · 수정됨 · 저장 필요" });
   }
 
   function markAllQuestionReviewsConfirmed() {
@@ -7499,6 +7501,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
         })
       );
     });
+    setReviewStatus({ state: "dirty", message: "시험분석 · 확정 변경됨 · 저장 필요" });
   }
 
   function buildQuestionReviewPayload() {
