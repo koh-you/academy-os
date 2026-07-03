@@ -701,6 +701,14 @@ button {
   justify-content: space-between;
 }
 
+.examAnalysisColumnHeaderActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .examAnalysisColumnHeader strong {
   color: #17213d;
   display: block;
@@ -727,6 +735,7 @@ button {
 }
 
 .examAnalysisColumnList {
+  align-content: start;
   overflow: auto;
 }
 

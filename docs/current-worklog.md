@@ -10,6 +10,17 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P0. 시험분석 v2 PDF 저장 확인과 삭제/학교추가 보강
+
+- 상태: 완료
+- 사용자 확인: PDF 업로드/저장이 되는지 확인이 필요했고, 잘못 올린 분석을 삭제할 수 없었다. 학교 컬럼에는 추가 버튼이 필요하며, 분석은 연도별로 카드가 쌓여야 하고, `200KB` 표시가 텍스트 추출량처럼 보이는 것도 의심된다고 했다.
+- 운영 확인: Render API `GET /api/exam-analysis-runs?limit=5`에서 Supabase source로 `자운고 고1 1학기 중간/기말` run 2건이 조회됐다. 상세 조회에서 `[자운고] 2026 1-1 기말 공통수학1.pdf`가 `exam-analysis-pipeline-sources` Storage 경로와 `exam_analysis_sources` row로 저장되어 있고 `source_uploaded` 이벤트가 남은 것을 확인했다. 표시된 `200KB`는 PDF 텍스트 추출량이 아니라 `sizeBytes=204668` 파일 크기다.
+- 이번 작업 결과: 분석 run 삭제 API를 추가했다. `DELETE /api/exam-analysis-runs?id=...`는 연결된 PDF Storage 객체 삭제를 먼저 시도하고, `exam_analysis_runs` row를 삭제해 cascade로 source/question/job/event row를 정리한다.
+- UI 보강: 학교 컬럼에 `추가` 버튼을 되살려 기본 5개 외 직접 입력 학교도 분석 저장 후 카드로 쌓이게 했다. 분석 컬럼에는 선택 분석 `삭제` 버튼과 `시험분석 · 삭제 중/완료/실패` 상태 배지를 추가했다. 분석 기본 제목에는 현재 연도를 포함하고, 분석 카드에는 생성연도를 표시한다.
+- 표시 보정: PDF 원본 목록은 `PDF 저장 완료 · 파일 200KB · 텍스트 추출 전`처럼 파일 크기와 텍스트 추출 상태를 구분해 보여준다. 실제 텍스트 추출은 아직 다음 단계다.
+- 저장 주의: 새 SQL edit은 필요 없다. 기존 v2 테이블과 `exam-analysis-pipeline-sources` Storage를 사용한다.
+- 검증: `node --check api/routes/examAnalysisPipeline.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 231, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P0. 시험분석 v2 학교/학년/고사/분석 4열 보드
 
 - 상태: 완료

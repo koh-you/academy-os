@@ -41,16 +41,18 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 
 - 사이드바에 새 `examAnalysisPipeline` 기반 `시험분석` 탭을 추가했다. 옛 `examAnalysis` 탭과 `ExamAnalysisCenter`는 복구하지 않는다.
 - `ExamAnalysisPipelineCenter`는 `학교 -> 학년 -> 고사 -> 분석` 카드형 컬럼 목록, 기본정보 저장, PDF 원본 업로드, 진행 단계, 저장 이벤트를 보여준다.
 - 학교 카드는 `상계고`, `자운고`, `창동고`, `용화여고`, `정의여고` 고정이다. 학년 카드는 `고1`, `고2`, `고3` 고정이고, 고사 카드는 `1학기 중간`, `1학기 기말`, `2학기 중간`, `2학기 기말` 고정이다.
-- 프론트는 `GET/POST /api/exam-analysis-runs`, `POST /api/exam-analysis-source-files`, `GET /api/exam-analysis-source-files/open`만 사용한다.
-- 저장/불러오기/PDF 업로드 상태는 작업 화면 안의 `시험분석 · 저장 중/완료/실패`, `시험분석 PDF · 업로드 중/완료/실패` 배지로 표시한다.
+- 프론트는 `GET/POST/DELETE /api/exam-analysis-runs`, `POST /api/exam-analysis-source-files`, `GET /api/exam-analysis-source-files/open`을 사용한다.
+- 저장/불러오기/PDF 업로드/삭제 상태는 작업 화면 안의 `시험분석 · 저장 중/완료/실패`, `시험분석 PDF · 업로드 중/완료/실패`, `시험분석 · 삭제 중/완료/실패` 배지로 표시한다.
 - 학교/학년/고사/분석 목록은 밝은 컬럼 안의 큰 카드로 표시하고, 선택 카드는 네이비 배경으로 표시한다.
+- 학교 컬럼에는 `추가` 버튼이 있다. 분석 컬럼에는 선택 분석 `삭제` 버튼이 있으며, 삭제 시 연결 PDF Storage 객체와 run row를 함께 정리한다.
+- PDF 원본 목록의 `파일 200KB` 같은 값은 업로드 파일 크기다. 아직 텍스트 추출량이 아니며, 다음 단계에서 `extracted_text`와 추출 상태를 별도로 채운다.
 - 아직 PDF 텍스트 추출, 문항 수 판독, 1~N 행 생성, AI 행 채움은 붙이지 않았다.
 
 ## 다음 세션 우선순위
 
 1. 기존 시험분석 기능을 복구하지 않는다.
 2. 운영 Supabase에서 새 v2 테이블과 `exam-analysis-pipeline-sources` Storage bucket이 정상인지 확인한다.
-3. 다음 구현은 PDF 텍스트/페이지 추출이다. 업로드된 source를 입력으로 받고, 추출 결과를 `exam_analysis_sources.extracted_text`, `page_manifest`, `extraction_status`에 저장한다.
+3. 다음 구현은 PDF 텍스트/페이지 추출이다. 업로드된 source를 입력으로 받고, 추출 결과를 `exam_analysis_sources.extracted_text`, `page_text_ranges`, `page_image_manifest`, `extraction_status`에 저장한다.
 4. 문항 수 판독과 AI 행 채움은 추출 단계 검증 후 별도 단계로 나눈다.
 
 ## 참조 파일

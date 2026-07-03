@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
+import { deleteRows, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
 
 const fallbackSource = "local_sample";
 const databaseSource = "supabase";
@@ -260,6 +260,21 @@ export async function updateExamAnalysisRun(analysisRunId, patch = {}) {
     toRunRow({ ...patch, analysisRunId })
   );
   return { source: databaseSource, analysisRun: rows[0] ? fromRunRow(rows[0]) : null };
+}
+
+export async function deleteExamAnalysisRun(analysisRunId) {
+  if (!analysisRunId) throw new Error("analysisRunId가 필요합니다.");
+  requireServiceRole();
+  const detail = await getExamAnalysisRun(analysisRunId);
+  const deletedRows = await deleteRows(
+    "exam_analysis_runs",
+    `analysis_run_id=eq.${encodeURIComponent(analysisRunId)}`
+  );
+  return {
+    source: databaseSource,
+    deletedAnalysisRun: deletedRows[0] ? fromRunRow(deletedRows[0]) : detail.analysisRun,
+    deletedSources: detail.sources ?? []
+  };
 }
 
 export async function recordExamAnalysisEvent(event = {}) {

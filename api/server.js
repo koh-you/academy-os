@@ -47,6 +47,7 @@ import { loadEnvFile } from "./lib/loadEnv.js";
 import { isSupabaseConfigured, listRows, upsertRows } from "./lib/supabaseRest.js";
 import { getAiStatus, polishLessonComment } from "./routes/commentPolish.js";
 import {
+  deleteExamAnalysisRun,
   examAnalysisSourceBucket,
   getExamAnalysisRun,
   listExamAnalysisRuns,
@@ -820,6 +821,17 @@ async function createSignedStorageUrl(bucketId, storagePath, expiresIn = 60 * 60
   return `${getSupabaseStorageBaseUrl()}${result.signedURL}`;
 }
 
+async function deleteStorageObject(bucketId, storagePath) {
+  if (!bucketId || !storagePath) return false;
+  try {
+    await supabaseStorageRequest(`object/${bucketId}/${storagePath}`, { method: "DELETE" });
+    return true;
+  } catch (error) {
+    if (error?.statusCode === 404) return false;
+    throw error;
+  }
+}
+
 async function uploadExamPostFile(payload) {
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
     throw new Error("Supabase Storage 업로드에는 service role 설정이 필요합니다.");
@@ -1260,6 +1272,29 @@ const server = http.createServer(async (request, response) => {
       const payload = await readJsonBody(request);
       const result = await upsertExamAnalysisRun(payload.analysisRun ?? payload.run ?? payload);
       sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "DELETE" && requestUrl.pathname === "/api/exam-analysis-runs") {
+    try {
+      const analysisRunId = requestUrl.searchParams.get("id") || requestUrl.searchParams.get("analysisRunId");
+      if (!analysisRunId) throw new Error("analysisRunId가 필요합니다.");
+      const detail = await getExamAnalysisRun(analysisRunId);
+      const storageResults = await Promise.allSettled(
+        (detail.sources ?? []).map((source) => deleteStorageObject(source.bucketId || examAnalysisSourceBucket, source.storagePath))
+      );
+      const result = await deleteExamAnalysisRun(analysisRunId);
+      sendJson(request, response, 200, {
+        ok: true,
+        ...result,
+        deletedStorageCount: storageResults.filter((item) => item.status === "fulfilled" && item.value).length,
+        storageDeleteErrors: storageResults
+          .filter((item) => item.status === "rejected")
+          .map((item) => item.reason?.message || String(item.reason))
+      });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
     }

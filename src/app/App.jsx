@@ -922,6 +922,16 @@ function workflowStatusLabel(status = "") {
   return labels[status] ?? status ?? "초안";
 }
 
+function examAnalysisSourceStatusLabel(status = "") {
+  const labels = {
+    uploaded: "PDF 저장 완료",
+    extracting: "텍스트 추출 중",
+    extracted: "텍스트 추출 완료",
+    failed: "텍스트 추출 실패"
+  };
+  return labels[status] ?? status ?? "PDF 저장 완료";
+}
+
 function getExamAnalysisRunTitle(run = {}) {
   return run.title || [run.schoolName, run.grade, run.subject, run.examCycle].filter(Boolean).join(" · ") || "새 시험분석";
 }
@@ -960,7 +970,7 @@ function formatExamAnalysisExamCycleTitle(value) {
 }
 
 function buildExamAnalysisTitle({ schoolName, grade, examCycle } = {}) {
-  return `${schoolName || "학교"} ${grade || "학년"} ${formatExamAnalysisExamCycleTitle(examCycle)} 시험분석`;
+  return `${new Date().getFullYear()} ${schoolName || "학교"} ${grade || "학년"} ${formatExamAnalysisExamCycleTitle(examCycle)} 시험분석`;
 }
 
 function postMakeupTask(makeupTask) {
@@ -984,6 +994,15 @@ function deleteExamPrepRowRequest(examPrepId) {
     .then(async (response) => {
       const result = await response.json();
       if (!response.ok || !result.ok) throw new Error(result.error || "시험정보 삭제 실패");
+      return result;
+    });
+}
+
+function deleteExamAnalysisRunRequest(analysisRunId) {
+  return fetch(apiUrl(`/api/exam-analysis-runs?id=${encodeURIComponent(analysisRunId)}`), { method: "DELETE" })
+    .then(async (response) => {
+      const result = await response.json();
+      if (!response.ok || !result.ok) throw new Error(result.error || "시험분석 삭제 실패");
       return result;
     });
 }
@@ -6267,6 +6286,8 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const [loadStatus, setLoadStatus] = useState({ state: "idle", message: "" });
   const [saveStatus, setSaveStatus] = useState({ state: "idle", message: "" });
   const [uploadStatus, setUploadStatus] = useState({ state: "idle", message: "" });
+  const [deleteStatus, setDeleteStatus] = useState({ state: "idle", message: "" });
+  const [deletingRunId, setDeletingRunId] = useState("");
 
   const selectedExamPrepRow = useMemo(
     () => examPrepRows.find((row) => row.examPrepId === selectedExamPrepId) ?? null,
@@ -6276,12 +6297,20 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const activeRun = selectedDetailRun ?? analysisRuns.find((run) => run.analysisRunId === selectedRunId) ?? null;
   const sourceFiles = selectedDetailRun ? selectedDetail?.sources ?? [] : [];
   const events = selectedDetailRun ? selectedDetail?.events ?? [] : [];
-  const schoolCards = useMemo(() => examAnalysisSchools.map((schoolName) => ({
-    name: schoolName,
-    gradeCount: examAnalysisGrades.length,
-    examCount: examAnalysisExamCycles.length,
-    runCount: analysisRuns.filter((run) => normalizeExamAnalysisSchoolName(run.schoolName) === schoolName).length
-  })), [analysisRuns]);
+  const schoolCards = useMemo(() => {
+    const customSchools = [...new Set([
+      ...examPrepRows.map((row) => normalizeExamAnalysisSchoolName(row.schoolName)),
+      ...analysisRuns.map((run) => normalizeExamAnalysisSchoolName(run.schoolName))
+    ].filter(Boolean))]
+      .filter((schoolName) => !examAnalysisSchools.includes(schoolName))
+      .sort((a, b) => a.localeCompare(b, "ko"));
+    return [...examAnalysisSchools, ...customSchools].map((schoolName) => ({
+      name: schoolName,
+      gradeCount: examAnalysisGrades.length,
+      examCount: examAnalysisExamCycles.length,
+      runCount: analysisRuns.filter((run) => normalizeExamAnalysisSchoolName(run.schoolName) === schoolName).length
+    }));
+  }, [analysisRuns, examPrepRows]);
   const gradeCards = useMemo(() => {
     return examAnalysisGrades.map((grade) => ({
       name: grade,
@@ -6453,6 +6482,26 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     }));
   }
 
+  function startManualSchool() {
+    const nextGrade = selectedGrade || examAnalysisGrades[0];
+    const nextExamCycle = selectedExamCycle || examAnalysisExamCycles[0];
+    didAutoSelectExamPrepRef.current = true;
+    setSelectedRunId("");
+    setSelectedDetail(null);
+    setSelectedSchoolName("");
+    setSelectedGrade(nextGrade);
+    setSelectedExamCycle(nextExamCycle);
+    setSelectedExamPrepId("");
+    setDraft({
+      title: buildExamAnalysisTitle({ schoolName: "", grade: nextGrade, examCycle: nextExamCycle }),
+      schoolName: "",
+      grade: nextGrade,
+      subject: "수학",
+      examTerm: "",
+      examCycle: nextExamCycle
+    });
+  }
+
   function startNewAnalysis() {
     const targetSchoolName = selectedSchoolName || draft.schoolName;
     const targetGrade = selectedGrade || draft.grade;
@@ -6488,13 +6537,13 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     };
   }
 
-  async function loadRuns(nextSelectedRunId = "") {
+  async function loadRuns(nextSelectedRunId) {
     setLoadStatus({ state: "loading", message: "시험분석 · 불러오는 중" });
     try {
       const result = await getJsonWithTimeout("/api/exam-analysis-runs", 12000, "시험분석 목록 조회가 지연되고 있습니다.");
       const runs = result.analysisRuns ?? [];
       setAnalysisRuns(runs);
-      const nextId = nextSelectedRunId || selectedRunId || runs[0]?.analysisRunId || "";
+      const nextId = nextSelectedRunId !== undefined ? nextSelectedRunId : selectedRunId || runs[0]?.analysisRunId || "";
       setSelectedRunId(nextId);
       setLoadStatus({ state: "success", message: "시험분석 · 불러오기 완료" });
     } catch (error) {
@@ -6529,6 +6578,27 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       }
     } catch (error) {
       setSaveStatus({ state: "failed", message: `시험분석 · 저장 실패 · ${error.message}` });
+    }
+  }
+
+  async function deleteSelectedAnalysisRun() {
+    const targetRun = activeRun;
+    if (!targetRun?.analysisRunId) return;
+    const confirmMessage = `${getExamAnalysisRunTitle(targetRun)} 분석과 연결된 PDF 원본을 삭제할까요?`;
+    if (!window.confirm(confirmMessage)) return;
+    setDeletingRunId(targetRun.analysisRunId);
+    setDeleteStatus({ state: "saving", message: "시험분석 · 삭제 중" });
+    try {
+      await deleteExamAnalysisRunRequest(targetRun.analysisRunId);
+      setAnalysisRuns((current) => current.filter((run) => run.analysisRunId !== targetRun.analysisRunId));
+      setSelectedRunId("");
+      setSelectedDetail(null);
+      setDeleteStatus({ state: "success", message: "시험분석 · 삭제 완료" });
+      await loadRuns("");
+    } catch (error) {
+      setDeleteStatus({ state: "failed", message: `시험분석 · 삭제 실패 · ${error.message}` });
+    } finally {
+      setDeletingRunId("");
     }
   }
 
@@ -6582,7 +6652,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       </div>
 
       <div className="examAnalysisStatusBar">
-        {[loadStatus, saveStatus, uploadStatus].filter((item) => item.message).map((item, index) => (
+        {[loadStatus, saveStatus, uploadStatus, deleteStatus].filter((item) => item.message).map((item, index) => (
           <span className={`saveStateBadge ${item.state}`} key={`${item.message}-${index}`}>{item.message}</span>
         ))}
       </div>
@@ -6596,6 +6666,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   <strong>학교</strong>
                   <span>{schoolCards.length}개</span>
                 </div>
+                <button className="secondaryButton compact" onClick={startManualSchool} type="button">추가</button>
               </div>
               <div className="examAnalysisColumnList">
                 {schoolCards.length === 0 ? (
@@ -6666,7 +6737,17 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   <strong>분석</strong>
                   <span>{scopedRuns.length}건</span>
                 </div>
-                <button className="secondaryButton compact" onClick={startNewAnalysis} type="button">추가</button>
+                <div className="examAnalysisColumnHeaderActions">
+                  <button className="secondaryButton compact" onClick={startNewAnalysis} type="button">추가</button>
+                  <button
+                    className="dangerSoftButton compact"
+                    disabled={!activeRun?.analysisRunId || deletingRunId === activeRun?.analysisRunId}
+                    onClick={deleteSelectedAnalysisRun}
+                    type="button"
+                  >
+                    {deletingRunId === activeRun?.analysisRunId ? "삭제 중" : "삭제"}
+                  </button>
+                </div>
               </div>
               <div className="examAnalysisColumnList">
                 {scopedRuns.length === 0 ? (
@@ -6679,7 +6760,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                     type="button"
                   >
                     <strong>{getExamAnalysisRunTitle(run)}</strong>
-                    <span>{workflowStatusLabel(run.workflowStatus)} · {run.subject || "수학"}</span>
+                    <span>{[run.createdAt?.slice(0, 4), workflowStatusLabel(run.workflowStatus), run.subject || "수학"].filter(Boolean).join(" · ")}</span>
                   </button>
                 ))}
               </div>
@@ -6769,7 +6850,12 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                 <div className="examAnalysisSourceItem" key={file.sourceId}>
                   <div>
                     <strong>{file.originalFileName || "PDF 원본"}</strong>
-                    <span>{file.extractionStatus} · {formatBytes(file.sizeBytes)} · {file.createdAt ? file.createdAt.slice(0, 10) : "-"}</span>
+                    <span>
+                      {examAnalysisSourceStatusLabel(file.extractionStatus)}
+                      {" · "}파일 {formatBytes(file.sizeBytes)}
+                      {" · "}{file.extractedText ? `추출 ${formatBytes(new Blob([file.extractedText]).size)}` : "텍스트 추출 전"}
+                      {" · "}{file.createdAt ? file.createdAt.slice(0, 10) : "-"}
+                    </span>
                   </div>
                   {getExamAnalysisSourceOpenUrl(file) ? (
                     <a className="secondaryButton linkButton" href={getExamAnalysisSourceOpenUrl(file)} rel="noreferrer" target="_blank">열기</a>
