@@ -1187,7 +1187,7 @@ function ExamAnalysisFinalPreviewPanel({
       <div className="sectionHeader slim">
         <div>
           <strong>최종 미리보기</strong>
-          <span>{meta.confirmedCount}/{meta.totalQuestions}문항 · {model.notes.sourceOfTruth}</span>
+          <span>{meta.totalQuestions}문항 · {model.notes.sourceOfTruth}</span>
         </div>
         <div className="headerActions">
           {reviewStatus?.message ? <span className={`saveStateBadge ${reviewStatus.state}`}>{reviewStatus.message}</span> : null}
@@ -7574,7 +7574,8 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     }
   }
 
-  async function saveQuestionReviews() {
+  async function saveQuestionReviews(options = {}) {
+    const saveOptions = options && !options.nativeEvent ? options : {};
     if (!activeRun?.analysisRunId) {
       setReviewStatus({ state: "failed", message: "시험분석 · 분석을 먼저 저장해 주세요." });
       return;
@@ -7585,7 +7586,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     }
 
     setIsSavingReviews(true);
-    setReviewStatus({ state: "saving", message: "시험분석 · 검수 저장 중" });
+    setReviewStatus({ state: "saving", message: saveOptions.pendingMessage || "시험분석 · 검수 저장 중" });
     try {
       const result = await saveExamAnalysisQuestionReviewsRequest({
         analysisRunId: activeRun.analysisRunId,
@@ -7597,7 +7598,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       setReviewDrafts(buildExamAnalysisReviewDrafts(result.questions ?? []));
       setReviewStatus({
         state: "success",
-        message: `시험분석 · 검수 저장 완료 · ${confirmedCount}/${totalCount}개 확정`
+        message: saveOptions.successMessage || `시험분석 · 검수 저장 완료 · ${confirmedCount}/${totalCount}개 확정`
       });
       await loadRuns(activeRun.analysisRunId);
       await loadRunDetail(activeRun.analysisRunId);
@@ -8244,7 +8245,10 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
           <ExamAnalysisFinalPreviewPanel
             model={finalPreviewModel}
             onDifficultyChange={(questionNumber, difficulty) => updateReviewDraft(questionNumber, { difficulty })}
-            onSaveReviews={saveQuestionReviews}
+            onSaveReviews={() => saveQuestionReviews({
+              pendingMessage: "시험분석 · 난이도 저장 중",
+              successMessage: "시험분석 · 난이도 저장 완료"
+            })}
             isSavingReviews={isSavingReviews}
             canSaveReviews={reviewRowsReady}
             reviewStatus={reviewStatus}

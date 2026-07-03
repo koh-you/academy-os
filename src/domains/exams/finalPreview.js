@@ -1,12 +1,12 @@
 export const examAnalysisPreviewPalette = {
-  units: ["#2563eb", "#14b8a6", "#f97316", "#ec4899", "#8b5cf6", "#22c55e", "#eab308", "#06b6d4"],
+  units: ["#0057ff", "#00c2a8", "#ff7a00", "#ff2aa1", "#7c3cff", "#00c853", "#ffd000", "#00aaff"],
   difficulties: {
-    하: "#38bdf8",
-    중하: "#22c55e",
-    중: "#facc15",
-    중상: "#f97316",
-    상: "#ef4444",
-    미정: "#94a3b8"
+    하: "#00b8ff",
+    중하: "#00d26a",
+    중: "#ffd400",
+    중상: "#ff8a00",
+    상: "#ff3b30",
+    미정: "#a1a1aa"
   }
 };
 
