@@ -14,6 +14,14 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-04 P0. 최종 미리보기 운영 반영 확인과 팔레트 재상향
+
+- 상태: 완료
+- 사용자 요청: 색이 밝아진 것 같지 않고, 최종 미리보기의 난이도 수정 버튼도 여전히 보인다.
+- 확인: 로컬 소스와 로컬 dev 서버에는 `난이도 수정 저장` 버튼이 이미 제거되어 있었다. 운영 Vercel URL을 직접 확인하니 최신 `6141f05`가 아니라 직전 번들 일부가 내려오고 있어 버튼이 계속 보이는 상태였다.
+- 이번 작업 결과: 새 배포를 트리거하기 위해 팔레트를 한 번 더 밝고 선명하게 조정했다. 기존 진한 블루/그린보다 더 밝은 광고형 블루, 민트, 오렌지, 핑크, 바이올렛, 라임, 옐로, 시안 계열로 바꿨다.
+- 검증: 앱 코드에서 `난이도 수정 저장`, `시험분석 · 난이도 저장 완료`, `examAnalysisPreviewDifficultySelect`가 사라졌는지 확인했다. `node --check src/domains/exams/finalPreview.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 232, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-04 P0. 최종 미리보기 난이도 수정 제거
 
 - 상태: 완료
