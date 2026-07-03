@@ -10555,8 +10555,10 @@ function ExamPostSubmissionManager({
 function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUpdateRow, row, saveState = "idle" }) {
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
+  const copyStatusTimerRef = useRef(null);
   const latestReviewDraftRef = useRef("");
   const saveReviewTimerRef = useRef(null);
+  const [reviewCopyStatus, setReviewCopyStatus] = useState("");
   const [reviewDraft, setReviewDraft] = useState(() => {
     const currentReview = String(row.review ?? "");
     const initialReview = currentReview.trim() ? normalizeExamReviewDraftText(currentReview, row) : createExamReviewDraft(row);
@@ -10575,6 +10577,7 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
   }, [row.examPrepId]);
 
   useEffect(() => () => {
+    if (copyStatusTimerRef.current) clearTimeout(copyStatusTimerRef.current);
     if (saveReviewTimerRef.current) clearTimeout(saveReviewTimerRef.current);
   }, []);
 
@@ -10603,6 +10606,16 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
   function handleClose() {
     flushPendingReviewSave();
     onClose();
+  }
+
+  async function copyRevisedReview() {
+    const copied = await copyTextToClipboard(row.revisedReview ?? "");
+    setReviewCopyStatus(copied ? "복사되었습니다." : "복사할 내용을 확인해 주세요.");
+    if (copyStatusTimerRef.current) clearTimeout(copyStatusTimerRef.current);
+    copyStatusTimerRef.current = setTimeout(() => {
+      copyStatusTimerRef.current = null;
+      setReviewCopyStatus("");
+    }, 1800);
   }
 
   async function polishReview() {
@@ -10677,7 +10690,7 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
             <button
               className="softButton"
               disabled={!String(row.revisedReview ?? "").trim()}
-              onClick={() => copyTextToClipboard(row.revisedReview ?? "")}
+              onClick={copyRevisedReview}
               type="button"
             >
               수정본 복사
@@ -10686,9 +10699,15 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
           <textarea
             className="commentComposerTextarea"
             value={row.revisedReview ?? ""}
-            onChange={(event) => onUpdateRow(row.examPrepId, "revisedReview", event.target.value)}
+            onChange={(event) => {
+              setReviewCopyStatus("");
+              onUpdateRow(row.examPrepId, "revisedReview", event.target.value);
+            }}
             placeholder="AI가 다듬은 총평 또는 강사가 최종 수정한 총평이 들어갑니다."
           />
+          {reviewCopyStatus ? (
+            <small className="reviewCopyStatus" role="status" aria-live="polite">{reviewCopyStatus}</small>
+          ) : null}
         </section>
       </div>
     </Modal>

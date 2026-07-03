@@ -222,9 +222,9 @@ export function parseInstagramSlides(value = "") {
   return slides.length ? slides : [{ number: 1, title: "카드뉴스 초안", lines: ["아직 내용이 없습니다."] }];
 }
 
-export function copyTextToClipboard(text = "") {
+export async function copyTextToClipboard(text = "") {
   const value = String(text ?? "").trim();
-  if (!value) return;
+  if (!value) return false;
   const fallbackCopy = () => {
     const textarea = document.createElement("textarea");
     textarea.value = value;
@@ -236,17 +236,24 @@ export function copyTextToClipboard(text = "") {
     textarea.focus();
     textarea.select();
     try {
-      document.execCommand("copy");
+      const copied = document.execCommand("copy");
+      if (!copied) window.alert(value);
+      return copied;
     } catch (error) {
       window.alert(value);
+      return false;
     } finally {
       document.body.removeChild(textarea);
     }
   };
 
   if (window.navigator?.clipboard?.writeText) {
-    window.navigator.clipboard.writeText(value).catch(fallbackCopy);
-    return;
+    try {
+      await window.navigator.clipboard.writeText(value);
+      return true;
+    } catch (error) {
+      return fallbackCopy();
+    }
   }
-  fallbackCopy();
+  return fallbackCopy();
 }

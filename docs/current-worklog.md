@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P1. 시험 후 총평 수정본 복사 완료 표시
+
+- 상태: 완료
+- 사용자 요청: 시험 후 총평 모달에서 `수정본 복사`를 누르면 `복사되었습니다.` 같은 표시가 보여야 한다.
+- 이번 작업 결과: 수정본 복사 버튼 클릭 시 클립보드 복사 성공 여부를 받아 모달 안에 `복사되었습니다.` 상태 문구를 1.8초 동안 표시한다. 복사할 내용이 없거나 실패한 경우에는 안내 문구를 표시한다.
+- 복사 helper 보강: `copyTextToClipboard`가 복사 성공 여부를 반환하는 async helper가 되도록 정리했다. 기존 호출부는 그대로 동작하고, 필요한 화면에서는 성공 상태를 UI에 반영할 수 있다.
+- 회귀 방지: 운영 시나리오 테스트에 `reviewCopyStatus`, `복사되었습니다.`, `copyTextToClipboard` async/fallback 조건을 추가했다.
+- 저장 주의: 저장 경로 변경 없음. 새 Supabase SQL edit 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 242, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P1. 시험 후 총평 수정본 미리보기 제거와 복사 기능
 
 - 상태: 완료

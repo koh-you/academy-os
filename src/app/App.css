@@ -8474,6 +8474,12 @@ textarea {
   min-height: 36px;
 }
 
+.reviewCopyStatus {
+  color: #15803d;
+  font-size: 13px;
+  font-weight: 900;
+}
+
 .commentSourceToggle {
   align-items: center;
   display: flex;
