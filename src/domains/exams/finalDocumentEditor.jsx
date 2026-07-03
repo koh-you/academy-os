@@ -17,6 +17,23 @@ import {
   ExamAnalysisReportText
 } from "./reportPreview.jsx";
 
+const saveStateLabels = {
+  idle: "저장 전",
+  dirty: "변경됨",
+  saving: "저장 중",
+  saved: "저장 완료",
+  failed: "저장 실패"
+};
+
+function FinalDocumentSaveStatus({ saveState = "idle" }) {
+  const normalizedSaveState = Object.prototype.hasOwnProperty.call(saveStateLabels, saveState) ? saveState : "idle";
+  return (
+    <small className={`saveState save-${normalizedSaveState} inlineSaveStatus`}>
+      최종편집본 · {saveStateLabels[normalizedSaveState]}
+    </small>
+  );
+}
+
 export function ExamFinalDocumentPrint({ document }) {
   const normalizedDocument = normalizeExamFinalDocument(document);
   if (!normalizedDocument?.blocks?.length) return null;
@@ -129,7 +146,8 @@ export function ExamFinalDocumentBuilder({
   createDocumentFromAnalysis = createFallbackExamFinalDocumentFromAnalysis,
   document,
   onChange,
-  onRegenerate
+  onRegenerate,
+  saveState = "idle"
 }) {
   const fallbackDocument = useMemo(
     () => createDocumentFromAnalysis(analysis),
@@ -189,6 +207,7 @@ export function ExamFinalDocumentBuilder({
           <p className="muted">글은 바로 수정하고, 표는 셀 수정, 차트·흐름도는 원본 데이터를 고치면 렌더링이 함께 바뀝니다.</p>
         </div>
         <div className="analysisFinalReportActions">
+          <FinalDocumentSaveStatus saveState={saveState} />
           <button
             className="softButton"
             onClick={() => {

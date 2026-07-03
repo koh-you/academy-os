@@ -502,6 +502,29 @@ const saveStateLabels = {
   failed: "저장 실패"
 };
 
+function normalizeSaveState(saveState) {
+  return Object.prototype.hasOwnProperty.call(saveStateLabels, saveState) ? saveState : "idle";
+}
+
+function getAggregateSaveState(states = []) {
+  const normalizedStates = states.map(normalizeSaveState).filter((state) => state !== "idle");
+  if (normalizedStates.includes("saving")) return "saving";
+  if (normalizedStates.includes("dirty")) return "dirty";
+  if (normalizedStates.includes("failed")) return "failed";
+  if (normalizedStates.includes("saved")) return "saved";
+  return "idle";
+}
+
+function InlineSaveStatus({ className = "", label = "", saveState = "idle" }) {
+  const normalizedSaveState = normalizeSaveState(saveState);
+  const classes = ["saveState", `save-${normalizedSaveState}`, "inlineSaveStatus", className].filter(Boolean).join(" ");
+  return (
+    <small className={classes}>
+      {label ? `${label} · ` : ""}{saveStateLabels[normalizedSaveState]}
+    </small>
+  );
+}
+
 function getSaveButtonLabel(saveState) {
   if (saveState === "saving") return "저장 중";
   if (saveState === "failed") return "다시 저장";
@@ -2220,6 +2243,10 @@ export function App() {
   const [isPortalDataReady, setIsPortalDataReady] = useState(false);
   const [attendanceReloadKey, setAttendanceReloadKey] = useState(0);
   const [saveStates, setSaveStates] = useState({});
+  const [appStateSaveState, setAppStateSaveState] = useState("idle");
+  const [examPrepRowSaveStates, setExamPrepRowSaveStates] = useState({});
+  const [studentAutoSaveStates, setStudentAutoSaveStates] = useState({});
+  const [studentIntakeSaveStates, setStudentIntakeSaveStates] = useState({});
   const [reportModal, setReportModal] = useState(null);
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
   const [editingLesson, setEditingLesson] = useState(null);
@@ -2234,6 +2261,10 @@ export function App() {
   const initialMakeupTasksRef = useRef(makeupTasks);
   const initialExamPrepRowsRef = useRef(examPrepRows);
   const initialSchoolEventsRef = useRef(schoolEvents);
+  const appStateSaveRequestRef = useRef(0);
+  const examPrepRowSaveRequestRef = useRef({});
+  const studentAutoSaveRequestRef = useRef({});
+  const studentIntakeSaveRequestRef = useRef({});
   const isApplyingRemoteAppStateRef = useRef(false);
   const attendanceOnlyMode = isAttendanceOnlyRoute();
 
@@ -2429,7 +2460,7 @@ export function App() {
           const changedRows = normalizedRows.filter((row, index) => JSON.stringify(row) !== JSON.stringify(examPrepRowsResult.examPrepRows[index]));
           setExamPrepRows(normalizedRows);
           if (changedRows.length > 0) {
-            postExamPrepRows(changedRows).catch((error) => console.error(error));
+            persistExamPrepRows(changedRows);
           }
         }
         if (schoolEventsResult.ok && Array.isArray(schoolEventsResult.schoolEvents)) {
@@ -2520,7 +2551,17 @@ export function App() {
 
   useEffect(() => {
     if (session?.role !== "teacher" || !isAppStateReady || isApplyingRemoteAppStateRef.current) return;
-    postAppState(sharedAppState).catch((error) => console.error(error));
+    const requestId = appStateSaveRequestRef.current + 1;
+    appStateSaveRequestRef.current = requestId;
+    setAppStateSaveState("saving");
+    postAppState(sharedAppState)
+      .then(() => {
+        if (appStateSaveRequestRef.current === requestId) setAppStateSaveState("saved");
+      })
+      .catch((error) => {
+        console.error(error);
+        if (appStateSaveRequestRef.current === requestId) setAppStateSaveState("failed");
+      });
   }, [isAppStateReady, sharedAppState, session?.role]);
 
   useEffect(() => {
@@ -2560,7 +2601,7 @@ export function App() {
       const repairedRows = repairExamPrepRowsFromPersistedPreExamLessons(current, lessons);
       const changedRows = repairedRows.filter((row, index) => JSON.stringify(row) !== JSON.stringify(current[index]));
       if (changedRows.length > 0) {
-        postExamPrepRows(changedRows).catch((error) => console.error(error));
+        persistExamPrepRows(changedRows);
       }
       return changedRows.length > 0 ? repairedRows : current;
     });
@@ -2762,7 +2803,7 @@ export function App() {
       const normalizedRows = normalizeExamPrepRows(current);
       const changedRows = normalizedRows.filter((row, index) => JSON.stringify(row) !== JSON.stringify(current[index]));
       if (changedRows.length > 0) {
-        postExamPrepRows(changedRows).catch((error) => console.error(error));
+        persistExamPrepRows(changedRows);
       }
       return changedRows.length > 0 ? normalizedRows : current;
     });
@@ -2790,7 +2831,7 @@ export function App() {
       const nextRows = mergeById(current, nextRowsToAdd, "examPrepId");
       const addedRows = nextRows.filter((row) => !current.some((item) => item.examPrepId === row.examPrepId));
       if (addedRows.length > 0) {
-        postExamPrepRows(addedRows).catch((error) => console.error(error));
+        persistExamPrepRows(addedRows);
       }
       return nextRows;
     });
@@ -2805,7 +2846,7 @@ export function App() {
         return { ...row, examPeriod: getDefaultExamPeriodText(row.examCycle) };
       });
       if (hasChanged) {
-        postExamPrepRows(nextRows.filter((row, index) => row !== current[index])).catch((error) => console.error(error));
+        persistExamPrepRows(nextRows.filter((row, index) => row !== current[index]));
       }
       return hasChanged ? nextRows : current;
     });
@@ -3498,7 +3539,21 @@ export function App() {
     setStudentIntakeApplicants((current) =>
       current.map((applicant) => (applicant.applicantId === applicantId ? nextApplicant : applicant))
     );
-    postJson("/api/student-intake-applicants", { applicant: nextApplicant }).catch((error) => console.error(error));
+    const requestId = (studentIntakeSaveRequestRef.current[applicantId] ?? 0) + 1;
+    studentIntakeSaveRequestRef.current[applicantId] = requestId;
+    setStudentIntakeSaveStates((current) => ({ ...current, [applicantId]: "saving" }));
+    postJson("/api/student-intake-applicants", { applicant: nextApplicant })
+      .then(() => {
+        if (studentIntakeSaveRequestRef.current[applicantId] === requestId) {
+          setStudentIntakeSaveStates((current) => ({ ...current, [applicantId]: "saved" }));
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        if (studentIntakeSaveRequestRef.current[applicantId] === requestId) {
+          setStudentIntakeSaveStates((current) => ({ ...current, [applicantId]: "failed" }));
+        }
+      });
   }
 
   function handleRegisterStudentIntakeApplicant(applicantId, values) {
@@ -3540,7 +3595,21 @@ export function App() {
       current.map((student) => (student.studentId === studentId ? { ...student, [field]: value } : student))
     );
     if (shouldPersist && nextStudent) {
-      postJson("/api/students", { student: nextStudent }).catch((error) => console.error(error));
+      const requestId = (studentAutoSaveRequestRef.current[studentId] ?? 0) + 1;
+      studentAutoSaveRequestRef.current[studentId] = requestId;
+      setStudentAutoSaveStates((current) => ({ ...current, [studentId]: "saving" }));
+      postJson("/api/students", { student: nextStudent })
+        .then(() => {
+          if (studentAutoSaveRequestRef.current[studentId] === requestId) {
+            setStudentAutoSaveStates((current) => ({ ...current, [studentId]: "saved" }));
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+          if (studentAutoSaveRequestRef.current[studentId] === requestId) {
+            setStudentAutoSaveStates((current) => ({ ...current, [studentId]: "failed" }));
+          }
+        });
     }
   }
 
@@ -3556,6 +3625,45 @@ export function App() {
     }
   }
 
+  function persistExamPrepRows(rowsToPersist) {
+    const changedRows = rowsToPersist.filter(Boolean);
+    if (changedRows.length === 0) return Promise.resolve();
+    const rowIds = [...new Set(changedRows.map((row) => row.examPrepId).filter(Boolean))];
+    const requestIds = rowIds.reduce((acc, rowId) => {
+      const requestId = (examPrepRowSaveRequestRef.current[rowId] ?? 0) + 1;
+      examPrepRowSaveRequestRef.current[rowId] = requestId;
+      acc[rowId] = requestId;
+      return acc;
+    }, {});
+    setExamPrepRowSaveStates((current) => {
+      const next = { ...current };
+      rowIds.forEach((rowId) => {
+        next[rowId] = "saving";
+      });
+      return next;
+    });
+    return postExamPrepRows(changedRows)
+      .then(() => {
+        setExamPrepRowSaveStates((current) => {
+          const next = { ...current };
+          rowIds.forEach((rowId) => {
+            if (examPrepRowSaveRequestRef.current[rowId] === requestIds[rowId]) next[rowId] = "saved";
+          });
+          return next;
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+        setExamPrepRowSaveStates((current) => {
+          const next = { ...current };
+          rowIds.forEach((rowId) => {
+            if (examPrepRowSaveRequestRef.current[rowId] === requestIds[rowId]) next[rowId] = "failed";
+          });
+          return next;
+        });
+      });
+  }
+
   function handleUpdateExamPrepRow(examPrepId, field, value) {
     setExamPrepRows((current) => {
       const existingExamRow = current.find((row) => row.examPrepId === examPrepId);
@@ -3568,7 +3676,7 @@ export function App() {
         return previousRow && JSON.stringify(previousRow) !== JSON.stringify(row);
       });
       if (changedRows.length > 0) {
-        postExamPrepRows(changedRows).catch((error) => console.error(error));
+        persistExamPrepRows(changedRows);
       }
       return nextRows;
     });
@@ -4454,8 +4562,10 @@ export function App() {
         {activeView === "students" ? (
           <StudentManager
             academyTests={academyTests}
+            appStateSaveState={appStateSaveState}
             ModalComponent={Modal}
             scoreRecords={scoreRecords}
+            studentAutoSaveStates={studentAutoSaveStates}
             students={students}
             templates={classTemplates}
             onAddAcademyTest={(studentId) =>
@@ -4518,6 +4628,7 @@ export function App() {
             aiSettings={aiSettings}
             examPostSubmissions={examPostSubmissions}
             examPostTargetStudentIds={examPostTargetStudentIds}
+            rowSaveStates={examPrepRowSaveStates}
             tallySubmissions={tallySubmissions}
             tallySummaries={tallySummaries}
             templates={classTemplates}
@@ -4530,7 +4641,7 @@ export function App() {
                 const nextRows = mergeById(current, nextRowsToAdd, "examPrepId");
                 const addedRows = nextRows.filter((row) => !current.some((item) => item.examPrepId === row.examPrepId));
                 if (addedRows.length > 0) {
-                  postExamPrepRows(addedRows).catch((error) => console.error(error));
+                  persistExamPrepRows(addedRows);
                 }
                 return nextRows;
               })
@@ -4546,6 +4657,7 @@ export function App() {
         {activeView === "examAnalysis" ? (
           <ExamAnalysisCenter
             aiSettings={aiSettings}
+            appStateSaveState={appStateSaveState}
             analyses={examAnalyses}
             analysisFolders={examAnalysisFolders}
             examPrepRows={examPrepRows}
@@ -4665,6 +4777,7 @@ export function App() {
 
         {activeView === "lessonResearch" ? (
           <LessonResearchCenter
+            appStateSaveState={appStateSaveState}
             items={lessonResearchItems}
             onAddItem={(subject) =>
               setLessonResearchItems((current) => [
@@ -4692,6 +4805,7 @@ export function App() {
         {activeView === "settings" ? (
           <SettingsCenter
             aiSettings={aiSettings}
+            appStateSaveState={appStateSaveState}
             attendanceSettings={attendanceSettings}
             integrationStatus={integrationStatus}
             onUpdateAiSettings={setAiSettings}
@@ -4719,6 +4833,7 @@ export function App() {
 
         {activeView === "followups" ? (
           <FollowUpCenter
+            appStateSaveState={appStateSaveState}
             homeworks={homeworks}
             lessons={lessons}
             notificationLogs={notificationLogs}
@@ -4791,6 +4906,7 @@ export function App() {
 
         {activeView === "materials" ? (
           <MaterialManager
+            appStateSaveState={appStateSaveState}
             problemBooks={problemBooks}
             students={students}
             onAddFolder={(folderName) =>
@@ -4909,6 +5025,7 @@ export function App() {
       {isStudentModalOpen ? (
         <StudentModal
           intakeApplicants={studentIntakeApplicants}
+          applicantSaveStates={studentIntakeSaveStates}
           templates={classTemplates}
           onClose={() => setIsStudentModalOpen(false)}
           onRegisterApplicant={handleRegisterStudentIntakeApplicant}
@@ -9607,6 +9724,7 @@ function ExamPrepCenter({
   aiSettings = defaultAiSettings,
   examPostSubmissions = [],
   examPostTargetStudentIds = {},
+  rowSaveStates = {},
   tallySubmissions = [],
   tallySummaries = {},
   rows,
@@ -9660,6 +9778,7 @@ function ExamPrepCenter({
     ].join(" ");
     return haystack.toLowerCase().includes(query.toLowerCase());
   });
+  const examPrepSaveState = getAggregateSaveState(filteredRows.map((row) => rowSaveStates[row.examPrepId]));
   const selectedClass = templates.find((template) => template.classTemplateId === selectedClassTemplateId);
   const editingExamPrepRow = visibleRows.find((row) => row.examPrepId === editingExamPrepId) ?? null;
   const reviewModalRow = visibleRows.find((row) => row.examPrepId === reviewModalRowId) ?? null;
@@ -9778,14 +9897,17 @@ function ExamPrepCenter({
           <h1>시험관리</h1>
           <p className="muted">{selectedClass?.name} · {examCycleLabel(selectedExamCycle)}</p>
         </div>
-        {activeTab === "info" ? (
-          <input
-            className="searchInput"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="학교, 과목, 출판사 검색"
-          />
-        ) : null}
+        <div className="examPrepHeaderActions">
+          {examPrepSaveState !== "idle" ? <InlineSaveStatus label="시험정보" saveState={examPrepSaveState} /> : null}
+          {activeTab === "info" ? (
+            <input
+              className="searchInput"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="학교, 과목, 출판사 검색"
+            />
+          ) : null}
+        </div>
       </div>
 
       <div className="examManagementTabs" aria-label="시험관리 하위 탭">
@@ -9873,6 +9995,7 @@ function ExamPrepCenter({
                     <span>{reviewSummary}</span>
                   </button>
                   <div className="examPrepRowActions">
+                    {rowSaveStates[row.examPrepId] ? <InlineSaveStatus saveState={rowSaveStates[row.examPrepId]} /> : null}
                     <button className="softButton compact" onClick={() => setEditingExamPrepId(row.examPrepId)} type="button">수정</button>
                     <button className="dangerSoftButton compact" onClick={() => onDeleteRow?.(row.examPrepId)} type="button">삭제</button>
                   </div>
@@ -9947,6 +10070,7 @@ function ExamPrepCenter({
       {reviewModalRow ? (
         <ExamReviewComposerModal
           aiSettings={aiSettings}
+          saveState={rowSaveStates[reviewModalRow.examPrepId] ?? "idle"}
           row={reviewModalRow}
           onClose={() => setReviewModalRowId("")}
           onUpdateRow={onUpdateRow}
@@ -9955,6 +10079,7 @@ function ExamPrepCenter({
       {editingExamPrepRow ? (
         <ExamPrepEditModal
           row={editingExamPrepRow}
+          saveState={rowSaveStates[editingExamPrepRow.examPrepId] ?? "idle"}
           getEditableMathExamEntries={getEditableMathExamEntries}
           onAddMathExamEntry={addMathExamEntry}
           onClose={() => setEditingExamPrepId("")}
@@ -9974,7 +10099,8 @@ function ExamPrepEditModal({
   onRemoveMathExamEntry,
   onUpdateMathExamEntry,
   onUpdateRow,
-  row
+  row,
+  saveState = "idle"
 }) {
   const specialNote = row.specialNote ?? row.memo ?? "";
 
@@ -10101,7 +10227,8 @@ function ExamPrepEditModal({
         </section>
 
         <div className="modalActionBar">
-          <button className="primaryButton" onClick={onClose} type="button">저장 완료</button>
+          {saveState !== "idle" ? <InlineSaveStatus label="시험정보" saveState={saveState} /> : null}
+          <button className="primaryButton" onClick={onClose} type="button">닫기</button>
         </div>
       </div>
     </Modal>
@@ -10282,7 +10409,7 @@ function ExamPostSubmissionManager({
   );
 }
 
-function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUpdateRow, row }) {
+function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUpdateRow, row, saveState = "idle" }) {
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
 
@@ -10324,6 +10451,11 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
       subtitle={`${row.grade} · ${row.subject} · ${row.publisher || "출판사 미입력"}`}
       onClose={onClose}
     >
+      {saveState !== "idle" ? (
+        <div className="modalSaveStatusBar">
+          <InlineSaveStatus label="시험정보" saveState={saveState} />
+        </div>
+      ) : null}
       <div className="commentComposerGrid">
         <section className="commentDraftPanel">
           <div className="sectionHeader slim">
@@ -10529,6 +10661,7 @@ function NotificationSettingsSection({ integrationStatus }) {
 
 function SettingsCenter({
   aiSettings,
+  appStateSaveState = "idle",
   attendanceSettings = defaultAttendanceSettings,
   integrationStatus,
   onUpdateAiSettings,
@@ -10731,6 +10864,7 @@ function SettingsCenter({
           <h1>설정</h1>
           <p>AI 사용 모드는 이곳에서 한 번 정해두고 각 기능에서 그대로 사용합니다.</p>
         </div>
+        <InlineSaveStatus label="설정 자동저장" saveState={appStateSaveState} />
       </header>
 
       <section className="panel settingsCard">
@@ -10896,6 +11030,7 @@ function SettingsCenter({
 
 function ExamAnalysisCenter({
   aiSettings = defaultAiSettings,
+  appStateSaveState = "idle",
   analyses,
   analysisFolders = [],
   examPrepRows,
@@ -12181,6 +12316,7 @@ function ExamAnalysisCenter({
           <p className="muted">기출 PDF 1개 또는 여러 개를 구조화하고, 강사 인사이트를 더해 강사용·학생용·블로그·인스타 산출물을 만듭니다.</p>
         </div>
         <div className="analysisTopActions">
+          <InlineSaveStatus label="시험분석 자동저장" saveState={appStateSaveState} />
           {isAnalysisWorkspaceOpen ? (
             <button className="softButton" onClick={() => setIsAnalysisWorkspaceOpen(false)} type="button">← 분석 목록</button>
           ) : (
@@ -13214,6 +13350,7 @@ function ExamAnalysisCenter({
                 </summary>
                 <ExamFinalDocumentBuilder
                   analysis={selectedAnalysis}
+                  saveState={appStateSaveState}
                   createDocumentFromAnalysis={createExamFinalDocumentFromAnalysis}
                   document={selectedAnalysis.finalDocument}
                   onChange={updateFinalDocument}
@@ -14367,7 +14504,7 @@ function ClassManager({ students, templates, onUpdateClassRoster }) {
   );
 }
 
-function LessonResearchCenter({ items, onAddItem, onDeleteItem, onUpdateItem }) {
+function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, onDeleteItem, onUpdateItem }) {
   const [selectedSubject, setSelectedSubject] = useState(lessonResearchSubjects[0]);
   const [selectedItemId, setSelectedItemId] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("전체");
@@ -14411,7 +14548,10 @@ function LessonResearchCenter({ items, onAddItem, onDeleteItem, onUpdateItem }) 
           <h1>수업연구</h1>
           <p className="muted">못 푼 문제, 설명이 아쉬웠던 문제, 빈출 테마를 과목별로 모아 교재 후보로 발전시키는 공간입니다.</p>
         </div>
-        <button className="primaryButton" onClick={handleAddItem} type="button">+ 연구 항목 추가</button>
+        <div className="researchTopActions">
+          <InlineSaveStatus label="수업연구 자동저장" saveState={appStateSaveState} />
+          <button className="primaryButton" onClick={handleAddItem} type="button">+ 연구 항목 추가</button>
+        </div>
       </div>
 
       <div className="researchSubjectTabs">
@@ -16882,6 +17022,7 @@ function SupplementHistoryModal({ onChangeQuery, onClose, onUndoPassTask, query,
 }
 
 function FollowUpCenter({
+  appStateSaveState = "idle",
   homeworks,
   lessons,
   notificationLogs,
@@ -16907,7 +17048,10 @@ function FollowUpCenter({
           <h1>오답관리</h1>
           <p className="muted">교재 PDF를 원본으로 등록하고, 단원별 문항 상태와 학생별 오답 흐름을 관리합니다.</p>
         </div>
-        <span className="countBadge">{tasks.length}개 진행</span>
+        <div className="followUpTopActions">
+          <InlineSaveStatus label="오답관리 자동저장" saveState={appStateSaveState} />
+          <span className="countBadge">{tasks.length}개 진행</span>
+        </div>
       </div>
 
       <WrongProblemBoard
@@ -17575,6 +17719,7 @@ function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteMaterial
 }
 
 function MaterialManager({
+  appStateSaveState = "idle",
   problemBooks,
   students,
   onAddFolder,
@@ -17646,6 +17791,7 @@ function MaterialManager({
               <p className="muted">교재 원본 PDF, PageSnap 단원 JSON, 문항 수를 관리합니다. 여기서 등록한 교재는 오답관리에서 사용됩니다.</p>
             </div>
             <div className="materialHeaderActions">
+              <InlineSaveStatus label="교재 자동저장" saveState={appStateSaveState} />
               <button className="softButton" onClick={() => setIsPageSnapModalOpen(true)} type="button">
                 PageSnap JSON 가져오기
               </button>
@@ -18123,6 +18269,7 @@ const intakeStatusOptions = [
 ];
 
 function StudentModal({
+  applicantSaveStates = {},
   intakeApplicants = [],
   templates,
   onClose,
@@ -18288,6 +18435,9 @@ function StudentModal({
                 </div>
                 <div className="studentIntakeActions">
                   <small>{applicant.formName || "Tally"} · {applicant.createdAt ? new Date(applicant.createdAt).toLocaleString("ko-KR") : "접수일 미확인"}</small>
+                  {applicantSaveStates[applicant.applicantId] ? (
+                    <InlineSaveStatus label="접수정보" saveState={applicantSaveStates[applicant.applicantId]} />
+                  ) : null}
                   <button
                     className="primaryButton"
                     disabled={!applicant.name}

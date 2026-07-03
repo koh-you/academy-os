@@ -2296,8 +2296,25 @@ button {
 }
 
 .modalActionBar {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.modalSaveStatusBar {
   display: flex;
   justify-content: flex-end;
+  margin: -4px 0 12px;
+}
+
+.examPrepHeaderActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-left: auto;
 }
 
 .examManagementTabs {
@@ -6785,6 +6802,21 @@ button:disabled {
   font-weight: 800;
 }
 
+.inlineSaveStatus {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 12px;
+  min-height: 28px;
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
+.pageTop > .inlineSaveStatus {
+  margin-left: auto;
+}
+
 .save-dirty {
   color: var(--status-pending-text);
 }
@@ -6799,6 +6831,26 @@ button:disabled {
 
 .save-failed {
   color: var(--status-danger-text);
+}
+
+.inlineSaveStatus.save-dirty {
+  background: var(--status-pending-bg);
+  border-color: var(--status-pending-border);
+}
+
+.inlineSaveStatus.save-saving {
+  background: var(--status-info-bg);
+  border-color: var(--status-info-border);
+}
+
+.inlineSaveStatus.save-saved {
+  background: var(--status-success-bg);
+  border-color: var(--status-success-border);
+}
+
+.inlineSaveStatus.save-failed {
+  background: var(--status-danger-bg);
+  border-color: var(--status-danger-border);
 }
 
 .modalBackdrop {
@@ -9019,7 +9071,9 @@ textarea {
 .profileHeaderActions {
   align-items: center;
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
+  justify-content: flex-end;
 }
 
 .profileEditInput {
@@ -11995,6 +12049,15 @@ textarea.profileEditInput {
 
 .followUpPage .pageTop {
   margin-bottom: 0;
+}
+
+.followUpTopActions,
+.researchTopActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
 }
 
 .supplementOverviewGrid {

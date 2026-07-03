@@ -6,13 +6,32 @@ const withdrawalReasonOptions = [
   { value: "other", label: "기타" }
 ];
 
+const saveStateLabels = {
+  idle: "저장 전",
+  dirty: "변경됨",
+  saving: "저장 중",
+  saved: "저장 완료",
+  failed: "저장 실패"
+};
+
+function InlineSaveStatus({ label = "", saveState = "idle" }) {
+  const normalizedSaveState = Object.prototype.hasOwnProperty.call(saveStateLabels, saveState) ? saveState : "idle";
+  return (
+    <small className={`saveState save-${normalizedSaveState} inlineSaveStatus`}>
+      {label ? `${label} · ` : ""}{saveStateLabels[normalizedSaveState]}
+    </small>
+  );
+}
+
 function formatShortDate(date = "") {
   return date ? date.slice(5).replace("-", ".") : "날짜 미입력";
 }
 
 export function StudentManager({
   academyTests,
+  appStateSaveState = "idle",
   scoreRecords,
+  studentAutoSaveStates = {},
   students,
   templates,
   ModalComponent,
@@ -406,6 +425,7 @@ export function StudentManager({
 
       {selectedStudent ? (
         <StudentProfileModal
+          appStateSaveState={appStateSaveState}
           academyTests={selectedAcademyTests}
           className={getStudentClassName(selectedStudent)}
           ModalComponent={ModalComponent}
@@ -416,6 +436,7 @@ export function StudentManager({
           onUpdateScore={onUpdateScore}
           onUpdateStudent={onUpdateStudent}
           scores={selectedScores}
+          studentAutoSaveState={studentAutoSaveStates[selectedStudent.studentId] ?? "idle"}
           student={selectedStudent}
         />
       ) : null}
@@ -477,6 +498,7 @@ export function StudentManager({
 }
 
 function StudentProfileModal({
+  appStateSaveState = "idle",
   academyTests,
   className,
   ModalComponent,
@@ -487,6 +509,7 @@ function StudentProfileModal({
   onUpdateScore,
   onUpdateStudent,
   scores,
+  studentAutoSaveState = "idle",
   student
 }) {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -527,6 +550,8 @@ function StudentProfileModal({
             <h2>{student.name}</h2>
           </div>
           <div className="profileHeaderActions">
+            {studentAutoSaveState !== "idle" ? <InlineSaveStatus label="기본정보" saveState={studentAutoSaveState} /> : null}
+            <InlineSaveStatus label="성적/테스트" saveState={appStateSaveState} />
             <span className="countBadge">{className}</span>
             <button
               className={isEditingProfile ? "saveButton" : "softButton"}
