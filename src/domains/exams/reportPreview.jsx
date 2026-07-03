@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from "react";
+
 import {
   getExamAnalysisInitialFields,
   splitReportLines
@@ -130,14 +132,34 @@ export function ExamAnalysisInstagramPreview({ value }) {
 }
 
 export function AnalysisOutputPreviewCard({ title, tone = "", value = "", onEdit, onOpen, children }) {
+  const copyStatusTimerRef = useRef(null);
+  const [copyStatus, setCopyStatus] = useState("");
+
+  useEffect(() => () => {
+    if (copyStatusTimerRef.current) clearTimeout(copyStatusTimerRef.current);
+  }, []);
+
+  async function copyPreviewText() {
+    const copied = await copyTextToClipboard(value);
+    setCopyStatus(copied ? "복사되었습니다." : "복사할 내용을 확인해 주세요.");
+    if (copyStatusTimerRef.current) clearTimeout(copyStatusTimerRef.current);
+    copyStatusTimerRef.current = setTimeout(() => {
+      copyStatusTimerRef.current = null;
+      setCopyStatus("");
+    }, 1800);
+  }
+
   return (
     <article className={["panel", "outputPreviewCard", tone].filter(Boolean).join(" ")}>
       <div className="sectionHeader slim">
         <h2>{title}</h2>
         <div className="analysisPreviewActions">
           {onOpen ? <button className="primaryButton" onClick={onOpen} type="button">보기</button> : null}
-          <button className="softButton" onClick={() => copyTextToClipboard(value)} type="button">복사</button>
+          <button className="softButton" onClick={copyPreviewText} type="button">복사</button>
           {onEdit ? <button className="softButton" onClick={onEdit} type="button">수정</button> : null}
+          {copyStatus ? (
+            <small className="copyFeedbackStatus" role="status" aria-live="polite">{copyStatus}</small>
+          ) : null}
         </div>
       </div>
       <div

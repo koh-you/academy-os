@@ -11262,6 +11262,7 @@ function ExamAnalysisCenter({
   const [isReportPreviewOpen, setIsReportPreviewOpen] = useState(false);
   const [isAiInitialViewOpen, setIsAiInitialViewOpen] = useState(false);
   const [outputPreviewId, setOutputPreviewId] = useState("");
+  const [outputPreviewCopyStatus, setOutputPreviewCopyStatus] = useState("");
   const [analysisNow, setAnalysisNow] = useState(Date.now());
   const [analysisApiCheck, setAnalysisApiCheck] = useState({ analysisId: "", message: "", status: "idle" });
   const [selectedQuestionId, setSelectedQuestionId] = useState("");
@@ -11283,6 +11284,7 @@ function ExamAnalysisCenter({
   const cropSurfaceRef = useRef(null);
   const pdfCanvasRef = useRef(null);
   const pdfRenderTaskRef = useRef(null);
+  const outputPreviewCopyTimerRef = useRef(null);
   const normalizedAnalyses = useMemo(
     () => analyses.map((analysis) => {
       const normalized = normalizeExamAnalysisForDisplay(analysis);
@@ -11461,6 +11463,18 @@ function ExamAnalysisCenter({
     instagram: { title: "인스타 카드뉴스", kind: "instagram", value: selectedAnalysis.instagramDraft, editSection: "output" }
   } : {};
   const outputPreview = outputPreviewMap[outputPreviewId] ?? null;
+  useEffect(() => {
+    setOutputPreviewCopyStatus("");
+    if (outputPreviewCopyTimerRef.current) {
+      clearTimeout(outputPreviewCopyTimerRef.current);
+      outputPreviewCopyTimerRef.current = null;
+    }
+  }, [outputPreviewId]);
+
+  useEffect(() => () => {
+    if (outputPreviewCopyTimerRef.current) clearTimeout(outputPreviewCopyTimerRef.current);
+  }, []);
+
   useEffect(() => {
     if (selectedAnalysis?.aiStatus !== "분석 중") return undefined;
     setAnalysisNow(Date.now());
@@ -11695,6 +11709,17 @@ function ExamAnalysisCenter({
 
   function updateFinalDocument(nextDocument) {
     update("finalDocument", normalizeExamFinalDocument(nextDocument));
+  }
+
+  async function copyOutputPreviewText() {
+    if (!outputPreview) return;
+    const copied = await copyTextToClipboard(outputPreview.value ?? "");
+    setOutputPreviewCopyStatus(copied ? "복사되었습니다." : "복사할 내용을 확인해 주세요.");
+    if (outputPreviewCopyTimerRef.current) clearTimeout(outputPreviewCopyTimerRef.current);
+    outputPreviewCopyTimerRef.current = setTimeout(() => {
+      outputPreviewCopyTimerRef.current = null;
+      setOutputPreviewCopyStatus("");
+    }, 1800);
   }
 
   function regenerateFinalDocument() {
@@ -13756,7 +13781,10 @@ function ExamAnalysisCenter({
           onClose={() => setOutputPreviewId("")}
         >
           <div className="analysisReportToolbar">
-            <button className="primaryButton" onClick={() => copyTextToClipboard(outputPreview.value)} type="button">복사</button>
+            <button className="primaryButton" onClick={copyOutputPreviewText} type="button">복사</button>
+            {outputPreviewCopyStatus ? (
+              <small className="copyFeedbackStatus" role="status" aria-live="polite">{outputPreviewCopyStatus}</small>
+            ) : null}
             <button
               className="softButton"
               onClick={() => {

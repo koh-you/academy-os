@@ -4386,6 +4386,7 @@ button {
 
 .analysisFinalReportActions,
 .analysisReportToolbar {
+  align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -5009,6 +5010,7 @@ button {
 }
 
 .analysisPreviewActions {
+  align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -8474,6 +8476,7 @@ textarea {
   min-height: 36px;
 }
 
+.copyFeedbackStatus,
 .reviewCopyStatus {
   color: #15803d;
   font-size: 13px;
