@@ -570,13 +570,267 @@ button {
   padding: 0 20px;
 }
 
+.secondaryButton {
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #cbd8ee;
+  border-radius: 8px;
+  color: #17213d;
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 900;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  text-decoration: none;
+}
+
 .primaryButton.full {
   width: 100%;
+}
+
+.saveStateBadge {
+  align-items: center;
+  background: var(--status-neutral-bg);
+  border: 1px solid var(--status-neutral-border);
+  border-radius: 999px;
+  color: var(--status-neutral-text);
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 900;
+  min-height: 32px;
+  padding: 0 12px;
+}
+
+.saveStateBadge.loading,
+.saveStateBadge.saving {
+  background: var(--status-pending-bg);
+  border-color: var(--status-pending-border);
+  color: var(--status-pending-text);
+}
+
+.saveStateBadge.success {
+  background: var(--status-success-bg);
+  border-color: var(--status-success-border);
+  color: var(--status-success-text);
+}
+
+.saveStateBadge.failed {
+  background: var(--status-danger-bg);
+  border-color: var(--status-danger-border);
+  color: var(--status-danger-text);
+}
+
+.headerActions {
+  align-items: center;
+  display: flex;
+  gap: 8px;
 }
 
 .calendarShell {
   margin-top: 18px;
   padding: 20px;
+}
+
+.examAnalysisPipelinePage {
+  display: grid;
+  gap: 14px;
+}
+
+.examAnalysisStatusBar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 36px;
+}
+
+.examAnalysisGrid {
+  align-items: start;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+}
+
+.examAnalysisListPanel,
+.examAnalysisFormPanel,
+.examAnalysisUploadPanel,
+.examAnalysisStepPanel,
+.examAnalysisEventPanel {
+  padding: 16px;
+}
+
+.examAnalysisListPanel {
+  display: grid;
+  gap: 12px;
+  position: sticky;
+  top: 12px;
+}
+
+.examAnalysisRunList,
+.examAnalysisSourceList,
+.examAnalysisEventList,
+.examAnalysisWorkPanel {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.examAnalysisRunList {
+  max-height: calc(100vh - 210px);
+  overflow: auto;
+}
+
+.examAnalysisRunList button {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  color: #17213d;
+  display: grid;
+  gap: 5px;
+  min-height: 92px;
+  padding: 12px;
+  text-align: left;
+}
+
+.examAnalysisRunList button.active {
+  background: #17213d;
+  border-color: #17213d;
+  color: #ffffff;
+}
+
+.examAnalysisRunList button span,
+.examAnalysisRunList button small {
+  color: #64748b;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.examAnalysisRunList button.active span,
+.examAnalysisRunList button.active small {
+  color: #dbeafe;
+}
+
+.examAnalysisFormGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.examAnalysisFormGrid label {
+  color: #17213d;
+  display: grid;
+  font-size: 13px;
+  font-weight: 900;
+  gap: 7px;
+  min-width: 0;
+}
+
+.examAnalysisFormGrid label.span2 {
+  grid-column: span 2;
+}
+
+.examAnalysisFormGrid input,
+.examAnalysisFormGrid select {
+  background: #ffffff;
+  border: 1px solid #cbd8ee;
+  border-radius: 8px;
+  color: #0f172a;
+  min-height: 44px;
+  min-width: 0;
+  padding: 0 12px;
+}
+
+.examAnalysisLinkedInfo {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.examAnalysisLinkedInfo span {
+  background: #f8fafc;
+  border: 1px solid #d8e3f8;
+  border-radius: 999px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 900;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 7px 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.examAnalysisSourceItem,
+.examAnalysisEventItem {
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-height: 66px;
+  padding: 12px;
+}
+
+.examAnalysisSourceItem > div,
+.examAnalysisEventItem {
+  min-width: 0;
+}
+
+.examAnalysisSourceItem strong,
+.examAnalysisEventItem strong {
+  color: #17213d;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.examAnalysisSourceItem span,
+.examAnalysisEventItem span {
+  color: #64748b;
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.examAnalysisSteps {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.examAnalysisSteps span {
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  color: #64748b;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 8px;
+  text-align: center;
+}
+
+.examAnalysisSteps span.active {
+  background: #ecfdf5;
+  border-color: #86efac;
+  color: #047857;
+}
+
+.emptyState.compact {
+  min-height: 88px;
+  padding: 18px;
 }
 
 .teacherCalendarTop {
@@ -10351,6 +10605,7 @@ body.attendanceOnlyBody {
   .researchLayout,
   .schoolCalendarLayout,
   .schoolCalendarLayout.formCollapsed,
+  .examAnalysisGrid,
   .followCandidateGrid,
   .supplementOverviewGrid,
   .profileSummary,
@@ -10380,6 +10635,19 @@ body.attendanceOnlyBody {
   .sourceAnalysisButton {
     min-width: 0;
     width: 100%;
+  }
+
+  .examAnalysisListPanel {
+    position: static;
+  }
+
+  .examAnalysisRunList {
+    max-height: none;
+  }
+
+  .examAnalysisFormGrid,
+  .examAnalysisSteps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .analysisSummaryHero {
@@ -10487,7 +10755,18 @@ body.attendanceOnlyBody {
 
   .examPrepEditGrid,
   .examPrepDateGrid,
+  .examAnalysisFormGrid,
   .modalMathExamEntryEditor .mathExamEntryRow {
+    grid-template-columns: 1fr;
+  }
+
+  .examAnalysisFormGrid label.span2 {
+    grid-column: auto;
+  }
+
+  .examAnalysisSourceItem,
+  .examAnalysisEventItem,
+  .examAnalysisSteps {
     grid-template-columns: 1fr;
   }
 

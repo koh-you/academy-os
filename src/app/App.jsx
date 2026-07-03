@@ -888,6 +888,44 @@ function getExamPostFileOpenUrl(file) {
   return apiUrl(`/api/exam-post-files/open?bucket=${encodeURIComponent(file.bucketId || "exam-submissions")}&path=${encodeURIComponent(file.storagePath)}`);
 }
 
+function getExamAnalysisSourceOpenUrl(file) {
+  if (file?.signedUrl) return file.signedUrl;
+  if (!file?.storagePath) return "";
+  return apiUrl(`/api/exam-analysis-source-files/open?bucket=${encodeURIComponent(file.bucketId || "exam-analysis-pipeline-sources")}&path=${encodeURIComponent(file.storagePath)}`);
+}
+
+function formatBytes(sizeBytes) {
+  const value = Number(sizeBytes || 0);
+  if (!value) return "-";
+  if (value < 1024) return `${value}B`;
+  if (value < 1024 * 1024) return `${Math.round(value / 1024)}KB`;
+  return `${(value / 1024 / 1024).toFixed(1)}MB`;
+}
+
+function workflowStatusLabel(status = "") {
+  const labels = {
+    draft: "초안",
+    source_uploaded: "PDF 저장 완료",
+    source_extracted: "추출 완료",
+    question_count_detected: "문항 수 판독 완료",
+    question_count_confirmed: "문항 수 확정",
+    rows_created: "1~N 행 생성",
+    ai_fill_running: "AI 행 채움 중",
+    ai_filled: "AI 행 채움 완료",
+    missing_audit_needed: "누락 검수 필요",
+    missing_retry_running: "누락 재요청 중",
+    teacher_review: "선생님 검토",
+    completed: "완료",
+    failed: "실패",
+    archived: "보관"
+  };
+  return labels[status] ?? status ?? "초안";
+}
+
+function getExamAnalysisRunTitle(run = {}) {
+  return run.title || [run.schoolName, run.grade, run.subject, run.examCycle].filter(Boolean).join(" · ") || "새 시험분석";
+}
+
 function postMakeupTask(makeupTask) {
   return postJson("/api/makeup-tasks", { makeupTask });
 }
@@ -4397,6 +4435,10 @@ export function App() {
           />
         ) : null}
 
+        {activeView === "examAnalysisPipeline" ? (
+          <ExamAnalysisPipelineCenter examPrepRows={examPrepRows} />
+        ) : null}
+
         {activeView === "schoolCalendar" ? (
           <SchoolCalendarCenter
             generatedLessonPlan={generatedLessonPlan}
@@ -6161,6 +6203,358 @@ function NotificationCenter({
   );
 }
 
+function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
+  const fileInputRef = useRef(null);
+  const didAutoSelectExamPrepRef = useRef(Boolean(examPrepRows[0]?.examPrepId));
+  const [analysisRuns, setAnalysisRuns] = useState([]);
+  const [selectedRunId, setSelectedRunId] = useState("");
+  const [selectedDetail, setSelectedDetail] = useState(null);
+  const [selectedExamPrepId, setSelectedExamPrepId] = useState(examPrepRows[0]?.examPrepId ?? "");
+  const [draft, setDraft] = useState(() => {
+    const row = examPrepRows[0] ?? {};
+    return {
+      title: row.schoolName ? `${row.schoolName} ${row.examCycle || row.examTerm || ""} 시험분석`.trim() : "새 시험분석",
+      schoolName: row.schoolName ?? "",
+      grade: row.grade ?? "",
+      subject: row.subject ?? "수학",
+      examTerm: row.examTerm ?? "",
+      examCycle: row.examCycle ?? ""
+    };
+  });
+  const [loadStatus, setLoadStatus] = useState({ state: "idle", message: "" });
+  const [saveStatus, setSaveStatus] = useState({ state: "idle", message: "" });
+  const [uploadStatus, setUploadStatus] = useState({ state: "idle", message: "" });
+
+  const selectedExamPrepRow = useMemo(
+    () => examPrepRows.find((row) => row.examPrepId === selectedExamPrepId) ?? null,
+    [examPrepRows, selectedExamPrepId]
+  );
+  const selectedDetailRun = selectedDetail?.analysisRun?.analysisRunId === selectedRunId ? selectedDetail.analysisRun : null;
+  const activeRun = selectedDetailRun ?? analysisRuns.find((run) => run.analysisRunId === selectedRunId) ?? null;
+  const sourceFiles = selectedDetailRun ? selectedDetail?.sources ?? [] : [];
+  const events = selectedDetailRun ? selectedDetail?.events ?? [] : [];
+
+  useEffect(() => {
+    if (!didAutoSelectExamPrepRef.current && !selectedExamPrepId && examPrepRows[0]?.examPrepId) {
+      didAutoSelectExamPrepRef.current = true;
+      setSelectedExamPrepId(examPrepRows[0].examPrepId);
+      applyExamPrepRow(examPrepRows[0]);
+    }
+  }, [examPrepRows, selectedExamPrepId]);
+
+  useEffect(() => {
+    loadRuns();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedRunId) {
+      setSelectedDetail(null);
+      return;
+    }
+    loadRunDetail(selectedRunId);
+  }, [selectedRunId]);
+
+  function applyExamPrepRow(row) {
+    if (!row) return;
+    setDraft({
+      title: `${row.schoolName || "학교"} ${row.examCycle || row.examTerm || "시험"} 시험분석`,
+      schoolName: row.schoolName ?? "",
+      grade: row.grade ?? "",
+      subject: row.subject ?? "수학",
+      examTerm: row.examTerm ?? "",
+      examCycle: row.examCycle ?? ""
+    });
+  }
+
+  function applyRunToDraft(run) {
+    if (!run) return;
+    didAutoSelectExamPrepRef.current = true;
+    setSelectedExamPrepId(run.examPrepId || "");
+    setDraft({
+      title: run.title || getExamAnalysisRunTitle(run),
+      schoolName: run.schoolName ?? "",
+      grade: run.grade ?? "",
+      subject: run.subject ?? "수학",
+      examTerm: run.examTerm ?? "",
+      examCycle: run.examCycle ?? ""
+    });
+  }
+
+  function buildRunPayload() {
+    return {
+      analysisRunId: selectedRunId || undefined,
+      examPrepId: selectedExamPrepId || "",
+      title: draft.title.trim() || "새 시험분석",
+      schoolName: draft.schoolName.trim(),
+      grade: draft.grade.trim(),
+      subject: draft.subject.trim() || "수학",
+      examTerm: draft.examTerm.trim(),
+      examCycle: draft.examCycle.trim()
+    };
+  }
+
+  async function loadRuns(nextSelectedRunId = "") {
+    setLoadStatus({ state: "loading", message: "시험분석 · 불러오는 중" });
+    try {
+      const result = await getJsonWithTimeout("/api/exam-analysis-runs", 12000, "시험분석 목록 조회가 지연되고 있습니다.");
+      const runs = result.analysisRuns ?? [];
+      setAnalysisRuns(runs);
+      const nextId = nextSelectedRunId || selectedRunId || runs[0]?.analysisRunId || "";
+      setSelectedRunId(nextId);
+      setLoadStatus({ state: "success", message: "시험분석 · 불러오기 완료" });
+    } catch (error) {
+      setLoadStatus({ state: "failed", message: `시험분석 · 불러오기 실패 · ${error.message}` });
+    }
+  }
+
+  async function loadRunDetail(analysisRunId) {
+    setLoadStatus({ state: "loading", message: "시험분석 상세 · 불러오는 중" });
+    try {
+      const result = await getJsonWithTimeout(
+        `/api/exam-analysis-runs?id=${encodeURIComponent(analysisRunId)}`,
+        12000,
+        "시험분석 상세 조회가 지연되고 있습니다."
+      );
+      setSelectedDetail(result);
+      applyRunToDraft(result.analysisRun);
+      setLoadStatus({ state: "success", message: "시험분석 상세 · 불러오기 완료" });
+    } catch (error) {
+      setLoadStatus({ state: "failed", message: `시험분석 상세 · 불러오기 실패 · ${error.message}` });
+    }
+  }
+
+  async function saveRun() {
+    setSaveStatus({ state: "saving", message: "시험분석 · 저장 중" });
+    try {
+      const result = await postJson("/api/exam-analysis-runs", { analysisRun: buildRunPayload() });
+      const savedRun = result.analysisRun;
+      setSaveStatus({ state: "success", message: "시험분석 · 저장 완료" });
+      if (savedRun?.analysisRunId) {
+        await loadRuns(savedRun.analysisRunId);
+      }
+    } catch (error) {
+      setSaveStatus({ state: "failed", message: `시험분석 · 저장 실패 · ${error.message}` });
+    }
+  }
+
+  async function uploadPdf(file) {
+    if (!file) return;
+    const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+    if (!isPdf) {
+      setUploadStatus({ state: "failed", message: "시험분석 PDF · PDF 파일만 업로드할 수 있습니다." });
+      return;
+    }
+
+    setUploadStatus({ state: "saving", message: "시험분석 PDF · 업로드 중" });
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      const result = await postJsonWithTimeout(
+        "/api/exam-analysis-source-files",
+        {
+          ...buildRunPayload(),
+          analysisRunId: selectedRunId || undefined,
+          analysisRun: buildRunPayload(),
+          dataUrl,
+          fileName: file.name,
+          fileType: file.type
+        },
+        90000,
+        "시험분석 PDF 업로드가 지연되고 있습니다."
+      );
+      const nextRunId = result.analysisRun?.analysisRunId || selectedRunId;
+      setUploadStatus({ state: "success", message: "시험분석 PDF · 업로드 완료" });
+      if (nextRunId) {
+        await loadRuns(nextRunId);
+      }
+    } catch (error) {
+      setUploadStatus({ state: "failed", message: `시험분석 PDF · 업로드 실패 · ${error.message}` });
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  return (
+    <section className="examAnalysisPipelinePage">
+      <div className="pageTop">
+        <div>
+          <h1>시험분석</h1>
+          <p className="muted">PDF 원본 저장과 분석 작업 관리</p>
+        </div>
+        <div className="pageActions">
+          <button className="secondaryButton" onClick={() => loadRuns(selectedRunId)} type="button">새로고침</button>
+          <button className="primaryButton" onClick={saveRun} type="button">분석 저장</button>
+        </div>
+      </div>
+
+      <div className="examAnalysisStatusBar">
+        {[loadStatus, saveStatus, uploadStatus].filter((item) => item.message).map((item, index) => (
+          <span className={`saveStateBadge ${item.state}`} key={`${item.message}-${index}`}>{item.message}</span>
+        ))}
+      </div>
+
+      <div className="examAnalysisGrid">
+        <aside className="examAnalysisListPanel panel">
+          <div className="sectionHeader slim">
+            <div>
+              <strong>분석 목록</strong>
+              <span>{analysisRuns.length}건</span>
+            </div>
+          </div>
+          <div className="examAnalysisRunList">
+            {analysisRuns.length === 0 ? (
+              <div className="emptyState compact">저장된 분석이 없습니다.</div>
+            ) : analysisRuns.map((run) => (
+              <button
+                className={selectedRunId === run.analysisRunId ? "active" : ""}
+                key={run.analysisRunId}
+                onClick={() => setSelectedRunId(run.analysisRunId)}
+                type="button"
+              >
+                <strong>{getExamAnalysisRunTitle(run)}</strong>
+                <span>{[run.schoolName, run.grade, run.subject].filter(Boolean).join(" · ") || "기본정보 미입력"}</span>
+                <small>{workflowStatusLabel(run.workflowStatus)}</small>
+              </button>
+            ))}
+          </div>
+        </aside>
+
+        <section className="examAnalysisWorkPanel">
+          <div className="panel examAnalysisFormPanel">
+            <div className="sectionHeader slim">
+              <div>
+                <strong>기본정보</strong>
+                <span>{activeRun ? workflowStatusLabel(activeRun.workflowStatus) : "새 분석"}</span>
+              </div>
+            </div>
+            <div className="examAnalysisFormGrid">
+              <label>
+                <span>연결 시험정보</span>
+                <select
+                  value={selectedExamPrepId}
+                  onChange={(event) => {
+                    const nextId = event.target.value;
+                    setSelectedExamPrepId(nextId);
+                    applyExamPrepRow(examPrepRows.find((row) => row.examPrepId === nextId));
+                  }}
+                >
+                  <option value="">직접 입력</option>
+                  {examPrepRows.map((row) => (
+                    <option key={row.examPrepId} value={row.examPrepId}>
+                      {[row.schoolName, row.grade, row.subject, row.examCycle || row.examTerm].filter(Boolean).join(" · ")}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="span2">
+                <span>분석명</span>
+                <input value={draft.title} onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))} />
+              </label>
+              <label>
+                <span>학교</span>
+                <input value={draft.schoolName} onChange={(event) => setDraft((current) => ({ ...current, schoolName: event.target.value }))} />
+              </label>
+              <label>
+                <span>학년</span>
+                <input value={draft.grade} onChange={(event) => setDraft((current) => ({ ...current, grade: event.target.value }))} />
+              </label>
+              <label>
+                <span>과목</span>
+                <input value={draft.subject} onChange={(event) => setDraft((current) => ({ ...current, subject: event.target.value }))} />
+              </label>
+              <label>
+                <span>고사</span>
+                <input value={draft.examCycle || draft.examTerm} onChange={(event) => setDraft((current) => ({ ...current, examCycle: event.target.value }))} />
+              </label>
+            </div>
+            {selectedExamPrepRow ? (
+              <div className="examAnalysisLinkedInfo">
+                <span>시험기간 {selectedExamPrepRow.examPeriod || "-"}</span>
+                <span>수학 시험일 {selectedExamPrepRow.mathExamDate || selectedExamPrepRow.mathExamDates?.[0]?.date || "-"}</span>
+                <span>범위 {selectedExamPrepRow.scope || "미입력"}</span>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="panel examAnalysisUploadPanel">
+            <div className="sectionHeader slim">
+              <div>
+                <strong>PDF 원본</strong>
+                <span>{sourceFiles.length}개</span>
+              </div>
+              <div className="headerActions">
+                <input
+                  accept="application/pdf,.pdf"
+                  className="visuallyHiddenInput"
+                  onChange={(event) => uploadPdf(event.target.files?.[0])}
+                  ref={fileInputRef}
+                  type="file"
+                />
+                <button className="primaryButton" onClick={() => fileInputRef.current?.click()} type="button">PDF 업로드</button>
+              </div>
+            </div>
+            <div className="examAnalysisSourceList">
+              {sourceFiles.length === 0 ? (
+                <div className="emptyState compact">PDF 원본 없음</div>
+              ) : sourceFiles.map((file) => (
+                <div className="examAnalysisSourceItem" key={file.sourceId}>
+                  <div>
+                    <strong>{file.originalFileName || "PDF 원본"}</strong>
+                    <span>{file.extractionStatus} · {formatBytes(file.sizeBytes)} · {file.createdAt ? file.createdAt.slice(0, 10) : "-"}</span>
+                  </div>
+                  {getExamAnalysisSourceOpenUrl(file) ? (
+                    <a className="secondaryButton linkButton" href={getExamAnalysisSourceOpenUrl(file)} rel="noreferrer" target="_blank">열기</a>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="panel examAnalysisStepPanel">
+            <div className="sectionHeader slim">
+              <div>
+                <strong>진행 단계</strong>
+                <span>{activeRun ? workflowStatusLabel(activeRun.workflowStatus) : "대기"}</span>
+              </div>
+            </div>
+            <div className="examAnalysisSteps">
+              {[
+                ["source_uploaded", "PDF 저장"],
+                ["source_extracted", "텍스트/페이지 추출"],
+                ["question_count_detected", "문항 수 판독"],
+                ["question_count_confirmed", "선생님 확인"],
+                ["rows_created", "1~N 행 고정"],
+                ["ai_filled", "AI 행 채움"],
+                ["completed", "최종 확정"]
+              ].map(([status, label]) => (
+                <span className={activeRun?.workflowStatus === status ? "active" : ""} key={status}>{label}</span>
+              ))}
+            </div>
+          </div>
+
+          <div className="panel examAnalysisEventPanel">
+            <div className="sectionHeader slim">
+              <div>
+                <strong>저장 이벤트</strong>
+                <span>{events.length}건</span>
+              </div>
+            </div>
+            <div className="examAnalysisEventList">
+              {events.length === 0 ? (
+                <div className="emptyState compact">이벤트 없음</div>
+              ) : events.slice(0, 8).map((event) => (
+                <div className="examAnalysisEventItem" key={event.eventId}>
+                  <strong>{event.message || event.eventType}</strong>
+                  <span>{event.createdAt ? event.createdAt.replace("T", " ").slice(0, 16) : ""}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+  );
+}
+
 function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle }) {
   const menuGroups = [
     {
@@ -6185,6 +6579,7 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle }) 
       title: "시험",
       items: [
         { id: "examPrep", label: "시험관리", icon: "📋" },
+        { id: "examAnalysisPipeline", label: "시험분석", icon: "🧾" },
         { id: "schoolCalendar", label: "학사일정", icon: "🗓️" }
       ]
     },

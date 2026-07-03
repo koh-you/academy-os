@@ -10,6 +10,18 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P0. 시험분석 v2 첫 UI/PDF 업로드 화면
+
+- 상태: 완료
+- 사용자 진행: 운영 Supabase에 `supabase/20260703_exam_analysis_pipeline.sql`을 SQL edit 적용했다.
+- 이번 작업 범위: 옛 시험분석 기능을 복구하지 않고, 새 v2 파이프라인의 목록/기본정보 저장/PDF 원본 업로드/상태 확인 화면만 붙인다. 텍스트 추출, 문항 수 판독, AI 호출은 다음 단계로 남긴다.
+- 이번 작업 결과: 사이드바에 새 `examAnalysisPipeline` 기반 `시험분석` 탭을 추가하고 `ExamAnalysisPipelineCenter`를 만들었다. 화면은 분석 목록, 기본정보, PDF 원본, 진행 단계, 저장 이벤트를 보여준다.
+- 저장 흐름: `GET/POST /api/exam-analysis-runs`로 run을 조회/저장하고, `POST /api/exam-analysis-source-files`로 PDF를 `exam-analysis-pipeline-sources` bucket에 업로드한다. 저장/불러오기/PDF 업로드는 작업 화면 안의 `시험분석 · 저장 중/완료/실패`, `시험분석 PDF · 업로드 중/완료/실패` 배지로 표시한다.
+- UI 보정: 저장된 분석을 클릭하면 입력 draft가 해당 run으로 동기화되고, `직접 입력` 선택이 시험정보 첫 항목으로 되돌아가지 않게 했다. 상세 조회가 끝나기 전에는 이전 run의 PDF/이벤트가 섞여 보이지 않게 했다.
+- 회귀 방지: 운영 시나리오 테스트에 새 v2 프론트가 목록/생성/PDF 업로드/상태 표시만 제공하고 `/api/ai/exam-analysis`를 되살리지 않는지 확인하는 체크를 추가했다.
+- 저장 주의: 기존 `supabase/20260703_exam_analysis_pipeline.sql` 구조를 사용한다. 이번 작업으로 새 SQL edit은 필요 없다.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 231, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P0. 시험분석 v2 백엔드 run/PDF 업로드 API
 
 - 상태: 완료

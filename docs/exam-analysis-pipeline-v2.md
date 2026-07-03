@@ -79,22 +79,30 @@
 - `missing_question_numbers`와 `exam_analysis_ai_jobs.target_question_numbers`로 대상 번호를 남긴다.
 - 재요청은 전체 분석이 아니라 누락 번호만 대상으로 한다.
 
+## 현재 구현 상태
+
+- 완료: `supabase/20260703_exam_analysis_pipeline.sql` 저장 구조
+- 완료: `GET/POST /api/exam-analysis-runs`
+- 완료: `POST /api/exam-analysis-source-files`
+- 완료: `GET /api/exam-analysis-source-files/open`
+- 완료: 새 `시험분석` 탭의 목록, 기본정보 저장, PDF 업로드, 진행 단계, 저장 이벤트 UI
+- 미구현: PDF 텍스트/페이지 추출
+- 미구현: 문항 수 판독, 선생님 확인, 1~N 행 생성
+- 미구현: AI 행 채움, 누락 검수, 재요청
+
 ## 다음 구현 순서
 
-1. `supabase/20260703_exam_analysis_pipeline.sql` 운영 적용 확인
-2. 백엔드 CRUD route 추가
-3. PDF 업로드 API 추가
-4. 목록/업로드 전용 최소 UI 추가
-5. 텍스트/페이지 추출 단계 추가
-6. 문항 수 판독 API 추가
-7. 선생님 확인 UI 추가
-8. 1~N 행 생성 API/UI 추가
-9. AI 행 채움 API 추가
-10. 누락 검수/재요청 추가
+1. PDF 텍스트/페이지 추출 단계 추가
+2. 문항 수 판독 API 추가
+3. 문항 수 판독 근거 표시 UI 추가
+4. 선생님 확인 UI 추가
+5. 1~N 행 생성 API/UI 추가
+6. AI 행 채움 API 추가
+7. 누락 검수/재요청 추가
 
 ## 현재 API
 
-아직 AI 호출은 붙이지 않는다.
+아직 AI 호출은 붙이지 않는다. 현재 API와 UI는 원본 PDF 저장과 상태 확인까지만 담당한다.
 
 - `GET /api/exam-analysis-runs`: 분석 run 목록
 - `GET /api/exam-analysis-runs?id={analysisRunId}`: run 상세, source, question, AI job, event 조회
