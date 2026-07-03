@@ -10,6 +10,17 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P1. 문항분류가 저장된 mock 5문항에 묶이는 문제 수정
+
+- 상태: 완료
+- 사용자 제보: 같은 PDF를 올렸는데 문항별 분류표 화면에서 계속 `mock 분석: 현재 문항 카드 수 기준`과 5문항으로 잡힌다.
+- 원인: 기존 저장 분석지에 남아 있던 mock `questionComposition.total=5`와 기존 분류행 5개가 PDF 원본보다 먼저 문항 수 기준으로 사용됐다. 그래서 실제 PDF 원문과 이미지가 있어도 문항분류 AI 요청의 목표 문항 수가 5로 제한될 수 있었다.
+- 이번 작업 결과: 숫자 24를 고정값으로 넣지 않았다. PDF마다 추출 텍스트에서 `1번~N번` 또는 `1. ... N.`처럼 연속 문항번호를 감지해 해당 시험지의 동적 목표 문항 수로 사용한다. 이 PDF는 로컬 추출 기준 1~24번이 감지될 뿐이며, 다른 시험지는 감지된 N값을 사용한다.
+- 프론트 보강: mock 근거의 `questionComposition`은 PDF 원문 감지값보다 우선하지 않게 했다. 문항 수 입력, 누락 후보, AI 분류표 생성 목표 수가 기존 5행보다 PDF 원문 감지값을 먼저 보도록 순서를 바꿨다.
+- 서버 보강: 프론트에서 오래된 5문항 값이 넘어오더라도 `/api/ai/exam-analysis`, `/api/ai/exam-question-info-text`, `/api/ai/exam-question-classification`에서 PDF 추출 텍스트의 연속 문항번호가 더 크면 그 값을 목표 문항 수로 확장한다. AI 프롬프트도 1~N번 전체 행을 요구한다.
+- 저장 주의: 기존 `app_state.examAnalyses` 저장 구조 안의 값 해석/갱신만 변경했다. 새 Supabase SQL edit 없음.
+- 검증: 제보 PDF 로컬 텍스트 추출에서 1~24번 연속 문항번호 감지 확인. `node --check api/routes/examAnalysis.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 245, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P1. 시험분석 AI 요청 진행 로그 표시
 
 - 상태: 완료

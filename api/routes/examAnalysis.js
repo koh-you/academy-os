@@ -71,6 +71,54 @@ function normalizeCompactText(value = "") {
     .replace(/[(){}\[\],.]/g, "");
 }
 
+function extractExamQuestionNumbersFromText(text = "") {
+  const source = String(text ?? "");
+  const patterns = [
+    /(?:^|[^\d])([1-9]\d?)\s*(?:[.)]|번)(?=\s|[^\d]|$)/g,
+    /(?:^|[^\d])([1-9]\d?)\s*[①②③④⑤]/g
+  ];
+  const numbers = [];
+  patterns.forEach((pattern) => {
+    let match = pattern.exec(source);
+    while (match) {
+      const number = Math.max(0, Number(match[1]) || 0);
+      if (number >= 1 && number <= 80) numbers.push(number);
+      match = pattern.exec(source);
+    }
+  });
+  return numbers;
+}
+
+function inferExamQuestionCountFromText(text = "") {
+  const numbers = new Set(extractExamQuestionNumbersFromText(text));
+  for (let candidate = 80; candidate >= 6; candidate -= 1) {
+    if (!numbers.has(candidate)) continue;
+    const coverage = Array.from({ length: candidate }, (_, index) => index + 1)
+      .filter((number) => numbers.has(number)).length;
+    if (coverage >= Math.max(6, Math.ceil(candidate * 0.65))) return candidate;
+  }
+  return 0;
+}
+
+function inferExamQuestionCountFromPayload(payload = {}) {
+  const sourceFileText = Array.isArray(payload.sourceFiles)
+    ? payload.sourceFiles.map((file) => file?.extractedText || "").filter(Boolean).join("\n")
+    : "";
+  return inferExamQuestionCountFromText([sourceFileText, payload.rawExamText].filter(Boolean).join("\n"));
+}
+
+function createTextInferredQuestionComposition(count = 0) {
+  const total = Math.max(0, Math.min(80, Number(count) || 0));
+  if (!total) return null;
+  return {
+    total,
+    sections: [{ label: "전체", start: 1, end: total, count: total, score: "" }],
+    totalScore: "",
+    evidence: `PDF 텍스트 원문에서 1~${total}번 문항번호 감지`,
+    confidence: "확인 필요"
+  };
+}
+
 function getSsenSearchText(payload = {}) {
   const examPrepContext = payload.examPrepContext && typeof payload.examPrepContext === "object" ? payload.examPrepContext : {};
   return [
@@ -526,11 +574,12 @@ function buildExamAnalysisPrompt(payload) {
 function buildQuestionItemsPrompt(payload) {
   const examPrepContext = payload.examPrepContext && typeof payload.examPrepContext === "object" ? payload.examPrepContext : null;
   const scopedRawExamText = limitPromptText(payload.rawExamText || "");
+  const inferredQuestionCount = inferExamQuestionCountFromPayload(payload);
   const targetCount = Math.max(
     1,
     Math.min(
       80,
-      Number(payload.questionTargetCount) ||
+      Math.max(Number(payload.questionTargetCount) || 0, inferredQuestionCount) ||
         (Array.isArray(payload.questionItems) ? payload.questionItems.length : 0) ||
         20
     )
@@ -631,7 +680,8 @@ function buildQuestionItemsPrompt(payload) {
 
 function buildQuestionInfoTextPrompt(payload) {
   const examPrepContext = payload.examPrepContext && typeof payload.examPrepContext === "object" ? payload.examPrepContext : null;
-  const targetCount = Math.max(1, Math.min(80, Number(payload.questionTargetCount) || (Array.isArray(payload.questionItems) ? payload.questionItems.length : 0) || 20));
+  const inferredQuestionCount = inferExamQuestionCountFromPayload(payload);
+  const targetCount = Math.max(1, Math.min(80, Math.max(Number(payload.questionTargetCount) || 0, inferredQuestionCount) || (Array.isArray(payload.questionItems) ? payload.questionItems.length : 0) || 20));
   const currentItems = Array.isArray(payload.questionItems) ? payload.questionItems : [];
   const currentItemLines = currentItems
     .slice(0, targetCount)
@@ -736,7 +786,9 @@ function buildQuestionClassificationPrompt(payload) {
   const seedRows = normalizeClassificationSeedRows(payload);
   const requestedNumbers = normalizeClassificationRequestedNumbers(payload.missingQuestionNumbers || payload.repairQuestionNumbers);
   const isRepairOnly = requestedNumbers.length > 0 || Boolean(payload.repairOnly);
-  const targetCount = Math.max(1, Math.min(80, requestedNumbers.length || Number(payload.classificationTargetCount) || Number(payload.questionTargetCount) || seedRows.length || 20));
+  const inferredQuestionCount = inferExamQuestionCountFromPayload(payload);
+  const explicitTargetCount = Math.max(Number(payload.classificationTargetCount) || 0, Number(payload.questionTargetCount) || 0);
+  const targetCount = Math.max(1, Math.min(80, requestedNumbers.length || Math.max(explicitTargetCount, inferredQuestionCount, seedRows.length) || 20));
   const targetDescription = isRepairOnly && requestedNumbers.length
     ? `${requestedNumbers.join(", ")}번 ${requestedNumbers.length}개`
     : `1번부터 ${targetCount}번까지 ${targetCount}개`;
@@ -1094,7 +1146,8 @@ function normalizeQuestionInfoAiItemsFromText(text) {
 }
 
 function buildQuestionInfoRepairPrompt(payload, aiText) {
-  const targetCount = Math.max(1, Math.min(80, Number(payload.questionTargetCount) || (Array.isArray(payload.questionItems) ? payload.questionItems.length : 0) || 20));
+  const inferredQuestionCount = inferExamQuestionCountFromPayload(payload);
+  const targetCount = Math.max(1, Math.min(80, Math.max(Number(payload.questionTargetCount) || 0, inferredQuestionCount) || (Array.isArray(payload.questionItems) ? payload.questionItems.length : 0) || 20));
   const currentItems = Array.isArray(payload.questionItems) ? payload.questionItems : [];
   return [
     "아래 AI 응답을 웹앱이 읽을 수 있는 순수 JSON으로만 복구하세요.",
@@ -1760,6 +1813,7 @@ function normalizeAnalysisFields(fields, payload, rawText = "") {
   const questionItems = normalizeQuestionItemsFromAi(extractQuestionItemsFromParsed(parsed));
   const questionClassifications = normalizeClassificationRowsFromAi(extractClassificationRowsFromParsed(parsed));
   const questionComposition = normalizeQuestionCompositionFromAi(parsed.questionComposition);
+  const inferredQuestionComposition = createTextInferredQuestionComposition(inferExamQuestionCountFromPayload(payload));
 
   const normalized = {
     oneLineSummary: parsed.oneLineSummary || fallback.oneLineSummary,
@@ -1774,7 +1828,7 @@ function normalizeAnalysisFields(fields, payload, rawText = "") {
     blogDraft: parsed.blogDraft || fallback.blogDraft,
     instagramDraft: parsed.instagramDraft || fallback.instagramDraft
   };
-  normalized.questionComposition = questionComposition || normalizeQuestionCompositionFromAi(fallback.questionComposition);
+  normalized.questionComposition = questionComposition || inferredQuestionComposition || normalizeQuestionCompositionFromAi(fallback.questionComposition);
   const rawSourceCompositions = Array.isArray(parsed.sourceCompositions)
     ? parsed.sourceCompositions
     : parsed.sourceCompositions && typeof parsed.sourceCompositions === "object"
@@ -2185,7 +2239,8 @@ export async function runExamQuestionInfoText(payload) {
       repairText = `복구 요청 실패: ${repairError.message}`;
     }
   }
-  const targetCount = Math.max(1, Math.min(80, Number(payload.questionTargetCount) || fallbackItems.length || 20));
+  const inferredQuestionCount = inferExamQuestionCountFromPayload(payload);
+  const targetCount = Math.max(1, Math.min(80, Math.max(Number(payload.questionTargetCount) || 0, inferredQuestionCount) || fallbackItems.length || 20));
   const warning = questionItems.length < targetCount
     ? `AI 응답 문항정보가 ${questionItems.length}/${targetCount}개라 OCR 기반 기본정보를 함께 유지했습니다.`
     : "";
@@ -2207,7 +2262,9 @@ export async function runExamQuestionClassification(payload) {
   let model = selectedModel(payload, "questionClassification");
   const seedRows = normalizeClassificationRowsFromAi(normalizeClassificationSeedRows(payload));
   const requestedNumbers = normalizeClassificationRequestedNumbers(payload.missingQuestionNumbers || payload.repairQuestionNumbers);
-  const targetCount = Math.max(1, Math.min(80, requestedNumbers.length || Number(payload.classificationTargetCount) || Number(payload.questionTargetCount) || seedRows.length || 20));
+  const inferredQuestionCount = inferExamQuestionCountFromPayload(payload);
+  const explicitTargetCount = Math.max(Number(payload.classificationTargetCount) || 0, Number(payload.questionTargetCount) || 0);
+  const targetCount = Math.max(1, Math.min(80, requestedNumbers.length || Math.max(explicitTargetCount, inferredQuestionCount, seedRows.length) || 20));
   const expectedQuestionNumbers = requestedNumbers.length
     ? requestedNumbers
     : Array.from({ length: targetCount }, (_, index) => index + 1);

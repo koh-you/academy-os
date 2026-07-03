@@ -2337,6 +2337,52 @@ function formatExamAnalysisProgressTime(value = "") {
   });
 }
 
+function isMockExamQuestionComposition(composition = null) {
+  const evidence = String(composition?.evidence || "").trim();
+  return /mock 분석|현재 문항 카드 수 기준/.test(evidence);
+}
+
+function extractExamQuestionNumbersFromText(text = "") {
+  const source = String(text ?? "");
+  const patterns = [
+    /(?:^|[^\d])([1-9]\d?)\s*(?:[.)]|번)(?=\s|[^\d]|$)/g,
+    /(?:^|[^\d])([1-9]\d?)\s*[①②③④⑤]/g
+  ];
+  const numbers = [];
+  patterns.forEach((pattern) => {
+    let match = pattern.exec(source);
+    while (match) {
+      const number = Math.max(0, Number(match[1]) || 0);
+      if (number >= 1 && number <= 80) numbers.push(number);
+      match = pattern.exec(source);
+    }
+  });
+  return numbers;
+}
+
+function inferExamQuestionCountFromText(text = "") {
+  const numbers = new Set(extractExamQuestionNumbersFromText(text));
+  for (let candidate = 80; candidate >= 6; candidate -= 1) {
+    if (!numbers.has(candidate)) continue;
+    const coverage = Array.from({ length: candidate }, (_, index) => index + 1)
+      .filter((number) => numbers.has(number)).length;
+    if (coverage >= Math.max(6, Math.ceil(candidate * 0.65))) return candidate;
+  }
+  return 0;
+}
+
+function createTextInferredQuestionComposition(count = 0) {
+  const total = Math.max(0, Math.min(80, Number(count) || 0));
+  if (!total) return null;
+  return {
+    total,
+    sections: [{ label: "전체", start: 1, end: total, count: total, score: "" }],
+    totalScore: "",
+    evidence: `PDF 텍스트 원문에서 1~${total}번 문항번호 감지`,
+    confidence: "확인 필요"
+  };
+}
+
 function countProblemStatuses(problems = []) {
   return Object.keys(problemStatusMeta).reduce((counts, status) => {
     counts[status] = problems.filter((problem) => problem.status === status).length;
@@ -5430,7 +5476,11 @@ export function App() {
                       "done"
                     )
                   ],
-                  questionComposition: activeAiSourceId ? item.questionComposition || questionComposition : questionComposition || analysisAiFields.questionComposition,
+                  questionComposition: activeAiSourceId
+                    ? isMockExamQuestionComposition(item.questionComposition)
+                      ? questionComposition || item.questionComposition
+                      : item.questionComposition || questionComposition
+                    : questionComposition || analysisAiFields.questionComposition,
                   questionCompositionsBySource: nextCompositionsBySource,
                   questionTargetCountsBySource: nextTargetCountsBySource,
                   questionItems: mergeAiQuestionDrafts(item.questionItems, aiQuestionItems, {
@@ -11519,6 +11569,7 @@ function ExamAnalysisCenter({
   const activeQuestionSourceOption = renderSourceFileOptions.find((option) => option.sourceId === activeQuestionSourceId) ?? renderSourceFileOptions[0] ?? null;
   const resolvedQuestionSourceId = activeQuestionSourceOption?.sourceId || "";
   const hasMultipleQuestionSources = renderSourceFileOptions.length > 1;
+  const selectedQuestionSourceFile = activeQuestionSourceOption?.file ?? renderSourceFiles[0];
   const sourceQuestionComposition = normalizeExamQuestionComposition(questionCompositionsBySource[resolvedQuestionSourceId]);
   const activeClassificationRows = classificationRows.filter((row) => {
     if (!resolvedQuestionSourceId) return true;
@@ -11537,12 +11588,19 @@ function ExamAnalysisCenter({
         confidence: "확인 필요"
       })
     : null;
-  const questionComposition = sourceQuestionComposition || sourceFallbackQuestionComposition || (hasMultipleQuestionSources && resolvedQuestionSourceId ? null : globalQuestionComposition);
+  const activeSourceExtractedText = [
+    selectedQuestionSourceFile?.extractedText,
+    selectedAnalysis?.rawExamText
+  ].filter(Boolean).join("\n");
+  const sourceTextQuestionCount = inferExamQuestionCountFromText(activeSourceExtractedText);
+  const sourceTextQuestionComposition = createTextInferredQuestionComposition(sourceTextQuestionCount);
+  const usableSourceQuestionComposition = isMockExamQuestionComposition(sourceQuestionComposition) ? null : sourceQuestionComposition;
+  const usableGlobalQuestionComposition = isMockExamQuestionComposition(globalQuestionComposition) ? null : globalQuestionComposition;
+  const questionComposition = usableSourceQuestionComposition || sourceTextQuestionComposition || sourceFallbackQuestionComposition || (hasMultipleQuestionSources && resolvedQuestionSourceId ? null : usableGlobalQuestionComposition);
   const activeQuestionMaxNumber = getExamQuestionMaxNumber(activeQuestionItems);
   const manualQuestionCount = Math.max(0, Math.min(80, Number(questionCountDraft) || 0));
   const activeQuestionNumberKey = activeQuestionItems.map((item) => Number(item.number) || 0).join(",");
   const selectedQuestion = activeQuestionItems.find((item) => item.questionId === selectedQuestionId) ?? activeQuestionItems[0] ?? null;
-  const selectedQuestionSourceFile = activeQuestionSourceOption?.file ?? renderSourceFiles[0];
   const selectedQuestionSourceId = activeQuestionSourceOption?.sourceId || (selectedQuestionSourceFile ? getExamAnalysisSourceFileId(selectedQuestionSourceFile) : "");
   const selectedQuestionSourceIsPdf = isPdfExamAnalysisSource(selectedQuestionSourceFile);
   const selectedQuestionSourceIsImage = isImageExamAnalysisSource(selectedQuestionSourceFile);
@@ -11556,7 +11614,7 @@ function ExamAnalysisCenter({
   const cropViewerPageNumber = Math.max(1, Math.min(pdfPageCount || 999, Number(cropViewerPage) || selectedQuestionPage || 1));
   const selectedQuestionCropIsVisible = !selectedQuestionSourceIsPdf || selectedQuestionPage === cropViewerPageNumber || Boolean(cropDraft);
   const selectedQuestionCropBox = normalizeCropBox(cropDraft || (selectedQuestionCropIsVisible ? selectedQuestion?.cropBox : null));
-  const activeQuestionTargetCount = sourceQuestionTargetCount || activeClassificationRows.length || manualQuestionCount || questionComposition?.total || (hasMultipleQuestionSources ? 0 : Number(selectedAnalysis?.questionTargetCount)) || 0;
+  const activeQuestionTargetCount = sourceQuestionTargetCount || questionComposition?.total || sourceTextQuestionCount || manualQuestionCount || activeClassificationRows.length || (hasMultipleQuestionSources ? 0 : Number(selectedAnalysis?.questionTargetCount)) || 0;
   const missingClassificationNumbers = getMissingExamQuestionClassificationNumbers(activeClassificationRows, activeQuestionTargetCount || questionCountDraft);
   const selectedQuestionInsightRecommended = isExamQuestionInsightRecommended(selectedQuestion);
   const selectedQuestionHasDetailedInsight = hasExamQuestionDetailedInsight(selectedQuestion);
@@ -11747,9 +11805,9 @@ function ExamAnalysisCenter({
   }, [activeQuestionSourceId, defaultQuestionSourceId, renderSourceIdsKey]);
 
   useEffect(() => {
-    const nextCount = sourceQuestionTargetCount || questionComposition?.total || activeClassificationRows.length || (!hasMultipleQuestionSources ? Number(selectedAnalysis?.questionTargetCount) || 0 : 0) || "";
+    const nextCount = sourceQuestionTargetCount || questionComposition?.total || sourceTextQuestionCount || activeClassificationRows.length || (!hasMultipleQuestionSources ? Number(selectedAnalysis?.questionTargetCount) || 0 : 0) || "";
     setQuestionCountDraft(nextCount ? String(nextCount) : "");
-  }, [selectedAnalysis?.examAnalysisId, resolvedQuestionSourceId, sourceQuestionTargetCount, questionComposition?.total, activeClassificationRows.length, hasMultipleQuestionSources, selectedAnalysis?.questionTargetCount]);
+  }, [selectedAnalysis?.examAnalysisId, resolvedQuestionSourceId, sourceQuestionTargetCount, questionComposition?.total, sourceTextQuestionCount, activeClassificationRows.length, hasMultipleQuestionSources, selectedAnalysis?.questionTargetCount]);
 
   useEffect(() => {
     if (!activeQuestionItems.length) {
@@ -11928,7 +11986,7 @@ function ExamAnalysisCenter({
 
   function createBlankQuestionItemsForSource(sourceId, sourceFile) {
     const sourceUrl = sourceFile ? getExamAnalysisSourceRenderUrl(sourceFile) : "";
-    const targetCount = Math.max(1, Math.min(80, Number(questionCountDraft) || sourceQuestionTargetCount || activeQuestionItems.length || questionComposition?.total || 20));
+    const targetCount = Math.max(1, Math.min(80, Number(questionCountDraft) || sourceQuestionTargetCount || questionComposition?.total || sourceTextQuestionCount || activeQuestionItems.length || 20));
     return createExamQuestionItemsFromCount(targetCount, []).map((item, index) => createExamQuestionItem({
       number: item.number || index + 1,
       page: item.page || 1,
@@ -12116,7 +12174,7 @@ function ExamAnalysisCenter({
       ? options.repairQuestionNumbers.map((number) => Math.max(0, Number(number) || 0)).filter(Boolean)
       : [];
     const repairOnly = Boolean(options.repairOnly && repairQuestionNumbers.length);
-    const requestedCount = Math.max(1, Math.min(80, Number(questionCountDraft) || activeClassificationRows.length || questionComposition?.total || sourceQuestionTargetCount || 20));
+    const requestedCount = Math.max(1, Math.min(80, Number(questionCountDraft) || sourceQuestionTargetCount || questionComposition?.total || sourceTextQuestionCount || activeClassificationRows.length || 20));
     const baseRows = createExamQuestionClassificationRowsFromCount(requestedCount, activeClassificationRows).map(withActiveClassificationSource);
     const sourceText = selectedQuestionSourceFile?.extractedText
       ? `[현재 시험지/연도 원문] ${selectedQuestionSourceFile.fileName}\n${selectedQuestionSourceFile.extractedText}`
