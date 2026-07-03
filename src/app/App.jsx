@@ -502,9 +502,20 @@ const saveStateLabels = {
   failed: "저장 실패"
 };
 
+function normalizeExamReviewDraftValue(value = "") {
+  const lines = String(value ?? "")
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  return lines.filter((line, index) => index === 0 || line !== lines[index - 1]).join("\n");
+}
+
 function formatExamReviewDraftLine(label, value = "") {
-  const normalizedValue = String(value ?? "").trim();
-  return normalizedValue ? `${label} ${normalizedValue}` : label;
+  const normalizedValue = normalizeExamReviewDraftValue(value);
+  if (!normalizedValue) return label;
+  const [firstLine, ...restLines] = normalizedValue.split("\n");
+  return [`${label} ${firstLine}`, ...restLines].join("\n");
 }
 
 function createExamReviewDraft(row = {}) {
@@ -537,27 +548,49 @@ function isExamReviewDraftLike(value = "") {
   );
 }
 
+function isExamReviewDraftSectionLine(line = "") {
+  return /^[1-5]\.\s*(시험 범위|난이도|문항 출처|특이사항|대비 방법)\s*:/.test(String(line).trim());
+}
+
+function getNextExamReviewDraftSectionIndex(lines = [], fromIndex = 0) {
+  for (let index = fromIndex + 1; index < lines.length; index += 1) {
+    if (isExamReviewDraftSectionLine(lines[index])) return index;
+  }
+  return lines.length;
+}
+
+function replaceExamReviewDraftField(lines = [], fieldPattern, label, value = "") {
+  const normalizedValue = normalizeExamReviewDraftValue(value);
+  if (!normalizedValue) return lines;
+  const fieldIndex = lines.findIndex((line) => fieldPattern.test(String(line).trim()));
+  if (fieldIndex < 0) return lines;
+  const nextSectionIndex = getNextExamReviewDraftSectionIndex(lines, fieldIndex);
+  const replacementLines = formatExamReviewDraftLine(label, normalizedValue).split("\n");
+  return [
+    ...lines.slice(0, fieldIndex),
+    ...replacementLines,
+    ...lines.slice(nextSectionIndex)
+  ];
+}
+
 function syncExamReviewDraftWithExamPrepRow(review = "", row = {}) {
   const currentReview = String(review ?? "");
   if (!currentReview.trim()) return createExamReviewDraft(row);
   if (!isExamReviewDraftLike(currentReview)) return currentReview;
-  const nextScope = String(row.scope ?? "").trim();
-  const nextSubTextbook = String(row.subTextbook ?? "").trim();
+  const nextScope = normalizeExamReviewDraftValue(row.scope);
+  const nextSubTextbook = normalizeExamReviewDraftValue(row.subTextbook);
   if (!nextScope && !nextSubTextbook) return currentReview;
-  return currentReview
-    .replace(/\r\n/g, "\n")
-    .split("\n")
-    .map((line) => {
-      const trimmedLine = line.trim();
-      if (nextScope && /^1\.\s*시험 범위\s*:/.test(trimmedLine)) {
-        return formatExamReviewDraftLine("1. 시험 범위 :", nextScope);
-      }
-      if (nextSubTextbook && /^3\.\s*문항 출처\s*:/.test(trimmedLine)) {
-        return formatExamReviewDraftLine("3. 문항 출처  :", nextSubTextbook);
-      }
-      return line;
-    })
-    .join("\n");
+  let nextLines = currentReview.replace(/\r\n/g, "\n").split("\n");
+  nextLines = replaceExamReviewDraftField(nextLines, /^1\.\s*시험 범위\s*:/, "1. 시험 범위 :", nextScope);
+  nextLines = replaceExamReviewDraftField(nextLines, /^3\.\s*문항 출처\s*:/, "3. 문항 출처  :", nextSubTextbook);
+  return nextLines.join("\n");
+}
+
+function normalizeExamPrepRowReviewDraft(row = {}) {
+  const currentReview = String(row.review ?? "");
+  if (!isExamReviewDraftLike(currentReview)) return row;
+  const nextReview = syncExamReviewDraftWithExamPrepRow(currentReview, row);
+  return nextReview === currentReview ? row : { ...row, review: nextReview };
 }
 
 function normalizeSaveState(saveState) {
@@ -1123,7 +1156,7 @@ function normalizeExamPrepRowCycle(row = {}) {
 }
 
 function normalizeExamPrepRows(rows = []) {
-  return rows.map(normalizeExamPrepRowCycle);
+  return rows.map((row) => normalizeExamPrepRowReviewDraft(normalizeExamPrepRowCycle(row)));
 }
 
 function createParentLoginId(student) {
@@ -3725,6 +3758,7 @@ export function App() {
   function handleUpdateExamPrepRow(examPrepId, field, value) {
     setExamPrepRows((current) => {
       const existingExamRow = current.find((row) => row.examPrepId === examPrepId);
+      if (!existingExamRow || existingExamRow[field] === value) return current;
       const updatedExamRow = existingExamRow ? { ...existingExamRow, [field]: value } : null;
       const shouldSyncPublisher = ["publisher", "examCycle", "schoolName", "grade", "subject"].includes(field);
       const updatedRows = current.map((row) => (row.examPrepId === examPrepId ? { ...row, [field]: value } : row));
