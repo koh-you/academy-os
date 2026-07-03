@@ -1,4 +1,5 @@
 ﻿import http from "node:http";
+import fs from "node:fs";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import {
   deleteLesson,
@@ -74,6 +75,10 @@ import {
 } from "./routes/notifications.js";
 
 loadEnvFile();
+
+const ssenTypeIndex = JSON.parse(
+  fs.readFileSync(new URL("./data/ssenTypeIndex.json", import.meta.url), "utf8")
+);
 
 const port = Number(process.env.PORT ?? process.env.ACADEMY_API_PORT ?? 8787);
 const host = process.env.ACADEMY_API_HOST ?? (process.env.RENDER ? "0.0.0.0" : "127.0.0.1");
@@ -885,6 +890,33 @@ function sanitizeExamAnalysisSubject(value = "") {
   return text;
 }
 
+function getExamAnalysisSsenSubject({ sourceFile = {}, analysisRun = {} } = {}) {
+  return inferExamAnalysisSubjectFromText([
+    analysisRun.subject,
+    analysisRun.extractionSummary?.visionCheck?.subject,
+    sourceFile.originalFileName,
+    analysisRun.title
+  ].filter(Boolean).join("\n"));
+}
+
+function getSsenTypesForExamAnalysis({ sourceFile = {}, analysisRun = {} } = {}) {
+  const subject = getExamAnalysisSsenSubject({ sourceFile, analysisRun });
+  const types = subject
+    ? ssenTypeIndex.filter((item) => item.subject === subject)
+    : [];
+  return {
+    subject,
+    types: types.length ? types : ssenTypeIndex.slice(0, 240)
+  };
+}
+
+function formatSsenTypeCandidatesForPrompt(types = []) {
+  return (Array.isArray(types) ? types : [])
+    .slice(0, 240)
+    .map((item) => `${item.typeCode} | ${item.unitName} | ${item.typeName}`)
+    .join("\n");
+}
+
 function detectQuestionNumberCandidates(text = "") {
   const candidates = new Set();
   const pattern = /(?:^|\n)\s*(\d{1,3})\s*[.)]/g;
@@ -1174,8 +1206,20 @@ function normalizePdfQuestionBoundaryResult({ provider, model, rawText, parsed =
   };
 }
 
-function buildPdfQuestionRowFillPrompt({ sourceFile = {}, analysisRun = {}, questions = [] } = {}) {
-  const questionLines = questions
+function buildPdfQuestionRowFillPrompt({
+  sourceFile = {},
+  analysisRun = {},
+  questions = [],
+  targetQuestionNumbers = [],
+  mode = "fill"
+} = {}) {
+  const targetSet = new Set((Array.isArray(targetQuestionNumbers) ? targetQuestionNumbers : [])
+    .map(Number)
+    .filter((number) => Number.isInteger(number) && number > 0));
+  const targetQuestions = targetSet.size
+    ? questions.filter((question) => targetSet.has(Number(question.questionNumber)))
+    : questions;
+  const questionLines = targetQuestions
     .map((question) => {
       const boundary = question.sourceEvidence?.boundary ?? {};
       const pageStart = boundary.pageStart || question.sourcePage || "?";
@@ -1184,11 +1228,18 @@ function buildPdfQuestionRowFillPrompt({ sourceFile = {}, analysisRun = {}, ques
       return `${question.questionNumber}: ${pageStart}${pageEnd}p, ${position}`;
     })
     .join("\n");
+  const ssenTypes = getSsenTypesForExamAnalysis({ sourceFile, analysisRun });
+  const ssenCandidateText = formatSsenTypeCandidatesForPrompt(ssenTypes.types);
   return [
-    "역할: 수학 시험지 문항 메타데이터 초안 작성자",
-    "목표: 이미 확정된 1~N 문항 행에 대해 단원, 쎈 주유형, 보조유형, 난이도, 짧은 판별 근거만 채운다.",
-    "금지: 문제 본문 대량 복사, 정답 추론, 상세 풀이, 학생용 해설 작성은 하지 않는다.",
+    mode === "refine"
+      ? "역할: 수학 시험지 문항 메타데이터 2차 검수자"
+      : "역할: 수학 시험지 문항 메타데이터 초안 작성자",
+    mode === "refine"
+      ? "목표: 재확인 대상 문항만 PDF 원본을 다시 자세히 읽고, 필요한 만큼 짧게 풀이 방향을 따져 쎈 기준 유형을 더 정확히 고친다."
+      : "목표: 이미 확정된 1~N 문항 행에 대해 단원, 쎈 주유형, 보조유형, 난이도, 짧은 판별 근거만 채운다.",
+    "금지: 문제 본문 대량 복사, 정답 추론 결과, 상세 풀이, 학생용 해설 작성은 반환하지 않는다.",
     "중요: 결과는 사람이 검수할 AI 초안이다. 확실하지 않은 문항은 needs_review=true로 표시한다.",
+    "중요: main_type과 sub_types는 아래 [쎈 유형 후보]의 typeName을 그대로 사용한다. '방정식', '행렬', '부등식' 같은 대분류만 쓰면 안 된다.",
     "",
     "[분석 대상]",
     `파일명: ${sourceFile.originalFileName || "exam-source.pdf"}`,
@@ -1196,20 +1247,26 @@ function buildPdfQuestionRowFillPrompt({ sourceFile = {}, analysisRun = {}, ques
     `학년: ${analysisRun.grade || ""}`,
     `고사: ${analysisRun.examCycle || analysisRun.examTerm || ""}`,
     `과목: ${analysisRun.subject || ""}`,
+    `쎈 기준 과목: ${ssenTypes.subject || "과목 자동 판별 실패"}`,
     "",
-    "[확정 문항 경계]",
+    targetSet.size ? "[재검토 대상 문항 경계]" : "[확정 문항 경계]",
     questionLines,
     "",
+    "[쎈 유형 후보]",
+    ssenCandidateText || "쎈 유형 후보를 찾지 못했습니다. 이 경우 needs_review=true로 표시하고 reason에 과목 확인 필요라고 쓴다.",
+    "",
     "[분류 기준]",
-    "- unit_name: 교과 단원명 또는 시험 범위상 단원명",
-    "- main_type: 쎈 유형별분석표에 붙일 수 있는 대표 주유형 이름. 확실하지 않으면 일반적인 수학 유형명으로 짧게 쓴다.",
-    "- sub_types: 보조유형 0~2개. 복합 문항이면 결합 요소를 짧게 쓴다.",
+    "- unit_name: [쎈 유형 후보]의 unitName을 우선 사용한다.",
+    "- main_type: [쎈 유형 후보]의 typeName 중 가장 대표적인 하나를 그대로 쓴다.",
+    "- sub_types: [쎈 유형 후보]의 typeName 중 보조유형 0~2개를 그대로 쓴다. 복합 문항이면 결합된 쎈 유형을 넣는다.",
     "- difficulty: 하, 중하, 중, 중상, 상 중 하나에 가깝게 쓴다.",
-    "- reasoning_summary: 본문을 복사하지 말고, 어떤 구조라서 그렇게 봤는지 1문장으로만 쓴다.",
+    "- reasoning_summary: 본문을 복사하지 말고, 어떤 풀이 행동/조건 때문에 그 쎈 유형으로 봤는지 1문장으로만 쓴다.",
+    "- main_type_code: 선택한 주유형의 typeCode를 쓴다.",
+    "- sub_type_codes: 선택한 보조유형들의 typeCode를 쓴다.",
     "",
     "반드시 JSON 객체만 반환한다.",
     "필드:",
-    "- rows: array of { question_number:number, unit_name:string, main_type:string, sub_types:string[], difficulty:string, reasoning_summary:string, concept_tags:string[], confidence:number, needs_review:boolean, warnings:string[] }",
+    "- rows: array of { question_number:number, unit_name:string, main_type:string, main_type_code:string, sub_types:string[], sub_type_codes:string[], difficulty:string, reasoning_summary:string, concept_tags:string[], confidence:number, needs_review:boolean, warnings:string[] }",
     "- missing_question_numbers: number[]",
     "- summary: string"
   ].join("\n");
@@ -1226,8 +1283,12 @@ function normalizePdfQuestionRowFillResult({ provider, model, rawText, parsed = 
       questionNumber: Number(row.question_number ?? row.questionNumber),
       unitName: String(row.unit_name ?? row.unitName ?? "").slice(0, 120),
       mainType: String(row.main_type ?? row.mainType ?? "").slice(0, 160),
+      mainTypeCode: String(row.main_type_code ?? row.mainTypeCode ?? "").slice(0, 60),
       subTypes: Array.isArray(row.sub_types ?? row.subTypes)
         ? (row.sub_types ?? row.subTypes).map(String).filter(Boolean).slice(0, 3)
+        : [],
+      subTypeCodes: Array.isArray(row.sub_type_codes ?? row.subTypeCodes)
+        ? (row.sub_type_codes ?? row.subTypeCodes).map(String).filter(Boolean).slice(0, 3)
         : [],
       difficulty: String(row.difficulty || "").slice(0, 40),
       reasoningSummary: String(row.reasoning_summary ?? row.reasoningSummary ?? "").slice(0, 500),
@@ -1451,7 +1512,7 @@ async function runPdfQuestionBoundaryDetection(sourceFile, buffer, detail) {
   throw new Error("ANTHROPIC_API_KEY 또는 OPENAI_API_KEY 환경변수가 필요합니다.");
 }
 
-async function runAnthropicPdfQuestionRowFill(sourceFile, buffer, detail) {
+async function runAnthropicPdfQuestionRowFill(sourceFile, buffer, detail, options = {}) {
   const apiKey = apiEnvValue("ANTHROPIC_API_KEY");
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY 환경변수가 필요합니다.");
   const model = apiEnvValue("ANTHROPIC_EXAM_PDF_MODEL") || apiEnvValue("ANTHROPIC_MODEL") || "claude-sonnet-4-5";
@@ -1477,7 +1538,7 @@ async function runAnthropicPdfQuestionRowFill(sourceFile, buffer, detail) {
                 data: buffer.toString("base64")
               }
             },
-            { type: "text", text: buildPdfQuestionRowFillPrompt({ sourceFile, analysisRun: detail.analysisRun, questions: detail.questions }) }
+            { type: "text", text: buildPdfQuestionRowFillPrompt({ sourceFile, analysisRun: detail.analysisRun, questions: detail.questions, ...options }) }
           ]
         }
       ]
@@ -1496,7 +1557,7 @@ async function runAnthropicPdfQuestionRowFill(sourceFile, buffer, detail) {
   });
 }
 
-async function runOpenAiPdfQuestionRowFill(sourceFile, buffer, detail) {
+async function runOpenAiPdfQuestionRowFill(sourceFile, buffer, detail, options = {}) {
   const apiKey = apiEnvValue("OPENAI_API_KEY");
   if (!apiKey) throw new Error("OPENAI_API_KEY 환경변수가 필요합니다.");
   const model = apiEnvValue("OPENAI_EXAM_PDF_MODEL") || apiEnvValue("OPENAI_MODEL") || "gpt-4.1-mini";
@@ -1517,7 +1578,7 @@ async function runOpenAiPdfQuestionRowFill(sourceFile, buffer, detail) {
               filename: sourceFile.originalFileName || "exam-source.pdf",
               file_data: `data:application/pdf;base64,${buffer.toString("base64")}`
             },
-            { type: "input_text", text: buildPdfQuestionRowFillPrompt({ sourceFile, analysisRun: detail.analysisRun, questions: detail.questions }) }
+            { type: "input_text", text: buildPdfQuestionRowFillPrompt({ sourceFile, analysisRun: detail.analysisRun, questions: detail.questions, ...options }) }
           ]
         }
       ],
@@ -1537,12 +1598,12 @@ async function runOpenAiPdfQuestionRowFill(sourceFile, buffer, detail) {
   });
 }
 
-async function runPdfQuestionRowFill(sourceFile, buffer, detail) {
+async function runPdfQuestionRowFill(sourceFile, buffer, detail, options = {}) {
   if (apiEnvValue("ANTHROPIC_API_KEY")) {
-    return runAnthropicPdfQuestionRowFill(sourceFile, buffer, detail);
+    return runAnthropicPdfQuestionRowFill(sourceFile, buffer, detail, options);
   }
   if (apiEnvValue("OPENAI_API_KEY")) {
-    return runOpenAiPdfQuestionRowFill(sourceFile, buffer, detail);
+    return runOpenAiPdfQuestionRowFill(sourceFile, buffer, detail, options);
   }
   throw new Error("ANTHROPIC_API_KEY 또는 OPENAI_API_KEY 환경변수가 필요합니다.");
 }
@@ -1899,6 +1960,7 @@ async function fillExamAnalysisQuestionRowsWithAi({ analysisRunId, sourceId } = 
 
   try {
     const rowFillResult = await runPdfQuestionRowFill(sourceFile, buffer, detail);
+    rowFillResult.mode = "fill";
     const saved = await saveExamAnalysisQuestionRowFill({
       analysisRunId,
       sourceId: sourceFile.sourceId,
@@ -1921,6 +1983,77 @@ async function fillExamAnalysisQuestionRowsWithAi({ analysisRunId, sourceId } = 
       eventType: "question_rows_ai_fill_failed",
       message: "AI 행 채움에 실패했습니다.",
       payload: { sourceId: sourceFile.sourceId, error: error.message }
+    });
+    throw error;
+  }
+}
+
+async function refineExamAnalysisQuestionRowsWithAi({ analysisRunId, sourceId, targetQuestionNumbers = [] } = {}) {
+  if (!analysisRunId) throw new Error("analysisRunId가 필요합니다.");
+  const detail = await getExamAnalysisRun(analysisRunId);
+  if (!detail.analysisRun?.analysisRunId) throw new Error("시험분석 작업을 찾지 못했습니다.");
+  if (!detail.questions?.length) throw new Error("고정 문항 행을 먼저 생성해 주세요.");
+  const targetNumbers = [...new Set((Array.isArray(targetQuestionNumbers) ? targetQuestionNumbers : [])
+    .map(Number)
+    .filter((number) => Number.isInteger(number) && number > 0))]
+    .sort((a, b) => a - b);
+  if (!targetNumbers.length) throw new Error("AI 2차 수정 대상 문항을 선택해 주세요.");
+  const targetSet = new Set(targetNumbers);
+  const targetQuestions = detail.questions.filter((question) => targetSet.has(Number(question.questionNumber)));
+  if (!targetQuestions.length) throw new Error("선택한 문항 행을 찾지 못했습니다.");
+  const lockedNumbers = targetQuestions
+    .filter((question) => question.teacherOverride || question.rowStatus === "teacher_edited" || question.rowStatus === "confirmed")
+    .map((question) => Number(question.questionNumber));
+  const runnableNumbers = targetNumbers.filter((number) => !lockedNumbers.includes(number));
+  if (!runnableNumbers.length) {
+    throw new Error("선생님이 수정/확정한 문항은 AI가 덮어쓸 수 없습니다. 수정본을 유지하거나 해당 분석을 다시 만들어 주세요.");
+  }
+  const sourceFile = sourceId
+    ? detail.sources?.find((source) => source.sourceId === sourceId)
+    : detail.sources?.[0];
+  if (!sourceFile?.sourceId) throw new Error("PDF 원본 정보를 찾지 못했습니다.");
+  const buffer = await downloadStorageObject(sourceFile.bucketId || examAnalysisSourceBucket, sourceFile.storagePath);
+
+  await updateExamAnalysisRun(analysisRunId, { workflowStatus: "missing_retry_running" });
+  await recordExamAnalysisEvent({
+    analysisRunId,
+    eventType: "question_rows_refine_started",
+    message: `AI 2차 수정을 시작했습니다. 대상 ${runnableNumbers.join(", ")}번.`,
+    payload: { sourceId: sourceFile.sourceId, targetQuestionNumbers: runnableNumbers, skippedLockedNumbers: lockedNumbers }
+  });
+
+  try {
+    const rowFillResult = await runPdfQuestionRowFill(sourceFile, buffer, detail, {
+      mode: "refine",
+      targetQuestionNumbers: runnableNumbers
+    });
+    rowFillResult.mode = "refine";
+    rowFillResult.targetQuestionNumbers = runnableNumbers;
+    rowFillResult.skippedLockedNumbers = lockedNumbers;
+    const saved = await saveExamAnalysisQuestionRowFill({
+      analysisRunId,
+      sourceId: sourceFile.sourceId,
+      rowFillResult
+    });
+    return {
+      ...saved,
+      rowRefineResult: {
+        provider: rowFillResult.provider,
+        model: rowFillResult.model,
+        targetQuestionNumbers: runnableNumbers,
+        skippedLockedNumbers: lockedNumbers,
+        returnedCount: rowFillResult.rows.length,
+        missingQuestionNumbers: rowFillResult.missingQuestionNumbers,
+        summary: rowFillResult.summary
+      }
+    };
+  } catch (error) {
+    await updateExamAnalysisRun(analysisRunId, { workflowStatus: "missing_audit_needed" });
+    await recordExamAnalysisEvent({
+      analysisRunId,
+      eventType: "question_rows_refine_failed",
+      message: "AI 2차 수정에 실패했습니다.",
+      payload: { sourceId: sourceFile.sourceId, targetQuestionNumbers: runnableNumbers, error: error.message }
     });
     throw error;
   }
@@ -2309,6 +2442,21 @@ const server = http.createServer(async (request, response) => {
       const result = await fillExamAnalysisQuestionRowsWithAi({
         analysisRunId: payload.analysisRunId,
         sourceId: payload.sourceId
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/refine-question-rows") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await refineExamAnalysisQuestionRowsWithAi({
+        analysisRunId: payload.analysisRunId,
+        sourceId: payload.sourceId,
+        targetQuestionNumbers: payload.targetQuestionNumbers
       });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {

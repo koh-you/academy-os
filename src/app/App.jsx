@@ -1282,6 +1282,15 @@ function fillExamAnalysisQuestionRowsRequest(payload) {
   );
 }
 
+function refineExamAnalysisQuestionRowsRequest(payload) {
+  return postJsonWithTimeout(
+    "/api/exam-analysis-runs/refine-question-rows",
+    payload,
+    240000,
+    "AI 2차 수정이 지연되고 있습니다."
+  );
+}
+
 function saveExamAnalysisQuestionReviewsRequest(payload) {
   return postJsonWithTimeout(
     "/api/exam-analysis-runs/save-question-reviews",
@@ -6584,6 +6593,8 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const [isDetectingBoundaries, setIsDetectingBoundaries] = useState(false);
   const [rowFillStatus, setRowFillStatus] = useState({ state: "idle", message: "" });
   const [isFillingRows, setIsFillingRows] = useState(false);
+  const [rowRefineStatus, setRowRefineStatus] = useState({ state: "idle", message: "" });
+  const [isRefiningRows, setIsRefiningRows] = useState(false);
   const [reviewStatus, setReviewStatus] = useState({ state: "idle", message: "" });
   const [reviewDrafts, setReviewDrafts] = useState({});
   const [isSavingReviews, setIsSavingReviews] = useState(false);
@@ -6603,6 +6614,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   );
   const boundaryDetection = activeRun?.auditSummary?.boundaryDetection ?? null;
   const rowFill = activeRun?.auditSummary?.rowFill ?? null;
+  const rowRefine = activeRun?.auditSummary?.rowRefine ?? null;
   const teacherReview = activeRun?.auditSummary?.teacherReview ?? null;
   const reviewSeedKey = useMemo(
     () => questionRows
@@ -7204,6 +7216,60 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     });
   }
 
+  function getQuestionReviewRefineTargetNumbers() {
+    return questionRows
+      .filter((question) => {
+        const draftValue = reviewDrafts[String(question.questionNumber)] ?? createExamAnalysisReviewDraft(question);
+        const needsReview = question.rowStatus === "missing" || question.aiFields?.needsReview || question.aiFields?.warnings?.length;
+        return !draftValue.confirmed || needsReview;
+      })
+      .map((question) => Number(question.questionNumber))
+      .filter((number) => Number.isInteger(number) && number > 0)
+      .sort((a, b) => a - b);
+  }
+
+  async function refineQuestionRowsWithAi() {
+    if (!activeRun?.analysisRunId) {
+      setRowRefineStatus({ state: "failed", message: "시험분석 · 분석을 먼저 저장해 주세요." });
+      return;
+    }
+    const targetQuestionNumbers = getQuestionReviewRefineTargetNumbers();
+    if (!targetQuestionNumbers.length) {
+      setRowRefineStatus({ state: "failed", message: "시험분석 · AI 2차 수정 대상 문항이 없습니다." });
+      return;
+    }
+    const sourceFile = sourceFiles[0];
+    if (!sourceFile?.sourceId) {
+      setRowRefineStatus({ state: "failed", message: "시험분석 · PDF 원본이 필요합니다." });
+      return;
+    }
+
+    setIsRefiningRows(true);
+    setRowRefineStatus({ state: "saving", message: `시험분석 · AI 2차 수정 중 · ${targetQuestionNumbers.join(", ")}번` });
+    try {
+      const result = await refineExamAnalysisQuestionRowsRequest({
+        analysisRunId: activeRun.analysisRunId,
+        sourceId: sourceFile.sourceId,
+        targetQuestionNumbers
+      });
+      const updatedCount = result.analysisRun?.auditSummary?.rowRefine?.updatedCount || result.rowRefine?.updatedCount || result.rowRefineResult?.returnedCount || 0;
+      const targetCount = result.analysisRun?.auditSummary?.rowRefine?.targetQuestionNumbers?.length || targetQuestionNumbers.length;
+      setSelectedDetail(result);
+      setReviewDrafts(buildExamAnalysisReviewDrafts(result.questions ?? []));
+      setRowRefineStatus({
+        state: "success",
+        message: `시험분석 · AI 2차 수정 완료 · ${updatedCount}/${targetCount}개`
+      });
+      await loadRuns(activeRun.analysisRunId);
+      await loadRunDetail(activeRun.analysisRunId);
+    } catch (error) {
+      setRowRefineStatus({ state: "failed", message: `시험분석 · AI 2차 수정 실패 · ${error.message}` });
+      if (selectedRunId) await loadRunDetail(selectedRunId);
+    } finally {
+      setIsRefiningRows(false);
+    }
+  }
+
   async function saveQuestionReviews() {
     if (!activeRun?.analysisRunId) {
       setReviewStatus({ state: "failed", message: "시험분석 · 분석을 먼저 저장해 주세요." });
@@ -7261,6 +7327,10 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     const draftValue = reviewDrafts[String(question.questionNumber)] ?? createExamAnalysisReviewDraft(question);
     return Boolean(draftValue.confirmed);
   }).length;
+  const refineTargetCount = questionRows.filter((question) => {
+    const draftValue = reviewDrafts[String(question.questionNumber)] ?? createExamAnalysisReviewDraft(question);
+    return !draftValue.confirmed || question.rowStatus === "missing" || question.aiFields?.needsReview || question.aiFields?.warnings?.length;
+  }).length;
   const questionCountButtonLabel = isConfirmingQuestionCount
     ? "확정 중"
     : questionCountDraft
@@ -7281,7 +7351,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       </div>
 
       <div className="examAnalysisStatusBar">
-        {[loadStatus, saveStatus, uploadStatus, extractStatus, visionStatus, confirmStatus, boundaryStatus, rowFillStatus, reviewStatus, deleteStatus].filter((item) => item.message).map((item, index) => (
+        {[loadStatus, saveStatus, uploadStatus, extractStatus, visionStatus, confirmStatus, boundaryStatus, rowFillStatus, rowRefineStatus, reviewStatus, deleteStatus].filter((item) => item.message).map((item, index) => (
           <span className={`saveStateBadge ${item.state}`} key={`${item.message}-${index}`}>{item.message}</span>
         ))}
       </div>
@@ -7728,10 +7798,19 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                 <span>{questionRows.length ? `${confirmedReviewCount}/${questionRows.length}개 확정` : "대기"}</span>
               </div>
               <div className="headerActions">
+                {rowRefineStatus.message ? <span className={`saveStateBadge ${rowRefineStatus.state}`}>{rowRefineStatus.message}</span> : null}
                 {reviewStatus.message ? <span className={`saveStateBadge ${reviewStatus.state}`}>{reviewStatus.message}</span> : null}
                 <button
                   className="secondaryButton"
-                  disabled={!reviewRowsReady || isSavingReviews}
+                  disabled={!reviewRowsReady || isSavingReviews || isRefiningRows || !refineTargetCount}
+                  onClick={refineQuestionRowsWithAi}
+                  type="button"
+                >
+                  {isRefiningRows ? "2차 수정 중" : `AI 2차 수정(과금)${refineTargetCount ? ` · ${refineTargetCount}개` : ""}`}
+                </button>
+                <button
+                  className="secondaryButton"
+                  disabled={!reviewRowsReady || isSavingReviews || isRefiningRows}
                   onClick={markAllQuestionReviewsConfirmed}
                   type="button"
                 >
@@ -7739,7 +7818,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                 </button>
                 <button
                   className="primaryButton"
-                  disabled={!reviewRowsReady || isSavingReviews}
+                  disabled={!reviewRowsReady || isSavingReviews || isRefiningRows}
                   onClick={saveQuestionReviews}
                   type="button"
                 >
@@ -7757,77 +7836,101 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                 {teacherReview.unconfirmedNumbers?.length ? <small>미확정 {teacherReview.unconfirmedNumbers.join(", ")}</small> : null}
               </div>
             ) : null}
+            {rowRefine ? (
+              <div className={rowRefine.status === "needs_review" ? "examAnalysisReviewSummary needsReview" : "examAnalysisReviewSummary ok"}>
+                <strong>AI 2차 수정</strong>
+                <span>
+                  {rowRefine.updatedCount || 0}/{rowRefine.targetQuestionNumbers?.length || 0}개
+                  {rowRefine.provider ? ` · ${rowRefine.provider}` : ""}
+                  {rowRefine.refinedAt ? ` · ${formatExamAnalysisEventTime(rowRefine.refinedAt)}` : ""}
+                </span>
+                {rowRefine.needsReviewNumbers?.length ? <small>재확인 {rowRefine.needsReviewNumbers.join(", ")}</small> : null}
+                {rowRefine.skippedTeacherOverrideNumbers?.length ? <small>선생님 수정본 보호 {rowRefine.skippedTeacherOverrideNumbers.join(", ")}</small> : null}
+              </div>
+            ) : null}
             {reviewRowsReady ? (
-              <div className="examAnalysisReviewGrid">
-                {questionRows.map((question) => {
-                  const draftValue = reviewDrafts[String(question.questionNumber)] ?? createExamAnalysisReviewDraft(question);
-                  const needsReview = question.rowStatus === "missing" || question.aiFields?.needsReview || question.aiFields?.warnings?.length;
-                  const reviewClassName = [
-                    "examAnalysisReviewCard",
-                    needsReview ? "needsReview" : "",
-                    draftValue.confirmed ? "confirmed" : ""
-                  ].filter(Boolean).join(" ");
-                  return (
-                    <div className={reviewClassName} key={question.questionRowId || question.questionNumber}>
-                      <div className="examAnalysisReviewCardHeader">
-                        <strong>{question.questionNumber}</strong>
-                        <label>
-                          <input
-                            checked={Boolean(draftValue.confirmed)}
-                            onChange={(event) => updateReviewDraft(question.questionNumber, { confirmed: event.target.checked })}
-                            type="checkbox"
-                          />
-                          확정
-                        </label>
-                      </div>
-                      <label>
-                        <span>단원</span>
-                        <input
-                          value={draftValue.unitName}
-                          onChange={(event) => updateReviewDraft(question.questionNumber, { unitName: event.target.value })}
-                          placeholder="단원"
-                        />
-                      </label>
-                      <label>
-                        <span>주유형</span>
-                        <input
-                          value={draftValue.mainType}
-                          onChange={(event) => updateReviewDraft(question.questionNumber, { mainType: event.target.value })}
-                          placeholder="쎈 주유형"
-                        />
-                      </label>
-                      <label>
-                        <span>보조유형</span>
-                        <input
-                          value={draftValue.subTypesText}
-                          onChange={(event) => updateReviewDraft(question.questionNumber, { subTypesText: event.target.value })}
-                          placeholder="쉼표로 구분"
-                        />
-                      </label>
-                      <label>
-                        <span>난이도</span>
-                        <select
-                          value={draftValue.difficulty}
-                          onChange={(event) => updateReviewDraft(question.questionNumber, { difficulty: event.target.value })}
-                        >
-                          <option value="">선택</option>
-                          <option value="하">하</option>
-                          <option value="중">중</option>
-                          <option value="중상">중상</option>
-                          <option value="상">상</option>
-                        </select>
-                      </label>
-                      <label className="span2">
-                        <span>검수 메모</span>
-                        <input
-                          value={draftValue.reviewNote}
-                          onChange={(event) => updateReviewDraft(question.questionNumber, { reviewNote: event.target.value })}
-                          placeholder="재확인 근거나 수정 이유"
-                        />
-                      </label>
-                    </div>
-                  );
-                })}
+              <div className="examAnalysisReviewTableWrap">
+                <table className="examAnalysisReviewTable">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>확정</th>
+                      <th>단원</th>
+                      <th>쎈 주유형</th>
+                      <th>쎈 보조유형</th>
+                      <th>난이도</th>
+                      <th>검수 메모</th>
+                      <th>상태</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {questionRows.map((question) => {
+                      const draftValue = reviewDrafts[String(question.questionNumber)] ?? createExamAnalysisReviewDraft(question);
+                      const needsReview = question.rowStatus === "missing" || question.aiFields?.needsReview || question.aiFields?.warnings?.length;
+                      const reviewClassName = [
+                        needsReview ? "needsReview" : "",
+                        draftValue.confirmed ? "confirmed" : ""
+                      ].filter(Boolean).join(" ");
+                      return (
+                        <tr className={reviewClassName} key={question.questionRowId || question.questionNumber}>
+                          <td className="questionNo">{question.questionNumber}</td>
+                          <td className="confirmCell">
+                            <input
+                              aria-label={`${question.questionNumber}번 확정`}
+                              checked={Boolean(draftValue.confirmed)}
+                              onChange={(event) => updateReviewDraft(question.questionNumber, { confirmed: event.target.checked })}
+                              type="checkbox"
+                            />
+                          </td>
+                          <td>
+                            <input
+                              value={draftValue.unitName}
+                              onChange={(event) => updateReviewDraft(question.questionNumber, { unitName: event.target.value })}
+                              placeholder="단원"
+                            />
+                          </td>
+                          <td>
+                            <input
+                              value={draftValue.mainType}
+                              onChange={(event) => updateReviewDraft(question.questionNumber, { mainType: event.target.value })}
+                              placeholder="쎈 주유형"
+                            />
+                          </td>
+                          <td>
+                            <input
+                              value={draftValue.subTypesText}
+                              onChange={(event) => updateReviewDraft(question.questionNumber, { subTypesText: event.target.value })}
+                              placeholder="쉼표로 구분"
+                            />
+                          </td>
+                          <td>
+                            <select
+                              value={draftValue.difficulty}
+                              onChange={(event) => updateReviewDraft(question.questionNumber, { difficulty: event.target.value })}
+                            >
+                              <option value="">선택</option>
+                              <option value="하">하</option>
+                              <option value="중하">중하</option>
+                              <option value="중">중</option>
+                              <option value="중상">중상</option>
+                              <option value="상">상</option>
+                            </select>
+                          </td>
+                          <td>
+                            <input
+                              value={draftValue.reviewNote}
+                              onChange={(event) => updateReviewDraft(question.questionNumber, { reviewNote: event.target.value })}
+                              placeholder="재확인 근거 또는 수정 이유"
+                            />
+                          </td>
+                          <td className="reviewStateCell">
+                            {draftValue.confirmed ? "확정" : needsReview ? "재확인" : "미확정"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             ) : (
               <div className="emptyState compact">AI 행 채움 후 검수할 수 있습니다.</div>

@@ -85,29 +85,38 @@
 - 완료: `GET/POST /api/exam-analysis-runs`
 - 완료: `POST /api/exam-analysis-source-files`
 - 완료: `GET /api/exam-analysis-source-files/open`
-- 완료: 새 `시험분석` 탭의 목록, 기본정보 저장, PDF 업로드, 진행 단계, 저장 이벤트 UI
-- 미구현: PDF 텍스트/페이지 추출
-- 미구현: 문항 수 판독, 선생님 확인, 1~N 행 생성
-- 미구현: AI 행 채움, 누락 검수, 재요청
+- 완료: `DELETE /api/exam-analysis-runs`
+- 완료: `POST /api/exam-analysis-source-files/extract`
+- 완료: `POST /api/exam-analysis-source-files/vision-check`
+- 완료: `POST /api/exam-analysis-runs/confirm-question-count`
+- 완료: `POST /api/exam-analysis-runs/detect-question-boundaries`
+- 완료: `POST /api/exam-analysis-runs/fill-question-rows`
+- 완료: `POST /api/exam-analysis-runs/refine-question-rows`
+- 완료: `POST /api/exam-analysis-runs/save-question-reviews`
+- 완료: 새 `시험분석` 탭의 학교/학년/고사/분석 보드, 기본정보 저장, PDF 업로드, 텍스트 검증, AI 원본 검증, 문항 수 확인, 1~N 행 생성, 문항 경계, AI 행 채움, 엑셀식 AI 결과 검수, AI 2차 수정, 저장 이벤트 UI
+- 미구현: 최종 산출물 생성
 
 ## 다음 구현 순서
 
-1. PDF 텍스트/페이지 추출 단계 추가
-2. 문항 수 판독 API 추가
-3. 문항 수 판독 근거 표시 UI 추가
-4. 선생님 확인 UI 추가
-5. 1~N 행 생성 API/UI 추가
-6. AI 행 채움 API 추가
-7. 누락 검수/재요청 추가
+1. 실제 운영 PDF에서 AI 2차 수정 결과 검증
+2. 남은 미확정 문항 처리 UX 정리
+3. 최종 확정 산출물 생성
+4. 학생 유형 노드맵/보충관리와 연결할 저장 구조 설계
 
 ## 현재 API
 
-아직 AI 호출은 붙이지 않는다. 현재 API와 UI는 원본 PDF 저장과 상태 확인까지만 담당한다.
+현재 API와 UI는 PDF 저장부터 선생님 검수 저장까지 담당한다.
 
 - `GET /api/exam-analysis-runs`: 분석 run 목록
 - `GET /api/exam-analysis-runs?id={analysisRunId}`: run 상세, source, question, AI job, event 조회
 - `POST /api/exam-analysis-runs`: 분석 run 생성/수정
+- `DELETE /api/exam-analysis-runs`: 테스트 분석과 연결 source/Storage 정리
 - `POST /api/exam-analysis-source-files`: PDF 업로드 후 source row와 event 저장
 - `GET /api/exam-analysis-source-files/open?bucket={bucketId}&path={storagePath}`: 저장 PDF signed URL 열기
-
-`POST /api/exam-analysis-source-files`는 PDF만 받으며, 업로드 성공 시 `workflow_status`를 `source_uploaded`로 둔다. 다음 단계는 이 상태를 입력으로 받아 텍스트/페이지 추출을 수행한다.
+- `POST /api/exam-analysis-source-files/extract`: 텍스트/페이지 정보 추출
+- `POST /api/exam-analysis-source-files/vision-check`: Claude/OpenAI PDF 원본 검증
+- `POST /api/exam-analysis-runs/confirm-question-count`: 선생님 확정 문항 수 저장과 1~N 행 생성
+- `POST /api/exam-analysis-runs/detect-question-boundaries`: 문항별 시작/끝 페이지와 위치 탐지
+- `POST /api/exam-analysis-runs/fill-question-rows`: 쎈 기준표 후보 기반 AI 행 채움
+- `POST /api/exam-analysis-runs/refine-question-rows`: 미확정/재확인 문항 AI 2차 수정
+- `POST /api/exam-analysis-runs/save-question-reviews`: 선생님 검수본 저장

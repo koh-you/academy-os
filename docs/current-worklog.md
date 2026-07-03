@@ -13,6 +13,18 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P0. 시험분석 v2 검수 테이블, 쎈 기준표 연결, AI 2차 수정
+
+- 상태: 완료
+- 사용자 요청: 문항 검수 화면은 카드가 아니라 엑셀처럼 한 문항당 한 행으로 보여야 한다. 주유형/보조유형은 쎈 유형 기준이어야 하며, 수정이 필요한 문항은 AI가 한 번 더 자세히 보거나 풀어보는 방식으로 2차 수정할 수 있어야 한다.
+- 쎈 기준표 확인: `api/data/ssenTypeIndex.json`이 남아 있다. 이 파일은 쎈 6권 통합 유형 메타데이터 883개를 담고 있으며, 현재 운영 PDF처럼 `공통수학1`이 감지되면 공통수학1 유형 179개를 AI 프롬프트의 실제 후보 목록으로 넣는다.
+- 백엔드: `POST /api/exam-analysis-runs/refine-question-rows`를 추가했다. 대상 문항 번호만 PDF 원본을 다시 읽고, 필요하면 짧게 풀이 방향을 따져 쎈 기준 유형을 더 정확히 고친다. 단, 문제 본문/정답/상세 풀이는 저장하지 않는다.
+- 프롬프트 보강: v2 AI 행 채움/2차 수정 프롬프트에 실제 쎈 유형 후보를 넣고, `main_type`/`sub_types`는 후보의 `typeName`을 그대로 쓰게 했다. `방정식`, `행렬`, `부등식` 같은 대분류만 쓰면 안 된다고 명시했다. 선택한 `typeCode`는 `ai_fields` 안에 메타데이터로 저장한다.
+- 사용자 편집본 보호: AI 2차 수정은 미확정/재확인 문항을 대상으로 하며, 이미 선생님이 수정/확정한 `teacher_override`, `teacher_fields`, `final_fields`는 덮어쓰지 않는다.
+- 화면: `AI 결과 검수`를 카드형 그리드에서 엑셀식 테이블로 바꿨다. 각 문항은 한 행이며 `#`, `확정`, `단원`, `쎈 주유형`, `쎈 보조유형`, `난이도`, `검수 메모`, `상태` 열로 편집한다. 같은 패널 안에 `AI 2차 수정(과금)`, `모두 확정`, `검수 저장` 버튼과 저장/수정 상태가 보인다.
+- 저장 주의: 새 SQL edit은 필요 없다. 기존 `exam_analysis_questions`의 top-level 유형 필드와 `ai_fields`, `teacher_fields`, `final_fields`, run의 `audit_summary.rowRefine`을 사용한다.
+- 검증: `node --check api/server.js`, `node --check api/routes/examAnalysisPipeline.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 통과(total 231, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P0. AI 자기검토 질문과 맥락 중심 검토 지침
 
 - 상태: 완료

@@ -239,8 +239,12 @@ function normalizeQuestionRowFill(row = {}) {
     questionNumber,
     unitName: String(row.unitName ?? row.unit_name ?? "").slice(0, 120),
     mainType: String(row.mainType ?? row.main_type ?? "").slice(0, 160),
+    mainTypeCode: String(row.mainTypeCode ?? row.main_type_code ?? "").slice(0, 60),
     subTypes: Array.isArray(row.subTypes ?? row.sub_types)
       ? (row.subTypes ?? row.sub_types).map(String).filter(Boolean).slice(0, 3)
+      : [],
+    subTypeCodes: Array.isArray(row.subTypeCodes ?? row.sub_type_codes)
+      ? (row.subTypeCodes ?? row.sub_type_codes).map(String).filter(Boolean).slice(0, 3)
       : [],
     difficulty: String(row.difficulty ?? "").slice(0, 40),
     reasoningSummary: String(row.reasoningSummary ?? row.reasoning_summary ?? "").slice(0, 500),
@@ -633,10 +637,16 @@ export async function saveExamAnalysisQuestionRowFill({
   if (!questions.length) throw new Error("고정 문항 행을 먼저 생성해 주세요.");
 
   const questionMap = new Map(questions.map((question) => [Number(question.questionNumber), question]));
+  const isRefineMode = rowFillResult.mode === "refine";
+  const targetQuestionNumbers = normalizePositiveNumbers(rowFillResult.targetQuestionNumbers);
+  const effectiveQuestionNumbers = targetQuestionNumbers.length
+    ? targetQuestionNumbers.filter((questionNumber) => questionMap.has(questionNumber))
+    : questions.map((question) => Number(question.questionNumber));
+  const effectiveQuestionSet = new Set(effectiveQuestionNumbers);
   const filledAt = new Date().toISOString();
   const rows = (Array.isArray(rowFillResult.rows) ? rowFillResult.rows : [])
     .map(normalizeQuestionRowFill)
-    .filter((row) => row && questionMap.has(row.questionNumber));
+    .filter((row) => row && questionMap.has(row.questionNumber) && effectiveQuestionSet.has(row.questionNumber));
 
   let filledCount = 0;
   const skippedTeacherOverrideNumbers = [];
@@ -663,6 +673,8 @@ export async function saveExamAnalysisQuestionRowFill({
           filledAt,
           provider: rowFillResult.provider || "",
           model: rowFillResult.model || "",
+          mainTypeCode: row.mainTypeCode,
+          subTypeCodes: row.subTypeCodes,
           reasoningSummary: row.reasoningSummary,
           conceptTags: row.conceptTags,
           confidence: Number.isFinite(row.confidence) ? row.confidence : null,
@@ -679,45 +691,85 @@ export async function saveExamAnalysisQuestionRowFill({
   }
 
   const returnedNumbers = new Set(rows.map((row) => row.questionNumber));
-  const missingQuestionNumbers = questions
-    .map((question) => Number(question.questionNumber))
+  const missingQuestionNumbers = effectiveQuestionNumbers
     .filter((questionNumber) => !returnedNumbers.has(questionNumber))
     .sort((a, b) => a - b);
   const uniqueNeedsReviewNumbers = normalizePositiveNumbers([...needsReviewNumbers, ...missingQuestionNumbers]);
   const status = uniqueNeedsReviewNumbers.length || skippedTeacherOverrideNumbers.length ? "needs_review" : "filled";
-  const workflowStatus = uniqueNeedsReviewNumbers.length ? "missing_audit_needed" : "ai_filled";
+  const previousRowFill = detail.analysisRun.auditSummary?.rowFill ?? {};
+  const successfulNumbers = rows
+    .filter((row) => row.unitName && row.mainType && !row.needsReview && !row.warnings.length)
+    .map((row) => row.questionNumber);
+  const remainingNeedsReviewNumbers = isRefineMode
+    ? normalizePositiveNumbers([
+        ...(previousRowFill.needsReviewNumbers ?? []).filter((number) => !successfulNumbers.includes(Number(number))),
+        ...uniqueNeedsReviewNumbers
+      ])
+    : uniqueNeedsReviewNumbers;
+  const workflowStatus = remainingNeedsReviewNumbers.length ? "missing_audit_needed" : "ai_filled";
+  const auditSummary = {
+    ...(detail.analysisRun.auditSummary ?? {}),
+    rowFill: isRefineMode
+      ? {
+          ...previousRowFill,
+          status: remainingNeedsReviewNumbers.length ? "needs_review" : "filled",
+          needsReviewNumbers: remainingNeedsReviewNumbers,
+          lastRefinedAt: filledAt
+        }
+      : {
+          sourceId,
+          status,
+          filledAt,
+          provider: rowFillResult.provider || "",
+          model: rowFillResult.model || "",
+          filledCount,
+          returnedCount: rows.length,
+          totalQuestionCount: questions.length,
+          missingQuestionNumbers,
+          needsReviewNumbers: uniqueNeedsReviewNumbers,
+          skippedTeacherOverrideNumbers,
+          ssenSubject: rowFillResult.ssenSubject || "",
+          summary: String(rowFillResult.summary || "").slice(0, 500)
+        }
+  };
+  if (isRefineMode) {
+    auditSummary.rowRefine = {
+      sourceId,
+      status,
+      refinedAt: filledAt,
+      provider: rowFillResult.provider || "",
+      model: rowFillResult.model || "",
+      targetQuestionNumbers: effectiveQuestionNumbers,
+      updatedCount: filledCount,
+      returnedCount: rows.length,
+      missingQuestionNumbers,
+      needsReviewNumbers: uniqueNeedsReviewNumbers,
+      skippedTeacherOverrideNumbers: normalizePositiveNumbers([
+        ...skippedTeacherOverrideNumbers,
+        ...(rowFillResult.skippedLockedNumbers ?? [])
+      ]),
+      summary: String(rowFillResult.summary || "").slice(0, 500)
+    };
+  }
 
   await updateExamAnalysisRun(analysisRunId, {
     workflowStatus,
-    auditSummary: {
-      ...(detail.analysisRun.auditSummary ?? {}),
-      rowFill: {
-        sourceId,
-        status,
-        filledAt,
-        provider: rowFillResult.provider || "",
-        model: rowFillResult.model || "",
-        filledCount,
-        returnedCount: rows.length,
-        totalQuestionCount: questions.length,
-        missingQuestionNumbers,
-        needsReviewNumbers: uniqueNeedsReviewNumbers,
-        skippedTeacherOverrideNumbers,
-        summary: String(rowFillResult.summary || "").slice(0, 500)
-      }
-    }
+    auditSummary
   });
 
   await recordExamAnalysisEvent({
     analysisRunId,
-    eventType: "question_rows_ai_filled",
-    message: `AI가 문항 행을 ${filledCount}/${questions.length}개 채웠습니다.`,
+    eventType: isRefineMode ? "question_rows_ai_refined" : "question_rows_ai_filled",
+    message: isRefineMode
+      ? `AI가 재확인 문항을 ${filledCount}/${effectiveQuestionNumbers.length}개 2차 수정했습니다.`
+      : `AI가 문항 행을 ${filledCount}/${questions.length}개 채웠습니다.`,
     payload: {
       sourceId,
       status,
       filledCount,
       returnedCount: rows.length,
-      totalQuestionCount: questions.length,
+      totalQuestionCount: isRefineMode ? effectiveQuestionNumbers.length : questions.length,
+      targetQuestionNumbers: isRefineMode ? effectiveQuestionNumbers : undefined,
       missingQuestionNumbers,
       needsReviewNumbers: uniqueNeedsReviewNumbers
     }
