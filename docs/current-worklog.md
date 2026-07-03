@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P2. 시험분석 원본 입력 분석 중 버튼 크기 조정
+
+- 상태: 완료
+- 사용자 요청: 시험분석 원본 입력의 `분석 중...` 버튼이 작아 보인다.
+- 이번 작업 결과: 원본 입력 다음 단계 버튼에 `sourceAnalysisButton` 전용 클래스를 추가했다. 버튼 최소 폭과 높이, 패딩을 키우고 `white-space: nowrap`을 적용해 `분석 중...` 문구가 두 줄로 쪼개지지 않도록 했다. 작은 화면에서는 버튼이 카드 폭에 맞춰 100%로 펼쳐진다.
+- 회귀 방지: 운영 시나리오 테스트가 원본 입력 AI 분석 버튼 전용 클래스와 줄바꿈 방지 CSS를 확인하도록 보강했다.
+- 저장 주의: CSS/UI 표시만 변경했다. 새 Supabase SQL edit 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 243, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P1. 시험분석 원본 업로드 ReferenceError 수정
 
 - 상태: 완료

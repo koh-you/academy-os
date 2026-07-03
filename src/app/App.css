@@ -3426,6 +3426,17 @@ button {
   font-weight: 800;
 }
 
+.sourceAnalysisButton {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  line-height: 1.2;
+  min-height: 52px;
+  min-width: 136px;
+  padding: 0 28px;
+  white-space: nowrap;
+}
+
 .analysisWorkflowHint {
   display: grid;
   gap: 8px;
@@ -13424,6 +13435,11 @@ body.attendanceOnlyBody {
   .sourcePrimaryAction {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .sourceAnalysisButton {
+    min-width: 0;
+    width: 100%;
   }
 
   .analysisSummaryHero {

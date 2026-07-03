@@ -13124,7 +13124,7 @@ function ExamAnalysisCenter({
                     <span>PDF 업로드 후 AI 분석을 시작하고, 분석 검토 단계에서 강사 인사이트를 반드시 추가합니다.</span>
                   </div>
                   <button
-                    className="primaryButton"
+                    className="primaryButton sourceAnalysisButton"
                     disabled={selectedAnalysis.aiStatus === "분석 중"}
                     onClick={() => onRunAnalysis({ ...selectedAnalysis, examPrepContext }, aiSettings)}
                     type="button"
