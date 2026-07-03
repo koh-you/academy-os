@@ -12695,14 +12695,7 @@ function ExamAnalysisCenter({
           <InlineSaveStatus label="시험분석 자동저장" saveState={appStateSaveState} />
           {isAnalysisWorkspaceOpen ? (
             <button className="softButton" onClick={() => setIsAnalysisWorkspaceOpen(false)} type="button">← 분석 목록</button>
-          ) : (
-            <>
-              <button className="softButton" onClick={openCreateFolder} type="button">+ 학교</button>
-              <button className="softButton" disabled={!selectedSchool} onClick={() => openCreateGradeFolder()} type="button">+ 학년</button>
-              <button className="softButton" disabled={!selectedGrade} onClick={() => openCreateExamFolder()} type="button">+ 고사</button>
-              <button className="primaryButton" disabled={!selectedFolder} onClick={() => createAnalysisInFolder()} type="button">+ 분석 문서</button>
-            </>
-          )}
+          ) : null}
         </div>
       </header>
 
