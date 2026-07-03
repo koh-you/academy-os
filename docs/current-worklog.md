@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P0. 시험분석 v2 저장 파이프라인 1단계
+
+- 상태: 완료
+- 사용자 요청: 삭제한 시험분석을 옛 구조로 복구하지 말고, `PDF -> 문항 수 판독 -> 선생님 확인 -> 1~N 행 고정 -> AI 행 채움 -> 누락 검수 -> 재요청` 순서의 검증 가능한 작은 단위로 새로 진행한다.
+- 이번 작업 범위: 전체 화면을 한 번에 만들지 않고 1단계 저장 구조부터 구현한다.
+- 이번 작업 결과: `supabase/20260703_exam_analysis_pipeline.sql`을 추가했다. 새 구조는 `exam_analysis_runs`, `exam_analysis_sources`, `exam_analysis_questions`, `exam_analysis_ai_jobs`, `exam_analysis_events`로 분리된다. `ensure_exam_analysis_question_rows(run_id, count)` 함수가 선생님 확정 N 기준으로 1~N 빈 행을 만들고, `(analysis_run_id, question_number)` unique 제약으로 행 재번호/중복을 막는다.
+- 저장 주의: 운영 Supabase SQL editor에 `supabase/20260703_exam_analysis_pipeline.sql` 적용이 필요하다. 새 bucket은 `exam-analysis-pipeline-sources`이며, 삭제된 옛 `exam-analysis-sources`와 구분한다. 아직 UI/API는 붙이지 않았으므로 SQL 적용 전후 기존 운영 화면에는 변화가 없다.
+- 회귀 방지: 운영 시나리오 테스트에 v2 스키마가 문항 수 판독, 선생님 확정, 고정 행, AI job, 선생님 수정본 보존 필드를 분리했는지 확인하는 체크를 추가했다.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 229, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P0. 시험분석 기능과 저장 데이터 경로 제거
 
 - 상태: 완료

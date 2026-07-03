@@ -7,7 +7,7 @@
 ```text
 E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 docs/next-session/README.md를 읽고, git status와 최신 worklog를 확인해 주세요.
 
-최근 작업에서 시험분석 탭과 관련 AI/PDF 분석 기능, app_state 저장 데이터 경로를 제거했습니다. 다음 세션은 시험분석 기능을 되살리지 말고, 수업일지와 시험관리, 학생/학부모 운영 흐름을 중심으로 이어가 주세요.
+최근 작업에서 기존 시험분석 탭과 관련 AI/PDF 분석 기능, app_state 저장 데이터 경로를 제거했습니다. 이후 사용자는 시험분석을 v2 파이프라인으로 새로 만들기로 했습니다. 옛 코드를 복구하지 말고 `PDF -> 문항 수 판독 -> 선생님 확인 -> 1~N 행 고정 -> AI 행 채움 -> 누락 검수 -> 재요청` 순서로 이어가 주세요.
 ```
 
 ## 현재 기준
@@ -21,9 +21,10 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 
   - `node --check api/routes/coreData.js` 통과
   - `node --check scripts/scenario-tests-production.cjs` 통과
   - `git diff --check` 통과
-  - `npm run test:production` 통과: total 227, failed 0
+  - `npm run test:production` 통과: total 229, failed 0
   - `npm run build` 통과, 기존 Vite chunk size warning만 있음
 - 운영 Supabase에서 즉시 기존 시험분석 저장 데이터를 지우려면 `supabase/20260703_remove_exam_analysis_app_state.sql`을 SQL editor에 적용한다. 앱/API에서는 `examAnalyses`, `examAnalysisFolders`를 deprecated app_state 키로 숨기고 다음 app_state 저장 때 삭제한다. SQL은 제거된 시험분석 `app_state`와 `exam-analysis-sources` Storage 객체/버킷만 지우며, 시험 후 제출용 `exam-submissions` 같은 활성 Storage는 건드리지 않는다.
+- 새 시험분석 v2 저장 구조를 쓰려면 `supabase/20260703_exam_analysis_pipeline.sql`을 SQL editor에 적용한다. 새 bucket은 `exam-analysis-pipeline-sources`다.
 
 ## 이번 삭제 기준
 
@@ -38,10 +39,10 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 
 
 ## 다음 세션 우선순위
 
-1. 시험분석 기능을 복구하지 않는다.
-2. 수업일지 저장 상태, 시험관리 총평/시험정보 저장 상태, 학생/학부모 데이터 보존 흐름을 우선 검수한다.
-3. 운영 Supabase SQL edit 적용 여부를 사용자에게 확인한다. 적용 대상은 `supabase/20260703_remove_exam_analysis_app_state.sql`이다.
-4. 사용자가 PDF/기출 분석을 다시 요구하면 기존 시험분석 탭을 복구하기보다 별도 설계부터 다시 확인한다.
+1. 기존 시험분석 기능을 복구하지 않는다.
+2. 운영 Supabase SQL edit 적용 여부를 확인한다. 정리 SQL은 `supabase/20260703_remove_exam_analysis_app_state.sql`, 새 v2 구조 SQL은 `supabase/20260703_exam_analysis_pipeline.sql`이다.
+3. 다음 구현은 백엔드 CRUD route와 PDF 업로드 API부터 시작한다. 아직 AI 호출을 붙이지 않는다.
+4. 첫 UI는 목록/업로드/상태 확인만 만든다. 문항 수 판독과 AI 행 채움은 별도 단계로 나눈다.
 
 ## 참조 파일
 
@@ -54,6 +55,8 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 
 - `api/server.js`
 - `scripts/scenario-tests-production.cjs`
 - `supabase/20260703_remove_exam_analysis_app_state.sql`
+- `supabase/20260703_exam_analysis_pipeline.sql`
+- `docs/exam-analysis-pipeline-v2.md`
 
 ## 자주 쓰는 명령
 

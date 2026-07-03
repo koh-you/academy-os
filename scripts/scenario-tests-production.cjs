@@ -38,6 +38,7 @@ const schemaPath = path.join(root, "supabase", "schema.sql");
 const studentIntakeSchemaPath = path.join(root, "supabase", "20260624_student_intake_applicants.sql");
 const frontendFieldPersistenceSchemaPath = path.join(root, "supabase", "20260624_persist_frontend_fields.sql");
 const studentWithdrawalSchemaPath = path.join(root, "supabase", "20260701_student_withdrawal_reason.sql");
+const examAnalysisPipelineSchemaPath = path.join(root, "supabase", "20260703_exam_analysis_pipeline.sql");
 const envExamplePath = path.join(root, ".env.example");
 const packageJsonPath = path.join(root, "package.json");
 const renderYamlPath = path.join(root, "render.yaml");
@@ -81,6 +82,7 @@ const schema = fs.existsSync(schemaPath) ? fs.readFileSync(schemaPath, "utf8") :
 const studentIntakeSchema = fs.existsSync(studentIntakeSchemaPath) ? fs.readFileSync(studentIntakeSchemaPath, "utf8") : "";
 const frontendFieldPersistenceSchema = fs.existsSync(frontendFieldPersistenceSchemaPath) ? fs.readFileSync(frontendFieldPersistenceSchemaPath, "utf8") : "";
 const studentWithdrawalSchema = fs.existsSync(studentWithdrawalSchemaPath) ? fs.readFileSync(studentWithdrawalSchemaPath, "utf8") : "";
+const examAnalysisPipelineSchema = fs.existsSync(examAnalysisPipelineSchemaPath) ? fs.readFileSync(examAnalysisPipelineSchemaPath, "utf8") : "";
 const envExample = fs.readFileSync(envExamplePath, "utf8");
 const packageJson = fs.readFileSync(packageJsonPath, "utf8");
 const renderYaml = fs.readFileSync(renderYamlPath, "utf8");
@@ -201,6 +203,8 @@ check("35d exam analysis domain files are deleted but exam management helpers re
 check("35e comment polish route remains without exam analysis runners", hasAll(commentPolishRoute, ["export async function polishLessonComment", 'payload.polishMode === "spellingOnly"', "최종 교정문만 반환한다", "export function getAiStatus"]) && !commentPolishRoute.includes("runExamAnalysis") && !commentPolishRoute.includes("buildExamAnalysisPrompt") && !commentPolishRoute.includes("runExamQuestionClassification"));
 check("35f pdf analysis dependencies are removed", !packageJson.includes("pdf-parse") && !packageJson.includes("pdfjs-dist") && !serverSource.includes("pdfParse") && !serverSource.includes("downloadSignedStorageObject"));
 check("35g AI settings keep review/comment prompts and remove analysis mappings", hasAll(app, ["시험 후 총평 맞춤법 AI", "commentPolish", "promptMappingCard"]) && !app.includes("시험분석 원본 입력의 AI 분석 시작 버튼") && !app.includes("examAnalysisProvider") && !app.includes("questionClassificationProvider"));
+check("35h exam analysis pipeline v2 schema separates detection confirmation rows and jobs", hasAll(examAnalysisPipelineSchema, ["create table if not exists public.exam_analysis_runs", "create table if not exists public.exam_analysis_sources", "create table if not exists public.exam_analysis_questions", "create table if not exists public.exam_analysis_ai_jobs", "create table if not exists public.exam_analysis_events", "detected_question_count", "detected_question_evidence", "confirmed_question_count", "question_count_status", "unique (analysis_run_id, question_number)", "create or replace function public.ensure_exam_analysis_question_rows", "generate_series(1, p_question_count)", "exam-analysis-pipeline-sources"]));
+check("35i exam analysis pipeline preserves teacher edits as the new source of truth", hasAll(examAnalysisPipelineSchema, ["teacher_fields jsonb", "final_fields jsonb", "teacher_override boolean not null default false", "manual_edit_count integer not null default 0", "on conflict (analysis_run_id, question_number) do nothing"]));
 check("36 ai setting badges are hidden from work screens", !hasAll(app, ["aiVariantHeroActions", "aiModelSelectMock"]) && !app.includes("<h3>AI 모델</h3>"));
 
 check("37 exam publisher syncs across same term", hasAll(app, ["examCycleTermKey", "examPublisherLinkKey", "findLinkedPublisher", "syncPublisherAcrossExamTerm"]));
