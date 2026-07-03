@@ -1042,6 +1042,39 @@ function parseExamAnalysisReviewSubTypes(value = "") {
     .slice(0, 3);
 }
 
+const examAnalysisDifficultyOptions = ["하", "중하", "중", "중상", "상"];
+
+function applyExamAnalysisReviewDraftsToQuestions(questions = [], reviewDrafts = {}) {
+  return (Array.isArray(questions) ? questions : []).map((question) => {
+    const draftValue = reviewDrafts[String(question.questionNumber)];
+    if (!draftValue) return question;
+    const subTypes = parseExamAnalysisReviewSubTypes(draftValue.subTypesText);
+    const fields = {
+      unitName: draftValue.unitName ?? "",
+      mainType: draftValue.mainType ?? "",
+      subTypes,
+      difficulty: draftValue.difficulty ?? "",
+      reviewNote: draftValue.reviewNote ?? ""
+    };
+    return {
+      ...question,
+      unitName: fields.unitName,
+      mainType: fields.mainType,
+      subTypes,
+      difficulty: fields.difficulty,
+      teacherFields: {
+        ...(question.teacherFields ?? {}),
+        ...fields
+      },
+      finalFields: {
+        ...(question.finalFields ?? {}),
+        ...fields
+      },
+      rowStatus: draftValue.confirmed ? "confirmed" : question.rowStatus
+    };
+  });
+}
+
 function ExamAnalysisMiniDonut({ segments = [] }) {
   const visibleSegments = segments.filter((segment) => Number(segment.count || 0) > 0);
   let offset = 0;
@@ -1128,7 +1161,14 @@ function ExamAnalysisQuestionMap({ questions = [] }) {
   );
 }
 
-function ExamAnalysisFinalPreviewPanel({ model }) {
+function ExamAnalysisFinalPreviewPanel({
+  model,
+  onDifficultyChange,
+  onSaveReviews,
+  isSavingReviews = false,
+  canSaveReviews = false,
+  reviewStatus
+}) {
   if (!model?.questions?.length) {
     return (
       <div className="panel examAnalysisFinalPreviewPanel">
@@ -1150,6 +1190,17 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
         <div>
           <strong>최종 미리보기</strong>
           <span>{meta.confirmedCount}/{meta.totalQuestions}문항 · {model.notes.sourceOfTruth}</span>
+        </div>
+        <div className="headerActions">
+          {reviewStatus?.message ? <span className={`saveStateBadge ${reviewStatus.state}`}>{reviewStatus.message}</span> : null}
+          <button
+            className="secondaryButton"
+            disabled={!canSaveReviews || isSavingReviews}
+            onClick={onSaveReviews}
+            type="button"
+          >
+            {isSavingReviews ? "저장 중" : "난이도 수정 저장"}
+          </button>
         </div>
       </div>
       <div className="examAnalysisPreviewHero">
@@ -1236,7 +1287,7 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
               <th>단원</th>
               <th>주요 유형</th>
               <th>보조유형</th>
-              <th>난이도</th>
+              <th>난이도 수정</th>
               <th>검수 메모</th>
             </tr>
           </thead>
@@ -1248,7 +1299,18 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
                 <td>{question.unitName || "미입력"}</td>
                 <td>{question.mainType || "미입력"}</td>
                 <td>{question.subTypes.join(", ") || "-"}</td>
-                <td>{question.difficulty || "미정"}</td>
+                <td>
+                  <select
+                    className="examAnalysisPreviewDifficultySelect"
+                    value={question.difficulty === "미정" ? "" : question.difficulty}
+                    onChange={(event) => onDifficultyChange?.(question.questionNumber, event.target.value)}
+                  >
+                    <option value="">미정</option>
+                    {examAnalysisDifficultyOptions.map((difficulty) => (
+                      <option key={difficulty} value={difficulty}>{difficulty}</option>
+                    ))}
+                  </select>
+                </td>
                 <td>{question.reviewNote || "-"}</td>
               </tr>
             ))}
@@ -1257,6 +1319,7 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
       </div>
 
       <div className="examAnalysisPreviewPolicy">
+        <span>난이도는 AI 초안이 틀릴 수 있어 이 표에서 바로 수정한 뒤 저장합니다.</span>
         <span>{model.notes.formulaPolicy}</span>
         <span>{model.notes.publicOutputPolicy}</span>
       </div>
@@ -6842,13 +6905,17 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const rowFill = activeRun?.auditSummary?.rowFill ?? null;
   const rowRefine = activeRun?.auditSummary?.rowRefine ?? null;
   const teacherReview = activeRun?.auditSummary?.teacherReview ?? null;
+  const previewQuestionRows = useMemo(
+    () => applyExamAnalysisReviewDraftsToQuestions(questionRows, reviewDrafts),
+    [questionRows, reviewDrafts]
+  );
   const finalPreviewModel = useMemo(
     () => createExamAnalysisFinalPreviewModel({
       analysisRun: activeRun ?? {},
-      questions: questionRows,
+      questions: previewQuestionRows,
       sourceFiles
     }),
-    [activeRun, questionRows, sourceFiles]
+    [activeRun, previewQuestionRows, sourceFiles]
   );
   const reviewSeedKey = useMemo(
     () => questionRows
@@ -8171,7 +8238,14 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
             )}
           </div>
 
-          <ExamAnalysisFinalPreviewPanel model={finalPreviewModel} />
+          <ExamAnalysisFinalPreviewPanel
+            model={finalPreviewModel}
+            onDifficultyChange={(questionNumber, difficulty) => updateReviewDraft(questionNumber, { difficulty })}
+            onSaveReviews={saveQuestionReviews}
+            isSavingReviews={isSavingReviews}
+            canSaveReviews={reviewRowsReady}
+            reviewStatus={reviewStatus}
+          />
 
           <div className="panel examAnalysisStepPanel">
             <div className="sectionHeader slim">

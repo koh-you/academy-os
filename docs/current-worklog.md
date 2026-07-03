@@ -13,6 +13,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-04 P0. 시험분석 최종 미리보기 팔레트와 난이도 수정
+
+- 상태: 완료
+- 사용자 요청: 최종 미리보기 팔레트 색상이 더 전문가적인 느낌이어야 한다. 문항 난이도는 AI가 잘 못 잡는 것 같으므로 선생님이 수정할 수 있어야 한다. 이전 단계에서 난이도 수정이 가능했는지도 확인이 필요했다.
+- 확인: 이전 `AI 결과 검수` 표에도 난이도 select가 있어 수정 가능했다. 다만 최종 미리보기 화면에서는 읽기 전용으로 보여 수정 경로가 잘 보이지 않았다.
+- 이번 작업 결과: `src/domains/exams/finalPreview.js`의 단원/난이도 팔레트를 더 차분한 전문가 톤으로 바꿨다. 원색 계열을 줄이고 네이비, 틸, 옥커, 버건디, 플럼, 올리브 계열로 조정했다.
+- 화면: 최종 미리보기 상세표의 난이도 칸을 select로 바꾸고, 패널 상단에 `난이도 수정 저장` 버튼을 추가했다. select 변경은 즉시 미리보기 차트에 반영되고, 저장 버튼은 기존 `save-question-reviews` 검수 저장 API를 사용한다.
+- 저장 원칙: 새 SQL edit 없음. 난이도 수정은 별도 저장소를 만들지 않고 기존 `teacher_fields`/`final_fields` 검수본 저장 경로를 사용한다. 사용자 편집본이 AI 초안보다 우선한다.
+- 검증: `node --check src/domains/exams/finalPreview.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 232, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-04 P0. 시험분석 v2 최종 미리보기 1차와 산출물 방향 정리
 
 - 상태: 완료
