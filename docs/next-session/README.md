@@ -1,11 +1,22 @@
 # Next Session Handoff
 
-이 폴더 하나만 다음 Codex 프로젝트 세션에 넘기면 됩니다. 새 세션은 `AGENTS.md`와 이 파일을 먼저 읽고, `git status --short`, `git log -1 --oneline`, `docs/current-worklog.md`를 확인한 뒤 이어가면 됩니다.
+이 폴더 하나만 다음 Codex 프로젝트 세션에 넘기면 됩니다. 새 세션은 `docs/next-session/` 폴더 안의 이 파일과 `2026-07-04-ai-collaboration-retrospective.md`를 먼저 읽고, 이어서 `AGENTS.md`, `git status --short`, `git log -1 --oneline`, `docs/current-worklog.md`를 확인한 뒤 이어가면 됩니다.
+
+## 폴더 전체 읽기용 프롬프트
+
+다음 세션에서 사용자가 한 줄만 붙여넣고 싶으면 아래 프롬프트를 사용합니다.
+
+```text
+E:\academy-os 작업을 이어가겠습니다.
+다음 인수인계 폴더의 파일을 먼저 읽어주세요: docs/next-session/
+특히 docs/next-session/README.md와 docs/next-session/2026-07-04-ai-collaboration-retrospective.md를 읽고, 이어서 AGENTS.md와 docs/current-worklog.md, git status, 최신 커밋을 확인해주세요.
+그 후 지금 해야 할 다음 작업 후보와 검토 절차를 요약한 뒤, 바로 이어갈 수 있는 가장 작은 다음 작업을 제안해주세요.
+```
 
 ## 시작 프롬프트
 
 ```text
-E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 docs/next-session/README.md를 읽고, git status와 최신 worklog를 확인해 주세요.
+E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 docs/next-session/ 폴더 안의 README.md와 2026-07-04-ai-collaboration-retrospective.md를 읽고, 이어서 AGENTS.md, docs/current-worklog.md, git status와 최신 커밋을 확인해 주세요.
 
 최근 작업에서 기존 시험분석 탭과 관련 AI/PDF 분석 기능, app_state 저장 데이터 경로를 제거했습니다. 이후 사용자는 시험분석을 v2 파이프라인으로 새로 만들기로 했습니다. 옛 코드를 복구하지 말고 `PDF -> 텍스트 후보 추출 -> Claude 원본 검증 -> 문항 수 판독 -> 선생님 확인 -> 1~N 행 고정 -> AI 행 채움 -> 누락 검수 -> 재요청` 순서로 이어가 주세요.
 
