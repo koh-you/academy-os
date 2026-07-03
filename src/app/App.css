@@ -8448,6 +8448,7 @@ textarea {
 }
 
 .commentComposerGrid {
+  align-items: start;
   display: grid;
   gap: 18px;
   grid-template-columns: minmax(0, 1fr) minmax(360px, 0.9fr);
@@ -8461,6 +8462,16 @@ textarea {
 
 .commentComposerTextarea {
   min-height: 360px;
+}
+
+.examReviewComposerModal .commentDraftPanel,
+.examReviewComposerModal .commentPreviewPanel {
+  align-content: start;
+  align-self: start;
+}
+
+.examReviewComposerModal .sectionHeader.slim {
+  min-height: 36px;
 }
 
 .commentSourceToggle {

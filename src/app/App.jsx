@@ -2182,6 +2182,17 @@ const defaultAiPrompts = {
     "- 제목, 마크다운, 구분선, 설명 문구는 쓰지 않는다.",
     "- 2~5문장 안에서 간결하게 작성한다."
   ].join("\n"),
+  examReviewSpelling: [
+    "역할: 시험 후 총평 맞춤법 교정자",
+    "목표: 입력된 시험 후 총평의 맞춤법, 띄어쓰기, 명백한 오탈자만 고친다.",
+    "작성 원칙:",
+    "- 문장 구조, 어휘, 말투, 분량, 번호, 줄바꿈은 유지한다.",
+    "- 사실, 날짜, 점수, 난이도, 과목명, 학교명, 교재명은 바꾸지 않는다.",
+    "- 내용을 요약하거나 더 자연스럽게 다시 쓰지 않는다.",
+    "- 새 문장이나 설명을 추가하지 않는다.",
+    "- 수정할 곳이 없으면 원문을 그대로 반환한다.",
+    "- 최종 교정문만 반환한다."
+  ].join("\n"),
   preparationNotice: [
     "역할: 으뜸수학 고태영T의 수업메모 알림톡 편집자",
     "목표: 강사용 수업메모를 학생 또는 학부모에게 보낼 짧고 정중한 안내문으로 다듬는다.",
@@ -10603,12 +10614,13 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
         body: JSON.stringify({
           aiProvider: commentAiProvider,
           aiModel: commentAiModel,
-          aiPrompt: getAiPrompt(aiSettings, "commentPolish"),
+          aiPrompt: getAiPrompt(aiSettings, "examReviewSpelling"),
           audience: "teacher",
           grade: row.grade,
           homeworkStatus: "시험 후 총평",
           lessonDate: row.mathExamDate || row.examPeriod || today,
           lessonName: `${row.schoolName} ${row.subject} 시험 총평`,
+          polishMode: "spellingOnly",
           rawText: reviewDraft,
           schoolName: row.schoolName,
           studentName: "시험관리"
@@ -10627,7 +10639,7 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
 
   return (
     <Modal
-      className="commentComposerModal"
+      className="commentComposerModal examReviewComposerModal"
       title={`${row.schoolName} 시험 후 총평`}
       subtitle={`${row.grade} · ${row.subject} · ${row.publisher || "출판사 미입력"}`}
       onClose={handleClose}
@@ -10908,9 +10920,14 @@ function SettingsCenter({
   ];
   const promptRows = [
     {
-      description: "학부모/학생 알림톡 코멘트와 시험 후 총평을 다듬을 때 사용합니다.",
+      description: "학부모/학생 알림톡 코멘트를 다듬을 때 사용합니다.",
       key: "commentPolish",
       title: "코멘트 AI"
+    },
+    {
+      description: "시험관리의 시험 후 총평 모달에서 맞춤법과 띄어쓰기만 고칠 때 사용합니다.",
+      key: "examReviewSpelling",
+      title: "시험 후 총평 맞춤법 AI"
     },
     {
       description: "수업메모를 학생/학부모 안내문으로 바꿀 때 사용합니다.",

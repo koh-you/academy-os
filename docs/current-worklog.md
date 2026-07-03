@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P1. 시험 후 총평 모달 상단 정렬과 맞춤법 전용 AI 수정
+
+- 상태: 완료
+- 사용자 요청: 시험 후 총평 모달에서 ORIGINAL/REVISED 윗부분을 맞추고, 이 모달의 AI 수정은 맞춤법만 고치게 한다.
+- 이번 작업 결과: 시험 후 총평 모달에 `examReviewComposerModal` 전용 클래스를 추가하고 양쪽 패널을 상단 정렬했다. 헤더 최소 높이를 맞춰 ORIGINAL/REVISED 영역이 같은 높이에서 시작되도록 CSS를 보강했다.
+- AI 수정 변경: 시험 후 총평 모달은 기존 코멘트 다듬기 프롬프트 대신 `examReviewSpelling` 전용 프롬프트와 `polishMode: "spellingOnly"`를 사용한다. 서버 프롬프트도 이 모드에서는 맞춤법, 띄어쓰기, 명백한 오탈자만 고치고 문장 구조/말투/번호/줄바꿈/사실을 유지하도록 분기했다.
+- 회귀 방지: 운영 시나리오 테스트에 총평 AI가 맞춤법 전용 프롬프트와 상단 정렬 CSS를 사용하는지 확인하는 조건을 추가했다.
+- 저장 주의: 기존 `exam_prep_rows.review`, `revised_review`, `review_ai_status` 저장 경로를 그대로 사용한다. 새 Supabase SQL edit 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 242, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P1. 시험 후 총평 자동저장 중 Enter 입력 방해 수정
 
 - 상태: 완료

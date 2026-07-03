@@ -856,6 +856,28 @@ function buildQuestionClassificationPrompt(payload) {
 }
 
 function buildCommentPrompt(payload) {
+  const isSpellingOnly = payload.polishMode === "spellingOnly";
+  if (isSpellingOnly) {
+    const basePrompt = String(payload.aiPrompt ?? "").trim() || [
+      "역할: 시험 후 총평 맞춤법 교정자",
+      "목표: 입력된 시험 후 총평의 맞춤법, 띄어쓰기, 명백한 오탈자만 고친다.",
+      "작성 원칙:",
+      "- 문장 구조, 어휘, 말투, 분량, 번호, 줄바꿈은 유지한다.",
+      "- 사실, 날짜, 점수, 난이도, 과목명, 학교명, 교재명은 바꾸지 않는다.",
+      "- 내용을 요약하거나 더 자연스럽게 다시 쓰지 않는다.",
+      "- 새 문장이나 설명을 추가하지 않는다.",
+      "- 수정할 곳이 없으면 원문을 그대로 반환한다.",
+      "- 최종 교정문만 반환한다."
+    ].join("\n");
+
+    return [
+      basePrompt,
+      "",
+      "[원문]",
+      payload.rawText || "원문 없음"
+    ].join("\n");
+  }
+
   const audienceLabel = payload.audience === "student" ? "학생" : payload.audience === "teacher" ? "강사" : "학부모";
   const audienceRule =
     payload.audience === "student"
@@ -1770,6 +1792,10 @@ function normalizeAnalysisFields(fields, payload, rawText = "") {
 function createMockComment(payload) {
   const name = payload.studentName || "학생";
   const rawText = payload.rawText?.trim();
+  if (payload.polishMode === "spellingOnly") {
+    return rawText || "";
+  }
+
   if (payload.audience === "student") {
     return rawText
       ? `${name}, 오늘 확인한 내용은 다음 시간에 이어서 같이 보겠습니다. ${rawText}`
