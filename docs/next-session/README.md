@@ -9,7 +9,7 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 
 
 최근 작업에서 기존 시험분석 탭과 관련 AI/PDF 분석 기능, app_state 저장 데이터 경로를 제거했습니다. 이후 사용자는 시험분석을 v2 파이프라인으로 새로 만들기로 했습니다. 옛 코드를 복구하지 말고 `PDF -> 텍스트 후보 추출 -> Claude 원본 검증 -> 문항 수 판독 -> 선생님 확인 -> 1~N 행 고정 -> AI 행 채움 -> 누락 검수 -> 재요청` 순서로 이어가 주세요.
 
-단, 다음 세션의 첫 작업은 시험분석 구현을 바로 이어가기 전에 `데이터 원천 중복/덧대기 전수조사`입니다. `fallback`, `sampleData`, `mock`, `default`, `infer*`, `normalize*`, `dedupe*`, `duplicate`, `legacy`, `deprecated`, `hiddenAppState`, `app_state`, `localStorage`, `override` 키워드로 후보를 표로 만들고, 원천 삭제/마이그레이션이 필요한 구조와 정상 파생 표시를 구분해 주세요.
+단, 다음 세션의 첫 작업은 시험분석 구현을 바로 이어가기 전에 `데이터 원천 중복/덧대기 전수조사`입니다. `fallback`, `sampleData`, `mock`, `default`, `infer*`, `normalize*`, `dedupe*`, `duplicate`, `legacy`, `deprecated`, `hiddenAppState`, `app_state`, `localStorage`, `override` 키워드로 후보를 표로 만들고, 원천 삭제/마이그레이션이 필요한 구조와 정상 파생 표시를 구분해 주세요. 필터/정규화/우선순위 보정을 여러 겹 덧대어 오류를 숨기지 말고, 시험분석 테스트 데이터가 손상됐으면 삭제 후 처음부터 다시 올리는 방향을 우선 검토하세요. 보정 로직이 2겹 이상 필요해 보이면 사용자에게 확인한 뒤 진행하세요.
 
 현재 새 v2 구조의 SQL, 백엔드 run/PDF 업로드/삭제 API, 첫 UI(학교/학년/고사/분석 카드형 목록, 기본정보 저장, PDF 업로드, 상태 확인), PDF 텍스트 후보 추출, Claude 우선 원본 검증까지 들어가 있습니다. 전수조사 후 다음 구현은 문항 수 후보를 선생님이 확인하고 1~N 빈 행을 고정 생성하는 단계입니다.
 ```
@@ -61,12 +61,13 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 
 
 1. 데이터 원천 중복/덧대기 전수조사를 먼저 한다. 후보를 `원천 데이터`, `파생 표시`, `일시 override`, `마이그레이션/삭제 대상`, `정상 fallback`으로 분류하고, 바로 고치기 전에 목록과 우선순위를 확정한다.
 2. 1차 스캔 후보: `api/routes/coreData.js`의 `fallbackSource`/`sampleData` 반환, `src/app/App.jsx`의 `useStoredState(... sampleData ...)` 초기값, `dedupeExamPrepRowsForDisplay`, `inferExamCycleFromPrepId`, `app_state.generatedLessonControls`, `app_state.examPostTargetStudentIds`, `deprecatedAppStateKeys`/`hiddenAppStateKeys`, 수업일지 저장 직후 `localStorage` 직접 갱신 구간, 시험관리 중복 정리 API와 화면 dedupe 관계.
-3. 기존 시험분석 기능을 복구하지 않는다.
-4. 운영 Supabase에서 새 v2 테이블과 `exam-analysis-pipeline-sources` Storage bucket이 정상인지 확인한다.
-5. 전수조사 후 시험분석 다음 구현은 문항 수 후보 확인 UI다. 텍스트 후보와 Claude 원본 검증 결과를 비교해 `detected_question_count`, `detected_question_evidence`, `missing_question_numbers`, `question_count_status`에 저장한다.
-6. 선생님이 N을 확인하면 `ensure_exam_analysis_question_rows(run_id, count)`로 1~N 빈 행을 고정 생성한다.
-7. 그 다음은 `문항 경계 탐지` 단계다. Claude에게 문제 풀이/유형분류를 시키지 말고, 1~N 각 문항의 page, 대략 위치, 다음 문항 전까지의 범위만 JSON으로 받는다. 한 문항이 두 페이지에 걸치는 경우도 표시해야 한다.
-8. AI 행 채움은 경계 탐지 후의 다음 단계다. 이전처럼 문항별 크롭/비전 분석으로 바로 가지 말고, 비용과 실패 지점을 작게 쪼개서 설계한다.
+3. 필터/정규화/우선순위 보정을 여러 겹 덧대어 오류를 숨기지 않는다. 테스트 단계 데이터가 손상됐으면 삭제 후 재업로드/재분석을 우선 검토하고, 보정 로직이 2겹 이상 필요해 보이면 사용자에게 확인한다.
+4. 기존 시험분석 기능을 복구하지 않는다.
+5. 운영 Supabase에서 새 v2 테이블과 `exam-analysis-pipeline-sources` Storage bucket이 정상인지 확인한다.
+6. 전수조사 후 시험분석 다음 구현은 문항 수 후보 확인 UI다. 텍스트 후보와 Claude 원본 검증 결과를 비교해 `detected_question_count`, `detected_question_evidence`, `missing_question_numbers`, `question_count_status`에 저장한다.
+7. 선생님이 N을 확인하면 `ensure_exam_analysis_question_rows(run_id, count)`로 1~N 빈 행을 고정 생성한다.
+8. 그 다음은 `문항 경계 탐지` 단계다. Claude에게 문제 풀이/유형분류를 시키지 말고, 1~N 각 문항의 page, 대략 위치, 다음 문항 전까지의 범위만 JSON으로 받는다. 한 문항이 두 페이지에 걸치는 경우도 표시해야 한다.
+9. AI 행 채움은 경계 탐지 후의 다음 단계다. 이전처럼 문항별 크롭/비전 분석으로 바로 가지 말고, 비용과 실패 지점을 작게 쪼개서 설계한다.
 
 ## 참조 파일
 

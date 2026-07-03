@@ -19,6 +19,7 @@
 - 1차 스캔 후보: `api/routes/coreData.js`의 `fallbackSource`/`sampleData` 반환, `src/app/App.jsx`의 `useStoredState(... sampleData ...)` 초기값, `dedupeExamPrepRowsForDisplay`, `inferExamCycleFromPrepId`, `app_state.generatedLessonControls`, `app_state.examPostTargetStudentIds`, `deprecatedAppStateKeys`/`hiddenAppStateKeys`, 수업일지 저장 직후 `localStorage` 직접 갱신 구간, 시험관리 중복 정리 API와 화면 dedupe 관계.
 - 내일 산출물: 후보별 표를 만들고, 운영 데이터에 영향이 큰 순서대로 `원천 삭제/마이그레이션`, `정상 파생으로 문서화`, `화면 덧대기 제거`, `테스트 추가` 중 하나로 결론을 낸다. 바로 고치기보다 먼저 목록과 우선순위를 확정한다.
 - 주의: 모든 fallback이 나쁜 것은 아니다. Supabase 미설정 로컬 개발용 fallback, 명시적 app_state override, 표시 전용 dedupe는 역할이 명확하면 유지 가능하다. 다만 운영 Supabase 원천과 충돌하거나 잘못된 값을 숨기는 fallback/보정은 정리 대상이다.
+- 추가 지침: 필터/정규화/우선순위 보정을 여러 겹 덧대어 오류를 숨기지 않는다. 특히 시험분석 v2는 테스트 단계이므로 손상된 테스트 데이터는 보존보다 삭제 후 재업로드/재분석을 우선 검토한다. 원천 오류를 바로 끊을 수 없거나 보정 로직이 2겹 이상 필요해 보이면 작업을 멈추고 사용자에게 확인한다.
 
 ### 2026-07-03 P0. 시험분석 v2 PDF 텍스트 후보 추출과 Claude 원본 검증
 
