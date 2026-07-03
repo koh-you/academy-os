@@ -667,6 +667,7 @@ button {
 .examAnalysisBoundaryPanel,
 .examAnalysisRowFillPanel,
 .examAnalysisReviewPanel,
+.examAnalysisFinalPreviewPanel,
 .examAnalysisStepPanel,
 .examAnalysisEventPanel {
   padding: 16px;
@@ -1329,6 +1330,399 @@ button {
   color: #475569;
   text-align: center;
   white-space: nowrap;
+}
+
+.examAnalysisFinalPreviewPanel {
+  display: grid;
+  gap: 14px;
+}
+
+.examAnalysisPreviewHero {
+  align-items: stretch;
+  background: #f8fafc;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.36fr);
+  padding: 14px;
+}
+
+.examAnalysisPreviewHero > div:first-child {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.examAnalysisPreviewHero strong {
+  color: #17213d;
+  font-size: 22px;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.examAnalysisPreviewHero span,
+.examAnalysisPreviewHero small {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.45;
+}
+
+.examAnalysisPreviewMetricGrid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.examAnalysisPreviewMetricGrid span {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  color: #17213d;
+  display: grid;
+  gap: 3px;
+  justify-items: center;
+  min-height: 76px;
+  padding: 10px;
+}
+
+.examAnalysisPreviewMetricGrid b {
+  color: #17213d;
+  font-size: 24px;
+  font-weight: 950;
+}
+
+.examAnalysisPreviewMetricGrid small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.examAnalysisPreviewGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.examAnalysisPreviewCard {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px;
+}
+
+.examAnalysisPreviewCard.wide {
+  grid-column: 1 / -1;
+}
+
+.examAnalysisPreviewCardHeader {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.examAnalysisPreviewCardHeader strong {
+  color: #17213d;
+  font-size: 16px;
+  font-weight: 950;
+}
+
+.examAnalysisPreviewCardHeader span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.examAnalysisPreviewDonutLayout {
+  align-items: center;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 170px minmax(0, 1fr);
+}
+
+.examAnalysisDonut {
+  display: block;
+  height: 170px;
+  width: 170px;
+}
+
+.examAnalysisDonut.empty {
+  background: #f8fafc;
+  border: 1px dashed #cbd8ee;
+  border-radius: 999px;
+}
+
+.examAnalysisDonutBase {
+  fill: transparent;
+  stroke: #e2e8f0;
+  stroke-width: 8;
+}
+
+.examAnalysisDonutSlice {
+  fill: transparent;
+  stroke-linecap: butt;
+  stroke-width: 8;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+.examAnalysisDonut text {
+  fill: #17213d;
+  font-size: 5px;
+  font-weight: 950;
+}
+
+.examAnalysisDonut text + text {
+  fill: #64748b;
+  font-size: 3px;
+}
+
+.examAnalysisPreviewLegend {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.examAnalysisPreviewLegend span {
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 3px 8px;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding: 9px;
+}
+
+.examAnalysisPreviewLegend i {
+  border-radius: 999px;
+  display: block;
+  grid-row: span 2;
+  height: 12px;
+  width: 12px;
+}
+
+.examAnalysisPreviewLegend b {
+  color: #17213d;
+  font-size: 13px;
+  font-weight: 950;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.examAnalysisPreviewLegend small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.examAnalysisPreviewBars {
+  display: grid;
+  gap: 10px;
+}
+
+.examAnalysisPreviewBarRow {
+  display: grid;
+  gap: 6px;
+}
+
+.examAnalysisPreviewBarRow > div:first-child {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.examAnalysisPreviewBarRow strong {
+  color: #17213d;
+  font-size: 13px;
+  font-weight: 950;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.examAnalysisPreviewBarRow span {
+  color: #64748b;
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.examAnalysisPreviewBarTrack {
+  background: #eef2f7;
+  border-radius: 999px;
+  height: 12px;
+  overflow: hidden;
+}
+
+.examAnalysisPreviewBarTrack span {
+  border-radius: 999px;
+  display: block;
+  height: 100%;
+}
+
+.examAnalysisQuestionMap {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+}
+
+.examAnalysisQuestionMap span {
+  align-items: center;
+  border: 2px solid #cbd8ee;
+  border-radius: 8px;
+  color: #17213d;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 950;
+  height: 36px;
+  justify-content: center;
+  min-width: 0;
+}
+
+.examAnalysisImportantQuestions {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.examAnalysisImportantQuestions article {
+  background: #f8fafc;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding: 12px;
+}
+
+.examAnalysisImportantQuestions article > strong {
+  align-items: center;
+  background: #17213d;
+  border-radius: 999px;
+  color: #ffffff;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 950;
+  height: 34px;
+  justify-content: center;
+  min-width: 44px;
+  padding: 0 9px;
+}
+
+.examAnalysisImportantQuestions div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.examAnalysisImportantQuestions b {
+  color: #17213d;
+  font-size: 14px;
+  font-weight: 950;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.examAnalysisImportantQuestions span,
+.examAnalysisImportantQuestions small,
+.examAnalysisImportantQuestions p {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.examAnalysisPreviewTableWrap {
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  overflow: auto;
+}
+
+.examAnalysisPreviewTable {
+  border-collapse: collapse;
+  min-width: 980px;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.examAnalysisPreviewTable th {
+  background: #f8fafc;
+  border-bottom: 1px solid #d8e3f8;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 950;
+  height: 38px;
+  padding: 8px;
+  text-align: left;
+}
+
+.examAnalysisPreviewTable td {
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  color: #17213d;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 8px;
+  vertical-align: top;
+}
+
+.examAnalysisPreviewTable th:nth-child(1),
+.examAnalysisPreviewTable td:nth-child(1) {
+  text-align: center;
+  width: 48px;
+}
+
+.examAnalysisPreviewTable th:nth-child(2),
+.examAnalysisPreviewTable td:nth-child(2) {
+  width: 74px;
+}
+
+.examAnalysisPreviewTable th:nth-child(3),
+.examAnalysisPreviewTable td:nth-child(3) {
+  width: 150px;
+}
+
+.examAnalysisPreviewTable th:nth-child(4),
+.examAnalysisPreviewTable td:nth-child(4) {
+  width: 220px;
+}
+
+.examAnalysisPreviewTable th:nth-child(5),
+.examAnalysisPreviewTable td:nth-child(5) {
+  width: 220px;
+}
+
+.examAnalysisPreviewTable th:nth-child(6),
+.examAnalysisPreviewTable td:nth-child(6) {
+  width: 80px;
+}
+
+.examAnalysisPreviewPolicy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.examAnalysisPreviewPolicy span {
+  background: #f8fafc;
+  border: 1px solid #d8e3f8;
+  border-radius: 999px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.4;
+  padding: 7px 10px;
 }
 
 .examAnalysisReviewCard {
@@ -11259,8 +11653,15 @@ body.attendanceOnlyBody {
 
   .examAnalysisFormGrid,
   .examAnalysisQuestionCountGrid,
+  .examAnalysisPreviewHero,
+  .examAnalysisPreviewGrid,
   .examAnalysisSteps {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .examAnalysisPreviewHero,
+  .examAnalysisPreviewGrid {
+    grid-template-columns: 1fr;
   }
 
   .analysisSummaryHero {
@@ -11397,8 +11798,20 @@ body.attendanceOnlyBody {
   .examAnalysisSourceItem,
   .examAnalysisEventItem,
   .examAnalysisQuestionCountGrid,
+  .examAnalysisPreviewHero,
+  .examAnalysisPreviewGrid,
+  .examAnalysisPreviewDonutLayout,
   .examAnalysisSteps {
     grid-template-columns: 1fr;
+  }
+
+  .examAnalysisPreviewMetricGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .examAnalysisDonut {
+    height: 150px;
+    width: 150px;
   }
 
   .studentPortalTabletFirst .portalHeader,

@@ -3,6 +3,10 @@ import {
   copyTextToClipboard
 } from "../domains/exams/outputPreview.js";
 import {
+  createExamAnalysisFinalPreviewModel,
+  examAnalysisPreviewPalette
+} from "../domains/exams/finalPreview.js";
+import {
   examPostAcademyHelpOptions,
   examPostFeelingOptions,
   examPostRegretReasonOptions,
@@ -1036,6 +1040,228 @@ function parseExamAnalysisReviewSubTypes(value = "") {
     .map((item) => item.trim())
     .filter(Boolean)
     .slice(0, 3);
+}
+
+function ExamAnalysisMiniDonut({ segments = [] }) {
+  const visibleSegments = segments.filter((segment) => Number(segment.count || 0) > 0);
+  let offset = 0;
+  if (!visibleSegments.length) {
+    return <div className="examAnalysisDonut empty" aria-label="데이터 없음" />;
+  }
+  return (
+    <svg className="examAnalysisDonut" viewBox="0 0 42 42" role="img" aria-label="단원별 출제 비중">
+      <circle className="examAnalysisDonutBase" cx="21" cy="21" r="15.9155" />
+      {visibleSegments.map((segment) => {
+        const dash = `${segment.percent} ${100 - segment.percent}`;
+        const circle = (
+          <circle
+            className="examAnalysisDonutSlice"
+            cx="21"
+            cy="21"
+            key={segment.label}
+            r="15.9155"
+            stroke={segment.color}
+            strokeDasharray={dash}
+            strokeDashoffset={-offset}
+          />
+        );
+        offset += segment.percent;
+        return circle;
+      })}
+      <text x="21" y="20" textAnchor="middle">{visibleSegments.length}</text>
+      <text x="21" y="25" textAnchor="middle">단원</text>
+    </svg>
+  );
+}
+
+function ExamAnalysisLegendList({ items = [], emptyLabel = "데이터 없음" }) {
+  if (!items.length) return <div className="emptyState compact">{emptyLabel}</div>;
+  return (
+    <div className="examAnalysisPreviewLegend">
+      {items.map((item) => (
+        <span key={item.label}>
+          <i style={{ backgroundColor: item.color }} />
+          <b>{item.label}</b>
+          <small>{item.count}문항 · {item.percent}%</small>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function ExamAnalysisBarList({ items = [], emptyLabel = "데이터 없음" }) {
+  if (!items.length) return <div className="emptyState compact">{emptyLabel}</div>;
+  return (
+    <div className="examAnalysisPreviewBars">
+      {items.map((item) => (
+        <div className="examAnalysisPreviewBarRow" key={item.label}>
+          <div>
+            <strong>{item.label}</strong>
+            <span>{item.count}문항 · {item.percent}%</span>
+          </div>
+          <div className="examAnalysisPreviewBarTrack">
+            <span style={{ backgroundColor: item.color, width: `${Math.max(item.percent, 4)}%` }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ExamAnalysisQuestionMap({ questions = [] }) {
+  if (!questions.length) return <div className="emptyState compact">문항 없음</div>;
+  return (
+    <div className="examAnalysisQuestionMap">
+      {questions.map((question) => {
+        const color = examAnalysisPreviewPalette.difficulties[question.difficulty] || examAnalysisPreviewPalette.difficulties["미정"];
+        return (
+          <span
+            key={question.questionNumber}
+            style={{ borderColor: color, backgroundColor: `${color}1a` }}
+            title={[`${question.questionNumber}번`, question.unitName, question.mainType, question.difficulty].filter(Boolean).join(" · ")}
+          >
+            {question.questionNumber}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+function ExamAnalysisFinalPreviewPanel({ model }) {
+  if (!model?.questions?.length) {
+    return (
+      <div className="panel examAnalysisFinalPreviewPanel">
+        <div className="sectionHeader slim">
+          <div>
+            <strong>최종 미리보기</strong>
+            <span>검수 저장 후 표시됩니다.</span>
+          </div>
+        </div>
+        <div className="emptyState compact">저장된 문항 검수본이 없습니다.</div>
+      </div>
+    );
+  }
+
+  const { meta } = model;
+  return (
+    <div className="panel examAnalysisFinalPreviewPanel">
+      <div className="sectionHeader slim">
+        <div>
+          <strong>최종 미리보기</strong>
+          <span>{meta.confirmedCount}/{meta.totalQuestions}문항 · {model.notes.sourceOfTruth}</span>
+        </div>
+      </div>
+      <div className="examAnalysisPreviewHero">
+        <div>
+          <strong>{meta.title}</strong>
+          <span>{[meta.schoolName, meta.grade, meta.examCycle, meta.subject].filter(Boolean).join(" · ") || "기본정보 없음"}</span>
+          {meta.sourceFileName ? <small>PDF 원본 · {meta.sourceFileName}</small> : null}
+          {meta.reviewedAt ? <small>검수 저장 · {formatExamAnalysisEventTime(meta.reviewedAt)}</small> : null}
+        </div>
+        <div className="examAnalysisPreviewMetricGrid">
+          <span><b>{meta.totalQuestions}</b><small>문항</small></span>
+          <span><b>{model.unitDistribution.length}</b><small>단원</small></span>
+          <span><b>{model.importantQuestions.length}</b><small>주요문항 후보</small></span>
+        </div>
+      </div>
+
+      <div className="examAnalysisPreviewGrid">
+        <section className="examAnalysisPreviewCard wide">
+          <div className="examAnalysisPreviewCardHeader">
+            <strong>단원별 출제 비중</strong>
+            <span>자동 범례</span>
+          </div>
+          <div className="examAnalysisPreviewDonutLayout">
+            <ExamAnalysisMiniDonut segments={model.unitDistribution} />
+            <ExamAnalysisLegendList items={model.unitDistribution} />
+          </div>
+        </section>
+
+        <section className="examAnalysisPreviewCard">
+          <div className="examAnalysisPreviewCardHeader">
+            <strong>난이도 분포</strong>
+            <span>고정 색상</span>
+          </div>
+          <ExamAnalysisBarList items={model.difficultyDistribution} />
+        </section>
+
+        <section className="examAnalysisPreviewCard">
+          <div className="examAnalysisPreviewCardHeader">
+            <strong>주요 유형</strong>
+            <span>쎈 기준 참고</span>
+          </div>
+          <ExamAnalysisBarList items={model.majorTypes.slice(0, 6)} emptyLabel="주요 유형 없음" />
+        </section>
+
+        <section className="examAnalysisPreviewCard wide">
+          <div className="examAnalysisPreviewCardHeader">
+            <strong>문항 흐름</strong>
+            <span>난이도 색상 기준</span>
+          </div>
+          <ExamAnalysisQuestionMap questions={model.questions} />
+        </section>
+
+        <section className="examAnalysisPreviewCard wide">
+          <div className="examAnalysisPreviewCardHeader">
+            <strong>주요문항 후보</strong>
+            <span>AI 추천/선생님 선택은 다음 단계</span>
+          </div>
+          {model.importantQuestions.length ? (
+            <div className="examAnalysisImportantQuestions">
+              {model.importantQuestions.map((question) => (
+                <article key={question.questionNumber}>
+                  <strong>{question.questionNumber}번</strong>
+                  <div>
+                    <b>{question.mainType || "유형 미입력"}</b>
+                    <span>{[question.unitName, question.difficulty, question.pageLabel].filter(Boolean).join(" · ")}</span>
+                    <small>{question.reasons?.join(" · ") || "후보"}</small>
+                    {question.reviewNote ? <p>{question.reviewNote}</p> : null}
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="emptyState compact">주요문항 후보 없음</div>
+          )}
+        </section>
+      </div>
+
+      <div className="examAnalysisPreviewTableWrap">
+        <table className="examAnalysisPreviewTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>페이지</th>
+              <th>단원</th>
+              <th>주요 유형</th>
+              <th>보조유형</th>
+              <th>난이도</th>
+              <th>검수 메모</th>
+            </tr>
+          </thead>
+          <tbody>
+            {model.questions.map((question) => (
+              <tr key={question.questionRowId || question.questionNumber}>
+                <td>{question.questionNumber}</td>
+                <td>{question.pageLabel || "-"}</td>
+                <td>{question.unitName || "미입력"}</td>
+                <td>{question.mainType || "미입력"}</td>
+                <td>{question.subTypes.join(", ") || "-"}</td>
+                <td>{question.difficulty || "미정"}</td>
+                <td>{question.reviewNote || "-"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="examAnalysisPreviewPolicy">
+        <span>{model.notes.formulaPolicy}</span>
+        <span>{model.notes.publicOutputPolicy}</span>
+      </div>
+    </div>
+  );
 }
 
 function getExamAnalysisQuestionCountCandidate(run = {}, sourceFiles = []) {
@@ -6616,6 +6842,14 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const rowFill = activeRun?.auditSummary?.rowFill ?? null;
   const rowRefine = activeRun?.auditSummary?.rowRefine ?? null;
   const teacherReview = activeRun?.auditSummary?.teacherReview ?? null;
+  const finalPreviewModel = useMemo(
+    () => createExamAnalysisFinalPreviewModel({
+      analysisRun: activeRun ?? {},
+      questions: questionRows,
+      sourceFiles
+    }),
+    [activeRun, questionRows, sourceFiles]
+  );
   const reviewSeedKey = useMemo(
     () => questionRows
       .map((question) => [
@@ -7936,6 +8170,8 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
               <div className="emptyState compact">AI 행 채움 후 검수할 수 있습니다.</div>
             )}
           </div>
+
+          <ExamAnalysisFinalPreviewPanel model={finalPreviewModel} />
 
           <div className="panel examAnalysisStepPanel">
             <div className="sectionHeader slim">
