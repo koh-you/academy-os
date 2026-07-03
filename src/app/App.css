@@ -1683,19 +1683,6 @@ button {
   vertical-align: top;
 }
 
-.examAnalysisPreviewDifficultySelect {
-  background: #ffffff;
-  border: 1px solid #93c5fd;
-  border-radius: 6px;
-  color: #17213d;
-  font-size: 13px;
-  font-weight: 850;
-  height: 34px;
-  min-width: 74px;
-  padding: 0 8px;
-  width: 100%;
-}
-
 .examAnalysisPreviewTable th:nth-child(1),
 .examAnalysisPreviewTable td:nth-child(1) {
   text-align: center;

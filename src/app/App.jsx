@@ -1159,14 +1159,7 @@ function ExamAnalysisQuestionMap({ questions = [] }) {
   );
 }
 
-function ExamAnalysisFinalPreviewPanel({
-  model,
-  onDifficultyChange,
-  onSaveReviews,
-  isSavingReviews = false,
-  canSaveReviews = false,
-  reviewStatus
-}) {
+function ExamAnalysisFinalPreviewPanel({ model }) {
   if (!model?.questions?.length) {
     return (
       <div className="panel examAnalysisFinalPreviewPanel">
@@ -1188,17 +1181,6 @@ function ExamAnalysisFinalPreviewPanel({
         <div>
           <strong>최종 미리보기</strong>
           <span>{meta.totalQuestions}문항 · {model.notes.sourceOfTruth}</span>
-        </div>
-        <div className="headerActions">
-          {reviewStatus?.message ? <span className={`saveStateBadge ${reviewStatus.state}`}>{reviewStatus.message}</span> : null}
-          <button
-            className={reviewStatus?.state === "dirty" ? "primaryButton" : "secondaryButton"}
-            disabled={!canSaveReviews || isSavingReviews}
-            onClick={onSaveReviews}
-            type="button"
-          >
-            {isSavingReviews ? "저장 중" : "난이도 수정 저장"}
-          </button>
         </div>
       </div>
       <div className="examAnalysisPreviewHero">
@@ -1285,7 +1267,7 @@ function ExamAnalysisFinalPreviewPanel({
               <th>단원</th>
               <th>주요 유형</th>
               <th>보조유형</th>
-              <th>난이도 수정</th>
+              <th>난이도</th>
               <th>검수 메모</th>
             </tr>
           </thead>
@@ -1297,18 +1279,7 @@ function ExamAnalysisFinalPreviewPanel({
                 <td>{question.unitName || "미입력"}</td>
                 <td>{question.mainType || "미입력"}</td>
                 <td>{question.subTypes.join(", ") || "-"}</td>
-                <td>
-                  <select
-                    className="examAnalysisPreviewDifficultySelect"
-                    value={question.difficulty === "미정" ? "" : question.difficulty}
-                    onChange={(event) => onDifficultyChange?.(question.questionNumber, event.target.value)}
-                  >
-                    <option value="">미정</option>
-                    {examAnalysisDifficultyOptions.map((difficulty) => (
-                      <option key={difficulty} value={difficulty}>{difficulty}</option>
-                    ))}
-                  </select>
-                </td>
+                <td>{question.difficulty || "미정"}</td>
                 <td>{question.reviewNote || "-"}</td>
               </tr>
             ))}
@@ -1317,7 +1288,7 @@ function ExamAnalysisFinalPreviewPanel({
       </div>
 
       <div className="examAnalysisPreviewPolicy">
-        <span>난이도 변경은 차트에 먼저 반영되고, 난이도 수정 저장을 눌러야 새로고침 후 유지됩니다.</span>
+        <span>난이도 수정과 저장은 위 AI 결과 검수 표에서 진행합니다.</span>
         <span>{model.notes.formulaPolicy}</span>
         <span>{model.notes.publicOutputPolicy}</span>
       </div>
@@ -7574,8 +7545,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     }
   }
 
-  async function saveQuestionReviews(options = {}) {
-    const saveOptions = options && !options.nativeEvent ? options : {};
+  async function saveQuestionReviews() {
     if (!activeRun?.analysisRunId) {
       setReviewStatus({ state: "failed", message: "시험분석 · 분석을 먼저 저장해 주세요." });
       return;
@@ -7586,7 +7556,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     }
 
     setIsSavingReviews(true);
-    setReviewStatus({ state: "saving", message: saveOptions.pendingMessage || "시험분석 · 검수 저장 중" });
+    setReviewStatus({ state: "saving", message: "시험분석 · 검수 저장 중" });
     try {
       const result = await saveExamAnalysisQuestionReviewsRequest({
         analysisRunId: activeRun.analysisRunId,
@@ -7598,7 +7568,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       setReviewDrafts(buildExamAnalysisReviewDrafts(result.questions ?? []));
       setReviewStatus({
         state: "success",
-        message: saveOptions.successMessage || `시험분석 · 검수 저장 완료 · ${confirmedCount}/${totalCount}개 확정`
+        message: `시험분석 · 검수 저장 완료 · ${confirmedCount}/${totalCount}개 확정`
       });
       await loadRuns(activeRun.analysisRunId);
       await loadRunDetail(activeRun.analysisRunId);
@@ -8244,14 +8214,6 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
 
           <ExamAnalysisFinalPreviewPanel
             model={finalPreviewModel}
-            onDifficultyChange={(questionNumber, difficulty) => updateReviewDraft(questionNumber, { difficulty })}
-            onSaveReviews={() => saveQuestionReviews({
-              pendingMessage: "시험분석 · 난이도 저장 중",
-              successMessage: "시험분석 · 난이도 저장 완료"
-            })}
-            isSavingReviews={isSavingReviews}
-            canSaveReviews={reviewRowsReady}
-            reviewStatus={reviewStatus}
           />
 
           <div className="panel examAnalysisStepPanel">
