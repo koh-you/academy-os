@@ -926,6 +926,43 @@ function getExamAnalysisRunTitle(run = {}) {
   return run.title || [run.schoolName, run.grade, run.subject, run.examCycle].filter(Boolean).join(" · ") || "새 시험분석";
 }
 
+const examAnalysisSchools = ["상계고", "자운고", "창동고", "용화여고", "정의여고"];
+const examAnalysisGrades = ["고1", "고2", "고3"];
+const examAnalysisExamCycles = ["1학기 중간", "1학기 기말", "2학기 중간", "2학기 기말"];
+
+function normalizeExamAnalysisSchoolName(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  return examAnalysisSchools.find((school) => text.includes(school.replace("고", "")) || text.includes(school)) || text;
+}
+
+function normalizeExamAnalysisGrade(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  if (/고?\s*1|1\s*학년/.test(text)) return "고1";
+  if (/고?\s*2|2\s*학년/.test(text)) return "고2";
+  if (/고?\s*3|3\s*학년/.test(text)) return "고3";
+  return text;
+}
+
+function normalizeExamAnalysisExamCycle(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  const semester = text.includes("2학기") ? "2학기" : text.includes("1학기") ? "1학기" : "";
+  const cycle = text.includes("기말") ? "기말" : text.includes("중간") ? "중간" : "";
+  return semester && cycle ? `${semester} ${cycle}` : text.replace(/고사/g, "").trim();
+}
+
+function formatExamAnalysisExamCycleTitle(value) {
+  const normalized = normalizeExamAnalysisExamCycle(value);
+  if (!normalized) return "고사";
+  return normalized.endsWith("고사") ? normalized : `${normalized}고사`;
+}
+
+function buildExamAnalysisTitle({ schoolName, grade, examCycle } = {}) {
+  return `${schoolName || "학교"} ${grade || "학년"} ${formatExamAnalysisExamCycleTitle(examCycle)} 시험분석`;
+}
+
 function postMakeupTask(makeupTask) {
   return postJson("/api/makeup-tasks", { makeupTask });
 }
@@ -6210,17 +6247,21 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const [selectedRunId, setSelectedRunId] = useState("");
   const [selectedDetail, setSelectedDetail] = useState(null);
   const [selectedExamPrepId, setSelectedExamPrepId] = useState(examPrepRows[0]?.examPrepId ?? "");
-  const [selectedSchoolName, setSelectedSchoolName] = useState(examPrepRows[0]?.schoolName ?? "");
-  const [selectedGrade, setSelectedGrade] = useState(examPrepRows[0]?.grade ?? "");
+  const [selectedSchoolName, setSelectedSchoolName] = useState(normalizeExamAnalysisSchoolName(examPrepRows[0]?.schoolName) || examAnalysisSchools[0]);
+  const [selectedGrade, setSelectedGrade] = useState(normalizeExamAnalysisGrade(examPrepRows[0]?.grade) || examAnalysisGrades[0]);
+  const [selectedExamCycle, setSelectedExamCycle] = useState(normalizeExamAnalysisExamCycle(examPrepRows[0]?.examCycle || examPrepRows[0]?.examTerm) || examAnalysisExamCycles[0]);
   const [draft, setDraft] = useState(() => {
     const row = examPrepRows[0] ?? {};
+    const schoolName = normalizeExamAnalysisSchoolName(row.schoolName) || examAnalysisSchools[0];
+    const grade = normalizeExamAnalysisGrade(row.grade) || examAnalysisGrades[0];
+    const examCycle = normalizeExamAnalysisExamCycle(row.examCycle || row.examTerm) || examAnalysisExamCycles[0];
     return {
-      title: row.schoolName ? `${row.schoolName} ${row.examCycle || row.examTerm || ""} 시험분석`.trim() : "새 시험분석",
-      schoolName: row.schoolName ?? "",
-      grade: row.grade ?? "",
+      title: buildExamAnalysisTitle({ schoolName, grade, examCycle }),
+      schoolName,
+      grade,
       subject: row.subject ?? "수학",
       examTerm: row.examTerm ?? "",
-      examCycle: row.examCycle ?? ""
+      examCycle
     };
   });
   const [loadStatus, setLoadStatus] = useState({ state: "idle", message: "" });
@@ -6235,76 +6276,37 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const activeRun = selectedDetailRun ?? analysisRuns.find((run) => run.analysisRunId === selectedRunId) ?? null;
   const sourceFiles = selectedDetailRun ? selectedDetail?.sources ?? [] : [];
   const events = selectedDetailRun ? selectedDetail?.events ?? [] : [];
-  const schoolCards = useMemo(() => {
-    const schoolMap = new Map();
-    const ensureSchool = (schoolName) => {
-      const name = String(schoolName || "미지정").trim() || "미지정";
-      if (!schoolMap.has(name)) {
-        schoolMap.set(name, { name, grades: new Set(), examPrepIds: new Set(), runIds: new Set() });
-      }
-      return schoolMap.get(name);
-    };
-
-    examPrepRows.forEach((row) => {
-      const item = ensureSchool(row.schoolName);
-      if (row.grade) item.grades.add(row.grade);
-      if (row.examPrepId) item.examPrepIds.add(row.examPrepId);
-    });
-    analysisRuns.forEach((run) => {
-      const item = ensureSchool(run.schoolName);
-      if (run.grade) item.grades.add(run.grade);
-      if (run.examPrepId) item.examPrepIds.add(run.examPrepId);
-      if (run.analysisRunId) item.runIds.add(run.analysisRunId);
-    });
-
-    return Array.from(schoolMap.values())
-      .map((item) => ({
-        ...item,
-        gradeCount: item.grades.size,
-        examCount: item.examPrepIds.size,
-        runCount: item.runIds.size,
-        sortedGrades: Array.from(item.grades).sort((a, b) => String(a).localeCompare(String(b), "ko"))
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name, "ko"));
-  }, [analysisRuns, examPrepRows]);
+  const schoolCards = useMemo(() => examAnalysisSchools.map((schoolName) => ({
+    name: schoolName,
+    gradeCount: examAnalysisGrades.length,
+    examCount: examAnalysisExamCycles.length,
+    runCount: analysisRuns.filter((run) => normalizeExamAnalysisSchoolName(run.schoolName) === schoolName).length
+  })), [analysisRuns]);
   const gradeCards = useMemo(() => {
-    const gradeMap = new Map();
-    const ensureGrade = (grade) => {
-      const name = String(grade || "미지정").trim() || "미지정";
-      if (!gradeMap.has(name)) {
-        gradeMap.set(name, { name, examPrepIds: new Set(), runIds: new Set() });
-      }
-      return gradeMap.get(name);
-    };
-
-    examPrepRows
-      .filter((row) => !selectedSchoolName || row.schoolName === selectedSchoolName)
-      .forEach((row) => {
-        const item = ensureGrade(row.grade);
-        if (row.examPrepId) item.examPrepIds.add(row.examPrepId);
-      });
-    analysisRuns
-      .filter((run) => !selectedSchoolName || run.schoolName === selectedSchoolName)
-      .forEach((run) => {
-        const item = ensureGrade(run.grade);
-        if (run.examPrepId) item.examPrepIds.add(run.examPrepId);
-        if (run.analysisRunId) item.runIds.add(run.analysisRunId);
-      });
-
-    return Array.from(gradeMap.values())
-      .map((item) => ({
-        ...item,
-        examCount: item.examPrepIds.size,
-        runCount: item.runIds.size
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name, "ko"));
-  }, [analysisRuns, examPrepRows, selectedSchoolName]);
+    return examAnalysisGrades.map((grade) => ({
+      name: grade,
+      examCount: examAnalysisExamCycles.length,
+      runCount: analysisRuns.filter((run) => (
+        normalizeExamAnalysisSchoolName(run.schoolName) === selectedSchoolName
+        && normalizeExamAnalysisGrade(run.grade) === grade
+      )).length
+    }));
+  }, [analysisRuns, selectedSchoolName]);
+  const examCycleCards = useMemo(() => examAnalysisExamCycles.map((examCycle) => ({
+    name: examCycle,
+    runCount: analysisRuns.filter((run) => (
+      normalizeExamAnalysisSchoolName(run.schoolName) === selectedSchoolName
+      && normalizeExamAnalysisGrade(run.grade) === selectedGrade
+      && normalizeExamAnalysisExamCycle(run.examCycle || run.examTerm) === examCycle
+    )).length
+  })), [analysisRuns, selectedExamCycle, selectedGrade, selectedSchoolName]);
   const scopedRuns = useMemo(
     () => analysisRuns.filter((run) => (
-      (!selectedSchoolName || run.schoolName === selectedSchoolName)
-      && (!selectedGrade || run.grade === selectedGrade)
+      normalizeExamAnalysisSchoolName(run.schoolName) === selectedSchoolName
+      && normalizeExamAnalysisGrade(run.grade) === selectedGrade
+      && normalizeExamAnalysisExamCycle(run.examCycle || run.examTerm) === selectedExamCycle
     )),
-    [analysisRuns, selectedGrade, selectedSchoolName]
+    [analysisRuns, selectedExamCycle, selectedGrade, selectedSchoolName]
   );
 
   useEffect(() => {
@@ -6319,9 +6321,15 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     if (!didAutoSelectExamPrepRef.current && !selectedSchoolName && !draft.schoolName && schoolCards[0]?.name) {
       didAutoSelectExamPrepRef.current = true;
       setSelectedSchoolName(schoolCards[0].name);
-      setDraft((current) => ({ ...current, schoolName: schoolCards[0].name }));
+      setDraft((current) => ({
+        ...current,
+        schoolName: schoolCards[0].name,
+        grade: selectedGrade,
+        examCycle: selectedExamCycle,
+        title: buildExamAnalysisTitle({ schoolName: schoolCards[0].name, grade: selectedGrade, examCycle: selectedExamCycle })
+      }));
     }
-  }, [draft.schoolName, schoolCards, selectedSchoolName]);
+  }, [draft.schoolName, schoolCards, selectedExamCycle, selectedGrade, selectedSchoolName]);
 
   useEffect(() => {
     loadRuns();
@@ -6337,50 +6345,60 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
 
   function applyExamPrepRow(row) {
     if (!row) return;
-    setSelectedSchoolName(row.schoolName ?? "");
-    setSelectedGrade(row.grade ?? "");
+    const schoolName = normalizeExamAnalysisSchoolName(row.schoolName) || selectedSchoolName;
+    const grade = normalizeExamAnalysisGrade(row.grade) || selectedGrade;
+    const examCycle = normalizeExamAnalysisExamCycle(row.examCycle || row.examTerm) || selectedExamCycle;
+    setSelectedSchoolName(schoolName);
+    setSelectedGrade(grade);
+    setSelectedExamCycle(examCycle);
     setDraft({
-      title: `${row.schoolName || "학교"} ${row.examCycle || row.examTerm || "시험"} 시험분석`,
-      schoolName: row.schoolName ?? "",
-      grade: row.grade ?? "",
+      title: buildExamAnalysisTitle({ schoolName, grade, examCycle }),
+      schoolName,
+      grade,
       subject: row.subject ?? "수학",
       examTerm: row.examTerm ?? "",
-      examCycle: row.examCycle ?? ""
+      examCycle
     });
   }
 
   function applyRunToDraft(run) {
     if (!run) return;
+    const schoolName = normalizeExamAnalysisSchoolName(run.schoolName) || selectedSchoolName;
+    const grade = normalizeExamAnalysisGrade(run.grade) || selectedGrade;
+    const examCycle = normalizeExamAnalysisExamCycle(run.examCycle || run.examTerm) || selectedExamCycle;
     didAutoSelectExamPrepRef.current = true;
     setSelectedExamPrepId(run.examPrepId || "");
-    setSelectedSchoolName(run.schoolName || "");
-    setSelectedGrade(run.grade || "");
+    setSelectedSchoolName(schoolName);
+    setSelectedGrade(grade);
+    setSelectedExamCycle(examCycle);
     setDraft({
-      title: run.title || getExamAnalysisRunTitle(run),
-      schoolName: run.schoolName ?? "",
-      grade: run.grade ?? "",
+      title: run.title || buildExamAnalysisTitle({ schoolName, grade, examCycle }),
+      schoolName,
+      grade,
       subject: run.subject ?? "수학",
       examTerm: run.examTerm ?? "",
-      examCycle: run.examCycle ?? ""
+      examCycle
     });
   }
 
-  function getFirstExamPrepRow(schoolName = selectedSchoolName, grade = selectedGrade) {
-    if (!schoolName && !grade) return null;
+  function getFirstExamPrepRow(schoolName = selectedSchoolName, grade = selectedGrade, examCycle = selectedExamCycle) {
     return examPrepRows.find((row) => (
-      (!schoolName || row.schoolName === schoolName)
-      && (!grade || row.grade === grade)
+      normalizeExamAnalysisSchoolName(row.schoolName) === schoolName
+      && normalizeExamAnalysisGrade(row.grade) === grade
+      && normalizeExamAnalysisExamCycle(row.examCycle || row.examTerm) === examCycle
     )) ?? null;
   }
 
   function selectSchoolCard(school) {
-    const nextSchoolName = school?.name === "미지정" ? "" : school?.name || "";
-    const nextGrade = school?.sortedGrades?.[0] && school.sortedGrades[0] !== "미지정" ? school.sortedGrades[0] : "";
-    const row = getFirstExamPrepRow(nextSchoolName, nextGrade);
+    const nextSchoolName = school?.name || examAnalysisSchools[0];
+    const nextGrade = selectedGrade || examAnalysisGrades[0];
+    const nextExamCycle = selectedExamCycle || examAnalysisExamCycles[0];
+    const row = getFirstExamPrepRow(nextSchoolName, nextGrade, nextExamCycle);
     setSelectedRunId("");
     setSelectedDetail(null);
     setSelectedSchoolName(nextSchoolName);
     setSelectedGrade(nextGrade);
+    setSelectedExamCycle(nextExamCycle);
     setSelectedExamPrepId(row?.examPrepId || "");
     if (row) {
       applyExamPrepRow(row);
@@ -6388,15 +6406,16 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     }
     setDraft((current) => ({
       ...current,
-      title: nextSchoolName ? `${nextSchoolName} ${nextGrade || "시험"} 시험분석` : "새 시험분석",
+      title: buildExamAnalysisTitle({ schoolName: nextSchoolName, grade: nextGrade, examCycle: nextExamCycle }),
       schoolName: nextSchoolName,
-      grade: nextGrade
+      grade: nextGrade,
+      examCycle: nextExamCycle
     }));
   }
 
   function selectGradeCard(grade) {
-    const nextGrade = grade?.name === "미지정" ? "" : grade?.name || "";
-    const row = getFirstExamPrepRow(selectedSchoolName, nextGrade);
+    const nextGrade = grade?.name || examAnalysisGrades[0];
+    const row = getFirstExamPrepRow(selectedSchoolName, nextGrade, selectedExamCycle);
     setSelectedRunId("");
     setSelectedDetail(null);
     setSelectedGrade(nextGrade);
@@ -6407,47 +6426,38 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     }
     setDraft((current) => ({
       ...current,
-      title: `${selectedSchoolName || current.schoolName || "학교"} ${nextGrade || "시험"} 시험분석`,
+      title: buildExamAnalysisTitle({ schoolName: selectedSchoolName || current.schoolName, grade: nextGrade, examCycle: selectedExamCycle || current.examCycle }),
       schoolName: selectedSchoolName || current.schoolName,
-      grade: nextGrade
+      grade: nextGrade,
+      examCycle: selectedExamCycle || current.examCycle
     }));
   }
 
-  function startManualSchool() {
-    didAutoSelectExamPrepRef.current = true;
+  function selectExamCycleCard(examCycle) {
+    const nextExamCycle = examCycle?.name || examAnalysisExamCycles[0];
+    const row = getFirstExamPrepRow(selectedSchoolName, selectedGrade, nextExamCycle);
     setSelectedRunId("");
     setSelectedDetail(null);
-    setSelectedSchoolName("");
-    setSelectedGrade("");
-    setSelectedExamPrepId("");
-    setDraft({
-      title: "새 시험분석",
-      schoolName: "",
-      grade: "",
-      subject: "수학",
-      examTerm: "",
-      examCycle: ""
-    });
-  }
-
-  function startManualGrade() {
-    didAutoSelectExamPrepRef.current = true;
-    setSelectedRunId("");
-    setSelectedDetail(null);
-    setSelectedGrade("");
-    setSelectedExamPrepId("");
+    setSelectedExamCycle(nextExamCycle);
+    setSelectedExamPrepId(row?.examPrepId || "");
+    if (row) {
+      applyExamPrepRow(row);
+      return;
+    }
     setDraft((current) => ({
       ...current,
-      title: `${selectedSchoolName || current.schoolName || "학교"} 시험분석`,
+      title: buildExamAnalysisTitle({ schoolName: selectedSchoolName || current.schoolName, grade: selectedGrade || current.grade, examCycle: nextExamCycle }),
       schoolName: selectedSchoolName || current.schoolName,
-      grade: ""
+      grade: selectedGrade || current.grade,
+      examCycle: nextExamCycle
     }));
   }
 
   function startNewAnalysis() {
     const targetSchoolName = selectedSchoolName || draft.schoolName;
     const targetGrade = selectedGrade || draft.grade;
-    const row = getFirstExamPrepRow(targetSchoolName, targetGrade);
+    const targetExamCycle = selectedExamCycle || draft.examCycle;
+    const row = getFirstExamPrepRow(targetSchoolName, targetGrade, targetExamCycle);
     setSelectedRunId("");
     setSelectedDetail(null);
     setSelectedExamPrepId(row?.examPrepId || "");
@@ -6457,9 +6467,10 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     }
     setDraft((current) => ({
       ...current,
-      title: `${targetSchoolName || current.schoolName || "학교"} ${targetGrade || current.grade || "시험"} 시험분석`,
+      title: buildExamAnalysisTitle({ schoolName: targetSchoolName || current.schoolName, grade: targetGrade || current.grade, examCycle: targetExamCycle || current.examCycle }),
       schoolName: targetSchoolName || current.schoolName,
       grade: targetGrade || current.grade,
+      examCycle: targetExamCycle || current.examCycle,
       subject: current.subject || "수학"
     }));
   }
@@ -6585,7 +6596,6 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   <strong>학교</strong>
                   <span>{schoolCards.length}개</span>
                 </div>
-                <button className="secondaryButton compact" onClick={startManualSchool} type="button">추가</button>
               </div>
               <div className="examAnalysisColumnList">
                 {schoolCards.length === 0 ? (
@@ -6610,7 +6620,6 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   <strong>학년</strong>
                   <span>{gradeCards.length}개</span>
                 </div>
-                <button className="secondaryButton compact" disabled={!selectedSchoolName && !draft.schoolName} onClick={startManualGrade} type="button">추가</button>
               </div>
               <div className="examAnalysisColumnList">
                 {gradeCards.length === 0 ? (
@@ -6624,6 +6633,28 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   >
                     <strong>{grade.name}</strong>
                     <span>{grade.examCount}고사 · {grade.runCount}건</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="examAnalysisColumn">
+              <div className="examAnalysisColumnHeader">
+                <div>
+                  <strong>고사</strong>
+                  <span>{examCycleCards.length}개</span>
+                </div>
+              </div>
+              <div className="examAnalysisColumnList">
+                {examCycleCards.map((examCycle) => (
+                  <button
+                    className={selectedExamCycle === examCycle.name ? "examAnalysisColumnCard active" : "examAnalysisColumnCard"}
+                    key={examCycle.name}
+                    onClick={() => selectExamCycleCard(examCycle)}
+                    type="button"
+                  >
+                    <strong>{examCycle.name}</strong>
+                    <span>{examCycle.runCount}건</span>
                   </button>
                 ))}
               </div>

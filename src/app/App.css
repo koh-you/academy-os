@@ -657,7 +657,7 @@ button {
   align-items: start;
   display: grid;
   gap: 14px;
-  grid-template-columns: minmax(640px, 1.35fr) minmax(420px, 0.65fr);
+  grid-template-columns: 1fr;
 }
 
 .examAnalysisLibraryPanel,
@@ -675,7 +675,7 @@ button {
 .examAnalysisColumnBoard {
   display: grid;
   gap: 16px;
-  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  grid-template-columns: repeat(4, minmax(190px, 1fr));
   min-height: 420px;
   min-width: 0;
   overflow-x: auto;
