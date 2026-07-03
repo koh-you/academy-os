@@ -6210,6 +6210,8 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const [selectedRunId, setSelectedRunId] = useState("");
   const [selectedDetail, setSelectedDetail] = useState(null);
   const [selectedExamPrepId, setSelectedExamPrepId] = useState(examPrepRows[0]?.examPrepId ?? "");
+  const [selectedSchoolName, setSelectedSchoolName] = useState(examPrepRows[0]?.schoolName ?? "");
+  const [selectedGrade, setSelectedGrade] = useState(examPrepRows[0]?.grade ?? "");
   const [draft, setDraft] = useState(() => {
     const row = examPrepRows[0] ?? {};
     return {
@@ -6233,6 +6235,77 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const activeRun = selectedDetailRun ?? analysisRuns.find((run) => run.analysisRunId === selectedRunId) ?? null;
   const sourceFiles = selectedDetailRun ? selectedDetail?.sources ?? [] : [];
   const events = selectedDetailRun ? selectedDetail?.events ?? [] : [];
+  const schoolCards = useMemo(() => {
+    const schoolMap = new Map();
+    const ensureSchool = (schoolName) => {
+      const name = String(schoolName || "미지정").trim() || "미지정";
+      if (!schoolMap.has(name)) {
+        schoolMap.set(name, { name, grades: new Set(), examPrepIds: new Set(), runIds: new Set() });
+      }
+      return schoolMap.get(name);
+    };
+
+    examPrepRows.forEach((row) => {
+      const item = ensureSchool(row.schoolName);
+      if (row.grade) item.grades.add(row.grade);
+      if (row.examPrepId) item.examPrepIds.add(row.examPrepId);
+    });
+    analysisRuns.forEach((run) => {
+      const item = ensureSchool(run.schoolName);
+      if (run.grade) item.grades.add(run.grade);
+      if (run.examPrepId) item.examPrepIds.add(run.examPrepId);
+      if (run.analysisRunId) item.runIds.add(run.analysisRunId);
+    });
+
+    return Array.from(schoolMap.values())
+      .map((item) => ({
+        ...item,
+        gradeCount: item.grades.size,
+        examCount: item.examPrepIds.size,
+        runCount: item.runIds.size,
+        sortedGrades: Array.from(item.grades).sort((a, b) => String(a).localeCompare(String(b), "ko"))
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name, "ko"));
+  }, [analysisRuns, examPrepRows]);
+  const gradeCards = useMemo(() => {
+    const gradeMap = new Map();
+    const ensureGrade = (grade) => {
+      const name = String(grade || "미지정").trim() || "미지정";
+      if (!gradeMap.has(name)) {
+        gradeMap.set(name, { name, examPrepIds: new Set(), runIds: new Set() });
+      }
+      return gradeMap.get(name);
+    };
+
+    examPrepRows
+      .filter((row) => !selectedSchoolName || row.schoolName === selectedSchoolName)
+      .forEach((row) => {
+        const item = ensureGrade(row.grade);
+        if (row.examPrepId) item.examPrepIds.add(row.examPrepId);
+      });
+    analysisRuns
+      .filter((run) => !selectedSchoolName || run.schoolName === selectedSchoolName)
+      .forEach((run) => {
+        const item = ensureGrade(run.grade);
+        if (run.examPrepId) item.examPrepIds.add(run.examPrepId);
+        if (run.analysisRunId) item.runIds.add(run.analysisRunId);
+      });
+
+    return Array.from(gradeMap.values())
+      .map((item) => ({
+        ...item,
+        examCount: item.examPrepIds.size,
+        runCount: item.runIds.size
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name, "ko"));
+  }, [analysisRuns, examPrepRows, selectedSchoolName]);
+  const scopedRuns = useMemo(
+    () => analysisRuns.filter((run) => (
+      (!selectedSchoolName || run.schoolName === selectedSchoolName)
+      && (!selectedGrade || run.grade === selectedGrade)
+    )),
+    [analysisRuns, selectedGrade, selectedSchoolName]
+  );
 
   useEffect(() => {
     if (!didAutoSelectExamPrepRef.current && !selectedExamPrepId && examPrepRows[0]?.examPrepId) {
@@ -6241,6 +6314,14 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       applyExamPrepRow(examPrepRows[0]);
     }
   }, [examPrepRows, selectedExamPrepId]);
+
+  useEffect(() => {
+    if (!didAutoSelectExamPrepRef.current && !selectedSchoolName && !draft.schoolName && schoolCards[0]?.name) {
+      didAutoSelectExamPrepRef.current = true;
+      setSelectedSchoolName(schoolCards[0].name);
+      setDraft((current) => ({ ...current, schoolName: schoolCards[0].name }));
+    }
+  }, [draft.schoolName, schoolCards, selectedSchoolName]);
 
   useEffect(() => {
     loadRuns();
@@ -6256,6 +6337,8 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
 
   function applyExamPrepRow(row) {
     if (!row) return;
+    setSelectedSchoolName(row.schoolName ?? "");
+    setSelectedGrade(row.grade ?? "");
     setDraft({
       title: `${row.schoolName || "학교"} ${row.examCycle || row.examTerm || "시험"} 시험분석`,
       schoolName: row.schoolName ?? "",
@@ -6270,6 +6353,8 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     if (!run) return;
     didAutoSelectExamPrepRef.current = true;
     setSelectedExamPrepId(run.examPrepId || "");
+    setSelectedSchoolName(run.schoolName || "");
+    setSelectedGrade(run.grade || "");
     setDraft({
       title: run.title || getExamAnalysisRunTitle(run),
       schoolName: run.schoolName ?? "",
@@ -6278,6 +6363,105 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       examTerm: run.examTerm ?? "",
       examCycle: run.examCycle ?? ""
     });
+  }
+
+  function getFirstExamPrepRow(schoolName = selectedSchoolName, grade = selectedGrade) {
+    if (!schoolName && !grade) return null;
+    return examPrepRows.find((row) => (
+      (!schoolName || row.schoolName === schoolName)
+      && (!grade || row.grade === grade)
+    )) ?? null;
+  }
+
+  function selectSchoolCard(school) {
+    const nextSchoolName = school?.name === "미지정" ? "" : school?.name || "";
+    const nextGrade = school?.sortedGrades?.[0] && school.sortedGrades[0] !== "미지정" ? school.sortedGrades[0] : "";
+    const row = getFirstExamPrepRow(nextSchoolName, nextGrade);
+    setSelectedRunId("");
+    setSelectedDetail(null);
+    setSelectedSchoolName(nextSchoolName);
+    setSelectedGrade(nextGrade);
+    setSelectedExamPrepId(row?.examPrepId || "");
+    if (row) {
+      applyExamPrepRow(row);
+      return;
+    }
+    setDraft((current) => ({
+      ...current,
+      title: nextSchoolName ? `${nextSchoolName} ${nextGrade || "시험"} 시험분석` : "새 시험분석",
+      schoolName: nextSchoolName,
+      grade: nextGrade
+    }));
+  }
+
+  function selectGradeCard(grade) {
+    const nextGrade = grade?.name === "미지정" ? "" : grade?.name || "";
+    const row = getFirstExamPrepRow(selectedSchoolName, nextGrade);
+    setSelectedRunId("");
+    setSelectedDetail(null);
+    setSelectedGrade(nextGrade);
+    setSelectedExamPrepId(row?.examPrepId || "");
+    if (row) {
+      applyExamPrepRow(row);
+      return;
+    }
+    setDraft((current) => ({
+      ...current,
+      title: `${selectedSchoolName || current.schoolName || "학교"} ${nextGrade || "시험"} 시험분석`,
+      schoolName: selectedSchoolName || current.schoolName,
+      grade: nextGrade
+    }));
+  }
+
+  function startManualSchool() {
+    didAutoSelectExamPrepRef.current = true;
+    setSelectedRunId("");
+    setSelectedDetail(null);
+    setSelectedSchoolName("");
+    setSelectedGrade("");
+    setSelectedExamPrepId("");
+    setDraft({
+      title: "새 시험분석",
+      schoolName: "",
+      grade: "",
+      subject: "수학",
+      examTerm: "",
+      examCycle: ""
+    });
+  }
+
+  function startManualGrade() {
+    didAutoSelectExamPrepRef.current = true;
+    setSelectedRunId("");
+    setSelectedDetail(null);
+    setSelectedGrade("");
+    setSelectedExamPrepId("");
+    setDraft((current) => ({
+      ...current,
+      title: `${selectedSchoolName || current.schoolName || "학교"} 시험분석`,
+      schoolName: selectedSchoolName || current.schoolName,
+      grade: ""
+    }));
+  }
+
+  function startNewAnalysis() {
+    const targetSchoolName = selectedSchoolName || draft.schoolName;
+    const targetGrade = selectedGrade || draft.grade;
+    const row = getFirstExamPrepRow(targetSchoolName, targetGrade);
+    setSelectedRunId("");
+    setSelectedDetail(null);
+    setSelectedExamPrepId(row?.examPrepId || "");
+    if (row) {
+      applyExamPrepRow(row);
+      return;
+    }
+    setDraft((current) => ({
+      ...current,
+      title: `${targetSchoolName || current.schoolName || "학교"} ${targetGrade || current.grade || "시험"} 시험분석`,
+      schoolName: targetSchoolName || current.schoolName,
+      grade: targetGrade || current.grade,
+      subject: current.subject || "수학"
+    }));
   }
 
   function buildRunPayload() {
@@ -6393,30 +6577,84 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       </div>
 
       <div className="examAnalysisGrid">
-        <aside className="examAnalysisListPanel panel">
-          <div className="sectionHeader slim">
-            <div>
-              <strong>분석 목록</strong>
-              <span>{analysisRuns.length}건</span>
+        <section className="examAnalysisLibraryPanel panel">
+          <div className="examAnalysisColumnBoard">
+            <div className="examAnalysisColumn">
+              <div className="examAnalysisColumnHeader">
+                <div>
+                  <strong>학교</strong>
+                  <span>{schoolCards.length}개</span>
+                </div>
+                <button className="secondaryButton compact" onClick={startManualSchool} type="button">추가</button>
+              </div>
+              <div className="examAnalysisColumnList">
+                {schoolCards.length === 0 ? (
+                  <div className="emptyState compact">학교 없음</div>
+                ) : schoolCards.map((school) => (
+                  <button
+                    className={selectedSchoolName === school.name ? "examAnalysisColumnCard active" : "examAnalysisColumnCard"}
+                    key={school.name}
+                    onClick={() => selectSchoolCard(school)}
+                    type="button"
+                  >
+                    <strong>{school.name}</strong>
+                    <span>{school.gradeCount}학년 · {school.examCount}고사 · {school.runCount}건</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="examAnalysisColumn">
+              <div className="examAnalysisColumnHeader">
+                <div>
+                  <strong>학년</strong>
+                  <span>{gradeCards.length}개</span>
+                </div>
+                <button className="secondaryButton compact" disabled={!selectedSchoolName && !draft.schoolName} onClick={startManualGrade} type="button">추가</button>
+              </div>
+              <div className="examAnalysisColumnList">
+                {gradeCards.length === 0 ? (
+                  <div className="emptyState compact">학년 없음</div>
+                ) : gradeCards.map((grade) => (
+                  <button
+                    className={selectedGrade === grade.name ? "examAnalysisColumnCard active" : "examAnalysisColumnCard"}
+                    key={grade.name}
+                    onClick={() => selectGradeCard(grade)}
+                    type="button"
+                  >
+                    <strong>{grade.name}</strong>
+                    <span>{grade.examCount}고사 · {grade.runCount}건</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="examAnalysisColumn">
+              <div className="examAnalysisColumnHeader">
+                <div>
+                  <strong>분석</strong>
+                  <span>{scopedRuns.length}건</span>
+                </div>
+                <button className="secondaryButton compact" onClick={startNewAnalysis} type="button">추가</button>
+              </div>
+              <div className="examAnalysisColumnList">
+                {scopedRuns.length === 0 ? (
+                  <div className="emptyState compact">분석 없음</div>
+                ) : scopedRuns.map((run) => (
+                  <button
+                    className={selectedRunId === run.analysisRunId ? "examAnalysisColumnCard active" : "examAnalysisColumnCard"}
+                    key={run.analysisRunId}
+                    onClick={() => setSelectedRunId(run.analysisRunId)}
+                    type="button"
+                  >
+                    <strong>{getExamAnalysisRunTitle(run)}</strong>
+                    <span>{workflowStatusLabel(run.workflowStatus)} · {run.subject || "수학"}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-          <div className="examAnalysisRunList">
-            {analysisRuns.length === 0 ? (
-              <div className="emptyState compact">저장된 분석이 없습니다.</div>
-            ) : analysisRuns.map((run) => (
-              <button
-                className={selectedRunId === run.analysisRunId ? "active" : ""}
-                key={run.analysisRunId}
-                onClick={() => setSelectedRunId(run.analysisRunId)}
-                type="button"
-              >
-                <strong>{getExamAnalysisRunTitle(run)}</strong>
-                <span>{[run.schoolName, run.grade, run.subject].filter(Boolean).join(" · ") || "기본정보 미입력"}</span>
-                <small>{workflowStatusLabel(run.workflowStatus)}</small>
-              </button>
-            ))}
-          </div>
-        </aside>
+        </section>
 
         <section className="examAnalysisWorkPanel">
           <div className="panel examAnalysisFormPanel">
@@ -6434,6 +6672,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   onChange={(event) => {
                     const nextId = event.target.value;
                     setSelectedExamPrepId(nextId);
+                    if (!nextId) return;
                     applyExamPrepRow(examPrepRows.find((row) => row.examPrepId === nextId));
                   }}
                 >

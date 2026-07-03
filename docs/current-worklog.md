@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P0. 시험분석 v2 카드형 목록 CSS 보정
+
+- 상태: 완료
+- 사용자 요청: 시험분석 화면 CSS 구성을 학교/학년 카드 컬럼처럼 만들고, 사용자가 직접 검증할 방법을 알려달라고 했다.
+- 이번 작업 결과: `ExamAnalysisPipelineCenter`의 목록 영역을 `학교 -> 학년 -> 분석` 3열 카드 보드로 바꿨다. 학교/학년은 `examPrepRows`와 `analysisRuns`에서 파생해 보여주고, 선택한 카드가 오른쪽 기본정보/PDF 업로드 패널 draft에 바로 반영된다.
+- UI 기준: 컬럼 헤더에는 이름과 개수를 표시하고, 각 카드에는 `3학년 · 1고사 · 1건`, `0고사 · 0건`처럼 검증 가능한 카운트를 보여준다. 선택 카드는 네이비 배경으로 표시한다. 모바일에서는 3열을 1열로 쌓아 텍스트가 찌그러지지 않게 했다.
+- 저장 주의: 화면 선택/표시 구조와 CSS만 변경했다. 저장 경로는 기존 v2 `exam_analysis_runs`, `exam_analysis_sources`, `exam-analysis-pipeline-sources` 그대로이며 새 SQL edit은 필요 없다.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 231, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P0. 시험분석 v2 첫 UI/PDF 업로드 화면
 
 - 상태: 완료

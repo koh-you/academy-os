@@ -585,6 +585,14 @@ button {
   text-decoration: none;
 }
 
+.secondaryButton.compact {
+  border-color: #cbd5ff;
+  color: #4f46e5;
+  font-size: 15px;
+  min-height: 42px;
+  padding: 0 16px;
+}
+
 .primaryButton.full {
   width: 100%;
 }
@@ -649,10 +657,10 @@ button {
   align-items: start;
   display: grid;
   gap: 14px;
-  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  grid-template-columns: minmax(640px, 1.35fr) minmax(420px, 0.65fr);
 }
 
-.examAnalysisListPanel,
+.examAnalysisLibraryPanel,
 .examAnalysisFormPanel,
 .examAnalysisUploadPanel,
 .examAnalysisStepPanel,
@@ -660,14 +668,56 @@ button {
   padding: 16px;
 }
 
-.examAnalysisListPanel {
-  display: grid;
-  gap: 12px;
-  position: sticky;
-  top: 12px;
+.examAnalysisLibraryPanel {
+  overflow: hidden;
 }
 
-.examAnalysisRunList,
+.examAnalysisColumnBoard {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  min-height: 420px;
+  min-width: 0;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.examAnalysisColumn {
+  background: #f8fbff;
+  border: 1px solid #d8e5fb;
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 410px;
+  min-width: 220px;
+  padding: 16px;
+}
+
+.examAnalysisColumnHeader {
+  align-items: start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.examAnalysisColumnHeader strong {
+  color: #17213d;
+  display: block;
+  font-size: 24px;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.examAnalysisColumnHeader span {
+  color: #64748b;
+  display: block;
+  font-size: 17px;
+  font-weight: 900;
+  margin-top: 6px;
+}
+
+.examAnalysisColumnList,
 .examAnalysisSourceList,
 .examAnalysisEventList,
 .examAnalysisWorkPanel {
@@ -676,40 +726,51 @@ button {
   min-width: 0;
 }
 
-.examAnalysisRunList {
-  max-height: calc(100vh - 210px);
+.examAnalysisColumnList {
   overflow: auto;
 }
 
-.examAnalysisRunList button {
+.examAnalysisColumnCard {
   background: #ffffff;
   border: 1px solid #d8e3f8;
   border-radius: 8px;
   color: #17213d;
   display: grid;
-  gap: 5px;
-  min-height: 92px;
-  padding: 12px;
+  gap: 14px;
+  min-height: 108px;
+  padding: 18px;
   text-align: left;
+  width: 100%;
 }
 
-.examAnalysisRunList button.active {
+.examAnalysisColumnCard.active {
   background: #17213d;
   border-color: #17213d;
   color: #ffffff;
 }
 
-.examAnalysisRunList button span,
-.examAnalysisRunList button small {
+.examAnalysisColumnCard strong {
+  color: inherit;
+  display: block;
+  font-size: 22px;
+  font-weight: 950;
+  letter-spacing: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.examAnalysisColumnCard span {
   color: #64748b;
+  display: block;
+  font-size: 16px;
   font-weight: 800;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.examAnalysisRunList button.active span,
-.examAnalysisRunList button.active small {
+.examAnalysisColumnCard.active span {
   color: #dbeafe;
 }
 
@@ -10637,12 +10698,12 @@ body.attendanceOnlyBody {
     width: 100%;
   }
 
-  .examAnalysisListPanel {
-    position: static;
+  .examAnalysisColumnBoard {
+    min-height: auto;
   }
 
-  .examAnalysisRunList {
-    max-height: none;
+  .examAnalysisColumn {
+    min-height: 320px;
   }
 
   .examAnalysisFormGrid,
@@ -10762,6 +10823,15 @@ body.attendanceOnlyBody {
 
   .examAnalysisFormGrid label.span2 {
     grid-column: auto;
+  }
+
+  .examAnalysisColumnBoard {
+    grid-template-columns: 1fr;
+    overflow-x: visible;
+  }
+
+  .examAnalysisColumn {
+    min-height: auto;
   }
 
   .examAnalysisSourceItem,

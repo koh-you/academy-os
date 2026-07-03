@@ -9,7 +9,7 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 
 
 최근 작업에서 기존 시험분석 탭과 관련 AI/PDF 분석 기능, app_state 저장 데이터 경로를 제거했습니다. 이후 사용자는 시험분석을 v2 파이프라인으로 새로 만들기로 했습니다. 옛 코드를 복구하지 말고 `PDF -> 문항 수 판독 -> 선생님 확인 -> 1~N 행 고정 -> AI 행 채움 -> 누락 검수 -> 재요청` 순서로 이어가 주세요.
 
-현재 새 v2 구조의 SQL, 백엔드 run/PDF 업로드 API, 첫 UI(목록/기본정보 저장/PDF 업로드/상태 확인)는 들어가 있습니다. 다음 작업은 AI 호출이 아니라 PDF 텍스트/페이지 추출 단계입니다.
+현재 새 v2 구조의 SQL, 백엔드 run/PDF 업로드 API, 첫 UI(학교/학년/분석 카드형 목록, 기본정보 저장, PDF 업로드, 상태 확인)는 들어가 있습니다. 다음 작업은 AI 호출이 아니라 PDF 텍스트/페이지 추출 단계입니다.
 ```
 
 ## 현재 기준
@@ -39,9 +39,10 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 AGENTS.md와 
 ## 새 v2 구현 기준
 
 - 사이드바에 새 `examAnalysisPipeline` 기반 `시험분석` 탭을 추가했다. 옛 `examAnalysis` 탭과 `ExamAnalysisCenter`는 복구하지 않는다.
-- `ExamAnalysisPipelineCenter`는 분석 목록, 기본정보 저장, PDF 원본 업로드, 진행 단계, 저장 이벤트를 보여준다.
+- `ExamAnalysisPipelineCenter`는 `학교 -> 학년 -> 분석` 카드형 컬럼 목록, 기본정보 저장, PDF 원본 업로드, 진행 단계, 저장 이벤트를 보여준다.
 - 프론트는 `GET/POST /api/exam-analysis-runs`, `POST /api/exam-analysis-source-files`, `GET /api/exam-analysis-source-files/open`만 사용한다.
 - 저장/불러오기/PDF 업로드 상태는 작업 화면 안의 `시험분석 · 저장 중/완료/실패`, `시험분석 PDF · 업로드 중/완료/실패` 배지로 표시한다.
+- 학교/학년/분석 목록은 밝은 컬럼 안의 큰 카드로 표시하고, 선택 카드는 네이비 배경으로 표시한다.
 - 아직 PDF 텍스트 추출, 문항 수 판독, 1~N 행 생성, AI 행 채움은 붙이지 않았다.
 
 ## 다음 세션 우선순위
