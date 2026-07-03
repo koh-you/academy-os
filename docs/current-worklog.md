@@ -10,6 +10,15 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P1. 시험분석 학교 추가 2개 제한 오류 수정
+
+- 상태: 완료
+- 사용자 요청: 시험분석 `분석 목록`에서 학교 추가가 2개까지만 되는 문제를 수정한다.
+- 원인/판단: `+ 학교`로 새 학교 모달을 열 때 빈 학교명 기준의 `folderId`가 먼저 만들어지고, 사용자가 학교명을 입력해도 같은 placeholder `folderId`가 유지됐다. 그 결과 새 학교를 여러 번 저장해도 같은 학교 폴더 ID를 덮어써서 수동 추가 학교가 1개처럼 보일 수 있었다.
+- 이번 작업 결과: 새 학교 생성 draft는 `folderId`를 비워 두고, 저장 시점의 학교명으로 `createExamAnalysisSchoolId`가 실행되도록 수정했다. 이제 3번째 이후 학교도 별도 폴더로 저장된다.
+- 저장 주의: 기존 `app_state.examAnalysisFolders` 저장 경로를 그대로 사용한다. 새 Supabase SQL edit 없음.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 239, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-01 P1. 퇴원생 목록 연락처 표시와 정보 보관 보강
 
 - 상태: 완료

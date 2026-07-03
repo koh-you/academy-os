@@ -11999,7 +11999,10 @@ function ExamAnalysisCenter({
   }
 
   function openCreateFolder() {
-    setFolderDraft(createExamAnalysisSchoolDraft({ schoolName: "" }));
+    setFolderDraft({
+      ...createExamAnalysisSchoolDraft({ schoolName: "" }),
+      folderId: ""
+    });
     setFolderModalMode("schoolCreate");
   }
 
