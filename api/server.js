@@ -58,6 +58,7 @@ import {
   recordExamAnalysisSourceUpload,
   saveExamAnalysisSourceExtraction,
   saveExamAnalysisQuestionBoundaries,
+  saveExamAnalysisQuestionRowFill,
   updateExamAnalysisRun,
   updateExamAnalysisSource,
   upsertExamAnalysisRun
@@ -1172,6 +1173,77 @@ function normalizePdfQuestionBoundaryResult({ provider, model, rawText, parsed =
   };
 }
 
+function buildPdfQuestionRowFillPrompt({ sourceFile = {}, analysisRun = {}, questions = [] } = {}) {
+  const questionLines = questions
+    .map((question) => {
+      const boundary = question.sourceEvidence?.boundary ?? {};
+      const pageStart = boundary.pageStart || question.sourcePage || "?";
+      const pageEnd = boundary.pageEnd && boundary.pageEnd !== pageStart ? `~${boundary.pageEnd}` : "";
+      const position = boundary.positionHint || "unknown";
+      return `${question.questionNumber}: ${pageStart}${pageEnd}p, ${position}`;
+    })
+    .join("\n");
+  return [
+    "역할: 수학 시험지 문항 메타데이터 초안 작성자",
+    "목표: 이미 확정된 1~N 문항 행에 대해 단원, 쎈 주유형, 보조유형, 난이도, 짧은 판별 근거만 채운다.",
+    "금지: 문제 본문 대량 복사, 정답 추론, 상세 풀이, 학생용 해설 작성은 하지 않는다.",
+    "중요: 결과는 사람이 검수할 AI 초안이다. 확실하지 않은 문항은 needs_review=true로 표시한다.",
+    "",
+    "[분석 대상]",
+    `파일명: ${sourceFile.originalFileName || "exam-source.pdf"}`,
+    `학교: ${analysisRun.schoolName || ""}`,
+    `학년: ${analysisRun.grade || ""}`,
+    `고사: ${analysisRun.examCycle || analysisRun.examTerm || ""}`,
+    `과목: ${analysisRun.subject || ""}`,
+    "",
+    "[확정 문항 경계]",
+    questionLines,
+    "",
+    "[분류 기준]",
+    "- unit_name: 교과 단원명 또는 시험 범위상 단원명",
+    "- main_type: 쎈 유형별분석표에 붙일 수 있는 대표 주유형 이름. 확실하지 않으면 일반적인 수학 유형명으로 짧게 쓴다.",
+    "- sub_types: 보조유형 0~2개. 복합 문항이면 결합 요소를 짧게 쓴다.",
+    "- difficulty: 하, 중하, 중, 중상, 상 중 하나에 가깝게 쓴다.",
+    "- reasoning_summary: 본문을 복사하지 말고, 어떤 구조라서 그렇게 봤는지 1문장으로만 쓴다.",
+    "",
+    "반드시 JSON 객체만 반환한다.",
+    "필드:",
+    "- rows: array of { question_number:number, unit_name:string, main_type:string, sub_types:string[], difficulty:string, reasoning_summary:string, concept_tags:string[], confidence:number, needs_review:boolean, warnings:string[] }",
+    "- missing_question_numbers: number[]",
+    "- summary: string"
+  ].join("\n");
+}
+
+function normalizePdfQuestionRowFillResult({ provider, model, rawText, parsed = {} }) {
+  const rows = Array.isArray(parsed.rows) ? parsed.rows : [];
+  return {
+    provider,
+    model,
+    filledAt: new Date().toISOString(),
+    rawText,
+    rows: rows.map((row) => ({
+      questionNumber: Number(row.question_number ?? row.questionNumber),
+      unitName: String(row.unit_name ?? row.unitName ?? "").slice(0, 120),
+      mainType: String(row.main_type ?? row.mainType ?? "").slice(0, 160),
+      subTypes: Array.isArray(row.sub_types ?? row.subTypes)
+        ? (row.sub_types ?? row.subTypes).map(String).filter(Boolean).slice(0, 3)
+        : [],
+      difficulty: String(row.difficulty || "").slice(0, 40),
+      reasoningSummary: String(row.reasoning_summary ?? row.reasoningSummary ?? "").slice(0, 500),
+      conceptTags: Array.isArray(row.concept_tags ?? row.conceptTags)
+        ? (row.concept_tags ?? row.conceptTags).map(String).filter(Boolean).slice(0, 10)
+        : [],
+      confidence: row.confidence === undefined || row.confidence === null ? null : Number(row.confidence),
+      needsReview: Boolean(row.needs_review ?? row.needsReview),
+      warnings: Array.isArray(row.warnings) ? row.warnings.map(String).slice(0, 6) : []
+    })).filter((row) => Number.isInteger(row.questionNumber) && row.questionNumber > 0),
+    missingQuestionNumbers: Array.isArray(parsed.missing_question_numbers)
+      ? parsed.missing_question_numbers.map(Number).filter((number) => Number.isFinite(number) && number > 0)
+      : [],
+    summary: String(parsed.summary || "").slice(0, 500)
+  };
+}
+
 function outputTextFromAnthropicResponse(data = {}) {
   if (!Array.isArray(data.content)) return "";
   return data.content
@@ -1374,6 +1446,102 @@ async function runPdfQuestionBoundaryDetection(sourceFile, buffer, detail) {
   }
   if (apiEnvValue("OPENAI_API_KEY")) {
     return runOpenAiPdfQuestionBoundaryDetection(sourceFile, buffer, detail);
+  }
+  throw new Error("ANTHROPIC_API_KEY 또는 OPENAI_API_KEY 환경변수가 필요합니다.");
+}
+
+async function runAnthropicPdfQuestionRowFill(sourceFile, buffer, detail) {
+  const apiKey = apiEnvValue("ANTHROPIC_API_KEY");
+  if (!apiKey) throw new Error("ANTHROPIC_API_KEY 환경변수가 필요합니다.");
+  const model = apiEnvValue("ANTHROPIC_EXAM_PDF_MODEL") || apiEnvValue("ANTHROPIC_MODEL") || "claude-sonnet-4-5";
+  const response = await fetch(anthropicMessagesUrl, {
+    method: "POST",
+    headers: {
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+      "x-api-key": apiKey
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 6000,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "document",
+              source: {
+                type: "base64",
+                media_type: "application/pdf",
+                data: buffer.toString("base64")
+              }
+            },
+            { type: "text", text: buildPdfQuestionRowFillPrompt({ sourceFile, analysisRun: detail.analysisRun, questions: detail.questions }) }
+          ]
+        }
+      ]
+    })
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error?.message || "Claude AI 행 채움 요청에 실패했습니다.");
+  }
+  const rawText = outputTextFromAnthropicResponse(data);
+  return normalizePdfQuestionRowFillResult({
+    provider: "anthropic",
+    model,
+    rawText,
+    parsed: parseLooseJsonObject(rawText)
+  });
+}
+
+async function runOpenAiPdfQuestionRowFill(sourceFile, buffer, detail) {
+  const apiKey = apiEnvValue("OPENAI_API_KEY");
+  if (!apiKey) throw new Error("OPENAI_API_KEY 환경변수가 필요합니다.");
+  const model = apiEnvValue("OPENAI_EXAM_PDF_MODEL") || apiEnvValue("OPENAI_MODEL") || "gpt-4.1-mini";
+  const response = await fetch(openAiResponsesUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model,
+      input: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_file",
+              filename: sourceFile.originalFileName || "exam-source.pdf",
+              file_data: `data:application/pdf;base64,${buffer.toString("base64")}`
+            },
+            { type: "input_text", text: buildPdfQuestionRowFillPrompt({ sourceFile, analysisRun: detail.analysisRun, questions: detail.questions }) }
+          ]
+        }
+      ],
+      max_output_tokens: 6000
+    })
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error?.message || "OpenAI AI 행 채움 요청에 실패했습니다.");
+  }
+  const rawText = outputTextFromOpenAiResponse(data);
+  return normalizePdfQuestionRowFillResult({
+    provider: "openai",
+    model,
+    rawText,
+    parsed: parseLooseJsonObject(rawText)
+  });
+}
+
+async function runPdfQuestionRowFill(sourceFile, buffer, detail) {
+  if (apiEnvValue("ANTHROPIC_API_KEY")) {
+    return runAnthropicPdfQuestionRowFill(sourceFile, buffer, detail);
+  }
+  if (apiEnvValue("OPENAI_API_KEY")) {
+    return runOpenAiPdfQuestionRowFill(sourceFile, buffer, detail);
   }
   throw new Error("ANTHROPIC_API_KEY 또는 OPENAI_API_KEY 환경변수가 필요합니다.");
 }
@@ -1701,6 +1869,56 @@ async function detectExamAnalysisQuestionBoundaries({ analysisRunId, sourceId } 
       analysisRunId,
       eventType: "question_boundary_detect_failed",
       message: "문항 경계 탐지에 실패했습니다.",
+      payload: { sourceId: sourceFile.sourceId, error: error.message }
+    });
+    throw error;
+  }
+}
+
+async function fillExamAnalysisQuestionRowsWithAi({ analysisRunId, sourceId } = {}) {
+  if (!analysisRunId) throw new Error("analysisRunId가 필요합니다.");
+  const detail = await getExamAnalysisRun(analysisRunId);
+  if (!detail.analysisRun?.analysisRunId) throw new Error("시험분석 작업을 찾지 못했습니다.");
+  if (!detail.questions?.length) throw new Error("고정 문항 행을 먼저 생성해 주세요.");
+  const hasBoundaries = detail.questions.some((question) => question.sourceEvidence?.boundary?.pageStart || question.sourcePage);
+  if (!hasBoundaries) throw new Error("문항 경계를 먼저 탐지해 주세요.");
+  const sourceFile = sourceId
+    ? detail.sources?.find((source) => source.sourceId === sourceId)
+    : detail.sources?.[0];
+  if (!sourceFile?.sourceId) throw new Error("PDF 원본 정보를 찾지 못했습니다.");
+  const buffer = await downloadStorageObject(sourceFile.bucketId || examAnalysisSourceBucket, sourceFile.storagePath);
+
+  await updateExamAnalysisRun(analysisRunId, { workflowStatus: "ai_fill_running" });
+  await recordExamAnalysisEvent({
+    analysisRunId,
+    eventType: "question_rows_ai_fill_started",
+    message: "AI 행 채움을 시작했습니다.",
+    payload: { sourceId: sourceFile.sourceId, questionCount: detail.questions.length }
+  });
+
+  try {
+    const rowFillResult = await runPdfQuestionRowFill(sourceFile, buffer, detail);
+    const saved = await saveExamAnalysisQuestionRowFill({
+      analysisRunId,
+      sourceId: sourceFile.sourceId,
+      rowFillResult
+    });
+    return {
+      ...saved,
+      rowFillResult: {
+        provider: rowFillResult.provider,
+        model: rowFillResult.model,
+        returnedCount: rowFillResult.rows.length,
+        missingQuestionNumbers: rowFillResult.missingQuestionNumbers,
+        summary: rowFillResult.summary
+      }
+    };
+  } catch (error) {
+    await updateExamAnalysisRun(analysisRunId, { workflowStatus: "missing_audit_needed" });
+    await recordExamAnalysisEvent({
+      analysisRunId,
+      eventType: "question_rows_ai_fill_failed",
+      message: "AI 행 채움에 실패했습니다.",
       payload: { sourceId: sourceFile.sourceId, error: error.message }
     });
     throw error;
@@ -2074,6 +2292,20 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await detectExamAnalysisQuestionBoundaries({
+        analysisRunId: payload.analysisRunId,
+        sourceId: payload.sourceId
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/fill-question-rows") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await fillExamAnalysisQuestionRowsWithAi({
         analysisRunId: payload.analysisRunId,
         sourceId: payload.sourceId
       });

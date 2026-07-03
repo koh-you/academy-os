@@ -232,6 +232,27 @@ function normalizeQuestionBoundary(boundary = {}) {
   };
 }
 
+function normalizeQuestionRowFill(row = {}) {
+  const questionNumber = Number(row.questionNumber ?? row.question_number);
+  if (!Number.isInteger(questionNumber) || questionNumber < 1 || questionNumber > 200) return null;
+  return {
+    questionNumber,
+    unitName: String(row.unitName ?? row.unit_name ?? "").slice(0, 120),
+    mainType: String(row.mainType ?? row.main_type ?? "").slice(0, 160),
+    subTypes: Array.isArray(row.subTypes ?? row.sub_types)
+      ? (row.subTypes ?? row.sub_types).map(String).filter(Boolean).slice(0, 3)
+      : [],
+    difficulty: String(row.difficulty ?? "").slice(0, 40),
+    reasoningSummary: String(row.reasoningSummary ?? row.reasoning_summary ?? "").slice(0, 500),
+    conceptTags: Array.isArray(row.conceptTags ?? row.concept_tags)
+      ? (row.conceptTags ?? row.concept_tags).map(String).filter(Boolean).slice(0, 10)
+      : [],
+    confidence: row.confidence === undefined || row.confidence === null ? null : Number(row.confidence),
+    needsReview: Boolean(row.needsReview ?? row.needs_review),
+    warnings: Array.isArray(row.warnings) ? row.warnings.map(String).slice(0, 6) : []
+  };
+}
+
 function requireServiceRole() {
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
     throw new Error("시험분석 v2 저장에는 Supabase service role 설정이 필요합니다.");
@@ -574,6 +595,119 @@ export async function saveExamAnalysisQuestionBoundaries({
     ...nextDetail,
     source: databaseSource,
     boundaryDetection: nextDetail.analysisRun?.auditSummary?.boundaryDetection ?? null
+  };
+}
+
+export async function saveExamAnalysisQuestionRowFill({
+  analysisRunId,
+  sourceId,
+  rowFillResult = {}
+} = {}) {
+  if (!analysisRunId) throw new Error("analysisRunId가 필요합니다.");
+  if (!sourceId) throw new Error("sourceId가 필요합니다.");
+  requireServiceRole();
+
+  const detail = await getExamAnalysisRun(analysisRunId);
+  if (!detail.analysisRun?.analysisRunId) throw new Error("시험분석 작업을 찾지 못했습니다.");
+  const questions = detail.questions ?? [];
+  if (!questions.length) throw new Error("고정 문항 행을 먼저 생성해 주세요.");
+
+  const questionMap = new Map(questions.map((question) => [Number(question.questionNumber), question]));
+  const filledAt = new Date().toISOString();
+  const rows = (Array.isArray(rowFillResult.rows) ? rowFillResult.rows : [])
+    .map(normalizeQuestionRowFill)
+    .filter((row) => row && questionMap.has(row.questionNumber));
+
+  let filledCount = 0;
+  const skippedTeacherOverrideNumbers = [];
+  const needsReviewNumbers = [];
+  for (const row of rows) {
+    const question = questionMap.get(row.questionNumber);
+    if (question?.teacherOverride || question?.rowStatus === "teacher_edited" || question?.rowStatus === "confirmed") {
+      skippedTeacherOverrideNumbers.push(row.questionNumber);
+      continue;
+    }
+    const rowStatus = row.unitName && row.mainType && !row.needsReview ? "ai_filled" : "missing";
+    if (rowStatus === "missing" || row.warnings.length) needsReviewNumbers.push(row.questionNumber);
+    await patchRows(
+      "exam_analysis_questions",
+      `analysis_run_id=eq.${encodeURIComponent(analysisRunId)}&question_number=eq.${row.questionNumber}`,
+      {
+        row_status: rowStatus,
+        unit_name: row.unitName || null,
+        main_type: row.mainType || null,
+        sub_types: row.subTypes,
+        difficulty: row.difficulty || null,
+        ai_fields: {
+          sourceId,
+          filledAt,
+          provider: rowFillResult.provider || "",
+          model: rowFillResult.model || "",
+          reasoningSummary: row.reasoningSummary,
+          conceptTags: row.conceptTags,
+          confidence: Number.isFinite(row.confidence) ? row.confidence : null,
+          needsReview: row.needsReview,
+          warnings: row.warnings
+        },
+        ai_provider: rowFillResult.provider || null,
+        ai_model: rowFillResult.model || null,
+        ai_filled_at: filledAt,
+        updated_at: filledAt
+      }
+    );
+    if (rowStatus === "ai_filled") filledCount += 1;
+  }
+
+  const returnedNumbers = new Set(rows.map((row) => row.questionNumber));
+  const missingQuestionNumbers = questions
+    .map((question) => Number(question.questionNumber))
+    .filter((questionNumber) => !returnedNumbers.has(questionNumber))
+    .sort((a, b) => a - b);
+  const uniqueNeedsReviewNumbers = normalizePositiveNumbers([...needsReviewNumbers, ...missingQuestionNumbers]);
+  const status = uniqueNeedsReviewNumbers.length || skippedTeacherOverrideNumbers.length ? "needs_review" : "filled";
+  const workflowStatus = uniqueNeedsReviewNumbers.length ? "missing_audit_needed" : "ai_filled";
+
+  await updateExamAnalysisRun(analysisRunId, {
+    workflowStatus,
+    auditSummary: {
+      ...(detail.analysisRun.auditSummary ?? {}),
+      rowFill: {
+        sourceId,
+        status,
+        filledAt,
+        provider: rowFillResult.provider || "",
+        model: rowFillResult.model || "",
+        filledCount,
+        returnedCount: rows.length,
+        totalQuestionCount: questions.length,
+        missingQuestionNumbers,
+        needsReviewNumbers: uniqueNeedsReviewNumbers,
+        skippedTeacherOverrideNumbers,
+        summary: String(rowFillResult.summary || "").slice(0, 500)
+      }
+    }
+  });
+
+  await recordExamAnalysisEvent({
+    analysisRunId,
+    eventType: "question_rows_ai_filled",
+    message: `AI가 문항 행을 ${filledCount}/${questions.length}개 채웠습니다.`,
+    payload: {
+      sourceId,
+      status,
+      filledCount,
+      returnedCount: rows.length,
+      totalQuestionCount: questions.length,
+      missingQuestionNumbers,
+      needsReviewNumbers: uniqueNeedsReviewNumbers
+    }
+  });
+
+  const nextDetail = await getExamAnalysisRun(analysisRunId);
+  return {
+    ...nextDetail,
+    source: databaseSource,
+    rowFill: nextDetail.analysisRun?.auditSummary?.rowFill ?? null
   };
 }
 

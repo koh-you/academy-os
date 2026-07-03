@@ -10,6 +10,17 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P0. 시험분석 v2 AI 행 채움 1단계
+
+- 상태: 완료
+- 사용자 확인: 문항 경계 탐지가 24/24로 완료되어 다음 파이프라인 단계로 진행했다.
+- 이번 작업 범위: 확정된 문항 행과 문항 경계 정보를 기준으로 AI가 `단원`, `쎈 주유형/대표 유형`, `보조유형`, `난이도`, 짧은 판별 근거를 채우는 1단계를 추가했다. 문제 본문 대량 저장, 정답 추론, 상세 풀이 저장은 하지 않는다.
+- 백엔드: `POST /api/exam-analysis-runs/fill-question-rows`를 추가했다. Anthropic API key가 있으면 Claude PDF `document` 입력을 우선 사용하고, 없으면 OpenAI PDF 입력을 예비 경로로 둔다. 결과는 각 `exam_analysis_questions` 행의 `unit_name`, `main_type`, `sub_types`, `difficulty`, `ai_fields`, `ai_provider`, `ai_model`, `ai_filled_at`에 저장한다.
+- 보호 장치: 선생님이 이미 수정/확정한 행은 덮어쓰지 않는다. AI 행 채움은 `ai_fields` 초안만 만들고 `teacher_fields`/`final_fields`는 건드리지 않는다. 확실하지 않은 문항은 `row_status=missing`, `audit_summary.rowFill.needsReviewNumbers`로 넘긴다.
+- 화면: 시험분석 작업 패널에 `AI 행 채움` 카드를 추가했다. `AI 행 채움(과금)` 버튼은 수동 실행이며, `시험분석 · AI 행 채움 중/완료/실패` 상태를 표시한다. 완료 후 각 문항 카드에 단원, 유형, 난이도 초안이 보인다.
+- 저장 주의: 새 SQL edit은 필요 없다. 기존 `exam_analysis_questions`와 `exam_analysis_runs.audit_summary`를 사용한다.
+- 검증: `node --check api/routes/examAnalysisPipeline.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 231, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P0. 시험분석 v2 문항 경계 탐지 1단계
 
 - 상태: 완료

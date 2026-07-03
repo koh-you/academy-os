@@ -1240,6 +1240,15 @@ function detectExamAnalysisQuestionBoundariesRequest(payload) {
   );
 }
 
+function fillExamAnalysisQuestionRowsRequest(payload) {
+  return postJsonWithTimeout(
+    "/api/exam-analysis-runs/fill-question-rows",
+    payload,
+    240000,
+    "AI 행 채움이 지연되고 있습니다."
+  );
+}
+
 function postSchoolEvent(schoolEvent) {
   return postJson("/api/school-events", { schoolEvent });
 }
@@ -6530,6 +6539,8 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const [isConfirmingQuestionCount, setIsConfirmingQuestionCount] = useState(false);
   const [boundaryStatus, setBoundaryStatus] = useState({ state: "idle", message: "" });
   const [isDetectingBoundaries, setIsDetectingBoundaries] = useState(false);
+  const [rowFillStatus, setRowFillStatus] = useState({ state: "idle", message: "" });
+  const [isFillingRows, setIsFillingRows] = useState(false);
 
   const selectedExamPrepRow = useMemo(
     () => examPrepRows.find((row) => row.examPrepId === selectedExamPrepId) ?? null,
@@ -6545,6 +6556,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     [activeRun, sourceFiles]
   );
   const boundaryDetection = activeRun?.auditSummary?.boundaryDetection ?? null;
+  const rowFill = activeRun?.auditSummary?.rowFill ?? null;
   const schoolCards = useMemo(() => {
     const customSchools = [...new Set([
       ...examPrepRows.map((row) => normalizeExamAnalysisSchoolName(row.schoolName)),
@@ -7019,6 +7031,49 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     }
   }
 
+  async function fillQuestionRowsWithAi() {
+    if (!activeRun?.analysisRunId) {
+      setRowFillStatus({ state: "failed", message: "시험분석 · 분석을 먼저 저장해 주세요." });
+      return;
+    }
+    if (!questionRows.length) {
+      setRowFillStatus({ state: "failed", message: "시험분석 · 문항 수를 먼저 확정해 주세요." });
+      return;
+    }
+    if (!boundaryDetectedCount) {
+      setRowFillStatus({ state: "failed", message: "시험분석 · 문항 경계를 먼저 탐지해 주세요." });
+      return;
+    }
+    const sourceFile = sourceFiles[0];
+    if (!sourceFile?.sourceId) {
+      setRowFillStatus({ state: "failed", message: "시험분석 · PDF 원본이 필요합니다." });
+      return;
+    }
+
+    setIsFillingRows(true);
+    setRowFillStatus({ state: "saving", message: "시험분석 · AI 행 채움 중" });
+    try {
+      const result = await fillExamAnalysisQuestionRowsRequest({
+        analysisRunId: activeRun.analysisRunId,
+        sourceId: sourceFile.sourceId
+      });
+      const filledCount = result.rowFill?.filledCount || result.questions?.filter((question) => question.rowStatus === "ai_filled").length || 0;
+      const totalCount = result.rowFill?.totalQuestionCount || questionRows.length;
+      setSelectedDetail(result);
+      setRowFillStatus({
+        state: "success",
+        message: `시험분석 · AI 행 채움 완료 · ${filledCount}/${totalCount}개`
+      });
+      await loadRuns(activeRun.analysisRunId);
+      await loadRunDetail(activeRun.analysisRunId);
+    } catch (error) {
+      setRowFillStatus({ state: "failed", message: `시험분석 · AI 행 채움 실패 · ${error.message}` });
+      if (selectedRunId) await loadRunDetail(selectedRunId);
+    } finally {
+      setIsFillingRows(false);
+    }
+  }
+
   const confirmedQuestionCount = Number(activeRun?.confirmedQuestionCount || 0);
   const questionRowNumbers = questionRows
     .map((question) => Number(question.questionNumber))
@@ -7030,6 +7085,12 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     boundary: getExamAnalysisQuestionBoundary(question)
   }));
   const boundaryDetectedCount = boundaryRows.filter(({ boundary }) => Boolean(boundary?.pageStart)).length;
+  const aiFilledRows = questionRows.filter((question) => question.rowStatus === "ai_filled" || question.unitName || question.mainType);
+  const aiNeedsReviewRows = questionRows.filter((question) => (
+    question.rowStatus === "missing" ||
+    question.aiFields?.needsReview ||
+    question.aiFields?.warnings?.length
+  ));
   const questionCountButtonLabel = isConfirmingQuestionCount
     ? "확정 중"
     : questionCountDraft
@@ -7050,7 +7111,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       </div>
 
       <div className="examAnalysisStatusBar">
-        {[loadStatus, saveStatus, uploadStatus, extractStatus, visionStatus, confirmStatus, boundaryStatus, deleteStatus].filter((item) => item.message).map((item, index) => (
+        {[loadStatus, saveStatus, uploadStatus, extractStatus, visionStatus, confirmStatus, boundaryStatus, rowFillStatus, deleteStatus].filter((item) => item.message).map((item, index) => (
           <span className={`saveStateBadge ${item.state}`} key={`${item.message}-${index}`}>{item.message}</span>
         ))}
       </div>
@@ -7438,6 +7499,58 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
             )}
           </div>
 
+          <div className="panel examAnalysisRowFillPanel">
+            <div className="sectionHeader slim">
+              <div>
+                <strong>AI 행 채움</strong>
+                <span>{questionRows.length ? `${aiFilledRows.length}/${questionRows.length}개` : "대기"}</span>
+              </div>
+              <div className="headerActions">
+                {rowFillStatus.message ? <span className={`saveStateBadge ${rowFillStatus.state}`}>{rowFillStatus.message}</span> : null}
+                <button
+                  className="secondaryButton"
+                  disabled={!questionRows.length || !boundaryDetectedCount || isFillingRows}
+                  onClick={fillQuestionRowsWithAi}
+                  type="button"
+                >
+                  {isFillingRows ? "채움 중" : "AI 행 채움(과금)"}
+                </button>
+              </div>
+            </div>
+            {rowFill ? (
+              <div className={rowFill.status === "needs_review" ? "examAnalysisRowFillSummary needsReview" : "examAnalysisRowFillSummary ok"}>
+                <strong>{rowFill.status === "needs_review" ? "검토 필요" : "채움 완료"}</strong>
+                <span>
+                  {rowFill.filledCount || 0}/{rowFill.totalQuestionCount || questionRows.length || 0}개
+                  {rowFill.provider ? ` · ${rowFill.provider}` : ""}
+                  {rowFill.filledAt ? ` · ${formatExamAnalysisEventTime(rowFill.filledAt)}` : ""}
+                </span>
+                {rowFill.needsReviewNumbers?.length ? <small>재확인 {rowFill.needsReviewNumbers.join(", ")}</small> : null}
+                {rowFill.missingQuestionNumbers?.length ? <small>누락 {rowFill.missingQuestionNumbers.join(", ")}</small> : null}
+              </div>
+            ) : null}
+            {questionRows.length ? (
+              <div className="examAnalysisRowFillGrid">
+                {questionRows.map((question) => {
+                  const needsReview = question.rowStatus === "missing" || question.aiFields?.needsReview || question.aiFields?.warnings?.length;
+                  return (
+                    <div className={needsReview ? "examAnalysisRowFillCard needsReview" : "examAnalysisRowFillCard"} key={question.questionRowId || question.questionNumber}>
+                      <strong>{question.questionNumber}</strong>
+                      <span>{question.unitName || "단원 대기"}</span>
+                      <small>{question.mainType || "유형 대기"}</small>
+                      {question.difficulty ? <em>{question.difficulty}</em> : null}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="emptyState compact">고정 문항 행 없음</div>
+            )}
+            {aiNeedsReviewRows.length ? (
+              <p className="examAnalysisReviewNotice">재확인 문항 {aiNeedsReviewRows.map((question) => question.questionNumber).join(", ")}번은 다음 검수 단계에서 확인해야 합니다.</p>
+            ) : null}
+          </div>
+
           <div className="panel examAnalysisStepPanel">
             <div className="sectionHeader slim">
               <div>
@@ -7457,7 +7570,13 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                 ["completed", "최종 확정"]
               ].map(([status, label]) => (
                 <span
-                  className={activeRun?.workflowStatus === status || (status === "boundary_detected" && boundaryDetection) ? "active" : ""}
+                  className={
+                    activeRun?.workflowStatus === status ||
+                    (status === "boundary_detected" && boundaryDetection) ||
+                    (status === "ai_filled" && rowFill)
+                      ? "active"
+                      : ""
+                  }
                   key={status}
                 >
                   {label}
