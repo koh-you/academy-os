@@ -2697,20 +2697,29 @@ button {
   border-top: 1px solid #d8e3f8;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
+  justify-content: space-between;
   padding: 12px 0;
 }
 
-.analysisActionGroup {
+.analysisSelectionSummary,
+.analysisSelectionActions {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.analysisActionGroup + .analysisActionGroup {
-  border-left: 1px solid #d8e3f8;
-  padding-left: 12px;
+.analysisSelectionSummary span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.analysisSelectionSummary strong {
+  color: #17213d;
+  font-size: 14px;
+  font-weight: 900;
 }
 
 .analysisLibraryActions .danger {
@@ -2723,7 +2732,6 @@ button {
   color: #15803d;
   font-size: 13px;
   font-weight: 900;
-  margin-left: auto;
 }
 
 .analysisLibraryGrid {
@@ -2755,6 +2763,12 @@ button {
   justify-content: space-between;
 }
 
+.analysisTreeColumnHeader > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
 .analysisTreeColumnHeader strong {
   color: #17213d;
   font-size: 16px;
@@ -2765,6 +2779,19 @@ button {
   color: #64748b;
   font-size: 12px;
   font-weight: 900;
+}
+
+.analysisColumnAddButton {
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  color: #4f46e5;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  min-height: 30px;
+  padding: 5px 10px;
 }
 
 .analysisTreeList {

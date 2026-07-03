@@ -4851,11 +4851,19 @@ export function App() {
                     updatedAt: new Date().toISOString()
                   });
               const previousSchoolName = folder.previousSchoolName || normalizedFolder.schoolName;
+              const previousGrade = folder.previousGrade || normalizedFolder.grade;
               setExamAnalysisFolders((current) => {
                 const exists = current.some((item) => item.folderId === normalizedFolder.folderId);
                 const upserted = exists
                   ? current.map((item) => (item.folderId === normalizedFolder.folderId ? { ...item, ...normalizedFolder } : item))
                   : [normalizedFolder, ...current];
+                if (normalizedFolder.folderType === "grade" && previousGrade !== normalizedFolder.grade) {
+                  return upserted.map((item) => (
+                    item.folderType === "exam" && item.schoolName === normalizedFolder.schoolName && item.grade === previousGrade
+                      ? { ...item, grade: normalizedFolder.grade, updatedAt: new Date().toISOString() }
+                      : item
+                  ));
+                }
                 if (normalizedFolder.folderType !== "school" || previousSchoolName === normalizedFolder.schoolName) return upserted;
                 return upserted.map((item) => (
                   item.folderType !== "school" && item.schoolName === previousSchoolName
@@ -4876,7 +4884,7 @@ export function App() {
               } else if (normalizedFolder.folderType === "grade") {
                 setExamAnalyses((current) =>
                   current.map((item) => (
-                    item.schoolName === normalizedFolder.schoolName && item.grade === normalizedFolder.grade
+                    item.schoolName === normalizedFolder.schoolName && item.grade === previousGrade
                       ? { ...item, grade: normalizedFolder.grade, updatedAt: new Date().toISOString() }
                       : item
                   ))
@@ -11288,6 +11296,7 @@ function ExamAnalysisCenter({
   const [folderModalMode, setFolderModalMode] = useState("");
   const [folderDraft, setFolderDraft] = useState(null);
   const [analysisLibraryStatus, setAnalysisLibraryStatus] = useState("");
+  const [analysisLibraryActionTarget, setAnalysisLibraryActionTarget] = useState("school");
   const [detailSectionId, setDetailSectionId] = useState("");
   const [isReportPreviewOpen, setIsReportPreviewOpen] = useState(false);
   const [isAiInitialViewOpen, setIsAiInitialViewOpen] = useState(false);
@@ -12421,6 +12430,7 @@ function ExamAnalysisCenter({
     setSelectedGradeKey(nextAnalysis.grade || "학년 미입력");
     setSelectedFolderId(nextAnalysis.analysisFolderId);
     setSelectedAnalysisId(nextAnalysis.examAnalysisId);
+    setAnalysisLibraryActionTarget("analysis");
     setIsAnalysisWorkspaceOpen(true);
     showAnalysisLibraryStatus("분석지를 만들었습니다.");
   }
@@ -12440,6 +12450,15 @@ function ExamAnalysisCenter({
     }
     setFolderDraft(createExamAnalysisSchoolDraft({ ...school, previousSchoolName: school.schoolName }));
     setFolderModalMode("schoolEdit");
+  }
+
+  function openEditGrade(grade = selectedGrade) {
+    if (!grade) {
+      showAnalysisLibraryStatus("학년을 먼저 선택해 주세요.");
+      return;
+    }
+    setFolderDraft(createExamAnalysisGradeDraft({ ...grade, previousGrade: grade.grade }));
+    setFolderModalMode("gradeEdit");
   }
 
   function openCreateGradeFolder(school = selectedSchool) {
@@ -12518,6 +12537,7 @@ function ExamAnalysisCenter({
     if (isSchoolDraft) {
       const normalizedSchool = normalizeExamAnalysisSchoolFolder(savedFolder || folderDraft);
       setSelectedSchoolId(normalizedSchool.folderId);
+      setAnalysisLibraryActionTarget("school");
       return normalizedSchool;
     }
     if (isGradeDraft) {
@@ -12526,12 +12546,14 @@ function ExamAnalysisCenter({
       setSelectedGradeKey(normalizedGrade.grade || "학년 미입력");
       setSelectedFolderId("");
       setSelectedAnalysisId("");
+      setAnalysisLibraryActionTarget("grade");
       return normalizedGrade;
     }
     const normalizedFolder = normalizeExamAnalysisFolder(savedFolder || folderDraft);
     setSelectedSchoolId(createExamAnalysisSchoolId({ schoolName: normalizedFolder.schoolName }));
     setSelectedGradeKey(normalizedFolder.grade || "학년 미입력");
     setSelectedFolderId(normalizedFolder.folderId);
+    setAnalysisLibraryActionTarget("folder");
     return normalizedFolder;
   }
 
@@ -12561,6 +12583,7 @@ function ExamAnalysisCenter({
     onDeleteAnalysisFolder(folder);
     setSelectedFolderId("");
     setSelectedAnalysisId("");
+    setAnalysisLibraryActionTarget("grade");
     showAnalysisLibraryStatus(`${folder.examName || "고사"} 삭제 완료`);
   }
 
@@ -12579,6 +12602,22 @@ function ExamAnalysisCenter({
     showAnalysisLibraryStatus(`${school.schoolName || "학교"} 삭제 완료`);
   }
 
+  function deleteGrade(grade = selectedGrade) {
+    if (!grade || !onDeleteAnalysisFolder) {
+      showAnalysisLibraryStatus("학년을 먼저 선택해 주세요.");
+      return;
+    }
+    const label = [grade.schoolName || selectedSchool?.schoolName, grade.grade].filter(Boolean).join(" · ") || "선택한 학년";
+    const countText = grade.analysisCount ? ` 아래 분석지 ${grade.analysisCount}건도 함께 삭제됩니다.` : " 빈 학년만 삭제됩니다.";
+    if (!window.confirm(`${label} 학년을 삭제할까요?${countText}`)) return;
+    onDeleteAnalysisFolder(grade);
+    setSelectedGradeKey("");
+    setSelectedFolderId("");
+    setSelectedAnalysisId("");
+    setAnalysisLibraryActionTarget("school");
+    showAnalysisLibraryStatus(`${grade.grade || "학년"} 삭제 완료`);
+  }
+
   function deleteAnalysis(analysis) {
     if (!analysis || !onDeleteAnalysis) {
       showAnalysisLibraryStatus("분석지를 먼저 선택해 주세요.");
@@ -12589,7 +12628,79 @@ function ExamAnalysisCenter({
     if (analysis.examAnalysisId === selectedAnalysisId) setIsAnalysisWorkspaceOpen(false);
     onDeleteAnalysis(analysis.examAnalysisId);
     setSelectedAnalysisId("");
+    setAnalysisLibraryActionTarget("folder");
     showAnalysisLibraryStatus("분석지 삭제 완료");
+  }
+
+  function getAnalysisLibraryTargetMeta(target = analysisLibraryActionTarget) {
+    if (target === "analysis") {
+      return {
+        item: selectedAnalysis,
+        label: "분석지",
+        name: selectedAnalysis?.examName || selectedAnalysis?.subject || "분석지"
+      };
+    }
+    if (target === "folder") {
+      return {
+        item: selectedFolder,
+        label: "고사",
+        name: selectedFolder?.examName || examCycleLabel(selectedFolder?.examCycle) || "고사"
+      };
+    }
+    if (target === "grade") {
+      return {
+        item: selectedGrade,
+        label: "학년",
+        name: selectedGrade?.grade || "학년"
+      };
+    }
+    return {
+      item: selectedSchool,
+      label: "학교",
+      name: selectedSchool?.schoolName || "학교"
+    };
+  }
+
+  function editSelectedLibraryTarget() {
+    const target = getAnalysisLibraryTargetMeta();
+    if (!target.item) {
+      showAnalysisLibraryStatus("수정할 상자를 먼저 선택해 주세요.");
+      return;
+    }
+    if (analysisLibraryActionTarget === "analysis") {
+      openAnalysisWorkspace(selectedAnalysis?.examAnalysisId);
+      return;
+    }
+    if (analysisLibraryActionTarget === "folder") {
+      openEditFolder(selectedFolder);
+      return;
+    }
+    if (analysisLibraryActionTarget === "grade") {
+      openEditGrade(selectedGrade);
+      return;
+    }
+    openEditSchool(selectedSchool);
+  }
+
+  function deleteSelectedLibraryTarget() {
+    const target = getAnalysisLibraryTargetMeta();
+    if (!target.item) {
+      showAnalysisLibraryStatus("삭제할 상자를 먼저 선택해 주세요.");
+      return;
+    }
+    if (analysisLibraryActionTarget === "analysis") {
+      deleteAnalysis(selectedAnalysis);
+      return;
+    }
+    if (analysisLibraryActionTarget === "folder") {
+      deleteFolder(selectedFolder);
+      return;
+    }
+    if (analysisLibraryActionTarget === "grade") {
+      deleteGrade(selectedGrade);
+      return;
+    }
+    deleteSchool(selectedSchool);
   }
 
   function moveSelectedAnalysisToFolder(folderId) {
@@ -12670,12 +12781,13 @@ function ExamAnalysisCenter({
     event.target.value = "";
   }
 
+  const analysisLibraryTargetMeta = getAnalysisLibraryTargetMeta();
   const isSchoolFolderModal = folderModalMode.startsWith("school");
   const isGradeFolderModal = folderModalMode.startsWith("grade");
   const folderModalTitle = isSchoolFolderModal
     ? (folderModalMode === "schoolCreate" ? "학교 만들기" : "학교 수정")
     : isGradeFolderModal
-    ? "학년 만들기"
+    ? (folderModalMode === "gradeCreate" ? "학년 만들기" : "학년 수정")
     : (folderModalMode === "examCreate" ? "고사 만들기" : "고사 수정");
   const folderModalSubtitle = isSchoolFolderModal
     ? "학교를 먼저 만들고, 그 아래 학년과 고사를 누적합니다."
@@ -12710,19 +12822,13 @@ function ExamAnalysisCenter({
               <span className="countBadge">{analysisSchoolTree.length}학교 · {analyses.length}건</span>
             </div>
             <div className="analysisLibraryActions">
-              <div className="analysisActionGroup">
-                <button className="primaryButton" onClick={openCreateFolder} type="button">+ 학교</button>
-                <button className="softButton" disabled={!selectedSchool} onClick={() => openCreateGradeFolder()} type="button">+ 학년</button>
-                <button className="softButton" disabled={!selectedGrade} onClick={() => openCreateExamFolder()} type="button">+ 고사</button>
-                <button className="softButton" disabled={!selectedFolder} onClick={() => createAnalysisInFolder()} type="button">+ 분석지</button>
+              <div className="analysisSelectionSummary">
+                <span>선택</span>
+                <strong>{analysisLibraryTargetMeta.item ? `${analysisLibraryTargetMeta.label} · ${analysisLibraryTargetMeta.name}` : "상자를 선택해 주세요"}</strong>
               </div>
-              <div className="analysisActionGroup">
-                <button className="softButton" disabled={!selectedSchool} onClick={() => openEditSchool()} type="button">학교 수정</button>
-                <button className="softButton danger" disabled={!selectedSchool} onClick={() => deleteSchool()} type="button">학교 삭제</button>
-                <button className="softButton" disabled={!selectedFolder} onClick={() => openEditFolder()} type="button">고사 수정</button>
-                <button className="softButton danger" disabled={!selectedFolder} onClick={() => deleteFolder()} type="button">고사 삭제</button>
-                <button className="softButton" disabled={!selectedAnalysis} onClick={() => openAnalysisWorkspace()} type="button">분석 열기</button>
-                <button className="softButton danger" disabled={!selectedAnalysis} onClick={() => deleteAnalysis(selectedAnalysis)} type="button">분석 삭제</button>
+              <div className="analysisSelectionActions">
+                <button className="softButton" disabled={!analysisLibraryTargetMeta.item} onClick={editSelectedLibraryTarget} type="button">수정</button>
+                <button className="softButton danger" disabled={!analysisLibraryTargetMeta.item} onClick={deleteSelectedLibraryTarget} type="button">삭제</button>
               </div>
               {analysisLibraryStatus ? (
                 <small className="analysisLibraryStatus" role="status" aria-live="polite">{analysisLibraryStatus}</small>
@@ -12731,15 +12837,21 @@ function ExamAnalysisCenter({
             <div className="analysisLibraryGrid">
               <article className="analysisTreeColumn">
                 <div className="analysisTreeColumnHeader">
-                  <strong>학교</strong>
-                  <span>{analysisSchoolTree.length}개</span>
+                  <div>
+                    <strong>학교</strong>
+                    <span>{analysisSchoolTree.length}개</span>
+                  </div>
+                  <button className="analysisColumnAddButton" onClick={openCreateFolder} type="button">추가</button>
                 </div>
                 <div className="analysisTreeList">
                   {analysisSchoolTree.length ? analysisSchoolTree.map((school) => (
                     <button
                       className={selectedSchool?.folderId === school.folderId ? "analysisTreeItem active" : "analysisTreeItem"}
                       key={school.folderId}
-                      onClick={() => setSelectedSchoolId(school.folderId)}
+                      onClick={() => {
+                        setSelectedSchoolId(school.folderId);
+                        setAnalysisLibraryActionTarget("school");
+                      }}
                       type="button"
                     >
                       <strong>{school.schoolName}</strong>
@@ -12753,15 +12865,21 @@ function ExamAnalysisCenter({
 
               <article className="analysisTreeColumn">
                 <div className="analysisTreeColumnHeader">
-                  <strong>학년</strong>
-                  <span>{selectedSchool?.grades.length ?? 0}개</span>
+                  <div>
+                    <strong>학년</strong>
+                    <span>{selectedSchool?.grades.length ?? 0}개</span>
+                  </div>
+                  <button className="analysisColumnAddButton" disabled={!selectedSchool} onClick={() => openCreateGradeFolder()} type="button">추가</button>
                 </div>
                 <div className="analysisTreeList">
                   {selectedSchool?.grades.length ? selectedSchool.grades.map((grade) => (
                     <button
                       className={selectedGrade?.grade === grade.grade ? "analysisTreeItem active" : "analysisTreeItem"}
                       key={grade.grade}
-                      onClick={() => setSelectedGradeKey(grade.grade)}
+                      onClick={() => {
+                        setSelectedGradeKey(grade.grade);
+                        setAnalysisLibraryActionTarget("grade");
+                      }}
                       type="button"
                     >
                       <strong>{grade.grade}</strong>
@@ -12775,15 +12893,21 @@ function ExamAnalysisCenter({
 
               <article className="analysisTreeColumn">
                 <div className="analysisTreeColumnHeader">
-                  <strong>고사</strong>
-                  <span>{selectedGrade?.exams.length ?? 0}개</span>
+                  <div>
+                    <strong>고사</strong>
+                    <span>{selectedGrade?.exams.length ?? 0}개</span>
+                  </div>
+                  <button className="analysisColumnAddButton" disabled={!selectedGrade} onClick={() => openCreateExamFolder()} type="button">추가</button>
                 </div>
                 <div className="analysisTreeList">
                   {selectedGrade?.exams.length ? selectedGrade.exams.map((folder) => (
                     <button
                       className={selectedFolder?.folderId === folder.folderId ? "analysisTreeItem active" : "analysisTreeItem"}
                       key={folder.folderId}
-                      onClick={() => setSelectedFolderId(folder.folderId)}
+                      onClick={() => {
+                        setSelectedFolderId(folder.folderId);
+                        setAnalysisLibraryActionTarget("folder");
+                      }}
                       type="button"
                     >
                       <strong>{folder.examName || examCycleLabel(folder.examCycle) || "고사 미입력"}</strong>
@@ -12797,16 +12921,25 @@ function ExamAnalysisCenter({
 
               <article className="analysisTreeColumn analysisTreeColumnWide">
                 <div className="analysisTreeColumnHeader">
-                  <strong>분석지</strong>
-                  <span>{visibleAnalyses.length}건</span>
+                  <div>
+                    <strong>분석지</strong>
+                    <span>{visibleAnalyses.length}건</span>
+                  </div>
+                  <button className="analysisColumnAddButton" disabled={!selectedFolder} onClick={() => createAnalysisInFolder()} type="button">추가</button>
                 </div>
                 <div className="analysisTreeList">
                   {visibleAnalyses.length ? visibleAnalyses.map((analysis) => (
                     <button
                       className={selectedAnalysis?.examAnalysisId === analysis.examAnalysisId ? "analysisTreeItem active" : "analysisTreeItem"}
                       key={analysis.examAnalysisId}
-                      onClick={() => setSelectedAnalysisId(analysis.examAnalysisId)}
-                      onDoubleClick={() => openAnalysisWorkspace(analysis.examAnalysisId)}
+                      onClick={() => {
+                        setSelectedAnalysisId(analysis.examAnalysisId);
+                        setAnalysisLibraryActionTarget("analysis");
+                      }}
+                      onDoubleClick={() => {
+                        setAnalysisLibraryActionTarget("analysis");
+                        openAnalysisWorkspace(analysis.examAnalysisId);
+                      }}
                       type="button"
                     >
                       <strong>{analysis.examName || "새 분석"}</strong>

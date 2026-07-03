@@ -10,6 +10,17 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-03 P1. 시험분석 컬럼별 추가 버튼과 통합 수정/삭제 액션
+
+- 상태: 완료
+- 사용자 요청: 분석 목록의 `+ 학교`, `+ 학년`, `+ 고사`, `+ 분석지` 추가 버튼을 각 박스 안으로 옮기고, 학교/고사/분석별로 나뉜 수정·삭제 버튼을 하나의 `수정`, `삭제` 기능으로 통일한다.
+- 이번 작업 결과: 학교/학년/고사/분석지 각 컬럼 헤더 안에 `추가` 버튼을 배치했다. 상단 액션 바는 마지막으로 클릭한 상자를 기준으로 `선택: 유형 · 이름`을 보여주고, 공통 `수정`, `삭제` 버튼만 제공한다. 분석지 선택 후 `수정`을 누르면 분석 작업 화면으로 열린다.
+- 학년 관리 보강: 통합 수정/삭제 대상에 학년도 포함했다. 학년 수정 시 이전 학년명 아래의 고사 폴더와 분석지가 새 학년명으로 함께 따라가도록 `previousGrade` 동기화를 추가했다.
+- CSS 정리: 기존 `analysisActionGroup` 스타일을 제거하고 `analysisSelectionSummary`, `analysisSelectionActions`, `analysisColumnAddButton` 스타일로 교체했다.
+- 회귀 방지: 운영 시나리오 테스트를 새 구조에 맞게 갱신해 컬럼별 `추가`, 공통 `수정/삭제`, 개별 삭제 버튼 제거 조건을 확인한다.
+- 저장 주의: 기존 `app_state.examAnalysisFolders`, `app_state.examAnalyses` 저장 경로를 그대로 사용한다. 새 Supabase SQL edit 없음.
+- 검증: `node --check src/domains/exams/library.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 243, failed 0), `npm run build` 통과. Vite 빌드에서는 기존 chunk size warning만 발생했다.
+
 ### 2026-07-03 P1. 시험분석 중복 액션 버튼 제거와 CSS 정리
 
 - 상태: 완료

@@ -136,7 +136,8 @@ export function createExamAnalysisGradeDraft(folder = {}) {
     folderType: "grade",
     schoolName: normalized.schoolName,
     grade: normalized.grade || "고1",
-    folderName: normalized.folderName
+    folderName: normalized.folderName,
+    previousGrade: folder.previousGrade ?? normalized.grade
   };
 }
 
