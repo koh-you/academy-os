@@ -10,6 +10,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-04 P0 예정. 데이터 원천 중복/덧대기 전수조사
+
+- 상태: 예정
+- 사용자 요청: 데이터가 중복되거나 틀렸을 때 원천을 끊지 않고 화면/저장 직전에 덧대어 보정하는 구조가 또 남아 있는지 확인하고, 다음 작업 최우선순위로 전수조사해 정리한다.
+- 문제의식: 오늘 시험분석 v2에서 과목 `기하`가 원천 데이터에 섞였는데, 처음에는 저장 경계/화면 표시에서 우선순위를 바꾸는 식으로 보정하려 했다. 이런 방식은 원천 오류를 숨겨 나중에 다시 반복될 수 있으므로, 데이터 원천과 파생/표시/override의 책임을 명확히 나눠야 한다.
+- 전수조사 기준: `fallback`, `sampleData`, `mock`, `default`, `infer*`, `normalize*`, `dedupe*`, `duplicate`, `legacy`, `deprecated`, `hiddenAppState`, `app_state`, `localStorage`, `override` 키워드를 기준으로 코드와 문서를 훑는다. 각 후보는 `원천 데이터`, `파생 표시`, `일시 override`, `마이그레이션/삭제 대상`, `정상 fallback`으로 분류한다.
+- 1차 스캔 후보: `api/routes/coreData.js`의 `fallbackSource`/`sampleData` 반환, `src/app/App.jsx`의 `useStoredState(... sampleData ...)` 초기값, `dedupeExamPrepRowsForDisplay`, `inferExamCycleFromPrepId`, `app_state.generatedLessonControls`, `app_state.examPostTargetStudentIds`, `deprecatedAppStateKeys`/`hiddenAppStateKeys`, 수업일지 저장 직후 `localStorage` 직접 갱신 구간, 시험관리 중복 정리 API와 화면 dedupe 관계.
+- 내일 산출물: 후보별 표를 만들고, 운영 데이터에 영향이 큰 순서대로 `원천 삭제/마이그레이션`, `정상 파생으로 문서화`, `화면 덧대기 제거`, `테스트 추가` 중 하나로 결론을 낸다. 바로 고치기보다 먼저 목록과 우선순위를 확정한다.
+- 주의: 모든 fallback이 나쁜 것은 아니다. Supabase 미설정 로컬 개발용 fallback, 명시적 app_state override, 표시 전용 dedupe는 역할이 명확하면 유지 가능하다. 다만 운영 Supabase 원천과 충돌하거나 잘못된 값을 숨기는 fallback/보정은 정리 대상이다.
+
 ### 2026-07-03 P0. 시험분석 v2 PDF 텍스트 후보 추출과 Claude 원본 검증
 
 - 상태: 완료
