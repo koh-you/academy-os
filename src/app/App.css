@@ -1232,7 +1232,7 @@ button {
 
 .examAnalysisReviewTable {
   border-collapse: collapse;
-  min-width: 1180px;
+  min-width: 1240px;
   table-layout: fixed;
   width: 100%;
 }
@@ -1279,31 +1279,37 @@ button {
 
 .examAnalysisReviewTable th:nth-child(3),
 .examAnalysisReviewTable td:nth-child(3) {
-  width: 150px;
+  text-align: center;
+  width: 56px;
 }
 
 .examAnalysisReviewTable th:nth-child(4),
 .examAnalysisReviewTable td:nth-child(4) {
-  width: 220px;
+  width: 150px;
 }
 
 .examAnalysisReviewTable th:nth-child(5),
 .examAnalysisReviewTable td:nth-child(5) {
-  width: 260px;
+  width: 220px;
 }
 
 .examAnalysisReviewTable th:nth-child(6),
 .examAnalysisReviewTable td:nth-child(6) {
-  width: 94px;
+  width: 260px;
 }
 
 .examAnalysisReviewTable th:nth-child(7),
 .examAnalysisReviewTable td:nth-child(7) {
-  width: 260px;
+  width: 94px;
 }
 
 .examAnalysisReviewTable th:nth-child(8),
 .examAnalysisReviewTable td:nth-child(8) {
+  width: 260px;
+}
+
+.examAnalysisReviewTable th:nth-child(9),
+.examAnalysisReviewTable td:nth-child(9) {
   width: 82px;
 }
 
@@ -1332,6 +1338,7 @@ button {
   text-align: center;
 }
 
+.examAnalysisReviewTable .importantCell,
 .examAnalysisReviewTable .reviewStateCell {
   color: #475569;
   text-align: center;
@@ -1691,17 +1698,18 @@ button {
 
 .examAnalysisPreviewTable th:nth-child(2),
 .examAnalysisPreviewTable td:nth-child(2) {
-  width: 74px;
+  text-align: center;
+  width: 58px;
 }
 
 .examAnalysisPreviewTable th:nth-child(3),
 .examAnalysisPreviewTable td:nth-child(3) {
-  width: 150px;
+  width: 74px;
 }
 
 .examAnalysisPreviewTable th:nth-child(4),
 .examAnalysisPreviewTable td:nth-child(4) {
-  width: 220px;
+  width: 150px;
 }
 
 .examAnalysisPreviewTable th:nth-child(5),
@@ -1711,6 +1719,11 @@ button {
 
 .examAnalysisPreviewTable th:nth-child(6),
 .examAnalysisPreviewTable td:nth-child(6) {
+  width: 220px;
+}
+
+.examAnalysisPreviewTable th:nth-child(7),
+.examAnalysisPreviewTable td:nth-child(7) {
   width: 80px;
 }
 

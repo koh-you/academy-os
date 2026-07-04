@@ -1020,6 +1020,7 @@ function createExamAnalysisReviewDraft(question = {}) {
     subTypesText: subTypes.join(", "),
     difficulty: sourceFields.difficulty ?? "",
     reviewNote: sourceFields.reviewNote ?? "",
+    isImportantQuestion: Boolean(sourceFields.isImportantQuestion),
     confirmed: question.rowStatus === "confirmed" || Boolean(question.confirmedAt || finalFields.confirmedAt)
   };
 }
@@ -1052,7 +1053,8 @@ function applyExamAnalysisReviewDraftsToQuestions(questions = [], reviewDrafts =
       mainType: draftValue.mainType ?? "",
       subTypes,
       difficulty: draftValue.difficulty ?? "",
-      reviewNote: draftValue.reviewNote ?? ""
+      reviewNote: draftValue.reviewNote ?? "",
+      isImportantQuestion: Boolean(draftValue.isImportantQuestion)
     };
     return {
       ...question,
@@ -1060,6 +1062,7 @@ function applyExamAnalysisReviewDraftsToQuestions(questions = [], reviewDrafts =
       mainType: fields.mainType,
       subTypes,
       difficulty: fields.difficulty,
+      isImportantQuestion: fields.isImportantQuestion,
       teacherFields: {
         ...(question.teacherFields ?? {}),
         ...fields
@@ -1193,7 +1196,7 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
         <div className="examAnalysisPreviewMetricGrid">
           <span><b>{meta.totalQuestions}</b><small>문항</small></span>
           <span><b>{model.unitDistribution.length}</b><small>단원</small></span>
-          <span><b>{model.importantQuestions.length}</b><small>주요문항 후보</small></span>
+          <span><b>{model.importantQuestions.length}</b><small>주요문항</small></span>
         </div>
       </div>
 
@@ -1235,8 +1238,8 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
 
         <section className="examAnalysisPreviewCard wide">
           <div className="examAnalysisPreviewCardHeader">
-            <strong>주요문항 후보</strong>
-            <span>AI 추천/선생님 선택은 다음 단계</span>
+            <strong>주요문항</strong>
+            <span>선생님 체크 저장본</span>
           </div>
           {model.importantQuestions.length ? (
             <div className="examAnalysisImportantQuestions">
@@ -1253,7 +1256,7 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
               ))}
             </div>
           ) : (
-            <div className="emptyState compact">주요문항 후보 없음</div>
+            <div className="emptyState compact">주요문항 선택 없음</div>
           )}
         </section>
       </div>
@@ -1263,6 +1266,7 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
           <thead>
             <tr>
               <th>#</th>
+              <th>주요</th>
               <th>페이지</th>
               <th>단원</th>
               <th>주요 유형</th>
@@ -1275,6 +1279,7 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
             {model.questions.map((question) => (
               <tr key={question.questionRowId || question.questionNumber}>
                 <td>{question.questionNumber}</td>
+                <td>{question.isImportantQuestion ? "체크" : "-"}</td>
                 <td>{question.pageLabel || "-"}</td>
                 <td>{question.unitName || "미입력"}</td>
                 <td>{question.mainType || "미입력"}</td>
@@ -7486,6 +7491,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
         subTypes: parseExamAnalysisReviewSubTypes(draftValue.subTypesText),
         difficulty: draftValue.difficulty ?? "",
         reviewNote: draftValue.reviewNote ?? "",
+        isImportantQuestion: Boolean(draftValue.isImportantQuestion),
         confirmed: Boolean(draftValue.confirmed)
       };
     });
@@ -8130,6 +8136,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                     <tr>
                       <th>#</th>
                       <th>확정</th>
+                      <th>주요</th>
                       <th>단원</th>
                       <th>쎈 주유형</th>
                       <th>쎈 보조유형</th>
@@ -8154,6 +8161,14 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                               aria-label={`${question.questionNumber}번 확정`}
                               checked={Boolean(draftValue.confirmed)}
                               onChange={(event) => updateReviewDraft(question.questionNumber, { confirmed: event.target.checked })}
+                              type="checkbox"
+                            />
+                          </td>
+                          <td className="importantCell">
+                            <input
+                              aria-label={`${question.questionNumber}번 주요문항`}
+                              checked={Boolean(draftValue.isImportantQuestion)}
+                              onChange={(event) => updateReviewDraft(question.questionNumber, { isImportantQuestion: event.target.checked })}
                               type="checkbox"
                             />
                           </td>

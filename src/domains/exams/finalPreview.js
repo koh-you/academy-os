@@ -52,6 +52,7 @@ function getFinalQuestionFields(question = {}) {
     subTypes,
     difficulty: cleanText(finalFields.difficulty || teacherFields.difficulty || question.difficulty) || "미정",
     reviewNote: cleanText(finalFields.reviewNote || teacherFields.reviewNote || ""),
+    isImportantQuestion: Boolean(finalFields.isImportantQuestion ?? teacherFields.isImportantQuestion ?? question.isImportantQuestion),
     rowStatus: question.rowStatus || "",
     confirmed: question.rowStatus === "confirmed" || Boolean(question.confirmedAt || finalFields.confirmedAt),
     pageStart: question.sourceEvidence?.boundary?.pageStart || question.sourcePage || null,
@@ -67,46 +68,14 @@ function formatPageLabel(question = {}) {
   return `${question.pageStart}p`;
 }
 
-function getImportantQuestionScore(question = {}) {
-  let score = 0;
-  const reasons = [];
-  if (question.difficulty === "상") {
-    score += 5;
-    reasons.push("난이도 상");
-  } else if (question.difficulty === "중상") {
-    score += 3;
-    reasons.push("난이도 중상");
-  }
-  if (question.reviewNote) {
-    score += 4;
-    reasons.push("검수 메모 있음");
-  }
-  if (question.aiNeedsReview) {
-    score += 2;
-    reasons.push("AI 재확인 흔적");
-  }
-  if (question.boundaryNeedsReview) {
-    score += 1;
-    reasons.push("경계 검토 흔적");
-  }
-  if (question.subTypes.length >= 2) {
-    score += 1;
-    reasons.push("복합 유형");
-  }
-  return { score, reasons };
-}
-
-function buildImportantQuestionCandidates(questions = []) {
-  const candidates = questions
-    .map((question) => ({ ...question, ...getImportantQuestionScore(question) }))
-    .filter((question) => question.score >= 3)
-    .sort((a, b) => b.score - a.score || a.questionNumber - b.questionNumber)
-    .slice(0, 8);
-  if (candidates.length) return candidates;
+function buildImportantQuestions(questions = []) {
   return questions
-    .filter((question) => ["상", "중상"].includes(question.difficulty))
-    .slice(0, 6)
-    .map((question) => ({ ...question, ...getImportantQuestionScore(question), reasons: [question.difficulty ? `난이도 ${question.difficulty}` : "후보"] }));
+    .filter((question) => question.isImportantQuestion)
+    .map((question) => ({
+      ...question,
+      reasons: ["선생님 선택"]
+    }))
+    .sort((a, b) => a.questionNumber - b.questionNumber);
 }
 
 export function createExamAnalysisFinalPreviewModel({ analysisRun = {}, questions = [], sourceFiles = [] } = {}) {
@@ -131,7 +100,7 @@ export function createExamAnalysisFinalPreviewModel({ analysisRun = {}, question
     totalQuestions,
     (_item, index) => examAnalysisPreviewPalette.units[(index + 2) % examAnalysisPreviewPalette.units.length]
   );
-  const importantQuestions = buildImportantQuestionCandidates(finalQuestions);
+  const importantQuestions = buildImportantQuestions(finalQuestions);
   const confirmedCount = finalQuestions.filter((question) => question.confirmed).length;
   const reviewedAt = analysisRun?.auditSummary?.teacherReview?.reviewedAt || "";
   const sourceFileName = sourceFiles[0]?.originalFileName || "";

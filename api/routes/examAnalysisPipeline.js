@@ -273,6 +273,7 @@ function normalizeQuestionTeacherReview(review = {}) {
     subTypes: subTypes.map((item) => String(item).trim()).filter(Boolean).slice(0, 3),
     difficulty: String(review.difficulty ?? "").trim().slice(0, 40),
     reviewNote: String(review.reviewNote ?? review.review_note ?? "").trim().slice(0, 500),
+    isImportantQuestion: Boolean(review.isImportantQuestion ?? review.is_important_question ?? review.importantQuestion),
     confirmed: Boolean(review.confirmed) && Boolean(unitName) && Boolean(mainType)
   };
 }
@@ -811,7 +812,8 @@ export async function saveExamAnalysisQuestionTeacherReviews({
       mainType: review.mainType,
       subTypes: review.subTypes,
       difficulty: review.difficulty,
-      reviewNote: review.reviewNote
+      reviewNote: review.reviewNote,
+      isImportantQuestion: review.isImportantQuestion
     };
     const patch = {
       row_status: review.confirmed ? "confirmed" : "teacher_edited",
@@ -843,6 +845,11 @@ export async function saveExamAnalysisQuestionTeacherReviews({
   const totalQuestionCount = nextQuestions.length;
   const confirmedCount = nextQuestions.filter((question) => question.rowStatus === "confirmed").length;
   const editedCount = nextQuestions.filter((question) => question.teacherOverride).length;
+  const importantQuestionNumbers = nextQuestions
+    .filter((question) => Boolean(question.finalFields?.isImportantQuestion ?? question.teacherFields?.isImportantQuestion))
+    .map((question) => Number(question.questionNumber))
+    .filter((number) => Number.isInteger(number))
+    .sort((a, b) => a - b);
   const unconfirmedNumbers = nextQuestions
     .filter((question) => question.rowStatus !== "confirmed")
     .map((question) => Number(question.questionNumber))
@@ -860,6 +867,7 @@ export async function saveExamAnalysisQuestionTeacherReviews({
         reviewedCount: normalizedReviews.length,
         editedCount,
         confirmedCount,
+        importantQuestionNumbers,
         totalQuestionCount,
         unconfirmedNumbers
       }
@@ -875,6 +883,7 @@ export async function saveExamAnalysisQuestionTeacherReviews({
       reviewedCount: normalizedReviews.length,
       editedCount,
       confirmedCount,
+      importantQuestionNumbers,
       totalQuestionCount,
       unconfirmedNumbers
     }
