@@ -1612,22 +1612,491 @@ function downloadExamAnalysisOutputTextFile({ activeRun, outputType, text }) {
   return true;
 }
 
+function downloadBlobFile(blob, fileName) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function escapeExamAnalysisSvgText(value = "") {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function truncateExamAnalysisChartLabel(value = "", maxLength = 24) {
+  const text = String(value || "").trim();
+  return text.length > maxLength ? `${text.slice(0, maxLength - 1)}...` : text;
+}
+
+const examAnalysisChartPngExportScale = 3;
+
+function createExamAnalysisChartSvgShell({ title, subtitle, width = 1200, height = 675, body = "" }) {
+  return [
+    `<?xml version="1.0" encoding="UTF-8"?>`,
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
+    `<rect width="${width}" height="${height}" rx="28" fill="#ffffff"/>`,
+    `<rect x="24" y="24" width="${width - 48}" height="${height - 48}" rx="24" fill="#f8fbff" stroke="#bfdbfe" stroke-width="2"/>`,
+    `<style>text{font-family:'Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif;letter-spacing:0}.title{fill:#17213d;font-size:36px;font-weight:900}.subtitle{fill:#64748b;font-size:19px;font-weight:800}.label{fill:#17213d;font-size:20px;font-weight:900}.muted{fill:#64748b;font-size:17px;font-weight:800}.small{fill:#64748b;font-size:15px;font-weight:800}.num{fill:#17213d;font-size:22px;font-weight:900}</style>`,
+    `<text class="title" x="64" y="78">${escapeExamAnalysisSvgText(title)}</text>`,
+    subtitle ? `<text class="subtitle" x="64" y="112">${escapeExamAnalysisSvgText(subtitle)}</text>` : "",
+    body,
+    `<text class="small" x="${width - 64}" y="${height - 42}" text-anchor="end">Academy OS 시험분석</text>`,
+    `</svg>`
+  ].filter(Boolean).join("");
+}
+
+function createExamAnalysisPartDistributionSvg(model = {}) {
+  const width = 1200;
+  const height = 675;
+  const segments = (model.partDistribution ?? []).filter((item) => Number(item.count || 0) > 0).slice(0, 8);
+  const total = segments.reduce((sum, item) => sum + Number(item.count || 0), 0);
+  const cx = 255;
+  const cy = 365;
+  const r = 132;
+  const strokeWidth = 70;
+  const circumference = 2 * Math.PI * r;
+  let offset = 0;
+  const slices = segments.map((segment) => {
+    const ratio = total ? Number(segment.count || 0) / total : 0;
+    const dash = ratio * circumference;
+    const gap = circumference - dash;
+    const circle = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${segment.color}" stroke-width="${strokeWidth}" stroke-dasharray="${dash} ${gap}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${cx} ${cy})"/>`;
+    offset += dash;
+    return circle;
+  }).join("");
+  const legend = segments.map((segment, index) => {
+    const x = 500 + (index % 2) * 330;
+    const y = 190 + Math.floor(index / 2) * 82;
+    return [
+      `<rect x="${x}" y="${y - 34}" width="292" height="62" rx="18" fill="#ffffff" stroke="#dbeafe"/>`,
+      `<circle cx="${x + 26}" cy="${y - 4}" r="10" fill="${segment.color}"/>`,
+      `<text class="label" x="${x + 48}" y="${y - 8}">${escapeExamAnalysisSvgText(truncateExamAnalysisChartLabel(segment.label, 18))}</text>`,
+      `<text class="muted" x="${x + 48}" y="${y + 18}">${segment.count}문항 · ${segment.percent}%</text>`
+    ].join("");
+  }).join("");
+  const body = [
+    `<circle cx="${cx}" cy="${cy}" r="${r + strokeWidth / 2}" fill="#eff6ff"/>`,
+    slices,
+    `<circle cx="${cx}" cy="${cy}" r="${r - strokeWidth / 2 + 4}" fill="#ffffff"/>`,
+    `<text class="title" x="${cx}" y="${cy - 8}" text-anchor="middle">${segments.length}</text>`,
+    `<text class="muted" x="${cx}" y="${cy + 26}" text-anchor="middle">대단원</text>`,
+    legend || `<text class="muted" x="500" y="240">대단원 데이터 없음</text>`
+  ].join("");
+  return {
+    key: "part-distribution",
+    label: "대단원별 출제 비중",
+    fileName: "01-part-distribution.png",
+    width,
+    height,
+    svg: createExamAnalysisChartSvgShell({
+      title: "대단원별 출제 비중",
+      subtitle: `${model.meta?.title || "시험분석"} · 선생님 검수 저장본 기준`,
+      width,
+      height,
+      body
+    })
+  };
+}
+
+function createExamAnalysisDifficultyDistributionSvg(model = {}) {
+  const width = 1200;
+  const height = 675;
+  const items = model.difficultyDistribution ?? [];
+  const maxCount = Math.max(1, ...items.map((item) => Number(item.count || 0)));
+  const rows = items.length ? items : [{ label: "데이터 없음", count: 0, percent: 0, color: "#cbd5e1" }];
+  const body = rows.map((item, index) => {
+    const y = 190 + index * 82;
+    const barWidth = Math.max(24, (Number(item.count || 0) / maxCount) * 760);
+    return [
+      `<text class="label" x="94" y="${y}">${escapeExamAnalysisSvgText(item.label)}</text>`,
+      `<text class="muted" x="1080" y="${y}" text-anchor="end">${item.count}문항 · ${item.percent}%</text>`,
+      `<rect x="240" y="${y - 25}" width="780" height="28" rx="14" fill="#eaf1fb"/>`,
+      `<rect x="240" y="${y - 25}" width="${barWidth}" height="28" rx="14" fill="${item.color}"/>`
+    ].join("");
+  }).join("");
+  return {
+    key: "difficulty-distribution",
+    label: "난이도 분포",
+    fileName: "02-difficulty-distribution.png",
+    width,
+    height,
+    svg: createExamAnalysisChartSvgShell({
+      title: "난이도 분포",
+      subtitle: "하 · 중하 · 중 · 중상 · 상 고정 색상",
+      width,
+      height,
+      body
+    })
+  };
+}
+
+function createExamAnalysisPartDifficultySvg(model = {}) {
+  const width = 1200;
+  const items = (model.difficultyByPart ?? []).slice(0, 7);
+  const height = Math.max(675, 185 + items.length * 84 + 80);
+  const rows = items.length ? items : [{ label: "데이터 없음", count: 0, percent: 0, difficulties: [] }];
+  const body = rows.map((part, index) => {
+    const y = 178 + index * 84;
+    let x = 310;
+    const segments = part.difficulties?.length ? part.difficulties : [{ label: "미정", count: 0, percent: 100, color: "#cbd5e1" }];
+    const bars = segments.map((difficulty) => {
+      const widthValue = Math.max(16, difficulty.percent * 7.6);
+      const rect = `<rect x="${x}" y="${y - 25}" width="${widthValue}" height="28" rx="14" fill="${difficulty.color}"/>`;
+      x += widthValue;
+      return rect;
+    }).join("");
+    return [
+      `<text class="label" x="94" y="${y}">${escapeExamAnalysisSvgText(truncateExamAnalysisChartLabel(part.label, 14))}</text>`,
+      `<text class="muted" x="1080" y="${y}" text-anchor="end">${part.count}문항 · ${part.percent}%</text>`,
+      `<rect x="310" y="${y - 25}" width="760" height="28" rx="14" fill="#eaf1fb"/>`,
+      bars,
+      `<text class="small" x="310" y="${y + 28}">${escapeExamAnalysisSvgText(segments.map((difficulty) => `${difficulty.label} ${difficulty.count}`).join(" · "))}</text>`
+    ].join("");
+  }).join("");
+  return {
+    key: "part-difficulty",
+    label: "대단원별 난이도",
+    fileName: "03-part-difficulty.png",
+    width,
+    height,
+    svg: createExamAnalysisChartSvgShell({
+      title: "대단원별 난이도",
+      subtitle: "대단원마다 난이도 분포를 누적 막대로 표시",
+      width,
+      height,
+      body
+    })
+  };
+}
+
+function createExamAnalysisQuestionFlowSvg(model = {}) {
+  const width = 1200;
+  const questions = model.questions ?? [];
+  const columns = 10;
+  const cellWidth = 96;
+  const cellHeight = 62;
+  const gap = 12;
+  const rows = Math.max(1, Math.ceil(questions.length / columns));
+  const height = Math.max(675, 170 + rows * (cellHeight + gap) + 96);
+  const body = questions.length ? questions.map((question, index) => {
+    const col = index % columns;
+    const row = Math.floor(index / columns);
+    const x = 78 + col * (cellWidth + gap);
+    const y = 164 + row * (cellHeight + gap);
+    const color = examAnalysisPreviewPalette.difficulties[question.difficulty] || examAnalysisPreviewPalette.difficulties["미정"];
+    return [
+      `<rect x="${x}" y="${y}" width="${cellWidth}" height="${cellHeight}" rx="18" fill="${color}22" stroke="${color}" stroke-width="3"/>`,
+      `<text class="num" x="${x + 20}" y="${y + 34}">${question.questionNumber}</text>`,
+      `<text class="small" x="${x + cellWidth - 16}" y="${y + 34}" text-anchor="end">${escapeExamAnalysisSvgText(question.difficulty || "미정")}</text>`
+    ].join("");
+  }).join("") : `<text class="muted" x="78" y="210">문항 흐름 데이터 없음</text>`;
+  return {
+    key: "question-flow",
+    label: "문항 흐름",
+    fileName: "04-question-flow.png",
+    width,
+    height,
+    svg: createExamAnalysisChartSvgShell({
+      title: "문항 흐름",
+      subtitle: "문항 번호 순서대로 난이도 색상을 표시",
+      width,
+      height,
+      body
+    })
+  };
+}
+
+function createExamAnalysisChartSvgAssets(model = {}) {
+  if (!model?.questions?.length) return [];
+  return [
+    createExamAnalysisPartDistributionSvg(model),
+    createExamAnalysisDifficultyDistributionSvg(model),
+    createExamAnalysisPartDifficultySvg(model),
+    createExamAnalysisQuestionFlowSvg(model)
+  ];
+}
+
+function createExamAnalysisChartSvgFiles(model = {}) {
+  return createExamAnalysisChartSvgAssets(model).map((asset) => ({
+    name: `charts-svg/${asset.fileName.replace(/\.png$/i, ".svg")}`,
+    text: asset.svg,
+    label: `${asset.label} SVG`
+  }));
+}
+
+function convertExamAnalysisSvgToPngBlob(asset) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    const svgBlob = new Blob([asset.svg], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(svgBlob);
+    image.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = asset.width * examAnalysisChartPngExportScale;
+        canvas.height = asset.height * examAnalysisChartPngExportScale;
+        const context = canvas.getContext("2d");
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+          URL.revokeObjectURL(url);
+          if (blob) resolve(blob);
+          else reject(new Error("차트 PNG 생성에 실패했습니다."));
+        }, "image/png");
+      } catch (error) {
+        URL.revokeObjectURL(url);
+        reject(error);
+      }
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("차트 SVG를 이미지로 변환하지 못했습니다."));
+    };
+    image.src = url;
+  });
+}
+
+async function createExamAnalysisChartPngFiles(model = {}) {
+  const assets = createExamAnalysisChartSvgAssets(model);
+  const files = [];
+  for (const asset of assets) {
+    const blob = await convertExamAnalysisSvgToPngBlob(asset);
+    files.push({
+      name: `charts/${asset.fileName}`,
+      blob,
+      label: asset.label
+    });
+  }
+  return files;
+}
+
+let examAnalysisZipCrcTable = null;
+
+function getExamAnalysisZipCrcTable() {
+  if (examAnalysisZipCrcTable) return examAnalysisZipCrcTable;
+  examAnalysisZipCrcTable = new Uint32Array(256);
+  for (let index = 0; index < 256; index += 1) {
+    let value = index;
+    for (let bit = 0; bit < 8; bit += 1) {
+      value = value & 1 ? 0xedb88320 ^ (value >>> 1) : value >>> 1;
+    }
+    examAnalysisZipCrcTable[index] = value >>> 0;
+  }
+  return examAnalysisZipCrcTable;
+}
+
+function getExamAnalysisZipCrc32(bytes) {
+  const table = getExamAnalysisZipCrcTable();
+  let crc = 0xffffffff;
+  for (let index = 0; index < bytes.length; index += 1) {
+    crc = table[(crc ^ bytes[index]) & 0xff] ^ (crc >>> 8);
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function writeExamAnalysisZipUint16(view, offset, value) {
+  view.setUint16(offset, value, true);
+}
+
+function writeExamAnalysisZipUint32(view, offset, value) {
+  view.setUint32(offset, value >>> 0, true);
+}
+
+function getExamAnalysisZipDosDateTime(date = new Date()) {
+  const year = Math.max(1980, date.getFullYear());
+  const dosTime = (date.getHours() << 11) | (date.getMinutes() << 5) | Math.floor(date.getSeconds() / 2);
+  const dosDate = ((year - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate();
+  return { dosDate, dosTime };
+}
+
+async function getExamAnalysisZipFileBytes(file) {
+  if (file.blob instanceof Blob) return new Uint8Array(await file.blob.arrayBuffer());
+  return new TextEncoder().encode(String(file.text ?? ""));
+}
+
+async function createExamAnalysisZipBlob(files = []) {
+  const encoder = new TextEncoder();
+  const now = getExamAnalysisZipDosDateTime();
+  const chunks = [];
+  const centralChunks = [];
+  let offset = 0;
+
+  for (const file of files) {
+    const safeName = String(file.name || "file.txt").replace(/\\/g, "/");
+    const nameBytes = encoder.encode(safeName);
+    const dataBytes = await getExamAnalysisZipFileBytes(file);
+    const crc = getExamAnalysisZipCrc32(dataBytes);
+    const localHeader = new Uint8Array(30 + nameBytes.length);
+    const localView = new DataView(localHeader.buffer);
+    writeExamAnalysisZipUint32(localView, 0, 0x04034b50);
+    writeExamAnalysisZipUint16(localView, 4, 20);
+    writeExamAnalysisZipUint16(localView, 6, 0x0800);
+    writeExamAnalysisZipUint16(localView, 8, 0);
+    writeExamAnalysisZipUint16(localView, 10, now.dosTime);
+    writeExamAnalysisZipUint16(localView, 12, now.dosDate);
+    writeExamAnalysisZipUint32(localView, 14, crc);
+    writeExamAnalysisZipUint32(localView, 18, dataBytes.length);
+    writeExamAnalysisZipUint32(localView, 22, dataBytes.length);
+    writeExamAnalysisZipUint16(localView, 26, nameBytes.length);
+    writeExamAnalysisZipUint16(localView, 28, 0);
+    localHeader.set(nameBytes, 30);
+    chunks.push(localHeader, dataBytes);
+
+    const centralHeader = new Uint8Array(46 + nameBytes.length);
+    const centralView = new DataView(centralHeader.buffer);
+    writeExamAnalysisZipUint32(centralView, 0, 0x02014b50);
+    writeExamAnalysisZipUint16(centralView, 4, 20);
+    writeExamAnalysisZipUint16(centralView, 6, 20);
+    writeExamAnalysisZipUint16(centralView, 8, 0x0800);
+    writeExamAnalysisZipUint16(centralView, 10, 0);
+    writeExamAnalysisZipUint16(centralView, 12, now.dosTime);
+    writeExamAnalysisZipUint16(centralView, 14, now.dosDate);
+    writeExamAnalysisZipUint32(centralView, 16, crc);
+    writeExamAnalysisZipUint32(centralView, 20, dataBytes.length);
+    writeExamAnalysisZipUint32(centralView, 24, dataBytes.length);
+    writeExamAnalysisZipUint16(centralView, 28, nameBytes.length);
+    writeExamAnalysisZipUint16(centralView, 30, 0);
+    writeExamAnalysisZipUint16(centralView, 32, 0);
+    writeExamAnalysisZipUint16(centralView, 34, 0);
+    writeExamAnalysisZipUint16(centralView, 36, 0);
+    writeExamAnalysisZipUint32(centralView, 38, 0);
+    writeExamAnalysisZipUint32(centralView, 42, offset);
+    centralHeader.set(nameBytes, 46);
+    centralChunks.push(centralHeader);
+    offset += localHeader.length + dataBytes.length;
+  }
+
+  const centralSize = centralChunks.reduce((sum, chunk) => sum + chunk.length, 0);
+  const endHeader = new Uint8Array(22);
+  const endView = new DataView(endHeader.buffer);
+  writeExamAnalysisZipUint32(endView, 0, 0x06054b50);
+  writeExamAnalysisZipUint16(endView, 4, 0);
+  writeExamAnalysisZipUint16(endView, 6, 0);
+  writeExamAnalysisZipUint16(endView, 8, files.length);
+  writeExamAnalysisZipUint16(endView, 10, files.length);
+  writeExamAnalysisZipUint32(endView, 12, centralSize);
+  writeExamAnalysisZipUint32(endView, 16, offset);
+  writeExamAnalysisZipUint16(endView, 20, 0);
+  return new Blob([...chunks, ...centralChunks, endHeader], { type: "application/zip" });
+}
+
+function createExamAnalysisPackageReadme({ activeRun = {}, chartFiles = [] } = {}) {
+  return [
+    "Academy OS 시험분석 산출물 패키지",
+    "",
+    "사용 방법",
+    "1. texts/blog-draft.txt 내용을 네이버 블로그 에디터에 붙여넣고 문장을 최종 수정합니다.",
+    "2. texts/instagram-card-draft.txt 내용을 Canva 카드뉴스 문구로 사용합니다.",
+    `3. charts 폴더의 PNG 이미지는 ${examAnalysisChartPngExportScale}배 해상도 고화질 이미지입니다. 네이버 블로그 본문 또는 Canva 이미지 슬롯에 업로드합니다.`,
+    "4. charts-svg 폴더의 SVG 원본은 PPT/Canva에서 더 선명한 원본이 필요할 때 사용합니다.",
+    "5. 외부 에디터에서 수정한 최종본은 현재 앱으로 자동 동기화되지 않습니다.",
+    "",
+    "포함 차트",
+    chartFiles.length ? chartFiles.map((file) => `- ${file.name}`).join("\n") : "- 차트 없음",
+    "",
+    `분석: ${[activeRun.schoolName, activeRun.grade, activeRun.examCycle || activeRun.examTerm, activeRun.subject].filter(Boolean).join(" · ") || "시험분석"}`,
+    `생성 시각: ${new Date().toISOString()}`
+  ].join("\n");
+}
+
+function createExamAnalysisPackageManifest({ activeRun = {}, outputDrafts = {}, chartFiles = [] } = {}) {
+  return JSON.stringify({
+    generatedAt: new Date().toISOString(),
+    analysisRunId: activeRun.analysisRunId || "",
+    title: activeRun.title || "",
+    schoolName: activeRun.schoolName || "",
+    grade: activeRun.grade || "",
+    examCycle: activeRun.examCycle || activeRun.examTerm || "",
+    subject: activeRun.subject || "",
+    sourceOfTruth: "exam_analysis_runs.audit_summary.outputDrafts + final preview model",
+    texts: {
+      blog: "texts/blog-draft.txt",
+      instagram: "texts/instagram-card-draft.txt"
+    },
+    charts: chartFiles.map((file) => ({
+      label: file.label,
+      path: file.name
+    })),
+    chartSourceFiles: "charts-svg/*.svg",
+    imageQuality: {
+      pngScale: examAnalysisChartPngExportScale,
+      policy: "용량보다 선명도 우선"
+    },
+    canvaSlots: [
+      { slot: "cover", suggestedSource: "texts/instagram-card-draft.txt" },
+      { slot: "difficulty", suggestedSource: "charts/02-difficulty-distribution.png" },
+      { slot: "questionFlow", suggestedSource: "charts/04-question-flow.png" },
+      { slot: "partDistribution", suggestedSource: "charts/01-part-distribution.png" },
+      { slot: "partDifficulty", suggestedSource: "charts/03-part-difficulty.png" }
+    ],
+    draftStatus: {
+      blog: getExamAnalysisOutputSectionLabel(outputDrafts.blog),
+      instagram: getExamAnalysisOutputSectionLabel(outputDrafts.instagram)
+    }
+  }, null, 2);
+}
+
+async function downloadExamAnalysisChartPngZip({ activeRun = {}, model = {} } = {}) {
+  const chartFiles = await createExamAnalysisChartPngFiles(model);
+  const svgFiles = createExamAnalysisChartSvgFiles(model);
+  if (!chartFiles.length && !svgFiles.length) return { pngCount: 0, svgCount: 0 };
+  const zipBlob = await createExamAnalysisZipBlob([...chartFiles, ...svgFiles]);
+  const baseName = sanitizeExamAnalysisOutputFileNamePart(activeRun.title || [activeRun.schoolName, activeRun.grade, activeRun.examCycle || activeRun.examTerm].filter(Boolean).join(" "));
+  downloadBlobFile(zipBlob, `${baseName}-high-res-charts.zip`);
+  return { pngCount: chartFiles.length, svgCount: svgFiles.length };
+}
+
+async function downloadExamAnalysisOutputPackageZip({ activeRun = {}, model = {}, outputDrafts = {} } = {}) {
+  const blogText = getExamAnalysisOutputSectionText(outputDrafts.blog);
+  const instagramText = getExamAnalysisOutputSectionText(outputDrafts.instagram);
+  const chartFiles = await createExamAnalysisChartPngFiles(model);
+  const svgFiles = createExamAnalysisChartSvgFiles(model);
+  const files = [
+    { name: "README.txt", text: createExamAnalysisPackageReadme({ activeRun, chartFiles }) },
+    { name: "manifest.json", text: createExamAnalysisPackageManifest({ activeRun, outputDrafts, chartFiles }) },
+    { name: "texts/blog-draft.txt", text: blogText || "블로그 초안 없음" },
+    { name: "texts/instagram-card-draft.txt", text: instagramText || "인스타 카드 초안 없음" },
+    ...chartFiles,
+    ...svgFiles
+  ];
+  const zipBlob = await createExamAnalysisZipBlob(files);
+  const baseName = sanitizeExamAnalysisOutputFileNamePart(activeRun.title || [activeRun.schoolName, activeRun.grade, activeRun.examCycle || activeRun.examTerm].filter(Boolean).join(" "));
+  downloadBlobFile(zipBlob, `${baseName}-output-package.zip`);
+  return {
+    textCount: [blogText, instagramText].filter((text) => String(text || "").trim()).length,
+    chartCount: chartFiles.length,
+    svgCount: svgFiles.length
+  };
+}
+
 function ExamAnalysisOutputDraftPanel({
   activeRun,
   model,
   outputDrafts,
   outputStatus,
   generatingOutputType,
+  exportingOutputType,
   isSavingOutputDrafts,
   onGenerateOutputDraft,
   onCopyOutputDraft,
   onDownloadOutputDraft,
+  onDownloadChartPngZip,
+  onDownloadOutputPackageZip,
   onSaveOutputDrafts,
   onUpdateInput,
   onUpdateTeacherDraft
 }) {
   const hasRun = Boolean(activeRun?.analysisRunId);
   const hasReviewModel = Boolean(model?.questions?.length);
+  const isOutputBusy = isSavingOutputDrafts || Boolean(generatingOutputType) || Boolean(exportingOutputType);
   const blogText = getExamAnalysisOutputSectionText(outputDrafts.blog);
   const instagramText = getExamAnalysisOutputSectionText(outputDrafts.instagram);
   const inputCount = getExamAnalysisOutputInputCount(outputDrafts.inputs);
@@ -1666,7 +2135,7 @@ function ExamAnalysisOutputDraftPanel({
           {outputStatus.message ? <span className={`saveStateBadge ${outputStatus.state}`}>{outputStatus.message}</span> : null}
           <button
             className="secondaryButton"
-            disabled={!hasRun || !hasReviewModel || isSavingOutputDrafts || Boolean(generatingOutputType)}
+            disabled={!hasRun || !hasReviewModel || isOutputBusy}
             onClick={() => onGenerateOutputDraft("blog")}
             type="button"
           >
@@ -1674,15 +2143,31 @@ function ExamAnalysisOutputDraftPanel({
           </button>
           <button
             className="secondaryButton"
-            disabled={!hasRun || !hasReviewModel || isSavingOutputDrafts || Boolean(generatingOutputType)}
+            disabled={!hasRun || !hasReviewModel || isOutputBusy}
             onClick={() => onGenerateOutputDraft("instagram")}
             type="button"
           >
             {generatingOutputType === "instagram" ? "인스타 생성 중" : "인스타 카드 초안 생성"}
           </button>
           <button
+            className="secondaryButton"
+            disabled={!hasRun || !hasReviewModel || isOutputBusy}
+            onClick={onDownloadChartPngZip}
+            type="button"
+          >
+            {exportingOutputType === "charts" ? "차트 생성 중" : "차트 고화질 ZIP"}
+          </button>
+          <button
+            className="secondaryButton"
+            disabled={!hasRun || !hasReviewModel || isOutputBusy}
+            onClick={onDownloadOutputPackageZip}
+            type="button"
+          >
+            {exportingOutputType === "package" ? "패키지 생성 중" : "산출물 ZIP"}
+          </button>
+          <button
             className="primaryButton"
-            disabled={!hasRun || isSavingOutputDrafts || Boolean(generatingOutputType)}
+            disabled={!hasRun || isOutputBusy}
             onClick={onSaveOutputDrafts}
             type="button"
           >
@@ -1746,7 +2231,7 @@ function ExamAnalysisOutputDraftPanel({
               <span>{getExamAnalysisOutputSectionLabel(outputDrafts.blog)}</span>
             </div>
             <div className="examAnalysisOutputEditorActions">
-              <button disabled={isSavingOutputDrafts || Boolean(generatingOutputType)} onClick={onSaveOutputDrafts} type="button">저장</button>
+              <button disabled={isOutputBusy} onClick={onSaveOutputDrafts} type="button">저장</button>
               <button disabled={!blogText.trim()} onClick={() => onCopyOutputDraft("blog", blogText)} type="button">복사</button>
               <button disabled={!blogText.trim()} onClick={() => onDownloadOutputDraft("blog", blogText)} type="button">TXT</button>
             </div>
@@ -1765,7 +2250,7 @@ function ExamAnalysisOutputDraftPanel({
               <span>{getExamAnalysisOutputSectionLabel(outputDrafts.instagram)}</span>
             </div>
             <div className="examAnalysisOutputEditorActions">
-              <button disabled={isSavingOutputDrafts || Boolean(generatingOutputType)} onClick={onSaveOutputDrafts} type="button">저장</button>
+              <button disabled={isOutputBusy} onClick={onSaveOutputDrafts} type="button">저장</button>
               <button disabled={!instagramText.trim()} onClick={() => onCopyOutputDraft("instagram", instagramText)} type="button">복사</button>
               <button disabled={!instagramText.trim()} onClick={() => onDownloadOutputDraft("instagram", instagramText)} type="button">TXT</button>
             </div>
@@ -7399,6 +7884,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const [outputStatus, setOutputStatus] = useState({ state: "idle", message: "" });
   const [isSavingOutputDrafts, setIsSavingOutputDrafts] = useState(false);
   const [generatingOutputType, setGeneratingOutputType] = useState("");
+  const [exportingOutputType, setExportingOutputType] = useState("");
 
   const selectedExamPrepRow = useMemo(
     () => examPrepRows.find((row) => row.examPrepId === selectedExamPrepId) ?? null,
@@ -8430,6 +8916,63 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     });
   }
 
+  async function downloadChartPngZip() {
+    if (!activeRun?.analysisRunId) {
+      setOutputStatus({ state: "failed", message: "시험분석 산출물 · 분석을 먼저 저장해 주세요." });
+      return;
+    }
+    if (!finalPreviewModel?.questions?.length) {
+      setOutputStatus({ state: "failed", message: "시험분석 산출물 · 차트로 만들 검수 저장본이 없습니다." });
+      return;
+    }
+    setExportingOutputType("charts");
+    setOutputStatus({ state: "saving", message: "시험분석 산출물 · 고화질 차트 ZIP 생성 중" });
+    try {
+      const result = await downloadExamAnalysisChartPngZip({
+        activeRun,
+        model: finalPreviewModel
+      });
+      setOutputStatus({
+        state: result.pngCount ? "success" : "failed",
+        message: result.pngCount
+          ? `시험분석 산출물 · 고화질 차트 ZIP 완료 · PNG ${result.pngCount}개 · SVG ${result.svgCount}개`
+          : "시험분석 산출물 · 내보낼 차트가 없습니다."
+      });
+    } catch (error) {
+      setOutputStatus({ state: "failed", message: `시험분석 산출물 · 차트 ZIP 실패 · ${error.message}` });
+    } finally {
+      setExportingOutputType("");
+    }
+  }
+
+  async function downloadOutputPackageZip() {
+    if (!activeRun?.analysisRunId) {
+      setOutputStatus({ state: "failed", message: "시험분석 산출물 · 분석을 먼저 저장해 주세요." });
+      return;
+    }
+    if (!finalPreviewModel?.questions?.length) {
+      setOutputStatus({ state: "failed", message: "시험분석 산출물 · 패키지에 넣을 검수 저장본이 없습니다." });
+      return;
+    }
+    setExportingOutputType("package");
+    setOutputStatus({ state: "saving", message: "시험분석 산출물 · 산출물 ZIP 생성 중 · 현재 화면 수정본 기준" });
+    try {
+      const result = await downloadExamAnalysisOutputPackageZip({
+        activeRun,
+        model: finalPreviewModel,
+        outputDrafts
+      });
+      setOutputStatus({
+        state: "success",
+        message: `시험분석 산출물 · 산출물 ZIP 완료 · 텍스트 ${result.textCount}개 · PNG ${result.chartCount}개 · SVG ${result.svgCount}개`
+      });
+    } catch (error) {
+      setOutputStatus({ state: "failed", message: `시험분석 산출물 · 산출물 ZIP 실패 · ${error.message}` });
+    } finally {
+      setExportingOutputType("");
+    }
+  }
+
   const confirmedQuestionCount = Number(activeRun?.confirmedQuestionCount || 0);
   const questionRowNumbers = questionRows
     .map((question) => Number(question.questionNumber))
@@ -9213,12 +9756,15 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
 
           <ExamAnalysisOutputDraftPanel
             activeRun={activeRun}
+            exportingOutputType={exportingOutputType}
             generatingOutputType={generatingOutputType}
             isSavingOutputDrafts={isSavingOutputDrafts}
             model={finalPreviewModel}
             onGenerateOutputDraft={generateOutputDraft}
             onCopyOutputDraft={copyOutputDraft}
+            onDownloadChartPngZip={downloadChartPngZip}
             onDownloadOutputDraft={downloadOutputDraft}
+            onDownloadOutputPackageZip={downloadOutputPackageZip}
             onSaveOutputDrafts={saveOutputDrafts}
             onUpdateInput={updateOutputInput}
             onUpdateTeacherDraft={updateOutputTeacherDraft}

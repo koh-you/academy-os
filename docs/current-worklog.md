@@ -14,6 +14,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-04 P0. 시험분석 산출물 차트/ZIP 내보내기 1차 gate
+
+- 상태: 완료
+- 사용자 요청: Canva 직접 연동 전에 약속한 1차 gate인 `차트 PNG 내보내기`와 `산출물 ZIP 내보내기`를 먼저 마무리한다. 화질은 용량보다 우선한다.
+- 이번 작업 결과: `블로그/인스타 산출물 초안` 패널에 `차트 고화질 ZIP`과 `산출물 ZIP` 버튼을 추가했다. `차트 고화질 ZIP`은 최종 미리보기 모델을 기준으로 대단원별 출제 비중, 난이도 분포, 대단원별 난이도, 문항 흐름 차트를 3배 해상도 PNG로 생성하고, 같은 차트의 SVG 원본도 함께 묶는다. `산출물 ZIP`은 블로그/인스타 텍스트 초안, 고화질 차트 PNG, SVG 원본, README, manifest를 함께 내려받는다.
+- 저장/원천: 새 SQL edit 없음. 저장 원천은 기존 `exam_analysis_runs.audit_summary.outputDrafts`와 최종 미리보기 모델이다. 내보내기는 브라우저에서 파일을 생성하는 작업이며 Supabase 저장본을 바꾸지 않는다. 산출물 ZIP은 현재 화면의 선생님 수정본을 기준으로 만들 수 있으므로, 새로고침 유지가 필요한 문장은 먼저 `산출물 저장`을 눌러야 한다.
+- UX: 내보내기 중/완료/실패 상태는 산출물 패널 안의 기존 상태 배지와 checkpoint에서 바로 확인된다. 완료 메시지는 PNG/SVG 개수를 함께 보여준다. 외부 네이버 블로그/Canva/PPT에서 수정한 최종본은 앱으로 자동 동기화되지 않는다.
+- 다음 단계: Canva 카드뉴스 템플릿 구조를 확정한 뒤, 필요하면 Canva Connect API 인증/디자인 생성/디자인 링크 저장을 별도 gate로 구현한다. 이번 작업에는 Canva API 연동을 섞지 않았다.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check` 통과. `npm run test:production` 통과(total 236, failed 0). `npm run build` 통과. Vite 기존 chunk size warning만 발생했다.
+
 ### 2026-07-04 P0. 시험분석 블로그/인스타 산출물 입력과 초안 저장
 
 - 상태: 완료
