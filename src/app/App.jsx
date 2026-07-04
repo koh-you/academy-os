@@ -1033,6 +1033,32 @@ function buildExamAnalysisReviewDrafts(questions = []) {
   );
 }
 
+function isSameExamAnalysisReviewDraft(left = {}, right = {}) {
+  return (
+    String(left.unitName ?? "") === String(right.unitName ?? "") &&
+    String(left.mainType ?? "") === String(right.mainType ?? "") &&
+    String(left.subTypesText ?? "") === String(right.subTypesText ?? "") &&
+    String(left.difficulty ?? "") === String(right.difficulty ?? "") &&
+    String(left.reviewNote ?? "") === String(right.reviewNote ?? "") &&
+    Boolean(left.isImportantQuestion) === Boolean(right.isImportantQuestion) &&
+    Boolean(left.confirmed) === Boolean(right.confirmed)
+  );
+}
+
+function mergeExamAnalysisReviewDraftsFromSeed(currentDrafts = {}, previousSeedDrafts = {}, nextSeedDrafts = {}) {
+  return Object.fromEntries(
+    Object.entries(nextSeedDrafts).map(([questionNumber, nextSeedDraft]) => {
+      const currentDraft = currentDrafts[questionNumber];
+      if (!currentDraft) return [questionNumber, nextSeedDraft];
+      const previousSeedDraft = previousSeedDrafts[questionNumber];
+      if (previousSeedDraft && isSameExamAnalysisReviewDraft(currentDraft, previousSeedDraft)) {
+        return [questionNumber, nextSeedDraft];
+      }
+      return [questionNumber, currentDraft];
+    })
+  );
+}
+
 function parseExamAnalysisReviewSubTypes(value = "") {
   return String(value ?? "")
     .split(/[,，]/)
@@ -6819,6 +6845,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const fileInputRef = useRef(null);
   const didAutoSelectExamPrepRef = useRef(Boolean(examPrepRows[0]?.examPrepId));
   const reviewDraftRunIdRef = useRef("");
+  const reviewSeedDraftsRef = useRef({});
   const [analysisRuns, setAnalysisRuns] = useState([]);
   const [selectedRunId, setSelectedRunId] = useState("");
   const [selectedDetail, setSelectedDetail] = useState(null);
@@ -6988,25 +7015,22 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     const runId = activeRun?.analysisRunId || "";
     if (!runId || !questionRows.length) {
       reviewDraftRunIdRef.current = runId;
+      reviewSeedDraftsRef.current = {};
       setReviewDrafts({});
       return;
     }
     const seededDrafts = buildExamAnalysisReviewDrafts(questionRows);
     if (reviewDraftRunIdRef.current !== runId) {
       reviewDraftRunIdRef.current = runId;
+      reviewSeedDraftsRef.current = seededDrafts;
       setReviewDrafts(seededDrafts);
       return;
     }
+    const previousSeedDrafts = reviewSeedDraftsRef.current;
     setReviewDrafts((current) => {
-      const next = { ...current };
-      Object.keys(next).forEach((questionNumber) => {
-        if (!seededDrafts[questionNumber]) delete next[questionNumber];
-      });
-      Object.entries(seededDrafts).forEach(([questionNumber, draftValue]) => {
-        if (!next[questionNumber]) next[questionNumber] = draftValue;
-      });
-      return next;
+      return mergeExamAnalysisReviewDraftsFromSeed(current, previousSeedDrafts, seededDrafts);
     });
+    reviewSeedDraftsRef.current = seededDrafts;
   }, [activeRun?.analysisRunId, questionRows.length, reviewSeedKey]);
 
   function applyExamPrepRow(row) {
@@ -7420,7 +7444,6 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       const filledCount = result.rowFill?.filledCount || result.questions?.filter((question) => question.rowStatus === "ai_filled").length || 0;
       const totalCount = result.rowFill?.totalQuestionCount || questionRows.length;
       setSelectedDetail(result);
-      setReviewDrafts(buildExamAnalysisReviewDrafts(result.questions ?? []));
       setRowFillStatus({
         state: "success",
         message: `시험분석 · AI 행 채움 완료 · ${filledCount}/${totalCount}개`
@@ -7526,7 +7549,6 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       const updatedCount = result.analysisRun?.auditSummary?.rowRefine?.updatedCount || result.rowRefine?.updatedCount || result.rowRefineResult?.returnedCount || 0;
       const targetCount = result.analysisRun?.auditSummary?.rowRefine?.targetQuestionNumbers?.length || targetQuestionNumbers.length;
       setSelectedDetail(result);
-      setReviewDrafts(buildExamAnalysisReviewDrafts(result.questions ?? []));
       setRowRefineStatus({
         state: "success",
         message: `시험분석 · AI 2차 수정 완료 · ${updatedCount}/${targetCount}개`

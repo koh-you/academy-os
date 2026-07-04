@@ -22,7 +22,7 @@
 - 업로드 UX: PDF 업로드 패널에 드롭존을 추가했다. PDF가 아닌 파일을 드롭하면 같은 작업 패널 안에 실패 상태가 표시된다.
 - 화면 밀도: 시험분석 보드/컬럼/카드/기본정보 입력 패딩과 높이를 줄여 테스트 화면에서 카드가 더 작게 보이도록 조정했다.
 - 버튼 문구: AI 실행 버튼의 괄호 과금 표현을 제거했다. AI가 들어간 버튼은 여전히 토큰 사용 가능성이 있는 수동 실행 버튼이다.
-- 검수 반영: `AI 행 채움` 완료 직후 `reviewDrafts`를 서버가 돌려준 질문 row로 다시 seed해, 새로고침 없이도 `AI 결과 검수` 표에 채움 결과가 바로 보이게 했다.
+- 검수 반영: 빈 1~N 행에서 만들어진 `reviewDrafts`가 AI 행 채움 이후에도 사용자 편집본처럼 보존되던 원인을 수정했다. 이전 seed 그대로인 draft만 새 원본 row로 갱신하고, 사용자가 실제로 수정한 local draft는 보존한다.
 - 문항 crop 확인: 현재 저장된 `source_evidence.boundary`는 pageStart/pageEnd와 positionHint 중심이라 정확한 bounding box crop에는 부족하다. 실제 crop 팝업을 만들려면 PDF 페이지 렌더 이미지와 문항별 좌표를 별도 저장하는 gate가 먼저 필요하다.
 - SQL 주의: 기존 저장 구조와 JSON 필드만 사용하므로 Supabase SQL Editor 적용은 필요 없다.
 - 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check` 통과. `npm run test:production` 통과(total 232, failed 0). `npm run build` 통과. Vite 기존 chunk size warning만 발생했다.
