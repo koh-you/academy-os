@@ -22,6 +22,7 @@
 - 저장 원천: 새 SQL edit 없이 기존 `exam_analysis_questions.teacher_fields`/`final_fields`에 `isImportantQuestion`을 저장한다. 선생님 체크값이 원본이며, AI 추천/자동 후보/난이도 기반 추정값이 이를 덮어쓰지 않는다.
 - 최종 미리보기: 기존 난이도/메모 기반 자동 `주요문항 후보` 계산을 제거하고, 선생님이 체크한 문항만 `주요문항 · 선생님 체크 저장본`으로 표시한다. 상세 표에도 읽기 전용 `주요` 열을 추가해 새로고침 후 유지 여부를 확인할 수 있게 했다.
 - 테스트 보강: 프로덕션 시나리오 테스트의 최종 미리보기 기대 문구를 `주요문항 후보`/`AI 추천 다음 단계`에서 선생님 체크 저장본 기준으로 갱신했다.
+- 사람 검수: 사용자가 실제 화면에서 주요문항을 확정하고, 새로고침 후에도 체크 저장값이 유지되는 것을 확인했다.
 - SQL 주의: 기존 JSON 필드 저장만 사용하므로 Supabase SQL Editor 적용은 필요 없다.
 - 검증: `node --check api/routes/examAnalysisPipeline.js`, `node --check src/domains/exams/finalPreview.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check` 통과. `npm run test:production` 통과(total 232, failed 0). `npm run build` 통과. Vite 기존 chunk size warning만 발생했다.
 
