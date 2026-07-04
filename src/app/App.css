@@ -2052,6 +2052,25 @@ button {
   line-height: 1.55;
 }
 
+.examAnalysisOutputGuide small {
+  color: #17213d;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.examAnalysisOutputGuide ol {
+  color: #17213d;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.55;
+  margin: 0 0 0 18px;
+  padding: 0;
+}
+
+.examAnalysisOutputGuide li {
+  padding-left: 2px;
+}
+
 .examAnalysisOutputVisibility {
   align-items: center;
   display: flex;
