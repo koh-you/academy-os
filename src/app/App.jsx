@@ -1446,39 +1446,6 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
         </section>
       </div>
 
-      <div className="examAnalysisPreviewTableWrap">
-        <table className="examAnalysisPreviewTable">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>주요</th>
-              <th>페이지</th>
-              <th>대단원</th>
-              <th>중단원</th>
-              <th>주유형</th>
-              <th>보조유형</th>
-              <th>난이도</th>
-              <th>검수 메모</th>
-            </tr>
-          </thead>
-          <tbody>
-            {model.questions.map((question) => (
-              <tr key={question.questionRowId || question.questionNumber}>
-                <td>{question.questionNumber}</td>
-                <td>{question.isImportantQuestion ? "체크" : "-"}</td>
-                <td>{question.pageLabel || "-"}</td>
-                <td>{question.partName || "미입력"}</td>
-                <td>{question.unitName || "미입력"}</td>
-                <td>{question.mainType || "미입력"}</td>
-                <td>{question.subTypes.join(", ") || "-"}</td>
-                <td>{question.difficulty || "미정"}</td>
-                <td>{question.reviewNote || "-"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
       <div className="examAnalysisPreviewPolicy">
         <span>난이도 수정과 저장은 위 AI 결과 검수 표에서 진행합니다.</span>
         <span>{model.notes.formulaPolicy}</span>
@@ -8585,7 +8552,6 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                       const mainTypeMeta = getSsenTypeByCode(draftValue.mainTypeCode);
                       const isSsenEditing = editingSsenQuestionNumber === String(question.questionNumber);
                       const unitLabel = mainTypeMeta?.unitName || draftValue.unitName || "단원 선택 필요";
-                      const partLabel = mainTypeMeta?.partName || draftValue.partName || "";
                       const mainTypeLabel = mainTypeMeta?.typeName || draftValue.mainType || "주유형 선택 필요";
                       const subTypeLabels = selectedSubTypes.length
                         ? selectedSubTypes.map((type) => type.typeName)
@@ -8630,7 +8596,6 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                             ) : (
                               <div className="examAnalysisSubTypeChips readonly compact">
                                 <span>{unitLabel}</span>
-                                {partLabel && partLabel !== unitLabel ? <span className="mutedChip">{partLabel}</span> : null}
                               </div>
                             )}
                           </td>

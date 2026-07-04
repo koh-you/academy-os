@@ -1553,12 +1553,6 @@ button {
   min-width: 0;
 }
 
-.examAnalysisSubTypeChips .mutedChip {
-  background: #f8fafc;
-  border-color: #d8e3f8;
-  color: #64748b;
-}
-
 .examAnalysisReviewTable .ssenMetaCell {
   color: #475569;
   display: grid;
@@ -1963,77 +1957,6 @@ button {
   font-weight: 850;
   line-height: 1.45;
   margin: 0;
-}
-
-.examAnalysisPreviewTableWrap {
-  border: 1px solid #bfdbfe;
-  border-radius: 8px;
-  overflow: auto;
-}
-
-.examAnalysisPreviewTable {
-  border-collapse: collapse;
-  min-width: 980px;
-  table-layout: fixed;
-  width: 100%;
-}
-
-.examAnalysisPreviewTable th {
-  background: #eff6ff;
-  border-bottom: 1px solid #bfdbfe;
-  color: #475569;
-  font-size: 12px;
-  font-weight: 950;
-  height: 38px;
-  padding: 8px;
-  text-align: left;
-}
-
-.examAnalysisPreviewTable td {
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  color: #17213d;
-  font-size: 13px;
-  font-weight: 800;
-  padding: 8px;
-  vertical-align: top;
-}
-
-.examAnalysisPreviewTable th:nth-child(1),
-.examAnalysisPreviewTable td:nth-child(1) {
-  text-align: center;
-  width: 48px;
-}
-
-.examAnalysisPreviewTable th:nth-child(2),
-.examAnalysisPreviewTable td:nth-child(2) {
-  text-align: center;
-  width: 58px;
-}
-
-.examAnalysisPreviewTable th:nth-child(3),
-.examAnalysisPreviewTable td:nth-child(3) {
-  width: 74px;
-}
-
-.examAnalysisPreviewTable th:nth-child(4),
-.examAnalysisPreviewTable td:nth-child(4) {
-  width: 150px;
-}
-
-.examAnalysisPreviewTable th:nth-child(5),
-.examAnalysisPreviewTable td:nth-child(5) {
-  width: 220px;
-}
-
-.examAnalysisPreviewTable th:nth-child(6),
-.examAnalysisPreviewTable td:nth-child(6) {
-  width: 220px;
-}
-
-.examAnalysisPreviewTable th:nth-child(7),
-.examAnalysisPreviewTable td:nth-child(7) {
-  width: 80px;
 }
 
 .examAnalysisPreviewPolicy {
