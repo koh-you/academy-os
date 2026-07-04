@@ -1687,6 +1687,15 @@ function deleteExamAnalysisRunRequest(analysisRunId) {
     });
 }
 
+function deleteExamAnalysisSourceRequest(sourceId) {
+  return fetch(apiUrl(`/api/exam-analysis-source-files?id=${encodeURIComponent(sourceId)}`), { method: "DELETE" })
+    .then(async (response) => {
+      const result = await response.json();
+      if (!response.ok || !result.ok) throw new Error(result.error || "PDF 원본 삭제 실패");
+      return result;
+    });
+}
+
 function fetchExamAnalysisSsenTypesRequest(payload = {}) {
   const params = new URLSearchParams();
   if (payload.analysisRunId) params.set("analysisRunId", payload.analysisRunId);
@@ -7045,6 +7054,8 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const [uploadStatus, setUploadStatus] = useState({ state: "idle", message: "" });
   const [deleteStatus, setDeleteStatus] = useState({ state: "idle", message: "" });
   const [deletingRunId, setDeletingRunId] = useState("");
+  const [sourceDeleteStatus, setSourceDeleteStatus] = useState({ state: "idle", message: "" });
+  const [deletingSourceId, setDeletingSourceId] = useState("");
   const [extractStatus, setExtractStatus] = useState({ state: "idle", message: "" });
   const [extractingSourceId, setExtractingSourceId] = useState("");
   const [visionStatus, setVisionStatus] = useState({ state: "idle", message: "" });
@@ -7483,6 +7494,32 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       setUploadStatus({ state: "failed", message: `시험분석 PDF · 업로드 실패 · ${error.message}` });
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  async function deleteSourceFile(sourceFile) {
+    if (!sourceFile?.sourceId) return;
+    const isLastSource = sourceFiles.length <= 1;
+    const confirmMessage = isLastSource
+      ? `${sourceFile.originalFileName || "PDF 원본"} 파일을 삭제할까요?\n마지막 PDF 원본입니다. 문항 행과 검수 저장본은 유지되지만 이후 PDF 확인/AI 실행에는 원본이 필요합니다.`
+      : `${sourceFile.originalFileName || "PDF 원본"} 파일 1건을 삭제할까요?\n문항 행과 검수 저장본은 유지됩니다.`;
+    if (!window.confirm(confirmMessage)) return;
+    setDeletingSourceId(sourceFile.sourceId);
+    setSourceDeleteStatus({ state: "saving", message: "시험분석 PDF · 삭제 중" });
+    try {
+      await deleteExamAnalysisSourceRequest(sourceFile.sourceId);
+      setSourceDeleteStatus({ state: "success", message: "시험분석 PDF · 삭제 완료" });
+      if (activeRun?.analysisRunId) {
+        await loadRuns(activeRun.analysisRunId);
+        await loadRunDetail(activeRun.analysisRunId);
+      } else {
+        await loadRuns(selectedRunId);
+      }
+    } catch (error) {
+      setSourceDeleteStatus({ state: "failed", message: `시험분석 PDF · 삭제 실패 · ${error.message}` });
+      if (selectedRunId) await loadRunDetail(selectedRunId);
+    } finally {
+      setDeletingSourceId("");
     }
   }
 
@@ -7984,7 +8021,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       </div>
 
       <div className="examAnalysisStatusBar">
-        {[loadStatus, saveStatus, uploadStatus, extractStatus, visionStatus, confirmStatus, boundaryStatus, rowFillStatus, rowRefineStatus, reviewStatus, deleteStatus].filter((item) => item.message).map((item, index) => (
+        {[loadStatus, saveStatus, uploadStatus, sourceDeleteStatus, extractStatus, visionStatus, confirmStatus, boundaryStatus, rowFillStatus, rowRefineStatus, reviewStatus, deleteStatus].filter((item) => item.message).map((item, index) => (
           <span className={`saveStateBadge ${item.state}`} key={`${item.message}-${index}`}>{item.message}</span>
         ))}
       </div>
@@ -8267,6 +8304,14 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                       {getExamAnalysisSourceOpenUrl(file) ? (
                         <a className="secondaryButton linkButton" href={getExamAnalysisSourceOpenUrl(file)} rel="noreferrer" target="_blank">열기</a>
                       ) : null}
+                      <button
+                        className="dangerSoftButton compact"
+                        disabled={deletingSourceId === file.sourceId || extractingSourceId === file.sourceId || checkingSourceId === file.sourceId}
+                        onClick={() => deleteSourceFile(file)}
+                        type="button"
+                      >
+                        {deletingSourceId === file.sourceId ? "삭제 중" : "삭제"}
+                      </button>
                     </div>
                   </div>
                 );

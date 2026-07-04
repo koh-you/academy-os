@@ -491,6 +491,38 @@ export async function deleteExamAnalysisRun(analysisRunId) {
   };
 }
 
+export async function deleteExamAnalysisSource(sourceId) {
+  if (!sourceId) throw new Error("sourceId가 필요합니다.");
+  requireServiceRole();
+  const { sourceFile } = await getExamAnalysisSource(sourceId);
+  if (!sourceFile?.sourceId) throw new Error("PDF 원본 정보를 찾지 못했습니다.");
+  const deletedRows = await deleteRows(
+    "exam_analysis_sources",
+    `source_id=eq.${encodeURIComponent(sourceId)}`
+  );
+  await patchRows(
+    "exam_analysis_runs",
+    `analysis_run_id=eq.${encodeURIComponent(sourceFile.analysisRunId)}`,
+    {
+      updated_at: new Date().toISOString()
+    }
+  );
+  await recordExamAnalysisEvent({
+    analysisRunId: sourceFile.analysisRunId,
+    eventType: "source_deleted",
+    message: "PDF 원본 1건이 삭제되었습니다.",
+    payload: {
+      sourceId,
+      originalFileName: sourceFile.originalFileName,
+      storagePath: sourceFile.storagePath
+    }
+  });
+  return {
+    source: databaseSource,
+    deletedSource: deletedRows[0] ? fromSourceRow(deletedRows[0]) : sourceFile
+  };
+}
+
 export async function confirmExamAnalysisQuestionCount({
   analysisRunId,
   questionCount,

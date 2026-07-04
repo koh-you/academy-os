@@ -51,6 +51,7 @@ import { getAiStatus, polishLessonComment } from "./routes/commentPolish.js";
 import {
   confirmExamAnalysisQuestionCount,
   deleteExamAnalysisRun,
+  deleteExamAnalysisSource,
   examAnalysisSourceBucket,
   getExamAnalysisRun,
   getExamAnalysisSource,
@@ -2708,6 +2709,25 @@ const server = http.createServer(async (request, response) => {
       const payload = await readJsonBody(request, { limitBytes: 68 * 1024 * 1024 });
       const result = await uploadExamAnalysisSourceFile(payload);
       sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "DELETE" && requestUrl.pathname === "/api/exam-analysis-source-files") {
+    try {
+      const sourceId = requestUrl.searchParams.get("id") || requestUrl.searchParams.get("sourceId");
+      if (!sourceId) throw new Error("sourceId가 필요합니다.");
+      const { sourceFile } = await getExamAnalysisSource(sourceId);
+      if (!sourceFile?.sourceId) throw new Error("PDF 원본 정보를 찾지 못했습니다.");
+      const storageDeleted = await deleteStorageObject(sourceFile.bucketId || examAnalysisSourceBucket, sourceFile.storagePath);
+      const result = await deleteExamAnalysisSource(sourceId);
+      sendJson(request, response, 200, {
+        ok: true,
+        ...result,
+        storageDeleted
+      });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
     }
