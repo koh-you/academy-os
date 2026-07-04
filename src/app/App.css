@@ -1306,6 +1306,15 @@ button {
   background: #ecfdf5;
 }
 
+.examAnalysisReviewTable tr.confirmed.needsReview td {
+  background: #fff7ed;
+}
+
+.examAnalysisReviewTable tr.needsReview td:first-child,
+.examAnalysisReviewTable tr.confirmed.needsReview td:first-child {
+  border-left: 4px solid #fb923c;
+}
+
 .examAnalysisReviewTable th:nth-child(1),
 .examAnalysisReviewTable td:nth-child(1) {
   width: 46px;

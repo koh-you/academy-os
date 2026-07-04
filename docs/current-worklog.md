@@ -14,6 +14,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-04 P0. 시험분석 검수 표 2차 수정 대상 표시 보강
+
+- 상태: 완료
+- 사용자 요청: `AI 결과 검수` 표의 `쎈 주유형/쎈 보조유형` 표기를 `주유형/보조유형`으로 줄이고, 확정 체크가 되어 있어도 AI 2차 수정 대상인 행은 초록색 확정 행처럼 보이지 않게 한다. 최종 미리보기의 단원/유형 차트는 원천 데이터를 먼저 확인한다.
+- 이번 작업 결과: 검수 표 헤더와 주유형 placeholder에서 `쎈` 접두어를 제거했다. `AI 2차 수정` 버튼의 대상 계산과 같은 기준을 쓰는 `isExamAnalysisQuestionAiReviewTarget`/`isExamAnalysisQuestionRefineTarget` 판정을 분리했고, `needsReview`가 남은 행은 확정 체크가 있어도 `2차 수정 필요` 상태와 주황색 강조가 먼저 보인다.
+- 저장 원천: 저장 구조는 바꾸지 않았다. AI 초안은 기존 `exam_analysis_questions.ai_fields`, 선생님 저장본은 기존 `teacher_fields`/`final_fields`가 원본이다. 새 SQL edit은 필요 없다.
+- 단원 원천 확인: `api/data/ssenTypeIndex.json`에는 `partName`(대단원에 가까운 묶음), `unitNo`, `unitName`(쎈 중단원), `typeName`(주유형 후보)이 있다. 현재 문항 row에는 `unit_name/main_type/sub_types`와 `ai_fields.mainTypeCode/subTypeCodes`가 저장되며, 대단원/중단원 메타를 확정 저장본으로 쓰려면 코드 메타를 teacher/final source에 연결하는 별도 gate가 필요하다.
+- 차트 판단: 현재 `단원별 출제 비중`은 검수 저장본의 `unitName` 기준이라 쎈 중단원 집계에 가깝다. `주요 유형` 차트는 너무 세분화될 수 있으므로 다음 단계에서 대단원/중단원/난이도/주요문항 중 무엇을 산출물 지표로 쓸지 정한 뒤 바꾼다.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check` 통과. `npm run test:production` 통과(total 233, failed 0). `npm run build` 통과. Vite 기존 chunk size warning만 발생했다.
+
 ### 2026-07-04 P0. 시험분석 재테스트 전 업로드/검수 UX 정리
 
 - 상태: 완료

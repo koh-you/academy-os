@@ -1067,6 +1067,18 @@ function parseExamAnalysisReviewSubTypes(value = "") {
     .slice(0, 3);
 }
 
+function isExamAnalysisQuestionAiReviewTarget(question = {}) {
+  return Boolean(
+    question.rowStatus === "missing" ||
+    question.aiFields?.needsReview ||
+    question.aiFields?.warnings?.length
+  );
+}
+
+function isExamAnalysisQuestionRefineTarget(question = {}, draftValue = {}) {
+  return !draftValue.confirmed || isExamAnalysisQuestionAiReviewTarget(question);
+}
+
 const examAnalysisDifficultyOptions = ["하", "중하", "중", "중상", "상"];
 
 function applyExamAnalysisReviewDraftsToQuestions(questions = [], reviewDrafts = {}) {
@@ -7514,8 +7526,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     return questionRows
       .filter((question) => {
         const draftValue = reviewDrafts[String(question.questionNumber)] ?? createExamAnalysisReviewDraft(question);
-        const needsReview = question.rowStatus === "missing" || question.aiFields?.needsReview || question.aiFields?.warnings?.length;
-        return !draftValue.confirmed || needsReview;
+        return isExamAnalysisQuestionRefineTarget(question, draftValue);
       })
       .map((question) => Number(question.questionNumber))
       .filter((number) => Number.isInteger(number) && number > 0)
@@ -7610,11 +7621,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   }));
   const boundaryDetectedCount = boundaryRows.filter(({ boundary }) => Boolean(boundary?.pageStart)).length;
   const aiFilledRows = questionRows.filter((question) => question.rowStatus === "ai_filled" || question.unitName || question.mainType);
-  const aiNeedsReviewRows = questionRows.filter((question) => (
-    question.rowStatus === "missing" ||
-    question.aiFields?.needsReview ||
-    question.aiFields?.warnings?.length
-  ));
+  const aiNeedsReviewRows = questionRows.filter(isExamAnalysisQuestionAiReviewTarget);
   const reviewRowsReady = questionRows.length > 0 && (Boolean(rowFill) || aiFilledRows.length > 0 || Boolean(teacherReview));
   const confirmedReviewCount = questionRows.filter((question) => {
     const draftValue = reviewDrafts[String(question.questionNumber)] ?? createExamAnalysisReviewDraft(question);
@@ -7622,7 +7629,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   }).length;
   const refineTargetCount = questionRows.filter((question) => {
     const draftValue = reviewDrafts[String(question.questionNumber)] ?? createExamAnalysisReviewDraft(question);
-    return !draftValue.confirmed || question.rowStatus === "missing" || question.aiFields?.needsReview || question.aiFields?.warnings?.length;
+    return isExamAnalysisQuestionRefineTarget(question, draftValue);
   }).length;
   const questionCountButtonLabel = isConfirmingQuestionCount
     ? "확정 중"
@@ -8084,7 +8091,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
             {questionRows.length ? (
               <div className="examAnalysisRowFillGrid">
                 {questionRows.map((question) => {
-                  const needsReview = question.rowStatus === "missing" || question.aiFields?.needsReview || question.aiFields?.warnings?.length;
+                  const needsReview = isExamAnalysisQuestionAiReviewTarget(question);
                   return (
                     <div className={needsReview ? "examAnalysisRowFillCard needsReview" : "examAnalysisRowFillCard"} key={question.questionRowId || question.questionNumber}>
                       <strong>{question.questionNumber}</strong>
@@ -8169,8 +8176,8 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                       <th>확정</th>
                       <th>주요</th>
                       <th>단원</th>
-                      <th>쎈 주유형</th>
-                      <th>쎈 보조유형</th>
+                      <th>주유형</th>
+                      <th>보조유형</th>
                       <th>난이도</th>
                       <th>검수 메모</th>
                       <th>상태</th>
@@ -8179,7 +8186,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   <tbody>
                     {questionRows.map((question) => {
                       const draftValue = reviewDrafts[String(question.questionNumber)] ?? createExamAnalysisReviewDraft(question);
-                      const needsReview = question.rowStatus === "missing" || question.aiFields?.needsReview || question.aiFields?.warnings?.length;
+                      const needsReview = isExamAnalysisQuestionAiReviewTarget(question);
                       const reviewClassName = [
                         needsReview ? "needsReview" : "",
                         draftValue.confirmed ? "confirmed" : ""
@@ -8214,7 +8221,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                             <input
                               value={draftValue.mainType}
                               onChange={(event) => updateReviewDraft(question.questionNumber, { mainType: event.target.value })}
-                              placeholder="쎈 주유형"
+                              placeholder="주유형"
                             />
                           </td>
                           <td>
@@ -8245,7 +8252,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                             />
                           </td>
                           <td className="reviewStateCell">
-                            {draftValue.confirmed ? "확정" : needsReview ? "재확인" : "미확정"}
+                            {needsReview ? "2차 수정 필요" : draftValue.confirmed ? "확정" : "미확정"}
                           </td>
                         </tr>
                       );
