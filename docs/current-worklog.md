@@ -14,6 +14,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-04 P0. 시험분석 산출물 저장 원천 확인과 local draft 보호
+
+- 상태: 완료
+- 사용자 요청: 새 세션 시작 기준으로 `AGENTS.md`, `docs/current-worklog.md`, `docs/home-codex-setup.md`를 읽고, 시험분석 v2와 블로그/인스타/Canva 산출물 작업의 저장 원천을 먼저 확인한다. `AI 초안 -> 선생님 검수/수정 -> 선생님 저장본 원본화` 원칙을 반드시 적용한다.
+- 저장 원천 확인: 시험분석 v2는 옛 `app_state.examAnalyses`나 옛 `exam-analysis-sources` bucket을 쓰지 않고, `exam_analysis_runs`, `exam_analysis_sources`, `exam_analysis_questions`, `exam_analysis_ai_jobs`, `exam_analysis_events`, Storage bucket `exam-analysis-pipeline-sources`를 사용한다. PDF 텍스트/페이지 정보는 `exam_analysis_sources`, AI 원본 검증 결과는 `exam_analysis_runs.extraction_summary.visionCheck`, 선생님 확정 문항 수는 `exam_analysis_runs.confirmed_question_count`, 문항별 AI 초안은 `exam_analysis_questions.ai_fields`, 선생님 검수본은 `teacher_fields`/`final_fields`가 원천이다.
+- 산출물 원천 확인: 블로그/인스타 산출물은 새 SQL edit 없이 `exam_analysis_runs.audit_summary.outputDrafts.inputs/blog/instagram`에 저장한다. `aiDraft`는 AI 초안, `teacherDraft`는 선생님 수정본이며 화면과 ZIP/TXT 내보내기는 `teacherDraft > aiDraft > empty` 순서로 읽는다. 산출물 ZIP의 PNG/SVG 차트는 Supabase에 저장되는 최종 파일이 아니라 브라우저에서 현재 검수/수정 화면 기준으로 생성되는 내보내기 결과다.
+- 이번 보강: 저장된 선생님 수정본은 기존에도 보호됐지만, 저장 전 local draft가 있는 상태에서 AI 초안을 재생성하거나 run 상세가 다시 로드되면 local 수정본이 서버 seed로 되돌아갈 수 있는 위험이 있었다. `mergeExamAnalysisOutputDraftsPreservingLocalEdits`를 추가해 같은 run의 dirty 상태에서는 local `teacherTouched` draft를 보존하고, AI 재생성 후에도 `선생님 수정본 저장 필요` 상태가 유지되게 했다.
+- 다음 gate: 실제 테스트 PDF를 처음부터 새 run으로 돌리고 `PDF 업로드 -> 텍스트 추출 -> AI 원본 검증 -> 문항 수 선생님 확정 -> 1~N 행 고정 -> AI 행 채움 -> 선생님 검수 저장 -> 산출물 ZIP -> Canva 슬롯 삽입` 순서로 검증한다. 데이터가 꼬이면 필터 보정이 아니라 삭제 후 재생성/마이그레이션/원천 수정/기능 재구성 중 하나로 판단한다.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check` 통과. `npm run test:production` 통과(total 236, failed 0). `npm run build` 통과. Vite 기존 chunk size warning만 발생했다.
+
 ### 2026-07-04 P0. 시험분석 산출물 작성 기준 지침화
 
 - 상태: 완료

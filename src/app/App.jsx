@@ -1581,6 +1581,29 @@ function getExamAnalysisOutputLastSavedAt(outputDrafts = {}) {
     .at(-1) || "";
 }
 
+function mergeExamAnalysisOutputSectionPreservingLocalEdits(nextSection = {}, localSection = {}) {
+  if (!localSection?.teacherTouched) return nextSection;
+  return {
+    ...nextSection,
+    teacherDraft: localSection.teacherDraft ?? "",
+    teacherTouched: true,
+    teacherUpdatedAt: localSection.teacherUpdatedAt || nextSection.teacherUpdatedAt || "",
+    updatedAt: nextSection.updatedAt || localSection.updatedAt || ""
+  };
+}
+
+function mergeExamAnalysisOutputDraftsPreservingLocalEdits(nextDrafts = {}, localDrafts = {}) {
+  return {
+    ...nextDrafts,
+    inputs: {
+      ...(nextDrafts.inputs ?? {}),
+      ...(localDrafts.inputs ?? {})
+    },
+    blog: mergeExamAnalysisOutputSectionPreservingLocalEdits(nextDrafts.blog ?? {}, localDrafts.blog ?? {}),
+    instagram: mergeExamAnalysisOutputSectionPreservingLocalEdits(nextDrafts.instagram ?? {}, localDrafts.instagram ?? {})
+  };
+}
+
 function getExamAnalysisOutputInputCount(inputs = {}) {
   return examAnalysisOutputInputFields.filter((field) => String(inputs[field.key] || "").trim()).length;
 }
@@ -8140,7 +8163,15 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
 
   useEffect(() => {
     const runId = activeRun?.analysisRunId || "";
-    setOutputDrafts(getExamAnalysisOutputDraftsFromRun(activeRun));
+    const nextDrafts = getExamAnalysisOutputDraftsFromRun(activeRun);
+    const shouldPreserveLocalDraft = Boolean(runId)
+      && outputDraftRunIdRef.current === runId
+      && outputStatus.state === "dirty";
+    setOutputDrafts((current) => (
+      shouldPreserveLocalDraft
+        ? mergeExamAnalysisOutputDraftsPreservingLocalEdits(nextDrafts, current)
+        : nextDrafts
+    ));
     if (outputDraftRunIdRef.current !== runId) {
       outputDraftRunIdRef.current = runId;
       setOutputStatus({ state: "idle", message: "" });
@@ -8918,6 +8949,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     }
     const section = outputDrafts[outputType] ?? {};
     const hasTeacherDraft = Boolean(section.teacherTouched || section.teacherUpdatedAt || section.teacherDraft);
+    const hasUnsavedTeacherDraft = Boolean(section.teacherTouched);
     if (hasTeacherDraft && !window.confirm("선생님 수정본은 유지하고 AI 초안만 다시 생성할까요?")) {
       return;
     }
@@ -8932,11 +8964,18 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
         outputType,
         outputInputs: outputDrafts.inputs
       });
+      const generatedDrafts = getExamAnalysisOutputDraftsFromRun(result.analysisRun);
       setSelectedDetail(result);
-      setOutputDrafts(getExamAnalysisOutputDraftsFromRun(result.analysisRun));
+      setOutputDrafts(hasUnsavedTeacherDraft
+        ? mergeExamAnalysisOutputDraftsPreservingLocalEdits(generatedDrafts, outputDrafts)
+        : generatedDrafts);
       setOutputStatus({
-        state: "success",
-        message: outputType === "blog" ? "시험분석 산출물 · 블로그 초안 생성 완료" : "시험분석 산출물 · 인스타 카드 초안 생성 완료"
+        state: hasUnsavedTeacherDraft ? "dirty" : "success",
+        message: hasUnsavedTeacherDraft
+          ? (outputType === "blog"
+              ? "시험분석 산출물 · 블로그 초안 생성 완료 · 선생님 수정본 저장 필요"
+              : "시험분석 산출물 · 인스타 카드 초안 생성 완료 · 선생님 수정본 저장 필요")
+          : (outputType === "blog" ? "시험분석 산출물 · 블로그 초안 생성 완료" : "시험분석 산출물 · 인스타 카드 초안 생성 완료")
       });
       await loadRuns(activeRun.analysisRunId);
       await loadRunDetail(activeRun.analysisRunId);
