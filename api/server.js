@@ -1593,7 +1593,9 @@ function normalizeExamAnalysisOutputInputs(inputs = {}) {
     oneLineReview: cleanExamAnalysisOutputText(inputs.oneLineReview, 500),
     flowReview: cleanExamAnalysisOutputText(inputs.flowReview, 1200),
     scoreGapPoint: cleanExamAnalysisOutputText(inputs.scoreGapPoint, 1200),
-    nextStudyPlan: cleanExamAnalysisOutputText(inputs.nextStudyPlan, 1200)
+    nextStudyPlan: cleanExamAnalysisOutputText(inputs.nextStudyPlan, 1200),
+    imageSlotNotes: cleanExamAnalysisOutputText(inputs.imageSlotNotes, 1600),
+    schoolVariationNotes: cleanExamAnalysisOutputText(inputs.schoolVariationNotes, 1600)
   };
 }
 
@@ -1729,13 +1731,41 @@ function buildExamAnalysisOutputPrompt({ outputType, detail, inputs }) {
     "- 다음 시험까지 뭘 해야 하는지",
     "- 이 학원이 학교 시험을 제대로 분석하고 있다는 신뢰감"
   ].join("\n");
+  const benchmarkFormatRules = [
+    "[벤치마킹 문체/강조 규칙]",
+    "- 모바일 블로그에서 읽기 좋게 한 문단은 1~2줄 중심으로 짧게 끊는다.",
+    "- AI가 쓴 티가 나는 과장된 문장, 추상적인 홍보 문구, 같은 접속사의 반복을 피한다.",
+    "- 인사말 끝에는 😊를 1회 사용한다.",
+    "- 주요문항 섹션 시작에는 📌를 사용한다.",
+    "- 핵심 포인트, 자주 틀리는 지점, 다음 대비 체크에는 ✅를 사용한다.",
+    "- 신청/상담/블로그 유입 CTA에는 ⬇️⬇️를 사용한다.",
+    "- 위치에는 📍, 전화번호에는 ☎를 사용한다.",
+    "- 형광펜이 필요한 문장은 텍스트로 [형광펜: 하늘색]...[/형광펜] 또는 [형광펜: 노랑]...[/형광펜]처럼 표시한다.",
+    "- 하늘색 형광펜은 핵심 결론/전문성, 노랑 형광펜은 실수 포인트/주의 지점에만 쓴다.",
+    "- 정답과 상세 풀이를 길게 공개하지 말고, 출제 의도/실수 가능성/대비 전략 중심으로 쓴다."
+  ].join("\n");
+  const canvaCardRules = [
+    "[10장 Canva 카드뉴스 고정 구조]",
+    "카드 1: 표지 - 학교/학년/고사/과목과 한줄 훅",
+    "카드 2: 이번 시험 한줄 총평 - 쉬웠는지/어려웠는지",
+    "카드 3: 시험 구조 - 문항 수/범위/출제 흐름",
+    "카드 4: 단원별 출제 비중 - PNG 슬롯 390x430",
+    "카드 5: 난이도/문항 흐름 - PNG 슬롯 390x430",
+    "카드 6: 주요문항 1 - 문항 이미지 슬롯 + 왜 중요했는지",
+    "카드 7: 주요문항 2 - 문항 이미지 슬롯 + 자주 틀리는 지점",
+    "카드 8: 주요문항 3 또는 학교별 변별 포인트 - 문항/차트 이미지 슬롯",
+    "카드 9: 다음 시험 대비 - 학생이 해야 할 훈련",
+    "카드 10: 블로그 유입/상담 CTA - 더 자세한 해설은 블로그에서 확인"
+  ].join("\n");
   const inputSummary = [
     `[선생님 작성 원문 - 최우선 원천]`,
     `공개 범위: ${inputs.visibility}`,
     `한줄 총평: ${inputs.oneLineReview || "(미입력)"}`,
     `시험 흐름/체감: ${inputs.flowReview || "(미입력)"}`,
     `점수 갈림 포인트: ${inputs.scoreGapPoint || "(미입력)"}`,
-    `다음 시험 대비: ${inputs.nextStudyPlan || "(미입력)"}`
+    `다음 시험 대비: ${inputs.nextStudyPlan || "(미입력)"}`,
+    `10장 이미지/슬롯 메모: ${inputs.imageSlotNotes || "(미입력)"}`,
+    `학교별 변주/홍보 메모: ${inputs.schoolVariationNotes || "(미입력)"}`
   ].join("\n");
   const sharedRules = [
     "역할: 수학학원 시험분석 공개 산출물 편집자",
@@ -1746,6 +1776,9 @@ function buildExamAnalysisOutputPrompt({ outputType, detail, inputs }) {
     "편집 점검 기준: 아래 항목을 그대로 소제목/카드 제목으로 쓰지 않아도 된다. 다만 초안을 다 읽고 나면 아래 질문에 대한 답이 자연스럽게 보여야 한다.",
     editorialChecklist,
     "톤: 전문적이되 과장하지 말고, 학부모가 읽어도 바로 이해되게 쓴다.",
+    "브랜드 톤: 으뜸수학 고태영T 기준으로 블루/화이트 계열의 차분하고 전문적인 인상을 전제로 쓴다.",
+    benchmarkFormatRules,
+    canvaCardRules,
     "",
     inputSummary,
     "",
@@ -1756,32 +1789,36 @@ function buildExamAnalysisOutputPrompt({ outputType, detail, inputs }) {
       ...sharedRules,
       "",
       "[출력 형식]",
-      "인스타 카드뉴스 초안을 작성한다. 총 7장 안팎으로 구성한다.",
-      "카드 1: 표지",
-      "카드 2: 한줄 총평 + 시험 체감/난이도",
-      "카드 3: 시험 흐름 + 점수 갈림/실수 포인트",
-      "카드 4~6: 선생님 선택 주요문항 2~3개. 각 카드에는 왜 중요했는지, 어떤 실수/사고력이 갈렸는지 쓴다.",
-      "카드 7: 다음 시험 대비 학습 전략과 마무리. 학원이 시험을 구체적으로 분석하고 관리한다는 신뢰감이 자연스럽게 남아야 한다.",
-      "각 카드는 아래 형식을 반복한다.",
+      "인스타/Canva 카드뉴스 초안을 반드시 10장으로 작성한다.",
+      "시험지 정보 이미지가 10개 있다는 전제로, 각 카드마다 이미지 슬롯 안내를 쓴다.",
+      "각 카드는 아래 형식을 정확히 반복한다.",
       "[카드 n] 제목",
-      "본문: 2~4줄",
-      "이미지 슬롯: 들어가면 좋은 차트/문항 crop/시각 요소",
+      "본문: 모바일에서 읽히는 2~4줄",
+      "이미지 슬롯: 들어갈 PNG/문항 이미지/차트",
+      "강조: 형광펜 색 또는 이모티콘 사용 위치",
       "",
-      "마지막에 캡션 초안도 5~8줄로 붙인다."
+      "카드 10에는 반드시 블로그 유입 CTA를 넣는다.",
+      "마지막에 인스타 캡션 초안을 5~8줄로 붙이고, 더 자세한 해설은 블로그에서 확인하라는 문장을 포함한다."
     ].join("\n");
   }
   return [
     ...sharedRules,
     "",
     "[출력 형식]",
-    "네이버 블로그 초안을 작성한다.",
-    "구성은 서론-본문-결론으로 둔다.",
-    "서론: 한줄 총평과 시험 체감으로 시작한다.",
-    "본문 1: 전체 시험 흐름과 난이도 분포를 학생/학부모 언어로 풀어쓴다.",
-    "본문 2: 점수 갈림 포인트와 실수 포인트를 설명한다.",
-    "본문 3: 선생님 선택 주요문항 2~3개를 번호별로 다루되, 정답/상세풀이 대신 변별 이유와 학습 의미를 쓴다.",
-    "결론: 다음 시험 대비 학습 전략과 상담/수업 연결 문장으로 마무리한다. 학원이 학교 시험을 구체적으로 분석하고 있다는 신뢰감이 자연스럽게 남아야 한다.",
-    "제목 후보 2개를 먼저 쓰고, 이어서 본문 초안을 쓴다."
+    "네이버 블로그 초안을 작성한다. 벤치마킹 블로그처럼 사람이 쓴 시험분석 글처럼 보이게 짧은 문단으로 쓴다.",
+    "제목 후보 3개를 먼저 쓴다. 제목에는 학교명, 학년, 고사, 수학/과목, 시험분석 키워드를 자연스럽게 포함한다.",
+    "본문 구조는 아래 순서로 고정한다.",
+    "1. 인사말: 으뜸수학 고태영T 소개와 😊",
+    "2. 첫 결론: [형광펜: 하늘색]한줄 총평[/형광펜]",
+    "3. 시험 구조: 문항 수, 범위, 단원별 비중, 난이도 흐름",
+    "4. 점수가 갈린 지점: 조건 해석/계산 실수/시간 관리/서술형 감점 중 해당 요소",
+    "5. Canva 카드뉴스 삽입 안내: [이미지 1]~[이미지 10] 위치를 본문 중간중간 표시",
+    "6. 📌 주요문항 2~4개: 각 문항마다 출제 의도, ✅ 자주 틀리는 지점, 다음 대비를 쓴다.",
+    "7. 다음 시험 대비: 학생이 해야 할 구체적 훈련",
+    "8. 학원 관리 방식: 학교별 시험을 분석해 수업/보충에 반영한다는 신뢰감",
+    "9. ⬇️⬇️ CTA: 상담/문의 안내",
+    "10. 📍 위치와 ☎ 전화번호 자리: 실제 연락처는 선생님이 나중에 수정할 수 있게 자리표시자로 둔다.",
+    "네이버 에디터에서 사람이 형광펜을 적용할 수 있도록 [형광펜: 색] 표시를 유지한다."
   ].join("\n");
 }
 
@@ -1798,7 +1835,7 @@ async function runAnthropicExamAnalysisOutputDraft(prompt, outputType) {
     },
     body: JSON.stringify({
       model,
-      max_tokens: outputType === "blog" ? 5000 : 3800,
+      max_tokens: outputType === "blog" ? 6500 : 4800,
       messages: [{ role: "user", content: [{ type: "text", text: prompt }] }]
     })
   });
@@ -1826,7 +1863,7 @@ async function runOpenAiExamAnalysisOutputDraft(prompt, outputType) {
     body: JSON.stringify({
       model,
       input: [{ role: "user", content: [{ type: "input_text", text: prompt }] }],
-      max_output_tokens: outputType === "blog" ? 5000 : 3800
+      max_output_tokens: outputType === "blog" ? 6500 : 4800
     })
   });
   const data = await response.json();

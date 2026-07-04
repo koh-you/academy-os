@@ -1479,6 +1479,18 @@ const examAnalysisOutputInputFields = [
     label: "다음 시험 대비",
     guide: "다음 행동과 신뢰감입니다. 다음 시험까지 무엇을 해야 하는지와, 이 분석을 바탕으로 학원이 어떻게 관리할 수 있는지까지 적어주세요.",
     placeholder: "예: 단순 유형 반복보다 조건을 식으로 바꾸는 훈련, 풀이 과정 검산, 중상 난이도 문항의 시간 배분 연습이 필요합니다."
+  },
+  {
+    key: "imageSlotNotes",
+    label: "10장 이미지/슬롯 메모",
+    guide: "Canva 10장 카드뉴스에 들어갈 이미지 흐름입니다. 시험지 정보 이미지 10개, 차트 PNG, 주요문항 crop을 어느 카드에 넣을지 적어주세요.",
+    placeholder: "예: 1 표지, 2 한줄총평, 3 시험구조, 4 단원비중 PNG, 5 난이도/문항흐름 PNG, 6~8 주요문항 crop, 9 다음대비, 10 블로그 유입 CTA"
+  },
+  {
+    key: "schoolVariationNotes",
+    label: "학교별 변주/홍보 메모",
+    guide: "학교별 출제 습관, 유사 교재, 이번 시험만의 특징, 마지막 CTA에 넣을 상담/수업 연결 문장을 적어주세요.",
+    placeholder: "예: 상계고는 조건 해석과 계산량이 반복 포인트. CTA는 학교별 시험분석을 수업/보충에 반영한다는 신뢰감 중심."
   }
 ];
 
@@ -1497,7 +1509,9 @@ function createEmptyExamAnalysisOutputDrafts() {
       oneLineReview: "",
       flowReview: "",
       scoreGapPoint: "",
-      nextStudyPlan: ""
+      nextStudyPlan: "",
+      imageSlotNotes: "",
+      schoolVariationNotes: ""
     },
     blog: {
       aiDraft: "",
@@ -1670,6 +1684,18 @@ function truncateExamAnalysisChartLabel(value = "", maxLength = 24) {
 const examAnalysisChartPngExportScale = 3;
 const examAnalysisChartFooterLabel = "으뜸수학학원 고태영T 시험분석";
 const examAnalysisChartDifficultyOrder = ["하", "중하", "중", "중상", "상", "미정"];
+const examAnalysisCanvaCardPlan = [
+  { card: 1, role: "표지", suggestedSource: "texts/instagram-card-draft.txt", slot: "학교/학년/고사/과목 + 한줄 훅" },
+  { card: 2, role: "이번 시험 한줄 총평", suggestedSource: "texts/instagram-card-draft.txt", slot: "시험 체감/난이도 핵심 문장" },
+  { card: 3, role: "시험 구조", suggestedSource: "texts/instagram-card-draft.txt", slot: "문항 수/범위/출제 흐름" },
+  { card: 4, role: "단원별 출제 비중", suggestedSource: "charts/01-part-distribution.png", slot: "390x430 PNG 슬롯" },
+  { card: 5, role: "난이도/문항 흐름", suggestedSource: "charts/02-difficulty-distribution.png + charts/03-question-flow.png", slot: "390x430 PNG 슬롯" },
+  { card: 6, role: "주요문항 1", suggestedSource: "teacher-crop-01.png", slot: "문항 crop + 변별 이유" },
+  { card: 7, role: "주요문항 2", suggestedSource: "teacher-crop-02.png", slot: "문항 crop + 자주 틀리는 지점" },
+  { card: 8, role: "주요문항 3/학교별 변별 포인트", suggestedSource: "teacher-crop-03.png", slot: "문항 crop 또는 차트" },
+  { card: 9, role: "다음 시험 대비", suggestedSource: "texts/instagram-card-draft.txt", slot: "학습 전략/훈련 루틴" },
+  { card: 10, role: "블로그 유입/상담 CTA", suggestedSource: "texts/blog-draft.txt", slot: "더 자세한 해설은 블로그에서 확인" }
+];
 
 function getExamAnalysisChartPartLabel(question = {}) {
   return String(question.partName || question.unitName || "미입력").trim() || "미입력";
@@ -2085,10 +2111,14 @@ function createExamAnalysisPackageReadme({ activeRun = {}, chartFiles = [] } = {
     "",
     "사용 방법",
     "1. texts/blog-draft.txt 내용을 네이버 블로그 에디터에 붙여넣고 문장을 최종 수정합니다.",
-    "2. texts/instagram-card-draft.txt 내용을 Canva 카드뉴스 문구로 사용합니다.",
+    "2. texts/instagram-card-draft.txt 내용을 Canva 10장 카드뉴스 문구로 사용합니다.",
     `3. charts 폴더의 PNG 이미지는 ${examAnalysisChartPngExportScale}배 해상도 고화질 이미지입니다. 네이버 블로그 본문, 미리캔버스, Canva 이미지 슬롯에 업로드합니다.`,
-    "4. charts-svg 폴더의 SVG 원본은 PPT/Canva에서 더 선명한 원본이 필요할 때 사용합니다.",
-    "5. 외부 에디터에서 수정한 최종본은 현재 앱으로 자동 동기화되지 않습니다.",
+    "4. texts/canva-10-card-plan.txt 기준으로 1~10번 카드의 고정 역할과 이미지 슬롯을 확인합니다.",
+    "5. charts-svg 폴더의 SVG 원본은 PPT/Canva에서 더 선명한 원본이 필요할 때 사용합니다.",
+    "6. 외부 에디터에서 수정한 최종본은 현재 앱으로 자동 동기화되지 않습니다.",
+    "",
+    "Canva 10장 카드 구조",
+    examAnalysisCanvaCardPlan.map((item) => `${item.card}. ${item.role} - ${item.slot}`).join("\n"),
     "",
     "포함 차트",
     chartFiles.length ? chartFiles.map((file) => `- ${file.name}`).join("\n") : "- 차트 없음",
@@ -2121,17 +2151,29 @@ function createExamAnalysisPackageManifest({ activeRun = {}, outputDrafts = {}, 
       pngScale: examAnalysisChartPngExportScale,
       policy: "용량보다 선명도 우선"
     },
-    canvaSlots: [
-      { slot: "cover", suggestedSource: "texts/instagram-card-draft.txt" },
-      { slot: "unitDistribution", suggestedSource: "charts/01-part-distribution.png" },
-      { slot: "difficulty", suggestedSource: "charts/02-difficulty-distribution.png" },
-      { slot: "questionFlow", suggestedSource: "charts/03-question-flow.png" }
-    ],
+    canvaSlots: examAnalysisCanvaCardPlan,
     draftStatus: {
       blog: getExamAnalysisOutputSectionLabel(outputDrafts.blog),
       instagram: getExamAnalysisOutputSectionLabel(outputDrafts.instagram)
     }
   }, null, 2);
+}
+
+function createExamAnalysisCanvaCardPlanText() {
+  return [
+    "Canva 10장 카드뉴스 고정 구조",
+    "",
+    ...examAnalysisCanvaCardPlan.map((item) => [
+      `[카드 ${item.card}] ${item.role}`,
+      `이미지/텍스트 슬롯: ${item.slot}`,
+      `추천 원천: ${item.suggestedSource}`
+    ].join("\n")),
+    "",
+    "운영 원칙",
+    "- 카드 구조는 학교별로 바꾸지 않고, 텍스트/이미지/주요문항만 바꿉니다.",
+    "- 인스타에는 10장 카드뉴스를 올리고, 마지막 카드에서 블로그 상세 해설로 유입합니다.",
+    "- 블로그에는 같은 카드뉴스 이미지와 더 긴 문항별 해설/다음 대비 전략을 붙입니다."
+  ].join("\n\n");
 }
 
 async function downloadExamAnalysisOutputPackageZip({ activeRun = {}, model = {}, outputDrafts = {} } = {}) {
@@ -2144,6 +2186,7 @@ async function downloadExamAnalysisOutputPackageZip({ activeRun = {}, model = {}
     { name: "manifest.json", text: createExamAnalysisPackageManifest({ activeRun, outputDrafts, chartFiles }) },
     { name: "texts/blog-draft.txt", text: blogText || "블로그 초안 없음" },
     { name: "texts/instagram-card-draft.txt", text: instagramText || "인스타 카드 초안 없음" },
+    { name: "texts/canva-10-card-plan.txt", text: createExamAnalysisCanvaCardPlanText() },
     ...chartFiles,
     ...svgFiles
   ];
@@ -2251,18 +2294,25 @@ function ExamAnalysisOutputDraftPanel({
         <strong>{saveCheckpointTitle}</strong>
         <span>{saveCheckpointText}</span>
         <small>
-          입력 {inputCount}/4칸 · 블로그 {getExamAnalysisOutputSectionLabel(outputDrafts.blog)} · 인스타 {getExamAnalysisOutputSectionLabel(outputDrafts.instagram)}
+          입력 {inputCount}/{examAnalysisOutputInputFields.length}칸 · 블로그 {getExamAnalysisOutputSectionLabel(outputDrafts.blog)} · 인스타 {getExamAnalysisOutputSectionLabel(outputDrafts.instagram)}
         </small>
       </div>
 
       <div className="examAnalysisOutputGuide">
         <strong>작성 방향</strong>
-        <span>산출물은 단원 분류를 보여주는 자료가 아니라, 학생과 학부모가 실제로 궁금해하는 내용을 해석해주는 자료입니다. 개괄 정보는 근거로 쓰되, 문장은 시험 체감, 변별 포인트, 실수 포인트, 학습 전략 중심으로 작성합니다.</span>
+        <span>산출물은 단원 분류를 보여주는 자료가 아니라, 학생과 학부모가 실제로 궁금해하는 내용을 해석해주는 자료입니다. 10장 Canva 카드뉴스는 핵심 요약으로, 블로그는 같은 카드뉴스에 상세 해설을 붙이는 구조로 작성합니다.</span>
         <small>초안 점검 기준</small>
         <ol>
           {examAnalysisOutputEditorialChecklist.map((item) => (
             <li key={item}>{item}</li>
           ))}
+        </ol>
+        <small>벤치마킹 포맷</small>
+        <ol>
+          <li>😊 인사말 끝 · 📌 주요문항 시작 · ✅ 핵심 포인트/자주 틀리는 지점</li>
+          <li>⬇️⬇️ CTA · 📍 위치 · ☎ 전화번호 자리표시자를 사용합니다.</li>
+          <li>[형광펜: 하늘색]핵심 결론[/형광펜], [형광펜: 노랑]주의 지점[/형광펜]처럼 표시합니다.</li>
+          <li>Canva는 10장 고정 구조로 만들고, 인스타는 카드뉴스만, 블로그는 상세 해설을 추가합니다.</li>
         </ol>
       </div>
 
@@ -8941,10 +8991,12 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       outputDrafts.inputs.oneLineReview,
       outputDrafts.inputs.flowReview,
       outputDrafts.inputs.scoreGapPoint,
-      outputDrafts.inputs.nextStudyPlan
+      outputDrafts.inputs.nextStudyPlan,
+      outputDrafts.inputs.imageSlotNotes,
+      outputDrafts.inputs.schoolVariationNotes
     ];
     if (!inputValues.some((value) => String(value || "").trim())) {
-      setOutputStatus({ state: "failed", message: "시험분석 산출물 · 먼저 총평 입력칸 중 하나 이상을 작성해 주세요." });
+      setOutputStatus({ state: "failed", message: "시험분석 산출물 · 먼저 총평/슬롯/변주 입력칸 중 하나 이상을 작성해 주세요." });
       return;
     }
     const section = outputDrafts[outputType] ?? {};
