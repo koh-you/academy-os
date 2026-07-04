@@ -1557,6 +1557,26 @@ function getExamAnalysisOutputSectionLabel(section = {}) {
   return "초안 없음";
 }
 
+function getExamAnalysisOutputLastSavedAt(outputDrafts = {}) {
+  return [
+    outputDrafts.inputs?.updatedAt,
+    outputDrafts.blog?.teacherUpdatedAt,
+    outputDrafts.blog?.generatedAt,
+    outputDrafts.blog?.updatedAt,
+    outputDrafts.instagram?.teacherUpdatedAt,
+    outputDrafts.instagram?.generatedAt,
+    outputDrafts.instagram?.updatedAt
+  ]
+    .map((value) => String(value || ""))
+    .filter(Boolean)
+    .sort()
+    .at(-1) || "";
+}
+
+function getExamAnalysisOutputInputCount(inputs = {}) {
+  return examAnalysisOutputInputFields.filter((field) => String(inputs[field.key] || "").trim()).length;
+}
+
 function ExamAnalysisOutputDraftPanel({
   activeRun,
   model,
@@ -1573,6 +1593,31 @@ function ExamAnalysisOutputDraftPanel({
   const hasReviewModel = Boolean(model?.questions?.length);
   const blogText = getExamAnalysisOutputSectionText(outputDrafts.blog);
   const instagramText = getExamAnalysisOutputSectionText(outputDrafts.instagram);
+  const inputCount = getExamAnalysisOutputInputCount(outputDrafts.inputs);
+  const lastSavedAt = getExamAnalysisOutputLastSavedAt(outputDrafts);
+  const saveCheckpointState = outputStatus.state === "dirty" || outputStatus.state === "saving" || outputStatus.state === "failed"
+    ? outputStatus.state
+    : lastSavedAt
+      ? "success"
+      : "idle";
+  const saveCheckpointTitle = saveCheckpointState === "dirty"
+    ? "저장 전 수정 있음"
+    : saveCheckpointState === "saving"
+      ? "저장 중"
+      : saveCheckpointState === "failed"
+        ? "저장 실패"
+        : lastSavedAt
+          ? "저장 확인됨"
+          : "아직 저장 전";
+  const saveCheckpointText = saveCheckpointState === "dirty"
+    ? "산출물 저장을 눌러야 새로고침 후에도 유지됩니다."
+    : saveCheckpointState === "saving"
+      ? "입력칸과 선생님 수정본을 저장하고 있습니다."
+      : saveCheckpointState === "failed"
+        ? outputStatus.message || "저장에 실패했습니다."
+        : lastSavedAt
+          ? `마지막 저장 ${formatExamAnalysisEventTime(lastSavedAt)} · 새로고침 유지`
+          : "산출물 저장을 누르면 입력칸과 선생님 수정본이 저장됩니다.";
   return (
     <div className="panel examAnalysisOutputDraftPanel">
       <div className="sectionHeader slim">
@@ -1607,6 +1652,14 @@ function ExamAnalysisOutputDraftPanel({
             {isSavingOutputDrafts ? "저장 중" : "산출물 저장"}
           </button>
         </div>
+      </div>
+
+      <div className={`examAnalysisOutputSaveCheckpoint ${saveCheckpointState}`}>
+        <strong>{saveCheckpointTitle}</strong>
+        <span>{saveCheckpointText}</span>
+        <small>
+          입력 {inputCount}/4칸 · 블로그 {getExamAnalysisOutputSectionLabel(outputDrafts.blog)} · 인스타 {getExamAnalysisOutputSectionLabel(outputDrafts.instagram)}
+        </small>
       </div>
 
       <div className="examAnalysisOutputGuide">
@@ -7242,6 +7295,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const didAutoSelectExamPrepRef = useRef(Boolean(examPrepRows[0]?.examPrepId));
   const reviewDraftRunIdRef = useRef("");
   const reviewSeedDraftsRef = useRef({});
+  const outputDraftRunIdRef = useRef("");
   const [analysisRuns, setAnalysisRuns] = useState([]);
   const [selectedRunId, setSelectedRunId] = useState("");
   const [selectedDetail, setSelectedDetail] = useState(null);
@@ -7494,8 +7548,12 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   }, [activeRun?.analysisRunId, questionRows.length, reviewSeedKey]);
 
   useEffect(() => {
+    const runId = activeRun?.analysisRunId || "";
     setOutputDrafts(getExamAnalysisOutputDraftsFromRun(activeRun));
-    setOutputStatus({ state: "idle", message: "" });
+    if (outputDraftRunIdRef.current !== runId) {
+      outputDraftRunIdRef.current = runId;
+      setOutputStatus({ state: "idle", message: "" });
+    }
   }, [activeRun?.analysisRunId, activeRun?.auditSummary?.outputDrafts]);
 
   function applyExamPrepRow(row) {

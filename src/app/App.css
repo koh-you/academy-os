@@ -1982,6 +1982,54 @@ button {
   gap: 14px;
 }
 
+.examAnalysisOutputSaveCheckpoint {
+  background: #f8fafc;
+  border: 1px solid #dbeafe;
+  border-left: 5px solid #93c5fd;
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  padding: 11px 12px;
+}
+
+.examAnalysisOutputSaveCheckpoint strong {
+  color: #17213d;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.examAnalysisOutputSaveCheckpoint span,
+.examAnalysisOutputSaveCheckpoint small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.45;
+}
+
+.examAnalysisOutputSaveCheckpoint.success {
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+  border-left-color: #22c55e;
+}
+
+.examAnalysisOutputSaveCheckpoint.dirty {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  border-left-color: #fb923c;
+}
+
+.examAnalysisOutputSaveCheckpoint.saving {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  border-left-color: #2563eb;
+}
+
+.examAnalysisOutputSaveCheckpoint.failed {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  border-left-color: #ef4444;
+}
+
 .examAnalysisOutputGuide {
   background: #f8fafc;
   border: 1px solid #dbeafe;
