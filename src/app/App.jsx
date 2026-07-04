@@ -1377,7 +1377,7 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
         </div>
         <div className="examAnalysisPreviewMetricGrid">
           <span><b>{meta.totalQuestions}</b><small>문항</small></span>
-          <span><b>{model.partDistribution.length}</b><small>대단원</small></span>
+          <span><b>{model.partDistribution.length}</b><small>단원</small></span>
           <span><b>{model.importantQuestions.length}</b><small>주요문항</small></span>
         </div>
       </div>
@@ -1385,11 +1385,11 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
       <div className="examAnalysisPreviewGrid">
         <section className="examAnalysisPreviewCard wide">
           <div className="examAnalysisPreviewCardHeader">
-            <strong>대단원별 출제 비중</strong>
-            <span>중단원 breakdown</span>
+            <strong>단원별 출제 비중</strong>
+            <span>주요유형 breakdown</span>
           </div>
           <div className="examAnalysisPreviewDonutLayout">
-            <ExamAnalysisMiniDonut segments={model.partDistribution} centerLabel="대단원" ariaLabel="대단원별 출제 비중" />
+            <ExamAnalysisMiniDonut segments={model.partDistribution} centerLabel="단원" ariaLabel="단원별 출제 비중" />
             <div>
               <ExamAnalysisLegendList items={model.partDistribution} />
               <ExamAnalysisUnitBreakdownList items={model.unitBreakdown} />
@@ -1407,7 +1407,7 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
 
         <section className="examAnalysisPreviewCard">
           <div className="examAnalysisPreviewCardHeader">
-            <strong>대단원별 난이도</strong>
+            <strong>단원별 난이도</strong>
             <span>검수 저장본</span>
           </div>
           <ExamAnalysisPartDifficultyList items={model.difficultyByPart} />
@@ -1637,6 +1637,48 @@ function truncateExamAnalysisChartLabel(value = "", maxLength = 24) {
 }
 
 const examAnalysisChartPngExportScale = 3;
+const examAnalysisChartFooterLabel = "으뜸수학학원 고태영T 시험분석";
+const examAnalysisChartDifficultyOrder = ["하", "중하", "중", "중상", "상", "미정"];
+
+function getExamAnalysisChartPartLabel(question = {}) {
+  return String(question.partName || question.unitName || "미입력").trim() || "미입력";
+}
+
+function countExamAnalysisChartLabels(values = []) {
+  const counts = new Map();
+  values
+    .map((value) => String(value || "").trim())
+    .filter(Boolean)
+    .forEach((value) => counts.set(value, (counts.get(value) || 0) + 1));
+  return [...counts.entries()]
+    .map(([label, count]) => ({ label, count }))
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, "ko"));
+}
+
+function createExamAnalysisPartInsightRows(model = {}) {
+  const difficultyByPart = new Map((model.difficultyByPart ?? []).map((part) => [part.label, part]));
+  return (model.partDistribution ?? [])
+    .filter((item) => Number(item.count || 0) > 0)
+    .slice(0, 6)
+    .map((part) => {
+      const partQuestions = (model.questions ?? []).filter((question) => getExamAnalysisChartPartLabel(question) === part.label);
+      const fallbackDifficultyCounts = countExamAnalysisChartLabels(partQuestions.map((question) => question.difficulty));
+      const fallbackDifficulties = examAnalysisChartDifficultyOrder
+        .map((label) => ({
+          label,
+          count: fallbackDifficultyCounts.find((item) => item.label === label)?.count || 0,
+          percent: partQuestions.length ? Math.round(((fallbackDifficultyCounts.find((item) => item.label === label)?.count || 0) / partQuestions.length) * 1000) / 10 : 0,
+          color: examAnalysisPreviewPalette.difficulties[label] || examAnalysisPreviewPalette.difficulties["미정"]
+        }))
+        .filter((item) => item.count > 0);
+      const difficultyMeta = difficultyByPart.get(part.label);
+      return {
+        ...part,
+        difficulties: difficultyMeta?.difficulties?.length ? difficultyMeta.difficulties : fallbackDifficulties,
+        mainTypes: countExamAnalysisChartLabels(partQuestions.map((question) => question.mainType)).slice(0, 3)
+      };
+    });
+}
 
 function createExamAnalysisChartSvgShell({ title, subtitle, width = 1200, height = 675, body = "" }) {
   return [
@@ -1648,7 +1690,7 @@ function createExamAnalysisChartSvgShell({ title, subtitle, width = 1200, height
     `<text class="title" x="64" y="78">${escapeExamAnalysisSvgText(title)}</text>`,
     subtitle ? `<text class="subtitle" x="64" y="112">${escapeExamAnalysisSvgText(subtitle)}</text>` : "",
     body,
-    `<text class="small" x="${width - 64}" y="${height - 42}" text-anchor="end">Academy OS 시험분석</text>`,
+    `<text class="small" x="${width - 64}" y="${height - 42}" text-anchor="end">${escapeExamAnalysisSvgText(examAnalysisChartFooterLabel)}</text>`,
     `</svg>`
   ].filter(Boolean).join("");
 }
@@ -1656,10 +1698,10 @@ function createExamAnalysisChartSvgShell({ title, subtitle, width = 1200, height
 function createExamAnalysisPartDistributionSvg(model = {}) {
   const width = 1200;
   const height = 675;
-  const segments = (model.partDistribution ?? []).filter((item) => Number(item.count || 0) > 0).slice(0, 8);
+  const segments = createExamAnalysisPartInsightRows(model);
   const total = segments.reduce((sum, item) => sum + Number(item.count || 0), 0);
   const cx = 255;
-  const cy = 365;
+  const cy = 380;
   const r = 132;
   const strokeWidth = 70;
   const circumference = 2 * Math.PI * r;
@@ -1672,14 +1714,32 @@ function createExamAnalysisPartDistributionSvg(model = {}) {
     offset += dash;
     return circle;
   }).join("");
-  const legend = segments.map((segment, index) => {
-    const x = 500 + (index % 2) * 330;
-    const y = 190 + Math.floor(index / 2) * 82;
+  const detailRows = segments.map((segment, index) => {
+    const x = 480;
+    const y = 176 + index * 92;
+    const difficultyText = segment.difficulties?.length
+      ? segment.difficulties.map((difficulty) => `${difficulty.label} ${difficulty.count}`).join(" · ")
+      : "난이도 미입력";
+    const mainTypeText = segment.mainTypes?.length
+      ? segment.mainTypes.map((type) => `${truncateExamAnalysisChartLabel(type.label, 16)} ${type.count}`).join(" · ")
+      : "대표유형 미입력";
+    let barX = x + 350;
+    const barWidth = 260;
+    const bars = (segment.difficulties ?? []).map((difficulty) => {
+      const widthValue = Math.max(12, (Number(difficulty.count || 0) / Math.max(1, Number(segment.count || 0))) * barWidth);
+      const rect = `<rect x="${barX}" y="${y + 53}" width="${widthValue}" height="16" rx="8" fill="${difficulty.color}"/>`;
+      barX += widthValue;
+      return rect;
+    }).join("");
     return [
-      `<rect x="${x}" y="${y - 34}" width="292" height="62" rx="18" fill="#ffffff" stroke="#dbeafe"/>`,
-      `<circle cx="${x + 26}" cy="${y - 4}" r="10" fill="${segment.color}"/>`,
-      `<text class="label" x="${x + 48}" y="${y - 8}">${escapeExamAnalysisSvgText(truncateExamAnalysisChartLabel(segment.label, 18))}</text>`,
-      `<text class="muted" x="${x + 48}" y="${y + 18}">${segment.count}문항 · ${segment.percent}%</text>`
+      `<rect x="${x}" y="${y}" width="650" height="80" rx="18" fill="#ffffff" stroke="#dbeafe"/>`,
+      `<circle cx="${x + 30}" cy="${y + 29}" r="10" fill="${segment.color}"/>`,
+      `<text class="label" x="${x + 54}" y="${y + 31}">${escapeExamAnalysisSvgText(truncateExamAnalysisChartLabel(segment.label, 14))}</text>`,
+      `<text class="muted" x="${x + 616}" y="${y + 31}" text-anchor="end">${segment.count}문항 · ${segment.percent}%</text>`,
+      `<text class="small" x="${x + 54}" y="${y + 57}">대표유형: ${escapeExamAnalysisSvgText(mainTypeText)}</text>`,
+      `<text class="small" x="${x + 54}" y="${y + 76}">난이도: ${escapeExamAnalysisSvgText(difficultyText)}</text>`,
+      `<rect x="${x + 350}" y="${y + 53}" width="${barWidth}" height="16" rx="8" fill="#eaf1fb"/>`,
+      bars
     ].join("");
   }).join("");
   const body = [
@@ -1687,18 +1747,19 @@ function createExamAnalysisPartDistributionSvg(model = {}) {
     slices,
     `<circle cx="${cx}" cy="${cy}" r="${r - strokeWidth / 2 + 4}" fill="#ffffff"/>`,
     `<text class="title" x="${cx}" y="${cy - 8}" text-anchor="middle">${segments.length}</text>`,
-    `<text class="muted" x="${cx}" y="${cy + 26}" text-anchor="middle">대단원</text>`,
-    legend || `<text class="muted" x="500" y="240">대단원 데이터 없음</text>`
+    `<text class="muted" x="${cx}" y="${cy + 26}" text-anchor="middle">단원</text>`,
+    `<text class="small" x="${cx}" y="${cy + 56}" text-anchor="middle">${total}문항 기준</text>`,
+    detailRows || `<text class="muted" x="500" y="240">단원 데이터 없음</text>`
   ].join("");
   return {
     key: "part-distribution",
-    label: "대단원별 출제 비중",
+    label: "단원별 출제 비중",
     fileName: "01-part-distribution.png",
     width,
     height,
     svg: createExamAnalysisChartSvgShell({
-      title: "대단원별 출제 비중",
-      subtitle: `${model.meta?.title || "시험분석"} · 선생님 검수 저장본 기준`,
+      title: "단원별 출제 비중",
+      subtitle: "문항 비중 · 단원별 난이도 · 대표 주요유형",
       width,
       height,
       body
@@ -1763,13 +1824,13 @@ function createExamAnalysisPartDifficultySvg(model = {}) {
   }).join("");
   return {
     key: "part-difficulty",
-    label: "대단원별 난이도",
+    label: "단원별 난이도",
     fileName: "03-part-difficulty.png",
     width,
     height,
     svg: createExamAnalysisChartSvgShell({
-      title: "대단원별 난이도",
-      subtitle: "대단원마다 난이도 분포를 누적 막대로 표시",
+      title: "단원별 난이도",
+      subtitle: "단원마다 난이도 분포를 누적 막대로 표시",
       width,
       height,
       body
@@ -1801,7 +1862,7 @@ function createExamAnalysisQuestionFlowSvg(model = {}) {
   return {
     key: "question-flow",
     label: "문항 흐름",
-    fileName: "04-question-flow.png",
+    fileName: "03-question-flow.png",
     width,
     height,
     svg: createExamAnalysisChartSvgShell({
@@ -1819,7 +1880,6 @@ function createExamAnalysisChartSvgAssets(model = {}) {
   return [
     createExamAnalysisPartDistributionSvg(model),
     createExamAnalysisDifficultyDistributionSvg(model),
-    createExamAnalysisPartDifficultySvg(model),
     createExamAnalysisQuestionFlowSvg(model)
   ];
 }
@@ -1990,12 +2050,12 @@ async function createExamAnalysisZipBlob(files = []) {
 
 function createExamAnalysisPackageReadme({ activeRun = {}, chartFiles = [] } = {}) {
   return [
-    "Academy OS 시험분석 산출물 패키지",
+    "으뜸수학학원 고태영T 시험분석 산출물 패키지",
     "",
     "사용 방법",
     "1. texts/blog-draft.txt 내용을 네이버 블로그 에디터에 붙여넣고 문장을 최종 수정합니다.",
     "2. texts/instagram-card-draft.txt 내용을 Canva 카드뉴스 문구로 사용합니다.",
-    `3. charts 폴더의 PNG 이미지는 ${examAnalysisChartPngExportScale}배 해상도 고화질 이미지입니다. 네이버 블로그 본문 또는 Canva 이미지 슬롯에 업로드합니다.`,
+    `3. charts 폴더의 PNG 이미지는 ${examAnalysisChartPngExportScale}배 해상도 고화질 이미지입니다. 네이버 블로그 본문, 미리캔버스, Canva 이미지 슬롯에 업로드합니다.`,
     "4. charts-svg 폴더의 SVG 원본은 PPT/Canva에서 더 선명한 원본이 필요할 때 사용합니다.",
     "5. 외부 에디터에서 수정한 최종본은 현재 앱으로 자동 동기화되지 않습니다.",
     "",
@@ -2032,26 +2092,15 @@ function createExamAnalysisPackageManifest({ activeRun = {}, outputDrafts = {}, 
     },
     canvaSlots: [
       { slot: "cover", suggestedSource: "texts/instagram-card-draft.txt" },
+      { slot: "unitDistribution", suggestedSource: "charts/01-part-distribution.png" },
       { slot: "difficulty", suggestedSource: "charts/02-difficulty-distribution.png" },
-      { slot: "questionFlow", suggestedSource: "charts/04-question-flow.png" },
-      { slot: "partDistribution", suggestedSource: "charts/01-part-distribution.png" },
-      { slot: "partDifficulty", suggestedSource: "charts/03-part-difficulty.png" }
+      { slot: "questionFlow", suggestedSource: "charts/03-question-flow.png" }
     ],
     draftStatus: {
       blog: getExamAnalysisOutputSectionLabel(outputDrafts.blog),
       instagram: getExamAnalysisOutputSectionLabel(outputDrafts.instagram)
     }
   }, null, 2);
-}
-
-async function downloadExamAnalysisChartPngZip({ activeRun = {}, model = {} } = {}) {
-  const chartFiles = await createExamAnalysisChartPngFiles(model);
-  const svgFiles = createExamAnalysisChartSvgFiles(model);
-  if (!chartFiles.length && !svgFiles.length) return { pngCount: 0, svgCount: 0 };
-  const zipBlob = await createExamAnalysisZipBlob([...chartFiles, ...svgFiles]);
-  const baseName = sanitizeExamAnalysisOutputFileNamePart(activeRun.title || [activeRun.schoolName, activeRun.grade, activeRun.examCycle || activeRun.examTerm].filter(Boolean).join(" "));
-  downloadBlobFile(zipBlob, `${baseName}-high-res-charts.zip`);
-  return { pngCount: chartFiles.length, svgCount: svgFiles.length };
 }
 
 async function downloadExamAnalysisOutputPackageZip({ activeRun = {}, model = {}, outputDrafts = {} } = {}) {
@@ -2088,7 +2137,6 @@ function ExamAnalysisOutputDraftPanel({
   onGenerateOutputDraft,
   onCopyOutputDraft,
   onDownloadOutputDraft,
-  onDownloadChartPngZip,
   onDownloadOutputPackageZip,
   onSaveOutputDrafts,
   onUpdateInput,
@@ -2148,14 +2196,6 @@ function ExamAnalysisOutputDraftPanel({
             type="button"
           >
             {generatingOutputType === "instagram" ? "인스타 생성 중" : "인스타 카드 초안 생성"}
-          </button>
-          <button
-            className="secondaryButton"
-            disabled={!hasRun || !hasReviewModel || isOutputBusy}
-            onClick={onDownloadChartPngZip}
-            type="button"
-          >
-            {exportingOutputType === "charts" ? "차트 생성 중" : "차트 고화질 ZIP"}
           </button>
           <button
             className="secondaryButton"
@@ -8916,35 +8956,6 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     });
   }
 
-  async function downloadChartPngZip() {
-    if (!activeRun?.analysisRunId) {
-      setOutputStatus({ state: "failed", message: "시험분석 산출물 · 분석을 먼저 저장해 주세요." });
-      return;
-    }
-    if (!finalPreviewModel?.questions?.length) {
-      setOutputStatus({ state: "failed", message: "시험분석 산출물 · 차트로 만들 검수 저장본이 없습니다." });
-      return;
-    }
-    setExportingOutputType("charts");
-    setOutputStatus({ state: "saving", message: "시험분석 산출물 · 고화질 차트 ZIP 생성 중" });
-    try {
-      const result = await downloadExamAnalysisChartPngZip({
-        activeRun,
-        model: finalPreviewModel
-      });
-      setOutputStatus({
-        state: result.pngCount ? "success" : "failed",
-        message: result.pngCount
-          ? `시험분석 산출물 · 고화질 차트 ZIP 완료 · PNG ${result.pngCount}개 · SVG ${result.svgCount}개`
-          : "시험분석 산출물 · 내보낼 차트가 없습니다."
-      });
-    } catch (error) {
-      setOutputStatus({ state: "failed", message: `시험분석 산출물 · 차트 ZIP 실패 · ${error.message}` });
-    } finally {
-      setExportingOutputType("");
-    }
-  }
-
   async function downloadOutputPackageZip() {
     if (!activeRun?.analysisRunId) {
       setOutputStatus({ state: "failed", message: "시험분석 산출물 · 분석을 먼저 저장해 주세요." });
@@ -9762,7 +9773,6 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
             model={finalPreviewModel}
             onGenerateOutputDraft={generateOutputDraft}
             onCopyOutputDraft={copyOutputDraft}
-            onDownloadChartPngZip={downloadChartPngZip}
             onDownloadOutputDraft={downloadOutputDraft}
             onDownloadOutputPackageZip={downloadOutputPackageZip}
             onSaveOutputDrafts={saveOutputDrafts}
