@@ -16,7 +16,7 @@
 
 ### 2026-07-05 P0. 다음 작업 - 블로그 블록 + JS 카드뉴스 렌더러 MVP
 
-- 상태: 대기
+- 상태: 진행 중 - Gate 0 기존 구현 검수 완료
 - 사용자 정정: 기존 `18개 섹션`은 사용자가 예로 든 벤치마킹 관찰 흐름이지 고정 입력 스키마가 아니다. 5개 질문도 선생님 입력칸이 아니라 최종 산출물이 답해야 하는 품질 체크다. 다음 구현은 전체 의도와 맥락을 우선해 `블로그 블록 + 카드뉴스 모델`로 진행한다.
 - 사람/AI/코드 역할:
   - 사람: 시험분석 원본 사실 확정, 주요문항 1~3 직접 crop, 블로그 카드 사이사이에 들어갈 흐름/의도 입력, 최종 문장/이미지 검수, 공개 승인.
@@ -32,6 +32,18 @@
 - Gate 3 PNG/ZIP: 화면 미리보기 기준으로 `cards/card-01.png`~`card-10.png`를 생성하고 기존 산출물 ZIP에 포함한다. 처음에는 프론트 React/HTML/CSS 렌더링을 우선하고, 품질 문제가 보이면 Puppeteer 서버 렌더링을 2차로 검토한다.
 - Gate 4 블로그 조립 가이드: `blog-assembly-guide.txt`를 생성해 `[card-03.png 삽입] -> 시험 구조 설명글 -> [card-06.png 삽입] -> 주요문항 설명글`처럼 네이버 블로그에 붙일 순서를 안내한다.
 - 중단 조건: 18개 섹션을 필수 입력처럼 강제함, 5개 질문을 입력 스키마로 고정함, AI가 문항 수/시험 범위/정답/풀이/유사문항을 추측함, 사람이 저장한 문장이나 crop 이미지를 AI 재생성이 덮어씀, 카드 미리보기 없이 PNG만 생성함.
+
+#### Gate 0 기존 구현 검수 결과 - 2026-07-05
+
+- 통과: 산출물 저장 원천은 `exam_analysis_runs.audit_summary.outputDrafts.inputs/blog/instagram`이다. AI 초안은 `aiDraft`, 선생님 수정본은 `teacherDraft`이며 화면/TXT/ZIP은 `teacherDraft > aiDraft > empty` 순서로 읽는다.
+- 통과: `save-output-drafts` API는 선생님이 실제로 수정한 draft만 `teacherDraft`와 `teacherUpdatedAt`으로 저장한다. `generate-output-draft` API는 AI 초안만 갱신하고 기존 선생님 저장본은 유지한다.
+- 통과: 프론트 local draft 보호는 `outputStatus.state === "dirty"`와 같은 run 기준으로 동작한다. 같은 run에서 상세가 다시 로드되거나 AI 생성 결과가 돌아와도 dirty 선생님 수정본은 보존된다.
+- 통과: 산출물 패널 안에 저장/생성/복사/TXT/ZIP 상태 배지가 있고, `산출물 저장을 눌러야 새로고침 후에도 유지됩니다`, `마지막 저장 · 새로고침 유지` 안내가 보인다.
+- 통과: `npm run test:production` 통과(total 236, failed 0). `npm run build` 통과. Vite 기존 chunk size warning만 발생했다.
+- 보류/전환 필요: 현재 UI와 ZIP 안내에는 `블로그 18개 강사 섹션`이 그대로 남아 있고, 서버 블로그 프롬프트도 `본문 구조는 아래 18개 섹션 순서로 고정한다`고 되어 있다. 이는 사용자 정정과 충돌하므로 Gate 1에서 `blogBlocks` 예시 프리셋으로 전환해야 한다.
+- 보류/전환 필요: 현재 `examAnalysisCanvaCardPlan`은 예전 10장 구조(`표지 -> 한줄 총평 -> 시험 구조 -> 단원별 비중 -> 난이도/흐름 -> 주요문항 1~3 -> 다음 대비 -> CTA`)다. 오늘 확정한 6개 슬라이드 유형(`cover`, `examStructure`, `overallReview`, `keyQuestion`, `solution`, `closing`) 반복 구조로 다시 잡아야 한다.
+- 보류/전환 필요: 현재 ZIP은 블로그/인스타 TXT, Canva plan, 강사 섹션 guide, 차트 PNG/SVG를 담지만 `cards/card-01.png`~`card-10.png` 카드뉴스 PNG와 10장 미리보기는 아직 없다.
+- 보류/전환 필요: 주요문항/손풀이 crop 이미지를 업로드하거나 슬롯에 연결하는 데이터 모델이 아직 없다. 다음 단계에서는 자동 crop이 아니라 선생님이 직접 올린 이미지를 카드 슬롯에 배치하는 구조만 만든다.
 
 ### 2026-07-04 P0. 다음 작업 - Canva 10장 벤치마킹형 레이아웃 재설계와 실제 검수
 
