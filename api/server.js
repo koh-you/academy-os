@@ -910,6 +910,77 @@ function getSsenTypesForExamAnalysis({ sourceFile = {}, analysisRun = {} } = {})
   };
 }
 
+function normalizeSsenTypeIndexRow(row = {}, scopeText = "") {
+  const compactScope = String(scopeText || "").replace(/\s+/g, "");
+  const partName = String(row.partName ?? "").trim();
+  const unitName = String(row.unitName ?? "").trim();
+  const scopeMatched = Boolean(
+    compactScope &&
+    [partName, unitName]
+      .map((value) => value.replace(/\s+/g, ""))
+      .filter(Boolean)
+      .some((value) => compactScope.includes(value))
+  );
+  return {
+    bookCode: row.bookCode || "",
+    bookTitle: row.bookTitle || "",
+    subject: row.subject || "",
+    typeCode: row.typeCode || "",
+    partName,
+    unitNo: row.unitNo || "",
+    unitName,
+    typeNo: row.typeNo || "",
+    typeName: row.typeName || "",
+    scopeMatched
+  };
+}
+
+function getSsenTypeCatalogForExamAnalysis({ subject = "", scope = "", analysisRun = null } = {}) {
+  const inferredSubject = inferExamAnalysisSubjectFromText([
+    subject,
+    scope,
+    analysisRun?.subject,
+    analysisRun?.extractionSummary?.visionCheck?.subject,
+    analysisRun?.title
+  ].filter(Boolean).join("\n"));
+  const normalizedSubject = inferredSubject || sanitizeExamAnalysisSubject(subject || analysisRun?.subject || "");
+  const subjectTypes = normalizedSubject
+    ? ssenTypeIndex.filter((item) => item.subject === normalizedSubject)
+    : [];
+  const normalizedTypes = subjectTypes.map((row) => normalizeSsenTypeIndexRow(row, scope));
+  const scopeMatchedTypes = normalizedTypes.filter((row) => row.scopeMatched);
+  const visibleTypes = scopeMatchedTypes.length ? scopeMatchedTypes : normalizedTypes;
+  const unitMap = new Map();
+  visibleTypes.forEach((row) => {
+    const key = [row.partName, row.unitNo, row.unitName].join("|");
+    if (!unitMap.has(key)) {
+      unitMap.set(key, {
+        key,
+        partName: row.partName,
+        unitNo: row.unitNo,
+        unitName: row.unitName,
+        typeCount: 0
+      });
+    }
+    unitMap.get(key).typeCount += 1;
+  });
+  return {
+    subject: normalizedSubject,
+    scope: String(scope || "").trim(),
+    status: !normalizedSubject
+      ? "subject_missing"
+      : scope && !scopeMatchedTypes.length
+        ? "scope_not_matched"
+        : scopeMatchedTypes.length
+          ? "scope_matched"
+          : "subject_all",
+    subjectTypeCount: subjectTypes.length,
+    scopeMatchedCount: scopeMatchedTypes.length,
+    types: visibleTypes,
+    units: [...unitMap.values()]
+  };
+}
+
 function formatSsenTypeCandidatesForPrompt(types = []) {
   return (Array.isArray(types) ? types : [])
     .slice(0, 240)
@@ -2386,6 +2457,22 @@ const server = http.createServer(async (request, response) => {
             workflowStatus: requestUrl.searchParams.get("workflowStatus"),
             limit: requestUrl.searchParams.get("limit")
           });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/exam-analysis-ssen-types") {
+    try {
+      const analysisRunId = requestUrl.searchParams.get("analysisRunId") || "";
+      const detail = analysisRunId ? await getExamAnalysisRun(analysisRunId) : null;
+      const result = getSsenTypeCatalogForExamAnalysis({
+        subject: requestUrl.searchParams.get("subject") || "",
+        scope: requestUrl.searchParams.get("scope") || "",
+        analysisRun: detail?.analysisRun ?? null
+      });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });

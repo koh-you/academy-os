@@ -43,12 +43,23 @@ function withPercent(items = [], total = 0, colorFor = () => "#94a3b8") {
 function getFinalQuestionFields(question = {}) {
   const finalFields = question.finalFields && typeof question.finalFields === "object" ? question.finalFields : {};
   const teacherFields = question.teacherFields && typeof question.teacherFields === "object" ? question.teacherFields : {};
+  const ssenMeta = finalFields.ssenMeta && typeof finalFields.ssenMeta === "object"
+    ? finalFields.ssenMeta
+    : teacherFields.ssenMeta && typeof teacherFields.ssenMeta === "object"
+      ? teacherFields.ssenMeta
+      : {};
+  const mainTypeMeta = ssenMeta.mainType && typeof ssenMeta.mainType === "object" ? ssenMeta.mainType : {};
   const subTypes = toArray(finalFields.subTypes?.length ? finalFields.subTypes : teacherFields.subTypes?.length ? teacherFields.subTypes : question.subTypes);
   return {
     questionRowId: question.questionRowId,
     questionNumber: Number(question.questionNumber),
-    unitName: cleanText(finalFields.unitName || teacherFields.unitName || question.unitName),
-    mainType: cleanText(finalFields.mainType || teacherFields.mainType || question.mainType),
+    partName: cleanText(finalFields.partName || teacherFields.partName || mainTypeMeta.partName),
+    unitNo: cleanText(finalFields.unitNo || teacherFields.unitNo || mainTypeMeta.unitNo),
+    unitName: cleanText(finalFields.unitName || teacherFields.unitName || mainTypeMeta.unitName || question.unitName),
+    mainType: cleanText(finalFields.mainType || teacherFields.mainType || mainTypeMeta.typeName || question.mainType),
+    mainTypeCode: cleanText(finalFields.mainTypeCode || teacherFields.mainTypeCode || mainTypeMeta.typeCode || question.aiFields?.mainTypeCode),
+    subTypeCodes: toArray(finalFields.subTypeCodes?.length ? finalFields.subTypeCodes : teacherFields.subTypeCodes?.length ? teacherFields.subTypeCodes : question.aiFields?.subTypeCodes),
+    ssenMeta,
     subTypes,
     difficulty: cleanText(finalFields.difficulty || teacherFields.difficulty || question.difficulty) || "미정",
     reviewNote: cleanText(finalFields.reviewNote || teacherFields.reviewNote || ""),
@@ -60,6 +71,10 @@ function getFinalQuestionFields(question = {}) {
     boundaryNeedsReview: Boolean(question.sourceEvidence?.boundary?.needsReview),
     aiNeedsReview: Boolean(question.aiFields?.needsReview || question.aiFields?.warnings?.length)
   };
+}
+
+function getQuestionPartLabel(question = {}) {
+  return cleanText(question.partName || question.unitName) || "미입력";
 }
 
 function formatPageLabel(question = {}) {
@@ -84,17 +99,47 @@ export function createExamAnalysisFinalPreviewModel({ analysisRun = {}, question
     .filter((question) => Number.isInteger(question.questionNumber) && question.questionNumber > 0)
     .sort((a, b) => a.questionNumber - b.questionNumber);
   const totalQuestions = finalQuestions.length;
-  const unitDistribution = withPercent(
-    countBy(finalQuestions, (question) => question.unitName),
+  const partDistribution = withPercent(
+    countBy(finalQuestions, getQuestionPartLabel),
     totalQuestions,
     (_item, index) => examAnalysisPreviewPalette.units[index % examAnalysisPreviewPalette.units.length]
   );
+  const unitDistribution = withPercent(
+    countBy(finalQuestions, (question) => question.unitName),
+    totalQuestions,
+    (_item, index) => examAnalysisPreviewPalette.units[(index + 1) % examAnalysisPreviewPalette.units.length]
+  );
+  const unitBreakdown = partDistribution.map((part) => {
+    const partQuestions = finalQuestions.filter((question) => getQuestionPartLabel(question) === part.label);
+    return {
+      ...part,
+      units: withPercent(
+        countBy(partQuestions, (question) => question.unitName),
+        partQuestions.length,
+        (_item, index) => examAnalysisPreviewPalette.units[(index + 2) % examAnalysisPreviewPalette.units.length]
+      )
+    };
+  });
   const difficultyCounts = countBy(finalQuestions, (question) => difficultyOrder.includes(question.difficulty) ? question.difficulty : "미정");
   const difficultyDistribution = withPercent(
     difficultyOrder.map((label) => ({ label, count: difficultyCounts.find((item) => item.label === label)?.count || 0 })).filter((item) => item.count > 0),
     totalQuestions,
     (item) => examAnalysisPreviewPalette.difficulties[item.label] || examAnalysisPreviewPalette.difficulties["미정"]
   );
+  const difficultyByPart = partDistribution.map((part) => {
+    const partQuestions = finalQuestions.filter((question) => getQuestionPartLabel(question) === part.label);
+    const partDifficultyCounts = countBy(partQuestions, (question) => difficultyOrder.includes(question.difficulty) ? question.difficulty : "미정");
+    return {
+      label: part.label,
+      count: partQuestions.length,
+      percent: part.percent,
+      difficulties: withPercent(
+        difficultyOrder.map((label) => ({ label, count: partDifficultyCounts.find((item) => item.label === label)?.count || 0 })).filter((item) => item.count > 0),
+        partQuestions.length,
+        (item) => examAnalysisPreviewPalette.difficulties[item.label] || examAnalysisPreviewPalette.difficulties["미정"]
+      )
+    };
+  });
   const majorTypes = withPercent(
     countBy(finalQuestions, (question) => question.mainType).filter((item) => item.label !== "미입력").slice(0, 10),
     totalQuestions,
@@ -118,8 +163,11 @@ export function createExamAnalysisFinalPreviewModel({ analysisRun = {}, question
       totalQuestions
     },
     questions: finalQuestions.map((question) => ({ ...question, pageLabel: formatPageLabel(question) })),
+    partDistribution,
     unitDistribution,
+    unitBreakdown,
     difficultyDistribution,
+    difficultyByPart,
     majorTypes,
     importantQuestions,
     notes: {

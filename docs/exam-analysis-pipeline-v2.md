@@ -101,7 +101,10 @@
 - 완료: AI 실행 버튼의 괄호 과금 표현을 제거했다.
 - 완료: `AI 행 채움` 후 빈 1~N seed draft가 검수 표에 남는 원인을 수정했다. 이전 seed 그대로인 draft만 새 원본 row로 갱신하고, 사용자가 실제로 수정한 local draft는 보존한다.
 - 완료: `AI 결과 검수` 표의 화면 라벨을 `주유형/보조유형`으로 줄이고, AI 2차 수정 대상 행은 확정 체크가 있어도 `2차 수정 필요` 상태와 주황색 강조가 먼저 보이게 했다.
+- 완료: `AI 결과 검수` 표에 `쎈 기준표` 선택 gate를 추가했다. 단원은 `partName · unitName`, 주유형/보조유형은 해당 단원 안의 `typeName` 후보에서 선택한다. 선택값은 `mainTypeCode`, `subTypeCodes`, `ssenMeta`와 함께 local draft와 저장 payload에 들어간다.
+- 완료: 선생님 검수 저장본의 `teacher_fields`/`final_fields`에 `ssenMeta`를 저장한다. `partName`은 대단원, `unitName`은 중단원, `typeName`은 주유형 원천이다. 새 SQL edit은 필요 없다.
 - 완료: 저장된 검수본 기준 앱 안 최종 미리보기 1차. 단원별 출제 비중, 난이도 분포, 주요 유형, 문항 흐름, 선생님 체크 주요문항, 상세 표를 렌더링한다.
+- 완료: 최종 미리보기 차트를 `대단원별 출제 비중 + 중단원 breakdown`, `대단원별 난이도`로 바꿨다. 너무 세분화된 `주요 유형` 빈도 차트는 앱 화면에서 제거했다.
 - 완료: 최종 미리보기 팔레트를 전문가 톤으로 조정했다. 최종 미리보기는 읽기 전용이며, 난이도와 주요문항 수정/저장은 위 `AI 결과 검수` 표에서 진행한다.
 - 완료: AI 추천 없이 선생님이 `AI 결과 검수` 표에서 직접 주요문항을 체크하고 저장할 수 있다. 저장값은 `exam_analysis_questions.teacher_fields`/`final_fields`의 `isImportantQuestion`이며, 새 SQL edit은 필요 없다.
 - 확인: 사용자가 실제 화면에서 주요문항을 확정하고 새로고침 후에도 저장값이 유지되는 것을 확인했다.
@@ -121,9 +124,9 @@
 
 - 앱 안 최종 미리보기: 저장된 `exam_analysis_questions`의 `teacher_fields`/`final_fields`를 원천으로 계산한다. AI가 숫자를 다시 만들지 않는다.
 - 차트: 1차는 별도 차트 라이브러리 없이 CSS/SVG로 도넛, 막대, 문항맵을 렌더링한다. 색상과 범례는 테스트 후 고정 색상코드로 확정한다. 차트 라이브러리는 출력 품질/상호작용 요구가 커질 때 도입한다.
-- 단원 원천: `api/data/ssenTypeIndex.json`에는 `partName`, `unitNo`, `unitName`, `typeName`이 있다. 현재 최종 미리보기의 `단원별 출제 비중`은 선생님 검수 저장본의 `unitName`을 집계하므로 쎈 중단원 기준에 가깝다. `partName` 대단원 집계나 대단원-중단원 2단 구조는 typeCode 메타를 선생님 저장본 원천에 연결하는 gate를 먼저 둔다.
+- 단원 원천: `api/data/ssenTypeIndex.json`에는 `partName`, `unitNo`, `unitName`, `typeName`이 있다. 검수 저장본의 `ssenMeta.mainType.partName`은 대단원, `ssenMeta.mainType.unitName`은 중단원, `ssenMeta.mainType.typeName`은 주유형 원천이다.
 - 난이도: AI 초안이 틀릴 수 있으므로 `AI 결과 검수` 표에서 선생님이 수정한다. 저장은 기존 `save-question-reviews` API를 사용한다.
-- 주요 유형: 쎈 기준표를 참고하되 화면 문구는 `주요 유형`으로 쓴다. `주요 쎈 유형 수`, `주유형 TOP`처럼 운영자가 원치 않는 지표명은 쓰지 않는다.
+- 유형 차트: 주유형 빈도는 너무 세분화되므로 앱 안 최종 미리보기에서는 `대단원별 난이도`를 우선 보여준다. 주유형/typeName은 상세 표와 주요문항 카드에서 원천값으로 남긴다.
 - 주요문항: 현재 1차는 AI 추천 없이 선생님이 `AI 결과 검수` 표에서 직접 체크한다. 이 체크값이 원본이며 최종 미리보기, 블로그, 인스타 산출물은 이 저장값을 우선 읽는다. AI 추천은 이후 선택적으로 붙일 초안 기능이다.
 - 수식/그래프/원문: 앱 미리보기 1차에서는 PDF/HWP 원문 수식과 그래프를 재렌더링하지 않는다. 원문 이미지는 공개 산출물 단계에서 별도 이미지 슬롯으로 다룬다.
 - HWP/HWPX: HWP 원문을 웹앱에 복사/붙여넣어 수식과 그래프를 안정적으로 보존하는 것은 어렵다. HWPX 파싱, HWP/PDF 내보내기, 사용자가 직접 만든 이미지 슬롯, Canva/PPT 삽입 중 어느 경로가 좋은지 별도 검증한다.

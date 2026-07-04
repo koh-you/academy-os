@@ -257,6 +257,33 @@ function normalizeQuestionRowFill(row = {}) {
   };
 }
 
+function normalizeSsenTypeMeta(value = {}) {
+  if (!value || typeof value !== "object") return {};
+  return {
+    subject: String(value.subject ?? "").trim().slice(0, 40),
+    typeCode: String(value.typeCode ?? value.type_code ?? "").trim().slice(0, 60),
+    partName: String(value.partName ?? value.part_name ?? "").trim().slice(0, 120),
+    unitNo: String(value.unitNo ?? value.unit_no ?? "").trim().slice(0, 20),
+    unitName: String(value.unitName ?? value.unit_name ?? "").trim().slice(0, 120),
+    typeNo: String(value.typeNo ?? value.type_no ?? "").trim().slice(0, 20),
+    typeName: String(value.typeName ?? value.type_name ?? "").trim().slice(0, 160)
+  };
+}
+
+function normalizeSsenMeta(value = {}) {
+  if (!value || typeof value !== "object") return {};
+  const mainType = normalizeSsenTypeMeta(value.mainType ?? value.main_type ?? {});
+  const subTypes = Array.isArray(value.subTypes ?? value.sub_types)
+    ? (value.subTypes ?? value.sub_types).map(normalizeSsenTypeMeta).filter((item) => item.typeCode || item.typeName).slice(0, 3)
+    : [];
+  return {
+    source: String(value.source ?? "teacher_review").trim().slice(0, 60),
+    matchStatus: String(value.matchStatus ?? value.match_status ?? "").trim().slice(0, 60),
+    mainType,
+    subTypes
+  };
+}
+
 function normalizeQuestionTeacherReview(review = {}) {
   const questionNumber = Number(review.questionNumber ?? review.question_number);
   if (!Number.isInteger(questionNumber) || questionNumber < 1 || questionNumber > 200) return null;
@@ -271,6 +298,11 @@ function normalizeQuestionTeacherReview(review = {}) {
     unitName,
     mainType,
     subTypes: subTypes.map((item) => String(item).trim()).filter(Boolean).slice(0, 3),
+    mainTypeCode: String(review.mainTypeCode ?? review.main_type_code ?? "").trim().slice(0, 60),
+    subTypeCodes: Array.isArray(review.subTypeCodes ?? review.sub_type_codes)
+      ? (review.subTypeCodes ?? review.sub_type_codes).map((item) => String(item).trim()).filter(Boolean).slice(0, 3)
+      : [],
+    ssenMeta: normalizeSsenMeta(review.ssenMeta ?? review.ssen_meta ?? {}),
     difficulty: String(review.difficulty ?? "").trim().slice(0, 40),
     reviewNote: String(review.reviewNote ?? review.review_note ?? "").trim().slice(0, 500),
     isImportantQuestion: Boolean(review.isImportantQuestion ?? review.is_important_question ?? review.importantQuestion),
@@ -811,6 +843,9 @@ export async function saveExamAnalysisQuestionTeacherReviews({
       unitName: review.unitName,
       mainType: review.mainType,
       subTypes: review.subTypes,
+      mainTypeCode: review.mainTypeCode,
+      subTypeCodes: review.subTypeCodes,
+      ssenMeta: review.ssenMeta,
       difficulty: review.difficulty,
       reviewNote: review.reviewNote,
       isImportantQuestion: review.isImportantQuestion

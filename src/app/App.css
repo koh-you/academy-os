@@ -1258,6 +1258,35 @@ button {
   line-height: 1.45;
 }
 
+.examAnalysisSsenGate {
+  background: #f8fafc;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+}
+
+.examAnalysisSsenGate.needsReview {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.examAnalysisSsenGate strong {
+  color: #17213d;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.examAnalysisSsenGate span,
+.examAnalysisSsenGate small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.4;
+}
+
 .examAnalysisReviewGrid {
   display: grid;
   gap: 10px;
@@ -1272,7 +1301,7 @@ button {
 
 .examAnalysisReviewTable {
   border-collapse: collapse;
-  min-width: 1240px;
+  min-width: 1420px;
   table-layout: fixed;
   width: 100%;
 }
@@ -1359,6 +1388,11 @@ button {
 
 .examAnalysisReviewTable th:nth-child(9),
 .examAnalysisReviewTable td:nth-child(9) {
+  width: 150px;
+}
+
+.examAnalysisReviewTable th:nth-child(10),
+.examAnalysisReviewTable td:nth-child(10) {
   width: 82px;
 }
 
@@ -1392,6 +1426,60 @@ button {
   color: #475569;
   text-align: center;
   white-space: nowrap;
+}
+
+.examAnalysisSubTypePicker {
+  display: grid;
+  gap: 6px;
+}
+
+.examAnalysisSubTypeChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  min-height: 22px;
+}
+
+.examAnalysisSubTypeChips button,
+.examAnalysisSubTypeChips span {
+  align-items: center;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  color: #17213d;
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 850;
+  min-height: 22px;
+  padding: 0 8px;
+}
+
+.examAnalysisSubTypeChips button {
+  cursor: pointer;
+}
+
+.examAnalysisReviewTable .ssenMetaCell {
+  color: #475569;
+  display: grid;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.examAnalysisReviewTable .ssenMetaCell strong {
+  color: #17213d;
+  font-size: 12px;
+  font-weight: 950;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.examAnalysisReviewTable .ssenMetaCell span,
+.examAnalysisReviewTable .ssenMetaCell small {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .examAnalysisFinalPreviewPanel {
@@ -1588,6 +1676,77 @@ button {
 .examAnalysisPreviewBars {
   display: grid;
   gap: 10px;
+}
+
+.examAnalysisUnitBreakdown {
+  display: grid;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.examAnalysisUnitBreakdown div {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 3px;
+  padding: 8px 10px;
+}
+
+.examAnalysisUnitBreakdown strong {
+  color: #17213d;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.examAnalysisUnitBreakdown span {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.45;
+}
+
+.examAnalysisPartDifficultyList {
+  display: grid;
+  gap: 11px;
+}
+
+.examAnalysisPartDifficultyRow {
+  display: grid;
+  gap: 5px;
+}
+
+.examAnalysisPartDifficultyRow > div:first-child {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.examAnalysisPartDifficultyRow strong {
+  color: #17213d;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.examAnalysisPartDifficultyRow span,
+.examAnalysisPartDifficultyRow small {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.examAnalysisStackedBar {
+  background: #eef2f7;
+  border-radius: 999px;
+  display: flex;
+  height: 12px;
+  overflow: hidden;
+}
+
+.examAnalysisStackedBar span {
+  display: block;
+  min-width: 8px;
 }
 
 .examAnalysisPreviewBarRow {

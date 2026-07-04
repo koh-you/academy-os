@@ -1009,15 +1009,108 @@ function formatExamAnalysisBoundaryPage(boundary = {}) {
   return `${boundary.pageStart}p`;
 }
 
+function normalizeExamAnalysisSsenCodeList(value = []) {
+  return (Array.isArray(value) ? value : [])
+    .map((item) => String(item ?? "").trim())
+    .filter(Boolean)
+    .slice(0, 3);
+}
+
+function createExamAnalysisSsenUnitKey(value = {}) {
+  return [value.partName, value.unitNo, value.unitName].map((item) => String(item ?? "").trim()).join("|");
+}
+
+function createExamAnalysisReviewSsenMeta({
+  catalog = {},
+  mainTypeCode = "",
+  subTypeCodes = []
+} = {}) {
+  const types = Array.isArray(catalog.types) ? catalog.types : [];
+  const findType = (typeCode) => types.find((item) => item.typeCode === typeCode) ?? null;
+  const mainType = findType(mainTypeCode);
+  const subTypes = normalizeExamAnalysisSsenCodeList(subTypeCodes)
+    .map(findType)
+    .filter(Boolean);
+  return {
+    source: "ssen_type_index",
+    matchStatus: mainType ? "matched" : "needs_mapping",
+    mainType: mainType
+      ? {
+          subject: mainType.subject,
+          typeCode: mainType.typeCode,
+          partName: mainType.partName,
+          unitNo: mainType.unitNo,
+          unitName: mainType.unitName,
+          typeNo: mainType.typeNo,
+          typeName: mainType.typeName
+        }
+      : {},
+    subTypes: subTypes.map((item) => ({
+      subject: item.subject,
+      typeCode: item.typeCode,
+      partName: item.partName,
+      unitNo: item.unitNo,
+      unitName: item.unitName,
+      typeNo: item.typeNo,
+      typeName: item.typeName
+    }))
+  };
+}
+
+function enrichExamAnalysisReviewDraftWithSsenCatalog(draftValue = {}, catalog = {}) {
+  if (!draftValue?.mainTypeCode) return draftValue;
+  const meta = createExamAnalysisReviewSsenMeta({
+    catalog,
+    mainTypeCode: draftValue.mainTypeCode,
+    subTypeCodes: draftValue.subTypeCodes
+  });
+  if (meta.matchStatus !== "matched") return draftValue;
+  return {
+    ...draftValue,
+    unitKey: createExamAnalysisSsenUnitKey(meta.mainType),
+    partName: meta.mainType.partName,
+    unitNo: meta.mainType.unitNo,
+    unitName: draftValue.unitName || meta.mainType.unitName,
+    mainType: draftValue.mainType || meta.mainType.typeName,
+    ssenMeta: meta
+  };
+}
+
+function createEmptyExamAnalysisSsenCatalog() {
+  return {
+    subject: "",
+    scope: "",
+    status: "idle",
+    subjectTypeCount: 0,
+    scopeMatchedCount: 0,
+    types: [],
+    units: []
+  };
+}
+
 function createExamAnalysisReviewDraft(question = {}) {
   const finalFields = question.finalFields ?? {};
   const teacherFields = question.teacherFields ?? {};
   const sourceFields = { ...question, ...teacherFields, ...finalFields };
   const subTypes = Array.isArray(sourceFields.subTypes) ? sourceFields.subTypes : [];
+  const aiFields = question.aiFields ?? {};
+  const ssenMeta = sourceFields.ssenMeta && typeof sourceFields.ssenMeta === "object" ? sourceFields.ssenMeta : {};
+  const mainTypeMeta = ssenMeta.mainType && typeof ssenMeta.mainType === "object" ? ssenMeta.mainType : {};
+  const mainTypeCode = sourceFields.mainTypeCode ?? mainTypeMeta.typeCode ?? aiFields.mainTypeCode ?? "";
+  const subTypeCodes = normalizeExamAnalysisSsenCodeList(sourceFields.subTypeCodes ?? aiFields.subTypeCodes ?? []);
+  const partName = sourceFields.partName ?? mainTypeMeta.partName ?? "";
+  const unitNo = sourceFields.unitNo ?? mainTypeMeta.unitNo ?? "";
+  const unitName = sourceFields.unitName ?? mainTypeMeta.unitName ?? "";
   return {
-    unitName: sourceFields.unitName ?? "",
+    unitKey: sourceFields.unitKey ?? createExamAnalysisSsenUnitKey({ partName, unitNo, unitName }),
+    partName,
+    unitNo,
+    unitName,
     mainType: sourceFields.mainType ?? "",
+    mainTypeCode,
     subTypesText: subTypes.join(", "),
+    subTypeCodes,
+    ssenMeta,
     difficulty: sourceFields.difficulty ?? "",
     reviewNote: sourceFields.reviewNote ?? "",
     isImportantQuestion: Boolean(sourceFields.isImportantQuestion),
@@ -1038,6 +1131,10 @@ function isSameExamAnalysisReviewDraft(left = {}, right = {}) {
     String(left.unitName ?? "") === String(right.unitName ?? "") &&
     String(left.mainType ?? "") === String(right.mainType ?? "") &&
     String(left.subTypesText ?? "") === String(right.subTypesText ?? "") &&
+    String(left.mainTypeCode ?? "") === String(right.mainTypeCode ?? "") &&
+    normalizeExamAnalysisSsenCodeList(left.subTypeCodes).join("|") === normalizeExamAnalysisSsenCodeList(right.subTypeCodes).join("|") &&
+    String(left.partName ?? "") === String(right.partName ?? "") &&
+    String(left.unitNo ?? "") === String(right.unitNo ?? "") &&
     String(left.difficulty ?? "") === String(right.difficulty ?? "") &&
     String(left.reviewNote ?? "") === String(right.reviewNote ?? "") &&
     Boolean(left.isImportantQuestion) === Boolean(right.isImportantQuestion) &&
@@ -1081,15 +1178,21 @@ function isExamAnalysisQuestionRefineTarget(question = {}, draftValue = {}) {
 
 const examAnalysisDifficultyOptions = ["하", "중하", "중", "중상", "상"];
 
-function applyExamAnalysisReviewDraftsToQuestions(questions = [], reviewDrafts = {}) {
+function applyExamAnalysisReviewDraftsToQuestions(questions = [], reviewDrafts = {}, ssenCatalog = {}) {
   return (Array.isArray(questions) ? questions : []).map((question) => {
-    const draftValue = reviewDrafts[String(question.questionNumber)];
+    const draftValue = enrichExamAnalysisReviewDraftWithSsenCatalog(reviewDrafts[String(question.questionNumber)], ssenCatalog);
     if (!draftValue) return question;
     const subTypes = parseExamAnalysisReviewSubTypes(draftValue.subTypesText);
     const fields = {
       unitName: draftValue.unitName ?? "",
       mainType: draftValue.mainType ?? "",
       subTypes,
+      partName: draftValue.partName ?? "",
+      unitNo: draftValue.unitNo ?? "",
+      unitKey: draftValue.unitKey ?? "",
+      mainTypeCode: draftValue.mainTypeCode ?? "",
+      subTypeCodes: normalizeExamAnalysisSsenCodeList(draftValue.subTypeCodes),
+      ssenMeta: draftValue.ssenMeta ?? {},
       difficulty: draftValue.difficulty ?? "",
       reviewNote: draftValue.reviewNote ?? "",
       isImportantQuestion: Boolean(draftValue.isImportantQuestion)
@@ -1114,14 +1217,14 @@ function applyExamAnalysisReviewDraftsToQuestions(questions = [], reviewDrafts =
   });
 }
 
-function ExamAnalysisMiniDonut({ segments = [] }) {
+function ExamAnalysisMiniDonut({ segments = [], centerLabel = "단원", ariaLabel = "출제 비중" }) {
   const visibleSegments = segments.filter((segment) => Number(segment.count || 0) > 0);
   let offset = 0;
   if (!visibleSegments.length) {
     return <div className="examAnalysisDonut empty" aria-label="데이터 없음" />;
   }
   return (
-    <svg className="examAnalysisDonut" viewBox="0 0 42 42" role="img" aria-label="단원별 출제 비중">
+    <svg className="examAnalysisDonut" viewBox="0 0 42 42" role="img" aria-label={ariaLabel}>
       <circle className="examAnalysisDonutBase" cx="21" cy="21" r="15.9155" />
       {visibleSegments.map((segment) => {
         const dash = `${segment.percent} ${100 - segment.percent}`;
@@ -1141,7 +1244,7 @@ function ExamAnalysisMiniDonut({ segments = [] }) {
         return circle;
       })}
       <text x="21" y="20" textAnchor="middle">{visibleSegments.length}</text>
-      <text x="21" y="25" textAnchor="middle">단원</text>
+      <text x="21" y="25" textAnchor="middle">{centerLabel}</text>
     </svg>
   );
 }
@@ -1174,6 +1277,47 @@ function ExamAnalysisBarList({ items = [], emptyLabel = "데이터 없음" }) {
           <div className="examAnalysisPreviewBarTrack">
             <span style={{ backgroundColor: item.color, width: `${Math.max(item.percent, 4)}%` }} />
           </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ExamAnalysisUnitBreakdownList({ items = [] }) {
+  const visibleItems = items.filter((item) => item.units?.length);
+  if (!visibleItems.length) return null;
+  return (
+    <div className="examAnalysisUnitBreakdown">
+      {visibleItems.map((part) => (
+        <div key={part.label}>
+          <strong>{part.label}</strong>
+          <span>{part.units.map((unit) => `${unit.label} ${unit.count}`).join(" · ")}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ExamAnalysisPartDifficultyList({ items = [] }) {
+  if (!items.length) return <div className="emptyState compact">난이도 데이터 없음</div>;
+  return (
+    <div className="examAnalysisPartDifficultyList">
+      {items.map((part) => (
+        <div className="examAnalysisPartDifficultyRow" key={part.label}>
+          <div>
+            <strong>{part.label}</strong>
+            <span>{part.count}문항 · {part.percent}%</span>
+          </div>
+          <div className="examAnalysisStackedBar">
+            {part.difficulties.map((difficulty) => (
+              <span
+                key={difficulty.label}
+                style={{ backgroundColor: difficulty.color, width: `${Math.max(difficulty.percent, 6)}%` }}
+                title={`${difficulty.label} · ${difficulty.count}문항`}
+              />
+            ))}
+          </div>
+          <small>{part.difficulties.map((difficulty) => `${difficulty.label} ${difficulty.count}`).join(" · ")}</small>
         </div>
       ))}
     </div>
@@ -1233,7 +1377,7 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
         </div>
         <div className="examAnalysisPreviewMetricGrid">
           <span><b>{meta.totalQuestions}</b><small>문항</small></span>
-          <span><b>{model.unitDistribution.length}</b><small>단원</small></span>
+          <span><b>{model.partDistribution.length}</b><small>대단원</small></span>
           <span><b>{model.importantQuestions.length}</b><small>주요문항</small></span>
         </div>
       </div>
@@ -1241,12 +1385,15 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
       <div className="examAnalysisPreviewGrid">
         <section className="examAnalysisPreviewCard wide">
           <div className="examAnalysisPreviewCardHeader">
-            <strong>단원별 출제 비중</strong>
-            <span>자동 범례</span>
+            <strong>대단원별 출제 비중</strong>
+            <span>중단원 breakdown</span>
           </div>
           <div className="examAnalysisPreviewDonutLayout">
-            <ExamAnalysisMiniDonut segments={model.unitDistribution} />
-            <ExamAnalysisLegendList items={model.unitDistribution} />
+            <ExamAnalysisMiniDonut segments={model.partDistribution} centerLabel="대단원" ariaLabel="대단원별 출제 비중" />
+            <div>
+              <ExamAnalysisLegendList items={model.partDistribution} />
+              <ExamAnalysisUnitBreakdownList items={model.unitBreakdown} />
+            </div>
           </div>
         </section>
 
@@ -1260,10 +1407,10 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
 
         <section className="examAnalysisPreviewCard">
           <div className="examAnalysisPreviewCardHeader">
-            <strong>주요 유형</strong>
-            <span>쎈 기준 참고</span>
+            <strong>대단원별 난이도</strong>
+            <span>검수 저장본</span>
           </div>
-          <ExamAnalysisBarList items={model.majorTypes.slice(0, 6)} emptyLabel="주요 유형 없음" />
+          <ExamAnalysisPartDifficultyList items={model.difficultyByPart} />
         </section>
 
         <section className="examAnalysisPreviewCard wide">
@@ -1286,7 +1433,7 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
                   <strong>{question.questionNumber}번</strong>
                   <div>
                     <b>{question.mainType || "유형 미입력"}</b>
-                    <span>{[question.unitName, question.difficulty, question.pageLabel].filter(Boolean).join(" · ")}</span>
+                    <span>{[question.partName, question.unitName, question.difficulty, question.pageLabel].filter(Boolean).join(" · ")}</span>
                     <small>{question.reasons?.join(" · ") || "후보"}</small>
                     {question.reviewNote ? <p>{question.reviewNote}</p> : null}
                   </div>
@@ -1306,8 +1453,9 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
               <th>#</th>
               <th>주요</th>
               <th>페이지</th>
-              <th>단원</th>
-              <th>주요 유형</th>
+              <th>대단원</th>
+              <th>중단원</th>
+              <th>주유형</th>
               <th>보조유형</th>
               <th>난이도</th>
               <th>검수 메모</th>
@@ -1319,6 +1467,7 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
                 <td>{question.questionNumber}</td>
                 <td>{question.isImportantQuestion ? "체크" : "-"}</td>
                 <td>{question.pageLabel || "-"}</td>
+                <td>{question.partName || "미입력"}</td>
                 <td>{question.unitName || "미입력"}</td>
                 <td>{question.mainType || "미입력"}</td>
                 <td>{question.subTypes.join(", ") || "-"}</td>
@@ -1536,6 +1685,18 @@ function deleteExamAnalysisRunRequest(analysisRunId) {
       if (!response.ok || !result.ok) throw new Error(result.error || "시험분석 삭제 실패");
       return result;
     });
+}
+
+function fetchExamAnalysisSsenTypesRequest(payload = {}) {
+  const params = new URLSearchParams();
+  if (payload.analysisRunId) params.set("analysisRunId", payload.analysisRunId);
+  if (payload.subject) params.set("subject", payload.subject);
+  if (payload.scope) params.set("scope", payload.scope);
+  return getJsonWithTimeout(
+    `/api/exam-analysis-ssen-types?${params.toString()}`,
+    12000,
+    "쎈 기준표 조회가 지연되고 있습니다."
+  );
 }
 
 function extractExamAnalysisSourceRequest(sourceId) {
@@ -6901,6 +7062,8 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const [reviewDrafts, setReviewDrafts] = useState({});
   const [isSavingReviews, setIsSavingReviews] = useState(false);
   const [isPdfDropActive, setIsPdfDropActive] = useState(false);
+  const [ssenCatalog, setSsenCatalog] = useState(() => createEmptyExamAnalysisSsenCatalog());
+  const [ssenCatalogStatus, setSsenCatalogStatus] = useState({ state: "idle", message: "" });
 
   const selectedExamPrepRow = useMemo(
     () => examPrepRows.find((row) => row.examPrepId === selectedExamPrepId) ?? null,
@@ -6911,6 +7074,19 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const sourceFiles = selectedDetailRun ? selectedDetail?.sources ?? [] : [];
   const questionRows = selectedDetailRun ? selectedDetail?.questions ?? [] : [];
   const events = selectedDetailRun ? selectedDetail?.events ?? [] : [];
+  const ssenCatalogQuery = useMemo(() => {
+    const scope = selectedExamPrepRow?.scope ?? "";
+    const subject = getDefaultExamAnalysisSubject({
+      subject: draft.subject || activeRun?.subject || selectedExamPrepRow?.subject || "",
+      scope,
+      title: draft.title || activeRun?.title || ""
+    });
+    return {
+      analysisRunId: activeRun?.analysisRunId || "",
+      subject,
+      scope
+    };
+  }, [activeRun?.analysisRunId, activeRun?.subject, activeRun?.title, draft.subject, draft.title, selectedExamPrepRow?.scope, selectedExamPrepRow?.subject]);
   const questionCountCandidate = useMemo(
     () => getExamAnalysisQuestionCountCandidate(activeRun, sourceFiles),
     [activeRun, sourceFiles]
@@ -6920,8 +7096,8 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const rowRefine = activeRun?.auditSummary?.rowRefine ?? null;
   const teacherReview = activeRun?.auditSummary?.teacherReview ?? null;
   const previewQuestionRows = useMemo(
-    () => applyExamAnalysisReviewDraftsToQuestions(questionRows, reviewDrafts),
-    [questionRows, reviewDrafts]
+    () => applyExamAnalysisReviewDraftsToQuestions(questionRows, reviewDrafts, ssenCatalog),
+    [questionRows, reviewDrafts, ssenCatalog]
   );
   const finalPreviewModel = useMemo(
     () => createExamAnalysisFinalPreviewModel({
@@ -6983,6 +7159,46 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     )),
     [analysisRuns, selectedExamCycle, selectedGrade, selectedSchoolName]
   );
+
+  useEffect(() => {
+    if (!ssenCatalogQuery.analysisRunId && !ssenCatalogQuery.subject && !ssenCatalogQuery.scope) {
+      setSsenCatalog(createEmptyExamAnalysisSsenCatalog());
+      setSsenCatalogStatus({ state: "idle", message: "" });
+      return;
+    }
+    let canceled = false;
+    setSsenCatalogStatus({ state: "saving", message: "시험분석 · 쎈 기준표 조회 중" });
+    fetchExamAnalysisSsenTypesRequest(ssenCatalogQuery)
+      .then((result) => {
+        if (canceled) return;
+        setSsenCatalog({
+          subject: result.subject || "",
+          scope: result.scope || "",
+          status: result.status || "",
+          subjectTypeCount: result.subjectTypeCount || 0,
+          scopeMatchedCount: result.scopeMatchedCount || 0,
+          types: Array.isArray(result.types) ? result.types : [],
+          units: Array.isArray(result.units) ? result.units : []
+        });
+        const count = result.scopeMatchedCount || result.subjectTypeCount || 0;
+        setSsenCatalogStatus({
+          state: result.status === "subject_missing" ? "failed" : "success",
+          message: result.status === "scope_not_matched"
+            ? `시험분석 · 쎈 기준표 과목 전체 · ${count}개`
+            : result.status === "subject_missing"
+              ? "시험분석 · 쎈 기준표 과목 확인 필요"
+              : `시험분석 · 쎈 기준표 준비 · ${count}개`
+        });
+      })
+      .catch((error) => {
+        if (canceled) return;
+        setSsenCatalog(createEmptyExamAnalysisSsenCatalog());
+        setSsenCatalogStatus({ state: "failed", message: `시험분석 · 쎈 기준표 조회 실패 · ${error.message}` });
+      });
+    return () => {
+      canceled = true;
+    };
+  }, [ssenCatalogQuery]);
 
   useEffect(() => {
     if (!didAutoSelectExamPrepRef.current && !selectedExamPrepId && examPrepRows[0]?.examPrepId) {
@@ -7470,6 +7686,102 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     }
   }
 
+  function getSsenTypeByCode(typeCode = "") {
+    return (ssenCatalog.types ?? []).find((item) => item.typeCode === typeCode) ?? null;
+  }
+
+  function getSsenUnitByKey(unitKey = "") {
+    return (ssenCatalog.units ?? []).find((item) => item.key === unitKey) ?? null;
+  }
+
+  function getReviewDraftUnitKey(draftValue = {}) {
+    if (draftValue.unitKey && getSsenUnitByKey(draftValue.unitKey)) return draftValue.unitKey;
+    const mainType = getSsenTypeByCode(draftValue.mainTypeCode);
+    if (mainType) return createExamAnalysisSsenUnitKey(mainType);
+    const unit = (ssenCatalog.units ?? []).find((item) => item.unitName === draftValue.unitName);
+    return unit?.key ?? "";
+  }
+
+  function getSsenTypesForReviewDraft(draftValue = {}) {
+    const unitKey = getReviewDraftUnitKey(draftValue);
+    const types = Array.isArray(ssenCatalog.types) ? ssenCatalog.types : [];
+    if (!unitKey) return types;
+    const unit = getSsenUnitByKey(unitKey);
+    if (!unit) return types;
+    return types.filter((item) => createExamAnalysisSsenUnitKey(item) === unit.key);
+  }
+
+  function selectReviewSsenUnit(questionNumber, unitKey) {
+    const unit = getSsenUnitByKey(unitKey);
+    updateReviewDraft(questionNumber, {
+      unitKey: unit?.key ?? "",
+      partName: unit?.partName ?? "",
+      unitNo: unit?.unitNo ?? "",
+      unitName: unit?.unitName ?? "",
+      mainType: "",
+      mainTypeCode: "",
+      subTypesText: "",
+      subTypeCodes: [],
+      ssenMeta: { source: "ssen_type_index", matchStatus: "unit_selected", mainType: {}, subTypes: [] }
+    });
+  }
+
+  function selectReviewMainType(questionNumber, typeCode) {
+    const type = getSsenTypeByCode(typeCode);
+    if (!type) {
+      updateReviewDraft(questionNumber, {
+        mainType: "",
+        mainTypeCode: "",
+        ssenMeta: { source: "ssen_type_index", matchStatus: "needs_mapping", mainType: {}, subTypes: [] }
+      });
+      return;
+    }
+    const nextSubTypeCodes = [];
+    updateReviewDraft(questionNumber, {
+      unitKey: createExamAnalysisSsenUnitKey(type),
+      partName: type.partName,
+      unitNo: type.unitNo,
+      unitName: type.unitName,
+      mainType: type.typeName,
+      mainTypeCode: type.typeCode,
+      subTypesText: "",
+      subTypeCodes: nextSubTypeCodes,
+      ssenMeta: createExamAnalysisReviewSsenMeta({ catalog: ssenCatalog, mainTypeCode: type.typeCode, subTypeCodes: nextSubTypeCodes })
+    });
+  }
+
+  function addReviewSubType(questionNumber, draftValue = {}, typeCode = "") {
+    const type = getSsenTypeByCode(typeCode);
+    if (!type) return;
+    const nextSubTypeCodes = [...new Set([...normalizeExamAnalysisSsenCodeList(draftValue.subTypeCodes), type.typeCode])]
+      .filter((code) => code !== draftValue.mainTypeCode)
+      .slice(0, 3);
+    const nextSubTypes = nextSubTypeCodes.map(getSsenTypeByCode).filter(Boolean);
+    updateReviewDraft(questionNumber, {
+      subTypeCodes: nextSubTypeCodes,
+      subTypesText: nextSubTypes.map((item) => item.typeName).join(", "),
+      ssenMeta: createExamAnalysisReviewSsenMeta({
+        catalog: ssenCatalog,
+        mainTypeCode: draftValue.mainTypeCode,
+        subTypeCodes: nextSubTypeCodes
+      })
+    });
+  }
+
+  function removeReviewSubType(questionNumber, draftValue = {}, typeCode = "") {
+    const nextSubTypeCodes = normalizeExamAnalysisSsenCodeList(draftValue.subTypeCodes).filter((code) => code !== typeCode);
+    const nextSubTypes = nextSubTypeCodes.map(getSsenTypeByCode).filter(Boolean);
+    updateReviewDraft(questionNumber, {
+      subTypeCodes: nextSubTypeCodes,
+      subTypesText: nextSubTypes.map((item) => item.typeName).join(", "),
+      ssenMeta: createExamAnalysisReviewSsenMeta({
+        catalog: ssenCatalog,
+        mainTypeCode: draftValue.mainTypeCode,
+        subTypeCodes: nextSubTypeCodes
+      })
+    });
+  }
+
   function updateReviewDraft(questionNumber, patch) {
     const key = String(questionNumber);
     const question = questionRows.find((row) => String(row.questionNumber) === key);
@@ -7508,12 +7820,26 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   function buildQuestionReviewPayload() {
     return questionRows.map((question) => {
       const key = String(question.questionNumber);
-      const draftValue = reviewDrafts[key] ?? createExamAnalysisReviewDraft(question);
+      const draftValue = enrichExamAnalysisReviewDraftWithSsenCatalog(
+        reviewDrafts[key] ?? createExamAnalysisReviewDraft(question),
+        ssenCatalog
+      );
+      const subTypeCodes = normalizeExamAnalysisSsenCodeList(draftValue.subTypeCodes);
+      const ssenMeta = draftValue.ssenMeta?.matchStatus === "matched"
+        ? draftValue.ssenMeta
+        : createExamAnalysisReviewSsenMeta({
+            catalog: ssenCatalog,
+            mainTypeCode: draftValue.mainTypeCode,
+            subTypeCodes
+          });
       return {
         questionNumber: Number(question.questionNumber),
         unitName: draftValue.unitName ?? "",
         mainType: draftValue.mainType ?? "",
         subTypes: parseExamAnalysisReviewSubTypes(draftValue.subTypesText),
+        mainTypeCode: draftValue.mainTypeCode ?? "",
+        subTypeCodes,
+        ssenMeta,
         difficulty: draftValue.difficulty ?? "",
         reviewNote: draftValue.reviewNote ?? "",
         isImportantQuestion: Boolean(draftValue.isImportantQuestion),
@@ -7636,6 +7962,13 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     : questionCountDraft
       ? `${questionCountDraft}문항 확정`
       : "문항 수 확정";
+  const ssenCatalogLabel = ssenCatalog.status === "scope_matched"
+    ? `${ssenCatalog.subject} · 범위 후보 ${ssenCatalog.scopeMatchedCount}개`
+    : ssenCatalog.status === "scope_not_matched"
+      ? `${ssenCatalog.subject || "과목 미정"} · 범위 매칭 없음 · 과목 전체 ${ssenCatalog.subjectTypeCount}개`
+      : ssenCatalog.status === "subject_all"
+        ? `${ssenCatalog.subject} · 과목 전체 ${ssenCatalog.subjectTypeCount}개`
+        : "과목 확인 필요";
 
   return (
     <section className="examAnalysisPipelinePage">
@@ -8167,6 +8500,11 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                 {rowRefine.skippedTeacherOverrideNumbers?.length ? <small>선생님 수정본 보호 {rowRefine.skippedTeacherOverrideNumbers.join(", ")}</small> : null}
               </div>
             ) : null}
+            <div className={ssenCatalog.status === "scope_not_matched" || ssenCatalog.status === "subject_missing" ? "examAnalysisSsenGate needsReview" : "examAnalysisSsenGate"}>
+              <strong>쎈 기준표</strong>
+              <span>{ssenCatalogStatus.message || ssenCatalogLabel}</span>
+              <small>{ssenCatalogLabel}</small>
+            </div>
             {reviewRowsReady ? (
               <div className="examAnalysisReviewTableWrap">
                 <table className="examAnalysisReviewTable">
@@ -8180,13 +8518,22 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                       <th>보조유형</th>
                       <th>난이도</th>
                       <th>검수 메모</th>
+                      <th>기준표</th>
                       <th>상태</th>
                     </tr>
                   </thead>
                   <tbody>
                     {questionRows.map((question) => {
-                      const draftValue = reviewDrafts[String(question.questionNumber)] ?? createExamAnalysisReviewDraft(question);
+                      const draftValue = enrichExamAnalysisReviewDraftWithSsenCatalog(
+                        reviewDrafts[String(question.questionNumber)] ?? createExamAnalysisReviewDraft(question),
+                        ssenCatalog
+                      );
                       const needsReview = isExamAnalysisQuestionAiReviewTarget(question);
+                      const unitKey = getReviewDraftUnitKey(draftValue);
+                      const ssenTypeOptions = getSsenTypesForReviewDraft(draftValue);
+                      const selectedSubTypeCodes = normalizeExamAnalysisSsenCodeList(draftValue.subTypeCodes);
+                      const selectedSubTypes = selectedSubTypeCodes.map(getSsenTypeByCode).filter(Boolean);
+                      const mainTypeMeta = getSsenTypeByCode(draftValue.mainTypeCode);
                       const reviewClassName = [
                         needsReview ? "needsReview" : "",
                         draftValue.confirmed ? "confirmed" : ""
@@ -8211,25 +8558,63 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                             />
                           </td>
                           <td>
-                            <input
-                              value={draftValue.unitName}
-                              onChange={(event) => updateReviewDraft(question.questionNumber, { unitName: event.target.value })}
-                              placeholder="단원"
-                            />
+                            <select
+                              value={unitKey}
+                              onChange={(event) => selectReviewSsenUnit(question.questionNumber, event.target.value)}
+                            >
+                              <option value="">단원 선택</option>
+                              {(ssenCatalog.units ?? []).map((unit) => (
+                                <option key={unit.key} value={unit.key}>
+                                  {[unit.partName, unit.unitName].filter(Boolean).join(" · ")}
+                                </option>
+                              ))}
+                            </select>
                           </td>
                           <td>
-                            <input
-                              value={draftValue.mainType}
-                              onChange={(event) => updateReviewDraft(question.questionNumber, { mainType: event.target.value })}
-                              placeholder="주유형"
-                            />
+                            <select
+                              value={draftValue.mainTypeCode}
+                              onChange={(event) => selectReviewMainType(question.questionNumber, event.target.value)}
+                            >
+                              <option value="">주유형 선택</option>
+                              {ssenTypeOptions.map((type) => (
+                                <option key={type.typeCode} value={type.typeCode}>
+                                  {`${type.typeNo}. ${type.typeName}`}
+                                </option>
+                              ))}
+                            </select>
                           </td>
                           <td>
-                            <input
-                              value={draftValue.subTypesText}
-                              onChange={(event) => updateReviewDraft(question.questionNumber, { subTypesText: event.target.value })}
-                              placeholder="쉼표로 구분"
-                            />
+                            <div className="examAnalysisSubTypePicker">
+                              <select
+                                aria-label={`${question.questionNumber}번 보조유형 추가`}
+                                onChange={(event) => {
+                                  addReviewSubType(question.questionNumber, draftValue, event.target.value);
+                                  event.target.value = "";
+                                }}
+                                value=""
+                              >
+                                <option value="">보조유형 추가</option>
+                                {ssenTypeOptions
+                                  .filter((type) => type.typeCode !== draftValue.mainTypeCode && !selectedSubTypeCodes.includes(type.typeCode))
+                                  .map((type) => (
+                                    <option key={type.typeCode} value={type.typeCode}>
+                                      {`${type.typeNo}. ${type.typeName}`}
+                                    </option>
+                                  ))}
+                              </select>
+                              <div className="examAnalysisSubTypeChips">
+                                {selectedSubTypes.length ? selectedSubTypes.map((type) => (
+                                  <button
+                                    aria-label={`${type.typeName} 제거`}
+                                    key={type.typeCode}
+                                    onClick={() => removeReviewSubType(question.questionNumber, draftValue, type.typeCode)}
+                                    type="button"
+                                  >
+                                    {type.typeName}
+                                  </button>
+                                )) : <span>없음</span>}
+                              </div>
+                            </div>
                           </td>
                           <td>
                             <select
@@ -8250,6 +8635,11 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                               onChange={(event) => updateReviewDraft(question.questionNumber, { reviewNote: event.target.value })}
                               placeholder="재확인 근거 또는 수정 이유"
                             />
+                          </td>
+                          <td className="ssenMetaCell">
+                            <strong>{mainTypeMeta?.partName || draftValue.partName || "매칭 필요"}</strong>
+                            <span>{mainTypeMeta ? `${mainTypeMeta.unitNo}. ${mainTypeMeta.unitName}` : draftValue.unitName || "-"}</span>
+                            <small>{draftValue.mainTypeCode || "typeCode 없음"}</small>
                           </td>
                           <td className="reviewStateCell">
                             {needsReview ? "2차 수정 필요" : draftValue.confirmed ? "확정" : "미확정"}

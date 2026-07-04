@@ -14,6 +14,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-04 P0. 시험분석 쎈 기준표 선택 gate와 대단원 차트 연결
+
+- 상태: 완료
+- 사용자 요청: 쎈 기준표의 `partName/unitName/typeName`을 각각 대단원/중단원/주유형 원천으로 쓰고, 선생님이 검수 표에서 범위 내 쎈 유형을 직접 골라 저장한 뒤 최종 미리보기 차트를 대단원/중단원 기준으로 바꾼다.
+- 이번 작업 결과: `GET /api/exam-analysis-ssen-types`를 추가했다. 원천은 기존 `api/data/ssenTypeIndex.json` 하나이며, 과목/범위 문자열을 받아 범위에 명시적으로 매칭된 후보가 있으면 그 후보를, 없으면 `scope_not_matched` 상태와 함께 과목 전체 후보를 내려준다.
+- 검수 UI: `AI 결과 검수` 표에 `쎈 기준표` gate를 추가했다. 단원 select는 `partName · unitName` 기준이고, 주유형/보조유형은 해당 단원 안의 `typeName` 후보에서 선택한다. 주유형 선택 시 `mainTypeCode`, `partName`, `unitNo`, `unitName`, `typeName`이 local draft에 함께 들어간다.
+- 저장 원천: `POST /api/exam-analysis-runs/save-question-reviews`가 `mainTypeCode`, `subTypeCodes`, `ssenMeta`를 받아 기존 `exam_analysis_questions.teacher_fields`/`final_fields` JSON에 저장한다. 새 SQL edit은 필요 없다.
+- 최종 미리보기: 저장본의 `ssenMeta.mainType.partName`을 대단원 원천으로 사용한다. `단원별 출제 비중`은 `대단원별 출제 비중 + 중단원 breakdown`으로 바꿨고, 너무 세분화되던 `주요 유형` 차트는 `대단원별 난이도`로 대체했다.
+- 검증: `node --check api/server.js`, `node --check api/routes/examAnalysisPipeline.js`, `node --check src/domains/exams/finalPreview.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check` 통과. `npm run test:production` 통과(total 235, failed 0). `npm run build` 통과. Vite 기존 chunk size warning만 발생했다.
+
 ### 2026-07-04 P0. 시험분석 검수 표 2차 수정 대상 표시 보강
 
 - 상태: 완료
