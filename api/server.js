@@ -910,17 +910,126 @@ function getSsenTypesForExamAnalysis({ sourceFile = {}, analysisRun = {} } = {})
   };
 }
 
+function compactSsenScopeText(value = "") {
+  return String(value || "").replace(/[\s.,，/|·:;()[\]{}~\-–—_]+/g, "");
+}
+
+function getSsenScopeTokens(scopeText = "") {
+  return String(scopeText || "")
+    .split(/[\n,，/|·:;()[\]{}]+|부터|까지|~/g)
+    .map(compactSsenScopeText)
+    .filter((token) => token.length >= 2);
+}
+
+function getSsenScopeSegments(scopeText = "") {
+  return String(scopeText || "")
+    .split(/[\n,，/|·:;()[\]{}]+/g)
+    .map((segment) => segment.trim())
+    .filter(Boolean);
+}
+
+function getSsenUnitKey(row = {}) {
+  return [row.partName, row.unitNo, row.unitName].map((item) => String(item ?? "").trim()).join("|");
+}
+
+function getSsenUnitNumber(row = {}) {
+  const unitNo = Number(row.unitNo);
+  return Number.isInteger(unitNo) ? unitNo : null;
+}
+
+function addSsenUnitRange(unitKeys, rows = [], startUnitNo, endUnitNo) {
+  if (!Number.isInteger(startUnitNo) || !Number.isInteger(endUnitNo)) return;
+  const minUnitNo = Math.min(startUnitNo, endUnitNo);
+  const maxUnitNo = Math.max(startUnitNo, endUnitNo);
+  rows.forEach((row) => {
+    const unitNo = getSsenUnitNumber(row);
+    if (Number.isInteger(unitNo) && unitNo >= minUnitNo && unitNo <= maxUnitNo) {
+      unitKeys.add(getSsenUnitKey(row));
+    }
+  });
+}
+
+function ssenRowMatchesScope(row = {}, scopeText = "") {
+  const compactScope = compactSsenScopeText(scopeText);
+  const tokens = getSsenScopeTokens(scopeText);
+  const partName = compactSsenScopeText(row.partName);
+  const unitName = compactSsenScopeText(row.unitName);
+  const typeName = compactSsenScopeText(row.typeName);
+  if (!compactScope) return false;
+  if ([partName, unitName].filter(Boolean).some((label) => compactScope.includes(label))) return true;
+  return tokens.some((token) => (
+    (partName && (partName.includes(token) || token.includes(partName))) ||
+    (unitName && (unitName.includes(token) || token.includes(unitName))) ||
+    (typeName && typeName.includes(token))
+  ));
+}
+
+function getSsenUnitLabelMatchedKeys(rows = [], scopeText = "") {
+  const compactScope = compactSsenScopeText(scopeText);
+  if (!compactScope) return new Set();
+  const tokens = getSsenScopeTokens(scopeText);
+  const exactLabelKeys = new Set(rows
+    .filter((row) => [row.partName, row.unitName]
+      .map(compactSsenScopeText)
+      .filter(Boolean)
+      .some((label) => tokens.includes(label)))
+    .map(getSsenUnitKey));
+  if (exactLabelKeys.size) return exactLabelKeys;
+
+  const unitNameKeys = new Set(rows
+    .filter((row) => {
+      const unitName = compactSsenScopeText(row.unitName);
+      return unitName && compactScope.includes(unitName);
+    })
+    .map(getSsenUnitKey));
+  if (unitNameKeys.size) return unitNameKeys;
+
+  return new Set(rows
+    .filter((row) => {
+      const partName = compactSsenScopeText(row.partName);
+      return partName && compactScope.includes(partName);
+    })
+    .map(getSsenUnitKey));
+}
+
+function getSsenScopeMatchedUnitKeys(rows = [], scopeText = "") {
+  const segments = getSsenScopeSegments(scopeText);
+  const matchedUnitKeys = new Set();
+  const sortedUnitNumbers = [...new Set(rows.map(getSsenUnitNumber).filter((number) => Number.isInteger(number)))]
+    .sort((a, b) => a - b);
+  const firstUnitNo = sortedUnitNumbers[0] ?? null;
+
+  segments.forEach((segment) => {
+    const unitLabelMatchedKeys = getSsenUnitLabelMatchedKeys(rows, segment);
+    const segmentMatchedUnitKeys = unitLabelMatchedKeys.size
+      ? unitLabelMatchedKeys
+      : new Set(rows.filter((row) => ssenRowMatchesScope(row, segment)).map(getSsenUnitKey));
+    const segmentUnitNumbers = [...segmentMatchedUnitKeys]
+      .map((key) => Number(key.split("|")[1]))
+      .filter((number) => Number.isInteger(number));
+    const scopeHasRange = /[~\-–—]|부터|까지/.test(segment);
+    if (scopeHasRange && segmentUnitNumbers.length >= 2) {
+      addSsenUnitRange(matchedUnitKeys, rows, Math.min(...segmentUnitNumbers), Math.max(...segmentUnitNumbers));
+      return;
+    }
+    if (
+      scopeHasRange
+      && segmentUnitNumbers.length === 1
+      && Number.isInteger(firstUnitNo)
+      && (/^\s*[~\-–—]/.test(segment) || /까지/.test(segment))
+    ) {
+      addSsenUnitRange(matchedUnitKeys, rows, firstUnitNo, segmentUnitNumbers[0]);
+      return;
+    }
+    segmentMatchedUnitKeys.forEach((key) => matchedUnitKeys.add(key));
+  });
+
+  return matchedUnitKeys;
+}
+
 function normalizeSsenTypeIndexRow(row = {}, scopeText = "") {
-  const compactScope = String(scopeText || "").replace(/\s+/g, "");
   const partName = String(row.partName ?? "").trim();
   const unitName = String(row.unitName ?? "").trim();
-  const scopeMatched = Boolean(
-    compactScope &&
-    [partName, unitName]
-      .map((value) => value.replace(/\s+/g, ""))
-      .filter(Boolean)
-      .some((value) => compactScope.includes(value))
-  );
   return {
     bookCode: row.bookCode || "",
     bookTitle: row.bookTitle || "",
@@ -931,7 +1040,7 @@ function normalizeSsenTypeIndexRow(row = {}, scopeText = "") {
     unitName,
     typeNo: row.typeNo || "",
     typeName: row.typeName || "",
-    scopeMatched
+    scopeMatched: ssenRowMatchesScope(row, scopeText)
   };
 }
 
@@ -948,7 +1057,12 @@ function getSsenTypeCatalogForExamAnalysis({ subject = "", scope = "", analysisR
     ? ssenTypeIndex.filter((item) => item.subject === normalizedSubject)
     : [];
   const normalizedTypes = subjectTypes.map((row) => normalizeSsenTypeIndexRow(row, scope));
-  const scopeMatchedTypes = normalizedTypes.filter((row) => row.scopeMatched);
+  const matchedUnitKeys = getSsenScopeMatchedUnitKeys(normalizedTypes, scope);
+  const scopeMatchedTypes = matchedUnitKeys.size
+    ? normalizedTypes
+        .filter((row) => matchedUnitKeys.has(getSsenUnitKey(row)))
+        .map((row) => ({ ...row, scopeMatched: true }))
+    : [];
   const visibleTypes = scopeMatchedTypes.length ? scopeMatchedTypes : normalizedTypes;
   const unitMap = new Map();
   visibleTypes.forEach((row) => {
