@@ -6861,6 +6861,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const [reviewStatus, setReviewStatus] = useState({ state: "idle", message: "" });
   const [reviewDrafts, setReviewDrafts] = useState({});
   const [isSavingReviews, setIsSavingReviews] = useState(false);
+  const [isPdfDropActive, setIsPdfDropActive] = useState(false);
 
   const selectedExamPrepRow = useMemo(
     () => examPrepRows.find((row) => row.examPrepId === selectedExamPrepId) ?? null,
@@ -7118,48 +7119,6 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     }));
   }
 
-  function startManualSchool() {
-    const nextGrade = selectedGrade || examAnalysisGrades[0];
-    const nextExamCycle = selectedExamCycle || examAnalysisExamCycles[0];
-    didAutoSelectExamPrepRef.current = true;
-    setSelectedRunId("");
-    setSelectedDetail(null);
-    setSelectedSchoolName("");
-    setSelectedGrade(nextGrade);
-    setSelectedExamCycle(nextExamCycle);
-    setSelectedExamPrepId("");
-    setDraft({
-      title: buildExamAnalysisTitle({ schoolName: "", grade: nextGrade, examCycle: nextExamCycle }),
-      schoolName: "",
-      grade: nextGrade,
-      subject: defaultExamAnalysisSubject,
-      examTerm: "",
-      examCycle: nextExamCycle
-    });
-  }
-
-  function startNewAnalysis() {
-    const targetSchoolName = selectedSchoolName || draft.schoolName;
-    const targetGrade = selectedGrade || draft.grade;
-    const targetExamCycle = selectedExamCycle || draft.examCycle;
-    const row = getFirstExamPrepRow(targetSchoolName, targetGrade, targetExamCycle);
-    setSelectedRunId("");
-    setSelectedDetail(null);
-    setSelectedExamPrepId(row?.examPrepId || "");
-    if (row) {
-      applyExamPrepRow(row);
-      return;
-    }
-    setDraft((current) => ({
-      ...current,
-      title: buildExamAnalysisTitle({ schoolName: targetSchoolName || current.schoolName, grade: targetGrade || current.grade, examCycle: targetExamCycle || current.examCycle }),
-      schoolName: targetSchoolName || current.schoolName,
-      grade: targetGrade || current.grade,
-      examCycle: targetExamCycle || current.examCycle,
-      subject: current.subject || defaultExamAnalysisSubject
-    }));
-  }
-
   function buildRunPayload() {
     return {
       analysisRunId: selectedRunId || undefined,
@@ -7273,6 +7232,36 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
+  }
+
+  function handlePdfDragEvent(event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  function handlePdfDragEnter(event) {
+    handlePdfDragEvent(event);
+    setIsPdfDropActive(true);
+  }
+
+  function handlePdfDragLeave(event) {
+    handlePdfDragEvent(event);
+    if (!event.currentTarget.contains(event.relatedTarget)) {
+      setIsPdfDropActive(false);
+    }
+  }
+
+  async function handlePdfDrop(event) {
+    handlePdfDragEvent(event);
+    setIsPdfDropActive(false);
+    const file = [...(event.dataTransfer?.files ?? [])].find((item) => (
+      item.type === "application/pdf" || /\.pdf$/i.test(item.name)
+    ));
+    if (!file) {
+      setUploadStatus({ state: "failed", message: "시험분석 PDF · PDF 파일만 드롭할 수 있습니다." });
+      return;
+    }
+    await uploadPdf(file);
   }
 
   async function extractSourceText(sourceFile) {
@@ -7431,6 +7420,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       const filledCount = result.rowFill?.filledCount || result.questions?.filter((question) => question.rowStatus === "ai_filled").length || 0;
       const totalCount = result.rowFill?.totalQuestionCount || questionRows.length;
       setSelectedDetail(result);
+      setReviewDrafts(buildExamAnalysisReviewDrafts(result.questions ?? []));
       setRowFillStatus({
         state: "success",
         message: `시험분석 · AI 행 채움 완료 · ${filledCount}/${totalCount}개`
@@ -7646,7 +7636,6 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   <strong>학교</strong>
                   <span>{schoolCards.length}개</span>
                 </div>
-                <button className="secondaryButton compact" onClick={startManualSchool} type="button">추가</button>
               </div>
               <div className="examAnalysisColumnList">
                 {schoolCards.length === 0 ? (
@@ -7718,7 +7707,6 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   <span>{scopedRuns.length}건</span>
                 </div>
                 <div className="examAnalysisColumnHeaderActions">
-                  <button className="secondaryButton compact" onClick={startNewAnalysis} type="button">추가</button>
                   <button
                     className="dangerSoftButton compact"
                     disabled={!activeRun?.analysisRunId || deletingRunId === activeRun?.analysisRunId}
@@ -7731,7 +7719,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
               </div>
               <div className="examAnalysisColumnList">
                 {scopedRuns.length === 0 ? (
-                  <div className="emptyState compact">분석 없음</div>
+                  <div className="emptyState compact">PDF를 업로드하면 분석이 생성됩니다.</div>
                 ) : scopedRuns.map((run) => (
                   <button
                     className={selectedRunId === run.analysisRunId ? "examAnalysisColumnCard active" : "examAnalysisColumnCard"}
@@ -7806,7 +7794,13 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
             ) : null}
           </div>
 
-          <div className="panel examAnalysisUploadPanel">
+          <div
+            className={isPdfDropActive ? "panel examAnalysisUploadPanel dropActive" : "panel examAnalysisUploadPanel"}
+            onDragEnter={handlePdfDragEnter}
+            onDragLeave={handlePdfDragLeave}
+            onDragOver={handlePdfDragEvent}
+            onDrop={handlePdfDrop}
+          >
             <div className="sectionHeader slim">
               <div>
                 <strong>PDF 원본</strong>
@@ -7822,6 +7816,21 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                 />
                 <button className="primaryButton" onClick={() => fileInputRef.current?.click()} type="button">PDF 업로드</button>
               </div>
+            </div>
+            <div
+              className="examAnalysisDropZone"
+              onClick={() => fileInputRef.current?.click()}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  fileInputRef.current?.click();
+                }
+              }}
+              role="button"
+              tabIndex={0}
+            >
+              <strong>PDF 파일을 여기에 드롭</strong>
+              <span>또는 PDF 업로드 버튼으로 선택</span>
             </div>
             <div className="examAnalysisSourceList">
               {sourceFiles.length === 0 ? (
@@ -7891,7 +7900,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                         onClick={() => verifySourceWithAi(file)}
                         type="button"
                       >
-                        {checkingSourceId === file.sourceId ? "검증 중" : "AI 검증(과금)"}
+                        {checkingSourceId === file.sourceId ? "검증 중" : "원본 AI 검증"}
                       </button>
                       {getExamAnalysisSourceOpenUrl(file) ? (
                         <a className="secondaryButton linkButton" href={getExamAnalysisSourceOpenUrl(file)} rel="noreferrer" target="_blank">열기</a>
@@ -7988,7 +7997,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   onClick={detectQuestionBoundaries}
                   type="button"
                 >
-                  {isDetectingBoundaries ? "탐지 중" : "경계 탐지(과금)"}
+                  {isDetectingBoundaries ? "탐지 중" : "문항 경계 탐지"}
                 </button>
               </div>
             </div>
@@ -8034,7 +8043,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   onClick={fillQuestionRowsWithAi}
                   type="button"
                 >
-                  {isFillingRows ? "채움 중" : "AI 행 채움(과금)"}
+                  {isFillingRows ? "채움 중" : "AI 행 채움"}
                 </button>
               </div>
             </div>
@@ -8087,7 +8096,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   onClick={refineQuestionRowsWithAi}
                   type="button"
                 >
-                  {isRefiningRows ? "2차 수정 중" : `AI 2차 수정(과금)${refineTargetCount ? ` · ${refineTargetCount}개` : ""}`}
+                  {isRefiningRows ? "2차 수정 중" : `AI 2차 수정${refineTargetCount ? ` · ${refineTargetCount}개` : ""}`}
                 </button>
                 <button
                   className="secondaryButton"

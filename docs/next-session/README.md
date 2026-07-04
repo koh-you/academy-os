@@ -68,7 +68,7 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 docs/next-ses
 - 프론트는 `GET/POST/DELETE /api/exam-analysis-runs`, `POST /api/exam-analysis-source-files`, `GET /api/exam-analysis-source-files/open`을 사용한다.
 - 저장/불러오기/PDF 업로드/삭제 상태는 작업 화면 안의 `시험분석 · 저장 중/완료/실패`, `시험분석 PDF · 업로드 중/완료/실패`, `시험분석 · 삭제 중/완료/실패` 배지로 표시한다.
 - 학교/학년/고사/분석 목록은 밝은 컬럼 안의 큰 카드로 표시하고, 선택 카드는 네이비 배경으로 표시한다.
-- 학교 컬럼에는 `추가` 버튼이 있다. 분석 컬럼에는 선택 분석 `삭제` 버튼이 있으며, 삭제 시 연결 PDF Storage 객체와 run row를 함께 정리한다.
+- 학교/분석 컬럼의 `추가` 버튼은 제거했다. PDF를 업로드하면 현재 선택한 학교/학년/고사 기준으로 분석 run이 생성된다. 분석 컬럼에는 선택 분석 `삭제` 버튼이 있으며, 삭제 시 연결 PDF Storage 객체와 run row를 함께 정리한다.
 - PDF 원본 목록의 `파일 200KB` 같은 값은 업로드 파일 크기다. 텍스트 추출 후에는 `추출 nKB`, `n쪽`, 문항번호 후보, 누락 후보, 텍스트 레이어 잡음 경고가 별도로 보인다.
 - `POST /api/exam-analysis-source-files/extract`는 PDF source를 Supabase Storage에서 내려받아 `exam_analysis_sources.extracted_text`, `page_text_ranges`, `page_image_manifest`, `extraction_status`를 채운다. 원문 텍스트 필터링으로 잡음을 제거하지 않고, 문항번호 후보/누락 후보/잡음 여부만 품질 지표로 저장한다.
 - `POST /api/exam-analysis-source-files/vision-check`는 Anthropic API key가 있으면 Claude Messages API PDF `document` 입력을 우선 사용한다. Anthropic 키가 없을 때만 OpenAI Responses PDF 입력을 예비 경로로 둔다. 이 버튼은 API 과금 대상이므로 자동 실행하지 않는다.
@@ -76,11 +76,11 @@ E:\academy-os 프로젝트 작업을 이어가겠습니다. 먼저 docs/next-ses
 - `POST /api/exam-analysis-runs/confirm-question-count`는 선생님이 확정한 문항 수를 저장하고, Supabase RPC `ensure_exam_analysis_question_rows(run_id, count)`로 1~N 빈 행을 생성한다. 화면에는 `문항 수 확인` 카드, `선생님 확정 문항 수` 입력, `n문항 확정` 버튼, `시험분석 · 문항 수 확정 중/완료/실패` 상태, `고정 문항 행` 번호 칩이 있다.
 - 문항 수를 줄일 때 N보다 큰 기존 행이 비어 있으면 정리하지만, 이미 AI/선생님 내용이 들어간 행이면 오류를 내고 테스트 분석 삭제 후 재생성을 요구한다. 필터/우선순위 보정을 덧대어 화면만 맞추는 방식으로 처리하지 않는다.
 - `POST /api/exam-analysis-runs/detect-question-boundaries`는 확정된 1~N 행 기준으로 PDF 원본에서 각 문항의 시작 페이지, 끝 페이지, 대략 위치만 찾는다. 결과는 `exam_analysis_questions.source_page`, `source_evidence.boundary`, `exam_analysis_runs.audit_summary.boundaryDetection`에 저장한다. 새 SQL edit은 필요 없다.
-- 화면에는 `문항 경계 탐지` 카드와 `경계 탐지(과금)` 버튼이 있다. 버튼은 자동 실행하지 않는다. 완료 후 각 문항 카드에 `1p`, `2~3p` 같은 페이지 범위와 위치 힌트가 보인다. 저장 이벤트 시간은 `MM.DD HH:mm` 한국 시간 라벨로 표시한다.
+- 화면에는 `문항 경계 탐지` 카드와 `문항 경계 탐지` 버튼이 있다. 버튼은 자동 실행하지 않는다. 완료 후 각 문항 카드에 `1p`, `2~3p` 같은 페이지 범위와 위치 힌트가 보인다. 저장 이벤트 시간은 `MM.DD HH:mm` 한국 시간 라벨로 표시한다.
 - `POST /api/exam-analysis-runs/fill-question-rows`는 확정 행과 경계 정보를 기준으로 AI 초안을 채운다. 결과는 `exam_analysis_questions.unit_name`, `main_type`, `sub_types`, `difficulty`, `ai_fields`, `ai_provider`, `ai_model`, `ai_filled_at`에 저장한다. 선생님이 이미 수정/확정한 행은 덮어쓰지 않고, `teacher_fields`/`final_fields`는 건드리지 않는다.
-- 화면에는 `AI 행 채움` 카드와 `AI 행 채움(과금)` 버튼이 있다. 완료 후 각 문항 카드에 단원, 유형, 난이도 초안이 보인다. 확실하지 않은 문항은 `missing`/재확인 대상으로 남는다.
+- 화면에는 `AI 행 채움` 카드와 `AI 행 채움` 버튼이 있다. 완료 후 각 문항 카드와 `AI 결과 검수` 표에 단원, 유형, 난이도 초안이 바로 보인다. 확실하지 않은 문항은 `missing`/재확인 대상으로 남는다.
 - `POST /api/exam-analysis-runs/save-question-reviews`는 선생님이 수정/확정한 검수 결과를 저장한다. 저장값은 기존 `exam_analysis_questions.teacher_fields`, `final_fields`, `teacher_override`, `manual_edit_count`, `teacher_edited_at`, `confirmed_at`, `row_status`를 사용하므로 새 SQL edit은 필요 없다.
-- 화면에는 `AI 결과 검수` 패널이 있다. 카드형이 아니라 엑셀식 테이블이며, 각 문항은 한 행으로 `#`, `확정`, `단원`, `쎈 주유형`, `쎈 보조유형`, `난이도`, `검수 메모`, `상태` 열에서 편집한다. `AI 2차 수정(과금)`, `모두 확정`, `검수 저장` 버튼과 `시험분석 · AI 2차 수정 중/완료`, `시험분석 · 검수 저장 중/완료/실패` 상태가 같은 패널 안에 표시된다.
+- 화면에는 `AI 결과 검수` 패널이 있다. 카드형이 아니라 엑셀식 테이블이며, 각 문항은 한 행으로 `#`, `확정`, `주요`, `단원`, `쎈 주유형`, `쎈 보조유형`, `난이도`, `검수 메모`, `상태` 열에서 편집한다. `AI 2차 수정`, `모두 확정`, `검수 저장` 버튼과 `시험분석 · AI 2차 수정 중/완료`, `시험분석 · 검수 저장 중/완료/실패` 상태가 같은 패널 안에 표시된다.
 - 선생님이 입력한 값은 이후 화면/새로고침의 기준이다. AI 초안이나 자동 매핑이 검수본을 다시 덮어쓰면 안 된다. 모든 문항이 확정되면 `workflow_status=completed`, 일부만 확정되면 `workflow_status=teacher_review`가 된다.
 - 쎈 기준표는 `api/data/ssenTypeIndex.json`에 남아 있다. 쎈 6권 통합 유형 메타데이터 883개이며, 현재 운영 PDF처럼 `공통수학1`이 감지되면 공통수학1 유형 179개를 AI 행 채움/2차 수정 프롬프트의 실제 후보 목록으로 넣는다. AI는 `방정식`, `행렬` 같은 대분류가 아니라 후보의 `typeName`을 주유형/보조유형으로 써야 한다.
 - `POST /api/exam-analysis-runs/refine-question-rows`는 미확정/재확인 문항만 PDF 원본을 다시 보고 2차 수정한다. 선생님이 수정/확정한 행은 덮어쓰지 않는다.

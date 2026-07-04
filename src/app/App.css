@@ -676,7 +676,7 @@ button {
 .examAnalysisFinalPreviewPanel,
 .examAnalysisStepPanel,
 .examAnalysisEventPanel {
-  padding: 16px;
+  padding: 12px;
 }
 
 .examAnalysisLibraryPanel {
@@ -685,9 +685,9 @@ button {
 
 .examAnalysisColumnBoard {
   display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(4, minmax(190px, 1fr));
-  min-height: 420px;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(170px, 1fr));
+  min-height: 360px;
   min-width: 0;
   overflow-x: auto;
   padding-bottom: 2px;
@@ -698,11 +698,11 @@ button {
   border: 1px solid #d8e5fb;
   border-radius: 8px;
   display: grid;
-  gap: 14px;
+  gap: 10px;
   grid-template-rows: auto minmax(0, 1fr);
-  min-height: 410px;
-  min-width: 220px;
-  padding: 16px;
+  min-height: 350px;
+  min-width: 190px;
+  padding: 12px;
 }
 
 .examAnalysisColumnHeader {
@@ -723,7 +723,7 @@ button {
 .examAnalysisColumnHeader strong {
   color: #17213d;
   display: block;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 950;
   letter-spacing: 0;
 }
@@ -731,9 +731,9 @@ button {
 .examAnalysisColumnHeader span {
   color: #64748b;
   display: block;
-  font-size: 17px;
+  font-size: 14px;
   font-weight: 900;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 .examAnalysisColumnList,
@@ -756,9 +756,9 @@ button {
   border-radius: 8px;
   color: #17213d;
   display: grid;
-  gap: 14px;
-  min-height: 108px;
-  padding: 18px;
+  gap: 9px;
+  min-height: 82px;
+  padding: 12px;
   text-align: left;
   width: 100%;
 }
@@ -772,7 +772,7 @@ button {
 .examAnalysisColumnCard strong {
   color: inherit;
   display: block;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 950;
   letter-spacing: 0;
   overflow: hidden;
@@ -783,7 +783,7 @@ button {
 .examAnalysisColumnCard span {
   color: #64748b;
   display: block;
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 800;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -796,7 +796,7 @@ button {
 
 .examAnalysisFormGrid {
   display: grid;
-  gap: 12px;
+  gap: 10px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
@@ -819,9 +819,49 @@ button {
   border: 1px solid #cbd8ee;
   border-radius: 8px;
   color: #0f172a;
-  min-height: 44px;
+  min-height: 38px;
   min-width: 0;
   padding: 0 12px;
+}
+
+.examAnalysisUploadPanel {
+  border-style: solid;
+  transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.examAnalysisUploadPanel.dropActive {
+  background: #eff6ff;
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18);
+}
+
+.examAnalysisDropZone {
+  align-items: center;
+  background: #f8fafc;
+  border: 1px dashed #93c5fd;
+  border-radius: 8px;
+  color: #475569;
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 10px;
+  min-height: 54px;
+  padding: 10px;
+  text-align: center;
+}
+
+.examAnalysisDropZone strong {
+  color: #17213d;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.examAnalysisDropZone span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .examAnalysisLinkedInfo {
