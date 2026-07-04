@@ -21,7 +21,7 @@
 - 이번 작업 결과: 최종 미리보기 아래에 `블로그/인스타 산출물 초안` 패널을 추가했다. 선생님 입력칸은 `한줄 총평`, `시험 흐름/체감`, `점수 갈림 포인트`, `다음 시험 대비` 4개로 압축했고, `공개 범위`는 블로그+인스타/블로그용/인스타용/내부용으로 선택하게 했다. 각 입력칸에는 블로그와 인스타에서 어떻게 쓰이는지, 무엇을 중심으로 적어야 하는지 안내 문구와 예시 placeholder를 넣었다.
 - 저장 모델: 새 SQL edit 없이 기존 `exam_analysis_runs.audit_summary` JSON에 `outputDrafts.inputs`, `outputDrafts.blog`, `outputDrafts.instagram`을 저장한다. AI 초안은 `aiDraft`, 선생님 수정본은 `teacherDraft`이며 읽기 우선순위는 `teacherDraft > aiDraft > empty`다. AI 재생성은 AI 초안만 갱신하고 저장된 선생님 수정본은 덮어쓰지 않는다.
 - API: `POST /api/exam-analysis-runs/save-output-drafts`와 `POST /api/exam-analysis-runs/generate-output-draft`를 추가했다. 초안 생성 프롬프트는 선생님 작성 원문을 최우선 원천으로 삼고, 검수 저장본/난이도/문항 흐름/선생님 선택 주요문항은 보조 자료로만 사용한다.
-- 화면 UX: 산출물 패널 안에 `시험분석 산출물 · 저장 중/저장 완료/실패`, `블로그 초안 생성 중`, `인스타 카드 초안 생성 중` 상태가 보인다. 저장 완료 배지만으로는 확인이 약해서 `저장 확인됨`, `마지막 저장 시각`, `새로고침 유지`, 입력칸/블로그/인스타 draft 상태를 패널 안 고정 checkpoint로 추가했다. 선생님이 수정한 draft가 있으면 AI 재생성 시 수정본을 유지하고 AI 초안만 다시 만들지 확인한다.
+- 화면 UX: 산출물 패널 안에 `시험분석 산출물 · 저장 중/저장 완료/실패`, `블로그 초안 생성 중`, `인스타 카드 초안 생성 중` 상태가 보인다. 저장 완료 배지만으로는 확인이 약해서 `저장 확인됨`, `마지막 저장 시각`, `새로고침 유지`, 입력칸/블로그/인스타 draft 상태를 패널 안 고정 checkpoint로 추가했다. 블로그/인스타 초안 각각에 `저장`, `복사`, `TXT` 버튼을 붙여 외부 에디터로 옮기기 전 초안별 저장과 내보내기를 할 수 있게 했다. 선생님이 수정한 draft가 있으면 AI 재생성 시 수정본을 유지하고 AI 초안만 다시 만들지 확인한다.
 - 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check` 통과. `npm run test:production` 통과(total 236, failed 0). `npm run build` 통과. Vite 기존 chunk size warning만 발생했다.
 
 ### 2026-07-04 P0. 시험분석 최종 미리보기 중복 상세표 제거

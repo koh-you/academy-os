@@ -1577,6 +1577,41 @@ function getExamAnalysisOutputInputCount(inputs = {}) {
   return examAnalysisOutputInputFields.filter((field) => String(inputs[field.key] || "").trim()).length;
 }
 
+function sanitizeExamAnalysisOutputFileNamePart(value = "") {
+  return String(value || "")
+    .trim()
+    .replace(/[\\/:*?"<>|]/g, " ")
+    .replace(/\s+/g, " ")
+    .slice(0, 60)
+    .trim() || "시험분석";
+}
+
+function createExamAnalysisOutputExportFileName(activeRun = {}, outputType = "blog") {
+  const mediaLabel = outputType === "instagram" ? "instagram-card" : "blog";
+  const title = sanitizeExamAnalysisOutputFileNamePart([
+    activeRun.schoolName,
+    activeRun.grade,
+    activeRun.examCycle || activeRun.examTerm,
+    activeRun.subject
+  ].filter(Boolean).join(" "));
+  return `${title}-${mediaLabel}-draft.txt`;
+}
+
+function downloadExamAnalysisOutputTextFile({ activeRun, outputType, text }) {
+  const value = String(text || "").trim();
+  if (!value) return false;
+  const blob = new Blob([value], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = createExamAnalysisOutputExportFileName(activeRun, outputType);
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  return true;
+}
+
 function ExamAnalysisOutputDraftPanel({
   activeRun,
   model,
@@ -1585,6 +1620,8 @@ function ExamAnalysisOutputDraftPanel({
   generatingOutputType,
   isSavingOutputDrafts,
   onGenerateOutputDraft,
+  onCopyOutputDraft,
+  onDownloadOutputDraft,
   onSaveOutputDrafts,
   onUpdateInput,
   onUpdateTeacherDraft
@@ -1704,8 +1741,15 @@ function ExamAnalysisOutputDraftPanel({
       <div className="examAnalysisOutputEditorGrid">
         <section>
           <div>
-            <strong>블로그 초안</strong>
-            <span>{getExamAnalysisOutputSectionLabel(outputDrafts.blog)}</span>
+            <div>
+              <strong>블로그 초안</strong>
+              <span>{getExamAnalysisOutputSectionLabel(outputDrafts.blog)}</span>
+            </div>
+            <div className="examAnalysisOutputEditorActions">
+              <button disabled={isSavingOutputDrafts || Boolean(generatingOutputType)} onClick={onSaveOutputDrafts} type="button">저장</button>
+              <button disabled={!blogText.trim()} onClick={() => onCopyOutputDraft("blog", blogText)} type="button">복사</button>
+              <button disabled={!blogText.trim()} onClick={() => onDownloadOutputDraft("blog", blogText)} type="button">TXT</button>
+            </div>
           </div>
           <textarea
             onChange={(event) => onUpdateTeacherDraft("blog", event.target.value)}
@@ -1716,8 +1760,15 @@ function ExamAnalysisOutputDraftPanel({
         </section>
         <section>
           <div>
-            <strong>인스타 카드 초안</strong>
-            <span>{getExamAnalysisOutputSectionLabel(outputDrafts.instagram)}</span>
+            <div>
+              <strong>인스타 카드 초안</strong>
+              <span>{getExamAnalysisOutputSectionLabel(outputDrafts.instagram)}</span>
+            </div>
+            <div className="examAnalysisOutputEditorActions">
+              <button disabled={isSavingOutputDrafts || Boolean(generatingOutputType)} onClick={onSaveOutputDrafts} type="button">저장</button>
+              <button disabled={!instagramText.trim()} onClick={() => onCopyOutputDraft("instagram", instagramText)} type="button">복사</button>
+              <button disabled={!instagramText.trim()} onClick={() => onDownloadOutputDraft("instagram", instagramText)} type="button">TXT</button>
+            </div>
           </div>
           <textarea
             onChange={(event) => onUpdateTeacherDraft("instagram", event.target.value)}
@@ -8357,6 +8408,28 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     }
   }
 
+  async function copyOutputDraft(outputType, text) {
+    const copied = await copyTextToClipboard(text);
+    const label = outputType === "instagram" ? "인스타 카드 초안" : "블로그 초안";
+    setOutputStatus({
+      state: copied ? "success" : "failed",
+      message: copied ? `시험분석 산출물 · ${label} 복사 완료` : `시험분석 산출물 · ${label} 복사 실패`
+    });
+  }
+
+  function downloadOutputDraft(outputType, text) {
+    const label = outputType === "instagram" ? "인스타 카드 초안" : "블로그 초안";
+    const downloaded = downloadExamAnalysisOutputTextFile({
+      activeRun: activeRun ?? {},
+      outputType,
+      text
+    });
+    setOutputStatus({
+      state: downloaded ? "success" : "failed",
+      message: downloaded ? `시험분석 산출물 · ${label} TXT 내보내기 완료` : `시험분석 산출물 · ${label} 내보낼 내용이 없습니다.`
+    });
+  }
+
   const confirmedQuestionCount = Number(activeRun?.confirmedQuestionCount || 0);
   const questionRowNumbers = questionRows
     .map((question) => Number(question.questionNumber))
@@ -9144,6 +9217,8 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
             isSavingOutputDrafts={isSavingOutputDrafts}
             model={finalPreviewModel}
             onGenerateOutputDraft={generateOutputDraft}
+            onCopyOutputDraft={copyOutputDraft}
+            onDownloadOutputDraft={downloadOutputDraft}
             onSaveOutputDrafts={saveOutputDrafts}
             onUpdateInput={updateOutputInput}
             onUpdateTeacherDraft={updateOutputTeacherDraft}
