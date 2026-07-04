@@ -1482,9 +1482,9 @@ const examAnalysisOutputInputFields = [
   },
   {
     key: "imageSlotNotes",
-    label: "10장 카드 렌더/슬롯 메모",
-    guide: "Canva 10장 카드뉴스의 제작 방식입니다. 수정이 거의 없는 카드는 통으로 렌더링하고, 시험문제/손풀이 원본을 붙여야 하는 카드만 이미지 슬롯을 둡니다.",
-    placeholder: "예: 1~5 통렌더, 6~8 주요문항 원본/손풀이 슬롯, 9~10 통렌더. 문제 이미지는 선생님이 검수 후 삽입."
+    label: "6개 슬라이드 유형/슬롯 메모",
+    guide: "시작, 시험구조, 총평, 주요문항, 손풀이, 마무리 슬라이드의 제작 방식입니다. 주요문항/손풀이 이미지는 선생님이 직접 crop한 파일만 슬롯에 넣습니다.",
+    placeholder: "예: 시작/시험구조/총평/마무리는 통렌더, 주요문항과 손풀이는 선생님 crop 이미지 슬롯. 주요문항 3개 기준 10장."
   },
   {
     key: "schoolVariationNotes",
@@ -1494,138 +1494,87 @@ const examAnalysisOutputInputFields = [
   }
 ];
 
-const examAnalysisBlogInstructorSectionFields = [
+const examAnalysisBlogBlockFields = [
   {
-    key: "blogSectionOpening",
-    number: 1,
-    label: "초기 글",
-    guide: "인사말과 이번 글의 목적입니다. 학교/학년/고사와 이번 분석에서 무엇을 보려는지 적어주세요.",
+    key: "blogBlockOpening",
+    order: 1,
+    type: "paragraph",
+    label: "시작글/인사",
+    guide: "카드뉴스 전에 들어갈 첫 문단입니다. 학교/학년/고사와 이번 분석의 목적, 한줄 체감을 적어주세요.",
     placeholder: "예: 2026 불암중 2학년 1학기 기말고사를 기준으로, 이번 시험의 체감 난도와 내신 대비 핵심을 정리합니다."
   },
   {
-    key: "blogSectionIntroCard",
-    number: 2,
-    label: "정리된 카드",
-    guide: "첫 카드에 들어갈 핵심 문구입니다. 학교명, 고사명, 한줄 훅, 대표 결론을 짧게 적어주세요.",
-    placeholder: "예: 예년과 비슷했지만 실수 관리가 고득점의 핵심. 조건 해석과 풀이 순서가 중요했습니다."
-  },
-  {
-    key: "blogSectionStructureText1",
-    number: 3,
-    label: "구조 글",
-    guide: "시험 구조를 줄글로 설명합니다. 객관식/서술형 수, 만점, 범위, 큰 출제 흐름을 적어주세요.",
+    key: "blogBlockStructure",
+    order: 2,
+    type: "paragraph",
+    label: "시험구조 설명",
+    guide: "시험구조 카드 전후에 붙일 설명입니다. 객관식/서술형 수, 만점, 범위, 큰 출제 흐름을 줄글로 적어주세요.",
     placeholder: "예: 객관식 24문항, 서술형 0문항, 100점 만점. 연립방정식부터 일차함수 관계까지 출제되었습니다."
   },
   {
-    key: "blogSectionStructureCard",
-    number: 4,
-    label: "구조 카드",
-    guide: "통렌더 시험 구조 카드에 들어갈 숫자와 차트 메모입니다. 문항 수, 단원별 비중, 강조할 구조를 적어주세요.",
-    placeholder: "예: 연립방정식 풀이 10문항, 일차함수와 그래프 7문항. 카드 전체는 통렌더."
-  },
-  {
-    key: "blogSectionStructureText2",
-    number: 5,
-    label: "구조 글 2",
-    guide: "문항 수만으로 보이지 않는 변별 요소입니다. 어느 단원이 실제 점수 차이를 만들었는지 적어주세요.",
-    placeholder: "예: 문항 수는 연립방정식 풀이가 많았지만, 변별력은 문장제와 그래프 해석에서 만들어졌습니다."
-  },
-  {
-    key: "blogSectionOverallCard",
-    number: 6,
-    label: "총평 카드",
-    guide: "총평 카드용 짧은 문구입니다. 전체 난도, 체감 난도 요소, 고득점 전략을 3~4개 키워드로 적어주세요.",
-    placeholder: "예: 전체 난도 중 / 후반부 시간 관리 / 계산 실수 관리 / 조건 해석"
-  },
-  {
-    key: "blogSectionOverallText1",
-    number: 7,
-    label: "총평 글",
-    guide: "시험이 쉬웠는지 어려웠는지 설명합니다. 학부모가 체감할 수 있게 이유를 적어주세요.",
+    key: "blogBlockOverallReview",
+    order: 3,
+    type: "highlight",
+    label: "총평/변별 포인트",
+    guide: "총평 카드 전후에 붙일 핵심 해석입니다. 시험이 쉬웠는지, 어디서 점수가 갈렸는지, 왜 그렇게 봤는지 적어주세요.",
     placeholder: "예: 난도가 크게 튄 시험은 아니지만, 쉬운 시험이라고 보기에는 후반부 조건 정리가 까다로웠습니다."
   },
   {
-    key: "blogSectionOverallText2",
-    number: 8,
-    label: "총평 글 2",
-    guide: "점수가 갈린 구체 이유입니다. 시간, 실수, 조건 해석, 그래프 해석 중 해당 항목을 적어주세요.",
-    placeholder: "예: 앞쪽에서 시간을 오래 쓰면 후반 문장제를 차분히 읽을 여유가 줄어드는 구조였습니다."
-  },
-  {
-    key: "blogSectionQuestion1Look",
-    number: 9,
-    label: "주요문항 1 살펴보기",
-    guide: "주요문항 1의 시작 메모입니다. 문항번호, 단원, 왜 대표 문항인지 적어주세요.",
+    key: "blogBlockKeyQuestion",
+    order: 4,
+    type: "questionExplanation",
+    label: "주요문항 설명",
+    guide: "주요문항 카드마다 반복될 설명 기준입니다. 문항번호, 단원, 대표 이유, 자주 틀리는 지점을 적어주세요.",
     placeholder: "예: 객관식 9번. 단계별 선발 인원과 경쟁률 관계를 식으로 정리하는 문항입니다."
   },
   {
-    key: "blogSectionQuestion1Explain",
-    number: 10,
-    label: "주요문항 1 설명",
-    guide: "주요문항 1에서 학생이 흔들리는 지점입니다. 자주 틀리는 조건, 사고 순서, 실수 가능성을 적어주세요.",
-    placeholder: "예: 2차 합격자와 최종 합격자를 혼동하기 쉽고, 전체 지원자 수와 1차 합격자 수를 먼저 잡아야 합니다."
-  },
-  {
-    key: "blogSectionQuestion1SolutionCard",
-    number: 11,
-    label: "주요문항 1 손풀이 카드",
-    guide: "손풀이 카드에 넣을 풀이 흐름입니다. 정답보다 풀이 순서, 핵심 계산, 이미지 슬롯을 적어주세요.",
+    key: "blogBlockSolution",
+    order: 5,
+    type: "questionExplanation",
+    label: "손풀이 설명",
+    guide: "손풀이 카드 뒤에 붙일 설명입니다. 정답보다 풀이 순서, 조건 정리, 다음 훈련 방향을 적어주세요.",
     placeholder: "예: 전체 인원 x, 1차 합격자 y 설정 -> 조건별 식 세우기 -> 최종 경쟁률 확인."
   },
   {
-    key: "blogSectionQuestion1SolutionText",
-    number: 12,
-    label: "주요문항 1 손풀이 설명글",
-    guide: "손풀이 뒤 설명글입니다. 왜 이 풀이 방향이 필요한지, 다음에 어떻게 훈련해야 하는지 적어주세요.",
-    placeholder: "예: 풀이 과정을 외우기보다 조건을 나누어 표로 정리하는 연습이 필요합니다."
-  },
-  {
-    key: "blogSectionQuestion23Pattern",
-    number: 13,
-    label: "주요문항 2, 3 반복",
-    guide: "주요문항 2와 3도 같은 방식으로 적습니다. 문항번호/핵심/실수/손풀이 이미지 여부를 적어주세요.",
-    placeholder: "예: 24번은 넓이 조건과 좌표 해석, 10번은 혼합물 비율 유지가 핵심. 각 문항 crop 사용."
-  },
-  {
-    key: "blogSectionNextExam",
-    number: 14,
+    key: "blogBlockNextStudy",
+    order: 6,
+    type: "paragraph",
     label: "다음 시험 준비",
-    guide: "다음 시험까지 해야 할 학습입니다. 학생이 실제로 해야 할 훈련을 구체적으로 적어주세요.",
+    guide: "마무리 카드 전후에 붙일 학습 전략입니다. 다음 시험까지 학생이 실제로 해야 할 훈련을 구체적으로 적어주세요.",
     placeholder: "예: 계산 안정감, 문장제 조건 분리, 그래프 해석, 시간 배분 루틴을 같이 훈련해야 합니다."
   },
   {
-    key: "blogSectionClosing1",
-    number: 15,
-    label: "마무리글 1",
-    guide: "학원이 시험지를 어떻게 분석하는지 보여주는 문장입니다. 문항별 분석/유형 연결/수업 반영을 적어주세요.",
+    key: "blogBlockAcademyTrust",
+    order: 7,
+    type: "paragraph",
+    label: "학원 분석 신뢰 문장",
+    guide: "학원이 시험지를 어떻게 분석하고 수업/보충에 반영하는지 보여주는 문장입니다.",
     placeholder: "예: 시험지를 문항별로 분석해 어떤 개념, 유형, 실수가 연결되는지 확인합니다."
   },
   {
-    key: "blogSectionClosing2",
-    number: 16,
-    label: "마무리글 2",
-    guide: "이번 시험의 최종 결론입니다. 핵심 변별 요소와 상위권 대비 방향을 적어주세요.",
-    placeholder: "예: 이번 시험은 문장제 해석력, 계산 안정감, 그래프 해석력이 고득점을 가른 시험이었습니다."
-  },
-  {
-    key: "blogSectionClosing3",
-    number: 17,
-    label: "마무리글 3",
-    guide: "학생/학부모에게 남길 마지막 메시지입니다. 지금부터 준비해야 한다는 흐름으로 적어주세요.",
-    placeholder: "예: 다음 시험은 지금부터 준비해야 하며, 같은 실수를 반복하지 않도록 개인별 보완 전략이 필요합니다."
-  },
-  {
-    key: "blogSectionCta",
-    number: 18,
+    key: "blogBlockCta",
+    order: 8,
+    type: "cta",
     label: "CTA",
     guide: "상담/블로그 유입/위치/전화 안내 메모입니다. 실제 연락처는 자리표시자로 두어도 됩니다.",
     placeholder: "예: 더 자세한 시험 해설은 블로그에서 확인, 학교별 내신 대비 상담 가능, 위치/전화 자리표시자."
   }
 ];
 
+const legacyExamAnalysisBlogInstructorSectionGroups = {
+  blogBlockOpening: ["blogSectionOpening", "blogSectionIntroCard"],
+  blogBlockStructure: ["blogSectionStructureText1", "blogSectionStructureCard", "blogSectionStructureText2"],
+  blogBlockOverallReview: ["blogSectionOverallCard", "blogSectionOverallText1", "blogSectionOverallText2"],
+  blogBlockKeyQuestion: ["blogSectionQuestion1Look", "blogSectionQuestion1Explain", "blogSectionQuestion23Pattern"],
+  blogBlockSolution: ["blogSectionQuestion1SolutionCard", "blogSectionQuestion1SolutionText"],
+  blogBlockNextStudy: ["blogSectionNextExam"],
+  blogBlockAcademyTrust: ["blogSectionClosing1", "blogSectionClosing2", "blogSectionClosing3"],
+  blogBlockCta: ["blogSectionCta"]
+};
+
 const examAnalysisOutputAllInputFields = [
   ...examAnalysisOutputInputFields,
-  ...examAnalysisBlogInstructorSectionFields
+  ...examAnalysisBlogBlockFields
 ];
 
 const examAnalysisOutputEditorialChecklist = [
@@ -1653,7 +1602,7 @@ function createEmptyExamAnalysisOutputDrafts() {
       nextStudyPlan: "",
       imageSlotNotes: "",
       schoolVariationNotes: "",
-      ...Object.fromEntries(examAnalysisBlogInstructorSectionFields.map((field) => [field.key, ""]))
+      ...Object.fromEntries(examAnalysisBlogBlockFields.map((field) => [field.key, ""]))
     },
     blog: {
       aiDraft: "",
@@ -1680,6 +1629,19 @@ function createEmptyExamAnalysisOutputDrafts() {
   };
 }
 
+function migrateLegacyExamAnalysisBlogSectionInputs(inputs = {}) {
+  const nextInputs = { ...(inputs && typeof inputs === "object" ? inputs : {}) };
+  Object.entries(legacyExamAnalysisBlogInstructorSectionGroups).forEach(([targetKey, legacyKeys]) => {
+    if (String(nextInputs[targetKey] || "").trim()) return;
+    const legacyText = legacyKeys
+      .map((legacyKey) => String(inputs?.[legacyKey] || "").trim())
+      .filter(Boolean)
+      .join("\n");
+    if (legacyText) nextInputs[targetKey] = legacyText;
+  });
+  return nextInputs;
+}
+
 function normalizeExamAnalysisOutputDraftSection(section = {}) {
   return {
     aiDraft: String(section.aiDraft ?? ""),
@@ -1699,10 +1661,11 @@ function getExamAnalysisOutputDraftsFromRun(run = {}) {
     ? run.auditSummary.outputDrafts
     : {};
   const empty = createEmptyExamAnalysisOutputDrafts();
+  const storedInputs = migrateLegacyExamAnalysisBlogSectionInputs(stored.inputs ?? {});
   return {
     inputs: {
       ...empty.inputs,
-      ...(stored.inputs && typeof stored.inputs === "object" ? stored.inputs : {})
+      ...(storedInputs && typeof storedInputs === "object" ? storedInputs : {})
     },
     blog: normalizeExamAnalysisOutputDraftSection(stored.blog ?? {}),
     instagram: normalizeExamAnalysisOutputDraftSection(stored.instagram ?? {})
@@ -1826,18 +1789,27 @@ function truncateExamAnalysisChartLabel(value = "", maxLength = 24) {
 const examAnalysisChartPngExportScale = 3;
 const examAnalysisChartFooterLabel = "으뜸수학학원 고태영T 시험분석";
 const examAnalysisChartDifficultyOrder = ["하", "중하", "중", "중상", "상", "미정"];
-const examAnalysisCanvaCardPlan = [
-  { card: 1, role: "표지", renderMode: "통렌더", suggestedSource: "full-render/card-01-cover.png", slot: "학교/학년/고사/과목 + 한줄 훅" },
-  { card: 2, role: "이번 시험 한줄 총평", renderMode: "통렌더", suggestedSource: "full-render/card-02-one-line.png", slot: "시험 체감/난이도 핵심 문장" },
-  { card: 3, role: "시험 구조", renderMode: "통렌더", suggestedSource: "full-render/card-03-structure.png", slot: "문항 수/범위/출제 흐름" },
-  { card: 4, role: "단원별 출제 비중", renderMode: "통렌더", suggestedSource: "full-render/card-04-part-distribution.png + charts/01-part-distribution.png", slot: "차트/수치가 카드 안에 합성된 완성형 카드" },
-  { card: 5, role: "난이도/문항 흐름", renderMode: "통렌더", suggestedSource: "full-render/card-05-difficulty-flow.png + charts/02-difficulty-distribution.png", slot: "난이도/흐름이 카드 안에 합성된 완성형 카드" },
-  { card: 6, role: "주요문항 1", renderMode: "문제/손풀이 슬롯", suggestedSource: "teacher-crop-01.png + full-render/card-06-question-01.png", slot: "시험문제 원본 또는 손풀이 이미지 슬롯 + 변별 이유" },
-  { card: 7, role: "주요문항 2", renderMode: "문제/손풀이 슬롯", suggestedSource: "teacher-crop-02.png + full-render/card-07-question-02.png", slot: "시험문제 원본 또는 손풀이 이미지 슬롯 + 자주 틀리는 지점" },
-  { card: 8, role: "주요문항 3/학교별 변별 포인트", renderMode: "문제/손풀이 슬롯", suggestedSource: "teacher-crop-03.png + full-render/card-08-question-03.png", slot: "시험문제 원본/손풀이 슬롯 또는 학교별 변별 카드" },
-  { card: 9, role: "다음 시험 대비", renderMode: "통렌더", suggestedSource: "full-render/card-09-next-study.png", slot: "학습 전략/훈련 루틴" },
-  { card: 10, role: "블로그 유입/상담 CTA", renderMode: "통렌더", suggestedSource: "full-render/card-10-cta.png", slot: "더 자세한 해설은 블로그에서 확인" }
+const examAnalysisCardNewsSlideTypes = [
+  { type: "cover", label: "시작 슬라이드" },
+  { type: "examStructure", label: "시험구조 슬라이드" },
+  { type: "overallReview", label: "총평 슬라이드" },
+  { type: "keyQuestion", label: "주요문항 슬라이드" },
+  { type: "solution", label: "손풀이 슬라이드" },
+  { type: "closing", label: "마무리 슬라이드" }
 ];
+const examAnalysisCardNewsModel = [
+  { card: 1, type: "cover", role: "시작 슬라이드", renderMode: "통렌더", suggestedSource: "cards/card-01.png", slot: "학교/학년/고사/과목 + 한줄 훅" },
+  { card: 2, type: "examStructure", role: "시험구조 슬라이드", renderMode: "통렌더", suggestedSource: "cards/card-02.png", slot: "객관식/서술형/만점/범위/출제 흐름" },
+  { card: 3, type: "overallReview", role: "총평 슬라이드", renderMode: "통렌더", suggestedSource: "cards/card-03.png", slot: "난도/점수 갈림/실수 포인트/고득점 전략" },
+  { card: 4, type: "keyQuestion", role: "주요문항 1 슬라이드", renderMode: "문제 이미지 슬롯", suggestedSource: "teacher-crops/question-01.png + cards/card-04.png", slot: "선생님이 직접 crop한 문제 이미지 + 왜 중요한지" },
+  { card: 5, type: "solution", role: "손풀이 1 슬라이드", renderMode: "손풀이 이미지 슬롯", suggestedSource: "teacher-crops/solution-01.png + cards/card-05.png", slot: "선생님이 직접 crop한 손풀이 이미지 + 풀이 흐름" },
+  { card: 6, type: "keyQuestion", role: "주요문항 2 슬라이드", renderMode: "문제 이미지 슬롯", suggestedSource: "teacher-crops/question-02.png + cards/card-06.png", slot: "선생님이 직접 crop한 문제 이미지 + 자주 틀리는 지점" },
+  { card: 7, type: "solution", role: "손풀이 2 슬라이드", renderMode: "손풀이 이미지 슬롯", suggestedSource: "teacher-crops/solution-02.png + cards/card-07.png", slot: "선생님이 직접 crop한 손풀이 이미지 + 핵심 계산" },
+  { card: 8, type: "keyQuestion", role: "주요문항 3 슬라이드", renderMode: "문제 이미지 슬롯", suggestedSource: "teacher-crops/question-03.png + cards/card-08.png", slot: "선생님이 직접 crop한 문제 이미지 + 변별 포인트" },
+  { card: 9, type: "solution", role: "손풀이 3 슬라이드", renderMode: "손풀이 이미지 슬롯", suggestedSource: "teacher-crops/solution-03.png + cards/card-09.png", slot: "선생님이 직접 crop한 손풀이 이미지 + 다음 훈련 방향" },
+  { card: 10, type: "closing", role: "마무리 슬라이드", renderMode: "통렌더", suggestedSource: "cards/card-10.png", slot: "다음 시험 대비 + 블로그 유입/상담 CTA" }
+];
+const examAnalysisCanvaCardPlan = examAnalysisCardNewsModel;
 
 function getExamAnalysisChartPartLabel(question = {}) {
   return String(question.partName || question.unitName || "미입력").trim() || "미입력";
@@ -2255,12 +2227,12 @@ function createExamAnalysisPackageReadme({ activeRun = {}, chartFiles = [] } = {
     "1. texts/blog-draft.txt 내용을 네이버 블로그 에디터에 붙여넣고 문장을 최종 수정합니다.",
     "2. texts/instagram-card-draft.txt 내용을 Canva 10장 카드뉴스 문구로 사용합니다.",
     `3. charts 폴더의 PNG 이미지는 ${examAnalysisChartPngExportScale}배 해상도 고화질 이미지입니다. 통렌더 카드의 재료 또는 네이버 블로그 보조 이미지로 사용합니다.`,
-    "4. texts/canva-10-card-plan.txt 기준으로 1~10번 카드의 통렌더/문제 슬롯 역할을 확인합니다.",
-    "5. texts/blog-instructor-section-guide.txt 기준으로 블로그 18개 강사 섹션의 위치별 메모를 확인합니다.",
+    "4. texts/canva-10-card-plan.txt 기준으로 6개 슬라이드 유형과 10장 반복 구조를 확인합니다.",
+    "5. texts/blog-block-guide.txt 기준으로 블로그 블록 조립 순서를 확인합니다.",
     "6. charts-svg 폴더의 SVG 원본은 PPT/Canva에서 더 선명한 원본이 필요할 때 사용합니다.",
     "7. 외부 에디터에서 수정한 최종본은 현재 앱으로 자동 동기화되지 않습니다.",
     "",
-    "Canva 10장 카드 구조",
+    "카드뉴스 10장 구조",
     examAnalysisCanvaCardPlan.map((item) => `${item.card}. ${item.role} [${item.renderMode}] - ${item.slot}`).join("\n"),
     "",
     "포함 차트",
@@ -2284,7 +2256,7 @@ function createExamAnalysisPackageManifest({ activeRun = {}, outputDrafts = {}, 
     texts: {
       blog: "texts/blog-draft.txt",
       instagram: "texts/instagram-card-draft.txt",
-      blogInstructorSectionGuide: "texts/blog-instructor-section-guide.txt",
+      blogBlockGuide: "texts/blog-block-guide.txt",
       canvaCardPlan: "texts/canva-10-card-plan.txt"
     },
     charts: chartFiles.map((file) => ({
@@ -2306,34 +2278,46 @@ function createExamAnalysisPackageManifest({ activeRun = {}, outputDrafts = {}, 
 
 function createExamAnalysisCanvaCardPlanText() {
   return [
-    "Canva 10장 카드뉴스 고정 구조",
+    "카드뉴스 10장 구조 - 6개 슬라이드 유형 반복",
+    "",
+    "슬라이드 유형",
+    examAnalysisCardNewsSlideTypes.map((item) => `- ${item.type}: ${item.label}`).join("\n"),
     "",
     ...examAnalysisCanvaCardPlan.map((item) => [
       `[카드 ${item.card}] ${item.role}`,
+      `슬라이드 유형: ${item.type}`,
       `제작 방식: ${item.renderMode}`,
       `이미지/텍스트 슬롯: ${item.slot}`,
       `추천 원천: ${item.suggestedSource}`
     ].join("\n")),
     "",
     "운영 원칙",
-    "- 카드 구조는 학교별로 바꾸지 않고, 텍스트/이미지/주요문항만 바꿉니다.",
-    "- 수정이 거의 필요 없는 카드는 카드 전체를 통렌더하고, 시험문제/손풀이 원본이 필요한 카드만 이미지 슬롯을 둡니다.",
+    "- 카드 구조는 학교별로 바꾸지 않고, 텍스트/색상 포인트/주요문항만 바꿉니다.",
+    "- 시작/시험구조/총평/마무리는 통렌더하고, 주요문항/손풀이 카드는 선생님 crop 이미지만 슬롯에 둡니다.",
     "- 인스타에는 10장 카드뉴스를 올리고, 마지막 카드에서 블로그 상세 해설로 유입합니다.",
     "- 블로그에는 같은 카드뉴스 이미지와 더 긴 문항별 해설/다음 대비 전략을 붙입니다."
   ].join("\n\n");
 }
 
-function createExamAnalysisBlogInstructorSectionGuideText() {
+function createExamAnalysisBlogBlockGuideText() {
   return [
-    "블로그 18개 강사 섹션 작성 가이드",
+    "블로그 블록 작성 가이드",
     "",
-    "선생님은 완성문을 쓰지 않아도 됩니다. 각 위치에 들어갈 사실, 판단, 문항 메모를 짧게 적고 AI가 문체/줄나눔/강조를 정리합니다.",
+    "선생님은 완성문을 쓰지 않아도 됩니다. 카드 사이에 들어갈 사실, 판단, 문항 메모를 블록별로 적고 AI가 문체/줄나눔/강조를 정리합니다.",
+    "18개 섹션은 벤치마킹 예시일 뿐 고정 입력 스키마가 아닙니다.",
     "",
-    ...examAnalysisBlogInstructorSectionFields.map((field) => [
-      `${field.number}. ${field.label}`,
+    ...examAnalysisBlogBlockFields.map((field) => [
+      `${field.order}. ${field.label} (${field.type})`,
       `작성 성격: ${field.guide}`,
       `예시 메모: ${field.placeholder}`
     ].join("\n")),
+    "",
+    "블로그 조립 순서 예시",
+    "- 시작글 -> [card-01.png 삽입]",
+    "- 시험구조 설명 -> [card-02.png 삽입]",
+    "- 총평/변별 포인트 -> [card-03.png 삽입]",
+    "- 주요문항 설명 -> [card-04.png 삽입] -> 손풀이 설명 -> [card-05.png 삽입]",
+    "- 주요문항/손풀이 쌍 반복 -> [card-10.png 삽입] -> CTA",
     "",
     "AI 편집 규칙",
     ...examAnalysisOutputAiBoundaryRules.map((rule) => `- ${rule}`),
@@ -2361,7 +2345,7 @@ async function downloadExamAnalysisOutputPackageZip({ activeRun = {}, model = {}
     { name: "texts/blog-draft.txt", text: blogText || "블로그 초안 없음" },
     { name: "texts/instagram-card-draft.txt", text: instagramText || "인스타 카드 초안 없음" },
     { name: "texts/canva-10-card-plan.txt", text: createExamAnalysisCanvaCardPlanText() },
-    { name: "texts/blog-instructor-section-guide.txt", text: createExamAnalysisBlogInstructorSectionGuideText() },
+    { name: "texts/blog-block-guide.txt", text: createExamAnalysisBlogBlockGuideText() },
     ...chartFiles,
     ...svgFiles
   ];
@@ -2475,7 +2459,7 @@ function ExamAnalysisOutputDraftPanel({
 
       <div className="examAnalysisOutputGuide">
         <strong>작성 방향</strong>
-        <span>산출물은 단원 분류를 보여주는 자료가 아니라, 학생과 학부모가 실제로 궁금해하는 내용을 해석해주는 자료입니다. 10장 Canva 카드뉴스는 통렌더 카드와 시험문제/손풀이 슬롯 카드를 구분하고, 블로그는 같은 카드뉴스에 상세 해설을 붙이는 구조로 작성합니다.</span>
+        <span>산출물은 단원 분류를 보여주는 자료가 아니라, 학생과 학부모가 실제로 궁금해하는 내용을 해석해주는 자료입니다. 카드뉴스는 6개 슬라이드 유형을 바탕으로 만들고, 주요문항/손풀이 카드는 선생님 crop 이미지만 슬롯에 넣습니다.</span>
         <small>초안 점검 기준</small>
         <ol>
           {examAnalysisOutputEditorialChecklist.map((item) => (
@@ -2532,14 +2516,14 @@ function ExamAnalysisOutputDraftPanel({
       </div>
 
       <div className="examAnalysisInstructorSectionHeader">
-        <strong>블로그 18개 강사 섹션</strong>
-        <span>완성문이 아니라 위치별 메모를 적는 칸입니다. AI는 이 메모를 바탕으로 줄나눔, 이모티콘, 형광펜 태그, 문체만 정리합니다.</span>
+        <strong>블로그 흐름 블록</strong>
+        <span>18개 고정 섹션이 아니라 카드 사이에 들어갈 글의 성격을 적는 칸입니다. AI는 이 메모를 바탕으로 줄나눔, 이모티콘, 형광펜 태그, 문체만 정리합니다.</span>
       </div>
 
       <div className="examAnalysisOutputInputGrid instructorSections">
-        {examAnalysisBlogInstructorSectionFields.map((field) => (
+        {examAnalysisBlogBlockFields.map((field) => (
           <label key={field.key}>
-            <span>{field.number}. {field.label}</span>
+            <span>{field.order}. {field.label}</span>
             <small>{field.guide}</small>
             <textarea
               onChange={(event) => onUpdateInput(field.key, event.target.value)}
@@ -2585,7 +2569,7 @@ function ExamAnalysisOutputDraftPanel({
           </div>
           <textarea
             onChange={(event) => onUpdateTeacherDraft("instagram", event.target.value)}
-            placeholder="인스타 카드 초안 생성 후 카드별 문구, 통렌더 여부, 문제/손풀이 슬롯을 수정합니다."
+            placeholder="인스타 카드 초안 생성 후 카드별 문구, 슬라이드 유형, 주요문항/손풀이 슬롯 안내를 수정합니다."
             rows={18}
             value={instagramText}
           />
@@ -9190,7 +9174,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     }
     const inputValues = examAnalysisOutputAllInputFields.map((field) => outputDrafts.inputs[field.key]);
     if (!inputValues.some((value) => String(value || "").trim())) {
-      setOutputStatus({ state: "failed", message: "시험분석 산출물 · 먼저 기본 메모 또는 블로그 강사 섹션 중 하나 이상을 작성해 주세요." });
+      setOutputStatus({ state: "failed", message: "시험분석 산출물 · 먼저 기본 메모 또는 블로그 흐름 블록 중 하나 이상을 작성해 주세요." });
       return;
     }
     const section = outputDrafts[outputType] ?? {};
