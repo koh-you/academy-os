@@ -1576,6 +1576,372 @@ function outputTextFromAnthropicResponse(data = {}) {
     .trim();
 }
 
+function cleanExamAnalysisOutputText(value = "", maxLength = 4000) {
+  return String(value ?? "").trim().slice(0, maxLength);
+}
+
+function normalizeExamAnalysisOutputVisibility(value = "") {
+  const normalized = String(value || "").trim();
+  return ["blog_instagram", "blog", "instagram", "internal"].includes(normalized)
+    ? normalized
+    : "blog_instagram";
+}
+
+function normalizeExamAnalysisOutputInputs(inputs = {}) {
+  return {
+    visibility: normalizeExamAnalysisOutputVisibility(inputs.visibility),
+    oneLineReview: cleanExamAnalysisOutputText(inputs.oneLineReview, 500),
+    flowReview: cleanExamAnalysisOutputText(inputs.flowReview, 1200),
+    scoreGapPoint: cleanExamAnalysisOutputText(inputs.scoreGapPoint, 1200),
+    nextStudyPlan: cleanExamAnalysisOutputText(inputs.nextStudyPlan, 1200)
+  };
+}
+
+function getExamAnalysisOutputDrafts(auditSummary = {}) {
+  const outputDrafts = auditSummary?.outputDrafts && typeof auditSummary.outputDrafts === "object"
+    ? auditSummary.outputDrafts
+    : {};
+  const normalizeSection = (section = {}) => ({
+    aiDraft: cleanExamAnalysisOutputText(section.aiDraft, 20000),
+    teacherDraft: cleanExamAnalysisOutputText(section.teacherDraft, 20000),
+    status: cleanExamAnalysisOutputText(section.status, 80),
+    provider: cleanExamAnalysisOutputText(section.provider, 80),
+    model: cleanExamAnalysisOutputText(section.model, 120),
+    generatedAt: cleanExamAnalysisOutputText(section.generatedAt, 80),
+    teacherUpdatedAt: cleanExamAnalysisOutputText(section.teacherUpdatedAt, 80),
+    updatedAt: cleanExamAnalysisOutputText(section.updatedAt, 80)
+  });
+  return {
+    inputs: normalizeExamAnalysisOutputInputs(outputDrafts.inputs ?? {}),
+    blog: normalizeSection(outputDrafts.blog ?? {}),
+    instagram: normalizeSection(outputDrafts.instagram ?? {})
+  };
+}
+
+function getExamAnalysisOutputQuestionFields(question = {}) {
+  const aiFields = question.aiFields && typeof question.aiFields === "object" ? question.aiFields : {};
+  const teacherFields = question.teacherFields && typeof question.teacherFields === "object" ? question.teacherFields : {};
+  const finalFields = question.finalFields && typeof question.finalFields === "object" ? question.finalFields : {};
+  const ssenMeta = finalFields.ssenMeta && typeof finalFields.ssenMeta === "object"
+    ? finalFields.ssenMeta
+    : teacherFields.ssenMeta && typeof teacherFields.ssenMeta === "object"
+      ? teacherFields.ssenMeta
+      : aiFields.ssenMeta && typeof aiFields.ssenMeta === "object"
+        ? aiFields.ssenMeta
+        : {};
+  const mainTypeMeta = ssenMeta.mainType && typeof ssenMeta.mainType === "object" ? ssenMeta.mainType : {};
+  const valueFrom = (...values) => values.map((value) => String(value ?? "").trim()).find(Boolean) || "";
+  const arrayFrom = (...values) => {
+    for (const value of values) {
+      if (Array.isArray(value) && value.length) return value.map((item) => String(item).trim()).filter(Boolean);
+    }
+    return [];
+  };
+  return {
+    questionNumber: Number(question.questionNumber),
+    partName: valueFrom(finalFields.partName, teacherFields.partName, mainTypeMeta.partName),
+    unitName: valueFrom(finalFields.unitName, teacherFields.unitName, mainTypeMeta.unitName, question.unitName),
+    mainType: valueFrom(finalFields.mainType, teacherFields.mainType, mainTypeMeta.typeName, question.mainType),
+    subTypes: arrayFrom(finalFields.subTypes, teacherFields.subTypes, question.subTypes, aiFields.subTypes),
+    difficulty: valueFrom(finalFields.difficulty, teacherFields.difficulty, question.difficulty, aiFields.difficulty, "미정"),
+    reviewNote: valueFrom(finalFields.reviewNote, teacherFields.reviewNote),
+    isImportantQuestion: Boolean(finalFields.isImportantQuestion ?? teacherFields.isImportantQuestion ?? false),
+    pageStart: question.sourceEvidence?.boundary?.pageStart || question.sourcePage || null,
+    pageEnd: question.sourceEvidence?.boundary?.pageEnd || question.sourceEvidence?.boundary?.pageStart || question.sourcePage || null
+  };
+}
+
+function countExamAnalysisOutputLabels(items = [], selector) {
+  const counts = new Map();
+  items.forEach((item) => {
+    const label = cleanExamAnalysisOutputText(selector(item) || "미입력", 120) || "미입력";
+    counts.set(label, (counts.get(label) || 0) + 1);
+  });
+  return [...counts.entries()]
+    .map(([label, count]) => ({ label, count }))
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, "ko"));
+}
+
+function formatExamAnalysisOutputCountSummary(items = [], total = 0) {
+  return items.map((item) => `${item.label} ${item.count}문항${total ? `(${Math.round((item.count / total) * 1000) / 10}%)` : ""}`).join(", ");
+}
+
+function formatExamAnalysisOutputQuestionPage(question = {}) {
+  if (!question.pageStart) return "";
+  return question.pageEnd && question.pageEnd !== question.pageStart
+    ? `${question.pageStart}~${question.pageEnd}p`
+    : `${question.pageStart}p`;
+}
+
+function buildExamAnalysisOutputContext(detail = {}) {
+  const analysisRun = detail.analysisRun ?? {};
+  const questions = (detail.questions ?? [])
+    .map(getExamAnalysisOutputQuestionFields)
+    .filter((question) => Number.isInteger(question.questionNumber) && question.questionNumber > 0)
+    .sort((a, b) => a.questionNumber - b.questionNumber);
+  const total = questions.length;
+  const difficultySummary = formatExamAnalysisOutputCountSummary(
+    countExamAnalysisOutputLabels(questions, (question) => question.difficulty),
+    total
+  );
+  const partSummary = formatExamAnalysisOutputCountSummary(
+    countExamAnalysisOutputLabels(questions, (question) => question.partName || question.unitName),
+    total
+  );
+  const importantQuestions = questions.filter((question) => question.isImportantQuestion);
+  const importantSummary = importantQuestions.length
+    ? importantQuestions.map((question) => {
+        const parts = [
+          `${question.questionNumber}번`,
+          question.mainType,
+          question.unitName,
+          question.difficulty,
+          formatExamAnalysisOutputQuestionPage(question),
+          question.reviewNote ? `메모: ${question.reviewNote}` : ""
+        ].filter(Boolean);
+        return `- ${parts.join(" · ")}`;
+      }).join("\n")
+    : "- 선생님이 선택한 주요문항 없음";
+  const questionFlow = questions.map((question) => (
+    `${question.questionNumber}번 ${question.difficulty} ${question.mainType || question.unitName || "유형 미입력"}`
+  )).join(" | ").slice(0, 3000);
+  return [
+    `[분석 메타]`,
+    `제목: ${analysisRun.title || ""}`,
+    `학교/학년/고사/과목: ${[analysisRun.schoolName, analysisRun.grade, analysisRun.examCycle || analysisRun.examTerm, analysisRun.subject].filter(Boolean).join(" · ")}`,
+    `총 문항 수: ${total}`,
+    "",
+    "[검수 저장본 요약]",
+    `대단원/중단원 분포: ${partSummary || "없음"}`,
+    `난이도 분포: ${difficultySummary || "없음"}`,
+    `문항 흐름: ${questionFlow || "없음"}`,
+    "",
+    "[선생님 선택 주요문항]",
+    importantSummary
+  ].join("\n");
+}
+
+function buildExamAnalysisOutputPrompt({ outputType, detail, inputs }) {
+  const inputSummary = [
+    `[선생님 작성 원문 - 최우선 원천]`,
+    `공개 범위: ${inputs.visibility}`,
+    `한줄 총평: ${inputs.oneLineReview || "(미입력)"}`,
+    `시험 흐름/체감: ${inputs.flowReview || "(미입력)"}`,
+    `점수 갈림 포인트: ${inputs.scoreGapPoint || "(미입력)"}`,
+    `다음 시험 대비: ${inputs.nextStudyPlan || "(미입력)"}`
+  ].join("\n");
+  const sharedRules = [
+    "역할: 수학학원 시험분석 공개 산출물 편집자",
+    "원칙: 선생님 작성 원문을 최우선 원천으로 삼고, 검수 저장본 수치와 주요문항만 보조 자료로 쓴다.",
+    "금지: 문제 본문/정답/상세 풀이를 길게 노출하지 않는다. 없는 사실을 만들거나 학교/학생을 단정적으로 평가하지 않는다.",
+    "문장 방향: 단원명 나열보다 학생과 학부모가 궁금해하는 시험 체감, 왜 어려웠는가, 어디서 점수가 갈렸는가, 무엇을 조심해야 하는가, 다음 시험 대비를 중심으로 쓴다.",
+    "톤: 전문적이되 과장하지 말고, 학부모가 읽어도 바로 이해되게 쓴다.",
+    "",
+    inputSummary,
+    "",
+    buildExamAnalysisOutputContext(detail)
+  ];
+  if (outputType === "instagram") {
+    return [
+      ...sharedRules,
+      "",
+      "[출력 형식]",
+      "인스타 카드뉴스 초안을 작성한다. 총 7장 안팎으로 구성한다.",
+      "카드 1: 표지",
+      "카드 2: 한줄 총평 + 시험 체감/난이도",
+      "카드 3: 시험 흐름 + 점수 갈림/실수 포인트",
+      "카드 4~6: 선생님 선택 주요문항 2~3개. 각 카드에는 왜 중요했는지, 어떤 실수/사고력이 갈렸는지 쓴다.",
+      "카드 7: 다음 시험 대비 학습 전략과 마무리",
+      "각 카드는 아래 형식을 반복한다.",
+      "[카드 n] 제목",
+      "본문: 2~4줄",
+      "이미지 슬롯: 들어가면 좋은 차트/문항 crop/시각 요소",
+      "",
+      "마지막에 캡션 초안도 5~8줄로 붙인다."
+    ].join("\n");
+  }
+  return [
+    ...sharedRules,
+    "",
+    "[출력 형식]",
+    "네이버 블로그 초안을 작성한다.",
+    "구성은 서론-본문-결론으로 둔다.",
+    "서론: 한줄 총평과 시험 체감으로 시작한다.",
+    "본문 1: 전체 시험 흐름과 난이도 분포를 학생/학부모 언어로 풀어쓴다.",
+    "본문 2: 점수 갈림 포인트와 실수 포인트를 설명한다.",
+    "본문 3: 선생님 선택 주요문항 2~3개를 번호별로 다루되, 정답/상세풀이 대신 변별 이유와 학습 의미를 쓴다.",
+    "결론: 다음 시험 대비 학습 전략과 상담/수업 연결 문장으로 마무리한다.",
+    "제목 후보 2개를 먼저 쓰고, 이어서 본문 초안을 쓴다."
+  ].join("\n");
+}
+
+async function runAnthropicExamAnalysisOutputDraft(prompt, outputType) {
+  const apiKey = apiEnvValue("ANTHROPIC_API_KEY");
+  if (!apiKey) throw new Error("ANTHROPIC_API_KEY 환경변수가 필요합니다.");
+  const model = apiEnvValue("ANTHROPIC_EXAM_OUTPUT_MODEL") || apiEnvValue("ANTHROPIC_MODEL") || "claude-sonnet-4-5";
+  const response = await fetch(anthropicMessagesUrl, {
+    method: "POST",
+    headers: {
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+      "x-api-key": apiKey
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: outputType === "blog" ? 5000 : 3800,
+      messages: [{ role: "user", content: [{ type: "text", text: prompt }] }]
+    })
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error?.message || "Claude 시험분석 산출물 초안 생성에 실패했습니다.");
+  }
+  return {
+    provider: "anthropic",
+    model,
+    text: outputTextFromAnthropicResponse(data)
+  };
+}
+
+async function runOpenAiExamAnalysisOutputDraft(prompt, outputType) {
+  const apiKey = apiEnvValue("OPENAI_API_KEY");
+  if (!apiKey) throw new Error("OPENAI_API_KEY 환경변수가 필요합니다.");
+  const model = apiEnvValue("OPENAI_EXAM_OUTPUT_MODEL") || apiEnvValue("OPENAI_MODEL") || "gpt-4.1-mini";
+  const response = await fetch(openAiResponsesUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model,
+      input: [{ role: "user", content: [{ type: "input_text", text: prompt }] }],
+      max_output_tokens: outputType === "blog" ? 5000 : 3800
+    })
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error?.message || "OpenAI 시험분석 산출물 초안 생성에 실패했습니다.");
+  }
+  return {
+    provider: "openai",
+    model,
+    text: outputTextFromOpenAiResponse(data)
+  };
+}
+
+async function runExamAnalysisOutputDraftAi({ outputType, prompt } = {}) {
+  if (apiEnvValue("ANTHROPIC_API_KEY")) {
+    return runAnthropicExamAnalysisOutputDraft(prompt, outputType);
+  }
+  if (apiEnvValue("OPENAI_API_KEY")) {
+    return runOpenAiExamAnalysisOutputDraft(prompt, outputType);
+  }
+  throw new Error("ANTHROPIC_API_KEY 또는 OPENAI_API_KEY 환경변수가 필요합니다.");
+}
+
+async function saveExamAnalysisOutputDrafts({ analysisRunId, outputInputs = {}, blogTeacherDraft, instagramTeacherDraft, blogTeacherDraftEdited = false, instagramTeacherDraftEdited = false } = {}) {
+  if (!analysisRunId) throw new Error("analysisRunId가 필요합니다.");
+  const detail = await getExamAnalysisRun(analysisRunId);
+  if (!detail.analysisRun?.analysisRunId) throw new Error("시험분석 작업을 찾지 못했습니다.");
+  const now = new Date().toISOString();
+  const previousAuditSummary = detail.analysisRun.auditSummary ?? {};
+  const previousDrafts = getExamAnalysisOutputDrafts(previousAuditSummary);
+  const nextDrafts = {
+    ...previousDrafts,
+    inputs: {
+      ...normalizeExamAnalysisOutputInputs({ ...previousDrafts.inputs, ...outputInputs }),
+      updatedAt: now
+    },
+    blog: {
+      ...previousDrafts.blog,
+      ...(blogTeacherDraftEdited ? {
+        teacherDraft: cleanExamAnalysisOutputText(blogTeacherDraft, 20000),
+        teacherUpdatedAt: now
+      } : {}),
+      updatedAt: now
+    },
+    instagram: {
+      ...previousDrafts.instagram,
+      ...(instagramTeacherDraftEdited ? {
+        teacherDraft: cleanExamAnalysisOutputText(instagramTeacherDraft, 20000),
+        teacherUpdatedAt: now
+      } : {}),
+      updatedAt: now
+    }
+  };
+  nextDrafts.blog.status = nextDrafts.blog.teacherUpdatedAt ? "teacher_saved" : nextDrafts.blog.aiDraft ? "ai_draft" : "inputs_saved";
+  nextDrafts.instagram.status = nextDrafts.instagram.teacherUpdatedAt ? "teacher_saved" : nextDrafts.instagram.aiDraft ? "ai_draft" : "inputs_saved";
+  await updateExamAnalysisRun(analysisRunId, {
+    auditSummary: {
+      ...previousAuditSummary,
+      outputDrafts: nextDrafts
+    }
+  });
+  await recordExamAnalysisEvent({
+    analysisRunId,
+    eventType: "exam_analysis_output_draft_saved",
+    message: "시험분석 블로그/인스타 산출물 초안이 저장되었습니다.",
+    payload: {
+      hasBlogTeacherDraft: Boolean(nextDrafts.blog.teacherDraft),
+      hasInstagramTeacherDraft: Boolean(nextDrafts.instagram.teacherDraft),
+      visibility: nextDrafts.inputs.visibility
+    }
+  });
+  return getExamAnalysisRun(analysisRunId);
+}
+
+async function generateExamAnalysisOutputDraft({ analysisRunId, outputType, outputInputs = {} } = {}) {
+  if (!analysisRunId) throw new Error("analysisRunId가 필요합니다.");
+  if (!["blog", "instagram"].includes(outputType)) throw new Error("outputType은 blog 또는 instagram이어야 합니다.");
+  const detail = await getExamAnalysisRun(analysisRunId);
+  if (!detail.analysisRun?.analysisRunId) throw new Error("시험분석 작업을 찾지 못했습니다.");
+  const now = new Date().toISOString();
+  const previousAuditSummary = detail.analysisRun.auditSummary ?? {};
+  const previousDrafts = getExamAnalysisOutputDrafts(previousAuditSummary);
+  const inputs = normalizeExamAnalysisOutputInputs({ ...previousDrafts.inputs, ...outputInputs });
+  const hasTeacherInput = [inputs.oneLineReview, inputs.flowReview, inputs.scoreGapPoint, inputs.nextStudyPlan].some(Boolean);
+  if (!hasTeacherInput) {
+    throw new Error("먼저 한줄 총평, 시험 흐름, 점수 갈림 포인트, 다음 시험 대비 중 하나 이상을 작성해 주세요.");
+  }
+  const prompt = buildExamAnalysisOutputPrompt({ outputType, detail, inputs });
+  const generated = await runExamAnalysisOutputDraftAi({ outputType, prompt });
+  const nextDrafts = {
+    ...previousDrafts,
+    inputs: {
+      ...inputs,
+      updatedAt: now
+    },
+    [outputType]: {
+      ...previousDrafts[outputType],
+      aiDraft: cleanExamAnalysisOutputText(generated.text, 20000),
+      provider: generated.provider,
+      model: generated.model,
+      generatedAt: now,
+      updatedAt: now,
+      status: previousDrafts[outputType]?.teacherUpdatedAt ? "teacher_saved" : "ai_draft"
+    }
+  };
+  await updateExamAnalysisRun(analysisRunId, {
+    auditSummary: {
+      ...previousAuditSummary,
+      outputDrafts: nextDrafts
+    }
+  });
+  await recordExamAnalysisEvent({
+    analysisRunId,
+    eventType: "exam_analysis_output_draft_generated",
+    message: outputType === "blog" ? "블로그 초안이 생성되었습니다." : "인스타 카드 초안이 생성되었습니다.",
+    payload: {
+      outputType,
+      provider: generated.provider,
+      model: generated.model,
+      preservedTeacherDraft: Boolean(previousDrafts[outputType]?.teacherUpdatedAt)
+    }
+  });
+  return getExamAnalysisRun(analysisRunId);
+}
+
 async function runAnthropicPdfVisionCheck(sourceFile, buffer) {
   const apiKey = apiEnvValue("ANTHROPIC_API_KEY");
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY 환경변수가 필요합니다.");
@@ -2756,6 +3122,39 @@ const server = http.createServer(async (request, response) => {
       const result = await saveExamAnalysisQuestionTeacherReviews({
         analysisRunId: payload.analysisRunId,
         reviews: payload.reviews
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-output-drafts") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await saveExamAnalysisOutputDrafts({
+        analysisRunId: payload.analysisRunId,
+        outputInputs: payload.outputInputs,
+        blogTeacherDraft: payload.blogTeacherDraft,
+        instagramTeacherDraft: payload.instagramTeacherDraft,
+        blogTeacherDraftEdited: payload.blogTeacherDraftEdited,
+        instagramTeacherDraftEdited: payload.instagramTeacherDraftEdited
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/generate-output-draft") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await generateExamAnalysisOutputDraft({
+        analysisRunId: payload.analysisRunId,
+        outputType: payload.outputType,
+        outputInputs: payload.outputInputs
       });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {

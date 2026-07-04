@@ -1455,6 +1455,235 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
   );
 }
 
+const examAnalysisOutputInputFields = [
+  {
+    key: "oneLineReview",
+    label: "한줄 총평",
+    guide: "블로그 서론 첫 문장과 인스타 2장 핵심 카피가 됩니다. 단원명을 먼저 나열하기보다, 학생과 학부모가 바로 이해할 수 있게 이번 시험의 체감과 성격을 한 문장으로 잡아주세요.",
+    placeholder: "예: 전 범위가 고르게 나왔지만, 후반부 계산 집중력과 조건 해석에서 점수가 갈린 시험이었습니다."
+  },
+  {
+    key: "flowReview",
+    label: "시험 흐름/체감",
+    guide: "문항 흐름 차트를 보며 초반-중반-후반 체감을 적습니다. 어디까지는 무난했고, 어느 구간부터 시간이 걸렸는지, 뒤쪽에 어려운 문항이 몰렸는지를 중심으로 쓰면 좋습니다.",
+    placeholder: "예: 1~10번은 기본 유형 확인에 가까웠고, 13번 이후부터 계산량과 조건 해석이 늘어나 체감 난이도가 올라갔습니다."
+  },
+  {
+    key: "scoreGapPoint",
+    label: "점수 갈림 포인트",
+    guide: "변별 포인트와 실수 포인트를 합쳐 씁니다. '왜 어려웠는가 / 어디서 갈렸는가 / 무엇을 조심해야 하는가'가 핵심입니다. 주요문항 코멘트도 이 문장을 바탕으로 확장됩니다.",
+    placeholder: "예: 익숙한 유형처럼 보여도 조건을 끝까지 정리하지 않으면 식을 잘못 세우기 쉬웠고, 중상 문항에서 풀이 순서 선택이 중요했습니다."
+  },
+  {
+    key: "nextStudyPlan",
+    label: "다음 시험 대비",
+    guide: "결론과 마지막 카드에 들어갈 학습 전략입니다. 학생에게는 무엇을 연습해야 하는지, 학부모에게는 왜 그 훈련이 필요한지 납득되도록 적어주세요.",
+    placeholder: "예: 단순 유형 반복보다 조건을 식으로 바꾸는 훈련, 풀이 과정 검산, 중상 난이도 문항의 시간 배분 연습이 필요합니다."
+  }
+];
+
+function createEmptyExamAnalysisOutputDrafts() {
+  return {
+    inputs: {
+      visibility: "blog_instagram",
+      oneLineReview: "",
+      flowReview: "",
+      scoreGapPoint: "",
+      nextStudyPlan: ""
+    },
+    blog: {
+      aiDraft: "",
+      teacherDraft: "",
+      status: "",
+      provider: "",
+      model: "",
+      generatedAt: "",
+      teacherUpdatedAt: "",
+      updatedAt: "",
+      teacherTouched: false
+    },
+    instagram: {
+      aiDraft: "",
+      teacherDraft: "",
+      status: "",
+      provider: "",
+      model: "",
+      generatedAt: "",
+      teacherUpdatedAt: "",
+      updatedAt: "",
+      teacherTouched: false
+    }
+  };
+}
+
+function normalizeExamAnalysisOutputDraftSection(section = {}) {
+  return {
+    aiDraft: String(section.aiDraft ?? ""),
+    teacherDraft: String(section.teacherDraft ?? ""),
+    status: String(section.status ?? ""),
+    provider: String(section.provider ?? ""),
+    model: String(section.model ?? ""),
+    generatedAt: String(section.generatedAt ?? ""),
+    teacherUpdatedAt: String(section.teacherUpdatedAt ?? ""),
+    updatedAt: String(section.updatedAt ?? ""),
+    teacherTouched: Boolean(section.teacherTouched)
+  };
+}
+
+function getExamAnalysisOutputDraftsFromRun(run = {}) {
+  const stored = run?.auditSummary?.outputDrafts && typeof run.auditSummary.outputDrafts === "object"
+    ? run.auditSummary.outputDrafts
+    : {};
+  const empty = createEmptyExamAnalysisOutputDrafts();
+  return {
+    inputs: {
+      ...empty.inputs,
+      ...(stored.inputs && typeof stored.inputs === "object" ? stored.inputs : {})
+    },
+    blog: normalizeExamAnalysisOutputDraftSection(stored.blog ?? {}),
+    instagram: normalizeExamAnalysisOutputDraftSection(stored.instagram ?? {})
+  };
+}
+
+function getExamAnalysisOutputSectionText(section = {}) {
+  return section.teacherTouched || section.teacherUpdatedAt || section.teacherDraft
+    ? section.teacherDraft
+    : section.aiDraft || "";
+}
+
+function getExamAnalysisOutputSectionLabel(section = {}) {
+  if (section.teacherTouched || section.teacherUpdatedAt || section.teacherDraft) return "선생님 수정본 우선";
+  if (section.aiDraft) return "AI 초안";
+  return "초안 없음";
+}
+
+function ExamAnalysisOutputDraftPanel({
+  activeRun,
+  model,
+  outputDrafts,
+  outputStatus,
+  generatingOutputType,
+  isSavingOutputDrafts,
+  onGenerateOutputDraft,
+  onSaveOutputDrafts,
+  onUpdateInput,
+  onUpdateTeacherDraft
+}) {
+  const hasRun = Boolean(activeRun?.analysisRunId);
+  const hasReviewModel = Boolean(model?.questions?.length);
+  const blogText = getExamAnalysisOutputSectionText(outputDrafts.blog);
+  const instagramText = getExamAnalysisOutputSectionText(outputDrafts.instagram);
+  return (
+    <div className="panel examAnalysisOutputDraftPanel">
+      <div className="sectionHeader slim">
+        <div>
+          <strong>블로그/인스타 산출물 초안</strong>
+          <span>선생님 총평 입력 · AI 초안 · 선생님 수정본 저장</span>
+        </div>
+        <div className="headerActions">
+          {outputStatus.message ? <span className={`saveStateBadge ${outputStatus.state}`}>{outputStatus.message}</span> : null}
+          <button
+            className="secondaryButton"
+            disabled={!hasRun || !hasReviewModel || isSavingOutputDrafts || Boolean(generatingOutputType)}
+            onClick={() => onGenerateOutputDraft("blog")}
+            type="button"
+          >
+            {generatingOutputType === "blog" ? "블로그 생성 중" : "블로그 초안 생성"}
+          </button>
+          <button
+            className="secondaryButton"
+            disabled={!hasRun || !hasReviewModel || isSavingOutputDrafts || Boolean(generatingOutputType)}
+            onClick={() => onGenerateOutputDraft("instagram")}
+            type="button"
+          >
+            {generatingOutputType === "instagram" ? "인스타 생성 중" : "인스타 카드 초안 생성"}
+          </button>
+          <button
+            className="primaryButton"
+            disabled={!hasRun || isSavingOutputDrafts || Boolean(generatingOutputType)}
+            onClick={onSaveOutputDrafts}
+            type="button"
+          >
+            {isSavingOutputDrafts ? "저장 중" : "산출물 저장"}
+          </button>
+        </div>
+      </div>
+
+      <div className="examAnalysisOutputGuide">
+        <strong>작성 방향</strong>
+        <span>학생과 학부모가 원하는 정보는 단원명 나열보다 시험 체감, 변별 포인트, 실수 포인트, 다음 행동입니다. 아래 4칸은 블로그의 서론-본문-결론과 인스타 카드 흐름으로 그대로 이어집니다.</span>
+      </div>
+
+      <div className="examAnalysisOutputVisibility">
+        <span>공개 범위</span>
+        {[
+          ["blog_instagram", "블로그+인스타"],
+          ["blog", "블로그용"],
+          ["instagram", "인스타용"],
+          ["internal", "내부용"]
+        ].map(([value, label]) => (
+          <button
+            className={outputDrafts.inputs.visibility === value ? "active" : ""}
+            key={value}
+            onClick={() => onUpdateInput("visibility", value)}
+            type="button"
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <div className="examAnalysisOutputInputGrid">
+        {examAnalysisOutputInputFields.map((field) => (
+          <label key={field.key}>
+            <span>{field.label}</span>
+            <small>{field.guide}</small>
+            <textarea
+              onChange={(event) => onUpdateInput(field.key, event.target.value)}
+              placeholder={field.placeholder}
+              rows={4}
+              value={outputDrafts.inputs[field.key] || ""}
+            />
+          </label>
+        ))}
+      </div>
+
+      <div className="examAnalysisOutputEditorGrid">
+        <section>
+          <div>
+            <strong>블로그 초안</strong>
+            <span>{getExamAnalysisOutputSectionLabel(outputDrafts.blog)}</span>
+          </div>
+          <textarea
+            onChange={(event) => onUpdateTeacherDraft("blog", event.target.value)}
+            placeholder="블로그 초안 생성 후 선생님이 최종 문장으로 수정합니다."
+            rows={18}
+            value={blogText}
+          />
+        </section>
+        <section>
+          <div>
+            <strong>인스타 카드 초안</strong>
+            <span>{getExamAnalysisOutputSectionLabel(outputDrafts.instagram)}</span>
+          </div>
+          <textarea
+            onChange={(event) => onUpdateTeacherDraft("instagram", event.target.value)}
+            placeholder="인스타 카드 초안 생성 후 카드별 문구와 이미지 슬롯을 수정합니다."
+            rows={18}
+            value={instagramText}
+          />
+        </section>
+      </div>
+
+      <div className="examAnalysisOutputPolicy">
+        <span>입력칸과 선생님 수정본은 저장 후 새로고침해도 유지됩니다.</span>
+        <span>읽기 우선순위: 선생님 수정본 &gt; AI 초안 &gt; 빈 값입니다.</span>
+        <span>AI 재생성은 AI 초안만 갱신하고, 저장된 선생님 수정본은 덮어쓰지 않습니다.</span>
+      </div>
+    </div>
+  );
+}
+
 function getExamAnalysisQuestionCountCandidate(run = {}, sourceFiles = []) {
   const files = Array.isArray(sourceFiles) ? sourceFiles : [];
   const visionChecks = files
@@ -1735,6 +1964,24 @@ function saveExamAnalysisQuestionReviewsRequest(payload) {
     payload,
     30000,
     "문항 검수 저장이 지연되고 있습니다."
+  );
+}
+
+function saveExamAnalysisOutputDraftsRequest(payload) {
+  return postJsonWithTimeout(
+    "/api/exam-analysis-runs/save-output-drafts",
+    payload,
+    30000,
+    "시험분석 산출물 저장이 지연되고 있습니다."
+  );
+}
+
+function generateExamAnalysisOutputDraftRequest(payload) {
+  return postJsonWithTimeout(
+    "/api/exam-analysis-runs/generate-output-draft",
+    payload,
+    120000,
+    "시험분석 산출물 AI 초안 생성이 지연되고 있습니다."
   );
 }
 
@@ -7043,6 +7290,10 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const [isPdfDropActive, setIsPdfDropActive] = useState(false);
   const [ssenCatalog, setSsenCatalog] = useState(() => createEmptyExamAnalysisSsenCatalog());
   const [ssenCatalogStatus, setSsenCatalogStatus] = useState({ state: "idle", message: "" });
+  const [outputDrafts, setOutputDrafts] = useState(() => createEmptyExamAnalysisOutputDrafts());
+  const [outputStatus, setOutputStatus] = useState({ state: "idle", message: "" });
+  const [isSavingOutputDrafts, setIsSavingOutputDrafts] = useState(false);
+  const [generatingOutputType, setGeneratingOutputType] = useState("");
 
   const selectedExamPrepRow = useMemo(
     () => examPrepRows.find((row) => row.examPrepId === selectedExamPrepId) ?? null,
@@ -7241,6 +7492,11 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     });
     reviewSeedDraftsRef.current = seededDrafts;
   }, [activeRun?.analysisRunId, questionRows.length, reviewSeedKey]);
+
+  useEffect(() => {
+    setOutputDrafts(getExamAnalysisOutputDraftsFromRun(activeRun));
+    setOutputStatus({ state: "idle", message: "" });
+  }, [activeRun?.analysisRunId, activeRun?.auditSummary?.outputDrafts]);
 
   function applyExamPrepRow(row) {
     if (!row) return;
@@ -7943,6 +8199,106 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     }
   }
 
+  function updateOutputInput(key, value) {
+    setOutputDrafts((current) => ({
+      ...current,
+      inputs: {
+        ...current.inputs,
+        [key]: value
+      }
+    }));
+    setOutputStatus({ state: "dirty", message: "시험분석 산출물 · 수정됨 · 저장 필요" });
+  }
+
+  function updateOutputTeacherDraft(outputType, value) {
+    setOutputDrafts((current) => ({
+      ...current,
+      [outputType]: {
+        ...current[outputType],
+        teacherDraft: value,
+        teacherTouched: true,
+        teacherUpdatedAt: current[outputType]?.teacherUpdatedAt || new Date().toISOString()
+      }
+    }));
+    setOutputStatus({ state: "dirty", message: "시험분석 산출물 · 수정됨 · 저장 필요" });
+  }
+
+  async function saveOutputDrafts() {
+    if (!activeRun?.analysisRunId) {
+      setOutputStatus({ state: "failed", message: "시험분석 산출물 · 분석을 먼저 저장해 주세요." });
+      return;
+    }
+    setIsSavingOutputDrafts(true);
+    setOutputStatus({ state: "saving", message: "시험분석 산출물 · 저장 중" });
+    try {
+      const result = await saveExamAnalysisOutputDraftsRequest({
+        analysisRunId: activeRun.analysisRunId,
+        outputInputs: outputDrafts.inputs,
+        blogTeacherDraft: outputDrafts.blog.teacherDraft,
+        instagramTeacherDraft: outputDrafts.instagram.teacherDraft,
+        blogTeacherDraftEdited: Boolean(outputDrafts.blog.teacherTouched),
+        instagramTeacherDraftEdited: Boolean(outputDrafts.instagram.teacherTouched)
+      });
+      setSelectedDetail(result);
+      setOutputDrafts(getExamAnalysisOutputDraftsFromRun(result.analysisRun));
+      setOutputStatus({ state: "success", message: "시험분석 산출물 · 저장 완료" });
+      await loadRuns(activeRun.analysisRunId);
+      await loadRunDetail(activeRun.analysisRunId);
+    } catch (error) {
+      setOutputStatus({ state: "failed", message: `시험분석 산출물 · 저장 실패 · ${error.message}` });
+      if (selectedRunId) await loadRunDetail(selectedRunId);
+    } finally {
+      setIsSavingOutputDrafts(false);
+    }
+  }
+
+  async function generateOutputDraft(outputType) {
+    if (!activeRun?.analysisRunId) {
+      setOutputStatus({ state: "failed", message: "시험분석 산출물 · 분석을 먼저 저장해 주세요." });
+      return;
+    }
+    const inputValues = [
+      outputDrafts.inputs.oneLineReview,
+      outputDrafts.inputs.flowReview,
+      outputDrafts.inputs.scoreGapPoint,
+      outputDrafts.inputs.nextStudyPlan
+    ];
+    if (!inputValues.some((value) => String(value || "").trim())) {
+      setOutputStatus({ state: "failed", message: "시험분석 산출물 · 먼저 총평 입력칸 중 하나 이상을 작성해 주세요." });
+      return;
+    }
+    const section = outputDrafts[outputType] ?? {};
+    const hasTeacherDraft = Boolean(section.teacherTouched || section.teacherUpdatedAt || section.teacherDraft);
+    if (hasTeacherDraft && !window.confirm("선생님 수정본은 유지하고 AI 초안만 다시 생성할까요?")) {
+      return;
+    }
+    setGeneratingOutputType(outputType);
+    setOutputStatus({
+      state: "saving",
+      message: outputType === "blog" ? "시험분석 산출물 · 블로그 초안 생성 중" : "시험분석 산출물 · 인스타 카드 초안 생성 중"
+    });
+    try {
+      const result = await generateExamAnalysisOutputDraftRequest({
+        analysisRunId: activeRun.analysisRunId,
+        outputType,
+        outputInputs: outputDrafts.inputs
+      });
+      setSelectedDetail(result);
+      setOutputDrafts(getExamAnalysisOutputDraftsFromRun(result.analysisRun));
+      setOutputStatus({
+        state: "success",
+        message: outputType === "blog" ? "시험분석 산출물 · 블로그 초안 생성 완료" : "시험분석 산출물 · 인스타 카드 초안 생성 완료"
+      });
+      await loadRuns(activeRun.analysisRunId);
+      await loadRunDetail(activeRun.analysisRunId);
+    } catch (error) {
+      setOutputStatus({ state: "failed", message: `시험분석 산출물 · 초안 생성 실패 · ${error.message}` });
+      if (selectedRunId) await loadRunDetail(selectedRunId);
+    } finally {
+      setGeneratingOutputType("");
+    }
+  }
+
   const confirmedQuestionCount = Number(activeRun?.confirmedQuestionCount || 0);
   const questionRowNumbers = questionRows
     .map((question) => Number(question.questionNumber))
@@ -7992,7 +8348,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       </div>
 
       <div className="examAnalysisStatusBar">
-        {[loadStatus, saveStatus, uploadStatus, sourceDeleteStatus, extractStatus, visionStatus, confirmStatus, boundaryStatus, rowFillStatus, rowRefineStatus, reviewStatus, deleteStatus].filter((item) => item.message).map((item, index) => (
+        {[loadStatus, saveStatus, uploadStatus, sourceDeleteStatus, extractStatus, visionStatus, confirmStatus, boundaryStatus, rowFillStatus, rowRefineStatus, reviewStatus, outputStatus, deleteStatus].filter((item) => item.message).map((item, index) => (
           <span className={`saveStateBadge ${item.state}`} key={`${item.message}-${index}`}>{item.message}</span>
         ))}
       </div>
@@ -8722,6 +9078,19 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
 
           <ExamAnalysisFinalPreviewPanel
             model={finalPreviewModel}
+          />
+
+          <ExamAnalysisOutputDraftPanel
+            activeRun={activeRun}
+            generatingOutputType={generatingOutputType}
+            isSavingOutputDrafts={isSavingOutputDrafts}
+            model={finalPreviewModel}
+            onGenerateOutputDraft={generateOutputDraft}
+            onSaveOutputDrafts={saveOutputDrafts}
+            onUpdateInput={updateOutputInput}
+            onUpdateTeacherDraft={updateOutputTeacherDraft}
+            outputDrafts={outputDrafts}
+            outputStatus={outputStatus}
           />
 
           <div className="panel examAnalysisStepPanel">
