@@ -1482,9 +1482,9 @@ const examAnalysisOutputInputFields = [
   },
   {
     key: "imageSlotNotes",
-    label: "10장 이미지/슬롯 메모",
-    guide: "Canva 10장 카드뉴스에 들어갈 이미지 흐름입니다. 시험지 정보 이미지 10개, 차트 PNG, 주요문항 crop을 어느 카드에 넣을지 적어주세요.",
-    placeholder: "예: 1 표지, 2 한줄총평, 3 시험구조, 4 단원비중 PNG, 5 난이도/문항흐름 PNG, 6~8 주요문항 crop, 9 다음대비, 10 블로그 유입 CTA"
+    label: "10장 카드 렌더/슬롯 메모",
+    guide: "Canva 10장 카드뉴스의 제작 방식입니다. 수정이 거의 없는 카드는 통으로 렌더링하고, 시험문제/손풀이 원본을 붙여야 하는 카드만 이미지 슬롯을 둡니다.",
+    placeholder: "예: 1~5 통렌더, 6~8 주요문항 원본/손풀이 슬롯, 9~10 통렌더. 문제 이미지는 선생님이 검수 후 삽입."
   },
   {
     key: "schoolVariationNotes",
@@ -1520,8 +1520,8 @@ const examAnalysisBlogInstructorSectionFields = [
     key: "blogSectionStructureCard",
     number: 4,
     label: "구조 카드",
-    guide: "시험 구조 카드에 들어갈 숫자와 차트 메모입니다. 문항 수, 단원별 비중, 이미지 슬롯을 적어주세요.",
-    placeholder: "예: 단원별 비중 PNG 삽입. 연립방정식 풀이 10문항, 일차함수와 그래프 7문항."
+    guide: "통렌더 시험 구조 카드에 들어갈 숫자와 차트 메모입니다. 문항 수, 단원별 비중, 강조할 구조를 적어주세요.",
+    placeholder: "예: 연립방정식 풀이 10문항, 일차함수와 그래프 7문항. 카드 전체는 통렌더."
   },
   {
     key: "blogSectionStructureText2",
@@ -1827,16 +1827,16 @@ const examAnalysisChartPngExportScale = 3;
 const examAnalysisChartFooterLabel = "으뜸수학학원 고태영T 시험분석";
 const examAnalysisChartDifficultyOrder = ["하", "중하", "중", "중상", "상", "미정"];
 const examAnalysisCanvaCardPlan = [
-  { card: 1, role: "표지", suggestedSource: "texts/instagram-card-draft.txt", slot: "학교/학년/고사/과목 + 한줄 훅" },
-  { card: 2, role: "이번 시험 한줄 총평", suggestedSource: "texts/instagram-card-draft.txt", slot: "시험 체감/난이도 핵심 문장" },
-  { card: 3, role: "시험 구조", suggestedSource: "texts/instagram-card-draft.txt", slot: "문항 수/범위/출제 흐름" },
-  { card: 4, role: "단원별 출제 비중", suggestedSource: "charts/01-part-distribution.png", slot: "390x430 PNG 슬롯" },
-  { card: 5, role: "난이도/문항 흐름", suggestedSource: "charts/02-difficulty-distribution.png + charts/03-question-flow.png", slot: "390x430 PNG 슬롯" },
-  { card: 6, role: "주요문항 1", suggestedSource: "teacher-crop-01.png", slot: "문항 crop + 변별 이유" },
-  { card: 7, role: "주요문항 2", suggestedSource: "teacher-crop-02.png", slot: "문항 crop + 자주 틀리는 지점" },
-  { card: 8, role: "주요문항 3/학교별 변별 포인트", suggestedSource: "teacher-crop-03.png", slot: "문항 crop 또는 차트" },
-  { card: 9, role: "다음 시험 대비", suggestedSource: "texts/instagram-card-draft.txt", slot: "학습 전략/훈련 루틴" },
-  { card: 10, role: "블로그 유입/상담 CTA", suggestedSource: "texts/blog-draft.txt", slot: "더 자세한 해설은 블로그에서 확인" }
+  { card: 1, role: "표지", renderMode: "통렌더", suggestedSource: "full-render/card-01-cover.png", slot: "학교/학년/고사/과목 + 한줄 훅" },
+  { card: 2, role: "이번 시험 한줄 총평", renderMode: "통렌더", suggestedSource: "full-render/card-02-one-line.png", slot: "시험 체감/난이도 핵심 문장" },
+  { card: 3, role: "시험 구조", renderMode: "통렌더", suggestedSource: "full-render/card-03-structure.png", slot: "문항 수/범위/출제 흐름" },
+  { card: 4, role: "단원별 출제 비중", renderMode: "통렌더", suggestedSource: "full-render/card-04-part-distribution.png + charts/01-part-distribution.png", slot: "차트/수치가 카드 안에 합성된 완성형 카드" },
+  { card: 5, role: "난이도/문항 흐름", renderMode: "통렌더", suggestedSource: "full-render/card-05-difficulty-flow.png + charts/02-difficulty-distribution.png", slot: "난이도/흐름이 카드 안에 합성된 완성형 카드" },
+  { card: 6, role: "주요문항 1", renderMode: "문제/손풀이 슬롯", suggestedSource: "teacher-crop-01.png + full-render/card-06-question-01.png", slot: "시험문제 원본 또는 손풀이 이미지 슬롯 + 변별 이유" },
+  { card: 7, role: "주요문항 2", renderMode: "문제/손풀이 슬롯", suggestedSource: "teacher-crop-02.png + full-render/card-07-question-02.png", slot: "시험문제 원본 또는 손풀이 이미지 슬롯 + 자주 틀리는 지점" },
+  { card: 8, role: "주요문항 3/학교별 변별 포인트", renderMode: "문제/손풀이 슬롯", suggestedSource: "teacher-crop-03.png + full-render/card-08-question-03.png", slot: "시험문제 원본/손풀이 슬롯 또는 학교별 변별 카드" },
+  { card: 9, role: "다음 시험 대비", renderMode: "통렌더", suggestedSource: "full-render/card-09-next-study.png", slot: "학습 전략/훈련 루틴" },
+  { card: 10, role: "블로그 유입/상담 CTA", renderMode: "통렌더", suggestedSource: "full-render/card-10-cta.png", slot: "더 자세한 해설은 블로그에서 확인" }
 ];
 
 function getExamAnalysisChartPartLabel(question = {}) {
@@ -2254,14 +2254,14 @@ function createExamAnalysisPackageReadme({ activeRun = {}, chartFiles = [] } = {
     "사용 방법",
     "1. texts/blog-draft.txt 내용을 네이버 블로그 에디터에 붙여넣고 문장을 최종 수정합니다.",
     "2. texts/instagram-card-draft.txt 내용을 Canva 10장 카드뉴스 문구로 사용합니다.",
-    `3. charts 폴더의 PNG 이미지는 ${examAnalysisChartPngExportScale}배 해상도 고화질 이미지입니다. 네이버 블로그 본문, 미리캔버스, Canva 이미지 슬롯에 업로드합니다.`,
-    "4. texts/canva-10-card-plan.txt 기준으로 1~10번 카드의 고정 역할과 이미지 슬롯을 확인합니다.",
+    `3. charts 폴더의 PNG 이미지는 ${examAnalysisChartPngExportScale}배 해상도 고화질 이미지입니다. 통렌더 카드의 재료 또는 네이버 블로그 보조 이미지로 사용합니다.`,
+    "4. texts/canva-10-card-plan.txt 기준으로 1~10번 카드의 통렌더/문제 슬롯 역할을 확인합니다.",
     "5. texts/blog-instructor-section-guide.txt 기준으로 블로그 18개 강사 섹션의 위치별 메모를 확인합니다.",
     "6. charts-svg 폴더의 SVG 원본은 PPT/Canva에서 더 선명한 원본이 필요할 때 사용합니다.",
     "7. 외부 에디터에서 수정한 최종본은 현재 앱으로 자동 동기화되지 않습니다.",
     "",
     "Canva 10장 카드 구조",
-    examAnalysisCanvaCardPlan.map((item) => `${item.card}. ${item.role} - ${item.slot}`).join("\n"),
+    examAnalysisCanvaCardPlan.map((item) => `${item.card}. ${item.role} [${item.renderMode}] - ${item.slot}`).join("\n"),
     "",
     "포함 차트",
     chartFiles.length ? chartFiles.map((file) => `- ${file.name}`).join("\n") : "- 차트 없음",
@@ -2310,12 +2310,14 @@ function createExamAnalysisCanvaCardPlanText() {
     "",
     ...examAnalysisCanvaCardPlan.map((item) => [
       `[카드 ${item.card}] ${item.role}`,
+      `제작 방식: ${item.renderMode}`,
       `이미지/텍스트 슬롯: ${item.slot}`,
       `추천 원천: ${item.suggestedSource}`
     ].join("\n")),
     "",
     "운영 원칙",
     "- 카드 구조는 학교별로 바꾸지 않고, 텍스트/이미지/주요문항만 바꿉니다.",
+    "- 수정이 거의 필요 없는 카드는 카드 전체를 통렌더하고, 시험문제/손풀이 원본이 필요한 카드만 이미지 슬롯을 둡니다.",
     "- 인스타에는 10장 카드뉴스를 올리고, 마지막 카드에서 블로그 상세 해설로 유입합니다.",
     "- 블로그에는 같은 카드뉴스 이미지와 더 긴 문항별 해설/다음 대비 전략을 붙입니다."
   ].join("\n\n");
@@ -2473,7 +2475,7 @@ function ExamAnalysisOutputDraftPanel({
 
       <div className="examAnalysisOutputGuide">
         <strong>작성 방향</strong>
-        <span>산출물은 단원 분류를 보여주는 자료가 아니라, 학생과 학부모가 실제로 궁금해하는 내용을 해석해주는 자료입니다. 10장 Canva 카드뉴스는 핵심 요약으로, 블로그는 같은 카드뉴스에 상세 해설을 붙이는 구조로 작성합니다.</span>
+        <span>산출물은 단원 분류를 보여주는 자료가 아니라, 학생과 학부모가 실제로 궁금해하는 내용을 해석해주는 자료입니다. 10장 Canva 카드뉴스는 통렌더 카드와 시험문제/손풀이 슬롯 카드를 구분하고, 블로그는 같은 카드뉴스에 상세 해설을 붙이는 구조로 작성합니다.</span>
         <small>초안 점검 기준</small>
         <ol>
           {examAnalysisOutputEditorialChecklist.map((item) => (
@@ -2485,7 +2487,7 @@ function ExamAnalysisOutputDraftPanel({
           <li>😊 인사말 끝 · 📌 주요문항 시작 · ✅ 핵심 포인트/자주 틀리는 지점</li>
           <li>⬇️⬇️ CTA · 📍 위치 · ☎ 전화번호 자리표시자를 사용합니다.</li>
           <li>[형광펜: 하늘색]핵심 결론[/형광펜], [형광펜: 노랑]주의 지점[/형광펜]처럼 표시합니다.</li>
-          <li>Canva는 10장 고정 구조로 만들고, 인스타는 카드뉴스만, 블로그는 상세 해설을 추가합니다.</li>
+          <li>Canva는 10장 고정 구조로 만들되, 수정이 필요 없는 카드는 통렌더하고 시험문제/손풀이 원본이 필요한 카드만 슬롯을 둡니다.</li>
         </ol>
         <small>AI 편집 경계</small>
         <ol>
@@ -2583,7 +2585,7 @@ function ExamAnalysisOutputDraftPanel({
           </div>
           <textarea
             onChange={(event) => onUpdateTeacherDraft("instagram", event.target.value)}
-            placeholder="인스타 카드 초안 생성 후 카드별 문구와 이미지 슬롯을 수정합니다."
+            placeholder="인스타 카드 초안 생성 후 카드별 문구, 통렌더 여부, 문제/손풀이 슬롯을 수정합니다."
             rows={18}
             value={instagramText}
           />
