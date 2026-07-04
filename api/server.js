@@ -80,6 +80,13 @@ loadEnvFile();
 const ssenTypeIndex = JSON.parse(
   fs.readFileSync(new URL("./data/ssenTypeIndex.json", import.meta.url), "utf8")
 );
+const ssenSubjectNames = [...new Set(ssenTypeIndex
+  .map((row) => String(row.subject || "").trim())
+  .filter(Boolean))];
+const ssenSubjectNameSet = new Set(ssenSubjectNames);
+const ssenSubjectByTypeCode = new Map(ssenTypeIndex
+  .filter((row) => row.typeCode && row.subject)
+  .map((row) => [String(row.typeCode).trim(), String(row.subject).trim()]));
 
 const port = Number(process.env.PORT ?? process.env.ACADEMY_API_PORT ?? 8787);
 const host = process.env.ACADEMY_API_HOST ?? (process.env.RENDER ? "0.0.0.0" : "127.0.0.1");
@@ -879,29 +886,80 @@ function inferExamAnalysisSubjectFromText(value = "") {
     [/공통수학2|공수2|공통수학Ⅱ|공통수학II/i, "공통수학2"],
     [/미적분2|미적분Ⅱ|미적분II/i, "미적분2"],
     [/미적분1|미적분Ⅰ|미적분I/i, "미적분1"],
-    [/확률과통계|확통/i, "확률과통계"],
+    [/확률과통계|확통/i, "확률과 통계"],
+    [/기하/i, "기하"],
     [/대수/i, "대수"]
   ];
-  return candidates.find(([pattern]) => pattern.test(text))?.[1] ?? "";
+  const inferredSubject = candidates.find(([pattern]) => pattern.test(text))?.[1] ?? "";
+  return inferredSubject && ssenSubjectNameSet.has(inferredSubject) ? inferredSubject : "";
 }
 
 function sanitizeExamAnalysisSubject(value = "") {
-  const text = String(value || "").trim();
-  if (!text || text === "기하") return "";
-  return text;
+  const text = String(value || "").trim().replace(/\s+/g, " ");
+  if (!text) return "";
+  const compactText = text.replace(/\s+/g, "");
+  if (["수학", "수학영역", "수학과"].includes(compactText)) return "";
+  const inferredSubject = inferExamAnalysisSubjectFromText(text);
+  if (inferredSubject && ssenSubjectNameSet.has(inferredSubject)) return inferredSubject;
+  return ssenSubjectNames.find((subject) => subject.replace(/\s+/g, "") === compactText) || "";
 }
 
-function getExamAnalysisSsenSubject({ sourceFile = {}, analysisRun = {} } = {}) {
-  return inferExamAnalysisSubjectFromText([
+function collectExamAnalysisQuestionTypeCodes(questions = []) {
+  const codes = [];
+  const addCode = (value) => {
+    const code = String(value || "").trim();
+    if (code) codes.push(code);
+  };
+  const addCodes = (values) => {
+    if (Array.isArray(values)) values.forEach(addCode);
+  };
+  (Array.isArray(questions) ? questions : []).forEach((question) => {
+    addCode(question.mainTypeCode ?? question.main_type_code);
+    addCodes(question.subTypeCodes ?? question.sub_type_codes);
+    [question.finalFields, question.teacherFields, question.aiFields, question.final_fields, question.teacher_fields, question.ai_fields]
+      .filter((fields) => fields && typeof fields === "object")
+      .forEach((fields) => {
+        addCode(fields.mainTypeCode ?? fields.main_type_code);
+        addCodes(fields.subTypeCodes ?? fields.sub_type_codes);
+        addCode(fields.ssenMeta?.mainType?.typeCode ?? fields.ssen_meta?.main_type?.type_code);
+        addCodes(Array.isArray(fields.ssenMeta?.subTypes)
+          ? fields.ssenMeta.subTypes.map((item) => item?.typeCode)
+          : []);
+        addCodes(Array.isArray(fields.ssen_meta?.sub_types)
+          ? fields.ssen_meta.sub_types.map((item) => item?.type_code)
+          : []);
+      });
+  });
+  return [...new Set(codes)];
+}
+
+function inferExamAnalysisSubjectFromTypeCodes(typeCodes = []) {
+  const subjectCounts = new Map();
+  (Array.isArray(typeCodes) ? typeCodes : []).forEach((typeCode) => {
+    const subject = ssenSubjectByTypeCode.get(String(typeCode || "").trim());
+    if (subject) subjectCounts.set(subject, (subjectCounts.get(subject) ?? 0) + 1);
+  });
+  return [...subjectCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
+}
+
+function getExamAnalysisSsenSubject({ sourceFile = {}, analysisRun = {}, sourceFiles = [], questions = [] } = {}) {
+  const inferredSubject = inferExamAnalysisSubjectFromText([
     analysisRun.subject,
     analysisRun.extractionSummary?.visionCheck?.subject,
+    analysisRun.extractionSummary?.visionCheck?.firstPageEvidence,
+    analysisRun.extractionSummary?.visionCheck?.lastPageEvidence,
     sourceFile.originalFileName,
+    ...(Array.isArray(sourceFiles) ? sourceFiles.map((source) => source.originalFileName) : []),
     analysisRun.title
   ].filter(Boolean).join("\n"));
+  if (inferredSubject) return inferredSubject;
+  const typeCodeSubject = inferExamAnalysisSubjectFromTypeCodes(collectExamAnalysisQuestionTypeCodes(questions));
+  if (typeCodeSubject) return typeCodeSubject;
+  return sanitizeExamAnalysisSubject(analysisRun.subject);
 }
 
-function getSsenTypesForExamAnalysis({ sourceFile = {}, analysisRun = {} } = {}) {
-  const subject = getExamAnalysisSsenSubject({ sourceFile, analysisRun });
+function getSsenTypesForExamAnalysis({ sourceFile = {}, analysisRun = {}, questions = [] } = {}) {
+  const subject = getExamAnalysisSsenSubject({ sourceFile, analysisRun, questions });
   const types = subject
     ? ssenTypeIndex.filter((item) => item.subject === subject)
     : [];
@@ -1045,15 +1103,28 @@ function normalizeSsenTypeIndexRow(row = {}, scopeText = "") {
   };
 }
 
-function getSsenTypeCatalogForExamAnalysis({ subject = "", scope = "", analysisRun = null } = {}) {
+function getSsenTypeCatalogForExamAnalysis({
+  subject = "",
+  scope = "",
+  analysisRun = null,
+  sourceFiles = [],
+  questions = []
+} = {}) {
   const inferredSubject = inferExamAnalysisSubjectFromText([
     subject,
     scope,
     analysisRun?.subject,
     analysisRun?.extractionSummary?.visionCheck?.subject,
-    analysisRun?.title
+    analysisRun?.extractionSummary?.visionCheck?.firstPageEvidence,
+    analysisRun?.extractionSummary?.visionCheck?.lastPageEvidence,
+    analysisRun?.title,
+    ...(Array.isArray(sourceFiles) ? sourceFiles.map((source) => source.originalFileName) : [])
   ].filter(Boolean).join("\n"));
-  const normalizedSubject = inferredSubject || sanitizeExamAnalysisSubject(subject || analysisRun?.subject || "");
+  const typeCodeSubject = inferExamAnalysisSubjectFromTypeCodes(collectExamAnalysisQuestionTypeCodes(questions));
+  const normalizedSubject = inferredSubject
+    || typeCodeSubject
+    || sanitizeExamAnalysisSubject(subject)
+    || sanitizeExamAnalysisSubject(analysisRun?.subject);
   const subjectTypes = normalizedSubject
     ? ssenTypeIndex.filter((item) => item.subject === normalizedSubject)
     : [];
@@ -1414,7 +1485,7 @@ function buildPdfQuestionRowFillPrompt({
       return `${question.questionNumber}: ${pageStart}${pageEnd}p, ${position}`;
     })
     .join("\n");
-  const ssenTypes = getSsenTypesForExamAnalysis({ sourceFile, analysisRun });
+  const ssenTypes = getSsenTypesForExamAnalysis({ sourceFile, analysisRun, questions: targetQuestions });
   const ssenCandidateText = formatSsenTypeCandidatesForPrompt(ssenTypes.types);
   return [
     mode === "refine"
@@ -2035,8 +2106,18 @@ async function verifyExamAnalysisSourceFileWithAi(sourceId) {
     const visionCheck = await runPdfVisionCheck(sourceFile, buffer);
     const detail = await getExamAnalysisRun(sourceFile.analysisRunId);
     const previousSummary = detail.analysisRun?.extractionSummary ?? {};
+    const verifiedSubject = getExamAnalysisSsenSubject({
+      sourceFile,
+      analysisRun: {
+        ...(detail.analysisRun ?? {}),
+        extractionSummary: {
+          ...previousSummary,
+          visionCheck
+        }
+      }
+    });
     const runResult = await updateExamAnalysisRun(sourceFile.analysisRunId, {
-      subject: visionCheck.subject || detail.analysisRun?.subject || "",
+      subject: verifiedSubject || detail.analysisRun?.subject || "",
       extractionSummary: {
         ...previousSummary,
         visionCheck: {
@@ -2586,7 +2667,9 @@ const server = http.createServer(async (request, response) => {
       const result = getSsenTypeCatalogForExamAnalysis({
         subject: requestUrl.searchParams.get("subject") || "",
         scope: requestUrl.searchParams.get("scope") || "",
-        analysisRun: detail?.analysisRun ?? null
+        analysisRun: detail?.analysisRun ?? null,
+        sourceFiles: detail?.sources ?? [],
+        questions: detail?.questions ?? []
       });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {

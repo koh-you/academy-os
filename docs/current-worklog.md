@@ -14,6 +14,18 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-04 P0. 시험분석 쎈 기준표 과목 원천 복구
+
+- 상태: 완료
+- 사용자 요청: `AI 행 채움 23/23`까지 완료됐는데 `AI 결과 검수` 표가 `0/23`처럼 보이고 단원/주유형 select가 비는 문제를, 필터나 화면 덮어쓰기 없이 데이터 로직부터 정확히 확인하고 수정한다.
+- 원인 확인: 운영 테스트 run `exam_analysis_run_1783146567088_90a47a9336a6`의 문항 row와 `ai_fields.mainTypeCode`는 정상 저장되어 있었다. 문제는 run/AI 검증 과목 원천이 `수학`으로 남아 있고, `GET /api/exam-analysis-ssen-types`가 run의 PDF 원본 파일명과 문항 typeCode를 보지 못해 쎈 기준표 과목 후보를 `수학 -> 0개`로 계산한 것이었다.
+- 이번 작업 결과: 서버 과목 판정을 보강했다. `수학` 같은 일반 과목명은 쎈 기준표 과목으로 확정하지 않고, PDF 파일명, AI 검증 근거, 저장된 문항의 `SSEN-...` typeCode에서 `공통수학1` 같은 실제 쎈 과목을 복구한다. 기준표 API는 이제 `analysisRun`뿐 아니라 `sources`와 `questions`도 함께 본다.
+- AI 원본 검증 보강: Claude가 과목을 `수학`처럼 넓게 반환해도 그 값으로 기준표 과목을 확정하지 않는다. 파일명/검증 근거에서 구체 과목이 확인되면 run subject를 구체 과목으로 저장한다.
+- AI 행 채움 보강: 행 채움 프롬프트의 쎈 후보 목록도 같은 과목 판정 경로를 사용한다. 이미 저장된 선생님 검수본이나 `teacher_fields`/`final_fields`는 건드리지 않는다.
+- 현재 테스트 run 확인: 운영 run 데이터를 수정 로직에 넣었을 때 저장 subject는 `수학`이어도 PDF명 `[상계고] 2026 1-1 기말 공통수학1.pdf`와 `SSEN-CM1-...` 코드에서 `공통수학1`을 복구했고, 기준표 후보는 179개로 계산됐다. 데이터 삭제/마이그레이션 없이 Render 배포 후 새로고침으로 복구되는 유형이다.
+- 저장 원천: DB 스키마 변경 없음. 기존 `exam_analysis_runs`, `exam_analysis_sources`, `exam_analysis_questions.ai_fields/teacher_fields/final_fields`만 읽는다. 새 SQL edit은 필요 없다.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 통과(total 235, failed 0). `npm run build` 통과. Vite 기존 chunk size warning만 발생했다.
+
 ### 2026-07-04 P0. 시험분석 PDF 원본 중복 삭제 gate
 
 - 상태: 완료
