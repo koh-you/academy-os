@@ -1587,7 +1587,38 @@ function normalizeExamAnalysisOutputVisibility(value = "") {
     : "blog_instagram";
 }
 
+const examAnalysisBlogInstructorSectionFields = [
+  ["blogSectionOpening", 1, "초기 글"],
+  ["blogSectionIntroCard", 2, "정리된 카드"],
+  ["blogSectionStructureText1", 3, "구조 글"],
+  ["blogSectionStructureCard", 4, "구조 카드"],
+  ["blogSectionStructureText2", 5, "구조 글 2"],
+  ["blogSectionOverallCard", 6, "총평 카드"],
+  ["blogSectionOverallText1", 7, "총평 글"],
+  ["blogSectionOverallText2", 8, "총평 글 2"],
+  ["blogSectionQuestion1Look", 9, "주요문항 1 살펴보기"],
+  ["blogSectionQuestion1Explain", 10, "주요문항 1 설명"],
+  ["blogSectionQuestion1SolutionCard", 11, "주요문항 1 손풀이 카드"],
+  ["blogSectionQuestion1SolutionText", 12, "주요문항 1 손풀이 설명글"],
+  ["blogSectionQuestion23Pattern", 13, "주요문항 2, 3 반복"],
+  ["blogSectionNextExam", 14, "다음 시험 준비"],
+  ["blogSectionClosing1", 15, "마무리글 1"],
+  ["blogSectionClosing2", 16, "마무리글 2"],
+  ["blogSectionClosing3", 17, "마무리글 3"],
+  ["blogSectionCta", 18, "CTA"]
+];
+
+const examAnalysisOutputAiBoundaryRules = [
+  "AI 가능: 이모티콘 위치, 문단 줄나눔, 형광펜 태그, 문체 다듬기, 카드 문구 압축",
+  "AI 가능: 선생님 메모를 학부모가 읽기 쉬운 블로그 문장과 인스타 카드 문장으로 재구성",
+  "AI 불가: 문항 수, 시험 범위, 문항번호, 유사문항, 정답/풀이 사실을 추측해서 새로 만들기",
+  "AI 불가: 선생님 저장본을 자동으로 덮어쓰기, Canva 실제 레이아웃을 확인 없이 완료 처리하기"
+];
+
 function normalizeExamAnalysisOutputInputs(inputs = {}) {
+  const sectionInputs = Object.fromEntries(
+    examAnalysisBlogInstructorSectionFields.map(([key]) => [key, cleanExamAnalysisOutputText(inputs[key], 1400)])
+  );
   return {
     visibility: normalizeExamAnalysisOutputVisibility(inputs.visibility),
     oneLineReview: cleanExamAnalysisOutputText(inputs.oneLineReview, 500),
@@ -1595,7 +1626,8 @@ function normalizeExamAnalysisOutputInputs(inputs = {}) {
     scoreGapPoint: cleanExamAnalysisOutputText(inputs.scoreGapPoint, 1200),
     nextStudyPlan: cleanExamAnalysisOutputText(inputs.nextStudyPlan, 1200),
     imageSlotNotes: cleanExamAnalysisOutputText(inputs.imageSlotNotes, 1600),
-    schoolVariationNotes: cleanExamAnalysisOutputText(inputs.schoolVariationNotes, 1600)
+    schoolVariationNotes: cleanExamAnalysisOutputText(inputs.schoolVariationNotes, 1600),
+    ...sectionInputs
   };
 }
 
@@ -1744,6 +1776,10 @@ function buildExamAnalysisOutputPrompt({ outputType, detail, inputs }) {
     "- 하늘색 형광펜은 핵심 결론/전문성, 노랑 형광펜은 실수 포인트/주의 지점에만 쓴다.",
     "- 정답과 상세 풀이를 길게 공개하지 말고, 출제 의도/실수 가능성/대비 전략 중심으로 쓴다."
   ].join("\n");
+  const aiBoundaryRules = [
+    "[AI 편집 가능/불가 경계]",
+    ...examAnalysisOutputAiBoundaryRules.map((rule) => `- ${rule}`)
+  ].join("\n");
   const canvaCardRules = [
     "[10장 Canva 카드뉴스 고정 구조]",
     "카드 1: 표지 - 학교/학년/고사/과목과 한줄 훅",
@@ -1757,6 +1793,12 @@ function buildExamAnalysisOutputPrompt({ outputType, detail, inputs }) {
     "카드 9: 다음 시험 대비 - 학생이 해야 할 훈련",
     "카드 10: 블로그 유입/상담 CTA - 더 자세한 해설은 블로그에서 확인"
   ].join("\n");
+  const instructorSectionSummary = [
+    "[블로그 18개 강사 섹션 메모 - 위치별 최우선 원천]",
+    ...examAnalysisBlogInstructorSectionFields.map(([key, number, label]) => (
+      `${number}. ${label}: ${inputs[key] || "(미입력)"}`
+    ))
+  ].join("\n");
   const inputSummary = [
     `[선생님 작성 원문 - 최우선 원천]`,
     `공개 범위: ${inputs.visibility}`,
@@ -1765,7 +1807,9 @@ function buildExamAnalysisOutputPrompt({ outputType, detail, inputs }) {
     `점수 갈림 포인트: ${inputs.scoreGapPoint || "(미입력)"}`,
     `다음 시험 대비: ${inputs.nextStudyPlan || "(미입력)"}`,
     `10장 이미지/슬롯 메모: ${inputs.imageSlotNotes || "(미입력)"}`,
-    `학교별 변주/홍보 메모: ${inputs.schoolVariationNotes || "(미입력)"}`
+    `학교별 변주/홍보 메모: ${inputs.schoolVariationNotes || "(미입력)"}`,
+    "",
+    instructorSectionSummary
   ].join("\n");
   const sharedRules = [
     "역할: 수학학원 시험분석 공개 산출물 편집자",
@@ -1778,6 +1822,7 @@ function buildExamAnalysisOutputPrompt({ outputType, detail, inputs }) {
     "톤: 전문적이되 과장하지 말고, 학부모가 읽어도 바로 이해되게 쓴다.",
     "브랜드 톤: 으뜸수학 고태영T 기준으로 블루/화이트 계열의 차분하고 전문적인 인상을 전제로 쓴다.",
     benchmarkFormatRules,
+    aiBoundaryRules,
     canvaCardRules,
     "",
     inputSummary,
@@ -1807,17 +1852,25 @@ function buildExamAnalysisOutputPrompt({ outputType, detail, inputs }) {
     "[출력 형식]",
     "네이버 블로그 초안을 작성한다. 벤치마킹 블로그처럼 사람이 쓴 시험분석 글처럼 보이게 짧은 문단으로 쓴다.",
     "제목 후보 3개를 먼저 쓴다. 제목에는 학교명, 학년, 고사, 수학/과목, 시험분석 키워드를 자연스럽게 포함한다.",
-    "본문 구조는 아래 순서로 고정한다.",
-    "1. 인사말: 으뜸수학 고태영T 소개와 😊",
-    "2. 첫 결론: [형광펜: 하늘색]한줄 총평[/형광펜]",
-    "3. 시험 구조: 문항 수, 범위, 단원별 비중, 난이도 흐름",
-    "4. 점수가 갈린 지점: 조건 해석/계산 실수/시간 관리/서술형 감점 중 해당 요소",
-    "5. Canva 카드뉴스 삽입 안내: [이미지 1]~[이미지 10] 위치를 본문 중간중간 표시",
-    "6. 📌 주요문항 2~4개: 각 문항마다 출제 의도, ✅ 자주 틀리는 지점, 다음 대비를 쓴다.",
-    "7. 다음 시험 대비: 학생이 해야 할 구체적 훈련",
-    "8. 학원 관리 방식: 학교별 시험을 분석해 수업/보충에 반영한다는 신뢰감",
-    "9. ⬇️⬇️ CTA: 상담/문의 안내",
-    "10. 📍 위치와 ☎ 전화번호 자리: 실제 연락처는 선생님이 나중에 수정할 수 있게 자리표시자로 둔다.",
+    "본문 구조는 아래 18개 섹션 순서로 고정한다. 섹션 제목은 그대로 노출해도 되지만, 자연스럽지 않으면 블로그 문체에 맞게 소제목을 다듬어도 된다.",
+    "1. 초기 글: 인사말과 이번 분석 목적. 인사말 끝에는 😊를 둔다.",
+    "2. 정리된 카드: [이미지 1] 표지/대표 카드 삽입 위치와 한줄 훅.",
+    "3. 구조 글: 객관식/서술형/만점/시험 범위 설명.",
+    "4. 구조 카드: [이미지 2] 시험 구조 카드 삽입 위치와 카드 요약.",
+    "5. 구조 글 2: 문항 수와 실제 변별 포인트의 차이를 설명.",
+    "6. 총평 카드: [이미지 3] 총평 카드 삽입 위치와 3~4개 키워드.",
+    "7. 총평 글: 이번 시험이 쉬웠는지 어려웠는지 판단.",
+    "8. 총평 글 2: 어디서 점수가 갈렸는지, 왜 체감 난도가 달랐는지 설명.",
+    "9. 주요문항 1 살펴보기: 📌로 시작하고 문항번호/단원/대표 이유를 쓴다.",
+    "10. 주요문항 1 설명: ✅ 자주 틀리는 지점과 풀이 방향.",
+    "11. 주요문항 1 손풀이 카드: [이미지 4] 문항/손풀이 카드 삽입 위치.",
+    "12. 주요문항 1 손풀이 설명글: 암기보다 사고 순서와 훈련 방향.",
+    "13. 같은 방법으로 주요문항 2, 3: [이미지 5]~[이미지 8] 위치를 쓰고 문항별로 📌/✅ 패턴 반복.",
+    "14. 이후 다음 시험을 준비하며: [이미지 9] 다음 대비 카드와 학생 행동 전략.",
+    "15. 마무리글 1: 학원이 시험지를 어떻게 문항별로 분석하는지.",
+    "16. 마무리글 2: 이번 시험 최종 결론과 상위권 대비 방향.",
+    "17. 마무리글 3: 다음 시험은 지금부터 준비해야 한다는 메시지.",
+    "18. CTA: [이미지 10] 블로그/상담/특강 유입, ⬇️⬇️, 📍, ☎ 자리표시자.",
     "네이버 에디터에서 사람이 형광펜을 적용할 수 있도록 [형광펜: 색] 표시를 유지한다."
   ].join("\n");
 }
@@ -1947,9 +2000,17 @@ async function generateExamAnalysisOutputDraft({ analysisRunId, outputType, outp
   const previousAuditSummary = detail.analysisRun.auditSummary ?? {};
   const previousDrafts = getExamAnalysisOutputDrafts(previousAuditSummary);
   const inputs = normalizeExamAnalysisOutputInputs({ ...previousDrafts.inputs, ...outputInputs });
-  const hasTeacherInput = [inputs.oneLineReview, inputs.flowReview, inputs.scoreGapPoint, inputs.nextStudyPlan].some(Boolean);
+  const hasTeacherInput = [
+    inputs.oneLineReview,
+    inputs.flowReview,
+    inputs.scoreGapPoint,
+    inputs.nextStudyPlan,
+    inputs.imageSlotNotes,
+    inputs.schoolVariationNotes,
+    ...examAnalysisBlogInstructorSectionFields.map(([key]) => inputs[key])
+  ].some(Boolean);
   if (!hasTeacherInput) {
-    throw new Error("먼저 한줄 총평, 시험 흐름, 점수 갈림 포인트, 다음 시험 대비 중 하나 이상을 작성해 주세요.");
+    throw new Error("먼저 기본 메모 또는 블로그 강사 섹션 중 하나 이상을 작성해 주세요.");
   }
   const prompt = buildExamAnalysisOutputPrompt({ outputType, detail, inputs });
   const generated = await runExamAnalysisOutputDraftAi({ outputType, prompt });
