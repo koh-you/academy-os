@@ -8592,7 +8592,8 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                         : parseExamAnalysisReviewSubTypes(draftValue.subTypesText);
                       const reviewClassName = [
                         needsReview ? "needsReview" : "",
-                        draftValue.confirmed ? "confirmed" : ""
+                        draftValue.confirmed ? "confirmed" : "",
+                        isSsenEditing ? "editingSsen" : ""
                       ].filter(Boolean).join(" ");
                       return (
                         <tr className={reviewClassName} key={question.questionRowId || question.questionNumber}>
@@ -8627,28 +8628,39 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                                 ))}
                               </select>
                             ) : (
-                              <div className="examAnalysisReviewReadonlyCell">
-                                <strong>{unitLabel}</strong>
-                                {partLabel ? <small>{partLabel}</small> : null}
+                              <div className="examAnalysisSubTypeChips readonly compact">
+                                <span>{unitLabel}</span>
+                                {partLabel && partLabel !== unitLabel ? <span className="mutedChip">{partLabel}</span> : null}
                               </div>
                             )}
                           </td>
                           <td>
                             {isSsenEditing ? (
-                              <select
-                                value={draftValue.mainTypeCode}
-                                onChange={(event) => selectReviewMainType(question.questionNumber, event.target.value)}
-                              >
-                                <option value="">주유형 선택</option>
-                                {ssenTypeOptions.map((type) => (
-                                  <option key={type.typeCode} value={type.typeCode}>
-                                    {`${type.typeNo}. ${type.typeName}`}
-                                  </option>
-                                ))}
-                              </select>
+                              <div className="examAnalysisReviewEditCell withAction">
+                                <select
+                                  value={draftValue.mainTypeCode}
+                                  onChange={(event) => selectReviewMainType(question.questionNumber, event.target.value)}
+                                >
+                                  <option value="">주유형 선택</option>
+                                  {ssenTypeOptions.map((type) => (
+                                    <option key={type.typeCode} value={type.typeCode}>
+                                      {`${type.typeNo}. ${type.typeName}`}
+                                    </option>
+                                  ))}
+                                </select>
+                                <button
+                                  className="softTinyButton square"
+                                  onClick={() => setEditingSsenQuestionNumber("")}
+                                  type="button"
+                                >
+                                  닫기
+                                </button>
+                              </div>
                             ) : (
-                              <div className="examAnalysisReviewReadonlyCell withAction">
-                                <strong>{mainTypeLabel}</strong>
+                              <div className="examAnalysisReviewTypeCell">
+                                <div className="examAnalysisSubTypeChips readonly compact">
+                                  <span>{mainTypeLabel}</span>
+                                </div>
                                 <button
                                   className="softTinyButton"
                                   onClick={() => setEditingSsenQuestionNumber(String(question.questionNumber))}
@@ -8691,13 +8703,6 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                                     </button>
                                   )) : <span>없음</span>}
                                 </div>
-                                <button
-                                  className="softTinyButton"
-                                  onClick={() => setEditingSsenQuestionNumber("")}
-                                  type="button"
-                                >
-                                  닫기
-                                </button>
                               </div>
                             ) : (
                               <div className="examAnalysisSubTypeChips readonly">

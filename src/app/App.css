@@ -1339,6 +1339,11 @@ button {
   background: #fff7ed;
 }
 
+.examAnalysisReviewTable tr.editingSsen td {
+  background: #f8fbff;
+  vertical-align: top;
+}
+
 .examAnalysisReviewTable tr.needsReview td:first-child,
 .examAnalysisReviewTable tr.confirmed.needsReview td:first-child {
   border-left: 4px solid #fb923c;
@@ -1474,6 +1479,11 @@ button {
   background: #eff6ff;
 }
 
+.softTinyButton.square {
+  border-radius: 6px;
+  min-height: 34px;
+}
+
 .examAnalysisReviewTable .questionNo {
   color: #17213d;
   font-weight: 950;
@@ -1492,11 +1502,21 @@ button {
   gap: 6px;
 }
 
+.examAnalysisReviewTypeCell,
+.examAnalysisReviewEditCell.withAction {
+  align-items: center;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-width: 0;
+}
+
 .examAnalysisSubTypeChips {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
   min-height: 22px;
+  min-width: 0;
 }
 
 .examAnalysisSubTypeChips button,
@@ -1522,6 +1542,21 @@ button {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.examAnalysisSubTypeChips.readonly.compact {
+  flex-wrap: nowrap;
+  max-width: 100%;
+}
+
+.examAnalysisSubTypeChips.readonly.compact span {
+  min-width: 0;
+}
+
+.examAnalysisSubTypeChips .mutedChip {
+  background: #f8fafc;
+  border-color: #d8e3f8;
+  color: #64748b;
 }
 
 .examAnalysisReviewTable .ssenMetaCell {
