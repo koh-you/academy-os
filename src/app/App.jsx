@@ -1173,7 +1173,7 @@ function isExamAnalysisQuestionAiReviewTarget(question = {}) {
 }
 
 function isExamAnalysisQuestionRefineTarget(question = {}, draftValue = {}) {
-  return !draftValue.confirmed || isExamAnalysisQuestionAiReviewTarget(question);
+  return isExamAnalysisQuestionAiReviewTarget(question);
 }
 
 const examAnalysisDifficultyOptions = ["하", "중하", "중", "중상", "상"];
@@ -7072,6 +7072,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const [reviewStatus, setReviewStatus] = useState({ state: "idle", message: "" });
   const [reviewDrafts, setReviewDrafts] = useState({});
   const [isSavingReviews, setIsSavingReviews] = useState(false);
+  const [editingSsenQuestionNumber, setEditingSsenQuestionNumber] = useState("");
   const [isPdfDropActive, setIsPdfDropActive] = useState(false);
   const [ssenCatalog, setSsenCatalog] = useState(() => createEmptyExamAnalysisSsenCatalog());
   const [ssenCatalogStatus, setSsenCatalogStatus] = useState({ state: "idle", message: "" });
@@ -7255,6 +7256,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     if (!runId || !questionRows.length) {
       reviewDraftRunIdRef.current = runId;
       reviewSeedDraftsRef.current = {};
+      setEditingSsenQuestionNumber("");
       setReviewDrafts({});
       return;
     }
@@ -7262,6 +7264,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     if (reviewDraftRunIdRef.current !== runId) {
       reviewDraftRunIdRef.current = runId;
       reviewSeedDraftsRef.current = seededDrafts;
+      setEditingSsenQuestionNumber("");
       setReviewDrafts(seededDrafts);
       return;
     }
@@ -7958,6 +7961,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       const confirmedCount = result.teacherReview?.confirmedCount || result.questions?.filter((question) => question.rowStatus === "confirmed").length || 0;
       setSelectedDetail(result);
       setReviewDrafts(buildExamAnalysisReviewDrafts(result.questions ?? []));
+      setEditingSsenQuestionNumber("");
       setReviewStatus({
         state: "success",
         message: `시험분석 · 검수 저장 완료 · ${confirmedCount}/${totalCount}개 확정`
@@ -8579,6 +8583,13 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                       const selectedSubTypeCodes = normalizeExamAnalysisSsenCodeList(draftValue.subTypeCodes);
                       const selectedSubTypes = selectedSubTypeCodes.map(getSsenTypeByCode).filter(Boolean);
                       const mainTypeMeta = getSsenTypeByCode(draftValue.mainTypeCode);
+                      const isSsenEditing = editingSsenQuestionNumber === String(question.questionNumber);
+                      const unitLabel = mainTypeMeta?.unitName || draftValue.unitName || "단원 선택 필요";
+                      const partLabel = mainTypeMeta?.partName || draftValue.partName || "";
+                      const mainTypeLabel = mainTypeMeta?.typeName || draftValue.mainType || "주유형 선택 필요";
+                      const subTypeLabels = selectedSubTypes.length
+                        ? selectedSubTypes.map((type) => type.typeName)
+                        : parseExamAnalysisReviewSubTypes(draftValue.subTypesText);
                       const reviewClassName = [
                         needsReview ? "needsReview" : "",
                         draftValue.confirmed ? "confirmed" : ""
@@ -8603,76 +8614,115 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                             />
                           </td>
                           <td>
-                            <select
-                              value={unitKey}
-                              onChange={(event) => selectReviewSsenUnit(question.questionNumber, event.target.value)}
-                            >
-                              <option value="">단원 선택</option>
-                              {(ssenCatalog.units ?? []).map((unit) => (
-                                <option key={unit.key} value={unit.key}>
-                                  {[unit.partName, unit.unitName].filter(Boolean).join(" · ")}
-                                </option>
-                              ))}
-                            </select>
-                          </td>
-                          <td>
-                            <select
-                              value={draftValue.mainTypeCode}
-                              onChange={(event) => selectReviewMainType(question.questionNumber, event.target.value)}
-                            >
-                              <option value="">주유형 선택</option>
-                              {ssenTypeOptions.map((type) => (
-                                <option key={type.typeCode} value={type.typeCode}>
-                                  {`${type.typeNo}. ${type.typeName}`}
-                                </option>
-                              ))}
-                            </select>
-                          </td>
-                          <td>
-                            <div className="examAnalysisSubTypePicker">
+                            {isSsenEditing ? (
                               <select
-                                aria-label={`${question.questionNumber}번 보조유형 추가`}
-                                onChange={(event) => {
-                                  addReviewSubType(question.questionNumber, draftValue, event.target.value);
-                                  event.target.value = "";
-                                }}
-                                value=""
+                                value={unitKey}
+                                onChange={(event) => selectReviewSsenUnit(question.questionNumber, event.target.value)}
                               >
-                                <option value="">보조유형 추가</option>
-                                {ssenTypeOptions
-                                  .filter((type) => type.typeCode !== draftValue.mainTypeCode && !selectedSubTypeCodes.includes(type.typeCode))
-                                  .map((type) => (
-                                    <option key={type.typeCode} value={type.typeCode}>
-                                      {`${type.typeNo}. ${type.typeName}`}
-                                    </option>
-                                  ))}
+                                <option value="">단원 선택</option>
+                                {(ssenCatalog.units ?? []).map((unit) => (
+                                  <option key={unit.key} value={unit.key}>
+                                    {[unit.partName, unit.unitName].filter(Boolean).join(" · ")}
+                                  </option>
+                                ))}
                               </select>
-                              <div className="examAnalysisSubTypeChips">
-                                {selectedSubTypes.length ? selectedSubTypes.map((type) => (
-                                  <button
-                                    aria-label={`${type.typeName} 제거`}
-                                    key={type.typeCode}
-                                    onClick={() => removeReviewSubType(question.questionNumber, draftValue, type.typeCode)}
-                                    type="button"
-                                  >
-                                    {type.typeName}
-                                  </button>
+                            ) : (
+                              <div className="examAnalysisReviewReadonlyCell">
+                                <strong>{unitLabel}</strong>
+                                {partLabel ? <small>{partLabel}</small> : null}
+                              </div>
+                            )}
+                          </td>
+                          <td>
+                            {isSsenEditing ? (
+                              <select
+                                value={draftValue.mainTypeCode}
+                                onChange={(event) => selectReviewMainType(question.questionNumber, event.target.value)}
+                              >
+                                <option value="">주유형 선택</option>
+                                {ssenTypeOptions.map((type) => (
+                                  <option key={type.typeCode} value={type.typeCode}>
+                                    {`${type.typeNo}. ${type.typeName}`}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <div className="examAnalysisReviewReadonlyCell withAction">
+                                <strong>{mainTypeLabel}</strong>
+                                <button
+                                  className="softTinyButton"
+                                  onClick={() => setEditingSsenQuestionNumber(String(question.questionNumber))}
+                                  type="button"
+                                >
+                                  수정
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                          <td>
+                            {isSsenEditing ? (
+                              <div className="examAnalysisSubTypePicker">
+                                <select
+                                  aria-label={`${question.questionNumber}번 보조유형 추가`}
+                                  onChange={(event) => {
+                                    addReviewSubType(question.questionNumber, draftValue, event.target.value);
+                                    event.target.value = "";
+                                  }}
+                                  value=""
+                                >
+                                  <option value="">보조유형 추가</option>
+                                  {ssenTypeOptions
+                                    .filter((type) => type.typeCode !== draftValue.mainTypeCode && !selectedSubTypeCodes.includes(type.typeCode))
+                                    .map((type) => (
+                                      <option key={type.typeCode} value={type.typeCode}>
+                                        {`${type.typeNo}. ${type.typeName}`}
+                                      </option>
+                                    ))}
+                                </select>
+                                <div className="examAnalysisSubTypeChips">
+                                  {selectedSubTypes.length ? selectedSubTypes.map((type) => (
+                                    <button
+                                      aria-label={`${type.typeName} 제거`}
+                                      key={type.typeCode}
+                                      onClick={() => removeReviewSubType(question.questionNumber, draftValue, type.typeCode)}
+                                      type="button"
+                                    >
+                                      {type.typeName}
+                                    </button>
+                                  )) : <span>없음</span>}
+                                </div>
+                                <button
+                                  className="softTinyButton"
+                                  onClick={() => setEditingSsenQuestionNumber("")}
+                                  type="button"
+                                >
+                                  닫기
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="examAnalysisSubTypeChips readonly">
+                                {subTypeLabels.length ? subTypeLabels.map((label) => (
+                                  <span key={label}>{label}</span>
                                 )) : <span>없음</span>}
                               </div>
-                            </div>
+                            )}
                           </td>
                           <td>
-                            <select
-                              value={draftValue.difficulty}
-                              onChange={(event) => updateReviewDraft(question.questionNumber, { difficulty: event.target.value })}
-                            >
-                              <option value="">선택</option>
-                              <option value="하">하</option>
-                              <option value="중하">중하</option>
-                              <option value="중">중</option>
-                              <option value="중상">중상</option>
-                              <option value="상">상</option>
-                            </select>
+                            {isSsenEditing ? (
+                              <select
+                                value={draftValue.difficulty}
+                                onChange={(event) => updateReviewDraft(question.questionNumber, { difficulty: event.target.value })}
+                              >
+                                <option value="">선택</option>
+                                <option value="하">하</option>
+                                <option value="중하">중하</option>
+                                <option value="중">중</option>
+                                <option value="중상">중상</option>
+                                <option value="상">상</option>
+                              </select>
+                            ) : (
+                              <span className="examAnalysisReviewPill">{draftValue.difficulty || "미정"}</span>
+                            )}
                           </td>
                           <td>
                             <input
