@@ -2581,22 +2581,64 @@ function getExamAnalysisCardDesignFooter(slide = {}) {
   return "으뜸수학 고태영T 시험분석";
 }
 
+function getExamAnalysisCardSchoolShortLabel(slide = {}) {
+  return String(slide.schoolLabel || "학교").split(" ")[0] || "학교";
+}
+
+function getExamAnalysisCardDesignBadge(slide = {}) {
+  if (slide.type === "cover") return "기말고사";
+  if (slide.type === "examStructure") return "100점 만점";
+  if (slide.type === "overallReview") return "전체 난도";
+  if (slide.type === "keyQuestion") return slide.questionNumber ? `객관식 ${slide.questionNumber}` : "주요문항";
+  if (slide.type === "solution") return slide.questionNumber ? `${slide.questionNumber}번 손풀이` : "손풀이";
+  return "다음 대비";
+}
+
+function getExamAnalysisCardDisplayTitle(slide = {}) {
+  if (slide.type === "cover") {
+    return {
+      primary: getExamAnalysisCardSchoolShortLabel(slide),
+      secondary: "시험분석"
+    };
+  }
+  if (slide.type === "keyQuestion") {
+    return {
+      primary: slide.questionNumber ? `주요문항 ${slide.questionNumber}` : "주요문항",
+      secondary: "살펴보기"
+    };
+  }
+  if (slide.type === "solution") {
+    return {
+      primary: slide.questionNumber ? `주요문항 ${slide.questionNumber}` : "주요문항",
+      secondary: "손풀이"
+    };
+  }
+  const [primary, ...rest] = String(slide.title || "").split(" ");
+  return {
+    primary: primary || slide.title,
+    secondary: rest.join(" ")
+  };
+}
+
 function renderExamAnalysisCardDesignBody(slide = {}) {
   const lines = Array.isArray(slide.lines) && slide.lines.length
     ? slide.lines
     : ["선생님 메모를 입력하면 이 영역의 문구 밀도를 확인할 수 있습니다."];
+  const titleParts = getExamAnalysisCardDisplayTitle(slide);
 
   if (slide.type === "cover") {
     return (
-      <div className="examAnalysisCardDesignCoverBody">
-        <div className="examAnalysisCardDesignHeroBand">
-          <strong>{slide.headline}</strong>
-          <span>시험 체감 · 변별 포인트 · 다음 대비</span>
+      <div className="examAnalysisBenchmarkCoverBody">
+        <div className="examAnalysisBenchmarkHeroTitle">
+          <strong>{titleParts.primary}</strong>
+          <b>{titleParts.secondary}</b>
         </div>
-        <div className="examAnalysisCardDesignMiniList">
-          {lines.slice(0, 3).map((line, index) => (
-            <p key={`${slide.card}-cover-${index}`}>{line}</p>
-          ))}
+        <div className="examAnalysisBenchmarkBrushBand">
+          <span>{slide.headline}</span>
+          <strong>실수 관리와 풀이 순서가 핵심</strong>
+        </div>
+        <div className="examAnalysisBenchmarkCoverCta">
+          총평 · 주요문항 · 손풀이 확인
         </div>
       </div>
     );
@@ -2604,14 +2646,30 @@ function renderExamAnalysisCardDesignBody(slide = {}) {
 
   if (slide.type === "examStructure") {
     return (
-      <div className="examAnalysisCardDesignStructureBody">
-        <div className="examAnalysisCardDesignStatGrid">
-          <div><small>문항 구조</small><strong>{lines[0] || "검수본 기준"}</strong></div>
-          <div><small>출제 비중</small><strong>{lines[1] || "단원별 분포 확인"}</strong></div>
-          <div><small>난이도</small><strong>{lines[2] || "체감 난도 정리"}</strong></div>
+      <div className="examAnalysisBenchmarkStructureBody">
+        <div className="examAnalysisBenchmarkStatRow">
+          <div><small>객관식</small><strong>{slide.totalQuestions ? `${slide.totalQuestions}문항` : "검수"}</strong></div>
+          <div><small>서술형</small><strong>{slide.essayQuestions ? `${slide.essayQuestions}문항` : "확인"}</strong></div>
+          <div><small>만점</small><strong>100점</strong></div>
         </div>
-        <div className="examAnalysisCardDesignFlow">
-          {["범위 확인", "비중 파악", "풀이 순서"].map((label) => <span key={label}>{label}</span>)}
+        <div className="examAnalysisBenchmarkMetaRow">
+          <span>시행일 · {slide.examDate || "확인 필요"}</span>
+          <span>출판사 · {slide.publisher || "확인 필요"}</span>
+        </div>
+        <div className="examAnalysisBenchmarkTwoColumns">
+          <section>
+            <strong>시험 범위</strong>
+            {lines.slice(0, 4).map((line, index) => <p key={`${slide.card}-scope-${index}`}>{line}</p>)}
+          </section>
+          <section>
+            <strong>단원별 출제 비중</strong>
+            {(slide.partSummary?.length ? slide.partSummary : lines).slice(0, 4).map((line, index) => (
+              <p key={`${slide.card}-ratio-${index}`}>{line}</p>
+            ))}
+          </section>
+        </div>
+        <div className="examAnalysisBenchmarkFlowRow">
+          {["범위 확인", "비중 파악", "풀이 순서", "실수 점검"].map((label) => <span key={label}>{label}</span>)}
         </div>
       </div>
     );
@@ -2619,13 +2677,52 @@ function renderExamAnalysisCardDesignBody(slide = {}) {
 
   if (slide.type === "overallReview") {
     return (
-      <div className="examAnalysisCardDesignReviewBody">
-        <div className="examAnalysisCardDesignQuote">{slide.headline}</div>
-        <div className="examAnalysisCardDesignInsightGrid">
+      <div className="examAnalysisBenchmarkReviewBody">
+        <div className="examAnalysisBenchmarkReviewGrid">
           {lines.slice(0, 4).map((line, index) => (
             <div key={`${slide.card}-review-${index}`}>
-              <small>{index + 1}</small>
+              <strong>{["출제 경향", "체감 난도", "후반부 특징", "고득점 전략"][index] || `포인트 ${index + 1}`}</strong>
               <p>{line}</p>
+            </div>
+          ))}
+        </div>
+        <div className="examAnalysisBenchmarkSearchBand">
+          {slide.headline}
+        </div>
+        <div className="examAnalysisBenchmarkOneLine">
+          한줄평 | 실수 관리와 풀이 순서가 고득점의 핵심
+        </div>
+      </div>
+    );
+  }
+
+  if (slide.type === "keyQuestion" || slide.type === "solution") {
+    const isSolution = slide.type === "solution";
+    return (
+      <div className="examAnalysisBenchmarkQuestionBody">
+        <div className="examAnalysisBenchmarkQuestionColumns">
+          <section className="examAnalysisBenchmarkImagePanel">
+            <strong>{isSolution ? "문제" : "시험 원안"}</strong>
+            <div className={`examAnalysisCardDesignImageSlot ${slide.type}`}>
+              <span>{isSolution ? "선생님 crop 문제 이미지" : "선생님 crop 시험문제 이미지"}</span>
+            </div>
+          </section>
+          <section className="examAnalysisBenchmarkImagePanel">
+            <strong>{isSolution ? "수학의기술 BEST 풀이" : "유사유형 / 핵심 해석"}</strong>
+            <div className={`examAnalysisCardDesignImageSlot ${isSolution ? "solution" : "keyQuestion"}`}>
+              <span>{isSolution ? "선생님 crop 손풀이 이미지" : slide.headline}</span>
+            </div>
+          </section>
+        </div>
+        <div className="examAnalysisBenchmarkTipStrip">
+          <strong>{isSolution ? "문제풀이 TIP" : "핵심 개념"}</strong>
+          <span>{lines[0] || slide.headline}</span>
+        </div>
+        <div className="examAnalysisBenchmarkBottomBoxes">
+          {["개념 연결", "자주 틀리는 포인트", "추천 복습"].map((label, index) => (
+            <div key={`${slide.card}-${label}`}>
+              <strong>{label}</strong>
+              <p>{lines[index + 1] || lines[index] || "선생님 메모 기준으로 채워집니다."}</p>
             </div>
           ))}
         </div>
@@ -2633,33 +2730,25 @@ function renderExamAnalysisCardDesignBody(slide = {}) {
     );
   }
 
-  if (slide.type === "keyQuestion" || slide.type === "solution") {
-    return (
-      <div className="examAnalysisCardDesignQuestionBody">
-        <div className={`examAnalysisCardDesignImageSlot ${slide.type}`}>
-          <strong>{slide.type === "solution" ? "손풀이 이미지 슬롯" : "문제 이미지 슬롯"}</strong>
-          <span>{slide.slotLabel || "선생님 crop 이미지를 다음 gate에서 연결합니다."}</span>
-        </div>
-        <div className="examAnalysisCardDesignPointList">
-          {lines.slice(0, 3).map((line, index) => (
-            <p key={`${slide.card}-question-${index}`}>{line}</p>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="examAnalysisCardDesignClosingBody">
-      <div className="examAnalysisCardDesignActionGrid">
+    <div className="examAnalysisBenchmarkClosingBody">
+      <div className="examAnalysisBenchmarkReviewGrid">
+        {["정확도", "해석력", "그래프", "시간 관리"].map((label, index) => (
+          <div key={`${slide.card}-closing-${label}`}>
+            <strong>{label}</strong>
+            <p>{lines[index] || "다음 시험 대비 방향을 입력해 주세요."}</p>
+          </div>
+        ))}
+      </div>
+      <div className="examAnalysisBenchmarkBottomBoxes">
         {lines.slice(0, 3).map((line, index) => (
-          <div key={`${slide.card}-closing-${index}`}>
-            <small>{index + 1}</small>
+          <div key={`${slide.card}-closing-line-${index}`}>
+            <strong>{index + 1}</strong>
             <p>{line}</p>
           </div>
         ))}
       </div>
-      <div className="examAnalysisCardDesignCtaBand">더 자세한 해설은 블로그에서 확인</div>
+      <div className="examAnalysisBenchmarkOneLine">더 자세한 해설은 블로그에서 확인</div>
     </div>
   );
 }
@@ -2674,15 +2763,16 @@ function ExamAnalysisCardDesignCard({ isFocused = false, isSelected = false, onF
   return (
     <article className={cardClassName}>
       <header className="examAnalysisCardDesignHeader">
-        <div>
-          <strong>으뜸수학 고태영T</strong>
-          <span>{slide.schoolLabel}</span>
-        </div>
-        <small>card-{String(slide.card).padStart(2, "0")}</small>
+        <span className="examAnalysisBenchmarkSchoolBadge">{getExamAnalysisCardSchoolShortLabel(slide)}</span>
+        <strong>으뜸수학 고태영T</strong>
+        <small>{getExamAnalysisCardDesignBadge(slide)}</small>
       </header>
-      <div className="examAnalysisCardDesignTitleBlock">
+      <div className={`examAnalysisCardDesignTitleBlock ${slide.type}`}>
         <span>{getExamAnalysisCardDesignKicker(slide)} · {slide.examLabel}</span>
-        <h4>{slide.title}</h4>
+        <h4>
+          <span>{getExamAnalysisCardDisplayTitle(slide).primary}</span>
+          {getExamAnalysisCardDisplayTitle(slide).secondary ? <b>{getExamAnalysisCardDisplayTitle(slide).secondary}</b> : null}
+        </h4>
         <p>{slide.headline}</p>
       </div>
       {renderExamAnalysisCardDesignBody(slide)}
@@ -2727,6 +2817,9 @@ function createExamAnalysisCardNewsPreviewSlides({ activeRun = {}, model = {}, o
       schoolLabel,
       examLabel,
       chips: [slide.renderMode, slide.type],
+      totalQuestions,
+      partSummary,
+      difficultySummary,
       slotLabel: slide.renderMode.includes("슬롯") ? slide.slot : "",
       sourceNote: "현재 화면 수정본 기준"
     };

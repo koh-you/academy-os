@@ -2286,18 +2286,19 @@ button {
   background:
     linear-gradient(rgba(59, 130, 246, 0.055) 1px, transparent 1px),
     linear-gradient(90deg, rgba(59, 130, 246, 0.045) 1px, transparent 1px),
-    linear-gradient(180deg, #f8fbff 0%, #ffffff 58%, #eef6ff 100%),
+    radial-gradient(circle at 92% 18%, rgba(14, 116, 144, 0.08), transparent 18%),
+    linear-gradient(180deg, #f8fbff 0%, #ffffff 48%, #eef6ff 100%),
     #ffffff;
-  background-size: 24px 24px, 24px 24px, 100% 100%;
+  background-size: 24px 24px, 24px 24px, 100% 100%, 100% 100%;
   border: 1px solid #bfdbfe;
   border-radius: 8px;
   box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
   display: grid;
-  gap: 9px;
+  gap: 8px;
   grid-template-rows: auto auto minmax(0, 1fr) auto;
   min-width: 0;
   overflow: hidden;
-  padding: 14px;
+  padding: 13px;
   position: relative;
 }
 
@@ -2313,7 +2314,7 @@ button {
 }
 
 .examAnalysisCardDesignCard::before {
-  background: #1d4ed8;
+  background: linear-gradient(90deg, #1d4ed8, #38bdf8);
   content: "";
   height: 5px;
   left: 0;
@@ -2324,60 +2325,69 @@ button {
 
 .examAnalysisCardDesignCard.keyQuestion::before,
 .examAnalysisCardDesignCard.solution::before {
-  background: #0f766e;
+  background: linear-gradient(90deg, #0f766e, #38bdf8);
 }
 
 .examAnalysisCardDesignHeader,
 .examAnalysisCardDesignFooter {
   align-items: center;
   display: flex;
-  gap: 8px;
+  gap: 9px;
   justify-content: space-between;
-  min-width: 0;
-}
-
-.examAnalysisCardDesignHeader > div {
-  display: grid;
-  gap: 2px;
   min-width: 0;
 }
 
 .examAnalysisCardDesignHeader strong {
   color: #0f172a;
-  font-size: 12px;
+  flex: 1 1 auto;
+  font-size: 17px;
   font-weight: 950;
+  line-height: 1.1;
+  text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.examAnalysisCardDesignHeader span {
-  color: #2563eb;
-  font-size: 10px;
-  font-weight: 900;
+.examAnalysisBenchmarkSchoolBadge {
+  align-items: center;
+  background: #dbeafe;
+  border: 1px solid #93c5fd;
+  border-radius: 999px;
+  color: #1e3a8a;
+  display: inline-flex;
+  flex: 0 1 110px;
+  font-size: 12px;
+  font-weight: 950;
+  justify-content: center;
+  line-height: 1.2;
+  min-width: 0;
   overflow: hidden;
+  padding: 8px 10px;
+  text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .examAnalysisCardDesignHeader small,
 .examAnalysisCardDesignFooter span {
-  background: #e0f2fe;
-  border: 1px solid #bae6fd;
-  border-radius: 999px;
-  color: #075985;
+  background: #ffffff;
+  border: 1px solid #93c5fd;
+  border-radius: 8px;
+  color: #0f172a;
   flex: 0 0 auto;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 950;
-  padding: 5px 8px;
+  padding: 7px 9px;
 }
 
 .examAnalysisCardDesignTitleBlock {
-  border-bottom: 1px solid #dbeafe;
+  border-bottom: 0;
   display: grid;
-  gap: 4px;
+  gap: 3px;
   min-width: 0;
-  padding-bottom: 8px;
+  padding-bottom: 2px;
+  text-align: center;
 }
 
 .examAnalysisCardDesignTitleBlock > span {
@@ -2391,37 +2401,52 @@ button {
 
 .examAnalysisCardDesignTitleBlock h4 {
   color: #0f172a;
-  font-size: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 38px;
   font-weight: 950;
+  gap: 6px;
+  justify-content: center;
   letter-spacing: 0;
-  line-height: 1.08;
+  line-height: 1;
   margin: 0;
   overflow-wrap: keep-all;
   word-break: keep-all;
 }
 
+.examAnalysisCardDesignTitleBlock h4 > span {
+  color: #1d4ed8;
+  text-shadow: 0 2px 0 #dbeafe;
+}
+
+.examAnalysisCardDesignTitleBlock h4 > b {
+  color: #0f172a;
+  font-weight: 950;
+  text-shadow: 0 2px 0 #dbeafe;
+}
+
 .examAnalysisCardDesignCard.focused .examAnalysisCardDesignTitleBlock h4 {
-  font-size: 38px;
-  line-height: 1.08;
+  font-size: 56px;
+  line-height: 1;
 }
 
 .examAnalysisCardDesignTitleBlock p {
   color: #1e3a8a;
   display: -webkit-box;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 900;
-  line-height: 1.45;
+  line-height: 1.35;
   margin: 0;
   overflow: hidden;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
 }
 
-.examAnalysisCardDesignCoverBody,
-.examAnalysisCardDesignStructureBody,
-.examAnalysisCardDesignReviewBody,
-.examAnalysisCardDesignQuestionBody,
-.examAnalysisCardDesignClosingBody {
+.examAnalysisBenchmarkCoverBody,
+.examAnalysisBenchmarkStructureBody,
+.examAnalysisBenchmarkReviewBody,
+.examAnalysisBenchmarkQuestionBody,
+.examAnalysisBenchmarkClosingBody {
   display: grid;
   gap: 8px;
   min-height: 0;
@@ -2429,47 +2454,125 @@ button {
   overflow: hidden;
 }
 
-.examAnalysisCardDesignHeroBand,
-.examAnalysisCardDesignCtaBand,
-.examAnalysisCardDesignQuote {
+.examAnalysisBenchmarkHeroTitle {
+  display: none;
+}
+
+.examAnalysisBenchmarkBrushBand,
+.examAnalysisBenchmarkOneLine,
+.examAnalysisBenchmarkCoverCta,
+.examAnalysisBenchmarkSearchBand {
   background: #dbeafe;
   border: 1px solid #bfdbfe;
   border-radius: 8px;
   color: #0f172a;
   display: grid;
-  gap: 3px;
-  padding: 9px;
+  gap: 4px;
+  padding: 9px 10px;
   text-align: center;
 }
 
-.examAnalysisCardDesignHeroBand strong,
-.examAnalysisCardDesignQuote {
-  font-size: 15px;
+.examAnalysisBenchmarkBrushBand {
+  background:
+    linear-gradient(90deg, rgba(191, 219, 254, 0.72), rgba(219, 234, 254, 0.96), rgba(191, 219, 254, 0.72));
+  border-style: dashed;
+}
+
+.examAnalysisBenchmarkBrushBand span,
+.examAnalysisBenchmarkBrushBand strong,
+.examAnalysisBenchmarkOneLine,
+.examAnalysisBenchmarkCoverCta {
+  font-size: 16px;
   font-weight: 950;
   line-height: 1.35;
 }
 
-.examAnalysisCardDesignHeroBand span,
-.examAnalysisCardDesignCtaBand {
-  color: #1e3a8a;
-  font-size: 11px;
-  font-weight: 900;
-  line-height: 1.4;
+.examAnalysisBenchmarkCoverCta {
+  align-items: center;
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  border-radius: 999px;
+  color: #ffffff;
+  display: flex;
+  justify-content: center;
+  min-height: 46px;
 }
 
-.examAnalysisCardDesignMiniList,
-.examAnalysisCardDesignPointList {
+.examAnalysisBenchmarkStatRow,
+.examAnalysisBenchmarkMetaRow,
+.examAnalysisBenchmarkFlowRow {
   display: grid;
-  gap: 5px;
+  gap: 6px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.examAnalysisBenchmarkStatRow div,
+.examAnalysisBenchmarkMetaRow span,
+.examAnalysisBenchmarkFlowRow span {
+  background: #ffffff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  color: #0f172a;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 8px;
+  text-align: center;
+}
+
+.examAnalysisBenchmarkStatRow small,
+.examAnalysisBenchmarkTwoColumns strong,
+.examAnalysisBenchmarkImagePanel strong,
+.examAnalysisBenchmarkTipStrip strong,
+.examAnalysisBenchmarkBottomBoxes strong,
+.examAnalysisBenchmarkReviewGrid strong {
+  color: #1e3a8a;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.examAnalysisBenchmarkStatRow strong {
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 950;
+}
+
+.examAnalysisBenchmarkMetaRow {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.examAnalysisBenchmarkMetaRow span,
+.examAnalysisBenchmarkFlowRow span {
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.3;
+}
+
+.examAnalysisBenchmarkTwoColumns,
+.examAnalysisBenchmarkQuestionColumns {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   min-height: 0;
   overflow: hidden;
 }
 
-.examAnalysisCardDesignMiniList p,
-.examAnalysisCardDesignPointList p {
+.examAnalysisBenchmarkTwoColumns section,
+.examAnalysisBenchmarkImagePanel {
   background: #ffffff;
-  border-left: 4px solid #38bdf8;
+  border: 1px solid #bfdbfe;
   border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  padding: 9px;
+}
+
+.examAnalysisBenchmarkTwoColumns p,
+.examAnalysisBenchmarkReviewGrid p,
+.examAnalysisBenchmarkBottomBoxes p {
   color: #334155;
   display: -webkit-box;
   font-size: 11px;
@@ -2477,14 +2580,12 @@ button {
   line-height: 1.4;
   margin: 0;
   overflow: hidden;
-  padding: 7px 8px;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
 
-.examAnalysisCardDesignStatGrid,
-.examAnalysisCardDesignInsightGrid,
-.examAnalysisCardDesignActionGrid {
+.examAnalysisBenchmarkReviewGrid,
+.examAnalysisBenchmarkBottomBoxes {
   display: grid;
   gap: 7px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2492,9 +2593,8 @@ button {
   overflow: hidden;
 }
 
-.examAnalysisCardDesignStatGrid div,
-.examAnalysisCardDesignInsightGrid div,
-.examAnalysisCardDesignActionGrid div {
+.examAnalysisBenchmarkReviewGrid div,
+.examAnalysisBenchmarkBottomBoxes div {
   background: #ffffff;
   border: 1px solid #dbeafe;
   border-radius: 8px;
@@ -2504,48 +2604,35 @@ button {
   padding: 8px;
 }
 
-.examAnalysisCardDesignStatGrid div:first-child {
-  grid-column: 1 / -1;
+.examAnalysisBenchmarkReviewGrid div {
+  align-content: center;
+  text-align: center;
 }
 
-.examAnalysisCardDesignStatGrid small,
-.examAnalysisCardDesignInsightGrid small,
-.examAnalysisCardDesignActionGrid small {
-  color: #2563eb;
-  font-size: 10px;
-  font-weight: 950;
-}
-
-.examAnalysisCardDesignStatGrid strong,
-.examAnalysisCardDesignInsightGrid p,
-.examAnalysisCardDesignActionGrid p {
-  color: #334155;
-  display: -webkit-box;
-  font-size: 11px;
-  font-weight: 850;
-  line-height: 1.45;
-  margin: 0;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-}
-
-.examAnalysisCardDesignFlow {
-  display: grid;
-  gap: 6px;
+.examAnalysisBenchmarkBottomBoxes {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.examAnalysisCardDesignFlow span {
-  background: #eef6ff;
+.examAnalysisBenchmarkTipStrip {
+  align-items: center;
+  background: #f8fafc;
   border: 1px solid #bfdbfe;
   border-radius: 8px;
-  color: #1d4ed8;
-  font-size: 10px;
-  font-weight: 950;
-  line-height: 1.3;
-  padding: 8px 6px;
-  text-align: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding: 8px 10px;
+}
+
+.examAnalysisBenchmarkTipStrip span {
+  color: #0f172a;
+  display: -webkit-box;
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.35;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .examAnalysisCardDesignImageSlot {
@@ -2556,13 +2643,13 @@ button {
   display: grid;
   gap: 5px;
   justify-items: center;
-  min-height: 108px;
+  min-height: 104px;
   padding: 10px;
   text-align: center;
 }
 
 .examAnalysisCardDesignCard.focused .examAnalysisCardDesignImageSlot {
-  min-height: 180px;
+  min-height: 178px;
 }
 
 .examAnalysisCardDesignImageSlot.solution {
