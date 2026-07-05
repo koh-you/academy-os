@@ -2559,7 +2559,7 @@ function attachExamAnalysisCardRendererSkeleton(slide = {}) {
   return {
     ...slide,
     rendererLabel: "HTML/CSS/JS 렌더러 골격",
-    aspectRatio: "1080x1350",
+    aspectRatio: "1080x1080",
     regions: createExamAnalysisCardRendererRegions(slide),
     sourceKeys: getExamAnalysisCardRendererSourceKeys(slide)
   };
@@ -2821,7 +2821,7 @@ function ExamAnalysisCardNewsPreviewPanel({ slides = [] }) {
     <div className="examAnalysisCardNewsPreviewPanel">
       <div className="examAnalysisCardNewsPreviewSummary">
         <strong>블로그형 카드 디자인 Gate 3</strong>
-        <span>{slides.length}장 · 1080x1350 비율 검수용 · HTML/CSS/JS 렌더러에 블루/화이트 전문 톤을 얹어보는 화면 검수 단계</span>
+        <span>{slides.length}장 · 1080x1080 정사각형 검수용 · HTML/CSS/JS 렌더러에 블루/화이트 전문 톤을 얹어보는 화면 검수 단계</span>
       </div>
       <div className="examAnalysisCardFocusPanel">
         <div className="examAnalysisCardFocusHeader">
