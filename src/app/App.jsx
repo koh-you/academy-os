@@ -2565,6 +2565,105 @@ function attachExamAnalysisCardRendererSkeleton(slide = {}) {
   };
 }
 
+function getExamAnalysisCardDesignKicker(slide = {}) {
+  if (slide.type === "cover") return "시험분석 리포트";
+  if (slide.type === "examStructure") return "시험 구조";
+  if (slide.type === "overallReview") return "총평 정리";
+  if (slide.type === "keyQuestion") return "주요문항 살펴보기";
+  if (slide.type === "solution") return "손풀이 흐름";
+  return "다음 시험 준비";
+}
+
+function getExamAnalysisCardDesignFooter(slide = {}) {
+  if (slide.type === "closing") return "블로그에서 상세 해설 확인";
+  if (slide.type === "keyQuestion") return "문제 이미지는 선생님 crop 기준";
+  if (slide.type === "solution") return "손풀이는 선생님 저장본 기준";
+  return "으뜸수학 고태영T 시험분석";
+}
+
+function renderExamAnalysisCardDesignBody(slide = {}) {
+  const lines = Array.isArray(slide.lines) && slide.lines.length
+    ? slide.lines
+    : ["선생님 메모를 입력하면 이 영역의 문구 밀도를 확인할 수 있습니다."];
+
+  if (slide.type === "cover") {
+    return (
+      <div className="examAnalysisCardDesignCoverBody">
+        <div className="examAnalysisCardDesignHeroBand">
+          <strong>{slide.headline}</strong>
+          <span>시험 체감 · 변별 포인트 · 다음 대비</span>
+        </div>
+        <div className="examAnalysisCardDesignMiniList">
+          {lines.slice(0, 3).map((line, index) => (
+            <p key={`${slide.card}-cover-${index}`}>{line}</p>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (slide.type === "examStructure") {
+    return (
+      <div className="examAnalysisCardDesignStructureBody">
+        <div className="examAnalysisCardDesignStatGrid">
+          <div><small>문항 구조</small><strong>{lines[0] || "검수본 기준"}</strong></div>
+          <div><small>출제 비중</small><strong>{lines[1] || "단원별 분포 확인"}</strong></div>
+          <div><small>난이도</small><strong>{lines[2] || "체감 난도 정리"}</strong></div>
+        </div>
+        <div className="examAnalysisCardDesignFlow">
+          {["범위 확인", "비중 파악", "풀이 순서"].map((label) => <span key={label}>{label}</span>)}
+        </div>
+      </div>
+    );
+  }
+
+  if (slide.type === "overallReview") {
+    return (
+      <div className="examAnalysisCardDesignReviewBody">
+        <div className="examAnalysisCardDesignQuote">{slide.headline}</div>
+        <div className="examAnalysisCardDesignInsightGrid">
+          {lines.slice(0, 4).map((line, index) => (
+            <div key={`${slide.card}-review-${index}`}>
+              <small>{index + 1}</small>
+              <p>{line}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (slide.type === "keyQuestion" || slide.type === "solution") {
+    return (
+      <div className="examAnalysisCardDesignQuestionBody">
+        <div className={`examAnalysisCardDesignImageSlot ${slide.type}`}>
+          <strong>{slide.type === "solution" ? "손풀이 이미지 슬롯" : "문제 이미지 슬롯"}</strong>
+          <span>{slide.slotLabel || "선생님 crop 이미지를 다음 gate에서 연결합니다."}</span>
+        </div>
+        <div className="examAnalysisCardDesignPointList">
+          {lines.slice(0, 3).map((line, index) => (
+            <p key={`${slide.card}-question-${index}`}>{line}</p>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="examAnalysisCardDesignClosingBody">
+      <div className="examAnalysisCardDesignActionGrid">
+        {lines.slice(0, 3).map((line, index) => (
+          <div key={`${slide.card}-closing-${index}`}>
+            <small>{index + 1}</small>
+            <p>{line}</p>
+          </div>
+        ))}
+      </div>
+      <div className="examAnalysisCardDesignCtaBand">더 자세한 해설은 블로그에서 확인</div>
+    </div>
+  );
+}
+
 function createExamAnalysisCardNewsPreviewSlides({ activeRun = {}, model = {}, outputDrafts = {} } = {}) {
   const run = activeRun && typeof activeRun === "object" ? activeRun : {};
   const previewModel = model && typeof model === "object" ? model : {};
@@ -2681,46 +2780,73 @@ function ExamAnalysisCardNewsPreviewPanel({ slides = [] }) {
   return (
     <div className="examAnalysisCardNewsPreviewPanel">
       <div className="examAnalysisCardNewsPreviewSummary">
-        <strong>HTML/JS 카드 렌더러 골격</strong>
-        <span>{slides.length}장 · 1080x1350 비율 검수용 · 디자인 확정 전 데이터 연결/영역 검수 단계</span>
+        <strong>블로그형 카드 디자인 Gate 3</strong>
+        <span>{slides.length}장 · 1080x1350 비율 검수용 · HTML/CSS/JS 렌더러에 블루/화이트 전문 톤을 얹어보는 화면 검수 단계</span>
       </div>
-      <div className="examAnalysisCardNewsPreviewGrid">
+      <div className="examAnalysisCardDesignGrid">
         {slides.map((slide) => (
-          <article className={`examAnalysisCardNewsPreviewCard ${slide.type}`} key={`${slide.card}-${slide.type}`}>
-            <div className="examAnalysisCardRendererMeta">
+          <article className={`examAnalysisCardDesignCard ${slide.type}`} key={`${slide.card}-${slide.type}-design`}>
+            <header className="examAnalysisCardDesignHeader">
               <div>
-                <strong>card-{String(slide.card).padStart(2, "0")}</strong>
-                <span>{slide.role}</span>
+                <strong>으뜸수학 고태영T</strong>
+                <span>{slide.schoolLabel}</span>
               </div>
-              <small>{slide.rendererLabel} · {slide.renderMode}</small>
+              <small>card-{String(slide.card).padStart(2, "0")}</small>
+            </header>
+            <div className="examAnalysisCardDesignTitleBlock">
+              <span>{getExamAnalysisCardDesignKicker(slide)} · {slide.examLabel}</span>
+              <h4>{slide.title}</h4>
+              <p>{slide.headline}</p>
             </div>
-            <div className="examAnalysisCardRendererFrame" aria-label={`${slide.role} HTML 렌더러 골격`}>
-              {slide.regions.map((region) => {
-                const contentLines = String(region.content || "")
-                  .split("\n")
-                  .map((line) => line.trim())
-                  .filter(Boolean);
-                return (
-                  <section className={`examAnalysisCardRendererRegion ${region.kind}`} key={region.key}>
-                    <div className="examAnalysisCardRendererRegionHeader">
-                      <strong>{region.label}</strong>
-                      <span>{region.source}</span>
-                    </div>
-                    <div className="examAnalysisCardRendererContent">
-                      {contentLines.map((line, lineIndex) => (
-                        <p key={`${region.key}-${lineIndex}`}>{line}</p>
-                      ))}
-                    </div>
-                  </section>
-                );
-              })}
-            </div>
-            <div className="examAnalysisCardRendererSources">
-              {slide.sourceKeys.map((sourceKey) => <span key={sourceKey}>{sourceKey}</span>)}
-            </div>
+            {renderExamAnalysisCardDesignBody(slide)}
+            <footer className="examAnalysisCardDesignFooter">
+              <span>{slide.renderMode}</span>
+              <strong>{getExamAnalysisCardDesignFooter(slide)}</strong>
+            </footer>
           </article>
         ))}
       </div>
+
+      <details className="examAnalysisCardRendererDetails">
+        <summary>HTML 영역/데이터 원천 확인 열기</summary>
+        <div className="examAnalysisCardNewsPreviewGrid">
+          {slides.map((slide) => (
+            <article className={`examAnalysisCardNewsPreviewCard ${slide.type}`} key={`${slide.card}-${slide.type}`}>
+              <div className="examAnalysisCardRendererMeta">
+                <div>
+                  <strong>card-{String(slide.card).padStart(2, "0")}</strong>
+                  <span>{slide.role}</span>
+                </div>
+                <small>{slide.rendererLabel} · {slide.renderMode}</small>
+              </div>
+              <div className="examAnalysisCardRendererFrame" aria-label={`${slide.role} HTML 렌더러 골격`}>
+                {slide.regions.map((region) => {
+                  const contentLines = String(region.content || "")
+                    .split("\n")
+                    .map((line) => line.trim())
+                    .filter(Boolean);
+                  return (
+                    <section className={`examAnalysisCardRendererRegion ${region.kind}`} key={region.key}>
+                      <div className="examAnalysisCardRendererRegionHeader">
+                        <strong>{region.label}</strong>
+                        <span>{region.source}</span>
+                      </div>
+                      <div className="examAnalysisCardRendererContent">
+                        {contentLines.map((line, lineIndex) => (
+                          <p key={`${region.key}-${lineIndex}`}>{line}</p>
+                        ))}
+                      </div>
+                    </section>
+                  );
+                })}
+              </div>
+              <div className="examAnalysisCardRendererSources">
+                {slide.sourceKeys.map((sourceKey) => <span key={sourceKey}>{sourceKey}</span>)}
+              </div>
+            </article>
+          ))}
+        </div>
+      </details>
     </div>
   );
 }
@@ -3105,8 +3231,8 @@ function ExamAnalysisOutputDraftPanel({
 
       <div className="examAnalysisOutputCollapsibleHeader">
         <div>
-          <strong>HTML/JS 카드 렌더러 골격 Gate 2</strong>
-          <span>디자인을 확정하기 전 현재 선생님 입력값과 최종 검수 모델이 어떤 HTML 영역에 연결되는지 먼저 확인합니다.</span>
+          <strong>블로그형 카드 디자인 Gate 3</strong>
+          <span>확정된 HTML 골격 위에 블루/화이트 카드 디자인을 얹어 카드 수, 반복 구조, 모바일 가독성을 확인합니다.</span>
         </div>
         <button
           className="examAnalysisOutputCollapseButton"
