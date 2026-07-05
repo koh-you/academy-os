@@ -7682,6 +7682,12 @@ const noticeMessageTemplates = [
   }
 ];
 
+const noticeWithdrawnClassFilterId = "withdrawn_students";
+
+function isNoticeWithdrawnStudent(student = {}) {
+  return ["paused", "withdrawn"].includes(student.status ?? "active") || Boolean(student.withdrawnAt);
+}
+
 function NotificationCenter({
   aiSettings = defaultAiSettings,
   classTemplates = [],
@@ -7748,7 +7754,11 @@ function NotificationCenter({
     { id: "student", label: "학생", description: "선택 학생에게만" }
   ];
   const activeStudents = useMemo(
-    () => students.filter((student) => !["paused", "withdrawn"].includes(student.status ?? "active")),
+    () => students.filter((student) => !isNoticeWithdrawnStudent(student)),
+    [students]
+  );
+  const withdrawnStudents = useMemo(
+    () => students.filter((student) => isNoticeWithdrawnStudent(student)),
     [students]
   );
   const classTemplateById = useMemo(
@@ -7756,6 +7766,7 @@ function NotificationCenter({
     [classTemplates]
   );
   const studentMatchesNoticeClass = (student) => {
+    if (classFilter === noticeWithdrawnClassFilterId) return isNoticeWithdrawnStudent(student);
     if (classFilter === "all") return true;
     const template = classTemplateById.get(classFilter);
     return (
@@ -7765,7 +7776,10 @@ function NotificationCenter({
       (template?.name && [student.className, student.defaultClassName].includes(template.name))
     );
   };
-  const classFilteredStudents = useMemo(() => activeStudents.filter((student) => studentMatchesNoticeClass(student)), [activeStudents, classFilter, classTemplateById]);
+  const classFilteredStudents = useMemo(() => {
+    const sourceStudents = classFilter === noticeWithdrawnClassFilterId ? withdrawnStudents : activeStudents;
+    return sourceStudents.filter((student) => studentMatchesNoticeClass(student));
+  }, [activeStudents, withdrawnStudents, classFilter, classTemplateById]);
   const searchableStudents = useMemo(() => classFilteredStudents.filter((student) => {
     const keyword = normalizeMessageText(searchText).toLowerCase();
     const matchesSearch =
@@ -8138,6 +8152,7 @@ function NotificationCenter({
                   {classTemplates.map((template) => (
                     <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
                   ))}
+                  <option value={noticeWithdrawnClassFilterId}>퇴원학생반 ({withdrawnStudents.length}명)</option>
                 </select>
               </label>
               <label>
@@ -8180,7 +8195,15 @@ function NotificationCenter({
                       <input checked={checked} onChange={() => toggleStudentSelection(student.studentId)} type="checkbox" />
                       <span>
                         <strong>{student.name}</strong>
-                        <small>{[student.grade, student.schoolName].filter(Boolean).join(" · ") || "기본 정보 없음"}</small>
+                        <small>
+                          {[
+                            student.grade,
+                            student.schoolName,
+                            classFilter === noticeWithdrawnClassFilterId
+                              ? `퇴원${student.withdrawnAt ? ` ${String(student.withdrawnAt).slice(0, 10)}` : ""}`
+                              : ""
+                          ].filter(Boolean).join(" · ") || "기본 정보 없음"}
+                        </small>
                       </span>
                       <span className="noticeRecipientBadges">
                         {targetAudiences.map((audience) => {
