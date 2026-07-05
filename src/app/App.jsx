@@ -1918,12 +1918,18 @@ function createExamAnalysisCardNewsModel(keyQuestionBlocks = [createEmptyExamAna
         type: "keyQuestion",
         role: `주요문항 ${index + 1} 슬라이드`,
         renderMode: "문제 이미지 슬롯",
+        keyQuestionIndex: index,
+        keyQuestionBlockId: block.blockId || `key-question-${index + 1}`,
+        questionNumber: block.questionNumber || "",
         slot: `${block.questionNumber ? `${block.questionNumber} ` : ""}선생님 crop 문제 이미지 + 왜 중요한지`
       },
       {
         type: "solution",
         role: `손풀이 ${index + 1} 슬라이드`,
         renderMode: "손풀이 이미지 슬롯",
+        keyQuestionIndex: index,
+        keyQuestionBlockId: block.blockId || `key-question-${index + 1}`,
+        questionNumber: block.questionNumber || "",
         slot: `${block.questionNumber ? `${block.questionNumber} ` : ""}선생님 crop 손풀이 이미지 + 풀이 흐름`
       }
     ])),
@@ -2469,6 +2475,168 @@ function createExamAnalysisBlogBlockGuideText() {
   ].join("\n\n");
 }
 
+function getExamAnalysisCardPreviewText(value = "", fallback = "") {
+  return String(value || "").trim() || fallback;
+}
+
+function getExamAnalysisCardPreviewLines(values = [], maxCount = 4) {
+  return values
+    .flatMap((value) => String(value || "").split("\n"))
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .slice(0, maxCount);
+}
+
+function createExamAnalysisCardNewsPreviewSlides({ activeRun = {}, model = {}, outputDrafts = {} } = {}) {
+  const inputs = outputDrafts.inputs || {};
+  const keyQuestionBlocks = normalizeExamAnalysisKeyQuestionBlocks(inputs);
+  const cardPlan = getExamAnalysisOutputCardPlan(outputDrafts);
+  const meta = model?.meta || {};
+  const schoolLabel = [activeRun.schoolName || meta.schoolName, activeRun.grade || meta.grade].filter(Boolean).join(" ") || "학교/학년";
+  const examLabel = [activeRun.examCycle || activeRun.examTerm || meta.examCycle, activeRun.subject || meta.subject].filter(Boolean).join(" · ") || "고사/과목";
+  const totalQuestions = Number(meta.totalQuestions || model?.questions?.length || 0);
+  const partSummary = (model?.partDistribution || [])
+    .slice(0, 4)
+    .map((item) => `${item.label} ${item.count}문항`);
+  const difficultySummary = (model?.difficultyDistribution || [])
+    .slice(0, 4)
+    .map((item) => `${item.label} ${item.count}문항`);
+
+  return cardPlan.map((slide) => {
+    const block = Number.isInteger(slide.keyQuestionIndex) ? keyQuestionBlocks[slide.keyQuestionIndex] || {} : {};
+    const questionLabel = getExamAnalysisCardPreviewText(block.questionNumber, `주요문항 ${Number(slide.keyQuestionIndex || 0) + 1}`);
+    const base = {
+      ...slide,
+      schoolLabel,
+      examLabel,
+      chips: [slide.renderMode, slide.type],
+      slotLabel: slide.renderMode.includes("슬롯") ? slide.slot : "",
+      sourceNote: "현재 화면 수정본 기준"
+    };
+
+    if (slide.type === "cover") {
+      return {
+        ...base,
+        title: "시험분석",
+        headline: getExamAnalysisCardPreviewText(inputs.oneLineReview, "한줄 총평을 입력하면 표지 핵심 문구로 들어갑니다."),
+        lines: getExamAnalysisCardPreviewLines([
+          inputs.flowReview,
+          `${totalQuestions || "검수"}문항 기준 · ${examLabel}`,
+          inputs.schoolVariationNotes
+        ], 3)
+      };
+    }
+
+    if (slide.type === "examStructure") {
+      return {
+        ...base,
+        title: "시험 구조",
+        headline: totalQuestions ? `${totalQuestions}문항 기준 구조 미리보기` : "검수 저장본 기준 시험 구조",
+        lines: getExamAnalysisCardPreviewLines([
+          inputs.blogBlockStructure,
+          partSummary.join(" · "),
+          difficultySummary.join(" · "),
+          inputs.imageSlotNotes
+        ], 4)
+      };
+    }
+
+    if (slide.type === "overallReview") {
+      return {
+        ...base,
+        title: "총평 정리",
+        headline: getExamAnalysisCardPreviewText(inputs.oneLineReview, "총평 핵심 문장을 입력해 주세요."),
+        lines: getExamAnalysisCardPreviewLines([
+          inputs.flowReview,
+          inputs.scoreGapPoint,
+          inputs.blogBlockOverallReview
+        ], 4)
+      };
+    }
+
+    if (slide.type === "keyQuestion") {
+      return {
+        ...base,
+        title: `${questionLabel} 살펴보기`,
+        headline: getExamAnalysisCardPreviewText(block.title, "대표 문항의 핵심을 입력해 주세요."),
+        lines: getExamAnalysisCardPreviewLines([
+          block.questionMemo,
+          block.mistakePoint ? `자주 틀리는 지점: ${block.mistakePoint}` : "",
+          block.imageSlotMemo
+        ], 4)
+      };
+    }
+
+    if (slide.type === "solution") {
+      return {
+        ...base,
+        title: `${questionLabel} 손풀이`,
+        headline: getExamAnalysisCardPreviewText(block.title, "풀이 방향과 조건 정리 흐름을 보여줍니다."),
+        lines: getExamAnalysisCardPreviewLines([
+          block.solutionMemo,
+          block.mistakePoint ? `풀이 전 점검: ${block.mistakePoint}` : "",
+          "문제/풀이 사실은 선생님 crop 이미지와 저장 메모 기준입니다."
+        ], 4)
+      };
+    }
+
+    return {
+      ...base,
+      title: "다음 시험을 준비하며",
+      headline: getExamAnalysisCardPreviewText(inputs.nextStudyPlan || inputs.blogBlockNextStudy, "다음 시험 대비 방향을 입력해 주세요."),
+      lines: getExamAnalysisCardPreviewLines([
+        inputs.blogBlockAcademyTrust,
+        inputs.blogBlockCta,
+        "더 자세한 시험 해설은 블로그에서 확인합니다."
+      ], 4)
+    };
+  });
+}
+
+function ExamAnalysisCardNewsPreviewPanel({ slides = [] }) {
+  if (!slides.length) return <div className="emptyState compact">카드뉴스 미리보기 없음</div>;
+  return (
+    <div className="examAnalysisCardNewsPreviewPanel">
+      <div className="examAnalysisCardNewsPreviewSummary">
+        <strong>카드뉴스 미리보기</strong>
+        <span>{slides.length}장 · 1080x1350 비율 검수용 · PNG export 전 화면 확인 단계</span>
+      </div>
+      <div className="examAnalysisCardNewsPreviewGrid">
+        {slides.map((slide) => (
+          <article className={`examAnalysisCardNewsPreviewCard ${slide.type}`} key={`${slide.card}-${slide.type}`}>
+            <div className="examAnalysisCardNewsPreviewTop">
+              <span>Card {String(slide.card).padStart(2, "0")}</span>
+              <small>{slide.renderMode}</small>
+            </div>
+            <div className="examAnalysisCardNewsPreviewBrand">
+              <b>으뜸수학 고태영T</b>
+              <span>{slide.schoolLabel}</span>
+            </div>
+            <div className="examAnalysisCardNewsPreviewTitle">
+              <small>{slide.examLabel}</small>
+              <strong>{slide.title}</strong>
+              <p>{slide.headline}</p>
+            </div>
+            {slide.slotLabel ? (
+              <div className="examAnalysisCardNewsPreviewSlot">
+                <span>{slide.slotLabel}</span>
+              </div>
+            ) : null}
+            <ul>
+              {slide.lines.length ? slide.lines.map((line, lineIndex) => (
+                <li key={`${slide.card}-${lineIndex}`}>{line}</li>
+              )) : <li>선생님 메모를 입력하면 이 영역의 문구 밀도를 확인할 수 있습니다.</li>}
+            </ul>
+            <div className="examAnalysisCardNewsPreviewFooter">
+              {slide.chips.map((chip) => <span key={chip}>{chip}</span>)}
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 async function downloadExamAnalysisOutputPackageZip({ activeRun = {}, model = {}, outputDrafts = {} } = {}) {
   const blogText = getExamAnalysisOutputSectionText(outputDrafts.blog);
   const instagramText = getExamAnalysisOutputSectionText(outputDrafts.instagram);
@@ -2521,6 +2689,7 @@ function ExamAnalysisOutputDraftPanel({
   const inputCount = getExamAnalysisOutputInputCount(outputDrafts.inputs);
   const inputTotal = getExamAnalysisOutputInputTotal(outputDrafts.inputs);
   const keyQuestionBlocks = normalizeExamAnalysisKeyQuestionBlocks(outputDrafts.inputs);
+  const cardPreviewSlides = createExamAnalysisCardNewsPreviewSlides({ activeRun, model, outputDrafts });
   const lastSavedAt = getExamAnalysisOutputLastSavedAt(outputDrafts);
   const saveCheckpointState = outputStatus.state === "dirty" || outputStatus.state === "saving" || outputStatus.state === "failed"
     ? outputStatus.state
@@ -2546,10 +2715,12 @@ function ExamAnalysisOutputDraftPanel({
         ? `마지막 저장 ${formatExamAnalysisEventTime(lastSavedAt)} · 새로고침 유지`
         : "산출물 저장을 누르면 입력칸과 선생님 수정본이 저장됩니다.";
   const [collapsedOutputSections, setCollapsedOutputSections] = useState({
+    topSummary: false,
     guide: true,
     baseInputs: false,
     blogBlocks: false,
     keyQuestions: false,
+    cardPreview: false,
     finalDrafts: true
   });
   const toggleOutputSection = (sectionKey) => {
@@ -2603,28 +2774,47 @@ function ExamAnalysisOutputDraftPanel({
         </div>
       </div>
 
-      <div className={`examAnalysisOutputSaveCheckpoint ${saveCheckpointState}`}>
-        <strong>{saveCheckpointTitle}</strong>
-        <span>{saveCheckpointText}</span>
-        <small>
-          입력 {inputCount}/{inputTotal}블록 · 블로그 {getExamAnalysisOutputSectionLabel(outputDrafts.blog)} · 인스타 {getExamAnalysisOutputSectionLabel(outputDrafts.instagram)}
-        </small>
+      <div className="examAnalysisOutputCollapsibleHeader">
+        <div>
+          <strong>상단 안내/저장 상태</strong>
+          <span>
+            {saveCheckpointTitle} · 입력 {inputCount}/{inputTotal}블록 · 블로그 {getExamAnalysisOutputSectionLabel(outputDrafts.blog)} · 인스타 {getExamAnalysisOutputSectionLabel(outputDrafts.instagram)}
+          </span>
+        </div>
+        <button
+          className="examAnalysisOutputCollapseButton"
+          onClick={() => toggleOutputSection("topSummary")}
+          type="button"
+        >
+          {isOutputSectionCollapsed("topSummary") ? "펼치기" : "접기"}
+        </button>
       </div>
+      {!isOutputSectionCollapsed("topSummary") ? (
+        <>
+          <div className={`examAnalysisOutputSaveCheckpoint ${saveCheckpointState}`}>
+            <strong>{saveCheckpointTitle}</strong>
+            <span>{saveCheckpointText}</span>
+            <small>
+              입력 {inputCount}/{inputTotal}블록 · 블로그 {getExamAnalysisOutputSectionLabel(outputDrafts.blog)} · 인스타 {getExamAnalysisOutputSectionLabel(outputDrafts.instagram)}
+            </small>
+          </div>
 
-      <div className="examAnalysisBenchmarkMap">
-        <div>
-          <strong>벤치마킹 글 위치표</strong>
-          <span>아래 입력칸이 네이버 글의 어느 흐름에 들어가는지 먼저 확인합니다.</span>
-        </div>
-        <div>
-          {examAnalysisOutputBenchmarkMap.map(([label, description]) => (
-            <span key={label}>
-              <strong>{label}</strong>
-              {description}
-            </span>
-          ))}
-        </div>
-      </div>
+          <div className="examAnalysisBenchmarkMap">
+            <div>
+              <strong>벤치마킹 글 위치표</strong>
+              <span>아래 입력칸이 네이버 글의 어느 흐름에 들어가는지 먼저 확인합니다.</span>
+            </div>
+            <div>
+              {examAnalysisOutputBenchmarkMap.map(([label, description]) => (
+                <span key={label}>
+                  <strong>{label}</strong>
+                  {description}
+                </span>
+              ))}
+            </div>
+          </div>
+        </>
+      ) : null}
 
       <div className="examAnalysisOutputCollapsibleHeader">
         <div>
@@ -2665,24 +2855,26 @@ function ExamAnalysisOutputDraftPanel({
         </div>
       ) : null}
 
-      <div className="examAnalysisOutputVisibility">
-        <span>공개 범위</span>
-        {[
-          ["blog_instagram", "블로그+인스타"],
-          ["blog", "블로그용"],
-          ["instagram", "인스타용"],
-          ["internal", "내부용"]
-        ].map(([value, label]) => (
-          <button
-            className={outputDrafts.inputs.visibility === value ? "active" : ""}
-            key={value}
-            onClick={() => onUpdateInput("visibility", value)}
-            type="button"
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      {!isOutputSectionCollapsed("topSummary") ? (
+        <div className="examAnalysisOutputVisibility">
+          <span>공개 범위</span>
+          {[
+            ["blog_instagram", "블로그+인스타"],
+            ["blog", "블로그용"],
+            ["instagram", "인스타용"],
+            ["internal", "내부용"]
+          ].map(([value, label]) => (
+            <button
+              className={outputDrafts.inputs.visibility === value ? "active" : ""}
+              key={value}
+              onClick={() => onUpdateInput("visibility", value)}
+              type="button"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       <div className="examAnalysisOutputCollapsibleHeader">
         <div>
@@ -2821,6 +3013,23 @@ function ExamAnalysisOutputDraftPanel({
             </article>
           ))}
         </div>
+      ) : null}
+
+      <div className="examAnalysisOutputCollapsibleHeader">
+        <div>
+          <strong>카드뉴스 미리보기 Gate 2</strong>
+          <span>현재 선생님 입력값과 최종 검수 모델을 읽어 카드 수, 순서, 문구 밀도, 문제/손풀이 슬롯을 화면에서 먼저 확인합니다.</span>
+        </div>
+        <button
+          className="examAnalysisOutputCollapseButton"
+          onClick={() => toggleOutputSection("cardPreview")}
+          type="button"
+        >
+          {isOutputSectionCollapsed("cardPreview") ? "펼치기" : "접기"}
+        </button>
+      </div>
+      {!isOutputSectionCollapsed("cardPreview") ? (
+        <ExamAnalysisCardNewsPreviewPanel slides={cardPreviewSlides} />
       ) : null}
 
       <div className="examAnalysisOutputCollapsibleHeader">
