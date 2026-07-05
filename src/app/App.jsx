@@ -1520,24 +1520,8 @@ const examAnalysisBlogBlockFields = [
     placeholder: "예: 난도가 크게 튄 시험은 아니지만, 쉬운 시험이라고 보기에는 후반부 조건 정리가 까다로웠습니다."
   },
   {
-    key: "blogBlockKeyQuestion",
-    order: 4,
-    type: "questionExplanation",
-    label: "주요문항 설명",
-    guide: "주요문항 카드마다 반복될 설명 기준입니다. 문항번호, 단원, 대표 이유, 자주 틀리는 지점을 적어주세요.",
-    placeholder: "예: 객관식 9번. 단계별 선발 인원과 경쟁률 관계를 식으로 정리하는 문항입니다."
-  },
-  {
-    key: "blogBlockSolution",
-    order: 5,
-    type: "questionExplanation",
-    label: "손풀이 설명",
-    guide: "손풀이 카드 뒤에 붙일 설명입니다. 정답보다 풀이 순서, 조건 정리, 다음 훈련 방향을 적어주세요.",
-    placeholder: "예: 전체 인원 x, 1차 합격자 y 설정 -> 조건별 식 세우기 -> 최종 경쟁률 확인."
-  },
-  {
     key: "blogBlockNextStudy",
-    order: 6,
+    order: 4,
     type: "paragraph",
     label: "다음 시험 준비",
     guide: "마무리 카드 전후에 붙일 학습 전략입니다. 다음 시험까지 학생이 실제로 해야 할 훈련을 구체적으로 적어주세요.",
@@ -1545,7 +1529,7 @@ const examAnalysisBlogBlockFields = [
   },
   {
     key: "blogBlockAcademyTrust",
-    order: 7,
+    order: 5,
     type: "paragraph",
     label: "학원 분석 신뢰 문장",
     guide: "학원이 시험지를 어떻게 분석하고 수업/보충에 반영하는지 보여주는 문장입니다.",
@@ -1553,7 +1537,7 @@ const examAnalysisBlogBlockFields = [
   },
   {
     key: "blogBlockCta",
-    order: 8,
+    order: 6,
     type: "cta",
     label: "CTA",
     guide: "상담/블로그 유입/위치/전화 안내 메모입니다. 실제 연락처는 자리표시자로 두어도 됩니다.",
@@ -1565,12 +1549,54 @@ const legacyExamAnalysisBlogInstructorSectionGroups = {
   blogBlockOpening: ["blogSectionOpening", "blogSectionIntroCard"],
   blogBlockStructure: ["blogSectionStructureText1", "blogSectionStructureCard", "blogSectionStructureText2"],
   blogBlockOverallReview: ["blogSectionOverallCard", "blogSectionOverallText1", "blogSectionOverallText2"],
-  blogBlockKeyQuestion: ["blogSectionQuestion1Look", "blogSectionQuestion1Explain", "blogSectionQuestion23Pattern"],
-  blogBlockSolution: ["blogSectionQuestion1SolutionCard", "blogSectionQuestion1SolutionText"],
   blogBlockNextStudy: ["blogSectionNextExam"],
   blogBlockAcademyTrust: ["blogSectionClosing1", "blogSectionClosing2", "blogSectionClosing3"],
   blogBlockCta: ["blogSectionCta"]
 };
+
+const legacyExamAnalysisKeyQuestionGroups = {
+  questionMemo: ["blogBlockKeyQuestion", "blogSectionQuestion1Look", "blogSectionQuestion1Explain", "blogSectionQuestion23Pattern"],
+  solutionMemo: ["blogBlockSolution", "blogSectionQuestion1SolutionCard", "blogSectionQuestion1SolutionText"]
+};
+
+const examAnalysisKeyQuestionBlockFields = [
+  {
+    key: "questionNumber",
+    label: "문항번호",
+    placeholder: "예: 9번",
+    type: "input"
+  },
+  {
+    key: "title",
+    label: "카드 제목/핵심",
+    placeholder: "예: 조건을 식으로 바꾸는 문항",
+    type: "input"
+  },
+  {
+    key: "questionMemo",
+    label: "주요문항 설명",
+    placeholder: "왜 대표 문항인지, 어떤 단원/유형인지, 학생이 어디서 흔들리는지 적어주세요.",
+    type: "textarea"
+  },
+  {
+    key: "mistakePoint",
+    label: "자주 틀리는 지점",
+    placeholder: "예: 2차 합격자와 최종 합격자 조건을 혼동하기 쉽습니다.",
+    type: "textarea"
+  },
+  {
+    key: "solutionMemo",
+    label: "손풀이 설명",
+    placeholder: "정답보다 풀이 순서, 조건 정리, 다음 훈련 방향을 적어주세요.",
+    type: "textarea"
+  },
+  {
+    key: "imageSlotMemo",
+    label: "이미지 슬롯 메모",
+    placeholder: "예: 문제 crop 1장, 손풀이 crop 1장 사용. 이미지는 선생님이 직접 crop.",
+    type: "textarea"
+  }
+];
 
 const examAnalysisOutputAllInputFields = [
   ...examAnalysisOutputInputFields,
@@ -1592,6 +1618,58 @@ const examAnalysisOutputAiBoundaryRules = [
   "AI 불가: 선생님 저장본을 자동으로 덮어쓰기, Canva 실제 레이아웃을 확인 없이 완료 처리하기"
 ];
 
+function createEmptyExamAnalysisKeyQuestionBlock(index = 1) {
+  return {
+    blockId: `key-question-${index}`,
+    questionNumber: "",
+    title: "",
+    questionMemo: "",
+    mistakePoint: "",
+    solutionMemo: "",
+    imageSlotMemo: ""
+  };
+}
+
+function normalizeExamAnalysisKeyQuestionBlock(block = {}, index = 0) {
+  const empty = createEmptyExamAnalysisKeyQuestionBlock(index + 1);
+  const blockId = String(block.blockId || empty.blockId || `key-question-${index + 1}`).trim();
+  return {
+    ...empty,
+    blockId,
+    questionNumber: String(block.questionNumber ?? ""),
+    title: String(block.title ?? ""),
+    questionMemo: String(block.questionMemo ?? ""),
+    mistakePoint: String(block.mistakePoint ?? ""),
+    solutionMemo: String(block.solutionMemo ?? ""),
+    imageSlotMemo: String(block.imageSlotMemo ?? "")
+  };
+}
+
+function getExamAnalysisKeyQuestionBlockHasContent(block = {}) {
+  return examAnalysisKeyQuestionBlockFields.some((field) => String(block[field.key] || "").trim());
+}
+
+function getLegacyExamAnalysisKeyQuestionText(inputs = {}, keys = []) {
+  return keys
+    .map((key) => String(inputs?.[key] || "").trim())
+    .filter(Boolean)
+    .join("\n");
+}
+
+function normalizeExamAnalysisKeyQuestionBlocks(inputs = {}) {
+  if (Array.isArray(inputs.keyQuestionBlocks) && inputs.keyQuestionBlocks.length) {
+    return inputs.keyQuestionBlocks.map(normalizeExamAnalysisKeyQuestionBlock);
+  }
+  const legacyQuestionMemo = getLegacyExamAnalysisKeyQuestionText(inputs, legacyExamAnalysisKeyQuestionGroups.questionMemo);
+  const legacySolutionMemo = getLegacyExamAnalysisKeyQuestionText(inputs, legacyExamAnalysisKeyQuestionGroups.solutionMemo);
+  const legacyBlock = {
+    ...createEmptyExamAnalysisKeyQuestionBlock(1),
+    questionMemo: legacyQuestionMemo,
+    solutionMemo: legacySolutionMemo
+  };
+  return [normalizeExamAnalysisKeyQuestionBlock(legacyBlock, 0)];
+}
+
 function createEmptyExamAnalysisOutputDrafts() {
   return {
     inputs: {
@@ -1602,7 +1680,8 @@ function createEmptyExamAnalysisOutputDrafts() {
       nextStudyPlan: "",
       imageSlotNotes: "",
       schoolVariationNotes: "",
-      ...Object.fromEntries(examAnalysisBlogBlockFields.map((field) => [field.key, ""]))
+      ...Object.fromEntries(examAnalysisBlogBlockFields.map((field) => [field.key, ""])),
+      keyQuestionBlocks: [createEmptyExamAnalysisKeyQuestionBlock(1)]
     },
     blog: {
       aiDraft: "",
@@ -1665,7 +1744,8 @@ function getExamAnalysisOutputDraftsFromRun(run = {}) {
   return {
     inputs: {
       ...empty.inputs,
-      ...(storedInputs && typeof storedInputs === "object" ? storedInputs : {})
+      ...(storedInputs && typeof storedInputs === "object" ? storedInputs : {}),
+      keyQuestionBlocks: normalizeExamAnalysisKeyQuestionBlocks(storedInputs)
     },
     blog: normalizeExamAnalysisOutputDraftSection(stored.blog ?? {}),
     instagram: normalizeExamAnalysisOutputDraftSection(stored.instagram ?? {})
@@ -1724,7 +1804,16 @@ function mergeExamAnalysisOutputDraftsPreservingLocalEdits(nextDrafts = {}, loca
 }
 
 function getExamAnalysisOutputInputCount(inputs = {}) {
-  return examAnalysisOutputAllInputFields.filter((field) => String(inputs[field.key] || "").trim()).length;
+  const regularInputCount = examAnalysisOutputAllInputFields.filter((field) => String(inputs[field.key] || "").trim()).length;
+  const keyQuestionInputCount = (inputs.keyQuestionBlocks ?? []).filter(getExamAnalysisKeyQuestionBlockHasContent).length;
+  return regularInputCount + keyQuestionInputCount;
+}
+
+function getExamAnalysisOutputInputTotal(inputs = {}) {
+  const keyQuestionBlocks = Array.isArray(inputs.keyQuestionBlocks) && inputs.keyQuestionBlocks.length
+    ? inputs.keyQuestionBlocks
+    : [createEmptyExamAnalysisKeyQuestionBlock(1)];
+  return examAnalysisOutputAllInputFields.length + keyQuestionBlocks.length;
 }
 
 function sanitizeExamAnalysisOutputFileNamePart(value = "") {
@@ -1797,18 +1886,38 @@ const examAnalysisCardNewsSlideTypes = [
   { type: "solution", label: "손풀이 슬라이드" },
   { type: "closing", label: "마무리 슬라이드" }
 ];
-const examAnalysisCardNewsModel = [
-  { card: 1, type: "cover", role: "시작 슬라이드", renderMode: "통렌더", suggestedSource: "cards/card-01.png", slot: "학교/학년/고사/과목 + 한줄 훅" },
-  { card: 2, type: "examStructure", role: "시험구조 슬라이드", renderMode: "통렌더", suggestedSource: "cards/card-02.png", slot: "객관식/서술형/만점/범위/출제 흐름" },
-  { card: 3, type: "overallReview", role: "총평 슬라이드", renderMode: "통렌더", suggestedSource: "cards/card-03.png", slot: "난도/점수 갈림/실수 포인트/고득점 전략" },
-  { card: 4, type: "keyQuestion", role: "주요문항 1 슬라이드", renderMode: "문제 이미지 슬롯", suggestedSource: "teacher-crops/question-01.png + cards/card-04.png", slot: "선생님이 직접 crop한 문제 이미지 + 왜 중요한지" },
-  { card: 5, type: "solution", role: "손풀이 1 슬라이드", renderMode: "손풀이 이미지 슬롯", suggestedSource: "teacher-crops/solution-01.png + cards/card-05.png", slot: "선생님이 직접 crop한 손풀이 이미지 + 풀이 흐름" },
-  { card: 6, type: "keyQuestion", role: "주요문항 2 슬라이드", renderMode: "문제 이미지 슬롯", suggestedSource: "teacher-crops/question-02.png + cards/card-06.png", slot: "선생님이 직접 crop한 문제 이미지 + 자주 틀리는 지점" },
-  { card: 7, type: "solution", role: "손풀이 2 슬라이드", renderMode: "손풀이 이미지 슬롯", suggestedSource: "teacher-crops/solution-02.png + cards/card-07.png", slot: "선생님이 직접 crop한 손풀이 이미지 + 핵심 계산" },
-  { card: 8, type: "keyQuestion", role: "주요문항 3 슬라이드", renderMode: "문제 이미지 슬롯", suggestedSource: "teacher-crops/question-03.png + cards/card-08.png", slot: "선생님이 직접 crop한 문제 이미지 + 변별 포인트" },
-  { card: 9, type: "solution", role: "손풀이 3 슬라이드", renderMode: "손풀이 이미지 슬롯", suggestedSource: "teacher-crops/solution-03.png + cards/card-09.png", slot: "선생님이 직접 crop한 손풀이 이미지 + 다음 훈련 방향" },
-  { card: 10, type: "closing", role: "마무리 슬라이드", renderMode: "통렌더", suggestedSource: "cards/card-10.png", slot: "다음 시험 대비 + 블로그 유입/상담 CTA" }
-];
+function createExamAnalysisCardNewsModel(keyQuestionBlocks = [createEmptyExamAnalysisKeyQuestionBlock(1)]) {
+  const questionBlocks = Array.isArray(keyQuestionBlocks) && keyQuestionBlocks.length
+    ? keyQuestionBlocks
+    : [createEmptyExamAnalysisKeyQuestionBlock(1)];
+  const slides = [
+    { type: "cover", role: "시작 슬라이드", renderMode: "통렌더", slot: "학교/학년/고사/과목 + 한줄 훅" },
+    { type: "examStructure", role: "시험구조 슬라이드", renderMode: "통렌더", slot: "객관식/서술형/만점/범위/출제 흐름" },
+    { type: "overallReview", role: "총평 슬라이드", renderMode: "통렌더", slot: "난도/점수 갈림/실수 포인트/고득점 전략" },
+    ...questionBlocks.flatMap((block, index) => ([
+      {
+        type: "keyQuestion",
+        role: `주요문항 ${index + 1} 슬라이드`,
+        renderMode: "문제 이미지 슬롯",
+        slot: `${block.questionNumber ? `${block.questionNumber} ` : ""}선생님 crop 문제 이미지 + 왜 중요한지`
+      },
+      {
+        type: "solution",
+        role: `손풀이 ${index + 1} 슬라이드`,
+        renderMode: "손풀이 이미지 슬롯",
+        slot: `${block.questionNumber ? `${block.questionNumber} ` : ""}선생님 crop 손풀이 이미지 + 풀이 흐름`
+      }
+    ])),
+    { type: "closing", role: "마무리 슬라이드", renderMode: "통렌더", slot: "다음 시험 대비 + 블로그 유입/상담 CTA" }
+  ];
+  return slides.map((slide, index) => ({
+    ...slide,
+    card: index + 1,
+    suggestedSource: `cards/card-${String(index + 1).padStart(2, "0")}.png`
+  }));
+}
+
+const examAnalysisCardNewsModel = createExamAnalysisCardNewsModel();
 const examAnalysisCanvaCardPlan = examAnalysisCardNewsModel;
 
 function getExamAnalysisChartPartLabel(question = {}) {
@@ -2219,21 +2328,26 @@ async function createExamAnalysisZipBlob(files = []) {
   return new Blob([...chunks, ...centralChunks, endHeader], { type: "application/zip" });
 }
 
-function createExamAnalysisPackageReadme({ activeRun = {}, chartFiles = [] } = {}) {
+function getExamAnalysisOutputCardPlan(outputDrafts = {}) {
+  return createExamAnalysisCardNewsModel(outputDrafts?.inputs?.keyQuestionBlocks);
+}
+
+function createExamAnalysisPackageReadme({ activeRun = {}, outputDrafts = {}, chartFiles = [] } = {}) {
+  const canvaCardPlan = getExamAnalysisOutputCardPlan(outputDrafts);
   return [
     "으뜸수학학원 고태영T 시험분석 산출물 패키지",
     "",
     "사용 방법",
     "1. texts/blog-draft.txt 내용을 네이버 블로그 에디터에 붙여넣고 문장을 최종 수정합니다.",
-    "2. texts/instagram-card-draft.txt 내용을 Canva 10장 카드뉴스 문구로 사용합니다.",
+    "2. texts/instagram-card-draft.txt 내용을 Canva 카드뉴스 문구로 사용합니다.",
     `3. charts 폴더의 PNG 이미지는 ${examAnalysisChartPngExportScale}배 해상도 고화질 이미지입니다. 통렌더 카드의 재료 또는 네이버 블로그 보조 이미지로 사용합니다.`,
-    "4. texts/canva-10-card-plan.txt 기준으로 6개 슬라이드 유형과 10장 반복 구조를 확인합니다.",
+    "4. texts/canva-10-card-plan.txt 기준으로 6개 슬라이드 유형과 주요문항 반복 구조를 확인합니다.",
     "5. texts/blog-block-guide.txt 기준으로 블로그 블록 조립 순서를 확인합니다.",
     "6. charts-svg 폴더의 SVG 원본은 PPT/Canva에서 더 선명한 원본이 필요할 때 사용합니다.",
     "7. 외부 에디터에서 수정한 최종본은 현재 앱으로 자동 동기화되지 않습니다.",
     "",
-    "카드뉴스 10장 구조",
-    examAnalysisCanvaCardPlan.map((item) => `${item.card}. ${item.role} [${item.renderMode}] - ${item.slot}`).join("\n"),
+    `카드뉴스 구조 (${canvaCardPlan.length}장)`,
+    canvaCardPlan.map((item) => `${item.card}. ${item.role} [${item.renderMode}] - ${item.slot}`).join("\n"),
     "",
     "포함 차트",
     chartFiles.length ? chartFiles.map((file) => `- ${file.name}`).join("\n") : "- 차트 없음",
@@ -2268,7 +2382,7 @@ function createExamAnalysisPackageManifest({ activeRun = {}, outputDrafts = {}, 
       pngScale: examAnalysisChartPngExportScale,
       policy: "용량보다 선명도 우선"
     },
-    canvaSlots: examAnalysisCanvaCardPlan,
+    canvaSlots: getExamAnalysisOutputCardPlan(outputDrafts),
     draftStatus: {
       blog: getExamAnalysisOutputSectionLabel(outputDrafts.blog),
       instagram: getExamAnalysisOutputSectionLabel(outputDrafts.instagram)
@@ -2276,14 +2390,15 @@ function createExamAnalysisPackageManifest({ activeRun = {}, outputDrafts = {}, 
   }, null, 2);
 }
 
-function createExamAnalysisCanvaCardPlanText() {
+function createExamAnalysisCanvaCardPlanText(outputDrafts = {}) {
+  const canvaCardPlan = getExamAnalysisOutputCardPlan(outputDrafts);
   return [
-    "카드뉴스 10장 구조 - 6개 슬라이드 유형 반복",
+    `카드뉴스 ${canvaCardPlan.length}장 구조 - 6개 슬라이드 유형 반복`,
     "",
     "슬라이드 유형",
     examAnalysisCardNewsSlideTypes.map((item) => `- ${item.type}: ${item.label}`).join("\n"),
     "",
-    ...examAnalysisCanvaCardPlan.map((item) => [
+    ...canvaCardPlan.map((item) => [
       `[카드 ${item.card}] ${item.role}`,
       `슬라이드 유형: ${item.type}`,
       `제작 방식: ${item.renderMode}`,
@@ -2293,8 +2408,9 @@ function createExamAnalysisCanvaCardPlanText() {
     "",
     "운영 원칙",
     "- 카드 구조는 학교별로 바꾸지 않고, 텍스트/색상 포인트/주요문항만 바꿉니다.",
+    "- 주요문항이 늘어나면 주요문항/손풀이 카드 쌍이 같은 구조로 반복됩니다.",
     "- 시작/시험구조/총평/마무리는 통렌더하고, 주요문항/손풀이 카드는 선생님 crop 이미지만 슬롯에 둡니다.",
-    "- 인스타에는 10장 카드뉴스를 올리고, 마지막 카드에서 블로그 상세 해설로 유입합니다.",
+    "- 인스타에는 생성된 카드뉴스를 올리고, 마지막 카드에서 블로그 상세 해설로 유입합니다.",
     "- 블로그에는 같은 카드뉴스 이미지와 더 긴 문항별 해설/다음 대비 전략을 붙입니다."
   ].join("\n\n");
 }
@@ -2317,7 +2433,7 @@ function createExamAnalysisBlogBlockGuideText() {
     "- 시험구조 설명 -> [card-02.png 삽입]",
     "- 총평/변별 포인트 -> [card-03.png 삽입]",
     "- 주요문항 설명 -> [card-04.png 삽입] -> 손풀이 설명 -> [card-05.png 삽입]",
-    "- 주요문항/손풀이 쌍 반복 -> [card-10.png 삽입] -> CTA",
+    "- 주요문항/손풀이 쌍 반복 -> 마지막 마무리 카드 삽입 -> CTA",
     "",
     "AI 편집 규칙",
     ...examAnalysisOutputAiBoundaryRules.map((rule) => `- ${rule}`),
@@ -2340,11 +2456,11 @@ async function downloadExamAnalysisOutputPackageZip({ activeRun = {}, model = {}
   const chartFiles = await createExamAnalysisChartPngFiles(model);
   const svgFiles = createExamAnalysisChartSvgFiles(model);
   const files = [
-    { name: "README.txt", text: createExamAnalysisPackageReadme({ activeRun, chartFiles }) },
+    { name: "README.txt", text: createExamAnalysisPackageReadme({ activeRun, outputDrafts, chartFiles }) },
     { name: "manifest.json", text: createExamAnalysisPackageManifest({ activeRun, outputDrafts, chartFiles }) },
     { name: "texts/blog-draft.txt", text: blogText || "블로그 초안 없음" },
     { name: "texts/instagram-card-draft.txt", text: instagramText || "인스타 카드 초안 없음" },
-    { name: "texts/canva-10-card-plan.txt", text: createExamAnalysisCanvaCardPlanText() },
+    { name: "texts/canva-10-card-plan.txt", text: createExamAnalysisCanvaCardPlanText(outputDrafts) },
     { name: "texts/blog-block-guide.txt", text: createExamAnalysisBlogBlockGuideText() },
     ...chartFiles,
     ...svgFiles
@@ -2373,6 +2489,9 @@ function ExamAnalysisOutputDraftPanel({
   onDownloadOutputPackageZip,
   onSaveOutputDrafts,
   onUpdateInput,
+  onAddKeyQuestionBlock,
+  onUpdateKeyQuestionBlock,
+  onRemoveKeyQuestionBlock,
   onUpdateTeacherDraft
 }) {
   const hasRun = Boolean(activeRun?.analysisRunId);
@@ -2381,6 +2500,8 @@ function ExamAnalysisOutputDraftPanel({
   const blogText = getExamAnalysisOutputSectionText(outputDrafts.blog);
   const instagramText = getExamAnalysisOutputSectionText(outputDrafts.instagram);
   const inputCount = getExamAnalysisOutputInputCount(outputDrafts.inputs);
+  const inputTotal = getExamAnalysisOutputInputTotal(outputDrafts.inputs);
+  const keyQuestionBlocks = normalizeExamAnalysisKeyQuestionBlocks(outputDrafts.inputs);
   const lastSavedAt = getExamAnalysisOutputLastSavedAt(outputDrafts);
   const saveCheckpointState = outputStatus.state === "dirty" || outputStatus.state === "saving" || outputStatus.state === "failed"
     ? outputStatus.state
@@ -2453,7 +2574,7 @@ function ExamAnalysisOutputDraftPanel({
         <strong>{saveCheckpointTitle}</strong>
         <span>{saveCheckpointText}</span>
         <small>
-          입력 {inputCount}/{examAnalysisOutputAllInputFields.length}칸 · 블로그 {getExamAnalysisOutputSectionLabel(outputDrafts.blog)} · 인스타 {getExamAnalysisOutputSectionLabel(outputDrafts.instagram)}
+          입력 {inputCount}/{inputTotal}블록 · 블로그 {getExamAnalysisOutputSectionLabel(outputDrafts.blog)} · 인스타 {getExamAnalysisOutputSectionLabel(outputDrafts.instagram)}
         </small>
       </div>
 
@@ -2471,7 +2592,7 @@ function ExamAnalysisOutputDraftPanel({
           <li>😊 인사말 끝 · 📌 주요문항 시작 · ✅ 핵심 포인트/자주 틀리는 지점</li>
           <li>⬇️⬇️ CTA · 📍 위치 · ☎ 전화번호 자리표시자를 사용합니다.</li>
           <li>[형광펜: 하늘색]핵심 결론[/형광펜], [형광펜: 노랑]주의 지점[/형광펜]처럼 표시합니다.</li>
-          <li>Canva는 10장 고정 구조로 만들되, 수정이 필요 없는 카드는 통렌더하고 시험문제/손풀이 원본이 필요한 카드만 슬롯을 둡니다.</li>
+          <li>Canva는 주요문항 3개 기준 10장 구조를 기본으로 보고, 주요문항 수가 바뀌면 주요문항/손풀이 카드 쌍만 반복합니다.</li>
         </ol>
         <small>AI 편집 경계</small>
         <ol>
@@ -2520,18 +2641,83 @@ function ExamAnalysisOutputDraftPanel({
         <span>18개 고정 섹션이 아니라 카드 사이에 들어갈 글의 성격을 적는 칸입니다. AI는 이 메모를 바탕으로 줄나눔, 이모티콘, 형광펜 태그, 문체만 정리합니다.</span>
       </div>
 
-      <div className="examAnalysisOutputInputGrid instructorSections">
+      <div className="examAnalysisBlogBlockGrid">
         {examAnalysisBlogBlockFields.map((field) => (
-          <label key={field.key}>
-            <span>{field.order}. {field.label}</span>
-            <small>{field.guide}</small>
+          <article className="examAnalysisBlogBlockCard" key={field.key}>
+            <div className="examAnalysisBlogBlockCardHeader">
+              <span>{field.order}</span>
+              <div>
+                <strong>{field.label}</strong>
+                <small>{field.type}</small>
+              </div>
+            </div>
+            <p>{field.guide}</p>
             <textarea
               onChange={(event) => onUpdateInput(field.key, event.target.value)}
               placeholder={field.placeholder}
               rows={3}
               value={outputDrafts.inputs[field.key] || ""}
             />
-          </label>
+          </article>
+        ))}
+      </div>
+
+      <div className="examAnalysisKeyQuestionHeader">
+        <div>
+          <strong>주요문항 반복 블록</strong>
+          <span>주요문항 하나가 추가될 때마다 주요문항 카드, 손풀이 카드, 블로그 설명글 구조가 함께 반복됩니다. 문제와 손풀이는 선생님이 직접 crop한 이미지를 슬롯에 넣는 전제입니다.</span>
+        </div>
+        <button
+          className="secondaryButton"
+          disabled={isOutputBusy}
+          onClick={onAddKeyQuestionBlock}
+          type="button"
+        >
+          주요문항 추가
+        </button>
+      </div>
+
+      <div className="examAnalysisKeyQuestionList">
+        {keyQuestionBlocks.map((block, index) => (
+          <article className="examAnalysisKeyQuestionCard" key={block.blockId || index}>
+            <div className="examAnalysisKeyQuestionCardHeader">
+              <div>
+                <strong>주요문항 {index + 1}</strong>
+                <span>주요문항 슬라이드 + 손풀이 슬라이드 + 블로그 설명글</span>
+              </div>
+              <button
+                disabled={isOutputBusy || keyQuestionBlocks.length <= 1}
+                onClick={() => onRemoveKeyQuestionBlock(block.blockId)}
+                type="button"
+              >
+                삭제
+              </button>
+            </div>
+            <div className="examAnalysisKeyQuestionFields">
+              {examAnalysisKeyQuestionBlockFields.map((field) => (
+                <label className={field.type === "textarea" ? "wide" : ""} key={field.key}>
+                  <span>{field.label}</span>
+                  {field.type === "input" ? (
+                    <input
+                      disabled={isOutputBusy}
+                      onChange={(event) => onUpdateKeyQuestionBlock(block.blockId, field.key, event.target.value)}
+                      placeholder={field.placeholder}
+                      type="text"
+                      value={block[field.key] || ""}
+                    />
+                  ) : (
+                    <textarea
+                      disabled={isOutputBusy}
+                      onChange={(event) => onUpdateKeyQuestionBlock(block.blockId, field.key, event.target.value)}
+                      placeholder={field.placeholder}
+                      rows={3}
+                      value={block[field.key] || ""}
+                    />
+                  )}
+                </label>
+              ))}
+            </div>
+          </article>
         ))}
       </div>
 
@@ -9125,6 +9311,58 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     setOutputStatus({ state: "dirty", message: "시험분석 산출물 · 수정됨 · 저장 필요" });
   }
 
+  function updateOutputKeyQuestionBlock(blockId, fieldKey, value) {
+    setOutputDrafts((current) => {
+      const currentBlocks = normalizeExamAnalysisKeyQuestionBlocks(current.inputs);
+      return {
+        ...current,
+        inputs: {
+          ...current.inputs,
+          keyQuestionBlocks: currentBlocks.map((block) => (
+            block.blockId === blockId ? { ...block, [fieldKey]: value } : block
+          ))
+        }
+      };
+    });
+    setOutputStatus({ state: "dirty", message: "시험분석 산출물 · 주요문항 수정됨 · 저장 필요" });
+  }
+
+  function addOutputKeyQuestionBlock() {
+    setOutputDrafts((current) => {
+      const currentBlocks = normalizeExamAnalysisKeyQuestionBlocks(current.inputs);
+      const nextIndex = currentBlocks.length + 1;
+      const nextBlock = {
+        ...createEmptyExamAnalysisKeyQuestionBlock(nextIndex),
+        blockId: `key-question-${Date.now()}-${nextIndex}`
+      };
+      return {
+        ...current,
+        inputs: {
+          ...current.inputs,
+          keyQuestionBlocks: [...currentBlocks, nextBlock]
+        }
+      };
+    });
+    setOutputStatus({ state: "dirty", message: "시험분석 산출물 · 주요문항 추가됨 · 저장 필요" });
+  }
+
+  function removeOutputKeyQuestionBlock(blockId) {
+    setOutputDrafts((current) => {
+      const currentBlocks = normalizeExamAnalysisKeyQuestionBlocks(current.inputs);
+      const nextBlocks = currentBlocks.length > 1
+        ? currentBlocks.filter((block) => block.blockId !== blockId)
+        : currentBlocks;
+      return {
+        ...current,
+        inputs: {
+          ...current.inputs,
+          keyQuestionBlocks: nextBlocks
+        }
+      };
+    });
+    setOutputStatus({ state: "dirty", message: "시험분석 산출물 · 주요문항 삭제됨 · 저장 필요" });
+  }
+
   function updateOutputTeacherDraft(outputType, value) {
     setOutputDrafts((current) => ({
       ...current,
@@ -9172,7 +9410,12 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       setOutputStatus({ state: "failed", message: "시험분석 산출물 · 분석을 먼저 저장해 주세요." });
       return;
     }
-    const inputValues = examAnalysisOutputAllInputFields.map((field) => outputDrafts.inputs[field.key]);
+    const keyQuestionValues = normalizeExamAnalysisKeyQuestionBlocks(outputDrafts.inputs)
+      .flatMap((block) => examAnalysisKeyQuestionBlockFields.map((field) => block[field.key]));
+    const inputValues = [
+      ...examAnalysisOutputAllInputFields.map((field) => outputDrafts.inputs[field.key]),
+      ...keyQuestionValues
+    ];
     if (!inputValues.some((value) => String(value || "").trim())) {
       setOutputStatus({ state: "failed", message: "시험분석 산출물 · 먼저 기본 메모 또는 블로그 흐름 블록 중 하나 이상을 작성해 주세요." });
       return;
@@ -10055,11 +10298,14 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
             isSavingOutputDrafts={isSavingOutputDrafts}
             model={finalPreviewModel}
             onGenerateOutputDraft={generateOutputDraft}
+            onAddKeyQuestionBlock={addOutputKeyQuestionBlock}
             onCopyOutputDraft={copyOutputDraft}
             onDownloadOutputDraft={downloadOutputDraft}
             onDownloadOutputPackageZip={downloadOutputPackageZip}
+            onRemoveKeyQuestionBlock={removeOutputKeyQuestionBlock}
             onSaveOutputDrafts={saveOutputDrafts}
             onUpdateInput={updateOutputInput}
+            onUpdateKeyQuestionBlock={updateOutputKeyQuestionBlock}
             onUpdateTeacherDraft={updateOutputTeacherDraft}
             outputDrafts={outputDrafts}
             outputStatus={outputStatus}
