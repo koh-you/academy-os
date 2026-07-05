@@ -2488,17 +2488,22 @@ function getExamAnalysisCardPreviewLines(values = [], maxCount = 4) {
 }
 
 function createExamAnalysisCardNewsPreviewSlides({ activeRun = {}, model = {}, outputDrafts = {} } = {}) {
-  const inputs = outputDrafts.inputs || {};
+  const run = activeRun && typeof activeRun === "object" ? activeRun : {};
+  const previewModel = model && typeof model === "object" ? model : {};
+  const drafts = outputDrafts && typeof outputDrafts === "object" ? outputDrafts : {};
+  const inputs = drafts.inputs && typeof drafts.inputs === "object" ? drafts.inputs : {};
   const keyQuestionBlocks = normalizeExamAnalysisKeyQuestionBlocks(inputs);
-  const cardPlan = getExamAnalysisOutputCardPlan(outputDrafts);
-  const meta = model?.meta || {};
-  const schoolLabel = [activeRun.schoolName || meta.schoolName, activeRun.grade || meta.grade].filter(Boolean).join(" ") || "학교/학년";
-  const examLabel = [activeRun.examCycle || activeRun.examTerm || meta.examCycle, activeRun.subject || meta.subject].filter(Boolean).join(" · ") || "고사/과목";
-  const totalQuestions = Number(meta.totalQuestions || model?.questions?.length || 0);
-  const partSummary = (model?.partDistribution || [])
+  const cardPlan = getExamAnalysisOutputCardPlan(drafts);
+  const meta = previewModel.meta && typeof previewModel.meta === "object" ? previewModel.meta : {};
+  const schoolLabel = [run.schoolName || meta.schoolName, run.grade || meta.grade].filter(Boolean).join(" ") || "학교/학년";
+  const examLabel = [run.examCycle || run.examTerm || meta.examCycle, run.subject || meta.subject].filter(Boolean).join(" · ") || "고사/과목";
+  const totalQuestions = Number(meta.totalQuestions || previewModel.questions?.length || 0);
+  const partDistribution = Array.isArray(previewModel.partDistribution) ? previewModel.partDistribution : [];
+  const difficultyDistribution = Array.isArray(previewModel.difficultyDistribution) ? previewModel.difficultyDistribution : [];
+  const partSummary = partDistribution
     .slice(0, 4)
     .map((item) => `${item.label} ${item.count}문항`);
-  const difficultySummary = (model?.difficultyDistribution || [])
+  const difficultySummary = difficultyDistribution
     .slice(0, 4)
     .map((item) => `${item.label} ${item.count}문항`);
 
