@@ -2620,6 +2620,71 @@ function getExamAnalysisCardDisplayTitle(slide = {}) {
   };
 }
 
+function ExamAnalysisBenchmarkDonut({ segments = [], centerLabel = "단원" }) {
+  const visibleSegments = (Array.isArray(segments) ? segments : [])
+    .filter((segment) => Number(segment.count || 0) > 0)
+    .slice(0, 5);
+  let offset = 0;
+  if (!visibleSegments.length) {
+    return <div className="examAnalysisBenchmarkChartEmpty">차트 데이터 없음</div>;
+  }
+  return (
+    <div className="examAnalysisBenchmarkDonutLayout">
+      <svg className="examAnalysisBenchmarkDonut" viewBox="0 0 42 42" role="img" aria-label="카드뉴스 단원별 출제 비중">
+        <circle className="examAnalysisBenchmarkDonutBase" cx="21" cy="21" r="15.9155" />
+        {visibleSegments.map((segment) => {
+          const percent = Math.max(0, Math.min(100, Number(segment.percent || 0)));
+          const circle = (
+            <circle
+              className="examAnalysisBenchmarkDonutSlice"
+              cx="21"
+              cy="21"
+              key={segment.label}
+              r="15.9155"
+              stroke={segment.color || "#2563eb"}
+              strokeDasharray={`${percent} ${100 - percent}`}
+              strokeDashoffset={-offset}
+            />
+          );
+          offset += percent;
+          return circle;
+        })}
+        <text x="21" y="20" textAnchor="middle">{visibleSegments.length}</text>
+        <text x="21" y="25" textAnchor="middle">{centerLabel}</text>
+      </svg>
+      <div className="examAnalysisBenchmarkChartLegend">
+        {visibleSegments.slice(0, 4).map((segment) => (
+          <span key={segment.label}>
+            <i style={{ backgroundColor: segment.color || "#2563eb" }} />
+            <b>{segment.label}</b>
+            <small>{segment.count}문항</small>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ExamAnalysisBenchmarkMiniBars({ items = [] }) {
+  const visibleItems = (Array.isArray(items) ? items : [])
+    .filter((item) => Number(item.count || 0) > 0)
+    .slice(0, 5);
+  if (!visibleItems.length) {
+    return <div className="examAnalysisBenchmarkChartEmpty">난이도 데이터 없음</div>;
+  }
+  return (
+    <div className="examAnalysisBenchmarkMiniBars">
+      {visibleItems.map((item) => (
+        <div className="examAnalysisBenchmarkMiniBarRow" key={item.label}>
+          <span>{item.label}</span>
+          <div><i style={{ backgroundColor: item.color || "#2563eb", width: `${Math.max(Number(item.percent || 0), 7)}%` }} /></div>
+          <b>{item.count}</b>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function renderExamAnalysisCardDesignBody(slide = {}) {
   const lines = Array.isArray(slide.lines) && slide.lines.length
     ? slide.lines
@@ -2656,16 +2721,18 @@ function renderExamAnalysisCardDesignBody(slide = {}) {
           <span>시행일 · {slide.examDate || "확인 필요"}</span>
           <span>출판사 · {slide.publisher || "확인 필요"}</span>
         </div>
-        <div className="examAnalysisBenchmarkTwoColumns">
+        <div className="examAnalysisBenchmarkTwoColumns structure">
           <section>
             <strong>시험 범위</strong>
             {lines.slice(0, 4).map((line, index) => <p key={`${slide.card}-scope-${index}`}>{line}</p>)}
           </section>
-          <section>
+          <section className="examAnalysisBenchmarkChartPanel">
             <strong>단원별 출제 비중</strong>
-            {(slide.partSummary?.length ? slide.partSummary : lines).slice(0, 4).map((line, index) => (
-              <p key={`${slide.card}-ratio-${index}`}>{line}</p>
-            ))}
+            <ExamAnalysisBenchmarkDonut segments={slide.partDistribution} />
+            <div className="examAnalysisBenchmarkDifficultyPanel">
+              <b>난이도 분포</b>
+              <ExamAnalysisBenchmarkMiniBars items={slide.difficultyDistribution} />
+            </div>
           </section>
         </div>
         <div className="examAnalysisBenchmarkFlowRow">
@@ -2820,6 +2887,8 @@ function createExamAnalysisCardNewsPreviewSlides({ activeRun = {}, model = {}, o
       totalQuestions,
       partSummary,
       difficultySummary,
+      partDistribution,
+      difficultyDistribution,
       slotLabel: slide.renderMode.includes("슬롯") ? slide.slot : "",
       sourceNote: "현재 화면 수정본 기준"
     };
