@@ -2071,6 +2071,116 @@ button {
   padding-left: 2px;
 }
 
+.examAnalysisBenchmarkMap {
+  background: #ffffff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.examAnalysisBenchmarkMap > div:first-child,
+.examAnalysisOutputCollapsibleHeader > div,
+.examAnalysisInstructorSectionHeader.withAction > div,
+.examAnalysisKeyQuestionHeader > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.examAnalysisBenchmarkMap > div:first-child strong,
+.examAnalysisOutputCollapsibleHeader strong {
+  color: #17213d;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.examAnalysisBenchmarkMap > div:first-child span,
+.examAnalysisOutputCollapsibleHeader span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.5;
+}
+
+.examAnalysisBenchmarkMap > div:last-child {
+  display: grid;
+  gap: 7px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.examAnalysisBenchmarkMap > div:last-child span {
+  background: #f8fafc;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  color: #475569;
+  display: grid;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.45;
+  min-width: 0;
+  padding: 9px 10px;
+}
+
+.examAnalysisBenchmarkMap > div:last-child strong {
+  color: #17213d;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.examAnalysisOutputCollapsibleHeader,
+.examAnalysisInstructorSectionHeader.withAction {
+  align-items: center;
+  background: #eef6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 11px 12px;
+}
+
+.examAnalysisOutputCollapseButton,
+.examAnalysisSectionActionGroup .examAnalysisOutputCollapseButton {
+  background: #ffffff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  color: #17213d;
+  cursor: pointer;
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 900;
+  min-height: 32px;
+  padding: 6px 10px;
+}
+
+.examAnalysisOutputCollapseButton:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+
+.examAnalysisSectionActionGroup {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.examAnalysisBenchmarkHint {
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  color: #1e3a8a;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.45;
+  padding: 8px 9px;
+}
+
 .examAnalysisOutputVisibility {
   align-items: center;
   display: flex;
@@ -12338,6 +12448,7 @@ body.attendanceOnlyBody {
   .examAnalysisPreviewHero,
   .examAnalysisPreviewGrid,
   .examAnalysisOutputInputGrid,
+  .examAnalysisBenchmarkMap > div:last-child,
   .examAnalysisKeyQuestionFields,
   .examAnalysisOutputEditorGrid {
     grid-template-columns: 1fr;

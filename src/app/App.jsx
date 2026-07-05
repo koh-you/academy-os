@@ -1505,6 +1505,7 @@ const examAnalysisBlogBlockFields = [
     type: "paragraph",
     label: "시작글/인사",
     guide: "카드뉴스 전에 들어갈 첫 문단입니다. 학교/학년/고사와 이번 분석의 목적, 한줄 체감을 적어주세요.",
+    benchmark: "벤치마킹 위치: 인사말 😊 -> 시험 소개 -> 한줄 체감",
     placeholder: "예: 2026 불암중 2학년 1학기 기말고사를 기준으로, 이번 시험의 체감 난도와 내신 대비 핵심을 정리합니다."
   },
   {
@@ -1513,6 +1514,7 @@ const examAnalysisBlogBlockFields = [
     type: "paragraph",
     label: "시험구조 설명",
     guide: "시험구조 카드 전후에 붙일 설명입니다. 객관식/서술형 수, 만점, 범위, 큰 출제 흐름을 줄글로 적어주세요.",
+    benchmark: "벤치마킹 위치: 시험 구조 카드 전후 · 객관식/서술형/범위 설명",
     placeholder: "예: 객관식 24문항, 서술형 0문항, 100점 만점. 연립방정식부터 일차함수 관계까지 출제되었습니다."
   },
   {
@@ -1521,6 +1523,7 @@ const examAnalysisBlogBlockFields = [
     type: "highlight",
     label: "총평/변별 포인트",
     guide: "총평 카드 전후에 붙일 핵심 해석입니다. 시험이 쉬웠는지, 어디서 점수가 갈렸는지, 왜 그렇게 봤는지 적어주세요.",
+    benchmark: "벤치마킹 위치: 총평 카드 전후 · 난도/체감/점수 갈림",
     placeholder: "예: 난도가 크게 튄 시험은 아니지만, 쉬운 시험이라고 보기에는 후반부 조건 정리가 까다로웠습니다."
   },
   {
@@ -1529,6 +1532,7 @@ const examAnalysisBlogBlockFields = [
     type: "paragraph",
     label: "다음 시험 준비",
     guide: "마무리 카드 전후에 붙일 학습 전략입니다. 다음 시험까지 학생이 실제로 해야 할 훈련을 구체적으로 적어주세요.",
+    benchmark: "벤치마킹 위치: 다음 시험을 준비하며 · 체크리스트/훈련 방향",
     placeholder: "예: 계산 안정감, 문장제 조건 분리, 그래프 해석, 시간 배분 루틴을 같이 훈련해야 합니다."
   },
   {
@@ -1537,6 +1541,7 @@ const examAnalysisBlogBlockFields = [
     type: "paragraph",
     label: "학원 분석 신뢰 문장",
     guide: "학원이 시험지를 어떻게 분석하고 수업/보충에 반영하는지 보여주는 문장입니다.",
+    benchmark: "벤치마킹 위치: 학원 분석 방식 · 문항별 분석/관리 신뢰 문장",
     placeholder: "예: 시험지를 문항별로 분석해 어떤 개념, 유형, 실수가 연결되는지 확인합니다."
   },
   {
@@ -1545,8 +1550,18 @@ const examAnalysisBlogBlockFields = [
     type: "cta",
     label: "CTA",
     guide: "상담/블로그 유입/위치/전화 안내 메모입니다. 실제 연락처는 자리표시자로 두어도 됩니다.",
+    benchmark: "벤치마킹 위치: 마무리/신청 안내 ⬇️⬇️ · 위치 📍 · 전화 ☎",
     placeholder: "예: 더 자세한 시험 해설은 블로그에서 확인, 학교별 내신 대비 상담 가능, 위치/전화 자리표시자."
   }
+];
+
+const examAnalysisOutputBenchmarkMap = [
+  ["인사말", "시작글/인사 블록 -> 블로그 첫 문단"],
+  ["시험 구조", "시험구조 설명 블록 -> 구조 카드 앞뒤 설명"],
+  ["총평", "총평/변별 포인트 블록 -> 체감 난도와 점수 갈림"],
+  ["📌 주요문항", "주요문항 반복 블록 -> 문제 카드, 설명글, 손풀이 카드"],
+  ["다음 대비", "다음 시험 준비 블록 -> 훈련 체크리스트"],
+  ["CTA", "CTA 블록 -> 신청 안내, 위치, 전화"]
 ];
 
 const legacyExamAnalysisBlogInstructorSectionGroups = {
@@ -2528,8 +2543,22 @@ function ExamAnalysisOutputDraftPanel({
       : saveCheckpointState === "failed"
         ? outputStatus.message || "저장에 실패했습니다."
         : lastSavedAt
-          ? `마지막 저장 ${formatExamAnalysisEventTime(lastSavedAt)} · 새로고침 유지`
-          : "산출물 저장을 누르면 입력칸과 선생님 수정본이 저장됩니다.";
+        ? `마지막 저장 ${formatExamAnalysisEventTime(lastSavedAt)} · 새로고침 유지`
+        : "산출물 저장을 누르면 입력칸과 선생님 수정본이 저장됩니다.";
+  const [collapsedOutputSections, setCollapsedOutputSections] = useState({
+    guide: true,
+    baseInputs: false,
+    blogBlocks: false,
+    keyQuestions: false,
+    finalDrafts: true
+  });
+  const toggleOutputSection = (sectionKey) => {
+    setCollapsedOutputSections((currentSections) => ({
+      ...currentSections,
+      [sectionKey]: !currentSections[sectionKey]
+    }));
+  };
+  const isOutputSectionCollapsed = (sectionKey) => Boolean(collapsedOutputSections[sectionKey]);
   return (
     <div className="panel examAnalysisOutputDraftPanel">
       <div className="sectionHeader slim">
@@ -2582,29 +2611,59 @@ function ExamAnalysisOutputDraftPanel({
         </small>
       </div>
 
-      <div className="examAnalysisOutputGuide">
-        <strong>작성 방향</strong>
-        <span>산출물은 단원 분류를 보여주는 자료가 아니라, 학생과 학부모가 실제로 궁금해하는 내용을 해석해주는 자료입니다. 카드뉴스는 6개 슬라이드 유형을 바탕으로 만들고, 주요문항/손풀이 카드는 선생님 crop 이미지만 슬롯에 넣습니다.</span>
-        <small>초안 점검 기준</small>
-        <ol>
-          {examAnalysisOutputEditorialChecklist.map((item) => (
-            <li key={item}>{item}</li>
+      <div className="examAnalysisBenchmarkMap">
+        <div>
+          <strong>벤치마킹 글 위치표</strong>
+          <span>아래 입력칸이 네이버 글의 어느 흐름에 들어가는지 먼저 확인합니다.</span>
+        </div>
+        <div>
+          {examAnalysisOutputBenchmarkMap.map(([label, description]) => (
+            <span key={label}>
+              <strong>{label}</strong>
+              {description}
+            </span>
           ))}
-        </ol>
-        <small>벤치마킹 포맷</small>
-        <ol>
-          <li>😊 인사말 끝 · 📌 주요문항 시작 · ✅ 핵심 포인트/자주 틀리는 지점</li>
-          <li>⬇️⬇️ CTA · 📍 위치 · ☎ 전화번호 자리표시자를 사용합니다.</li>
-          <li>[형광펜: 하늘색]핵심 결론[/형광펜], [형광펜: 노랑]주의 지점[/형광펜]처럼 표시합니다.</li>
-          <li>Canva는 주요문항 3개 기준 10장 구조를 기본으로 보고, 주요문항 수가 바뀌면 주요문항/손풀이 카드 쌍만 반복합니다.</li>
-        </ol>
-        <small>AI 편집 경계</small>
-        <ol>
-          {examAnalysisOutputAiBoundaryRules.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ol>
+        </div>
       </div>
+
+      <div className="examAnalysisOutputCollapsibleHeader">
+        <div>
+          <strong>작성 방향/AI 편집 룰</strong>
+          <span>초안 점검 기준, 이모티콘, 형광펜, AI 가능/불가 경계를 확인합니다.</span>
+        </div>
+        <button
+          className="examAnalysisOutputCollapseButton"
+          onClick={() => toggleOutputSection("guide")}
+          type="button"
+        >
+          {isOutputSectionCollapsed("guide") ? "펼치기" : "접기"}
+        </button>
+      </div>
+      {!isOutputSectionCollapsed("guide") ? (
+        <div className="examAnalysisOutputGuide">
+          <strong>작성 방향</strong>
+          <span>산출물은 단원 분류를 보여주는 자료가 아니라, 학생과 학부모가 실제로 궁금해하는 내용을 해석해주는 자료입니다. 카드뉴스는 6개 슬라이드 유형을 바탕으로 만들고, 주요문항/손풀이 카드는 선생님 crop 이미지만 슬롯에 넣습니다.</span>
+          <small>초안 점검 기준</small>
+          <ol>
+            {examAnalysisOutputEditorialChecklist.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ol>
+          <small>벤치마킹 포맷</small>
+          <ol>
+            <li>😊 인사말 끝 · 📌 주요문항 시작 · ✅ 핵심 포인트/자주 틀리는 지점</li>
+            <li>⬇️⬇️ CTA · 📍 위치 · ☎ 전화번호 자리표시자를 사용합니다.</li>
+            <li>[형광펜: 하늘색]핵심 결론[/형광펜], [형광펜: 노랑]주의 지점[/형광펜]처럼 표시합니다.</li>
+            <li>Canva는 주요문항 3개 기준 10장 구조를 기본으로 보고, 주요문항 수가 바뀌면 주요문항/손풀이 카드 쌍만 반복합니다.</li>
+          </ol>
+          <small>AI 편집 경계</small>
+          <ol>
+            {examAnalysisOutputAiBoundaryRules.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ol>
+        </div>
+      ) : null}
 
       <div className="examAnalysisOutputVisibility">
         <span>공개 범위</span>
@@ -2625,146 +2684,200 @@ function ExamAnalysisOutputDraftPanel({
         ))}
       </div>
 
-      <div className="examAnalysisOutputInputGrid">
-        {examAnalysisOutputInputFields.map((field) => (
-          <label key={field.key}>
-            <span>{field.label}</span>
-            <small>{field.guide}</small>
-            <textarea
-              onChange={(event) => onUpdateInput(field.key, event.target.value)}
-              placeholder={field.placeholder}
-              rows={4}
-              value={outputDrafts.inputs[field.key] || ""}
-            />
-          </label>
-        ))}
+      <div className="examAnalysisOutputCollapsibleHeader">
+        <div>
+          <strong>기본 메모</strong>
+          <span>한줄 총평, 시험 체감, 점수 갈림, 다음 대비처럼 전체 산출물에 반복해서 쓰는 원천 메모입니다.</span>
+        </div>
+        <button
+          className="examAnalysisOutputCollapseButton"
+          onClick={() => toggleOutputSection("baseInputs")}
+          type="button"
+        >
+          {isOutputSectionCollapsed("baseInputs") ? "펼치기" : "접기"}
+        </button>
+      </div>
+      {!isOutputSectionCollapsed("baseInputs") ? (
+        <div className="examAnalysisOutputInputGrid">
+          {examAnalysisOutputInputFields.map((field) => (
+            <label key={field.key}>
+              <span>{field.label}</span>
+              <small>{field.guide}</small>
+              <textarea
+                onChange={(event) => onUpdateInput(field.key, event.target.value)}
+                placeholder={field.placeholder}
+                rows={4}
+                value={outputDrafts.inputs[field.key] || ""}
+              />
+            </label>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="examAnalysisInstructorSectionHeader withAction">
+        <div>
+          <strong>블로그 흐름 블록</strong>
+          <span>18개 고정 섹션이 아니라 카드 사이에 들어갈 글의 성격을 적는 칸입니다. 각 카드에 벤치마킹 글 위치를 표시했습니다.</span>
+        </div>
+        <button
+          className="examAnalysisOutputCollapseButton"
+          onClick={() => toggleOutputSection("blogBlocks")}
+          type="button"
+        >
+          {isOutputSectionCollapsed("blogBlocks") ? "펼치기" : "접기"}
+        </button>
       </div>
 
-      <div className="examAnalysisInstructorSectionHeader">
-        <strong>블로그 흐름 블록</strong>
-        <span>18개 고정 섹션이 아니라 카드 사이에 들어갈 글의 성격을 적는 칸입니다. AI는 이 메모를 바탕으로 줄나눔, 이모티콘, 형광펜 태그, 문체만 정리합니다.</span>
-      </div>
-
-      <div className="examAnalysisBlogBlockGrid">
-        {examAnalysisBlogBlockFields.map((field) => (
-          <article className="examAnalysisBlogBlockCard" key={field.key}>
-            <div className="examAnalysisBlogBlockCardHeader">
-              <span>{field.order}</span>
-              <div>
-                <strong>{field.label}</strong>
-                <small>{field.type}</small>
+      {!isOutputSectionCollapsed("blogBlocks") ? (
+        <div className="examAnalysisBlogBlockGrid">
+          {examAnalysisBlogBlockFields.map((field) => (
+            <article className="examAnalysisBlogBlockCard" key={field.key}>
+              <div className="examAnalysisBlogBlockCardHeader">
+                <span>{field.order}</span>
+                <div>
+                  <strong>{field.label}</strong>
+                  <small>{field.type}</small>
+                </div>
               </div>
-            </div>
-            <p>{field.guide}</p>
-            <textarea
-              onChange={(event) => onUpdateInput(field.key, event.target.value)}
-              placeholder={field.placeholder}
-              rows={3}
-              value={outputDrafts.inputs[field.key] || ""}
-            />
-          </article>
-        ))}
-      </div>
+              <p>{field.guide}</p>
+              <span className="examAnalysisBenchmarkHint">{field.benchmark}</span>
+              <textarea
+                onChange={(event) => onUpdateInput(field.key, event.target.value)}
+                placeholder={field.placeholder}
+                rows={3}
+                value={outputDrafts.inputs[field.key] || ""}
+              />
+            </article>
+          ))}
+        </div>
+      ) : null}
 
       <div className="examAnalysisKeyQuestionHeader">
         <div>
           <strong>주요문항 반복 블록</strong>
-          <span>주요문항 하나가 추가될 때마다 주요문항 카드, 손풀이 카드, 블로그 설명글 구조가 함께 반복됩니다. 문제와 손풀이는 선생님이 직접 crop한 이미지를 슬롯에 넣는 전제입니다.</span>
+          <span>주요문항 하나가 추가될 때마다 주요문항 카드, 손풀이 카드, 블로그 설명글 구조가 함께 반복됩니다.</span>
+          <span>{"벤치마킹 위치: 📌 주요문항 시작 -> 문제 카드 -> 설명글 -> 손풀이 카드 -> 손풀이 설명글"}</span>
+        </div>
+        <div className="examAnalysisSectionActionGroup">
+          <button
+            className="examAnalysisOutputCollapseButton"
+            onClick={() => toggleOutputSection("keyQuestions")}
+            type="button"
+          >
+            {isOutputSectionCollapsed("keyQuestions") ? "펼치기" : "접기"}
+          </button>
+          <button
+            className="secondaryButton"
+            disabled={isOutputBusy}
+            onClick={onAddKeyQuestionBlock}
+            type="button"
+          >
+            주요문항 추가
+          </button>
+        </div>
+      </div>
+
+      {!isOutputSectionCollapsed("keyQuestions") ? (
+        <div className="examAnalysisKeyQuestionList">
+          {keyQuestionBlocks.map((block, index) => (
+            <article className="examAnalysisKeyQuestionCard" key={block.blockId || index}>
+              <div className="examAnalysisKeyQuestionCardHeader">
+                <div>
+                  <strong>주요문항 {index + 1}</strong>
+                  <span>주요문항 슬라이드 + 손풀이 슬라이드 + 블로그 설명글</span>
+                </div>
+                <button
+                  disabled={isOutputBusy || keyQuestionBlocks.length <= 1}
+                  onClick={() => onRemoveKeyQuestionBlock(block.blockId)}
+                  type="button"
+                >
+                  삭제
+                </button>
+              </div>
+              <div className="examAnalysisKeyQuestionFields">
+                {examAnalysisKeyQuestionBlockFields.map((field) => (
+                  <label className={field.type === "textarea" ? "wide" : ""} key={field.key}>
+                    <span>{field.label}</span>
+                    {field.type === "input" ? (
+                      <input
+                        disabled={isOutputBusy}
+                        onChange={(event) => onUpdateKeyQuestionBlock(block.blockId, field.key, event.target.value)}
+                        placeholder={field.placeholder}
+                        type="text"
+                        value={block[field.key] || ""}
+                      />
+                    ) : (
+                      <textarea
+                        disabled={isOutputBusy}
+                        onChange={(event) => onUpdateKeyQuestionBlock(block.blockId, field.key, event.target.value)}
+                        placeholder={field.placeholder}
+                        rows={3}
+                        value={block[field.key] || ""}
+                      />
+                    )}
+                  </label>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="examAnalysisOutputCollapsibleHeader">
+        <div>
+          <strong>최종 초안 / 복사 / TXT</strong>
+          <span>블로그/인스타 초안은 삭제하지 않습니다. AI 생성 후 선생님이 최종 문장으로 고치는 원본이며, 복사/TXT/ZIP export가 이 값을 읽습니다.</span>
         </div>
         <button
-          className="secondaryButton"
-          disabled={isOutputBusy}
-          onClick={onAddKeyQuestionBlock}
+          className="examAnalysisOutputCollapseButton"
+          onClick={() => toggleOutputSection("finalDrafts")}
           type="button"
         >
-          주요문항 추가
+          {isOutputSectionCollapsed("finalDrafts") ? "펼치기" : "접기"}
         </button>
       </div>
-
-      <div className="examAnalysisKeyQuestionList">
-        {keyQuestionBlocks.map((block, index) => (
-          <article className="examAnalysisKeyQuestionCard" key={block.blockId || index}>
-            <div className="examAnalysisKeyQuestionCardHeader">
+      {!isOutputSectionCollapsed("finalDrafts") ? (
+        <div className="examAnalysisOutputEditorGrid">
+          <section>
+            <div>
               <div>
-                <strong>주요문항 {index + 1}</strong>
-                <span>주요문항 슬라이드 + 손풀이 슬라이드 + 블로그 설명글</span>
+                <strong>블로그 초안</strong>
+                <span>{getExamAnalysisOutputSectionLabel(outputDrafts.blog)}</span>
               </div>
-              <button
-                disabled={isOutputBusy || keyQuestionBlocks.length <= 1}
-                onClick={() => onRemoveKeyQuestionBlock(block.blockId)}
-                type="button"
-              >
-                삭제
-              </button>
+              <div className="examAnalysisOutputEditorActions">
+                <button disabled={isOutputBusy} onClick={onSaveOutputDrafts} type="button">저장</button>
+                <button disabled={!blogText.trim()} onClick={() => onCopyOutputDraft("blog", blogText)} type="button">복사</button>
+                <button disabled={!blogText.trim()} onClick={() => onDownloadOutputDraft("blog", blogText)} type="button">TXT</button>
+              </div>
             </div>
-            <div className="examAnalysisKeyQuestionFields">
-              {examAnalysisKeyQuestionBlockFields.map((field) => (
-                <label className={field.type === "textarea" ? "wide" : ""} key={field.key}>
-                  <span>{field.label}</span>
-                  {field.type === "input" ? (
-                    <input
-                      disabled={isOutputBusy}
-                      onChange={(event) => onUpdateKeyQuestionBlock(block.blockId, field.key, event.target.value)}
-                      placeholder={field.placeholder}
-                      type="text"
-                      value={block[field.key] || ""}
-                    />
-                  ) : (
-                    <textarea
-                      disabled={isOutputBusy}
-                      onChange={(event) => onUpdateKeyQuestionBlock(block.blockId, field.key, event.target.value)}
-                      placeholder={field.placeholder}
-                      rows={3}
-                      value={block[field.key] || ""}
-                    />
-                  )}
-                </label>
-              ))}
-            </div>
-          </article>
-        ))}
-      </div>
-
-      <div className="examAnalysisOutputEditorGrid">
-        <section>
-          <div>
+            <textarea
+              onChange={(event) => onUpdateTeacherDraft("blog", event.target.value)}
+              placeholder="블로그 초안 생성 후 선생님이 최종 문장으로 수정합니다."
+              rows={18}
+              value={blogText}
+            />
+          </section>
+          <section>
             <div>
-              <strong>블로그 초안</strong>
-              <span>{getExamAnalysisOutputSectionLabel(outputDrafts.blog)}</span>
+              <div>
+                <strong>인스타 카드 초안</strong>
+                <span>{getExamAnalysisOutputSectionLabel(outputDrafts.instagram)}</span>
+              </div>
+              <div className="examAnalysisOutputEditorActions">
+                <button disabled={isOutputBusy} onClick={onSaveOutputDrafts} type="button">저장</button>
+                <button disabled={!instagramText.trim()} onClick={() => onCopyOutputDraft("instagram", instagramText)} type="button">복사</button>
+                <button disabled={!instagramText.trim()} onClick={() => onDownloadOutputDraft("instagram", instagramText)} type="button">TXT</button>
+              </div>
             </div>
-            <div className="examAnalysisOutputEditorActions">
-              <button disabled={isOutputBusy} onClick={onSaveOutputDrafts} type="button">저장</button>
-              <button disabled={!blogText.trim()} onClick={() => onCopyOutputDraft("blog", blogText)} type="button">복사</button>
-              <button disabled={!blogText.trim()} onClick={() => onDownloadOutputDraft("blog", blogText)} type="button">TXT</button>
-            </div>
-          </div>
-          <textarea
-            onChange={(event) => onUpdateTeacherDraft("blog", event.target.value)}
-            placeholder="블로그 초안 생성 후 선생님이 최종 문장으로 수정합니다."
-            rows={18}
-            value={blogText}
-          />
-        </section>
-        <section>
-          <div>
-            <div>
-              <strong>인스타 카드 초안</strong>
-              <span>{getExamAnalysisOutputSectionLabel(outputDrafts.instagram)}</span>
-            </div>
-            <div className="examAnalysisOutputEditorActions">
-              <button disabled={isOutputBusy} onClick={onSaveOutputDrafts} type="button">저장</button>
-              <button disabled={!instagramText.trim()} onClick={() => onCopyOutputDraft("instagram", instagramText)} type="button">복사</button>
-              <button disabled={!instagramText.trim()} onClick={() => onDownloadOutputDraft("instagram", instagramText)} type="button">TXT</button>
-            </div>
-          </div>
-          <textarea
-            onChange={(event) => onUpdateTeacherDraft("instagram", event.target.value)}
-            placeholder="인스타 카드 초안 생성 후 카드별 문구, 슬라이드 유형, 주요문항/손풀이 슬롯 안내를 수정합니다."
-            rows={18}
-            value={instagramText}
-          />
-        </section>
-      </div>
+            <textarea
+              onChange={(event) => onUpdateTeacherDraft("instagram", event.target.value)}
+              placeholder="인스타 카드 초안 생성 후 카드별 문구, 슬라이드 유형, 주요문항/손풀이 슬롯 안내를 수정합니다."
+              rows={18}
+              value={instagramText}
+            />
+          </section>
+        </div>
+      ) : null}
 
       <div className="examAnalysisOutputPolicy">
         <span>입력칸과 선생님 수정본은 저장 후 새로고침해도 유지됩니다.</span>
