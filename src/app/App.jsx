@@ -590,6 +590,10 @@ function canDeleteNotificationJob(job) {
   return deletableNotificationJobStatuses.has(job?.status);
 }
 
+function canCancelNotificationJob(job) {
+  return job?.status === "scheduled" && !isNotificationSchedulePast(job.scheduledAt);
+}
+
 function normalizePhoneNumber(value = "") {
   return String(value ?? "").replaceAll(/\D/g, "");
 }
@@ -8097,6 +8101,36 @@ function NotificationCenter({
     }
   }
 
+  async function cancelNotificationJob(job) {
+    if (!canCancelNotificationJob(job) || deletingJobId) return;
+    if (typeof window !== "undefined" && !window.confirm("이 예약 발송 1건을 취소할까요? 취소한 기록은 이력에 남습니다.")) return;
+    const canceledAt = new Date().toISOString();
+    const canceledJob = {
+      ...job,
+      status: "canceled",
+      error: "",
+      result: {
+        ...(job.result && typeof job.result === "object" ? job.result : {}),
+        canceledAt,
+        canceledBy: "teacher"
+      },
+      updatedAt: canceledAt
+    };
+    setDeletingJobId(job.notificationJobId);
+    setDispatchMessage("");
+    try {
+      await persistNoticeJob(canceledJob);
+      upsertLocalNoticeJob(canceledJob);
+      setDispatchMessage("공지 예약 1건을 취소했습니다.");
+      setJobFilter("draft");
+      refreshNoticeJobsInBackground();
+    } catch (error) {
+      setDispatchMessage(`공지 예약 취소 실패: ${error.message}`);
+    } finally {
+      setDeletingJobId("");
+    }
+  }
+
   return (
     <section className="notificationCenterPage">
       <div className="pageTop">
@@ -8325,6 +8359,16 @@ function NotificationCenter({
                   {job.error ? `오류: ${job.error}` : job.previewBody || job.payload?.message || "미리보기 없음"}
                 </p>
                 <span className="notificationJobActions">
+                  {canCancelNotificationJob(job) ? (
+                    <button
+                      className="dangerSoftButton compact"
+                      disabled={deletingJobId === job.notificationJobId}
+                      onClick={() => cancelNotificationJob(job)}
+                      type="button"
+                    >
+                      {deletingJobId === job.notificationJobId ? "취소 중" : "예약 취소"}
+                    </button>
+                  ) : null}
                   {canDeleteNotificationJob(job) ? (
                     <button
                       className="dangerSoftButton compact"
@@ -8334,9 +8378,10 @@ function NotificationCenter({
                     >
                       {deletingJobId === job.notificationJobId ? "삭제 중" : "삭제"}
                     </button>
-                  ) : (
+                  ) : null}
+                  {!canCancelNotificationJob(job) && !canDeleteNotificationJob(job) ? (
                     <small>보관</small>
-                  )}
+                  ) : null}
                 </span>
               </article>
             ))
