@@ -2664,6 +2664,41 @@ function renderExamAnalysisCardDesignBody(slide = {}) {
   );
 }
 
+function ExamAnalysisCardDesignCard({ isFocused = false, isSelected = false, onFocus = null, slide = {} }) {
+  const cardClassName = [
+    "examAnalysisCardDesignCard",
+    slide.type,
+    isFocused ? "focused" : "",
+    isSelected ? "selected" : ""
+  ].filter(Boolean).join(" ");
+  return (
+    <article className={cardClassName}>
+      <header className="examAnalysisCardDesignHeader">
+        <div>
+          <strong>으뜸수학 고태영T</strong>
+          <span>{slide.schoolLabel}</span>
+        </div>
+        <small>card-{String(slide.card).padStart(2, "0")}</small>
+      </header>
+      <div className="examAnalysisCardDesignTitleBlock">
+        <span>{getExamAnalysisCardDesignKicker(slide)} · {slide.examLabel}</span>
+        <h4>{slide.title}</h4>
+        <p>{slide.headline}</p>
+      </div>
+      {renderExamAnalysisCardDesignBody(slide)}
+      <footer className="examAnalysisCardDesignFooter">
+        <span>{slide.renderMode}</span>
+        <strong>{getExamAnalysisCardDesignFooter(slide)}</strong>
+      </footer>
+      {onFocus ? (
+        <button className="examAnalysisCardDesignZoomButton" onClick={onFocus} type="button">
+          크게 보기
+        </button>
+      ) : null}
+    </article>
+  );
+}
+
 function createExamAnalysisCardNewsPreviewSlides({ activeRun = {}, model = {}, outputDrafts = {} } = {}) {
   const run = activeRun && typeof activeRun === "object" ? activeRun : {};
   const previewModel = model && typeof model === "object" ? model : {};
@@ -2776,34 +2811,41 @@ function createExamAnalysisCardNewsPreviewSlides({ activeRun = {}, model = {}, o
 }
 
 function ExamAnalysisCardNewsPreviewPanel({ slides = [] }) {
+  const [focusedCardIndex, setFocusedCardIndex] = useState(0);
   if (!slides.length) return <div className="emptyState compact">카드뉴스 미리보기 없음</div>;
+  const safeFocusedIndex = Math.min(focusedCardIndex, slides.length - 1);
+  const focusedSlide = slides[safeFocusedIndex] || slides[0];
+  const selectPreviousCard = () => setFocusedCardIndex((current) => Math.max(current - 1, 0));
+  const selectNextCard = () => setFocusedCardIndex((current) => Math.min(current + 1, slides.length - 1));
   return (
     <div className="examAnalysisCardNewsPreviewPanel">
       <div className="examAnalysisCardNewsPreviewSummary">
         <strong>블로그형 카드 디자인 Gate 3</strong>
         <span>{slides.length}장 · 1080x1350 비율 검수용 · HTML/CSS/JS 렌더러에 블루/화이트 전문 톤을 얹어보는 화면 검수 단계</span>
       </div>
+      <div className="examAnalysisCardFocusPanel">
+        <div className="examAnalysisCardFocusHeader">
+          <div>
+            <strong>크게 보기</strong>
+            <span>카드 {safeFocusedIndex + 1}/{slides.length} · 글자 밀도, 줄바꿈, 슬롯 크기를 이 화면에서 먼저 검수합니다.</span>
+          </div>
+          <div className="examAnalysisCardFocusActions">
+            <button disabled={safeFocusedIndex === 0} onClick={selectPreviousCard} type="button">이전</button>
+            <button disabled={safeFocusedIndex >= slides.length - 1} onClick={selectNextCard} type="button">다음</button>
+          </div>
+        </div>
+        <div className="examAnalysisCardFocusCanvas">
+          <ExamAnalysisCardDesignCard isFocused slide={focusedSlide} />
+        </div>
+      </div>
       <div className="examAnalysisCardDesignGrid">
-        {slides.map((slide) => (
-          <article className={`examAnalysisCardDesignCard ${slide.type}`} key={`${slide.card}-${slide.type}-design`}>
-            <header className="examAnalysisCardDesignHeader">
-              <div>
-                <strong>으뜸수학 고태영T</strong>
-                <span>{slide.schoolLabel}</span>
-              </div>
-              <small>card-{String(slide.card).padStart(2, "0")}</small>
-            </header>
-            <div className="examAnalysisCardDesignTitleBlock">
-              <span>{getExamAnalysisCardDesignKicker(slide)} · {slide.examLabel}</span>
-              <h4>{slide.title}</h4>
-              <p>{slide.headline}</p>
-            </div>
-            {renderExamAnalysisCardDesignBody(slide)}
-            <footer className="examAnalysisCardDesignFooter">
-              <span>{slide.renderMode}</span>
-              <strong>{getExamAnalysisCardDesignFooter(slide)}</strong>
-            </footer>
-          </article>
+        {slides.map((slide, index) => (
+          <ExamAnalysisCardDesignCard
+            isSelected={index === safeFocusedIndex}
+            key={`${slide.card}-${slide.type}-design`}
+            onFocus={() => setFocusedCardIndex(index)}
+            slide={slide}
+          />
         ))}
       </div>
 
