@@ -792,6 +792,57 @@ function fromNotificationJobRow(row) {
   };
 }
 
+function toAttendanceEventRow(event = {}) {
+  return {
+    attendance_event_id: event.attendanceEventId,
+    lesson_id: compact(event.lessonId),
+    student_id: compact(event.studentId),
+    lesson_student_record_id: compact(event.lessonStudentRecordId),
+    event_type: event.eventType ?? "checkin",
+    source: event.source ?? "unknown",
+    attendance_status: compact(event.attendanceStatus),
+    checked_at: compact(event.checkedAt),
+    check_in_at: compact(event.checkInAt),
+    check_in_time: compact(event.checkInTime),
+    check_out_at: compact(event.checkOutAt),
+    check_out_time: compact(event.checkOutTime),
+    attendance_reason: compact(event.attendanceReason),
+    late_minutes: event.lateMinutes === "" || event.lateMinutes === undefined || event.lateMinutes === null ? null : Number(event.lateMinutes),
+    actor_id: compact(event.actorId),
+    record_before: event.recordBefore ?? null,
+    record_after: event.recordAfter ?? null,
+    alimtalk_status: compact(event.alimtalkStatus),
+    alimtalk_result: event.alimtalkResult ?? null,
+    error: compact(event.error)
+  };
+}
+
+function fromAttendanceEventRow(row) {
+  return {
+    attendanceEventId: row.attendance_event_id,
+    lessonId: row.lesson_id ?? "",
+    studentId: row.student_id ?? "",
+    lessonStudentRecordId: row.lesson_student_record_id ?? "",
+    eventType: row.event_type ?? "",
+    source: row.source ?? "",
+    attendanceStatus: row.attendance_status ?? "",
+    checkedAt: row.checked_at ?? "",
+    checkInAt: row.check_in_at ?? "",
+    checkInTime: row.check_in_time ?? "",
+    checkOutAt: row.check_out_at ?? "",
+    checkOutTime: row.check_out_time ?? "",
+    attendanceReason: row.attendance_reason ?? "",
+    lateMinutes: row.late_minutes ?? "",
+    actorId: row.actor_id ?? "",
+    recordBefore: row.record_before ?? null,
+    recordAfter: row.record_after ?? null,
+    alimtalkStatus: row.alimtalk_status ?? "",
+    alimtalkResult: row.alimtalk_result ?? null,
+    error: row.error ?? "",
+    createdAt: row.created_at
+  };
+}
+
 export function getCoreDataStatus() {
   return {
     ...getSupabaseStatus(),
@@ -1255,6 +1306,73 @@ export async function upsertNotificationJob(job) {
   return { source: databaseSource, notificationJob: fromNotificationJobRow(row) };
 }
 
+export async function recordAttendanceEvent(event) {
+  const normalizedEvent = {
+    ...event,
+    attendanceEventId: event.attendanceEventId || `attendance_event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+  };
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, attendanceEvent: normalizedEvent };
+  }
+
+  const [row] = await upsertRows("attendance_events", [toAttendanceEventRow(normalizedEvent)], { onConflict: "attendance_event_id" });
+  return { source: databaseSource, attendanceEvent: fromAttendanceEventRow(row) };
+}
+
+export async function patchLessonStudentRecordNotificationStatus({
+  lessonId,
+  lessonStudentRecordId,
+  studentId,
+  teacherCommentSendStatus,
+  studentCommentSendStatus,
+  updatedBy = "instructor_owner_001"
+} = {}) {
+  if (!lessonId || !studentId) throw new Error("알림톡 상태를 저장할 수업/학생 ID가 필요합니다.");
+  const nowIso = new Date().toISOString();
+  const patch = { updated_at: nowIso };
+  if (teacherCommentSendStatus !== undefined) {
+    patch.teacher_comment_send_status = compact(teacherCommentSendStatus);
+  }
+  if (studentCommentSendStatus !== undefined) {
+    patch.student_comment_send_status = compact(studentCommentSendStatus);
+  }
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return {
+      source: fallbackSource,
+      record: {
+        lessonStudentRecordId,
+        lessonId,
+        studentId,
+        teacherCommentSendStatus: teacherCommentSendStatus ?? "",
+        studentCommentSendStatus: studentCommentSendStatus ?? "",
+        updatedBy,
+        updatedAt: nowIso
+      }
+    };
+  }
+
+  const encodedLessonId = encodeURIComponent(lessonId);
+  const encodedStudentId = encodeURIComponent(studentId);
+  const rows = await patchRows(
+    "lesson_student_records",
+    `lesson_id=eq.${encodedLessonId}&student_id=eq.${encodedStudentId}`,
+    patch
+  );
+  if (rows[0]) return { source: databaseSource, record: fromLessonRecordRow(rows[0]) };
+
+  const record = {
+    lessonStudentRecordId: lessonStudentRecordId || `lsr_${lessonId.replace("lesson_", "")}_${studentId}`,
+    lessonId,
+    studentId,
+    attendanceStatus: "pending",
+    teacherCommentSendStatus: teacherCommentSendStatus ?? "",
+    studentCommentSendStatus: studentCommentSendStatus ?? "",
+    updatedBy,
+    updatedAt: nowIso
+  };
+  return upsertLessonStudentRecord(record);
+}
+
 export async function claimNotificationJob(job, claimId) {
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
     return { source: fallbackSource, notificationJob: job };
@@ -1297,6 +1415,37 @@ export async function deleteNotificationJob(notificationJobId) {
   };
 }
 
+function hasAttendanceState(record = {}) {
+  return Boolean(
+    record.checkInAt ||
+    record.checkInTime ||
+    record.checkOutAt ||
+    record.checkOutTime ||
+    (record.attendanceStatus && record.attendanceStatus !== "pending")
+  );
+}
+
+function hasExplicitAttendanceTime(record = {}) {
+  return Boolean(record.checkInAt || record.checkInTime || record.checkOutAt || record.checkOutTime);
+}
+
+function mergeExistingAttendanceForNonAttendanceSave(nextRecord = {}, existingRecord = null) {
+  if (!existingRecord || !hasAttendanceState(existingRecord)) return nextRecord;
+  const source = String(nextRecord.updatedBy || "");
+  const isAttendanceSource = source.includes("attendance") || source.includes("kiosk");
+  if (isAttendanceSource || hasExplicitAttendanceTime(nextRecord)) return nextRecord;
+  return {
+    ...nextRecord,
+    attendanceStatus: existingRecord.attendanceStatus || nextRecord.attendanceStatus || "pending",
+    attendanceReason: existingRecord.attendanceReason ?? nextRecord.attendanceReason ?? "",
+    lateMinutes: existingRecord.lateMinutes ?? nextRecord.lateMinutes ?? "",
+    checkInAt: existingRecord.checkInAt ?? "",
+    checkInTime: existingRecord.checkInTime ?? "",
+    checkOutAt: existingRecord.checkOutAt ?? "",
+    checkOutTime: existingRecord.checkOutTime ?? ""
+  };
+}
+
 export async function upsertLessonStudentRecord(record) {
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
     return { source: fallbackSource, record };
@@ -1304,15 +1453,17 @@ export async function upsertLessonStudentRecord(record) {
 
   const existingRows = await listRows(
     "lesson_student_records",
-    `select=lesson_student_record_id&lesson_id=eq.${encodeURIComponent(record.lessonId)}&student_id=eq.${encodeURIComponent(record.studentId)}&limit=1`,
+    `select=*&lesson_id=eq.${encodeURIComponent(record.lessonId)}&student_id=eq.${encodeURIComponent(record.studentId)}&limit=1`,
     { requireServiceRole: true }
   );
+  const existingRecord = existingRows[0] ? fromLessonRecordRow(existingRows[0]) : null;
   const stableRecord = existingRows[0]
     ? { ...record, lessonStudentRecordId: existingRows[0].lesson_student_record_id }
     : record;
+  const recordToSave = mergeExistingAttendanceForNonAttendanceSave(stableRecord, existingRecord);
   let row;
   try {
-    [row] = await upsertRows("lesson_student_records", [toLessonRecordRow(stableRecord)], { onConflict: "lesson_id,student_id" });
+    [row] = await upsertRows("lesson_student_records", [toLessonRecordRow(recordToSave)], { onConflict: "lesson_id,student_id" });
   } catch (error) {
     const message = String(error?.message ?? "");
     const isAttendanceTimeMigration =
@@ -1336,29 +1487,29 @@ export async function upsertLessonStudentRecord(record) {
       message.includes("prep_student_visible") ||
       isAttendanceTimeMigration;
     const hasExtendedValues = [
-      stableRecord.lessonMaterial,
-      stableRecord.lessonContent,
-      stableRecord.assignmentStatus,
-      stableRecord.preparationMemo,
-      stableRecord.prepStudentNotice,
-      stableRecord.prepParentNotice,
-      stableRecord.prepStudentAiStatus,
-      stableRecord.prepParentAiStatus,
-      stableRecord.behaviorTag,
-      stableRecord.homeworkStatus && stableRecord.homeworkStatus !== "not_started" ? stableRecord.homeworkStatus : "",
-      Boolean(stableRecord.needsMakeup),
-      Boolean(stableRecord.needsRetest),
-      Boolean(stableRecord.notificationMutedParent),
-      Boolean(stableRecord.notificationMutedStudent),
-      stableRecord.notificationMutedReason,
-      stableRecord.prepStudentVisible,
-      stableRecord.prepParentVisible
+      recordToSave.lessonMaterial,
+      recordToSave.lessonContent,
+      recordToSave.assignmentStatus,
+      recordToSave.preparationMemo,
+      recordToSave.prepStudentNotice,
+      recordToSave.prepParentNotice,
+      recordToSave.prepStudentAiStatus,
+      recordToSave.prepParentAiStatus,
+      recordToSave.behaviorTag,
+      recordToSave.homeworkStatus && recordToSave.homeworkStatus !== "not_started" ? recordToSave.homeworkStatus : "",
+      Boolean(recordToSave.needsMakeup),
+      Boolean(recordToSave.needsRetest),
+      Boolean(recordToSave.notificationMutedParent),
+      Boolean(recordToSave.notificationMutedStudent),
+      recordToSave.notificationMutedReason,
+      recordToSave.prepStudentVisible,
+      recordToSave.prepParentVisible
     ].some((value) => (typeof value === "boolean" ? value : Boolean(String(value ?? "").trim())));
     if (!isPendingMigration) throw error;
     if (isAttendanceTimeMigration) {
       [row] = await upsertRows(
         "lesson_student_records",
-        [toLessonRecordRow(stableRecord, { includeAttendanceTimeFields: false })],
+        [toLessonRecordRow(recordToSave, { includeAttendanceTimeFields: false })],
         { onConflict: "lesson_id,student_id" }
       );
       return { source: databaseSource, record: fromLessonRecordRow(row) };
@@ -1370,7 +1521,7 @@ export async function upsertLessonStudentRecord(record) {
     }
     [row] = await upsertRows(
       "lesson_student_records",
-      [toLessonRecordRow(stableRecord, { includeExtendedFields: false })],
+      [toLessonRecordRow(recordToSave, { includeExtendedFields: false })],
       { onConflict: "lesson_id,student_id" }
     );
   }

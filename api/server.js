@@ -24,6 +24,8 @@ import {
   listSchoolEvents,
   listStudentIntakeApplicants,
   listStudents,
+  patchLessonStudentRecordNotificationStatus,
+  recordAttendanceEvent,
   claimNotificationJob,
   seedCoreData,
   upsertAppState,
@@ -206,6 +208,325 @@ async function sendAttendanceAlimtalkOnce(payload) {
     recentAttendanceAlimtalkSends.delete(dedupeKey);
     throw error;
   }
+}
+
+function getKoreaDateStringForAttendance(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function formatKoreaAttendanceTime(date = new Date()) {
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  }).format(date);
+}
+
+function normalizeAttendanceTime(value = "") {
+  const text = String(value ?? "").trim();
+  const match = text.match(/(\d{1,2}):(\d{2})/);
+  if (!match) return "";
+  const hour = Math.max(0, Math.min(23, Number(match[1]) || 0));
+  const minute = Math.max(0, Math.min(59, Number(match[2]) || 0));
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
+
+function createKoreaIsoForAttendance(dateValue, timeValue, fallbackIso = new Date().toISOString()) {
+  const time = normalizeAttendanceTime(timeValue);
+  if (!dateValue || !time) return fallbackIso;
+  const date = new Date(`${dateValue}T${time}:00+09:00`);
+  return Number.isNaN(date.getTime()) ? fallbackIso : date.toISOString();
+}
+
+function createLessonStudentRecordIdForAttendance(lessonId, studentId) {
+  return `lsr_${String(lessonId || "").replace("lesson_", "")}_${studentId}`;
+}
+
+function sortLessonsByStartTime(left = {}, right = {}) {
+  return String(left.startTime || "").localeCompare(String(right.startTime || ""));
+}
+
+function findAttendanceRecord(records = [], lessonId, studentId) {
+  return records.find((record) => record.lessonId === lessonId && record.studentId === studentId) ?? null;
+}
+
+function hasAttendanceArrival(record = {}) {
+  const status = record?.attendanceStatus || "pending";
+  return Boolean(
+    record?.checkInAt ||
+    record?.checkInTime ||
+    ["present", "late", "checkin"].includes(status)
+  );
+}
+
+function hasAttendanceCheckout(record = {}) {
+  return Boolean(record?.checkOutAt || record?.checkOutTime);
+}
+
+function calculateAttendanceLateMinutes(lesson = {}, now = new Date(), graceMinutes = 0) {
+  if (!lesson?.date || !lesson?.startTime) return "";
+  const start = new Date(`${lesson.date}T${String(lesson.startTime).slice(0, 5)}:00+09:00`);
+  if (Number.isNaN(start.getTime())) return "";
+  const diff = Math.floor((now.getTime() - start.getTime()) / 60000);
+  return Math.max(0, diff - (Number(graceMinutes) || 0));
+}
+
+function normalizeAttendanceStatusForRecord(status = "present") {
+  if (status === "checkin") return "present";
+  if (status === "checkout") return "present";
+  if (["pending", "present", "late", "absent", "excused"].includes(status)) return status;
+  return "present";
+}
+
+function getAttendanceResultMode(eventType) {
+  if (eventType === "checkout") return "checkOut";
+  if (eventType === "completed") return "completed";
+  return "checkIn";
+}
+
+async function tryRecordAttendanceEvent(event) {
+  try {
+    return await recordAttendanceEvent(event);
+  } catch (error) {
+    return {
+      source: "not_recorded",
+      attendanceEvent: {
+        ...event,
+        error: error.message
+      }
+    };
+  }
+}
+
+async function handleAttendanceCheck(payload = {}) {
+  const source = String(payload.source || "kiosk");
+  const now = new Date();
+  const nowIso = now.toISOString();
+  const todayString = getKoreaDateStringForAttendance(now);
+  const currentTime = formatKoreaAttendanceTime(now);
+  const sendAlimtalk = payload.sendAlimtalk !== false;
+
+  const [studentsResult, lessonsResult, recordsResult] = await Promise.all([
+    listStudents(),
+    listLessons({ date: payload.date || todayString }),
+    listLessonStudentRecords()
+  ]);
+  const students = studentsResult.students ?? [];
+  const lessons = (lessonsResult.lessons ?? []).filter((lesson) => lesson.date === (payload.date || todayString) && lesson.status !== "canceled");
+  const records = recordsResult.records ?? [];
+
+  let student = null;
+  if (payload.studentId) {
+    student = students.find((item) => item.studentId === payload.studentId) ?? null;
+  } else {
+    const digits = compactPhoneNumber(payload.phoneLast4).slice(-4);
+    if (digits.length !== 4) throw new Error("휴대폰 번호 뒤 4자리가 필요합니다.");
+    const matchedStudents = students.filter((item) => {
+      if ((item.status ?? "active") !== "active") return false;
+      return compactPhoneNumber(item.studentPhone).slice(-4) === digits;
+    });
+    if (matchedStudents.length === 0) throw new Error("해당 학생 전화번호를 찾지 못했습니다.");
+    if (matchedStudents.length > 1) throw new Error("같은 뒤 4자리 학생 전화번호가 2명 이상입니다. 선생님께 말씀해 주세요.");
+    student = matchedStudents[0];
+  }
+  if (!student) throw new Error("학생을 찾지 못했습니다.");
+
+  let lesson = payload.lessonId
+    ? lessons.find((item) => item.lessonId === payload.lessonId) ?? null
+    : null;
+  if (!lesson) {
+    const studentLesson = lessons
+      .filter((item) => (item.studentIds ?? []).includes(student.studentId))
+      .sort(sortLessonsByStartTime)[0];
+    const classLesson = lessons
+      .filter((item) => item.classTemplateId && item.classTemplateId === student.defaultClassTemplateId)
+      .sort(sortLessonsByStartTime)[0];
+    lesson = studentLesson ?? classLesson ?? null;
+  }
+  if (!lesson) throw new Error(`${student.name} 학생의 오늘 수업 일정이 없습니다.`);
+
+  if (!(lesson.studentIds ?? []).includes(student.studentId)) {
+    lesson = {
+      ...lesson,
+      studentIds: [...(lesson.studentIds ?? []), student.studentId]
+    };
+    await upsertLesson(lesson);
+  }
+
+  const recordId = createLessonStudentRecordIdForAttendance(lesson.lessonId, student.studentId);
+  const existingRecord = findAttendanceRecord(records, lesson.lessonId, student.studentId);
+  const hasArrival = hasAttendanceArrival(existingRecord);
+  const hasCheckout = hasAttendanceCheckout(existingRecord);
+
+  let eventType = String(payload.action || "");
+  if (!eventType) {
+    if (source === "manual") {
+      const manualStatus = String(payload.attendanceStatus || "present");
+      eventType = manualStatus === "checkout" ? "checkout" : ["absent", "excused", "pending"].includes(manualStatus) ? "status" : "checkin";
+    } else {
+      eventType = hasCheckout ? "completed" : hasArrival ? "checkout" : "checkin";
+    }
+  }
+
+  if (eventType === "completed") {
+    const eventResult = await tryRecordAttendanceEvent({
+      attendanceEventId: `attendance_event_${Date.now()}_${student.studentId}_completed`,
+      lessonId: lesson.lessonId,
+      studentId: student.studentId,
+      lessonStudentRecordId: recordId,
+      eventType: "completed",
+      source,
+      attendanceStatus: existingRecord?.attendanceStatus || "present",
+      checkedAt: nowIso,
+      checkInAt: existingRecord?.checkInAt || "",
+      checkInTime: existingRecord?.checkInTime || "",
+      checkOutAt: existingRecord?.checkOutAt || "",
+      checkOutTime: existingRecord?.checkOutTime || "",
+      attendanceReason: existingRecord?.attendanceReason || "",
+      actorId: payload.actorId || "",
+      recordBefore: existingRecord,
+      recordAfter: existingRecord,
+      alimtalkStatus: "skipped_completed"
+    });
+    return {
+      mode: "completed",
+      message: `${student.name} 이미 하원 처리되었습니다.`,
+      student,
+      lesson,
+      record: existingRecord,
+      attendanceEvent: eventResult.attendanceEvent,
+      alimtalk: { status: "skipped_completed" }
+    };
+  }
+
+  const manualCheckInTime = normalizeAttendanceTime(payload.checkInTime);
+  const manualCheckOutTime = normalizeAttendanceTime(payload.checkOutTime);
+  const existingStatus = normalizeAttendanceStatusForRecord(existingRecord?.attendanceStatus || "pending");
+  const lateMinutes = payload.lateMinutes === "" || payload.lateMinutes === undefined || payload.lateMinutes === null
+    ? eventType === "checkin"
+      ? calculateAttendanceLateMinutes(lesson, now, payload.lateGraceMinutes)
+      : existingRecord?.lateMinutes ?? ""
+    : payload.lateMinutes;
+
+  let nextStatus = normalizeAttendanceStatusForRecord(payload.attendanceStatus || existingStatus || "present");
+  let checkInTime = existingRecord?.checkInTime || "";
+  let checkInAt = existingRecord?.checkInAt || "";
+  let checkOutTime = existingRecord?.checkOutTime || "";
+  let checkOutAt = existingRecord?.checkOutAt || "";
+
+  if (eventType === "checkin") {
+    nextStatus = normalizeAttendanceStatusForRecord(payload.attendanceStatus || (Number(lateMinutes) > 0 ? "late" : "present"));
+    checkInTime = manualCheckInTime || checkInTime || currentTime;
+    checkInAt = createKoreaIsoForAttendance(lesson.date, checkInTime, checkInAt || nowIso);
+    checkOutTime = "";
+    checkOutAt = "";
+  } else if (eventType === "checkout") {
+    nextStatus = ["present", "late"].includes(existingStatus) ? existingStatus : "present";
+    checkInTime = manualCheckInTime || checkInTime;
+    checkInAt = checkInTime ? createKoreaIsoForAttendance(lesson.date, checkInTime, checkInAt || nowIso) : checkInAt;
+    checkOutTime = manualCheckOutTime || checkOutTime || currentTime;
+    checkOutAt = createKoreaIsoForAttendance(lesson.date, checkOutTime, checkOutAt || nowIso);
+  } else if (["status", "absent", "excused", "pending"].includes(eventType)) {
+    nextStatus = normalizeAttendanceStatusForRecord(payload.attendanceStatus || eventType);
+    if (["absent", "excused", "pending"].includes(nextStatus)) {
+      checkInTime = "";
+      checkInAt = "";
+      checkOutTime = "";
+      checkOutAt = "";
+    }
+  }
+
+  const nextRecord = {
+    ...(existingRecord ?? {}),
+    lessonStudentRecordId: recordId,
+    lessonId: lesson.lessonId,
+    studentId: student.studentId,
+    attendanceStatus: nextStatus,
+    attendanceReason: payload.attendanceReason ?? existingRecord?.attendanceReason ?? "",
+    lateMinutes,
+    checkInAt,
+    checkInTime,
+    checkOutAt,
+    checkOutTime,
+    updatedBy: source === "manual" ? "manual_attendance" : "attendance_kiosk",
+    updatedAt: nowIso
+  };
+  const savedResult = await upsertLessonStudentRecord(nextRecord);
+  const savedRecord = savedResult.record;
+
+  const alimtalkPayload = {
+    attendanceStatus: eventType === "checkout" ? "checkout" : nextStatus === "present" ? "checkin" : nextStatus,
+    checkedAt: eventType === "checkout" ? savedRecord.checkOutAt || nowIso : savedRecord.checkInAt || nowIso,
+    checkInTime: eventType === "checkout" ? savedRecord.checkOutTime : savedRecord.checkInTime,
+    lateMinutes: savedRecord.lateMinutes,
+    lessonId: lesson.lessonId,
+    lessonName: lesson.className,
+    parentPhone: student.parentPhone,
+    reason: savedRecord.attendanceReason,
+    studentId: student.studentId,
+    studentName: student.name
+  };
+
+  let alimtalkStatus = "skipped";
+  let alimtalkResult = null;
+  let alimtalkError = "";
+  if (sendAlimtalk) {
+    try {
+      alimtalkResult = await sendAttendanceAlimtalkOnce(alimtalkPayload);
+      alimtalkStatus = alimtalkResult?.duplicateSuppressed ? "duplicate_suppressed" : "sent";
+    } catch (error) {
+      alimtalkStatus = "failed";
+      alimtalkError = error.message;
+    }
+  }
+
+  const checkedAt = eventType === "checkout" ? savedRecord.checkOutAt : savedRecord.checkInAt;
+  const checkedTime = eventType === "checkout" ? savedRecord.checkOutTime : savedRecord.checkInTime;
+  const eventResult = await tryRecordAttendanceEvent({
+    attendanceEventId: `attendance_event_${Date.now()}_${student.studentId}_${eventType}`,
+    lessonId: lesson.lessonId,
+    studentId: student.studentId,
+    lessonStudentRecordId: recordId,
+    eventType,
+    source,
+    attendanceStatus: savedRecord.attendanceStatus,
+    checkedAt,
+    checkInAt: savedRecord.checkInAt,
+    checkInTime: savedRecord.checkInTime,
+    checkOutAt: savedRecord.checkOutAt,
+    checkOutTime: savedRecord.checkOutTime,
+    attendanceReason: savedRecord.attendanceReason,
+    lateMinutes: savedRecord.lateMinutes,
+    actorId: payload.actorId || "",
+    recordBefore: existingRecord,
+    recordAfter: savedRecord,
+    alimtalkStatus,
+    alimtalkResult,
+    error: alimtalkError
+  });
+
+  return {
+    mode: getAttendanceResultMode(eventType),
+    message: `${student.name} ${eventType === "checkout" ? "하원" : nextStatus === "late" ? "지각" : nextStatus === "absent" ? "결석" : "등원"}`,
+    checkedTime,
+    student,
+    lesson,
+    record: savedRecord,
+    attendanceEvent: eventResult.attendanceEvent,
+    alimtalk: {
+      status: alimtalkStatus,
+      result: alimtalkResult,
+      error: alimtalkError
+    }
+  };
 }
 
 function getDispatchTokenFromRequest(request, payload = {}) {
@@ -3636,6 +3957,28 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await upsertLessonStudentRecord(payload.record ?? payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/lesson-records/notification-status") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await patchLessonStudentRecordNotificationStatus(payload.record ?? payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/attendance/check") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await handleAttendanceCheck(payload);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });

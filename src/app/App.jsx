@@ -27,7 +27,6 @@ import {
   normalizeAssignmentStatusValue
 } from "../domains/lessons/assignmentStatus.js";
 import {
-  applyManualAttendanceTimeFields,
   clearAttendanceFields,
   formatKoreaTimeFromIso,
   formatShortDateLabel,
@@ -3816,6 +3815,19 @@ function generateExamAnalysisOutputDraftRequest(payload) {
   );
 }
 
+function checkAttendanceRequest(payload) {
+  return postJsonWithTimeout(
+    "/api/attendance/check",
+    payload,
+    30000,
+    "출결 저장과 알림톡 처리가 지연되고 있습니다."
+  );
+}
+
+function patchLessonRecordNotificationStatusRequest(record) {
+  return postJson("/api/lesson-records/notification-status", { record });
+}
+
 function postSchoolEvent(schoolEvent) {
   return postJson("/api/school-events", { schoolEvent });
 }
@@ -4853,7 +4865,6 @@ export function App() {
   const [lessonClipboard, setLessonClipboard] = useState(null);
   const [lessonUndoStack, setLessonUndoStack] = useState([]);
   const lessonCancelRequestsRef = useRef(new Map());
-  const attendanceNotificationLocksRef = useRef(new Set());
   const attendanceLoadedDateRef = useRef(getKoreaDateString());
   const [deletedLessonBundles, setDeletedLessonBundles] = useStoredState(storageKeys.deletedLessonBundles, []);
   const [classTemplates, setClassTemplates] = useStoredState(storageKeys.classTemplates, sampleData.classTemplates);
@@ -5561,7 +5572,30 @@ export function App() {
     const scheduledJobCount = notificationJobs.filter((job) =>
       expectedJobIds.has(job.notificationJobId) && job.status === "scheduled"
     ).length;
-    if (expectedJobIds.size > 0 && scheduledJobCount >= expectedJobIds.size) return;
+    const activeLessonStudents = students.filter(
+      (student) => (student.status ?? "active") === "active" && (selectedLesson.studentIds ?? []).includes(student.studentId)
+    );
+    const hasStaleAttendanceJob = activeLessonStudents.some((student) => {
+      const record = findLessonStudentRecord(recordsRef.current, selectedLesson, student) ?? createEmptyRecord(selectedLesson, student);
+      const jobs = ["parent", "student"]
+        .map((target) => notificationJobs.find((job) =>
+          job.notificationJobId === getLessonNotificationJobId(selectedLesson.lessonId, student.studentId, target) &&
+          job.status === "scheduled"
+        ))
+        .filter(Boolean);
+      if (jobs.length === 0) return true;
+      return jobs.some((job) => {
+        const payload = job.payload ?? {};
+        return (
+          String(payload.attendanceStatus ?? "") !== String(record.attendanceStatus ?? "pending") ||
+          String(payload.attendanceReason ?? payload.reason ?? "") !== String(record.attendanceReason ?? "") ||
+          String(payload.checkInTime ?? "") !== String(record.checkInTime ?? "") ||
+          String(payload.checkOutTime ?? "") !== String(record.checkOutTime ?? "") ||
+          String(payload.lateMinutes ?? "") !== String(record.lateMinutes ?? "")
+        );
+      });
+    });
+    if (expectedJobIds.size > 0 && scheduledJobCount >= expectedJobIds.size && !hasStaleAttendanceJob) return;
 
     if (!currentPlan) {
       setLessonNotificationPlans((current) => {
@@ -5573,7 +5607,7 @@ export function App() {
       });
     }
     applyLessonNotificationPlan(selectedLesson.lessonId, currentMode);
-  }, [isAppStateReady, isLessonJournalOpen, lessonNotificationPlans, notificationJobs, selectedLesson, session?.role]);
+  }, [isAppStateReady, isLessonJournalOpen, lessonNotificationPlans, notificationJobs, records, selectedLesson, session?.role, students]);
 
   const reportLesson = lessons.find((lesson) => lesson.lessonId === selectedReportLessonId) ?? lessons[0];
   const reportRecords = reportLesson
@@ -5661,7 +5695,7 @@ export function App() {
     setActiveView("lessons");
   }
 
-  function handleAttendancePinCheck(phoneLast4) {
+  async function handleAttendancePinCheck(phoneLast4) {
     if (attendanceOnlyMode && attendanceLoadedDateRef.current !== getKoreaDateString()) {
       setIsAppStateReady(false);
       setAttendanceReloadKey((current) => current + 1);
@@ -5673,118 +5707,41 @@ export function App() {
       return { ok: false, message: "휴대폰 번호 뒤 4자리를 입력해 주세요." };
     }
 
-    const matchedStudents = students.filter((student) => {
-      if ((student.status ?? "active") !== "active") return false;
-      const studentPhone = String(student.studentPhone ?? "").replaceAll(/\D/g, "");
-      return studentPhone.slice(-4) === digits;
-    });
-
-    if (matchedStudents.length === 0) {
-      return { ok: false, message: "해당 학생 전화번호를 찾지 못했습니다." };
+    try {
+      const result = await checkAttendanceRequest({
+        phoneLast4: digits,
+        lateGraceMinutes: attendanceSettings.lateGraceMinutes,
+        sendAlimtalk: true,
+        source: "kiosk"
+      });
+      if (result.lesson) {
+        setLessons((current) => upsertById(current, result.lesson, "lessonId"));
+      }
+      if (result.record) {
+        const nextRecords = upsertLessonStudentRecord(recordsRef.current, result.record);
+        recordsRef.current = nextRecords;
+        setRecords(nextRecords);
+      }
+      if (result.attendanceEvent) {
+        setNotificationLogs((current) => [
+          {
+            notificationLogId: result.attendanceEvent.attendanceEventId || `attendance_kiosk_${Date.now()}_${result.student?.studentId || "student"}`,
+            channel: "attendance_kiosk",
+            createdAt: result.attendanceEvent.createdAt || new Date().toISOString(),
+            lessonId: result.lesson?.lessonId,
+            message: `[출결체크] ${result.message} · ${result.checkedTime || ""}`.trim(),
+            provider: "academy-os",
+            status: result.alimtalk?.status || "saved",
+            studentId: result.student?.studentId,
+            target: "parent"
+          },
+          ...current
+        ]);
+      }
+      return { ok: true, ...result };
+    } catch (error) {
+      return { ok: false, message: error.message || "출결 저장에 실패했습니다. 선생님께 말씀해 주세요." };
     }
-    if (matchedStudents.length > 1) {
-      return { ok: false, message: "같은 뒤 4자리 학생 전화번호가 2명 이상입니다. 선생님께 말씀해 주세요." };
-    }
-
-    const student = matchedStudents[0];
-    const now = new Date();
-    const todayString = getKoreaDateString(now);
-    const todayStudentLesson = lessons
-      .filter((item) => item.date === todayString && (item.studentIds ?? []).includes(student.studentId))
-      .sort(sortByTime)[0];
-    const todayClassLesson = lessons
-      .filter((item) => item.date === todayString && item.classTemplateId === student.defaultClassTemplateId)
-      .sort(sortByTime)[0];
-    let lesson = todayStudentLesson ?? todayClassLesson;
-
-    if (!lesson) {
-      return { ok: false, message: `${student.name} 학생의 오늘 수업 일정이 없습니다. 미래 수업에는 출결을 기록하지 않습니다.` };
-    }
-    if (!(lesson.studentIds ?? []).includes(student.studentId)) {
-      lesson = {
-        ...lesson,
-        studentIds: [...(lesson.studentIds ?? []), student.studentId]
-      };
-      setLessons((current) => current.map((item) => (item.lessonId === lesson.lessonId ? lesson : item)));
-      postJson("/api/lessons/bulk", { lessons: [lesson] }).catch((error) => console.error(error));
-    }
-
-    const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
-    const existingRecord = findLessonStudentRecord(recordsRef.current, lesson, student);
-    const activeExistingRecord = getAttendanceDateMismatch(existingRecord, lesson)
-      ? clearAttendanceFields(existingRecord)
-      : existingRecord;
-    const nowIso = now.toISOString();
-    const koreaTime = new Intl.DateTimeFormat("ko-KR", {
-      timeZone: "Asia/Seoul",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false
-    }).format(now);
-    if (activeExistingRecord?.checkInAt && activeExistingRecord?.checkOutAt) {
-      return {
-        ok: true,
-        message: `${student.name} 이미 하원 처리되었습니다. 추가 확인이 필요하면 담당 선생님께 따로 말씀해 주세요.`,
-        student,
-        lesson,
-        mode: "completed",
-        checkedTime: koreaTime
-      };
-    }
-    const isCheckOut = Boolean(activeExistingRecord?.checkInAt && !activeExistingRecord?.checkOutAt);
-    const lateMinutes = isCheckOut
-      ? activeExistingRecord?.lateMinutes ?? ""
-      : calculateLateMinutes(lesson, now, attendanceSettings.lateGraceMinutes);
-    const attendanceStatus = isCheckOut ? activeExistingRecord?.attendanceStatus ?? "present" : lateMinutes > 0 ? "late" : "present";
-    const nextRecord = {
-      ...createEmptyRecord(lesson, student),
-      ...(activeExistingRecord ?? {}),
-      lessonStudentRecordId: recordId,
-      attendanceStatus,
-      checkInAt: activeExistingRecord?.checkInAt ?? nowIso,
-      checkInTime: activeExistingRecord?.checkInTime ?? koreaTime,
-      checkOutAt: isCheckOut ? nowIso : activeExistingRecord?.checkOutAt ?? "",
-      checkOutTime: isCheckOut ? koreaTime : activeExistingRecord?.checkOutTime ?? "",
-      lateMinutes,
-      attendanceReason: activeExistingRecord?.attendanceReason ?? "",
-      updatedBy: "attendance_kiosk",
-      updatedAt: nowIso
-    };
-
-    const nextRecords = upsertLessonStudentRecord(recordsRef.current, nextRecord);
-    recordsRef.current = nextRecords;
-    setRecords(nextRecords);
-    handleSaveRecord(recordId, lesson, student, nextRecord);
-    handleSendAttendanceAlimtalk(lesson, student, {
-      attendanceStatus: isCheckOut ? "checkout" : attendanceStatus === "late" ? "late" : "checkin",
-      attendanceReason: nextRecord.attendanceReason,
-      checkedAt: isCheckOut ? nextRecord.checkOutAt : nextRecord.checkInAt,
-      checkInTime: isCheckOut ? nextRecord.checkOutTime : nextRecord.checkInTime,
-      lateMinutes
-    });
-    setNotificationLogs((current) => [
-      {
-        notificationLogId: `attendance_kiosk_${Date.now()}_${student.studentId}`,
-        channel: "attendance_kiosk",
-        createdAt: nowIso,
-        lessonId: lesson.lessonId,
-        message: `[출결체크] ${student.name} ${isCheckOut ? "하원" : "등원"} · ${koreaTime}`,
-        provider: "academy-os",
-        status: "checked_and_sent",
-        studentId: student.studentId,
-        target: "parent"
-      },
-      ...current
-    ]);
-
-    return {
-      ok: true,
-      message: `${student.name} ${isCheckOut ? "하원" : "등원"}`,
-      student,
-      lesson,
-      mode: isCheckOut ? "checkOut" : "checkIn",
-      checkedTime: koreaTime
-    };
   }
 
   if (attendanceOnlyMode) {
@@ -6458,29 +6415,34 @@ export function App() {
     autoSaveTimersRef.current.set(recordId, timerId);
   }
 
-  async function saveAttendanceRecord(lesson, student, values, updatedBy = "instructor_owner_001") {
-    const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
-    const existingRecord = findLessonStudentRecord(recordsRef.current, lesson, student);
-    const activeExistingRecord = getAttendanceDateMismatch(existingRecord, lesson)
-      ? clearAttendanceFields(existingRecord)
-      : existingRecord;
-    const nowIso = new Date().toISOString();
-    const timedValues = applyManualAttendanceTimeFields(activeExistingRecord, values, nowIso, lesson);
-    const nextRecord = {
-      ...createEmptyRecord(lesson, student),
-      ...(activeExistingRecord ?? {}),
-      ...timedValues,
-      lessonStudentRecordId: recordId,
+  async function saveAttendanceRecord(lesson, student, values, updatedBy = "instructor_owner_001", options = {}) {
+    const result = await checkAttendanceRequest({
+      action: values.attendanceStatus === "checkout"
+        ? "checkout"
+        : ["absent", "excused", "pending"].includes(values.attendanceStatus)
+        ? "status"
+        : "checkin",
+      actorId: updatedBy,
+      attendanceReason: values.attendanceReason,
+      attendanceStatus: values.attendanceStatus,
+      checkInTime: values.checkInTime,
+      checkOutTime: values.checkOutTime,
+      lateMinutes: values.lateMinutes,
       lessonId: lesson.lessonId,
-      studentId: student.studentId,
-      updatedBy,
-      updatedAt: nowIso
-    };
+      sendAlimtalk: Boolean(options.sendAlimtalk),
+      source: "manual",
+      studentId: student.studentId
+    });
+    const nextRecord = result.record;
+    if (!nextRecord) throw new Error("출결 저장 결과가 없습니다.");
+    if (result.lesson) {
+      setLessons((current) => upsertById(current, result.lesson, "lessonId"));
+    }
     const nextRecords = upsertLessonStudentRecord(recordsRef.current, nextRecord);
     recordsRef.current = nextRecords;
     setRecords(nextRecords);
-    const saved = await handleSaveRecord(recordId, lesson, student, nextRecord);
-    return { record: nextRecord, saved };
+    refreshLessonNotificationJobsForRecord(nextRecord, result.lesson ?? lesson);
+    return { record: nextRecord, saved: true };
   }
 
   function handleChangeRecord(lesson, student, field, value) {
@@ -6594,7 +6556,8 @@ export function App() {
       attendanceStatus: record?.attendanceStatus ?? "pending",
       attendanceReason: record?.attendanceReason ?? "",
       checkInTime: record?.checkInTime ?? "",
-      checkedAt: record?.updatedAt ?? "",
+      checkOutTime: record?.checkOutTime ?? "",
+      checkedAt: record?.checkInAt || record?.checkOutAt || "",
       lateMinutes: record?.lateMinutes ?? "",
       commentBodyOverride: commentBody,
       lessonContent: getLessonContent(record),
@@ -6672,7 +6635,14 @@ export function App() {
     setRecords(nextRecords);
     const savingStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "saving"]));
     setSaveStates((currentStates) => ({ ...currentStates, ...savingStates }));
-    Promise.all(recordsToSave.map((record) => postJson("/api/lesson-records", { record })))
+    Promise.all(recordsToSave.map((record) => patchLessonRecordNotificationStatusRequest({
+      lessonId: record.lessonId,
+      lessonStudentRecordId: record.lessonStudentRecordId,
+      studentId: record.studentId,
+      teacherCommentSendStatus: record.teacherCommentSendStatus,
+      studentCommentSendStatus: record.studentCommentSendStatus,
+      updatedBy: record.updatedBy
+    })))
       .then(() => {
         const savedStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "saved"]));
         setSaveStates((currentStates) => ({ ...currentStates, ...savedStates }));
@@ -7032,65 +7002,6 @@ export function App() {
 
   function handleSaveReportSnapshot(snapshot) {
     setReportSnapshots((current) => [snapshot, ...current]);
-  }
-
-  async function handleSendAttendanceAlimtalk(lesson, student, values) {
-    const lockKey = [
-      student.studentId,
-      lesson.lessonId,
-      values.attendanceStatus,
-      values.checkInTime || values.checkedAt || values.checkInAt || "",
-      student.parentPhone
-    ].join("|");
-    if (attendanceNotificationLocksRef.current.has(lockKey)) {
-      return;
-    }
-    attendanceNotificationLocksRef.current.add(lockKey);
-
-    const payload = {
-      attendanceStatus: values.attendanceStatus,
-      checkedAt: values.checkedAt || values.checkInAt || getKoreaDateTimeString(),
-      checkInTime: values.checkInTime,
-      lateMinutes: values.lateMinutes,
-      lessonId: lesson.lessonId,
-      lessonName: lesson.className,
-      parentPhone: student.parentPhone,
-      reason: values.attendanceReason,
-      studentId: student.studentId,
-      studentName: student.name
-    };
-    const logBase = {
-      notificationLogId: `attendance_notification_${Date.now()}_${student.studentId}`,
-      studentId: student.studentId,
-      lessonId: lesson.lessonId,
-      channel: "alimtalk",
-      message: createAttendanceNotificationText(payload),
-      createdAt: new Date().toISOString()
-    };
-
-    try {
-      const response = await fetch(apiUrl("/api/notifications/attendance-alimtalk"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      const result = await response.json();
-      if (!response.ok || !result.ok) {
-        throw new Error(result.error || "알림톡 발송 실패");
-      }
-      const status = result.result?.duplicateSuppressed ? "duplicate_suppressed" : "sent";
-      setNotificationLogs((current) => [
-        { ...logBase, provider: "solapi", status, result },
-        ...current
-      ]);
-    } catch (error) {
-      setNotificationLogs((current) => [
-        { ...logBase, provider: "solapi", status: "failed", error: error.message },
-        ...current
-      ]);
-    } finally {
-      attendanceNotificationLocksRef.current.delete(lockKey);
-    }
   }
 
   function handleChangeView(nextView) {
@@ -7604,18 +7515,10 @@ export function App() {
           item={attendanceModal}
           onClose={() => setAttendanceModal(null)}
           onSave={async (lesson, student, values, options = {}) => {
-            const { record: savedRecord, saved } = await saveAttendanceRecord(lesson, student, values, "instructor_owner_001");
+            const { saved } = await saveAttendanceRecord(lesson, student, values, "instructor_owner_001", {
+              sendAlimtalk: Boolean(options.sendAlimtalk)
+            });
             if (!saved) return false;
-            if (options.sendAlimtalk) {
-              const isCheckout = values.attendanceStatus === "checkout";
-              await handleSendAttendanceAlimtalk(lesson, student, {
-                ...values,
-                attendanceStatus: isCheckout ? "checkout" : values.attendanceStatus,
-                checkedAt: isCheckout ? savedRecord.checkOutAt || savedRecord.updatedAt : savedRecord.checkInAt || savedRecord.updatedAt,
-                checkInAt: savedRecord.checkInAt,
-                checkInTime: isCheckout ? savedRecord.checkOutTime : savedRecord.checkInTime
-              });
-            }
             setAttendanceModal(null);
             return true;
           }}
@@ -7894,11 +7797,20 @@ export function App() {
         ...createEmptyRecord(lesson, student),
         ...(record ?? {}),
         lessonStudentRecordId: recordId,
+        lessonId: lesson.lessonId,
+        studentId: student.studentId,
         [statusField]: statusText
       };
       setRecords((current) => upsertLessonStudentRecord(current, nextRecord));
       if (persist) {
-        postJson("/api/lesson-records", { record: nextRecord }).catch((error) => console.error(error));
+        patchLessonRecordNotificationStatusRequest({
+          lessonId: lesson.lessonId,
+          lessonStudentRecordId: recordId,
+          studentId: student.studentId,
+          teacherCommentSendStatus: target === "parent" ? statusText : undefined,
+          studentCommentSendStatus: target === "student" ? statusText : undefined,
+          updatedBy: "instructor_owner_001"
+        }).catch((error) => console.error(error));
       }
     };
 
@@ -7929,7 +7841,8 @@ export function App() {
         attendanceStatus: record?.attendanceStatus ?? "pending",
         attendanceReason: record?.attendanceReason ?? "",
         checkInTime: record?.checkInTime ?? "",
-        checkedAt: record?.updatedAt ?? "",
+        checkOutTime: record?.checkOutTime ?? "",
+        checkedAt: record?.checkInAt || record?.checkOutAt || "",
         lateMinutes: record?.lateMinutes ?? "",
         lessonDate: lesson.date,
         lessonContent,
@@ -13446,6 +13359,7 @@ function AttendanceKiosk({
   const [pin, setPin] = useState("");
   const [result, setResult] = useState(null);
   const [remainingSeconds, setRemainingSeconds] = useState(3);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!result) return undefined;
@@ -13460,20 +13374,28 @@ function AttendanceKiosk({
     };
   }, [result]);
 
-  function runAttendanceCheck(nextPin) {
-    const nextResult = onAttendanceCheck(nextPin);
-    setResult(nextResult);
-    setPin("");
+  async function runAttendanceCheck(nextPin) {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const nextResult = await onAttendanceCheck(nextPin);
+      setResult(nextResult);
+      setPin("");
+    } catch (error) {
+      setResult({ ok: false, message: error.message || "출결 체크에 실패했습니다." });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   function submitPin(event) {
     event?.preventDefault();
-    if (isLoading) return;
+    if (isLoading || isSubmitting) return;
     runAttendanceCheck(pin);
   }
 
   function pressKey(value) {
-    if (isLoading) return;
+    if (isLoading || isSubmitting) return;
     if (value === "backspace") {
       setPin((current) => current.slice(0, -1));
       return;
@@ -13508,21 +13430,23 @@ function AttendanceKiosk({
             autoFocus
             inputMode="numeric"
             maxLength={4}
-            disabled={isLoading}
+            disabled={isLoading || isSubmitting}
             value={pin}
             onChange={(event) => setPin(event.target.value.replaceAll(/\D/g, "").slice(0, 4))}
-            placeholder={isLoading ? "대기" : "뒤 4자리"}
+            placeholder={isLoading || isSubmitting ? "대기" : "뒤 4자리"}
           />
-          <button className="primaryButton" disabled={isLoading || pin.length !== 4} type="submit">확인</button>
+          <button className="primaryButton" disabled={isLoading || isSubmitting || pin.length !== 4} type="submit">
+            {isSubmitting ? "저장 중" : "확인"}
+          </button>
         </form>
 
-        <div className={isLoading ? "attendanceNumberPad disabled" : "attendanceNumberPad"} aria-label="출결 번호 입력 키패드">
+        <div className={isLoading || isSubmitting ? "attendanceNumberPad disabled" : "attendanceNumberPad"} aria-label="출결 번호 입력 키패드">
           {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((value) => (
-            <button disabled={isLoading} key={value} onClick={() => pressKey(value)} type="button">{value}</button>
+            <button disabled={isLoading || isSubmitting} key={value} onClick={() => pressKey(value)} type="button">{value}</button>
           ))}
-          <button className="secondaryKey" disabled={isLoading} onClick={() => pressKey("clear")} type="button">지움</button>
-          <button disabled={isLoading} onClick={() => pressKey("0")} type="button">0</button>
-          <button className="secondaryKey" disabled={isLoading} onClick={() => pressKey("backspace")} type="button">⌫</button>
+          <button className="secondaryKey" disabled={isLoading || isSubmitting} onClick={() => pressKey("clear")} type="button">지움</button>
+          <button disabled={isLoading || isSubmitting} onClick={() => pressKey("0")} type="button">0</button>
+          <button className="secondaryKey" disabled={isLoading || isSubmitting} onClick={() => pressKey("backspace")} type="button">⌫</button>
         </div>
       </div>
 

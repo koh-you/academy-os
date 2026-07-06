@@ -102,11 +102,9 @@ export function getAttendanceDisplay(record = {}, lesson = null) {
     };
   }
   const status = record.attendanceStatus ?? "pending";
-  const updatedTime = formatKoreaTimeFromIso(record.updatedAt);
   const isArrivalStatus = ["checkin", "present", "late"].includes(status);
-  const isCheckoutStatus = status === "checkout";
-  const checkInTime = record.checkInTime || formatKoreaTimeFromIso(record.checkInAt) || (isArrivalStatus ? updatedTime : "");
-  const checkOutTime = record.checkOutTime || formatKoreaTimeFromIso(record.checkOutAt) || (isCheckoutStatus ? updatedTime : "");
+  const checkInTime = record.checkInTime || formatKoreaTimeFromIso(record.checkInAt);
+  const checkOutTime = record.checkOutTime || formatKoreaTimeFromIso(record.checkOutAt);
   const label = checkOutTime && !["absent", "excused", "pending"].includes(status)
     ? "하원"
     : isArrivalStatus || checkInTime
