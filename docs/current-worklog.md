@@ -14,6 +14,17 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-06 P0. Canva 중심 산출물 화면/데이터 워크플로우 재설계
+
+- 상태: 완료 - 문서화
+- 사용자 요청: 코딩부터 하지 말고 시험분석 공개 산출물을 Canva 중심 워크플로우 기준으로 화면/데이터 관점에서 재설계한다.
+- 작업 결과: `docs/exam-analysis-canva-workflow.md`를 추가해 Canva 10장 템플릿의 카드별 역할, 고정 영역/교체 영역, 웹앱 export 재료, 차트 PNG, 문제/손풀이 crop 파일명 가이드, 블로그 초안 흐름, 인스타 캡션 흐름을 정리했다.
+- 핵심 결정: Canva는 최종 카드뉴스 디자인 편집기이고 웹앱은 시험분석 원본/AI 초안/선생님 저장본/Canva 재료 export/블로그·인스타 문구 관리 역할이다. JS/CSS 렌더러는 최종 제작기가 아니라 `Canva 재료 미리보기/구조 검수`, 문구 길이 확인, 차트/이미지 재료 생성, 장기 Puppeteer 후보로 유지한다.
+- 저장 원천: 새 SQL 없음. 새 저장 구조 구현 없음. 설계 기준은 기존 `exam_analysis_runs.audit_summary.outputDrafts.inputs`, `outputDrafts.blog.teacherDraft`, `outputDrafts.instagram.teacherDraft`, `finalPreviewModel`을 source of truth로 삼는다. Canva에서 수정한 최종 문구는 웹앱 선생님 저장본에 다시 반영해야 한다.
+- 다음 구현 후보: 산출물 패널의 `블로그형 카드 디자인 Gate 3` 문구를 `Canva 재료 미리보기/구조 검수`로 재명명, 카드별 Canva 재료 보드 추가, ZIP export를 `texts/canva-card-*.txt`와 `texts/crop-file-guide.txt`로 세분화, Canva 최종 문구 역반영 UI 추가.
+- 검증: 문서 변경만 있으므로 `npm run build`, `npm run test:production`은 실행하지 않는다. `git diff --check`로 공백/패치 오류만 확인한다.
+- 중단 조건: 10장 기준을 임의로 8장 등으로 낮춤, AI가 문항 수/시험범위/문항번호/풀이 사실을 추측함, Canva 최종본과 웹앱 선생님 저장본이 갈라짐, 선생님 입력값을 AI/템플릿/렌더러가 덮어씀, 필터/보정 로직이 여러 겹 쌓임.
+
 ### 2026-07-06 P0. 다음 세션 인수인계 - Canva 중심 MVP 재정리
 
 - 상태: 완료
