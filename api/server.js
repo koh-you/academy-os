@@ -254,6 +254,53 @@ function sortLessonsByStartTime(left = {}, right = {}) {
   return String(left.startTime || "").localeCompare(String(right.startTime || ""));
 }
 
+function parseAttendanceClockMinutes(value = "") {
+  const match = String(value ?? "").match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return null;
+  return (Number(match[1]) || 0) * 60 + (Number(match[2]) || 0);
+}
+
+function getKoreaClockMinutesForAttendance(date = new Date()) {
+  const time = formatKoreaAttendanceTime(date);
+  return parseAttendanceClockMinutes(time) ?? 0;
+}
+
+function getAttendanceLessonTimeDistance(lesson = {}, currentMinutes = 0) {
+  const startMinutes = parseAttendanceClockMinutes(lesson.startTime);
+  const endMinutes = parseAttendanceClockMinutes(lesson.endTime);
+  if (startMinutes === null && endMinutes === null) return Number.MAX_SAFE_INTEGER;
+  if (startMinutes !== null && endMinutes !== null && currentMinutes >= startMinutes && currentMinutes <= endMinutes) {
+    return 0;
+  }
+  const distances = [startMinutes, endMinutes]
+    .filter((value) => value !== null)
+    .map((value) => Math.abs(currentMinutes - value));
+  return Math.min(...distances);
+}
+
+function selectAttendanceLessonForStudent(lessons = [], student = {}, now = new Date()) {
+  const currentMinutes = getKoreaClockMinutesForAttendance(now);
+  const candidates = new Map();
+  lessons.forEach((lesson) => {
+    const matchedByStudent = (lesson.studentIds ?? []).includes(student.studentId);
+    const matchedByClass = Boolean(lesson.classTemplateId && lesson.classTemplateId === student.defaultClassTemplateId);
+    if (!matchedByStudent && !matchedByClass) return;
+    const existing = candidates.get(lesson.lessonId);
+    candidates.set(lesson.lessonId, {
+      lesson,
+      matchedByStudent: Boolean(existing?.matchedByStudent || matchedByStudent),
+      matchedByClass: Boolean(existing?.matchedByClass || matchedByClass)
+    });
+  });
+  return [...candidates.values()]
+    .sort((left, right) => {
+      const timeDistance = getAttendanceLessonTimeDistance(left.lesson, currentMinutes) - getAttendanceLessonTimeDistance(right.lesson, currentMinutes);
+      if (timeDistance !== 0) return timeDistance;
+      if (left.matchedByStudent !== right.matchedByStudent) return left.matchedByStudent ? -1 : 1;
+      return sortLessonsByStartTime(left.lesson, right.lesson);
+    })[0]?.lesson ?? null;
+}
+
 function findAttendanceRecord(records = [], lessonId, studentId) {
   return records.find((record) => record.lessonId === lessonId && record.studentId === studentId) ?? null;
 }
@@ -343,13 +390,7 @@ async function handleAttendanceCheck(payload = {}) {
     ? lessons.find((item) => item.lessonId === payload.lessonId) ?? null
     : null;
   if (!lesson) {
-    const studentLesson = lessons
-      .filter((item) => (item.studentIds ?? []).includes(student.studentId))
-      .sort(sortLessonsByStartTime)[0];
-    const classLesson = lessons
-      .filter((item) => item.classTemplateId && item.classTemplateId === student.defaultClassTemplateId)
-      .sort(sortLessonsByStartTime)[0];
-    lesson = studentLesson ?? classLesson ?? null;
+    lesson = selectAttendanceLessonForStudent(lessons, student, now);
   }
   if (!lesson) throw new Error(`${student.name} 학생의 오늘 수업 일정이 없습니다.`);
 

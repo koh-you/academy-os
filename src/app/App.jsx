@@ -202,6 +202,22 @@ function formatAttendanceMessageTime(value) {
   return text;
 }
 
+function formatLessonClockTime(value = "") {
+  const match = String(value ?? "").match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return String(value ?? "");
+  return `${String(match[1]).padStart(2, "0")}:${match[2]}`;
+}
+
+function formatLessonTimeRange(lesson = {}) {
+  const start = formatLessonClockTime(lesson.startTime);
+  const end = formatLessonClockTime(lesson.endTime);
+  return [start, end].filter(Boolean).join("-");
+}
+
+function formatLessonDisplayName(lesson = {}) {
+  return [lesson.className, formatLessonTimeRange(lesson)].filter(Boolean).join(" · ");
+}
+
 function formatAttendanceForMessage(recordOrPayload = {}) {
   const attendanceStatus = recordOrPayload.attendanceStatus ?? "pending";
   const label = attendanceLabels[attendanceStatus] ?? attendanceStatus ?? "";
@@ -12449,7 +12465,7 @@ function LessonJournalDetail({
         <button className="iconButton" onClick={onBack} type="button">‹</button>
         <div>
           <button className="linkTitleButton" onClick={onOpenExamPrep} type="button">{lesson.className}</button>
-          <p className="muted">{lesson.date} · {lesson.startTime}-{lesson.endTime} · {lessonStudents.length}명</p>
+          <p className="muted">{lesson.date} · {formatLessonTimeRange(lesson)} · {lessonStudents.length}명</p>
         </div>
         <span className="shortcutHint">{lesson.lessonTopic || "수업일지"}</span>
         <button className="softButton" onClick={() => onEditLesson(lesson)} type="button">수업 수정</button>
@@ -13411,7 +13427,7 @@ function AttendanceKiosk({
       ? (result.mode === "completed" ? "하원" : result.mode === "checkOut" ? "하원" : "등원")
       : "출결 체크 실패";
   const resultDetail = result?.ok
-    ? `${result.student.name} · ${result.lesson.className} · ${result.checkedTime}`
+    ? `${result.student.name} · ${formatLessonDisplayName(result.lesson)} · ${result.checkedTime}`
     : result?.message;
 
   return (
@@ -13512,7 +13528,7 @@ function TeacherLessonHub({
               <div>
                 <h2>{selectedLesson.className}</h2>
                 <p className="muted">
-                  {selectedLesson.date} · {selectedLesson.startTime}-{selectedLesson.endTime} · {students.length}명
+                  {selectedLesson.date} · {formatLessonTimeRange(selectedLesson)} · {students.length}명
                 </p>
               </div>
               <div className="lessonToolbarActions">
@@ -13579,7 +13595,7 @@ function TeacherMonthCalendar({ lessons, selectedDate, selectedLessonId, onDateS
                   }}
                   style={{ background: lesson.color }}
                 >
-                  {lesson.startTime} {lesson.className} ({lesson.studentIds.length}명)
+                  {formatLessonDisplayName(lesson)} ({lesson.studentIds.length}명)
                 </span>
               ))}
             </span>
@@ -13642,7 +13658,7 @@ function LessonHub({
               >
                 <span className="lessonDot" style={{ background: lesson.color }} />
                 <strong>{lesson.className}</strong>
-                <small>{lesson.startTime}-{lesson.endTime} · {lesson.studentIds.length}명</small>
+                <small>{formatLessonTimeRange(lesson)} · {lesson.studentIds.length}명</small>
               </button>
             ))}
           </div>
@@ -13699,7 +13715,7 @@ function MonthCalendar({ lessons, selectedDate, onDateSelect }) {
                   style={{ background: lesson.color }}
                   title={`${lesson.className} · ${lesson.startTime}-${lesson.endTime}`}
                 >
-                  {lesson.startTime} {lesson.className}
+                  {formatLessonDisplayName(lesson)}
                 </span>
               ))}
             </span>
@@ -13720,7 +13736,7 @@ function LessonDetail({ lesson, records, saveStates, students, homeworks, onChan
         </div>
         <div className="metaGrid">
           <span>{lesson.date}</span>
-          <span>{lesson.startTime}-{lesson.endTime}</span>
+          <span>{formatLessonTimeRange(lesson)}</span>
           <span>{lesson.status}</span>
         </div>
       </div>

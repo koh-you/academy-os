@@ -16,7 +16,7 @@
 
 ### 2026-07-06 P0. 출결알림톡 저장-우선 재구현
 
-- 상태: 완료 - 구현/검증 완료
+- 상태: 완료 - 구현/검증 완료, 중복 수업명 선택 보강 완료
 - 사용자 요청: 조윤빈/이하민 사례처럼 학생 키오스크 등원 기록이 수업일지에 보이지 않아 선생님이 수동 발송했고, 이후 학생 하원 스캔이 다시 등원으로 처리/발송된 문제를 해결한다. 기존 출결알림톡은 모두 삭제하는지 여부도 확인했다.
 - 결론: 기존 알림관리 전체를 삭제하지 않는다. 문제를 만든 오래된 즉시 출결 발송 프론트 경로는 새 저장-우선 API로 교체하고, 알림관리의 예약/이력/데일리 알림톡 기능은 유지한다. 출결 이벤트와 수업일지 알림톡 상태 저장을 분리한다.
 - 구현 결과: `POST /api/attendance/check`를 추가했다. 키오스크/수동 출결 모두 서버가 학생·오늘 수업·기존 record를 찾고, `lesson_student_records` 저장 성공 후에만 출결 알림톡을 발송한다. 저장 실패 시 알림톡 발송으로 넘어가지 않는다.
@@ -25,6 +25,7 @@
 - 구현 결과: 수업일지 화면은 더 이상 `updatedAt`을 출결 시각 fallback으로 쓰지 않는다. 실제 `checkInTime/checkInAt`, `checkOutTime/checkOutAt`이 없으면 가짜 등원 시간이 표시되지 않는다.
 - 구현 결과: 데일리 알림톡 예약/개별 발송 상태 갱신은 `POST /api/lesson-records/notification-status`로 상태 필드만 PATCH한다. 알림톡 상태 저장이 출결 시간/상태를 빈 값으로 덮어쓰지 않게 했다.
 - 구현 결과: 서버 중복 발송 억제는 유지하되 프론트 lock 대신 `sendAttendanceAlimtalkOnce` 서버 dedupe로 정리했다.
+- 추가 보강: 같은 학생이 오늘 같은 이름/템플릿의 수업 여러 개에 들어 있는 경우, 키오스크 출결은 시작 시간이 가장 빠른 수업이 아니라 현재 시각에 가장 가까운 수업을 고른다. 키오스크 결과 모달, 수업일지 헤더, 캘린더/수업 카드에는 `수업명 · HH:MM-HH:MM` 형태를 보여 중복 수업명 혼동을 줄였다.
 - 새 SQL: `supabase/20260706_attendance_events.sql` 추가. `attendance_events` 테이블은 checkin/checkout/status/completed 이벤트, 저장 전후 record, 알림톡 결과/실패를 감사 로그로 남긴다. 운영 Supabase SQL Editor 적용 필요. 이 테이블이 없어도 출결 record 저장은 동작하지만 이벤트 감사 로그는 남지 않는다.
 - 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 통과.
 - 사람 검토 핵심: `/attendance`에서 테스트 학생 등원 -> 수업일지 새로고침 후 실제 등원 시각 표시, 선생님 수동 등원 저장 후 같은 학생 키오스크 재입력 -> 하원 표시/하원 알림톡, 지각 사유 수정 후 데일리 알림톡 예약 문구 갱신을 확인한다.
