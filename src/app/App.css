@@ -13192,6 +13192,37 @@ body.attendanceOnlyBody {
   margin: 0;
 }
 
+.attendancePreviewSummary {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  text-align: left;
+  width: 100%;
+}
+
+.attendancePreviewSummary span {
+  background: #f8fafc;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  min-height: 68px;
+  padding: 10px 12px;
+}
+
+.attendancePreviewSummary small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.attendancePreviewSummary b {
+  color: #0f172a;
+  font-size: 18px;
+  line-height: 1.25;
+  word-break: keep-all;
+}
+
 .attendanceTodayTable {
   border: 1px solid #e2e8f0;
   border-radius: 8px;

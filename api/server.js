@@ -326,6 +326,13 @@ function calculateAttendanceLateMinutes(lesson = {}, now = new Date(), graceMinu
   return Math.max(0, diff - (Number(graceMinutes) || 0));
 }
 
+function calculateAttendanceLateMinutesFromTime(lesson = {}, timeValue = "", graceMinutes = 0) {
+  const startMinutes = parseAttendanceClockMinutes(lesson.startTime);
+  const checkedMinutes = parseAttendanceClockMinutes(timeValue);
+  if (startMinutes === null || checkedMinutes === null) return "";
+  return Math.max(0, checkedMinutes - startMinutes - (Number(graceMinutes) || 0));
+}
+
 function normalizeAttendanceStatusForRecord(status = "present") {
   if (status === "checkin") return "present";
   if (status === "checkout") return "present";
@@ -359,7 +366,8 @@ async function handleAttendanceCheck(payload = {}) {
   const nowIso = now.toISOString();
   const todayString = getKoreaDateStringForAttendance(now);
   const currentTime = formatKoreaAttendanceTime(now);
-  const sendAlimtalk = payload.sendAlimtalk !== false;
+  const previewOnly = payload.previewOnly === true;
+  const sendAlimtalk = !previewOnly && payload.sendAlimtalk !== false;
 
   const [studentsResult, lessonsResult, recordsResult] = await Promise.all([
     listStudents(),
@@ -399,7 +407,7 @@ async function handleAttendanceCheck(payload = {}) {
       ...lesson,
       studentIds: [...(lesson.studentIds ?? []), student.studentId]
     };
-    await upsertLesson(lesson);
+    if (!previewOnly) await upsertLesson(lesson);
   }
 
   const recordId = createLessonStudentRecordIdForAttendance(lesson.lessonId, student.studentId);
@@ -418,6 +426,19 @@ async function handleAttendanceCheck(payload = {}) {
   }
 
   if (eventType === "completed") {
+    const checkedTime = existingRecord?.checkOutTime || existingRecord?.checkInTime || currentTime;
+    if (previewOnly) {
+      return {
+        mode: "completed",
+        message: `${student.name} 이미 하원 처리되었습니다.`,
+        checkedTime,
+        student,
+        lesson,
+        record: existingRecord,
+        attendanceEvent: null,
+        alimtalk: { status: "preview" }
+      };
+    }
     const eventResult = await tryRecordAttendanceEvent({
       attendanceEventId: `attendance_event_${Date.now()}_${student.studentId}_completed`,
       lessonId: lesson.lessonId,
@@ -440,6 +461,7 @@ async function handleAttendanceCheck(payload = {}) {
     return {
       mode: "completed",
       message: `${student.name} 이미 하원 처리되었습니다.`,
+      checkedTime,
       student,
       lesson,
       record: existingRecord,
@@ -451,9 +473,16 @@ async function handleAttendanceCheck(payload = {}) {
   const manualCheckInTime = normalizeAttendanceTime(payload.checkInTime);
   const manualCheckOutTime = normalizeAttendanceTime(payload.checkOutTime);
   const existingStatus = normalizeAttendanceStatusForRecord(existingRecord?.attendanceStatus || "pending");
+  const lateMinutesFromCheckedTime = calculateAttendanceLateMinutesFromTime(
+    lesson,
+    manualCheckInTime || existingRecord?.checkInTime || currentTime,
+    payload.lateGraceMinutes
+  );
   const lateMinutes = payload.lateMinutes === "" || payload.lateMinutes === undefined || payload.lateMinutes === null
     ? eventType === "checkin"
-      ? calculateAttendanceLateMinutes(lesson, now, payload.lateGraceMinutes)
+      ? lateMinutesFromCheckedTime !== ""
+        ? lateMinutesFromCheckedTime
+        : calculateAttendanceLateMinutes(lesson, now, payload.lateGraceMinutes)
       : existingRecord?.lateMinutes ?? ""
     : payload.lateMinutes;
 
@@ -500,6 +529,20 @@ async function handleAttendanceCheck(payload = {}) {
     updatedBy: source === "manual" ? "manual_attendance" : "attendance_kiosk",
     updatedAt: nowIso
   };
+  const previewCheckedTime = eventType === "checkout" ? nextRecord.checkOutTime : nextRecord.checkInTime;
+  if (previewOnly) {
+    return {
+      mode: getAttendanceResultMode(eventType),
+      message: `${student.name} ${eventType === "checkout" ? "하원" : nextStatus === "late" ? "지각" : nextStatus === "absent" ? "결석" : "등원"}`,
+      checkedTime: previewCheckedTime,
+      student,
+      lesson,
+      record: nextRecord,
+      attendanceEvent: null,
+      alimtalk: { status: "preview" }
+    };
+  }
+
   const savedResult = await upsertLessonStudentRecord(nextRecord);
   const savedRecord = savedResult.record;
 
@@ -4020,6 +4063,21 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await handleAttendanceCheck(payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/attendance/preview") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await handleAttendanceCheck({
+        ...payload,
+        previewOnly: true,
+        sendAlimtalk: false
+      });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });

@@ -218,6 +218,20 @@ function formatLessonDisplayName(lesson = {}) {
   return [lesson.className, formatLessonTimeRange(lesson)].filter(Boolean).join(" · ");
 }
 
+function getAttendanceClockMinutes(value = "") {
+  const time = normalizeTimeInput(value);
+  if (!time) return null;
+  const [hour, minute] = time.split(":").map(Number);
+  return hour * 60 + minute;
+}
+
+function calculateLateMinutesFromLessonTime(lesson = {}, checkInTime = "", graceMinutes = 0) {
+  const startMinutes = getAttendanceClockMinutes(lesson.startTime);
+  const checkInMinutes = getAttendanceClockMinutes(checkInTime);
+  if (startMinutes === null || checkInMinutes === null) return "";
+  return Math.max(0, checkInMinutes - startMinutes - (Number(graceMinutes) || 0));
+}
+
 function formatAttendanceForMessage(recordOrPayload = {}) {
   const attendanceStatus = recordOrPayload.attendanceStatus ?? "pending";
   const label = attendanceLabels[attendanceStatus] ?? attendanceStatus ?? "";
@@ -3840,6 +3854,15 @@ function checkAttendanceRequest(payload) {
   );
 }
 
+function previewAttendanceRequest(payload) {
+  return postJsonWithTimeout(
+    "/api/attendance/preview",
+    payload,
+    30000,
+    "출결 확인이 지연되고 있습니다."
+  );
+}
+
 function patchLessonRecordNotificationStatusRequest(record) {
   return postJson("/api/lesson-records/notification-status", { record });
 }
@@ -5711,7 +5734,31 @@ export function App() {
     setActiveView("lessons");
   }
 
-  async function handleAttendancePinCheck(phoneLast4) {
+  async function handleAttendancePinPreview(phoneLast4) {
+    if (attendanceOnlyMode && attendanceLoadedDateRef.current !== getKoreaDateString()) {
+      setIsAppStateReady(false);
+      setAttendanceReloadKey((current) => current + 1);
+      return { ok: false, message: "날짜가 바뀌어 출결 데이터를 다시 불러오는 중입니다. 잠시 후 다시 입력해 주세요." };
+    }
+
+    const digits = String(phoneLast4).replaceAll(/\D/g, "").slice(-4);
+    if (digits.length !== 4) {
+      return { ok: false, message: "휴대폰 번호 뒤 4자리를 입력해 주세요." };
+    }
+
+    try {
+      const result = await previewAttendanceRequest({
+        phoneLast4: digits,
+        lateGraceMinutes: attendanceSettings.lateGraceMinutes,
+        source: "kiosk"
+      });
+      return { ok: true, ...result };
+    } catch (error) {
+      return { ok: false, message: error.message || "출결 확인에 실패했습니다. 선생님께 말씀해 주세요." };
+    }
+  }
+
+  async function handleAttendancePinCheck(phoneLast4, options = {}) {
     if (attendanceOnlyMode && attendanceLoadedDateRef.current !== getKoreaDateString()) {
       setIsAppStateReady(false);
       setAttendanceReloadKey((current) => current + 1);
@@ -5725,10 +5772,16 @@ export function App() {
 
     try {
       const result = await checkAttendanceRequest({
+        attendanceStatus: options.attendanceStatus,
+        checkInTime: options.checkInTime,
+        checkOutTime: options.checkOutTime,
         phoneLast4: digits,
+        lateMinutes: options.lateMinutes,
         lateGraceMinutes: attendanceSettings.lateGraceMinutes,
+        lessonId: options.lessonId,
         sendAlimtalk: true,
-        source: "kiosk"
+        source: "kiosk",
+        studentId: options.studentId
       });
       if (result.lesson) {
         setLessons((current) => upsertById(current, result.lesson, "lessonId"));
@@ -5769,6 +5822,7 @@ export function App() {
         records={records}
         students={students}
         onAttendanceCheck={handleAttendancePinCheck}
+        onAttendancePreview={handleAttendancePinPreview}
       />
     );
   }
@@ -6444,6 +6498,7 @@ export function App() {
       checkInTime: values.checkInTime,
       checkOutTime: values.checkOutTime,
       lateMinutes: values.lateMinutes,
+      lateGraceMinutes: attendanceSettings.lateGraceMinutes,
       lessonId: lesson.lessonId,
       sendAlimtalk: Boolean(options.sendAlimtalk),
       source: "manual",
@@ -7529,6 +7584,7 @@ export function App() {
       {attendanceModal ? (
         <AttendanceModal
           item={attendanceModal}
+          lateGraceMinutes={attendanceSettings.lateGraceMinutes}
           onClose={() => setAttendanceModal(null)}
           onSave={async (lesson, student, values, options = {}) => {
             const { saved } = await saveAttendanceRecord(lesson, student, values, "instructor_owner_001", {
@@ -13196,12 +13252,11 @@ function CommentComposerModal({
   );
 }
 
-function AttendanceModal({ item, onClose, onSave }) {
+function AttendanceModal({ item, lateGraceMinutes = 0, onClose, onSave }) {
   const { lesson, record, student } = item;
   const attendanceDateMismatch = getAttendanceDateMismatch(record, lesson);
   const editableRecord = attendanceDateMismatch ? clearAttendanceFields(record) : record;
   const [attendanceStatus, setAttendanceStatus] = useState(getManualAttendanceInitialStatus(editableRecord));
-  const [lateMinutes, setLateMinutes] = useState(editableRecord.lateMinutes ?? "");
   const [checkInTime, setCheckInTime] = useState(editableRecord.checkInTime || formatKoreaTimeFromIso(editableRecord.checkInAt) || "");
   const [checkOutTime, setCheckOutTime] = useState(editableRecord.checkOutTime || formatKoreaTimeFromIso(editableRecord.checkOutAt) || "");
   const [attendanceReason, setAttendanceReason] = useState(editableRecord.attendanceReason ?? "");
@@ -13209,7 +13264,15 @@ function AttendanceModal({ item, onClose, onSave }) {
   const [confirmStep, setConfirmStep] = useState("");
   const [saveError, setSaveError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const values = { attendanceStatus, lateMinutes, checkInTime, checkOutTime, attendanceReason };
+  const calculatedLateMinutes = attendanceStatus === "late"
+    ? calculateLateMinutesFromLessonTime(lesson, checkInTime, lateGraceMinutes)
+    : "";
+  const effectiveLateMinutes = attendanceStatus !== "late"
+    ? ""
+    : calculatedLateMinutes !== ""
+      ? calculatedLateMinutes
+      : editableRecord.lateMinutes ?? "";
+  const values = { attendanceStatus, lateMinutes: effectiveLateMinutes, checkInTime, checkOutTime, attendanceReason };
   const hasKioskRecord = !attendanceDateMismatch && hasTabletAttendanceRecord(record);
   const hasChanged = hasAttendanceModalChanges(editableRecord, values);
 
@@ -13268,7 +13331,7 @@ function AttendanceModal({ item, onClose, onSave }) {
             value={checkInTime}
             onChange={(event) => setCheckInTime(event.target.value)}
           />
-          <small>출결을 못 찍은 학생은 실제 등원 시각을 입력하세요.</small>
+          <small>출결을 못 찍은 학생은 실제 등원 시각을 입력하세요. 지각 분은 수업 시작 기준으로 자동 계산됩니다.</small>
         </label>
         <label>
           하원 시각
@@ -13278,10 +13341,6 @@ function AttendanceModal({ item, onClose, onSave }) {
             onChange={(event) => setCheckOutTime(event.target.value)}
           />
           <small>하원 처리를 못 찍은 학생은 실제 하원 시각을 입력하세요.</small>
-        </label>
-        <label>
-          얼마나 늦었나요?
-          <input value={lateMinutes} onChange={(event) => setLateMinutes(event.target.value)} placeholder="예: 10분" />
         </label>
         <label>
           사유
@@ -13363,6 +13422,16 @@ function hasAttendanceModalChanges(record = {}, values = {}) {
   );
 }
 
+function getAttendanceActionLabel(result = {}) {
+  if (result.mode === "completed") return "이미 하원";
+  if (result.mode === "checkOut") return "하원";
+  const status = result.record?.attendanceStatus ?? "";
+  if (status === "late") return "지각 등원";
+  if (status === "absent") return "결석";
+  if (status === "excused") return "인정결석";
+  return "등원";
+}
+
 function AttendanceKiosk({
   isLoading = false,
   isStandalone = false,
@@ -13370,9 +13439,11 @@ function AttendanceKiosk({
   records = [],
   students,
   onAttendanceCheck,
+  onAttendancePreview,
   onBack
 }) {
   const [pin, setPin] = useState("");
+  const [pendingPreview, setPendingPreview] = useState(null);
   const [result, setResult] = useState(null);
   const [remainingSeconds, setRemainingSeconds] = useState(3);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -13390,15 +13461,46 @@ function AttendanceKiosk({
     };
   }, [result]);
 
-  async function runAttendanceCheck(nextPin) {
+  async function runAttendancePreview(nextPin) {
     if (isSubmitting) return;
     setIsSubmitting(true);
     try {
-      const nextResult = await onAttendanceCheck(nextPin);
-      setResult(nextResult);
-      setPin("");
+      const nextPreview = await onAttendancePreview(nextPin);
+      if (nextPreview.ok) {
+        setPendingPreview({ ...nextPreview, pin: nextPin });
+        setResult(null);
+        setPin("");
+      } else {
+        setResult(nextPreview);
+      }
     } catch (error) {
-      setResult({ ok: false, message: error.message || "출결 체크에 실패했습니다." });
+      setResult({ ok: false, message: error.message || "출결 확인에 실패했습니다." });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function confirmAttendanceCheck() {
+    if (!pendingPreview || isSubmitting) return;
+    if (pendingPreview.mode === "completed") {
+      setPendingPreview(null);
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const nextResult = await onAttendanceCheck(pendingPreview.pin, {
+        attendanceStatus: pendingPreview.record?.attendanceStatus,
+        checkInTime: pendingPreview.record?.checkInTime,
+        checkOutTime: pendingPreview.record?.checkOutTime,
+        lateMinutes: pendingPreview.record?.lateMinutes,
+        lessonId: pendingPreview.lesson?.lessonId,
+        studentId: pendingPreview.student?.studentId
+      });
+      setResult(nextResult);
+      setPendingPreview(null);
+    } catch (error) {
+      setResult({ ok: false, message: error.message || "출결 저장에 실패했습니다." });
+      setPendingPreview(null);
     } finally {
       setIsSubmitting(false);
     }
@@ -13406,12 +13508,12 @@ function AttendanceKiosk({
 
   function submitPin(event) {
     event?.preventDefault();
-    if (isLoading || isSubmitting) return;
-    runAttendanceCheck(pin);
+    if (isLoading || isSubmitting || pendingPreview) return;
+    runAttendancePreview(pin);
   }
 
   function pressKey(value) {
-    if (isLoading || isSubmitting) return;
+    if (isLoading || isSubmitting || pendingPreview) return;
     if (value === "backspace") {
       setPin((current) => current.slice(0, -1));
       return;
@@ -13423,12 +13525,14 @@ function AttendanceKiosk({
     setPin((current) => `${current}${value}`.replaceAll(/\D/g, "").slice(0, 4));
   }
 
-  const resultTitle = result?.ok
-      ? (result.mode === "completed" ? "하원" : result.mode === "checkOut" ? "하원" : "등원")
-      : "출결 체크 실패";
+  const resultTitle = result?.ok ? getAttendanceActionLabel(result) : "출결 체크 실패";
   const resultDetail = result?.ok
-    ? `${result.student.name} · ${formatLessonDisplayName(result.lesson)} · ${result.checkedTime}`
+    ? `${result.student?.name ?? ""} · ${formatLessonDisplayName(result.lesson)} · ${result.checkedTime || ""}`
     : result?.message;
+  const previewActionLabel = pendingPreview ? getAttendanceActionLabel(pendingPreview) : "";
+  const previewDetail = pendingPreview?.ok
+    ? `${pendingPreview.student?.name ?? ""} · ${formatLessonDisplayName(pendingPreview.lesson)} · ${pendingPreview.checkedTime || ""}`
+    : "";
 
   return (
     <section className={isStandalone ? "attendanceKioskPage standalone" : "attendanceKioskPage"}>
@@ -13446,25 +13550,53 @@ function AttendanceKiosk({
             autoFocus
             inputMode="numeric"
             maxLength={4}
-            disabled={isLoading || isSubmitting}
+            disabled={isLoading || isSubmitting || Boolean(pendingPreview)}
             value={pin}
             onChange={(event) => setPin(event.target.value.replaceAll(/\D/g, "").slice(0, 4))}
             placeholder={isLoading || isSubmitting ? "대기" : "뒤 4자리"}
           />
-          <button className="primaryButton" disabled={isLoading || isSubmitting || pin.length !== 4} type="submit">
-            {isSubmitting ? "저장 중" : "확인"}
+          <button className="primaryButton" disabled={isLoading || isSubmitting || Boolean(pendingPreview) || pin.length !== 4} type="submit">
+            {isSubmitting ? "확인 중" : "확인"}
           </button>
         </form>
 
-        <div className={isLoading || isSubmitting ? "attendanceNumberPad disabled" : "attendanceNumberPad"} aria-label="출결 번호 입력 키패드">
+        <div className={isLoading || isSubmitting || pendingPreview ? "attendanceNumberPad disabled" : "attendanceNumberPad"} aria-label="출결 번호 입력 키패드">
           {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((value) => (
-            <button disabled={isLoading || isSubmitting} key={value} onClick={() => pressKey(value)} type="button">{value}</button>
+            <button disabled={isLoading || isSubmitting || Boolean(pendingPreview)} key={value} onClick={() => pressKey(value)} type="button">{value}</button>
           ))}
-          <button className="secondaryKey" disabled={isLoading || isSubmitting} onClick={() => pressKey("clear")} type="button">지움</button>
-          <button disabled={isLoading || isSubmitting} onClick={() => pressKey("0")} type="button">0</button>
-          <button className="secondaryKey" disabled={isLoading || isSubmitting} onClick={() => pressKey("backspace")} type="button">⌫</button>
+          <button className="secondaryKey" disabled={isLoading || isSubmitting || Boolean(pendingPreview)} onClick={() => pressKey("clear")} type="button">지움</button>
+          <button disabled={isLoading || isSubmitting || Boolean(pendingPreview)} onClick={() => pressKey("0")} type="button">0</button>
+          <button className="secondaryKey" disabled={isLoading || isSubmitting || Boolean(pendingPreview)} onClick={() => pressKey("backspace")} type="button">⌫</button>
         </div>
       </div>
+
+      {pendingPreview ? (
+        <Modal
+          className="attendanceResultModal"
+          onClose={() => setPendingPreview(null)}
+          subtitle={previewDetail}
+          title="출결 확인"
+        >
+          <div className="attendanceResultContent">
+            <strong>{previewActionLabel}</strong>
+            <div className="attendancePreviewSummary">
+              <span><small>학생</small><b>{pendingPreview.student?.name ?? "-"}</b></span>
+              <span><small>수업</small><b>{formatLessonDisplayName(pendingPreview.lesson) || "-"}</b></span>
+              <span><small>처리</small><b>{previewActionLabel}</b></span>
+              <span><small>시간</small><b>{pendingPreview.checkedTime || "-"}</b></span>
+            </div>
+            <p>맞으면 저장 후 알림톡을 발송합니다.</p>
+            <div className="attendanceConfirmActions">
+              <button className="softButton" disabled={isSubmitting} onClick={() => setPendingPreview(null)} type="button">
+                다시 입력
+              </button>
+              <button className="primaryButton" disabled={isSubmitting} onClick={confirmAttendanceCheck} type="button">
+                {pendingPreview.mode === "completed" ? "닫기" : isSubmitting ? "저장 중..." : "저장하고 알림톡 발송"}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      ) : null}
 
       {result ? (
         <Modal
