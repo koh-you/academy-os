@@ -218,6 +218,10 @@ function formatLessonDisplayName(lesson = {}) {
   return [lesson.className, formatLessonTimeRange(lesson)].filter(Boolean).join(" · ");
 }
 
+function getLessonStudentIds(lesson = {}) {
+  return Array.isArray(lesson?.studentIds) ? lesson.studentIds : [];
+}
+
 function getAttendanceClockMinutes(value = "") {
   const time = normalizeTimeInput(value);
   if (!time) return null;
@@ -5589,13 +5593,18 @@ export function App() {
     : [];
 
   const selectedStudents = selectedLesson
-    ? selectedLesson.studentIds
+    ? getLessonStudentIds(selectedLesson)
         .map((studentId) => students.find((student) => student.studentId === studentId))
         .filter((student) => student && (student.status ?? "active") === "active")
     : [];
 
   useEffect(() => {
     if (!isLessonJournalOpen || !selectedLesson?.lessonId || !isAppStateReady || session?.role !== "teacher") return;
+    const selectedLessonStudentIds = new Set(getLessonStudentIds(selectedLesson));
+    const activeLessonStudents = students.filter(
+      (student) => (student.status ?? "active") === "active" && selectedLessonStudentIds.has(student.studentId)
+    );
+    if (activeLessonStudents.length === 0) return;
     const currentPlan = lessonNotificationPlans[selectedLesson.lessonId];
     const currentMode = currentPlan?.mode || "default";
     if (currentMode === "none") return;
@@ -5603,7 +5612,7 @@ export function App() {
     if (isLessonAlimtalkScheduleExpired(selectedLesson, delayMinutes)) return;
 
     const expectedJobIds = new Set(
-      (selectedLesson.studentIds ?? []).flatMap((studentId) => [
+      getLessonStudentIds(selectedLesson).flatMap((studentId) => [
         getLessonNotificationJobId(selectedLesson.lessonId, studentId, "parent"),
         getLessonNotificationJobId(selectedLesson.lessonId, studentId, "student")
       ])
@@ -5611,9 +5620,6 @@ export function App() {
     const scheduledJobCount = notificationJobs.filter((job) =>
       expectedJobIds.has(job.notificationJobId) && job.status === "scheduled"
     ).length;
-    const activeLessonStudents = students.filter(
-      (student) => (student.status ?? "active") === "active" && (selectedLesson.studentIds ?? []).includes(student.studentId)
-    );
     const hasStaleAttendanceJob = activeLessonStudents.some((student) => {
       const record = findLessonStudentRecord(recordsRef.current, selectedLesson, student) ?? createEmptyRecord(selectedLesson, student);
       const jobs = ["parent", "student"]
@@ -6679,7 +6685,7 @@ export function App() {
   }
 
   function updateLessonNotificationRecordStatuses(lesson, statusText) {
-    const lessonStudentIds = new Set(lesson.studentIds ?? []);
+    const lessonStudentIds = new Set(getLessonStudentIds(lesson));
     const lessonStudentsForRecords = students.filter(
       (student) => (student.status ?? "active") === "active" && lessonStudentIds.has(student.studentId)
     );
@@ -6698,6 +6704,7 @@ export function App() {
         updatedAt
       };
     });
+    if (recordsToSave.length === 0) return;
     const nextRecords = recordsToSave.reduce(
       (currentRecords, record) => upsertLessonStudentRecord(currentRecords, record),
       recordsRef.current
@@ -6723,6 +6730,21 @@ export function App() {
         const failedStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "failed"]));
         setSaveStates((currentStates) => ({ ...currentStates, ...failedStates }));
       });
+  }
+
+  function cancelActiveLessonNotificationJobs(lesson, reason = "수업 학생 없음") {
+    const canceledJobs = notificationJobs
+      .filter((job) => job.lessonId === lesson.lessonId)
+      .filter((job) => !["sent", "dry_run", "failed", "canceled"].includes(job.status))
+      .map((job) => ({ ...job, status: "canceled", error: reason, updatedAt: new Date().toISOString() }));
+    if (canceledJobs.length === 0) return [];
+    setNotificationJobs((current) =>
+      current.map((job) => canceledJobs.find((canceledJob) => canceledJob.notificationJobId === job.notificationJobId) ?? job)
+    );
+    canceledJobs.forEach((notificationJob) =>
+      postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
+    );
+    return canceledJobs;
   }
 
   function refreshLessonNotificationJobsForRecord(record, lessonForRecord = null) {
@@ -6760,9 +6782,14 @@ export function App() {
   function applyLessonNotificationPlan(lessonId, mode) {
     const lesson = lessons.find((item) => item.lessonId === lessonId);
     if (!lesson) return;
+    const lessonStudentIds = new Set(getLessonStudentIds(lesson));
     const lessonStudents = students.filter(
-      (student) => (student.status ?? "active") === "active" && lesson.studentIds?.includes(student.studentId)
+      (student) => (student.status ?? "active") === "active" && lessonStudentIds.has(student.studentId)
     );
+    if (lessonStudents.length === 0) {
+      cancelActiveLessonNotificationJobs(lesson, "수업 학생 없음");
+      return;
+    }
     const jobIds = new Set(
       lessonStudents.flatMap((student) => [
         getLessonNotificationJobId(lesson.lessonId, student.studentId, "parent"),
@@ -6816,9 +6843,14 @@ export function App() {
 
   function scheduleLessonNotificationsAt(lesson, scheduledDate, mode = "manual") {
     if (!lesson?.lessonId || !scheduledDate) return;
+    const lessonStudentIds = new Set(getLessonStudentIds(lesson));
     const lessonStudents = students.filter(
-      (student) => (student.status ?? "active") === "active" && lesson.studentIds?.includes(student.studentId)
+      (student) => (student.status ?? "active") === "active" && lessonStudentIds.has(student.studentId)
     );
+    if (lessonStudents.length === 0) {
+      cancelActiveLessonNotificationJobs(lesson, "수업 학생 없음");
+      return;
+    }
     const jobIds = new Set(
       lessonStudents.flatMap((student) => [
         getLessonNotificationJobId(lesson.lessonId, student.studentId, "parent"),
@@ -7008,7 +7040,7 @@ export function App() {
   }
 
   function handleApplyBulkHomework(lesson, homeworkType, title) {
-    lesson.studentIds.forEach((studentId) => {
+    getLessonStudentIds(lesson).forEach((studentId) => {
       const student = students.find((item) => item.studentId === studentId);
       if (student) handleUpdateHomework(lesson, student, homeworkType, title);
     });
@@ -11680,7 +11712,7 @@ function TeacherLessonHubV2({
                           ? lesson.virtualBlockMemo ? ` · ${lesson.virtualBlockMemo}` : " · 이동"
                           : lesson.lessonType === "examSundayMakeup"
                           ? sundayMakeupSourceLabel ? ` · ${sundayMakeupSourceLabel}` : ""
-                          : ` (${lesson.studentIds.length}명)`}
+                          : ` (${getLessonStudentIds(lesson).length}명)`}
                       </button>
                     );
                   })}
@@ -13727,7 +13759,7 @@ function TeacherMonthCalendar({ lessons, selectedDate, selectedLessonId, onDateS
                   }}
                   style={{ background: lesson.color }}
                 >
-                  {formatLessonDisplayName(lesson)} ({lesson.studentIds.length}명)
+                  {formatLessonDisplayName(lesson)} ({getLessonStudentIds(lesson).length}명)
                 </span>
               ))}
             </span>
@@ -13790,7 +13822,7 @@ function LessonHub({
               >
                 <span className="lessonDot" style={{ background: lesson.color }} />
                 <strong>{lesson.className}</strong>
-                <small>{formatLessonTimeRange(lesson)} · {lesson.studentIds.length}명</small>
+                <small>{formatLessonTimeRange(lesson)} · {getLessonStudentIds(lesson).length}명</small>
               </button>
             ))}
           </div>
