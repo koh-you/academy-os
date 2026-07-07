@@ -14,6 +14,20 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-07 P0. 예약 수업일지 알림톡 원본 최신화
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청: 22:30 예약 알림톡이 새벽 1시대에 발송된 원인을 분석하고, 수업일지를 수정/학생 삭제한 뒤에는 선생님이 마지막으로 저장한 수업일지가 알림톡 발송 원본이 되게 한다.
+- 결론: 기존 예약 job에 들어 있던 payload snapshot을 최종 원본으로 보지 않는다. 예약 job은 발송 예약/대상 식별자이고, 실제 발송 직전 서버가 최신 `lessons`, `lesson_student_records`, `students`, `homeworks`, `makeup_tasks`를 다시 읽어 문구를 재구성한다.
+- 구현 결과: 예약 수업 알림 dispatch 직전 `createLessonNotificationDispatchContext`와 `refreshLessonCommentJobBeforeSend`를 거친다. 수업이 삭제/취소됐거나 학생이 현재 수업 명단에서 빠졌거나 학생이 비활성/개별 알림 제외 상태이면 발송하지 않고 job을 `canceled`로 남긴다.
+- 구현 결과: 발송 가능한 job은 최신 저장본 기준으로 출결, 과제 상태, 강의 교재, 강의 내용, 지난/다음 과제, 수업메모/보충일정, 학생/학부모 대상 문구를 다시 만들고 그 결과를 `payload`와 `previewBody`에 반영한 뒤 Solapi로 보낸다.
+- 구현 결과: 수업 저장/upsert 시 현재 명단에 없는 학생의 미발송 예약 job을 `수업 명단에서 제외됨`으로 취소한다. 수업 삭제 시 해당 수업의 미발송 예약 job은 `수업 삭제`로 취소한다. 프론트 예약 재적용도 같은 lesson의 오래된 active job을 남기지 않게 정리했다.
+- 운영 판단: 이 변경은 “오래된 예약 payload가 나가는 문제”를 막는다. 단, Render free web service가 sleep 상태이면 22:30에 서버 내부 interval이 정확히 실행되지 않을 수 있으므로, 정확한 예약 시각 보장은 Render Cron Job 또는 외부 scheduler를 별도 적용해야 한다.
+- SQL 주의: 기존 `notification_jobs`, `lessons`, `lesson_student_records`, `homeworks`, `students` 테이블만 사용한다. 새 Supabase SQL Editor 적용은 필요 없다.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 242개 통과.
+- 사람 검토 핵심: 테스트 수업에서 학생 2명을 넣고 기본 예약을 만든 뒤, 한 학생을 삭제하고 남은 학생의 수업일지 내용을 수정/저장한다. 알림관리 또는 `/api/notification-jobs?includeResult=true`에서 삭제된 학생 job이 취소되고, 발송 시 남은 학생에게 최신 저장 내용만 나가는지 확인한다.
+- 중단 조건: 학생 삭제 후에도 해당 학생 job이 `scheduled`로 남음, 삭제한 학생에게 발송됨, 이전 수업일지 문구가 발송됨, 수업 삭제 후 예약 job이 남음, 발송 직전 최신 record가 아니라 예약 당시 payload가 최종 원본처럼 사용됨.
+
 ### 2026-07-06 P0. 출결알림톡 저장-우선 재구현
 
 - 상태: 완료 - 구현/검증 완료, 중복 수업명 선택 보강 및 키오스크 발송 전 확인 보강 완료

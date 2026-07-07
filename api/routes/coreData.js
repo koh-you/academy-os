@@ -4,6 +4,7 @@ import { deleteRows, getSupabaseStatus, isSupabaseConfigured, listRows, patchRow
 const fallbackSource = "local_sample";
 const databaseSource = "supabase";
 const canceledLessonRetentionMs = 7 * 24 * 60 * 60 * 1000;
+const pendingNotificationJobStatuses = ["scheduled", "queued", "pending_send"];
 const sensitiveAppStateKeys = new Set(["teacherAccountSettings"]);
 const deprecatedAppStateKeys = new Set(["examAnalyses", "examAnalysisFolders"]);
 const hiddenAppStateKeys = new Set([...sensitiveAppStateKeys, ...deprecatedAppStateKeys]);
@@ -792,6 +793,57 @@ function fromNotificationJobRow(row) {
   };
 }
 
+async function cancelPendingNotificationJobsForLesson(lessonId, reason = "수업 변경") {
+  if (!lessonId || !isSupabaseConfigured({ requireServiceRole: true })) return [];
+  const encodedLessonId = encodeURIComponent(lessonId);
+  const statusFilter = pendingNotificationJobStatuses.join(",");
+  const rows = await listRows(
+    "notification_jobs",
+    `select=notification_job_id&lesson_id=eq.${encodedLessonId}&status=in.(${statusFilter})`,
+    { requireServiceRole: true }
+  );
+  const nowIso = new Date().toISOString();
+  for (const row of rows) {
+    if (!row.notification_job_id) continue;
+    await patchRows(
+      "notification_jobs",
+      `notification_job_id=eq.${encodeURIComponent(row.notification_job_id)}&status=in.(${statusFilter})`,
+      {
+        error: reason,
+        status: "canceled",
+        updated_at: nowIso
+      }
+    );
+  }
+  return rows.map((row) => row.notification_job_id).filter(Boolean);
+}
+
+async function cancelPendingNotificationJobsForRemovedLessonStudents(lesson = {}, reason = "수업 명단에서 제외됨") {
+  if (!lesson.lessonId || !isSupabaseConfigured({ requireServiceRole: true })) return [];
+  const allowedStudentIds = new Set(Array.isArray(lesson.studentIds) ? lesson.studentIds : []);
+  const encodedLessonId = encodeURIComponent(lesson.lessonId);
+  const statusFilter = pendingNotificationJobStatuses.join(",");
+  const rows = await listRows(
+    "notification_jobs",
+    `select=notification_job_id,student_id&lesson_id=eq.${encodedLessonId}&status=in.(${statusFilter})`,
+    { requireServiceRole: true }
+  );
+  const removedRows = rows.filter((row) => row.notification_job_id && !allowedStudentIds.has(row.student_id));
+  const nowIso = new Date().toISOString();
+  for (const row of removedRows) {
+    await patchRows(
+      "notification_jobs",
+      `notification_job_id=eq.${encodeURIComponent(row.notification_job_id)}&status=in.(${statusFilter})`,
+      {
+        error: reason,
+        status: "canceled",
+        updated_at: nowIso
+      }
+    );
+  }
+  return removedRows.map((row) => row.notification_job_id).filter(Boolean);
+}
+
 function toAttendanceEventRow(event = {}) {
   return {
     attendance_event_id: event.attendanceEventId,
@@ -979,7 +1031,9 @@ export async function upsertLesson(lesson) {
   }
 
   const [row] = await upsertRows("lessons", [toLessonRow(lesson)], { onConflict: "lesson_id" });
-  return { source: databaseSource, lesson: fromLessonRow(row) };
+  const savedLesson = fromLessonRow(row);
+  await cancelPendingNotificationJobsForRemovedLessonStudents(savedLesson, "수업 명단에서 제외됨");
+  return { source: databaseSource, lesson: savedLesson };
 }
 
 export async function upsertLessons(lessons) {
@@ -991,7 +1045,11 @@ export async function upsertLessons(lessons) {
   }
 
   const rows = await upsertRows("lessons", lessons.map(toLessonRow), { onConflict: "lesson_id" });
-  return { source: databaseSource, lessons: rows.map(fromLessonRow) };
+  const savedLessons = rows.map(fromLessonRow);
+  for (const savedLesson of savedLessons) {
+    await cancelPendingNotificationJobsForRemovedLessonStudents(savedLesson, "수업 명단에서 제외됨");
+  }
+  return { source: databaseSource, lessons: savedLessons };
 }
 
 export async function deleteLesson(lessonId) {
@@ -1001,6 +1059,7 @@ export async function deleteLesson(lessonId) {
   }
 
   const encodedLessonId = encodeURIComponent(lessonId);
+  await cancelPendingNotificationJobsForLesson(lessonId, "수업 삭제");
   await deleteRows("homeworks", `lesson_id=eq.${encodedLessonId}`);
   await deleteRows("lesson_student_records", `lesson_id=eq.${encodedLessonId}`);
   await deleteRows("lessons", `lesson_id=eq.${encodedLessonId}`);

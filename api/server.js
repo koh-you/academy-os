@@ -51,6 +51,12 @@ import { loadEnvFile } from "./lib/loadEnv.js";
 import { isSupabaseConfigured, listRows, upsertRows } from "./lib/supabaseRest.js";
 import { getAiStatus, polishLessonComment } from "./routes/commentPolish.js";
 import {
+  getAssignmentStatusMessage,
+  getAssignmentStatusParentMessage,
+  getAssignmentStatusStudentMessage,
+  normalizeAssignmentStatusValue
+} from "../src/domains/lessons/assignmentStatus.js";
+import {
   confirmExamAnalysisQuestionCount,
   deleteExamAnalysisRun,
   deleteExamAnalysisSource,
@@ -1006,6 +1012,456 @@ const lessonBodyFields = [
   "commentBodyOverride",
   "reportBody"
 ];
+const attendanceLabelMap = {
+  absent: "결석",
+  checkin: "등원",
+  checkout: "하원",
+  excused: "인정결석",
+  late: "지각",
+  pending: "대기",
+  present: "등원"
+};
+
+function isLessonCommentNotificationJob(job = {}) {
+  return lessonCommentNotificationTypes.has(job.notificationType);
+}
+
+function shouldRefreshLessonCommentJobBeforeSend(job = {}) {
+  return Boolean(job.lessonId && job.studentId && isLessonCommentNotificationJob(job));
+}
+
+function normalizeNotificationText(value = "") {
+  return String(value ?? "")
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join("\n");
+}
+
+function getNotificationTextKey(value = "") {
+  return normalizeNotificationText(value).replace(/\s+/g, " ");
+}
+
+function compactDuplicateNotificationBlocks(value = "") {
+  const seen = new Set();
+  return String(value ?? "")
+    .replace(/\r\n/g, "\n")
+    .split(/\n\s*\n+/g)
+    .map(normalizeNotificationText)
+    .filter(Boolean)
+    .filter((block) => {
+      const key = getNotificationTextKey(block);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .join("\n\n");
+}
+
+function notificationTextIncludesBlock(text = "", block = "") {
+  const textKey = getNotificationTextKey(text);
+  const blockKey = getNotificationTextKey(block);
+  return Boolean(blockKey && textKey.includes(blockKey));
+}
+
+function notificationTextIncludesEveryLine(text = "", lines = []) {
+  const textKey = getNotificationTextKey(text);
+  return lines.every((line) => {
+    const lineKey = getNotificationTextKey(line);
+    return !lineKey || textKey.includes(lineKey);
+  });
+}
+
+function joinNotificationBlocks(blocks = []) {
+  return blocks.map(normalizeNotificationText).filter(Boolean).join("\n\n");
+}
+
+function notificationLine(label, value) {
+  const text = normalizeNotificationText(value);
+  return text ? `${label} : ${text}` : "";
+}
+
+function notificationBlock(label, value) {
+  const text = normalizeNotificationText(value);
+  return text ? `${label}\n${text}` : "";
+}
+
+function getLessonStudentIdsForNotification(lesson = {}) {
+  return Array.isArray(lesson.studentIds) ? lesson.studentIds : [];
+}
+
+function createLessonStudentRecordIdForNotification(lessonId = "", studentId = "") {
+  return `lsr_${String(lessonId).replace(/^lesson_/, "")}_${studentId}`;
+}
+
+function createEmptyNotificationRecord(lesson = {}, student = {}) {
+  return {
+    lessonStudentRecordId: createLessonStudentRecordIdForNotification(lesson.lessonId, student.studentId),
+    lessonId: lesson.lessonId,
+    studentId: student.studentId,
+    attendanceStatus: "pending",
+    attendanceReason: "",
+    checkInAt: "",
+    checkInTime: "",
+    checkOutAt: "",
+    checkOutTime: "",
+    lateMinutes: "",
+    lessonMaterial: "",
+    lessonContent: "",
+    lessonProgress: "",
+    progress: "",
+    preparationMemo: "",
+    prepParentVisible: false,
+    prepStudentVisible: false,
+    teacherComment: "",
+    studentComment: "",
+    assignmentStatus: "",
+    incompleteHomework: "",
+    notificationMutedParent: false,
+    notificationMutedStudent: false,
+    notificationMutedReason: ""
+  };
+}
+
+function getLatestNotificationRecord(context, lesson = {}, student = {}) {
+  return (
+    context.recordByLessonStudent.get(`${lesson.lessonId}|${student.studentId}`) ??
+    createEmptyNotificationRecord(lesson, student)
+  );
+}
+
+function getNotificationLessonMaterial(record = {}, student = {}) {
+  return compactText(record.lessonMaterial) || compactText(student.textbook) || compactText(student.currentTextbook);
+}
+
+function getNotificationLessonContent(record = {}) {
+  return compactText(record.lessonProgress) || compactText(record.progress) || compactText(record.lessonContent);
+}
+
+function getHomeworkAssignmentStatusForNotification(homework = {}, records = []) {
+  const ownStatus = homework.assignmentStatus ?? homework.incompleteHomework ?? "";
+  if (ownStatus) return ownStatus;
+  const record = records.find(
+    (item) => item.lessonId === (homework.checkedLessonId ?? homework.lessonId) && item.studentId === homework.studentId
+  );
+  return record?.assignmentStatus ?? record?.incompleteHomework ?? "";
+}
+
+function getAssignmentStatusForNotification(record = {}, previousHomework = null, records = []) {
+  const recordStatus = normalizeAssignmentStatusValue(record.assignmentStatus ?? record.incompleteHomework ?? "");
+  if (recordStatus) return recordStatus;
+
+  const homeworkStatus = normalizeAssignmentStatusValue(
+    getHomeworkAssignmentStatusForNotification(previousHomework ?? {}, records)
+  );
+  if (homeworkStatus) return homeworkStatus;
+
+  if (previousHomework?.teacherStatus === "verified" || previousHomework?.status === "verified") return "complete_thorough";
+  if (previousHomework?.teacherStatus === "missing") return "not_done";
+  if (previousHomework?.teacherStatus === "unverified") return "not_checked";
+  if (previousHomework?.teacherStatus === "partial") return "partial_50";
+  return "";
+}
+
+function getLessonHomeworkForNotification(homeworks = [], lessons = [], lesson = {}, student = {}, homeworkType = "") {
+  const directHomework =
+    homeworks.find(
+      (homework) =>
+        homework.lessonId === lesson.lessonId &&
+        homework.studentId === student.studentId &&
+        homework.homeworkType === homeworkType
+    ) ?? null;
+
+  if (directHomework || homeworkType !== "previous") return directHomework;
+
+  const previousLesson = [...lessons]
+    .filter(
+      (item) =>
+        item.lessonId !== lesson.lessonId &&
+        item.date < lesson.date &&
+        getLessonStudentIdsForNotification(item).includes(student.studentId) &&
+        (!lesson.classTemplateId || !item.classTemplateId || item.classTemplateId === lesson.classTemplateId)
+    )
+    .sort((a, b) => b.date.localeCompare(a.date) || b.startTime.localeCompare(a.startTime))[0];
+
+  if (!previousLesson) return null;
+
+  return (
+    homeworks.find(
+      (homework) =>
+        homework.lessonId === previousLesson.lessonId &&
+        homework.studentId === student.studentId &&
+        homework.homeworkType === "next"
+    ) ?? null
+  );
+}
+
+function followUpTypeLabelForNotification(taskType) {
+  return {
+    homework_makeup: "숙제보충",
+    absence_makeup: "결석 보강",
+    retest: "재시험"
+  }[taskType] ?? "보충관리";
+}
+
+function supplementMethodLabelForNotification(task = {}) {
+  const defaultMethod = task.taskType === "homework_makeup" ? "stay_after" : task.taskType === "absence_makeup" ? "onsite_makeup" : "onsite_retest";
+  const methodId = task.supplementMethod || defaultMethod;
+  return {
+    arrival_makeup: "등원보충",
+    next_lesson: "다음시간까지",
+    onsite_makeup: "현장보강",
+    onsite_retest: "현장 재시험",
+    recorded_lecture: "녹강보강",
+    stay_after: "남아서 하고 가기"
+  }[methodId] ?? "방식 미정";
+}
+
+function getSupplementTaskSourceLabelForNotification(task = {}) {
+  if (task.taskType === "homework_makeup") {
+    return task.supplementHomeworkNote || task.sourceLabel || "";
+  }
+  return task.sourceLabel || "";
+}
+
+function formatSupplementScheduleLineForNotification(task = {}) {
+  const schedule = [task.scheduledDate, task.scheduledTime].filter(Boolean).join(" ");
+  const method = supplementMethodLabelForNotification(task);
+  const source = getSupplementTaskSourceLabelForNotification(task) || followUpTypeLabelForNotification(task.taskType);
+  const status = task.status === "done" ? "보충 완료" : task.status === "scheduled" ? "일정 확정" : "일정 미확정";
+  return [schedule || "일정 미정", source, method, status].filter(Boolean).join(" · ");
+}
+
+function getStudentSupplementSchedulesForNotification(makeupTasks = [], studentId = "") {
+  return makeupTasks
+    .filter((task) => task.studentId === studentId && task.status !== "done")
+    .filter((task) => task.scheduledDate || task.scheduledTime || task.notificationDraft || task.supplementHomeworkNote || task.sourceLabel)
+    .sort((a, b) => `${a.scheduledDate || "9999-99-99"} ${a.scheduledTime || ""}`.localeCompare(`${b.scheduledDate || "9999-99-99"} ${b.scheduledTime || ""}`))
+    .map(formatSupplementScheduleLineForNotification);
+}
+
+function getPreparationNoticeForNotification(record = {}, target = "parent") {
+  const shouldInclude = target === "student" ? Boolean(record.prepStudentVisible) : Boolean(record.prepParentVisible);
+  return shouldInclude ? normalizeNotificationText(record.preparationMemo) : "";
+}
+
+function buildInitialNotificationComment({ audience, existingComment, record, supplementSchedules }) {
+  const commentText = compactDuplicateNotificationBlocks(existingComment);
+  const prepMemo = getPreparationNoticeForNotification(record, audience);
+  const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
+  const supplementBlock = supplementText ? `보충 일정:\n${supplementText}` : "";
+  const shouldAddPrepMemo = prepMemo && !notificationTextIncludesBlock(commentText, prepMemo);
+  const shouldAddSupplement =
+    supplementBlock &&
+    !notificationTextIncludesBlock(commentText, supplementBlock) &&
+    !notificationTextIncludesEveryLine(commentText, supplementSchedules);
+
+  return joinNotificationBlocks([
+    shouldAddPrepMemo ? prepMemo : "",
+    shouldAddSupplement ? supplementBlock : "",
+    commentText
+  ]);
+}
+
+function formatNotificationAttendance(record = {}) {
+  const label = attendanceLabelMap[record.attendanceStatus ?? "pending"] ?? record.attendanceStatus ?? "";
+  if (!["지각", "결석", "인정결석"].includes(label)) return label;
+
+  const details = [];
+  const reason = normalizeNotificationText(record.attendanceReason ?? record.reason ?? "");
+  const time = compactText(record.checkInTime || record.checkedAt || record.checkInAt);
+  if (reason) details.push(`사유: ${reason}`);
+  if (label === "지각" && time) details.push(`등원 ${time}`);
+  if (label === "지각" && !time && record.lateMinutes) details.push(`${record.lateMinutes}분 지각`);
+  if ((label === "결석" || label === "인정결석") && time) details.push(`처리 ${time}`);
+  return details.length ? `${label} (${details.join(" · ")})` : label;
+}
+
+function buildLatestLessonCommentPreview({ audience, commentBody, lesson, nextHomework, previousHomework, record, student, supplementSchedules }) {
+  const assignmentStatus = getAssignmentStatusForNotification(record, previousHomework);
+  const commentText = normalizeNotificationText(commentBody);
+  const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
+  const supplementNotice =
+    supplementText && !commentText.includes("보충일정") && !supplementSchedules.some((item) => commentText.includes(item))
+      ? supplementText
+      : "";
+
+  return joinNotificationBlocks([
+    `${student.name} 학생 ${audience === "student" ? "안내" : "수업 안내"}`,
+    notificationLine("🏫 출결", formatNotificationAttendance(record)),
+    notificationLine("✅ 과제 상태", getAssignmentStatusMessage(audience, assignmentStatus)),
+    notificationLine("📚 강의 교재", getNotificationLessonMaterial(record, student)),
+    notificationLine("🧭 강의 내용", getNotificationLessonContent(record)),
+    notificationLine("📘 지난 과제", previousHomework?.title ?? ""),
+    notificationLine("➡️ 다음 과제", nextHomework?.title ?? ""),
+    notificationBlock("⭐ 중요 · 보충 일정", supplementNotice),
+    notificationBlock("💬 코멘트", commentText),
+    notificationLine("📘 수업", lesson.className)
+  ]);
+}
+
+async function createLessonNotificationDispatchContext(jobs = []) {
+  if (!jobs.some(shouldRefreshLessonCommentJobBeforeSend)) return null;
+  const [
+    lessonsResult,
+    recordsResult,
+    studentsResult,
+    homeworksResult,
+    makeupTasksResult
+  ] = await Promise.all([
+    listLessons(),
+    listLessonStudentRecords(),
+    listStudents(),
+    listHomeworks(),
+    listMakeupTasks()
+  ]);
+  const lessons = lessonsResult.lessons ?? [];
+  const records = recordsResult.records ?? [];
+  const students = studentsResult.students ?? [];
+
+  return {
+    homeworks: homeworksResult.homeworks ?? [],
+    lessons,
+    makeupTasks: makeupTasksResult.makeupTasks ?? [],
+    records,
+    students,
+    lessonById: new Map(lessons.map((lesson) => [lesson.lessonId, lesson])),
+    recordByLessonStudent: new Map(records.map((record) => [`${record.lessonId}|${record.studentId}`, record])),
+    studentById: new Map(students.map((student) => [student.studentId, student]))
+  };
+}
+
+function cancelNotificationJobBeforeSend(job = {}, reason = "발송 대상이 아닙니다.", code = "not_dispatchable") {
+  return {
+    ...job,
+    status: "canceled",
+    provider: "academy-os",
+    providerMessageId: "",
+    error: reason,
+    result: {
+      ...(job.result && typeof job.result === "object" ? job.result : {}),
+      dispatchCheckedAt: new Date().toISOString(),
+      dispatchSkipped: true,
+      dispatchSkippedCode: code,
+      dispatchSkippedReason: reason
+    },
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function refreshLessonCommentJobBeforeSend(job = {}, context = null) {
+  if (!shouldRefreshLessonCommentJobBeforeSend(job) || !context) {
+    return { action: "send", job };
+  }
+
+  const lesson = context.lessonById.get(job.lessonId);
+  if (!lesson || ["canceled", "deleted"].includes(lesson.status)) {
+    return {
+      action: "cancel",
+      job: cancelNotificationJobBeforeSend(job, "수업이 삭제되었거나 취소되어 발송하지 않았습니다.", "lesson_missing")
+    };
+  }
+
+  const lessonStudentIds = getLessonStudentIdsForNotification(lesson);
+  if (!lessonStudentIds.includes(job.studentId)) {
+    return {
+      action: "cancel",
+      job: cancelNotificationJobBeforeSend(job, "학생이 현재 수업 명단에서 제외되어 발송하지 않았습니다.", "student_removed_from_lesson")
+    };
+  }
+
+  const student = context.studentById.get(job.studentId);
+  if (!student || (student.status ?? "active") !== "active") {
+    return {
+      action: "cancel",
+      job: cancelNotificationJobBeforeSend(job, "학생이 현재 활성 학생이 아니어서 발송하지 않았습니다.", "student_inactive")
+    };
+  }
+
+  const audience = job.notificationType === "student_comment" || job.target === "student" ? "student" : "parent";
+  const record = getLatestNotificationRecord(context, lesson, student);
+  if (audience === "parent" && record.notificationMutedParent) {
+    return {
+      action: "cancel",
+      job: cancelNotificationJobBeforeSend(job, "학부모 알림 제외 상태라 발송하지 않았습니다.", "parent_muted")
+    };
+  }
+  if (audience === "student" && record.notificationMutedStudent) {
+    return {
+      action: "cancel",
+      job: cancelNotificationJobBeforeSend(job, "학생 알림 제외 상태라 발송하지 않았습니다.", "student_muted")
+    };
+  }
+
+  const previousHomework = getLessonHomeworkForNotification(context.homeworks, context.lessons, lesson, student, "previous");
+  const nextHomework = getLessonHomeworkForNotification(context.homeworks, context.lessons, lesson, student, "next");
+  const supplementSchedules = getStudentSupplementSchedulesForNotification(context.makeupTasks, student.studentId);
+  const sourceField = audience === "student" ? "studentComment" : "teacherComment";
+  const commentBody = buildInitialNotificationComment({
+    audience,
+    existingComment: record[sourceField] ?? "",
+    record,
+    supplementSchedules
+  });
+  const assignmentStatus = getAssignmentStatusForNotification(record, previousHomework, context.records);
+  const payload = {
+    ...(job.payload ?? {}),
+    academyName: (job.payload ?? {}).academyName || "으뜸수학 고태영T",
+    assignmentStatus,
+    assignmentStatusMessage: getAssignmentStatusMessage(audience, assignmentStatus),
+    assignmentStatusParentMessage: getAssignmentStatusParentMessage(assignmentStatus),
+    assignmentStatusStudentMessage: getAssignmentStatusStudentMessage(assignmentStatus),
+    attendanceReason: record.attendanceReason ?? "",
+    attendanceStatus: record.attendanceStatus ?? "pending",
+    checkedAt: record.checkInAt || record.checkOutAt || "",
+    checkInTime: record.checkInTime ?? "",
+    checkOutTime: record.checkOutTime ?? "",
+    commentBodyOverride: commentBody,
+    lateMinutes: record.lateMinutes ?? "",
+    lessonContent: getNotificationLessonContent(record),
+    lessonDate: lesson.date,
+    lessonId: lesson.lessonId,
+    lessonMaterial: getNotificationLessonMaterial(record, student),
+    lessonName: lesson.className,
+    message: commentBody,
+    nextHomework: nextHomework?.title ?? "",
+    osScheduled: true,
+    parentPhone: student.parentPhone,
+    preparationNotice: "",
+    previousHomework: previousHomework?.title ?? "",
+    scheduledDate: job.scheduledAt,
+    sendMode: "scheduled",
+    studentId: student.studentId,
+    studentName: student.name,
+    studentPhone: student.studentPhone,
+    supplementSchedule: supplementSchedules.join("\n"),
+    target: audience
+  };
+  const previewBody = buildLatestLessonCommentPreview({
+    audience,
+    commentBody,
+    lesson,
+    nextHomework,
+    previousHomework,
+    record,
+    student,
+    supplementSchedules
+  });
+
+  return {
+    action: "send",
+    job: {
+      ...job,
+      lessonStudentRecordId: record.lessonStudentRecordId,
+      payload,
+      previewBody,
+      recipient: audience === "student" ? student.studentPhone : student.parentPhone,
+      target: audience,
+      updatedAt: new Date().toISOString()
+    }
+  };
+}
 
 function getReadinessMissingFields(job) {
   const payload = job.payload ?? {};
@@ -3324,6 +3780,7 @@ async function dispatchDueNotificationJobs({
       return !Number.isNaN(scheduledTime) && scheduledTime <= nowTime;
     })
     .slice(0, Math.max(1, Number(limit) || 20));
+  const lessonNotificationContext = await createLessonNotificationDispatchContext(jobs);
 
   const processed = [];
   for (const job of jobs) {
@@ -3337,10 +3794,21 @@ async function dispatchDueNotificationJobs({
     }
 
     try {
-      const result = await sendNotificationJob(claimedJob, { forceDryRun });
+      const prepared = refreshLessonCommentJobBeforeSend(claimedJob, lessonNotificationContext);
+      if (prepared.action === "cancel") {
+        await upsertNotificationJob(prepared.job);
+        processed.push({
+          error: prepared.job.error,
+          notificationJobId: claimedJob.notificationJobId,
+          status: "canceled"
+        });
+        continue;
+      }
+
+      const result = await sendNotificationJob(prepared.job, { forceDryRun });
       const status = result?.dryRun ? "dry_run" : "sent";
       const updatedJob = {
-        ...claimedJob,
+        ...prepared.job,
         status,
         result,
         provider: "solapi",

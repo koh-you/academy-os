@@ -6770,6 +6770,10 @@ export function App() {
     return canceledJobs;
   }
 
+  function isActiveNotificationJob(job = {}) {
+    return !["sent", "dry_run", "failed", "canceled"].includes(job.status);
+  }
+
   function buildLessonNotificationJobs(lesson, lessonStudents, scheduledDate, mode) {
     return lessonStudents
       .flatMap((student) => [
@@ -6790,17 +6794,10 @@ export function App() {
       cancelActiveLessonNotificationJobs(lesson, "수업 학생 없음");
       return;
     }
-    const jobIds = new Set(
-      lessonStudents.flatMap((student) => [
-        getLessonNotificationJobId(lesson.lessonId, student.studentId, "parent"),
-        getLessonNotificationJobId(lesson.lessonId, student.studentId, "student")
-      ])
-    );
-
     if (mode === "none") {
       const canceledJobs = notificationJobs
-        .filter((job) => jobIds.has(job.notificationJobId))
-        .filter((job) => !["sent", "dry_run", "failed"].includes(job.status))
+        .filter((job) => job.lessonId === lesson.lessonId)
+        .filter(isActiveNotificationJob)
         .map((job) => ({ ...job, status: "canceled", error: "", updatedAt: new Date().toISOString() }));
       if (canceledJobs.length) {
         setNotificationJobs((current) =>
@@ -6824,13 +6821,17 @@ export function App() {
     const nextJobs = buildLessonNotificationJobs(lesson, lessonStudents, scheduledDate, mode);
     const nextJobIds = new Set(nextJobs.map((job) => job.notificationJobId));
     const canceledJobs = notificationJobs
-      .filter((job) => jobIds.has(job.notificationJobId) && !nextJobIds.has(job.notificationJobId))
-      .filter((job) => !["sent", "dry_run", "failed", "canceled"].includes(job.status))
+      .filter((job) => job.lessonId === lesson.lessonId && !nextJobIds.has(job.notificationJobId))
+      .filter(isActiveNotificationJob)
       .map((job) => ({ ...job, status: "canceled", error: "알림 제외", updatedAt: new Date().toISOString() }));
+    const replacedJobIds = new Set([...nextJobIds, ...canceledJobs.map((job) => job.notificationJobId)]);
     setNotificationJobs((current) => [
       ...nextJobs,
       ...canceledJobs,
-      ...current.filter((job) => !jobIds.has(job.notificationJobId))
+      ...current.filter((job) =>
+        !replacedJobIds.has(job.notificationJobId) &&
+        !(job.lessonId === lesson.lessonId && isActiveNotificationJob(job))
+      )
     ]);
     nextJobs.forEach((notificationJob) =>
       postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
@@ -6851,23 +6852,21 @@ export function App() {
       cancelActiveLessonNotificationJobs(lesson, "수업 학생 없음");
       return;
     }
-    const jobIds = new Set(
-      lessonStudents.flatMap((student) => [
-        getLessonNotificationJobId(lesson.lessonId, student.studentId, "parent"),
-        getLessonNotificationJobId(lesson.lessonId, student.studentId, "student")
-      ])
-    );
     const nextJobs = buildLessonNotificationJobs(lesson, lessonStudents, scheduledDate, mode);
     const nextJobIds = new Set(nextJobs.map((job) => job.notificationJobId));
     const canceledJobs = notificationJobs
-      .filter((job) => jobIds.has(job.notificationJobId) && !nextJobIds.has(job.notificationJobId))
-      .filter((job) => !["sent", "dry_run", "failed", "canceled"].includes(job.status))
+      .filter((job) => job.lessonId === lesson.lessonId && !nextJobIds.has(job.notificationJobId))
+      .filter(isActiveNotificationJob)
       .map((job) => ({ ...job, status: "canceled", error: "알림 제외", updatedAt: new Date().toISOString() }));
+    const replacedJobIds = new Set([...nextJobIds, ...canceledJobs.map((job) => job.notificationJobId)]);
     const scheduledLabel = formatKoreaTimeLabel(scheduledDate);
     setNotificationJobs((current) => [
       ...nextJobs,
       ...canceledJobs,
-      ...current.filter((job) => !jobIds.has(job.notificationJobId))
+      ...current.filter((job) =>
+        !replacedJobIds.has(job.notificationJobId) &&
+        !(job.lessonId === lesson.lessonId && isActiveNotificationJob(job))
+      )
     ]);
     nextJobs.forEach((notificationJob) =>
       postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
