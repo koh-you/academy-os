@@ -13476,21 +13476,7 @@ function AttendanceKiosk({
   const [pin, setPin] = useState("");
   const [pendingPreview, setPendingPreview] = useState(null);
   const [result, setResult] = useState(null);
-  const [remainingSeconds, setRemainingSeconds] = useState(3);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (!result) return undefined;
-    setRemainingSeconds(3);
-    const intervalId = window.setInterval(() => {
-      setRemainingSeconds((current) => Math.max(1, current - 1));
-    }, 1000);
-    const timerId = window.setTimeout(() => setResult(null), 3000);
-    return () => {
-      window.clearInterval(intervalId);
-      window.clearTimeout(timerId);
-    };
-  }, [result]);
 
   async function runAttendancePreview(nextPin) {
     if (isSubmitting) return;
@@ -13527,8 +13513,10 @@ function AttendanceKiosk({
         lessonId: pendingPreview.lesson?.lessonId,
         studentId: pendingPreview.student?.studentId
       });
-      setResult(nextResult);
       setPendingPreview(null);
+      if (!nextResult?.ok) {
+        setResult(nextResult);
+      }
     } catch (error) {
       setResult({ ok: false, message: error.message || "출결 저장에 실패했습니다." });
       setPendingPreview(null);
@@ -13604,7 +13592,7 @@ function AttendanceKiosk({
       {pendingPreview ? (
         <Modal
           className="attendanceResultModal"
-          onClose={() => setPendingPreview(null)}
+          hideCloseButton
           subtitle={previewDetail}
           title="출결 확인"
         >
@@ -13616,13 +13604,9 @@ function AttendanceKiosk({
               <span><small>처리</small><b>{previewActionLabel}</b></span>
               <span><small>시간</small><b>{pendingPreview.checkedTime || "-"}</b></span>
             </div>
-            <p>맞으면 저장 후 알림톡을 발송합니다.</p>
-            <div className="attendanceConfirmActions">
-              <button className="softButton" disabled={isSubmitting} onClick={() => setPendingPreview(null)} type="button">
-                다시 입력
-              </button>
+            <div className="attendanceConfirmActions single">
               <button className="primaryButton" disabled={isSubmitting} onClick={confirmAttendanceCheck} type="button">
-                {pendingPreview.mode === "completed" ? "닫기" : isSubmitting ? "저장 중..." : "저장하고 알림톡 발송"}
+                {isSubmitting ? "저장 중..." : "확인"}
               </button>
             </div>
           </div>
@@ -13638,7 +13622,7 @@ function AttendanceKiosk({
         >
           <div className="attendanceResultContent">
             <strong>{result.message}</strong>
-            <p>{result.ok ? `${remainingSeconds}초 후 자동으로 닫힙니다.` : "번호를 확인한 뒤 다시 입력해 주세요."}</p>
+            <p>번호를 확인한 뒤 다시 입력해 주세요.</p>
             <button className="primaryButton" onClick={() => setResult(null)} type="button">닫기</button>
           </div>
         </Modal>
@@ -20748,7 +20732,7 @@ function ReportCenter({ lessons, records, reportLesson, selectedReportLessonId, 
   );
 }
 
-function Modal({ backdropClassName = "", children, className = "", hideHeader = false, onClose, subtitle, title }) {
+function Modal({ backdropClassName = "", children, className = "", hideCloseButton = false, hideHeader = false, onClose, subtitle, title }) {
   useEffect(() => {
     function handleEscapeKey(event) {
       if (event.key === "Escape") {
@@ -20770,7 +20754,7 @@ function Modal({ backdropClassName = "", children, className = "", hideHeader = 
               <h2>{title}</h2>
               {subtitle ? <p className="muted">{subtitle}</p> : null}
             </div>
-            <button className="iconButton" onClick={onClose} type="button">×</button>
+            {hideCloseButton ? null : <button className="iconButton" onClick={onClose} type="button">×</button>}
           </div>
         )}
         {children}
