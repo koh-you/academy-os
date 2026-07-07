@@ -255,6 +255,16 @@ function formatAttendanceForMessage(recordOrPayload = {}) {
   return details.length ? `${label} (${details.join(" · ")})` : label;
 }
 
+function formatAttendanceStatusForMessage(recordOrPayload = {}) {
+  const attendanceStatus = recordOrPayload.attendanceStatus ?? "pending";
+  const label = attendanceLabels[attendanceStatus] ?? attendanceStatus ?? "";
+  const reason = normalizeMessageText(recordOrPayload.attendanceReason ?? recordOrPayload.reason ?? "");
+  if (reason && ["지각", "결석", "인정결석"].includes(label)) {
+    return `${label} (사유: ${reason})`;
+  }
+  return label;
+}
+
 function joinMessageBlocks(blocks) {
   return blocks.map(normalizeMessageText).filter(Boolean).join("\n\n");
 }
@@ -694,8 +704,9 @@ function buildNotificationTemplatePreview(type) {
       `#{학원명}: ${base.academyName}`,
       `#{학생명}: ${base.studentName}`,
       "#{출결본문}:",
-      createMessageLine("🏫 출결", formatAttendanceForMessage(attendanceSample)),
-      createMessageLine("📚 수업", base.lessonName)
+      createMessageLine("🏫 출결", formatAttendanceStatusForMessage(attendanceSample)),
+      createMessageLine("📘 수업", base.lessonName),
+      createMessageLine("🕒 시간", attendanceSample.checkInTime)
     ]);
   }
 
@@ -13601,7 +13612,6 @@ function AttendanceKiosk({
             <div className="attendancePreviewSummary">
               <span><small>학생</small><b>{pendingPreview.student?.name ?? "-"}</b></span>
               <span><small>수업</small><b>{formatLessonDisplayName(pendingPreview.lesson) || "-"}</b></span>
-              <span><small>처리</small><b>{previewActionLabel}</b></span>
               <span><small>시간</small><b>{pendingPreview.checkedTime || "-"}</b></span>
             </div>
             <div className="attendanceConfirmActions single">
