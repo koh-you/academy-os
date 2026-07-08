@@ -195,6 +195,28 @@ function createServiceConfig(templateEnvName) {
   };
 }
 
+function createSolapiMessageService() {
+  return new SolapiMessageService(requiredEnv("SOLAPI_API_KEY"), requiredEnv("SOLAPI_API_SECRET"));
+}
+
+function buildSolapiCustomFields(payload = {}, recipientType = "parent") {
+  return Object.fromEntries(
+    Object.entries({
+      academyOs: "true",
+      lessonId: payload.lessonId,
+      lessonDate: payload.lessonDate,
+      studentId: payload.studentId,
+      studentName: payload.studentName,
+      target: payload.target ?? recipientType,
+      sendMode: payload.sendMode,
+      osScheduled: payload.osScheduled ? "true" : "",
+      notificationType: payload.notificationType
+    })
+      .map(([key, value]) => [key, String(value ?? "").slice(0, 100)])
+      .filter(([, value]) => value)
+  );
+}
+
 function configState(name) {
   return Boolean(envValue(name));
 }
@@ -395,6 +417,7 @@ async function sendKakaoAlimtalk({ payload, recipientPhone, recipientType = "par
   const service = new SolapiMessageService(config.apiKey, config.apiSecret);
   const message = {
     to: recipient.to,
+    customFields: buildSolapiCustomFields(payload, recipientType),
     kakaoOptions: {
       pfId: config.pfId,
       templateId: config.templateId,
@@ -405,7 +428,7 @@ async function sendKakaoAlimtalk({ payload, recipientPhone, recipientType = "par
   if (config.from) {
     message.from = config.from;
   }
-  const requestConfig = scheduledDate ? { scheduledDate } : undefined;
+  const requestConfig = scheduledDate ? { scheduledDate, showMessageList: true } : { showMessageList: true };
   const response = await service.send(message, requestConfig);
 
   return {
@@ -415,6 +438,97 @@ async function sendKakaoAlimtalk({ payload, recipientPhone, recipientType = "par
     isTestRedirected: recipient.isTestRedirected,
     scheduledDate: scheduledDate ? scheduledDate.toISOString() : "",
     dryRun: false
+  };
+}
+
+function objectRecordValues(record = {}) {
+  if (!record || typeof record !== "object") return [];
+  if (Array.isArray(record)) return record;
+  return Object.values(record);
+}
+
+function summarizeSolapiMessage(message = {}) {
+  return {
+    accountId: message.accountId ?? "",
+    customFields: message.customFields ?? null,
+    dateCreated: message.dateCreated ?? "",
+    dateProcessed: message.dateProcessed ?? "",
+    dateReceived: message.dateReceived ?? "",
+    dateReported: message.dateReported ?? "",
+    dateUpdated: message.dateUpdated ?? "",
+    from: message.from ?? "",
+    groupId: message.groupId ?? "",
+    messageId: message.messageId ?? message._id ?? "",
+    reason: message.reason ?? "",
+    status: message.status ?? "",
+    statusCode: message.statusCode ?? "",
+    text: message.text ?? "",
+    to: message.to ?? "",
+    type: message.type ?? ""
+  };
+}
+
+function summarizeSolapiGroup(group = {}) {
+  return {
+    accountId: group.accountId ?? "",
+    count: group.count ?? null,
+    dateCompleted: group.dateCompleted ?? "",
+    dateCreated: group.dateCreated ?? "",
+    dateSent: group.dateSent ?? "",
+    dateUpdated: group.dateUpdated ?? "",
+    groupId: group.groupId ?? "",
+    isRefunded: Boolean(group.isRefunded),
+    scheduledDate: group.scheduledDate ?? "",
+    status: group.status ?? ""
+  };
+}
+
+export async function listSolapiMessages({ endDate, groupId, limit = 100, messageId, startDate, statusCode, to, type = "ATA" } = {}) {
+  const service = createSolapiMessageService();
+  const request = {
+    limit: Math.max(1, Math.min(500, Number(limit) || 100))
+  };
+  if (startDate) request.startDate = startDate;
+  if (endDate) request.endDate = endDate;
+  if (startDate || endDate) request.dateType = "CREATED";
+  if (groupId) request.groupId = groupId;
+  if (messageId) request.messageId = messageId;
+  if (statusCode) request.statusCode = statusCode;
+  if (to) request.to = compactPhoneNumber(to);
+  if (type) request.type = type;
+  const result = await service.getMessages(request);
+  return {
+    messages: objectRecordValues(result.messageList).map(summarizeSolapiMessage),
+    nextKey: result.nextKey ?? "",
+    source: "solapi",
+    startKey: result.startKey ?? ""
+  };
+}
+
+export async function listSolapiGroups({ endDate, groupId, limit = 100, startDate } = {}) {
+  const service = createSolapiMessageService();
+  const request = {
+    limit: Math.max(1, Math.min(500, Number(limit) || 100))
+  };
+  if (startDate) request.startDate = startDate;
+  if (endDate) request.endDate = endDate;
+  if (groupId) request.groupId = groupId;
+  const result = await service.getGroups(request);
+  return {
+    groups: objectRecordValues(result.groupList).map(summarizeSolapiGroup),
+    nextKey: result.nextKey ?? "",
+    source: "solapi",
+    startKey: result.startKey ?? ""
+  };
+}
+
+export async function cancelSolapiReservationGroup(groupId) {
+  if (!groupId) throw new Error("Solapi groupId가 필요합니다.");
+  const service = createSolapiMessageService();
+  const result = await service.removeReservationToGroup(groupId);
+  return {
+    group: summarizeSolapiGroup(result),
+    source: "solapi"
   };
 }
 

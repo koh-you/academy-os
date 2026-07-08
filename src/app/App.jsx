@@ -735,13 +735,60 @@ function formatNotificationJobStatus(job) {
 }
 
 const deletableNotificationJobStatuses = new Set(["failed", "draft", "dry_run", "canceled"]);
+const cancelableNotificationJobStatuses = new Set(["scheduled", "queued", "pending_send"]);
 
 function canDeleteNotificationJob(job) {
   return deletableNotificationJobStatuses.has(job?.status);
 }
 
 function canCancelNotificationJob(job) {
-  return job?.status === "scheduled" && !isNotificationSchedulePast(job.scheduledAt);
+  return cancelableNotificationJobStatuses.has(job?.status);
+}
+
+function getNotificationProviderReference(result = {}) {
+  return (
+    result?.response?.groupInfo?.groupId ||
+    result?.response?.groupInfo?._id ||
+    result?.response?.messageList?.[0]?.messageId ||
+    result?.response?.failedMessageList?.[0]?.messageId ||
+    result?.response?.messageId ||
+    result?.response?.message_id ||
+    result?.response?.groupId ||
+    result?.response?.group_id ||
+    result?.result?.response?.groupInfo?.groupId ||
+    result?.result?.response?.messageList?.[0]?.messageId ||
+    result?.result?.response?.groupId ||
+    result?.groupId ||
+    result?.messageId ||
+    ""
+  );
+}
+
+function getNotificationJobProviderReference(job = {}) {
+  return job.providerMessageId || getNotificationProviderReference(job.result);
+}
+
+function getNotificationJobPriority(job = {}) {
+  if (job.status === "scheduled") return 0;
+  if (job.status === "queued" || job.status === "pending_send") return 1;
+  if (job.status === "sent" || job.status === "send_unconfirmed") return 2;
+  if (job.status === "failed") return 3;
+  if (job.status === "canceled") return 4;
+  return 5;
+}
+
+function sortNotificationJobsForCurrentStatus(left = {}, right = {}) {
+  const priorityDiff = getNotificationJobPriority(left) - getNotificationJobPriority(right);
+  if (priorityDiff) return priorityDiff;
+  return String(right.updatedAt || right.createdAt || right.scheduledAt || "").localeCompare(
+    String(left.updatedAt || left.createdAt || left.scheduledAt || "")
+  );
+}
+
+function maskPhoneForDisplay(value = "") {
+  const phone = normalizePhoneNumber(value);
+  if (phone.length < 8) return value || "-";
+  return `${phone.slice(0, 3)}-${"*".repeat(Math.max(3, phone.length - 7))}-${phone.slice(-4)}`;
 }
 
 function normalizePhoneNumber(value = "") {
@@ -5740,6 +5787,21 @@ export function App() {
     }
   }
 
+  async function handleCancelNotificationJob(notificationJob, reason = "선생님 예약 취소") {
+    if (!notificationJob?.notificationJobId) throw new Error("취소할 알림톡 예약 ID가 없습니다.");
+    const result = await postJson("/api/notification-jobs/cancel", {
+      notificationJobId: notificationJob.notificationJobId,
+      reason
+    });
+    if (result.notificationJob) {
+      setNotificationJobs((current) => [
+        result.notificationJob,
+        ...current.filter((job) => job.notificationJobId !== result.notificationJob.notificationJobId)
+      ]);
+    }
+    return result;
+  }
+
   useEffect(() => {
     let isMounted = true;
 
@@ -5900,11 +5962,15 @@ export function App() {
     const expectedJobs = buildLessonNotificationJobs(selectedLesson, activeLessonStudents, scheduledDate, currentMode);
     if (expectedJobs.length === 0) return;
     const needsNotificationRebuild = expectedJobs.some((expectedJob) => {
+      const existingAnyJob = notificationJobs.find((job) => job.notificationJobId === expectedJob.notificationJobId);
+      if (existingAnyJob?.status === "failed") return false;
       const existingJob = notificationJobs.find((job) =>
         job.notificationJobId === expectedJob.notificationJobId &&
         job.status === "scheduled"
       );
       if (!existingJob) return true;
+      if (existingJob.provider === "academy-os-reserving" || existingJob.result?.reservationPending) return false;
+      if (existingJob.provider !== "solapi" || !getNotificationJobProviderReference(existingJob)) return true;
       const existingPayload = existingJob.payload ?? {};
       const expectedPayload = expectedJob.payload ?? {};
       return (
@@ -6972,7 +7038,8 @@ export function App() {
         supplementSchedules
       }),
       status: "scheduled",
-      provider: "academy-os",
+      provider: "academy-os-reserving",
+      result: { reservationPending: true },
       error: "",
       createdAt: new Date().toISOString()
     };
@@ -7023,6 +7090,50 @@ export function App() {
       });
   }
 
+  function upsertNotificationJobState(notificationJob) {
+    if (!notificationJob?.notificationJobId) return;
+    setNotificationJobs((current) => [
+      notificationJob,
+      ...current.filter((job) => job.notificationJobId !== notificationJob.notificationJobId)
+    ]);
+  }
+
+  async function reserveLessonNotificationJob(notificationJob, reason = "수업일지 예약") {
+    try {
+      const result = await postJson("/api/notification-jobs/reserve", { notificationJob, reason });
+      if (result.notificationJob) upsertNotificationJobState(result.notificationJob);
+      return result.notificationJob ?? notificationJob;
+    } catch (error) {
+      const failedJob = {
+        ...notificationJob,
+        error: `Solapi 예약 실패: ${error.message}`,
+        provider: "academy-os",
+        status: "failed",
+        updatedAt: new Date().toISOString()
+      };
+      upsertNotificationJobState(failedJob);
+      postJson("/api/notification-jobs", { notificationJob: failedJob }).catch((persistError) => console.error(persistError));
+      return failedJob;
+    }
+  }
+
+  async function persistCanceledNotificationJob(notificationJob, reason = "알림 제외") {
+    if (!notificationJob?.notificationJobId) return null;
+    try {
+      const result = await handleCancelNotificationJob(notificationJob, reason);
+      return result.notificationJob ?? notificationJob;
+    } catch (error) {
+      const fallbackJob = {
+        ...notificationJob,
+        error: reason,
+        status: "canceled",
+        updatedAt: new Date().toISOString()
+      };
+      postJson("/api/notification-jobs", { notificationJob: fallbackJob }).catch((persistError) => console.error(persistError));
+      return fallbackJob;
+    }
+  }
+
   function cancelActiveLessonNotificationJobs(lesson, reason = "수업 학생 없음") {
     const canceledJobs = notificationJobs
       .filter((job) => job.lessonId === lesson.lessonId)
@@ -7032,9 +7143,9 @@ export function App() {
     setNotificationJobs((current) =>
       current.map((job) => canceledJobs.find((canceledJob) => canceledJob.notificationJobId === job.notificationJobId) ?? job)
     );
-    canceledJobs.forEach((notificationJob) =>
-      postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
-    );
+    canceledJobs.forEach((notificationJob) => {
+      persistCanceledNotificationJob(notificationJob, reason).catch((error) => console.error(error));
+    });
     return canceledJobs;
   }
 
@@ -7043,12 +7154,20 @@ export function App() {
     if (!lesson?.lessonId) return;
     const planMode = lessonNotificationPlans[lesson.lessonId]?.mode || "default";
     if (planMode === "none") return;
+    const currentPlan = lessonNotificationPlans[lesson.lessonId];
     const student = students.find((item) => item.studentId === record?.studentId);
     if (!student || !(lesson.studentIds ?? []).includes(student.studentId)) return;
     const delayMinutes = planMode === "delay30" ? 30 : 0;
-    if (isLessonAlimtalkScheduleExpired(lesson, delayMinutes)) return;
+    const scheduledDate = planMode === "manual"
+      ? currentPlan?.scheduledAt
+      : getLessonAlimtalkScheduledDate(lesson, delayMinutes);
+    if (!scheduledDate) return;
+    if (planMode === "manual") {
+      if (isNotificationSchedulePast(scheduledDate, 0)) return;
+    } else if (isLessonAlimtalkScheduleExpired(lesson, delayMinutes)) {
+      return;
+    }
 
-    const scheduledDate = getLessonAlimtalkScheduledDate(lesson, delayMinutes);
     const nextJobs = buildLessonNotificationJobs(lesson, [student], scheduledDate, planMode);
     const nextJobIds = new Set(nextJobs.map((job) => job.notificationJobId));
     const canceledJobs = notificationJobs
@@ -7061,12 +7180,12 @@ export function App() {
       ...canceledJobs,
       ...current.filter((job) => !replacedJobIds.has(job.notificationJobId))
     ]);
-    nextJobs.forEach((notificationJob) =>
-      postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
-    );
-    canceledJobs.forEach((notificationJob) =>
-      postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
-    );
+    nextJobs.forEach((notificationJob) => {
+      reserveLessonNotificationJob(notificationJob, "수업일지 학생별 예약 갱신").catch((error) => console.error(error));
+    });
+    canceledJobs.forEach((notificationJob) => {
+      persistCanceledNotificationJob(notificationJob, "알림 제외").catch((error) => console.error(error));
+    });
   }
 
   function cancelNotificationJobs(jobIds, reason = "알림 제외") {
@@ -7078,9 +7197,9 @@ export function App() {
     setNotificationJobs((current) =>
       current.map((job) => canceledJobs.find((canceledJob) => canceledJob.notificationJobId === job.notificationJobId) ?? job)
     );
-    canceledJobs.forEach((notificationJob) =>
-      postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
-    );
+    canceledJobs.forEach((notificationJob) => {
+      persistCanceledNotificationJob(notificationJob, reason).catch((error) => console.error(error));
+    });
     return canceledJobs;
   }
 
@@ -7114,9 +7233,9 @@ export function App() {
         setNotificationJobs((current) =>
           current.map((job) => canceledJobs.find((canceledJob) => canceledJob.notificationJobId === job.notificationJobId) ?? job)
         );
-        canceledJobs.forEach((notificationJob) =>
-          postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
-        );
+        canceledJobs.forEach((notificationJob) => {
+          persistCanceledNotificationJob(notificationJob, "알림톡 없음").catch((error) => console.error(error));
+        });
       }
       updateLessonNotificationRecordStatuses(lesson, "알림톡 없음");
       return;
@@ -7144,12 +7263,12 @@ export function App() {
         !(job.lessonId === lesson.lessonId && isActiveNotificationJob(job))
       )
     ]);
-    nextJobs.forEach((notificationJob) =>
-      postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
-    );
-    canceledJobs.forEach((notificationJob) =>
-      postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
-    );
+    nextJobs.forEach((notificationJob) => {
+      reserveLessonNotificationJob(notificationJob, "수업일지 반 전체 예약").catch((error) => console.error(error));
+    });
+    canceledJobs.forEach((notificationJob) => {
+      persistCanceledNotificationJob(notificationJob, "알림 제외").catch((error) => console.error(error));
+    });
     updateLessonNotificationRecordStatuses(lesson, `예약 중 · ${scheduledLabel}`);
   }
 
@@ -7176,12 +7295,12 @@ export function App() {
         !(job.lessonId === lesson.lessonId && isActiveNotificationJob(job))
       )
     ]);
-    nextJobs.forEach((notificationJob) =>
-      postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
-    );
-    canceledJobs.forEach((notificationJob) =>
-      postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
-    );
+    nextJobs.forEach((notificationJob) => {
+      reserveLessonNotificationJob(notificationJob, "수업일지 수동 시각 예약").catch((error) => console.error(error));
+    });
+    canceledJobs.forEach((notificationJob) => {
+      persistCanceledNotificationJob(notificationJob, "알림 제외").catch((error) => console.error(error));
+    });
     updateLessonNotificationRecordStatuses(lesson, `예약 중 · ${scheduledLabel}`);
   }
 
@@ -7463,6 +7582,7 @@ export function App() {
             }}
             onApplyBulkHomework={handleApplyBulkHomework}
             onBackToCalendar={() => setIsLessonJournalOpen(false)}
+            onCancelNotificationJob={handleCancelNotificationJob}
             onMoveDate={handleCalendarMove}
             onOpenAttendance={setAttendanceModal}
             onOpenExamPrep={() => handleChangeView("examPrep")}
@@ -8289,6 +8409,7 @@ export function App() {
         lessonStudentRecordId: recordId,
         payload: notificationPayload,
         previewBody: logBase.message,
+        providerMessageId: getNotificationProviderReference(result.result),
         recipient: target === "student" ? student.studentPhone : student.parentPhone,
         scheduledAt: scheduledDate,
         status: logStatus === "dry_run" ? "draft" : logStatus
@@ -11821,6 +11942,7 @@ function TeacherLessonHubV2({
   onAddLesson,
   onApplyBulkHomework,
   onBackToCalendar,
+  onCancelNotificationJob,
   onChangeRecord,
   onCopyLesson,
   onDateSelect,
@@ -11993,6 +12115,7 @@ function TeacherLessonHubV2({
             makeupTasks={makeupTasks}
             onApplyBulkHomework={onApplyBulkHomework}
             onBack={onBackToCalendar}
+            onCancelNotificationJob={onCancelNotificationJob}
             onChangeRecord={onChangeRecord}
             onDeleteLesson={onDeleteLesson}
             onEditLesson={onEditLesson}
@@ -12737,6 +12860,7 @@ function LessonJournalDetail({
   makeupTasks = [],
   onApplyBulkHomework,
   onBack,
+  onCancelNotificationJob,
   onChangeRecord,
   onDeleteLesson,
   onEditLesson,
@@ -12764,6 +12888,15 @@ function LessonJournalDetail({
   const [commentModal, setCommentModal] = useState(null);
   const [prepMemoModal, setPrepMemoModal] = useState(null);
   const [reservationModalOpen, setReservationModalOpen] = useState(false);
+  const [reservationAudit, setReservationAudit] = useState({
+    message: "",
+    osJobs: null,
+    solapiGroups: [],
+    solapiMessages: [],
+    state: "idle"
+  });
+  const [cancelingReservationJobId, setCancelingReservationJobId] = useState("");
+  const [cancelingSolapiGroupId, setCancelingSolapiGroupId] = useState("");
   const [editingMemoKey, setEditingMemoKey] = useState("");
   const [showPreSendCheck, setShowPreSendCheck] = useState(false);
   const [studentPreviewId, setStudentPreviewId] = useState("");
@@ -12775,15 +12908,31 @@ function LessonJournalDetail({
   const isDefaultScheduleExpired = isLessonAlimtalkScheduleExpired(lesson, 0);
   const isDelayedScheduleExpired = isLessonAlimtalkScheduleExpired(lesson, 30);
   const lessonNotificationJobs = notificationJobs.filter((job) => job.lessonId === lesson.lessonId);
-  const scheduledParentCount = lessonNotificationJobs.filter((job) => job.notificationType === "parent_comment" && job.status === "scheduled").length;
-  const scheduledStudentCount = lessonNotificationJobs.filter((job) => job.notificationType === "student_comment" && job.status === "scheduled").length;
-  const sentParentCount = lessonNotificationJobs.filter((job) => job.notificationType === "parent_comment" && job.status === "sent").length;
-  const sentStudentCount = lessonNotificationJobs.filter((job) => job.notificationType === "student_comment" && job.status === "sent").length;
-  const canceledJobCount = lessonNotificationJobs.filter((job) => job.status === "canceled").length;
-  const failedJobCount = lessonNotificationJobs.filter((job) => job.status === "failed").length;
+  const auditedLessonNotificationJobs = Array.isArray(reservationAudit.osJobs) ? reservationAudit.osJobs : lessonNotificationJobs;
   const todayTwoPmIso = new Date(`${today}T14:00:00+09:00`).toISOString();
   const canScheduleTodayTwoPm = lesson.date < today && Boolean(onScheduleLessonNotificationsAt);
   const lessonStudents = getActiveLessonStudents(lesson, students);
+  const lessonStudentIdSet = new Set(lessonStudents.map((student) => student.studentId));
+  const scheduledParentCount = auditedLessonNotificationJobs.filter((job) => job.notificationType === "parent_comment" && job.status === "scheduled").length;
+  const scheduledStudentCount = auditedLessonNotificationJobs.filter((job) => job.notificationType === "student_comment" && job.status === "scheduled").length;
+  const sentParentCount = auditedLessonNotificationJobs.filter((job) => job.notificationType === "parent_comment" && job.status === "sent").length;
+  const sentStudentCount = auditedLessonNotificationJobs.filter((job) => job.notificationType === "student_comment" && job.status === "sent").length;
+  const canceledJobCount = auditedLessonNotificationJobs.filter((job) => job.status === "canceled").length;
+  const failedJobCount = auditedLessonNotificationJobs.filter((job) => job.status === "failed").length;
+  const orphanScheduledJobs = auditedLessonNotificationJobs
+    .filter((job) => canCancelNotificationJob(job) && job.studentId && !lessonStudentIdSet.has(job.studentId))
+    .sort(sortNotificationJobsForCurrentStatus);
+  const solapiLessonMessages = reservationAudit.solapiMessages.filter((message) => {
+    if (message.customFields?.lessonId === lesson.lessonId) return true;
+    const messageTo = normalizePhoneNumber(Array.isArray(message.to) ? message.to[0] : message.to);
+    if (!messageTo) return false;
+    return lessonStudents.some((student) =>
+      [student.parentPhone, student.studentPhone].some((phone) => normalizePhoneNumber(phone) === messageTo)
+    );
+  });
+  const solapiScheduledGroups = reservationAudit.solapiGroups.filter((group) =>
+    group.scheduledDate && !group.dateSent && !group.dateCompleted && group.status !== "CANCELED"
+  );
   const lessonRecordSaveStates = lessonStudents
     .map((student) => saveStates[createLessonStudentRecordId(lesson.lessonId, student.studentId)])
     .filter(Boolean);
@@ -12804,6 +12953,95 @@ function LessonJournalDetail({
   });
   const isHomeworkMakeupLesson = isHomeworkMakeupTaskLesson(lesson, linkedMakeupTask);
   const isExamSundayMakeupLesson = lesson.lessonType === "examSundayMakeup";
+
+  async function refreshReservationAudit() {
+    setReservationAudit((current) => ({ ...current, message: "예약 원천을 조회하는 중입니다.", state: "loading" }));
+    const osPath = `/api/notification-jobs?date=${encodeURIComponent(lesson.date)}&lessonId=${encodeURIComponent(lesson.lessonId)}&limit=500&includeResult=true`;
+    const solapiGroupsPath = `/api/solapi/groups?date=${encodeURIComponent(lesson.date)}&limit=100`;
+    const solapiMessagesPath = `/api/solapi/messages?date=${encodeURIComponent(lesson.date)}&limit=100`;
+    const [osResult, groupsResult, messagesResult] = await Promise.allSettled([
+      getJsonWithTimeout(osPath, 12000, "OS 알림톡 예약 큐 조회가 12초를 넘었습니다."),
+      getJsonWithTimeout(solapiGroupsPath, 12000, "Solapi 그룹 이력 조회가 12초를 넘었습니다."),
+      getJsonWithTimeout(solapiMessagesPath, 12000, "Solapi 메시지 이력 조회가 12초를 넘었습니다.")
+    ]);
+    const osJobs = osResult.status === "fulfilled" ? osResult.value.notificationJobs ?? [] : null;
+    const solapiGroups = groupsResult.status === "fulfilled" ? groupsResult.value.groups ?? [] : [];
+    const solapiMessages = messagesResult.status === "fulfilled" ? messagesResult.value.messages ?? [] : [];
+    const errors = [osResult, groupsResult, messagesResult]
+      .filter((result) => result.status === "rejected")
+      .map((result) => result.reason?.message ?? "조회 실패");
+    setReservationAudit({
+      message: errors.length
+        ? `일부 조회 실패: ${errors.join(" / ")}`
+        : `OS 예약 ${osJobs?.length ?? 0}건 · Solapi 그룹 ${solapiGroups.length}건 · Solapi 메시지 ${solapiMessages.length}건`,
+      osJobs,
+      solapiGroups,
+      solapiMessages,
+      state: errors.length ? "partial" : "ready"
+    });
+  }
+
+  useEffect(() => {
+    if (!reservationModalOpen) return;
+    refreshReservationAudit().catch((error) => {
+      setReservationAudit((current) => ({
+        ...current,
+        message: `예약 원천 조회 실패: ${error.message}`,
+        state: "failed"
+      }));
+    });
+  }, [lesson.date, lesson.lessonId, reservationModalOpen]);
+
+  async function cancelReservationJob(job) {
+    if (!job?.notificationJobId || cancelingReservationJobId) return;
+    if (typeof window !== "undefined" && !window.confirm("이 알림톡 예약 1건을 취소할까요? 취소한 기록은 이력에 남습니다.")) return;
+    setCancelingReservationJobId(job.notificationJobId);
+    try {
+      const result = await onCancelNotificationJob?.(job, "수업일지 예약 확인에서 취소");
+      if (result?.notificationJob) {
+        setReservationAudit((current) => ({
+          ...current,
+          message: "예약 1건을 취소했습니다.",
+          osJobs: Array.isArray(current.osJobs)
+            ? [
+                result.notificationJob,
+                ...current.osJobs.filter((item) => item.notificationJobId !== result.notificationJob.notificationJobId)
+              ]
+            : current.osJobs,
+          state: current.state === "idle" ? "ready" : current.state
+        }));
+      } else {
+        await refreshReservationAudit();
+      }
+    } catch (error) {
+      setReservationAudit((current) => ({ ...current, message: `예약 취소 실패: ${error.message}`, state: "failed" }));
+    } finally {
+      setCancelingReservationJobId("");
+    }
+  }
+
+  async function cancelSolapiGroup(group) {
+    if (!group?.groupId || cancelingSolapiGroupId) return;
+    const count = group.count?.total ? ` ${group.count.total}건` : "";
+    if (typeof window !== "undefined" && !window.confirm(`Solapi 그룹 예약${count}을 취소할까요? groupId: ${group.groupId}`)) return;
+    setCancelingSolapiGroupId(group.groupId);
+    try {
+      await postJson("/api/solapi/groups/cancel", { groupId: group.groupId });
+      setReservationAudit((current) => ({
+        ...current,
+        message: "Solapi 그룹 예약을 취소했습니다.",
+        solapiGroups: current.solapiGroups.map((item) =>
+          item.groupId === group.groupId ? { ...item, status: "CANCELED", dateCompleted: item.dateCompleted || new Date().toISOString() } : item
+        ),
+        state: current.state === "idle" ? "ready" : current.state
+      }));
+    } catch (error) {
+      setReservationAudit((current) => ({ ...current, message: `Solapi 그룹 취소 실패: ${error.message}`, state: "failed" }));
+    } finally {
+      setCancelingSolapiGroupId("");
+    }
+  }
+
 
   if (isHomeworkMakeupLesson) {
     return (
@@ -12947,7 +13185,30 @@ function LessonJournalDetail({
 
   function getStudentReservationStatus(student, target) {
     const notificationType = target === "student" ? "student_comment" : "parent_comment";
-    return lessonNotificationJobs.find((job) => job.studentId === student.studentId && job.notificationType === notificationType) ?? null;
+    return auditedLessonNotificationJobs
+      .filter((job) => job.studentId === student.studentId && job.notificationType === notificationType)
+      .sort(sortNotificationJobsForCurrentStatus)[0] ?? null;
+  }
+
+  function renderReservationStatusCell(job, isMuted = false) {
+    if (isMuted) return <span className="reservationStatusCell muted">알림 제외</span>;
+    const providerReference = getNotificationJobProviderReference(job);
+    return (
+      <span className="reservationStatusCell">
+        <span>{formatNotificationJobStatus(job)}</span>
+        {providerReference ? <small>Solapi {providerReference}</small> : null}
+        {canCancelNotificationJob(job) ? (
+          <button
+            className="dangerSoftButton compact"
+            disabled={cancelingReservationJobId === job.notificationJobId}
+            onClick={() => cancelReservationJob(job)}
+            type="button"
+          >
+            {cancelingReservationJobId === job.notificationJobId ? "취소 중" : "취소"}
+          </button>
+        ) : null}
+      </span>
+    );
   }
 
   function getEffectiveCommentSendStatus(record, student, target) {
@@ -13040,16 +13301,16 @@ function LessonJournalDetail({
         >
           <div className="reservationSummaryGrid">
             <div>
-              <span>학부모 예약</span>
+              <span>OS 학부모 예약</span>
               <strong>{scheduledParentCount}건</strong>
             </div>
             <div>
-              <span>학생 예약</span>
+              <span>OS 학생 예약</span>
               <strong>{scheduledStudentCount}건</strong>
             </div>
             <div>
-              <span>발송 완료</span>
-              <strong>{sentParentCount + sentStudentCount}건</strong>
+              <span>Solapi 예약 그룹</span>
+              <strong>{solapiScheduledGroups.length}건</strong>
             </div>
             <div>
               <span>취소/실패</span>
@@ -13057,7 +13318,15 @@ function LessonJournalDetail({
             </div>
           </div>
           <div className="reservationModalActions">
-            <span>예약 기준: 실제 서버 발송 대기열</span>
+            <span>{reservationAudit.message || "예약 기준: Solapi 실제 예약 + OS 검수 기록"}</span>
+            <button
+              className="softButton compact"
+              disabled={reservationAudit.state === "loading"}
+              onClick={refreshReservationAudit}
+              type="button"
+            >
+              {reservationAudit.state === "loading" ? "조회 중" : "Solapi/OS 새로고침"}
+            </button>
             {canScheduleTodayTwoPm ? (
               <button
                 className="sendButton"
@@ -13068,6 +13337,23 @@ function LessonJournalDetail({
               </button>
             ) : null}
           </div>
+          {orphanScheduledJobs.length ? (
+            <div className="reservationWarningBox">
+              <strong>명단 밖 예약 {orphanScheduledJobs.length}건</strong>
+              <span>현재 수업일지 명단에 없는 학생 예약입니다. 확인 후 취소하세요.</span>
+              {orphanScheduledJobs.map((job) => (
+                <button
+                  className="dangerSoftButton compact"
+                  disabled={cancelingReservationJobId === job.notificationJobId}
+                  key={job.notificationJobId}
+                  onClick={() => cancelReservationJob(job)}
+                  type="button"
+                >
+                  {job.payload?.studentName || job.studentId} · {getNotificationJobLabel(job.notificationType)} 취소
+                </button>
+              ))}
+            </div>
+          ) : null}
           <div className="reservationStatusTable">
             <div className="reservationStatusRow head">
               <span>학생</span>
@@ -13081,11 +13367,57 @@ function LessonJournalDetail({
               return (
                 <div className="reservationStatusRow" key={student.studentId}>
                   <strong>{student.name}</strong>
-                  <span>{record.notificationMutedParent ? "알림 제외" : formatNotificationJobStatus(parentJob)}</span>
-                  <span>{record.notificationMutedStudent ? "알림 제외" : formatNotificationJobStatus(studentJob)}</span>
+                  {renderReservationStatusCell(parentJob, record.notificationMutedParent)}
+                  {renderReservationStatusCell(studentJob, record.notificationMutedStudent)}
                 </div>
               );
             })}
+          </div>
+          <div className="reservationAuditGrid">
+            <section>
+              <div className="reservationAuditHeader">
+                <strong>Solapi 그룹</strong>
+                <span>{reservationAudit.solapiGroups.length}건</span>
+              </div>
+              <div className="reservationAuditList">
+                {reservationAudit.solapiGroups.length ? reservationAudit.solapiGroups.slice(0, 8).map((group) => (
+                  <article key={group.groupId}>
+                    <strong>{group.scheduledDate ? formatKoreaTimeLabel(group.scheduledDate) : formatKoreaTimeLabel(group.dateCreated)}</strong>
+                    <span>{group.status || "-"} · {group.count?.total ?? 0}건</span>
+                    <small>{group.groupId}</small>
+                    {group.scheduledDate && !group.dateSent && !group.dateCompleted ? (
+                      <button
+                        className="dangerSoftButton compact"
+                        disabled={cancelingSolapiGroupId === group.groupId}
+                        onClick={() => cancelSolapiGroup(group)}
+                        type="button"
+                      >
+                        {cancelingSolapiGroupId === group.groupId ? "취소 중" : "그룹 취소"}
+                      </button>
+                    ) : null}
+                  </article>
+                )) : (
+                  <p className="emptyState compact">Solapi 그룹 이력이 없습니다.</p>
+                )}
+              </div>
+            </section>
+            <section>
+              <div className="reservationAuditHeader">
+                <strong>Solapi 메시지</strong>
+                <span>{solapiLessonMessages.length}건</span>
+              </div>
+              <div className="reservationAuditList">
+                {solapiLessonMessages.length ? solapiLessonMessages.slice(0, 8).map((message) => (
+                  <article key={message.messageId || `${message.groupId}_${message.to}`}>
+                    <strong>{message.customFields?.studentName || maskPhoneForDisplay(message.to)}</strong>
+                    <span>{message.statusCode || message.status || "-"} · {formatKoreaTimeLabel(message.dateCreated)}</span>
+                    <small>{message.messageId || message.groupId}</small>
+                  </article>
+                )) : (
+                  <p className="emptyState compact">이 수업 학생과 매칭되는 Solapi 메시지가 없습니다.</p>
+                )}
+              </div>
+            </section>
           </div>
         </Modal>
       ) : null}

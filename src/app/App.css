@@ -4423,6 +4423,116 @@ button {
   font-weight: 800;
 }
 
+.reservationStatusCell {
+  align-items: flex-start;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.reservationStatusCell small {
+  color: #64748b;
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reservationStatusCell.muted {
+  color: #94a3b8;
+}
+
+.reservationWarningBox {
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  border-radius: 8px;
+  color: #9a3412;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 10px;
+}
+
+.reservationWarningBox strong,
+.reservationWarningBox span {
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.reservationAuditGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.reservationAuditGrid section {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.reservationAuditHeader {
+  align-items: center;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 10px;
+}
+
+.reservationAuditHeader strong,
+.reservationAuditHeader span {
+  color: #334155;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.reservationAuditList {
+  display: grid;
+  gap: 0;
+  max-height: 240px;
+  overflow: auto;
+}
+
+.reservationAuditList article {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+}
+
+.reservationAuditList article + article {
+  border-top: 1px solid #e2e8f0;
+}
+
+.reservationAuditList article strong,
+.reservationAuditList article span,
+.reservationAuditList article small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reservationAuditList article strong {
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.reservationAuditList article span,
+.reservationAuditList article small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .notificationControlGrid {
   align-items: end;
   display: grid;

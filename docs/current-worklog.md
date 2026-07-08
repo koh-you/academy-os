@@ -94,6 +94,19 @@
 - 저장 원천: 운영 계획 원본은 `app_state.lessonNotificationPlans`, 예약 원본은 `notification_jobs`, 수업일지 저장 상태 원본은 `lesson_student_records`다. 새 SQL 적용은 필요 없다.
 - 검증: 운영 Supabase에서 `월수금 7-10반` 계획이 `manual / 23:00`, scheduled job 16건임을 확인했다. `npm run test:production` 252개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
 
+### 2026-07-08 P1. 수업일지 알림톡 Solapi 실제 예약 전환
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청: 수업일지 알림톡이 OS 내부 `notification_jobs`에만 보관됐다가 Render dispatch 시각에 즉시 발송되는 구조를 바꾸고, 그날 Solapi 예약/발송 내역을 확인하고 취소할 수 있게 한다.
+- 원인 분석: 기존 수업일지 상단 예약은 `notification_jobs`를 내부 발송 큐처럼 사용했고, 실제 Solapi 예약이 즉시 만들어지지 않았다. 그래서 수업일지 화면, 내부 큐, 실제 Solapi 발송 이력이 서로 다른 원천처럼 보였고, Render dispatch 지연/배포 지연/자동 재예약 effect가 겹치면 선생님이 최종 발송 원천을 직접 검수하기 어려웠다.
+- 구현 결과: `POST /api/notification-jobs/reserve`를 추가했다. 수업일지 기본 예약/30분 지연/수동 시각 예약은 이제 job 저장만 하지 않고 서버에서 최신 `lesson_student_records`, 숙제, 보충일정을 다시 읽은 뒤 Solapi `scheduledDate` 예약을 생성한다. 반환된 `groupId/messageId`는 `notification_jobs.provider_message_id`와 `result`에 저장된다.
+- 구현 결과: 같은 job이 이미 Solapi 예약되어 있고 예약 시각/본문/출결/숙제가 같으면 재예약하지 않는다. 내용이 바뀌면 기존 Solapi 예약 group을 취소한 뒤 새 예약을 만든다. 예약 생성 중 선생님이 먼저 취소한 경우에는 방금 생성된 Solapi 예약도 즉시 취소하고 `canceled`로 남긴다.
+- 구현 결과: Render dispatch는 `provider: "solapi"` 또는 예약 생성 대기 상태인 `academy-os-reserving` job을 다시 발송하지 않는다. 기존 내부 큐 방식의 잔여 job은 배포 후 수업일지에서 예약을 다시 만들거나 기록을 갱신하면 Solapi 실제 예약으로 전환된다.
+- 구현 결과: 수업일지 `예약 확인` 모달을 OS 검수 기록과 Solapi 실제 조회로 분리했다. 날짜/수업 기준 `notification_jobs` 조회, Solapi groups/messages 조회, 명단 밖 예약 경고, 학생별 학부모/학생 예약 취소, Solapi group 예약 취소 버튼을 제공한다.
+- 구현 결과: `GET /api/notification-jobs`는 `date`, `lessonId`, `scheduledFrom`, `scheduledTo`, `status` 필터를 지원한다. `GET /api/solapi/groups`, `GET /api/solapi/messages`, `POST /api/solapi/groups/cancel`, `POST /api/notification-jobs/cancel`을 추가했다. Solapi 발송 요청에는 Academy OS 수업/학생 식별자를 `customFields`로 함께 남긴다.
+- 저장 원천: 예약 검수 원본은 Supabase `notification_jobs`, 수업일지 원본은 `lesson_student_records`, 예약 계획 원본은 `app_state.lessonNotificationPlans`, 실제 예약/발송 원천은 Solapi groups/messages다. 새 SQL 적용은 필요 없다.
+- 검증: `node --check api/server.js`, `node --check api/routes/notifications.js`, `node --check api/routes/coreData.js`, `git diff --check`, `npm run test:production` 252개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-08 P1. 수업연구 유형별 강의 교안 리뉴얼
 
 - 상태: 완료 - 구현/검증 완료

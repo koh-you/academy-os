@@ -1438,14 +1438,41 @@ export async function deleteResourceMaterial(materialId) {
   return { source: databaseSource, materialId };
 }
 
-export async function listNotificationJobs({ limit = 1000 } = {}) {
+export async function listNotificationJobs({ lessonId = "", limit = 1000, scheduledFrom = "", scheduledTo = "", status = "" } = {}) {
   if (!isSupabaseConfigured()) {
     return { source: fallbackSource, notificationJobs: [] };
   }
 
   const safeLimit = Math.max(1, Math.min(1000, Number(limit) || 1000));
-  const rows = await listRows("notification_jobs", `select=*&order=created_at.desc&limit=${safeLimit}`, { requireServiceRole: true });
+  const filters = ["select=*"];
+  if (lessonId) filters.push(`lesson_id=eq.${encodeURIComponent(lessonId)}`);
+  if (scheduledFrom) filters.push(`scheduled_at=gte.${encodeURIComponent(scheduledFrom)}`);
+  if (scheduledTo) filters.push(`scheduled_at=lt.${encodeURIComponent(scheduledTo)}`);
+  if (status) {
+    const statuses = String(status)
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .join(",");
+    if (statuses) filters.push(`status=in.(${statuses})`);
+  }
+  filters.push("order=created_at.desc", `limit=${safeLimit}`);
+  const query = filters.join("&");
+  const rows = await listRows("notification_jobs", query, { requireServiceRole: true });
   return { source: databaseSource, notificationJobs: rows.map(fromNotificationJobRow) };
+}
+
+export async function getNotificationJob(notificationJobId) {
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, notificationJob: null };
+  }
+
+  const rows = await listRows(
+    "notification_jobs",
+    `select=*&notification_job_id=eq.${encodeURIComponent(notificationJobId)}&limit=1`,
+    { requireServiceRole: true }
+  );
+  return { source: databaseSource, notificationJob: rows[0] ? fromNotificationJobRow(rows[0]) : null };
 }
 
 export async function upsertNotificationJob(job) {
@@ -1565,6 +1592,37 @@ export async function deleteNotificationJob(notificationJobId) {
     source: databaseSource,
     deletedNotificationJobIds: rows.map((row) => row.notification_job_id).filter(Boolean)
   };
+}
+
+export async function cancelNotificationJob(notificationJobId, reason = "선생님 예약 취소") {
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return {
+      source: fallbackSource,
+      notificationJob: {
+        notificationJobId,
+        status: "canceled",
+        error: reason,
+        updatedAt: new Date().toISOString()
+      }
+    };
+  }
+
+  const nowIso = new Date().toISOString();
+  const rows = await patchRows(
+    "notification_jobs",
+    `notification_job_id=eq.${encodeURIComponent(notificationJobId)}&status=in.(${pendingNotificationJobStatuses.join(",")})`,
+    {
+      error: reason,
+      result: {
+        canceledAt: nowIso,
+        canceledBy: "teacher",
+        canceledReason: reason
+      },
+      status: "canceled",
+      updated_at: nowIso
+    }
+  );
+  return { source: databaseSource, notificationJob: rows[0] ? fromNotificationJobRow(rows[0]) : null };
 }
 
 function hasAttendanceState(record = {}) {

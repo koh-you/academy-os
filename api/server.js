@@ -2,6 +2,7 @@
 import fs from "node:fs";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import {
+  cancelNotificationJob,
   deleteLesson,
   deleteLessonsBefore,
   deleteDuplicateExamPrepRows,
@@ -12,6 +13,7 @@ import {
   deleteResourceMaterial,
   deleteSchoolEvent,
   getCoreDataStatus,
+  getNotificationJob,
   listAppState,
   listClassTemplates,
   listExamPrepRows,
@@ -76,7 +78,10 @@ import {
   upsertExamAnalysisRun
 } from "./routes/examAnalysisPipeline.js";
 import {
+  cancelSolapiReservationGroup,
   getNotificationStatus,
+  listSolapiGroups,
+  listSolapiMessages,
   sendAttendanceAlimtalk,
   sendDailyReportAlimtalk,
   sendLessonCommentAlimtalk,
@@ -653,6 +658,8 @@ function isNoticeNotificationType(type = "") {
 }
 
 function isOsScheduledNotificationJob(job) {
+  if (job.provider === "solapi") return false;
+  if (job.provider === "academy-os-reserving" || job.result?.reservationPending) return false;
   if (job.payload?.osScheduled === true) return true;
   return (
     isNoticeNotificationType(job.notificationType) &&
@@ -985,12 +992,35 @@ function getProviderMessageId(result) {
   return (
     result?.response?.messageId ??
     result?.response?.message_id ??
+    result?.response?.groupInfo?.groupId ??
+    result?.response?.groupInfo?._id ??
+    result?.response?.messageList?.[0]?.messageId ??
+    result?.response?.failedMessageList?.[0]?.messageId ??
     result?.response?.groupId ??
     result?.response?.group_id ??
     result?.response?.[0]?.messageId ??
     result?.response?.[0]?.message_id ??
     ""
   );
+}
+
+function getKoreaDayUtcRange(dateText = "") {
+  const date = String(dateText || "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { startIso: "", endIso: "" };
+  const start = new Date(`${date}T00:00:00+09:00`);
+  const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return { startIso: "", endIso: "" };
+  return { startIso: start.toISOString(), endIso: end.toISOString() };
+}
+
+function getNotificationJobQueryFilters(requestUrl) {
+  const { startIso, endIso } = getKoreaDayUtcRange(requestUrl.searchParams.get("date") || "");
+  return {
+    lessonId: requestUrl.searchParams.get("lessonId") || "",
+    scheduledFrom: requestUrl.searchParams.get("scheduledFrom") || startIso,
+    scheduledTo: requestUrl.searchParams.get("scheduledTo") || endIso,
+    status: requestUrl.searchParams.get("status") || ""
+  };
 }
 
 function hasText(value) {
@@ -1580,6 +1610,145 @@ async function sendNotificationJob(job, { forceDryRun = false } = {}) {
     ...payload,
     target: job.notificationType === "student_comment" || job.notificationType === "notice_student" ? "student" : payload.target ?? "parent"
   });
+}
+
+function getNotificationReservationFingerprint(job = {}) {
+  const payload = job.payload ?? {};
+  return JSON.stringify({
+    notificationType: job.notificationType,
+    previewBody: job.previewBody ?? "",
+    recipient: job.recipient ?? "",
+    scheduledAt: job.scheduledAt ?? "",
+    target: job.target ?? "",
+    payload: {
+      assignmentStatus: payload.assignmentStatus ?? "",
+      attendanceReason: payload.attendanceReason ?? payload.reason ?? "",
+      attendanceStatus: payload.attendanceStatus ?? "",
+      checkInTime: payload.checkInTime ?? "",
+      checkOutTime: payload.checkOutTime ?? "",
+      commentBodyOverride: payload.commentBodyOverride ?? "",
+      lateMinutes: payload.lateMinutes ?? "",
+      lessonContent: payload.lessonContent ?? "",
+      lessonDate: payload.lessonDate ?? "",
+      lessonMaterial: payload.lessonMaterial ?? "",
+      message: payload.message ?? "",
+      nextHomework: payload.nextHomework ?? "",
+      previousHomework: payload.previousHomework ?? "",
+      studentName: payload.studentName ?? "",
+      target: payload.target ?? ""
+    }
+  });
+}
+
+function isSameSolapiReservation(existingJob = {}, nextJob = {}) {
+  return (
+    existingJob.status === "scheduled" &&
+    existingJob.provider === "solapi" &&
+    Boolean(getProviderMessageId(existingJob.result) || existingJob.providerMessageId) &&
+    getNotificationReservationFingerprint(existingJob) === getNotificationReservationFingerprint(nextJob)
+  );
+}
+
+async function sendScheduledNotificationJobToSolapi(job, { forceDryRun = false } = {}) {
+  const scheduledDate = job.scheduledAt || job.payload?.scheduledDate || "";
+  if (!scheduledDate) throw new Error("Solapi 예약 발송 시각이 필요합니다.");
+  const payload = {
+    ...(job.payload ?? {}),
+    forceDryRun: forceDryRun || Boolean(job.payload?.forceDryRun),
+    notificationType: job.notificationType,
+    scheduledDate,
+    sendMode: "scheduled"
+  };
+
+  if (job.notificationType === "attendance") {
+    return sendAttendanceAlimtalk(payload);
+  }
+  if (job.notificationType === "daily_report") {
+    return sendDailyReportAlimtalk(payload);
+  }
+  if (job.notificationType === "student_reminder") {
+    return sendStudentScheduleReminderAlimtalk(payload);
+  }
+  return sendLessonCommentAlimtalk({
+    ...payload,
+    target: job.notificationType === "student_comment" || job.notificationType === "notice_student" ? "student" : payload.target ?? "parent"
+  });
+}
+
+async function reserveNotificationJobInSolapi(job, { forceDryRun = false, reason = "Solapi 예약 갱신" } = {}) {
+  if (!job?.notificationJobId) throw new Error("예약할 알림톡 job ID가 필요합니다.");
+  const context = lessonCommentNotificationTypes.has(job.notificationType)
+    ? await createLessonNotificationDispatchContext([job])
+    : null;
+  const prepared = refreshLessonCommentJobBeforeSend(job, context);
+  if (prepared.action === "cancel") {
+    await upsertNotificationJob(prepared.job);
+    return { notificationJob: prepared.job, reserved: false, source: "supabase" };
+  }
+
+  const nextJob = prepared.job;
+  const existing = await getNotificationJob(nextJob.notificationJobId);
+  const existingJob = existing.notificationJob;
+  if (isSameSolapiReservation(existingJob, nextJob)) {
+    return { notificationJob: existingJob, reserved: false, reused: true, source: existing.source };
+  }
+
+  const existingProviderGroupId =
+    existingJob?.provider === "solapi"
+      ? existingJob.providerMessageId || getProviderMessageId(existingJob.result)
+      : "";
+  let solapiCancellation = null;
+  if (existingProviderGroupId && existingJob?.status === "scheduled") {
+    solapiCancellation = await cancelSolapiReservationGroup(existingProviderGroupId);
+  }
+
+  const result = await sendScheduledNotificationJobToSolapi(nextJob, { forceDryRun });
+  const status = result?.dryRun ? "dry_run" : "scheduled";
+  const latest = await getNotificationJob(nextJob.notificationJobId);
+  if (latest.notificationJob?.status === "canceled") {
+    const reservedGroupId = getProviderMessageId(result);
+    let canceledReservedGroup = null;
+    if (reservedGroupId && !result?.dryRun) {
+      canceledReservedGroup = await cancelSolapiReservationGroup(reservedGroupId);
+    }
+    const canceledJob = {
+      ...latest.notificationJob,
+      provider: reservedGroupId ? "solapi" : latest.notificationJob.provider,
+      providerMessageId: reservedGroupId || latest.notificationJob.providerMessageId || "",
+      result: {
+        ...(latest.notificationJob.result && typeof latest.notificationJob.result === "object" ? latest.notificationJob.result : {}),
+        canceledReservedGroup,
+        reservationCanceledAfterTeacherCancel: true
+      }
+    };
+    await upsertNotificationJob(canceledJob);
+    return { notificationJob: canceledJob, reserved: false, canceledAfterReserve: true, source: "solapi" };
+  }
+  const updatedJob = {
+    ...nextJob,
+    error: "",
+    payload: {
+      ...(nextJob.payload ?? {}),
+      scheduledDate: nextJob.scheduledAt,
+      sendMode: "scheduled"
+    },
+    provider: "solapi",
+    providerMessageId: getProviderMessageId(result),
+    result: {
+      ...(result && typeof result === "object" ? result : {}),
+      reservedAt: new Date().toISOString(),
+      reservationReason: reason
+    },
+    status,
+    updatedAt: new Date().toISOString()
+  };
+  await upsertNotificationJob(updatedJob);
+  return {
+    notificationJob: updatedJob,
+    reserved: status === "scheduled",
+    solapiCancellation,
+    source: "solapi"
+  };
 }
 
 function getSupabaseEnv(name) {
@@ -4759,7 +4928,8 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "GET" && requestUrl.pathname === "/api/notification-jobs") {
     try {
-      const result = await listNotificationJobs({ limit: requestUrl.searchParams.get("limit") || 300 });
+      const notificationJobFilters = getNotificationJobQueryFilters(requestUrl);
+      const result = await listNotificationJobs({ limit: requestUrl.searchParams.get("limit") || 300, ...notificationJobFilters });
       const includeResult = requestUrl.searchParams.get("includeResult") === "true";
       sendJson(request, response, 200, {
         ok: true,
@@ -4768,6 +4938,49 @@ const server = http.createServer(async (request, response) => {
           ? result.notificationJobs
           : (result.notificationJobs ?? []).map(summarizeNotificationJobForList)
       });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/cancel") {
+    try {
+      const payload = await readJsonBody(request);
+      const notificationJobId = payload.notificationJobId || payload.id;
+      if (!notificationJobId) throw new Error("취소할 알림톡 예약 ID가 필요합니다.");
+      const reason = payload.reason || "선생님 예약 취소";
+      const existing = await getNotificationJob(notificationJobId);
+      const job = existing.notificationJob;
+      if (!job) throw new Error("취소할 알림톡 예약을 찾지 못했습니다.");
+      const providerGroupId =
+        job.providerMessageId ||
+        getProviderMessageId(job.result) ||
+        getProviderMessageId(job.result?.result) ||
+        job.result?.groupId ||
+        job.result?.result?.groupId ||
+        "";
+      let solapiCancellation = null;
+      if (payload.cancelSolapi !== false && job.provider === "solapi" && providerGroupId) {
+        solapiCancellation = await cancelSolapiReservationGroup(providerGroupId);
+      }
+      const result = await cancelNotificationJob(notificationJobId, reason);
+      sendJson(request, response, 200, { ok: true, ...result, solapiCancellation });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/reserve") {
+    try {
+      const payload = await readJsonBody(request);
+      const notificationJob = payload.notificationJob ?? payload;
+      const result = await reserveNotificationJobInSolapi(notificationJob, {
+        forceDryRun: Boolean(payload.forceDryRun),
+        reason: payload.reason || "수업일지 예약"
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
     }
@@ -4785,11 +4998,60 @@ const server = http.createServer(async (request, response) => {
     return;
   }
 
+  if (request.method === "GET" && requestUrl.pathname === "/api/solapi/messages") {
+    try {
+      const { startIso, endIso } = getKoreaDayUtcRange(requestUrl.searchParams.get("date") || "");
+      const result = await listSolapiMessages({
+        endDate: requestUrl.searchParams.get("endDate") || endIso,
+        groupId: requestUrl.searchParams.get("groupId") || "",
+        limit: requestUrl.searchParams.get("limit") || 100,
+        messageId: requestUrl.searchParams.get("messageId") || "",
+        startDate: requestUrl.searchParams.get("startDate") || startIso,
+        statusCode: requestUrl.searchParams.get("statusCode") || "",
+        to: requestUrl.searchParams.get("to") || "",
+        type: requestUrl.searchParams.get("type") || "ATA"
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/solapi/groups") {
+    try {
+      const { startIso, endIso } = getKoreaDayUtcRange(requestUrl.searchParams.get("date") || "");
+      const result = await listSolapiGroups({
+        endDate: requestUrl.searchParams.get("endDate") || endIso,
+        groupId: requestUrl.searchParams.get("groupId") || "",
+        limit: requestUrl.searchParams.get("limit") || 100,
+        startDate: requestUrl.searchParams.get("startDate") || startIso
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
   if (request.method === "DELETE" && requestUrl.pathname === "/api/notification-jobs") {
     try {
       const notificationJobId = requestUrl.searchParams.get("id");
       if (!notificationJobId) throw new Error("삭제할 알림톡 기록 ID가 필요합니다.");
       const result = await deleteNotificationJob(notificationJobId);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/solapi/groups/cancel") {
+    try {
+      const payload = await readJsonBody(request);
+      const groupId = payload.groupId || payload.id;
+      if (!groupId) throw new Error("취소할 Solapi groupId가 필요합니다.");
+      const result = await cancelSolapiReservationGroup(groupId);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
