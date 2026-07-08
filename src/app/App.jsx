@@ -12558,6 +12558,22 @@ function LessonJournalDetail({
       const sourceLesson = lessonById.get(record.lessonId);
       return `${getRecordLessonDate(record)} ${sourceLesson?.startTime ?? ""}`;
     };
+    const acknowledgedMemoCutoff = sourceRecords
+      .filter((item) =>
+        item.studentId === student.studentId &&
+        item.prepMemoCheckedAt &&
+        item.prepMemoCheckedSourceDate &&
+        getRecordLessonDate(item) <= lesson.date
+      )
+      .sort((recordA, recordB) => (
+        String(recordB.prepMemoCheckedSourceDate).localeCompare(String(recordA.prepMemoCheckedSourceDate)) ||
+        String(recordB.prepMemoCheckedAt).localeCompare(String(recordA.prepMemoCheckedAt))
+      ))[0] ?? null;
+    const acknowledgedMemoCutoffDate = acknowledgedMemoCutoff?.prepMemoCheckedSourceDate ?? "";
+    const isMemoRecordAcknowledged = (record) => {
+      const recordDate = getRecordLessonDate(record);
+      return Boolean(acknowledgedMemoCutoffDate && recordDate && recordDate <= acknowledgedMemoCutoffDate);
+    };
     const previousLessons = lessons
       .filter((item) =>
         item.lessonId !== lesson.lessonId &&
@@ -12574,20 +12590,27 @@ function LessonJournalDetail({
         sourceRecords.find((item) => item.lessonId === previousLesson.lessonId && item.studentId === student.studentId)
       )
       .find(Boolean);
+    const visiblePreviousMemoRecord = previousLessonRecord?.preparationMemo?.trim() && !isMemoRecordAcknowledged(previousLessonRecord)
+      ? previousLessonRecord
+      : null;
 
-    const previousMemoRecord = sourceRecords
+    const referenceMemoRecord = sourceRecords
       .filter((item) =>
         item.lessonId !== lesson.lessonId &&
         item.studentId === student.studentId &&
         item.preparationMemo?.trim() &&
         getRecordLessonDate(item) < lesson.date
+        && !isMemoRecordAcknowledged(item)
         && item.lessonId !== previousLessonRecord?.lessonId
       )
       .sort((recordA, recordB) => getRecordLessonSortValue(recordB).localeCompare(getRecordLessonSortValue(recordA)))[0];
 
     return {
+      acknowledgedMemoCutoff,
+      acknowledgedMemoCutoffDate,
+      previousMemoRecord: visiblePreviousMemoRecord,
       previousRecord: previousLessonRecord ?? null,
-      referenceRecord: previousLessonRecord?.preparationMemo?.trim() ? null : previousMemoRecord ?? null
+      referenceRecord: visiblePreviousMemoRecord ? null : referenceMemoRecord ?? null
     };
   }
 
@@ -12759,11 +12782,13 @@ function LessonJournalDetail({
             const checkoutMissing = hasMissingCheckOut(record, lesson);
             const previousMemoContext = getPreviousLessonMemoContext(student);
             const previousRecord = previousMemoContext.previousRecord;
+            const previousMemoRecord = previousMemoContext.previousMemoRecord;
             const referenceRecord = previousMemoContext.referenceRecord;
             const previousLessonMaterial = previousRecord?.lessonMaterial?.trim() ?? "";
             const previousLessonContent = getLessonContent(previousRecord);
-            const previousPreparationMemo = previousRecord?.preparationMemo?.trim() ?? "";
+            const previousPreparationMemo = previousMemoRecord?.preparationMemo?.trim() ?? "";
             const referencePreparationMemo = referenceRecord?.preparationMemo?.trim() ?? "";
+            const hasCheckedPriorPrepMemo = Boolean(previousMemoContext.acknowledgedMemoCutoffDate);
             const parentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "parent");
             const studentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "student");
             const parentCommentState = getCommentButtonState(record.teacherComment, parentCommentSendStatus);
@@ -12793,10 +12818,20 @@ function LessonJournalDetail({
                     className={[
                       "prepMemoButton",
                       record.preparationMemo || record.prepStudentVisible || record.prepParentVisible ? "filled" : "",
+                      hasCheckedPriorPrepMemo && !previousPreparationMemo && !referencePreparationMemo ? "checked" : "",
                       previousPreparationMemo ? "hasPrevious" : "",
                       !previousPreparationMemo && referencePreparationMemo ? "hasReference" : ""
                     ].filter(Boolean).join(" ")}
-                    onClick={() => setPrepMemoModal({ nextHomework, previousHomework, previousRecord, record, referenceRecord, student })}
+                    onClick={() => setPrepMemoModal({
+                      acknowledgedMemoCutoff: previousMemoContext.acknowledgedMemoCutoff,
+                      nextHomework,
+                      previousHomework,
+                      previousMemoRecord,
+                      previousRecord,
+                      record,
+                      referenceRecord,
+                      student
+                    })}
                     type="button"
                   >
                     수업메모
@@ -12805,6 +12840,7 @@ function LessonJournalDetail({
                     {[
                       previousPreparationMemo ? "직전 메모 있음" : "",
                       !previousPreparationMemo && referencePreparationMemo ? "참고 메모 있음" : "",
+                      hasCheckedPriorPrepMemo && !previousPreparationMemo && !referencePreparationMemo ? "이전 메모 확인됨" : "",
                       record.prepStudentVisible ? "학생 알림톡 포함" : "",
                       record.prepParentVisible ? "학부모 알림톡 포함" : ""
                     ].filter(Boolean).join(" · ") || "알림톡 미포함"}
@@ -12937,6 +12973,7 @@ function LessonJournalDetail({
 
       {prepMemoModal ? (
         <PreparationMemoModal
+          acknowledgedMemoCutoff={prepMemoModal.acknowledgedMemoCutoff}
           lesson={lesson}
           onChangeRecord={onChangeRecord}
           onClose={() => setPrepMemoModal(null)}
@@ -12948,8 +12985,8 @@ function LessonJournalDetail({
           }
           saveState={saveStates[createLessonStudentRecordId(lesson.lessonId, prepMemoModal.student.studentId)] ?? "idle"}
           student={prepMemoModal.student}
-          previousRecord={prepMemoModal.previousRecord}
-          previousLesson={prepMemoModal.previousRecord ? lessons.find((item) => item.lessonId === prepMemoModal.previousRecord.lessonId) : null}
+          previousRecord={prepMemoModal.previousMemoRecord}
+          previousLesson={prepMemoModal.previousMemoRecord ? lessons.find((item) => item.lessonId === prepMemoModal.previousMemoRecord.lessonId) : null}
           referenceRecord={prepMemoModal.referenceRecord}
           referenceLesson={prepMemoModal.referenceRecord ? lessons.find((item) => item.lessonId === prepMemoModal.referenceRecord.lessonId) : null}
         />
@@ -12983,6 +13020,7 @@ function LessonJournalDetail({
 }
 
 function PreparationMemoModal({
+  acknowledgedMemoCutoff = null,
   lesson,
   onChangeRecord,
   onClose,
@@ -13003,12 +13041,11 @@ function PreparationMemoModal({
   const [draftMemo, setDraftMemo] = useState(currentRecord.preparationMemo ?? "");
   const [draftStudentVisible, setDraftStudentVisible] = useState(Boolean(currentRecord.prepStudentVisible));
   const [draftParentVisible, setDraftParentVisible] = useState(Boolean(currentRecord.prepParentVisible));
-  const initialDraftSnapshot = JSON.stringify({
-    preparationMemo: currentRecord.preparationMemo ?? "",
-    prepStudentVisible: Boolean(currentRecord.prepStudentVisible),
-    prepParentVisible: Boolean(currentRecord.prepParentVisible)
+  const [localCheckedMemo, setLocalCheckedMemo] = useState({
+    checkedAt: currentRecord.prepMemoCheckedAt ?? "",
+    sourceDate: currentRecord.prepMemoCheckedSourceDate ?? "",
+    sourceRecordId: currentRecord.prepMemoCheckedSourceRecordId ?? ""
   });
-  const lastSavedSnapshotRef = useRef(initialDraftSnapshot);
   const previousMemo = previousRecord?.preparationMemo?.trim() ?? "";
   const previousLessonLabel = previousLesson
     ? `${previousLesson.date} · ${previousLesson.className}`
@@ -13017,6 +13054,43 @@ function PreparationMemoModal({
   const referenceLessonLabel = referenceLesson
     ? `${referenceLesson.date} · ${referenceLesson.className}`
     : "최근 참고 수업";
+  const priorMemoSourceRecord = previousMemo ? previousRecord : referenceMemo ? referenceRecord : null;
+  const priorMemoSourceLesson = previousMemo ? previousLesson : referenceMemo ? referenceLesson : null;
+  const priorMemoSourceRecordId = getLessonStudentRecordIdentity(priorMemoSourceRecord);
+  const priorMemoSourceDate = priorMemoSourceLesson?.date || getLessonStudentRecordDate(priorMemoSourceRecord);
+  const effectiveCheckedSourceDate = localCheckedMemo.sourceDate || currentRecord.prepMemoCheckedSourceDate || "";
+  const isPriorMemoChecked = Boolean(
+    priorMemoSourceDate &&
+    effectiveCheckedSourceDate &&
+    priorMemoSourceDate <= effectiveCheckedSourceDate
+  );
+  const visiblePreviousMemo = isPriorMemoChecked ? "" : previousMemo;
+  const visibleReferenceMemo = isPriorMemoChecked ? "" : referenceMemo;
+  const checkedMemoDate = localCheckedMemo.sourceDate || acknowledgedMemoCutoff?.prepMemoCheckedSourceDate || "";
+  const checkedMemoAt = localCheckedMemo.checkedAt || acknowledgedMemoCutoff?.prepMemoCheckedAt || "";
+  const hasCheckedPriorMemo = Boolean(checkedMemoDate || isPriorMemoChecked);
+  const canCheckPriorMemo = Boolean(priorMemoSourceRecordId && priorMemoSourceDate && !isPriorMemoChecked);
+
+  function createMemoSnapshot(checkedMemo = localCheckedMemo) {
+    return JSON.stringify({
+      preparationMemo: draftMemo,
+      prepMemoCheckedAt: checkedMemo.checkedAt || "",
+      prepMemoCheckedSourceDate: checkedMemo.sourceDate || "",
+      prepMemoCheckedSourceRecordId: checkedMemo.sourceRecordId || "",
+      prepStudentVisible: draftStudentVisible,
+      prepParentVisible: draftParentVisible
+    });
+  }
+
+  const initialDraftSnapshot = JSON.stringify({
+    preparationMemo: currentRecord.preparationMemo ?? "",
+    prepMemoCheckedAt: currentRecord.prepMemoCheckedAt ?? "",
+    prepMemoCheckedSourceDate: currentRecord.prepMemoCheckedSourceDate ?? "",
+    prepMemoCheckedSourceRecordId: currentRecord.prepMemoCheckedSourceRecordId ?? "",
+    prepStudentVisible: Boolean(currentRecord.prepStudentVisible),
+    prepParentVisible: Boolean(currentRecord.prepParentVisible)
+  });
+  const lastSavedSnapshotRef = useRef(initialDraftSnapshot);
 
   function updateDraft(field, value) {
     if (field === "preparationMemo") setDraftMemo(value);
@@ -13025,11 +13099,7 @@ function PreparationMemoModal({
   }
 
   function saveMemo() {
-    const draftSnapshot = JSON.stringify({
-      preparationMemo: draftMemo,
-      prepStudentVisible: draftStudentVisible,
-      prepParentVisible: draftParentVisible
-    });
+    const draftSnapshot = createMemoSnapshot();
     if (draftSnapshot === lastSavedSnapshotRef.current && saveState !== "failed") {
       return Promise.resolve();
     }
@@ -13037,6 +13107,9 @@ function PreparationMemoModal({
     return onSaveRecord(recordId, lesson, student, {
       ...currentRecord,
       preparationMemo: draftMemo,
+      prepMemoCheckedAt: localCheckedMemo.checkedAt || currentRecord.prepMemoCheckedAt || "",
+      prepMemoCheckedSourceDate: localCheckedMemo.sourceDate || currentRecord.prepMemoCheckedSourceDate || "",
+      prepMemoCheckedSourceRecordId: localCheckedMemo.sourceRecordId || currentRecord.prepMemoCheckedSourceRecordId || "",
       prepStudentVisible: draftStudentVisible,
       prepParentVisible: draftParentVisible,
       updatedBy: "instructor_owner_001",
@@ -13044,6 +13117,40 @@ function PreparationMemoModal({
     }, { skipRelatedHomeworks: true, skipNotificationRefresh: true }).then((saved) => {
       if (saved !== false) lastSavedSnapshotRef.current = draftSnapshot;
       return saved;
+    });
+  }
+
+  function checkPriorMemo() {
+    if (!canCheckPriorMemo) return Promise.resolve(false);
+    const nowIso = new Date().toISOString();
+    const checkedMemo = {
+      checkedAt: nowIso,
+      sourceDate: priorMemoSourceDate,
+      sourceRecordId: priorMemoSourceRecordId
+    };
+    setLocalCheckedMemo(checkedMemo);
+    const draftSnapshot = createMemoSnapshot(checkedMemo);
+    return onSaveRecord(recordId, lesson, student, {
+      ...currentRecord,
+      preparationMemo: draftMemo,
+      prepMemoCheckedAt: checkedMemo.checkedAt,
+      prepMemoCheckedSourceDate: checkedMemo.sourceDate,
+      prepMemoCheckedSourceRecordId: checkedMemo.sourceRecordId,
+      prepStudentVisible: draftStudentVisible,
+      prepParentVisible: draftParentVisible,
+      updatedBy: "instructor_owner_001",
+      updatedAt: nowIso
+    }, { skipRelatedHomeworks: true, skipNotificationRefresh: true }).then((saved) => {
+      if (saved === false) {
+        setLocalCheckedMemo({
+          checkedAt: currentRecord.prepMemoCheckedAt ?? "",
+          sourceDate: currentRecord.prepMemoCheckedSourceDate ?? "",
+          sourceRecordId: currentRecord.prepMemoCheckedSourceRecordId ?? ""
+        });
+        return false;
+      }
+      lastSavedSnapshotRef.current = draftSnapshot;
+      return true;
     });
   }
 
@@ -13066,14 +13173,36 @@ function PreparationMemoModal({
               <p className="eyebrow">PREVIOUS</p>
               <h2>직전 수업메모</h2>
             </div>
+            {canCheckPriorMemo ? (
+              <label className="prepMemoAcknowledgeLine">
+                <input
+                  checked={false}
+                  disabled={saveState === "saving"}
+                  onChange={(event) => {
+                    if (event.target.checked) checkPriorMemo();
+                  }}
+                  type="checkbox"
+                />
+                확인 후 숨기기
+              </label>
+            ) : null}
           </div>
-          <span>{previousLessonLabel}</span>
-          {previousMemo ? (
-            <pre>{previousMemo}</pre>
+          {hasCheckedPriorMemo && !visiblePreviousMemo && !visibleReferenceMemo ? (
+            <div className="prepMemoCheckedState">
+              <strong>✓ 이전 수업메모 확인 완료</strong>
+              <span>{checkedMemoDate ? `${checkedMemoDate}까지의 메모는 다시 표시하지 않습니다.` : "확인한 이전 메모는 다시 표시하지 않습니다."}</span>
+              {checkedMemoAt ? <small>{formatKoreaTimeLabel(checkedMemoAt)}</small> : null}
+            </div>
+          ) : null}
+          {visiblePreviousMemo ? (
+            <>
+              <span>{previousLessonLabel}</span>
+              <pre>{visiblePreviousMemo}</pre>
+            </>
           ) : (
-            <div className="emptyState compact">직전 수업메모가 없습니다.</div>
+            !hasCheckedPriorMemo ? <div className="emptyState compact">직전 수업메모가 없습니다.</div> : null
           )}
-          {referenceMemo ? (
+          {visibleReferenceMemo ? (
             <div className="prepMemoReference">
               <div className="sectionHeader slim">
                 <div>
@@ -13082,7 +13211,7 @@ function PreparationMemoModal({
                 </div>
               </div>
               <span>{referenceLessonLabel}</span>
-              <pre>{referenceMemo}</pre>
+              <pre>{visibleReferenceMemo}</pre>
             </div>
           ) : null}
         </section>
@@ -21714,6 +21843,9 @@ function createEmptyRecord(lesson, student) {
     lessonMaterial: "",
     lessonProgress: "",
     preparationMemo: "",
+    prepMemoCheckedAt: "",
+    prepMemoCheckedSourceDate: "",
+    prepMemoCheckedSourceRecordId: "",
     prepStudentVisible: false,
     prepParentVisible: false,
     prepStudentNotice: "",
@@ -21727,6 +21859,18 @@ function createEmptyRecord(lesson, student) {
     needsMakeup: false,
     needsRetest: false
   };
+}
+
+function getLessonStudentRecordIdentity(record = null) {
+  if (!record) return "";
+  if (record.lessonStudentRecordId) return record.lessonStudentRecordId;
+  if (record.lessonId && record.studentId) return createLessonStudentRecordId(record.lessonId, record.studentId);
+  return "";
+}
+
+function getLessonStudentRecordDate(record = null) {
+  if (!record) return "";
+  return String(record.lessonStudentRecordId ?? "").match(/\d{4}-\d{2}-\d{2}/)?.[0] ?? "";
 }
 
 function upsertById(items, nextItem, idKey) {

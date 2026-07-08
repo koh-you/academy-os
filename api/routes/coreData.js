@@ -235,6 +235,11 @@ function toLessonRecordRow(record, { includeExtendedFields = true, includeAttend
     notification_muted_student: Boolean(record.notificationMutedStudent),
     notification_muted_reason: compact(record.notificationMutedReason)
   };
+  if (record.prepMemoCheckedAt || record.prepMemoCheckedSourceDate || record.prepMemoCheckedSourceRecordId) {
+    extendedRow.prep_memo_checked_at = compact(record.prepMemoCheckedAt);
+    extendedRow.prep_memo_checked_source_date = compact(record.prepMemoCheckedSourceDate);
+    extendedRow.prep_memo_checked_source_record_id = compact(record.prepMemoCheckedSourceRecordId);
+  }
 
   if (!includeAttendanceTimeFields) return extendedRow;
 
@@ -266,6 +271,9 @@ function fromLessonRecordRow(row) {
     lessonContent: row.lesson_content ?? "",
     assignmentStatus: row.assignment_status ?? "",
     preparationMemo: row.preparation_memo ?? "",
+    prepMemoCheckedAt: row.prep_memo_checked_at ?? "",
+    prepMemoCheckedSourceDate: row.prep_memo_checked_source_date ?? "",
+    prepMemoCheckedSourceRecordId: row.prep_memo_checked_source_record_id ?? "",
     prepStudentNotice: row.prep_student_notice ?? "",
     prepStudentVisible: Boolean(row.prep_student_visible),
     prepParentVisible: Boolean(row.prep_parent_visible),
@@ -1542,6 +1550,9 @@ export async function upsertLessonStudentRecord(record) {
       message.includes("notification_muted_student") ||
       message.includes("notification_muted_reason") ||
       message.includes("preparation_memo") ||
+      message.includes("prep_memo_checked_at") ||
+      message.includes("prep_memo_checked_source_date") ||
+      message.includes("prep_memo_checked_source_record_id") ||
       message.includes("prep_student_notice") ||
       message.includes("prep_student_visible") ||
       isAttendanceTimeMigration;
@@ -1550,6 +1561,9 @@ export async function upsertLessonStudentRecord(record) {
       recordToSave.lessonContent,
       recordToSave.assignmentStatus,
       recordToSave.preparationMemo,
+      recordToSave.prepMemoCheckedAt,
+      recordToSave.prepMemoCheckedSourceDate,
+      recordToSave.prepMemoCheckedSourceRecordId,
       recordToSave.prepStudentNotice,
       recordToSave.prepParentNotice,
       recordToSave.prepStudentAiStatus,
@@ -1575,7 +1589,7 @@ export async function upsertLessonStudentRecord(record) {
     }
     if (hasExtendedValues) {
       throw new Error(
-        "Supabase lesson_student_records 확장 컬럼 migration이 필요합니다. supabase/20260617_lesson_prep_resources_notifications.sql 또는 supabase/20260624_persist_frontend_fields.sql을 실행한 뒤 다시 저장하세요."
+        "Supabase lesson_student_records 확장 컬럼 migration이 필요합니다. supabase/20260708_prep_memo_acknowledgements.sql 또는 기존 lesson_student_records 확장 SQL을 실행한 뒤 다시 저장하세요."
       );
     }
     [row] = await upsertRows(

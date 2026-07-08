@@ -8640,6 +8640,19 @@ textarea {
   color: #1d4ed8;
 }
 
+.prepMemoButton.checked {
+  background: #ecfdf5;
+  border-color: #86efac;
+  color: #15803d;
+}
+
+.prepMemoButton.checked::after {
+  content: "✓";
+  font-size: 13px;
+  font-weight: 900;
+  margin-left: 6px;
+}
+
 .prepMemoButton.filled.hasPrevious {
   background: #fef3c7;
   border-color: #f59e0b;
@@ -8693,6 +8706,47 @@ textarea {
   overflow: auto;
   padding: 12px;
   white-space: pre-wrap;
+}
+
+.prepMemoAcknowledgeLine {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #fed7aa;
+  border-radius: 999px;
+  color: #9a3412;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 6px;
+  padding: 7px 10px;
+}
+
+.prepMemoAcknowledgeLine input {
+  cursor: pointer;
+}
+
+.prepMemoCheckedState {
+  align-content: center;
+  background: #ecfdf5;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  color: #166534;
+  display: grid;
+  gap: 5px;
+  min-height: 140px;
+  padding: 18px;
+}
+
+.prepMemoCheckedState strong {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.prepMemoCheckedState span,
+.prepMemoCheckedState small {
+  color: #15803d;
+  font-weight: 800;
 }
 
 .prepMemoReference {
