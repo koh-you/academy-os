@@ -214,8 +214,9 @@ function formatScheduleItem(item) {
   return parts.filter(Boolean).join(" · ");
 }
 
-function buildAttendanceBody({ attendanceStatus, checkedAt, checkInTime, lessonName, lateMinutes, reason }) {
-  const time = formatAttendanceTime(checkInTime || checkedAt);
+function buildAttendanceBody({ attendanceStatus, checkedAt, checkInTime, checkOutTime, lessonName, lateMinutes, reason }) {
+  const timeSource = attendanceStatus === "checkout" ? checkOutTime || checkedAt : checkInTime || checkedAt;
+  const time = formatAttendanceTime(timeSource);
   const lines = [
     messageLine("🏫 출결", attendanceLabelForAttendanceBody({ attendanceStatus, lateMinutes, reason })),
     lessonName ? messageLine("📘 수업", lessonName) : "",
@@ -424,6 +425,7 @@ export async function sendAttendanceAlimtalk(payload) {
       attendanceStatus: payload.attendanceStatus,
       checkedAt: payload.checkedAt,
       checkInTime: payload.checkInTime,
+      checkOutTime: payload.checkOutTime,
       lessonName: payload.lessonName,
       lateMinutes: payload.lateMinutes,
       reason: payload.reason

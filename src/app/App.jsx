@@ -5887,6 +5887,7 @@ export function App() {
 
   useEffect(() => {
     if (!isLessonJournalOpen || !selectedLesson?.lessonId || !isAppStateReady || session?.role !== "teacher") return;
+    if (notificationJobsStatus?.state !== "ready") return;
     const activeLessonStudents = getActiveLessonStudents(selectedLesson, students);
     if (activeLessonStudents.length === 0) return;
     const currentPlan = lessonNotificationPlans[selectedLesson.lessonId];
@@ -5936,7 +5937,7 @@ export function App() {
       });
     }
     applyLessonNotificationPlan(selectedLesson.lessonId, currentMode);
-  }, [isAppStateReady, isLessonJournalOpen, lessonNotificationPlans, notificationJobs, records, selectedLesson, session?.role, students]);
+  }, [isAppStateReady, isLessonJournalOpen, lessonNotificationPlans, notificationJobs, notificationJobsStatus?.state, records, selectedLesson, session?.role, students]);
 
   const reportLesson = lessons.find((lesson) => lesson.lessonId === selectedReportLessonId) ?? lessons[0];
   const reportRecords = reportLesson
@@ -7051,7 +7052,30 @@ export function App() {
     if (!lesson?.lessonId) return;
     const planMode = lessonNotificationPlans[lesson.lessonId]?.mode || "default";
     if (planMode === "none") return;
-    applyLessonNotificationPlan(lesson.lessonId, planMode);
+    const student = students.find((item) => item.studentId === record?.studentId);
+    if (!student || !(lesson.studentIds ?? []).includes(student.studentId)) return;
+    const delayMinutes = planMode === "delay30" ? 30 : 0;
+    if (isLessonAlimtalkScheduleExpired(lesson, delayMinutes)) return;
+
+    const scheduledDate = getLessonAlimtalkScheduledDate(lesson, delayMinutes);
+    const nextJobs = buildLessonNotificationJobs(lesson, [student], scheduledDate, planMode);
+    const nextJobIds = new Set(nextJobs.map((job) => job.notificationJobId));
+    const canceledJobs = notificationJobs
+      .filter((job) => job.lessonId === lesson.lessonId && job.studentId === student.studentId && !nextJobIds.has(job.notificationJobId))
+      .filter(isActiveNotificationJob)
+      .map((job) => ({ ...job, status: "canceled", error: "알림 제외", updatedAt: new Date().toISOString() }));
+    const replacedJobIds = new Set([...nextJobIds, ...canceledJobs.map((job) => job.notificationJobId)]);
+    setNotificationJobs((current) => [
+      ...nextJobs,
+      ...canceledJobs,
+      ...current.filter((job) => !replacedJobIds.has(job.notificationJobId))
+    ]);
+    nextJobs.forEach((notificationJob) =>
+      postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
+    );
+    canceledJobs.forEach((notificationJob) =>
+      postJson("/api/notification-jobs", { notificationJob }).catch((error) => console.error(error))
+    );
   }
 
   function cancelNotificationJobs(jobIds, reason = "알림 제외") {

@@ -556,7 +556,8 @@ async function handleAttendanceCheck(payload = {}) {
   const alimtalkPayload = {
     attendanceStatus: eventType === "checkout" ? "checkout" : nextStatus === "present" ? "checkin" : nextStatus,
     checkedAt: eventType === "checkout" ? savedRecord.checkOutAt || nowIso : savedRecord.checkInAt || nowIso,
-    checkInTime: eventType === "checkout" ? savedRecord.checkOutTime : savedRecord.checkInTime,
+    checkInTime: savedRecord.checkInTime,
+    checkOutTime: savedRecord.checkOutTime,
     lateMinutes: savedRecord.lateMinutes,
     lessonId: lesson.lessonId,
     lessonName: lesson.className,

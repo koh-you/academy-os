@@ -72,6 +72,18 @@
 - 저장 원천: 수업일지 원본은 Supabase `lesson_student_records`, 알림 예약 원본은 `notification_jobs`, 수업 명단 원본은 `lessons.student_ids`다. 새 SQL 적용은 필요 없다.
 - 검증: 운영 API 재조회로 김예나가 `월수금 7-10반` record만 가진 것을 확인했다. `월수금 4-7반` 알림 job은 canceled 상태라 발송 대상이 아니다. `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 251개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
 
+### 2026-07-08 P1. 수업일지 저장 병목과 23:00 예약 이동
+
+- 상태: 완료 - 운영 즉시 조치/구현/검증 완료
+- 사용자 제보: 김서윤 학생을 수동 하원 처리했는데 출결 알림톡은 `등원`으로 발송됐고, 웹앱 OS가 최신 코드로 업데이트되지 않았다. 이어서 수업일지 저장이 전반적으로 느리고 `저장 중...`이 오래 남는다고 제보했다. 긴급으로 밤 `10:30` 알림톡을 밤 `11:00`으로 이동 요청했다.
+- 운영 배포 확인: 운영 API에 최신 endpoint `POST /api/lesson-records/prune-stale`가 없고, Vercel 운영 번들에도 `hasManualCheckOutTime` 문자열이 없어 프론트/백엔드 모두 최신 `main` 반영 전 상태임을 확인했다.
+- 운영 데이터 정리: 김서윤 `student_mwf710_008`의 `월수금 7-10반` 수업일지 record는 `checkInTime 18:57`, `checkOutTime` 공백이었다. 추가 알림톡을 보내지 않고 운영 API로 `checkOutTime 22:14`, `checkOutAt 2026-07-08T13:14:00+00:00`을 저장했다.
+- 예약 즉시 조치: 2026-07-08 `22:30` KST 예정이던 scheduled 알림 job 26건을 `23:00` KST(`2026-07-08T14:00:00+00:00`)로 이동했다. 오래된 웹앱이 일부 22:30 job을 다시 만든 정황이 있어 `app_state.lessonNotificationPlans`의 `월수금 4-7반`, `월수금 7-10반`을 `delay30`으로 고정하고 잔여 16건을 다시 이동했다. 최종 확인 기준 두 수업의 22:30 scheduled job은 0건이다.
+- 구현 결과: 출결 알림톡 본문 생성이 하원일 때 `checkOutTime`을 직접 읽도록 수정했다. 기존처럼 하원 시간을 `checkInTime` 자리에 넣는 우회 방식 대신 `checkInTime`과 `checkOutTime`을 분리해 전달한다.
+- 구현 결과: 수업일지 한 학생 record 저장 후 예약 알림을 갱신할 때 반 전체 job/상태를 다시 저장하지 않고 해당 학생의 학부모/학생 job 2개만 갱신한다. 알림 job 목록이 아직 로딩/실패 상태일 때는 자동 예약 재생성을 실행하지 않아, `notification_jobs` 조회 지연이 수업일지 저장 폭주로 이어지지 않게 했다.
+- 저장 원천: 출결/수업일지 원본은 Supabase `lesson_student_records`, 예약 원본은 `notification_jobs`, 예약 계획 원본은 `app_state.lessonNotificationPlans`다. 새 SQL 적용은 필요 없다.
+- 검증: 운영 Supabase 직접 조회로 두 수업의 22:30 scheduled job 0건, 23:00 scheduled job 존재를 확인했다. `node --check api/server.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 252개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-08 P1. 수업연구 유형별 강의 교안 리뉴얼
 
 - 상태: 완료 - 구현/검증 완료
