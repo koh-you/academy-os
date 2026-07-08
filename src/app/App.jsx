@@ -452,6 +452,79 @@ function getExamReviewDraftTitle(row = {}) {
   return schoolName ? `[${schoolName} 시험지 총평]` : "[시험지 총평]";
 }
 
+const examReviewChecklistSections = [
+  {
+    key: "scope",
+    number: 1,
+    title: "시험 범위",
+    label: "1. 시험 범위 :",
+    placeholder: "예: 여러 가지 방정식과 부등식 ~ 행렬, 교과서 pp.74~141"
+  },
+  {
+    key: "difficulty",
+    number: 2,
+    title: "난이도/체감",
+    label: "2. 난이도 :",
+    placeholder: "예: 중간고사보다 쉬웠지만 후반 조건 해석에서 시간이 걸렸음"
+  },
+  {
+    key: "source",
+    number: 3,
+    title: "문항 출처",
+    label: "3. 문항 출처  :",
+    placeholder: "예: 교과서, 부교재, 모의고사 변형, 학교 프린트"
+  },
+  {
+    key: "special",
+    number: 4,
+    title: "특이사항",
+    label: "4. 특이사항  :",
+    placeholder: "예: 조건 해석형 문항이 반복되고 계산량은 평이했음"
+  },
+  {
+    key: "preparation",
+    number: 5,
+    title: "대비 방법",
+    label: "5. 대비 방법  :",
+    placeholder: "예: 기본 유형을 빠르게 끝내고 후반 조건 정리 연습을 늘려야 함"
+  },
+  {
+    key: "scoreSplit",
+    number: 6,
+    title: "점수 갈림 구간",
+    label: "6. 점수 갈림 구간 :",
+    placeholder: "예: 18~21번에서 시간 관리와 조건 해석이 갈렸음"
+  },
+  {
+    key: "mistakeReason",
+    number: 7,
+    title: "학생들이 틀릴 이유",
+    label: "7. 학생들이 틀릴 이유 :",
+    placeholder: "예: 개념은 알아도 식 세팅, 부호, 계산 실수에서 감점 가능"
+  },
+  {
+    key: "keyQuestions",
+    number: 8,
+    title: "주요문항/유형",
+    label: "8. 주요문항/유형 :",
+    placeholder: "예: 20번 조건 해석, 23번 경우 분류, 서술형 2번 감점 포인트"
+  },
+  {
+    key: "lessonLink",
+    number: 9,
+    title: "수업/보충 연결",
+    label: "9. 수업/보충 연결 :",
+    placeholder: "예: 수업에서 다룬 쎈 B유형과 연결, 오답 학생은 보충에서 재확인"
+  },
+  {
+    key: "blogCta",
+    number: 10,
+    title: "블로그/상담 연결",
+    label: "10. 블로그/상담 연결 :",
+    placeholder: "예: 학교별 시험분석을 수업/보충 계획에 바로 반영한다는 신뢰감"
+  }
+];
+
 function createExamReviewDraft(row = {}) {
   const specialNote = row.specialNote ?? row.memo ?? "";
   return `${getExamReviewDraftTitle(row)}
@@ -464,7 +537,17 @@ ${formatExamReviewDraftLine("3. 문항 출처  :", row.subTextbook)}
 
 ${formatExamReviewDraftLine("4. 특이사항  :", specialNote)}
 
-5. 대비 방법  :`;
+5. 대비 방법  :
+
+6. 점수 갈림 구간 :
+
+7. 학생들이 틀릴 이유 :
+
+8. 주요문항/유형 :
+
+9. 수업/보충 연결 :
+
+10. 블로그/상담 연결 :`;
 }
 
 const defaultExamReviewDraft = createExamReviewDraft();
@@ -487,7 +570,7 @@ function isExamReviewDraftLike(value = "") {
 }
 
 function isExamReviewDraftSectionLine(line = "") {
-  return /^[1-5]\.\s*(시험 범위|난이도|문항 출처|특이사항|대비 방법)\s*:/.test(String(line).trim());
+  return /^(?:[1-9]|10)\.\s*(시험 범위|난이도|문항 출처|특이사항|대비 방법|점수 갈림 구간|학생들이 틀릴 이유|주요문항\/유형|수업\/보충 연결|블로그\/상담 연결)\s*:/.test(String(line).trim());
 }
 
 function getNextExamReviewDraftSectionIndex(lines = [], fromIndex = 0) {
@@ -2550,6 +2633,51 @@ function getExamAnalysisCardPreviewLines(values = [], maxCount = 4) {
     .map((value) => value.trim())
     .filter(Boolean)
     .slice(0, maxCount);
+}
+
+function getExamReviewSectionValue(review = "", section = {}) {
+  const lines = String(review ?? "").replace(/\r\n/g, "\n").split("\n");
+  const fieldIndex = lines.findIndex((line) => new RegExp(`^${section.number}\\.\\s*${escapeRegExp(section.title)}\\s*:`).test(String(line).trim()));
+  if (fieldIndex < 0) return "";
+  const firstLine = String(lines[fieldIndex] ?? "").replace(new RegExp(`^${section.number}\\.\\s*${escapeRegExp(section.title)}\\s*:\\s*`), "");
+  const nextSectionIndex = getNextExamReviewDraftSectionIndex(lines, fieldIndex);
+  return [firstLine, ...lines.slice(fieldIndex + 1, nextSectionIndex)]
+    .join("\n")
+    .trim();
+}
+
+function setExamReviewSectionValue(review = "", section = {}, value = "") {
+  const lines = String(review ?? "").replace(/\r\n/g, "\n").split("\n");
+  const pattern = new RegExp(`^${section.number}\\.\\s*${escapeRegExp(section.title)}\\s*:`);
+  if (!lines.some((line) => pattern.test(String(line).trim()))) {
+    return `${review.trim()}\n\n${formatExamReviewDraftLine(section.label, value)}`.trim();
+  }
+  const fieldIndex = lines.findIndex((line) => pattern.test(String(line).trim()));
+  const nextSectionIndex = getNextExamReviewDraftSectionIndex(lines, fieldIndex);
+  const normalizedValue = normalizeExamReviewDraftValue(value);
+  const replacementLines = normalizedValue
+    ? formatExamReviewDraftLine(section.label, normalizedValue).split("\n")
+    : [section.label];
+  return [
+    ...lines.slice(0, fieldIndex),
+    ...replacementLines,
+    ...lines.slice(nextSectionIndex)
+  ].join("\n");
+}
+
+function buildExamReviewBlogSourceText(review = "") {
+  const values = Object.fromEntries(
+    examReviewChecklistSections.map((section) => [section.key, getExamReviewSectionValue(review, section)])
+  );
+  return [
+    values.difficulty ? `첫 문단 총평: ${values.difficulty}` : "",
+    values.scoreSplit ? `변별 포인트: ${values.scoreSplit}` : "",
+    values.mistakeReason ? `자주 틀릴 이유: ${values.mistakeReason}` : "",
+    values.keyQuestions ? `주요문항 설명: ${values.keyQuestions}` : "",
+    values.preparation ? `다음 대비: ${values.preparation}` : "",
+    values.lessonLink ? `수업/보충 연결: ${values.lessonLink}` : "",
+    values.blogCta ? `상담/CTA: ${values.blogCta}` : ""
+  ].filter(Boolean).join("\n\n");
 }
 
 function createExamAnalysisCardRendererRegions(slide = {}) {
@@ -4645,6 +4773,186 @@ function createDefaultLessonResearchItems() {
   ];
 }
 
+const testPaperSubjectOptions = ["공통수학1", "공통수학2", "수학1", "수학2", "확률과통계", "미적분"];
+
+const testPaperKindOptions = [
+  { id: "daily", label: "데일리", description: "오늘 배운 유형을 바로 확인" },
+  { id: "cumulative", label: "누적", description: "지난 유형을 섞어 망각 방지" },
+  { id: "unit", label: "단원", description: "중단원/대단원 마무리" },
+  { id: "retest", label: "재시험", description: "미통과 학생 재확인" }
+];
+
+const testPaperPreparationOptions = [
+  { id: "draft", label: "준비중" },
+  { id: "review", label: "검토필요" },
+  { id: "ready", label: "준비완료" },
+  { id: "active", label: "사용중" },
+  { id: "hold", label: "보류" }
+];
+
+const testPaperProgressOptions = [
+  { id: "waiting", label: "대기" },
+  { id: "scheduled", label: "예정" },
+  { id: "passed", label: "통과" },
+  { id: "failed", label: "미통과" },
+  { id: "retest1", label: "재시험1" },
+  { id: "retest2", label: "재시험2" },
+  { id: "hold", label: "강사확인" }
+];
+
+const ssenTypeCatalog = {
+  "공통수학1": [
+    {
+      id: "cm1_poly",
+      title: "다항식",
+      units: [
+        {
+          id: "cm1_poly_ops",
+          title: "다항식의 연산",
+          types: [
+            { id: "cm1_poly_ops_basic", title: "다항식의 덧셈과 뺄셈" },
+            { id: "cm1_poly_ops_multi", title: "다항식의 곱셈과 전개" },
+            { id: "cm1_poly_ops_division", title: "다항식의 나눗셈" }
+          ]
+        },
+        {
+          id: "cm1_identity_remainder",
+          title: "항등식과 나머지정리",
+          types: [
+            { id: "cm1_identity_coeff", title: "항등식의 계수 비교" },
+            { id: "cm1_remainder_basic", title: "나머지정리 기본" },
+            { id: "cm1_factor_theorem", title: "인수정리 활용" }
+          ]
+        },
+        {
+          id: "cm1_factorization",
+          title: "인수분해",
+          types: [
+            { id: "cm1_factor_common", title: "공통인수와 묶기" },
+            { id: "cm1_factor_formula", title: "공식 적용" },
+            { id: "cm1_factor_complex", title: "복잡한 인수분해" }
+          ]
+        }
+      ]
+    },
+    {
+      id: "cm1_equation_inequality",
+      title: "방정식과 부등식",
+      units: [
+        {
+          id: "cm1_complex_number",
+          title: "복소수와 이차방정식",
+          types: [
+            { id: "cm1_complex_basic", title: "복소수 계산" },
+            { id: "cm1_quadratic_roots", title: "이차방정식의 근" },
+            { id: "cm1_discriminant", title: "판별식 활용" }
+          ]
+        },
+        {
+          id: "cm1_various_equations",
+          title: "여러 가지 방정식",
+          types: [
+            { id: "cm1_high_degree", title: "고차방정식" },
+            { id: "cm1_simultaneous", title: "연립방정식" },
+            { id: "cm1_abs_equation", title: "절댓값 방정식" }
+          ]
+        }
+      ]
+    }
+  ],
+  "공통수학2": [
+    {
+      id: "cm2_geometry",
+      title: "도형의 방정식",
+      units: [
+        {
+          id: "cm2_line_circle",
+          title: "직선과 원",
+          types: [
+            { id: "cm2_line_equation", title: "직선의 방정식" },
+            { id: "cm2_circle_equation", title: "원의 방정식" },
+            { id: "cm2_position_relation", title: "위치 관계" }
+          ]
+        },
+        {
+          id: "cm2_motion",
+          title: "도형의 이동",
+          types: [
+            { id: "cm2_parallel", title: "평행이동" },
+            { id: "cm2_symmetry", title: "대칭이동" },
+            { id: "cm2_locus", title: "자취" }
+          ]
+        }
+      ]
+    }
+  ]
+};
+
+function getTestPaperKindLabel(value = "") {
+  return testPaperKindOptions.find((option) => option.id === value)?.label ?? "데일리";
+}
+
+function getTestPaperPreparationLabel(value = "") {
+  return testPaperPreparationOptions.find((option) => option.id === value)?.label ?? "준비중";
+}
+
+function getTestPaperProgressLabel(value = "") {
+  return testPaperProgressOptions.find((option) => option.id === value)?.label ?? "대기";
+}
+
+function inferTestPaperKind(book = {}) {
+  if (book.testKind) return book.testKind;
+  const text = `${book.title ?? ""} ${book.unit ?? ""}`.toLowerCase();
+  if (text.includes("누적")) return "cumulative";
+  if (text.includes("단원")) return "unit";
+  if (text.includes("재시험")) return "retest";
+  return "daily";
+}
+
+function normalizeBookLinkedTypeIds(book = {}) {
+  return Array.isArray(book.linkedTypeIds) ? book.linkedTypeIds.filter(Boolean) : [];
+}
+
+function typeNodeMatchesBook(book = {}, type = {}) {
+  const linkedIds = normalizeBookLinkedTypeIds(book);
+  if (linkedIds.includes(type.id)) return true;
+  const haystack = `${book.title ?? ""} ${book.unit ?? ""} ${book.note ?? ""}`.replace(/\s+/g, "");
+  return String(type.title ?? "")
+    .split(/\s+|과|와|의/)
+    .filter((token) => token.length >= 2)
+    .some((token) => haystack.includes(token));
+}
+
+function getBooksForType(problemBooks = [], subject = "", type = {}) {
+  return problemBooks.filter((book) =>
+    (book.subject || "") === subject && typeNodeMatchesBook(book, type)
+  );
+}
+
+function getTypeNodeStats(problemBooks = [], subject = "", type = {}) {
+  const books = getBooksForType(problemBooks, subject, type);
+  const registeredProblemCount = books.reduce((sum, book) => sum + Number(book.problems?.length ?? book.totalProblems ?? 0), 0);
+  const recentUsedAt = books
+    .map((book) => book.lastUsedAt || book.plannedDate || "")
+    .filter(Boolean)
+    .sort()
+    .slice(-1)[0] || "";
+  const kindLabels = [...new Set(books.map((book) => getTestPaperKindLabel(inferTestPaperKind(book))))];
+  const preparedCount = books.filter((book) => (book.preparationStatus || "draft") === "ready").length;
+  return {
+    books,
+    kindLabels,
+    preparedCount,
+    recentUsedAt,
+    registeredProblemCount
+  };
+}
+
+function getBookStudentProgress(book = {}, studentId = "") {
+  const progress = book.studentProgress && typeof book.studentProgress === "object" ? book.studentProgress : {};
+  return progress[studentId] ?? { status: "waiting", attempt: 0, score: "" };
+}
+
 function createDefaultProblemBooks() {
   return [
     {
@@ -4653,8 +4961,16 @@ function createDefaultProblemBooks() {
       subject: "공통수학1",
       grade: "고1",
       unit: "다항식의 연산",
+      testKind: "daily",
+      preparationStatus: "ready",
+      trackOrder: 1,
+      plannedDate: "",
+      passScore: 80,
+      maxRetestCount: 2,
+      linkedTypeIds: ["cm1_poly_ops_basic", "cm1_poly_ops_multi"],
       sourceFileName: "sample_textbook.pdf",
       totalProblems: 28,
+      studentProgress: {},
       statusCounts: { first: 28, retry: 0, second: 0, wrong: 0, question: 0, outOfScope: 0, unchecked: 0 },
       problems: Array.from({ length: 28 }, (_, index) => ({
         problemId: `problem_step01_${index + 1}`,
@@ -4672,8 +4988,16 @@ function createDefaultProblemBooks() {
       subject: "공통수학1",
       grade: "고1",
       unit: "항등식과 나머지정리",
+      testKind: "cumulative",
+      preparationStatus: "review",
+      trackOrder: 2,
+      plannedDate: "",
+      passScore: 80,
+      maxRetestCount: 2,
+      linkedTypeIds: ["cm1_identity_coeff", "cm1_remainder_basic", "cm1_factor_theorem"],
       sourceFileName: "sample_textbook.pdf",
       totalProblems: 26,
+      studentProgress: {},
       statusCounts: { first: 4, retry: 2, second: 0, wrong: 1, question: 0, outOfScope: 0, unchecked: 19 },
       problems: Array.from({ length: 26 }, (_, index) => ({
         problemId: `problem_step02_${index + 78}`,
@@ -4692,13 +5016,21 @@ function createProblemBookFromFile(fileName) {
   const timestamp = Date.now();
   return {
     problemBookId: `book_uploaded_${timestamp}`,
-    title: fileName.replace(/\.[^.]+$/, "") || "새 교재",
+    title: fileName.replace(/\.[^.]+$/, "") || "새 시험지",
     subject: "공통수학1",
     grade: "고1",
     unit: "단원 미지정",
+    testKind: "daily",
+    preparationStatus: "draft",
+    trackOrder: "",
+    plannedDate: "",
+    passScore: 80,
+    maxRetestCount: 2,
+    linkedTypeIds: [],
     sourceFileName: fileName,
     uploadedAt: today,
     totalProblems: 30,
+    studentProgress: {},
     problems: Array.from({ length: 30 }, (_, index) => ({
       problemId: `problem_uploaded_${timestamp}_${index + 1}`,
       number: index + 1,
@@ -4713,18 +5045,27 @@ function createProblemBookFromFile(fileName) {
 
 function createProblemBookFolder(folderName) {
   const timestamp = Date.now();
+  const inferredSubject = testPaperSubjectOptions.find((subject) => String(folderName ?? "").includes(subject)) ?? testPaperSubjectOptions[0];
   return {
     problemBookId: `book_folder_${timestamp}`,
-    title: folderName || "새 교재 폴더",
-    subject: folderName || "과목 미지정",
+    title: folderName || "새 시험지",
+    subject: inferredSubject,
     grade: "",
     unit: "",
+    testKind: "daily",
+    preparationStatus: "draft",
+    trackOrder: "",
+    plannedDate: "",
+    passScore: 80,
+    maxRetestCount: 2,
+    linkedTypeIds: [],
     sourceFileName: "",
     uploadedAt: today,
     uploadedAcademy: academyBrandName,
     numberRange: "",
     averageMinutes: "",
     totalProblems: 0,
+    studentProgress: {},
     problems: []
   };
 }
@@ -4739,12 +5080,12 @@ function createProblemBooksFromPageSnapJson(jsonText) {
 
   const rows = Array.isArray(parsed) ? parsed : [parsed];
   if (rows.length === 0) {
-    throw new Error("가져올 교재 항목이 없습니다.");
+    throw new Error("가져올 시험지 항목이 없습니다.");
   }
 
   const timestamp = Date.now();
   return rows.map((row, index) => {
-    const title = row.item_title || row.book_name || `PageSnap 교재 ${index + 1}`;
+    const title = row.item_title || row.book_name || `PageSnap 시험지 ${index + 1}`;
     const startProblem = Number.parseInt(row.start_problem_id ?? row.startProblemId ?? 1, 10) || 1;
     const endProblem = Number.parseInt(row.end_problem_id ?? row.endProblemId ?? startProblem, 10) || startProblem;
     const problemCount = Math.max(0, endProblem - startProblem + 1);
@@ -4753,9 +5094,16 @@ function createProblemBooksFromPageSnapJson(jsonText) {
     return {
       problemBookId: bookId,
       title,
-      subject: row.subject || "과목 미지정",
+      subject: row.subject || testPaperSubjectOptions[0],
       grade: row.grade || inferGradeFromSubject(row.subject),
       unit: row.item_title || row.unit || title,
+      testKind: row.test_kind || row.testKind || "daily",
+      preparationStatus: row.preparation_status || row.preparationStatus || "draft",
+      trackOrder: row.track_order ?? row.trackOrder ?? "",
+      plannedDate: row.planned_date ?? row.plannedDate ?? "",
+      passScore: row.pass_score ?? row.passScore ?? 80,
+      maxRetestCount: row.max_retest_count ?? row.maxRetestCount ?? 2,
+      linkedTypeIds: Array.isArray(row.linked_type_ids ?? row.linkedTypeIds) ? (row.linked_type_ids ?? row.linkedTypeIds) : [],
       sourceFileName: row.source_file_name || row.pdf_file_name || "PageSnap",
       sourceType: "pagesnap",
       bookName: row.book_name || "",
@@ -4770,6 +5118,7 @@ function createProblemBooksFromPageSnapJson(jsonText) {
       confidence: row.confidence ?? "",
       note: row.note ?? "",
       totalProblems: problemCount,
+      studentProgress: {},
       problems: Array.from({ length: problemCount }, (_, problemIndex) => {
         const number = startProblem + problemIndex;
         return {
@@ -7547,6 +7896,7 @@ export function App() {
             appStateSaveState={appStateSaveState}
             problemBooks={problemBooks}
             students={students}
+            templates={classTemplates}
             onAddFolder={(folderName) =>
               setProblemBooks((current) => [createProblemBookFolder(folderName), ...current])
             }
@@ -11264,7 +11614,7 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle }) 
         { id: "overdue", label: "숙제현황", icon: "📊" },
         { id: "followups", label: "오답관리", icon: "✕" },
         { id: "supplements", label: "보충관리", icon: "↪" },
-        { id: "materials", label: "교재관리", icon: "📚" },
+        { id: "materials", label: "시험지관리", icon: "📚" },
         { id: "resources", label: "자료함", icon: "📁" }
       ]
     },
@@ -15289,6 +15639,11 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
     scheduleReviewDraftSave(value);
   }
 
+  function updateReviewSection(section, value) {
+    const nextReview = setExamReviewSectionValue(reviewDraft, section, value);
+    updateReviewDraft(nextReview);
+  }
+
   function handleClose() {
     flushPendingReviewSave();
     onClose();
@@ -15353,17 +15708,33 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
           <div className="sectionHeader slim">
             <div>
               <p className="eyebrow">ORIGINAL</p>
-              <h2>시험 후 총평</h2>
+              <h2>시험 후 기록지</h2>
             </div>
             <button className="softButton" onClick={polishReview} type="button">AI 수정</button>
           </div>
-          <textarea
-            className="commentComposerTextarea"
-            value={reviewDraft}
-            onBlur={flushPendingReviewSave}
-            onChange={(event) => updateReviewDraft(event.target.value)}
-            placeholder="탈리 제출 원문, 현장 체감, 학생 반응 등을 적어주세요."
-          />
+          <div className="examReviewChecklist">
+            {examReviewChecklistSections.map((section) => (
+              <label className="examReviewChecklistItem" key={section.key}>
+                <span>{section.number}. {section.title}</span>
+                <textarea
+                  value={getExamReviewSectionValue(reviewDraft, section)}
+                  onBlur={flushPendingReviewSave}
+                  onChange={(event) => updateReviewSection(section, event.target.value)}
+                  placeholder={section.placeholder}
+                />
+              </label>
+            ))}
+          </div>
+          <details className="examReviewRawDraft">
+            <summary>전체 원문 보기/직접 수정</summary>
+            <textarea
+              className="commentComposerTextarea"
+              value={reviewDraft}
+              onBlur={flushPendingReviewSave}
+              onChange={(event) => updateReviewDraft(event.target.value)}
+              placeholder="시험 후 기록지 전체 원문"
+            />
+          </details>
           <small className="muted">{row.reviewAiStatus || "AI 대기"}</small>
         </section>
 
@@ -15381,6 +15752,10 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
             >
               수정본 복사
             </button>
+          </div>
+          <div className="examReviewBlogSource">
+            <strong>블로그 발췌 재료</strong>
+            <pre>{buildExamReviewBlogSourceText(reviewDraft) || "왼쪽 항목을 채우면 블로그 첫 문단, 변별 포인트, 다음 대비 문장으로 가져갈 재료가 정리됩니다."}</pre>
           </div>
           <textarea
             className="commentComposerTextarea"
@@ -20090,17 +20465,32 @@ function MaterialManager({
   appStateSaveState = "idle",
   problemBooks,
   students,
+  templates = [],
   onAddFolder,
   onAddPdf,
   onImportPageSnapBooks,
   onSyncProblemCounts,
   onUpdateBook
 }) {
-  const [activeTab, setActiveTab] = useState("books");
+  const [activeTab, setActiveTab] = useState("track");
+  const [activeSubject, setActiveSubject] = useState(testPaperSubjectOptions[0]);
   const [folderName, setFolderName] = useState("");
   const [isPageSnapModalOpen, setIsPageSnapModalOpen] = useState(false);
   const [pageSnapJson, setPageSnapJson] = useState("");
   const [pageSnapImportMessage, setPageSnapImportMessage] = useState("");
+  const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("all");
+  const activeStudents = students.filter(isActiveStudent);
+  const trackStudents = selectedClassTemplateId === "all"
+    ? activeStudents
+    : activeStudents.filter((student) => student.defaultClassTemplateId === selectedClassTemplateId);
+  const subjectBooks = problemBooks
+    .filter((book) => (book.subject || "") === activeSubject)
+    .sort((a, b) => {
+      const orderA = Number(a.trackOrder || 9999);
+      const orderB = Number(b.trackOrder || 9999);
+      return orderA - orderB || String(a.title ?? "").localeCompare(String(b.title ?? ""));
+    });
+  const catalogUnits = ssenTypeCatalog[activeSubject] ?? [];
   const textbookRows = useMemo(() => {
     const rows = new Map();
     students.forEach((student) => {
@@ -20133,33 +20523,238 @@ function MaterialManager({
   function handlePageSnapImport() {
     try {
       const count = onImportPageSnapBooks(pageSnapJson);
-      setPageSnapImportMessage(`${count}개 PageSnap 교재 항목을 가져왔습니다.`);
+      setPageSnapImportMessage(`${count}개 PageSnap 시험지 항목을 가져왔습니다.`);
       setPageSnapJson("");
     } catch (error) {
       setPageSnapImportMessage(error.message);
     }
   }
 
+  function updateBookStudentProgress(problemBookId, studentId, field, value) {
+    const book = problemBooks.find((item) => item.problemBookId === problemBookId);
+    if (!book) return;
+    const currentProgress = getBookStudentProgress(book, studentId);
+    const nextProgress = {
+      ...(book.studentProgress ?? {}),
+      [studentId]: {
+        ...currentProgress,
+        [field]: value
+      }
+    };
+    onUpdateBook(problemBookId, "studentProgress", nextProgress);
+  }
+
   return (
     <section className="materialManagerPage">
       <div className="localTabs materialTabs">
+        <button className={activeTab === "track" ? "active" : ""} onClick={() => setActiveTab("track")} type="button">
+          진도별 트랙
+        </button>
+        <button className={activeTab === "types" ? "active" : ""} onClick={() => setActiveTab("types")} type="button">
+          쎈 유형트리
+        </button>
         <button className={activeTab === "books" ? "active" : ""} onClick={() => setActiveTab("books")} type="button">
-          📚 교재 관리
+          시험지 보관함
         </button>
         <button className={activeTab === "textbooks" ? "active" : ""} onClick={() => setActiveTab("textbooks")} type="button">
-          📖 교과서 관리
+          교과서 관리
         </button>
       </div>
+
+      {activeTab === "track" || activeTab === "types" ? (
+        <section className="panel materialPanel testPaperOverviewPanel">
+          <div className="sectionHeader">
+            <div>
+              <h1>시험지관리</h1>
+              <p className="muted">쎈 유형을 기준으로 시험지를 미리 준비하고, 학생이 어느 테스트까지 통과했는지 한 화면에서 봅니다.</p>
+            </div>
+            <InlineSaveStatus label="시험지 자동저장" saveState={appStateSaveState} />
+          </div>
+          <div className="testPaperSubjectTabs" aria-label="시험지관리 과목 선택">
+            {testPaperSubjectOptions.map((subject) => (
+              <button
+                className={activeSubject === subject ? "active" : ""}
+                key={subject}
+                onClick={() => setActiveSubject(subject)}
+                type="button"
+              >
+                {subject}
+              </button>
+            ))}
+          </div>
+
+          {activeTab === "types" ? (
+            <div className="ssenTypeTree">
+              {catalogUnits.map((chapter) => (
+                <details className="ssenChapterNode" key={chapter.id} open>
+                  <summary>
+                    <strong>{chapter.title}</strong>
+                    <span>{chapter.units.reduce((sum, unit) => sum + unit.types.length, 0)}개 세부유형</span>
+                  </summary>
+                  <div className="ssenUnitList">
+                    {chapter.units.map((unit) => (
+                      <details className="ssenUnitNode" key={unit.id} open>
+                        <summary>
+                          <b>{unit.title}</b>
+                          <span>{unit.types.length}개 유형</span>
+                        </summary>
+                        <div className="ssenTypeNodeList">
+                          {unit.types.map((type) => {
+                            const stats = getTypeNodeStats(problemBooks, activeSubject, type);
+                            return (
+                              <article className="ssenTypeNode" key={type.id}>
+                                <div>
+                                  <strong>{type.title}</strong>
+                                  <small>{type.id}</small>
+                                </div>
+                                <div className="ssenTypeStats">
+                                  <span>등록 {stats.registeredProblemCount}문항</span>
+                                  <span>시험지 {stats.books.length}개</span>
+                                  <span>준비완료 {stats.preparedCount}개</span>
+                                  <span>{stats.recentUsedAt ? `최근 ${stats.recentUsedAt}` : "최근 출제 없음"}</span>
+                                </div>
+                                <div className="ssenTypeKindChips">
+                                  {stats.kindLabels.length ? stats.kindLabels.map((label) => <i key={label}>{label}</i>) : <i>미포함</i>}
+                                </div>
+                              </article>
+                            );
+                          })}
+                        </div>
+                      </details>
+                    ))}
+                  </div>
+                </details>
+              ))}
+              {catalogUnits.length === 0 ? (
+                <div className="examPrepEmptyState">
+                  <strong>{activeSubject} 유형 트리는 아직 등록 전입니다.</strong>
+                  <span>쎈 유형표가 준비되면 이 영역에 대단원/중단원/세부유형을 추가합니다.</span>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          {activeTab === "track" ? (
+            <div className="testTrackLayout">
+              <section className="testTrackPlan">
+                <div className="sectionHeader slim">
+                  <div>
+                    <h2>진도별 테스트 순서</h2>
+                    <p className="muted">준비완료가 된 시험지만 실제 배포 대상으로 봅니다.</p>
+                  </div>
+                  <select value={selectedClassTemplateId} onChange={(event) => setSelectedClassTemplateId(event.target.value)}>
+                    <option value="all">전체 학생</option>
+                    {templates.map((template) => (
+                      <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="testTrackTable">
+                  <div className="testTrackRow testTrackHead">
+                    <span>순서</span>
+                    <span>시험지</span>
+                    <span>종류</span>
+                    <span>준비</span>
+                    <span>배포일</span>
+                    <span>기준</span>
+                  </div>
+                  {subjectBooks.map((book, index) => (
+                    <div className="testTrackRow" key={book.problemBookId}>
+                      <input
+                        value={book.trackOrder ?? index + 1}
+                        onChange={(event) => onUpdateBook(book.problemBookId, "trackOrder", event.target.value)}
+                      />
+                      <div className="testTrackTitle">
+                        <strong>{book.title}</strong>
+                        <small>{book.unit || "유형 미지정"} · {book.problems?.length ?? book.totalProblems ?? 0}문항</small>
+                      </div>
+                      <select value={inferTestPaperKind(book)} onChange={(event) => onUpdateBook(book.problemBookId, "testKind", event.target.value)}>
+                        {testPaperKindOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
+                      </select>
+                      <select value={book.preparationStatus || "draft"} onChange={(event) => onUpdateBook(book.problemBookId, "preparationStatus", event.target.value)}>
+                        {testPaperPreparationOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
+                      </select>
+                      <input
+                        type="date"
+                        value={book.plannedDate ?? ""}
+                        onChange={(event) => onUpdateBook(book.problemBookId, "plannedDate", event.target.value)}
+                      />
+                      <div className="testTrackCriteria">
+                        <input
+                          value={book.passScore ?? 80}
+                          onChange={(event) => onUpdateBook(book.problemBookId, "passScore", event.target.value)}
+                          aria-label={`${book.title} 통과 기준`}
+                        />
+                        <span>점 · 재시험 {book.maxRetestCount ?? 2}회</span>
+                      </div>
+                    </div>
+                  ))}
+                  {subjectBooks.length === 0 ? (
+                    <div className="examPrepEmptyState">
+                      <strong>{activeSubject} 시험지가 없습니다.</strong>
+                      <span>시험지 보관함에서 폴더를 추가하거나 PageSnap JSON을 가져오면 트랙에 표시됩니다.</span>
+                    </div>
+                  ) : null}
+                </div>
+              </section>
+
+              <section className="testStudentProgressPanel">
+                <div className="sectionHeader slim">
+                  <div>
+                    <h2>학생별 진행 상태</h2>
+                    <p className="muted">미통과 학생은 재시험1, 재시험2까지 표시해 다음 시험으로 넘어가기 전 막힌 지점을 확인합니다.</p>
+                  </div>
+                </div>
+                <div className="testProgressTable">
+                  <div className="testProgressRow testProgressHead" style={{ gridTemplateColumns: `150px repeat(${Math.max(subjectBooks.length, 1)}, 180px)` }}>
+                    <span>학생</span>
+                    {subjectBooks.map((book) => <span key={book.problemBookId}>{book.trackOrder || "-"} · {getTestPaperKindLabel(inferTestPaperKind(book))}</span>)}
+                  </div>
+                  {trackStudents.map((student) => (
+                    <div className="testProgressRow" key={student.studentId} style={{ gridTemplateColumns: `150px repeat(${Math.max(subjectBooks.length, 1)}, 180px)` }}>
+                      <strong>{student.name}</strong>
+                      {subjectBooks.map((book) => {
+                        const progress = getBookStudentProgress(book, student.studentId);
+                        return (
+                          <div className={`testProgressCell status-${progress.status || "waiting"}`} key={`${book.problemBookId}_${student.studentId}`}>
+                            <select
+                              value={progress.status || "waiting"}
+                              onChange={(event) => updateBookStudentProgress(book.problemBookId, student.studentId, "status", event.target.value)}
+                            >
+                              {testPaperProgressOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
+                            </select>
+                            <input
+                              value={progress.score ?? ""}
+                              onChange={(event) => updateBookStudentProgress(book.problemBookId, student.studentId, "score", event.target.value)}
+                              placeholder="점수"
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                  {trackStudents.length === 0 ? (
+                    <div className="examPrepEmptyState">
+                      <strong>표시할 학생이 없습니다.</strong>
+                      <span>반을 바꾸거나 학생관리에서 반 배정을 확인하세요.</span>
+                    </div>
+                  ) : null}
+                </div>
+              </section>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
 
       {activeTab === "books" ? (
         <section className="panel materialPanel">
           <div className="sectionHeader">
             <div>
-              <h1>교재 폴더</h1>
-              <p className="muted">교재 원본 PDF, PageSnap 단원 JSON, 문항 수를 관리합니다. 여기서 등록한 교재는 오답관리에서 사용됩니다.</p>
+              <h1>시험지 보관함</h1>
+              <p className="muted">시험지 PDF, PageSnap 단원 JSON, 문항 수와 준비 상태를 관리합니다. 여기서 등록한 시험지가 진도별 트랙에 표시됩니다.</p>
             </div>
             <div className="materialHeaderActions">
-              <InlineSaveStatus label="교재 자동저장" saveState={appStateSaveState} />
+              <InlineSaveStatus label="시험지 자동저장" saveState={appStateSaveState} />
               <button className="softButton" onClick={() => setIsPageSnapModalOpen(true)} type="button">
                 PageSnap JSON 가져오기
               </button>
@@ -20177,9 +20772,9 @@ function MaterialManager({
               onKeyDown={(event) => {
                 if (event.key === "Enter") handleAddFolder();
               }}
-              placeholder="새 폴더명 입력 (예: 공통수학1, 중2 추가)"
+              placeholder="새 시험지명 입력 (예: 공통수학1 데일리 01)"
             />
-            <button className="primaryButton" onClick={handleAddFolder} type="button">+ 폴더 추가</button>
+            <button className="primaryButton" onClick={handleAddFolder} type="button">+ 시험지 추가</button>
             <button className="orangeButton" onClick={onSyncProblemCounts} type="button">문제수 동기화</button>
           </div>
 
@@ -20187,10 +20782,11 @@ function MaterialManager({
             <div className="materialRow materialHead">
               <span>이름</span>
               <span>과목</span>
+              <span>종류</span>
+              <span>준비</span>
               <span>문제수</span>
               <span>번호범위</span>
-              <span>PDF쪽</span>
-              <span>이미지</span>
+              <span>배포일</span>
               <span>평균(분)</span>
               <span>업로드학원</span>
             </div>
@@ -20201,14 +20797,19 @@ function MaterialManager({
                   <input value={book.title} onChange={(event) => onUpdateBook(book.problemBookId, "title", event.target.value)} />
                 </label>
                 <input value={book.subject ?? ""} onChange={(event) => onUpdateBook(book.problemBookId, "subject", event.target.value)} placeholder="과목" />
+                <select value={inferTestPaperKind(book)} onChange={(event) => onUpdateBook(book.problemBookId, "testKind", event.target.value)}>
+                  {testPaperKindOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
+                </select>
+                <select value={book.preparationStatus || "draft"} onChange={(event) => onUpdateBook(book.problemBookId, "preparationStatus", event.target.value)}>
+                  {testPaperPreparationOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
+                </select>
                 <input
                   type="number"
                   value={book.problems?.length ?? book.totalProblems ?? 0}
                   onChange={(event) => onUpdateBook(book.problemBookId, "totalProblems", Number(event.target.value))}
                 />
                 <input value={book.numberRange ?? ""} onChange={(event) => onUpdateBook(book.problemBookId, "numberRange", event.target.value)} placeholder="예: 1~895" />
-                <span className="muted">{book.startPdfPage && book.endPdfPage ? `${book.startPdfPage}~${book.endPdfPage}` : "-"}</span>
-                <span className="muted">{book.problems?.some((problem) => problem.cropImageUrl) ? "있음" : "대기"}</span>
+                <input type="date" value={book.plannedDate ?? ""} onChange={(event) => onUpdateBook(book.problemBookId, "plannedDate", event.target.value)} />
                 <input value={book.averageMinutes ?? ""} onChange={(event) => onUpdateBook(book.problemBookId, "averageMinutes", event.target.value)} placeholder="분" />
                 <input
                   value={book.uploadedAcademy ?? academyBrandName}
@@ -20224,7 +20825,7 @@ function MaterialManager({
         <Modal
           className="pageSnapImportModal"
           title="PageSnap JSON 가져오기"
-          subtitle="PageSnap의 GPT 프롬프트 결과 JSON을 붙여넣으면 교재 단원과 문항 번호가 오답관리 교재로 저장됩니다."
+          subtitle="PageSnap의 GPT 프롬프트 결과 JSON을 붙여넣으면 시험지 단원과 문항 번호가 진도별 트랙 재료로 저장됩니다."
           onClose={() => setIsPageSnapModalOpen(false)}
         >
           <div className="pageSnapImportLayout">
@@ -20242,7 +20843,7 @@ function MaterialManager({
                 쎈 공통수학1 예시 채우기
               </button>
               <strong>가져오는 값</strong>
-              <span>교재명 / 단원명</span>
+              <span>시험지명 / 단원명</span>
               <span>과목</span>
               <span>PDF 페이지 범위</span>
               <span>문항 시작-끝 번호</span>

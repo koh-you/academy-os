@@ -8432,6 +8432,81 @@ textarea {
   min-height: 36px;
 }
 
+.examReviewChecklist {
+  display: grid;
+  gap: 10px;
+  max-height: 560px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.examReviewChecklistItem {
+  background: #f8fbff;
+  border: 1px solid #dbe7fb;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 12px;
+}
+
+.examReviewChecklistItem span {
+  color: #17213d;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.examReviewChecklistItem textarea {
+  background: #ffffff;
+  border: 1px solid #cfe0ff;
+  border-radius: 8px;
+  min-height: 74px;
+  padding: 10px;
+  resize: vertical;
+}
+
+.examReviewRawDraft {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.examReviewRawDraft summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.examReviewRawDraft .commentComposerTextarea {
+  margin-top: 10px;
+  min-height: 220px;
+}
+
+.examReviewBlogSource {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.examReviewBlogSource strong {
+  color: #17213d;
+}
+
+.examReviewBlogSource pre {
+  color: #1e3a8a;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  margin: 0;
+  max-height: 180px;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
 .copyFeedbackStatus,
 .reviewCopyStatus {
   color: #15803d;
@@ -12945,7 +13020,7 @@ textarea.profileEditInput {
 
 .materialTabs {
   justify-self: start;
-  max-width: 360px;
+  max-width: 620px;
 }
 
 .materialPanel {
@@ -12983,8 +13058,8 @@ textarea.profileEditInput {
   border-top: 1px solid #e2e8f0;
   display: grid;
   gap: 10px;
-  grid-template-columns: 240px 120px 90px 120px 90px 100px 110px minmax(180px, 1fr);
-  min-width: 1140px;
+  grid-template-columns: 240px 120px 96px 112px 90px 120px 132px 110px minmax(180px, 1fr);
+  min-width: 1320px;
   padding: 10px 14px;
 }
 
@@ -13011,7 +13086,8 @@ textarea.profileEditInput {
   font-size: 20px;
 }
 
-.materialRow input {
+.materialRow input,
+.materialRow select {
   background: #ffffff;
   border: 1px solid #d8e3f8;
   border-radius: 8px;
@@ -13027,6 +13103,228 @@ textarea.profileEditInput {
 .textbookTable .materialRow {
   grid-template-columns: 160px 240px minmax(360px, 1fr);
   min-width: 760px;
+}
+
+.testPaperOverviewPanel {
+  gap: 16px;
+}
+
+.testPaperSubjectTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.testPaperSubjectTabs button {
+  background: #ffffff;
+  border: 1px solid #cfe0ff;
+  border-radius: 8px;
+  color: #17213d;
+  font-weight: 900;
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+.testPaperSubjectTabs button.active {
+  background: #17213d;
+  border-color: #17213d;
+  color: #ffffff;
+}
+
+.ssenTypeTree,
+.testTrackLayout,
+.testTrackPlan,
+.testStudentProgressPanel {
+  display: grid;
+  gap: 14px;
+}
+
+.ssenChapterNode,
+.ssenUnitNode,
+.ssenTypeNode,
+.testTrackPlan,
+.testStudentProgressPanel {
+  background: #ffffff;
+  border: 1px solid #dbe7fb;
+  border-radius: 8px;
+}
+
+.ssenChapterNode,
+.ssenUnitNode {
+  overflow: hidden;
+}
+
+.ssenChapterNode > summary,
+.ssenUnitNode > summary {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  list-style: none;
+  min-height: 46px;
+  padding: 0 16px;
+}
+
+.ssenChapterNode > summary {
+  background: #eff6ff;
+}
+
+.ssenUnitNode > summary {
+  background: #f8fafc;
+}
+
+.ssenChapterNode > summary span,
+.ssenUnitNode > summary span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ssenUnitList,
+.ssenTypeNodeList {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.ssenTypeNode {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(180px, 1fr) minmax(360px, 1.4fr) minmax(140px, auto);
+  padding: 12px;
+}
+
+.ssenTypeNode small {
+  color: #94a3b8;
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.ssenTypeStats,
+.ssenTypeKindChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ssenTypeStats span,
+.ssenTypeKindChips i {
+  background: #eef5ff;
+  border: 1px solid #cfe0ff;
+  border-radius: 999px;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+  padding: 5px 8px;
+}
+
+.ssenTypeKindChips i {
+  background: #f8fafc;
+  color: #334155;
+}
+
+.testTrackPlan,
+.testStudentProgressPanel {
+  padding: 16px;
+}
+
+.testTrackTable,
+.testProgressTable {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: auto;
+}
+
+.testTrackRow,
+.testProgressRow {
+  align-items: center;
+  border-top: 1px solid #e2e8f0;
+  display: grid;
+  gap: 10px;
+  min-width: 920px;
+  padding: 10px 12px;
+}
+
+.testTrackRow {
+  grid-template-columns: 64px minmax(260px, 1fr) 110px 130px 150px 150px;
+}
+
+.testTrackRow:first-child,
+.testProgressRow:first-child {
+  border-top: 0;
+}
+
+.testTrackHead,
+.testProgressHead {
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.testTrackRow input,
+.testTrackRow select,
+.testProgressCell input,
+.testProgressCell select,
+.testTrackPlan .sectionHeader select {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  min-height: 36px;
+  padding: 0 10px;
+}
+
+.testTrackTitle {
+  display: grid;
+  gap: 4px;
+}
+
+.testTrackTitle small,
+.testTrackCriteria span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.testTrackCriteria {
+  align-items: center;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: 54px 1fr;
+}
+
+.testProgressRow {
+  min-width: max-content;
+}
+
+.testProgressCell {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: 1fr 58px;
+  padding: 8px;
+}
+
+.testProgressCell.status-passed {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.testProgressCell.status-failed,
+.testProgressCell.status-retest1,
+.testProgressCell.status-retest2 {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.testProgressCell.status-hold {
+  background: #fef2f2;
+  border-color: #fecaca;
 }
 
 .modalCard.pageSnapImportModal {
