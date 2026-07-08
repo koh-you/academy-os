@@ -28,6 +28,10 @@ function formatShortDate(date = "") {
   return date ? date.slice(5).replace("-", ".") : "날짜 미입력";
 }
 
+function isWithdrawnStudent(student = {}) {
+  return (student.status ?? "active") !== "active" || Boolean(student.withdrawnAt);
+}
+
 export function StudentManager({
   academyTests,
   appStateSaveState = "idle",
@@ -60,8 +64,8 @@ export function StudentManager({
   const deleteStudent = students.find((student) => student.studentId === deleteStudentId) ?? null;
   const selectedScores = scoreRecords.filter((score) => score.studentId === selectedStudent?.studentId);
   const selectedAcademyTests = academyTests.filter((item) => item.studentId === selectedStudent?.studentId);
-  const activeStudents = students.filter((student) => (student.status ?? "active") === "active");
-  const withdrawnStudents = students.filter((student) => (student.status ?? "active") !== "active");
+  const activeStudents = students.filter((student) => !isWithdrawnStudent(student));
+  const withdrawnStudents = students.filter(isWithdrawnStudent);
   const visibleStudents =
     activeTab === "withdrawn"
       ? withdrawnStudents
