@@ -5746,7 +5746,7 @@ button {
 
 .schoolEventPill.mathExamTab {
   border-radius: 6px;
-  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.14);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.16);
   box-sizing: border-box;
   display: block;
   flex: 0 1 calc(50% - 3px);
@@ -6256,6 +6256,7 @@ button {
 
 .schoolDateGroup {
   border: 1px solid #d8e3f8;
+  border-left: 4px solid var(--school-color, #d8e3f8);
   border-radius: 8px;
   display: grid;
   gap: 10px;
@@ -6274,7 +6275,7 @@ button {
 }
 
 .schoolDateGroupHeader strong {
-  color: #0f172a;
+  color: var(--school-color, #0f172a);
   font-size: 16px;
   font-weight: 900;
 }
@@ -6287,6 +6288,7 @@ button {
 
 .schoolDateEventEditor {
   border: 1px solid #d8e3f8;
+  border-left: 4px solid var(--school-color, #d8e3f8);
   border-radius: 8px;
   display: grid;
   gap: 12px;
@@ -6306,7 +6308,7 @@ button {
 }
 
 .schoolDateEventEditorTop strong {
-  color: #0f172a;
+  color: var(--school-color, #0f172a);
   font-size: 18px;
   font-weight: 900;
 }

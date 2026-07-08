@@ -3969,6 +3969,14 @@ const examPrepTextbookBySchoolGrade = {
 
 const schoolCalendarGradeOptions = ["중3", "고1", "고2", "고3"];
 const schoolCalendarMathSubjectOptions = ["공통수학1", "공통수학2", "대수", "미적분1", "확률과통계", "미적분2", "기하"];
+const schoolCalendarSchoolColorPalette = ["#2563eb", "#0f766e", "#7c3aed", "#ea580c", "#db2777", "#0891b2", "#4f46e5", "#65a30d", "#b45309"];
+const schoolCalendarKnownColors = {
+  상계고: "#2563eb",
+  자운고: "#0f766e",
+  정의여고: "#7c3aed",
+  용화여고: "#db2777",
+  창동고: "#ea580c"
+};
 const currentExamCycle = getDefaultExamCycleForDate(today);
 
 function inferExamCycleFromPrepId(examPrepId = "") {
@@ -4063,6 +4071,17 @@ function normalizeSchoolName(value = "") {
     .replace(/남자고/g, "남고")
     .replace(/고등학교/g, "고")
     .replace(/중학교/g, "중");
+}
+
+function getSchoolCalendarSchoolColor(schoolName = "") {
+  const key = normalizeSchoolName(schoolName) || "학교미입력";
+  if (schoolCalendarKnownColors[key]) return schoolCalendarKnownColors[key];
+  const hash = [...key].reduce((total, character) => total + character.charCodeAt(0), 0);
+  return schoolCalendarSchoolColorPalette[hash % schoolCalendarSchoolColorPalette.length];
+}
+
+function getSchoolCalendarEventColor(event = {}) {
+  return event.color || getSchoolCalendarSchoolColor(event.schoolName);
 }
 
 function schoolNamesMatch(firstSchool = "", secondSchool = "", { allowBlank = true } = {}) {
@@ -4326,13 +4345,14 @@ function buildExamPrepRowsFromStudents(students, examCycle, classTemplateId = ""
 }
 
 function createSchoolEventFromExamPrepRow(row, index = 0) {
+  const schoolName = row.schoolName || "학교 미입력";
   return {
     eventId: `event_exam_${row.examPrepId ?? index}`,
     date: getDefaultMathExamDate(row, index),
-    schoolName: row.schoolName || "학교 미입력",
+    schoolName,
     title: `${examCycleLabel(row.examCycle ?? currentExamCycle)} 수학시험`,
     type: "mathExam",
-    color: "#dc2626"
+    color: getSchoolCalendarSchoolColor(schoolName)
   };
 }
 
@@ -4457,8 +4477,10 @@ function groupExamPeriodEventsForMonth(events = []) {
   const grouped = new Map();
   events.forEach((event) => {
     if (event.type !== "examPeriod") return;
+    const schoolKey = normalizeSchoolName(event.schoolName || "") || "학교미입력";
     const key = [
       event.examCycle || currentExamCycle,
+      schoolKey,
       event.date || "",
       event.endDate || event.date || ""
     ].join("|");
@@ -4466,11 +4488,12 @@ function groupExamPeriodEventsForMonth(events = []) {
       ...event,
       eventId: `month_period_${safeIdPart(key)}`,
       title: "",
+      color: getSchoolCalendarEventColor(event),
       schoolNames: new Set(),
       type: "examPeriod"
     };
     if (event.schoolName) existing.schoolNames.add(event.schoolName);
-    existing.title = `${examCycleLabel(event.examCycle || currentExamCycle)} 시험기간 · ${existing.schoolNames.size}개 학교`;
+    existing.title = `${event.schoolName || "학교 미입력"} ${examCycleLabel(event.examCycle || currentExamCycle)} 시험기간`;
     grouped.set(key, existing);
   });
   return [...grouped.values()].map((event) => ({
@@ -4500,8 +4523,10 @@ function getMonthCellDisplayEvents(dayEvents = []) {
 function buildExamCalendarEvents(rows) {
   const periodKeys = new Set();
   return dedupeExamPrepRowsForDisplay(rows).flatMap((row) => {
+    const schoolName = row.schoolName || "학교 미입력";
+    const schoolColor = getSchoolCalendarSchoolColor(schoolName);
     const base = {
-      schoolName: row.schoolName || "학교 미입력",
+      schoolName,
       grade: row.grade || "",
       examSubject: "수학",
       memo: "시험관리 탭에서 연동된 일정입니다.",
@@ -4522,7 +4547,7 @@ function buildExamCalendarEvents(rows) {
           endDate: period.endDate,
           title: `${row.schoolName || "학교 미입력"} ${row.grade || ""} ${examCycleLabel(row.examCycle ?? currentExamCycle)} 시험기간`.trim(),
           type: "examPeriod",
-          color: "#ef4444"
+          color: schoolColor
         });
       }
     }
@@ -4544,7 +4569,7 @@ function buildExamCalendarEvents(rows) {
         type: "mathExam",
         mathExamEntryId: entry.id,
         mathExamEntryIndex: index,
-        color: "#dc2626"
+        color: schoolColor
       });
     };
     mathEntries.forEach(addMathExamEvent);
@@ -15806,7 +15831,7 @@ function SchoolCalendarCenter({
     endDate: "",
     title: "",
     type: "examPeriod",
-    color: "#dc2626",
+    color: getSchoolCalendarSchoolColor(rows[0]?.schoolName ?? ""),
     examSubject: "",
     memo: "",
     mathExamItems: [
@@ -15839,7 +15864,7 @@ function SchoolCalendarCenter({
     { id: "vacation", label: "방학/개학" },
     { id: "preExam", label: "직전일정" }
   ];
-  const eventColorOptions = ["#dc2626", "#2563eb", "#16a34a", "#7c3aed", "#ea580c", "#0891b2", "#17213d"];
+  const eventColorOptions = [...schoolCalendarSchoolColorPalette, "#17213d"];
   const examEvents = buildExamCalendarEvents(rows);
   const manualEvents = events.filter((event) =>
     !String(event.eventId ?? "").startsWith("event_exam_") &&
@@ -15882,7 +15907,8 @@ function SchoolCalendarCenter({
       eventId: `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       schoolName,
       title,
-      examSubject: subjectTitle
+      examSubject: subjectTitle,
+      color: newEvent.color || getSchoolCalendarSchoolColor(schoolName)
     };
     syncSchoolCalendarEventToExamPrepRows(rows, nextEvent, onUpdateExamPrepRow);
     if (nextEvent.type === "mathExam") onSyncPreExamLesson?.(nextEvent);
@@ -15907,7 +15933,7 @@ function SchoolCalendarCenter({
             title: joinCalendarLabel(schoolName, itemDetail, "수학시험"),
             examSubject: itemSubject,
             memo: item.memo || newEvent.memo,
-            color: "#dc2626"
+            color: getSchoolCalendarSchoolColor(schoolName)
           };
           syncSchoolCalendarEventToExamPrepRows(rows, mathEvent, onUpdateExamPrepRow);
           onSyncPreExamLesson?.(mathEvent);
@@ -15922,7 +15948,7 @@ function SchoolCalendarCenter({
         schoolName,
         title: joinCalendarLabel(schoolName, subjectTitle),
         examSubject: subjectTitle,
-        color: "#dc2626"
+        color: getSchoolCalendarSchoolColor(schoolName)
       };
       syncSchoolCalendarEventToExamPrepRows(rows, mathEvent, onUpdateExamPrepRow);
       onSyncPreExamLesson?.(mathEvent);
@@ -16013,6 +16039,7 @@ function SchoolCalendarCenter({
       examCycle: current.examCycle || currentExamCycle,
       title: current.type === "examPeriod" && !current.title ? examCycleLabel(current.examCycle || currentExamCycle) : current.title,
       schoolName: schoolFilter === "전체 학교" ? current.schoolName : schoolFilter,
+      color: schoolFilter === "전체 학교" ? current.color : getSchoolCalendarSchoolColor(schoolFilter),
       mathExamItems: current.mathExamItems.map((item, index) => ({
         ...item,
         id: item.id || `math_item_${Date.now()}_${index}`,
@@ -16104,7 +16131,18 @@ function SchoolCalendarCenter({
               </label>
               <label>
                 학교
-                <select value={newEvent.schoolName} onChange={(event) => setNewEvent((current) => ({ ...current, schoolName: event.target.value, grade: "" }))}>
+                <select
+                  value={newEvent.schoolName}
+                  onChange={(event) => {
+                    const schoolName = event.target.value;
+                    setNewEvent((current) => ({
+                      ...current,
+                      schoolName,
+                      grade: "",
+                      color: getSchoolCalendarSchoolColor(schoolName)
+                    }));
+                  }}
+                >
                   <option value="">학교 선택</option>
                   {schools.map((school) => (
                     <option key={school} value={school}>{school}</option>
@@ -16323,12 +16361,13 @@ function SchoolCalendarCenter({
                       {periodSummaries.map((event, periodIndex) => {
                         const periodBarClass = getPeriodBarClass(day.date, event);
                         const showPeriodLabel = periodBarClass === "periodStart" || periodBarClass === "periodSingle";
+                        const eventColor = getSchoolCalendarEventColor(event);
                         return (
                           <span
                             className={`schoolEventPill event-${event.type} periodBar ${periodBarClass}`}
                             key={event.eventId}
                             style={{
-                              "--period-color": event.color ?? "#f472b6",
+                              "--period-color": eventColor,
                               "--period-index": periodIndex
                             }}
                             title={event.title}
@@ -16341,12 +16380,14 @@ function SchoolCalendarCenter({
                     <span className="schoolMathExamLayer">
                       {mathExamEvents.map((event, mathTabIndex) => {
                         const eventLabel = formatCalendarSummaryLabel(event);
+                        const eventColor = getSchoolCalendarEventColor(event);
                         return (
                           <span
                             className={`schoolEventPill event-${event.type} mathExamTab`}
                             key={event.eventId}
                             style={{
-                              backgroundColor: event.color ?? undefined,
+                              "--event-color": eventColor,
+                              backgroundColor: eventColor,
                               "--math-tab-index": mathTabIndex
                             }}
                             title={event.title}
@@ -16359,11 +16400,12 @@ function SchoolCalendarCenter({
                     <span className="schoolRegularEventLayer">
                       {regularEvents.map((event) => {
                         const eventLabel = formatCalendarSummaryLabel(event);
+                        const eventColor = getSchoolCalendarEventColor(event);
                         return (
                           <span
                             className={`schoolEventPill event-${event.type}`}
                             key={event.eventId}
-                            style={{ backgroundColor: event.color ?? undefined }}
+                            style={{ "--event-color": eventColor, backgroundColor: eventColor }}
                             title={event.title}
                           >
                             {eventLabel}
@@ -16429,7 +16471,11 @@ function SchoolDateScheduleModal({
       ) : (
         <div className="schoolDateEventStack">
           {groupedEventEntries.map(([schoolName, schoolEvents]) => (
-            <section className="schoolDateGroup" key={schoolName}>
+            <section
+              className="schoolDateGroup"
+              key={schoolName}
+              style={{ "--school-color": getSchoolCalendarSchoolColor(schoolName) }}
+            >
               <div className="schoolDateGroupHeader">
                 <strong>{schoolName}</strong>
                 <span>{schoolEvents.length}건</span>
@@ -16438,8 +16484,12 @@ function SchoolDateScheduleModal({
                 const canEditDerivedDate = event.derived && ["examPeriod", "mathExam"].includes(event.type);
                 const canEditDerivedSubject = event.derived && event.type === "mathExam";
                 const canEditEventDetails = !event.derived;
+                const eventColor = getSchoolCalendarEventColor(event);
+                const eventColorOptionsForDisplay = eventColorOptions.includes(eventColor)
+                  ? eventColorOptions
+                  : [eventColor, ...eventColorOptions];
                 return (
-                  <article className="schoolDateEventEditor" key={event.eventId}>
+                  <article className="schoolDateEventEditor" key={event.eventId} style={{ "--school-color": eventColor }}>
                     <div className="schoolDateEventEditorTop">
                       <div>
                         <strong>{formatCalendarSummaryLabel(event)}</strong>
@@ -16508,10 +16558,10 @@ function SchoolDateScheduleModal({
                     <label>
                       일정 색상
                       <div className="calendarColorPicker">
-                        {eventColorOptions.map((color) => (
+                        {eventColorOptionsForDisplay.map((color) => (
                           <button
                             aria-label={`색상 ${color}`}
-                            className={(event.color ?? "#dc2626") === color ? "active" : ""}
+                            className={eventColor === color ? "active" : ""}
                             disabled={!canEditEventDetails}
                             key={color}
                             onClick={() => onUpdateEvent(event, "color", color)}
