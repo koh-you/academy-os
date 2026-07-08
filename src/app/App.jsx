@@ -745,6 +745,75 @@ function canCancelNotificationJob(job) {
   return cancelableNotificationJobStatuses.has(job?.status);
 }
 
+function createLessonNotificationJobId(lessonId, studentId, target) {
+  return `lesson_comment_${lessonId}_${studentId}_${target}`;
+}
+
+function isActiveNotificationJobStatus(job = {}) {
+  return !["sent", "dry_run", "failed", "canceled"].includes(job.status);
+}
+
+function buildLessonReservationPayloadSnapshot({
+  audience,
+  lesson,
+  mode,
+  nextHomework,
+  previousHomework,
+  record,
+  scheduledDate,
+  student,
+  supplementSchedules = []
+}) {
+  const sourceField = audience === "student" ? "studentComment" : "teacherComment";
+  const commentBody = buildInitialCommentDraft({
+    audience,
+    existingComment: record?.[sourceField] ?? "",
+    record,
+    supplementSchedules
+  });
+  return {
+    assignmentStatus: getAssignmentStatusForMessage(record, previousHomework),
+    attendanceReason: record?.attendanceReason ?? "",
+    attendanceStatus: record?.attendanceStatus ?? "pending",
+    checkInTime: record?.checkInTime ?? "",
+    checkOutTime: record?.checkOutTime ?? "",
+    commentBodyOverride: commentBody,
+    lateMinutes: record?.lateMinutes ?? "",
+    lessonContent: getLessonContent(record),
+    lessonMaterial: getLessonMaterial(record, student),
+    nextHomework: nextHomework?.title ?? "",
+    previousHomework: previousHomework?.title ?? "",
+    recipient: audience === "student" ? student.studentPhone : student.parentPhone,
+    scheduledDate,
+    scheduleMode: mode,
+    studentId: student.studentId,
+    supplementSchedule: supplementSchedules.join("\n"),
+    target: audience
+  };
+}
+
+function getLessonReservationPayloadFingerprint(payload = {}) {
+  return JSON.stringify({
+    assignmentStatus: String(payload.assignmentStatus ?? ""),
+    attendanceReason: String(payload.attendanceReason ?? payload.reason ?? ""),
+    attendanceStatus: String(payload.attendanceStatus ?? ""),
+    checkInTime: String(payload.checkInTime ?? ""),
+    checkOutTime: String(payload.checkOutTime ?? ""),
+    commentBodyOverride: normalizeMessageText(payload.commentBodyOverride ?? payload.message ?? ""),
+    lateMinutes: String(payload.lateMinutes ?? ""),
+    lessonContent: normalizeMessageText(payload.lessonContent ?? ""),
+    lessonMaterial: normalizeMessageText(payload.lessonMaterial ?? ""),
+    nextHomework: normalizeMessageText(payload.nextHomework ?? ""),
+    previousHomework: normalizeMessageText(payload.previousHomework ?? ""),
+    recipient: normalizePhoneNumber(payload.recipient ?? (payload.target === "student" ? payload.studentPhone : payload.parentPhone) ?? ""),
+    scheduledDate: String(payload.scheduledDate ?? ""),
+    scheduleMode: String(payload.scheduleMode ?? ""),
+    studentId: String(payload.studentId ?? ""),
+    supplementSchedule: normalizeMessageText(payload.supplementSchedule ?? ""),
+    target: String(payload.target ?? "")
+  });
+}
+
 function getNotificationProviderReference(result = {}) {
   return (
     result?.response?.groupInfo?.groupId ||
@@ -5950,53 +6019,19 @@ export function App() {
 
   useEffect(() => {
     if (!isLessonJournalOpen || !selectedLesson?.lessonId || !isAppStateReady || session?.role !== "teacher") return;
-    if (notificationJobsStatus?.state !== "ready") return;
-    const activeLessonStudents = getActiveLessonStudents(selectedLesson, students);
-    if (activeLessonStudents.length === 0) return;
     const currentPlan = lessonNotificationPlans[selectedLesson.lessonId];
-    const currentMode = currentPlan?.mode || "default";
-    if (currentMode === "none") return;
-    if (currentMode === "manual") return;
     if (!currentPlan?.autoRebuildEnabled) return;
-    const delayMinutes = currentMode === "delay30" ? 30 : 0;
-    if (isLessonAlimtalkScheduleExpired(selectedLesson, delayMinutes)) return;
-    const scheduledDate = getLessonAlimtalkScheduledDate(selectedLesson, delayMinutes);
-    const expectedJobs = buildLessonNotificationJobs(selectedLesson, activeLessonStudents, scheduledDate, currentMode);
-    if (expectedJobs.length === 0) return;
-    const needsNotificationRebuild = expectedJobs.some((expectedJob) => {
-      const existingAnyJob = notificationJobs.find((job) => job.notificationJobId === expectedJob.notificationJobId);
-      if (existingAnyJob?.status === "failed") return false;
-      const existingJob = notificationJobs.find((job) =>
-        job.notificationJobId === expectedJob.notificationJobId &&
-        job.status === "scheduled"
-      );
-      if (!existingJob) return true;
-      if (existingJob.provider === "academy-os-reserving" || existingJob.result?.reservationPending) return false;
-      if (existingJob.provider !== "solapi" || !getNotificationJobProviderReference(existingJob)) return true;
-      const existingPayload = existingJob.payload ?? {};
-      const expectedPayload = expectedJob.payload ?? {};
-      return (
-        String(existingJob.scheduledAt ?? "") !== String(expectedJob.scheduledAt ?? "") ||
-        String(existingPayload.attendanceStatus ?? "") !== String(expectedPayload.attendanceStatus ?? "") ||
-        String(existingPayload.attendanceReason ?? existingPayload.reason ?? "") !== String(expectedPayload.attendanceReason ?? "") ||
-        String(existingPayload.checkInTime ?? "") !== String(expectedPayload.checkInTime ?? "") ||
-        String(existingPayload.checkOutTime ?? "") !== String(expectedPayload.checkOutTime ?? "") ||
-        String(existingPayload.lateMinutes ?? "") !== String(expectedPayload.lateMinutes ?? "")
-      );
-    });
-    if (!needsNotificationRebuild) return;
-
-    if (!currentPlan) {
-      setLessonNotificationPlans((current) => {
-        if (current[selectedLesson.lessonId]) return current;
-        return {
-          ...current,
-          [selectedLesson.lessonId]: { mode: "default", updatedAt: new Date().toISOString() }
-        };
-      });
-    }
-    applyLessonNotificationPlan(selectedLesson.lessonId, currentMode);
-  }, [isAppStateReady, isLessonJournalOpen, lessonNotificationPlans, notificationJobs, notificationJobsStatus?.state, selectedLesson, session?.role, students]);
+    const nextPlans = {
+      ...lessonNotificationPlans,
+      [selectedLesson.lessonId]: {
+        ...currentPlan,
+        autoRebuildEnabled: false,
+        updatedAt: new Date().toISOString()
+      }
+    };
+    setLessonNotificationPlans(nextPlans);
+    persistLessonNotificationPlans(nextPlans);
+  }, [isAppStateReady, isLessonJournalOpen, lessonNotificationPlans, selectedLesson, session?.role]);
 
   const reportLesson = lessons.find((lesson) => lesson.lessonId === selectedReportLessonId) ?? lessons[0];
   const reportRecords = reportLesson
@@ -6944,17 +6979,22 @@ export function App() {
       ...lessonNotificationPlans,
       [lessonId]: {
         ...(currentPlan ?? {}),
+        autoRebuildEnabled: false,
         mode: nextMode,
         updatedAt: new Date().toISOString()
       }
     };
     setLessonNotificationPlans(nextPlans);
     persistLessonNotificationPlans(nextPlans);
-    applyLessonNotificationPlan(lessonId, nextMode);
+  }
+
+  async function handleApplyLessonNotificationPlan(lessonId) {
+    const mode = lessonNotificationPlans[lessonId]?.mode || "default";
+    return applyLessonNotificationPlan(lessonId, mode);
   }
 
   function getLessonNotificationJobId(lessonId, studentId, target) {
-    return `lesson_comment_${lessonId}_${studentId}_${target}`;
+    return createLessonNotificationJobId(lessonId, studentId, target);
   }
 
   function isRecordNotificationMuted(record, target) {
@@ -6972,14 +7012,19 @@ export function App() {
     const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
     const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
     const audience = target === "student" ? "student" : "parent";
-    const sourceField = audience === "student" ? "studentComment" : "teacherComment";
     const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId);
-    const commentBody = buildInitialCommentDraft({
+    const payloadSnapshot = buildLessonReservationPayloadSnapshot({
       audience,
-      existingComment: record?.[sourceField] ?? "",
+      lesson,
+      mode,
+      nextHomework,
+      previousHomework,
       record,
+      scheduledDate,
+      student,
       supplementSchedules
     });
+    const commentBody = payloadSnapshot.commentBodyOverride;
     const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
     const payload = {
       academyName: academyBrandName,
@@ -7201,7 +7246,7 @@ export function App() {
   }
 
   function isActiveNotificationJob(job = {}) {
-    return !["sent", "dry_run", "failed", "canceled"].includes(job.status);
+    return isActiveNotificationJobStatus(job);
   }
 
   function buildLessonNotificationJobs(lesson, lessonStudents, scheduledDate, mode) {
@@ -7213,13 +7258,13 @@ export function App() {
       .filter(Boolean);
   }
 
-  function applyLessonNotificationPlan(lessonId, mode) {
+  async function applyLessonNotificationPlan(lessonId, mode) {
     const lesson = lessons.find((item) => item.lessonId === lessonId);
-    if (!lesson) return;
+    if (!lesson) return { ok: false, error: "수업을 찾지 못했습니다." };
     const lessonStudents = getActiveLessonStudents(lesson, students);
     if (lessonStudents.length === 0) {
       cancelActiveLessonNotificationJobs(lesson, "수업 학생 없음");
-      return;
+      return { ok: true, canceledCount: 0, reservedCount: 0 };
     }
     if (mode === "none") {
       const canceledJobs = notificationJobs
@@ -7230,18 +7275,16 @@ export function App() {
         setNotificationJobs((current) =>
           current.map((job) => canceledJobs.find((canceledJob) => canceledJob.notificationJobId === job.notificationJobId) ?? job)
         );
-        canceledJobs.forEach((notificationJob) => {
-          persistCanceledNotificationJob(notificationJob, "알림톡 없음").catch((error) => console.error(error));
-        });
       }
       updateLessonNotificationRecordStatuses(lesson, "알림톡 없음");
-      return;
+      await Promise.all(canceledJobs.map((notificationJob) => persistCanceledNotificationJob(notificationJob, "알림톡 없음")));
+      return { ok: true, canceledCount: canceledJobs.length, reservedCount: 0 };
     }
 
     const delayMinutes = mode === "delay30" ? 30 : 0;
     if (isLessonAlimtalkScheduleExpired(lesson, delayMinutes)) {
       updateLessonNotificationRecordStatuses(lesson, "예약 시간 지남");
-      return;
+      return { ok: false, error: "예약 시간이 이미 지났습니다." };
     }
     const scheduledDate = getLessonAlimtalkScheduledDate(lesson, delayMinutes);
     const scheduledLabel = formatKoreaTimeLabel(scheduledDate);
@@ -7260,13 +7303,16 @@ export function App() {
         !(job.lessonId === lesson.lessonId && isActiveNotificationJob(job))
       )
     ]);
-    nextJobs.forEach((notificationJob) => {
-      reserveLessonNotificationJob(notificationJob, "수업일지 반 전체 예약").catch((error) => console.error(error));
-    });
-    canceledJobs.forEach((notificationJob) => {
-      persistCanceledNotificationJob(notificationJob, "알림 제외").catch((error) => console.error(error));
-    });
     updateLessonNotificationRecordStatuses(lesson, `예약 중 · ${scheduledLabel}`);
+    const reservedJobs = await Promise.all(nextJobs.map((notificationJob) =>
+      reserveLessonNotificationJob(notificationJob, "수업일지 반 전체 예약")
+    ));
+    await Promise.all(canceledJobs.map((notificationJob) => persistCanceledNotificationJob(notificationJob, "알림 제외")));
+    return {
+      ok: !reservedJobs.some((job) => job?.status === "failed"),
+      canceledCount: canceledJobs.length,
+      reservedCount: reservedJobs.filter((job) => job?.status === "scheduled").length
+    };
   }
 
   function scheduleLessonNotificationsAt(lesson, scheduledDate, mode = "manual") {
@@ -7339,18 +7385,10 @@ export function App() {
     const nextRecords = upsertLessonStudentRecord(recordsRef.current, nextRecord);
     recordsRef.current = nextRecords;
     setRecords(nextRecords);
-    handleSaveRecord(recordId, lesson, student, nextRecord);
-
-    const jobId = getLessonNotificationJobId(lesson.lessonId, student.studentId, target);
-    if (nextMuted) {
-      cancelNotificationJobs(new Set([jobId]), "개별 알림 제외");
-      return;
-    }
-
-    const planMode = lessonNotificationPlans[lesson.lessonId]?.mode || "default";
-    if (planMode !== "none") {
-      applyLessonNotificationPlan(lesson.lessonId, planMode);
-    }
+    handleSaveRecord(recordId, lesson, student, nextRecord, {
+      skipNotificationRefresh: true,
+      skipRelatedHomeworks: true
+    });
   }
 
   function syncPreviousHomeworkStatusFromAssignment(lesson, student, assignmentStatus) {
@@ -7718,6 +7756,7 @@ export function App() {
             onPassMakeupTask={handlePassSupplementTask}
             onSaveRecord={handleSaveRecord}
             onSaveLessonJournalDrafts={handleSaveLessonJournalDrafts}
+            onApplyLessonNotificationPlan={handleApplyLessonNotificationPlan}
             onSendComment={handleSendLessonComment}
             onSelectLesson={setSelectedLessonId}
             onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
@@ -12099,6 +12138,7 @@ function TeacherLessonHubV2({
   onPassMakeupTask,
   onPolishComment,
   onPolishPreparationNotice,
+  onApplyLessonNotificationPlan,
   onSaveRecord,
   onSaveLessonJournalDrafts,
   onScheduleLessonNotificationsAt,
@@ -12267,6 +12307,7 @@ function TeacherLessonHubV2({
             onPassMakeupTask={onPassMakeupTask}
             onPolishComment={onPolishComment}
             onPolishPreparationNotice={onPolishPreparationNotice}
+            onApplyLessonNotificationPlan={onApplyLessonNotificationPlan}
             onSaveRecord={onSaveRecord}
             onSaveLessonJournalDrafts={onSaveLessonJournalDrafts}
             onScheduleLessonNotificationsAt={onScheduleLessonNotificationsAt}
@@ -13015,6 +13056,7 @@ function LessonJournalDetail({
   onPassMakeupTask,
   onPolishComment,
   onPolishPreparationNotice,
+  onApplyLessonNotificationPlan,
   onSaveRecord,
   onSaveLessonJournalDrafts,
   onScheduleLessonNotificationsAt,
@@ -13048,6 +13090,7 @@ function LessonJournalDetail({
   const [reservationInspectMode, setReservationInspectMode] = useState("all");
   const [cancelingReservationJobId, setCancelingReservationJobId] = useState("");
   const [cancelingSolapiGroupId, setCancelingSolapiGroupId] = useState("");
+  const [reservationApplyState, setReservationApplyState] = useState("idle");
   const [editingMemoKey, setEditingMemoKey] = useState("");
   const [showPreSendCheck, setShowPreSendCheck] = useState(false);
   const [studentPreviewId, setStudentPreviewId] = useState("");
@@ -13132,11 +13175,121 @@ function LessonJournalDetail({
     setJournalRecordDrafts({});
     setJournalHomeworkDrafts({});
     setJournalManualSaveMessage("");
+    setReservationApplyState("idle");
   }, [lesson.lessonId]);
+
+  useEffect(() => {
+    setReservationApplyState("idle");
+  }, [lessonNotificationPlan?.mode, lessonNotificationPlan?.scheduledAt]);
 
   const journalRecordDraftCount = Object.keys(journalRecordDrafts).length;
   const journalHomeworkDraftCount = Object.keys(journalHomeworkDrafts).length;
   const hasJournalDraftChanges = journalRecordDraftCount > 0 || journalHomeworkDraftCount > 0;
+  const activeLessonReservationJobs = lessonNotificationJobs.filter(isActiveNotificationJobStatus);
+
+  function getExpectedSolapiReservationItems() {
+    if (notificationPlanMode === "none") return [];
+    const scheduledDate = notificationPlanMode === "manual"
+      ? lessonNotificationPlan?.scheduledAt
+      : getLessonAlimtalkScheduledDate(lesson, notificationPlanMode === "delay30" ? 30 : 0, { allowPastFallback: false });
+    if (!scheduledDate) return [];
+    return lessonStudents.flatMap((student) => {
+      const record = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
+      const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
+      const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
+      const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId);
+      return ["parent", "student"].flatMap((audience) => {
+        if (audience === "parent" && record.notificationMutedParent) return [];
+        if (audience === "student" && record.notificationMutedStudent) return [];
+        const payloadSnapshot = buildLessonReservationPayloadSnapshot({
+          audience,
+          lesson,
+          mode: notificationPlanMode,
+          nextHomework,
+          previousHomework,
+          record,
+          scheduledDate,
+          student,
+          supplementSchedules
+        });
+        return [{
+          fingerprint: getLessonReservationPayloadFingerprint(payloadSnapshot),
+          notificationJobId: createLessonNotificationJobId(lesson.lessonId, student.studentId, audience)
+        }];
+      });
+    });
+  }
+
+  function getSolapiReservationSyncStatus() {
+    if (reservationApplyState === "applying") {
+      return { detail: "Solapi 실제 예약/취소를 반영하는 중입니다.", state: "applying", label: "Solapi 반영 중" };
+    }
+    if (reservationApplyState === "failed") {
+      return { detail: "예약 확인에서 실패 항목을 확인한 뒤 다시 반영하세요.", state: "failed", label: "Solapi 반영 실패" };
+    }
+    if (hasJournalDraftChanges) {
+      return { detail: "먼저 수업일지 변경 저장을 눌러 최신 저장본을 확정하세요.", state: "blocked", label: "수업일지 저장 필요" };
+    }
+    if (notificationPlanMode === "none") {
+      return activeLessonReservationJobs.length
+        ? { detail: `활성 예약 ${activeLessonReservationJobs.length}건을 취소 반영해야 합니다.`, state: "needs", label: "Solapi 취소 반영 필요" }
+        : { detail: "현재 활성 Solapi 예약이 없습니다.", state: "synced", label: "Solapi 예약 없음" };
+    }
+    if (notificationPlanMode === "manual" && !lessonNotificationPlan?.scheduledAt) {
+      return { detail: "수동 예약 시각이 없습니다.", state: "failed", label: "예약 시각 없음" };
+    }
+    if (notificationPlanMode !== "manual") {
+      const delayMinutes = notificationPlanMode === "delay30" ? 30 : 0;
+      if (isLessonAlimtalkScheduleExpired(lesson, delayMinutes)) {
+        return { detail: "기본 예약 시각이 지나 수동 예약으로 다시 잡아야 합니다.", state: "failed", label: "예약 시간 지남" };
+      }
+    }
+    const expectedItems = getExpectedSolapiReservationItems();
+    if (!expectedItems.length) {
+      return activeLessonReservationJobs.length
+        ? { detail: `발송 대상은 없지만 활성 예약 ${activeLessonReservationJobs.length}건이 남아 있습니다.`, state: "needs", label: "Solapi 취소 반영 필요" }
+        : { detail: "현재 발송 대상이 없습니다.", state: "synced", label: "Solapi 예약 대상 없음" };
+    }
+    const expectedIds = new Set(expectedItems.map((item) => item.notificationJobId));
+    const activeById = new Map(activeLessonReservationJobs.map((job) => [job.notificationJobId, job]));
+    const missingCount = expectedItems.filter((item) => !activeById.has(item.notificationJobId)).length;
+    const extraCount = activeLessonReservationJobs.filter((job) => !expectedIds.has(job.notificationJobId)).length;
+    const staleCount = expectedItems.filter((item) => {
+      const job = activeById.get(item.notificationJobId);
+      if (!job) return false;
+      if (job.status !== "scheduled") return true;
+      if (job.provider !== "solapi" || !getNotificationJobProviderReference(job)) return true;
+      const payloadFingerprint = getLessonReservationPayloadFingerprint({
+        ...(job.payload ?? {}),
+        recipient: job.recipient,
+        scheduledDate: job.scheduledAt || job.payload?.scheduledDate || ""
+      });
+      return payloadFingerprint !== item.fingerprint;
+    }).length;
+    if (missingCount || extraCount || staleCount) {
+      return {
+        detail: [`누락 ${missingCount}건`, `남은 예약 ${extraCount}건`, `내용 변경 ${staleCount}건`].join(" · "),
+        state: "needs",
+        label: "Solapi 예약 업데이트 필요"
+      };
+    }
+    return { detail: `저장된 최종본 기준 Solapi 예약 ${expectedItems.length}건이 맞습니다.`, state: "synced", label: "Solapi 반영 완료" };
+  }
+
+  const solapiReservationSyncStatus = getSolapiReservationSyncStatus();
+  const solapiApplyButtonLabel =
+    reservationApplyState === "applying"
+      ? "Solapi 반영 중"
+      : notificationPlanMode === "none"
+        ? "Solapi 취소 반영"
+        : solapiReservationSyncStatus.state === "needs"
+          ? "Solapi 예약 업데이트"
+          : "Solapi 예약 반영";
+  const canApplySolapiReservation =
+    Boolean(onApplyLessonNotificationPlan) &&
+    !hasJournalDraftChanges &&
+    reservationApplyState !== "applying" &&
+    (solapiReservationSyncStatus.state === "needs" || reservationApplyState === "failed");
 
   async function refreshReservationAudit() {
     setReservationAudit((current) => ({ ...current, message: "예약 원천을 조회하는 중입니다.", state: "loading" }));
@@ -13444,6 +13597,20 @@ function LessonJournalDetail({
     setJournalHomeworkDrafts({});
     setJournalEditMode(false);
     setJournalManualSaveMessage("수업일지 · 저장 완료");
+    setReservationApplyState("idle");
+  }
+
+  async function applySolapiReservationPlan() {
+    if (!onApplyLessonNotificationPlan || hasJournalDraftChanges) return;
+    setReservationApplyState("applying");
+    const result = await onApplyLessonNotificationPlan(lesson.lessonId);
+    if (result?.ok === false) {
+      setReservationApplyState("failed");
+      setJournalManualSaveMessage(`Solapi 반영 실패 · ${result.error || "예약 확인 필요"}`);
+      return;
+    }
+    setReservationApplyState("saved");
+    setJournalManualSaveMessage(notificationPlanMode === "none" ? "Solapi 취소 반영 완료" : "Solapi 예약 반영 완료");
   }
 
   function toggleReservationInspectMode(mode) {
@@ -13610,6 +13777,21 @@ function LessonJournalDetail({
         >
           알림톡 없음
         </button>
+        <button
+          className={solapiReservationSyncStatus.state === "needs" || reservationApplyState === "failed" ? "sendButton" : "schedulePlanButton check"}
+          disabled={!canApplySolapiReservation}
+          onClick={applySolapiReservationPlan}
+          type="button"
+        >
+          {solapiApplyButtonLabel}
+        </button>
+        <span
+          aria-live="polite"
+          className={`solapiReservationSync ${solapiReservationSyncStatus.state}`}
+          title={solapiReservationSyncStatus.detail}
+        >
+          {solapiReservationSyncStatus.label}
+        </span>
       </section>
 
       {reservationModalOpen ? (

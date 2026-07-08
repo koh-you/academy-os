@@ -4331,6 +4331,41 @@ button {
   padding: 6px 10px;
 }
 
+.solapiReservationSync {
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 10px;
+}
+
+.solapiReservationSync.needs,
+.solapiReservationSync.blocked {
+  background: #fff7ed;
+  border-color: #fdba74;
+  color: #9a3412;
+}
+
+.solapiReservationSync.applying {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.solapiReservationSync.synced {
+  background: #ecfdf5;
+  border-color: #86efac;
+  color: #166534;
+}
+
+.solapiReservationSync.failed {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
 .checkoutMissingSummary {
   background: #fff7ed;
   border: 1px solid #fdba74;

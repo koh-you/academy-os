@@ -14,6 +14,17 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-09 P1. 수업일지 발송계획 선택과 Solapi 실제 반영 분리
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 의도 정정: 수업일지/알림톡 저장과 Solapi 실제 예약/취소는 분리하되, 예약을 반영하는 버튼은 반드시 Solapi 실제 예약/취소와 연결되어야 한다. OS에만 scheduled로 쌓아두고 나중에 Render가 발송하는 방식은 운영자가 Solapi 실제 예약과 OS 표시를 맞춰 보기 어려웠던 과거 문제에 가깝다.
+- 구현 결과: 수업일지 상단 `기본 예약`, `30분 지연`, `알림톡 없음` 버튼은 이제 발송계획 선택만 저장한다. 이 버튼만 눌러서는 Solapi 실제 예약/취소가 실행되지 않는다. 기존 `autoRebuildEnabled`가 남아 있으면 수업일지 진입 시 자동 실행하지 않고 false로 꺼서 과거 자동 재예약 흐름을 차단한다.
+- 구현 결과: 별도 `Solapi 예약 반영`/`Solapi 예약 업데이트`/`Solapi 취소 반영` 버튼을 추가했다. 이 버튼을 눌렀을 때만 현재 저장된 수업일지, 최종 알림톡 문구, 알림 제외 설정, 발송계획을 기준으로 `/api/notification-jobs/reserve` 또는 cancel 경로가 실행되어 Solapi 실제 예약/취소가 반영된다.
+- 구현 결과: 수업일지 저장 전 변경이 있으면 Solapi 반영 버튼은 잠기고 `수업일지 저장 필요`가 표시된다. 저장본과 현재 Solapi 예약 snapshot이 다르면 `Solapi 예약 업데이트 필요`, 알림톡 없음 계획인데 활성 예약이 남아 있으면 `Solapi 취소 반영 필요`, 최신 저장본과 예약이 일치하면 `Solapi 반영 완료`가 표시된다.
+- 구현 결과: 개별행 `알림 제외/제외 해제`는 이제 `lesson_student_records.notificationMutedParent/Student`만 저장하고 Solapi를 즉시 취소/재예약하지 않는다. 변경 후에는 상단 `Solapi 예약 업데이트` 또는 `Solapi 취소 반영` 버튼으로 실제 Solapi 상태를 반영한다.
+- 저장 원천: 발송계획 선택은 `app_state.lessonNotificationPlans`, 수업일지/최종문구/알림 제외는 Supabase `lesson_student_records`, 실제 예약/취소 이력은 `notification_jobs`와 Solapi 그룹/메시지다. 새 SQL 적용은 필요 없다.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 256개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-08 P1. 수업일지/수업알림톡 자동저장 분리와 명시 저장 전환
 
 - 상태: 완료 - 수업일지/수업알림톡 1차 구현/검증 완료, 붉은 위험 UI와 다른 자동저장 화면 정리는 후속
