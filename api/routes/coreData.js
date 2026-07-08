@@ -13,6 +13,15 @@ function compact(value) {
   return value === undefined || value === "" ? null : value;
 }
 
+function normalizeClockTime(value) {
+  const text = String(value ?? "").trim();
+  const match = text.match(/(\d{1,2}):(\d{2})/);
+  if (!match) return "";
+  const hour = Math.max(0, Math.min(23, Number(match[1]) || 0));
+  const minute = Math.max(0, Math.min(59, Number(match[2]) || 0));
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
+
 function errorMentionsAnyColumn(error, columns = []) {
   const message = String(error?.message ?? "");
   return columns.some((column) => message.includes(column));
@@ -133,8 +142,8 @@ function toClassTemplateRow(classTemplate) {
     class_template_id: classTemplate.classTemplateId,
     name: classTemplate.name,
     days: classTemplate.days ?? [],
-    start_time: classTemplate.startTime,
-    end_time: classTemplate.endTime,
+    start_time: compact(normalizeClockTime(classTemplate.startTime)),
+    end_time: compact(normalizeClockTime(classTemplate.endTime)),
     color: classTemplate.color ?? "#17213a",
     status: classTemplate.status ?? "active",
     updated_at: new Date().toISOString()
@@ -146,8 +155,8 @@ function fromClassTemplateRow(row) {
     classTemplateId: row.class_template_id,
     name: row.name,
     days: row.days ?? [],
-    startTime: row.start_time,
-    endTime: row.end_time,
+    startTime: normalizeClockTime(row.start_time),
+    endTime: normalizeClockTime(row.end_time),
     color: row.color,
     status: row.status
   };
@@ -159,8 +168,8 @@ function toLessonRow(lesson) {
     class_template_id: compact(lesson.classTemplateId),
     class_name: lesson.className,
     lesson_date: lesson.date,
-    start_time: lesson.startTime,
-    end_time: lesson.endTime,
+    start_time: compact(normalizeClockTime(lesson.startTime)),
+    end_time: compact(normalizeClockTime(lesson.endTime)),
     color: lesson.color ?? "#17213a",
     student_ids: lesson.studentIds ?? [],
     lesson_type: compact(lesson.lessonType),
@@ -179,8 +188,8 @@ function fromLessonRow(row) {
     classTemplateId: row.class_template_id ?? "",
     className: row.class_name,
     date: row.lesson_date,
-    startTime: row.start_time,
-    endTime: row.end_time,
+    startTime: normalizeClockTime(row.start_time),
+    endTime: normalizeClockTime(row.end_time),
     color: row.color,
     studentIds: row.student_ids ?? [],
     lessonType: row.lesson_type ?? "",

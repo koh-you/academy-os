@@ -21257,13 +21257,15 @@ function areGeneratedLessonPersistedFieldsEqual(candidate = {}, existing = {}) {
     "sourceSchoolEventId",
     "sourceLabel",
     "date",
-    "startTime",
-    "endTime",
     "color",
     "status"
   ];
   const sameFields = fields.every((field) => String(candidate[field] ?? "") === String(existing[field] ?? ""));
   if (!sameFields) return false;
+  const sameTimes = ["startTime", "endTime"].every((field) =>
+    normalizeTimeInput(candidate[field] ?? "") === normalizeTimeInput(existing[field] ?? "")
+  );
+  if (!sameTimes) return false;
   return JSON.stringify(normalizeStudentIdList(candidate.studentIds ?? [])) === JSON.stringify(normalizeStudentIdList(existing.studentIds ?? []));
 }
 
