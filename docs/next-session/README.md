@@ -14,7 +14,9 @@ E:\academy-os 작업을 이어가겠습니다.
 4. git status --short
 5. git log -1 --oneline
 
-현재 최신 커밋은 `4d8e10f Add type-based lesson research plans`입니다.
+먼저 `git log -1 --oneline`으로 현재 최신 커밋을 확인하세요.
+기능 구현 기준 최신 커밋은 `4d8e10f Add type-based lesson research plans`입니다.
+이후 `docs/next-session/README.md`만 갱신한 인수인계 커밋이 최신 커밋으로 있을 수 있습니다.
 
 오늘까지의 핵심 작업은 시험지관리/수업연구를 같은 유형 원천으로 연결한 것입니다.
 
@@ -65,7 +67,7 @@ E:\academy-os 작업을 이어가겠습니다.
 우선 코딩보다 운영 화면 검수를 먼저 해주세요.
 
 필수 검수 A. 시험지관리
-1. 운영 배포가 최신 커밋 `4d8e10f` 이상인지 확인합니다.
+1. 운영 배포가 기능 기준 커밋 `4d8e10f` 이상인지 확인합니다.
 2. `시험지관리` 탭 순서가 `진도별 트랙`, `시험지 보관함`, `유형트리`인지 확인합니다.
 3. `유형트리`에서 공통수학1 유형이 몇 개 샘플이 아니라 179개 규모로 보이는지 확인합니다.
 4. 단원 접기/펼치기가 되는지 확인합니다.
@@ -107,7 +109,8 @@ E:\academy-os 작업을 이어가겠습니다.
 
 ## 최신 구현/검증 상태
 
-- 최신 커밋: `4d8e10f Add type-based lesson research plans`
+- 기능 기준 최신 커밋: `4d8e10f Add type-based lesson research plans`
+- 현재 실제 최신 커밋은 새 세션에서 `git log -1 --oneline`으로 확인합니다.
 - 직전 주요 커밋:
   - `61d0ac9 Refine test paper type tree navigation`
   - `0ffb6de Expand test paper type tree and progress matrix`
