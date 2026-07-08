@@ -84,6 +84,16 @@
 - 저장 원천: 출결/수업일지 원본은 Supabase `lesson_student_records`, 예약 원본은 `notification_jobs`, 예약 계획 원본은 `app_state.lessonNotificationPlans`다. 새 SQL 적용은 필요 없다.
 - 검증: 운영 Supabase 직접 조회로 두 수업의 22:30 scheduled job 0건, 23:00 scheduled job 존재를 확인했다. `node --check api/server.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 252개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
 
+### 2026-07-08 P1. 월수금 7-10반 저장 상태 점멸 중단
+
+- 상태: 완료 - 운영 즉시 조치/구현/검증 완료
+- 사용자 제보: `월수금 7-10반` 수업일지에서 저장 중/저장 완료가 무한히 점멸했다.
+- 원인: 자동 예약 보정 effect가 현재 생성되어야 하는 job 목록이 아니라 `activeLessonStudents x parent/student` 전체 개수를 기준으로 scheduled job 수를 기대했다. `월수금 7-10반`은 scheduled job이 16건(8명분)인데 수업 명단 기준 기대치와 달라, effect가 계속 `applyLessonNotificationPlan`을 호출하고 반 전체 `lesson_student_records` 알림 상태를 다시 patch하면서 저장 상태가 반복 점멸했다.
+- 운영 즉시 조치: `app_state.lessonNotificationPlans`에서 `월수금 7-10반` 계획을 `manual`, `scheduledAt: 2026-07-08T14:00:00+00:00`으로 바꿔 현재 열린 운영 화면의 자동 반 전체 재생성을 중단했다. 23:00 scheduled job 16건은 유지했다.
+- 구현 결과: 자동 예약 보정 effect는 `manual` 계획에서는 실행하지 않는다. 기본/30분 지연 자동 계획에서는 실제 `buildLessonNotificationJobs(...)`가 생성할 expected job만 비교하고, 해당 job의 scheduledAt/출결 payload가 다를 때만 반 전체 예약 재생성을 수행한다. 알림 제외/누락 등으로 의도적으로 job 수가 줄어든 상황을 무한 재생성 조건으로 보지 않는다.
+- 저장 원천: 운영 계획 원본은 `app_state.lessonNotificationPlans`, 예약 원본은 `notification_jobs`, 수업일지 저장 상태 원본은 `lesson_student_records`다. 새 SQL 적용은 필요 없다.
+- 검증: 운영 Supabase에서 `월수금 7-10반` 계획이 `manual / 23:00`, scheduled job 16건임을 확인했다. `npm run test:production` 252개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-08 P1. 수업연구 유형별 강의 교안 리뉴얼
 
 - 상태: 완료 - 구현/검증 완료

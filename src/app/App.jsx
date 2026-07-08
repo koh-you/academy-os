@@ -5893,39 +5893,30 @@ export function App() {
     const currentPlan = lessonNotificationPlans[selectedLesson.lessonId];
     const currentMode = currentPlan?.mode || "default";
     if (currentMode === "none") return;
+    if (currentMode === "manual") return;
     const delayMinutes = currentMode === "delay30" ? 30 : 0;
     if (isLessonAlimtalkScheduleExpired(selectedLesson, delayMinutes)) return;
-
-    const expectedJobIds = new Set(
-      activeLessonStudents.flatMap((student) => [
-        getLessonNotificationJobId(selectedLesson.lessonId, student.studentId, "parent"),
-        getLessonNotificationJobId(selectedLesson.lessonId, student.studentId, "student")
-      ])
-    );
-    const scheduledJobCount = notificationJobs.filter((job) =>
-      expectedJobIds.has(job.notificationJobId) && job.status === "scheduled"
-    ).length;
-    const hasStaleAttendanceJob = activeLessonStudents.some((student) => {
-      const record = findLessonStudentRecord(recordsRef.current, selectedLesson, student) ?? createEmptyRecord(selectedLesson, student);
-      const jobs = ["parent", "student"]
-        .map((target) => notificationJobs.find((job) =>
-          job.notificationJobId === getLessonNotificationJobId(selectedLesson.lessonId, student.studentId, target) &&
-          job.status === "scheduled"
-        ))
-        .filter(Boolean);
-      if (jobs.length === 0) return true;
-      return jobs.some((job) => {
-        const payload = job.payload ?? {};
-        return (
-          String(payload.attendanceStatus ?? "") !== String(record.attendanceStatus ?? "pending") ||
-          String(payload.attendanceReason ?? payload.reason ?? "") !== String(record.attendanceReason ?? "") ||
-          String(payload.checkInTime ?? "") !== String(record.checkInTime ?? "") ||
-          String(payload.checkOutTime ?? "") !== String(record.checkOutTime ?? "") ||
-          String(payload.lateMinutes ?? "") !== String(record.lateMinutes ?? "")
-        );
-      });
+    const scheduledDate = getLessonAlimtalkScheduledDate(selectedLesson, delayMinutes);
+    const expectedJobs = buildLessonNotificationJobs(selectedLesson, activeLessonStudents, scheduledDate, currentMode);
+    if (expectedJobs.length === 0) return;
+    const needsNotificationRebuild = expectedJobs.some((expectedJob) => {
+      const existingJob = notificationJobs.find((job) =>
+        job.notificationJobId === expectedJob.notificationJobId &&
+        job.status === "scheduled"
+      );
+      if (!existingJob) return true;
+      const existingPayload = existingJob.payload ?? {};
+      const expectedPayload = expectedJob.payload ?? {};
+      return (
+        String(existingJob.scheduledAt ?? "") !== String(expectedJob.scheduledAt ?? "") ||
+        String(existingPayload.attendanceStatus ?? "") !== String(expectedPayload.attendanceStatus ?? "") ||
+        String(existingPayload.attendanceReason ?? existingPayload.reason ?? "") !== String(expectedPayload.attendanceReason ?? "") ||
+        String(existingPayload.checkInTime ?? "") !== String(expectedPayload.checkInTime ?? "") ||
+        String(existingPayload.checkOutTime ?? "") !== String(expectedPayload.checkOutTime ?? "") ||
+        String(existingPayload.lateMinutes ?? "") !== String(expectedPayload.lateMinutes ?? "")
+      );
     });
-    if (expectedJobIds.size > 0 && scheduledJobCount >= expectedJobIds.size && !hasStaleAttendanceJob) return;
+    if (!needsNotificationRebuild) return;
 
     if (!currentPlan) {
       setLessonNotificationPlans((current) => {
