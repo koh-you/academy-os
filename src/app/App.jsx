@@ -409,6 +409,8 @@ function getStudentSupplementSchedules(makeupTasks = [], studentId = "") {
 
 function buildInitialCommentDraft({ audience, existingComment, record, supplementSchedules }) {
   const commentText = compactDuplicateMessageBlocks(existingComment);
+  if (commentText) return commentText;
+
   const prepMemo = getPreparationNoticeForTarget(record, audience);
   const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
   const supplementBlock = supplementText ? `보충 일정:\n${supplementText}` : "";

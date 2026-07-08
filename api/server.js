@@ -1248,6 +1248,8 @@ function getPreparationNoticeForNotification(record = {}, target = "parent") {
 
 function buildInitialNotificationComment({ audience, existingComment, record, supplementSchedules }) {
   const commentText = compactDuplicateNotificationBlocks(existingComment);
+  if (commentText) return commentText;
+
   const prepMemo = getPreparationNoticeForNotification(record, audience);
   const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
   const supplementBlock = supplementText ? `보충 일정:\n${supplementText}` : "";

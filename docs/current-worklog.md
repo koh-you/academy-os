@@ -41,6 +41,15 @@
 - 저장 원천: 화면 기본 접힘 상태만 바꾼 UI 변경이다. Supabase 테이블, Storage, `app_state`, 시험분석 API 저장 구조 변경은 없다. 시험분석 원본은 기존처럼 `exam_analysis_runs`, `exam_analysis_sources`, `exam_analysis_questions`, Storage의 `exam-analysis-pipeline-sources`를 사용한다.
 - 검증: `npm run test:production` 250개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
 
+### 2026-07-08 P1. 최종 알림톡 문구 새 원본화
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 제보: 학생/학부모 최종 알림톡 문구를 수정하면 그 문구가 최종본이 되어야 하는데, 새로고침 후 저장된 수정본에 기존 초안/수업메모가 다시 함께 붙는다.
+- 원인: `buildInitialCommentDraft`와 예약 발송 직전 서버의 `buildInitialNotificationComment`가 저장된 `teacherComment`/`studentComment`가 이미 있어도 수업메모/보충일정 seed를 다시 합성했다. 그래서 선생님 수정본이 새 원본이 된 뒤에도 자동 초안 재생성처럼 보이는 중복이 생길 수 있었다.
+- 구현 결과: 저장된 최종 문구가 있으면 `compactDuplicate...`로 정리한 문구를 그대로 반환하게 했다. 수업메모/보충일정은 알림톡 문구가 비어 있을 때 최초 초안 seed로만 들어간다. 같은 규칙을 프론트 모달, 자동 예약 job 생성, 서버 발송 직전 refresh에 모두 적용했다.
+- 저장 원천: 최종 문구 원본은 기존 Supabase `lesson_student_records.teacher_comment`와 `lesson_student_records.student_comment`다. 새 SQL 적용은 필요 없다. 예약 job은 기존 `notification_jobs.payload.commentBodyOverride/message`를 최신 저장본 기준으로 갱신한다.
+- 검증: `node --check api/server.js`, `npm run test:production` 250개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-08 P1. 수업연구 유형별 강의 교안 리뉴얼
 
 - 상태: 완료 - 구현/검증 완료
