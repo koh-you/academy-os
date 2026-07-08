@@ -664,6 +664,44 @@ button {
   overflow: hidden;
 }
 
+.examAnalysisStagePanel .sectionHeader {
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.examAnalysisStagePanel .headerActions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.examAnalysisStageToggleButton {
+  min-height: 34px;
+  padding: 0 12px;
+}
+
+.examAnalysisStageCollapsedHint {
+  background: #f8fafc;
+  border: 1px dashed #cbd8ee;
+  border-radius: 8px;
+  display: grid;
+  gap: 5px;
+  margin-top: 12px;
+  padding: 12px;
+}
+
+.examAnalysisStageCollapsedHint strong {
+  color: #17213d;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.examAnalysisStageCollapsedHint span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
 .examAnalysisColumnBoard {
   display: grid;
   gap: 12px;

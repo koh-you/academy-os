@@ -33,6 +33,14 @@
 - 저장 원천: UI 기본 펼침 상태만 바꾼 것이므로 Supabase 저장 경로 변경은 없다. 시험지/진행 상태 원본은 기존처럼 `app_state.problemBooks`, 유형 원천은 `api/data/ssenTypeIndex.json`이다.
 - 검증: `npm run test:production` 250개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
 
+### 2026-07-08 P1. 시험분석 완료 단계 기본 접힘
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청: 시험분석도 AI 검수까지 완료된 작업 중 확정되었거나 초록색 완료 상태가 된 작업은 접힌 상태를 기본으로 한다.
+- 구현 결과: 시험분석의 `문항 수 확인`, `문항 경계 탐지`, `AI 행 채움`, `AI 결과 검수` 패널에 접기/펼치기 버튼을 추가했다. 문항 수가 확정됐거나, 경계 탐지/AI 행 채움이 `needs_review`가 아닌 초록 완료 상태이거나, AI 결과 검수가 `completed`이면 해당 패널은 기본으로 접힌다. 펼치면 기존 입력/재실행 버튼과 표를 그대로 확인할 수 있다.
+- 저장 원천: 화면 기본 접힘 상태만 바꾼 UI 변경이다. Supabase 테이블, Storage, `app_state`, 시험분석 API 저장 구조 변경은 없다. 시험분석 원본은 기존처럼 `exam_analysis_runs`, `exam_analysis_sources`, `exam_analysis_questions`, Storage의 `exam-analysis-pipeline-sources`를 사용한다.
+- 검증: `npm run test:production` 250개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-08 P1. 수업연구 유형별 강의 교안 리뉴얼
 
 - 상태: 완료 - 구현/검증 완료

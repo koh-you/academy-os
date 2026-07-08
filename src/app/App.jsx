@@ -9476,6 +9476,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const [reviewDrafts, setReviewDrafts] = useState({});
   const [isSavingReviews, setIsSavingReviews] = useState(false);
   const [editingSsenQuestionNumber, setEditingSsenQuestionNumber] = useState("");
+  const [examAnalysisStageCollapseOverrides, setExamAnalysisStageCollapseOverrides] = useState({});
   const [isPdfDropActive, setIsPdfDropActive] = useState(false);
   const [ssenCatalog, setSsenCatalog] = useState(() => createEmptyExamAnalysisSsenCatalog());
   const [ssenCatalogStatus, setSsenCatalogStatus] = useState({ state: "idle", message: "" });
@@ -10645,6 +10646,51 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       : ssenCatalog.status === "subject_all"
         ? `${ssenCatalog.subject} · 과목 전체 ${ssenCatalog.subjectTypeCount}개`
         : "과목 확인 필요";
+  const examAnalysisStageCollapseKey = activeRun?.analysisRunId || selectedRunId || "draft";
+  const questionCountStageComplete = confirmedQuestionCount > 0;
+  const boundaryStageComplete = Boolean(boundaryDetection && boundaryDetection.status !== "needs_review");
+  const rowFillStageComplete = Boolean(rowFill && rowFill.status !== "needs_review");
+  const reviewStageComplete = teacherReview?.status === "completed";
+  const questionCountStageCollapsed = isExamAnalysisStageCollapsed("question-count", questionCountStageComplete);
+  const boundaryStageCollapsed = isExamAnalysisStageCollapsed("boundary", boundaryStageComplete);
+  const rowFillStageCollapsed = isExamAnalysisStageCollapsed("row-fill", rowFillStageComplete);
+  const reviewStageCollapsed = isExamAnalysisStageCollapsed("review", reviewStageComplete);
+
+  function getExamAnalysisStageCollapseOverrideKey(stageKey) {
+    return `${examAnalysisStageCollapseKey}:${stageKey}`;
+  }
+
+  function isExamAnalysisStageCollapsed(stageKey, defaultCollapsed) {
+    const overrideKey = getExamAnalysisStageCollapseOverrideKey(stageKey);
+    const overrideValue = examAnalysisStageCollapseOverrides[overrideKey];
+    return typeof overrideValue === "boolean" ? overrideValue : Boolean(defaultCollapsed);
+  }
+
+  function toggleExamAnalysisStage(stageKey, defaultCollapsed) {
+    const overrideKey = getExamAnalysisStageCollapseOverrideKey(stageKey);
+    setExamAnalysisStageCollapseOverrides((current) => {
+      const currentCollapsed = typeof current[overrideKey] === "boolean"
+        ? current[overrideKey]
+        : Boolean(defaultCollapsed);
+      return {
+        ...current,
+        [overrideKey]: !currentCollapsed
+      };
+    });
+  }
+
+  function renderExamAnalysisStageCollapsedHint(title, isComplete) {
+    return (
+      <div className="examAnalysisStageCollapsedHint">
+        <strong>{isComplete ? `${title} 완료` : `${title} 접힘`}</strong>
+        <span>
+          {isComplete
+            ? "완료된 작업입니다. 펼쳐서 세부 내용과 재실행 버튼을 확인할 수 있습니다."
+            : "펼쳐서 입력과 실행 영역을 확인할 수 있습니다."}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <section className="examAnalysisPipelinePage">
@@ -10958,7 +11004,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
             </div>
           </div>
 
-          <div className="panel examAnalysisQuestionCountPanel">
+          <div className={questionCountStageCollapsed ? "panel examAnalysisQuestionCountPanel examAnalysisStagePanel collapsed" : "panel examAnalysisQuestionCountPanel examAnalysisStagePanel"}>
             <div className="sectionHeader slim">
               <div>
                 <strong>문항 수 확인</strong>
@@ -10967,65 +11013,78 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                     ? `${confirmedQuestionCount}문항 확정`
                     : questionCountCandidate.count
                       ? `${questionCountCandidate.count}문항 후보`
-                      : "대기"}
+                    : "대기"}
                 </span>
               </div>
-              {confirmStatus.message ? <span className={`saveStateBadge ${confirmStatus.state}`}>{confirmStatus.message}</span> : null}
-            </div>
-            <div className="examAnalysisQuestionCountGrid">
-              <div className="examAnalysisQuestionCountCard">
-                <strong>{questionCountCandidate.count ? `${questionCountCandidate.count}문항 후보` : "문항 후보 없음"}</strong>
-                <span>{questionCountCandidate.sourceLabel || "PDF 검증 대기"}</span>
-                <small>{questionCountCandidate.detailLabel}</small>
-                {questionCountCandidate.detectedQuestionEvidence?.length ? (
-                  <small>{questionCountCandidate.detectedQuestionEvidence.slice(0, 3).join(" · ")}</small>
-                ) : null}
-                {questionCountCandidate.missingQuestionNumbers?.length ? (
-                  <small>누락 후보 {questionCountCandidate.missingQuestionNumbers.join(", ")}</small>
-                ) : null}
-              </div>
-              <div className="examAnalysisQuestionCountConfirm">
-                <label>
-                  <span>선생님 확정 문항 수</span>
-                  <input
-                    inputMode="numeric"
-                    max="200"
-                    min="1"
-                    onChange={(event) => setQuestionCountDraft(event.target.value)}
-                    placeholder="예: 24"
-                    type="number"
-                    value={questionCountDraft}
-                  />
-                </label>
+              <div className="headerActions">
+                {confirmStatus.message ? <span className={`saveStateBadge ${confirmStatus.state}`}>{confirmStatus.message}</span> : null}
                 <button
-                  className="primaryButton"
-                  disabled={!activeRun?.analysisRunId || isConfirmingQuestionCount}
-                  onClick={confirmQuestionCount}
+                  className="secondaryButton compact examAnalysisStageToggleButton"
+                  onClick={() => toggleExamAnalysisStage("question-count", questionCountStageComplete)}
                   type="button"
                 >
-                  {questionCountButtonLabel}
+                  {questionCountStageCollapsed ? "펼치기" : "접기"}
                 </button>
               </div>
             </div>
-            <div className="questionRowsPreview">
-              <div>
-                <strong>고정 문항 행</strong>
-                <span>
-                  {questionRowNumbers.length
-                    ? `${questionRowNumbers[0]}~${questionRowNumbers.at(-1)}번 · ${questionRowNumbers.length}행`
-                    : "문항 수를 확정하면 1~N 빈 행이 생성됩니다."}
-                </span>
-              </div>
-              {questionRowNumbers.length ? (
-                <div className="questionRowsPreviewChips">
-                  {shownQuestionRowNumbers.map((number) => <span key={number}>{number}</span>)}
-                  {questionRowNumbers.length > shownQuestionRowNumbers.length ? <span>+{questionRowNumbers.length - shownQuestionRowNumbers.length}</span> : null}
+            {questionCountStageCollapsed ? renderExamAnalysisStageCollapsedHint("문항 수 확인", questionCountStageComplete) : (
+              <>
+                <div className="examAnalysisQuestionCountGrid">
+                  <div className="examAnalysisQuestionCountCard">
+                    <strong>{questionCountCandidate.count ? `${questionCountCandidate.count}문항 후보` : "문항 후보 없음"}</strong>
+                    <span>{questionCountCandidate.sourceLabel || "PDF 검증 대기"}</span>
+                    <small>{questionCountCandidate.detailLabel}</small>
+                    {questionCountCandidate.detectedQuestionEvidence?.length ? (
+                      <small>{questionCountCandidate.detectedQuestionEvidence.slice(0, 3).join(" · ")}</small>
+                    ) : null}
+                    {questionCountCandidate.missingQuestionNumbers?.length ? (
+                      <small>누락 후보 {questionCountCandidate.missingQuestionNumbers.join(", ")}</small>
+                    ) : null}
+                  </div>
+                  <div className="examAnalysisQuestionCountConfirm">
+                    <label>
+                      <span>선생님 확정 문항 수</span>
+                      <input
+                        inputMode="numeric"
+                        max="200"
+                        min="1"
+                        onChange={(event) => setQuestionCountDraft(event.target.value)}
+                        placeholder="예: 24"
+                        type="number"
+                        value={questionCountDraft}
+                      />
+                    </label>
+                    <button
+                      className="primaryButton"
+                      disabled={!activeRun?.analysisRunId || isConfirmingQuestionCount}
+                      onClick={confirmQuestionCount}
+                      type="button"
+                    >
+                      {questionCountButtonLabel}
+                    </button>
+                  </div>
                 </div>
-              ) : null}
-            </div>
+                <div className="questionRowsPreview">
+                  <div>
+                    <strong>고정 문항 행</strong>
+                    <span>
+                      {questionRowNumbers.length
+                        ? `${questionRowNumbers[0]}~${questionRowNumbers.at(-1)}번 · ${questionRowNumbers.length}행`
+                        : "문항 수를 확정하면 1~N 빈 행이 생성됩니다."}
+                    </span>
+                  </div>
+                  {questionRowNumbers.length ? (
+                    <div className="questionRowsPreviewChips">
+                      {shownQuestionRowNumbers.map((number) => <span key={number}>{number}</span>)}
+                      {questionRowNumbers.length > shownQuestionRowNumbers.length ? <span>+{questionRowNumbers.length - shownQuestionRowNumbers.length}</span> : null}
+                    </div>
+                  ) : null}
+                </div>
+              </>
+            )}
           </div>
 
-          <div className="panel examAnalysisBoundaryPanel">
+          <div className={boundaryStageCollapsed ? "panel examAnalysisBoundaryPanel examAnalysisStagePanel collapsed" : "panel examAnalysisBoundaryPanel examAnalysisStagePanel"}>
             <div className="sectionHeader slim">
               <div>
                 <strong>문항 경계 탐지</strong>
@@ -11045,37 +11104,48 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                 >
                   {isDetectingBoundaries ? "탐지 중" : "문항 경계 탐지"}
                 </button>
+                <button
+                  className="secondaryButton compact examAnalysisStageToggleButton"
+                  onClick={() => toggleExamAnalysisStage("boundary", boundaryStageComplete)}
+                  type="button"
+                >
+                  {boundaryStageCollapsed ? "펼치기" : "접기"}
+                </button>
               </div>
             </div>
-            {boundaryDetection ? (
-              <div className={boundaryDetection.status === "needs_review" ? "examAnalysisBoundarySummary needsReview" : "examAnalysisBoundarySummary ok"}>
-                <strong>{boundaryDetection.status === "needs_review" ? "검토 필요" : "탐지 완료"}</strong>
-                <span>
-                  {boundaryDetection.detectedCount || 0}/{boundaryDetection.totalQuestionCount || questionRows.length || 0}개
-                  {boundaryDetection.provider ? ` · ${boundaryDetection.provider}` : ""}
-                  {boundaryDetection.detectedAt ? ` · ${formatExamAnalysisEventTime(boundaryDetection.detectedAt)}` : ""}
-                </span>
-                {boundaryDetection.missingQuestionNumbers?.length ? <small>누락 {boundaryDetection.missingQuestionNumbers.join(", ")}</small> : null}
-                {boundaryDetection.needsReviewNumbers?.length ? <small>재확인 {boundaryDetection.needsReviewNumbers.join(", ")}</small> : null}
-                {boundaryDetection.overlapWarnings?.length ? <small>{boundaryDetection.overlapWarnings.join(" · ")}</small> : null}
-              </div>
-            ) : null}
-            {boundaryRows.length ? (
-              <div className="examAnalysisBoundaryGrid">
-                {boundaryRows.map(({ question, boundary }) => (
-                  <div className={boundary?.needsReview || !boundary?.pageStart ? "examAnalysisBoundaryCard needsReview" : "examAnalysisBoundaryCard"} key={question.questionRowId || question.questionNumber}>
-                    <strong>{question.questionNumber}</strong>
-                    <span>{formatExamAnalysisBoundaryPage(boundary)}</span>
-                    <small>{boundary?.positionHint || "위치 대기"}</small>
+            {boundaryStageCollapsed ? renderExamAnalysisStageCollapsedHint("문항 경계 탐지", boundaryStageComplete) : (
+              <>
+                {boundaryDetection ? (
+                  <div className={boundaryDetection.status === "needs_review" ? "examAnalysisBoundarySummary needsReview" : "examAnalysisBoundarySummary ok"}>
+                    <strong>{boundaryDetection.status === "needs_review" ? "검토 필요" : "탐지 완료"}</strong>
+                    <span>
+                      {boundaryDetection.detectedCount || 0}/{boundaryDetection.totalQuestionCount || questionRows.length || 0}개
+                      {boundaryDetection.provider ? ` · ${boundaryDetection.provider}` : ""}
+                      {boundaryDetection.detectedAt ? ` · ${formatExamAnalysisEventTime(boundaryDetection.detectedAt)}` : ""}
+                    </span>
+                    {boundaryDetection.missingQuestionNumbers?.length ? <small>누락 {boundaryDetection.missingQuestionNumbers.join(", ")}</small> : null}
+                    {boundaryDetection.needsReviewNumbers?.length ? <small>재확인 {boundaryDetection.needsReviewNumbers.join(", ")}</small> : null}
+                    {boundaryDetection.overlapWarnings?.length ? <small>{boundaryDetection.overlapWarnings.join(" · ")}</small> : null}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="emptyState compact">고정 문항 행 없음</div>
+                ) : null}
+                {boundaryRows.length ? (
+                  <div className="examAnalysisBoundaryGrid">
+                    {boundaryRows.map(({ question, boundary }) => (
+                      <div className={boundary?.needsReview || !boundary?.pageStart ? "examAnalysisBoundaryCard needsReview" : "examAnalysisBoundaryCard"} key={question.questionRowId || question.questionNumber}>
+                        <strong>{question.questionNumber}</strong>
+                        <span>{formatExamAnalysisBoundaryPage(boundary)}</span>
+                        <small>{boundary?.positionHint || "위치 대기"}</small>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="emptyState compact">고정 문항 행 없음</div>
+                )}
+              </>
             )}
           </div>
 
-          <div className="panel examAnalysisRowFillPanel">
+          <div className={rowFillStageCollapsed ? "panel examAnalysisRowFillPanel examAnalysisStagePanel collapsed" : "panel examAnalysisRowFillPanel examAnalysisStagePanel"}>
             <div className="sectionHeader slim">
               <div>
                 <strong>AI 행 채움</strong>
@@ -11091,43 +11161,54 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                 >
                   {isFillingRows ? "채움 중" : "AI 행 채움"}
                 </button>
+                <button
+                  className="secondaryButton compact examAnalysisStageToggleButton"
+                  onClick={() => toggleExamAnalysisStage("row-fill", rowFillStageComplete)}
+                  type="button"
+                >
+                  {rowFillStageCollapsed ? "펼치기" : "접기"}
+                </button>
               </div>
             </div>
-            {rowFill ? (
-              <div className={rowFill.status === "needs_review" ? "examAnalysisRowFillSummary needsReview" : "examAnalysisRowFillSummary ok"}>
-                <strong>{rowFill.status === "needs_review" ? "검토 필요" : "채움 완료"}</strong>
-                <span>
-                  {rowFill.filledCount || 0}/{rowFill.totalQuestionCount || questionRows.length || 0}개
-                  {rowFill.provider ? ` · ${rowFill.provider}` : ""}
-                  {rowFill.filledAt ? ` · ${formatExamAnalysisEventTime(rowFill.filledAt)}` : ""}
-                </span>
-                {rowFill.needsReviewNumbers?.length ? <small>재확인 {rowFill.needsReviewNumbers.join(", ")}</small> : null}
-                {rowFill.missingQuestionNumbers?.length ? <small>누락 {rowFill.missingQuestionNumbers.join(", ")}</small> : null}
-              </div>
-            ) : null}
-            {questionRows.length ? (
-              <div className="examAnalysisRowFillGrid">
-                {questionRows.map((question) => {
-                  const needsReview = isExamAnalysisQuestionAiReviewTarget(question);
-                  return (
-                    <div className={needsReview ? "examAnalysisRowFillCard needsReview" : "examAnalysisRowFillCard"} key={question.questionRowId || question.questionNumber}>
-                      <strong>{question.questionNumber}</strong>
-                      <span>{question.unitName || "단원 대기"}</span>
-                      <small>{question.mainType || "유형 대기"}</small>
-                      {question.difficulty ? <em>{question.difficulty}</em> : null}
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="emptyState compact">고정 문항 행 없음</div>
+            {rowFillStageCollapsed ? renderExamAnalysisStageCollapsedHint("AI 행 채움", rowFillStageComplete) : (
+              <>
+                {rowFill ? (
+                  <div className={rowFill.status === "needs_review" ? "examAnalysisRowFillSummary needsReview" : "examAnalysisRowFillSummary ok"}>
+                    <strong>{rowFill.status === "needs_review" ? "검토 필요" : "채움 완료"}</strong>
+                    <span>
+                      {rowFill.filledCount || 0}/{rowFill.totalQuestionCount || questionRows.length || 0}개
+                      {rowFill.provider ? ` · ${rowFill.provider}` : ""}
+                      {rowFill.filledAt ? ` · ${formatExamAnalysisEventTime(rowFill.filledAt)}` : ""}
+                    </span>
+                    {rowFill.needsReviewNumbers?.length ? <small>재확인 {rowFill.needsReviewNumbers.join(", ")}</small> : null}
+                    {rowFill.missingQuestionNumbers?.length ? <small>누락 {rowFill.missingQuestionNumbers.join(", ")}</small> : null}
+                  </div>
+                ) : null}
+                {questionRows.length ? (
+                  <div className="examAnalysisRowFillGrid">
+                    {questionRows.map((question) => {
+                      const needsReview = isExamAnalysisQuestionAiReviewTarget(question);
+                      return (
+                        <div className={needsReview ? "examAnalysisRowFillCard needsReview" : "examAnalysisRowFillCard"} key={question.questionRowId || question.questionNumber}>
+                          <strong>{question.questionNumber}</strong>
+                          <span>{question.unitName || "단원 대기"}</span>
+                          <small>{question.mainType || "유형 대기"}</small>
+                          {question.difficulty ? <em>{question.difficulty}</em> : null}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="emptyState compact">고정 문항 행 없음</div>
+                )}
+                {aiNeedsReviewRows.length ? (
+                  <p className="examAnalysisReviewNotice">재확인 문항 {aiNeedsReviewRows.map((question) => question.questionNumber).join(", ")}번은 다음 검수 단계에서 확인해야 합니다.</p>
+                ) : null}
+              </>
             )}
-            {aiNeedsReviewRows.length ? (
-              <p className="examAnalysisReviewNotice">재확인 문항 {aiNeedsReviewRows.map((question) => question.questionNumber).join(", ")}번은 다음 검수 단계에서 확인해야 합니다.</p>
-            ) : null}
           </div>
 
-          <div className="panel examAnalysisReviewPanel">
+          <div className={reviewStageCollapsed ? "panel examAnalysisReviewPanel examAnalysisStagePanel collapsed" : "panel examAnalysisReviewPanel examAnalysisStagePanel"}>
             <div className="sectionHeader slim">
               <div>
                 <strong>AI 결과 검수</strong>
@@ -11160,135 +11241,144 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                 >
                   {isSavingReviews ? "저장 중" : "검수 저장"}
                 </button>
+                <button
+                  className="secondaryButton compact examAnalysisStageToggleButton"
+                  onClick={() => toggleExamAnalysisStage("review", reviewStageComplete)}
+                  type="button"
+                >
+                  {reviewStageCollapsed ? "펼치기" : "접기"}
+                </button>
               </div>
             </div>
-            {teacherReview ? (
-              <div className={teacherReview.status === "completed" ? "examAnalysisReviewSummary ok" : "examAnalysisReviewSummary needsReview"}>
-                <strong>{teacherReview.status === "completed" ? "검수 완료" : "검수 진행 중"}</strong>
-                <span>
-                  {teacherReview.confirmedCount || 0}/{teacherReview.totalQuestionCount || questionRows.length || 0}개
-                  {teacherReview.reviewedAt ? ` · ${formatExamAnalysisEventTime(teacherReview.reviewedAt)}` : ""}
-                </span>
-                {teacherReview.unconfirmedNumbers?.length ? <small>미확정 {teacherReview.unconfirmedNumbers.join(", ")}</small> : null}
-              </div>
-            ) : null}
-            {rowRefine ? (
-              <div className={rowRefine.status === "needs_review" ? "examAnalysisReviewSummary needsReview" : "examAnalysisReviewSummary ok"}>
-                <strong>AI 2차 수정</strong>
-                <span>
-                  {rowRefine.updatedCount || 0}/{rowRefine.targetQuestionNumbers?.length || 0}개
-                  {rowRefine.provider ? ` · ${rowRefine.provider}` : ""}
-                  {rowRefine.refinedAt ? ` · ${formatExamAnalysisEventTime(rowRefine.refinedAt)}` : ""}
-                </span>
-                {rowRefine.needsReviewNumbers?.length ? <small>재확인 {rowRefine.needsReviewNumbers.join(", ")}</small> : null}
-                {rowRefine.skippedTeacherOverrideNumbers?.length ? <small>선생님 수정본 보호 {rowRefine.skippedTeacherOverrideNumbers.join(", ")}</small> : null}
-              </div>
-            ) : null}
-            <div className={ssenCatalog.status === "scope_not_matched" || ssenCatalog.status === "subject_missing" ? "examAnalysisSsenGate needsReview" : "examAnalysisSsenGate"}>
-              <strong>쎈 기준표</strong>
-              <span>{ssenCatalogStatus.message || ssenCatalogLabel}</span>
-              <small>{ssenCatalogLabel}</small>
-            </div>
-            {reviewRowsReady ? (
-              <div className="examAnalysisReviewTableWrap">
-                <table className="examAnalysisReviewTable">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>확정</th>
-                      <th>주요</th>
-                      <th>단원</th>
-                      <th>주유형</th>
-                      <th>보조유형</th>
-                      <th>난이도</th>
-                      <th>검수 메모</th>
-                      <th>기준표</th>
-                      <th>상태</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {questionRows.map((question) => {
-                      const draftValue = enrichExamAnalysisReviewDraftWithSsenCatalog(
-                        reviewDrafts[String(question.questionNumber)] ?? createExamAnalysisReviewDraft(question),
-                        ssenCatalog
-                      );
-                      const needsReview = isExamAnalysisQuestionAiReviewTarget(question);
-                      const unitKey = getReviewDraftUnitKey(draftValue);
-                      const ssenTypeOptions = getSsenTypesForReviewDraft(draftValue);
-                      const selectedSubTypeCodes = normalizeExamAnalysisSsenCodeList(draftValue.subTypeCodes);
-                      const selectedSubTypes = selectedSubTypeCodes.map(getSsenTypeByCode).filter(Boolean);
-                      const mainTypeMeta = getSsenTypeByCode(draftValue.mainTypeCode);
-                      const isSsenEditing = editingSsenQuestionNumber === String(question.questionNumber);
-                      const unitLabel = mainTypeMeta?.unitName || draftValue.unitName || "단원 선택 필요";
-                      const mainTypeLabel = mainTypeMeta?.typeName || draftValue.mainType || "주유형 선택 필요";
-                      const subTypeLabels = selectedSubTypes.length
-                        ? selectedSubTypes.map((type) => type.typeName)
-                        : parseExamAnalysisReviewSubTypes(draftValue.subTypesText);
-                      const reviewClassName = [
-                        needsReview ? "needsReview" : "",
-                        draftValue.confirmed ? "confirmed" : "",
-                        isSsenEditing ? "editingSsen" : ""
-                      ].filter(Boolean).join(" ");
-                      return (
-                        <tr className={reviewClassName} key={question.questionRowId || question.questionNumber}>
-                          <td className="questionNo">{question.questionNumber}</td>
-                          <td className="confirmCell">
-                            <input
-                              aria-label={`${question.questionNumber}번 확정`}
-                              checked={Boolean(draftValue.confirmed)}
-                              onChange={(event) => updateReviewDraft(question.questionNumber, { confirmed: event.target.checked })}
-                              type="checkbox"
-                            />
-                          </td>
-                          <td className="importantCell">
-                            <input
-                              aria-label={`${question.questionNumber}번 주요문항`}
-                              checked={Boolean(draftValue.isImportantQuestion)}
-                              onChange={(event) => updateReviewDraft(question.questionNumber, { isImportantQuestion: event.target.checked })}
-                              type="checkbox"
-                            />
-                          </td>
-                          <td>
-                            {isSsenEditing ? (
-                              <select
-                                value={unitKey}
-                                onChange={(event) => selectReviewSsenUnit(question.questionNumber, event.target.value)}
-                              >
-                                <option value="">단원 선택</option>
-                                {(ssenCatalog.units ?? []).map((unit) => (
-                                  <option key={unit.key} value={unit.key}>
-                                    {[unit.partName, unit.unitName].filter(Boolean).join(" · ")}
-                                  </option>
-                                ))}
-                              </select>
-                            ) : (
-                              <div className="examAnalysisSubTypeChips readonly compact">
-                                <span>{unitLabel}</span>
-                              </div>
-                            )}
-                          </td>
-                          <td>
-                            {isSsenEditing ? (
-                              <div className="examAnalysisReviewEditCell withAction">
-                                <select
-                                  value={draftValue.mainTypeCode}
-                                  onChange={(event) => selectReviewMainType(question.questionNumber, event.target.value)}
-                                >
-                                  <option value="">주유형 선택</option>
-                                  {ssenTypeOptions.map((type) => (
-                                    <option key={type.typeCode} value={type.typeCode}>
-                                      {`${type.typeNo}. ${type.typeName}`}
-                                    </option>
-                                  ))}
-                                </select>
-                                <button
-                                  className="softTinyButton square"
-                                  onClick={() => setEditingSsenQuestionNumber("")}
-                                  type="button"
-                                >
-                                  닫기
-                                </button>
-                              </div>
+            {reviewStageCollapsed ? renderExamAnalysisStageCollapsedHint("AI 결과 검수", reviewStageComplete) : (
+              <>
+                {teacherReview ? (
+                  <div className={teacherReview.status === "completed" ? "examAnalysisReviewSummary ok" : "examAnalysisReviewSummary needsReview"}>
+                    <strong>{teacherReview.status === "completed" ? "검수 완료" : "검수 진행 중"}</strong>
+                    <span>
+                      {teacherReview.confirmedCount || 0}/{teacherReview.totalQuestionCount || questionRows.length || 0}개
+                      {teacherReview.reviewedAt ? ` · ${formatExamAnalysisEventTime(teacherReview.reviewedAt)}` : ""}
+                    </span>
+                    {teacherReview.unconfirmedNumbers?.length ? <small>미확정 {teacherReview.unconfirmedNumbers.join(", ")}</small> : null}
+                  </div>
+                ) : null}
+                {rowRefine ? (
+                  <div className={rowRefine.status === "needs_review" ? "examAnalysisReviewSummary needsReview" : "examAnalysisReviewSummary ok"}>
+                    <strong>AI 2차 수정</strong>
+                    <span>
+                      {rowRefine.updatedCount || 0}/{rowRefine.targetQuestionNumbers?.length || 0}개
+                      {rowRefine.provider ? ` · ${rowRefine.provider}` : ""}
+                      {rowRefine.refinedAt ? ` · ${formatExamAnalysisEventTime(rowRefine.refinedAt)}` : ""}
+                    </span>
+                    {rowRefine.needsReviewNumbers?.length ? <small>재확인 {rowRefine.needsReviewNumbers.join(", ")}</small> : null}
+                    {rowRefine.skippedTeacherOverrideNumbers?.length ? <small>선생님 수정본 보호 {rowRefine.skippedTeacherOverrideNumbers.join(", ")}</small> : null}
+                  </div>
+                ) : null}
+                <div className={ssenCatalog.status === "scope_not_matched" || ssenCatalog.status === "subject_missing" ? "examAnalysisSsenGate needsReview" : "examAnalysisSsenGate"}>
+                  <strong>쎈 기준표</strong>
+                  <span>{ssenCatalogStatus.message || ssenCatalogLabel}</span>
+                  <small>{ssenCatalogLabel}</small>
+                </div>
+                {reviewRowsReady ? (
+                  <div className="examAnalysisReviewTableWrap">
+                    <table className="examAnalysisReviewTable">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>확정</th>
+                          <th>주요</th>
+                          <th>단원</th>
+                          <th>주유형</th>
+                          <th>보조유형</th>
+                          <th>난이도</th>
+                          <th>검수 메모</th>
+                          <th>기준표</th>
+                          <th>상태</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {questionRows.map((question) => {
+                          const draftValue = enrichExamAnalysisReviewDraftWithSsenCatalog(
+                            reviewDrafts[String(question.questionNumber)] ?? createExamAnalysisReviewDraft(question),
+                            ssenCatalog
+                          );
+                          const needsReview = isExamAnalysisQuestionAiReviewTarget(question);
+                          const unitKey = getReviewDraftUnitKey(draftValue);
+                          const ssenTypeOptions = getSsenTypesForReviewDraft(draftValue);
+                          const selectedSubTypeCodes = normalizeExamAnalysisSsenCodeList(draftValue.subTypeCodes);
+                          const selectedSubTypes = selectedSubTypeCodes.map(getSsenTypeByCode).filter(Boolean);
+                          const mainTypeMeta = getSsenTypeByCode(draftValue.mainTypeCode);
+                          const isSsenEditing = editingSsenQuestionNumber === String(question.questionNumber);
+                          const unitLabel = mainTypeMeta?.unitName || draftValue.unitName || "단원 선택 필요";
+                          const mainTypeLabel = mainTypeMeta?.typeName || draftValue.mainType || "주유형 선택 필요";
+                          const subTypeLabels = selectedSubTypes.length
+                            ? selectedSubTypes.map((type) => type.typeName)
+                            : parseExamAnalysisReviewSubTypes(draftValue.subTypesText);
+                          const reviewClassName = [
+                            needsReview ? "needsReview" : "",
+                            draftValue.confirmed ? "confirmed" : "",
+                            isSsenEditing ? "editingSsen" : ""
+                          ].filter(Boolean).join(" ");
+                          return (
+                            <tr className={reviewClassName} key={question.questionRowId || question.questionNumber}>
+                              <td className="questionNo">{question.questionNumber}</td>
+                              <td className="confirmCell">
+                                <input
+                                  aria-label={`${question.questionNumber}번 확정`}
+                                  checked={Boolean(draftValue.confirmed)}
+                                  onChange={(event) => updateReviewDraft(question.questionNumber, { confirmed: event.target.checked })}
+                                  type="checkbox"
+                                />
+                              </td>
+                              <td className="importantCell">
+                                <input
+                                  aria-label={`${question.questionNumber}번 주요문항`}
+                                  checked={Boolean(draftValue.isImportantQuestion)}
+                                  onChange={(event) => updateReviewDraft(question.questionNumber, { isImportantQuestion: event.target.checked })}
+                                  type="checkbox"
+                                />
+                              </td>
+                              <td>
+                                {isSsenEditing ? (
+                                  <select
+                                    value={unitKey}
+                                    onChange={(event) => selectReviewSsenUnit(question.questionNumber, event.target.value)}
+                                  >
+                                    <option value="">단원 선택</option>
+                                    {(ssenCatalog.units ?? []).map((unit) => (
+                                      <option key={unit.key} value={unit.key}>
+                                        {[unit.partName, unit.unitName].filter(Boolean).join(" · ")}
+                                      </option>
+                                    ))}
+                                  </select>
+                                ) : (
+                                  <div className="examAnalysisSubTypeChips readonly compact">
+                                    <span>{unitLabel}</span>
+                                  </div>
+                                )}
+                              </td>
+                              <td>
+                                {isSsenEditing ? (
+                                  <div className="examAnalysisReviewEditCell withAction">
+                                    <select
+                                      value={draftValue.mainTypeCode}
+                                      onChange={(event) => selectReviewMainType(question.questionNumber, event.target.value)}
+                                    >
+                                      <option value="">주유형 선택</option>
+                                      {ssenTypeOptions.map((type) => (
+                                        <option key={type.typeCode} value={type.typeCode}>
+                                          {`${type.typeNo}. ${type.typeName}`}
+                                        </option>
+                                      ))}
+                                    </select>
+                                    <button
+                                      className="softTinyButton square"
+                                      onClick={() => setEditingSsenQuestionNumber("")}
+                                      type="button"
+                                    >
+                                      닫기
+                                    </button>
+                                  </div>
                             ) : (
                               <div className="examAnalysisReviewTypeCell">
                                 <div className="examAnalysisSubTypeChips readonly compact">
@@ -11383,8 +11473,10 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   </tbody>
                 </table>
               </div>
-            ) : (
-              <div className="emptyState compact">AI 행 채움 후 검수할 수 있습니다.</div>
+                ) : (
+                  <div className="emptyState compact">AI 행 채움 후 검수할 수 있습니다.</div>
+                )}
+              </>
             )}
           </div>
 
