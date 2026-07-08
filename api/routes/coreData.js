@@ -861,6 +861,54 @@ async function cancelPendingNotificationJobsForRemovedLessonStudents(lesson = {}
   return removedRows.map((row) => row.notification_job_id).filter(Boolean);
 }
 
+async function deleteLessonStudentRecordsForRemovedLessonStudents(lesson = {}) {
+  if (!lesson.lessonId || !isSupabaseConfigured({ requireServiceRole: true })) return [];
+  const allowedStudentIds = new Set(Array.isArray(lesson.studentIds) ? lesson.studentIds : []);
+  const encodedLessonId = encodeURIComponent(lesson.lessonId);
+  const rows = await listRows(
+    "lesson_student_records",
+    `select=lesson_student_record_id,student_id&lesson_id=eq.${encodedLessonId}`,
+    { requireServiceRole: true }
+  );
+  const removedRows = rows.filter((row) => row.lesson_student_record_id && !allowedStudentIds.has(row.student_id));
+  for (const row of removedRows) {
+    await deleteRows(
+      "lesson_student_records",
+      `lesson_student_record_id=eq.${encodeURIComponent(row.lesson_student_record_id)}`
+    );
+  }
+  return removedRows.map((row) => row.lesson_student_record_id).filter(Boolean);
+}
+
+function filterLessonRecordsToCurrentRosters(records = [], lessons = []) {
+  const allowedStudentIdsByLesson = new Map(
+    lessons.map((lesson) => [
+      lesson.lessonId,
+      new Set(Array.isArray(lesson.studentIds) ? lesson.studentIds : [])
+    ])
+  );
+  return records.filter((record) => {
+    const allowedStudentIds = allowedStudentIdsByLesson.get(record.lessonId);
+    if (!allowedStudentIds) return false;
+    return allowedStudentIds.has(record.studentId);
+  });
+}
+
+async function assertLessonStudentRecordBelongsToLesson(lessonId, studentId) {
+  if (!lessonId || !studentId || !isSupabaseConfigured({ requireServiceRole: true })) return;
+  const rows = await listRows(
+    "lessons",
+    `select=lesson_id,student_ids&lesson_id=eq.${encodeURIComponent(lessonId)}&limit=1`,
+    { requireServiceRole: true }
+  );
+  const [lesson] = rows;
+  if (!lesson) throw new Error("수업을 찾지 못했습니다.");
+  const studentIds = Array.isArray(lesson.student_ids) ? lesson.student_ids : [];
+  if (!studentIds.includes(studentId)) {
+    throw new Error("수업 명단에 없는 학생의 수업일지는 저장할 수 없습니다.");
+  }
+}
+
 function toAttendanceEventRow(event = {}) {
   return {
     attendance_event_id: event.attendanceEventId,
@@ -1050,6 +1098,7 @@ export async function upsertLesson(lesson) {
   const [row] = await upsertRows("lessons", [toLessonRow(lesson)], { onConflict: "lesson_id" });
   const savedLesson = fromLessonRow(row);
   await cancelPendingNotificationJobsForRemovedLessonStudents(savedLesson, "수업 명단에서 제외됨");
+  await deleteLessonStudentRecordsForRemovedLessonStudents(savedLesson);
   return { source: databaseSource, lesson: savedLesson };
 }
 
@@ -1065,6 +1114,7 @@ export async function upsertLessons(lessons) {
   const savedLessons = rows.map(fromLessonRow);
   for (const savedLesson of savedLessons) {
     await cancelPendingNotificationJobsForRemovedLessonStudents(savedLesson, "수업 명단에서 제외됨");
+    await deleteLessonStudentRecordsForRemovedLessonStudents(savedLesson);
   }
   return { source: databaseSource, lessons: savedLessons };
 }
@@ -1124,8 +1174,33 @@ export async function listLessonStudentRecords() {
     return { source: fallbackSource, records: sampleData.lessonStudentRecords };
   }
 
-  const rows = await listRows("lesson_student_records", "select=*&order=lesson_id.asc", { requireServiceRole: true });
-  return { source: databaseSource, records: rows.map(fromLessonRecordRow) };
+  const [recordRows, lessonRows] = await Promise.all([
+    listRows("lesson_student_records", "select=*&order=lesson_id.asc", { requireServiceRole: true }),
+    listRows("lessons", "select=lesson_id,student_ids", { requireServiceRole: true })
+  ]);
+  const lessons = lessonRows.map((row) => ({
+    lessonId: row.lesson_id,
+    studentIds: Array.isArray(row.student_ids) ? row.student_ids : []
+  }));
+  const records = filterLessonRecordsToCurrentRosters(recordRows.map(fromLessonRecordRow), lessons);
+  return { source: databaseSource, records };
+}
+
+export async function pruneStaleLessonStudentRecords(lessonId) {
+  if (!lessonId) throw new Error("정리할 수업 ID가 필요합니다.");
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, deletedLessonStudentRecordIds: [], lessonId };
+  }
+  const rows = await listRows(
+    "lessons",
+    `select=*&lesson_id=eq.${encodeURIComponent(lessonId)}&limit=1`,
+    { requireServiceRole: true }
+  );
+  if (!rows[0]) throw new Error("수업을 찾지 못했습니다.");
+  const lesson = fromLessonRow(rows[0]);
+  await cancelPendingNotificationJobsForRemovedLessonStudents(lesson, "수업 명단에서 제외됨");
+  const deletedLessonStudentRecordIds = await deleteLessonStudentRecordsForRemovedLessonStudents(lesson);
+  return { source: databaseSource, deletedLessonStudentRecordIds, lessonId };
 }
 
 export async function listHomeworks() {
@@ -1427,6 +1502,7 @@ export async function patchLessonStudentRecordNotificationStatus({
     };
   }
 
+  await assertLessonStudentRecordBelongsToLesson(lessonId, studentId);
   const encodedLessonId = encodeURIComponent(lessonId);
   const encodedStudentId = encodeURIComponent(studentId);
   const rows = await patchRows(
@@ -1527,6 +1603,7 @@ export async function upsertLessonStudentRecord(record) {
     return { source: fallbackSource, record };
   }
 
+  await assertLessonStudentRecordBelongsToLesson(record.lessonId, record.studentId);
   const existingRows = await listRows(
     "lesson_student_records",
     `select=*&lesson_id=eq.${encodeURIComponent(record.lessonId)}&student_id=eq.${encodeURIComponent(record.studentId)}&limit=1`,

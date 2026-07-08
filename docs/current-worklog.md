@@ -61,6 +61,17 @@
 - 저장 원천: 하원 시각 원본은 기존 Supabase `lesson_student_records.check_out_time`과 `lesson_student_records.check_out_at`이다. 새 SQL 적용은 필요 없다. 출결 이벤트 기록은 기존 `attendance_events` 흐름을 따른다.
 - 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 250개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
 
+### 2026-07-08 P1. 반이동 학생 수업일지 record 정리
+
+- 상태: 완료 - 운영 데이터 정리/재발 방지 구현 완료
+- 사용자 제보: 김예나는 `월수금 7-10반`으로 반이동했으므로 `월수금 4-7반` 수업일지 record가 남아 있으면 안 되고, 수업일지에 없는 학생에게 알림톡이 나가면 안 된다.
+- 운영 데이터 분석: 김예나 `student_1782290019848`은 2026-07-08 기준 `월수금 7-10반` lesson studentIds에만 포함되어 있었다. `월수금 4-7반`에는 현재 명단에 없지만 오래된 `lesson_student_records` 1건이 남아 있었고, 해당 4-7반 학생/학부모 알림 job 2건은 이미 `canceled / 수업 명단에서 제외됨` 상태였다.
+- 운영 정리: Supabase에서 `lesson_2026-07-08_월수금-4-7반_1781949077445`의 김예나 stale record `lsr_2026-07-08_월수금-4-7반_1781949077445_student_1782290019848` 1건을 삭제했다. 재조회 결과 김예나 수업일지 record는 `월수금 7-10반` 1건만 남았다.
+- 구현 결과: 수업 명단 저장/반이동 동기화 시 명단에서 빠진 학생의 pending 알림 job을 취소하는 기존 로직에 더해, 해당 학생의 `lesson_student_records`도 삭제한다. `/api/lesson-records` 조회는 현재 lesson studentIds에 속한 record만 반환한다. 또한 수업 명단 밖 학생 record 저장/알림 상태 저장 요청은 서버에서 거부한다.
+- 구현 결과: 운영 정리를 위해 `POST /api/lesson-records/prune-stale` endpoint를 추가했다. lessonId를 받아 현재 명단 밖 record를 삭제하고 관련 pending job을 취소한다.
+- 저장 원천: 수업일지 원본은 Supabase `lesson_student_records`, 알림 예약 원본은 `notification_jobs`, 수업 명단 원본은 `lessons.student_ids`다. 새 SQL 적용은 필요 없다.
+- 검증: 운영 API 재조회로 김예나가 `월수금 7-10반` record만 가진 것을 확인했다. `월수금 4-7반` 알림 job은 canceled 상태라 발송 대상이 아니다. `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 251개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-08 P1. 수업연구 유형별 강의 교안 리뉴얼
 
 - 상태: 완료 - 구현/검증 완료

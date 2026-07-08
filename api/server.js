@@ -25,6 +25,7 @@ import {
   listStudentIntakeApplicants,
   listStudents,
   patchLessonStudentRecordNotificationStatus,
+  pruneStaleLessonStudentRecords,
   recordAttendanceEvent,
   claimNotificationJob,
   seedCoreData,
@@ -4522,6 +4523,17 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await patchLessonStudentRecordNotificationStatus(payload.record ?? payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/lesson-records/prune-stale") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await pruneStaleLessonStudentRecords(payload.lessonId);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
