@@ -20539,7 +20539,7 @@ function MaterialManager({
           {activeTab === "types" ? (
             <div className="ssenTypeTree">
               {catalogUnits.map((chapter) => (
-                <details className="ssenChapterNode" key={chapter.id} open>
+                <details className="ssenChapterNode" key={chapter.id}>
                   <summary>
                     <strong>{chapter.title}</strong>
                     <span>{chapter.units.reduce((sum, unit) => sum + unit.types.length, 0)}개 세부유형</span>
