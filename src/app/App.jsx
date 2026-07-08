@@ -222,6 +222,27 @@ function getLessonStudentIds(lesson = {}) {
   return Array.isArray(lesson?.studentIds) ? lesson.studentIds : [];
 }
 
+function isWithdrawnStudent(student = {}) {
+  return (student.status ?? "active") !== "active" || Boolean(student.withdrawnAt);
+}
+
+function isActiveStudent(student = {}) {
+  return student && !isWithdrawnStudent(student);
+}
+
+function getActiveLessonStudents(lesson = {}, students = []) {
+  return getLessonStudentIds(lesson)
+    .map((studentId) => students.find((student) => student.studentId === studentId))
+    .filter(isActiveStudent);
+}
+
+function getActiveStudentIdsFromSelection(studentIds = [], students = []) {
+  const selectedStudentIds = new Set(studentIds);
+  return students
+    .filter((student) => isActiveStudent(student) && selectedStudentIds.has(student.studentId))
+    .map((student) => student.studentId);
+}
+
 function getAttendanceClockMinutes(value = "") {
   const time = normalizeTimeInput(value);
   if (!time) return null;
@@ -5604,17 +5625,19 @@ export function App() {
     : [];
 
   const selectedStudents = selectedLesson
-    ? getLessonStudentIds(selectedLesson)
-        .map((studentId) => students.find((student) => student.studentId === studentId))
-        .filter((student) => student && (student.status ?? "active") === "active")
+    ? getActiveLessonStudents(selectedLesson, students)
     : [];
 
   useEffect(() => {
+    if (!isAppStateReady || session?.role !== "teacher") return;
+    const inactiveStudentIds = students.filter(isWithdrawnStudent).map((student) => student.studentId);
+    if (inactiveStudentIds.length === 0) return;
+    removeStudentsFromLessonsFromDate(inactiveStudentIds, today);
+  }, [isAppStateReady, lessons, session?.role, students]);
+
+  useEffect(() => {
     if (!isLessonJournalOpen || !selectedLesson?.lessonId || !isAppStateReady || session?.role !== "teacher") return;
-    const selectedLessonStudentIds = new Set(getLessonStudentIds(selectedLesson));
-    const activeLessonStudents = students.filter(
-      (student) => (student.status ?? "active") === "active" && selectedLessonStudentIds.has(student.studentId)
-    );
+    const activeLessonStudents = getActiveLessonStudents(selectedLesson, students);
     if (activeLessonStudents.length === 0) return;
     const currentPlan = lessonNotificationPlans[selectedLesson.lessonId];
     const currentMode = currentPlan?.mode || "default";
@@ -5623,9 +5646,9 @@ export function App() {
     if (isLessonAlimtalkScheduleExpired(selectedLesson, delayMinutes)) return;
 
     const expectedJobIds = new Set(
-      getLessonStudentIds(selectedLesson).flatMap((studentId) => [
-        getLessonNotificationJobId(selectedLesson.lessonId, studentId, "parent"),
-        getLessonNotificationJobId(selectedLesson.lessonId, studentId, "student")
+      activeLessonStudents.flatMap((student) => [
+        getLessonNotificationJobId(selectedLesson.lessonId, student.studentId, "parent"),
+        getLessonNotificationJobId(selectedLesson.lessonId, student.studentId, "student")
       ])
     );
     const scheduledJobCount = notificationJobs.filter((job) =>
@@ -6031,9 +6054,7 @@ export function App() {
       (item) => item.classTemplateId === formValues.classTemplateId
     );
     const classTemplateId = formValues.classTemplateId && template ? template.classTemplateId : "";
-    const studentIds = students
-      .filter((student) => formValues.studentIds.includes(student.studentId))
-      .map((student) => student.studentId);
+    const studentIds = getActiveStudentIdsFromSelection(formValues.studentIds, students);
     const lesson = {
       lessonId: createLessonId(formValues.date, formValues.name),
       classTemplateId,
@@ -6064,9 +6085,7 @@ export function App() {
       (item) => item.classTemplateId === formValues.classTemplateId
     );
     const classTemplateId = formValues.classTemplateId && template ? template.classTemplateId : "";
-    const studentIds = students
-      .filter((student) => formValues.studentIds.includes(student.studentId))
-      .map((student) => student.studentId);
+    const studentIds = getActiveStudentIdsFromSelection(formValues.studentIds, students);
     const lesson = {
       ...editingLesson,
       isExamPrepAutoLesson: undefined,
@@ -6151,7 +6170,7 @@ export function App() {
   }
 
   function addStudentToFutureClassLessons(student, fromDate = today) {
-    if (!student.defaultClassTemplateId) return [];
+    if (!isActiveStudent(student) || !student.defaultClassTemplateId) return [];
     const changedLessons = lessons
       .filter((lesson) =>
         isActiveLessonForRosterSync(lesson) &&
@@ -6167,46 +6186,62 @@ export function App() {
     return changedLessons;
   }
 
-  function reconcileStudentFutureClassLessons(student, previousClassTemplateId = "", fromDate = today) {
-    const nextClassTemplateId = student.defaultClassTemplateId ?? "";
-    if (!previousClassTemplateId && !nextClassTemplateId) return [];
+  function reconcileChangedStudentsFutureClassLessons(changedStudents = [], previousStudents = [], fromDate = today) {
+    const changePairs = changedStudents
+      .map((student) => ({
+        student,
+        previousStudent: previousStudents.find((item) => item.studentId === student.studentId)
+      }))
+      .filter(({ student, previousStudent }) => student && previousStudent);
+    if (changePairs.length === 0) return [];
+
     const changedLessons = lessons.flatMap((lesson) => {
       if (!isActiveLessonForRosterSync(lesson) || String(lesson.date) < fromDate) return [];
-      const studentIds = lesson.studentIds ?? [];
-      const shouldRemoveFromPrevious =
-        previousClassTemplateId &&
-        previousClassTemplateId !== nextClassTemplateId &&
-        lesson.classTemplateId === previousClassTemplateId &&
-        studentIds.includes(student.studentId);
-      const shouldAddToNext =
-        nextClassTemplateId &&
-        lesson.classTemplateId === nextClassTemplateId &&
-        !studentIds.includes(student.studentId);
-      if (!shouldRemoveFromPrevious && !shouldAddToNext) return [];
-      return [{
-        ...lesson,
-        studentIds: shouldAddToNext
-          ? [...studentIds, student.studentId]
-          : studentIds.filter((id) => id !== student.studentId)
-      }];
+      let nextStudentIds = lesson.studentIds ?? [];
+      changePairs.forEach(({ student, previousStudent }) => {
+        const previousClassTemplateId = previousStudent.defaultClassTemplateId ?? "";
+        const nextClassTemplateId = isActiveStudent(student) ? (student.defaultClassTemplateId ?? "") : "";
+        if (previousClassTemplateId && previousClassTemplateId !== nextClassTemplateId && lesson.classTemplateId === previousClassTemplateId) {
+          nextStudentIds = nextStudentIds.filter((id) => id !== student.studentId);
+        }
+        if (nextClassTemplateId && lesson.classTemplateId === nextClassTemplateId && !nextStudentIds.includes(student.studentId)) {
+          nextStudentIds = [...nextStudentIds, student.studentId];
+        }
+      });
+      if (JSON.stringify(nextStudentIds) === JSON.stringify(lesson.studentIds ?? [])) return [];
+      return [{ ...lesson, studentIds: nextStudentIds }];
     });
     applyLessonRosterChanges(changedLessons);
     return changedLessons;
   }
 
-  function removeStudentFromLessonsAfterDate(studentId, cutoffDate = today) {
+  function reconcileStudentFutureClassLessons(student, previousClassTemplateId = "", fromDate = today) {
+    const previousStudent = {
+      ...student,
+      defaultClassTemplateId: previousClassTemplateId
+    };
+    return reconcileChangedStudentsFutureClassLessons([student], [previousStudent], fromDate);
+  }
+
+  function removeStudentsFromLessonsFromDate(studentIds = [], fromDate = today) {
+    const removalStudentIds = new Set(studentIds);
+    if (removalStudentIds.size === 0) return [];
     const changedLessons = lessons
       .filter((lesson) =>
         isActiveLessonForRosterSync(lesson) &&
-        String(lesson.date) > cutoffDate &&
-        (lesson.studentIds ?? []).includes(studentId)
+        String(lesson.date) >= fromDate &&
+        (lesson.studentIds ?? []).some((studentId) => removalStudentIds.has(studentId))
       )
       .map((lesson) => ({
         ...lesson,
-        studentIds: (lesson.studentIds ?? []).filter((id) => id !== studentId)
+        studentIds: (lesson.studentIds ?? []).filter((id) => !removalStudentIds.has(id))
       }));
     applyLessonRosterChanges(changedLessons);
     return changedLessons;
+  }
+
+  function removeStudentFromLessonsFromDate(studentId, fromDate = today) {
+    return removeStudentsFromLessonsFromDate([studentId], fromDate);
   }
 
   function handleAddStudent(formValues) {
@@ -6451,7 +6486,7 @@ export function App() {
     const nextStudentIdSet = new Set(nextStudentIds);
     const previousStudents = students;
     const nextStudents = previousStudents.map((student) => {
-      if ((student.status ?? "active") !== "active") {
+      if (!isActiveStudent(student)) {
         return student;
       }
       if (nextStudentIdSet.has(student.studentId)) {
@@ -6467,6 +6502,7 @@ export function App() {
       const previousStudent = previousStudents.find((item) => item.studentId === student.studentId);
       return previousStudent && previousStudent.defaultClassTemplateId !== student.defaultClassTemplateId;
     });
+    reconcileChangedStudentsFutureClassLessons(changedStudents, previousStudents, today);
     if (changedStudents.length > 0) {
       postJson("/api/students/bulk", { students: changedStudents }).catch((error) => console.error(error));
     }
@@ -6483,7 +6519,7 @@ export function App() {
       withdrawnAt: new Date().toISOString()
     };
     setStudents((current) => current.map((student) => (student.studentId === studentId ? pausedStudent : student)));
-    removeStudentFromLessonsAfterDate(studentId, today);
+    removeStudentFromLessonsFromDate(studentId, today);
     if (removedStudent) {
       postJson("/api/students", { student: pausedStudent }).catch((error) => console.error(error));
     }
@@ -6696,10 +6732,7 @@ export function App() {
   }
 
   function updateLessonNotificationRecordStatuses(lesson, statusText) {
-    const lessonStudentIds = new Set(getLessonStudentIds(lesson));
-    const lessonStudentsForRecords = students.filter(
-      (student) => (student.status ?? "active") === "active" && lessonStudentIds.has(student.studentId)
-    );
+    const lessonStudentsForRecords = getActiveLessonStudents(lesson, students);
     const updatedAt = new Date().toISOString();
     const recordsToSave = lessonStudentsForRecords.map((student) => {
       const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
@@ -6797,10 +6830,7 @@ export function App() {
   function applyLessonNotificationPlan(lessonId, mode) {
     const lesson = lessons.find((item) => item.lessonId === lessonId);
     if (!lesson) return;
-    const lessonStudentIds = new Set(getLessonStudentIds(lesson));
-    const lessonStudents = students.filter(
-      (student) => (student.status ?? "active") === "active" && lessonStudentIds.has(student.studentId)
-    );
+    const lessonStudents = getActiveLessonStudents(lesson, students);
     if (lessonStudents.length === 0) {
       cancelActiveLessonNotificationJobs(lesson, "수업 학생 없음");
       return;
@@ -6855,10 +6885,7 @@ export function App() {
 
   function scheduleLessonNotificationsAt(lesson, scheduledDate, mode = "manual") {
     if (!lesson?.lessonId || !scheduledDate) return;
-    const lessonStudentIds = new Set(getLessonStudentIds(lesson));
-    const lessonStudents = students.filter(
-      (student) => (student.status ?? "active") === "active" && lessonStudentIds.has(student.studentId)
-    );
+    const lessonStudents = getActiveLessonStudents(lesson, students);
     if (lessonStudents.length === 0) {
       cancelActiveLessonNotificationJobs(lesson, "수업 학생 없음");
       return;
@@ -7050,10 +7077,7 @@ export function App() {
   }
 
   function handleApplyBulkHomework(lesson, homeworkType, title) {
-    getLessonStudentIds(lesson).forEach((studentId) => {
-      const student = students.find((item) => item.studentId === studentId);
-      if (student) handleUpdateHomework(lesson, student, homeworkType, title);
-    });
+    getActiveLessonStudents(lesson, students).forEach((student) => handleUpdateHomework(lesson, student, homeworkType, title));
   }
 
   async function handleSaveRecord(recordId, lessonForRecord = null, studentForRecord = null, recordOverride = null, options = {}) {
@@ -12404,9 +12428,7 @@ function LessonJournalDetail({
   const failedJobCount = lessonNotificationJobs.filter((job) => job.status === "failed").length;
   const todayTwoPmIso = new Date(`${today}T14:00:00+09:00`).toISOString();
   const canScheduleTodayTwoPm = lesson.date < today && Boolean(onScheduleLessonNotificationsAt);
-  const lessonStudents = (lesson.studentIds ?? [])
-    .map((studentId) => students.find((student) => student.studentId === studentId))
-    .filter((student) => student && (student.status ?? "active") === "active");
+  const lessonStudents = getActiveLessonStudents(lesson, students);
   const lessonRecordSaveStates = lessonStudents
     .map((student) => saveStates[createLessonStudentRecordId(lesson.lessonId, student.studentId)])
     .filter(Boolean);
@@ -14038,6 +14060,7 @@ function ReportModal({ report, onClose, onMockSend, onSaveSnapshot }) {
 }
 
 function LessonModal({ initialLesson = null, students, templates, onClose, onSubmit }) {
+  const activeStudents = students.filter(isActiveStudent);
   const fallbackTemplate = templates[0] ?? { name: "", startTime: "16:00", endTime: "17:00", color: "#17213d" };
   const [lessonType, setLessonType] = useState(initialLesson?.lessonType ?? "class");
   const [classTemplateId, setClassTemplateId] = useState(initialLesson ? initialLesson.classTemplateId || "" : templates[0]?.classTemplateId || "");
@@ -14047,10 +14070,13 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
   const [startTime, setStartTime] = useState(normalizeTimeInput(initialLesson?.startTime) || activeTemplate.startTime);
   const [endTime, setEndTime] = useState(normalizeTimeInput(initialLesson?.endTime) || activeTemplate.endTime);
   const [color, setColor] = useState(initialLesson?.color ?? activeTemplate.color);
-  const [studentIds, setStudentIds] = useState(initialLesson?.studentIds ?? students.map((student) => student.studentId));
+  const [studentIds, setStudentIds] = useState(() => {
+    const initialStudentIds = initialLesson?.studentIds ?? activeStudents.map((student) => student.studentId);
+    return getActiveStudentIdsFromSelection(initialStudentIds, activeStudents);
+  });
   const [studentSearch, setStudentSearch] = useState("");
   const lessonColors = ["#17213d", "#3b82f6", "#6366f1", "#8b5cf6", "#ec4899", "#ef4444", "#f59e0b", "#10b981", "#059669", "#0891b2", "#7c3aed", "#dc2626", "#d97706", "#16a34a", "#0284c7"];
-  const filteredStudents = students.filter((student) =>
+  const filteredStudents = activeStudents.filter((student) =>
     [student.name, student.grade, student.schoolName].join(" ").toLowerCase().includes(studentSearch.toLowerCase())
   );
   const lessonStudentGradeOrder = ["고3", "고2", "고1", "중3", "중2", "중1"];
@@ -14073,7 +14099,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
     setEndTime(getTemplateEndTime(template, date));
     setColor(template.color);
     setStudentIds(
-      students
+      activeStudents
         .filter((student) => student.defaultClassTemplateId === nextTemplateId)
         .map((student) => student.studentId)
     );
@@ -14178,7 +14204,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
             보이는 학생 선택
           </button>
         </div>
-        <small className="muted">전체 {students.length}명</small>
+        <small className="muted">전체 {activeStudents.length}명</small>
         <div className="lessonStudentGroups">
           {groupedStudents.map((group) => (
             <div className="lessonStudentGroup" key={group.grade}>
@@ -16555,7 +16581,7 @@ function ClassManager({ students, templates, onUpdateClassRoster }) {
   const [isRosterModalOpen, setIsRosterModalOpen] = useState(false);
   const [draftStudentIds, setDraftStudentIds] = useState([]);
   const selectedTemplate = templates.find((template) => template.classTemplateId === selectedTemplateId) ?? templates[0];
-  const activeStudents = students.filter((student) => (student.status ?? "active") === "active");
+  const activeStudents = students.filter(isActiveStudent);
   const classStudents = activeStudents.filter((student) => student.defaultClassTemplateId === selectedTemplate?.classTemplateId);
 
   function openRosterModal() {
@@ -21071,7 +21097,7 @@ function createPreExamGeneratedKey(event = {}) {
 function getStudentsForSchoolCalendarEvent(students = [], event = {}) {
   const eventGrade = normalizeGradeLabel(event.grade || "");
   return students.filter((student) => {
-    if ((student.status ?? "active") !== "active") return false;
+    if (!isActiveStudent(student)) return false;
     const studentSchool = student.schoolName || "";
     const eventSchool = event.schoolName || "";
     if ((studentSchool || eventSchool) && !schoolNamesMatch(studentSchool, eventSchool, { allowBlank: false })) return false;
