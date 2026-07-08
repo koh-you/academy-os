@@ -40,6 +40,7 @@ import { attendanceLabels, dayLabels, homeworkLabels } from "../domains/lessons/
 import { sampleData } from "../shared/data/sampleData.js";
 import { readFileAsDataUrl } from "../shared/utils/file.js";
 import { safeIdPart, shortStableHash } from "../shared/utils/id.js";
+import ssenTypeIndex from "../../api/data/ssenTypeIndex.json";
 
 const storageKeys = {
   classTemplates: "academy-os.classTemplates.v1",
@@ -4773,7 +4774,58 @@ function createDefaultLessonResearchItems() {
   ];
 }
 
-const testPaperSubjectOptions = ["공통수학1", "공통수학2", "수학1", "수학2", "확률과통계", "미적분"];
+function buildSsenTypeCatalog(rows = []) {
+  const subjectMap = new Map();
+  rows.forEach((row) => {
+    const subject = row.subject || "과목 미지정";
+    const chapterName = row.partName || "대단원 미지정";
+    const unitName = row.unitName || "중단원 미지정";
+    if (!subjectMap.has(subject)) subjectMap.set(subject, new Map());
+    const chapterMap = subjectMap.get(subject);
+    const chapterId = `${row.bookCode || subject}_${safeIdPart(chapterName)}`;
+    if (!chapterMap.has(chapterName)) {
+      chapterMap.set(chapterName, {
+        id: chapterId,
+        title: chapterName,
+        units: new Map()
+      });
+    }
+    const chapter = chapterMap.get(chapterName);
+    const unitKey = `${row.unitNo || ""}_${unitName}`;
+    if (!chapter.units.has(unitKey)) {
+      chapter.units.set(unitKey, {
+        id: `${row.bookCode || subject}_${row.unitNo || safeIdPart(unitName)}`,
+        title: unitName,
+        unitNo: row.unitNo || "",
+        types: []
+      });
+    }
+    chapter.units.get(unitKey).types.push({
+      id: row.typeCode || `${subject}_${row.unitNo || ""}_${row.typeNo || ""}_${safeIdPart(row.typeName || "")}`,
+      title: row.typeName || "유형명 미입력",
+      typeNo: row.typeNo || "",
+      bookTitle: row.bookTitle || "",
+      partName: chapterName,
+      unitName
+    });
+  });
+
+  return Object.fromEntries(
+    Array.from(subjectMap.entries()).map(([subject, chapterMap]) => [
+      subject,
+      Array.from(chapterMap.values()).map((chapter) => ({
+        ...chapter,
+        units: Array.from(chapter.units.values()).map((unit) => ({
+          ...unit,
+          types: unit.types.sort((a, b) => String(a.typeNo).localeCompare(String(b.typeNo), "ko", { numeric: true }))
+        }))
+      }))
+    ])
+  );
+}
+
+const ssenTypeCatalog = buildSsenTypeCatalog(ssenTypeIndex);
+const testPaperSubjectOptions = Object.keys(ssenTypeCatalog);
 
 const testPaperKindOptions = [
   { id: "daily", label: "데일리 테스트", description: "오늘 배운 유형을 바로 확인" },
@@ -4799,94 +4851,6 @@ const testPaperProgressOptions = [
   { id: "hold", label: "강사확인" }
 ];
 
-const ssenTypeCatalog = {
-  "공통수학1": [
-    {
-      id: "cm1_poly",
-      title: "다항식",
-      units: [
-        {
-          id: "cm1_poly_ops",
-          title: "다항식의 연산",
-          types: [
-            { id: "cm1_poly_ops_basic", title: "다항식의 덧셈과 뺄셈" },
-            { id: "cm1_poly_ops_multi", title: "다항식의 곱셈과 전개" },
-            { id: "cm1_poly_ops_division", title: "다항식의 나눗셈" }
-          ]
-        },
-        {
-          id: "cm1_identity_remainder",
-          title: "항등식과 나머지정리",
-          types: [
-            { id: "cm1_identity_coeff", title: "항등식의 계수 비교" },
-            { id: "cm1_remainder_basic", title: "나머지정리 기본" },
-            { id: "cm1_factor_theorem", title: "인수정리 활용" }
-          ]
-        },
-        {
-          id: "cm1_factorization",
-          title: "인수분해",
-          types: [
-            { id: "cm1_factor_common", title: "공통인수와 묶기" },
-            { id: "cm1_factor_formula", title: "공식 적용" },
-            { id: "cm1_factor_complex", title: "복잡한 인수분해" }
-          ]
-        }
-      ]
-    },
-    {
-      id: "cm1_equation_inequality",
-      title: "방정식과 부등식",
-      units: [
-        {
-          id: "cm1_complex_number",
-          title: "복소수와 이차방정식",
-          types: [
-            { id: "cm1_complex_basic", title: "복소수 계산" },
-            { id: "cm1_quadratic_roots", title: "이차방정식의 근" },
-            { id: "cm1_discriminant", title: "판별식 활용" }
-          ]
-        },
-        {
-          id: "cm1_various_equations",
-          title: "여러 가지 방정식",
-          types: [
-            { id: "cm1_high_degree", title: "고차방정식" },
-            { id: "cm1_simultaneous", title: "연립방정식" },
-            { id: "cm1_abs_equation", title: "절댓값 방정식" }
-          ]
-        }
-      ]
-    }
-  ],
-  "공통수학2": [
-    {
-      id: "cm2_geometry",
-      title: "도형의 방정식",
-      units: [
-        {
-          id: "cm2_line_circle",
-          title: "직선과 원",
-          types: [
-            { id: "cm2_line_equation", title: "직선의 방정식" },
-            { id: "cm2_circle_equation", title: "원의 방정식" },
-            { id: "cm2_position_relation", title: "위치 관계" }
-          ]
-        },
-        {
-          id: "cm2_motion",
-          title: "도형의 이동",
-          types: [
-            { id: "cm2_parallel", title: "평행이동" },
-            { id: "cm2_symmetry", title: "대칭이동" },
-            { id: "cm2_locus", title: "자취" }
-          ]
-        }
-      ]
-    }
-  ]
-};
-
 function getTestPaperKindLabel(value = "") {
   return testPaperKindOptions.find((option) => option.id === value)?.label ?? "데일리";
 }
@@ -4905,6 +4869,11 @@ function inferTestPaperKind(book = {}) {
   if (text.includes("누적")) return "cumulative";
   if (text.includes("단원")) return "unit";
   return "daily";
+}
+
+function inferTestPaperSubjectFromText(text = "", fallbackSubject = testPaperSubjectOptions[0]) {
+  const compactText = String(text ?? "").replace(/\s+/g, "");
+  return testPaperSubjectOptions.find((subject) => compactText.includes(String(subject).replace(/\s+/g, ""))) ?? fallbackSubject ?? testPaperSubjectOptions[0];
 }
 
 function normalizeBookLinkedTypeIds(book = {}) {
@@ -4975,12 +4944,12 @@ function createDefaultProblemBooks() {
   return [];
 }
 
-function createProblemBookFromFile(fileName, testKind = "daily") {
+function createProblemBookFromFile(fileName, testKind = "daily", fallbackSubject = testPaperSubjectOptions[0]) {
   const timestamp = Date.now();
   return {
     problemBookId: `book_uploaded_${timestamp}`,
     title: fileName.replace(/\.[^.]+$/, "") || "새 시험지",
-    subject: "공통수학1",
+    subject: inferTestPaperSubjectFromText(fileName, fallbackSubject),
     grade: "고1",
     unit: "단원 미지정",
     testKind: testPaperKindOptions.some((option) => option.id === testKind) ? testKind : "daily",
@@ -5006,9 +4975,9 @@ function createProblemBookFromFile(fileName, testKind = "daily") {
   };
 }
 
-function createProblemBookFolder(folderName, testKind = "daily") {
+function createProblemBookFolder(folderName, testKind = "daily", fallbackSubject = testPaperSubjectOptions[0]) {
   const timestamp = Date.now();
-  const inferredSubject = testPaperSubjectOptions.find((subject) => String(folderName ?? "").includes(subject)) ?? testPaperSubjectOptions[0];
+  const inferredSubject = inferTestPaperSubjectFromText(folderName, fallbackSubject);
   return {
     problemBookId: `book_folder_${timestamp}`,
     title: folderName || "새 시험지",
@@ -7741,16 +7710,11 @@ export function App() {
             problemBooks={problemBooks}
             students={students}
             templates={classTemplates}
-            onAddFolder={(folderName, testKind) =>
-              setProblemBooks((current) => [createProblemBookFolder(folderName, testKind), ...current])
+            onAddFolder={(folderName, testKind, subject) =>
+              setProblemBooks((current) => [createProblemBookFolder(folderName, testKind, subject), ...current])
             }
-            onAddPdf={(fileName, testKind) =>
-              setProblemBooks((current) => [createProblemBookFromFile(fileName, testKind), ...current])
-            }
-            onSyncProblemCounts={() =>
-              setProblemBooks((current) =>
-                current.map((book) => ({ ...book, totalProblems: book.problems?.length ?? book.totalProblems ?? 0 }))
-              )
+            onAddPdf={(fileName, testKind, subject) =>
+              setProblemBooks((current) => [createProblemBookFromFile(fileName, testKind, subject), ...current])
             }
             onDeleteBook={(problemBookId) =>
               setProblemBooks((current) => current.filter((book) => book.problemBookId !== problemBookId))
@@ -20310,7 +20274,6 @@ function MaterialManager({
   templates = [],
   onAddFolder,
   onAddPdf,
-  onSyncProblemCounts,
   onDeleteBook,
   onUpdateBook
 }) {
@@ -20319,6 +20282,7 @@ function MaterialManager({
   const [activeBookKind, setActiveBookKind] = useState(testPaperKindOptions[0].id);
   const [folderName, setFolderName] = useState("");
   const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("all");
+  const testPaperKindOrder = new Map(testPaperKindOptions.map((option, index) => [option.id, index]));
   const activeStudents = students.filter(isActiveStudent);
   const trackStudents = selectedClassTemplateId === "all"
     ? activeStudents
@@ -20326,24 +20290,31 @@ function MaterialManager({
   const subjectBooks = problemBooks
     .filter((book) => (book.subject || "") === activeSubject)
     .sort((a, b) => {
+      const kindA = testPaperKindOrder.get(inferTestPaperKind(a)) ?? 999;
+      const kindB = testPaperKindOrder.get(inferTestPaperKind(b)) ?? 999;
+      const orderA = Number(a.trackOrder || 9999);
+      const orderB = Number(b.trackOrder || 9999);
+      return kindA - kindB || orderA - orderB || String(a.title ?? "").localeCompare(String(b.title ?? ""));
+    });
+  const bookShelfBooks = problemBooks
+    .filter((book) => inferTestPaperKind(book) === activeBookKind)
+    .sort((a, b) => {
       const orderA = Number(a.trackOrder || 9999);
       const orderB = Number(b.trackOrder || 9999);
       return orderA - orderB || String(a.title ?? "").localeCompare(String(b.title ?? ""));
     });
-  const filteredSubjectBooks = subjectBooks.filter((book) => inferTestPaperKind(book) === activeBookKind);
-  const bookShelfBooks = problemBooks.filter((book) => inferTestPaperKind(book) === activeBookKind);
   const catalogUnits = ssenTypeCatalog[activeSubject] ?? [];
 
   function handleAddFolder() {
     if (!folderName.trim()) return;
-    onAddFolder(folderName.trim(), activeBookKind);
+    onAddFolder(folderName.trim(), activeBookKind, activeSubject);
     setFolderName("");
   }
 
   function handlePdfUpload(event) {
     const file = event.target.files?.[0];
     if (!file) return;
-    onAddPdf(file.name, activeBookKind);
+    onAddPdf(file.name, activeBookKind, activeSubject);
     event.target.value = "";
   }
 
@@ -20396,21 +20367,6 @@ function MaterialManager({
               </button>
             ))}
           </div>
-          {activeTab === "track" ? (
-            <div className="testPaperKindTabs" aria-label="시험지 종류 선택">
-              {testPaperKindOptions.map((option) => (
-                <button
-                  className={activeBookKind === option.id ? "active" : ""}
-                  key={option.id}
-                  onClick={() => setActiveBookKind(option.id)}
-                  type="button"
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          ) : null}
-
           {activeTab === "types" ? (
             <div className="ssenTypeTree">
               {catalogUnits.map((chapter) => (
@@ -20432,7 +20388,7 @@ function MaterialManager({
                             return (
                               <article className="ssenTypeNode" key={type.id}>
                                 <div>
-                                  <strong>{type.title}</strong>
+                                  <strong>{type.typeNo ? `${type.typeNo}. ${type.title}` : type.title}</strong>
                                   <small>{type.id}</small>
                                 </div>
                                 <div className="ssenTypeStats">
@@ -20478,14 +20434,19 @@ function MaterialManager({
                   </select>
                 </div>
                 <div className="testProgressTable">
-                  <div className="testProgressRow testProgressHead" style={{ gridTemplateColumns: `150px repeat(${Math.max(filteredSubjectBooks.length, 1)}, 180px)` }}>
+                  <div className="testProgressRow testProgressHead" style={{ gridTemplateColumns: `150px repeat(${Math.max(subjectBooks.length, 1)}, 190px)` }}>
                     <span>학생</span>
-                    {filteredSubjectBooks.map((book) => <span key={book.problemBookId}>{book.trackOrder || "-"} · {book.title || getTestPaperKindLabel(inferTestPaperKind(book))}</span>)}
+                    {subjectBooks.map((book) => (
+                      <span className="testProgressHeaderCell" key={book.problemBookId}>
+                        <strong>{book.trackOrder || "-"} · {book.title || "시험지명 미입력"}</strong>
+                        <small>{getTestPaperKindLabel(inferTestPaperKind(book))}</small>
+                      </span>
+                    ))}
                   </div>
                   {trackStudents.map((student) => (
-                    <div className="testProgressRow" key={student.studentId} style={{ gridTemplateColumns: `150px repeat(${Math.max(filteredSubjectBooks.length, 1)}, 180px)` }}>
+                    <div className="testProgressRow" key={student.studentId} style={{ gridTemplateColumns: `150px repeat(${Math.max(subjectBooks.length, 1)}, 190px)` }}>
                       <strong>{student.name}</strong>
-                      {filteredSubjectBooks.map((book) => {
+                      {subjectBooks.map((book) => {
                         const progress = getBookStudentProgress(book, student.studentId);
                         return (
                           <div className={`testProgressCell status-${progress.status || "waiting"}`} key={`${book.problemBookId}_${student.studentId}`}>
@@ -20505,10 +20466,10 @@ function MaterialManager({
                       })}
                     </div>
                   ))}
-                  {filteredSubjectBooks.length === 0 ? (
+                  {subjectBooks.length === 0 ? (
                     <div className="examPrepEmptyState">
-                      <strong>{activeSubject} {getTestPaperKindLabel(activeBookKind)} 시험지가 없습니다.</strong>
-                      <span>시험지 보관함에서 시험지를 추가하면 학생별 진행 상태에 표시됩니다.</span>
+                      <strong>{activeSubject} 시험지가 없습니다.</strong>
+                      <span>시험지 보관함에서 데일리/누적/단원 시험지를 추가하면 이 표의 상단에 컬럼으로 표시됩니다.</span>
                     </div>
                   ) : null}
                   {trackStudents.length === 0 ? (
@@ -20563,7 +20524,6 @@ function MaterialManager({
               placeholder="새 시험지명 입력 (예: 공통수학1 데일리 01)"
             />
             <button className="primaryButton" onClick={handleAddFolder} type="button">+ 시험지 추가</button>
-            <button className="orangeButton" onClick={onSyncProblemCounts} type="button">문제수 동기화</button>
           </div>
 
           <div className="materialTable">

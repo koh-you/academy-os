@@ -13060,7 +13060,7 @@ textarea.profileEditInput {
   align-items: center;
   display: grid;
   gap: 10px;
-  grid-template-columns: minmax(260px, 1fr) auto auto;
+  grid-template-columns: minmax(260px, 1fr) auto;
 }
 
 .materialFolderBar input {
@@ -13284,9 +13284,8 @@ textarea.profileEditInput {
   align-items: center;
   border-top: 1px solid #e2e8f0;
   display: grid;
-  gap: 10px;
+  gap: 0;
   min-width: 920px;
-  padding: 10px 12px;
 }
 
 .testProgressRow:first-child {
@@ -13297,6 +13296,36 @@ textarea.profileEditInput {
   background: #f8fafc;
   color: #64748b;
   font-size: 12px;
+  font-weight: 900;
+}
+
+.testProgressRow > strong,
+.testProgressHead > span,
+.testProgressHeaderCell {
+  align-items: center;
+  align-self: stretch;
+  border-right: 1px solid #e2e8f0;
+  display: grid;
+  min-height: 46px;
+  padding: 8px 10px;
+}
+
+.testProgressHeaderCell {
+  gap: 3px;
+}
+
+.testProgressHeaderCell strong {
+  color: #17213d;
+  font-size: 12px;
+  font-weight: 950;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.testProgressHeaderCell small {
+  color: #2563eb;
+  font-size: 11px;
   font-weight: 900;
 }
 
@@ -13315,11 +13344,11 @@ textarea.profileEditInput {
 }
 
 .testProgressCell {
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border-right: 1px solid #e2e8f0;
   display: grid;
   gap: 6px;
   grid-template-columns: 1fr 58px;
+  min-height: 54px;
   padding: 8px;
 }
 
