@@ -5298,6 +5298,7 @@ export function App() {
   const recordsRef = useRef(records);
   const homeworksRef = useRef(homeworks);
   const autoSaveTimersRef = useRef(new Map());
+  const dirtyHomeworkIdsRef = useRef(new Set());
   const initialMakeupTasksRef = useRef(makeupTasks);
   const initialExamPrepRowsRef = useRef(examPrepRows);
   const initialSchoolEventsRef = useRef(schoolEvents);
@@ -5956,6 +5957,7 @@ export function App() {
     const currentMode = currentPlan?.mode || "default";
     if (currentMode === "none") return;
     if (currentMode === "manual") return;
+    if (!currentPlan?.autoRebuildEnabled) return;
     const delayMinutes = currentMode === "delay30" ? 30 : 0;
     if (isLessonAlimtalkScheduleExpired(selectedLesson, delayMinutes)) return;
     const scheduledDate = getLessonAlimtalkScheduledDate(selectedLesson, delayMinutes);
@@ -5994,7 +5996,7 @@ export function App() {
       });
     }
     applyLessonNotificationPlan(selectedLesson.lessonId, currentMode);
-  }, [isAppStateReady, isLessonJournalOpen, lessonNotificationPlans, notificationJobs, notificationJobsStatus?.state, records, selectedLesson, session?.role, students]);
+  }, [isAppStateReady, isLessonJournalOpen, lessonNotificationPlans, notificationJobs, notificationJobsStatus?.state, selectedLesson, session?.role, students]);
 
   const reportLesson = lessons.find((lesson) => lesson.lessonId === selectedReportLessonId) ?? lessons[0];
   const reportRecords = reportLesson
@@ -6838,12 +6840,8 @@ export function App() {
     const recordId = record.lessonStudentRecordId;
     const existingTimerId = autoSaveTimersRef.current.get(recordId);
     if (existingTimerId) clearTimeout(existingTimerId);
+    autoSaveTimersRef.current.delete(recordId);
     setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "dirty" }));
-    const timerId = setTimeout(() => {
-      autoSaveTimersRef.current.delete(recordId);
-      handleSaveRecord(recordId, lessonForRecord, null, record);
-    }, 1000);
-    autoSaveTimersRef.current.set(recordId, timerId);
   }
 
   async function saveAttendanceRecord(lesson, student, values, updatedBy = "instructor_owner_001", options = {}) {
@@ -6878,7 +6876,6 @@ export function App() {
     const nextRecords = upsertLessonStudentRecord(recordsRef.current, nextRecord);
     recordsRef.current = nextRecords;
     setRecords(nextRecords);
-    refreshLessonNotificationJobsForRecord(nextRecord, result.lesson ?? lesson);
     return { record: nextRecord, saved: true };
   }
 
@@ -7395,7 +7392,7 @@ export function App() {
         : null;
 
       const changedHomeworks = updatedSourceHomework ? [nextHomework, updatedSourceHomework] : [nextHomework];
-      postJson("/api/homeworks/bulk", { homeworks: changedHomeworks }).catch((error) => console.error(error));
+      changedHomeworks.forEach((homework) => dirtyHomeworkIdsRef.current.add(homework.homeworkId));
       return current.map((homework) => {
         if (homework.homeworkId === nextHomework.homeworkId) return nextHomework;
         if (updatedSourceHomework && homework.homeworkId === updatedSourceHomework.homeworkId) return updatedSourceHomework;
@@ -7404,73 +7401,200 @@ export function App() {
     });
   }
 
-  function handleUpdateHomework(lesson, student, homeworkType, title) {
+  function buildHomeworkDraftUpdate(currentHomeworks, lesson, student, homeworkType, title) {
     const existingId = `homework_${homeworkType}_${lesson.date}_${student.studentId}`;
+    const existing = currentHomeworks.find(
+      (homework) =>
+        homework.lessonId === lesson.lessonId &&
+        homework.studentId === student.studentId &&
+        homework.homeworkType === homeworkType
+    );
+    const nextHomework = {
+      ...(existing ?? {}),
+      homeworkId: existing?.homeworkId ?? existingId,
+      lessonId: lesson.lessonId,
+      studentId: student.studentId,
+      title,
+      subject: existing?.subject ?? "노션 수업 DB",
+      homeworkType,
+      totalProblems: existing?.totalProblems ?? null,
+      status: existing?.status ?? (homeworkType === "previous" ? "verified" : "assigned"),
+      studentStatus: existing?.studentStatus ?? "not_started",
+      teacherStatus: existing?.teacherStatus ?? "unverified",
+      assignedDate: lesson.date,
+      dueDate: existing?.dueDate ?? ""
+    };
+
+    const updatedHomeworks = existing
+      ? currentHomeworks.map((homework) => (homework.homeworkId === existing.homeworkId ? nextHomework : homework))
+      : [nextHomework, ...currentHomeworks];
+
+    if (homeworkType !== "next") {
+      return { changedHomeworks: [nextHomework], homeworks: updatedHomeworks };
+    }
+
+    const linkedPreviousHomework = createLinkedPreviousHomework(
+      updatedHomeworks,
+      lessons,
+      lesson,
+      student,
+      nextHomework
+    );
+
+    if (!linkedPreviousHomework) {
+      return { changedHomeworks: [nextHomework], homeworks: updatedHomeworks };
+    }
+
+    const withLinkedPrevious = updatedHomeworks.some((homework) => homework.homeworkId === linkedPreviousHomework.homeworkId)
+      ? updatedHomeworks.map((homework) =>
+          homework.homeworkId === linkedPreviousHomework.homeworkId ? linkedPreviousHomework : homework
+        )
+      : [linkedPreviousHomework, ...updatedHomeworks];
+
+    return { changedHomeworks: [nextHomework, linkedPreviousHomework], homeworks: withLinkedPrevious };
+  }
+
+  function handleUpdateHomework(lesson, student, homeworkType, title) {
     setHomeworks((current) => {
-      const existing = current.find(
-        (homework) =>
-          homework.lessonId === lesson.lessonId &&
-          homework.studentId === student.studentId &&
-          homework.homeworkType === homeworkType
-      );
-      const nextHomework = {
-        ...(existing ?? {}),
-        homeworkId: existing?.homeworkId ?? existingId,
-        lessonId: lesson.lessonId,
-        studentId: student.studentId,
-        title,
-        subject: existing?.subject ?? "노션 수업 DB",
-        homeworkType,
-        totalProblems: existing?.totalProblems ?? null,
-        status: existing?.status ?? (homeworkType === "previous" ? "verified" : "assigned"),
-        studentStatus: existing?.studentStatus ?? "not_started",
-        teacherStatus: existing?.teacherStatus ?? "unverified",
-        assignedDate: lesson.date,
-        dueDate: existing?.dueDate ?? ""
-      };
-
-      const updatedHomeworks = existing
-        ? current.map((homework) => (homework.homeworkId === existing.homeworkId ? nextHomework : homework))
-        : [nextHomework, ...current];
-
-      if (homeworkType !== "next") {
-        postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
-        return updatedHomeworks;
-      }
-
-      const linkedPreviousHomework = createLinkedPreviousHomework(
-        updatedHomeworks,
-        lessons,
-        lesson,
-        student,
-        nextHomework
-      );
-
-      if (!linkedPreviousHomework) {
-        postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
-        return updatedHomeworks;
-      }
-
-      const withLinkedPrevious = updatedHomeworks.some((homework) => homework.homeworkId === linkedPreviousHomework.homeworkId)
-        ? updatedHomeworks.map((homework) =>
-            homework.homeworkId === linkedPreviousHomework.homeworkId ? linkedPreviousHomework : homework
-          )
-        : [linkedPreviousHomework, ...updatedHomeworks];
-
-      postJson("/api/homeworks/bulk", { homeworks: [nextHomework, linkedPreviousHomework] }).catch((error) =>
-        console.error(error)
-      );
-
-      return withLinkedPrevious;
+      const result = buildHomeworkDraftUpdate(current, lesson, student, homeworkType, title);
+      result.changedHomeworks.forEach((homework) => dirtyHomeworkIdsRef.current.add(homework.homeworkId));
+      return result.homeworks;
     });
+    const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+    setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "dirty" }));
   }
 
   function handleApplyBulkHomework(lesson, homeworkType, title) {
     getActiveLessonStudents(lesson, students).forEach((student) => handleUpdateHomework(lesson, student, homeworkType, title));
   }
 
+  async function saveDirtyHomeworks() {
+    const dirtyIds = Array.from(dirtyHomeworkIdsRef.current);
+    if (!dirtyIds.length) return true;
+    const dirtyIdSet = new Set(dirtyIds);
+    const homeworksToSave = homeworksRef.current.filter((homework) => dirtyIdSet.has(homework.homeworkId));
+    if (!homeworksToSave.length) {
+      dirtyHomeworkIdsRef.current.clear();
+      return true;
+    }
+    await postJson("/api/homeworks/bulk", { homeworks: homeworksToSave });
+    homeworksToSave.forEach((homework) => dirtyHomeworkIdsRef.current.delete(homework.homeworkId));
+    window.localStorage.setItem(storageKeys.homeworks, JSON.stringify(homeworksRef.current));
+    return true;
+  }
+
+  async function handleSaveLessonJournalDrafts(lesson, recordDrafts = [], homeworkDrafts = []) {
+    if (!lesson?.lessonId) return false;
+    let nextHomeworks = homeworksRef.current;
+    const changedHomeworkMap = new Map();
+
+    homeworkDrafts.forEach((draft) => {
+      const student = students.find((item) => item.studentId === draft.studentId);
+      if (!student) return;
+      const result = buildHomeworkDraftUpdate(nextHomeworks, lesson, student, draft.homeworkType, draft.title ?? "");
+      nextHomeworks = result.homeworks;
+      result.changedHomeworks.forEach((homework) => {
+        changedHomeworkMap.set(homework.homeworkId, homework);
+        dirtyHomeworkIdsRef.current.add(homework.homeworkId);
+      });
+    });
+
+    if (changedHomeworkMap.size) {
+      homeworksRef.current = nextHomeworks;
+      setHomeworks(nextHomeworks);
+    }
+
+    const recordsToSave = recordDrafts
+      .filter((record) => record?.lessonStudentRecordId)
+      .map((record) => ({
+        ...record,
+        updatedBy: "instructor_owner_001",
+        updatedAt: new Date().toISOString()
+      }));
+
+    recordsToSave.forEach((record) => {
+      const assignmentStatus = record.assignmentStatus ?? record.incompleteHomework ?? "";
+      if (!assignmentStatus) return;
+      const student = students.find((item) => item.studentId === record.studentId);
+      if (!student) return;
+      const previousHomework = getLessonHomework(nextHomeworks, lesson, student, "previous", lessons);
+      if (!previousHomework?.homeworkId || !previousHomework.title?.trim()) return;
+      const existing = nextHomeworks.find((homework) => homework.homeworkId === previousHomework.homeworkId);
+      if (!existing) return;
+      const homeworkStatus = getHomeworkStatusFromAssignmentStatus(assignmentStatus);
+      const normalizedAssignmentStatus = normalizeAssignmentStatusValue(assignmentStatus);
+      const checkedFields = {
+        status: homeworkStatus.status,
+        teacherStatus: homeworkStatus.teacherStatus,
+        assignmentStatus: normalizedAssignmentStatus,
+        incompleteHomework: normalizedAssignmentStatus,
+        checkedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      const nextHomework = {
+        ...existing,
+        ...checkedFields,
+        dueDate: existing.dueDate || lesson.date
+      };
+      const sourceHomework = nextHomeworks.find(
+        (homework) =>
+          homework.homeworkType === "next" &&
+          homework.studentId === student.studentId &&
+          homework.lessonId === (existing.linkedFromLessonId || previousHomework.linkedFromLessonId) &&
+          String(homework.title ?? "").trim() === String(existing.title ?? "").trim()
+      );
+      const updatedSourceHomework = sourceHomework
+        ? {
+            ...sourceHomework,
+            ...checkedFields,
+            dueDate: sourceHomework.dueDate || lesson.date
+          }
+        : null;
+      changedHomeworkMap.set(nextHomework.homeworkId, nextHomework);
+      dirtyHomeworkIdsRef.current.add(nextHomework.homeworkId);
+      if (updatedSourceHomework) {
+        changedHomeworkMap.set(updatedSourceHomework.homeworkId, updatedSourceHomework);
+        dirtyHomeworkIdsRef.current.add(updatedSourceHomework.homeworkId);
+      }
+      nextHomeworks = nextHomeworks.map((homework) => {
+        if (homework.homeworkId === nextHomework.homeworkId) return nextHomework;
+        if (updatedSourceHomework && homework.homeworkId === updatedSourceHomework.homeworkId) return updatedSourceHomework;
+        return homework;
+      });
+    });
+
+    if (changedHomeworkMap.size) {
+      homeworksRef.current = nextHomeworks;
+      setHomeworks(nextHomeworks);
+    }
+
+    const savingStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "saving"]));
+    if (recordsToSave.length) {
+      setSaveStates((currentStates) => ({ ...currentStates, ...savingStates }));
+    }
+
+    try {
+      const results = await Promise.all(recordsToSave.map((record) => {
+        const student = students.find((item) => item.studentId === record.studentId) ?? null;
+        return handleSaveRecord(record.lessonStudentRecordId, lesson, student, record, {
+          skipNotificationRefresh: true,
+          skipRelatedHomeworks: true
+        });
+      }));
+      await saveDirtyHomeworks();
+      return results.every(Boolean);
+    } catch (error) {
+      console.error(error);
+      const failedStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "failed"]));
+      if (recordsToSave.length) {
+        setSaveStates((currentStates) => ({ ...currentStates, ...failedStates }));
+      }
+      return false;
+    }
+  }
+
   async function handleSaveRecord(recordId, lessonForRecord = null, studentForRecord = null, recordOverride = null, options = {}) {
-    const { skipNotificationRefresh = false, skipRelatedHomeworks = false } = options;
+    const { skipNotificationRefresh = true, skipRelatedHomeworks = false } = options;
     const existingTimerId = autoSaveTimersRef.current.get(recordId);
     if (existingTimerId) {
       clearTimeout(existingTimerId);
@@ -7593,6 +7717,7 @@ export function App() {
             onPolishPreparationNotice={handlePolishPreparationNotice}
             onPassMakeupTask={handlePassSupplementTask}
             onSaveRecord={handleSaveRecord}
+            onSaveLessonJournalDrafts={handleSaveLessonJournalDrafts}
             onSendComment={handleSendLessonComment}
             onSelectLesson={setSelectedLessonId}
             onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
@@ -8114,6 +8239,7 @@ export function App() {
     const statusField = target === "student" ? "studentCommentAiStatus" : "teacherCommentAiStatus";
     const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId);
     const rawTextSeed = normalizeMessageText(options.rawText);
+    const shouldPersist = options.persist !== false;
     const sourceDraft = buildInitialCommentDraft({
       audience: target === "student" ? "student" : "parent",
       existingComment: record?.[sourceField] ?? "",
@@ -8121,18 +8247,20 @@ export function App() {
       supplementSchedules
     });
 
-    setRecords((current) =>
-      upsertById(
-        current,
-        {
-          ...createEmptyRecord(lesson, student),
-          ...(record ?? {}),
-          lessonStudentRecordId: recordId,
-          [statusField]: "AI 수정 중"
-        },
-        "lessonStudentRecordId"
-      )
-    );
+    if (shouldPersist) {
+      setRecords((current) =>
+        upsertById(
+          current,
+          {
+            ...createEmptyRecord(lesson, student),
+            ...(record ?? {}),
+            lessonStudentRecordId: recordId,
+            [statusField]: "AI 수정 중"
+          },
+          "lessonStudentRecordId"
+        )
+      );
+    }
 
     try {
       const response = await fetch(apiUrl("/api/ai/comment-polish"), {
@@ -8161,6 +8289,13 @@ export function App() {
       if (!response.ok || !result.ok) {
         throw new Error(result.error || "코멘트 AI 수정에 실패했습니다.");
       }
+      if (!shouldPersist) {
+        return {
+          ok: true,
+          polishedText: result.result.polishedText,
+          provider: result.result.provider
+        };
+      }
 
       const nextRecord = {
         ...createEmptyRecord(lesson, student),
@@ -8177,19 +8312,23 @@ export function App() {
       recordsRef.current = nextRecords;
       setRecords(nextRecords);
       await handleSaveRecord(recordId, lesson, student, nextRecord);
+      return { ok: true, polishedText: result.result.polishedText, provider: result.result.provider };
     } catch (error) {
-      setRecords((current) =>
-        upsertById(
-          current,
-          {
-            ...createEmptyRecord(lesson, student),
-            ...(record ?? {}),
-            lessonStudentRecordId: recordId,
-            [statusField]: `실패 · ${error.message}`
-          },
-          "lessonStudentRecordId"
-        )
-      );
+      if (shouldPersist) {
+        setRecords((current) =>
+          upsertById(
+            current,
+            {
+              ...createEmptyRecord(lesson, student),
+              ...(record ?? {}),
+              lessonStudentRecordId: recordId,
+              [statusField]: `실패 · ${error.message}`
+            },
+            "lessonStudentRecordId"
+          )
+        );
+      }
+      return { error: error.message, ok: false };
     }
   }
 
@@ -11961,6 +12100,7 @@ function TeacherLessonHubV2({
   onPolishComment,
   onPolishPreparationNotice,
   onSaveRecord,
+  onSaveLessonJournalDrafts,
   onScheduleLessonNotificationsAt,
   onSendComment,
   onSelectLesson,
@@ -12128,6 +12268,7 @@ function TeacherLessonHubV2({
             onPolishComment={onPolishComment}
             onPolishPreparationNotice={onPolishPreparationNotice}
             onSaveRecord={onSaveRecord}
+            onSaveLessonJournalDrafts={onSaveLessonJournalDrafts}
             onScheduleLessonNotificationsAt={onScheduleLessonNotificationsAt}
             onSendComment={onSendComment}
             onUpdateExamSundayMakeupBlocks={onUpdateExamSundayMakeupBlocks}
@@ -12765,9 +12906,9 @@ function HomeworkMakeupLessonDetail({
   );
 }
 
-function EditableMemoCard({ className = "", editKey, editingKey, onChange, onEdit, placeholder, value }) {
+function EditableMemoCard({ className = "", disabled = false, editKey, editingKey, onChange, onEdit, placeholder, value }) {
   const textareaRef = useRef(null);
-  const isEditing = editingKey === editKey;
+  const isEditing = !disabled && editingKey === editKey;
   const displayValue = value?.trim() ? value : "";
 
   useEffect(() => {
@@ -12806,8 +12947,10 @@ function EditableMemoCard({ className = "", editKey, editingKey, onChange, onEdi
 
   return (
     <button
-      className={`journalMemoCardRead ${displayValue ? "" : "empty"} ${className}`.trim()}
-      onClick={() => onEdit(editKey)}
+      className={`journalMemoCardRead ${displayValue ? "" : "empty"} ${disabled ? "locked" : ""} ${className}`.trim()}
+      onClick={() => {
+        if (!disabled) onEdit(editKey);
+      }}
       type="button"
     >
       {displayValue || placeholder}
@@ -12873,6 +13016,7 @@ function LessonJournalDetail({
   onPolishComment,
   onPolishPreparationNotice,
   onSaveRecord,
+  onSaveLessonJournalDrafts,
   onScheduleLessonNotificationsAt,
   onSendComment,
   onUpdateExamSundayMakeupBlocks,
@@ -12889,6 +13033,10 @@ function LessonJournalDetail({
   const [bulkNextHomework, setBulkNextHomework] = useState("");
   const [commentModal, setCommentModal] = useState(null);
   const [prepMemoModal, setPrepMemoModal] = useState(null);
+  const [journalEditMode, setJournalEditMode] = useState(false);
+  const [journalRecordDrafts, setJournalRecordDrafts] = useState({});
+  const [journalHomeworkDrafts, setJournalHomeworkDrafts] = useState({});
+  const [journalManualSaveMessage, setJournalManualSaveMessage] = useState("");
   const [reservationModalOpen, setReservationModalOpen] = useState(false);
   const [reservationAudit, setReservationAudit] = useState({
     message: "",
@@ -12978,6 +13126,17 @@ function LessonJournalDetail({
   });
   const isHomeworkMakeupLesson = isHomeworkMakeupTaskLesson(lesson, linkedMakeupTask);
   const isExamSundayMakeupLesson = lesson.lessonType === "examSundayMakeup";
+
+  useEffect(() => {
+    setJournalEditMode(false);
+    setJournalRecordDrafts({});
+    setJournalHomeworkDrafts({});
+    setJournalManualSaveMessage("");
+  }, [lesson.lessonId]);
+
+  const journalRecordDraftCount = Object.keys(journalRecordDrafts).length;
+  const journalHomeworkDraftCount = Object.keys(journalHomeworkDrafts).length;
+  const hasJournalDraftChanges = journalRecordDraftCount > 0 || journalHomeworkDraftCount > 0;
 
   async function refreshReservationAudit() {
     setReservationAudit((current) => ({ ...current, message: "예약 원천을 조회하는 중입니다.", state: "loading" }));
@@ -13121,10 +13280,6 @@ function LessonJournalDetail({
     const shouldSeedDraft = draft && draft !== normalizeMessageText(baseRecord?.[field] ?? "");
     const nextRecord = shouldSeedDraft ? { ...baseRecord, [field]: draft } : baseRecord;
 
-    if (shouldSeedDraft) {
-      onChangeRecord(lesson, targetStudent, field, draft);
-    }
-
     setCommentModal({ audience, nextHomework, previousHomework, record: nextRecord, student: targetStudent, supplementSchedules });
   }
 
@@ -13215,6 +13370,82 @@ function LessonJournalDetail({
       .sort(sortNotificationJobsForCurrentStatus)[0] ?? null;
   }
 
+  function getEditableRecord(recordId, baseRecord) {
+    return journalRecordDrafts[recordId] ?? baseRecord;
+  }
+
+  function updateJournalRecordDraft(student, baseRecord, field, value) {
+    if (!journalEditMode) return;
+    const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+    const nowIso = new Date().toISOString();
+    const nextRecord = {
+      ...createEmptyRecord(lesson, student),
+      ...(journalRecordDrafts[recordId] ?? baseRecord ?? {}),
+      lessonStudentRecordId: recordId,
+      lessonId: lesson.lessonId,
+      studentId: student.studentId,
+      [field]: value,
+      ...(field === "assignmentStatus" ? { incompleteHomework: value } : {}),
+      ...(field === "teacherComment" ? { teacherCommentSendStatus: "" } : {}),
+      ...(field === "studentComment" ? { studentCommentSendStatus: "" } : {}),
+      updatedBy: "instructor_owner_001",
+      updatedAt: nowIso
+    };
+    setJournalRecordDrafts((current) => ({ ...current, [recordId]: nextRecord }));
+    setJournalManualSaveMessage("수업일지 · 저장 필요");
+  }
+
+  function getHomeworkDraftKey(student, homeworkType) {
+    return `${createLessonStudentRecordId(lesson.lessonId, student.studentId)}:${homeworkType}`;
+  }
+
+  function getHomeworkDraftTitle(student, homeworkType, homework) {
+    return journalHomeworkDrafts[getHomeworkDraftKey(student, homeworkType)]?.title ?? homework?.title ?? "";
+  }
+
+  function updateJournalHomeworkDraft(student, homeworkType, title) {
+    if (!journalEditMode) return;
+    const key = getHomeworkDraftKey(student, homeworkType);
+    setJournalHomeworkDrafts((current) => ({
+      ...current,
+      [key]: { homeworkType, key, studentId: student.studentId, title }
+    }));
+    setJournalManualSaveMessage("수업일지 · 저장 필요");
+  }
+
+  function applyBulkHomeworkDraft(homeworkType, title) {
+    if (!journalEditMode) return;
+    const nextDrafts = {};
+    lessonStudents.forEach((student) => {
+      const key = getHomeworkDraftKey(student, homeworkType);
+      nextDrafts[key] = { homeworkType, key, studentId: student.studentId, title };
+    });
+    setJournalHomeworkDrafts((current) => ({ ...current, ...nextDrafts }));
+    setJournalManualSaveMessage("수업일지 · 저장 필요");
+  }
+
+  async function saveJournalDrafts() {
+    if (!hasJournalDraftChanges) {
+      setJournalEditMode(false);
+      setJournalManualSaveMessage("수업일지 · 변경 없음");
+      return;
+    }
+    setJournalManualSaveMessage("수업일지 · 저장 중");
+    const saved = await onSaveLessonJournalDrafts?.(
+      lesson,
+      Object.values(journalRecordDrafts),
+      Object.values(journalHomeworkDrafts)
+    );
+    if (saved === false) {
+      setJournalManualSaveMessage("수업일지 · 저장 실패");
+      return;
+    }
+    setJournalRecordDrafts({});
+    setJournalHomeworkDrafts({});
+    setJournalEditMode(false);
+    setJournalManualSaveMessage("수업일지 · 저장 완료");
+  }
+
   function toggleReservationInspectMode(mode) {
     setReservationInspectMode((current) => current === mode ? "all" : mode);
   }
@@ -13297,14 +13528,14 @@ function LessonJournalDetail({
           전체 지난 숙제
           <div className="inlineInputAction">
             <input value={bulkPreviousHomework} onChange={(event) => setBulkPreviousHomework(event.target.value)} placeholder="전체 지난 과제 입력" />
-            <button className="softButton" onClick={() => onApplyBulkHomework(lesson, "previous", bulkPreviousHomework)} type="button">전체 적용</button>
+            <button className="softButton" disabled={!journalEditMode} onClick={() => applyBulkHomeworkDraft("previous", bulkPreviousHomework)} type="button">전체 적용</button>
           </div>
         </label>
         <label>
           전체 다음 숙제
           <div className="inlineInputAction">
             <input value={bulkNextHomework} onChange={(event) => setBulkNextHomework(event.target.value)} placeholder="전체 다음 과제 입력" />
-            <button className="softButton" onClick={() => onApplyBulkHomework(lesson, "next", bulkNextHomework)} type="button">전체 적용</button>
+            <button className="softButton" disabled={!journalEditMode} onClick={() => applyBulkHomeworkDraft("next", bulkNextHomework)} type="button">전체 적용</button>
           </div>
         </label>
       </section>
@@ -13313,13 +13544,34 @@ function LessonJournalDetail({
         <button className={showPreSendCheck ? "preSendCheckButton active" : "preSendCheckButton"} onClick={() => setShowPreSendCheck((current) => !current)} type="button">
           {showPreSendCheck ? "점검 표시 해제" : "발송 전 점검"}
         </button>
+        <button
+          className={journalEditMode ? "schedulePlanButton active" : "schedulePlanButton"}
+          onClick={() => {
+            setJournalEditMode(true);
+            setJournalManualSaveMessage("수업일지 · 편집 중");
+          }}
+          type="button"
+        >
+          수정 시작
+        </button>
+        <button
+          className="saveDraftButton"
+          disabled={!journalEditMode || !hasJournalDraftChanges}
+          onClick={saveJournalDrafts}
+          type="button"
+        >
+          변경 저장
+        </button>
         <span
           aria-live="polite"
           className={`defaultScheduleHint journalAutoSaveStatus ${lessonJournalSaveStatus.tone}`}
           title={defaultScheduleHintText}
         >
-          {lessonJournalSaveStatus.label || defaultScheduleHintText}
+          {journalManualSaveMessage || lessonJournalSaveStatus.label || defaultScheduleHintText}
         </span>
+        {hasJournalDraftChanges ? (
+          <span className="manualSaveDraftSummary">저장 전 변경 {journalRecordDraftCount + journalHomeworkDraftCount}건</span>
+        ) : null}
         {checkoutMissingStudents.length > 0 ? (
           <span className="checkoutMissingSummary" title={checkoutMissingStudents.map((student) => student.name).join(", ")}>
             하원 미체크 {checkoutMissingStudents.length}명
@@ -13530,9 +13782,18 @@ function LessonJournalDetail({
           </div>
           {lessonStudents.map((student) => {
             const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
-            const record = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
+            const persistedRecord = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
+            const record = getEditableRecord(recordId, persistedRecord);
             const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
             const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
+            const previousHomeworkTitle = getHomeworkDraftTitle(student, "previous", previousHomework);
+            const nextHomeworkTitle = getHomeworkDraftTitle(student, "next", nextHomework);
+            const effectivePreviousHomework = previousHomeworkTitle !== (previousHomework?.title ?? "")
+              ? { ...(previousHomework ?? {}), title: previousHomeworkTitle }
+              : previousHomework;
+            const effectiveNextHomework = nextHomeworkTitle !== (nextHomework?.title ?? "")
+              ? { ...(nextHomework ?? {}), title: nextHomeworkTitle }
+              : nextHomework;
             const attendanceDisplay = getAttendanceDisplay(record, lesson);
             const checkoutMissing = hasMissingCheckOut(record, lesson);
             const previousMemoContext = getPreviousLessonMemoContext(student);
@@ -13548,7 +13809,7 @@ function LessonJournalDetail({
             const studentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "student");
             const parentCommentState = getCommentButtonState(record.teacherComment, parentCommentSendStatus);
             const studentCommentState = getCommentButtonState(record.studentComment, studentCommentSendStatus);
-            const hasMissingPreSendData = hasPreSendMissingRequiredData(record, previousHomework, nextHomework);
+            const hasMissingPreSendData = hasPreSendMissingRequiredData(record, effectivePreviousHomework, effectiveNextHomework);
             const isParentNotificationOff = isLessonNotificationOff || record.notificationMutedParent;
             const isStudentNotificationOff = isLessonNotificationOff || record.notificationMutedStudent;
 
@@ -13612,41 +13873,46 @@ function LessonJournalDetail({
                   {checkoutMissing ? <small className="checkoutMissingText">하원 미체크</small> : null}
                 </button>
                 <EditableMemoCard
+                  disabled={!journalEditMode}
                   editKey={`${recordId}:lessonMaterial`}
                   editingKey={editingMemoKey}
-                  onChange={(value) => onChangeRecord(lesson, student, "lessonMaterial", value)}
+                  onChange={(value) => updateJournalRecordDraft(student, record, "lessonMaterial", value)}
                   onEdit={setEditingMemoKey}
                   placeholder={previousLessonMaterial || student.textbook || student.currentTextbook || "강의 교재"}
                   value={record.lessonMaterial ?? ""}
                 />
                 <EditableMemoCard
+                  disabled={!journalEditMode}
                   editKey={`${recordId}:lessonProgress`}
                   editingKey={editingMemoKey}
-                  onChange={(value) => onChangeRecord(lesson, student, "lessonProgress", value)}
+                  onChange={(value) => updateJournalRecordDraft(student, record, "lessonProgress", value)}
                   onEdit={setEditingMemoKey}
                   placeholder={previousLessonContent || "오늘 강의 내용"}
                   value={record.lessonProgress ?? record.progress ?? ""}
                 />
                 <EditableMemoCard
+                  disabled={!journalEditMode}
                   editKey={`${recordId}:previousHomework`}
                   editingKey={editingMemoKey}
-                  onChange={(value) => onUpdateHomework(lesson, student, "previous", value)}
+                  onChange={(value) => updateJournalHomeworkDraft(student, "previous", value)}
                   onEdit={setEditingMemoKey}
                   placeholder="지난 숙제"
-                  value={previousHomework?.title ?? ""}
+                  value={previousHomeworkTitle}
                 />
                 <EditableMemoCard
+                  disabled={!journalEditMode}
                   editKey={`${recordId}:nextHomework`}
                   editingKey={editingMemoKey}
-                  onChange={(value) => onUpdateHomework(lesson, student, "next", value)}
+                  onChange={(value) => updateJournalHomeworkDraft(student, "next", value)}
                   onEdit={setEditingMemoKey}
                   placeholder="다음 숙제"
-                  value={nextHomework?.title ?? ""}
+                  value={nextHomeworkTitle}
                 />
                 <select
                   className="assignmentStatusSelect"
+                  disabled={!journalEditMode}
                   value={normalizeAssignmentStatusValue(record.assignmentStatus ?? record.incompleteHomework ?? "")}
-                  onChange={(event) => onChangeRecord(lesson, student, "assignmentStatus", event.target.value)}
+                  onChange={(event) => updateJournalRecordDraft(student, record, "assignmentStatus", event.target.value)}
                 >
                   {assignmentStatusOptions.map((option) => (
                     <option key={option.value || "empty"} value={option.value}>{option.label}</option>
@@ -13655,7 +13921,7 @@ function LessonJournalDetail({
                 <div className="journalCommentCell">
                   <button
                     className={`commentOpenButton comment-${parentCommentState}${isParentNotificationOff ? " notification-off" : ""}`}
-                    onClick={() => openCommentComposer("parent", student, record, previousHomework, nextHomework)}
+                    onClick={() => openCommentComposer("parent", student, record, effectivePreviousHomework, effectiveNextHomework)}
                     type="button"
                   >
                     학부모 알림톡
@@ -13679,7 +13945,7 @@ function LessonJournalDetail({
                 <div className="journalCommentCell">
                   <button
                     className={`commentOpenButton comment-${studentCommentState}${isStudentNotificationOff ? " notification-off" : ""}`}
-                    onClick={() => openCommentComposer("student", student, record, previousHomework, nextHomework)}
+                    onClick={() => openCommentComposer("student", student, record, effectivePreviousHomework, effectiveNextHomework)}
                     type="button"
                   >
                     학생 알림톡
@@ -13717,6 +13983,7 @@ function LessonJournalDetail({
           onChangeRecord={onChangeRecord}
           onClose={() => setCommentModal(null)}
           onPolishComment={onPolishComment}
+          onSaveRecord={onSaveRecord}
           onSendComment={onSendComment}
           record={getCommentModalRecord()}
           saveState={saveStates[createLessonStudentRecordId(lesson.lessonId, commentModal.student.studentId)] ?? "idle"}
@@ -14029,6 +14296,7 @@ function CommentComposerModal({
   onChangeRecord,
   onClose,
   onPolishComment,
+  onSaveRecord,
   onSendComment,
   previousHomework,
   record,
@@ -14047,15 +14315,18 @@ function CommentComposerModal({
   const comment = record?.[field] ?? "";
   const aiStatus = isParent ? record?.teacherCommentAiStatus : record?.studentCommentAiStatus;
   const [draftComment, setDraftComment] = useState(comment);
-  const draftAutoSaveTimerRef = useRef(null);
-  const lastQueuedDraftRef = useRef(comment);
+  const [localAiStatus, setLocalAiStatus] = useState(aiStatus || "AI 대기");
+  const [draftSaveState, setDraftSaveState] = useState("idle");
+  const lastSavedDraftRef = useRef(comment);
   const previousAiStatusRef = useRef(aiStatus);
   const normalizedDraftSaveState = normalizeSaveState(saveState);
-  const hasUnqueuedDraft = draftComment !== lastQueuedDraftRef.current || draftComment !== comment;
+  const hasUnsavedDraft = draftComment !== lastSavedDraftRef.current || draftComment !== comment;
   const visibleDraftSaveState =
-    hasUnqueuedDraft && !["dirty", "saving"].includes(normalizedDraftSaveState)
+    hasUnsavedDraft && !["dirty", "saving"].includes(normalizeSaveState(draftSaveState))
       ? "dirty"
-      : normalizedDraftSaveState;
+      : normalizeSaveState(draftSaveState) !== "idle"
+        ? normalizeSaveState(draftSaveState)
+        : normalizedDraftSaveState;
   const title = isParent ? `${student.name} 학부모 알림톡` : `${student.name} 학생 알림톡`;
   const receiverLabel = isParent ? `${student.name} 학부모님` : student.name;
   const previewTitle = isParent ? "학부모 알림톡 미리보기" : "학생 알림톡 미리보기";
@@ -14115,8 +14386,10 @@ function CommentComposerModal({
   useEffect(() => {
     const nextComment = record?.[field] ?? "";
     setDraftComment(nextComment);
-    lastQueuedDraftRef.current = nextComment;
+    lastSavedDraftRef.current = nextComment;
     previousAiStatusRef.current = aiStatus;
+    setDraftSaveState("idle");
+    setLocalAiStatus(aiStatus || "AI 대기");
   }, [audience, student.studentId]);
 
   useEffect(() => {
@@ -14127,55 +14400,59 @@ function CommentComposerModal({
     }
   }, [aiStatus, field, record]);
 
-  useEffect(() => () => {
-    if (draftAutoSaveTimerRef.current) {
-      window.clearTimeout(draftAutoSaveTimerRef.current);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (draftComment === lastQueuedDraftRef.current) return undefined;
-    if (draftAutoSaveTimerRef.current) {
-      window.clearTimeout(draftAutoSaveTimerRef.current);
-    }
-    draftAutoSaveTimerRef.current = window.setTimeout(() => {
-      lastQueuedDraftRef.current = draftComment;
-      onChangeRecord(lesson, student, field, draftComment);
-    }, 700);
-    return () => {
-      if (draftAutoSaveTimerRef.current) {
-        window.clearTimeout(draftAutoSaveTimerRef.current);
-        draftAutoSaveTimerRef.current = null;
-      }
-    };
-  }, [draftComment, field, lesson.lessonId, student.studentId]);
-
-  function persistDraftComment() {
-    if (draftAutoSaveTimerRef.current) {
-      window.clearTimeout(draftAutoSaveTimerRef.current);
-      draftAutoSaveTimerRef.current = null;
-    }
-    if (draftComment !== lastQueuedDraftRef.current || draftComment !== comment) {
-      lastQueuedDraftRef.current = draftComment;
-      onChangeRecord(lesson, student, field, draftComment);
-    }
-  }
-
   function handleClose() {
-    persistDraftComment();
+    if (hasUnsavedDraft && typeof window !== "undefined" && !window.confirm("저장하지 않은 최종 문구가 있습니다. 닫을까요?")) {
+      return;
+    }
     onClose();
   }
 
-  function handlePolishClick() {
+  async function handlePolishClick() {
     const nextRecord = { ...(record ?? {}), [field]: draftComment };
     const rawText = normalizeMessageText(draftComment) || normalizeMessageText(sourceText) || normalizeMessageText(generatedPreviewText);
-    persistDraftComment();
-    onPolishComment(lesson, student, nextRecord, audience, aiProvider, aiModel, { rawText });
+    setLocalAiStatus("AI 수정 중");
+    const result = await onPolishComment(lesson, student, nextRecord, audience, aiProvider, aiModel, { persist: false, rawText });
+    if (result?.ok && result.polishedText) {
+      setDraftComment(result.polishedText);
+      setDraftSaveState("dirty");
+      setLocalAiStatus(`완료 · ${result.provider}`);
+      return;
+    }
+    setLocalAiStatus(`실패 · ${result?.error || "AI 수정 실패"}`);
+  }
+
+  async function handleSaveDraftClick() {
+    const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+    const nextRecord = { ...(record ?? {}), [field]: draftComment };
+    const recordToSave = {
+      ...createEmptyRecord(lesson, student),
+      ...nextRecord,
+      lessonStudentRecordId: recordId,
+      lessonId: lesson.lessonId,
+      studentId: student.studentId,
+      [field]: draftComment,
+      ...(field === "teacherComment" ? { teacherCommentSendStatus: "" } : {}),
+      ...(field === "studentComment" ? { studentCommentSendStatus: "" } : {}),
+      updatedBy: "instructor_owner_001",
+      updatedAt: new Date().toISOString()
+    };
+    setDraftSaveState("saving");
+    const saved = await onSaveRecord?.(recordId, lesson, student, recordToSave, {
+      skipNotificationRefresh: true,
+      skipRelatedHomeworks: true
+    });
+    if (saved === false) {
+      setDraftSaveState("failed");
+      return false;
+    }
+    lastSavedDraftRef.current = draftComment;
+    setDraftSaveState("saved");
+    return true;
   }
 
   function handleSendClick() {
+    if (hasUnsavedDraft) return;
     const nextRecord = { ...(record ?? {}), [field]: draftComment };
-    persistDraftComment();
     onSendComment(lesson, student, nextRecord, audience, {
       delayMinutes: sendDelayMinutes,
       forceDryRun,
@@ -14215,24 +14492,33 @@ function CommentComposerModal({
           />
           <div className="commentComposerStatusRow">
             <InlineSaveStatus label="최종 문구" saveState={visibleDraftSaveState} />
-            <small className="muted">{aiStatus || "AI 대기"}</small>
+            <small className="muted">{localAiStatus}</small>
           </div>
           <div className="commentComposerActions">
             <button
               className="softButton"
-              disabled={aiStatus === "AI 수정 중"}
+              disabled={localAiStatus === "AI 수정 중"}
               onClick={handlePolishClick}
               type="button"
             >
-              {aiStatus === "AI 수정 중" ? "AI 수정 중..." : "AI 수정"}
+              {localAiStatus === "AI 수정 중" ? "AI 수정 중..." : "AI 수정"}
+            </button>
+            <button
+              className="saveDraftButton"
+              disabled={!hasUnsavedDraft || draftSaveState === "saving"}
+              onClick={handleSaveDraftClick}
+              type="button"
+            >
+              {draftSaveState === "saving" ? "저장 중" : "최종 문구 저장"}
             </button>
             <button
               className="sendButton"
-              disabled={isNotificationMuted || (planMode === "none" && !isManualResendAvailable)}
+              disabled={hasUnsavedDraft || isNotificationMuted || (planMode === "none" && !isManualResendAvailable)}
               onClick={handleSendClick}
+              title={hasUnsavedDraft ? "최종 문구 저장 후 예약/발송할 수 있습니다." : ""}
               type="button"
             >
-              {actionLabel}
+              {hasUnsavedDraft ? "저장 후 가능" : actionLabel}
             </button>
           </div>
           <div className="currentSchedulePlan" aria-label="현재 수업 발송 계획">
