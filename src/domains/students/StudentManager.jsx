@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 const withdrawalReasonOptions = [
   { value: "graduation", label: "졸업" },
   { value: "class_move", label: "반이동" },
+  { value: "withdrawal", label: "퇴원" },
   { value: "other", label: "기타" }
 ];
 
