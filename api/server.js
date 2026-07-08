@@ -420,12 +420,13 @@ async function handleAttendanceCheck(payload = {}) {
   const existingRecord = findAttendanceRecord(records, lesson.lessonId, student.studentId);
   const hasArrival = hasAttendanceArrival(existingRecord);
   const hasCheckout = hasAttendanceCheckout(existingRecord);
+  const manualCheckOutTime = normalizeAttendanceTime(payload.checkOutTime);
 
   let eventType = String(payload.action || "");
   if (!eventType) {
     if (source === "manual") {
       const manualStatus = String(payload.attendanceStatus || "present");
-      eventType = manualStatus === "checkout" ? "checkout" : ["absent", "excused", "pending"].includes(manualStatus) ? "status" : "checkin";
+      eventType = manualStatus === "checkout" || manualCheckOutTime ? "checkout" : ["absent", "excused", "pending"].includes(manualStatus) ? "status" : "checkin";
     } else {
       eventType = hasCheckout ? "completed" : hasArrival ? "checkout" : "checkin";
     }
@@ -477,7 +478,6 @@ async function handleAttendanceCheck(payload = {}) {
   }
 
   const manualCheckInTime = normalizeAttendanceTime(payload.checkInTime);
-  const manualCheckOutTime = normalizeAttendanceTime(payload.checkOutTime);
   const existingStatus = normalizeAttendanceStatusForRecord(existingRecord?.attendanceStatus || "pending");
   const lateMinutesFromCheckedTime = calculateAttendanceLateMinutesFromTime(
     lesson,

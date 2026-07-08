@@ -50,6 +50,17 @@
 - 저장 원천: 최종 문구 원본은 기존 Supabase `lesson_student_records.teacher_comment`와 `lesson_student_records.student_comment`다. 새 SQL 적용은 필요 없다. 예약 job은 기존 `notification_jobs.payload.commentBodyOverride/message`를 최신 저장본 기준으로 갱신한다.
 - 검증: `node --check api/server.js`, `npm run test:production` 250개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
 
+### 2026-07-08 P1. 수동 하원 시각 저장 보정
+
+- 상태: 완료 - 분석/구현/검증 완료
+- 사용자 제보: 2026-07-08 `월수금 4-7반` 수업일지에서 하원 미체크 4명이 보이고, 학생이 하원 미체크했거나 선생님이 수동 입력한 하원 시각이 반영되지 않은 것 같다고 제보했다.
+- 운영 데이터 분석: 운영 API 기준 해당 수업은 `lesson_2026-07-08_월수금-4-7반_1781949077445`이고 현재 학생 5명 중 조윤빈은 `absent`다. 하원 미체크 4명은 김재연 `checkInTime 17:08`, 이하민 `17:07`, 홍선희 `17:15`, 이윤채 `16:00`으로 모두 `checkOutTime`/`checkOutAt`이 비어 있었다. 화면 표시는 현재 저장 원천과 일치하므로 단순 표시 오류가 아니다.
+- 추가 관찰: 같은 수업에 현재 반 편성에는 없는 김예나 record가 1개 남아 있었지만 `lesson.studentIds`에 포함되지 않아 현재 화면 4명 하원 미체크와 직접 관련은 없다.
+- 원인: 수동 출결 저장에서 하원 시각을 입력해도 상태가 `하원` 액션으로 가지 않으면 프론트가 `checkin` 저장을 보냈고, 서버의 `checkin` 분기는 `checkOutTime`/`checkOutAt`을 비웠다. 따라서 선생님이 하원 시각만 입력하고 상태 선택이 하원으로 확정되지 않은 경우 입력값이 저장되지 않을 수 있었다.
+- 구현 결과: 프론트 수동 출결 저장에서 `checkOutTime`이 입력되어 있고 결석/인정결석/대기가 아니면 `checkout` 액션으로 저장한다. 서버도 수동 payload에 하원 시각이 있으면 `attendanceStatus`가 `checkout`으로 오지 않아도 하원 이벤트로 해석하게 보강했다.
+- 저장 원천: 하원 시각 원본은 기존 Supabase `lesson_student_records.check_out_time`과 `lesson_student_records.check_out_at`이다. 새 SQL 적용은 필요 없다. 출결 이벤트 기록은 기존 `attendance_events` 흐름을 따른다.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 250개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-08 P1. 수업연구 유형별 강의 교안 리뉴얼
 
 - 상태: 완료 - 구현/검증 완료

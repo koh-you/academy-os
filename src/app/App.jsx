@@ -6789,15 +6789,20 @@ export function App() {
   }
 
   async function saveAttendanceRecord(lesson, student, values, updatedBy = "instructor_owner_001", options = {}) {
+    const hasManualCheckOutTime = Boolean(String(values.checkOutTime ?? "").trim());
+    const shouldSaveCheckOut =
+      values.attendanceStatus === "checkout" ||
+      (hasManualCheckOutTime && !["absent", "excused", "pending"].includes(values.attendanceStatus));
+    const nextAttendanceStatus = shouldSaveCheckOut ? "checkout" : values.attendanceStatus;
     const result = await checkAttendanceRequest({
-      action: values.attendanceStatus === "checkout"
+      action: shouldSaveCheckOut
         ? "checkout"
-        : ["absent", "excused", "pending"].includes(values.attendanceStatus)
+        : ["absent", "excused", "pending"].includes(nextAttendanceStatus)
         ? "status"
         : "checkin",
       actorId: updatedBy,
       attendanceReason: values.attendanceReason,
-      attendanceStatus: values.attendanceStatus,
+      attendanceStatus: nextAttendanceStatus,
       checkInTime: values.checkInTime,
       checkOutTime: values.checkOutTime,
       lateMinutes: values.lateMinutes,
