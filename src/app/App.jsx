@@ -11303,7 +11303,6 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle }) 
     <aside className={isCollapsed ? "sidebar collapsed" : "sidebar"}>
       <div className="brandBlock">
         <div className="brandHeader">
-          <span className="brandMark">KYM</span>
           <button
             aria-label={isCollapsed ? "좌측 메뉴 펼치기" : "좌측 메뉴 접기"}
             className="sidebarToggle"

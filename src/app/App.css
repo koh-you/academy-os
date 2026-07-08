@@ -189,21 +189,7 @@ button {
   align-items: center;
   display: flex;
   gap: 10px;
-  justify-content: space-between;
-}
-
-.brandMark {
-  align-items: center;
-  background: #17213d;
-  border-radius: 8px;
-  color: #ffffff;
-  display: inline-flex;
-  font-size: 12px;
-  font-weight: 900;
-  height: 34px;
-  justify-content: center;
-  letter-spacing: 1px;
-  width: 48px;
+  justify-content: flex-end;
 }
 
 .sidebarToggle {
@@ -243,14 +229,8 @@ button {
 }
 
 .sidebar.collapsed .brandBlock strong,
-.sidebar.collapsed .brandBlock > span:not(.brandMark) {
+.sidebar.collapsed .brandBlock > span {
   display: none;
-}
-
-.sidebar.collapsed .brandMark {
-  font-size: 11px;
-  height: 42px;
-  width: 42px;
 }
 
 .brandBlock span,
