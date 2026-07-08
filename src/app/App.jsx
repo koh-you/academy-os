@@ -4714,15 +4714,40 @@ function mergeById(currentItems, nextItems, idKey) {
   return [...currentItems, ...nextItems.filter((item) => !existingIds.has(item[idKey]))];
 }
 
-const lessonResearchSubjects = ["공통수학1", "공통수학2", "대수", "확률과 통계", "미적분", "기하", "미적분2"];
+const lessonResearchSubjects = ["공통수학1", "공통수학2", "대수", "미적분1", "확률과 통계", "기하"];
+const lessonResearchCategories = ["유형별 교안", "특정문항 교안", "못 푼 문제", "설명 아쉬움", "빈출 테마", "교재화 후보"];
+const lessonResearchStatuses = ["수집", "정리중", "교안작성", "교재후보", "완료"];
 
-function createLessonResearchItem(subject = "공통수학1") {
+function normalizeLessonResearchSubject(subject = "") {
+  const compactSubject = String(subject ?? "").replace(/\s+/g, "");
+  if (compactSubject === "미적분" || compactSubject === "미적분2") return "미적분1";
+  if (compactSubject === "확률과통계") return "확률과 통계";
+  return lessonResearchSubjects.includes(subject) ? subject : lessonResearchSubjects[0];
+}
+
+function createLessonResearchItem(subject = "공통수학1", typeInfo = {}) {
+  const normalizedSubject = normalizeLessonResearchSubject(subject);
+  const typeTitle = typeInfo.typeTitle || typeInfo.title || "";
+  const typeNo = typeInfo.typeNo || "";
+  const hasTypeLink = Boolean(typeInfo.typeId || typeInfo.id || typeTitle);
   return {
-    researchItemId: `research_${Date.now()}`,
-    subject,
-    category: "빈출 테마",
-    title: "새 연구 항목",
-    source: "",
+    researchItemId: typeInfo.researchItemId || `research_${Date.now()}`,
+    subject: normalizedSubject,
+    category: "유형별 교안",
+    title: hasTypeLink ? `${typeNo ? `${typeNo}. ` : ""}${typeTitle}` : "새 교안 항목",
+    source: hasTypeLink ? [typeInfo.partName, typeInfo.unitName].filter(Boolean).join(" > ") : "",
+    linkedTypeId: typeInfo.typeId || typeInfo.id || "",
+    linkedTypeNo: typeNo,
+    linkedTypeTitle: typeTitle,
+    linkedTypeUnit: typeInfo.unitName || "",
+    linkedTypeChapter: typeInfo.partName || "",
+    specificProblem: "",
+    studentDifficulty: "",
+    explanationGoal: "",
+    explanationFrame: "",
+    boardFlow: "",
+    checkQuestions: "",
+    practicePlan: "",
     problemNote: "",
     teachingNote: "",
     materialPlan: "",
@@ -4733,19 +4758,55 @@ function createLessonResearchItem(subject = "공통수학1") {
   };
 }
 
+function normalizeLessonResearchItem(item = {}) {
+  const subject = normalizeLessonResearchSubject(item.subject);
+  return {
+    ...createLessonResearchItem(subject),
+    ...item,
+    subject,
+    category: item.category || "유형별 교안",
+    status: item.status || "수집",
+    priority: item.priority || "중",
+    linkedTypeId: item.linkedTypeId || "",
+    linkedTypeNo: item.linkedTypeNo || "",
+    linkedTypeTitle: item.linkedTypeTitle || "",
+    linkedTypeUnit: item.linkedTypeUnit || "",
+    linkedTypeChapter: item.linkedTypeChapter || "",
+    specificProblem: item.specificProblem || "",
+    studentDifficulty: item.studentDifficulty || "",
+    explanationGoal: item.explanationGoal || "",
+    explanationFrame: item.explanationFrame || "",
+    boardFlow: item.boardFlow || "",
+    checkQuestions: item.checkQuestions || "",
+    practicePlan: item.practicePlan || "",
+    problemNote: item.problemNote || "",
+    teachingNote: item.teachingNote || "",
+    materialPlan: item.materialPlan || "",
+    updatedAt: item.updatedAt || item.createdAt || today
+  };
+}
+
+function normalizeLessonResearchItems(items = []) {
+  return Array.isArray(items) ? items.map(normalizeLessonResearchItem) : [];
+}
+
 function createDefaultLessonResearchItems() {
-  return [
+  return normalizeLessonResearchItems([
     {
       ...createLessonResearchItem("공통수학1"),
       researchItemId: "research_common_math_1_quadratic_theme",
-      category: "빈출 테마",
+      category: "유형별 교안",
       title: "이차함수 그래프와 부등식 연결",
       source: "고1 내신 대비 수업 메모",
       problemNote: "그래프의 위치 관계를 식으로 옮기는 과정에서 학생들이 자주 멈춤.",
       teachingNote: "교점 개수, 판별식, 부호표를 한 흐름으로 설명하는 판서를 보강.",
       materialPlan: "개념 확인 3문항 + 내신형 5문항으로 교재 후보 구성",
+      studentDifficulty: "그래프 조건을 식의 부호 조건으로 바꾸는 첫 단계에서 멈춘다.",
+      explanationGoal: "그림-교점-판별식-부호표를 하나의 언어로 연결한다.",
+      boardFlow: "1. 그래프 위치를 말로 읽기\n2. 교점 개수를 판별식으로 확인\n3. 부호표로 답의 범위를 정리",
+      checkQuestions: "교점이 2개라는 말은 식에서 무엇을 보라는 뜻인가?",
       priority: "상",
-      status: "정리중"
+      status: "교안작성"
     },
     {
       ...createLessonResearchItem("대수"),
@@ -4760,7 +4821,7 @@ function createDefaultLessonResearchItems() {
       status: "수집"
     },
     {
-      ...createLessonResearchItem("미적분"),
+      ...createLessonResearchItem("미적분1"),
       researchItemId: "research_calculus_derivative_killer",
       category: "못 푼 문제",
       title: "접선 조건이 숨어 있는 미분 문제",
@@ -4771,7 +4832,7 @@ function createDefaultLessonResearchItems() {
       priority: "상",
       status: "교재후보"
     }
-  ];
+  ]);
 }
 
 function buildSsenTypeCatalog(rows = []) {
@@ -5403,7 +5464,7 @@ export function App() {
           if (states.lessonNotificationPlans && typeof states.lessonNotificationPlans === "object" && !Array.isArray(states.lessonNotificationPlans)) {
             setLessonNotificationPlans(states.lessonNotificationPlans);
           }
-          if (Array.isArray(states.lessonResearchItems)) setLessonResearchItems(states.lessonResearchItems);
+          if (Array.isArray(states.lessonResearchItems)) setLessonResearchItems(normalizeLessonResearchItems(states.lessonResearchItems));
           if (Array.isArray(states.notificationLogs)) setNotificationLogs(states.notificationLogs);
           if (Array.isArray(states.problemBooks)) setProblemBooks(normalizeProblemBooks(states.problemBooks));
           if (Array.isArray(states.reportSnapshots)) setReportSnapshots(states.reportSnapshots);
@@ -7579,9 +7640,9 @@ export function App() {
           <LessonResearchCenter
             appStateSaveState={appStateSaveState}
             items={lessonResearchItems}
-            onAddItem={(subject) =>
+            onAddItem={(subject, typeInfo) =>
               setLessonResearchItems((current) => [
-                createLessonResearchItem(subject),
+                createLessonResearchItem(subject, typeInfo),
                 ...current
               ])
             }
@@ -17060,12 +17121,13 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
   const [selectedItemId, setSelectedItemId] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("전체");
   const [statusFilter, setStatusFilter] = useState("전체");
+  const catalogUnits = ssenTypeCatalog[selectedSubject] ?? [];
 
   const filteredItems = useMemo(
     () =>
       items.filter(
         (item) =>
-          item.subject === selectedSubject &&
+          normalizeLessonResearchSubject(item.subject) === selectedSubject &&
           (categoryFilter === "전체" || item.category === categoryFilter) &&
           (statusFilter === "전체" || item.status === statusFilter)
       ),
@@ -17075,20 +17137,38 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
   const selectedItem =
     items.find((item) => item.researchItemId === selectedItemId) ??
     filteredItems[0] ??
-    items.find((item) => item.subject === selectedSubject) ??
+    items.find((item) => normalizeLessonResearchSubject(item.subject) === selectedSubject) ??
     null;
 
   const subjectCounts = useMemo(
     () =>
       lessonResearchSubjects.reduce((acc, subject) => {
-        acc[subject] = items.filter((item) => item.subject === subject).length;
+        acc[subject] = items.filter((item) => normalizeLessonResearchSubject(item.subject) === subject).length;
         return acc;
       }, {}),
     [items]
   );
 
   function handleAddItem() {
-    onAddItem(selectedSubject);
+    const researchItemId = `research_${Date.now()}`;
+    onAddItem(selectedSubject, { researchItemId });
+    setSelectedItemId(researchItemId);
+  }
+
+  function handleAddTypeLessonPlan(type, chapter, unit) {
+    const researchItemId = `research_${Date.now()}_${safeIdPart(type.id || type.title || "type")}`;
+    onAddItem(selectedSubject, {
+      researchItemId,
+      id: type.id,
+      typeId: type.id,
+      typeNo: type.typeNo,
+      typeTitle: type.title,
+      partName: chapter.title,
+      unitName: unit.title
+    });
+    setCategoryFilter("전체");
+    setStatusFilter("전체");
+    setSelectedItemId(researchItemId);
   }
 
   return (
@@ -17097,11 +17177,11 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
         <div>
           <p className="eyebrow">LESSON RESEARCH</p>
           <h1>수업연구</h1>
-          <p className="muted">못 푼 문제, 설명이 아쉬웠던 문제, 빈출 테마를 과목별로 모아 교재 후보로 발전시키는 공간입니다.</p>
+          <p className="muted">유형별 강의 교안, 특정문항 설명 틀, 학생이 자주 막히는 지점을 과목별로 정리합니다.</p>
         </div>
         <div className="researchTopActions">
           <InlineSaveStatus label="수업연구 자동저장" saveState={appStateSaveState} />
-          <button className="primaryButton" onClick={handleAddItem} type="button">+ 연구 항목 추가</button>
+          <button className="primaryButton" onClick={handleAddItem} type="button">+ 교안 항목 추가</button>
         </div>
       </div>
 
@@ -17123,26 +17203,66 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
       </div>
 
       <div className="researchMetricGrid">
-        <MetricCard label="전체 연구 항목" value={`${items.length}개`} hint="과목 전체 누적" />
-        <MetricCard label="교재화 후보" value={`${items.filter((item) => item.status === "교재후보").length}개`} hint="문항집으로 발전 가능" />
+        <MetricCard label="전체 교안 항목" value={`${items.length}개`} hint="과목 전체 누적" />
+        <MetricCard label="유형 연결 교안" value={`${items.filter((item) => item.linkedTypeId).length}개`} hint="유형트리와 연결됨" />
         <MetricCard label="상 우선순위" value={`${items.filter((item) => item.priority === "상").length}개`} hint="다음 수업 전 확인" />
       </div>
 
       <div className="researchLayout">
         <section className="panel researchListPanel">
+          <div className="researchTypeTreePanel">
+            <div className="sectionHeader slim">
+              <div>
+                <p className="eyebrow">TYPE TREE</p>
+                <h2>유형트리</h2>
+                <p className="muted">유형을 골라 바로 강의 교안 항목을 만듭니다.</p>
+              </div>
+            </div>
+            <div className="researchTypeTree">
+              {catalogUnits.map((chapter) => (
+                <details className="researchTypeChapter" key={chapter.id} open>
+                  <summary>
+                    <strong>{chapter.title}</strong>
+                    <span>{chapter.units.reduce((sum, unit) => sum + unit.types.length, 0)}개 유형</span>
+                  </summary>
+                  <div className="researchTypeUnitList">
+                    {chapter.units.map((unit) => (
+                      <details className="researchTypeUnit" key={unit.id}>
+                        <summary>
+                          <b>{unit.title}</b>
+                          <span>{unit.types.length}개</span>
+                        </summary>
+                        <div className="researchTypeNodeList">
+                          {unit.types.map((type) => (
+                            <button className="researchTypeNode" key={type.id} onClick={() => handleAddTypeLessonPlan(type, chapter, unit)} type="button">
+                              <span>
+                                <strong>{type.typeNo ? `${type.typeNo}. ${type.title}` : type.title}</strong>
+                                <small>{type.id}</small>
+                              </span>
+                              <b>교안</b>
+                            </button>
+                          ))}
+                        </div>
+                      </details>
+                    ))}
+                  </div>
+                </details>
+              ))}
+            </div>
+          </div>
           <div className="sectionHeader">
             <div>
               <p className="eyebrow">COLLECT</p>
-              <h2>{selectedSubject}</h2>
+              <h2>교안 목록</h2>
             </div>
             <div className="researchFilters">
               <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
-                {["전체", "못 푼 문제", "설명 아쉬움", "빈출 테마", "교재화 후보"].map((option) => (
+                {["전체", ...lessonResearchCategories].map((option) => (
                   <option key={option} value={option}>{option}</option>
                 ))}
               </select>
               <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-                {["전체", "수집", "정리중", "교재후보", "완료"].map((option) => (
+                {["전체", ...lessonResearchStatuses].map((option) => (
                   <option key={option} value={option}>{option}</option>
                 ))}
               </select>
@@ -17165,6 +17285,7 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
                     <span>{item.source || "출처 미입력"}</span>
                   </div>
                   <div className="researchBadges">
+                    {item.linkedTypeNo || item.linkedTypeTitle ? <span>{[item.linkedTypeNo, item.linkedTypeTitle].filter(Boolean).join(" · ")}</span> : null}
                     <span>{item.category}</span>
                     <span>{item.status}</span>
                     <b>{item.priority}</b>
@@ -17181,7 +17302,7 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
               <div className="sectionHeader">
                 <div>
                   <p className="eyebrow">EDIT</p>
-                  <h2>연구 항목 정리</h2>
+                  <h2>강의 교안 정리</h2>
                   <p className="muted">마지막 수정일 {selectedItem.updatedAt || selectedItem.createdAt}</p>
                 </div>
                 <button className="ghostButton dangerText" onClick={() => onDeleteItem(selectedItem.researchItemId)} type="button">삭제</button>
@@ -17190,7 +17311,7 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
               <div className="researchMetaGrid">
                 <label>
                   과목
-                  <select value={selectedItem.subject} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "subject", event.target.value)}>
+                  <select value={normalizeLessonResearchSubject(selectedItem.subject)} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "subject", event.target.value)}>
                     {lessonResearchSubjects.map((subject) => (
                       <option key={subject} value={subject}>{subject}</option>
                     ))}
@@ -17199,7 +17320,7 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
                 <label>
                   분류
                   <select value={selectedItem.category} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "category", event.target.value)}>
-                    {["못 푼 문제", "설명 아쉬움", "빈출 테마", "교재화 후보"].map((option) => (
+                    {lessonResearchCategories.map((option) => (
                       <option key={option} value={option}>{option}</option>
                     ))}
                   </select>
@@ -17207,7 +17328,7 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
                 <label>
                   상태
                   <select value={selectedItem.status} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "status", event.target.value)}>
-                    {["수집", "정리중", "교재후보", "완료"].map((option) => (
+                    {lessonResearchStatuses.map((option) => (
                       <option key={option} value={option}>{option}</option>
                     ))}
                   </select>
@@ -17230,18 +17351,66 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
                 출처 / 수업 맥락
                 <input value={selectedItem.source} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "source", event.target.value)} placeholder="예: 6/12 월수금 7-10 질문, 창동고 기출, 자체교재 p.32" />
               </label>
+              <div className="researchLinkedTypePanel">
+                <div>
+                  <span>연결 유형</span>
+                  <strong>{selectedItem.linkedTypeTitle ? `${selectedItem.linkedTypeNo ? `${selectedItem.linkedTypeNo}. ` : ""}${selectedItem.linkedTypeTitle}` : "유형트리에서 교안 버튼을 눌러 연결"}</strong>
+                  <small>{[selectedItem.linkedTypeChapter, selectedItem.linkedTypeUnit].filter(Boolean).join(" > ") || "유형을 연결하면 단원 경로가 표시됩니다."}</small>
+                </div>
+                {selectedItem.linkedTypeId ? (
+                  <button
+                    className="softButton"
+                    onClick={() => {
+                      ["linkedTypeId", "linkedTypeNo", "linkedTypeTitle", "linkedTypeUnit", "linkedTypeChapter"].forEach((field) =>
+                        onUpdateItem(selectedItem.researchItemId, field, "")
+                      );
+                    }}
+                    type="button"
+                  >
+                    연결 해제
+                  </button>
+                ) : null}
+              </div>
+              <label className="wideLabel">
+                특정 문항 / 예시 상황
+                <input value={selectedItem.specificProblem ?? ""} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "specificProblem", event.target.value)} placeholder="예: 상계고 2026 1학기 기말 17번, 쎈 B단계 유사문항, 학생 질문 사진" />
+              </label>
 
               <div className="researchTextareaGrid">
                 <label>
-                  문제 메모
-                  <textarea value={selectedItem.problemNote} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "problemNote", event.target.value)} placeholder="문항 조건, 학생이 막힌 지점, 다시 풀어볼 포인트" />
+                  학생이 막히는 지점
+                  <textarea value={selectedItem.studentDifficulty ?? ""} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "studentDifficulty", event.target.value)} placeholder="학생들이 어디서 멈추는지, 어떤 오개념이 반복되는지" />
                 </label>
                 <label>
-                  설명 보완 메모
-                  <textarea value={selectedItem.teachingNote} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "teachingNote", event.target.value)} placeholder="다음 수업에서 어떻게 설명할지, 판서 흐름, 비유, 질문 순서" />
+                  설명 한 줄 목표
+                  <textarea value={selectedItem.explanationGoal ?? ""} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "explanationGoal", event.target.value)} placeholder="이 유형을 설명한 뒤 학생이 무엇을 할 수 있어야 하는지" />
+                </label>
+                <label>
+                  설명 틀 / 핵심 질문
+                  <textarea value={selectedItem.explanationFrame ?? ""} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "explanationFrame", event.target.value)} placeholder="처음 던질 질문, 조건을 읽는 순서, 개념 연결 문장" />
+                </label>
+                <label>
+                  판서 흐름
+                  <textarea value={selectedItem.boardFlow ?? ""} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "boardFlow", event.target.value)} placeholder="1. 조건 분해 → 2. 대표식 세팅 → 3. 실수 방지 체크처럼 수업 순서로 작성" />
+                </label>
+                <label>
+                  확인 질문
+                  <textarea value={selectedItem.checkQuestions ?? ""} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "checkQuestions", event.target.value)} placeholder="설명 후 바로 물어볼 질문, 학생 답변 기준" />
+                </label>
+                <label>
+                  연습/숙제 연결
+                  <textarea value={selectedItem.practicePlan ?? ""} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "practicePlan", event.target.value)} placeholder="대표문항, 유제, 재시험/누적테스트로 연결할 방식" />
                 </label>
                 <label className="researchWideTextarea">
-                  교재화 아이디어
+                  문항 관찰 메모
+                  <textarea value={selectedItem.problemNote} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "problemNote", event.target.value)} placeholder="문항 조건, 학생 답안, 다시 풀어볼 포인트" />
+                </label>
+                <label className="researchWideTextarea">
+                  설명 보완 메모
+                  <textarea value={selectedItem.teachingNote} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "teachingNote", event.target.value)} placeholder="다음 수업에서 보완할 비유, 말 순서, 강조 포인트" />
+                </label>
+                <label className="researchWideTextarea">
+                  수업/교재화 메모
                   <textarea value={selectedItem.materialPlan} onChange={(event) => onUpdateItem(selectedItem.researchItemId, "materialPlan", event.target.value)} placeholder="개념 설명, 대표문항, 유제, 심화문항으로 발전시킬 방향" />
                 </label>
               </div>

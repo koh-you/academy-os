@@ -9505,7 +9505,7 @@ textarea.profileEditInput {
   border-radius: 8px;
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   padding: 8px;
 }
 
@@ -9553,7 +9553,7 @@ textarea.profileEditInput {
 .researchLayout {
   display: grid;
   gap: 18px;
-  grid-template-columns: 420px minmax(0, 1fr);
+  grid-template-columns: 520px minmax(0, 1fr);
 }
 
 .researchListPanel,
@@ -9571,6 +9571,134 @@ textarea.profileEditInput {
 
 .researchFilters select {
   min-width: 120px;
+}
+
+.researchTypeTreePanel {
+  background: #f8fbff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.researchTypeTree {
+  display: grid;
+  gap: 8px;
+  max-height: 390px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.researchTypeChapter,
+.researchTypeUnit {
+  background: #ffffff;
+  border: 1px solid #dbe7fb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.researchTypeChapter > summary,
+.researchTypeUnit > summary {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  list-style: none;
+  min-height: 40px;
+  padding: 0 12px;
+}
+
+.researchTypeChapter > summary::-webkit-details-marker,
+.researchTypeUnit > summary::-webkit-details-marker {
+  display: none;
+}
+
+.researchTypeChapter > summary {
+  background: #eff6ff;
+}
+
+.researchTypeUnit > summary {
+  background: #f8fafc;
+}
+
+.researchTypeChapter > summary span,
+.researchTypeUnit > summary span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  margin-left: auto;
+}
+
+.researchTypeChapter > summary::after,
+.researchTypeUnit > summary::after {
+  background: #ffffff;
+  border: 1px solid #cfe0ff;
+  border-radius: 999px;
+  color: #2563eb;
+  content: "펼치기";
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 4px 8px;
+}
+
+.researchTypeChapter[open] > summary::after,
+.researchTypeUnit[open] > summary::after {
+  content: "접기";
+}
+
+.researchTypeUnitList,
+.researchTypeNodeList {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
+.researchTypeNode {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #17213d;
+  cursor: pointer;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 10px;
+  text-align: left;
+}
+
+.researchTypeNode:hover {
+  background: #eef6ff;
+  border-color: #93c5fd;
+}
+
+.researchTypeNode span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.researchTypeNode strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.researchTypeNode small {
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.researchTypeNode b {
+  background: #17213d;
+  border-radius: 999px;
+  color: #ffffff;
+  font-size: 12px;
+  padding: 5px 8px;
 }
 
 .researchCardList {
@@ -9637,6 +9765,35 @@ textarea.profileEditInput {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.researchLinkedTypePanel {
+  align-items: center;
+  background: #eef6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 12px;
+}
+
+.researchLinkedTypePanel div {
+  display: grid;
+  gap: 4px;
+}
+
+.researchLinkedTypePanel span,
+.researchLinkedTypePanel small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.researchLinkedTypePanel strong {
+  color: #17213d;
+  font-size: 16px;
+  font-weight: 950;
 }
 
 .researchTextareaGrid {
@@ -13757,6 +13914,7 @@ body.attendanceOnlyBody {
   .calendarDateGrid,
   .examSubjectRow,
   .mathExamItemRow,
+  .researchLinkedTypePanel,
   .researchMetaGrid,
   .researchTextareaGrid {
     grid-template-columns: 1fr;
