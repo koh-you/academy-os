@@ -14,6 +14,17 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-08 P1. 알림톡 AI 수정 저장 표시와 지각 유예시간 보정
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 제보: 수업일지 알림톡 작성 모달에서 `AI 수정`이 동작하지 않는 것처럼 보이고, 최종 문구를 수정해도 저장 여부를 알 수 없었다. 또한 설정에서 지각 유예시간을 5분으로 두었는데 1분 늦은 등원도 지각으로 표시됐다.
+- 원인: 알림톡 `AI 수정`은 최종 textarea 값만 원문으로 사용했다. textarea가 비어 있고 오른쪽 미리보기만 채워진 경우 AI가 참고할 원문이 약했고, AI 결과도 화면 state 갱신에 머물러 즉시 `lesson_student_records` 저장으로 이어지지 않았다. 모달에는 기존 수업일지 `saveStates`가 전달되지 않아 저장 중/저장 완료도 보이지 않았다.
+- 구현 결과: 알림톡 `AI 수정`은 현재 최종 문구가 있으면 그 값을, 비어 있으면 원본 정보/미리보기 seed를 AI 원문으로 넘긴다. AI 수정 결과를 받으면 `teacherComment` 또는 `studentComment`에 반영하고 즉시 기존 수업일지 저장 경로로 저장한다.
+- 구현 결과: 최종 알림톡 textarea는 0.7초 후 기존 `onChangeRecord -> scheduleRecordAutoSave -> lesson_student_records` 흐름으로 자동저장되며, 모달 내부에 `최종 문구 · 변경됨/저장 중/저장 완료/저장 실패` 상태가 표시된다. 닫기/AI 수정/발송 버튼을 누를 때도 남은 draft를 먼저 저장 큐에 넣는다.
+- 구현 결과: 수동 출결 모달과 서버 `/api/attendance/check` 모두 지각 유예시간을 적용한다. `late`로 들어와도 계산된 지각분이 0분 이하이면 저장 직전에 `present`로 정규화하고 `lateMinutes`를 비운다. 하원 저장 시 기존 `late` 기록도 실제 등원 시간이 유예시간 안이면 `present`로 보정된다.
+- 저장 원천: 최종 알림톡 문구 원본은 Supabase `lesson_student_records.teacher_comment`/`student_comment`다. 출결 상태 원본은 `lesson_student_records.attendance_status`, `check_in_time`, `late_minutes`다. 새 SQL 적용은 필요 없다.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 255개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-08 P1. 시험지관리/수업연구 운영 검수
 
 - 상태: 완료 - 운영 화면 자동 검수 통과

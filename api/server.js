@@ -345,6 +345,12 @@ function calculateAttendanceLateMinutesFromTime(lesson = {}, timeValue = "", gra
   return Math.max(0, checkedMinutes - startMinutes - (Number(graceMinutes) || 0));
 }
 
+function isWithinAttendanceGrace(lateMinutes) {
+  if (lateMinutes === "" || lateMinutes === undefined || lateMinutes === null) return false;
+  const numericLateMinutes = Number(lateMinutes);
+  return Number.isFinite(numericLateMinutes) && numericLateMinutes <= 0;
+}
+
 function normalizeAttendanceStatusForRecord(status = "present") {
   if (status === "checkin") return "present";
   if (status === "checkout") return "present";
@@ -505,7 +511,14 @@ async function handleAttendanceCheck(payload = {}) {
   let checkOutAt = existingRecord?.checkOutAt || "";
 
   if (eventType === "checkin") {
-    nextStatus = normalizeAttendanceStatusForRecord(payload.attendanceStatus || (Number(lateMinutes) > 0 ? "late" : "present"));
+    nextStatus = payload.attendanceStatus
+      ? normalizeAttendanceStatusForRecord(payload.attendanceStatus)
+      : Number(lateMinutes) > 0
+        ? "late"
+        : "present";
+    if (nextStatus === "late" && isWithinAttendanceGrace(lateMinutes)) {
+      nextStatus = "present";
+    }
     checkInTime = manualCheckInTime || checkInTime || currentTime;
     checkInAt = createKoreaIsoForAttendance(lesson.date, checkInTime, checkInAt || nowIso);
     checkOutTime = "";
@@ -516,6 +529,10 @@ async function handleAttendanceCheck(payload = {}) {
     checkInAt = checkInTime ? createKoreaIsoForAttendance(lesson.date, checkInTime, checkInAt || nowIso) : checkInAt;
     checkOutTime = manualCheckOutTime || checkOutTime || currentTime;
     checkOutAt = createKoreaIsoForAttendance(lesson.date, checkOutTime, checkOutAt || nowIso);
+    const checkoutLateMinutes = calculateAttendanceLateMinutesFromTime(lesson, checkInTime, payload.lateGraceMinutes);
+    if (nextStatus === "late" && isWithinAttendanceGrace(checkoutLateMinutes)) {
+      nextStatus = "present";
+    }
   } else if (["status", "absent", "excused", "pending"].includes(eventType)) {
     nextStatus = normalizeAttendanceStatusForRecord(payload.attendanceStatus || eventType);
     if (["absent", "excused", "pending"].includes(nextStatus)) {
@@ -525,6 +542,7 @@ async function handleAttendanceCheck(payload = {}) {
       checkOutAt = "";
     }
   }
+  const persistedLateMinutes = nextStatus === "late" ? lateMinutes : "";
 
   const nextRecord = {
     ...(existingRecord ?? {}),
@@ -533,7 +551,7 @@ async function handleAttendanceCheck(payload = {}) {
     studentId: student.studentId,
     attendanceStatus: nextStatus,
     attendanceReason: payload.attendanceReason ?? existingRecord?.attendanceReason ?? "",
-    lateMinutes,
+    lateMinutes: persistedLateMinutes,
     checkInAt,
     checkInTime,
     checkOutAt,

@@ -8108,11 +8108,12 @@ export function App() {
     });
   }
 
-  async function handlePolishLessonComment(lesson, student, record, target, aiProvider, aiModel) {
+  async function handlePolishLessonComment(lesson, student, record, target, aiProvider, aiModel, options = {}) {
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
     const sourceField = target === "student" ? "studentComment" : "teacherComment";
     const statusField = target === "student" ? "studentCommentAiStatus" : "teacherCommentAiStatus";
     const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId);
+    const rawTextSeed = normalizeMessageText(options.rawText);
     const sourceDraft = buildInitialCommentDraft({
       audience: target === "student" ? "student" : "parent",
       existingComment: record?.[sourceField] ?? "",
@@ -8150,7 +8151,7 @@ export function App() {
           lessonContent: getLessonContent(record),
           lessonMaterial: getLessonMaterial(record, student),
           lessonName: lesson.className,
-          rawText: sourceDraft || (record?.[sourceField] ?? ""),
+          rawText: rawTextSeed || sourceDraft || (record?.[sourceField] ?? ""),
           schoolName: student.schoolName,
           studentName: student.name,
           supplementSchedule: supplementSchedules.join("\n")
@@ -8161,20 +8162,21 @@ export function App() {
         throw new Error(result.error || "코멘트 AI 수정에 실패했습니다.");
       }
 
-      setRecords((current) =>
-        upsertById(
-          current,
-          {
-            ...createEmptyRecord(lesson, student),
-            ...(record ?? {}),
-            lessonStudentRecordId: recordId,
-            [sourceField]: result.result.polishedText,
-            [statusField]: `완료 · ${result.result.provider}`,
-            updatedAt: new Date().toISOString()
-          },
-          "lessonStudentRecordId"
-        )
-      );
+      const nextRecord = {
+        ...createEmptyRecord(lesson, student),
+        ...(record ?? {}),
+        lessonStudentRecordId: recordId,
+        lessonId: lesson.lessonId,
+        studentId: student.studentId,
+        [sourceField]: result.result.polishedText,
+        [statusField]: `완료 · ${result.result.provider}`,
+        updatedBy: "instructor_owner_001",
+        updatedAt: new Date().toISOString()
+      };
+      const nextRecords = upsertLessonStudentRecord(recordsRef.current, nextRecord);
+      recordsRef.current = nextRecords;
+      setRecords(nextRecords);
+      await handleSaveRecord(recordId, lesson, student, nextRecord);
     } catch (error) {
       setRecords((current) =>
         upsertById(
@@ -13627,6 +13629,7 @@ function LessonJournalDetail({
           onPolishComment={onPolishComment}
           onSendComment={onSendComment}
           record={getCommentModalRecord()}
+          saveState={saveStates[createLessonStudentRecordId(lesson.lessonId, commentModal.student.studentId)] ?? "idle"}
           nextHomework={commentModal.nextHomework}
           previousHomework={commentModal.previousHomework}
           student={commentModal.student}
@@ -13939,6 +13942,7 @@ function CommentComposerModal({
   onSendComment,
   previousHomework,
   record,
+  saveState = "idle",
   student,
   supplementSchedules = []
 }) {
@@ -13953,7 +13957,15 @@ function CommentComposerModal({
   const comment = record?.[field] ?? "";
   const aiStatus = isParent ? record?.teacherCommentAiStatus : record?.studentCommentAiStatus;
   const [draftComment, setDraftComment] = useState(comment);
+  const draftAutoSaveTimerRef = useRef(null);
+  const lastQueuedDraftRef = useRef(comment);
   const previousAiStatusRef = useRef(aiStatus);
+  const normalizedDraftSaveState = normalizeSaveState(saveState);
+  const hasUnqueuedDraft = draftComment !== lastQueuedDraftRef.current || draftComment !== comment;
+  const visibleDraftSaveState =
+    hasUnqueuedDraft && !["dirty", "saving"].includes(normalizedDraftSaveState)
+      ? "dirty"
+      : normalizedDraftSaveState;
   const title = isParent ? `${student.name} 학부모 알림톡` : `${student.name} 학생 알림톡`;
   const receiverLabel = isParent ? `${student.name} 학부모님` : student.name;
   const previewTitle = isParent ? "학부모 알림톡 미리보기" : "학생 알림톡 미리보기";
@@ -14011,7 +14023,9 @@ function CommentComposerModal({
     supplementSchedules
   });
   useEffect(() => {
-    setDraftComment(record?.[field] ?? "");
+    const nextComment = record?.[field] ?? "";
+    setDraftComment(nextComment);
+    lastQueuedDraftRef.current = nextComment;
     previousAiStatusRef.current = aiStatus;
   }, [audience, student.studentId]);
 
@@ -14023,8 +14037,36 @@ function CommentComposerModal({
     }
   }, [aiStatus, field, record]);
 
+  useEffect(() => () => {
+    if (draftAutoSaveTimerRef.current) {
+      window.clearTimeout(draftAutoSaveTimerRef.current);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (draftComment === lastQueuedDraftRef.current) return undefined;
+    if (draftAutoSaveTimerRef.current) {
+      window.clearTimeout(draftAutoSaveTimerRef.current);
+    }
+    draftAutoSaveTimerRef.current = window.setTimeout(() => {
+      lastQueuedDraftRef.current = draftComment;
+      onChangeRecord(lesson, student, field, draftComment);
+    }, 700);
+    return () => {
+      if (draftAutoSaveTimerRef.current) {
+        window.clearTimeout(draftAutoSaveTimerRef.current);
+        draftAutoSaveTimerRef.current = null;
+      }
+    };
+  }, [draftComment, field, lesson.lessonId, student.studentId]);
+
   function persistDraftComment() {
-    if (draftComment !== comment) {
+    if (draftAutoSaveTimerRef.current) {
+      window.clearTimeout(draftAutoSaveTimerRef.current);
+      draftAutoSaveTimerRef.current = null;
+    }
+    if (draftComment !== lastQueuedDraftRef.current || draftComment !== comment) {
+      lastQueuedDraftRef.current = draftComment;
       onChangeRecord(lesson, student, field, draftComment);
     }
   }
@@ -14036,8 +14078,9 @@ function CommentComposerModal({
 
   function handlePolishClick() {
     const nextRecord = { ...(record ?? {}), [field]: draftComment };
+    const rawText = normalizeMessageText(draftComment) || normalizeMessageText(sourceText) || normalizeMessageText(generatedPreviewText);
     persistDraftComment();
-    onPolishComment(lesson, student, nextRecord, audience, aiProvider, aiModel);
+    onPolishComment(lesson, student, nextRecord, audience, aiProvider, aiModel, { rawText });
   }
 
   function handleSendClick() {
@@ -14080,6 +14123,10 @@ function CommentComposerModal({
             onChange={(event) => setDraftComment(event.target.value)}
             placeholder={isParent ? "학부모님께 실제로 보낼 최종 문구를 적어주세요." : "학생에게 실제로 보낼 최종 문구를 적어주세요."}
           />
+          <div className="commentComposerStatusRow">
+            <InlineSaveStatus label="최종 문구" saveState={visibleDraftSaveState} />
+            <small className="muted">{aiStatus || "AI 대기"}</small>
+          </div>
           <div className="commentComposerActions">
             <button
               className="softButton"
@@ -14115,7 +14162,7 @@ function CommentComposerModal({
             {missingNotificationEnv.length ? <span>미입력 환경변수: {missingNotificationEnv.join(", ")}</span> : null}
           </div>
           <small className="muted">발송 수신 기준: {canSendNowToRealRecipient ? "등록된 실제 번호" : "테스트 번호 또는 dry-run"}</small>
-          <small className="muted">{aiStatus || "AI 대기"} · {displaySendStatus || "발송 전"}</small>
+          <small className="muted">{displaySendStatus || "발송 전"}</small>
         </section>
 
         <section className="commentPreviewPanel">
@@ -14152,7 +14199,15 @@ function AttendanceModal({ item, lateGraceMinutes = 0, onClose, onSave }) {
     : calculatedLateMinutes !== ""
       ? calculatedLateMinutes
       : editableRecord.lateMinutes ?? "";
-  const values = { attendanceStatus, lateMinutes: effectiveLateMinutes, checkInTime, checkOutTime, attendanceReason };
+  const isWithinLateGrace = attendanceStatus === "late" && effectiveLateMinutes !== "" && Number(effectiveLateMinutes) <= 0;
+  const effectiveAttendanceStatus = isWithinLateGrace ? "present" : attendanceStatus;
+  const values = {
+    attendanceStatus: effectiveAttendanceStatus,
+    lateMinutes: effectiveAttendanceStatus === "late" ? effectiveLateMinutes : "",
+    checkInTime,
+    checkOutTime,
+    attendanceReason
+  };
   const hasKioskRecord = !attendanceDateMismatch && hasTabletAttendanceRecord(record);
   const hasChanged = hasAttendanceModalChanges(editableRecord, values);
 
@@ -14227,6 +14282,11 @@ function AttendanceModal({ item, lateGraceMinutes = 0, onClose, onSave }) {
           <input value={attendanceReason} onChange={(event) => setAttendanceReason(event.target.value)} placeholder="예: 학교 동아리" />
         </label>
       </div>
+      {isWithinLateGrace ? (
+        <div className="attendanceSourceNotice">
+          지각 유예시간 {lateGraceMinutes}분 안의 등원이라 저장 시 정상 등원으로 처리됩니다.
+        </div>
+      ) : null}
       {hasKioskRecord ? (
         <div className="attendanceSourceNotice">
           태블릿에서 기록된 출결입니다. 수동으로 바꾸면 확인 후 저장됩니다.

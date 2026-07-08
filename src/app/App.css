@@ -8570,6 +8570,14 @@ textarea {
   min-height: 360px;
 }
 
+.commentComposerStatusRow {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .examReviewComposerModal .commentDraftPanel,
 .examReviewComposerModal .commentPreviewPanel {
   align-content: start;
