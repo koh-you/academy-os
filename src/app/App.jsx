@@ -20338,11 +20338,11 @@ function MaterialManager({
         <button className={activeTab === "track" ? "active" : ""} onClick={() => setActiveTab("track")} type="button">
           진도별 트랙
         </button>
-        <button className={activeTab === "types" ? "active" : ""} onClick={() => setActiveTab("types")} type="button">
-          쎈 유형트리
-        </button>
         <button className={activeTab === "books" ? "active" : ""} onClick={() => setActiveTab("books")} type="button">
           시험지 보관함
+        </button>
+        <button className={activeTab === "types" ? "active" : ""} onClick={() => setActiveTab("types")} type="button">
+          유형트리
         </button>
       </div>
 
@@ -20351,7 +20351,7 @@ function MaterialManager({
           <div className="sectionHeader">
             <div>
               <h1>시험지관리</h1>
-              <p className="muted">쎈 유형을 기준으로 시험지를 미리 준비하고, 학생이 어느 테스트까지 통과했는지 한 화면에서 봅니다.</p>
+              <p className="muted">유형을 기준으로 시험지를 미리 준비하고, 학생이 어느 테스트까지 통과했는지 한 화면에서 봅니다.</p>
             </div>
             <InlineSaveStatus label="시험지 자동저장" saveState={appStateSaveState} />
           </div>
@@ -20377,7 +20377,7 @@ function MaterialManager({
                   </summary>
                   <div className="ssenUnitList">
                     {chapter.units.map((unit) => (
-                      <details className="ssenUnitNode" key={unit.id} open>
+                      <details className="ssenUnitNode" key={unit.id}>
                         <summary>
                           <b>{unit.title}</b>
                           <span>{unit.types.length}개 유형</span>
@@ -20411,8 +20411,8 @@ function MaterialManager({
               ))}
               {catalogUnits.length === 0 ? (
                 <div className="examPrepEmptyState">
-                  <strong>{activeSubject} 유형 트리는 아직 등록 전입니다.</strong>
-                  <span>쎈 유형표가 준비되면 이 영역에 대단원/중단원/세부유형을 추가합니다.</span>
+                  <strong>{activeSubject} 유형트리는 아직 등록 전입니다.</strong>
+                  <span>유형표가 준비되면 이 영역에 대단원/중단원/세부유형을 추가합니다.</span>
                 </div>
               ) : null}
             </div>

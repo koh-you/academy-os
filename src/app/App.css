@@ -13202,10 +13202,16 @@ textarea.profileEditInput {
   align-items: center;
   cursor: pointer;
   display: flex;
+  gap: 10px;
   justify-content: space-between;
   list-style: none;
   min-height: 46px;
   padding: 0 16px;
+}
+
+.ssenChapterNode > summary::-webkit-details-marker,
+.ssenUnitNode > summary::-webkit-details-marker {
+  display: none;
 }
 
 .ssenChapterNode > summary {
@@ -13221,6 +13227,25 @@ textarea.profileEditInput {
   color: #64748b;
   font-size: 12px;
   font-weight: 800;
+  margin-left: auto;
+}
+
+.ssenChapterNode > summary::after,
+.ssenUnitNode > summary::after {
+  background: #ffffff;
+  border: 1px solid #cfe0ff;
+  border-radius: 999px;
+  color: #2563eb;
+  content: "펼치기";
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 4px 8px;
+}
+
+.ssenChapterNode[open] > summary::after,
+.ssenUnitNode[open] > summary::after {
+  content: "접기";
 }
 
 .ssenUnitList,
