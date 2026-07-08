@@ -4776,10 +4776,9 @@ function createDefaultLessonResearchItems() {
 const testPaperSubjectOptions = ["공통수학1", "공통수학2", "수학1", "수학2", "확률과통계", "미적분"];
 
 const testPaperKindOptions = [
-  { id: "daily", label: "데일리", description: "오늘 배운 유형을 바로 확인" },
-  { id: "cumulative", label: "누적", description: "지난 유형을 섞어 망각 방지" },
-  { id: "unit", label: "단원", description: "중단원/대단원 마무리" },
-  { id: "retest", label: "재시험", description: "미통과 학생 재확인" }
+  { id: "daily", label: "데일리 테스트", description: "오늘 배운 유형을 바로 확인" },
+  { id: "cumulative", label: "누적테스트", description: "지난 유형을 섞어 망각 방지" },
+  { id: "unit", label: "단원테스트", description: "중단원/대단원 마무리" }
 ];
 
 const testPaperPreparationOptions = [
@@ -4901,11 +4900,10 @@ function getTestPaperProgressLabel(value = "") {
 }
 
 function inferTestPaperKind(book = {}) {
-  if (book.testKind) return book.testKind;
+  if (testPaperKindOptions.some((option) => option.id === book.testKind)) return book.testKind;
   const text = `${book.title ?? ""} ${book.unit ?? ""}`.toLowerCase();
   if (text.includes("누적")) return "cumulative";
   if (text.includes("단원")) return "unit";
-  if (text.includes("재시험")) return "retest";
   return "daily";
 }
 
@@ -4953,66 +4951,31 @@ function getBookStudentProgress(book = {}, studentId = "") {
   return progress[studentId] ?? { status: "waiting", attempt: 0, score: "" };
 }
 
-function createDefaultProblemBooks() {
-  return [
-    {
-      problemBookId: "book_common_math_step01",
-      title: "공수1 고쟁이 STEP 01 다항식의 연산",
-      subject: "공통수학1",
-      grade: "고1",
-      unit: "다항식의 연산",
-      testKind: "daily",
-      preparationStatus: "ready",
-      trackOrder: 1,
-      plannedDate: "",
-      passScore: 80,
-      maxRetestCount: 2,
-      linkedTypeIds: ["cm1_poly_ops_basic", "cm1_poly_ops_multi"],
-      sourceFileName: "sample_textbook.pdf",
-      totalProblems: 28,
-      studentProgress: {},
-      statusCounts: { first: 28, retry: 0, second: 0, wrong: 0, question: 0, outOfScope: 0, unchecked: 0 },
-      problems: Array.from({ length: 28 }, (_, index) => ({
-        problemId: `problem_step01_${index + 1}`,
-        number: index + 1,
-        status: "first",
-        cropImageUrl: "",
-        text: index === 3 ? "다항식 (x+3y-1)(2x-y+3)을 바르게 전개한 것은?" : "",
-        answer: "",
-        note: ""
-      }))
-    },
-    {
-      problemBookId: "book_common_math_step02",
-      title: "공수1 고쟁이 STEP 02 항등식과 나머지정리",
-      subject: "공통수학1",
-      grade: "고1",
-      unit: "항등식과 나머지정리",
-      testKind: "cumulative",
-      preparationStatus: "review",
-      trackOrder: 2,
-      plannedDate: "",
-      passScore: 80,
-      maxRetestCount: 2,
-      linkedTypeIds: ["cm1_identity_coeff", "cm1_remainder_basic", "cm1_factor_theorem"],
-      sourceFileName: "sample_textbook.pdf",
-      totalProblems: 26,
-      studentProgress: {},
-      statusCounts: { first: 4, retry: 2, second: 0, wrong: 1, question: 0, outOfScope: 0, unchecked: 19 },
-      problems: Array.from({ length: 26 }, (_, index) => ({
-        problemId: `problem_step02_${index + 78}`,
-        number: index + 78,
-        status: index === 3 ? "retry" : index === 4 ? "wrong" : index < 4 ? "first" : "unchecked",
-        cropImageUrl: "",
-        text: "",
-        answer: "",
-        note: ""
-      }))
-    }
-  ];
+function isRetiredProblemBookSeed(book = {}) {
+  const problemBookId = String(book.problemBookId ?? "");
+  return (
+    problemBookId === "book_common_math_step01" ||
+    problemBookId === "book_common_math_step02" ||
+    problemBookId.startsWith("book_pagesnap_") ||
+    book.sourceType === "pagesnap" ||
+    String(book.sourceFileName ?? "").toLowerCase() === "pagesnap"
+  );
 }
 
-function createProblemBookFromFile(fileName) {
+function normalizeProblemBooks(problemBooks = []) {
+  return problemBooks
+    .filter((book) => !isRetiredProblemBookSeed(book))
+    .map((book) => {
+      const testKind = inferTestPaperKind(book);
+      return book.testKind === testKind ? book : { ...book, testKind };
+    });
+}
+
+function createDefaultProblemBooks() {
+  return [];
+}
+
+function createProblemBookFromFile(fileName, testKind = "daily") {
   const timestamp = Date.now();
   return {
     problemBookId: `book_uploaded_${timestamp}`,
@@ -5020,7 +4983,7 @@ function createProblemBookFromFile(fileName) {
     subject: "공통수학1",
     grade: "고1",
     unit: "단원 미지정",
-    testKind: "daily",
+    testKind: testPaperKindOptions.some((option) => option.id === testKind) ? testKind : "daily",
     preparationStatus: "draft",
     trackOrder: "",
     plannedDate: "",
@@ -5043,7 +5006,7 @@ function createProblemBookFromFile(fileName) {
   };
 }
 
-function createProblemBookFolder(folderName) {
+function createProblemBookFolder(folderName, testKind = "daily") {
   const timestamp = Date.now();
   const inferredSubject = testPaperSubjectOptions.find((subject) => String(folderName ?? "").includes(subject)) ?? testPaperSubjectOptions[0];
   return {
@@ -5052,7 +5015,7 @@ function createProblemBookFolder(folderName) {
     subject: inferredSubject,
     grade: "",
     unit: "",
-    testKind: "daily",
+    testKind: testPaperKindOptions.some((option) => option.id === testKind) ? testKind : "daily",
     preparationStatus: "draft",
     trackOrder: "",
     plannedDate: "",
@@ -5068,132 +5031,6 @@ function createProblemBookFolder(folderName) {
     studentProgress: {},
     problems: []
   };
-}
-
-function createProblemBooksFromPageSnapJson(jsonText) {
-  let parsed;
-  try {
-    parsed = JSON.parse(jsonText);
-  } catch (error) {
-    throw new Error("JSON 형식이 올바르지 않습니다. PageSnap의 AI JSON 가져오기 형식 그대로 붙여넣어 주세요.");
-  }
-
-  const rows = Array.isArray(parsed) ? parsed : [parsed];
-  if (rows.length === 0) {
-    throw new Error("가져올 시험지 항목이 없습니다.");
-  }
-
-  const timestamp = Date.now();
-  return rows.map((row, index) => {
-    const title = row.item_title || row.book_name || `PageSnap 시험지 ${index + 1}`;
-    const startProblem = Number.parseInt(row.start_problem_id ?? row.startProblemId ?? 1, 10) || 1;
-    const endProblem = Number.parseInt(row.end_problem_id ?? row.endProblemId ?? startProblem, 10) || startProblem;
-    const problemCount = Math.max(0, endProblem - startProblem + 1);
-    const bookId = `book_pagesnap_${timestamp}_${index}_${safeIdPart(title)}`;
-
-    return {
-      problemBookId: bookId,
-      title,
-      subject: row.subject || testPaperSubjectOptions[0],
-      grade: row.grade || inferGradeFromSubject(row.subject),
-      unit: row.item_title || row.unit || title,
-      testKind: row.test_kind || row.testKind || "daily",
-      preparationStatus: row.preparation_status || row.preparationStatus || "draft",
-      trackOrder: row.track_order ?? row.trackOrder ?? "",
-      plannedDate: row.planned_date ?? row.plannedDate ?? "",
-      passScore: row.pass_score ?? row.passScore ?? 80,
-      maxRetestCount: row.max_retest_count ?? row.maxRetestCount ?? 2,
-      linkedTypeIds: Array.isArray(row.linked_type_ids ?? row.linkedTypeIds) ? (row.linked_type_ids ?? row.linkedTypeIds) : [],
-      sourceFileName: row.source_file_name || row.pdf_file_name || "PageSnap",
-      sourceType: "pagesnap",
-      bookName: row.book_name || "",
-      uploadedAt: today,
-      uploadedAcademy: academyBrandName,
-      numberRange: `${startProblem}~${endProblem}`,
-      startPdfPage: row.start_pdf_page ?? "",
-      endPdfPage: row.end_pdf_page ?? "",
-      startBookPage: row.start_book_page ?? "",
-      endBookPage: row.end_book_page ?? "",
-      averageMinutes: row.estimated_minutes_per_problem ?? "",
-      confidence: row.confidence ?? "",
-      note: row.note ?? "",
-      totalProblems: problemCount,
-      studentProgress: {},
-      problems: Array.from({ length: problemCount }, (_, problemIndex) => {
-        const number = startProblem + problemIndex;
-        return {
-          problemId: `${bookId}_problem_${number}`,
-          number,
-          status: "unchecked",
-          cropImageUrl: "",
-          text: "",
-          answer: "",
-          note: row.note ?? "",
-          sourcePdfPage: row.start_pdf_page ?? "",
-          sourceBookPage: row.start_book_page ?? ""
-        };
-      })
-    };
-  });
-}
-
-function createSsenCommonMath1PageSnapExample() {
-  return JSON.stringify(
-    [
-      {
-        item_title: "쎈 공통수학1 다항식의 연산",
-        book_name: "쎈 공통수학1 본문",
-        subject: "공통수학1",
-        source_file_name: "쎈 공통수학1 본문.pdf",
-        start_pdf_page: 1,
-        end_pdf_page: 6,
-        start_book_page: 8,
-        end_book_page: 13,
-        start_problem_id: 1,
-        end_problem_id: 28,
-        estimated_minutes_per_problem: 3,
-        confidence: 0.7,
-        note: "예시 데이터입니다. 실제 단원/페이지/문항 번호는 PageSnap에서 PDF를 보며 조정합니다."
-      },
-      {
-        item_title: "쎈 공통수학1 항등식과 나머지정리",
-        book_name: "쎈 공통수학1 본문",
-        subject: "공통수학1",
-        source_file_name: "쎈 공통수학1 본문.pdf",
-        start_pdf_page: 7,
-        end_pdf_page: 12,
-        start_book_page: 14,
-        end_book_page: 19,
-        start_problem_id: 29,
-        end_problem_id: 56,
-        estimated_minutes_per_problem: 3,
-        confidence: 0.7,
-        note: "예시 데이터입니다. 실제 단원/페이지/문항 번호는 PageSnap에서 PDF를 보며 조정합니다."
-      },
-      {
-        item_title: "쎈 공통수학1 인수분해",
-        book_name: "쎈 공통수학1 본문",
-        subject: "공통수학1",
-        source_file_name: "쎈 공통수학1 본문.pdf",
-        start_pdf_page: 13,
-        end_pdf_page: 20,
-        start_book_page: 20,
-        end_book_page: 27,
-        start_problem_id: 57,
-        end_problem_id: 97,
-        estimated_minutes_per_problem: 3,
-        confidence: 0.7,
-        note: "예시 데이터입니다. 실제 단원/페이지/문항 번호는 PageSnap에서 PDF를 보며 조정합니다."
-      }
-    ],
-    null,
-    2
-  );
-}
-
-function inferGradeFromSubject(subject = "") {
-  if (String(subject).includes("중")) return String(subject).slice(0, 2);
-  return "고1";
 }
 
 const problemStatusMeta = {
@@ -5599,7 +5436,7 @@ export function App() {
           }
           if (Array.isArray(states.lessonResearchItems)) setLessonResearchItems(states.lessonResearchItems);
           if (Array.isArray(states.notificationLogs)) setNotificationLogs(states.notificationLogs);
-          if (Array.isArray(states.problemBooks)) setProblemBooks(states.problemBooks);
+          if (Array.isArray(states.problemBooks)) setProblemBooks(normalizeProblemBooks(states.problemBooks));
           if (Array.isArray(states.reportSnapshots)) setReportSnapshots(states.reportSnapshots);
           if (Array.isArray(states.scoreRecords)) setScoreRecords(states.scoreRecords);
           if (Array.isArray(states.examPostSubmissions)) setExamPostSubmissions(states.examPostSubmissions);
@@ -5676,6 +5513,13 @@ export function App() {
         if (appStateSaveRequestRef.current === requestId) setAppStateSaveState("failed");
       });
   }, [isAppStateReady, sharedAppState, session?.role]);
+
+  useEffect(() => {
+    setProblemBooks((current) => {
+      const normalized = normalizeProblemBooks(current);
+      return JSON.stringify(normalized) === JSON.stringify(current) ? current : normalized;
+    });
+  }, [setProblemBooks]);
 
   useEffect(() => {
     if (!isPortalDataReady || !["student", "parent"].includes(session?.role) || !session?.sessionToken) return;
@@ -7897,22 +7741,20 @@ export function App() {
             problemBooks={problemBooks}
             students={students}
             templates={classTemplates}
-            onAddFolder={(folderName) =>
-              setProblemBooks((current) => [createProblemBookFolder(folderName), ...current])
+            onAddFolder={(folderName, testKind) =>
+              setProblemBooks((current) => [createProblemBookFolder(folderName, testKind), ...current])
             }
-            onAddPdf={(fileName) =>
-              setProblemBooks((current) => [createProblemBookFromFile(fileName), ...current])
+            onAddPdf={(fileName, testKind) =>
+              setProblemBooks((current) => [createProblemBookFromFile(fileName, testKind), ...current])
             }
             onSyncProblemCounts={() =>
               setProblemBooks((current) =>
                 current.map((book) => ({ ...book, totalProblems: book.problems?.length ?? book.totalProblems ?? 0 }))
               )
             }
-            onImportPageSnapBooks={(jsonText) => {
-              const importedBooks = createProblemBooksFromPageSnapJson(jsonText);
-              setProblemBooks((current) => [...importedBooks, ...current]);
-              return importedBooks.length;
-            }}
+            onDeleteBook={(problemBookId) =>
+              setProblemBooks((current) => current.filter((book) => book.problemBookId !== problemBookId))
+            }
             onUpdateBook={(problemBookId, field, value) =>
               setProblemBooks((current) =>
                 current.map((book) => (book.problemBookId === problemBookId ? { ...book, [field]: value } : book))
@@ -20468,16 +20310,14 @@ function MaterialManager({
   templates = [],
   onAddFolder,
   onAddPdf,
-  onImportPageSnapBooks,
   onSyncProblemCounts,
+  onDeleteBook,
   onUpdateBook
 }) {
   const [activeTab, setActiveTab] = useState("track");
   const [activeSubject, setActiveSubject] = useState(testPaperSubjectOptions[0]);
+  const [activeBookKind, setActiveBookKind] = useState(testPaperKindOptions[0].id);
   const [folderName, setFolderName] = useState("");
-  const [isPageSnapModalOpen, setIsPageSnapModalOpen] = useState(false);
-  const [pageSnapJson, setPageSnapJson] = useState("");
-  const [pageSnapImportMessage, setPageSnapImportMessage] = useState("");
   const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("all");
   const activeStudents = students.filter(isActiveStudent);
   const trackStudents = selectedClassTemplateId === "all"
@@ -20490,44 +20330,21 @@ function MaterialManager({
       const orderB = Number(b.trackOrder || 9999);
       return orderA - orderB || String(a.title ?? "").localeCompare(String(b.title ?? ""));
     });
+  const filteredSubjectBooks = subjectBooks.filter((book) => inferTestPaperKind(book) === activeBookKind);
+  const bookShelfBooks = problemBooks.filter((book) => inferTestPaperKind(book) === activeBookKind);
   const catalogUnits = ssenTypeCatalog[activeSubject] ?? [];
-  const textbookRows = useMemo(() => {
-    const rows = new Map();
-    students.forEach((student) => {
-      const key = `${student.grade || "학년 미입력"}_${student.textbook || "교과서 미입력"}`;
-      if (!rows.has(key)) {
-        rows.set(key, {
-          grade: student.grade || "학년 미입력",
-          textbook: student.textbook || "교과서 미입력",
-          students: []
-        });
-      }
-      rows.get(key).students.push(student.name);
-    });
-    return Array.from(rows.values());
-  }, [students]);
 
   function handleAddFolder() {
     if (!folderName.trim()) return;
-    onAddFolder(folderName.trim());
+    onAddFolder(folderName.trim(), activeBookKind);
     setFolderName("");
   }
 
   function handlePdfUpload(event) {
     const file = event.target.files?.[0];
     if (!file) return;
-    onAddPdf(file.name);
+    onAddPdf(file.name, activeBookKind);
     event.target.value = "";
-  }
-
-  function handlePageSnapImport() {
-    try {
-      const count = onImportPageSnapBooks(pageSnapJson);
-      setPageSnapImportMessage(`${count}개 PageSnap 시험지 항목을 가져왔습니다.`);
-      setPageSnapJson("");
-    } catch (error) {
-      setPageSnapImportMessage(error.message);
-    }
   }
 
   function updateBookStudentProgress(problemBookId, studentId, field, value) {
@@ -20556,9 +20373,6 @@ function MaterialManager({
         <button className={activeTab === "books" ? "active" : ""} onClick={() => setActiveTab("books")} type="button">
           시험지 보관함
         </button>
-        <button className={activeTab === "textbooks" ? "active" : ""} onClick={() => setActiveTab("textbooks")} type="button">
-          교과서 관리
-        </button>
       </div>
 
       {activeTab === "track" || activeTab === "types" ? (
@@ -20582,6 +20396,20 @@ function MaterialManager({
               </button>
             ))}
           </div>
+          {activeTab === "track" ? (
+            <div className="testPaperKindTabs" aria-label="시험지 종류 선택">
+              {testPaperKindOptions.map((option) => (
+                <button
+                  className={activeBookKind === option.id ? "active" : ""}
+                  key={option.id}
+                  onClick={() => setActiveBookKind(option.id)}
+                  type="button"
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          ) : null}
 
           {activeTab === "types" ? (
             <div className="ssenTypeTree">
@@ -20636,11 +20464,11 @@ function MaterialManager({
 
           {activeTab === "track" ? (
             <div className="testTrackLayout">
-              <section className="testTrackPlan">
+              <section className="testStudentProgressPanel">
                 <div className="sectionHeader slim">
                   <div>
-                    <h2>진도별 테스트 순서</h2>
-                    <p className="muted">준비완료가 된 시험지만 실제 배포 대상으로 봅니다.</p>
+                    <h2>학생별 진행 상태</h2>
+                    <p className="muted">반별로 학생을 나눠 보고, 미통과 학생은 재시험1, 재시험2까지 표시합니다.</p>
                   </div>
                   <select value={selectedClassTemplateId} onChange={(event) => setSelectedClassTemplateId(event.target.value)}>
                     <option value="all">전체 학생</option>
@@ -20649,71 +20477,15 @@ function MaterialManager({
                     ))}
                   </select>
                 </div>
-                <div className="testTrackTable">
-                  <div className="testTrackRow testTrackHead">
-                    <span>순서</span>
-                    <span>시험지</span>
-                    <span>종류</span>
-                    <span>준비</span>
-                    <span>배포일</span>
-                    <span>기준</span>
-                  </div>
-                  {subjectBooks.map((book, index) => (
-                    <div className="testTrackRow" key={book.problemBookId}>
-                      <input
-                        value={book.trackOrder ?? index + 1}
-                        onChange={(event) => onUpdateBook(book.problemBookId, "trackOrder", event.target.value)}
-                      />
-                      <div className="testTrackTitle">
-                        <strong>{book.title}</strong>
-                        <small>{book.unit || "유형 미지정"} · {book.problems?.length ?? book.totalProblems ?? 0}문항</small>
-                      </div>
-                      <select value={inferTestPaperKind(book)} onChange={(event) => onUpdateBook(book.problemBookId, "testKind", event.target.value)}>
-                        {testPaperKindOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
-                      </select>
-                      <select value={book.preparationStatus || "draft"} onChange={(event) => onUpdateBook(book.problemBookId, "preparationStatus", event.target.value)}>
-                        {testPaperPreparationOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
-                      </select>
-                      <input
-                        type="date"
-                        value={book.plannedDate ?? ""}
-                        onChange={(event) => onUpdateBook(book.problemBookId, "plannedDate", event.target.value)}
-                      />
-                      <div className="testTrackCriteria">
-                        <input
-                          value={book.passScore ?? 80}
-                          onChange={(event) => onUpdateBook(book.problemBookId, "passScore", event.target.value)}
-                          aria-label={`${book.title} 통과 기준`}
-                        />
-                        <span>점 · 재시험 {book.maxRetestCount ?? 2}회</span>
-                      </div>
-                    </div>
-                  ))}
-                  {subjectBooks.length === 0 ? (
-                    <div className="examPrepEmptyState">
-                      <strong>{activeSubject} 시험지가 없습니다.</strong>
-                      <span>시험지 보관함에서 폴더를 추가하거나 PageSnap JSON을 가져오면 트랙에 표시됩니다.</span>
-                    </div>
-                  ) : null}
-                </div>
-              </section>
-
-              <section className="testStudentProgressPanel">
-                <div className="sectionHeader slim">
-                  <div>
-                    <h2>학생별 진행 상태</h2>
-                    <p className="muted">미통과 학생은 재시험1, 재시험2까지 표시해 다음 시험으로 넘어가기 전 막힌 지점을 확인합니다.</p>
-                  </div>
-                </div>
                 <div className="testProgressTable">
-                  <div className="testProgressRow testProgressHead" style={{ gridTemplateColumns: `150px repeat(${Math.max(subjectBooks.length, 1)}, 180px)` }}>
+                  <div className="testProgressRow testProgressHead" style={{ gridTemplateColumns: `150px repeat(${Math.max(filteredSubjectBooks.length, 1)}, 180px)` }}>
                     <span>학생</span>
-                    {subjectBooks.map((book) => <span key={book.problemBookId}>{book.trackOrder || "-"} · {getTestPaperKindLabel(inferTestPaperKind(book))}</span>)}
+                    {filteredSubjectBooks.map((book) => <span key={book.problemBookId}>{book.trackOrder || "-"} · {book.title || getTestPaperKindLabel(inferTestPaperKind(book))}</span>)}
                   </div>
                   {trackStudents.map((student) => (
-                    <div className="testProgressRow" key={student.studentId} style={{ gridTemplateColumns: `150px repeat(${Math.max(subjectBooks.length, 1)}, 180px)` }}>
+                    <div className="testProgressRow" key={student.studentId} style={{ gridTemplateColumns: `150px repeat(${Math.max(filteredSubjectBooks.length, 1)}, 180px)` }}>
                       <strong>{student.name}</strong>
-                      {subjectBooks.map((book) => {
+                      {filteredSubjectBooks.map((book) => {
                         const progress = getBookStudentProgress(book, student.studentId);
                         return (
                           <div className={`testProgressCell status-${progress.status || "waiting"}`} key={`${book.problemBookId}_${student.studentId}`}>
@@ -20733,6 +20505,12 @@ function MaterialManager({
                       })}
                     </div>
                   ))}
+                  {filteredSubjectBooks.length === 0 ? (
+                    <div className="examPrepEmptyState">
+                      <strong>{activeSubject} {getTestPaperKindLabel(activeBookKind)} 시험지가 없습니다.</strong>
+                      <span>시험지 보관함에서 시험지를 추가하면 학생별 진행 상태에 표시됩니다.</span>
+                    </div>
+                  ) : null}
                   {trackStudents.length === 0 ? (
                     <div className="examPrepEmptyState">
                       <strong>표시할 학생이 없습니다.</strong>
@@ -20751,18 +20529,28 @@ function MaterialManager({
           <div className="sectionHeader">
             <div>
               <h1>시험지 보관함</h1>
-              <p className="muted">시험지 PDF, PageSnap 단원 JSON, 문항 수와 준비 상태를 관리합니다. 여기서 등록한 시험지가 진도별 트랙에 표시됩니다.</p>
+              <p className="muted">시험지를 직접 추가하고 종류, 순서, 준비 상태, 배포일을 관리합니다. 등록한 시험지는 진도별 트랙에 표시됩니다.</p>
             </div>
             <div className="materialHeaderActions">
               <InlineSaveStatus label="시험지 자동저장" saveState={appStateSaveState} />
-              <button className="softButton" onClick={() => setIsPageSnapModalOpen(true)} type="button">
-                PageSnap JSON 가져오기
-              </button>
               <label className="pdfUploadButton">
                 PDF 업로드
                 <input accept="application/pdf,image/*" onChange={handlePdfUpload} type="file" />
               </label>
             </div>
+          </div>
+
+          <div className="testPaperKindTabs" aria-label="시험지 보관함 종류 선택">
+            {testPaperKindOptions.map((option) => (
+              <button
+                className={activeBookKind === option.id ? "active" : ""}
+                key={option.id}
+                onClick={() => setActiveBookKind(option.id)}
+                type="button"
+              >
+                {option.label}
+              </button>
+            ))}
           </div>
 
           <div className="materialFolderBar">
@@ -20780,6 +20568,7 @@ function MaterialManager({
 
           <div className="materialTable">
             <div className="materialRow materialHead">
+              <span>순서</span>
               <span>이름</span>
               <span>과목</span>
               <span>종류</span>
@@ -20789,9 +20578,15 @@ function MaterialManager({
               <span>배포일</span>
               <span>평균(분)</span>
               <span>업로드학원</span>
+              <span>관리</span>
             </div>
-            {problemBooks.map((book) => (
+            {bookShelfBooks.map((book) => (
               <div className="materialRow" key={book.problemBookId}>
+                <input
+                  value={book.trackOrder ?? ""}
+                  onChange={(event) => onUpdateBook(book.problemBookId, "trackOrder", event.target.value)}
+                  placeholder="순서"
+                />
                 <label className="folderNameCell">
                   <span>📁</span>
                   <input value={book.title} onChange={(event) => onUpdateBook(book.problemBookId, "title", event.target.value)} />
@@ -20815,74 +20610,17 @@ function MaterialManager({
                   value={book.uploadedAcademy ?? academyBrandName}
                   onChange={(event) => onUpdateBook(book.problemBookId, "uploadedAcademy", event.target.value)}
                 />
+                <button className="dangerTextButton" onClick={() => onDeleteBook(book.problemBookId)} type="button">
+                  삭제
+                </button>
               </div>
             ))}
-          </div>
-        </section>
-      ) : null}
-
-      {isPageSnapModalOpen ? (
-        <Modal
-          className="pageSnapImportModal"
-          title="PageSnap JSON 가져오기"
-          subtitle="PageSnap의 GPT 프롬프트 결과 JSON을 붙여넣으면 시험지 단원과 문항 번호가 진도별 트랙 재료로 저장됩니다."
-          onClose={() => setIsPageSnapModalOpen(false)}
-        >
-          <div className="pageSnapImportLayout">
-            <label>
-              JSON 붙여넣기
-              <textarea
-                rows="14"
-                value={pageSnapJson}
-                onChange={(event) => setPageSnapJson(event.target.value)}
-                placeholder='[{"item_title":"공수1 고쟁이 STEP 01 다항식의 연산","book_name":"고쟁이","subject":"공통수학1","start_pdf_page":1,"end_pdf_page":4,"start_problem_id":1,"end_problem_id":28,"estimated_minutes_per_problem":3}]'
-              />
-            </label>
-            <aside className="pageSnapImportGuide">
-              <button className="softButton" onClick={() => setPageSnapJson(createSsenCommonMath1PageSnapExample())} type="button">
-                쎈 공통수학1 예시 채우기
-              </button>
-              <strong>가져오는 값</strong>
-              <span>시험지명 / 단원명</span>
-              <span>과목</span>
-              <span>PDF 페이지 범위</span>
-              <span>문항 시작-끝 번호</span>
-              <span>문항당 예상 시간</span>
-              <p className="muted">
-                예시 PDF: C:\Users\force\Desktop\쎈 공통수학1 본문.pdf · 192쪽.
-                이미지 크롭 파일은 다음 단계에서 export 폴더를 연결하면 붙일 수 있습니다.
-              </p>
-            </aside>
-          </div>
-          {pageSnapImportMessage ? <p className="importMessage">{pageSnapImportMessage}</p> : null}
-          <div className="modalActionRow">
-            <button className="primaryButton" onClick={handlePageSnapImport} type="button">가져오기</button>
-            <button className="softButton" onClick={() => setIsPageSnapModalOpen(false)} type="button">닫기</button>
-          </div>
-        </Modal>
-      ) : null}
-
-      {activeTab === "textbooks" ? (
-        <section className="panel materialPanel">
-          <div className="sectionHeader">
-            <div>
-              <h1>교과서 관리</h1>
-              <p className="muted">학생 정보에 입력된 학교/학년/교과서를 기준으로 교과서 사용 현황을 모읍니다.</p>
-            </div>
-          </div>
-          <div className="materialTable textbookTable">
-            <div className="materialRow materialHead">
-              <span>학년</span>
-              <span>교과서</span>
-              <span>연결 학생</span>
-            </div>
-            {textbookRows.map((row) => (
-              <div className="materialRow" key={`${row.grade}_${row.textbook}`}>
-                <strong>{row.grade}</strong>
-                <span>{row.textbook}</span>
-                <span>{row.students.join(", ")}</span>
+            {bookShelfBooks.length === 0 ? (
+              <div className="examPrepEmptyState">
+                <strong>{getTestPaperKindLabel(activeBookKind)} 시험지가 없습니다.</strong>
+                <span>새 시험지명을 입력하고 `+ 시험지 추가`를 누르면 이 목록에 추가됩니다.</span>
               </div>
-            ))}
+            ) : null}
           </div>
         </section>
       ) : null}

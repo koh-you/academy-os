@@ -13018,6 +13018,34 @@ textarea.profileEditInput {
   gap: 16px;
 }
 
+.localTabs {
+  background: #eff6ff;
+  border: 1px solid #cfe0ff;
+  border-radius: 8px;
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+}
+
+.localTabs button {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: #475569;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 900;
+  min-height: 36px;
+  padding: 0 14px;
+}
+
+.localTabs button.active {
+  background: #17213d;
+  box-shadow: 0 8px 18px rgba(23, 33, 61, 0.14);
+  color: #ffffff;
+}
+
 .materialTabs {
   justify-self: start;
   max-width: 620px;
@@ -13058,8 +13086,8 @@ textarea.profileEditInput {
   border-top: 1px solid #e2e8f0;
   display: grid;
   gap: 10px;
-  grid-template-columns: 240px 120px 96px 112px 90px 120px 132px 110px minmax(180px, 1fr);
-  min-width: 1320px;
+  grid-template-columns: 68px 240px 120px 132px 112px 90px 120px 132px 110px minmax(160px, 1fr) 76px;
+  min-width: 1480px;
   padding: 10px 14px;
 }
 
@@ -13100,11 +13128,6 @@ textarea.profileEditInput {
   font-weight: 900;
 }
 
-.textbookTable .materialRow {
-  grid-template-columns: 160px 240px minmax(360px, 1fr);
-  min-width: 760px;
-}
-
 .testPaperOverviewPanel {
   gap: 16px;
 }
@@ -13131,9 +13154,30 @@ textarea.profileEditInput {
   color: #ffffff;
 }
 
+.testPaperKindTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.testPaperKindTabs button {
+  background: #f8fafc;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  color: #334155;
+  font-weight: 900;
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+.testPaperKindTabs button.active {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #ffffff;
+}
+
 .ssenTypeTree,
 .testTrackLayout,
-.testTrackPlan,
 .testStudentProgressPanel {
   display: grid;
   gap: 14px;
@@ -13142,7 +13186,6 @@ textarea.profileEditInput {
 .ssenChapterNode,
 .ssenUnitNode,
 .ssenTypeNode,
-.testTrackPlan,
 .testStudentProgressPanel {
   background: #ffffff;
   border: 1px solid #dbe7fb;
@@ -13227,19 +13270,16 @@ textarea.profileEditInput {
   color: #334155;
 }
 
-.testTrackPlan,
 .testStudentProgressPanel {
   padding: 16px;
 }
 
-.testTrackTable,
 .testProgressTable {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   overflow: auto;
 }
 
-.testTrackRow,
 .testProgressRow {
   align-items: center;
   border-top: 1px solid #e2e8f0;
@@ -13249,16 +13289,10 @@ textarea.profileEditInput {
   padding: 10px 12px;
 }
 
-.testTrackRow {
-  grid-template-columns: 64px minmax(260px, 1fr) 110px 130px 150px 150px;
-}
-
-.testTrackRow:first-child,
 .testProgressRow:first-child {
   border-top: 0;
 }
 
-.testTrackHead,
 .testProgressHead {
   background: #f8fafc;
   color: #64748b;
@@ -13266,35 +13300,14 @@ textarea.profileEditInput {
   font-weight: 900;
 }
 
-.testTrackRow input,
-.testTrackRow select,
 .testProgressCell input,
 .testProgressCell select,
-.testTrackPlan .sectionHeader select {
+.testStudentProgressPanel .sectionHeader select {
   background: #ffffff;
   border: 1px solid #d8e3f8;
   border-radius: 8px;
   min-height: 36px;
   padding: 0 10px;
-}
-
-.testTrackTitle {
-  display: grid;
-  gap: 4px;
-}
-
-.testTrackTitle small,
-.testTrackCriteria span {
-  color: #64748b;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.testTrackCriteria {
-  align-items: center;
-  display: grid;
-  gap: 6px;
-  grid-template-columns: 54px 1fr;
 }
 
 .testProgressRow {
@@ -13327,48 +13340,14 @@ textarea.profileEditInput {
   border-color: #fecaca;
 }
 
-.modalCard.pageSnapImportModal {
-  max-width: 980px;
-}
-
-.pageSnapImportLayout {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: minmax(0, 1fr) 260px;
-}
-
-.pageSnapImportLayout textarea {
-  font-family: Consolas, "Courier New", monospace;
-  min-height: 320px;
-}
-
-.pageSnapImportGuide {
-  align-content: start;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+.dangerTextButton {
+  background: #fff7f7;
+  border: 1px solid #fecaca;
   border-radius: 8px;
-  display: grid;
-  gap: 10px;
-  padding: 14px;
-}
-
-.pageSnapImportGuide span {
-  background: #eef5ff;
-  border: 1px solid #bfdbfe;
-  border-radius: 8px;
-  color: #2563eb;
+  color: #dc2626;
   font-weight: 900;
-  padding: 8px 10px;
-}
-
-.importMessage {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  color: #17213d;
-  font-weight: 900;
-  margin: 0;
-  padding: 12px 14px;
+  min-height: 36px;
+  padding: 0 10px;
 }
 
 .modalActionRow {

@@ -179,7 +179,7 @@ results.push(assert("18. problem status click cycle matches requested colors", (
     cycleProblemStatus("wrong") === "mistake" &&
     cycleProblemStatus("mistake") === "first";
 })()));
-results.push(assert("19. PageSnap/material import path remains present", includesAll(app, ["createProblemBooksFromPageSnapJson", "createSsenCommonMath1PageSnapExample", "sourceType: \"pagesnap\"", "source_file_name"])));
+results.push(assert("19. test paper manager removes PageSnap import UI and keeps manual shelf controls", includesAll(app, ["function createDefaultProblemBooks", "function normalizeProblemBooks", "시험지 보관함", "testPaperKindTabs", "onDeleteBook", "dangerTextButton"]) && !app.includes("PageSnap JSON") && !app.includes("createProblemBooksFromPageSnapJson") && !app.includes("createSsenCommonMath1PageSnapExample")));
 results.push(assert("20. school calendar supports add/update/delete", includesAll(app, ["onAddEvent", "onDeleteEvent", "onUpdateEvent", "SchoolCalendarCenter"])));
 results.push(assert("21. sample data keeps 8 pilot student identifiers", (data.match(/student_mwf710_/g) ?? []).length >= 8));
 results.push(assert("22. lesson comments send through comment Alimtalk API", includesAll(app, ["/api/notifications/comment-alimtalk", "student_alimtalk", "parent_alimtalk", "알림톡 발송 중"])));
