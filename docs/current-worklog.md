@@ -14,6 +14,17 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-08 P1. 기존 샘플/PageSnap 시험지 운영 app_state 완전 삭제
+
+- 상태: 완료 - 운영 저장 원천 확인/삭제 완료
+- 사용자 요청: 기존 샘플 시험지 2개와 PageSnap 출처 시험지를 화면에서 숨기는 수준이 아니라 완전히 삭제한다.
+- 조치 결과: 운영 API `https://koh-you-math-academy-os-api.onrender.com/api/app-state`에서 Supabase `app_state.problemBooks`를 조회했다. 조회 시점에 이미 `problemBooks` 총 0개, 삭제 대상 0개였다.
+- 조치 결과: 삭제 상태를 확정하기 위해 `/api/app-state`에 `{ problemBooks: [] }`를 명시 저장했다. 재조회 결과 `problemBooks` 총 0개, 샘플/PageSnap 대상 0개로 확인했다.
+- 저장 원천: Supabase `app_state`의 `problemBooks` key가 원본이다. 새 SQL 적용은 필요 없다.
+- 검증: 운영 API 저장/재조회로 확인했다. 코드 변경은 없고 문서 기록만 남겼다.
+- 사람 검토 핵심: 운영 배포/새로고침 후 `시험지관리 > 시험지 보관함`에서 이전 샘플 2개와 PageSnap 출처 시험지가 보이지 않아야 한다. 새 시험지는 사용자가 직접 추가한 것만 보여야 한다.
+- 중단 조건: `공수1 고쟁이 STEP 01`, `공수1 고쟁이 STEP 02`, PageSnap 출처 시험지가 새로고침 후 다시 보이면 즉시 멈추고 `app_state.problemBooks`를 다시 조회한다.
+
 ### 2026-07-08 P1. 시험지관리 샘플/PageSnap/교과서 탭 제거와 보관함 정리
 
 - 상태: 완료 - 구현/검증 완료
