@@ -12897,6 +12897,7 @@ function LessonJournalDetail({
     solapiMessages: [],
     state: "idle"
   });
+  const [reservationInspectMode, setReservationInspectMode] = useState("all");
   const [cancelingReservationJobId, setCancelingReservationJobId] = useState("");
   const [cancelingSolapiGroupId, setCancelingSolapiGroupId] = useState("");
   const [editingMemoKey, setEditingMemoKey] = useState("");
@@ -12935,6 +12936,28 @@ function LessonJournalDetail({
   const solapiScheduledGroups = reservationAudit.solapiGroups.filter((group) =>
     group.scheduledDate && !group.dateSent && !group.dateCompleted && group.status !== "CANCELED"
   );
+  const issueReservationJobs = auditedLessonNotificationJobs
+    .filter((job) => job.status === "canceled" || job.status === "failed")
+    .sort(sortNotificationJobsForCurrentStatus);
+  const reservationInspectLabels = {
+    all: "전체 예약",
+    issues: "취소/실패",
+    parentScheduled: "OS 학부모 예약",
+    solapiScheduled: "Solapi 예약 그룹",
+    studentScheduled: "OS 학생 예약"
+  };
+  const displayedSolapiGroups = reservationInspectMode === "solapiScheduled"
+    ? solapiScheduledGroups
+    : reservationAudit.solapiGroups;
+  const displayedSolapiMessages = reservationInspectMode === "solapiScheduled"
+    ? solapiLessonMessages.filter((message) => {
+        const groupId = message.groupId || message.group?.groupId || message.customFields?.groupId;
+        return !groupId || solapiScheduledGroups.some((group) => group.groupId === groupId);
+      })
+    : solapiLessonMessages;
+  const shouldShowStudentReservationTable = reservationInspectMode !== "solapiScheduled";
+  const shouldShowSolapiAudit = reservationInspectMode === "all" || reservationInspectMode === "solapiScheduled";
+  const shouldShowIssueAudit = reservationInspectMode === "issues";
   const lessonRecordSaveStates = lessonStudents
     .map((student) => saveStates[createLessonStudentRecordId(lesson.lessonId, student.studentId)])
     .filter(Boolean);
@@ -13192,6 +13215,42 @@ function LessonJournalDetail({
       .sort(sortNotificationJobsForCurrentStatus)[0] ?? null;
   }
 
+  function toggleReservationInspectMode(mode) {
+    setReservationInspectMode((current) => current === mode ? "all" : mode);
+  }
+
+  function hasReservationIssue(job) {
+    return job?.status === "canceled" || job?.status === "failed";
+  }
+
+  function getVisibleReservationStudents() {
+    if (reservationInspectMode === "all") return lessonStudents;
+    if (reservationInspectMode === "solapiScheduled") return [];
+    return lessonStudents.filter((student) => {
+      const parentJob = getStudentReservationStatus(student, "parent");
+      const studentJob = getStudentReservationStatus(student, "student");
+      if (reservationInspectMode === "parentScheduled") return parentJob?.status === "scheduled";
+      if (reservationInspectMode === "studentScheduled") return studentJob?.status === "scheduled";
+      if (reservationInspectMode === "issues") return hasReservationIssue(parentJob) || hasReservationIssue(studentJob);
+      return true;
+    });
+  }
+
+  function renderReservationSummaryButton(mode, label, count) {
+    const active = reservationInspectMode === mode;
+    return (
+      <button
+        aria-pressed={active}
+        className={active ? "reservationSummaryCard active" : "reservationSummaryCard"}
+        onClick={() => toggleReservationInspectMode(mode)}
+        type="button"
+      >
+        <span>{label}</span>
+        <strong>{count}건</strong>
+      </button>
+    );
+  }
+
   function renderReservationStatusCell(job, isMuted = false) {
     if (isMuted) return <span className="reservationStatusCell muted">알림 제외</span>;
     const providerReference = getNotificationJobProviderReference(job);
@@ -13266,7 +13325,14 @@ function LessonJournalDetail({
             하원 미체크 {checkoutMissingStudents.length}명
           </span>
         ) : null}
-        <button className="schedulePlanButton check" onClick={() => setReservationModalOpen(true)} type="button">
+        <button
+          className="schedulePlanButton check"
+          onClick={() => {
+            setReservationInspectMode("all");
+            setReservationModalOpen(true);
+          }}
+          type="button"
+        >
           예약 확인
         </button>
         <button
@@ -13302,22 +13368,10 @@ function LessonJournalDetail({
           onClose={() => setReservationModalOpen(false)}
         >
           <div className="reservationSummaryGrid">
-            <div>
-              <span>OS 학부모 예약</span>
-              <strong>{scheduledParentCount}건</strong>
-            </div>
-            <div>
-              <span>OS 학생 예약</span>
-              <strong>{scheduledStudentCount}건</strong>
-            </div>
-            <div>
-              <span>Solapi 예약 그룹</span>
-              <strong>{solapiScheduledGroups.length}건</strong>
-            </div>
-            <div>
-              <span>취소/실패</span>
-              <strong>{canceledJobCount + failedJobCount}건</strong>
-            </div>
+            {renderReservationSummaryButton("parentScheduled", "OS 학부모 예약", scheduledParentCount)}
+            {renderReservationSummaryButton("studentScheduled", "OS 학생 예약", scheduledStudentCount)}
+            {renderReservationSummaryButton("solapiScheduled", "Solapi 예약 그룹", solapiScheduledGroups.length)}
+            {renderReservationSummaryButton("issues", "취소/실패", canceledJobCount + failedJobCount)}
           </div>
           <div className="reservationModalActions">
             <span>{reservationAudit.message || "예약 기준: Solapi 실제 예약 + OS 검수 기록"}</span>
@@ -13329,6 +13383,11 @@ function LessonJournalDetail({
             >
               {reservationAudit.state === "loading" ? "조회 중" : "Solapi/OS 새로고침"}
             </button>
+            {reservationInspectMode !== "all" ? (
+              <button className="softButton compact" onClick={() => setReservationInspectMode("all")} type="button">
+                전체 보기
+              </button>
+            ) : null}
             {canScheduleTodayTwoPm ? (
               <button
                 className="sendButton"
@@ -13356,33 +13415,63 @@ function LessonJournalDetail({
               ))}
             </div>
           ) : null}
-          <div className="reservationStatusTable">
-            <div className="reservationStatusRow head">
-              <span>학생</span>
-              <span>학부모</span>
-              <span>학생</span>
-            </div>
-            {lessonStudents.map((student) => {
-              const record = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
-              const parentJob = getStudentReservationStatus(student, "parent");
-              const studentJob = getStudentReservationStatus(student, "student");
-              return (
-                <div className="reservationStatusRow" key={student.studentId}>
-                  <strong>{student.name}</strong>
-                  {renderReservationStatusCell(parentJob, record.notificationMutedParent)}
-                  {renderReservationStatusCell(studentJob, record.notificationMutedStudent)}
-                </div>
-              );
-            })}
+          <div className="reservationInspectHeader">
+            <strong>{reservationInspectLabels[reservationInspectMode] ?? "전체 예약"}</strong>
+            <span>
+              OS 예약 {auditedLessonNotificationJobs.length}건 · Solapi 그룹 {reservationAudit.solapiGroups.length}건 · Solapi 메시지 {solapiLessonMessages.length}건
+            </span>
           </div>
+          {shouldShowStudentReservationTable ? (
+            <div className="reservationStatusTable">
+              <div className="reservationStatusRow head">
+                <span>학생</span>
+                <span>학부모</span>
+                <span>학생</span>
+              </div>
+              {getVisibleReservationStudents().length ? getVisibleReservationStudents().map((student) => {
+                const record = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
+                const parentJob = getStudentReservationStatus(student, "parent");
+                const studentJob = getStudentReservationStatus(student, "student");
+                return (
+                  <div className="reservationStatusRow" key={student.studentId}>
+                    <strong>{student.name}</strong>
+                    {renderReservationStatusCell(parentJob, record.notificationMutedParent)}
+                    {renderReservationStatusCell(studentJob, record.notificationMutedStudent)}
+                  </div>
+                );
+              }) : (
+                <p className="emptyState compact">해당 조건의 학생 예약이 없습니다.</p>
+              )}
+            </div>
+          ) : null}
+          {shouldShowIssueAudit ? (
+            <section className="reservationIssueList">
+              <div className="reservationAuditHeader">
+                <strong>OS 취소/실패</strong>
+                <span>{issueReservationJobs.length}건</span>
+              </div>
+              <div className="reservationAuditList">
+                {issueReservationJobs.length ? issueReservationJobs.map((job) => (
+                  <article key={job.notificationJobId}>
+                    <strong>{job.payload?.studentName || students.find((student) => student.studentId === job.studentId)?.name || job.studentId || "학생"}</strong>
+                    <span>{getNotificationJobLabel(job.notificationType)} · {formatNotificationJobStatus(job)}</span>
+                    <small>{job.notificationJobId}</small>
+                  </article>
+                )) : (
+                  <p className="emptyState compact">취소/실패한 OS 예약이 없습니다.</p>
+                )}
+              </div>
+            </section>
+          ) : null}
+          {shouldShowSolapiAudit ? (
           <div className="reservationAuditGrid">
             <section>
               <div className="reservationAuditHeader">
                 <strong>Solapi 그룹</strong>
-                <span>{reservationAudit.solapiGroups.length}건</span>
+                <span>{displayedSolapiGroups.length}건</span>
               </div>
               <div className="reservationAuditList">
-                {reservationAudit.solapiGroups.length ? reservationAudit.solapiGroups.slice(0, 8).map((group) => (
+                {displayedSolapiGroups.length ? displayedSolapiGroups.map((group) => (
                   <article key={group.groupId}>
                     <strong>{group.scheduledDate ? formatKoreaTimeLabel(group.scheduledDate) : formatKoreaTimeLabel(group.dateCreated)}</strong>
                     <span>{group.status || "-"} · {group.count?.total ?? 0}건</span>
@@ -13406,10 +13495,10 @@ function LessonJournalDetail({
             <section>
               <div className="reservationAuditHeader">
                 <strong>Solapi 메시지</strong>
-                <span>{solapiLessonMessages.length}건</span>
+                <span>{displayedSolapiMessages.length}건</span>
               </div>
               <div className="reservationAuditList">
-                {solapiLessonMessages.length ? solapiLessonMessages.slice(0, 8).map((message) => (
+                {displayedSolapiMessages.length ? displayedSolapiMessages.map((message) => (
                   <article key={message.messageId || `${message.groupId}_${message.to}`}>
                     <strong>{message.customFields?.studentName || maskPhoneForDisplay(message.to)}</strong>
                     <span>{message.statusCode || message.status || "-"} · {formatKoreaTimeLabel(message.dateCreated)}</span>
@@ -13421,6 +13510,7 @@ function LessonJournalDetail({
               </div>
             </section>
           </div>
+          ) : null}
         </Modal>
       ) : null}
 

@@ -4359,13 +4359,29 @@ button {
   margin-bottom: 14px;
 }
 
-.reservationSummaryGrid div {
+.reservationSummaryCard {
   background: #f8fafc;
   border: 1px solid #d8e3f8;
   border-radius: 8px;
+  cursor: pointer;
   display: grid;
   gap: 4px;
+  min-height: 70px;
   padding: 12px;
+  text-align: left;
+  transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+.reservationSummaryCard:hover {
+  border-color: #8aa8ff;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.12);
+  transform: translateY(-1px);
+}
+
+.reservationSummaryCard.active {
+  background: #eef4ff;
+  border-color: #4f63ff;
+  box-shadow: 0 0 0 2px rgba(79, 99, 255, 0.12);
 }
 
 .reservationSummaryGrid span {
@@ -4377,6 +4393,11 @@ button {
 .reservationSummaryGrid strong {
   color: #0f172a;
   font-size: 22px;
+}
+
+.reservationSummaryCard.active span,
+.reservationSummaryCard.active strong {
+  color: #2434d8;
 }
 
 .reservationModalActions {
@@ -4397,6 +4418,11 @@ button {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   overflow: hidden;
+}
+
+.reservationStatusTable .emptyState {
+  margin: 0;
+  padding: 16px;
 }
 
 .reservationStatusRow {
@@ -4462,6 +4488,36 @@ button {
 .reservationWarningBox span {
   font-size: 13px;
   font-weight: 900;
+}
+
+.reservationInspectHeader {
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+}
+
+.reservationInspectHeader strong,
+.reservationInspectHeader span {
+  color: #334155;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.reservationInspectHeader span {
+  color: #64748b;
+}
+
+.reservationIssueList {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-top: 14px;
+  overflow: hidden;
 }
 
 .reservationAuditGrid {
