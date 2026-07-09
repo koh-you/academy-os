@@ -57,8 +57,18 @@
 - 상태: 완료 - 반복 제작용 GPT 프로젝트/대화세션 구조 문서화
 - 사용자 요청: 총평란/체크리스트 내용을 바탕으로 GPT 프로젝트 안에서 각 슬라이드를 한 장씩 생성할 수 있는 반복 가능한 모듈 구조가 필요하다.
 - 결과: `docs/exam-analysis-gpt-image-project-module-2026-07-09.md`를 추가했다. 이 문서에는 GPT 프로젝트 고정 지침, 시험 체크리스트 입력 템플릿, 시험별 기획 세션 패킷, 카드별 생성 세션 패킷, 카드 수정 프롬프트, 10장 카드 역할표, 검수 Gate, 중단 조건을 정리했다.
-- 구조 원칙: `teacherChecklist -> featureClassification -> cardPlan -> cardRenderPacket -> teacherFinal`로 레이어를 분리한다. GPT image는 카드 전체를 렌더링하는 도구이고, 시험 사실 원본은 선생님 체크리스트/확정본이다.
-- 저장 원천: 운영 DB/Supabase/app_state에는 저장하지 않았다. 이번 작업은 문서화이며, 이후 앱에 붙일 때는 `teacherChecklist`, `confirmedCardPlan`, `finalCardImages`를 분리 저장해야 한다.
+- 구조 원칙: `webAppExamSeed -> examAnalysisSeed -> teacherConfirmChecklist -> featureClassification -> cardPlan -> cardRenderPacket -> teacherFinal`로 레이어를 분리한다. GPT image는 카드 전체를 렌더링하는 도구이고, 공개 산출물 원본은 선생님 확인 체크리스트/확정본이다.
+- 저장 원천: 운영 DB/Supabase/app_state에는 저장하지 않았다. 이번 작업은 문서화이며, 이후 앱에 붙일 때는 `webAppExamSeed`, `examAnalysisSeed`, `teacherConfirmChecklist`, `confirmedCardPlan`, `finalCardImages`를 분리 저장해야 한다.
+
+### 2026-07-09 P1. 시험분석 카드뉴스 체크리스트 원천 분리
+
+- 상태: 완료 - 문서/지침 갱신 완료
+- 사용자 정정: 객관식/서술형/단답형 수와 단원별 실제 비중은 선생님이 매번 직접 입력할 항목이 아니라 시험지분석으로 확인 가능한 항목이다. 주요문항은 AI가 자동 확정하지 않고 선생님이 최종 선정해야 한다.
+- 결과: `docs/exam-analysis-gpt-image-project-module-2026-07-09.md`의 반복 제작 구조를 `웹앱 기존 시험 데이터 -> 시험지분석 확정/후보 데이터 -> 선생님 확인 체크리스트 -> 카드 기획안 -> GPT image`로 수정했다.
+- 체크리스트 구조: `웹앱 자동 입력`, `시험지분석 자동 후보/확정`, `선생님 확정 입력`, `선생님 해석/문장화`, `금지/불확실`로 나눴다. 문항 수/배점/단원 비중/난도 흐름 후보는 시험지분석에서 가져오고, 등급컷/출제 근거/주요문항 최종 선택/유사유형 근거/금지 항목은 선생님 확정값으로 둔다.
+- 웹앱 방향: 이후 산출물 입력 화면은 항목별 출처 배지(`웹앱 자동 입력`, `시험지분석 후보`, `선생님 확정 필요`, `확정 완료`, `생성 금지`)를 보여야 한다. 저장 후 새로고침에서는 선생님 확정값이 AI 후보보다 우선한다.
+- 지침 반영: `AGENTS.md`에 카드뉴스/GPT Image 체크리스트 원천 분리, 시험지분석 자동 후보, 주요문항 선생님 최종 선정 원칙을 추가했다.
+- 저장 원천: 이번 작업은 문서/지침 갱신이며 운영 DB/Supabase/app_state에는 저장하지 않았다. 새 SQL 적용은 필요 없다.
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
