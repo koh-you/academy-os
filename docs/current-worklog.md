@@ -44,6 +44,14 @@
 - 저장 원천: 운영 DB/Supabase/app_state에는 저장하지 않았다. 이번 결과는 로컬 raw JSON과 커밋된 요약 문서/재실행 스크립트다. 새 SQL 적용은 필요 없다.
 - 다음 작업: 이 키워드 사전을 바탕으로 시험분석 산출물 화면에 선생님 검수 질문과 `AI 초안 -> 선생님 편집 -> 저장본 원본화` 흐름을 설계한다.
 
+### 2026-07-09 P1. GPT Image용 시험분석 카드뉴스 소스 정리
+
+- 상태: 완료 - GPT image 프롬프트 입력용 소스 문서 생성
+- 사용자 요청: Vision AI로 분석한 내용을 GPT image에 넘겨 카드뉴스를 만들 때 어떤 소스를 넣어야 하는지 정리한다.
+- 결과: `docs/exam-analysis-gpt-image-source-2026-07-09.md`를 추가했다. 이 문서는 raw JSON 전체를 붙이는 대신 `브랜드/디자인 규칙`, `선택 학교의 시험 특징`, `이번 카드 1장의 역할과 문구`, `금지 규칙`만 카드 단위로 넘기도록 안내한다.
+- 포함 내용: 12개 학교별 요약 소스, raw JSON 경로표, 10장 카드뉴스 구성 소스, GPT image용 최종 프롬프트 예시를 정리했다.
+- 저장 원천: 운영 DB/Supabase/app_state에는 저장하지 않았다. 원본 raw OCR/분류는 `.codex-temp/benchmark-vision-results/*-latest.json`, 커밋된 프롬프트 소스는 `docs/exam-analysis-gpt-image-source-2026-07-09.md`다.
+
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
 ### 2026-07-09 P1. 수업일지 발송계획 선택과 Solapi 실제 반영 분리
