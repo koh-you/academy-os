@@ -23,6 +23,16 @@
 - 저장 원천: 기존 `exam_analysis_runs.audit_summary.outputDrafts` 구조를 유지한다. 키 이름은 호환성을 위해 유지하되 화면 라벨/가이드/AI 프롬프트만 정리했다. 시험관리 `exam_prep_rows.review/revisedReview`는 시험 사실/총평 원본이고, 시험분석 `outputDrafts`는 공개글/카드뉴스 발췌와 보충 메모다. 새 SQL 적용은 필요 없다.
 - 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production`, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
 
+### 2026-07-09 P1. 시험분석 블로그 Vision AI 키워드 파일럿
+
+- 상태: 완료 - Claude Vision 1개 글 과금 호출 및 검수용 결과 저장 완료
+- 사용자 요청: 각 학교 시험의 실제 특징을 블로그 속 키워드로 분류하기 위해 Vision AI 과금 호출을 허용했다. 핵심은 평범한 시험을 그럴싸하게 바꾸는 것이 아니라, 부교재/모의고사/시험범위/시간관리/후반부 조건 해석처럼 학교별 실제 특징을 이미지 문구에서 읽어 분류하는 것이다.
+- 구현 결과: `scripts/analyze-blog-benchmark-vision.mjs`를 추가했다. `.env.local`의 `ANTHROPIC_API_KEY`를 로드하고, 네이버 모바일 본문 텍스트와 로컬 카드뉴스 이미지 8장을 Claude Vision에 보내 `visible_image`, `body_text`, `inferred_from_visible`, `uncertain` 근거 타입을 분리한 JSON을 생성한다.
+- 파일럿 실행: 불암중학교 2학년 1학기 기말고사 글(`logNo=224336139893`)의 카드뉴스 8장을 대상으로 Claude Vision 호출을 실행했다. 최종 성공 호출은 `claude-sonnet-4-5-20250929`, input 16766 tokens, output 7797 tokens를 사용했다. 원본 JSON은 `.codex-temp/benchmark-vision-results/224336139893-latest.json`에 저장했으며 Git에는 올리지 않는다.
+- 파일럿 결과: 이미지에서 `미래엔(황)`, `객관식 24문항`, `서술형 0문항`, 단원별 문항 수, `최고수준/A급수학/쎈B` 유사유형, 문장제 체감난도, 후반부 시간관리, 글밥이 긴 조건 정리, 주요문항 9/10/24번 패턴을 추출했다. 요약은 `docs/exam-analysis-blog-vision-pilot-2026-07-09.md`에 정리했다.
+- 저장 원천: 운영 DB/Supabase/app_state에는 저장하지 않았다. 이번 작업의 원본은 로컬 `.codex-temp` JSON이고, 커밋 대상은 재실행 가능한 스크립트와 검수용 요약 문서다. 새 SQL 적용은 필요 없다.
+- 다음 작업: 사용자가 1개 글 결과를 검수한 뒤, 같은 분류 축으로 12개 글 전체를 실행하고 반복 키워드를 `벤치마킹 키워드 사전`으로 정리한다.
+
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
 ### 2026-07-09 P1. 수업일지 발송계획 선택과 Solapi 실제 반영 분리
