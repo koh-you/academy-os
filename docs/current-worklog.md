@@ -89,6 +89,15 @@
 - 사용법: ChatGPT 프로젝트 `소스`에서 기존 체크리스트 관련 오래된 소스를 제거하거나 비활성화하고 이 파일을 업로드한다. 웹앱에서는 `시험분석 -> 분석 카드 선택 -> 블로그/인스타 산출물 초안 -> GPT 대화세션 체크리스트 -> 산출물 저장 -> GPT 기획 패킷 복사` 순서로 사용한다.
 - 저장 원천: 운영 DB/Supabase/app_state에는 변경 없음. 문서만 추가했으며 새 SQL 적용은 필요 없다.
 
+### 2026-07-09 P0. 시험분석 탭 진입 오류 수정
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 제보: 다른 탭은 열리지만 시험분석 탭만 접속되지 않았다.
+- 원인: `GPT 대화세션 체크리스트` 자동 요약 함수가 시험분석 상세 데이터 로딩 전 `activeRun` 또는 `finalPreviewModel`이 `null`인 초기 렌더를 만나면서 `totalQuestionCount`를 직접 읽어 런타임 오류가 발생했다. 이 오류가 `ExamAnalysisOutputDraftPanel` 전체를 중단시켜 시험분석 탭이 빈 화면처럼 보였다.
+- 구현 결과: `getExamAnalysisGptChecklistAutoItems`, `createExamAnalysisGptChecklistText`, `createExamAnalysisGptPlanningPacket`에서 `activeRun`, `model`, `outputDrafts`를 안전 객체로 정규화하도록 수정했다. 상세 데이터가 아직 없으면 자동 입력값은 `미입력` 또는 `시험지분석 검수 후 자동 표시`로 표시하고, 상세 로딩 완료 후 실제 값으로 갱신된다.
+- 저장 원천: Supabase/app_state/Storage 변경 없음. 프론트 렌더 안정성 수정이며 새 SQL 적용은 필요 없다.
+- 검증: 로컬 API/프론트와 Chrome headless로 선생님 세션 주입 후 `시험분석` 탭 클릭을 재현했다. `시험분석`, `블로그/인스타 산출물 초안`, `GPT 대화세션 체크리스트`가 표시되고 콘솔 예외 0건을 확인했다. `npm run build`, `npm run test:production` 256개 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
 ### 2026-07-09 P1. 수업일지 발송계획 선택과 Solapi 실제 반영 분리

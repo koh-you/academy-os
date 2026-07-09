@@ -2226,19 +2226,29 @@ function formatExamAnalysisKeyQuestionBlockChecklist(blocks = []) {
 }
 
 function getExamAnalysisGptChecklistAutoItems({ activeRun = {}, model = {}, outputDrafts = {} } = {}) {
-  const inputs = outputDrafts.inputs ?? {};
-  const meta = model.meta ?? {};
-  const totalQuestions = Number(meta.totalQuestions || model.questions?.length || activeRun.totalQuestionCount || 0);
+  const safeRun = activeRun && typeof activeRun === "object" ? activeRun : {};
+  const safeModel = model && typeof model === "object" ? model : {};
+  const safeDrafts = outputDrafts && typeof outputDrafts === "object" ? outputDrafts : {};
+  const inputs = safeDrafts.inputs ?? {};
+  const meta = safeModel.meta ?? {};
+  const totalQuestions = Number(
+    meta.totalQuestions
+    || safeModel.questions?.length
+    || safeRun.confirmedQuestionCount
+    || safeRun.detectedQuestionCount
+    || safeRun.totalQuestionCount
+    || 0
+  );
   return [
     {
       label: "학교/학년",
       source: "웹앱 자동 입력",
-      value: [activeRun.schoolName || meta.schoolName, activeRun.grade || meta.grade].filter(Boolean).join(" ") || "미입력"
+      value: [safeRun.schoolName || meta.schoolName, safeRun.grade || meta.grade].filter(Boolean).join(" ") || "미입력"
     },
     {
       label: "고사명/과목",
       source: "웹앱 자동 입력",
-      value: [activeRun.examCycle || activeRun.examTerm || meta.examCycle, activeRun.subject || meta.subject].filter(Boolean).join(" · ") || "미입력"
+      value: [safeRun.examCycle || safeRun.examTerm || meta.examCycle, safeRun.subject || meta.subject].filter(Boolean).join(" · ") || "미입력"
     },
     {
       label: "시험일/범위",
@@ -2253,23 +2263,24 @@ function getExamAnalysisGptChecklistAutoItems({ activeRun = {}, model = {}, outp
     {
       label: "단원별 실제 비중",
       source: "시험지분석 후보/확정",
-      value: formatExamAnalysisChecklistDistribution(model.partDistribution) || "시험지분석 검수 후 자동 표시"
+      value: formatExamAnalysisChecklistDistribution(safeModel.partDistribution) || "시험지분석 검수 후 자동 표시"
     },
     {
       label: "난도 분포",
       source: "시험지분석 후보/확정",
-      value: formatExamAnalysisChecklistDistribution(model.difficultyDistribution) || "시험지분석 검수 후 자동 표시"
+      value: formatExamAnalysisChecklistDistribution(safeModel.difficultyDistribution) || "시험지분석 검수 후 자동 표시"
     },
     {
       label: "주요문항 후보/체크 저장본",
       source: "시험지분석 후보",
-      value: formatExamAnalysisImportantQuestionSummary(model.importantQuestions) || "AI 결과 검수 표에서 주요문항 체크 필요"
+      value: formatExamAnalysisImportantQuestionSummary(safeModel.importantQuestions) || "AI 결과 검수 표에서 주요문항 체크 필요"
     }
   ];
 }
 
 function createExamAnalysisGptChecklistText({ activeRun = {}, model = {}, outputDrafts = {} } = {}) {
-  const inputs = outputDrafts.inputs ?? {};
+  const safeDrafts = outputDrafts && typeof outputDrafts === "object" ? outputDrafts : {};
+  const inputs = safeDrafts.inputs ?? {};
   const autoItems = getExamAnalysisGptChecklistAutoItems({ activeRun, model, outputDrafts });
   const valueFor = (key) => String(inputs[key] || "").trim() || "(미입력)";
   return [
@@ -2301,7 +2312,8 @@ function createExamAnalysisGptChecklistText({ activeRun = {}, model = {}, output
 }
 
 function createExamAnalysisGptPlanningPacket({ activeRun = {}, model = {}, outputDrafts = {} } = {}) {
-  const keyQuestionBlocks = normalizeExamAnalysisKeyQuestionBlocks(outputDrafts.inputs ?? {});
+  const safeDrafts = outputDrafts && typeof outputDrafts === "object" ? outputDrafts : {};
+  const keyQuestionBlocks = normalizeExamAnalysisKeyQuestionBlocks(safeDrafts.inputs ?? {});
   const cardPlan = createExamAnalysisCardNewsModel(keyQuestionBlocks);
   const checklistText = createExamAnalysisGptChecklistText({ activeRun, model, outputDrafts });
   return [
