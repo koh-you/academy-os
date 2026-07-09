@@ -12,6 +12,20 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-09 P0. 시험분석 Gate 3 완전 삭제와 다음 세션 인수인계
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청: 시험분석 산출물 패널에 남아 있던 `블로그형 카드 디자인 Gate 3`를 완전히 삭제하고, 오늘 작업 요약과 다음 세션에 넘길 프롬프트를 준비한다. 특히 지침에 남겨둔 후속 작업을 먼저 정리해 프롬프트에 포함한다.
+- 구현 결과: `src/app/App.jsx`에서 인앱 HTML/CSS/JS 카드 렌더러 관련 함수, 카드 미리보기 패널, `cardPreview` 접기 상태, `cardPreviewSlides` 계산을 제거했다. `src/app/App.css`의 Gate 3 카드 렌더러 스타일도 제거했다.
+- 구현 결과: 시험분석 산출물 흐름은 `GPT 대화세션 체크리스트`, `GPT 기획 패킷 복사`, `Canva 10장 계획 텍스트`, 산출물 ZIP 텍스트를 유지한다. 웹앱은 더 이상 카드 이미지를 직접 렌더링하지 않고, GPT Image 프로젝트에서 한 장씩 생성하는 구조를 원칙으로 둔다.
+- 문서 갱신: `docs/exam-analysis-canva-workflow.md`에서 Gate 3 재명명 후보를 폐기하고 `GPT Image 기획 패킷 / Canva 재료 보드` 기준으로 수정했다. `docs/next-session/README.md`는 오늘 작업 요약, 남은 후속/주의, 운영 검수 우선순위, 다음 세션 프롬프트 중심으로 다시 작성했다.
+- 남은 후속 1: AGENTS의 `Autosave Risk Register`에 남긴 붉은 `자동저장 위험` UI는 아직 구현하지 않았다. 후보는 전역 `app_state` snapshot 저장, 시험정보/시험 후 기록지, 학생 프로필, 보충 task, 학교 일정처럼 입력마다 API를 호출하거나 큰 row를 저장하는 화면이다.
+- 남은 후속 2: 수업메모 이전 메모 확인 기능은 운영 SQL 적용이 필요하다. 파일은 `supabase/20260708_prep_memo_acknowledgements.sql`이며, SQL 적용은 사용자가 Supabase SQL editor에서 직접 한다.
+- 남은 후속 3: `솔라피 발송결과` 버튼은 구현/테스트됐지만 운영 배포 후 실제 affected lesson에서 Solapi 원천 `statusCode 4000`이 OS `발송 완료`로 반영되는지 사람이 검수해야 한다.
+- 남은 후속 4: GPT Image로 만든 최종 이미지/Canva 수정본을 웹앱에 역반영하는 저장 UI는 아직 없다. 현재 원본은 `exam_analysis_runs.audit_summary.outputDrafts.inputs`의 선생님 체크리스트/기획 입력이다.
+- 저장 원천: 이번 삭제는 UI/문서/테스트 정리이며 Supabase/app_state/Storage 저장 구조 변경은 없다. 시험분석 산출물 입력 원본은 기존처럼 `exam_analysis_runs.audit_summary.outputDrafts.inputs`다. 새 SQL 적용은 필요 없다.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production`, `npm run build`, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-09 P1. 시험분석 블로그 벤치마킹 구조 체크리스트 정리
 
 - 상태: 완료 - 구현/검증 완료
@@ -455,9 +469,9 @@
 - 상태: 완료 - 문서화
 - 사용자 요청: 코딩부터 하지 말고 시험분석 공개 산출물을 Canva 중심 워크플로우 기준으로 화면/데이터 관점에서 재설계한다.
 - 작업 결과: `docs/exam-analysis-canva-workflow.md`를 추가해 Canva 10장 템플릿의 카드별 역할, 고정 영역/교체 영역, 웹앱 export 재료, 차트 PNG, 문제/손풀이 crop 파일명 가이드, 블로그 초안 흐름, 인스타 캡션 흐름을 정리했다.
-- 핵심 결정: Canva는 최종 카드뉴스 디자인 편집기이고 웹앱은 시험분석 원본/AI 초안/선생님 저장본/Canva 재료 export/블로그·인스타 문구 관리 역할이다. JS/CSS 렌더러는 최종 제작기가 아니라 `Canva 재료 미리보기/구조 검수`, 문구 길이 확인, 차트/이미지 재료 생성, 장기 Puppeteer 후보로 유지한다.
+- 핵심 결정: Canva는 최종 카드뉴스 디자인 편집기이고 웹앱은 시험분석 원본/AI 초안/선생님 저장본/Canva 재료 export/블로그·인스타 문구 관리 역할이다. 2026-07-09 기준 인앱 JS/CSS 카드 렌더러 Gate 3는 삭제했고, 카드 이미지는 GPT Image 프로젝트에서 생성한다.
 - 저장 원천: 새 SQL 없음. 새 저장 구조 구현 없음. 설계 기준은 기존 `exam_analysis_runs.audit_summary.outputDrafts.inputs`, `outputDrafts.blog.teacherDraft`, `outputDrafts.instagram.teacherDraft`, `finalPreviewModel`을 source of truth로 삼는다. Canva에서 수정한 최종 문구는 웹앱 선생님 저장본에 다시 반영해야 한다.
-- 다음 구현 후보: 산출물 패널의 `블로그형 카드 디자인 Gate 3` 문구를 `Canva 재료 미리보기/구조 검수`로 재명명, 카드별 Canva 재료 보드 추가, ZIP export를 `texts/canva-card-*.txt`와 `texts/crop-file-guide.txt`로 세분화, Canva 최종 문구 역반영 UI 추가.
+- 다음 구현 후보: 카드별 Canva 재료 보드 추가, ZIP export를 `texts/canva-card-*.txt`와 `texts/crop-file-guide.txt`로 세분화, Canva/GPT Image 최종 문구 역반영 UI 추가.
 - 검증: 문서 변경만 있으므로 `npm run build`, `npm run test:production`은 실행하지 않는다. `git diff --check`로 공백/패치 오류만 확인한다.
 - 중단 조건: 10장 기준을 임의로 8장 등으로 낮춤, AI가 문항 수/시험범위/문항번호/풀이 사실을 추측함, Canva 최종본과 웹앱 선생님 저장본이 갈라짐, 선생님 입력값을 AI/템플릿/렌더러가 덮어씀, 필터/보정 로직이 여러 겹 쌓임.
 

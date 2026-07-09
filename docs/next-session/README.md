@@ -14,170 +14,93 @@ E:\academy-os 작업을 이어가겠습니다.
 4. git status --short
 5. git log -1 --oneline
 
-먼저 `git log -1 --oneline`으로 현재 최신 커밋을 확인하세요.
-기능 구현 기준 최신 커밋은 `4d8e10f Add type-based lesson research plans`입니다.
-이후 `docs/next-session/README.md`만 갱신한 인수인계 커밋이 최신 커밋으로 있을 수 있습니다.
+현재 실제 최신 커밋은 반드시 `git log -1 --oneline`으로 확인해주세요.
 
-오늘까지의 핵심 작업은 시험지관리/수업연구를 같은 유형 원천으로 연결한 것입니다.
+오늘까지의 핵심 흐름:
+- 수업일지/수업알림톡은 자동저장과 Solapi 예약을 분리하는 방향으로 정리 중입니다. 수업일지 저장은 Supabase `lesson_student_records` 저장이고, Solapi 예약/취소/발송결과 확인은 별도 버튼/별도 API 흐름이어야 합니다.
+- `솔라피 발송결과` 버튼과 `/api/notification-jobs/reconcile-solapi`가 추가되어, 이미 Solapi에서 발송된 결과를 OS `notification_jobs`와 `lesson_student_records`에 반영할 수 있습니다.
+- 시험분석은 웹앱에서 `GPT 대화세션 체크리스트`와 `GPT 기획 패킷 복사`를 만들고, 실제 카드 이미지는 GPT Image 프로젝트에서 한 장씩 생성하는 방향입니다.
+- 인앱 HTML/CSS/JS 카드 렌더러였던 `블로그형 카드 디자인 Gate 3`는 완전히 삭제했습니다. 앞으로 웹앱은 체크리스트/기획 패킷/ZIP 텍스트까지 담당하고, 카드 이미지 렌더링은 GPT Image 프로젝트가 담당합니다.
 
-1. 시험지관리
-- `교재관리`는 `시험지관리` 흐름으로 전환되어 있습니다.
-- 상단 탭 순서는 `진도별 트랙 -> 시험지 보관함 -> 유형트리`입니다.
-- `유형트리`는 `api/data/ssenTypeIndex.json` 원천을 읽습니다.
-- 현재 유형 원천은 총 883개입니다.
-  - 공통수학1 179
-  - 공통수학2 187
-  - 대수 175
-  - 미적분1 148
-  - 확률과 통계 92
-  - 기하 102
-- 이전 하드코딩 샘플 유형트리는 제거됐습니다.
-- `문제수 동기화` 버튼과 `onSyncProblemCounts` 로직은 제거됐습니다.
-- 새 시험지/PDF 추가 시 이름에 과목명이 있으면 그 과목으로, 없으면 현재 선택 과목으로 저장됩니다.
-- `진도별 트랙`은 선택 과목의 데일리/누적/단원 시험지를 한 표의 컬럼으로 함께 보여줍니다.
-- 학생별 셀에서 `대기/예정/통과/미통과/재시험1/재시험2/강사확인`과 점수를 저장합니다.
+먼저 정리해야 할 남은 후속/주의:
+1. 자동저장 위험 붉은 UI는 아직 구현하지 않았습니다.
+   - AGENTS.md의 `Autosave Risk Register`에 따라 고위험 자동저장 화면에는 `자동저장 위험` 배지와 `왜 위험한가` 버튼을 붙여야 합니다.
+   - 우선 후보: 전역 `app_state` snapshot 저장, 시험정보/시험 후 기록지, 학생 프로필, 보충 task, 학교 일정처럼 입력마다 API를 호출하거나 큰 row를 저장하는 화면.
+   - 수업일지/수업알림톡은 1차로 수정모드/저장버튼/예약 분리가 들어갔지만, 운영 검수 전에는 안전하다고 단정하지 마세요.
+2. 수업메모 이전 메모 확인 기능은 운영 SQL 적용이 필요합니다.
+   - 파일: `supabase/20260708_prep_memo_acknowledgements.sql`
+   - SQL 적용은 사용자가 Supabase SQL editor에서 직접 합니다.
+3. Solapi 발송결과 반영은 운영 배포 후 실제 수업에서 검수해야 합니다.
+   - affected lesson에서 `솔라피 발송결과`를 눌렀을 때 Solapi 원천 `statusCode 4000`이 OS에 `발송 완료`로 반영되는지 확인하세요.
+   - 이 버튼은 새 예약 생성 버튼이 아니라 원천 발송결과 반영 버튼입니다.
+4. 시험분석 GPT Image 워크플로우는 아직 최종 이미지 파일을 웹앱으로 다시 가져오는 저장 UI까지 구현된 것은 아닙니다.
+   - 현재 원본은 `exam_analysis_runs.audit_summary.outputDrafts.inputs`에 저장되는 선생님 체크리스트/기획 입력입니다.
+   - GPT Image 결과물은 프로젝트 대화세션에서 생성하고, 필요하면 다음 단계에서 최종 이미지/문구 역반영 UI를 설계하세요.
+5. Vision AI raw 결과는 `.codex-temp/benchmark-vision-results`에 있고 Git에는 올리지 않습니다.
+   - 지속 가능한 참고는 커밋된 docs 요약 파일을 우선 사용하세요.
 
-2. 수업연구
-- 수업연구는 `유형별 강의 교안` 중심으로 리뉴얼됐습니다.
-- 왼쪽에 시험지관리와 같은 유형 원천 기반 `유형트리`가 있습니다.
-- 세부유형의 `교안` 버튼을 누르면 해당 유형이 연결된 강의 교안 항목이 생성되고 오른쪽 편집기에 열립니다.
-- 교안 항목은 기존 `app_state.lessonResearchItems`에 저장됩니다.
-- 새 SQL은 필요 없습니다.
-- 저장 필드:
-  - `linkedTypeId`, `linkedTypeNo`, `linkedTypeTitle`, `linkedTypeChapter`, `linkedTypeUnit`
-  - 특정 문항 / 예시 상황
-  - 학생이 막히는 지점
-  - 설명 한 줄 목표
-  - 설명 틀 / 핵심 질문
-  - 판서 흐름
-  - 확인 질문
-  - 연습/숙제 연결
-  - 문항 관찰 메모
-  - 설명 보완 메모
-  - 수업/교재화 메모
-- 기존 수업연구 메모는 삭제하지 않고 보정해서 유지합니다.
-- 기존 `미적분`, `미적분2`, `확률과통계` 저장값은 화면에서 `미적분1`, `확률과 통계`로 읽히게 했습니다.
-
-3. 시험 후 기록지 / 블로그 연결
-- 시험관리의 `시험 후 총평`은 체크리스트형 `시험 후 기록지`로 정리되어 있습니다.
-- 한 번 입력한 항목이 나중에 블로그/상담/카드뉴스 문구 재료로 발췌되는 방향입니다.
-- 같은 글을 세 군데에 따로 쓰는 구조를 지양합니다.
-
-4. 남은 운영 검수
-우선 코딩보다 운영 화면 검수를 먼저 해주세요.
-
-필수 검수 A. 시험지관리
-1. 운영 배포가 기능 기준 커밋 `4d8e10f` 이상인지 확인합니다.
-2. `시험지관리` 탭 순서가 `진도별 트랙`, `시험지 보관함`, `유형트리`인지 확인합니다.
-3. `유형트리`에서 공통수학1 유형이 몇 개 샘플이 아니라 179개 규모로 보이는지 확인합니다.
-4. 단원 접기/펼치기가 되는지 확인합니다.
-5. `시험지 보관함`에 `문제수 동기화` 버튼이 없는지 확인합니다.
-6. 새 시험지를 추가하고 `진도별 트랙` 상단 컬럼에 바로 표시되는지 확인합니다.
-7. 학생별 통과/재시험 상태와 점수를 입력한 뒤 새로고침해도 유지되는지 확인합니다.
-
-필수 검수 B. 수업연구
-1. `수업연구`에서 과목을 선택합니다.
-2. 왼쪽 `유형트리`에서 단원을 펼칩니다.
-3. 특정 세부유형의 `교안` 버튼을 누릅니다.
-4. 오른쪽 `강의 교안 정리`에 연결 유형과 단원 경로가 보이는지 확인합니다.
-5. 특정 문항, 학생 난점, 설명 틀, 판서 흐름, 확인 질문, 연습 연결을 입력합니다.
-6. 새로고침 후 입력값과 연결 유형이 유지되는지 확인합니다.
-7. 기존 수업연구 메모가 사라지지 않았는지 확인합니다.
-
-필수 검수 C. 수업일지 이전 메모 확인
-- 이전 작업 중 `수업메모 이전 메모 확인 처리`는 운영 SQL 적용이 필요합니다.
-- 필요한 SQL: `supabase/20260708_prep_memo_acknowledgements.sql`
-- SQL 적용 후 수업일지에서 `확인 후 숨기기`가 새로고침 후 유지되는지 확인합니다.
+운영 검수 우선순위:
+1. 수업일지에서 저장 버튼과 Solapi 버튼이 분리되어 있는지 확인합니다.
+2. 이미 예약 시간이 지난 수업에서 `솔라피 발송결과` 버튼을 눌러 OS 상태가 Solapi 원천과 맞게 갱신되는지 확인합니다.
+3. 시험분석 탭 진입이 정상인지 확인합니다.
+4. 시험분석 산출물 패널에서 `GPT 대화세션 체크리스트`, `GPT 기획 패킷 복사`, `산출물 ZIP`이 보이고, `블로그형 카드 디자인 Gate 3`/카드 미리보기 렌더러가 보이지 않는지 확인합니다.
+5. 웹앱 체크리스트에 입력한 선생님 확정값이 `산출물 저장` 후 새로고침해도 유지되는지 확인합니다.
 
 중단 조건:
-- 유형트리가 다시 몇 개 샘플만 보임
-- 새 시험지가 진행표에 안 뜸
-- 학생별 상태가 다른 학생에게 섞임
-- 수업연구 `교안` 버튼으로 항목이 생성되지 않음
-- 연결 유형이 저장되지 않음
-- 기존 수업연구 메모가 사라짐
-- 새로고침 후 교안 필드가 비어 있음
-- 필터/표시 보정만 덧대야 하는 상황이면 구현을 멈추고 원천 데이터/저장 경계를 먼저 확인
+- 수업일지 저장이 다시 Solapi 예약/취소를 자동으로 건드림
+- Solapi 발송결과 버튼이 새 예약을 만들거나 기존 예약을 취소함
+- 시험분석 탭이 다시 접속 불가
+- Gate 3 카드 렌더러 UI가 다시 보임
+- 선생님 체크리스트 저장값이 AI/템플릿 값으로 덮어써짐
+- 자동저장 문제를 필터/표시 보정으로만 숨기려는 상황
 
-큰 개발 원칙:
+작업 원칙:
 - `AI 초안 -> 선생님 검수/수정 -> 선생님 저장본 원본화`
-- 저장 원천을 먼저 정하고, 화면 필터로만 맞아 보이게 하지 않습니다.
+- 저장 원천을 먼저 확인하고 화면 필터로만 맞아 보이게 하지 않습니다.
 - 선생님이 수정/저장한 값은 이후 AI/템플릿/자동 매핑이 덮어쓰면 안 됩니다.
-
-작업 완료 시에는 반드시 `사람 검토 절차`와 `AI 자기검토`를 포함하고, 가능한 변경은 검증 후 커밋/푸시까지 진행하세요.
+- 완료 시 `사람 검토 절차`와 `AI 자기검토`를 반드시 포함하고, 가능한 변경은 검증 후 커밋/푸시까지 진행하세요.
 ```
 
-## 최신 구현/검증 상태
+## 오늘 작업 요약
 
-- 기능 기준 최신 커밋: `4d8e10f Add type-based lesson research plans`
-- 현재 실제 최신 커밋은 새 세션에서 `git log -1 --oneline`으로 확인합니다.
-- 직전 주요 커밋:
-  - `61d0ac9 Refine test paper type tree navigation`
-  - `0ffb6de Expand test paper type tree and progress matrix`
-  - `83b1c65 Record test paper app state cleanup`
-- 마지막 검증:
-  - `node --check scripts/scenario-tests-production.cjs` 통과
-  - `node --check scripts/scenario-tests-stability.cjs` 통과
-  - `git diff --check` 통과, CRLF 경고만 있음
-  - `npm run test:production` 통과, 250 checks
-  - `npm run build` 통과, 기존 Vite 번들 크기 경고만 있음
-- 현재 작업트리에는 `.codex-temp/` 미추적 폴더가 있을 수 있습니다. 커밋하지 마세요.
+### 수업일지 / 알림톡
 
-## 오늘 완료한 내용 요약
+- 최종 알림톡 문구는 선생님이 저장한 `lesson_student_records.teacher_comment` / `student_comment`를 새 원본으로 보게 정리했다.
+- 수동 하원 시각 저장, 반이동 stale record 삭제/방지, 지각 유예시간 보정, 저장 점멸 방지, 수업일지 저장과 Solapi 예약 분리 흐름을 정리했다.
+- `솔라피 발송결과` 버튼과 `/api/notification-jobs/reconcile-solapi`를 추가해 Solapi 원천 발송 결과를 OS 상태에 반영할 수 있게 했다.
 
-### 1. 시험지관리 전체 유형트리
+### 시험분석 / GPT Image
 
-- `api/data/ssenTypeIndex.json`을 프론트에서 읽어 유형트리를 구성합니다.
-- 과목별 대단원-단원-세부유형 구조로 표시합니다.
-- 화면명은 `유형트리`입니다.
-- 단원은 접힌 상태로 시작하고 필요한 단원만 펼쳐봅니다.
-- 기존 `쎈 유형트리` 라벨은 사용자-facing 영역에서 `유형트리`로 정리했습니다.
+- 네이버 벤치마킹 글 12개를 Vision AI로 분석해 반복 키워드/구조를 문서화했다.
+- GPT Image 프로젝트용 소스, 프로젝트 모듈, 체크리스트 구조, 웹앱 입력 패킷 흐름을 정리했다.
+- 시험분석 산출물 패널에 `GPT 대화세션 체크리스트`와 `GPT 기획 패킷 복사` 흐름을 붙였다.
+- 시험분석 탭 초기 렌더 오류를 수정했다.
+- 인앱 카드 렌더러였던 `블로그형 카드 디자인 Gate 3`는 삭제했다. 이제 웹앱은 카드 이미지 자체를 렌더링하지 않는다.
 
-### 2. 시험지관리 진행표
+### 시험지관리 / 수업연구
 
-- `문제수 동기화` 버튼과 관련 로직을 제거했습니다.
-- `진도별 트랙`은 데일리/누적/단원 시험지를 한 표의 컬럼으로 보여줍니다.
-- 각 학생 셀에서 상태와 점수를 저장합니다.
-- 저장 원천은 `app_state.problemBooks`입니다.
+- 시험지관리 유형트리는 전체 유형 원천을 읽고 기본 접힘 상태로 시작한다.
+- 수업연구는 같은 유형 원천에서 세부유형별 교안 항목을 만들 수 있다.
+- 운영 SQL이 필요한 항목은 수업메모 이전 메모 확인 기능뿐이다.
 
-### 3. 수업연구 유형별 강의 교안
+## 현재 저장 원천
 
-- `수업연구`에 유형트리 패널을 추가했습니다.
-- 유형별 `교안` 버튼으로 강의 교안 항목을 생성합니다.
-- 특정 문항, 학생 난점, 설명 틀, 판서 흐름, 확인 질문, 연습 연결을 구조화해 입력합니다.
-- 저장 원천은 `app_state.lessonResearchItems`입니다.
-- 기존 연구 메모는 삭제하지 않고 보존합니다.
-
-### 4. 시험 후 기록지
-
-- 시험관리 총평은 반복 가능한 체크리스트형 기록지로 정리되어 있습니다.
-- 블로그/인스타/카드뉴스 문구는 이 기록지를 재료로 발췌하는 방향입니다.
-
-## 남은 운영 확인
-
-### 필수 화면 검수
-
-1. `시험지관리 > 유형트리`: 전체 유형 수와 단원 접기/펼치기 확인
-2. `시험지관리 > 시험지 보관함`: 새 시험지 추가/삭제 확인
-3. `시험지관리 > 진도별 트랙`: 학생별 통과/재시험/점수 저장 확인
-4. `수업연구`: 유형 선택 후 교안 생성/저장/새로고침 유지 확인
-5. `수업일지`: 이전 수업메모 확인 SQL 적용 후 동작 확인
-
-### SQL 주의
-
-- 이번 시험지관리/수업연구 작업은 새 SQL이 필요 없습니다.
-- 이전 수업메모 확인 기능은 운영 SQL 적용 필요:
-  - `supabase/20260708_prep_memo_acknowledgements.sql`
+- 수업일지/알림톡 최종 문구: Supabase `lesson_student_records`
+- 수업 알림 예약/발송 상태: Supabase `notification_jobs` + Solapi 원천 groups/messages
+- 시험분석 산출물 체크리스트: `exam_analysis_runs.audit_summary.outputDrafts.inputs`
+- 시험분석 PDF/문항 분석: `exam_analysis_runs`, `exam_analysis_sources`, `exam_analysis_questions`, Storage `exam-analysis-pipeline-sources`
+- 시험지관리: `app_state.problemBooks`
+- 수업연구: `app_state.lessonResearchItems`
 
 ## 참조 파일
 
 - `AGENTS.md`
 - `docs/current-worklog.md`
-- `docs/next-session/README.md`
-- `src/app/App.jsx`
-- `src/app/App.css`
-- `api/data/ssenTypeIndex.json`
-- `scripts/scenario-tests-production.cjs`
+- `docs/exam-analysis-gpt-checklist-project-source-2026-07-09.md`
+- `docs/exam-analysis-gpt-image-project-module-2026-07-09.md`
+- `docs/exam-analysis-gpt-image-source-2026-07-09.md`
+- `docs/exam-analysis-blog-vision-all-posts-2026-07-09.md`
+- `docs/exam-analysis-canva-workflow.md`
 - `supabase/20260708_prep_memo_acknowledgements.sql`
 
 ## 자주 쓰는 명령
@@ -185,8 +108,8 @@ E:\academy-os 작업을 이어가겠습니다.
 ```powershell
 git status --short
 git log --oneline -8
+node --check api/server.js
 node --check scripts/scenario-tests-production.cjs
-node --check scripts/scenario-tests-stability.cjs
 npm run test:production
 npm run build
 git diff --check
