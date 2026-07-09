@@ -1765,6 +1765,65 @@ const examAnalysisOutputInputFields = [
   }
 ];
 
+const examAnalysisGptChecklistManualFields = [
+  {
+    key: "checklistExamDate",
+    label: "시험일",
+    source: "선생님 확정 필요",
+    guide: "웹앱 시험관리와 다르면 선생님 확인값을 적습니다.",
+    placeholder: "예: 2026-07-08"
+  },
+  {
+    key: "checklistExamRange",
+    label: "시험범위",
+    source: "웹앱 자동 입력 보완",
+    guide: "웹앱/시험관리 범위가 비어 있거나 공개글용으로 다듬어야 할 때 적습니다.",
+    placeholder: "예: 연립방정식 ~ 일차함수와 일차방정식의 관계"
+  },
+  {
+    key: "checklistTextbookPublisher",
+    label: "교과서/출판사",
+    source: "선생님 확정 필요",
+    guide: "이미 확인된 교과서와 출판사만 적습니다.",
+    placeholder: "예: 미래엔(황), 천재(이)"
+  },
+  {
+    key: "checklistGradeCut",
+    label: "등급컷/예상 등급컷",
+    source: "선생님 확정 필요",
+    guide: "확인되지 않았으면 비워두고 아래 금지/불확실에 남깁니다.",
+    placeholder: "예: 예상 1등급 컷 88점 내외"
+  },
+  {
+    key: "checklistSourceEvidence",
+    label: "부교재/모의고사/학습지 출제 근거",
+    source: "선생님 확정 필요",
+    guide: "부교재명, 유사유형, 학습지, 모의고사 근거를 확인된 범위에서만 적습니다.",
+    placeholder: "예: 학교 학습지 반복 유형, 쎈 B단계 유사, 2024년 3월 학력평가 변형 신호"
+  },
+  {
+    key: "checklistForbiddenTextbook",
+    label: "쓰면 안 되는 교재명",
+    source: "생성 금지",
+    guide: "확인되지 않았거나 오해 소지가 있는 교재명을 적습니다.",
+    placeholder: "예: 블랙라벨 언급 금지, 고쟁이 문항번호 미확인"
+  },
+  {
+    key: "checklistUnconfirmedQuestions",
+    label: "확인 안 된 문항번호",
+    source: "생성 금지",
+    guide: "AI가 주요문항/유사유형으로 쓰면 안 되는 문항번호를 적습니다.",
+    placeholder: "예: 18번은 번호 재확인 전까지 공개글 사용 금지"
+  },
+  {
+    key: "checklistAiNoGuess",
+    label: "AI가 추측하면 안 되는 내용",
+    source: "생성 금지",
+    guide: "GPT 대화세션이 추가로 만들어내면 안 되는 사실을 적습니다.",
+    placeholder: "예: 등급컷, 정확한 페이지, 교재 문항번호, 학교별 평균점수는 추측 금지"
+  }
+];
+
 const examAnalysisBlogBlockFields = [
   {
     key: "blogBlockOpening",
@@ -1859,6 +1918,18 @@ const examAnalysisKeyQuestionBlockFields = [
     type: "input"
   },
   {
+    key: "selectionReason",
+    label: "선생님 선택 이유",
+    placeholder: "예: 후반부에서 학생들이 조건 해석과 시간 배분으로 흔들릴 대표 문항입니다.",
+    type: "textarea"
+  },
+  {
+    key: "similarTypeEvidence",
+    label: "유사유형 근거",
+    placeholder: "예: 학교 학습지 3번 변형, 쎈 B단계 유사, 부교재 ○○쪽 유사. 확인된 근거만 적습니다.",
+    type: "textarea"
+  },
+  {
     key: "questionMemo",
     label: "주요문항 설명",
     placeholder: "왜 대표 문항인지, 어떤 단원/유형인지, 학생이 어디서 흔들리는지 적어주세요.",
@@ -1886,6 +1957,7 @@ const examAnalysisKeyQuestionBlockFields = [
 
 const examAnalysisOutputAllInputFields = [
   ...examAnalysisOutputInputFields,
+  ...examAnalysisGptChecklistManualFields,
   ...examAnalysisBlogBlockFields
 ];
 
@@ -1909,6 +1981,8 @@ function createEmptyExamAnalysisKeyQuestionBlock(index = 1) {
     blockId: `key-question-${index}`,
     questionNumber: "",
     title: "",
+    selectionReason: "",
+    similarTypeEvidence: "",
     questionMemo: "",
     mistakePoint: "",
     solutionMemo: "",
@@ -1924,6 +1998,8 @@ function normalizeExamAnalysisKeyQuestionBlock(block = {}, index = 0) {
     blockId,
     questionNumber: String(block.questionNumber ?? ""),
     title: String(block.title ?? ""),
+    selectionReason: String(block.selectionReason ?? ""),
+    similarTypeEvidence: String(block.similarTypeEvidence ?? ""),
     questionMemo: String(block.questionMemo ?? ""),
     mistakePoint: String(block.mistakePoint ?? ""),
     solutionMemo: String(block.solutionMemo ?? ""),
@@ -1966,6 +2042,7 @@ function createEmptyExamAnalysisOutputDrafts() {
       nextStudyPlan: "",
       imageSlotNotes: "",
       schoolVariationNotes: "",
+      ...Object.fromEntries(examAnalysisGptChecklistManualFields.map((field) => [field.key, ""])),
       ...Object.fromEntries(examAnalysisBlogBlockFields.map((field) => [field.key, ""])),
       keyQuestionBlocks: [createEmptyExamAnalysisKeyQuestionBlock(1)]
     },
@@ -2100,6 +2177,161 @@ function getExamAnalysisOutputInputTotal(inputs = {}) {
     ? inputs.keyQuestionBlocks
     : [createEmptyExamAnalysisKeyQuestionBlock(1)];
   return examAnalysisOutputAllInputFields.length + keyQuestionBlocks.length;
+}
+
+function formatExamAnalysisChecklistDistribution(items = [], maxItems = 6) {
+  return (Array.isArray(items) ? items : [])
+    .filter((item) => Number(item?.count || 0) > 0)
+    .slice(0, maxItems)
+    .map((item) => {
+      const label = String(item.label || "미입력").trim() || "미입력";
+      const count = Number(item.count || 0);
+      const percent = Number(item.percent || 0);
+      return `${label} ${count}문항${percent ? `(${percent}%)` : ""}`;
+    })
+    .join(", ");
+}
+
+function formatExamAnalysisImportantQuestionSummary(questions = []) {
+  return (Array.isArray(questions) ? questions : [])
+    .slice(0, 12)
+    .map((question) => {
+      const parts = [
+        `${question.questionNumber}번`,
+        question.mainType,
+        question.unitName,
+        question.difficulty,
+        question.pageLabel,
+        question.reviewNote ? `메모: ${question.reviewNote}` : ""
+      ].filter(Boolean);
+      return parts.join(" · ");
+    })
+    .join("\n");
+}
+
+function formatExamAnalysisKeyQuestionBlockChecklist(blocks = []) {
+  const meaningfulBlocks = normalizeExamAnalysisKeyQuestionBlocks({ keyQuestionBlocks: blocks })
+    .filter(getExamAnalysisKeyQuestionBlockHasContent);
+  if (!meaningfulBlocks.length) return "미입력 - 주요문항 반복 블록에서 선생님이 최종 선택";
+  return meaningfulBlocks.map((block, index) => [
+    `주요문항 최종 선택 ${index + 1}`,
+    `- 문항번호: ${block.questionNumber || "(미입력)"}`,
+    `- 선택 이유: ${block.selectionReason || "(미입력)"}`,
+    `- 핵심 개념/카드 제목: ${block.title || "(미입력)"}`,
+    `- 유사유형 근거: ${block.similarTypeEvidence || "(미입력)"}`,
+    `- 설명 메모: ${block.questionMemo || "(미입력)"}`,
+    `- 자주 틀리는 지점: ${block.mistakePoint || "(미입력)"}`,
+    `- 추천 복습/손풀이 메모: ${block.solutionMemo || "(미입력)"}`
+  ].join("\n")).join("\n\n");
+}
+
+function getExamAnalysisGptChecklistAutoItems({ activeRun = {}, model = {}, outputDrafts = {} } = {}) {
+  const inputs = outputDrafts.inputs ?? {};
+  const meta = model.meta ?? {};
+  const totalQuestions = Number(meta.totalQuestions || model.questions?.length || activeRun.totalQuestionCount || 0);
+  return [
+    {
+      label: "학교/학년",
+      source: "웹앱 자동 입력",
+      value: [activeRun.schoolName || meta.schoolName, activeRun.grade || meta.grade].filter(Boolean).join(" ") || "미입력"
+    },
+    {
+      label: "고사명/과목",
+      source: "웹앱 자동 입력",
+      value: [activeRun.examCycle || activeRun.examTerm || meta.examCycle, activeRun.subject || meta.subject].filter(Boolean).join(" · ") || "미입력"
+    },
+    {
+      label: "시험일/범위",
+      source: "선생님 입력 우선",
+      value: [inputs.checklistExamDate, inputs.checklistExamRange].filter(Boolean).join(" · ") || "미입력"
+    },
+    {
+      label: "문항 수",
+      source: "시험지분석 후보/확정",
+      value: totalQuestions ? `${totalQuestions}문항` : "시험지분석 검수 후 자동 표시"
+    },
+    {
+      label: "단원별 실제 비중",
+      source: "시험지분석 후보/확정",
+      value: formatExamAnalysisChecklistDistribution(model.partDistribution) || "시험지분석 검수 후 자동 표시"
+    },
+    {
+      label: "난도 분포",
+      source: "시험지분석 후보/확정",
+      value: formatExamAnalysisChecklistDistribution(model.difficultyDistribution) || "시험지분석 검수 후 자동 표시"
+    },
+    {
+      label: "주요문항 후보/체크 저장본",
+      source: "시험지분석 후보",
+      value: formatExamAnalysisImportantQuestionSummary(model.importantQuestions) || "AI 결과 검수 표에서 주요문항 체크 필요"
+    }
+  ];
+}
+
+function createExamAnalysisGptChecklistText({ activeRun = {}, model = {}, outputDrafts = {} } = {}) {
+  const inputs = outputDrafts.inputs ?? {};
+  const autoItems = getExamAnalysisGptChecklistAutoItems({ activeRun, model, outputDrafts });
+  const valueFor = (key) => String(inputs[key] || "").trim() || "(미입력)";
+  return [
+    "[A. 웹앱/시험지분석 자동 입력]",
+    ...autoItems.map((item) => `- ${item.label}: ${item.value} (${item.source})`),
+    "",
+    "[B. 선생님 확정 입력]",
+    `- 시험일: ${valueFor("checklistExamDate")}`,
+    `- 시험범위: ${valueFor("checklistExamRange")}`,
+    `- 교과서/출판사: ${valueFor("checklistTextbookPublisher")}`,
+    `- 등급컷/예상 등급컷: ${valueFor("checklistGradeCut")}`,
+    `- 부교재/모의고사/학습지 출제 근거: ${valueFor("checklistSourceEvidence")}`,
+    "",
+    "[C. 주요문항 최종 선택 - 선생님 선정만 사용]",
+    formatExamAnalysisKeyQuestionBlockChecklist(inputs.keyQuestionBlocks),
+    "",
+    "[D. 선생님 해석/문장화]",
+    `- 한 줄 총평: ${valueFor("oneLineReview")}`,
+    `- 시험 흐름/체감 난도: ${valueFor("flowReview")}`,
+    `- 변별 문항/흔들린 지점: ${valueFor("scoreGapPoint")}`,
+    `- 다음 학습 방향: ${valueFor("nextStudyPlan")}`,
+    `- 수업/상담 연결 메모: ${valueFor("schoolVariationNotes")}`,
+    "",
+    "[E. 금지/불확실]",
+    `- 쓰면 안 되는 교재명: ${valueFor("checklistForbiddenTextbook")}`,
+    `- 확인 안 된 문항번호: ${valueFor("checklistUnconfirmedQuestions")}`,
+    `- AI가 추측하면 안 되는 내용: ${valueFor("checklistAiNoGuess")}`
+  ].join("\n");
+}
+
+function createExamAnalysisGptPlanningPacket({ activeRun = {}, model = {}, outputDrafts = {} } = {}) {
+  const keyQuestionBlocks = normalizeExamAnalysisKeyQuestionBlocks(outputDrafts.inputs ?? {});
+  const cardPlan = createExamAnalysisCardNewsModel(keyQuestionBlocks);
+  const checklistText = createExamAnalysisGptChecklistText({ activeRun, model, outputDrafts });
+  return [
+    "[작업 목표]",
+    "아래 체크리스트를 바탕으로 블로그/인스타 카드뉴스 기획안을 만들어줘.",
+    "아직 이미지를 만들지 말고, 카드별 내용만 표로 정리해줘.",
+    "",
+    "[브랜드]",
+    "- 으뜸수학 고태영T",
+    "- 블루/화이트 중심",
+    "- 전문적이고 차분한 내신 분석 카드뉴스",
+    "- 벤치마킹 블로그의 정보 구조는 참고하되 문장/디자인/브랜드는 복제하지 않음",
+    "",
+    "[체크리스트]",
+    checklistText,
+    "",
+    "[카드 구조]",
+    ...cardPlan.map((card) => `- 카드 ${card.card}: ${card.role} / ${card.renderMode} / ${card.slot}`),
+    "",
+    "[출력 형식]",
+    "카드번호 / 카드 역할 / 메인 문구 / 보조 문구 / 강조 키워드 / 반드시 넣을 숫자·표 / 검수 필요 사실",
+    "",
+    "[주의]",
+    "- 체크리스트에 없는 시험 사실은 추가하지 마.",
+    "- 주요문항은 [C. 주요문항 최종 선택]에 있는 문항만 사용해.",
+    "- 시험지분석 후보는 선생님 최종 선택으로 확정하지 마.",
+    "- 불확실한 내용은 카드에 넣지 말고 검수 필요 사실에 적어.",
+    "- 한 카드에 문구를 너무 많이 넣지 마.",
+    "- 원본 블로그 문장/디자인/브랜드를 복제하지 마."
+  ].join("\n");
 }
 
 function sanitizeExamAnalysisOutputFileNamePart(value = "") {
@@ -2632,11 +2864,12 @@ function createExamAnalysisPackageReadme({ activeRun = {}, outputDrafts = {}, ch
     "사용 방법",
     "1. texts/blog-draft.txt 내용을 네이버 블로그 에디터에 붙여넣고 문장을 최종 수정합니다.",
     "2. texts/instagram-card-draft.txt 내용을 Canva 카드뉴스 문구로 사용합니다.",
-    `3. charts 폴더의 PNG 이미지는 ${examAnalysisChartPngExportScale}배 해상도 고화질 이미지입니다. 통렌더 카드의 재료 또는 네이버 블로그 보조 이미지로 사용합니다.`,
-    "4. texts/canva-10-card-plan.txt 기준으로 6개 슬라이드 유형과 주요문항 반복 구조를 확인합니다.",
-    "5. texts/blog-block-guide.txt 기준으로 블로그 블록 조립 순서를 확인합니다.",
-    "6. charts-svg 폴더의 SVG 원본은 PPT/Canva에서 더 선명한 원본이 필요할 때 사용합니다.",
-    "7. 외부 에디터에서 수정한 최종본은 현재 앱으로 자동 동기화되지 않습니다.",
+    "3. texts/gpt-project-planning-packet.txt 내용을 GPT 프로젝트 대화세션 첫 메시지로 붙여넣고 카드 기획안을 받습니다.",
+    `4. charts 폴더의 PNG 이미지는 ${examAnalysisChartPngExportScale}배 해상도 고화질 이미지입니다. 통렌더 카드의 재료 또는 네이버 블로그 보조 이미지로 사용합니다.`,
+    "5. texts/canva-10-card-plan.txt 기준으로 6개 슬라이드 유형과 주요문항 반복 구조를 확인합니다.",
+    "6. texts/blog-block-guide.txt 기준으로 블로그 블록 조립 순서를 확인합니다.",
+    "7. charts-svg 폴더의 SVG 원본은 PPT/Canva에서 더 선명한 원본이 필요할 때 사용합니다.",
+    "8. 외부 에디터에서 수정한 최종본은 현재 앱으로 자동 동기화되지 않습니다.",
     "",
     `카드뉴스 구조 (${canvaCardPlan.length}장)`,
     canvaCardPlan.map((item) => `${item.card}. ${item.role} [${item.renderMode}] - ${item.slot}`).join("\n"),
@@ -2662,6 +2895,7 @@ function createExamAnalysisPackageManifest({ activeRun = {}, outputDrafts = {}, 
     texts: {
       blog: "texts/blog-draft.txt",
       instagram: "texts/instagram-card-draft.txt",
+      gptProjectPlanningPacket: "texts/gpt-project-planning-packet.txt",
       blogBlockGuide: "texts/blog-block-guide.txt",
       canvaCardPlan: "texts/canva-10-card-plan.txt"
     },
@@ -3377,6 +3611,7 @@ async function downloadExamAnalysisOutputPackageZip({ activeRun = {}, model = {}
     { name: "manifest.json", text: createExamAnalysisPackageManifest({ activeRun, outputDrafts, chartFiles }) },
     { name: "texts/blog-draft.txt", text: blogText || "블로그 초안 없음" },
     { name: "texts/instagram-card-draft.txt", text: instagramText || "인스타 카드 초안 없음" },
+    { name: "texts/gpt-project-planning-packet.txt", text: createExamAnalysisGptPlanningPacket({ activeRun, model, outputDrafts }) },
     { name: "texts/canva-10-card-plan.txt", text: createExamAnalysisCanvaCardPlanText(outputDrafts) },
     { name: "texts/blog-block-guide.txt", text: createExamAnalysisBlogBlockGuideText() },
     ...chartFiles,
@@ -3402,6 +3637,7 @@ function ExamAnalysisOutputDraftPanel({
   isSavingOutputDrafts,
   onGenerateOutputDraft,
   onCopyOutputDraft,
+  onCopyText,
   onDownloadOutputDraft,
   onDownloadOutputPackageZip,
   onSaveOutputDrafts,
@@ -3420,6 +3656,8 @@ function ExamAnalysisOutputDraftPanel({
   const inputTotal = getExamAnalysisOutputInputTotal(outputDrafts.inputs);
   const keyQuestionBlocks = normalizeExamAnalysisKeyQuestionBlocks(outputDrafts.inputs);
   const cardPreviewSlides = createExamAnalysisCardNewsPreviewSlides({ activeRun, model, outputDrafts });
+  const gptChecklistAutoItems = getExamAnalysisGptChecklistAutoItems({ activeRun, model, outputDrafts });
+  const gptPlanningPacket = createExamAnalysisGptPlanningPacket({ activeRun, model, outputDrafts });
   const lastSavedAt = getExamAnalysisOutputLastSavedAt(outputDrafts);
   const saveCheckpointState = outputStatus.state === "dirty" || outputStatus.state === "saving" || outputStatus.state === "failed"
     ? outputStatus.state
@@ -3447,6 +3685,7 @@ function ExamAnalysisOutputDraftPanel({
   const [collapsedOutputSections, setCollapsedOutputSections] = useState({
     topSummary: false,
     guide: true,
+    gptChecklist: false,
     baseInputs: false,
     blogBlocks: false,
     keyQuestions: false,
@@ -3603,6 +3842,69 @@ function ExamAnalysisOutputDraftPanel({
               {label}
             </button>
           ))}
+        </div>
+      ) : null}
+
+      <div className="examAnalysisOutputCollapsibleHeader">
+        <div>
+          <strong>GPT 대화세션 체크리스트</strong>
+          <span>웹앱/시험지분석에서 자동으로 채운 값과 선생님 확정 입력을 합쳐 GPT 프로젝트 첫 메시지로 복사합니다.</span>
+        </div>
+        <button
+          className="examAnalysisOutputCollapseButton"
+          onClick={() => toggleOutputSection("gptChecklist")}
+          type="button"
+        >
+          {isOutputSectionCollapsed("gptChecklist") ? "펼치기" : "접기"}
+        </button>
+      </div>
+      {!isOutputSectionCollapsed("gptChecklist") ? (
+        <div className="examAnalysisGptChecklistPanel">
+          <div className="examAnalysisGptChecklistNotice">
+            <strong>반복 제작 기준</strong>
+            <span>자동 입력값은 읽기 전용입니다. 등급컷, 출제 근거, 금지 항목, 주요문항 최종 선택은 선생님 저장본을 원본으로 사용합니다.</span>
+          </div>
+          <div className="examAnalysisGptChecklistAutoGrid">
+            {gptChecklistAutoItems.map((item) => (
+              <article key={item.label}>
+                <span>{item.source}</span>
+                <strong>{item.label}</strong>
+                <p>{item.value}</p>
+              </article>
+            ))}
+          </div>
+          <div className="examAnalysisOutputInputGrid gptChecklistManual">
+            {examAnalysisGptChecklistManualFields.map((field) => (
+              <label key={field.key}>
+                <span>{field.label}</span>
+                <small>{field.source} · {field.guide}</small>
+                <textarea
+                  disabled={isOutputBusy}
+                  onChange={(event) => onUpdateInput(field.key, event.target.value)}
+                  placeholder={field.placeholder}
+                  rows={3}
+                  value={outputDrafts.inputs[field.key] || ""}
+                />
+              </label>
+            ))}
+          </div>
+          <div className="examAnalysisGptPacketBox">
+            <div>
+              <div>
+                <strong>GPT 프로젝트 첫 메시지 패킷</strong>
+                <span>이 내용을 GPT 프로젝트 대화세션 첫 메시지에 붙여넣고 카드 기획안부터 받습니다.</span>
+              </div>
+              <button
+                className="secondaryButton"
+                disabled={!gptPlanningPacket.trim()}
+                onClick={() => onCopyText("GPT 기획 패킷", gptPlanningPacket)}
+                type="button"
+              >
+                GPT 기획 패킷 복사
+              </button>
+            </div>
+            <textarea readOnly rows={12} value={gptPlanningPacket} />
+          </div>
         </div>
       ) : null}
 
@@ -10894,6 +11196,14 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     });
   }
 
+  async function copyOutputText(label, text) {
+    const copied = await copyTextToClipboard(text);
+    setOutputStatus({
+      state: copied ? "success" : "failed",
+      message: copied ? `시험분석 산출물 · ${label} 복사 완료` : `시험분석 산출물 · ${label} 복사 실패`
+    });
+  }
+
   function downloadOutputDraft(outputType, text) {
     const label = outputType === "instagram" ? "인스타 카드 초안" : "블로그 초안";
     const downloaded = downloadExamAnalysisOutputTextFile({
@@ -11816,6 +12126,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
             onGenerateOutputDraft={generateOutputDraft}
             onAddKeyQuestionBlock={addOutputKeyQuestionBlock}
             onCopyOutputDraft={copyOutputDraft}
+            onCopyText={copyOutputText}
             onDownloadOutputDraft={downloadOutputDraft}
             onDownloadOutputPackageZip={downloadOutputPackageZip}
             onRemoveKeyQuestionBlock={removeOutputKeyQuestionBlock}

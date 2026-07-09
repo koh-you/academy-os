@@ -2662,13 +2662,35 @@ const legacyExamAnalysisKeyQuestionGroups = {
   solutionMemo: ["blogBlockSolution", "blogSectionQuestion1SolutionCard", "blogSectionQuestion1SolutionText"]
 };
 
-const examAnalysisKeyQuestionBlockFields = ["questionNumber", "title", "questionMemo", "mistakePoint", "solutionMemo", "imageSlotMemo"];
+const examAnalysisGptChecklistManualFields = [
+  "checklistExamDate",
+  "checklistExamRange",
+  "checklistTextbookPublisher",
+  "checklistGradeCut",
+  "checklistSourceEvidence",
+  "checklistForbiddenTextbook",
+  "checklistUnconfirmedQuestions",
+  "checklistAiNoGuess"
+];
+
+const examAnalysisKeyQuestionBlockFields = [
+  "questionNumber",
+  "title",
+  "selectionReason",
+  "similarTypeEvidence",
+  "questionMemo",
+  "mistakePoint",
+  "solutionMemo",
+  "imageSlotMemo"
+];
 
 function createEmptyExamAnalysisKeyQuestionBlock(index = 1) {
   return {
     blockId: `key-question-${index}`,
     questionNumber: "",
     title: "",
+    selectionReason: "",
+    similarTypeEvidence: "",
     questionMemo: "",
     mistakePoint: "",
     solutionMemo: "",
@@ -2684,6 +2706,8 @@ function cleanExamAnalysisKeyQuestionBlock(block = {}, index = 0) {
     blockId,
     questionNumber: cleanExamAnalysisOutputText(block.questionNumber, 80),
     title: cleanExamAnalysisOutputText(block.title, 240),
+    selectionReason: cleanExamAnalysisOutputText(block.selectionReason, 1200),
+    similarTypeEvidence: cleanExamAnalysisOutputText(block.similarTypeEvidence, 1200),
     questionMemo: cleanExamAnalysisOutputText(block.questionMemo, 1600),
     mistakePoint: cleanExamAnalysisOutputText(block.mistakePoint, 1200),
     solutionMemo: cleanExamAnalysisOutputText(block.solutionMemo, 1600),
@@ -2769,6 +2793,10 @@ function normalizeExamAnalysisOutputInputs(inputs = {}) {
     nextStudyPlan: cleanExamAnalysisOutputText(migratedInputs.nextStudyPlan, 1200),
     imageSlotNotes: cleanExamAnalysisOutputText(migratedInputs.imageSlotNotes, 1600),
     schoolVariationNotes: cleanExamAnalysisOutputText(migratedInputs.schoolVariationNotes, 1600),
+    ...Object.fromEntries(examAnalysisGptChecklistManualFields.map((key) => [
+      key,
+      cleanExamAnalysisOutputText(migratedInputs[key], 1600)
+    ])),
     keyQuestionBlocks: normalizeExamAnalysisKeyQuestionBlocks(migratedInputs),
     ...blogBlockInputs
   };
@@ -2948,6 +2976,8 @@ function buildExamAnalysisOutputPrompt({ outputType, detail, inputs }) {
       `주요문항 ${index + 1}`,
       `문항번호: ${block.questionNumber || "(미입력)"}`,
       `카드 제목/핵심: ${block.title || "(미입력)"}`,
+      `선생님 선택 이유: ${block.selectionReason || "(미입력)"}`,
+      `유사유형 근거: ${block.similarTypeEvidence || "(미입력)"}`,
       `주요문항 설명: ${block.questionMemo || "(미입력)"}`,
       `자주 틀리는 지점: ${block.mistakePoint || "(미입력)"}`,
       `손풀이 설명: ${block.solutionMemo || "(미입력)"}`,
@@ -2963,6 +2993,16 @@ function buildExamAnalysisOutputPrompt({ outputType, detail, inputs }) {
     `다음 학습 방향: ${inputs.nextStudyPlan || "(미입력)"}`,
     `6개 슬라이드 유형/슬롯 메모: ${inputs.imageSlotNotes || "(미입력)"}`,
     `수업/상담 연결 메모: ${inputs.schoolVariationNotes || "(미입력)"}`,
+    "",
+    "[GPT Image/카드뉴스 체크리스트 - 선생님 확정 입력]",
+    `시험일: ${inputs.checklistExamDate || "(미입력)"}`,
+    `시험범위: ${inputs.checklistExamRange || "(미입력)"}`,
+    `교과서/출판사: ${inputs.checklistTextbookPublisher || "(미입력)"}`,
+    `등급컷/예상 등급컷: ${inputs.checklistGradeCut || "(미입력)"}`,
+    `부교재/모의고사/학습지 출제 근거: ${inputs.checklistSourceEvidence || "(미입력)"}`,
+    `쓰면 안 되는 교재명: ${inputs.checklistForbiddenTextbook || "(미입력)"}`,
+    `확인 안 된 문항번호: ${inputs.checklistUnconfirmedQuestions || "(미입력)"}`,
+    `AI가 추측하면 안 되는 내용: ${inputs.checklistAiNoGuess || "(미입력)"}`,
     "",
     blogBlockSummary,
     "",
@@ -3154,6 +3194,7 @@ async function generateExamAnalysisOutputDraft({ analysisRunId, outputType, outp
     inputs.nextStudyPlan,
     inputs.imageSlotNotes,
     inputs.schoolVariationNotes,
+    ...examAnalysisGptChecklistManualFields.map((key) => inputs[key]),
     ...examAnalysisBlogBlockFields.map(([key]) => inputs[key]),
     ...normalizeExamAnalysisKeyQuestionBlocks(inputs).flatMap((block) => examAnalysisKeyQuestionBlockFields.map((key) => block[key]))
   ].some(Boolean);

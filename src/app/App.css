@@ -3109,6 +3109,131 @@ button {
   color: #ffffff;
 }
 
+.examAnalysisGptChecklistPanel {
+  display: grid;
+  gap: 12px;
+}
+
+.examAnalysisGptChecklistNotice {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+}
+
+.examAnalysisGptChecklistNotice strong {
+  color: #17213d;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.examAnalysisGptChecklistNotice span {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.55;
+}
+
+.examAnalysisGptChecklistAutoGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.examAnalysisGptChecklistAutoGrid article {
+  background: #ffffff;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  padding: 12px;
+}
+
+.examAnalysisGptChecklistAutoGrid article > span {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 900;
+  justify-self: start;
+  line-height: 1.3;
+  padding: 5px 8px;
+}
+
+.examAnalysisGptChecklistAutoGrid strong {
+  color: #17213d;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.examAnalysisGptChecklistAutoGrid p {
+  color: #334155;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.55;
+  margin: 0;
+  white-space: pre-line;
+}
+
+.examAnalysisOutputInputGrid.gptChecklistManual {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.examAnalysisGptPacketBox {
+  background: #ffffff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.examAnalysisGptPacketBox > div {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.examAnalysisGptPacketBox > div > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.examAnalysisGptPacketBox strong {
+  color: #17213d;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.examAnalysisGptPacketBox span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.5;
+}
+
+.examAnalysisGptPacketBox textarea {
+  background: #f8fafc;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  color: #17213d;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.55;
+  min-width: 0;
+  padding: 11px;
+  resize: vertical;
+  width: 100%;
+}
+
 .examAnalysisOutputInputGrid {
   display: grid;
   gap: 12px;
@@ -14169,6 +14294,7 @@ body.attendanceOnlyBody {
   .examAnalysisQuestionCountGrid,
   .examAnalysisPreviewHero,
   .examAnalysisPreviewGrid,
+  .examAnalysisGptChecklistAutoGrid,
   .examAnalysisOutputInputGrid,
   .examAnalysisOutputEditorGrid,
   .examAnalysisSteps {
@@ -14178,6 +14304,8 @@ body.attendanceOnlyBody {
   .examAnalysisPreviewHero,
   .examAnalysisPreviewGrid,
   .examAnalysisOutputInputGrid,
+  .examAnalysisOutputInputGrid.gptChecklistManual,
+  .examAnalysisGptChecklistAutoGrid,
   .examAnalysisBenchmarkMap > div:last-child,
   .examAnalysisKeyQuestionFields,
   .examAnalysisOutputEditorGrid {
@@ -14322,8 +14450,15 @@ body.attendanceOnlyBody {
   .examAnalysisPreviewHero,
   .examAnalysisPreviewGrid,
   .examAnalysisPreviewDonutLayout,
+  .examAnalysisGptChecklistAutoGrid,
+  .examAnalysisOutputInputGrid.gptChecklistManual,
   .examAnalysisSteps {
     grid-template-columns: 1fr;
+  }
+
+  .examAnalysisGptPacketBox > div {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .examAnalysisPreviewMetricGrid {
