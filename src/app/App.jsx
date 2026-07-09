@@ -1729,39 +1729,39 @@ function ExamAnalysisFinalPreviewPanel({ model }) {
 const examAnalysisOutputInputFields = [
   {
     key: "oneLineReview",
-    label: "한줄 총평",
-    guide: "산출물의 첫 결론입니다. 이번 시험이 쉬웠는지 어려웠는지, 작년/중간고사/평소 모의고사 대비 체감이 어땠는지를 한 문장으로 잡아주세요.",
-    placeholder: "예: 전 범위가 고르게 나왔지만, 후반부 계산 집중력과 조건 해석에서 점수가 갈린 시험이었습니다."
+    label: "첫 문단 핵심 요약",
+    guide: "벤치마킹 글의 도입부처럼 학교/학년/고사와 이번 시험의 핵심 성격을 1~2문장으로 적습니다. 시험관리 기록지를 다시 베끼는 칸이 아니라 공개글 첫 흐름을 잡는 보충 메모입니다.",
+    placeholder: "예: 2026학년도 ○○중 2학년 1학기 기말고사는 기본 개념 확인과 후반부 조건 해석이 함께 요구된 시험이었습니다."
   },
   {
     key: "flowReview",
-    label: "시험 흐름/체감",
-    guide: "체감 난이도와 점수 갈림의 근거입니다. 초반-중반-후반 흐름, 어느 구간부터 시간이 걸렸는지, 점수가 갈린 위치를 문항 흐름 기준으로 적어주세요.",
-    placeholder: "예: 1~10번은 기본 유형 확인에 가까웠고, 13번 이후부터 계산량과 조건 해석이 늘어나 체감 난이도가 올라갔습니다."
+    label: "시험 흐름/체감 난도",
+    guide: "벤치마킹 글의 '전체 흐름' 단락입니다. 초반/중반/후반 문항 흐름, 체감 난도, 학생이 부담을 느낄 지점을 적습니다.",
+    placeholder: "예: 초반부는 대표 유형 확인에 가까웠고, 후반부로 갈수록 그래프 해석과 조건 정리가 함께 필요한 문항이 늘었습니다."
   },
   {
     key: "scoreGapPoint",
-    label: "점수 갈림 포인트",
-    guide: "변별 포인트와 실수 포인트입니다. 어디서 점수가 갈렸는지, 틀렸다면 왜 틀렸을 가능성이 큰지, 실수인지 이해 부족인지 구분해 적어주세요.",
-    placeholder: "예: 익숙한 유형처럼 보여도 조건을 끝까지 정리하지 않으면 식을 잘못 세우기 쉬웠고, 중상 문항에서 풀이 순서 선택이 중요했습니다."
+    label: "변별 문항/흔들린 지점",
+    guide: "벤치마킹 글처럼 별도 추상 제목을 만들지 않고, 주요문항과 학생들이 흔들리는 이유를 중심으로 적습니다. 변별을 만든 문항번호, 개념, 실수 지점을 짧게 정리합니다.",
+    placeholder: "예: 18번과 20번에서 조건을 그래프로 해석하는 과정이 중요했고, 계산보다 식 세팅과 풀이 순서에서 흔들릴 수 있었습니다."
   },
   {
     key: "nextStudyPlan",
-    label: "다음 시험 대비",
-    guide: "다음 행동과 신뢰감입니다. 다음 시험까지 무엇을 해야 하는지와, 이 분석을 바탕으로 학원이 어떻게 관리할 수 있는지까지 적어주세요.",
-    placeholder: "예: 단순 유형 반복보다 조건을 식으로 바꾸는 훈련, 풀이 과정 검산, 중상 난이도 문항의 시간 배분 연습이 필요합니다."
+    label: "다음 학습 방향",
+    guide: "벤치마킹 글의 마무리 학습 제안입니다. 다음 단원/방학/예비 과정과 연결해 학생이 실제로 해야 할 훈련을 적습니다.",
+    placeholder: "예: 조건을 표와 식으로 정리하는 훈련, 그래프 해석, 후반부 문항을 다시 읽는 시간 관리 루틴이 필요합니다."
   },
   {
     key: "imageSlotNotes",
     label: "6개 슬라이드 유형/슬롯 메모",
-    guide: "시작, 시험구조, 총평, 주요문항, 손풀이, 마무리 슬라이드의 제작 방식입니다. 주요문항/손풀이 이미지는 선생님이 직접 crop한 파일만 슬롯에 넣습니다.",
-    placeholder: "예: 시작/시험구조/총평/마무리는 통렌더, 주요문항과 손풀이는 선생님 crop 이미지 슬롯. 주요문항 3개 기준 10장."
+    guide: "벤치마킹 글처럼 표지/시험구조/전체 흐름/주요문항/손풀이/마무리 카드가 어떻게 반복될지 적습니다. 주요문항/손풀이는 선생님 crop 이미지만 슬롯에 넣습니다.",
+    placeholder: "예: 표지/시험구조/흐름/마무리는 통렌더, 주요문항 3개와 손풀이는 선생님 crop 이미지 슬롯으로 구성."
   },
   {
     key: "schoolVariationNotes",
-    label: "학교별 변주/홍보 메모",
-    guide: "학교별 출제 습관, 유사 교재, 이번 시험만의 특징, 마지막 CTA에 넣을 상담/수업 연결 문장을 적어주세요.",
-    placeholder: "예: 상계고는 조건 해석과 계산량이 반복 포인트. CTA는 학교별 시험분석을 수업/보충에 반영한다는 신뢰감 중심."
+    label: "수업/상담 연결 메모",
+    guide: "벤치마킹 글의 후반부처럼 학교별 시험 분석을 수업, 보충, 특강, 상담으로 어떻게 연결할지 적습니다.",
+    placeholder: "예: 학교별 기출 흐름과 유사문항을 수업/보충에 반영하고, 방학 특강은 다음 단원 심화와 연결."
   }
 ];
 
@@ -1770,65 +1770,65 @@ const examAnalysisBlogBlockFields = [
     key: "blogBlockOpening",
     order: 1,
     type: "paragraph",
-    label: "시작글/인사",
-    guide: "카드뉴스 전에 들어갈 첫 문단입니다. 학교/학년/고사와 이번 분석의 목적, 한줄 체감을 적어주세요.",
-    benchmark: "벤치마킹 위치: 인사말 😊 -> 시험 소개 -> 한줄 체감",
-    placeholder: "예: 2026 불암중 2학년 1학기 기말고사를 기준으로, 이번 시험의 체감 난도와 내신 대비 핵심을 정리합니다."
+    label: "인사/시험 소개",
+    guide: "벤치마킹 글의 시작입니다. 인사, 학교/학년/고사, 분석 목적을 짧게 적습니다.",
+    benchmark: "벤치마킹 위치: 안녕하세요 -> 학교/학년/고사 소개 -> 분석 목적",
+    placeholder: "예: 오늘은 2026 ○○중학교 2학년 1학기 기말고사 수학 시험을 분석해보겠습니다."
   },
   {
     key: "blogBlockStructure",
     order: 2,
     type: "paragraph",
-    label: "시험구조 설명",
-    guide: "시험구조 카드 전후에 붙일 설명입니다. 객관식/서술형 수, 만점, 범위, 큰 출제 흐름을 줄글로 적어주세요.",
-    benchmark: "벤치마킹 위치: 시험 구조 카드 전후 · 객관식/서술형/범위 설명",
-    placeholder: "예: 객관식 24문항, 서술형 0문항, 100점 만점. 연립방정식부터 일차함수 관계까지 출제되었습니다."
+    label: "시험 개요/구조",
+    guide: "벤치마킹 글의 시험 구조입니다. 문항 구성, 배점, 시험범위, 출판사, 등급컷/예상컷이 있으면 함께 적습니다.",
+    benchmark: "벤치마킹 위치: 시험 구조/시험 개요 카드 · 문항구성/배점/범위",
+    placeholder: "예: 객관식 24문항, 서술형 0문항, 100점 만점. 시험범위는 연립방정식부터 일차함수와 일차방정식의 관계까지였습니다."
   },
   {
     key: "blogBlockOverallReview",
     order: 3,
     type: "highlight",
-    label: "총평/변별 포인트",
-    guide: "총평 카드 전후에 붙일 핵심 해석입니다. 시험이 쉬웠는지, 어디서 점수가 갈렸는지, 왜 그렇게 봤는지 적어주세요.",
-    benchmark: "벤치마킹 위치: 총평 카드 전후 · 난도/체감/점수 갈림",
-    placeholder: "예: 난도가 크게 튄 시험은 아니지만, 쉬운 시험이라고 보기에는 후반부 조건 정리가 까다로웠습니다."
+    label: "출제 흐름/체감 정리",
+    guide: "벤치마킹 글의 전체 흐름 정리입니다. 쉬웠다/어려웠다로 끝내지 말고 전반부, 후반부, 조건 해석, 시간 관리처럼 흐름을 적습니다.",
+    benchmark: "벤치마킹 위치: 전체 흐름/체감 난도 · 초반-후반 변화",
+    placeholder: "예: 난도가 크게 튄 시험은 아니지만, 후반부 문장제와 그래프 해석에서 체감 난도가 올라간 시험이었습니다."
   },
   {
     key: "blogBlockNextStudy",
     order: 4,
     type: "paragraph",
-    label: "다음 시험 준비",
-    guide: "마무리 카드 전후에 붙일 학습 전략입니다. 다음 시험까지 학생이 실제로 해야 할 훈련을 구체적으로 적어주세요.",
-    benchmark: "벤치마킹 위치: 다음 시험을 준비하며 · 체크리스트/훈련 방향",
-    placeholder: "예: 계산 안정감, 문장제 조건 분리, 그래프 해석, 시간 배분 루틴을 같이 훈련해야 합니다."
+    label: "다음 학습 방향",
+    guide: "벤치마킹 글의 마무리 학습 방향입니다. 다음 단원, 방학, 예비 과정, 반복 훈련을 구체적으로 적습니다.",
+    benchmark: "벤치마킹 위치: 다음 학습 방향/방학 대비 · 체크리스트/훈련 방향",
+    placeholder: "예: 학교 학습지는 반복 회독하고, 조건을 표와 식으로 정리하는 훈련과 후반부 문항 시간 배분 연습이 필요합니다."
   },
   {
     key: "blogBlockAcademyTrust",
     order: 5,
     type: "paragraph",
-    label: "학원 분석 신뢰 문장",
-    guide: "학원이 시험지를 어떻게 분석하고 수업/보충에 반영하는지 보여주는 문장입니다.",
-    benchmark: "벤치마킹 위치: 학원 분석 방식 · 문항별 분석/관리 신뢰 문장",
-    placeholder: "예: 시험지를 문항별로 분석해 어떤 개념, 유형, 실수가 연결되는지 확인합니다."
+    label: "학원 관리 문장",
+    guide: "벤치마킹 글 후반부처럼 학교별 기출 흐름, 유사문항, 풀이 순서, 보충/특강 연결을 어떻게 관리하는지 적습니다.",
+    benchmark: "벤치마킹 위치: 학원은 이런 시험을 대비할 때 · 분석/관리 신뢰 문장",
+    placeholder: "예: 학교별 기출 흐름을 기준으로 자주 나오는 유형, 실수 지점, 유사문항, 시험장 풀이 순서를 함께 훈련합니다."
   },
   {
     key: "blogBlockCta",
     order: 6,
     type: "cta",
-    label: "CTA",
-    guide: "상담/블로그 유입/위치/전화 안내 메모입니다. 실제 연락처는 자리표시자로 두어도 됩니다.",
-    benchmark: "벤치마킹 위치: 마무리/신청 안내 ⬇️⬇️ · 위치 📍 · 전화 ☎",
-    placeholder: "예: 더 자세한 시험 해설은 블로그에서 확인, 학교별 내신 대비 상담 가능, 위치/전화 자리표시자."
+    label: "특강/상담 CTA",
+    guide: "벤치마킹 글의 마지막 안내입니다. 방학특강, 내신대비, 상담, 위치/전화 안내를 적습니다.",
+    benchmark: "벤치마킹 위치: 마감 임박 강좌 안내/상담 안내 ⬇️⬇️ · 위치 📍 · 전화 ☎",
+    placeholder: "예: 2학기 내신 대비와 방학 심화 특강 상담 가능, 위치/전화 자리표시자."
   }
 ];
 
 const examAnalysisOutputBenchmarkMap = [
-  ["인사말", "시작글/인사 블록 -> 블로그 첫 문단"],
-  ["시험 구조", "시험구조 설명 블록 -> 구조 카드 앞뒤 설명"],
-  ["총평", "총평/변별 포인트 블록 -> 체감 난도와 점수 갈림"],
-  ["📌 주요문항", "주요문항 반복 블록 -> 문제 카드, 설명글, 손풀이 카드"],
-  ["다음 대비", "다음 시험 준비 블록 -> 훈련 체크리스트"],
-  ["CTA", "CTA 블록 -> 신청 안내, 위치, 전화"]
+  ["인사/소개", "인사/시험 소개 블록 -> 학교/학년/고사와 분석 목적"],
+  ["시험 개요", "시험 개요/구조 블록 -> 문항구성, 배점, 범위, 등급컷"],
+  ["출제 흐름", "출제 흐름/체감 정리 블록 -> 초반/후반 흐름과 체감 난도"],
+  ["📌 주요문항", "주요문항 반복 블록 -> 문항번호, 유사교재, 핵심, 흔들린 지점, 손풀이"],
+  ["다음 학습", "다음 학습 방향 블록 -> 방학/다음 단원/예비 과정 대비"],
+  ["CTA", "특강/상담 CTA 블록 -> 강좌 안내, 상담, 위치, 전화"]
 ];
 
 const legacyExamAnalysisBlogInstructorSectionGroups = {
@@ -1890,11 +1890,11 @@ const examAnalysisOutputAllInputFields = [
 ];
 
 const examAnalysisOutputEditorialChecklist = [
-  "이번 시험이 쉬웠는지 어려웠는지",
-  "어디서 점수가 갈렸는지",
-  "우리 아이가 틀렸다면 왜 틀렸을 가능성이 큰지",
-  "다음 시험까지 뭘 해야 하는지",
-  "이 학원이 학교 시험을 제대로 분석하고 있다는 신뢰감"
+  "인사와 학교/학년/고사 소개가 자연스럽게 시작되는지",
+  "시험 개요에 문항 구성, 배점, 범위, 등급컷 또는 예상컷이 필요한 만큼 들어갔는지",
+  "초반/중반/후반 출제 흐름과 체감 난도가 벤치마킹 글처럼 설명되는지",
+  "주요문항마다 문항번호, 유사교재, 핵심 개념, 학생이 흔들릴 지점, 풀이 방향이 보이는지",
+  "다음 학습 방향과 수업/특강/상담 연결이 과장 없이 이어지는지"
 ];
 
 const examAnalysisOutputAiBoundaryRules = [
@@ -2167,7 +2167,7 @@ const examAnalysisChartDifficultyOrder = ["하", "중하", "중", "중상", "상
 const examAnalysisCardNewsSlideTypes = [
   { type: "cover", label: "시작 슬라이드" },
   { type: "examStructure", label: "시험구조 슬라이드" },
-  { type: "overallReview", label: "총평 슬라이드" },
+  { type: "overallReview", label: "출제 흐름 슬라이드" },
   { type: "keyQuestion", label: "주요문항 슬라이드" },
   { type: "solution", label: "손풀이 슬라이드" },
   { type: "closing", label: "마무리 슬라이드" }
@@ -2177,9 +2177,9 @@ function createExamAnalysisCardNewsModel(keyQuestionBlocks = [createEmptyExamAna
     ? keyQuestionBlocks
     : [createEmptyExamAnalysisKeyQuestionBlock(1)];
   const slides = [
-    { type: "cover", role: "시작 슬라이드", renderMode: "통렌더", slot: "학교/학년/고사/과목 + 한줄 훅" },
+    { type: "cover", role: "시작 슬라이드", renderMode: "통렌더", slot: "학교/학년/고사/과목 + 첫 문단 핵심" },
     { type: "examStructure", role: "시험구조 슬라이드", renderMode: "통렌더", slot: "객관식/서술형/만점/범위/출제 흐름" },
-    { type: "overallReview", role: "총평 슬라이드", renderMode: "통렌더", slot: "난도/점수 갈림/실수 포인트/고득점 전략" },
+    { type: "overallReview", role: "출제 흐름 슬라이드", renderMode: "통렌더", slot: "체감 난도/후반부 흐름/흔들린 지점/학습 포인트" },
     ...questionBlocks.flatMap((block, index) => ([
       {
         type: "keyQuestion",
@@ -2200,7 +2200,7 @@ function createExamAnalysisCardNewsModel(keyQuestionBlocks = [createEmptyExamAna
         slot: `${block.questionNumber ? `${block.questionNumber} ` : ""}선생님 crop 손풀이 이미지 + 풀이 흐름`
       }
     ])),
-    { type: "closing", role: "마무리 슬라이드", renderMode: "통렌더", slot: "다음 시험 대비 + 블로그 유입/상담 CTA" }
+    { type: "closing", role: "마무리 슬라이드", renderMode: "통렌더", slot: "다음 학습 방향 + 특강/상담 CTA" }
   ];
   return slides.map((slide, index) => ({
     ...slide,
@@ -2721,11 +2721,11 @@ function createExamAnalysisBlogBlockGuideText() {
     ].join("\n")),
     "",
     "블로그 조립 순서 예시",
-    "- 시작글 -> [card-01.png 삽입]",
-    "- 시험구조 설명 -> [card-02.png 삽입]",
-    "- 총평/변별 포인트 -> [card-03.png 삽입]",
+    "- 인사/시험 소개 -> [card-01.png 삽입]",
+    "- 시험 개요/구조 -> [card-02.png 삽입]",
+    "- 출제 흐름/체감 정리 -> [card-03.png 삽입]",
     "- 주요문항 설명 -> [card-04.png 삽입] -> 손풀이 설명 -> [card-05.png 삽입]",
-    "- 주요문항/손풀이 쌍 반복 -> 마지막 마무리 카드 삽입 -> CTA",
+    "- 주요문항/손풀이 쌍 반복 -> 마지막 마무리 카드 삽입 -> 특강/상담 CTA",
     "",
     "AI 편집 규칙",
     ...examAnalysisOutputAiBoundaryRules.map((rule) => `- ${rule}`),
@@ -2734,7 +2734,7 @@ function createExamAnalysisBlogBlockGuideText() {
     "- 😊: 인사말 끝",
     "- 📌: 주요문항 시작",
     "- ✅: 핵심 포인트, 자주 틀리는 지점, 다음 대비 체크",
-    "- ⬇️⬇️: CTA/신청/블로그 유입",
+    "- ⬇️⬇️: 특강/상담/블로그 유입",
     "- 📍: 위치",
     "- ☎: 전화번호",
     "- [형광펜: 하늘색]: 핵심 결론/전문성",
@@ -3115,7 +3115,7 @@ function renderExamAnalysisCardDesignBody(slide = {}) {
         {["정확도", "해석력", "그래프", "시간 관리"].map((label, index) => (
           <div key={`${slide.card}-closing-${label}`}>
             <strong>{label}</strong>
-            <p>{lines[index] || "다음 시험 대비 방향을 입력해 주세요."}</p>
+            <p>{lines[index] || "다음 학습 방향을 입력해 주세요."}</p>
           </div>
         ))}
       </div>
@@ -3209,7 +3209,7 @@ function createExamAnalysisCardNewsPreviewSlides({ activeRun = {}, model = {}, o
       return {
         ...base,
         title: "시험분석",
-        headline: getExamAnalysisCardPreviewText(inputs.oneLineReview, "한줄 총평을 입력하면 표지 핵심 문구로 들어갑니다."),
+        headline: getExamAnalysisCardPreviewText(inputs.oneLineReview, "첫 문단 핵심 요약을 입력하면 표지 문구로 들어갑니다."),
         lines: getExamAnalysisCardPreviewLines([
           inputs.flowReview,
           `${totalQuestions || "검수"}문항 기준 · ${examLabel}`,
@@ -3235,8 +3235,8 @@ function createExamAnalysisCardNewsPreviewSlides({ activeRun = {}, model = {}, o
     if (slide.type === "overallReview") {
       return {
         ...base,
-        title: "총평 정리",
-        headline: getExamAnalysisCardPreviewText(inputs.oneLineReview, "총평 핵심 문장을 입력해 주세요."),
+        title: "출제 흐름 정리",
+        headline: getExamAnalysisCardPreviewText(inputs.oneLineReview, "첫 문단 핵심 요약을 입력해 주세요."),
         lines: getExamAnalysisCardPreviewLines([
           inputs.flowReview,
           inputs.scoreGapPoint,
@@ -3274,7 +3274,7 @@ function createExamAnalysisCardNewsPreviewSlides({ activeRun = {}, model = {}, o
     return {
       ...base,
       title: "다음 시험을 준비하며",
-      headline: getExamAnalysisCardPreviewText(inputs.nextStudyPlan || inputs.blogBlockNextStudy, "다음 시험 대비 방향을 입력해 주세요."),
+      headline: getExamAnalysisCardPreviewText(inputs.nextStudyPlan || inputs.blogBlockNextStudy, "다음 학습 방향을 입력해 주세요."),
       lines: getExamAnalysisCardPreviewLines([
         inputs.blogBlockAcademyTrust,
         inputs.blogBlockCta,
@@ -3608,8 +3608,8 @@ function ExamAnalysisOutputDraftPanel({
 
       <div className="examAnalysisOutputCollapsibleHeader">
         <div>
-          <strong>기본 메모</strong>
-          <span>한줄 총평, 시험 체감, 점수 갈림, 다음 대비처럼 전체 산출물에 반복해서 쓰는 원천 메모입니다.</span>
+          <strong>공개글 발췌/보충 메모</strong>
+          <span>시험관리 기록지를 다시 쓰는 칸이 아니라, 벤치마킹 글 첫 문단과 카드뉴스에 필요한 표현만 보충합니다.</span>
         </div>
         <button
           className="examAnalysisOutputCollapseButton"

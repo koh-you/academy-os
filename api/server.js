@@ -2640,12 +2640,12 @@ function normalizeExamAnalysisOutputVisibility(value = "") {
 }
 
 const examAnalysisBlogBlockFields = [
-  ["blogBlockOpening", 1, "시작글/인사", "paragraph"],
-  ["blogBlockStructure", 2, "시험구조 설명", "paragraph"],
-  ["blogBlockOverallReview", 3, "총평/변별 포인트", "highlight"],
-  ["blogBlockNextStudy", 4, "다음 시험 준비", "paragraph"],
-  ["blogBlockAcademyTrust", 5, "학원 분석 신뢰 문장", "paragraph"],
-  ["blogBlockCta", 6, "CTA", "cta"]
+  ["blogBlockOpening", 1, "인사/시험 소개", "paragraph"],
+  ["blogBlockStructure", 2, "시험 개요/구조", "paragraph"],
+  ["blogBlockOverallReview", 3, "출제 흐름/체감 정리", "highlight"],
+  ["blogBlockNextStudy", 4, "다음 학습 방향", "paragraph"],
+  ["blogBlockAcademyTrust", 5, "학원 관리 문장", "paragraph"],
+  ["blogBlockCta", 6, "특강/상담 CTA", "cta"]
 ];
 
 const legacyExamAnalysisBlogInstructorSectionGroups = {
@@ -2722,14 +2722,14 @@ function createExamAnalysisCardNewsModel(keyQuestionBlocks = []) {
     ? keyQuestionBlocks
     : [createEmptyExamAnalysisKeyQuestionBlock(1)];
   const slides = [
-    [0, "cover", "시작 슬라이드", "통렌더", "학교/학년/고사/과목 + 한줄 훅"],
+    [0, "cover", "시작 슬라이드", "통렌더", "학교/학년/고사/과목 + 첫 문단 핵심"],
     [0, "examStructure", "시험구조 슬라이드", "통렌더", "객관식/서술형/만점/범위/출제 흐름"],
-    [0, "overallReview", "총평 슬라이드", "통렌더", "난도/점수 갈림/실수 포인트/고득점 전략"],
+    [0, "overallReview", "출제 흐름 슬라이드", "통렌더", "체감 난도/후반부 흐름/흔들린 지점/학습 포인트"],
     ...questionBlocks.flatMap((block, index) => ([
       [0, "keyQuestion", `주요문항 ${index + 1} 슬라이드`, "문제 이미지 슬롯", `${block.questionNumber ? `${block.questionNumber} ` : ""}선생님 crop 문제 이미지 + 왜 중요한지`],
       [0, "solution", `손풀이 ${index + 1} 슬라이드`, "손풀이 이미지 슬롯", `${block.questionNumber ? `${block.questionNumber} ` : ""}선생님 crop 손풀이 이미지 + 풀이 흐름`]
     ])),
-    [0, "closing", "마무리 슬라이드", "통렌더", "다음 시험 대비 + 블로그 유입/상담 CTA"]
+    [0, "closing", "마무리 슬라이드", "통렌더", "다음 학습 방향 + 특강/상담 CTA"]
   ];
   return slides.map((slide, index) => [index + 1, slide[1], slide[2], slide[3], slide[4]]);
 }
@@ -2900,11 +2900,11 @@ function buildExamAnalysisOutputContext(detail = {}) {
 
 function buildExamAnalysisOutputPrompt({ outputType, detail, inputs }) {
   const editorialChecklist = [
-    "- 이번 시험이 쉬웠는지 어려웠는지",
-    "- 어디서 점수가 갈렸는지",
-    "- 우리 아이가 틀렸다면 왜 틀렸을 가능성이 큰지",
-    "- 다음 시험까지 뭘 해야 하는지",
-    "- 이 학원이 학교 시험을 제대로 분석하고 있다는 신뢰감"
+    "- 인사와 학교/학년/고사 소개가 자연스럽게 시작되는지",
+    "- 시험 개요에 문항 구성, 배점, 범위, 등급컷 또는 예상컷이 필요한 만큼 들어갔는지",
+    "- 초반/중반/후반 출제 흐름과 체감 난도가 설명되는지",
+    "- 주요문항마다 문항번호, 유사교재, 핵심 개념, 학생이 흔들릴 지점, 풀이 방향이 보이는지",
+    "- 다음 학습 방향과 수업/특강/상담 연결이 과장 없이 이어지는지"
   ].join("\n");
   const benchmarkFormatRules = [
     "[벤치마킹 문체/강조 규칙]",
@@ -2913,7 +2913,7 @@ function buildExamAnalysisOutputPrompt({ outputType, detail, inputs }) {
     "- 인사말 끝에는 😊를 1회 사용한다.",
     "- 주요문항 섹션 시작에는 📌를 사용한다.",
     "- 핵심 포인트, 자주 틀리는 지점, 다음 대비 체크에는 ✅를 사용한다.",
-    "- 신청/상담/블로그 유입 CTA에는 ⬇️⬇️를 사용한다.",
+    "- 특강/상담/블로그 유입 CTA에는 ⬇️⬇️를 사용한다.",
     "- 위치에는 📍, 전화번호에는 ☎를 사용한다.",
     "- 형광펜이 필요한 문장은 텍스트로 [형광펜: 하늘색]...[/형광펜] 또는 [형광펜: 노랑]...[/형광펜]처럼 표시한다.",
     "- 하늘색 형광펜은 핵심 결론/전문성, 노랑 형광펜은 실수 포인트/주의 지점에만 쓴다.",
@@ -2957,12 +2957,12 @@ function buildExamAnalysisOutputPrompt({ outputType, detail, inputs }) {
   const inputSummary = [
     `[선생님 작성 원문 - 최우선 원천]`,
     `공개 범위: ${inputs.visibility}`,
-    `한줄 총평: ${inputs.oneLineReview || "(미입력)"}`,
-    `시험 흐름/체감: ${inputs.flowReview || "(미입력)"}`,
-    `점수 갈림 포인트: ${inputs.scoreGapPoint || "(미입력)"}`,
-    `다음 시험 대비: ${inputs.nextStudyPlan || "(미입력)"}`,
+    `첫 문단 핵심 요약: ${inputs.oneLineReview || "(미입력)"}`,
+    `시험 흐름/체감 난도: ${inputs.flowReview || "(미입력)"}`,
+    `변별 문항/흔들린 지점: ${inputs.scoreGapPoint || "(미입력)"}`,
+    `다음 학습 방향: ${inputs.nextStudyPlan || "(미입력)"}`,
     `6개 슬라이드 유형/슬롯 메모: ${inputs.imageSlotNotes || "(미입력)"}`,
-    `학교별 변주/홍보 메모: ${inputs.schoolVariationNotes || "(미입력)"}`,
+    `수업/상담 연결 메모: ${inputs.schoolVariationNotes || "(미입력)"}`,
     "",
     blogBlockSummary,
     "",
@@ -2972,7 +2972,7 @@ function buildExamAnalysisOutputPrompt({ outputType, detail, inputs }) {
     "역할: 수학학원 시험분석 공개 산출물 편집자",
     "원칙: 선생님 작성 원문을 최우선 원천으로 삼고, 검수 저장본 수치와 주요문항만 보조 자료로 쓴다.",
     "금지: 문제 본문/정답/상세 풀이를 길게 노출하지 않는다. 없는 사실을 만들거나 학교/학생을 단정적으로 평가하지 않는다.",
-    "문장 방향: 단원명 나열보다 학생과 학부모가 궁금해하는 시험 체감, 변별 포인트, 실수 포인트, 학습 전략을 중심으로 쓴다.",
+    "문장 방향: 벤치마킹 블로그처럼 인사/시험 소개, 시험 개요, 출제 흐름, 주요문항, 다음 학습 방향, 특강/상담 연결 순서로 쓴다.",
     "개괄 정보 사용법: 단원/난이도/문항 흐름/주요문항 수치는 답변의 근거로만 쓰고, 수치 자체를 길게 나열하지 않는다.",
     "편집 점검 기준: 아래 항목을 그대로 소제목/카드 제목으로 쓰지 않아도 된다. 다만 초안을 다 읽고 나면 아래 질문에 대한 답이 자연스럽게 보여야 한다.",
     editorialChecklist,
@@ -3002,7 +3002,7 @@ function buildExamAnalysisOutputPrompt({ outputType, detail, inputs }) {
       "이미지 슬롯: 주요문항/손풀이 카드에만 들어갈 선생님 crop 이미지",
       "강조: 형광펜 색 또는 이모티콘 사용 위치",
       "",
-      "마지막 카드에는 반드시 블로그 유입 CTA를 넣는다.",
+      "마지막 카드에는 반드시 다음 학습 방향과 특강/상담 CTA를 넣는다.",
       "마지막에 인스타 캡션 초안을 5~8줄로 붙이고, 더 자세한 해설은 블로그에서 확인하라는 문장을 포함한다."
     ].join("\n");
   }
@@ -3014,7 +3014,7 @@ function buildExamAnalysisOutputPrompt({ outputType, detail, inputs }) {
     "제목 후보 3개를 먼저 쓴다. 제목에는 학교명, 학년, 고사, 수학/과목, 시험분석 키워드를 자연스럽게 포함한다.",
     "본문 구조는 blogBlocks를 기준으로 조립한다. 18개 섹션 순서를 고정하지 않는다.",
     "블로그는 전체를 통이미지로 만들지 말고, 일반 줄글과 카드 이미지 삽입 위치를 섞는다.",
-    "권장 흐름: 시작글 -> [card-01.png 삽입] -> 시험구조 설명 -> [card-02.png 삽입] -> 총평/변별 포인트 -> [card-03.png 삽입] -> 주요문항 설명/카드 -> 손풀이 설명/카드 쌍을 keyQuestionBlocks 수만큼 반복 -> 다음 시험 준비 -> 마지막 카드 삽입 -> CTA.",
+    "권장 흐름: 인사/시험 소개 -> [card-01.png 삽입] -> 시험 개요/구조 -> [card-02.png 삽입] -> 출제 흐름/체감 정리 -> [card-03.png 삽입] -> 주요문항 설명/카드 -> 손풀이 설명/카드 쌍을 keyQuestionBlocks 수만큼 반복 -> 다음 학습 방향 -> 마지막 카드 삽입 -> 특강/상담 CTA.",
     "주요문항 섹션은 📌로 시작하고, 핵심 포인트와 자주 틀리는 지점에는 ✅를 사용한다.",
     "주요문항/손풀이 이미지 자체는 사람이 직접 crop해서 넣으므로 AI가 문제 이미지나 풀이 이미지를 만들거나 추측하지 않는다.",
     "네이버 에디터에서 사람이 형광펜을 적용할 수 있도록 [형광펜: 색] 표시를 유지한다."
