@@ -52,6 +52,14 @@
 - 포함 내용: 12개 학교별 요약 소스, raw JSON 경로표, 10장 카드뉴스 구성 소스, GPT image용 최종 프롬프트 예시를 정리했다.
 - 저장 원천: 운영 DB/Supabase/app_state에는 저장하지 않았다. 원본 raw OCR/분류는 `.codex-temp/benchmark-vision-results/*-latest.json`, 커밋된 프롬프트 소스는 `docs/exam-analysis-gpt-image-source-2026-07-09.md`다.
 
+### 2026-07-09 P1. 시험분석 GPT Image 프로젝트 모듈 구조
+
+- 상태: 완료 - 반복 제작용 GPT 프로젝트/대화세션 구조 문서화
+- 사용자 요청: 총평란/체크리스트 내용을 바탕으로 GPT 프로젝트 안에서 각 슬라이드를 한 장씩 생성할 수 있는 반복 가능한 모듈 구조가 필요하다.
+- 결과: `docs/exam-analysis-gpt-image-project-module-2026-07-09.md`를 추가했다. 이 문서에는 GPT 프로젝트 고정 지침, 시험 체크리스트 입력 템플릿, 시험별 기획 세션 패킷, 카드별 생성 세션 패킷, 카드 수정 프롬프트, 10장 카드 역할표, 검수 Gate, 중단 조건을 정리했다.
+- 구조 원칙: `teacherChecklist -> featureClassification -> cardPlan -> cardRenderPacket -> teacherFinal`로 레이어를 분리한다. GPT image는 카드 전체를 렌더링하는 도구이고, 시험 사실 원본은 선생님 체크리스트/확정본이다.
+- 저장 원천: 운영 DB/Supabase/app_state에는 저장하지 않았다. 이번 작업은 문서화이며, 이후 앱에 붙일 때는 `teacherChecklist`, `confirmedCardPlan`, `finalCardImages`를 분리 저장해야 한다.
+
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
 ### 2026-07-09 P1. 수업일지 발송계획 선택과 Solapi 실제 반영 분리

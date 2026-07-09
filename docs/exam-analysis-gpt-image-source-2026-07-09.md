@@ -26,6 +26,7 @@ GPT image에는 raw JSON 전체가 아니라 아래 4가지를 넘긴다.
 원본 Vision AI 결과는 아래에 있다.
 
 - 전체 요약/키워드 사전: `docs/exam-analysis-blog-vision-all-posts-2026-07-09.md`
+- GPT 프로젝트 모듈 구조: `docs/exam-analysis-gpt-image-project-module-2026-07-09.md`
 - raw OCR/분류 JSON: `.codex-temp/benchmark-vision-results/<logNo>-latest.json`
 - 전체 aggregate JSON: `.codex-temp/benchmark-vision-results/all-posts-latest.json`
 
