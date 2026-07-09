@@ -37,6 +37,7 @@ import {
 } from "../domains/lessons/attendance.js";
 import { LessonJournalErrorBoundary } from "../domains/lessons/LessonJournalErrorBoundary.jsx";
 import { attendanceLabels, dayLabels, homeworkLabels } from "../domains/lessons/labels.js";
+import { AutosaveRiskNotice } from "../shared/components/AutosaveRiskNotice.jsx";
 import { sampleData } from "../shared/data/sampleData.js";
 import { readFileAsDataUrl } from "../shared/utils/file.js";
 import { safeIdPart, shortStableHash } from "../shared/utils/id.js";
@@ -656,6 +657,38 @@ function InlineSaveStatus({ className = "", label = "", saveState = "idle" }) {
     </small>
   );
 }
+
+const appStateAutosaveRisk = {
+  title: "app_state 전체 snapshot 저장",
+  storage: "Supabase app_state: aiSettings, attendanceSettings, lessonResearchItems, problemBooks, wrongProblems, scoreRecords, academyTests 등 sharedAppState 묶음",
+  risk: "작은 입력도 공통 snapshot 저장 요청으로 이어집니다. 오래된 탭이나 저장 실패가 끼면 화면 하나의 수정이 다른 데이터 묶음까지 함께 덮을 수 있습니다.",
+  stopCondition: "저장 실패가 뜨거나, 새로고침 뒤 이전 값이 보이거나, 이 화면과 무관한 데이터가 같이 바뀌면 다음 입력을 멈춥니다.",
+  recommendation: "후속 작업에서 key별 dirty 저장, updatedAt/version 충돌 확인, 행 단위 저장으로 분리합니다."
+};
+
+const examPrepAutosaveRisk = {
+  title: "시험정보/시험 후 기록지 입력 저장",
+  storage: "Supabase exam_prep_rows: 시험기간, 수학시험 일정, 시험범위, 부교재, review/revisedReview",
+  risk: "입력마다 행 저장이 실행되고, 학사일정의 시험기간/수학시험 수정도 같은 row를 갱신합니다. 중복 행이나 오래된 고사 값이 있으면 화면 보정만으로 숨기기 쉽습니다.",
+  stopCondition: "중복 시험정보, 잘못된 고사 값, 저장 실패, 새로고침 후 값 되돌림이 보이면 필터를 덧대지 말고 원천 row를 확인합니다.",
+  recommendation: "행 단위 저장 상태를 확인하고, 필요하면 삭제/마이그레이션/원천 데이터 수정 중 하나로 처리합니다."
+};
+
+const schoolCalendarAutosaveRisk = {
+  title: "학사일정과 시험정보 동시 갱신",
+  storage: "Supabase school_events, exam_prep_rows, lessons",
+  risk: "시험기간 또는 수학시험 일정은 학사일정 화면에서 입력해도 시험정보 row와 직전수업 후보를 함께 움직일 수 있습니다.",
+  stopCondition: "일정 하나를 고쳤는데 시험정보가 중복되거나 직전수업/일요보강 후보가 예상 밖으로 바뀌면 다음 저장을 멈춥니다.",
+  recommendation: "시험정보 원본을 먼저 확인하고, 일정 등록과 수업 반영은 저장 결과를 화면에서 확인한 뒤 진행합니다."
+};
+
+const supplementAutosaveRisk = {
+  title: "보충관리 입력과 일정 반영 분리 검토",
+  storage: "Supabase makeup_tasks, lessons, notificationLogs",
+  risk: "보충 메모/방식/날짜 입력은 보충 task를 저장하고, 저장 버튼을 누르면 수업일지 일정과 알림톡 초안까지 함께 반영될 수 있습니다.",
+  stopCondition: "내용만 저장하려 했는데 일정이 생기거나, 일정 수정이 알림톡/수업일지를 예상 밖으로 바꾸면 다음 단계로 가지 않습니다.",
+  recommendation: "수정 모드, local draft, 저장 버튼, 수업일지 반영, 발송 검수를 단계별 gate로 분리합니다."
+};
 
 function getSaveButtonLabel(saveState) {
   if (saveState === "saving") return "저장 중";
@@ -15851,6 +15884,7 @@ function ExamPrepCenter({
 
       {activeTab === "info" ? (
         <>
+          <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...examPrepAutosaveRisk} />
           <div className="examCycleBar">
             <strong>현재 고사</strong>
             <select value={selectedExamCycle} onChange={(event) => changeExamCycle(event.target.value)}>
@@ -16038,6 +16072,7 @@ function ExamPrepEditModal({
       onClose={onClose}
     >
       <div className="examPrepEditForm">
+        <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...examPrepAutosaveRisk} />
         <section className="examPrepEditSection">
           <h2>기본 정보</h2>
           <div className="examPrepEditGrid">
@@ -16450,6 +16485,7 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
           <InlineSaveStatus label="시험정보" saveState={saveState} />
         </div>
       ) : null}
+      <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...examPrepAutosaveRisk} />
       <div className="commentComposerGrid">
         <section className="commentDraftPanel">
           <div className="sectionHeader slim">
@@ -16864,6 +16900,8 @@ function SettingsCenter({
         </div>
         <InlineSaveStatus label="설정 자동저장" saveState={appStateSaveState} />
       </header>
+
+      <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...appStateAutosaveRisk} />
 
       <section className="panel settingsCard">
         <div className="sectionTitle">
@@ -17361,6 +17399,8 @@ function SchoolCalendarCenter({
           <button className="primaryButton" onClick={() => openEventForm(selectedDate)} type="button">+ 일정 등록</button>
         </div>
       </header>
+
+      <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...schoolCalendarAutosaveRisk} />
 
       <div className="schoolCalendarLayout">
         {isFormModalOpen ? (
@@ -18064,6 +18104,8 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
           <button className="primaryButton" onClick={handleAddItem} type="button">+ 교안 항목 추가</button>
         </div>
       </div>
+
+      <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...appStateAutosaveRisk} />
 
       <div className="researchSubjectTabs">
         {lessonResearchSubjects.map((subject) => (
@@ -20184,6 +20226,8 @@ function SupplementCenter({
         </button>
       </div>
 
+      <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...supplementAutosaveRisk} />
+
       <div className="supplementOverviewGrid">
         {supplementTabs.map((tab) => (
           <button
@@ -20387,6 +20431,7 @@ function SupplementStudentModal({
           <button className="iconButton" onClick={() => setFeedback(null)} type="button">×</button>
         </div>
       ) : null}
+      <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...supplementAutosaveRisk} />
       <div className="supplementModalLayout single">
         <section className="supplementModalMain">
           <div className="sectionHeader slim">
@@ -20651,6 +20696,8 @@ function FollowUpCenter({
           <span className="countBadge">{tasks.length}개 진행</span>
         </div>
       </div>
+
+      <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...appStateAutosaveRisk} />
 
       <WrongProblemBoard
         problemBooks={problemBooks}
@@ -21404,6 +21451,7 @@ function MaterialManager({
             </div>
             <InlineSaveStatus label="시험지 자동저장" saveState={appStateSaveState} />
           </div>
+          <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...appStateAutosaveRisk} />
           <div className="testPaperSubjectTabs" aria-label="시험지관리 과목 선택">
             {testPaperSubjectOptions.map((subject) => (
               <button
@@ -21549,6 +21597,7 @@ function MaterialManager({
               </label>
             </div>
           </div>
+          <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...appStateAutosaveRisk} />
 
           <div className="testPaperKindTabs" aria-label="시험지 보관함 종류 선택">
             {testPaperKindOptions.map((option) => (

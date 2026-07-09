@@ -438,6 +438,89 @@ button {
   color: #be123c;
 }
 
+.autosaveRiskNotice {
+  background: var(--status-danger-bg);
+  border: 1px solid var(--status-danger-border);
+  border-radius: 8px;
+  color: #7f1d1d;
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.autosaveRiskNoticeInline {
+  margin: 0;
+}
+
+.autosaveRiskSummary {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.autosaveRiskBadge {
+  background: #fee2e2;
+  border: 1px solid var(--status-danger-border);
+  border-radius: 999px;
+  color: var(--status-danger-text);
+  font-size: 12px;
+  font-weight: 900;
+  padding: 5px 8px;
+  white-space: nowrap;
+}
+
+.autosaveRiskTitle {
+  color: #7f1d1d;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.autosaveRiskToggle {
+  background: #ffffff;
+  border: 1px solid var(--status-danger-border);
+  border-radius: 8px;
+  color: var(--status-danger-text);
+  font-size: 13px;
+  font-weight: 900;
+  margin-left: auto;
+  min-height: 32px;
+  padding: 0 10px;
+}
+
+.autosaveRiskDetails {
+  border-top: 1px solid var(--status-danger-border);
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-top: 8px;
+}
+
+.autosaveRiskDetails > div {
+  display: grid;
+  gap: 4px;
+}
+
+.autosaveRiskDetails dt {
+  color: var(--status-danger-text);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.autosaveRiskDetails dd {
+  color: #7f1d1d;
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.autosaveRiskDetails p {
+  margin: 0;
+}
+
 .inlineNotice.analysisRunNotice,
 .inlineNotice.noticeDispatchMessage {
   display: flex;

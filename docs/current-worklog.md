@@ -12,6 +12,16 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-09 P0. 자동저장 위험 붉은 UI 1차 부착
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청/인수인계 기준: AGENTS의 `Autosave Risk Register`에 따라 고위험/중위험 자동저장 화면에 붉은 `자동저장 위험` 배지와 `왜 위험한가` 버튼을 붙인다. 저장 원천, 현재 부작용, 중단 조건, 권장 수정 방향을 화면에서 바로 확인할 수 있어야 한다.
+- 구현 결과: `src/shared/components/AutosaveRiskNotice.jsx`를 추가해 공통 경고 UI를 만들었다. 접힌 상태에서는 `자동저장 위험` 배지와 화면별 제목만 보이고, `왜 위험한가`를 누르면 `저장 원천`, `현재 부작용`, `중단 조건`, `권장 방향`이 펼쳐진다.
+- 적용 화면: 설정(`app_state` snapshot), 시험정보 목록/수정 모달/시험 후 기록지 모달(`exam_prep_rows`), 학사일정(`school_events` + `exam_prep_rows` + `lessons`), 수업연구(`app_state.lessonResearchItems`), 오답관리(`app_state.problemBooks/wrongProblems`), 시험지관리(`app_state.problemBooks`), 보충관리 목록/학생별 모달(`makeup_tasks` + `lessons` + 알림 초안), 학생 프로파일(`students` + `app_state.scoreRecords/academyTests`).
+- 저장 원천: 이번 작업은 경고 UI만 추가했다. Supabase 스키마, 저장 API, `app_state` 저장 구조, local draft 흐름은 변경하지 않았다. 따라서 위험이 제거된 것이 아니라, 사람이 운영 중 멈춰야 할 조건을 화면에서 볼 수 있게 한 1차 조치다.
+- 남은 후속: 전역 `app_state` snapshot 저장은 여전히 key별 dirty/version 저장으로 분리해야 한다. 시험정보/학생 성적/시험지/수업연구/오답관리/보충관리도 장기적으로 행 단위 저장, local draft, 저장 전후 diff, 서버 updatedAt/version 확인을 검토해야 한다.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 257개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-09 P0. 시험분석 Gate 3 완전 삭제와 다음 세션 인수인계
 
 - 상태: 완료 - 구현/검증 완료

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { AutosaveRiskNotice } from "../../shared/components/AutosaveRiskNotice.jsx";
 
 const withdrawalReasonOptions = [
   { value: "graduation", label: "졸업" },
@@ -13,6 +14,14 @@ const saveStateLabels = {
   saving: "저장 중",
   saved: "저장 완료",
   failed: "저장 실패"
+};
+
+const studentProfileAutosaveRisk = {
+  title: "학생 프로파일 저장 원천 분리",
+  storage: "기본정보는 Supabase students, 성적/테스트는 Supabase app_state scoreRecords/academyTests",
+  risk: "프로파일 기본정보는 입력마다 학생 row를 저장하고, 성적/테스트 입력은 app_state snapshot 자동저장을 탑니다. 두 저장 원천이 달라 새로고침 후 한쪽만 반영될 수 있습니다.",
+  stopCondition: "기본정보와 성적/테스트 중 한쪽만 저장되거나, 새로고침 후 오래된 값이 보이면 다음 학생 입력을 멈춥니다.",
+  recommendation: "성적/테스트도 후속 작업에서 학생별 row 저장 또는 key별 dirty 저장으로 분리합니다."
 };
 
 function InlineSaveStatus({ label = "", saveState = "idle" }) {
@@ -567,6 +576,7 @@ function StudentProfileModal({
             </button>
           </div>
         </div>
+        <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...studentProfileAutosaveRisk} />
         <div className="studentProfileGrid">
           {renderProfileField("학교", "schoolName")}
           {renderProfileField("학년", "grade")}
