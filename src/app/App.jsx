@@ -6171,6 +6171,44 @@ export function App() {
     }
   }
 
+  function mergeNotificationJobsIntoState(nextJobs = []) {
+    const validJobs = nextJobs.filter((job) => job?.notificationJobId);
+    if (!validJobs.length) return;
+    const nextJobIds = new Set(validJobs.map((job) => job.notificationJobId));
+    setNotificationJobs((current) => [
+      ...validJobs,
+      ...current.filter((job) => !nextJobIds.has(job.notificationJobId))
+    ]);
+  }
+
+  async function handleReconcileSolapiNotificationResults({ lessonId = "", date = "" } = {}) {
+    const result = await postJsonWithTimeout(
+      "/api/notification-jobs/reconcile-solapi",
+      { date, lessonId, limit: 500 },
+      30000,
+      "Solapi 발송결과 조회가 30초를 넘었습니다. 예약 확인에서 다시 시도해 주세요."
+    );
+    mergeNotificationJobsIntoState(result.notificationJobs ?? []);
+    if (Array.isArray(result.records) && result.records.length) {
+      const nextRecords = result.records.reduce(
+        (currentRecords, record) => upsertLessonStudentRecord(currentRecords, record),
+        recordsRef.current
+      );
+      recordsRef.current = nextRecords;
+      setRecords(nextRecords);
+      window.localStorage.setItem(storageKeys.records, JSON.stringify(nextRecords));
+      const savedStates = Object.fromEntries(
+        result.records
+          .filter((record) => record?.lessonStudentRecordId)
+          .map((record) => [record.lessonStudentRecordId, "saved"])
+      );
+      if (Object.keys(savedStates).length) {
+        setSaveStates((currentStates) => ({ ...currentStates, ...savedStates }));
+      }
+    }
+    return result;
+  }
+
   async function handleCancelNotificationJob(notificationJob, reason = "선생님 예약 취소") {
     if (!notificationJob?.notificationJobId) throw new Error("취소할 알림톡 예약 ID가 없습니다.");
     const result = await postJson("/api/notification-jobs/cancel", {
@@ -8068,6 +8106,7 @@ export function App() {
             onPolishComment={handlePolishLessonComment}
             onPolishPreparationNotice={handlePolishPreparationNotice}
             onPassMakeupTask={handlePassSupplementTask}
+            onReconcileSolapiNotificationResults={handleReconcileSolapiNotificationResults}
             onSaveRecord={handleSaveRecord}
             onSaveLessonJournalDrafts={handleSaveLessonJournalDrafts}
             onApplyLessonNotificationPlan={handleApplyLessonNotificationPlan}
@@ -12461,6 +12500,7 @@ function TeacherLessonHubV2({
   onPassMakeupTask,
   onPolishComment,
   onPolishPreparationNotice,
+  onReconcileSolapiNotificationResults,
   onApplyLessonNotificationPlan,
   onSaveRecord,
   onSaveLessonJournalDrafts,
@@ -12630,6 +12670,7 @@ function TeacherLessonHubV2({
             onPassMakeupTask={onPassMakeupTask}
             onPolishComment={onPolishComment}
             onPolishPreparationNotice={onPolishPreparationNotice}
+            onReconcileSolapiNotificationResults={onReconcileSolapiNotificationResults}
             onApplyLessonNotificationPlan={onApplyLessonNotificationPlan}
             onSaveRecord={onSaveRecord}
             onSaveLessonJournalDrafts={onSaveLessonJournalDrafts}
@@ -13379,6 +13420,7 @@ function LessonJournalDetail({
   onPassMakeupTask,
   onPolishComment,
   onPolishPreparationNotice,
+  onReconcileSolapiNotificationResults,
   onApplyLessonNotificationPlan,
   onSaveRecord,
   onSaveLessonJournalDrafts,
@@ -13414,6 +13456,7 @@ function LessonJournalDetail({
   const [cancelingReservationJobId, setCancelingReservationJobId] = useState("");
   const [cancelingSolapiGroupId, setCancelingSolapiGroupId] = useState("");
   const [reservationApplyState, setReservationApplyState] = useState("idle");
+  const [solapiResultRefreshState, setSolapiResultRefreshState] = useState("idle");
   const [editingMemoKey, setEditingMemoKey] = useState("");
   const [showPreSendCheck, setShowPreSendCheck] = useState(false);
   const [studentPreviewId, setStudentPreviewId] = useState("");
@@ -13499,6 +13542,7 @@ function LessonJournalDetail({
     setJournalHomeworkDrafts({});
     setJournalManualSaveMessage("");
     setReservationApplyState("idle");
+    setSolapiResultRefreshState("idle");
   }, [lesson.lessonId]);
 
   useEffect(() => {
@@ -13509,6 +13553,11 @@ function LessonJournalDetail({
   const journalHomeworkDraftCount = Object.keys(journalHomeworkDrafts).length;
   const hasJournalDraftChanges = journalRecordDraftCount > 0 || journalHomeworkDraftCount > 0;
   const activeLessonReservationJobs = lessonNotificationJobs.filter(isActiveNotificationJobStatus);
+  const solapiResultRefreshTargetJobs = auditedLessonNotificationJobs.filter((job) =>
+    job.provider === "solapi" &&
+    (job.status === "send_unconfirmed" || (job.status === "scheduled" && isNotificationSchedulePast(job.scheduledAt)))
+  );
+  const hasSolapiResultRefreshTarget = solapiResultRefreshTargetJobs.length > 0;
 
   function getExpectedSolapiReservationItems() {
     if (notificationPlanMode === "none") return [];
@@ -13613,6 +13662,11 @@ function LessonJournalDetail({
     !hasJournalDraftChanges &&
     reservationApplyState !== "applying" &&
     (solapiReservationSyncStatus.state === "needs" || reservationApplyState === "failed");
+  const canRefreshSolapiResults =
+    Boolean(onReconcileSolapiNotificationResults) &&
+    !hasJournalDraftChanges &&
+    solapiResultRefreshState !== "loading" &&
+    hasSolapiResultRefreshTarget;
 
   async function refreshReservationAudit() {
     setReservationAudit((current) => ({ ...current, message: "예약 원천을 조회하는 중입니다.", state: "loading" }));
@@ -13936,6 +13990,23 @@ function LessonJournalDetail({
     setJournalManualSaveMessage(notificationPlanMode === "none" ? "Solapi 취소 반영 완료" : "Solapi 예약 반영 완료");
   }
 
+  async function refreshSolapiSendResults() {
+    if (!canRefreshSolapiResults) return;
+    setSolapiResultRefreshState("loading");
+    setJournalManualSaveMessage("솔라피 발송결과 · 확인 중");
+    try {
+      const result = await onReconcileSolapiNotificationResults?.({ date: lesson.date, lessonId: lesson.lessonId });
+      setSolapiResultRefreshState("saved");
+      setJournalManualSaveMessage(`솔라피 발송결과 · ${result?.updatedCount ?? 0}건 반영`);
+      if (reservationModalOpen) {
+        await refreshReservationAudit();
+      }
+    } catch (error) {
+      setSolapiResultRefreshState("failed");
+      setJournalManualSaveMessage(`솔라피 발송결과 실패 · ${error.message}`);
+    }
+  }
+
   function toggleReservationInspectMode(mode) {
     setReservationInspectMode((current) => current === mode ? "all" : mode);
   }
@@ -14108,6 +14179,17 @@ function LessonJournalDetail({
         >
           {solapiApplyButtonLabel}
         </button>
+        {hasSolapiResultRefreshTarget ? (
+          <button
+            className={solapiResultRefreshState === "failed" ? "dangerSoftButton" : "schedulePlanButton check"}
+            disabled={!canRefreshSolapiResults}
+            onClick={refreshSolapiSendResults}
+            title={`Solapi 발송 원천 ${solapiResultRefreshTargetJobs.length}건을 OS 상태에 반영합니다.`}
+            type="button"
+          >
+            {solapiResultRefreshState === "loading" ? "확인 중" : "솔라피 발송결과"}
+          </button>
+        ) : null}
         <span
           aria-live="polite"
           className={`solapiReservationSync ${solapiReservationSyncStatus.state}`}
@@ -14140,6 +14222,16 @@ function LessonJournalDetail({
             >
               {reservationAudit.state === "loading" ? "조회 중" : "Solapi/OS 새로고침"}
             </button>
+            {hasSolapiResultRefreshTarget ? (
+              <button
+                className="softButton compact"
+                disabled={!canRefreshSolapiResults}
+                onClick={refreshSolapiSendResults}
+                type="button"
+              >
+                {solapiResultRefreshState === "loading" ? "확인 중" : "솔라피 발송결과"}
+              </button>
+            ) : null}
             {reservationInspectMode !== "all" ? (
               <button className="softButton compact" onClick={() => setReservationInspectMode("all")} type="button">
                 전체 보기

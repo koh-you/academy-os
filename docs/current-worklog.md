@@ -100,6 +100,16 @@
 
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
+### 2026-07-09 P0. 수업일지 Solapi 발송결과 OS 반영
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 제보: 2026-07-09 수업의 22:30 Solapi 예약은 실제 발송된 것으로 보이지만, Academy OS 수업일지에는 `예약 시각 지남` 상태가 남아 있었다. 예약 확인/예약 반영 버튼은 예약 생성/취소 의미와 섞이면 위험하므로, 이미 발송된 Solapi 원천 결과를 별도로 확인해 OS 상태에 반영하는 버튼이 필요했다.
+- 구현 결과: 서버에 `POST /api/notification-jobs/reconcile-solapi`를 추가했다. 이 API는 `notification_jobs`의 Solapi `providerMessageId/groupId`를 기준으로 Solapi 그룹/메시지 원천 상태를 조회하고, 새 예약은 만들지 않는다.
+- 구현 결과: Solapi 메시지 `statusCode 4000`은 `notification_jobs.status = sent`와 수업일지 `teacherCommentSendStatus/studentCommentSendStatus = 발송 완료`로 반영한다. Solapi 완료 상태지만 성공 코드가 확인되지 않으면 `send_unconfirmed`와 `발송 확인 필요`로 남겨 운영자가 확인하게 한다. 실패/취소 원천이 명확하면 `failed/canceled`로 반영한다.
+- 구현 결과: 수업일지 상단과 `예약 확인` 모달에 `솔라피 발송결과` 버튼을 추가했다. 라벨은 사용자가 요청한 짧은 문구인 `솔라피 발송결과`로 고정했다. 이 버튼은 지난 Solapi 예약 또는 확인 필요 job이 있을 때만 표시되며, 예약 생성/업데이트 버튼과 분리되어 동작한다.
+- 저장 원천: 실제 발송 원천은 Solapi 그룹/메시지, OS 반영 원천은 Supabase `notification_jobs`와 `lesson_student_records`다. 새 SQL 적용은 필요 없다.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 257개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다. 운영 원천 조회/반영은 사용자가 해당 수업에서 버튼을 눌러 확인하는 검토 gate로 둔다.
+
 ### 2026-07-09 P1. 수업일지 발송계획 선택과 Solapi 실제 반영 분리
 
 - 상태: 완료 - 구현/검증 완료

@@ -1769,6 +1769,184 @@ async function reserveNotificationJobInSolapi(job, { forceDryRun = false, reason
   };
 }
 
+function getNotificationJobSolapiGroupId(job = {}) {
+  return (
+    job.providerMessageId ||
+    getProviderMessageId(job.result) ||
+    getProviderMessageId(job.result?.result) ||
+    job.result?.groupId ||
+    job.result?.result?.groupId ||
+    ""
+  );
+}
+
+function normalizeSolapiStatus(value = "") {
+  return String(value ?? "").trim().toUpperCase();
+}
+
+function isSolapiCanceledStatus(value = "") {
+  const status = normalizeSolapiStatus(value);
+  return status === "CANCELED" || status === "CANCELLED" || status.includes("CANCEL");
+}
+
+function isSolapiFailedStatus(value = "") {
+  const status = normalizeSolapiStatus(value);
+  return status === "FAILED" || status === "FAIL" || status.includes("FAIL") || status.includes("ERROR");
+}
+
+function isSolapiCompleteStatus(value = "") {
+  const status = normalizeSolapiStatus(value);
+  return status === "COMPLETE" || status === "COMPLETED" || status === "DONE" || status.includes("COMPLETE");
+}
+
+function getSolapiPrimaryMessage(messages = [], job = {}) {
+  const recipient = String(job.recipient || job.payload?.recipient || "").replace(/\D/g, "");
+  if (recipient) {
+    const matched = messages.find((message) => String(message.to || "").replace(/\D/g, "") === recipient);
+    if (matched) return matched;
+  }
+  return messages.find((message) => String(message.statusCode || "") === "4000") ?? messages[0] ?? null;
+}
+
+function getSolapiStatusDetail({ group, message } = {}) {
+  const statusCode = String(message?.statusCode || "").trim();
+  const messageStatus = String(message?.status || "").trim();
+  const groupStatus = String(group?.status || "").trim();
+  const reason = String(message?.reason || "").trim();
+  return [statusCode ? `statusCode ${statusCode}` : "", reason, messageStatus || groupStatus]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+function getReconciledSolapiJobState(job = {}, group = null, messages = [], now = new Date()) {
+  const message = getSolapiPrimaryMessage(messages, job);
+  const statusCode = String(message?.statusCode || "").trim();
+  const detail = getSolapiStatusDetail({ group, message });
+
+  if (statusCode === "4000") {
+    return { error: "", message, shouldUpdate: job.status !== "sent", status: "sent" };
+  }
+  if (isSolapiCanceledStatus(group?.status) || isSolapiCanceledStatus(message?.status)) {
+    return { error: detail || "Solapi 취소", message, shouldUpdate: job.status !== "canceled", status: "canceled" };
+  }
+  if (isSolapiFailedStatus(group?.status) || isSolapiFailedStatus(message?.status)) {
+    return { error: detail || "Solapi 실패", message, shouldUpdate: job.status !== "failed" || job.error !== detail, status: "failed" };
+  }
+  if (isSolapiCompleteStatus(group?.status) || isSolapiCompleteStatus(message?.status) || group?.dateCompleted || message?.dateReported) {
+    const error = detail || "Solapi 완료 상태 확인 필요";
+    return { error, message, shouldUpdate: job.status !== "send_unconfirmed" || job.error !== error, status: "send_unconfirmed" };
+  }
+
+  const scheduledTime = job.scheduledAt ? new Date(job.scheduledAt).getTime() : NaN;
+  if (Number.isFinite(scheduledTime) && now.getTime() > scheduledTime) {
+    const error = detail || "Solapi 발송결과 확인 필요";
+    return { error, message, shouldUpdate: job.status !== "send_unconfirmed" || job.error !== error, status: "send_unconfirmed" };
+  }
+
+  return { error: detail, message, shouldUpdate: false, status: job.status || "scheduled" };
+}
+
+function getLessonRecordStatusForSolapiResult(status, error = "") {
+  if (status === "sent") return "발송 완료";
+  if (status === "send_unconfirmed") return error ? `발송 확인 필요 · ${error}` : "발송 확인 필요";
+  if (status === "failed") return error ? `발송 실패 · ${error}` : "발송 실패";
+  if (status === "canceled") return "취소";
+  return "";
+}
+
+async function reconcileSolapiNotificationJobs({ date = "", lessonId = "", limit = 500, scheduledFrom = "", scheduledTo = "" } = {}) {
+  if (!date && !lessonId && !scheduledFrom && !scheduledTo) {
+    throw new Error("조회할 수업일 또는 수업 ID가 필요합니다.");
+  }
+  const { startIso, endIso } = getKoreaDayUtcRange(date);
+  const result = await listNotificationJobs({
+    lessonId,
+    limit,
+    scheduledFrom: scheduledFrom || startIso,
+    scheduledTo: scheduledTo || endIso,
+    status: "scheduled,send_unconfirmed"
+  });
+  const now = new Date();
+  const candidates = (result.notificationJobs ?? []).filter((job) =>
+    job.provider === "solapi" && getNotificationJobSolapiGroupId(job)
+  );
+  const checked = [];
+  const notificationJobs = [];
+  const records = [];
+
+  for (const job of candidates) {
+    const groupId = getNotificationJobSolapiGroupId(job);
+    try {
+      const [groupsResult, messagesResult] = await Promise.all([
+        listSolapiGroups({ groupId, limit: 1 }),
+        listSolapiMessages({ groupId, limit: 20 })
+      ]);
+      const group = groupsResult.groups?.[0] ?? null;
+      const messages = messagesResult.messages ?? [];
+      const reconciled = getReconciledSolapiJobState(job, group, messages, now);
+      checked.push({
+        group,
+        groupId,
+        message: reconciled.message,
+        notificationJobId: job.notificationJobId,
+        status: reconciled.status,
+        updated: reconciled.shouldUpdate
+      });
+      if (!reconciled.shouldUpdate) continue;
+
+      const updatedJob = {
+        ...job,
+        error: reconciled.error,
+        result: {
+          ...(job.result && typeof job.result === "object" ? job.result : {}),
+          solapiGroup: group,
+          solapiMessages: messages,
+          solapiReconciledAt: now.toISOString(),
+          solapiReconciledSource: "manual-send-result"
+        },
+        status: reconciled.status,
+        updatedAt: now.toISOString()
+      };
+      const savedJob = await upsertNotificationJob(updatedJob);
+      notificationJobs.push(savedJob.notificationJob ?? updatedJob);
+
+      const recordStatus = getLessonRecordStatusForSolapiResult(reconciled.status, reconciled.error);
+      if (lessonCommentNotificationTypes.has(job.notificationType) && job.lessonId && job.studentId && recordStatus) {
+        try {
+          const patchResult = await patchLessonStudentRecordNotificationStatus({
+            lessonId: job.lessonId,
+            lessonStudentRecordId: job.lessonStudentRecordId,
+            studentId: job.studentId,
+            ...(job.notificationType === "student_comment"
+              ? { studentCommentSendStatus: recordStatus }
+              : { teacherCommentSendStatus: recordStatus })
+          });
+          if (patchResult.record) records.push(patchResult.record);
+        } catch (recordError) {
+          checked[checked.length - 1].recordError = recordError.message;
+        }
+      }
+    } catch (error) {
+      checked.push({
+        error: error.message,
+        groupId,
+        notificationJobId: job.notificationJobId,
+        status: "failed_to_check",
+        updated: false
+      });
+    }
+  }
+
+  return {
+    checked,
+    checkedCount: checked.length,
+    notificationJobs,
+    records,
+    source: "solapi",
+    updatedCount: notificationJobs.length
+  };
+}
+
 function getSupabaseEnv(name) {
   return process.env[name]?.trim() ?? "";
 }
@@ -5038,6 +5216,23 @@ const server = http.createServer(async (request, response) => {
       const result = await reserveNotificationJobInSolapi(notificationJob, {
         forceDryRun: Boolean(payload.forceDryRun),
         reason: payload.reason || "수업일지 예약"
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/reconcile-solapi") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await reconcileSolapiNotificationJobs({
+        date: payload.date || "",
+        lessonId: payload.lessonId || "",
+        limit: payload.limit || 500,
+        scheduledFrom: payload.scheduledFrom || "",
+        scheduledTo: payload.scheduledTo || ""
       });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
