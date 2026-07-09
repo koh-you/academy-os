@@ -33,6 +33,17 @@
 - 저장 원천: 운영 DB/Supabase/app_state에는 저장하지 않았다. 이번 작업의 원본은 로컬 `.codex-temp` JSON이고, 커밋 대상은 재실행 가능한 스크립트와 검수용 요약 문서다. 새 SQL 적용은 필요 없다.
 - 다음 작업: 사용자가 1개 글 결과를 검수한 뒤, 같은 분류 축으로 12개 글 전체를 실행하고 반복 키워드를 `벤치마킹 키워드 사전`으로 정리한다.
 
+### 2026-07-09 P1. 시험분석 블로그 Vision AI 12개 글 전체 분석
+
+- 상태: 완료 - 12개 글 전체 카드 이미지 Vision 분석 및 요약 문서화 완료
+- 사용자 정정: 글 속 이미지는 8장 이상일 수 있으므로 8장 제한으로 핵심 문구만 압축하면 누락 위험이 있다. 이에 따라 단일 압축 호출을 중단하고, 실제 카드 이미지를 모두 수집한 뒤 5장 이하 묶음으로 상세 OCR/분류하고 글 단위로 병합하는 방식으로 바꿨다.
+- 실행 범위: 상명중3/2, 대진고1, 혜성여고1, 불암중2/3, 청원여고1, 중계중3/2, 을지중2/3, 선덕고1 총 12개 글을 완료했다. 실제 카드 수는 8~14장이며, 선덕고1은 14장 전체를 분석했다.
+- 구현 결과: `scripts/analyze-blog-benchmark-vision.mjs`에 `--all`, `--aggregate-only`, 이미지 자동 다운로드, chunk 분석/병합, JSON 잘림 시 작은 묶음 재분석 로직을 추가했다. raw 결과는 `.codex-temp/benchmark-vision-results/*-latest.json`에 저장하고 Git에는 올리지 않는다.
+- 산출물: 전체 요약과 반복 키워드 사전 초안은 `docs/exam-analysis-blog-vision-all-posts-2026-07-09.md`에 정리했다. 최신 aggregate는 `.codex-temp/benchmark-vision-results/all-posts-latest.json`이다.
+- 사용량 참고: 최신 12개 결과 기준 input 313,972 tokens / output 239,734 tokens다. 로컬에 저장된 유료 결과 파일 전체 합계는 input 390,431 tokens / output 279,243 tokens이며, 실제 청구 비용은 Anthropic Console Usage에서 확인해야 한다.
+- 저장 원천: 운영 DB/Supabase/app_state에는 저장하지 않았다. 이번 결과는 로컬 raw JSON과 커밋된 요약 문서/재실행 스크립트다. 새 SQL 적용은 필요 없다.
+- 다음 작업: 이 키워드 사전을 바탕으로 시험분석 산출물 화면에 선생님 검수 질문과 `AI 초안 -> 선생님 편집 -> 저장본 원본화` 흐름을 설계한다.
+
 ## 현재 다음 작업 큐 - 2026-06-25 최종 정리
 
 ### 2026-07-09 P1. 수업일지 발송계획 선택과 Solapi 실제 반영 분리
