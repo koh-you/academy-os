@@ -44,6 +44,26 @@ export function normalizeTimeInput(value) {
   return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
 }
 
+function getAttendanceClockMinutes(value = "") {
+  const time = normalizeTimeInput(value);
+  if (!time) return null;
+  const [hour, minute] = time.split(":").map(Number);
+  return hour * 60 + minute;
+}
+
+function normalizeLateGraceMinutes(value = 5) {
+  const minutes = Number(value);
+  return Number.isFinite(minutes) && minutes > 0 ? minutes : 5;
+}
+
+function isLateWithinGrace(record = {}, lesson = null, lateGraceMinutes = 5) {
+  if ((record?.attendanceStatus ?? "") !== "late") return false;
+  const startMinutes = getAttendanceClockMinutes(lesson?.startTime);
+  const checkInMinutes = getAttendanceClockMinutes(record.checkInTime || formatKoreaTimeFromIso(record.checkInAt));
+  if (startMinutes === null || checkInMinutes === null) return false;
+  return checkInMinutes - startMinutes <= normalizeLateGraceMinutes(lateGraceMinutes);
+}
+
 export function addMinutesToAttendanceTime(timeValue, minutesToAdd = 0) {
   const time = normalizeTimeInput(timeValue);
   if (!time) return "";
@@ -90,7 +110,7 @@ export function clearAttendanceFields(record = {}) {
   };
 }
 
-export function getAttendanceDisplay(record = {}, lesson = null) {
+export function getAttendanceDisplay(record = {}, lesson = null, lateGraceMinutes = 5) {
   record = record ?? {};
   const dateMismatch = getAttendanceDateMismatch(record, lesson);
   if (dateMismatch) {
@@ -102,19 +122,20 @@ export function getAttendanceDisplay(record = {}, lesson = null) {
     };
   }
   const status = record.attendanceStatus ?? "pending";
+  const effectiveStatus = isLateWithinGrace(record, lesson, lateGraceMinutes) ? "present" : status;
   const isArrivalStatus = ["checkin", "present", "late"].includes(status);
   const checkInTime = record.checkInTime || formatKoreaTimeFromIso(record.checkInAt);
   const checkOutTime = record.checkOutTime || formatKoreaTimeFromIso(record.checkOutAt);
   const label = checkOutTime && !["absent", "excused", "pending"].includes(status)
     ? "하원"
     : isArrivalStatus || checkInTime
-      ? status === "late" ? "지각" : "등원"
+      ? effectiveStatus === "late" ? "지각" : "등원"
       : attendanceLabels[status] ?? status ?? "대기";
   const detail = [
     checkInTime ? `등원 ${checkInTime}` : "",
     checkOutTime ? `하원 ${checkOutTime}` : ""
   ].filter(Boolean).join(" · ");
-  return { label, detail };
+  return { label, detail, statusClass: effectiveStatus };
 }
 
 export function hasMissingCheckOut(record = {}, lesson = null) {

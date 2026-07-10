@@ -333,19 +333,24 @@ function hasAttendanceCheckout(record = {}) {
   return Boolean(record?.checkOutAt || record?.checkOutTime);
 }
 
-function calculateAttendanceLateMinutes(lesson = {}, now = new Date(), graceMinutes = 0) {
+function calculateAttendanceLateMinutes(lesson = {}, now = new Date(), graceMinutes = 5) {
   if (!lesson?.date || !lesson?.startTime) return "";
   const start = new Date(`${lesson.date}T${String(lesson.startTime).slice(0, 5)}:00+09:00`);
   if (Number.isNaN(start.getTime())) return "";
   const diff = Math.floor((now.getTime() - start.getTime()) / 60000);
-  return Math.max(0, diff - (Number(graceMinutes) || 0));
+  return Math.max(0, diff - normalizeAttendanceGraceMinutes(graceMinutes));
 }
 
-function calculateAttendanceLateMinutesFromTime(lesson = {}, timeValue = "", graceMinutes = 0) {
+function calculateAttendanceLateMinutesFromTime(lesson = {}, timeValue = "", graceMinutes = 5) {
   const startMinutes = parseAttendanceClockMinutes(lesson.startTime);
   const checkedMinutes = parseAttendanceClockMinutes(timeValue);
   if (startMinutes === null || checkedMinutes === null) return "";
-  return Math.max(0, checkedMinutes - startMinutes - (Number(graceMinutes) || 0));
+  return Math.max(0, checkedMinutes - startMinutes - normalizeAttendanceGraceMinutes(graceMinutes));
+}
+
+function normalizeAttendanceGraceMinutes(value = 5) {
+  const minutes = Number(value);
+  return Number.isFinite(minutes) && minutes > 0 ? minutes : 5;
 }
 
 function isWithinAttendanceGrace(lateMinutes) {

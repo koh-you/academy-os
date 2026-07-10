@@ -254,11 +254,12 @@ function getAttendanceClockMinutes(value = "") {
   return hour * 60 + minute;
 }
 
-function calculateLateMinutesFromLessonTime(lesson = {}, checkInTime = "", graceMinutes = 0) {
+function calculateLateMinutesFromLessonTime(lesson = {}, checkInTime = "", graceMinutes = 5) {
   const startMinutes = getAttendanceClockMinutes(lesson.startTime);
   const checkInMinutes = getAttendanceClockMinutes(checkInTime);
   if (startMinutes === null || checkInMinutes === null) return "";
-  return Math.max(0, checkInMinutes - startMinutes - (Number(graceMinutes) || 0));
+  const normalizedGraceMinutes = Number(graceMinutes);
+  return Math.max(0, checkInMinutes - startMinutes - (Number.isFinite(normalizedGraceMinutes) && normalizedGraceMinutes > 0 ? normalizedGraceMinutes : 5));
 }
 
 function formatAttendanceForMessage(recordOrPayload = {}) {
@@ -5243,7 +5244,7 @@ const defaultAiSettings = {
 };
 
 const defaultAttendanceSettings = {
-  lateGraceMinutes: 0
+  lateGraceMinutes: 5
 };
 
 function hasBrokenPromptEncoding(prompt = "") {
@@ -5262,10 +5263,14 @@ function normalizeAiPrompts(prompts = {}) {
 }
 
 function normalizeAttendanceSettings(settings = {}) {
+  const rawLateGraceMinutes = settings?.lateGraceMinutes ?? defaultAttendanceSettings.lateGraceMinutes;
+  const lateGraceMinutes = Number(rawLateGraceMinutes);
   return {
     ...defaultAttendanceSettings,
     ...(settings ?? {}),
-    lateGraceMinutes: Number(settings?.lateGraceMinutes ?? defaultAttendanceSettings.lateGraceMinutes) || 0
+    lateGraceMinutes: Number.isFinite(lateGraceMinutes) && lateGraceMinutes > 0
+      ? lateGraceMinutes
+      : defaultAttendanceSettings.lateGraceMinutes
   };
 }
 
@@ -14425,7 +14430,7 @@ function LessonJournalDetail({
             const effectiveNextHomework = nextHomeworkTitle !== (nextHomework?.title ?? "")
               ? { ...(nextHomework ?? {}), title: nextHomeworkTitle }
               : nextHomework;
-            const attendanceDisplay = getAttendanceDisplay(record, lesson);
+            const attendanceDisplay = getAttendanceDisplay(record, lesson, attendanceSettings.lateGraceMinutes);
             const checkoutMissing = hasMissingCheckOut(record, lesson);
             const previousMemoContext = getPreviousLessonMemoContext(student);
             const previousRecord = previousMemoContext.previousRecord;
@@ -15209,7 +15214,7 @@ function CommentComposerModal({
   );
 }
 
-function AttendanceModal({ item, lateGraceMinutes = 0, onClose, onSave }) {
+function AttendanceModal({ item, lateGraceMinutes = 5, onClose, onSave }) {
   const { lesson, record, student } = item;
   const attendanceDateMismatch = getAttendanceDateMismatch(record, lesson);
   const editableRecord = attendanceDateMismatch ? clearAttendanceFields(record) : record;
@@ -17696,11 +17701,11 @@ function SettingsCenter({
             </div>
             <input
               inputMode="numeric"
-              min="0"
+              min="5"
               type="number"
               value={attendance.lateGraceMinutes}
               onChange={(event) =>
-                updateAttendanceSetting("lateGraceMinutes", Math.max(0, Number(event.target.value) || 0))
+                updateAttendanceSetting("lateGraceMinutes", Math.max(5, Number(event.target.value) || 5))
               }
             />
             <span className="aiSettingBadge fieldBadge">분 단위</span>
@@ -23812,11 +23817,12 @@ function getTemplateEndTime(template, date) {
   return getDayKey(date) === "sat" && template.saturdayEndTime ? template.saturdayEndTime : template.endTime;
 }
 
-function calculateLateMinutes(lesson, now = new Date(), graceMinutes = 0) {
+function calculateLateMinutes(lesson, now = new Date(), graceMinutes = 5) {
   if (!lesson?.date || !lesson?.startTime) return 0;
   const start = new Date(`${lesson.date}T${lesson.startTime}:00+09:00`);
   const diff = Math.floor((now.getTime() - start.getTime()) / 60000);
-  return Math.max(0, diff - (Number(graceMinutes) || 0));
+  const normalizedGraceMinutes = Number(graceMinutes);
+  return Math.max(0, diff - (Number.isFinite(normalizedGraceMinutes) && normalizedGraceMinutes > 0 ? normalizedGraceMinutes : 5));
 }
 
 function createLessonStudentRecordId(lessonId, studentId) {

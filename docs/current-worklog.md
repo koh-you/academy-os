@@ -12,6 +12,17 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-10 P1. 출결 지각 유예시간 5분 기본값 보정
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 제보: 19:00 수업에서 19:01 등원한 학생이 수업일지 카드에서 `지각`으로 표시됐다. 운영 기준은 수업 시작 후 5분까지 정상 등원이어야 한다.
+- 원인 판단: 출결 설정 기본값과 오래된 설정 fallback이 `lateGraceMinutes: 0`으로 남을 수 있었고, 수업일지 표시는 이미 저장된 `attendanceStatus: late`를 그대로 표시해 기존 row가 5분 유예 규칙으로 재해석되지 않았다.
+- 구현 결과: 출결 지각 유예시간 기본값과 최소값을 5분으로 맞췄다. 프론트 수동 저장, 태블릿 출결 API payload, 서버 출결 계산 모두 유효하지 않거나 0인 유예시간을 5분으로 정규화한다.
+- 구현 결과: 수업일지의 출결 배지는 저장된 row가 `late`여도 수업 시작 시각과 `checkInTime`/`checkInAt` 기준으로 5분 이내면 `등원`/`attendance-present`로 표시한다. 새로 저장되는 5분 이내 등원은 `attendanceStatus: present`, `lateMinutes: ""`로 저장된다.
+- 저장 원천: 출결 원본은 계속 Supabase `lesson_student_records`의 `attendance_status`, `check_in_time`, `check_in_at`, `late_minutes`다. 지각 유예시간 설정은 기존 `app_state.attendanceSettings.lateGraceMinutes`를 쓰되, 0/누락 값은 앱과 서버에서 5분으로 해석한다. 새 SQL 적용은 필요 없다.
+- 알림톡 영향: 출결 저장 후 알림톡을 보내는 기존 분리 흐름은 유지한다. 5분 이내 등원으로 새 저장된 row는 출결 알림톡/수업일지 표시에서 정상 등원 기준을 따른다. Solapi 예약/취소 로직은 건드리지 않았다.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 263개 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-10 P1. 수업메모 저장과 알림톡 초안 반영 보강
 
 - 상태: 완료 - 구현/검증 완료
