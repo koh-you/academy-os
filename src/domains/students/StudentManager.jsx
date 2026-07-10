@@ -409,7 +409,6 @@ export function StudentManager({
             <span>학부모전화번호</span>
             <span>출생연도</span>
             <span>저장</span>
-            <span>정보확정</span>
             <span>퇴원</span>
           </div>
           {visibleStudents.map((student, index) => {
@@ -493,13 +492,6 @@ export function StudentManager({
                   type="button"
                 >
                   {getStudentSaveLabel(student.studentId)}
-                </button>
-                <button
-                  className={student.confirmed === false ? "statusText danger" : "statusText"}
-                  onClick={() => updateStudentField(student.studentId, "confirmed", student.confirmed === false)}
-                  type="button"
-                >
-                  {student.confirmed === false ? "미확정" : "확정"}
                 </button>
                 <button
                   aria-label={`${student.name} 퇴원 처리`}
