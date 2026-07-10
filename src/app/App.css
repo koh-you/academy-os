@@ -8748,7 +8748,7 @@ textarea {
 }
 
 .studentScoreModalTable .studentScoreRow {
-  min-width: 920px;
+  min-width: 1080px;
 }
 
 .studentProfileDataTable {
@@ -8761,8 +8761,8 @@ textarea {
 }
 
 .academyTestProfileRow {
-  grid-template-columns: 140px 170px 170px 100px 100px minmax(220px, 1fr);
-  min-width: 900px;
+  grid-template-columns: 140px 170px 170px 100px 100px minmax(220px, 1fr) 150px;
+  min-width: 1050px;
 }
 
 .reportDataSummaryGrid {
@@ -8823,6 +8823,69 @@ textarea {
   justify-content: flex-end;
 }
 
+.studentConsultationComposer,
+.studentConsultationItem {
+  background: #f8fbff;
+  border: 1px solid #dbe7fb;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.studentConsultationControls,
+.studentConsultationMeta,
+.studentProfileRowActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.studentConsultationControls select,
+.studentConsultationControls input,
+.studentConsultationMeta select,
+.studentConsultationMeta input {
+  min-height: 38px;
+}
+
+.studentConsultationComposer textarea,
+.studentConsultationItem textarea {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  line-height: 1.5;
+  min-height: 92px;
+  padding: 10px;
+  resize: vertical;
+  width: 100%;
+}
+
+.studentConsultationList {
+  display: grid;
+  gap: 10px;
+}
+
+.studentConsultationItem.dirty,
+.managementRow.dirty,
+.managementRow.draftRow {
+  background: #fff7ed;
+}
+
+.studentConsultationType {
+  background: #eef2ff;
+  border-radius: 999px;
+  color: #3730a3;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 9px;
+}
+
+.studentProfileRowActions .softButton,
+.studentProfileRowActions .dangerSoftButton {
+  min-height: 36px;
+  padding-inline: 10px;
+}
+
 .profileEditInput {
   background: #ffffff;
   border: 1px solid #cbd5e1;
@@ -8857,8 +8920,8 @@ textarea.profileEditInput {
 }
 
 .managementRow.studentScoreRow {
-  grid-template-columns: 130px 150px 150px 110px 110px minmax(260px, 1fr);
-  min-width: 920px;
+  grid-template-columns: 130px 150px 150px 110px 110px minmax(260px, 1fr) 150px;
+  min-width: 1080px;
 }
 
 .classManagerPage,

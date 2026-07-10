@@ -64,6 +64,7 @@ const storageKeys = {
   schoolEvents: "academy-os.schoolEvents.v1",
   studentQuestions: "academy-os.studentQuestions.v1",
   examPostSubmissions: "academy-os.examPostSubmissions.v1",
+  studentConsultations: "academy-os.studentConsultations.v1",
   resourceMaterials: "academy-os.resourceMaterials.v1",
   lessonResearchItems: "academy-os.lessonResearchItems.v1",
   aiSettings: "academy-os.aiSettings.v1",
@@ -660,10 +661,10 @@ function InlineSaveStatus({ className = "", label = "", saveState = "idle" }) {
 
 const appStateAutosaveRisk = {
   title: "app_state 전체 snapshot 저장",
-  storage: "Supabase app_state: aiSettings, attendanceSettings, lessonResearchItems, problemBooks, wrongProblems, scoreRecords, academyTests 등 sharedAppState 묶음",
+  storage: "Supabase app_state: aiSettings, attendanceSettings, lessonResearchItems, problemBooks, wrongProblems 등 sharedAppState 묶음",
   risk: "작은 입력도 공통 snapshot 저장 요청으로 이어집니다. 오래된 탭이나 저장 실패가 끼면 화면 하나의 수정이 다른 데이터 묶음까지 함께 덮을 수 있습니다.",
   stopCondition: "저장 실패가 뜨거나, 새로고침 뒤 이전 값이 보이거나, 이 화면과 무관한 데이터가 같이 바뀌면 다음 입력을 멈춥니다.",
-  recommendation: "후속 작업에서 key별 dirty 저장, updatedAt/version 충돌 확인, 행 단위 저장으로 분리합니다."
+  recommendation: "학생 상담/성적/테스트처럼 독립성이 큰 데이터부터 key별 저장으로 분리하고, 남은 묶음은 updatedAt/version 충돌 확인을 붙입니다."
 };
 
 const examPrepAutosaveRisk = {
@@ -5070,6 +5071,7 @@ export function App() {
   const [studentQuestions, setStudentQuestions] = useStoredState(storageKeys.studentQuestions, []);
   const [examPostSubmissions, setExamPostSubmissions] = useStoredState(storageKeys.examPostSubmissions, []);
   const [examPostTargetStudentIds, setExamPostTargetStudentIds] = useStoredState(storageKeys.examPostTargetStudentIds, {});
+  const [studentConsultations, setStudentConsultations] = useStoredState(storageKeys.studentConsultations, []);
   const [schoolEvents, setSchoolEvents] = useStoredState(
     storageKeys.schoolEvents,
     createDefaultSchoolEvents(sampleData.examPrepRows ?? [])
@@ -5101,6 +5103,9 @@ export function App() {
   const [attendanceReloadKey, setAttendanceReloadKey] = useState(0);
   const [saveStates, setSaveStates] = useState({});
   const [appStateSaveState, setAppStateSaveState] = useState("idle");
+  const [scoreRecordSaveState, setScoreRecordSaveState] = useState("idle");
+  const [academyTestSaveState, setAcademyTestSaveState] = useState("idle");
+  const [studentConsultationSaveState, setStudentConsultationSaveState] = useState("idle");
   const [examPrepRowSaveStates, setExamPrepRowSaveStates] = useState({});
   const [studentAutoSaveStates, setStudentAutoSaveStates] = useState({});
   const [studentIntakeSaveStates, setStudentIntakeSaveStates] = useState({});
@@ -5120,6 +5125,9 @@ export function App() {
   const initialExamPrepRowsRef = useRef(examPrepRows);
   const initialSchoolEventsRef = useRef(schoolEvents);
   const appStateSaveRequestRef = useRef(0);
+  const scoreRecordSaveRequestRef = useRef(0);
+  const academyTestSaveRequestRef = useRef(0);
+  const studentConsultationSaveRequestRef = useRef(0);
   const examPrepRowSaveRequestRef = useRef({});
   const studentAutoSaveRequestRef = useRef({});
   const studentIntakeSaveRequestRef = useRef({});
@@ -5127,7 +5135,6 @@ export function App() {
   const attendanceOnlyMode = isAttendanceOnlyRoute();
 
   const sharedAppState = useMemo(() => ({
-    academyTests,
     aiSettings,
     attendanceSettings,
     deletedLessonBundles,
@@ -5137,7 +5144,6 @@ export function App() {
     notificationLogs,
     problemBooks,
     reportSnapshots,
-    scoreRecords,
     examPostSubmissions,
     examPostTargetStudentIds,
     studentQuestions,
@@ -5145,7 +5151,6 @@ export function App() {
     tallySummaries,
     wrongProblems
   }), [
-    academyTests,
     aiSettings,
     attendanceSettings,
     deletedLessonBundles,
@@ -5155,7 +5160,6 @@ export function App() {
     notificationLogs,
     problemBooks,
     reportSnapshots,
-    scoreRecords,
     examPostSubmissions,
     examPostTargetStudentIds,
     studentQuestions,
@@ -5341,6 +5345,7 @@ export function App() {
             setExamPostTargetStudentIds(states.examPostTargetStudentIds);
           }
           if (Array.isArray(states.studentQuestions)) setStudentQuestions(states.studentQuestions);
+          if (Array.isArray(states.studentConsultations)) setStudentConsultations(states.studentConsultations);
           if (Array.isArray(states.tallySubmissions)) setTallySubmissions(states.tallySubmissions);
           if (states.tallySummaries && typeof states.tallySummaries === "object" && !Array.isArray(states.tallySummaries)) {
             setTallySummaries(states.tallySummaries);
@@ -5387,6 +5392,7 @@ export function App() {
     setScoreRecords,
     setSchoolEvents,
     setStudents,
+    setStudentConsultations,
     setStudentIntakeApplicants,
     setTallySubmissions,
     setTallySummaries,
@@ -6478,6 +6484,136 @@ export function App() {
     ) {
       reconcileStudentFutureClassLessons(student, options.previousClassTemplateId, today);
     }
+  }
+
+  function persistScoreRecords(nextScoreRecords) {
+    const requestId = scoreRecordSaveRequestRef.current + 1;
+    scoreRecordSaveRequestRef.current = requestId;
+    setScoreRecordSaveState("saving");
+    return postAppState({ scoreRecords: nextScoreRecords })
+      .then(() => {
+        if (scoreRecordSaveRequestRef.current === requestId) setScoreRecordSaveState("saved");
+      })
+      .catch((error) => {
+        console.error(error);
+        if (scoreRecordSaveRequestRef.current === requestId) setScoreRecordSaveState("failed");
+        throw error;
+      });
+  }
+
+  function handleSaveScoreRecord(scoreRecord) {
+    if (!scoreRecord?.studentId) return Promise.reject(new Error("성적 기록 학생 ID가 필요합니다."));
+    const existingRecord = scoreRecords.find((item) => item.scoreRecordId === scoreRecord.scoreRecordId);
+    const nextRecord = {
+      scoreRecordId: scoreRecord.scoreRecordId || `score_${Date.now()}_${scoreRecord.studentId}`,
+      studentId: scoreRecord.studentId,
+      examType: scoreRecord.examType || "내신",
+      examDate: scoreRecord.examDate || today,
+      subject: scoreRecord.subject || "수학",
+      score: scoreRecord.score ?? "",
+      grade: scoreRecord.grade ?? "",
+      note: scoreRecord.note ?? "",
+      createdAt: existingRecord?.createdAt || scoreRecord.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    const nextScoreRecords = upsertById(scoreRecords, nextRecord, "scoreRecordId");
+    setScoreRecords(nextScoreRecords);
+    return persistScoreRecords(nextScoreRecords);
+  }
+
+  function handleDeleteScoreRecord(scoreRecordId) {
+    if (!scoreRecordId) return Promise.reject(new Error("삭제할 성적 기록 ID가 필요합니다."));
+    if (typeof window !== "undefined" && !window.confirm("이 성적 기록을 삭제할까요?")) return Promise.resolve();
+    const nextScoreRecords = scoreRecords.filter((item) => item.scoreRecordId !== scoreRecordId);
+    setScoreRecords(nextScoreRecords);
+    return persistScoreRecords(nextScoreRecords);
+  }
+
+  function persistAcademyTests(nextAcademyTests) {
+    const requestId = academyTestSaveRequestRef.current + 1;
+    academyTestSaveRequestRef.current = requestId;
+    setAcademyTestSaveState("saving");
+    return postAppState({ academyTests: nextAcademyTests })
+      .then(() => {
+        if (academyTestSaveRequestRef.current === requestId) setAcademyTestSaveState("saved");
+      })
+      .catch((error) => {
+        console.error(error);
+        if (academyTestSaveRequestRef.current === requestId) setAcademyTestSaveState("failed");
+        throw error;
+      });
+  }
+
+  function handleSaveAcademyTest(academyTest) {
+    if (!academyTest?.studentId) return Promise.reject(new Error("테스트 기록 학생 ID가 필요합니다."));
+    const existingTest = academyTests.find((item) => item.testId === academyTest.testId);
+    const nextTest = {
+      testId: academyTest.testId || `academy_test_${Date.now()}_${academyTest.studentId}`,
+      studentId: academyTest.studentId,
+      testDate: academyTest.testDate || today,
+      title: academyTest.title || "학원 테스트",
+      scope: academyTest.scope ?? "",
+      score: academyTest.score ?? "",
+      averageScore: academyTest.averageScore ?? "",
+      note: academyTest.note ?? "",
+      createdAt: existingTest?.createdAt || academyTest.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    const nextAcademyTests = upsertById(academyTests, nextTest, "testId");
+    setAcademyTests(nextAcademyTests);
+    return persistAcademyTests(nextAcademyTests);
+  }
+
+  function handleDeleteAcademyTest(testId) {
+    if (!testId) return Promise.reject(new Error("삭제할 테스트 기록 ID가 필요합니다."));
+    if (typeof window !== "undefined" && !window.confirm("이 테스트 기록을 삭제할까요?")) return Promise.resolve();
+    const nextAcademyTests = academyTests.filter((item) => item.testId !== testId);
+    setAcademyTests(nextAcademyTests);
+    return persistAcademyTests(nextAcademyTests);
+  }
+
+  function persistStudentConsultations(nextConsultations) {
+    const requestId = studentConsultationSaveRequestRef.current + 1;
+    studentConsultationSaveRequestRef.current = requestId;
+    setStudentConsultationSaveState("saving");
+    return postAppState({ studentConsultations: nextConsultations })
+      .then(() => {
+        if (studentConsultationSaveRequestRef.current === requestId) {
+          setStudentConsultationSaveState("saved");
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        if (studentConsultationSaveRequestRef.current === requestId) {
+          setStudentConsultationSaveState("failed");
+        }
+        throw error;
+      });
+  }
+
+  function handleSaveStudentConsultation(consultation) {
+    if (!consultation?.studentId) return Promise.reject(new Error("상담기록 학생 ID가 필요합니다."));
+    const existingConsultation = studentConsultations.find((item) => item.consultationId === consultation.consultationId);
+    const nextConsultation = {
+      consultationId: consultation.consultationId || `consult_${Date.now()}_${consultation.studentId}`,
+      studentId: consultation.studentId,
+      consultationType: consultation.consultationType || "student",
+      consultationDate: consultation.consultationDate || today,
+      content: String(consultation.content ?? "").trim(),
+      createdAt: existingConsultation?.createdAt || consultation.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    const nextConsultations = upsertById(studentConsultations, nextConsultation, "consultationId");
+    setStudentConsultations(nextConsultations);
+    return persistStudentConsultations(nextConsultations);
+  }
+
+  function handleDeleteStudentConsultation(consultationId) {
+    if (!consultationId) return Promise.reject(new Error("삭제할 상담기록 ID가 필요합니다."));
+    if (typeof window !== "undefined" && !window.confirm("이 상담기록을 삭제할까요?")) return Promise.resolve();
+    const nextConsultations = studentConsultations.filter((item) => item.consultationId !== consultationId);
+    setStudentConsultations(nextConsultations);
+    return persistStudentConsultations(nextConsultations);
   }
 
   function persistExamPrepRows(rowsToPersist) {
@@ -7597,53 +7733,22 @@ export function App() {
         {activeView === "students" ? (
           <StudentManager
             academyTests={academyTests}
-            appStateSaveState={appStateSaveState}
+            academyTestSaveState={academyTestSaveState}
             ModalComponent={Modal}
             scoreRecords={scoreRecords}
+            scoreRecordSaveState={scoreRecordSaveState}
+            studentConsultationSaveState={studentConsultationSaveState}
+            studentConsultations={studentConsultations}
             studentAutoSaveStates={studentAutoSaveStates}
             students={students}
             templates={classTemplates}
-            onAddAcademyTest={(studentId) =>
-              setAcademyTests((current) => [
-                {
-                  testId: `academy_test_${Date.now()}_${studentId}`,
-                  studentId,
-                  testDate: today,
-                  title: "학원 테스트",
-                  scope: "",
-                  score: "",
-                  averageScore: "",
-                  note: ""
-                },
-                ...current
-              ])
-            }
             onAddStudent={() => setIsStudentModalOpen(true)}
-            onAddScore={(studentId) =>
-              setScoreRecords((current) => [
-                {
-                  scoreRecordId: `score_${Date.now()}_${studentId}`,
-                  studentId,
-                  examType: "내신",
-                  examDate: today,
-                  subject: "수학",
-                  score: "",
-                  grade: "",
-                  note: ""
-                },
-                ...current
-              ])
-            }
-            onUpdateAcademyTest={(testId, field, value) =>
-              setAcademyTests((current) =>
-                current.map((item) => (item.testId === testId ? { ...item, [field]: value } : item))
-              )
-            }
-            onUpdateScore={(scoreRecordId, field, value) =>
-              setScoreRecords((current) =>
-                current.map((item) => (item.scoreRecordId === scoreRecordId ? { ...item, [field]: value } : item))
-              )
-            }
+            onDeleteAcademyTest={handleDeleteAcademyTest}
+            onDeleteScore={handleDeleteScoreRecord}
+            onDeleteStudentConsultation={handleDeleteStudentConsultation}
+            onSaveAcademyTest={handleSaveAcademyTest}
+            onSaveScore={handleSaveScoreRecord}
+            onSaveStudentConsultation={handleSaveStudentConsultation}
             onDeleteStudent={handleDeleteStudent}
             onSaveStudent={handleSaveStudent}
             onUpdateStudent={handleUpdateStudent}
@@ -7897,34 +8002,6 @@ export function App() {
             scoreRecords={scoreRecords}
             students={students}
             wrongProblems={wrongProblems}
-            onAddAcademyTest={() =>
-              setAcademyTests((current) => [
-                {
-                  testId: `academy_test_${Date.now()}`,
-                  testDate: today,
-                  title: "학원 테스트",
-                  scope: "",
-                  averageScore: "",
-                  note: ""
-                },
-                ...current
-              ])
-            }
-            onAddScore={() =>
-              setScoreRecords((current) => [
-                {
-                  scoreRecordId: `score_${Date.now()}`,
-                  studentId: students[0]?.studentId ?? "",
-                  examType: "내신",
-                  examDate: today,
-                  subject: "수학",
-                  score: "",
-                  grade: "",
-                  note: ""
-                },
-                ...current
-              ])
-            }
             onAddWrongProblem={() =>
               setWrongProblems((current) => [
                 {
@@ -7937,16 +8014,6 @@ export function App() {
                 },
                 ...current
               ])
-            }
-            onUpdateAcademyTest={(testId, field, value) =>
-              setAcademyTests((current) =>
-                current.map((item) => (item.testId === testId ? { ...item, [field]: value } : item))
-              )
-            }
-            onUpdateScore={(scoreRecordId, field, value) =>
-              setScoreRecords((current) =>
-                current.map((item) => (item.scoreRecordId === scoreRecordId ? { ...item, [field]: value } : item))
-              )
             }
             onUpdateWrongProblem={(wrongProblemId, field, value) =>
               setWrongProblems((current) =>
