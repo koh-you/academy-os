@@ -13341,16 +13341,17 @@ function HomeworkMakeupLessonDetail({
 
 function EditableMemoCard({ className = "", disabled = false, editKey, editingKey, onChange, onEdit, placeholder, value }) {
   const textareaRef = useRef(null);
-  const isEditing = !disabled && editingKey === editKey;
+  const isEditable = !disabled;
+  const shouldFocus = isEditable && editingKey === editKey;
   const displayValue = value?.trim() ? value : "";
 
   useEffect(() => {
-    if (!isEditing || !textareaRef.current) return;
+    if (!isEditable || !textareaRef.current) return;
     const textarea = textareaRef.current;
-    textarea.focus();
     textarea.style.height = "auto";
     textarea.style.height = `${textarea.scrollHeight}px`;
-  }, [isEditing, value]);
+    if (shouldFocus) textarea.focus();
+  }, [isEditable, shouldFocus, value]);
 
   function handleChange(event) {
     const textarea = event.target;
@@ -13359,12 +13360,12 @@ function EditableMemoCard({ className = "", disabled = false, editKey, editingKe
     onChange(textarea.value);
   }
 
-  if (isEditing) {
+  if (isEditable) {
     return (
       <textarea
         className={`journalMemoCardInput ${className}`.trim()}
-        onBlur={() => onEdit("")}
         onChange={handleChange}
+        onFocus={() => onEdit(editKey)}
         onKeyDown={(event) => {
           if (event.key === "Escape" || (event.key === "Enter" && (event.ctrlKey || event.metaKey))) {
             event.currentTarget.blur();
@@ -13698,6 +13699,15 @@ function LessonJournalDetail({
     !hasJournalDraftChanges &&
     solapiResultRefreshState !== "loading" &&
     hasSolapiResultRefreshTarget;
+
+  function startJournalEditMode() {
+    setJournalEditMode(true);
+    setJournalManualSaveMessage("수업일지 · 편집 중");
+    const firstStudent = lessonStudents[0];
+    if (!firstStudent) return;
+    const firstRecordId = createLessonStudentRecordId(lesson.lessonId, firstStudent.studentId);
+    setEditingMemoKey(`${firstRecordId}:lessonMaterial`);
+  }
 
   async function refreshReservationAudit() {
     setReservationAudit((current) => ({ ...current, message: "예약 원천을 조회하는 중입니다.", state: "loading" }));
@@ -14151,13 +14161,10 @@ function LessonJournalDetail({
         </button>
         <button
           className={journalEditMode ? "schedulePlanButton active" : "schedulePlanButton"}
-          onClick={() => {
-            setJournalEditMode(true);
-            setJournalManualSaveMessage("수업일지 · 편집 중");
-          }}
+          onClick={startJournalEditMode}
           type="button"
         >
-          수정 시작
+          {journalEditMode ? "수정 중" : "수정 시작"}
         </button>
         <button
           className="saveDraftButton"
@@ -14408,7 +14415,7 @@ function LessonJournalDetail({
       ) : null}
 
       <section className="panel journalTablePanel">
-        <div className="journalTable">
+        <div className={journalEditMode ? "journalTable editing" : "journalTable"}>
           <div className="journalRow journalHead">
             <span>학생</span>
             <span>수업메모</span>

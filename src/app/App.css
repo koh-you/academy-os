@@ -4294,6 +4294,10 @@ button {
   min-width: 1450px;
 }
 
+.journalTable.editing {
+  background: #f8fbff;
+}
+
 .journalRow {
   align-items: stretch;
   border-top: 1px solid #e5edf8;
@@ -6382,6 +6386,12 @@ textarea {
   text-align: left;
 }
 
+.journalTable.editing .journalMemoCardInput {
+  background: #ffffff;
+  border-color: #9fb7d8;
+  box-shadow: inset 3px 0 0 #4f46e5, 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
 .journalTable .journalMemoCardInput:hover {
   background: #ffffff;
   border-color: #a9bdd9;
@@ -6424,6 +6434,8 @@ textarea {
 }
 
 .journalTable .journalMemoCardRead.locked {
+  background: #f8fafc;
+  color: #64748b;
   cursor: default;
 }
 
