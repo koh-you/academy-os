@@ -702,6 +702,98 @@ function fromSchoolEventRow(row) {
   };
 }
 
+const academyReminderTypes = new Set([
+  "consultation",
+  "student_consultation",
+  "parent_consultation",
+  "student_intake",
+  "special_note",
+  "parent_contact",
+  "custom"
+]);
+const academyReminderStatuses = new Set(["pending", "done", "canceled"]);
+const academyReminderPriorities = new Set(["low", "normal", "high"]);
+
+function normalizeAcademyReminderType(value = "custom") {
+  const type = String(value || "custom").trim();
+  if (type === "student") return "student_consultation";
+  if (type === "parent") return "parent_consultation";
+  return academyReminderTypes.has(type) ? type : "custom";
+}
+
+function normalizeAcademyReminderStatus(value = "pending") {
+  const status = String(value || "pending").trim();
+  return academyReminderStatuses.has(status) ? status : "pending";
+}
+
+function normalizeAcademyReminderPriority(value = "normal") {
+  const priority = String(value || "normal").trim();
+  return academyReminderPriorities.has(priority) ? priority : "normal";
+}
+
+function createAcademyReminderId() {
+  return `reminder_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function isMissingAcademyRemindersTable(error) {
+  const message = String(error?.message ?? "").toLowerCase();
+  return message.includes("academy_reminders") || message.includes("schema cache");
+}
+
+function toAcademyReminderRow(reminder = {}) {
+  const reminderDate = reminder.reminderDate ?? reminder.date;
+  const title = String(reminder.title ?? "").trim();
+  if (!reminderDate) throw new Error("알림 날짜가 필요합니다.");
+  if (!title) throw new Error("알림 제목이 필요합니다.");
+  return {
+    reminder_id: reminder.reminderId || reminder.id || createAcademyReminderId(),
+    reminder_type: normalizeAcademyReminderType(reminder.reminderType ?? reminder.type),
+    title,
+    reminder_date: reminderDate,
+    reminder_time: compact(normalizeClockTime(reminder.reminderTime ?? reminder.time)),
+    student_id: compact(reminder.studentId),
+    lesson_id: compact(reminder.lessonId),
+    school_event_id: compact(reminder.schoolEventId),
+    content: compact(reminder.content ?? reminder.memo),
+    status: normalizeAcademyReminderStatus(reminder.status),
+    priority: normalizeAcademyReminderPriority(reminder.priority),
+    slack_notify: reminder.slackNotify !== false,
+    source: compact(reminder.source),
+    source_payload: reminder.sourcePayload ?? {},
+    completed_at: compact(reminder.completedAt),
+    updated_at: new Date().toISOString()
+  };
+}
+
+function fromAcademyReminderRow(row = {}) {
+  const reminderType = normalizeAcademyReminderType(row.reminder_type);
+  const reminderTime = normalizeClockTime(row.reminder_time);
+  return {
+    reminderId: row.reminder_id,
+    id: row.reminder_id,
+    reminderType,
+    type: reminderType,
+    title: row.title ?? "",
+    reminderDate: row.reminder_date ?? "",
+    date: row.reminder_date ?? "",
+    reminderTime,
+    time: reminderTime,
+    studentId: row.student_id ?? "",
+    lessonId: row.lesson_id ?? "",
+    schoolEventId: row.school_event_id ?? "",
+    content: row.content ?? "",
+    memo: row.content ?? "",
+    status: normalizeAcademyReminderStatus(row.status),
+    priority: normalizeAcademyReminderPriority(row.priority),
+    slackNotify: row.slack_notify !== false,
+    source: row.source ?? "",
+    sourcePayload: row.source_payload ?? {},
+    completedAt: row.completed_at ?? "",
+    createdAt: row.created_at ?? "",
+    updatedAt: row.updated_at ?? ""
+  };
+}
+
 function toAppStateRow(key, value) {
   return {
     state_key: key,
@@ -1372,6 +1464,52 @@ export async function deleteSchoolEvent(eventId) {
 
   await deleteRows("school_events", `school_event_id=eq.${encodeURIComponent(eventId)}`);
   return { source: databaseSource, schoolEventId: eventId };
+}
+
+export async function listAcademyReminders({ date = "", from = "", to = "", includeDone = false, status = "" } = {}) {
+  if (!isSupabaseConfigured()) {
+    return { source: fallbackSource, academyReminders: [] };
+  }
+
+  const filters = ["select=*"];
+  if (date) filters.push(`reminder_date=eq.${encodeURIComponent(date)}`);
+  if (from) filters.push(`reminder_date=gte.${encodeURIComponent(from)}`);
+  if (to) filters.push(`reminder_date=lte.${encodeURIComponent(to)}`);
+  if (status) {
+    filters.push(`status=eq.${encodeURIComponent(normalizeAcademyReminderStatus(status))}`);
+  } else if (!includeDone) {
+    filters.push("status=neq.done", "status=neq.canceled");
+  }
+  filters.push("order=reminder_date.asc,reminder_time.asc,title.asc");
+
+  try {
+    const rows = await listRows("academy_reminders", filters.join("&"), { requireServiceRole: true });
+    return { source: databaseSource, academyReminders: rows.map(fromAcademyReminderRow) };
+  } catch (error) {
+    if (isMissingAcademyRemindersTable(error)) {
+      return { source: "supabase_missing_table", academyReminders: [], missingTable: true };
+    }
+    throw error;
+  }
+}
+
+export async function upsertAcademyReminder(reminder) {
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, academyReminder: { ...reminder, reminderId: reminder.reminderId || reminder.id || createAcademyReminderId() } };
+  }
+
+  const [row] = await upsertRows("academy_reminders", [toAcademyReminderRow(reminder)]);
+  return { source: databaseSource, academyReminder: fromAcademyReminderRow(row) };
+}
+
+export async function deleteAcademyReminder(reminderId) {
+  if (!reminderId) throw new Error("삭제할 운영 알림 ID가 필요합니다.");
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, academyReminderId: reminderId };
+  }
+
+  await deleteRows("academy_reminders", `reminder_id=eq.${encodeURIComponent(reminderId)}`);
+  return { source: databaseSource, academyReminderId: reminderId };
 }
 
 export async function listAppState() {

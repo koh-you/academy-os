@@ -20,6 +20,15 @@ const consultationTypeOptions = [
   { value: "parent", label: "학부모 상담" }
 ];
 
+const studentReminderTypeOptions = [
+  { value: "student_consultation", label: "학생 상담 일정" },
+  { value: "parent_consultation", label: "학부모 상담 일정" },
+  { value: "student_intake", label: "신입생 일정" },
+  { value: "special_note", label: "특이사항 알림" },
+  { value: "parent_contact", label: "학부모 연락" },
+  { value: "custom", label: "운영 알림" }
+];
+
 const studentProfileFields = [
   "schoolName",
   "grade",
@@ -71,6 +80,21 @@ function createConsultationDraft(studentId) {
   };
 }
 
+function createStudentReminderDraft(studentId) {
+  return {
+    studentId,
+    reminderType: "student_consultation",
+    reminderDate: getTodayInputDate(),
+    reminderTime: "",
+    title: "",
+    content: "",
+    priority: "normal",
+    slackNotify: true,
+    status: "pending",
+    source: "student_profile"
+  };
+}
+
 function createStudentProfileDraft(student = {}) {
   return studentProfileFields.reduce(
     (draft, field) => ({
@@ -87,6 +111,20 @@ function hasStudentProfileDraftChanges(student = {}, draft = {}) {
 
 function consultationTypeLabel(value) {
   return consultationTypeOptions.find((option) => option.value === value)?.label ?? "상담";
+}
+
+function studentReminderTypeLabel(value) {
+  return studentReminderTypeOptions.find((option) => option.value === value)?.label ?? "운영 알림";
+}
+
+function studentReminderStatusLabel(value) {
+  return { pending: "대기", done: "완료", canceled: "취소" }[value] ?? "대기";
+}
+
+function formatStudentReminderDateTime(reminder = {}) {
+  return [reminder.reminderDate || reminder.date || "날짜 미입력", reminder.reminderTime || reminder.time || ""]
+    .filter(Boolean)
+    .join(" ");
 }
 
 function saveActionLabel(defaultLabel, saveState) {
@@ -149,6 +187,7 @@ function isWithdrawnStudent(student = {}) {
 }
 
 export function StudentManager({
+  academyReminders = [],
   academyTests,
   academyTestSaveState = "idle",
   scoreRecords,
@@ -161,9 +200,11 @@ export function StudentManager({
   ModalComponent,
   onAddStudent,
   onDeleteAcademyTest,
+  onDeleteAcademyReminder,
   onDeleteScore,
   onDeleteStudentConsultation,
   onSaveAcademyTest,
+  onSaveAcademyReminder,
   onSaveScore,
   onSaveStudentProfile,
   onSaveStudentConsultation,
@@ -189,6 +230,12 @@ export function StudentManager({
   const selectedConsultations = studentConsultations
     .filter((item) => item.studentId === selectedStudent?.studentId)
     .sort((a, b) => String(b.consultationDate ?? "").localeCompare(String(a.consultationDate ?? "")));
+  const selectedAcademyReminders = academyReminders
+    .filter((item) => item.studentId === selectedStudent?.studentId)
+    .sort((a, b) => (
+      String(a.reminderDate || a.date || "").localeCompare(String(b.reminderDate || b.date || "")) ||
+      String(a.reminderTime || a.time || "").localeCompare(String(b.reminderTime || b.time || ""))
+    ));
   const activeStudents = students.filter((student) => !isWithdrawnStudent(student));
   const withdrawnStudents = students.filter(isWithdrawnStudent);
   const visibleStudents =
@@ -554,13 +601,16 @@ export function StudentManager({
         >
           <StudentProfileModal
             academyTests={selectedAcademyTests}
+            academyReminders={selectedAcademyReminders}
             className={getStudentClassName(selectedStudent)}
             ModalComponent={ModalComponent}
             onClose={() => setSelectedStudentId("")}
             onDeleteAcademyTest={onDeleteAcademyTest}
+            onDeleteAcademyReminder={onDeleteAcademyReminder}
             onDeleteScore={onDeleteScore}
             onDeleteStudentConsultation={onDeleteStudentConsultation}
             onSaveAcademyTest={onSaveAcademyTest}
+            onSaveAcademyReminder={onSaveAcademyReminder}
             onSaveScore={onSaveScore}
             onSaveStudentProfile={onSaveStudentProfile}
             onSaveStudentConsultation={onSaveStudentConsultation}
@@ -633,15 +683,18 @@ export function StudentManager({
 
 function StudentProfileModal({
   academyTestSaveState = "idle",
+  academyReminders = [],
   academyTests,
   className,
   consultations = [],
   ModalComponent,
   onClose,
   onDeleteAcademyTest,
+  onDeleteAcademyReminder,
   onDeleteScore,
   onDeleteStudentConsultation,
   onSaveAcademyTest,
+  onSaveAcademyReminder,
   onSaveScore,
   onSaveStudentProfile,
   onSaveStudentConsultation,
@@ -661,6 +714,7 @@ function StudentProfileModal({
   const [newScoreDraft, setNewScoreDraft] = useState(() => createScoreDraft(student.studentId));
   const [newAcademyTestDraft, setNewAcademyTestDraft] = useState(() => createAcademyTestDraft(student.studentId));
   const [newConsultationDraft, setNewConsultationDraft] = useState(() => createConsultationDraft(student.studentId));
+  const [newReminderDraft, setNewReminderDraft] = useState(() => createStudentReminderDraft(student.studentId));
 
   useEffect(() => {
     setIsEditingProfile(false);
@@ -673,6 +727,7 @@ function StudentProfileModal({
     setNewScoreDraft(createScoreDraft(student.studentId));
     setNewAcademyTestDraft(createAcademyTestDraft(student.studentId));
     setNewConsultationDraft(createConsultationDraft(student.studentId));
+    setNewReminderDraft(createStudentReminderDraft(student.studentId));
   }, [student.studentId]);
 
   useEffect(() => {
@@ -729,6 +784,7 @@ function StudentProfileModal({
     setNewScoreDraft(createScoreDraft(student.studentId));
     setNewAcademyTestDraft(createAcademyTestDraft(student.studentId));
     setNewConsultationDraft(createConsultationDraft(student.studentId));
+    setNewReminderDraft(createStudentReminderDraft(student.studentId));
     setIsEditingProfile(false);
   }
 
@@ -780,6 +836,11 @@ function StudentProfileModal({
     setNewConsultationDraft((current) => ({ ...current, [field]: value }));
   }
 
+  function updateNewReminderDraft(field, value) {
+    setProfileActionError("");
+    setNewReminderDraft((current) => ({ ...current, [field]: value }));
+  }
+
   async function saveScoreDraft(score) {
     const draft = scoreDrafts[score.scoreRecordId] ?? score;
     await onSaveScore?.({ ...score, ...draft, studentId: student.studentId });
@@ -826,6 +887,12 @@ function StudentProfileModal({
     setNewConsultationDraft(createConsultationDraft(student.studentId));
   }
 
+  async function saveNewReminderDraft() {
+    if (!String(newReminderDraft.title || newReminderDraft.content || "").trim()) return;
+    await onSaveAcademyReminder?.({ ...newReminderDraft, studentId: student.studentId, source: "student_profile" });
+    setNewReminderDraft(createStudentReminderDraft(student.studentId));
+  }
+
   function renderProfileField(label, field, fallback = "-") {
     return (
       <div>
@@ -847,10 +914,13 @@ function StudentProfileModal({
   const defaultNewScoreDraft = createScoreDraft(student.studentId);
   const defaultNewAcademyTestDraft = createAcademyTestDraft(student.studentId);
   const defaultNewConsultationDraft = createConsultationDraft(student.studentId);
+  const defaultNewReminderDraft = createStudentReminderDraft(student.studentId);
   const hasNewScoreDraftChanges = JSON.stringify(newScoreDraft) !== JSON.stringify(defaultNewScoreDraft);
   const hasNewAcademyTestDraftChanges = JSON.stringify(newAcademyTestDraft) !== JSON.stringify(defaultNewAcademyTestDraft);
   const hasNewConsultationDraftChanges = JSON.stringify(newConsultationDraft) !== JSON.stringify(defaultNewConsultationDraft);
   const hasNewConsultationContent = Boolean(String(newConsultationDraft.content ?? "").trim());
+  const hasNewReminderDraftChanges = JSON.stringify(newReminderDraft) !== JSON.stringify(defaultNewReminderDraft);
+  const hasNewReminderContent = Boolean(String(newReminderDraft.title || newReminderDraft.content || "").trim());
   const isProfileDirty = hasStudentProfileDraftChanges(student, profileDraft);
   const hasRecordDraftChanges =
     Object.keys(scoreDrafts).length > 0 ||
@@ -858,7 +928,8 @@ function StudentProfileModal({
     Object.keys(consultationDrafts).length > 0 ||
     hasNewScoreDraftChanges ||
     hasNewAcademyTestDraftChanges ||
-    hasNewConsultationDraftChanges;
+    hasNewConsultationDraftChanges ||
+    hasNewReminderDraftChanges;
   const hasAnyEditingDraftChanges = isProfileDirty || hasRecordDraftChanges;
   const effectiveProfileSaveState =
     studentProfileSaveState === "saving" || studentProfileSaveState === "failed"
@@ -970,6 +1041,117 @@ function StudentProfileModal({
               <strong>{student.scheduleOverride || "기본 반 스케줄"}</strong>
             )}
           </div>
+        </div>
+
+        <div className="sectionHeader slim">
+          <div>
+            <h2>학생별 운영 알림</h2>
+            <p className="muted">상담 일정, 학부모 연락, 특이사항 알림을 대시보드 원본과 같이 봅니다.</p>
+          </div>
+          <span className="saveState save-idle inlineSaveStatus">09:00 슬랙 원본</span>
+        </div>
+        {isEditingProfile ? (
+          <section className="studentReminderComposer">
+            <div className="studentReminderControls">
+              <select
+                value={newReminderDraft.reminderType}
+                onChange={(event) => updateNewReminderDraft("reminderType", event.target.value)}
+              >
+                {studentReminderTypeOptions.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+              <input
+                type="date"
+                value={newReminderDraft.reminderDate}
+                onChange={(event) => updateNewReminderDraft("reminderDate", event.target.value)}
+              />
+              <input
+                type="time"
+                value={newReminderDraft.reminderTime}
+                onChange={(event) => updateNewReminderDraft("reminderTime", event.target.value)}
+              />
+              <select
+                value={newReminderDraft.priority}
+                onChange={(event) => updateNewReminderDraft("priority", event.target.value)}
+              >
+                <option value="normal">일반</option>
+                <option value="high">중요</option>
+                <option value="low">낮음</option>
+              </select>
+              <label className="studentReminderSlackToggle">
+                <input
+                  checked={newReminderDraft.slackNotify !== false}
+                  onChange={(event) => updateNewReminderDraft("slackNotify", event.target.checked)}
+                  type="checkbox"
+                />
+                09:00 슬랙 포함
+              </label>
+              <button
+                className="primaryButton"
+                disabled={!hasNewReminderContent}
+                onClick={() => runProfileAction("운영 알림 저장", saveNewReminderDraft)}
+                type="button"
+              >
+                운영 알림 저장
+              </button>
+            </div>
+            <input
+              value={newReminderDraft.title}
+              onChange={(event) => updateNewReminderDraft("title", event.target.value)}
+              placeholder="알림 제목"
+            />
+            <textarea
+              value={newReminderDraft.content}
+              onChange={(event) => updateNewReminderDraft("content", event.target.value)}
+              placeholder="예: 상담에서 확인할 내용, 학부모 요청, 다음 수업 전 확인할 특이사항"
+            />
+          </section>
+        ) : (
+          <div className="profileEditHint">수정 버튼을 누르면 이 학생의 운영 알림을 추가할 수 있습니다.</div>
+        )}
+        <div className="studentReminderList">
+          {academyReminders.length === 0 ? (
+            <div className="emptyState">이 학생에게 연결된 운영 알림이 없습니다.</div>
+          ) : (
+            academyReminders.map((reminder) => (
+              <article className={`studentReminderItem status-${reminder.status || "pending"}`} key={reminder.reminderId}>
+                <div className="studentConsultationMeta">
+                  <span className="studentConsultationDate">{formatStudentReminderDateTime(reminder)}</span>
+                  <span className="studentConsultationType">{studentReminderTypeLabel(reminder.reminderType ?? reminder.type)}</span>
+                  <span className="studentConsultationType">{studentReminderStatusLabel(reminder.status)}</span>
+                  {reminder.slackNotify === false ? <span className="studentConsultationType">슬랙 제외</span> : null}
+                </div>
+                <strong>{reminder.title || "운영 알림"}</strong>
+                <p className="studentConsultationContent">{reminder.content || reminder.memo || "내용 없음"}</p>
+                {isEditingProfile ? (
+                  <div className="studentProfileRowActions">
+                    <button
+                      className="softButton primarySoft"
+                      disabled={reminder.status === "done"}
+                      onClick={() =>
+                        runProfileAction("운영 알림 완료", () =>
+                          onSaveAcademyReminder?.({ ...reminder, status: "done", completedAt: new Date().toISOString() }) ?? Promise.resolve()
+                        )
+                      }
+                      type="button"
+                    >
+                      완료
+                    </button>
+                    <button
+                      className="dangerSoftButton"
+                      onClick={() =>
+                        runProfileAction("운영 알림 삭제", () => onDeleteAcademyReminder?.(reminder.reminderId) ?? Promise.resolve())
+                      }
+                      type="button"
+                    >
+                      삭제
+                    </button>
+                  </div>
+                ) : null}
+              </article>
+            ))
+          )}
         </div>
 
         <div className="sectionHeader slim">

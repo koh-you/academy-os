@@ -236,6 +236,35 @@ function formatScheduleItem(item) {
   return parts.filter(Boolean).join(" · ");
 }
 
+function reminderTypeLabel(type = "") {
+  return {
+    consultation: "상담",
+    student_consultation: "학생 상담",
+    parent_consultation: "학부모 상담",
+    student_intake: "신입생 일정",
+    special_note: "특이사항",
+    parent_contact: "학부모 연락",
+    custom: "운영 알림"
+  }[type] ?? "운영 알림";
+}
+
+function formatAcademyReminderItem(item) {
+  if (typeof item === "string") return item;
+
+  const priority = item.priority === "high" ? "중요" : "";
+  const parts = [
+    reminderTypeLabel(item.reminderType ?? item.type),
+    item.studentName,
+    item.title,
+    item.date ?? item.reminderDate,
+    item.time ?? item.reminderTime,
+    priority,
+    item.memo ?? item.content
+  ];
+
+  return parts.filter(Boolean).join(" · ");
+}
+
 function buildAttendanceBody({ attendanceStatus, checkedAt, checkInTime, checkOutTime, lessonName, lateMinutes, reason }) {
   const timeSource = attendanceStatus === "checkout" ? checkOutTime || checkedAt : checkInTime || checkedAt;
   const time = formatAttendanceTime(timeSource);
@@ -349,12 +378,14 @@ function buildStudentScheduleReminderBody({ scheduleType, scheduleTitle, schedul
   ]);
 }
 
-function buildSlackDailyScheduleSummary({ date, retests, supplements }) {
+function buildSlackDailyScheduleSummary({ date, reminders, retests, supplements }) {
+  const reminderItems = normalizeList(reminders).map(formatAcademyReminderItem);
   const retestItems = normalizeList(retests).map(formatScheduleItem);
   const supplementItems = normalizeList(supplements).map(formatScheduleItem);
 
   return joinMessageBlocks([
-    `[${ACADEMY_NAME}] ${date ?? "오늘"} 보충/재시험 일정`,
+    `[${ACADEMY_NAME}] ${date ?? "오늘"} 오늘 운영 일정`,
+    reminderItems.length ? messageBlock("📍 상담/운영 알림", reminderItems.map((item) => `- ${item}`).join("\n")) : "📍 상담/운영 알림\n없음",
     retestItems.length ? messageBlock("⭐ 재시험", retestItems.map((item) => `- ${item}`).join("\n")) : "⭐ 재시험\n없음",
     supplementItems.length ? messageBlock("📌 보충", supplementItems.map((item) => `- ${item}`).join("\n")) : "📌 보충\n없음"
   ]);
@@ -646,6 +677,7 @@ export async function sendSlackDailyScheduleSummary(payload) {
     payload.text ??
     buildSlackDailyScheduleSummary({
       date: payload.date,
+      reminders: payload.reminders,
       retests: payload.retests,
       supplements: payload.supplements
     });

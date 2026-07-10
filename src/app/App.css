@@ -698,6 +698,161 @@ button {
   color: var(--status-danger-text);
 }
 
+.academyReminderPanel {
+  display: grid;
+  gap: 16px;
+}
+
+.academyReminderForm {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 150px 170px minmax(180px, 1fr) 150px 110px 110px 150px;
+}
+
+.academyReminderForm textarea {
+  grid-column: 1 / -2;
+  min-height: 74px;
+  resize: vertical;
+}
+
+.academyReminderForm .primaryButton {
+  align-self: stretch;
+}
+
+.academyReminderSlackToggle,
+.studentReminderSlackToggle {
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #dbe5f4;
+  border-radius: 8px;
+  color: #334155;
+  display: flex;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 8px;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 10px;
+}
+
+.academyReminderColumns {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.miniSectionHeader {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.miniSectionHeader span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.academyReminderList,
+.studentReminderList {
+  display: grid;
+  gap: 8px;
+}
+
+.academyReminderItem,
+.studentReminderItem {
+  background: #ffffff;
+  border: 1px solid #dbeafe;
+  border-left: 4px solid #0f766e;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 12px;
+}
+
+.academyReminderItem.priority-high,
+.studentReminderItem.priority-high {
+  border-left-color: #dc2626;
+}
+
+.academyReminderItem.status-done,
+.studentReminderItem.status-done {
+  opacity: 0.72;
+}
+
+.academyReminderItemTop,
+.academyReminderMeta {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.academyReminderItemTop strong,
+.studentReminderItem strong {
+  color: #0f172a;
+}
+
+.academyReminderType,
+.academyReminderMeta span {
+  background: #f1f5f9;
+  border-radius: 999px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 8px;
+}
+
+.academyReminderDateTime {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.academyReminderItem p,
+.studentReminderItem p {
+  color: #334155;
+  margin: 4px 0 0;
+  white-space: pre-wrap;
+}
+
+.academyReminderActions,
+.studentProfileRowActions {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+}
+
+.lessonReminderPanel .academyReminderItem {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.studentReminderComposer {
+  background: #f8fbff;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.studentReminderControls {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 160px 150px 110px 95px 140px 130px;
+}
+
+.studentReminderComposer textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.schoolEventPill.event-reminder {
+  color: #ffffff;
+}
+
 .headerActions {
   align-items: center;
   display: flex;
@@ -13922,6 +14077,23 @@ body.attendanceOnlyBody {
 
   .examSundaySaveBar button {
     flex: 1;
+  }
+}
+
+@media (max-width: 900px) {
+  .academyReminderForm,
+  .academyReminderColumns,
+  .studentReminderControls {
+    grid-template-columns: 1fr;
+  }
+
+  .academyReminderForm textarea {
+    grid-column: 1;
+  }
+
+  .academyReminderItem,
+  .studentReminderItem {
+    grid-template-columns: 1fr;
   }
 }
 

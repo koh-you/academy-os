@@ -36,7 +36,7 @@ services:
   - type: cron
     name: koh-you-math-academy-os-slack-daily-schedule
     env: node
-    schedule: "0 1 * * *"
+    schedule: "0 0 * * *"
     buildCommand: npm install
     startCommand: npm run slack:daily-schedule
     envVars:

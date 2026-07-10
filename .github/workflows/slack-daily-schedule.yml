@@ -1,0 +1,27 @@
+name: Send daily Slack schedule
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: slack-daily-schedule
+  cancel-in-progress: false
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Send today schedule summary
+        env:
+          ACADEMY_API_URL: https://koh-you-math-academy-os-api.onrender.com
+        run: |
+          set -euo pipefail
+
+          curl --fail-with-body \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -d '{"notifyEmpty":true}' \
+            "${ACADEMY_API_URL%/}/api/notifications/slack-today-schedule"

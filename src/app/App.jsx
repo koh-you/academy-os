@@ -52,6 +52,7 @@ const storageKeys = {
   homeworks: "academy-os.homeworks.v7",
   reportSnapshots: "academy-os.reportSnapshots.v1",
   makeupTasks: "academy-os.makeupTasks.v1",
+  academyReminders: "academy-os.academyReminders.v1",
   notificationLogs: "academy-os.notificationLogs.v1",
   wrongProblems: "academy-os.wrongProblems.v1",
   problemBooks: "academy-os.problemBooks.v1",
@@ -901,6 +902,144 @@ function normalizePhoneNumber(value = "") {
 const today = getKoreaDateString();
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8787").replace(/\/$/, "");
 const appRuntimeSessionId = `runtime_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+
+const academyReminderTypeOptions = [
+  { value: "student_consultation", label: "학생 상담" },
+  { value: "parent_consultation", label: "학부모 상담" },
+  { value: "consultation", label: "상담 일정" },
+  { value: "student_intake", label: "신입생 일정" },
+  { value: "special_note", label: "특이사항" },
+  { value: "parent_contact", label: "학부모 연락" },
+  { value: "custom", label: "운영 알림" }
+];
+const academyReminderPriorityOptions = [
+  { value: "normal", label: "일반" },
+  { value: "high", label: "중요" },
+  { value: "low", label: "낮음" }
+];
+const academyReminderStatusLabels = {
+  pending: "대기",
+  done: "완료",
+  canceled: "취소"
+};
+
+function getAcademyReminderTypeLabel(type = "custom") {
+  return academyReminderTypeOptions.find((option) => option.value === type)?.label ?? "운영 알림";
+}
+
+function getAcademyReminderPriorityLabel(priority = "normal") {
+  return academyReminderPriorityOptions.find((option) => option.value === priority)?.label ?? "일반";
+}
+
+function normalizeAcademyReminderType(type = "custom") {
+  if (type === "student") return "student_consultation";
+  if (type === "parent") return "parent_consultation";
+  return academyReminderTypeOptions.some((option) => option.value === type) ? type : "custom";
+}
+
+function normalizeAcademyReminderStatus(status = "pending") {
+  return Object.prototype.hasOwnProperty.call(academyReminderStatusLabels, status) ? status : "pending";
+}
+
+function normalizeAcademyReminderPriority(priority = "normal") {
+  return academyReminderPriorityOptions.some((option) => option.value === priority) ? priority : "normal";
+}
+
+function createAcademyReminderDraft(date = today, studentId = "") {
+  return {
+    reminderId: "",
+    reminderType: "student_consultation",
+    title: "",
+    reminderDate: date || today,
+    reminderTime: "",
+    studentId,
+    lessonId: "",
+    schoolEventId: "",
+    content: "",
+    status: "pending",
+    priority: "normal",
+    slackNotify: true,
+    source: "manual"
+  };
+}
+
+function normalizeAcademyReminderDraft(reminder = {}) {
+  const reminderType = normalizeAcademyReminderType(reminder.reminderType ?? reminder.type);
+  const reminderDate = reminder.reminderDate || reminder.date || today;
+  const title = String(reminder.title ?? "").trim() || getAcademyReminderTypeLabel(reminderType);
+  const nowIso = new Date().toISOString();
+  return {
+    reminderId: reminder.reminderId || reminder.id || `reminder_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    reminderType,
+    title,
+    reminderDate,
+    date: reminderDate,
+    reminderTime: normalizeTimeInput(reminder.reminderTime ?? reminder.time ?? ""),
+    time: normalizeTimeInput(reminder.reminderTime ?? reminder.time ?? ""),
+    studentId: reminder.studentId ?? "",
+    lessonId: reminder.lessonId ?? "",
+    schoolEventId: reminder.schoolEventId ?? "",
+    content: String(reminder.content ?? reminder.memo ?? "").trim(),
+    memo: String(reminder.content ?? reminder.memo ?? "").trim(),
+    status: normalizeAcademyReminderStatus(reminder.status),
+    priority: normalizeAcademyReminderPriority(reminder.priority),
+    slackNotify: reminder.slackNotify !== false,
+    source: reminder.source || "manual",
+    sourcePayload: reminder.sourcePayload ?? {},
+    completedAt: reminder.completedAt ?? "",
+    createdAt: reminder.createdAt || nowIso,
+    updatedAt: nowIso
+  };
+}
+
+function sortAcademyReminders(reminders = []) {
+  return [...reminders].sort((left, right) => {
+    const leftKey = [left.reminderDate || left.date || "", left.reminderTime || left.time || "99:99", left.title || ""].join("|");
+    const rightKey = [right.reminderDate || right.date || "", right.reminderTime || right.time || "99:99", right.title || ""].join("|");
+    return leftKey.localeCompare(rightKey);
+  });
+}
+
+function getAcademyReminderStudentName(reminder = {}, students = []) {
+  return students.find((student) => student.studentId === reminder.studentId)?.name ?? "";
+}
+
+function formatAcademyReminderDateTime(reminder = {}) {
+  return [reminder.reminderDate || reminder.date || "날짜 미입력", reminder.reminderTime || reminder.time || ""]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function getAcademyReminderSummary(reminder = {}, students = []) {
+  const studentName = getAcademyReminderStudentName(reminder, students);
+  return [
+    getAcademyReminderTypeLabel(reminder.reminderType ?? reminder.type),
+    studentName,
+    reminder.title,
+    formatAcademyReminderDateTime(reminder)
+  ].filter(Boolean).join(" · ");
+}
+
+function getAcademyRemindersForDate(reminders = [], date = today, { includeDone = false } = {}) {
+  return sortAcademyReminders(reminders).filter((reminder) => {
+    if ((reminder.reminderDate || reminder.date) !== date) return false;
+    if (includeDone) return true;
+    return normalizeAcademyReminderStatus(reminder.status) === "pending";
+  });
+}
+
+function getAcademyRemindersForStudent(reminders = [], studentId = "") {
+  if (!studentId) return [];
+  return sortAcademyReminders(reminders).filter((reminder) => reminder.studentId === studentId);
+}
+
+function getAcademyRemindersForLesson(reminders = [], lesson = {}, lessonStudents = []) {
+  const lessonStudentIds = new Set(lessonStudents.map((student) => student.studentId));
+  return getAcademyRemindersForDate(reminders, lesson.date).filter((reminder) => (
+    reminder.lessonId === lesson.lessonId ||
+    (reminder.studentId && lessonStudentIds.has(reminder.studentId))
+  ));
+}
 
 function apiUrl(path) {
   return `${apiBaseUrl}${path}`;
@@ -3745,6 +3884,19 @@ function postMakeupTask(makeupTask) {
   return postJson("/api/makeup-tasks", { makeupTask });
 }
 
+function postAcademyReminder(academyReminder) {
+  return postJson("/api/academy-reminders", { academyReminder });
+}
+
+function deleteAcademyReminderFromApi(reminderId) {
+  return fetch(apiUrl(`/api/academy-reminders?id=${encodeURIComponent(reminderId)}`), { method: "DELETE" })
+    .then(async (response) => {
+      const result = await response.json();
+      if (!response.ok || !result.ok) throw new Error(result.error || "운영 알림 삭제 실패");
+      return result;
+    });
+}
+
 function postMakeupTasks(makeupTasks) {
   return postJson("/api/makeup-tasks/bulk", { makeupTasks });
 }
@@ -4198,6 +4350,7 @@ function formatMathExamEntryLabel(row = {}, entry = {}) {
 }
 
 function formatCalendarSummaryLabel(event = {}) {
+  if (event.type === "reminder") return event.title || "운영 알림";
   return [event.schoolName, event.grade, event.examSubject || event.subject]
     .filter(Boolean)
     .join(" ")
@@ -4256,11 +4409,15 @@ function getSchoolCalendarFilterGroup(event = {}) {
   if (event.type === "examPeriod") return "examPeriod";
   if (event.type === "mathExam") return "mathExam";
   if (event.type === "preExam") return "preExam";
+  if (event.type === "reminder") return "reminder";
   if (event.type === "vacation") return "vacation";
   return "custom";
 }
 
 function formatCalendarEventLabel(event = {}) {
+  if (event.type === "reminder") {
+    return event.title || "운영 알림";
+  }
   if (event.type === "mathExam") {
     return joinCalendarLabel(event.schoolName, event.title || event.examSubject || "수학시험");
   }
@@ -4268,6 +4425,31 @@ function formatCalendarEventLabel(event = {}) {
     return joinCalendarLabel(event.schoolName, event.title || "시험기간");
   }
   return joinCalendarLabel(event.schoolName, event.title || event.examSubject || "일정");
+}
+
+function createSchoolCalendarReminderEvents(reminders = [], students = []) {
+  return reminders.map((reminder) => {
+    const student = students.find((item) => item.studentId === reminder.studentId);
+    const title = [
+      getAcademyReminderTypeLabel(reminder.reminderType ?? reminder.type),
+      student?.name,
+      reminder.title
+    ].filter(Boolean).join(" · ");
+    return {
+      eventId: `reminder_${reminder.reminderId}`,
+      reminderId: reminder.reminderId,
+      readonly: true,
+      schoolName: student?.schoolName || "운영 알림",
+      grade: student?.grade || "",
+      title: title || "운영 알림",
+      type: "reminder",
+      date: reminder.reminderDate || reminder.date,
+      endDate: reminder.reminderDate || reminder.date,
+      memo: reminder.content || reminder.memo || "",
+      color: "#0f766e",
+      reminder
+    };
+  }).filter((event) => event.date);
 }
 
 function syncPrimaryMathExamDate(entries = []) {
@@ -5058,6 +5240,7 @@ export function App() {
   const [homeworks, setHomeworks] = useStoredState(storageKeys.homeworks, sampleData.homeworks);
   const [reportSnapshots, setReportSnapshots] = useStoredState(storageKeys.reportSnapshots, []);
   const [makeupTasks, setMakeupTasks] = useStoredState(storageKeys.makeupTasks, []);
+  const [academyReminders, setAcademyReminders] = useStoredState(storageKeys.academyReminders, []);
   const [notificationLogs, setNotificationLogs] = useStoredState(storageKeys.notificationLogs, []);
   const [notificationJobs, setNotificationJobs] = useState([]);
   const [notificationJobsStatus, setNotificationJobsStatus] = useState({ state: "idle", message: "" });
@@ -5241,6 +5424,7 @@ export function App() {
           recordsResponse,
           homeworksResponse,
           makeupTasksResponse,
+          academyRemindersResponse,
           examPrepRowsResponse,
           schoolEventsResponse,
           appStateResponse,
@@ -5253,6 +5437,7 @@ export function App() {
           fetch(apiUrl("/api/lesson-records")),
           fetch(apiUrl("/api/homeworks")),
           fetch(apiUrl("/api/makeup-tasks")),
+          fetch(apiUrl("/api/academy-reminders")),
           fetch(apiUrl("/api/exam-prep-rows")),
           fetch(apiUrl("/api/school-events")),
           fetch(apiUrl("/api/app-state")),
@@ -5266,6 +5451,7 @@ export function App() {
           recordsResult,
           homeworksResult,
           makeupTasksResult,
+          academyRemindersResult,
           examPrepRowsResult,
           schoolEventsResult,
           appStateResult,
@@ -5278,6 +5464,7 @@ export function App() {
           recordsResponse.json(),
           homeworksResponse.json(),
           makeupTasksResponse.json(),
+          academyRemindersResponse.json(),
           examPrepRowsResponse.json(),
           schoolEventsResponse.json(),
           appStateResponse.json(),
@@ -5312,6 +5499,9 @@ export function App() {
         }
         if (makeupTasksResult.ok && Array.isArray(makeupTasksResult.makeupTasks)) {
           setMakeupTasks(makeupTasksResult.makeupTasks);
+        }
+        if (academyRemindersResult.ok && Array.isArray(academyRemindersResult.academyReminders)) {
+          setAcademyReminders(sortAcademyReminders(academyRemindersResult.academyReminders));
         }
         if (examPrepRowsResult.ok && Array.isArray(examPrepRowsResult.examPrepRows)) {
           const normalizedRows = normalizeExamPrepRows(examPrepRowsResult.examPrepRows);
@@ -5373,6 +5563,7 @@ export function App() {
       isMounted = false;
     };
   }, [
+    setAcademyReminders,
     setClassTemplates,
     setAcademyTests,
     setAiSettings,
@@ -6621,6 +6812,24 @@ export function App() {
     return persistStudentConsultations(nextConsultations);
   }
 
+  async function handleSaveAcademyReminder(reminder) {
+    const nextReminder = normalizeAcademyReminderDraft(reminder);
+    const result = await postAcademyReminder(nextReminder);
+    const savedReminder = result.academyReminder ?? nextReminder;
+    setAcademyReminders((current) =>
+      sortAcademyReminders(upsertById(current, normalizeAcademyReminderDraft(savedReminder), "reminderId"))
+    );
+    return savedReminder;
+  }
+
+  async function handleDeleteAcademyReminder(reminderId) {
+    if (!reminderId) throw new Error("삭제할 운영 알림 ID가 필요합니다.");
+    if (typeof window !== "undefined" && !window.confirm("이 운영 알림을 삭제할까요?")) return null;
+    await deleteAcademyReminderFromApi(reminderId);
+    setAcademyReminders((current) => current.filter((item) => item.reminderId !== reminderId));
+    return reminderId;
+  }
+
   function persistExamPrepRows(rowsToPersist) {
     const changedRows = rowsToPersist.filter(Boolean);
     if (changedRows.length === 0) return Promise.resolve();
@@ -7639,6 +7848,7 @@ export function App() {
       <section className="mainPanel">
         {activeView === "lessons" ? (
           <TeacherLessonHubV2
+            academyReminders={academyReminders}
             academyTests={academyTests}
             aiSettings={aiSettings}
             allRecords={records}
@@ -7664,6 +7874,7 @@ export function App() {
             onCopyLesson={handleCopySelectedLesson}
             onDateSelect={handleDateSelect}
             onDeleteLesson={handleDeleteLesson}
+            onDeleteAcademyReminder={handleDeleteAcademyReminder}
             onDeleteSelectedLesson={handleDeleteSelectedLessonFromCalendar}
             onEditLesson={(lesson) => {
               setEditingLesson(lesson);
@@ -7684,6 +7895,7 @@ export function App() {
             onReconcileSolapiNotificationResults={handleReconcileSolapiNotificationResults}
             onSaveRecord={handleSaveRecord}
             onSaveLessonJournalDrafts={handleSaveLessonJournalDrafts}
+            onSaveAcademyReminder={handleSaveAcademyReminder}
             onApplyLessonNotificationPlan={handleApplyLessonNotificationPlan}
             onSendComment={handleSendLessonComment}
             onSelectLesson={setSelectedLessonId}
@@ -7737,6 +7949,7 @@ export function App() {
 
         {activeView === "students" ? (
           <StudentManager
+            academyReminders={academyReminders}
             academyTests={academyTests}
             academyTestSaveState={academyTestSaveState}
             ModalComponent={Modal}
@@ -7749,9 +7962,11 @@ export function App() {
             templates={classTemplates}
             onAddStudent={() => setIsStudentModalOpen(true)}
             onDeleteAcademyTest={handleDeleteAcademyTest}
+            onDeleteAcademyReminder={handleDeleteAcademyReminder}
             onDeleteScore={handleDeleteScoreRecord}
             onDeleteStudentConsultation={handleDeleteStudentConsultation}
             onSaveAcademyTest={handleSaveAcademyTest}
+            onSaveAcademyReminder={handleSaveAcademyReminder}
             onSaveScore={handleSaveScoreRecord}
             onSaveStudentProfile={handleSaveStudentProfile}
             onSaveStudentConsultation={handleSaveStudentConsultation}
@@ -7806,10 +8021,12 @@ export function App() {
 
         {activeView === "schoolCalendar" ? (
           <SchoolCalendarCenter
+            academyReminders={academyReminders}
             generatedLessonPlan={generatedLessonPlan}
             generatedLessonSaveStatus={generatedLessonSaveStatus}
             events={schoolEvents}
             rows={examPrepRows}
+            students={students}
             onApplyGeneratedLesson={handleApplyGeneratedLesson}
             onApplyGeneratedLessons={handleApplyGeneratedLessons}
             onClearGeneratedLessonManualOverride={clearGeneratedLessonManualOverride}
@@ -11969,7 +12186,225 @@ function RoleLoginScreen({ initialRole = "student", onLogin }) {
   );
 }
 
+function AcademyReminderList({
+  emptyText = "표시할 운영 알림이 없습니다.",
+  onDeleteAcademyReminder,
+  onSaveAcademyReminder,
+  reminders = [],
+  showActions = false,
+  students = []
+}) {
+  const [busyReminderId, setBusyReminderId] = useState("");
+
+  async function markDone(reminder) {
+    if (!reminder?.reminderId || busyReminderId) return;
+    setBusyReminderId(reminder.reminderId);
+    try {
+      await onSaveAcademyReminder?.({
+        ...reminder,
+        status: "done",
+        completedAt: new Date().toISOString()
+      });
+    } finally {
+      setBusyReminderId("");
+    }
+  }
+
+  async function removeReminder(reminder) {
+    if (!reminder?.reminderId || busyReminderId) return;
+    setBusyReminderId(reminder.reminderId);
+    try {
+      await onDeleteAcademyReminder?.(reminder.reminderId);
+    } finally {
+      setBusyReminderId("");
+    }
+  }
+
+  if (!reminders.length) {
+    return <div className="emptyState academyReminderEmpty">{emptyText}</div>;
+  }
+
+  return (
+    <div className="academyReminderList">
+      {sortAcademyReminders(reminders).map((reminder) => {
+        const status = normalizeAcademyReminderStatus(reminder.status);
+        const studentName = getAcademyReminderStudentName(reminder, students);
+        return (
+          <article className={`academyReminderItem status-${status} priority-${reminder.priority || "normal"}`} key={reminder.reminderId}>
+            <div className="academyReminderItemMain">
+              <div className="academyReminderItemTop">
+                <span className="academyReminderType">{getAcademyReminderTypeLabel(reminder.reminderType ?? reminder.type)}</span>
+                <strong>{reminder.title || "운영 알림"}</strong>
+                <span className="academyReminderDateTime">{formatAcademyReminderDateTime(reminder)}</span>
+              </div>
+              <p>{reminder.content || reminder.memo || "내용 없음"}</p>
+              <div className="academyReminderMeta">
+                {studentName ? <span>{studentName}</span> : null}
+                <span>{getAcademyReminderPriorityLabel(reminder.priority)}</span>
+                <span>{academyReminderStatusLabels[status]}</span>
+                <span>{reminder.slackNotify === false ? "슬랙 제외" : "09:00 슬랙 포함"}</span>
+              </div>
+            </div>
+            {showActions ? (
+              <div className="academyReminderActions">
+                <button
+                  className="softButton compact"
+                  disabled={status === "done" || busyReminderId === reminder.reminderId}
+                  onClick={() => markDone(reminder)}
+                  type="button"
+                >
+                  완료
+                </button>
+                <button
+                  className="dangerSoftButton compact"
+                  disabled={busyReminderId === reminder.reminderId}
+                  onClick={() => removeReminder(reminder)}
+                  type="button"
+                >
+                  삭제
+                </button>
+              </div>
+            ) : null}
+          </article>
+        );
+      })}
+    </div>
+  );
+}
+
+function AcademyReminderPanel({
+  reminders = [],
+  selectedDate = today,
+  students = [],
+  onDeleteAcademyReminder,
+  onSaveAcademyReminder
+}) {
+  const [draft, setDraft] = useState(() => createAcademyReminderDraft(selectedDate));
+  const [saveState, setSaveState] = useState("idle");
+  const [saveMessage, setSaveMessage] = useState("");
+  const activeStudents = students.filter(isActiveStudent);
+  const selectedDateReminders = getAcademyRemindersForDate(reminders, selectedDate, { includeDone: true });
+  const upcomingReminders = sortAcademyReminders(reminders)
+    .filter((reminder) => normalizeAcademyReminderStatus(reminder.status) === "pending")
+    .filter((reminder) => (reminder.reminderDate || reminder.date || "") >= today)
+    .slice(0, 8);
+
+  useEffect(() => {
+    setDraft((current) => ({ ...current, reminderDate: selectedDate || today, date: selectedDate || today }));
+  }, [selectedDate]);
+
+  function updateDraft(field, value) {
+    setSaveState("idle");
+    setSaveMessage("");
+    setDraft((current) => ({ ...current, [field]: value }));
+  }
+
+  async function saveDraft() {
+    setSaveState("saving");
+    setSaveMessage("운영 알림을 저장하는 중입니다.");
+    try {
+      const saved = await onSaveAcademyReminder?.(draft);
+      setDraft(createAcademyReminderDraft(saved?.reminderDate || selectedDate || today));
+      setSaveState("saved");
+      setSaveMessage("운영 알림 · 저장 완료");
+    } catch (error) {
+      setSaveState("failed");
+      setSaveMessage(`운영 알림 저장 실패 · ${error?.message || "알 수 없는 오류"}`);
+    }
+  }
+
+  return (
+    <section className="panel academyReminderPanel">
+      <div className="sectionHeader slim">
+        <div>
+          <p className="eyebrow">OPERATIONS SOURCE</p>
+          <h2>운영 알림 원본</h2>
+          <p className="muted">상담 일정, 신입생 일정, 특이사항 알림을 한 곳에 저장하고 각 화면과 09:00 슬랙 요약에서 읽습니다.</p>
+        </div>
+        <span className={`saveStateBadge ${saveState === "saved" ? "success" : saveState}`}>{saveMessage || "Supabase academy_reminders"}</span>
+      </div>
+      <div className="academyReminderForm">
+        <select value={draft.reminderType} onChange={(event) => updateDraft("reminderType", event.target.value)}>
+          {academyReminderTypeOptions.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+        </select>
+        <select value={draft.studentId} onChange={(event) => updateDraft("studentId", event.target.value)}>
+          <option value="">학생 선택 없음</option>
+          {activeStudents.map((student) => (
+            <option key={student.studentId} value={student.studentId}>{student.name}</option>
+          ))}
+        </select>
+        <input
+          value={draft.title}
+          onChange={(event) => updateDraft("title", event.target.value)}
+          placeholder="알림 제목"
+        />
+        <input type="date" value={draft.reminderDate} onChange={(event) => updateDraft("reminderDate", event.target.value)} />
+        <input type="time" value={draft.reminderTime} onChange={(event) => updateDraft("reminderTime", event.target.value)} />
+        <select value={draft.priority} onChange={(event) => updateDraft("priority", event.target.value)}>
+          {academyReminderPriorityOptions.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+        </select>
+        <label className="academyReminderSlackToggle">
+          <input
+            checked={draft.slackNotify !== false}
+            onChange={(event) => updateDraft("slackNotify", event.target.checked)}
+            type="checkbox"
+          />
+          09:00 슬랙 포함
+        </label>
+        <textarea
+          value={draft.content}
+          onChange={(event) => updateDraft("content", event.target.value)}
+          placeholder="내용을 입력하세요. 예: 상담 주제, 학부모 요청, 신입생 준비물, 당일 확인할 특이사항"
+          rows="3"
+        />
+        <button
+          className="primaryButton"
+          disabled={!String(draft.title || draft.content).trim() || saveState === "saving"}
+          onClick={saveDraft}
+          type="button"
+        >
+          운영 알림 저장
+        </button>
+      </div>
+      <div className="academyReminderColumns">
+        <section>
+          <div className="miniSectionHeader">
+            <strong>{selectedDate} 알림</strong>
+            <span>{selectedDateReminders.length}건</span>
+          </div>
+          <AcademyReminderList
+            onDeleteAcademyReminder={onDeleteAcademyReminder}
+            onSaveAcademyReminder={onSaveAcademyReminder}
+            reminders={selectedDateReminders}
+            showActions
+            students={students}
+          />
+        </section>
+        <section>
+          <div className="miniSectionHeader">
+            <strong>다가오는 알림</strong>
+            <span>{upcomingReminders.length}건</span>
+          </div>
+          <AcademyReminderList
+            emptyText="대기 중인 운영 알림이 없습니다."
+            onDeleteAcademyReminder={onDeleteAcademyReminder}
+            onSaveAcademyReminder={onSaveAcademyReminder}
+            reminders={upcomingReminders}
+            showActions
+            students={students}
+          />
+        </section>
+      </div>
+    </section>
+  );
+}
+
 function TeacherLessonHubV2({
+  academyReminders = [],
   academyTests = [],
   aiSettings,
   allRecords = [],
@@ -11996,6 +12431,7 @@ function TeacherLessonHubV2({
   onCopyLesson,
   onDateSelect,
   onDeleteLesson,
+  onDeleteAcademyReminder,
   onDeleteSelectedLesson,
   onEditLesson,
   onMoveDate,
@@ -12011,6 +12447,7 @@ function TeacherLessonHubV2({
   onApplyLessonNotificationPlan,
   onSaveRecord,
   onSaveLessonJournalDrafts,
+  onSaveAcademyReminder,
   onScheduleLessonNotificationsAt,
   onSendComment,
   onSelectLesson,
@@ -12153,6 +12590,7 @@ function TeacherLessonHubV2({
           )}
         >
           <LessonJournalDetail
+            academyReminders={academyReminders}
             academyTests={academyTests}
             aiSettings={aiSettings}
             allRecords={allRecords}
@@ -12232,6 +12670,14 @@ function TeacherLessonHubV2({
         </div>
         <button className="primaryButton" onClick={onAddLesson} type="button">+ 수업 등록</button>
       </header>
+
+      <AcademyReminderPanel
+        onDeleteAcademyReminder={onDeleteAcademyReminder}
+        onSaveAcademyReminder={onSaveAcademyReminder}
+        reminders={academyReminders}
+        selectedDate={selectedDate}
+        students={students}
+      />
 
       <section className="calendarShell teacherCalendarShell">
         <div className="calendarGrid teacherCalendarGrid">
@@ -12904,6 +13350,7 @@ function LessonJournalFallback({ error, lesson, onBack, onDeleteLesson, onEditLe
 }
 
 function LessonJournalDetail({
+  academyReminders = [],
   academyTests = [],
   aiSettings = defaultAiSettings,
   allRecords = [],
@@ -12979,6 +13426,7 @@ function LessonJournalDetail({
   const todayTwoPmIso = new Date(`${today}T14:00:00+09:00`).toISOString();
   const canScheduleTodayTwoPm = lesson.date < today && Boolean(onScheduleLessonNotificationsAt);
   const lessonStudents = getActiveLessonStudents(lesson, students);
+  const lessonAcademyReminders = getAcademyRemindersForLesson(academyReminders, lesson, lessonStudents);
   const lessonStudentIdSet = new Set(lessonStudents.map((student) => student.studentId));
   const scheduledParentCount = auditedLessonNotificationJobs.filter((job) => job.notificationType === "parent_comment" && job.status === "scheduled").length;
   const scheduledStudentCount = auditedLessonNotificationJobs.filter((job) => job.notificationType === "student_comment" && job.status === "scheduled").length;
@@ -13590,6 +14038,19 @@ function LessonJournalDetail({
         <button className="softButton" onClick={() => onEditLesson(lesson)} type="button">수업 수정</button>
         <button className="dangerButton" onClick={() => onDeleteLesson(lesson.lessonId)} type="button">수업 취소 처리</button>
       </header>
+
+      {lessonAcademyReminders.length > 0 ? (
+        <section className="panel lessonReminderPanel">
+          <div className="sectionHeader slim">
+            <div>
+              <strong>수업 관련 운영 알림</strong>
+              <p className="muted">대시보드 원본 알림 중 오늘 수업 학생과 연결된 항목입니다.</p>
+            </div>
+            <span className="countBadge">{lessonAcademyReminders.length}건</span>
+          </div>
+          <AcademyReminderList reminders={lessonAcademyReminders} students={students} />
+        </section>
+      ) : null}
 
       <section className="panel bulkHomeworkPanel">
         <label>
@@ -17162,6 +17623,7 @@ function SettingsCenter({
 }
 
 function SchoolCalendarCenter({
+  academyReminders = [],
   events,
   generatedLessonPlan = [],
   generatedLessonSaveStatus = { lessons: [], message: "", state: "idle" },
@@ -17176,7 +17638,8 @@ function SchoolCalendarCenter({
   onUnsuppressGeneratedLesson,
   onSyncPreExamLesson,
   onUpdateExamPrepRow,
-  onUpdateEvent
+  onUpdateEvent,
+  students = []
 }) {
   const [selectedMonth, setSelectedMonth] = useState(today);
   const [selectedDate, setSelectedDate] = useState(today);
@@ -17214,6 +17677,7 @@ function SchoolCalendarCenter({
     examPeriod: "시험기간",
     mathExam: "수학시험",
     preExam: "직전대비",
+    reminder: "운영 알림",
     vacation: "방학/개학",
     schoolEvent: "학교행사",
     custom: "일반"
@@ -17223,7 +17687,8 @@ function SchoolCalendarCenter({
     { id: "examPeriod", label: "내신기간" },
     { id: "mathExam", label: "수학시험날짜" },
     { id: "vacation", label: "방학/개학" },
-    { id: "preExam", label: "직전일정" }
+    { id: "preExam", label: "직전일정" },
+    { id: "reminder", label: "운영알림" }
   ];
   const eventColorOptions = [...schoolCalendarSchoolColorPalette, "#17213d"];
   const examEvents = buildExamCalendarEvents(rows);
@@ -17231,7 +17696,8 @@ function SchoolCalendarCenter({
     !String(event.eventId ?? "").startsWith("event_exam_") &&
     !isExamLinkedCalendarEvent(event)
   );
-  const academicEvents = [...examEvents, ...manualEvents].sort((a, b) => a.date.localeCompare(b.date));
+  const reminderEvents = createSchoolCalendarReminderEvents(academyReminders, students);
+  const academicEvents = [...examEvents, ...manualEvents, ...reminderEvents].sort((a, b) => a.date.localeCompare(b.date));
   const filteredEvents = academicEvents.filter(
     (event) => schoolFilter === "전체 학교" || event.schoolName === schoolFilter
   );
@@ -17412,6 +17878,7 @@ function SchoolCalendarCenter({
   }
 
   function updateAcademicEvent(event, field, value) {
+    if (event.readonly || event.reminderId) return;
     if (event.derived && event.examPrepId) {
       const sourceRow = rows.find((row) => row.examPrepId === event.examPrepId);
       if (event.type === "examPeriod" && ["date", "endDate"].includes(field)) {
@@ -17844,9 +18311,10 @@ function SchoolDateScheduleModal({
                 <span>{schoolEvents.length}건</span>
               </div>
               {schoolEvents.map((event) => {
-                const canEditDerivedDate = event.derived && ["examPeriod", "mathExam"].includes(event.type);
-                const canEditDerivedSubject = event.derived && event.type === "mathExam";
-                const canEditEventDetails = !event.derived;
+                const isReadonlyEvent = Boolean(event.readonly || event.reminderId);
+                const canEditDerivedDate = !isReadonlyEvent && event.derived && ["examPeriod", "mathExam"].includes(event.type);
+                const canEditDerivedSubject = !isReadonlyEvent && event.derived && event.type === "mathExam";
+                const canEditEventDetails = !event.derived && !isReadonlyEvent;
                 const eventColor = getSchoolCalendarEventColor(event);
                 const eventColorOptionsForDisplay = eventColorOptions.includes(eventColor)
                   ? eventColorOptions
@@ -17858,7 +18326,9 @@ function SchoolDateScheduleModal({
                         <strong>{formatCalendarSummaryLabel(event)}</strong>
                         <span>{event.type === "examPeriod" ? `${event.date} ~ ${event.endDate || event.date}` : event.date}</span>
                       </div>
-                      {event.derived ? (
+                      {isReadonlyEvent ? (
+                        <span>운영 알림 원본 · 대시보드에서 수정</span>
+                      ) : event.derived ? (
                         <span>시험관리 연동 · 수정 즉시 반영</span>
                       ) : (
                         <button className="dangerSoftButton" onClick={() => onDeleteEvent(event.eventId)} type="button">삭제</button>
@@ -17867,12 +18337,17 @@ function SchoolDateScheduleModal({
                     <div className="fieldGrid two">
                       <label>
                         {event.type === "examPeriod" ? "시작일" : "날짜"}
-                        <input disabled={event.derived && !canEditDerivedDate} type="date" value={event.date} onChange={(change) => onUpdateEvent(event, "date", change.target.value)} />
+                        <input disabled={!canEditEventDetails && !canEditDerivedDate} type="date" value={event.date} onChange={(change) => onUpdateEvent(event, "date", change.target.value)} />
                       </label>
                       {event.type === "examPeriod" ? (
                         <label>
                           종료일
-                          <input type="date" value={event.endDate ?? ""} onChange={(change) => onUpdateEvent(event, "endDate", change.target.value)} />
+                          <input disabled={!canEditEventDetails && !canEditDerivedDate} type="date" value={event.endDate ?? ""} onChange={(change) => onUpdateEvent(event, "endDate", change.target.value)} />
+                        </label>
+                      ) : event.type === "reminder" ? (
+                        <label>
+                          종류
+                          <input disabled value={eventTypeLabels[event.type] ?? "운영 알림"} />
                         </label>
                       ) : (
                         <label>

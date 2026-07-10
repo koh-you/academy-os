@@ -45,6 +45,7 @@ const envExamplePath = path.join(root, ".env.example");
 const packageJsonPath = path.join(root, "package.json");
 const renderYamlPath = path.join(root, "render.yaml");
 const dispatchWorkflowPath = path.join(root, ".github", "workflows", "dispatch-notifications.yml");
+const slackDailyScheduleWorkflowPath = path.join(root, ".github", "workflows", "slack-daily-schedule.yml");
 
 const app = fs.readFileSync(appPath, "utf8");
 const studentManagerSource = fs.existsSync(studentManagerPath) ? fs.readFileSync(studentManagerPath, "utf8") : "";
@@ -91,6 +92,7 @@ const envExample = fs.readFileSync(envExamplePath, "utf8");
 const packageJson = fs.readFileSync(packageJsonPath, "utf8");
 const renderYaml = fs.readFileSync(renderYamlPath, "utf8");
 const dispatchWorkflow = fs.existsSync(dispatchWorkflowPath) ? fs.readFileSync(dispatchWorkflowPath, "utf8") : "";
+const slackDailyScheduleWorkflow = fs.existsSync(slackDailyScheduleWorkflowPath) ? fs.readFileSync(slackDailyScheduleWorkflowPath, "utf8") : "";
 
 const checks = [];
 
@@ -367,6 +369,7 @@ check("92b manual makeup lessons open the regular lesson journal", hasAll(app, [
 check("92c lesson journal resolves students inside the selected lesson", hasAll(app, ["records={records}", "students={students}", "const lessonStudents = (lesson.studentIds ?? [])", ".map((studentId) => students.find((student) => student.studentId === studentId))", "lessonStudents.map((student) =>", "lessonStudents.length", "normalizeTimeInput(initialLesson?.startTime)"]));
 check("92d lesson journal render errors show a fallback instead of a blank modal", hasAll(lessonFrontendSource, ["class LessonJournalErrorBoundary extends Component", "componentDidCatch(error)", "function LessonJournalFallback", "수업일지를 여는 중 오류가 발생했습니다.", "fallback={(error) => (", "<LessonJournalErrorBoundary", "onDeleteLesson={onDeleteLesson}", "수업 취소 처리"]) && hasAll(css, [".lessonJournalFallback", "word-break: break-word"]));
 check("93 lesson edit avoids custom class template foreign key", hasAll(app, ["<option value=\"\">직접 입력 일정</option>", "const classTemplateId = formValues.classTemplateId && template ? template.classTemplateId : \"\"", "classTemplateId,"]) && !app.includes('classTemplateId: template?.classTemplateId ?? "custom"'));
+check("94 academy reminders persist as Supabase source and feed dashboard journal calendar Slack", hasAll(schema, ["create table if not exists academy_reminders", "reminder_type text not null", "slack_notify boolean not null default true", "idx_academy_reminders_date_status"]) && fs.existsSync(path.join(root, "supabase", "20260710_academy_reminders.sql")) && hasAll(coreDataRoute, ["function toAcademyReminderRow", "function fromAcademyReminderRow", "export async function listAcademyReminders", "export async function upsertAcademyReminder", "export async function deleteAcademyReminder"]) && hasAll(serverSource, ["requestUrl.pathname === \"/api/academy-reminders\"", "listAcademyReminders({ date, includeDone: false })", "slack_daily_summary_${date}", "already_sent", "sendSlackDailyScheduleSummary({ date, reminders, retests, supplements })"]) && hasAll(notificationRoute, ["function formatAcademyReminderItem", "상담/운영 알림", "reminders: payload.reminders"]) && hasAll(app, ["academyReminders: \"academy-os.academyReminders.v1\"", "AcademyReminderPanel", "운영 알림 원본", "onSaveAcademyReminder={handleSaveAcademyReminder}", "getAcademyRemindersForLesson", "수업 관련 운영 알림", "createSchoolCalendarReminderEvents", "event.type === \"reminder\"", "운영 알림 원본 · 대시보드에서 수정"]) && hasAll(studentManagerSource, ["학생별 운영 알림", "studentReminderTypeOptions", "createStudentReminderDraft", "onSaveAcademyReminder", "onDeleteAcademyReminder"]) && hasAll(renderYaml, ["koh-you-math-academy-os-slack-daily-schedule", "schedule: \"0 0 * * *\""]) && hasAll(slackDailyScheduleWorkflow, ["cron: \"0 0 * * *\"", "api/notifications/slack-today-schedule", "\"notifyEmpty\":true"]));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));

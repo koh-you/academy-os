@@ -7,6 +7,7 @@ import {
   deleteLessonsBefore,
   deleteDuplicateExamPrepRows,
   deleteExamPrepRow,
+  deleteAcademyReminder,
   deleteAllMakeupTasks,
   deleteMakeupTask,
   deleteNotificationJob,
@@ -14,6 +15,7 @@ import {
   deleteSchoolEvent,
   getCoreDataStatus,
   getNotificationJob,
+  listAcademyReminders,
   listAppState,
   listClassTemplates,
   listExamPrepRows,
@@ -32,6 +34,7 @@ import {
   claimNotificationJob,
   seedCoreData,
   upsertAppState,
+  upsertAcademyReminder,
   upsertHomework,
   upsertHomeworks,
   upsertExamPrepRow,
@@ -4313,12 +4316,28 @@ function formatTeacherScheduleItem(lesson = {}, students = []) {
   };
 }
 
-async function sendTodayTeacherScheduleSlack({ date = getKoreaDateString(), notifyEmpty = true } = {}) {
-  const [{ lessons }, { students }] = await Promise.all([
+function formatAcademyReminderSlackItem(reminder = {}, students = []) {
+  const student = students.find((item) => item.studentId === reminder.studentId);
+  return {
+    ...reminder,
+    date: reminder.reminderDate || reminder.date,
+    time: reminder.reminderTime || reminder.time,
+    memo: reminder.content || reminder.memo,
+    studentName: student?.name || reminder.studentName || "",
+    lessonName: reminder.title
+  };
+}
+
+async function sendTodayTeacherScheduleSlack({ date = getKoreaDateString(), force = false, notifyEmpty = true } = {}) {
+  const [{ lessons }, { students }, { academyReminders }] = await Promise.all([
     listLessons({ date }),
-    listStudents()
+    listStudents(),
+    listAcademyReminders({ date, includeDone: false })
   ]);
   const activeLessons = (lessons ?? []).filter((lesson) => !["canceled", "deleted"].includes(lesson.status));
+  const reminders = (academyReminders ?? [])
+    .filter((reminder) => reminder.slackNotify !== false)
+    .map((reminder) => formatAcademyReminderSlackItem(reminder, students ?? []));
   const supplements = activeLessons
     .filter(isSupplementLesson)
     .filter((lesson) => !isRetestLesson(lesson))
@@ -4327,12 +4346,30 @@ async function sendTodayTeacherScheduleSlack({ date = getKoreaDateString(), noti
     .filter(isRetestLesson)
     .map((lesson) => formatTeacherScheduleItem(lesson, students ?? []));
 
-  if (!notifyEmpty && supplements.length === 0 && retests.length === 0) {
-    return { skipped: true, date, supplements, retests };
+  if (!notifyEmpty && reminders.length === 0 && supplements.length === 0 && retests.length === 0) {
+    return { skipped: true, date, reminders, supplements, retests };
   }
 
-  const result = await sendSlackDailyScheduleSummary({ date, retests, supplements });
-  return { date, result, retests, supplements };
+  const notificationJobId = `slack_daily_summary_${date}`;
+  const existingJob = await getNotificationJob(notificationJobId);
+  if (!force && existingJob.notificationJob?.status === "sent") {
+    return { skipped: true, reason: "already_sent", date, reminders, retests, supplements };
+  }
+
+  const result = await sendSlackDailyScheduleSummary({ date, reminders, retests, supplements });
+  await upsertNotificationJob({
+    notificationJobId,
+    notificationType: "slack_daily_summary",
+    target: "slack",
+    recipient: "SLACK_WEBHOOK_URL",
+    scheduledAt: `${date}T00:00:00.000Z`,
+    payload: { date, reminders, retests, supplements },
+    previewBody: result.text,
+    status: result.dryRun ? "dry_run" : "sent",
+    provider: "slack",
+    result
+  });
+  return { date, result, reminders, retests, supplements };
 }
 
 const server = http.createServer(async (request, response) => {
@@ -4996,6 +5033,43 @@ const server = http.createServer(async (request, response) => {
     return;
   }
 
+  if (request.method === "GET" && requestUrl.pathname === "/api/academy-reminders") {
+    try {
+      const result = await listAcademyReminders({
+        date: requestUrl.searchParams.get("date") ?? "",
+        from: requestUrl.searchParams.get("from") ?? "",
+        to: requestUrl.searchParams.get("to") ?? "",
+        includeDone: requestUrl.searchParams.get("includeDone") === "true",
+        status: requestUrl.searchParams.get("status") ?? ""
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/academy-reminders") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await upsertAcademyReminder(payload.academyReminder ?? payload.reminder ?? payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "DELETE" && requestUrl.pathname === "/api/academy-reminders") {
+    try {
+      const result = await deleteAcademyReminder(requestUrl.searchParams.get("id"));
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
   if (request.method === "GET" && requestUrl.pathname === "/api/makeup-tasks") {
     try {
       const result = await listMakeupTasks();
@@ -5423,6 +5497,7 @@ const server = http.createServer(async (request, response) => {
       const payload = await readJsonBody(request);
       const result = await sendTodayTeacherScheduleSlack({
         date: payload.date || getKoreaDateString(payload.now || new Date()),
+        force: payload.force === true,
         notifyEmpty: payload.notifyEmpty !== false
       });
       sendJson(request, response, 200, { ok: true, provider: "slack", result });

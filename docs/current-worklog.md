@@ -12,6 +12,19 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-10 P1. 운영 알림 원본과 슬랙 오전 9시 요약
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청: 상담일정, 신입생 일정, 특이사항 일정 같은 운영 알림을 대시보드에 원본 데이터로 두고, 학생프로필/수업일지/학사일정이 같은 원본을 읽어 표시하며, 슬랙은 당일 오전 9시에 오게 한다.
+- 구현 방향: 운영 알림 원본을 Supabase `academy_reminders` 테이블로 분리했다. 대시보드/수업 허브에는 `운영 알림 원본` 입력·관리 패널을 두고, 학생프로필은 학생별 필터, 수업일지는 해당 수업 날짜/학생 필터, 학사일정은 읽기 전용 파생 일정으로 표시한다.
+- 구현 결과: `/api/academy-reminders` GET/POST/DELETE를 추가했다. 목록 조회는 운영 SQL 미적용 상태에서도 앱 전체 로딩이 깨지지 않도록 빈 배열로 처리하고, 저장/삭제는 SQL 적용 전 명확히 실패하게 뒀다.
+- 슬랙 변경: `/api/notifications/slack-today-schedule`가 당일 `academy_reminders`의 미완료/슬랙 포함 알림을 보충·재시험과 함께 요약한다. Render cron `koh-you-math-academy-os-slack-daily-schedule`을 `0 0 * * *`로 바꿔 KST 09:00에 맞췄고, GitHub Actions 백업 `.github/workflows/slack-daily-schedule.yml`도 같은 시간에 호출한다.
+- 중복 방지: 슬랙 실발송 후 `notification_jobs`에 `slack_daily_summary_YYYY-MM-DD` 기록을 남기고, 같은 날짜 재호출은 기본값으로 `already_sent` skip한다. 강제 재발송이 필요할 때만 API body에 `force: true`를 쓴다.
+- 저장 원천: 운영 알림 원본은 Supabase `academy_reminders`, 슬랙 발송 요약 이력은 `notification_jobs`, 기존 상담 기록 원본은 계속 `app_state.studentConsultations`다. 상담 기록은 과거 이력, 운영 알림은 앞으로 챙길 일정/확인사항으로 구분한다.
+- SQL 주의: 운영 사용 전 `supabase/20260710_academy_reminders.sql`을 Supabase SQL editor에서 사용자가 직접 적용해야 한다. SQL 미적용 상태에서는 대시보드 알림 저장이 실패하는 것이 정상이다.
+- 문서 갱신: `docs/reminder-notification-plan.md`를 `academy_reminders` 원본, 09:00 KST cron, 중복 방지 기준으로 수정했다.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과.
+
 ### 2026-07-10 P1. 수업메모 이전 메모 확인 버튼 크기 보정
 
 - 상태: 완료 - 구현/검증 완료
