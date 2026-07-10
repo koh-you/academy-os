@@ -12,6 +12,15 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-10 P1. 학생 프로필 런타임 오류 방지와 저장 액션 표시 보강
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 제보: 상담 저장 후에도 학생 프로필 화면에서 런타임 오류처럼 보이는 현상이 반복되고, 빈 상담 입력 영역의 버튼이 `저장 완료`로 보여 저장 여부가 혼란스러웠다.
+- 판단: 저장 원천 자체는 이전 작업 기준과 같다. 기본정보는 Supabase `students` row, 상담/성적/테스트는 Supabase `app_state.studentConsultations/scoreRecords/academyTests` key 저장이다. 다만 상담/성적/테스트 저장·삭제 버튼 일부가 실패를 모달 안에서 처리하지 않고 콘솔 오류 경로로 흘려보내 개발 화면에서는 런타임 오류처럼 보일 수 있었다.
+- 구현 방향: 학생 프로필 모달에 렌더 오류 보호막을 추가하고, 상담/성적/테스트 저장·삭제 버튼은 `runProfileAction`을 통해 실패를 `... 실패 · 원인` 형태로 모달 내부에 표시한다. 빈 새 상담/성적/테스트 초안은 버튼에 `저장 완료`가 남지 않게 기본 라벨로 되돌린다.
+- 저장 원천: 새 SQL 적용 없음. 저장 위치는 기본정보 `students`, 상담 `app_state.studentConsultations`, 성적 `app_state.scoreRecords`, 테스트 `app_state.academyTests`로 유지한다.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 260개 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-10 P1. 학생 프로필 기본정보 저장 실패 표시 보강
 
 - 상태: 완료 - 구현/검증 완료
