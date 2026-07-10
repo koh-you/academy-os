@@ -18,6 +18,7 @@
 - 사용자 요청: 대시보드의 `운영 알림 원본` 입력 패널 CSS가 과하게 커지고, Slack 연동 방법을 상세히 알고 싶었다.
 - 구현 결과: `academyReminderForm`의 그리드 폭을 다시 잡고, textarea 옆 저장 버튼이 textarea 높이만큼 커지지 않도록 버튼 높이를 고정했다. `09:00 슬랙 포함` 체크박스는 16px로 고정하고 줄바꿈을 막아 작은 토글 라벨처럼 보이게 했다.
 - 문서 결과: `docs/slack-integration-guide.md`를 추가했다. Slack Incoming Webhook 생성, Render 환경변수 `SLACK_WEBHOOK_URL`/`SLACK_DRY_RUN=false`, 상태 확인, 수동 테스트, KST 09:00 자동 발송, 문제 해결 순서를 정리했다.
+- 다음 계획: 실제 Slack 연동은 사용자가 2026-07-11에 이어서 진행한다. 다음 작업은 Slack 앱에서 Incoming Webhook URL을 만들고, 비밀값을 Git에 남기지 않은 채 Render API 환경변수에 `SLACK_WEBHOOK_URL`과 `SLACK_DRY_RUN=false`를 설정한 뒤 `/api/integrations/status`와 `/api/notifications/slack-today-schedule` 수동 테스트로 검수한다.
 - 저장 원천: 이번 작업은 CSS/문서/테스트 보강이다. 운영 알림 원본은 기존처럼 Supabase `academy_reminders`이며 새 SQL은 추가하지 않았다.
 - 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과.
 
