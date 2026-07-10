@@ -7923,6 +7923,7 @@ export function App() {
             academyTests={academyTests}
             aiSettings={aiSettings}
             allRecords={records}
+            attendanceSettings={attendanceSettings}
             generatedLessonControls={generatedLessonControls}
             integrationStatus={integrationStatus}
             lessonNotificationPlans={lessonNotificationPlans}
@@ -12479,6 +12480,7 @@ function TeacherLessonHubV2({
   academyTests = [],
   aiSettings,
   allRecords = [],
+  attendanceSettings = defaultAttendanceSettings,
   generatedLessonControls = defaultGeneratedLessonControls,
   integrationStatus,
   lessonNotificationPlans = {},

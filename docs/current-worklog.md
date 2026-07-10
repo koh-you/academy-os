@@ -12,6 +12,15 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-10 P1. 수업일지 빈 화면 원인 추가 수정
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 제보: 수업일지 클릭은 되지만 오류 창도 뜨지 않고 빈 화면이 나왔다.
+- 원인 판단: 이전 수정에서 `LessonJournalDetail`로는 `attendanceSettings`를 넘겼지만, 상위 `App -> TeacherLessonHubV2` 전달과 `TeacherLessonHubV2` props destructuring이 빠져 있었다. 그래서 수업일지를 열 때 error boundary 바깥에서 `attendanceSettings` ReferenceError가 나 빈 화면이 됐다.
+- 구현 결과: `App`의 `TeacherLessonHubV2` 호출에 `attendanceSettings={attendanceSettings}`를 추가하고, `TeacherLessonHubV2` props에는 `attendanceSettings = defaultAttendanceSettings` fallback을 추가했다. production scenario 테스트는 `App -> TeacherLessonHubV2 -> LessonJournalDetail` 세 단계 전달 경로를 정규식으로 확인하게 보강했다.
+- 저장 원천: 저장 로직 변경 없음. 출결 원본은 Supabase `lesson_student_records`, 지각 유예시간 설정은 기존 `app_state.attendanceSettings.lateGraceMinutes`다. 새 SQL 적용은 필요 없다.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 263개 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-10 P1. 수업일지 출결 설정 전달 누락 런타임 오류 수정
 
 - 상태: 완료 - 구현/검증 완료
