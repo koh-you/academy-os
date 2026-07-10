@@ -12665,6 +12665,7 @@ function TeacherLessonHubV2({
             academyTests={academyTests}
             aiSettings={aiSettings}
             allRecords={allRecords}
+            attendanceSettings={attendanceSettings}
             generatedLessonControls={generatedLessonControls}
             integrationStatus={integrationStatus}
             lessonNotificationPlan={lessonNotificationPlans[selectedLesson.lessonId] ?? { mode: "default" }}
@@ -13425,6 +13426,7 @@ function LessonJournalDetail({
   academyTests = [],
   aiSettings = defaultAiSettings,
   allRecords = [],
+  attendanceSettings = defaultAttendanceSettings,
   generatedLessonControls = defaultGeneratedLessonControls,
   integrationStatus,
   homeworks = [],
