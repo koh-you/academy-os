@@ -429,6 +429,72 @@ function buildInitialCommentDraft({ audience, existingComment, record, supplemen
   ]);
 }
 
+function getPreparationMemoCommentDraftUpdate({ existingComment, previousMemo, nextMemo, shouldInclude }) {
+  const commentText = compactDuplicateMessageBlocks(existingComment);
+  const previousText = normalizeMessageText(previousMemo);
+  const nextText = normalizeMessageText(nextMemo);
+  const commentKey = getMessageDedupeKey(commentText);
+  const previousKey = getMessageDedupeKey(previousText);
+  const nextKey = getMessageDedupeKey(nextText);
+
+  if (!shouldInclude || !nextText) {
+    if (previousKey && commentKey === previousKey) {
+      return { changed: true, value: "" };
+    }
+    return { changed: false, value: commentText };
+  }
+
+  if (!commentText) {
+    return { changed: true, value: nextText };
+  }
+
+  if (nextKey && commentKey === nextKey) {
+    return { changed: false, value: commentText };
+  }
+
+  if (previousKey && commentKey === previousKey) {
+    return { changed: true, value: nextText };
+  }
+
+  const commentBlocks = commentText.split(/\n\s*\n+/g).map(normalizeMessageText).filter(Boolean);
+  const hasPreviousBlock = Boolean(previousKey && commentBlocks.some((block) => getMessageDedupeKey(block) === previousKey));
+  if (!hasPreviousBlock) {
+    return { changed: false, value: commentText };
+  }
+
+  const nextBlocks = commentBlocks.map((block) => (
+    getMessageDedupeKey(block) === previousKey ? nextText : block
+  ));
+  return { changed: true, value: compactDuplicateMessageBlocks(nextBlocks.join("\n\n")) };
+}
+
+function getPreparationMemoCommentDraftUpdates(record = {}, nextMemo = "", options = {}) {
+  const parentDraft = getPreparationMemoCommentDraftUpdate({
+    existingComment: record.teacherComment,
+    previousMemo: record.preparationMemo,
+    nextMemo,
+    shouldInclude: Boolean(options.parentVisible)
+  });
+  const studentDraft = getPreparationMemoCommentDraftUpdate({
+    existingComment: record.studentComment,
+    previousMemo: record.preparationMemo,
+    nextMemo,
+    shouldInclude: Boolean(options.studentVisible)
+  });
+  const updates = {};
+
+  if (parentDraft.changed) {
+    updates.teacherComment = parentDraft.value;
+    updates.teacherCommentSendStatus = "";
+  }
+  if (studentDraft.changed) {
+    updates.studentComment = studentDraft.value;
+    updates.studentCommentSendStatus = "";
+  }
+
+  return updates;
+}
+
 const saveStateLabels = {
   idle: "저장 전",
   dirty: "변경됨",
@@ -14634,6 +14700,8 @@ function PreparationMemoModal({
     sourceDate: currentRecord.prepMemoCheckedSourceDate ?? "",
     sourceRecordId: currentRecord.prepMemoCheckedSourceRecordId ?? ""
   });
+  const [localSaveError, setLocalSaveError] = useState("");
+  const [isClosingAfterSave, setIsClosingAfterSave] = useState(false);
   const previousMemo = previousRecord?.preparationMemo?.trim() ?? "";
   const previousLessonLabel = previousLesson
     ? `${previousLesson.date} · ${previousLesson.className}`
@@ -14687,13 +14755,19 @@ function PreparationMemoModal({
   }
 
   function saveMemo() {
+    setLocalSaveError("");
     const draftSnapshot = createMemoSnapshot();
     if (draftSnapshot === lastSavedSnapshotRef.current && saveState !== "failed") {
       return Promise.resolve();
     }
     const nowIso = new Date().toISOString();
+    const commentDraftUpdates = getPreparationMemoCommentDraftUpdates(currentRecord, draftMemo, {
+      parentVisible: draftParentVisible,
+      studentVisible: draftStudentVisible
+    });
     return onSaveRecord(recordId, lesson, student, {
       ...currentRecord,
+      ...commentDraftUpdates,
       preparationMemo: draftMemo,
       prepMemoCheckedAt: localCheckedMemo.checkedAt || currentRecord.prepMemoCheckedAt || "",
       prepMemoCheckedSourceDate: localCheckedMemo.sourceDate || currentRecord.prepMemoCheckedSourceDate || "",
@@ -14704,6 +14778,7 @@ function PreparationMemoModal({
       updatedAt: nowIso
     }, { skipRelatedHomeworks: true, skipNotificationRefresh: true }).then((saved) => {
       if (saved !== false) lastSavedSnapshotRef.current = draftSnapshot;
+      if (saved === false) setLocalSaveError("수업메모 저장 실패 · 내용을 유지한 채 다시 저장해 주세요.");
       return saved;
     });
   }
@@ -14718,8 +14793,13 @@ function PreparationMemoModal({
     };
     setLocalCheckedMemo(checkedMemo);
     const draftSnapshot = createMemoSnapshot(checkedMemo);
+    const commentDraftUpdates = getPreparationMemoCommentDraftUpdates(currentRecord, draftMemo, {
+      parentVisible: draftParentVisible,
+      studentVisible: draftStudentVisible
+    });
     return onSaveRecord(recordId, lesson, student, {
       ...currentRecord,
+      ...commentDraftUpdates,
       preparationMemo: draftMemo,
       prepMemoCheckedAt: checkedMemo.checkedAt,
       prepMemoCheckedSourceDate: checkedMemo.sourceDate,
@@ -14743,8 +14823,16 @@ function PreparationMemoModal({
   }
 
   function closeMemo() {
-    saveMemo();
-    onClose();
+    if (isClosingAfterSave || saveState === "saving") return;
+    setIsClosingAfterSave(true);
+    saveMemo().then((saved) => {
+      setIsClosingAfterSave(false);
+      if (saved === false) return;
+      onClose();
+    }).catch((error) => {
+      setIsClosingAfterSave(false);
+      setLocalSaveError(`수업메모 저장 실패 · ${error.message}`);
+    });
   }
 
   return (
@@ -14837,12 +14925,13 @@ function PreparationMemoModal({
           <div className="prepMemoSaveBar">
             <button
               className={`journalSaveButton journalSave-${saveState}`}
-              disabled={saveState === "saving"}
+              disabled={saveState === "saving" || isClosingAfterSave}
               onClick={saveMemo}
               type="button"
             >
-              {getSaveButtonLabel(saveState)}
+              {isClosingAfterSave ? "저장 중" : getSaveButtonLabel(saveState)}
             </button>
+            {localSaveError ? <span className="saveState save-failed">{localSaveError}</span> : null}
           </div>
         </section>
       </div>

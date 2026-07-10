@@ -12,6 +12,16 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-10 P1. 수업메모 저장과 알림톡 초안 반영 보강
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 제보: 수업일지 수정, 수업메모 수정, Solapi 알림톡 수정 흐름을 함께 봤을 때 수업메모에 작성한 내용이 강사용 알림톡 초안에 반영되지 않고, 변경 중 저장되지 않은 채 날아가는 것처럼 보였다.
+- 원인 판단: 기존 중복 방지 로직은 `teacherComment`/`studentComment`가 이미 있으면 수업메모를 다시 합치지 않았다. 그래서 수업메모를 수정해도 비어 있지 않은 알림톡 초안에는 새 메모가 반영되지 않았다. 또한 수업메모 모달 닫기 시 `saveMemo()`를 기다리지 않고 바로 닫아 저장 완료 전 다른 화면으로 이동할 수 있었다.
+- 구현 결과: 수업메모 저장 시 `prepParentVisible`/`prepStudentVisible`이 켜진 대상에 대해 알림톡 초안이 비어 있거나 이전 수업메모 자동 seed 그대로인 경우에만 `teacherComment`/`studentComment`를 새 메모로 갱신한다. 선생님이 직접 고쳐 저장한 알림톡 문구는 자동으로 덮어쓰지 않는다.
+- 구현 결과: 수업메모 모달 닫기는 저장 완료를 기다린 뒤 닫히며, 저장 실패 시 모달을 닫지 않고 `수업메모 저장 실패` 메시지를 보여 입력값을 유지한다.
+- 저장 원천: 수업메모와 알림톡 초안 원본은 계속 Supabase `lesson_student_records`의 `preparation_memo`, `prep_parent_visible`, `prep_student_visible`, `teacher_comment`, `student_comment`다. Solapi 예약/취소/발송결과 갱신은 여전히 별도 버튼/API 흐름이며, 수업메모 저장이 Solapi를 자동 변경하지 않는다.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-10 P1. 운영 알림 패널 CSS 정리와 Slack 연동 가이드
 
 - 상태: 완료 - 구현/검증 완료
