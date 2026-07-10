@@ -59,6 +59,8 @@ SOLAPI_STUDENT_COMMENT_TEMPLATE_ID
 
 ## 강사 슬랙 오전 요약
 
+상세 설정 절차는 `docs/slack-integration-guide.md`를 따른다.
+
 백엔드 엔드포인트:
 
 ```text

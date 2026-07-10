@@ -704,19 +704,30 @@ button {
 }
 
 .academyReminderForm {
+  align-items: start;
   display: grid;
   gap: 10px;
-  grid-template-columns: 150px 170px minmax(180px, 1fr) 150px 110px 110px 150px;
+  grid-template-columns:
+    minmax(132px, 0.8fr)
+    minmax(152px, 0.9fr)
+    minmax(260px, 2fr)
+    142px
+    108px
+    112px
+    154px;
 }
 
 .academyReminderForm textarea {
   grid-column: 1 / -2;
-  min-height: 74px;
+  min-height: 82px;
   resize: vertical;
 }
 
 .academyReminderForm .primaryButton {
-  align-self: stretch;
+  align-self: start;
+  min-height: 46px;
+  padding: 0 18px;
+  width: 100%;
 }
 
 .academyReminderSlackToggle,
@@ -733,6 +744,17 @@ button {
   justify-content: center;
   min-height: 42px;
   padding: 0 10px;
+  white-space: nowrap;
+}
+
+.academyReminderSlackToggle input,
+.studentReminderSlackToggle input {
+  flex: 0 0 16px;
+  height: 16px;
+  margin: 0;
+  min-height: 0;
+  padding: 0;
+  width: 16px;
 }
 
 .academyReminderColumns {
