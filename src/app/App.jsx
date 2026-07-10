@@ -7103,6 +7103,7 @@ export function App() {
       attendanceStatus: nextAttendanceStatus,
       checkInTime: values.checkInTime,
       checkOutTime: values.checkOutTime,
+      date: lesson.date,
       lateMinutes: values.lateMinutes,
       lateGraceMinutes: attendanceSettings.lateGraceMinutes,
       lessonId: lesson.lessonId,

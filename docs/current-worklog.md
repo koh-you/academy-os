@@ -12,6 +12,16 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-10 P1. 미래 수업 결석 미리 저장 날짜 라우팅 수정
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 제보: 2026-07-22 수업에서 학생 결석을 미리 표시하려고 했지만 표시되지 않고, 출결 저장 후에도 저장내역이 바뀌지 않았다.
+- 원인 판단: 수업일지 수동 출결 저장 요청이 `lessonId`만 보내고 `lesson.date`를 보내지 않았다. 서버 `/api/attendance/check`는 날짜가 없으면 오늘 수업 목록에서 `lessonId`를 찾고, 못 찾으면 오늘의 가장 가까운 수업으로 fallback할 수 있어 미래 수업 row가 갱신되지 않는 구조였다.
+- 구현 결과: 수업일지 수동 출결 저장 payload에 `date: lesson.date`를 포함했다. 서버는 `attendanceDate` 기준으로 수업을 조회하고, `lessonId`가 명시된 요청에서 해당 날짜의 수업을 못 찾으면 다른 수업으로 fallback하지 않고 오류를 반환하게 했다.
+- 저장 원천: 결석/등원/지각 원본은 계속 Supabase `lesson_student_records`의 `attendance_status`, `attendance_reason`, `check_in_time`, `check_out_time`, `late_minutes`다. 새 SQL 적용은 필요 없다.
+- 알림톡 영향: `저장만`은 Solapi를 건드리지 않고 출결 row만 저장한다. `저장 후 출결 알림톡 발송`을 누른 경우에만 기존 출결 알림톡 흐름을 탄다. 수업일지 저장/알림톡 예약 로직은 변경하지 않았다.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 263개 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-10 P1. 수업일지 빈 화면 원인 추가 수정
 
 - 상태: 완료 - 구현/검증 완료

@@ -391,17 +391,18 @@ async function handleAttendanceCheck(payload = {}) {
   const now = new Date();
   const nowIso = now.toISOString();
   const todayString = getKoreaDateStringForAttendance(now);
+  const attendanceDate = String(payload.date || todayString);
   const currentTime = formatKoreaAttendanceTime(now);
   const previewOnly = payload.previewOnly === true;
   const sendAlimtalk = !previewOnly && payload.sendAlimtalk !== false;
 
   const [studentsResult, lessonsResult, recordsResult] = await Promise.all([
     listStudents(),
-    listLessons({ date: payload.date || todayString }),
+    listLessons({ date: attendanceDate }),
     listLessonStudentRecords()
   ]);
   const students = studentsResult.students ?? [];
-  const lessons = (lessonsResult.lessons ?? []).filter((lesson) => lesson.date === (payload.date || todayString) && lesson.status !== "canceled");
+  const lessons = (lessonsResult.lessons ?? []).filter((lesson) => lesson.date === attendanceDate && lesson.status !== "canceled");
   const records = recordsResult.records ?? [];
 
   let student = null;
@@ -423,10 +424,13 @@ async function handleAttendanceCheck(payload = {}) {
   let lesson = payload.lessonId
     ? lessons.find((item) => item.lessonId === payload.lessonId) ?? null
     : null;
+  if (payload.lessonId && !lesson) {
+    throw new Error(`${student.name} 학생의 ${attendanceDate} 수업을 찾지 못했습니다.`);
+  }
   if (!lesson) {
     lesson = selectAttendanceLessonForStudent(lessons, student, now);
   }
-  if (!lesson) throw new Error(`${student.name} 학생의 오늘 수업 일정이 없습니다.`);
+  if (!lesson) throw new Error(`${student.name} 학생의 ${attendanceDate === todayString ? "오늘" : attendanceDate} 수업 일정이 없습니다.`);
 
   if (!(lesson.studentIds ?? []).includes(student.studentId)) {
     lesson = {
