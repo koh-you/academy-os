@@ -12,6 +12,14 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-10 P1. 수업메모 이전 메모 확인 버튼 크기 보정
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 제보: 수업메모의 `확인 후 숨기기` 표시가 너무 크게 보여 모달 안에서 시각적으로 과했다.
+- 구현 방향: `prepMemoAcknowledgeLine` 안의 checkbox 크기와 pill padding을 축소해 작은 보조 액션처럼 보이게 한다. 기능/저장 원천은 변경하지 않는다.
+- 저장 원천: 기존처럼 `lesson_student_records.prep_memo_checked_at`, `prep_memo_checked_source_date`, `prep_memo_checked_source_record_id`다. 운영 SQL `supabase/20260708_prep_memo_acknowledgements.sql` 적용 필요 조건은 그대로다.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 260개 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-10 P1. 학생 프로필 런타임 오류 방지와 저장 액션 표시 보강
 
 - 상태: 완료 - 구현/검증 완료

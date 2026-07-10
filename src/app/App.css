@@ -8374,11 +8374,20 @@ textarea {
   font-size: 12px;
   font-weight: 900;
   gap: 6px;
-  padding: 7px 10px;
+  line-height: 1.2;
+  min-height: 0;
+  padding: 5px 9px;
+  width: fit-content;
 }
 
 .prepMemoAcknowledgeLine input {
+  appearance: auto;
   cursor: pointer;
+  flex: 0 0 auto;
+  height: 13px;
+  margin: 0;
+  min-height: 0;
+  width: 13px;
 }
 
 .prepMemoCheckedState {
