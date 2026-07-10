@@ -8798,6 +8798,17 @@ textarea {
   padding: 10px 12px;
 }
 
+.profileSaveError {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 8px;
+  color: #be123c;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.45;
+  padding: 10px 12px;
+}
+
 .profileSavedText {
   color: #15803d;
   font-size: 13px;

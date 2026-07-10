@@ -611,6 +611,7 @@ function StudentProfileModal({
 }) {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileDraft, setProfileDraft] = useState(() => createStudentProfileDraft(student));
+  const [profileSaveError, setProfileSaveError] = useState("");
   const [scoreDrafts, setScoreDrafts] = useState({});
   const [academyTestDrafts, setAcademyTestDrafts] = useState({});
   const [consultationDrafts, setConsultationDrafts] = useState({});
@@ -621,6 +622,7 @@ function StudentProfileModal({
   useEffect(() => {
     setIsEditingProfile(false);
     setProfileDraft(createStudentProfileDraft(student));
+    setProfileSaveError("");
     setScoreDrafts({});
     setAcademyTestDrafts({});
     setConsultationDrafts({});
@@ -636,22 +638,28 @@ function StudentProfileModal({
   }, [isEditingProfile, student]);
 
   function updateProfile(field, value) {
+    setProfileSaveError("");
     setProfileDraft((current) => ({ ...current, [field]: value }));
   }
 
   async function saveProfileDraft() {
-    await onSaveStudentProfile?.({ ...student, ...profileDraft, studentId: student.studentId });
-    const defaultScoreDraft = createScoreDraft(student.studentId);
-    const defaultAcademyTestDraft = createAcademyTestDraft(student.studentId);
-    const defaultConsultationDraft = createConsultationDraft(student.studentId);
-    const hasOtherDraftChanges =
-      Object.keys(scoreDrafts).length > 0 ||
-      Object.keys(academyTestDrafts).length > 0 ||
-      Object.keys(consultationDrafts).length > 0 ||
-      JSON.stringify(newScoreDraft) !== JSON.stringify(defaultScoreDraft) ||
-      JSON.stringify(newAcademyTestDraft) !== JSON.stringify(defaultAcademyTestDraft) ||
-      JSON.stringify(newConsultationDraft) !== JSON.stringify(defaultConsultationDraft);
-    if (!hasOtherDraftChanges) setIsEditingProfile(false);
+    setProfileSaveError("");
+    try {
+      await onSaveStudentProfile?.({ ...student, ...profileDraft, studentId: student.studentId });
+      const defaultScoreDraft = createScoreDraft(student.studentId);
+      const defaultAcademyTestDraft = createAcademyTestDraft(student.studentId);
+      const defaultConsultationDraft = createConsultationDraft(student.studentId);
+      const hasOtherDraftChanges =
+        Object.keys(scoreDrafts).length > 0 ||
+        Object.keys(academyTestDrafts).length > 0 ||
+        Object.keys(consultationDrafts).length > 0 ||
+        JSON.stringify(newScoreDraft) !== JSON.stringify(defaultScoreDraft) ||
+        JSON.stringify(newAcademyTestDraft) !== JSON.stringify(defaultAcademyTestDraft) ||
+        JSON.stringify(newConsultationDraft) !== JSON.stringify(defaultConsultationDraft);
+      if (!hasOtherDraftChanges) setIsEditingProfile(false);
+    } catch (error) {
+      setProfileSaveError(error?.message || "기본정보 저장에 실패했습니다.");
+    }
   }
 
   function cancelProfileEdit() {
@@ -799,7 +807,7 @@ function StudentProfileModal({
                 <button
                   className="saveButton"
                   disabled={!isProfileDirty || studentProfileSaveState === "saving"}
-                  onClick={() => saveProfileDraft().catch(console.error)}
+                  onClick={saveProfileDraft}
                   type="button"
                 >
                   기본정보 저장
@@ -810,6 +818,11 @@ function StudentProfileModal({
             )}
           </div>
         </div>
+        {profileSaveError ? (
+          <div className="profileSaveError" role="alert">
+            기본정보 저장 실패 · {profileSaveError}
+          </div>
+        ) : null}
         <div className="studentProfileGrid">
           {renderProfileField("학교", "schoolName")}
           {renderProfileField("학년", "grade")}
