@@ -23612,7 +23612,7 @@ function getKoreaDateTimeString(date = new Date()) {
 }
 
 function getLessonAlimtalkBaseScheduledDate(lesson, delayMinutes = 0) {
-  const baseTime = getDayKey(lesson?.date) === "sat" ? "18:30" : "22:30";
+  const baseTime = getDayKey(lesson?.date) === "sat" ? "16:30" : "22:30";
   const baseDate = new Date(`${lesson?.date ?? getKoreaDateString()}T${baseTime}:00+09:00`);
   baseDate.setMinutes(baseDate.getMinutes() + delayMinutes);
   return baseDate;
