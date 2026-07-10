@@ -12,6 +12,16 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-10 P1. 지난 Solapi 예약 발송결과 갱신 버튼 노출 보강
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 제보: 2026-07-10 수업 알림톡 예약 시각이 30분 이상 지난 뒤에도 수업일지 상단이 `예약 시간 지남`에 머물고 `솔라피 발송결과` 갱신을 할 수 없어 보였다.
+- 원인 판단: 운영 Solapi 원천 확인 결과 예시 그룹 `G4V20260710222532DL2PDWV6SBTHQTK`는 `status: COMPLETE`, 메시지는 `statusCode: 4000`/`수신 완료`였다. 즉 Solapi 발송은 끝났지만 OS `notification_jobs`가 `scheduled`로 남아 있었다. 화면 로직은 예약 시간이 지난 경우 새 예약 금지 상태인 `예약 시간 지남`을 먼저 반환했고, 발송결과 갱신 버튼은 로컬/audit job 목록에 과거 Solapi job이 잡힐 때만 노출되어 실제 갱신 가능 상태를 가렸다.
+- 구현 결과: 현재 수업 발송 계획의 예약 시각이 지나면 로컬 job 목록 로드 여부와 무관하게 `솔라피 발송결과` 버튼을 노출할 수 있게 했다. 지난 Solapi 예약이 있는 상태는 `예약 시간 지남` 대신 `발송결과 확인 필요` 배지로 표시한다.
+- 구현 결과: `발송결과 확인 필요` 상태에서는 `Solapi 예약 반영` 버튼이 새 예약 업데이트처럼 활성화되지 않게 막았다. 사용자는 새 예약 생성이 아니라 `/api/notification-jobs/reconcile-solapi`를 호출하는 `솔라피 발송결과` 버튼으로 OS 상태를 Solapi 원천에 맞춘다.
+- 저장 원천: Solapi 원천 groups/messages는 조회만 하며, 반영 결과는 Supabase `notification_jobs`와 `lesson_student_records.teacher_comment_send_status/student_comment_send_status`에 저장된다. 수업일지 저장이나 Solapi 새 예약 생성/취소는 실행하지 않는다.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 263개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-10 P1. 토요일 수업 알림톡 기본 예약 16:30 조정
 
 - 상태: 완료 - 구현/검증 완료

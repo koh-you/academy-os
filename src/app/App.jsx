@@ -13585,11 +13585,21 @@ function LessonJournalDetail({
   const journalHomeworkDraftCount = Object.keys(journalHomeworkDrafts).length;
   const hasJournalDraftChanges = journalRecordDraftCount > 0 || journalHomeworkDraftCount > 0;
   const activeLessonReservationJobs = lessonNotificationJobs.filter(isActiveNotificationJobStatus);
+  const currentPlanScheduledDate = notificationPlanMode === "manual"
+    ? lessonNotificationPlan?.scheduledAt
+    : notificationPlanMode === "none"
+      ? ""
+      : getLessonAlimtalkScheduledDate(lesson, notificationPlanMode === "delay30" ? 30 : 0, { allowPastFallback: false });
+  const isCurrentPlanResultRefreshDue = Boolean(
+    currentPlanScheduledDate &&
+    isNotificationSchedulePast(currentPlanScheduledDate)
+  );
   const solapiResultRefreshTargetJobs = auditedLessonNotificationJobs.filter((job) =>
     job.provider === "solapi" &&
+    getNotificationJobProviderReference(job) &&
     (job.status === "send_unconfirmed" || (job.status === "scheduled" && isNotificationSchedulePast(job.scheduledAt)))
   );
-  const hasSolapiResultRefreshTarget = solapiResultRefreshTargetJobs.length > 0;
+  const hasSolapiResultRefreshTarget = solapiResultRefreshTargetJobs.length > 0 || isCurrentPlanResultRefreshDue;
 
   function getExpectedSolapiReservationItems() {
     if (notificationPlanMode === "none") return [];
@@ -13645,6 +13655,13 @@ function LessonJournalDetail({
     if (notificationPlanMode !== "manual") {
       const delayMinutes = notificationPlanMode === "delay30" ? 30 : 0;
       if (isLessonAlimtalkScheduleExpired(lesson, delayMinutes)) {
+        if (hasSolapiResultRefreshTarget) {
+          return {
+            detail: "예약 시각이 지났습니다. 새 예약이 아니라 Solapi 발송결과를 OS 상태에 반영하세요.",
+            state: "resultDue",
+            label: "발송결과 확인 필요"
+          };
+        }
         return { detail: "기본 예약 시각이 지나 수동 예약으로 다시 잡아야 합니다.", state: "failed", label: "예약 시간 지남" };
       }
     }
@@ -13693,12 +13710,16 @@ function LessonJournalDetail({
     Boolean(onApplyLessonNotificationPlan) &&
     !hasJournalDraftChanges &&
     reservationApplyState !== "applying" &&
+    solapiReservationSyncStatus.state !== "resultDue" &&
     (solapiReservationSyncStatus.state === "needs" || reservationApplyState === "failed");
   const canRefreshSolapiResults =
     Boolean(onReconcileSolapiNotificationResults) &&
     !hasJournalDraftChanges &&
     solapiResultRefreshState !== "loading" &&
     hasSolapiResultRefreshTarget;
+  const solapiResultRefreshTitle = solapiResultRefreshTargetJobs.length
+    ? `Solapi 발송 원천 ${solapiResultRefreshTargetJobs.length}건을 OS 상태에 반영합니다.`
+    : "지난 예약의 Solapi 발송결과를 OS 상태에 반영합니다.";
 
   function startJournalEditMode() {
     setJournalEditMode(true);
@@ -14235,7 +14256,7 @@ function LessonJournalDetail({
             className={solapiResultRefreshState === "failed" ? "dangerSoftButton" : "schedulePlanButton check"}
             disabled={!canRefreshSolapiResults}
             onClick={refreshSolapiSendResults}
-            title={`Solapi 발송 원천 ${solapiResultRefreshTargetJobs.length}건을 OS 상태에 반영합니다.`}
+            title={solapiResultRefreshTitle}
             type="button"
           >
             {solapiResultRefreshState === "loading" ? "확인 중" : "솔라피 발송결과"}

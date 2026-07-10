@@ -3860,6 +3860,12 @@ button {
   color: #1d4ed8;
 }
 
+.solapiReservationSync.resultDue {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+  color: #3730a3;
+}
+
 .solapiReservationSync.synced {
   background: #ecfdf5;
   border-color: #86efac;
