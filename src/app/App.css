@@ -8823,6 +8823,22 @@ textarea {
   justify-content: flex-end;
 }
 
+.profileEditHint {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 10px 12px;
+}
+
+.profileSavedText {
+  color: #15803d;
+  font-size: 13px;
+  font-weight: 900;
+}
+
 .studentConsultationComposer,
 .studentConsultationItem {
   background: #f8fbff;
@@ -8878,6 +8894,21 @@ textarea {
   font-size: 12px;
   font-weight: 900;
   padding: 6px 9px;
+}
+
+.studentConsultationDate {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.studentConsultationContent {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.55;
+  margin: 0;
+  white-space: pre-wrap;
 }
 
 .studentProfileRowActions .softButton,

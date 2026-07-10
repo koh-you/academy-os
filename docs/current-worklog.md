@@ -12,6 +12,17 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-10 P1. 학생 프로필 자동저장 위험 제거 검토와 수정 모드 정리
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청: 학생 프로필에서 `자동저장 위험`이 실제로 사라졌는지 검토하고, 사라졌다면 경고 UI를 삭제한다. 추가 제보로 성적 기록/테스트가 `수정` 버튼과 무관하게 항상 수정 가능하고 저장 여부 확인이 어렵다는 문제를 함께 정리한다.
+- 검토 결과: 상담/성적/테스트는 이전 작업에서 key별 명시 저장으로 분리됐지만, 학생 기본정보는 아직 `onUpdateStudent` 입력마다 `/api/students` 저장을 호출하는 자동저장 경로가 남아 있었다. 따라서 경고를 단순 삭제하지 않고 기본정보 저장 흐름을 먼저 수정했다.
+- 구현 결과: 학생 프로필 기본정보를 `수정 -> local draft -> 기본정보 저장 -> Supabase students 저장 성공 -> 화면 원본 갱신` 흐름으로 바꿨다. local draft는 타이핑 중 임시 상태일 뿐 원본이 아니며, 최종 원본은 Supabase `students` row다.
+- 구현 결과: 프로필 안 기존 상담/성적/테스트 row는 읽기 모드에서 잠기고, `수정` 버튼을 누른 뒤에만 입력/수정/삭제 버튼이 열린다. 새 상담/성적/테스트 입력도 수정 모드 안에서 열리며, 저장 버튼 문구와 섹션 배지로 `저장 중/저장 완료/저장 실패`를 확인할 수 있다.
+- 제거 근거: 학생 프로필 모달에서 `AutosaveRiskNotice`와 `studentProfileAutosaveRisk`를 제거했다. 기본정보는 Supabase 명시 저장, 상담/성적/테스트는 `app_state.studentConsultations/scoreRecords/academyTests` key 명시 저장으로 분리되어 프로필 내부의 자동저장 위험 경고는 더 이상 표시하지 않는다.
+- 저장 원천: 기본정보는 Supabase `students`, 상담 기록은 Supabase `app_state.studentConsultations`, 성적 기록은 `app_state.scoreRecords`, 학원 테스트는 `app_state.academyTests`다. 새 SQL 적용은 필요 없다.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 260개 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-10 P1. 학생 프로필 상담 기록과 성적/테스트 명시 저장
 
 - 상태: 완료 - 구현/검증 완료
@@ -20,7 +31,7 @@
 - 구현 결과: 학생 프로필 모달에 `상담 기록` 섹션을 추가했다. 새 상담은 `학생 상담/학부모 상담`, 상담일, 상담 내용으로 입력하고 `상담 저장`을 눌러 확정한다. 기존 상담은 모달 안 local draft로 수정한 뒤 `변경 저장`을 눌러야 저장되며 삭제도 명시 버튼으로만 실행된다.
 - 구현 결과: 성적 기록과 테스트 성적 입력을 자동저장 표에서 local draft + `성적 저장`/`테스트 저장` 흐름으로 바꿨다. 기존 row 수정도 입력 즉시 저장하지 않고, 변경된 row에만 저장 버튼이 활성화된다.
 - 저장 원천: 학생 기본정보는 기존처럼 Supabase `students` row다. 상담 기록은 Supabase `app_state.studentConsultations`, 성적 기록은 `app_state.scoreRecords`, 학원 테스트는 `app_state.academyTests`가 원본이다. 새 SQL 적용은 필요 없다.
-- 남은 후속: 학생 기본정보 자체는 아직 입력마다 Supabase `students` row를 저장하는 구조다. 장기적으로 기본정보도 `수정 모드 -> local draft -> 저장 버튼 -> row 저장`으로 분리하면 학생 프로필의 붉은 자동저장 위험을 더 줄일 수 있다.
+- 후속 처리: 이 항목 당시에는 학생 기본정보가 아직 입력마다 Supabase `students` row를 저장했지만, 바로 위 `학생 프로필 자동저장 위험 제거 검토와 수정 모드 정리` 작업에서 기본정보도 `수정 모드 -> local draft -> 기본정보 저장 -> Supabase students 저장`으로 분리했다.
 - 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run build`, `npm run test:production` 259개 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
 
 ### 2026-07-09 P0. 자동저장 위험 붉은 UI 1차 부착

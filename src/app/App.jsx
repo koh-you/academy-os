@@ -5107,7 +5107,7 @@ export function App() {
   const [academyTestSaveState, setAcademyTestSaveState] = useState("idle");
   const [studentConsultationSaveState, setStudentConsultationSaveState] = useState("idle");
   const [examPrepRowSaveStates, setExamPrepRowSaveStates] = useState({});
-  const [studentAutoSaveStates, setStudentAutoSaveStates] = useState({});
+  const [studentProfileSaveStates, setStudentProfileSaveStates] = useState({});
   const [studentIntakeSaveStates, setStudentIntakeSaveStates] = useState({});
   const [reportModal, setReportModal] = useState(null);
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
@@ -5129,7 +5129,7 @@ export function App() {
   const academyTestSaveRequestRef = useRef(0);
   const studentConsultationSaveRequestRef = useRef(0);
   const examPrepRowSaveRequestRef = useRef({});
-  const studentAutoSaveRequestRef = useRef({});
+  const studentProfileSaveRequestRef = useRef({});
   const studentIntakeSaveRequestRef = useRef({});
   const isApplyingRemoteAppStateRef = useRef(false);
   const attendanceOnlyMode = isAttendanceOnlyRoute();
@@ -6448,30 +6448,10 @@ export function App() {
     postJson("/api/student-intake-applicants", { applicant: registeredApplicant }).catch((error) => console.error(error));
   }
 
-  function handleUpdateStudent(studentId, field, value, options = {}) {
-    const shouldPersist = options.persist !== false;
-    const currentStudent = students.find((student) => student.studentId === studentId);
-    const nextStudent = currentStudent ? { ...currentStudent, [field]: value } : null;
+  function handleUpdateStudent(studentId, field, value) {
     setStudents((current) =>
       current.map((student) => (student.studentId === studentId ? { ...student, [field]: value } : student))
     );
-    if (shouldPersist && nextStudent) {
-      const requestId = (studentAutoSaveRequestRef.current[studentId] ?? 0) + 1;
-      studentAutoSaveRequestRef.current[studentId] = requestId;
-      setStudentAutoSaveStates((current) => ({ ...current, [studentId]: "saving" }));
-      postJson("/api/students", { student: nextStudent })
-        .then(() => {
-          if (studentAutoSaveRequestRef.current[studentId] === requestId) {
-            setStudentAutoSaveStates((current) => ({ ...current, [studentId]: "saved" }));
-          }
-        })
-        .catch((error) => {
-          console.error(error);
-          if (studentAutoSaveRequestRef.current[studentId] === requestId) {
-            setStudentAutoSaveStates((current) => ({ ...current, [studentId]: "failed" }));
-          }
-        });
-    }
   }
 
   async function handleSaveStudent(studentId, options = {}) {
@@ -6483,6 +6463,31 @@ export function App() {
       options.previousClassTemplateId !== student.defaultClassTemplateId
     ) {
       reconcileStudentFutureClassLessons(student, options.previousClassTemplateId, today);
+    }
+  }
+
+  async function handleSaveStudentProfile(studentDraft) {
+    if (!studentDraft?.studentId) throw new Error("저장할 학생을 찾지 못했습니다.");
+    const currentStudent = students.find((item) => item.studentId === studentDraft.studentId);
+    const nextStudent = { ...(currentStudent ?? {}), ...studentDraft };
+    const requestId = (studentProfileSaveRequestRef.current[nextStudent.studentId] ?? 0) + 1;
+    studentProfileSaveRequestRef.current[nextStudent.studentId] = requestId;
+    setStudentProfileSaveStates((current) => ({ ...current, [nextStudent.studentId]: "saving" }));
+    try {
+      const result = await postJson("/api/students", { student: nextStudent });
+      const savedStudent = result.student ?? nextStudent;
+      setStudents((current) =>
+        current.map((student) => (student.studentId === savedStudent.studentId ? { ...student, ...savedStudent } : student))
+      );
+      if (studentProfileSaveRequestRef.current[nextStudent.studentId] === requestId) {
+        setStudentProfileSaveStates((current) => ({ ...current, [nextStudent.studentId]: "saved" }));
+      }
+    } catch (error) {
+      console.error(error);
+      if (studentProfileSaveRequestRef.current[nextStudent.studentId] === requestId) {
+        setStudentProfileSaveStates((current) => ({ ...current, [nextStudent.studentId]: "failed" }));
+      }
+      throw error;
     }
   }
 
@@ -7739,7 +7744,7 @@ export function App() {
             scoreRecordSaveState={scoreRecordSaveState}
             studentConsultationSaveState={studentConsultationSaveState}
             studentConsultations={studentConsultations}
-            studentAutoSaveStates={studentAutoSaveStates}
+            studentProfileSaveStates={studentProfileSaveStates}
             students={students}
             templates={classTemplates}
             onAddStudent={() => setIsStudentModalOpen(true)}
@@ -7748,6 +7753,7 @@ export function App() {
             onDeleteStudentConsultation={handleDeleteStudentConsultation}
             onSaveAcademyTest={handleSaveAcademyTest}
             onSaveScore={handleSaveScoreRecord}
+            onSaveStudentProfile={handleSaveStudentProfile}
             onSaveStudentConsultation={handleSaveStudentConsultation}
             onDeleteStudent={handleDeleteStudent}
             onSaveStudent={handleSaveStudent}

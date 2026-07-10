@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { AutosaveRiskNotice } from "../../shared/components/AutosaveRiskNotice.jsx";
 
 const withdrawalReasonOptions = [
   { value: "graduation", label: "졸업" },
@@ -21,13 +20,17 @@ const consultationTypeOptions = [
   { value: "parent", label: "학부모 상담" }
 ];
 
-const studentProfileAutosaveRisk = {
-  title: "학생 프로파일 저장 원천 분리",
-  storage: "기본정보는 Supabase students, 상담/성적/테스트는 Supabase app_state의 studentConsultations/scoreRecords/academyTests key",
-  risk: "기본정보는 아직 입력마다 학생 row를 저장합니다. 상담/성적/테스트는 모달 안 local draft를 저장 버튼으로 확정하고, 해당 key만 저장합니다.",
-  stopCondition: "저장 버튼을 눌렀는데 상태가 저장 실패로 남거나, 새로고침 후 상담/성적/테스트 중 일부가 사라지면 다음 학생 입력을 멈춥니다.",
-  recommendation: "상담/성적/테스트처럼 학생별 누적 데이터는 계속 key별 저장 또는 전용 row 테이블로 분리합니다."
-};
+const studentProfileFields = [
+  "schoolName",
+  "grade",
+  "textbook",
+  "studentPhone",
+  "parentPhone",
+  "loginId",
+  "pin",
+  "specialNote",
+  "scheduleOverride"
+];
 
 function getTodayInputDate() {
   const now = new Date();
@@ -68,8 +71,29 @@ function createConsultationDraft(studentId) {
   };
 }
 
+function createStudentProfileDraft(student = {}) {
+  return studentProfileFields.reduce(
+    (draft, field) => ({
+      ...draft,
+      [field]: student[field] ?? ""
+    }),
+    {}
+  );
+}
+
+function hasStudentProfileDraftChanges(student = {}, draft = {}) {
+  return studentProfileFields.some((field) => String(student[field] ?? "") !== String(draft[field] ?? ""));
+}
+
 function consultationTypeLabel(value) {
   return consultationTypeOptions.find((option) => option.value === value)?.label ?? "상담";
+}
+
+function saveActionLabel(defaultLabel, saveState) {
+  if (saveState === "saving") return "저장 중";
+  if (saveState === "failed") return "저장 실패";
+  if (saveState === "saved") return "저장 완료";
+  return defaultLabel;
 }
 
 function InlineSaveStatus({ label = "", saveState = "idle" }) {
@@ -96,7 +120,7 @@ export function StudentManager({
   scoreRecordSaveState = "idle",
   studentConsultationSaveState = "idle",
   studentConsultations = [],
-  studentAutoSaveStates = {},
+  studentProfileSaveStates = {},
   students,
   templates,
   ModalComponent,
@@ -106,6 +130,7 @@ export function StudentManager({
   onDeleteStudentConsultation,
   onSaveAcademyTest,
   onSaveScore,
+  onSaveStudentProfile,
   onSaveStudentConsultation,
   onDeleteStudent,
   onSaveStudent,
@@ -504,14 +529,14 @@ export function StudentManager({
           onDeleteStudentConsultation={onDeleteStudentConsultation}
           onSaveAcademyTest={onSaveAcademyTest}
           onSaveScore={onSaveScore}
+          onSaveStudentProfile={onSaveStudentProfile}
           onSaveStudentConsultation={onSaveStudentConsultation}
-          onUpdateStudent={onUpdateStudent}
           scores={selectedScores}
           academyTestSaveState={academyTestSaveState}
           scoreRecordSaveState={scoreRecordSaveState}
           studentConsultationSaveState={studentConsultationSaveState}
           consultations={selectedConsultations}
-          studentAutoSaveState={studentAutoSaveStates[selectedStudent.studentId] ?? "idle"}
+          studentProfileSaveState={studentProfileSaveStates[selectedStudent.studentId] ?? "idle"}
           student={selectedStudent}
         />
       ) : null}
@@ -584,15 +609,16 @@ function StudentProfileModal({
   onDeleteStudentConsultation,
   onSaveAcademyTest,
   onSaveScore,
+  onSaveStudentProfile,
   onSaveStudentConsultation,
-  onUpdateStudent,
   scores,
   scoreRecordSaveState = "idle",
   studentConsultationSaveState = "idle",
-  studentAutoSaveState = "idle",
+  studentProfileSaveState = "idle",
   student
 }) {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileDraft, setProfileDraft] = useState(() => createStudentProfileDraft(student));
   const [scoreDrafts, setScoreDrafts] = useState({});
   const [academyTestDrafts, setAcademyTestDrafts] = useState({});
   const [consultationDrafts, setConsultationDrafts] = useState({});
@@ -601,6 +627,8 @@ function StudentProfileModal({
   const [newConsultationDraft, setNewConsultationDraft] = useState(() => createConsultationDraft(student.studentId));
 
   useEffect(() => {
+    setIsEditingProfile(false);
+    setProfileDraft(createStudentProfileDraft(student));
     setScoreDrafts({});
     setAcademyTestDrafts({});
     setConsultationDrafts({});
@@ -609,8 +637,37 @@ function StudentProfileModal({
     setNewConsultationDraft(createConsultationDraft(student.studentId));
   }, [student.studentId]);
 
+  useEffect(() => {
+    if (!isEditingProfile) {
+      setProfileDraft(createStudentProfileDraft(student));
+    }
+  }, [isEditingProfile, student]);
+
   function updateProfile(field, value) {
-    onUpdateStudent(student.studentId, field, value);
+    setProfileDraft((current) => ({ ...current, [field]: value }));
+  }
+
+  async function saveProfileDraft() {
+    await onSaveStudentProfile?.({ ...student, ...profileDraft, studentId: student.studentId });
+    const defaultScoreDraft = createScoreDraft(student.studentId);
+    const defaultAcademyTestDraft = createAcademyTestDraft(student.studentId);
+    const defaultConsultationDraft = createConsultationDraft(student.studentId);
+    const hasOtherDraftChanges =
+      Object.keys(scoreDrafts).length > 0 ||
+      Object.keys(academyTestDrafts).length > 0 ||
+      Object.keys(consultationDrafts).length > 0 ||
+      JSON.stringify(newScoreDraft) !== JSON.stringify(defaultScoreDraft) ||
+      JSON.stringify(newAcademyTestDraft) !== JSON.stringify(defaultAcademyTestDraft) ||
+      JSON.stringify(newConsultationDraft) !== JSON.stringify(defaultConsultationDraft);
+    if (!hasOtherDraftChanges) setIsEditingProfile(false);
+  }
+
+  function cancelProfileEdit() {
+    setProfileDraft(createStudentProfileDraft(student));
+    setScoreDrafts({});
+    setAcademyTestDrafts({});
+    setConsultationDrafts({});
+    setIsEditingProfile(false);
   }
 
   function updateScoreDraft(scoreRecordId, field, value) {
@@ -696,7 +753,7 @@ function StudentProfileModal({
         {isEditingProfile ? (
           <input
             className="profileEditInput"
-            value={student[field] ?? ""}
+            value={profileDraft[field] ?? ""}
             onChange={(event) => updateProfile(field, event.target.value)}
             placeholder={fallback}
           />
@@ -706,6 +763,22 @@ function StudentProfileModal({
       </div>
     );
   }
+
+  const isProfileDirty = hasStudentProfileDraftChanges(student, profileDraft);
+  const hasRecordDraftChanges =
+    Object.keys(scoreDrafts).length > 0 ||
+    Object.keys(academyTestDrafts).length > 0 ||
+    Object.keys(consultationDrafts).length > 0 ||
+    JSON.stringify(newScoreDraft) !== JSON.stringify(createScoreDraft(student.studentId)) ||
+    JSON.stringify(newAcademyTestDraft) !== JSON.stringify(createAcademyTestDraft(student.studentId)) ||
+    JSON.stringify(newConsultationDraft) !== JSON.stringify(createConsultationDraft(student.studentId));
+  const hasAnyEditingDraftChanges = isProfileDirty || hasRecordDraftChanges;
+  const effectiveProfileSaveState =
+    studentProfileSaveState === "saving" || studentProfileSaveState === "failed"
+      ? studentProfileSaveState
+      : isProfileDirty
+        ? "dirty"
+        : studentProfileSaveState;
 
   return (
     <ModalComponent
@@ -721,21 +794,30 @@ function StudentProfileModal({
             <h2>{student.name}</h2>
           </div>
           <div className="profileHeaderActions">
-            {studentAutoSaveState !== "idle" ? <InlineSaveStatus label="기본정보" saveState={studentAutoSaveState} /> : null}
+            {effectiveProfileSaveState !== "idle" ? <InlineSaveStatus label="기본정보" saveState={effectiveProfileSaveState} /> : null}
             <InlineSaveStatus label="상담기록" saveState={studentConsultationSaveState} />
             <InlineSaveStatus label="성적" saveState={scoreRecordSaveState} />
             <InlineSaveStatus label="테스트" saveState={academyTestSaveState} />
             <span className="countBadge">{className}</span>
-            <button
-              className={isEditingProfile ? "saveButton" : "softButton"}
-              onClick={() => setIsEditingProfile((current) => !current)}
-              type="button"
-            >
-              {isEditingProfile ? "수정 완료" : "수정"}
-            </button>
+            {isEditingProfile ? (
+              <>
+                <button className="softButton" onClick={cancelProfileEdit} type="button">
+                  {hasAnyEditingDraftChanges ? "취소" : "수정 종료"}
+                </button>
+                <button
+                  className="saveButton"
+                  disabled={!isProfileDirty || studentProfileSaveState === "saving"}
+                  onClick={() => saveProfileDraft().catch(console.error)}
+                  type="button"
+                >
+                  기본정보 저장
+                </button>
+              </>
+            ) : (
+              <button className="softButton" onClick={() => setIsEditingProfile(true)} type="button">수정</button>
+            )}
           </div>
         </div>
-        <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...studentProfileAutosaveRisk} />
         <div className="studentProfileGrid">
           {renderProfileField("학교", "schoolName")}
           {renderProfileField("학년", "grade")}
@@ -748,13 +830,13 @@ function StudentProfileModal({
               <div className="profileLoginEdit">
                 <input
                   className="profileEditInput"
-                  value={student.loginId ?? ""}
+                  value={profileDraft.loginId ?? ""}
                   onChange={(event) => updateProfile("loginId", event.target.value)}
                   placeholder="아이디"
                 />
                 <input
                   className="profileEditInput"
-                  value={student.pin ?? ""}
+                  value={profileDraft.pin ?? ""}
                   onChange={(event) => updateProfile("pin", event.target.value)}
                   placeholder="PIN"
                 />
@@ -768,7 +850,7 @@ function StudentProfileModal({
             {isEditingProfile ? (
               <textarea
                 className="profileEditInput"
-                value={student.specialNote ?? ""}
+                value={profileDraft.specialNote ?? ""}
                 onChange={(event) => updateProfile("specialNote", event.target.value)}
                 placeholder="없음"
                 rows="2"
@@ -782,7 +864,7 @@ function StudentProfileModal({
             {isEditingProfile ? (
               <textarea
                 className="profileEditInput"
-                value={student.scheduleOverride ?? ""}
+                value={profileDraft.scheduleOverride ?? ""}
                 onChange={(event) => updateProfile("scheduleOverride", event.target.value)}
                 placeholder="기본 반 스케줄"
                 rows="2"
@@ -800,36 +882,40 @@ function StudentProfileModal({
           </div>
           <InlineSaveStatus label="상담기록" saveState={studentConsultationSaveState} />
         </div>
-        <section className="studentConsultationComposer">
-          <div className="studentConsultationControls">
-            <select
-              value={newConsultationDraft.consultationType}
-              onChange={(event) => setNewConsultationDraft((current) => ({ ...current, consultationType: event.target.value }))}
-            >
-              {consultationTypeOptions.map((option) => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-              ))}
-            </select>
-            <input
-              type="date"
-              value={newConsultationDraft.consultationDate}
-              onChange={(event) => setNewConsultationDraft((current) => ({ ...current, consultationDate: event.target.value }))}
+        {isEditingProfile ? (
+          <section className="studentConsultationComposer">
+            <div className="studentConsultationControls">
+              <select
+                value={newConsultationDraft.consultationType}
+                onChange={(event) => setNewConsultationDraft((current) => ({ ...current, consultationType: event.target.value }))}
+              >
+                {consultationTypeOptions.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+              <input
+                type="date"
+                value={newConsultationDraft.consultationDate}
+                onChange={(event) => setNewConsultationDraft((current) => ({ ...current, consultationDate: event.target.value }))}
+              />
+              <button
+                className="primaryButton"
+                disabled={!String(newConsultationDraft.content ?? "").trim() || studentConsultationSaveState === "saving"}
+                onClick={() => saveNewConsultationDraft().catch(console.error)}
+                type="button"
+              >
+                {saveActionLabel("상담 저장", studentConsultationSaveState)}
+              </button>
+            </div>
+            <textarea
+              value={newConsultationDraft.content}
+              onChange={(event) => setNewConsultationDraft((current) => ({ ...current, content: event.target.value }))}
+              placeholder="상담 내용을 정리하세요. 예: 학습 태도, 숙제 습관, 학부모 요청사항, 다음 조치"
             />
-            <button
-              className="primaryButton"
-              disabled={!String(newConsultationDraft.content ?? "").trim() || studentConsultationSaveState === "saving"}
-              onClick={() => saveNewConsultationDraft().catch(console.error)}
-              type="button"
-            >
-              상담 저장
-            </button>
-          </div>
-          <textarea
-            value={newConsultationDraft.content}
-            onChange={(event) => setNewConsultationDraft((current) => ({ ...current, content: event.target.value }))}
-            placeholder="상담 내용을 정리하세요. 예: 학습 태도, 숙제 습관, 학부모 요청사항, 다음 조치"
-          />
-        </section>
+          </section>
+        ) : (
+          <div className="profileEditHint">수정 버튼을 누르면 새 상담 입력과 기존 상담 수정이 열립니다.</div>
+        )}
         <div className="studentConsultationList">
           {consultations.length === 0 ? (
             <div className="emptyState">아직 상담 기록이 없습니다.</div>
@@ -840,38 +926,50 @@ function StudentProfileModal({
               return (
                 <article className={isDirty ? "studentConsultationItem dirty" : "studentConsultationItem"} key={item.consultationId}>
                   <div className="studentConsultationMeta">
-                    <select
-                      value={draft.consultationType}
-                      onChange={(event) => updateConsultationDraft(item.consultationId, "consultationType", event.target.value)}
-                    >
-                      {consultationTypeOptions.map((option) => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                    <input
-                      type="date"
-                      value={draft.consultationDate ?? ""}
-                      onChange={(event) => updateConsultationDraft(item.consultationId, "consultationDate", event.target.value)}
-                    />
+                    {isEditingProfile ? (
+                      <>
+                        <select
+                          value={draft.consultationType}
+                          onChange={(event) => updateConsultationDraft(item.consultationId, "consultationType", event.target.value)}
+                        >
+                          {consultationTypeOptions.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                        <input
+                          type="date"
+                          value={draft.consultationDate ?? ""}
+                          onChange={(event) => updateConsultationDraft(item.consultationId, "consultationDate", event.target.value)}
+                        />
+                      </>
+                    ) : (
+                      <span className="studentConsultationDate">{draft.consultationDate || "-"}</span>
+                    )}
                     <span className="studentConsultationType">{consultationTypeLabel(draft.consultationType)}</span>
                   </div>
-                  <textarea
-                    value={draft.content ?? ""}
-                    onChange={(event) => updateConsultationDraft(item.consultationId, "content", event.target.value)}
-                  />
-                  <div className="studentProfileRowActions">
-                    <button
-                      className="softButton primarySoft"
-                      disabled={!isDirty || studentConsultationSaveState === "saving"}
-                      onClick={() => saveConsultationDraft(item).catch(console.error)}
-                      type="button"
-                    >
-                      {isDirty ? "변경 저장" : "저장됨"}
-                    </button>
-                    <button className="dangerSoftButton" onClick={() => (onDeleteStudentConsultation?.(item.consultationId) ?? Promise.resolve()).catch(console.error)} type="button">
-                      삭제
-                    </button>
-                  </div>
+                  {isEditingProfile ? (
+                    <textarea
+                      value={draft.content ?? ""}
+                      onChange={(event) => updateConsultationDraft(item.consultationId, "content", event.target.value)}
+                    />
+                  ) : (
+                    <p className="studentConsultationContent">{draft.content || "내용 없음"}</p>
+                  )}
+                  {isEditingProfile ? (
+                    <div className="studentProfileRowActions">
+                      <button
+                        className="softButton primarySoft"
+                        disabled={!isDirty || studentConsultationSaveState === "saving"}
+                        onClick={() => saveConsultationDraft(item).catch(console.error)}
+                        type="button"
+                      >
+                        {isDirty ? saveActionLabel("변경 저장", studentConsultationSaveState) : "저장됨"}
+                      </button>
+                      <button className="dangerSoftButton" onClick={() => (onDeleteStudentConsultation?.(item.consultationId) ?? Promise.resolve()).catch(console.error)} type="button">
+                        삭제
+                      </button>
+                    </div>
+                  ) : null}
                 </article>
               );
             })
@@ -895,20 +993,24 @@ function StudentProfileModal({
             <span>메모</span>
             <span>관리</span>
           </div>
-          <div className="managementRow studentScoreRow draftRow">
-            <select value={newScoreDraft.examType} onChange={(event) => setNewScoreDraft((current) => ({ ...current, examType: event.target.value }))}>
-              <option value="내신">내신</option>
-              <option value="모의고사">모의고사</option>
-            </select>
-            <input type="date" value={newScoreDraft.examDate} onChange={(event) => setNewScoreDraft((current) => ({ ...current, examDate: event.target.value }))} />
-            <input value={newScoreDraft.subject} onChange={(event) => setNewScoreDraft((current) => ({ ...current, subject: event.target.value }))} />
-            <input value={newScoreDraft.score} onChange={(event) => setNewScoreDraft((current) => ({ ...current, score: event.target.value }))} placeholder="점수" />
-            <input value={newScoreDraft.grade} onChange={(event) => setNewScoreDraft((current) => ({ ...current, grade: event.target.value }))} placeholder="등급" />
-            <input value={newScoreDraft.note} onChange={(event) => setNewScoreDraft((current) => ({ ...current, note: event.target.value }))} placeholder="메모" />
-            <button className="primaryButton compact" disabled={scoreRecordSaveState === "saving"} onClick={() => saveNewScoreDraft().catch(console.error)} type="button">
-              성적 저장
-            </button>
-          </div>
+          {isEditingProfile ? (
+            <div className="managementRow studentScoreRow draftRow">
+              <select value={newScoreDraft.examType} onChange={(event) => setNewScoreDraft((current) => ({ ...current, examType: event.target.value }))}>
+                <option value="내신">내신</option>
+                <option value="모의고사">모의고사</option>
+              </select>
+              <input type="date" value={newScoreDraft.examDate} onChange={(event) => setNewScoreDraft((current) => ({ ...current, examDate: event.target.value }))} />
+              <input value={newScoreDraft.subject} onChange={(event) => setNewScoreDraft((current) => ({ ...current, subject: event.target.value }))} />
+              <input value={newScoreDraft.score} onChange={(event) => setNewScoreDraft((current) => ({ ...current, score: event.target.value }))} placeholder="점수" />
+              <input value={newScoreDraft.grade} onChange={(event) => setNewScoreDraft((current) => ({ ...current, grade: event.target.value }))} placeholder="등급" />
+              <input value={newScoreDraft.note} onChange={(event) => setNewScoreDraft((current) => ({ ...current, note: event.target.value }))} placeholder="메모" />
+              <button className="primaryButton compact" disabled={scoreRecordSaveState === "saving"} onClick={() => saveNewScoreDraft().catch(console.error)} type="button">
+                {saveActionLabel("성적 저장", scoreRecordSaveState)}
+              </button>
+            </div>
+          ) : (
+            <div className="profileEditHint">수정 버튼을 누르면 성적 입력과 기존 성적 수정이 열립니다.</div>
+          )}
           {scores.length === 0 ? (
             <div className="emptyState">아직 저장된 성적이 없습니다.</div>
           ) : (
@@ -917,23 +1019,37 @@ function StudentProfileModal({
               const isDirty = Boolean(scoreDrafts[item.scoreRecordId]);
               return (
                 <div className={isDirty ? "managementRow studentScoreRow dirty" : "managementRow studentScoreRow"} key={item.scoreRecordId}>
-                  <select value={draft.examType} onChange={(event) => updateScoreDraft(item.scoreRecordId, "examType", event.target.value)}>
-                    <option value="내신">내신</option>
-                    <option value="모의고사">모의고사</option>
-                  </select>
-                  <input type="date" value={draft.examDate ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "examDate", event.target.value)} />
-                  <input value={draft.subject ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "subject", event.target.value)} />
-                  <input value={draft.score ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "score", event.target.value)} />
-                  <input value={draft.grade ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "grade", event.target.value)} />
-                  <input value={draft.note ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "note", event.target.value)} />
-                  <div className="studentProfileRowActions">
-                    <button className="softButton primarySoft" disabled={!isDirty || scoreRecordSaveState === "saving"} onClick={() => saveScoreDraft(item).catch(console.error)} type="button">
-                      {isDirty ? "저장" : "저장됨"}
-                    </button>
-                    <button className="dangerSoftButton" onClick={() => (onDeleteScore?.(item.scoreRecordId) ?? Promise.resolve()).catch(console.error)} type="button">
-                      삭제
-                    </button>
-                  </div>
+                  {isEditingProfile ? (
+                    <>
+                      <select value={draft.examType} onChange={(event) => updateScoreDraft(item.scoreRecordId, "examType", event.target.value)}>
+                        <option value="내신">내신</option>
+                        <option value="모의고사">모의고사</option>
+                      </select>
+                      <input type="date" value={draft.examDate ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "examDate", event.target.value)} />
+                      <input value={draft.subject ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "subject", event.target.value)} />
+                      <input value={draft.score ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "score", event.target.value)} />
+                      <input value={draft.grade ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "grade", event.target.value)} />
+                      <input value={draft.note ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "note", event.target.value)} />
+                      <div className="studentProfileRowActions">
+                        <button className="softButton primarySoft" disabled={!isDirty || scoreRecordSaveState === "saving"} onClick={() => saveScoreDraft(item).catch(console.error)} type="button">
+                          {isDirty ? saveActionLabel("변경 저장", scoreRecordSaveState) : "저장됨"}
+                        </button>
+                        <button className="dangerSoftButton" onClick={() => (onDeleteScore?.(item.scoreRecordId) ?? Promise.resolve()).catch(console.error)} type="button">
+                          삭제
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <span>{draft.examType || "-"}</span>
+                      <span>{draft.examDate || "-"}</span>
+                      <span>{draft.subject || "-"}</span>
+                      <span>{draft.score || "-"}</span>
+                      <span>{draft.grade || "-"}</span>
+                      <span>{draft.note || "-"}</span>
+                      <span className="profileSavedText">저장됨</span>
+                    </>
+                  )}
                 </div>
               );
             })
@@ -957,17 +1073,21 @@ function StudentProfileModal({
             <span>메모</span>
             <span>관리</span>
           </div>
-          <div className="managementRow academyTestProfileRow draftRow">
-            <input type="date" value={newAcademyTestDraft.testDate} onChange={(event) => setNewAcademyTestDraft((current) => ({ ...current, testDate: event.target.value }))} />
-            <input value={newAcademyTestDraft.title} onChange={(event) => setNewAcademyTestDraft((current) => ({ ...current, title: event.target.value }))} />
-            <input value={newAcademyTestDraft.scope} onChange={(event) => setNewAcademyTestDraft((current) => ({ ...current, scope: event.target.value }))} placeholder="범위" />
-            <input value={newAcademyTestDraft.score} onChange={(event) => setNewAcademyTestDraft((current) => ({ ...current, score: event.target.value }))} placeholder="점수" />
-            <input value={newAcademyTestDraft.averageScore} onChange={(event) => setNewAcademyTestDraft((current) => ({ ...current, averageScore: event.target.value }))} placeholder="평균" />
-            <input value={newAcademyTestDraft.note} onChange={(event) => setNewAcademyTestDraft((current) => ({ ...current, note: event.target.value }))} placeholder="메모" />
-            <button className="primaryButton compact" disabled={academyTestSaveState === "saving"} onClick={() => saveNewAcademyTestDraft().catch(console.error)} type="button">
-              테스트 저장
-            </button>
-          </div>
+          {isEditingProfile ? (
+            <div className="managementRow academyTestProfileRow draftRow">
+              <input type="date" value={newAcademyTestDraft.testDate} onChange={(event) => setNewAcademyTestDraft((current) => ({ ...current, testDate: event.target.value }))} />
+              <input value={newAcademyTestDraft.title} onChange={(event) => setNewAcademyTestDraft((current) => ({ ...current, title: event.target.value }))} />
+              <input value={newAcademyTestDraft.scope} onChange={(event) => setNewAcademyTestDraft((current) => ({ ...current, scope: event.target.value }))} placeholder="범위" />
+              <input value={newAcademyTestDraft.score} onChange={(event) => setNewAcademyTestDraft((current) => ({ ...current, score: event.target.value }))} placeholder="점수" />
+              <input value={newAcademyTestDraft.averageScore} onChange={(event) => setNewAcademyTestDraft((current) => ({ ...current, averageScore: event.target.value }))} placeholder="평균" />
+              <input value={newAcademyTestDraft.note} onChange={(event) => setNewAcademyTestDraft((current) => ({ ...current, note: event.target.value }))} placeholder="메모" />
+              <button className="primaryButton compact" disabled={academyTestSaveState === "saving"} onClick={() => saveNewAcademyTestDraft().catch(console.error)} type="button">
+                {saveActionLabel("테스트 저장", academyTestSaveState)}
+              </button>
+            </div>
+          ) : (
+            <div className="profileEditHint">수정 버튼을 누르면 테스트 입력과 기존 테스트 수정이 열립니다.</div>
+          )}
           {academyTests.length === 0 ? (
             <div className="emptyState">아직 저장된 테스트 성적이 없습니다.</div>
           ) : (
@@ -976,20 +1096,34 @@ function StudentProfileModal({
               const isDirty = Boolean(academyTestDrafts[item.testId]);
               return (
                 <div className={isDirty ? "managementRow academyTestProfileRow dirty" : "managementRow academyTestProfileRow"} key={item.testId}>
-                  <input type="date" value={draft.testDate ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "testDate", event.target.value)} />
-                  <input value={draft.title ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "title", event.target.value)} />
-                  <input value={draft.scope ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "scope", event.target.value)} />
-                  <input value={draft.score ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "score", event.target.value)} placeholder="점수" />
-                  <input value={draft.averageScore ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "averageScore", event.target.value)} placeholder="평균" />
-                  <input value={draft.note ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "note", event.target.value)} />
-                  <div className="studentProfileRowActions">
-                    <button className="softButton primarySoft" disabled={!isDirty || academyTestSaveState === "saving"} onClick={() => saveAcademyTestDraft(item).catch(console.error)} type="button">
-                      {isDirty ? "저장" : "저장됨"}
-                    </button>
-                    <button className="dangerSoftButton" onClick={() => (onDeleteAcademyTest?.(item.testId) ?? Promise.resolve()).catch(console.error)} type="button">
-                      삭제
-                    </button>
-                  </div>
+                  {isEditingProfile ? (
+                    <>
+                      <input type="date" value={draft.testDate ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "testDate", event.target.value)} />
+                      <input value={draft.title ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "title", event.target.value)} />
+                      <input value={draft.scope ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "scope", event.target.value)} />
+                      <input value={draft.score ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "score", event.target.value)} placeholder="점수" />
+                      <input value={draft.averageScore ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "averageScore", event.target.value)} placeholder="평균" />
+                      <input value={draft.note ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "note", event.target.value)} />
+                      <div className="studentProfileRowActions">
+                        <button className="softButton primarySoft" disabled={!isDirty || academyTestSaveState === "saving"} onClick={() => saveAcademyTestDraft(item).catch(console.error)} type="button">
+                          {isDirty ? saveActionLabel("변경 저장", academyTestSaveState) : "저장됨"}
+                        </button>
+                        <button className="dangerSoftButton" onClick={() => (onDeleteAcademyTest?.(item.testId) ?? Promise.resolve()).catch(console.error)} type="button">
+                          삭제
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <span>{draft.testDate || "-"}</span>
+                      <span>{draft.title || "-"}</span>
+                      <span>{draft.scope || "-"}</span>
+                      <span>{draft.score || "-"}</span>
+                      <span>{draft.averageScore || "-"}</span>
+                      <span>{draft.note || "-"}</span>
+                      <span className="profileSavedText">저장됨</span>
+                    </>
+                  )}
                 </div>
               );
             })
