@@ -12458,7 +12458,7 @@ function AcademyReminderPanel({
   const [saveMessage, setSaveMessage] = useState("");
   const isEditingReminder = Boolean(editingReminderId);
   const activeStudents = students.filter(isActiveStudent);
-  const selectedDateReminders = getAcademyRemindersForDate(reminders, selectedDate, { includeDone: true });
+  const selectedDateReminders = getAcademyRemindersForDate(reminders, selectedDate);
   const upcomingReminders = sortAcademyReminders(reminders)
     .filter((reminder) => normalizeAcademyReminderStatus(reminder.status) === "pending")
     .filter((reminder) => (reminder.reminderDate || reminder.date || "") >= today)

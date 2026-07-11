@@ -12,6 +12,16 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-11 P1. 운영 알림 완료 즉시 목록 반영
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 제보: 운영 알림 좌측 날짜별 목록에서 `완료`를 누르면 새로고침 전까지 알림이 사라지지 않고, 새로고침하면 사라진다.
+- 원인 판단: 완료 저장은 Supabase `academy_reminders.status = done`으로 정상 반영되고 있었지만, 좌측 `selectedDateReminders`가 `includeDone: true`로 완료 알림까지 렌더링하고 있었다. 서버 재조회/새로고침 경로는 완료 알림을 제외하므로 새로고침 후에만 사라져 보였다.
+- 구현 결과: 좌측 날짜별 운영 알림 목록을 기본 pending 필터로 돌려 `완료` 저장 직후 화면에서도 즉시 사라지게 했다. `다가오는 알림`과 서버 재조회 기준도 같은 pending 원칙을 유지한다.
+- 저장 원천: 운영 알림 원본은 Supabase `academy_reminders`이며, 완료 상태는 `status = done`이다. 이번 수정은 저장 원천 변경이 아니라 화면의 활성 목록 필터 보정이다. 새 SQL은 필요 없다.
+- 중단 조건: 완료 저장 후 새로고침 없이 좌측 목록에 계속 남음, 완료 저장 실패가 배지/행 오류로 표시되지 않음, 새로고침 후 완료 상태가 되돌아옴, 완료하지 않은 pending 알림까지 사라짐.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 272개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-11 P1. 운영 알림 수정 버튼과 일정 조정
 
 - 상태: 완료 - 구현/검증 완료
