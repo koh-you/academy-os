@@ -790,9 +790,9 @@ const schoolCalendarAutosaveRisk = {
 
 const supplementAutosaveRisk = {
   title: "보충관리 후보 검토와 완료 처리 분리",
-  storage: "Supabase makeup_tasks, lessons, homeworks, notificationLogs",
-  risk: "후보 목록은 보충이 필요한 대상을 보여주는 진입 화면입니다. 초안 저장, 수업일지 일정 반영, 완료 처리는 상세 검토 gate를 거쳐야 원천 데이터가 안전하게 바뀝니다.",
-  stopCondition: "목록에서 바로 원천 숙제 완료, 수업일지 일정 생성, 알림톡 발송/예약이 발생하면 다음 단계로 가지 않습니다.",
+  storage: "Supabase makeup_tasks, lessons, homeworks(후보 원천), notificationLogs",
+  risk: "후보 목록은 보충이 필요한 대상을 보여주는 진입 화면입니다. 초안 저장, 수업일지 일정 반영, 완료 처리는 상세 검토 gate를 거쳐야 보충 원천과 일정 데이터가 안전하게 바뀝니다.",
+  stopCondition: "목록에서 바로 보충 항목 저장, 수업일지 일정 생성, 원본 숙제 상태 변경, 알림톡 발송/예약이 발생하면 다음 단계로 가지 않습니다.",
   recommendation: "후보는 상세 검토로 열고, local draft 확인 후 내용 저장, 일정 반영, 완료 처리를 순서대로 진행합니다."
 };
 
@@ -9113,19 +9113,6 @@ export function App() {
     const savedTask = taskResult.makeupTask ?? nextTask;
     setMakeupTasks((current) => upsertById(current, savedTask, "makeupTaskId"));
 
-    if (!needsMoreSupplement && task.taskType === "homework_makeup") {
-      const sourceHomework = homeworks.find((homework) => homework.homeworkId === task.sourceId);
-      if (sourceHomework) {
-        const nextHomework = {
-          ...sourceHomework,
-          status: "verified",
-          teacherStatus: "verified",
-          verifiedAt: completedAt
-        };
-        await postJson("/api/homeworks", { homework: nextHomework });
-        setHomeworks((current) => current.map((homework) => (homework.homeworkId === nextHomework.homeworkId ? nextHomework : homework)));
-      }
-    }
     return savedTask;
   }
 
@@ -9148,23 +9135,6 @@ export function App() {
         return nextTask;
       })
     );
-
-    if (task.taskType === "homework_makeup" && task.sourceId) {
-      setHomeworks((current) =>
-        current.map((homework) => {
-          if (homework.homeworkId !== task.sourceId) return homework;
-          const nextTeacherStatus = task.reason?.includes("미완료") ? "missing" : "partial";
-          const nextHomework = {
-            ...homework,
-            status: nextTeacherStatus,
-            teacherStatus: nextTeacherStatus,
-            verifiedAt: ""
-          };
-          postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
-          return nextHomework;
-        })
-      );
-    }
   }
 
   function handleUpdateMakeupTask(taskId, field, value) {

@@ -12,6 +12,17 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-11 P1. 보충 완료 처리 시 과거 숙제 상태 보존
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청: 7월 15일 숙제를 안 해와서 7월 17일까지 해오기로 한 뒤 17일에 보충 확인이 되어도, 7월 15일 원본 숙제의 `미완료` 상태를 `완료`로 바꾸지는 않는다. 보충 완료는 보충 task 완료 이력으로만 남기고 과거 숙제 이력은 그대로 둔다.
+- 원인 판단: 기존 `handlePassSupplementTask`는 숙제보충 완료 시 연결된 `homeworks` row를 `teacherStatus/status = verified`로 바꿨고, `보충관리로 복귀`도 원본 숙제 상태를 다시 `missing/partial`로 바꿀 수 있었다. 이 구조는 보충 처리 이력과 과거 수업 당시 숙제 검사 이력을 섞는다.
+- 구현 결과: `보충 완료 처리`는 이제 `makeup_tasks.status = done`, `completedAt/passedAt`, `supplementProcessStatus = completed`만 저장한다. 연결된 과거 `homeworks` row의 `teacherStatus`, `status`, `verifiedAt`은 바꾸지 않는다.
+- 구현 결과: `보충관리로 복귀`도 `makeup_tasks` 상태만 복귀시키고, 연결된 과거 숙제 상태는 되돌리거나 수정하지 않는다.
+- 저장 원천: 과거 숙제 검사 이력은 Supabase `homeworks`가 원본이고, 보충 완료 이력은 Supabase `makeup_tasks`가 원본이다. 보충 일정은 기존처럼 `lessons`가 원본이다. 새 SQL은 필요 없다.
+- 중단 조건: 보충 완료 처리 후 과거 숙제 `teacherStatus`가 `verified`로 바뀜, 보충관리 복귀 후 과거 숙제 상태가 `missing/partial`로 덮어써짐, 보충 완료가 `makeup_tasks`에 저장되지 않음, 새로고침 후 완료 이력이 사라짐.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 273개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-11 P1. 태블릿 출결 성공 배너 제거
 
 - 상태: 완료 - 구현/검증 완료
