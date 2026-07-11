@@ -12,6 +12,17 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-11 P1. 운영 알림 완료 버튼 런타임 오류 방지
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 제보: `운영 알림 원본` 목록에서 `완료` 버튼을 누르면 계속 런타임 오류처럼 보였다.
+- 원인 판단: 완료 버튼은 Supabase `academy_reminders` row를 `status: done`으로 저장하는 경로인데, 저장 실패가 목록 액션 안에서 catch되지 않아 화면 오류로 번질 수 있었다. 또한 운영 DB에 `completed_at` 컬럼 적용이 늦어져 있으면 완료 저장 payload의 `completed_at` 때문에 upsert 전체가 실패할 수 있었다.
+- 구현 결과: `완료`/`삭제` 버튼 액션에 인라인 오류 처리를 추가했다. 실패 시 화면이 죽지 않고 운영 알림 목록 위에 `운영 알림 완료 실패` 또는 `운영 알림 삭제 실패` 메시지를 표시한다. 처리 중에는 해당 행 버튼이 `처리 중`으로 바뀌고 중복 클릭을 막는다.
+- 구현 결과: `academy_reminders.completed_at` 컬럼이 아직 없다는 Supabase schema cache 오류가 나면 `completed_at`만 제외하고 한 번 재시도한다. 따라서 SQL 적용 전이어도 완료 상태(`status: done`)는 저장되고, SQL 적용 후에는 완료 시각(`completed_at`)까지 저장된다.
+- 저장 원천: 운영 알림 원본은 Supabase `academy_reminders`다. 완료 여부는 `status`, 완료 시각은 `completed_at`이 원천이다. 새 SQL은 만들지 않았고, 컬럼 정식 적용은 기존 `supabase/20260710_academy_reminders.sql`에 포함되어 있다.
+- 중단 조건: `완료` 클릭 후 런타임 오버레이가 뜸, `status`가 `done`으로 저장되지 않음, 실패했는데 화면에 오류 메시지가 보이지 않음, 삭제 실패가 조용히 무시됨, 완료/삭제 중 같은 알림을 여러 번 누를 수 있음.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 267개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-11 P1. 태블릿 출결 확인 속도 개선
 
 - 상태: 완료 - 구현/검증 완료

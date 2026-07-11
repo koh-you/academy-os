@@ -740,12 +740,12 @@ function isMissingAcademyRemindersTable(error) {
   return message.includes("academy_reminders") || message.includes("schema cache");
 }
 
-function toAcademyReminderRow(reminder = {}) {
+function toAcademyReminderRow(reminder = {}, { includeCompletedAt = true } = {}) {
   const reminderDate = reminder.reminderDate ?? reminder.date;
   const title = String(reminder.title ?? "").trim();
   if (!reminderDate) throw new Error("알림 날짜가 필요합니다.");
   if (!title) throw new Error("알림 제목이 필요합니다.");
-  return {
+  const row = {
     reminder_id: reminder.reminderId || reminder.id || createAcademyReminderId(),
     reminder_type: normalizeAcademyReminderType(reminder.reminderType ?? reminder.type),
     title,
@@ -760,9 +760,12 @@ function toAcademyReminderRow(reminder = {}) {
     slack_notify: reminder.slackNotify !== false,
     source: compact(reminder.source),
     source_payload: reminder.sourcePayload ?? {},
-    completed_at: compact(reminder.completedAt),
     updated_at: new Date().toISOString()
   };
+  if (includeCompletedAt) {
+    row.completed_at = compact(reminder.completedAt);
+  }
+  return row;
 }
 
 function fromAcademyReminderRow(row = {}) {
@@ -1598,7 +1601,13 @@ export async function upsertAcademyReminder(reminder) {
     return { source: fallbackSource, academyReminder: { ...reminder, reminderId: reminder.reminderId || reminder.id || createAcademyReminderId() } };
   }
 
-  const [row] = await upsertRows("academy_reminders", [toAcademyReminderRow(reminder)]);
+  let row;
+  try {
+    [row] = await upsertRows("academy_reminders", [toAcademyReminderRow(reminder)]);
+  } catch (error) {
+    if (!errorMentionsAnyColumn(error, ["completed_at"])) throw error;
+    [row] = await upsertRows("academy_reminders", [toAcademyReminderRow(reminder, { includeCompletedAt: false })]);
+  }
   return { source: databaseSource, academyReminder: fromAcademyReminderRow(row) };
 }
 

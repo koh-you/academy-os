@@ -12281,42 +12281,67 @@ function AcademyReminderList({
   students = []
 }) {
   const [busyReminderId, setBusyReminderId] = useState("");
+  const [actionError, setActionError] = useState("");
+  const safeReminders = Array.isArray(reminders) ? reminders.filter(Boolean) : [];
 
   async function markDone(reminder) {
-    if (!reminder?.reminderId || busyReminderId) return;
-    setBusyReminderId(reminder.reminderId);
+    const reminderId = reminder?.reminderId || reminder?.id || "";
+    if (busyReminderId) return;
+    if (!reminderId) {
+      setActionError("운영 알림 ID가 없어 완료 처리할 수 없습니다. 새로고침 후 다시 시도해 주세요.");
+      return;
+    }
+    setBusyReminderId(reminderId);
+    setActionError("");
     try {
-      await onSaveAcademyReminder?.({
+      await onSaveAcademyReminder?.(normalizeAcademyReminderDraft({
         ...reminder,
+        reminderId,
+        id: reminderId,
         status: "done",
         completedAt: new Date().toISOString()
-      });
+      }));
+    } catch (error) {
+      console.error("Failed to mark academy reminder done", error);
+      setActionError(`운영 알림 완료 실패 · ${error?.message || "알 수 없는 오류"}`);
     } finally {
       setBusyReminderId("");
     }
   }
 
   async function removeReminder(reminder) {
-    if (!reminder?.reminderId || busyReminderId) return;
-    setBusyReminderId(reminder.reminderId);
+    const reminderId = reminder?.reminderId || reminder?.id || "";
+    if (busyReminderId) return;
+    if (!reminderId) {
+      setActionError("운영 알림 ID가 없어 삭제할 수 없습니다. 새로고침 후 다시 시도해 주세요.");
+      return;
+    }
+    setBusyReminderId(reminderId);
+    setActionError("");
     try {
-      await onDeleteAcademyReminder?.(reminder.reminderId);
+      await onDeleteAcademyReminder?.(reminderId);
+    } catch (error) {
+      console.error("Failed to delete academy reminder", error);
+      setActionError(`운영 알림 삭제 실패 · ${error?.message || "알 수 없는 오류"}`);
     } finally {
       setBusyReminderId("");
     }
   }
 
-  if (!reminders.length) {
+  if (!safeReminders.length) {
     return <div className="emptyState academyReminderEmpty">{emptyText}</div>;
   }
 
   return (
     <div className="academyReminderList">
-      {sortAcademyReminders(reminders).map((reminder) => {
+      {actionError ? <div className="academyReminderActionError">{actionError}</div> : null}
+      {sortAcademyReminders(safeReminders).map((rawReminder) => {
+        const reminderId = rawReminder.reminderId || rawReminder.id || "";
+        const reminder = normalizeAcademyReminderDraft(reminderId ? { ...rawReminder, reminderId, id: reminderId } : rawReminder);
         const status = normalizeAcademyReminderStatus(reminder.status);
         const studentName = getAcademyReminderStudentName(reminder, students);
         return (
-          <article className={`academyReminderItem status-${status} priority-${reminder.priority || "normal"}`} key={reminder.reminderId}>
+          <article className={`academyReminderItem status-${status} priority-${reminder.priority || "normal"}`} key={reminderId || reminder.reminderId}>
             <div className="academyReminderItemMain">
               <div className="academyReminderItemTop">
                 <span className="academyReminderType">{getAcademyReminderTypeLabel(reminder.reminderType ?? reminder.type)}</span>
@@ -12335,15 +12360,15 @@ function AcademyReminderList({
               <div className="academyReminderActions">
                 <button
                   className="softButton compact"
-                  disabled={status === "done" || busyReminderId === reminder.reminderId}
+                  disabled={status === "done" || !reminderId || busyReminderId === reminderId}
                   onClick={() => markDone(reminder)}
                   type="button"
                 >
-                  완료
+                  {busyReminderId === reminderId ? "처리 중" : "완료"}
                 </button>
                 <button
                   className="dangerSoftButton compact"
-                  disabled={busyReminderId === reminder.reminderId}
+                  disabled={!reminderId || busyReminderId === reminderId}
                   onClick={() => removeReminder(reminder)}
                   type="button"
                 >

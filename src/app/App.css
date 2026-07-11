@@ -782,6 +782,16 @@ button {
   gap: 8px;
 }
 
+.academyReminderActionError {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 10px 12px;
+}
+
 .academyReminderItem,
 .studentReminderItem {
   background: #ffffff;

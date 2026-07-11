@@ -389,6 +389,7 @@ check("94 academy reminders persist as Supabase source and feed dashboard journa
 check("94a academy reminder form keeps compact Slack toggle and save button", hasAll(css, [".academyReminderForm", "grid-template-columns:", ".academyReminderForm .primaryButton", "min-height: 46px", ".academyReminderSlackToggle input", "flex: 0 0 16px", "white-space: nowrap"]));
 check("94b academy reminder source sits above calendar controls", hasTeacherReminderAboveCalendarControls(app));
 check("94c lesson journal does not show bulk previous or next homework inputs", !app.includes("전체 지난 숙제") && !app.includes("전체 다음 숙제") && !app.includes("bulkHomeworkPanel") && !css.includes("bulkHomeworkPanel"));
+check("94d academy reminder done action handles save failures and missing completed_at", hasAll(coreDataRoute, ["function toAcademyReminderRow(reminder = {}, { includeCompletedAt = true } = {})", "if (includeCompletedAt)", "errorMentionsAnyColumn(error, [\"completed_at\"])", "toAcademyReminderRow(reminder, { includeCompletedAt: false })"]) && hasAll(app, ["const [actionError, setActionError] = useState(\"\")", "운영 알림 완료 실패", "academyReminderActionError", "busyReminderId === reminderId ? \"처리 중\" : \"완료\""]) && hasAll(css, [".academyReminderActionError"]));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));
