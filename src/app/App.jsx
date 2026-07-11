@@ -96,6 +96,26 @@ const regularLessonClassColors = {
   template_tt_sat_back: "#fbcfe8"
 };
 const fallbackRegularLessonColors = ["#bfdbfe", "#c7d2fe", "#bbf7d0", "#fbcfe8"];
+const classTemplateScheduleRules = {
+  template_tt_sat_front: {
+    days: ["tue", "thu", "sat"],
+    endTime: "19:00",
+    name: "화목 4-7 / 토 10-1반",
+    saturdayEndTime: "13:00",
+    saturdayStartTime: "10:00",
+    startTime: "16:00",
+    timeLabel: "화목 16:00-19:00 / 토 10:00-13:00"
+  },
+  template_tt_sat_back: {
+    days: ["tue", "thu", "sat"],
+    endTime: "22:00",
+    name: "화목 7-10 / 토 1-4반",
+    saturdayEndTime: "16:00",
+    saturdayStartTime: "13:00",
+    startTime: "19:00",
+    timeLabel: "화목 19:00-22:00 / 토 13:00-16:00"
+  }
+};
 
 function getAssignmentStatusForMessage(record, previousHomework) {
   const recordStatus = normalizeAssignmentStatusValue(record?.assignmentStatus ?? record?.incompleteHomework ?? "");
@@ -5465,7 +5485,7 @@ export function App() {
           ]);
           if (!isMounted) return;
           const nextLessons = lessonsResult.ok && Array.isArray(lessonsResult.lessons)
-            ? filterActiveLessons(lessonsResult.lessons)
+            ? filterActiveLessons(normalizeLessonCalendarRules(lessonsResult.lessons, [], []))
             : [];
           if (studentsResult.ok && Array.isArray(studentsResult.students)) {
             setStudents(studentsResult.students);
@@ -5566,16 +5586,19 @@ export function App() {
         if (studentIntakeApplicantsResult.ok && Array.isArray(studentIntakeApplicantsResult.applicants)) {
           setStudentIntakeApplicants(studentIntakeApplicantsResult.applicants);
         }
+        const normalizedClassTemplates = classesResult.ok && Array.isArray(classesResult.classTemplates) && classesResult.classTemplates.length > 0
+          ? normalizeClassTemplates(classesResult.classTemplates)
+          : classTemplates;
         if (classesResult.ok && Array.isArray(classesResult.classTemplates) && classesResult.classTemplates.length > 0) {
-          setClassTemplates(classesResult.classTemplates);
+          setClassTemplates(normalizedClassTemplates);
         }
         const normalizedLessons = lessonsResult.ok && Array.isArray(lessonsResult.lessons)
-          ? normalizeLessonCalendarColors(lessonsResult.lessons, makeupTasksResult.makeupTasks ?? [])
+          ? normalizeLessonCalendarRules(lessonsResult.lessons, makeupTasksResult.makeupTasks ?? [], normalizedClassTemplates)
           : [];
         if (normalizedLessons.length > 0) {
           setLessons(filterActiveLessons(normalizedLessons));
           normalizedLessons
-            .filter((lesson, index) => lesson.color !== lessonsResult.lessons[index]?.color)
+            .filter((lesson, index) => !areLessonCalendarRuleFieldsEqual(lesson, lessonsResult.lessons[index]))
             .forEach((lesson) => postJson("/api/lessons", { lesson }).catch((error) => console.error(error)));
         }
         if (recordsResult.ok && Array.isArray(recordsResult.records) && recordsResult.records.length > 0) {
@@ -16053,14 +16076,17 @@ function ReportModal({ report, onClose, onMockSend, onSaveSnapshot }) {
 
 function LessonModal({ initialLesson = null, students, templates, onClose, onSubmit }) {
   const activeStudents = students.filter(isActiveStudent);
-  const fallbackTemplate = templates[0] ?? { name: "", startTime: "16:00", endTime: "17:00", color: lessonCalendarColors.regular };
+  const normalizedTemplates = normalizeClassTemplates(templates);
+  const fallbackTemplate = normalizedTemplates[0] ?? { name: "", startTime: "16:00", endTime: "17:00", color: lessonCalendarColors.regular };
   const [lessonType, setLessonType] = useState(initialLesson?.lessonType ?? "class");
-  const [classTemplateId, setClassTemplateId] = useState(initialLesson ? initialLesson.classTemplateId || "" : templates[0]?.classTemplateId || "");
-  const activeTemplate = templates.find((template) => template.classTemplateId === classTemplateId) ?? fallbackTemplate;
+  const [classTemplateId, setClassTemplateId] = useState(initialLesson ? initialLesson.classTemplateId || "" : normalizedTemplates[0]?.classTemplateId || "");
+  const activeTemplate = normalizedTemplates.find((template) => template.classTemplateId === classTemplateId) ?? fallbackTemplate;
+  const initialDate = initialLesson?.date ?? today;
+  const initialTemplateTimes = getTemplateLessonTimes(activeTemplate, initialDate);
   const [name, setName] = useState(initialLesson?.className ?? activeTemplate.name);
-  const [date, setDate] = useState(initialLesson?.date ?? today);
-  const [startTime, setStartTime] = useState(normalizeTimeInput(initialLesson?.startTime) || activeTemplate.startTime);
-  const [endTime, setEndTime] = useState(normalizeTimeInput(initialLesson?.endTime) || activeTemplate.endTime);
+  const [date, setDate] = useState(initialDate);
+  const [startTime, setStartTime] = useState(normalizeTimeInput(initialLesson?.startTime) || initialTemplateTimes.startTime);
+  const [endTime, setEndTime] = useState(normalizeTimeInput(initialLesson?.endTime) || initialTemplateTimes.endTime);
   const [color, setColor] = useState(
     getStandardLessonColor(initialLesson ?? { lessonType: "class", classTemplateId: activeTemplate.classTemplateId, className: activeTemplate.name })
   );
@@ -16069,7 +16095,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
     return getActiveStudentIdsFromSelection(initialStudentIds, activeStudents);
   });
   const [studentSearch, setStudentSearch] = useState("");
-  const regularClassColorOptions = templates.map((template) => ({
+  const regularClassColorOptions = normalizedTemplates.map((template) => ({
     id: `class-${template.classTemplateId}`,
     label: template.name,
     lessonType: "class",
@@ -16098,12 +16124,13 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
   })).filter((group) => group.students.length > 0);
 
   function handleTemplateChange(nextTemplateId, nextLessonType = lessonType) {
-    const template = templates.find((item) => item.classTemplateId === nextTemplateId);
+    const template = normalizedTemplates.find((item) => item.classTemplateId === nextTemplateId);
     setClassTemplateId(nextTemplateId);
     if (!template) return;
+    const templateTimes = getTemplateLessonTimes(template, date);
     setName(template.name);
-    setStartTime(getTemplateStartTime(template, date));
-    setEndTime(getTemplateEndTime(template, date));
+    setStartTime(templateTimes.startTime);
+    setEndTime(templateTimes.endTime);
     setColor(getStandardLessonColor({ lessonType: nextLessonType, classTemplateId: nextTemplateId, className: template.name }));
     setStudentIds(
       activeStudents
@@ -16128,8 +16155,9 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
 
   function handleDateChange(nextDate) {
     setDate(nextDate);
-    setStartTime(getTemplateStartTime(activeTemplate, nextDate));
-    setEndTime(getTemplateEndTime(activeTemplate, nextDate));
+    const templateTimes = getTemplateLessonTimes(activeTemplate, nextDate);
+    setStartTime(templateTimes.startTime);
+    setEndTime(templateTimes.endTime);
   }
 
   return (
@@ -16161,7 +16189,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
           큰 수업 틀
           <select value={classTemplateId} onChange={(event) => handleTemplateChange(event.target.value)}>
             <option value="">직접 입력 일정</option>
-            {templates.map((template) => (
+            {normalizedTemplates.map((template) => (
               <option key={template.classTemplateId} value={template.classTemplateId}>
                 {template.name}
               </option>
@@ -23707,6 +23735,62 @@ function getRegularLessonColor(lesson = {}) {
   return regularLessonClassColors[colorKey] ?? getFallbackRegularLessonColor(colorKey);
 }
 
+function getClassTemplateScheduleRule(template = {}) {
+  const classTemplateId = String(template.classTemplateId ?? template.classId ?? "").trim();
+  const compactName = String(template.name ?? template.className ?? "")
+    .replace(/\s+/g, "")
+    .replaceAll("/", "");
+  if (
+    classTemplateId === "template_tt_sat_front" ||
+    compactName.includes("화목토앞") ||
+    compactName.includes("화목4-7") ||
+    compactName.includes("토10-1")
+  ) {
+    return classTemplateScheduleRules.template_tt_sat_front;
+  }
+  if (
+    classTemplateId === "template_tt_sat_back" ||
+    compactName.includes("화목토뒷") ||
+    compactName.includes("화목7-10") ||
+    compactName.includes("토1-4")
+  ) {
+    return classTemplateScheduleRules.template_tt_sat_back;
+  }
+  return null;
+}
+
+function formatClassTemplateTimeLabel(template = {}) {
+  const startTime = normalizeTimeInput(template.startTime);
+  const endTime = normalizeTimeInput(template.endTime);
+  return startTime && endTime ? `${startTime}-${endTime}` : "";
+}
+
+function normalizeClassTemplateSchedule(template = {}) {
+  const rule = getClassTemplateScheduleRule(template);
+  if (!rule) {
+    return {
+      ...template,
+      startTime: normalizeTimeInput(template.startTime) || template.startTime || "",
+      endTime: normalizeTimeInput(template.endTime) || template.endTime || "",
+      timeLabel: template.timeLabel || formatClassTemplateTimeLabel(template)
+    };
+  }
+  return {
+    ...template,
+    days: Array.isArray(template.days) && template.days.length > 0 ? template.days : rule.days,
+    endTime: rule.endTime,
+    name: rule.name,
+    saturdayEndTime: rule.saturdayEndTime,
+    saturdayStartTime: rule.saturdayStartTime,
+    startTime: rule.startTime,
+    timeLabel: rule.timeLabel
+  };
+}
+
+function normalizeClassTemplates(templates = []) {
+  return templates.map((template) => normalizeClassTemplateSchedule(template));
+}
+
 function getSupplementLessonColor(taskType) {
   if (taskType === "homework_makeup") return lessonCalendarColors.homeworkMakeup;
   if (taskType === "retest") return lessonCalendarColors.retest;
@@ -23751,6 +23835,48 @@ function normalizeLessonCalendarColors(lessons = [], makeupTasks = []) {
     const standardColor = getStandardLessonColor(lesson, taskByLessonId.get(lesson.lessonId));
     return lesson.color === standardColor ? lesson : { ...lesson, color: standardColor };
   });
+}
+
+function normalizeLessonTemplateTimes(lessons = [], classTemplates = []) {
+  const templateById = new Map(normalizeClassTemplates(classTemplates).map((template) => [template.classTemplateId, template]));
+  return lessons.map((lesson) => {
+    if (!lesson || lesson.lessonType !== "class") return lesson;
+    const template = templateById.get(lesson.classTemplateId) ?? normalizeClassTemplateSchedule({
+      classTemplateId: lesson.classTemplateId,
+      endTime: lesson.endTime,
+      name: lesson.className,
+      startTime: lesson.startTime
+    });
+    if (!getClassTemplateScheduleRule(template)) return lesson;
+    const templateTimes = getTemplateLessonTimes(template, lesson.date);
+    const sameStartTime = normalizeTimeInput(lesson.startTime) === templateTimes.startTime;
+    const sameEndTime = normalizeTimeInput(lesson.endTime) === templateTimes.endTime;
+    const nextClassName = template.name || lesson.className;
+    if (sameStartTime && sameEndTime && lesson.className === nextClassName) return lesson;
+    return {
+      ...lesson,
+      className: nextClassName,
+      endTime: templateTimes.endTime,
+      startTime: templateTimes.startTime
+    };
+  });
+}
+
+function normalizeLessonCalendarRules(lessons = [], makeupTasks = [], classTemplates = []) {
+  return normalizeLessonTemplateTimes(
+    normalizeLessonCalendarColors(lessons, makeupTasks),
+    classTemplates
+  );
+}
+
+function areLessonCalendarRuleFieldsEqual(candidate = {}, existing = {}) {
+  if (!candidate || !existing) return false;
+  const fields = ["className", "color"];
+  const sameFields = fields.every((field) => String(candidate[field] ?? "") === String(existing[field] ?? ""));
+  if (!sameFields) return false;
+  return ["startTime", "endTime"].every((field) =>
+    normalizeTimeInput(candidate[field] ?? "") === normalizeTimeInput(existing[field] ?? "")
+  );
 }
 
 function normalizeGeneratedLessonControls(value = {}) {
@@ -24319,11 +24445,26 @@ function createExamPostSubmissionPayload(target, student, values = {}) {
 }
 
 function getTemplateStartTime(template, date) {
-  return getDayKey(date) === "sat" && template.saturdayStartTime ? template.saturdayStartTime : template.startTime;
+  const normalizedTemplate = normalizeClassTemplateSchedule(template);
+  const time = getDayKey(date) === "sat" && normalizedTemplate.saturdayStartTime
+    ? normalizedTemplate.saturdayStartTime
+    : normalizedTemplate.startTime;
+  return normalizeTimeInput(time) || time || "";
 }
 
 function getTemplateEndTime(template, date) {
-  return getDayKey(date) === "sat" && template.saturdayEndTime ? template.saturdayEndTime : template.endTime;
+  const normalizedTemplate = normalizeClassTemplateSchedule(template);
+  const time = getDayKey(date) === "sat" && normalizedTemplate.saturdayEndTime
+    ? normalizedTemplate.saturdayEndTime
+    : normalizedTemplate.endTime;
+  return normalizeTimeInput(time) || time || "";
+}
+
+function getTemplateLessonTimes(template, date) {
+  return {
+    endTime: getTemplateEndTime(template, date),
+    startTime: getTemplateStartTime(template, date)
+  };
 }
 
 function calculateLateMinutes(lesson, now = new Date(), graceMinutes = 5) {
