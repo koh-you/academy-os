@@ -437,6 +437,7 @@ function formatSupplementScheduleLine(task = {}) {
   const schedule = [task.scheduledDate, task.scheduledTime].filter(Boolean).join(" ");
   const method = supplementMethodLabel(task);
   const source = getSupplementTaskSourceLabel(task) || followUpTypeLabel(task.taskType);
+  const homeworkCheckSentence = formatSupplementHomeworkCheckSentence(task);
   const schedulePrefix = schedule ? `${schedule}에 ` : "";
 
   if (task.taskType === "homework_makeup") {
@@ -447,7 +448,7 @@ function formatSupplementScheduleLine(task = {}) {
   }
 
   if (task.taskType === "absence_makeup") {
-    return `${schedulePrefix}${method}으로 ${source}을 진행하겠습니다.`;
+    return `${schedulePrefix}${method}으로 ${source} 결석 보강을 진행하겠습니다.${homeworkCheckSentence ? ` ${homeworkCheckSentence}` : ""}`;
   }
 
   if (task.taskType === "retest") {
@@ -20885,7 +20886,7 @@ function SupplementCenter({
   const [supplementRowActions, setSupplementRowActions] = useState({});
   const makeupHomeworks = homeworks.filter((homework) => isHomeworkMakeupCandidate(homework, records, lessons));
   const absentRecords = records
-    .filter((record) => record.attendanceStatus === "absent" || record.attendanceStatus === "excused");
+    .filter((record) => isAbsenceLikeAttendanceStatus(record.attendanceStatus));
   const retestRecords = records
     .filter((record) => record.needsRetest);
 
@@ -20905,6 +20906,13 @@ function SupplementCenter({
         task.sourceId === candidateTask.sourceId &&
         task.taskType === candidateTask.taskType
     );
+  }
+
+  function hydrateSupplementTask(task = {}) {
+    if (task.taskType !== "absence_makeup" || task.supplementHomeworkNote?.trim()) return task;
+    const sourceRecord = records.find((record) => record.lessonStudentRecordId === task.sourceId);
+    const homeworkCheckLabel = getAbsenceHomeworkCheckLabel(sourceRecord, homeworks, lessons, students);
+    return homeworkCheckLabel ? { ...task, supplementHomeworkNote: homeworkCheckLabel } : task;
   }
 
   function getSupplementActionKey(task = {}) {
@@ -21019,9 +21027,8 @@ function SupplementCenter({
   }
 
   const selectedSupplementStudent = students.find((student) => student.studentId === selectedSupplementStudentId);
-  const persistedSelectedSupplementTasks = tasks.filter(
-    (task) => task.studentId === selectedSupplementStudentId && task.taskType === activeSupplementTab
-  );
+  const persistedSelectedSupplementTasks = tasks.filter((task) => task.studentId === selectedSupplementStudentId && task.taskType === activeSupplementTab)
+    .map(hydrateSupplementTask);
   const selectedSupplementTasks = pendingCandidateTask &&
     pendingCandidateTask.studentId === selectedSupplementStudentId &&
     pendingCandidateTask.taskType === activeSupplementTab &&
@@ -21032,9 +21039,9 @@ function SupplementCenter({
     {
       id: "homework_makeup",
       title: "숙제보충",
-      subtitle: "미완료 숙제를 보충 과제로 전환합니다.",
+      subtitle: "미완료/부분완료 숙제를 보충 과제로 전환합니다.",
       count: makeupHomeworks.length,
-      emptyText: "미완료 숙제가 없습니다.",
+      emptyText: "미완료/부분완료 숙제가 없습니다.",
       items: makeupHomeworks.map((homework) => ({
         id: homework.homeworkId,
         studentId: homework.studentId,
@@ -21057,21 +21064,28 @@ function SupplementCenter({
       subtitle: "결석 기록을 보강 일정으로 전환합니다.",
       count: absentRecords.length,
       emptyText: "결석 보강이 없습니다.",
-      items: absentRecords.map((record) => ({
-        id: record.lessonStudentRecordId,
-        studentId: record.studentId,
-        title: lessonLabel(record.lessonId),
-        meta: `${attendanceLabels[record.attendanceStatus]} · ${record.attendanceReason || "사유 미입력"}`,
-        task: {
-          taskType: "absence_makeup",
+      items: absentRecords.map((record) => {
+        const homeworkCheckLabel = getAbsenceHomeworkCheckLabel(record, homeworks, lessons, students);
+        return {
+          id: record.lessonStudentRecordId,
           studentId: record.studentId,
-          sourceId: record.lessonStudentRecordId,
-          sourceLabel: lessonLabel(record.lessonId),
-          reason: "결석 보강",
-          absenceReason: record.attendanceReason || "사유 미입력",
-          supplementMethod: "onsite_makeup"
-        }
-      }))
+          title: lessonLabel(record.lessonId),
+          meta: [
+            `${attendanceLabels[record.attendanceStatus] ?? record.attendanceStatus} · ${record.attendanceReason || "사유 미입력"}`,
+            homeworkCheckLabel ? `지난 숙제 확인: ${homeworkCheckLabel}` : ""
+          ].filter(Boolean).join(" · "),
+          task: {
+            taskType: "absence_makeup",
+            studentId: record.studentId,
+            sourceId: record.lessonStudentRecordId,
+            sourceLabel: lessonLabel(record.lessonId),
+            reason: homeworkCheckLabel ? "결석 보강 · 지난 숙제 확인" : "결석 보강",
+            absenceReason: record.attendanceReason || "사유 미입력",
+            supplementHomeworkNote: homeworkCheckLabel,
+            supplementMethod: "onsite_makeup"
+          }
+        };
+      })
     },
     {
       id: "retest",
@@ -21730,14 +21744,18 @@ function SupplementStudentModal({
                     </div>
                   </div>
                   <div className="supplementReadableGrid">
-                    {task.taskType === "homework_makeup" ? (
+                    {task.taskType === "homework_makeup" || task.taskType === "absence_makeup" ? (
                     <label className="supplementHomeworkField supplementReadableField">
-                      <strong>보충할 숙제 내역</strong>
-                      <span>보충일지와 알림톡 문구에 반영되는 핵심 내용입니다.</span>
+                      <strong>{task.taskType === "absence_makeup" ? "함께 확인할 지난 숙제" : "보충할 숙제 내역"}</strong>
+                      <span>
+                        {task.taskType === "absence_makeup"
+                          ? "결석보강 알림톡과 보충 기록에 함께 확인할 지난 숙제로 반영됩니다."
+                          : "보충일지와 알림톡 문구에 반영되는 핵심 내용입니다."}
+                      </span>
                       <textarea
                         value={supplementHomeworkNote}
                         onChange={(event) => updateTaskDraft(task, "supplementHomeworkNote", event.target.value)}
-                        placeholder="예: 교과서 프린트, 지난 시간 미완료 숙제"
+                        placeholder={task.taskType === "absence_makeup" ? "예: 공수1 개념원리 p.18,19, 곱셈공식 프린트 25문항" : "예: 교과서 프린트, 지난 시간 미완료 숙제"}
                       />
                     </label>
                     ) : null}
@@ -24855,6 +24873,39 @@ function isHomeworkActionRequired(homework) {
   return Boolean(homework?.title?.trim()) && !isHomeworkResolved(homework);
 }
 
+function isAbsenceLikeAttendanceStatus(status) {
+  return ["absent", "excused", "unexcused"].includes(status);
+}
+
+function getRecordLesson(record, lessons = []) {
+  return lessons.find((lesson) => lesson.lessonId === record?.lessonId) ?? null;
+}
+
+function getRecordStudent(record, students = []) {
+  return students.find((student) => student.studentId === record?.studentId) ?? null;
+}
+
+function getRecordPreviousHomework(record, homeworks = [], lessons = [], students = []) {
+  const lesson = getRecordLesson(record, lessons);
+  const student = getRecordStudent(record, students);
+  if (lesson && student) {
+    const lessonHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
+    if (lessonHomework) return lessonHomework;
+  }
+  return homeworks.find(
+    (homework) =>
+      homework.lessonId === record?.lessonId &&
+      homework.studentId === record?.studentId &&
+      homework.homeworkType === "previous"
+  ) ?? null;
+}
+
+function getAbsenceHomeworkCheckLabel(record, homeworks = [], lessons = [], students = []) {
+  if (!isAbsenceLikeAttendanceStatus(record?.attendanceStatus)) return "";
+  const previousHomework = getRecordPreviousHomework(record, homeworks, lessons, students);
+  return normalizeMessageText(previousHomework?.title || record?.previousHomework || "").replace(/\s+/g, " ").trim();
+}
+
 function getHomeworkDedupeKey(homework) {
   return [
     homework.studentId ?? "",
@@ -25008,6 +25059,12 @@ function getSupplementTaskSourceLabel(task) {
   return task?.sourceLabel || "";
 }
 
+function formatSupplementHomeworkCheckSentence(task = {}) {
+  const homeworkText = normalizeMessageText(task.supplementHomeworkNote || "").replace(/\s+/g, " ").trim();
+  if (!homeworkText) return "";
+  return `지난 숙제 ${homeworkText}도 함께 확인하겠습니다.`;
+}
+
 function createNotificationDraft(task, students) {
   const student = students.find((item) => item.studentId === task.studentId);
   const studentName = student?.name ?? "학생";
@@ -25018,6 +25075,7 @@ function createNotificationDraft(task, students) {
   const progressMemoBlock = progressMemo ? `\n\n보충 메모:\n${progressMemo}` : "";
   const methodId = task.supplementMethod || supplementDefaultMethod(task.taskType);
   const absenceText = task.taskType === "absence_makeup" && task.absenceReason ? ` 결석사유는 ${task.absenceReason}입니다.` : "";
+  const homeworkCheckSentence = task.taskType === "absence_makeup" ? formatSupplementHomeworkCheckSentence(task) : "";
 
   if (task.taskType === "homework_makeup") {
     if (methodId === "next_lesson") {
@@ -25033,9 +25091,9 @@ function createNotificationDraft(task, students) {
 
   if (task.taskType === "absence_makeup") {
     if (methodId === "recorded_lecture") {
-      return `${studentName} 학생 결석 보강 안내드립니다.\n\n${scheduleText}에 ${sourceText} 결석 보강을 녹화 강의로 진행하겠습니다.${absenceText}${progressMemoBlock}`;
+      return `${studentName} 학생 결석 보강 안내드립니다.\n\n${scheduleText}에 ${sourceText} 결석 보강을 녹화 강의로 진행하겠습니다.${absenceText}${homeworkCheckSentence ? ` ${homeworkCheckSentence}` : ""}${progressMemoBlock}`;
     }
-    return `${studentName} 학생 결석 보강 안내드립니다.\n\n${scheduleText}에 ${sourceText} 결석 보강을 현장에서 진행하겠습니다.${absenceText}${progressMemoBlock}`;
+    return `${studentName} 학생 결석 보강 안내드립니다.\n\n${scheduleText}에 ${sourceText} 결석 보강을 현장에서 진행하겠습니다.${absenceText}${homeworkCheckSentence ? ` ${homeworkCheckSentence}` : ""}${progressMemoBlock}`;
   }
 
   if (task.taskType === "retest") {

@@ -1322,10 +1322,17 @@ function getSupplementTaskSourceLabelForNotification(task = {}) {
   return task.sourceLabel || "";
 }
 
+function formatSupplementHomeworkCheckSentenceForNotification(task = {}) {
+  const homeworkText = normalizeNotificationText(task.supplementHomeworkNote || "").replace(/\s+/g, " ").trim();
+  if (!homeworkText) return "";
+  return `지난 숙제 ${homeworkText}도 함께 확인하겠습니다.`;
+}
+
 function formatSupplementScheduleLineForNotification(task = {}) {
   const schedule = [task.scheduledDate, task.scheduledTime].filter(Boolean).join(" ");
   const method = supplementMethodLabelForNotification(task);
   const source = getSupplementTaskSourceLabelForNotification(task) || followUpTypeLabelForNotification(task.taskType);
+  const homeworkCheckSentence = formatSupplementHomeworkCheckSentenceForNotification(task);
   const schedulePrefix = schedule ? `${schedule}에 ` : "";
 
   if (task.taskType === "homework_makeup") {
@@ -1337,7 +1344,7 @@ function formatSupplementScheduleLineForNotification(task = {}) {
   }
 
   if (task.taskType === "absence_makeup") {
-    return `${schedulePrefix}${method}으로 ${source}을 진행하겠습니다.`;
+    return `${schedulePrefix}${method}으로 ${source} 결석 보강을 진행하겠습니다.${homeworkCheckSentence ? ` ${homeworkCheckSentence}` : ""}`;
   }
 
   if (task.taskType === "retest") {

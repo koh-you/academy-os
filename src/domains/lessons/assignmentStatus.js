@@ -97,5 +97,5 @@ export function getHomeworkStatusFromAssignmentStatus(value) {
 
 export function isAssignmentStatusHomeworkMakeupCandidate(value) {
   const normalizedValue = normalizeAssignmentStatusValue(value);
-  return ["not_done", "partial_80", "partial_50", "not_checked"].includes(normalizedValue);
+  return ["not_done", "partial_80", "partial_50"].includes(normalizedValue);
 }
