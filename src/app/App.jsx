@@ -15566,13 +15566,11 @@ function AttendanceKiosk({
   const [pin, setPin] = useState("");
   const [pendingPreview, setPendingPreview] = useState(null);
   const [result, setResult] = useState(null);
-  const [kioskStatus, setKioskStatus] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function runAttendancePreview(nextPin) {
     if (isSubmitting) return;
     setIsSubmitting(true);
-    setKioskStatus("");
     try {
       const nextPreview = await onAttendancePreview(nextPin);
       if (nextPreview.ok) {
@@ -15609,7 +15607,7 @@ function AttendanceKiosk({
       if (!nextResult?.ok) {
         setResult(nextResult);
       } else {
-        setKioskStatus(nextResult.alimtalk?.queued ? "출결 저장 완료 · 알림톡 처리 중" : "출결 저장 완료");
+        setResult(null);
       }
     } catch (error) {
       setResult({ ok: false, message: error.message || "출결 저장에 실패했습니다." });
@@ -15628,16 +15626,13 @@ function AttendanceKiosk({
   function pressKey(value) {
     if (isLoading || isSubmitting || pendingPreview) return;
     if (value === "backspace") {
-      setKioskStatus("");
       setPin((current) => current.slice(0, -1));
       return;
     }
     if (value === "clear") {
-      setKioskStatus("");
       setPin("");
       return;
     }
-    setKioskStatus("");
     setPin((current) => `${current}${value}`.replaceAll(/\D/g, "").slice(0, 4));
   }
 
@@ -15669,7 +15664,6 @@ function AttendanceKiosk({
             disabled={isLoading || isSubmitting || Boolean(pendingPreview)}
             value={pin}
             onChange={(event) => {
-              setKioskStatus("");
               setPin(event.target.value.replaceAll(/\D/g, "").slice(0, 4));
             }}
             placeholder={isLoading || isSubmitting ? "대기" : "뒤 4자리"}
@@ -15687,7 +15681,6 @@ function AttendanceKiosk({
           <button disabled={isLoading || isSubmitting || Boolean(pendingPreview)} onClick={() => pressKey("0")} type="button">0</button>
           <button className="secondaryKey" disabled={isLoading || isSubmitting || Boolean(pendingPreview)} onClick={() => pressKey("backspace")} type="button">⌫</button>
         </div>
-        {kioskStatus ? <div className="attendanceKioskStatus">{kioskStatus}</div> : null}
       </div>
 
       {pendingPreview ? (

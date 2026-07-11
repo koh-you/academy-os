@@ -12,6 +12,16 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-11 P1. 태블릿 출결 성공 배너 제거
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 제보: 태블릿 출결 화면에서 `출결 저장 완료 · 알림톡 처리 중` 배너가 사라지지 않는다. 알림톡 처리는 화면에 띄우지 말고 백그라운드에서만 작동하면 된다.
+- 원인 판단: 출결 저장 성공 후 프론트 `AttendanceKiosk`가 `kioskStatus`를 성공 문구로 세팅하고, 이 상태를 카드 하단 배너로 계속 렌더링했다. 실제 알림톡 큐 처리는 서버 `/api/attendance/check`의 `queueKioskAttendanceAlimtalk(...)`에서 백그라운드로 진행되므로 화면 배너가 없어도 처리 로직은 유지된다.
+- 구현 결과: 태블릿 출결 저장 성공 시 성공 배너를 만들지 않고, 확인 모달을 닫은 뒤 바로 키패드 입력 상태로 돌아가게 했다. 실패 메시지/학생 미조회 같은 오류 모달은 그대로 유지한다.
+- 저장 원천: 출결 원본은 Supabase `lesson_student_records`와 `attendance_events`이며, 알림톡 처리는 서버 백그라운드 큐와 Solapi 결과를 따른다. 이번 변경은 프론트 성공 배너 표시 제거만 수행하며 새 SQL은 필요 없다.
+- 중단 조건: 출결 저장 후 `lesson_student_records`가 갱신되지 않음, 서버에서 kiosk 알림톡 큐가 잡히지 않음, 실패 상황에서도 아무 오류가 보이지 않음, 성공 후 키패드가 계속 비활성화됨, `출결 저장 완료 · 알림톡 처리 중` 배너가 화면에 다시 보임.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 272개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-11 P1. 운영 알림 완료 즉시 목록 반영
 
 - 상태: 완료 - 구현/검증 완료
