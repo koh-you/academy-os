@@ -12067,6 +12067,13 @@ textarea.profileEditInput {
   padding: 0 14px;
 }
 
+.passButton:disabled {
+  background: #f8fafc;
+  border-color: #dbe5f3;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
 .softButton.subtle {
   background: #ffffff;
   color: #334155;
@@ -12533,11 +12540,54 @@ textarea.profileEditInput {
   white-space: nowrap;
 }
 
+.supplementRowActionState {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  margin-top: 2px;
+  padding: 5px 8px;
+  width: fit-content;
+}
+
+.supplementRowActionState.blocked,
+.supplementRowActionState.draft {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+}
+
+.supplementRowActionState.failed {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.supplementRowActionState.saving {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+}
+
+.supplementRowActionState.idle,
+.supplementRowActionState.saved {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #047857;
+}
+
 .supplementRowItem .softButton,
 .supplementRowItem .passButton {
   justify-self: end;
   min-width: 108px;
   white-space: nowrap;
+}
+
+.supplementRowItem .passButton:disabled {
+  background: #f8fafc;
+  border-color: #dbe5f3;
+  color: #64748b;
+  cursor: not-allowed;
 }
 
 .supplementRowItem:last-child {
