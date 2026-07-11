@@ -442,7 +442,7 @@ export const sampleData = {
       timeLabel: "19:00-22:00",
       startTime: "19:00",
       endTime: "22:00",
-      color: "#e5489b",
+      color: "#c7d2fe",
       track: "고1 내신",
       notionClassPageUrl
     }
@@ -475,7 +475,7 @@ export const sampleData = {
       dayOfWeek: new Date(`${date}T00:00:00+09:00`).toLocaleDateString("en-US", { weekday: "short" }).toLowerCase(),
       startTime: "19:00",
       endTime: "22:00",
-      color: "#e5489b",
+      color: "#c7d2fe",
       teacherId: "instructor_owner_001",
       studentIds,
       status: "completed",
@@ -610,7 +610,7 @@ const realClassTemplates = [
     timeLabel: "16:00-19:00",
     startTime: "16:00",
     endTime: "19:00",
-    color: "#2563eb",
+    color: "#bfdbfe",
     track: "고1 내신",
     notionClassPageUrl
   },
@@ -621,7 +621,7 @@ const realClassTemplates = [
     timeLabel: "19:00-22:00",
     startTime: "19:00",
     endTime: "22:00",
-    color: "#e5489b",
+    color: "#c7d2fe",
     track: "고1 내신",
     notionClassPageUrl
   },
@@ -634,7 +634,7 @@ const realClassTemplates = [
     endTime: "19:00",
     saturdayStartTime: "10:00",
     saturdayEndTime: "13:00",
-    color: "#10b981",
+    color: "#bbf7d0",
     track: "내신",
     notionClassPageUrl: ""
   },
@@ -647,7 +647,7 @@ const realClassTemplates = [
     endTime: "22:00",
     saturdayStartTime: "13:00",
     saturdayEndTime: "16:00",
-    color: "#7c3aed",
+    color: "#fbcfe8",
     track: "내신",
     notionClassPageUrl: ""
   }
@@ -680,7 +680,7 @@ sampleData.lessons = sampleData.lessons.map((lesson) => ({
   ...lesson,
   className: "월수금 7-10반",
   classTemplateId: "template_mwf_7_10",
-  color: "#e5489b"
+  color: "#c7d2fe"
 }));
 
 sampleData.examPrepRows = [

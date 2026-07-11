@@ -80,15 +80,22 @@ const academyBrandName = "으뜸수학 고태영T";
 const academyOperationalStartDate = "2026-06-19";
 const lessonDeleteRetentionMs = 7 * 24 * 60 * 60 * 1000;
 const lessonCalendarColors = {
-  regular: "#2563eb",
-  preExam: "#f97316",
-  exam: "#16a34a",
-  makeup: "#7c3aed",
-  homeworkMakeup: "#dc2626",
-  absenceMakeup: "#7c3aed",
-  retest: "#b91c1c",
-  examSundayMakeup: "#0891b2"
+  regular: "#bfdbfe",
+  preExam: "#fed7aa",
+  exam: "#fde68a",
+  makeup: "#ddd6fe",
+  homeworkMakeup: "#fecaca",
+  absenceMakeup: "#e9d5ff",
+  retest: "#fca5a5",
+  examSundayMakeup: "#bae6fd"
 };
+const regularLessonClassColors = {
+  template_mwf_4_7: "#bfdbfe",
+  template_mwf_7_10: "#c7d2fe",
+  template_tt_sat_front: "#bbf7d0",
+  template_tt_sat_back: "#fbcfe8"
+};
+const fallbackRegularLessonColors = ["#bfdbfe", "#c7d2fe", "#bbf7d0", "#fbcfe8"];
 
 function getAssignmentStatusForMessage(record, previousHomework) {
   const recordStatus = normalizeAssignmentStatusValue(record?.assignmentStatus ?? record?.incompleteHomework ?? "");
@@ -6473,7 +6480,7 @@ export function App() {
       dayOfWeek: getDayKey(formValues.date),
       startTime: formValues.startTime,
       endTime: formValues.endTime,
-      color: getStandardLessonColor({ lessonType: formValues.lessonType, className: formValues.name }),
+      color: getStandardLessonColor({ lessonType: formValues.lessonType, classTemplateId, className: formValues.name }),
       teacherId: "instructor_owner_001",
       studentIds,
       status: "scheduled"
@@ -6506,7 +6513,7 @@ export function App() {
       dayOfWeek: getDayKey(formValues.date),
       startTime: formValues.startTime,
       endTime: formValues.endTime,
-      color: getStandardLessonColor({ ...editingLesson, lessonType: formValues.lessonType, className: formValues.name }),
+      color: getStandardLessonColor({ ...editingLesson, lessonType: formValues.lessonType, classTemplateId, className: formValues.name }),
       studentIds,
       status: editingLesson?.status ?? "scheduled"
     };
@@ -15985,18 +15992,27 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
   const [date, setDate] = useState(initialLesson?.date ?? today);
   const [startTime, setStartTime] = useState(normalizeTimeInput(initialLesson?.startTime) || activeTemplate.startTime);
   const [endTime, setEndTime] = useState(normalizeTimeInput(initialLesson?.endTime) || activeTemplate.endTime);
-  const [color, setColor] = useState(getStandardLessonColor(initialLesson ?? { lessonType: "class" }));
+  const [color, setColor] = useState(
+    getStandardLessonColor(initialLesson ?? { lessonType: "class", classTemplateId: activeTemplate.classTemplateId, className: activeTemplate.name })
+  );
   const [studentIds, setStudentIds] = useState(() => {
     const initialStudentIds = initialLesson?.studentIds ?? activeStudents.map((student) => student.studentId);
     return getActiveStudentIdsFromSelection(initialStudentIds, activeStudents);
   });
   const [studentSearch, setStudentSearch] = useState("");
+  const regularClassColorOptions = templates.map((template) => ({
+    id: `class-${template.classTemplateId}`,
+    label: template.name,
+    lessonType: "class",
+    classTemplateId: template.classTemplateId,
+    color: getRegularLessonColor(template)
+  }));
   const lessonColorOptions = [
-    { id: "class", label: "정규수업", color: lessonCalendarColors.regular },
-    { id: "preExam", label: "직전수업", color: lessonCalendarColors.preExam },
-    { id: "makeup", label: "보충수업", color: lessonCalendarColors.makeup },
-    { id: "examSundayMakeup", label: "일요보강", color: lessonCalendarColors.examSundayMakeup },
-    { id: "exam", label: "평가", color: lessonCalendarColors.exam }
+    ...regularClassColorOptions,
+    { id: "preExam", label: "직전수업", lessonType: "preExam", color: lessonCalendarColors.preExam },
+    { id: "makeup", label: "보충수업", lessonType: "makeup", color: lessonCalendarColors.makeup },
+    { id: "examSundayMakeup", label: "일요보강", lessonType: "examSundayMakeup", color: lessonCalendarColors.examSundayMakeup },
+    { id: "exam", label: "평가", lessonType: "exam", color: lessonCalendarColors.exam }
   ];
   const filteredStudents = activeStudents.filter((student) =>
     [student.name, student.grade, student.schoolName].join(" ").toLowerCase().includes(studentSearch.toLowerCase())
@@ -16012,14 +16028,14 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
     students: filteredStudents.filter((student) => (student.grade || "학년 미입력") === grade)
   })).filter((group) => group.students.length > 0);
 
-  function handleTemplateChange(nextTemplateId) {
+  function handleTemplateChange(nextTemplateId, nextLessonType = lessonType) {
     const template = templates.find((item) => item.classTemplateId === nextTemplateId);
     setClassTemplateId(nextTemplateId);
     if (!template) return;
     setName(template.name);
     setStartTime(getTemplateStartTime(template, date));
     setEndTime(getTemplateEndTime(template, date));
-    setColor(getStandardLessonColor({ lessonType, className: template.name }));
+    setColor(getStandardLessonColor({ lessonType: nextLessonType, classTemplateId: nextTemplateId, className: template.name }));
     setStudentIds(
       activeStudents
         .filter((student) => student.defaultClassTemplateId === nextTemplateId)
@@ -16029,7 +16045,16 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
 
   function handleLessonTypeChange(nextLessonType) {
     setLessonType(nextLessonType);
-    setColor(getStandardLessonColor({ lessonType: nextLessonType, className: name }));
+    setColor(getStandardLessonColor({ lessonType: nextLessonType, classTemplateId, className: name }));
+  }
+
+  function handleColorOptionClick(item) {
+    if (item.lessonType === "class" && item.classTemplateId) {
+      setLessonType("class");
+      handleTemplateChange(item.classTemplateId, "class");
+      return;
+    }
+    handleLessonTypeChange(item.lessonType);
   }
 
   function handleDateChange(nextDate) {
@@ -16084,7 +16109,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
               aria-label={`${item.label} 색상 미리보기`}
               className={color.toLowerCase() === item.color.toLowerCase() ? "active" : ""}
               key={item.id}
-              onClick={() => handleLessonTypeChange(item.id)}
+              onClick={() => handleColorOptionClick(item)}
               style={{ background: item.color }}
               type="button"
               title={item.label}
@@ -23230,6 +23255,23 @@ function createSupplementLessonName(task, student) {
   return `${followUpTypeLabel(task.taskType)} · ${student.name}`;
 }
 
+function getRegularLessonColorKey(lesson = {}) {
+  const classTemplateId = String(lesson.classTemplateId ?? lesson.classId ?? "").trim();
+  if (classTemplateId) return classTemplateId;
+  return String(lesson.className ?? lesson.name ?? "").trim();
+}
+
+function getFallbackRegularLessonColor(key = "") {
+  if (!key) return lessonCalendarColors.regular;
+  const hash = Array.from(key).reduce((sum, character) => sum + character.charCodeAt(0), 0);
+  return fallbackRegularLessonColors[hash % fallbackRegularLessonColors.length] ?? lessonCalendarColors.regular;
+}
+
+function getRegularLessonColor(lesson = {}) {
+  const colorKey = getRegularLessonColorKey(lesson);
+  return regularLessonClassColors[colorKey] ?? getFallbackRegularLessonColor(colorKey);
+}
+
 function getSupplementLessonColor(taskType) {
   if (taskType === "homework_makeup") return lessonCalendarColors.homeworkMakeup;
   if (taskType === "retest") return lessonCalendarColors.retest;
@@ -23251,7 +23293,7 @@ function getStandardLessonColor(lesson = {}, linkedTask = null) {
     }
     return lessonCalendarColors.makeup;
   }
-  return lessonCalendarColors.regular;
+  return getRegularLessonColor(lesson);
 }
 
 function isHomeworkMakeupTaskLesson(lesson, task) {
