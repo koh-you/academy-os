@@ -79,6 +79,16 @@ const legacySensitiveStorageKeys = ["academy-os.teacherAccountSettings.v1"];
 const academyBrandName = "으뜸수학 고태영T";
 const academyOperationalStartDate = "2026-06-19";
 const lessonDeleteRetentionMs = 7 * 24 * 60 * 60 * 1000;
+const lessonCalendarColors = {
+  regular: "#2563eb",
+  preExam: "#f97316",
+  exam: "#16a34a",
+  makeup: "#7c3aed",
+  homeworkMakeup: "#dc2626",
+  absenceMakeup: "#7c3aed",
+  retest: "#b91c1c",
+  examSundayMakeup: "#0891b2"
+};
 
 function getAssignmentStatusForMessage(record, previousHomework) {
   const recordStatus = normalizeAssignmentStatusValue(record?.assignmentStatus ?? record?.incompleteHomework ?? "");
@@ -5552,7 +5562,7 @@ export function App() {
           setClassTemplates(classesResult.classTemplates);
         }
         const normalizedLessons = lessonsResult.ok && Array.isArray(lessonsResult.lessons)
-          ? normalizeHomeworkMakeupLessonColors(lessonsResult.lessons, makeupTasksResult.makeupTasks ?? [])
+          ? normalizeLessonCalendarColors(lessonsResult.lessons, makeupTasksResult.makeupTasks ?? [])
           : [];
         if (normalizedLessons.length > 0) {
           setLessons(filterActiveLessons(normalizedLessons));
@@ -6463,7 +6473,7 @@ export function App() {
       dayOfWeek: getDayKey(formValues.date),
       startTime: formValues.startTime,
       endTime: formValues.endTime,
-      color: formValues.color,
+      color: getStandardLessonColor({ lessonType: formValues.lessonType, className: formValues.name }),
       teacherId: "instructor_owner_001",
       studentIds,
       status: "scheduled"
@@ -6496,7 +6506,7 @@ export function App() {
       dayOfWeek: getDayKey(formValues.date),
       startTime: formValues.startTime,
       endTime: formValues.endTime,
-      color: formValues.color,
+      color: getStandardLessonColor({ ...editingLesson, lessonType: formValues.lessonType, className: formValues.name }),
       studentIds,
       status: editingLesson?.status ?? "scheduled"
     };
@@ -7710,10 +7720,6 @@ export function App() {
     setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "dirty" }));
   }
 
-  function handleApplyBulkHomework(lesson, homeworkType, title) {
-    getActiveLessonStudents(lesson, students).forEach((student) => handleUpdateHomework(lesson, student, homeworkType, title));
-  }
-
   async function saveDirtyHomeworks() {
     const dirtyIds = Array.from(dirtyHomeworkIdsRef.current);
     if (!dirtyIds.length) return true;
@@ -7953,7 +7959,6 @@ export function App() {
               setEditingLesson(lesson);
               setIsLessonModalOpen(true);
             }}
-            onApplyBulkHomework={handleApplyBulkHomework}
             onBackToCalendar={() => setIsLessonJournalOpen(false)}
             onCancelNotificationJob={handleCancelNotificationJob}
             onMoveDate={handleCalendarMove}
@@ -12498,7 +12503,6 @@ function TeacherLessonHubV2({
   students,
   homeworks,
   onAddLesson,
-  onApplyBulkHomework,
   onBackToCalendar,
   onCancelNotificationJob,
   onChangeRecord,
@@ -12678,7 +12682,6 @@ function TeacherLessonHubV2({
             lessons={lessons}
             materials={materials}
             makeupTasks={makeupTasks}
-            onApplyBulkHomework={onApplyBulkHomework}
             onBack={onBackToCalendar}
             onCancelNotificationJob={onCancelNotificationJob}
             onChangeRecord={onChangeRecord}
@@ -12726,6 +12729,14 @@ function TeacherLessonHubV2({
 
   return (
     <>
+      <AcademyReminderPanel
+        onDeleteAcademyReminder={onDeleteAcademyReminder}
+        onSaveAcademyReminder={onSaveAcademyReminder}
+        reminders={academyReminders}
+        selectedDate={selectedDate}
+        students={students}
+      />
+
       <header className="pageTop teacherCalendarTop">
         <button className="iconButton" onClick={() => onMoveDate(-30)} type="button">‹</button>
         <h1>{formatMonthTitle(selectedDate)}</h1>
@@ -12745,14 +12756,6 @@ function TeacherLessonHubV2({
         </div>
         <button className="primaryButton" onClick={onAddLesson} type="button">+ 수업 등록</button>
       </header>
-
-      <AcademyReminderPanel
-        onDeleteAcademyReminder={onDeleteAcademyReminder}
-        onSaveAcademyReminder={onSaveAcademyReminder}
-        reminders={academyReminders}
-        selectedDate={selectedDate}
-        students={students}
-      />
 
       <section className="calendarShell teacherCalendarShell">
         <div className="calendarGrid teacherCalendarGrid">
@@ -13439,7 +13442,6 @@ function LessonJournalDetail({
   lessons,
   materials = [],
   makeupTasks = [],
-  onApplyBulkHomework,
   onBack,
   onCancelNotificationJob,
   onChangeRecord,
@@ -13467,8 +13469,6 @@ function LessonJournalDetail({
   saveStates,
   students
 }) {
-  const [bulkPreviousHomework, setBulkPreviousHomework] = useState("");
-  const [bulkNextHomework, setBulkNextHomework] = useState("");
   const [commentModal, setCommentModal] = useState(null);
   const [prepMemoModal, setPrepMemoModal] = useState(null);
   const [journalEditMode, setJournalEditMode] = useState(false);
@@ -14005,17 +14005,6 @@ function LessonJournalDetail({
     setJournalManualSaveMessage("수업일지 · 저장 필요");
   }
 
-  function applyBulkHomeworkDraft(homeworkType, title) {
-    if (!journalEditMode) return;
-    const nextDrafts = {};
-    lessonStudents.forEach((student) => {
-      const key = getHomeworkDraftKey(student, homeworkType);
-      nextDrafts[key] = { homeworkType, key, studentId: student.studentId, title };
-    });
-    setJournalHomeworkDrafts((current) => ({ ...current, ...nextDrafts }));
-    setJournalManualSaveMessage("수업일지 · 저장 필요");
-  }
-
   async function saveJournalDrafts() {
     if (!hasJournalDraftChanges) {
       setJournalEditMode(false);
@@ -14158,23 +14147,6 @@ function LessonJournalDetail({
           <AcademyReminderList reminders={lessonAcademyReminders} students={students} />
         </section>
       ) : null}
-
-      <section className="panel bulkHomeworkPanel">
-        <label>
-          전체 지난 숙제
-          <div className="inlineInputAction">
-            <input value={bulkPreviousHomework} onChange={(event) => setBulkPreviousHomework(event.target.value)} placeholder="전체 지난 과제 입력" />
-            <button className="softButton" disabled={!journalEditMode} onClick={() => applyBulkHomeworkDraft("previous", bulkPreviousHomework)} type="button">전체 적용</button>
-          </div>
-        </label>
-        <label>
-          전체 다음 숙제
-          <div className="inlineInputAction">
-            <input value={bulkNextHomework} onChange={(event) => setBulkNextHomework(event.target.value)} placeholder="전체 다음 과제 입력" />
-            <button className="softButton" disabled={!journalEditMode} onClick={() => applyBulkHomeworkDraft("next", bulkNextHomework)} type="button">전체 적용</button>
-          </div>
-        </label>
-      </section>
 
       <section className="panel lessonSaveSummary" aria-label="발송 전 점검">
         <button className={showPreSendCheck ? "preSendCheckButton active" : "preSendCheckButton"} onClick={() => setShowPreSendCheck((current) => !current)} type="button">
@@ -16005,7 +15977,7 @@ function ReportModal({ report, onClose, onMockSend, onSaveSnapshot }) {
 
 function LessonModal({ initialLesson = null, students, templates, onClose, onSubmit }) {
   const activeStudents = students.filter(isActiveStudent);
-  const fallbackTemplate = templates[0] ?? { name: "", startTime: "16:00", endTime: "17:00", color: "#17213d" };
+  const fallbackTemplate = templates[0] ?? { name: "", startTime: "16:00", endTime: "17:00", color: lessonCalendarColors.regular };
   const [lessonType, setLessonType] = useState(initialLesson?.lessonType ?? "class");
   const [classTemplateId, setClassTemplateId] = useState(initialLesson ? initialLesson.classTemplateId || "" : templates[0]?.classTemplateId || "");
   const activeTemplate = templates.find((template) => template.classTemplateId === classTemplateId) ?? fallbackTemplate;
@@ -16013,13 +15985,19 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
   const [date, setDate] = useState(initialLesson?.date ?? today);
   const [startTime, setStartTime] = useState(normalizeTimeInput(initialLesson?.startTime) || activeTemplate.startTime);
   const [endTime, setEndTime] = useState(normalizeTimeInput(initialLesson?.endTime) || activeTemplate.endTime);
-  const [color, setColor] = useState(initialLesson?.color ?? activeTemplate.color);
+  const [color, setColor] = useState(getStandardLessonColor(initialLesson ?? { lessonType: "class" }));
   const [studentIds, setStudentIds] = useState(() => {
     const initialStudentIds = initialLesson?.studentIds ?? activeStudents.map((student) => student.studentId);
     return getActiveStudentIdsFromSelection(initialStudentIds, activeStudents);
   });
   const [studentSearch, setStudentSearch] = useState("");
-  const lessonColors = ["#17213d", "#3b82f6", "#6366f1", "#8b5cf6", "#ec4899", "#ef4444", "#f59e0b", "#10b981", "#059669", "#0891b2", "#7c3aed", "#dc2626", "#d97706", "#16a34a", "#0284c7"];
+  const lessonColorOptions = [
+    { id: "class", label: "정규수업", color: lessonCalendarColors.regular },
+    { id: "preExam", label: "직전수업", color: lessonCalendarColors.preExam },
+    { id: "makeup", label: "보충수업", color: lessonCalendarColors.makeup },
+    { id: "examSundayMakeup", label: "일요보강", color: lessonCalendarColors.examSundayMakeup },
+    { id: "exam", label: "평가", color: lessonCalendarColors.exam }
+  ];
   const filteredStudents = activeStudents.filter((student) =>
     [student.name, student.grade, student.schoolName].join(" ").toLowerCase().includes(studentSearch.toLowerCase())
   );
@@ -16041,12 +16019,17 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
     setName(template.name);
     setStartTime(getTemplateStartTime(template, date));
     setEndTime(getTemplateEndTime(template, date));
-    setColor(template.color);
+    setColor(getStandardLessonColor({ lessonType, className: template.name }));
     setStudentIds(
       activeStudents
         .filter((student) => student.defaultClassTemplateId === nextTemplateId)
         .map((student) => student.studentId)
     );
+  }
+
+  function handleLessonTypeChange(nextLessonType) {
+    setLessonType(nextLessonType);
+    setColor(getStandardLessonColor({ lessonType: nextLessonType, className: name }));
   }
 
   function handleDateChange(nextDate) {
@@ -16070,7 +16053,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
             <button
               className={lessonType === value ? "active" : ""}
               key={value}
-              onClick={() => setLessonType(value)}
+              onClick={() => handleLessonTypeChange(value)}
               type="button"
             >
               {label}
@@ -16096,21 +16079,17 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
       <div className="modalSection lessonModalSection">
         <label>달력 색상</label>
         <div className="lessonColorPalette">
-          {lessonColors.map((item) => (
+          {lessonColorOptions.map((item) => (
             <button
-              aria-label={`${item} 색상 선택`}
-              className={color.toLowerCase() === item.toLowerCase() ? "active" : ""}
-              key={item}
-              onClick={() => setColor(item)}
-              style={{ background: item }}
+              aria-label={`${item.label} 색상 미리보기`}
+              className={color.toLowerCase() === item.color.toLowerCase() ? "active" : ""}
+              key={item.id}
+              onClick={() => handleLessonTypeChange(item.id)}
+              style={{ background: item.color }}
               type="button"
+              title={item.label}
             />
           ))}
-          <label className="customColorInput">
-            <span style={{ background: color }} />
-            직접입력
-            <input type="color" value={color} onChange={(event) => setColor(event.target.value)} />
-          </label>
         </div>
       </div>
 
@@ -23252,28 +23231,42 @@ function createSupplementLessonName(task, student) {
 }
 
 function getSupplementLessonColor(taskType) {
-  if (taskType === "homework_makeup") return "#172554";
-  if (taskType === "retest") return "#ef4444";
-  return "#7c3aed";
+  if (taskType === "homework_makeup") return lessonCalendarColors.homeworkMakeup;
+  if (taskType === "retest") return lessonCalendarColors.retest;
+  if (taskType === "absence_makeup") return lessonCalendarColors.absenceMakeup;
+  return lessonCalendarColors.makeup;
+}
+
+function getStandardLessonColor(lesson = {}, linkedTask = null) {
+  if (lesson.lessonType === "preExam") return lessonCalendarColors.preExam;
+  if (lesson.lessonType === "exam") return lessonCalendarColors.exam;
+  if (lesson.lessonType === "examSundayMakeup") return lessonCalendarColors.examSundayMakeup;
+  if (lesson.lessonType === "makeup") {
+    if (linkedTask?.taskType) return getSupplementLessonColor(linkedTask.taskType);
+    if (lesson.lessonTopic?.includes("숙제보충") || lesson.className?.includes("숙제보충")) {
+      return getSupplementLessonColor("homework_makeup");
+    }
+    if (lesson.lessonTopic?.includes("재시험") || lesson.className?.includes("재시험")) {
+      return getSupplementLessonColor("retest");
+    }
+    return lessonCalendarColors.makeup;
+  }
+  return lessonCalendarColors.regular;
 }
 
 function isHomeworkMakeupTaskLesson(lesson, task) {
   return lesson?.lessonType === "makeup" && task?.taskType === "homework_makeup";
 }
 
-function normalizeHomeworkMakeupLessonColors(lessons = [], makeupTasks = []) {
-  const homeworkMakeupLessonIds = new Set(
+function normalizeLessonCalendarColors(lessons = [], makeupTasks = []) {
+  const taskByLessonId = new Map(
     makeupTasks
-      .filter((task) => task.taskType === "homework_makeup" && task.linkedLessonId)
-      .map((task) => task.linkedLessonId)
+      .filter((task) => task.linkedLessonId)
+      .map((task) => [task.linkedLessonId, task])
   );
   return lessons.map((lesson) => {
-    const isHomeworkMakeupLesson =
-      homeworkMakeupLessonIds.has(lesson.lessonId) ||
-      (lesson.lessonType === "makeup" &&
-        (lesson.lessonTopic?.includes("숙제보충") || lesson.className?.includes("숙제보충")));
-    if (!isHomeworkMakeupLesson || lesson.color === getSupplementLessonColor("homework_makeup")) return lesson;
-    return { ...lesson, color: getSupplementLessonColor("homework_makeup") };
+    const standardColor = getStandardLessonColor(lesson, taskByLessonId.get(lesson.lessonId));
+    return lesson.color === standardColor ? lesson : { ...lesson, color: standardColor };
   });
 }
 
@@ -23379,7 +23372,7 @@ function createPreExamLessonFromSchoolEvent(event = {}, students = []) {
     dayOfWeek: getDayKey(addDaysInKorea(event.date, -1)),
     startTime: "19:00",
     endTime: "21:00",
-    color: "#7c3aed",
+    color: getStandardLessonColor({ lessonType: "preExam" }),
     teacherId: "instructor_owner_001",
     studentIds: lessonStudents.map((student) => student.studentId),
     status: "scheduled",
@@ -23535,7 +23528,7 @@ function buildSundayMakeupCandidates(rows = []) {
         dayOfWeek: "sun",
         startTime: "13:00",
         endTime: "18:00",
-        color: "#0891b2",
+        color: getStandardLessonColor({ lessonType: "examSundayMakeup" }),
         teacherId: "instructor_owner_001",
         studentIds: [],
         status: "scheduled",

@@ -3714,12 +3714,6 @@ button {
   margin-top: 10px;
 }
 
-.bulkHomeworkPanel {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
 .aiSettingBadge {
   align-items: center;
   background: #eef2ff;
@@ -4276,19 +4270,6 @@ button {
 
 .commentOpenButton span {
   font-size: 12px;
-}
-
-.bulkHomeworkPanel label {
-  color: #17213d;
-  display: grid;
-  font-weight: 900;
-  gap: 8px;
-}
-
-.inlineInputAction {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: minmax(0, 1fr) auto;
 }
 
 .journalTablePanel {
