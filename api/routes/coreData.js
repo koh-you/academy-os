@@ -162,8 +162,8 @@ function fromClassTemplateRow(row) {
   };
 }
 
-function toLessonRow(lesson) {
-  return {
+function toLessonRow(lesson, { includeScheduleMetadata = true } = {}) {
+  const row = {
     lesson_id: lesson.lessonId,
     class_template_id: compact(lesson.classTemplateId),
     class_name: lesson.className,
@@ -172,14 +172,17 @@ function toLessonRow(lesson) {
     end_time: compact(normalizeClockTime(lesson.endTime)),
     color: lesson.color ?? "#17213a",
     student_ids: lesson.studentIds ?? [],
-    lesson_type: compact(lesson.lessonType),
-    lesson_topic: compact(lesson.lessonTopic),
-    source_makeup_task_id: compact(lesson.sourceMakeupTaskId),
-    source_school_event_id: compact(lesson.sourceSchoolEventId),
-    source_label: compact(lesson.sourceLabel),
     status: lesson.status ?? "scheduled",
     updated_at: new Date().toISOString()
   };
+  if (includeScheduleMetadata) {
+    row.lesson_type = compact(lesson.lessonType);
+    row.lesson_topic = compact(lesson.lessonTopic);
+    row.source_makeup_task_id = compact(lesson.sourceMakeupTaskId);
+    row.source_school_event_id = compact(lesson.sourceSchoolEventId);
+    row.source_label = compact(lesson.sourceLabel);
+  }
+  return row;
 }
 
 function fromLessonRow(row) {
@@ -1237,7 +1240,13 @@ export async function upsertLesson(lesson) {
     return { source: fallbackSource, lesson };
   }
 
-  const [row] = await upsertRows("lessons", [toLessonRow(lesson)], { onConflict: "lesson_id" });
+  let row;
+  try {
+    [row] = await upsertRows("lessons", [toLessonRow(lesson)], { onConflict: "lesson_id" });
+  } catch (error) {
+    if (!errorMentionsAnyColumn(error, ["lesson_type", "lesson_topic", "source_makeup_task_id", "source_school_event_id", "source_label"])) throw error;
+    [row] = await upsertRows("lessons", [toLessonRow(lesson, { includeScheduleMetadata: false })], { onConflict: "lesson_id" });
+  }
   const savedLesson = fromLessonRow(row);
   await cancelPendingNotificationJobsForRemovedLessonStudents(savedLesson, "수업 명단에서 제외됨");
   await deleteLessonStudentRecordsForRemovedLessonStudents(savedLesson);
@@ -1252,7 +1261,17 @@ export async function upsertLessons(lessons) {
     return { source: fallbackSource, lessons };
   }
 
-  const rows = await upsertRows("lessons", lessons.map(toLessonRow), { onConflict: "lesson_id" });
+  let rows;
+  try {
+    rows = await upsertRows("lessons", lessons.map((lesson) => toLessonRow(lesson)), { onConflict: "lesson_id" });
+  } catch (error) {
+    if (!errorMentionsAnyColumn(error, ["lesson_type", "lesson_topic", "source_makeup_task_id", "source_school_event_id", "source_label"])) throw error;
+    rows = await upsertRows(
+      "lessons",
+      lessons.map((lesson) => toLessonRow(lesson, { includeScheduleMetadata: false })),
+      { onConflict: "lesson_id" }
+    );
+  }
   const savedLessons = rows.map(fromLessonRow);
   for (const savedLesson of savedLessons) {
     await cancelPendingNotificationJobsForRemovedLessonStudents(savedLesson, "수업 명단에서 제외됨");

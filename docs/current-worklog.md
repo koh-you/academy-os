@@ -12,6 +12,18 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-11 P1. 보충관리 저장/일정반영 버튼 작동 보강
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 제보: 보충관리 학생별 상세에서 `수정 저장하고 일정 반영`과 `보충 완료 처리` 버튼이 작동하지 않는 것처럼 보였다.
+- 원인 판단: 기존 버튼은 `makeup_tasks` 저장과 `lessons` 일정 반영 API를 fire-and-forget으로 호출한 뒤 성공 팝업을 먼저 띄웠다. API 실패는 콘솔에만 남아 화면에서는 버튼이 먹지 않는 것처럼 보일 수 있었다. 또한 운영 DB에 lesson schedule metadata 컬럼(`lesson_type`, `source_makeup_task_id` 등)이 늦게 적용된 경우 `/api/lessons` 저장 전체가 실패할 수 있었다.
+- 구현 결과: 보충관리 `내용만 저장`/`저장하고 일정 반영`/`수정 저장하고 일정 반영`은 API 저장을 await한 뒤에만 성공 메시지를 표시한다. 저장 중에는 버튼이 `저장 중`으로 바뀌고, 실패하면 같은 모달 안에 `보충 저장 실패`가 붉게 표시된다.
+- 구현 결과: `보충 완료 처리`도 API 완료를 기다린 뒤 완료 메시지를 띄우며, 실패 시 확인 모달/상단 피드백에 실패 메시지를 표시한다. 중복 클릭은 처리 중 버튼 비활성화로 막았다.
+- 구현 결과: `/api/lessons` 저장 시 lesson metadata 컬럼 누락 오류가 나면 기본 수업 일정 row로 한 번 재시도한다. 이 경우에도 `makeup_tasks.linkedLessonId`를 통해 보충 task와 달력 수업 연결을 찾도록 프론트 조회 경로를 보강했다.
+- 저장 원천: 보충관리 원본은 Supabase `makeup_tasks`, 달력 수업 원본은 Supabase `lessons`, 숙제보충 완료 시 숙제 검증 원본은 Supabase `homeworks`다. 새 SQL은 만들지 않았다. 다만 완전한 보충수업 메타 저장은 기존 `supabase/20260620_lesson_schedule_metadata.sql` 적용이 정식 기준이다.
+- 중단 조건: 버튼 클릭 후 성공 메시지가 떴는데 새로고침하면 `makeup_tasks`/`lessons` 반영이 사라짐, 저장 실패가 화면에 표시되지 않음, 같은 버튼을 처리 중 여러 번 누를 수 있음, 보충수업 일정이 달력에 중복 생성됨, 숙제보충이 아닌 수동 보강이 숙제보충 전용 화면으로 열림.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 268개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-11 P1. 운영 알림 완료 버튼 런타임 오류 방지
 
 - 상태: 완료 - 구현/검증 완료

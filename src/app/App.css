@@ -12564,6 +12564,37 @@ textarea.profileEditInput {
   margin: 0;
 }
 
+.supplementFeedbackPopup.saving {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.supplementFeedbackPopup.saving p {
+  color: #1e40af;
+}
+
+.supplementFeedbackPopup.failed {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+.supplementFeedbackPopup.failed p {
+  color: #b91c1c;
+}
+
+.supplementPassError {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #b91c1c;
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin-top: 12px;
+  padding: 10px 12px;
+}
+
 .supplementModalAside {
   align-content: start;
   background: #f8fafc;

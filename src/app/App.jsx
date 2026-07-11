@@ -8266,6 +8266,7 @@ export function App() {
             tasks={makeupTasks}
             onCreateTask={handleCreateMakeupTask}
             onPassTask={handlePassSupplementTask}
+            onSaveTask={handleSaveMakeupTask}
             onScheduleTask={handleScheduleSupplementTask}
             onUndoPassTask={handleUndoPassSupplementTask}
             onUpdateTask={handleUpdateMakeupTask}
@@ -8985,9 +8986,19 @@ export function App() {
     );
   }
 
-  function handleScheduleSupplementTask(task) {
+  async function handleSaveMakeupTask(task) {
+    if (!task?.makeupTaskId) throw new Error("보충관리 ID가 없어 저장할 수 없습니다.");
+    const result = await postMakeupTask({ ...task, updatedAt: new Date().toISOString() });
+    const savedTask = result.makeupTask ?? { ...task, updatedAt: new Date().toISOString() };
+    setMakeupTasks((current) => upsertById(current, savedTask, "makeupTaskId"));
+    return savedTask;
+  }
+
+  async function handleScheduleSupplementTask(task) {
     const student = students.find((item) => item.studentId === task.studentId);
-    if (!student || !task.scheduledDate || !task.scheduledTime) return;
+    if (!student) throw new Error("보충 일정을 반영할 학생 정보를 찾을 수 없습니다.");
+    if (!task?.makeupTaskId) throw new Error("보충관리 ID가 없어 일정을 반영할 수 없습니다.");
+    if (!task.scheduledDate || !task.scheduledTime) throw new Error("배정일과 시간을 입력해야 일정을 반영할 수 있습니다.");
 
     const lessonId = task.linkedLessonId || createSupplementLessonId(task);
     const className = createSupplementLessonName(task, student);
@@ -9008,35 +9019,33 @@ export function App() {
       sourceMakeupTaskId: task.makeupTaskId,
       sourceLabel: task.sourceLabel
     };
+    const nextTask = {
+      ...task,
+      status: "scheduled",
+      scheduledDate: lesson.date,
+      scheduledTime: lesson.startTime,
+      linkedLessonId: lessonId,
+      linkedLessonDate: lesson.date,
+      linkedLessonTime: lesson.startTime,
+      needsLessonResync: false,
+      lastScheduledAt: new Date().toISOString()
+    };
 
-    setLessons((current) => upsertById(current, lesson, "lessonId"));
-    setMakeupTasks((current) =>
-      current.map((item) => {
-        if (item.makeupTaskId !== task.makeupTaskId) return item;
-        const nextTask = {
-          ...item,
-          ...task,
-          status: "scheduled",
-          scheduledDate: lesson.date,
-          scheduledTime: lesson.startTime,
-          linkedLessonId: lessonId,
-          linkedLessonDate: lesson.date,
-          linkedLessonTime: lesson.startTime,
-          needsLessonResync: false,
-          lastScheduledAt: new Date().toISOString()
-        };
-        postMakeupTask(nextTask).catch((error) => console.error(error));
-        return nextTask;
-      })
-    );
-    setSelectedDate(lesson.date);
-    setSelectedLessonId(lesson.lessonId);
+    const lessonResult = await postJson("/api/lessons", { lesson });
+    const savedLesson = lessonResult.lesson ?? lesson;
+    const taskResult = await postMakeupTask(nextTask);
+    const savedTask = taskResult.makeupTask ?? nextTask;
+
+    setLessons((current) => upsertById(current, savedLesson, "lessonId"));
+    setMakeupTasks((current) => upsertById(current, savedTask, "makeupTaskId"));
+    setSelectedDate(savedLesson.date);
+    setSelectedLessonId(savedLesson.lessonId);
     setIsLessonJournalOpen(false);
-    postJson("/api/lessons", { lesson }).catch((error) => console.error(error));
+    return { lesson: savedLesson, makeupTask: savedTask };
   }
 
-  function handlePassSupplementTask(task) {
-    if (!task?.studentId || !task?.sourceId) return;
+  async function handlePassSupplementTask(task) {
+    if (!task?.studentId || !task?.sourceId) throw new Error("완료 처리할 보충 항목 정보가 부족합니다.");
     const completedAt = new Date().toISOString();
     const makeupTaskId = task.makeupTaskId || `makeup_pass_${Date.now()}_${task.studentId}`;
     const needsMoreSupplement = task.completionDecision === "needs_more" || task.supplementProcessStatus === "needs_more";
@@ -9056,24 +9065,24 @@ export function App() {
       touchedAt: completedAt
     };
 
-    setMakeupTasks((current) => upsertById(current, nextTask, "makeupTaskId"));
-    postMakeupTask(nextTask).catch((error) => console.error(error));
+    const taskResult = await postMakeupTask(nextTask);
+    const savedTask = taskResult.makeupTask ?? nextTask;
+    setMakeupTasks((current) => upsertById(current, savedTask, "makeupTaskId"));
 
     if (!needsMoreSupplement && task.taskType === "homework_makeup") {
-      setHomeworks((current) =>
-        current.map((homework) => {
-          if (homework.homeworkId !== task.sourceId) return homework;
-          const nextHomework = {
-            ...homework,
-            status: "verified",
-            teacherStatus: "verified",
-            verifiedAt: completedAt
-          };
-          postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
-          return nextHomework;
-        })
-      );
+      const sourceHomework = homeworks.find((homework) => homework.homeworkId === task.sourceId);
+      if (sourceHomework) {
+        const nextHomework = {
+          ...sourceHomework,
+          status: "verified",
+          teacherStatus: "verified",
+          verifiedAt: completedAt
+        };
+        await postJson("/api/homeworks", { homework: nextHomework });
+        setHomeworks((current) => current.map((homework) => (homework.homeworkId === nextHomework.homeworkId ? nextHomework : homework)));
+      }
     }
+    return savedTask;
   }
 
   function handleUndoPassSupplementTask(task) {
@@ -12634,7 +12643,7 @@ function TeacherLessonHubV2({
   ]);
 
   const selectedMakeupTask = selectedLesson
-    ? makeupTasks.find((task) => task.makeupTaskId === selectedLesson.sourceMakeupTaskId)
+    ? makeupTasks.find((task) => task.makeupTaskId === selectedLesson.sourceMakeupTaskId || task.linkedLessonId === selectedLesson.lessonId)
     : null;
   const selectedSourceLesson = selectedLesson?.sourceLessonId
     ? lessons.find((lesson) => lesson.lessonId === selectedLesson.sourceLessonId) ?? selectedLesson
@@ -13526,7 +13535,7 @@ function LessonJournalDetail({
   const [studentPreviewId, setStudentPreviewId] = useState("");
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
-  const linkedMakeupTask = makeupTasks.find((task) => task.makeupTaskId === lesson.sourceMakeupTaskId);
+  const linkedMakeupTask = makeupTasks.find((task) => task.makeupTaskId === lesson.sourceMakeupTaskId || task.linkedLessonId === lesson.lessonId);
   const notificationPlanMode = lessonNotificationPlan?.mode || "default";
   const defaultAlimtalkTimeLabel = formatKoreaTimeLabel(getLessonAlimtalkScheduledDate(lesson, 0, { allowPastFallback: false }));
   const isDefaultScheduleExpired = isLessonAlimtalkScheduleExpired(lesson, 0);
@@ -20785,6 +20794,7 @@ function SupplementCenter({
   tasks,
   onCreateTask,
   onPassTask,
+  onSaveTask,
   onScheduleTask,
   onUndoPassTask,
   onUpdateTask
@@ -20794,6 +20804,8 @@ function SupplementCenter({
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [historyQuery, setHistoryQuery] = useState("");
   const [passConfirmTask, setPassConfirmTask] = useState(null);
+  const [passBusyTaskId, setPassBusyTaskId] = useState("");
+  const [passActionError, setPassActionError] = useState("");
   const makeupHomeworks = homeworks.filter((homework) => isHomeworkMakeupCandidate(homework, records, lessons)).slice(0, 8);
   const absentRecords = records
     .filter((record) => record.attendanceStatus === "absent" || record.attendanceStatus === "excused")
@@ -20828,6 +20840,7 @@ function SupplementCenter({
 
   function openPassConfirm(existingTask, item) {
     const task = existingTask ?? item.task;
+    setPassActionError("");
     setPassConfirmTask({
       ...task,
       studentId: item.studentId,
@@ -20835,10 +20848,19 @@ function SupplementCenter({
     });
   }
 
-  function confirmPassTask() {
+  async function confirmPassTask() {
     if (!passConfirmTask) return;
-    onPassTask(passConfirmTask);
-    setPassConfirmTask(null);
+    setPassBusyTaskId(passConfirmTask.makeupTaskId || passConfirmTask.sourceId || "");
+    setPassActionError("");
+    try {
+      await onPassTask(passConfirmTask);
+      setPassConfirmTask(null);
+    } catch (error) {
+      console.error("Failed to pass supplement task", error);
+      setPassActionError(error?.message || "보충 완료 처리에 실패했습니다.");
+    } finally {
+      setPassBusyTaskId("");
+    }
   }
 
   const selectedSupplementStudent = students.find((student) => student.studentId === selectedSupplementStudentId);
@@ -21016,6 +21038,7 @@ function SupplementCenter({
         <SupplementStudentModal
           onClose={() => setSelectedSupplementStudentId("")}
           onPassTask={onPassTask}
+          onSaveTask={onSaveTask}
           onScheduleTask={onScheduleTask}
           onUpdateTask={onUpdateTask}
           student={selectedSupplementStudent}
@@ -21035,6 +21058,8 @@ function SupplementCenter({
       ) : null}
       {passConfirmTask ? (
         <SupplementPassConfirmModal
+          errorMessage={passActionError}
+          isBusy={passBusyTaskId === (passConfirmTask.makeupTaskId || passConfirmTask.sourceId)}
           onCancel={() => setPassConfirmTask(null)}
           onConfirm={confirmPassTask}
           studentName={studentName(passConfirmTask.studentId)}
@@ -21045,7 +21070,7 @@ function SupplementCenter({
   );
 }
 
-function SupplementPassConfirmModal({ onCancel, onConfirm, studentName, task }) {
+function SupplementPassConfirmModal({ errorMessage = "", isBusy = false, onCancel, onConfirm, studentName, task }) {
   const targetLabel = task.taskType === "homework_makeup"
     ? task.supplementHomeworkNote || task.sourceLabel || task.reason || "보충 항목"
     : task.sourceLabel || task.reason || "보충 항목";
@@ -21074,13 +21099,14 @@ function SupplementPassConfirmModal({ onCancel, onConfirm, studentName, task }) 
             <dd>{task.scheduledDate || "미확정"} {task.scheduledTime || ""}</dd>
           </div>
         </dl>
+        {errorMessage ? <div className="supplementPassError">{errorMessage}</div> : null}
       </div>
       <div className="modalActions confirmActions">
-        <button className="softButton" onClick={onCancel} type="button">
+        <button className="softButton" disabled={isBusy} onClick={onCancel} type="button">
           취소
         </button>
-        <button className="passButton" onClick={onConfirm} type="button">
-          보충 완료 처리
+        <button className="passButton" disabled={isBusy} onClick={onConfirm} type="button">
+          {isBusy ? "처리 중" : "보충 완료 처리"}
         </button>
       </div>
     </Modal>
@@ -21090,6 +21116,7 @@ function SupplementPassConfirmModal({ onCancel, onConfirm, studentName, task }) 
 function SupplementStudentModal({
   onClose,
   onPassTask,
+  onSaveTask,
   onScheduleTask,
   onUpdateTask,
   student,
@@ -21098,37 +21125,58 @@ function SupplementStudentModal({
 }) {
   const [feedback, setFeedback] = useState(null);
   const [passConfirmTask, setPassConfirmTask] = useState(null);
+  const [busyTaskId, setBusyTaskId] = useState("");
 
-  function showFeedback(title, message) {
-    setFeedback({ title, message });
+  function showFeedback(title, message, tone = "success") {
+    setFeedback({ title, message, tone });
   }
 
-  function handleSaveTask(task) {
+  async function handleSaveTask(task) {
+    if (!task?.makeupTaskId || busyTaskId) return;
     const draft = createNotificationDraft(task, [student]);
     const taskWithDraft = { ...task, notificationDraft: draft };
-    onUpdateTask(task.makeupTaskId, "notificationDraft", draft);
+    setBusyTaskId(task.makeupTaskId);
+    showFeedback("보충 저장 중", task.scheduledDate && task.scheduledTime ? "보충 일정과 알림톡 초안을 저장하고 있습니다." : "보충 내용과 알림톡 초안을 저장하고 있습니다.", "saving");
 
-    if (task.scheduledDate && task.scheduledTime) {
-      onScheduleTask(taskWithDraft);
-      showFeedback(
-        task.linkedLessonId ? "보충 내용 저장 및 일정 수정 완료" : "보충 내용 저장 및 일정 반영 완료",
-        `${task.scheduledDate} ${task.scheduledTime} 보충 일정과 알림톡 초안이 함께 반영되었습니다.`
-      );
-      return;
+    try {
+      if (task.scheduledDate && task.scheduledTime) {
+        await onScheduleTask?.(taskWithDraft);
+        showFeedback(
+          task.linkedLessonId ? "보충 내용 저장 및 일정 수정 완료" : "보충 내용 저장 및 일정 반영 완료",
+          `${task.scheduledDate} ${task.scheduledTime} 보충 일정과 알림톡 초안이 함께 반영되었습니다.`
+        );
+        return;
+      }
+
+      await onSaveTask?.(taskWithDraft);
+      showFeedback("보충 내용만 저장 완료", "알림톡 초안은 갱신되었습니다. 배정일과 시간을 입력하면 수업일지 일정에도 함께 반영할 수 있습니다.");
+    } catch (error) {
+      console.error("Failed to save supplement task", error);
+      showFeedback("보충 저장 실패", error?.message || "알 수 없는 오류가 발생했습니다.", "failed");
+    } finally {
+      setBusyTaskId("");
     }
-
-    showFeedback("보충 내용만 저장 완료", "알림톡 초안은 갱신되었습니다. 배정일과 시간을 입력하면 수업일지 일정에도 함께 반영할 수 있습니다.");
   }
 
-  function handlePassTask(task) {
-    onPassTask(task);
-    showFeedback("보충 완료 처리 완료", `${student.name} 학생의 보충 항목을 완료 처리했습니다.`);
+  async function handlePassTask(task) {
+    if (!task?.makeupTaskId || busyTaskId) return;
+    setBusyTaskId(task.makeupTaskId);
+    showFeedback("보충 완료 처리 중", `${student.name} 학생의 보충 항목을 완료 처리하고 있습니다.`, "saving");
+    try {
+      await onPassTask?.(task);
+      showFeedback("보충 완료 처리 완료", `${student.name} 학생의 보충 항목을 완료 처리했습니다.`);
+      setPassConfirmTask(null);
+    } catch (error) {
+      console.error("Failed to pass supplement task", error);
+      showFeedback("보충 완료 처리 실패", error?.message || "알 수 없는 오류가 발생했습니다.", "failed");
+    } finally {
+      setBusyTaskId("");
+    }
   }
 
   function confirmPassTask() {
     if (!passConfirmTask) return;
     handlePassTask(passConfirmTask);
-    setPassConfirmTask(null);
   }
 
   return (
@@ -21139,7 +21187,7 @@ function SupplementStudentModal({
       onClose={onClose}
     >
       {feedback ? (
-        <div className="supplementFeedbackPopup" role="status" aria-live="polite">
+        <div className={`supplementFeedbackPopup ${feedback.tone || "success"}`} role="status" aria-live="polite">
           <div>
             <strong>{feedback.title}</strong>
             <p>{feedback.message}</p>
@@ -21168,6 +21216,7 @@ function SupplementStudentModal({
               const visibleDraft = task.notificationDraft || freshDraft;
               const supplementHomeworkNote = task.supplementHomeworkNote ?? task.sourceLabel ?? "";
               const supplementMemo = task.supplementProgressMemo ?? "";
+              const isTaskBusy = busyTaskId === task.makeupTaskId;
               return (
                 <article className="taskCard" key={task.makeupTaskId}>
                   <div className="taskCardTop">
@@ -21265,13 +21314,13 @@ function SupplementStudentModal({
                     />
                   </label>
                   <div className="modalActions">
-                    <button className="softButton primarySoft" onClick={() => handleSaveTask(task)} type="button">
-                      {task.scheduledDate && task.scheduledTime
+                    <button className="softButton primarySoft" disabled={isTaskBusy} onClick={() => handleSaveTask(task)} type="button">
+                      {isTaskBusy ? "저장 중" : task.scheduledDate && task.scheduledTime
                         ? task.linkedLessonId ? "수정 저장하고 일정 반영" : "저장하고 일정 반영"
                         : "내용만 저장"}
                     </button>
-                    <button className="passButton" onClick={() => setPassConfirmTask(task)} type="button">
-                      보충 완료 처리
+                    <button className="passButton" disabled={isTaskBusy} onClick={() => setPassConfirmTask(task)} type="button">
+                      {isTaskBusy ? "처리 중" : "보충 완료 처리"}
                     </button>
                   </div>
                 </article>
@@ -21282,6 +21331,7 @@ function SupplementStudentModal({
       </div>
       {passConfirmTask ? (
         <SupplementPassConfirmModal
+          isBusy={busyTaskId === passConfirmTask.makeupTaskId}
           onCancel={() => setPassConfirmTask(null)}
           onConfirm={confirmPassTask}
           studentName={student.name}
@@ -23317,6 +23367,9 @@ function getSupplementLessonColor(taskType) {
 }
 
 function getStandardLessonColor(lesson = {}, linkedTask = null) {
+  if (linkedTask?.taskType && linkedTask.linkedLessonId === lesson.lessonId) {
+    return getSupplementLessonColor(linkedTask.taskType);
+  }
   if (lesson.lessonType === "preExam") return lessonCalendarColors.preExam;
   if (lesson.lessonType === "exam") return lessonCalendarColors.exam;
   if (lesson.lessonType === "examSundayMakeup") return lessonCalendarColors.examSundayMakeup;
@@ -23334,7 +23387,10 @@ function getStandardLessonColor(lesson = {}, linkedTask = null) {
 }
 
 function isHomeworkMakeupTaskLesson(lesson, task) {
-  return lesson?.lessonType === "makeup" && task?.taskType === "homework_makeup";
+  return Boolean(
+    task?.taskType === "homework_makeup" &&
+    (lesson?.lessonType === "makeup" || task.linkedLessonId === lesson?.lessonId || lesson?.sourceMakeupTaskId === task.makeupTaskId)
+  );
 }
 
 function normalizeLessonCalendarColors(lessons = [], makeupTasks = []) {
