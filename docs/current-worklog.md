@@ -12,6 +12,17 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-11 P1. 결석보강 상세 모달 source 단위 고정
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 제보: 최원석 학생이 2026-07-08, 2026-07-10 이틀 결석이라 결석보강 후보가 2건 있는데, 7월 10일 결석보강 모달에 7월 8일 데이터가 함께 보이고 `보충 완료 처리`를 눌러도 완료 처리된 것처럼 보이지 않았다.
+- 원인 판단: 보충관리 상세 모달이 `선택한 source 1건`이 아니라 `같은 학생 + 같은 보충 탭`의 모든 task를 한 번에 보여줬다. 그래서 같은 학생의 7/8, 7/10 결석보강이 한 모달에 섞였고, 완료 후에도 열린 모달 안에 완료/다른 task가 남아 처리 실패처럼 보였다.
+- 구현 결과: 상세 모달에 `selectedSupplementTaskKey`를 추가해 `taskType + studentId + sourceId`가 같은 선택 row 1건만 표시한다. 학생 이름 클릭과 `상세 검토/초안 검토` 버튼 모두 같은 source 고정 흐름을 탄다.
+- 구현 결과: 모달 안 `보충 완료 처리` 성공 시 parent `makeup_tasks` 저장 결과를 받은 뒤 모달을 닫는다. 완료된 task는 열린 모달에 계속 남지 않고, 목록의 active 후보에서도 제외된다. 이미 완료된 task를 다시 누르면 안내만 표시한다.
+- 저장 원천: 완료 원본은 Supabase `makeup_tasks.status = done`, `completedAt/passedAt`, `supplementProcessStatus = completed`이다. 이번 수정은 모달 표시 범위와 완료 후 UI 반영을 바로잡는 변경이며 새 SQL은 필요 없다.
+- 중단 조건: 7월 10일 결석보강 상세에 7월 8일 보강 카드가 같이 보임, 완료 처리 후 모달이 그대로 남아 완료 안 된 것처럼 보임, 완료 후 새로고침하면 같은 후보가 다시 active 목록에 나타남, 다른 날짜 task가 함께 완료됨.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production`(276개 통과), `npm run build`, `git diff --check` 통과.
+
 ### 2026-07-11 P1. 결석보강에 지난 숙제 확인 통합
 
 - 상태: 완료 - 구현/검증 완료

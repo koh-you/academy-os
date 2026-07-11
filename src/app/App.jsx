@@ -20883,6 +20883,7 @@ function SupplementCenter({
   const [passBusyTaskId, setPassBusyTaskId] = useState("");
   const [passActionError, setPassActionError] = useState("");
   const [pendingCandidateTask, setPendingCandidateTask] = useState(null);
+  const [selectedSupplementTaskKey, setSelectedSupplementTaskKey] = useState("");
   const [supplementRowActions, setSupplementRowActions] = useState({});
   const makeupHomeworks = homeworks.filter((homework) => isHomeworkMakeupCandidate(homework, records, lessons));
   const absentRecords = records
@@ -20946,8 +20947,10 @@ function SupplementCenter({
 
   function openCandidateReview(item) {
     const existingTask = findTaskForCandidate(item.task);
+    const selectedTaskKey = getSupplementActionKey(existingTask ?? item.task);
     setActiveSupplementTab(item.task.taskType);
     setSelectedSupplementStudentId(item.studentId);
+    setSelectedSupplementTaskKey(selectedTaskKey);
     setPassActionError("");
     if (existingTask) {
       setPendingCandidateTask(null);
@@ -20994,6 +20997,27 @@ function SupplementCenter({
     }
   }
 
+  async function handlePassSupplementTaskFromModal(task) {
+    setSupplementRowAction(task, "saving", "보충 완료 처리 중");
+    try {
+      const savedTask = await onPassTask(task);
+      const nextTask = savedTask ?? task;
+      clearPendingCandidateTask(nextTask);
+      setSupplementRowAction(nextTask, "saved", "보충 완료 처리 완료");
+      return savedTask;
+    } catch (error) {
+      setSupplementRowAction(task, "failed", error?.message || "보충 완료 처리 실패");
+      throw error;
+    }
+  }
+
+  function closeSupplementStudentModal() {
+    setSelectedSupplementStudentId("");
+    setSelectedSupplementTaskKey("");
+    setPendingCandidateTask(null);
+    setPassActionError("");
+  }
+
   function openPassConfirm(existingTask, item) {
     if (!existingTask) {
       setSupplementRowAction(item.task, "blocked", "기존 보충 항목을 연 뒤 완료 처리할 수 있습니다.");
@@ -21029,12 +21053,19 @@ function SupplementCenter({
   const selectedSupplementStudent = students.find((student) => student.studentId === selectedSupplementStudentId);
   const persistedSelectedSupplementTasks = tasks.filter((task) => task.studentId === selectedSupplementStudentId && task.taskType === activeSupplementTab)
     .map(hydrateSupplementTask);
-  const selectedSupplementTasks = pendingCandidateTask &&
+  const focusedPersistedSupplementTasks = selectedSupplementTaskKey
+    ? persistedSelectedSupplementTasks.filter((task) => getSupplementActionKey(task) === selectedSupplementTaskKey && task.status !== "done")
+    : [];
+  const shouldShowPendingCandidate =
+    pendingCandidateTask &&
     pendingCandidateTask.studentId === selectedSupplementStudentId &&
     pendingCandidateTask.taskType === activeSupplementTab &&
-    !persistedSelectedSupplementTasks.some((task) => getSupplementActionKey(task) === getSupplementActionKey(pendingCandidateTask))
-    ? [pendingCandidateTask, ...persistedSelectedSupplementTasks]
-    : persistedSelectedSupplementTasks;
+    (!selectedSupplementTaskKey || getSupplementActionKey(pendingCandidateTask) === selectedSupplementTaskKey) &&
+    !focusedPersistedSupplementTasks.some((task) => getSupplementActionKey(task) === getSupplementActionKey(pendingCandidateTask));
+  const selectedSupplementTasks = pendingCandidateTask &&
+    shouldShowPendingCandidate
+    ? [pendingCandidateTask, ...focusedPersistedSupplementTasks]
+    : focusedPersistedSupplementTasks;
   const supplementTabDefinitions = [
     {
       id: "homework_makeup",
@@ -21173,7 +21204,7 @@ function SupplementCenter({
             return (
               <article className="candidateItem supplementRowItem" key={item.id}>
                 <div>
-                  <button className="textLinkButton" onClick={() => setSelectedSupplementStudentId(item.studentId)} type="button">
+                  <button className="textLinkButton" onClick={() => openCandidateReview(item)} type="button">
                     {studentName(item.studentId)}
                   </button>
                   <span>{item.title}</span>
@@ -21215,8 +21246,8 @@ function SupplementCenter({
 
       {selectedSupplementStudent ? (
         <SupplementStudentModal
-          onClose={() => setSelectedSupplementStudentId("")}
-          onPassTask={onPassTask}
+          onClose={closeSupplementStudentModal}
+          onPassTask={handlePassSupplementTaskFromModal}
           onSaveTask={handleSaveSupplementTaskFromModal}
           onScheduleTask={handleScheduleSupplementTaskFromModal}
           student={selectedSupplementStudent}
@@ -21622,6 +21653,10 @@ function SupplementStudentModal({
       showFeedback("보충 완료 처리 전 저장 필요", "초안 검토 상태에서는 먼저 내용만 저장을 눌러 보충 항목을 생성해야 합니다.", "failed");
       return;
     }
+    if (task.status === "done") {
+      showFeedback("이미 보충 완료 처리됨", "이미 완료된 보충 항목입니다. 목록에서 새로고침 후에도 제외됩니다.");
+      return;
+    }
     const taskWithDraft = createPersistableSupplementTask(buildTaskWithDraft(task));
     setBusyTaskId(`${task.makeupTaskId}:pass`);
     showFeedback("보충 완료 처리 중", `${student.name} 학생의 보충 항목을 완료 처리하고 있습니다.`, "saving");
@@ -21629,6 +21664,7 @@ function SupplementStudentModal({
       await onPassTask?.(taskWithDraft);
       showFeedback("보충 완료 처리 완료", `${student.name} 학생의 보충 항목을 완료 처리했습니다.`);
       setPassConfirmTask(null);
+      onClose?.();
     } catch (error) {
       console.error("Failed to pass supplement task", error);
       showFeedback("보충 완료 처리 실패", error?.message || "알 수 없는 오류가 발생했습니다.", "failed");
