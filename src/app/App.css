@@ -11688,6 +11688,12 @@ textarea.profileEditInput {
   color: #047857;
 }
 
+.taskLinkedLesson.draftMode {
+  background: #fefce8;
+  border-color: #fde68a;
+  color: #854d0e;
+}
+
 .taskLinkedLesson b {
   color: #17213d;
   font-size: 12px;
@@ -11854,6 +11860,165 @@ textarea.profileEditInput {
 
 .notificationDraftField textarea {
   min-height: 180px;
+}
+
+.supplementDraftDiff {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px;
+}
+
+.supplementDraftDiff[data-state="clean"] {
+  background: #f8fafc;
+  border-color: #dbe5f6;
+}
+
+.supplementDraftDiff > strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.supplementDraftDiff p,
+.supplementDraftDiff ul {
+  margin: 0;
+}
+
+.supplementDraftDiff p {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.supplementDraftDiff ul {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+}
+
+.supplementDraftDiff li {
+  align-items: center;
+  color: #475569;
+  display: grid;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 8px;
+  grid-template-columns: minmax(96px, 0.7fr) minmax(0, 1fr) auto minmax(0, 1fr);
+}
+
+.supplementDraftDiff li b {
+  color: #9a3412;
+  font-weight: 900;
+}
+
+.supplementDraftDiff li span {
+  background: #ffffff;
+  border: 1px solid #ffedd5;
+  border-radius: 6px;
+  min-width: 0;
+  overflow: hidden;
+  padding: 6px 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.supplementDraftDiff li em {
+  color: #c2410c;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.supplementSaveStatusGrid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.supplementSaveStatusPill {
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #dbe5f6;
+  border-radius: 8px;
+  color: #475569;
+  display: flex;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 8px;
+  justify-content: space-between;
+  min-height: 38px;
+  padding: 8px 10px;
+}
+
+.supplementSaveStatusPill b {
+  color: #17213d;
+  font-weight: 900;
+}
+
+.supplementSaveStatusPill.changed,
+.supplementSaveStatusPill.ready {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #9a3412;
+}
+
+.supplementSaveStatusPill.saving {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.supplementSaveStatusPill.saved,
+.supplementSaveStatusPill.synced {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #047857;
+}
+
+.supplementSaveStatusPill.failed {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+.supplementSaveStatusPill.empty,
+.supplementSaveStatusPill.notApplied {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #64748b;
+}
+
+.supplementSendGateNote {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.5;
+  padding: 10px 12px;
+}
+
+.supplementSplitActions {
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.softButton.scheduleApplyButton {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #047857;
+}
+
+.softButton.scheduleApplyButton:disabled {
+  background: #f8fafc;
+  border-color: #dbe5f6;
+  color: #94a3b8;
+  cursor: not-allowed;
 }
 
 .statusBlue,
@@ -13768,6 +13933,7 @@ body.attendanceOnlyBody {
   .profileSummary,
   .commentComposerGrid,
   .supplementReadableGrid,
+  .supplementSaveStatusGrid,
   .aiVariantWorkspace,
   .insightGrid,
   .promptSettingsLayout,
@@ -13792,6 +13958,15 @@ body.attendanceOnlyBody {
   .sourceAnalysisButton {
     min-width: 0;
     width: 100%;
+  }
+
+  .supplementDraftDiff li {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .supplementDraftDiff li em {
+    display: none;
   }
 
   .examAnalysisColumnBoard {

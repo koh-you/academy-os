@@ -9006,6 +9006,24 @@ export function App() {
     if (!task.scheduledDate || !task.scheduledTime) throw new Error("배정일과 시간을 입력해야 일정을 반영할 수 있습니다.");
 
     const lessonId = task.linkedLessonId || createSupplementLessonId(task);
+    const scheduleTime = normalizeTimeInput(task.scheduledTime);
+    const duplicateLesson = lessons.find((lesson) => {
+      if (!lesson || lesson.lessonId === lessonId || lesson.status === "canceled") return false;
+      const lessonTime = normalizeTimeInput(lesson.startTime);
+      const lessonStudentIds = getLessonStudentIds(lesson);
+      const sameSourceTask = lesson.sourceMakeupTaskId && lesson.sourceMakeupTaskId === task.makeupTaskId;
+      const sameStudentSchedule =
+        lesson.lessonType === "makeup" &&
+        lesson.date === task.scheduledDate &&
+        lessonTime === scheduleTime &&
+        lessonStudentIds.includes(student.studentId);
+      return sameSourceTask || sameStudentSchedule;
+    });
+    if (duplicateLesson) {
+      throw new Error(
+        `이미 같은 학생의 보충 일정이 있습니다: ${duplicateLesson.date} ${duplicateLesson.startTime || ""} ${duplicateLesson.className || ""}`.trim()
+      );
+    }
     const className = createSupplementLessonName(task, student);
     const lesson = {
       lessonId,
@@ -21118,12 +21136,98 @@ function SupplementPassConfirmModal({ errorMessage = "", isBusy = false, onCance
   );
 }
 
+const supplementDraftFieldLabels = {
+  status: "진행 상태",
+  supplementHomeworkNote: "보충할 숙제 내역",
+  supplementProgressMemo: "보충 메모",
+  supplementMethod: "보충 방식",
+  scheduledDate: "배정일",
+  scheduledTime: "시간",
+  notificationDraft: "알림톡 문구"
+};
+
+const supplementSaveStatusLabels = {
+  changed: "저장 전 변경",
+  empty: "미입력",
+  failed: "저장 실패",
+  idle: "대기",
+  notApplied: "미반영",
+  ready: "반영 가능",
+  saved: "저장 완료",
+  saving: "저장 중",
+  synced: "반영 완료"
+};
+
+function normalizeSupplementDraftValue(value) {
+  return String(value ?? "");
+}
+
+function formatSupplementDraftDiffValue(value) {
+  const text = normalizeSupplementDraftValue(value).trim();
+  return text || "미입력";
+}
+
+function getSupplementTaskSourceVersion(task = {}) {
+  return [
+    task.updatedAt,
+    task.touchedAt,
+    task.lastScheduledAt,
+    task.status,
+    task.supplementHomeworkNote,
+    task.supplementProgressMemo,
+    task.supplementMethod,
+    task.scheduledDate,
+    task.scheduledTime,
+    task.notificationDraft
+  ].map((value) => normalizeSupplementDraftValue(value)).join("|");
+}
+
+function createSupplementTaskDraft(task = {}, student = null) {
+  const taskWithDefaultMethod = {
+    ...task,
+    supplementMethod: task.supplementMethod || supplementDefaultMethod(task.taskType)
+  };
+  return {
+    status: task.status || "draft",
+    supplementHomeworkNote: task.supplementHomeworkNote ?? task.sourceLabel ?? "",
+    supplementProgressMemo: task.supplementProgressMemo ?? "",
+    supplementMethod: taskWithDefaultMethod.supplementMethod,
+    scheduledDate: task.scheduledDate || "",
+    scheduledTime: task.scheduledTime || "",
+    notificationDraft: task.notificationDraft || createNotificationDraft(taskWithDefaultMethod, student ? [student] : [])
+  };
+}
+
+function areSupplementTaskDraftValuesEqual(left = {}, right = {}) {
+  return Object.keys(supplementDraftFieldLabels).every(
+    (field) => normalizeSupplementDraftValue(left[field]) === normalizeSupplementDraftValue(right[field])
+  );
+}
+
+function getSupplementTaskDraftDiff(task = {}, draft = {}, student = null) {
+  const source = createSupplementTaskDraft(task, student);
+  return Object.entries(supplementDraftFieldLabels).flatMap(([field, label]) => {
+    const beforeValue = normalizeSupplementDraftValue(source[field]);
+    const afterValue = normalizeSupplementDraftValue(draft[field]);
+    if (beforeValue === afterValue) return [];
+    return [{
+      after: formatSupplementDraftDiffValue(afterValue),
+      before: formatSupplementDraftDiffValue(beforeValue),
+      field,
+      label
+    }];
+  });
+}
+
+function getSupplementSaveStatusLabel(status) {
+  return supplementSaveStatusLabels[status] || supplementSaveStatusLabels.idle;
+}
+
 function SupplementStudentModal({
   onClose,
   onPassTask,
   onSaveTask,
   onScheduleTask,
-  onUpdateTask,
   student,
   tabTitle,
   tasks
@@ -21131,33 +21235,222 @@ function SupplementStudentModal({
   const [feedback, setFeedback] = useState(null);
   const [passConfirmTask, setPassConfirmTask] = useState(null);
   const [busyTaskId, setBusyTaskId] = useState("");
+  const [taskDrafts, setTaskDrafts] = useState({});
+  const [taskSaveStatus, setTaskSaveStatus] = useState({});
+  const taskDraftSyncKey = tasks.map((task) => `${task.makeupTaskId}:${getSupplementTaskSourceVersion(task)}`).join("||");
+
+  useEffect(() => {
+    setTaskDrafts((current) => {
+      const next = {};
+      let changed = Object.keys(current).length !== tasks.filter((task) => task.makeupTaskId).length;
+
+      tasks.forEach((task) => {
+        if (!task.makeupTaskId) return;
+        const existing = current[task.makeupTaskId];
+        if (existing?.dirty) {
+          next[task.makeupTaskId] = existing;
+          return;
+        }
+
+        const sourceVersion = getSupplementTaskSourceVersion(task);
+        const seededValues = createSupplementTaskDraft(task, student);
+        if (
+          existing &&
+          existing.sourceVersion === sourceVersion &&
+          areSupplementTaskDraftValuesEqual(existing.values, seededValues)
+        ) {
+          next[task.makeupTaskId] = existing;
+          return;
+        }
+
+        changed = true;
+        next[task.makeupTaskId] = {
+          dirty: false,
+          sourceVersion,
+          values: seededValues
+        };
+      });
+
+      const nextIds = Object.keys(next);
+      if (!changed && nextIds.every((taskId) => current[taskId] === next[taskId])) return current;
+      return next;
+    });
+  }, [student, taskDraftSyncKey, tasks]);
 
   function showFeedback(title, message, tone = "success") {
     setFeedback({ title, message, tone });
   }
 
+  function getTaskDraftState(task) {
+    return taskDrafts[task.makeupTaskId] ?? {
+      dirty: false,
+      sourceVersion: getSupplementTaskSourceVersion(task),
+      values: createSupplementTaskDraft(task, student)
+    };
+  }
+
+  function setTaskSaveStatusPatch(taskId, patch) {
+    setTaskSaveStatus((current) => ({
+      ...current,
+      [taskId]: {
+        ...(current[taskId] ?? {}),
+        ...patch
+      }
+    }));
+  }
+
+  function updateTaskDraft(task, field, value) {
+    if (!task?.makeupTaskId) return;
+    setTaskDrafts((current) => {
+      const existing = current[task.makeupTaskId];
+      const previousValues = existing?.values ?? createSupplementTaskDraft(task, student);
+      const values = {
+        ...previousValues,
+        [field]: value
+      };
+      const shouldRefreshGeneratedDraft =
+        field !== "notificationDraft" &&
+        ["supplementHomeworkNote", "supplementProgressMemo", "supplementMethod", "scheduledDate", "scheduledTime"].includes(field) &&
+        !task.notificationDraft?.trim();
+      if (shouldRefreshGeneratedDraft) {
+        const previousGeneratedDraft = createNotificationDraft(
+          { ...task, ...previousValues, scheduledTime: normalizeTimeInput(previousValues.scheduledTime) || previousValues.scheduledTime },
+          [student]
+        );
+        if (normalizeSupplementDraftValue(previousValues.notificationDraft) === normalizeSupplementDraftValue(previousGeneratedDraft)) {
+          values.notificationDraft = createNotificationDraft(
+            { ...task, ...values, scheduledTime: normalizeTimeInput(values.scheduledTime) || values.scheduledTime },
+            [student]
+          );
+        }
+      }
+      const diff = getSupplementTaskDraftDiff(task, values, student);
+      return {
+        ...current,
+        [task.makeupTaskId]: {
+          ...(existing ?? { sourceVersion: getSupplementTaskSourceVersion(task) }),
+          dirty: diff.length > 0,
+          values
+        }
+      };
+    });
+    setTaskSaveStatusPatch(task.makeupTaskId, {
+      lesson: ["scheduledDate", "scheduledTime"].includes(field) ? "changed" : taskSaveStatus[task.makeupTaskId]?.lesson,
+      makeupTask: "changed",
+      notificationDraft: field === "notificationDraft" ? "changed" : taskSaveStatus[task.makeupTaskId]?.notificationDraft
+    });
+  }
+
+  function markTaskDraftSaved(taskId, savedTask) {
+    const sourceVersion = getSupplementTaskSourceVersion(savedTask);
+    setTaskDrafts((current) => ({
+      ...current,
+      [taskId]: {
+        dirty: false,
+        sourceVersion,
+        values: createSupplementTaskDraft(savedTask, student)
+      }
+    }));
+  }
+
+  function buildTaskWithDraft(task) {
+    const draftValues = getTaskDraftState(task).values;
+    const normalizedScheduledTime = normalizeTimeInput(draftValues.scheduledTime) || draftValues.scheduledTime;
+    const taskWithDraftValues = {
+      ...task,
+      ...draftValues,
+      scheduledTime: normalizedScheduledTime
+    };
+    const notificationDraft = draftValues.notificationDraft?.trim()
+      ? draftValues.notificationDraft
+      : createNotificationDraft(taskWithDraftValues, [student]);
+    const nextTask = {
+      ...taskWithDraftValues,
+      notificationDraft
+    };
+
+    if (
+      task.linkedLessonId &&
+      (nextTask.scheduledDate !== task.linkedLessonDate ||
+        normalizeTimeInput(nextTask.scheduledTime) !== normalizeTimeInput(task.linkedLessonTime))
+    ) {
+      nextTask.needsLessonResync = true;
+    }
+    return nextTask;
+  }
+
   async function handleSaveTask(task) {
     if (!task?.makeupTaskId || busyTaskId) return;
-    const draft = createNotificationDraft(task, [student]);
-    const taskWithDraft = { ...task, notificationDraft: draft };
-    setBusyTaskId(task.makeupTaskId);
-    showFeedback("보충 저장 중", task.scheduledDate && task.scheduledTime ? "보충 일정과 알림톡 초안을 저장하고 있습니다." : "보충 내용과 알림톡 초안을 저장하고 있습니다.", "saving");
+    const taskWithDraft = buildTaskWithDraft(task);
+    const actionKey = `${task.makeupTaskId}:content`;
+    setBusyTaskId(actionKey);
+    setTaskSaveStatusPatch(task.makeupTaskId, {
+      makeupTask: "saving",
+      notificationDraft: "saving"
+    });
+    showFeedback("보충 내용 저장 중", "makeup_tasks와 알림톡 초안만 저장합니다. 수업일지 일정은 아직 반영하지 않습니다.", "saving");
 
     try {
-      if (task.scheduledDate && task.scheduledTime) {
-        await onScheduleTask?.(taskWithDraft);
-        showFeedback(
-          task.linkedLessonId ? "보충 내용 저장 및 일정 수정 완료" : "보충 내용 저장 및 일정 반영 완료",
-          `${task.scheduledDate} ${task.scheduledTime} 보충 일정과 알림톡 초안이 함께 반영되었습니다.`
-        );
-        return;
-      }
-
-      await onSaveTask?.(taskWithDraft);
-      showFeedback("보충 내용만 저장 완료", "알림톡 초안은 갱신되었습니다. 배정일과 시간을 입력하면 수업일지 일정에도 함께 반영할 수 있습니다.");
+      const savedTask = await onSaveTask?.(taskWithDraft);
+      const nextTask = savedTask ?? taskWithDraft;
+      markTaskDraftSaved(task.makeupTaskId, nextTask);
+      setTaskSaveStatusPatch(task.makeupTaskId, {
+        lesson: nextTask.linkedLessonId && nextTask.needsLessonResync ? "changed" : taskSaveStatus[task.makeupTaskId]?.lesson,
+        makeupTask: "saved",
+        notificationDraft: "saved"
+      });
+      showFeedback("내용만 저장 완료", "보충 내용과 알림톡 초안이 저장되었습니다. 일정 반영은 별도 버튼으로 진행합니다.");
     } catch (error) {
       console.error("Failed to save supplement task", error);
+      setTaskSaveStatusPatch(task.makeupTaskId, {
+        makeupTask: "failed",
+        notificationDraft: "failed"
+      });
       showFeedback("보충 저장 실패", error?.message || "알 수 없는 오류가 발생했습니다.", "failed");
+    } finally {
+      setBusyTaskId("");
+    }
+  }
+
+  async function handleApplyScheduleTask(task) {
+    if (!task?.makeupTaskId || busyTaskId) return;
+    const taskWithDraft = buildTaskWithDraft(task);
+    if (!taskWithDraft.scheduledDate || !taskWithDraft.scheduledTime) {
+      showFeedback("일정 반영 실패", "배정일과 시간을 먼저 입력해야 합니다.", "failed");
+      setTaskSaveStatusPatch(task.makeupTaskId, { lesson: "failed" });
+      return;
+    }
+
+    const actionKey = `${task.makeupTaskId}:schedule`;
+    setBusyTaskId(actionKey);
+    setTaskSaveStatusPatch(task.makeupTaskId, {
+      lesson: "saving",
+      makeupTask: "saving",
+      notificationDraft: "saving"
+    });
+    showFeedback("일정 반영 중", "makeup_tasks 저장 후 lessons 일정에 반영합니다. 알림톡 발송은 별도 검수 단계입니다.", "saving");
+
+    try {
+      const result = await onScheduleTask?.(taskWithDraft);
+      const nextTask = result?.makeupTask ?? taskWithDraft;
+      markTaskDraftSaved(task.makeupTaskId, nextTask);
+      setTaskSaveStatusPatch(task.makeupTaskId, {
+        lesson: "synced",
+        makeupTask: "saved",
+        notificationDraft: "saved"
+      });
+      showFeedback(
+        task.linkedLessonId ? "일정 수정 반영 완료" : "일정 반영 완료",
+        `${nextTask.scheduledDate} ${nextTask.scheduledTime} 보충 일정이 수업일지에 반영되었습니다.`
+      );
+    } catch (error) {
+      console.error("Failed to apply supplement schedule", error);
+      setTaskSaveStatusPatch(task.makeupTaskId, {
+        lesson: "failed",
+        makeupTask: "failed",
+        notificationDraft: "failed"
+      });
+      showFeedback("일정 반영 실패", error?.message || "알 수 없는 오류가 발생했습니다.", "failed");
     } finally {
       setBusyTaskId("");
     }
@@ -21165,10 +21458,11 @@ function SupplementStudentModal({
 
   async function handlePassTask(task) {
     if (!task?.makeupTaskId || busyTaskId) return;
-    setBusyTaskId(task.makeupTaskId);
+    const taskWithDraft = buildTaskWithDraft(task);
+    setBusyTaskId(`${task.makeupTaskId}:pass`);
     showFeedback("보충 완료 처리 중", `${student.name} 학생의 보충 항목을 완료 처리하고 있습니다.`, "saving");
     try {
-      await onPassTask?.(task);
+      await onPassTask?.(taskWithDraft);
       showFeedback("보충 완료 처리 완료", `${student.name} 학생의 보충 항목을 완료 처리했습니다.`);
       setPassConfirmTask(null);
     } catch (error) {
@@ -21182,6 +21476,16 @@ function SupplementStudentModal({
   function confirmPassTask() {
     if (!passConfirmTask) return;
     handlePassTask(passConfirmTask);
+  }
+
+  function renderSaveStatusPill(label, status) {
+    const state = status || "idle";
+    return (
+      <span className={`supplementSaveStatusPill ${state}`} key={label}>
+        <b>{label}</b>
+        {getSupplementSaveStatusLabel(state)}
+      </span>
+    );
   }
 
   return (
@@ -21217,18 +21521,31 @@ function SupplementStudentModal({
 
           <div className="taskStack">
             {tasks.map((task) => {
-              const freshDraft = createNotificationDraft(task, [student]);
-              const visibleDraft = task.notificationDraft || freshDraft;
-              const supplementHomeworkNote = task.supplementHomeworkNote ?? task.sourceLabel ?? "";
-              const supplementMemo = task.supplementProgressMemo ?? "";
-              const isTaskBusy = busyTaskId === task.makeupTaskId;
+              const taskDraftState = getTaskDraftState(task);
+              const draftValues = taskDraftState.values;
+              const draftDiff = getSupplementTaskDraftDiff(task, draftValues, student);
+              const supplementHomeworkNote = draftValues.supplementHomeworkNote ?? "";
+              const supplementMemo = draftValues.supplementProgressMemo ?? "";
+              const saveStatus = taskSaveStatus[task.makeupTaskId] ?? {};
+              const isTaskBusy = busyTaskId.startsWith(`${task.makeupTaskId}:`);
+              const isContentBusy = busyTaskId === `${task.makeupTaskId}:content`;
+              const isScheduleBusy = busyTaskId === `${task.makeupTaskId}:schedule`;
+              const hasScheduleDraft = Boolean(draftValues.scheduledDate && draftValues.scheduledTime);
+              const hasScheduleDiff = draftDiff.some((item) => ["scheduledDate", "scheduledTime"].includes(item.field));
+              const hasNotificationDiff = draftDiff.some((item) => item.field === "notificationDraft");
+              const makeupStatus = saveStatus.makeupTask || (draftDiff.length ? "changed" : "saved");
+              const lessonStatus = saveStatus.lesson || (hasScheduleDiff ? "changed" : task.linkedLessonId ? "synced" : hasScheduleDraft ? "ready" : "empty");
+              const notificationStatus = saveStatus.notificationDraft || (hasNotificationDiff ? "changed" : draftValues.notificationDraft ? "saved" : "empty");
               return (
                 <article className="taskCard" key={task.makeupTaskId}>
                   <div className="taskCardTop">
                     <div>
                       <strong>{followUpTypeLabel(task.taskType)}</strong>
                       <p>{task.taskType === "homework_makeup" ? supplementHomeworkNote : task.sourceLabel}</p>
-                      <small>{task.reason} · {supplementMethodLabel(task)} · 배정 {task.attemptCount ?? 0}회</small>
+                      <small>{task.reason} · {supplementMethodLabel({ ...task, supplementMethod: draftValues.supplementMethod })} · 배정 {task.attemptCount ?? 0}회</small>
+                      <span className="taskLinkedLesson draftMode">
+                        수정 모드 · local draft
+                      </span>
                       {task.notificationDraft?.trim() ? (
                         <span className="taskLinkedLesson draftReady">
                           알림톡 초안 반영 완료
@@ -21250,9 +21567,9 @@ function SupplementStudentModal({
                       <div className="taskStepControl">
                         {supplementStatusSteps.map((step) => (
                           <button
-                            className={task.status === step.id ? "active" : ""}
+                            className={draftValues.status === step.id ? "active" : ""}
                             key={step.id}
-                            onClick={() => onUpdateTask(task.makeupTaskId, "status", step.id)}
+                            onClick={() => updateTaskDraft(task, "status", step.id)}
                             type="button"
                           >
                             {step.label}
@@ -21268,7 +21585,7 @@ function SupplementStudentModal({
                       <span>보충일지와 알림톡 문구에 반영되는 핵심 내용입니다.</span>
                       <textarea
                         value={supplementHomeworkNote}
-                        onChange={(event) => onUpdateTask(task.makeupTaskId, "supplementHomeworkNote", event.target.value)}
+                        onChange={(event) => updateTaskDraft(task, "supplementHomeworkNote", event.target.value)}
                         placeholder="예: 교과서 프린트, 지난 시간 미완료 숙제"
                       />
                     </label>
@@ -21278,7 +21595,7 @@ function SupplementStudentModal({
                     <span>진행한 내용, 남은 문항, 다음 확인 사항을 남깁니다.</span>
                     <textarea
                       value={supplementMemo}
-                      onChange={(event) => onUpdateTask(task.makeupTaskId, "supplementProgressMemo", event.target.value)}
+                      onChange={(event) => updateTaskDraft(task, "supplementProgressMemo", event.target.value)}
                       placeholder="예: 오답 30문제 중 18번까지 확인, 남은 12문제는 다음 보충 때 마무리"
                     />
                   </label>
@@ -21289,9 +21606,9 @@ function SupplementStudentModal({
                       <div className="taskChoiceGrid">
                         {supplementMethodOptions(task.taskType).map((option) => (
                           <button
-                            className={(task.supplementMethod || supplementDefaultMethod(task.taskType)) === option.id ? "active" : ""}
+                            className={draftValues.supplementMethod === option.id ? "active" : ""}
                             key={option.id}
-                            onClick={() => onUpdateTask(task.makeupTaskId, "supplementMethod", option.id)}
+                            onClick={() => updateTaskDraft(task, "supplementMethod", option.id)}
                             type="button"
                           >
                             {option.label}
@@ -21302,30 +21619,56 @@ function SupplementStudentModal({
                     <div className="fieldGrid two supplementDateGrid">
                       <label>
                         <strong>배정일</strong>
-                        <input type="date" value={task.scheduledDate} onChange={(event) => onUpdateTask(task.makeupTaskId, "scheduledDate", event.target.value)} />
+                        <input type="date" value={draftValues.scheduledDate} onChange={(event) => updateTaskDraft(task, "scheduledDate", event.target.value)} />
                       </label>
                       <label>
                         <strong>시간</strong>
-                        <input type="time" value={task.scheduledTime} onChange={(event) => onUpdateTask(task.makeupTaskId, "scheduledTime", event.target.value)} />
+                        <input type="time" value={draftValues.scheduledTime} onChange={(event) => updateTaskDraft(task, "scheduledTime", event.target.value)} />
                       </label>
                     </div>
+                  </div>
+                  <div className="supplementDraftDiff" data-state={draftDiff.length ? "dirty" : "clean"}>
+                    <strong>저장 전 변경 diff</strong>
+                    {draftDiff.length ? (
+                      <ul>
+                        {draftDiff.map((item) => (
+                          <li key={item.field}>
+                            <b>{item.label}</b>
+                            <span>{item.before}</span>
+                            <em>→</em>
+                            <span>{item.after}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>저장 전 변경 없음</p>
+                    )}
+                  </div>
+                  <div className="supplementSaveStatusGrid">
+                    {renderSaveStatusPill("makeup_tasks", makeupStatus)}
+                    {renderSaveStatusPill("lessons", lessonStatus)}
+                    {renderSaveStatusPill("알림톡 초안", notificationStatus)}
                   </div>
                   <label className="notificationDraftField supplementReadableField">
                     <strong>알림톡 문구</strong>
                     <span>보충 일정 안내 초안입니다. 실제 발송은 별도 확정 단계에서 진행합니다.</span>
                     <textarea
-                      value={visibleDraft}
-                      onChange={(event) => onUpdateTask(task.makeupTaskId, "notificationDraft", event.target.value)}
+                      value={draftValues.notificationDraft}
+                      onChange={(event) => updateTaskDraft(task, "notificationDraft", event.target.value)}
                     />
                   </label>
-                  <div className="modalActions">
+                  <div className="supplementSendGateNote">
+                    발송 검수 gate: 이 화면은 초안 저장까지만 처리하며, 실제 발송/예약은 별도 확정 단계에서 진행합니다.
+                  </div>
+                  <div className="modalActions supplementSplitActions">
                     <button className="softButton primarySoft" disabled={isTaskBusy} onClick={() => handleSaveTask(task)} type="button">
-                      {isTaskBusy ? "저장 중" : task.scheduledDate && task.scheduledTime
-                        ? task.linkedLessonId ? "수정 저장하고 일정 반영" : "저장하고 일정 반영"
-                        : "내용만 저장"}
+                      {isContentBusy ? "내용 저장 중" : "내용만 저장"}
                     </button>
-                    <button className="passButton" disabled={isTaskBusy} onClick={() => setPassConfirmTask(task)} type="button">
-                      {isTaskBusy ? "처리 중" : "보충 완료 처리"}
+                    <button className="softButton scheduleApplyButton" disabled={isTaskBusy || !hasScheduleDraft} onClick={() => handleApplyScheduleTask(task)} type="button">
+                      {isScheduleBusy ? "일정 반영 중" : task.linkedLessonId ? "일정 수정 반영" : "일정 반영"}
+                    </button>
+                    <button className="passButton" disabled={isTaskBusy} onClick={() => setPassConfirmTask(buildTaskWithDraft(task))} type="button">
+                      {busyTaskId === `${task.makeupTaskId}:pass` ? "처리 중" : "보충 완료 처리"}
                     </button>
                   </div>
                 </article>
@@ -21336,7 +21679,7 @@ function SupplementStudentModal({
       </div>
       {passConfirmTask ? (
         <SupplementPassConfirmModal
-          isBusy={busyTaskId === passConfirmTask.makeupTaskId}
+          isBusy={busyTaskId === `${passConfirmTask.makeupTaskId}:pass`}
           onCancel={() => setPassConfirmTask(null)}
           onConfirm={confirmPassTask}
           studentName={student.name}
