@@ -5452,10 +5452,11 @@ export function App() {
       if (attendanceOnlyMode) setIsAppStateReady(false);
       try {
         if (attendanceOnlyMode) {
+          const attendanceDate = getKoreaDateString();
           const [studentsResponse, lessonsResponse, recordsResponse] = await Promise.all([
             fetch(apiUrl("/api/students")),
-            fetch(apiUrl("/api/lessons")),
-            fetch(apiUrl("/api/lesson-records"))
+            fetch(apiUrl(`/api/lessons?date=${encodeURIComponent(attendanceDate)}`)),
+            fetch(apiUrl(`/api/lesson-records?date=${encodeURIComponent(attendanceDate)}`))
           ]);
           const [studentsResult, lessonsResult, recordsResult] = await Promise.all([
             studentsResponse.json(),
@@ -5476,7 +5477,7 @@ export function App() {
             setRecords(nextLessons.length > 0 ? filterRecordsForLessons(recordsResult.records, nextLessons) : recordsResult.records);
           }
           setAttendanceSettings((current) => normalizeAttendanceSettings(current));
-          attendanceLoadedDateRef.current = getKoreaDateString();
+          attendanceLoadedDateRef.current = attendanceDate;
           setIsPortalDataReady(false);
           setIsAppStateReady(true);
           return;
@@ -15432,11 +15433,13 @@ function AttendanceKiosk({
   const [pin, setPin] = useState("");
   const [pendingPreview, setPendingPreview] = useState(null);
   const [result, setResult] = useState(null);
+  const [kioskStatus, setKioskStatus] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function runAttendancePreview(nextPin) {
     if (isSubmitting) return;
     setIsSubmitting(true);
+    setKioskStatus("");
     try {
       const nextPreview = await onAttendancePreview(nextPin);
       if (nextPreview.ok) {
@@ -15472,6 +15475,8 @@ function AttendanceKiosk({
       setPendingPreview(null);
       if (!nextResult?.ok) {
         setResult(nextResult);
+      } else {
+        setKioskStatus(nextResult.alimtalk?.queued ? "출결 저장 완료 · 알림톡 처리 중" : "출결 저장 완료");
       }
     } catch (error) {
       setResult({ ok: false, message: error.message || "출결 저장에 실패했습니다." });
@@ -15490,13 +15495,16 @@ function AttendanceKiosk({
   function pressKey(value) {
     if (isLoading || isSubmitting || pendingPreview) return;
     if (value === "backspace") {
+      setKioskStatus("");
       setPin((current) => current.slice(0, -1));
       return;
     }
     if (value === "clear") {
+      setKioskStatus("");
       setPin("");
       return;
     }
+    setKioskStatus("");
     setPin((current) => `${current}${value}`.replaceAll(/\D/g, "").slice(0, 4));
   }
 
@@ -15527,7 +15535,10 @@ function AttendanceKiosk({
             maxLength={4}
             disabled={isLoading || isSubmitting || Boolean(pendingPreview)}
             value={pin}
-            onChange={(event) => setPin(event.target.value.replaceAll(/\D/g, "").slice(0, 4))}
+            onChange={(event) => {
+              setKioskStatus("");
+              setPin(event.target.value.replaceAll(/\D/g, "").slice(0, 4));
+            }}
             placeholder={isLoading || isSubmitting ? "대기" : "뒤 4자리"}
           />
           <button className="primaryButton" disabled={isLoading || isSubmitting || Boolean(pendingPreview) || pin.length !== 4} type="submit">
@@ -15543,6 +15554,7 @@ function AttendanceKiosk({
           <button disabled={isLoading || isSubmitting || Boolean(pendingPreview)} onClick={() => pressKey("0")} type="button">0</button>
           <button className="secondaryKey" disabled={isLoading || isSubmitting || Boolean(pendingPreview)} onClick={() => pressKey("backspace")} type="button">⌫</button>
         </div>
+        {kioskStatus ? <div className="attendanceKioskStatus">{kioskStatus}</div> : null}
       </div>
 
       {pendingPreview ? (

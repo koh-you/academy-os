@@ -14,7 +14,9 @@ import {
   deleteResourceMaterial,
   deleteSchoolEvent,
   getCoreDataStatus,
+  getLessonStudentRecordForAttendance,
   getNotificationJob,
+  listAttendanceCandidateStudents,
   listAcademyReminders,
   listAppState,
   listClassTemplates,
@@ -22,6 +24,7 @@ import {
   listHomeworks,
   listLessons,
   listLessonStudentRecords,
+  listLessonStudentRecordsForLessons,
   listMakeupTasks,
   listNotificationJobs,
   listResourceMaterials,
@@ -386,6 +389,29 @@ async function tryRecordAttendanceEvent(event) {
   }
 }
 
+function queueKioskAttendanceAlimtalk(attendanceEvent, alimtalkPayload) {
+  Promise.resolve()
+    .then(async () => {
+      try {
+        const alimtalkResult = await sendAttendanceAlimtalkOnce(alimtalkPayload);
+        await tryRecordAttendanceEvent({
+          ...attendanceEvent,
+          alimtalkStatus: alimtalkResult?.duplicateSuppressed ? "duplicate_suppressed" : "sent",
+          alimtalkResult,
+          error: ""
+        });
+      } catch (error) {
+        await tryRecordAttendanceEvent({
+          ...attendanceEvent,
+          alimtalkStatus: "failed",
+          alimtalkResult: null,
+          error: error.message
+        });
+      }
+    })
+    .catch((error) => console.error("Queued attendance Alimtalk failed.", error));
+}
+
 async function handleAttendanceCheck(payload = {}) {
   const source = String(payload.source || "kiosk");
   const now = new Date();
@@ -396,14 +422,15 @@ async function handleAttendanceCheck(payload = {}) {
   const previewOnly = payload.previewOnly === true;
   const sendAlimtalk = !previewOnly && payload.sendAlimtalk !== false;
 
-  const [studentsResult, lessonsResult, recordsResult] = await Promise.all([
-    listStudents(),
-    listLessons({ date: attendanceDate }),
-    listLessonStudentRecords()
+  const [studentsResult, lessonsResult] = await Promise.all([
+    listAttendanceCandidateStudents({
+      phoneLast4: payload.phoneLast4,
+      studentId: payload.studentId
+    }),
+    listLessons({ date: attendanceDate })
   ]);
   const students = studentsResult.students ?? [];
   const lessons = (lessonsResult.lessons ?? []).filter((lesson) => lesson.date === attendanceDate && lesson.status !== "canceled");
-  const records = recordsResult.records ?? [];
 
   let student = null;
   if (payload.studentId) {
@@ -441,6 +468,8 @@ async function handleAttendanceCheck(payload = {}) {
   }
 
   const recordId = createLessonStudentRecordIdForAttendance(lesson.lessonId, student.studentId);
+  const recordResult = await getLessonStudentRecordForAttendance(lesson.lessonId, student.studentId);
+  const records = recordResult.record ? [recordResult.record] : [];
   const existingRecord = findAttendanceRecord(records, lesson.lessonId, student.studentId);
   const hasArrival = hasAttendanceArrival(existingRecord);
   const hasCheckout = hasAttendanceCheckout(existingRecord);
@@ -602,10 +631,11 @@ async function handleAttendanceCheck(payload = {}) {
     studentName: student.name
   };
 
-  let alimtalkStatus = "skipped";
+  const shouldQueueKioskAlimtalk = sendAlimtalk && source === "kiosk";
+  let alimtalkStatus = shouldQueueKioskAlimtalk ? "queued" : "skipped";
   let alimtalkResult = null;
   let alimtalkError = "";
-  if (sendAlimtalk) {
+  if (sendAlimtalk && !shouldQueueKioskAlimtalk) {
     try {
       alimtalkResult = await sendAttendanceAlimtalkOnce(alimtalkPayload);
       alimtalkStatus = alimtalkResult?.duplicateSuppressed ? "duplicate_suppressed" : "sent";
@@ -617,7 +647,7 @@ async function handleAttendanceCheck(payload = {}) {
 
   const checkedAt = eventType === "checkout" ? savedRecord.checkOutAt : savedRecord.checkInAt;
   const checkedTime = eventType === "checkout" ? savedRecord.checkOutTime : savedRecord.checkInTime;
-  const eventResult = await tryRecordAttendanceEvent({
+  const attendanceEventPayload = {
     attendanceEventId: `attendance_event_${Date.now()}_${student.studentId}_${eventType}`,
     lessonId: lesson.lessonId,
     studentId: student.studentId,
@@ -638,7 +668,11 @@ async function handleAttendanceCheck(payload = {}) {
     alimtalkStatus,
     alimtalkResult,
     error: alimtalkError
-  });
+  };
+  const eventResult = await tryRecordAttendanceEvent(attendanceEventPayload);
+  if (shouldQueueKioskAlimtalk) {
+    queueKioskAttendanceAlimtalk(attendanceEventPayload, alimtalkPayload);
+  }
 
   return {
     mode: getAttendanceResultMode(eventType),
@@ -651,7 +685,8 @@ async function handleAttendanceCheck(payload = {}) {
     alimtalk: {
       status: alimtalkStatus,
       result: alimtalkResult,
-      error: alimtalkError
+      error: alimtalkError,
+      queued: shouldQueueKioskAlimtalk
     }
   };
 }
@@ -4943,7 +4978,10 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "GET" && requestUrl.pathname === "/api/lesson-records") {
     try {
-      const result = await listLessonStudentRecords();
+      const date = requestUrl.searchParams.get("date");
+      const result = date
+        ? await listLessonStudentRecordsForLessons((await listLessons({ date })).lessons ?? [])
+        : await listLessonStudentRecords();
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });

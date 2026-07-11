@@ -1068,6 +1068,53 @@ export async function listStudents() {
   return { source: databaseSource, students: rows.map(fromStudentRow) };
 }
 
+export async function listAttendanceCandidateStudents({ phoneLast4 = "", studentId = "" } = {}) {
+  const digits = String(phoneLast4 ?? "").replace(/\D/g, "").slice(-4);
+  if (!isSupabaseConfigured()) {
+    const students = sampleData.students.filter((student) => {
+      if (studentId) return student.studentId === studentId;
+      if ((student.status ?? "active") !== "active") return false;
+      return String(student.studentPhone ?? "").replace(/\D/g, "").slice(-4) === digits;
+    });
+    return { source: fallbackSource, students };
+  }
+
+  if (studentId) {
+    const rows = await listRows(
+      "students",
+      `select=*&student_id=eq.${encodeURIComponent(studentId)}&limit=1`,
+      { requireServiceRole: true }
+    );
+    return { source: databaseSource, students: rows.map(fromStudentRow) };
+  }
+
+  if (digits.length !== 4) {
+    return { source: databaseSource, students: [] };
+  }
+
+  const rows = await listRows(
+    "students",
+    `select=*&status=eq.active&student_phone=like.${encodeURIComponent(`*${digits}`)}&limit=10`,
+    { requireServiceRole: true }
+  );
+  const students = rows.map(fromStudentRow).filter((student) => (
+    String(student.studentPhone ?? "").replace(/\D/g, "").slice(-4) === digits
+  ));
+  if (students.length > 0) return { source: databaseSource, students };
+
+  const fallbackRows = await listRows(
+    "students",
+    "select=*&status=eq.active&limit=1000",
+    { requireServiceRole: true }
+  );
+  return {
+    source: databaseSource,
+    students: fallbackRows.map(fromStudentRow).filter((student) => (
+      String(student.studentPhone ?? "").replace(/\D/g, "").slice(-4) === digits
+    ))
+  };
+}
+
 export async function listStudentIntakeApplicants() {
   if (!isSupabaseConfigured()) {
     return { source: fallbackSource, applicants: [] };
@@ -1276,6 +1323,59 @@ export async function listLessonStudentRecords() {
   }));
   const records = filterLessonRecordsToCurrentRosters(recordRows.map(fromLessonRecordRow), lessons);
   return { source: databaseSource, records };
+}
+
+export async function listLessonStudentRecordsForLessons(lessons = []) {
+  const lessonRows = lessons
+    .filter((lesson) => lesson?.lessonId)
+    .map((lesson) => ({
+      lessonId: lesson.lessonId,
+      studentIds: Array.isArray(lesson.studentIds) ? lesson.studentIds : []
+    }));
+  const lessonIds = [...new Set(lessonRows.map((lesson) => lesson.lessonId))];
+  if (lessonIds.length === 0) {
+    return { source: isSupabaseConfigured() ? databaseSource : fallbackSource, records: [] };
+  }
+  if (!isSupabaseConfigured()) {
+    const lessonIdSet = new Set(lessonIds);
+    return {
+      source: fallbackSource,
+      records: filterLessonRecordsToCurrentRosters(
+        sampleData.lessonStudentRecords.filter((record) => lessonIdSet.has(record.lessonId)),
+        lessonRows
+      )
+    };
+  }
+
+  const lessonIdFilter = lessonIds.map((lessonId) => encodeURIComponent(lessonId)).join(",");
+  const recordRows = await listRows(
+    "lesson_student_records",
+    `select=*&lesson_id=in.(${lessonIdFilter})&order=lesson_id.asc`,
+    { requireServiceRole: true }
+  );
+  const records = filterLessonRecordsToCurrentRosters(recordRows.map(fromLessonRecordRow), lessonRows);
+  return { source: databaseSource, records };
+}
+
+export async function getLessonStudentRecordForAttendance(lessonId, studentId) {
+  if (!lessonId || !studentId) {
+    return { source: isSupabaseConfigured() ? databaseSource : fallbackSource, record: null };
+  }
+  if (!isSupabaseConfigured()) {
+    return {
+      source: fallbackSource,
+      record: sampleData.lessonStudentRecords.find((record) => (
+        record.lessonId === lessonId && record.studentId === studentId
+      )) ?? null
+    };
+  }
+
+  const rows = await listRows(
+    "lesson_student_records",
+    `select=*&lesson_id=eq.${encodeURIComponent(lessonId)}&student_id=eq.${encodeURIComponent(studentId)}&limit=1`,
+    { requireServiceRole: true }
+  );
+  return { source: databaseSource, record: rows[0] ? fromLessonRecordRow(rows[0]) : null };
 }
 
 export async function pruneStaleLessonStudentRecords(lessonId) {

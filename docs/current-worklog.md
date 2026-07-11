@@ -12,6 +12,19 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-11 P1. 태블릿 출결 확인 속도 개선
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 제보: 태블릿 출결 화면에서 번호 입력 후 `확인`을 누르면 오래 기다려야 했다. 현재 출결 판정 로직은 맞으므로 로직을 깨지 않고 속도만 개선해야 한다.
+- 원인 판단: 기존 `/api/attendance/preview`와 `/api/attendance/check`가 매번 학생 전체, 당일 수업, 전체 `lesson_student_records`를 조회했다. 실제 저장 단계는 Supabase 저장 후 Solapi 출결 알림톡 응답까지 기다린 뒤 태블릿에 응답했기 때문에 `확인` 뒤 대기 시간이 길어졌다.
+- 구현 결과: 출결 API가 `listAttendanceCandidateStudents`, `getLessonStudentRecordForAttendance`를 사용해 학생 후보와 해당 수업/학생 record 1건만 조회하도록 줄였다. 학생 전화번호 뒤 4자리 매칭, 오늘 가장 가까운 수업 선택, 수업 명단 자동 보강, 등원/하원/이미 하원 판정은 유지했다.
+- 구현 결과: `/attendance` 전용 초기 로딩은 `/api/lessons?date=<오늘>`과 `/api/lesson-records?date=<오늘>`만 조회한다. 일반 선생님 화면의 전체 수업일지 record 조회는 기존 경로를 유지한다.
+- 구현 결과: 태블릿 kiosk 출결 저장은 Supabase `lesson_student_records` 저장과 `attendance_events` queued 기록까지 완료한 뒤 즉시 응답한다. 출결 알림톡은 같은 payload로 백그라운드에서 `sendAttendanceAlimtalkOnce`를 실행하고, 같은 `attendance_event_id`에 `sent`/`duplicate_suppressed`/`failed`를 후속 반영한다. 수동 출결 저장은 기존처럼 알림톡 결과까지 기다리는 흐름을 유지한다.
+- 구현 결과: 태블릿 화면에는 성공 후 모달로 막지 않고 `출결 저장 완료 · 알림톡 처리 중` 상태를 카드 안에 표시해 다음 학생 번호를 바로 입력할 수 있게 했다.
+- 저장 원천: 출결 원본은 Supabase `lesson_student_records`, 출결 처리/audit 원본은 `attendance_events`, 알림톡 발송 원천은 Solapi다. 새 SQL은 필요 없다.
+- 중단 조건: 4자리 매칭이 학생 전화번호가 아닌 학부모 번호를 잡음, 오늘 수업 선택이 바뀜, 이미 등원한 학생이 하원으로 넘어가지 않음, 이미 하원 학생이 다시 저장됨, Supabase 출결 저장 전에 성공 표시가 나옴, `attendance_events`가 queued에서 최종 상태로 후속 반영되지 않음, 수동 출결 저장의 알림톡 대기 흐름이 바뀜.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 266개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-11 P1. 수업 색상 2차 파스텔 및 정규반 4색 분리
 
 - 상태: 완료 - 구현/검증 완료
