@@ -379,7 +379,8 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, previousHom
   const attendance = formatAttendanceForMessage(record);
   const commentText = normalizeMessageText(comment);
   const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
-  const supplementNotice = supplementText && !commentText.includes("보충일정") && !supplementSchedules.some((item) => commentText.includes(item))
+  const commentHasSupplement = commentText.includes("보충일정") || commentText.includes("보충 일정") || supplementSchedules.some((item) => commentText.includes(item));
+  const supplementNotice = supplementText && !commentHasSupplement
     ? supplementText
     : "";
   const lines = [
@@ -436,8 +437,24 @@ function formatSupplementScheduleLine(task = {}) {
   const schedule = [task.scheduledDate, task.scheduledTime].filter(Boolean).join(" ");
   const method = supplementMethodLabel(task);
   const source = getSupplementTaskSourceLabel(task) || followUpTypeLabel(task.taskType);
-  const status = task.status === "done" ? "보충 완료" : task.status === "scheduled" ? "일정 확정" : "일정 미확정";
-  return [schedule || "일정 미정", source, method, status].filter(Boolean).join(" · ");
+  const schedulePrefix = schedule ? `${schedule}에 ` : "";
+
+  if (task.taskType === "homework_makeup") {
+    if ((task.supplementMethod || supplementDefaultMethod(task.taskType)) === "next_lesson") {
+      return `다음 수업 때 ${source}를 함께 확인하겠습니다.`;
+    }
+    return `${schedulePrefix}${method}으로 ${source} 보충을 진행하겠습니다.`;
+  }
+
+  if (task.taskType === "absence_makeup") {
+    return `${schedulePrefix}${method}으로 ${source}을 진행하겠습니다.`;
+  }
+
+  if (task.taskType === "retest") {
+    return `${schedulePrefix}${source} 재시험을 진행하겠습니다.`;
+  }
+
+  return `${schedulePrefix}${source} 일정을 진행하겠습니다.`;
 }
 
 function getStudentSupplementSchedules(makeupTasks = [], studentId = "") {
@@ -453,16 +470,9 @@ function buildInitialCommentDraft({ audience, existingComment, record, supplemen
   if (commentText) return commentText;
 
   const prepMemo = getPreparationNoticeForTarget(record, audience);
-  const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
-  const supplementBlock = supplementText ? `보충 일정:\n${supplementText}` : "";
   const shouldAddPrepMemo = prepMemo && !textIncludesMessageBlock(commentText, prepMemo);
-  const shouldAddSupplement =
-    supplementBlock &&
-    !textIncludesMessageBlock(commentText, supplementBlock) &&
-    !textIncludesEveryLine(commentText, supplementSchedules);
   return joinMessageBlocks([
     shouldAddPrepMemo ? prepMemo : "",
-    shouldAddSupplement ? supplementBlock : "",
     commentText
   ]);
 }
@@ -25003,7 +25013,7 @@ function createNotificationDraft(task, students) {
   const studentName = student?.name ?? "학생";
   const scheduleText = [task.scheduledDate, task.scheduledTime].filter(Boolean).join(" ");
   const sourceLabel = getSupplementTaskSourceLabel(task);
-  const sourceText = sourceLabel ? `${sourceLabel} ` : "";
+  const sourceText = sourceLabel || (task.taskType === "homework_makeup" ? "보충 과제" : followUpTypeLabel(task.taskType));
   const progressMemo = normalizeMessageText(task.supplementProgressMemo);
   const progressMemoBlock = progressMemo ? `\n\n보충 메모:\n${progressMemo}` : "";
   const methodId = task.supplementMethod || supplementDefaultMethod(task.taskType);
@@ -25011,28 +25021,28 @@ function createNotificationDraft(task, students) {
 
   if (task.taskType === "homework_makeup") {
     if (methodId === "next_lesson") {
-      return `${studentName} 학생 숙제 보충 안내드립니다.\n\n다음 수업 전까지 ${sourceText}보충을 마무리할 수 있도록 안내하겠습니다.${progressMemoBlock}`;
+      return `${studentName} 학생 숙제 보충 안내드립니다.\n\n다음 수업 때 ${sourceText}를 함께 확인하겠습니다.${progressMemoBlock}`;
     }
     if (methodId === "arrival_makeup") {
-      return `${studentName} 학생 숙제 보충 안내드립니다.\n\n${scheduleText} 등원 후 ${sourceText}보충을 진행하겠습니다.${progressMemoBlock}`;
+      return `${studentName} 학생 숙제 보충 안내드립니다.\n\n${scheduleText} 등원 후 ${sourceText} 보충을 진행하겠습니다.${progressMemoBlock}`;
     }
     if (methodId === "stay_after") {
-      return `${studentName} 학생 숙제 보충 안내드립니다.\n\n${scheduleText} 수업 후 남아서 ${sourceText}보충을 마무리하겠습니다.${progressMemoBlock}`;
+      return `${studentName} 학생 숙제 보충 안내드립니다.\n\n${scheduleText} 수업 후 남아서 ${sourceText} 보충을 마무리하겠습니다.${progressMemoBlock}`;
     }
   }
 
   if (task.taskType === "absence_makeup") {
     if (methodId === "recorded_lecture") {
-      return `${studentName} 학생 결석 보강 안내드립니다.\n\n${scheduleText}에 ${sourceText}결석 보강을 녹화 강의로 진행하겠습니다.${absenceText}${progressMemoBlock}`;
+      return `${studentName} 학생 결석 보강 안내드립니다.\n\n${scheduleText}에 ${sourceText} 결석 보강을 녹화 강의로 진행하겠습니다.${absenceText}${progressMemoBlock}`;
     }
-    return `${studentName} 학생 결석 보강 안내드립니다.\n\n${scheduleText}에 ${sourceText}결석 보강을 현장에서 진행하겠습니다.${absenceText}${progressMemoBlock}`;
+    return `${studentName} 학생 결석 보강 안내드립니다.\n\n${scheduleText}에 ${sourceText} 결석 보강을 현장에서 진행하겠습니다.${absenceText}${progressMemoBlock}`;
   }
 
   if (task.taskType === "retest") {
-    return `${studentName} 학생 재시험 안내드립니다.\n\n${scheduleText}에 ${sourceText}재시험을 진행하겠습니다.${progressMemoBlock}`;
+    return `${studentName} 학생 재시험 안내드립니다.\n\n${scheduleText}에 ${sourceText} 재시험을 진행하겠습니다.${progressMemoBlock}`;
   }
 
-  return `${studentName} 학생 ${followUpTypeLabel(task.taskType)} 안내드립니다.\n\n${scheduleText}에 ${sourceText}관련 일정을 진행하겠습니다.${progressMemoBlock}`;
+  return `${studentName} 학생 ${followUpTypeLabel(task.taskType)} 안내드립니다.\n\n${scheduleText}에 ${sourceText} 일정을 진행하겠습니다.${progressMemoBlock}`;
 }
 
 function getSupplementTaskProgress(task, lessons = []) {

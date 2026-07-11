@@ -1326,8 +1326,25 @@ function formatSupplementScheduleLineForNotification(task = {}) {
   const schedule = [task.scheduledDate, task.scheduledTime].filter(Boolean).join(" ");
   const method = supplementMethodLabelForNotification(task);
   const source = getSupplementTaskSourceLabelForNotification(task) || followUpTypeLabelForNotification(task.taskType);
-  const status = task.status === "done" ? "보충 완료" : task.status === "scheduled" ? "일정 확정" : "일정 미확정";
-  return [schedule || "일정 미정", source, method, status].filter(Boolean).join(" · ");
+  const schedulePrefix = schedule ? `${schedule}에 ` : "";
+
+  if (task.taskType === "homework_makeup") {
+    const methodId = task.supplementMethod || "stay_after";
+    if (methodId === "next_lesson") {
+      return `다음 수업 때 ${source}를 함께 확인하겠습니다.`;
+    }
+    return `${schedulePrefix}${method}으로 ${source} 보충을 진행하겠습니다.`;
+  }
+
+  if (task.taskType === "absence_makeup") {
+    return `${schedulePrefix}${method}으로 ${source}을 진행하겠습니다.`;
+  }
+
+  if (task.taskType === "retest") {
+    return `${schedulePrefix}${source} 재시험을 진행하겠습니다.`;
+  }
+
+  return `${schedulePrefix}${source} 일정을 진행하겠습니다.`;
 }
 
 function getStudentSupplementSchedulesForNotification(makeupTasks = [], studentId = "") {
@@ -1348,17 +1365,10 @@ function buildInitialNotificationComment({ audience, existingComment, record, su
   if (commentText) return commentText;
 
   const prepMemo = getPreparationNoticeForNotification(record, audience);
-  const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
-  const supplementBlock = supplementText ? `보충 일정:\n${supplementText}` : "";
   const shouldAddPrepMemo = prepMemo && !notificationTextIncludesBlock(commentText, prepMemo);
-  const shouldAddSupplement =
-    supplementBlock &&
-    !notificationTextIncludesBlock(commentText, supplementBlock) &&
-    !notificationTextIncludesEveryLine(commentText, supplementSchedules);
 
   return joinNotificationBlocks([
     shouldAddPrepMemo ? prepMemo : "",
-    shouldAddSupplement ? supplementBlock : "",
     commentText
   ]);
 }
@@ -1381,8 +1391,12 @@ function buildLatestLessonCommentPreview({ audience, commentBody, lesson, nextHo
   const assignmentStatus = getAssignmentStatusForNotification(record, previousHomework);
   const commentText = normalizeNotificationText(commentBody);
   const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
+  const commentHasSupplement =
+    commentText.includes("보충일정") ||
+    commentText.includes("보충 일정") ||
+    supplementSchedules.some((item) => commentText.includes(item));
   const supplementNotice =
-    supplementText && !commentText.includes("보충일정") && !supplementSchedules.some((item) => commentText.includes(item))
+    supplementText && !commentHasSupplement
       ? supplementText
       : "";
 
