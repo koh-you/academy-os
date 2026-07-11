@@ -12,6 +12,17 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-11 P1. 학생 프로필 기본정보 저장 로딩 고착 방지
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 제보: 학생 프로필에서 기본정보를 수정한 뒤 `기본정보 저장`이 계속 로딩에 걸리는 것처럼 보였다.
+- 원인 판단: 학생 기본정보 저장은 Supabase `students` row에 저장되지만 프론트 요청에 별도 타임아웃이 없어 API 응답이 지연/고착되면 `saving` 상태가 오래 남을 수 있었다. 또한 버튼 문구가 고정 `기본정보 저장`이라 실제 저장 중/실패 상태를 버튼 자체에서 확인하기 어려웠다.
+- 구현 결과: 학생 기본정보 저장 요청을 `postJsonWithTimeout`으로 바꾸고 15초 초과 시 `학생 기본정보 저장 요청이 15초를 넘었습니다...` 오류를 띄우도록 했다. 실패 시 프로필 모달 안의 `기본정보 저장 실패` 메시지로 확인할 수 있고, 수정 모드와 입력 draft는 유지된다.
+- 구현 결과: `기본정보 저장` 버튼 문구가 저장 상태에 따라 `저장 중`, `저장 실패`, `저장 완료`를 표시하게 했다. 저장 중에는 중복 클릭이 막히고, 실패 후에는 변경 draft가 남아 재시도할 수 있다.
+- 저장 원천: 기본정보 원본은 Supabase `students` row다. local draft는 수정 중 임시값이며 저장 성공 전 원본으로 보지 않는다. 새 SQL은 필요 없다.
+- 중단 조건: 15초 이상 `저장 중` 상태가 계속 유지됨, 실패했는데 모달 안에 오류가 보이지 않음, 저장 실패 후 입력값이 사라짐, 새로고침 후 Supabase `students` 값이 저장본과 다름.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 268개 통과, `npm run build` 통과, `git diff --check` 통과. `node --check src/domains/students/StudentManager.jsx`는 Node가 `.jsx` 확장자를 직접 검사하지 못해 `ERR_UNKNOWN_FILE_EXTENSION`로 실행 불가했고, Vite build로 JSX 문법 검증을 대체했다. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-11 P1. 보충관리 저장/일정반영 버튼 작동 보강
 
 - 상태: 완료 - 구현/검증 완료

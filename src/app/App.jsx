@@ -6754,7 +6754,12 @@ export function App() {
     studentProfileSaveRequestRef.current[nextStudent.studentId] = requestId;
     setStudentProfileSaveStates((current) => ({ ...current, [nextStudent.studentId]: "saving" }));
     try {
-      const result = await postJson("/api/students", { student: nextStudent });
+      const result = await postJsonWithTimeout(
+        "/api/students",
+        { student: nextStudent },
+        15000,
+        "학생 기본정보 저장 요청이 15초를 넘었습니다. 저장 상태를 확인한 뒤 다시 시도해 주세요."
+      );
       const savedStudent = result.student ?? nextStudent;
       setStudents((current) =>
         current.map((student) => (student.studentId === savedStudent.studentId ? { ...student, ...savedStudent } : student))

@@ -937,6 +937,7 @@ function StudentProfileModal({
       : isProfileDirty
         ? "dirty"
         : studentProfileSaveState;
+  const isProfileSaving = effectiveProfileSaveState === "saving";
 
   return (
     <ModalComponent
@@ -964,11 +965,11 @@ function StudentProfileModal({
                 </button>
                 <button
                   className="saveButton"
-                  disabled={!isProfileDirty || studentProfileSaveState === "saving"}
+                  disabled={!isProfileDirty || isProfileSaving}
                   onClick={saveProfileDraft}
                   type="button"
                 >
-                  기본정보 저장
+                  {saveActionLabel("기본정보 저장", effectiveProfileSaveState)}
                 </button>
               </>
             ) : (
