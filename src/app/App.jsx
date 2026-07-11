@@ -12328,6 +12328,7 @@ function RoleLoginScreen({ initialRole = "student", onLogin }) {
 function AcademyReminderList({
   emptyText = "표시할 운영 알림이 없습니다.",
   onDeleteAcademyReminder,
+  onEditAcademyReminder,
   onSaveAcademyReminder,
   reminders = [],
   showActions = false,
@@ -12413,6 +12414,14 @@ function AcademyReminderList({
               <div className="academyReminderActions">
                 <button
                   className="softButton compact"
+                  disabled={!reminderId || busyReminderId === reminderId}
+                  onClick={() => onEditAcademyReminder?.(reminder)}
+                  type="button"
+                >
+                  수정
+                </button>
+                <button
+                  className="softButton compact"
                   disabled={status === "done" || !reminderId || busyReminderId === reminderId}
                   onClick={() => markDone(reminder)}
                   type="button"
@@ -12444,8 +12453,10 @@ function AcademyReminderPanel({
   onSaveAcademyReminder
 }) {
   const [draft, setDraft] = useState(() => createAcademyReminderDraft(selectedDate));
+  const [editingReminderId, setEditingReminderId] = useState("");
   const [saveState, setSaveState] = useState("idle");
   const [saveMessage, setSaveMessage] = useState("");
+  const isEditingReminder = Boolean(editingReminderId);
   const activeStudents = students.filter(isActiveStudent);
   const selectedDateReminders = getAcademyRemindersForDate(reminders, selectedDate, { includeDone: true });
   const upcomingReminders = sortAcademyReminders(reminders)
@@ -12454,26 +12465,52 @@ function AcademyReminderPanel({
     .slice(0, 8);
 
   useEffect(() => {
+    if (editingReminderId) return;
     setDraft((current) => ({ ...current, reminderDate: selectedDate || today, date: selectedDate || today }));
-  }, [selectedDate]);
+  }, [editingReminderId, selectedDate]);
 
   function updateDraft(field, value) {
-    setSaveState("idle");
-    setSaveMessage("");
+    setSaveState(isEditingReminder ? "dirty" : "idle");
+    setSaveMessage(isEditingReminder ? "운영 알림 수정 중 · 저장 전" : "");
     setDraft((current) => ({ ...current, [field]: value }));
   }
 
+  function startEditReminder(reminder) {
+    const normalized = normalizeAcademyReminderDraft(reminder);
+    setEditingReminderId(normalized.reminderId);
+    setDraft(normalized);
+    setSaveState("dirty");
+    setSaveMessage("운영 알림 수정 중 · 저장 전");
+  }
+
+  function cancelEditReminder() {
+    setEditingReminderId("");
+    setDraft(createAcademyReminderDraft(selectedDate || today));
+    setSaveState("idle");
+    setSaveMessage("");
+  }
+
   async function saveDraft() {
+    const status = normalizeAcademyReminderStatus(draft.status);
+    const reminderToSave = normalizeAcademyReminderDraft({
+      ...draft,
+      reminderId: editingReminderId || draft.reminderId,
+      id: editingReminderId || draft.reminderId,
+      completedAt: status === "done" ? (draft.completedAt || new Date().toISOString()) : "",
+      status
+    });
     setSaveState("saving");
-    setSaveMessage("운영 알림을 저장하는 중입니다.");
+    setSaveMessage(isEditingReminder ? "운영 알림을 수정 저장하는 중입니다." : "운영 알림을 저장하는 중입니다.");
     try {
-      const saved = await onSaveAcademyReminder?.(draft);
-      setDraft(createAcademyReminderDraft(saved?.reminderDate || selectedDate || today));
+      const saved = await onSaveAcademyReminder?.(reminderToSave);
+      const nextDate = saved?.reminderDate || reminderToSave.reminderDate || selectedDate || today;
+      setEditingReminderId("");
       setSaveState("saved");
-      setSaveMessage("운영 알림 · 저장 완료");
+      setSaveMessage(isEditingReminder ? "운영 알림 · 수정 완료" : "운영 알림 · 저장 완료");
+      setDraft(createAcademyReminderDraft(nextDate));
     } catch (error) {
       setSaveState("failed");
-      setSaveMessage(`운영 알림 저장 실패 · ${error?.message || "알 수 없는 오류"}`);
+      setSaveMessage(`운영 알림 ${isEditingReminder ? "수정" : "저장"} 실패 · ${error?.message || "알 수 없는 오류"}`);
     }
   }
 
@@ -12487,6 +12524,17 @@ function AcademyReminderPanel({
         </div>
         <span className={`saveStateBadge ${saveState === "saved" ? "success" : saveState}`}>{saveMessage || "Supabase academy_reminders"}</span>
       </div>
+      {isEditingReminder ? (
+        <div className="academyReminderEditBanner">
+          <div>
+            <strong>운영 알림 수정 중</strong>
+            <span>같은 reminderId를 유지해 날짜, 시간, 내용만 수정 저장합니다.</span>
+          </div>
+          <button className="softButton compact" disabled={saveState === "saving"} onClick={cancelEditReminder} type="button">
+            수정 취소
+          </button>
+        </div>
+      ) : null}
       <div className="academyReminderForm">
         <select value={draft.reminderType} onChange={(event) => updateDraft("reminderType", event.target.value)}>
           {academyReminderTypeOptions.map((option) => (
@@ -12511,6 +12559,11 @@ function AcademyReminderPanel({
             <option key={option.value} value={option.value}>{option.label}</option>
           ))}
         </select>
+        <select value={draft.status} onChange={(event) => updateDraft("status", event.target.value)}>
+          {Object.entries(academyReminderStatusLabels).map(([value, label]) => (
+            <option key={value} value={value}>{label}</option>
+          ))}
+        </select>
         <label className="academyReminderSlackToggle">
           <input
             checked={draft.slackNotify !== false}
@@ -12531,7 +12584,7 @@ function AcademyReminderPanel({
           onClick={saveDraft}
           type="button"
         >
-          운영 알림 저장
+          {saveState === "saving" ? "저장 중" : isEditingReminder ? "수정 저장" : "운영 알림 저장"}
         </button>
       </div>
       <div className="academyReminderColumns">
@@ -12542,6 +12595,7 @@ function AcademyReminderPanel({
           </div>
           <AcademyReminderList
             onDeleteAcademyReminder={onDeleteAcademyReminder}
+            onEditAcademyReminder={startEditReminder}
             onSaveAcademyReminder={onSaveAcademyReminder}
             reminders={selectedDateReminders}
             showActions
@@ -12556,6 +12610,7 @@ function AcademyReminderPanel({
           <AcademyReminderList
             emptyText="대기 중인 운영 알림이 없습니다."
             onDeleteAcademyReminder={onDeleteAcademyReminder}
+            onEditAcademyReminder={startEditReminder}
             onSaveAcademyReminder={onSaveAcademyReminder}
             reminders={upcomingReminders}
             showActions

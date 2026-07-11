@@ -710,11 +710,39 @@ button {
   grid-template-columns:
     minmax(132px, 0.8fr)
     minmax(152px, 0.9fr)
-    minmax(260px, 2fr)
-    142px
-    108px
-    112px
+    minmax(220px, 1.8fr)
+    132px
+    104px
+    104px
+    96px
     154px;
+}
+
+.academyReminderEditBanner {
+  align-items: center;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  color: #9a3412;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 10px 12px;
+}
+
+.academyReminderEditBanner div {
+  display: grid;
+  gap: 3px;
+}
+
+.academyReminderEditBanner strong {
+  color: #7c2d12;
+  font-size: 14px;
+}
+
+.academyReminderEditBanner span {
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .academyReminderForm textarea {
@@ -14388,6 +14416,11 @@ body.attendanceOnlyBody {
 
   .academyReminderForm textarea {
     grid-column: 1;
+  }
+
+  .academyReminderEditBanner {
+    align-items: stretch;
+    display: grid;
   }
 
   .academyReminderItem,
