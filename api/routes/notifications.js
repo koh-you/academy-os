@@ -292,6 +292,7 @@ function buildDailyReportBody({
   retestSchedule,
   audience = "parent",
   supplementSchedule,
+  testResult,
   teacherComment
 }) {
   const incompleteList = normalizeList(incompleteHomeworks);
@@ -310,6 +311,7 @@ function buildDailyReportBody({
     messageLine("🧭 강의 내용", lessonContent),
     messageLine("📘 지난 과제", previousHomework),
     messageLine("➡️ 다음 과제", nextHomework),
+    messageBlock("📝 테스트", testResult),
     incompleteList.length ? messageBlock("⚠️ 미완료 과제", incompleteList.map((item) => `- ${item}`).join("\n")) : "",
     messageBlock("⭐ 중요 · 재시험 일정", retestSchedule),
     messageBlock("⭐ 중요 · 보충 일정", supplementSchedule),
@@ -334,6 +336,7 @@ function buildLessonCommentBody(payload, audience) {
     previousHomework: payload.previousHomework,
     preparationNotice: payload.preparationNotice,
     supplementSchedule: payload.supplementSchedule,
+    testResult: payload.testResult,
     teacherComment: payload.message
   });
 }
@@ -606,6 +609,7 @@ export async function sendDailyReportAlimtalk(payload) {
       preparationNotice: payload.preparationNotice,
       retestSchedule: payload.retestSchedule,
       supplementSchedule: payload.supplementSchedule,
+      testResult: payload.testResult,
       teacherComment: payload.teacherComment
     });
 

@@ -373,6 +373,83 @@ function fromHomeworkRow(row) {
   };
 }
 
+function sanitizePositiveInteger(value) {
+  if (value === "" || value === null || value === undefined) return null;
+  const number = Number(value);
+  if (!Number.isFinite(number)) return null;
+  return Math.max(0, Math.round(number));
+}
+
+function toTestSessionRow(session = {}) {
+  return {
+    test_session_id: session.testSessionId,
+    problem_book_id: compact(session.problemBookId),
+    test_date: session.testDate,
+    class_template_id: compact(session.classTemplateId),
+    class_name: compact(session.className),
+    test_kind: session.testKind || "daily",
+    test_title: session.testTitle || "시험지명 미입력",
+    subject: compact(session.subject),
+    unit: compact(session.unit),
+    total_questions: sanitizePositiveInteger(session.totalQuestions),
+    pass_correct_count: sanitizePositiveInteger(session.passCorrectCount),
+    source: session.source || "manual",
+    memo: compact(session.memo),
+    created_at: session.createdAt ?? new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+}
+
+function fromTestSessionRow(row = {}) {
+  return {
+    testSessionId: row.test_session_id,
+    problemBookId: row.problem_book_id ?? "",
+    testDate: row.test_date ?? "",
+    classTemplateId: row.class_template_id ?? "",
+    className: row.class_name ?? "",
+    testKind: row.test_kind ?? "daily",
+    testTitle: row.test_title ?? "",
+    subject: row.subject ?? "",
+    unit: row.unit ?? "",
+    totalQuestions: row.total_questions ?? "",
+    passCorrectCount: row.pass_correct_count ?? "",
+    source: row.source ?? "manual",
+    memo: row.memo ?? "",
+    createdAt: row.created_at ?? "",
+    updatedAt: row.updated_at ?? ""
+  };
+}
+
+function toTestAttemptRow(attempt = {}) {
+  return {
+    test_attempt_id: attempt.testAttemptId,
+    test_session_id: attempt.testSessionId,
+    student_id: attempt.studentId,
+    status: attempt.status === "not_taken" ? "not_taken" : "taken",
+    correct_count: attempt.status === "not_taken" ? null : sanitizePositiveInteger(attempt.correctCount),
+    not_taken_reason: compact(attempt.notTakenReason),
+    pass_status: compact(attempt.passStatus),
+    memo: compact(attempt.memo),
+    created_at: attempt.createdAt ?? new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+}
+
+function fromTestAttemptRow(row = {}) {
+  return {
+    testAttemptId: row.test_attempt_id,
+    testSessionId: row.test_session_id,
+    studentId: row.student_id,
+    status: row.status ?? "taken",
+    correctCount: row.correct_count ?? "",
+    notTakenReason: row.not_taken_reason ?? "",
+    passStatus: row.pass_status ?? "",
+    memo: row.memo ?? "",
+    createdAt: row.created_at ?? "",
+    updatedAt: row.updated_at ?? ""
+  };
+}
+
 function parseJsonNote(value) {
   if (!value) return {};
   try {
@@ -1547,6 +1624,93 @@ export async function upsertExamPrepRows(rows) {
   const safeRows = rows.map((row) => mergeExamPrepScheduleFields(row, existingRows.get(row.examPrepId)));
   const savedRows = await upsertRows("exam_prep_rows", safeRows.map(toExamPrepRow));
   return { source: databaseSource, examPrepRows: savedRows.map(fromExamPrepRow) };
+}
+
+export async function listTestSessions(filters = {}) {
+  if (!isSupabaseConfigured()) {
+    return { source: fallbackSource, testSessions: [] };
+  }
+
+  const query = ["select=*", "order=test_date.desc,updated_at.desc"];
+  if (filters.testDate) query.push(`test_date=eq.${encodeURIComponent(filters.testDate)}`);
+  if (filters.classTemplateId) query.push(`class_template_id=eq.${encodeURIComponent(filters.classTemplateId)}`);
+  const rows = await listRows("test_sessions", query.join("&"), { requireServiceRole: true });
+  return { source: databaseSource, testSessions: rows.map(fromTestSessionRow) };
+}
+
+export async function listTestAttempts(filters = {}) {
+  if (!isSupabaseConfigured()) {
+    return { source: fallbackSource, testAttempts: [] };
+  }
+
+  const query = ["select=*", "order=updated_at.desc"];
+  if (filters.testSessionId) query.push(`test_session_id=eq.${encodeURIComponent(filters.testSessionId)}`);
+  if (filters.studentId) query.push(`student_id=eq.${encodeURIComponent(filters.studentId)}`);
+  const rows = await listRows("test_attempts", query.join("&"), { requireServiceRole: true });
+  return { source: databaseSource, testAttempts: rows.map(fromTestAttemptRow) };
+}
+
+export async function upsertTestSessionWithAttempts(session, attempts = []) {
+  if (!session?.testSessionId) throw new Error("저장할 테스트 회차 ID가 필요합니다.");
+  if (!session?.testDate) throw new Error("테스트 날짜가 필요합니다.");
+  if (!session?.testTitle) throw new Error("시험지명이 필요합니다.");
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, testSession: session, testAttempts: attempts };
+  }
+
+  let savedSessionRows;
+  try {
+    savedSessionRows = await upsertRows("test_sessions", [toTestSessionRow(session)], { onConflict: "test_session_id" });
+  } catch (error) {
+    throw new Error(`Supabase 테스트 응시 기록 SQL이 필요합니다. supabase/20260713_test_sessions.sql을 실행한 뒤 다시 저장하세요. (${error.message})`);
+  }
+
+  const normalizedAttempts = attempts
+    .filter((attempt) => attempt?.studentId && ["taken", "not_taken"].includes(attempt.status))
+    .map((attempt) => ({
+      ...attempt,
+      testSessionId: session.testSessionId,
+      testAttemptId: attempt.testAttemptId || `test_attempt_${session.testSessionId}_${attempt.studentId}`
+    }));
+  let savedAttemptRows = [];
+  if (normalizedAttempts.length > 0) {
+    try {
+      savedAttemptRows = await upsertRows(
+        "test_attempts",
+        normalizedAttempts.map(toTestAttemptRow),
+        { onConflict: "test_session_id,student_id" }
+      );
+      const existingAttemptRows = await listRows(
+        "test_attempts",
+        `select=test_attempt_id,student_id&test_session_id=eq.${encodeURIComponent(session.testSessionId)}`,
+        { requireServiceRole: true }
+      );
+      const keptStudentIds = new Set(normalizedAttempts.map((attempt) => attempt.studentId));
+      for (const existingAttempt of existingAttemptRows) {
+        if (!keptStudentIds.has(existingAttempt.student_id)) {
+          await deleteRows("test_attempts", `test_attempt_id=eq.${encodeURIComponent(existingAttempt.test_attempt_id)}`);
+        }
+      }
+    } catch (error) {
+      throw new Error(`Supabase 테스트 응시 결과 SQL이 필요합니다. supabase/20260713_test_sessions.sql을 실행한 뒤 다시 저장하세요. (${error.message})`);
+    }
+  }
+
+  return {
+    source: databaseSource,
+    testSession: fromTestSessionRow(savedSessionRows[0]),
+    testAttempts: savedAttemptRows.map(fromTestAttemptRow)
+  };
+}
+
+export async function deleteTestSession(testSessionId) {
+  if (!testSessionId) throw new Error("삭제할 테스트 회차 ID가 필요합니다.");
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, deletedTestSessionId: testSessionId };
+  }
+
+  await deleteRows("test_sessions", `test_session_id=eq.${encodeURIComponent(testSessionId)}`);
+  return { source: databaseSource, deletedTestSessionId: testSessionId };
 }
 
 export async function listSchoolEvents() {

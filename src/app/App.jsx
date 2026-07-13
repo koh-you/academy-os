@@ -372,13 +372,14 @@ function getPreparationNoticeForTarget(record = {}, target = "parent") {
   return shouldIncludePrepMemo ? normalizeMessageText(record?.preparationMemo) : "";
 }
 
-function buildCommentPreviewLines({ audience, comment, nextHomework, previousHomework, record, student, supplementSchedules = [] }) {
+function buildCommentPreviewLines({ audience, comment, nextHomework, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
   const lessonMaterial = getLessonMaterial(record, student);
   const lessonContent = getLessonContent(record);
   const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
   const attendance = formatAttendanceForMessage(record);
   const commentText = normalizeMessageText(comment);
   const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
+  const testResultText = testResultLines.length ? testResultLines.map((item) => `- ${item}`).join("\n") : "";
   const commentHasSupplement = commentText.includes("보충일정") || commentText.includes("보충 일정") || supplementSchedules.some((item) => commentText.includes(item));
   const supplementNotice = supplementText && !commentHasSupplement
     ? supplementText
@@ -390,6 +391,7 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, previousHom
     createMessageLine("🧭 강의 내용", lessonContent),
     createMessageLine("📘 지난 과제", previousHomework?.title),
     createMessageLine("➡️ 다음 과제", nextHomework?.title),
+    testResultText ? createMessageBlock("📝 테스트", testResultText) : "",
     supplementNotice ? createMessageBlock("⭐ 보충 일정", supplementNotice) : "",
     commentText ? createMessageBlock("💬 코멘트", commentText) : ""
   ];
@@ -397,7 +399,7 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, previousHom
   return lines.filter(Boolean);
 }
 
-function buildCommentPreviewText({ audience, comment, lesson, nextHomework, previousHomework, record, student, supplementSchedules = [] }) {
+function buildCommentPreviewText({ audience, comment, lesson, nextHomework, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
   const isParent = audience === "parent";
   const previewLines = buildCommentPreviewLines({
     audience,
@@ -406,7 +408,8 @@ function buildCommentPreviewText({ audience, comment, lesson, nextHomework, prev
     previousHomework,
     record,
     student,
-    supplementSchedules
+    supplementSchedules,
+    testResultLines
   });
 
   return joinMessageBlocks([
@@ -418,7 +421,7 @@ function buildCommentPreviewText({ audience, comment, lesson, nextHomework, prev
   ]);
 }
 
-function buildCommentSourceText({ audience = "parent", lesson, nextHomework, previousHomework, record, student, supplementSchedules = [] }) {
+function buildCommentSourceText({ audience = "parent", lesson, nextHomework, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
   return joinMessageBlocks([
     createMessageLine("수신 학생", student.name),
     createMessageLine("수업", `${lesson.date} ${lesson.className}`),
@@ -428,6 +431,7 @@ function buildCommentSourceText({ audience = "parent", lesson, nextHomework, pre
     createMessageLine("강의 내용", getLessonContent(record)),
     createMessageLine("지난 과제", previousHomework?.title),
     createMessageLine("다음 과제", nextHomework?.title),
+    testResultLines.length ? createMessageBlock("테스트", testResultLines.map((item) => `- ${item}`).join("\n")) : "",
     supplementSchedules.length ? createMessageBlock("보충일정", supplementSchedules.map((item) => `- ${item}`).join("\n")) : "",
     createMessageBlock("수업메모", record?.preparationMemo)
   ]) || "알림톡에 참고할 원본 정보가 아직 없습니다.";
@@ -464,6 +468,46 @@ function getStudentSupplementSchedules(makeupTasks = [], studentId = "") {
     .filter((task) => task.scheduledDate || task.scheduledTime || task.notificationDraft || task.supplementHomeworkNote || task.sourceLabel)
     .sort((a, b) => `${a.scheduledDate || "9999-99-99"} ${a.scheduledTime || ""}`.localeCompare(`${b.scheduledDate || "9999-99-99"} ${b.scheduledTime || ""}`))
     .map(formatSupplementScheduleLine);
+}
+
+function formatTestAttemptMessageLine(session = {}, attempt = {}) {
+  const title = normalizeMessageText(session.testTitle) || getTestPaperKindLabel(session.testKind);
+  if (attempt.status === "not_taken") {
+    const reason = normalizeMessageText(attempt.notTakenReason);
+    return `${title} · 미응시${reason ? ` (사유: ${reason})` : ""}`;
+  }
+
+  const hasCorrect = attempt.correctCount !== "" && attempt.correctCount !== null && attempt.correctCount !== undefined;
+  const total = session.totalQuestions !== "" && session.totalQuestions !== null && session.totalQuestions !== undefined
+    ? `${session.totalQuestions}문항 중 `
+    : "";
+  return `${title} · ${hasCorrect ? `${total}${attempt.correctCount}문항 정답` : "응시"}`;
+}
+
+function getLessonTestResultLines(testSessions = [], testAttempts = [], lesson = {}, student = {}) {
+  const sessionById = new Map(testSessions.map((session) => [session.testSessionId, session]));
+  return testAttempts
+    .filter((attempt) => attempt.studentId === student.studentId)
+    .map((attempt) => ({ attempt, session: sessionById.get(attempt.testSessionId) }))
+    .filter(({ session }) => session && session.testDate === lesson.date)
+    .filter(({ session }) => !session.classTemplateId || session.classTemplateId === lesson.classTemplateId)
+    .sort((a, b) => String(a.session.updatedAt || a.session.createdAt || "").localeCompare(String(b.session.updatedAt || b.session.createdAt || "")))
+    .map(({ session, attempt }) => formatTestAttemptMessageLine(session, attempt));
+}
+
+function hasIncompleteLessonTestAttempt(testSessions = [], testAttempts = [], lesson = {}, student = {}) {
+  const relevantSessions = testSessions.filter((session) =>
+    session.testDate === lesson.date &&
+    (!session.classTemplateId || session.classTemplateId === lesson.classTemplateId)
+  );
+  if (!relevantSessions.length) return false;
+  return relevantSessions.some((session) => {
+    const attempt = testAttempts.find((item) => item.testSessionId === session.testSessionId && item.studentId === student.studentId);
+    if (!attempt) return true;
+    if (attempt.status === "not_taken") return !normalizeMessageText(attempt.notTakenReason);
+    if (attempt.status === "taken") return attempt.correctCount === "" || attempt.correctCount === null || attempt.correctCount === undefined;
+    return true;
+  });
 }
 
 function buildInitialCommentDraft({ audience, existingComment, record, supplementSchedules }) {
@@ -912,7 +956,8 @@ function buildLessonReservationPayloadSnapshot({
   record,
   scheduledDate,
   student,
-  supplementSchedules = []
+  supplementSchedules = [],
+  testResultLines = []
 }) {
   const sourceField = audience === "student" ? "studentComment" : "teacherComment";
   const commentBody = buildInitialCommentDraft({
@@ -938,6 +983,7 @@ function buildLessonReservationPayloadSnapshot({
     scheduleMode: mode,
     studentId: student.studentId,
     supplementSchedule: supplementSchedules.join("\n"),
+    testResult: testResultLines.join("\n"),
     target: audience
   };
 }
@@ -960,6 +1006,7 @@ function getLessonReservationPayloadFingerprint(payload = {}) {
     scheduleMode: String(payload.scheduleMode ?? ""),
     studentId: String(payload.studentId ?? ""),
     supplementSchedule: normalizeMessageText(payload.supplementSchedule ?? ""),
+    testResult: normalizeMessageText(payload.testResult ?? ""),
     target: String(payload.target ?? "")
   });
 }
@@ -4187,6 +4234,19 @@ function postAppState(states) {
   return postJson("/api/app-state", { states });
 }
 
+function postTestSession(testSession, testAttempts = []) {
+  return postJson("/api/test-sessions", { testSession, testAttempts });
+}
+
+function deleteTestSessionFromApi(testSessionId) {
+  return fetch(apiUrl(`/api/test-sessions?testSessionId=${encodeURIComponent(testSessionId)}`), { method: "DELETE" })
+    .then((response) => response.json())
+    .then((result) => {
+      if (!result.ok) throw new Error(result.error || "테스트 응시 기록 삭제 실패");
+      return result;
+    });
+}
+
 async function fetchPortalData(sessionToken) {
   const response = await fetch(apiUrl("/api/portal-data"), {
     headers: { Authorization: `Bearer ${sessionToken}` }
@@ -5076,6 +5136,12 @@ const testPaperProgressOptions = [
   { id: "hold", label: "강사확인" }
 ];
 
+const testAttemptStatusOptions = [
+  { id: "", label: "미입력" },
+  { id: "taken", label: "응시" },
+  { id: "not_taken", label: "미응시" }
+];
+
 function getTestPaperKindLabel(value = "") {
   return testPaperKindOptions.find((option) => option.id === value)?.label ?? "데일리";
 }
@@ -5086,6 +5152,47 @@ function getTestPaperPreparationLabel(value = "") {
 
 function getTestPaperProgressLabel(value = "") {
   return testPaperProgressOptions.find((option) => option.id === value)?.label ?? "대기";
+}
+
+function getTestAttemptStatusLabel(value = "") {
+  return testAttemptStatusOptions.find((option) => option.id === value)?.label ?? "미입력";
+}
+
+function createTestSessionIdForPaper({ classTemplateId = "", problemBookId = "", testDate = "" } = {}) {
+  return `test_session_${safeIdPart(testDate || "date")}_${safeIdPart(classTemplateId || "all")}_${safeIdPart(problemBookId || "paper")}`;
+}
+
+function createTestAttemptId(testSessionId = "", studentId = "") {
+  return `test_attempt_${safeIdPart(testSessionId)}_${safeIdPart(studentId)}`;
+}
+
+function getProblemBookTotalQuestions(book = {}) {
+  const problemsCount = Array.isArray(book.problems) ? book.problems.length : 0;
+  return Number(book.totalProblems || problemsCount || 0);
+}
+
+function getProblemBookPassCorrectCount(book = {}) {
+  const totalQuestions = getProblemBookTotalQuestions(book);
+  const passScore = Number(book.passScore || 0);
+  if (!Number.isFinite(passScore) || passScore <= 0 || totalQuestions <= 0) return "";
+  if (passScore <= totalQuestions) return Math.ceil(passScore);
+  return Math.ceil(totalQuestions * Math.min(passScore, 100) / 100);
+}
+
+function getTestAttemptPassStatus(attempt = {}, session = {}) {
+  if (attempt.status === "not_taken") return "not_taken";
+  const correctCount = Number(attempt.correctCount);
+  const passCorrectCount = Number(session.passCorrectCount);
+  if (!Number.isFinite(correctCount) || !Number.isFinite(passCorrectCount) || passCorrectCount <= 0) return "";
+  return correctCount >= passCorrectCount ? "passed" : "failed";
+}
+
+function getTestAttemptPassLabel(value = "") {
+  return {
+    failed: "미통과",
+    not_taken: "미응시",
+    passed: "통과"
+  }[value] ?? "판정 전";
 }
 
 function inferTestPaperKind(book = {}) {
@@ -5365,6 +5472,8 @@ export function App() {
   const [notificationJobsStatus, setNotificationJobsStatus] = useState({ state: "idle", message: "" });
   const [wrongProblems, setWrongProblems] = useStoredState(storageKeys.wrongProblems, sampleData.wrongProblems ?? []);
   const [problemBooks, setProblemBooks] = useStoredState(storageKeys.problemBooks, createDefaultProblemBooks());
+  const [testSessions, setTestSessions] = useState([]);
+  const [testAttempts, setTestAttempts] = useState([]);
   const [scoreRecords, setScoreRecords] = useStoredState(storageKeys.scoreRecords, sampleData.scoreRecords ?? []);
   const [academyTests, setAcademyTests] = useStoredState(storageKeys.academyTests, sampleData.academyTests ?? []);
   const [examPrepRows, setExamPrepRows] = useStoredState(storageKeys.examPrepRows, normalizeExamPrepRows(sampleData.examPrepRows ?? []));
@@ -5405,6 +5514,7 @@ export function App() {
   const [attendanceReloadKey, setAttendanceReloadKey] = useState(0);
   const [saveStates, setSaveStates] = useState({});
   const [appStateSaveState, setAppStateSaveState] = useState("idle");
+  const [testResultSaveState, setTestResultSaveState] = useState("idle");
   const [scoreRecordSaveState, setScoreRecordSaveState] = useState("idle");
   const [academyTestSaveState, setAcademyTestSaveState] = useState("idle");
   const [studentConsultationSaveState, setStudentConsultationSaveState] = useState("idle");
@@ -5547,6 +5657,8 @@ export function App() {
           academyRemindersResponse,
           examPrepRowsResponse,
           schoolEventsResponse,
+          testSessionsResponse,
+          testAttemptsResponse,
           appStateResponse,
           resourceMaterialsResponse
         ] = await Promise.all([
@@ -5560,6 +5672,8 @@ export function App() {
           fetch(apiUrl("/api/academy-reminders")),
           fetch(apiUrl("/api/exam-prep-rows")),
           fetch(apiUrl("/api/school-events")),
+          fetch(apiUrl("/api/test-sessions")),
+          fetch(apiUrl("/api/test-attempts")),
           fetch(apiUrl("/api/app-state")),
           fetch(apiUrl("/api/resource-materials"))
         ]);
@@ -5574,6 +5688,8 @@ export function App() {
           academyRemindersResult,
           examPrepRowsResult,
           schoolEventsResult,
+          testSessionsResult,
+          testAttemptsResult,
           appStateResult,
           resourceMaterialsResult
         ] = await Promise.all([
@@ -5587,6 +5703,8 @@ export function App() {
           academyRemindersResponse.json(),
           examPrepRowsResponse.json(),
           schoolEventsResponse.json(),
+          testSessionsResponse.json(),
+          testAttemptsResponse.json(),
           appStateResponse.json(),
           resourceMaterialsResponse.json()
         ]);
@@ -5636,6 +5754,12 @@ export function App() {
         }
         if (schoolEventsResult.ok && Array.isArray(schoolEventsResult.schoolEvents)) {
           setSchoolEvents(schoolEventsResult.schoolEvents);
+        }
+        if (testSessionsResult.ok && Array.isArray(testSessionsResult.testSessions)) {
+          setTestSessions(testSessionsResult.testSessions);
+        }
+        if (testAttemptsResult.ok && Array.isArray(testAttemptsResult.testAttempts)) {
+          setTestAttempts(testAttemptsResult.testAttempts);
         }
         if (appStateResult.ok && appStateResult.states && Object.keys(appStateResult.states).length > 0) {
           const states = appStateResult.states;
@@ -6853,6 +6977,45 @@ export function App() {
     return persistScoreRecords(nextScoreRecords);
   }
 
+  async function handleSaveTestSession(testSession, testAttemptsForSession = []) {
+    setTestResultSaveState("saving");
+    try {
+      const result = await postTestSession(testSession, testAttemptsForSession);
+      const savedSession = result.testSession ?? testSession;
+      const savedAttempts = result.testAttempts ?? testAttemptsForSession;
+      setTestSessions((current) => upsertById(current, savedSession, "testSessionId"));
+      setTestAttempts((current) => {
+        const nextByKey = new Map(current.map((attempt) => [`${attempt.testSessionId}|${attempt.studentId}`, attempt]));
+        savedAttempts.forEach((attempt) => {
+          nextByKey.set(`${attempt.testSessionId}|${attempt.studentId}`, attempt);
+        });
+        return [...nextByKey.values()];
+      });
+      setTestResultSaveState("saved");
+      return { ok: true, testSession: savedSession, testAttempts: savedAttempts };
+    } catch (error) {
+      console.error(error);
+      setTestResultSaveState("failed");
+      throw error;
+    }
+  }
+
+  async function handleDeleteTestSession(testSessionId) {
+    if (!testSessionId) return;
+    if (typeof window !== "undefined" && !window.confirm("이 테스트 응시 기록을 삭제할까요? 학생별 결과도 함께 삭제됩니다.")) return;
+    setTestResultSaveState("saving");
+    try {
+      await deleteTestSessionFromApi(testSessionId);
+      setTestSessions((current) => current.filter((session) => session.testSessionId !== testSessionId));
+      setTestAttempts((current) => current.filter((attempt) => attempt.testSessionId !== testSessionId));
+      setTestResultSaveState("saved");
+    } catch (error) {
+      console.error(error);
+      setTestResultSaveState("failed");
+      throw error;
+    }
+  }
+
   function persistAcademyTests(nextAcademyTests) {
     const requestId = academyTestSaveRequestRef.current + 1;
     academyTestSaveRequestRef.current = requestId;
@@ -7278,6 +7441,7 @@ export function App() {
     const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
     const audience = target === "student" ? "student" : "parent";
     const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId);
+    const testResultLines = getLessonTestResultLines(testSessions, testAttempts, lesson, student);
     const payloadSnapshot = buildLessonReservationPayloadSnapshot({
       audience,
       lesson,
@@ -7287,7 +7451,8 @@ export function App() {
       record,
       scheduledDate,
       student,
-      supplementSchedules
+      supplementSchedules,
+      testResultLines
     });
     const commentBody = payloadSnapshot.commentBodyOverride;
     const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
@@ -7322,6 +7487,7 @@ export function App() {
       studentName: student.name,
       studentPhone: student.studentPhone,
       supplementSchedule: supplementSchedules.join("\n"),
+      testResult: testResultLines.join("\n"),
       target: audience
     };
     return {
@@ -7342,7 +7508,8 @@ export function App() {
         previousHomework,
         record,
         student,
-        supplementSchedules
+        supplementSchedules,
+        testResultLines
       }),
       status: "scheduled",
       provider: "academy-os-reserving",
@@ -7992,6 +8159,8 @@ export function App() {
             selectedLesson={selectedLesson}
             selectedLessonId={selectedLessonId}
             students={students}
+            testAttempts={testAttempts}
+            testSessions={testSessions}
             homeworks={homeworks}
             clipboardCount={lessonClipboard ? 1 : 0}
             undoCount={lessonUndoStack.length}
@@ -8315,6 +8484,9 @@ export function App() {
             appStateSaveState={appStateSaveState}
             problemBooks={problemBooks}
             students={students}
+            testAttempts={testAttempts}
+            testResultSaveState={testResultSaveState}
+            testSessions={testSessions}
             templates={classTemplates}
             onAddFolder={(folderName, testKind, subject) =>
               setProblemBooks((current) => [createProblemBookFolder(folderName, testKind, subject), ...current])
@@ -8325,6 +8497,8 @@ export function App() {
             onDeleteBook={(problemBookId) =>
               setProblemBooks((current) => current.filter((book) => book.problemBookId !== problemBookId))
             }
+            onDeleteTestSession={handleDeleteTestSession}
+            onSaveTestSession={handleSaveTestSession}
             onUpdateBook={(problemBookId, field, value) =>
               setProblemBooks((current) =>
                 current.map((book) => (book.problemBookId === problemBookId ? { ...book, [field]: value } : book))
@@ -8478,6 +8652,7 @@ export function App() {
     const sourceField = target === "student" ? "studentComment" : "teacherComment";
     const statusField = target === "student" ? "studentCommentAiStatus" : "teacherCommentAiStatus";
     const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId);
+    const testResultLines = getLessonTestResultLines(testSessions, testAttempts, lesson, student);
     const rawTextSeed = normalizeMessageText(options.rawText);
     const shouldPersist = options.persist !== false;
     const sourceDraft = buildInitialCommentDraft({
@@ -8522,7 +8697,8 @@ export function App() {
           rawText: rawTextSeed || sourceDraft || (record?.[sourceField] ?? ""),
           schoolName: student.schoolName,
           studentName: student.name,
-          supplementSchedule: supplementSchedules.join("\n")
+          supplementSchedule: supplementSchedules.join("\n"),
+          testResult: testResultLines.join("\n")
         })
       });
       const result = await response.json();
@@ -8735,6 +8911,7 @@ export function App() {
       const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
       const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
       const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId);
+      const testResultLines = getLessonTestResultLines(testSessions, testAttempts, lesson, student);
       const notificationPayload = {
         academyName: academyBrandName,
         assignmentStatus,
@@ -8768,6 +8945,7 @@ export function App() {
         studentName: student.name,
         studentPhone: student.studentPhone,
         supplementSchedule: supplementSchedules.join("\n"),
+        testResult: testResultLines.join("\n"),
         target
       };
       const response = await fetch(apiUrl("/api/notifications/comment-alimtalk"), {
@@ -12623,6 +12801,8 @@ function TeacherLessonHubV2({
   selectedLesson,
   selectedLessonId,
   students,
+  testAttempts = [],
+  testSessions = [],
   homeworks,
   onAddLesson,
   onBackToCalendar,
@@ -12829,6 +13009,8 @@ function TeacherLessonHubV2({
             records={records}
             saveStates={saveStates}
             students={students}
+            testAttempts={testAttempts}
+            testSessions={testSessions}
           />
         </LessonJournalErrorBoundary>
       </Modal>
@@ -13589,7 +13771,9 @@ function LessonJournalDetail({
   notificationJobs = [],
   records,
   saveStates,
-  students
+  students,
+  testAttempts = [],
+  testSessions = []
 }) {
   const [commentModal, setCommentModal] = useState(null);
   const [prepMemoModal, setPrepMemoModal] = useState(null);
@@ -13734,6 +13918,7 @@ function LessonJournalDetail({
       const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
       const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
       const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId);
+      const testResultLines = getLessonTestResultLines(testSessions, testAttempts, lesson, student);
       return ["parent", "student"].flatMap((audience) => {
         if (audience === "parent" && record.notificationMutedParent) return [];
         if (audience === "student" && record.notificationMutedStudent) return [];
@@ -13746,7 +13931,8 @@ function LessonJournalDetail({
           record,
           scheduledDate,
           student,
-          supplementSchedules
+          supplementSchedules,
+          testResultLines
         });
         return [{
           fingerprint: getLessonReservationPayloadFingerprint(payloadSnapshot),
@@ -13967,7 +14153,7 @@ function LessonJournalDetail({
       />
     );
   }
-  function hasPreSendMissingRequiredData(record, previousHomework, nextHomework) {
+  function hasPreSendMissingRequiredData(record, student, previousHomework, nextHomework) {
     const attendanceStatus = record?.attendanceStatus ?? "pending";
     const attendanceDateMismatch = getAttendanceDateMismatch(record, lesson);
     return (
@@ -13978,6 +14164,7 @@ function LessonJournalDetail({
       !String(getLessonContent(record) ?? "").trim() ||
       !String(previousHomework?.title ?? "").trim() ||
       !String(nextHomework?.title ?? "").trim() ||
+      hasIncompleteLessonTestAttempt(testSessions, testAttempts, lesson, student) ||
       !normalizeAssignmentStatusValue(getAssignmentStatusForMessage(record, previousHomework))
     );
   }
@@ -13985,6 +14172,7 @@ function LessonJournalDetail({
   function openCommentComposer(audience, targetStudent, baseRecord, previousHomework, nextHomework) {
     const field = audience === "student" ? "studentComment" : "teacherComment";
     const supplementSchedules = getStudentSupplementSchedules(makeupTasks, targetStudent.studentId);
+    const testResultLines = getLessonTestResultLines(testSessions, testAttempts, lesson, targetStudent);
     const draft = buildInitialCommentDraft({
       audience,
       existingComment: baseRecord?.[field] ?? "",
@@ -13994,7 +14182,7 @@ function LessonJournalDetail({
     const shouldSeedDraft = draft && draft !== normalizeMessageText(baseRecord?.[field] ?? "");
     const nextRecord = shouldSeedDraft ? { ...baseRecord, [field]: draft } : baseRecord;
 
-    setCommentModal({ audience, nextHomework, previousHomework, record: nextRecord, student: targetStudent, supplementSchedules });
+    setCommentModal({ audience, nextHomework, previousHomework, record: nextRecord, student: targetStudent, supplementSchedules, testResultLines });
   }
 
   function getCommentModalRecord() {
@@ -14572,7 +14760,7 @@ function LessonJournalDetail({
             const studentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "student");
             const parentCommentState = getCommentButtonState(record.teacherComment, parentCommentSendStatus);
             const studentCommentState = getCommentButtonState(record.studentComment, studentCommentSendStatus);
-            const hasMissingPreSendData = hasPreSendMissingRequiredData(record, effectivePreviousHomework, effectiveNextHomework);
+            const hasMissingPreSendData = hasPreSendMissingRequiredData(record, student, effectivePreviousHomework, effectiveNextHomework);
             const isParentNotificationOff = isLessonNotificationOff || record.notificationMutedParent;
             const isStudentNotificationOff = isLessonNotificationOff || record.notificationMutedStudent;
 
@@ -14754,6 +14942,7 @@ function LessonJournalDetail({
           previousHomework={commentModal.previousHomework}
           student={commentModal.student}
           supplementSchedules={commentModal.supplementSchedules}
+          testResultLines={commentModal.testResultLines}
         />
       ) : null}
 
@@ -15088,7 +15277,8 @@ function CommentComposerModal({
   record,
   saveState = "idle",
   student,
-  supplementSchedules = []
+  supplementSchedules = [],
+  testResultLines = []
 }) {
   const [isSourceOpen, setIsSourceOpen] = useState(false);
   const planMode = ["default", "delay30", "none"].includes(initialSendTiming) ? initialSendTiming : "default";
@@ -15157,7 +15347,8 @@ function CommentComposerModal({
     previousHomework,
     record,
     student,
-    supplementSchedules
+    supplementSchedules,
+    testResultLines
   });
   const generatedPreviewText = buildCommentPreviewText({
     audience,
@@ -15167,7 +15358,8 @@ function CommentComposerModal({
     previousHomework,
     record,
     student,
-    supplementSchedules
+    supplementSchedules,
+    testResultLines
   });
   useEffect(() => {
     const nextComment = record?.[field] ?? "";
@@ -22692,15 +22884,27 @@ function MaterialManager({
   appStateSaveState = "idle",
   problemBooks,
   students,
+  testAttempts = [],
+  testResultSaveState = "idle",
+  testSessions = [],
   templates = [],
   onAddFolder,
   onAddPdf,
   onDeleteBook,
+  onDeleteTestSession,
+  onSaveTestSession,
   onUpdateBook
 }) {
   const [activeTab, setActiveTab] = useState("track");
   const [activeSubject, setActiveSubject] = useState(testPaperSubjectOptions[0]);
   const [activeBookKind, setActiveBookKind] = useState(testPaperKindOptions[0].id);
+  const [attemptDate, setAttemptDate] = useState(today);
+  const [attemptClassTemplateId, setAttemptClassTemplateId] = useState("all");
+  const [attemptProblemBookId, setAttemptProblemBookId] = useState("");
+  const [attemptDrafts, setAttemptDrafts] = useState({});
+  const [attemptMemo, setAttemptMemo] = useState("");
+  const [attemptError, setAttemptError] = useState("");
+  const [selectedHistoryStudentId, setSelectedHistoryStudentId] = useState("");
   const [folderName, setFolderName] = useState("");
   const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("all");
   const testPaperKindOrder = new Map(testPaperKindOptions.map((option, index) => [option.id, index]));
@@ -22724,7 +22928,67 @@ function MaterialManager({
       const orderB = Number(b.trackOrder || 9999);
       return orderA - orderB || String(a.title ?? "").localeCompare(String(b.title ?? ""));
     });
+  const attemptBooks = subjectBooks.length ? subjectBooks : problemBooks;
+  const selectedAttemptBook = problemBooks.find((book) => book.problemBookId === attemptProblemBookId) ?? attemptBooks[0] ?? null;
+  const selectedAttemptTemplate = templates.find((template) => template.classTemplateId === attemptClassTemplateId) ?? null;
+  const attemptStudents = attemptClassTemplateId === "all"
+    ? activeStudents
+    : activeStudents.filter((student) => student.defaultClassTemplateId === attemptClassTemplateId);
+  const currentTestSessionId = selectedAttemptBook
+    ? createTestSessionIdForPaper({
+        classTemplateId: attemptClassTemplateId === "all" ? "" : attemptClassTemplateId,
+        problemBookId: selectedAttemptBook.problemBookId,
+        testDate: attemptDate
+      })
+    : "";
+  const currentTestSession = testSessions.find((session) => session.testSessionId === currentTestSessionId) ?? null;
+  const currentTestAttempts = testAttempts.filter((attempt) => attempt.testSessionId === currentTestSessionId);
+  const historyStudent = activeStudents.find((student) => student.studentId === selectedHistoryStudentId) ?? activeStudents[0] ?? null;
+  const historyRows = historyStudent
+    ? testAttempts
+        .filter((attempt) => attempt.studentId === historyStudent.studentId)
+        .map((attempt) => ({
+          attempt,
+          session: testSessions.find((session) => session.testSessionId === attempt.testSessionId)
+        }))
+        .filter((row) => row.session)
+        .sort((a, b) => String(b.session.testDate || "").localeCompare(String(a.session.testDate || "")))
+    : [];
   const catalogUnits = ssenTypeCatalog[activeSubject] ?? [];
+
+  useEffect(() => {
+    if (!selectedHistoryStudentId && activeStudents[0]) {
+      setSelectedHistoryStudentId(activeStudents[0].studentId);
+    }
+  }, [activeStudents, selectedHistoryStudentId]);
+
+  useEffect(() => {
+    if (!attemptProblemBookId && attemptBooks[0]) {
+      setAttemptProblemBookId(attemptBooks[0].problemBookId);
+    }
+  }, [attemptBooks, attemptProblemBookId]);
+
+  useEffect(() => {
+    if (!currentTestSessionId) {
+      setAttemptDrafts({});
+      setAttemptMemo("");
+      return;
+    }
+    const attemptByStudent = new Map(currentTestAttempts.map((attempt) => [attempt.studentId, attempt]));
+    const nextDrafts = {};
+    attemptStudents.forEach((student) => {
+      const attempt = attemptByStudent.get(student.studentId);
+      nextDrafts[student.studentId] = {
+        status: attempt?.status ?? "",
+        correctCount: attempt?.correctCount ?? "",
+        notTakenReason: attempt?.notTakenReason ?? "",
+        memo: attempt?.memo ?? ""
+      };
+    });
+    setAttemptDrafts(nextDrafts);
+    setAttemptMemo(currentTestSession?.memo ?? "");
+    setAttemptError("");
+  }, [attemptClassTemplateId, attemptDate, attemptProblemBookId, currentTestSessionId, testAttempts, testSessions, students]);
 
   function handleAddFolder() {
     if (!folderName.trim()) return;
@@ -22737,6 +23001,74 @@ function MaterialManager({
     if (!file) return;
     onAddPdf(file.name, activeBookKind, activeSubject);
     event.target.value = "";
+  }
+
+  function updateAttemptDraft(studentId, field, value) {
+    setAttemptDrafts((current) => ({
+      ...current,
+      [studentId]: {
+        ...(current[studentId] ?? {}),
+        [field]: value,
+        ...(field === "correctCount" && value !== "" ? { status: "taken" } : {})
+      }
+    }));
+    setAttemptError("");
+  }
+
+  async function saveAttemptSession() {
+    if (!selectedAttemptBook || !currentTestSessionId) {
+      setAttemptError("저장할 시험지를 선택해 주세요.");
+      return;
+    }
+    const totalQuestions = getProblemBookTotalQuestions(selectedAttemptBook);
+    const passCorrectCount = getProblemBookPassCorrectCount(selectedAttemptBook);
+    const testSession = {
+      testSessionId: currentTestSessionId,
+      problemBookId: selectedAttemptBook.problemBookId,
+      testDate: attemptDate,
+      classTemplateId: attemptClassTemplateId === "all" ? "" : attemptClassTemplateId,
+      className: selectedAttemptTemplate?.name ?? (attemptClassTemplateId === "all" ? "전체 학생" : ""),
+      testKind: inferTestPaperKind(selectedAttemptBook),
+      testTitle: selectedAttemptBook.title || "시험지명 미입력",
+      subject: selectedAttemptBook.subject || activeSubject,
+      unit: selectedAttemptBook.unit ?? "",
+      totalQuestions,
+      passCorrectCount,
+      source: "test_paper_manager",
+      memo: attemptMemo
+    };
+    const attempts = attemptStudents
+      .map((student) => {
+        const draft = attemptDrafts[student.studentId] ?? {};
+        const status = draft.status || (draft.correctCount !== "" && draft.correctCount !== undefined ? "taken" : "");
+        if (!["taken", "not_taken"].includes(status)) return null;
+        const attempt = {
+          testAttemptId: createTestAttemptId(currentTestSessionId, student.studentId),
+          testSessionId: currentTestSessionId,
+          studentId: student.studentId,
+          status,
+          correctCount: status === "taken" ? draft.correctCount : "",
+          notTakenReason: status === "not_taken" ? draft.notTakenReason : "",
+          memo: draft.memo ?? ""
+        };
+        return {
+          ...attempt,
+          passStatus: getTestAttemptPassStatus(attempt, testSession)
+        };
+      })
+      .filter(Boolean);
+
+    if (!attempts.length) {
+      setAttemptError("응시 또는 미응시로 기록할 학생을 1명 이상 입력해 주세요.");
+      return;
+    }
+
+    try {
+      await onSaveTestSession?.(testSession, attempts);
+      setAttemptError("");
+    } catch (error) {
+      setAttemptError(error.message);
+    }
   }
 
   function updateBookStudentProgress(problemBookId, studentId, field, value) {
@@ -22761,6 +23093,12 @@ function MaterialManager({
         </button>
         <button className={activeTab === "books" ? "active" : ""} onClick={() => setActiveTab("books")} type="button">
           시험지 보관함
+        </button>
+        <button className={activeTab === "attempts" ? "active" : ""} onClick={() => setActiveTab("attempts")} type="button">
+          응시 기록
+        </button>
+        <button className={activeTab === "history" ? "active" : ""} onClick={() => setActiveTab("history")} type="button">
+          학생 이력
         </button>
         <button className={activeTab === "types" ? "active" : ""} onClick={() => setActiveTab("types")} type="button">
           유형트리
@@ -23002,6 +23340,184 @@ function MaterialManager({
               <div className="examPrepEmptyState">
                 <strong>{getTestPaperKindLabel(activeBookKind)} 시험지가 없습니다.</strong>
                 <span>새 시험지명을 입력하고 `+ 시험지 추가`를 누르면 이 목록에 추가됩니다.</span>
+              </div>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      {activeTab === "attempts" ? (
+        <section className="panel materialPanel testAttemptPanel">
+          <div className="sectionHeader">
+            <div>
+              <h1>응시 기록</h1>
+              <p className="muted">시험지관리에서 입력한 오늘 테스트 결과가 같은 날짜 수업 알림톡에 반영됩니다.</p>
+            </div>
+            <InlineSaveStatus label="응시 기록" saveState={testResultSaveState} />
+          </div>
+          <div className="testAttemptFormGrid">
+            <label>
+              응시일
+              <input type="date" value={attemptDate} onChange={(event) => setAttemptDate(event.target.value)} />
+            </label>
+            <label>
+              대상 반
+              <select value={attemptClassTemplateId} onChange={(event) => setAttemptClassTemplateId(event.target.value)}>
+                <option value="all">전체 학생</option>
+                {templates.map((template) => (
+                  <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              시험지
+              <select value={selectedAttemptBook?.problemBookId ?? ""} onChange={(event) => setAttemptProblemBookId(event.target.value)}>
+                {attemptBooks.map((book) => (
+                  <option key={book.problemBookId} value={book.problemBookId}>
+                    {book.title || "시험지명 미입력"} · {getTestPaperKindLabel(inferTestPaperKind(book))}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              회차 메모
+              <input value={attemptMemo} onChange={(event) => setAttemptMemo(event.target.value)} placeholder="예: 7월 2주차 데일리" />
+            </label>
+          </div>
+          {selectedAttemptBook ? (
+            <div className="testAttemptMeta">
+              <span>{getTestPaperKindLabel(inferTestPaperKind(selectedAttemptBook))}</span>
+              <span>{selectedAttemptBook.subject || activeSubject}</span>
+              <span>{getProblemBookTotalQuestions(selectedAttemptBook) || "-"}문항</span>
+              <span>통과 기준 {getProblemBookPassCorrectCount(selectedAttemptBook) || "-"}문항</span>
+              {currentTestSession ? <span>기존 기록 수정 중</span> : <span>새 응시 회차</span>}
+            </div>
+          ) : (
+            <div className="examPrepEmptyState">
+              <strong>선택할 시험지가 없습니다.</strong>
+              <span>시험지 보관함에서 시험지를 먼저 추가해 주세요.</span>
+            </div>
+          )}
+          {attemptStudents.length ? (
+            <div className="testAttemptTable">
+              <div className="testAttemptRow head">
+                <span>학생</span>
+                <span>응시 상태</span>
+                <span>정답 수</span>
+                <span>미응시 사유</span>
+                <span>판정</span>
+              </div>
+              {attemptStudents.map((student) => {
+                const draft = attemptDrafts[student.studentId] ?? {};
+                const attemptForStatus = {
+                  status: draft.status,
+                  correctCount: draft.correctCount
+                };
+                const sessionForStatus = selectedAttemptBook
+                  ? { passCorrectCount: getProblemBookPassCorrectCount(selectedAttemptBook) }
+                  : {};
+                const passStatus = getTestAttemptPassStatus(attemptForStatus, sessionForStatus);
+                return (
+                  <div className="testAttemptRow" key={student.studentId}>
+                    <strong>{student.name}</strong>
+                    <select value={draft.status ?? ""} onChange={(event) => updateAttemptDraft(student.studentId, "status", event.target.value)}>
+                      {testAttemptStatusOptions.map((option) => <option key={option.id || "blank"} value={option.id}>{option.label}</option>)}
+                    </select>
+                    <input
+                      disabled={draft.status === "not_taken"}
+                      min="0"
+                      type="number"
+                      value={draft.correctCount ?? ""}
+                      onChange={(event) => updateAttemptDraft(student.studentId, "correctCount", event.target.value)}
+                      placeholder="정답"
+                    />
+                    <input
+                      disabled={draft.status === "taken"}
+                      value={draft.notTakenReason ?? ""}
+                      onChange={(event) => updateAttemptDraft(student.studentId, "notTakenReason", event.target.value)}
+                      placeholder="예: 결석, 다음 시간 응시"
+                    />
+                    <span className={`testAttemptPass pass-${passStatus || "pending"}`}>{getTestAttemptPassLabel(passStatus)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="examPrepEmptyState">
+              <strong>대상 학생이 없습니다.</strong>
+              <span>반 선택 또는 학생관리의 기본 반 배정을 확인해 주세요.</span>
+            </div>
+          )}
+          <div className="testAttemptActions">
+            {attemptError ? <span className="saveState save-failed">{attemptError}</span> : null}
+            {currentTestSession ? (
+              <button className="dangerSoftButton" onClick={() => onDeleteTestSession?.(currentTestSession.testSessionId)} type="button">
+                이 회차 삭제
+              </button>
+            ) : null}
+            <button className="saveDraftButton" disabled={!selectedAttemptBook || testResultSaveState === "saving"} onClick={saveAttemptSession} type="button">
+              {testResultSaveState === "saving" ? "저장 중" : "응시 기록 저장"}
+            </button>
+          </div>
+          <section className="testSessionList">
+            <div className="sectionHeader slim">
+              <div>
+                <h2>최근 응시 회차</h2>
+                <p className="muted">수업일지 알림톡은 같은 날짜와 학생의 기록을 자동으로 읽습니다.</p>
+              </div>
+              <span className="countBadge">{testSessions.length}건</span>
+            </div>
+            {testSessions.slice(0, 12).map((session) => (
+              <button
+                className="testSessionItem"
+                key={session.testSessionId}
+                onClick={() => {
+                  setAttemptDate(session.testDate || today);
+                  setAttemptClassTemplateId(session.classTemplateId || "all");
+                  setAttemptProblemBookId(session.problemBookId || "");
+                  setActiveSubject(session.subject || activeSubject);
+                }}
+                type="button"
+              >
+                <strong>{session.testDate} · {session.testTitle}</strong>
+                <span>{session.className || "전체 학생"} · {getTestPaperKindLabel(session.testKind)} · {session.totalQuestions || "-"}문항</span>
+              </button>
+            ))}
+            {!testSessions.length ? <div className="emptyState compact">저장된 응시 회차가 없습니다.</div> : null}
+          </section>
+        </section>
+      ) : null}
+
+      {activeTab === "history" ? (
+        <section className="panel materialPanel testHistoryPanel">
+          <div className="sectionHeader">
+            <div>
+              <h1>학생별 테스트 이력</h1>
+              <p className="muted">학생이 지금까지 본 데일리/누적/단원 테스트 결과를 한곳에서 확인합니다.</p>
+            </div>
+            <select value={historyStudent?.studentId ?? ""} onChange={(event) => setSelectedHistoryStudentId(event.target.value)}>
+              {activeStudents.map((student) => (
+                <option key={student.studentId} value={student.studentId}>{student.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="testHistoryList">
+            {historyRows.map(({ session, attempt }) => (
+              <article className="testHistoryItem" key={attempt.testAttemptId}>
+                <div>
+                  <strong>{session.testDate} · {session.testTitle}</strong>
+                  <span>{session.className || "전체 학생"} · {getTestPaperKindLabel(session.testKind)} · {session.totalQuestions || "-"}문항</span>
+                </div>
+                <div>
+                  <b>{attempt.status === "not_taken" ? "미응시" : `${attempt.correctCount || "-"}문항 정답`}</b>
+                  <small>{attempt.status === "not_taken" ? (attempt.notTakenReason || "사유 미입력") : getTestAttemptPassLabel(attempt.passStatus)}</small>
+                </div>
+              </article>
+            ))}
+            {!historyRows.length ? (
+              <div className="examPrepEmptyState">
+                <strong>테스트 이력이 없습니다.</strong>
+                <span>응시 기록 탭에서 학생별 결과를 저장하면 여기에 누적됩니다.</span>
               </div>
             ) : null}
           </div>

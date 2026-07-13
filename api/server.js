@@ -31,6 +31,8 @@ import {
   listSchoolEvents,
   listStudentIntakeApplicants,
   listStudents,
+  listTestAttempts,
+  listTestSessions,
   patchLessonStudentRecordNotificationStatus,
   pruneStaleLessonStudentRecords,
   recordAttendanceEvent,
@@ -53,7 +55,9 @@ import {
   upsertStudentIntakeApplicant,
   upsertStudent,
   upsertStudents,
-  upsertLessonStudentRecord
+  upsertLessonStudentRecord,
+  upsertTestSessionWithAttempts,
+  deleteTestSession
 } from "./routes/coreData.js";
 import crypto from "node:crypto";
 import { loadEnvFile } from "./lib/loadEnv.js";
@@ -1104,6 +1108,7 @@ const lessonBodyFields = [
   "previousHomework",
   "nextHomework",
   "preparationNotice",
+  "testResult",
   "supplementSchedule",
   "message",
   "commentBodyOverride",
@@ -1362,6 +1367,44 @@ function getStudentSupplementSchedulesForNotification(makeupTasks = [], studentI
     .map(formatSupplementScheduleLineForNotification);
 }
 
+function getNotificationTestKindLabel(kind = "") {
+  return {
+    cumulative: "누적테스트",
+    daily: "데일리테스트",
+    unit: "단원테스트"
+  }[kind] ?? "테스트";
+}
+
+function formatTestAttemptLineForNotification(session = {}, attempt = {}) {
+  const title = compactText(session.testTitle) || getNotificationTestKindLabel(session.testKind);
+  if (attempt.status === "not_taken") {
+    const reason = compactText(attempt.notTakenReason);
+    return `${title} · 미응시${reason ? ` (사유: ${reason})` : ""}`;
+  }
+
+  const correct = attempt.correctCount === "" || attempt.correctCount === null || attempt.correctCount === undefined
+    ? ""
+    : `${attempt.correctCount}문항 정답`;
+  const total = session.totalQuestions === "" || session.totalQuestions === null || session.totalQuestions === undefined
+    ? ""
+    : `${session.totalQuestions}문항 중 `;
+  return `${title} · ${correct ? `${total}${correct}` : "응시"}`;
+}
+
+function getStudentTestResultLinesForNotification(testSessions = [], testAttempts = [], lesson = {}, student = {}) {
+  const sessionById = new Map(testSessions.map((session) => [session.testSessionId, session]));
+  return testAttempts
+    .filter((attempt) => attempt.studentId === student.studentId)
+    .map((attempt) => ({ attempt, session: sessionById.get(attempt.testSessionId) }))
+    .filter(({ session }) => session && session.testDate === lesson.date)
+    .filter(({ session }) => {
+      if (!session.classTemplateId) return true;
+      return session.classTemplateId === lesson.classTemplateId;
+    })
+    .sort((a, b) => String(a.session.updatedAt || a.session.createdAt || "").localeCompare(String(b.session.updatedAt || b.session.createdAt || "")))
+    .map(({ session, attempt }) => formatTestAttemptLineForNotification(session, attempt));
+}
+
 function getPreparationNoticeForNotification(record = {}, target = "parent") {
   const shouldInclude = target === "student" ? Boolean(record.prepStudentVisible) : Boolean(record.prepParentVisible);
   return shouldInclude ? normalizeNotificationText(record.preparationMemo) : "";
@@ -1394,10 +1437,11 @@ function formatNotificationAttendance(record = {}) {
   return details.length ? `${label} (${details.join(" · ")})` : label;
 }
 
-function buildLatestLessonCommentPreview({ audience, commentBody, lesson, nextHomework, previousHomework, record, student, supplementSchedules }) {
+function buildLatestLessonCommentPreview({ audience, commentBody, lesson, nextHomework, previousHomework, record, student, supplementSchedules, testResultLines = [] }) {
   const assignmentStatus = getAssignmentStatusForNotification(record, previousHomework);
   const commentText = normalizeNotificationText(commentBody);
   const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
+  const testResultText = testResultLines.length ? testResultLines.map((item) => `- ${item}`).join("\n") : "";
   const commentHasSupplement =
     commentText.includes("보충일정") ||
     commentText.includes("보충 일정") ||
@@ -1415,6 +1459,7 @@ function buildLatestLessonCommentPreview({ audience, commentBody, lesson, nextHo
     notificationLine("🧭 강의 내용", getNotificationLessonContent(record)),
     notificationLine("📘 지난 과제", previousHomework?.title ?? ""),
     notificationLine("➡️ 다음 과제", nextHomework?.title ?? ""),
+    notificationBlock("📝 테스트", testResultText),
     notificationBlock("⭐ 중요 · 보충 일정", supplementNotice),
     notificationBlock("💬 코멘트", commentText),
     notificationLine("📘 수업", lesson.className)
@@ -1428,13 +1473,17 @@ async function createLessonNotificationDispatchContext(jobs = []) {
     recordsResult,
     studentsResult,
     homeworksResult,
-    makeupTasksResult
+    makeupTasksResult,
+    testSessionsResult,
+    testAttemptsResult
   ] = await Promise.all([
     listLessons(),
     listLessonStudentRecords(),
     listStudents(),
     listHomeworks(),
-    listMakeupTasks()
+    listMakeupTasks(),
+    listTestSessions(),
+    listTestAttempts()
   ]);
   const lessons = lessonsResult.lessons ?? [];
   const records = recordsResult.records ?? [];
@@ -1446,6 +1495,8 @@ async function createLessonNotificationDispatchContext(jobs = []) {
     makeupTasks: makeupTasksResult.makeupTasks ?? [],
     records,
     students,
+    testAttempts: testAttemptsResult.testAttempts ?? [],
+    testSessions: testSessionsResult.testSessions ?? [],
     lessonById: new Map(lessons.map((lesson) => [lesson.lessonId, lesson])),
     recordByLessonStudent: new Map(records.map((record) => [`${record.lessonId}|${record.studentId}`, record])),
     studentById: new Map(students.map((student) => [student.studentId, student]))
@@ -1517,6 +1568,7 @@ function refreshLessonCommentJobBeforeSend(job = {}, context = null) {
   const previousHomework = getLessonHomeworkForNotification(context.homeworks, context.lessons, lesson, student, "previous");
   const nextHomework = getLessonHomeworkForNotification(context.homeworks, context.lessons, lesson, student, "next");
   const supplementSchedules = getStudentSupplementSchedulesForNotification(context.makeupTasks, student.studentId);
+  const testResultLines = getStudentTestResultLinesForNotification(context.testSessions, context.testAttempts, lesson, student);
   const sourceField = audience === "student" ? "studentComment" : "teacherComment";
   const commentBody = buildInitialNotificationComment({
     audience,
@@ -1556,6 +1608,7 @@ function refreshLessonCommentJobBeforeSend(job = {}, context = null) {
     studentName: student.name,
     studentPhone: student.studentPhone,
     supplementSchedule: supplementSchedules.join("\n"),
+    testResult: testResultLines.join("\n"),
     target: audience
   };
   const previewBody = buildLatestLessonCommentPreview({
@@ -1566,7 +1619,8 @@ function refreshLessonCommentJobBeforeSend(job = {}, context = null) {
     previousHomework,
     record,
     student,
-    supplementSchedules
+    supplementSchedules,
+    testResultLines
   });
 
   return {
@@ -4582,6 +4636,54 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await upsertAppState(payload.states ?? payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/test-sessions") {
+    try {
+      const result = await listTestSessions({
+        testDate: requestUrl.searchParams.get("date") || requestUrl.searchParams.get("testDate") || "",
+        classTemplateId: requestUrl.searchParams.get("classTemplateId") || ""
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/test-attempts") {
+    try {
+      const result = await listTestAttempts({
+        testSessionId: requestUrl.searchParams.get("testSessionId") || "",
+        studentId: requestUrl.searchParams.get("studentId") || ""
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/test-sessions") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await upsertTestSessionWithAttempts(payload.testSession ?? payload.session ?? payload, payload.testAttempts ?? payload.attempts ?? []);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "DELETE" && requestUrl.pathname === "/api/test-sessions") {
+    try {
+      const testSessionId = requestUrl.searchParams.get("testSessionId") || requestUrl.searchParams.get("id") || "";
+      const result = await deleteTestSession(testSessionId);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
