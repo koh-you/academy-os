@@ -13781,8 +13781,8 @@ textarea.profileEditInput {
   border-top: 1px solid #e2e8f0;
   display: grid;
   gap: 10px;
-  grid-template-columns: 150px 120px 100px minmax(220px, 1fr) 96px;
-  min-width: 820px;
+  grid-template-columns: 150px 120px 110px minmax(240px, 1fr);
+  min-width: 680px;
   padding: 10px 12px;
 }
 

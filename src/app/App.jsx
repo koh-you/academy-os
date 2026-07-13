@@ -5158,8 +5158,16 @@ function getTestAttemptStatusLabel(value = "") {
   return testAttemptStatusOptions.find((option) => option.id === value)?.label ?? "미입력";
 }
 
-function createTestSessionIdForPaper({ classTemplateId = "", problemBookId = "", testDate = "" } = {}) {
-  return `test_session_${safeIdPart(testDate || "date")}_${safeIdPart(classTemplateId || "all")}_${safeIdPart(problemBookId || "paper")}`;
+function createTestSessionIdForPaper({
+  classTemplateId = "",
+  problemBookId = "",
+  subject = "",
+  testDate = "",
+  testKind = "",
+  testTitle = ""
+} = {}) {
+  const sourceKey = problemBookId || [testKind, subject, testTitle].filter(Boolean).join("_");
+  return `test_session_${safeIdPart(testDate || "date")}_${safeIdPart(classTemplateId || "all")}_${safeIdPart(sourceKey || "test")}`;
 }
 
 function createTestAttemptId(testSessionId = "", studentId = "") {
@@ -7064,11 +7072,8 @@ export function App() {
       const savedAttempts = result.testAttempts ?? testAttemptsForSession;
       setTestSessions((current) => upsertById(current, savedSession, "testSessionId"));
       setTestAttempts((current) => {
-        const nextByKey = new Map(current.map((attempt) => [`${attempt.testSessionId}|${attempt.studentId}`, attempt]));
-        savedAttempts.forEach((attempt) => {
-          nextByKey.set(`${attempt.testSessionId}|${attempt.studentId}`, attempt);
-        });
-        return [...nextByKey.values()];
+        const otherAttempts = current.filter((attempt) => attempt.testSessionId !== savedSession.testSessionId);
+        return [...otherAttempts, ...savedAttempts];
       });
       setTestResultSaveState("saved");
       return { ok: true, testSession: savedSession, testAttempts: savedAttempts };
@@ -8545,18 +8550,13 @@ export function App() {
 
         {activeView === "materials" ? (
           <MaterialManager
-            problemBooks={problemBooks}
-            problemBookSaveState={problemBookSaveState}
             students={students}
             testAttempts={testAttempts}
             testResultSaveState={testResultSaveState}
             testSessions={testSessions}
             templates={classTemplates}
-            onAddFolder={handleAddProblemBookFolder}
-            onDeleteBook={handleDeleteProblemBook}
             onDeleteTestSession={handleDeleteTestSession}
             onSaveTestSession={handleSaveTestSession}
-            onUpdateBook={handleUpdateProblemBook}
           />
         ) : null}
 
@@ -22934,69 +22934,50 @@ function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteMaterial
 }
 
 function MaterialManager({
-  problemBooks,
-  problemBookSaveState = "idle",
   students,
   testAttempts = [],
   testResultSaveState = "idle",
   testSessions = [],
   templates = [],
-  onAddFolder,
-  onDeleteBook,
   onDeleteTestSession,
-  onSaveTestSession,
-  onUpdateBook
+  onSaveTestSession
 }) {
-  const [activeTab, setActiveTab] = useState("track");
-  const [activeSubject, setActiveSubject] = useState(testPaperSubjectOptions[0]);
-  const [activeBookKind, setActiveBookKind] = useState(testPaperKindOptions[0].id);
+  const [activeTab, setActiveTab] = useState("attempts");
   const [attemptDate, setAttemptDate] = useState(today);
   const [attemptClassTemplateId, setAttemptClassTemplateId] = useState("all");
-  const [attemptProblemBookId, setAttemptProblemBookId] = useState("");
-  const [attemptDrafts, setAttemptDrafts] = useState({});
+  const [attemptTestKind, setAttemptTestKind] = useState(testPaperKindOptions[0].id);
+  const [attemptTitle, setAttemptTitle] = useState("");
+  const [attemptSubject, setAttemptSubject] = useState(testPaperSubjectOptions[0]);
+  const [attemptUnit, setAttemptUnit] = useState("");
+  const [attemptTotalQuestions, setAttemptTotalQuestions] = useState("");
   const [attemptMemo, setAttemptMemo] = useState("");
+  const [attemptDrafts, setAttemptDrafts] = useState({});
   const [attemptError, setAttemptError] = useState("");
-  const [bookError, setBookError] = useState("");
+  const [editingTestSessionId, setEditingTestSessionId] = useState("");
   const [selectedHistoryStudentId, setSelectedHistoryStudentId] = useState("");
-  const [folderName, setFolderName] = useState("");
-  const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("all");
-  const testPaperKindOrder = new Map(testPaperKindOptions.map((option, index) => [option.id, index]));
   const activeStudents = students.filter(isActiveStudent);
-  const trackStudents = selectedClassTemplateId === "all"
-    ? activeStudents
-    : activeStudents.filter((student) => student.defaultClassTemplateId === selectedClassTemplateId);
-  const subjectBooks = problemBooks
-    .filter((book) => (book.subject || "") === activeSubject)
-    .sort((a, b) => {
-      const kindA = testPaperKindOrder.get(inferTestPaperKind(a)) ?? 999;
-      const kindB = testPaperKindOrder.get(inferTestPaperKind(b)) ?? 999;
-      const orderA = Number(a.trackOrder || 9999);
-      const orderB = Number(b.trackOrder || 9999);
-      return kindA - kindB || orderA - orderB || String(a.title ?? "").localeCompare(String(b.title ?? ""));
-    });
-  const bookShelfBooks = problemBooks
-    .filter((book) => inferTestPaperKind(book) === activeBookKind)
-    .sort((a, b) => {
-      const orderA = Number(a.trackOrder || 9999);
-      const orderB = Number(b.trackOrder || 9999);
-      return orderA - orderB || String(a.title ?? "").localeCompare(String(b.title ?? ""));
-    });
-  const attemptBooks = subjectBooks.length ? subjectBooks : problemBooks;
-  const selectedAttemptBook = problemBooks.find((book) => book.problemBookId === attemptProblemBookId) ?? attemptBooks[0] ?? null;
   const selectedAttemptTemplate = templates.find((template) => template.classTemplateId === attemptClassTemplateId) ?? null;
   const attemptStudents = attemptClassTemplateId === "all"
     ? activeStudents
     : activeStudents.filter((student) => student.defaultClassTemplateId === attemptClassTemplateId);
-  const currentTestSessionId = selectedAttemptBook
+  const normalizedAttemptTitle = attemptTitle.trim();
+  const currentTestSessionId = editingTestSessionId || (normalizedAttemptTitle
     ? createTestSessionIdForPaper({
         classTemplateId: attemptClassTemplateId === "all" ? "" : attemptClassTemplateId,
-        problemBookId: selectedAttemptBook.problemBookId,
-        testDate: attemptDate
+        subject: attemptSubject,
+        testDate: attemptDate,
+        testKind: attemptTestKind,
+        testTitle: normalizedAttemptTitle
       })
-    : "";
+    : "");
   const currentTestSession = testSessions.find((session) => session.testSessionId === currentTestSessionId) ?? null;
   const currentTestAttempts = testAttempts.filter((attempt) => attempt.testSessionId === currentTestSessionId);
   const historyStudent = activeStudents.find((student) => student.studentId === selectedHistoryStudentId) ?? activeStudents[0] ?? null;
+  const recentTestSessions = [...testSessions]
+    .sort((a, b) =>
+      String(b.testDate || "").localeCompare(String(a.testDate || "")) ||
+      String(b.updatedAt || b.createdAt || "").localeCompare(String(a.updatedAt || a.createdAt || ""))
+    );
   const historyRows = historyStudent
     ? testAttempts
         .filter((attempt) => attempt.studentId === historyStudent.studentId)
@@ -23007,7 +22988,6 @@ function MaterialManager({
         .filter((row) => row.session)
         .sort((a, b) => String(b.session.testDate || "").localeCompare(String(a.session.testDate || "")))
     : [];
-  const catalogUnits = ssenTypeCatalog[activeSubject] ?? [];
 
   useEffect(() => {
     if (!selectedHistoryStudentId && activeStudents[0]) {
@@ -23016,46 +22996,51 @@ function MaterialManager({
   }, [activeStudents, selectedHistoryStudentId]);
 
   useEffect(() => {
-    if (!attemptProblemBookId && attemptBooks[0]) {
-      setAttemptProblemBookId(attemptBooks[0].problemBookId);
-    }
-  }, [attemptBooks, attemptProblemBookId]);
-
-  useEffect(() => {
-    if (!currentTestSessionId) {
-      setAttemptDrafts({});
-      setAttemptMemo("");
-      return;
-    }
     const attemptByStudent = new Map(currentTestAttempts.map((attempt) => [attempt.studentId, attempt]));
-    const nextDrafts = {};
-    attemptStudents.forEach((student) => {
-      const attempt = attemptByStudent.get(student.studentId);
-      nextDrafts[student.studentId] = {
-        status: attempt?.status ?? "",
-        correctCount: attempt?.correctCount ?? "",
-        notTakenReason: attempt?.notTakenReason ?? "",
-        memo: attempt?.memo ?? ""
-      };
+    setAttemptDrafts((current) => {
+      const nextDrafts = {};
+      attemptStudents.forEach((student) => {
+        const attempt = attemptByStudent.get(student.studentId);
+        const currentDraft = current[student.studentId] ?? {};
+        nextDrafts[student.studentId] = {
+          status: attempt?.status ?? currentDraft.status ?? "",
+          correctCount: attempt?.correctCount ?? currentDraft.correctCount ?? "",
+          notTakenReason: attempt?.notTakenReason ?? currentDraft.notTakenReason ?? "",
+          memo: attempt?.memo ?? currentDraft.memo ?? ""
+        };
+      });
+      return nextDrafts;
     });
-    setAttemptDrafts(nextDrafts);
-    setAttemptMemo(currentTestSession?.memo ?? "");
+    if (currentTestSession) setAttemptMemo(currentTestSession.memo ?? "");
     setAttemptError("");
-  }, [attemptClassTemplateId, attemptDate, attemptProblemBookId, currentTestSessionId, testAttempts, testSessions, students]);
+  }, [attemptClassTemplateId, currentTestSessionId, testAttempts, students, currentTestSession?.memo]);
 
-  async function handleAddFolder() {
-    const nextFolderName = folderName.trim();
-    if (!nextFolderName) {
-      setBookError("추가할 시험지명을 입력해 주세요.");
-      return;
-    }
-    try {
-      setBookError("");
-      await onAddFolder?.(nextFolderName, activeBookKind, activeSubject);
-      setFolderName("");
-    } catch (error) {
-      setBookError(error.message || "시험지 추가 저장 실패");
-    }
+  function resetAttemptForm() {
+    setEditingTestSessionId("");
+    setAttemptDate(today);
+    setAttemptClassTemplateId("all");
+    setAttemptTestKind(testPaperKindOptions[0].id);
+    setAttemptTitle("");
+    setAttemptSubject(testPaperSubjectOptions[0]);
+    setAttemptUnit("");
+    setAttemptTotalQuestions("");
+    setAttemptMemo("");
+    setAttemptDrafts({});
+    setAttemptError("");
+  }
+
+  function openTestSession(session) {
+    setEditingTestSessionId(session.testSessionId);
+    setAttemptDate(session.testDate || today);
+    setAttemptClassTemplateId(session.classTemplateId || "all");
+    setAttemptTestKind(session.testKind || testPaperKindOptions[0].id);
+    setAttemptTitle(session.testTitle || "");
+    setAttemptSubject(session.subject || testPaperSubjectOptions[0]);
+    setAttemptUnit(session.unit || "");
+    setAttemptTotalQuestions(session.totalQuestions === null || session.totalQuestions === undefined ? "" : String(session.totalQuestions));
+    setAttemptMemo(session.memo || "");
+    setAttemptError("");
+    setActiveTab("attempts");
   }
 
   function updateAttemptDraft(studentId, field, value) {
@@ -23071,337 +23056,97 @@ function MaterialManager({
   }
 
   async function saveAttemptSession() {
-    if (!selectedAttemptBook || !currentTestSessionId) {
-      setAttemptError("저장할 시험지를 선택해 주세요.");
+    const totalQuestions = Number(attemptTotalQuestions);
+    if (!normalizedAttemptTitle) {
+      setAttemptError("테스트명을 입력해 주세요.");
       return;
     }
-    const totalQuestions = getProblemBookTotalQuestions(selectedAttemptBook);
-    const passCorrectCount = getProblemBookPassCorrectCount(selectedAttemptBook);
-    const testSession = {
-      testSessionId: currentTestSessionId,
-      problemBookId: selectedAttemptBook.problemBookId,
-      testDate: attemptDate,
-      classTemplateId: attemptClassTemplateId === "all" ? "" : attemptClassTemplateId,
-      className: selectedAttemptTemplate?.name ?? (attemptClassTemplateId === "all" ? "전체 학생" : ""),
-      testKind: inferTestPaperKind(selectedAttemptBook),
-      testTitle: selectedAttemptBook.title || "시험지명 미입력",
-      subject: selectedAttemptBook.subject || activeSubject,
-      unit: selectedAttemptBook.unit ?? "",
-      totalQuestions,
-      passCorrectCount,
-      source: "test_paper_manager",
-      memo: attemptMemo
-    };
-    const attempts = attemptStudents
-      .map((student) => {
-        const draft = attemptDrafts[student.studentId] ?? {};
-        const status = draft.status || (draft.correctCount !== "" && draft.correctCount !== undefined ? "taken" : "");
-        if (!["taken", "not_taken"].includes(status)) return null;
-        const attempt = {
-          testAttemptId: createTestAttemptId(currentTestSessionId, student.studentId),
-          testSessionId: currentTestSessionId,
-          studentId: student.studentId,
-          status,
-          correctCount: status === "taken" ? draft.correctCount : "",
-          notTakenReason: status === "not_taken" ? draft.notTakenReason : "",
-          memo: draft.memo ?? ""
-        };
-        return {
-          ...attempt,
-          passStatus: getTestAttemptPassStatus(attempt, testSession)
-        };
-      })
-      .filter(Boolean);
+    if (!Number.isFinite(totalQuestions) || totalQuestions <= 0) {
+      setAttemptError("총 문항 수를 1 이상으로 입력해 주세요.");
+      return;
+    }
+
+    const attempts = [];
+    for (const student of attemptStudents) {
+      const draft = attemptDrafts[student.studentId] ?? {};
+      const status = draft.status || (draft.correctCount !== "" && draft.correctCount !== undefined ? "taken" : "");
+      if (!["taken", "not_taken"].includes(status)) continue;
+      const attempt = {
+        testAttemptId: createTestAttemptId(currentTestSessionId, student.studentId),
+        testSessionId: currentTestSessionId,
+        studentId: student.studentId,
+        status,
+        correctCount: "",
+        notTakenReason: "",
+        memo: draft.memo ?? "",
+        passStatus: ""
+      };
+      if (status === "taken") {
+        const correctCount = Number(draft.correctCount);
+        if (!Number.isFinite(correctCount) || correctCount < 0 || correctCount > totalQuestions) {
+          setAttemptError(`${student.name} 학생의 정답 수를 0~${totalQuestions} 사이로 입력해 주세요.`);
+          return;
+        }
+        attempt.correctCount = correctCount;
+      }
+      if (status === "not_taken") {
+        const reason = String(draft.notTakenReason ?? "").trim();
+        if (!reason) {
+          setAttemptError(`${student.name} 학생의 미응시 사유를 입력해 주세요.`);
+          return;
+        }
+        attempt.notTakenReason = reason;
+      }
+      attempts.push(attempt);
+    }
 
     if (!attempts.length) {
       setAttemptError("응시 또는 미응시로 기록할 학생을 1명 이상 입력해 주세요.");
       return;
     }
 
+    const testSession = {
+      testSessionId: currentTestSessionId,
+      problemBookId: "",
+      testDate: attemptDate,
+      classTemplateId: attemptClassTemplateId === "all" ? "" : attemptClassTemplateId,
+      className: selectedAttemptTemplate?.name ?? (attemptClassTemplateId === "all" ? "전체 학생" : ""),
+      testKind: attemptTestKind,
+      testTitle: normalizedAttemptTitle,
+      subject: attemptSubject,
+      unit: attemptUnit,
+      totalQuestions,
+      passCorrectCount: "",
+      source: "manual_test_result",
+      memo: attemptMemo
+    };
+
     try {
-      await onSaveTestSession?.(testSession, attempts);
+      const result = await onSaveTestSession?.(testSession, attempts);
+      setEditingTestSessionId(result?.testSession?.testSessionId || currentTestSessionId);
       setAttemptError("");
     } catch (error) {
       setAttemptError(error.message);
     }
   }
 
-  function updateBookStudentProgress(problemBookId, studentId, field, value) {
-    const book = problemBooks.find((item) => item.problemBookId === problemBookId);
-    if (!book) return;
-    const currentProgress = getBookStudentProgress(book, studentId);
-    const nextProgress = {
-      ...(book.studentProgress ?? {}),
-      [studentId]: {
-        ...currentProgress,
-        [field]: value
-      }
-    };
-    onUpdateBook(problemBookId, "studentProgress", nextProgress);
-  }
-
   return (
     <section className="materialManagerPage">
       <div className="localTabs materialTabs">
-        <button className={activeTab === "track" ? "active" : ""} onClick={() => setActiveTab("track")} type="button">
-          진도별 트랙
-        </button>
-        <button className={activeTab === "books" ? "active" : ""} onClick={() => setActiveTab("books")} type="button">
-          시험지 보관함
-        </button>
         <button className={activeTab === "attempts" ? "active" : ""} onClick={() => setActiveTab("attempts")} type="button">
           응시 기록
         </button>
         <button className={activeTab === "history" ? "active" : ""} onClick={() => setActiveTab("history")} type="button">
           학생 이력
         </button>
-        <button className={activeTab === "types" ? "active" : ""} onClick={() => setActiveTab("types")} type="button">
-          유형트리
-        </button>
       </div>
-
-      {activeTab === "track" || activeTab === "types" ? (
-        <section className="panel materialPanel testPaperOverviewPanel">
-          <div className="sectionHeader">
-            <div>
-              <h1>시험지관리</h1>
-              <p className="muted">유형을 기준으로 시험지를 미리 준비하고, 학생이 어느 테스트까지 통과했는지 한 화면에서 봅니다.</p>
-            </div>
-            <InlineSaveStatus label="시험지 저장" saveState={problemBookSaveState} />
-          </div>
-          <div className="testPaperSubjectTabs" aria-label="시험지관리 과목 선택">
-            {testPaperSubjectOptions.map((subject) => (
-              <button
-                className={activeSubject === subject ? "active" : ""}
-                key={subject}
-                onClick={() => setActiveSubject(subject)}
-                type="button"
-              >
-                {subject}
-              </button>
-            ))}
-          </div>
-          {activeTab === "types" ? (
-            <div className="ssenTypeTree">
-              {catalogUnits.map((chapter) => (
-                <details className="ssenChapterNode" key={chapter.id}>
-                  <summary>
-                    <strong>{chapter.title}</strong>
-                    <span>{chapter.units.reduce((sum, unit) => sum + unit.types.length, 0)}개 세부유형</span>
-                  </summary>
-                  <div className="ssenUnitList">
-                    {chapter.units.map((unit) => (
-                      <details className="ssenUnitNode" key={unit.id}>
-                        <summary>
-                          <b>{unit.title}</b>
-                          <span>{unit.types.length}개 유형</span>
-                        </summary>
-                        <div className="ssenTypeNodeList">
-                          {unit.types.map((type) => {
-                            const stats = getTypeNodeStats(problemBooks, activeSubject, type);
-                            return (
-                              <article className="ssenTypeNode" key={type.id}>
-                                <div>
-                                  <strong>{type.typeNo ? `${type.typeNo}. ${type.title}` : type.title}</strong>
-                                  <small>{type.id}</small>
-                                </div>
-                                <div className="ssenTypeStats">
-                                  <span>등록 {stats.registeredProblemCount}문항</span>
-                                  <span>시험지 {stats.books.length}개</span>
-                                  <span>준비완료 {stats.preparedCount}개</span>
-                                  <span>{stats.recentUsedAt ? `최근 ${stats.recentUsedAt}` : "최근 출제 없음"}</span>
-                                </div>
-                                <div className="ssenTypeKindChips">
-                                  {stats.kindLabels.length ? stats.kindLabels.map((label) => <i key={label}>{label}</i>) : <i>미포함</i>}
-                                </div>
-                              </article>
-                            );
-                          })}
-                        </div>
-                      </details>
-                    ))}
-                  </div>
-                </details>
-              ))}
-              {catalogUnits.length === 0 ? (
-                <div className="examPrepEmptyState">
-                  <strong>{activeSubject} 유형트리는 아직 등록 전입니다.</strong>
-                  <span>유형표가 준비되면 이 영역에 대단원/중단원/세부유형을 추가합니다.</span>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-
-          {activeTab === "track" ? (
-            <div className="testTrackLayout">
-              <section className="testStudentProgressPanel">
-                <div className="sectionHeader slim">
-                  <div>
-                    <h2>학생별 진행 상태</h2>
-                    <p className="muted">반별로 학생을 나눠 보고, 미통과 학생은 재시험1, 재시험2까지 표시합니다.</p>
-                  </div>
-                  <select value={selectedClassTemplateId} onChange={(event) => setSelectedClassTemplateId(event.target.value)}>
-                    <option value="all">전체 학생</option>
-                    {templates.map((template) => (
-                      <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="testProgressTable">
-                  <div className="testProgressRow testProgressHead" style={{ gridTemplateColumns: `150px repeat(${Math.max(subjectBooks.length, 1)}, 190px)` }}>
-                    <span>학생</span>
-                    {subjectBooks.map((book) => (
-                      <span className="testProgressHeaderCell" key={book.problemBookId}>
-                        <strong>{book.trackOrder || "-"} · {book.title || "시험지명 미입력"}</strong>
-                        <small>{getTestPaperKindLabel(inferTestPaperKind(book))}</small>
-                      </span>
-                    ))}
-                  </div>
-                  {trackStudents.map((student) => (
-                    <div className="testProgressRow" key={student.studentId} style={{ gridTemplateColumns: `150px repeat(${Math.max(subjectBooks.length, 1)}, 190px)` }}>
-                      <strong>{student.name}</strong>
-                      {subjectBooks.map((book) => {
-                        const progress = getBookStudentProgress(book, student.studentId);
-                        return (
-                          <div className={`testProgressCell status-${progress.status || "waiting"}`} key={`${book.problemBookId}_${student.studentId}`}>
-                            <select
-                              value={progress.status || "waiting"}
-                              onChange={(event) => updateBookStudentProgress(book.problemBookId, student.studentId, "status", event.target.value)}
-                            >
-                              {testPaperProgressOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
-                            </select>
-                            <input
-                              value={progress.score ?? ""}
-                              onChange={(event) => updateBookStudentProgress(book.problemBookId, student.studentId, "score", event.target.value)}
-                              placeholder="점수"
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ))}
-                  {subjectBooks.length === 0 ? (
-                    <div className="examPrepEmptyState">
-                      <strong>{activeSubject} 시험지가 없습니다.</strong>
-                      <span>시험지 보관함에서 데일리/누적/단원 시험지를 추가하면 이 표의 상단에 컬럼으로 표시됩니다.</span>
-                    </div>
-                  ) : null}
-                  {trackStudents.length === 0 ? (
-                    <div className="examPrepEmptyState">
-                      <strong>표시할 학생이 없습니다.</strong>
-                      <span>반을 바꾸거나 학생관리에서 반 배정을 확인하세요.</span>
-                    </div>
-                  ) : null}
-                </div>
-              </section>
-            </div>
-          ) : null}
-        </section>
-      ) : null}
-
-      {activeTab === "books" ? (
-        <section className="panel materialPanel">
-          <div className="sectionHeader">
-            <div>
-              <h1>시험지 보관함</h1>
-              <p className="muted">시험지를 직접 추가하고 종류, 순서, 준비 상태, 배포일을 관리합니다. 등록한 시험지는 진도별 트랙에 표시됩니다.</p>
-            </div>
-            <div className="materialHeaderActions">
-              <InlineSaveStatus label="시험지 저장" saveState={problemBookSaveState} />
-            </div>
-          </div>
-
-          <div className="testPaperKindTabs" aria-label="시험지 보관함 종류 선택">
-            {testPaperKindOptions.map((option) => (
-              <button
-                className={activeBookKind === option.id ? "active" : ""}
-                key={option.id}
-                onClick={() => setActiveBookKind(option.id)}
-                type="button"
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="materialFolderBar">
-            <input
-              value={folderName}
-              onChange={(event) => setFolderName(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") handleAddFolder();
-              }}
-              placeholder="새 시험지명 입력 (예: 공통수학1 데일리 01)"
-            />
-            <button className="primaryButton" onClick={handleAddFolder} type="button">+ 시험지 추가</button>
-          </div>
-          {bookError ? <p className="apiErrorBox">{bookError}</p> : null}
-
-          <div className="materialTable">
-            <div className="materialRow materialHead">
-              <span>순서</span>
-              <span>이름</span>
-              <span>과목</span>
-              <span>종류</span>
-              <span>준비</span>
-              <span>문제수</span>
-              <span>번호범위</span>
-              <span>배포일</span>
-              <span>평균(분)</span>
-              <span>업로드학원</span>
-              <span>관리</span>
-            </div>
-            {bookShelfBooks.map((book) => (
-              <div className="materialRow" key={book.problemBookId}>
-                <input
-                  value={book.trackOrder ?? ""}
-                  onChange={(event) => onUpdateBook(book.problemBookId, "trackOrder", event.target.value)}
-                  placeholder="순서"
-                />
-                <label className="folderNameCell">
-                  <span>📁</span>
-                  <input value={book.title} onChange={(event) => onUpdateBook(book.problemBookId, "title", event.target.value)} />
-                </label>
-                <input value={book.subject ?? ""} onChange={(event) => onUpdateBook(book.problemBookId, "subject", event.target.value)} placeholder="과목" />
-                <select value={inferTestPaperKind(book)} onChange={(event) => onUpdateBook(book.problemBookId, "testKind", event.target.value)}>
-                  {testPaperKindOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
-                </select>
-                <select value={book.preparationStatus || "draft"} onChange={(event) => onUpdateBook(book.problemBookId, "preparationStatus", event.target.value)}>
-                  {testPaperPreparationOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
-                </select>
-                <input
-                  type="number"
-                  value={book.problems?.length ?? book.totalProblems ?? 0}
-                  onChange={(event) => onUpdateBook(book.problemBookId, "totalProblems", Number(event.target.value))}
-                />
-                <input value={book.numberRange ?? ""} onChange={(event) => onUpdateBook(book.problemBookId, "numberRange", event.target.value)} placeholder="예: 1~895" />
-                <input type="date" value={book.plannedDate ?? ""} onChange={(event) => onUpdateBook(book.problemBookId, "plannedDate", event.target.value)} />
-                <input value={book.averageMinutes ?? ""} onChange={(event) => onUpdateBook(book.problemBookId, "averageMinutes", event.target.value)} placeholder="분" />
-                <input
-                  value={book.uploadedAcademy ?? academyBrandName}
-                  onChange={(event) => onUpdateBook(book.problemBookId, "uploadedAcademy", event.target.value)}
-                />
-                <button className="dangerTextButton" onClick={() => onDeleteBook(book.problemBookId)} type="button">
-                  삭제
-                </button>
-              </div>
-            ))}
-            {bookShelfBooks.length === 0 ? (
-              <div className="examPrepEmptyState">
-                <strong>{getTestPaperKindLabel(activeBookKind)} 시험지가 없습니다.</strong>
-                <span>새 시험지명을 입력하고 `+ 시험지 추가`를 누르면 이 목록에 추가됩니다.</span>
-              </div>
-            ) : null}
-          </div>
-        </section>
-      ) : null}
 
       {activeTab === "attempts" ? (
         <section className="panel materialPanel testAttemptPanel">
           <div className="sectionHeader">
             <div>
               <h1>응시 기록</h1>
-              <p className="muted">시험지관리에서 입력한 오늘 테스트 결과가 같은 날짜 수업 알림톡에 반영됩니다.</p>
+              <p className="muted">오늘 본 데일리/단원/누적 테스트와 학생별 결과만 기록합니다. 저장된 결과는 같은 날짜 수업 알림톡에 반영됩니다.</p>
             </div>
             <InlineSaveStatus label="응시 기록" saveState={testResultSaveState} />
           </div>
@@ -23420,34 +23165,40 @@ function MaterialManager({
               </select>
             </label>
             <label>
-              시험지
-              <select value={selectedAttemptBook?.problemBookId ?? ""} onChange={(event) => setAttemptProblemBookId(event.target.value)}>
-                {attemptBooks.map((book) => (
-                  <option key={book.problemBookId} value={book.problemBookId}>
-                    {book.title || "시험지명 미입력"} · {getTestPaperKindLabel(inferTestPaperKind(book))}
-                  </option>
-                ))}
+              테스트 종류
+              <select value={attemptTestKind} onChange={(event) => setAttemptTestKind(event.target.value)}>
+                {testPaperKindOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
               </select>
             </label>
             <label>
+              테스트명
+              <input value={attemptTitle} onChange={(event) => setAttemptTitle(event.target.value)} placeholder="예: 평면좌표 데일리 01" />
+            </label>
+            <label>
+              과목
+              <select value={attemptSubject} onChange={(event) => setAttemptSubject(event.target.value)}>
+                {testPaperSubjectOptions.map((subject) => <option key={subject} value={subject}>{subject}</option>)}
+              </select>
+            </label>
+            <label>
+              범위/단원
+              <input value={attemptUnit} onChange={(event) => setAttemptUnit(event.target.value)} placeholder="예: 평면좌표" />
+            </label>
+            <label>
+              총 문항 수
+              <input min="1" type="number" value={attemptTotalQuestions} onChange={(event) => setAttemptTotalQuestions(event.target.value)} placeholder="예: 20" />
+            </label>
+            <label>
               회차 메모
-              <input value={attemptMemo} onChange={(event) => setAttemptMemo(event.target.value)} placeholder="예: 7월 2주차 데일리" />
+              <input value={attemptMemo} onChange={(event) => setAttemptMemo(event.target.value)} placeholder="선택 입력" />
             </label>
           </div>
-          {selectedAttemptBook ? (
-            <div className="testAttemptMeta">
-              <span>{getTestPaperKindLabel(inferTestPaperKind(selectedAttemptBook))}</span>
-              <span>{selectedAttemptBook.subject || activeSubject}</span>
-              <span>{getProblemBookTotalQuestions(selectedAttemptBook) || "-"}문항</span>
-              <span>통과 기준 {getProblemBookPassCorrectCount(selectedAttemptBook) || "-"}문항</span>
-              {currentTestSession ? <span>기존 기록 수정 중</span> : <span>새 응시 회차</span>}
-            </div>
-          ) : (
-            <div className="examPrepEmptyState">
-              <strong>선택할 시험지가 없습니다.</strong>
-              <span>시험지 보관함에서 시험지를 먼저 추가해 주세요.</span>
-            </div>
-          )}
+          <div className="testAttemptMeta">
+            <span>{getTestPaperKindLabel(attemptTestKind)}</span>
+            <span>{attemptSubject}</span>
+            <span>{attemptTotalQuestions || "-"}문항</span>
+            {currentTestSession ? <span>기존 기록 수정 중</span> : <span>새 응시 회차</span>}
+          </div>
           {attemptStudents.length ? (
             <div className="testAttemptTable">
               <div className="testAttemptRow head">
@@ -23455,18 +23206,9 @@ function MaterialManager({
                 <span>응시 상태</span>
                 <span>정답 수</span>
                 <span>미응시 사유</span>
-                <span>판정</span>
               </div>
               {attemptStudents.map((student) => {
                 const draft = attemptDrafts[student.studentId] ?? {};
-                const attemptForStatus = {
-                  status: draft.status,
-                  correctCount: draft.correctCount
-                };
-                const sessionForStatus = selectedAttemptBook
-                  ? { passCorrectCount: getProblemBookPassCorrectCount(selectedAttemptBook) }
-                  : {};
-                const passStatus = getTestAttemptPassStatus(attemptForStatus, sessionForStatus);
                 return (
                   <div className="testAttemptRow" key={student.studentId}>
                     <strong>{student.name}</strong>
@@ -23487,7 +23229,6 @@ function MaterialManager({
                       onChange={(event) => updateAttemptDraft(student.studentId, "notTakenReason", event.target.value)}
                       placeholder="예: 결석, 다음 시간 응시"
                     />
-                    <span className={`testAttemptPass pass-${passStatus || "pending"}`}>{getTestAttemptPassLabel(passStatus)}</span>
                   </div>
                 );
               })}
@@ -23500,12 +23241,13 @@ function MaterialManager({
           )}
           <div className="testAttemptActions">
             {attemptError ? <span className="saveState save-failed">{attemptError}</span> : null}
+            <button className="softButton" onClick={resetAttemptForm} type="button">새 회차 입력</button>
             {currentTestSession ? (
               <button className="dangerSoftButton" onClick={() => onDeleteTestSession?.(currentTestSession.testSessionId)} type="button">
                 이 회차 삭제
               </button>
             ) : null}
-            <button className="saveDraftButton" disabled={!selectedAttemptBook || testResultSaveState === "saving"} onClick={saveAttemptSession} type="button">
+            <button className="saveDraftButton" disabled={!normalizedAttemptTitle || testResultSaveState === "saving"} onClick={saveAttemptSession} type="button">
               {testResultSaveState === "saving" ? "저장 중" : "응시 기록 저장"}
             </button>
           </div>
@@ -23517,16 +23259,11 @@ function MaterialManager({
               </div>
               <span className="countBadge">{testSessions.length}건</span>
             </div>
-            {testSessions.slice(0, 12).map((session) => (
+            {recentTestSessions.slice(0, 12).map((session) => (
               <button
                 className="testSessionItem"
                 key={session.testSessionId}
-                onClick={() => {
-                  setAttemptDate(session.testDate || today);
-                  setAttemptClassTemplateId(session.classTemplateId || "all");
-                  setAttemptProblemBookId(session.problemBookId || "");
-                  setActiveSubject(session.subject || activeSubject);
-                }}
+                onClick={() => openTestSession(session)}
                 type="button"
               >
                 <strong>{session.testDate} · {session.testTitle}</strong>
@@ -23543,7 +23280,7 @@ function MaterialManager({
           <div className="sectionHeader">
             <div>
               <h1>학생별 테스트 이력</h1>
-              <p className="muted">학생이 지금까지 본 데일리/누적/단원 테스트 결과를 한곳에서 확인합니다.</p>
+              <p className="muted">학생이 지금까지 본 데일리/단원/누적 테스트 결과를 한곳에서 확인합니다.</p>
             </div>
             <select value={historyStudent?.studentId ?? ""} onChange={(event) => setSelectedHistoryStudentId(event.target.value)}>
               {activeStudents.map((student) => (
@@ -23559,8 +23296,8 @@ function MaterialManager({
                   <span>{session.className || "전체 학생"} · {getTestPaperKindLabel(session.testKind)} · {session.totalQuestions || "-"}문항</span>
                 </div>
                 <div>
-                  <b>{attempt.status === "not_taken" ? "미응시" : `${attempt.correctCount || "-"}문항 정답`}</b>
-                  <small>{attempt.status === "not_taken" ? (attempt.notTakenReason || "사유 미입력") : getTestAttemptPassLabel(attempt.passStatus)}</small>
+                  <b>{attempt.status === "not_taken" ? "미응시" : `${session.totalQuestions || "-"}문항 중 ${attempt.correctCount || "-"}문항 정답`}</b>
+                  <small>{attempt.status === "not_taken" ? (attempt.notTakenReason || "사유 미입력") : (session.unit || session.subject || "범위 미입력")}</small>
                 </div>
               </article>
             ))}
