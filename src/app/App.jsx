@@ -821,10 +821,10 @@ function InlineSaveStatus({ className = "", label = "", saveState = "idle" }) {
 
 const appStateAutosaveRisk = {
   title: "app_state 전체 snapshot 저장",
-  storage: "Supabase app_state: aiSettings, attendanceSettings, lessonResearchItems, problemBooks, wrongProblems 등 sharedAppState 묶음",
+  storage: "Supabase app_state: aiSettings, attendanceSettings, lessonResearchItems, wrongProblems 등 sharedAppState 묶음",
   risk: "작은 입력도 공통 snapshot 저장 요청으로 이어집니다. 오래된 탭이나 저장 실패가 끼면 화면 하나의 수정이 다른 데이터 묶음까지 함께 덮을 수 있습니다.",
   stopCondition: "저장 실패가 뜨거나, 새로고침 뒤 이전 값이 보이거나, 이 화면과 무관한 데이터가 같이 바뀌면 다음 입력을 멈춥니다.",
-  recommendation: "학생 상담/성적/테스트처럼 독립성이 큰 데이터부터 key별 저장으로 분리하고, 남은 묶음은 updatedAt/version 충돌 확인을 붙입니다."
+  recommendation: "학생 상담/성적/시험지처럼 독립성이 큰 데이터부터 key별 저장으로 분리하고, 남은 묶음은 updatedAt/version 충돌 확인을 붙입니다."
 };
 
 const examPrepAutosaveRisk = {
@@ -5514,6 +5514,7 @@ export function App() {
   const [attendanceReloadKey, setAttendanceReloadKey] = useState(0);
   const [saveStates, setSaveStates] = useState({});
   const [appStateSaveState, setAppStateSaveState] = useState("idle");
+  const [problemBookSaveState, setProblemBookSaveState] = useState("idle");
   const [testResultSaveState, setTestResultSaveState] = useState("idle");
   const [scoreRecordSaveState, setScoreRecordSaveState] = useState("idle");
   const [academyTestSaveState, setAcademyTestSaveState] = useState("idle");
@@ -5537,6 +5538,8 @@ export function App() {
   const initialExamPrepRowsRef = useRef(examPrepRows);
   const initialSchoolEventsRef = useRef(schoolEvents);
   const appStateSaveRequestRef = useRef(0);
+  const problemBookSaveRequestRef = useRef(0);
+  const problemBookSaveTimerRef = useRef(null);
   const scoreRecordSaveRequestRef = useRef(0);
   const academyTestSaveRequestRef = useRef(0);
   const studentConsultationSaveRequestRef = useRef(0);
@@ -5554,7 +5557,6 @@ export function App() {
     lessonNotificationPlans,
     lessonResearchItems,
     notificationLogs,
-    problemBooks,
     reportSnapshots,
     examPostSubmissions,
     examPostTargetStudentIds,
@@ -5570,7 +5572,6 @@ export function App() {
     lessonNotificationPlans,
     lessonResearchItems,
     notificationLogs,
-    problemBooks,
     reportSnapshots,
     examPostSubmissions,
     examPostTargetStudentIds,
@@ -5854,6 +5855,84 @@ export function App() {
         if (appStateSaveRequestRef.current === requestId) setAppStateSaveState("failed");
       });
   }, [isAppStateReady, sharedAppState, session?.role]);
+
+  useEffect(() => () => {
+    if (problemBookSaveTimerRef.current) window.clearTimeout(problemBookSaveTimerRef.current);
+  }, []);
+
+  function persistProblemBooksNow(nextProblemBooks) {
+    const normalizedBooks = normalizeProblemBooks(nextProblemBooks);
+    if (problemBookSaveTimerRef.current) {
+      window.clearTimeout(problemBookSaveTimerRef.current);
+      problemBookSaveTimerRef.current = null;
+    }
+    const requestId = problemBookSaveRequestRef.current + 1;
+    problemBookSaveRequestRef.current = requestId;
+    setProblemBookSaveState("saving");
+    return postAppState({ problemBooks: normalizedBooks })
+      .then(() => {
+        if (problemBookSaveRequestRef.current === requestId) setProblemBookSaveState("saved");
+        return normalizedBooks;
+      })
+      .catch((error) => {
+        console.error(error);
+        if (problemBookSaveRequestRef.current === requestId) setProblemBookSaveState("failed");
+        throw error;
+      });
+  }
+
+  function scheduleProblemBooksSave(nextProblemBooks) {
+    const normalizedBooks = normalizeProblemBooks(nextProblemBooks);
+    if (problemBookSaveTimerRef.current) window.clearTimeout(problemBookSaveTimerRef.current);
+    setProblemBookSaveState("saving");
+    problemBookSaveTimerRef.current = window.setTimeout(() => {
+      problemBookSaveTimerRef.current = null;
+      persistProblemBooksNow(normalizedBooks).catch((error) => console.error(error));
+    }, 500);
+  }
+
+  async function handleAddProblemBookFolder(folderName, testKind, subject) {
+    const nextBooks = normalizeProblemBooks([createProblemBookFolder(folderName, testKind, subject), ...problemBooks]);
+    setProblemBooks(nextBooks);
+    await persistProblemBooksNow(nextBooks);
+  }
+
+  async function handleAddProblemBookFromFile(fileName, testKind, subject) {
+    const nextBooks = normalizeProblemBooks([createProblemBookFromFile(fileName, testKind, subject), ...problemBooks]);
+    setProblemBooks(nextBooks);
+    await persistProblemBooksNow(nextBooks);
+  }
+
+  function handleDeleteProblemBook(problemBookId) {
+    const nextBooks = normalizeProblemBooks(problemBooks.filter((book) => book.problemBookId !== problemBookId));
+    setProblemBooks(nextBooks);
+    persistProblemBooksNow(nextBooks).catch((error) => console.error(error));
+  }
+
+  function handleUpdateProblemBook(problemBookId, field, value) {
+    const nextBooks = normalizeProblemBooks(
+      problemBooks.map((book) => (book.problemBookId === problemBookId ? { ...book, [field]: value } : book))
+    );
+    setProblemBooks(nextBooks);
+    scheduleProblemBooksSave(nextBooks);
+  }
+
+  function handleUpdateProblemMeta(problemBookId, problemId, field, value) {
+    const nextBooks = normalizeProblemBooks(
+      problemBooks.map((book) =>
+        book.problemBookId === problemBookId
+          ? {
+              ...book,
+              problems: (book.problems ?? []).map((problem) =>
+                problem.problemId === problemId ? { ...problem, [field]: value } : problem
+              )
+            }
+          : book
+      )
+    );
+    setProblemBooks(nextBooks);
+    scheduleProblemBooksSave(nextBooks);
+  }
 
   useEffect(() => {
     setProblemBooks((current) => {
@@ -8418,9 +8497,7 @@ export function App() {
             students={students}
             tasks={makeupTasks}
             wrongProblems={wrongProblems}
-            onAddProblemBook={(fileName) =>
-              setProblemBooks((current) => [createProblemBookFromFile(fileName), ...current])
-            }
+            onAddProblemBook={handleAddProblemBookFromFile}
             onAddWrongProblem={(studentId) =>
               setWrongProblems((current) => [
                 {
@@ -8438,23 +8515,10 @@ export function App() {
             onCreateTask={handleCreateMakeupTask}
             onLogNotification={handleLogNotification}
             onUpdateProblemBook={(problemBookId, field, value) =>
-              setProblemBooks((current) =>
-                current.map((book) => (book.problemBookId === problemBookId ? { ...book, [field]: value } : book))
-              )
+              handleUpdateProblemBook(problemBookId, field, value)
             }
             onUpdateProblemMeta={(problemBookId, problemId, field, value) =>
-              setProblemBooks((current) =>
-                current.map((book) =>
-                  book.problemBookId === problemBookId
-                    ? {
-                        ...book,
-                        problems: book.problems.map((problem) =>
-                          problem.problemId === problemId ? { ...problem, [field]: value } : problem
-                        )
-                      }
-                    : book
-                )
-              )
+              handleUpdateProblemMeta(problemBookId, problemId, field, value)
             }
             onUpdateTask={handleUpdateMakeupTask}
             onUpdateWrongProblem={(wrongProblemId, field, value) =>
@@ -8481,29 +8545,18 @@ export function App() {
 
         {activeView === "materials" ? (
           <MaterialManager
-            appStateSaveState={appStateSaveState}
             problemBooks={problemBooks}
+            problemBookSaveState={problemBookSaveState}
             students={students}
             testAttempts={testAttempts}
             testResultSaveState={testResultSaveState}
             testSessions={testSessions}
             templates={classTemplates}
-            onAddFolder={(folderName, testKind, subject) =>
-              setProblemBooks((current) => [createProblemBookFolder(folderName, testKind, subject), ...current])
-            }
-            onAddPdf={(fileName, testKind, subject) =>
-              setProblemBooks((current) => [createProblemBookFromFile(fileName, testKind, subject), ...current])
-            }
-            onDeleteBook={(problemBookId) =>
-              setProblemBooks((current) => current.filter((book) => book.problemBookId !== problemBookId))
-            }
+            onAddFolder={handleAddProblemBookFolder}
+            onDeleteBook={handleDeleteProblemBook}
             onDeleteTestSession={handleDeleteTestSession}
             onSaveTestSession={handleSaveTestSession}
-            onUpdateBook={(problemBookId, field, value) =>
-              setProblemBooks((current) =>
-                current.map((book) => (book.problemBookId === problemBookId ? { ...book, [field]: value } : book))
-              )
-            }
+            onUpdateBook={handleUpdateProblemBook}
           />
         ) : null}
 
@@ -22881,15 +22934,14 @@ function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteMaterial
 }
 
 function MaterialManager({
-  appStateSaveState = "idle",
   problemBooks,
+  problemBookSaveState = "idle",
   students,
   testAttempts = [],
   testResultSaveState = "idle",
   testSessions = [],
   templates = [],
   onAddFolder,
-  onAddPdf,
   onDeleteBook,
   onDeleteTestSession,
   onSaveTestSession,
@@ -22904,6 +22956,7 @@ function MaterialManager({
   const [attemptDrafts, setAttemptDrafts] = useState({});
   const [attemptMemo, setAttemptMemo] = useState("");
   const [attemptError, setAttemptError] = useState("");
+  const [bookError, setBookError] = useState("");
   const [selectedHistoryStudentId, setSelectedHistoryStudentId] = useState("");
   const [folderName, setFolderName] = useState("");
   const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("all");
@@ -22990,17 +23043,19 @@ function MaterialManager({
     setAttemptError("");
   }, [attemptClassTemplateId, attemptDate, attemptProblemBookId, currentTestSessionId, testAttempts, testSessions, students]);
 
-  function handleAddFolder() {
-    if (!folderName.trim()) return;
-    onAddFolder(folderName.trim(), activeBookKind, activeSubject);
-    setFolderName("");
-  }
-
-  function handlePdfUpload(event) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    onAddPdf(file.name, activeBookKind, activeSubject);
-    event.target.value = "";
+  async function handleAddFolder() {
+    const nextFolderName = folderName.trim();
+    if (!nextFolderName) {
+      setBookError("추가할 시험지명을 입력해 주세요.");
+      return;
+    }
+    try {
+      setBookError("");
+      await onAddFolder?.(nextFolderName, activeBookKind, activeSubject);
+      setFolderName("");
+    } catch (error) {
+      setBookError(error.message || "시험지 추가 저장 실패");
+    }
   }
 
   function updateAttemptDraft(studentId, field, value) {
@@ -23112,9 +23167,8 @@ function MaterialManager({
               <h1>시험지관리</h1>
               <p className="muted">유형을 기준으로 시험지를 미리 준비하고, 학생이 어느 테스트까지 통과했는지 한 화면에서 봅니다.</p>
             </div>
-            <InlineSaveStatus label="시험지 자동저장" saveState={appStateSaveState} />
+            <InlineSaveStatus label="시험지 저장" saveState={problemBookSaveState} />
           </div>
-          <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...appStateAutosaveRisk} />
           <div className="testPaperSubjectTabs" aria-label="시험지관리 과목 선택">
             {testPaperSubjectOptions.map((subject) => (
               <button
@@ -23253,14 +23307,9 @@ function MaterialManager({
               <p className="muted">시험지를 직접 추가하고 종류, 순서, 준비 상태, 배포일을 관리합니다. 등록한 시험지는 진도별 트랙에 표시됩니다.</p>
             </div>
             <div className="materialHeaderActions">
-              <InlineSaveStatus label="시험지 자동저장" saveState={appStateSaveState} />
-              <label className="pdfUploadButton">
-                PDF 업로드
-                <input accept="application/pdf,image/*" onChange={handlePdfUpload} type="file" />
-              </label>
+              <InlineSaveStatus label="시험지 저장" saveState={problemBookSaveState} />
             </div>
           </div>
-          <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...appStateAutosaveRisk} />
 
           <div className="testPaperKindTabs" aria-label="시험지 보관함 종류 선택">
             {testPaperKindOptions.map((option) => (
@@ -23286,6 +23335,7 @@ function MaterialManager({
             />
             <button className="primaryButton" onClick={handleAddFolder} type="button">+ 시험지 추가</button>
           </div>
+          {bookError ? <p className="apiErrorBox">{bookError}</p> : null}
 
           <div className="materialTable">
             <div className="materialRow materialHead">

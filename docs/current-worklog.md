@@ -12,6 +12,18 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-13 P1. 시험지 보관함 PDF 업로드 제거와 저장 위험 완화
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 제보: `시험지 보관함`의 PDF 업로드 버튼은 삭제가 필요하고, `+ 시험지 추가` 버튼이 작동하지 않았다. 화면의 붉은 `app_state 전체 snapshot 저장` 위험요소와 오늘 추가한 응시 기록/알림톡 반영 흐름을 함께 검토해야 한다.
+- 원인 판단: 오늘 추가한 `응시 기록/학생 이력` 원본은 Supabase `test_sessions/test_attempts`로 분리되어 있어 알림톡 반영 원천은 안전한 편이다. 반면 `시험지 보관함`의 `problemBooks`는 아직 `sharedAppState` 전체 자동저장 묶음에 들어 있어 작은 시험지 추가/수정이 aiSettings, attendanceSettings, lessonResearchItems, wrongProblems 등 다른 app_state 묶음 저장과 같은 요청 경로를 탔다.
+- 구현 결과: `시험지 보관함`의 PDF 업로드 버튼과 `onAddPdf` 경로를 제거했다. 시험지는 직접 이름을 입력해 추가하는 흐름만 남겼다.
+- 구현 결과: `problemBooks`를 `sharedAppState` 전체 snapshot 자동저장 대상에서 제외하고, 시험지 추가/수정/삭제/문항 메타 수정은 `postAppState({ problemBooks })` key 단위 저장으로 분리했다. 추가 버튼은 저장 요청 결과를 기다린 뒤 입력칸을 비우며, 실패하면 같은 화면에 오류를 표시한다.
+- 저장 원천: 시험지 보관함 원본은 여전히 Supabase `app_state.problemBooks` key다. 다만 더 이상 sharedAppState 전체 snapshot과 함께 저장하지 않는다. 응시 회차/학생별 결과 원본은 Supabase `test_sessions/test_attempts`다.
+- 남은 위험: `problemBooks`는 아직 독립 테이블/updatedAt version 충돌 확인까지 간 것은 아니다. 여러 탭에서 같은 시험지를 동시에 수정하는 운영이 잦아지면 다음 단계로 `problem_books` 전용 테이블 또는 app_state key version 확인이 필요하다.
+- 중단 조건: 시험지를 추가했는데 화면에 row가 생기지 않음, 저장 실패가 보이는데 계속 입력함, 새로고침 후 추가한 시험지가 사라짐, 시험지 수정이 다른 app_state 묶음 저장 상태를 흔듦, 응시 기록이 다른 날짜/반 수업 알림톡에 섞임.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 277개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-13 P1. 시험지관리 응시 기록과 알림톡 반영
 
 - 상태: 완료 - 구현/검증 완료
