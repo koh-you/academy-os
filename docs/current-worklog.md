@@ -12,6 +12,14 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-13 P1. 다음 세션 handoff 프롬프트 갱신
+
+- 상태: 완료 - 문서 갱신/검증 완료
+- 사용자 요청: 다음 세션으로 넘길 프롬프트를 최신 작업 기준으로 정리한다.
+- 구현 결과: `docs/next-session/README.md`를 최신 커밋 `1d764a1 Focus supplement modal on selected source` 기준으로 갱신했다. 보충관리 결석/숙제 흐름, source 단위 상세 모달, 보충 알림톡 자연문, Slack 상태, Solapi 첫 클릭 후속, Supabase SQL 적용 확인, 중단 조건, 검증 명령을 다음 세션 프롬프트에 반영했다.
+- 저장 원천: 문서 handoff 원본은 Git의 `docs/next-session/README.md`이며, 새 SQL은 필요 없다.
+- 검증: `git diff --check`, `npm run build` 통과. 문서 변경만 있어 `npm run test:production`은 생략했다.
+
 ### 2026-07-11 P1. 결석보강 상세 모달 source 단위 고정
 
 - 상태: 완료 - 구현/검증 완료

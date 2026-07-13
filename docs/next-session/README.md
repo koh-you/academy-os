@@ -15,140 +15,149 @@ E:\academy-os 작업을 이어가겠습니다.
 5. git log -1 --oneline
 
 현재 실제 최신 커밋은 반드시 `git log -1 --oneline`으로 확인해주세요.
-이 handoff 작성 시점의 최신 커밋은 `080b42d Show Solapi result refresh after schedule`입니다.
+이 handoff 작성 시점의 최신 커밋은 `1d764a1 Focus supplement modal on selected source`입니다.
 
-오늘까지의 핵심 흐름:
-- 수업일지/수업알림톡은 자동저장과 Solapi 예약을 분리하는 방향으로 정리 중입니다. 수업일지 저장은 Supabase `lesson_student_records` 저장이고, Solapi 예약/취소/발송결과 확인은 별도 버튼/별도 API 흐름이어야 합니다.
-- `솔라피 발송결과` 버튼과 `/api/notification-jobs/reconcile-solapi`가 추가되어, 이미 Solapi에서 발송된 결과를 OS `notification_jobs`와 `lesson_student_records`에 반영할 수 있습니다.
-- 2026-07-10 실제 Solapi 원천 확인 결과, 지난 예약 그룹은 Solapi에서 `COMPLETE`/메시지 `statusCode 4000`인데 OS `notification_jobs`가 `scheduled`로 남을 수 있었습니다. 최신 수정은 지난 예약을 `발송결과 확인 필요`로 표시하고 `솔라피 발송결과` 버튼을 노출합니다. 이 버튼은 새 예약을 만들지 않고 원천 결과만 반영해야 합니다.
-- 토요일 수업 알림톡 기본 예약은 `16:30`, `30분 지연`은 `17:00`입니다. 이미 Solapi에 생성된 기존 예약은 코드 변경만으로 자동 이동하지 않으므로, 수업일지 저장본 확인 후 `Solapi 예약 반영`을 눌러야 합니다.
-- 시험분석은 웹앱에서 `GPT 대화세션 체크리스트`와 `GPT 기획 패킷 복사`를 만들고, 실제 카드 이미지는 GPT Image 프로젝트에서 한 장씩 생성하는 방향입니다.
-- 인앱 HTML/CSS/JS 카드 렌더러였던 `블로그형 카드 디자인 Gate 3`는 완전히 삭제했습니다. 앞으로 웹앱은 체크리스트/기획 패킷/ZIP 텍스트까지 담당하고, 카드 이미지 렌더링은 GPT Image 프로젝트가 담당합니다.
-- 운영 알림 원본은 Supabase `academy_reminders`로 분리했고, 대시보드/학생프로필/수업일지/학사일정이 같은 원본을 읽는 방향입니다. Slack 오전 9시 요약 API와 cron은 구현되어 있지만, 실제 Slack webhook 비밀값 설정과 실발송 검수는 아직 진행하지 않았습니다.
+현재 미추적 로컬 항목:
+- `.codex-temp/`
+- 이 폴더는 Git에 올리지 말고, 작업 중 임시 산출물로만 봅니다.
 
-먼저 정리해야 할 남은 후속/주의:
-1. 2026-07-11 실제 수업일지 운영 검수는 최우선입니다.
-   - 실제 토요일 수업에서 수업일지를 작성하고 `변경 저장` 후 새로고침 유지까지 확인합니다.
-   - 토요일 기본 예약 `16:30`, 30분 지연 `17:00`, 알림톡 없음 무발송 계획을 확인합니다.
-   - 저장본 확인 후에만 `Solapi 예약 반영`을 누르고, `예약 확인`에서 학생별 학부모/학생 job이 중복 없이 1건씩인지 봅니다.
-   - 예약 시각이 지난 수업은 새 예약 버튼이 아니라 `솔라피 발송결과` 버튼으로 OS 상태를 Solapi 원천에 맞춥니다.
-2. Slack 실제 연동은 다음 우선순위입니다.
-   - 가이드: `docs/slack-integration-guide.md`
-   - Slack 앱에서 Incoming Webhook URL을 만들고, 이 URL은 절대 Git/문서/채팅에 그대로 남기지 않습니다.
-   - Render API 서비스 `koh-you-math-academy-os-api` 환경변수에 `SLACK_WEBHOOK_URL`과 `SLACK_DRY_RUN=false`를 설정합니다.
-   - API 재시작/재배포 후 `/api/integrations/status`에서 `slackConfigured: true`를 확인합니다.
-   - 수동 테스트는 `/api/notifications/slack-today-schedule`에 `{"notifyEmpty":true,"force":true}`를 POST해 확인합니다.
-   - 오전 9시 자동 발송은 KST 09:00 = UTC 00:00, cron `0 0 * * *` 기준입니다.
-3. 운영 알림 원본은 운영 SQL 적용이 필요합니다.
-   - 파일: `supabase/20260710_academy_reminders.sql`
-   - SQL 적용은 사용자가 Supabase SQL editor에서 직접 합니다.
-4. 자동저장 위험 붉은 UI는 1차 구현했습니다.
-   - 설정, 시험정보/시험 후 기록지, 학사일정, 수업연구, 오답관리, 시험지관리, 보충관리, 학생 프로파일에 `자동저장 위험` 배지와 `왜 위험한가` 버튼이 붙었습니다.
-   - 이 UI는 위험을 제거한 것이 아니라 저장 원천/부작용/중단 조건/권장 방향을 화면에 노출한 1차 조치입니다.
-   - 전역 `app_state` snapshot 저장, 입력마다 API를 호출하는 화면, 수업일지/수업알림톡의 운영 안정성은 계속 검수해야 합니다.
-5. 수업메모 이전 메모 확인 기능은 운영 SQL 적용이 필요합니다.
-   - 파일: `supabase/20260708_prep_memo_acknowledgements.sql`
-   - SQL 적용은 사용자가 Supabase SQL editor에서 직접 합니다.
-6. Solapi 발송결과 반영은 운영 배포 후 실제 수업에서 검수해야 합니다.
-   - affected lesson에서 `솔라피 발송결과`를 눌렀을 때 Solapi 원천 `statusCode 4000`이 OS에 `발송 완료`로 반영되는지 확인하세요.
-   - 지난 예약 상태에서는 상단 배지가 `예약 시간 지남`만 남으면 안 되고, `발송결과 확인 필요`와 `솔라피 발송결과` 버튼이 보여야 합니다.
-   - 이 버튼은 새 예약 생성 버튼이 아니라 원천 발송결과 반영 버튼입니다.
-7. 시험분석 GPT Image 워크플로우는 아직 최종 이미지 파일을 웹앱으로 다시 가져오는 저장 UI까지 구현된 것은 아닙니다.
-   - 현재 원본은 `exam_analysis_runs.audit_summary.outputDrafts.inputs`에 저장되는 선생님 체크리스트/기획 입력입니다.
-   - GPT Image 결과물은 프로젝트 대화세션에서 생성하고, 필요하면 다음 단계에서 최종 이미지/문구 역반영 UI를 설계하세요.
-8. Vision AI raw 결과는 `.codex-temp/benchmark-vision-results`에 있고 Git에는 올리지 않습니다.
-   - 지속 가능한 참고는 커밋된 docs 요약 파일을 우선 사용하세요.
+최근 완료된 핵심 작업:
+1. 보충관리 결석/숙제 흐름 정리
+   - `미검사(not_checked)`는 숙제보충 후보에서 제외했습니다.
+   - 실제 숙제보충 후보는 `not_done`, `partial_80`, `partial_50`입니다.
+   - 결석/인정결석/무단결석 보강 후보는 해당 수업의 지난 숙제를 `함께 확인할 지난 숙제`로 품습니다.
+   - 결석보강 완료는 과거 숙제 상태를 자동 완료로 바꾸지 않습니다.
+   - 원본 분리:
+     - 결석/수업 기록: `lesson_student_records`
+     - 지난 숙제 기록: `homeworks`
+     - 보충관리 task: `makeup_tasks`
 
-운영 검수 우선순위:
-1. 2026-07-11 토요일 실제 수업에서 수업일지를 작성한 뒤 `변경 저장`을 먼저 눌러 `수업일지 · 저장 완료`를 확인합니다.
-2. 새로고침 후 강의 교재/강의 내용/지난 숙제/다음 숙제와 학부모/학생 알림톡 초안이 선생님 저장본 그대로 유지되는지 확인합니다.
-3. 토요일 수업의 `기본 예약` 표시가 `16:30`, `30분 지연` 표시가 `17:00`, `알림톡 없음`이 무발송 계획으로 표시되는지 확인합니다.
-4. 저장본 확인 후에만 `Solapi 예약 반영`을 누르고, `예약 확인`에서 학부모/학생 알림톡 job이 학생별로 1건씩만 있는지 확인합니다.
-5. 첫 클릭에서 `Cannot read properties of null (reading 'status')`가 다시 나오면 즉시 반복 클릭하지 말고 `예약 확인`에서 Solapi 원천 그룹 생성 여부와 중복 예약 여부를 먼저 확인합니다.
-6. 이미 예약 시간이 지난 수업에서는 `발송결과 확인 필요`와 `솔라피 발송결과` 버튼이 보이는지 확인합니다.
-7. `솔라피 발송결과` 버튼을 눌렀을 때 Solapi 원천 `statusCode 4000`이 OS `발송 완료`로 반영되는지 확인합니다.
-8. 이때 새 예약이 생기거나 기존 예약이 취소되면 중단합니다.
-9. `docs/slack-integration-guide.md`를 보며 Slack Incoming Webhook과 Render 환경변수를 설정합니다.
-10. `/api/integrations/status`에서 `slackConfigured: true`가 나오는지 확인합니다.
-11. `/api/notifications/slack-today-schedule` 수동 테스트로 선택한 Slack 채널에 오늘 운영 요약이 도착하는지 확인합니다.
-12. Supabase SQL editor에서 `supabase/20260710_academy_reminders.sql` 적용 여부를 확인하고, 대시보드 `운영 알림 원본` 저장/새로고침 유지를 검수합니다.
-13. 수업일지에서 저장 버튼과 Solapi 버튼이 분리되어 있는지 확인합니다.
-14. 시험분석 탭 진입이 정상인지 확인합니다.
-15. 시험분석 산출물 패널에서 `GPT 대화세션 체크리스트`, `GPT 기획 패킷 복사`, `산출물 ZIP`이 보이고, `블로그형 카드 디자인 Gate 3`/카드 미리보기 렌더러가 보이지 않는지 확인합니다.
-16. 웹앱 체크리스트에 입력한 선생님 확정값이 `산출물 저장` 후 새로고침해도 유지되는지 확인합니다.
-17. 자동저장 위험 후보 화면에서 `자동저장 위험` 배지와 `왜 위험한가` 버튼을 눌러 저장 원천/중단 조건이 보이는지 확인합니다.
+2. 보충관리 상세 모달 source 단위 고정
+   - 최원석처럼 2026-07-08, 2026-07-10 이틀 결석보강이 있는 경우, 7/10 상세에 7/8 카드가 섞이던 문제를 수정했습니다.
+   - 상세 모달은 이제 `taskType + studentId + sourceId` 기준으로 선택한 row 1건만 표시합니다.
+   - 모달 안 `보충 완료 처리` 성공 시 모달을 닫고 active 목록에서 빠지게 했습니다.
+   - 회귀 테스트: `88b-1 supplement detail modal is focused to the selected source row`
+
+3. 보충 일정 알림톡 문구 정리
+   - 최종 코멘트 초안에는 자동으로 `보충 일정:` 블록을 넣지 않습니다.
+   - 보충 일정은 미리보기/발송 구조의 `보충 일정` 섹션에서만 보여줍니다.
+   - `일정 확정`, `일정 미확정`, 가운데 점 나열 같은 내부 상태 문구를 학부모/학생용 문구에서 제거했습니다.
+   - 결석보강 문구에는 `지난 숙제 ...도 함께 확인하겠습니다.`가 자연문으로 붙습니다.
+
+4. 보충 완료 처리 원본 보존
+   - `보충 완료 처리`는 `makeup_tasks.status = done`, `completedAt/passedAt`, `supplementProcessStatus = completed`만 저장합니다.
+   - 연결된 과거 `homeworks.teacherStatus/status/verifiedAt`는 바꾸지 않습니다.
+
+5. 태블릿 출결 UX
+   - 출결 저장 성공 후 `출결 저장 완료 · 알림톡 처리 중` 배너를 화면에 띄우지 않게 했습니다.
+   - 알림톡 처리는 서버 백그라운드 큐로 유지합니다.
+
+6. 운영 알림 / Slack
+   - 운영 알림 원본은 Supabase `academy_reminders`입니다.
+   - 운영 알림 수정 버튼과 완료 즉시 목록 반영을 구현했습니다.
+   - Slack Incoming Webhook/Render 환경변수 설정 및 수동 테스트는 사용자가 진행했고, Slack 테스트 알림은 성공했습니다.
+   - Slack URL 같은 비밀값은 문서/로그/Git diff에 절대 남기지 않습니다.
+
+7. 화목토 반 시간 자동 보정
+   - 화목토 앞반: 화목 `16:00-19:00`, 토 `10:00-13:00`
+   - 화목토 뒷반: 화목 `19:00-22:00`, 토 `13:00-16:00`
+   - 토요일 수업 생성/보정 시 위 시간이 적용됩니다.
+
+최근 검증 결과:
+- `node --check api/server.js`
+- `node --check api/routes/coreData.js`
+- `node --check scripts/scenario-tests-production.cjs`
+- `npm run test:production` 통과, 276개
+- `npm run build` 통과
+- `git diff --check` 통과
+
+다음 세션 최우선 운영 검수:
+1. 운영 배포 최신 커밋 확인
+   - GitHub 최신: `1d764a1 Focus supplement modal on selected source`
+   - 운영 프론트: https://academy-os-blue.vercel.app
+   - 운영 API: https://koh-you-math-academy-os-api.onrender.com
+   - 운영 화면에서 아직 이전 증상이 보이면 코드 문제가 아니라 배포/캐시 지연인지 먼저 구분합니다.
+
+2. 최원석 결석보강 실제 검수
+   - 보충관리 > 결석보강에서 최원석 2026-07-10 상세를 엽니다.
+   - 모달에는 2026-07-10 카드 1건만 보여야 합니다.
+   - 2026-07-08 카드가 같이 보이면 중단합니다.
+   - `보충 완료 처리`를 누르면 모달이 닫히고 active 결석보강 목록에서 빠져야 합니다.
+   - 새로고침 후에도 완료한 항목이 active 목록에 다시 나타나면 중단합니다.
+   - 최근 한 달 보충 내역에서는 완료 이력으로 확인되어야 합니다.
+
+3. 결석보강 + 지난 숙제 확인 검수
+   - 결석으로 숙제를 검사하지 못한 학생은 `숙제보충`이 아니라 `결석보강` 1건으로 관리되어야 합니다.
+   - 결석보강 상세 안에 `함께 확인할 지난 숙제`가 보여야 합니다.
+   - 알림톡 미리보기에는 `결석 보강`과 `지난 숙제 ...도 함께 확인하겠습니다.`가 자연문으로 보여야 합니다.
+   - 결석보강 완료 후 과거 숙제 상태가 자동 완료로 바뀌면 중단합니다.
+
+4. 실제 수업일지 / Solapi 검수
+   - 수업일지 작성 후 먼저 `변경 저장`을 눌러 `수업일지 · 저장 완료`를 확인합니다.
+   - 새로고침 후 강의 교재/강의 내용/지난 숙제/다음 숙제와 학부모/학생 알림톡 초안이 선생님 저장본 그대로 유지되는지 확인합니다.
+   - 토요일 수업 기본 예약은 `16:30`, 30분 지연은 `17:00`, 알림톡 없음은 무발송 계획이어야 합니다.
+   - 저장본 확인 후에만 `Solapi 예약 반영`을 누릅니다.
+   - `예약 확인`에서 학생별 학부모/학생 job이 중복 없이 1건씩인지 봅니다.
+   - 예약 시각이 지난 수업은 새 예약 생성이 아니라 `솔라피 발송결과` 버튼으로 OS 상태를 Solapi 원천에 맞춥니다.
+
+5. 월요일 후속: Solapi 예약반영 첫 클릭 오류
+   - 사용자 제보: `Solapi 예약반영`을 처음 누르면 오류가 나고 두 번째 누르면 성공하는 경우가 있습니다.
+   - 월요일 할일로 넘겼던 이슈입니다.
+   - 반복 클릭으로 중복 예약이 생길 수 있으므로, 재현 시 첫 클릭 실패 직후 `예약 확인`과 `notification_jobs` 상태를 먼저 확인합니다.
+   - 원인 후보:
+     - 첫 클릭에서 필요한 lesson notification plan/job 상태가 아직 null인 상태
+     - 예약 payload fingerprint/plan 초기화 순서 문제
+     - 예약 생성 후 프론트 상태 반영 전에 두 번째 클릭이 다른 경로로 성공
+   - 수정 시 새 예약 생성/취소 부작용이 없는지 먼저 gate를 설계합니다.
+
+6. Supabase SQL 적용 상태 확인
+   - 운영 SQL 자동 적용은 하지 않습니다. 사용자가 Supabase SQL editor에서 직접 적용합니다.
+   - 확인 대상 파일:
+     - `supabase/20260710_academy_reminders.sql`
+     - `supabase/20260708_prep_memo_acknowledgements.sql`
+   - 적용 여부가 불확실하면 Supabase에서 테이블/컬럼 존재를 확인하거나, 화면에서 새로고침 유지로 검수합니다.
+   - SQL 비밀값이나 접속 자격을 문서/Git에 남기지 않습니다.
 
 중단 조건:
-- Slack webhook URL이 Git diff, 문서, 로그에 평문으로 남음
-- Slack 설정 후에도 `slackConfigured: false`가 계속 나옴
-- Slack 수동 테스트가 새 운영 알림 원본을 읽지 못하거나 같은 날짜 요약을 중복 발송함
-- 수업일지 저장이 다시 Solapi 예약/취소를 자동으로 건드림
-- 토요일 수업 기본 예약이 `16:30`이 아니거나, 30분 지연이 `17:00`이 아님
-- 수업일지 새로고침 후 선생님 저장본이 사라지거나 AI/템플릿 값으로 덮어써짐
+- `.env`, API key, Slack webhook URL, Supabase service role key, Solapi key/secret이 Git diff/문서/로그에 평문으로 남음
+- 결석 학생의 미검사 숙제가 숙제보충과 결석보강에 동시에 뜸
+- 결석보강 상세에서 다른 날짜 task가 같은 모달에 섞임
+- 보충 완료 처리 후 active 목록/새로고침에서 다시 나타남
+- 보충 완료 처리로 과거 숙제 상태가 자동 완료로 바뀜
+- 수업일지 저장이 Solapi 예약/취소를 자동으로 건드림
 - 같은 학생/같은 대상/같은 예약시각의 Solapi 예약이 2건 이상 생김
-- 예약 시각이 지난 수업에서 `솔라피 발송결과`가 보이지 않고 `예약 시간 지남`만 남음
-- Solapi 발송결과 버튼이 새 예약을 만들거나 기존 예약을 취소함
+- 예약 시각이 지난 수업에서 `솔라피 발송결과` 버튼 대신 새 예약 흐름만 보임
 - Solapi 원천 `statusCode 4000`인데 OS가 계속 `예약 중`으로 남음
-- 시험분석 탭이 다시 접속 불가
-- Gate 3 카드 렌더러 UI가 다시 보임
-- 선생님 체크리스트 저장값이 AI/템플릿 값으로 덮어써짐
-- 자동저장 위험 배지가 보이지 않거나 `왜 위험한가` 설명에 저장 원천/중단 조건이 빠짐
-- 자동저장 문제를 필터/표시 보정으로만 숨기려는 상황
+- 선생님이 저장한 최종 코멘트/알림톡 문구가 AI/템플릿/자동 매핑값으로 덮어써짐
+- 화면 필터나 표시 보정으로 원천 데이터 꼬임을 숨기려는 상황
 
 작업 원칙:
-- `AI 초안 -> 선생님 검수/수정 -> 선생님 저장본 원본화`
-- 저장 원천을 먼저 확인하고 화면 필터로만 맞아 보이게 하지 않습니다.
-- 선생님이 수정/저장한 값은 이후 AI/템플릿/자동 매핑이 덮어쓰면 안 됩니다.
-- 완료 시 `사람 검토 절차`와 `AI 자기검토`를 반드시 포함하고, 가능한 변경은 검증 후 커밋/푸시까지 진행하세요.
+- 한 번에 하나의 우선순위 작업만 구현합니다.
+- 구현 전 저장 원천을 먼저 확인합니다.
+- 보충관리/수업일지/알림톡은 `local draft -> 명시 저장 -> Supabase 저장 완료 -> 별도 발송/예약 검수` 흐름을 지킵니다.
+- AI/자동 초안은 선생님 저장본을 덮어쓰면 안 됩니다.
+- 완료 답변에는 `사람 검토 절차`와 `AI 자기검토`를 반드시 포함합니다.
+- 검증 가능하면 `node --check`, `npm run test:production`, `npm run build`, `git diff --check` 후 커밋/푸시까지 진행합니다.
 ```
 
-## 오늘 작업 요약
+## 현재 최신 기준
 
-### 수업일지 / 알림톡
+- 작성일: 2026-07-13
+- 최신 커밋: `1d764a1 Focus supplement modal on selected source`
+- 브랜치: `main`
+- 운영 프론트: https://academy-os-blue.vercel.app
+- 운영 API: https://koh-you-math-academy-os-api.onrender.com
+- 마지막 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 276개 통과, `npm run build`, `git diff --check`
 
-- 최종 알림톡 문구는 선생님이 저장한 `lesson_student_records.teacher_comment` / `student_comment`를 새 원본으로 보게 정리했다.
-- 수동 하원 시각 저장, 반이동 stale record 삭제/방지, 지각 유예시간 보정, 저장 점멸 방지, 수업일지 저장과 Solapi 예약 분리 흐름을 정리했다.
-- `솔라피 발송결과` 버튼과 `/api/notification-jobs/reconcile-solapi`를 추가해 Solapi 원천 발송 결과를 OS 상태에 반영할 수 있게 했다.
-- 수업일지 `수정 시작`은 즉시 편집 모드로 보이게 하고, 강의 교재/강의 내용/지난 숙제/다음 숙제는 `변경 저장`으로 명시 저장한다.
-- 2026-07-10 운영 Solapi 원천을 확인해, 발송 완료 그룹이 OS에서 `scheduled`로 남는 문제를 찾았다. 지난 예약은 `발송결과 확인 필요`로 표시하고 `솔라피 발송결과` 버튼으로 OS 상태를 맞추게 했다.
-- 토요일 수업 기본 알림톡 예약은 `16:30`, `30분 지연`은 `17:00`으로 바꿨다.
-- 미래 수업 결석 미리 저장은 해당 수업 날짜로 저장되게 보정했다.
-- 19:00 수업 19:01 등원처럼 5분 이내 등원은 정상 등원으로 표시/저장되게 보정했다.
-
-### 시험분석 / GPT Image
-
-- 네이버 벤치마킹 글 12개를 Vision AI로 분석해 반복 키워드/구조를 문서화했다.
-- GPT Image 프로젝트용 소스, 프로젝트 모듈, 체크리스트 구조, 웹앱 입력 패킷 흐름을 정리했다.
-- 시험분석 산출물 패널에 `GPT 대화세션 체크리스트`와 `GPT 기획 패킷 복사` 흐름을 붙였다.
-- 시험분석 탭 초기 렌더 오류를 수정했다.
-- 인앱 카드 렌더러였던 `블로그형 카드 디자인 Gate 3`는 삭제했다. 이제 웹앱은 카드 이미지 자체를 렌더링하지 않는다.
-
-### 시험지관리 / 수업연구
-
-- 시험지관리 유형트리는 전체 유형 원천을 읽고 기본 접힘 상태로 시작한다.
-- 수업연구는 같은 유형 원천에서 세부유형별 교안 항목을 만들 수 있다.
-- 운영 SQL이 필요한 항목은 수업메모 이전 메모 확인 기능과 운영 알림 원본 `academy_reminders`다.
-
-### 운영 알림 / Slack
-
-- 운영 알림 원본은 대시보드에서 입력하고, 학생프로필/수업일지/학사일정이 같은 Supabase `academy_reminders` 데이터를 읽는다.
-- Slack 오전 9시 요약 API와 cron은 구현되어 있다.
-- 실제 Slack Incoming Webhook 생성, Render `SLACK_WEBHOOK_URL`/`SLACK_DRY_RUN=false` 설정, 수동 실발송 검수는 다음 작업으로 남겼다.
-
-### 자동저장 위험 UI
-
-- `src/shared/components/AutosaveRiskNotice.jsx`를 추가했다.
-- 설정, 시험정보/시험 후 기록지, 학사일정, 수업연구, 오답관리, 시험지관리, 보충관리, 학생 프로파일에 붉은 `자동저장 위험` UI를 붙였다.
-- 저장 구조 자체를 바꾼 것은 아니므로, 후속 작업은 여전히 `app_state` key별 dirty 저장, 행 단위 저장, 서버 updatedAt/version 확인이다.
-
-## 현재 저장 원천
+## 저장 원천 요약
 
 - 수업일지/알림톡 최종 문구: Supabase `lesson_student_records`
-- 수업 알림 예약/발송 상태: Supabase `notification_jobs` + Solapi 원천 groups/messages
-- 시험분석 산출물 체크리스트: `exam_analysis_runs.audit_summary.outputDrafts.inputs`
-- 시험분석 PDF/문항 분석: `exam_analysis_runs`, `exam_analysis_sources`, `exam_analysis_questions`, Storage `exam-analysis-pipeline-sources`
+- 수업 알림 예약/발송 상태: Supabase `notification_jobs` + Solapi groups/messages
+- 보충관리 task: Supabase `makeup_tasks`
+- 과거 숙제 검사 이력: Supabase `homeworks`
 - 운영 알림 원본: Supabase `academy_reminders`
 - Slack 오전 요약 발송 이력: Supabase `notification_jobs`
+- 시험분석 산출물 체크리스트: `exam_analysis_runs.audit_summary.outputDrafts.inputs`
 - 시험지관리: `app_state.problemBooks`
 - 수업연구: `app_state.lessonResearchItems`
 
@@ -156,21 +165,24 @@ E:\academy-os 작업을 이어가겠습니다.
 
 - `AGENTS.md`
 - `docs/current-worklog.md`
-- `docs/exam-analysis-gpt-checklist-project-source-2026-07-09.md`
-- `docs/exam-analysis-gpt-image-project-module-2026-07-09.md`
-- `docs/exam-analysis-gpt-image-source-2026-07-09.md`
-- `docs/exam-analysis-blog-vision-all-posts-2026-07-09.md`
-- `docs/exam-analysis-canva-workflow.md`
+- `docs/home-codex-setup.md`
 - `docs/slack-integration-guide.md`
 - `supabase/20260710_academy_reminders.sql`
 - `supabase/20260708_prep_memo_acknowledgements.sql`
+- `src/app/App.jsx`
+- `src/domains/lessons/assignmentStatus.js`
+- `api/server.js`
+- `api/routes/coreData.js`
+- `scripts/scenario-tests-production.cjs`
 
 ## 자주 쓰는 명령
 
 ```powershell
 git status --short
+git log -1 --oneline
 git log --oneline -8
 node --check api/server.js
+node --check api/routes/coreData.js
 node --check scripts/scenario-tests-production.cjs
 npm run test:production
 npm run build
