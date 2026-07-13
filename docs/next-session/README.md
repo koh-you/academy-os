@@ -15,7 +15,8 @@ E:\academy-os 작업을 이어가겠습니다.
 5. git log -1 --oneline
 
 현재 실제 최신 커밋은 반드시 `git log -1 --oneline`으로 확인해주세요.
-이 handoff 작성 시점의 최신 커밋은 `1d764a1 Focus supplement modal on selected source`입니다.
+이 handoff의 기능 기준 최신 커밋은 `1d764a1 Focus supplement modal on selected source`입니다.
+handoff 문서 갱신 커밋이 그 뒤에 있을 수 있으므로, 실제 최신 커밋은 `git log -1 --oneline` 결과를 우선하세요.
 
 현재 미추적 로컬 항목:
 - `.codex-temp/`
@@ -73,7 +74,8 @@ E:\academy-os 작업을 이어가겠습니다.
 
 다음 세션 최우선 운영 검수:
 1. 운영 배포 최신 커밋 확인
-   - GitHub 최신: `1d764a1 Focus supplement modal on selected source`
+   - 기능 기준 커밋: `1d764a1 Focus supplement modal on selected source`
+   - 실제 최신 커밋은 `git log -1 --oneline`으로 다시 확인합니다.
    - 운영 프론트: https://academy-os-blue.vercel.app
    - 운영 API: https://koh-you-math-academy-os-api.onrender.com
    - 운영 화면에서 아직 이전 증상이 보이면 코드 문제가 아니라 배포/캐시 지연인지 먼저 구분합니다.
@@ -143,7 +145,8 @@ E:\academy-os 작업을 이어가겠습니다.
 ## 현재 최신 기준
 
 - 작성일: 2026-07-13
-- 최신 커밋: `1d764a1 Focus supplement modal on selected source`
+- 기능 기준 최신 커밋: `1d764a1 Focus supplement modal on selected source`
+- 실제 최신 커밋: `git log -1 --oneline` 결과를 우선
 - 브랜치: `main`
 - 운영 프론트: https://academy-os-blue.vercel.app
 - 운영 API: https://koh-you-math-academy-os-api.onrender.com
