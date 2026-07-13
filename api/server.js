@@ -1727,6 +1727,7 @@ function getNotificationReservationFingerprint(job = {}) {
 }
 
 function isSameSolapiReservation(existingJob = {}, nextJob = {}) {
+  if (!existingJob) return false;
   return (
     existingJob.status === "scheduled" &&
     existingJob.provider === "solapi" &&

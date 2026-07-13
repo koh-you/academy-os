@@ -12,6 +12,18 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-13 P1. Solapi 예약 첫 클릭 null 오류와 발송결과 버튼 보강
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 제보: 수업일지 `Solapi 예약 반영`을 처음 누르면 `Cannot read properties of null (reading 'status')`가 뜨고, 다시 누르면 예약되는 경우가 있었다. 또한 예약 시각인 22:30이 지난 뒤에도 `솔라피 발송결과` 버튼이 바로 보이지 않았다.
+- 원인 판단: 신규 예약은 아직 `notification_jobs` row가 없으므로 `getNotificationJob()`이 `notificationJob: null`을 반환한다. 서버의 `isSameSolapiReservation(existingJob, nextJob)`는 기본값 인자로 `{}`를 갖고 있었지만, 호출자가 `null`을 넘기면 기본값이 적용되지 않아 `existingJob.status` 접근에서 런타임 오류가 났다. 첫 클릭 실패 후 프론트가 같은 ID로 `failed` row를 저장하므로 두 번째 클릭에서는 더 이상 null이 아니어서 예약이 진행되는 구조였다.
+- 원인 판단: `솔라피 발송결과` 버튼 노출 기준은 현재 수업 발송 계획의 예약 시각이 지난 경우를 보지만, `isNotificationSchedulePast()` 기본 10분 grace를 사용해 예약 시각 직후에는 버튼이 보이지 않았다. 22:30 예약이면 22:40 전까지 `발송결과` 버튼이 숨겨질 수 있었다.
+- 구현 결과: `isSameSolapiReservation`이 `null` 기존 job을 안전하게 `false`로 처리하게 했다. 신규 예약 첫 클릭에서도 기존 예약 비교를 통과해 Solapi 예약 생성 흐름으로 들어간다.
+- 구현 결과: `솔라피 발송결과` 버튼 노출은 현재 계획 예약 시각과 Solapi 예약 job 시각이 지나면 grace 없이 바로 활성 후보가 되도록 했다. 예약 시각이 지난 상태에서는 새 예약 생성이 아니라 `솔라피 발송결과`로 OS 상태를 Solapi 원천에 맞추는 흐름을 유지한다.
+- 저장 원천: 예약 검수 원본은 Supabase `notification_jobs`, 실제 예약/발송 원천은 Solapi groups/messages, 수업일지/최종문구 원본은 Supabase `lesson_student_records`다. 새 SQL은 필요 없다.
+- 내일 최우선 검수: 운영 배포 후 22:30 이후 수업일지에서 `솔라피 발송결과` 버튼이 바로 보이는지, 신규 Solapi 예약 첫 클릭에서 null 오류 없이 예약되는지, 같은 학생/대상/예약시각 Solapi 예약이 중복 생성되지 않는지 확인한다. 2026-07-14 22:00 KST 리마인더를 생성했다.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 276개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-13 P1. 다음 세션 handoff 프롬프트 갱신
 
 - 상태: 완료 - 문서 갱신/검증 완료

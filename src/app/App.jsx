@@ -13714,12 +13714,12 @@ function LessonJournalDetail({
       : getLessonAlimtalkScheduledDate(lesson, notificationPlanMode === "delay30" ? 30 : 0, { allowPastFallback: false });
   const isCurrentPlanResultRefreshDue = Boolean(
     currentPlanScheduledDate &&
-    isNotificationSchedulePast(currentPlanScheduledDate)
+    isNotificationSchedulePast(currentPlanScheduledDate, 0)
   );
   const solapiResultRefreshTargetJobs = auditedLessonNotificationJobs.filter((job) =>
     job.provider === "solapi" &&
     getNotificationJobProviderReference(job) &&
-    (job.status === "send_unconfirmed" || (job.status === "scheduled" && isNotificationSchedulePast(job.scheduledAt)))
+    (job.status === "send_unconfirmed" || (job.status === "scheduled" && isNotificationSchedulePast(job.scheduledAt, 0)))
   );
   const hasSolapiResultRefreshTarget = solapiResultRefreshTargetJobs.length > 0 || isCurrentPlanResultRefreshDue;
 
