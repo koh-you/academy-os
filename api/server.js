@@ -1772,8 +1772,14 @@ function getNotificationReservationFingerprint(job = {}) {
       lessonDate: payload.lessonDate ?? "",
       lessonMaterial: payload.lessonMaterial ?? "",
       message: payload.message ?? "",
+      makeupTaskId: payload.makeupTaskId ?? "",
       nextHomework: payload.nextHomework ?? "",
       previousHomework: payload.previousHomework ?? "",
+      reminderBody: payload.reminderBody ?? "",
+      scheduleDate: payload.scheduleDate ?? "",
+      scheduleTime: payload.scheduleTime ?? "",
+      scheduleTitle: payload.scheduleTitle ?? "",
+      scheduleType: payload.scheduleType ?? "",
       studentName: payload.studentName ?? "",
       target: payload.target ?? ""
     }

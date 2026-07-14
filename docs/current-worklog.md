@@ -12,6 +12,18 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-14 P1. 보충관리 보강 당일 11시 학생 알림톡 예약
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청: 숙제보충이나 결석보강이 있는 경우 Solapi 예약을 통해 보강 당일 오전 11시에 학생에게 별도 알림톡이 가야 한다. 이 예약은 보충관리 탭 모달에서 보이고, 수업일정 반영과 함께 저장되어야 한다.
+- 구현 결과: 보충관리 상세 모달의 `일정 반영`을 누르면 기존처럼 `makeup_tasks`와 `lessons`를 저장한 뒤, 같은 보충 task 기준 deterministic `student_reminder` notification job을 만들고 `/api/notification-jobs/reserve`로 Solapi 예약까지 반영한다. 예약 시각은 `scheduledDate 11:00 KST`다.
+- 구현 결과: 모달의 저장 상태 pill에 `학생 11시 알림톡`을 추가했다. `내용만 저장`은 기존처럼 `makeup_tasks`와 알림톡 초안만 저장하고 예약을 만들지 않는다. `일정 반영` 성공 시에는 피드백에 학생 11시 알림톡 예약 결과가 함께 표시된다.
+- 구현 결과: 같은 보충 task는 같은 notification job id를 사용한다. 보강일/문구/대상 변경 후 다시 `일정 반영`을 누르면 서버의 Solapi 예약 fingerprint가 보충 task 필드를 포함해 기존 예약을 재사용하거나 갱신하고, 중복 예약을 피한다.
+- 구현 결과: 보충 완료 처리 시 아직 active 상태인 해당 학생 11시 알림톡 예약은 best-effort로 취소한다. 보강 당일 11:00이 이미 지난 경우에는 새 예약을 만들지 않고 모달에 `결과 확인 필요` 상태를 남긴다.
+- 저장 원천: 보충관리 원본은 Supabase `makeup_tasks`, 보충 수업일정 원본은 Supabase `lessons`, 학생 11시 알림톡 예약 원본은 Supabase `notification_jobs`와 Solapi 예약 group이다. 새 SQL은 필요 없다. 기존 `student_reminder` notification type과 학생 코멘트 템플릿 경로를 사용한다.
+- 중단 조건: `내용만 저장`만 눌렀는데 Solapi/notification_jobs 예약이 생김, `일정 반영` 후 `lessons`는 생겼는데 `학생 11시 알림톡` 상태가 실패/미반영으로 남음, 같은 보충 task를 다시 반영할 때 같은 학생/같은 예약시각 Solapi 예약이 2건 이상 생김, 보충 완료 처리 후 아직 미래 예약이 active로 남음, 보강 당일 11시가 지난 뒤 새 예약이 생성됨.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 282개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-14 P1. 운영 알림 지연 처리와 보충관리 확인 뱃지
 
 - 상태: 완료 - 구현/검증 완료

@@ -8213,7 +8213,7 @@ export function App() {
     ]);
   }
 
-  async function reserveLessonNotificationJob(notificationJob, reason = "수업일지 예약") {
+  async function reserveNotificationJob(notificationJob, reason = "알림톡 예약") {
     try {
       const result = await postJson("/api/notification-jobs/reserve", { notificationJob, reason });
       if (result.notificationJob) upsertNotificationJobState(result.notificationJob);
@@ -8229,6 +8229,51 @@ export function App() {
       upsertNotificationJobState(failedJob);
       postJson("/api/notification-jobs", { notificationJob: failedJob }).catch((persistError) => console.error(persistError));
       return failedJob;
+    }
+  }
+
+  async function reserveLessonNotificationJob(notificationJob, reason = "수업일지 예약") {
+    return reserveNotificationJob(notificationJob, reason);
+  }
+
+  async function reserveSupplementStudentReminder(task) {
+    if (!isSupplementStudentReminderTask(task)) {
+      return { skipped: true, message: "학생 11시 알림톡 대상이 아닙니다." };
+    }
+    const student = students.find((item) => item.studentId === task.studentId);
+    const scheduledAt = getSupplementStudentReminderScheduledAt(task);
+    if (!student) {
+      return { skipped: true, message: "학생 정보를 찾지 못해 11시 알림톡을 예약하지 않았습니다." };
+    }
+    if (!scheduledAt) {
+      return { skipped: true, message: "배정일이 없어 11시 알림톡을 예약하지 않았습니다." };
+    }
+    if (isNotificationSchedulePast(scheduledAt, 0)) {
+      return { skipped: true, message: "보강 당일 11:00이 이미 지나 새 예약을 만들지 않았습니다." };
+    }
+    const notificationJob = buildSupplementStudentReminderJob(task, student, scheduledAt);
+    const reservedJob = await reserveNotificationJob(notificationJob, "보충관리 학생 11시 알림톡 예약");
+    return {
+      notificationJob: reservedJob,
+      skipped: false,
+      message: reservedJob?.status === "scheduled" || reservedJob?.status === "dry_run"
+        ? `학생 11시 알림톡 예약 완료 · ${formatKoreaTimeLabel(reservedJob.scheduledAt)}`
+        : reservedJob?.error || "학생 11시 알림톡 예약 상태를 확인하세요."
+    };
+  }
+
+  async function cancelSupplementStudentReminder(task, reason = "보충 완료 처리") {
+    if (!isSupplementStudentReminderTask(task)) return null;
+    const notificationJobId = getSupplementStudentReminderJobId(task);
+    if (!notificationJobId) return null;
+    const existingJob = notificationJobs.find((job) => job.notificationJobId === notificationJobId);
+    if (existingJob && !isActiveNotificationJob(existingJob)) return existingJob;
+    try {
+      const result = await handleCancelNotificationJob(existingJob || { notificationJobId }, reason);
+      return result.notificationJob ?? null;
+    } catch (error) {
+      console.error("Failed to cancel supplement student reminder", error);
+      return null;
     }
   }
 
@@ -9099,6 +9144,7 @@ export function App() {
           <SupplementCenter
             homeworks={homeworks}
             lessons={lessons}
+            notificationJobs={notificationJobs}
             records={records}
             students={students}
             tasks={makeupTasks}
@@ -9888,7 +9934,14 @@ export function App() {
     setSelectedDate(savedLesson.date);
     setSelectedLessonId(savedLesson.lessonId);
     setIsLessonJournalOpen(false);
-    return { lesson: savedLesson, makeupTask: savedTask };
+    const supplementReminder = await reserveSupplementStudentReminder(savedTask);
+    return {
+      lesson: savedLesson,
+      makeupTask: savedTask,
+      supplementReminderJob: supplementReminder.notificationJob ?? null,
+      supplementReminderMessage: supplementReminder.message ?? "",
+      supplementReminderSkipped: Boolean(supplementReminder.skipped)
+    };
   }
 
   async function handlePassSupplementTask(task) {
@@ -9915,6 +9968,7 @@ export function App() {
     const taskResult = await postMakeupTask(nextTask);
     const savedTask = taskResult.makeupTask ?? nextTask;
     setMakeupTasks((current) => upsertById(current, savedTask, "makeupTaskId"));
+    await cancelSupplementStudentReminder(savedTask, "보충 완료 처리로 학생 11시 알림톡 취소");
 
     return savedTask;
   }
@@ -22370,6 +22424,7 @@ function HomeworkActionCard({ homework, records = [], onStudentCheckHomework }) 
 function SupplementCenter({
   homeworks,
   lessons,
+  notificationJobs = [],
   records,
   students,
   tasks,
@@ -22753,6 +22808,7 @@ function SupplementCenter({
           onPassTask={handlePassSupplementTaskFromModal}
           onSaveTask={handleSaveSupplementTaskFromModal}
           onScheduleTask={handleScheduleSupplementTaskFromModal}
+          notificationJobs={notificationJobs}
           student={selectedSupplementStudent}
           tabTitle={activeTabData.title}
           tasks={selectedSupplementTasks}
@@ -22842,8 +22898,11 @@ const supplementSaveStatusLabels = {
   idle: "대기",
   notApplied: "미반영",
   ready: "반영 가능",
+  resultDue: "결과 확인 필요",
   saved: "저장 완료",
+  scheduled: "예약 완료",
   saving: "저장 중",
+  canceled: "취소됨",
   synced: "반영 완료"
 };
 
@@ -22918,6 +22977,7 @@ function createPersistableSupplementTask(task = {}) {
 }
 
 function SupplementStudentModal({
+  notificationJobs = [],
   onClose,
   onPassTask,
   onSaveTask,
@@ -23120,9 +23180,10 @@ function SupplementStudentModal({
     setTaskSaveStatusPatch(task.makeupTaskId, {
       lesson: "saving",
       makeupTask: "saving",
-      notificationDraft: "saving"
+      notificationDraft: "saving",
+      studentReminder: "saving"
     });
-    showFeedback("일정 반영 중", "makeup_tasks 저장 후 lessons 일정에 반영합니다. 알림톡 발송은 별도 검수 단계입니다.", "saving");
+    showFeedback("일정 반영 중", "makeup_tasks 저장 후 lessons 일정과 보강 당일 11시 학생 알림톡 예약을 함께 반영합니다.", "saving");
 
     try {
       const result = await onScheduleTask?.(taskWithDraft);
@@ -23131,18 +23192,23 @@ function SupplementStudentModal({
       setTaskSaveStatusPatch(task.makeupTaskId, {
         lesson: "synced",
         makeupTask: "saved",
-        notificationDraft: "saved"
+        notificationDraft: "saved",
+        studentReminder: result?.supplementReminderSkipped ? "resultDue" : "scheduled"
       });
       showFeedback(
         task.linkedLessonId ? "일정 수정 반영 완료" : "일정 반영 완료",
-        `${nextTask.scheduledDate} ${nextTask.scheduledTime} 보충 일정이 수업일지에 반영되었습니다.`
+        [
+          `${nextTask.scheduledDate} ${nextTask.scheduledTime} 보충 일정이 수업일지에 반영되었습니다.`,
+          result?.supplementReminderMessage || "학생 11시 알림톡 예약 상태를 확인하세요."
+        ].filter(Boolean).join(" ")
       );
     } catch (error) {
       console.error("Failed to apply supplement schedule", error);
       setTaskSaveStatusPatch(task.makeupTaskId, {
         lesson: "failed",
         makeupTask: "failed",
-        notificationDraft: "failed"
+        notificationDraft: "failed",
+        studentReminder: "failed"
       });
       showFeedback("일정 반영 실패", error?.message || "알 수 없는 오류가 발생했습니다.", "failed");
     } finally {
@@ -23240,6 +23306,7 @@ function SupplementStudentModal({
               const makeupStatus = saveStatus.makeupTask || (draftDiff.length ? "changed" : "saved");
               const lessonStatus = saveStatus.lesson || (hasScheduleDiff ? "changed" : task.linkedLessonId ? "synced" : hasScheduleDraft ? "ready" : "empty");
               const notificationStatus = saveStatus.notificationDraft || (hasNotificationDiff ? "changed" : draftValues.notificationDraft ? "saved" : "empty");
+              const studentReminderStatus = saveStatus.studentReminder || getSupplementStudentReminderSaveStatus(task, notificationJobs);
               return (
                 <article className="taskCard" key={task.makeupTaskId}>
                   <div className="taskCardTop">
@@ -23356,17 +23423,18 @@ function SupplementStudentModal({
                     {renderSaveStatusPill("makeup_tasks", makeupStatus)}
                     {renderSaveStatusPill("lessons", lessonStatus)}
                     {renderSaveStatusPill("알림톡 초안", notificationStatus)}
+                    {renderSaveStatusPill("학생 11시 알림톡", studentReminderStatus)}
                   </div>
                   <label className="notificationDraftField supplementReadableField">
                     <strong>알림톡 문구</strong>
-                    <span>보충 일정 안내 초안입니다. 실제 발송은 별도 확정 단계에서 진행합니다.</span>
+                    <span>보충 일정 안내 초안입니다. 일정 반영 시 보강 당일 오전 11시에 학생 알림톡으로 예약됩니다.</span>
                     <textarea
                       value={draftValues.notificationDraft}
                       onChange={(event) => updateTaskDraft(task, "notificationDraft", event.target.value)}
                     />
                   </label>
                   <div className="supplementSendGateNote">
-                    발송 검수 gate: 이 화면은 초안 저장까지만 처리하며, 실제 발송/예약은 별도 확정 단계에서 진행합니다.
+                    발송 검수 gate: 내용만 저장은 예약을 만들지 않습니다. 일정 반영을 누르면 수업일지 일정과 학생 11시 알림톡 예약을 함께 저장합니다.
                   </div>
                   <div className="modalActions supplementSplitActions">
                     <button className="softButton primarySoft" disabled={isTaskBusy} onClick={() => handleSaveTask(task)} type="button">
@@ -26760,6 +26828,89 @@ function createNotificationDraft(task, students) {
   }
 
   return `${studentName} 학생 ${followUpTypeLabel(task.taskType)} 안내드립니다.\n\n${scheduleText}에 ${sourceText} 일정을 진행하겠습니다.${progressMemoBlock}`;
+}
+
+function isSupplementStudentReminderTask(task = {}) {
+  return ["homework_makeup", "absence_makeup"].includes(task.taskType);
+}
+
+function getSupplementStudentReminderJobId(task = {}) {
+  if (!isSupplementStudentReminderTask(task)) return "";
+  const taskId = task.makeupTaskId || task.sourceId || "";
+  if (!taskId || !task.studentId) return "";
+  return `supplement_student_reminder_${safeIdPart(taskId)}_${safeIdPart(task.studentId)}`;
+}
+
+function getSupplementStudentReminderScheduledAt(task = {}) {
+  if (!isSupplementStudentReminderTask(task) || !task.scheduledDate) return "";
+  const scheduledAt = new Date(`${task.scheduledDate}T11:00:00+09:00`);
+  return Number.isNaN(scheduledAt.getTime()) ? "" : scheduledAt.toISOString();
+}
+
+function getSupplementStudentReminderTitle(task = {}) {
+  const taskLabel = task.taskType === "absence_makeup" ? "결석보강" : "숙제보충";
+  const source = normalizeMessageText(task.supplementHomeworkNote || task.sourceLabel || task.reason || "").replace(/\s+/g, " ").trim();
+  return [taskLabel, source].filter(Boolean).join(" · ");
+}
+
+function buildSupplementStudentReminderJob(task = {}, student = {}, scheduledAt = "") {
+  const notificationJobId = getSupplementStudentReminderJobId(task);
+  const scheduleTitle = getSupplementStudentReminderTitle(task);
+  const reminderBody = normalizeMessageText(task.notificationDraft);
+  const payload = {
+    academyName: academyBrandName,
+    makeupTaskId: task.makeupTaskId,
+    notificationType: "student_reminder",
+    reminderBody,
+    scheduleDate: task.scheduledDate,
+    scheduledDate: scheduledAt,
+    scheduleTime: task.scheduledTime,
+    scheduleTitle,
+    scheduleType: "supplement",
+    sendMode: "scheduled",
+    studentId: student.studentId,
+    studentName: student.name,
+    studentPhone: student.studentPhone,
+    target: "student"
+  };
+  return {
+    notificationJobId,
+    notificationType: "student_reminder",
+    studentId: student.studentId,
+    lessonId: task.linkedLessonId || "",
+    lessonStudentRecordId: "",
+    target: "student",
+    recipient: student.studentPhone,
+    scheduledAt,
+    payload,
+    previewBody: reminderBody || `오늘 ${scheduleTitle} 일정이 있습니다. ${task.scheduledDate} ${task.scheduledTime || ""}`.trim(),
+    status: "scheduled",
+    provider: "academy-os-reserving",
+    result: { reservationPending: true, makeupTaskId: task.makeupTaskId },
+    error: "",
+    createdAt: new Date().toISOString()
+  };
+}
+
+function getSupplementStudentReminderJob(task = {}, notificationJobs = []) {
+  const notificationJobId = getSupplementStudentReminderJobId(task);
+  if (!notificationJobId) return null;
+  return notificationJobs.find((job) => job.notificationJobId === notificationJobId) ?? null;
+}
+
+function getSupplementStudentReminderSaveStatus(task = {}, notificationJobs = []) {
+  if (!isSupplementStudentReminderTask(task)) return "notApplied";
+  if (!task.scheduledDate) return "empty";
+  const scheduledAt = getSupplementStudentReminderScheduledAt(task);
+  const job = getSupplementStudentReminderJob(task, notificationJobs);
+  if (job?.status === "scheduled") return isNotificationSchedulePast(job.scheduledAt, 0) ? "resultDue" : "scheduled";
+  if (job?.status === "dry_run") return "scheduled";
+  if (job?.status === "sent") return "synced";
+  if (job?.status === "send_unconfirmed") return "resultDue";
+  if (job?.status === "failed") return "failed";
+  if (job?.status === "canceled") return "canceled";
+  if (scheduledAt && isNotificationSchedulePast(scheduledAt, 0)) return "resultDue";
+  return "ready";
 }
 
 function getSupplementTaskProgress(task, lessons = []) {

@@ -12612,7 +12612,7 @@ textarea.profileEditInput {
 .supplementSaveStatusGrid {
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .supplementSaveStatusPill {
@@ -12649,16 +12649,24 @@ textarea.profileEditInput {
 }
 
 .supplementSaveStatusPill.saved,
+.supplementSaveStatusPill.scheduled,
 .supplementSaveStatusPill.synced {
   background: #f0fdf4;
   border-color: #bbf7d0;
   color: #047857;
 }
 
-.supplementSaveStatusPill.failed {
+.supplementSaveStatusPill.failed,
+.supplementSaveStatusPill.resultDue {
   background: #fef2f2;
   border-color: #fecaca;
   color: #b91c1c;
+}
+
+.supplementSaveStatusPill.canceled {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #475569;
 }
 
 .supplementSaveStatusPill.empty,
