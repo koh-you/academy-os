@@ -1655,7 +1655,7 @@ function getReadinessMissingFields(job) {
     return missing;
   }
 
-  if (job.notificationType === "student_reminder") {
+  if (job.notificationType === "student_reminder" || job.notificationType === "schedule_reminder") {
     if (!hasText(payload.scheduleTitle) && !hasText(payload.lessonName)) missing.push("일정명");
     if (!hasText(payload.scheduleDate) && !hasText(job.scheduledAt)) missing.push("일정일");
     return missing;
@@ -1747,7 +1747,7 @@ async function sendNotificationJob(job, { forceDryRun = false } = {}) {
   if (job.notificationType === "daily_report") {
     return sendDailyReportAlimtalk(payload);
   }
-  if (job.notificationType === "student_reminder") {
+  if (job.notificationType === "student_reminder" || job.notificationType === "schedule_reminder") {
     return sendStudentScheduleReminderAlimtalk(payload);
   }
   return sendLessonCommentAlimtalk({
@@ -1817,7 +1817,7 @@ async function sendScheduledNotificationJobToSolapi(job, { forceDryRun = false }
   if (job.notificationType === "daily_report") {
     return sendDailyReportAlimtalk(payload);
   }
-  if (job.notificationType === "student_reminder") {
+  if (job.notificationType === "student_reminder" || job.notificationType === "schedule_reminder") {
     return sendStudentScheduleReminderAlimtalk(payload);
   }
   return sendLessonCommentAlimtalk({

@@ -12,6 +12,17 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-14 P1. 보충 일정 변경 즉시 안내와 11시 예약 분리
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 정정: 보충 일정을 변경할 때 `바로 보내는 것`과 `보강 당일 오전 11시 예약`은 별도다. 변경 사실은 즉시 학생에게 나가야 하고, 당일 11시 리마인더 예약은 그대로 갱신되어야 한다.
+- 구현 결과: 기존 일정이 변경된 경우 `변경 안내 발송 + 11시 예약 갱신` 버튼은 먼저 `schedule_reminder` 즉시 발송 job을 만들고 `/api/notifications/student-schedule-reminder`로 학생에게 변경 안내를 보낸다. 이후/동시에 같은 보충 task 기준 deterministic `student_reminder` 11시 예약도 갱신한다.
+- 구현 결과: 즉시 변경 안내와 11시 예약은 `notification_jobs`에서 서로 다른 타입으로 기록된다. 즉시 변경 안내는 `schedule_reminder`, 당일 11시 리마인더는 기존 `student_reminder`다. `schedule_reminder`도 서버 발송/예약 함수에서 학생 일정 알림톡 처리 경로를 타도록 보강했다.
+- 템플릿 기준: 새 Solapi 템플릿은 만들지 않았다. 기존 `SOLAPI_STUDENT_COMMENT_TEMPLATE_ID`의 `#{코멘트}` 변수에 변경 안내 문구를 넣어 보낸다. 단, Solapi 템플릿에서 `#{코멘트}` 변수가 제거되어 있으면 템플릿 수정이 필요하다.
+- 저장 원천: 보충관리 원본은 Supabase `makeup_tasks`, 수업일지 일정 원본은 `lessons`, 발송/예약 이력은 `notification_jobs`다. 즉시 변경 안내 실패는 일정 저장을 롤백하지 않고 `send_unconfirmed` 또는 `failed` job으로 남긴다.
+- 중단 조건: 변경 안내가 즉시 나가지 않음, 11시 리마인더 예약이 사라짐, `schedule_reminder`와 `student_reminder`가 같은 job으로 덮임, 같은 보충 task의 11시 예약이 중복 생성됨, Solapi 템플릿 변수 누락으로 본문이 비어 나감.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 287개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-14 P1. 보충 일정 수정 버튼과 학생 알림톡 예약 갱신 gate
 
 - 상태: 완료 - 구현/검증 완료
