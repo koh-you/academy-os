@@ -3460,6 +3460,75 @@ button {
   gap: 8px;
 }
 
+.homeworkMakeupScheduleEditor {
+  background: #f8fbff;
+  border: 1px solid #cfe0ff;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.homeworkMakeupScheduleEditor > div:first-child {
+  display: grid;
+  gap: 5px;
+}
+
+.homeworkMakeupScheduleEditor > div:first-child strong {
+  color: #17213d;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.homeworkMakeupScheduleEditor > div:first-child span {
+  color: #52647f;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.homeworkMakeupScheduleEditor label {
+  background: #ffffff;
+  border: 1px solid #dbe5f5;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
+.homeworkMakeupScheduleEditor label strong {
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.homeworkMakeupScheduleState {
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.45;
+  margin: 0;
+  padding: 10px 12px;
+}
+
+.homeworkMakeupScheduleState.saving {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+}
+
+.homeworkMakeupScheduleState.saved {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #047857;
+}
+
+.homeworkMakeupScheduleState.failed {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
 .examSundayMakeupBody {
   display: grid;
   gap: 14px;
@@ -6659,6 +6728,53 @@ textarea {
   font-weight: 900;
   min-height: 34px;
   padding: 0 12px;
+}
+
+.ghostButton {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #cbd8ee;
+  border-radius: 8px;
+  color: #334155;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-weight: 900;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 12px;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.ghostButton:hover,
+.ghostButton:focus-visible {
+  background: #f8fafc;
+  border-color: #9fb3d4;
+  color: #17213d;
+  outline: none;
+}
+
+.ghostButton:active {
+  transform: translateY(1px);
+}
+
+.ghostButton.scheduleEditButton {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+  color: #4f46e5;
+}
+
+.ghostButton.scheduleEditButton:hover,
+.ghostButton.scheduleEditButton:focus-visible {
+  background: #e0e7ff;
+  border-color: #a5b4fc;
+  color: #4338ca;
+}
+
+.ghostButton.dangerText {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #c2410c;
 }
 
 .softButton {
@@ -13692,9 +13808,24 @@ textarea.profileEditInput {
   overflow-wrap: anywhere;
 }
 
+.supplementScheduleConfirmNote {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  color: #9a3412 !important;
+  font-size: 13px !important;
+  font-weight: 900;
+  line-height: 1.5 !important;
+  padding: 10px 12px;
+}
+
 .confirmActions {
   justify-content: flex-end;
   margin-top: 4px;
+}
+
+.supplementScheduleConfirmActions {
+  gap: 8px;
 }
 
 .supplementHistoryModal {

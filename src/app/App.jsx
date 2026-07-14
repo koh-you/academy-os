@@ -8951,6 +8951,7 @@ export function App() {
             onPassMakeupTask={handlePassSupplementTask}
             onReconcileSolapiNotificationResults={handleReconcileSolapiNotificationResults}
             onRetryGeneratedLessonSave={handleRetryGeneratedLessonSave}
+            onScheduleMakeupTask={handleScheduleSupplementTask}
             onSaveRecord={handleSaveRecord}
             onSaveLessonJournalDrafts={handleSaveLessonJournalDrafts}
             onSaveAcademyReminder={handleSaveAcademyReminder}
@@ -9937,21 +9938,23 @@ export function App() {
   }
 
   async function handleScheduleSupplementTask(task) {
-    const student = students.find((item) => item.studentId === task.studentId);
+    const { keepLessonJournalOpen, skipStudentReminder, suppressStudentReminder, ...taskForSchedule } = task ?? {};
+    const shouldUpdateStudentReminder = !skipStudentReminder && !suppressStudentReminder;
+    const student = students.find((item) => item.studentId === taskForSchedule.studentId);
     if (!student) throw new Error("보충 일정을 반영할 학생 정보를 찾을 수 없습니다.");
-    if (!task?.makeupTaskId) throw new Error("보충관리 ID가 없어 일정을 반영할 수 없습니다.");
-    if (!task.scheduledDate || !task.scheduledTime) throw new Error("배정일과 시간을 입력해야 일정을 반영할 수 있습니다.");
+    if (!taskForSchedule?.makeupTaskId) throw new Error("보충관리 ID가 없어 일정을 반영할 수 없습니다.");
+    if (!taskForSchedule.scheduledDate || !taskForSchedule.scheduledTime) throw new Error("배정일과 시간을 입력해야 일정을 반영할 수 있습니다.");
 
-    const lessonId = task.linkedLessonId || createSupplementLessonId(task);
-    const scheduleTime = normalizeTimeInput(task.scheduledTime);
+    const lessonId = taskForSchedule.linkedLessonId || createSupplementLessonId(taskForSchedule);
+    const scheduleTime = normalizeTimeInput(taskForSchedule.scheduledTime);
     const duplicateLesson = lessons.find((lesson) => {
       if (!lesson || lesson.lessonId === lessonId || lesson.status === "canceled") return false;
       const lessonTime = normalizeTimeInput(lesson.startTime);
       const lessonStudentIds = getLessonStudentIds(lesson);
-      const sameSourceTask = lesson.sourceMakeupTaskId && lesson.sourceMakeupTaskId === task.makeupTaskId;
+      const sameSourceTask = lesson.sourceMakeupTaskId && lesson.sourceMakeupTaskId === taskForSchedule.makeupTaskId;
       const sameStudentSchedule =
         lesson.lessonType === "makeup" &&
-        lesson.date === task.scheduledDate &&
+        lesson.date === taskForSchedule.scheduledDate &&
         lessonTime === scheduleTime &&
         lessonStudentIds.includes(student.studentId);
       return sameSourceTask || sameStudentSchedule;
@@ -9961,26 +9964,26 @@ export function App() {
         `이미 같은 학생의 보충 일정이 있습니다: ${duplicateLesson.date} ${duplicateLesson.startTime || ""} ${duplicateLesson.className || ""}`.trim()
       );
     }
-    const className = createSupplementLessonName(task, student);
+    const className = createSupplementLessonName(taskForSchedule, student);
     const lesson = {
       lessonId,
       classTemplateId: "",
       className,
       lessonType: "makeup",
-      date: task.scheduledDate,
-      dayOfWeek: getDayKey(task.scheduledDate),
-      startTime: task.scheduledTime,
-      endTime: addMinutesToTime(task.scheduledTime, 60),
-      color: getSupplementLessonColor(task.taskType),
+      date: taskForSchedule.scheduledDate,
+      dayOfWeek: getDayKey(taskForSchedule.scheduledDate),
+      startTime: taskForSchedule.scheduledTime,
+      endTime: addMinutesToTime(taskForSchedule.scheduledTime, 60),
+      color: getSupplementLessonColor(taskForSchedule.taskType),
       teacherId: "instructor_owner_001",
       studentIds: [student.studentId],
       status: "scheduled",
-      lessonTopic: `${followUpTypeLabel(task.taskType)} 일정`,
-      sourceMakeupTaskId: task.makeupTaskId,
-      sourceLabel: task.sourceLabel
+      lessonTopic: `${followUpTypeLabel(taskForSchedule.taskType)} 일정`,
+      sourceMakeupTaskId: taskForSchedule.makeupTaskId,
+      sourceLabel: taskForSchedule.sourceLabel
     };
     const nextTask = {
-      ...task,
+      ...taskForSchedule,
       status: "scheduled",
       scheduledDate: lesson.date,
       scheduledTime: lesson.startTime,
@@ -10000,14 +10003,25 @@ export function App() {
     setMakeupTasks((current) => upsertById(current, savedTask, "makeupTaskId"));
     setSelectedDate(savedLesson.date);
     setSelectedLessonId(savedLesson.lessonId);
-    setIsLessonJournalOpen(false);
-    const supplementReminder = await reserveSupplementStudentReminder(savedTask);
+    if (!keepLessonJournalOpen) {
+      setIsLessonJournalOpen(false);
+    }
+    const supplementReminder = shouldUpdateStudentReminder
+      ? await reserveSupplementStudentReminder(savedTask)
+      : {
+          skipped: true,
+          status: "notApplied",
+          message: "학생 11시 알림톡 예약은 갱신하지 않았습니다. 예약 확인에서 기존 예약이 맞는지 확인하세요."
+        };
     return {
       lesson: savedLesson,
       makeupTask: savedTask,
       supplementReminderJob: supplementReminder.notificationJob ?? null,
       supplementReminderMessage: supplementReminder.message ?? "",
-      supplementReminderSkipped: Boolean(supplementReminder.skipped)
+      supplementReminderSkipped: Boolean(supplementReminder.skipped),
+      supplementReminderStatus: shouldUpdateStudentReminder
+        ? supplementReminder.skipped ? "resultDue" : "scheduled"
+        : "notApplied"
     };
   }
 
@@ -14418,6 +14432,7 @@ function TeacherLessonHubV2({
   onReconcileSolapiNotificationResults,
   onRetryGeneratedLessonSave,
   onApplyLessonNotificationPlan,
+  onScheduleMakeupTask,
   onSaveRecord,
   onSaveLessonJournalDrafts,
   onSaveAcademyReminder,
@@ -14519,6 +14534,7 @@ function TeacherLessonHubV2({
           onDeleteLesson={onDeleteLesson}
           onEditLesson={onEditLesson}
           onPassTask={onPassMakeupTask}
+          onScheduleTask={onScheduleMakeupTask}
           onUpdateTask={onUpdateMakeupTask}
           students={students}
           task={selectedMakeupTask}
@@ -14592,6 +14608,7 @@ function TeacherLessonHubV2({
             onApplyLessonNotificationPlan={onApplyLessonNotificationPlan}
             onSaveRecord={onSaveRecord}
             onSaveLessonJournalDrafts={onSaveLessonJournalDrafts}
+            onScheduleMakeupTask={onScheduleMakeupTask}
             onScheduleLessonNotificationsAt={onScheduleLessonNotificationsAt}
             onSendComment={onSendComment}
             onUpdateExamSundayMakeupBlocks={onUpdateExamSundayMakeupBlocks}
@@ -14992,11 +15009,18 @@ function HomeworkMakeupLessonDetail({
   onDeleteLesson,
   onEditLesson,
   onPassTask,
+  onScheduleTask,
   onUpdateTask,
   students = [],
   task
 }) {
   const [passConfirmMode, setPassConfirmMode] = useState("");
+  const [isScheduleEditOpen, setIsScheduleEditOpen] = useState(false);
+  const [scheduleDraft, setScheduleDraft] = useState({
+    scheduledDate: task?.scheduledDate || lesson.date || "",
+    scheduledTime: task?.scheduledTime || lesson.startTime || ""
+  });
+  const [scheduleSaveState, setScheduleSaveState] = useState({ message: "", state: "idle" });
   const lessonStudents = (lesson.studentIds ?? [])
     .map((studentId) => students.find((student) => student.studentId === studentId))
     .filter(Boolean);
@@ -15036,6 +15060,18 @@ function HomeworkMakeupLessonDetail({
   const processStatus = task?.supplementProcessStatus || (task?.status === "done" ? "completed" : "in_progress");
   const processMemo = task?.supplementProgressMemo || "";
   const nextSupplementPlan = task?.nextSupplementPlan || "";
+  const normalizedScheduleDraftTime = normalizeTimeInput(scheduleDraft.scheduledTime) || scheduleDraft.scheduledTime;
+  const canSaveScheduleDraft = Boolean(onScheduleTask && task?.makeupTaskId && scheduleDraft.scheduledDate && scheduleDraft.scheduledTime);
+  const isScheduleSaving = scheduleSaveState.state === "saving";
+
+  useEffect(() => {
+    setScheduleDraft({
+      scheduledDate: task?.scheduledDate || lesson.date || "",
+      scheduledTime: task?.scheduledTime || lesson.startTime || ""
+    });
+    setScheduleSaveState({ message: "", state: "idle" });
+    setIsScheduleEditOpen(false);
+  }, [lesson.lessonId, task?.makeupTaskId]);
 
   function updateTaskField(field, value) {
     if (!task?.makeupTaskId || !onUpdateTask) return;
@@ -15063,6 +15099,58 @@ function HomeworkMakeupLessonDetail({
       completionDecision: passConfirmMode === "needs_more" ? "needs_more" : "completed"
     });
     setPassConfirmMode("");
+  }
+
+  async function saveScheduleDraft(updateStudentReminder) {
+    if (!task?.makeupTaskId) {
+      setScheduleSaveState({ message: "연결된 보충관리 항목을 찾지 못해 일정을 저장할 수 없습니다.", state: "failed" });
+      return;
+    }
+    if (!scheduleDraft.scheduledDate || !scheduleDraft.scheduledTime) {
+      setScheduleSaveState({ message: "배정일과 시간을 먼저 입력해주세요.", state: "failed" });
+      return;
+    }
+    if (!onScheduleTask) {
+      setScheduleSaveState({ message: "보충관리 일정 저장 경로가 연결되어 있지 않습니다.", state: "failed" });
+      return;
+    }
+
+    setScheduleSaveState({
+      message: updateStudentReminder
+        ? "일정과 학생 11시 알림톡 예약을 함께 갱신하는 중입니다."
+        : "일정만 저장하는 중입니다. 학생 11시 알림톡 예약은 변경하지 않습니다.",
+      state: "saving"
+    });
+
+    try {
+      const result = await onScheduleTask({
+        ...task,
+        keepLessonJournalOpen: true,
+        scheduledDate: scheduleDraft.scheduledDate,
+        scheduledTime: normalizedScheduleDraftTime,
+        skipStudentReminder: !updateStudentReminder
+      });
+      const nextTask = result?.makeupTask ?? {
+        ...task,
+        scheduledDate: scheduleDraft.scheduledDate,
+        scheduledTime: normalizedScheduleDraftTime
+      };
+      setScheduleDraft({
+        scheduledDate: nextTask.scheduledDate || scheduleDraft.scheduledDate,
+        scheduledTime: nextTask.scheduledTime || normalizedScheduleDraftTime
+      });
+      setScheduleSaveState({
+        message: updateStudentReminder
+          ? result?.supplementReminderMessage || "일정과 학생 11시 알림톡 예약을 갱신했습니다."
+          : result?.supplementReminderMessage || "일정만 저장했습니다. 학생 11시 알림톡 예약은 변경하지 않았습니다.",
+        state: "saved"
+      });
+    } catch (error) {
+      setScheduleSaveState({
+        message: error?.message || "보충 일정을 저장하지 못했습니다.",
+        state: "failed"
+      });
+    }
   }
 
   return (
@@ -15093,14 +15181,52 @@ function HomeworkMakeupLessonDetail({
       <div className="homeworkMakeupModalActions">
         <span className="statusPill">{statusLabel}</span>
         <div>
-          <button className="ghostButton" type="button" onClick={() => onEditLesson(lesson)}>
-            일정 수정
+          <button className="ghostButton scheduleEditButton" type="button" onClick={() => setIsScheduleEditOpen((current) => !current)}>
+            {isScheduleEditOpen ? "수정 닫기" : "일정 수정"}
           </button>
           <button className="dangerButton" type="button" onClick={() => onDeleteLesson(lesson.lessonId)}>
             일정 삭제
           </button>
         </div>
       </div>
+
+      {isScheduleEditOpen ? (
+        <section className="homeworkMakeupScheduleEditor" aria-label="숙제보충 일정 수정">
+          <div>
+            <strong>보충 일정 수정</strong>
+            <span>저장하면 보충관리와 수업일지 일정이 함께 갱신됩니다. 학생 알림톡 예약 갱신 여부는 아래에서 선택합니다.</span>
+          </div>
+          <div className="fieldGrid two">
+            <label>
+              <strong>배정일</strong>
+              <input
+                type="date"
+                value={scheduleDraft.scheduledDate}
+                onChange={(event) => setScheduleDraft((current) => ({ ...current, scheduledDate: event.target.value }))}
+              />
+            </label>
+            <label>
+              <strong>시간</strong>
+              <input
+                type="time"
+                value={scheduleDraft.scheduledTime}
+                onChange={(event) => setScheduleDraft((current) => ({ ...current, scheduledTime: event.target.value }))}
+              />
+            </label>
+          </div>
+          {scheduleSaveState.message ? (
+            <p className={`homeworkMakeupScheduleState ${scheduleSaveState.state}`}>{scheduleSaveState.message}</p>
+          ) : null}
+          <div className="modalActions supplementSplitActions">
+            <button className="softButton" disabled={!canSaveScheduleDraft || isScheduleSaving} onClick={() => saveScheduleDraft(false)} type="button">
+              {isScheduleSaving ? "저장 중" : "일정만 저장"}
+            </button>
+            <button className="softButton scheduleApplyButton" disabled={!canSaveScheduleDraft || isScheduleSaving} onClick={() => saveScheduleDraft(true)} type="button">
+              {isScheduleSaving ? "갱신 중" : "저장 후 알림톡 예약 갱신"}
+            </button>
+          </div>
+        </section>
+      ) : null}
 
       <section className="panel homeworkMakeupTarget">
         <div className="sectionHeader">
@@ -15366,6 +15492,7 @@ function LessonJournalDetail({
   onApplyLessonNotificationPlan,
   onSaveRecord,
   onSaveLessonJournalDrafts,
+  onScheduleMakeupTask,
   onScheduleLessonNotificationsAt,
   onSendComment,
   onUpdateExamSundayMakeupBlocks,
@@ -15742,6 +15869,7 @@ function LessonJournalDetail({
         onDeleteLesson={onDeleteLesson}
         onEditLesson={onEditLesson}
         onPassTask={onPassMakeupTask}
+        onScheduleTask={onScheduleMakeupTask}
         onUpdateTask={onUpdateMakeupTask}
         students={students}
         task={linkedMakeupTask}
@@ -23172,6 +23300,61 @@ function SupplementPassConfirmModal({ errorMessage = "", isBusy = false, onCance
   );
 }
 
+function SupplementScheduleChangeConfirmModal({
+  isBusy = false,
+  onCancel,
+  onConfirmWithReminder,
+  onConfirmWithoutReminder,
+  studentName,
+  task
+}) {
+  const targetLabel = task.taskType === "homework_makeup"
+    ? task.supplementHomeworkNote || task.sourceLabel || task.reason || "보충 항목"
+    : task.sourceLabel || task.reason || "보충 항목";
+  return (
+    <Modal
+      className="supplementPassConfirmModal supplementScheduleConfirmModal"
+      title="보충 일정 변경 저장"
+      subtitle="기존 보충 일정을 바꾸면 학생 11시 알림톡 예약도 갱신할지 먼저 선택합니다."
+      onClose={onCancel}
+    >
+      <div className="supplementPassConfirmBody">
+        <p>
+          <strong>{studentName}</strong> 학생의 보충 일정을 저장할까요?
+        </p>
+        <dl className="supplementPassConfirmSummary">
+          <div>
+            <dt>구분</dt>
+            <dd>{followUpTypeLabel(task.taskType)}</dd>
+          </div>
+          <div>
+            <dt>항목</dt>
+            <dd>{targetLabel}</dd>
+          </div>
+          <div>
+            <dt>변경 일정</dt>
+            <dd>{task.scheduledDate || "미확정"} {task.scheduledTime || ""}</dd>
+          </div>
+        </dl>
+        <p className="supplementScheduleConfirmNote">
+          알림톡 예약 갱신을 선택하면 보강 당일 오전 11시 학생 알림톡 예약도 같은 보충 항목 기준으로 갱신됩니다.
+        </p>
+      </div>
+      <div className="modalActions confirmActions supplementScheduleConfirmActions">
+        <button className="softButton subtle" disabled={isBusy} onClick={onCancel} type="button">
+          취소
+        </button>
+        <button className="softButton" disabled={isBusy} onClick={onConfirmWithoutReminder} type="button">
+          {isBusy ? "저장 중" : "일정만 저장"}
+        </button>
+        <button className="softButton scheduleApplyButton" disabled={isBusy} onClick={onConfirmWithReminder} type="button">
+          {isBusy ? "갱신 중" : "저장 후 알림톡 예약 갱신"}
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
 const supplementDraftFieldLabels = {
   status: "진행 상태",
   supplementHomeworkNote: "보충할 숙제 내역",
@@ -23279,6 +23462,7 @@ function SupplementStudentModal({
 }) {
   const [feedback, setFeedback] = useState(null);
   const [passConfirmTask, setPassConfirmTask] = useState(null);
+  const [scheduleConfirmTask, setScheduleConfirmTask] = useState(null);
   const [busyTaskId, setBusyTaskId] = useState("");
   const [taskDrafts, setTaskDrafts] = useState({});
   const [taskSaveStatus, setTaskSaveStatus] = useState({});
@@ -23457,9 +23641,25 @@ function SupplementStudentModal({
     }
   }
 
+  function requestApplyScheduleTask(task) {
+    if (!task?.makeupTaskId || busyTaskId) return;
+    const taskWithDraft = createPersistableSupplementTask(buildTaskWithDraft(task));
+    if (!taskWithDraft.scheduledDate || !taskWithDraft.scheduledTime) {
+      showFeedback("일정 반영 실패", "배정일과 시간을 먼저 입력해야 합니다.", "failed");
+      setTaskSaveStatusPatch(task.makeupTaskId, { lesson: "failed" });
+      return;
+    }
+    if (task.linkedLessonId) {
+      setScheduleConfirmTask(taskWithDraft);
+      return;
+    }
+    handleApplyScheduleTask(task);
+  }
+
   async function handleApplyScheduleTask(task) {
     if (!task?.makeupTaskId || busyTaskId) return;
     const taskWithDraft = createPersistableSupplementTask(buildTaskWithDraft(task));
+    const shouldUpdateStudentReminder = !taskWithDraft.skipStudentReminder && !taskWithDraft.suppressStudentReminder;
     if (!taskWithDraft.scheduledDate || !taskWithDraft.scheduledTime) {
       showFeedback("일정 반영 실패", "배정일과 시간을 먼저 입력해야 합니다.", "failed");
       setTaskSaveStatusPatch(task.makeupTaskId, { lesson: "failed" });
@@ -23474,7 +23674,13 @@ function SupplementStudentModal({
       notificationDraft: "saving",
       studentReminder: "saving"
     });
-    showFeedback("일정 반영 중", "makeup_tasks 저장 후 lessons 일정과 보강 당일 11시 학생 알림톡 예약을 함께 반영합니다.", "saving");
+    showFeedback(
+      "일정 반영 중",
+      shouldUpdateStudentReminder
+        ? "보충관리 저장 후 수업일지 일정과 보강 당일 11시 학생 알림톡 예약을 함께 반영합니다."
+        : "보충관리 저장 후 수업일지 일정만 반영합니다. 학생 11시 알림톡 예약은 변경하지 않습니다.",
+      "saving"
+    );
 
     try {
       const result = await onScheduleTask?.(taskWithDraft);
@@ -23484,10 +23690,11 @@ function SupplementStudentModal({
         lesson: "synced",
         makeupTask: "saved",
         notificationDraft: "saved",
-        studentReminder: result?.supplementReminderSkipped ? "resultDue" : "scheduled"
+        studentReminder: result?.supplementReminderStatus || (result?.supplementReminderSkipped ? "resultDue" : "scheduled")
       });
+      setScheduleConfirmTask(null);
       showFeedback(
-        task.linkedLessonId ? "일정 수정 반영 완료" : "일정 반영 완료",
+        task.linkedLessonId ? "일정 변경 저장 완료" : "일정 반영 완료",
         [
           `${nextTask.scheduledDate} ${nextTask.scheduledTime} 보충 일정이 수업일지에 반영되었습니다.`,
           result?.supplementReminderMessage || "학생 11시 알림톡 예약 상태를 확인하세요."
@@ -23536,6 +23743,14 @@ function SupplementStudentModal({
   function confirmPassTask() {
     if (!passConfirmTask) return;
     handlePassTask(passConfirmTask);
+  }
+
+  function confirmScheduleTask(updateStudentReminder) {
+    if (!scheduleConfirmTask) return;
+    handleApplyScheduleTask({
+      ...scheduleConfirmTask,
+      skipStudentReminder: !updateStudentReminder
+    });
   }
 
   function renderSaveStatusPill(label, status) {
@@ -23725,14 +23940,14 @@ function SupplementStudentModal({
                     />
                   </label>
                   <div className="supplementSendGateNote">
-                    발송 검수 gate: 내용만 저장은 예약을 만들지 않습니다. 일정 반영을 누르면 수업일지 일정과 학생 11시 알림톡 예약을 함께 저장합니다.
+                    발송 검수 gate: 내용만 저장은 예약을 만들지 않습니다. 일정 저장은 수업일지 일정을 반영하고, 기존 일정 변경 시 학생 11시 알림톡 예약 갱신 여부를 먼저 확인합니다.
                   </div>
                   <div className="modalActions supplementSplitActions">
                     <button className="softButton primarySoft" disabled={isTaskBusy} onClick={() => handleSaveTask(task)} type="button">
                       {isContentBusy ? "내용 저장 중" : "내용만 저장"}
                     </button>
-                    <button className="softButton scheduleApplyButton" disabled={isTaskBusy || !hasScheduleDraft} onClick={() => handleApplyScheduleTask(task)} type="button">
-                      {isScheduleBusy ? "일정 반영 중" : task.linkedLessonId ? "일정 수정 반영" : "일정 반영"}
+                    <button className="softButton scheduleApplyButton" disabled={isTaskBusy || !hasScheduleDraft} onClick={() => requestApplyScheduleTask(task)} type="button">
+                      {isScheduleBusy ? "일정 저장 중" : task.linkedLessonId ? "일정 변경 저장" : "일정 반영"}
                     </button>
                     {!isLocalDraftTask ? (
                       <button
@@ -23759,6 +23974,16 @@ function SupplementStudentModal({
           onConfirm={confirmPassTask}
           studentName={student.name}
           task={passConfirmTask}
+        />
+      ) : null}
+      {scheduleConfirmTask ? (
+        <SupplementScheduleChangeConfirmModal
+          isBusy={busyTaskId === `${scheduleConfirmTask.makeupTaskId}:schedule`}
+          onCancel={() => setScheduleConfirmTask(null)}
+          onConfirmWithReminder={() => confirmScheduleTask(true)}
+          onConfirmWithoutReminder={() => confirmScheduleTask(false)}
+          studentName={student.name}
+          task={scheduleConfirmTask}
         />
       ) : null}
     </Modal>
