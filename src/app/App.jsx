@@ -1441,6 +1441,26 @@ function applySpecialLectureCalculatedScheduleDraft(guide = {}, previousGuide = 
   }, previousGuide);
 }
 
+function createNextSpecialLectureSession(sessions = [], guide = {}) {
+  const normalizedSessions = sessions.map(normalizeSpecialLectureSession);
+  const lastSession = normalizedSessions[normalizedSessions.length - 1] ?? {};
+  let nextDateKey = String(guide.periodStart || today || "").trim();
+  const lastDate = createDateFromKey(lastSession.dateKey);
+  if (lastDate) {
+    lastDate.setDate(lastDate.getDate() + 1);
+    nextDateKey = getSpecialLectureDateKey(lastDate);
+  }
+  const weekday = createDateFromKey(nextDateKey)?.getDay();
+  return normalizeSpecialLectureSession({
+    date: formatSpecialLectureDateLabel(nextDateKey),
+    dateKey: nextDateKey,
+    day: getWeekdayLabel(weekday),
+    startTime: lastSession.startTime || "13:00",
+    endTime: lastSession.endTime || "16:00",
+    topic: guide.defaultSessionTopic || "특강 수업"
+  }, normalizedSessions.length);
+}
+
 function getSpecialLectureWeekdayCounts(sessions = []) {
   const counts = new Map(specialLectureWeekdayOptions.map((option) => [option.label, 0]));
   sessions.forEach((session) => {
@@ -1681,36 +1701,6 @@ function getSpecialLectureApplicationUrl(guide = {}) {
     source: "os_guide",
     campaign: campaign || "special_lecture"
   });
-}
-
-function formatSpecialLectureScheduleText(sessions = []) {
-  return sessions
-    .map((session) => [
-      session.date,
-      session.day ? `(${session.day})` : "",
-      session.startTime && session.endTime ? `${session.startTime}-${session.endTime}` : "",
-      "|",
-      session.topic
-    ].filter(Boolean).join(" "))
-    .join("\n");
-}
-
-function parseSpecialLectureScheduleText(value = "") {
-  return String(value ?? "")
-    .split("\n")
-    .map((line, index) => {
-      const [left = "", ...topicParts] = line.split("|");
-      const topic = topicParts.join("|").trim() || `회차 ${index + 1}`;
-      const dateMatch = left.trim().match(/^(.+?)(?:\s*\((.+?)\))?(?:\s+(\d{1,2}:\d{2})-(\d{1,2}:\d{2}))?$/);
-      return normalizeSpecialLectureSession({
-        date: dateMatch?.[1]?.trim() || left.trim(),
-        day: dateMatch?.[2]?.trim() || "",
-        startTime: dateMatch?.[3]?.trim() || "",
-        endTime: dateMatch?.[4]?.trim() || "",
-        topic
-      }, index);
-    })
-    .filter((session) => session.date || session.topic);
 }
 
 function buildSpecialLectureNoticeText(guide = {}, guideUrl = getSpecialLecturePublicUrl(guide)) {
@@ -11197,13 +11187,13 @@ function SpecialLectureNoticePanel({
   const [showStoredGuides, setShowStoredGuides] = useState(false);
   const [managementGuideId, setManagementGuideId] = useState("");
   const [highlightDraftText, setHighlightDraftText] = useState("");
-  const [scheduleDraftText, setScheduleDraftText] = useState("");
   const [isScheduleBuilderOpen, setIsScheduleBuilderOpen] = useState(false);
   const primaryGuides = draftGuides.filter(isSpecialLecturePrimaryGuide);
   const storedGuides = draftGuides.filter((guide) => !isSpecialLecturePrimaryGuide(guide));
   const selectedGuide = draftGuides.find((guide) => guide.specialLectureGuideId === selectedGuideId) ?? null;
   const selectedGuideUrl = selectedGuide ? getSpecialLecturePublicUrl(selectedGuide) : "";
   const noticeText = selectedGuide ? buildSpecialLectureNoticeText(selectedGuide, selectedGuideUrl) : "";
+  const selectedGuideSessions = selectedGuide ? (selectedGuide.sessions ?? []).map(normalizeSpecialLectureSession) : [];
   const generatedSessionsPreview = selectedGuide ? generateSpecialLectureSessions(selectedGuide) : [];
   const calculatedSessionCount = generatedSessionsPreview.length;
   const calculatedTotalHours = getSpecialLectureTotalHours(generatedSessionsPreview);
@@ -11234,7 +11224,6 @@ function SpecialLectureNoticePanel({
   useEffect(() => {
     const guide = draftGuides.find((item) => item.specialLectureGuideId === selectedGuideId) ?? draftGuides[0];
     setHighlightDraftText((guide?.highlights ?? []).join("\n"));
-    setScheduleDraftText(formatSpecialLectureScheduleText(guide?.sessions ?? []));
     setCopyMessage("");
   }, [draftGuides, selectedGuideId]);
 
@@ -11282,9 +11271,6 @@ function SpecialLectureNoticePanel({
         guide.specialLectureGuideId === selectedGuide.specialLectureGuideId ? nextGuide : guide
       )
     );
-    if (shouldRefreshCalculatedSchedule) {
-      setScheduleDraftText(formatSpecialLectureScheduleText(nextGuide.sessions));
-    }
   }
 
   function updateHighlights(value) {
@@ -11293,17 +11279,16 @@ function SpecialLectureNoticePanel({
     updateSelectedGuide("highlights", value.split("\n").map((line) => line.trim()).filter(Boolean));
   }
 
-  function updateSchedule(value) {
+  function replaceSelectedGuideSessions(sessions) {
     if (!selectedGuide) return;
-    setScheduleDraftText(value);
-    const sessions = parseSpecialLectureScheduleText(value);
-    const calculated = getSpecialLectureCalculatedFields({ ...selectedGuide, sessions });
+    const normalizedSessions = sessions.map(normalizeSpecialLectureSession);
+    const calculated = getSpecialLectureCalculatedFields({ ...selectedGuide, sessions: normalizedSessions });
     setDraftGuides((current) =>
       current.map((guide) =>
         guide.specialLectureGuideId === selectedGuide.specialLectureGuideId
           ? normalizeSpecialLectureGuide({
               ...guide,
-              sessions,
+              sessions: normalizedSessions,
               lessonCount: calculated.lessonCount,
               totalHours: calculated.totalHours,
               tuition: calculated.tuition,
@@ -11312,6 +11297,37 @@ function SpecialLectureNoticePanel({
           : guide
       )
     );
+  }
+
+  function updateSpecialLectureSessionCard(sessionIndex, field, value) {
+    if (!selectedGuide) return;
+    const sessions = selectedGuideSessions.map((session, index) => {
+      if (index !== sessionIndex) return session;
+      if (field === "dateKey") {
+        const weekday = createDateFromKey(value)?.getDay();
+        return normalizeSpecialLectureSession({
+          ...session,
+          dateKey: value,
+          date: formatSpecialLectureDateLabel(value),
+          day: getWeekdayLabel(weekday)
+        }, index);
+      }
+      return normalizeSpecialLectureSession({ ...session, [field]: value }, index);
+    });
+    replaceSelectedGuideSessions(sessions);
+  }
+
+  function addSpecialLectureSessionCard() {
+    if (!selectedGuide) return;
+    replaceSelectedGuideSessions([
+      ...selectedGuideSessions,
+      createNextSpecialLectureSession(selectedGuideSessions, selectedGuide)
+    ]);
+  }
+
+  function removeSpecialLectureSessionCard(sessionIndex) {
+    if (!selectedGuide) return;
+    replaceSelectedGuideSessions(selectedGuideSessions.filter((_, index) => index !== sessionIndex));
   }
 
   function createNewGuide() {
@@ -11444,7 +11460,6 @@ function SpecialLectureNoticePanel({
         guide.specialLectureGuideId === selectedGuide.specialLectureGuideId ? nextGuide : guide
       )
     );
-    setScheduleDraftText(formatSpecialLectureScheduleText(sessions));
     setPanelMessage(`일정 계산 완료: ${sessions.length}회, ${formatSpecialLectureHours(totalHours)}, ${formatCurrencyWon(tuition)}`);
   }
 
@@ -11763,10 +11778,66 @@ function SpecialLectureNoticePanel({
             핵심 안내
             <textarea rows="5" value={highlightDraftText} onChange={(event) => updateHighlights(event.target.value)} />
           </label>
-          <label className="specialLectureWideField">
-            회차별 일정
-            <textarea rows="8" value={scheduleDraftText} onChange={(event) => updateSchedule(event.target.value)} />
-          </label>
+          <section className="specialLectureSessionCards">
+            <div className="sectionHeader slim">
+              <div>
+                <p className="eyebrow">SESSION PLAN</p>
+                <h3>회차별 일정</h3>
+                <span>각 회차의 날짜, 시간, 주제를 카드에서 바로 수정합니다.</span>
+              </div>
+              <button className="softButton compact" onClick={addSpecialLectureSessionCard} type="button">회차 추가</button>
+            </div>
+            {selectedGuideSessions.length ? (
+              <div className="specialLectureSessionCardList">
+                {selectedGuideSessions.map((session, index) => (
+                  <article className="specialLectureSessionCard" key={`${selectedGuide.specialLectureGuideId}_session_${index}`}>
+                    <div className="specialLectureSessionCardHeader">
+                      <strong>{index + 1}회차</strong>
+                      <span>{session.day || getWeekdayLabel(createDateFromKey(session.dateKey)?.getDay()) || "요일 없음"}</span>
+                      <button className="dangerSoftButton compact" onClick={() => removeSpecialLectureSessionCard(index)} type="button">삭제</button>
+                    </div>
+                    <div className="specialLectureSessionCardGrid">
+                      <label>
+                        날짜
+                        <input
+                          type="date"
+                          value={session.dateKey || ""}
+                          onChange={(event) => updateSpecialLectureSessionCard(index, "dateKey", event.target.value)}
+                        />
+                      </label>
+                      <label>
+                        시작
+                        <input
+                          type="time"
+                          value={session.startTime || ""}
+                          onChange={(event) => updateSpecialLectureSessionCard(index, "startTime", event.target.value)}
+                        />
+                      </label>
+                      <label>
+                        종료
+                        <input
+                          type="time"
+                          value={session.endTime || ""}
+                          onChange={(event) => updateSpecialLectureSessionCard(index, "endTime", event.target.value)}
+                        />
+                      </label>
+                      <label className="specialLectureSessionTopicInput">
+                        회차 주제
+                        <input
+                          value={session.topic || ""}
+                          onChange={(event) => updateSpecialLectureSessionCard(index, "topic", event.target.value)}
+                        />
+                      </label>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="specialLectureSessionEmpty">
+                일정 계산을 펼쳐 요일/시간을 정한 뒤 `일정 계산 적용`을 누르거나, `회차 추가`로 직접 회차를 만드세요.
+              </div>
+            )}
+          </section>
           <label className="specialLectureWideField">
             알림톡 링크 안내 문장
             <input value={selectedGuide.noticeMemo} onChange={(event) => updateSelectedGuide("noticeMemo", event.target.value)} />

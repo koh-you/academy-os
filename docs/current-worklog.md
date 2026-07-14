@@ -12,6 +12,17 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-14 P1. 특강 회차별 일정 카드 입력 전환
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청: 특강알림의 `회차별 일정` textarea는 문법을 잘 모르겠으니, 회차에 맞게 입력할 수 있는 카드형 입력으로 바꾼다. Tally Thank you page는 사용자가 직접 처리한다.
+- 구현 결과: `회차별 일정` textarea를 제거하고, 각 회차를 날짜/시작/종료/회차 주제 카드로 수정하게 바꿨다. `회차 추가`와 회차별 `삭제` 버튼을 제공한다.
+- 구현 결과: 회차 카드 수정은 즉시 `selectedGuide.sessions` local draft를 갱신하고, `lessonCount`, `totalHours`, `tuition`을 재계산해 오른쪽 공개 안내문 미리보기에 반영한다. 기존 `일정 계산 적용`으로 생성된 회차도 카드에서 세부 주제를 다듬는 흐름으로 이어진다.
+- 저장 원천: 특강 안내문 원본은 기존처럼 `app_state.specialLectureGuides`이며, 저장 전에는 local draft만 바뀐다. `안내문 저장`을 눌러야 공개 링크 저장본에 반영된다.
+- Tally: API 키로 폼 조회와 백업은 확인했지만, 사용자가 Tally Thank you page는 직접 처리한다고 해서 Tally 폼 PATCH는 하지 않았다. 백업 JSON은 `.codex-temp/`에만 남겼고 Git에는 올리지 않는다.
+- 중단 조건: 회차 카드 수정 후 오른쪽 회차별 계획이 갱신되지 않음, 회차 추가/삭제 후 시수·수강료가 바뀌지 않음, 저장 전 공개 링크에 바뀐 것처럼 표시됨, `일정 계산 적용`이 기존 회차 주제를 불필요하게 덮어씀, `.codex-temp/` 또는 Tally API 키가 Git diff에 포함됨.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 287개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-14 P1. 특강 안내문 실시간 미리보기 보정
 
 - 상태: 완료 - 구현/검증 완료
