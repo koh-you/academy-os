@@ -27723,42 +27723,67 @@ function formatSupplementHomeworkCheckSentence(task = {}) {
   return `지난 숙제 ${homeworkText}도 함께 확인하겠습니다.`;
 }
 
+function formatSupplementDraftScheduleText(task = {}) {
+  const dateText = String(task.scheduledDate || "").trim();
+  const timeText = String(task.scheduledTime || "").trim();
+  if (!dateText) return timeText;
+  const date = new Date(`${dateText}T00:00:00+09:00`);
+  const weekday = Number.isNaN(date.getTime()) ? "" : ["일", "월", "화", "수", "목", "금", "토"][date.getDay()];
+  const [, month = "", day = ""] = dateText.match(/^(\d{4})-(\d{2})-(\d{2})$/) ?? [];
+  const dateLabel = month && day
+    ? `${Number(month)}/${Number(day)}${weekday ? `(${weekday})` : ""}`
+    : dateText;
+  return [dateLabel, timeText].filter(Boolean).join(" ");
+}
+
+function formatSupplementDraftReasonLine(task = {}) {
+  const reason = normalizeMessageText(task.absenceReason || "").replace(/\s+/g, " ").trim();
+  return reason ? `사유: ${reason}` : "";
+}
+
+function formatSupplementDraftHomeworkLine(task = {}) {
+  const homeworkText = normalizeMessageText(task.supplementHomeworkNote || "").replace(/\s+/g, " ").trim();
+  return homeworkText ? `지난 숙제: ${homeworkText} 확인` : "";
+}
+
 function createNotificationDraft(task, students) {
   const student = students.find((item) => item.studentId === task.studentId);
   const studentName = student?.name ?? "학생";
-  const scheduleText = [task.scheduledDate, task.scheduledTime].filter(Boolean).join(" ");
+  const scheduleText = formatSupplementDraftScheduleText(task);
   const sourceLabel = getSupplementTaskSourceLabel(task);
   const sourceText = sourceLabel || (task.taskType === "homework_makeup" ? "보충 과제" : followUpTypeLabel(task.taskType));
   const progressMemo = normalizeMessageText(task.supplementProgressMemo);
   const progressMemoBlock = progressMemo ? `\n\n보충 메모:\n${progressMemo}` : "";
   const methodId = task.supplementMethod || supplementDefaultMethod(task.taskType);
-  const absenceText = task.taskType === "absence_makeup" && task.absenceReason ? ` 결석사유는 ${task.absenceReason}입니다.` : "";
-  const homeworkCheckSentence = task.taskType === "absence_makeup" ? formatSupplementHomeworkCheckSentence(task) : "";
+  const absenceReasonLine = task.taskType === "absence_makeup" ? formatSupplementDraftReasonLine(task) : "";
+  const homeworkCheckLine = task.taskType === "absence_makeup" ? formatSupplementDraftHomeworkLine(task) : "";
+  const absenceExtraLines = [absenceReasonLine, homeworkCheckLine].filter(Boolean).join("\n");
 
   if (task.taskType === "homework_makeup") {
     if (methodId === "next_lesson") {
-      return `${studentName} 학생 숙제 보충 안내드립니다.\n\n다음 수업 때 ${sourceText}를 함께 확인하겠습니다.${progressMemoBlock}`;
+      return `${studentName} 학생 숙제 보충 안내입니다.\n\n다음 수업 때 ${sourceText}를 함께 확인합니다.${progressMemoBlock}`;
     }
     if (methodId === "arrival_makeup") {
-      return `${studentName} 학생 숙제 보충 안내드립니다.\n\n${scheduleText} 등원 후 ${sourceText} 보충을 진행하겠습니다.${progressMemoBlock}`;
+      return `${studentName} 학생 숙제 보충 안내입니다.\n\n${scheduleText}\n등원 후 ${sourceText} 보충을 진행합니다.${progressMemoBlock}`;
     }
     if (methodId === "stay_after") {
-      return `${studentName} 학생 숙제 보충 안내드립니다.\n\n${scheduleText} 수업 후 남아서 ${sourceText} 보충을 마무리하겠습니다.${progressMemoBlock}`;
+      return `${studentName} 학생 숙제 보충 안내입니다.\n\n${scheduleText}\n수업 후 ${sourceText} 보충을 마무리합니다.${progressMemoBlock}`;
     }
   }
 
   if (task.taskType === "absence_makeup") {
+    const extraBlock = absenceExtraLines ? `\n${absenceExtraLines}` : "";
     if (methodId === "recorded_lecture") {
-      return `${studentName} 학생 결석 보강 안내드립니다.\n\n${scheduleText}에 ${sourceText} 결석 보강을 녹화 강의로 진행하겠습니다.${absenceText}${homeworkCheckSentence ? ` ${homeworkCheckSentence}` : ""}${progressMemoBlock}`;
+      return `${studentName} 학생 결석 보강 안내입니다.\n\n${scheduleText}\n${sourceText} 결석 보강을 녹화 강의로 진행합니다.${extraBlock}${progressMemoBlock}`;
     }
-    return `${studentName} 학생 결석 보강 안내드립니다.\n\n${scheduleText}에 ${sourceText} 결석 보강을 현장에서 진행하겠습니다.${absenceText}${homeworkCheckSentence ? ` ${homeworkCheckSentence}` : ""}${progressMemoBlock}`;
+    return `${studentName} 학생 결석 보강 안내입니다.\n\n${scheduleText}\n${sourceText} 결석 보강을 진행합니다.${extraBlock}${progressMemoBlock}`;
   }
 
   if (task.taskType === "retest") {
-    return `${studentName} 학생 재시험 안내드립니다.\n\n${scheduleText}에 ${sourceText} 재시험을 진행하겠습니다.${progressMemoBlock}`;
+    return `${studentName} 학생 재시험 안내입니다.\n\n${scheduleText}\n${sourceText} 재시험을 진행합니다.${progressMemoBlock}`;
   }
 
-  return `${studentName} 학생 ${followUpTypeLabel(task.taskType)} 안내드립니다.\n\n${scheduleText}에 ${sourceText} 일정을 진행하겠습니다.${progressMemoBlock}`;
+  return `${studentName} 학생 ${followUpTypeLabel(task.taskType)} 안내입니다.\n\n${scheduleText}\n${sourceText} 일정을 진행합니다.${progressMemoBlock}`;
 }
 
 function isSupplementStudentReminderTask(task = {}) {
