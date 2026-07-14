@@ -1035,12 +1035,13 @@ function StudentProfileModal({
                 className="profileEditInput"
                 value={profileDraft.scheduleOverride ?? ""}
                 onChange={(event) => updateProfile("scheduleOverride", event.target.value)}
-                placeholder="기본 반 스케줄"
+                placeholder="예: 화목 17:00-20:00 / 토 10:00-13:00"
                 rows="2"
               />
             ) : (
               <strong>{student.scheduleOverride || "기본 반 스케줄"}</strong>
             )}
+            <span className="muted">반 이름과 실제 등원 시간이 다를 때 입력합니다. 예: 화목 5-8</span>
           </div>
         </div>
 

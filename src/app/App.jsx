@@ -41,6 +41,7 @@ import { AutosaveRiskNotice } from "../shared/components/AutosaveRiskNotice.jsx"
 import { sampleData } from "../shared/data/sampleData.js";
 import { readFileAsDataUrl } from "../shared/utils/file.js";
 import { safeIdPart, shortStableHash } from "../shared/utils/id.js";
+import { applyStudentScheduleToLesson } from "../shared/utils/studentSchedule.js";
 import ssenTypeIndex from "../../api/data/ssenTypeIndex.json";
 
 const storageKeys = {
@@ -15239,7 +15240,8 @@ function LessonJournalDetail({
   const isLessonNotificationOff = notificationPlanMode === "none";
   const checkoutMissingStudents = lessonStudents.filter((student) => {
     const record = findLessonStudentRecord(records, lesson, student);
-    return hasMissingCheckOut(record, lesson);
+    const attendanceLesson = applyStudentScheduleToLesson(lesson, student);
+    return hasMissingCheckOut(record, attendanceLesson);
   });
   const isHomeworkMakeupLesson = isHomeworkMakeupTaskLesson(lesson, linkedMakeupTask);
   const isExamSundayMakeupLesson = lesson.lessonType === "examSundayMakeup";
@@ -16105,6 +16107,7 @@ function LessonJournalDetail({
             const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
             const persistedRecord = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
             const record = getEditableRecord(recordId, persistedRecord);
+            const attendanceLesson = applyStudentScheduleToLesson(lesson, student);
             const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
             const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
             const previousHomeworkTitle = getHomeworkDraftTitle(student, "previous", previousHomework);
@@ -16115,8 +16118,8 @@ function LessonJournalDetail({
             const effectiveNextHomework = nextHomeworkTitle !== (nextHomework?.title ?? "")
               ? { ...(nextHomework ?? {}), title: nextHomeworkTitle }
               : nextHomework;
-            const attendanceDisplay = getAttendanceDisplay(record, lesson, attendanceSettings.lateGraceMinutes);
-            const checkoutMissing = hasMissingCheckOut(record, lesson);
+            const attendanceDisplay = getAttendanceDisplay(record, attendanceLesson, attendanceSettings.lateGraceMinutes);
+            const checkoutMissing = hasMissingCheckOut(record, attendanceLesson);
             const previousMemoContext = getPreviousLessonMemoContext(student);
             const previousRecord = previousMemoContext.previousRecord;
             const previousMemoRecord = previousMemoContext.previousMemoRecord;
@@ -16185,11 +16188,12 @@ function LessonJournalDetail({
                 </div>
                 <button
                   className={`attendanceBadge attendance-${attendanceDisplay.statusClass ?? record.attendanceStatus ?? "pending"}`}
-                  onClick={() => onOpenAttendance({ lesson, record, student })}
+                  onClick={() => onOpenAttendance({ lesson: attendanceLesson, record, student })}
                   type="button"
                 >
                   <span>{attendanceDisplay.label}</span>
                   {attendanceDisplay.detail ? <small>{attendanceDisplay.detail}</small> : null}
+                  {attendanceLesson.studentScheduleOverride ? <small>기준 {attendanceLesson.startTime}-{attendanceLesson.endTime}</small> : null}
                   {attendanceDisplay.dateMismatch ? <small className="attendanceMismatchText">확인 필요</small> : null}
                   {checkoutMissing ? <small className="checkoutMissingText">하원 미체크</small> : null}
                 </button>
@@ -21894,6 +21898,9 @@ function StudentLessonHistoryCalendar({ homeworks = [], lessons = [], recordsWit
   const selectedRecords = recordsByDate.get(selectedDate) ?? [];
   const selectedRecord = selectedRecords[0] ?? null;
   const selectedLesson = selectedRecord?.lesson ?? null;
+  const selectedAttendanceLesson = selectedLesson && selectedStudent
+    ? applyStudentScheduleToLesson(selectedLesson, selectedStudent)
+    : selectedLesson;
   const lessonMaterial = selectedRecord ? getLessonMaterial(selectedRecord, selectedStudent) : "";
   const lessonContent = selectedRecord ? getLessonContent(selectedRecord) : "";
   const previousHomework =
@@ -21906,7 +21913,12 @@ function StudentLessonHistoryCalendar({ homeworks = [], lessons = [], recordsWit
       : null;
   const previousHomeworkText = previousHomework?.title || selectedRecord?.previousHomework || "";
   const nextHomeworkText = nextHomework?.title || selectedRecord?.nextHomework || "";
-  const selectedAttendanceDisplay = getAttendanceDisplay(selectedRecord ?? {}, selectedLesson);
+  const selectedAttendanceDisplay = getAttendanceDisplay(selectedRecord ?? {}, selectedAttendanceLesson);
+  const selectedAttendanceTimeLabel = selectedAttendanceLesson?.startTime && selectedAttendanceLesson?.endTime
+    ? `${selectedAttendanceLesson.startTime}-${selectedAttendanceLesson.endTime}`
+    : selectedRecord?.lesson?.startTime && selectedRecord?.lesson?.endTime
+      ? `${selectedRecord.lesson.startTime}-${selectedRecord.lesson.endTime}`
+      : "시간 미입력";
   const calendarDays = buildMonthDays(today);
 
   useEffect(() => {
@@ -21948,7 +21960,7 @@ function StudentLessonHistoryCalendar({ homeworks = [], lessons = [], recordsWit
             <>
               <div>
                 <strong>{selectedRecord.lesson.date} · {selectedRecord.lesson.className}</strong>
-                <span>{selectedRecord.lesson.startTime}-{selectedRecord.lesson.endTime}</span>
+                <span>{selectedAttendanceTimeLabel}</span>
               </div>
               <dl>
                 <div>

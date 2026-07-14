@@ -9807,6 +9807,11 @@ textarea.profileEditInput {
   grid-column: span 3;
 }
 
+.wideProfileItem > .muted {
+  display: block;
+  margin-top: 6px;
+}
+
 .studentScorePanel {
   display: grid;
   gap: 14px;

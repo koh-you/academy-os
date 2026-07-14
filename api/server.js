@@ -69,6 +69,7 @@ import {
   getAssignmentStatusStudentMessage,
   normalizeAssignmentStatusValue
 } from "../src/domains/lessons/assignmentStatus.js";
+import { applyStudentScheduleToLesson } from "../src/shared/utils/studentSchedule.js";
 import {
   confirmExamAnalysisQuestionCount,
   deleteExamAnalysisRun,
@@ -307,8 +308,10 @@ function selectAttendanceLessonForStudent(lessons = [], student = {}, now = new 
     const matchedByStudent = (lesson.studentIds ?? []).includes(student.studentId);
     const matchedByClass = Boolean(lesson.classTemplateId && lesson.classTemplateId === student.defaultClassTemplateId);
     if (!matchedByStudent && !matchedByClass) return;
+    const studentLesson = applyStudentScheduleToLesson(lesson, student);
     const existing = candidates.get(lesson.lessonId);
     candidates.set(lesson.lessonId, {
+      attendanceLesson: studentLesson,
       lesson,
       matchedByStudent: Boolean(existing?.matchedByStudent || matchedByStudent),
       matchedByClass: Boolean(existing?.matchedByClass || matchedByClass)
@@ -316,10 +319,10 @@ function selectAttendanceLessonForStudent(lessons = [], student = {}, now = new 
   });
   return [...candidates.values()]
     .sort((left, right) => {
-      const timeDistance = getAttendanceLessonTimeDistance(left.lesson, currentMinutes) - getAttendanceLessonTimeDistance(right.lesson, currentMinutes);
+      const timeDistance = getAttendanceLessonTimeDistance(left.attendanceLesson, currentMinutes) - getAttendanceLessonTimeDistance(right.attendanceLesson, currentMinutes);
       if (timeDistance !== 0) return timeDistance;
       if (left.matchedByStudent !== right.matchedByStudent) return left.matchedByStudent ? -1 : 1;
-      return sortLessonsByStartTime(left.lesson, right.lesson);
+      return sortLessonsByStartTime(left.attendanceLesson, right.attendanceLesson);
     })[0]?.lesson ?? null;
 }
 
@@ -470,6 +473,7 @@ async function handleAttendanceCheck(payload = {}) {
     };
     if (!previewOnly) await upsertLesson(lesson);
   }
+  const attendanceLesson = applyStudentScheduleToLesson(lesson, student);
 
   const recordId = createLessonStudentRecordIdForAttendance(lesson.lessonId, student.studentId);
   const recordResult = await getLessonStudentRecordForAttendance(lesson.lessonId, student.studentId);
@@ -537,7 +541,7 @@ async function handleAttendanceCheck(payload = {}) {
   const manualCheckInTime = normalizeAttendanceTime(payload.checkInTime);
   const existingStatus = normalizeAttendanceStatusForRecord(existingRecord?.attendanceStatus || "pending");
   const lateMinutesFromCheckedTime = calculateAttendanceLateMinutesFromTime(
-    lesson,
+    attendanceLesson,
     manualCheckInTime || existingRecord?.checkInTime || currentTime,
     payload.lateGraceMinutes
   );
@@ -545,7 +549,7 @@ async function handleAttendanceCheck(payload = {}) {
     ? eventType === "checkin"
       ? lateMinutesFromCheckedTime !== ""
         ? lateMinutesFromCheckedTime
-        : calculateAttendanceLateMinutes(lesson, now, payload.lateGraceMinutes)
+        : calculateAttendanceLateMinutes(attendanceLesson, now, payload.lateGraceMinutes)
       : existingRecord?.lateMinutes ?? ""
     : payload.lateMinutes;
 
@@ -574,7 +578,7 @@ async function handleAttendanceCheck(payload = {}) {
     checkInAt = checkInTime ? createKoreaIsoForAttendance(lesson.date, checkInTime, checkInAt || nowIso) : checkInAt;
     checkOutTime = manualCheckOutTime || checkOutTime || currentTime;
     checkOutAt = createKoreaIsoForAttendance(lesson.date, checkOutTime, checkOutAt || nowIso);
-    const checkoutLateMinutes = calculateAttendanceLateMinutesFromTime(lesson, checkInTime, payload.lateGraceMinutes);
+    const checkoutLateMinutes = calculateAttendanceLateMinutesFromTime(attendanceLesson, checkInTime, payload.lateGraceMinutes);
     if (nextStatus === "late" && isWithinAttendanceGrace(checkoutLateMinutes)) {
       nextStatus = "present";
     }
