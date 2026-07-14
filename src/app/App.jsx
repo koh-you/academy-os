@@ -68,6 +68,7 @@ const storageKeys = {
   studentConsultations: "academy-os.studentConsultations.v1",
   resourceMaterials: "academy-os.resourceMaterials.v1",
   lessonResearchItems: "academy-os.lessonResearchItems.v1",
+  specialLectureGuides: "academy-os.specialLectureGuides.v1",
   aiSettings: "academy-os.aiSettings.v1",
   attendanceSettings: "academy-os.attendanceSettings.v1",
   lessonNotificationPlans: "academy-os.lessonNotificationPlans.v1",
@@ -1064,6 +1065,171 @@ function normalizePhoneNumber(value = "") {
 const today = getKoreaDateString();
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8787").replace(/\/$/, "");
 const appRuntimeSessionId = `runtime_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+
+const defaultSpecialLectureGuides = [
+  {
+    specialLectureGuideId: "special_lecture_2026_summer_high1_clinic_mwf",
+    slug: "2026-summer-high1-clinic-mwf",
+    title: "2026 여름 개별 진도 클리닉",
+    shortTitle: "여름 개별 진도 클리닉",
+    audience: "예비고1, 예비고2",
+    goal: "개별 진도와 취약 단원을 학생별로 점검합니다.",
+    days: "월·수·금",
+    time: "13:00-16:00",
+    lessonCount: "총 8회",
+    tuition: "300,000원",
+    teacher: "고태영T",
+    textbook: "개별 선정",
+    summary: "방학 동안 각 학생의 현재 진도를 기준으로 빈틈을 정리하고, 다음 학기 수업을 따라갈 수 있는 계산력과 개념 연결을 점검합니다.",
+    highlights: [
+      "학생별 현재 진도와 취약 단원을 기준으로 수업합니다.",
+      "새 교재를 일괄 지정하지 않고 필요한 교재를 개별 선정합니다.",
+      "매 회차 수업에서 풀이 습관과 복습 우선순위를 함께 확인합니다."
+    ],
+    sessions: [
+      { date: "7월 22일", day: "수", topic: "개별 클리닉" },
+      { date: "7월 24일", day: "금", topic: "개별 클리닉" },
+      { date: "7월 27일", day: "월", topic: "개별 클리닉" },
+      { date: "7월 29일", day: "수", topic: "개별 클리닉" },
+      { date: "7월 31일", day: "금", topic: "개별 클리닉" },
+      { date: "8월 3일", day: "월", topic: "개별 클리닉" },
+      { date: "8월 5일", day: "수", topic: "개별 클리닉" },
+      { date: "8월 7일", day: "금", topic: "개별 클리닉" }
+    ],
+    noticeMemo: "자세한 커리큘럼과 안내사항은 링크에서 확인 부탁드립니다.",
+    updatedAt: "2026-07-14T00:00:00.000Z"
+  },
+  {
+    specialLectureGuideId: "special_lecture_2026_summer_high1_common_math2_tts",
+    slug: "2026-summer-high1-common-math2-tts",
+    title: "2026 고1 여름 공통수학2 유형 문제풀이",
+    shortTitle: "고1 공통수학2 여름특강",
+    audience: "고등학교 1학년",
+    goal: "공통수학2 핵심 단원을 유형별 문제풀이로 정리합니다.",
+    days: "화·목 / 토",
+    time: "화·목 13:00-16:00, 토 16:00-19:00",
+    lessonCount: "총 10회",
+    tuition: "375,000원",
+    teacher: "고태영T",
+    textbook: "올림포스 유형편 공통수학2",
+    summary: "평면좌표와 직선, 원의 방정식, 도형의 이동, 집합과 명제를 방학 중 한 흐름으로 묶어 고1 2학기 학습의 출발점을 안정적으로 만듭니다.",
+    highlights: [
+      "단원별 핵심 개념을 확인한 뒤 바로 유형 문제로 연결합니다.",
+      "학교 내신에서 자주 흔들리는 계산 과정과 조건 해석을 점검합니다.",
+      "수업 후 복습 방향을 정리해 다음 회차에서 누적 확인합니다."
+    ],
+    sessions: [
+      { date: "7월 21일", day: "화", topic: "01. 평면좌표와 직선의 방정식" },
+      { date: "7월 23일", day: "목", topic: "01. 평면좌표와 직선의 방정식" },
+      { date: "7월 25일", day: "토", topic: "02. 원의 방정식" },
+      { date: "7월 28일", day: "화", topic: "02. 원의 방정식" },
+      { date: "7월 30일", day: "목", topic: "03. 도형의 이동" },
+      { date: "8월 1일", day: "토", topic: "03. 도형의 이동" },
+      { date: "8월 4일", day: "화", topic: "04. 집합" },
+      { date: "8월 6일", day: "목", topic: "04. 집합" },
+      { date: "8월 8일", day: "토", topic: "05. 명제" },
+      { date: "8월 11일", day: "화", topic: "05. 명제" }
+    ],
+    noticeMemo: "자세한 커리큘럼과 안내사항은 링크에서 확인 부탁드립니다.",
+    updatedAt: "2026-07-14T00:00:00.000Z"
+  }
+];
+
+function normalizeSpecialLectureSession(session = {}, index = 0) {
+  return {
+    date: String(session.date ?? "").trim(),
+    day: String(session.day ?? "").trim(),
+    topic: String(session.topic ?? session.content ?? "").trim() || `회차 ${index + 1}`
+  };
+}
+
+function normalizeSpecialLectureGuide(guide = {}, fallback = defaultSpecialLectureGuides[0], index = 0) {
+  const source = { ...(fallback ?? {}), ...(guide ?? {}) };
+  const id = String(source.specialLectureGuideId || source.id || `special_lecture_${index + 1}`).trim();
+  const slug = String(source.slug || id).trim().replaceAll(/\s+/g, "-").toLowerCase();
+  return {
+    specialLectureGuideId: id,
+    slug,
+    title: String(source.title ?? "").trim(),
+    shortTitle: String(source.shortTitle || source.title || "").trim(),
+    audience: String(source.audience ?? "").trim(),
+    goal: String(source.goal ?? "").trim(),
+    days: String(source.days ?? "").trim(),
+    time: String(source.time ?? "").trim(),
+    lessonCount: String(source.lessonCount ?? "").trim(),
+    tuition: String(source.tuition ?? "").trim(),
+    teacher: String(source.teacher ?? "고태영T").trim(),
+    textbook: String(source.textbook ?? "").trim(),
+    summary: String(source.summary ?? "").trim(),
+    highlights: Array.isArray(source.highlights)
+      ? source.highlights.map((item) => String(item ?? "").trim()).filter(Boolean).slice(0, 6)
+      : [],
+    sessions: Array.isArray(source.sessions)
+      ? source.sessions.map(normalizeSpecialLectureSession).filter((session) => session.date || session.topic)
+      : [],
+    noticeMemo: String(source.noticeMemo ?? "").trim(),
+    updatedAt: String(source.updatedAt ?? "").trim()
+  };
+}
+
+function normalizeSpecialLectureGuides(guides = []) {
+  const sourceGuides = Array.isArray(guides) && guides.length ? guides : defaultSpecialLectureGuides;
+  return sourceGuides.map((guide, index) =>
+    normalizeSpecialLectureGuide(guide, defaultSpecialLectureGuides[index] ?? defaultSpecialLectureGuides[0], index)
+  );
+}
+
+function getSpecialLectureGuideSlug(guide = {}) {
+  return String(guide.slug || guide.specialLectureGuideId || defaultSpecialLectureGuides[0].slug).trim();
+}
+
+function getSpecialLecturePublicUrl(guide = {}) {
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://academy-os-blue.vercel.app";
+  return `${origin}/special-lecture?guide=${encodeURIComponent(getSpecialLectureGuideSlug(guide))}`;
+}
+
+function formatSpecialLectureScheduleText(sessions = []) {
+  return sessions
+    .map((session) => [session.date, session.day ? `(${session.day})` : "", "|", session.topic].filter(Boolean).join(" "))
+    .join("\n");
+}
+
+function parseSpecialLectureScheduleText(value = "") {
+  return String(value ?? "")
+    .split("\n")
+    .map((line, index) => {
+      const [left = "", ...topicParts] = line.split("|");
+      const topic = topicParts.join("|").trim() || `회차 ${index + 1}`;
+      const dateMatch = left.trim().match(/^(.+?)(?:\s*\((.+?)\))?$/);
+      return normalizeSpecialLectureSession({
+        date: dateMatch?.[1]?.trim() || left.trim(),
+        day: dateMatch?.[2]?.trim() || "",
+        topic
+      }, index);
+    })
+    .filter((session) => session.date || session.topic);
+}
+
+function buildSpecialLectureNoticeText(guide = {}, guideUrl = getSpecialLecturePublicUrl(guide)) {
+  const normalizedGuide = normalizeSpecialLectureGuide(guide);
+  return [
+    `안녕하세요. ${academyBrandName}입니다.`,
+    "",
+    `${normalizedGuide.shortTitle || normalizedGuide.title} 안내드립니다.`,
+    "",
+    `요일: ${normalizedGuide.days || "-"}`,
+    `시간: ${normalizedGuide.time || "-"}`,
+    `시수: ${normalizedGuide.lessonCount || "-"}`,
+    "",
+    normalizedGuide.noticeMemo || "자세한 커리큘럼과 안내사항은 아래 링크에서 확인 부탁드립니다.",
+    guideUrl
+  ].join("\n");
+}
+
+function isSpecialLectureRoute() {
+  if (typeof window === "undefined") return false;
+  return window.location.pathname === "/special-lecture" || window.location.hash.startsWith("#special-lecture");
+}
 
 const academyReminderTypeOptions = [
   { value: "student_consultation", label: "학생 상담" },
@@ -5499,6 +5665,10 @@ export function App() {
     storageKeys.lessonResearchItems,
     createDefaultLessonResearchItems()
   );
+  const [specialLectureGuides, setSpecialLectureGuides] = useStoredState(
+    storageKeys.specialLectureGuides,
+    defaultSpecialLectureGuides
+  );
   const [resourceMaterials, setResourceMaterials] = useStoredState(storageKeys.resourceMaterials, []);
   const [aiSettings, setAiSettings] = useStoredState(storageKeys.aiSettings, defaultAiSettings);
   const [attendanceSettings, setAttendanceSettings] = useStoredState(
@@ -5527,6 +5697,7 @@ export function App() {
   const [scoreRecordSaveState, setScoreRecordSaveState] = useState("idle");
   const [academyTestSaveState, setAcademyTestSaveState] = useState("idle");
   const [studentConsultationSaveState, setStudentConsultationSaveState] = useState("idle");
+  const [specialLectureGuideSaveState, setSpecialLectureGuideSaveState] = useState("idle");
   const [examPrepRowSaveStates, setExamPrepRowSaveStates] = useState({});
   const [studentProfileSaveStates, setStudentProfileSaveStates] = useState({});
   const [studentIntakeSaveStates, setStudentIntakeSaveStates] = useState({});
@@ -5556,6 +5727,7 @@ export function App() {
   const studentIntakeSaveRequestRef = useRef({});
   const isApplyingRemoteAppStateRef = useRef(false);
   const attendanceOnlyMode = isAttendanceOnlyRoute();
+  const specialLectureOnlyMode = isSpecialLectureRoute();
 
   const sharedAppState = useMemo(() => ({
     aiSettings,
@@ -5594,7 +5766,12 @@ export function App() {
     let isMounted = true;
 
     async function loadCoreDataFromApi() {
-      if (!session && !attendanceOnlyMode) {
+      if (!session && !attendanceOnlyMode && !specialLectureOnlyMode) {
+        setIsAppStateReady(false);
+        setIsPortalDataReady(false);
+        return;
+      }
+      if (specialLectureOnlyMode) {
         setIsAppStateReady(false);
         setIsPortalDataReady(false);
         return;
@@ -5792,6 +5969,7 @@ export function App() {
           }
           if (Array.isArray(states.studentQuestions)) setStudentQuestions(states.studentQuestions);
           if (Array.isArray(states.studentConsultations)) setStudentConsultations(states.studentConsultations);
+          if (Array.isArray(states.specialLectureGuides)) setSpecialLectureGuides(normalizeSpecialLectureGuides(states.specialLectureGuides));
           if (Array.isArray(states.tallySubmissions)) setTallySubmissions(states.tallySubmissions);
           if (states.tallySummaries && typeof states.tallySummaries === "object" && !Array.isArray(states.tallySummaries)) {
             setTallySummaries(states.tallySummaries);
@@ -5838,6 +6016,7 @@ export function App() {
     setResourceMaterials,
     setScoreRecords,
     setSchoolEvents,
+    setSpecialLectureGuides,
     setStudents,
     setStudentConsultations,
     setStudentIntakeApplicants,
@@ -5846,6 +6025,7 @@ export function App() {
     setWrongProblems,
     session,
     attendanceOnlyMode,
+    specialLectureOnlyMode,
     attendanceReloadKey
   ]);
 
@@ -5897,6 +6077,22 @@ export function App() {
       problemBookSaveTimerRef.current = null;
       persistProblemBooksNow(normalizedBooks).catch((error) => console.error(error));
     }, 500);
+  }
+
+  function handleSaveSpecialLectureGuides(nextGuides) {
+    const normalizedGuides = normalizeSpecialLectureGuides(nextGuides);
+    setSpecialLectureGuideSaveState("saving");
+    return postAppState({ specialLectureGuides: normalizedGuides })
+      .then(() => {
+        setSpecialLectureGuides(normalizedGuides);
+        setSpecialLectureGuideSaveState("saved");
+        return normalizedGuides;
+      })
+      .catch((error) => {
+        console.error(error);
+        setSpecialLectureGuideSaveState("failed");
+        throw error;
+      });
   }
 
   async function handleAddProblemBookFolder(folderName, testKind, subject) {
@@ -6527,6 +6723,10 @@ export function App() {
         onAttendancePreview={handleAttendancePinPreview}
       />
     );
+  }
+
+  if (specialLectureOnlyMode) {
+    return <SpecialLecturePublicPage />;
   }
 
   if (!session) {
@@ -8484,7 +8684,10 @@ export function App() {
             notificationJobs={notificationJobs}
             notificationJobsStatus={notificationJobsStatus}
             notificationLogs={notificationLogs}
+            specialLectureGuides={specialLectureGuides}
+            specialLectureGuideSaveState={specialLectureGuideSaveState}
             onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
+            onSaveSpecialLectureGuides={handleSaveSpecialLectureGuides}
             onUpdateLessonNotificationPlan={handleUpdateLessonNotificationPlan}
             students={students}
             onRefresh={refreshNotificationJobs}
@@ -9467,6 +9670,12 @@ const noticeMessageTemplates = [
     label: "공지문자",
     title: "공지 안내",
     body: "안녕하세요. 으뜸수학 고태영T입니다.\n\n학원 공지사항을 안내드립니다.\n내용 확인 부탁드립니다.\n\n감사합니다."
+  },
+  {
+    id: "specialLecture",
+    label: "특강문자",
+    title: "특강 안내",
+    body: "안녕하세요. 으뜸수학 고태영T입니다.\n\n특강 일정을 안내드립니다.\n요일:\n시간:\n시수:\n\n자세한 안내는 아래 링크에서 확인 부탁드립니다.\n"
   }
 ];
 
@@ -9483,8 +9692,12 @@ function NotificationCenter({
   notificationJobs,
   notificationJobsStatus = { state: "idle", message: "" },
   onRefresh,
+  onSaveSpecialLectureGuides,
+  specialLectureGuides = defaultSpecialLectureGuides,
+  specialLectureGuideSaveState = "idle",
   students
 }) {
+  const [activeNotificationTab, setActiveNotificationTab] = useState("notice");
   const [classFilter, setClassFilter] = useState("all");
   const [deletingJobId, setDeletingJobId] = useState("");
   const [dispatchMessage, setDispatchMessage] = useState("");
@@ -9493,7 +9706,9 @@ function NotificationCenter({
   const [jobFilter, setJobFilter] = useState("all");
   const [localNoticeJobs, setLocalNoticeJobs] = useState([]);
   const [noticeBody, setNoticeBody] = useState("");
+  const [noticeKind, setNoticeKind] = useState("general");
   const [noticeRecipientMode, setNoticeRecipientMode] = useState("selected");
+  const [noticeSpecialLectureMeta, setNoticeSpecialLectureMeta] = useState(null);
   const [noticeTemplateId, setNoticeTemplateId] = useState("notice");
   const [noticeTitle, setNoticeTitle] = useState("");
   const [scheduleDate, setScheduleDate] = useState(today);
@@ -9633,9 +9848,33 @@ function NotificationCenter({
   function applyNoticeTemplate(templateId) {
     const template = noticeMessageTemplates.find((item) => item.id === templateId);
     setNoticeTemplateId(templateId);
-    if (!template) return;
+    if (!template) {
+      setNoticeKind("general");
+      setNoticeSpecialLectureMeta(null);
+      return;
+    }
+    setNoticeKind(templateId === "specialLecture" ? "special_lecture" : "general");
+    setNoticeSpecialLectureMeta(null);
     setNoticeTitle(template.title);
     setNoticeBody(template.body);
+  }
+
+  function applySpecialLectureGuideToNotice(guide, noticeBodyText, guideUrl) {
+    const normalizedGuide = normalizeSpecialLectureGuide(guide);
+    setNoticeTemplateId("specialLecture");
+    setNoticeKind("special_lecture");
+    setNoticeSpecialLectureMeta({
+      guideId: normalizedGuide.specialLectureGuideId,
+      guideUrl,
+      lessonCount: normalizedGuide.lessonCount,
+      title: normalizedGuide.title,
+      days: normalizedGuide.days,
+      time: normalizedGuide.time
+    });
+    setNoticeTitle(normalizedGuide.shortTitle || normalizedGuide.title || "특강 안내");
+    setNoticeBody(noticeBodyText);
+    setActiveNotificationTab("notice");
+    setDispatchMessage("특강알림 문구를 공지 작성 영역에 반영했습니다. 수신 대상을 선택한 뒤 테스트 발송으로 먼저 확인하세요.");
   }
 
   function selectJobFilter(nextFilter) {
@@ -9661,6 +9900,7 @@ function NotificationCenter({
       lessonDate: today,
       lessonName: noticeTitle.trim() || `${audienceLabel} 공지`,
       message: noticeText,
+      noticeKind,
       noticeAudience: recipient.audience,
       noticeBody,
       noticeTitle,
@@ -9671,7 +9911,17 @@ function NotificationCenter({
       studentId: recipient.student.studentId,
       studentName: recipient.student.name,
       studentPhone: recipient.student.studentPhone,
-      target: recipient.audience
+      target: recipient.audience,
+      ...(noticeKind === "special_lecture" && noticeSpecialLectureMeta
+        ? {
+            specialLectureDays: noticeSpecialLectureMeta.days,
+            specialLectureGuideId: noticeSpecialLectureMeta.guideId,
+            specialLectureLessonCount: noticeSpecialLectureMeta.lessonCount,
+            specialLectureTime: noticeSpecialLectureMeta.time,
+            specialLectureTitle: noticeSpecialLectureMeta.title,
+            specialLectureUrl: noticeSpecialLectureMeta.guideUrl
+          }
+        : {})
     };
   }
 
@@ -9938,6 +10188,32 @@ function NotificationCenter({
       ) : null}
       {dispatchMessage ? <p className="inlineNotice">{dispatchMessage}</p> : null}
 
+      <div className="notificationSectionTabs">
+        <button
+          className={activeNotificationTab === "notice" ? "active" : ""}
+          onClick={() => setActiveNotificationTab("notice")}
+          type="button"
+        >
+          일반공지
+        </button>
+        <button
+          className={activeNotificationTab === "specialLecture" ? "active" : ""}
+          onClick={() => setActiveNotificationTab("specialLecture")}
+          type="button"
+        >
+          특강알림
+        </button>
+      </div>
+
+      {activeNotificationTab === "specialLecture" ? (
+        <SpecialLectureNoticePanel
+          guides={specialLectureGuides}
+          saveState={specialLectureGuideSaveState}
+          onApplyToNotice={applySpecialLectureGuideToNotice}
+          onSaveGuides={onSaveSpecialLectureGuides}
+        />
+      ) : (
+        <>
       <section className="notificationPanel noticeComposerPanel">
         <div className="sectionHeader slim">
           <div>
@@ -10172,7 +10448,319 @@ function NotificationCenter({
           )}
         </div>
       </section>
+        </>
+      )}
     </section>
+  );
+}
+
+function SpecialLectureNoticePanel({
+  guides = defaultSpecialLectureGuides,
+  onApplyToNotice,
+  onSaveGuides,
+  saveState = "idle"
+}) {
+  const normalizedGuides = useMemo(() => normalizeSpecialLectureGuides(guides), [guides]);
+  const [copyMessage, setCopyMessage] = useState("");
+  const [draftGuides, setDraftGuides] = useState(normalizedGuides);
+  const [panelMessage, setPanelMessage] = useState("");
+  const [selectedGuideId, setSelectedGuideId] = useState(normalizedGuides[0]?.specialLectureGuideId || "");
+  const [highlightDraftText, setHighlightDraftText] = useState("");
+  const [scheduleDraftText, setScheduleDraftText] = useState("");
+  const selectedGuide = draftGuides.find((guide) => guide.specialLectureGuideId === selectedGuideId) ?? draftGuides[0] ?? normalizeSpecialLectureGuide();
+  const selectedGuideUrl = getSpecialLecturePublicUrl(selectedGuide);
+  const noticeText = buildSpecialLectureNoticeText(selectedGuide, selectedGuideUrl);
+
+  useEffect(() => {
+    setDraftGuides(normalizedGuides);
+    setSelectedGuideId((current) =>
+      normalizedGuides.some((guide) => guide.specialLectureGuideId === current)
+        ? current
+        : normalizedGuides[0]?.specialLectureGuideId || ""
+    );
+  }, [normalizedGuides]);
+
+  useEffect(() => {
+    const guide = draftGuides.find((item) => item.specialLectureGuideId === selectedGuideId) ?? draftGuides[0];
+    setHighlightDraftText((guide?.highlights ?? []).join("\n"));
+    setScheduleDraftText(formatSpecialLectureScheduleText(guide?.sessions ?? []));
+    setCopyMessage("");
+  }, [selectedGuideId]);
+
+  function updateSelectedGuide(field, value) {
+    setDraftGuides((current) =>
+      current.map((guide) =>
+        guide.specialLectureGuideId === selectedGuide.specialLectureGuideId
+          ? normalizeSpecialLectureGuide({ ...guide, [field]: value, updatedAt: new Date().toISOString() }, guide)
+          : guide
+      )
+    );
+  }
+
+  function updateHighlights(value) {
+    setHighlightDraftText(value);
+    updateSelectedGuide("highlights", value.split("\n").map((line) => line.trim()).filter(Boolean));
+  }
+
+  function updateSchedule(value) {
+    setScheduleDraftText(value);
+    updateSelectedGuide("sessions", parseSpecialLectureScheduleText(value));
+  }
+
+  async function copyGuideUrl() {
+    setCopyMessage("");
+    const copied = await copyTextToClipboard(selectedGuideUrl);
+    setCopyMessage(copied ? "안내문 링크를 복사했습니다." : "링크 복사에 실패했습니다. 화면의 URL을 직접 복사해 주세요.");
+  }
+
+  async function copyNoticeText() {
+    setCopyMessage("");
+    const copied = await copyTextToClipboard(noticeText);
+    setCopyMessage(copied ? "알림톡 본문을 복사했습니다." : "본문 복사에 실패했습니다.");
+  }
+
+  async function saveGuides() {
+    if (!onSaveGuides) return;
+    setPanelMessage("");
+    try {
+      const saved = await onSaveGuides(draftGuides.map((guide) => normalizeSpecialLectureGuide({
+        ...guide,
+        updatedAt: new Date().toISOString()
+      }, guide)));
+      setDraftGuides(saved);
+      setPanelMessage("특강 안내문을 저장했습니다. 공개 링크는 저장본을 읽습니다.");
+    } catch (error) {
+      setPanelMessage(`특강 안내문 저장 실패: ${error.message}`);
+    }
+  }
+
+  return (
+    <section className="notificationPanel specialLecturePanel">
+      <div className="sectionHeader slim">
+        <div>
+          <p className="eyebrow">SPECIAL LECTURE</p>
+          <h2>특강알림</h2>
+        </div>
+        <InlineSaveStatus label="특강 안내문" saveState={saveState} />
+      </div>
+
+      <div className="specialLectureSelector">
+        {draftGuides.map((guide) => (
+          <button
+            className={guide.specialLectureGuideId === selectedGuide.specialLectureGuideId ? "active" : ""}
+            key={guide.specialLectureGuideId}
+            onClick={() => setSelectedGuideId(guide.specialLectureGuideId)}
+            type="button"
+          >
+            <strong>{guide.shortTitle || guide.title}</strong>
+            <span>{guide.days} · {guide.time}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="specialLectureEditorGrid">
+        <div className="specialLectureEditor">
+          <div className="noticeBox specialLectureNoticeBox">
+            <strong>저장/발송 분리</strong>
+            <p>이 탭은 안내문과 링크를 준비합니다. 실제 발송은 `공지 작성에 반영` 후 일반공지에서 테스트 발송과 수신 대상 확인을 거쳐 진행합니다.</p>
+          </div>
+
+          <div className="specialLectureFormGrid">
+            <label>
+              안내문 제목
+              <input value={selectedGuide.title} onChange={(event) => updateSelectedGuide("title", event.target.value)} />
+            </label>
+            <label>
+              짧은 제목
+              <input value={selectedGuide.shortTitle} onChange={(event) => updateSelectedGuide("shortTitle", event.target.value)} />
+            </label>
+            <label>
+              대상
+              <input value={selectedGuide.audience} onChange={(event) => updateSelectedGuide("audience", event.target.value)} />
+            </label>
+            <label>
+              담당
+              <input value={selectedGuide.teacher} onChange={(event) => updateSelectedGuide("teacher", event.target.value)} />
+            </label>
+            <label>
+              요일
+              <input value={selectedGuide.days} onChange={(event) => updateSelectedGuide("days", event.target.value)} />
+            </label>
+            <label>
+              시간
+              <input value={selectedGuide.time} onChange={(event) => updateSelectedGuide("time", event.target.value)} />
+            </label>
+            <label>
+              시수
+              <input value={selectedGuide.lessonCount} onChange={(event) => updateSelectedGuide("lessonCount", event.target.value)} />
+            </label>
+            <label>
+              수강료
+              <input value={selectedGuide.tuition} onChange={(event) => updateSelectedGuide("tuition", event.target.value)} />
+            </label>
+            <label>
+              교재
+              <input value={selectedGuide.textbook} onChange={(event) => updateSelectedGuide("textbook", event.target.value)} />
+            </label>
+            <label>
+              공개 URL slug
+              <input value={selectedGuide.slug} onChange={(event) => updateSelectedGuide("slug", event.target.value)} />
+            </label>
+          </div>
+
+          <label className="specialLectureWideField">
+            학습 목표
+            <textarea rows="3" value={selectedGuide.goal} onChange={(event) => updateSelectedGuide("goal", event.target.value)} />
+          </label>
+          <label className="specialLectureWideField">
+            안내문 요약
+            <textarea rows="4" value={selectedGuide.summary} onChange={(event) => updateSelectedGuide("summary", event.target.value)} />
+          </label>
+          <label className="specialLectureWideField">
+            핵심 안내
+            <textarea rows="5" value={highlightDraftText} onChange={(event) => updateHighlights(event.target.value)} />
+          </label>
+          <label className="specialLectureWideField">
+            회차별 일정
+            <textarea rows="8" value={scheduleDraftText} onChange={(event) => updateSchedule(event.target.value)} />
+          </label>
+          <label className="specialLectureWideField">
+            알림톡 링크 안내 문장
+            <input value={selectedGuide.noticeMemo} onChange={(event) => updateSelectedGuide("noticeMemo", event.target.value)} />
+          </label>
+
+          <div className="specialLectureActionBar">
+            <button className="softButton" onClick={saveGuides} type="button">
+              {saveState === "saving" ? "저장 중" : "안내문 저장"}
+            </button>
+            <button className="softButton" onClick={copyGuideUrl} type="button">링크 복사</button>
+            <button className="softButton" onClick={copyNoticeText} type="button">알림톡 본문 복사</button>
+            <button
+              className="sendButton"
+              onClick={() => onApplyToNotice?.(selectedGuide, noticeText, selectedGuideUrl)}
+              type="button"
+            >
+              공지 작성에 반영
+            </button>
+          </div>
+          {copyMessage ? <p className="inlineNotice">{copyMessage}</p> : null}
+          {panelMessage ? <p className={panelMessage.includes("실패") ? "inlineNotice danger" : "inlineNotice"}>{panelMessage}</p> : null}
+
+          <div className="specialLectureNoticePreview">
+            <strong>알림톡 본문 미리보기</strong>
+            <p>{noticeText}</p>
+          </div>
+        </div>
+
+        <SpecialLectureGuidePreview guide={selectedGuide} guideUrl={selectedGuideUrl} />
+      </div>
+    </section>
+  );
+}
+
+function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
+  const normalizedGuide = normalizeSpecialLectureGuide(guide);
+  return (
+    <article className="specialLectureGuidePreview">
+      <header className="specialLectureHero">
+        <p>{academyBrandName}</p>
+        <h1>{normalizedGuide.title}</h1>
+        <span>{normalizedGuide.goal}</span>
+      </header>
+
+      <section className="specialLectureQuickFacts">
+        {[
+          ["대상", normalizedGuide.audience],
+          ["요일", normalizedGuide.days],
+          ["시간", normalizedGuide.time],
+          ["시수", normalizedGuide.lessonCount],
+          ["교재", normalizedGuide.textbook],
+          ["수강료", normalizedGuide.tuition]
+        ].map(([label, value]) => (
+          <div key={label}>
+            <span>{label}</span>
+            <strong>{value || "-"}</strong>
+          </div>
+        ))}
+      </section>
+
+      <section className="specialLectureGuideSection">
+        <h2>수업 방향</h2>
+        <p>{normalizedGuide.summary}</p>
+        <ul>
+          {normalizedGuide.highlights.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="specialLectureGuideSection">
+        <h2>회차별 계획</h2>
+        <div className="specialLectureTimeline">
+          {normalizedGuide.sessions.map((session, index) => (
+            <div className="specialLectureTimelineItem" key={`${session.date}_${session.topic}_${index}`}>
+              <span>{index + 1}</span>
+              <div>
+                <strong>{session.date}{session.day ? ` (${session.day})` : ""}</strong>
+                <p>{session.topic}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="specialLectureGuideFooter">
+        <div>
+          <span>담당</span>
+          <strong>{normalizedGuide.teacher}</strong>
+        </div>
+        <p>신청과 세부 문의는 학원으로 회신해 주세요.</p>
+        {guideUrl ? <small>{guideUrl}</small> : null}
+      </section>
+    </article>
+  );
+}
+
+function SpecialLecturePublicPage() {
+  const [guides, setGuides] = useState(defaultSpecialLectureGuides);
+  const [loadState, setLoadState] = useState("loading");
+  const query = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : new URLSearchParams();
+  const requestedSlug = query.get("guide") || (typeof window !== "undefined" ? window.location.hash.replace(/^#special-lecture\/?/, "") : "");
+  const normalizedGuides = normalizeSpecialLectureGuides(guides);
+  const selectedGuide = normalizedGuides.find((guide) => getSpecialLectureGuideSlug(guide) === requestedSlug) ?? normalizedGuides[0];
+
+  useEffect(() => {
+    let isMounted = true;
+    fetch(apiUrl("/api/special-lecture-guides"))
+      .then((response) => response.json())
+      .then((result) => {
+        if (!isMounted) return;
+        if (result.ok && Array.isArray(result.specialLectureGuides) && result.specialLectureGuides.length) {
+          setGuides(normalizeSpecialLectureGuides(result.specialLectureGuides));
+        }
+        setLoadState("loaded");
+      })
+      .catch(() => {
+        if (isMounted) setLoadState("fallback");
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof document !== "undefined" && selectedGuide?.title) {
+      document.title = `${selectedGuide.title} - ${academyBrandName}`;
+    }
+  }, [selectedGuide?.title]);
+
+  return (
+    <main className="specialLecturePublicPage">
+      <SpecialLectureGuidePreview guide={selectedGuide} />
+      {loadState === "fallback" ? (
+        <p className="specialLectureLoadNotice">저장본을 불러오지 못해 기본 안내문을 표시하고 있습니다.</p>
+      ) : null}
+    </main>
   );
 }
 

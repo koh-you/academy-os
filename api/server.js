@@ -4632,6 +4632,23 @@ const server = http.createServer(async (request, response) => {
     return;
   }
 
+  if (request.method === "GET" && requestUrl.pathname === "/api/special-lecture-guides") {
+    try {
+      const result = await listAppState();
+      const specialLectureGuides = Array.isArray(result.states?.specialLectureGuides)
+        ? result.states.specialLectureGuides
+        : [];
+      sendJson(request, response, 200, {
+        ok: true,
+        source: result.source,
+        specialLectureGuides
+      });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
   if (request.method === "POST" && requestUrl.pathname === "/api/app-state") {
     try {
       const payload = await readJsonBody(request);

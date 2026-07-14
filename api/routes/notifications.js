@@ -15,6 +15,7 @@ const REQUIRED_SOLAPI_ENV = [
 const TEMPLATE_ENV = {
   attendance: "SOLAPI_ATTENDANCE_TEMPLATE_ID",
   dailyReport: "SOLAPI_DAILY_REPORT_TEMPLATE_ID",
+  specialLectureNotice: "SOLAPI_SPECIAL_LECTURE_TEMPLATE_ID",
   studentComment: "SOLAPI_STUDENT_COMMENT_TEMPLATE_ID"
 };
 
@@ -416,6 +417,7 @@ export function getNotificationStatus() {
     templatesConfigured: {
       attendance: configState(TEMPLATE_ENV.attendance),
       dailyReport: configState(TEMPLATE_ENV.dailyReport),
+      specialLectureNotice: configState(TEMPLATE_ENV.specialLectureNotice),
       studentComment: configState(TEMPLATE_ENV.studentComment)
     },
     missing: required.filter((name) => !configState(name))
@@ -630,7 +632,10 @@ export async function sendDailyReportAlimtalk(payload) {
 export async function sendLessonCommentAlimtalk(payload) {
   const audience = payload.target === "student" ? "student" : "parent";
   const recipientPhone = audience === "student" ? payload.studentPhone : payload.parentPhone;
-  const templateEnvName = audience === "student" ? TEMPLATE_ENV.studentComment : TEMPLATE_ENV.dailyReport;
+  const canUseSpecialLectureTemplate = payload.noticeKind === "special_lecture" && configState(TEMPLATE_ENV.specialLectureNotice);
+  const templateEnvName = canUseSpecialLectureTemplate
+    ? TEMPLATE_ENV.specialLectureNotice
+    : audience === "student" ? TEMPLATE_ENV.studentComment : TEMPLATE_ENV.dailyReport;
   const commentBody = resolveLessonCommentBody(payload, audience);
 
   return sendKakaoAlimtalk({
@@ -644,7 +649,12 @@ export async function sendLessonCommentAlimtalk(payload) {
       "#{수업명}": String(payload.lessonName ?? ""),
       "#{수업일}": String(payload.lessonDate ?? ""),
       "#{리포트본문}": commentBody,
-      "#{코멘트}": commentBody
+      "#{코멘트}": commentBody,
+      "#{특강명}": String(payload.specialLectureTitle ?? payload.noticeTitle ?? payload.lessonName ?? ""),
+      "#{요일}": String(payload.specialLectureDays ?? ""),
+      "#{시간}": String(payload.specialLectureTime ?? ""),
+      "#{시수}": String(payload.specialLectureLessonCount ?? ""),
+      "#{안내문링크}": String(payload.specialLectureUrl ?? "")
     }
   });
 }

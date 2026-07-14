@@ -7182,6 +7182,333 @@ button:disabled {
   margin-top: 14px;
 }
 
+.notificationSectionTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 14px;
+}
+
+.notificationSectionTabs button {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 900;
+  padding: 10px 14px;
+}
+
+.notificationSectionTabs button.active {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #ffffff;
+}
+
+.specialLecturePanel {
+  display: grid;
+  gap: 16px;
+}
+
+.specialLectureSelector {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.specialLectureSelector button {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  padding: 13px;
+  text-align: left;
+}
+
+.specialLectureSelector button.active {
+  background: #eef2ff;
+  border-color: #3b82f6;
+}
+
+.specialLectureSelector strong {
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.specialLectureSelector span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.specialLectureEditorGrid {
+  align-items: start;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(420px, 1.1fr) minmax(340px, 0.9fr);
+}
+
+.specialLectureEditor,
+.specialLectureFormGrid,
+.specialLectureWideField {
+  display: grid;
+  gap: 10px;
+}
+
+.specialLectureNoticeBox p {
+  margin: 0;
+}
+
+.specialLectureFormGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.specialLectureEditor label,
+.specialLectureWideField {
+  color: #334155;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.specialLectureEditor input,
+.specialLectureEditor textarea {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #0f172a;
+  font: inherit;
+  line-height: 1.5;
+  padding: 10px 11px;
+}
+
+.specialLectureEditor textarea {
+  resize: vertical;
+}
+
+.specialLectureActionBar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.specialLectureNoticePreview {
+  background: #f8fafc;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.specialLectureNoticePreview strong {
+  color: #1e3a8a;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.specialLectureNoticePreview p {
+  color: #334155;
+  line-height: 1.65;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.specialLectureGuidePreview {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.specialLectureHero {
+  background: #1d4ed8;
+  color: #ffffff;
+  display: grid;
+  gap: 10px;
+  padding: 28px;
+}
+
+.specialLectureHero p,
+.specialLectureHero h1,
+.specialLectureHero span {
+  margin: 0;
+}
+
+.specialLectureHero p {
+  font-size: 13px;
+  font-weight: 900;
+  opacity: 0.86;
+}
+
+.specialLectureHero h1 {
+  font-size: 30px;
+  line-height: 1.25;
+}
+
+.specialLectureHero span {
+  font-size: 15px;
+  line-height: 1.55;
+  opacity: 0.92;
+}
+
+.specialLectureQuickFacts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.specialLectureQuickFacts div {
+  border-bottom: 1px solid #e2e8f0;
+  border-right: 1px solid #e2e8f0;
+  display: grid;
+  gap: 5px;
+  min-height: 82px;
+  padding: 14px;
+}
+
+.specialLectureQuickFacts div:nth-child(2n) {
+  border-right: 0;
+}
+
+.specialLectureQuickFacts span,
+.specialLectureGuideFooter span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.specialLectureQuickFacts strong,
+.specialLectureGuideFooter strong {
+  color: #0f172a;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.specialLectureGuideSection {
+  border-bottom: 1px solid #e2e8f0;
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+}
+
+.specialLectureGuideSection h2 {
+  color: #0f172a;
+  font-size: 20px;
+  margin: 0;
+}
+
+.specialLectureGuideSection p {
+  color: #334155;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.specialLectureGuideSection ul {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.specialLectureGuideSection li {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  color: #166534;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.5;
+  padding: 10px 12px;
+}
+
+.specialLectureTimeline {
+  display: grid;
+  gap: 10px;
+}
+
+.specialLectureTimelineItem {
+  align-items: start;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 34px 1fr;
+}
+
+.specialLectureTimelineItem > span {
+  align-items: center;
+  background: #1d4ed8;
+  border-radius: 999px;
+  color: #ffffff;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 900;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+}
+
+.specialLectureTimelineItem div {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+}
+
+.specialLectureTimelineItem strong {
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.specialLectureTimelineItem p {
+  color: #475569;
+  font-size: 14px;
+  margin: 0;
+}
+
+.specialLectureGuideFooter {
+  background: #f8fafc;
+  display: grid;
+  gap: 10px;
+  padding: 22px;
+}
+
+.specialLectureGuideFooter div {
+  display: grid;
+  gap: 4px;
+}
+
+.specialLectureGuideFooter p,
+.specialLectureGuideFooter small {
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.specialLecturePublicPage {
+  background: #edf5ff;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.specialLecturePublicPage .specialLectureGuidePreview {
+  margin: 0 auto;
+  max-width: 760px;
+}
+
+.specialLectureLoadNotice {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+  margin: 14px auto 0;
+  max-width: 760px;
+  text-align: center;
+}
+
 .statusPill {
   align-self: start;
   background: var(--status-neutral-bg);
@@ -14161,6 +14488,7 @@ body.attendanceOnlyBody {
   .schoolCalendarLayout,
   .schoolCalendarLayout.formCollapsed,
   .examAnalysisGrid,
+  .specialLectureEditorGrid,
   .followCandidateGrid,
   .supplementOverviewGrid,
   .profileSummary,
@@ -14175,6 +14503,8 @@ body.attendanceOnlyBody {
   }
 
   .materialFolderBar,
+  .specialLectureFormGrid,
+  .specialLectureSelector,
   .wrongBoardFilterPanel,
   .wrongBookHeader,
   .wrongBookBody,
@@ -14414,6 +14744,41 @@ body.attendanceOnlyBody {
   .parentPortalMobileFirst .portalActions > * {
     justify-content: center;
     width: 100%;
+  }
+
+  .specialLecturePublicPage {
+    padding: 12px;
+  }
+
+  .specialLectureHero {
+    padding: 22px;
+  }
+
+  .specialLectureHero h1 {
+    font-size: 24px;
+  }
+
+  .specialLectureQuickFacts {
+    grid-template-columns: 1fr;
+  }
+
+  .specialLectureQuickFacts div {
+    border-right: 0;
+    min-height: 70px;
+  }
+
+  .specialLectureGuideSection,
+  .specialLectureGuideFooter {
+    padding: 18px;
+  }
+
+  .specialLectureTimelineItem {
+    grid-template-columns: 30px 1fr;
+  }
+
+  .specialLectureTimelineItem > span {
+    height: 30px;
+    width: 30px;
   }
 
   .studentPortalTabletFirst .metricGrid {
