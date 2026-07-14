@@ -5671,9 +5671,48 @@ button {
   display: block;
 }
 
-.schoolEventPill {
+.schoolCalendarSaveNotice {
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #dbe5f5;
   border-radius: 8px;
-  color: #ffffff;
+  color: #475569;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+  margin: 10px 0 14px;
+  padding: 10px 12px;
+}
+
+.schoolCalendarSaveNotice strong,
+.schoolCalendarSaveNotice span {
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.schoolCalendarSaveNotice.saving {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #9a3412;
+}
+
+.schoolCalendarSaveNotice.saved {
+  background: #f0fdfa;
+  border-color: #99f6e4;
+  color: #115e59;
+}
+
+.schoolCalendarSaveNotice.failed {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.schoolEventPill {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 8px;
+  color: #17213d;
   display: block;
   font-size: 11px;
   font-weight: 900;
@@ -5686,11 +5725,11 @@ button {
 }
 
 .event-mathExam {
-  background: #dc2626;
+  background: #fecaca;
 }
 
 .event-examPeriod {
-  background: #ef4444;
+  background: #fed7aa;
 }
 
 .schoolEventMorePill {
@@ -5721,7 +5760,7 @@ button {
 
 .schoolEventPill.mathExamTab {
   border-radius: 6px;
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.16);
+  box-shadow: 0 5px 12px rgba(76, 90, 125, 0.14);
   box-sizing: border-box;
   display: block;
   flex: 0 1 calc(50% - 3px);
@@ -5757,15 +5796,15 @@ button {
 }
 
 .event-preExam {
-  background: #2563eb;
+  background: #bfdbfe;
 }
 
 .event-vacation {
-  background: #10b981;
+  background: #bbf7d0;
 }
 
 .event-schoolEvent {
-  background: #f59e0b;
+  background: #fde68a;
 }
 
 .event-custom {
@@ -5821,8 +5860,8 @@ button {
 }
 
 .schoolAcademicStatsGrid article {
-  background: #f8fbff;
-  border: 1px solid #dbe8fb;
+  background: linear-gradient(135deg, #fff7ed, #f0fdfa);
+  border: 1px solid #dbeadf;
   border-radius: 8px;
   display: grid;
   gap: 5px;
@@ -5849,7 +5888,7 @@ button {
 }
 
 .examPeriodOverviewCard {
-  background: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 52%, #fff7ed 100%);
   border: 1px solid #d8e4f6;
   border-left: 4px solid var(--school-color, #2563eb);
   border-radius: 8px;
@@ -5859,13 +5898,21 @@ button {
   padding: 15px;
 }
 
-.examPeriodOverviewCard > div:first-child {
+.examPeriodOverviewCardHeader {
+  align-items: flex-start;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.examPeriodOverviewCardHeader > div {
   display: grid;
   gap: 4px;
+  min-width: 0;
 }
 
 .examPeriodOverviewCard strong {
-  color: var(--school-color, #17213d);
+  color: #17213d;
   font-size: 17px;
   line-height: 1.25;
 }
@@ -5886,10 +5933,10 @@ button {
 }
 
 .examPeriodMathChips span {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
+  background: #f0fdfa;
+  border: 1px solid #b8eee5;
   border-radius: 999px;
-  color: #1f3f8f;
+  color: #17564e;
   font-size: 12px;
   padding: 5px 8px;
 }
@@ -6324,6 +6371,7 @@ button {
 }
 
 .schoolDateGroup {
+  background: #fbfdff;
   border: 1px solid #d8e3f8;
   border-left: 4px solid var(--school-color, #d8e3f8);
   border-radius: 8px;
@@ -6344,7 +6392,7 @@ button {
 }
 
 .schoolDateGroupHeader strong {
-  color: var(--school-color, #0f172a);
+  color: #17213d;
   font-size: 16px;
   font-weight: 900;
 }
@@ -6356,6 +6404,7 @@ button {
 }
 
 .schoolDateEventEditor {
+  background: #ffffff;
   border: 1px solid #d8e3f8;
   border-left: 4px solid var(--school-color, #d8e3f8);
   border-radius: 8px;
@@ -6383,12 +6432,25 @@ button {
 }
 
 .schoolDateEventEditorTop span {
-  background: #eef2ff;
+  background: #f0fdfa;
   border-radius: 999px;
-  color: #3730a3;
+  color: #115e59;
   font-size: 12px;
   font-weight: 900;
   padding: 6px 10px;
+}
+
+.schoolDateEventActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.schoolDateEventActions .primaryButton.compact {
+  min-height: 34px;
+  padding: 0 12px;
 }
 
 .schoolDateEventEditor label {

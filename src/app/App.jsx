@@ -4965,13 +4965,24 @@ const examPrepTextbookBySchoolGrade = {
 
 const schoolCalendarGradeOptions = ["중3", "고1", "고2", "고3"];
 const schoolCalendarMathSubjectOptions = ["공통수학1", "공통수학2", "대수", "미적분1", "확률과통계", "미적분2", "기하"];
-const schoolCalendarSchoolColorPalette = ["#2563eb", "#0f766e", "#7c3aed", "#ea580c", "#db2777", "#0891b2", "#4f46e5", "#65a30d", "#b45309"];
+const schoolCalendarSchoolColorPalette = ["#7aa7ff", "#5fc8bd", "#a78bfa", "#fdba74", "#f9a8d4", "#67e8f9", "#93c5fd", "#86efac", "#fcd34d"];
 const schoolCalendarKnownColors = {
-  상계고: "#2563eb",
-  자운고: "#0f766e",
-  정의여고: "#7c3aed",
-  용화여고: "#db2777",
-  창동고: "#ea580c"
+  상계고: "#7aa7ff",
+  자운고: "#5fc8bd",
+  정의여고: "#a78bfa",
+  용화여고: "#f9a8d4",
+  창동고: "#fdba74"
+};
+const schoolCalendarLegacyColorMap = {
+  "#2563eb": "#7aa7ff",
+  "#0f766e": "#5fc8bd",
+  "#7c3aed": "#a78bfa",
+  "#ea580c": "#fdba74",
+  "#db2777": "#f9a8d4",
+  "#0891b2": "#67e8f9",
+  "#4f46e5": "#93c5fd",
+  "#65a30d": "#86efac",
+  "#b45309": "#fcd34d"
 };
 const currentExamCycle = getDefaultExamCycleForDate(today);
 
@@ -5076,8 +5087,13 @@ function getSchoolCalendarSchoolColor(schoolName = "") {
   return schoolCalendarSchoolColorPalette[hash % schoolCalendarSchoolColorPalette.length];
 }
 
+function normalizeSchoolCalendarColor(color = "") {
+  const key = String(color || "").trim().toLowerCase();
+  return schoolCalendarLegacyColorMap[key] || color;
+}
+
 function getSchoolCalendarEventColor(event = {}) {
-  return event.color || getSchoolCalendarSchoolColor(event.schoolName);
+  return normalizeSchoolCalendarColor(event.color) || getSchoolCalendarSchoolColor(event.schoolName);
 }
 
 function schoolNamesMatch(firstSchool = "", secondSchool = "", { allowBlank = true } = {}) {
@@ -9273,28 +9289,23 @@ export function App() {
         {activeView === "schoolCalendar" ? (
           <SchoolCalendarCenter
             events={schoolEvents}
+            rowSaveStates={examPrepRowSaveStates}
             rows={examPrepRows}
-            onAddEvent={(event) => {
+            onSaveEvent={async (event) => {
               const nextEvent = { ...event, eventId: event.eventId || `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}` };
-              setSchoolEvents((current) => [nextEvent, ...current]);
-              postSchoolEvent(nextEvent).catch((error) => console.error(error));
+              setSchoolEvents((current) => upsertById(current, nextEvent, "eventId"));
+              const result = await postSchoolEvent(nextEvent);
+              const savedEvent = result.schoolEvent ?? nextEvent;
+              setSchoolEvents((current) => upsertById(current, savedEvent, "eventId"));
+              return savedEvent;
             }}
-            onDeleteEvent={(eventId) => {
+            onDeleteEvent={async (eventId) => {
               setSchoolEvents((current) => current.filter((event) => event.eventId !== eventId));
-              deleteSchoolEventFromApi(eventId).catch((error) => console.error(error));
+              await deleteSchoolEventFromApi(eventId);
+              return eventId;
             }}
             onSyncPreExamLesson={handleSyncPreExamLessonFromSchoolEvent}
             onUpdateExamPrepRow={handleUpdateExamPrepRow}
-            onUpdateEvent={(eventId, field, value) =>
-              setSchoolEvents((current) =>
-                current.map((event) => {
-                  if (event.eventId !== eventId) return event;
-                  const nextEvent = { ...event, [field]: value };
-                  postSchoolEvent(nextEvent).catch((error) => console.error(error));
-                  return nextEvent;
-                })
-              )
-            }
           />
         ) : null}
 
@@ -20377,12 +20388,12 @@ function SettingsCenter({
 
 function SchoolCalendarCenter({
   events,
+  rowSaveStates = {},
   rows,
-  onAddEvent,
   onDeleteEvent,
+  onSaveEvent,
   onSyncPreExamLesson,
-  onUpdateExamPrepRow,
-  onUpdateEvent
+  onUpdateExamPrepRow
 }) {
   const [selectedMonth, setSelectedMonth] = useState(today);
   const [selectedDate, setSelectedDate] = useState(today);
@@ -20390,6 +20401,13 @@ function SchoolCalendarCenter({
   const [schoolFilter, setSchoolFilter] = useState("전체 학교");
   const [calendarFilter, setCalendarFilter] = useState("all");
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [pendingExamPrepSaveIds, setPendingExamPrepSaveIds] = useState([]);
+  const [observedExamPrepSaving, setObservedExamPrepSaving] = useState(false);
+  const [schoolCalendarSaveState, setSchoolCalendarSaveState] = useState({
+    state: "idle",
+    message: "등록/수정 후 저장 결과가 여기에 표시됩니다."
+  });
   const [newEvent, setNewEvent] = useState({
     schoolName: rows[0]?.schoolName ?? "",
     grade: schoolCalendarGradeOptions.includes(rows[0]?.grade) ? rows[0]?.grade : "고1",
@@ -20430,7 +20448,7 @@ function SchoolCalendarCenter({
     { id: "schoolEvent", label: "학교행사" },
     { id: "custom", label: "기타" }
   ];
-  const eventColorOptions = [...schoolCalendarSchoolColorPalette, "#17213d"];
+  const eventColorOptions = [...schoolCalendarSchoolColorPalette, "#c4b5fd", "#fecaca", "#bbf7d0"];
   const examEvents = buildExamCalendarEvents(rows);
   const manualEvents = events.filter((event) =>
     !String(event.eventId ?? "").startsWith("event_exam_") &&
@@ -20454,6 +20472,38 @@ function SchoolCalendarCenter({
     filteredEvents.filter((event) => event.type === "mathExam"),
     selectedMonth
   );
+  const isEditingEvent = Boolean(editingEvent);
+  const isEditingDerivedEvent = Boolean(editingEvent?.derived);
+
+  useEffect(() => {
+    if (!pendingExamPrepSaveIds.length) return;
+    const saveStates = pendingExamPrepSaveIds.map((rowId) => rowSaveStates[rowId]).filter(Boolean);
+    if (saveStates.includes("failed")) {
+      setSchoolCalendarSaveState({
+        state: "failed",
+        message: "시험관리 연동 일정 저장에 실패했습니다. 시험관리 원본을 확인한 뒤 다시 저장하세요."
+      });
+      setPendingExamPrepSaveIds([]);
+      setObservedExamPrepSaving(false);
+      return;
+    }
+    if (saveStates.includes("saving")) {
+      setObservedExamPrepSaving(true);
+      setSchoolCalendarSaveState({
+        state: "saving",
+        message: "시험관리 원본에 학사일정을 저장하는 중입니다."
+      });
+      return;
+    }
+    if (observedExamPrepSaving && saveStates.length && saveStates.every((state) => state === "saved")) {
+      setSchoolCalendarSaveState({
+        state: "saved",
+        message: "학사일정 · 시험관리 원본 저장 완료"
+      });
+      setPendingExamPrepSaveIds([]);
+      setObservedExamPrepSaving(false);
+    }
+  }, [observedExamPrepSaving, pendingExamPrepSaveIds, rowSaveStates]);
 
   function shiftMonth(amount) {
     const [year, month] = selectedMonth.split("-").map(Number);
@@ -20462,7 +20512,165 @@ function SchoolCalendarCenter({
     setSelectedMonth(nextDate);
   }
 
-  function submitNewEvent() {
+  function getExamPrepSaveIdsForEvent(event = {}) {
+    if (event.derived && event.type === "examPeriod") {
+      const targetRows = event.examPeriodGroupKey
+        ? rows.filter((row) => getExamPeriodGroupKey(row) === event.examPeriodGroupKey)
+        : rows.filter((row) => row.examPrepId === event.examPrepId);
+      return [...new Set(targetRows.map((row) => row.examPrepId).filter(Boolean))];
+    }
+    if (event.derived && event.examPrepId) return [event.examPrepId];
+    if (isExamLinkedCalendarEvent(event)) {
+      return [...new Set(getSchoolCalendarTargetRows(rows, event).map((row) => row.examPrepId).filter(Boolean))];
+    }
+    return [];
+  }
+
+  function beginLinkedSaveTracking(event) {
+    const rowIds = getExamPrepSaveIdsForEvent(event);
+    if (!rowIds.length) {
+      setSchoolCalendarSaveState({
+        state: "failed",
+        message: "저장할 시험관리 원본 행을 찾지 못했습니다. 학교/학년/시험구분을 먼저 확인하세요."
+      });
+      return false;
+    }
+    setPendingExamPrepSaveIds(rowIds);
+    setObservedExamPrepSaving(false);
+    setSchoolCalendarSaveState({
+      state: "saving",
+      message: "시험관리 원본에 학사일정을 저장하는 중입니다."
+    });
+    return true;
+  }
+
+  function closeEventForm() {
+    setIsFormModalOpen(false);
+    setEditingEvent(null);
+  }
+
+  function createDraftFromCalendarEvent(event = {}) {
+    return {
+      schoolName: event.schoolName || event.schoolNames?.[0] || rows[0]?.schoolName || "",
+      grade: event.grade || (schoolCalendarGradeOptions.includes(rows[0]?.grade) ? rows[0]?.grade : "고1"),
+      examCycle: event.examCycle || currentExamCycle,
+      date: event.date || selectedDate,
+      endDate: event.endDate || "",
+      title: event.title || "",
+      type: event.type || "schoolEvent",
+      color: getSchoolCalendarEventColor(event),
+      examSubject: event.examSubject || "",
+      memo: event.memo || "",
+      mathExamItems: [
+        {
+          id: `math_item_${Date.now()}`,
+          grade: event.grade || (schoolCalendarGradeOptions.includes(rows[0]?.grade) ? rows[0]?.grade : "고1"),
+          subject: event.examSubject || "공통수학1",
+          date: event.date || selectedDate,
+          memo: event.memo || ""
+        }
+      ]
+    };
+  }
+
+  function openEventEditForm(event) {
+    setEditingEvent(event);
+    setSelectedDate(event.date || selectedDate);
+    if (event.date) setSelectedMonth(event.date);
+    setNewEvent(createDraftFromCalendarEvent(event));
+    setIsDateModalOpen(false);
+    setIsFormModalOpen(true);
+  }
+
+  async function saveAcademicEventDraft(originalEvent, draftEvent) {
+    const nextEvent = {
+      ...originalEvent,
+      ...draftEvent,
+      mathExamItems: undefined,
+      endDate: draftEvent.type === "mathExam" ? "" : draftEvent.endDate,
+      color: draftEvent.color || getSchoolCalendarSchoolColor(draftEvent.schoolName)
+    };
+    const editableFields = originalEvent.derived
+      ? originalEvent.type === "examPeriod" ? ["date", "endDate"] : ["date", "examSubject"]
+      : ["date", "endDate", "schoolName", "grade", "type", "title", "memo", "color", "examSubject"];
+    const changedFields = editableFields.filter((field) => String(originalEvent[field] ?? "") !== String(nextEvent[field] ?? ""));
+    if (!changedFields.length) {
+      setSchoolCalendarSaveState({ state: "saved", message: "변경된 내용이 없습니다." });
+      closeEventForm();
+      return;
+    }
+    if (originalEvent.derived) {
+      if (!beginLinkedSaveTracking(nextEvent)) return;
+      if (originalEvent.type === "examPeriod") {
+        const targetRows = originalEvent.examPeriodGroupKey
+          ? rows.filter((row) => getExamPeriodGroupKey(row) === originalEvent.examPeriodGroupKey)
+          : rows.filter((row) => row.examPrepId === originalEvent.examPrepId);
+        targetRows.forEach((row) => {
+          onUpdateExamPrepRow?.(
+            row.examPrepId,
+            "examPeriod",
+            formatDateRangeText(nextEvent.date, nextEvent.endDate || nextEvent.date)
+          );
+        });
+      } else if (originalEvent.type === "mathExam") {
+        const sourceRow = rows.find((row) => row.examPrepId === originalEvent.examPrepId);
+        const entries = normalizeMathExamEntries(sourceRow ?? {});
+        const fallbackEntries = entries.length ? entries : [createMathExamEntry(sourceRow ?? {}, 0)];
+        const targetIndex = typeof originalEvent.mathExamEntryIndex === "number"
+          ? originalEvent.mathExamEntryIndex
+          : fallbackEntries.findIndex((entry) => entry.id === originalEvent.mathExamEntryId);
+        const safeIndex = targetIndex >= 0 ? targetIndex : 0;
+        const nextEntries = fallbackEntries.map((entry, index) => (
+          index === safeIndex
+            ? {
+                ...entry,
+                date: nextEvent.date || "",
+                subject: normalizeMathSubject(nextEvent.examSubject || entry.subject),
+                label: nextEvent.examSubject || entry.label
+              }
+            : entry
+        ));
+        onUpdateExamPrepRow?.(originalEvent.examPrepId, "mathExamDates", nextEntries);
+        onUpdateExamPrepRow?.(originalEvent.examPrepId, "mathExamDate", syncPrimaryMathExamDate(nextEntries));
+        onSyncPreExamLesson?.({ ...originalEvent, ...nextEvent });
+      } else {
+        changedFields.forEach((field) => updateAcademicEvent(originalEvent, field, nextEvent[field]));
+      }
+      closeEventForm();
+      return;
+    }
+    try {
+      setSchoolCalendarSaveState({ state: "saving", message: "수동 학사일정을 저장하는 중입니다." });
+      const savedEvent = await onSaveEvent?.(nextEvent);
+      setSchoolCalendarSaveState({
+        state: "saved",
+        message: `${savedEvent?.title || nextEvent.title || "학사일정"} · 저장 완료`
+      });
+      closeEventForm();
+    } catch (error) {
+      console.error(error);
+      setSchoolCalendarSaveState({
+        state: "failed",
+        message: error.message || "학사일정 저장에 실패했습니다."
+      });
+    }
+  }
+
+  async function deleteAcademicEvent(eventId) {
+    try {
+      setSchoolCalendarSaveState({ state: "saving", message: "수동 학사일정을 삭제하는 중입니다." });
+      await onDeleteEvent?.(eventId);
+      setSchoolCalendarSaveState({ state: "saved", message: "학사일정 · 삭제 완료" });
+    } catch (error) {
+      console.error(error);
+      setSchoolCalendarSaveState({
+        state: "failed",
+        message: error.message || "학사일정 삭제에 실패했습니다."
+      });
+    }
+  }
+
+  async function submitNewEvent() {
     const schoolName = newEvent.schoolName || schools[0] || "학교 미입력";
     const isMathExamType = newEvent.type === "mathExam";
     const subjectTitle = isMathExamType ? newEvent.examSubject.trim() || "수학시험" : "";
@@ -20483,10 +20691,30 @@ function SchoolCalendarCenter({
       endDate: isMathExamType ? "" : newEvent.endDate,
       color: newEvent.color || getSchoolCalendarSchoolColor(schoolName)
     };
+    if (editingEvent) {
+      await saveAcademicEventDraft(editingEvent, nextEvent);
+      return;
+    }
+    const isLinkedEvent = isExamLinkedCalendarEvent(nextEvent);
+    if (isLinkedEvent && !beginLinkedSaveTracking(nextEvent)) return;
     syncSchoolCalendarEventToExamPrepRows(rows, nextEvent, onUpdateExamPrepRow);
     if (nextEvent.type === "mathExam") onSyncPreExamLesson?.(nextEvent);
-    if (!isExamLinkedCalendarEvent(nextEvent)) {
-      onAddEvent(nextEvent);
+    if (!isLinkedEvent) {
+      try {
+        setSchoolCalendarSaveState({ state: "saving", message: "수동 학사일정을 저장하는 중입니다." });
+        const savedEvent = await onSaveEvent?.(nextEvent);
+        setSchoolCalendarSaveState({
+          state: "saved",
+          message: `${savedEvent?.title || nextEvent.title || "학사일정"} · 저장 완료`
+        });
+      } catch (error) {
+        console.error(error);
+        setSchoolCalendarSaveState({
+          state: "failed",
+          message: error.message || "학사일정 저장에 실패했습니다."
+        });
+        return;
+      }
     }
     if (newEvent.type === "examPeriod") {
       newEvent.mathExamItems
@@ -20522,7 +20750,7 @@ function SchoolCalendarCenter({
       endDate: current.type === "mathExam" ? "" : current.endDate,
       mathExamItems: [{ id: `math_item_${Date.now()}`, grade: current.grade, subject: current.examSubject || "", date: current.date, memo: "" }]
     }));
-    setIsFormModalOpen(false);
+    closeEventForm();
   }
 
   function updateMathExamItem(itemId, field, value) {
@@ -20597,6 +20825,7 @@ function SchoolCalendarCenter({
   }
 
   function openEventForm(date = selectedDate) {
+    setEditingEvent(null);
     setSelectedDate(date);
     setSelectedMonth(date);
     setNewEvent((current) => ({
@@ -20659,7 +20888,7 @@ function SchoolCalendarCenter({
       }
     }
     const nextEvent = { ...event, [field]: value };
-    onUpdateEvent(event.eventId, field, value);
+    Promise.resolve(onSaveEvent?.(nextEvent)).catch((error) => console.error(error));
     syncSchoolCalendarEventToExamPrepRows(rows, nextEvent, onUpdateExamPrepRow);
     if (nextEvent.type === "mathExam") onSyncPreExamLesson?.(nextEvent);
   }
@@ -20683,19 +20912,23 @@ function SchoolCalendarCenter({
       </header>
 
       <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...schoolCalendarAutosaveRisk} />
+      <div className={`schoolCalendarSaveNotice ${schoolCalendarSaveState.state}`} role="status">
+        <strong>학사일정 저장</strong>
+        <span>{schoolCalendarSaveState.message}</span>
+      </div>
 
       <div className="schoolCalendarLayout">
         {isFormModalOpen ? (
           <Modal
             className="schoolEventFormModal"
-            title="일정 등록"
-            subtitle="입력 유형을 먼저 고른 뒤 필요한 정보만 입력합니다."
-            onClose={() => setIsFormModalOpen(false)}
+            title={isEditingEvent ? "일정 수정" : "일정 등록"}
+            subtitle={isEditingEvent ? "변경할 항목을 확인한 뒤 저장합니다." : "입력 유형을 먼저 고른 뒤 필요한 정보만 입력합니다."}
+            onClose={closeEventForm}
           >
             <div className="schoolEventFormPanel modalForm">
               <label className="inputTypeField">
                 입력 유형
-                <select value={newEvent.type} onChange={(event) => changeNewEventType(event.target.value)}>
+                <select disabled={isEditingDerivedEvent} value={newEvent.type} onChange={(event) => changeNewEventType(event.target.value)}>
                   {Object.entries(eventTypeLabels).map(([value, label]) => (
                     <option key={value} value={value}>{label}</option>
                   ))}
@@ -20704,6 +20937,7 @@ function SchoolCalendarCenter({
               <label>
                 학교
                 <select
+                  disabled={isEditingDerivedEvent}
                   value={newEvent.schoolName}
                   onChange={(event) => {
                     const schoolName = event.target.value;
@@ -20724,7 +20958,7 @@ function SchoolCalendarCenter({
               {["examPeriod", "mathExam"].includes(newEvent.type) ? (
                 <label>
                   시험 구분
-                  <select value={newEvent.examCycle} onChange={(event) => changeNewEventExamCycle(event.target.value)}>
+                  <select disabled={isEditingDerivedEvent} value={newEvent.examCycle} onChange={(event) => changeNewEventExamCycle(event.target.value)}>
                     {safeExamCycleOptions.map((cycle) => (
                       <option key={cycle} value={cycle}>{examCycleLabel(cycle)}</option>
                     ))}
@@ -20755,6 +20989,7 @@ function SchoolCalendarCenter({
                     <button
                       aria-label={`색상 ${color}`}
                       className={newEvent.color === color ? "active" : ""}
+                      disabled={isEditingDerivedEvent}
                       key={color}
                       onClick={() => setNewEvent((current) => ({ ...current, color }))}
                       style={{ backgroundColor: color }}
@@ -20775,7 +21010,8 @@ function SchoolCalendarCenter({
                       <input type="date" value={newEvent.endDate} onChange={(event) => setNewEvent((current) => ({ ...current, endDate: event.target.value }))} />
                     </label>
                   </div>
-                  <div className="examSubjectBox schoolExamBundleBox">
+                  {!isEditingEvent ? (
+                    <div className="examSubjectBox schoolExamBundleBox">
                     <div className="sectionHeader slim">
                       <strong>수학시험 날짜</strong>
                       <button className="softButton small" onClick={addMathExamItem} type="button">+ 수학시험 추가</button>
@@ -20815,6 +21051,7 @@ function SchoolCalendarCenter({
                       ))}
                     </div>
                   </div>
+                  ) : null}
                 </>
               ) : newEvent.type === "mathExam" ? (
                 <div className="examSubjectBox">
@@ -20849,7 +21086,7 @@ function SchoolCalendarCenter({
                 <textarea value={newEvent.memo} onChange={(event) => setNewEvent((current) => ({ ...current, memo: event.target.value }))} placeholder="필요한 메모" rows="4" />
               </label>
               <button className="primaryButton full" onClick={submitNewEvent} type="button">
-                {newEvent.type === "examPeriod" ? "시험일정 묶음 등록" : "일정 등록"}
+                {isEditingEvent ? "변경 저장" : newEvent.type === "examPeriod" ? "시험일정 묶음 등록" : "일정 등록"}
               </button>
             </div>
           </Modal>
@@ -20886,9 +21123,12 @@ function SchoolCalendarCenter({
                   key={event.eventId}
                   style={{ "--school-color": getSchoolCalendarEventColor(event) }}
                 >
-                  <div>
-                    <strong>{formatPeriodSummaryLabel(event)}</strong>
-                    <span>{examCycleLabel(event.examCycle || currentExamCycle)}</span>
+                  <div className="examPeriodOverviewCardHeader">
+                    <div>
+                      <strong>{formatPeriodSummaryLabel(event)}</strong>
+                      <span>{examCycleLabel(event.examCycle || currentExamCycle)}</span>
+                    </div>
+                    <button className="softButton small" onClick={() => openEventEditForm(event)} type="button">수정</button>
                   </div>
                   <p>{event.date} ~ {event.endDate || event.date}</p>
                   <div className="examPeriodMathChips">
@@ -21009,9 +21249,9 @@ function SchoolCalendarCenter({
           eventTypeLabels={eventTypeLabels}
           events={selectedDateEvents}
           onClose={() => setIsDateModalOpen(false)}
-          onDeleteEvent={onDeleteEvent}
+          onDeleteEvent={deleteAcademicEvent}
           onCreateEvent={openEventForm}
-          onUpdateEvent={updateAcademicEvent}
+          onSaveEvent={saveAcademicEventDraft}
           schools={schools}
           selectedDate={selectedDate}
         />
@@ -21027,7 +21267,7 @@ function SchoolDateScheduleModal({
   onClose,
   onCreateEvent,
   onDeleteEvent,
-  onUpdateEvent,
+  onSaveEvent,
   schools,
   selectedDate
 }) {
@@ -21038,6 +21278,25 @@ function SchoolDateScheduleModal({
     return groups;
   }, new Map());
   const groupedEventEntries = [...groupedEvents.entries()].sort(([schoolA], [schoolB]) => schoolA.localeCompare(schoolB));
+  const [draftEvents, setDraftEvents] = useState({});
+
+  useEffect(() => {
+    setDraftEvents(Object.fromEntries(events.map((event) => [event.eventId, { ...event }])));
+  }, [events]);
+
+  function getDraftEvent(event) {
+    return draftEvents[event.eventId] ?? event;
+  }
+
+  function updateDraftEvent(eventId, field, value) {
+    setDraftEvents((current) => ({
+      ...current,
+      [eventId]: {
+        ...(current[eventId] ?? events.find((event) => event.eventId === eventId) ?? {}),
+        [field]: value
+      }
+    }));
+  }
 
   return (
     <Modal className="schoolDateScheduleModal" title={`${selectedDate} 일정`} subtitle="일정 내용과 색상을 확인하고 수정합니다." onClose={onClose}>
@@ -21061,11 +21320,12 @@ function SchoolDateScheduleModal({
                 <span>{schoolEvents.length}건</span>
               </div>
               {schoolEvents.map((event) => {
+                const draftEvent = getDraftEvent(event);
                 const isReadonlyEvent = Boolean(event.readonly);
                 const canEditDerivedDate = !isReadonlyEvent && event.derived && ["examPeriod", "mathExam"].includes(event.type);
                 const canEditDerivedSubject = !isReadonlyEvent && event.derived && event.type === "mathExam";
                 const canEditEventDetails = !event.derived && !isReadonlyEvent;
-                const eventColor = getSchoolCalendarEventColor(event);
+                const eventColor = getSchoolCalendarEventColor(draftEvent);
                 const eventColorOptionsForDisplay = eventColorOptions.includes(eventColor)
                   ? eventColorOptions
                   : [eventColor, ...eventColorOptions];
@@ -21073,31 +21333,36 @@ function SchoolDateScheduleModal({
                   <article className="schoolDateEventEditor" key={event.eventId} style={{ "--school-color": eventColor }}>
                     <div className="schoolDateEventEditorTop">
                       <div>
-                        <strong>{formatCalendarSummaryLabel(event)}</strong>
-                        <span>{event.type === "examPeriod" ? `${event.date} ~ ${event.endDate || event.date}` : event.date}</span>
+                        <strong>{formatCalendarSummaryLabel(draftEvent)}</strong>
+                        <span>{event.type === "examPeriod" ? `${draftEvent.date} ~ ${draftEvent.endDate || draftEvent.date}` : draftEvent.date}</span>
                       </div>
-                      {isReadonlyEvent ? (
-                        <span>읽기 전용 일정</span>
-                      ) : event.derived ? (
-                        <span>시험관리 연동 · 수정 즉시 반영</span>
-                      ) : (
-                        <button className="dangerSoftButton" onClick={() => onDeleteEvent(event.eventId)} type="button">삭제</button>
-                      )}
+                      <div className="schoolDateEventActions">
+                        {isReadonlyEvent ? (
+                          <span>읽기 전용 일정</span>
+                        ) : event.derived ? (
+                          <span>시험관리 연동</span>
+                        ) : (
+                          <button className="dangerSoftButton" onClick={() => onDeleteEvent(event.eventId)} type="button">삭제</button>
+                        )}
+                        {!isReadonlyEvent ? (
+                          <button className="primaryButton compact" onClick={() => onSaveEvent(event, draftEvent)} type="button">저장</button>
+                        ) : null}
+                      </div>
                     </div>
                     <div className="fieldGrid two">
                       <label>
                         {event.type === "examPeriod" ? "시작일" : "날짜"}
-                        <input disabled={!canEditEventDetails && !canEditDerivedDate} type="date" value={event.date} onChange={(change) => onUpdateEvent(event, "date", change.target.value)} />
+                        <input disabled={!canEditEventDetails && !canEditDerivedDate} type="date" value={draftEvent.date} onChange={(change) => updateDraftEvent(event.eventId, "date", change.target.value)} />
                       </label>
                       {event.type === "examPeriod" ? (
                         <label>
                           종료일
-                          <input disabled={!canEditEventDetails && !canEditDerivedDate} type="date" value={event.endDate ?? ""} onChange={(change) => onUpdateEvent(event, "endDate", change.target.value)} />
+                          <input disabled={!canEditEventDetails && !canEditDerivedDate} type="date" value={draftEvent.endDate ?? ""} onChange={(change) => updateDraftEvent(event.eventId, "endDate", change.target.value)} />
                         </label>
                       ) : event.type === "mathExam" ? (
                         <label>
                           과목
-                          <select disabled={!canEditEventDetails && !canEditDerivedSubject} value={normalizeMathSubject(event.examSubject ?? "공통수학1")} onChange={(change) => onUpdateEvent(event, "examSubject", change.target.value)}>
+                          <select disabled={!canEditEventDetails && !canEditDerivedSubject} value={normalizeMathSubject(draftEvent.examSubject ?? "공통수학1")} onChange={(change) => updateDraftEvent(event.eventId, "examSubject", change.target.value)}>
                             {schoolCalendarMathSubjectOptions.map((subject) => (
                               <option key={subject} value={subject}>{subject}</option>
                             ))}
@@ -21106,20 +21371,20 @@ function SchoolDateScheduleModal({
                       ) : (
                         <label>
                           종료일
-                          <input disabled={!canEditEventDetails} type="date" value={event.endDate || event.date || ""} onChange={(change) => onUpdateEvent(event, "endDate", change.target.value)} />
+                          <input disabled={!canEditEventDetails} type="date" value={draftEvent.endDate || draftEvent.date || ""} onChange={(change) => updateDraftEvent(event.eventId, "endDate", change.target.value)} />
                         </label>
                       )}
                       <label>
                         학교
-                        <select disabled={!canEditEventDetails} value={event.schoolName} onChange={(change) => onUpdateEvent(event, "schoolName", change.target.value)}>
-                          {[event.schoolName, ...schools].filter(Boolean).filter((school, index, array) => array.indexOf(school) === index).map((school) => (
+                        <select disabled={!canEditEventDetails} value={draftEvent.schoolName} onChange={(change) => updateDraftEvent(event.eventId, "schoolName", change.target.value)}>
+                          {[draftEvent.schoolName, ...schools].filter(Boolean).filter((school, index, array) => array.indexOf(school) === index).map((school) => (
                             <option key={school} value={school}>{school}</option>
                           ))}
                         </select>
                       </label>
                       <label>
                         학년
-                        <select disabled={!canEditEventDetails} value={event.grade ?? ""} onChange={(change) => onUpdateEvent(event, "grade", change.target.value)}>
+                        <select disabled={!canEditEventDetails} value={draftEvent.grade ?? ""} onChange={(change) => updateDraftEvent(event.eventId, "grade", change.target.value)}>
                           <option value="">전체 학년</option>
                           {schoolCalendarGradeOptions.map((grade) => (
                             <option key={grade} value={grade}>{grade}</option>
@@ -21128,20 +21393,22 @@ function SchoolDateScheduleModal({
                       </label>
                       <label>
                         일정 종류
-                        <select disabled={!canEditEventDetails} value={event.type} onChange={(change) => onUpdateEvent(event, "type", change.target.value)}>
-                          {Object.entries(eventTypeLabels).map(([value, label]) => (
-                            <option key={value} value={value}>{label}</option>
-                          ))}
+                        <select disabled={!canEditEventDetails} value={draftEvent.type} onChange={(change) => updateDraftEvent(event.eventId, "type", change.target.value)}>
+                          {Object.entries(eventTypeLabels)
+                            .filter(([value]) => !["examPeriod", "mathExam"].includes(value) || value === event.type)
+                            .map(([value, label]) => (
+                              <option key={value} value={value}>{label}</option>
+                            ))}
                         </select>
                       </label>
                       <label>
                         일정명
-                        <input disabled={!canEditEventDetails} value={event.title} onChange={(change) => onUpdateEvent(event, "title", change.target.value)} />
+                        <input disabled={!canEditEventDetails} value={draftEvent.title} onChange={(change) => updateDraftEvent(event.eventId, "title", change.target.value)} />
                       </label>
                     </div>
                     <label>
                       메모
-                      <textarea disabled={!canEditEventDetails} value={event.memo ?? ""} onChange={(change) => onUpdateEvent(event, "memo", change.target.value)} rows="3" />
+                      <textarea disabled={!canEditEventDetails} value={draftEvent.memo ?? ""} onChange={(change) => updateDraftEvent(event.eventId, "memo", change.target.value)} rows="3" />
                     </label>
                     <label>
                       일정 색상
@@ -21152,7 +21419,7 @@ function SchoolDateScheduleModal({
                             className={eventColor === color ? "active" : ""}
                             disabled={!canEditEventDetails}
                             key={color}
-                            onClick={() => onUpdateEvent(event, "color", color)}
+                            onClick={() => updateDraftEvent(event.eventId, "color", color)}
                             style={{ backgroundColor: color }}
                             type="button"
                           />
