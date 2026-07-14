@@ -13170,6 +13170,55 @@ textarea.profileEditInput {
   overflow: hidden;
 }
 
+.supplementDeferredPanel {
+  background: #f8fbff;
+  border: 1px solid #dbe8fb;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+
+.supplementDeferredToggle {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #d8e4f6;
+  border-radius: 8px;
+  color: #0f172a;
+  cursor: pointer;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 14px 16px;
+  text-align: left;
+  width: 100%;
+}
+
+.supplementDeferredToggle span {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.supplementDeferredToggle b {
+  font-size: 15px;
+}
+
+.supplementDeferredToggle small {
+  color: #52647f;
+  line-height: 1.4;
+}
+
+.supplementDeferredToggle strong {
+  color: #1f3f8f;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.supplementDeferredList {
+  background: #fff;
+}
+
 .supplementRowItem {
   align-items: center;
   border: 0;
@@ -13181,6 +13230,10 @@ textarea.profileEditInput {
   grid-template-columns: minmax(280px, 1fr) 120px 120px;
   min-height: 104px;
   padding: 20px 20px;
+}
+
+.supplementRowItem.futureDeferred {
+  background: #fbfdff;
 }
 
 .supplementRowItem > div {
@@ -13209,6 +13262,11 @@ textarea.profileEditInput {
 .supplementRowItem small {
   color: #52647f;
   line-height: 1.4;
+}
+
+.supplementFutureHint {
+  color: #1f3f8f;
+  font-weight: 900;
 }
 
 .supplementMemoPreview {
@@ -15181,6 +15239,15 @@ body.attendanceOnlyBody {
     align-items: stretch;
     grid-template-columns: 1fr;
     min-height: auto;
+  }
+
+  .supplementDeferredToggle {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .supplementDeferredToggle strong {
+    align-self: flex-start;
   }
 
   .supplementRowItem .softButton,

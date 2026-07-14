@@ -1063,6 +1063,7 @@ function normalizePhoneNumber(value = "") {
 }
 
 const today = getKoreaDateString();
+const futureAbsenceMakeupVisibleDays = 7;
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8787").replace(/\/$/, "");
 const appRuntimeSessionId = `runtime_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
@@ -22443,6 +22444,7 @@ function SupplementCenter({
   const [pendingCandidateTask, setPendingCandidateTask] = useState(null);
   const [selectedSupplementTaskKey, setSelectedSupplementTaskKey] = useState("");
   const [supplementRowActions, setSupplementRowActions] = useState({});
+  const [isFutureAbsenceOpen, setIsFutureAbsenceOpen] = useState(false);
   const makeupHomeworks = homeworks.filter((homework) => isHomeworkMakeupCandidate(homework, records, lessons));
   const absentRecords = records
     .filter((record) => isAbsenceLikeAttendanceStatus(record.attendanceStatus));
@@ -22456,6 +22458,35 @@ function SupplementCenter({
   function lessonLabel(lessonId) {
     const lesson = lessons.find((item) => item.lessonId === lessonId);
     return lesson ? `${lesson.date} ${lesson.className}` : "연결 수업 없음";
+  }
+
+  function createAbsenceSupplementItem(record) {
+    const homeworkCheckLabel = getAbsenceHomeworkCheckLabel(record, homeworks, lessons, students);
+    const availability = getAbsenceMakeupAvailability(record, lessons);
+    return {
+      id: record.lessonStudentRecordId,
+      studentId: record.studentId,
+      title: lessonLabel(record.lessonId),
+      meta: [
+        `${attendanceLabels[record.attendanceStatus] ?? record.attendanceStatus} · ${record.attendanceReason || "사유 미입력"}`,
+        homeworkCheckLabel ? `지난 숙제 확인: ${homeworkCheckLabel}` : ""
+      ].filter(Boolean).join(" · "),
+      futureMeta: availability.isDeferred
+        ? `${formatDdayLabel(availability.daysUntilLesson)} · ${futureAbsenceMakeupVisibleDays}일 전부터 기본 목록에 표시`
+        : "",
+      isFutureDeferred: availability.isDeferred,
+      lessonDate: availability.lessonDate,
+      task: {
+        taskType: "absence_makeup",
+        studentId: record.studentId,
+        sourceId: record.lessonStudentRecordId,
+        sourceLabel: lessonLabel(record.lessonId),
+        reason: homeworkCheckLabel ? "결석 보강 · 지난 숙제 확인" : "결석 보강",
+        absenceReason: record.attendanceReason || "사유 미입력",
+        supplementHomeworkNote: homeworkCheckLabel,
+        supplementMethod: "onsite_makeup"
+      }
+    };
   }
 
   function findTaskForCandidate(candidateTask) {
@@ -22608,6 +22639,53 @@ function SupplementCenter({
     }
   }
 
+  function renderSupplementRow(item) {
+    const existingTask = findTaskForCandidate(item.task);
+    const taskProgress = getSupplementTaskProgress(existingTask, lessons);
+    const rowAction = supplementRowActions[getSupplementActionKey(existingTask ?? item.task)];
+    const canPassTask = Boolean(existingTask);
+    return (
+      <article className={item.isFutureDeferred ? "candidateItem supplementRowItem futureDeferred" : "candidateItem supplementRowItem"} key={item.id}>
+        <div>
+          <button className="textLinkButton" onClick={() => openCandidateReview(item)} type="button">
+            {studentName(item.studentId)}
+          </button>
+          <span>{item.title}</span>
+          <small>{item.meta}</small>
+          {item.futureMeta ? <small className="supplementFutureHint">{item.futureMeta}</small> : null}
+          {existingTask ? (
+            <span className={`supplementProgressBadge ${taskProgress.tone}`}>
+              {taskProgress.label}
+              {taskProgress.detail ? <b>{taskProgress.detail}</b> : null}
+            </span>
+          ) : null}
+          {existingTask?.supplementProgressMemo?.trim() ? (
+            <small className="supplementMemoPreview">메모: {existingTask.supplementProgressMemo}</small>
+          ) : null}
+          {rowAction?.message ? (
+            <small className={`supplementRowActionState ${rowAction.state}`}>{rowAction.message}</small>
+          ) : null}
+        </div>
+        <button
+          className={existingTask ? "softButton subtle" : "softButton"}
+          onClick={() => openCandidateReview(item)}
+          type="button"
+        >
+          {existingTask ? "상세 검토" : "초안 검토"}
+        </button>
+        <button
+          className="passButton"
+          disabled={!canPassTask || passBusyTaskId === (existingTask?.makeupTaskId || "")}
+          onClick={() => openPassConfirm(existingTask, item)}
+          title={canPassTask ? "보충 완료 처리" : "상세 검토에서 보충 항목을 먼저 저장하세요."}
+          type="button"
+        >
+          {canPassTask ? "보충 완료 처리" : "저장 후 완료"}
+        </button>
+      </article>
+    );
+  }
+
   const selectedSupplementStudent = students.find((student) => student.studentId === selectedSupplementStudentId);
   const persistedSelectedSupplementTasks = tasks.filter((task) => task.studentId === selectedSupplementStudentId && task.taskType === activeSupplementTab)
     .map(hydrateSupplementTask);
@@ -22624,6 +22702,12 @@ function SupplementCenter({
     shouldShowPendingCandidate
     ? [pendingCandidateTask, ...focusedPersistedSupplementTasks]
     : focusedPersistedSupplementTasks;
+  const absenceSupplementItems = absentRecords.map(createAbsenceSupplementItem);
+  const visibleAbsenceSupplementItems = absenceSupplementItems.filter((item) => !item.isFutureDeferred);
+  const deferredAbsenceSupplementItems = absenceSupplementItems.filter((item) => item.isFutureDeferred);
+  const activeDeferredAbsenceItems = deferredAbsenceSupplementItems
+    .filter((item) => findTaskForCandidate(item.task)?.status !== "done")
+    .sort((a, b) => String(a.lessonDate || "").localeCompare(String(b.lessonDate || "")));
   const supplementTabDefinitions = [
     {
       id: "homework_makeup",
@@ -22650,31 +22734,12 @@ function SupplementCenter({
     {
       id: "absence_makeup",
       title: "결석보강",
-      subtitle: "결석 기록을 보강 일정으로 전환합니다.",
-      count: absentRecords.length,
-      emptyText: "결석 보강이 없습니다.",
-      items: absentRecords.map((record) => {
-        const homeworkCheckLabel = getAbsenceHomeworkCheckLabel(record, homeworks, lessons, students);
-        return {
-          id: record.lessonStudentRecordId,
-          studentId: record.studentId,
-          title: lessonLabel(record.lessonId),
-          meta: [
-            `${attendanceLabels[record.attendanceStatus] ?? record.attendanceStatus} · ${record.attendanceReason || "사유 미입력"}`,
-            homeworkCheckLabel ? `지난 숙제 확인: ${homeworkCheckLabel}` : ""
-          ].filter(Boolean).join(" · "),
-          task: {
-            taskType: "absence_makeup",
-            studentId: record.studentId,
-            sourceId: record.lessonStudentRecordId,
-            sourceLabel: lessonLabel(record.lessonId),
-            reason: homeworkCheckLabel ? "결석 보강 · 지난 숙제 확인" : "결석 보강",
-            absenceReason: record.attendanceReason || "사유 미입력",
-            supplementHomeworkNote: homeworkCheckLabel,
-            supplementMethod: "onsite_makeup"
-          }
-        };
-      })
+      subtitle: activeDeferredAbsenceItems.length
+        ? `7일 초과 미래 결석 ${activeDeferredAbsenceItems.length}건은 접어두었습니다.`
+        : "결석 기록을 보강 일정으로 전환합니다.",
+      count: visibleAbsenceSupplementItems.length,
+      emptyText: "지금 처리할 결석 보강이 없습니다.",
+      items: visibleAbsenceSupplementItems
     },
     {
       id: "retest",
@@ -22753,52 +22818,30 @@ function SupplementCenter({
 
         {activeTabData.items.length === 0 ? <div className="emptyHomeworkBox">{activeTabData.emptyText}</div> : null}
 
+        {activeSupplementTab === "absence_makeup" && activeDeferredAbsenceItems.length > 0 ? (
+          <section className="supplementDeferredPanel">
+            <button
+              aria-expanded={isFutureAbsenceOpen}
+              className="supplementDeferredToggle"
+              onClick={() => setIsFutureAbsenceOpen((current) => !current)}
+              type="button"
+            >
+              <span>
+                <b>미래 결석 예정 {activeDeferredAbsenceItems.length}건</b>
+                <small>{futureAbsenceMakeupVisibleDays}일 전부터 결석보강 기본 목록에 자동 표시됩니다.</small>
+              </span>
+              <strong>{isFutureAbsenceOpen ? "접기" : "펼치기"}</strong>
+            </button>
+            {isFutureAbsenceOpen ? (
+              <div className="supplementItemList supplementDeferredList">
+                {activeDeferredAbsenceItems.map((item) => renderSupplementRow(item))}
+              </div>
+            ) : null}
+          </section>
+        ) : null}
+
         <div className="supplementItemList">
-          {activeTabData.items.map((item) => {
-            const existingTask = findTaskForCandidate(item.task);
-            const taskProgress = getSupplementTaskProgress(existingTask, lessons);
-            const rowAction = supplementRowActions[getSupplementActionKey(existingTask ?? item.task)];
-            const canPassTask = Boolean(existingTask);
-            return (
-              <article className="candidateItem supplementRowItem" key={item.id}>
-                <div>
-                  <button className="textLinkButton" onClick={() => openCandidateReview(item)} type="button">
-                    {studentName(item.studentId)}
-                  </button>
-                  <span>{item.title}</span>
-                  <small>{item.meta}</small>
-                  {existingTask ? (
-                    <span className={`supplementProgressBadge ${taskProgress.tone}`}>
-                      {taskProgress.label}
-                      {taskProgress.detail ? <b>{taskProgress.detail}</b> : null}
-                    </span>
-                  ) : null}
-                  {existingTask?.supplementProgressMemo?.trim() ? (
-                    <small className="supplementMemoPreview">메모: {existingTask.supplementProgressMemo}</small>
-                  ) : null}
-                  {rowAction?.message ? (
-                    <small className={`supplementRowActionState ${rowAction.state}`}>{rowAction.message}</small>
-                  ) : null}
-                </div>
-                <button
-                  className={existingTask ? "softButton subtle" : "softButton"}
-                  onClick={() => openCandidateReview(item)}
-                  type="button"
-                >
-                  {existingTask ? "상세 검토" : "초안 검토"}
-                </button>
-                <button
-                  className="passButton"
-                  disabled={!canPassTask || passBusyTaskId === (existingTask?.makeupTaskId || "")}
-                  onClick={() => openPassConfirm(existingTask, item)}
-                  title={canPassTask ? "보충 완료 처리" : "상세 검토에서 보충 항목을 먼저 저장하세요."}
-                  type="button"
-                >
-                  {canPassTask ? "보충 완료 처리" : "저장 후 완료"}
-                </button>
-              </article>
-            );
-          })}
+          {activeTabData.items.map((item) => renderSupplementRow(item))}
         </div>
       </section>
 
@@ -26539,6 +26582,7 @@ function getSupplementAttentionSummary({ homeworks = [], lessons = [], records =
     }));
   const absenceItems = records
     .filter((record) => isAbsenceLikeAttendanceStatus(record.attendanceStatus))
+    .filter((record) => !getAbsenceMakeupAvailability(record, lessons).isDeferred)
     .map((record) => ({
       task: {
         taskType: "absence_makeup",
@@ -26546,6 +26590,16 @@ function getSupplementAttentionSummary({ homeworks = [], lessons = [], records =
         sourceId: record.lessonStudentRecordId
       },
       title: lessonLabel(record.lessonId)
+    }));
+  const futureAbsenceItems = records
+    .filter((record) => isAbsenceLikeAttendanceStatus(record.attendanceStatus))
+    .filter((record) => getAbsenceMakeupAvailability(record, lessons).isDeferred)
+    .map((record) => ({
+      task: {
+        taskType: "absence_makeup",
+        studentId: record.studentId,
+        sourceId: record.lessonStudentRecordId
+      }
     }));
   const retestItems = records
     .filter((record) => record.needsRetest)
@@ -26559,6 +26613,7 @@ function getSupplementAttentionSummary({ homeworks = [], lessons = [], records =
   const counts = {
     homeworkMakeup: activeCandidateCount(homeworkItems),
     absenceMakeup: activeCandidateCount(absenceItems),
+    futureAbsenceMakeup: activeCandidateCount(futureAbsenceItems),
     retest: activeCandidateCount(retestItems)
   };
   const total = counts.homeworkMakeup + counts.absenceMakeup + counts.retest;
@@ -26602,6 +26657,20 @@ function isHomeworkActionRequired(homework) {
 
 function isAbsenceLikeAttendanceStatus(status) {
   return ["absent", "excused", "unexcused"].includes(status);
+}
+
+function getRecordLessonDate(record, lessons = []) {
+  return getRecordLesson(record, lessons)?.date || record?.lessonDate || record?.attendanceDate || record?.date || "";
+}
+
+function getAbsenceMakeupAvailability(record, lessons = []) {
+  const lessonDate = getRecordLessonDate(record, lessons);
+  const daysUntilLesson = lessonDate ? getDateDiffInDays(today, lessonDate) : 0;
+  return {
+    daysUntilLesson,
+    isDeferred: Number.isFinite(daysUntilLesson) && daysUntilLesson > futureAbsenceMakeupVisibleDays,
+    lessonDate
+  };
 }
 
 function getRecordLesson(record, lessons = []) {
