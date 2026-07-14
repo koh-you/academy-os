@@ -464,9 +464,19 @@ function formatSupplementScheduleLine(task = {}) {
   return `${schedulePrefix}${source} 일정을 진행하겠습니다.`;
 }
 
-function getStudentSupplementSchedules(makeupTasks = [], studentId = "") {
+function isLessonCommentSupplementSchedule(task = {}, lesson = null) {
+  if (!isSupplementStudentReminderTask(task)) return false;
+  if (task.status !== "scheduled") return false;
+  if (task.supplementProcessStatus === "completed") return false;
+  if (task.linkedLessonId) return true;
+  return Boolean(lesson?.sourceMakeupTaskId && lesson.sourceMakeupTaskId === task.makeupTaskId);
+}
+
+function getStudentSupplementSchedules(makeupTasks = [], studentId = "", options = {}) {
+  const { lesson = null, mode = "all" } = options;
   return makeupTasks
     .filter((task) => task.studentId === studentId && task.status !== "done")
+    .filter((task) => (mode === "lesson_comment" ? isLessonCommentSupplementSchedule(task, lesson) : true))
     .filter((task) => task.scheduledDate || task.scheduledTime || task.notificationDraft || task.supplementHomeworkNote || task.sourceLabel)
     .sort((a, b) => `${a.scheduledDate || "9999-99-99"} ${a.scheduledTime || ""}`.localeCompare(`${b.scheduledDate || "9999-99-99"} ${b.scheduledTime || ""}`))
     .map(formatSupplementScheduleLine);
@@ -8156,7 +8166,7 @@ export function App() {
     const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
     const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
     const audience = target === "student" ? "student" : "parent";
-    const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId);
+    const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId, { lesson, mode: "lesson_comment" });
     const testResultLines = getLessonTestResultLines(testSessions, testAttempts, lesson, student);
     const payloadSnapshot = buildLessonReservationPayloadSnapshot({
       audience,
@@ -9494,7 +9504,7 @@ export function App() {
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
     const sourceField = target === "student" ? "studentComment" : "teacherComment";
     const statusField = target === "student" ? "studentCommentAiStatus" : "teacherCommentAiStatus";
-    const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId);
+    const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId, { lesson, mode: "lesson_comment" });
     const testResultLines = getLessonTestResultLines(testSessions, testAttempts, lesson, student);
     const rawTextSeed = normalizeMessageText(options.rawText);
     const shouldPersist = options.persist !== false;
@@ -9753,7 +9763,7 @@ export function App() {
       const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
       const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
       const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
-      const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId);
+      const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId, { lesson, mode: "lesson_comment" });
       const testResultLines = getLessonTestResultLines(testSessions, testAttempts, lesson, student);
       const notificationPayload = {
         academyName: academyBrandName,
@@ -15934,7 +15944,7 @@ function LessonJournalDetail({
       const record = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
       const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
       const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
-      const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId);
+      const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId, { lesson, mode: "lesson_comment" });
       const testResultLines = getLessonTestResultLines(testSessions, testAttempts, lesson, student);
       return ["parent", "student"].flatMap((audience) => {
         if (audience === "parent" && record.notificationMutedParent) return [];
@@ -16192,7 +16202,7 @@ function LessonJournalDetail({
 
   function openCommentComposer(audience, targetStudent, baseRecord, previousHomework, nextHomework) {
     const field = audience === "student" ? "studentComment" : "teacherComment";
-    const supplementSchedules = getStudentSupplementSchedules(makeupTasks, targetStudent.studentId);
+    const supplementSchedules = getStudentSupplementSchedules(makeupTasks, targetStudent.studentId, { lesson, mode: "lesson_comment" });
     const testResultLines = getLessonTestResultLines(testSessions, testAttempts, lesson, targetStudent);
     const draft = buildInitialCommentDraft({
       audience,

@@ -12,6 +12,16 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-14 P1. 수업 알림톡 보충 일정 자동 첨부 기준 축소
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청: 최지민 학부모 알림톡 미리보기에 뜬 `보충 일정`이 어디서 온 것인지 확인하고, 초안/미확정 보충이 수업 알림톡에 자동 첨부되지 않게 한다.
+- 원인 확인: 학부모/학생 수업 알림톡 미리보기와 예약 payload가 `getStudentSupplementSchedules(makeupTasks, studentId)`로 해당 학생의 완료되지 않은 보충 task 전체를 읽고 있었다. 운영 Supabase에서 최지민 학생에게 `linkedLessonId`가 없는 숙제보충 1건과 `draft` 결석보강 1건이 남아 있어 오늘 수업 알림톡에 자동 첨부됐다.
+- 구현 결과: `lesson_comment` 모드를 추가해 수업 알림톡/예약/AI 수정/미리보기에서는 `status: scheduled`이고 실제 `linkedLessonId`가 있거나 현재 보충 수업과 직접 연결된 보충 task만 `보충 일정` 블록으로 붙인다. 학생 포털의 전체 보충 현황은 기존처럼 전체 보충 task를 볼 수 있게 유지했다.
+- 저장 원천: 보충 task 원본은 Supabase `makeup_tasks`, 실제 보충 수업 연결은 `linkedLessonId`/`lessons.sourceMakeupTaskId`, 수업 알림톡 이력은 `notification_jobs.payload/previewBody`다. 새 SQL은 필요 없다.
+- 중단 조건: `draft` 보충이나 `linkedLessonId` 없는 보충이 학부모/학생 수업 알림톡에 자동 첨부됨, 확정된 보충 수업의 학생 11시 예약이 사라짐, 학생 포털의 전체 보충 현황이 비어 버림, 수업 알림톡 예약 payload와 미리보기의 보충 일정이 서로 다름.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 287개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-14 P1. 보충 일정 변경 안내 템플릿 입력값 정리
 
 - 상태: 완료 - 구현/검증 완료
