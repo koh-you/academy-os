@@ -20716,6 +20716,39 @@ function SchoolCalendarCenter({
     }
   }
 
+  async function deleteEditingAcademicEvent() {
+    if (!editingEvent) return;
+    const eventLabel = editingEvent.type === "examPeriod"
+      ? `${formatPeriodSummaryLabel(editingEvent)} ${examCycleLabel(editingEvent.examCycle || currentExamCycle)} 시험기간`
+      : formatCalendarEventLabel(editingEvent);
+    if (typeof window !== "undefined" && !window.confirm(`${eventLabel}을 삭제할까요?`)) return;
+    if (editingEvent.derived) {
+      if (!beginLinkedSaveTracking(editingEvent)) return;
+      if (editingEvent.type === "examPeriod") {
+        const targetRows = editingEvent.examPeriodGroupKey
+          ? rows.filter((row) => getExamPeriodGroupKey(row) === editingEvent.examPeriodGroupKey)
+          : rows.filter((row) => row.examPrepId === editingEvent.examPrepId);
+        targetRows.forEach((row) => onUpdateExamPrepRow?.(row.examPrepId, "examPeriod", ""));
+        closeEventForm();
+        return;
+      }
+      if (editingEvent.type === "mathExam") {
+        const sourceRow = rows.find((row) => row.examPrepId === editingEvent.examPrepId);
+        const entries = normalizeMathExamEntries(sourceRow ?? {});
+        const targetIndex = typeof editingEvent.mathExamEntryIndex === "number"
+          ? editingEvent.mathExamEntryIndex
+          : entries.findIndex((entry) => entry.id === editingEvent.mathExamEntryId);
+        const nextEntries = entries.filter((_, index) => index !== targetIndex);
+        onUpdateExamPrepRow?.(editingEvent.examPrepId, "mathExamDates", nextEntries);
+        onUpdateExamPrepRow?.(editingEvent.examPrepId, "mathExamDate", syncPrimaryMathExamDate(nextEntries));
+        closeEventForm();
+      }
+      return;
+    }
+    await deleteAcademicEvent(editingEvent.eventId);
+    closeEventForm();
+  }
+
   async function submitNewEvent() {
     const schoolName = newEvent.schoolName || schools[0] || "학교 미입력";
     const isMathExamType = newEvent.type === "mathExam";
@@ -21131,9 +21164,16 @@ function SchoolCalendarCenter({
                 메모
                 <textarea value={newEvent.memo} onChange={(event) => setNewEvent((current) => ({ ...current, memo: event.target.value }))} placeholder="필요한 메모" rows="4" />
               </label>
-              <button className="primaryButton full" onClick={submitNewEvent} type="button">
-                {isEditingEvent ? "변경 저장" : newEvent.type === "examPeriod" ? "시험일정 묶음 등록" : "일정 등록"}
-              </button>
+              <div className="schoolEventFormActions">
+                {isEditingEvent ? (
+                  <button className="dangerSoftButton" onClick={deleteEditingAcademicEvent} type="button">
+                    {newEvent.type === "examPeriod" ? "시험기간 삭제" : "일정 삭제"}
+                  </button>
+                ) : null}
+                <button className="primaryButton" onClick={submitNewEvent} type="button">
+                  {isEditingEvent ? "변경 저장" : newEvent.type === "examPeriod" ? "시험일정 묶음 등록" : "일정 등록"}
+                </button>
+              </div>
             </div>
           </Modal>
         ) : null}
@@ -21164,17 +21204,19 @@ function SchoolCalendarCenter({
           ) : (
             <div className="examPeriodGallery">
               {examPeriodCards.map((event) => (
-                <article
+                <button
+                  aria-label={`${formatPeriodSummaryLabel(event)} 시험기간 상세 열기`}
                   className="examPeriodOverviewCard"
                   key={event.eventId}
+                  onClick={() => openEventEditForm(event)}
                   style={{ "--school-color": getSchoolCalendarEventColor(event) }}
+                  type="button"
                 >
                   <div className="examPeriodOverviewCardHeader">
                     <div>
                       <strong>{formatPeriodSummaryLabel(event)}</strong>
                       <span>{examCycleLabel(event.examCycle || currentExamCycle)}</span>
                     </div>
-                    <button className="softButton small" onClick={() => openEventEditForm(event)} type="button">수정</button>
                   </div>
                   <p>{event.date} ~ {event.endDate || event.date}</p>
                   <div className="examPeriodMathChips">
@@ -21186,7 +21228,7 @@ function SchoolCalendarCenter({
                       <span className="mutedChip">수학시험 날짜 미입력</span>
                     )}
                   </div>
-                </article>
+                </button>
               ))}
             </div>
           )}

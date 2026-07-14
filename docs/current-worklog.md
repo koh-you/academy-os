@@ -12,6 +12,17 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-15 P1. 학사일정 시험기간 카드 색상/클릭 모달 정리
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청: 월간 학사 개요의 시험기간 카드 색상을 달력에 표시된 학교별 파스텔 색상과 맞추고, 각 카드에 `수정/삭제` 버튼을 늘어놓지 말고 카드 하나를 누르면 해당 학교 시험기간 모달이 열리게 한다.
+- 구현 결과: 시험기간 카드를 `button.examPeriodOverviewCard`로 바꿔 카드 전체 클릭/키보드 포커스로 해당 시험기간 수정 모달을 열게 했다. 카드 안의 별도 `수정` 버튼은 제거했다.
+- 구현 결과: 시험기간 카드 배경, 테두리, 수학시험 날짜 chip이 달력 수학시험 칩과 같은 `--school-color` 원천을 사용하도록 바꿨다. 학교별 색상 원천은 기존 `getSchoolCalendarEventColor`/`schoolCalendarSchoolColorPalette`를 그대로 사용한다.
+- 구현 결과: 시험기간 수정 모달 하단에 `시험기간 삭제`와 `변경 저장` 액션을 함께 배치했다. 시험관리에서 파생된 시험기간 삭제는 해당 학교/시험구분의 `exam_prep_rows.exam_period` 값을 비워 카드에서 사라지게 한다.
+- 저장 원천: 시험기간 원본은 Supabase `exam_prep_rows.exam_period`, 수학시험 날짜 원본은 `exam_prep_rows.math_exam_dates/math_exam_date`, 수동 학사일정은 `school_events`다. 이번 변경은 새 SQL 없이 기존 원천을 사용한다.
+- 중단 조건: 카드 색상이 달력 수학시험 칩 색상과 다른 원천을 씀, 카드 클릭이 모달을 열지 않음, 시험기간 삭제 후 새로고침하면 카드가 다시 나타남, 삭제가 학교 전체가 아닌 다른 학교/다른 시험구분 row까지 지움, 저장/삭제 상태가 `학사일정 저장` 영역에 표시되지 않음.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 288개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P1. 공지 삭제 상태 문구 중복 제거
 
 - 상태: 완료 - 구현/검증 완료
