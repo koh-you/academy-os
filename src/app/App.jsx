@@ -11121,6 +11121,7 @@ function SpecialLectureNoticePanel({
   const [managementGuideId, setManagementGuideId] = useState("");
   const [highlightDraftText, setHighlightDraftText] = useState("");
   const [scheduleDraftText, setScheduleDraftText] = useState("");
+  const [isScheduleBuilderOpen, setIsScheduleBuilderOpen] = useState(false);
   const primaryGuides = draftGuides.filter(isSpecialLecturePrimaryGuide);
   const storedGuides = draftGuides.filter((guide) => !isSpecialLecturePrimaryGuide(guide));
   const selectedGuide = draftGuides.find((guide) => guide.specialLectureGuideId === selectedGuideId) ?? null;
@@ -11137,6 +11138,10 @@ function SpecialLectureNoticePanel({
     totalHours: calculatedTotalHours
   });
   const calculatedWeekdayCounts = getSpecialLectureWeekdayCounts(generatedSessionsPreview);
+  const normalizedScheduleRules = selectedGuide ? normalizeSpecialLectureScheduleRules(selectedGuide.scheduleRules) : [];
+  const calculatedWeekdaySummaryText = calculatedWeekdayCounts.length
+    ? calculatedWeekdayCounts.map((item) => `${item.label} ${item.count}회`).join(" · ")
+    : "기간과 요일을 선택하면 표시됩니다.";
   const selectedGuideStatus = selectedGuide ? getSpecialLectureStatusBadge(selectedGuide) : null;
   const isManagingSelectedGuide = Boolean(selectedGuide && managementGuideId === selectedGuide.specialLectureGuideId);
 
@@ -11527,86 +11532,112 @@ function SpecialLectureNoticePanel({
             </label>
           </div>
 
-          <section className="specialLectureCalculator">
-            <div className="sectionHeader slim">
+          <section className={`specialLectureCalculator ${isScheduleBuilderOpen ? "open" : "collapsed"}`}>
+            <div className="sectionHeader slim specialLectureCalculatorHeader">
               <div>
                 <p className="eyebrow">SCHEDULE BUILDER</p>
                 <h3>일정 계산</h3>
+                <p className="specialLectureCalculatorSummary">
+                  {calculatedSessionCount}회 · {formatSpecialLectureHours(calculatedTotalHours) || "0시간"} · {formatCurrencyWon(calculatedTuition)}
+                </p>
               </div>
-              <button className="softButton compact" onClick={applyCalculatedSchedule} type="button">일정 계산 적용</button>
-            </div>
-            <div className="specialLectureCalcStats">
-              <div>
-                <span>계산 회차</span>
-                <strong>{calculatedSessionCount}회</strong>
-              </div>
-              <div>
-                <span>총 시간</span>
-                <strong>{formatSpecialLectureHours(calculatedTotalHours) || "-"}</strong>
-              </div>
-              <div>
-                <span>계산 수강료</span>
-                <strong>{formatCurrencyWon(calculatedTuition)}</strong>
+              <div className="specialLectureCalculatorHeaderActions">
+                {isScheduleBuilderOpen ? (
+                  <button className="softButton compact" onClick={applyCalculatedSchedule} type="button">일정 계산 적용</button>
+                ) : null}
+                <button
+                  aria-expanded={isScheduleBuilderOpen}
+                  className="softButton compact"
+                  onClick={() => setIsScheduleBuilderOpen((current) => !current)}
+                  type="button"
+                >
+                  {isScheduleBuilderOpen ? "접기" : "펼치기"}
+                </button>
               </div>
             </div>
-            <div className="specialLectureWeekdaySummary">
-              <span>요일별 회차</span>
-              <strong>{calculatedWeekdayCounts.length ? calculatedWeekdayCounts.map((item) => `${item.label} ${item.count}회`).join(" · ") : "기간과 요일을 선택하면 표시됩니다."}</strong>
-            </div>
-            <div className="specialLecturePriceGrid">
-              <label>
-                요금 기준
-                <select value={selectedGuide.pricingMode} onChange={(event) => updateSelectedGuide("pricingMode", event.target.value)}>
-                  <option value="perSession">회당 금액</option>
-                  <option value="perHour">시간당 금액</option>
-                </select>
-              </label>
-              <label>
-                회당 금액
-                <input
-                  type="number"
-                  value={selectedGuide.pricePerSession}
-                  onChange={(event) => updateSelectedGuide("pricePerSession", Number(event.target.value))}
-                />
-              </label>
-              <label>
-                시간당 금액
-                <input
-                  type="number"
-                  value={selectedGuide.pricePerHour}
-                  onChange={(event) => updateSelectedGuide("pricePerHour", Number(event.target.value))}
-                />
-              </label>
-            </div>
-            <div className="specialLectureRuleList">
-              {normalizeSpecialLectureScheduleRules(selectedGuide.scheduleRules).map((rule, index) => (
-                <div className="specialLectureRuleRow" key={`${index}_${rule.startTime}_${rule.endTime}`}>
-                  <div className="specialLectureWeekdayToggles">
-                    {specialLectureWeekdayOptions.map((day) => (
-                      <button
-                        className={rule.days.includes(day.value) ? "active" : ""}
-                        key={day.value}
-                        onClick={() => toggleScheduleRuleDay(index, day.value)}
-                        type="button"
-                      >
-                        {day.label}
-                      </button>
-                    ))}
+
+            {isScheduleBuilderOpen ? (
+              <>
+                <div className="specialLectureCalcStats">
+                  <div>
+                    <span>계산 회차</span>
+                    <strong>{calculatedSessionCount}회</strong>
                   </div>
-                  <label>
-                    시작
-                    <input type="time" value={rule.startTime} onChange={(event) => updateScheduleRule(index, { startTime: event.target.value })} />
-                  </label>
-                  <label>
-                    종료
-                    <input type="time" value={rule.endTime} onChange={(event) => updateScheduleRule(index, { endTime: event.target.value })} />
-                  </label>
-                  <button className="dangerSoftButton compact" onClick={() => removeScheduleRule(index)} type="button">삭제</button>
+                  <div>
+                    <span>총 시간</span>
+                    <strong>{formatSpecialLectureHours(calculatedTotalHours) || "-"}</strong>
+                  </div>
+                  <div>
+                    <span>계산 수강료</span>
+                    <strong>{formatCurrencyWon(calculatedTuition)}</strong>
+                  </div>
                 </div>
-              ))}
-            </div>
-            <button className="softButton compact" onClick={addScheduleRule} type="button">요일/시간 추가</button>
-            <SpecialLectureCalendarPreview guide={{ ...selectedGuide, sessions: generatedSessionsPreview }} />
+                <div className="specialLectureWeekdaySummary">
+                  <span>요일별 회차</span>
+                  <strong>{calculatedWeekdaySummaryText}</strong>
+                </div>
+                <div className="specialLecturePriceGrid">
+                  <label>
+                    요금 기준
+                    <select value={selectedGuide.pricingMode} onChange={(event) => updateSelectedGuide("pricingMode", event.target.value)}>
+                      <option value="perSession">회당 금액</option>
+                      <option value="perHour">시간당 금액</option>
+                    </select>
+                  </label>
+                  <label>
+                    회당 금액
+                    <input
+                      type="number"
+                      value={selectedGuide.pricePerSession}
+                      onChange={(event) => updateSelectedGuide("pricePerSession", Number(event.target.value))}
+                    />
+                  </label>
+                  <label>
+                    시간당 금액
+                    <input
+                      type="number"
+                      value={selectedGuide.pricePerHour}
+                      onChange={(event) => updateSelectedGuide("pricePerHour", Number(event.target.value))}
+                    />
+                  </label>
+                </div>
+                <div className="specialLectureRuleList">
+                  {normalizedScheduleRules.map((rule, index) => (
+                    <div className="specialLectureRuleRow" key={`${index}_${rule.startTime}_${rule.endTime}`}>
+                      <div className="specialLectureWeekdayToggles">
+                        {specialLectureWeekdayOptions.map((day) => (
+                          <button
+                            className={rule.days.includes(day.value) ? "active" : ""}
+                            key={day.value}
+                            onClick={() => toggleScheduleRuleDay(index, day.value)}
+                            type="button"
+                          >
+                            {day.label}
+                          </button>
+                        ))}
+                      </div>
+                      <label>
+                        시작
+                        <input type="time" value={rule.startTime} onChange={(event) => updateScheduleRule(index, { startTime: event.target.value })} />
+                      </label>
+                      <label>
+                        종료
+                        <input type="time" value={rule.endTime} onChange={(event) => updateScheduleRule(index, { endTime: event.target.value })} />
+                      </label>
+                      <button className="dangerSoftButton compact" onClick={() => removeScheduleRule(index)} type="button">삭제</button>
+                    </div>
+                  ))}
+                </div>
+                <button className="softButton compact" onClick={addScheduleRule} type="button">요일/시간 추가</button>
+                <SpecialLectureCalendarPreview guide={{ ...selectedGuide, sessions: generatedSessionsPreview }} />
+              </>
+            ) : (
+              <div className="specialLectureCalculatorCollapsedSummary">
+                <span>요일별 {calculatedWeekdaySummaryText}</span>
+                <span>규칙 {normalizedScheduleRules.length}개</span>
+                <span>달력과 요금 설정은 펼치면 보입니다.</span>
+              </div>
+            )}
           </section>
 
           <label className="specialLectureWideField">

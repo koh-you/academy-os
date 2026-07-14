@@ -7820,10 +7820,50 @@ button:disabled {
   padding: 14px;
 }
 
+.specialLectureCalculator.collapsed {
+  gap: 8px;
+}
+
+.specialLectureCalculatorHeader {
+  align-items: center;
+}
+
+.specialLectureCalculatorHeaderActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .specialLectureCalculator h3 {
   color: #0f172a;
   font-size: 18px;
   margin: 0;
+}
+
+.specialLectureCalculatorSummary {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+  margin: 4px 0 0;
+}
+
+.specialLectureCalculatorCollapsedSummary {
+  align-items: center;
+  color: #334155;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  line-height: 1.4;
+}
+
+.specialLectureCalculatorCollapsedSummary span {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 10px;
 }
 
 .specialLectureCalcStats,
