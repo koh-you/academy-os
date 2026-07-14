@@ -1084,6 +1084,41 @@ const specialLectureSeasonOptions = [
   { value: "custom", label: "직접 입력" }
 ];
 
+function getSpecialLectureSeasonShortLabel(season = "summer") {
+  if (season === "winter") return "겨울";
+  if (season === "summer") return "여름";
+  return "";
+}
+
+function replaceSpecialLectureToken(value = "", previousToken = "", nextToken = "") {
+  const text = String(value ?? "");
+  const previousText = String(previousToken ?? "").trim();
+  const nextText = String(nextToken ?? "").trim();
+  if (!previousText || !nextText || !text.includes(previousText)) return text;
+  return text.replace(previousText, nextText);
+}
+
+function replaceSpecialLectureYearToken(value = "", previousYear = "", nextYear = "") {
+  const text = String(value ?? "");
+  const fromYear = String(previousYear ?? "").trim();
+  const toYear = String(nextYear ?? "").trim();
+  if (!/^\d{4}$/.test(toYear)) return text;
+  if (/^\d{4}$/.test(fromYear) && text.includes(fromYear)) return text.replace(fromYear, toYear);
+  return text.replace(/\d{4}/, toYear);
+}
+
+function replaceSpecialLectureYearInDateKey(value = "", previousYear = "", nextYear = "") {
+  const text = String(value ?? "").trim();
+  const fromYear = String(previousYear ?? "").trim();
+  const toYear = String(nextYear ?? "").trim();
+  if (!/^\d{4}$/.test(toYear)) return text;
+  if (/^\d{4}$/.test(fromYear) && text.startsWith(`${fromYear}-`)) {
+    return `${toYear}${text.slice(fromYear.length)}`;
+  }
+  if (/^\d{4}-/.test(text)) return `${toYear}${text.slice(4)}`;
+  return text;
+}
+
 const specialLectureWeekdayOptions = [
   { value: 1, label: "월" },
   { value: 2, label: "화" },
@@ -1362,6 +1397,48 @@ function getSpecialLectureCalculatedFields(guide = {}) {
     totalHours,
     tuition: formatCurrencyWon(tuitionValue)
   };
+}
+
+function shouldReplaceSpecialLectureDefaultTopics(sessions = [], previousDefaultTopic = "") {
+  const defaultTopic = String(previousDefaultTopic ?? "").trim();
+  if (!sessions.length) return true;
+  return sessions.every((session) => {
+    const topic = String(session?.topic ?? "").trim();
+    return !topic || topic === defaultTopic;
+  });
+}
+
+function applySpecialLectureCalculatedScheduleDraft(guide = {}, previousGuide = guide) {
+  const normalizedGuide = normalizeSpecialLectureGuide(guide, previousGuide);
+  const generatedSessions = generateSpecialLectureSessions(normalizedGuide);
+  const existingSessions = Array.isArray(previousGuide?.sessions)
+    ? previousGuide.sessions.map(normalizeSpecialLectureSession)
+    : [];
+  const replaceDefaultTopics = shouldReplaceSpecialLectureDefaultTopics(existingSessions, previousGuide?.defaultSessionTopic);
+  const sessions = generatedSessions.length
+    ? generatedSessions.map((session, index) => ({
+        ...session,
+        topic: replaceDefaultTopics ? session.topic : existingSessions[index]?.topic || session.topic
+      }))
+    : normalizedGuide.sessions;
+  const totalHours = getSpecialLectureTotalHours(sessions);
+  const tuition = calculateSpecialLectureTuition({
+    pricingMode: normalizedGuide.pricingMode,
+    pricePerHour: normalizedGuide.pricePerHour,
+    pricePerSession: normalizedGuide.pricePerSession,
+    sessionCount: sessions.length,
+    totalHours
+  });
+  return normalizeSpecialLectureGuide({
+    ...normalizedGuide,
+    days: generatedSessions.length ? formatSpecialLectureDaysFromRules(normalizedGuide.scheduleRules) : normalizedGuide.days,
+    time: generatedSessions.length ? formatSpecialLectureTimeFromRules(normalizedGuide.scheduleRules) : normalizedGuide.time,
+    sessions,
+    lessonCount: formatSpecialLectureLessonCount(sessions.length, totalHours),
+    totalHours,
+    tuition: formatCurrencyWon(tuition),
+    updatedAt: new Date().toISOString()
+  }, previousGuide);
 }
 
 function getSpecialLectureWeekdayCounts(sessions = []) {
@@ -11167,13 +11244,47 @@ function SpecialLectureNoticePanel({
 
   function updateSelectedGuide(field, value) {
     if (!selectedGuide) return;
+    const shouldRefreshCalculatedSchedule = [
+      "year",
+      "periodStart",
+      "periodEnd",
+      "defaultSessionTopic",
+      "scheduleRules",
+      "pricingMode",
+      "pricePerSession",
+      "pricePerHour"
+    ].includes(field);
+    let nextSource = { ...selectedGuide, [field]: value, updatedAt: new Date().toISOString() };
+    if (field === "year") {
+      nextSource = {
+        ...nextSource,
+        title: replaceSpecialLectureYearToken(nextSource.title, selectedGuide.year, value),
+        slug: replaceSpecialLectureYearToken(nextSource.slug, selectedGuide.year, value),
+        periodStart: replaceSpecialLectureYearInDateKey(selectedGuide.periodStart, selectedGuide.year, value),
+        periodEnd: replaceSpecialLectureYearInDateKey(selectedGuide.periodEnd, selectedGuide.year, value)
+      };
+    }
+    if (field === "season") {
+      const previousSeasonText = getSpecialLectureSeasonShortLabel(selectedGuide.season);
+      const nextSeasonText = getSpecialLectureSeasonShortLabel(value);
+      nextSource = {
+        ...nextSource,
+        title: replaceSpecialLectureToken(nextSource.title, previousSeasonText, nextSeasonText),
+        shortTitle: replaceSpecialLectureToken(nextSource.shortTitle, previousSeasonText, nextSeasonText),
+        slug: replaceSpecialLectureToken(nextSource.slug, selectedGuide.season, value)
+      };
+    }
+    const nextGuide = shouldRefreshCalculatedSchedule
+      ? applySpecialLectureCalculatedScheduleDraft(nextSource, selectedGuide)
+      : normalizeSpecialLectureGuide(nextSource, selectedGuide);
     setDraftGuides((current) =>
       current.map((guide) =>
-        guide.specialLectureGuideId === selectedGuide.specialLectureGuideId
-          ? normalizeSpecialLectureGuide({ ...guide, [field]: value, updatedAt: new Date().toISOString() }, guide)
-          : guide
+        guide.specialLectureGuideId === selectedGuide.specialLectureGuideId ? nextGuide : guide
       )
     );
+    if (shouldRefreshCalculatedSchedule) {
+      setScheduleDraftText(formatSpecialLectureScheduleText(nextGuide.sessions));
+    }
   }
 
   function updateHighlights(value) {
