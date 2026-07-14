@@ -4645,10 +4645,12 @@ const server = http.createServer(async (request, response) => {
   if (request.method === "GET" && requestUrl.pathname === "/api/special-lecture-guides") {
     try {
       const result = await listAppState();
-      const specialLectureGuides = Array.isArray(result.states?.specialLectureGuides)
+      const hasSpecialLectureGuides = Array.isArray(result.states?.specialLectureGuides);
+      const specialLectureGuides = hasSpecialLectureGuides
         ? result.states.specialLectureGuides
         : [];
       sendJson(request, response, 200, {
+        hasSpecialLectureGuides,
         ok: true,
         source: result.source,
         specialLectureGuides

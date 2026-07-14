@@ -1371,6 +1371,41 @@ function getSpecialLectureRangeFromSessions(sessions = []) {
   };
 }
 
+function getSpecialLectureEndDateKey(guide = {}) {
+  const sessionRange = getSpecialLectureRangeFromSessions(guide.sessions ?? []);
+  return String(guide.periodEnd || sessionRange.end || "").trim();
+}
+
+function getSpecialLectureStartDateKey(guide = {}) {
+  const sessionRange = getSpecialLectureRangeFromSessions(guide.sessions ?? []);
+  return String(guide.periodStart || sessionRange.start || "").trim();
+}
+
+function isSpecialLectureArchived(guide = {}) {
+  return guide.status === "archived" || Boolean(guide.archivedAt);
+}
+
+function isSpecialLecturePast(guide = {}, todayKey = today) {
+  const endDate = getSpecialLectureEndDateKey(guide);
+  return Boolean(endDate && endDate < todayKey);
+}
+
+function isSpecialLecturePrimaryGuide(guide = {}) {
+  return !isSpecialLectureArchived(guide) && !isSpecialLecturePast(guide);
+}
+
+function getSpecialLectureStatusBadge(guide = {}, todayKey = today) {
+  if (isSpecialLectureArchived(guide)) return { label: "보관", tone: "archived" };
+  if (isSpecialLecturePast(guide, todayKey)) return { label: "지난 특강", tone: "past" };
+  const startDate = getSpecialLectureStartDateKey(guide);
+  if (startDate && startDate > todayKey) return { label: "예정", tone: "upcoming" };
+  return { label: "진행중", tone: "active" };
+}
+
+function getDefaultSpecialLectureGuideId(guides = []) {
+  return guides.find(isSpecialLecturePrimaryGuide)?.specialLectureGuideId || "";
+}
+
 function getCalendarMonthLabel(year, monthIndex) {
   return `${year}년 ${monthIndex + 1}월`;
 }
@@ -1471,6 +1506,8 @@ function normalizeSpecialLectureGuide(guide = {}, fallback = defaultSpecialLectu
       : [],
     sessions,
     noticeMemo: String(source.noticeMemo ?? "").trim(),
+    status: source.status === "archived" || source.archived === true ? "archived" : "active",
+    archivedAt: String(source.archivedAt ?? source.archived_at ?? "").trim(),
     updatedAt: String(source.updatedAt ?? "").trim()
   };
 }
@@ -1500,13 +1537,15 @@ function createSpecialLectureGuideFromTemplate(template = defaultSpecialLectureG
     textbook: "",
     defaultSessionTopic: "특강 수업",
     sessions: [],
+    status: "active",
+    archivedAt: "",
     updatedAt: new Date().toISOString()
   }, template);
   return guide;
 }
 
-function normalizeSpecialLectureGuides(guides = []) {
-  const sourceGuides = Array.isArray(guides) && guides.length ? guides : defaultSpecialLectureGuides;
+function normalizeSpecialLectureGuides(guides = defaultSpecialLectureGuides) {
+  const sourceGuides = Array.isArray(guides) ? guides : defaultSpecialLectureGuides;
   return sourceGuides.map((guide, index) =>
     normalizeSpecialLectureGuide(guide, defaultSpecialLectureGuides[index] ?? defaultSpecialLectureGuides[0], index)
   );
@@ -10868,30 +10907,36 @@ function SpecialLectureNoticePanel({
   const [copyMessage, setCopyMessage] = useState("");
   const [draftGuides, setDraftGuides] = useState(normalizedGuides);
   const [panelMessage, setPanelMessage] = useState("");
-  const [selectedGuideId, setSelectedGuideId] = useState(normalizedGuides[0]?.specialLectureGuideId || "");
+  const [selectedGuideId, setSelectedGuideId] = useState(getDefaultSpecialLectureGuideId(normalizedGuides));
+  const [showStoredGuides, setShowStoredGuides] = useState(false);
+  const [managementGuideId, setManagementGuideId] = useState("");
   const [highlightDraftText, setHighlightDraftText] = useState("");
   const [scheduleDraftText, setScheduleDraftText] = useState("");
-  const selectedGuide = draftGuides.find((guide) => guide.specialLectureGuideId === selectedGuideId) ?? draftGuides[0] ?? normalizeSpecialLectureGuide();
-  const selectedGuideUrl = getSpecialLecturePublicUrl(selectedGuide);
-  const noticeText = buildSpecialLectureNoticeText(selectedGuide, selectedGuideUrl);
-  const generatedSessionsPreview = generateSpecialLectureSessions(selectedGuide);
+  const primaryGuides = draftGuides.filter(isSpecialLecturePrimaryGuide);
+  const storedGuides = draftGuides.filter((guide) => !isSpecialLecturePrimaryGuide(guide));
+  const selectedGuide = draftGuides.find((guide) => guide.specialLectureGuideId === selectedGuideId) ?? null;
+  const selectedGuideUrl = selectedGuide ? getSpecialLecturePublicUrl(selectedGuide) : "";
+  const noticeText = selectedGuide ? buildSpecialLectureNoticeText(selectedGuide, selectedGuideUrl) : "";
+  const generatedSessionsPreview = selectedGuide ? generateSpecialLectureSessions(selectedGuide) : [];
   const calculatedSessionCount = generatedSessionsPreview.length;
   const calculatedTotalHours = getSpecialLectureTotalHours(generatedSessionsPreview);
   const calculatedTuition = calculateSpecialLectureTuition({
-    pricingMode: selectedGuide.pricingMode,
-    pricePerHour: selectedGuide.pricePerHour,
-    pricePerSession: selectedGuide.pricePerSession,
+    pricingMode: selectedGuide?.pricingMode,
+    pricePerHour: selectedGuide?.pricePerHour,
+    pricePerSession: selectedGuide?.pricePerSession,
     sessionCount: calculatedSessionCount,
     totalHours: calculatedTotalHours
   });
   const calculatedWeekdayCounts = getSpecialLectureWeekdayCounts(generatedSessionsPreview);
+  const selectedGuideStatus = selectedGuide ? getSpecialLectureStatusBadge(selectedGuide) : null;
+  const isManagingSelectedGuide = Boolean(selectedGuide && managementGuideId === selectedGuide.specialLectureGuideId);
 
   useEffect(() => {
     setDraftGuides(normalizedGuides);
     setSelectedGuideId((current) =>
       normalizedGuides.some((guide) => guide.specialLectureGuideId === current)
         ? current
-        : normalizedGuides[0]?.specialLectureGuideId || ""
+        : getDefaultSpecialLectureGuideId(normalizedGuides)
     );
   }, [normalizedGuides]);
 
@@ -10900,9 +10945,14 @@ function SpecialLectureNoticePanel({
     setHighlightDraftText((guide?.highlights ?? []).join("\n"));
     setScheduleDraftText(formatSpecialLectureScheduleText(guide?.sessions ?? []));
     setCopyMessage("");
-  }, [selectedGuideId]);
+  }, [draftGuides, selectedGuideId]);
+
+  useEffect(() => {
+    if (selectedGuide && !isSpecialLecturePrimaryGuide(selectedGuide)) setShowStoredGuides(true);
+  }, [selectedGuide]);
 
   function updateSelectedGuide(field, value) {
+    if (!selectedGuide) return;
     setDraftGuides((current) =>
       current.map((guide) =>
         guide.specialLectureGuideId === selectedGuide.specialLectureGuideId
@@ -10913,11 +10963,13 @@ function SpecialLectureNoticePanel({
   }
 
   function updateHighlights(value) {
+    if (!selectedGuide) return;
     setHighlightDraftText(value);
     updateSelectedGuide("highlights", value.split("\n").map((line) => line.trim()).filter(Boolean));
   }
 
   function updateSchedule(value) {
+    if (!selectedGuide) return;
     setScheduleDraftText(value);
     const sessions = parseSpecialLectureScheduleText(value);
     const calculated = getSpecialLectureCalculatedFields({ ...selectedGuide, sessions });
@@ -10938,13 +10990,70 @@ function SpecialLectureNoticePanel({
   }
 
   function createNewGuide() {
-    const nextGuide = createSpecialLectureGuideFromTemplate(selectedGuide);
+    const nextGuide = createSpecialLectureGuideFromTemplate(selectedGuide ?? defaultSpecialLectureGuides[0]);
     setDraftGuides((current) => [nextGuide, ...current]);
     setSelectedGuideId(nextGuide.specialLectureGuideId);
     setPanelMessage("새 특강 초안을 만들었습니다. 일정 계산 후 저장하면 공개 링크가 유지됩니다.");
   }
 
+  async function persistGuideManagement(nextGuides, nextSelectedGuideId, successMessage) {
+    const normalizedNextGuides = normalizeSpecialLectureGuides(nextGuides);
+    setPanelMessage("");
+    setManagementGuideId(selectedGuide?.specialLectureGuideId || "all");
+    try {
+      const saved = onSaveGuides ? await onSaveGuides(normalizedNextGuides) : normalizedNextGuides;
+      setDraftGuides(saved);
+      setSelectedGuideId(nextSelectedGuideId && saved.some((guide) => guide.specialLectureGuideId === nextSelectedGuideId)
+        ? nextSelectedGuideId
+        : getDefaultSpecialLectureGuideId(saved));
+      setPanelMessage(successMessage);
+    } catch (error) {
+      setPanelMessage(`특강 관리 저장 실패: ${error.message}`);
+    } finally {
+      setManagementGuideId("");
+    }
+  }
+
+  function archiveSelectedGuide() {
+    if (!selectedGuide) return;
+    const nextGuides = draftGuides.map((guide) =>
+      guide.specialLectureGuideId === selectedGuide.specialLectureGuideId
+        ? normalizeSpecialLectureGuide({
+            ...guide,
+            archivedAt: new Date().toISOString(),
+            status: "archived",
+            updatedAt: new Date().toISOString()
+          }, guide)
+        : guide
+    );
+    persistGuideManagement(nextGuides, getDefaultSpecialLectureGuideId(nextGuides), "특강을 보관했습니다. 진행/예정 카드 목록에서는 숨겨집니다.");
+  }
+
+  function restoreSelectedGuide() {
+    if (!selectedGuide) return;
+    const nextGuides = draftGuides.map((guide) =>
+      guide.specialLectureGuideId === selectedGuide.specialLectureGuideId
+        ? normalizeSpecialLectureGuide({
+            ...guide,
+            archivedAt: "",
+            status: "active",
+            updatedAt: new Date().toISOString()
+          }, guide)
+        : guide
+    );
+    persistGuideManagement(nextGuides, selectedGuide.specialLectureGuideId, "보관된 특강을 복원했습니다.");
+  }
+
+  function deleteSelectedGuide() {
+    if (!selectedGuide) return;
+    const title = selectedGuide.shortTitle || selectedGuide.title || "이 특강";
+    if (typeof window !== "undefined" && !window.confirm(`${title} 안내문을 삭제할까요?\n삭제하면 공개 링크도 더 이상 이 안내문을 찾을 수 없습니다.`)) return;
+    const nextGuides = draftGuides.filter((guide) => guide.specialLectureGuideId !== selectedGuide.specialLectureGuideId);
+    persistGuideManagement(nextGuides, getDefaultSpecialLectureGuideId(nextGuides), "특강 안내문을 삭제했습니다.");
+  }
+
   function updateScheduleRule(ruleIndex, patch) {
+    if (!selectedGuide) return;
     const rules = normalizeSpecialLectureScheduleRules(selectedGuide.scheduleRules).map((rule, index) =>
       index === ruleIndex ? normalizeSpecialLectureScheduleRule({ ...rule, ...patch }) : rule
     );
@@ -10952,6 +11061,7 @@ function SpecialLectureNoticePanel({
   }
 
   function toggleScheduleRuleDay(ruleIndex, dayValue) {
+    if (!selectedGuide) return;
     const rules = normalizeSpecialLectureScheduleRules(selectedGuide.scheduleRules);
     const rule = rules[ruleIndex] ?? normalizeSpecialLectureScheduleRule();
     const hasDay = rule.days.includes(dayValue);
@@ -10960,6 +11070,7 @@ function SpecialLectureNoticePanel({
   }
 
   function addScheduleRule() {
+    if (!selectedGuide) return;
     updateSelectedGuide("scheduleRules", [
       ...normalizeSpecialLectureScheduleRules(selectedGuide.scheduleRules),
       { days: [], startTime: "13:00", endTime: "16:00" }
@@ -10967,12 +11078,14 @@ function SpecialLectureNoticePanel({
   }
 
   function removeScheduleRule(ruleIndex) {
+    if (!selectedGuide) return;
     const nextRules = normalizeSpecialLectureScheduleRules(selectedGuide.scheduleRules)
       .filter((_, index) => index !== ruleIndex);
     updateSelectedGuide("scheduleRules", nextRules.length ? nextRules : [{ days: [1], startTime: "13:00", endTime: "16:00" }]);
   }
 
   function applyCalculatedSchedule() {
+    if (!selectedGuide) return;
     const generatedSessions = generateSpecialLectureSessions(selectedGuide);
     if (!generatedSessions.length) {
       setPanelMessage("일정 계산 실패: 기간, 요일, 시작/종료 시간을 확인해 주세요.");
@@ -11011,12 +11124,14 @@ function SpecialLectureNoticePanel({
   }
 
   async function copyGuideUrl() {
+    if (!selectedGuideUrl) return;
     setCopyMessage("");
     const copied = await copyTextToClipboard(selectedGuideUrl);
     setCopyMessage(copied ? "안내문 링크를 복사했습니다." : "링크 복사에 실패했습니다. 화면의 URL을 직접 복사해 주세요.");
   }
 
   async function copyNoticeText() {
+    if (!noticeText) return;
     setCopyMessage("");
     const copied = await copyTextToClipboard(noticeText);
     setCopyMessage(copied ? "알림톡 본문을 복사했습니다." : "본문 복사에 실패했습니다.");
@@ -11037,6 +11152,25 @@ function SpecialLectureNoticePanel({
     }
   }
 
+  function renderGuideCard(guide, extraClass = "") {
+    const status = getSpecialLectureStatusBadge(guide);
+    return (
+      <button
+        className={[
+          guide.specialLectureGuideId === selectedGuide?.specialLectureGuideId ? "active" : "",
+          extraClass
+        ].filter(Boolean).join(" ")}
+        key={guide.specialLectureGuideId}
+        onClick={() => setSelectedGuideId(guide.specialLectureGuideId)}
+        type="button"
+      >
+        <span className={`specialLectureStatusPill ${status.tone}`}>{status.label}</span>
+        <strong>{guide.shortTitle || guide.title}</strong>
+        <span>{guide.days || "요일 미입력"} · {guide.time || "시간 미입력"}</span>
+      </button>
+    );
+  }
+
   return (
     <section className="notificationPanel specialLecturePanel">
       <div className="sectionHeader slim">
@@ -11050,25 +11184,63 @@ function SpecialLectureNoticePanel({
         </div>
       </div>
 
-      <div className="specialLectureSelector">
-        {draftGuides.map((guide) => (
-          <button
-            className={guide.specialLectureGuideId === selectedGuide.specialLectureGuideId ? "active" : ""}
-            key={guide.specialLectureGuideId}
-            onClick={() => setSelectedGuideId(guide.specialLectureGuideId)}
-            type="button"
-          >
-            <strong>{guide.shortTitle || guide.title}</strong>
-            <span>{guide.days} · {guide.time}</span>
-          </button>
-        ))}
+      <div className="specialLectureSelectorStack">
+        <div className="specialLectureSelectorHeader">
+          <strong>진행/예정 특강</strong>
+          <span>{primaryGuides.length}건</span>
+        </div>
+        {primaryGuides.length ? (
+          <div className="specialLectureSelector">
+            {primaryGuides.map((guide) => renderGuideCard(guide))}
+          </div>
+        ) : (
+          <div className="specialLectureEmptyState">
+            진행/예정 특강이 없습니다. 새 방학 특강을 만들거나 지난 특강을 펼쳐 복원하세요.
+          </div>
+        )}
+        {storedGuides.length ? (
+          <div className="specialLectureStoredPanel">
+            <button className="specialLectureStoredToggle" onClick={() => setShowStoredGuides((current) => !current)} type="button">
+              <span>지난/보관 특강</span>
+              <strong>{storedGuides.length}건</strong>
+              <em>{showStoredGuides ? "접기" : "펼치기"}</em>
+            </button>
+            {showStoredGuides ? (
+              <div className="specialLectureSelector stored">
+                {storedGuides.map((guide) => renderGuideCard(guide, "stored"))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
+      {selectedGuide ? (
       <div className="specialLectureEditorGrid">
         <div className="specialLectureEditor">
           <div className="noticeBox specialLectureNoticeBox">
             <strong>저장/발송 분리</strong>
             <p>이 탭은 안내문과 링크를 준비합니다. 실제 발송은 `공지 작성에 반영` 후 일반공지에서 테스트 발송과 수신 대상 확인을 거쳐 진행합니다.</p>
+          </div>
+          <div className="specialLectureManagementBar">
+            <div>
+              <span>선택 안내문</span>
+              <strong>{selectedGuide.shortTitle || selectedGuide.title || "제목 미입력"}</strong>
+              {selectedGuideStatus ? <small>{selectedGuideStatus.label} · {selectedGuide.periodStart || "시작일 미입력"} ~ {selectedGuide.periodEnd || "종료일 미입력"}</small> : null}
+            </div>
+            <div>
+              {isSpecialLectureArchived(selectedGuide) ? (
+                <button className="softButton compact" disabled={isManagingSelectedGuide} onClick={restoreSelectedGuide} type="button">
+                  {isManagingSelectedGuide ? "저장 중" : "보관 해제"}
+                </button>
+              ) : (
+                <button className="softButton compact" disabled={isManagingSelectedGuide} onClick={archiveSelectedGuide} type="button">
+                  {isManagingSelectedGuide ? "저장 중" : "보관"}
+                </button>
+              )}
+              <button className="dangerSoftButton compact" disabled={isManagingSelectedGuide} onClick={deleteSelectedGuide} type="button">
+                {isManagingSelectedGuide ? "삭제 중" : "삭제"}
+              </button>
+            </div>
           </div>
 
           <div className="specialLectureFormGrid">
@@ -11266,6 +11438,12 @@ function SpecialLectureNoticePanel({
 
         <SpecialLectureGuidePreview guide={selectedGuide} guideUrl={selectedGuideUrl} />
       </div>
+      ) : (
+        <div className="specialLectureNoSelection">
+          <strong>편집할 특강을 선택하세요.</strong>
+          <p>진행/예정 특강이 없으면 `새 특강 만들기`로 새 방학 특강을 시작하거나, 지난/보관 특강을 펼쳐 기존 안내문을 복원할 수 있습니다.</p>
+        </div>
+      )}
     </section>
   );
 }
@@ -11396,7 +11574,10 @@ function SpecialLecturePublicPage() {
   const query = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : new URLSearchParams();
   const requestedSlug = query.get("guide") || (typeof window !== "undefined" ? window.location.hash.replace(/^#special-lecture\/?/, "") : "");
   const normalizedGuides = normalizeSpecialLectureGuides(guides);
-  const selectedGuide = normalizedGuides.find((guide) => getSpecialLectureGuideSlug(guide) === requestedSlug) ?? normalizedGuides[0];
+  const selectedGuide = normalizedGuides.find((guide) => getSpecialLectureGuideSlug(guide) === requestedSlug)
+    ?? normalizedGuides.find(isSpecialLecturePrimaryGuide)
+    ?? normalizedGuides[0]
+    ?? null;
 
   useEffect(() => {
     let isMounted = true;
@@ -11404,7 +11585,7 @@ function SpecialLecturePublicPage() {
       .then((response) => response.json())
       .then((result) => {
         if (!isMounted) return;
-        if (result.ok && Array.isArray(result.specialLectureGuides) && result.specialLectureGuides.length) {
+        if (result.ok && Array.isArray(result.specialLectureGuides) && (result.hasSpecialLectureGuides || result.specialLectureGuides.length)) {
           setGuides(normalizeSpecialLectureGuides(result.specialLectureGuides));
         }
         setLoadState("loaded");
@@ -11425,7 +11606,14 @@ function SpecialLecturePublicPage() {
 
   return (
     <main className="specialLecturePublicPage">
-      <SpecialLectureGuidePreview guide={selectedGuide} />
+      {selectedGuide ? (
+        <SpecialLectureGuidePreview guide={selectedGuide} />
+      ) : (
+        <section className="specialLecturePublicEmpty">
+          <strong>현재 공개된 특강 안내문이 없습니다.</strong>
+          <p>특강 일정이 확정되면 안내 링크를 다시 보내드리겠습니다.</p>
+        </section>
+      )}
       {loadState === "fallback" ? (
         <p className="specialLectureLoadNotice">저장본을 불러오지 못해 기본 안내문을 표시하고 있습니다.</p>
       ) : null}
