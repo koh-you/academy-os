@@ -12,6 +12,16 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-14 P1. 보충 일정 변경 학부모 즉시 안내 추가
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청: 보충 일정 변경은 학생뿐 아니라 학부모에게도 발송되어야 한다. 단, 보강 당일 오전 11시 리마인더는 학생에게 가는 별도 예약으로 유지한다.
+- 구현 방향: 기존 일정이 변경된 경우 `학생·학부모 안내 + 11시 예약` 선택 시 학생 즉시 변경 안내(`schedule_reminder`), 학부모 즉시 변경 안내(`parent_comment`), 학생 11시 예약(`student_reminder`)을 각각 별도 `notification_jobs`로 기록한다.
+- 템플릿 기준: 학생 변경 안내는 기존 `SOLAPI_STUDENT_COMMENT_TEMPLATE_ID`의 `#{코멘트}` 경로를 쓰고, 학부모 변경 안내는 기존 학부모 리포트/코멘트 템플릿의 `#{리포트본문}`/`#{코멘트}` 변수에 동일한 변경 안내 자연문을 넣는다. 새 Solapi 템플릿은 만들지 않는다.
+- 저장 원천: 보충관리 원본은 Supabase `makeup_tasks`, 수업일지 일정 원본은 `lessons`, 학생/학부모 즉시 발송 및 학생 11시 예약 이력은 `notification_jobs`다. 즉시 발송 실패는 일정 저장을 롤백하지 않고 `send_unconfirmed` 또는 `failed` job으로 남긴다.
+- 중단 조건: 학부모 변경 안내가 누락됨, 학부모 안내 실패가 화면/기록에서 숨겨짐, 학생 11시 예약이 사라짐, 학생/학부모 즉시 안내가 같은 job으로 덮임, Solapi 템플릿 변수 누락으로 본문이 비어 나감.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 287개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-14 P1. 보충 일정 변경 즉시 안내와 11시 예약 분리
 
 - 상태: 완료 - 구현/검증 완료

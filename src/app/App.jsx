@@ -8340,20 +8340,19 @@ export function App() {
     };
   }
 
-  async function sendSupplementScheduleChangeNotice(task, student, previousScheduleText = "") {
-    if (!isSupplementStudentReminderTask(task)) {
-      return { skipped: true, status: "notApplied", message: "학생 변경 안내 대상이 아닙니다." };
-    }
-    if (!student) {
-      return { skipped: true, status: "failed", message: "학생 정보를 찾지 못해 변경 안내를 보내지 않았습니다." };
-    }
-    const notificationJob = buildSupplementScheduleChangeNoticeJob(task, student, previousScheduleText);
+  async function sendImmediateSupplementScheduleNotice(notificationJob, {
+    endpoint,
+    failedPrefix,
+    sentMessage,
+    timeoutMessage,
+    unconfirmedPrefix
+  }) {
     try {
       const result = await postJsonWithTimeout(
-        "/api/notifications/student-schedule-reminder",
+        endpoint,
         notificationJob.payload,
         45000,
-        "보충 일정 변경 안내 발송 요청이 45초를 넘었습니다. 실제 발송 여부는 발송 기록 또는 Solapi에서 확인해 주세요."
+        timeoutMessage
       );
       const sentJob = {
         ...notificationJob,
@@ -8370,8 +8369,8 @@ export function App() {
         skipped: false,
         status: sentJob.status,
         message: sentJob.status === "dry_run"
-          ? "학생 일정 변경 안내 테스트 기록 완료"
-          : "학생 일정 변경 안내 즉시 발송 완료"
+          ? sentMessage.replace("즉시 발송 완료", "테스트 기록 완료")
+          : sentMessage
       };
     } catch (error) {
       const timedOut = isRequestTimeoutError(error);
@@ -8389,10 +8388,68 @@ export function App() {
         skipped: false,
         status: failedJob.status,
         message: timedOut
-          ? `학생 일정 변경 안내 발송 확인 필요: ${error.message}`
-          : `학생 일정 변경 안내 발송 실패: ${error.message}`
+          ? `${unconfirmedPrefix}: ${error.message}`
+          : `${failedPrefix}: ${error.message}`
       };
     }
+  }
+
+  function persistSupplementScheduleNoticeFailure(notificationJob, messagePrefix, errorMessage) {
+    const failedJob = {
+      ...notificationJob,
+      error: errorMessage,
+      provider: "academy-os",
+      status: "failed",
+      updatedAt: new Date().toISOString()
+    };
+    upsertNotificationJobState(failedJob);
+    postJson("/api/notification-jobs", { notificationJob: failedJob }).catch((persistError) => console.error(persistError));
+    return {
+      notificationJob: failedJob,
+      skipped: false,
+      status: "failed",
+      message: `${messagePrefix}: ${errorMessage}`
+    };
+  }
+
+  async function sendSupplementScheduleChangeNotice(task, student, previousScheduleText = "") {
+    if (!isSupplementStudentReminderTask(task)) {
+      return { skipped: true, status: "notApplied", message: "학생 변경 안내 대상이 아닙니다." };
+    }
+    if (!student) {
+      return { skipped: true, status: "failed", message: "학생 정보를 찾지 못해 변경 안내를 보내지 않았습니다." };
+    }
+    const notificationJob = buildSupplementScheduleChangeNoticeJob(task, student, previousScheduleText);
+    if (!student.studentPhone) {
+      return persistSupplementScheduleNoticeFailure(notificationJob, "학생 일정 변경 안내 발송 실패", "학생 연락처가 없습니다.");
+    }
+    return sendImmediateSupplementScheduleNotice(notificationJob, {
+      endpoint: "/api/notifications/student-schedule-reminder",
+      failedPrefix: "학생 일정 변경 안내 발송 실패",
+      sentMessage: "학생 일정 변경 안내 즉시 발송 완료",
+      timeoutMessage: "보충 일정 변경 안내 발송 요청이 45초를 넘었습니다. 실제 발송 여부는 발송 기록 또는 Solapi에서 확인해 주세요.",
+      unconfirmedPrefix: "학생 일정 변경 안내 발송 확인 필요"
+    });
+  }
+
+  async function sendSupplementParentScheduleChangeNotice(task, student, previousScheduleText = "") {
+    if (!isSupplementStudentReminderTask(task)) {
+      return { skipped: true, status: "notApplied", message: "학부모 변경 안내 대상이 아닙니다." };
+    }
+    if (!student) {
+      return { skipped: true, status: "failed", message: "학생 정보를 찾지 못해 학부모 변경 안내를 보내지 않았습니다." };
+    }
+    const notificationJob = buildSupplementParentScheduleChangeNoticeJob(task, student, previousScheduleText);
+    if (!student.parentPhone) {
+      return persistSupplementScheduleNoticeFailure(notificationJob, "학부모 일정 변경 안내 발송 실패", "학부모 연락처가 없습니다.");
+    }
+    return sendImmediateSupplementScheduleNotice(notificationJob, {
+      endpoint: "/api/notifications/comment-alimtalk",
+      failedPrefix: "학부모 일정 변경 안내 발송 실패",
+      sentMessage: "학부모 일정 변경 안내 즉시 발송 완료",
+      timeoutMessage: "학부모 보충 일정 변경 안내 발송 요청이 45초를 넘었습니다. 실제 발송 여부는 발송 기록 또는 Solapi에서 확인해 주세요.",
+      unconfirmedPrefix: "학부모 일정 변경 안내 발송 확인 필요"
+    });
   }
 
   async function cancelSupplementStudentReminder(task, reason = "보충 완료 처리") {
@@ -10087,6 +10144,15 @@ export function App() {
             ? "일정 변경이 없어 학생 변경 안내는 보내지 않았습니다."
             : "새 보충 일정은 즉시 변경 안내 대상이 아닙니다."
         };
+    const parentScheduleChangeNotice = shouldSendScheduleChangeNotice
+      ? await sendSupplementParentScheduleChangeNotice(savedTask, student, previousScheduleText)
+      : {
+          skipped: true,
+          status: "notApplied",
+          message: hasExistingLinkedSchedule
+            ? "일정 변경이 없어 학부모 변경 안내는 보내지 않았습니다."
+            : "새 보충 일정은 학부모 즉시 변경 안내 대상이 아닙니다."
+        };
     return {
       lesson: savedLesson,
       makeupTask: savedTask,
@@ -10094,6 +10160,10 @@ export function App() {
       scheduleChangeNoticeMessage: scheduleChangeNotice.message ?? "",
       scheduleChangeNoticeSkipped: Boolean(scheduleChangeNotice.skipped),
       scheduleChangeNoticeStatus: scheduleChangeNotice.status || (scheduleChangeNotice.skipped ? "notApplied" : "sent"),
+      parentScheduleChangeNoticeJob: parentScheduleChangeNotice.notificationJob ?? null,
+      parentScheduleChangeNoticeMessage: parentScheduleChangeNotice.message ?? "",
+      parentScheduleChangeNoticeSkipped: Boolean(parentScheduleChangeNotice.skipped),
+      parentScheduleChangeNoticeStatus: parentScheduleChangeNotice.status || (parentScheduleChangeNotice.skipped ? "notApplied" : "sent"),
       supplementReminderJob: supplementReminder.notificationJob ?? null,
       supplementReminderMessage: supplementReminder.message ?? "",
       supplementReminderSkipped: Boolean(supplementReminder.skipped),
@@ -15196,7 +15266,7 @@ function HomeworkMakeupLessonDetail({
 
     setScheduleSaveState({
       message: updateStudentReminder
-        ? "일정과 학생 11시 알림톡 예약을 함께 갱신하는 중입니다."
+        ? "일정, 학생·학부모 변경 안내, 학생 11시 알림톡 예약을 함께 갱신하는 중입니다."
         : "일정만 저장하는 중입니다. 학생 11시 알림톡 예약은 변경하지 않습니다.",
       state: "saving"
     });
@@ -15222,6 +15292,7 @@ function HomeworkMakeupLessonDetail({
         message: updateStudentReminder
           ? [
               result?.scheduleChangeNoticeSkipped ? "" : result?.scheduleChangeNoticeMessage,
+              result?.parentScheduleChangeNoticeSkipped ? "" : result?.parentScheduleChangeNoticeMessage,
               result?.supplementReminderMessage || "학생 11시 알림톡 예약을 갱신했습니다."
             ].filter(Boolean).join(" ")
           : result?.supplementReminderMessage || "일정만 저장했습니다. 학생 11시 알림톡 예약은 변경하지 않았습니다.",
@@ -15276,7 +15347,7 @@ function HomeworkMakeupLessonDetail({
         <section className="homeworkMakeupScheduleEditor" aria-label="숙제보충 일정 수정">
           <div>
             <strong>보충 일정 수정</strong>
-            <span>저장하면 보충관리와 수업일지 일정이 함께 갱신됩니다. 변경 안내 즉시 발송과 11시 예약 갱신 여부는 아래에서 선택합니다.</span>
+            <span>저장하면 보충관리와 수업일지 일정이 함께 갱신됩니다. 학생·학부모 변경 안내와 학생 11시 예약 갱신 여부는 아래에서 선택합니다.</span>
           </div>
           <div className="fieldGrid two">
             <label>
@@ -15304,7 +15375,7 @@ function HomeworkMakeupLessonDetail({
               {isScheduleSaving ? "저장 중" : "일정만 저장"}
             </button>
             <button className="softButton scheduleApplyButton" disabled={!canSaveScheduleDraft || isScheduleSaving} onClick={() => saveScheduleDraft(true)} type="button">
-              {isScheduleSaving ? "발송/갱신 중" : "변경 안내 발송 + 11시 예약 갱신"}
+              {isScheduleSaving ? "발송/갱신 중" : "학생·학부모 안내 + 11시 예약"}
             </button>
           </div>
         </section>
@@ -23397,7 +23468,7 @@ function SupplementScheduleChangeConfirmModal({
     <Modal
       className="supplementPassConfirmModal supplementScheduleConfirmModal"
       title="보충 일정 변경 저장"
-      subtitle="기존 보충 일정을 바꾸면 변경 안내를 즉시 보낼지, 11시 예약도 갱신할지 함께 선택합니다."
+      subtitle="기존 보충 일정을 바꾸면 학생·학부모 변경 안내를 즉시 보낼지, 학생 11시 예약도 갱신할지 함께 선택합니다."
       onClose={onCancel}
     >
       <div className="supplementPassConfirmBody">
@@ -23419,7 +23490,7 @@ function SupplementScheduleChangeConfirmModal({
           </div>
         </dl>
         <p className="supplementScheduleConfirmNote">
-          알림톡 갱신을 선택하면 학생에게 일정 변경 안내가 지금 발송되고, 보강 당일 오전 11시 리마인더 예약도 같은 보충 항목 기준으로 갱신됩니다.
+          알림톡 갱신을 선택하면 학생과 학부모에게 일정 변경 안내가 지금 발송되고, 보강 당일 오전 11시 학생 리마인더 예약도 같은 보충 항목 기준으로 갱신됩니다.
         </p>
       </div>
       <div className="modalActions confirmActions supplementScheduleConfirmActions">
@@ -23430,7 +23501,7 @@ function SupplementScheduleChangeConfirmModal({
           {isBusy ? "저장 중" : "일정만 저장"}
         </button>
         <button className="softButton scheduleApplyButton" disabled={isBusy} onClick={onConfirmWithReminder} type="button">
-          {isBusy ? "발송/갱신 중" : "변경 안내 발송 + 11시 예약 갱신"}
+          {isBusy ? "발송/갱신 중" : "학생·학부모 안내 + 11시 예약"}
         </button>
       </div>
     </Modal>
@@ -23754,13 +23825,15 @@ function SupplementStudentModal({
       lesson: "saving",
       makeupTask: "saving",
       notificationDraft: "saving",
+      parentChangeNotice: "saving",
+      studentChangeNotice: "saving",
       studentReminder: "saving"
     });
     showFeedback(
       "일정 반영 중",
       shouldUpdateStudentReminder
         ? task.linkedLessonId
-          ? "보충관리 저장 후 일정 변경 안내를 즉시 발송하고, 보강 당일 11시 학생 알림톡 예약도 함께 갱신합니다."
+          ? "보충관리 저장 후 학생·학부모에게 일정 변경 안내를 즉시 발송하고, 보강 당일 11시 학생 알림톡 예약도 함께 갱신합니다."
           : "보충관리 저장 후 수업일지 일정과 보강 당일 11시 학생 알림톡 예약을 함께 반영합니다."
         : "보충관리 저장 후 수업일지 일정만 반영합니다. 학생 11시 알림톡 예약은 변경하지 않습니다.",
       "saving"
@@ -23774,6 +23847,8 @@ function SupplementStudentModal({
         lesson: "synced",
         makeupTask: "saved",
         notificationDraft: "saved",
+        parentChangeNotice: getSupplementImmediateNoticeSaveStatus(result?.parentScheduleChangeNoticeStatus, result?.parentScheduleChangeNoticeSkipped),
+        studentChangeNotice: getSupplementImmediateNoticeSaveStatus(result?.scheduleChangeNoticeStatus, result?.scheduleChangeNoticeSkipped),
         studentReminder: result?.supplementReminderStatus || (result?.supplementReminderSkipped ? "resultDue" : "scheduled")
       });
       setScheduleConfirmTask(null);
@@ -23782,6 +23857,7 @@ function SupplementStudentModal({
         [
           `${nextTask.scheduledDate} ${nextTask.scheduledTime} 보충 일정이 수업일지에 반영되었습니다.`,
           result?.scheduleChangeNoticeSkipped ? "" : result?.scheduleChangeNoticeMessage,
+          result?.parentScheduleChangeNoticeSkipped ? "" : result?.parentScheduleChangeNoticeMessage,
           result?.supplementReminderMessage || "학생 11시 알림톡 예약 상태를 확인하세요."
         ].filter(Boolean).join(" ")
       );
@@ -23791,6 +23867,8 @@ function SupplementStudentModal({
         lesson: "failed",
         makeupTask: "failed",
         notificationDraft: "failed",
+        parentChangeNotice: "failed",
+        studentChangeNotice: "failed",
         studentReminder: "failed"
       });
       showFeedback("일정 반영 실패", error?.message || "알 수 없는 오류가 발생했습니다.", "failed");
@@ -23897,6 +23975,8 @@ function SupplementStudentModal({
               const makeupStatus = saveStatus.makeupTask || (draftDiff.length ? "changed" : "saved");
               const lessonStatus = saveStatus.lesson || (hasScheduleDiff ? "changed" : task.linkedLessonId ? "synced" : hasScheduleDraft ? "ready" : "empty");
               const notificationStatus = saveStatus.notificationDraft || (hasNotificationDiff ? "changed" : draftValues.notificationDraft ? "saved" : "empty");
+              const parentChangeNoticeStatus = saveStatus.parentChangeNotice;
+              const studentChangeNoticeStatus = saveStatus.studentChangeNotice;
               const studentReminderStatus = saveStatus.studentReminder || getSupplementStudentReminderSaveStatus(task, notificationJobs);
               return (
                 <article className="taskCard" key={task.makeupTaskId}>
@@ -24014,6 +24094,8 @@ function SupplementStudentModal({
                     {renderSaveStatusPill("makeup_tasks", makeupStatus)}
                     {renderSaveStatusPill("lessons", lessonStatus)}
                     {renderSaveStatusPill("알림톡 초안", notificationStatus)}
+                    {studentChangeNoticeStatus ? renderSaveStatusPill("학생 변경 안내", studentChangeNoticeStatus) : null}
+                    {parentChangeNoticeStatus ? renderSaveStatusPill("학부모 변경 안내", parentChangeNoticeStatus) : null}
                     {renderSaveStatusPill("학생 11시 알림톡", studentReminderStatus)}
                   </div>
                   <label className="notificationDraftField supplementReadableField">
@@ -24025,7 +24107,7 @@ function SupplementStudentModal({
                     />
                   </label>
                   <div className="supplementSendGateNote">
-                    발송 검수 gate: 내용만 저장은 발송/예약을 만들지 않습니다. 기존 일정 변경 시에는 변경 안내 즉시 발송과 보강 당일 11시 예약 갱신 여부를 먼저 확인합니다.
+                    발송 검수 gate: 내용만 저장은 발송/예약을 만들지 않습니다. 기존 일정 변경 시에는 학생·학부모 변경 안내 즉시 발송과 보강 당일 학생 11시 예약 갱신 여부를 먼저 확인합니다.
                   </div>
                   <div className="modalActions supplementSplitActions">
                     <button className="softButton primarySoft" disabled={isTaskBusy} onClick={() => handleSaveTask(task)} type="button">
@@ -27578,6 +27660,48 @@ function buildSupplementScheduleChangeNoticeJob(task = {}, student = {}, previou
   };
 }
 
+function buildSupplementParentScheduleChangeNoticeJob(task = {}, student = {}, previousScheduleText = "") {
+  const now = Date.now();
+  const scheduleTitle = getSupplementStudentReminderTitle(task);
+  const reminderBody = buildSupplementScheduleChangeNoticeBody(task, previousScheduleText);
+  const payload = {
+    academyName: academyBrandName,
+    commentBodyOverride: reminderBody,
+    lessonDate: task.scheduledDate,
+    lessonName: `${scheduleTitle} 일정 변경`,
+    makeupTaskId: task.makeupTaskId,
+    message: reminderBody,
+    notificationType: "parent_comment",
+    parentPhone: student.parentPhone,
+    scheduleDate: task.scheduledDate,
+    scheduleTime: task.scheduledTime,
+    scheduleTitle: `${scheduleTitle} 일정 변경`,
+    scheduleType: "supplement",
+    sendMode: "immediate",
+    studentId: student.studentId,
+    studentName: student.name,
+    studentPhone: student.studentPhone,
+    target: "parent"
+  };
+  return {
+    notificationJobId: `supplement_parent_schedule_change_${safeIdPart(task.makeupTaskId || task.sourceId || "task")}_${safeIdPart(student.studentId || "student")}_${now}`,
+    notificationType: "parent_comment",
+    studentId: student.studentId,
+    lessonId: task.linkedLessonId || "",
+    lessonStudentRecordId: "",
+    target: "parent",
+    recipient: student.parentPhone,
+    scheduledAt: "",
+    payload,
+    previewBody: reminderBody,
+    status: "draft",
+    provider: "academy-os",
+    result: { makeupTaskId: task.makeupTaskId, previousScheduleText },
+    error: "",
+    createdAt: new Date(now).toISOString()
+  };
+}
+
 function getSupplementStudentReminderJob(task = {}, notificationJobs = []) {
   const notificationJobId = getSupplementStudentReminderJobId(task);
   if (!notificationJobId) return null;
@@ -27597,6 +27721,14 @@ function getSupplementStudentReminderSaveStatus(task = {}, notificationJobs = []
   if (job?.status === "canceled") return "canceled";
   if (scheduledAt && isNotificationSchedulePast(scheduledAt, 0)) return "resultDue";
   return "ready";
+}
+
+function getSupplementImmediateNoticeSaveStatus(status, skipped = false) {
+  if (skipped) return "notApplied";
+  if (status === "sent" || status === "dry_run") return "synced";
+  if (status === "send_unconfirmed") return "resultDue";
+  if (status === "failed") return "failed";
+  return status || "idle";
 }
 
 function getSupplementTaskProgress(task, lessons = []) {
