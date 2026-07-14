@@ -12,6 +12,16 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-15 P1. 공지 삭제 상태 문구 중복 제거
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청: 알림관리에서 발송하지 않은 공지 기록을 삭제한 뒤 `발송하지 않은 공지 기록 1건을 삭제했습니다.` 문구가 상단과 작성 패널 하단 두 군데에 보인다. 위쪽 문구는 지우고, 아래쪽 상태확인 문구를 더 잘 보이게 한다.
+- 구현 결과: 공지 발송 화면 상단의 전역 `dispatchMessage` 렌더를 제거하고, 공지 작성 패널 내부의 `noticeDispatchMessage`만 남겼다.
+- 구현 결과: 작성 패널 안 상태 문구에 파란 강조 배경, 왼쪽 강조선, 굵은 글씨를 적용해 삭제/발송/예약 결과가 현재 작업 영역 안에서 더 잘 보이게 했다.
+- 저장 원천: 이번 변경은 UI 표시 위치와 스타일만 바꾸며 Supabase `notification_jobs`, 공지 발송/예약/삭제 API, Solapi 호출 로직은 바꾸지 않는다. 새 SQL은 필요 없다.
+- 중단 조건: 삭제/예약/발송 후 같은 문구가 화면 두 군데에 다시 표시됨, 아래 상태 문구가 작업 패널 밖에만 보임, 공지 삭제 버튼이 `notification_jobs` 삭제 가능 상태 외의 기록을 삭제함, UI 문구 수정만으로 발송/예약 상태가 바뀜.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 288개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-14 P1. 공지 발송 기록 접기 UI
 
 - 상태: 완료 - 구현/검증 완료

@@ -10921,8 +10921,6 @@ function NotificationCenter({
           ) : null}
         </div>
       ) : null}
-      {dispatchMessage ? <p className="inlineNotice">{dispatchMessage}</p> : null}
-
       <div className="notificationSectionTabs">
         <button
           className={activeNotificationTab === "notice" ? "active" : ""}
