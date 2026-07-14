@@ -5496,44 +5496,6 @@ button {
   background: #ef4444;
 }
 
-.schoolEventPill.periodBar {
-  align-items: center;
-  background: transparent !important;
-  border-radius: 0;
-  border-top: 2px solid var(--period-color, #f472b6);
-  box-shadow: none;
-  color: var(--period-color, #f472b6);
-  display: flex;
-  font-size: 11px;
-  height: 16px;
-  justify-content: center;
-  left: 8px;
-  margin: 0;
-  min-height: 16px;
-  opacity: 0.95;
-  padding: 2px 6px 0;
-  position: absolute;
-  right: 8px;
-  text-align: center;
-  top: calc(75px + (var(--period-index, 0) * 18px));
-  z-index: 1;
-}
-
-.schoolEventPill.periodBar:empty {
-  height: 12px;
-  min-height: 12px;
-  padding: 0;
-}
-
-.schoolEventPill.periodBar::before,
-.schoolEventPill.periodBar::after {
-  color: var(--period-color, #f472b6);
-  font-size: 12px;
-  line-height: 1;
-  position: absolute;
-  top: -7px;
-}
-
 .schoolEventMorePill {
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid #d8e3f8;
@@ -5548,44 +5510,6 @@ button {
   z-index: 2;
 }
 
-.schoolEventPill.periodBar.periodStart {
-  border-bottom-right-radius: 0;
-  border-top-right-radius: 0;
-  left: 8px;
-  right: -2px;
-}
-
-.schoolEventPill.periodBar.periodStart::before,
-.schoolEventPill.periodBar.periodSingle::before {
-  content: "‹";
-  left: -1px;
-}
-
-.schoolEventPill.periodBar.periodMiddle {
-  border-radius: 0;
-  left: -2px;
-  right: -2px;
-}
-
-.schoolEventPill.periodBar.periodEnd {
-  border-bottom-left-radius: 0;
-  border-top-left-radius: 0;
-  left: -2px;
-  right: 8px;
-}
-
-.schoolEventPill.periodBar.periodEnd::after,
-.schoolEventPill.periodBar.periodSingle::after {
-  content: "›";
-  right: -1px;
-}
-
-.schoolEventPill.periodBar.periodSingle {
-  border-radius: 0;
-  left: 8px;
-  right: 8px;
-}
-
 .schoolMathExamLayer {
   display: flex;
   flex-wrap: wrap;
@@ -5596,10 +5520,6 @@ button {
   right: 8px;
   top: 32px;
   z-index: 4;
-}
-
-.schoolPeriodLayer {
-  display: block;
 }
 
 .schoolEventPill.mathExamTab {
@@ -5635,7 +5555,7 @@ button {
   left: 8px;
   position: absolute;
   right: 8px;
-  top: 108px;
+  top: 72px;
   z-index: 3;
 }
 
@@ -5690,6 +5610,99 @@ button {
   padding: 14px;
 }
 
+.schoolAcademicOverviewPanel {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding: 16px;
+}
+
+.schoolAcademicStatsGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.schoolAcademicStatsGrid article {
+  background: #f8fbff;
+  border: 1px solid #dbe8fb;
+  border-radius: 8px;
+  display: grid;
+  gap: 5px;
+  min-height: 78px;
+  padding: 13px 14px;
+}
+
+.schoolAcademicStatsGrid strong {
+  color: #0f172a;
+  font-size: 25px;
+  line-height: 1;
+}
+
+.schoolAcademicStatsGrid span {
+  color: #52647f;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.examPeriodGallery {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.examPeriodOverviewCard {
+  background: #ffffff;
+  border: 1px solid #d8e4f6;
+  border-left: 4px solid var(--school-color, #2563eb);
+  border-radius: 8px;
+  display: grid;
+  gap: 11px;
+  min-height: 154px;
+  padding: 15px;
+}
+
+.examPeriodOverviewCard > div:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.examPeriodOverviewCard strong {
+  color: var(--school-color, #17213d);
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.examPeriodOverviewCard span,
+.examPeriodOverviewCard p {
+  color: #52647f;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.examPeriodMathChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.examPeriodMathChips span {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  color: #1f3f8f;
+  font-size: 12px;
+  padding: 5px 8px;
+}
+
+.examPeriodMathChips .mutedChip {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #64748b;
+}
+
 .generatedLessonPreviewPanel {
   display: grid;
   gap: 12px;
@@ -5724,6 +5737,7 @@ button {
   flex-wrap: wrap;
   gap: 10px;
   justify-content: space-between;
+  margin-bottom: 14px;
   padding: 10px 12px;
 }
 
@@ -14862,6 +14876,7 @@ body.attendanceOnlyBody {
   .reportDataSummaryGrid,
   .researchMetricGrid,
   .researchLayout,
+  .schoolAcademicStatsGrid,
   .schoolCalendarLayout,
   .schoolCalendarLayout.formCollapsed,
   .examAnalysisGrid,

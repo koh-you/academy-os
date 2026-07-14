@@ -5045,7 +5045,6 @@ function formatMathExamEntryLabel(row = {}, entry = {}) {
 }
 
 function formatCalendarSummaryLabel(event = {}) {
-  if (event.type === "reminder") return event.title || "운영 알림";
   return [event.schoolName, event.grade, event.examSubject || event.subject]
     .filter(Boolean)
     .join(" ")
@@ -5103,16 +5102,12 @@ function dedupeExamPrepRowsForDisplay(rows = []) {
 function getSchoolCalendarFilterGroup(event = {}) {
   if (event.type === "examPeriod") return "examPeriod";
   if (event.type === "mathExam") return "mathExam";
-  if (event.type === "preExam") return "preExam";
-  if (event.type === "reminder") return "reminder";
   if (event.type === "vacation") return "vacation";
+  if (event.type === "schoolEvent") return "schoolEvent";
   return "custom";
 }
 
 function formatCalendarEventLabel(event = {}) {
-  if (event.type === "reminder") {
-    return event.title || "운영 알림";
-  }
   if (event.type === "mathExam") {
     return joinCalendarLabel(event.schoolName, event.title || event.examSubject || "수학시험");
   }
@@ -5120,31 +5115,6 @@ function formatCalendarEventLabel(event = {}) {
     return joinCalendarLabel(event.schoolName, event.title || "시험기간");
   }
   return joinCalendarLabel(event.schoolName, event.title || event.examSubject || "일정");
-}
-
-function createSchoolCalendarReminderEvents(reminders = [], students = []) {
-  return reminders.map((reminder) => {
-    const student = students.find((item) => item.studentId === reminder.studentId);
-    const title = [
-      getAcademyReminderTypeLabel(reminder.reminderType ?? reminder.type),
-      student?.name,
-      reminder.title
-    ].filter(Boolean).join(" · ");
-    return {
-      eventId: `reminder_${reminder.reminderId}`,
-      reminderId: reminder.reminderId,
-      readonly: true,
-      schoolName: student?.schoolName || "운영 알림",
-      grade: student?.grade || "",
-      title: title || "운영 알림",
-      type: "reminder",
-      date: reminder.reminderDate || reminder.date,
-      endDate: reminder.reminderDate || reminder.date,
-      memo: reminder.content || reminder.memo || "",
-      color: "#0f766e",
-      reminder
-    };
-  }).filter((event) => event.date);
 }
 
 function syncPrimaryMathExamDate(entries = []) {
@@ -5335,17 +5305,6 @@ function isDateWithinEvent(date, event) {
   return event.date <= date && date <= event.endDate;
 }
 
-function getPeriodBarClass(date, event) {
-  if (!event.endDate) return "periodSingle";
-  const dayOfWeek = new Date(`${date}T00:00:00+09:00`).getDay();
-  const startsHere = date === event.date || dayOfWeek === 0;
-  const endsHere = date === event.endDate || dayOfWeek === 6;
-  if (startsHere && endsHere) return "periodSingle";
-  if (startsHere) return "periodStart";
-  if (endsHere) return "periodEnd";
-  return "periodMiddle";
-}
-
 function groupExamPeriodEventsForMonth(events = []) {
   const grouped = new Map();
   events.forEach((event) => {
@@ -5382,15 +5341,53 @@ function formatPeriodSummaryLabel(event = {}) {
   return `${schools.slice(0, 2).join(", ")} 외 ${schools.length - 2}`;
 }
 
+function getMonthDateRange(monthString = today) {
+  const [yearText, monthText] = String(monthString).slice(0, 7).split("-");
+  const year = Number(yearText) || new Date(`${today}T00:00:00+09:00`).getFullYear();
+  const month = Number(monthText) || 1;
+  const start = `${year}-${String(month).padStart(2, "0")}-01`;
+  const endDate = new Date(Date.UTC(year, month, 0));
+  const end = `${endDate.getUTCFullYear()}-${String(endDate.getUTCMonth() + 1).padStart(2, "0")}-${String(endDate.getUTCDate()).padStart(2, "0")}`;
+  return { end, start };
+}
+
+function eventIntersectsDateRange(event = {}, start = "", end = "") {
+  const eventStart = event.date || "";
+  const eventEnd = event.endDate || event.date || "";
+  if (!eventStart || !start || !end) return false;
+  return eventStart <= end && eventEnd >= start;
+}
+
+function eventIntersectsMonth(event = {}, monthString = today) {
+  const range = getMonthDateRange(monthString);
+  return eventIntersectsDateRange(event, range.start, range.end);
+}
+
+function createSchoolCalendarPeriodCards(periodEvents = [], mathExamEvents = [], monthString = today) {
+  return groupExamPeriodEventsForMonth(periodEvents.filter((event) => eventIntersectsMonth(event, monthString)))
+    .map((event) => {
+      const schools = Array.isArray(event.schoolNames) && event.schoolNames.length ? event.schoolNames : [event.schoolName].filter(Boolean);
+      const relatedMathExamEvents = mathExamEvents
+        .filter((mathEvent) => {
+          const sameSchool = schools.length === 0 || schools.some((schoolName) => schoolNamesMatch(mathEvent.schoolName, schoolName, { allowBlank: false }));
+          const sameCycle = !event.examCycle || !mathEvent.examCycle || event.examCycle === mathEvent.examCycle;
+          return sameSchool && sameCycle && isDateWithinEvent(mathEvent.date, event);
+        })
+        .sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")) || formatCalendarSummaryLabel(a).localeCompare(formatCalendarSummaryLabel(b)));
+      return {
+        ...event,
+        relatedMathExamEvents
+      };
+    });
+}
+
 function getMonthCellDisplayEvents(dayEvents = []) {
-  const periodSummaries = groupExamPeriodEventsForMonth(dayEvents).slice(0, 3);
   const mathExamEvents = dayEvents.filter((event) => event.type === "mathExam").slice(0, 5);
-  const regularEvents = dayEvents.filter((event) => event.type !== "examPeriod" && event.type !== "mathExam").slice(0, 2);
+  const academicEvents = dayEvents.filter((event) => event.type !== "examPeriod" && event.type !== "mathExam").slice(0, 3);
   const hiddenCount =
-    Math.max(0, groupExamPeriodEventsForMonth(dayEvents).length - periodSummaries.length) +
     Math.max(0, dayEvents.filter((event) => event.type === "mathExam").length - mathExamEvents.length) +
-    Math.max(0, dayEvents.filter((event) => event.type !== "examPeriod" && event.type !== "mathExam").length - regularEvents.length);
-  return { hiddenCount, mathExamEvents, periodSummaries, regularEvents };
+    Math.max(0, dayEvents.filter((event) => event.type !== "examPeriod" && event.type !== "mathExam").length - academicEvents.length);
+  return { academicEvents, hiddenCount, mathExamEvents };
 }
 
 function buildExamCalendarEvents(rows) {
@@ -5401,6 +5398,7 @@ function buildExamCalendarEvents(rows) {
     const base = {
       schoolName,
       grade: row.grade || "",
+      examCycle: row.examCycle || currentExamCycle,
       examSubject: "수학",
       memo: "시험관리 탭에서 연동된 일정입니다.",
       derived: true,
@@ -8834,6 +8832,7 @@ export function App() {
             allRecords={records}
             attendanceSettings={attendanceSettings}
             generatedLessonControls={generatedLessonControls}
+            generatedLessonSaveStatus={generatedLessonSaveStatus}
             integrationStatus={integrationStatus}
             lessonNotificationPlans={lessonNotificationPlans}
             notificationJobs={notificationJobs}
@@ -8875,6 +8874,7 @@ export function App() {
             onPolishPreparationNotice={handlePolishPreparationNotice}
             onPassMakeupTask={handlePassSupplementTask}
             onReconcileSolapiNotificationResults={handleReconcileSolapiNotificationResults}
+            onRetryGeneratedLessonSave={handleRetryGeneratedLessonSave}
             onSaveRecord={handleSaveRecord}
             onSaveLessonJournalDrafts={handleSaveLessonJournalDrafts}
             onSaveAcademyReminder={handleSaveAcademyReminder}
@@ -9003,15 +9003,8 @@ export function App() {
 
         {activeView === "schoolCalendar" ? (
           <SchoolCalendarCenter
-            academyReminders={academyReminders}
-            generatedLessonPlan={generatedLessonPlan}
-            generatedLessonSaveStatus={generatedLessonSaveStatus}
             events={schoolEvents}
             rows={examPrepRows}
-            students={students}
-            onApplyGeneratedLesson={handleApplyGeneratedLesson}
-            onApplyGeneratedLessons={handleApplyGeneratedLessons}
-            onClearGeneratedLessonManualOverride={clearGeneratedLessonManualOverride}
             onAddEvent={(event) => {
               const nextEvent = { ...event, eventId: event.eventId || `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}` };
               setSchoolEvents((current) => [nextEvent, ...current]);
@@ -9021,9 +9014,6 @@ export function App() {
               setSchoolEvents((current) => current.filter((event) => event.eventId !== eventId));
               deleteSchoolEventFromApi(eventId).catch((error) => console.error(error));
             }}
-            onSuppressGeneratedLesson={suppressGeneratedLessonKey}
-            onRetryGeneratedLessonSave={handleRetryGeneratedLessonSave}
-            onUnsuppressGeneratedLesson={unsuppressGeneratedLessonKey}
             onSyncPreExamLesson={handleSyncPreExamLessonFromSchoolEvent}
             onUpdateExamPrepRow={handleUpdateExamPrepRow}
             onUpdateEvent={(eventId, field, value) =>
@@ -14154,6 +14144,7 @@ function TeacherLessonHubV2({
   allRecords = [],
   attendanceSettings = defaultAttendanceSettings,
   generatedLessonControls = defaultGeneratedLessonControls,
+  generatedLessonSaveStatus = { lessons: [], message: "", state: "idle" },
   integrationStatus,
   lessonNotificationPlans = {},
   clipboardCount,
@@ -14190,6 +14181,7 @@ function TeacherLessonHubV2({
   onPolishComment,
   onPolishPreparationNotice,
   onReconcileSolapiNotificationResults,
+  onRetryGeneratedLessonSave,
   onApplyLessonNotificationPlan,
   onSaveRecord,
   onSaveLessonJournalDrafts,
@@ -14396,6 +14388,7 @@ function TeacherLessonHubV2({
     return lesson.lessonType === lessonTypeFilter;
   });
   const visibleLessonCount = visibleLessons.filter((lesson) => lesson.date.slice(0, 7) === selectedDate.slice(0, 7)).length;
+  const shouldShowGeneratedLessonSaveNotice = generatedLessonSaveStatus?.state && generatedLessonSaveStatus.state !== "idle";
 
   return (
     <>
@@ -14406,6 +14399,17 @@ function TeacherLessonHubV2({
         selectedDate={selectedDate}
         students={students}
       />
+
+      {shouldShowGeneratedLessonSaveNotice ? (
+        <div className={`generatedLessonSaveNotice ${generatedLessonSaveStatus.state}`}>
+          <span>{generatedLessonSaveStatus.message || "직전수업 자동 저장 상태를 확인해 주세요."}</span>
+          {generatedLessonSaveStatus.state === "failed" ? (
+            <button className="softButton compact" onClick={onRetryGeneratedLessonSave} type="button">
+              다시 저장
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
       <header className="pageTop teacherCalendarTop">
         <button className="iconButton" onClick={() => onMoveDate(-30)} type="button">‹</button>
@@ -19436,23 +19440,13 @@ function SettingsCenter({
 }
 
 function SchoolCalendarCenter({
-  academyReminders = [],
   events,
-  generatedLessonPlan = [],
-  generatedLessonSaveStatus = { lessons: [], message: "", state: "idle" },
   rows,
   onAddEvent,
-  onApplyGeneratedLesson,
-  onApplyGeneratedLessons,
-  onClearGeneratedLessonManualOverride,
   onDeleteEvent,
-  onRetryGeneratedLessonSave,
-  onSuppressGeneratedLesson,
-  onUnsuppressGeneratedLesson,
   onSyncPreExamLesson,
   onUpdateExamPrepRow,
-  onUpdateEvent,
-  students = []
+  onUpdateEvent
 }) {
   const [selectedMonth, setSelectedMonth] = useState(today);
   const [selectedDate, setSelectedDate] = useState(today);
@@ -19488,20 +19482,17 @@ function SchoolCalendarCenter({
     : [currentExamCycle, "2026-1-mid", "2026-2-mid", "2026-2-final"];
   const eventTypeLabels = {
     examPeriod: "시험기간",
-    mathExam: "수학시험",
-    preExam: "직전대비",
-    reminder: "운영 알림",
+    mathExam: "수학시험 날짜",
     vacation: "방학/개학",
     schoolEvent: "학교행사",
-    custom: "일반"
+    custom: "기타 학사일정"
   };
   const calendarFilters = [
     { id: "all", label: "전체" },
-    { id: "examPeriod", label: "내신기간" },
-    { id: "mathExam", label: "수학시험날짜" },
+    { id: "mathExam", label: "수학시험" },
     { id: "vacation", label: "방학/개학" },
-    { id: "preExam", label: "직전일정" },
-    { id: "reminder", label: "운영알림" }
+    { id: "schoolEvent", label: "학교행사" },
+    { id: "custom", label: "기타" }
   ];
   const eventColorOptions = [...schoolCalendarSchoolColorPalette, "#17213d"];
   const examEvents = buildExamCalendarEvents(rows);
@@ -19509,22 +19500,24 @@ function SchoolCalendarCenter({
     !String(event.eventId ?? "").startsWith("event_exam_") &&
     !isExamLinkedCalendarEvent(event)
   );
-  const reminderEvents = createSchoolCalendarReminderEvents(academyReminders, students);
-  const academicEvents = [...examEvents, ...manualEvents, ...reminderEvents].sort((a, b) => a.date.localeCompare(b.date));
+  const academicEvents = [...examEvents, ...manualEvents].sort((a, b) => a.date.localeCompare(b.date));
   const filteredEvents = academicEvents.filter(
     (event) => schoolFilter === "전체 학교" || event.schoolName === schoolFilter
   );
-  const calendarDisplayEvents = filteredEvents.filter((event) => (
+  const calendarEvents = filteredEvents.filter((event) => event.type !== "examPeriod");
+  const calendarDisplayEvents = calendarEvents.filter((event) => (
     calendarFilter === "all" ? true : getSchoolCalendarFilterGroup(event) === calendarFilter
   ));
   const selectedDateEvents = calendarDisplayEvents.filter((event) => isDateWithinEvent(selectedDate, event));
-  const generatedPlanCounts = generatedLessonPlan.reduce((counts, item) => {
-    counts[item.status] = (counts[item.status] ?? 0) + 1;
-    return counts;
-  }, {});
-  const applyableGeneratedCount = (generatedPlanCounts.create ?? 0) + (generatedPlanCounts.update ?? 0);
-  const shouldShowGeneratedLessonSaveNotice = Boolean(generatedLessonSaveStatus.message);
-  const canSaveGeneratedLessons = applyableGeneratedCount > 0 || generatedLessonSaveStatus.state === "failed";
+  const monthDays = buildMonthDays(selectedMonth);
+  const monthCalendarEvents = calendarEvents.filter((event) => eventIntersectsMonth(event, selectedMonth));
+  const monthMathExamEvents = filteredEvents.filter((event) => event.type === "mathExam" && eventIntersectsMonth(event, selectedMonth));
+  const monthAcademicEvents = monthCalendarEvents.filter((event) => event.type !== "mathExam");
+  const examPeriodCards = createSchoolCalendarPeriodCards(
+    filteredEvents.filter((event) => event.type === "examPeriod"),
+    filteredEvents.filter((event) => event.type === "mathExam"),
+    selectedMonth
+  );
 
   function shiftMonth(amount) {
     const [year, month] = selectedMonth.split("-").map(Number);
@@ -19535,10 +19528,13 @@ function SchoolCalendarCenter({
 
   function submitNewEvent() {
     const schoolName = newEvent.schoolName || schools[0] || "학교 미입력";
-    const subjectTitle = newEvent.examSubject.trim() || (newEvent.type === "mathExam" ? "수학시험" : "");
+    const isMathExamType = newEvent.type === "mathExam";
+    const subjectTitle = isMathExamType ? newEvent.examSubject.trim() || "수학시험" : "";
     const fallbackTitle = newEvent.type === "examPeriod"
       ? joinCalendarLabel(schoolName, examCycleLabel(newEvent.examCycle), "시험기간")
-      : joinCalendarLabel(schoolName, subjectTitle);
+      : isMathExamType
+        ? joinCalendarLabel(schoolName, [newEvent.grade, subjectTitle].filter(Boolean).join(" "), "수학시험")
+        : joinCalendarLabel(schoolName, eventTypeLabels[newEvent.type] || "학사일정");
     const title = newEvent.title.trim() || fallbackTitle;
     if (!newEvent.date || !title) return;
     const nextEvent = {
@@ -19548,6 +19544,7 @@ function SchoolCalendarCenter({
       schoolName,
       title,
       examSubject: subjectTitle,
+      endDate: isMathExamType ? "" : newEvent.endDate,
       color: newEvent.color || getSchoolCalendarSchoolColor(schoolName)
     };
     syncSchoolCalendarEventToExamPrepRows(rows, nextEvent, onUpdateExamPrepRow);
@@ -19578,20 +19575,6 @@ function SchoolCalendarCenter({
           syncSchoolCalendarEventToExamPrepRows(rows, mathEvent, onUpdateExamPrepRow);
           onSyncPreExamLesson?.(mathEvent);
         });
-    } else if (newEvent.type !== "mathExam" && Boolean(subjectTitle)) {
-      const mathEvent = {
-        ...newEvent,
-        mathExamItems: undefined,
-        eventId: `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-        type: "mathExam",
-        endDate: "",
-        schoolName,
-        title: joinCalendarLabel(schoolName, subjectTitle),
-        examSubject: subjectTitle,
-        color: getSchoolCalendarSchoolColor(schoolName)
-      };
-      syncSchoolCalendarEventToExamPrepRows(rows, mathEvent, onUpdateExamPrepRow);
-      onSyncPreExamLesson?.(mathEvent);
     }
     setSelectedDate(newEvent.date);
     setSelectedMonth(newEvent.date);
@@ -19600,6 +19583,7 @@ function SchoolCalendarCenter({
       title: "",
       examSubject: "",
       memo: "",
+      endDate: current.type === "mathExam" ? "" : current.endDate,
       mathExamItems: [{ id: `math_item_${Date.now()}`, grade: current.grade, subject: current.examSubject || "", date: current.date, memo: "" }]
     }));
     setIsFormModalOpen(false);
@@ -19639,7 +19623,14 @@ function SchoolCalendarCenter({
 
   function changeNewEventType(type) {
     setNewEvent((current) => {
-      if (type !== "examPeriod") return { ...current, type };
+      if (type !== "examPeriod") {
+        return {
+          ...current,
+          type,
+          endDate: type === "mathExam" ? "" : current.endDate || current.date,
+          title: type === "mathExam" ? "" : current.title
+        };
+      }
       const range = getDefaultExamPeriodRange(current.examCycle);
       return {
         ...current,
@@ -19675,7 +19666,9 @@ function SchoolCalendarCenter({
     setNewEvent((current) => ({
       ...current,
       date: current.type === "examPeriod" ? getDefaultExamPeriodRange(current.examCycle || currentExamCycle).date : date,
-      endDate: current.type === "examPeriod" ? getDefaultExamPeriodRange(current.examCycle || currentExamCycle).endDate : date,
+      endDate: current.type === "examPeriod"
+        ? getDefaultExamPeriodRange(current.examCycle || currentExamCycle).endDate
+        : current.type === "mathExam" ? "" : current.endDate || date,
       examCycle: current.examCycle || currentExamCycle,
       title: current.type === "examPeriod" && !current.title ? examCycleLabel(current.examCycle || currentExamCycle) : current.title,
       schoolName: schoolFilter === "전체 학교" ? current.schoolName : schoolFilter,
@@ -19691,7 +19684,7 @@ function SchoolCalendarCenter({
   }
 
   function updateAcademicEvent(event, field, value) {
-    if (event.readonly || event.reminderId) return;
+    if (event.readonly) return;
     if (event.derived && event.examPrepId) {
       const sourceRow = rows.find((row) => row.examPrepId === event.examPrepId);
       if (event.type === "examPeriod" && ["date", "endDate"].includes(field)) {
@@ -19740,7 +19733,7 @@ function SchoolCalendarCenter({
       <header className="schoolCalendarHeader">
         <div>
           <h1>학사일정</h1>
-          <p className="muted">학교별 시험, 행사, 방학 일정을 등록하면 수업일지와 커리큘럼 일정관리에도 표시됩니다.</p>
+          <p className="muted">학교별 시험기간, 수학시험 날짜, 방학/개학 같은 학사 원본 일정을 관리합니다.</p>
         </div>
         <div className="schoolCalendarHeaderActions">
           <select value={schoolFilter} onChange={(event) => setSchoolFilter(event.target.value)}>
@@ -19792,15 +19785,17 @@ function SchoolCalendarCenter({
                   ))}
                 </select>
               </label>
-              <label>
-                시험 구분
-                <select value={newEvent.examCycle} onChange={(event) => changeNewEventExamCycle(event.target.value)}>
-                  {safeExamCycleOptions.map((cycle) => (
-                    <option key={cycle} value={cycle}>{examCycleLabel(cycle)}</option>
-                  ))}
-                </select>
-              </label>
-              {newEvent.type !== "examPeriod" ? (
+              {["examPeriod", "mathExam"].includes(newEvent.type) ? (
+                <label>
+                  시험 구분
+                  <select value={newEvent.examCycle} onChange={(event) => changeNewEventExamCycle(event.target.value)}>
+                    {safeExamCycleOptions.map((cycle) => (
+                      <option key={cycle} value={cycle}>{examCycleLabel(cycle)}</option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+              {newEvent.type === "mathExam" ? (
                 <>
                   <label>
                     학년
@@ -19885,10 +19880,10 @@ function SchoolCalendarCenter({
                     </div>
                   </div>
                 </>
-              ) : (
+              ) : newEvent.type === "mathExam" ? (
                 <div className="examSubjectBox">
                   <div className="sectionHeader slim">
-                    <strong>날짜별 시험 과목</strong>
+                    <strong>수학시험 날짜</strong>
                   </div>
                   <div className="examSubjectRow singleDate">
                     <label>
@@ -19900,6 +19895,17 @@ function SchoolCalendarCenter({
                       <input value={newEvent.examSubject} onChange={(event) => setNewEvent((current) => ({ ...current, examSubject: event.target.value }))} placeholder="예: 수학" />
                     </label>
                   </div>
+                </div>
+              ) : (
+                <div className="calendarDateGrid">
+                  <label>
+                    시작일
+                    <input type="date" value={newEvent.date} onChange={(event) => setNewEvent((current) => ({ ...current, date: event.target.value }))} />
+                  </label>
+                  <label>
+                    종료일
+                    <input type="date" value={newEvent.endDate || newEvent.date} onChange={(event) => setNewEvent((current) => ({ ...current, endDate: event.target.value }))} />
+                  </label>
                 </div>
               )}
               <label>
@@ -19913,40 +19919,55 @@ function SchoolCalendarCenter({
           </Modal>
         ) : null}
 
-        <section className="panel generatedLessonPreviewPanel">
+        <section className="panel schoolAcademicOverviewPanel">
           <div className="sectionHeader slim">
             <div>
-              <h2>시험관리 자동 수업</h2>
-              <p className="muted">시험관리의 수학시험 날짜를 기준으로 직전수업은 실제 수업으로 자동 저장되고, 일요시험보강은 자동 수업으로 관리됩니다.</p>
+              <h2>월간 학사 개요</h2>
+              <p className="muted">시험기간은 카드로 모아 보고, 달력에는 실제 날짜 확인이 필요한 수학시험과 학사일정만 표시합니다.</p>
             </div>
           </div>
-          <div className="generatedLessonSummary">
-            <span>자동저장 대기 {generatedPlanCounts.create ?? 0}</span>
-            <span>갱신 대기 {generatedPlanCounts.update ?? 0}</span>
-            <span>저장됨 {generatedPlanCounts.synced ?? 0}</span>
-            <span>수정됨 {generatedPlanCounts.protected ?? 0}</span>
-            <span>숨김 {generatedPlanCounts.skipped ?? 0}</span>
+          <div className="schoolAcademicStatsGrid">
+            <article>
+              <strong>{examPeriodCards.length}</strong>
+              <span>시험기간</span>
+            </article>
+            <article>
+              <strong>{monthMathExamEvents.length}</strong>
+              <span>수학시험 날짜</span>
+            </article>
+            <article>
+              <strong>{monthAcademicEvents.length}</strong>
+              <span>방학/개학·학교행사</span>
+            </article>
           </div>
-          {shouldShowGeneratedLessonSaveNotice ? (
-            <div className={`generatedLessonSaveNotice ${generatedLessonSaveStatus.state}`} role={generatedLessonSaveStatus.state === "failed" ? "alert" : "status"}>
-              <span>{generatedLessonSaveStatus.message}</span>
-              {generatedLessonSaveStatus.state === "failed" ? (
-                <button className="softButton compact" onClick={onRetryGeneratedLessonSave} type="button">
-                  다시 저장
-                </button>
-              ) : null}
+          {examPeriodCards.length === 0 ? (
+            <div className="emptyHomeworkBox">이 달에 표시할 시험기간 카드가 없습니다.</div>
+          ) : (
+            <div className="examPeriodGallery">
+              {examPeriodCards.map((event) => (
+                <article
+                  className="examPeriodOverviewCard"
+                  key={event.eventId}
+                  style={{ "--school-color": getSchoolCalendarEventColor(event) }}
+                >
+                  <div>
+                    <strong>{formatPeriodSummaryLabel(event)}</strong>
+                    <span>{examCycleLabel(event.examCycle || currentExamCycle)}</span>
+                  </div>
+                  <p>{event.date} ~ {event.endDate || event.date}</p>
+                  <div className="examPeriodMathChips">
+                    {event.relatedMathExamEvents.length ? (
+                      event.relatedMathExamEvents.map((mathEvent) => (
+                        <span key={mathEvent.eventId}>{formatShortDate(mathEvent.date)} · {mathEvent.grade || "전체"} {mathEvent.examSubject || "수학"}</span>
+                      ))
+                    ) : (
+                      <span className="mutedChip">수학시험 날짜 미입력</span>
+                    )}
+                  </div>
+                </article>
+              ))}
             </div>
-          ) : null}
-          {canSaveGeneratedLessons && generatedLessonSaveStatus.state !== "failed" ? (
-            <div className="generatedLessonActions">
-              <button className="softButton compact" onClick={onApplyGeneratedLessons} type="button">
-                자동 수업 저장
-              </button>
-            </div>
-          ) : null}
-          <div className="emptyHomeworkBox">
-            시험관리 입력값이 본데이터입니다. 직전수업은 수업일지에 실제 수업으로 저장되며, 수업일지에서 수정하면 해당 수업은 자동 갱신 보호 상태가 됩니다.
-          </div>
+          )}
         </section>
 
         <section className="panel schoolCalendarMainPanel">
@@ -19976,15 +19997,15 @@ function SchoolCalendarCenter({
             {["일", "월", "화", "수", "목", "금", "토"].map((label) => (
               <div className="weekday" key={label}>{label}</div>
             ))}
-            {buildMonthDays(selectedMonth).map((day) => {
-              const eventPriority = { examPeriod: 0, mathExam: 1, preExam: 2, vacation: 3 };
+            {monthDays.map((day) => {
+              const eventPriority = { mathExam: 0, vacation: 1, schoolEvent: 2, custom: 3 };
               const dayEvents = calendarDisplayEvents
                 .filter((event) => isDateWithinEvent(day.date, event))
                 .sort((eventA, eventB) => (
                   (eventPriority[eventA.type] ?? 4) - (eventPriority[eventB.type] ?? 4)
                   || formatCalendarEventLabel(eventA).localeCompare(formatCalendarEventLabel(eventB))
                 ));
-              const { hiddenCount, mathExamEvents, periodSummaries, regularEvents } = getMonthCellDisplayEvents(dayEvents);
+              const { academicEvents, hiddenCount, mathExamEvents } = getMonthCellDisplayEvents(dayEvents);
               return (
                 <button
                   className={[
@@ -20000,26 +20021,6 @@ function SchoolCalendarCenter({
                 >
                   <span className="dayNumber">{day.dayNumber}</span>
                   <span className="lessonPills">
-                    <span className="schoolPeriodLayer" aria-hidden="true">
-                      {periodSummaries.map((event, periodIndex) => {
-                        const periodBarClass = getPeriodBarClass(day.date, event);
-                        const showPeriodLabel = periodBarClass === "periodStart" || periodBarClass === "periodSingle";
-                        const eventColor = getSchoolCalendarEventColor(event);
-                        return (
-                          <span
-                            className={`schoolEventPill event-${event.type} periodBar ${periodBarClass}`}
-                            key={event.eventId}
-                            style={{
-                              "--period-color": eventColor,
-                              "--period-index": periodIndex
-                            }}
-                            title={event.title}
-                          >
-                            {showPeriodLabel ? formatPeriodSummaryLabel(event) : ""}
-                          </span>
-                        );
-                      })}
-                    </span>
                     <span className="schoolMathExamLayer">
                       {mathExamEvents.map((event, mathTabIndex) => {
                         const eventLabel = formatCalendarSummaryLabel(event);
@@ -20041,7 +20042,7 @@ function SchoolCalendarCenter({
                       })}
                     </span>
                     <span className="schoolRegularEventLayer">
-                      {regularEvents.map((event) => {
+                      {academicEvents.map((event) => {
                         const eventLabel = formatCalendarSummaryLabel(event);
                         const eventColor = getSchoolCalendarEventColor(event);
                         return (
@@ -20124,7 +20125,7 @@ function SchoolDateScheduleModal({
                 <span>{schoolEvents.length}건</span>
               </div>
               {schoolEvents.map((event) => {
-                const isReadonlyEvent = Boolean(event.readonly || event.reminderId);
+                const isReadonlyEvent = Boolean(event.readonly);
                 const canEditDerivedDate = !isReadonlyEvent && event.derived && ["examPeriod", "mathExam"].includes(event.type);
                 const canEditDerivedSubject = !isReadonlyEvent && event.derived && event.type === "mathExam";
                 const canEditEventDetails = !event.derived && !isReadonlyEvent;
@@ -20140,7 +20141,7 @@ function SchoolDateScheduleModal({
                         <span>{event.type === "examPeriod" ? `${event.date} ~ ${event.endDate || event.date}` : event.date}</span>
                       </div>
                       {isReadonlyEvent ? (
-                        <span>운영 알림 원본 · 대시보드에서 수정</span>
+                        <span>읽기 전용 일정</span>
                       ) : event.derived ? (
                         <span>시험관리 연동 · 수정 즉시 반영</span>
                       ) : (
@@ -20157,12 +20158,7 @@ function SchoolDateScheduleModal({
                           종료일
                           <input disabled={!canEditEventDetails && !canEditDerivedDate} type="date" value={event.endDate ?? ""} onChange={(change) => onUpdateEvent(event, "endDate", change.target.value)} />
                         </label>
-                      ) : event.type === "reminder" ? (
-                        <label>
-                          종류
-                          <input disabled value={eventTypeLabels[event.type] ?? "운영 알림"} />
-                        </label>
-                      ) : (
+                      ) : event.type === "mathExam" ? (
                         <label>
                           과목
                           <select disabled={!canEditEventDetails && !canEditDerivedSubject} value={normalizeMathSubject(event.examSubject ?? "공통수학1")} onChange={(change) => onUpdateEvent(event, "examSubject", change.target.value)}>
@@ -20170,6 +20166,11 @@ function SchoolDateScheduleModal({
                               <option key={subject} value={subject}>{subject}</option>
                             ))}
                           </select>
+                        </label>
+                      ) : (
+                        <label>
+                          종료일
+                          <input disabled={!canEditEventDetails} type="date" value={event.endDate || event.date || ""} onChange={(change) => onUpdateEvent(event, "endDate", change.target.value)} />
                         </label>
                       )}
                       <label>
