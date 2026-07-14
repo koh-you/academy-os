@@ -15172,6 +15172,8 @@ function SupplementMakeupLessonDetail({
   const [passConfirmMode, setPassConfirmMode] = useState("");
   const [isScheduleEditOpen, setIsScheduleEditOpen] = useState(false);
   const [scheduleDraft, setScheduleDraft] = useState({
+    scheduleChangeDetail: "",
+    scheduleChangeReason: "",
     scheduledDate: task?.scheduledDate || lesson.date || "",
     scheduledTime: task?.scheduledTime || lesson.startTime || ""
   });
@@ -15264,6 +15266,8 @@ function SupplementMakeupLessonDetail({
 
   useEffect(() => {
     setScheduleDraft({
+      scheduleChangeDetail: getSupplementScheduleChangeDetailSeed(task) || targetTitle,
+      scheduleChangeReason: "",
       scheduledDate: task?.scheduledDate || lesson.date || "",
       scheduledTime: task?.scheduledTime || lesson.startTime || ""
     });
@@ -15324,16 +15328,25 @@ function SupplementMakeupLessonDetail({
       const result = await onScheduleTask({
         ...task,
         keepLessonJournalOpen: true,
+        scheduleChangeDetail: scheduleDraft.scheduleChangeDetail,
+        scheduleChangeReason: scheduleDraft.scheduleChangeReason,
         scheduledDate: scheduleDraft.scheduledDate,
         scheduledTime: normalizedScheduleDraftTime,
         skipStudentReminder: !updateStudentReminder
       });
       const nextTask = result?.makeupTask ?? {
         ...task,
+        scheduleChangeDetail: scheduleDraft.scheduleChangeDetail,
+        scheduleChangeReason: "",
         scheduledDate: scheduleDraft.scheduledDate,
         scheduledTime: normalizedScheduleDraftTime
       };
+      const savedChangeDetail = Object.prototype.hasOwnProperty.call(nextTask, "scheduleChangeDetail")
+        ? nextTask.scheduleChangeDetail
+        : scheduleDraft.scheduleChangeDetail || getSupplementScheduleChangeDetailSeed(nextTask);
       setScheduleDraft({
+        scheduleChangeDetail: savedChangeDetail,
+        scheduleChangeReason: "",
         scheduledDate: nextTask.scheduledDate || scheduleDraft.scheduledDate,
         scheduledTime: nextTask.scheduledTime || normalizedScheduleDraftTime
       });
@@ -15413,6 +15426,24 @@ function SupplementMakeupLessonDetail({
                 type="time"
                 value={scheduleDraft.scheduledTime}
                 onChange={(event) => setScheduleDraft((current) => ({ ...current, scheduledTime: event.target.value }))}
+              />
+            </label>
+          </div>
+          <div className="fieldGrid two">
+            <label className="homeworkMakeupScheduleTextField">
+              <strong>보충 내역</strong>
+              <textarea
+                value={scheduleDraft.scheduleChangeDetail}
+                onChange={(event) => setScheduleDraft((current) => ({ ...current, scheduleChangeDetail: event.target.value }))}
+                placeholder="예: 쎈 C단계, 지난 숙제 확인, 결석 수업 보강 범위"
+              />
+            </label>
+            <label className="homeworkMakeupScheduleTextField">
+              <strong>변경 사유</strong>
+              <textarea
+                value={scheduleDraft.scheduleChangeReason}
+                onChange={(event) => setScheduleDraft((current) => ({ ...current, scheduleChangeReason: event.target.value }))}
+                placeholder="예: 학생 요청, 수업 시간 조정, 개인 일정 변경"
               />
             </label>
           </div>
@@ -23567,6 +23598,18 @@ function SupplementScheduleChangeConfirmModal({
   const targetLabel = task.taskType === "homework_makeup"
     ? task.supplementHomeworkNote || task.sourceLabel || task.reason || "보충 항목"
     : task.sourceLabel || task.reason || "보충 항목";
+  const [noticeDraft, setNoticeDraft] = useState({
+    scheduleChangeDetail: getSupplementScheduleChangeDetailSeed(task) || targetLabel,
+    scheduleChangeReason: ""
+  });
+
+  function buildNoticePatch() {
+    return {
+      scheduleChangeDetail: noticeDraft.scheduleChangeDetail,
+      scheduleChangeReason: noticeDraft.scheduleChangeReason
+    };
+  }
+
   return (
     <Modal
       className="supplementPassConfirmModal supplementScheduleConfirmModal"
@@ -23592,6 +23635,24 @@ function SupplementScheduleChangeConfirmModal({
             <dd>{task.scheduledDate || "미확정"} {task.scheduledTime || ""}</dd>
           </div>
         </dl>
+        <div className="supplementScheduleChangeFields">
+          <label>
+            <strong>보충 내역</strong>
+            <textarea
+              value={noticeDraft.scheduleChangeDetail}
+              onChange={(event) => setNoticeDraft((current) => ({ ...current, scheduleChangeDetail: event.target.value }))}
+              placeholder="예: 쎈 C단계, 지난 숙제 확인, 결석 수업 보강 범위"
+            />
+          </label>
+          <label>
+            <strong>변경 사유</strong>
+            <textarea
+              value={noticeDraft.scheduleChangeReason}
+              onChange={(event) => setNoticeDraft((current) => ({ ...current, scheduleChangeReason: event.target.value }))}
+              placeholder="예: 학생 요청, 수업 시간 조정, 개인 일정 변경"
+            />
+          </label>
+        </div>
         <p className="supplementScheduleConfirmNote">
           알림톡 갱신을 선택하면 학생과 학부모에게 일정 변경 안내가 지금 발송되고, 보강 당일 오전 11시 학생 리마인더 예약도 같은 보충 항목 기준으로 갱신됩니다.
         </p>
@@ -23600,10 +23661,10 @@ function SupplementScheduleChangeConfirmModal({
         <button className="softButton subtle" disabled={isBusy} onClick={onCancel} type="button">
           취소
         </button>
-        <button className="softButton" disabled={isBusy} onClick={onConfirmWithoutReminder} type="button">
+        <button className="softButton" disabled={isBusy} onClick={() => onConfirmWithoutReminder(buildNoticePatch())} type="button">
           {isBusy ? "저장 중" : "일정만 저장"}
         </button>
-        <button className="softButton scheduleApplyButton" disabled={isBusy} onClick={onConfirmWithReminder} type="button">
+        <button className="softButton scheduleApplyButton" disabled={isBusy} onClick={() => onConfirmWithReminder(buildNoticePatch())} type="button">
           {isBusy ? "발송/갱신 중" : "솔라피 발송 및 예약"}
         </button>
       </div>
@@ -24011,10 +24072,11 @@ function SupplementStudentModal({
     handlePassTask(passConfirmTask);
   }
 
-  function confirmScheduleTask(updateStudentReminder) {
+  function confirmScheduleTask(updateStudentReminder, noticePatch = {}) {
     if (!scheduleConfirmTask) return;
     handleApplyScheduleTask({
       ...scheduleConfirmTask,
+      ...noticePatch,
       skipStudentReminder: !updateStudentReminder
     });
   }
@@ -24250,8 +24312,8 @@ function SupplementStudentModal({
         <SupplementScheduleChangeConfirmModal
           isBusy={busyTaskId === `${scheduleConfirmTask.makeupTaskId}:schedule`}
           onCancel={() => setScheduleConfirmTask(null)}
-          onConfirmWithReminder={() => confirmScheduleTask(true)}
-          onConfirmWithoutReminder={() => confirmScheduleTask(false)}
+          onConfirmWithReminder={(noticePatch) => confirmScheduleTask(true, noticePatch)}
+          onConfirmWithoutReminder={(noticePatch) => confirmScheduleTask(false, noticePatch)}
           studentName={student.name}
           task={scheduleConfirmTask}
         />
@@ -27667,6 +27729,10 @@ function getSupplementStudentReminderTitle(task = {}) {
   return [taskLabel, source].filter(Boolean).join(" · ");
 }
 
+function getSupplementScheduleChangeDetailSeed(task = {}) {
+  return normalizeMessageText(task.supplementHomeworkNote || task.sourceLabel || task.reason || "").trim();
+}
+
 function formatSupplementScheduleDateTime(taskOrDate = {}, maybeTime = "") {
   const date = typeof taskOrDate === "object" ? taskOrDate.scheduledDate || taskOrDate.linkedLessonDate || "" : taskOrDate;
   const timeSource = typeof taskOrDate === "object" ? taskOrDate.scheduledTime || taskOrDate.linkedLessonTime || "" : maybeTime;
@@ -27676,12 +27742,18 @@ function formatSupplementScheduleDateTime(taskOrDate = {}, maybeTime = "") {
 
 function buildSupplementScheduleChangeNoticeBody(task = {}, previousScheduleText = "") {
   const scheduleTitle = getSupplementStudentReminderTitle(task) || followUpTypeLabel(task.taskType);
+  const changeDetailSource = Object.prototype.hasOwnProperty.call(task, "scheduleChangeDetail")
+    ? task.scheduleChangeDetail
+    : getSupplementScheduleChangeDetailSeed(task);
+  const changeDetail = normalizeMessageText(changeDetailSource).trim();
+  const changeReason = normalizeMessageText(task.scheduleChangeReason || "").trim();
   const nextScheduleText = formatSupplementScheduleDateTime(task);
   return [
     `${scheduleTitle} 일정이 변경되었습니다.`,
+    changeDetail ? `보충 내역:\n${changeDetail}` : "",
+    changeReason ? `변경 사유:\n${changeReason}` : "",
     previousScheduleText ? `변경 전: ${previousScheduleText}` : "",
-    `변경 후: ${nextScheduleText}`,
-    "보강 당일 오전 11시에 다시 한 번 안내하겠습니다."
+    `변경 후: ${nextScheduleText}`
   ].filter(Boolean).join("\n\n");
 }
 
@@ -27757,7 +27829,12 @@ function buildSupplementScheduleChangeNoticeJob(task = {}, student = {}, previou
     previewBody: reminderBody,
     status: "draft",
     provider: "academy-os",
-    result: { makeupTaskId: task.makeupTaskId, previousScheduleText },
+    result: {
+      makeupTaskId: task.makeupTaskId,
+      previousScheduleText,
+      scheduleChangeDetail: normalizeMessageText(task.scheduleChangeDetail || "").trim(),
+      scheduleChangeReason: normalizeMessageText(task.scheduleChangeReason || "").trim()
+    },
     error: "",
     createdAt: new Date(now).toISOString()
   };
@@ -27799,7 +27876,12 @@ function buildSupplementParentScheduleChangeNoticeJob(task = {}, student = {}, p
     previewBody: reminderBody,
     status: "draft",
     provider: "academy-os",
-    result: { makeupTaskId: task.makeupTaskId, previousScheduleText },
+    result: {
+      makeupTaskId: task.makeupTaskId,
+      previousScheduleText,
+      scheduleChangeDetail: normalizeMessageText(task.scheduleChangeDetail || "").trim(),
+      scheduleChangeReason: normalizeMessageText(task.scheduleChangeReason || "").trim()
+    },
     error: "",
     createdAt: new Date(now).toISOString()
   };
