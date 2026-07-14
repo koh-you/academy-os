@@ -1,4 +1,5 @@
 import { Component, useEffect, useState } from "react";
+import { parseStudentScheduleOverride } from "../../shared/utils/studentSchedule.js";
 
 const withdrawalReasonOptions = [
   { value: "graduation", label: "졸업" },
@@ -27,6 +28,16 @@ const studentReminderTypeOptions = [
   { value: "special_note", label: "특이사항 알림" },
   { value: "parent_contact", label: "학부모 연락" },
   { value: "custom", label: "운영 알림" }
+];
+
+const studentScheduleDayOptions = [
+  { value: "mon", label: "월" },
+  { value: "tue", label: "화" },
+  { value: "wed", label: "수" },
+  { value: "thu", label: "목" },
+  { value: "fri", label: "금" },
+  { value: "sat", label: "토" },
+  { value: "sun", label: "일" }
 ];
 
 const studentProfileFields = [
@@ -103,6 +114,42 @@ function createStudentProfileDraft(student = {}) {
     }),
     {}
   );
+}
+
+function createStudentScheduleRows(scheduleOverride = "") {
+  return parseStudentScheduleOverride(scheduleOverride).map((rule, index) => ({
+    days: rule.days.filter((day) => studentScheduleDayOptions.some((option) => option.value === day)),
+    endTime: rule.endTime || "20:00",
+    rowId: `student_schedule_${index}_${rule.days.join("")}_${rule.startTime}_${rule.endTime}`,
+    startTime: rule.startTime || "17:00"
+  }));
+}
+
+function getDefaultStudentScheduleRow(index = 0) {
+  const presets = [
+    { days: ["tue", "thu"], startTime: "17:00", endTime: "20:00" },
+    { days: ["sat"], startTime: "10:00", endTime: "13:00" },
+    { days: ["mon", "wed", "fri"], startTime: "17:00", endTime: "20:00" }
+  ];
+  const preset = presets[index] ?? presets[0];
+  return {
+    ...preset,
+    rowId: `student_schedule_new_${Date.now()}_${index}`
+  };
+}
+
+function formatStudentScheduleRows(rows = []) {
+  return rows
+    .map((row) => {
+      const days = studentScheduleDayOptions
+        .filter((option) => row.days.includes(option.value))
+        .map((option) => option.label)
+        .join("");
+      if (!days || !row.startTime || !row.endTime) return "";
+      return `${days} ${row.startTime}-${row.endTime}`;
+    })
+    .filter(Boolean)
+    .join(" / ");
 }
 
 function hasStudentProfileDraftChanges(student = {}, draft = {}) {
@@ -755,6 +802,42 @@ function StudentProfileModal({
     setProfileDraft((current) => ({ ...current, [field]: value }));
   }
 
+  function updateProfileScheduleRows(rows) {
+    updateProfile("scheduleOverride", formatStudentScheduleRows(rows));
+  }
+
+  function addProfileScheduleRow() {
+    const rows = createStudentScheduleRows(profileDraft.scheduleOverride);
+    updateProfileScheduleRows([...rows, getDefaultStudentScheduleRow(rows.length)]);
+  }
+
+  function removeProfileScheduleRow(rowIndex) {
+    updateProfileScheduleRows(createStudentScheduleRows(profileDraft.scheduleOverride).filter((_, index) => index !== rowIndex));
+  }
+
+  function updateProfileScheduleRow(rowIndex, patch) {
+    const rows = createStudentScheduleRows(profileDraft.scheduleOverride).map((row, index) =>
+      index === rowIndex ? { ...row, ...patch } : row
+    );
+    updateProfileScheduleRows(rows);
+  }
+
+  function toggleProfileScheduleDay(rowIndex, dayValue) {
+    const rows = createStudentScheduleRows(profileDraft.scheduleOverride);
+    const row = rows[rowIndex];
+    if (!row) return;
+    const hasDay = row.days.includes(dayValue);
+    const nextDays = hasDay
+      ? row.days.filter((day) => day !== dayValue)
+      : [...row.days, dayValue];
+    if (nextDays.length === 0) return;
+    updateProfileScheduleRow(rowIndex, { days: nextDays });
+  }
+
+  function clearProfileScheduleRows() {
+    updateProfile("scheduleOverride", "");
+  }
+
   async function saveProfileDraft() {
     clearProfileErrors();
     try {
@@ -938,6 +1021,8 @@ function StudentProfileModal({
         ? "dirty"
         : studentProfileSaveState;
   const isProfileSaving = effectiveProfileSaveState === "saving";
+  const profileScheduleRows = createStudentScheduleRows(profileDraft.scheduleOverride);
+  const hasUnparsedScheduleText = Boolean(String(profileDraft.scheduleOverride ?? "").trim()) && profileScheduleRows.length === 0;
 
   return (
     <ModalComponent
@@ -1031,17 +1116,63 @@ function StudentProfileModal({
           <div className="wideProfileItem">
             <small>개별 스케줄</small>
             {isEditingProfile ? (
-              <textarea
-                className="profileEditInput"
-                value={profileDraft.scheduleOverride ?? ""}
-                onChange={(event) => updateProfile("scheduleOverride", event.target.value)}
-                placeholder="예: 화목 17:00-20:00 / 토 10:00-13:00"
-                rows="2"
-              />
+              <div className="studentScheduleEditor">
+                {hasUnparsedScheduleText ? (
+                  <div className="studentScheduleLegacyText">
+                    <strong>기존 입력값을 시간표 행으로 해석하지 못했습니다.</strong>
+                    <span>{profileDraft.scheduleOverride}</span>
+                    <button className="softButton compact" onClick={clearProfileScheduleRows} type="button">초기화 후 다시 입력</button>
+                  </div>
+                ) : null}
+                {profileScheduleRows.map((row, rowIndex) => (
+                  <div className="studentScheduleRow" key={row.rowId}>
+                    <div className="studentScheduleDayButtons" aria-label="개별 스케줄 요일">
+                      {studentScheduleDayOptions.map((day) => (
+                        <button
+                          className={row.days.includes(day.value) ? "active" : ""}
+                          key={day.value}
+                          onClick={() => toggleProfileScheduleDay(rowIndex, day.value)}
+                          type="button"
+                        >
+                          {day.label}
+                        </button>
+                      ))}
+                    </div>
+                    <label>
+                      시작
+                      <input
+                        type="time"
+                        value={row.startTime}
+                        onChange={(event) => updateProfileScheduleRow(rowIndex, { startTime: event.target.value || row.startTime })}
+                      />
+                    </label>
+                    <label>
+                      종료
+                      <input
+                        type="time"
+                        value={row.endTime}
+                        onChange={(event) => updateProfileScheduleRow(rowIndex, { endTime: event.target.value || row.endTime })}
+                      />
+                    </label>
+                    <button className="dangerSoftButton compact" onClick={() => removeProfileScheduleRow(rowIndex)} type="button">삭제</button>
+                  </div>
+                ))}
+                {profileScheduleRows.length ? (
+                  <div className="studentSchedulePreview">
+                    저장값: <strong>{formatStudentScheduleRows(profileScheduleRows)}</strong>
+                  </div>
+                ) : (
+                  <div className="studentScheduleEmpty">개별 스케줄을 쓰지 않으면 기본 반 스케줄이 적용됩니다.</div>
+                )}
+                <div className="studentScheduleActions">
+                  <button className="softButton compact" onClick={addProfileScheduleRow} type="button">시간표 추가</button>
+                  <button className="softButton compact" disabled={!profileScheduleRows.length && !profileDraft.scheduleOverride} onClick={clearProfileScheduleRows} type="button">기본 반 스케줄 사용</button>
+                </div>
+              </div>
             ) : (
               <strong>{student.scheduleOverride || "기본 반 스케줄"}</strong>
             )}
-            <span className="muted">반 이름과 실제 등원 시간이 다를 때 입력합니다. 예: 화목 5-8</span>
+            <span className="muted">반 이름과 실제 등원 시간이 다를 때 설정합니다. 저장 후 출결 수업 매칭과 지각 판정에 반영됩니다.</span>
           </div>
         </div>
 

@@ -9884,6 +9884,97 @@ textarea {
   padding: 10px 12px;
 }
 
+.studentScheduleEditor {
+  display: grid;
+  gap: 10px;
+}
+
+.studentScheduleRow {
+  align-items: end;
+  background: #ffffff;
+  border: 1px solid #dbe7fb;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(260px, 1fr) 112px 112px auto;
+  padding: 10px;
+}
+
+.studentScheduleDayButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.studentScheduleDayButtons button {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 900;
+  min-height: 34px;
+  min-width: 34px;
+}
+
+.studentScheduleDayButtons button.active {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #ffffff;
+}
+
+.studentScheduleRow label {
+  color: #64748b;
+  display: grid;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 4px;
+}
+
+.studentScheduleRow input {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #0f172a;
+  font: inherit;
+  min-height: 36px;
+  padding: 0 8px;
+}
+
+.studentSchedulePreview,
+.studentScheduleEmpty,
+.studentScheduleLegacyText {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+  padding: 10px 12px;
+}
+
+.studentSchedulePreview strong {
+  color: #1d4ed8;
+}
+
+.studentScheduleLegacyText {
+  border-color: #fed7aa;
+  color: #9a3412;
+  display: grid;
+  gap: 8px;
+}
+
+.studentScheduleLegacyText span {
+  overflow-wrap: anywhere;
+}
+
+.studentScheduleActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .profileSavedText {
   color: #15803d;
   font-size: 13px;
@@ -15169,6 +15260,7 @@ body.attendanceOnlyBody {
   .accountSettingsGrid,
   .settingsRow,
   .studentProfileGrid,
+  .studentScheduleRow,
   .editableEvent,
   .calendarDateGrid,
   .examSubjectRow,

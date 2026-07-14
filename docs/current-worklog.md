@@ -12,6 +12,16 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-14 P1. 학생별 개별 시간표 직접 입력 UI
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청: 학생 프로필의 `개별 스케줄`을 `화목 5-8` 같은 텍스트 문법으로 직접 쓰게 하는 것은 직관적이지 않다. 요일과 시간을 화면에서 직접 입력할 수 있어야 한다.
+- 구현 결과: 학생 프로필 수정 모드의 `개별 스케줄` textarea를 요일 버튼과 시작/종료 시간 input으로 구성된 행 편집기로 바꿨다. `시간표 추가`, 행 삭제, `기본 반 스케줄 사용` 버튼을 제공한다.
+- 구현 결과: 화면에서는 구조화된 입력을 받지만 저장값은 기존 `students.schedule_override` 문자열로 변환한다. 예: 화/목 버튼 + 17:00~20:00, 토 버튼 + 10:00~12:00 입력 시 `화목 17:00-20:00 / 토 10:00-12:00`으로 저장된다.
+- 저장 원천: 학생별 시간표 원본은 기존 Supabase `students.schedule_override`다. 서버의 출결 수업 매칭/지각 판정은 기존 `parseStudentScheduleOverride`와 `applyStudentScheduleToLesson` 흐름을 그대로 사용한다. 새 SQL은 필요 없다.
+- 중단 조건: 수정 모드에서 다시 자유 텍스트 textarea만 보임, 요일/시간을 입력하고 기본정보 저장 후 새로고침하면 값이 사라짐, `기본 반 스케줄 사용`을 눌렀는데 기존 override가 남음, 개별 시간표 저장으로 반 전체 `lessons.start_time/end_time`이 바뀜, 출결 지각 판정이 개별 시간표 대신 반 기본 시간을 따름.
+- 검증: `node --check src/shared/utils/studentSchedule.js`, `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 통과, `npm run build`로 `StudentManager.jsx` 포함 JSX 번들 검증 통과, `git diff --check` 통과.
+
 ### 2026-07-14 P1. 특강 안내문 Tally 신청 버튼 연결
 
 - 상태: 완료 - 구현/검증 완료
