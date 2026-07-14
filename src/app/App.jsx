@@ -10433,6 +10433,7 @@ function NotificationCenter({
   const [dispatchMessage, setDispatchMessage] = useState("");
   const [isPolishingNotice, setIsPolishingNotice] = useState(false);
   const [isSendingNotice, setIsSendingNotice] = useState(false);
+  const [isNoticeHistoryOpen, setIsNoticeHistoryOpen] = useState(false);
   const [jobFilter, setJobFilter] = useState("all");
   const [localNoticeJobs, setLocalNoticeJobs] = useState([]);
   const [noticeBody, setNoticeBody] = useState("");
@@ -10609,6 +10610,7 @@ function NotificationCenter({
 
   function selectJobFilter(nextFilter) {
     setJobFilter(nextFilter);
+    setIsNoticeHistoryOpen(true);
     window.setTimeout(() => {
       document.querySelector(".notificationQueuePanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 0);
@@ -10737,6 +10739,7 @@ function NotificationCenter({
       }
       setDispatchMessage(`공지 발송 처리 완료: 성공 ${sentCount}건${pendingCount ? `, 확인 필요 ${pendingCount}건` : ""}${failedCount ? `, 실패 ${failedCount}건` : ""}${recordFailedCount ? `, 기록 저장 실패 ${recordFailedCount}건` : ""}`);
       setJobFilter(pendingCount ? "pending" : failedCount ? "failed" : "sent");
+      setIsNoticeHistoryOpen(true);
       refreshNoticeJobsInBackground();
     } finally {
       setIsSendingNotice(false);
@@ -10769,6 +10772,7 @@ function NotificationCenter({
       }
       setDispatchMessage(`${formatKoreaTimeLabel(scheduledAt)} 공지 예약 저장 완료: 성공 ${savedCount}건${failedCount ? `, 실패 ${failedCount}건` : ""}`);
       setJobFilter(failedCount ? "failed" : "scheduled");
+      setIsNoticeHistoryOpen(true);
       refreshNoticeJobsInBackground();
     } finally {
       setIsSendingNotice(false);
@@ -10887,6 +10891,7 @@ function NotificationCenter({
       upsertLocalNoticeJob(canceledJob);
       setDispatchMessage("공지 예약 1건을 취소했습니다.");
       setJobFilter("draft");
+      setIsNoticeHistoryOpen(true);
       refreshNoticeJobsInBackground();
     } catch (error) {
       setDispatchMessage(`공지 예약 취소 실패: ${error.message}`);
@@ -11123,8 +11128,17 @@ function NotificationCenter({
               <button className="softButton compact" onClick={() => setJobFilter("all")} type="button">전체 보기</button>
             ) : null}
             <span className="countBadge">{filteredNoticeJobs.length}건</span>
+            <button
+              aria-expanded={isNoticeHistoryOpen}
+              className="softButton compact"
+              onClick={() => setIsNoticeHistoryOpen((current) => !current)}
+              type="button"
+            >
+              {isNoticeHistoryOpen ? "접기" : "펼치기"}
+            </button>
           </div>
         </div>
+        {isNoticeHistoryOpen ? (
         <div className="notificationTable noticeHistoryTable">
           <div className="notificationTableHead">
             <span>상태</span>
@@ -11177,6 +11191,12 @@ function NotificationCenter({
             ))
           )}
         </div>
+        ) : (
+          <div className="noticeHistoryCollapsedSummary">
+            <strong>{filterLabels[jobFilter]} {filteredNoticeJobs.length}건</strong>
+            <span>상세 발송 기록은 펼치면 확인할 수 있습니다.</span>
+          </div>
+        )}
       </section>
         </>
       )}

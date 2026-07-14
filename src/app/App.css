@@ -7195,8 +7195,30 @@ button:disabled {
 .notificationQueueActions {
   align-items: center;
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end;
+}
+
+.noticeHistoryCollapsedSummary {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+}
+
+.noticeHistoryCollapsedSummary strong {
+  color: #17213d;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.noticeHistoryCollapsedSummary span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 900;
 }
 
 .integrationStatusGrid {
