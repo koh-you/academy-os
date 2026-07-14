@@ -5886,8 +5886,8 @@ button {
 }
 
 .schoolAcademicStatsGrid article {
-  background: linear-gradient(135deg, #fff7ed, #f0fdfa);
-  border: 1px solid #dbeadf;
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
   border-radius: 8px;
   display: grid;
   gap: 5px;
@@ -5915,11 +5915,11 @@ button {
 
 .examPeriodOverviewCard {
   appearance: none;
-  background: color-mix(in srgb, var(--school-color, #93c5fd) 26%, #ffffff);
-  border: 1px solid color-mix(in srgb, var(--school-color, #93c5fd) 58%, #ffffff);
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
   border-left: 4px solid var(--school-color, #2563eb);
   border-radius: 8px;
-  box-shadow: 0 10px 22px color-mix(in srgb, var(--school-color, #93c5fd) 18%, transparent);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
   color: inherit;
   cursor: pointer;
   display: grid;
@@ -5933,8 +5933,8 @@ button {
 }
 
 .examPeriodOverviewCard:hover {
-  border-color: var(--school-color, #2563eb);
-  box-shadow: 0 14px 28px color-mix(in srgb, var(--school-color, #93c5fd) 24%, transparent);
+  border-color: #bfdbfe;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.09);
   transform: translateY(-1px);
 }
 
@@ -5978,18 +5978,34 @@ button {
 }
 
 .examPeriodMathChips span {
-  background: color-mix(in srgb, var(--school-color, #93c5fd) 18%, #ffffff);
-  border: 1px solid color-mix(in srgb, var(--school-color, #93c5fd) 52%, #ffffff);
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #d8e3f8;
   border-radius: 999px;
   color: #17213d;
+  display: inline-flex;
   font-size: 12px;
+  gap: 6px;
   padding: 5px 8px;
+}
+
+.examPeriodMathChips span::before {
+  background: var(--school-color, #2563eb);
+  border-radius: 999px;
+  content: "";
+  flex: 0 0 auto;
+  height: 6px;
+  width: 6px;
 }
 
 .examPeriodMathChips .mutedChip {
   background: #f8fafc;
   border-color: #e2e8f0;
   color: #64748b;
+}
+
+.examPeriodMathChips .mutedChip::before {
+  background: #cbd5e1;
 }
 
 .generatedLessonPreviewPanel {
