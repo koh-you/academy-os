@@ -12,6 +12,16 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-14 P1. 수업일지 Solapi 예약 업데이트 필요 반복 원인 수정
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청: 오늘자 `화목 7-10 / 토 1-4반` 수업일지에서 `Solapi 예약 업데이트 필요`가 떠 있고, `Solapi 예약 업데이트`를 눌러도 계속 같은 상태가 반복된다.
+- 원인 확인: 프론트 수업 알림톡 미리보기/동기화 판정은 `lesson_comment` 기준으로 확정된 보충 일정만 읽도록 축소되어 있었지만, 서버의 Solapi 예약 직전 최신 저장본 갱신은 아직 해당 학생의 완료되지 않은 모든 보충 task를 읽고 있었다. 그 결과 서버가 예약 payload에 초안/미확정 보충 일정을 다시 넣고, 프론트는 저장본 기준 fingerprint와 다르다고 판단해 `내용 변경` 상태를 계속 표시했다.
+- 구현 결과: 서버 `getStudentSupplementSchedulesForNotification`에도 프론트와 같은 `lesson_comment` 필터를 추가했다. 예약 직전 최신 저장본 갱신도 `scheduled` 상태이고 실제 보충 lesson 연결이 있는 숙제보충/결석보강만 수업 알림톡 `보충 일정`에 포함한다.
+- 저장 원천: 수업 알림톡 예약 원본은 Supabase `notification_jobs.payload/preview_body/provider_message_id`, 수업일지 원본은 `lesson_student_records`, 보충 task 원본은 `makeup_tasks`다. 새 SQL은 필요 없다.
+- 중단 조건: `Solapi 예약 업데이트`를 눌러도 `내용 변경 N건`이 반복됨, linkedLessonId 없는 초안 보충이 수업 알림톡 본문에 다시 붙음, 확정된 보충 수업 안내가 빠짐, 예약 버튼 클릭으로 같은 학생/같은 수업/같은 대상의 Solapi 예약이 중복 생성됨.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 287개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-14 P1. 보충 완료 처리 화면 피드백 보강
 
 - 상태: 완료 - 구현/검증 완료

@@ -1363,9 +1363,23 @@ function formatSupplementScheduleLineForNotification(task = {}) {
   return `${schedulePrefix}${source} 일정을 진행하겠습니다.`;
 }
 
-function getStudentSupplementSchedulesForNotification(makeupTasks = [], studentId = "") {
+function isSupplementStudentReminderTaskForNotification(task = {}) {
+  return ["homework_makeup", "absence_makeup"].includes(task.taskType);
+}
+
+function isLessonCommentSupplementScheduleForNotification(task = {}, lesson = null) {
+  if (!isSupplementStudentReminderTaskForNotification(task)) return false;
+  if (task.status !== "scheduled") return false;
+  if (task.supplementProcessStatus === "completed") return false;
+  if (task.linkedLessonId) return true;
+  return Boolean(lesson?.sourceMakeupTaskId && lesson.sourceMakeupTaskId === task.makeupTaskId);
+}
+
+function getStudentSupplementSchedulesForNotification(makeupTasks = [], studentId = "", options = {}) {
+  const { lesson = null, mode = "all" } = options;
   return makeupTasks
     .filter((task) => task.studentId === studentId && task.status !== "done")
+    .filter((task) => (mode === "lesson_comment" ? isLessonCommentSupplementScheduleForNotification(task, lesson) : true))
     .filter((task) => task.scheduledDate || task.scheduledTime || task.notificationDraft || task.supplementHomeworkNote || task.sourceLabel)
     .sort((a, b) => `${a.scheduledDate || "9999-99-99"} ${a.scheduledTime || ""}`.localeCompare(`${b.scheduledDate || "9999-99-99"} ${b.scheduledTime || ""}`))
     .map(formatSupplementScheduleLineForNotification);
@@ -1571,7 +1585,10 @@ function refreshLessonCommentJobBeforeSend(job = {}, context = null) {
 
   const previousHomework = getLessonHomeworkForNotification(context.homeworks, context.lessons, lesson, student, "previous");
   const nextHomework = getLessonHomeworkForNotification(context.homeworks, context.lessons, lesson, student, "next");
-  const supplementSchedules = getStudentSupplementSchedulesForNotification(context.makeupTasks, student.studentId);
+  const supplementSchedules = getStudentSupplementSchedulesForNotification(context.makeupTasks, student.studentId, {
+    lesson,
+    mode: "lesson_comment"
+  });
   const testResultLines = getStudentTestResultLinesForNotification(context.testSessions, context.testAttempts, lesson, student);
   const sourceField = audience === "student" ? "studentComment" : "teacherComment";
   const commentBody = buildInitialNotificationComment({
