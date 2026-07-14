@@ -49,6 +49,7 @@ const storageKeys = {
   lessons: "academy-os.lessons.v8",
   students: "academy-os.students.v12",
   studentIntakeApplicants: "academy-os.studentIntakeApplicants.v1",
+  specialLectureApplications: "academy-os.specialLectureApplications.v1",
   records: "academy-os.lessonStudentRecords.v7",
   homeworks: "academy-os.homeworks.v7",
   reportSnapshots: "academy-os.reportSnapshots.v1",
@@ -1084,6 +1085,14 @@ const specialLectureSeasonOptions = [
   { value: "custom", label: "직접 입력" }
 ];
 
+const specialLectureApplicationStatusOptions = [
+  { value: "received", label: "접수" },
+  { value: "confirmed", label: "확정" },
+  { value: "contacted", label: "연락 완료" },
+  { value: "waiting", label: "대기" },
+  { value: "canceled", label: "취소" }
+];
+
 function getSpecialLectureSeasonShortLabel(season = "summer") {
   if (season === "winter") return "겨울";
   if (season === "summer") return "여름";
@@ -1661,6 +1670,45 @@ function normalizeSpecialLectureGuides(guides = defaultSpecialLectureGuides) {
   return sourceGuides.map((guide, index) =>
     normalizeSpecialLectureGuide(guide, defaultSpecialLectureGuides[index] ?? defaultSpecialLectureGuides[0], index)
   );
+}
+
+function normalizeSpecialLectureApplication(application = {}, index = 0) {
+  const nowIso = new Date().toISOString();
+  const id = String(application.applicationId || application.id || `special_lecture_application_${index + 1}`).trim();
+  const status = specialLectureApplicationStatusOptions.some((option) => option.value === application.status)
+    ? application.status
+    : "received";
+  return {
+    applicationId: id,
+    specialLectureGuideId: String(application.specialLectureGuideId || application.special_lecture_guide_id || "").trim(),
+    guideSlug: String(application.guideSlug || application.guide_slug || application.guideId || "").trim(),
+    campaign: String(application.campaign || "").trim(),
+    source: String(application.source || "manual").trim(),
+    sourceSubmissionId: String(application.sourceSubmissionId || application.source_submission_id || "").trim(),
+    formId: String(application.formId || application.form_id || "").trim(),
+    formName: String(application.formName || application.form_name || "").trim(),
+    status,
+    studentName: String(application.studentName || application.student_name || application.name || "").trim(),
+    schoolName: String(application.schoolName || application.school_name || "").trim(),
+    grade: String(application.grade || "").trim(),
+    studentPhone: String(application.studentPhone || application.student_phone || "").trim(),
+    parentPhone: String(application.parentPhone || application.parent_phone || "").trim(),
+    selectedSession: String(application.selectedSession || application.selected_session || "").trim(),
+    memo: String(application.memo || "").trim(),
+    rawPayload: application.rawPayload ?? application.raw_payload ?? null,
+    createdAt: application.createdAt || application.created_at || nowIso,
+    updatedAt: application.updatedAt || application.updated_at || nowIso
+  };
+}
+
+function normalizeSpecialLectureApplications(applications = []) {
+  return Array.isArray(applications)
+    ? applications.map(normalizeSpecialLectureApplication)
+    : [];
+}
+
+function getSpecialLectureApplicationStatusLabel(status = "received") {
+  return specialLectureApplicationStatusOptions.find((option) => option.value === status)?.label ?? "접수";
 }
 
 function getSpecialLectureGuideSlug(guide = {}) {
@@ -6156,6 +6204,7 @@ export function App() {
   const [classTemplates, setClassTemplates] = useStoredState(storageKeys.classTemplates, sampleData.classTemplates);
   const [students, setStudents] = useStoredState(storageKeys.students, sampleData.students);
   const [studentIntakeApplicants, setStudentIntakeApplicants] = useStoredState(storageKeys.studentIntakeApplicants, []);
+  const [specialLectureApplications, setSpecialLectureApplications] = useStoredState(storageKeys.specialLectureApplications, []);
   const [lessons, setLessons] = useStoredState(storageKeys.lessons, sampleData.lessons);
   const [records, setRecords] = useStoredState(storageKeys.records, sampleData.lessonStudentRecords);
   const [homeworks, setHomeworks] = useStoredState(storageKeys.homeworks, sampleData.homeworks);
@@ -6356,6 +6405,7 @@ export function App() {
         const [
           studentsResponse,
           studentIntakeApplicantsResponse,
+          specialLectureApplicationsResponse,
           classesResponse,
           lessonsResponse,
           recordsResponse,
@@ -6371,6 +6421,7 @@ export function App() {
         ] = await Promise.all([
           fetch(apiUrl("/api/students")),
           fetch(apiUrl("/api/student-intake-applicants")),
+          fetch(apiUrl("/api/special-lecture-applications")),
           fetch(apiUrl("/api/classes")),
           fetch(apiUrl("/api/lessons")),
           fetch(apiUrl("/api/lesson-records")),
@@ -6387,6 +6438,7 @@ export function App() {
         const [
           studentsResult,
           studentIntakeApplicantsResult,
+          specialLectureApplicationsResult,
           classesResult,
           lessonsResult,
           recordsResult,
@@ -6402,6 +6454,7 @@ export function App() {
         ] = await Promise.all([
           studentsResponse.json(),
           studentIntakeApplicantsResponse.json(),
+          specialLectureApplicationsResponse.json(),
           classesResponse.json(),
           lessonsResponse.json(),
           recordsResponse.json(),
@@ -6421,6 +6474,9 @@ export function App() {
         }
         if (studentIntakeApplicantsResult.ok && Array.isArray(studentIntakeApplicantsResult.applicants)) {
           setStudentIntakeApplicants(studentIntakeApplicantsResult.applicants);
+        }
+        if (specialLectureApplicationsResult.ok && Array.isArray(specialLectureApplicationsResult.applications)) {
+          setSpecialLectureApplications(normalizeSpecialLectureApplications(specialLectureApplicationsResult.applications));
         }
         const normalizedClassTemplates = classesResult.ok && Array.isArray(classesResult.classTemplates) && classesResult.classTemplates.length > 0
           ? normalizeClassTemplates(classesResult.classTemplates)
@@ -6537,6 +6593,7 @@ export function App() {
     setResourceMaterials,
     setScoreRecords,
     setSchoolEvents,
+    setSpecialLectureApplications,
     setSpecialLectureGuides,
     setStudents,
     setStudentConsultations,
@@ -6612,6 +6669,40 @@ export function App() {
       .catch((error) => {
         console.error(error);
         setSpecialLectureGuideSaveState("failed");
+        throw error;
+      });
+  }
+
+  function handleUpdateSpecialLectureApplication(applicationId, updates = {}) {
+    const existingApplication = specialLectureApplications.find((application) => application.applicationId === applicationId);
+    if (!existingApplication) return Promise.reject(new Error("특강 신청자 원본을 찾지 못했습니다."));
+    const nextApplication = normalizeSpecialLectureApplication({
+      ...existingApplication,
+      ...updates,
+      updatedAt: new Date().toISOString()
+    });
+    setSpecialLectureApplications((current) =>
+      normalizeSpecialLectureApplications(current.map((application) =>
+        application.applicationId === applicationId ? nextApplication : application
+      ))
+    );
+    return postJson("/api/special-lecture-applications", { application: nextApplication })
+      .then((result) => {
+        if (!result.ok) throw new Error(result.error || "특강 신청자 저장 실패");
+        const savedApplication = normalizeSpecialLectureApplication(result.application ?? nextApplication);
+        setSpecialLectureApplications((current) =>
+          normalizeSpecialLectureApplications(current.map((application) =>
+            application.applicationId === savedApplication.applicationId ? savedApplication : application
+          ))
+        );
+        return savedApplication;
+      })
+      .catch((error) => {
+        setSpecialLectureApplications((current) =>
+          normalizeSpecialLectureApplications(current.map((application) =>
+            application.applicationId === applicationId ? existingApplication : application
+          ))
+        );
         throw error;
       });
   }
@@ -9360,9 +9451,34 @@ export function App() {
             notificationLogs={notificationLogs}
             specialLectureGuides={specialLectureGuides}
             specialLectureGuideSaveState={specialLectureGuideSaveState}
+            showSpecialLectureTab={false}
             onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
             onSaveSpecialLectureGuides={handleSaveSpecialLectureGuides}
             onUpdateLessonNotificationPlan={handleUpdateLessonNotificationPlan}
+            students={students}
+            onRefresh={refreshNotificationJobs}
+          />
+        ) : null}
+
+        {activeView === "specialLectureManagement" ? (
+          <NotificationCenter
+            aiSettings={aiSettings}
+            classTemplates={classTemplates}
+            initialNotificationTab="specialLecture"
+            integrationStatus={integrationStatus}
+            lessons={calendarLessons}
+            notificationJobs={notificationJobs}
+            notificationJobsStatus={notificationJobsStatus}
+            notificationLogs={notificationLogs}
+            pageDescription="방학 특강 안내문을 만들고, Tally 신청자 원천을 분리해 확인합니다. 실제 발송은 발송 준비 후 수신 대상 검수를 거칩니다."
+            pageTitle="특강관리"
+            specialLectureApplications={specialLectureApplications}
+            specialLectureGuides={specialLectureGuides}
+            specialLectureGuideSaveState={specialLectureGuideSaveState}
+            onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
+            onSaveSpecialLectureGuides={handleSaveSpecialLectureGuides}
+            onUpdateLessonNotificationPlan={handleUpdateLessonNotificationPlan}
+            onUpdateSpecialLectureApplication={handleUpdateSpecialLectureApplication}
             students={students}
             onRefresh={refreshNotificationJobs}
           />
@@ -10418,16 +10534,22 @@ function isNoticeWithdrawnStudent(student = {}) {
 function NotificationCenter({
   aiSettings = defaultAiSettings,
   classTemplates = [],
+  initialNotificationTab = "notice",
   integrationStatus,
   notificationJobs,
   notificationJobsStatus = { state: "idle", message: "" },
   onRefresh,
   onSaveSpecialLectureGuides,
+  onUpdateSpecialLectureApplication,
+  pageDescription = "수업일지 밖에서 필요한 연락을 한 화면에서 작성하고, 수신 범위만 선택해 발송합니다.",
+  pageTitle = "알림관리",
+  showSpecialLectureTab = true,
+  specialLectureApplications = [],
   specialLectureGuides = defaultSpecialLectureGuides,
   specialLectureGuideSaveState = "idle",
   students
 }) {
-  const [activeNotificationTab, setActiveNotificationTab] = useState("notice");
+  const [activeNotificationTab, setActiveNotificationTab] = useState(showSpecialLectureTab ? initialNotificationTab : "notice");
   const [classFilter, setClassFilter] = useState("all");
   const [deletingJobId, setDeletingJobId] = useState("");
   const [dispatchMessage, setDispatchMessage] = useState("");
@@ -10495,6 +10617,10 @@ function NotificationCenter({
     () => students.filter((student) => isNoticeWithdrawnStudent(student)),
     [students]
   );
+
+  useEffect(() => {
+    setActiveNotificationTab(showSpecialLectureTab ? initialNotificationTab : "notice");
+  }, [initialNotificationTab, showSpecialLectureTab]);
   const classTemplateById = useMemo(
     () => new Map(classTemplates.map((template) => [template.classTemplateId, template])),
     [classTemplates]
@@ -10904,8 +11030,8 @@ function NotificationCenter({
     <section className="notificationCenterPage">
       <div className="pageTop">
         <div>
-          <h1>알림관리</h1>
-          <p className="muted">수업일지 밖에서 필요한 연락을 한 화면에서 작성하고, 수신 범위만 선택해 발송합니다.</p>
+          <h1>{pageTitle}</h1>
+          <p className="muted">{pageDescription}</p>
         </div>
         <div className="pageActions">
           <button className="softButton" disabled={isNotificationJobsLoading} onClick={onRefresh} type="button">
@@ -10921,6 +11047,7 @@ function NotificationCenter({
           ) : null}
         </div>
       ) : null}
+      {showSpecialLectureTab ? (
       <div className="notificationSectionTabs">
         <button
           className={activeNotificationTab === "notice" ? "active" : ""}
@@ -10937,13 +11064,16 @@ function NotificationCenter({
           특강 안내문
         </button>
       </div>
+      ) : null}
 
       {activeNotificationTab === "specialLecture" ? (
         <SpecialLectureNoticePanel
+          applications={specialLectureApplications}
           guides={specialLectureGuides}
           saveState={specialLectureGuideSaveState}
           onApplyToNotice={applySpecialLectureGuideToNotice}
           onSaveGuides={onSaveSpecialLectureGuides}
+          onUpdateApplication={onUpdateSpecialLectureApplication}
         />
       ) : (
         <>
@@ -11203,8 +11333,10 @@ function NotificationCenter({
 }
 
 function SpecialLectureNoticePanel({
+  applications = [],
   guides = defaultSpecialLectureGuides,
   onApplyToNotice,
+  onUpdateApplication,
   onSaveGuides,
   saveState = "idle"
 }) {
@@ -11571,6 +11703,12 @@ function SpecialLectureNoticePanel({
         ) : null}
       </div>
 
+      <SpecialLectureApplicationPanel
+        applications={applications}
+        onUpdateApplication={onUpdateApplication}
+        selectedGuide={selectedGuide}
+      />
+
       {selectedGuide ? (
       <div className="specialLectureEditorGrid">
         <div className="specialLectureEditor">
@@ -11915,6 +12053,115 @@ function SpecialLectureNoticePanel({
           <p>진행/예정 특강이 없으면 `새 특강 만들기`로 새 방학 특강을 시작하거나, 지난/보관 특강을 펼쳐 기존 안내문을 복원할 수 있습니다.</p>
         </div>
       )}
+    </section>
+  );
+}
+
+function SpecialLectureApplicationPanel({
+  applications = [],
+  onUpdateApplication,
+  selectedGuide = null
+}) {
+  const [panelMessage, setPanelMessage] = useState("");
+  const [updatingApplicationId, setUpdatingApplicationId] = useState("");
+  const normalizedApplications = useMemo(
+    () => normalizeSpecialLectureApplications(applications)
+      .sort((first, second) => new Date(second.createdAt).getTime() - new Date(first.createdAt).getTime()),
+    [applications]
+  );
+  const selectedGuideSlug = selectedGuide ? getSpecialLectureGuideSlug(selectedGuide) : "";
+  const selectedGuideApplications = selectedGuide
+    ? normalizedApplications.filter((application) => (
+        application.specialLectureGuideId === selectedGuide.specialLectureGuideId ||
+        application.guideSlug === selectedGuideSlug
+      ))
+    : normalizedApplications;
+  const visibleApplications = selectedGuideApplications.slice(0, 8);
+  const webhookUrl = apiUrl("/api/special-lecture-applications/tally");
+
+  async function copyWebhookUrl() {
+    setPanelMessage("");
+    const copied = await copyTextToClipboard(webhookUrl);
+    setPanelMessage(copied ? "Tally 웹훅 URL을 복사했습니다." : "웹훅 URL 복사에 실패했습니다.");
+  }
+
+  async function updateApplicationStatus(application, status) {
+    if (!onUpdateApplication || !application.applicationId) return;
+    setPanelMessage("");
+    setUpdatingApplicationId(application.applicationId);
+    try {
+      await onUpdateApplication(application.applicationId, { status });
+      setPanelMessage(`${application.studentName || "신청자"} 상태를 ${getSpecialLectureApplicationStatusLabel(status)}(으)로 저장했습니다.`);
+    } catch (error) {
+      setPanelMessage(`신청자 상태 저장 실패: ${error.message}`);
+    } finally {
+      setUpdatingApplicationId("");
+    }
+  }
+
+  return (
+    <section className="specialLectureApplicationsPanel">
+      <div className="sectionHeader slim">
+        <div>
+          <p className="eyebrow">APPLICATION SOURCE</p>
+          <h3>특강 신청자</h3>
+          <span>
+            전체 {normalizedApplications.length}건 · 현재 안내문 {selectedGuideApplications.length}건
+          </span>
+        </div>
+        <button className="softButton compact" onClick={copyWebhookUrl} type="button">Tally 웹훅 복사</button>
+      </div>
+
+      <div className="specialLectureWebhookBox">
+        <div>
+          <strong>별도 원천</strong>
+          <span>Supabase `special_lecture_applications`에 저장합니다. 신입생 상담 접수와 섞지 않습니다.</span>
+        </div>
+        <code>{webhookUrl}</code>
+      </div>
+
+      {visibleApplications.length ? (
+        <div className="specialLectureApplicationList">
+          {visibleApplications.map((application) => (
+            <article className="specialLectureApplicationCard" key={application.applicationId}>
+              <div>
+                <span className={`specialLectureApplicationStatus ${application.status}`}>
+                  {getSpecialLectureApplicationStatusLabel(application.status)}
+                </span>
+                <strong>{application.studentName || "이름 미입력"}</strong>
+                <p>{[application.schoolName, application.grade].filter(Boolean).join(" · ") || "학교/학년 미입력"}</p>
+                <small>
+                  {application.selectedSession || "신청 회차 미입력"}
+                  {application.createdAt ? ` · ${formatKoreaTimeLabel(application.createdAt)}` : ""}
+                </small>
+              </div>
+              <div className="specialLectureApplicationMeta">
+                <span>학생 {application.studentPhone || "-"}</span>
+                <span>학부모 {application.parentPhone || "-"}</span>
+                {application.memo ? <em>{application.memo}</em> : null}
+              </div>
+              <label>
+                처리 상태
+                <select
+                  disabled={!onUpdateApplication || updatingApplicationId === application.applicationId}
+                  onChange={(event) => updateApplicationStatus(application, event.target.value)}
+                  value={application.status}
+                >
+                  {specialLectureApplicationStatusOptions.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              </label>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="specialLectureApplicationEmpty">
+          <strong>아직 연결된 특강 신청자가 없습니다.</strong>
+          <p>SQL 적용 후 Tally Webhook에 위 URL을 연결하면 신청자가 이 영역에 쌓입니다.</p>
+        </div>
+      )}
+      {panelMessage ? <p className={panelMessage.includes("실패") ? "inlineNotice danger" : "inlineNotice"}>{panelMessage}</p> : null}
     </section>
   );
 }
@@ -14280,8 +14527,9 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle, su
       ]
     },
     {
-      title: "시스템",
+      title: "운영",
       items: [
+        { id: "specialLectureManagement", label: "특강관리", icon: "🎓" },
         { id: "notifications", label: "알림관리", icon: "📣" },
         { id: "settings", label: "설정", icon: "⚙️" }
       ]

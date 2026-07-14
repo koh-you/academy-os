@@ -12,6 +12,18 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-15 P1. 운영 > 특강관리 분리와 특강 신청자 원천 추가
+
+- 상태: 완료 - 구현/검증 완료, SQL은 사용자 수동 적용 필요
+- 사용자 요청: 기존 `시스템` 상위 메뉴를 `운영`으로 바꾸고, 특강 안내문/신청자 관리를 별도 상위 탭 `특강관리`로 만든다. 특강 신청자는 신입생 상담 접수와 섞지 않고 별도 원천을 둔다.
+- 구현 결과: 사이드바 그룹명을 `시스템`에서 `운영`으로 변경하고, `운영 > 특강관리` 메뉴를 추가했다. 기존 `알림관리`는 공지 발송 화면으로 남기고, 특강 안내문 탭은 `특강관리`에서 기본으로 열리게 했다.
+- 구현 결과: `특강관리` 안에 `특강 신청자` 패널을 추가했다. 현재 안내문 기준 신청자 수, 전체 신청자 수, Tally 웹훅 URL, 신청자 카드, 처리 상태 저장 select를 표시한다.
+- 구현 결과: 특강 신청자 API를 추가했다. `GET/POST /api/special-lecture-applications`는 신청자 목록/상태 저장을 담당하고, `POST /api/special-lecture-applications/tally`는 Tally 제출 payload를 특강 신청자로 변환해 저장한다. 기존 `/api/intake/tally` 신입생/상담 접수 경로는 그대로 유지한다.
+- SQL: `supabase/20260715_special_lecture_applications.sql`을 추가했다. 운영 Supabase에는 자동 적용하지 않는다. 사용자가 Supabase SQL editor에서 직접 실행해야 `special_lecture_applications` 테이블과 인덱스가 생긴다.
+- 저장 원천: 특강 안내문은 기존 Supabase `app_state.specialLectureGuides`가 원본이다. 특강 신청자는 새 Supabase `special_lecture_applications`가 원본이다. Tally raw payload는 `raw_payload`에 보존하고, 신청자 처리 상태는 같은 row의 `status`에 저장한다.
+- 중단 조건: SQL 적용 전인데 신청자 저장이 성공한 것처럼 보임, Tally 신청자가 `student_intake_applicants`에 섞임, `알림톡 발송 준비` 클릭만으로 실제 발송/예약이 생성됨, 특강 안내문 저장만으로 `notification_jobs`가 생김, Tally API key/웹훅 서명 secret 같은 비밀값이 Git diff에 남음.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 289개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P1. 다음 세션 handoff와 오늘 작업 검수 정리
 
 - 상태: 완료 - 문서 갱신/검증 완료

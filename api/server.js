@@ -29,6 +29,7 @@ import {
   listNotificationJobs,
   listResourceMaterials,
   listSchoolEvents,
+  listSpecialLectureApplications,
   listStudentIntakeApplicants,
   listStudents,
   listTestAttempts,
@@ -52,6 +53,7 @@ import {
   upsertResourceMaterial,
   upsertSchoolEvent,
   upsertSchoolEvents,
+  upsertSpecialLectureApplication,
   upsertStudentIntakeApplicant,
   upsertStudent,
   upsertStudents,
@@ -775,6 +777,40 @@ function findTallyField(fields, patterns) {
   return fields.find((field) => patterns.some((pattern) => pattern.test(getTallyFieldLabel(field))));
 }
 
+function normalizeTallyLookupKey(value = "") {
+  return compactText(value).toLowerCase().replaceAll(/[\s_-]+/g, "");
+}
+
+function getTallyObjectValue(source, names = []) {
+  if (!source || typeof source !== "object" || Array.isArray(source)) return "";
+  const normalizedNames = names.map(normalizeTallyLookupKey).filter(Boolean);
+  for (const [key, value] of Object.entries(source)) {
+    if (normalizedNames.includes(normalizeTallyLookupKey(key))) return compactText(value);
+  }
+  return "";
+}
+
+function getTallyPayloadValue(data = {}, names = []) {
+  const directValue = getTallyObjectValue(data, names)
+    || getTallyObjectValue(data.hiddenFields, names)
+    || getTallyObjectValue(data.hidden_fields, names)
+    || getTallyObjectValue(data.variables, names)
+    || getTallyObjectValue(data.query, names)
+    || getTallyObjectValue(data.metadata, names);
+  if (directValue) return directValue;
+
+  const fields = Array.isArray(data.fields) ? data.fields : [];
+  const normalizedNames = names.map(normalizeTallyLookupKey).filter(Boolean);
+  const matchedField = fields.find((field) => [
+    field.key,
+    field.name,
+    field.id,
+    field.label,
+    field.title
+  ].some((value) => normalizedNames.includes(normalizeTallyLookupKey(value))));
+  return getTallyFieldText(matchedField);
+}
+
 function normalizeTallyApplicantPayload(payload = {}) {
   const data = payload.data ?? payload;
   const fields = Array.isArray(data.fields) ? data.fields : [];
@@ -809,6 +845,38 @@ function normalizeTallyApplicantPayload(payload = {}) {
     previousSemesterScore,
     specialNote,
     memo: "",
+    rawPayload: payload,
+    createdAt: compactText(data.createdAt ?? payload.createdAt) || new Date().toISOString()
+  };
+}
+
+function normalizeSpecialLectureApplicationPayload(payload = {}) {
+  const data = payload.data ?? payload;
+  const fields = Array.isArray(data.fields) ? data.fields : [];
+  const getValue = (patterns) => getTallyFieldText(findTallyField(fields, patterns));
+  const getHidden = (names) => getTallyPayloadValue(data, names);
+  const submissionId = compactText(data.submissionId ?? data.responseId ?? payload.eventId);
+  const specialLectureGuideId = getHidden(["specialLectureId", "special_lecture_id", "specialLectureGuideId"]);
+  const guideSlug = getHidden(["guideId", "guide_slug", "guideSlug", "guide"]);
+  const campaign = getHidden(["campaign"]);
+  const studentName = getValue([/학생.*이름/i, /^이름$/i, /성명/i, /student.*name/i, /name/i]) || getHidden(["studentName", "name"]);
+  return {
+    applicationId: submissionId ? `special_lecture_tally_${submissionId}` : `special_lecture_tally_${Date.now()}`,
+    specialLectureGuideId,
+    guideSlug,
+    campaign,
+    source: "tally",
+    sourceSubmissionId: submissionId,
+    formId: compactText(data.formId),
+    formName: compactText(data.formName),
+    status: "received",
+    studentName,
+    schoolName: getValue([/학교/i, /school/i]) || getHidden(["schoolName", "school"]),
+    grade: normalizeGradeLabel(getValue([/학년/i, /grade/i]) || getHidden(["grade"])),
+    studentPhone: normalizePhone(getValue([/학생.*전화/i, /학생.*휴대/i, /student.*phone/i]) || getHidden(["studentPhone"])),
+    parentPhone: normalizePhone(getValue([/학부모.*전화/i, /보호자.*전화/i, /부모.*전화/i, /parent.*phone/i, /guardian.*phone/i]) || getHidden(["parentPhone"])),
+    selectedSession: getValue([/희망.*시간/i, /신청.*시간/i, /신청.*반/i, /희망.{0,12}반/i, /회차/i, /요일/i]) || getHidden(["selectedSession", "session", "classTime"]),
+    memo: getValue([/요청/i, /문의/i, /메모/i, /기타/i, /특이/i]) || getHidden(["memo"]),
     rawPayload: payload,
     createdAt: compactText(data.createdAt ?? payload.createdAt) || new Date().toISOString()
   };
@@ -1053,7 +1121,7 @@ function getCorsOrigin(request) {
 
 function sendJson(request, response, statusCode, data) {
   response.writeHead(statusCode, {
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type,Tally-Signature,Authorization",
     "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS",
     "Access-Control-Allow-Origin": getCorsOrigin(request),
     "Content-Type": "application/json; charset=utf-8"
@@ -5085,6 +5153,44 @@ const server = http.createServer(async (request, response) => {
       }
       const applicant = normalizeTallyApplicantPayload(payload);
       const result = await upsertStudentIntakeApplicant(applicant);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/special-lecture-applications") {
+    try {
+      const result = await listSpecialLectureApplications();
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/special-lecture-applications") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await upsertSpecialLectureApplication(payload.application ?? payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/special-lecture-applications/tally") {
+    try {
+      const payload = await readJsonBody(request);
+      const signature = request.headers["tally-signature"];
+      if (!verifyTallyWebhookSignature(payload, Array.isArray(signature) ? signature[0] : signature)) {
+        sendJson(request, response, 401, { ok: false, error: "Invalid Tally signature." });
+        return;
+      }
+      const application = normalizeSpecialLectureApplicationPayload(payload);
+      const result = await upsertSpecialLectureApplication(application);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });

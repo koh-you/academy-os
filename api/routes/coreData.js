@@ -137,6 +137,63 @@ function fromStudentIntakeApplicantRow(row) {
   };
 }
 
+function createSpecialLectureApplicationId() {
+  return `special_lecture_application_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function normalizeSpecialLectureApplicationStatus(value = "received") {
+  const status = compact(value || "received");
+  return ["received", "confirmed", "contacted", "waiting", "canceled"].includes(status) ? status : "received";
+}
+
+function toSpecialLectureApplicationRow(application) {
+  return {
+    application_id: application.applicationId || application.id || createSpecialLectureApplicationId(),
+    special_lecture_guide_id: compact(application.specialLectureGuideId),
+    guide_slug: compact(application.guideSlug),
+    campaign: compact(application.campaign),
+    source: compact(application.source) || "manual",
+    source_submission_id: compact(application.sourceSubmissionId),
+    form_id: compact(application.formId),
+    form_name: compact(application.formName),
+    status: normalizeSpecialLectureApplicationStatus(application.status),
+    student_name: compact(application.studentName || application.name),
+    school_name: compact(application.schoolName),
+    grade: compact(application.grade),
+    student_phone: compact(application.studentPhone),
+    parent_phone: compact(application.parentPhone),
+    selected_session: compact(application.selectedSession),
+    memo: compact(application.memo),
+    raw_payload: application.rawPayload ?? null,
+    created_at: application.createdAt ?? new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+}
+
+function fromSpecialLectureApplicationRow(row) {
+  return {
+    applicationId: row.application_id,
+    specialLectureGuideId: row.special_lecture_guide_id ?? "",
+    guideSlug: row.guide_slug ?? "",
+    campaign: row.campaign ?? "",
+    source: row.source ?? "manual",
+    sourceSubmissionId: row.source_submission_id ?? "",
+    formId: row.form_id ?? "",
+    formName: row.form_name ?? "",
+    status: normalizeSpecialLectureApplicationStatus(row.status),
+    studentName: row.student_name ?? "",
+    schoolName: row.school_name ?? "",
+    grade: row.grade ?? "",
+    studentPhone: row.student_phone ?? "",
+    parentPhone: row.parent_phone ?? "",
+    selectedSession: row.selected_session ?? "",
+    memo: row.memo ?? "",
+    rawPayload: row.raw_payload ?? null,
+    createdAt: row.created_at ?? "",
+    updatedAt: row.updated_at ?? ""
+  };
+}
+
 function toClassTemplateRow(classTemplate) {
   return {
     class_template_id: classTemplate.classTemplateId,
@@ -1216,6 +1273,24 @@ export async function listStudentIntakeApplicants() {
   }
 }
 
+export async function listSpecialLectureApplications() {
+  if (!isSupabaseConfigured()) {
+    return { source: fallbackSource, applications: [] };
+  }
+
+  try {
+    const rows = await listRows("special_lecture_applications", "select=*&order=created_at.desc", {
+      requireServiceRole: true
+    });
+    return { source: databaseSource, applications: rows.map(fromSpecialLectureApplicationRow) };
+  } catch (error) {
+    if (String(error?.message ?? "").includes("special_lecture_applications")) {
+      return { source: databaseSource, applications: [], warning: "special_lecture_applications table is not ready" };
+    }
+    throw error;
+  }
+}
+
 export async function listClassTemplates() {
   if (!isSupabaseConfigured()) {
     return { source: fallbackSource, classTemplates: sampleData.classTemplates };
@@ -1310,6 +1385,25 @@ export async function upsertStudentIntakeApplicant(applicant) {
 
   const [row] = await upsertRows("student_intake_applicants", [toStudentIntakeApplicantRow(normalizedApplicant)]);
   return { source: databaseSource, applicant: fromStudentIntakeApplicantRow(row) };
+}
+
+export async function upsertSpecialLectureApplication(application) {
+  const now = new Date().toISOString();
+  const normalizedApplication = {
+    ...application,
+    applicationId: application.applicationId || application.id || createSpecialLectureApplicationId(),
+    status: normalizeSpecialLectureApplicationStatus(application.status),
+    createdAt: application.createdAt || now,
+    updatedAt: now
+  };
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, application: normalizedApplication };
+  }
+
+  const [row] = await upsertRows("special_lecture_applications", [toSpecialLectureApplicationRow(normalizedApplication)], {
+    onConflict: "application_id"
+  });
+  return { source: databaseSource, application: fromSpecialLectureApplicationRow(row) };
 }
 
 export async function upsertLesson(lesson) {
