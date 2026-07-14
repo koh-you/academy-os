@@ -1066,20 +1066,51 @@ const today = getKoreaDateString();
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8787").replace(/\/$/, "");
 const appRuntimeSessionId = `runtime_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
+const specialLectureSeasonOptions = [
+  { value: "summer", label: "여름방학" },
+  { value: "winter", label: "겨울방학" },
+  { value: "custom", label: "직접 입력" }
+];
+
+const specialLectureWeekdayOptions = [
+  { value: 1, label: "월" },
+  { value: 2, label: "화" },
+  { value: 3, label: "수" },
+  { value: 4, label: "목" },
+  { value: 5, label: "금" },
+  { value: 6, label: "토" },
+  { value: 0, label: "일" }
+];
+
+const defaultSpecialLecturePricePerSession = 37500;
+const defaultSpecialLecturePricePerHour = 12500;
+
 const defaultSpecialLectureGuides = [
   {
     specialLectureGuideId: "special_lecture_2026_summer_high1_clinic_mwf",
     slug: "2026-summer-high1-clinic-mwf",
+    year: "2026",
+    season: "summer",
     title: "2026 여름 개별 진도 클리닉",
     shortTitle: "여름 개별 진도 클리닉",
     audience: "예비고1, 예비고2",
     goal: "개별 진도와 취약 단원을 학생별로 점검합니다.",
     days: "월·수·금",
     time: "13:00-16:00",
-    lessonCount: "총 8회",
+    periodStart: "2026-07-22",
+    periodEnd: "2026-08-07",
+    lessonCount: "총 8회 · 24시간",
+    totalHours: 24,
     tuition: "300,000원",
+    pricingMode: "perSession",
+    pricePerSession: 37500,
+    pricePerHour: 12500,
     teacher: "고태영T",
     textbook: "개별 선정",
+    defaultSessionTopic: "개별 클리닉",
+    scheduleRules: [
+      { days: [1, 3, 5], startTime: "13:00", endTime: "16:00" }
+    ],
     summary: "방학 동안 각 학생의 현재 진도를 기준으로 빈틈을 정리하고, 다음 학기 수업을 따라갈 수 있는 계산력과 개념 연결을 점검합니다.",
     highlights: [
       "학생별 현재 진도와 취약 단원을 기준으로 수업합니다.",
@@ -1087,14 +1118,14 @@ const defaultSpecialLectureGuides = [
       "매 회차 수업에서 풀이 습관과 복습 우선순위를 함께 확인합니다."
     ],
     sessions: [
-      { date: "7월 22일", day: "수", topic: "개별 클리닉" },
-      { date: "7월 24일", day: "금", topic: "개별 클리닉" },
-      { date: "7월 27일", day: "월", topic: "개별 클리닉" },
-      { date: "7월 29일", day: "수", topic: "개별 클리닉" },
-      { date: "7월 31일", day: "금", topic: "개별 클리닉" },
-      { date: "8월 3일", day: "월", topic: "개별 클리닉" },
-      { date: "8월 5일", day: "수", topic: "개별 클리닉" },
-      { date: "8월 7일", day: "금", topic: "개별 클리닉" }
+      { date: "7월 22일", dateKey: "2026-07-22", day: "수", startTime: "13:00", endTime: "16:00", topic: "개별 클리닉" },
+      { date: "7월 24일", dateKey: "2026-07-24", day: "금", startTime: "13:00", endTime: "16:00", topic: "개별 클리닉" },
+      { date: "7월 27일", dateKey: "2026-07-27", day: "월", startTime: "13:00", endTime: "16:00", topic: "개별 클리닉" },
+      { date: "7월 29일", dateKey: "2026-07-29", day: "수", startTime: "13:00", endTime: "16:00", topic: "개별 클리닉" },
+      { date: "7월 31일", dateKey: "2026-07-31", day: "금", startTime: "13:00", endTime: "16:00", topic: "개별 클리닉" },
+      { date: "8월 3일", dateKey: "2026-08-03", day: "월", startTime: "13:00", endTime: "16:00", topic: "개별 클리닉" },
+      { date: "8월 5일", dateKey: "2026-08-05", day: "수", startTime: "13:00", endTime: "16:00", topic: "개별 클리닉" },
+      { date: "8월 7일", dateKey: "2026-08-07", day: "금", startTime: "13:00", endTime: "16:00", topic: "개별 클리닉" }
     ],
     noticeMemo: "자세한 커리큘럼과 안내사항은 링크에서 확인 부탁드립니다.",
     updatedAt: "2026-07-14T00:00:00.000Z"
@@ -1102,16 +1133,29 @@ const defaultSpecialLectureGuides = [
   {
     specialLectureGuideId: "special_lecture_2026_summer_high1_common_math2_tts",
     slug: "2026-summer-high1-common-math2-tts",
+    year: "2026",
+    season: "summer",
     title: "2026 고1 여름 공통수학2 유형 문제풀이",
     shortTitle: "고1 공통수학2 여름특강",
     audience: "고등학교 1학년",
     goal: "공통수학2 핵심 단원을 유형별 문제풀이로 정리합니다.",
     days: "화·목 / 토",
     time: "화·목 13:00-16:00, 토 16:00-19:00",
-    lessonCount: "총 10회",
+    periodStart: "2026-07-21",
+    periodEnd: "2026-08-11",
+    lessonCount: "총 10회 · 30시간",
+    totalHours: 30,
     tuition: "375,000원",
+    pricingMode: "perSession",
+    pricePerSession: 37500,
+    pricePerHour: 12500,
     teacher: "고태영T",
     textbook: "올림포스 유형편 공통수학2",
+    defaultSessionTopic: "공통수학2 유형별 문제풀이",
+    scheduleRules: [
+      { days: [2, 4], startTime: "13:00", endTime: "16:00" },
+      { days: [6], startTime: "16:00", endTime: "19:00" }
+    ],
     summary: "평면좌표와 직선, 원의 방정식, 도형의 이동, 집합과 명제를 방학 중 한 흐름으로 묶어 고1 2학기 학습의 출발점을 안정적으로 만듭니다.",
     highlights: [
       "단원별 핵심 개념을 확인한 뒤 바로 유형 문제로 연결합니다.",
@@ -1119,16 +1163,16 @@ const defaultSpecialLectureGuides = [
       "수업 후 복습 방향을 정리해 다음 회차에서 누적 확인합니다."
     ],
     sessions: [
-      { date: "7월 21일", day: "화", topic: "01. 평면좌표와 직선의 방정식" },
-      { date: "7월 23일", day: "목", topic: "01. 평면좌표와 직선의 방정식" },
-      { date: "7월 25일", day: "토", topic: "02. 원의 방정식" },
-      { date: "7월 28일", day: "화", topic: "02. 원의 방정식" },
-      { date: "7월 30일", day: "목", topic: "03. 도형의 이동" },
-      { date: "8월 1일", day: "토", topic: "03. 도형의 이동" },
-      { date: "8월 4일", day: "화", topic: "04. 집합" },
-      { date: "8월 6일", day: "목", topic: "04. 집합" },
-      { date: "8월 8일", day: "토", topic: "05. 명제" },
-      { date: "8월 11일", day: "화", topic: "05. 명제" }
+      { date: "7월 21일", dateKey: "2026-07-21", day: "화", startTime: "13:00", endTime: "16:00", topic: "01. 평면좌표와 직선의 방정식" },
+      { date: "7월 23일", dateKey: "2026-07-23", day: "목", startTime: "13:00", endTime: "16:00", topic: "01. 평면좌표와 직선의 방정식" },
+      { date: "7월 25일", dateKey: "2026-07-25", day: "토", startTime: "16:00", endTime: "19:00", topic: "02. 원의 방정식" },
+      { date: "7월 28일", dateKey: "2026-07-28", day: "화", startTime: "13:00", endTime: "16:00", topic: "02. 원의 방정식" },
+      { date: "7월 30일", dateKey: "2026-07-30", day: "목", startTime: "13:00", endTime: "16:00", topic: "03. 도형의 이동" },
+      { date: "8월 1일", dateKey: "2026-08-01", day: "토", startTime: "16:00", endTime: "19:00", topic: "03. 도형의 이동" },
+      { date: "8월 4일", dateKey: "2026-08-04", day: "화", startTime: "13:00", endTime: "16:00", topic: "04. 집합" },
+      { date: "8월 6일", dateKey: "2026-08-06", day: "목", startTime: "13:00", endTime: "16:00", topic: "04. 집합" },
+      { date: "8월 8일", dateKey: "2026-08-08", day: "토", startTime: "16:00", endTime: "19:00", topic: "05. 명제" },
+      { date: "8월 11일", dateKey: "2026-08-11", day: "화", startTime: "13:00", endTime: "16:00", topic: "05. 명제" }
     ],
     noticeMemo: "자세한 커리큘럼과 안내사항은 링크에서 확인 부탁드립니다.",
     updatedAt: "2026-07-14T00:00:00.000Z"
@@ -1138,38 +1182,325 @@ const defaultSpecialLectureGuides = [
 function normalizeSpecialLectureSession(session = {}, index = 0) {
   return {
     date: String(session.date ?? "").trim(),
+    dateKey: String(session.dateKey ?? session.date_key ?? "").trim(),
     day: String(session.day ?? "").trim(),
+    startTime: String(session.startTime ?? session.start_time ?? "").trim(),
+    endTime: String(session.endTime ?? session.end_time ?? "").trim(),
     topic: String(session.topic ?? session.content ?? "").trim() || `회차 ${index + 1}`
   };
+}
+
+function normalizeSpecialLectureScheduleRule(rule = {}) {
+  const days = Array.isArray(rule.days)
+    ? rule.days.map((day) => Number(day)).filter((day) => specialLectureWeekdayOptions.some((option) => option.value === day))
+    : [];
+  return {
+    days: [...new Set(days)],
+    startTime: String(rule.startTime ?? rule.start_time ?? "13:00").slice(0, 5),
+    endTime: String(rule.endTime ?? rule.end_time ?? "16:00").slice(0, 5)
+  };
+}
+
+function normalizeSpecialLectureScheduleRules(rules = []) {
+  const normalized = Array.isArray(rules)
+    ? rules.map(normalizeSpecialLectureScheduleRule).filter((rule) => rule.days.length > 0 && rule.startTime && rule.endTime)
+    : [];
+  return normalized.length ? normalized : [{ days: [1, 3, 5], startTime: "13:00", endTime: "16:00" }];
+}
+
+function getWeekdayLabel(dayValue) {
+  return specialLectureWeekdayOptions.find((option) => option.value === Number(dayValue))?.label ?? "";
+}
+
+function parseDateKeyParts(dateKey = "") {
+  const match = String(dateKey ?? "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  return {
+    year: Number(match[1]),
+    month: Number(match[2]),
+    day: Number(match[3])
+  };
+}
+
+function createDateFromKey(dateKey = "") {
+  const parts = parseDateKeyParts(dateKey);
+  if (!parts) return null;
+  const date = new Date(parts.year, parts.month - 1, parts.day);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatSpecialLectureDateLabel(dateKey = "") {
+  const parts = parseDateKeyParts(dateKey);
+  if (!parts) return String(dateKey ?? "");
+  return `${parts.month}월 ${parts.day}일`;
+}
+
+function getSpecialLectureDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function timeToMinutes(value = "") {
+  const [hour, minute] = String(value ?? "").split(":").map((part) => Number(part));
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) return 0;
+  return hour * 60 + minute;
+}
+
+function getSpecialLectureSessionHours(session = {}) {
+  const start = timeToMinutes(session.startTime);
+  const end = timeToMinutes(session.endTime);
+  return end > start ? (end - start) / 60 : 0;
+}
+
+function getSpecialLectureTotalHours(sessions = []) {
+  return sessions.reduce((sum, session) => sum + getSpecialLectureSessionHours(session), 0);
+}
+
+function formatSpecialLectureHours(hours = 0) {
+  const safeHours = Number(hours);
+  if (!Number.isFinite(safeHours) || safeHours <= 0) return "";
+  return Number.isInteger(safeHours) ? `${safeHours}시간` : `${safeHours.toFixed(1)}시간`;
+}
+
+function formatSpecialLectureLessonCount(sessionCount = 0, totalHours = 0) {
+  const countText = `총 ${sessionCount}회`;
+  const hoursText = formatSpecialLectureHours(totalHours);
+  return hoursText ? `${countText} · ${hoursText}` : countText;
+}
+
+function formatCurrencyWon(value = 0) {
+  const number = Math.round(Number(value) || 0);
+  return `${number.toLocaleString("ko-KR")}원`;
+}
+
+function parseCurrencyNumber(value = "") {
+  const number = Number(String(value ?? "").replaceAll(/[^\d.-]/g, ""));
+  return Number.isFinite(number) ? number : 0;
+}
+
+function calculateSpecialLectureTuition({ pricingMode = "perSession", pricePerHour = 0, pricePerSession = 0, sessionCount = 0, totalHours = 0 } = {}) {
+  if (pricingMode === "perHour") return totalHours * Number(pricePerHour || 0);
+  return sessionCount * Number(pricePerSession || 0);
+}
+
+function formatSpecialLectureRuleDays(rule = {}) {
+  return (rule.days ?? []).map(getWeekdayLabel).filter(Boolean).join("·");
+}
+
+function formatSpecialLectureDaysFromRules(rules = []) {
+  return rules.map(formatSpecialLectureRuleDays).filter(Boolean).join(" / ");
+}
+
+function formatSpecialLectureTimeFromRules(rules = []) {
+  if (!rules.length) return "";
+  const timeGroups = rules.map((rule) => ({
+    days: formatSpecialLectureRuleDays(rule),
+    time: `${rule.startTime}-${rule.endTime}`
+  }));
+  const uniqueTimes = [...new Set(timeGroups.map((group) => group.time))];
+  if (uniqueTimes.length === 1) return uniqueTimes[0];
+  return timeGroups.map((group) => `${group.days} ${group.time}`).join(", ");
+}
+
+function generateSpecialLectureSessions(guide = {}) {
+  const start = createDateFromKey(guide.periodStart);
+  const end = createDateFromKey(guide.periodEnd);
+  const rules = normalizeSpecialLectureScheduleRules(guide.scheduleRules);
+  if (!start || !end || end < start) return [];
+  const sessions = [];
+  const cursor = new Date(start);
+  while (cursor <= end) {
+    const weekday = cursor.getDay();
+    const dateKey = getSpecialLectureDateKey(cursor);
+    rules
+      .filter((rule) => rule.days.includes(weekday))
+      .forEach((rule) => {
+        sessions.push(normalizeSpecialLectureSession({
+          date: formatSpecialLectureDateLabel(dateKey),
+          dateKey,
+          day: getWeekdayLabel(weekday),
+          startTime: rule.startTime,
+          endTime: rule.endTime,
+          topic: guide.defaultSessionTopic || guide.goal || "특강 수업"
+        }, sessions.length));
+      });
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return sessions.sort((left, right) =>
+    String(left.dateKey || left.date).localeCompare(String(right.dateKey || right.date)) ||
+    String(left.startTime).localeCompare(String(right.startTime))
+  );
+}
+
+function getSpecialLectureCalculatedFields(guide = {}) {
+  const sessions = Array.isArray(guide.sessions) ? guide.sessions.map(normalizeSpecialLectureSession) : [];
+  const sessionCount = sessions.length;
+  const totalHours = getSpecialLectureTotalHours(sessions);
+  const pricePerSession = Number(guide.pricePerSession) || defaultSpecialLecturePricePerSession;
+  const pricePerHour = Number(guide.pricePerHour) || defaultSpecialLecturePricePerHour;
+  const pricingMode = guide.pricingMode === "perHour" ? "perHour" : "perSession";
+  const tuitionValue = calculateSpecialLectureTuition({ pricingMode, pricePerHour, pricePerSession, sessionCount, totalHours });
+  return {
+    lessonCount: formatSpecialLectureLessonCount(sessionCount, totalHours),
+    totalHours,
+    tuition: formatCurrencyWon(tuitionValue)
+  };
+}
+
+function getSpecialLectureWeekdayCounts(sessions = []) {
+  const counts = new Map(specialLectureWeekdayOptions.map((option) => [option.label, 0]));
+  sessions.forEach((session) => {
+    const label = session.day || getWeekdayLabel(createDateFromKey(session.dateKey)?.getDay());
+    if (!label) return;
+    counts.set(label, (counts.get(label) ?? 0) + 1);
+  });
+  return specialLectureWeekdayOptions
+    .map((option) => ({ label: option.label, count: counts.get(option.label) ?? 0 }))
+    .filter((item) => item.count > 0);
+}
+
+function getSpecialLectureRangeFromSessions(sessions = []) {
+  const dateKeys = sessions.map((session) => session.dateKey).filter(Boolean).sort();
+  return {
+    start: dateKeys[0] || "",
+    end: dateKeys[dateKeys.length - 1] || ""
+  };
+}
+
+function getCalendarMonthLabel(year, monthIndex) {
+  return `${year}년 ${monthIndex + 1}월`;
+}
+
+function createSpecialLectureCalendarMonths(guide = {}) {
+  const sessions = Array.isArray(guide.sessions) ? guide.sessions.map(normalizeSpecialLectureSession) : [];
+  const inferredRange = getSpecialLectureRangeFromSessions(sessions);
+  const startKey = guide.periodStart || inferredRange.start;
+  const endKey = guide.periodEnd || inferredRange.end;
+  const start = createDateFromKey(startKey);
+  const end = createDateFromKey(endKey);
+  if (!start || !end || end < start) return [];
+
+  const sessionMap = new Map();
+  sessions.forEach((session) => {
+    if (!session.dateKey) return;
+    const current = sessionMap.get(session.dateKey) ?? [];
+    sessionMap.set(session.dateKey, [...current, session]);
+  });
+
+  const months = [];
+  const cursorMonth = new Date(start.getFullYear(), start.getMonth(), 1);
+  const lastMonth = new Date(end.getFullYear(), end.getMonth(), 1);
+  while (cursorMonth <= lastMonth) {
+    const year = cursorMonth.getFullYear();
+    const month = cursorMonth.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const gridStart = new Date(firstDay);
+    gridStart.setDate(firstDay.getDate() - ((firstDay.getDay() + 6) % 7));
+    const gridEnd = new Date(lastDay);
+    gridEnd.setDate(lastDay.getDate() + (6 - ((lastDay.getDay() + 6) % 7)));
+
+    const days = [];
+    const dayCursor = new Date(gridStart);
+    while (dayCursor <= gridEnd) {
+      const dateKey = getSpecialLectureDateKey(dayCursor);
+      const currentSessions = sessionMap.get(dateKey) ?? [];
+      days.push({
+        dateKey,
+        day: dayCursor.getDate(),
+        inRange: dayCursor >= start && dayCursor <= end,
+        isCurrentMonth: dayCursor.getMonth() === month,
+        sessions: currentSessions
+      });
+      dayCursor.setDate(dayCursor.getDate() + 1);
+    }
+
+    months.push({
+      key: `${year}-${String(month + 1).padStart(2, "0")}`,
+      label: getCalendarMonthLabel(year, month),
+      days
+    });
+    cursorMonth.setMonth(cursorMonth.getMonth() + 1);
+  }
+  return months;
 }
 
 function normalizeSpecialLectureGuide(guide = {}, fallback = defaultSpecialLectureGuides[0], index = 0) {
   const source = { ...(fallback ?? {}), ...(guide ?? {}) };
   const id = String(source.specialLectureGuideId || source.id || `special_lecture_${index + 1}`).trim();
   const slug = String(source.slug || id).trim().replaceAll(/\s+/g, "-").toLowerCase();
+  const scheduleRules = normalizeSpecialLectureScheduleRules(source.scheduleRules);
+  const sessions = Array.isArray(source.sessions)
+    ? source.sessions.map(normalizeSpecialLectureSession).filter((session) => session.date || session.topic)
+    : [];
+  const calculated = getSpecialLectureCalculatedFields({
+    ...source,
+    sessions,
+    scheduleRules
+  });
   return {
     specialLectureGuideId: id,
     slug,
+    year: String(source.year ?? "").trim(),
+    season: String(source.season ?? "summer").trim(),
     title: String(source.title ?? "").trim(),
     shortTitle: String(source.shortTitle || source.title || "").trim(),
     audience: String(source.audience ?? "").trim(),
     goal: String(source.goal ?? "").trim(),
     days: String(source.days ?? "").trim(),
     time: String(source.time ?? "").trim(),
-    lessonCount: String(source.lessonCount ?? "").trim(),
-    tuition: String(source.tuition ?? "").trim(),
+    periodStart: String(source.periodStart ?? "").trim(),
+    periodEnd: String(source.periodEnd ?? "").trim(),
+    lessonCount: String(source.lessonCount || calculated.lessonCount || "").trim(),
+    totalHours: Number(source.totalHours ?? calculated.totalHours) || 0,
+    tuition: String(source.tuition || calculated.tuition || "").trim(),
+    pricingMode: source.pricingMode === "perHour" ? "perHour" : "perSession",
+    pricePerSession: Number(source.pricePerSession) || defaultSpecialLecturePricePerSession,
+    pricePerHour: Number(source.pricePerHour) || defaultSpecialLecturePricePerHour,
     teacher: String(source.teacher ?? "고태영T").trim(),
     textbook: String(source.textbook ?? "").trim(),
+    defaultSessionTopic: String(source.defaultSessionTopic ?? source.goal ?? "특강 수업").trim(),
+    scheduleRules,
     summary: String(source.summary ?? "").trim(),
     highlights: Array.isArray(source.highlights)
       ? source.highlights.map((item) => String(item ?? "").trim()).filter(Boolean).slice(0, 6)
       : [],
-    sessions: Array.isArray(source.sessions)
-      ? source.sessions.map(normalizeSpecialLectureSession).filter((session) => session.date || session.topic)
-      : [],
+    sessions,
     noticeMemo: String(source.noticeMemo ?? "").trim(),
     updatedAt: String(source.updatedAt ?? "").trim()
   };
+}
+
+function createSpecialLectureGuideFromTemplate(template = defaultSpecialLectureGuides[0]) {
+  const now = new Date();
+  const year = String(now.getFullYear());
+  const season = "summer";
+  const id = `special_lecture_${year}_${season}_${Date.now().toString(36)}`;
+  const guide = normalizeSpecialLectureGuide({
+    ...template,
+    specialLectureGuideId: id,
+    slug: `${year}-${season}-special-${Date.now().toString(36)}`,
+    year,
+    season,
+    title: `${year} 여름방학 특강`,
+    shortTitle: "여름방학 특강",
+    audience: "",
+    goal: "",
+    periodStart: "",
+    periodEnd: "",
+    days: "",
+    time: "",
+    lessonCount: "",
+    totalHours: 0,
+    tuition: "",
+    textbook: "",
+    defaultSessionTopic: "특강 수업",
+    sessions: [],
+    updatedAt: new Date().toISOString()
+  }, template);
+  return guide;
 }
 
 function normalizeSpecialLectureGuides(guides = []) {
@@ -1190,7 +1521,13 @@ function getSpecialLecturePublicUrl(guide = {}) {
 
 function formatSpecialLectureScheduleText(sessions = []) {
   return sessions
-    .map((session) => [session.date, session.day ? `(${session.day})` : "", "|", session.topic].filter(Boolean).join(" "))
+    .map((session) => [
+      session.date,
+      session.day ? `(${session.day})` : "",
+      session.startTime && session.endTime ? `${session.startTime}-${session.endTime}` : "",
+      "|",
+      session.topic
+    ].filter(Boolean).join(" "))
     .join("\n");
 }
 
@@ -1200,10 +1537,12 @@ function parseSpecialLectureScheduleText(value = "") {
     .map((line, index) => {
       const [left = "", ...topicParts] = line.split("|");
       const topic = topicParts.join("|").trim() || `회차 ${index + 1}`;
-      const dateMatch = left.trim().match(/^(.+?)(?:\s*\((.+?)\))?$/);
+      const dateMatch = left.trim().match(/^(.+?)(?:\s*\((.+?)\))?(?:\s+(\d{1,2}:\d{2})-(\d{1,2}:\d{2}))?$/);
       return normalizeSpecialLectureSession({
         date: dateMatch?.[1]?.trim() || left.trim(),
         day: dateMatch?.[2]?.trim() || "",
+        startTime: dateMatch?.[3]?.trim() || "",
+        endTime: dateMatch?.[4]?.trim() || "",
         topic
       }, index);
     })
@@ -10470,6 +10809,17 @@ function SpecialLectureNoticePanel({
   const selectedGuide = draftGuides.find((guide) => guide.specialLectureGuideId === selectedGuideId) ?? draftGuides[0] ?? normalizeSpecialLectureGuide();
   const selectedGuideUrl = getSpecialLecturePublicUrl(selectedGuide);
   const noticeText = buildSpecialLectureNoticeText(selectedGuide, selectedGuideUrl);
+  const generatedSessionsPreview = generateSpecialLectureSessions(selectedGuide);
+  const calculatedSessionCount = generatedSessionsPreview.length;
+  const calculatedTotalHours = getSpecialLectureTotalHours(generatedSessionsPreview);
+  const calculatedTuition = calculateSpecialLectureTuition({
+    pricingMode: selectedGuide.pricingMode,
+    pricePerHour: selectedGuide.pricePerHour,
+    pricePerSession: selectedGuide.pricePerSession,
+    sessionCount: calculatedSessionCount,
+    totalHours: calculatedTotalHours
+  });
+  const calculatedWeekdayCounts = getSpecialLectureWeekdayCounts(generatedSessionsPreview);
 
   useEffect(() => {
     setDraftGuides(normalizedGuides);
@@ -10504,7 +10854,95 @@ function SpecialLectureNoticePanel({
 
   function updateSchedule(value) {
     setScheduleDraftText(value);
-    updateSelectedGuide("sessions", parseSpecialLectureScheduleText(value));
+    const sessions = parseSpecialLectureScheduleText(value);
+    const calculated = getSpecialLectureCalculatedFields({ ...selectedGuide, sessions });
+    setDraftGuides((current) =>
+      current.map((guide) =>
+        guide.specialLectureGuideId === selectedGuide.specialLectureGuideId
+          ? normalizeSpecialLectureGuide({
+              ...guide,
+              sessions,
+              lessonCount: calculated.lessonCount,
+              totalHours: calculated.totalHours,
+              tuition: calculated.tuition,
+              updatedAt: new Date().toISOString()
+            }, guide)
+          : guide
+      )
+    );
+  }
+
+  function createNewGuide() {
+    const nextGuide = createSpecialLectureGuideFromTemplate(selectedGuide);
+    setDraftGuides((current) => [nextGuide, ...current]);
+    setSelectedGuideId(nextGuide.specialLectureGuideId);
+    setPanelMessage("새 특강 초안을 만들었습니다. 일정 계산 후 저장하면 공개 링크가 유지됩니다.");
+  }
+
+  function updateScheduleRule(ruleIndex, patch) {
+    const rules = normalizeSpecialLectureScheduleRules(selectedGuide.scheduleRules).map((rule, index) =>
+      index === ruleIndex ? normalizeSpecialLectureScheduleRule({ ...rule, ...patch }) : rule
+    );
+    updateSelectedGuide("scheduleRules", rules);
+  }
+
+  function toggleScheduleRuleDay(ruleIndex, dayValue) {
+    const rules = normalizeSpecialLectureScheduleRules(selectedGuide.scheduleRules);
+    const rule = rules[ruleIndex] ?? normalizeSpecialLectureScheduleRule();
+    const hasDay = rule.days.includes(dayValue);
+    const nextDays = hasDay ? rule.days.filter((day) => day !== dayValue) : [...rule.days, dayValue];
+    updateScheduleRule(ruleIndex, { days: nextDays });
+  }
+
+  function addScheduleRule() {
+    updateSelectedGuide("scheduleRules", [
+      ...normalizeSpecialLectureScheduleRules(selectedGuide.scheduleRules),
+      { days: [], startTime: "13:00", endTime: "16:00" }
+    ]);
+  }
+
+  function removeScheduleRule(ruleIndex) {
+    const nextRules = normalizeSpecialLectureScheduleRules(selectedGuide.scheduleRules)
+      .filter((_, index) => index !== ruleIndex);
+    updateSelectedGuide("scheduleRules", nextRules.length ? nextRules : [{ days: [1], startTime: "13:00", endTime: "16:00" }]);
+  }
+
+  function applyCalculatedSchedule() {
+    const generatedSessions = generateSpecialLectureSessions(selectedGuide);
+    if (!generatedSessions.length) {
+      setPanelMessage("일정 계산 실패: 기간, 요일, 시작/종료 시간을 확인해 주세요.");
+      return;
+    }
+    const existingSessions = selectedGuide.sessions ?? [];
+    const sessions = generatedSessions.map((session, index) => ({
+      ...session,
+      topic: existingSessions[index]?.topic || session.topic
+    }));
+    const totalHours = getSpecialLectureTotalHours(sessions);
+    const tuition = calculateSpecialLectureTuition({
+      pricingMode: selectedGuide.pricingMode,
+      pricePerHour: selectedGuide.pricePerHour,
+      pricePerSession: selectedGuide.pricePerSession,
+      sessionCount: sessions.length,
+      totalHours
+    });
+    const nextGuide = normalizeSpecialLectureGuide({
+      ...selectedGuide,
+      days: formatSpecialLectureDaysFromRules(normalizeSpecialLectureScheduleRules(selectedGuide.scheduleRules)),
+      time: formatSpecialLectureTimeFromRules(normalizeSpecialLectureScheduleRules(selectedGuide.scheduleRules)),
+      sessions,
+      lessonCount: formatSpecialLectureLessonCount(sessions.length, totalHours),
+      totalHours,
+      tuition: formatCurrencyWon(tuition),
+      updatedAt: new Date().toISOString()
+    }, selectedGuide);
+    setDraftGuides((current) =>
+      current.map((guide) =>
+        guide.specialLectureGuideId === selectedGuide.specialLectureGuideId ? nextGuide : guide
+      )
+    );
+    setScheduleDraftText(formatSpecialLectureScheduleText(sessions));
+    setPanelMessage(`일정 계산 완료: ${sessions.length}회, ${formatSpecialLectureHours(totalHours)}, ${formatCurrencyWon(tuition)}`);
   }
 
   async function copyGuideUrl() {
@@ -10541,7 +10979,10 @@ function SpecialLectureNoticePanel({
           <p className="eyebrow">SPECIAL LECTURE</p>
           <h2>특강알림</h2>
         </div>
-        <InlineSaveStatus label="특강 안내문" saveState={saveState} />
+        <div className="specialLectureHeaderActions">
+          <button className="softButton compact" onClick={createNewGuide} type="button">새 특강 만들기</button>
+          <InlineSaveStatus label="특강 안내문" saveState={saveState} />
+        </div>
       </div>
 
       <div className="specialLectureSelector">
@@ -10567,6 +11008,18 @@ function SpecialLectureNoticePanel({
 
           <div className="specialLectureFormGrid">
             <label>
+              연도
+              <input value={selectedGuide.year} onChange={(event) => updateSelectedGuide("year", event.target.value)} />
+            </label>
+            <label>
+              방학
+              <select value={selectedGuide.season} onChange={(event) => updateSelectedGuide("season", event.target.value)}>
+                {specialLectureSeasonOptions.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+            </label>
+            <label>
               안내문 제목
               <input value={selectedGuide.title} onChange={(event) => updateSelectedGuide("title", event.target.value)} />
             </label>
@@ -10581,6 +11034,14 @@ function SpecialLectureNoticePanel({
             <label>
               담당
               <input value={selectedGuide.teacher} onChange={(event) => updateSelectedGuide("teacher", event.target.value)} />
+            </label>
+            <label>
+              기간 시작
+              <input type="date" value={selectedGuide.periodStart} onChange={(event) => updateSelectedGuide("periodStart", event.target.value)} />
+            </label>
+            <label>
+              기간 종료
+              <input type="date" value={selectedGuide.periodEnd} onChange={(event) => updateSelectedGuide("periodEnd", event.target.value)} />
             </label>
             <label>
               요일
@@ -10599,6 +11060,10 @@ function SpecialLectureNoticePanel({
               <input value={selectedGuide.tuition} onChange={(event) => updateSelectedGuide("tuition", event.target.value)} />
             </label>
             <label>
+              기본 회차 주제
+              <input value={selectedGuide.defaultSessionTopic} onChange={(event) => updateSelectedGuide("defaultSessionTopic", event.target.value)} />
+            </label>
+            <label>
               교재
               <input value={selectedGuide.textbook} onChange={(event) => updateSelectedGuide("textbook", event.target.value)} />
             </label>
@@ -10607,6 +11072,88 @@ function SpecialLectureNoticePanel({
               <input value={selectedGuide.slug} onChange={(event) => updateSelectedGuide("slug", event.target.value)} />
             </label>
           </div>
+
+          <section className="specialLectureCalculator">
+            <div className="sectionHeader slim">
+              <div>
+                <p className="eyebrow">SCHEDULE BUILDER</p>
+                <h3>일정 계산</h3>
+              </div>
+              <button className="softButton compact" onClick={applyCalculatedSchedule} type="button">일정 계산 적용</button>
+            </div>
+            <div className="specialLectureCalcStats">
+              <div>
+                <span>계산 회차</span>
+                <strong>{calculatedSessionCount}회</strong>
+              </div>
+              <div>
+                <span>총 시간</span>
+                <strong>{formatSpecialLectureHours(calculatedTotalHours) || "-"}</strong>
+              </div>
+              <div>
+                <span>계산 수강료</span>
+                <strong>{formatCurrencyWon(calculatedTuition)}</strong>
+              </div>
+            </div>
+            <div className="specialLectureWeekdaySummary">
+              <span>요일별 회차</span>
+              <strong>{calculatedWeekdayCounts.length ? calculatedWeekdayCounts.map((item) => `${item.label} ${item.count}회`).join(" · ") : "기간과 요일을 선택하면 표시됩니다."}</strong>
+            </div>
+            <div className="specialLecturePriceGrid">
+              <label>
+                요금 기준
+                <select value={selectedGuide.pricingMode} onChange={(event) => updateSelectedGuide("pricingMode", event.target.value)}>
+                  <option value="perSession">회당 금액</option>
+                  <option value="perHour">시간당 금액</option>
+                </select>
+              </label>
+              <label>
+                회당 금액
+                <input
+                  type="number"
+                  value={selectedGuide.pricePerSession}
+                  onChange={(event) => updateSelectedGuide("pricePerSession", Number(event.target.value))}
+                />
+              </label>
+              <label>
+                시간당 금액
+                <input
+                  type="number"
+                  value={selectedGuide.pricePerHour}
+                  onChange={(event) => updateSelectedGuide("pricePerHour", Number(event.target.value))}
+                />
+              </label>
+            </div>
+            <div className="specialLectureRuleList">
+              {normalizeSpecialLectureScheduleRules(selectedGuide.scheduleRules).map((rule, index) => (
+                <div className="specialLectureRuleRow" key={`${index}_${rule.startTime}_${rule.endTime}`}>
+                  <div className="specialLectureWeekdayToggles">
+                    {specialLectureWeekdayOptions.map((day) => (
+                      <button
+                        className={rule.days.includes(day.value) ? "active" : ""}
+                        key={day.value}
+                        onClick={() => toggleScheduleRuleDay(index, day.value)}
+                        type="button"
+                      >
+                        {day.label}
+                      </button>
+                    ))}
+                  </div>
+                  <label>
+                    시작
+                    <input type="time" value={rule.startTime} onChange={(event) => updateScheduleRule(index, { startTime: event.target.value })} />
+                  </label>
+                  <label>
+                    종료
+                    <input type="time" value={rule.endTime} onChange={(event) => updateScheduleRule(index, { endTime: event.target.value })} />
+                  </label>
+                  <button className="dangerSoftButton compact" onClick={() => removeScheduleRule(index)} type="button">삭제</button>
+                </div>
+              ))}
+            </div>
+            <button className="softButton compact" onClick={addScheduleRule} type="button">요일/시간 추가</button>
+            <SpecialLectureCalendarPreview guide={{ ...selectedGuide, sessions: generatedSessionsPreview }} />
+          </section>
 
           <label className="specialLectureWideField">
             학습 목표
@@ -10658,6 +11205,62 @@ function SpecialLectureNoticePanel({
   );
 }
 
+function SpecialLectureCalendarPreview({ guide }) {
+  const months = createSpecialLectureCalendarMonths(guide);
+  if (!months.length) {
+    return (
+      <div className="specialLectureCalendarPreview empty">
+        <strong>계산 달력</strong>
+        <p>기간을 입력하면 특강 날짜가 달력으로 표시됩니다.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="specialLectureCalendarPreview">
+      <div className="specialLectureCalendarHeader">
+        <strong>계산 달력</strong>
+        <span>파란 날짜가 특강 회차입니다.</span>
+      </div>
+      <div className="specialLectureMonthGrid">
+        {months.map((month) => (
+          <section className="specialLectureMonth" key={month.key}>
+            <h4>{month.label}</h4>
+            <div className="specialLectureCalendarWeekdays">
+              {["월", "화", "수", "목", "금", "토", "일"].map((day) => (
+                <span key={day}>{day}</span>
+              ))}
+            </div>
+            <div className="specialLectureCalendarDays">
+              {month.days.map((day) => {
+                const hasSession = day.sessions.length > 0;
+                return (
+                  <div
+                    className={[
+                      "specialLectureCalendarDay",
+                      day.isCurrentMonth ? "" : "muted",
+                      day.inRange ? "inRange" : "",
+                      hasSession ? "hasSession" : ""
+                    ].filter(Boolean).join(" ")}
+                    key={day.dateKey}
+                  >
+                    <span>{day.day}</span>
+                    {hasSession ? (
+                      <small>
+                        {day.sessions.length > 1 ? `${day.sessions.length}회` : `${day.sessions[0].startTime || ""}${day.sessions[0].endTime ? `-${day.sessions[0].endTime}` : ""}`.trim()}
+                      </small>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
   const normalizedGuide = normalizeSpecialLectureGuide(guide);
   return (
@@ -10702,6 +11305,7 @@ function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
               <span>{index + 1}</span>
               <div>
                 <strong>{session.date}{session.day ? ` (${session.day})` : ""}</strong>
+                {session.startTime && session.endTime ? <small>{session.startTime}-{session.endTime}</small> : null}
                 <p>{session.topic}</p>
               </div>
             </div>

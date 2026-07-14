@@ -7210,6 +7210,14 @@ button:disabled {
   gap: 16px;
 }
 
+.specialLectureHeaderActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .specialLectureSelector {
   display: grid;
   gap: 10px;
@@ -7273,6 +7281,7 @@ button:disabled {
 }
 
 .specialLectureEditor input,
+.specialLectureEditor select,
 .specialLectureEditor textarea {
   border: 1px solid #cbd5e1;
   border-radius: 8px;
@@ -7284,6 +7293,238 @@ button:disabled {
 
 .specialLectureEditor textarea {
   resize: vertical;
+}
+
+.specialLectureCalculator {
+  background: #f8fafc;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.specialLectureCalculator h3 {
+  color: #0f172a;
+  font-size: 18px;
+  margin: 0;
+}
+
+.specialLectureCalcStats,
+.specialLecturePriceGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.specialLectureCalcStats div {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 5px;
+  min-height: 70px;
+  padding: 11px;
+}
+
+.specialLectureCalcStats span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.specialLectureCalcStats strong {
+  color: #0f172a;
+  font-size: 18px;
+}
+
+.specialLectureWeekdaySummary {
+  background: #ffffff;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  padding: 11px 12px;
+}
+
+.specialLectureWeekdaySummary span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.specialLectureWeekdaySummary strong {
+  color: #1e3a8a;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.specialLecturePriceGrid label {
+  display: grid;
+  gap: 6px;
+}
+
+.specialLectureRuleList {
+  display: grid;
+  gap: 9px;
+}
+
+.specialLectureRuleRow {
+  align-items: end;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(220px, 1fr) 110px 110px auto;
+  padding: 10px;
+}
+
+.specialLectureRuleRow label {
+  display: grid;
+  gap: 5px;
+}
+
+.specialLectureWeekdayToggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.specialLectureWeekdayToggles button {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  color: #475569;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  height: 32px;
+  justify-content: center;
+  min-width: 34px;
+  padding: 0 10px;
+}
+
+.specialLectureWeekdayToggles button.active {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #ffffff;
+}
+
+.specialLectureCalendarPreview {
+  background: #ffffff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  padding: 13px;
+}
+
+.specialLectureCalendarPreview.empty {
+  color: #64748b;
+}
+
+.specialLectureCalendarPreview.empty p {
+  margin: 0;
+}
+
+.specialLectureCalendarHeader {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.specialLectureCalendarHeader strong,
+.specialLectureCalendarPreview.empty strong {
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.specialLectureCalendarHeader span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.specialLectureMonthGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.specialLectureMonth {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
+.specialLectureMonth h4 {
+  color: #0f172a;
+  font-size: 14px;
+  margin: 0;
+}
+
+.specialLectureCalendarWeekdays,
+.specialLectureCalendarDays {
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.specialLectureCalendarWeekdays span {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.specialLectureCalendarDay {
+  align-items: start;
+  aspect-ratio: 1;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  color: #94a3b8;
+  display: grid;
+  font-size: 11px;
+  gap: 2px;
+  justify-items: center;
+  min-width: 0;
+  padding: 5px 2px;
+}
+
+.specialLectureCalendarDay.inRange {
+  background: #ffffff;
+  color: #334155;
+}
+
+.specialLectureCalendarDay.muted {
+  opacity: 0.42;
+}
+
+.specialLectureCalendarDay.hasSession {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #ffffff;
+}
+
+.specialLectureCalendarDay span {
+  font-weight: 900;
+  line-height: 1;
+}
+
+.specialLectureCalendarDay small {
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+  text-align: center;
 }
 
 .specialLectureActionBar {
@@ -7460,6 +7701,12 @@ button:disabled {
 .specialLectureTimelineItem strong {
   color: #0f172a;
   font-size: 14px;
+}
+
+.specialLectureTimelineItem small {
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 900;
 }
 
 .specialLectureTimelineItem p {
@@ -14489,6 +14736,10 @@ body.attendanceOnlyBody {
   .schoolCalendarLayout.formCollapsed,
   .examAnalysisGrid,
   .specialLectureEditorGrid,
+  .specialLectureCalcStats,
+  .specialLecturePriceGrid,
+  .specialLectureMonthGrid,
+  .specialLectureRuleRow,
   .followCandidateGrid,
   .supplementOverviewGrid,
   .profileSummary,
