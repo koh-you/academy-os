@@ -12,6 +12,16 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-15 P1. 특강 안내문 목표 입력 단순화
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청: 특강알림 편집 화면의 `학습 목표`, `안내문 요약`, `핵심 안내` 중 `학습 목표`만 남기고, 이 입력 위치를 `일정 계산`과 `회차별 일정` 접힘 패널 사이가 아니라 위쪽으로 옮긴다.
+- 구현 결과: `학습 목표` textarea를 기본 정보 바로 아래, `일정 계산` 위로 이동했다.
+- 구현 결과: `안내문 요약`, `핵심 안내` 편집 필드와 공개 안내문 미리보기의 `수업 방향` 섹션을 제거했다. 기존 저장본 호환을 위해 `summary/highlights` 데이터 normalize는 유지하지만 화면/미리보기 원천으로 쓰지 않는다.
+- 저장 원천: 특강 안내문 원본은 Supabase `app_state.specialLectureGuides`이고, 저장 전에는 local draft만 바뀐다. 이번 변경은 UI/미리보기 단순화이며 새 SQL과 Solapi/공지 발송 변경은 없다.
+- 중단 조건: 편집 화면에 `안내문 요약` 또는 `핵심 안내`가 다시 보임, `학습 목표`가 일정 계산/회차별 일정 사이에 남음, 공개 안내문 미리보기에 `수업 방향` summary/highlights가 다시 보임, `안내문 저장` 전 공개 링크 저장본이 바뀐 것처럼 동작함.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 288개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P1. 특강 기간 입력을 일정 계산 안으로 이동
 
 - 상태: 완료 - 구현/검증 완료

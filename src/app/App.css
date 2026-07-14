@@ -7925,6 +7925,15 @@ button:disabled {
   font-weight: 900;
 }
 
+.specialLectureGoalField {
+  background: #ffffff;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
 .specialLectureEditor input,
 .specialLectureEditor select,
 .specialLectureEditor textarea {

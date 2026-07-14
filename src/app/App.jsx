@@ -11215,7 +11215,6 @@ function SpecialLectureNoticePanel({
   const [selectedGuideId, setSelectedGuideId] = useState(getDefaultSpecialLectureGuideId(normalizedGuides));
   const [showStoredGuides, setShowStoredGuides] = useState(false);
   const [managementGuideId, setManagementGuideId] = useState("");
-  const [highlightDraftText, setHighlightDraftText] = useState("");
   const [isScheduleBuilderOpen, setIsScheduleBuilderOpen] = useState(false);
   const [isSessionPlanOpen, setIsSessionPlanOpen] = useState(false);
   const primaryGuides = draftGuides.filter(isSpecialLecturePrimaryGuide);
@@ -11255,8 +11254,6 @@ function SpecialLectureNoticePanel({
   }, [normalizedGuides]);
 
   useEffect(() => {
-    const guide = draftGuides.find((item) => item.specialLectureGuideId === selectedGuideId) ?? draftGuides[0];
-    setHighlightDraftText((guide?.highlights ?? []).join("\n"));
     setCopyMessage("");
   }, [draftGuides, selectedGuideId]);
 
@@ -11304,12 +11301,6 @@ function SpecialLectureNoticePanel({
         guide.specialLectureGuideId === selectedGuide.specialLectureGuideId ? nextGuide : guide
       )
     );
-  }
-
-  function updateHighlights(value) {
-    if (!selectedGuide) return;
-    setHighlightDraftText(value);
-    updateSelectedGuide("highlights", value.split("\n").map((line) => line.trim()).filter(Boolean));
   }
 
   function replaceSelectedGuideSessions(sessions) {
@@ -11683,6 +11674,11 @@ function SpecialLectureNoticePanel({
             </label>
           </div>
 
+          <label className="specialLectureWideField specialLectureGoalField">
+            학습 목표
+            <textarea rows="3" value={selectedGuide.goal} onChange={(event) => updateSelectedGuide("goal", event.target.value)} />
+          </label>
+
           <section className={`specialLectureCalculator ${isScheduleBuilderOpen ? "open" : "collapsed"}`}>
             <div className="sectionHeader slim specialLectureCalculatorHeader">
               <div>
@@ -11801,18 +11797,6 @@ function SpecialLectureNoticePanel({
             )}
           </section>
 
-          <label className="specialLectureWideField">
-            학습 목표
-            <textarea rows="3" value={selectedGuide.goal} onChange={(event) => updateSelectedGuide("goal", event.target.value)} />
-          </label>
-          <label className="specialLectureWideField">
-            안내문 요약
-            <textarea rows="4" value={selectedGuide.summary} onChange={(event) => updateSelectedGuide("summary", event.target.value)} />
-          </label>
-          <label className="specialLectureWideField">
-            핵심 안내
-            <textarea rows="5" value={highlightDraftText} onChange={(event) => updateHighlights(event.target.value)} />
-          </label>
           <section className="specialLectureSessionCards">
             <div className="sectionHeader slim">
               <div>
@@ -12029,16 +12013,6 @@ function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
             <strong>{value || "-"}</strong>
           </div>
         ))}
-      </section>
-
-      <section className="specialLectureGuideSection">
-        <h2>수업 방향</h2>
-        <p>{normalizedGuide.summary}</p>
-        <ul>
-          {normalizedGuide.highlights.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
       </section>
 
       <section className="specialLectureGuideSection">
