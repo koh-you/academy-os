@@ -15347,7 +15347,7 @@ function HomeworkMakeupLessonDetail({
         <section className="homeworkMakeupScheduleEditor" aria-label="숙제보충 일정 수정">
           <div>
             <strong>보충 일정 수정</strong>
-            <span>저장하면 보충관리와 수업일지 일정이 함께 갱신됩니다. 학생·학부모 변경 안내와 학생 11시 예약 갱신 여부는 아래에서 선택합니다.</span>
+            <span>저장하면 보충관리와 수업일지 일정이 함께 갱신됩니다. 솔라피 발송과 예약 갱신 여부는 아래에서 선택합니다.</span>
           </div>
           <div className="fieldGrid two">
             <label>
@@ -15375,9 +15375,12 @@ function HomeworkMakeupLessonDetail({
               {isScheduleSaving ? "저장 중" : "일정만 저장"}
             </button>
             <button className="softButton scheduleApplyButton" disabled={!canSaveScheduleDraft || isScheduleSaving} onClick={() => saveScheduleDraft(true)} type="button">
-              {isScheduleSaving ? "발송/갱신 중" : "학생·학부모 안내 + 11시 예약"}
+              {isScheduleSaving ? "발송/갱신 중" : "솔라피 발송 및 예약"}
             </button>
           </div>
+          <p className="supplementScheduleActionHint">
+            기존 일정 변경 시 학생·학부모에게 변경 안내를 즉시 발송하고, 보강 당일 오전 11시 학생 알림톡 예약을 갱신합니다.
+          </p>
         </section>
       ) : null}
 
@@ -23468,7 +23471,7 @@ function SupplementScheduleChangeConfirmModal({
     <Modal
       className="supplementPassConfirmModal supplementScheduleConfirmModal"
       title="보충 일정 변경 저장"
-      subtitle="기존 보충 일정을 바꾸면 학생·학부모 변경 안내를 즉시 보낼지, 학생 11시 예약도 갱신할지 함께 선택합니다."
+      subtitle="기존 보충 일정을 바꾸면 솔라피 발송과 예약 갱신을 함께 선택합니다."
       onClose={onCancel}
     >
       <div className="supplementPassConfirmBody">
@@ -23501,7 +23504,7 @@ function SupplementScheduleChangeConfirmModal({
           {isBusy ? "저장 중" : "일정만 저장"}
         </button>
         <button className="softButton scheduleApplyButton" disabled={isBusy} onClick={onConfirmWithReminder} type="button">
-          {isBusy ? "발송/갱신 중" : "학생·학부모 안내 + 11시 예약"}
+          {isBusy ? "발송/갱신 중" : "솔라피 발송 및 예약"}
         </button>
       </div>
     </Modal>
