@@ -3547,6 +3547,37 @@ button {
   color: #b91c1c;
 }
 
+.homeworkMakeupPassState {
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.45;
+  margin: 0;
+  padding: 10px 12px;
+}
+
+.homeworkMakeupPassState.saving {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+}
+
+.homeworkMakeupPassState.saved {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #047857;
+}
+
+.homeworkMakeupPassState.failed {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.homeworkMakeupPassState.modalState {
+  margin-top: 10px;
+}
+
 .supplementScheduleActionHint {
   color: #64748b;
   font-size: 12px;

@@ -15180,6 +15180,7 @@ function SupplementMakeupLessonDetail({
   task
 }) {
   const [passConfirmMode, setPassConfirmMode] = useState("");
+  const [passSaveState, setPassSaveState] = useState({ message: "", mode: "", state: "idle" });
   const [isScheduleEditOpen, setIsScheduleEditOpen] = useState(false);
   const [scheduleDraft, setScheduleDraft] = useState({
     scheduleChangeDetail: "",
@@ -15262,14 +15263,22 @@ function SupplementMakeupLessonDetail({
     ? hasMissingCheckOut(supplementAttendanceRecord, supplementAttendanceLesson)
     : false;
   const methodLabel = task ? supplementMethodLabel(task) : "방식 미정";
+  const isTaskDone = task?.status === "done" || (passSaveState.state === "saved" && passSaveState.mode === "completed");
+  const isPassSaving = passSaveState.state === "saving";
   const statusLabel =
-    task?.status === "done" ? "보충 완료" : task?.status === "scheduled" ? "일정 확정" : "일정 미확정";
+    isTaskDone ? "보충 완료" : task?.status === "scheduled" ? "일정 확정" : "일정 미확정";
   const assignmentCount = task?.assignmentCount ?? task?.attemptCount ?? 0;
   const scheduledText = `${lesson.date} ${lesson.startTime || ""}`.trim();
   const confirmedText = task?.lastScheduledAt ? formatKoreanDateTime(task.lastScheduledAt) : "확정 기록 없음";
-  const processStatus = task?.supplementProcessStatus || (task?.status === "done" ? "completed" : "in_progress");
+  const completedText = task?.completedAt || task?.passedAt ? formatKoreanDateTime(task.completedAt || task.passedAt) : "";
+  const processStatus = isTaskDone ? "completed" : task?.supplementProcessStatus || "in_progress";
   const processMemo = task?.supplementProgressMemo || "";
   const nextSupplementPlan = task?.nextSupplementPlan || "";
+  const passStateMessage =
+    passSaveState.message ||
+    (task?.status === "done"
+      ? `보충 완료 처리 완료${completedText ? ` · ${completedText}` : ""}. 보충관리 active 목록에서는 제외됩니다.`
+      : "");
   const normalizedScheduleDraftTime = normalizeTimeInput(scheduleDraft.scheduledTime) || scheduleDraft.scheduledTime;
   const canSaveScheduleDraft = Boolean(onScheduleTask && task?.makeupTaskId && scheduleDraft.scheduledDate && scheduleDraft.scheduledTime);
   const isScheduleSaving = scheduleSaveState.state === "saving";
@@ -15282,6 +15291,7 @@ function SupplementMakeupLessonDetail({
       scheduledTime: task?.scheduledTime || lesson.startTime || ""
     });
     setScheduleSaveState({ message: "", state: "idle" });
+    setPassSaveState({ message: "", mode: "", state: "idle" });
     setIsScheduleEditOpen(false);
   }, [lesson.lessonId, task?.makeupTaskId]);
 
@@ -15297,20 +15307,42 @@ function SupplementMakeupLessonDetail({
     }
   }
 
-  function confirmPassTask() {
+  async function confirmPassTask() {
     if (!task || !onPassTask) return;
+    const isNeedsMore = passConfirmMode === "needs_more";
     const completedMemo = [
       processMemo,
-      passConfirmMode === "needs_more" && nextSupplementPlan ? `추가 보충 필요: ${nextSupplementPlan}` : ""
+      isNeedsMore && nextSupplementPlan ? `추가 보충 필요: ${nextSupplementPlan}` : ""
     ].filter(Boolean).join("\n");
-    onPassTask({
-      ...task,
-      supplementProcessStatus: passConfirmMode === "needs_more" ? "needs_more" : "completed",
-      supplementProgressMemo: completedMemo,
-      nextSupplementPlan: passConfirmMode === "needs_more" ? nextSupplementPlan : task.nextSupplementPlan || "",
-      completionDecision: passConfirmMode === "needs_more" ? "needs_more" : "completed"
+    setPassSaveState({
+      message: isNeedsMore ? "추가 보충 필요 상태로 저장하는 중입니다." : "보충 완료 처리 중입니다.",
+      mode: isNeedsMore ? "needs_more" : "completed",
+      state: "saving"
     });
-    setPassConfirmMode("");
+    try {
+      const savedTask = await onPassTask({
+        ...task,
+        supplementProcessStatus: isNeedsMore ? "needs_more" : "completed",
+        supplementProgressMemo: completedMemo,
+        nextSupplementPlan: isNeedsMore ? nextSupplementPlan : task.nextSupplementPlan || "",
+        completionDecision: isNeedsMore ? "needs_more" : "completed"
+      });
+      const savedAt = savedTask?.completedAt || savedTask?.passedAt ? formatKoreanDateTime(savedTask.completedAt || savedTask.passedAt) : "";
+      setPassConfirmMode("");
+      setPassSaveState({
+        message: isNeedsMore
+          ? "추가 보충 필요로 저장했습니다. 보충관리 목록에 계속 남습니다."
+          : `보충 완료 처리 완료${savedAt ? ` · ${savedAt}` : ""}. 보충관리 active 목록에서는 제외됩니다.`,
+        mode: isNeedsMore ? "needs_more" : "completed",
+        state: "saved"
+      });
+    } catch (error) {
+      setPassSaveState({
+        message: error?.message || "보충 완료 처리를 저장하지 못했습니다.",
+        mode: isNeedsMore ? "needs_more" : "completed",
+        state: "failed"
+      });
+    }
   }
 
   async function saveScheduleDraft(updateStudentReminder) {
@@ -15591,6 +15623,7 @@ function SupplementMakeupLessonDetail({
             ].map((option) => (
               <button
                 className={processStatus === option.id ? "active" : ""}
+                disabled={isPassSaving || isTaskDone}
                 key={option.id}
                 onClick={() => handleProcessStatusChange(option.id)}
                 type="button"
@@ -15604,6 +15637,7 @@ function SupplementMakeupLessonDetail({
             <label className="makeupProcessField">
               보충 진행 메모
               <textarea
+                disabled={isPassSaving || isTaskDone}
                 value={processMemo}
                 onChange={(event) => updateTaskField("supplementProgressMemo", event.target.value)}
                 placeholder="예: 쎈 오답 5문항 중 3문항 풀이 완료. 나머지 2문항은 계산 실수 반복으로 추가 확인 필요."
@@ -15612,18 +15646,24 @@ function SupplementMakeupLessonDetail({
             <label className="makeupProcessField">
               추가 보충 내용
               <textarea
+                disabled={isPassSaving || isTaskDone}
                 value={nextSupplementPlan}
                 onChange={(event) => updateTaskField("nextSupplementPlan", event.target.value)}
                 placeholder="추가 보충이 필요할 때 다음에 진행할 숙제/문항/범위를 적어주세요."
               />
             </label>
           </div>
+          {passStateMessage ? (
+            <p className={`homeworkMakeupPassState ${passSaveState.state === "idle" && task?.status === "done" ? "saved" : passSaveState.state}`}>
+              {passStateMessage}
+            </p>
+          ) : null}
           <div className="makeupProcessActions">
-            <button className="softButton" onClick={() => setPassConfirmMode("needs_more")} type="button">
-              추가 보충 필요로 기록
+            <button className="softButton" disabled={isPassSaving || isTaskDone} onClick={() => setPassConfirmMode("needs_more")} type="button">
+              {isPassSaving ? "처리 중" : "추가 보충 필요로 기록"}
             </button>
-            <button className="passButton" disabled={!task || task.status === "done"} onClick={() => setPassConfirmMode("completed")} type="button">
-              보충 완료 처리
+            <button className="passButton" disabled={!task || isTaskDone || isPassSaving} onClick={() => setPassConfirmMode("completed")} type="button">
+              {isTaskDone ? "보충 완료됨" : isPassSaving ? "처리 중" : "보충 완료 처리"}
             </button>
           </div>
         </section>
@@ -15633,7 +15673,9 @@ function SupplementMakeupLessonDetail({
           className="supplementPassConfirmModal"
           title={passConfirmMode === "needs_more" ? "추가 보충 필요 기록" : "보충 완료 처리"}
           subtitle="처리 내용은 보충관리 이력에 남습니다."
-          onClose={() => setPassConfirmMode("")}
+          onClose={() => {
+            if (!isPassSaving) setPassConfirmMode("");
+          }}
         >
           <div className="supplementPassConfirmBody">
             <p>
@@ -15658,13 +15700,16 @@ function SupplementMakeupLessonDetail({
             </dl>
           </div>
           <div className="modalActions confirmActions">
-            <button className="softButton" onClick={() => setPassConfirmMode("")} type="button">
+            <button className="softButton" disabled={isPassSaving} onClick={() => setPassConfirmMode("")} type="button">
               취소
             </button>
-            <button className="passButton" onClick={confirmPassTask} type="button">
-              {passConfirmMode === "needs_more" ? "추가 보충 필요 기록" : "보충 완료 처리"}
+            <button className="passButton" disabled={isPassSaving} onClick={confirmPassTask} type="button">
+              {isPassSaving ? "처리 중" : passConfirmMode === "needs_more" ? "추가 보충 필요 기록" : "보충 완료 처리"}
             </button>
           </div>
+          {passSaveState.message ? (
+            <p className={`homeworkMakeupPassState modalState ${passSaveState.state}`}>{passSaveState.message}</p>
+          ) : null}
         </Modal>
       ) : null}
     </div>
