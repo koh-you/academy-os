@@ -1086,6 +1086,7 @@ const specialLectureWeekdayOptions = [
 
 const defaultSpecialLecturePricePerSession = 37500;
 const defaultSpecialLecturePricePerHour = 12500;
+const defaultSpecialLectureApplicationUrl = "https://tally.so/r/eql9aJ";
 
 const defaultSpecialLectureGuides = [
   {
@@ -1130,6 +1131,7 @@ const defaultSpecialLectureGuides = [
       { date: "8월 7일", dateKey: "2026-08-07", day: "금", startTime: "13:00", endTime: "16:00", topic: "개별 클리닉" }
     ],
     noticeMemo: "자세한 커리큘럼과 안내사항은 링크에서 확인 부탁드립니다.",
+    applicationUrl: defaultSpecialLectureApplicationUrl,
     updatedAt: "2026-07-14T00:00:00.000Z"
   },
   {
@@ -1177,6 +1179,7 @@ const defaultSpecialLectureGuides = [
       { date: "8월 11일", dateKey: "2026-08-11", day: "화", startTime: "13:00", endTime: "16:00", topic: "05. 명제" }
     ],
     noticeMemo: "자세한 커리큘럼과 안내사항은 링크에서 확인 부탁드립니다.",
+    applicationUrl: defaultSpecialLectureApplicationUrl,
     updatedAt: "2026-07-14T00:00:00.000Z"
   }
 ];
@@ -1506,6 +1509,7 @@ function normalizeSpecialLectureGuide(guide = {}, fallback = defaultSpecialLectu
       : [],
     sessions,
     noticeMemo: String(source.noticeMemo ?? "").trim(),
+    applicationUrl: String(guide?.applicationUrl ?? guide?.application_url ?? fallback?.applicationUrl ?? fallback?.application_url ?? defaultSpecialLectureApplicationUrl).trim(),
     status: source.status === "archived" || source.archived === true ? "archived" : "active",
     archivedAt: String(source.archivedAt ?? source.archived_at ?? "").trim(),
     updatedAt: String(source.updatedAt ?? "").trim()
@@ -1537,6 +1541,7 @@ function createSpecialLectureGuideFromTemplate(template = defaultSpecialLectureG
     textbook: "",
     defaultSessionTopic: "특강 수업",
     sessions: [],
+    applicationUrl: template.applicationUrl || defaultSpecialLectureApplicationUrl,
     status: "active",
     archivedAt: "",
     updatedAt: new Date().toISOString()
@@ -1558,6 +1563,37 @@ function getSpecialLectureGuideSlug(guide = {}) {
 function getSpecialLecturePublicUrl(guide = {}) {
   const origin = typeof window !== "undefined" ? window.location.origin : "https://academy-os-blue.vercel.app";
   return `${origin}/special-lecture?guide=${encodeURIComponent(getSpecialLectureGuideSlug(guide))}`;
+}
+
+function appendSpecialLectureUrlParams(url = "", params = {}) {
+  const rawUrl = String(url ?? "").trim();
+  if (!rawUrl) return "";
+  try {
+    const nextUrl = new URL(rawUrl);
+    Object.entries(params).forEach(([key, value]) => {
+      const text = String(value ?? "").trim();
+      if (text) nextUrl.searchParams.set(key, text);
+    });
+    return nextUrl.toString();
+  } catch {
+    return rawUrl;
+  }
+}
+
+function getSpecialLectureApplicationUrl(guide = {}) {
+  const normalizedGuide = normalizeSpecialLectureGuide(guide);
+  if (!normalizedGuide.applicationUrl) return "";
+  const campaign = [
+    normalizedGuide.year,
+    normalizedGuide.season,
+    normalizedGuide.shortTitle || normalizedGuide.title
+  ].filter(Boolean).join("_").replaceAll(/\s+/g, "_");
+  return appendSpecialLectureUrlParams(normalizedGuide.applicationUrl, {
+    specialLectureId: normalizedGuide.specialLectureGuideId,
+    guideId: getSpecialLectureGuideSlug(normalizedGuide),
+    source: "os_guide",
+    campaign: campaign || "special_lecture"
+  });
 }
 
 function formatSpecialLectureScheduleText(sessions = []) {
@@ -11308,6 +11344,10 @@ function SpecialLectureNoticePanel({
               공개 URL slug
               <input value={selectedGuide.slug} onChange={(event) => updateSelectedGuide("slug", event.target.value)} />
             </label>
+            <label className="specialLectureFullInput">
+              신청폼 URL
+              <input value={selectedGuide.applicationUrl} onChange={(event) => updateSelectedGuide("applicationUrl", event.target.value)} />
+            </label>
           </div>
 
           <section className="specialLectureCalculator">
@@ -11506,6 +11546,7 @@ function SpecialLectureCalendarPreview({ guide }) {
 
 function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
   const normalizedGuide = normalizeSpecialLectureGuide(guide);
+  const applicationUrl = getSpecialLectureApplicationUrl(normalizedGuide);
   return (
     <article className="specialLectureGuidePreview">
       <header className="specialLectureHero">
@@ -11561,7 +11602,12 @@ function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
           <span>담당</span>
           <strong>{normalizedGuide.teacher}</strong>
         </div>
-        <p>신청과 세부 문의는 학원으로 회신해 주세요.</p>
+        <p>신청은 아래 버튼으로 접수하고, 세부 문의는 학원으로 회신해 주세요.</p>
+        {applicationUrl ? (
+          <a className="specialLectureApplyButton" href={applicationUrl} target="_blank" rel="noreferrer">
+            특강 신청하기
+          </a>
+        ) : null}
         {guideUrl ? <small>{guideUrl}</small> : null}
       </section>
     </article>

@@ -12,6 +12,17 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-14 P1. 특강 안내문 Tally 신청 버튼 연결
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청: Tally 신청폼은 만들었고 약간 수정할 예정이므로, OS 특강 안내문 안에 `특강 신청하기` 버튼을 넣어 Tally 폼으로 연결한다.
+- 구현 결과: 특강 안내문 저장본에 `applicationUrl` 필드를 추가했다. 기본값은 현재 Tally 신청폼 `https://tally.so/r/eql9aJ`이며, `특강알림` 편집 화면에서 `신청폼 URL`을 수정해 저장할 수 있다.
+- 구현 결과: 공개 특강 안내문 footer에 `특강 신청하기` 버튼을 추가했다. 버튼 URL에는 Tally hidden field 연동용 `specialLectureId`, `guideId`, `source=os_guide`, `campaign` query를 붙인다.
+- 저장 원천: 특강 안내문과 신청폼 URL 원본은 Supabase `app_state.specialLectureGuides`다. 이번 작업은 안내문 표시와 저장 필드 추가만 하며 `notification_jobs`, Solapi 예약/발송, Tally API 호출은 만들지 않는다. 새 SQL은 필요 없다.
+- 개별 시간표 검수 메모: 학생별 `schedule_override`는 서버 출결 수업 매칭과 지각 판정에 반영된다. 다만 출결 알림톡 본문은 현재 `출결/수업/시간` 중심이라 학생별 기준 시간(`기준 17:00-20:00`)을 별도 문장으로 표시하지는 않는다. 알림톡 문구에 기준 시간을 노출하려면 후속으로 작은 문구 추가가 필요하다.
+- 중단 조건: `신청폼 URL`을 저장했는데 새로고침 후 사라짐, 공개 안내문에 버튼이 보이지 않음, 버튼이 OS 안내문이 아닌 잘못된 URL로 이동함, 안내문 저장만으로 Solapi/notification_jobs/Tally API 호출이 발생함, Tally API key 같은 비밀값이 Git diff에 남음.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 통과, `npm run build` 통과, `git diff --check` 통과.
+
 ### 2026-07-14 P1. 특강 안내문 보관/삭제와 지난 특강 정리
 
 - 상태: 완료 - 구현/검증 완료
