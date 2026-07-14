@@ -12,6 +12,17 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-14 P1. 결석보강 전용 모달을 숙제보충 공통 모달로 확장
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청: 결석보충 모달도 숙제보충 모달처럼 열리게 하되, 결석보강에서는 오늘 보충 수업의 이전/다음 숙제가 아니라 원래 결석했던 수업일지 내용이 보여야 한다. 숙제보충/결석보강 모두 같은 출결 패널을 사용하고, 출결 저장/알림톡은 보충 수업의 `lessonId` 기준으로 처리되어야 한다.
+- 구현 결과: 기존 `HomeworkMakeupLessonDetail`을 `SupplementMakeupLessonDetail` 공통 모달로 확장했다. `homework_makeup`은 기존 숙제보충 화면 흐름을 유지하고, `absence_makeup`은 원 결석 수업일지 정보를 참고용 블록으로 보여준다.
+- 구현 결과: 결석보강 상세에는 `원 결석 수업일지` 영역을 추가했다. 강의 교재, 강의 내용, 지난 숙제, 다음 숙제는 `makeup_tasks.sourceId/sourceLessonId`로 연결된 원 결석 수업의 `lesson_student_records`와 숙제 원천을 읽는다. 오늘 보충 수업의 이전/다음 숙제를 참고 정보로 섞지 않도록 분리했다.
+- 구현 결과: 숙제보충/결석보강 공통으로 `보충 당일 출결` 패널을 추가했다. 이 버튼은 보충 수업 자체의 `lesson`과 `lesson_student_records`를 넘겨 등원/하원 저장 및 알림톡 흐름이 보충 수업 `lessonId` 기준으로 동작하게 했다.
+- 저장 원천: 원 결석 수업일지는 `lessons`, `lesson_student_records`, `homeworks`의 기존 저장본을 읽기 전용 참고 정보로 사용한다. 보충 처리 원본은 `makeup_tasks`, 보충 당일 출결 원본은 보충 수업의 `lesson_student_records`다. 이번 작업은 기존 테이블/필드만 사용하므로 새 SQL은 필요 없다.
+- 중단 조건: 김서윤처럼 `2026-07-13` 결석을 `2026-07-14`에 보충하는 케이스에서 결석보강 모달이 `2026-07-14` 보충 수업의 이전/다음 숙제를 보여줌, 원 결석 수업일지가 자동 수정됨, 출결 저장이 원 결석 수업 `lessonId`에 기록됨, 결석보강이 일반 수업일지 모달로 열림.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 287개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-14 P1. 보충 일정 솔라피 버튼명 정리와 추가보충 로직 검토
 
 - 상태: 완료 - 구현/검증 완료

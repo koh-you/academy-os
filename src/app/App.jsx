@@ -14665,26 +14665,29 @@ function TeacherLessonHubV2({
   const selectedSourceLesson = selectedLesson?.sourceLessonId
     ? lessons.find((lesson) => lesson.lessonId === selectedLesson.sourceLessonId) ?? selectedLesson
     : selectedLesson;
-  const isHomeworkMakeupLesson = isHomeworkMakeupTaskLesson(selectedLesson, selectedMakeupTask);
+  const isSupplementMakeupLesson = isSupplementMakeupTaskLesson(selectedLesson, selectedMakeupTask);
   const isExamSundayMakeupLesson = selectedLesson?.lessonType === "examSundayMakeup";
   const lessonJournalDialog = isLessonJournalOpen && selectedLesson ? (
-    isHomeworkMakeupLesson ? (
+    isSupplementMakeupLesson ? (
       <Modal
         backdropClassName="homeworkMakeupModalBackdrop"
         className="homeworkMakeupScheduleModal"
-        title="숙제보충 일정"
-        subtitle="일반 수업일지가 아니라, 미완료 숙제 보충 정보를 확인하는 전용 화면입니다."
+        title={`${followUpTypeLabel(selectedMakeupTask?.taskType)} 일정`}
+        subtitle="일반 수업일지가 아니라, 원 수업 참고와 보충 처리를 분리해 확인하는 전용 화면입니다."
         onClose={onBackToCalendar}
       >
-        <HomeworkMakeupLessonDetail
+        <SupplementMakeupLessonDetail
+          attendanceSettings={attendanceSettings}
           homeworks={homeworks}
           lesson={selectedLesson}
           lessons={lessons}
           onDeleteLesson={onDeleteLesson}
           onEditLesson={onEditLesson}
+          onOpenAttendance={onOpenAttendance}
           onPassTask={onPassMakeupTask}
           onScheduleTask={onScheduleMakeupTask}
           onUpdateTask={onUpdateMakeupTask}
+          records={records}
           students={students}
           task={selectedMakeupTask}
         />
@@ -15151,15 +15154,18 @@ function ExamSundayMakeupLessonDetail({
   );
 }
 
-function HomeworkMakeupLessonDetail({
+function SupplementMakeupLessonDetail({
+  attendanceSettings = defaultAttendanceSettings,
   homeworks = [],
   lesson,
   lessons = [],
   onDeleteLesson,
   onEditLesson,
+  onOpenAttendance,
   onPassTask,
   onScheduleTask,
   onUpdateTask,
+  records = [],
   students = [],
   task
 }) {
@@ -15174,6 +15180,8 @@ function HomeworkMakeupLessonDetail({
     .map((studentId) => students.find((student) => student.studentId === studentId))
     .filter(Boolean);
   const student = lessonStudents[0] ?? students.find((item) => item.studentId === task?.studentId);
+  const isAbsenceMakeup = task?.taskType === "absence_makeup";
+  const taskLabel = followUpTypeLabel(task?.taskType);
   const targetHomework =
     homeworks.find((homework) => homework.homeworkId === task?.sourceId) ??
     homeworks.find(
@@ -15181,25 +15189,66 @@ function HomeworkMakeupLessonDetail({
         homework.studentId === student?.studentId &&
         homework.title === (task?.sourceLabel ?? lesson.sourceLabel)
     );
-  const sourceLesson = targetHomework?.lessonId
+  const absenceSourceRecord = isAbsenceMakeup
+    ? records.find((record) => record.lessonStudentRecordId === task?.sourceId) ??
+      records.find((record) => record.lessonId === task?.sourceLessonId && record.studentId === student?.studentId)
+    : null;
+  const homeworkSourceLesson = targetHomework?.lessonId
     ? lessons.find((item) => item.lessonId === targetHomework.lessonId)
     : null;
+  const sourceLesson = isAbsenceMakeup
+    ? lessons.find((item) => item.lessonId === absenceSourceRecord?.lessonId) ??
+      lessons.find((item) => item.lessonId === task?.sourceLessonId) ??
+      null
+    : homeworkSourceLesson;
   const sourceDate =
-    sourceLesson?.date ??
-    targetHomework?.assignedDate ??
-    targetHomework?.startDate ??
-    targetHomework?.date ??
+    sourceLesson?.date ||
+    (isAbsenceMakeup ? task?.lessonDate : "") ||
+    targetHomework?.assignedDate ||
+    targetHomework?.startDate ||
+    targetHomework?.date ||
     "기록 없음";
-  const dueDate = targetHomework?.dueDate ?? targetHomework?.endDate ?? "기록 없음";
+  const dueDate = isAbsenceMakeup
+    ? sourceDate
+    : targetHomework?.dueDate ?? targetHomework?.endDate ?? "기록 없음";
   const sourceLessonLabel = sourceLesson?.className ?? sourceLesson?.lessonTopic ?? "원 수업 기록";
+  const sourcePreviousHomework = sourceLesson && student
+    ? getLessonHomework(homeworks, sourceLesson, student, "previous", lessons)
+    : null;
+  const sourceNextHomework = sourceLesson && student
+    ? getLessonHomework(homeworks, sourceLesson, student, "next", lessons)
+    : null;
+  const sourceLessonMaterial = absenceSourceRecord?.lessonMaterial || "";
+  const sourceLessonContent = absenceSourceRecord
+    ? getLessonContent(absenceSourceRecord)
+    : "";
+  const sourcePreviousHomeworkText =
+    sourcePreviousHomework?.title ||
+    absenceSourceRecord?.previousHomework ||
+    task?.supplementHomeworkNote ||
+    "";
+  const sourceNextHomeworkText =
+    sourceNextHomework?.title ||
+    absenceSourceRecord?.nextHomework ||
+    "";
   const targetTitle =
     getSupplementTaskSourceLabel(task) ||
     targetHomework?.title ||
     lesson.sourceLabel ||
-    "보충 대상 숙제";
+    `${taskLabel} 대상`;
   const originalHomeworkTitle = targetHomework?.title || task?.sourceLabel || lesson.sourceLabel || "";
   const originalHomeworkHint =
     originalHomeworkTitle && originalHomeworkTitle !== targetTitle ? `원본 숙제명: ${originalHomeworkTitle}` : sourceLessonLabel;
+  const supplementAttendanceLesson = lesson;
+  const supplementAttendanceRecord = student
+    ? findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student)
+    : null;
+  const supplementAttendanceDisplay = student && supplementAttendanceRecord
+    ? getAttendanceDisplay(supplementAttendanceRecord, supplementAttendanceLesson, attendanceSettings.lateGraceMinutes)
+    : null;
+  const supplementCheckoutMissing = student && supplementAttendanceRecord
+    ? hasMissingCheckOut(supplementAttendanceRecord, supplementAttendanceLesson)
+    : false;
   const methodLabel = task ? supplementMethodLabel(task) : "방식 미정";
   const statusLabel =
     task?.status === "done" ? "보충 완료" : task?.status === "scheduled" ? "일정 확정" : "일정 미확정";
@@ -15315,14 +15364,14 @@ function HomeworkMakeupLessonDetail({
           <small>{student?.grade ?? "-"} · {student?.schoolName ?? student?.school ?? "학교 미입력"}</small>
         </div>
         <div>
-          <span>해야 했던 날짜</span>
+          <span>{isAbsenceMakeup ? "결석한 수업" : "해야 했던 날짜"}</span>
           <strong>{dueDate}</strong>
-          <small>{sourceDate} 배정</small>
+          <small>{isAbsenceMakeup ? sourceLessonLabel : `${sourceDate} 배정`}</small>
         </div>
         <div>
-          <span>안 한 숙제 내용</span>
+          <span>{isAbsenceMakeup ? "결석 보강 내용" : "안 한 숙제 내용"}</span>
           <strong>{targetTitle}</strong>
-          <small>{originalHomeworkHint}</small>
+          <small>{isAbsenceMakeup ? task?.absenceReason || "결석 사유 미입력" : originalHomeworkHint}</small>
         </div>
         <div>
           <span>보충 확정 일정</span>
@@ -15387,13 +15436,14 @@ function HomeworkMakeupLessonDetail({
       <section className="panel homeworkMakeupTarget">
         <div className="sectionHeader">
           <div>
-            <span className="eyebrow">보충 대상 숙제</span>
+            <span className="eyebrow">{isAbsenceMakeup ? "원 결석 수업 기준" : "보충 대상 숙제"}</span>
             <h2>{targetTitle}</h2>
             <p>
-              {student?.name ?? "학생 미확인"} 학생이 {dueDate}까지 끝냈어야 하는 숙제입니다.
-              보충은 {scheduledText}에 진행됩니다.
+              {isAbsenceMakeup
+                ? `${student?.name ?? "학생 미확인"} 학생이 ${sourceDate}에 결석한 수업을 ${scheduledText}에 보강합니다.`
+                : `${student?.name ?? "학생 미확인"} 학생이 ${dueDate}까지 끝냈어야 하는 숙제입니다. 보충은 ${scheduledText}에 진행됩니다.`}
             </p>
-            {originalHomeworkTitle && originalHomeworkTitle !== targetTitle ? (
+            {!isAbsenceMakeup && originalHomeworkTitle && originalHomeworkTitle !== targetTitle ? (
               <small className="makeupOriginalHomework">수업일지 원본 숙제명: {originalHomeworkTitle}</small>
             ) : null}
           </div>
@@ -15407,14 +15457,14 @@ function HomeworkMakeupLessonDetail({
             </small>
           </div>
           <div className="makeupInfoTile">
-            <span>원 수업일자</span>
+            <span>{isAbsenceMakeup ? "원 결석 수업일" : "원 수업일자"}</span>
             <strong>{sourceDate}</strong>
             <small>{sourceLessonLabel}</small>
           </div>
           <div className="makeupInfoTile">
-            <span>숙제 마감일</span>
-            <strong>{dueDate}</strong>
-            <small>{assignmentCount ? `배정 ${assignmentCount}회` : "배정 기록 확인"}</small>
+            <span>{isAbsenceMakeup ? "결석 사유" : "숙제 마감일"}</span>
+            <strong>{isAbsenceMakeup ? task?.absenceReason || "사유 미입력" : dueDate}</strong>
+            <small>{isAbsenceMakeup ? "원 수업 출결 기록" : assignmentCount ? `배정 ${assignmentCount}회` : "배정 기록 확인"}</small>
           </div>
           <div className="makeupInfoTile">
             <span>보충 확정일</span>
@@ -15427,16 +15477,63 @@ function HomeworkMakeupLessonDetail({
             <small>{task?.reason ?? "숙제보충"}</small>
           </div>
         </div>
+        {isAbsenceMakeup ? (
+          <div className="absenceSourceJournalBox">
+            <div className="sectionHeader slim">
+              <div>
+                <h3>원 결석 수업일지</h3>
+                <p className="muted">오늘 보충 수업의 이전/다음 숙제가 아니라, 결석했던 수업의 저장본을 참고용으로 보여줍니다.</p>
+              </div>
+            </div>
+            <div className="absenceSourceJournalGrid">
+              <div>
+                <span>강의 교재</span>
+                <strong>{sourceLessonMaterial || "기록 없음"}</strong>
+              </div>
+              <div>
+                <span>강의 내용</span>
+                <strong>{sourceLessonContent || "기록 없음"}</strong>
+              </div>
+              <div>
+                <span>지난 숙제</span>
+                <strong>{sourcePreviousHomeworkText || "기록 없음"}</strong>
+              </div>
+              <div>
+                <span>다음 숙제</span>
+                <strong>{sourceNextHomeworkText || "기록 없음"}</strong>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </section>
 
       <div className="homeworkMakeupHero">
         <section className="panel homeworkMakeupNotice">
           <h3>보충 대상</h3>
           <div className="makeupLinkedBox">
-            <span>보충 대상</span>
+            <span>{isAbsenceMakeup ? "결석 보강 대상" : "보충 대상"}</span>
             <strong>{targetTitle}</strong>
-            <small>원 수업일자: {sourceDate} · 마감일: {dueDate}</small>
+            <small>{isAbsenceMakeup ? `원 결석 수업일: ${sourceDate}` : `원 수업일자: ${sourceDate} · 마감일: ${dueDate}`}</small>
           </div>
+          {student && supplementAttendanceRecord ? (
+            <div className="supplementAttendanceBox">
+              <div>
+                <span>보충 당일 출결</span>
+                <strong>{lesson.date} {lesson.startTime || ""}</strong>
+                <small>출결 저장/알림톡은 이 보충 수업의 lessonId 기준으로 처리됩니다.</small>
+              </div>
+              <button
+                className={`attendanceBadge attendance-${supplementAttendanceDisplay?.statusClass ?? supplementAttendanceRecord.attendanceStatus ?? "pending"}`}
+                disabled={!onOpenAttendance}
+                onClick={() => onOpenAttendance?.({ lesson: supplementAttendanceLesson, record: supplementAttendanceRecord, student })}
+                type="button"
+              >
+                <span>{supplementAttendanceDisplay?.label ?? "출결 입력"}</span>
+                {supplementAttendanceDisplay?.detail ? <small>{supplementAttendanceDisplay.detail}</small> : null}
+                {supplementCheckoutMissing ? <small className="checkoutMissingText">하원 미체크</small> : null}
+              </button>
+            </div>
+          ) : null}
         </section>
         <section className="panel homeworkMakeupProcess">
           <div className="sectionHeader slim">
@@ -15760,7 +15857,7 @@ function LessonJournalDetail({
     const attendanceLesson = applyStudentScheduleToLesson(lesson, student);
     return hasMissingCheckOut(record, attendanceLesson);
   });
-  const isHomeworkMakeupLesson = isHomeworkMakeupTaskLesson(lesson, linkedMakeupTask);
+  const isSupplementMakeupLesson = isSupplementMakeupTaskLesson(lesson, linkedMakeupTask);
   const isExamSundayMakeupLesson = lesson.lessonType === "examSundayMakeup";
 
   useEffect(() => {
@@ -16016,17 +16113,20 @@ function LessonJournalDetail({
   }
 
 
-  if (isHomeworkMakeupLesson) {
+  if (isSupplementMakeupLesson) {
     return (
-      <HomeworkMakeupLessonDetail
+      <SupplementMakeupLessonDetail
+        attendanceSettings={attendanceSettings}
         homeworks={homeworks}
         lesson={lesson}
         lessons={lessons}
         onDeleteLesson={onDeleteLesson}
         onEditLesson={onEditLesson}
+        onOpenAttendance={onOpenAttendance}
         onPassTask={onPassMakeupTask}
         onScheduleTask={onScheduleMakeupTask}
         onUpdateTask={onUpdateMakeupTask}
+        records={records}
         students={students}
         task={linkedMakeupTask}
       />
@@ -26318,9 +26418,9 @@ function getStandardLessonColor(lesson = {}, linkedTask = null) {
   return getRegularLessonColor(lesson);
 }
 
-function isHomeworkMakeupTaskLesson(lesson, task) {
+function isSupplementMakeupTaskLesson(lesson, task) {
   return Boolean(
-    task?.taskType === "homework_makeup" &&
+    ["homework_makeup", "absence_makeup"].includes(task?.taskType) &&
     (lesson?.lessonType === "makeup" || task.linkedLessonId === lesson?.lessonId || lesson?.sourceMakeupTaskId === task.makeupTaskId)
   );
 }

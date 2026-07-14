@@ -3829,6 +3829,76 @@ button {
   margin: 5px 0;
 }
 
+.supplementAttendanceBox {
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #dbe5f5;
+  border-radius: 8px;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding: 14px;
+}
+
+.supplementAttendanceBox > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.supplementAttendanceBox span,
+.supplementAttendanceBox small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.supplementAttendanceBox strong {
+  color: #17213d;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.absenceSourceJournalBox {
+  background: #f8fafc;
+  border: 1px solid #dbe5f5;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 14px;
+}
+
+.absenceSourceJournalGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.absenceSourceJournalGrid > div {
+  background: #ffffff;
+  border: 1px solid #dbe5f5;
+  border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  min-height: 92px;
+  padding: 12px;
+}
+
+.absenceSourceJournalGrid span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.absenceSourceJournalGrid strong {
+  color: #17213d;
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
 .makeupProcessStatusGrid {
   display: grid;
   gap: 8px;
@@ -15726,6 +15796,7 @@ body.attendanceOnlyBody {
   }
 
   .homeworkMakeupHero,
+  .absenceSourceJournalGrid,
   .makeupInfoGrid,
   .homeworkMakeupSummary,
   .examSundaySummaryGrid,
