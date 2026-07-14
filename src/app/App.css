@@ -8002,6 +8002,21 @@ button:disabled {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.specialLecturePeriodGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.specialLecturePeriodGrid label {
+  background: #ffffff;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  display: grid;
+  gap: 7px;
+  padding: 11px;
+}
+
 .specialLectureCalcStats div {
   background: #ffffff;
   border: 1px solid #e2e8f0;

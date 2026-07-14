@@ -11650,14 +11650,6 @@ function SpecialLectureNoticePanel({
               <input value={selectedGuide.teacher} onChange={(event) => updateSelectedGuide("teacher", event.target.value)} />
             </label>
             <label>
-              기간 시작
-              <input type="date" value={selectedGuide.periodStart} onChange={(event) => updateSelectedGuide("periodStart", event.target.value)} />
-            </label>
-            <label>
-              기간 종료
-              <input type="date" value={selectedGuide.periodEnd} onChange={(event) => updateSelectedGuide("periodEnd", event.target.value)} />
-            </label>
-            <label>
               요일
               <input value={selectedGuide.days} onChange={(event) => updateSelectedGuide("days", event.target.value)} />
             </label>
@@ -11717,6 +11709,16 @@ function SpecialLectureNoticePanel({
 
             {isScheduleBuilderOpen ? (
               <>
+                <div className="specialLecturePeriodGrid">
+                  <label>
+                    기간 시작
+                    <input type="date" value={selectedGuide.periodStart} onChange={(event) => updateSelectedGuide("periodStart", event.target.value)} />
+                  </label>
+                  <label>
+                    기간 종료
+                    <input type="date" value={selectedGuide.periodEnd} onChange={(event) => updateSelectedGuide("periodEnd", event.target.value)} />
+                  </label>
+                </div>
                 <div className="specialLectureCalcStats">
                   <div>
                     <span>계산 회차</span>

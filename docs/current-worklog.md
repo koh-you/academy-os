@@ -12,6 +12,16 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-15 P1. 특강 기간 입력을 일정 계산 안으로 이동
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청: 특강알림 편집 기본 정보 영역의 `기간 시작`, `기간 종료` 입력칸을 지우고, 해당 입력을 `일정 계산` 안으로 옮긴다.
+- 구현 결과: 기본 안내문 입력 폼에서 `기간 시작/기간 종료` 필드를 제거했다.
+- 구현 결과: `SCHEDULE BUILDER / 일정 계산`을 펼쳤을 때 상단에 기간 시작/종료 date input이 보이도록 `specialLecturePeriodGrid`를 추가했다. 기간 변경은 기존처럼 `periodStart/periodEnd`를 갱신하고 회차/시수/수강료 미리계산을 즉시 갱신한다.
+- 저장 원천: 특강 안내문 원본은 Supabase `app_state.specialLectureGuides`이며, 저장 전에는 local draft만 바뀐다. `안내문 저장` 전 공개 링크와 실제 발송 원본은 바뀌지 않는다. 새 SQL은 필요 없다.
+- 중단 조건: 기본 폼에 기간 시작/종료가 다시 보임, 일정 계산을 펼쳐도 기간 입력이 없음, 기간을 바꿨는데 계산 회차/달력/오른쪽 미리보기가 갱신되지 않음, `안내문 저장` 전 공개 링크 저장본이 바뀐 것처럼 동작함.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 288개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P1. 학사일정 시험기간 카드 색상/클릭 모달 정리
 
 - 상태: 완료 - 구현/검증 완료
