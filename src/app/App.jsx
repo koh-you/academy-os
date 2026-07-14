@@ -11430,6 +11430,10 @@ function SpecialLectureNoticePanel({
             <strong>저장/발송 분리</strong>
             <p>이 탭은 안내문과 링크를 준비합니다. 실제 발송은 `공지 작성에 반영` 후 일반공지에서 테스트 발송과 수신 대상 확인을 거쳐 진행합니다.</p>
           </div>
+          <div className="specialLecturePreviewSyncNotice">
+            <strong>입력 내용은 오른쪽 미리보기에 바로 반영됩니다.</strong>
+            <span>공개 링크에는 `안내문 저장` 후 적용됩니다.</span>
+          </div>
           <div className="specialLectureManagementBar">
             <div>
               <span>선택 안내문</span>
@@ -11630,8 +11634,6 @@ function SpecialLectureNoticePanel({
             <button className="softButton" onClick={saveGuides} type="button">
               {saveState === "saving" ? "저장 중" : "안내문 저장"}
             </button>
-            <button className="softButton" onClick={copyGuideUrl} type="button">링크 복사</button>
-            <button className="softButton" onClick={copyNoticeText} type="button">알림톡 본문 복사</button>
             <button
               className="sendButton"
               onClick={() => onApplyToNotice?.(selectedGuide, noticeText, selectedGuideUrl)}
@@ -11640,6 +11642,13 @@ function SpecialLectureNoticePanel({
               공지 작성에 반영
             </button>
           </div>
+          <details className="specialLectureCopyOptions">
+            <summary>복사 옵션</summary>
+            <div>
+              <button className="softButton compact" onClick={copyGuideUrl} type="button">링크 복사</button>
+              <button className="softButton compact" onClick={copyNoticeText} type="button">알림톡 본문 복사</button>
+            </div>
+          </details>
           {copyMessage ? <p className="inlineNotice">{copyMessage}</p> : null}
           {panelMessage ? <p className={panelMessage.includes("실패") ? "inlineNotice danger" : "inlineNotice"}>{panelMessage}</p> : null}
 
@@ -11649,7 +11658,13 @@ function SpecialLectureNoticePanel({
           </div>
         </div>
 
-        <SpecialLectureGuidePreview guide={selectedGuide} guideUrl={selectedGuideUrl} />
+        <div className="specialLecturePreviewColumn">
+          <div className="specialLectureLivePreviewLabel">
+            <strong>공개 안내문 미리보기</strong>
+            <span>왼쪽 입력값 실시간 반영</span>
+          </div>
+          <SpecialLectureGuidePreview guide={selectedGuide} guideUrl={selectedGuideUrl} />
+        </div>
       </div>
       ) : (
         <div className="specialLectureNoSelection">
