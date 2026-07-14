@@ -10605,7 +10605,7 @@ function NotificationCenter({
     setNoticeTitle(normalizedGuide.shortTitle || normalizedGuide.title || "특강 안내");
     setNoticeBody(noticeBodyText);
     setActiveNotificationTab("notice");
-    setDispatchMessage("특강알림 문구를 공지 작성 영역에 반영했습니다. 수신 대상을 선택한 뒤 테스트 발송으로 먼저 확인하세요.");
+    setDispatchMessage("특강 안내문을 공지 발송 화면에 반영했습니다. 수신 대상을 선택한 뒤 테스트 발송으로 먼저 확인하세요.");
   }
 
   function selectJobFilter(nextFilter) {
@@ -10927,14 +10927,14 @@ function NotificationCenter({
           onClick={() => setActiveNotificationTab("notice")}
           type="button"
         >
-          일반공지
+          공지 발송
         </button>
         <button
           className={activeNotificationTab === "specialLecture" ? "active" : ""}
           onClick={() => setActiveNotificationTab("specialLecture")}
           type="button"
         >
-          특강알림
+          특강 안내문
         </button>
       </div>
 
@@ -11494,13 +11494,6 @@ function SpecialLectureNoticePanel({
     setCopyMessage(copied ? "안내문 링크를 복사했습니다." : "링크 복사에 실패했습니다. 화면의 URL을 직접 복사해 주세요.");
   }
 
-  async function copyNoticeText() {
-    if (!noticeText) return;
-    setCopyMessage("");
-    const copied = await copyTextToClipboard(noticeText);
-    setCopyMessage(copied ? "알림톡 본문을 복사했습니다." : "본문 복사에 실패했습니다.");
-  }
-
   async function saveGuides() {
     if (!onSaveGuides) return;
     setPanelMessage("");
@@ -11540,7 +11533,7 @@ function SpecialLectureNoticePanel({
       <div className="sectionHeader slim">
         <div>
           <p className="eyebrow">SPECIAL LECTURE</p>
-          <h2>특강알림</h2>
+          <h2>특강 안내문</h2>
         </div>
         <div className="specialLectureHeaderActions">
           <button className="softButton compact" onClick={createNewGuide} type="button">새 특강 만들기</button>
@@ -11583,7 +11576,7 @@ function SpecialLectureNoticePanel({
         <div className="specialLectureEditor">
           <div className="noticeBox specialLectureNoticeBox">
             <strong>저장/발송 분리</strong>
-            <p>이 탭은 안내문과 링크를 준비합니다. 실제 발송은 `공지 작성에 반영` 후 일반공지에서 테스트 발송과 수신 대상 확인을 거쳐 진행합니다.</p>
+            <p>이 탭은 안내문과 링크를 준비합니다. 실제 발송은 `알림톡 발송 준비` 후 공지 발송 화면에서 테스트 발송과 수신 대상 확인을 거쳐 진행합니다.</p>
           </div>
           <div className="specialLecturePreviewSyncNotice">
             <strong>입력 내용은 오른쪽 미리보기에 바로 반영됩니다.</strong>
@@ -11895,16 +11888,10 @@ function SpecialLectureNoticePanel({
               onClick={() => onApplyToNotice?.(selectedGuide, noticeText, selectedGuideUrl)}
               type="button"
             >
-              공지 작성에 반영
+              알림톡 발송 준비
             </button>
+            <button className="softButton" onClick={copyGuideUrl} type="button">링크 복사</button>
           </div>
-          <details className="specialLectureCopyOptions">
-            <summary>복사 옵션</summary>
-            <div>
-              <button className="softButton compact" onClick={copyGuideUrl} type="button">링크 복사</button>
-              <button className="softButton compact" onClick={copyNoticeText} type="button">알림톡 본문 복사</button>
-            </div>
-          </details>
           {copyMessage ? <p className="inlineNotice">{copyMessage}</p> : null}
           {panelMessage ? <p className={panelMessage.includes("실패") ? "inlineNotice danger" : "inlineNotice"}>{panelMessage}</p> : null}
 

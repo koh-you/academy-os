@@ -12,6 +12,18 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-15 P1. 특강 안내문 버튼/탭 명칭 정리
+
+- 상태: 완료 - 구현/검증 완료
+- 사용자 요청: 특강 안내문 하단 버튼 중 중복되는 버튼을 정리하고, `일반공지/특강알림` 탭 명칭이 현재 역할과 맞는지 검토한다. Tally 폼을 받으면 OS에서 누가 신청했는지 볼 수 있는지도 확인한다.
+- 구현 결과: 특강 안내문 하단 버튼은 `안내문 저장`, `알림톡 발송 준비`, `링크 복사`만 남겼다. `복사 옵션` 접힘 박스와 `알림톡 본문 복사` 버튼은 제거했다.
+- 구현 결과: 알림관리 상단 탭명을 `일반공지`에서 `공지 발송`, `특강알림`에서 `특강 안내문`으로 바꿨다. 현재 화면은 특강 신청자 관리가 아니라 안내문 작성/저장/발송 준비 화면이므로 `특강관리`라고 부르지 않는다.
+- 확인 결과: 현재 Tally 웹훅 `/api/intake/tally`는 제출을 Supabase `student_intake_applicants`에 저장하는 신입생/상담 접수 흐름이다. 공개 특강 안내문 버튼은 Tally URL에 `source=os_guide`, `specialLectureId`, `guideId`, `campaign` query를 붙이지만, 특강 신청자 전용 저장소/목록 화면은 아직 없다.
+- 다음 방향: 특강 신청자를 OS에서 보려면 별도 `special_lecture_applications` 원천 또는 동등한 Supabase 저장소와 `특강관리 > 신청자` 목록이 필요하다. 기존 `student_intake_applicants`에 섞으면 신입생 접수와 재원생 특강 신청이 혼동될 수 있다.
+- 저장 원천: 이번 구현은 UI 명칭/버튼 정리만 바꾸며 특강 안내문 원본은 기존처럼 Supabase `app_state.specialLectureGuides`다. Tally 신청자 저장 구조, Solapi 발송/예약, `notification_jobs`는 바꾸지 않는다. 새 SQL은 이번 작업에 포함하지 않는다.
+- 중단 조건: `알림톡 본문 복사`나 `복사 옵션`이 다시 보임, `알림톡 발송 준비` 클릭만으로 실제 발송/예약이 진행됨, 특강 안내문 저장만으로 `notification_jobs` 또는 Tally API 호출이 발생함, Tally 신청자가 신입생 접수 후보와 특강 신청자로 구분 없이 섞임.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 288개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P1. 학사 개요 카드 배경 중립화
 
 - 상태: 완료 - 구현/검증 완료
