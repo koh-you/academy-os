@@ -11199,6 +11199,7 @@ function SpecialLectureNoticePanel({
   const [managementGuideId, setManagementGuideId] = useState("");
   const [highlightDraftText, setHighlightDraftText] = useState("");
   const [isScheduleBuilderOpen, setIsScheduleBuilderOpen] = useState(false);
+  const [isSessionPlanOpen, setIsSessionPlanOpen] = useState(false);
   const primaryGuides = draftGuides.filter(isSpecialLecturePrimaryGuide);
   const storedGuides = draftGuides.filter((guide) => !isSpecialLecturePrimaryGuide(guide));
   const selectedGuide = draftGuides.find((guide) => guide.specialLectureGuideId === selectedGuideId) ?? null;
@@ -11222,6 +11223,9 @@ function SpecialLectureNoticePanel({
     : "기간과 요일을 선택하면 표시됩니다.";
   const selectedGuideStatus = selectedGuide ? getSpecialLectureStatusBadge(selectedGuide) : null;
   const isManagingSelectedGuide = Boolean(selectedGuide && managementGuideId === selectedGuide.specialLectureGuideId);
+  const sessionPlanSummaryText = selectedGuideSessions.length
+    ? `${selectedGuideSessions.length}회 · ${selectedGuide.lessonCount || formatSpecialLectureLessonCount(selectedGuideSessions.length, getSpecialLectureTotalHours(selectedGuideSessions))} · ${selectedGuideSessions[0]?.dateKey || selectedGuideSessions[0]?.date || "시작일 미입력"} ~ ${selectedGuideSessions[selectedGuideSessions.length - 1]?.dateKey || selectedGuideSessions[selectedGuideSessions.length - 1]?.date || "종료일 미입력"}`
+    : "회차 일정이 없습니다.";
 
   useEffect(() => {
     setDraftGuides(normalizedGuides);
@@ -11794,11 +11798,35 @@ function SpecialLectureNoticePanel({
               <div>
                 <p className="eyebrow">SESSION PLAN</p>
                 <h3>회차별 일정</h3>
-                <span>각 회차의 날짜, 시간, 주제를 카드에서 바로 수정합니다.</span>
+                <span>카드 수정은 오른쪽 미리보기에 즉시 반영되고, 저장본/공개 링크에는 `안내문 저장` 후 반영됩니다.</span>
               </div>
-              <button className="softButton compact" onClick={addSpecialLectureSessionCard} type="button">회차 추가</button>
+              <div className="specialLectureSessionHeaderActions">
+                <button
+                  aria-expanded={isSessionPlanOpen}
+                  className="softButton compact"
+                  onClick={() => setIsSessionPlanOpen((current) => !current)}
+                  type="button"
+                >
+                  {isSessionPlanOpen ? "접기" : "펼치기"}
+                </button>
+                <button
+                  className="softButton compact"
+                  onClick={() => {
+                    addSpecialLectureSessionCard();
+                    setIsSessionPlanOpen(true);
+                  }}
+                  type="button"
+                >
+                  회차 추가
+                </button>
+              </div>
             </div>
-            {selectedGuideSessions.length ? (
+            {!isSessionPlanOpen ? (
+              <div className="specialLectureSessionCollapsedSummary">
+                <strong>{sessionPlanSummaryText}</strong>
+                <span>세부 날짜/시간/주제는 펼치면 수정할 수 있습니다.</span>
+              </div>
+            ) : selectedGuideSessions.length ? (
               <div className="specialLectureSessionCardList">
                 {selectedGuideSessions.map((session, index) => (
                   <article className="specialLectureSessionCard" key={`${selectedGuide.specialLectureGuideId}_session_${index}`}>

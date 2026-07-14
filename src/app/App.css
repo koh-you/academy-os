@@ -8000,6 +8000,36 @@ button:disabled {
   margin-top: 4px;
 }
 
+.specialLectureSessionHeaderActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.specialLectureSessionCollapsedSummary {
+  background: #ffffff;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  display: grid;
+  gap: 5px;
+  padding: 12px 14px;
+}
+
+.specialLectureSessionCollapsedSummary strong {
+  color: #17213d;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.specialLectureSessionCollapsedSummary span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
 .specialLectureSessionCardList {
   display: grid;
   gap: 10px;
