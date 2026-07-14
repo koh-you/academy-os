@@ -12,6 +12,16 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-15 P1. 다음 세션 handoff 갱신 - 특강관리/SQL 수동 작업 반영
+
+- 상태: 완료 - 문서 갱신/검증 완료
+- 사용자 요청: 방금 구현한 `운영 > 특강관리`와 `special_lecture_applications` SQL 내용을 내일 세션 프롬프트에 반영하고, SQL edit처럼 사람이 직접 해야 하는 작업은 대화세션에 직접 적는다.
+- 구현 결과: `docs/next-session/README.md`의 붙여넣기 프롬프트를 최신 커밋 `1ecf56b9 Add special lecture management source` 기준으로 갱신했다. 기존의 "특강 신청자 원천 없음" 설명을 제거하고, 새 `운영 > 특강관리`, 새 API, 새 SQL 파일, Tally 웹훅 URL을 반영했다.
+- 사람 수동 작업: Supabase SQL editor에서 `supabase/20260715_special_lecture_applications.sql`을 직접 실행해야 한다. Tally 특강 신청폼 Webhook은 `https://koh-you-math-academy-os-api.onrender.com/api/special-lecture-applications/tally`로 사용자가 직접 연결한다.
+- 저장 원천: 문서 변경만 수행했다. 앱 런타임 코드는 바꾸지 않았다. 특강 신청자 운영 원천은 이전 구현과 동일하게 Supabase `special_lecture_applications`다.
+- 중단 조건: handoff가 이전 커밋 `6564db5d`나 "특강 신청자 원천 없음" 상태를 계속 기준으로 삼음, SQL 자동 적용을 지시함, Tally 특강 신청자가 `/api/intake/tally`로 들어가도 된다고 오해되게 적힘, `.codex-temp/`나 비밀값이 문서/Git에 포함됨.
+- 검증: `git diff --check` 통과. 문서 변경만 수행했으므로 앱 빌드는 재실행하지 않았다.
+
 ### 2026-07-15 P1. 운영 > 특강관리 분리와 특강 신청자 원천 추가
 
 - 상태: 완료 - 구현/검증 완료, SQL은 사용자 수동 적용 필요
