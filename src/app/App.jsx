@@ -22549,7 +22549,7 @@ function SupplementCenter({
     }
     const pendingTask = createPendingMakeupTask(item.task);
     setPendingCandidateTask(pendingTask);
-    setSupplementRowAction(item.task, "draft", "상세 검토에서 내용 저장을 눌러야 보충 항목이 생성됩니다.");
+    setSupplementRowAction(item.task, "draft", "보충 생성 화면에서 내용만 저장을 눌러야 보충 항목이 생성됩니다.");
   }
 
   function clearPendingCandidateTask(savedTask) {
@@ -22644,7 +22644,6 @@ function SupplementCenter({
     const existingTask = findTaskForCandidate(item.task);
     const taskProgress = getSupplementTaskProgress(existingTask, lessons);
     const rowAction = supplementRowActions[getSupplementActionKey(existingTask ?? item.task)];
-    const canPassTask = Boolean(existingTask);
     return (
       <article className={item.isFutureDeferred ? "candidateItem supplementRowItem futureDeferred" : "candidateItem supplementRowItem"} key={item.id}>
         <div>
@@ -22672,17 +22671,19 @@ function SupplementCenter({
           onClick={() => openCandidateReview(item)}
           type="button"
         >
-          {existingTask ? "상세 검토" : "초안 검토"}
+          {existingTask ? "상세 검토" : "보충 생성"}
         </button>
-        <button
-          className="passButton"
-          disabled={!canPassTask || passBusyTaskId === (existingTask?.makeupTaskId || "")}
-          onClick={() => openPassConfirm(existingTask, item)}
-          title={canPassTask ? "보충 완료 처리" : "상세 검토에서 보충 항목을 먼저 저장하세요."}
-          type="button"
-        >
-          {canPassTask ? "보충 완료 처리" : "저장 후 완료"}
-        </button>
+        {existingTask ? (
+          <button
+            className="passButton"
+            disabled={passBusyTaskId === (existingTask.makeupTaskId || "")}
+            onClick={() => openPassConfirm(existingTask, item)}
+            title="보충 완료 처리"
+            type="button"
+          >
+            보충 완료 처리
+          </button>
+        ) : null}
       </article>
     );
   }
@@ -23263,7 +23264,7 @@ function SupplementStudentModal({
   async function handlePassTask(task) {
     if (!task?.makeupTaskId || busyTaskId) return;
     if (task.isLocalDraftTask) {
-      showFeedback("보충 완료 처리 전 저장 필요", "초안 검토 상태에서는 먼저 내용만 저장을 눌러 보충 항목을 생성해야 합니다.", "failed");
+      showFeedback("보충 완료 처리 전 저장 필요", "보충 생성 화면에서는 먼저 내용만 저장을 눌러 보충 항목을 생성해야 합니다.", "failed");
       return;
     }
     if (task.status === "done") {
@@ -23487,15 +23488,17 @@ function SupplementStudentModal({
                     <button className="softButton scheduleApplyButton" disabled={isTaskBusy || !hasScheduleDraft} onClick={() => handleApplyScheduleTask(task)} type="button">
                       {isScheduleBusy ? "일정 반영 중" : task.linkedLessonId ? "일정 수정 반영" : "일정 반영"}
                     </button>
-                    <button
-                      className="passButton"
-                      disabled={isTaskBusy || isLocalDraftTask}
-                      onClick={() => setPassConfirmTask(buildTaskWithDraft(task))}
-                      title={isLocalDraftTask ? "내용만 저장 후 완료 처리할 수 있습니다." : "보충 완료 처리"}
-                      type="button"
-                    >
-                      {isLocalDraftTask ? "저장 후 완료" : busyTaskId === `${task.makeupTaskId}:pass` ? "처리 중" : "보충 완료 처리"}
-                    </button>
+                    {!isLocalDraftTask ? (
+                      <button
+                        className="passButton"
+                        disabled={isTaskBusy}
+                        onClick={() => setPassConfirmTask(buildTaskWithDraft(task))}
+                        title="보충 완료 처리"
+                        type="button"
+                      >
+                        {busyTaskId === `${task.makeupTaskId}:pass` ? "처리 중" : "보충 완료 처리"}
+                      </button>
+                    ) : null}
                   </div>
                 </article>
               );
@@ -26570,8 +26573,8 @@ function getSupplementAttentionSummary({ homeworks = [], lessons = [], records =
     const lesson = lessons.find((item) => item.lessonId === lessonId);
     return lesson ? `${lesson.date} ${lesson.className}` : "연결 수업 없음";
   };
-  const activeCandidateCount = (items) =>
-    items.filter((item) => findSupplementTaskForCandidate(tasks, item.task)?.status !== "done").length;
+  const unplannedCandidateCount = (items) =>
+    items.filter((item) => !findSupplementTaskForCandidate(tasks, item.task)).length;
   const homeworkItems = homeworks
     .filter((homework) => isHomeworkMakeupCandidate(homework, records, lessons))
     .map((homework) => ({
@@ -26612,10 +26615,10 @@ function getSupplementAttentionSummary({ homeworks = [], lessons = [], records =
       }
     }));
   const counts = {
-    homeworkMakeup: activeCandidateCount(homeworkItems),
-    absenceMakeup: activeCandidateCount(absenceItems),
-    futureAbsenceMakeup: activeCandidateCount(futureAbsenceItems),
-    retest: activeCandidateCount(retestItems)
+    homeworkMakeup: unplannedCandidateCount(homeworkItems),
+    absenceMakeup: unplannedCandidateCount(absenceItems),
+    futureAbsenceMakeup: unplannedCandidateCount(futureAbsenceItems),
+    retest: unplannedCandidateCount(retestItems)
   };
   const total = counts.homeworkMakeup + counts.absenceMakeup + counts.retest;
   const label = [
@@ -26626,7 +26629,7 @@ function getSupplementAttentionSummary({ homeworks = [], lessons = [], records =
   return {
     ...counts,
     total,
-    label: label ? `확인해야 할 보충관리: ${label}` : ""
+    label: label ? `보충 생성 계획이 필요한 항목: ${label}` : ""
   };
 }
 
