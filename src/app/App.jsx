@@ -11674,6 +11674,31 @@ function SpecialLectureApplicationPanel({
     }
   }
 
+  async function matchApplicationToCurrentGuide(application) {
+    if (!onUpdateApplication || !application.applicationId || !selectedGuide) return;
+    const guideId = String(selectedGuide.specialLectureGuideId ?? "").trim();
+    const guideSlug = getSpecialLectureGuideSlug(selectedGuide);
+    const campaign = [
+      selectedGuide.year,
+      selectedGuide.season,
+      selectedGuide.title
+    ].filter(Boolean).join("_").replace(/\s+/g, "_") || application.campaign || "special_lecture";
+    setPanelMessage("");
+    setUpdatingApplicationId(application.applicationId);
+    try {
+      await onUpdateApplication(application.applicationId, {
+        specialLectureGuideId: guideId,
+        guideSlug,
+        campaign
+      });
+      setPanelMessage(`${application.studentName || "신청자"} 신청을 현재 안내문에 연결했습니다.`);
+    } catch (error) {
+      setPanelMessage(`신청자 안내문 연결 실패: ${error.message}`);
+    } finally {
+      setUpdatingApplicationId("");
+    }
+  }
+
   async function saveSpecialLectureLessons() {
     setLessonSaveStatus({ state: "idle", message: "" });
     if (!selectedGuide) {
@@ -11825,12 +11850,24 @@ function SpecialLectureApplicationPanel({
       {visibleUnmatchedApplications.length ? (
         <div className="specialLectureApplicationUnmatched">
           <strong>미매칭 신청 {unmatchedApplications.length}건</strong>
-          <p>Tally hidden field의 `specialLectureId` 또는 `guideId`가 현재 안내문과 맞지 않는 제출입니다.</p>
-          <div>
+          <p>Tally hidden field의 안내문 식별자가 비어 있거나 현재 안내문과 다른 제출입니다. 필요한 경우 현재 안내문에 연결한 뒤 상태를 확정으로 바꾸세요.</p>
+          <div className="specialLectureApplicationUnmatchedList">
             {visibleUnmatchedApplications.map((application) => (
-              <span key={`unmatched_${application.applicationId}`}>
-                {application.studentName || "이름 미입력"} · {application.guideSlug || application.specialLectureGuideId || "guide 없음"}
-              </span>
+              <article className="specialLectureApplicationUnmatchedItem" key={`unmatched_${application.applicationId}`}>
+                <span>
+                  {application.studentName || "이름 미입력"} · {application.guideSlug || application.specialLectureGuideId || "guide 없음"}
+                </span>
+                {selectedGuide ? (
+                  <button
+                    className="softButton compact"
+                    disabled={!onUpdateApplication || updatingApplicationId === application.applicationId}
+                    onClick={() => matchApplicationToCurrentGuide(application)}
+                    type="button"
+                  >
+                    {updatingApplicationId === application.applicationId ? "연결 중" : "현재 안내문에 연결"}
+                  </button>
+                ) : null}
+              </article>
             ))}
           </div>
         </div>

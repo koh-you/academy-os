@@ -394,9 +394,18 @@
         }
 
         function applicationUrl(guide) {
+          var guideId = text(guide.specialLectureGuideId || guide.special_lecture_guide_id);
+          var guideSlug = slugOf(guide);
           return appendParams(text(guide.applicationUrl || guide.application_url, "https://tally.so/r/eql9aJ"), {
-            specialLectureId: text(guide.specialLectureGuideId || guide.special_lecture_guide_id),
-            guideId: slugOf(guide),
+            specialLectureId: guideId,
+            specialLectureGuideId: guideId,
+            special_lecture_id: guideId,
+            special_lecture_guide_id: guideId,
+            guideId: guideSlug,
+            guideSlug: guideSlug,
+            guide_id: guideSlug,
+            guide_slug: guideSlug,
+            guide: guideSlug,
             source: "os_guide",
             campaign: [text(guide.year), text(guide.season), text(guide.title)].join("_").replace(/\s+/g, "_")
           });

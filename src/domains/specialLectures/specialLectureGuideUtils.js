@@ -618,8 +618,21 @@ export function normalizeSpecialLectureApplication(application = {}, index = 0) 
     : "received";
   return {
     applicationId: id,
-    specialLectureGuideId: String(application.specialLectureGuideId || application.special_lecture_guide_id || "").trim(),
-    guideSlug: String(application.guideSlug || application.guide_slug || application.guideId || "").trim(),
+    specialLectureGuideId: String(
+      application.specialLectureGuideId ||
+      application.special_lecture_guide_id ||
+      application.specialLectureId ||
+      application.special_lecture_id ||
+      ""
+    ).trim(),
+    guideSlug: String(
+      application.guideSlug ||
+      application.guide_slug ||
+      application.guideId ||
+      application.guide_id ||
+      application.guide ||
+      ""
+    ).trim(),
     campaign: String(application.campaign || "").trim(),
     source: String(application.source || "manual").trim(),
     sourceSubmissionId: String(application.sourceSubmissionId || application.source_submission_id || "").trim(),
@@ -689,14 +702,23 @@ export function appendSpecialLectureUrlParams(url = "", params = {}) {
 export function getSpecialLectureApplicationUrl(guide = {}) {
   const normalizedGuide = normalizeSpecialLectureGuide(guide);
   if (!normalizedGuide.applicationUrl) return "";
+  const guideId = normalizedGuide.specialLectureGuideId;
+  const guideSlug = getSpecialLectureGuideSlug(normalizedGuide);
   const campaign = [
     normalizedGuide.year,
     normalizedGuide.season,
     normalizedGuide.title
   ].filter(Boolean).join("_").replaceAll(/\s+/g, "_");
   return appendSpecialLectureUrlParams(normalizedGuide.applicationUrl, {
-    specialLectureId: normalizedGuide.specialLectureGuideId,
-    guideId: getSpecialLectureGuideSlug(normalizedGuide),
+    specialLectureId: guideId,
+    specialLectureGuideId: guideId,
+    special_lecture_id: guideId,
+    special_lecture_guide_id: guideId,
+    guideId: guideSlug,
+    guideSlug,
+    guide_id: guideSlug,
+    guide_slug: guideSlug,
+    guide: guideSlug,
     source: "os_guide",
     campaign: campaign || "special_lecture"
   });

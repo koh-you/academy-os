@@ -8031,15 +8031,26 @@ button:disabled {
   margin: 0;
 }
 
-.specialLectureApplicationUnmatched div {
+.specialLectureApplicationUnmatchedList {
+  display: grid;
+  gap: 8px;
+}
+
+.specialLectureApplicationUnmatchedItem {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
+  justify-content: space-between;
+  padding: 8px;
 }
 
 .specialLectureApplicationUnmatched span {
-  background: #ffffff;
-  border: 1px solid #fed7aa;
+  background: #fff7ed;
+  border: 1px solid #ffedd5;
   border-radius: 999px;
   color: #9a3412;
   font-size: 11px;

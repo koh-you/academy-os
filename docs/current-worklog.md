@@ -13,6 +13,19 @@
 - 리팩터링 gate 기본값: 리팩터링 구현/자동검증이 끝나면 커밋/푸시 전에 `AI 검수 결과`와 `사람이 확인할 것`을 함께 세션에 띄운다. AI는 변경 범위, 저장 원천/API/side effect diff, 테스트, 정적 invariant를 먼저 확인하고, 사람 확인은 AI가 확인할 수 없는 화면 어색함/운영 데이터/외부 서비스 상태 중심으로 최소화한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-15 P0. 특강 Tally 신청 guide 매칭 보강
+
+- 상태: 완료 - 구현/자동검증 완료
+- 사용자 요청: Tally 테스트 제출 1건이 특강 신청자로 들어왔지만 `미매칭 신청 1건`, `guide 없음`으로 표시되고 회차별 참석 명단이 비어 있다.
+- 원인 검토: 신청 row 자체와 학생명 파싱은 정상이다. 문제는 Tally webhook payload에서 현재 안내문을 식별하는 `specialLectureId`/`guideId`가 비어 들어온 것이다. 기존 공개 신청 링크와 서버 파서는 camelCase 중심이라 Tally hidden field 이름이 `snake_case`이거나 배열 형태로 들어오는 경우 guide 매칭이 실패할 수 있었다.
+- 구현 결과: 특강 공개 안내문과 독립 모바일 HTML의 Tally 신청 URL에 `specialLectureId`, `specialLectureGuideId`, `special_lecture_id`, `special_lecture_guide_id`, `guideId`, `guideSlug`, `guide_id`, `guide_slug`, `guide`를 함께 붙인다.
+- 구현 결과: Tally webhook 파서가 `hiddenFields` 객체/배열, `hidden_fields`, `queryParams`, `urlParams`, `trackingParams`, URL형 metadata, `special_lecture_guide_id`, `guide_id`, `guide_slug`를 읽도록 보강했다.
+- 구현 결과: 이미 들어온 `guide 없음` row를 운영자가 `현재 안내문에 연결` 버튼으로 복구할 수 있게 했다. 이 버튼은 기존 `special_lecture_applications` row의 `special_lecture_guide_id`/`guide_slug`만 저장하며, 확정 상태 변경이나 수업일지 생성은 별도 gate를 그대로 거친다.
+- 저장 원천: 특강 신청자 원본은 Supabase `special_lecture_applications`다. 안내문 원본은 기존 Supabase `app_state.specialLectureGuides`다. 새 SQL은 없다.
+- 외부 side effect: Solapi 실제 발송/예약, Tally API 호출, 특강 lesson 생성/수정, 수업기록/출결/알림톡 생성 없음.
+- 중단 조건: 새 Tally 테스트 제출이 계속 `guide 없음`으로 들어옴, `현재 안내문에 연결` 후 새로고침에서 다시 미매칭으로 돌아감, 연결 버튼만 눌렀는데 신청 상태가 `확정`으로 바뀜, `특강 수업일지 반영`이 미매칭/미확정 상태에서도 활성화됨.
+- 검증: `node --check api/server.js` 통과, `node --check scripts/scenario-tests-production.cjs` 통과, `npm run test:production` 305개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P0. 특강 공개 링크 모바일 전용 HTML 분리
 
 - 상태: 완료 - 구현/자동검증 완료

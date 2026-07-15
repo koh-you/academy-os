@@ -865,14 +865,26 @@ function normalizePhone(value = "") {
   return compactText(value).replace(/[^\d+]/g, "");
 }
 
+function getTallyScalarText(value) {
+  if (value === null || value === undefined) return "";
+  if (Array.isArray(value)) return value.map(getTallyScalarText).filter(Boolean).join(", ");
+  if (typeof value === "object") {
+    return compactText(value.value ?? value.text ?? value.answer ?? value.label ?? value.name ?? value.id ?? "");
+  }
+  return compactText(value);
+}
+
 function getTallyFieldText(field) {
   if (!field) return "";
-  if (Array.isArray(field.value)) {
+  const fieldValue = field.value ?? field.answer ?? field.text ?? field.response;
+  if (Array.isArray(fieldValue)) {
     const optionById = new Map((field.options ?? []).map((option) => [option.id, option.text]));
-    return field.value.map((value) => optionById.get(value) ?? value).filter(Boolean).join(", ");
+    return fieldValue.map((value) => optionById.get(value) ?? getTallyScalarText(value)).filter(Boolean).join(", ");
   }
-  if (field.value && typeof field.value === "object") return JSON.stringify(field.value);
-  return compactText(field.value);
+  if (fieldValue && typeof fieldValue === "object") {
+    return getTallyScalarText(fieldValue) || JSON.stringify(fieldValue);
+  }
+  return compactText(fieldValue);
 }
 
 function getTallyFieldLabel(field = {}) {
@@ -891,19 +903,94 @@ function getTallyObjectValue(source, names = []) {
   if (!source || typeof source !== "object" || Array.isArray(source)) return "";
   const normalizedNames = names.map(normalizeTallyLookupKey).filter(Boolean);
   for (const [key, value] of Object.entries(source)) {
-    if (normalizedNames.includes(normalizeTallyLookupKey(key))) return compactText(value);
+    if (normalizedNames.includes(normalizeTallyLookupKey(key))) return getTallyScalarText(value);
+  }
+  return "";
+}
+
+function getTallyArrayValue(source, names = []) {
+  if (!Array.isArray(source)) return "";
+  const normalizedNames = names.map(normalizeTallyLookupKey).filter(Boolean);
+  const matchedItem = source.find((item) => item && typeof item === "object" && [
+    item.key,
+    item.name,
+    item.id,
+    item.label,
+    item.title,
+    item.question
+  ].some((value) => normalizedNames.includes(normalizeTallyLookupKey(value))));
+  return getTallyFieldText(matchedItem);
+}
+
+function getTallyCollectionValue(source, names = []) {
+  return getTallyObjectValue(source, names) || getTallyArrayValue(source, names);
+}
+
+function getSearchParamValueFromUrl(value = "", names = []) {
+  const rawUrl = compactText(value);
+  if (!rawUrl || !rawUrl.includes("?")) return "";
+  const normalizedNames = names.map(normalizeTallyLookupKey).filter(Boolean);
+  try {
+    const parsedUrl = new URL(rawUrl, "https://academy-os.local");
+    for (const [key, paramValue] of parsedUrl.searchParams.entries()) {
+      if (normalizedNames.includes(normalizeTallyLookupKey(key))) return compactText(paramValue);
+    }
+  } catch {
+    const query = rawUrl.split("?")[1] ?? "";
+    const searchParams = new URLSearchParams(query);
+    for (const [key, paramValue] of searchParams.entries()) {
+      if (normalizedNames.includes(normalizeTallyLookupKey(key))) return compactText(paramValue);
+    }
+  }
+  return "";
+}
+
+function getTallyUrlPayloadValue(source, names = [], depth = 0) {
+  if (!source || depth > 2) return "";
+  if (typeof source === "string") return getSearchParamValueFromUrl(source, names);
+  if (Array.isArray(source)) {
+    for (const item of source) {
+      const value = getTallyUrlPayloadValue(item, names, depth + 1);
+      if (value) return value;
+    }
+    return "";
+  }
+  if (typeof source !== "object") return "";
+  for (const [key, value] of Object.entries(source)) {
+    if (typeof value === "string" && /(url|href|link|refer|page|source)/i.test(key)) {
+      const urlValue = getSearchParamValueFromUrl(value, names);
+      if (urlValue) return urlValue;
+    }
+    if (value && typeof value === "object") {
+      const nestedValue = getTallyUrlPayloadValue(value, names, depth + 1);
+      if (nestedValue) return nestedValue;
+    }
   }
   return "";
 }
 
 function getTallyPayloadValue(data = {}, names = []) {
-  const directValue = getTallyObjectValue(data, names)
-    || getTallyObjectValue(data.hiddenFields, names)
-    || getTallyObjectValue(data.hidden_fields, names)
-    || getTallyObjectValue(data.variables, names)
-    || getTallyObjectValue(data.query, names)
-    || getTallyObjectValue(data.metadata, names);
-  if (directValue) return directValue;
+  const sources = [
+    data,
+    data.hiddenFields,
+    data.hidden_fields,
+    data.hidden,
+    data.variables,
+    data.query,
+    data.queryParams,
+    data.query_params,
+    data.urlParams,
+    data.url_params,
+    data.metadata,
+    data.meta,
+    data.tracking,
+    data.trackingParams,
+    data.tracking_params
+  ];
+  for (const source of sources) {
+    const directValue = getTallyCollectionValue(source, names);
+    if (directValue) return directValue;
+  }
 
   const fields = Array.isArray(data.fields) ? data.fields : [];
   const normalizedNames = names.map(normalizeTallyLookupKey).filter(Boolean);
@@ -914,7 +1001,7 @@ function getTallyPayloadValue(data = {}, names = []) {
     field.label,
     field.title
   ].some((value) => normalizedNames.includes(normalizeTallyLookupKey(value))));
-  return getTallyFieldText(matchedField);
+  return getTallyFieldText(matchedField) || getTallyUrlPayloadValue(data, names);
 }
 
 function normalizeTallyApplicantPayload(payload = {}) {
@@ -962,8 +1049,24 @@ function normalizeSpecialLectureApplicationPayload(payload = {}) {
   const getValue = (patterns) => getTallyFieldText(findTallyField(fields, patterns));
   const getHidden = (names) => getTallyPayloadValue(data, names);
   const submissionId = compactText(data.submissionId ?? data.responseId ?? payload.eventId);
-  const specialLectureGuideId = getHidden(["specialLectureId", "special_lecture_id", "specialLectureGuideId"]);
-  const guideSlug = getHidden(["guideId", "guide_slug", "guideSlug", "guide"]);
+  const specialLectureGuideId = getHidden([
+    "specialLectureId",
+    "special_lecture_id",
+    "specialLectureGuideId",
+    "special_lecture_guide_id",
+    "specialLecture",
+    "special_lecture"
+  ]);
+  const guideSlug = getHidden([
+    "guideId",
+    "guide_id",
+    "guide_slug",
+    "guideSlug",
+    "guide",
+    "specialLectureSlug",
+    "special_lecture_slug",
+    "slug"
+  ]);
   const campaign = getHidden(["campaign"]);
   const studentName = getValue([/학생.*이름/i, /^이름$/i, /성명/i, /student.*name/i, /name/i]) || getHidden(["studentName", "name"]);
   return {
