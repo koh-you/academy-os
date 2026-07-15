@@ -11469,6 +11469,56 @@ textarea.profileEditInput {
   resize: vertical;
 }
 
+.notificationTemplateSettingsGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.notificationTemplateEditor {
+  align-content: start;
+  background: #f8fbff;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.notificationTemplateEditorTop {
+  align-items: start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.notificationTemplateEditorTop > div {
+  display: grid;
+  gap: 4px;
+}
+
+.notificationTemplateEditorTop strong {
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.notificationTemplateEditorTop span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.notificationTemplateEditor textarea {
+  background: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.55;
+  min-height: 220px;
+  resize: vertical;
+}
+
 .linkButton {
   align-items: center;
   display: inline-flex;
@@ -16503,6 +16553,7 @@ body.attendanceOnlyBody {
   .supplementOverviewGrid,
   .profileSummary,
   .commentComposerGrid,
+  .notificationTemplateSettingsGrid,
   .supplementReadableGrid,
   .supplementSourceSummary,
   .supplementScheduleChangeFields,

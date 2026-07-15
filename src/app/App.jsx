@@ -5500,9 +5500,49 @@ const defaultAiPrompts = {
   ].join("\n")
 };
 
+const defaultNotificationTemplates = {
+  absenceMakeupStudentReminder: [
+    "#{학생명} 학생 결석 보강 안내입니다.",
+    "",
+    "#{보강일정}",
+    "#{보강진행문장}",
+    "#{결석사유줄}",
+    "#{확인숙제줄}",
+    "#{보충메모}"
+  ].join("\n"),
+  supplementScheduleNotice: [
+    "#{일정제목} 일정이 #{상태}되었습니다.",
+    "",
+    "#{보충내역}",
+    "#{변경사유}",
+    "#{변경전}",
+    "#{일정라벨}: #{보강일정}"
+  ].join("\n")
+};
+
+const notificationTemplateRows = [
+  {
+    audience: "학생",
+    callSite: "보충관리 결석보강 · 학생 당일 11시 리마인더",
+    key: "absenceMakeupStudentReminder",
+    source: "Supabase app_state.aiSettings.notificationTemplates",
+    title: "결석보강 학생 11시 알림톡",
+    variables: "#{학생명}, #{보강일정}, #{보강진행문장}, #{결석사유줄}, #{확인숙제줄}, #{보충메모}"
+  },
+  {
+    audience: "학생/학부모",
+    callSite: "보충관리 수업일지 일정 만들기/변경 · 다음 정각 일정 안내",
+    key: "supplementScheduleNotice",
+    source: "Supabase app_state.aiSettings.notificationTemplates",
+    title: "보충 일정 확정/변경 안내",
+    variables: "#{일정제목}, #{상태}, #{보충내역}, #{변경사유}, #{변경전}, #{일정라벨}, #{보강일정}"
+  }
+];
+
 const defaultAiSettings = {
   commentProvider: "auto",
   commentModel: "server-default",
+  notificationTemplates: defaultNotificationTemplates,
   prompts: defaultAiPrompts
 };
 
@@ -5523,6 +5563,23 @@ function normalizeAiPrompts(prompts = {}) {
     [promptKey]: sourcePrompts[promptKey] ?? defaultAiPrompts[promptKey]
   }), {});
   return nextPrompts;
+}
+
+function normalizeNotificationTemplates(templates = {}) {
+  const sourceTemplates = templates && typeof templates === "object" ? templates : {};
+  return Object.keys(defaultNotificationTemplates).reduce((normalized, templateKey) => ({
+    ...normalized,
+    [templateKey]: sourceTemplates[templateKey] ?? defaultNotificationTemplates[templateKey]
+  }), {});
+}
+
+function normalizeAiSettings(settings = {}) {
+  return {
+    ...defaultAiSettings,
+    ...(settings ?? {}),
+    notificationTemplates: normalizeNotificationTemplates(settings?.notificationTemplates),
+    prompts: normalizeAiPrompts(settings?.prompts)
+  };
 }
 
 function normalizeAttendanceSettings(settings = {}) {
@@ -7966,7 +8023,7 @@ export function App() {
     if (isNotificationSchedulePast(scheduledAt, 0)) {
       return { skipped: true, message: "보강 당일 11:00이 이미 지나 새 예약을 만들지 않았습니다." };
     }
-    const notificationJob = buildSupplementStudentReminderJob(task, student, scheduledAt);
+    const notificationJob = buildSupplementStudentReminderJob(task, student, scheduledAt, aiSettings.notificationTemplates);
     const reservedJob = await reserveNotificationJob(notificationJob, "보충관리 학생 11시 알림톡 예약");
     return {
       notificationJob: reservedJob,
@@ -8033,8 +8090,8 @@ export function App() {
     }
     await cancelActiveSupplementScheduleNoticeJobs(task);
     const scheduledAt = getNextHourlyAlimtalkReservationAt();
-    const studentJob = buildSupplementScheduleNoticeJob(task, student, scheduledAt, "student", previousScheduleText);
-    const parentJob = buildSupplementScheduleNoticeJob(task, student, scheduledAt, "parent", previousScheduleText);
+    const studentJob = buildSupplementScheduleNoticeJob(task, student, scheduledAt, "student", previousScheduleText, aiSettings.notificationTemplates);
+    const parentJob = buildSupplementScheduleNoticeJob(task, student, scheduledAt, "parent", previousScheduleText, aiSettings.notificationTemplates);
     const [studentNotice, parentNotice] = await Promise.all([
       reserveSupplementScheduleNoticeJob(studentJob, "학생 보충 일정 안내 예약 실패"),
       reserveSupplementScheduleNoticeJob(parentJob, "학부모 보충 일정 안내 예약 실패")
@@ -8958,6 +9015,7 @@ export function App() {
           <SupplementCenter
             homeworks={homeworks}
             lessons={lessons}
+            notificationTemplates={aiSettings.notificationTemplates}
             notificationJobs={notificationJobs}
             records={records}
             students={students}
@@ -9887,7 +9945,7 @@ export function App() {
         studentId: task.studentId,
         channel: "mock",
         status: "draft_logged",
-        message: task.notificationDraft || createNotificationDraft(task, students),
+        message: task.notificationDraft || createNotificationDraft(task, students, aiSettings.notificationTemplates),
         createdAt: new Date().toISOString()
       },
       ...current
@@ -15298,9 +15356,9 @@ function SupplementMakeupLessonDetail({
 
       <div className="homeworkMakeupHero">
         <section className="panel homeworkMakeupNotice">
-          <h3>보충 대상</h3>
+          <h3>{isAbsenceMakeup ? "원 결석 수업" : "보충 대상"}</h3>
           <div className="makeupLinkedBox">
-            <span>{isAbsenceMakeup ? "결석 보강 대상" : "보충 대상"}</span>
+            <span>{isAbsenceMakeup ? "결석한 수업" : "보충 대상"}</span>
             <strong>{targetTitle}</strong>
             <small>{isAbsenceMakeup ? `원 결석 수업일: ${sourceDate}` : `원 수업일자: ${sourceDate} · 마감일: ${dueDate}`}</small>
             {!isAbsenceMakeup && originalHomeworkTitle && originalHomeworkTitle !== targetTitle ? (
@@ -15328,23 +15386,23 @@ function SupplementMakeupLessonDetail({
           ) : null}
           {isAbsenceMakeup ? (
             <div className="absenceSourceJournalBox compact">
-              <h4>원 결석 수업일지</h4>
+              <h4>원 결석 수업 맥락</h4>
               <p className="muted">오늘 보충 수업의 이전/다음 숙제가 아니라, 결석했던 수업의 저장본입니다.</p>
               <div className="absenceSourceJournalGrid compact">
                 <div>
-                  <span>강의 교재</span>
+                  <span>그날 수업 교재</span>
                   <strong>{sourceLessonMaterial || "기록 없음"}</strong>
                 </div>
                 <div>
-                  <span>강의 내용</span>
+                  <span>그날 수업 내용</span>
                   <strong>{sourceLessonContent || "기록 없음"}</strong>
                 </div>
                 <div>
-                  <span>지난 숙제</span>
+                  <span>그날 확인할 지난 숙제</span>
                   <strong>{sourcePreviousHomeworkText || "기록 없음"}</strong>
                 </div>
                 <div>
-                  <span>다음 숙제</span>
+                  <span>그날 새로 나간 숙제</span>
                   <strong>{sourceNextHomeworkText || "기록 없음"}</strong>
                 </div>
               </div>
@@ -19726,11 +19784,7 @@ function SettingsCenter({
     newPassword: ""
   });
   const [accountMessage, setAccountMessage] = useState("");
-  const settings = {
-    ...defaultAiSettings,
-    ...aiSettings,
-    prompts: normalizeAiPrompts(aiSettings?.prompts)
-  };
+  const settings = normalizeAiSettings(aiSettings);
   const attendance = { ...defaultAttendanceSettings, ...attendanceSettings };
   const attendanceUrl =
     typeof window === "undefined"
@@ -19829,6 +19883,20 @@ function SettingsCenter({
 
   function resetPrompt(promptKey) {
     updatePrompt(promptKey, defaultAiPrompts[promptKey] ?? "");
+  }
+
+  function updateNotificationTemplate(templateKey, value) {
+    onUpdateAiSettings((current) => ({
+      ...normalizeAiSettings(current),
+      notificationTemplates: {
+        ...normalizeNotificationTemplates(current?.notificationTemplates),
+        [templateKey]: value
+      }
+    }));
+  }
+
+  function resetNotificationTemplate(templateKey) {
+    updateNotificationTemplate(templateKey, defaultNotificationTemplates[templateKey] ?? "");
   }
 
   function updateAttendanceSetting(field, value) {
@@ -19949,6 +20017,49 @@ function SettingsCenter({
       </section>
 
       <NotificationSettingsSection integrationStatus={integrationStatus} />
+
+      <section className="panel settingsCard">
+        <div className="sectionTitle">
+          <div>
+            <h2>알림톡 템플릿 문구</h2>
+            <p>실제 발송/예약 job이 읽는 문구 원천입니다. 보충 알림톡부터 설정값을 사용합니다.</p>
+          </div>
+        </div>
+        <div className="notificationTemplateSettingsGrid">
+          {notificationTemplateRows.map((row) => (
+            <div className="notificationTemplateEditor" key={row.key}>
+              <div className="notificationTemplateEditorTop">
+                <div>
+                  <strong>{row.title}</strong>
+                  <span>{row.callSite}</span>
+                </div>
+                <button className="softButton mini" onClick={() => resetNotificationTemplate(row.key)} type="button">
+                  기본값
+                </button>
+              </div>
+              <div className="promptMappingCard">
+                <div>
+                  <strong>대상</strong>
+                  <span>{row.audience}</span>
+                </div>
+                <div>
+                  <strong>저장 원천</strong>
+                  <span>{row.source}</span>
+                </div>
+                <div>
+                  <strong>사용 변수</strong>
+                  <span>{row.variables}</span>
+                </div>
+              </div>
+              <textarea
+                value={settings.notificationTemplates[row.key] ?? ""}
+                onChange={(event) => updateNotificationTemplate(row.key, event.target.value)}
+                rows="8"
+              />
+            </div>
+          ))}
+        </div>
+      </section>
 
       <section className="panel settingsCard">
         <div className="sectionTitle">
@@ -23380,6 +23491,7 @@ function HomeworkActionCard({ homework, records = [], onStudentCheckHomework }) 
 function SupplementCenter({
   homeworks,
   lessons,
+  notificationTemplates = {},
   notificationJobs = [],
   records,
   students,
@@ -23839,6 +23951,7 @@ function SupplementCenter({
 
       {selectedSupplementStudent ? (
         <SupplementStudentModal
+          notificationTemplates={notificationTemplates}
           onClose={closeSupplementStudentModal}
           onPassTask={handlePassSupplementTaskFromModal}
           onSaveTask={handleSaveSupplementTaskFromModal}
@@ -24048,7 +24161,7 @@ function getSupplementTaskSourceVersion(task = {}) {
   ].map((value) => normalizeSupplementDraftValue(value)).join("|");
 }
 
-function createSupplementTaskDraft(task = {}, student = null) {
+function createSupplementTaskDraft(task = {}, student = null, notificationTemplates = {}) {
   const taskWithDefaultMethod = {
     ...task,
     supplementMethod: normalizeSupplementMethodForTask(task.taskType, task.supplementMethod)
@@ -24060,7 +24173,7 @@ function createSupplementTaskDraft(task = {}, student = null) {
     supplementMethod: taskWithDefaultMethod.supplementMethod,
     scheduledDate: task.scheduledDate || "",
     scheduledTime: task.scheduledTime || "",
-    notificationDraft: task.notificationDraft || createNotificationDraft(taskWithDefaultMethod, student ? [student] : [])
+    notificationDraft: task.notificationDraft || createNotificationDraft(taskWithDefaultMethod, student ? [student] : [], notificationTemplates)
   };
 }
 
@@ -24070,8 +24183,8 @@ function areSupplementTaskDraftValuesEqual(left = {}, right = {}) {
   );
 }
 
-function getSupplementTaskDraftDiff(task = {}, draft = {}, student = null) {
-  const source = createSupplementTaskDraft(task, student);
+function getSupplementTaskDraftDiff(task = {}, draft = {}, student = null, notificationTemplates = {}) {
+  const source = createSupplementTaskDraft(task, student, notificationTemplates);
   return Object.entries(supplementDraftFieldLabels).flatMap(([field, label]) => {
     const beforeValue = normalizeSupplementDraftValue(source[field]);
     const afterValue = normalizeSupplementDraftValue(draft[field]);
@@ -24095,6 +24208,7 @@ function createPersistableSupplementTask(task = {}) {
 }
 
 function SupplementStudentModal({
+  notificationTemplates = {},
   notificationJobs = [],
   onClose,
   onPassTask,
@@ -24104,6 +24218,10 @@ function SupplementStudentModal({
   tabTitle,
   tasks
 }) {
+  const normalizedNotificationTemplates = useMemo(
+    () => normalizeNotificationTemplates(notificationTemplates),
+    [notificationTemplates]
+  );
   const [feedback, setFeedback] = useState(null);
   const [passConfirmTask, setPassConfirmTask] = useState(null);
   const [scheduleConfirmTask, setScheduleConfirmTask] = useState(null);
@@ -24126,7 +24244,7 @@ function SupplementStudentModal({
         }
 
         const sourceVersion = getSupplementTaskSourceVersion(task);
-        const seededValues = createSupplementTaskDraft(task, student);
+        const seededValues = createSupplementTaskDraft(task, student, normalizedNotificationTemplates);
         if (
           existing &&
           existing.sourceVersion === sourceVersion &&
@@ -24148,7 +24266,7 @@ function SupplementStudentModal({
       if (!changed && nextIds.every((taskId) => current[taskId] === next[taskId])) return current;
       return next;
     });
-  }, [student, taskDraftSyncKey, tasks]);
+  }, [normalizedNotificationTemplates, student, taskDraftSyncKey, tasks]);
 
   function showFeedback(title, message, tone = "success") {
     setFeedback({ title, message, tone });
@@ -24158,7 +24276,7 @@ function SupplementStudentModal({
     return taskDrafts[task.makeupTaskId] ?? {
       dirty: false,
       sourceVersion: getSupplementTaskSourceVersion(task),
-      values: createSupplementTaskDraft(task, student)
+      values: createSupplementTaskDraft(task, student, normalizedNotificationTemplates)
     };
   }
 
@@ -24176,7 +24294,7 @@ function SupplementStudentModal({
     if (!task?.makeupTaskId) return;
     setTaskDrafts((current) => {
       const existing = current[task.makeupTaskId];
-      const previousValues = existing?.values ?? createSupplementTaskDraft(task, student);
+      const previousValues = existing?.values ?? createSupplementTaskDraft(task, student, normalizedNotificationTemplates);
       const values = {
         ...previousValues,
         [field]: value
@@ -24188,16 +24306,18 @@ function SupplementStudentModal({
       if (shouldRefreshGeneratedDraft) {
         const previousGeneratedDraft = createNotificationDraft(
           { ...task, ...previousValues, scheduledTime: normalizeTimeInput(previousValues.scheduledTime) || previousValues.scheduledTime },
-          [student]
+          [student],
+          normalizedNotificationTemplates
         );
         if (normalizeSupplementDraftValue(previousValues.notificationDraft) === normalizeSupplementDraftValue(previousGeneratedDraft)) {
           values.notificationDraft = createNotificationDraft(
             { ...task, ...values, scheduledTime: normalizeTimeInput(values.scheduledTime) || values.scheduledTime },
-            [student]
+            [student],
+            normalizedNotificationTemplates
           );
         }
       }
-      const diff = getSupplementTaskDraftDiff(task, values, student);
+      const diff = getSupplementTaskDraftDiff(task, values, student, normalizedNotificationTemplates);
       return {
         ...current,
         [task.makeupTaskId]: {
@@ -24221,7 +24341,7 @@ function SupplementStudentModal({
       [taskId]: {
         dirty: false,
         sourceVersion,
-        values: createSupplementTaskDraft(savedTask, student)
+        values: createSupplementTaskDraft(savedTask, student, normalizedNotificationTemplates)
       }
     }));
   }
@@ -24236,7 +24356,7 @@ function SupplementStudentModal({
     };
     const notificationDraft = draftValues.notificationDraft?.trim()
       ? draftValues.notificationDraft
-      : createNotificationDraft(taskWithDraftValues, [student]);
+      : createNotificationDraft(taskWithDraftValues, [student], normalizedNotificationTemplates);
     const nextTask = {
       ...taskWithDraftValues,
       notificationDraft
@@ -24445,7 +24565,7 @@ function SupplementStudentModal({
             {tasks.map((task) => {
               const taskDraftState = getTaskDraftState(task);
               const draftValues = taskDraftState.values;
-              const draftDiff = getSupplementTaskDraftDiff(task, draftValues, student);
+              const draftDiff = getSupplementTaskDraftDiff(task, draftValues, student, normalizedNotificationTemplates);
               const supplementHomeworkNote = draftValues.supplementHomeworkNote ?? "";
               const methodOptions = supplementMethodOptions(task.taskType);
               const shouldShowMethodOptions = methodOptions.length > 1;
@@ -28019,6 +28139,32 @@ function supplementMethodLabel(task) {
   return supplementMethodOptions(task?.taskType).find((option) => option.id === methodId)?.label ?? "방식 미정";
 }
 
+function renderNotificationTemplate(template = "", variables = {}) {
+  const rendered = Object.entries(variables).reduce(
+    (text, [key, value]) => text.replaceAll(`#{${key}}`, normalizeMessageText(value)),
+    String(template ?? "")
+  );
+  return rendered
+    .split("\n")
+    .map((line) => line.trimEnd())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function formatTemplateLine(label, value) {
+  const text = normalizeMessageText(value).replace(/\s+/g, " ").trim();
+  return text ? `${label}: ${text}` : "";
+}
+
+function getAbsenceMakeupSourceText(task = {}) {
+  return normalizeMessageText(task.sourceLessonLabel || task.sourceLabel || task.reason || "결석 수업").replace(/\s+/g, " ").trim();
+}
+
+function getAbsenceMakeupHomeworkText(task = {}) {
+  return normalizeMessageText(task.supplementHomeworkNote || task.sourcePreviousHomework || "").replace(/\s+/g, " ").trim();
+}
+
 function getSupplementTaskSourceLabel(task) {
   if (task?.taskType === "homework_makeup") {
     return task.supplementHomeworkNote || task.sourceLabel || "";
@@ -28027,7 +28173,7 @@ function getSupplementTaskSourceLabel(task) {
 }
 
 function formatSupplementHomeworkCheckSentence(task = {}) {
-  const homeworkText = normalizeMessageText(task.supplementHomeworkNote || "").replace(/\s+/g, " ").trim();
+  const homeworkText = getAbsenceMakeupHomeworkText(task);
   if (!homeworkText) return "";
   return `지난 숙제 ${homeworkText}도 함께 확인하겠습니다.`;
 }
@@ -28051,11 +28197,12 @@ function formatSupplementDraftReasonLine(task = {}) {
 }
 
 function formatSupplementDraftHomeworkLine(task = {}) {
-  const homeworkText = normalizeMessageText(task.supplementHomeworkNote || "").replace(/\s+/g, " ").trim();
-  return homeworkText ? `지난 숙제: ${homeworkText} 확인` : "";
+  const homeworkText = getAbsenceMakeupHomeworkText(task);
+  return homeworkText ? `확인할 지난 숙제: ${homeworkText}` : "";
 }
 
-function createNotificationDraft(task, students) {
+function createNotificationDraft(task, students, notificationTemplates = {}) {
+  const templates = normalizeNotificationTemplates(notificationTemplates);
   const student = students.find((item) => item.studentId === task.studentId);
   const studentName = student?.name ?? "학생";
   const scheduleText = formatSupplementDraftScheduleText(task);
@@ -28066,7 +28213,6 @@ function createNotificationDraft(task, students) {
   const methodId = task.supplementMethod || supplementDefaultMethod(task.taskType);
   const absenceReasonLine = task.taskType === "absence_makeup" ? formatSupplementDraftReasonLine(task) : "";
   const homeworkCheckLine = task.taskType === "absence_makeup" ? formatSupplementDraftHomeworkLine(task) : "";
-  const absenceExtraLines = [absenceReasonLine, homeworkCheckLine].filter(Boolean).join("\n");
 
   if (task.taskType === "homework_makeup") {
     if (methodId === "next_lesson") {
@@ -28081,11 +28227,19 @@ function createNotificationDraft(task, students) {
   }
 
   if (task.taskType === "absence_makeup") {
-    const extraBlock = absenceExtraLines ? `\n${absenceExtraLines}` : "";
-    if (methodId === "recorded_lecture") {
-      return `${studentName} 학생 결석 보강 안내입니다.\n\n${scheduleText}\n${sourceText} 결석 보강을 녹화 강의로 진행합니다.${extraBlock}${progressMemoBlock}`;
-    }
-    return `${studentName} 학생 결석 보강 안내입니다.\n\n${scheduleText}\n${sourceText} 결석 보강을 진행합니다.${extraBlock}${progressMemoBlock}`;
+    const absenceSourceText = getAbsenceMakeupSourceText(task);
+    const progressMemoLine = progressMemo ? `보충 메모:\n${progressMemo}` : "";
+    const progressSentence = methodId === "recorded_lecture"
+      ? `${absenceSourceText} 결석 보강을 녹화 강의로 진행합니다.`
+      : `${absenceSourceText} 결석 보강을 진행합니다.`;
+    return renderNotificationTemplate(templates.absenceMakeupStudentReminder, {
+      "결석사유줄": absenceReasonLine,
+      "보강일정": scheduleText,
+      "보강진행문장": progressSentence,
+      "보충메모": progressMemoLine,
+      "학생명": studentName,
+      "확인숙제줄": homeworkCheckLine
+    });
   }
 
   if (task.taskType === "retest") {
@@ -28119,11 +28273,19 @@ function getSupplementStudentReminderTitle(task = {}) {
     : methodId === "arrival_makeup"
       ? "등원보충"
       : "숙제보충";
-  const source = normalizeMessageText(task.supplementHomeworkNote || task.sourceLabel || task.reason || "").replace(/\s+/g, " ").trim();
+  const source = task.taskType === "absence_makeup"
+    ? getAbsenceMakeupSourceText(task)
+    : normalizeMessageText(task.supplementHomeworkNote || task.sourceLabel || task.reason || "").replace(/\s+/g, " ").trim();
   return [taskLabel, source].filter(Boolean).join(" · ");
 }
 
 function getSupplementScheduleChangeDetailSeed(task = {}) {
+  if (task.taskType === "absence_makeup") {
+    return [
+      formatTemplateLine("결석한 수업", getAbsenceMakeupSourceText(task)),
+      formatTemplateLine("확인할 지난 숙제", getAbsenceMakeupHomeworkText(task))
+    ].filter(Boolean).join("\n");
+  }
   return normalizeMessageText(task.supplementHomeworkNote || task.sourceLabel || task.reason || "").trim();
 }
 
@@ -28146,7 +28308,8 @@ function getNextHourlyAlimtalkReservationAt(now = new Date(), minimumLeadMinutes
   return scheduled.toISOString();
 }
 
-function buildSupplementScheduleNoticeBody(task = {}, previousScheduleText = "") {
+function buildSupplementScheduleNoticeBody(task = {}, previousScheduleText = "", notificationTemplates = {}) {
+  const templates = normalizeNotificationTemplates(notificationTemplates);
   const scheduleTitle = getSupplementStudentReminderTitle(task) || followUpTypeLabel(task.taskType);
   const isScheduleChange = Boolean(normalizeMessageText(previousScheduleText));
   const changeDetailSource = Object.prototype.hasOwnProperty.call(task, "scheduleChangeDetail")
@@ -28155,16 +28318,18 @@ function buildSupplementScheduleNoticeBody(task = {}, previousScheduleText = "")
   const changeDetail = normalizeMessageText(changeDetailSource).trim();
   const changeReason = normalizeMessageText(task.scheduleChangeReason || "").trim();
   const nextScheduleText = formatSupplementScheduleDateTime(task);
-  return [
-    `${scheduleTitle} 일정이 ${isScheduleChange ? "변경" : "확정"}되었습니다.`,
-    changeDetail ? `보충 내역:\n${changeDetail}` : "",
-    isScheduleChange && changeReason ? `변경 사유:\n${changeReason}` : "",
-    isScheduleChange && previousScheduleText ? `변경 전: ${previousScheduleText}` : "",
-    `${isScheduleChange ? "변경 후" : "일정"}: ${nextScheduleText}`
-  ].filter(Boolean).join("\n\n");
+  return renderNotificationTemplate(templates.supplementScheduleNotice, {
+    "변경사유": isScheduleChange && changeReason ? `변경 사유:\n${changeReason}` : "",
+    "변경전": isScheduleChange && previousScheduleText ? `변경 전: ${previousScheduleText}` : "",
+    "보강일정": nextScheduleText,
+    "보충내역": changeDetail ? `보충 내역:\n${changeDetail}` : "",
+    "상태": isScheduleChange ? "변경" : "확정",
+    "일정라벨": isScheduleChange ? "변경 후" : "일정",
+    "일정제목": scheduleTitle
+  });
 }
 
-function buildSupplementStudentReminderJob(task = {}, student = {}, scheduledAt = "") {
+function buildSupplementStudentReminderJob(task = {}, student = {}, scheduledAt = "", notificationTemplates = {}) {
   const notificationJobId = getSupplementStudentReminderJobId(task);
   const scheduleTitle = getSupplementStudentReminderTitle(task);
   const reminderBody = normalizeMessageText(task.notificationDraft);
@@ -28203,12 +28368,12 @@ function buildSupplementStudentReminderJob(task = {}, student = {}, scheduledAt 
   };
 }
 
-function buildSupplementScheduleNoticeJob(task = {}, student = {}, scheduledAt = "", target = "student", previousScheduleText = "") {
+function buildSupplementScheduleNoticeJob(task = {}, student = {}, scheduledAt = "", target = "student", previousScheduleText = "", notificationTemplates = {}) {
   const now = Date.now();
   const isParent = target === "parent";
   const notificationType = isParent ? "notice_parent" : "schedule_reminder";
   const scheduleTitle = getSupplementStudentReminderTitle(task);
-  const reminderBody = buildSupplementScheduleNoticeBody(task, previousScheduleText);
+  const reminderBody = buildSupplementScheduleNoticeBody(task, previousScheduleText, notificationTemplates);
   const scheduleNoticeTitle = `${scheduleTitle} 일정 안내`;
   const payload = isParent
     ? {
