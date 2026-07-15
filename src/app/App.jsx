@@ -11521,6 +11521,7 @@ function SpecialLectureCalendarPreview({ guide }) {
 function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
   const normalizedGuide = normalizeSpecialLectureGuide(guide);
   const applicationUrl = getSpecialLectureApplicationUrl(normalizedGuide);
+  const specialNotes = normalizedGuide.specialNotes.trim();
   return (
     <article className="specialLectureGuidePreview">
       <header className="specialLectureHero">
@@ -11545,10 +11546,10 @@ function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
         ))}
       </section>
 
-      {normalizedGuide.specialNotes ? (
+      {specialNotes ? (
         <section className="specialLectureGuideSection specialLectureGuideNotes">
           <h2>특이사항</h2>
-          <p>{normalizedGuide.specialNotes}</p>
+          <p>{specialNotes}</p>
         </section>
       ) : null}
 

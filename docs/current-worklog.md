@@ -84,6 +84,18 @@
 - 중단 조건: 특이사항 입력 후 `안내문 저장`/새로고침에서 사라짐, 알림톡 본문 미리보기에 특이사항이 누락됨, Tally 신청자가 `student_intake_applicants`에 섞임, 미매칭 신청이 생겼는데 hidden field/query를 확인하지 않고 확정 처리함, 안내문 저장이나 발송 준비만으로 `notification_jobs` 또는 신청자 row가 생김.
 - 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check src/shared/utils/apiClient.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 291개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
 
+### 2026-07-15 P1. 특강 안내문 특이사항 입력 공백 보존
+
+- 상태: 완료 - 구현/자동검증 완료
+- 사용자 요청: `운영 > 특강관리`의 `특이사항` textarea에서 스페이스바로 입력한 공백이 유지되지 않는 문제를 수정한다.
+- 원인: `normalizeSpecialLectureGuide`가 `specialNotes`에 `.trim()`을 적용했고, `updateSelectedGuide("specialNotes", event.target.value)`가 입력할 때마다 normalize를 다시 거치면서 controlled textarea의 trailing space가 즉시 제거됐다.
+- 구현 결과: 저장/편집 원본인 `specialNotes`는 공백과 줄바꿈을 보존하도록 바꾸고, Windows 줄바꿈만 `\n`으로 정규화했다. 공개 안내문 미리보기와 알림톡 본문 생성 시에는 표시용 값만 `.trim()`해 빈 특이사항 섹션이 노출되지 않게 했다.
+- 저장 원천: 특강 안내문/특이사항 원본은 기존 Supabase `app_state.specialLectureGuides` 그대로다. 새 SQL은 없다.
+- 사용자 편집본 보호: 입력 중 textarea 값은 normalize 단계에서 공백을 제거하지 않는다. 표시/발송 문구를 만들 때만 trim하므로 사용자가 중간에 입력한 문장 공백과 줄바꿈을 덮어쓰지 않는다.
+- 외부 side effect: Solapi 발송/예약, Tally API 호출, `notification_jobs`, 특강 신청자 row 생성/수정 없음.
+- 중단 조건: `특이사항` 입력 중 공백이 즉시 사라짐, 저장 후 새로고침에서 문장 공백이 붙어 보임, 미리보기/알림톡 본문에 앞뒤 공백만 있는 빈 특이사항이 표시됨, 안내문 저장만으로 `notification_jobs` 또는 신청자 row가 생김.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check src/shared/utils/apiClient.js`, `node --check src/domains/specialLectures/specialLectureGuideUtils.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 292개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P1. 다음 세션 handoff 갱신 - 특강관리/SQL 수동 작업 반영
 
 - 상태: 완료 - 문서 갱신/검증 완료

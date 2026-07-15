@@ -541,7 +541,7 @@ export function normalizeSpecialLectureGuide(guide = {}, fallback = defaultSpeci
     shortTitle: String(source.shortTitle || source.title || "").trim(),
     audience: String(source.audience ?? "").trim(),
     goal: String(source.goal ?? "").trim(),
-    specialNotes: String(source.specialNotes ?? source.special_notes ?? "").trim(),
+    specialNotes: String(source.specialNotes ?? source.special_notes ?? "").replace(/\r\n?/g, "\n"),
     days: String(source.days ?? "").trim(),
     time: String(source.time ?? "").trim(),
     periodStart: String(source.periodStart ?? "").trim(),
@@ -691,8 +691,9 @@ export function getSpecialLectureApplicationUrl(guide = {}) {
 
 export function buildSpecialLectureNoticeText(guide = {}, guideUrl = getSpecialLecturePublicUrl(guide), brandName = defaultSpecialLectureBrandName) {
   const normalizedGuide = normalizeSpecialLectureGuide(guide);
-  const specialNotesLines = normalizedGuide.specialNotes
-    ? ["", `특이사항: ${normalizedGuide.specialNotes}`]
+  const specialNotes = normalizedGuide.specialNotes.trim();
+  const specialNotesLines = specialNotes
+    ? ["", `특이사항: ${specialNotes}`]
     : [];
   return [
     `안녕하세요. ${brandName}입니다.`,
