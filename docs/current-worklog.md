@@ -109,6 +109,19 @@
 - 중단 조건: 같은 날 후보가 2개인데 선택 버튼 없이 바로 저장됨, 16:30 보충 등원 후 22:00 하원 입력이 보충 수업 하원으로 저장됨, 수업 선택 후 다른 `lessonId`에 저장됨, preview만으로 `lesson_student_records`가 생성됨, 출결 알림톡이 저장 실패 전에 발송됨.
 - 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 294개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
 
+### 2026-07-15 P1. 보충수업 모달 중복 패널 제거와 출결 버튼 확대
+
+- 상태: 완료 - 2번 작업 구현/자동검증 완료
+- 사용자 요청: 숙제보충/보충수업 모달에서 가운데 큰 `보충 대상 숙제` 패널이 상단 요약과 왼쪽 보충 대상 카드와 중복되므로 삭제한다. 출결 표시가 잘 보여야 하며 현재 버튼이 너무 작으므로 UI와 버튼을 정리한다.
+- 구현 결과: `SupplementMakeupLessonDetail`에서 `homeworkMakeupTarget` 큰 중복 패널과 그 안의 반복 요약 grid를 제거했다. 보충 대상 정보는 상단 요약과 왼쪽 `보충 대상` 카드로만 확인하게 정리했다.
+- 구현 결과: 결석보강에서 필요한 `원 결석 수업일지` 참고 정보는 삭제하지 않고 왼쪽 카드 안의 compact 참고 박스로 이동했다. 숙제보충 모달에서는 중복 패널이 더 이상 나타나지 않는다.
+- 구현 결과: `보충 당일 출결` 영역을 2열 grid로 정리하고, 출결 버튼을 보충 모달 안에서 `min-height: 84px`의 큰 버튼으로 재정의했다. 버튼 내부 출결 상태/시간/하원 미체크 문구가 전역 작은 배지 스타일에 눌리지 않도록 전용 CSS를 추가했다.
+- 저장 원천: 저장/API 흐름 변경 없음. 보충 일정/처리 상태는 기존 Supabase `makeup_tasks`, 보충 수업은 `lessons`, 출결은 `lesson_student_records` 기준을 유지한다. 새 SQL은 없다.
+- 외부 side effect: Solapi 보충 일정 변경 안내/학생 11시 알림톡 예약, 출결 알림톡, `notification_jobs` 생성/취소 로직은 바꾸지 않았다. 이번 작업은 모달 UI 구조와 CSS 정리만 수행했다.
+- 이번 작업 제외: 3번 특강 확정 명단/수업일지 반영 설계와 SQL은 아직 구현하지 않았다. 사용자가 요청한 번호 순서에 맞춰 2번만 닫았다.
+- 중단 조건: 숙제보충 모달에 `보충 대상 숙제` 큰 패널이 다시 보임, 출결 버튼이 작은 배지 크기로 돌아감, 결석보강에서 원 결석 수업일지 참고가 사라짐, 일정 수정/삭제/보충 완료 버튼이 저장 없이 성공처럼 보임, UI 변경만 했는데 Solapi/Tally/notification_jobs 동작이 새로 발생함.
+- 검증: `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 295개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P1. 다음 세션 handoff 갱신 - 특강관리/SQL 수동 작업 반영
 
 - 상태: 완료 - 문서 갱신/검증 완료

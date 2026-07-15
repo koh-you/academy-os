@@ -3805,16 +3805,6 @@ button {
   color: #166534;
 }
 
-.homeworkMakeupTarget {
-  background: #f8fbff;
-}
-
-.homeworkMakeupTarget h2 {
-  color: #0f172a;
-  font-size: 26px;
-  margin: 4px 0 14px;
-}
-
 .makeupOriginalHomework {
   color: #64748b;
   display: block;
@@ -3822,41 +3812,18 @@ button {
   margin-top: 8px;
 }
 
-.makeupInfoGrid {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(4, minmax(160px, 1fr));
-}
-
-.makeupInfoTile {
-  background: #fff;
-  border: 1px solid #dbe5f5;
-  border-radius: 8px;
-  padding: 14px;
-}
-
-.makeupInfoTile span,
-.makeupInfoTile small {
-  color: #64748b;
-  display: block;
-}
-
-.makeupInfoTile strong {
-  color: #0f172a;
-  display: block;
-  font-size: 18px;
-  margin: 6px 0 4px;
-}
-
 .homeworkMakeupHero {
   display: grid;
-  gap: 12px;
-  grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.15fr);
+  gap: 14px;
+  grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.1fr);
 }
 
 .homeworkMakeupNotice,
 .homeworkMakeupProcess {
+  align-content: start;
   border-radius: 8px;
+  display: grid;
+  gap: 12px;
 }
 
 .homeworkMakeupNotice h3,
@@ -3891,13 +3858,13 @@ button {
 }
 
 .supplementAttendanceBox {
-  align-items: center;
-  background: #f8fafc;
-  border: 1px solid #dbe5f5;
+  align-items: stretch;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
   border-radius: 8px;
-  display: flex;
+  display: grid;
   gap: 12px;
-  justify-content: space-between;
+  grid-template-columns: minmax(0, 1fr) minmax(168px, 0.48fr);
   margin-top: 12px;
   padding: 14px;
 }
@@ -3908,8 +3875,8 @@ button {
   min-width: 0;
 }
 
-.supplementAttendanceBox span,
-.supplementAttendanceBox small {
+.supplementAttendanceBox > div span,
+.supplementAttendanceBox > div small {
   color: #64748b;
   font-size: 12px;
   font-weight: 800;
@@ -3919,6 +3886,33 @@ button {
   color: #17213d;
   font-size: 15px;
   font-weight: 900;
+}
+
+.supplementAttendanceBox .attendanceBadge {
+  border-width: 2px;
+  cursor: pointer;
+  font-size: 18px;
+  gap: 5px;
+  min-height: 84px;
+  padding: 12px 14px;
+  width: 100%;
+}
+
+.supplementAttendanceBox .attendanceBadge span {
+  color: inherit;
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.supplementAttendanceBox .attendanceBadge small {
+  color: inherit;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.supplementAttendanceBox .attendanceBadge:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
 }
 
 .absenceSourceJournalBox {
@@ -3931,10 +3925,24 @@ button {
   padding: 14px;
 }
 
+.absenceSourceJournalBox.compact h4 {
+  color: #17213d;
+  font-size: 16px;
+  margin: 0;
+}
+
+.absenceSourceJournalBox.compact p {
+  margin: 0;
+}
+
 .absenceSourceJournalGrid {
   display: grid;
   gap: 10px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.absenceSourceJournalGrid.compact {
+  grid-template-columns: 1fr;
 }
 
 .absenceSourceJournalGrid > div {
@@ -4030,11 +4038,15 @@ button {
 }
 
 .makeupProcessActions {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 10px;
-  justify-content: flex-end;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-top: 10px;
+}
+
+.makeupProcessActions button {
+  min-height: 52px;
+  width: 100%;
 }
 
 .aiSettingBadge {
@@ -16528,7 +16540,7 @@ body.attendanceOnlyBody {
 
   .homeworkMakeupHero,
   .absenceSourceJournalGrid,
-  .makeupInfoGrid,
+  .supplementAttendanceBox,
   .homeworkMakeupSummary,
   .examSundaySummaryGrid,
   .makeupProcessFormGrid,

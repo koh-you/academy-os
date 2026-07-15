@@ -15065,12 +15065,10 @@ function SupplementMakeupLessonDetail({
   const supplementCheckoutMissing = student && supplementAttendanceRecord
     ? hasMissingCheckOut(supplementAttendanceRecord, supplementAttendanceLesson)
     : false;
-  const methodLabel = task ? supplementMethodLabel(task) : "방식 미정";
   const isTaskDone = task?.status === "done" || (passSaveState.state === "saved" && passSaveState.mode === "completed");
   const isPassSaving = passSaveState.state === "saving";
   const statusLabel =
     isTaskDone ? "보충 완료" : task?.status === "scheduled" ? "일정 확정" : "일정 미확정";
-  const assignmentCount = task?.assignmentCount ?? task?.attemptCount ?? 0;
   const scheduledText = `${lesson.date} ${lesson.startTime || ""}`.trim();
   const confirmedText = task?.lastScheduledAt ? formatKoreanDateTime(task.lastScheduledAt) : "확정 기록 없음";
   const completedText = task?.completedAt || task?.passedAt ? formatKoreanDateTime(task.completedAt || task.passedAt) : "";
@@ -15309,80 +15307,6 @@ function SupplementMakeupLessonDetail({
         </section>
       ) : null}
 
-      <section className="panel homeworkMakeupTarget">
-        <div className="sectionHeader">
-          <div>
-            <span className="eyebrow">{isAbsenceMakeup ? "원 결석 수업 기준" : "보충 대상 숙제"}</span>
-            <h2>{targetTitle}</h2>
-            <p>
-              {isAbsenceMakeup
-                ? `${student?.name ?? "학생 미확인"} 학생이 ${sourceDate}에 결석한 수업을 ${scheduledText}에 보강합니다.`
-                : `${student?.name ?? "학생 미확인"} 학생이 ${dueDate}까지 끝냈어야 하는 숙제입니다. 보충은 ${scheduledText}에 진행됩니다.`}
-            </p>
-            {!isAbsenceMakeup && originalHomeworkTitle && originalHomeworkTitle !== targetTitle ? (
-              <small className="makeupOriginalHomework">수업일지 원본 숙제명: {originalHomeworkTitle}</small>
-            ) : null}
-          </div>
-        </div>
-        <div className="makeupInfoGrid">
-          <div className="makeupInfoTile">
-            <span>대상 학생</span>
-            <strong>{student?.name ?? "미확인"}</strong>
-            <small>
-              {student?.grade ?? "-"} · {student?.schoolName ?? student?.school ?? "-"}
-            </small>
-          </div>
-          <div className="makeupInfoTile">
-            <span>{isAbsenceMakeup ? "원 결석 수업일" : "원 수업일자"}</span>
-            <strong>{sourceDate}</strong>
-            <small>{sourceLessonLabel}</small>
-          </div>
-          <div className="makeupInfoTile">
-            <span>{isAbsenceMakeup ? "결석 사유" : "숙제 마감일"}</span>
-            <strong>{isAbsenceMakeup ? task?.absenceReason || "사유 미입력" : dueDate}</strong>
-            <small>{isAbsenceMakeup ? "원 수업 출결 기록" : assignmentCount ? `배정 ${assignmentCount}회` : "배정 기록 확인"}</small>
-          </div>
-          <div className="makeupInfoTile">
-            <span>보충 확정일</span>
-            <strong>{scheduledText}</strong>
-            <small>확정 처리: {confirmedText}</small>
-          </div>
-          <div className="makeupInfoTile">
-            <span>보충 방식</span>
-            <strong>{methodLabel}</strong>
-            <small>{task?.reason ?? "숙제보충"}</small>
-          </div>
-        </div>
-        {isAbsenceMakeup ? (
-          <div className="absenceSourceJournalBox">
-            <div className="sectionHeader slim">
-              <div>
-                <h3>원 결석 수업일지</h3>
-                <p className="muted">오늘 보충 수업의 이전/다음 숙제가 아니라, 결석했던 수업의 저장본을 참고용으로 보여줍니다.</p>
-              </div>
-            </div>
-            <div className="absenceSourceJournalGrid">
-              <div>
-                <span>강의 교재</span>
-                <strong>{sourceLessonMaterial || "기록 없음"}</strong>
-              </div>
-              <div>
-                <span>강의 내용</span>
-                <strong>{sourceLessonContent || "기록 없음"}</strong>
-              </div>
-              <div>
-                <span>지난 숙제</span>
-                <strong>{sourcePreviousHomeworkText || "기록 없음"}</strong>
-              </div>
-              <div>
-                <span>다음 숙제</span>
-                <strong>{sourceNextHomeworkText || "기록 없음"}</strong>
-              </div>
-            </div>
-          </div>
-        ) : null}
-      </section>
-
       <div className="homeworkMakeupHero">
         <section className="panel homeworkMakeupNotice">
           <h3>보충 대상</h3>
@@ -15390,6 +15314,9 @@ function SupplementMakeupLessonDetail({
             <span>{isAbsenceMakeup ? "결석 보강 대상" : "보충 대상"}</span>
             <strong>{targetTitle}</strong>
             <small>{isAbsenceMakeup ? `원 결석 수업일: ${sourceDate}` : `원 수업일자: ${sourceDate} · 마감일: ${dueDate}`}</small>
+            {!isAbsenceMakeup && originalHomeworkTitle && originalHomeworkTitle !== targetTitle ? (
+              <small className="makeupOriginalHomework">수업일지 원본 숙제명: {originalHomeworkTitle}</small>
+            ) : null}
           </div>
           {student && supplementAttendanceRecord ? (
             <div className="supplementAttendanceBox">
@@ -15408,6 +15335,30 @@ function SupplementMakeupLessonDetail({
                 {supplementAttendanceDisplay?.detail ? <small>{supplementAttendanceDisplay.detail}</small> : null}
                 {supplementCheckoutMissing ? <small className="checkoutMissingText">하원 미체크</small> : null}
               </button>
+            </div>
+          ) : null}
+          {isAbsenceMakeup ? (
+            <div className="absenceSourceJournalBox compact">
+              <h4>원 결석 수업일지</h4>
+              <p className="muted">오늘 보충 수업의 이전/다음 숙제가 아니라, 결석했던 수업의 저장본입니다.</p>
+              <div className="absenceSourceJournalGrid compact">
+                <div>
+                  <span>강의 교재</span>
+                  <strong>{sourceLessonMaterial || "기록 없음"}</strong>
+                </div>
+                <div>
+                  <span>강의 내용</span>
+                  <strong>{sourceLessonContent || "기록 없음"}</strong>
+                </div>
+                <div>
+                  <span>지난 숙제</span>
+                  <strong>{sourcePreviousHomeworkText || "기록 없음"}</strong>
+                </div>
+                <div>
+                  <span>다음 숙제</span>
+                  <strong>{sourceNextHomeworkText || "기록 없음"}</strong>
+                </div>
+              </div>
             </div>
           ) : null}
         </section>
