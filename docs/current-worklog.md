@@ -14,6 +14,19 @@
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-15 P1. App.jsx 리팩터링 - shared Modal 분리
+
+- 상태: 완료 - 구현/자동검증 완료
+- 사용자 요청: 다음 리팩터링 절차를 진행한다.
+- 범위 선택: 저장/API/Solapi/Tally와 무관한 낮은 위험 공통 UI 단위인 `Modal`부터 분리했다. 수업일지, 보충관리, 알림톡 예약/발송 로직은 건드리지 않았다.
+- 구현 결과: App.jsx 하단의 공통 `Modal` 컴포넌트를 `src/shared/components/Modal.jsx`로 이동하고, App.jsx는 해당 컴포넌트를 import해서 기존 사용처를 그대로 유지한다. Escape 키 닫기, header 숨김, 닫기 버튼 숨김, backdrop/card className 전달 동작은 보존했다.
+- 테스트 갱신: production scenario가 더 이상 App.jsx 내부 문자열만 찾지 않고, 새 `src/shared/components/Modal.jsx` 파일에서 Escape-close invariant를 검사하도록 갱신했다.
+- 저장 원천: 없음. 순수 UI 컴포넌트 파일 분리이며 Supabase, `app_state`, localStorage, `notification_jobs` 저장 경로는 변경하지 않았다.
+- 외부 side effect: 없음. Solapi 실제 발송/예약, Tally API, Slack, AI 호출 없음.
+- 사람 검토 gate: 운영 화면에서 수업일지/학생관리/시험관리/보충관리 중 아무 모달 하나를 열고 `Escape`로 닫히는지 확인한다. 닫기 버튼이 있는 모달은 기존처럼 `×`로 닫히는지 확인한다. 수업일지 상세처럼 header 숨김 모달의 레이아웃이 깨지지 않으면 통과다.
+- 중단 조건: 모달이 열리지 않음, Escape로 닫히지 않음, 닫기 버튼이 사라짐, 수업일지 상세 모달의 헤더/레이아웃이 이전과 달라짐, StudentManager의 학생 프로필/퇴원 모달이 열리지 않음.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과, `npm run test:production` 305개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P0. 특강 알림톡 템플릿 검수 대기 지침
 
 - 상태: 대기 - Solapi/Kakao 특강 템플릿 검수 완료 확인 필요
