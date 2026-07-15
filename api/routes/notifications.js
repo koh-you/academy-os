@@ -174,6 +174,15 @@ function joinMessageBlocks(blocks) {
   return blocks.map(normalizeText).filter(Boolean).join("\n\n");
 }
 
+function normalizeBulletLines(value = "") {
+  return normalizeText(value)
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => line.startsWith("-") ? line : `- ${line}`)
+    .join("\n");
+}
+
 function canUseRealRecipient(recipientType = "parent") {
   if (recipientType === "student") return process.env.ALIMTALK_ALLOW_REAL_STUDENT_NUMBERS === "true";
   return process.env.ALIMTALK_ALLOW_REAL_PARENT_NUMBERS === "true";
@@ -295,6 +304,7 @@ function buildDailyReportBody({
   checkedAt,
   assignmentStatus,
   incompleteHomeworks,
+  homeworkFollowupNotice,
   lessonContent,
   lessonMaterial,
   nextHomework,
@@ -309,10 +319,16 @@ function buildDailyReportBody({
   const incompleteList = normalizeList(incompleteHomeworks);
   const assignmentStatusMessage = assignmentStatusText(assignmentStatus, assignmentStatus, audience);
   const preparationText = normalizeText(preparationNotice);
+  const homeworkFollowupText = normalizeBulletLines(homeworkFollowupNotice);
+  const supplementText = normalizeBulletLines(supplementSchedule);
   const teacherCommentText = normalizeText(teacherComment);
   const commentText = joinMessageBlocks([
     preparationText && !teacherCommentText.includes(preparationText) ? preparationText : "",
     teacherCommentText
+  ]);
+  const supplementNotice = joinMessageBlocks([
+    homeworkFollowupText,
+    supplementText
   ]);
 
   return joinMessageBlocks([
@@ -325,7 +341,7 @@ function buildDailyReportBody({
     messageBlock("📝 테스트", testResult),
     incompleteList.length ? messageBlock("⚠️ 미완료 과제", incompleteList.map((item) => `- ${item}`).join("\n")) : "",
     messageBlock("⭐ 중요 · 재시험 일정", retestSchedule),
-    messageBlock("⭐ 중요 · 보충 일정", supplementSchedule),
+    messageBlock("⭐ 보충/확인 안내", supplementNotice),
     messageBlock("💬 코멘트", commentText)
   ]);
 }
@@ -341,6 +357,7 @@ function buildLessonCommentBody(payload, audience) {
         ? payload.assignmentStatusStudentMessage || payload.assignmentStatusMessage || payload.assignmentStatus
         : payload.assignmentStatusParentMessage || payload.assignmentStatusMessage || payload.assignmentStatus,
     audience,
+    homeworkFollowupNotice: payload.homeworkFollowupNotice,
     lessonContent: payload.lessonContent,
     lessonMaterial: payload.lessonMaterial,
     nextHomework: payload.nextHomework,
@@ -364,7 +381,8 @@ function hasLessonCommentContext(payload = {}) {
     payload.previousHomework ||
     payload.nextHomework ||
     payload.supplementSchedule ||
-    payload.preparationNotice
+    payload.preparationNotice ||
+    payload.homeworkFollowupNotice
   );
 }
 

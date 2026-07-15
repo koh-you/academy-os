@@ -436,6 +436,12 @@ function textIncludesEveryLine(text = "", lines = []) {
 function getPreparationNoticeForTarget(record = {}, target = "parent") {
   const shouldIncludePrepMemo =
     target === "student" ? Boolean(record?.prepStudentVisible) : Boolean(record?.prepParentVisible);
+  return shouldIncludePrepMemo ? removeHomeworkFollowupMemoLines(record?.preparationMemo) : "";
+}
+
+function getHomeworkFollowupNoticeForTarget(record = {}, target = "parent") {
+  const shouldIncludePrepMemo =
+    target === "student" ? Boolean(record?.prepStudentVisible) : Boolean(record?.prepParentVisible);
   return shouldIncludePrepMemo ? formatHomeworkFollowupMemoForNotice(record?.preparationMemo) : "";
 }
 
@@ -471,16 +477,16 @@ function parseHomeworkFollowupMemoLine(line = "") {
 }
 
 function formatHomeworkFollowupMemoForNotice(value = "") {
-  const lines = normalizeMessageText(value).split("\n").map((line) => {
+  const lines = normalizeMessageText(value).split("\n").flatMap((line) => {
     const parsed = parseHomeworkFollowupMemoLine(line);
-    if (!parsed) return line;
+    if (!parsed) return [];
     if (parsed.method === "next_lesson") {
-      return `다음 수업 때 ${parsed.text}를 함께 확인하겠습니다.`;
+      return [`- 다음 수업 때 ${parsed.text}를 함께 확인하겠습니다.`];
     }
     if (parsed.method === "stay_after") {
-      return `오늘 수업 후 ${parsed.text} 보충을 마무리합니다.`;
+      return [`- 오늘 수업 후 ${parsed.text} 보충을 마무리합니다.`];
     }
-    return line;
+    return [];
   });
   return normalizeMessageText(lines.join("\n"));
 }
@@ -522,11 +528,18 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, previousHom
   const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
   const attendance = formatAttendanceForMessage(record);
   const commentText = normalizeMessageText(comment);
+  const homeworkFollowupNotice = getHomeworkFollowupNoticeForTarget(record, audience);
   const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
+  const supplementAndFollowupText = [homeworkFollowupNotice, supplementText].filter(Boolean).join("\n");
   const testResultText = testResultLines.length ? testResultLines.map((item) => `- ${item}`).join("\n") : "";
-  const commentHasSupplement = commentText.includes("보충일정") || commentText.includes("보충 일정") || supplementSchedules.some((item) => commentText.includes(item));
-  const supplementNotice = supplementText && !commentHasSupplement
-    ? supplementText
+  const commentHasSupplement =
+    commentText.includes("보충/확인 안내") ||
+    commentText.includes("보충일정") ||
+    commentText.includes("보충 일정") ||
+    supplementSchedules.some((item) => commentText.includes(item));
+  const commentHasFollowup = homeworkFollowupNotice && textIncludesEveryLine(commentText, homeworkFollowupNotice.split("\n"));
+  const supplementNotice = supplementAndFollowupText && (!commentHasSupplement || !commentHasFollowup)
+    ? [commentHasFollowup ? "" : homeworkFollowupNotice, commentHasSupplement ? "" : supplementText].filter(Boolean).join("\n")
     : "";
   const lines = [
     createMessageLine("🏫 출결", attendance),
@@ -536,7 +549,7 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, previousHom
     createMessageLine("📘 지난 과제", previousHomework?.title),
     createMessageLine("➡️ 다음 과제", nextHomework?.title),
     testResultText ? createMessageBlock("📝 테스트", testResultText) : "",
-    supplementNotice ? createMessageBlock("⭐ 보충 일정", supplementNotice) : "",
+    supplementNotice ? createMessageBlock("⭐ 보충/확인 안내", supplementNotice) : "",
     commentText ? createMessageBlock("💬 코멘트", commentText) : ""
   ];
 
@@ -566,6 +579,8 @@ function buildCommentPreviewText({ audience, comment, lesson, nextHomework, prev
 }
 
 function buildCommentSourceText({ audience = "parent", lesson, nextHomework, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
+  const homeworkFollowupNotice = getHomeworkFollowupNoticeForTarget(record, audience);
+  const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
   return joinMessageBlocks([
     createMessageLine("수신 학생", student.name),
     createMessageLine("수업", `${lesson.date} ${lesson.className}`),
@@ -576,7 +591,7 @@ function buildCommentSourceText({ audience = "parent", lesson, nextHomework, pre
     createMessageLine("지난 과제", previousHomework?.title),
     createMessageLine("다음 과제", nextHomework?.title),
     testResultLines.length ? createMessageBlock("테스트", testResultLines.map((item) => `- ${item}`).join("\n")) : "",
-    supplementSchedules.length ? createMessageBlock("보충일정", supplementSchedules.map((item) => `- ${item}`).join("\n")) : "",
+    homeworkFollowupNotice || supplementText ? createMessageBlock("보충/확인 안내", [homeworkFollowupNotice, supplementText].filter(Boolean).join("\n")) : "",
     createMessageBlock("수업메모", record?.preparationMemo)
   ]) || "알림톡에 참고할 원본 정보가 아직 없습니다.";
 }
@@ -1095,6 +1110,7 @@ function buildLessonReservationPayloadSnapshot({
     record,
     supplementSchedules
   });
+  const homeworkFollowupNotice = getHomeworkFollowupNoticeForTarget(record, audience);
   return {
     assignmentStatus: getAssignmentStatusForMessage(record, previousHomework),
     attendanceReason: record?.attendanceReason ?? "",
@@ -1105,7 +1121,9 @@ function buildLessonReservationPayloadSnapshot({
     lateMinutes: record?.lateMinutes ?? "",
     lessonContent: getLessonContent(record),
     lessonMaterial: getLessonMaterial(record, student),
+    homeworkFollowupNotice,
     nextHomework: nextHomework?.title ?? "",
+    preparationNotice: getPreparationNoticeForTarget(record, audience),
     previousHomework: previousHomework?.title ?? "",
     recipient: audience === "student" ? student.studentPhone : student.parentPhone,
     scheduledDate,
@@ -1125,10 +1143,12 @@ function getLessonReservationPayloadFingerprint(payload = {}) {
     checkInTime: String(payload.checkInTime ?? ""),
     checkOutTime: String(payload.checkOutTime ?? ""),
     commentBodyOverride: normalizeMessageText(payload.commentBodyOverride ?? payload.message ?? ""),
+    homeworkFollowupNotice: normalizeMessageText(payload.homeworkFollowupNotice ?? ""),
     lateMinutes: String(payload.lateMinutes ?? ""),
     lessonContent: normalizeMessageText(payload.lessonContent ?? ""),
     lessonMaterial: normalizeMessageText(payload.lessonMaterial ?? ""),
     nextHomework: normalizeMessageText(payload.nextHomework ?? ""),
+    preparationNotice: normalizeMessageText(payload.preparationNotice ?? ""),
     previousHomework: normalizeMessageText(payload.previousHomework ?? ""),
     recipient: normalizePhoneNumber(payload.recipient ?? (payload.target === "student" ? payload.studentPhone : payload.parentPhone) ?? ""),
     scheduledDate: String(payload.scheduledDate ?? ""),
@@ -7804,6 +7824,7 @@ export function App() {
       checkedAt: record?.checkInAt || record?.checkOutAt || "",
       lateMinutes: record?.lateMinutes ?? "",
       commentBodyOverride: commentBody,
+      homeworkFollowupNotice: payloadSnapshot.homeworkFollowupNotice,
       lessonContent: getLessonContent(record),
       lessonDate: lesson.date,
       lessonId: lesson.lessonId,
@@ -7813,7 +7834,7 @@ export function App() {
       nextHomework: nextHomework?.title ?? "",
       osScheduled: true,
       parentPhone: student.parentPhone,
-      preparationNotice: "",
+      preparationNotice: payloadSnapshot.preparationNotice,
       previousHomework: previousHomework?.title ?? "",
       scheduledDate,
       scheduleMode: mode,
@@ -9333,12 +9354,13 @@ export function App() {
     const sourceField = target === "student" ? "studentComment" : "teacherComment";
     const message = normalizeMessageText(record?.[sourceField]);
     const preparationNotice = getPreparationNoticeForTarget(record, target);
+    const homeworkFollowupNotice = getHomeworkFollowupNoticeForTarget(record, target);
     const prepMessage = preparationNotice && !textIncludesMessageBlock(message, preparationNotice) ? preparationNotice : "";
     const composedMessage = joinMessageBlocks([prepMessage, message]);
     const manualCommentBody = normalizeMessageText(options.manualCommentBody);
     const manualPreviewBody = normalizeMessageText(options.manualPreviewBody);
     const finalMessage = manualCommentBody || composedMessage;
-    const hasSendContent = Boolean(finalMessage);
+    const hasSendContent = Boolean(finalMessage || homeworkFollowupNotice);
     const channel = target === "student" ? "student_alimtalk" : "parent_alimtalk";
     const statusField = target === "student" ? "studentCommentSendStatus" : "teacherCommentSendStatus";
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
@@ -9349,7 +9371,7 @@ export function App() {
       channel,
       createdAt: new Date().toISOString(),
       lessonId: lesson.lessonId,
-      message: manualPreviewBody || finalMessage || "발송할 코멘트가 없습니다.",
+      message: manualPreviewBody || finalMessage || homeworkFollowupNotice || "발송할 코멘트가 없습니다.",
       provider: "solapi",
       scheduledDate,
       scheduledLabel,
@@ -9416,11 +9438,12 @@ export function App() {
         lessonName: lesson.className,
         forceDryRun: Boolean(options.forceDryRun),
         forceTestRecipient: Boolean(options.forceTestRecipient),
+        homeworkFollowupNotice,
         commentBodyOverride: manualCommentBody,
         manualResend: Boolean(options.resendReason),
         message: finalMessage,
         nextHomework: nextHomework?.title ?? "",
-        preparationNotice: "",
+        preparationNotice,
         parentPhone: student.parentPhone,
         previousHomework: previousHomework?.title ?? "",
         resendReason: options.resendReason ?? "",
@@ -24019,7 +24042,7 @@ function getSupplementTaskSourceVersion(task = {}) {
 function createSupplementTaskDraft(task = {}, student = null) {
   const taskWithDefaultMethod = {
     ...task,
-    supplementMethod: task.supplementMethod || supplementDefaultMethod(task.taskType)
+    supplementMethod: normalizeSupplementMethodForTask(task.taskType, task.supplementMethod)
   };
   return {
     status: task.status || "draft",
@@ -27899,8 +27922,6 @@ function followUpTypeLabel(taskType) {
 
 const supplementMethodsByType = {
   homework_makeup: [
-    { id: "stay_after", label: "남아서 하고 가기" },
-    { id: "next_lesson", label: "다음시간까지" },
     { id: "arrival_makeup", label: "등원보충" }
   ],
   absence_makeup: [
@@ -27917,13 +27938,19 @@ function supplementMethodOptions(taskType) {
 }
 
 function supplementDefaultMethod(taskType) {
-  if (taskType === "homework_makeup") return "stay_after";
+  if (taskType === "homework_makeup") return "arrival_makeup";
   if (taskType === "absence_makeup") return "onsite_makeup";
   return supplementMethodOptions(taskType)[0]?.id ?? "";
 }
 
+function normalizeSupplementMethodForTask(taskType, methodId) {
+  const options = supplementMethodOptions(taskType);
+  if (options.some((option) => option.id === methodId)) return methodId;
+  return supplementDefaultMethod(taskType);
+}
+
 function supplementMethodLabel(task) {
-  const methodId = task?.supplementMethod || supplementDefaultMethod(task?.taskType);
+  const methodId = normalizeSupplementMethodForTask(task?.taskType, task?.supplementMethod);
   return supplementMethodOptions(task?.taskType).find((option) => option.id === methodId)?.label ?? "방식 미정";
 }
 
