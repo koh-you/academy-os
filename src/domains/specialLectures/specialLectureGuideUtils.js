@@ -718,7 +718,7 @@ export function buildSpecialLectureNoticeText(guide = {}, guideUrl = getSpecialL
     `시간: ${normalizedGuide.time || "-"}`,
     ...specialNotesLines,
     "",
-    normalizedGuide.noticeMemo || "세부 시수와 수강료, 회차별 일정은 아래 링크에서 확인 부탁드립니다.",
+    normalizedGuide.noticeMemo || "세부 시수와 수강료, 회차별 일정은 아래 링크에서 확인 부탁드립니다. 수강을 원하시면 안내문에서 신청해 주세요.",
     guideUrl
   ].join("\n");
 }
