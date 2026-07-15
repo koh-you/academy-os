@@ -14,6 +14,19 @@
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-15 P1. 시험대비 clean-slate 전환과 legacy 숨김
+
+- 상태: 완료 - 구현/자동검증 완료
+- 사용자 요청: AI가 기존 일요보강 삭제/재구현 작업을 할 수 있는지 확인하고, 기존 일요보강을 모두 삭제한 뒤 새 `시험대비`로 구현하는 방향으로 진행한다.
+- AI 가능 범위: AI는 코드 전환, 삭제 대상 SQL 작성, 정적/빌드 검증, 사람 검토 gate 작성까지 수행할 수 있다. 운영 Supabase SQL Editor 실행은 프로젝트 지침상 사용자가 직접 한다. SQL 자동 적용은 사용하지 않는다.
+- 구현 결과: 앱 런타임에서 `examSundayMakeup`을 `examPrep`으로 호환 변환하지 않도록 바꿨다. 앞으로 앱이 정상 운용하는 시험대비 수업 타입은 `lessonType=examPrep`뿐이다.
+- 구현 결과: SQL 적용 전 legacy row가 남아 있어도 달력/필터에 다시 보이지 않도록 `examSundayMakeup`, `lesson_exam_sunday_makeup_%`, `generated:sunday_makeup:%` 수업을 숨긴다. 이는 표시 호환이 아니라 삭제 전 안전장치다.
+- 구현 결과: `app_state.generatedLessonControls.sundayMakeupBlocks`는 더 이상 runtime controls로 normalize하지 않는다. 기존 블록 draft 값은 새 시험대비 흐름의 원천이 아니다.
+- 저장 원천: 새 시험대비 수업 원천은 Supabase `lessons`의 `lessonType=examPrep`, `lessonId=lesson_exam_prep_<date>`, `sourceSchoolEventId=generated:exam_prep:<date>`다. 기존 일요보강 데이터 삭제는 `supabase/20260715_cleanup_legacy_exam_sunday_makeup_lessons.sql`로 수행한다.
+- SQL 필요: 기존 일요보강을 실제로 모두 삭제하려면 운영 SQL Editor에서 `supabase/20260715_cleanup_legacy_exam_sunday_makeup_lessons.sql`을 적용한다. active notification job이 있으면 SQL이 실패해야 정상이다.
+- 중단 조건: SQL preview 대상에 정규/특강/보충 수업이 섞임, active notification job count가 1 이상인데 삭제하려 함, 삭제 후 `examSundayMakeup` 수업이 화면에 다시 보임, 새 후보가 `lessonType=examSundayMakeup` 또는 `lesson_exam_sunday_makeup_`로 저장됨.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과, `npm run test:production` 307개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P1. 일요보강 가상블록 제거와 시험대비 lesson 원천 전환
 
 - 상태: 완료 - 구현/자동검증 완료
