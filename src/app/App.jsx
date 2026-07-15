@@ -5514,7 +5514,7 @@ const defaultNotificationTemplates = {
     "#{학생명} 학생 숙제 보충 안내입니다.",
     "",
     "#{보강일정}",
-    "#{보강대상}",
+    "#{밀린숙제}",
     "#{보충메모}"
   ].join("\n"),
   supplementScheduleNotice: [
@@ -5542,7 +5542,7 @@ const notificationTemplateRows = [
     key: "homeworkMakeupStudentReminder",
     source: "Supabase app_state.aiSettings.notificationTemplates",
     title: "숙제보충 학생 11시 알림톡",
-    variables: "#{학생명}, #{보강일정}, #{보강대상}, #{보충메모}"
+    variables: "#{학생명}, #{보강일정}, #{밀린숙제}, #{보충메모}"
   },
   {
     audience: "학생/학부모",
@@ -28185,10 +28185,13 @@ function getAbsenceMakeupHomeworkText(task = {}) {
   return normalizeMessageText(task.supplementHomeworkNote || task.sourcePreviousHomework || "").replace(/\s+/g, " ").trim();
 }
 
-function getHomeworkMakeupTargetText(task = {}) {
-  return normalizeMessageText(task.supplementHomeworkNote || task.sourceLabel || task.reason || "숙제 보충")
+function getHomeworkMakeupHomeworkText(task = {}) {
+  const homeworkText = normalizeMessageText(task.supplementHomeworkNote || task.sourceLabel || task.reason || "")
     .replace(/\s+/g, " ")
     .trim();
+  const homeworkDate = formatSupplementShortDate(task.sourceDueDate || task.sourceDate || task.lessonDate || "");
+  const homeworkDateText = homeworkDate ? `${homeworkDate} 숙제` : "";
+  return [homeworkDateText, homeworkText || "숙제 보충"].filter(Boolean).join(" · ");
 }
 
 function getSupplementTaskSourceLabel(task) {
@@ -28241,7 +28244,7 @@ function formatSupplementDraftReasonLine(task = {}) {
 
 function formatSupplementDraftHomeworkLine(task = {}) {
   const homeworkText = getAbsenceMakeupHomeworkText(task);
-  return homeworkText ? `확인할 지난 숙제: ${homeworkText}` : "";
+  return homeworkText ? `확인할 숙제: ${homeworkText}` : "";
 }
 
 function createNotificationDraft(task, students, notificationTemplates = {}) {
@@ -28259,12 +28262,14 @@ function createNotificationDraft(task, students, notificationTemplates = {}) {
 
   if (task.taskType === "homework_makeup") {
     const scheduleLine = scheduleText ? `일시: ${scheduleText}` : "";
-    const targetLine = formatTemplateLine("보강 대상", getHomeworkMakeupTargetText(task));
+    const homeworkLine = formatTemplateLine("밀린 숙제", getHomeworkMakeupHomeworkText(task));
     const progressMemoLine = progressMemo ? `보충 메모:\n${progressMemo}` : "";
     return renderNotificationTemplate(templates.homeworkMakeupStudentReminder, {
-      "보강대상": targetLine,
+      "보강대상": homeworkLine,
       "보강일정": scheduleLine,
+      "밀린숙제": homeworkLine,
       "보충메모": progressMemoLine,
+      "보충숙제": homeworkLine,
       "학생명": studentName
     });
   }
@@ -28326,7 +28331,7 @@ function getSupplementScheduleChangeDetailSeed(task = {}) {
   if (task.taskType === "absence_makeup") {
     return [
       formatTemplateLine("결석한 수업", getAbsenceMakeupSourceText(task)),
-      formatTemplateLine("확인할 지난 숙제", getAbsenceMakeupHomeworkText(task))
+      formatTemplateLine("확인할 숙제", getAbsenceMakeupHomeworkText(task))
     ].filter(Boolean).join("\n");
   }
   return normalizeMessageText(task.supplementHomeworkNote || task.sourceLabel || task.reason || "").trim();
