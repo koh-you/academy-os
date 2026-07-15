@@ -11112,6 +11112,16 @@ function SpecialLectureNoticePanel({
             <textarea rows="3" value={selectedGuide.goal} onChange={(event) => updateSelectedGuide("goal", event.target.value)} />
           </label>
 
+          <label className="specialLectureWideField specialLectureSummaryField">
+            수업 방향
+            <textarea
+              placeholder="예: 방학 동안 현재 진도 기준으로 빈틈을 정리하고 다음 학기 수업을 준비합니다."
+              rows="3"
+              value={selectedGuide.summary}
+              onChange={(event) => updateSelectedGuide("summary", event.target.value)}
+            />
+          </label>
+
           <label className="specialLectureWideField specialLectureNotesField">
             특이사항
             <textarea
@@ -11863,7 +11873,9 @@ function SpecialLectureCalendarPreview({ guide }) {
 function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
   const normalizedGuide = normalizeSpecialLectureGuide(guide);
   const applicationUrl = getSpecialLectureApplicationUrl(normalizedGuide);
+  const summary = normalizedGuide.summary.trim();
   const specialNotes = normalizedGuide.specialNotes.trim();
+  const hasOverview = Boolean(summary || normalizedGuide.highlights.length || specialNotes);
   const primaryFacts = [
     ["대상", normalizedGuide.audience],
     ["요일", normalizedGuide.days],
@@ -11894,13 +11906,13 @@ function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
         ))}
       </section>
 
-      {(normalizedGuide.summary || normalizedGuide.highlights.length) ? (
+      {hasOverview ? (
         <section className="specialLectureGuideSection specialLectureGuideOverview">
           <div className="specialLectureSectionTitle">
             <span>OVERVIEW</span>
             <h2>수업 방향</h2>
           </div>
-          {normalizedGuide.summary ? <p>{normalizedGuide.summary}</p> : null}
+          {summary ? <p>{summary}</p> : null}
           {normalizedGuide.highlights.length ? (
             <ul>
               {normalizedGuide.highlights.map((highlight) => (
@@ -11908,16 +11920,12 @@ function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
               ))}
             </ul>
           ) : null}
-        </section>
-      ) : null}
-
-      {specialNotes ? (
-        <section className="specialLectureGuideSection specialLectureGuideNotes">
-          <div className="specialLectureSectionTitle">
-            <span>NOTE</span>
-            <h2>특이사항</h2>
-          </div>
-          <p>{specialNotes}</p>
+          {specialNotes ? (
+            <div className="specialLectureOverviewNote">
+              <span>특이사항</span>
+              <p>{specialNotes}</p>
+            </div>
+          ) : null}
         </section>
       ) : null}
 

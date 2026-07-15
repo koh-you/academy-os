@@ -8294,7 +8294,8 @@ button:disabled {
   font-weight: 900;
 }
 
-.specialLectureGoalField {
+.specialLectureGoalField,
+.specialLectureSummaryField {
   background: #ffffff;
   border: 1px solid #dbeafe;
   border-radius: 8px;
@@ -8921,12 +8922,23 @@ button:disabled {
   background: #ffffff;
 }
 
-.specialLectureGuideNotes {
-  background: #eff6ff;
+.specialLectureOverviewNote {
+  background: #f7fee7;
+  border: 1px solid #d9f99d;
+  border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  padding: 12px;
 }
 
-.specialLectureGuideNotes p {
-  color: #1e3a8a;
+.specialLectureOverviewNote span {
+  color: #3f6212;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.specialLectureOverviewNote p {
+  color: #3f6212;
   font-weight: 800;
   white-space: pre-wrap;
 }

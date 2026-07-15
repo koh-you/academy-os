@@ -556,7 +556,7 @@ export function normalizeSpecialLectureGuide(guide = {}, fallback = defaultSpeci
     textbook: String(source.textbook ?? "").trim(),
     defaultSessionTopic: String(source.defaultSessionTopic ?? source.goal ?? "특강 수업").trim(),
     scheduleRules,
-    summary: String(source.summary ?? "").trim(),
+    summary: String(source.summary ?? "").replace(/\r\n?/g, "\n"),
     highlights: Array.isArray(source.highlights)
       ? source.highlights.map((item) => String(item ?? "").trim()).filter(Boolean).slice(0, 6)
       : [],
