@@ -28158,7 +28158,14 @@ function formatTemplateLine(label, value) {
 }
 
 function getAbsenceMakeupSourceText(task = {}) {
-  return normalizeMessageText(task.sourceLessonLabel || task.sourceLabel || task.reason || "결석 수업").replace(/\s+/g, " ").trim();
+  const rawSourceLabel = normalizeMessageText(task.sourceLessonLabel || task.sourceLabel || "").replace(/\s+/g, " ").trim();
+  const [, dateFromLabel = ""] = rawSourceLabel.match(/^(\d{4}-\d{2}-\d{2})\s*/) ?? [];
+  const sourceDate = task.sourceDate || task.lessonDate || dateFromLabel;
+  const sourceDateLabel = formatSupplementShortDate(sourceDate);
+  const sourceLabelWithoutDate = rawSourceLabel.replace(/^\d{4}-\d{2}-\d{2}\s*/, "").trim();
+  if (sourceDateLabel && sourceLabelWithoutDate) return `${sourceDateLabel} ${sourceLabelWithoutDate}`;
+  if (sourceDateLabel) return `${sourceDateLabel} 결석 수업`;
+  return sourceLabelWithoutDate || normalizeMessageText(task.reason || "결석 수업").replace(/\s+/g, " ").trim();
 }
 
 function getAbsenceMakeupHomeworkText(task = {}) {
@@ -28179,16 +28186,22 @@ function formatSupplementHomeworkCheckSentence(task = {}) {
 }
 
 function formatSupplementDraftScheduleText(task = {}) {
-  const dateText = String(task.scheduledDate || "").trim();
-  const timeText = String(task.scheduledTime || "").trim();
-  if (!dateText) return timeText;
-  const date = new Date(`${dateText}T00:00:00+09:00`);
+  return formatSupplementDateTimeText(task.scheduledDate, task.scheduledTime);
+}
+
+function formatSupplementShortDate(dateText = "") {
+  const normalizedDate = String(dateText || "").trim();
+  const [, , month = "", day = ""] = normalizedDate.match(/^(\d{4})-(\d{2})-(\d{2})$/) ?? [];
+  if (!month || !day) return "";
+  const date = new Date(`${normalizedDate}T00:00:00+09:00`);
   const weekday = Number.isNaN(date.getTime()) ? "" : ["일", "월", "화", "수", "목", "금", "토"][date.getDay()];
-  const [, month = "", day = ""] = dateText.match(/^(\d{4})-(\d{2})-(\d{2})$/) ?? [];
-  const dateLabel = month && day
-    ? `${Number(month)}/${Number(day)}${weekday ? `(${weekday})` : ""}`
-    : dateText;
-  return [dateLabel, timeText].filter(Boolean).join(" ");
+  return `${Number(month)}/${Number(day)}${weekday ? `(${weekday})` : ""}`;
+}
+
+function formatSupplementDateTimeText(dateText = "", timeText = "") {
+  const dateLabel = formatSupplementShortDate(dateText) || String(dateText || "").trim();
+  const timeLabel = String(timeText || "").trim();
+  return [dateLabel, timeLabel].filter(Boolean).join(" ");
 }
 
 function formatSupplementDraftReasonLine(task = {}) {
@@ -28228,13 +28241,15 @@ function createNotificationDraft(task, students, notificationTemplates = {}) {
 
   if (task.taskType === "absence_makeup") {
     const absenceSourceText = getAbsenceMakeupSourceText(task);
+    const scheduleLine = scheduleText ? `일시: ${scheduleText}` : "";
     const progressMemoLine = progressMemo ? `보충 메모:\n${progressMemo}` : "";
+    const absenceTargetText = absenceSourceText === "결석 수업" ? absenceSourceText : `${absenceSourceText} 결석 수업`;
     const progressSentence = methodId === "recorded_lecture"
-      ? `${absenceSourceText} 결석 보강을 녹화 강의로 진행합니다.`
-      : `${absenceSourceText} 결석 보강을 진행합니다.`;
+      ? `${absenceTargetText} 보강을 녹화 강의로 진행합니다.`
+      : `${absenceTargetText} 보강을 진행합니다.`;
     return renderNotificationTemplate(templates.absenceMakeupStudentReminder, {
       "결석사유줄": absenceReasonLine,
-      "보강일정": scheduleText,
+      "보강일정": scheduleLine,
       "보강진행문장": progressSentence,
       "보충메모": progressMemoLine,
       "학생명": studentName,
@@ -28293,7 +28308,7 @@ function formatSupplementScheduleDateTime(taskOrDate = {}, maybeTime = "") {
   const date = typeof taskOrDate === "object" ? taskOrDate.scheduledDate || taskOrDate.linkedLessonDate || "" : taskOrDate;
   const timeSource = typeof taskOrDate === "object" ? taskOrDate.scheduledTime || taskOrDate.linkedLessonTime || "" : maybeTime;
   const time = normalizeTimeInput(timeSource) || timeSource || "";
-  return [date, time].filter(Boolean).join(" ") || "미확정";
+  return formatSupplementDateTimeText(date, time) || "미확정";
 }
 
 function getNextHourlyAlimtalkReservationAt(now = new Date(), minimumLeadMinutes = 5) {
