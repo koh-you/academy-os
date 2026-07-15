@@ -1306,15 +1306,14 @@ function buildNotificationTemplatePreview(type) {
   if (type === "specialLecture") {
     return joinMessageBlocks([
       `[#{학원명}] 특강 안내`,
-      "#{학생명} 학생 보호자님께 안내드립니다.",
-      "본 메시지는 #{학원명}에 재원 중이거나 상담을 신청한 학생의 보호자님께 보내는 특강 일정 안내입니다.",
+      "안녕하세요. #{학원명}입니다.",
+      "#{학생명} 학생 보호자님께 특강 일정을 안내드립니다.",
+      "이 알림톡은 #{학원명} 재원생 보호자님께 드리는 특강 일정 안내입니다.",
       "특강명: #{특강명}",
       "대상: #{대상}",
       "요일: #{요일}",
       "시간: #{시간}",
-      "시수: #{시수}",
-      "수강료: #{수강료}",
-      "자세한 수업 구성과 회차별 일정은 아래 버튼에서 확인해 주세요.",
+      "세부 시수와 수강료, 회차별 일정은 아래 버튼에서 확인해 주세요.",
       "버튼: 특강 안내문 보기 -> #{안내문링크}"
     ]);
   }
@@ -9807,7 +9806,7 @@ const noticeMessageTemplates = [
     id: "specialLecture",
     label: "특강문자",
     title: "특강 안내",
-    body: "안녕하세요. 으뜸수학 고태영T입니다.\n\n특강 일정을 안내드립니다.\n요일:\n시간:\n시수:\n\n자세한 안내는 아래 링크에서 확인 부탁드립니다.\n"
+    body: "[#{학원명}] 특강 안내\n\n안녕하세요. #{학원명}입니다.\n#{학생명} 학생 보호자님께 특강 일정을 안내드립니다.\n\n이 알림톡은 #{학원명} 재원생 보호자님께 드리는 특강 일정 안내입니다.\n\n특강명: #{특강명}\n대상: #{대상}\n요일: #{요일}\n시간: #{시간}\n\n세부 시수와 수강료, 회차별 일정은 아래 버튼에서 확인해 주세요."
   }
 ];
 
@@ -10011,12 +10010,10 @@ function NotificationCenter({
     setNoticeSpecialLectureMeta({
       guideId: normalizedGuide.specialLectureGuideId,
       guideUrl,
-      lessonCount: normalizedGuide.lessonCount,
       title: normalizedGuide.title,
       audience: normalizedGuide.audience,
       days: normalizedGuide.days,
-      time: normalizedGuide.time,
-      tuition: normalizedGuide.tuition
+      time: normalizedGuide.time
     });
     setNoticeTitle(normalizedGuide.title || "특강 안내");
     setNoticeBody(noticeBodyText);
@@ -10065,10 +10062,8 @@ function NotificationCenter({
             specialLectureAudience: noticeSpecialLectureMeta.audience,
             specialLectureDays: noticeSpecialLectureMeta.days,
             specialLectureGuideId: noticeSpecialLectureMeta.guideId,
-            specialLectureLessonCount: noticeSpecialLectureMeta.lessonCount,
             specialLectureTime: noticeSpecialLectureMeta.time,
             specialLectureTitle: noticeSpecialLectureMeta.title,
-            specialLectureTuition: noticeSpecialLectureMeta.tuition,
             specialLectureUrl: noticeSpecialLectureMeta.guideUrl
           }
         : {})
@@ -19958,10 +19953,8 @@ function NotificationSettingsSection({ integrationStatus }) {
       reason: testType === "attendance" ? "태블릿/수기 출결 연결 점검" : "",
       specialLectureAudience: testType === "specialLecture" ? "예비고1, 예비고2" : "",
       specialLectureDays: testType === "specialLecture" ? "월·수·금" : "",
-      specialLectureLessonCount: testType === "specialLecture" ? "총 8회 · 24시간" : "",
       specialLectureTime: testType === "specialLecture" ? "13:00-16:00" : "",
       specialLectureTitle: testType === "specialLecture" ? "2026 여름 개별 진도 클리닉" : "",
-      specialLectureTuition: testType === "specialLecture" ? "300,000원" : "",
       specialLectureUrl: testType === "specialLecture" ? "https://academy-os-blue.vercel.app/#special-lecture?guide=2026-summer-high1-clinic-mwf" : "",
       studentName: "테스트학생",
       studentPhone: notificationStatus?.testRecipient,

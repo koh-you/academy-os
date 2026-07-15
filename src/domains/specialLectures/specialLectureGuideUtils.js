@@ -716,10 +716,9 @@ export function buildSpecialLectureNoticeText(guide = {}, guideUrl = getSpecialL
     `대상: ${normalizedGuide.audience || "-"}`,
     `요일: ${normalizedGuide.days || "-"}`,
     `시간: ${normalizedGuide.time || "-"}`,
-    `시수: ${normalizedGuide.lessonCount || "-"}`,
     ...specialNotesLines,
     "",
-    normalizedGuide.noticeMemo || "자세한 커리큘럼과 안내사항은 아래 링크에서 확인 부탁드립니다.",
+    normalizedGuide.noticeMemo || "세부 시수와 수강료, 회차별 일정은 아래 링크에서 확인 부탁드립니다.",
     guideUrl
   ].join("\n");
 }
