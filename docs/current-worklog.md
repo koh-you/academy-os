@@ -12,6 +12,31 @@
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-15 P1. 리팩터링 handoff와 작업지침 갱신
+
+- 상태: 완료 - 문서 갱신/검증 완료
+- 사용자 요청: 리팩터링 1번까지의 작업과 의도/목적을 다음 세션에 넘길 프롬프트로 정리하고, 앞으로의 유지보수 개발과 리팩터링을 함께 진행하는 작업지침으로 남긴다. 다음 세션 시작 즉시 해야 할 일을 AI가 새 대화세션에 띄울 수 있게 한다.
+- 구현 결과: `AGENTS.md`에 `Refactoring + Maintenance Workflow` 섹션을 추가했다. 리팩터링은 별도 프로젝트가 아니라 유지보수 개발 방식이며, 새 기능 개발 시에도 저장 원천, side effect, 분리 후보 파일명을 같이 본다는 원칙을 명시했다.
+- 구현 결과: `docs/next-session/README.md`를 현재 실제 최신 커밋 `df00de34`와 리팩터링 1번 커밋 전 상태 기준으로 다시 작성했다. 새 세션은 코딩을 바로 이어가지 않고, 먼저 리팩터링 1번 사람 검수 gate를 사용자에게 띄우도록 지시했다.
+- 구현 결과: 마무리 안 된 워크플로를 명시했다. 리팩터링 1번 사람 gate 후 커밋/푸시, `special_lecture_applications` SQL 수동 적용, Tally Webhook 연결, 운영 특강관리 신청자 검수, Solapi/null 오류 후속, 보충관리 회귀 검수가 남아 있다.
+- 저장 원천: 문서/작업지침 변경만 수행했다. 런타임 저장 원천은 바꾸지 않았다. 특강 안내문은 `app_state.specialLectureGuides`, 특강 신청자는 `special_lecture_applications`, 공지/예약은 `notification_jobs` 기준을 유지한다.
+- 커밋/푸시: 리팩터링 1번 사람 gate 전이므로 커밋/푸시하지 않는다. 다음 세션에서 gate 통과 후 검증 명령을 다시 실행하고 커밋/푸시한다.
+- 중단 조건: 다음 세션이 사람 gate 없이 리팩터링 2번을 시작함, 사람 gate 통과 전 커밋/푸시함, `.codex-temp/`나 비밀값을 Git에 포함함, Tally 특강 신청자 원천을 신입생 접수와 섞음.
+- 검증: `git diff --check` 통과 예정. 문서 변경이므로 앱 빌드는 재실행하지 않는다.
+
+### 2026-07-15 P1. App.jsx 리팩터링 1번 - 특강 helper 분리
+
+- 상태: 완료 - 사람 검수 gate 통과, gate 후 검증 재실행/커밋/푸시 진행
+- 사용자 요청: 리팩터링 중요도 1번인 `specialLecture helpers` 분리를 진행한다. 앞으로 리팩터링은 유지보수 개발과 함께 진행하고, 각 단위 종료 후 사람 검수 gate를 받아 통과하면 커밋/푸시한다.
+- 구현 결과: `App.jsx`에 있던 특강 안내문/일정 계산/회차 normalize/공개 URL/Tally URL/신청자 normalize helper를 `src/domains/specialLectures/specialLectureGuideUtils.js`로 분리했다.
+- 구현 결과: `App.jsx`는 새 특강 helper 모듈을 import해 기존 `SpecialLectureNoticePanel`, `SpecialLectureApplicationPanel`, `SpecialLecturePublicPage` 동작을 그대로 사용한다. 이번 작업에서 UI 컴포넌트 분리는 하지 않았다.
+- 구현 결과: production scenario 테스트가 특강 helper를 `App.jsx` 안에서만 찾던 부분을 새 모듈까지 포함하도록 갱신했다. 정적 테스트의 의도는 유지하고, 리팩터링된 파일 구조만 반영했다.
+- 사람 검수: 사용자가 `운영 > 특강관리` gate 통과를 확인했다. 기존 특강 카드, 공개 안내문 미리보기, 일정 계산, 회차별 일정 수정 반영, Tally 링크 유지, 알림톡 발송 준비의 무예약 동작, 새로고침 후 안내문 유지 확인을 통과 기준으로 삼았다.
+- 저장 원천: 저장 구조는 바꾸지 않았다. 특강 안내문 원본은 Supabase `app_state.specialLectureGuides`, 특강 신청자는 Supabase `special_lecture_applications`, 공지/알림톡 예약은 기존 `notification_jobs` 흐름 그대로다. 새 SQL은 없다.
+- 커밋/푸시: 사람 검수 gate 통과 후 검증 명령을 다시 실행하고, 리팩터링 1번 변경분만 GitHub `main`에 커밋/푸시한다.
+- 중단 조건: 특강 안내문 저장 후 새로고침에서 저장본이 사라짐, 공개 안내문 URL이 바뀌거나 Tally 신청 URL query가 빠짐, 일정 계산/회차 카드/수강료 계산 결과가 이전과 달라짐, `알림톡 발송 준비`가 실제 예약/발송을 생성함, 특강 신청자와 신입생 접수가 섞임.
+- 검증: 특강 helper 단독 import smoke check 통과, `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 289개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P1. 다음 세션 handoff 갱신 - 특강관리/SQL 수동 작업 반영
 
 - 상태: 완료 - 문서 갱신/검증 완료
