@@ -10670,6 +10670,9 @@ function SpecialLectureNoticePanel({
     : "기간과 요일을 선택하면 표시됩니다.";
   const selectedGuideStatus = selectedGuide ? getSpecialLectureStatusBadge(selectedGuide) : null;
   const isManagingSelectedGuide = Boolean(selectedGuide && managementGuideId === selectedGuide.specialLectureGuideId);
+  const selectedGuideHighlights = selectedGuide
+    ? (Array.isArray(selectedGuide.highlights) && selectedGuide.highlights.length ? selectedGuide.highlights : [""])
+    : [];
   const sessionPlanSummaryText = selectedGuideSessions.length
     ? `${selectedGuideSessions.length}회 · ${selectedGuide.lessonCount || formatSpecialLectureLessonCount(selectedGuideSessions.length, getSpecialLectureTotalHours(selectedGuideSessions))} · ${selectedGuideSessions[0]?.dateKey || selectedGuideSessions[0]?.date || "시작일 미입력"} ~ ${selectedGuideSessions[selectedGuideSessions.length - 1]?.dateKey || selectedGuideSessions[selectedGuideSessions.length - 1]?.date || "종료일 미입력"}`
     : "회차 일정이 없습니다.";
@@ -10730,6 +10733,25 @@ function SpecialLectureNoticePanel({
         guide.specialLectureGuideId === selectedGuide.specialLectureGuideId ? nextGuide : guide
       )
     );
+  }
+
+  function updateSpecialLectureHighlight(index, value) {
+    if (!selectedGuide) return;
+    const nextHighlights = selectedGuideHighlights.map((item, itemIndex) => (
+      itemIndex === index ? value : item
+    ));
+    updateSelectedGuide("highlights", nextHighlights);
+  }
+
+  function addSpecialLectureHighlight() {
+    if (!selectedGuide || selectedGuideHighlights.length >= 6) return;
+    updateSelectedGuide("highlights", [...selectedGuideHighlights, ""]);
+  }
+
+  function removeSpecialLectureHighlight(index) {
+    if (!selectedGuide) return;
+    const nextHighlights = selectedGuideHighlights.filter((_, itemIndex) => itemIndex !== index);
+    updateSelectedGuide("highlights", nextHighlights.length ? nextHighlights : [""]);
   }
 
   function replaceSelectedGuideSessions(sessions) {
@@ -11139,6 +11161,39 @@ function SpecialLectureNoticePanel({
               onChange={(event) => updateSelectedGuide("summary", event.target.value)}
             />
           </label>
+
+          <section className="specialLectureWideField specialLectureHighlightField">
+            <div className="specialLectureFieldHeader">
+              <strong>수업 방향 카드</strong>
+              <button
+                className="softButton compact"
+                disabled={selectedGuideHighlights.length >= 6}
+                onClick={addSpecialLectureHighlight}
+                type="button"
+              >
+                카드 추가
+              </button>
+            </div>
+            <div className="specialLectureHighlightEditorList">
+              {selectedGuideHighlights.map((highlight, index) => (
+                <div className="specialLectureHighlightEditorCard" key={`special_lecture_highlight_${index}`}>
+                  <input
+                    aria-label={`수업 방향 카드 ${index + 1}`}
+                    placeholder={`수업 방향 카드 ${index + 1}`}
+                    value={highlight}
+                    onChange={(event) => updateSpecialLectureHighlight(index, event.target.value)}
+                  />
+                  <button
+                    className="dangerSoftButton compact"
+                    onClick={() => removeSpecialLectureHighlight(index)}
+                    type="button"
+                  >
+                    삭제
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
 
           <label className="specialLectureWideField specialLectureNotesField">
             특이사항
@@ -11892,8 +11947,9 @@ function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
   const normalizedGuide = normalizeSpecialLectureGuide(guide);
   const applicationUrl = getSpecialLectureApplicationUrl(normalizedGuide);
   const summary = normalizedGuide.summary.trim();
+  const highlightCards = normalizedGuide.highlights.map((highlight) => highlight.trim()).filter(Boolean);
   const specialNotes = normalizedGuide.specialNotes.trim();
-  const hasOverview = Boolean(summary || normalizedGuide.highlights.length || specialNotes);
+  const hasOverview = Boolean(summary || highlightCards.length || specialNotes);
   const primaryFacts = [
     ["대상", normalizedGuide.audience],
     ["요일", normalizedGuide.days],
@@ -11931,9 +11987,9 @@ function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
             <h2>수업 방향</h2>
           </div>
           {summary ? <p>{summary}</p> : null}
-          {normalizedGuide.highlights.length ? (
-            <ul>
-              {normalizedGuide.highlights.map((highlight) => (
+          {highlightCards.length ? (
+            <ul className="specialLectureDirectionCards">
+              {highlightCards.map((highlight) => (
                 <li key={highlight}>{highlight}</li>
               ))}
             </ul>

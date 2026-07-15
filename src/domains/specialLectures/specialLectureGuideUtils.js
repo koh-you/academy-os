@@ -558,7 +558,7 @@ export function normalizeSpecialLectureGuide(guide = {}, fallback = defaultSpeci
     scheduleRules,
     summary: String(source.summary ?? "").replace(/\r\n?/g, "\n"),
     highlights: Array.isArray(source.highlights)
-      ? source.highlights.map((item) => String(item ?? "").trim()).filter(Boolean).slice(0, 6)
+      ? source.highlights.map((item) => String(item ?? "").replace(/\r\n?/g, "\n")).slice(0, 6)
       : [],
     sessions,
     noticeMemo: String(source.noticeMemo ?? "").trim(),
