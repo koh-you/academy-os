@@ -14,6 +14,21 @@
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-15 P1. 일요보강 가상블록 제거와 시험대비 lesson 원천 전환
+
+- 상태: 완료 - 구현/자동검증 완료
+- 사용자 요청: 기존 `일요보강`을 `시험대비`로 바꾸고, 날짜를 옮긴 학교별 블록을 가상 lesson으로 파생하는 구조를 제거한다. 기존 일요보강 수업은 모두 삭제하고 새 `시험대비` 수업으로 다시 만드는 방향이 더 나은지도 검토한다.
+- 구현 결과: 수업일지 달력에서 `generatedLessonControls.sundayMakeupBlocks` 기반 가상 lesson 파생을 제거했다. 더 이상 `isVirtualSundayMakeupBlock`, 이동 블록, 블록 저장/복구/삭제 UI가 생성되지 않는다.
+- 구현 결과: 새로 생성되는 시험대비 자동 수업은 `lessonType=examPrep`, `lessonId=lesson_exam_prep_<date>`, `sourceSchoolEventId=generated:exam_prep:<date>`로 저장된다. 기존 `examSundayMakeup`은 legacy 호환 타입으로만 읽고, 화면/필터/수정 모달에서는 `시험대비`로 보이게 했다.
+- 구현 결과: 기존 `examSundayMakeup` row가 로드되면 화면 상태에서 `examPrep`으로 normalize되고 표준 색상 `examPrep #bae6fd`를 쓴다. 기존 lessonId는 그대로 두는 호환 경로를 남겨 수업기록/숙제/알림톡 연결이 갑자기 끊기지 않게 했다.
+- 구현 결과: `시험대비` 상세 모달은 실제 persisted lesson 하나만 보여준다. 연결된 시험정보(`sourceLabel`), 날짜/시간, 학생 수, 일정 수정/삭제 버튼만 남기고 학교별 블록 편집은 제거했다.
+- SQL 필요: 운영에서 기존 일요보강 row를 깨끗하게 삭제하고 새 시험대비로 재생성하려면 `supabase/20260715_cleanup_legacy_exam_sunday_makeup_lessons.sql`을 적용한다. 이 SQL은 삭제 대상과 연결 record/homework/notification count를 먼저 조회하고, 활성 `notification_jobs`가 있으면 삭제를 중단한다.
+- 저장 원천: 시험대비 수업 원천은 Supabase `lessons`다. 시험정보 원천은 기존 Supabase `exam_prep_rows`, 자동생성 후보 제어는 기존 `app_state.generatedLessonControls`다. legacy `app_state.generatedLessonControls.sundayMakeupBlocks` 값은 삭제하지 않지만 더 이상 UI/달력 파생 원천으로 사용하지 않는다.
+- 외부 side effect: 이번 구현만으로 Solapi 예약/발송, Tally, Slack, AI 호출은 없다. SQL cleanup을 적용하면 기존 legacy lesson 삭제로 `lesson_student_records`는 FK cascade 삭제되고, `homeworks`/`notification_jobs`의 lesson 연결은 FK 정책에 따라 null 처리될 수 있다. 활성 알림톡 job이 있으면 SQL이 실패해야 정상이다.
+- 사람 검토 gate: SQL 적용 전 preview 결과에서 삭제 대상이 기존 일요보강/legacy 시험대비만인지 확인한다. active notification job count가 0이면 SQL을 적용한다. 이후 `시험관리/학사일정`에서 자동 수업 후보를 확인하고 시험대비를 다시 반영한다. `수업일지` 달력에서 필터 `시험대비`를 눌렀을 때 새 수업이 보이고, 클릭 시 일반 블록 편집이 아니라 시험대비 상세가 열리면 통과다.
+- 중단 조건: 삭제 대상에 정규/특강/보충 수업이 섞임, active notification job이 1건 이상인데 삭제가 진행됨, 삭제 후 기존 일요보강 가상블록이 계속 보임, 새 후보가 `lessonType=examSundayMakeup` 또는 `lesson_exam_sunday_makeup_`로 저장됨, 시험대비 삭제/생성만으로 Solapi 예약/발송이 생김.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과, `npm run test:production` 306개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P1. 특강 확정 수강명단 원천과 수업일지 생성 gate
 
 - 상태: 완료 - 구현/자동검증 완료

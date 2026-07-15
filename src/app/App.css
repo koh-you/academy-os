@@ -3301,16 +3301,12 @@ button {
   border-left: 4px solid #fb923c;
 }
 
-.lessonPill.sundayMakeupLessonPill {
+.lessonPill.examPrepLessonPill {
   border-left: 4px solid #38bdf8;
 }
 
 .lessonPill.specialLectureLessonPill {
   border-left: 4px solid #2563eb;
-}
-
-.lessonPill.sundayMakeupLessonPill.blockMoved {
-  border-left-color: #f59e0b;
 }
 
 .lessonTypeFilterBar {
@@ -3603,18 +3599,18 @@ button {
   text-align: right;
 }
 
-.examSundayMakeupBody {
+.examPrepLessonBody {
   display: grid;
   gap: 14px;
 }
 
-.examSundaySummaryGrid {
+.examPrepSummaryGrid {
   display: grid;
   gap: 10px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.examSundaySummaryGrid > div {
+.examPrepSummaryGrid > div {
   background: #f8fafc;
   border: 1px solid #dbe5f5;
   border-radius: 8px;
@@ -3624,38 +3620,36 @@ button {
   padding: 14px;
 }
 
-.examSundaySummaryGrid span,
-.examSundaySummaryGrid small {
+.examPrepSummaryGrid span,
+.examPrepSummaryGrid small {
   color: #64748b;
   font-weight: 800;
 }
 
-.examSundaySummaryGrid strong {
+.examPrepSummaryGrid strong {
   color: #0f172a;
   font-size: 18px;
   font-weight: 900;
   overflow-wrap: anywhere;
 }
 
-.examSundayPanel {
+.examPrepPanel {
   background: #f8fbff;
 }
 
-.examSundayPanel h3 {
+.examPrepPanel h3 {
   font-size: 22px;
   margin: 4px 0 8px;
 }
 
-.examSundayActions {
+.examPrepActions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end;
 }
 
-.examSundayActions button,
-.examSundaySaveBar button,
-.examSundayBlockActions button {
+.examPrepActions button {
   border-radius: 8px;
   font-size: 14px;
   font-weight: 900;
@@ -3663,150 +3657,51 @@ button {
   padding: 0 14px;
 }
 
-.examSundayBlockList {
+.examPrepSourceList {
   border: 1px solid #dbe5f5;
   border-radius: 8px;
   display: grid;
   overflow: hidden;
 }
 
-.examSundayBlockItem {
-  align-items: start;
+.examPrepSourceItem {
+  align-items: center;
   background: #fff;
   border-bottom: 1px solid #e2e8f0;
   display: grid;
-  gap: 12px;
-  grid-template-columns: 280px minmax(0, 1fr) auto;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
   padding: 14px 16px;
 }
 
-.examSundayBlockItem:last-child {
+.examPrepSourceItem:last-child {
   border-bottom: 0;
 }
 
-.examSundayBlockItem.focused {
-  background: #fffbeb;
-  box-shadow: inset 4px 0 0 #f59e0b;
-}
-
-.examSundayBlockItem time {
-  color: #1d4ed8;
-  font-weight: 900;
-}
-
-.examSundayBlockTimeFields {
-  display: grid;
-  gap: 8px;
-}
-
-.examSundayBlockTimeFields > div {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(2, minmax(132px, 1fr));
-}
-
-.examSundayBlockTimeFields input,
-.examSundayBlockTitleInput,
-.examSundayBlockItem textarea {
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  color: #0f172a;
-  font: inherit;
-  font-weight: 800;
-  min-width: 0;
-  padding: 10px 12px;
-  width: 100%;
-}
-
-.examSundayBlockTimeFields input[type="date"],
-.examSundayBlockTimeFields input[type="time"] {
-  min-height: 58px;
-}
-
-.examSundayBlockItem textarea {
-  min-height: 72px;
-  resize: vertical;
-}
-
-.examSundayBlockTitleInput {
-  font-size: 17px;
-  font-weight: 900;
-}
-
-.examSundayBlockItem strong {
+.examPrepSourceItem strong {
   color: #0f172a;
   display: block;
   font-size: 17px;
   overflow-wrap: anywhere;
 }
 
-.examSundayBlockItem small {
+.examPrepSourceItem small {
   color: #64748b;
   display: block;
-  margin-top: 4px;
-}
-
-.examSundayBlockActions {
-  align-items: end;
-  display: grid;
-  gap: 8px;
-  justify-items: end;
-}
-
-.examSundayBlockActions > span {
-  background: #eef2ff;
-  border-radius: 999px;
-  color: #3730a3;
-  font-size: 13px;
   font-weight: 900;
-  padding: 7px 10px;
   white-space: nowrap;
 }
 
-.examSundayBlockActions .dangerSoftButton {
-  background: #fff7ed;
-  border-color: #fed7aa;
-  color: #dc2626;
-  min-height: 36px;
-  padding: 0 12px;
-}
-
-.examSundaySaveBar {
-  align-items: center;
-  background: #f8fafc;
+.examPrepEmptyState {
+  background: #ffffff;
   border: 1px solid #dbe5f5;
   border-radius: 8px;
-  display: flex;
-  gap: 12px;
-  justify-content: space-between;
-  margin-top: 12px;
-  padding: 12px 14px;
-}
-
-.examSundaySaveBar > span {
   color: #64748b;
   font-size: 14px;
-  font-weight: 900;
-}
-
-.examSundaySaveBar > div {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-.examSundaySaveBar.dirty {
-  background: #fffbeb;
-  border-color: #fcd34d;
-}
-
-.examSundaySaveBar.dirty > span {
-  color: #92400e;
-}
-
-.examSundaySaveBar.saved > span {
-  color: #166534;
+  font-weight: 800;
+  line-height: 1.5;
+  margin: 0;
+  padding: 12px 14px;
 }
 
 .makeupOriginalHomework {
@@ -16949,36 +16844,15 @@ body.attendanceOnlyBody {
   .absenceSourceJournalGrid,
   .supplementAttendanceBox,
   .homeworkMakeupSummary,
-  .examSundaySummaryGrid,
+  .examPrepSummaryGrid,
   .makeupProcessFormGrid,
   .makeupProcessStatusGrid {
     grid-template-columns: 1fr;
   }
 
-  .examSundayBlockItem {
+  .examPrepSourceItem {
     align-items: start;
     grid-template-columns: 1fr;
-  }
-
-  .examSundayBlockTimeFields > div {
-    grid-template-columns: 1fr;
-  }
-
-  .examSundayBlockActions {
-    justify-items: start;
-  }
-
-  .examSundaySaveBar {
-    align-items: stretch;
-    display: grid;
-  }
-
-  .examSundaySaveBar > div {
-    justify-content: stretch;
-  }
-
-  .examSundaySaveBar button {
-    flex: 1;
   }
 }
 
