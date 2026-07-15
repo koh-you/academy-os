@@ -10,6 +10,7 @@
 - 큰 개발방향: Academy OS의 AI/자동화 기능은 `AI 초안 -> 사람이 보기 쉬운 편집 화면 -> 사람 수정/검수 -> 검수본 원본화 -> 산출물/누적데이터 반영` 흐름을 기본값으로 둔다. AI는 숨겨진 최종값이 아니라 사람이 검수할 초안을 만들고, 사용자가 수정/저장한 값이 이후 새 원본이다.
 - 자동 초안 편집 원칙: AI 초안, 템플릿 초안, DB/다른 필드 매핑값은 최초 seed 또는 명시적 재생성에서만 편집 상태로 들어와야 한다. 사용자가 입력을 시작한 뒤에는 로컬 draft/저장된 사용자 편집본이 원본이며, 렌더마다 파생값을 다시 계산해 textarea/input 값을 덮어쓰는 구조는 금지한다.
 - 자동 초안 구현 기준: 새 편집 UI는 `seed -> local draft -> save -> persisted user/teacher fields` 흐름을 먼저 설계한다. 저장 성공 후에는 서버가 돌려준 사용자 편집본으로 draft를 갱신하고, 새로고침 후에도 사용자 편집본이 AI/템플릿 초안보다 우선해야 한다.
+- 리팩터링 gate 기본값: 리팩터링 구현/자동검증이 끝나면 커밋/푸시 전에 `AI 검수 결과`와 `사람이 확인할 것`을 함께 세션에 띄운다. AI는 변경 범위, 저장 원천/API/side effect diff, 테스트, 정적 invariant를 먼저 확인하고, 사람 확인은 AI가 확인할 수 없는 화면 어색함/운영 데이터/외부 서비스 상태 중심으로 최소화한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
 ### 2026-07-15 P1. 리팩터링 handoff와 작업지침 갱신
@@ -51,6 +52,22 @@
 - 커밋/푸시: 사람 gate 승인 후 검증 명령을 다시 실행하고 리팩터링 2번 변경분만 커밋/푸시한다.
 - 중단 조건: 저장 상태 배지가 사라짐, 저장 중/저장 완료/저장 실패 문구가 달라짐, 학생 프로필 저장 상태가 보이지 않음, 특강/시험정보/수업일지 저장 상태 class가 깨짐, 저장 버튼 클릭이 저장 원천이나 발송 예약을 새로 건드림.
 - 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 289개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
+### 2026-07-15 P1. App.jsx 리팩터링 3번 - API client wrapper 분리
+
+- 상태: 구현/검증 완료, AI 검수 + 사람 확인 gate 대기 - 사용자 승인 전 커밋/푸시 금지
+- 사용자 요청: 리팩터링 2번 gate 승인 후 리팩터링 3번을 진행한다. 리팩터링 이후에는 항상 `AI 검수 결과`와 `사람이 확인할 것`을 함께 세션에 띄운다.
+- 구현 결과: `App.jsx`에 있던 API base URL, `apiUrl`, `postJson`, timeout 요청 helper, `postJsonWithHeaders`를 `src/shared/utils/apiClient.js`로 분리했다.
+- 구현 결과: `App.jsx`는 새 API client helper를 import해 기존 함수 이름과 호출부를 그대로 사용한다. endpoint 문자열, 요청 method/body/header 구조, timeout 에러 문구, portal state 에러 fallback 문구는 유지했다.
+- 구현 결과: production scenario 테스트가 `AbortController`, `getJsonWithTimeout`, `postJsonWithTimeout` 같은 API client 문자열을 `App.jsx`에서만 찾지 않고 `src/shared/utils/apiClient.js`까지 함께 검사하도록 갱신했다. 테스트 의도는 낮추지 않았다.
+- 저장 원천: 저장 원천 변경 없음. Supabase `app_state`, `lesson_student_records`, `notification_jobs`, `exam_prep_rows`, `special_lecture_applications` 등 기존 API 경로와 payload를 유지한다. 새 SQL은 없다.
+- local draft/사용자 편집본 보호: API wrapper 위치만 바꿨다. 입력 draft, 저장 버튼, 자동저장, 사용자 편집본 우선순위 로직은 바꾸지 않았다.
+- 외부 side effect: Solapi, Tally, Slack, notification_jobs 예약/발송 로직 변경 없음. API wrapper 분리로 인해 새 발송/예약/삭제 호출을 만들지 않았다.
+- AI 검수: 로컬 wrapper가 `src/shared/utils/apiClient.js`로만 남고 `App.jsx`는 import만 사용하는지 확인했다. 추가/삭제 diff 기준으로 앱 endpoint 추가/삭제가 없고, 테스트 쪽 검사 대상만 `appWithApiClient`로 확장된 것을 확인했다.
+- 사람이 확인할 것: 실제 화면에서 로그인/초기 데이터 로드가 정상인지, 공지 발송/시험분석처럼 timeout helper를 쓰는 화면이 오류 없이 열리는지만 최소 확인한다. 외부 발송/AI 과금 버튼은 누르지 않는다.
+- 커밋/푸시: 사람 gate 승인 전에는 커밋/푸시하지 않는다. 승인 후 검증 명령을 다시 실행하고 리팩터링 3번 변경분만 커밋/푸시한다.
+- 중단 조건: 로그인/초기 데이터 로드 실패, 모든 API 요청이 `127.0.0.1:8787` 또는 운영 API로 가지 않음, timeout 에러 문구가 깨짐, 공지 발송/시험분석/학생 포털 저장 API가 실패함, 리팩터링만 했는데 Solapi/Tally/Slack/notification_jobs 동작이 새로 발생함.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `node --check src/shared/utils/apiClient.js`, `npm run test:production` 289개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
 
 ### 2026-07-15 P1. 다음 세션 handoff 갱신 - 특강관리/SQL 수동 작업 반영
 

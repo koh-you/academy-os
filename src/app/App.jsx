@@ -89,6 +89,14 @@ import {
   saveStateLabels
 } from "../shared/components/InlineSaveStatus.jsx";
 import { sampleData } from "../shared/data/sampleData.js";
+import {
+  apiUrl,
+  getJsonWithTimeout,
+  isRequestTimeoutError,
+  postJson,
+  postJsonWithHeaders,
+  postJsonWithTimeout
+} from "../shared/utils/apiClient.js";
 import { readFileAsDataUrl } from "../shared/utils/file.js";
 import { safeIdPart, shortStableHash } from "../shared/utils/id.js";
 import { applyStudentScheduleToLesson } from "../shared/utils/studentSchedule.js";
@@ -1095,7 +1103,6 @@ function normalizePhoneNumber(value = "") {
 
 const today = getKoreaDateString();
 const futureAbsenceMakeupVisibleDays = 7;
-const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8787").replace(/\/$/, "");
 const appRuntimeSessionId = `runtime_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
 const academyReminderTypeOptions = [
@@ -1248,10 +1255,6 @@ function getAcademyRemindersForLesson(reminders = [], lesson = {}, lessonStudent
     reminder.lessonId === lesson.lessonId ||
     (reminder.studentId && lessonStudentIds.has(reminder.studentId))
   ));
-}
-
-function apiUrl(path) {
-  return `${apiBaseUrl}${path}`;
 }
 
 function getAlimtalkSafetyTone(notificationStatus, forceDryRun = false, forceTestRecipient = false) {
@@ -1442,83 +1445,6 @@ function persistTeacherSession(session) {
   removeStorageValue(window.localStorage, storageKeys.teacherSession);
   removeStorageValue(window.sessionStorage, storageKeys.teacherSession);
   removeCookieValue(storageKeys.teacherSession);
-}
-
-async function postJson(path, body) {
-  const response = await fetch(apiUrl(path), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body)
-  });
-  const result = await response.json();
-  if (!response.ok || !result.ok) {
-    throw new Error(result.error || "API 저장 실패");
-  }
-  return result;
-}
-
-function createRequestTimeoutError(timeoutMs, timeoutMessage = "") {
-  const error = new Error(timeoutMessage || `요청 시간이 ${Math.round(timeoutMs / 1000)}초를 넘었습니다. 잠시 뒤 상태를 확인해 주세요.`);
-  error.name = "TimeoutError";
-  error.requestTimedOut = true;
-  return error;
-}
-
-function isRequestTimeoutError(error) {
-  return Boolean(
-    error?.requestTimedOut ||
-    error?.name === "TimeoutError" ||
-    error?.name === "AbortError" ||
-    String(error?.message ?? "").includes("시간을 넘었습니다")
-  );
-}
-
-async function getJsonWithTimeout(path, timeoutMs = 12000, timeoutMessage = "") {
-  const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const response = await fetch(apiUrl(path), {
-      cache: "no-store",
-      signal: controller.signal
-    });
-    const result = await response.json();
-    if (!response.ok || !result.ok) {
-      throw new Error(result.error || `API 조회 실패: ${response.status}`);
-    }
-    return result;
-  } catch (error) {
-    if (error.name === "AbortError") {
-      throw createRequestTimeoutError(timeoutMs, timeoutMessage);
-    }
-    throw error;
-  } finally {
-    window.clearTimeout(timeoutId);
-  }
-}
-
-async function postJsonWithTimeout(path, body, timeoutMs = 30000, timeoutMessage = "") {
-  const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const response = await fetch(apiUrl(path), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-      signal: controller.signal
-    });
-    const result = await response.json();
-    if (!response.ok || !result.ok) {
-      throw new Error(result.error || "API 저장 실패");
-    }
-    return result;
-  } catch (error) {
-    if (error.name === "AbortError") {
-      throw createRequestTimeoutError(timeoutMs, timeoutMessage);
-    }
-    throw error;
-  } finally {
-    window.clearTimeout(timeoutId);
-  }
 }
 
 async function uploadExamPostSubmissionFile(file, target, student) {
@@ -4305,17 +4231,6 @@ async function fetchPortalData(sessionToken) {
 
 function postPortalState(sessionToken, states) {
   return postJsonWithHeaders("/api/portal-state", { states }, { Authorization: `Bearer ${sessionToken}` });
-}
-
-async function postJsonWithHeaders(path, body, headers = {}) {
-  const response = await fetch(apiUrl(path), {
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...headers },
-    body: JSON.stringify(body)
-  });
-  const result = await response.json();
-  if (!response.ok || result.ok === false) throw new Error(result.error || "요청에 실패했습니다.");
-  return result;
 }
 
 const teacherAccount = {
