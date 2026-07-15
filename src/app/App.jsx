@@ -5510,6 +5510,13 @@ const defaultNotificationTemplates = {
     "#{확인숙제줄}",
     "#{보충메모}"
   ].join("\n"),
+  homeworkMakeupStudentReminder: [
+    "#{학생명} 학생 숙제 보충 안내입니다.",
+    "",
+    "#{보강일정}",
+    "#{보강대상}",
+    "#{보충메모}"
+  ].join("\n"),
   supplementScheduleNotice: [
     "#{일정제목} 일정이 #{상태}되었습니다.",
     "",
@@ -5528,6 +5535,14 @@ const notificationTemplateRows = [
     source: "Supabase app_state.aiSettings.notificationTemplates",
     title: "결석보강 학생 11시 알림톡",
     variables: "#{학생명}, #{보강일정}, #{보강대상}, #{결석사유줄}, #{확인숙제줄}, #{보충메모}"
+  },
+  {
+    audience: "학생",
+    callSite: "보충관리 숙제보충 · 학생 당일 11시 리마인더",
+    key: "homeworkMakeupStudentReminder",
+    source: "Supabase app_state.aiSettings.notificationTemplates",
+    title: "숙제보충 학생 11시 알림톡",
+    variables: "#{학생명}, #{보강일정}, #{보강대상}, #{보충메모}"
   },
   {
     audience: "학생/학부모",
@@ -28170,6 +28185,12 @@ function getAbsenceMakeupHomeworkText(task = {}) {
   return normalizeMessageText(task.supplementHomeworkNote || task.sourcePreviousHomework || "").replace(/\s+/g, " ").trim();
 }
 
+function getHomeworkMakeupTargetText(task = {}) {
+  return normalizeMessageText(task.supplementHomeworkNote || task.sourceLabel || task.reason || "숙제 보충")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function getSupplementTaskSourceLabel(task) {
   if (task?.taskType === "homework_makeup") {
     return task.supplementHomeworkNote || task.sourceLabel || "";
@@ -28237,15 +28258,15 @@ function createNotificationDraft(task, students, notificationTemplates = {}) {
   const homeworkCheckLine = task.taskType === "absence_makeup" ? formatSupplementDraftHomeworkLine(task) : "";
 
   if (task.taskType === "homework_makeup") {
-    if (methodId === "next_lesson") {
-      return `${studentName} 학생 숙제 보충 안내입니다.\n\n다음 수업 때 ${sourceText}를 함께 확인합니다.${progressMemoBlock}`;
-    }
-    if (methodId === "arrival_makeup") {
-      return `${studentName} 학생 숙제 보충 안내입니다.\n\n${scheduleText}\n등원 후 ${sourceText} 보충을 진행합니다.${progressMemoBlock}`;
-    }
-    if (methodId === "stay_after") {
-      return `${studentName} 학생 숙제 보충 안내입니다.\n\n${scheduleText}\n수업 후 ${sourceText} 보충을 마무리합니다.${progressMemoBlock}`;
-    }
+    const scheduleLine = scheduleText ? `일시: ${scheduleText}` : "";
+    const targetLine = formatTemplateLine("보강 대상", getHomeworkMakeupTargetText(task));
+    const progressMemoLine = progressMemo ? `보충 메모:\n${progressMemo}` : "";
+    return renderNotificationTemplate(templates.homeworkMakeupStudentReminder, {
+      "보강대상": targetLine,
+      "보강일정": scheduleLine,
+      "보충메모": progressMemoLine,
+      "학생명": studentName
+    });
   }
 
   if (task.taskType === "absence_makeup") {
