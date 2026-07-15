@@ -37,6 +37,21 @@
 - 중단 조건: 특강 안내문 저장 후 새로고침에서 저장본이 사라짐, 공개 안내문 URL이 바뀌거나 Tally 신청 URL query가 빠짐, 일정 계산/회차 카드/수강료 계산 결과가 이전과 달라짐, `알림톡 발송 준비`가 실제 예약/발송을 생성함, 특강 신청자와 신입생 접수가 섞임.
 - 검증: 특강 helper 단독 import smoke check 통과, `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 289개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
 
+### 2026-07-15 P1. App.jsx 리팩터링 2번 - InlineSaveStatus 공통 UI 분리
+
+- 상태: 완료 - AI 검수 기반 사람 gate 승인, gate 후 검증 재실행/커밋/푸시 진행
+- 사용자 요청: 리팩터링 1번 gate 통과 후 리팩터링 2번을 진행한다. 리팩터링 2번은 common UI components 후보 중 작은 단위부터 진행한다.
+- 구현 결과: `App.jsx`와 `StudentManager.jsx`에 중복으로 있던 `InlineSaveStatus`, `saveStateLabels`, `normalizeSaveState`, `getAggregateSaveState` 계열을 `src/shared/components/InlineSaveStatus.jsx`로 분리했다.
+- 구현 결과: 기존 저장 상태 CSS class(`saveState`, `save-*`, `inlineSaveStatus`)와 표시 문구(`저장 전`, `변경됨`, `저장 중`, `저장 완료`, `저장 실패`)는 유지했다. UI 동작만 공통 컴포넌트를 읽도록 바꾸고 저장/API 로직은 바꾸지 않았다.
+- 저장 원천: 저장 원천 변경 없음. 학생 기본정보/상담/성적/테스트는 기존 Supabase/app_state 저장 흐름을 유지하고, 특강 안내문은 `app_state.specialLectureGuides`, 시험정보는 `exam_prep_rows`, 수업일지는 `lesson_student_records` 경로를 유지한다. 새 SQL은 없다.
+- local draft/사용자 편집본 보호: 이번 작업은 상태 표시 컴포넌트 분리만 수행했다. 입력값 seed/local draft/save/persisted 흐름을 새로 만들거나 덮어쓰지 않는다.
+- 외부 side effect: Solapi, Tally, Slack, notification_jobs, Supabase SQL, Storage 변경 없음.
+- 나중에 분리 후보: 다음 common UI 후보는 `Modal` 또는 `EmptyState` 계열이다. 단, 수업일지/Solapi/보충관리처럼 side effect가 큰 화면은 별도 gate를 먼저 둔다.
+- 사람 검수: 사용자가 AI 검수 결과를 기준으로 리팩터링 2번 gate 통과를 승인했다. AI 검수는 공통 파일 이동, 저장 상태 문구/class 유지, 저장/API/Solapi/Tally/notification_jobs diff 없음, 자동검증 통과를 기준으로 삼았다.
+- 커밋/푸시: 사람 gate 승인 후 검증 명령을 다시 실행하고 리팩터링 2번 변경분만 커밋/푸시한다.
+- 중단 조건: 저장 상태 배지가 사라짐, 저장 중/저장 완료/저장 실패 문구가 달라짐, 학생 프로필 저장 상태가 보이지 않음, 특강/시험정보/수업일지 저장 상태 class가 깨짐, 저장 버튼 클릭이 저장 원천이나 발송 예약을 새로 건드림.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 289개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P1. 다음 세션 handoff 갱신 - 특강관리/SQL 수동 작업 반영
 
 - 상태: 완료 - 문서 갱신/검증 완료

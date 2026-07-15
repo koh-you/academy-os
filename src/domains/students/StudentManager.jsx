@@ -1,4 +1,5 @@
 import { Component, useEffect, useState } from "react";
+import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { parseStudentScheduleOverride } from "../../shared/utils/studentSchedule.js";
 
 const withdrawalReasonOptions = [
@@ -7,14 +8,6 @@ const withdrawalReasonOptions = [
   { value: "withdrawal", label: "퇴원" },
   { value: "other", label: "기타" }
 ];
-
-const saveStateLabels = {
-  idle: "저장 전",
-  dirty: "변경됨",
-  saving: "저장 중",
-  saved: "저장 완료",
-  failed: "저장 실패"
-};
 
 const consultationTypeOptions = [
   { value: "student", label: "학생 상담" },
@@ -179,15 +172,6 @@ function saveActionLabel(defaultLabel, saveState) {
   if (saveState === "failed") return "저장 실패";
   if (saveState === "saved") return "저장 완료";
   return defaultLabel;
-}
-
-function InlineSaveStatus({ label = "", saveState = "idle" }) {
-  const normalizedSaveState = Object.prototype.hasOwnProperty.call(saveStateLabels, saveState) ? saveState : "idle";
-  return (
-    <small className={`saveState save-${normalizedSaveState} inlineSaveStatus`}>
-      {label ? `${label} · ` : ""}{saveStateLabels[normalizedSaveState]}
-    </small>
-  );
 }
 
 class StudentProfileErrorBoundary extends Component {

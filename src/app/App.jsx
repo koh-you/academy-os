@@ -82,6 +82,12 @@ import {
   specialLectureWeekdayOptions
 } from "../domains/specialLectures/specialLectureGuideUtils.js";
 import { AutosaveRiskNotice } from "../shared/components/AutosaveRiskNotice.jsx";
+import {
+  getAggregateSaveState,
+  InlineSaveStatus,
+  normalizeSaveState,
+  saveStateLabels
+} from "../shared/components/InlineSaveStatus.jsx";
 import { sampleData } from "../shared/data/sampleData.js";
 import { readFileAsDataUrl } from "../shared/utils/file.js";
 import { safeIdPart, shortStableHash } from "../shared/utils/id.js";
@@ -645,14 +651,6 @@ function getPreparationMemoCommentDraftUpdates(record = {}, nextMemo = "", optio
   return updates;
 }
 
-const saveStateLabels = {
-  idle: "저장 전",
-  dirty: "변경됨",
-  saving: "저장 중",
-  saved: "저장 완료",
-  failed: "저장 실패"
-};
-
 function normalizeExamReviewDraftValue(value = "") {
   const lines = String(value ?? "")
     .replace(/\r\n/g, "\n")
@@ -851,29 +849,6 @@ function normalizeExamPrepRowReviewDraft(row = {}) {
   if (!isExamReviewDraftLike(currentReview)) return row;
   const nextReview = normalizeExamReviewDraftText(currentReview, row);
   return nextReview === currentReview ? row : { ...row, review: nextReview };
-}
-
-function normalizeSaveState(saveState) {
-  return Object.prototype.hasOwnProperty.call(saveStateLabels, saveState) ? saveState : "idle";
-}
-
-function getAggregateSaveState(states = []) {
-  const normalizedStates = states.map(normalizeSaveState).filter((state) => state !== "idle");
-  if (normalizedStates.includes("saving")) return "saving";
-  if (normalizedStates.includes("dirty")) return "dirty";
-  if (normalizedStates.includes("failed")) return "failed";
-  if (normalizedStates.includes("saved")) return "saved";
-  return "idle";
-}
-
-function InlineSaveStatus({ className = "", label = "", saveState = "idle" }) {
-  const normalizedSaveState = normalizeSaveState(saveState);
-  const classes = ["saveState", `save-${normalizedSaveState}`, "inlineSaveStatus", className].filter(Boolean).join(" ");
-  return (
-    <small className={classes}>
-      {label ? `${label} · ` : ""}{saveStateLabels[normalizedSaveState]}
-    </small>
-  );
 }
 
 const appStateAutosaveRisk = {
