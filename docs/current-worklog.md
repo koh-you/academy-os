@@ -14,6 +14,21 @@
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-15 P1. 특강 확정 수강명단 원천과 수업일지 생성 gate
+
+- 상태: 완료 - 구현/자동검증 완료
+- 사용자 요청: 특강 신청자 원천을 다시 구성해 `특강 선택 -> 확정 + 기존 학생 매칭 명단 확인 -> 회차별 lesson 생성 -> lesson.studentIds 반영 -> 특강 수업일지 모달` 흐름으로 구현한다.
+- 구현 결과: Tally 신청자 원본 `special_lecture_applications`와 실제 수업 생성 원천을 분리하기 위해 `special_lecture_enrollments` 수강명단 레이어를 추가했다. 확정 신청자 중 기존 학생과 1:1 매칭된 학생만 `확정 명단에 추가`로 수강명단에 저장한다.
+- 구현 결과: `운영 > 특강관리` 신청자 패널에 `확정 수강명단 원천` 섹션을 추가했다. 학생별로 회차 체크박스와 메모를 저장할 수 있어, 창일중처럼 8회 중 5회만 수강하는 예외를 수업 생성 전에 반영할 수 있다.
+- 구현 결과: `특강 수업일지 생성 preview gate`를 추가했다. 저장된 수강명단을 기준으로 회차별 학생 명단을 보여주고, 버튼을 누르기 전에는 `lessons`에 저장하지 않는다. 저장 시 기존 `/api/lessons/bulk`를 사용하며 첫 회차 수업일지를 바로 열어 확인할 수 있게 했다.
+- 구현 결과: 생성되는 특강 lesson은 `lessonType=specialLecture`, `lessonTrackType=specialLecture`, `lessonTrackId=special_lecture:<guideId>`, `specialLectureGuideId`, `specialLectureSessionId`, `specialLectureSessionIndex`, `studentIds`를 저장한다. 기존 수업일지 연속성 로직은 이 track 기준으로 정규수업과 특강을 섞지 않는다.
+- 저장 원천: 신청 원본은 Supabase `special_lecture_applications`, 확정 수강명단은 새 Supabase `special_lecture_enrollments`, 생성된 수업은 Supabase `lessons`, 수업일지 학생별 기록은 기존 `lesson_student_records`다. 안내문은 기존 `app_state.specialLectureGuides`다.
+- SQL 필요: 운영 Supabase SQL editor에서 `supabase/20260715_special_lecture_enrollments.sql` 적용이 필요하다. 기존 특강 lesson track 컬럼이 없다면 `supabase/20260715_special_lecture_lesson_tracks.sql`도 적용되어 있어야 한다.
+- 외부 side effect: Solapi 발송/예약, Tally API 호출, `notification_jobs`, 알림톡 생성/예약 없음. `특강 수업일지 생성/갱신` 버튼을 눌러야 `lessons`가 생성/갱신된다. `lesson_student_records`와 출결/알림톡은 생성하지 않는다.
+- 사람 검토 gate: SQL 적용 후 `운영 > 특강관리`에서 특강 하나를 선택한다. Tally 신청자를 `확정`으로 바꾸고 기존 학생과 매칭되는지 확인한다. `확정 명단에 추가`를 누르면 수강명단 카드가 생기고, 학생별 회차 체크를 수정해 `회차 계획 저장` 후 새로고침에서도 유지되는지 확인한다. `특강 수업일지 생성/갱신` 전 preview의 회차별 학생 명단이 맞는지 확인하고, 버튼을 누른 뒤 첫 회차 수업일지 모달이 열리며 해당 회차 학생만 보이면 통과다.
+- 중단 조건: 확정 상태 변경만으로 `lessons`가 생김, 회차 계획 저장 실패 후 화면만 성공처럼 남음, 미매칭/복수 후보가 있는데 수업 생성이 가능함, 선택 회차에서 제외한 학생이 해당 회차 수업일지에 들어감, 정규수업 지난 숙제/지난 메모가 특강으로 섞임, 특강 생성만으로 알림톡 예약/발송이 생김.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check src/domains/specialLectures/specialLectureGuideUtils.js`, `node --check scripts/scenario-tests-production.cjs` 통과, `npm run test:production` 306개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P1. App.jsx 리팩터링 - shared Modal 분리
 
 - 상태: 완료 - 구현/자동검증 완료

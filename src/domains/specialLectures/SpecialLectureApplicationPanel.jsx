@@ -2,12 +2,20 @@ import { useMemo, useState } from "react";
 import { copyTextToClipboard } from "../exams/outputPreview.js";
 import { apiUrl } from "../../shared/utils/apiClient.js";
 import {
+  createSpecialLectureEnrollmentId,
+  createSpecialLectureLessonId,
   defaultSpecialLectureGuides,
+  getSpecialLectureEnrollmentStatusLabel,
   getSpecialLectureApplicationStatusLabel,
   getSpecialLectureGuideSlug,
+  getSpecialLectureLessonTrackId,
+  getSpecialLectureSessionId,
+  normalizeSpecialLectureEnrollment,
+  normalizeSpecialLectureEnrollments,
   normalizeSpecialLectureApplications,
   normalizeSpecialLectureGuides,
-  specialLectureApplicationStatusOptions
+  specialLectureApplicationStatusOptions,
+  specialLectureEnrollmentStatusOptions
 } from "./specialLectureGuideUtils.js";
 
 function normalizePhoneNumber(value = "") {
@@ -106,20 +114,112 @@ export function buildSpecialLectureMatchRows(applications = [], guide = null, st
     }));
 }
 
+function doesSpecialLectureEnrollmentMatchGuide(enrollment = {}, guide = null) {
+  if (!guide) return true;
+  const guideId = String(guide.specialLectureGuideId ?? "").trim();
+  const guideSlug = getSpecialLectureGuideSlug(guide);
+  return Boolean(
+    (enrollment.specialLectureGuideId && enrollment.specialLectureGuideId === guideId) ||
+    (enrollment.guideSlug && enrollment.guideSlug === guideSlug)
+  );
+}
+
+function getSpecialLectureGuideSessions(guide = null) {
+  if (!guide) return [];
+  const sessions = Array.isArray(guide.sessions) ? guide.sessions : [];
+  return sessions.map((session, index) => ({
+    ...session,
+    sessionId: getSpecialLectureSessionId(guide, session, index),
+    sessionIndex: index
+  }));
+}
+
+function getEnrollmentStudent(enrollment = {}, students = []) {
+  return students.find((student) => student.studentId === enrollment.studentId) ?? null;
+}
+
+function buildEnrollmentFromMatchRow(row, guide, sessionIds = [], existingEnrollment = null) {
+  const studentId = row.student?.studentId ?? "";
+  return normalizeSpecialLectureEnrollment({
+    ...(existingEnrollment ?? {}),
+    enrollmentId: existingEnrollment?.enrollmentId || createSpecialLectureEnrollmentId(guide, studentId),
+    specialLectureGuideId: guide.specialLectureGuideId,
+    guideSlug: getSpecialLectureGuideSlug(guide),
+    applicationId: row.application.applicationId,
+    studentId,
+    status: "active",
+    sessionIds: existingEnrollment?.sessionIds?.length ? existingEnrollment.sessionIds : sessionIds,
+    memo: existingEnrollment?.memo || row.application.selectedSession || row.application.memo || "",
+    createdAt: existingEnrollment?.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  });
+}
+
+function buildSpecialLectureLessonDrafts({ enrollments = [], guide = null, lessons = [], students = [] } = {}) {
+  const guideSessions = getSpecialLectureGuideSessions(guide);
+  const activeEnrollments = normalizeSpecialLectureEnrollments(enrollments)
+    .filter((enrollment) => enrollment.status === "active")
+    .filter((enrollment) => getEnrollmentStudent(enrollment, students));
+  const lessonTrackId = getSpecialLectureLessonTrackId(guide);
+  return guideSessions
+    .map((session) => {
+      if (!session.dateKey) return null;
+      const studentIds = activeEnrollments
+        .filter((enrollment) => enrollment.sessionIds.includes(session.sessionId))
+        .map((enrollment) => enrollment.studentId);
+      if (!studentIds.length) return null;
+      const lessonId = createSpecialLectureLessonId(guide, session, session.sessionIndex);
+      const existingLesson = lessons.find((lesson) => lesson.lessonId === lessonId);
+      return {
+        ...(existingLesson ?? {}),
+        lessonId,
+        classTemplateId: "",
+        className: guide.title || "특강",
+        lessonType: "specialLecture",
+        lessonTopic: session.topic || guide.defaultSessionTopic || guide.title || "특강 수업",
+        date: session.dateKey,
+        startTime: session.startTime,
+        endTime: session.endTime,
+        color: existingLesson?.color || "#93c5fd",
+        studentIds,
+        lessonTrackId,
+        lessonTrackType: "specialLecture",
+        specialLectureGuideId: guide.specialLectureGuideId,
+        specialLectureSessionId: session.sessionId,
+        specialLectureSessionIndex: session.sessionIndex,
+        status: existingLesson?.status || "scheduled"
+      };
+    })
+    .filter(Boolean);
+}
+
 export function SpecialLectureApplicationPanel({
   applications = [],
+  enrollments = [],
   guides = defaultSpecialLectureGuides,
+  lessons = [],
+  onCreateSpecialLectureLessons,
+  onSaveEnrollment,
+  onSaveEnrollments,
   onUpdateApplication,
   selectedGuide = null,
   students = []
 }) {
   const [panelMessage, setPanelMessage] = useState("");
+  const [enrollmentDrafts, setEnrollmentDrafts] = useState({});
+  const [lessonCreateState, setLessonCreateState] = useState({ state: "idle", message: "" });
+  const [savingEnrollmentId, setSavingEnrollmentId] = useState("");
   const [updatingApplicationId, setUpdatingApplicationId] = useState("");
   const normalizedGuides = useMemo(() => normalizeSpecialLectureGuides(guides), [guides]);
   const normalizedApplications = useMemo(
     () => normalizeSpecialLectureApplications(applications)
       .sort((first, second) => new Date(second.createdAt).getTime() - new Date(first.createdAt).getTime()),
     [applications]
+  );
+  const normalizedEnrollments = useMemo(
+    () => normalizeSpecialLectureEnrollments(enrollments)
+      .sort((first, second) => new Date(first.createdAt).getTime() - new Date(second.createdAt).getTime()),
+    [enrollments]
   );
   const knownGuideKeys = useMemo(() => new Set(normalizedGuides.flatMap((guide) => [
     guide.specialLectureGuideId,
@@ -128,6 +228,9 @@ export function SpecialLectureApplicationPanel({
   const selectedGuideApplications = selectedGuide
     ? normalizedApplications.filter((application) => doesSpecialLectureApplicationMatchGuide(application, selectedGuide))
     : normalizedApplications;
+  const selectedGuideEnrollments = selectedGuide
+    ? normalizedEnrollments.filter((enrollment) => doesSpecialLectureEnrollmentMatchGuide(enrollment, selectedGuide))
+    : normalizedEnrollments;
   const unmatchedApplications = normalizedApplications.filter((application) => {
     const keys = [application.specialLectureGuideId, application.guideSlug].filter(Boolean);
     return !keys.length || keys.every((key) => !knownGuideKeys.has(key));
@@ -148,6 +251,33 @@ export function SpecialLectureApplicationPanel({
   const needsReviewRows = confirmedMatchRows.filter((row) => row.status !== "matched" || !row.student);
   const visibleApplications = selectedGuideApplications.slice(0, 8);
   const visibleUnmatchedApplications = unmatchedApplications.slice(0, 3);
+  const guideSessions = useMemo(() => getSpecialLectureGuideSessions(selectedGuide), [selectedGuide]);
+  const guideSessionIds = guideSessions.map((session) => session.sessionId);
+  const activeEnrollments = selectedGuideEnrollments.filter((enrollment) => enrollment.status === "active");
+  const enrollmentByStudentId = new Map(selectedGuideEnrollments.map((enrollment) => [enrollment.studentId, enrollment]));
+  const missingEnrollmentRows = matchedRows.filter((row) => row.student?.studentId && !enrollmentByStudentId.has(row.student.studentId));
+  const lessonPreviewRows = guideSessions.map((session) => {
+    const attendees = activeEnrollments
+      .filter((enrollment) => enrollment.sessionIds.includes(session.sessionId))
+      .map((enrollment) => ({
+        enrollment,
+        student: getEnrollmentStudent(enrollment, students)
+      }))
+      .filter((row) => row.student);
+    const lessonId = createSpecialLectureLessonId(selectedGuide, session, session.sessionIndex);
+    return {
+      ...session,
+      attendees,
+      existingLesson: lessons.find((lesson) => lesson.lessonId === lessonId) ?? null,
+      lessonId
+    };
+  });
+  const lessonDrafts = useMemo(
+    () => buildSpecialLectureLessonDrafts({ enrollments: selectedGuideEnrollments, guide: selectedGuide, lessons, students }),
+    [selectedGuideEnrollments, selectedGuide, lessons, students]
+  );
+  const emptySessionCount = lessonPreviewRows.filter((row) => !row.attendees.length).length;
+  const canCreateLessons = Boolean(selectedGuide && activeEnrollments.length && lessonDrafts.length && !needsReviewRows.length);
   const webhookUrl = apiUrl("/api/special-lecture-applications/tally");
 
   async function copyWebhookUrl() {
@@ -192,6 +322,93 @@ export function SpecialLectureApplicationPanel({
       setPanelMessage(`신청자 안내문 연결 실패: ${error.message}`);
     } finally {
       setUpdatingApplicationId("");
+    }
+  }
+
+  function getEnrollmentDraft(enrollment) {
+    return {
+      memo: enrollment.memo,
+      sessionIds: enrollment.sessionIds,
+      status: enrollment.status,
+      ...(enrollmentDrafts[enrollment.enrollmentId] ?? {})
+    };
+  }
+
+  function updateEnrollmentDraft(enrollmentId, patch) {
+    setEnrollmentDrafts((current) => ({
+      ...current,
+      [enrollmentId]: {
+        ...(current[enrollmentId] ?? {}),
+        ...patch
+      }
+    }));
+  }
+
+  function toggleEnrollmentSession(enrollment, sessionId) {
+    const draft = getEnrollmentDraft(enrollment);
+    const hasSession = draft.sessionIds.includes(sessionId);
+    updateEnrollmentDraft(enrollment.enrollmentId, {
+      sessionIds: hasSession
+        ? draft.sessionIds.filter((item) => item !== sessionId)
+        : [...draft.sessionIds, sessionId]
+    });
+  }
+
+  async function addMatchedRowsToEnrollmentSource() {
+    if (!onSaveEnrollments || !selectedGuide || !guideSessionIds.length || !missingEnrollmentRows.length) return;
+    setPanelMessage("");
+    setSavingEnrollmentId("bulk");
+    try {
+      const nextEnrollments = missingEnrollmentRows.map((row) =>
+        buildEnrollmentFromMatchRow(row, selectedGuide, guideSessionIds)
+      );
+      await onSaveEnrollments(nextEnrollments);
+      setPanelMessage(`확정 수강명단 ${nextEnrollments.length}건을 저장했습니다. 학생별 회차를 확인한 뒤 수업일지를 생성하세요.`);
+    } catch (error) {
+      setPanelMessage(`확정 수강명단 저장 실패: ${error.message}`);
+    } finally {
+      setSavingEnrollmentId("");
+    }
+  }
+
+  async function saveEnrollmentDraft(enrollment) {
+    if (!onSaveEnrollment || !selectedGuide) return;
+    const draft = getEnrollmentDraft(enrollment);
+    const nextEnrollment = normalizeSpecialLectureEnrollment({
+      ...enrollment,
+      ...draft,
+      specialLectureGuideId: selectedGuide.specialLectureGuideId,
+      guideSlug: getSpecialLectureGuideSlug(selectedGuide),
+      updatedAt: new Date().toISOString()
+    });
+    setPanelMessage("");
+    setSavingEnrollmentId(enrollment.enrollmentId);
+    try {
+      await onSaveEnrollment(nextEnrollment);
+      setEnrollmentDrafts((current) => {
+        const nextDrafts = { ...current };
+        delete nextDrafts[enrollment.enrollmentId];
+        return nextDrafts;
+      });
+      setPanelMessage(`${getEnrollmentStudent(enrollment, students)?.name || "학생"} 특강 회차 계획을 저장했습니다.`);
+    } catch (error) {
+      setPanelMessage(`특강 회차 계획 저장 실패: ${error.message}`);
+    } finally {
+      setSavingEnrollmentId("");
+    }
+  }
+
+  async function createSpecialLectureLessons() {
+    if (!onCreateSpecialLectureLessons || !canCreateLessons) return;
+    setLessonCreateState({ state: "saving", message: "특강 수업일지를 생성하는 중입니다." });
+    try {
+      const savedLessons = await onCreateSpecialLectureLessons(lessonDrafts);
+      setLessonCreateState({
+        state: "saved",
+        message: `특강 수업일지 ${savedLessons.length}개를 생성/갱신했습니다. 첫 회차 수업일지를 열었습니다.`
+      });
+    } catch (error) {
+      setLessonCreateState({ state: "failed", message: `특강 수업일지 생성 실패: ${error.message}` });
     }
   }
 
@@ -262,6 +479,146 @@ export function SpecialLectureApplicationPanel({
         ) : (
           <p className="specialLectureGateEmpty">현재 안내문에 연결된 확정 신청자가 없습니다. 신청자 상태를 `확정`으로 바꾸면 이 gate에 나타납니다.</p>
         )}
+      </div>
+
+      <div className="specialLectureEnrollmentPanel">
+        <div className="specialLectureGateHeader">
+          <div>
+            <strong>확정 수강명단 원천</strong>
+            <span>신청자 원본과 분리된 `special_lecture_enrollments`에 저장합니다. 이 명단이 수업 생성의 기준입니다.</span>
+          </div>
+          <div className="specialLectureGateStats">
+            <span>수강 {activeEnrollments.length}</span>
+            <span>추가 필요 {missingEnrollmentRows.length}</span>
+            <span>회차 {guideSessions.length}</span>
+          </div>
+        </div>
+        {missingEnrollmentRows.length ? (
+          <div className="specialLectureEnrollmentSync">
+            <span>기존 학생과 매칭된 확정 신청자 {missingEnrollmentRows.length}명을 아직 수강명단에 저장하지 않았습니다.</span>
+            <button
+              className="primaryButton compact"
+              disabled={!onSaveEnrollments || savingEnrollmentId === "bulk" || !guideSessionIds.length}
+              onClick={addMatchedRowsToEnrollmentSource}
+              type="button"
+            >
+              {savingEnrollmentId === "bulk" ? "저장 중" : "확정 명단에 추가"}
+            </button>
+          </div>
+        ) : null}
+        {selectedGuideEnrollments.length ? (
+          <div className="specialLectureEnrollmentList">
+            {selectedGuideEnrollments.map((enrollment) => {
+              const student = getEnrollmentStudent(enrollment, students);
+              const draft = getEnrollmentDraft(enrollment);
+              return (
+                <article className="specialLectureEnrollmentCard" key={enrollment.enrollmentId}>
+                  <div className="specialLectureEnrollmentIdentity">
+                    <span className={`specialLectureEnrollmentStatus ${draft.status}`}>
+                      {getSpecialLectureEnrollmentStatusLabel(draft.status)}
+                    </span>
+                    <strong>{student?.name || enrollment.studentId || "학생 미매칭"}</strong>
+                    <small>{student ? [student.schoolName, student.grade].filter(Boolean).join(" · ") || "학교/학년 미입력" : "기존 학생 원천에서 찾지 못했습니다."}</small>
+                  </div>
+                  <div className="specialLectureSessionToggleGrid">
+                    {guideSessions.map((session) => (
+                      <label className="specialLectureSessionToggle" key={`${enrollment.enrollmentId}_${session.sessionId}`}>
+                        <input
+                          checked={draft.sessionIds.includes(session.sessionId)}
+                          onChange={() => toggleEnrollmentSession(enrollment, session.sessionId)}
+                          type="checkbox"
+                        />
+                        <span>{session.sessionIndex + 1}회차</span>
+                        <small>{session.dateKey || session.date} {session.startTime}</small>
+                      </label>
+                    ))}
+                  </div>
+                  <div className="specialLectureEnrollmentControls">
+                    <label>
+                      상태
+                      <select
+                        onChange={(event) => updateEnrollmentDraft(enrollment.enrollmentId, { status: event.target.value })}
+                        value={draft.status}
+                      >
+                        {specialLectureEnrollmentStatusOptions.map((option) => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      메모
+                      <textarea
+                        onChange={(event) => updateEnrollmentDraft(enrollment.enrollmentId, { memo: event.target.value })}
+                        value={draft.memo}
+                      />
+                    </label>
+                    <button
+                      className="softButton compact"
+                      disabled={!onSaveEnrollment || savingEnrollmentId === enrollment.enrollmentId}
+                      onClick={() => saveEnrollmentDraft(enrollment)}
+                      type="button"
+                    >
+                      {savingEnrollmentId === enrollment.enrollmentId ? "저장 중" : "회차 계획 저장"}
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="specialLectureGateEmpty">아직 저장된 확정 수강명단이 없습니다. 확정 신청자를 기존 학생과 매칭한 뒤 명단에 추가하세요.</p>
+        )}
+      </div>
+
+      <div className="specialLectureLessonPreviewGate">
+        <div className="specialLectureGateHeader">
+          <div>
+            <strong>특강 수업일지 생성 preview gate</strong>
+            <span>저장된 확정 수강명단을 기준으로 회차별 `lessons`를 생성/갱신합니다. 버튼 전에는 저장하지 않습니다.</span>
+          </div>
+          <div className="specialLectureGateStats">
+            <span>생성 {lessonDrafts.length}</span>
+            <span className={emptySessionCount ? "danger" : ""}>빈 회차 {emptySessionCount}</span>
+            <span className={needsReviewRows.length ? "danger" : ""}>검토 {needsReviewRows.length}</span>
+          </div>
+        </div>
+        {lessonPreviewRows.length ? (
+          <div className="specialLectureLessonPreviewList">
+            {lessonPreviewRows.map((row) => (
+              <article className={row.attendees.length ? "specialLectureLessonPreviewCard" : "specialLectureLessonPreviewCard empty"} key={row.sessionId}>
+                <div>
+                  <span>{row.sessionIndex + 1}회차 {row.existingLesson ? "· 갱신" : "· 신규"}</span>
+                  <strong>{row.dateKey || row.date} {row.startTime}-{row.endTime}</strong>
+                  <small>{row.topic || selectedGuide?.defaultSessionTopic || "특강 수업"}</small>
+                </div>
+                <p>
+                  {row.attendees.length
+                    ? row.attendees.map((item) => item.student.name).join(", ")
+                    : "수강 학생 없음 - 저장 제외"}
+                </p>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="specialLectureGateEmpty">회차별 계획을 먼저 저장해 주세요.</p>
+        )}
+        {needsReviewRows.length ? (
+          <p className="inlineNotice danger">확정 신청자 중 기존 학생 매칭이 필요한 건이 있어 수업일지 생성을 막았습니다.</p>
+        ) : null}
+        {lessonCreateState.message ? (
+          <p className={lessonCreateState.state === "failed" ? "inlineNotice danger" : "inlineNotice"}>{lessonCreateState.message}</p>
+        ) : null}
+        <div className="specialLectureLessonCreateActions">
+          <button
+            className="primaryButton"
+            disabled={!onCreateSpecialLectureLessons || !canCreateLessons || lessonCreateState.state === "saving"}
+            onClick={createSpecialLectureLessons}
+            type="button"
+          >
+            {lessonCreateState.state === "saving" ? "생성 중" : "특강 수업일지 생성/갱신"}
+          </button>
+          <span>저장 대상: Supabase `lessons` · 수업기록/출결/알림톡은 아직 만들지 않음</span>
+        </div>
       </div>
 
       {visibleUnmatchedApplications.length ? (

@@ -167,6 +167,15 @@ function normalizeSpecialLectureApplicationStatus(value = "received") {
   return ["received", "confirmed", "contacted", "waiting", "canceled"].includes(status) ? status : "received";
 }
 
+function createSpecialLectureEnrollmentId() {
+  return `special_lecture_enrollment_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function normalizeSpecialLectureEnrollmentStatus(value = "active") {
+  const status = compact(value || "active");
+  return ["active", "canceled"].includes(status) ? status : "active";
+}
+
 function toSpecialLectureApplicationRow(application) {
   return {
     application_id: application.applicationId || application.id || createSpecialLectureApplicationId(),
@@ -210,6 +219,41 @@ function fromSpecialLectureApplicationRow(row) {
     selectedSession: row.selected_session ?? "",
     memo: row.memo ?? "",
     rawPayload: row.raw_payload ?? null,
+    createdAt: row.created_at ?? "",
+    updatedAt: row.updated_at ?? ""
+  };
+}
+
+function normalizeSpecialLectureEnrollmentSessionIds(value) {
+  const source = Array.isArray(value) ? value : [];
+  return [...new Set(source.map((sessionId) => compact(sessionId)).filter(Boolean))];
+}
+
+function toSpecialLectureEnrollmentRow(enrollment) {
+  return {
+    enrollment_id: enrollment.enrollmentId || enrollment.id || createSpecialLectureEnrollmentId(),
+    special_lecture_guide_id: compact(enrollment.specialLectureGuideId),
+    guide_slug: compact(enrollment.guideSlug),
+    application_id: compact(enrollment.applicationId),
+    student_id: compact(enrollment.studentId),
+    status: normalizeSpecialLectureEnrollmentStatus(enrollment.status),
+    session_ids: normalizeSpecialLectureEnrollmentSessionIds(enrollment.sessionIds),
+    memo: compact(enrollment.memo),
+    created_at: enrollment.createdAt ?? new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+}
+
+function fromSpecialLectureEnrollmentRow(row) {
+  return {
+    enrollmentId: row.enrollment_id,
+    specialLectureGuideId: row.special_lecture_guide_id ?? "",
+    guideSlug: row.guide_slug ?? "",
+    applicationId: row.application_id ?? "",
+    studentId: row.student_id ?? "",
+    status: normalizeSpecialLectureEnrollmentStatus(row.status),
+    sessionIds: Array.isArray(row.session_ids) ? row.session_ids : [],
+    memo: row.memo ?? "",
     createdAt: row.created_at ?? "",
     updatedAt: row.updated_at ?? ""
   };
@@ -1324,6 +1368,24 @@ export async function listSpecialLectureApplications() {
   }
 }
 
+export async function listSpecialLectureEnrollments() {
+  if (!isSupabaseConfigured()) {
+    return { source: fallbackSource, enrollments: [] };
+  }
+
+  try {
+    const rows = await listRows("special_lecture_enrollments", "select=*&order=created_at.desc", {
+      requireServiceRole: true
+    });
+    return { source: databaseSource, enrollments: rows.map(fromSpecialLectureEnrollmentRow) };
+  } catch (error) {
+    if (String(error?.message ?? "").includes("special_lecture_enrollments")) {
+      return { source: databaseSource, enrollments: [], warning: "special_lecture_enrollments table is not ready" };
+    }
+    throw error;
+  }
+}
+
 export async function listClassTemplates() {
   if (!isSupabaseConfigured()) {
     return { source: fallbackSource, classTemplates: sampleData.classTemplates };
@@ -1437,6 +1499,53 @@ export async function upsertSpecialLectureApplication(application) {
     onConflict: "application_id"
   });
   return { source: databaseSource, application: fromSpecialLectureApplicationRow(row) };
+}
+
+export async function upsertSpecialLectureEnrollment(enrollment) {
+  const now = new Date().toISOString();
+  const normalizedEnrollment = {
+    ...enrollment,
+    enrollmentId: enrollment.enrollmentId || enrollment.id || createSpecialLectureEnrollmentId(),
+    status: normalizeSpecialLectureEnrollmentStatus(enrollment.status),
+    createdAt: enrollment.createdAt || now,
+    updatedAt: now
+  };
+  if (!normalizedEnrollment.specialLectureGuideId) throw new Error("특강 안내문 ID가 필요합니다.");
+  if (!normalizedEnrollment.studentId) throw new Error("특강 수강 학생 ID가 필요합니다.");
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, enrollment: normalizedEnrollment };
+  }
+
+  const [row] = await upsertRows("special_lecture_enrollments", [toSpecialLectureEnrollmentRow(normalizedEnrollment)], {
+    onConflict: "enrollment_id"
+  });
+  return { source: databaseSource, enrollment: fromSpecialLectureEnrollmentRow(row) };
+}
+
+export async function upsertSpecialLectureEnrollments(enrollments) {
+  if (!Array.isArray(enrollments) || enrollments.length === 0) {
+    return { source: isSupabaseConfigured() ? databaseSource : fallbackSource, enrollments: [] };
+  }
+  const now = new Date().toISOString();
+  const normalizedEnrollments = enrollments.map((enrollment) => ({
+    ...enrollment,
+    enrollmentId: enrollment.enrollmentId || enrollment.id || createSpecialLectureEnrollmentId(),
+    status: normalizeSpecialLectureEnrollmentStatus(enrollment.status),
+    createdAt: enrollment.createdAt || now,
+    updatedAt: now
+  }));
+  const invalidEnrollment = normalizedEnrollments.find((enrollment) => !enrollment.specialLectureGuideId || !enrollment.studentId);
+  if (invalidEnrollment) throw new Error("특강 수강명단 저장에는 안내문 ID와 학생 ID가 필요합니다.");
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, enrollments: normalizedEnrollments };
+  }
+
+  const rows = await upsertRows(
+    "special_lecture_enrollments",
+    normalizedEnrollments.map(toSpecialLectureEnrollmentRow),
+    { onConflict: "enrollment_id" }
+  );
+  return { source: databaseSource, enrollments: rows.map(fromSpecialLectureEnrollmentRow) };
 }
 
 export async function upsertLesson(lesson) {

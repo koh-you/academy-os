@@ -30,6 +30,7 @@ import {
   listResourceMaterials,
   listSchoolEvents,
   listSpecialLectureApplications,
+  listSpecialLectureEnrollments,
   listStudentIntakeApplicants,
   listStudents,
   listTestAttempts,
@@ -54,6 +55,8 @@ import {
   upsertSchoolEvent,
   upsertSchoolEvents,
   upsertSpecialLectureApplication,
+  upsertSpecialLectureEnrollment,
+  upsertSpecialLectureEnrollments,
   upsertStudentIntakeApplicant,
   upsertStudent,
   upsertStudents,
@@ -5400,6 +5403,38 @@ const server = http.createServer(async (request, response) => {
       }
       const application = normalizeSpecialLectureApplicationPayload(payload);
       const result = await upsertSpecialLectureApplication(application);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/special-lecture-enrollments") {
+    try {
+      const result = await listSpecialLectureEnrollments();
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/special-lecture-enrollments") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await upsertSpecialLectureEnrollment(payload.enrollment ?? payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/special-lecture-enrollments/bulk") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await upsertSpecialLectureEnrollments(payload.enrollments ?? []);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });

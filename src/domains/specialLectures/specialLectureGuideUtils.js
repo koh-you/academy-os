@@ -27,6 +27,11 @@ export const specialLectureApplicationStatusOptions = [
   { value: "canceled", label: "취소" }
 ];
 
+export const specialLectureEnrollmentStatusOptions = [
+  { value: "active", label: "수강" },
+  { value: "canceled", label: "제외" }
+];
+
 export function getSpecialLectureSeasonShortLabel(season = "summer") {
   if (season === "winter") return "겨울";
   if (season === "summer") return "여름";
@@ -183,6 +188,38 @@ export function normalizeSpecialLectureSession(session = {}, index = 0) {
     endTime: String(session.endTime ?? session.end_time ?? "").trim(),
     topic: String(session.topic ?? session.content ?? "").trim() || `회차 ${index + 1}`
   };
+}
+
+function sanitizeSpecialLectureIdPart(value = "item") {
+  const sanitized = String(value ?? "")
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return sanitized || "item";
+}
+
+export function getSpecialLectureLessonTrackId(guide = {}) {
+  const guideId = String(guide.specialLectureGuideId || guide.special_lecture_guide_id || getSpecialLectureGuideSlug(guide) || "special_lecture").trim();
+  return `special_lecture:${guideId}`;
+}
+
+export function getSpecialLectureSessionId(guide = {}, session = {}, index = 0) {
+  const guideId = sanitizeSpecialLectureIdPart(guide.specialLectureGuideId || guide.special_lecture_guide_id || getSpecialLectureGuideSlug(guide) || "special_lecture");
+  const sessionKey = String(session.specialLectureSessionId || session.special_lecture_session_id || session.sessionId || "").trim();
+  if (sessionKey) return sessionKey;
+  return `special_lecture_session_${guideId}_${String(index + 1).padStart(2, "0")}`;
+}
+
+export function createSpecialLectureLessonId(guide = {}, session = {}, index = 0) {
+  const guideId = sanitizeSpecialLectureIdPart(guide.specialLectureGuideId || guide.special_lecture_guide_id || getSpecialLectureGuideSlug(guide) || "special_lecture");
+  const sessionId = sanitizeSpecialLectureIdPart(getSpecialLectureSessionId(guide, session, index));
+  return `lesson_special_lecture_${guideId}_${sessionId}`;
+}
+
+export function createSpecialLectureEnrollmentId(guide = {}, studentId = "") {
+  const guideId = sanitizeSpecialLectureIdPart(guide.specialLectureGuideId || guide.special_lecture_guide_id || getSpecialLectureGuideSlug(guide) || "special_lecture");
+  const studentKey = sanitizeSpecialLectureIdPart(studentId || "student");
+  return `special_lecture_enrollment_${guideId}_${studentKey}`;
 }
 
 export function normalizeSpecialLectureScheduleRule(rule = {}) {
@@ -658,8 +695,42 @@ export function normalizeSpecialLectureApplications(applications = []) {
     : [];
 }
 
+export function normalizeSpecialLectureEnrollment(enrollment = {}, index = 0) {
+  const nowIso = new Date().toISOString();
+  const status = specialLectureEnrollmentStatusOptions.some((option) => option.value === enrollment.status)
+    ? enrollment.status
+    : "active";
+  const sessionIds = Array.isArray(enrollment.sessionIds)
+    ? enrollment.sessionIds
+    : Array.isArray(enrollment.session_ids)
+      ? enrollment.session_ids
+      : [];
+  return {
+    enrollmentId: String(enrollment.enrollmentId || enrollment.enrollment_id || `special_lecture_enrollment_${index + 1}`).trim(),
+    specialLectureGuideId: String(enrollment.specialLectureGuideId || enrollment.special_lecture_guide_id || "").trim(),
+    guideSlug: String(enrollment.guideSlug || enrollment.guide_slug || "").trim(),
+    applicationId: String(enrollment.applicationId || enrollment.application_id || "").trim(),
+    studentId: String(enrollment.studentId || enrollment.student_id || "").trim(),
+    status,
+    sessionIds: [...new Set(sessionIds.map((sessionId) => String(sessionId ?? "").trim()).filter(Boolean))],
+    memo: String(enrollment.memo || "").replace(/\r\n?/g, "\n"),
+    createdAt: enrollment.createdAt || enrollment.created_at || nowIso,
+    updatedAt: enrollment.updatedAt || enrollment.updated_at || nowIso
+  };
+}
+
+export function normalizeSpecialLectureEnrollments(enrollments = []) {
+  return Array.isArray(enrollments)
+    ? enrollments.map(normalizeSpecialLectureEnrollment)
+    : [];
+}
+
 export function getSpecialLectureApplicationStatusLabel(status = "received") {
   return specialLectureApplicationStatusOptions.find((option) => option.value === status)?.label ?? "접수";
+}
+
+export function getSpecialLectureEnrollmentStatusLabel(status = "active") {
+  return specialLectureEnrollmentStatusOptions.find((option) => option.value === status)?.label ?? "수강";
 }
 
 export function getSpecialLectureGuideSlug(guide = {}) {

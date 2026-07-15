@@ -7982,6 +7982,203 @@ button:disabled {
   margin: 0;
 }
 
+.specialLectureEnrollmentPanel,
+.specialLectureLessonPreviewGate {
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: #ffffff;
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 12px;
+}
+
+.specialLectureEnrollmentPanel {
+  background: #f7fee7;
+  border-color: #bef264;
+}
+
+.specialLectureEnrollmentSync {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #d9f99d;
+  border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.specialLectureEnrollmentSync span,
+.specialLectureLessonCreateActions span {
+  color: #52627a;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.specialLectureEnrollmentList {
+  display: grid;
+  gap: 10px;
+}
+
+.specialLectureEnrollmentCard {
+  background: #ffffff;
+  border: 1px solid #d9f99d;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(170px, 0.7fr) minmax(320px, 1.5fr) minmax(220px, 0.8fr);
+  padding: 12px;
+}
+
+.specialLectureEnrollmentIdentity {
+  display: grid;
+  gap: 5px;
+  align-content: start;
+}
+
+.specialLectureEnrollmentIdentity strong {
+  color: #0f172a;
+  font-size: 16px;
+}
+
+.specialLectureEnrollmentIdentity small {
+  color: #52627a;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.specialLectureEnrollmentStatus {
+  border: 1px solid #86efac;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #166534;
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 4px 9px;
+  width: fit-content;
+}
+
+.specialLectureEnrollmentStatus.canceled {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.specialLectureSessionToggleGrid {
+  display: grid;
+  gap: 7px;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+}
+
+.specialLectureSessionToggle {
+  align-items: center;
+  border: 1px solid #dbeafe;
+  border-radius: 7px;
+  background: #f8fbff;
+  color: #0f172a;
+  display: grid;
+  gap: 2px;
+  grid-template-columns: auto 1fr;
+  min-height: 46px;
+  padding: 7px;
+}
+
+.specialLectureSessionToggle input {
+  grid-row: span 2;
+  height: 18px;
+  width: 18px;
+}
+
+.specialLectureSessionToggle span {
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.specialLectureSessionToggle small {
+  color: #52627a;
+  font-size: 11px;
+}
+
+.specialLectureEnrollmentControls {
+  display: grid;
+  gap: 8px;
+}
+
+.specialLectureEnrollmentControls label {
+  color: #52627a;
+  display: grid;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.specialLectureEnrollmentControls select,
+.specialLectureEnrollmentControls textarea {
+  border: 1px solid #c7d2fe;
+  border-radius: 6px;
+  color: #0f172a;
+  font: inherit;
+  min-height: 36px;
+  padding: 8px 10px;
+}
+
+.specialLectureEnrollmentControls textarea {
+  min-height: 64px;
+  resize: vertical;
+}
+
+.specialLectureLessonPreviewList {
+  display: grid;
+  gap: 8px;
+}
+
+.specialLectureLessonPreviewCard {
+  align-items: center;
+  border: 1px solid #d9e6fb;
+  border-radius: 8px;
+  background: #ffffff;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(210px, 0.5fr) minmax(260px, 1fr);
+  padding: 10px;
+}
+
+.specialLectureLessonPreviewCard.empty {
+  background: #f8fafc;
+  border-style: dashed;
+}
+
+.specialLectureLessonPreviewCard span {
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.specialLectureLessonPreviewCard strong {
+  color: #0f172a;
+  display: block;
+  font-size: 13px;
+  margin-top: 3px;
+}
+
+.specialLectureLessonPreviewCard small,
+.specialLectureLessonPreviewCard p {
+  color: #52627a;
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.specialLectureLessonCreateActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .specialLectureApplicationUnmatched {
   background: #fff7ed;
   border: 1px solid #fed7aa;
@@ -16324,6 +16521,8 @@ body.attendanceOnlyBody {
   .specialLectureRuleRow,
   .specialLectureWebhookBox,
   .specialLectureApplicationCard,
+  .specialLectureEnrollmentCard,
+  .specialLectureLessonPreviewCard,
   .specialLectureSessionCardGrid,
   .followCandidateGrid,
   .supplementOverviewGrid,

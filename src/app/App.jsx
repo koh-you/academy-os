@@ -59,6 +59,7 @@ import {
   getSpecialLectureCalculatedFields,
   getSpecialLectureGuideSlugFromLocation,
   getSpecialLectureGuideSlug,
+  getSpecialLectureLessonTrackId,
   getSpecialLecturePublicUrl,
   getSpecialLectureSeasonShortLabel,
   getSpecialLectureStatusBadge,
@@ -70,6 +71,8 @@ import {
   isSpecialLectureRoute,
   normalizeSpecialLectureApplication,
   normalizeSpecialLectureApplications,
+  normalizeSpecialLectureEnrollment,
+  normalizeSpecialLectureEnrollments,
   normalizeSpecialLectureGuide,
   normalizeSpecialLectureGuides,
   normalizeSpecialLectureScheduleRule,
@@ -109,6 +112,7 @@ const storageKeys = {
   students: "academy-os.students.v12",
   studentIntakeApplicants: "academy-os.studentIntakeApplicants.v1",
   specialLectureApplications: "academy-os.specialLectureApplications.v1",
+  specialLectureEnrollments: "academy-os.specialLectureEnrollments.v1",
   records: "academy-os.lessonStudentRecords.v7",
   homeworks: "academy-os.homeworks.v7",
   reportSnapshots: "academy-os.reportSnapshots.v1",
@@ -5463,6 +5467,7 @@ export function App() {
   const [students, setStudents] = useStoredState(storageKeys.students, sampleData.students);
   const [studentIntakeApplicants, setStudentIntakeApplicants] = useStoredState(storageKeys.studentIntakeApplicants, []);
   const [specialLectureApplications, setSpecialLectureApplications] = useStoredState(storageKeys.specialLectureApplications, []);
+  const [specialLectureEnrollments, setSpecialLectureEnrollments] = useStoredState(storageKeys.specialLectureEnrollments, []);
   const [lessons, setLessons] = useStoredState(storageKeys.lessons, sampleData.lessons);
   const [records, setRecords] = useStoredState(storageKeys.records, sampleData.lessonStudentRecords);
   const [homeworks, setHomeworks] = useStoredState(storageKeys.homeworks, sampleData.homeworks);
@@ -5664,6 +5669,7 @@ export function App() {
           studentsResponse,
           studentIntakeApplicantsResponse,
           specialLectureApplicationsResponse,
+          specialLectureEnrollmentsResponse,
           classesResponse,
           lessonsResponse,
           recordsResponse,
@@ -5680,6 +5686,7 @@ export function App() {
           fetch(apiUrl("/api/students")),
           fetch(apiUrl("/api/student-intake-applicants")),
           fetch(apiUrl("/api/special-lecture-applications")),
+          fetch(apiUrl("/api/special-lecture-enrollments")),
           fetch(apiUrl("/api/classes")),
           fetch(apiUrl("/api/lessons")),
           fetch(apiUrl("/api/lesson-records")),
@@ -5697,6 +5704,7 @@ export function App() {
           studentsResult,
           studentIntakeApplicantsResult,
           specialLectureApplicationsResult,
+          specialLectureEnrollmentsResult,
           classesResult,
           lessonsResult,
           recordsResult,
@@ -5713,6 +5721,7 @@ export function App() {
           studentsResponse.json(),
           studentIntakeApplicantsResponse.json(),
           specialLectureApplicationsResponse.json(),
+          specialLectureEnrollmentsResponse.json(),
           classesResponse.json(),
           lessonsResponse.json(),
           recordsResponse.json(),
@@ -5735,6 +5744,9 @@ export function App() {
         }
         if (specialLectureApplicationsResult.ok && Array.isArray(specialLectureApplicationsResult.applications)) {
           setSpecialLectureApplications(normalizeSpecialLectureApplications(specialLectureApplicationsResult.applications));
+        }
+        if (specialLectureEnrollmentsResult.ok && Array.isArray(specialLectureEnrollmentsResult.enrollments)) {
+          setSpecialLectureEnrollments(normalizeSpecialLectureEnrollments(specialLectureEnrollmentsResult.enrollments));
         }
         const normalizedClassTemplates = classesResult.ok && Array.isArray(classesResult.classTemplates) && classesResult.classTemplates.length > 0
           ? normalizeClassTemplates(classesResult.classTemplates)
@@ -5852,6 +5864,7 @@ export function App() {
     setScoreRecords,
     setSchoolEvents,
     setSpecialLectureApplications,
+    setSpecialLectureEnrollments,
     setSpecialLectureGuides,
     setStudents,
     setStudentConsultations,
@@ -5962,6 +5975,90 @@ export function App() {
           ))
         );
         throw error;
+      });
+  }
+
+  function handleSaveSpecialLectureEnrollment(enrollment) {
+    const previousEnrollments = specialLectureEnrollments;
+    const nextEnrollment = normalizeSpecialLectureEnrollment({
+      ...enrollment,
+      updatedAt: new Date().toISOString()
+    });
+    setSpecialLectureEnrollments((current) =>
+      normalizeSpecialLectureEnrollments(upsertById(current, nextEnrollment, "enrollmentId"))
+    );
+    return postJson("/api/special-lecture-enrollments", { enrollment: nextEnrollment })
+      .then((result) => {
+        if (!result.ok) throw new Error(result.error || "특강 수강명단 저장 실패");
+        const savedEnrollment = normalizeSpecialLectureEnrollment(result.enrollment ?? nextEnrollment);
+        setSpecialLectureEnrollments((current) =>
+          normalizeSpecialLectureEnrollments(upsertById(current, savedEnrollment, "enrollmentId"))
+        );
+        return savedEnrollment;
+      })
+      .catch((error) => {
+        setSpecialLectureEnrollments(previousEnrollments);
+        throw error;
+      });
+  }
+
+  function handleSaveSpecialLectureEnrollments(enrollments) {
+    const previousEnrollments = specialLectureEnrollments;
+    const nextEnrollments = normalizeSpecialLectureEnrollments(enrollments.map((enrollment) => ({
+      ...enrollment,
+      updatedAt: new Date().toISOString()
+    })));
+    setSpecialLectureEnrollments((current) => {
+      let merged = current;
+      nextEnrollments.forEach((enrollment) => {
+        merged = upsertById(merged, enrollment, "enrollmentId");
+      });
+      return normalizeSpecialLectureEnrollments(merged);
+    });
+    return postJson("/api/special-lecture-enrollments/bulk", { enrollments: nextEnrollments })
+      .then((result) => {
+        if (!result.ok) throw new Error(result.error || "특강 수강명단 저장 실패");
+        const savedEnrollments = normalizeSpecialLectureEnrollments(result.enrollments ?? nextEnrollments);
+        setSpecialLectureEnrollments((current) => {
+          let merged = current;
+          savedEnrollments.forEach((enrollment) => {
+            merged = upsertById(merged, enrollment, "enrollmentId");
+          });
+          return normalizeSpecialLectureEnrollments(merged);
+        });
+        return savedEnrollments;
+      })
+      .catch((error) => {
+        setSpecialLectureEnrollments(previousEnrollments);
+        throw error;
+      });
+  }
+
+  function handleCreateSpecialLectureLessons(lessonDrafts = []) {
+    const normalizedLessons = lessonDrafts
+      .filter((lesson) => lesson?.lessonId && lesson?.date)
+      .map((lesson) => ({
+        ...lesson,
+        color: getStandardLessonColor(lesson),
+        status: lesson.status ?? "scheduled"
+      }));
+    if (!normalizedLessons.length) return Promise.reject(new Error("생성할 특강 회차가 없습니다."));
+    return postJson("/api/lessons/bulk", { lessons: normalizedLessons })
+      .then((result) => {
+        if (!result.ok) throw new Error(result.error || "특강 수업일지 생성 실패");
+        const savedLessons = Array.isArray(result.lessons) && result.lessons.length ? result.lessons : normalizedLessons;
+        setLessons((current) => filterActiveLessons(savedLessons.reduce(
+          (nextLessons, lesson) => upsertById(nextLessons, lesson, "lessonId"),
+          current
+        )));
+        const firstLesson = [...savedLessons].sort(sortByTime)[0];
+        if (firstLesson?.lessonId) {
+          setActiveView("lessons");
+          setSelectedDate(firstLesson.date);
+          setSelectedLessonId(firstLesson.lessonId);
+          setIsLessonJournalOpen(true);
+        }
+        return savedLessons;
       });
   }
 
@@ -8734,9 +8831,13 @@ export function App() {
             pageDescription="방학 특강 안내문을 만들고, Tally 신청자 원천을 분리해 확인합니다. 실제 발송은 발송 준비 후 수신 대상 검수를 거칩니다."
             pageTitle="특강관리"
             specialLectureApplications={specialLectureApplications}
+            specialLectureEnrollments={specialLectureEnrollments}
             specialLectureGuides={specialLectureGuides}
             specialLectureGuideSaveState={specialLectureGuideSaveState}
+            onCreateSpecialLectureLessons={handleCreateSpecialLectureLessons}
             onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
+            onSaveSpecialLectureEnrollment={handleSaveSpecialLectureEnrollment}
+            onSaveSpecialLectureEnrollments={handleSaveSpecialLectureEnrollments}
             onSaveSpecialLectureGuides={handleSaveSpecialLectureGuides}
             onUpdateLessonNotificationPlan={handleUpdateLessonNotificationPlan}
             onUpdateSpecialLectureApplication={handleUpdateSpecialLectureApplication}
@@ -9800,13 +9901,17 @@ function NotificationCenter({
   lessons = [],
   notificationJobs,
   notificationJobsStatus = { state: "idle", message: "" },
+  onCreateSpecialLectureLessons,
   onRefresh,
+  onSaveSpecialLectureEnrollment,
+  onSaveSpecialLectureEnrollments,
   onSaveSpecialLectureGuides,
   onUpdateSpecialLectureApplication,
   pageDescription = "수업일지 밖에서 필요한 연락을 한 화면에서 작성하고, 수신 범위만 선택해 발송합니다.",
   pageTitle = "알림관리",
   showSpecialLectureTab = true,
   specialLectureApplications = [],
+  specialLectureEnrollments = [],
   specialLectureGuides = defaultSpecialLectureGuides,
   specialLectureGuideSaveState = "idle",
   students = []
@@ -10351,9 +10456,14 @@ function NotificationCenter({
       {activeNotificationTab === "specialLecture" ? (
         <SpecialLectureNoticePanel
           applications={specialLectureApplications}
+          enrollments={specialLectureEnrollments}
           guides={specialLectureGuides}
+          lessons={lessons}
           saveState={specialLectureGuideSaveState}
           onApplyToNotice={applySpecialLectureGuideToNotice}
+          onCreateSpecialLectureLessons={onCreateSpecialLectureLessons}
+          onSaveEnrollment={onSaveSpecialLectureEnrollment}
+          onSaveEnrollments={onSaveSpecialLectureEnrollments}
           onSaveGuides={onSaveSpecialLectureGuides}
           onUpdateApplication={onUpdateSpecialLectureApplication}
           students={students}
@@ -10617,8 +10727,13 @@ function NotificationCenter({
 
 function SpecialLectureNoticePanel({
   applications = [],
+  enrollments = [],
   guides = defaultSpecialLectureGuides,
+  lessons = [],
   onApplyToNotice,
+  onCreateSpecialLectureLessons,
+  onSaveEnrollment,
+  onSaveEnrollments,
   onUpdateApplication,
   onSaveGuides,
   saveState = "idle",
@@ -11033,7 +11148,12 @@ function SpecialLectureNoticePanel({
 
       <SpecialLectureApplicationPanel
         applications={applications}
+        enrollments={enrollments}
         guides={draftGuides}
+        lessons={lessons}
+        onCreateSpecialLectureLessons={onCreateSpecialLectureLessons}
+        onSaveEnrollment={onSaveEnrollment}
+        onSaveEnrollments={onSaveEnrollments}
         onUpdateApplication={onUpdateApplication}
         selectedGuide={selectedGuide}
         students={students}
@@ -11435,11 +11555,6 @@ function SpecialLectureNoticePanel({
       )}
     </section>
   );
-}
-
-function getSpecialLectureLessonTrackId(guide = {}) {
-  const guideId = String(guide.specialLectureGuideId || getSpecialLectureGuideSlug(guide) || "special_lecture").trim();
-  return `special_lecture:${guideId}`;
 }
 
 function SpecialLectureCalendarPreview({ guide }) {
