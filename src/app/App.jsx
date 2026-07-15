@@ -1303,6 +1303,22 @@ function buildNotificationTemplatePreview(type) {
     studentName: "테스트학생"
   };
 
+  if (type === "specialLecture") {
+    return joinMessageBlocks([
+      `[#{학원명}] 특강 안내`,
+      "#{학생명} 학생 보호자님께 안내드립니다.",
+      "본 메시지는 #{학원명}에 재원 중이거나 상담을 신청한 학생의 보호자님께 보내는 특강 일정 안내입니다.",
+      "특강명: #{특강명}",
+      "대상: #{대상}",
+      "요일: #{요일}",
+      "시간: #{시간}",
+      "시수: #{시수}",
+      "수강료: #{수강료}",
+      "자세한 수업 구성과 회차별 일정은 아래 버튼에서 확인해 주세요.",
+      "버튼: 특강 안내문 보기 -> #{안내문링크}"
+    ]);
+  }
+
   if (type === "attendance") {
     const attendanceSample = {
       ...base,
@@ -9999,7 +10015,8 @@ function NotificationCenter({
       title: normalizedGuide.title,
       audience: normalizedGuide.audience,
       days: normalizedGuide.days,
-      time: normalizedGuide.time
+      time: normalizedGuide.time,
+      tuition: normalizedGuide.tuition
     });
     setNoticeTitle(normalizedGuide.title || "특강 안내");
     setNoticeBody(noticeBodyText);
@@ -10051,6 +10068,7 @@ function NotificationCenter({
             specialLectureLessonCount: noticeSpecialLectureMeta.lessonCount,
             specialLectureTime: noticeSpecialLectureMeta.time,
             specialLectureTitle: noticeSpecialLectureMeta.title,
+            specialLectureTuition: noticeSpecialLectureMeta.tuition,
             specialLectureUrl: noticeSpecialLectureMeta.guideUrl
           }
         : {})
@@ -19869,13 +19887,26 @@ function NotificationSettingsSection({ integrationStatus }) {
       lessonContent: "개별 진도 점검",
       lessonDate: todayKey,
       lessonMaterial: "공통수학1",
-      lessonName: testType === "attendance" ? "출결 테스트 수업" : "월수금 7-10반",
+      lessonName: testType === "attendance"
+        ? "출결 테스트 수업"
+        : testType === "specialLecture"
+          ? "2026 여름 개별 진도 클리닉"
+          : "월수금 7-10반",
       lateMinutes: testType === "attendance" ? 5 : "",
       message: "오늘 수업에서 확인한 내용을 바탕으로 다음 과제를 안내드립니다.",
       nextHomework: "쎈 - 경우의 수",
+      noticeKind: testType === "specialLecture" ? "special_lecture" : "general",
+      noticeTitle: testType === "specialLecture" ? "2026 여름 개별 진도 클리닉" : "",
       parentPhone: notificationStatus?.testRecipient,
       previousHomework: "rpm 순열과 조합",
       reason: testType === "attendance" ? "태블릿/수기 출결 연결 점검" : "",
+      specialLectureAudience: testType === "specialLecture" ? "예비고1, 예비고2" : "",
+      specialLectureDays: testType === "specialLecture" ? "월·수·금" : "",
+      specialLectureLessonCount: testType === "specialLecture" ? "총 8회 · 24시간" : "",
+      specialLectureTime: testType === "specialLecture" ? "13:00-16:00" : "",
+      specialLectureTitle: testType === "specialLecture" ? "2026 여름 개별 진도 클리닉" : "",
+      specialLectureTuition: testType === "specialLecture" ? "300,000원" : "",
+      specialLectureUrl: testType === "specialLecture" ? "https://academy-os-blue.vercel.app/#special-lecture?guide=2026-summer-high1-clinic-mwf" : "",
       studentName: "테스트학생",
       studentPhone: notificationStatus?.testRecipient,
       target: testType === "student" ? "student" : "parent"
@@ -19887,9 +19918,16 @@ function NotificationSettingsSection({ integrationStatus }) {
     try {
       const result = await postJson(endpoint, basePayload);
       const modeText = result.result?.dryRun ? "테스트 기록 완료 · 실제 발송 없음" : "테스트 번호로 발송 요청 완료";
-      setTestSendResult(`${getNotificationJobLabel(testType === "attendance" ? "attendance" : testType === "student" ? "student_comment" : "parent_comment")}: ${modeText}`);
+      const resultLabelType = testType === "attendance"
+        ? "attendance"
+        : testType === "student"
+          ? "student_comment"
+          : testType === "specialLecture"
+            ? "notice_parent"
+            : "parent_comment";
+      setTestSendResult(`${getNotificationJobLabel(resultLabelType)}: ${modeText}`);
       setTestSendDetail({
-        label: getNotificationJobLabel(testType === "attendance" ? "attendance" : testType === "student" ? "student_comment" : "parent_comment"),
+        label: getNotificationJobLabel(resultLabelType),
         dryRun: Boolean(result.result?.dryRun),
         requestedTo: result.result?.requestedTo || "-",
         sentTo: result.result?.sentTo || "-",
@@ -19921,6 +19959,7 @@ function NotificationSettingsSection({ integrationStatus }) {
           <span><StatusDot active={notificationStatus?.solapiConfigured} /> API/PFID 설정</span>
           <span><StatusDot active={notificationStatus?.templatesConfigured?.attendance} /> 출결 알림톡 템플릿</span>
           <span><StatusDot active={notificationStatus?.templatesConfigured?.dailyReport} /> 학부모 알림톡 템플릿</span>
+          <span><StatusDot active={notificationStatus?.templatesConfigured?.specialLectureNotice} /> 특강 안내 템플릿</span>
           <span><StatusDot active={notificationStatus?.templatesConfigured?.studentComment} /> 학생 알림톡 템플릿</span>
         </article>
         <article>
@@ -19945,6 +19984,7 @@ function NotificationSettingsSection({ integrationStatus }) {
         {[
           ["attendance", "출결 알림톡", "선생님 테스트 수신번호로 출결 알림톡 형식을 점검합니다."],
           ["parent", "학부모 알림톡", "출결, 과제 상태, 강의 내용, 코멘트 구조를 점검합니다."],
+          ["specialLecture", "특강 안내 알림톡", "카카오 재검수용 특강 템플릿 문구와 변수를 점검합니다."],
           ["student", "학생 알림톡", "학생에게 보낼 안내문과 다음 과제 문구를 점검합니다."]
         ].map(([id, title, description]) => (
           <article key={id}>

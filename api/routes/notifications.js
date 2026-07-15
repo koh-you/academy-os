@@ -655,6 +655,7 @@ export async function sendLessonCommentAlimtalk(payload) {
       "#{요일}": String(payload.specialLectureDays ?? ""),
       "#{시간}": String(payload.specialLectureTime ?? ""),
       "#{시수}": String(payload.specialLectureLessonCount ?? ""),
+      "#{수강료}": String(payload.specialLectureTuition ?? ""),
       "#{안내문링크}": String(payload.specialLectureUrl ?? "")
     }
   });
