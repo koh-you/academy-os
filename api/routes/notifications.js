@@ -135,6 +135,16 @@ function normalizeText(value) {
     .join("\n");
 }
 
+function normalizeMessageBodyText(value) {
+  return String(value ?? "")
+    .replace(/\r\n?/g, "\n")
+    .split("\n")
+    .map((line) => line.trim())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function normalizeList(value) {
   if (Array.isArray(value)) {
     return value
@@ -358,15 +368,29 @@ function hasLessonCommentContext(payload = {}) {
   );
 }
 
+function isNoticePayload(payload = {}) {
+  const notificationType = String(payload.notificationType ?? "");
+  return Boolean(
+    payload.noticeKind ||
+    payload.noticeTitle ||
+    payload.noticeBody ||
+    notificationType === "notice_parent" ||
+    notificationType === "notice_student"
+  );
+}
+
 function resolveLessonCommentBody(payload, audience) {
-  const overrideText = normalizeText(payload.commentBodyOverride);
+  const overrideText = normalizeMessageBodyText(payload.commentBodyOverride);
+  if (isNoticePayload(payload)) {
+    return overrideText || normalizeMessageBodyText(payload.message) || buildLessonCommentBody(payload, audience);
+  }
   if (!hasLessonCommentContext(payload)) {
     return overrideText || buildLessonCommentBody(payload, audience);
   }
 
   return buildLessonCommentBody({
     ...payload,
-    message: normalizeText(payload.message) || overrideText
+    message: normalizeMessageBodyText(payload.message) || overrideText
   }, audience);
 }
 

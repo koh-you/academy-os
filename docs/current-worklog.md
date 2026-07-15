@@ -13,6 +13,18 @@
 - 리팩터링 gate 기본값: 리팩터링 구현/자동검증이 끝나면 커밋/푸시 전에 `AI 검수 결과`와 `사람이 확인할 것`을 함께 세션에 띄운다. AI는 변경 범위, 저장 원천/API/side effect diff, 테스트, 정적 invariant를 먼저 확인하고, 사람 확인은 AI가 확인할 수 없는 화면 어색함/운영 데이터/외부 서비스 상태 중심으로 최소화한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-15 P1. 특강 안내 알림톡 임시 발송 줄간격 보정
+
+- 상태: 완료 - 구현/자동검증 완료
+- 사용자 요청: Solapi/Kakao 특강 전용 템플릿 검수 전이라 기존 임시 알림톡으로 먼저 보내야 하는데, 실제 수신 알림톡에서 미리보기처럼 문단 간격이 보이지 않고 줄이 붙어 보이는 문제를 수정한다.
+- 원인 검토: 전용 템플릿 승인 전 특강 안내는 기존 수업 안내 템플릿의 `commentBodyOverride` 변수에 특강 본문을 넣어 발송한다. 프론트 본문도 목록처럼 이어졌고, 서버의 `normalizeText()`가 빈 줄을 제거해 실제 발송 직전에 문단 간격이 사라졌다.
+- 구현 결과: 특강 임시 공지 본문을 인사/대상·요일·시간/특이사항/안내 문장/링크 블록으로 나누고, 블록 사이를 `\n\n`으로 분리했다.
+- 구현 결과: 서버에서 `commentBodyOverride`와 자유 본문 `message`는 새 `normalizeMessageBodyText()`를 통해 의도한 빈 줄을 보존하되, 과도한 3줄 이상 공백은 1개 빈 줄로 정리한다. 즉시/예약 공지 payload는 수업일지 구조로 감싸지 않고 같은 자유 본문을 쓰며, 기존 구조화된 출결/수업일지 본문 정규화는 그대로 둔다.
+- 저장 원천: 특강 안내문 원본은 기존 Supabase `app_state.specialLectureGuides`다. 이번 작업은 저장 구조와 SQL을 바꾸지 않는다.
+- 외부 side effect: Solapi 실제 발송/예약, `notification_jobs`, Tally 신청자, 특강 lesson 생성/수정 없음. 실제 발송 문구 생성 로직만 바꿨다.
+- 중단 조건: 실제 테스트 발송에서 빈 줄이 다시 사라짐, 특이사항/안내 링크가 누락됨, 새 안내 링크가 `/#special-lecture` hash 형태로 돌아감, 템플릿 승인 후에도 전용 템플릿 대신 임시 수업 안내 템플릿이 계속 쓰임.
+- 검증: `node --check api/routes/notifications.js`, `node --check src/domains/specialLectures/specialLectureGuideUtils.js`, `node --check scripts/scenario-tests-production.cjs`, 특강 본문 생성 직접 검증, 예약 공지 dry-run 변수 검증, `npm run test:production` 303개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P1. 특강 공개 안내문 하단 중복 제거와 직접 링크 복구
 
 - 상태: 완료 - 구현/자동검증 완료

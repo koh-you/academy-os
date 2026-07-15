@@ -705,22 +705,22 @@ export function getSpecialLectureApplicationUrl(guide = {}) {
 export function buildSpecialLectureNoticeText(guide = {}, guideUrl = getSpecialLecturePublicUrl(guide), brandName = defaultSpecialLectureBrandName) {
   const normalizedGuide = normalizeSpecialLectureGuide(guide);
   const specialNotes = normalizedGuide.specialNotes.trim();
-  const specialNotesLines = specialNotes
-    ? ["", `특이사항: ${specialNotes}`]
-    : [];
-  return [
+  const introLines = [
     `안녕하세요. ${brandName}입니다.`,
-    "",
-    `${normalizedGuide.title} 안내드립니다.`,
-    "",
+    `${normalizedGuide.title} 안내드립니다.`
+  ];
+  const detailLines = [
     `대상: ${normalizedGuide.audience || "-"}`,
     `요일: ${normalizedGuide.days || "-"}`,
-    `시간: ${normalizedGuide.time || "-"}`,
-    ...specialNotesLines,
-    "",
+    `시간: ${normalizedGuide.time || "-"}`
+  ];
+  return [
+    introLines.join("\n"),
+    detailLines.join("\n"),
+    specialNotes ? `특이사항:\n${specialNotes}` : "",
     normalizedGuide.noticeMemo || "세부 시수와 수강료, 회차별 일정은 아래 링크에서 확인 부탁드립니다. 수강을 원하시거나 문의사항이 있으신 경우 안내문에서 신청해 주세요.",
     guideUrl
-  ].join("\n");
+  ].filter(Boolean).join("\n\n");
 }
 
 export function isSpecialLectureRoute() {
