@@ -23477,7 +23477,7 @@ function SupplementCenter({
     }
     const pendingTask = createPendingMakeupTask(item.task);
     setPendingCandidateTask(pendingTask);
-    setSupplementRowAction(item.task, "draft", "보충 생성 화면에서 내용만 저장을 눌러야 보충 항목이 생성됩니다.");
+    setSupplementRowAction(item.task, "draft", "보충 생성 화면에서 보충 내용 저장을 눌러야 보충 항목이 생성됩니다.");
   }
 
   function clearPendingCandidateTask(savedTask) {
@@ -23502,15 +23502,15 @@ function SupplementCenter({
   }
 
   async function handleScheduleSupplementTaskFromModal(task) {
-    setSupplementRowAction(task, "saving", "보충 일정 반영 중");
+    setSupplementRowAction(task, "saving", "수업일지 일정 저장 중");
     try {
       const result = await onScheduleTask(task);
       const nextTask = result?.makeupTask ?? task;
       clearPendingCandidateTask(nextTask);
-      setSupplementRowAction(nextTask, "saved", "보충 일정 반영 완료");
+      setSupplementRowAction(nextTask, "saved", "수업일지 일정 저장 완료");
       return result;
     } catch (error) {
-      setSupplementRowAction(task, "failed", error?.message || "보충 일정 반영 실패");
+      setSupplementRowAction(task, "failed", error?.message || "수업일지 일정 저장 실패");
       throw error;
     }
   }
@@ -23940,23 +23940,21 @@ function SupplementScheduleChangeConfirmModal({
 }
 
 const supplementDraftFieldLabels = {
-  status: "진행 상태",
-  supplementHomeworkNote: "보충할 숙제 내역",
-  supplementProgressMemo: "보충 메모",
-  supplementMethod: "보충 방식",
+  supplementHomeworkNote: "보충 대상",
+  supplementMethod: "처리 방법",
   scheduledDate: "배정일",
   scheduledTime: "시간",
   notificationDraft: "알림톡 문구"
 };
 
 const supplementSaveStatusLabels = {
-  changed: "저장 전 변경",
-  empty: "미입력",
+  changed: "저장 필요",
+  empty: "아직 없음",
   failed: "저장 실패",
   idle: "대기",
-  notApplied: "미반영",
-  ready: "반영 가능",
-  resultDue: "결과 확인 필요",
+  notApplied: "반영 안 함",
+  ready: "일정 만들 수 있음",
+  resultDue: "발송 결과 확인 필요",
   saved: "저장 완료",
   scheduled: "예약 완료",
   saving: "저장 중",
@@ -24201,7 +24199,7 @@ function SupplementStudentModal({
       makeupTask: "saving",
       notificationDraft: "saving"
     });
-    showFeedback("보충 내용 저장 중", "makeup_tasks와 알림톡 초안만 저장합니다. 수업일지 일정은 아직 반영하지 않습니다.", "saving");
+    showFeedback("보충 내용 저장 중", "보충 대상과 알림톡 문구만 저장합니다. 수업일지 일정은 아직 만들지 않습니다.", "saving");
 
     try {
       const savedTask = await onSaveTask?.(taskWithDraft);
@@ -24212,7 +24210,7 @@ function SupplementStudentModal({
         makeupTask: "saved",
         notificationDraft: "saved"
       });
-      showFeedback("내용만 저장 완료", "보충 내용과 알림톡 초안이 저장되었습니다. 일정 반영은 별도 버튼으로 진행합니다.");
+      showFeedback("보충 내용 저장 완료", "보충 대상과 알림톡 문구가 저장되었습니다. 수업일지 일정은 별도 버튼으로 진행합니다.");
     } catch (error) {
       console.error("Failed to save supplement task", error);
       setTaskSaveStatusPatch(task.makeupTaskId, {
@@ -24229,7 +24227,7 @@ function SupplementStudentModal({
     if (!task?.makeupTaskId || busyTaskId) return;
     const taskWithDraft = createPersistableSupplementTask(buildTaskWithDraft(task));
     if (!taskWithDraft.scheduledDate || !taskWithDraft.scheduledTime) {
-      showFeedback("일정 반영 실패", "배정일과 시간을 먼저 입력해야 합니다.", "failed");
+      showFeedback("수업일지 일정 만들기 실패", "배정일과 시간을 먼저 입력해야 합니다.", "failed");
       setTaskSaveStatusPatch(task.makeupTaskId, { lesson: "failed" });
       return;
     }
@@ -24245,7 +24243,7 @@ function SupplementStudentModal({
     const taskWithDraft = createPersistableSupplementTask(buildTaskWithDraft(task));
     const shouldUpdateStudentReminder = !taskWithDraft.skipStudentReminder && !taskWithDraft.suppressStudentReminder;
     if (!taskWithDraft.scheduledDate || !taskWithDraft.scheduledTime) {
-      showFeedback("일정 반영 실패", "배정일과 시간을 먼저 입력해야 합니다.", "failed");
+      showFeedback("수업일지 일정 만들기 실패", "배정일과 시간을 먼저 입력해야 합니다.", "failed");
       setTaskSaveStatusPatch(task.makeupTaskId, { lesson: "failed" });
       return;
     }
@@ -24261,12 +24259,12 @@ function SupplementStudentModal({
       studentReminder: "saving"
     });
     showFeedback(
-      "일정 반영 중",
+      "수업일지 일정 저장 중",
       shouldUpdateStudentReminder
         ? task.linkedLessonId
           ? "보충관리 저장 후 학생·학부모에게 일정 변경 안내를 즉시 발송하고, 보강 당일 11시 학생 알림톡 예약도 함께 갱신합니다."
-          : "보충관리 저장 후 수업일지 일정과 보강 당일 11시 학생 알림톡 예약을 함께 반영합니다."
-        : "보충관리 저장 후 수업일지 일정만 반영합니다. 학생 11시 알림톡 예약은 변경하지 않습니다.",
+          : "보충관리 저장 후 수업일지 일정을 만들고, 보강 당일 11시 학생 알림톡 예약도 함께 확인합니다."
+        : "보충관리 저장 후 수업일지 일정만 저장합니다. 학생 11시 알림톡 예약은 변경하지 않습니다.",
       "saving"
     );
 
@@ -24284,7 +24282,7 @@ function SupplementStudentModal({
       });
       setScheduleConfirmTask(null);
       showFeedback(
-        task.linkedLessonId ? "일정 변경 저장 완료" : "일정 반영 완료",
+        task.linkedLessonId ? "수업일지 일정 변경 완료" : "수업일지 일정 만들기 완료",
         [
           `${nextTask.scheduledDate} ${nextTask.scheduledTime} 보충 일정이 수업일지에 반영되었습니다.`,
           result?.scheduleChangeNoticeSkipped ? "" : result?.scheduleChangeNoticeMessage,
@@ -24302,7 +24300,7 @@ function SupplementStudentModal({
         studentChangeNotice: "failed",
         studentReminder: "failed"
       });
-      showFeedback("일정 반영 실패", error?.message || "알 수 없는 오류가 발생했습니다.", "failed");
+      showFeedback("수업일지 일정 저장 실패", error?.message || "알 수 없는 오류가 발생했습니다.", "failed");
     } finally {
       setBusyTaskId("");
     }
@@ -24311,7 +24309,7 @@ function SupplementStudentModal({
   async function handlePassTask(task) {
     if (!task?.makeupTaskId || busyTaskId) return;
     if (task.isLocalDraftTask) {
-      showFeedback("보충 완료 처리 전 저장 필요", "보충 생성 화면에서는 먼저 내용만 저장을 눌러 보충 항목을 생성해야 합니다.", "failed");
+      showFeedback("보충 완료 처리 전 저장 필요", "보충 생성 화면에서는 먼저 보충 내용 저장을 눌러 보충 항목을 생성해야 합니다.", "failed");
       return;
     }
     if (task.status === "done") {
@@ -24377,14 +24375,6 @@ function SupplementStudentModal({
       <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...supplementAutosaveRisk} />
       <div className="supplementModalLayout single">
         <section className="supplementModalMain">
-          <div className="sectionHeader slim">
-            <div>
-              <h2>진행 항목</h2>
-              <p className="muted">학생별 보충 일정과 문구 초안을 이 화면에서 관리합니다.</p>
-            </div>
-            <span className="countBadge">{tasks.length}개</span>
-          </div>
-
           {tasks.length === 0 ? (
             <div className="emptyHomeworkBox">아직 생성된 보충관리 항목이 없습니다.</div>
           ) : null}
@@ -24395,7 +24385,6 @@ function SupplementStudentModal({
               const draftValues = taskDraftState.values;
               const draftDiff = getSupplementTaskDraftDiff(task, draftValues, student);
               const supplementHomeworkNote = draftValues.supplementHomeworkNote ?? "";
-              const supplementMemo = draftValues.supplementProgressMemo ?? "";
               const saveStatus = taskSaveStatus[task.makeupTaskId] ?? {};
               const isTaskBusy = busyTaskId.startsWith(`${task.makeupTaskId}:`);
               const isContentBusy = busyTaskId === `${task.makeupTaskId}:content`;
@@ -24415,10 +24404,9 @@ function SupplementStudentModal({
                   <div className="taskCardTop">
                     <div>
                       <strong>{followUpTypeLabel(task.taskType)}</strong>
-                      <p>{task.taskType === "homework_makeup" ? supplementHomeworkNote : task.sourceLabel}</p>
                       <small>{task.reason} · {supplementMethodLabel({ ...task, supplementMethod: draftValues.supplementMethod })} · 배정 {task.attemptCount ?? 0}회</small>
                       <span className="taskLinkedLesson draftMode">
-                        수정 모드 · local draft
+                        수정 중
                       </span>
                       {task.notificationDraft?.trim() ? (
                         <span className="taskLinkedLesson draftReady">
@@ -24436,51 +24424,10 @@ function SupplementStudentModal({
                         </span>
                       ) : null}
                     </div>
-                    <div className="taskStatusControl">
-                      <span>진행 상태</span>
-                      <div className="taskStepControl">
-                        {supplementStatusSteps.map((step) => (
-                          <button
-                            className={draftValues.status === step.id ? "active" : ""}
-                            key={step.id}
-                            onClick={() => updateTaskDraft(task, "status", step.id)}
-                            type="button"
-                          >
-                            {step.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
                   </div>
-                  <div className="supplementReadableGrid">
-                    {task.taskType === "homework_makeup" || task.taskType === "absence_makeup" ? (
-                    <label className="supplementHomeworkField supplementReadableField">
-                      <strong>{task.taskType === "absence_makeup" ? "함께 확인할 지난 숙제" : "보충할 숙제 내역"}</strong>
-                      <span>
-                        {task.taskType === "absence_makeup"
-                          ? "결석보강 알림톡과 보충 기록에 함께 확인할 지난 숙제로 반영됩니다."
-                          : "보충일지와 알림톡 문구에 반영되는 핵심 내용입니다."}
-                      </span>
-                      <textarea
-                        value={supplementHomeworkNote}
-                        onChange={(event) => updateTaskDraft(task, "supplementHomeworkNote", event.target.value)}
-                        placeholder={task.taskType === "absence_makeup" ? "예: 공수1 개념원리 p.18,19, 곱셈공식 프린트 25문항" : "예: 교과서 프린트, 지난 시간 미완료 숙제"}
-                      />
-                    </label>
-                    ) : null}
-                  <label className="supplementMemoField supplementReadableField">
-                    <strong>보충 메모</strong>
-                    <span>진행한 내용, 남은 문항, 다음 확인 사항을 남깁니다.</span>
-                    <textarea
-                      value={supplementMemo}
-                      onChange={(event) => updateTaskDraft(task, "supplementProgressMemo", event.target.value)}
-                      placeholder="예: 오답 30문제 중 18번까지 확인, 남은 12문제는 다음 보충 때 마무리"
-                    />
-                  </label>
-                    </div>
                   <div className="supplementSchedulePanel">
                     <label className="taskOptionBlock">
-                      <strong>보충 방식</strong>
+                      <strong>보충을 어떻게 처리할까요?</strong>
                       <div className="taskChoiceGrid">
                         {supplementMethodOptions(task.taskType).map((option) => (
                           <button
@@ -24505,9 +24452,26 @@ function SupplementStudentModal({
                       </label>
                     </div>
                   </div>
-                  <div className="supplementDraftDiff" data-state={draftDiff.length ? "dirty" : "clean"}>
-                    <strong>저장 전 변경 diff</strong>
-                    {draftDiff.length ? (
+                  <div className="supplementReadableGrid">
+                    {task.taskType === "homework_makeup" || task.taskType === "absence_makeup" ? (
+                      <label className="supplementHomeworkField supplementReadableField">
+                        <strong>{task.taskType === "absence_makeup" ? "함께 확인할 지난 숙제" : "보충 대상"}</strong>
+                        <span>
+                          {task.taskType === "absence_makeup"
+                            ? "결석보강 알림톡과 보충 기록에 함께 확인할 지난 숙제로 반영됩니다."
+                            : "보충일지와 알림톡 문구에 들어갈 핵심 내용입니다."}
+                        </span>
+                        <textarea
+                          value={supplementHomeworkNote}
+                          onChange={(event) => updateTaskDraft(task, "supplementHomeworkNote", event.target.value)}
+                          placeholder={task.taskType === "absence_makeup" ? "예: 공수1 개념원리 p.18,19, 곱셈공식 프린트 25문항" : "예: 교과서 프린트, 지난 시간 미완료 숙제"}
+                        />
+                      </label>
+                    ) : null}
+                  </div>
+                  {draftDiff.length ? (
+                    <div className="supplementDraftDiff" data-state="dirty">
+                      <strong>저장하면 바뀌는 내용</strong>
                       <ul>
                         {draftDiff.map((item) => (
                           <li key={item.field}>
@@ -24518,35 +24482,33 @@ function SupplementStudentModal({
                           </li>
                         ))}
                       </ul>
-                    ) : (
-                      <p>저장 전 변경 없음</p>
-                    )}
-                  </div>
+                    </div>
+                  ) : null}
                   <div className="supplementSaveStatusGrid">
-                    {renderSaveStatusPill("makeup_tasks", makeupStatus)}
-                    {renderSaveStatusPill("lessons", lessonStatus)}
-                    {renderSaveStatusPill("알림톡 초안", notificationStatus)}
+                    {renderSaveStatusPill("보충 내용", makeupStatus)}
+                    {renderSaveStatusPill("수업일지 일정", lessonStatus)}
+                    {renderSaveStatusPill("알림톡 문구", notificationStatus)}
                     {studentChangeNoticeStatus ? renderSaveStatusPill("학생 변경 안내", studentChangeNoticeStatus) : null}
                     {parentChangeNoticeStatus ? renderSaveStatusPill("학부모 변경 안내", parentChangeNoticeStatus) : null}
-                    {renderSaveStatusPill("학생 11시 알림톡", studentReminderStatus)}
+                    {renderSaveStatusPill("학생 11시 예약", studentReminderStatus)}
                   </div>
                   <label className="notificationDraftField supplementReadableField">
                     <strong>알림톡 문구</strong>
-                    <span>보충 일정 안내 초안입니다. 일정 반영 시 보강 당일 오전 11시에 학생 알림톡으로 예약됩니다.</span>
+                    <span>학생에게 보낼 보충 안내 문구입니다. 수업일지 일정 만들기를 누르면 보강 당일 오전 11시 예약까지 확인합니다.</span>
                     <textarea
                       value={draftValues.notificationDraft}
                       onChange={(event) => updateTaskDraft(task, "notificationDraft", event.target.value)}
                     />
                   </label>
                   <div className="supplementSendGateNote">
-                    발송 검수 gate: 내용만 저장은 발송/예약을 만들지 않습니다. 기존 일정 변경 시에는 학생·학부모 변경 안내 즉시 발송과 보강 당일 학생 11시 예약 갱신 여부를 먼저 확인합니다.
+                    알림톡 주의: 보충 내용 저장은 발송/예약을 만들지 않습니다. 수업일지 일정 만들기는 보강 당일 학생 11시 예약을 함께 확인합니다. 기존 일정 변경은 학생·학부모 변경 안내 여부를 먼저 묻습니다.
                   </div>
                   <div className="modalActions supplementSplitActions">
                     <button className="softButton primarySoft" disabled={isTaskBusy} onClick={() => handleSaveTask(task)} type="button">
-                      {isContentBusy ? "내용 저장 중" : "내용만 저장"}
+                      {isContentBusy ? "저장 중" : "보충 내용 저장"}
                     </button>
                     <button className="softButton scheduleApplyButton" disabled={isTaskBusy || !hasScheduleDraft} onClick={() => requestApplyScheduleTask(task)} type="button">
-                      {isScheduleBusy ? "일정 저장 중" : task.linkedLessonId ? "일정 변경 저장" : "일정 반영"}
+                      {isScheduleBusy ? "일정 저장 중" : task.linkedLessonId ? "수업일지 일정 변경" : "수업일지 일정 만들기"}
                     </button>
                     {!isLocalDraftTask ? (
                       <button
@@ -27904,12 +27866,6 @@ function followUpTypeLabel(taskType) {
   };
   return labels[taskType] ?? "보충관리";
 }
-
-const supplementStatusSteps = [
-  { id: "draft", label: "일정 미확정" },
-  { id: "scheduled", label: "일정 확정" },
-  { id: "done", label: "보충 완료" }
-];
 
 const supplementMethodsByType = {
   homework_makeup: [
