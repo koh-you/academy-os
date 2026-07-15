@@ -5,6 +5,14 @@
       "destination": "/attendance.html"
     },
     {
+      "source": "/special-lecture",
+      "destination": "/special-lecture.html"
+    },
+    {
+      "source": "/special-lecture/",
+      "destination": "/special-lecture.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

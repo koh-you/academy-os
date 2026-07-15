@@ -7,7 +7,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: "index.html",
-        attendance: "attendance.html"
+        attendance: "attendance.html",
+        specialLecture: "special-lecture.html"
       }
     }
   },

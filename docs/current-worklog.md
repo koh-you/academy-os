@@ -13,6 +13,19 @@
 - 리팩터링 gate 기본값: 리팩터링 구현/자동검증이 끝나면 커밋/푸시 전에 `AI 검수 결과`와 `사람이 확인할 것`을 함께 세션에 띄운다. AI는 변경 범위, 저장 원천/API/side effect diff, 테스트, 정적 invariant를 먼저 확인하고, 사람 확인은 AI가 확인할 수 없는 화면 어색함/운영 데이터/외부 서비스 상태 중심으로 최소화한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-15 P0. 특강 공개 링크 모바일 전용 HTML 분리
+
+- 상태: 완료 - 구현/자동검증 완료
+- 사용자 요청: 특강 공개 링크가 컴퓨터에서는 열리지만 모바일에서는 열리지 않는다. 이미 localStorage 방어까지 했는데도 모바일에서 빈 화면이 이어진다.
+- 원인 검토: 컴퓨터에서 열리고 운영 API도 200이면 URL/데이터 원천 문제는 아니다. 기존 `/special-lecture`는 전체 Academy OS React 번들을 로드한 뒤 공개 페이지로 분기한다. 모바일 WebView는 저장소뿐 아니라 큰 modern JS 번들, module script, 일부 브라우저 API 호환성에도 취약하므로 학부모 공개 링크를 전체 앱 번들에 의존시키는 구조 자체가 위험하다.
+- 구현 결과: `special-lecture.html` 독립 공개 페이지를 추가했다. 이 페이지는 React, module script, localStorage 없이 일반 script + `XMLHttpRequest`로 `/api/special-lecture-guides`를 읽고, 실패 시 기본 안내문을 렌더한다.
+- 구현 결과: Vercel rewrite에서 `/special-lecture`와 `/special-lecture/`를 `special-lecture.html`로 먼저 보내도록 변경했다. 기존 안내문 URL `/special-lecture?guide=<slug>`는 그대로 유지한다.
+- 구현 결과: Vite 빌드 입력에 `special-lecture.html`을 추가해 배포 산출물에 독립 공개 페이지가 포함되게 했다.
+- 저장 원천: 특강 안내문 원본은 기존 Supabase `app_state.specialLectureGuides`, 공개 조회는 `/api/special-lecture-guides`다. 새 SQL은 없다.
+- 외부 side effect: Solapi 실제 발송/예약, `notification_jobs`, Tally 신청자, 특강 lesson 생성/수정 없음. 공개 링크 렌더링 구조만 바꿨다.
+- 중단 조건: 모바일 카카오/문자 인앱에서 계속 빈 화면, `/special-lecture`가 다시 `index.html` SPA로 rewrite됨, 독립 HTML이 `localStorage`나 `/src/main.jsx`를 다시 참조함, API 실패 시 아무 안내도 렌더되지 않음.
+- 검증: HTML 정적 검증(module/main/localStorage 미사용, XHR/API 사용), Vercel/Vite 설정 검증, `npm run test:production` 305개 통과, `npm run build` 통과 및 `dist/special-lecture.html` 포함 확인, headless Chrome 로컬 standalone page 렌더 확인, `--disable-local-storage` 조건 렌더 확인, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P0. 특강 공개 링크 카카오 인앱 빈 화면 수정
 
 - 상태: 완료 - 구현/자동검증 완료
