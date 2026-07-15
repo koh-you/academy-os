@@ -99,5 +99,5 @@ E:\academy-os 작업을 이어가겠습니다.
 
 - 미룬 작업 큐의 source of truth는 `AGENTS.md` 최상단과 `docs/current-worklog.md` 최상단입니다.
 - 이 README는 붙여넣기 편의를 위한 사본입니다. 세션 종료 시 새로 미룬 작업이 생기면 세 곳을 함께 갱신하세요.
-- 이 handoff 작성 시점의 최신 커밋은 `58728cb0 Clarify supplement homework reminder labels`입니다. 새 세션에서 반드시 `git log -1 --oneline`으로 다시 확인하세요.
+- 보충 알림톡 라벨 정리 기능 커밋은 `58728cb0 Clarify supplement homework reminder labels`입니다. handoff 문서 갱신 커밋이 뒤에 올 수 있으므로 새 세션에서 반드시 `git log -1 --oneline`으로 최신 커밋을 다시 확인하세요.
 - 현재 로컬에 남을 수 있는 미추적 항목: `.codex-temp/`. 커밋하지 않습니다.
