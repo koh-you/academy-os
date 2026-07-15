@@ -5505,7 +5505,7 @@ const defaultNotificationTemplates = {
     "#{학생명} 학생 결석 보강 안내입니다.",
     "",
     "#{보강일정}",
-    "#{보강진행문장}",
+    "#{보강대상}",
     "#{결석사유줄}",
     "#{확인숙제줄}",
     "#{보충메모}"
@@ -5527,7 +5527,7 @@ const notificationTemplateRows = [
     key: "absenceMakeupStudentReminder",
     source: "Supabase app_state.aiSettings.notificationTemplates",
     title: "결석보강 학생 11시 알림톡",
-    variables: "#{학생명}, #{보강일정}, #{보강진행문장}, #{결석사유줄}, #{확인숙제줄}, #{보충메모}"
+    variables: "#{학생명}, #{보강일정}, #{보강대상}, #{결석사유줄}, #{확인숙제줄}, #{보충메모}"
   },
   {
     audience: "학생/학부모",
@@ -28162,10 +28162,8 @@ function getAbsenceMakeupSourceText(task = {}) {
   const [, dateFromLabel = ""] = rawSourceLabel.match(/^(\d{4}-\d{2}-\d{2})\s*/) ?? [];
   const sourceDate = task.sourceDate || task.lessonDate || dateFromLabel;
   const sourceDateLabel = formatSupplementShortDate(sourceDate);
-  const sourceLabelWithoutDate = rawSourceLabel.replace(/^\d{4}-\d{2}-\d{2}\s*/, "").trim();
-  if (sourceDateLabel && sourceLabelWithoutDate) return `${sourceDateLabel} ${sourceLabelWithoutDate}`;
   if (sourceDateLabel) return `${sourceDateLabel} 결석 수업`;
-  return sourceLabelWithoutDate || normalizeMessageText(task.reason || "결석 수업").replace(/\s+/g, " ").trim();
+  return "결석 수업";
 }
 
 function getAbsenceMakeupHomeworkText(task = {}) {
@@ -28198,9 +28196,20 @@ function formatSupplementShortDate(dateText = "") {
   return `${Number(month)}/${Number(day)}${weekday ? `(${weekday})` : ""}`;
 }
 
+function formatSupplementTimeLabel(timeText = "") {
+  const normalizedTime = String(timeText || "").trim();
+  const [, hourText = "", minuteText = "00"] = normalizedTime.match(/^(\d{1,2}):(\d{2})$/) ?? [];
+  if (!hourText) return normalizedTime;
+  const hour = Number(hourText);
+  if (!Number.isFinite(hour)) return normalizedTime;
+  const period = hour < 12 ? "오전" : "오후";
+  const displayHour = hour % 12 || 12;
+  return `${period} ${String(displayHour).padStart(2, "0")}:${minuteText}`;
+}
+
 function formatSupplementDateTimeText(dateText = "", timeText = "") {
   const dateLabel = formatSupplementShortDate(dateText) || String(dateText || "").trim();
-  const timeLabel = String(timeText || "").trim();
+  const timeLabel = formatSupplementTimeLabel(timeText);
   return [dateLabel, timeLabel].filter(Boolean).join(" ");
 }
 
@@ -28243,14 +28252,12 @@ function createNotificationDraft(task, students, notificationTemplates = {}) {
     const absenceSourceText = getAbsenceMakeupSourceText(task);
     const scheduleLine = scheduleText ? `일시: ${scheduleText}` : "";
     const progressMemoLine = progressMemo ? `보충 메모:\n${progressMemo}` : "";
-    const absenceTargetText = absenceSourceText === "결석 수업" ? absenceSourceText : `${absenceSourceText} 결석 수업`;
-    const progressSentence = methodId === "recorded_lecture"
-      ? `${absenceTargetText} 보강을 녹화 강의로 진행합니다.`
-      : `${absenceTargetText} 보강을 진행합니다.`;
+    const absenceTargetLine = formatTemplateLine("보강 대상", absenceSourceText);
     return renderNotificationTemplate(templates.absenceMakeupStudentReminder, {
       "결석사유줄": absenceReasonLine,
+      "보강대상": absenceTargetLine,
       "보강일정": scheduleLine,
-      "보강진행문장": progressSentence,
+      "보강진행문장": absenceTargetLine,
       "보충메모": progressMemoLine,
       "학생명": studentName,
       "확인숙제줄": homeworkCheckLine
