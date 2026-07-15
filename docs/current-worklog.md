@@ -13,6 +13,19 @@
 - 리팩터링 gate 기본값: 리팩터링 구현/자동검증이 끝나면 커밋/푸시 전에 `AI 검수 결과`와 `사람이 확인할 것`을 함께 세션에 띄운다. AI는 변경 범위, 저장 원천/API/side effect diff, 테스트, 정적 invariant를 먼저 확인하고, 사람 확인은 AI가 확인할 수 없는 화면 어색함/운영 데이터/외부 서비스 상태 중심으로 최소화한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-15 P0. 특강/공지 예약 발송 Solapi 직접 예약 전환
+
+- 상태: 완료 - 구현/자동검증 완료
+- 사용자 요청: 특강 예약 발송을 18:30으로 예약했지만 실제 Solapi 발송은 18:51에 이루어졌다. 데일리알림톡에서 해결한 예약 구조를 확인하고, 예약 발송은 Solapi 예약으로 진행되게 한다. 즉시발송은 같은 문제가 없는지도 확인한다.
+- 원인 검토: 운영 `notification_jobs` 15건은 `scheduledAt=2026-07-15T09:30:00Z`로 저장되어 있었지만 `provider=academy-os` OS 예약 큐 상태였다. Solapi 응답의 `scheduledDate`는 비어 있고 `dateSent`가 18:51~18:52 KST였으므로, 18:30 Solapi 예약이 아니라 Render 서버가 18:51에 깨어나 due job을 즉시 발송한 흐름이었다.
+- 구현 결과: 알림관리/특강관리 `예약 발송`은 이제 기존 `/api/notification-jobs` 단순 저장 대신 데일리/수업 예약과 같은 `/api/notification-jobs/reserve`를 호출한다. 서버는 `sendScheduledNotificationJobToSolapi` 경로로 `scheduledDate`를 Solapi에 넘겨 예약 그룹을 만들고 `provider=solapi`, `providerMessageId`를 `notification_jobs`에 저장한다.
+- 구현 결과: 예약 시각이 이미 지난 경우에는 Solapi 즉시발송처럼 흘러가지 않도록 예약을 중단하고 새 예약 시각 또는 즉시발송을 안내한다. 예약 실패 시에는 기존처럼 실패 이력을 `notification_jobs`에 남기고 화면 실패 필터에서 확인할 수 있다.
+- 즉시발송 확인: 공지/특강 즉시발송은 기존처럼 `/api/notifications/comment-alimtalk`을 바로 호출해 Solapi에 즉시 요청하고, 그 결과를 `notification_jobs`에 `sent`/`send_unconfirmed`/`failed`로 기록한다. 예약 시각 의존이나 서버 dispatch 지연 문제와는 별개다.
+- 저장 원천: 예약/발송 이력 원본은 기존 Supabase `notification_jobs`다. 새 SQL은 없다.
+- 외부 side effect: 앞으로 예약 발송 버튼은 실제 Solapi 예약 그룹을 생성한다. 즉시발송 버튼은 기존과 동일하게 실제 즉시 발송을 요청한다.
+- 중단 조건: 새 예약 기록의 `provider`가 `academy-os`로 남음, Solapi 응답 `scheduledDate`가 비어 있음, 예약 시각이 지난 건이 즉시 발송됨, 예약 취소가 Solapi group 취소로 이어지지 않음, 즉시발송이 예약 큐에만 쌓임.
+- 검증: 운영 API 조회로 기존 지연 발송 건의 원인을 확인했다. `node --check scripts/scenario-tests-production.cjs` 통과, `npm run test:production` 305개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P1. 특강 신청자 컴포넌트 분리와 생성 preview gate 제거
 
 - 상태: 완료 - 구현/자동검증 완료

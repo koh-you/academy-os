@@ -10072,6 +10072,16 @@ function NotificationCenter({
     );
   }
 
+  async function reserveNoticeJob(notificationJob) {
+    const result = await postJsonWithTimeout(
+      "/api/notification-jobs/reserve",
+      { notificationJob, reason: "공지 Solapi 예약" },
+      45000,
+      "Solapi 예약 요청이 45초를 넘었습니다. 실제 예약 여부는 발송 기록 또는 Solapi에서 확인해 주세요."
+    );
+    return result.notificationJob ?? notificationJob;
+  }
+
   function refreshNoticeJobsInBackground() {
     Promise.resolve(onRefresh?.()).catch((error) => {
       setDispatchMessage((current) => `${current || "처리는 완료됐습니다."} 발송 기록 새로고침 실패: ${error.message}`);
@@ -10135,29 +10145,39 @@ function NotificationCenter({
 
   async function scheduleNotice() {
     if (!noticeText || noticeRecipients.length === 0 || !scheduledAt || isSendingNotice) return;
+    if (isNotificationSchedulePast(scheduledAt, 0)) {
+      setDispatchMessage("예약 시각이 이미 지났습니다. 새 예약 시각을 선택하거나 즉시 발송을 사용해 주세요.");
+      return;
+    }
     setIsSendingNotice(true);
-    setDispatchMessage(`공지 예약 저장 중: 0/${noticeRecipients.length}건`);
+    setDispatchMessage(`Solapi 공지 예약 중: 0/${noticeRecipients.length}건`);
     let savedCount = 0;
     let failedCount = 0;
     try {
       const jobs = noticeRecipients.map((recipient) => buildNoticeJob(recipient, "scheduled"));
       for (const [index, notificationJob] of jobs.entries()) {
-        setDispatchMessage(`공지 예약 저장 중: ${index + 1}/${jobs.length}건`);
+        setDispatchMessage(`Solapi 공지 예약 중: ${index + 1}/${jobs.length}건`);
         try {
-          await persistNoticeJob(notificationJob);
-          upsertLocalNoticeJob(notificationJob);
+          const reservedJob = await reserveNoticeJob(notificationJob);
+          upsertLocalNoticeJob(reservedJob);
           savedCount += 1;
         } catch (error) {
-          upsertLocalNoticeJob({
+          const failedJob = {
             ...notificationJob,
             status: "failed",
-            error: `예약 저장 실패: ${error.message}`,
+            error: `Solapi 예약 실패: ${error.message}`,
             updatedAt: new Date().toISOString()
-          });
+          };
+          upsertLocalNoticeJob(failedJob);
+          try {
+            await persistNoticeJob(failedJob);
+          } catch (persistError) {
+            console.error(persistError);
+          }
           failedCount += 1;
         }
       }
-      setDispatchMessage(`${formatKoreaTimeLabel(scheduledAt)} 공지 예약 저장 완료: 성공 ${savedCount}건${failedCount ? `, 실패 ${failedCount}건` : ""}`);
+      setDispatchMessage(`${formatKoreaTimeLabel(scheduledAt)} Solapi 공지 예약 완료: 성공 ${savedCount}건${failedCount ? `, 실패 ${failedCount}건` : ""}`);
       setJobFilter(failedCount ? "failed" : "scheduled");
       setIsNoticeHistoryOpen(true);
       refreshNoticeJobsInBackground();
