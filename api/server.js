@@ -1705,15 +1705,43 @@ function getStudentTestResultLinesForNotification(testSessions = [], testAttempt
 
 function getPreparationNoticeForNotification(record = {}, target = "parent") {
   const shouldInclude = target === "student" ? Boolean(record.prepStudentVisible) : Boolean(record.prepParentVisible);
-  return shouldInclude ? normalizeNotificationText(record.preparationMemo) : "";
+  return shouldInclude ? formatHomeworkFollowupMemoForNotification(record.preparationMemo) : "";
+}
+
+function parseHomeworkFollowupMemoLineForNotification(line = "") {
+  const text = normalizeNotificationText(line);
+  const match = text.match(/^(다음 수업 확인|수업 후 보충)\s*:\s*(.+)$/);
+  if (!match) return null;
+  const method = match[1] === "다음 수업 확인" ? "next_lesson" : "stay_after";
+  return { method, text: match[2].trim() };
+}
+
+function formatHomeworkFollowupMemoForNotification(value = "") {
+  const lines = normalizeNotificationText(value).split("\n").map((line) => {
+    const parsed = parseHomeworkFollowupMemoLineForNotification(line);
+    if (!parsed) return line;
+    if (parsed.method === "next_lesson") {
+      return `다음 수업 때 ${parsed.text}를 함께 확인하겠습니다.`;
+    }
+    if (parsed.method === "stay_after") {
+      return `오늘 수업 후 ${parsed.text} 보충을 마무리합니다.`;
+    }
+    return line;
+  });
+  return normalizeNotificationText(lines.join("\n"));
 }
 
 function buildInitialNotificationComment({ audience, existingComment, record, supplementSchedules }) {
   const commentText = compactDuplicateNotificationBlocks(existingComment);
-  if (commentText) return commentText;
-
   const prepMemo = getPreparationNoticeForNotification(record, audience);
   const shouldAddPrepMemo = prepMemo && !notificationTextIncludesBlock(commentText, prepMemo);
+
+  if (commentText) {
+    return joinNotificationBlocks([
+      shouldAddPrepMemo ? prepMemo : "",
+      commentText
+    ]);
+  }
 
   return joinNotificationBlocks([
     shouldAddPrepMemo ? prepMemo : "",

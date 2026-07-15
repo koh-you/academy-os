@@ -436,7 +436,76 @@ function textIncludesEveryLine(text = "", lines = []) {
 function getPreparationNoticeForTarget(record = {}, target = "parent") {
   const shouldIncludePrepMemo =
     target === "student" ? Boolean(record?.prepStudentVisible) : Boolean(record?.prepParentVisible);
-  return shouldIncludePrepMemo ? normalizeMessageText(record?.preparationMemo) : "";
+  return shouldIncludePrepMemo ? formatHomeworkFollowupMemoForNotice(record?.preparationMemo) : "";
+}
+
+const homeworkFollowupMemoPrefixes = {
+  next_lesson: "다음 수업 확인",
+  stay_after: "수업 후 보충"
+};
+
+const homeworkFollowupMethods = [
+  { id: "stay_after", label: "남아서 하고 가기" },
+  { id: "next_lesson", label: "다음시간까지" },
+  { id: "arrival_makeup", label: "등원보충" }
+];
+
+function getHomeworkFollowupMemoPrefix(method = "") {
+  return homeworkFollowupMemoPrefixes[method] || "";
+}
+
+function parseHomeworkFollowupMemoLine(line = "") {
+  const text = normalizeMessageText(line);
+  const match = text.match(/^(다음 수업 확인|수업 후 보충)\s*:\s*(.+)$/);
+  if (!match) return null;
+  const method = match[1] === homeworkFollowupMemoPrefixes.next_lesson ? "next_lesson" : "stay_after";
+  return { method, text: match[2].trim() };
+}
+
+function formatHomeworkFollowupMemoForNotice(value = "") {
+  const lines = normalizeMessageText(value).split("\n").map((line) => {
+    const parsed = parseHomeworkFollowupMemoLine(line);
+    if (!parsed) return line;
+    if (parsed.method === "next_lesson") {
+      return `다음 수업 때 ${parsed.text}를 함께 확인하겠습니다.`;
+    }
+    if (parsed.method === "stay_after") {
+      return `오늘 수업 후 ${parsed.text} 보충을 마무리합니다.`;
+    }
+    return line;
+  });
+  return normalizeMessageText(lines.join("\n"));
+}
+
+function removeHomeworkFollowupMemoLines(value = "") {
+  return normalizeMessageText(value)
+    .split("\n")
+    .filter((line) => !parseHomeworkFollowupMemoLine(line))
+    .join("\n")
+    .trim();
+}
+
+function upsertHomeworkFollowupMemo(value = "", method = "", homeworkTitle = "") {
+  const baseMemo = removeHomeworkFollowupMemoLines(value);
+  const prefix = getHomeworkFollowupMemoPrefix(method);
+  const nextLine = prefix && homeworkTitle ? `${prefix}: ${homeworkTitle}` : "";
+  return [baseMemo, nextLine].filter(Boolean).join("\n");
+}
+
+function getHomeworkFollowupMethodFromRecord(record = {}) {
+  if (record?.needsMakeup) return "arrival_makeup";
+  const parsed = normalizeMessageText(record?.preparationMemo)
+    .split("\n")
+    .map(parseHomeworkFollowupMemoLine)
+    .find(Boolean);
+  return parsed?.method || "";
+}
+
+function getHomeworkFollowupSummaryFromMemo(value = "") {
+  return normalizeMessageText(value)
+    .split("\n")
+    .map(parseHomeworkFollowupMemoLine)
+    .find(Boolean);
 }
 
 function buildCommentPreviewLines({ audience, comment, nextHomework, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
@@ -589,10 +658,16 @@ function hasIncompleteLessonTestAttempt(testSessions = [], testAttempts = [], le
 
 function buildInitialCommentDraft({ audience, existingComment, record, supplementSchedules }) {
   const commentText = compactDuplicateMessageBlocks(existingComment);
-  if (commentText) return commentText;
-
   const prepMemo = getPreparationNoticeForTarget(record, audience);
   const shouldAddPrepMemo = prepMemo && !textIncludesMessageBlock(commentText, prepMemo);
+
+  if (commentText) {
+    return joinMessageBlocks([
+      shouldAddPrepMemo ? prepMemo : "",
+      commentText
+    ]);
+  }
+
   return joinMessageBlocks([
     shouldAddPrepMemo ? prepMemo : "",
     commentText
@@ -8599,6 +8674,7 @@ export function App() {
             onPolishComment={handlePolishLessonComment}
             onPolishPreparationNotice={handlePolishPreparationNotice}
             onPassMakeupTask={handlePassSupplementTask}
+            onCreateMakeupTask={handleCreateMakeupTask}
             onReconcileSolapiNotificationResults={handleReconcileSolapiNotificationResults}
             onRetryGeneratedLessonSave={handleRetryGeneratedLessonSave}
             onScheduleMakeupTask={handleScheduleSupplementTask}
@@ -9535,6 +9611,8 @@ export function App() {
       if (existingTask) {
         const nextTask = {
           ...existingTask,
+          ...task,
+          makeupTaskId: existingTask.makeupTaskId,
           status: existingTask.status === "done" ? "scheduled" : existingTask.status,
           touchedAt: new Date().toISOString()
         };
@@ -14487,6 +14565,7 @@ function TeacherLessonHubV2({
   onCancelNotificationJob,
   onChangeRecord,
   onCopyLesson,
+  onCreateMakeupTask,
   onDateSelect,
   onDeleteLesson,
   onDeleteAcademyReminder,
@@ -14662,6 +14741,7 @@ function TeacherLessonHubV2({
             onBack={onBackToCalendar}
             onCancelNotificationJob={onCancelNotificationJob}
             onChangeRecord={onChangeRecord}
+            onCreateMakeupTask={onCreateMakeupTask}
             onDeleteLesson={onDeleteLesson}
             onEditLesson={onEditLesson}
             onOpenAttendance={onOpenAttendance}
@@ -15479,6 +15559,7 @@ function LessonJournalDetail({
   onBack,
   onCancelNotificationJob,
   onChangeRecord,
+  onCreateMakeupTask,
   onDeleteLesson,
   onEditLesson,
   onOpenAttendance,
@@ -16017,6 +16098,15 @@ function LessonJournalDetail({
   }
 
   function updateJournalRecordDraft(student, baseRecord, field, value) {
+    updateJournalRecordDraftPatch(student, baseRecord, {
+      [field]: value,
+      ...(field === "assignmentStatus" ? { incompleteHomework: value } : {}),
+      ...(field === "teacherComment" ? { teacherCommentSendStatus: "" } : {}),
+      ...(field === "studentComment" ? { studentCommentSendStatus: "" } : {})
+    });
+  }
+
+  function updateJournalRecordDraftPatch(student, baseRecord, patch = {}) {
     if (!journalEditMode) return;
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
     const nowIso = new Date().toISOString();
@@ -16026,15 +16116,62 @@ function LessonJournalDetail({
       lessonStudentRecordId: recordId,
       lessonId: lesson.lessonId,
       studentId: student.studentId,
-      [field]: value,
-      ...(field === "assignmentStatus" ? { incompleteHomework: value } : {}),
-      ...(field === "teacherComment" ? { teacherCommentSendStatus: "" } : {}),
-      ...(field === "studentComment" ? { studentCommentSendStatus: "" } : {}),
+      ...patch,
       updatedBy: "instructor_owner_001",
       updatedAt: nowIso
     };
     setJournalRecordDrafts((current) => ({ ...current, [recordId]: nextRecord }));
     setJournalManualSaveMessage("수업일지 · 저장 필요");
+  }
+
+  function applyHomeworkFollowupMethod(student, baseRecord, previousHomework, method) {
+    if (!journalEditMode || !previousHomework) return;
+    const homeworkTitle = previousHomework.title || previousHomework.sourceLabel || "지난 숙제";
+    const clearFollowupMemo = removeHomeworkFollowupMemoLines(baseRecord.preparationMemo ?? "");
+    const commonPatch = {
+      assignmentStatus: normalizeAssignmentStatusValue(baseRecord.assignmentStatus ?? baseRecord.incompleteHomework ?? ""),
+      incompleteHomework: normalizeAssignmentStatusValue(baseRecord.assignmentStatus ?? baseRecord.incompleteHomework ?? ""),
+      teacherCommentSendStatus: "",
+      studentCommentSendStatus: ""
+    };
+
+    if (method === "arrival_makeup") {
+      const makeupTask = {
+        taskType: "homework_makeup",
+        studentId: student.studentId,
+        sourceId: previousHomework.homeworkId,
+        sourceHomeworkId: previousHomework.homeworkId,
+        sourceLessonId: previousHomework.lessonId || lesson.lessonId,
+        sourceLabel: homeworkTitle,
+        reason: "등원보충 필요 숙제",
+        supplementHomeworkNote: homeworkTitle,
+        supplementMethod: "arrival_makeup"
+      };
+      onCreateMakeupTask?.(makeupTask);
+      updateJournalRecordDraftPatch(student, baseRecord, {
+        ...commonPatch,
+        needsMakeup: true,
+        preparationMemo: clearFollowupMemo,
+        prepParentVisible: Boolean(clearFollowupMemo && baseRecord.prepParentVisible),
+        prepStudentVisible: Boolean(clearFollowupMemo && baseRecord.prepStudentVisible)
+      });
+      setJournalManualSaveMessage("수업일지 · 등원보충을 보충관리로 보냈습니다. 변경 저장이 필요합니다.");
+      return;
+    }
+
+    const nextMemo = upsertHomeworkFollowupMemo(baseRecord.preparationMemo ?? "", method, homeworkTitle);
+    updateJournalRecordDraftPatch(student, baseRecord, {
+      ...commonPatch,
+      needsMakeup: false,
+      preparationMemo: nextMemo,
+      prepParentVisible: true,
+      prepStudentVisible: true
+    });
+    setJournalManualSaveMessage(
+      method === "next_lesson"
+        ? "수업일지 · 다음 정규수업 확인 문구를 오늘 알림톡에 반영합니다."
+        : "수업일지 · 수업 후 보충 문구를 오늘 알림톡에 반영합니다."
+    );
   }
 
   function getHomeworkDraftKey(student, homeworkType) {
@@ -16496,6 +16633,7 @@ function LessonJournalDetail({
             const previousLessonContent = getLessonContent(previousRecord);
             const previousPreparationMemo = previousMemoRecord?.preparationMemo?.trim() ?? "";
             const referencePreparationMemo = referenceRecord?.preparationMemo?.trim() ?? "";
+            const pendingHomeworkFollowup = getHomeworkFollowupSummaryFromMemo(previousPreparationMemo || referencePreparationMemo);
             const hasCheckedPriorPrepMemo = Boolean(previousMemoContext.acknowledgedMemoCutoffDate);
             const parentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "parent");
             const studentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "student");
@@ -16504,6 +16642,12 @@ function LessonJournalDetail({
             const hasMissingPreSendData = hasPreSendMissingRequiredData(record, student, effectivePreviousHomework, effectiveNextHomework);
             const isParentNotificationOff = isLessonNotificationOff || record.notificationMutedParent;
             const isStudentNotificationOff = isLessonNotificationOff || record.notificationMutedStudent;
+            const assignmentStatusValue = normalizeAssignmentStatusValue(record.assignmentStatus ?? record.incompleteHomework ?? "");
+            const shouldShowHomeworkFollowupActions =
+              journalEditMode &&
+              Boolean(effectivePreviousHomework?.title) &&
+              isAssignmentStatusHomeworkMakeupCandidate(assignmentStatusValue);
+            const selectedHomeworkFollowupMethod = getHomeworkFollowupMethodFromRecord(record);
 
             return (
               <div className={["journalRow", showPreSendCheck && hasMissingPreSendData ? "preSendMissing" : ""].filter(Boolean).join(" ")} key={student.studentId}>
@@ -16601,16 +16745,37 @@ function LessonJournalDetail({
                   placeholder="다음 숙제"
                   value={nextHomeworkTitle}
                 />
-                <select
-                  className="assignmentStatusSelect"
-                  disabled={!journalEditMode}
-                  value={normalizeAssignmentStatusValue(record.assignmentStatus ?? record.incompleteHomework ?? "")}
-                  onChange={(event) => updateJournalRecordDraft(student, record, "assignmentStatus", event.target.value)}
-                >
-                  {assignmentStatusOptions.map((option) => (
-                    <option key={option.value || "empty"} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
+                <div className="assignmentStatusCell">
+                  <select
+                    className="assignmentStatusSelect"
+                    disabled={!journalEditMode}
+                    value={assignmentStatusValue}
+                    onChange={(event) => updateJournalRecordDraft(student, record, "assignmentStatus", event.target.value)}
+                  >
+                    {assignmentStatusOptions.map((option) => (
+                      <option key={option.value || "empty"} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                  {shouldShowHomeworkFollowupActions ? (
+                    <div className="homeworkFollowupActions" aria-label="숙제보충 처리 방식">
+                      {homeworkFollowupMethods.map((method) => (
+                        <button
+                          className={selectedHomeworkFollowupMethod === method.id ? "active" : ""}
+                          key={method.id}
+                          onClick={() => applyHomeworkFollowupMethod(student, record, effectivePreviousHomework, method.id)}
+                          type="button"
+                        >
+                          {method.label}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                  {pendingHomeworkFollowup ? (
+                    <span className="homeworkFollowupCheck">
+                      확인할 숙제 · {pendingHomeworkFollowup.text}
+                    </span>
+                  ) : null}
+                </div>
                 <div className="journalCommentCell">
                   <button
                     className={`commentOpenButton comment-${parentCommentState}${isParentNotificationOff ? " notification-off" : ""}`}
@@ -27473,6 +27638,8 @@ function isHomeworkMakeupCandidate(homework, records = [], lessons = []) {
   const assignmentStatus = record?.assignmentStatus ?? record?.incompleteHomework ?? "";
   const recordRequiresMakeup = assignmentStatus ? isAssignmentStatusHomeworkMakeupCandidate(assignmentStatus) : false;
   if (assignmentStatus) {
+    const followupMethod = getHomeworkFollowupMethodFromRecord(record);
+    if (["stay_after", "next_lesson"].includes(followupMethod)) return false;
     return isHomeworkActionRequired(homework) && recordRequiresMakeup;
   }
   return (

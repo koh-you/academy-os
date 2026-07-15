@@ -6824,6 +6824,48 @@ textarea {
   padding: 0 10px;
 }
 
+.assignmentStatusCell {
+  align-content: center;
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.homeworkFollowupActions {
+  display: grid;
+  gap: 4px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.homeworkFollowupActions button {
+  background: #ffffff;
+  border: 1px solid #cbd8ee;
+  border-radius: 999px;
+  color: #334155;
+  font-size: 11px;
+  font-weight: 900;
+  min-height: 30px;
+  padding: 0 5px;
+}
+
+.homeworkFollowupActions button.active {
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #ffffff;
+}
+
+.homeworkFollowupCheck {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 6px;
+  color: #9a3412;
+  display: block;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.35;
+  padding: 5px 6px;
+}
+
 .managementTable input,
 .managementTable select {
   min-height: 42px;
