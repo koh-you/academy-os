@@ -20,6 +20,17 @@
    - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다.
    - 검수 전에는 임시 특강 알림톡 구조를 유지하고, 검수 완료 확인 후에만 템플릿 ID/변수 연결, 테스트 데이터 발송, 링크/문구 검수를 진행한다.
 
+## 2026-07-15 세션 마무리 요약
+
+- 완료: 기존 일요보강/일요시험보강 runtime을 clean-slate `시험대비` 구조로 전환했다. 정상 원천은 Supabase `lessons.lesson_type=examPrep`이고, legacy `examSundayMakeup`을 자동 변환하지 않는다.
+- 완료: 운영 Supabase SQL Editor에서 `supabase/20260715_cleanup_legacy_exam_sunday_makeup_lessons.sql` cleanup을 사용자가 실행했다. preview 삭제 대상은 2건(`2026-06-21`, `2026-06-28`)이었고 `lesson_record_count`, `homework_count`, `notification_job_count`, `active_notification_job_count`가 모두 0이었다.
+- 운영 확인: cleanup 후 legacy 조회 결과가 `Success. No rows returned`로 확인됐다. 즉 `examSundayMakeup`, `lesson_exam_sunday_makeup_%`, `generated:sunday_makeup:%` row는 삭제 완료다.
+- 운영 확인: 새 `examPrep` 조회도 `Success. No rows returned`였다. 즉 새 시험대비 수업은 아직 Supabase `lessons`에 저장되지 않았다.
+- 운영 확인: 달력에 보였던 `시험대비`는 저장된 수업이 아니라 시험관리 데이터에서 계산된 자동 후보/미리보기였다. 사용자가 화면에서 해당 자동생성 시험대비 후보를 수동삭제했고, 이는 `app_state.generatedLessonControls.suppressedKeys` 기반 후보 제외로 이해한다.
+- 현재 상태: 시험대비는 아직 시작하지 않는다. 다음 세션에서 사용자가 명시적으로 요청하기 전까지 시험대비 수업을 생성/반영하지 않는다.
+- 후속 주의: 나중에 시험대비를 실제로 시작할 때는 `시험관리/학사일정`의 자동 수업 후보에서 필요한 항목만 반영한다. 이미 수동삭제한 후보가 필요하면 `제외 해제` 가능 여부를 먼저 확인한다.
+- 후속 후보: 저장 전 자동 후보가 실제 수업처럼 달력에 보여 헷갈릴 수 있으므로, 필요하면 `시험대비 자동 후보와 실제 저장 수업 표시 분리`를 별도 UI 개선 작업으로 잡는다.
+
 ## 상시 최우선 운영 원칙
 
 - 커밋/푸시 최우선: AI가 할 수 있는 변경 검수, 커밋, 푸시는 사용자가 따로 말하지 않아도 작업 완료 즉시 자동으로 진행한다. GitHub `main` 푸시로 Vercel/Render 자동 배포가 이어지는 흐름을 기본값으로 둔다.

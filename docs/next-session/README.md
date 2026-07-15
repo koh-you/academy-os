@@ -33,11 +33,27 @@ E:\academy-os 작업을 이어가겠습니다.
    - 검수 완료 전에는 임시 특강 알림톡 구조를 유지합니다.
    - 검수 완료 확인 후에만 템플릿 ID/변수 연결, 테스트 데이터 발송, 링크/문구 검수를 진행합니다.
 
-최근 기록된 완료 상태:
-- 최신 커밋은 반드시 `git log -1 --oneline`으로 다시 확인합니다.
-- 마지막 기록 커밋: `43adb9be Clean up legacy Sunday makeup runtime`
-- 기존 일요보강 runtime은 clean-slate 방향으로 정리됐고, 새 정상 원천은 `lessonType=examPrep`입니다.
-- 기존 일요보강 실제 삭제는 사용자가 운영 Supabase SQL Editor에서 `supabase/20260715_cleanup_legacy_exam_sunday_makeup_lessons.sql`을 적용해야 합니다.
+오늘 완료/확인된 작업:
+1. 기존 일요보강/일요시험보강 runtime을 clean-slate `시험대비` 구조로 전환했습니다.
+   - 새 정상 원천은 Supabase `lessons.lesson_type=examPrep`입니다.
+   - legacy `examSundayMakeup`을 `examPrep`으로 자동 변환하지 않습니다.
+   - 관련 코드 커밋: `43adb9be Clean up legacy Sunday makeup runtime`
+2. 미룬 작업 큐를 `AGENTS.md`, `docs/current-worklog.md`, `docs/next-session/README.md` 최상단 흐름으로 고정했습니다.
+   - 관련 커밋: `ba348ad8 Record deferred work queue in handoff docs`
+3. 운영 Supabase SQL Editor에서 기존 legacy 일요보강 cleanup을 사용자가 실행했습니다.
+   - 삭제 전 preview 대상은 2건: `2026-06-21`, `2026-06-28`
+   - `lesson_record_count`, `homework_count`, `notification_job_count`, `active_notification_job_count` 모두 0
+   - cleanup 후 legacy 조회는 `Success. No rows returned`
+4. 새 `examPrep` 수업 조회도 `Success. No rows returned`였습니다.
+   - 즉 시험대비 수업은 아직 Supabase `lessons`에 저장되지 않았습니다.
+   - 달력에 보였던 `시험대비`는 저장된 수업이 아니라 시험관리 데이터에서 계산된 자동 후보/미리보기였습니다.
+   - 사용자가 자동생성 시험대비 후보를 화면에서 수동삭제했습니다. 이는 `app_state.generatedLessonControls.suppressedKeys` 기반 후보 제외로 이해합니다.
+
+다음 세션 주의사항:
+- 사용자가 명시적으로 요청하기 전까지 새 시험대비 수업을 생성/반영하지 마세요. 아직 시험대비를 시작하지 않았습니다.
+- 나중에 시험대비를 실제로 시작할 때는 `시험관리/학사일정`의 자동 수업 후보에서 필요한 항목만 반영합니다.
+- 이미 수동삭제한 시험대비 후보가 필요해지면 `제외 해제` 가능 여부를 먼저 확인합니다.
+- 저장 전 자동 후보가 실제 수업처럼 달력에 보여 헷갈리는 문제가 계속되면 `시험대비 자동 후보와 실제 저장 수업 표시 분리`를 별도 UI 개선 작업으로 제안하세요.
 
 계속 커밋하지 말 것:
 - `.codex-temp/`
@@ -57,4 +73,5 @@ E:\academy-os 작업을 이어가겠습니다.
 
 - 미룬 작업 큐의 source of truth는 `AGENTS.md` 최상단과 `docs/current-worklog.md` 최상단입니다.
 - 이 README는 붙여넣기 편의를 위한 사본입니다. 세션 종료 시 새로 미룬 작업이 생기면 세 곳을 함께 갱신하세요.
+- 최신 커밋은 이 파일이 커밋된 뒤 달라질 수 있으므로 새 세션에서 반드시 `git log -1 --oneline`으로 확인하세요.
 - 현재 로컬에 남을 수 있는 미추적 항목: `.codex-temp/`. 커밋하지 않습니다.
