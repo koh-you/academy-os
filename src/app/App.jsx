@@ -450,6 +450,14 @@ const homeworkFollowupMethods = [
   { id: "arrival_makeup", label: "등원보충" }
 ];
 
+function getHomeworkFollowupOptionsForAssignmentStatus(status = "") {
+  const normalizedStatus = normalizeAssignmentStatusValue(status);
+  if (normalizedStatus === "not_checked") {
+    return homeworkFollowupMethods.filter((method) => method.id === "next_lesson");
+  }
+  return isAssignmentStatusHomeworkMakeupCandidate(normalizedStatus) ? homeworkFollowupMethods : [];
+}
+
 function getHomeworkFollowupMemoPrefix(method = "") {
   return homeworkFollowupMemoPrefixes[method] || "";
 }
@@ -16106,6 +16114,27 @@ function LessonJournalDetail({
     });
   }
 
+  function handleAssignmentStatusChange(student, baseRecord, previousHomework, value) {
+    const normalizedValue = normalizeAssignmentStatusValue(value);
+    const homeworkTitle = previousHomework?.title || previousHomework?.sourceLabel || "";
+    if (normalizedValue === "not_checked" && homeworkTitle) {
+      const nextMemo = upsertHomeworkFollowupMemo(baseRecord.preparationMemo ?? "", "next_lesson", homeworkTitle);
+      updateJournalRecordDraftPatch(student, baseRecord, {
+        assignmentStatus: normalizedValue,
+        incompleteHomework: normalizedValue,
+        needsMakeup: false,
+        preparationMemo: nextMemo,
+        prepParentVisible: true,
+        prepStudentVisible: true,
+        teacherCommentSendStatus: "",
+        studentCommentSendStatus: ""
+      });
+      setJournalManualSaveMessage("수업일지 · 미검사는 다음 정규수업 확인 문구를 오늘 알림톡에 반영합니다.");
+      return;
+    }
+    updateJournalRecordDraft(student, baseRecord, "assignmentStatus", normalizedValue);
+  }
+
   function updateJournalRecordDraftPatch(student, baseRecord, patch = {}) {
     if (!journalEditMode) return;
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
@@ -16643,10 +16672,11 @@ function LessonJournalDetail({
             const isParentNotificationOff = isLessonNotificationOff || record.notificationMutedParent;
             const isStudentNotificationOff = isLessonNotificationOff || record.notificationMutedStudent;
             const assignmentStatusValue = normalizeAssignmentStatusValue(record.assignmentStatus ?? record.incompleteHomework ?? "");
+            const homeworkFollowupOptions = getHomeworkFollowupOptionsForAssignmentStatus(assignmentStatusValue);
             const shouldShowHomeworkFollowupActions =
               journalEditMode &&
               Boolean(effectivePreviousHomework?.title) &&
-              isAssignmentStatusHomeworkMakeupCandidate(assignmentStatusValue);
+              homeworkFollowupOptions.length > 0;
             const selectedHomeworkFollowupMethod = getHomeworkFollowupMethodFromRecord(record);
 
             return (
@@ -16750,7 +16780,7 @@ function LessonJournalDetail({
                     className="assignmentStatusSelect"
                     disabled={!journalEditMode}
                     value={assignmentStatusValue}
-                    onChange={(event) => updateJournalRecordDraft(student, record, "assignmentStatus", event.target.value)}
+                    onChange={(event) => handleAssignmentStatusChange(student, record, effectivePreviousHomework, event.target.value)}
                   >
                     {assignmentStatusOptions.map((option) => (
                       <option key={option.value || "empty"} value={option.value}>{option.label}</option>
@@ -16758,7 +16788,7 @@ function LessonJournalDetail({
                   </select>
                   {shouldShowHomeworkFollowupActions ? (
                     <div className="homeworkFollowupActions" aria-label="숙제보충 처리 방식">
-                      {homeworkFollowupMethods.map((method) => (
+                      {homeworkFollowupOptions.map((method) => (
                         <button
                           className={selectedHomeworkFollowupMethod === method.id ? "active" : ""}
                           key={method.id}
