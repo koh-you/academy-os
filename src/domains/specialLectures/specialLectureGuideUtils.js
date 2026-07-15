@@ -655,7 +655,20 @@ export function getSpecialLectureGuideSlug(guide = {}) {
 
 export function getSpecialLecturePublicUrl(guide = {}) {
   const origin = typeof window !== "undefined" ? window.location.origin : "https://academy-os-blue.vercel.app";
-  return `${origin}/special-lecture?guide=${encodeURIComponent(getSpecialLectureGuideSlug(guide))}`;
+  return `${origin}/#special-lecture?guide=${encodeURIComponent(getSpecialLectureGuideSlug(guide))}`;
+}
+
+export function getSpecialLectureGuideSlugFromLocation(location = null) {
+  const sourceLocation = location || (typeof window !== "undefined" ? window.location : null);
+  if (!sourceLocation) return "";
+  const searchGuide = new URLSearchParams(sourceLocation.search || "").get("guide");
+  if (searchGuide) return searchGuide;
+  const hash = String(sourceLocation.hash || "").replace(/^#/, "");
+  if (!hash.startsWith("special-lecture")) return "";
+  const [, hashQuery = ""] = hash.split("?");
+  const hashGuide = new URLSearchParams(hashQuery).get("guide");
+  if (hashGuide) return hashGuide;
+  return hash.replace(/^special-lecture\/?/, "").trim();
 }
 
 export function appendSpecialLectureUrlParams(url = "", params = {}) {
@@ -679,7 +692,7 @@ export function getSpecialLectureApplicationUrl(guide = {}) {
   const campaign = [
     normalizedGuide.year,
     normalizedGuide.season,
-    normalizedGuide.shortTitle || normalizedGuide.title
+    normalizedGuide.title
   ].filter(Boolean).join("_").replaceAll(/\s+/g, "_");
   return appendSpecialLectureUrlParams(normalizedGuide.applicationUrl, {
     specialLectureId: normalizedGuide.specialLectureGuideId,
@@ -698,8 +711,9 @@ export function buildSpecialLectureNoticeText(guide = {}, guideUrl = getSpecialL
   return [
     `안녕하세요. ${brandName}입니다.`,
     "",
-    `${normalizedGuide.shortTitle || normalizedGuide.title} 안내드립니다.`,
+    `${normalizedGuide.title} 안내드립니다.`,
     "",
+    `대상: ${normalizedGuide.audience || "-"}`,
     `요일: ${normalizedGuide.days || "-"}`,
     `시간: ${normalizedGuide.time || "-"}`,
     `시수: ${normalizedGuide.lessonCount || "-"}`,

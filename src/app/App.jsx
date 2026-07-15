@@ -57,6 +57,7 @@ import {
   getSpecialLectureApplicationStatusLabel,
   getSpecialLectureApplicationUrl,
   getSpecialLectureCalculatedFields,
+  getSpecialLectureGuideSlugFromLocation,
   getSpecialLectureGuideSlug,
   getSpecialLecturePublicUrl,
   getSpecialLectureSeasonShortLabel,
@@ -9996,13 +9997,14 @@ function NotificationCenter({
       guideUrl,
       lessonCount: normalizedGuide.lessonCount,
       title: normalizedGuide.title,
+      audience: normalizedGuide.audience,
       days: normalizedGuide.days,
       time: normalizedGuide.time
     });
-    setNoticeTitle(normalizedGuide.shortTitle || normalizedGuide.title || "특강 안내");
+    setNoticeTitle(normalizedGuide.title || "특강 안내");
     setNoticeBody(noticeBodyText);
     setActiveNotificationTab("notice");
-    setDispatchMessage("특강 안내문을 공지 발송 화면에 반영했습니다. 수신 대상을 선택한 뒤 테스트 발송으로 먼저 확인하세요.");
+    setDispatchMessage("특강 안내문을 저장한 뒤 공지 발송 화면에 반영했습니다. 수신 대상을 선택한 뒤 테스트 발송으로 먼저 확인하세요.");
   }
 
   function selectJobFilter(nextFilter) {
@@ -10043,6 +10045,7 @@ function NotificationCenter({
       target: recipient.audience,
       ...(noticeKind === "special_lecture" && noticeSpecialLectureMeta
         ? {
+            specialLectureAudience: noticeSpecialLectureMeta.audience,
             specialLectureDays: noticeSpecialLectureMeta.days,
             specialLectureGuideId: noticeSpecialLectureMeta.guideId,
             specialLectureLessonCount: noticeSpecialLectureMeta.lessonCount,
@@ -10698,7 +10701,6 @@ function SpecialLectureNoticePanel({
       nextSource = {
         ...nextSource,
         title: replaceSpecialLectureToken(nextSource.title, previousSeasonText, nextSeasonText),
-        shortTitle: replaceSpecialLectureToken(nextSource.shortTitle, previousSeasonText, nextSeasonText),
         slug: replaceSpecialLectureToken(nextSource.slug, selectedGuide.season, value)
       };
     }
@@ -10820,7 +10822,7 @@ function SpecialLectureNoticePanel({
 
   function deleteSelectedGuide() {
     if (!selectedGuide) return;
-    const title = selectedGuide.shortTitle || selectedGuide.title || "이 특강";
+    const title = selectedGuide.title || "이 특강";
     if (typeof window !== "undefined" && !window.confirm(`${title} 안내문을 삭제할까요?\n삭제하면 공개 링크도 더 이상 이 안내문을 찾을 수 없습니다.`)) return;
     const nextGuides = draftGuides.filter((guide) => guide.specialLectureGuideId !== selectedGuide.specialLectureGuideId);
     persistGuideManagement(nextGuides, getDefaultSpecialLectureGuideId(nextGuides), "특강 안내문을 삭제했습니다.");
@@ -10903,18 +10905,41 @@ function SpecialLectureNoticePanel({
     setCopyMessage(copied ? "안내문 링크를 복사했습니다." : "링크 복사에 실패했습니다. 화면의 URL을 직접 복사해 주세요.");
   }
 
-  async function saveGuides() {
-    if (!onSaveGuides) return;
+  function buildGuidesSavePayload() {
+    return draftGuides.map((guide) => normalizeSpecialLectureGuide({
+      ...guide,
+      updatedAt: new Date().toISOString()
+    }, guide));
+  }
+
+  async function persistDraftGuides(successMessage = "특강 안내문을 저장했습니다. 공개 링크는 저장본을 읽습니다.") {
+    const payload = buildGuidesSavePayload();
+    if (!onSaveGuides) return payload;
     setPanelMessage("");
+    const saved = await onSaveGuides(payload);
+    setDraftGuides(saved);
+    if (successMessage) setPanelMessage(successMessage);
+    return saved;
+  }
+
+  async function saveGuides() {
     try {
-      const saved = await onSaveGuides(draftGuides.map((guide) => normalizeSpecialLectureGuide({
-        ...guide,
-        updatedAt: new Date().toISOString()
-      }, guide)));
-      setDraftGuides(saved);
-      setPanelMessage("특강 안내문을 저장했습니다. 공개 링크는 저장본을 읽습니다.");
+      await persistDraftGuides();
     } catch (error) {
       setPanelMessage(`특강 안내문 저장 실패: ${error.message}`);
+    }
+  }
+
+  async function prepareSpecialLectureNotice() {
+    if (!selectedGuide || !onApplyToNotice) return;
+    setPanelMessage("");
+    try {
+      const savedGuides = await persistDraftGuides("특강 안내문 저장 완료 후 알림톡 준비 화면으로 이동했습니다.");
+      const savedGuide = savedGuides.find((guide) => guide.specialLectureGuideId === selectedGuide.specialLectureGuideId) ?? selectedGuide;
+      const savedGuideUrl = getSpecialLecturePublicUrl(savedGuide);
+      onApplyToNotice(savedGuide, buildSpecialLectureNoticeText(savedGuide, savedGuideUrl), savedGuideUrl);
+    } catch (error) {
+      setPanelMessage(`알림톡 발송 준비 실패: ${error.message}`);
     }
   }
 
@@ -10931,7 +10956,7 @@ function SpecialLectureNoticePanel({
         type="button"
       >
         <span className={`specialLectureStatusPill ${status.tone}`}>{status.label}</span>
-        <strong>{guide.shortTitle || guide.title}</strong>
+              <strong>{guide.title}</strong>
         <span>{guide.days || "요일 미입력"} · {guide.time || "시간 미입력"}</span>
       </button>
     );
@@ -11004,7 +11029,7 @@ function SpecialLectureNoticePanel({
           <div className="specialLectureManagementBar">
             <div>
               <span>선택 안내문</span>
-              <strong>{selectedGuide.shortTitle || selectedGuide.title || "제목 미입력"}</strong>
+              <strong>{selectedGuide.title || "제목 미입력"}</strong>
               {selectedGuideStatus ? <small>{selectedGuideStatus.label} · {selectedGuide.periodStart || "시작일 미입력"} ~ {selectedGuide.periodEnd || "종료일 미입력"}</small> : null}
             </div>
             <div>
@@ -11039,10 +11064,6 @@ function SpecialLectureNoticePanel({
             <label>
               안내문 제목
               <input value={selectedGuide.title} onChange={(event) => updateSelectedGuide("title", event.target.value)} />
-            </label>
-            <label>
-              짧은 제목
-              <input value={selectedGuide.shortTitle} onChange={(event) => updateSelectedGuide("shortTitle", event.target.value)} />
             </label>
             <label>
               대상
@@ -11314,10 +11335,11 @@ function SpecialLectureNoticePanel({
             </button>
             <button
               className="sendButton"
-              onClick={() => onApplyToNotice?.(selectedGuide, noticeText, selectedGuideUrl)}
+              disabled={saveState === "saving"}
+              onClick={prepareSpecialLectureNotice}
               type="button"
             >
-              알림톡 발송 준비
+              {saveState === "saving" ? "저장 중" : "알림톡 발송 준비"}
             </button>
             <button className="softButton" onClick={copyGuideUrl} type="button">링크 복사</button>
           </div>
@@ -11469,7 +11491,7 @@ function buildSpecialLectureLessonDrafts(guide = null, matchedStudentIds = [], e
         ...existingLesson,
         lessonId,
         classTemplateId: "",
-        className: `${normalizedGuide.shortTitle || normalizedGuide.title || "특강"} ${index + 1}회`,
+        className: `${normalizedGuide.title || "특강"} ${index + 1}회`,
         lessonType: "specialLecture",
         lessonTopic: session.topic || normalizedGuide.defaultSessionTopic || "특강 수업",
         lessonTrackId: trackId,
@@ -11484,7 +11506,7 @@ function buildSpecialLectureLessonDrafts(guide = null, matchedStudentIds = [], e
         color: lessonCalendarColors.specialLecture,
         teacherId: existingLesson.teacherId || "instructor_owner_001",
         studentIds,
-        sourceLabel: normalizedGuide.shortTitle || normalizedGuide.title || "특강",
+        sourceLabel: normalizedGuide.title || "특강",
         status: existingLesson.status || "scheduled"
       };
     });
@@ -11842,23 +11864,29 @@ function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
   const normalizedGuide = normalizeSpecialLectureGuide(guide);
   const applicationUrl = getSpecialLectureApplicationUrl(normalizedGuide);
   const specialNotes = normalizedGuide.specialNotes.trim();
+  const primaryFacts = [
+    ["대상", normalizedGuide.audience],
+    ["요일", normalizedGuide.days],
+    ["시간", normalizedGuide.time],
+    ["시수", normalizedGuide.lessonCount]
+  ];
+  const secondaryFacts = [
+    ["교재", normalizedGuide.textbook],
+    ["수강료", normalizedGuide.tuition]
+  ];
   return (
     <article className="specialLectureGuidePreview">
       <header className="specialLectureHero">
-        <p>{academyBrandName}</p>
+        <div className="specialLectureHeroKicker">
+          <p>{academyBrandName}</p>
+          <span>{normalizedGuide.year} {getSpecialLectureSeasonShortLabel(normalizedGuide.season)} 특강</span>
+        </div>
         <h1>{normalizedGuide.title}</h1>
-        <span>{normalizedGuide.goal}</span>
+        {normalizedGuide.goal ? <span>{normalizedGuide.goal}</span> : null}
       </header>
 
       <section className="specialLectureQuickFacts">
-        {[
-          ["대상", normalizedGuide.audience],
-          ["요일", normalizedGuide.days],
-          ["시간", normalizedGuide.time],
-          ["시수", normalizedGuide.lessonCount],
-          ["교재", normalizedGuide.textbook],
-          ["수강료", normalizedGuide.tuition]
-        ].map(([label, value]) => (
+        {[...primaryFacts, ...secondaryFacts].map(([label, value]) => (
           <div key={label}>
             <span>{label}</span>
             <strong>{value || "-"}</strong>
@@ -11866,15 +11894,38 @@ function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
         ))}
       </section>
 
+      {(normalizedGuide.summary || normalizedGuide.highlights.length) ? (
+        <section className="specialLectureGuideSection specialLectureGuideOverview">
+          <div className="specialLectureSectionTitle">
+            <span>OVERVIEW</span>
+            <h2>수업 방향</h2>
+          </div>
+          {normalizedGuide.summary ? <p>{normalizedGuide.summary}</p> : null}
+          {normalizedGuide.highlights.length ? (
+            <ul>
+              {normalizedGuide.highlights.map((highlight) => (
+                <li key={highlight}>{highlight}</li>
+              ))}
+            </ul>
+          ) : null}
+        </section>
+      ) : null}
+
       {specialNotes ? (
         <section className="specialLectureGuideSection specialLectureGuideNotes">
-          <h2>특이사항</h2>
+          <div className="specialLectureSectionTitle">
+            <span>NOTE</span>
+            <h2>특이사항</h2>
+          </div>
           <p>{specialNotes}</p>
         </section>
       ) : null}
 
       <section className="specialLectureGuideSection">
-        <h2>회차별 계획</h2>
+        <div className="specialLectureSectionTitle">
+          <span>SCHEDULE</span>
+          <h2>회차별 계획</h2>
+        </div>
         <div className="specialLectureTimeline">
           {normalizedGuide.sessions.map((session, index) => (
             <div className="specialLectureTimelineItem" key={`${session.date}_${session.topic}_${index}`}>
@@ -11890,7 +11941,15 @@ function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
       </section>
 
       <section className="specialLectureGuideFooter">
-        <div>
+        <div className="specialLectureFooterSummary">
+          {primaryFacts.map(([label, value]) => (
+            <div key={`footer_${label}`}>
+              <span>{label}</span>
+              <strong>{value || "-"}</strong>
+            </div>
+          ))}
+        </div>
+        <div className="specialLectureTeacherBlock">
           <span>담당</span>
           <strong>{normalizedGuide.teacher}</strong>
         </div>
@@ -11909,8 +11968,7 @@ function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
 function SpecialLecturePublicPage() {
   const [guides, setGuides] = useState(defaultSpecialLectureGuides);
   const [loadState, setLoadState] = useState("loading");
-  const query = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : new URLSearchParams();
-  const requestedSlug = query.get("guide") || (typeof window !== "undefined" ? window.location.hash.replace(/^#special-lecture\/?/, "") : "");
+  const requestedSlug = getSpecialLectureGuideSlugFromLocation();
   const normalizedGuides = normalizeSpecialLectureGuides(guides);
   const selectedGuide = normalizedGuides.find((guide) => getSpecialLectureGuideSlug(guide) === requestedSlug)
     ?? normalizedGuides.find(isSpecialLecturePrimaryGuide)

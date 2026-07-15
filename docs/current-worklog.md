@@ -137,6 +137,20 @@
 - 중단 조건: SQL 적용 전인데 특강 lesson 저장이 성공처럼 보임, 미매칭 신청자가 있는데 저장 버튼이 활성화됨, 저장 버튼 클릭만으로 `lesson_student_records`나 알림톡 예약이 생김, 특강 2회차 지난 숙제가 정규수업 숙제로 보임, 정규수업 지난 숙제/지난 메모가 특강을 끌고 옴.
 - 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 298개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
 
+### 2026-07-15 P1. 특강관리/알림관리 안내문 저장과 공개 링크 수정
+
+- 상태: 완료 - 구현/자동검증 완료
+- 사용자 요청: 특강관리 편집값이 `알림톡 발송 준비` 후 저장되지 않는 문제를 고친다. `짧은 제목` 입력을 제거한다. 알림톡 안내문에 `대상`을 포함한다. 테스트 발송 링크가 빈 화면으로 열리는 문제를 중요 수정한다. 공개 특강 안내문 레이아웃을 개선한다.
+- 구현 결과: `알림톡 발송 준비` 버튼이 현재 draft를 먼저 `app_state.specialLectureGuides`에 저장한 뒤, 저장본 안내문/URL/본문을 공지 발송 화면으로 넘기도록 바꿨다. 저장 실패 시 화면 이동하지 않고 특강관리 안에 실패 문구를 표시한다.
+- 구현 결과: 특강관리 편집 화면에서 `짧은 제목` 입력을 제거했다. 알림톡 제목, 안내문 카드, 특강 lesson 이름/출처는 `안내문 제목` 기준으로 통일했다. 기존 저장 데이터의 `shortTitle`은 호환을 위해 normalize만 유지한다.
+- 구현 결과: 특강 알림톡 본문에 `대상`, `요일`, `시간`, `시수`가 함께 들어가도록 수정했다. 알림톡 payload와 서버 Solapi 변수에도 `specialLectureAudience`/`#{대상}`을 추가했다.
+- 구현 결과: 공개 링크를 `/special-lecture?guide=...` 직접 경로에서 `/#special-lecture?guide=...` hash 경로로 바꿨다. 기존 직접 경로도 읽을 수 있게 위치 파서를 보강해 이미 공유된 링크 호환성을 유지한다.
+- 구현 결과: 공개 특강 안내문 레이아웃을 문서형 구조로 정리했다. 상단 브랜드/특강명, 핵심정보 카드, 수업 방향, 특이사항, 회차별 계획, 하단 대상/요일/시간/시수 요약과 신청 CTA가 분리되어 보인다.
+- 저장 원천: 특강 안내문은 기존 Supabase `app_state.specialLectureGuides`다. 알림톡 준비는 공지 작성 화면 draft와 payload만 갱신하며, 실제 Solapi 발송/예약은 기존 공지 발송 gate에서만 진행한다.
+- 외부 side effect: 테스트/실제 발송, 예약, Tally row 생성, 특강 lesson 생성 없음. 이번 작업은 안내문 저장/링크/문구/레이아웃만 바꿨다.
+- 중단 조건: `알림톡 발송 준비` 후 돌아왔을 때 편집값이 사라짐, 링크 복사/테스트 발송 링크가 빈 화면으로 열림, 알림톡 본문에 대상이 빠짐, `짧은 제목` 입력이 다시 보임, 발송 준비만으로 Solapi 예약/발송이 생김.
+- 검증: `node --check api/routes/notifications.js`, `node --check src/domains/specialLectures/specialLectureGuideUtils.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 300개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P1. 다음 세션 handoff 갱신 - 특강관리/SQL 수동 작업 반영
 
 - 상태: 완료 - 문서 갱신/검증 완료

@@ -651,6 +651,7 @@ export async function sendLessonCommentAlimtalk(payload) {
       "#{리포트본문}": commentBody,
       "#{코멘트}": commentBody,
       "#{특강명}": String(payload.specialLectureTitle ?? payload.noticeTitle ?? payload.lessonName ?? ""),
+      "#{대상}": String(payload.specialLectureAudience ?? ""),
       "#{요일}": String(payload.specialLectureDays ?? ""),
       "#{시간}": String(payload.specialLectureTime ?? ""),
       "#{시수}": String(payload.specialLectureLessonCount ?? ""),
