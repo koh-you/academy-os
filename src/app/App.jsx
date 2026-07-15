@@ -6489,7 +6489,7 @@ export function App() {
     setActiveView("lessons");
   }
 
-  async function handleAttendancePinPreview(phoneLast4) {
+  async function handleAttendancePinPreview(phoneLast4, options = {}) {
     if (attendanceOnlyMode && attendanceLoadedDateRef.current !== getKoreaDateString()) {
       setIsAppStateReady(false);
       setAttendanceReloadKey((current) => current + 1);
@@ -6505,7 +6505,9 @@ export function App() {
       const result = await previewAttendanceRequest({
         phoneLast4: digits,
         lateGraceMinutes: attendanceSettings.lateGraceMinutes,
-        source: "kiosk"
+        lessonId: options.lessonId,
+        source: "kiosk",
+        studentId: options.studentId
       });
       return { ok: true, ...result };
     } catch (error) {
@@ -6527,6 +6529,7 @@ export function App() {
 
     try {
       const result = await checkAttendanceRequest({
+        action: options.action,
         attendanceStatus: options.attendanceStatus,
         checkInTime: options.checkInTime,
         checkOutTime: options.checkOutTime,
@@ -17638,6 +17641,30 @@ function AttendanceKiosk({
     }
   }
 
+  async function selectPendingPreviewLesson(candidate) {
+    const lessonId = candidate?.lesson?.lessonId || candidate?.attendanceLesson?.lessonId;
+    if (!pendingPreview?.pin || !lessonId || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const nextPreview = await onAttendancePreview(pendingPreview.pin, {
+        lessonId,
+        studentId: pendingPreview.student?.studentId
+      });
+      if (nextPreview.ok) {
+        setPendingPreview({ ...nextPreview, pin: pendingPreview.pin });
+        setResult(null);
+      } else {
+        setResult(nextPreview);
+        setPendingPreview(null);
+      }
+    } catch (error) {
+      setResult({ ok: false, message: error.message || "수업 선택 확인에 실패했습니다." });
+      setPendingPreview(null);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   async function confirmAttendanceCheck() {
     if (!pendingPreview || isSubmitting) return;
     if (pendingPreview.mode === "completed") {
@@ -17647,6 +17674,7 @@ function AttendanceKiosk({
     setIsSubmitting(true);
     try {
       const nextResult = await onAttendanceCheck(pendingPreview.pin, {
+        action: pendingPreview.action,
         attendanceStatus: pendingPreview.record?.attendanceStatus,
         checkInTime: pendingPreview.record?.checkInTime,
         checkOutTime: pendingPreview.record?.checkOutTime,
@@ -17691,9 +17719,17 @@ function AttendanceKiosk({
   const resultDetail = result?.ok
     ? `${result.student?.name ?? ""} · ${formatLessonDisplayName(result.lesson)} · ${result.checkedTime || ""}`
     : result?.message;
-  const previewActionLabel = pendingPreview ? getAttendanceActionLabel(pendingPreview) : "";
+  const previewRequiresLessonSelection = Boolean(pendingPreview?.requiresLessonSelection || pendingPreview?.mode === "selectLesson");
+  const previewLessonCandidates = Array.isArray(pendingPreview?.lessonCandidates) ? pendingPreview.lessonCandidates : [];
+  const previewActionLabel = pendingPreview
+    ? previewRequiresLessonSelection
+      ? "수업 선택"
+      : getAttendanceActionLabel(pendingPreview)
+    : "";
   const previewDetail = pendingPreview?.ok
-    ? `${pendingPreview.student?.name ?? ""} · ${formatLessonDisplayName(pendingPreview.lesson)} · ${pendingPreview.checkedTime || ""}`
+    ? previewRequiresLessonSelection
+      ? `${pendingPreview.student?.name ?? ""} · 수업 선택 · ${pendingPreview.checkedTime || ""}`
+      : `${pendingPreview.student?.name ?? ""} · ${formatLessonDisplayName(pendingPreview.lesson)} · ${pendingPreview.checkedTime || ""}`
     : "";
 
   return (
@@ -17743,16 +17779,48 @@ function AttendanceKiosk({
         >
           <div className="attendanceResultContent">
             <strong>{previewActionLabel}</strong>
-            <div className="attendancePreviewSummary">
-              <span><small>학생</small><b>{pendingPreview.student?.name ?? "-"}</b></span>
-              <span><small>수업</small><b>{formatLessonDisplayName(pendingPreview.lesson) || "-"}</b></span>
-              <span><small>시간</small><b>{pendingPreview.checkedTime || "-"}</b></span>
-            </div>
-            <div className="attendanceConfirmActions single">
-              <button className="primaryButton" disabled={isSubmitting} onClick={confirmAttendanceCheck} type="button">
-                {isSubmitting ? "저장 중..." : "확인"}
-              </button>
-            </div>
+            {previewRequiresLessonSelection ? (
+              <>
+                <p>오늘 수업이 2개 이상입니다. 등원 처리할 수업을 선택하세요.</p>
+                <div className="attendanceLessonChoiceGrid">
+                  {previewLessonCandidates.map((candidate) => {
+                    const lesson = candidate.attendanceLesson || candidate.lesson || {};
+                    const statusText = candidate.hasCheckout
+                      ? "하원 완료"
+                      : candidate.hasArrival
+                        ? "등원 기록 있음"
+                        : candidate.isLatest
+                          ? "오늘 마지막 수업"
+                          : "등원 대상";
+                    return (
+                      <button
+                        className={candidate.isLatest ? "attendanceLessonChoiceButton latest" : "attendanceLessonChoiceButton"}
+                        disabled={isSubmitting}
+                        key={candidate.lesson?.lessonId || candidate.attendanceLesson?.lessonId}
+                        onClick={() => selectPendingPreviewLesson(candidate)}
+                        type="button"
+                      >
+                        <strong>{formatLessonDisplayName(lesson) || "수업"}</strong>
+                        <small>{statusText}</small>
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="attendancePreviewSummary">
+                  <span><small>학생</small><b>{pendingPreview.student?.name ?? "-"}</b></span>
+                  <span><small>수업</small><b>{formatLessonDisplayName(pendingPreview.lesson) || "-"}</b></span>
+                  <span><small>시간</small><b>{pendingPreview.checkedTime || "-"}</b></span>
+                </div>
+                <div className="attendanceConfirmActions single">
+                  <button className="primaryButton" disabled={isSubmitting} onClick={confirmAttendanceCheck} type="button">
+                    {isSubmitting ? "저장 중..." : "확인"}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </Modal>
       ) : null}

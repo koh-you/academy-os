@@ -303,29 +303,85 @@ function getAttendanceLessonTimeDistance(lesson = {}, currentMinutes = 0) {
   return Math.min(...distances);
 }
 
-function selectAttendanceLessonForStudent(lessons = [], student = {}, now = new Date()) {
+function createAttendanceLessonCandidate(lesson = {}, student = {}, currentMinutes = 0) {
+  const matchedByStudent = (lesson.studentIds ?? []).includes(student.studentId);
+  const matchedByClass = Boolean(lesson.classTemplateId && lesson.classTemplateId === student.defaultClassTemplateId);
+  if (!matchedByStudent && !matchedByClass) return null;
+  const studentLesson = applyStudentScheduleToLesson(lesson, student);
+  return {
+    attendanceLesson: studentLesson,
+    distance: getAttendanceLessonTimeDistance(studentLesson, currentMinutes),
+    endMinutes: parseAttendanceClockMinutes(studentLesson.endTime),
+    lesson,
+    matchedByClass,
+    matchedByStudent,
+    startMinutes: parseAttendanceClockMinutes(studentLesson.startTime)
+  };
+}
+
+function getAttendanceLessonCandidatesForStudent(lessons = [], student = {}, now = new Date()) {
   const currentMinutes = getKoreaClockMinutesForAttendance(now);
   const candidates = new Map();
   lessons.forEach((lesson) => {
-    const matchedByStudent = (lesson.studentIds ?? []).includes(student.studentId);
-    const matchedByClass = Boolean(lesson.classTemplateId && lesson.classTemplateId === student.defaultClassTemplateId);
-    if (!matchedByStudent && !matchedByClass) return;
-    const studentLesson = applyStudentScheduleToLesson(lesson, student);
+    const candidate = createAttendanceLessonCandidate(lesson, student, currentMinutes);
+    if (!candidate) return;
     const existing = candidates.get(lesson.lessonId);
     candidates.set(lesson.lessonId, {
-      attendanceLesson: studentLesson,
-      lesson,
-      matchedByStudent: Boolean(existing?.matchedByStudent || matchedByStudent),
-      matchedByClass: Boolean(existing?.matchedByClass || matchedByClass)
+      ...candidate,
+      matchedByStudent: Boolean(existing?.matchedByStudent || candidate.matchedByStudent),
+      matchedByClass: Boolean(existing?.matchedByClass || candidate.matchedByClass)
     });
   });
-  return [...candidates.values()]
+  return [...candidates.values()];
+}
+
+function selectAttendanceLessonForStudent(lessons = [], student = {}, now = new Date()) {
+  const currentMinutes = getKoreaClockMinutesForAttendance(now);
+  return getAttendanceLessonCandidatesForStudent(lessons, student, now)
     .sort((left, right) => {
       const timeDistance = getAttendanceLessonTimeDistance(left.attendanceLesson, currentMinutes) - getAttendanceLessonTimeDistance(right.attendanceLesson, currentMinutes);
       if (timeDistance !== 0) return timeDistance;
       if (left.matchedByStudent !== right.matchedByStudent) return left.matchedByStudent ? -1 : 1;
       return sortLessonsByStartTime(left.attendanceLesson, right.attendanceLesson);
     })[0]?.lesson ?? null;
+}
+
+function selectLastAttendanceLessonCandidate(candidates = []) {
+  return [...candidates]
+    .sort((left, right) => {
+      const leftEnd = left.endMinutes ?? left.startMinutes ?? -1;
+      const rightEnd = right.endMinutes ?? right.startMinutes ?? -1;
+      if (leftEnd !== rightEnd) return rightEnd - leftEnd;
+      return sortLessonsByStartTime(right.attendanceLesson, left.attendanceLesson);
+    })[0] ?? null;
+}
+
+function createAttendanceRecordByLessonId(records = [], studentId = "") {
+  const byLessonId = new Map();
+  records
+    .filter((record) => record.studentId === studentId)
+    .forEach((record) => {
+      if (record.lessonId && !byLessonId.has(record.lessonId)) byLessonId.set(record.lessonId, record);
+    });
+  return byLessonId;
+}
+
+function createAttendanceLessonCandidatePayloads(candidates = [], recordByLessonId = new Map(), latestLessonId = "") {
+  return [...candidates]
+    .sort((left, right) => sortLessonsByStartTime(left.attendanceLesson, right.attendanceLesson))
+    .map((candidate) => {
+      const record = recordByLessonId.get(candidate.lesson.lessonId) ?? null;
+      return {
+        attendanceLesson: candidate.attendanceLesson,
+        hasArrival: hasAttendanceArrival(record),
+        hasCheckout: hasAttendanceCheckout(record),
+        isLatest: candidate.lesson.lessonId === latestLessonId,
+        lesson: candidate.lesson,
+        matchedByClass: candidate.matchedByClass,
+        matchedByStudent: candidate.matchedByStudent,
+        record
+      };
+    });
 }
 
 function findAttendanceRecord(records = [], lessonId, studentId) {
@@ -457,11 +513,56 @@ async function handleAttendanceCheck(payload = {}) {
   }
   if (!student) throw new Error("학생을 찾지 못했습니다.");
 
+  let attendanceCandidates = getAttendanceLessonCandidatesForStudent(lessons, student, now);
   let lesson = payload.lessonId
     ? lessons.find((item) => item.lessonId === payload.lessonId) ?? null
     : null;
   if (payload.lessonId && !lesson) {
     throw new Error(`${student.name} 학생의 ${attendanceDate} 수업을 찾지 못했습니다.`);
+  }
+  if (lesson && !attendanceCandidates.some((candidate) => candidate.lesson.lessonId === lesson.lessonId)) {
+    const selectedCandidate = createAttendanceLessonCandidate(lesson, student, getKoreaClockMinutesForAttendance(now));
+    if (selectedCandidate) attendanceCandidates = [...attendanceCandidates, selectedCandidate];
+  }
+  if (attendanceCandidates.length === 0 && !lesson) {
+    throw new Error(`${student.name} 학생의 ${attendanceDate === todayString ? "오늘" : attendanceDate} 수업 일정이 없습니다.`);
+  }
+
+  const candidateLessons = attendanceCandidates.map((candidate) => candidate.lesson);
+  const candidateRecordsResult = candidateLessons.length
+    ? await listLessonStudentRecordsForLessons(candidateLessons)
+    : { records: [] };
+  const candidateRecordByLessonId = createAttendanceRecordByLessonId(candidateRecordsResult.records ?? [], student.studentId);
+  const latestCandidate = selectLastAttendanceLessonCandidate(attendanceCandidates);
+  const latestLessonId = latestCandidate?.lesson?.lessonId ?? "";
+  const hasOpenAttendanceArrival = [...candidateRecordByLessonId.values()].some((record) => hasAttendanceArrival(record) && !hasAttendanceCheckout(record));
+  const shouldCheckoutLatestLesson = source === "kiosk" && !payload.lessonId && hasOpenAttendanceArrival && latestCandidate;
+
+  if (source === "kiosk" && !payload.lessonId && !shouldCheckoutLatestLesson && attendanceCandidates.length > 1) {
+    const lessonCandidates = createAttendanceLessonCandidatePayloads(attendanceCandidates, candidateRecordByLessonId, latestLessonId);
+    if (previewOnly) {
+      return {
+        action: "selectLesson",
+        mode: "selectLesson",
+        requiresLessonSelection: true,
+        message: `${student.name} 학생의 오늘 수업을 선택해 주세요.`,
+        checkedTime: currentTime,
+        student,
+        lesson: null,
+        lessonCandidates,
+        record: null,
+        attendanceEvent: null,
+        alimtalk: { status: "preview" }
+      };
+    }
+    throw new Error(`${student.name} 학생의 오늘 수업이 2개 이상입니다. 먼저 수업을 선택해 주세요.`);
+  }
+
+  let forcedKioskEventType = "";
+  if (shouldCheckoutLatestLesson) {
+    lesson = latestCandidate.lesson;
+    const latestRecord = candidateRecordByLessonId.get(lesson.lessonId) ?? null;
+    forcedKioskEventType = hasAttendanceCheckout(latestRecord) ? "completed" : "checkout";
   }
   if (!lesson) {
     lesson = selectAttendanceLessonForStudent(lessons, student, now);
@@ -492,6 +593,7 @@ async function handleAttendanceCheck(payload = {}) {
       eventType = manualStatus === "checkout" || manualCheckOutTime ? "checkout" : ["absent", "excused", "pending"].includes(manualStatus) ? "status" : "checkin";
     } else {
       eventType = hasCheckout ? "completed" : hasArrival ? "checkout" : "checkin";
+      if (forcedKioskEventType) eventType = forcedKioskEventType;
     }
   }
 
@@ -499,6 +601,7 @@ async function handleAttendanceCheck(payload = {}) {
     const checkedTime = existingRecord?.checkOutTime || existingRecord?.checkInTime || currentTime;
     if (previewOnly) {
       return {
+        action: "completed",
         mode: "completed",
         message: `${student.name} 이미 하원 처리되었습니다.`,
         checkedTime,
@@ -529,6 +632,7 @@ async function handleAttendanceCheck(payload = {}) {
       alimtalkStatus: "skipped_completed"
     });
     return {
+      action: "completed",
       mode: "completed",
       message: `${student.name} 이미 하원 처리되었습니다.`,
       checkedTime,
@@ -613,6 +717,7 @@ async function handleAttendanceCheck(payload = {}) {
   const previewCheckedTime = eventType === "checkout" ? nextRecord.checkOutTime : nextRecord.checkInTime;
   if (previewOnly) {
     return {
+      action: eventType,
       mode: getAttendanceResultMode(eventType),
       message: `${student.name} ${eventType === "checkout" ? "하원" : nextStatus === "late" ? "지각" : nextStatus === "absent" ? "결석" : "등원"}`,
       checkedTime: previewCheckedTime,
@@ -685,6 +790,7 @@ async function handleAttendanceCheck(payload = {}) {
   }
 
   return {
+    action: eventType,
     mode: getAttendanceResultMode(eventType),
     message: `${student.name} ${eventType === "checkout" ? "하원" : nextStatus === "late" ? "지각" : nextStatus === "absent" ? "결석" : "등원"}`,
     checkedTime,

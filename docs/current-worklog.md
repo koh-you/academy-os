@@ -96,6 +96,19 @@
 - 중단 조건: `특이사항` 입력 중 공백이 즉시 사라짐, 저장 후 새로고침에서 문장 공백이 붙어 보임, 미리보기/알림톡 본문에 앞뒤 공백만 있는 빈 특이사항이 표시됨, 안내문 저장만으로 `notification_jobs` 또는 신청자 row가 생김.
 - 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check src/shared/utils/apiClient.js`, `node --check src/domains/specialLectures/specialLectureGuideUtils.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 292개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
 
+### 2026-07-15 P1. 출결 키오스크 같은 날 복수 수업 선택과 마지막 수업 하원 처리
+
+- 상태: 완료 - 1번 작업 구현/자동검증 완료
+- 사용자 요청: 같은 날 한 학생에게 보충/정규/향후 특강처럼 수업이 2개 이상 있으면 키오스크 프리뷰 단계에서 큰 버튼으로 등원 대상 수업을 선택하게 한다. 단, 김예나 사례처럼 16:30 숙제보충 등원 후 19:00-22:00 정규수업까지 듣고 하원할 때는 마지막 수업 하원으로 처리한다.
+- 구현 결과: `/api/attendance/preview`가 학생의 당일 후보 수업을 모두 계산한다. 아직 열린 등원 기록이 없고 후보가 2개 이상이면 `requiresLessonSelection`과 `lessonCandidates`를 내려주며, 프론트 키오스크는 저장 버튼 대신 큰 수업 선택 버튼을 보여준다.
+- 구현 결과: 수업 선택 버튼을 누르면 해당 `lessonId`로 다시 preview를 받아 기존처럼 학생/수업/시간 확인 후 저장한다. 실제 저장 요청에는 preview에서 받은 `action`, `lessonId`, `studentId`, 출결 시각 필드를 함께 넘겨 미리 본 수업과 저장되는 수업이 갈라지지 않게 했다.
+- 구현 결과: 키오스크에서 당일 후보 수업 중 등원 기록은 있고 하원 기록이 없는 수업이 하나라도 있으면, 다음 키오스크 입력은 선택 UI를 띄우지 않고 당일 마지막 수업을 하원 대상으로 잡는다. 마지막 수업 record가 이미 하원 완료면 기존처럼 `이미 하원`으로 처리한다.
+- 저장 원천: 출결 저장 원천은 기존 Supabase `lesson_student_records`이며, 출결 이벤트 감사 원천은 기존 `attendance_events`다. 수업 후보는 기존 `lessons`와 학생의 `studentIds`/기본 반 매칭에서 계산한다. 새 SQL은 없다.
+- 외부 side effect: 키오스크 저장 후 기존 출결 알림톡 큐 흐름은 유지한다. Solapi 템플릿/예약, Tally, 특강 신청자, `notification_jobs` 생성 로직은 바꾸지 않았다.
+- 이번 작업 제외: 2번 보충수업 모달 UI 정리와 3번 특강 확정 명단/수업일지 반영 설계는 아직 구현하지 않았다. 사용자가 요청한 번호 순서에 맞춰 1번만 닫았다.
+- 중단 조건: 같은 날 후보가 2개인데 선택 버튼 없이 바로 저장됨, 16:30 보충 등원 후 22:00 하원 입력이 보충 수업 하원으로 저장됨, 수업 선택 후 다른 `lessonId`에 저장됨, preview만으로 `lesson_student_records`가 생성됨, 출결 알림톡이 저장 실패 전에 발송됨.
+- 검증: `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 294개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P1. 다음 세션 handoff 갱신 - 특강관리/SQL 수동 작업 반영
 
 - 상태: 완료 - 문서 갱신/검증 완료
