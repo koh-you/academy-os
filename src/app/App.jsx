@@ -23415,13 +23415,32 @@ function SupplementCenter({
     return lesson ? `${lesson.date} ${lesson.className}` : "연결 수업 없음";
   }
 
+  function createAbsenceSourceContext(record = {}) {
+    const sourceLesson = getRecordLesson(record, lessons);
+    const student = getRecordStudent(record, students);
+    const sourcePreviousHomework = getRecordPreviousHomework(record, homeworks, lessons, students);
+    const sourceNextHomework = sourceLesson && student
+      ? getLessonHomework(homeworks, sourceLesson, student, "next", lessons)
+      : null;
+    return {
+      sourceDate: getRecordLessonDate(record, lessons),
+      sourceLessonContent: getLessonContent(record),
+      sourceLessonId: record.lessonId || "",
+      sourceLessonLabel: sourceLesson ? `${sourceLesson.date} ${sourceLesson.className}` : lessonLabel(record.lessonId),
+      sourceLessonMaterial: record.lessonMaterial || "",
+      sourceNextHomework: sourceNextHomework?.title || record.nextHomework || "",
+      sourcePreviousHomework: sourcePreviousHomework?.title || record.previousHomework || ""
+    };
+  }
+
   function createAbsenceSupplementItem(record) {
     const homeworkCheckLabel = getAbsenceHomeworkCheckLabel(record, homeworks, lessons, students);
     const availability = getAbsenceMakeupAvailability(record, lessons);
+    const sourceContext = createAbsenceSourceContext(record);
     return {
       id: record.lessonStudentRecordId,
       studentId: record.studentId,
-      title: lessonLabel(record.lessonId),
+      title: sourceContext.sourceLessonLabel || lessonLabel(record.lessonId),
       meta: [
         `${attendanceLabels[record.attendanceStatus] ?? record.attendanceStatus} · ${record.attendanceReason || "사유 미입력"}`,
         homeworkCheckLabel ? `지난 숙제 확인: ${homeworkCheckLabel}` : ""
@@ -23435,7 +23454,8 @@ function SupplementCenter({
         taskType: "absence_makeup",
         studentId: record.studentId,
         sourceId: record.lessonStudentRecordId,
-        sourceLabel: lessonLabel(record.lessonId),
+        ...sourceContext,
+        sourceLabel: sourceContext.sourceLessonLabel || lessonLabel(record.lessonId),
         reason: homeworkCheckLabel ? "결석 보강 · 지난 숙제 확인" : "결석 보강",
         absenceReason: record.attendanceReason || "사유 미입력",
         supplementHomeworkNote: homeworkCheckLabel,
@@ -23454,10 +23474,24 @@ function SupplementCenter({
   }
 
   function hydrateSupplementTask(task = {}) {
-    if (task.taskType !== "absence_makeup" || task.supplementHomeworkNote?.trim()) return task;
+    if (task.taskType !== "absence_makeup") return task;
     const sourceRecord = records.find((record) => record.lessonStudentRecordId === task.sourceId);
+    const sourceContext = sourceRecord ? createAbsenceSourceContext(sourceRecord) : {};
     const homeworkCheckLabel = getAbsenceHomeworkCheckLabel(sourceRecord, homeworks, lessons, students);
-    return homeworkCheckLabel ? { ...task, supplementHomeworkNote: homeworkCheckLabel } : task;
+    const homeworkCheckSeed = task.supplementHomeworkNote?.trim()
+      ? task.supplementHomeworkNote
+      : homeworkCheckLabel || task.sourcePreviousHomework || sourceContext.sourcePreviousHomework || "";
+    return {
+      ...task,
+      sourceDate: task.sourceDate || sourceContext.sourceDate || task.lessonDate || "",
+      sourceLessonContent: task.sourceLessonContent || sourceContext.sourceLessonContent || "",
+      sourceLessonId: task.sourceLessonId || sourceContext.sourceLessonId || "",
+      sourceLessonLabel: task.sourceLessonLabel || sourceContext.sourceLessonLabel || task.sourceLabel || "",
+      sourceLessonMaterial: task.sourceLessonMaterial || sourceContext.sourceLessonMaterial || "",
+      sourceNextHomework: task.sourceNextHomework || sourceContext.sourceNextHomework || "",
+      sourcePreviousHomework: task.sourcePreviousHomework || sourceContext.sourcePreviousHomework || homeworkCheckLabel || "",
+      supplementHomeworkNote: homeworkCheckSeed
+    };
   }
 
   function getSupplementActionKey(task = {}) {
@@ -24418,6 +24452,12 @@ function SupplementStudentModal({
               const sourceDate = task.sourceDate || task.sourceAssignedDate || task.lessonDate || "";
               const sourceDueDate = task.sourceDueDate || task.homeworkDueDate || "";
               const sourceHomeworkTitle = task.sourceLabel || task.title || task.reason || "기록 없음";
+              const absenceSourceDate = task.sourceDate || task.lessonDate || "";
+              const absenceSourceLabel = task.sourceLessonLabel || task.sourceLabel || "원 결석 수업";
+              const absenceLessonMaterial = task.sourceLessonMaterial || "";
+              const absenceLessonContent = task.sourceLessonContent || "";
+              const absencePreviousHomework = task.sourcePreviousHomework || supplementHomeworkNote || "";
+              const absenceNextHomework = task.sourceNextHomework || "";
               const taskMetaParts = [
                 task.reason,
                 shouldShowMethodOptions ? supplementMethodLabel({ ...task, supplementMethod: draftValues.supplementMethod }) : "",
@@ -24477,6 +24517,30 @@ function SupplementStudentModal({
                       </div>
                     </div>
                   ) : null}
+                  {task.taskType === "absence_makeup" ? (
+                    <div className="supplementSourceSummary absenceSourceSummary">
+                      <div>
+                        <span>원 결석 수업</span>
+                        <strong>{absenceSourceDate || "기록 없음"}</strong>
+                        <small>{absenceSourceLabel}</small>
+                      </div>
+                      <div>
+                        <span>그날 수업 내용</span>
+                        <strong>{absenceLessonContent || "기록 없음"}</strong>
+                        <small>{absenceLessonMaterial ? `교재: ${absenceLessonMaterial}` : "교재 기록 없음"}</small>
+                      </div>
+                      <div>
+                        <span>그날 확인할 지난 숙제</span>
+                        <strong>{absencePreviousHomework || "기록 없음"}</strong>
+                        <small>아래에서 이번 보강 때 실제 확인할 부분만 수정합니다.</small>
+                      </div>
+                      <div>
+                        <span>그날 새로 나간 숙제</span>
+                        <strong>{absenceNextHomework || "기록 없음"}</strong>
+                        <small>보강 후 이어갈 숙제 맥락입니다.</small>
+                      </div>
+                    </div>
+                  ) : null}
                   <div className="supplementSchedulePanel">
                     {shouldShowMethodOptions ? (
                       <label className="taskOptionBlock">
@@ -24509,16 +24573,16 @@ function SupplementStudentModal({
                   <div className="supplementReadableGrid">
                     {task.taskType === "homework_makeup" || task.taskType === "absence_makeup" ? (
                       <label className="supplementHomeworkField supplementReadableField">
-                        <strong>{task.taskType === "absence_makeup" ? "함께 확인할 지난 숙제" : "등원해서 확인할 숙제"}</strong>
+                        <strong>{task.taskType === "absence_makeup" ? "보강 때 확인할 지난 숙제" : "등원해서 확인할 숙제"}</strong>
                         <span>
                           {task.taskType === "absence_makeup"
-                            ? "결석보강 알림톡과 보충 기록에 함께 확인할 지난 숙제로 반영됩니다."
+                            ? "원 결석 수업에서 확인하지 못한 지난 숙제 중, 이번 보강 때 실제 확인할 부분만 수정합니다."
                             : "원 숙제에서 실제 남은 부분만 수정해서 보충일지와 알림톡 문구에 반영합니다."}
                         </span>
                         <textarea
                           value={supplementHomeworkNote}
                           onChange={(event) => updateTaskDraft(task, "supplementHomeworkNote", event.target.value)}
-                          placeholder={task.taskType === "absence_makeup" ? "예: 공수1 개념원리 p.18,19, 곱셈공식 프린트 25문항" : "예: 개념원리 p.34~46 중 남은 12문제, RPM 104~127 중 오답"}
+                          placeholder={task.taskType === "absence_makeup" ? "예: 지난 숙제 중 개념원리 p.18~19 오답, 곱셈공식 프린트 10문항" : "예: 개념원리 p.34~46 중 남은 12문제, RPM 104~127 중 오답"}
                         />
                       </label>
                     ) : null}
