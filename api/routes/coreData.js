@@ -8,6 +8,14 @@ const pendingNotificationJobStatuses = ["scheduled", "queued", "pending_send"];
 const sensitiveAppStateKeys = new Set(["teacherAccountSettings"]);
 const deprecatedAppStateKeys = new Set(["examAnalyses", "examAnalysisFolders"]);
 const hiddenAppStateKeys = new Set([...sensitiveAppStateKeys, ...deprecatedAppStateKeys]);
+const lessonScheduleMetadataColumns = ["lesson_type", "lesson_topic", "source_makeup_task_id", "source_school_event_id", "source_label"];
+const specialLectureLessonTrackColumns = [
+  "lesson_track_id",
+  "lesson_track_type",
+  "special_lecture_guide_id",
+  "special_lecture_session_id",
+  "special_lecture_session_index"
+];
 
 function compact(value) {
   return value === undefined || value === "" ? null : value;
@@ -25,6 +33,19 @@ function normalizeClockTime(value) {
 function errorMentionsAnyColumn(error, columns = []) {
   const message = String(error?.message ?? "");
   return columns.some((column) => message.includes(column));
+}
+
+function isSpecialLectureTrackedLesson(lesson = {}) {
+  return Boolean(
+    lesson.lessonType === "specialLecture" ||
+    lesson.lessonTrackType === "specialLecture" ||
+    lesson.specialLectureGuideId ||
+    lesson.lessonTrackId
+  );
+}
+
+function throwSpecialLectureLessonTrackSchemaError() {
+  throw new Error("특강 수업일지 반영을 위해 supabase/20260715_special_lecture_lesson_tracks.sql 적용이 필요합니다.");
 }
 
 function hasMeaningfulValue(value) {
@@ -238,6 +259,13 @@ function toLessonRow(lesson, { includeScheduleMetadata = true } = {}) {
     row.source_makeup_task_id = compact(lesson.sourceMakeupTaskId);
     row.source_school_event_id = compact(lesson.sourceSchoolEventId);
     row.source_label = compact(lesson.sourceLabel);
+    row.lesson_track_id = compact(lesson.lessonTrackId);
+    row.lesson_track_type = compact(lesson.lessonTrackType);
+    row.special_lecture_guide_id = compact(lesson.specialLectureGuideId);
+    row.special_lecture_session_id = compact(lesson.specialLectureSessionId);
+    row.special_lecture_session_index = lesson.specialLectureSessionIndex === undefined || lesson.specialLectureSessionIndex === ""
+      ? null
+      : Number(lesson.specialLectureSessionIndex);
   }
   return row;
 }
@@ -257,6 +285,11 @@ function fromLessonRow(row) {
     sourceMakeupTaskId: row.source_makeup_task_id ?? "",
     sourceSchoolEventId: row.source_school_event_id ?? "",
     sourceLabel: row.source_label ?? "",
+    lessonTrackId: row.lesson_track_id ?? "",
+    lessonTrackType: row.lesson_track_type ?? "",
+    specialLectureGuideId: row.special_lecture_guide_id ?? "",
+    specialLectureSessionId: row.special_lecture_session_id ?? "",
+    specialLectureSessionIndex: row.special_lecture_session_index ?? null,
     status: row.status
   };
 }
@@ -1415,7 +1448,13 @@ export async function upsertLesson(lesson) {
   try {
     [row] = await upsertRows("lessons", [toLessonRow(lesson)], { onConflict: "lesson_id" });
   } catch (error) {
-    if (!errorMentionsAnyColumn(error, ["lesson_type", "lesson_topic", "source_makeup_task_id", "source_school_event_id", "source_label"])) throw error;
+    if (
+      isSpecialLectureTrackedLesson(lesson) &&
+      errorMentionsAnyColumn(error, [...lessonScheduleMetadataColumns, ...specialLectureLessonTrackColumns])
+    ) {
+      throwSpecialLectureLessonTrackSchemaError();
+    }
+    if (!errorMentionsAnyColumn(error, lessonScheduleMetadataColumns)) throw error;
     [row] = await upsertRows("lessons", [toLessonRow(lesson, { includeScheduleMetadata: false })], { onConflict: "lesson_id" });
   }
   const savedLesson = fromLessonRow(row);
@@ -1436,7 +1475,13 @@ export async function upsertLessons(lessons) {
   try {
     rows = await upsertRows("lessons", lessons.map((lesson) => toLessonRow(lesson)), { onConflict: "lesson_id" });
   } catch (error) {
-    if (!errorMentionsAnyColumn(error, ["lesson_type", "lesson_topic", "source_makeup_task_id", "source_school_event_id", "source_label"])) throw error;
+    if (
+      lessons.some(isSpecialLectureTrackedLesson) &&
+      errorMentionsAnyColumn(error, [...lessonScheduleMetadataColumns, ...specialLectureLessonTrackColumns])
+    ) {
+      throwSpecialLectureLessonTrackSchemaError();
+    }
+    if (!errorMentionsAnyColumn(error, lessonScheduleMetadataColumns)) throw error;
     rows = await upsertRows(
       "lessons",
       lessons.map((lesson) => toLessonRow(lesson, { includeScheduleMetadata: false })),

@@ -3305,6 +3305,10 @@ button {
   border-left: 4px solid #38bdf8;
 }
 
+.lessonPill.specialLectureLessonPill {
+  border-left: 4px solid #2563eb;
+}
+
 .lessonPill.sundayMakeupLessonPill.blockMoved {
   border-left-color: #f59e0b;
 }
@@ -7875,6 +7879,134 @@ button:disabled {
   flex-wrap: wrap;
   gap: 7px;
   margin-top: 12px;
+}
+
+.specialLectureLessonGate,
+.specialLectureLessonPreviewGate {
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: #f8fbff;
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 12px;
+}
+
+.specialLectureGateHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.specialLectureGateHeader div:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.specialLectureGateHeader strong {
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.specialLectureGateHeader span,
+.specialLectureGateEmpty,
+.specialLectureLessonPreviewActions span {
+  color: #52627a;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.specialLectureGateStats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.specialLectureGateStats span {
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  background: #fff;
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 5px 8px;
+}
+
+.specialLectureGateStats span.danger {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.specialLectureMatchGrid,
+.specialLectureLessonPreviewList {
+  display: grid;
+  gap: 8px;
+}
+
+.specialLectureMatchGrid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.specialLectureMatchCard,
+.specialLectureLessonPreviewCard {
+  border: 1px solid #d9e6fb;
+  border-radius: 8px;
+  background: #fff;
+  padding: 10px;
+}
+
+.specialLectureMatchCard {
+  display: grid;
+  gap: 4px;
+}
+
+.specialLectureMatchCard span,
+.specialLectureLessonPreviewCard span {
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.specialLectureMatchCard.review span {
+  color: #b91c1c;
+}
+
+.specialLectureMatchCard strong,
+.specialLectureLessonPreviewCard strong {
+  color: #0f172a;
+  font-size: 13px;
+}
+
+.specialLectureMatchCard small,
+.specialLectureLessonPreviewCard small,
+.specialLectureLessonPreviewCard p {
+  color: #52627a;
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.specialLectureLessonPreviewCard {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.75fr) minmax(240px, 1.25fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.specialLectureLessonPreviewCard div {
+  display: grid;
+  gap: 3px;
+}
+
+.specialLectureLessonPreviewActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
 }
 
 .specialLectureApplicationUnmatched {
@@ -16120,6 +16252,7 @@ body.attendanceOnlyBody {
   .specialLectureRuleRow,
   .specialLectureWebhookBox,
   .specialLectureApplicationCard,
+  .specialLectureLessonPreviewCard,
   .specialLectureSessionCardGrid,
   .followCandidateGrid,
   .supplementOverviewGrid,

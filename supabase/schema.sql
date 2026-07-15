@@ -51,6 +51,11 @@ create table if not exists lessons (
   source_makeup_task_id text,
   source_school_event_id text,
   source_label text,
+  lesson_track_id text,
+  lesson_track_type text,
+  special_lecture_guide_id text,
+  special_lecture_session_id text,
+  special_lecture_session_index integer,
   status text not null default 'scheduled' check (status in ('scheduled', 'completed', 'canceled')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -370,6 +375,9 @@ create table if not exists notification_jobs (
 
 create index if not exists idx_lessons_date on lessons(lesson_date);
 create index if not exists idx_lessons_type_date on lessons(lesson_type, lesson_date);
+create index if not exists idx_lessons_track_type_id on lessons(lesson_track_type, lesson_track_id);
+create index if not exists idx_lessons_special_lecture_guide on lessons(special_lecture_guide_id, lesson_date);
+create index if not exists idx_lessons_special_lecture_session on lessons(special_lecture_session_id);
 create index if not exists idx_lesson_records_lesson on lesson_student_records(lesson_id);
 create index if not exists idx_attendance_events_lesson_student on attendance_events(lesson_id, student_id, created_at desc);
 create index if not exists idx_attendance_events_created on attendance_events(created_at desc);

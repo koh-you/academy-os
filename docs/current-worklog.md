@@ -122,6 +122,21 @@
 - 중단 조건: 숙제보충 모달에 `보충 대상 숙제` 큰 패널이 다시 보임, 출결 버튼이 작은 배지 크기로 돌아감, 결석보강에서 원 결석 수업일지 참고가 사라짐, 일정 수정/삭제/보충 완료 버튼이 저장 없이 성공처럼 보임, UI 변경만 했는데 Solapi/Tally/notification_jobs 동작이 새로 발생함.
 - 검증: `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 295개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
 
+### 2026-07-15 P1. 특강 확정 명단 매칭과 수업일지 반영 gate
+
+- 상태: 완료 - 3번 작업 구현/자동검증 완료, SQL은 사용자 수동 적용 필요
+- 사용자 요청: 특강 확정 신청자가 생기면 특강 전용으로 기존 학생과 매칭하고, 특강 lesson 생성 preview gate를 거쳐 수업일지에 반영한다. 범용 반 구조로 만들지 말고 특강에만 별도 `lessonTrackId`를 둔다.
+- 구현 결과: `운영 > 특강관리`의 신청자 패널에 `특강 확정 명단 매칭 gate`를 추가했다. `confirmed` 신청자만 대상으로 하며, 전화번호 우선, 이름/학교/학년 보조 기준으로 기존 학생과 매칭한다. 미매칭/복수 후보가 있으면 수업일지 저장 버튼을 막는다.
+- 구현 결과: `특강 lesson 생성 preview gate`를 추가했다. 선택 안내문의 회차별 날짜/시간/주제와 매칭된 참석 명단을 보여주며, `특강 수업일지 반영` 버튼을 누르기 전에는 `lessons`에 저장하지 않는다.
+- 구현 결과: 저장 시 회차별 `lessonType: "specialLecture"`, `lessonTrackType: "specialLecture"`, `lessonTrackId`, `specialLectureGuideId`, `specialLectureSessionId`, `specialLectureSessionIndex`를 `lessons`에 bulk upsert한다. 이 단계에서는 `lesson_student_records`, 출결, 알림톡 예약/발송을 만들지 않는다.
+- 구현 결과: 수업일지 달력에 `특강` 필터와 특강 색상/표식을 추가했다. 정규수업 필터는 특강을 제외한다.
+- 구현 결과: 수업일지 지난 숙제/지난 메모 연결을 `getLessonContinuityKey` 기준으로 분리했다. 특강은 같은 `lessonTrackId`끼리만 연결되고, 정규수업은 특강의 지난 숙제/지난 메모를 끌고 오지 않는다.
+- SQL: 사용자가 Supabase SQL editor에서 `supabase/20260715_special_lecture_lesson_tracks.sql`을 직접 실행해야 한다. 추가 컬럼은 `lesson_track_id`, `lesson_track_type`, `special_lecture_guide_id`, `special_lecture_session_id`, `special_lecture_session_index`다. SQL 미적용 상태에서 특강 수업일지 저장을 시도하면 API가 명시적으로 실패 메시지를 반환한다.
+- 저장 원천: 특강 안내문은 기존 Supabase `app_state.specialLectureGuides`, 특강 신청자는 `special_lecture_applications`, 특강 수업일지는 `lessons`다. 수업일지 학생별 기록은 아직 생성하지 않고, 실제 수업 때 기존 수업일지 모달이 `lesson_student_records`를 저장한다.
+- 외부 side effect: Tally row 생성, Solapi 발송/예약, `notification_jobs`, 출결 이벤트 생성 없음. 이번 작업은 특강 확정 명단과 `lessons` 저장 gate까지만 만든다.
+- 중단 조건: SQL 적용 전인데 특강 lesson 저장이 성공처럼 보임, 미매칭 신청자가 있는데 저장 버튼이 활성화됨, 저장 버튼 클릭만으로 `lesson_student_records`나 알림톡 예약이 생김, 특강 2회차 지난 숙제가 정규수업 숙제로 보임, 정규수업 지난 숙제/지난 메모가 특강을 끌고 옴.
+- 검증: `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 298개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P1. 다음 세션 handoff 갱신 - 특강관리/SQL 수동 작업 반영
 
 - 상태: 완료 - 문서 갱신/검증 완료
