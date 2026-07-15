@@ -16165,6 +16165,8 @@ function LessonJournalDetail({
         sourceId: previousHomework.homeworkId,
         sourceHomeworkId: previousHomework.homeworkId,
         sourceLessonId: previousHomework.lessonId || lesson.lessonId,
+        sourceDate: previousHomework.assignedDate || lesson.date,
+        sourceDueDate: previousHomework.dueDate || lesson.date,
         sourceLabel: homeworkTitle,
         reason: "등원보충 필요 숙제",
         supplementHomeworkNote: homeworkTitle,
@@ -23678,6 +23680,8 @@ function SupplementCenter({
           taskType: "homework_makeup",
           studentId: homework.studentId,
           sourceId: homework.homeworkId,
+          sourceDate: homework.assignedDate || homework.dueDate || "",
+          sourceDueDate: homework.dueDate || "",
           sourceLabel: homework.title,
           supplementHomeworkNote: homework.title,
           reason: getHomeworkMakeupReason(homework, records),
@@ -24409,6 +24413,16 @@ function SupplementStudentModal({
               const draftValues = taskDraftState.values;
               const draftDiff = getSupplementTaskDraftDiff(task, draftValues, student);
               const supplementHomeworkNote = draftValues.supplementHomeworkNote ?? "";
+              const methodOptions = supplementMethodOptions(task.taskType);
+              const shouldShowMethodOptions = methodOptions.length > 1;
+              const sourceDate = task.sourceDate || task.sourceAssignedDate || task.lessonDate || "";
+              const sourceDueDate = task.sourceDueDate || task.homeworkDueDate || "";
+              const sourceHomeworkTitle = task.sourceLabel || task.title || task.reason || "기록 없음";
+              const taskMetaParts = [
+                task.reason,
+                shouldShowMethodOptions ? supplementMethodLabel({ ...task, supplementMethod: draftValues.supplementMethod }) : "",
+                `배정 ${task.attemptCount ?? 0}회`
+              ].filter(Boolean);
               const saveStatus = taskSaveStatus[task.makeupTaskId] ?? {};
               const isTaskBusy = busyTaskId.startsWith(`${task.makeupTaskId}:`);
               const isContentBusy = busyTaskId === `${task.makeupTaskId}:content`;
@@ -24428,7 +24442,7 @@ function SupplementStudentModal({
                   <div className="taskCardTop">
                     <div>
                       <strong>{followUpTypeLabel(task.taskType)}</strong>
-                      <small>{task.reason} · {supplementMethodLabel({ ...task, supplementMethod: draftValues.supplementMethod })} · 배정 {task.attemptCount ?? 0}회</small>
+                      <small>{taskMetaParts.join(" · ")}</small>
                       <span className="taskLinkedLesson draftMode">
                         수정 중
                       </span>
@@ -24449,22 +24463,38 @@ function SupplementStudentModal({
                       ) : null}
                     </div>
                   </div>
-                  <div className="supplementSchedulePanel">
-                    <label className="taskOptionBlock">
-                      <strong>보충을 어떻게 처리할까요?</strong>
-                      <div className="taskChoiceGrid">
-                        {supplementMethodOptions(task.taskType).map((option) => (
-                          <button
-                            className={draftValues.supplementMethod === option.id ? "active" : ""}
-                            key={option.id}
-                            onClick={() => updateTaskDraft(task, "supplementMethod", option.id)}
-                            type="button"
-                          >
-                            {option.label}
-                          </button>
-                        ))}
+                  {task.taskType === "homework_makeup" ? (
+                    <div className="supplementSourceSummary">
+                      <div>
+                        <span>원 숙제 배정일</span>
+                        <strong>{sourceDate || "기록 없음"}</strong>
+                        {sourceDueDate ? <small>마감/검사일 {sourceDueDate}</small> : null}
                       </div>
-                    </label>
+                      <div>
+                        <span>그날까지 해야 했던 숙제</span>
+                        <strong>{sourceHomeworkTitle}</strong>
+                        <small>아래에서 실제 등원해서 확인할 남은 부분만 수정합니다.</small>
+                      </div>
+                    </div>
+                  ) : null}
+                  <div className="supplementSchedulePanel">
+                    {shouldShowMethodOptions ? (
+                      <label className="taskOptionBlock">
+                        <strong>보충을 어떻게 처리할까요?</strong>
+                        <div className="taskChoiceGrid">
+                          {methodOptions.map((option) => (
+                            <button
+                              className={draftValues.supplementMethod === option.id ? "active" : ""}
+                              key={option.id}
+                              onClick={() => updateTaskDraft(task, "supplementMethod", option.id)}
+                              type="button"
+                            >
+                              {option.label}
+                            </button>
+                          ))}
+                        </div>
+                      </label>
+                    ) : null}
                     <div className="fieldGrid two supplementDateGrid">
                       <label>
                         <strong>배정일</strong>
@@ -24479,16 +24509,16 @@ function SupplementStudentModal({
                   <div className="supplementReadableGrid">
                     {task.taskType === "homework_makeup" || task.taskType === "absence_makeup" ? (
                       <label className="supplementHomeworkField supplementReadableField">
-                        <strong>{task.taskType === "absence_makeup" ? "함께 확인할 지난 숙제" : "보충 대상"}</strong>
+                        <strong>{task.taskType === "absence_makeup" ? "함께 확인할 지난 숙제" : "등원해서 확인할 숙제"}</strong>
                         <span>
                           {task.taskType === "absence_makeup"
                             ? "결석보강 알림톡과 보충 기록에 함께 확인할 지난 숙제로 반영됩니다."
-                            : "보충일지와 알림톡 문구에 들어갈 핵심 내용입니다."}
+                            : "원 숙제에서 실제 남은 부분만 수정해서 보충일지와 알림톡 문구에 반영합니다."}
                         </span>
                         <textarea
                           value={supplementHomeworkNote}
                           onChange={(event) => updateTaskDraft(task, "supplementHomeworkNote", event.target.value)}
-                          placeholder={task.taskType === "absence_makeup" ? "예: 공수1 개념원리 p.18,19, 곱셈공식 프린트 25문항" : "예: 교과서 프린트, 지난 시간 미완료 숙제"}
+                          placeholder={task.taskType === "absence_makeup" ? "예: 공수1 개념원리 p.18,19, 곱셈공식 프린트 25문항" : "예: 개념원리 p.34~46 중 남은 12문제, RPM 104~127 중 오답"}
                         />
                       </label>
                     ) : null}
