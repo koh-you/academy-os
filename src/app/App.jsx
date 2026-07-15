@@ -14,6 +14,7 @@ import {
   examPostStudyDifficultyOptions
 } from "../domains/exams/postSubmissionOptions.js";
 import { StudentManager } from "../domains/students/StudentManager.jsx";
+import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
   assignmentStatusLabels,
   assignmentStatusOptions,
@@ -54,7 +55,6 @@ import {
   formatSpecialLectureTimeFromRules,
   generateSpecialLectureSessions,
   getDefaultSpecialLectureGuideId,
-  getSpecialLectureApplicationStatusLabel,
   getSpecialLectureApplicationUrl,
   getSpecialLectureCalculatedFields,
   getSpecialLectureGuideSlugFromLocation,
@@ -78,7 +78,6 @@ import {
   replaceSpecialLectureToken,
   replaceSpecialLectureYearInDateKey,
   replaceSpecialLectureYearToken,
-  specialLectureApplicationStatusOptions,
   specialLectureSeasonOptions,
   specialLectureWeekdayOptions
 } from "../domains/specialLectures/specialLectureGuideUtils.js";
@@ -5965,28 +5964,6 @@ export function App() {
       });
   }
 
-  async function handleSaveSpecialLectureLessons(lessonsToSave = []) {
-    const specialLectureLessons = lessonsToSave.filter((lesson) => lesson.lessonType === "specialLecture");
-    if (!specialLectureLessons.length) return [];
-    const result = await postJsonWithTimeout(
-      "/api/lessons/bulk",
-      { lessons: specialLectureLessons },
-      20000,
-      "특강 수업일지 반영이 20초를 넘었습니다. 잠시 뒤 다시 시도해 주세요."
-    );
-    const savedLessons = Array.isArray(result.lessons) && result.lessons.length
-      ? result.lessons
-      : specialLectureLessons;
-    setLessons((current) => {
-      let next = current;
-      savedLessons.forEach((lesson) => {
-        next = upsertById(next, lesson, "lessonId");
-      });
-      return next;
-    });
-    return savedLessons;
-  }
-
   async function handleAddProblemBookFolder(folderName, testKind, subject) {
     const nextBooks = normalizeProblemBooks([createProblemBookFolder(folderName, testKind, subject), ...problemBooks]);
     setProblemBooks(nextBooks);
@@ -8737,7 +8714,6 @@ export function App() {
             showSpecialLectureTab={false}
             onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
             onSaveSpecialLectureGuides={handleSaveSpecialLectureGuides}
-            onSaveSpecialLectureLessons={handleSaveSpecialLectureLessons}
             onUpdateLessonNotificationPlan={handleUpdateLessonNotificationPlan}
             students={students}
             onRefresh={refreshNotificationJobs}
@@ -8761,7 +8737,6 @@ export function App() {
             specialLectureGuideSaveState={specialLectureGuideSaveState}
             onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
             onSaveSpecialLectureGuides={handleSaveSpecialLectureGuides}
-            onSaveSpecialLectureLessons={handleSaveSpecialLectureLessons}
             onUpdateLessonNotificationPlan={handleUpdateLessonNotificationPlan}
             onUpdateSpecialLectureApplication={handleUpdateSpecialLectureApplication}
             students={students}
@@ -9826,7 +9801,6 @@ function NotificationCenter({
   notificationJobsStatus = { state: "idle", message: "" },
   onRefresh,
   onSaveSpecialLectureGuides,
-  onSaveSpecialLectureLessons,
   onUpdateSpecialLectureApplication,
   pageDescription = "수업일지 밖에서 필요한 연락을 한 화면에서 작성하고, 수신 범위만 선택해 발송합니다.",
   pageTitle = "알림관리",
@@ -10357,11 +10331,9 @@ function NotificationCenter({
         <SpecialLectureNoticePanel
           applications={specialLectureApplications}
           guides={specialLectureGuides}
-          lessons={lessons}
           saveState={specialLectureGuideSaveState}
           onApplyToNotice={applySpecialLectureGuideToNotice}
           onSaveGuides={onSaveSpecialLectureGuides}
-          onSaveSpecialLectureLessons={onSaveSpecialLectureLessons}
           onUpdateApplication={onUpdateSpecialLectureApplication}
           students={students}
         />
@@ -10625,9 +10597,7 @@ function NotificationCenter({
 function SpecialLectureNoticePanel({
   applications = [],
   guides = defaultSpecialLectureGuides,
-  lessons = [],
   onApplyToNotice,
-  onSaveSpecialLectureLessons,
   onUpdateApplication,
   onSaveGuides,
   saveState = "idle",
@@ -11043,8 +11013,6 @@ function SpecialLectureNoticePanel({
       <SpecialLectureApplicationPanel
         applications={applications}
         guides={draftGuides}
-        lessons={lessons}
-        onSaveSpecialLectureLessons={onSaveSpecialLectureLessons}
         onUpdateApplication={onUpdateApplication}
         selectedGuide={selectedGuide}
         students={students}
@@ -11448,475 +11416,9 @@ function SpecialLectureNoticePanel({
   );
 }
 
-function doesSpecialLectureApplicationMatchGuide(application = {}, guide = null) {
-  if (!guide) return true;
-  const guideId = String(guide.specialLectureGuideId ?? "").trim();
-  const guideSlug = getSpecialLectureGuideSlug(guide);
-  return Boolean(
-    (application.specialLectureGuideId && application.specialLectureGuideId === guideId) ||
-    (application.guideSlug && application.guideSlug === guideSlug)
-  );
-}
-
-function normalizeSpecialLectureMatchText(value = "") {
-  return String(value ?? "").replace(/\s+/g, "").toLowerCase();
-}
-
-function normalizeSpecialLectureMatchPhone(value = "") {
-  const digits = normalizePhoneNumber(value);
-  if (digits.startsWith("82") && digits.length >= 11) return `0${digits.slice(2)}`;
-  return digits;
-}
-
-function getSpecialLectureStudentPhones(student = {}) {
-  return [student.studentPhone, student.parentPhone]
-    .map(normalizeSpecialLectureMatchPhone)
-    .filter(Boolean);
-}
-
-function getSpecialLectureStudentMatch(application = {}, students = []) {
-  const applicationPhones = [application.studentPhone, application.parentPhone]
-    .map(normalizeSpecialLectureMatchPhone)
-    .filter(Boolean);
-  const phoneMatches = applicationPhones.length
-    ? students.filter((student) => {
-        const studentPhones = getSpecialLectureStudentPhones(student);
-        return applicationPhones.some((phone) => studentPhones.includes(phone));
-      })
-    : [];
-  if (phoneMatches.length === 1) {
-    return { status: "matched", student: phoneMatches[0], candidates: phoneMatches, reason: "전화번호 일치" };
-  }
-  if (phoneMatches.length > 1) {
-    return { status: "ambiguous", student: null, candidates: phoneMatches, reason: "전화번호 후보 복수" };
-  }
-
-  const applicationName = normalizeSpecialLectureMatchText(application.studentName);
-  if (!applicationName) return { status: "unmatched", student: null, candidates: [], reason: "신청자 이름 없음" };
-
-  const nameMatches = students.filter((student) => normalizeSpecialLectureMatchText(student.name) === applicationName);
-  if (nameMatches.length === 0) return { status: "unmatched", student: null, candidates: [], reason: "기존 학생 이름 없음" };
-  const schoolText = normalizeSpecialLectureMatchText(application.schoolName);
-  const gradeText = normalizeSpecialLectureMatchText(application.grade);
-  const contextualMatches = nameMatches.filter((student) => {
-    const studentSchool = normalizeSpecialLectureMatchText(student.schoolName);
-    const studentGrade = normalizeSpecialLectureMatchText(student.grade);
-    const schoolMatches = !schoolText || !studentSchool || studentSchool === schoolText;
-    const gradeMatches = !gradeText || !studentGrade || studentGrade === gradeText;
-    return schoolMatches && gradeMatches;
-  });
-  const candidates = contextualMatches.length ? contextualMatches : nameMatches;
-  if (candidates.length === 1) {
-    return {
-      status: "matched",
-      student: candidates[0],
-      candidates,
-      reason: contextualMatches.length ? "이름/학교/학년 일치" : "이름 일치"
-    };
-  }
-  return { status: "ambiguous", student: null, candidates, reason: "이름 후보 복수" };
-}
-
 function getSpecialLectureLessonTrackId(guide = {}) {
   const guideId = String(guide.specialLectureGuideId || getSpecialLectureGuideSlug(guide) || "special_lecture").trim();
   return `special_lecture:${guideId}`;
-}
-
-function createSafeSpecialLectureLessonToken(value = "") {
-  return String(value || "special_lecture")
-    .trim()
-    .replace(/[^a-zA-Z0-9_-]+/g, "_")
-    .replace(/^_+|_+$/g, "") || "special_lecture";
-}
-
-function createSpecialLectureSessionId(guide = {}, session = {}, index = 0) {
-  const guideToken = createSafeSpecialLectureLessonToken(guide.specialLectureGuideId || getSpecialLectureGuideSlug(guide));
-  const dateToken = createSafeSpecialLectureLessonToken(session.dateKey || session.date || `session_${index + 1}`);
-  const timeToken = createSafeSpecialLectureLessonToken(session.startTime || "");
-  return `special_lecture_session_${guideToken}_${String(index + 1).padStart(2, "0")}_${dateToken}_${timeToken}`;
-}
-
-function createSpecialLectureLessonId(guide = {}, session = {}, index = 0) {
-  return `lesson_${createSpecialLectureSessionId(guide, session, index)}`;
-}
-
-function buildSpecialLectureMatchRows(applications = [], guide = null, students = []) {
-  const normalizedApplications = normalizeSpecialLectureApplications(applications);
-  return normalizedApplications
-    .filter((application) => application.status === "confirmed")
-    .filter((application) => doesSpecialLectureApplicationMatchGuide(application, guide))
-    .map((application) => ({
-      application,
-      ...getSpecialLectureStudentMatch(application, students)
-    }));
-}
-
-function buildSpecialLectureLessonDrafts(guide = null, matchedStudentIds = [], existingLessons = []) {
-  if (!guide) return [];
-  const normalizedGuide = normalizeSpecialLectureGuide(guide);
-  const studentIds = Array.from(new Set(matchedStudentIds.filter(Boolean)));
-  const trackId = getSpecialLectureLessonTrackId(normalizedGuide);
-  return (normalizedGuide.sessions ?? [])
-    .map(normalizeSpecialLectureSession)
-    .filter((session) => session.dateKey)
-    .map((session, index) => {
-      const lessonId = createSpecialLectureLessonId(normalizedGuide, session, index);
-      const existingLesson = existingLessons.find((lesson) => lesson.lessonId === lessonId) ?? {};
-      const sessionId = createSpecialLectureSessionId(normalizedGuide, session, index);
-      const startTime = normalizeTimeInput(session.startTime) || "13:00";
-      const endTime = normalizeTimeInput(session.endTime) || "16:00";
-      return {
-        ...existingLesson,
-        lessonId,
-        classTemplateId: "",
-        className: `${normalizedGuide.title || "특강"} ${index + 1}회`,
-        lessonType: "specialLecture",
-        lessonTopic: session.topic || normalizedGuide.defaultSessionTopic || "특강 수업",
-        lessonTrackId: trackId,
-        lessonTrackType: "specialLecture",
-        specialLectureGuideId: normalizedGuide.specialLectureGuideId,
-        specialLectureSessionId: sessionId,
-        specialLectureSessionIndex: index + 1,
-        date: session.dateKey,
-        dayOfWeek: getDayKey(session.dateKey),
-        startTime,
-        endTime,
-        color: lessonCalendarColors.specialLecture,
-        teacherId: existingLesson.teacherId || "instructor_owner_001",
-        studentIds,
-        sourceLabel: normalizedGuide.title || "특강",
-        status: existingLesson.status || "scheduled"
-      };
-    });
-}
-
-function SpecialLectureApplicationPanel({
-  applications = [],
-  guides = defaultSpecialLectureGuides,
-  lessons = [],
-  onUpdateApplication,
-  onSaveSpecialLectureLessons,
-  selectedGuide = null,
-  students = []
-}) {
-  const [panelMessage, setPanelMessage] = useState("");
-  const [lessonSaveStatus, setLessonSaveStatus] = useState({ state: "idle", message: "" });
-  const [updatingApplicationId, setUpdatingApplicationId] = useState("");
-  const normalizedGuides = useMemo(() => normalizeSpecialLectureGuides(guides), [guides]);
-  const normalizedApplications = useMemo(
-    () => normalizeSpecialLectureApplications(applications)
-      .sort((first, second) => new Date(second.createdAt).getTime() - new Date(first.createdAt).getTime()),
-    [applications]
-  );
-  const knownGuideKeys = useMemo(() => new Set(normalizedGuides.flatMap((guide) => [
-    guide.specialLectureGuideId,
-    getSpecialLectureGuideSlug(guide)
-  ]).filter(Boolean)), [normalizedGuides]);
-  const selectedGuideApplications = selectedGuide
-    ? normalizedApplications.filter((application) => doesSpecialLectureApplicationMatchGuide(application, selectedGuide))
-    : normalizedApplications;
-  const unmatchedApplications = normalizedApplications.filter((application) => {
-    const keys = [application.specialLectureGuideId, application.guideSlug].filter(Boolean);
-    return !keys.length || keys.every((key) => !knownGuideKeys.has(key));
-  });
-  const statusCounts = selectedGuideApplications.reduce((counts, application) => ({
-    ...counts,
-    [application.status]: (counts[application.status] ?? 0) + 1
-  }), {});
-  const statusSummary = specialLectureApplicationStatusOptions.map((option) => ({
-    ...option,
-    count: statusCounts[option.value] ?? 0
-  }));
-  const confirmedMatchRows = useMemo(
-    () => buildSpecialLectureMatchRows(normalizedApplications, selectedGuide, students),
-    [normalizedApplications, selectedGuide, students]
-  );
-  const matchedRows = confirmedMatchRows.filter((row) => row.status === "matched" && row.student);
-  const needsReviewRows = confirmedMatchRows.filter((row) => row.status !== "matched" || !row.student);
-  const matchedStudentIds = Array.from(new Set(matchedRows.map((row) => row.student.studentId).filter(Boolean)));
-  const studentNameById = new Map(students.map((student) => [student.studentId, student.name]));
-  const specialLectureLessonDrafts = useMemo(
-    () => buildSpecialLectureLessonDrafts(selectedGuide, matchedStudentIds, lessons),
-    [lessons, matchedStudentIds.join("|"), selectedGuide]
-  );
-  const existingSpecialLectureLessonCount = specialLectureLessonDrafts.filter((lesson) =>
-    lessons.some((existingLesson) => existingLesson.lessonId === lesson.lessonId)
-  ).length;
-  const visibleApplications = selectedGuideApplications.slice(0, 8);
-  const visibleUnmatchedApplications = unmatchedApplications.slice(0, 3);
-  const webhookUrl = apiUrl("/api/special-lecture-applications/tally");
-  const canSaveSpecialLectureLessons = Boolean(
-    selectedGuide &&
-    onSaveSpecialLectureLessons &&
-    specialLectureLessonDrafts.length &&
-    matchedRows.length &&
-    needsReviewRows.length === 0 &&
-    lessonSaveStatus.state !== "saving"
-  );
-
-  async function copyWebhookUrl() {
-    setPanelMessage("");
-    const copied = await copyTextToClipboard(webhookUrl);
-    setPanelMessage(copied ? "Tally 웹훅 URL을 복사했습니다." : "웹훅 URL 복사에 실패했습니다.");
-  }
-
-  async function updateApplicationStatus(application, status) {
-    if (!onUpdateApplication || !application.applicationId) return;
-    setPanelMessage("");
-    setUpdatingApplicationId(application.applicationId);
-    try {
-      await onUpdateApplication(application.applicationId, { status });
-      setPanelMessage(`${application.studentName || "신청자"} 상태를 ${getSpecialLectureApplicationStatusLabel(status)}(으)로 저장했습니다.`);
-    } catch (error) {
-      setPanelMessage(`신청자 상태 저장 실패: ${error.message}`);
-    } finally {
-      setUpdatingApplicationId("");
-    }
-  }
-
-  async function matchApplicationToCurrentGuide(application) {
-    if (!onUpdateApplication || !application.applicationId || !selectedGuide) return;
-    const guideId = String(selectedGuide.specialLectureGuideId ?? "").trim();
-    const guideSlug = getSpecialLectureGuideSlug(selectedGuide);
-    const campaign = [
-      selectedGuide.year,
-      selectedGuide.season,
-      selectedGuide.title
-    ].filter(Boolean).join("_").replace(/\s+/g, "_") || application.campaign || "special_lecture";
-    setPanelMessage("");
-    setUpdatingApplicationId(application.applicationId);
-    try {
-      await onUpdateApplication(application.applicationId, {
-        specialLectureGuideId: guideId,
-        guideSlug,
-        campaign
-      });
-      setPanelMessage(`${application.studentName || "신청자"} 신청을 현재 안내문에 연결했습니다.`);
-    } catch (error) {
-      setPanelMessage(`신청자 안내문 연결 실패: ${error.message}`);
-    } finally {
-      setUpdatingApplicationId("");
-    }
-  }
-
-  async function saveSpecialLectureLessons() {
-    setLessonSaveStatus({ state: "idle", message: "" });
-    if (!selectedGuide) {
-      setLessonSaveStatus({ state: "failed", message: "특강 안내문을 먼저 선택해 주세요." });
-      return;
-    }
-    if (!matchedRows.length) {
-      setLessonSaveStatus({ state: "failed", message: "확정 신청자 중 기존 학생과 매칭된 명단이 없습니다." });
-      return;
-    }
-    if (needsReviewRows.length) {
-      setLessonSaveStatus({ state: "failed", message: "미매칭/복수 후보 신청자를 먼저 확인한 뒤 저장해 주세요." });
-      return;
-    }
-    if (!specialLectureLessonDrafts.length) {
-      setLessonSaveStatus({ state: "failed", message: "회차 날짜가 있는 특강 일정이 없습니다. 회차별 일정을 먼저 계산/저장해 주세요." });
-      return;
-    }
-    setLessonSaveStatus({ state: "saving", message: `특강 수업 ${specialLectureLessonDrafts.length}회 저장 중...` });
-    try {
-      const savedLessons = await onSaveSpecialLectureLessons(specialLectureLessonDrafts);
-      setLessonSaveStatus({
-        state: "saved",
-        message: `특강 수업 ${savedLessons.length || specialLectureLessonDrafts.length}회가 수업일지에 반영됐습니다.`
-      });
-    } catch (error) {
-      setLessonSaveStatus({ state: "failed", message: `특강 수업일지 반영 실패: ${error.message}` });
-    }
-  }
-
-  return (
-    <section className="specialLectureApplicationsPanel">
-      <div className="sectionHeader slim">
-        <div>
-          <p className="eyebrow">APPLICATION SOURCE</p>
-          <h3>특강 신청자</h3>
-          <span>
-            전체 {normalizedApplications.length}건 · 현재 안내문 {selectedGuideApplications.length}건
-          </span>
-        </div>
-        <button className="softButton compact" onClick={copyWebhookUrl} type="button">Tally 웹훅 복사</button>
-      </div>
-
-      <div className="specialLectureWebhookBox">
-        <div>
-          <strong>별도 원천</strong>
-          <span>Supabase `special_lecture_applications`에 저장합니다. 신입생 상담 접수와 섞지 않습니다.</span>
-        </div>
-        <code>{webhookUrl}</code>
-      </div>
-
-      <div className="specialLectureApplicationStatusSummary">
-        {statusSummary.map((item) => (
-          <span className={`specialLectureApplicationStatus ${item.value}`} key={item.value}>
-            {item.label} {item.count}
-          </span>
-        ))}
-        {unmatchedApplications.length ? (
-          <span className="specialLectureApplicationStatus unmatched">미매칭 {unmatchedApplications.length}</span>
-        ) : null}
-      </div>
-
-      <div className="specialLectureLessonGate">
-        <div className="specialLectureGateHeader">
-          <div>
-            <strong>특강 확정 명단 매칭 gate</strong>
-            <span>확정 신청자만 기존 학생과 매칭합니다. 미매칭/복수 후보가 있으면 저장을 막습니다.</span>
-          </div>
-          <div className="specialLectureGateStats">
-            <span>확정 {confirmedMatchRows.length}</span>
-            <span>매칭 {matchedRows.length}</span>
-            <span className={needsReviewRows.length ? "danger" : ""}>검토 {needsReviewRows.length}</span>
-          </div>
-        </div>
-        {confirmedMatchRows.length ? (
-          <div className="specialLectureMatchGrid">
-            {matchedRows.slice(0, 6).map((row) => (
-              <article className="specialLectureMatchCard matched" key={row.application.applicationId}>
-                <span>매칭</span>
-                <strong>{row.application.studentName || "이름 미입력"} → {row.student.name}</strong>
-                <small>{row.reason} · {row.student.schoolName || "-"} {row.student.grade || ""}</small>
-              </article>
-            ))}
-            {needsReviewRows.slice(0, 6).map((row) => (
-              <article className="specialLectureMatchCard review" key={row.application.applicationId}>
-                <span>검토</span>
-                <strong>{row.application.studentName || "이름 미입력"}</strong>
-                <small>
-                  {row.reason}
-                  {row.candidates?.length ? ` · 후보 ${row.candidates.map((student) => student.name).join(", ")}` : ""}
-                </small>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <p className="specialLectureGateEmpty">현재 안내문에 연결된 확정 신청자가 없습니다. 신청자 상태를 `확정`으로 바꾸면 이 gate에 나타납니다.</p>
-        )}
-      </div>
-
-      <div className="specialLectureLessonPreviewGate">
-        <div className="specialLectureGateHeader">
-          <div>
-            <strong>특강 lesson 생성 preview gate</strong>
-            <span>회차별 날짜/시간/참석명단을 확인합니다. 아래 버튼을 누르기 전에는 저장하지 않습니다.</span>
-          </div>
-          <div className="specialLectureGateStats">
-            <span>생성 {specialLectureLessonDrafts.length}</span>
-            <span>기존 {existingSpecialLectureLessonCount}</span>
-            <span>학생 {matchedStudentIds.length}</span>
-          </div>
-        </div>
-        {specialLectureLessonDrafts.length ? (
-          <div className="specialLectureLessonPreviewList">
-            {specialLectureLessonDrafts.map((lesson) => {
-              const attendeeNames = (lesson.studentIds ?? []).map((studentId) => studentNameById.get(studentId) || studentId).join(", ");
-              return (
-                <article className="specialLectureLessonPreviewCard" key={lesson.lessonId}>
-                  <div>
-                    <span>{lesson.specialLectureSessionIndex}회차</span>
-                    <strong>{lesson.date} {lesson.startTime}-{lesson.endTime}</strong>
-                    <small>{lesson.lessonTopic}</small>
-                  </div>
-                  <p>{attendeeNames || "참석 명단 없음"}</p>
-                </article>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="specialLectureGateEmpty">회차별 일정의 날짜가 있어야 특강 수업일지 preview를 만들 수 있습니다.</p>
-        )}
-        <div className="specialLectureLessonPreviewActions">
-          <button
-            className="primaryButton compact"
-            disabled={!canSaveSpecialLectureLessons}
-            onClick={saveSpecialLectureLessons}
-            type="button"
-          >
-            특강 수업일지 반영
-          </button>
-          <span>저장 대상: `lessons` · 아직 수업기록/출결/알림톡은 만들지 않음</span>
-        </div>
-        {lessonSaveStatus.message ? (
-          <p className={lessonSaveStatus.state === "failed" ? "inlineNotice danger" : "inlineNotice"}>
-            {lessonSaveStatus.message}
-          </p>
-        ) : null}
-      </div>
-
-      {visibleUnmatchedApplications.length ? (
-        <div className="specialLectureApplicationUnmatched">
-          <strong>미매칭 신청 {unmatchedApplications.length}건</strong>
-          <p>Tally hidden field의 안내문 식별자가 비어 있거나 현재 안내문과 다른 제출입니다. 필요한 경우 현재 안내문에 연결한 뒤 상태를 확정으로 바꾸세요.</p>
-          <div className="specialLectureApplicationUnmatchedList">
-            {visibleUnmatchedApplications.map((application) => (
-              <article className="specialLectureApplicationUnmatchedItem" key={`unmatched_${application.applicationId}`}>
-                <span>
-                  {application.studentName || "이름 미입력"} · {application.guideSlug || application.specialLectureGuideId || "guide 없음"}
-                </span>
-                {selectedGuide ? (
-                  <button
-                    className="softButton compact"
-                    disabled={!onUpdateApplication || updatingApplicationId === application.applicationId}
-                    onClick={() => matchApplicationToCurrentGuide(application)}
-                    type="button"
-                  >
-                    {updatingApplicationId === application.applicationId ? "연결 중" : "현재 안내문에 연결"}
-                  </button>
-                ) : null}
-              </article>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      {visibleApplications.length ? (
-        <div className="specialLectureApplicationList">
-          {visibleApplications.map((application) => (
-            <article className="specialLectureApplicationCard" key={application.applicationId}>
-              <div>
-                <span className={`specialLectureApplicationStatus ${application.status}`}>
-                  {getSpecialLectureApplicationStatusLabel(application.status)}
-                </span>
-                <strong>{application.studentName || "이름 미입력"}</strong>
-                <p>{[application.schoolName, application.grade].filter(Boolean).join(" · ") || "학교/학년 미입력"}</p>
-                <small>
-                  {application.selectedSession || "신청 회차 미입력"}
-                  {application.createdAt ? ` · ${formatKoreaTimeLabel(application.createdAt)}` : ""}
-                </small>
-              </div>
-              <div className="specialLectureApplicationMeta">
-                <span>학생 {application.studentPhone || "-"}</span>
-                <span>학부모 {application.parentPhone || "-"}</span>
-                {application.memo ? <em>{application.memo}</em> : null}
-              </div>
-              <label>
-                처리 상태
-                <select
-                  disabled={!onUpdateApplication || updatingApplicationId === application.applicationId}
-                  onChange={(event) => updateApplicationStatus(application, event.target.value)}
-                  value={application.status}
-                >
-                  {specialLectureApplicationStatusOptions.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </label>
-            </article>
-          ))}
-        </div>
-      ) : (
-        <div className="specialLectureApplicationEmpty">
-          <strong>아직 연결된 특강 신청자가 없습니다.</strong>
-          <p>SQL 적용 후 Tally Webhook에 위 URL을 연결하면 신청자가 이 영역에 쌓입니다.</p>
-        </div>
-      )}
-      {panelMessage ? <p className={panelMessage.includes("실패") ? "inlineNotice danger" : "inlineNotice"}>{panelMessage}</p> : null}
-    </section>
-  );
 }
 
 function SpecialLectureCalendarPreview({ guide }) {

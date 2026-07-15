@@ -13,6 +13,18 @@
 - 리팩터링 gate 기본값: 리팩터링 구현/자동검증이 끝나면 커밋/푸시 전에 `AI 검수 결과`와 `사람이 확인할 것`을 함께 세션에 띄운다. AI는 변경 범위, 저장 원천/API/side effect diff, 테스트, 정적 invariant를 먼저 확인하고, 사람 확인은 AI가 확인할 수 없는 화면 어색함/운영 데이터/외부 서비스 상태 중심으로 최소화한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-15 P1. 특강 신청자 컴포넌트 분리와 생성 preview gate 제거
+
+- 상태: 완료 - 구현/자동검증 완료
+- 사용자 요청: `운영 > 특강관리 > 특강 신청자` 화면에서 `특강 lesson 생성 preview gate`를 제거하고, 특강 신청자 영역을 별도 컴포넌트로 분리한다.
+- 구현 결과: `src/domains/specialLectures/SpecialLectureApplicationPanel.jsx`를 추가하고, 신청자 상태 요약, 확정 명단 매칭 gate, 미매칭 안내문 연결, 신청자 카드/상태 저장 UI를 이 파일로 이동했다.
+- 구현 결과: `App.jsx`에서는 신청자 패널 구현을 제거하고 import/props 전달만 남겼다. `특강 lesson 생성 preview gate`, 회차별 참석 명단 preview, `특강 수업일지 반영` 버튼은 신청자 화면에서 제거했다.
+- 구현 결과: preview gate 전용 CSS(`specialLectureLessonPreview*`)를 제거하고, production scenario 테스트가 새 컴포넌트 파일을 검사하며 preview gate가 다시 생기지 않도록 갱신했다.
+- 저장 원천: 특강 신청자 원본은 기존 Supabase `special_lecture_applications`다. 상태 변경/현재 안내문 연결은 기존 `/api/special-lecture-applications` 저장 흐름을 유지한다. 새 SQL은 없다.
+- 외부 side effect: Solapi 실제 발송/예약, Tally API 호출, 특강 lesson 생성/수정, 수업기록/출결/알림톡 생성 없음. 이번 작업은 UI 표시와 컴포넌트 분리만 바꿨다.
+- 중단 조건: 신청자 상태 변경이 저장되지 않음, `현재 안내문에 연결` 후 새로고침에서 미매칭으로 돌아감, `특강 lesson 생성 preview gate` 또는 `특강 수업일지 반영` 버튼이 신청자 패널에 다시 보임, 확정 상태 변경만으로 `lessons`가 생성됨.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과, `npm run test:production` 305개 통과, `npm run build` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P0. 특강 Tally 신청 guide 매칭 보강
 
 - 상태: 완료 - 구현/자동검증 완료

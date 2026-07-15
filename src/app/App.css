@@ -7881,8 +7881,7 @@ button:disabled {
   margin-top: 12px;
 }
 
-.specialLectureLessonGate,
-.specialLectureLessonPreviewGate {
+.specialLectureLessonGate {
   border: 1px solid #dbeafe;
   border-radius: 8px;
   background: #f8fbff;
@@ -7910,8 +7909,7 @@ button:disabled {
 }
 
 .specialLectureGateHeader span,
-.specialLectureGateEmpty,
-.specialLectureLessonPreviewActions span {
+.specialLectureGateEmpty {
   color: #52627a;
   font-size: 12px;
   line-height: 1.5;
@@ -7941,8 +7939,7 @@ button:disabled {
   color: #b91c1c;
 }
 
-.specialLectureMatchGrid,
-.specialLectureLessonPreviewList {
+.specialLectureMatchGrid {
   display: grid;
   gap: 8px;
 }
@@ -7951,8 +7948,7 @@ button:disabled {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
-.specialLectureMatchCard,
-.specialLectureLessonPreviewCard {
+.specialLectureMatchCard {
   border: 1px solid #d9e6fb;
   border-radius: 8px;
   background: #fff;
@@ -7964,8 +7960,7 @@ button:disabled {
   gap: 4px;
 }
 
-.specialLectureMatchCard span,
-.specialLectureLessonPreviewCard span {
+.specialLectureMatchCard span {
   color: #1d4ed8;
   font-size: 11px;
   font-weight: 900;
@@ -7975,38 +7970,16 @@ button:disabled {
   color: #b91c1c;
 }
 
-.specialLectureMatchCard strong,
-.specialLectureLessonPreviewCard strong {
+.specialLectureMatchCard strong {
   color: #0f172a;
   font-size: 13px;
 }
 
-.specialLectureMatchCard small,
-.specialLectureLessonPreviewCard small,
-.specialLectureLessonPreviewCard p {
+.specialLectureMatchCard small {
   color: #52627a;
   font-size: 12px;
   line-height: 1.5;
   margin: 0;
-}
-
-.specialLectureLessonPreviewCard {
-  display: grid;
-  grid-template-columns: minmax(190px, 0.75fr) minmax(240px, 1.25fr);
-  gap: 12px;
-  align-items: start;
-}
-
-.specialLectureLessonPreviewCard div {
-  display: grid;
-  gap: 3px;
-}
-
-.specialLectureLessonPreviewActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
 }
 
 .specialLectureApplicationUnmatched {
@@ -16351,7 +16324,6 @@ body.attendanceOnlyBody {
   .specialLectureRuleRow,
   .specialLectureWebhookBox,
   .specialLectureApplicationCard,
-  .specialLectureLessonPreviewCard,
   .specialLectureSessionCardGrid,
   .followCandidateGrid,
   .supplementOverviewGrid,
