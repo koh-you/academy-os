@@ -17,6 +17,12 @@ E:\academy-os 작업을 이어가겠습니다.
 현재 실제 최신 커밋은 반드시 `git log -1 --oneline`으로 확인해주세요.
 이 handoff는 리팩터링 1번 커밋/푸시 이후 상태를 기준으로 합니다.
 
+최우선 확인:
+새 세션 시작 초기에 사용자에게 먼저 `Solapi 특강 템플릿 검수가 완료됐나요?`라고 확인해주세요.
+- 검수 전이면 특강 알림톡은 현재 완료 상태로 두고, 템플릿 연결/테스트 데이터 마무리는 진행하지 않습니다.
+- 검수 완료라고 사용자가 확인하면 `SOLAPI_SPECIAL_LECTURE_TEMPLATE_ID` 등 운영 환경변수와 템플릿 변수를 확인한 뒤, 테스트 데이터 1건으로 특강 템플릿 발송/예약/링크/문구를 검수합니다.
+- 다음 세션용 붙여넣기 프롬프트를 다시 만들 때도 이 최우선 확인 질문과 후속 순서를 반드시 포함합니다.
+
 중요: 리팩터링 1번은 사람 검수 gate 통과, gate 후 검증 재실행, 커밋/푸시까지 완료된 상태입니다.
 다음 세션은 코드를 바로 더 고치지 말고, 먼저 `git status --short`가 예상 범위인지 확인한 뒤 리팩터링 2번 후보를 사용자에게 제안해주세요.
 
@@ -107,6 +113,7 @@ git diff --check
    - 주의: 인증, 에러 메시지, Supabase/app_state 저장 경로 변경 금지
 
 마무리 안 된 운영 워크플로:
+0. Solapi/Kakao 특강 전용 템플릿 검수 완료 여부를 새 세션마다 사용자에게 먼저 확인해야 합니다. 검수 완료 전에는 템플릿 연결/테스트 데이터 마무리를 진행하지 않습니다.
 1. 운영 Supabase SQL editor에서 `supabase/20260715_special_lecture_applications.sql` 적용 여부를 사람이 확인해야 합니다.
 2. Tally 특강 신청폼 Webhook을 `/api/special-lecture-applications/tally`로 연결하고 테스트 제출 1건을 확인해야 합니다.
 3. 운영 배포 후 `운영 > 특강관리 > 특강 신청자`에서 신청자 카드/상태 저장/새로고침 유지 검수가 필요합니다.
@@ -126,6 +133,7 @@ git diff --check
 
 - 작성일: 2026-07-15
 - 실제 최신 커밋: 다음 세션에서 `git log -1 --oneline`으로 확인
+- 특강 알림톡: 임시 발송/공개 링크/예약 발송 구조는 완료. Solapi/Kakao 특강 전용 템플릿 검수 완료 여부는 새 세션마다 사용자에게 먼저 확인
 - 현재 리팩터링 1번은 사람 gate 통과 후 커밋/푸시 완료 상태
 - 브랜치: `main`
 - 운영 프론트: https://academy-os-blue.vercel.app
@@ -175,6 +183,10 @@ git diff --check
 
 ## 마무리 안 된 워크플로
 
+0. Solapi/Kakao 특강 전용 템플릿 검수 완료 여부 확인
+   - 새 세션 시작 초기에 사용자에게 먼저 확인
+   - 검수 전: 특강 알림톡 현재 완료 상태 유지, 템플릿 연결/테스트 데이터 마무리 보류
+   - 검수 완료 후: 운영 환경변수/템플릿 변수 확인, 테스트 데이터 1건 발송/예약/링크/문구 검수, 작업로그 최종 마무리
 1. `supabase/20260715_special_lecture_applications.sql` 운영 Supabase SQL editor 수동 적용
 2. Tally 특강 신청폼 Webhook 연결
 3. Tally 테스트 제출 1건이 `special_lecture_applications`에 들어오는지 확인
@@ -186,6 +198,7 @@ git diff --check
 ## 중단 조건
 
 - `.env`, API key, Slack webhook URL, Supabase service role key, Solapi key/secret, Tally API key가 Git diff/문서/로그에 평문으로 남음
+- 사용자에게 Solapi 특강 템플릿 검수 완료 여부를 확인하지 않고 템플릿 연결/테스트 데이터 마무리를 진행함
 - 리팩터링 2번부터도 사람 gate 통과 전 커밋/푸시를 시도함
 - `알림톡 발송 준비` 클릭만으로 실제 발송/예약이 생성됨
 - 특강 안내문 저장만으로 `notification_jobs`나 Tally API 호출이 발생함
