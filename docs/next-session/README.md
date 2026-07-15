@@ -68,6 +68,12 @@ E:\academy-os 작업을 이어가겠습니다.
    - 새 초안은 `일시: 7/17(금) 오전 04:00`, `밀린 숙제: 7/15(수) 숙제 · <등원해서 확인할 숙제>`처럼 표시합니다.
    - `설정 > 알림톡`에서 `숙제보충 학생 11시 알림톡` 템플릿을 확인/수정할 수 있습니다.
    - 기존 예약된 `notification_jobs`와 사용자 편집 초안은 자동 변경되지 않고, 새로 생성/변경 예약되는 job부터 새 문구를 사용합니다.
+   - 관련 최신 커밋: `58728cb0 Clarify supplement homework reminder labels`
+8. 최신 검증 결과
+   - `node --check scripts/scenario-tests-production.cjs` 통과
+   - `npm run test:production` 309개 통과
+   - `npm run build` 통과, 기존 Vite chunk size 경고만 남음
+   - `git diff --check` 통과
 
 다음 세션 주의사항:
 - 사용자가 명시적으로 요청하기 전까지 새 시험대비 수업을 생성/반영하지 마세요. 아직 시험대비를 시작하지 않았습니다.
@@ -93,5 +99,5 @@ E:\academy-os 작업을 이어가겠습니다.
 
 - 미룬 작업 큐의 source of truth는 `AGENTS.md` 최상단과 `docs/current-worklog.md` 최상단입니다.
 - 이 README는 붙여넣기 편의를 위한 사본입니다. 세션 종료 시 새로 미룬 작업이 생기면 세 곳을 함께 갱신하세요.
-- 최신 커밋은 이 파일이 커밋된 뒤 달라질 수 있으므로 새 세션에서 반드시 `git log -1 --oneline`으로 확인하세요.
+- 이 handoff 작성 시점의 최신 커밋은 `58728cb0 Clarify supplement homework reminder labels`입니다. 새 세션에서 반드시 `git log -1 --oneline`으로 다시 확인하세요.
 - 현재 로컬에 남을 수 있는 미추적 항목: `.codex-temp/`. 커밋하지 않습니다.
