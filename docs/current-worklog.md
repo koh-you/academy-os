@@ -13,6 +13,18 @@
 - 리팩터링 gate 기본값: 리팩터링 구현/자동검증이 끝나면 커밋/푸시 전에 `AI 검수 결과`와 `사람이 확인할 것`을 함께 세션에 띄운다. AI는 변경 범위, 저장 원천/API/side effect diff, 테스트, 정적 invariant를 먼저 확인하고, 사람 확인은 AI가 확인할 수 없는 화면 어색함/운영 데이터/외부 서비스 상태 중심으로 최소화한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-15 P1. 특강 공개 안내문 하단 중복 제거와 직접 링크 복구
+
+- 상태: 완료 - 구현/자동검증 완료
+- 사용자 요청: 특강 공개 안내문 하단에서 대상/요일/시간/시수 4개 카드가 상단 핵심 정보와 반복되므로 제거한다. 알림톡/화면의 특강 안내문 링크를 눌렀을 때 빈 화면이 나오는 문제를 확인하고 수정한다.
+- 원인 검토: 하단 4개 카드는 `specialLectureFooterSummary`로 별도 렌더링되어 상단 quick facts와 같은 정보를 다시 보여주고 있었다. 공개 URL은 `/#special-lecture?guide=...` hash 링크로 생성되고 있어 카카오/Solapi 버튼 또는 모바일 WebView에서 fragment가 깨질 수 있다. Vercel rewrite는 `/special-lecture?guide=...` 직접 경로를 index로 정상 전달하므로 직접 경로가 더 안전하다.
+- 구현 결과: 공개 안내문 footer의 4개 요약 카드를 제거하고 담당/신청 안내/신청 버튼/URL만 남겼다.
+- 구현 결과: 새로 복사/발송되는 특강 공개 URL을 `/special-lecture?guide=<slug>` 직접 경로로 바꿨다. 기존에 이미 공유된 `/#special-lecture?guide=...`와 `/#/special-lecture?guide=...` hash 링크도 계속 읽을 수 있게 파서를 유지/보강했다.
+- 저장 원천: 특강 안내문 원본은 기존 Supabase `app_state.specialLectureGuides`다. 이번 작업은 렌더링/링크 생성 로직만 바꾸며 새 SQL은 없다.
+- 외부 side effect: Solapi 실제 발송/예약, Tally row 생성, `notification_jobs`, 특강 lesson 생성/수정 없음.
+- 중단 조건: 하단에 대상/요일/시간/시수 카드가 다시 보임, 새 복사 링크가 `/#special-lecture` hash 형태로 생성됨, `/special-lecture?guide=...` 직접 링크가 로그인/빈 화면으로 열림, 기존 hash 링크가 완전히 깨짐.
+- 검증: `node --check src/domains/specialLectures/specialLectureGuideUtils.js`, `node --check scripts/scenario-tests-production.cjs`, 공개 URL/slug 파서 직접 검증, `npm run test:production` 302개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P1. 특강 안내 알림톡 문구 간소화
 
 - 상태: 완료 - 구현/자동검증 완료, Solapi/Kakao 템플릿 재검수는 사용자 수동 진행 필요
@@ -197,7 +209,7 @@
 - 구현 결과: `알림톡 발송 준비` 버튼이 현재 draft를 먼저 `app_state.specialLectureGuides`에 저장한 뒤, 저장본 안내문/URL/본문을 공지 발송 화면으로 넘기도록 바꿨다. 저장 실패 시 화면 이동하지 않고 특강관리 안에 실패 문구를 표시한다.
 - 구현 결과: 특강관리 편집 화면에서 `짧은 제목` 입력을 제거했다. 알림톡 제목, 안내문 카드, 특강 lesson 이름/출처는 `안내문 제목` 기준으로 통일했다. 기존 저장 데이터의 `shortTitle`은 호환을 위해 normalize만 유지한다.
 - 구현 결과: 특강 알림톡 본문에 `대상`, `요일`, `시간`, `시수`가 함께 들어가도록 수정했다. 알림톡 payload와 서버 Solapi 변수에도 `specialLectureAudience`/`#{대상}`을 추가했다.
-- 구현 결과: 공개 링크를 `/special-lecture?guide=...` 직접 경로에서 `/#special-lecture?guide=...` hash 경로로 바꿨다. 기존 직접 경로도 읽을 수 있게 위치 파서를 보강해 이미 공유된 링크 호환성을 유지한다.
+- 구현 결과: 공개 링크를 한때 `/#special-lecture?guide=...` hash 경로로 바꿨으나, 이후 카카오/Solapi 버튼 호환성을 위해 `/special-lecture?guide=...` 직접 경로로 되돌렸다. 기존 hash 링크도 읽을 수 있게 위치 파서를 유지한다.
 - 구현 결과: 공개 특강 안내문 레이아웃을 문서형 구조로 정리했다. 상단 브랜드/특강명, 핵심정보 카드, 수업 방향, 특이사항, 회차별 계획, 하단 대상/요일/시간/시수 요약과 신청 CTA가 분리되어 보인다.
 - 저장 원천: 특강 안내문은 기존 Supabase `app_state.specialLectureGuides`다. 알림톡 준비는 공지 작성 화면 draft와 payload만 갱신하며, 실제 Solapi 발송/예약은 기존 공지 발송 gate에서만 진행한다.
 - 외부 side effect: 테스트/실제 발송, 예약, Tally row 생성, 특강 lesson 생성 없음. 이번 작업은 안내문 저장/링크/문구/레이아웃만 바꿨다.

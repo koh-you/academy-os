@@ -9047,21 +9047,6 @@ button:disabled {
   gap: 4px;
 }
 
-.specialLectureFooterSummary {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.specialLectureFooterSummary div {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  display: grid;
-  gap: 3px;
-  padding: 10px;
-}
-
 .specialLectureGuideFooter p,
 .specialLectureGuideFooter small {
   color: #475569;
@@ -16633,8 +16618,7 @@ body.attendanceOnlyBody {
     font-size: 24px;
   }
 
-  .specialLectureQuickFacts,
-  .specialLectureFooterSummary {
+  .specialLectureQuickFacts {
     grid-template-columns: 1fr;
   }
 

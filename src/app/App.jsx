@@ -12018,14 +12018,6 @@ function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
       </section>
 
       <section className="specialLectureGuideFooter">
-        <div className="specialLectureFooterSummary">
-          {primaryFacts.map(([label, value]) => (
-            <div key={`footer_${label}`}>
-              <span>{label}</span>
-              <strong>{value || "-"}</strong>
-            </div>
-          ))}
-        </div>
         <div className="specialLectureTeacherBlock">
           <span>담당</span>
           <strong>{normalizedGuide.teacher}</strong>
@@ -19955,7 +19947,7 @@ function NotificationSettingsSection({ integrationStatus }) {
       specialLectureDays: testType === "specialLecture" ? "월·수·금" : "",
       specialLectureTime: testType === "specialLecture" ? "13:00-16:00" : "",
       specialLectureTitle: testType === "specialLecture" ? "2026 여름 개별 진도 클리닉" : "",
-      specialLectureUrl: testType === "specialLecture" ? "https://academy-os-blue.vercel.app/#special-lecture?guide=2026-summer-high1-clinic-mwf" : "",
+      specialLectureUrl: testType === "specialLecture" ? "https://academy-os-blue.vercel.app/special-lecture?guide=2026-summer-high1-clinic-mwf" : "",
       studentName: "테스트학생",
       studentPhone: notificationStatus?.testRecipient,
       target: testType === "student" ? "student" : "parent"

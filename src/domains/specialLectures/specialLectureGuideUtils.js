@@ -655,7 +655,7 @@ export function getSpecialLectureGuideSlug(guide = {}) {
 
 export function getSpecialLecturePublicUrl(guide = {}) {
   const origin = typeof window !== "undefined" ? window.location.origin : "https://academy-os-blue.vercel.app";
-  return `${origin}/#special-lecture?guide=${encodeURIComponent(getSpecialLectureGuideSlug(guide))}`;
+  return `${origin}/special-lecture?guide=${encodeURIComponent(getSpecialLectureGuideSlug(guide))}`;
 }
 
 export function getSpecialLectureGuideSlugFromLocation(location = null) {
@@ -663,7 +663,7 @@ export function getSpecialLectureGuideSlugFromLocation(location = null) {
   if (!sourceLocation) return "";
   const searchGuide = new URLSearchParams(sourceLocation.search || "").get("guide");
   if (searchGuide) return searchGuide;
-  const hash = String(sourceLocation.hash || "").replace(/^#/, "");
+  const hash = String(sourceLocation.hash || "").replace(/^#\/?/, "");
   if (!hash.startsWith("special-lecture")) return "";
   const [, hashQuery = ""] = hash.split("?");
   const hashGuide = new URLSearchParams(hashQuery).get("guide");
@@ -725,5 +725,7 @@ export function buildSpecialLectureNoticeText(guide = {}, guideUrl = getSpecialL
 
 export function isSpecialLectureRoute() {
   if (typeof window === "undefined") return false;
-  return window.location.pathname === "/special-lecture" || window.location.hash.startsWith("#special-lecture");
+  const pathname = window.location.pathname.replace(/\/+$/, "") || "/";
+  const hash = window.location.hash.replace(/^#\/?/, "");
+  return pathname === "/special-lecture" || hash.startsWith("special-lecture");
 }
