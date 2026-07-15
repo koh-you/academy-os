@@ -6249,7 +6249,7 @@ export function App() {
       );
       recordsRef.current = nextRecords;
       setRecords(nextRecords);
-      window.localStorage.setItem(storageKeys.records, JSON.stringify(nextRecords));
+      writeStorageValue(window.localStorage, storageKeys.records, JSON.stringify(nextRecords));
       const savedStates = Object.fromEntries(
         result.records
           .filter((record) => record?.lessonStudentRecordId)
@@ -6448,7 +6448,7 @@ export function App() {
     : [];
   const pendingDeleteLesson = lessons.find((lesson) => lesson.lessonId === lessonDeleteModalId) ?? null;
   useEffect(() => {
-    legacySensitiveStorageKeys.forEach((key) => window.localStorage.removeItem(key));
+    legacySensitiveStorageKeys.forEach((key) => removeStorageValue(window.localStorage, key));
   }, []);
 
   useEffect(() => {
@@ -8288,7 +8288,7 @@ export function App() {
     }
     await postJson("/api/homeworks/bulk", { homeworks: homeworksToSave });
     homeworksToSave.forEach((homework) => dirtyHomeworkIdsRef.current.delete(homework.homeworkId));
-    window.localStorage.setItem(storageKeys.homeworks, JSON.stringify(homeworksRef.current));
+    writeStorageValue(window.localStorage, storageKeys.homeworks, JSON.stringify(homeworksRef.current));
     return true;
   }
 
@@ -8443,8 +8443,8 @@ export function App() {
         recordsRef.current = nextRecords;
         setRecords(nextRecords);
       }
-      window.localStorage.setItem(storageKeys.records, JSON.stringify(recordsRef.current));
-      window.localStorage.setItem(storageKeys.homeworks, JSON.stringify(homeworksRef.current));
+      writeStorageValue(window.localStorage, storageKeys.records, JSON.stringify(recordsRef.current));
+      writeStorageValue(window.localStorage, storageKeys.homeworks, JSON.stringify(homeworksRef.current));
       if (isLatestRecord) {
         setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "saved" }));
       }
@@ -26835,7 +26835,8 @@ function useStoredState(key, fallbackValue) {
   });
 
   useEffect(() => {
-    window.localStorage.setItem(key, JSON.stringify(value));
+    if (typeof window === "undefined") return;
+    writeStorageValue(window.localStorage, key, JSON.stringify(value));
   }, [key, value]);
 
   return [value, setValue];

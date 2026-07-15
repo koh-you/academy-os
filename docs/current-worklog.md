@@ -13,6 +13,17 @@
 - 리팩터링 gate 기본값: 리팩터링 구현/자동검증이 끝나면 커밋/푸시 전에 `AI 검수 결과`와 `사람이 확인할 것`을 함께 세션에 띄운다. AI는 변경 범위, 저장 원천/API/side effect diff, 테스트, 정적 invariant를 먼저 확인하고, 사람 확인은 AI가 확인할 수 없는 화면 어색함/운영 데이터/외부 서비스 상태 중심으로 최소화한다.
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 
+### 2026-07-15 P0. 특강 공개 링크 카카오 인앱 빈 화면 수정
+
+- 상태: 완료 - 구현/자동검증 완료
+- 사용자 요청: 특강 알림톡 링크를 눌렀을 때 카카오 인앱 브라우저에서 여전히 안내문 화면이 보이지 않고 빈 화면만 나온다. 이미 2회 수정했는데도 고쳐지지 않았다.
+- 원인 검토: 운영 HTML과 `/api/special-lecture-guides`는 200 응답이며, API에는 저장된 특강 안내문이 정상으로 내려온다. 빈 화면은 링크/데이터 404가 아니라 React 앱 초기 실행 중 예외 가능성이 높다. 공개 페이지 진입 전에도 `useStoredState()` effect와 일부 직접 저장 로직이 `window.localStorage.setItem/removeItem`을 호출하고 있어, 카카오 인앱 WebView에서 저장소 접근이 막히면 공개 페이지 분기 전에 앱이 깨질 수 있다.
+- 구현 결과: `useStoredState()`의 localStorage 저장 effect를 안전 래퍼 `writeStorageValue()`로 바꿨다. legacy 민감키 삭제와 수업기록/숙제 local cache 저장도 `removeStorageValue()`/`writeStorageValue()`로 통일해 저장소 실패가 앱 렌더링을 중단하지 않게 했다.
+- 저장 원천: 특강 안내문 원본은 기존 Supabase `app_state.specialLectureGuides`이며, 공개 조회 API는 `/api/special-lecture-guides`를 유지한다. 새 SQL은 없다.
+- 외부 side effect: Solapi 실제 발송/예약, `notification_jobs`, Tally 신청자, 특강 lesson 생성/수정 없음. 공개 페이지 런타임 안정성만 수정했다.
+- 중단 조건: 카카오 인앱에서 계속 빈 화면, Chrome/Safari에서는 보이나 카카오에서만 실패, API가 200인데 root가 비어 있음, 공개 링크가 다시 로그인 화면으로 감.
+- 검증: 공개 API 직접 조회 200 및 저장 slug 확인, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 304개 통과, `npm run build` 통과, headless Chrome 로컬 preview 공개 링크 렌더 확인, `--disable-local-storage` 조건에서도 특강 제목/신청 버튼 DOM 렌더 확인, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-15 P1. 특강 안내 알림톡 임시 발송 줄간격 보정
 
 - 상태: 완료 - 구현/자동검증 완료
