@@ -7858,6 +7858,51 @@ button:disabled {
   padding: 10px;
 }
 
+.specialLectureApplicationStatusSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.specialLectureApplicationUnmatched {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  color: #9a3412;
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px;
+}
+
+.specialLectureApplicationUnmatched strong {
+  color: #7c2d12;
+  font-size: 13px;
+}
+
+.specialLectureApplicationUnmatched p {
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.specialLectureApplicationUnmatched div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.specialLectureApplicationUnmatched span {
+  background: #ffffff;
+  border: 1px solid #fed7aa;
+  border-radius: 999px;
+  color: #9a3412;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 5px 8px;
+}
+
 .specialLectureApplicationList {
   display: grid;
   gap: 10px;
@@ -7954,6 +7999,12 @@ button:disabled {
   border-color: #fecaca;
   background: #fef2f2;
   color: #b91c1c;
+}
+
+.specialLectureApplicationStatus.unmatched {
+  border-color: #fed7aa;
+  background: #fff7ed;
+  color: #9a3412;
 }
 
 .specialLectureApplicationEmpty {
@@ -8102,6 +8153,15 @@ button:disabled {
 .specialLectureGoalField {
   background: #ffffff;
   border: 1px solid #dbeafe;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.specialLectureNotesField {
+  background: #f8fbff;
+  border: 1px solid #bfdbfe;
   border-radius: 8px;
   display: grid;
   gap: 8px;
@@ -8681,6 +8741,16 @@ button:disabled {
   font-weight: 800;
   line-height: 1.5;
   padding: 10px 12px;
+}
+
+.specialLectureGuideNotes {
+  background: #f8fbff;
+}
+
+.specialLectureGuideNotes p {
+  color: #1e3a8a;
+  font-weight: 800;
+  white-space: pre-wrap;
 }
 
 .specialLectureTimeline {

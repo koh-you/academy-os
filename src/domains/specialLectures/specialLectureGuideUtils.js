@@ -86,6 +86,7 @@ export const defaultSpecialLectureGuides = [
     shortTitle: "여름 개별 진도 클리닉",
     audience: "예비고1, 예비고2",
     goal: "개별 진도와 취약 단원을 학생별로 점검합니다.",
+    specialNotes: "",
     days: "월·수·금",
     time: "13:00-16:00",
     periodStart: "2026-07-22",
@@ -131,6 +132,7 @@ export const defaultSpecialLectureGuides = [
     shortTitle: "고1 공통수학2 여름특강",
     audience: "고등학교 1학년",
     goal: "공통수학2 핵심 단원을 유형별 문제풀이로 정리합니다.",
+    specialNotes: "",
     days: "화·목 / 토",
     time: "화·목 13:00-16:00, 토 16:00-19:00",
     periodStart: "2026-07-21",
@@ -539,6 +541,7 @@ export function normalizeSpecialLectureGuide(guide = {}, fallback = defaultSpeci
     shortTitle: String(source.shortTitle || source.title || "").trim(),
     audience: String(source.audience ?? "").trim(),
     goal: String(source.goal ?? "").trim(),
+    specialNotes: String(source.specialNotes ?? source.special_notes ?? "").trim(),
     days: String(source.days ?? "").trim(),
     time: String(source.time ?? "").trim(),
     periodStart: String(source.periodStart ?? "").trim(),
@@ -581,6 +584,7 @@ export function createSpecialLectureGuideFromTemplate(template = defaultSpecialL
     shortTitle: "여름방학 특강",
     audience: "",
     goal: "",
+    specialNotes: "",
     periodStart: "",
     periodEnd: "",
     days: "",
@@ -687,6 +691,9 @@ export function getSpecialLectureApplicationUrl(guide = {}) {
 
 export function buildSpecialLectureNoticeText(guide = {}, guideUrl = getSpecialLecturePublicUrl(guide), brandName = defaultSpecialLectureBrandName) {
   const normalizedGuide = normalizeSpecialLectureGuide(guide);
+  const specialNotesLines = normalizedGuide.specialNotes
+    ? ["", `특이사항: ${normalizedGuide.specialNotes}`]
+    : [];
   return [
     `안녕하세요. ${brandName}입니다.`,
     "",
@@ -695,6 +702,7 @@ export function buildSpecialLectureNoticeText(guide = {}, guideUrl = getSpecialL
     `요일: ${normalizedGuide.days || "-"}`,
     `시간: ${normalizedGuide.time || "-"}`,
     `시수: ${normalizedGuide.lessonCount || "-"}`,
+    ...specialNotesLines,
     "",
     normalizedGuide.noticeMemo || "자세한 커리큘럼과 안내사항은 아래 링크에서 확인 부탁드립니다.",
     guideUrl

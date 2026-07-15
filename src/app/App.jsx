@@ -10946,6 +10946,7 @@ function SpecialLectureNoticePanel({
 
       <SpecialLectureApplicationPanel
         applications={applications}
+        guides={draftGuides}
         onUpdateApplication={onUpdateApplication}
         selectedGuide={selectedGuide}
       />
@@ -11049,6 +11050,16 @@ function SpecialLectureNoticePanel({
           <label className="specialLectureWideField specialLectureGoalField">
             학습 목표
             <textarea rows="3" value={selectedGuide.goal} onChange={(event) => updateSelectedGuide("goal", event.target.value)} />
+          </label>
+
+          <label className="specialLectureWideField specialLectureNotesField">
+            특이사항
+            <textarea
+              placeholder="예: 창일중은 학교 일정상 5회만 수강합니다."
+              rows="3"
+              value={selectedGuide.specialNotes}
+              onChange={(event) => updateSelectedGuide("specialNotes", event.target.value)}
+            />
           </label>
 
           <section className={`specialLectureCalculator ${isScheduleBuilderOpen ? "open" : "collapsed"}`}>
@@ -11300,24 +11311,43 @@ function SpecialLectureNoticePanel({
 
 function SpecialLectureApplicationPanel({
   applications = [],
+  guides = defaultSpecialLectureGuides,
   onUpdateApplication,
   selectedGuide = null
 }) {
   const [panelMessage, setPanelMessage] = useState("");
   const [updatingApplicationId, setUpdatingApplicationId] = useState("");
+  const normalizedGuides = useMemo(() => normalizeSpecialLectureGuides(guides), [guides]);
   const normalizedApplications = useMemo(
     () => normalizeSpecialLectureApplications(applications)
       .sort((first, second) => new Date(second.createdAt).getTime() - new Date(first.createdAt).getTime()),
     [applications]
   );
-  const selectedGuideSlug = selectedGuide ? getSpecialLectureGuideSlug(selectedGuide) : "";
+  const knownGuideKeys = useMemo(() => new Set(normalizedGuides.flatMap((guide) => [
+    guide.specialLectureGuideId,
+    getSpecialLectureGuideSlug(guide)
+  ]).filter(Boolean)), [normalizedGuides]);
+  const applicationMatchesGuide = (application, guide) => Boolean(guide && (
+    application.specialLectureGuideId === guide.specialLectureGuideId ||
+    application.guideSlug === getSpecialLectureGuideSlug(guide)
+  ));
   const selectedGuideApplications = selectedGuide
-    ? normalizedApplications.filter((application) => (
-        application.specialLectureGuideId === selectedGuide.specialLectureGuideId ||
-        application.guideSlug === selectedGuideSlug
-      ))
+    ? normalizedApplications.filter((application) => applicationMatchesGuide(application, selectedGuide))
     : normalizedApplications;
+  const unmatchedApplications = normalizedApplications.filter((application) => {
+    const keys = [application.specialLectureGuideId, application.guideSlug].filter(Boolean);
+    return !keys.length || keys.every((key) => !knownGuideKeys.has(key));
+  });
+  const statusCounts = selectedGuideApplications.reduce((counts, application) => ({
+    ...counts,
+    [application.status]: (counts[application.status] ?? 0) + 1
+  }), {});
+  const statusSummary = specialLectureApplicationStatusOptions.map((option) => ({
+    ...option,
+    count: statusCounts[option.value] ?? 0
+  }));
   const visibleApplications = selectedGuideApplications.slice(0, 8);
+  const visibleUnmatchedApplications = unmatchedApplications.slice(0, 3);
   const webhookUrl = apiUrl("/api/special-lecture-applications/tally");
 
   async function copyWebhookUrl() {
@@ -11360,6 +11390,31 @@ function SpecialLectureApplicationPanel({
         </div>
         <code>{webhookUrl}</code>
       </div>
+
+      <div className="specialLectureApplicationStatusSummary">
+        {statusSummary.map((item) => (
+          <span className={`specialLectureApplicationStatus ${item.value}`} key={item.value}>
+            {item.label} {item.count}
+          </span>
+        ))}
+        {unmatchedApplications.length ? (
+          <span className="specialLectureApplicationStatus unmatched">미매칭 {unmatchedApplications.length}</span>
+        ) : null}
+      </div>
+
+      {visibleUnmatchedApplications.length ? (
+        <div className="specialLectureApplicationUnmatched">
+          <strong>미매칭 신청 {unmatchedApplications.length}건</strong>
+          <p>Tally hidden field의 `specialLectureId` 또는 `guideId`가 현재 안내문과 맞지 않는 제출입니다.</p>
+          <div>
+            {visibleUnmatchedApplications.map((application) => (
+              <span key={`unmatched_${application.applicationId}`}>
+                {application.studentName || "이름 미입력"} · {application.guideSlug || application.specialLectureGuideId || "guide 없음"}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       {visibleApplications.length ? (
         <div className="specialLectureApplicationList">
@@ -11489,6 +11544,13 @@ function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
           </div>
         ))}
       </section>
+
+      {normalizedGuide.specialNotes ? (
+        <section className="specialLectureGuideSection specialLectureGuideNotes">
+          <h2>특이사항</h2>
+          <p>{normalizedGuide.specialNotes}</p>
+        </section>
+      ) : null}
 
       <section className="specialLectureGuideSection">
         <h2>회차별 계획</h2>

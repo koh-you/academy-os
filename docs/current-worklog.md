@@ -55,7 +55,7 @@
 
 ### 2026-07-15 P1. App.jsx 리팩터링 3번 - API client wrapper 분리
 
-- 상태: 구현/검증 완료, AI 검수 + 사람 확인 gate 대기 - 사용자 승인 전 커밋/푸시 금지
+- 상태: 완료 - AI 검수 + 사람 확인 gate 승인, gate 후 검증 재실행/커밋/푸시 완료
 - 사용자 요청: 리팩터링 2번 gate 승인 후 리팩터링 3번을 진행한다. 리팩터링 이후에는 항상 `AI 검수 결과`와 `사람이 확인할 것`을 함께 세션에 띄운다.
 - 구현 결과: `App.jsx`에 있던 API base URL, `apiUrl`, `postJson`, timeout 요청 helper, `postJsonWithHeaders`를 `src/shared/utils/apiClient.js`로 분리했다.
 - 구현 결과: `App.jsx`는 새 API client helper를 import해 기존 함수 이름과 호출부를 그대로 사용한다. endpoint 문자열, 요청 method/body/header 구조, timeout 에러 문구, portal state 에러 fallback 문구는 유지했다.
@@ -65,9 +65,24 @@
 - 외부 side effect: Solapi, Tally, Slack, notification_jobs 예약/발송 로직 변경 없음. API wrapper 분리로 인해 새 발송/예약/삭제 호출을 만들지 않았다.
 - AI 검수: 로컬 wrapper가 `src/shared/utils/apiClient.js`로만 남고 `App.jsx`는 import만 사용하는지 확인했다. 추가/삭제 diff 기준으로 앱 endpoint 추가/삭제가 없고, 테스트 쪽 검사 대상만 `appWithApiClient`로 확장된 것을 확인했다.
 - 사람이 확인할 것: 실제 화면에서 로그인/초기 데이터 로드가 정상인지, 공지 발송/시험분석처럼 timeout helper를 쓰는 화면이 오류 없이 열리는지만 최소 확인한다. 외부 발송/AI 과금 버튼은 누르지 않는다.
-- 커밋/푸시: 사람 gate 승인 전에는 커밋/푸시하지 않는다. 승인 후 검증 명령을 다시 실행하고 리팩터링 3번 변경분만 커밋/푸시한다.
+- 사람 검수: 사용자가 리팩터링 3번 gate를 승인했다. 승인 후 검증 명령을 다시 실행하고 리팩터링 3번 변경분만 커밋/푸시했다.
+- 커밋/푸시: `35e0ac19 Extract shared API client helpers`를 GitHub `main`에 푸시했다.
 - 중단 조건: 로그인/초기 데이터 로드 실패, 모든 API 요청이 `127.0.0.1:8787` 또는 운영 API로 가지 않음, timeout 에러 문구가 깨짐, 공지 발송/시험분석/학생 포털 저장 API가 실패함, 리팩터링만 했는데 Solapi/Tally/Slack/notification_jobs 동작이 새로 발생함.
 - 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `node --check src/shared/utils/apiClient.js`, `npm run test:production` 289개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
+### 2026-07-15 P1. 특강 안내문 특이사항과 Tally 신청자 목록 운영 로직
+
+- 상태: 완료 - 구현/자동검증 완료
+- 사용자 요청: 특강 안내문 아래에 특정 학교/학생군별 예외 수강 조건을 적을 수 있는 `특이사항` 입력을 추가한다. SQL edit와 Tally 웹훅 연결 이후, 특강 안내문 발송 뒤 Tally로 들어오는 신청자 목록 관리 로직을 검토한다.
+- 구현 결과: 특강 안내문 draft/저장본에 `specialNotes` 필드를 추가했다. 기존 저장본의 `special_notes`도 읽을 수 있게 normalize했고, 기본 특강/새 특강 템플릿에는 빈 값으로 들어간다.
+- 구현 결과: `운영 > 특강관리` 편집 화면의 `학습 목표` 아래에 `특이사항` textarea를 추가했다. 입력 즉시 오른쪽 공개 안내문 미리보기와 알림톡 본문 미리보기에 반영되고, 실제 공개 링크 저장본은 기존처럼 `안내문 저장` 후 `app_state.specialLectureGuides`에 반영된다.
+- 구현 결과: 공개 안내문에는 값이 있을 때만 `특이사항` 섹션을 회차별 계획 위에 표시한다. 알림톡 발송 준비 본문에도 `특이사항: ...` 줄을 포함한다.
+- 신청자 로직 검토/보강: Tally 제출은 `/api/special-lecture-applications/tally`에서만 `special_lecture_applications` row를 만들며, 안내문 저장/알림톡 발송 준비/링크 복사는 신청자를 만들지 않는다. 목록 화면에는 현재 안내문 기준 상태 카운트와 Tally hidden field가 현재 안내문과 맞지 않는 `미매칭 신청`을 따로 표시한다.
+- 운영 상태 흐름: Tally 제출 직후 `접수`, 전화/안내 확인 후 `연락 완료`, 실제 수강 명단 반영 대상은 `확정`, 자리/시간 미정은 `대기`, 취소 요청은 `취소`로 관리한다. 신청 row 확정이 수업/수강생 명단 자동 배정으로 이어지지는 않으며, 그 단계는 별도 명시적 gate로 둔다.
+- 저장 원천: 특강 안내문/특이사항은 Supabase `app_state.specialLectureGuides`, 특강 신청자는 Supabase `special_lecture_applications`, Tally raw payload는 `raw_payload`, 공지 발송/예약은 기존 `notification_jobs`다. 새 SQL은 필요 없다.
+- 외부 side effect: Solapi 발송/예약, Tally API 호출, notification_jobs 생성/수정 없음. Tally 웹훅 URL 연결은 사용자가 완료한 전제이며, 이번 작업은 로컬 코드와 화면 로직만 바꿨다.
+- 중단 조건: 특이사항 입력 후 `안내문 저장`/새로고침에서 사라짐, 알림톡 본문 미리보기에 특이사항이 누락됨, Tally 신청자가 `student_intake_applicants`에 섞임, 미매칭 신청이 생겼는데 hidden field/query를 확인하지 않고 확정 처리함, 안내문 저장이나 발송 준비만으로 `notification_jobs` 또는 신청자 row가 생김.
+- 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check src/shared/utils/apiClient.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 291개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
 
 ### 2026-07-15 P1. 다음 세션 handoff 갱신 - 특강관리/SQL 수동 작업 반영
 
