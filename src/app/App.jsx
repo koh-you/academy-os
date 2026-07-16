@@ -19,6 +19,7 @@ import { SpecialLectureApplicationPanel } from "../domains/specialLectures/Speci
 import {
   SpecialLectureGuideBasicFields,
   SpecialLectureGuideSelector,
+  SpecialLectureGuideTextFields,
   SpecialLectureManagementBar
 } from "../domains/specialLectures/SpecialLectureManagementPanel.jsx";
 import {
@@ -10928,20 +10929,10 @@ function SpecialLectureNoticePanel({
             onUpdateGuide={updateSelectedGuide}
           />
 
-          <label className="specialLectureWideField specialLectureGoalField">
-            학습 목표
-            <textarea rows="3" value={selectedGuide.goal} onChange={(event) => updateSelectedGuide("goal", event.target.value)} />
-          </label>
-
-          <label className="specialLectureWideField specialLectureSummaryField">
-            수업 방향
-            <textarea
-              placeholder="예: 방학 동안 현재 진도 기준으로 빈틈을 정리하고 다음 학기 수업을 준비합니다."
-              rows="3"
-              value={selectedGuide.summary}
-              onChange={(event) => updateSelectedGuide("summary", event.target.value)}
-            />
-          </label>
+          <SpecialLectureGuideTextFields
+            guide={selectedGuide}
+            onUpdateGuide={updateSelectedGuide}
+          />
 
           <section className="specialLectureWideField specialLectureHighlightField">
             <div className="specialLectureFieldHeader">

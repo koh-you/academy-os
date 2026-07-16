@@ -118,6 +118,38 @@ export function SpecialLectureGuideBasicFields({
   );
 }
 
+export function SpecialLectureGuideTextFields({
+  guide,
+  onUpdateGuide
+}) {
+  if (!guide) {
+    return null;
+  }
+
+  function updateField(field) {
+    return (event) => onUpdateGuide?.(field, event.target.value);
+  }
+
+  return (
+    <>
+      <label className="specialLectureWideField specialLectureGoalField">
+        학습 목표
+        <textarea rows="3" value={guide.goal} onChange={updateField("goal")} />
+      </label>
+
+      <label className="specialLectureWideField specialLectureSummaryField">
+        수업 방향
+        <textarea
+          placeholder="예: 방학 동안 현재 진도 기준으로 빈틈을 정리하고 다음 학기 수업을 준비합니다."
+          rows="3"
+          value={guide.summary}
+          onChange={updateField("summary")}
+        />
+      </label>
+    </>
+  );
+}
+
 export function SpecialLectureGuideSelector({
   onSelectGuide,
   onToggleStoredGuides,

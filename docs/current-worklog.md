@@ -79,6 +79,20 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 6번 - 특강 목표/방향 textarea 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
+- 범위 선택: 6번 `specialLecture management`의 네 번째 작은 단위로, 특강관리의 `학습 목표`와 `수업 방향` textarea만 분리했다. 기본 입력 grid, 수업 방향 카드, 특이사항, 일정 계산, 회차 카드는 건드리지 않았다.
+- 구현 결과: `SpecialLectureGuideTextFields`를 `src/domains/specialLectures/SpecialLectureManagementPanel.jsx`에 추가하고, `App.jsx`는 `selectedGuide`와 기존 `updateSelectedGuide` callback만 전달한다.
+- 테스트 갱신: production scenario의 `20j-6b`가 `App.jsx`의 직접 `updateSelectedGuide("summary")` 문자열 위치에 묶이지 않고, 새 분리 컴포넌트의 `updateField("summary")`까지 검사하도록 보정했다. 테스트 의도(수업 방향 textarea가 편집 가능하고 공개 안내문 summary 원천과 연결됨)는 유지했다.
+- 저장 원천: 변경 없음. textarea 값은 기존과 같이 `updateSelectedGuide`로 `draftGuides` local draft만 갱신하고, 실제 저장은 기존 `안내문 저장`/`saveGuides` 흐름을 거친다. `specialLectureGuides`, `/api/special-lecture-guides`, Supabase/API payload는 변경하지 않았다.
+- 외부 side effect: 없음. 새 API 호출, Solapi 실제 발송/예약, `notification_jobs`, Tally webhook, 특강 신청자 저장, 특강 수업 생성 API 호출 없음.
+- AI 검수 결과: `updateSelectedGuide`, `persistDraftGuides`, `prepareSpecialLectureNotice`, 신청자/수업 생성 함수 diff가 없다. 첫 `npm run test:production`은 테스트 위치 가정 때문에 `20j-6b` 1건이 실패했고, scenario 보정 후 309개 전체 통과했다. build도 통과했다.
+- 남은 6번 후보: 수업 방향 카드 editor, 특이사항 textarea, 일정 계산 panel, 회차 카드 editor, 알림톡 링크 안내 문장. 계산 적용/회차 추가/삭제/저장 함수 본문을 건드리면 별도 gate로 분리한다.
+- 사람 검토 필요 여부: 선택 사항. 화면 확인을 한다면 `학습 목표`/`수업 방향` textarea 입력이 끊기지 않고 오른쪽 미리보리에 즉시 반영되는지만 보면 된다. 저장/발송 준비 클릭은 필수 검토가 아니다.
+- 중단 조건: textarea 입력 중 커서가 튐, 줄바꿈이 사라짐, 수업 방향 미리보기가 갱신되지 않음, 저장/발송/Tally 경로 diff가 함께 생김.
+- 검증: `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
+
 ### 2026-07-16 P1. App.jsx 리팩터링 6번 - 특강 기본 입력 grid 분리
 
 - 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
