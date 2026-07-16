@@ -21,6 +21,7 @@ import {
   createTestSessionIdForPaper,
   getTestPaperKindLabel
 } from "../domains/tests/testManagerUtils.js";
+import { TestManagerTabs } from "../domains/tests/TestManagerPanels.jsx";
 import {
   SpecialLectureGuideBasicFields,
   SpecialLectureGuideSelector,
@@ -24281,14 +24282,7 @@ function MaterialManager({
 
   return (
     <section className="materialManagerPage">
-      <div className="localTabs materialTabs">
-        <button className={activeTab === "attempts" ? "active" : ""} onClick={() => setActiveTab("attempts")} type="button">
-          응시 기록
-        </button>
-        <button className={activeTab === "history" ? "active" : ""} onClick={() => setActiveTab("history")} type="button">
-          학생 이력
-        </button>
-      </div>
+      <TestManagerTabs activeTab={activeTab} onChange={setActiveTab} />
 
       {activeTab === "attempts" ? (
         <section className="panel materialPanel testAttemptPanel">
