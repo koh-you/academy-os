@@ -95,8 +95,14 @@ App.jsx 리팩터링 18개 기준 로드맵:
    - 새 초안은 `일시: 7/17(금) 오전 04:00`, `밀린 숙제: 7/15(수) 숙제 · <등원해서 확인할 숙제>`처럼 표시합니다.
    - `설정 > 알림톡`에서 `숙제보충 학생 11시 알림톡` 템플릿을 확인/수정할 수 있습니다.
    - 기존 예약된 `notification_jobs`와 사용자 편집 초안은 자동 변경되지 않고, 새로 생성/변경 예약되는 job부터 새 문구를 사용합니다.
-   - 관련 최신 커밋: `58728cb0 Clarify supplement homework reminder labels`
-8. 최신 검증 결과
+   - 관련 기능 커밋: `58728cb0 Clarify supplement homework reminder labels`
+8. App.jsx 리팩터링과 18개 기준 로드맵을 최신 문서에 반영했습니다.
+   - 시험분석 최종 미리보기 패널 분리 커밋: `364e52e9 Extract exam analysis final preview panel`
+   - shared `MetricCard` 분리 커밋: `87eab282 Extract shared metric card`
+   - 리팩터링 18개 기준 로드맵 문서화 커밋: `f2c6aab5 Document App.jsx refactoring roadmap`
+   - 다른 세션에서 붙여넣은 `AGENTS.md`, `docs/current-worklog.md`, `docs/next-session/README.md` 내용은 현재 repo 문서와 줄 단위로 동일함을 확인했습니다. 해시 차이는 줄바꿈/인코딩 차이로 보고, 빠진 항목은 이 README와 worklog에 보강합니다.
+   - 다음에 "다음 세션에 넘길 프롬프트"를 요청하면 이 README의 붙여넣기 프롬프트가 미룬 작업 큐, 18개 로드맵, 최근 리팩터링 커밋을 함께 넘깁니다.
+9. 최신 검증 결과
    - `node --check scripts/scenario-tests-production.cjs` 통과
    - `npm run test:production` 309개 통과
    - `npm run build` 통과, 기존 Vite chunk size 경고만 남음
@@ -126,6 +132,7 @@ App.jsx 리팩터링 18개 기준 로드맵:
 
 - 미룬 작업 큐의 source of truth는 `AGENTS.md` 최상단과 `docs/current-worklog.md` 최상단입니다.
 - App.jsx 리팩터링 18개 기준 로드맵은 `AGENTS.md`, `docs/current-worklog.md`, 이 README에 함께 기록되어 있습니다. 다른 세션이 목록을 못 찾으면 먼저 이 세 파일의 최상단 큐와 `App.jsx Refactoring Roadmap - 18 Units`를 확인하게 하세요.
+- 최근 리팩터링 흐름은 `364e52e9` 시험분석 최종 미리보기 패널 분리, `87eab282` shared `MetricCard` 분리, `f2c6aab5` 리팩터링 18개 로드맵 문서화입니다. 실제 최신 커밋은 새 세션에서 반드시 `git log -1 --oneline`으로 다시 확인하세요.
 - 이 README는 붙여넣기 편의를 위한 사본입니다. 세션 종료 시 새로 미룬 작업이 생기면 세 곳을 함께 갱신하세요.
 - 보충 알림톡 라벨 정리 기능 커밋은 `58728cb0 Clarify supplement homework reminder labels`입니다. handoff 문서 갱신 커밋이 뒤에 올 수 있으므로 새 세션에서 반드시 `git log -1 --oneline`으로 최신 커밋을 다시 확인하세요.
 - 현재 로컬에 남을 수 있는 미추적 항목: `.codex-temp/`. 커밋하지 않습니다.
