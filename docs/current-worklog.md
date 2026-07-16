@@ -79,6 +79,20 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 4번 - 교안연구 option 상수 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
+- 범위 선택: 4번 `storageKeys/config/constants`의 다섯 번째 작은 단위로, 교안연구 화면의 고정 subject/category/status option만 분리했다. 교안 항목 저장, 유형트리 연결, 교안 본문 draft 흐름은 건드리지 않았다.
+- 구현 결과: `lessonResearchSubjects`, `lessonResearchCategories`, `lessonResearchStatuses`를 `src/app/appConfig.js`로 이동했다. `App.jsx`는 같은 이름을 import해 기존 subject normalize, 필터, select 렌더링을 유지한다.
+- 테스트 갱신: production scenario가 `lessonResearchCategories`/`lessonResearchStatuses`를 `App.jsx` 선언 위치에 고정하지 않고 `appConfig.js`까지 함께 검사하도록 `appWithConfig` 기준을 적용했다. 유형트리 교안 frame 문구와 CSS 확인은 그대로 유지했다.
+- 저장 원천: 없음. 기존 교안연구 원본은 `storageKeys.lessonResearchItems`/관련 app state 흐름이며 이번 작업은 option 배열 위치만 바꿨다. 저장 key, local draft, payload는 변경하지 않았다.
+- 외부 side effect: 없음. API 호출, Solapi 실제 발송/예약, `notification_jobs`, Tally, Slack, AI 호출 없음.
+- AI 검수 결과: subject/category/status 문자열을 그대로 이동했고, `normalizeLessonResearchItems`, `handleAddTypeLessonPlan`, 교안 저장/수정 함수 diff가 없다. `npm run test:production`의 `70p lesson research supports type tree lesson plan frames`와 build가 통과해 사람 gate 없이 다음 낮은 위험 분리로 넘어갈 수 있다.
+- 남은 4번 후보: notice withdrawn class filter와 화면 내부 동적 option은 notification center 맥락과 섞일 수 있어 착수 전 side effect를 다시 본다.
+- 사람 검토 필요 여부: 선택 사항. 화면 확인을 한다면 교안연구의 과목/분류/상태 필터와 입력 select 라벨이 이전과 같은지만 보면 된다. 운영 데이터 변경 검토는 필요 없다.
+- 중단 조건: 교안연구 선택지 문구가 바뀜, 기존 교안 항목 저장/유형 연결 payload가 함께 바뀜, local draft나 app state 저장 key가 같이 바뀜, 교안 본문 자동생성/AI 흐름이 섞임.
+- 검증: `node --check src/app/appConfig.js` 통과, `node --check scripts/scenario-tests-production.cjs` 통과, `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
+
 ### 2026-07-16 P1. App.jsx 리팩터링 4번 - 테스트관리 option 상수 분리
 
 - 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능

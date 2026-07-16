@@ -119,6 +119,9 @@ import {
   legacySensitiveStorageKeys,
   lessonCalendarColors,
   lessonDeleteRetentionMs,
+  lessonResearchCategories,
+  lessonResearchStatuses,
+  lessonResearchSubjects,
   regularLessonClassColors,
   schoolCalendarGradeOptions,
   schoolCalendarKnownColors,
@@ -4706,10 +4709,6 @@ function mergeById(currentItems, nextItems, idKey) {
   const existingIds = new Set(currentItems.map((item) => item[idKey]));
   return [...currentItems, ...nextItems.filter((item) => !existingIds.has(item[idKey]))];
 }
-
-const lessonResearchSubjects = ["공통수학1", "공통수학2", "대수", "미적분1", "확률과 통계", "기하"];
-const lessonResearchCategories = ["유형별 교안", "특정문항 교안", "못 푼 문제", "설명 아쉬움", "빈출 테마", "교재화 후보"];
-const lessonResearchStatuses = ["수집", "정리중", "교안작성", "교재후보", "완료"];
 
 function normalizeLessonResearchSubject(subject = "") {
   const compactSubject = String(subject ?? "").replace(/\s+/g, "");

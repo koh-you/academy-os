@@ -156,3 +156,7 @@ export const testAttemptStatusOptions = [
   { id: "taken", label: "응시" },
   { id: "not_taken", label: "미응시" }
 ];
+
+export const lessonResearchSubjects = ["공통수학1", "공통수학2", "대수", "미적분1", "확률과 통계", "기하"];
+export const lessonResearchCategories = ["유형별 교안", "특정문항 교안", "못 푼 문제", "설명 아쉬움", "빈출 테마", "교재화 후보"];
+export const lessonResearchStatuses = ["수집", "정리중", "교안작성", "교재후보", "완료"];
