@@ -53,6 +53,19 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 - 시험분석 최종 미리보기 패널 분리
+
+- 상태: 완료 - 구현/자동검증 완료
+- 사용자 요청: 리팩터링 다음 작업을 진행한다.
+- 범위 선택: 저장/API/Solapi/출결/수업일지 알림톡과 무관한 낮은 위험 표시 단위인 `ExamAnalysisFinalPreviewPanel`부터 분리했다. 시험분석 v2의 데이터 생성, 저장, AI 실행, PDF 처리, 산출물 저장 흐름은 건드리지 않았다.
+- 구현 결과: `App.jsx` 안에 있던 시험분석 최종 미리보기 UI 묶음(`ExamAnalysisFinalPreviewPanel`, donut/legend/bar/question map 표시 컴포넌트)을 `src/domains/exams/ExamAnalysisFinalPreviewPanel.jsx`로 이동했다. `App.jsx`는 새 컴포넌트를 import해서 기존 사용처를 유지한다.
+- 테스트 갱신: production scenario가 `ExamAnalysisFinalPreviewPanel` 관련 문자열을 `App.jsx`에서만 찾지 않고, 새 분리 파일까지 함께 검사하도록 갱신했다. 테스트 의도는 유지하고 파일 위치 가정만 바꿨다.
+- 저장 원천: 없음. 순수 UI 컴포넌트 파일 분리이며 Supabase, `app_state`, Storage, localStorage 저장 경로는 변경하지 않았다.
+- 외부 side effect: 없음. Solapi 실제 발송/예약, `notification_jobs`, Tally, Slack, AI 호출 없음.
+- 사람 검토 gate: 시험관리의 시험분석 v2 화면에서 검수 저장본이 있는 분석을 열고 `최종 미리보기` 패널이 기존처럼 보이는지 확인한다. 단원별 출제 비중 donut, 난이도 분포, 단원별 난이도, 문항 흐름, 주요문항 영역이 깨지지 않고 표시되면 통과다. 검수 저장본이 없는 분석에서는 `저장된 문항 검수본이 없습니다.`가 보여야 한다.
+- 중단 조건: 시험분석 화면 진입이 실패함, `최종 미리보기` 패널이 비어 있거나 깨짐, 난이도 색상/주요문항 표시가 달라짐, 검수 저장/AI 행 채움/PDF 업로드 같은 저장 또는 과금 흐름이 같이 달라짐.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과, `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-16 P1. 숙제보충/결석보충 학생 11시 알림톡 숙제 라벨 정리
 
 - 상태: 완료 - 구현/자동검증 완료
