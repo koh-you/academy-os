@@ -186,3 +186,34 @@ export function TestAttemptActions({
     </div>
   );
 }
+
+export function RecentTestSessionList({
+  getKindLabel,
+  onOpenSession,
+  sessions = [],
+  totalCount = 0
+}) {
+  return (
+    <section className="testSessionList">
+      <div className="sectionHeader slim">
+        <div>
+          <h2>최근 응시 회차</h2>
+          <p className="muted">수업일지 알림톡은 같은 날짜와 학생의 기록을 자동으로 읽습니다.</p>
+        </div>
+        <span className="countBadge">{totalCount}건</span>
+      </div>
+      {sessions.slice(0, 12).map((session) => (
+        <button
+          className="testSessionItem"
+          key={session.testSessionId}
+          onClick={() => onOpenSession?.(session)}
+          type="button"
+        >
+          <strong>{session.testDate} · {session.testTitle}</strong>
+          <span>{session.className || "전체 학생"} · {getKindLabel?.(session.testKind)} · {session.totalQuestions || "-"}문항</span>
+        </button>
+      ))}
+      {!totalCount ? <EmptyState className="emptyState compact">저장된 응시 회차가 없습니다.</EmptyState> : null}
+    </section>
+  );
+}
