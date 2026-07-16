@@ -61,3 +61,17 @@ export function updateDateRangeField(value = "", field, nextValue = "") {
   const nextRange = { ...parsed, [field]: nextValue };
   return formatDateRangeText(nextRange.date, nextRange.endDate);
 }
+
+export function isDateWithinEvent(date, event) {
+  if (!event.endDate) return event.date === date;
+  return event.date <= date && date <= event.endDate;
+}
+
+export function getMonthCellDisplayEvents(dayEvents = []) {
+  const mathExamEvents = dayEvents.filter((event) => event.type === "mathExam").slice(0, 5);
+  const academicEvents = dayEvents.filter((event) => event.type !== "examPeriod" && event.type !== "mathExam").slice(0, 3);
+  const hiddenCount =
+    Math.max(0, dayEvents.filter((event) => event.type === "mathExam").length - mathExamEvents.length) +
+    Math.max(0, dayEvents.filter((event) => event.type !== "examPeriod" && event.type !== "mathExam").length - academicEvents.length);
+  return { academicEvents, hiddenCount, mathExamEvents };
+}

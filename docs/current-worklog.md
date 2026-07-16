@@ -79,6 +79,20 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 7번 - 학사일정 월간 표시 helper 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
+- 범위 선택: 7번 `school calendar helpers`의 세 번째 안전 단위로, 월간 달력 표시용 순수 helper만 분리했다. 학사일정 저장, 시험관리 sync, 시험대비/직전수업 후보 생성은 건드리지 않았다.
+- 구현 결과: `isDateWithinEvent`, `getMonthCellDisplayEvents`를 `src/domains/schoolCalendar/schoolCalendarUtils.js`로 이동했다. `App.jsx`는 같은 함수명을 import해 기존 선택일 이벤트 계산, 월 cell 표시, 시험기간 카드 연결에서 그대로 사용한다.
+- 테스트 갱신: production scenario의 `70g`가 `App.jsx` 위치에 묶이지 않고 `schoolCalendarUtils.js`까지 포함한 `appWithConfig` 기준으로 보도록 보정했다. `38`은 이미 `appWithConfig` 기준이라 `isDateWithinEvent` 이동 후에도 유지됐다.
+- 저장 원천: 없음. 월간 표시 helper는 화면 표시용 순수 계산이며, Supabase `school_events`, 시험관리 row, `app_state`, local draft 저장 경로를 변경하지 않았다.
+- 외부 side effect: 없음. API 호출, Supabase 저장/삭제, 시험관리 row update, 시험대비/직전수업 후보 생성, Solapi/notification_jobs 호출 없음.
+- AI 검수 결과: `syncSchoolCalendarEventToExamPrepRows`, `saveAcademicEventDraft`, `handleCreateSchoolEvent`, `handleUpdateSchoolEvent`, `createPreExamLessonFromSchoolEvent` 함수 diff가 없다. `node --check src/domains/schoolCalendar/schoolCalendarUtils.js`, production scenario, build가 통과했다.
+- 남은 7번 후보: 월 range/intersection helper, 시험기간 카드 grouping helper. 저장/삭제/시험관리 sync/시험대비 후보 생성 함수 본문을 건드리게 되면 별도 gate로 분리한다.
+- 사람 검토 필요 여부: 선택 사항. 화면 확인을 한다면 월간 달력에서 수학시험은 math tab으로, 일반 학사일정은 일반 event layer로 이전처럼 보이고 `+N` 더보기 수가 유지되는지만 보면 된다. 저장/삭제는 필수 검토가 아니다.
+- 중단 조건: 시험기간이 월간 날짜 cell에 다시 섞임, 수학시험/일반일정 노출 개수가 달라짐, 선택일 이벤트 목록이 달라짐, 저장/API/시험관리 sync diff가 함께 생김.
+- 검증: `node --check src/domains/schoolCalendar/schoolCalendarUtils.js` 통과, `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
+
 ### 2026-07-16 P1. App.jsx 리팩터링 7번 - 학사일정 날짜 범위 helper 분리
 
 - 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
