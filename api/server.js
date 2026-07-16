@@ -2351,6 +2351,20 @@ async function withSolapiRetry(action, { attempts = 3, delayMs = 350 } = {}) {
   throw lastError;
 }
 
+async function listNotificationJobsByIds(notificationJobIds = []) {
+  const uniqueIds = [...new Set(
+    notificationJobIds
+      .map((item) => String(item || "").trim())
+      .filter(Boolean)
+  )];
+  const results = [];
+  for (const notificationJobId of uniqueIds) {
+    const result = await getNotificationJob(notificationJobId);
+    if (result.notificationJob) results.push(result.notificationJob);
+  }
+  return results;
+}
+
 async function reconcileSolapiNotificationJobs({ date = "", lessonId = "", limit = 500, notificationJobIds = [], scheduledFrom = "", scheduledTo = "" } = {}) {
   const targetJobIds = Array.isArray(notificationJobIds)
     ? notificationJobIds.map((item) => String(item || "").trim()).filter(Boolean)
@@ -2358,18 +2372,22 @@ async function reconcileSolapiNotificationJobs({ date = "", lessonId = "", limit
   if (!date && !lessonId && !scheduledFrom && !scheduledTo && targetJobIds.length === 0) {
     throw new Error("조회할 알림톡 예약 ID, 수업일 또는 수업 ID가 필요합니다.");
   }
-  const { startIso, endIso } = getKoreaDayUtcRange(date);
-  const result = await listNotificationJobs({
-    lessonId,
-    limit: targetJobIds.length ? Math.max(limit, targetJobIds.length) : limit,
-    scheduledFrom: targetJobIds.length ? "" : scheduledFrom || startIso,
-    scheduledTo: targetJobIds.length ? "" : scheduledTo || endIso,
-    status: "scheduled,send_unconfirmed"
-  });
+  const { startIso, endIso } = targetJobIds.length ? { startIso: "", endIso: "" } : getKoreaDayUtcRange(date);
+  const targetJobs = targetJobIds.length
+    ? await listNotificationJobsByIds(targetJobIds)
+    : (await listNotificationJobs({
+        lessonId,
+        limit,
+        scheduledFrom: scheduledFrom || startIso,
+        scheduledTo: scheduledTo || endIso,
+        status: "scheduled,send_unconfirmed"
+      })).notificationJobs ?? [];
   const targetJobIdSet = new Set(targetJobIds);
+  const targetStatuses = new Set(["scheduled", "send_unconfirmed"]);
   const now = new Date();
-  const candidates = (result.notificationJobs ?? []).filter((job) =>
+  const candidates = targetJobs.filter((job) =>
     job.provider === "solapi" &&
+    targetStatuses.has(job.status) &&
     getNotificationJobSolapiGroupId(job) &&
     (targetJobIdSet.size === 0 || targetJobIdSet.has(job.notificationJobId))
   );
