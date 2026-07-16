@@ -38,6 +38,7 @@ import {
   SchoolCalendarFilterBar,
   SchoolCalendarHeader,
   SchoolCalendarSaveNotice,
+  SchoolMonthGrid,
   SchoolMonthHeader
 } from "../domains/schoolCalendar/SchoolCalendarComponents.jsx";
 import {
@@ -47,7 +48,6 @@ import {
   formatDateRangeText,
   formatPeriodSummaryLabel,
   getDateRangeField,
-  getMonthCellDisplayEvents,
   getSchoolCalendarEventColor,
   getSchoolCalendarFilterGroup,
   getSchoolCalendarSchoolColor,
@@ -19965,78 +19965,12 @@ function SchoolCalendarCenter({
             filters={calendarFilters}
             onChange={setCalendarFilter}
           />
-          <div className="calendarGrid teacherCalendarGrid schoolMonthGrid">
-            {["일", "월", "화", "수", "목", "금", "토"].map((label) => (
-              <div className="weekday" key={label}>{label}</div>
-            ))}
-            {monthDays.map((day) => {
-              const eventPriority = { mathExam: 0, vacation: 1, schoolEvent: 2, custom: 3 };
-              const dayEvents = calendarDisplayEvents
-                .filter((event) => isDateWithinEvent(day.date, event))
-                .sort((eventA, eventB) => (
-                  (eventPriority[eventA.type] ?? 4) - (eventPriority[eventB.type] ?? 4)
-                  || formatCalendarEventLabel(eventA).localeCompare(formatCalendarEventLabel(eventB))
-                ));
-              const { academicEvents, hiddenCount, mathExamEvents } = getMonthCellDisplayEvents(dayEvents);
-              return (
-                <button
-                  className={[
-                    "monthCell",
-                    "teacherMonthCell",
-                    "schoolMonthCell",
-                    day.inMonth ? "" : "outside",
-                    selectedDate === day.date ? "selected" : ""
-                  ].join(" ")}
-                  key={day.date}
-                  onClick={() => openDateModal(day.date)}
-                  type="button"
-                >
-                  <span className="dayNumber">{day.dayNumber}</span>
-                  <span className="lessonPills">
-                    <span className="schoolMathExamLayer">
-                      {mathExamEvents.map((event, mathTabIndex) => {
-                        const eventLabel = formatCalendarSummaryLabel(event);
-                        const eventColor = getSchoolCalendarEventColor(event);
-                        return (
-                          <span
-                            className={`schoolEventPill event-${event.type} mathExamTab`}
-                            key={event.eventId}
-                            style={{
-                              "--event-color": eventColor,
-                              backgroundColor: eventColor,
-                              "--math-tab-index": mathTabIndex
-                            }}
-                            title={event.title}
-                          >
-                            {eventLabel}
-                          </span>
-                        );
-                      })}
-                    </span>
-                    <span className="schoolRegularEventLayer">
-                      {academicEvents.map((event) => {
-                        const eventLabel = formatCalendarSummaryLabel(event);
-                        const eventColor = getSchoolCalendarEventColor(event);
-                        return (
-                          <span
-                            className={`schoolEventPill event-${event.type}`}
-                            key={event.eventId}
-                            style={{ "--event-color": eventColor, backgroundColor: eventColor }}
-                            title={event.title}
-                          >
-                            {eventLabel}
-                          </span>
-                        );
-                      })}
-                      {hiddenCount > 0 ? (
-                        <span className="schoolEventMorePill">+{hiddenCount}</span>
-                      ) : null}
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <SchoolMonthGrid
+            calendarDisplayEvents={calendarDisplayEvents}
+            monthDays={monthDays}
+            onOpenDateModal={openDateModal}
+            selectedDate={selectedDate}
+          />
         </section>
       </div>
       {isDateModalOpen ? (
