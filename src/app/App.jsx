@@ -22,6 +22,7 @@ import {
   getTestPaperKindLabel
 } from "../domains/tests/testManagerUtils.js";
 import {
+  TestAttemptFormGrid,
   TestAttemptPanelHeader,
   TestManagerTabs
 } from "../domains/tests/TestManagerPanels.jsx";
@@ -24290,49 +24291,27 @@ function MaterialManager({
       {activeTab === "attempts" ? (
         <section className="panel materialPanel testAttemptPanel">
           <TestAttemptPanelHeader testResultSaveState={testResultSaveState} />
-          <div className="testAttemptFormGrid">
-            <label>
-              응시일
-              <input type="date" value={attemptDate} onChange={(event) => setAttemptDate(event.target.value)} />
-            </label>
-            <label>
-              대상 반
-              <select value={attemptClassTemplateId} onChange={(event) => setAttemptClassTemplateId(event.target.value)}>
-                <option value="all">전체 학생</option>
-                {templates.map((template) => (
-                  <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              테스트 종류
-              <select value={attemptTestKind} onChange={(event) => setAttemptTestKind(event.target.value)}>
-                {testPaperKindOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
-              </select>
-            </label>
-            <label>
-              테스트명
-              <input value={attemptTitle} onChange={(event) => setAttemptTitle(event.target.value)} placeholder="예: 평면좌표 데일리 01" />
-            </label>
-            <label>
-              과목
-              <select value={attemptSubject} onChange={(event) => setAttemptSubject(event.target.value)}>
-                {testPaperSubjectOptions.map((subject) => <option key={subject} value={subject}>{subject}</option>)}
-              </select>
-            </label>
-            <label>
-              범위/단원
-              <input value={attemptUnit} onChange={(event) => setAttemptUnit(event.target.value)} placeholder="예: 평면좌표" />
-            </label>
-            <label>
-              총 문항 수
-              <input min="1" type="number" value={attemptTotalQuestions} onChange={(event) => setAttemptTotalQuestions(event.target.value)} placeholder="예: 20" />
-            </label>
-            <label>
-              회차 메모
-              <input value={attemptMemo} onChange={(event) => setAttemptMemo(event.target.value)} placeholder="선택 입력" />
-            </label>
-          </div>
+          <TestAttemptFormGrid
+            attemptClassTemplateId={attemptClassTemplateId}
+            attemptDate={attemptDate}
+            attemptMemo={attemptMemo}
+            attemptSubject={attemptSubject}
+            attemptTestKind={attemptTestKind}
+            attemptTitle={attemptTitle}
+            attemptTotalQuestions={attemptTotalQuestions}
+            attemptUnit={attemptUnit}
+            onAttemptClassTemplateIdChange={setAttemptClassTemplateId}
+            onAttemptDateChange={setAttemptDate}
+            onAttemptMemoChange={setAttemptMemo}
+            onAttemptSubjectChange={setAttemptSubject}
+            onAttemptTestKindChange={setAttemptTestKind}
+            onAttemptTitleChange={setAttemptTitle}
+            onAttemptTotalQuestionsChange={setAttemptTotalQuestions}
+            onAttemptUnitChange={setAttemptUnit}
+            subjectOptions={testPaperSubjectOptions}
+            templates={templates}
+            testKindOptions={testPaperKindOptions}
+          />
           <div className="testAttemptMeta">
             <span>{getTestPaperKindLabel(attemptTestKind)}</span>
             <span>{attemptSubject}</span>
