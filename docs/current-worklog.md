@@ -79,6 +79,20 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 8번 - 학사일정 월간 개요 panel 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
+- 범위 선택: 8번 `school calendar components`의 세 번째 작은 단위로, 월간 학사 개요/시험기간 카드 panel 렌더만 분리했다. 카드 생성 helper, 일정 수정 modal open 함수, 저장/삭제 함수는 건드리지 않았다.
+- 구현 결과: `SchoolAcademicOverviewPanel`을 `src/domains/schoolCalendar/SchoolCalendarComponents.jsx`에 추가하고, `App.jsx`는 `examPeriodCards`, 월별 수학시험/학사일정 count, label/color/날짜 formatter, `openEventEditForm` callback을 props로 넘긴다.
+- 테스트 갱신: production scenario의 `44`가 `App.jsx` 위치에 묶이지 않고 `SchoolCalendarComponents.jsx`까지 포함한 `appWithConfig` 기준으로 검사하도록 보정했다.
+- 저장 원천: 없음. 월간 개요 panel은 표시와 수정 modal 열기 callback만 수행하며, Supabase `school_events`, 시험관리 row, `app_state`, local draft 저장 경로를 변경하지 않았다.
+- 외부 side effect: 없음. API 호출, Supabase 저장/삭제, 시험관리 row update, 시험대비/직전수업 후보 생성, Solapi/notification_jobs 호출 없음.
+- AI 검수 결과: `createSchoolCalendarPeriodCards`, `openEventEditForm`, `saveAcademicEventDraft`, `deleteEditingAcademicEvent`, `syncSchoolCalendarEventToExamPrepRows` 함수 diff가 없다. production scenario와 build가 통과했다.
+- 남은 8번 후보: filter bar, 월 grid cell 렌더. 등록/수정 modal과 저장/삭제 action은 더 큰 gate로 분리한다.
+- 사람 검토 필요 여부: 선택 사항. 화면 확인을 한다면 월간 학사 개요 count, 시험기간 카드, 수학시험 chip, 카드 클릭 시 수정 modal 열림이 이전과 같은지만 보면 된다.
+- 중단 조건: 시험기간 카드가 사라짐, 수학시험 chip이 빠짐, 카드 클릭이 수정 modal로 이어지지 않음, 저장/삭제/sync 함수 diff가 함께 생김.
+- 검증: `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
+
 ### 2026-07-16 P1. App.jsx 리팩터링 8번 - 학사일정 header 컴포넌트 분리
 
 - 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
