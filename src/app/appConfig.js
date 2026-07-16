@@ -80,3 +80,25 @@ export const classTemplateScheduleRules = {
     timeLabel: "화목 19:00-22:00 / 토 13:00-16:00"
   }
 };
+
+export const academyReminderTypeOptions = [
+  { value: "student_consultation", label: "학생 상담" },
+  { value: "parent_consultation", label: "학부모 상담" },
+  { value: "consultation", label: "상담 일정" },
+  { value: "student_intake", label: "신입생 일정" },
+  { value: "special_note", label: "특이사항" },
+  { value: "parent_contact", label: "학부모 연락" },
+  { value: "custom", label: "운영 알림" }
+];
+
+export const academyReminderPriorityOptions = [
+  { value: "normal", label: "일반" },
+  { value: "high", label: "중요" },
+  { value: "low", label: "낮음" }
+];
+
+export const academyReminderStatusLabels = {
+  pending: "대기",
+  done: "완료",
+  canceled: "취소"
+};

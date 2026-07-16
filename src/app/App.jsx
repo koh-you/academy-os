@@ -111,6 +111,9 @@ import ssenTypeIndex from "../../api/data/ssenTypeIndex.json";
 import {
   academyBrandName,
   academyOperationalStartDate,
+  academyReminderPriorityOptions,
+  academyReminderStatusLabels,
+  academyReminderTypeOptions,
   classTemplateScheduleRules,
   fallbackRegularLessonColors,
   legacySensitiveStorageKeys,
@@ -1149,26 +1152,6 @@ function normalizePhoneNumber(value = "") {
 const today = getKoreaDateString();
 const futureAbsenceMakeupVisibleDays = 7;
 const appRuntimeSessionId = `runtime_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-
-const academyReminderTypeOptions = [
-  { value: "student_consultation", label: "학생 상담" },
-  { value: "parent_consultation", label: "학부모 상담" },
-  { value: "consultation", label: "상담 일정" },
-  { value: "student_intake", label: "신입생 일정" },
-  { value: "special_note", label: "특이사항" },
-  { value: "parent_contact", label: "학부모 연락" },
-  { value: "custom", label: "운영 알림" }
-];
-const academyReminderPriorityOptions = [
-  { value: "normal", label: "일반" },
-  { value: "high", label: "중요" },
-  { value: "low", label: "낮음" }
-];
-const academyReminderStatusLabels = {
-  pending: "대기",
-  done: "완료",
-  canceled: "취소"
-};
 
 function getAcademyReminderTypeLabel(type = "custom") {
   return academyReminderTypeOptions.find((option) => option.value === type)?.label ?? "운영 알림";
