@@ -2334,35 +2334,71 @@ function getLessonRecordStatusForSolapiResult(status, error = "") {
   return "";
 }
 
-async function reconcileSolapiNotificationJobs({ date = "", lessonId = "", limit = 500, scheduledFrom = "", scheduledTo = "" } = {}) {
-  if (!date && !lessonId && !scheduledFrom && !scheduledTo) {
-    throw new Error("조회할 수업일 또는 수업 ID가 필요합니다.");
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function withSolapiRetry(action, { attempts = 3, delayMs = 350 } = {}) {
+  let lastError = null;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await action();
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts) await wait(delayMs * attempt);
+    }
+  }
+  throw lastError;
+}
+
+async function reconcileSolapiNotificationJobs({ date = "", lessonId = "", limit = 500, notificationJobIds = [], scheduledFrom = "", scheduledTo = "" } = {}) {
+  const targetJobIds = Array.isArray(notificationJobIds)
+    ? notificationJobIds.map((item) => String(item || "").trim()).filter(Boolean)
+    : [];
+  if (!date && !lessonId && !scheduledFrom && !scheduledTo && targetJobIds.length === 0) {
+    throw new Error("조회할 알림톡 예약 ID, 수업일 또는 수업 ID가 필요합니다.");
   }
   const { startIso, endIso } = getKoreaDayUtcRange(date);
   const result = await listNotificationJobs({
     lessonId,
-    limit,
-    scheduledFrom: scheduledFrom || startIso,
-    scheduledTo: scheduledTo || endIso,
+    limit: targetJobIds.length ? Math.max(limit, targetJobIds.length) : limit,
+    scheduledFrom: targetJobIds.length ? "" : scheduledFrom || startIso,
+    scheduledTo: targetJobIds.length ? "" : scheduledTo || endIso,
     status: "scheduled,send_unconfirmed"
   });
+  const targetJobIdSet = new Set(targetJobIds);
   const now = new Date();
   const candidates = (result.notificationJobs ?? []).filter((job) =>
-    job.provider === "solapi" && getNotificationJobSolapiGroupId(job)
+    job.provider === "solapi" &&
+    getNotificationJobSolapiGroupId(job) &&
+    (targetJobIdSet.size === 0 || targetJobIdSet.has(job.notificationJobId))
   );
   const checked = [];
   const notificationJobs = [];
   const records = [];
+  const solapiLookupCache = new Map();
+
+  async function getSolapiLookup(groupId) {
+    if (!solapiLookupCache.has(groupId)) {
+      solapiLookupCache.set(groupId, withSolapiRetry(async () => {
+        const [groupsResult, messagesResult] = await Promise.all([
+          listSolapiGroups({ groupId, limit: 1 }),
+          listSolapiMessages({ groupId, limit: 50 })
+        ]);
+        return {
+          group: groupsResult.groups?.[0] ?? null,
+          messages: messagesResult.messages ?? []
+        };
+      }));
+    }
+    return solapiLookupCache.get(groupId);
+  }
 
   for (const job of candidates) {
     const groupId = getNotificationJobSolapiGroupId(job);
     try {
-      const [groupsResult, messagesResult] = await Promise.all([
-        listSolapiGroups({ groupId, limit: 1 }),
-        listSolapiMessages({ groupId, limit: 20 })
-      ]);
-      const group = groupsResult.groups?.[0] ?? null;
-      const messages = messagesResult.messages ?? [];
+      if (checked.length > 0) await wait(80);
+      const { group, messages } = await getSolapiLookup(groupId);
       const reconciled = getReconciledSolapiJobState(job, group, messages, now);
       checked.push({
         group,
@@ -5922,6 +5958,7 @@ const server = http.createServer(async (request, response) => {
         date: payload.date || "",
         lessonId: payload.lessonId || "",
         limit: payload.limit || 500,
+        notificationJobIds: payload.notificationJobIds ?? [],
         scheduledFrom: payload.scheduledFrom || "",
         scheduledTo: payload.scheduledTo || ""
       });

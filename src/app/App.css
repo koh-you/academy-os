@@ -7235,14 +7235,16 @@ button:disabled {
   gap: 6px;
 }
 
-.solapiResultSyncControl input {
+.solapiResultSyncControl strong {
+  background: #f8fafc;
   border: 1px solid #d8e3f8;
   border-radius: 8px;
   color: #17213d;
-  font-size: 13px;
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 900;
   min-height: 32px;
-  padding: 0 8px;
+  padding: 7px 9px;
+  white-space: nowrap;
 }
 
 .noticeSolapiResultNotice {
@@ -7383,7 +7385,7 @@ button:disabled {
 .notificationTableRow {
   display: grid;
   gap: 12px;
-  grid-template-columns: 110px 140px 100px 160px 130px minmax(260px, 1fr) 84px;
+  grid-template-columns: 110px 140px 100px 150px 120px minmax(240px, 1fr) 104px;
   padding: 12px 14px;
 }
 
@@ -7422,6 +7424,11 @@ button:disabled {
   align-items: start;
   display: grid;
   justify-items: start;
+}
+
+.notificationJobActions .dangerSoftButton.compact {
+  min-width: 74px;
+  white-space: nowrap;
 }
 
 .notificationJobActions small {

@@ -85,14 +85,17 @@
 
 - 사용자 요청: 알림관리에서 알림톡을 예약한 뒤 예약 시각이 지나 `확인 필요`가 떠도 Solapi 결과와 직접 매칭해 OS 상태를 업데이트할 방법이 없었다. 수업일지의 Solapi 발송결과 업데이트처럼 알림관리에서도 확인/반영할 수 있게 한다.
 - 범위 선택: 기존 서버 `/api/notification-jobs/reconcile-solapi`와 `handleReconcileSolapiNotificationResults`를 재사용했다. 새 예약 생성, 즉시 발송, 알림톡 문구, 템플릿 원천은 변경하지 않았다.
-- 구현 결과: 알림관리/특강관리의 `NotificationCenter`에 `결과 확인일` date input과 `Solapi 결과 확인` 버튼을 추가했다. 버튼을 누르면 선택일의 `scheduled`/`send_unconfirmed` Solapi job을 Solapi 그룹/메시지와 대조하고, `notification_jobs.status/error/result`를 갱신한다.
+- 구현 결과: 알림관리/특강관리의 `NotificationCenter`에 `결과 확인 시간` 표시와 `Solapi 결과 확인` 버튼을 추가했다. 버튼을 누르면 화면에 잡힌 Solapi `scheduled`/`send_unconfirmed` job ID 목록 전체를 서버에 넘겨 Solapi 그룹/메시지와 대조하고, `notification_jobs.status/error/result`를 갱신한다.
+- 화면 피드백 반영: 날짜/시간 입력으로 조회 대상을 좁히지 않는다. 예약했던 목록 전체를 조회 대상으로 삼고, `결과 확인 시간`은 사용자가 마지막으로 버튼을 눌러 확인한 시각을 표시하는 정보다.
+- 대량 조회 보강: 서버 reconcile은 `notificationJobIds`를 받을 수 있게 했고, Solapi 그룹/메시지 조회에 groupId 캐시, 짧은 대기, 3회 재시도를 추가했다. 프론트 timeout은 90초로 늘렸다.
+- UI 보정: 발송 기록 table의 관리 컬럼을 넓히고 `예약 취소` 버튼이 줄바꿈되지 않게 고정했다.
 - 확인성 보강: 공지 발송 기록의 종류 칸에 Solapi group/message 참조값을 함께 표시해 OS 기록과 Solapi 결과를 직접 매칭할 수 있게 했다.
 - 저장 원천: Supabase `notification_jobs`가 주 원천이다. 수업일지 코멘트 알림톡 job이 같은 날짜에 포함되면 기존 reconcile 로직에 따라 `lesson_student_records`의 코멘트 발송 상태도 함께 갱신될 수 있다.
 - 외부 side effect: Solapi 그룹/메시지 조회만 수행한다. 예약 생성/취소/발송은 수행하지 않는다.
-- AI 검수 결과: 수업일지의 기존 `솔라피 발송결과` 버튼은 같은 handler를 계속 사용한다. 알림관리 버튼은 날짜 기반으로 같은 API를 호출하며, `updatedCount`/`checkedCount`/조회 실패 건수를 화면 메시지로 보여준다.
+- AI 검수 결과: 수업일지의 기존 `솔라피 발송결과` 버튼은 같은 handler를 계속 사용한다. 알림관리 버튼은 job ID 목록 기반으로 같은 API를 호출하며, `updatedCount`/`checkedCount`/조회 실패 건수를 화면 메시지로 보여준다.
 - 테스트 보강: production scenario `20e-3 notification center reconciles scheduled notice Solapi results`를 추가했다.
 - 검증: `node --check scripts/scenario-tests-production.cjs` 통과, `node --check api/server.js` 통과, `npm run test:production` 310개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
-- 사람 gate: 운영 알림관리 화면에서 예약 시각이 지난 공지 알림톡이 `확인 필요`로 보일 때 `결과 확인일`을 해당 예약일로 맞추고 `Solapi 결과 확인`을 눌러 상태가 `발송 완료`/`실패`/`확인 필요`로 갱신되는지 확인한다.
+- 사람 gate: 운영 알림관리 화면에서 공지 알림톡이 `예약` 또는 `확인 필요`로 보일 때 `Solapi 결과 확인`을 눌러 목록 전체가 조회 대상으로 잡히고, 상태가 `발송 완료`/`실패`/`확인 필요`로 갱신되는지 확인한다. 버튼 옆 `결과 확인 시간`은 마지막 확인 시각으로 바뀌어야 한다.
 - 중단 조건: 버튼 클릭으로 새 알림톡이 발송/예약됨, 예약 문구가 바뀜, Solapi 참조값이 없는 job을 매칭한 것처럼 표시됨, 수업일지 코멘트 상태가 예상 밖으로 바뀜.
 
 ### 2026-07-16 P1. 다음 세션 리팩터링 시작 지점 9번 고정
