@@ -120,6 +120,11 @@ import {
   lessonCalendarColors,
   lessonDeleteRetentionMs,
   regularLessonClassColors,
+  schoolCalendarGradeOptions,
+  schoolCalendarKnownColors,
+  schoolCalendarLegacyColorMap,
+  schoolCalendarMathSubjectOptions,
+  schoolCalendarSchoolColorPalette,
   storageKeys
 } from "./appConfig.js";
 
@@ -4057,27 +4062,6 @@ const examPrepTextbookBySchoolGrade = {
   "창동고_고1": "미래엔"
 };
 
-const schoolCalendarGradeOptions = ["중3", "고1", "고2", "고3"];
-const schoolCalendarMathSubjectOptions = ["공통수학1", "공통수학2", "대수", "미적분1", "확률과통계", "미적분2", "기하"];
-const schoolCalendarSchoolColorPalette = ["#7aa7ff", "#5fc8bd", "#a78bfa", "#fdba74", "#f9a8d4", "#67e8f9", "#93c5fd", "#86efac", "#fcd34d"];
-const schoolCalendarKnownColors = {
-  상계고: "#7aa7ff",
-  자운고: "#5fc8bd",
-  정의여고: "#a78bfa",
-  용화여고: "#f9a8d4",
-  창동고: "#fdba74"
-};
-const schoolCalendarLegacyColorMap = {
-  "#2563eb": "#7aa7ff",
-  "#0f766e": "#5fc8bd",
-  "#7c3aed": "#a78bfa",
-  "#ea580c": "#fdba74",
-  "#db2777": "#f9a8d4",
-  "#0891b2": "#67e8f9",
-  "#4f46e5": "#93c5fd",
-  "#65a30d": "#86efac",
-  "#b45309": "#fcd34d"
-};
 const currentExamCycle = getDefaultExamCycleForDate(today);
 
 function inferExamCycleFromPrepId(examPrepId = "") {
