@@ -34,12 +34,16 @@ import {
   SpecialLecturePublicPage
 } from "../domains/specialLectures/SpecialLecturePublicPage.jsx";
 import {
+  compactCalendarLabel,
+  formatCalendarEventLabel,
+  formatCalendarSummaryLabel,
   formatDateRangeText,
   getDateRangeField,
   getMonthCellDisplayEvents,
   getSchoolCalendarEventColor,
   getSchoolCalendarSchoolColor,
   isDateWithinEvent,
+  joinCalendarLabel,
   normalizeSchoolName,
   parseDateRangeText,
   updateDateRangeField
@@ -4249,34 +4253,8 @@ function formatShortDate(date = "") {
   return date ? date.slice(5).replace("-", ".") : "날짜 미입력";
 }
 
-function compactCalendarLabel(value = "") {
-  return String(value ?? "").replace(/\s+/g, "");
-}
-
 function escapeRegExp(value = "") {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function normalizeRepeatedSchoolPrefix(value = "", schoolName = "") {
-  const cleanSchool = String(schoolName || "").trim();
-  let label = String(value || "").trim().replace(/\s+/g, " ");
-  if (!cleanSchool || !label) return label;
-  const duplicatePrefix = new RegExp(`^${escapeRegExp(cleanSchool)}\\s+${escapeRegExp(cleanSchool)}`);
-  while (duplicatePrefix.test(label)) {
-    label = label.replace(duplicatePrefix, cleanSchool);
-  }
-  return label;
-}
-
-function joinCalendarLabel(schoolName = "", detail = "", fallback = "") {
-  const cleanSchool = String(schoolName || "").trim();
-  const cleanDetail = normalizeRepeatedSchoolPrefix(String(detail || fallback || "").trim(), cleanSchool);
-  if (!cleanDetail) return cleanSchool || "학교 미입력";
-  if (!cleanSchool) return cleanDetail;
-  if (compactCalendarLabel(cleanDetail).startsWith(compactCalendarLabel(cleanSchool))) {
-    return cleanDetail;
-  }
-  return normalizeRepeatedSchoolPrefix(`${cleanSchool} ${cleanDetail}`, cleanSchool);
 }
 
 function formatMathExamEntryLabel(row = {}, entry = {}) {
@@ -4286,13 +4264,6 @@ function formatMathExamEntryLabel(row = {}, entry = {}) {
   const grade = entry.grade || row.grade || "";
   const detail = [grade, subject].filter(Boolean).join(" ").trim();
   return joinCalendarLabel(row.schoolName || "학교 미입력", detail, row.examName || "수학시험");
-}
-
-function formatCalendarSummaryLabel(event = {}) {
-  return [event.schoolName, event.grade, event.examSubject || event.subject]
-    .filter(Boolean)
-    .join(" ")
-    .trim() || formatCalendarEventLabel(event);
 }
 
 function getExamPrepLogicalKey(row = {}) {
@@ -4349,16 +4320,6 @@ function getSchoolCalendarFilterGroup(event = {}) {
   if (event.type === "vacation") return "vacation";
   if (event.type === "schoolEvent") return "schoolEvent";
   return "custom";
-}
-
-function formatCalendarEventLabel(event = {}) {
-  if (event.type === "mathExam") {
-    return joinCalendarLabel(event.schoolName, event.title || event.examSubject || "수학시험");
-  }
-  if (event.type === "examPeriod") {
-    return joinCalendarLabel(event.schoolName, event.title || "시험기간");
-  }
-  return joinCalendarLabel(event.schoolName, event.title || event.examSubject || "일정");
 }
 
 function syncPrimaryMathExamDate(entries = []) {

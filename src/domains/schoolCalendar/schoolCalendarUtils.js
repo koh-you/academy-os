@@ -75,3 +75,50 @@ export function getMonthCellDisplayEvents(dayEvents = []) {
     Math.max(0, dayEvents.filter((event) => event.type !== "examPeriod" && event.type !== "mathExam").length - academicEvents.length);
   return { academicEvents, hiddenCount, mathExamEvents };
 }
+
+export function compactCalendarLabel(value = "") {
+  return String(value ?? "").replace(/\s+/g, "");
+}
+
+function escapeCalendarRegExp(value = "") {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+export function normalizeRepeatedSchoolPrefix(value = "", schoolName = "") {
+  const cleanSchool = String(schoolName || "").trim();
+  let label = String(value || "").trim().replace(/\s+/g, " ");
+  if (!cleanSchool || !label) return label;
+  const duplicatePrefix = new RegExp(`^${escapeCalendarRegExp(cleanSchool)}\\s+${escapeCalendarRegExp(cleanSchool)}`);
+  while (duplicatePrefix.test(label)) {
+    label = label.replace(duplicatePrefix, cleanSchool);
+  }
+  return label;
+}
+
+export function joinCalendarLabel(schoolName = "", detail = "", fallback = "") {
+  const cleanSchool = String(schoolName || "").trim();
+  const cleanDetail = normalizeRepeatedSchoolPrefix(String(detail || fallback || "").trim(), cleanSchool);
+  if (!cleanDetail) return cleanSchool || "학교 미입력";
+  if (!cleanSchool) return cleanDetail;
+  if (compactCalendarLabel(cleanDetail).startsWith(compactCalendarLabel(cleanSchool))) {
+    return cleanDetail;
+  }
+  return normalizeRepeatedSchoolPrefix(`${cleanSchool} ${cleanDetail}`, cleanSchool);
+}
+
+export function formatCalendarEventLabel(event = {}) {
+  if (event.type === "mathExam") {
+    return joinCalendarLabel(event.schoolName, event.title || event.examSubject || "수학시험");
+  }
+  if (event.type === "examPeriod") {
+    return joinCalendarLabel(event.schoolName, event.title || "시험기간");
+  }
+  return joinCalendarLabel(event.schoolName, event.title || event.examSubject || "일정");
+}
+
+export function formatCalendarSummaryLabel(event = {}) {
+  return [event.schoolName, event.grade, event.examSubject || event.subject]
+    .filter(Boolean)
+    .join(" ")
+    .trim() || formatCalendarEventLabel(event);
+}
