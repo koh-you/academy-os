@@ -39,6 +39,7 @@ import {
   SchoolCalendarHeader,
   SchoolCalendarSaveNotice,
   SchoolDateScheduleModal,
+  SchoolEventFormModal,
   SchoolMonthGrid,
   SchoolMonthHeader
 } from "../domains/schoolCalendar/SchoolCalendarComponents.jsx";
@@ -19761,184 +19762,27 @@ function SchoolCalendarCenter({
 
       <div className="schoolCalendarLayout">
         {isFormModalOpen ? (
-          <Modal
-            className="schoolEventFormModal"
-            title={isEditingEvent ? "일정 수정" : "일정 등록"}
-            subtitle={isEditingEvent ? "변경할 항목을 확인한 뒤 저장합니다." : "입력 유형을 먼저 고른 뒤 필요한 정보만 입력합니다."}
+          <SchoolEventFormModal
+            eventColorOptions={eventColorOptions}
+            eventTypeLabels={eventTypeLabels}
+            examCycleLabel={examCycleLabel}
+            gradeOptions={schoolCalendarGradeOptions}
+            isEditingDerivedEvent={isEditingDerivedEvent}
+            isEditingEvent={isEditingEvent}
+            mathSubjectOptions={schoolCalendarMathSubjectOptions}
+            newEvent={newEvent}
+            onAddMathExamItem={addMathExamItem}
+            onChangeExamCycle={changeNewEventExamCycle}
+            onChangeEventType={changeNewEventType}
             onClose={closeEventForm}
-          >
-            <div className="schoolEventFormPanel modalForm">
-              <label className="inputTypeField">
-                입력 유형
-                <select disabled={isEditingDerivedEvent} value={newEvent.type} onChange={(event) => changeNewEventType(event.target.value)}>
-                  {Object.entries(eventTypeLabels).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                학교
-                <select
-                  disabled={isEditingDerivedEvent}
-                  value={newEvent.schoolName}
-                  onChange={(event) => {
-                    const schoolName = event.target.value;
-                    setNewEvent((current) => ({
-                      ...current,
-                      schoolName,
-                      grade: "",
-                      color: getSchoolCalendarSchoolColor(schoolName)
-                    }));
-                  }}
-                >
-                  <option value="">학교 선택</option>
-                  {schools.map((school) => (
-                    <option key={school} value={school}>{school}</option>
-                  ))}
-                </select>
-              </label>
-              {["examPeriod", "mathExam"].includes(newEvent.type) ? (
-                <label>
-                  시험 구분
-                  <select disabled={isEditingDerivedEvent} value={newEvent.examCycle} onChange={(event) => changeNewEventExamCycle(event.target.value)}>
-                    {safeExamCycleOptions.map((cycle) => (
-                      <option key={cycle} value={cycle}>{examCycleLabel(cycle)}</option>
-                    ))}
-                  </select>
-                </label>
-              ) : null}
-              {newEvent.type === "mathExam" ? (
-                <>
-                  <label>
-                    학년
-                    <select value={newEvent.grade} onChange={(event) => setNewEvent((current) => ({ ...current, grade: event.target.value }))}>
-                      <option value="">전체 학년</option>
-                      {schoolCalendarGradeOptions.map((grade) => (
-                        <option key={grade} value={grade}>{grade}</option>
-                      ))}
-                    </select>
-                  </label>
-                </>
-              ) : null}
-              <label>
-                일정명
-                <input value={newEvent.title} onChange={(event) => setNewEvent((current) => ({ ...current, title: event.target.value }))} placeholder="예: 1학기 기말고사" />
-              </label>
-              <label>
-                일정 색상
-                <div className="calendarColorPicker">
-                  {eventColorOptions.map((color) => (
-                    <button
-                      aria-label={`색상 ${color}`}
-                      className={newEvent.color === color ? "active" : ""}
-                      disabled={isEditingDerivedEvent}
-                      key={color}
-                      onClick={() => setNewEvent((current) => ({ ...current, color }))}
-                      style={{ backgroundColor: color }}
-                      type="button"
-                    />
-                  ))}
-                </div>
-              </label>
-              {newEvent.type === "examPeriod" ? (
-                <>
-                  <div className="calendarDateGrid">
-                    <label>
-                      시작일
-                      <input type="date" value={newEvent.date} onChange={(event) => setNewEvent((current) => ({ ...current, date: event.target.value }))} />
-                    </label>
-                    <label>
-                      종료일
-                      <input type="date" value={newEvent.endDate} onChange={(event) => setNewEvent((current) => ({ ...current, endDate: event.target.value }))} />
-                    </label>
-                  </div>
-                  {!isEditingEvent ? (
-                    <div className="examSubjectBox schoolExamBundleBox">
-                    <div className="sectionHeader slim">
-                      <strong>수학시험 날짜</strong>
-                      <button className="softButton small" onClick={addMathExamItem} type="button">+ 수학시험 추가</button>
-                    </div>
-                    <div className="mathExamItemStack">
-                      {newEvent.mathExamItems.map((item, index) => (
-                        <div className="mathExamItemRow" key={item.id}>
-                          <label>
-                            학년
-                            <select value={item.grade} onChange={(event) => updateMathExamItem(item.id, "grade", event.target.value)}>
-                              <option value="">학년 선택</option>
-                              {schoolCalendarGradeOptions.map((grade) => (
-                                <option key={grade} value={grade}>{grade}</option>
-                              ))}
-                            </select>
-                          </label>
-                          <label>
-                            과목
-                            <select value={item.subject} onChange={(event) => updateMathExamItem(item.id, "subject", event.target.value)}>
-                              {schoolCalendarMathSubjectOptions.map((subject) => (
-                                <option key={subject} value={subject}>{subject}</option>
-                              ))}
-                            </select>
-                          </label>
-                          <label>
-                            시험 날짜
-                            <input type="date" value={item.date} onChange={(event) => updateMathExamItem(item.id, "date", event.target.value)} />
-                          </label>
-                          <button className="iconButton" disabled={newEvent.mathExamItems.length === 1} onClick={() => removeMathExamItem(item.id)} type="button">
-                            ×
-                          </button>
-                          <label className="mathExamItemMemo">
-                            메모
-                            <input value={item.memo} onChange={(event) => updateMathExamItem(item.id, "memo", event.target.value)} placeholder={`${index + 1}번째 수학시험 메모`} />
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  ) : null}
-                </>
-              ) : newEvent.type === "mathExam" ? (
-                <div className="examSubjectBox">
-                  <div className="sectionHeader slim">
-                    <strong>수학시험 날짜</strong>
-                  </div>
-                  <div className="examSubjectRow singleDate">
-                    <label>
-                      시험 날짜
-                      <input type="date" value={newEvent.date} onChange={(event) => setNewEvent((current) => ({ ...current, date: event.target.value, endDate: event.target.value }))} />
-                    </label>
-                    <label>
-                      과목
-                      <input value={newEvent.examSubject} onChange={(event) => setNewEvent((current) => ({ ...current, examSubject: event.target.value }))} placeholder="예: 수학" />
-                    </label>
-                  </div>
-                </div>
-              ) : (
-                <div className="calendarDateGrid">
-                  <label>
-                    시작일
-                    <input type="date" value={newEvent.date} onChange={(event) => setNewEvent((current) => ({ ...current, date: event.target.value }))} />
-                  </label>
-                  <label>
-                    종료일
-                    <input type="date" value={newEvent.endDate || newEvent.date} onChange={(event) => setNewEvent((current) => ({ ...current, endDate: event.target.value }))} />
-                  </label>
-                </div>
-              )}
-              <label>
-                메모
-                <textarea value={newEvent.memo} onChange={(event) => setNewEvent((current) => ({ ...current, memo: event.target.value }))} placeholder="필요한 메모" rows="4" />
-              </label>
-              <div className="schoolEventFormActions">
-                {isEditingEvent ? (
-                  <button className="dangerSoftButton" onClick={deleteEditingAcademicEvent} type="button">
-                    {newEvent.type === "examPeriod" ? "시험기간 삭제" : "일정 삭제"}
-                  </button>
-                ) : null}
-                <button className="primaryButton" onClick={submitNewEvent} type="button">
-                  {isEditingEvent ? "변경 저장" : newEvent.type === "examPeriod" ? "시험일정 묶음 등록" : "일정 등록"}
-                </button>
-              </div>
-            </div>
-          </Modal>
+            onDeleteEditingEvent={deleteEditingAcademicEvent}
+            onRemoveMathExamItem={removeMathExamItem}
+            onSubmit={submitNewEvent}
+            onUpdateEventDraft={setNewEvent}
+            onUpdateMathExamItem={updateMathExamItem}
+            safeExamCycleOptions={safeExamCycleOptions}
+            schools={schools}
+          />
         ) : null}
 
         <SchoolAcademicOverviewPanel

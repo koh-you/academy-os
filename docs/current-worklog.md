@@ -79,6 +79,21 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 8번 - 학사일정 일정 등록/수정 form modal 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
+- 범위 선택: 8번 `school calendar components`의 여덟 번째 작은 단위로, 일정 등록/수정 form modal의 controlled JSX를 분리했다. 새 일정 생성, 기존 일정 수정, derived 시험관리 일정 저장/삭제, 시험대비/직전수업 sync 함수 본문은 `App.jsx`에 그대로 남겼다.
+- 착수 전 inventory: form draft 원천은 `SchoolCalendarCenter`의 `newEvent` state, 입력 변경은 기존 `setNewEvent` functional updater/`updateMathExamItem`/`changeNewEventType`/`changeNewEventExamCycle`, 저장은 `submitNewEvent`, 수정/삭제는 `saveAcademicEventDraft`/`deleteEditingAcademicEvent`, 실제 Supabase/시험관리 원천 변경은 기존 `onSaveEvent`/`onDeleteEvent`/`onUpdateExamPrepRow`/`onSyncPreExamLesson` 경로다.
+- 구현 결과: `SchoolEventFormModal`을 `src/domains/schoolCalendar/SchoolCalendarComponents.jsx`에 추가하고, `App.jsx`는 event options, school options, exam cycle label, draft updater, add/remove/update callbacks, submit/delete callbacks만 props로 넘긴다.
+- 테스트 갱신: production scenario의 `47`, `52`가 form modal의 새 위치를 보도록 `appWithConfig` 기준으로 보정했다. 테스트 의도는 유지하고, 리팩터링된 파일까지 검사 범위만 넓혔다.
+- 저장 원천: 변경 없음. `newEvent`는 기존 React state, 수동 학사일정은 기존 `/api/school-events` 경로, 시험관리 연동 일정은 기존 exam prep row update 경로, 직전수업 sync는 기존 callback 경로를 사용한다.
+- 외부 side effect: 변경 없음. 이번 파일 이동 자체는 API 호출, Supabase 저장/삭제, 시험관리 row update, 시험대비/직전수업 후보 생성, Solapi/notification_jobs 호출을 추가하지 않았다.
+- AI 검수 결과: `submitNewEvent`, `saveAcademicEventDraft`, `deleteEditingAcademicEvent`, `updateAcademicEvent`, `syncSchoolCalendarEventToExamPrepRows` 함수 본문 diff가 없다. production scenario와 build가 통과했다.
+- 8번 진행 상태: 학사일정 저장 notice/header/overview/filter/month header/month grid/date detail modal/form modal 분리 완료. 다음 리팩터링 후보는 9번 `test manager`로 넘어간다.
+- 사람 검토 필요 여부: 선택 사항. 화면 확인을 한다면 일정 등록 modal의 입력 유형, 시험기간 묶음 등록, 수학시험 추가/삭제, 색상 선택, 변경 저장/삭제 버튼이 이전과 같은지만 보면 된다.
+- 중단 조건: 일정 등록/수정 modal이 열리지 않음, 시험기간 묶음의 수학시험 row 추가/삭제가 안 됨, 변경 저장/삭제 버튼 동작이 바뀜, 저장/삭제/sync 함수 본문 diff가 함께 생김.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과, `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
+
 ### 2026-07-16 P1. App.jsx 리팩터링 8번 - 학사일정 날짜 상세 modal 분리
 
 - 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
