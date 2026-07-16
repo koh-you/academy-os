@@ -1,7 +1,8 @@
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import {
   getSpecialLectureStatusBadge,
-  isSpecialLectureArchived
+  isSpecialLectureArchived,
+  specialLectureSeasonOptions
 } from "./specialLectureGuideUtils.js";
 
 export function SpecialLectureManagementBar({
@@ -39,6 +40,80 @@ export function SpecialLectureManagementBar({
           {isManaging ? "삭제 중" : "삭제"}
         </button>
       </div>
+    </div>
+  );
+}
+
+export function SpecialLectureGuideBasicFields({
+  guide,
+  onUpdateGuide
+}) {
+  if (!guide) {
+    return null;
+  }
+
+  function updateField(field) {
+    return (event) => onUpdateGuide?.(field, event.target.value);
+  }
+
+  return (
+    <div className="specialLectureFormGrid">
+      <label>
+        연도
+        <input value={guide.year} onChange={updateField("year")} />
+      </label>
+      <label>
+        방학
+        <select value={guide.season} onChange={updateField("season")}>
+          {specialLectureSeasonOptions.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+        </select>
+      </label>
+      <label>
+        안내문 제목
+        <input value={guide.title} onChange={updateField("title")} />
+      </label>
+      <label>
+        대상
+        <input value={guide.audience} onChange={updateField("audience")} />
+      </label>
+      <label>
+        담당
+        <input value={guide.teacher} onChange={updateField("teacher")} />
+      </label>
+      <label>
+        요일
+        <input value={guide.days} onChange={updateField("days")} />
+      </label>
+      <label>
+        시간
+        <input value={guide.time} onChange={updateField("time")} />
+      </label>
+      <label>
+        시수
+        <input value={guide.lessonCount} onChange={updateField("lessonCount")} />
+      </label>
+      <label>
+        수강료
+        <input value={guide.tuition} onChange={updateField("tuition")} />
+      </label>
+      <label>
+        기본 회차 주제
+        <input value={guide.defaultSessionTopic} onChange={updateField("defaultSessionTopic")} />
+      </label>
+      <label>
+        교재
+        <input value={guide.textbook} onChange={updateField("textbook")} />
+      </label>
+      <label>
+        공개 URL slug
+        <input value={guide.slug} onChange={updateField("slug")} />
+      </label>
+      <label className="specialLectureFullInput">
+        신청폼 URL
+        <input value={guide.applicationUrl} onChange={updateField("applicationUrl")} />
+      </label>
     </div>
   );
 }

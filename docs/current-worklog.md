@@ -79,6 +79,19 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 6번 - 특강 기본 입력 grid 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
+- 범위 선택: 6번 `specialLecture management`의 세 번째 작은 단위로, 특강관리 기본 입력 grid(연도/방학/제목/대상/담당/요일/시간/시수/수강료/기본 회차 주제/교재/slug/신청폼 URL)만 분리했다. 학습 목표/수업 방향/수업 방향 카드/일정 계산/회차 카드는 아직 다음 하위 단위로 남겼다.
+- 구현 결과: `SpecialLectureGuideBasicFields`를 `src/domains/specialLectures/SpecialLectureManagementPanel.jsx`에 추가하고, `App.jsx`는 `selectedGuide`와 기존 `updateSelectedGuide` callback만 전달한다. `specialLectureSeasonOptions` 사용 위치는 새 컴포넌트로 이동했다.
+- 저장 원천: 변경 없음. 입력값은 기존과 같이 `updateSelectedGuide`로 `draftGuides` local draft만 갱신하고, 실제 저장은 기존 `안내문 저장`/`saveGuides` 흐름을 거친다. `specialLectureGuides`, `/api/special-lecture-guides`, Supabase/API payload는 변경하지 않았다.
+- 외부 side effect: 없음. 새 API 호출, Solapi 실제 발송/예약, `notification_jobs`, Tally webhook, 특강 신청자 저장, 특강 수업 생성 API 호출 없음.
+- AI 검수 결과: `updateSelectedGuide`, `persistDraftGuides`, `prepareSpecialLectureNotice`, 신청자/수업 생성 함수 diff가 없다. 기존 input/select field와 field name을 그대로 옮겼고, production scenario의 `신청폼 URL`/Tally form 검사가 새 파일 포함 source에서 계속 통과했다.
+- 남은 6번 후보: 학습 목표/수업 방향/특이사항 textarea 묶음, 수업 방향 카드 editor, 일정 계산 panel, 회차 카드 editor. 계산 적용/회차 추가/삭제/저장 함수 본문을 건드리면 별도 gate로 분리한다.
+- 사람 검토 필요 여부: 선택 사항. 화면 확인을 한다면 특강관리 기본 입력 grid의 모든 label/value가 이전과 같은지, 입력하면 오른쪽 미리보기에 즉시 반영되는지만 보면 된다. 저장/발송 준비 클릭은 필수 검토가 아니다.
+- 중단 조건: 입력 중 커서가 튐, 방학 select option이 달라짐, 신청폼 URL/slug가 미리보기에 반영되지 않음, 저장 함수나 Tally/Solapi 경로 diff가 함께 생김.
+- 검증: `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
+
 ### 2026-07-16 P1. App.jsx 리팩터링 6번 - 특강 선택 관리 bar 분리
 
 - 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능

@@ -17,6 +17,7 @@ import {
 import { StudentManager } from "../domains/students/StudentManager.jsx";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
+  SpecialLectureGuideBasicFields,
   SpecialLectureGuideSelector,
   SpecialLectureManagementBar
 } from "../domains/specialLectures/SpecialLectureManagementPanel.jsx";
@@ -86,7 +87,6 @@ import {
   replaceSpecialLectureToken,
   replaceSpecialLectureYearInDateKey,
   replaceSpecialLectureYearToken,
-  specialLectureSeasonOptions,
   specialLectureWeekdayOptions
 } from "../domains/specialLectures/specialLectureGuideUtils.js";
 import { AutosaveRiskNotice } from "../shared/components/AutosaveRiskNotice.jsx";
@@ -10923,64 +10923,10 @@ function SpecialLectureNoticePanel({
             onRestore={restoreSelectedGuide}
           />
 
-          <div className="specialLectureFormGrid">
-            <label>
-              연도
-              <input value={selectedGuide.year} onChange={(event) => updateSelectedGuide("year", event.target.value)} />
-            </label>
-            <label>
-              방학
-              <select value={selectedGuide.season} onChange={(event) => updateSelectedGuide("season", event.target.value)}>
-                {specialLectureSeasonOptions.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              안내문 제목
-              <input value={selectedGuide.title} onChange={(event) => updateSelectedGuide("title", event.target.value)} />
-            </label>
-            <label>
-              대상
-              <input value={selectedGuide.audience} onChange={(event) => updateSelectedGuide("audience", event.target.value)} />
-            </label>
-            <label>
-              담당
-              <input value={selectedGuide.teacher} onChange={(event) => updateSelectedGuide("teacher", event.target.value)} />
-            </label>
-            <label>
-              요일
-              <input value={selectedGuide.days} onChange={(event) => updateSelectedGuide("days", event.target.value)} />
-            </label>
-            <label>
-              시간
-              <input value={selectedGuide.time} onChange={(event) => updateSelectedGuide("time", event.target.value)} />
-            </label>
-            <label>
-              시수
-              <input value={selectedGuide.lessonCount} onChange={(event) => updateSelectedGuide("lessonCount", event.target.value)} />
-            </label>
-            <label>
-              수강료
-              <input value={selectedGuide.tuition} onChange={(event) => updateSelectedGuide("tuition", event.target.value)} />
-            </label>
-            <label>
-              기본 회차 주제
-              <input value={selectedGuide.defaultSessionTopic} onChange={(event) => updateSelectedGuide("defaultSessionTopic", event.target.value)} />
-            </label>
-            <label>
-              교재
-              <input value={selectedGuide.textbook} onChange={(event) => updateSelectedGuide("textbook", event.target.value)} />
-            </label>
-            <label>
-              공개 URL slug
-              <input value={selectedGuide.slug} onChange={(event) => updateSelectedGuide("slug", event.target.value)} />
-            </label>
-            <label className="specialLectureFullInput">
-              신청폼 URL
-              <input value={selectedGuide.applicationUrl} onChange={(event) => updateSelectedGuide("applicationUrl", event.target.value)} />
-            </label>
-          </div>
+          <SpecialLectureGuideBasicFields
+            guide={selectedGuide}
+            onUpdateGuide={updateSelectedGuide}
+          />
 
           <label className="specialLectureWideField specialLectureGoalField">
             학습 목표
