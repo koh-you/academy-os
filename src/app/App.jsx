@@ -35,6 +35,7 @@ import {
 } from "../domains/specialLectures/SpecialLecturePublicPage.jsx";
 import {
   SchoolAcademicOverviewPanel,
+  SchoolCalendarFilterBar,
   SchoolCalendarHeader,
   SchoolCalendarSaveNotice
 } from "../domains/schoolCalendar/SchoolCalendarComponents.jsx";
@@ -19961,18 +19962,11 @@ function SchoolCalendarCenter({
             </div>
             <button className="iconButton" onClick={() => shiftMonth(1)} type="button">›</button>
           </div>
-          <div className="schoolCalendarFilterBar" aria-label="학사일정 표시 항목">
-            {calendarFilters.map((filter) => (
-              <button
-                className={`schoolCalendarFilterButton${calendarFilter === filter.id ? " active" : ""}`}
-                key={filter.id}
-                onClick={() => setCalendarFilter(filter.id)}
-                type="button"
-              >
-                {filter.label}
-              </button>
-            ))}
-          </div>
+          <SchoolCalendarFilterBar
+            calendarFilter={calendarFilter}
+            filters={calendarFilters}
+            onChange={setCalendarFilter}
+          />
           <div className="calendarGrid teacherCalendarGrid schoolMonthGrid">
             {["일", "월", "화", "수", "목", "금", "토"].map((label) => (
               <div className="weekday" key={label}>{label}</div>
