@@ -79,6 +79,20 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 7번 - 학사일정 학교명/색상 helper 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
+- 범위 선택: 7번 `school calendar helpers`의 첫 안전 단위로, 학교명 정규화와 학사일정 색상 계산 helper만 분리했다. 학사일정 저장, 시험관리 sync, 시험대비/직전수업 후보 생성은 건드리지 않았다.
+- 구현 결과: `src/domains/schoolCalendar/schoolCalendarUtils.js`를 추가하고 `normalizeSchoolName`, `getSchoolCalendarSchoolColor`, `normalizeSchoolCalendarColor`, `getSchoolCalendarEventColor`를 이동했다. `App.jsx`는 같은 함수들을 import해서 기존 호출부를 유지한다.
+- 테스트 갱신: production scenario의 `appWithConfig`가 `schoolCalendarUtils.js`까지 함께 읽도록 확장했다. `46a`는 `normalizeSchoolName`의 새 위치를 반영해 `appWithConfig` 기준으로 검사하도록 보정했다.
+- 저장 원천: 없음. 색상/학교명 helper는 표시와 matching용 순수 계산이며, Supabase `school_events`, 시험관리 row, `app_state`, local draft 저장 경로를 변경하지 않았다.
+- 외부 side effect: 없음. API 호출, Supabase 저장/삭제, 시험관리 row update, 시험대비/직전수업 후보 생성, Solapi/notification_jobs 호출 없음.
+- AI 검수 결과: `syncSchoolCalendarEventToExamPrepRows`, `saveAcademicEventDraft`, `handleCreateSchoolEvent`, `handleUpdateSchoolEvent`, `createPreExamLessonFromSchoolEvent` 함수 diff가 없다. 첫 `test:production`은 테스트 위치 가정 때문에 `46a` 1건이 실패했고, scenario 보정 후 309개 전체 통과했다. build와 `node --check src/domains/schoolCalendar/schoolCalendarUtils.js`도 통과했다.
+- 남은 7번 후보: 날짜 범위/시험기간 카드/월간 표시 helper를 작은 단위로 분리할 수 있다. 저장/삭제/시험관리 sync/시험대비 후보 생성 함수 본문을 건드리게 되면 별도 gate로 분리한다.
+- 사람 검토 필요 여부: 선택 사항. 화면 확인을 한다면 학사일정에서 학교별 색상이 이전과 같고, 학교명 축약/여고/남고/고/중 matching이 깨지지 않는지만 보면 된다. 저장/삭제는 필수 검토가 아니다.
+- 중단 조건: 학교별 색상이 달라짐, 시험기간/수학시험 카드 색상이 학교 기준으로 묶이지 않음, 학교명 matching이 느슨해지거나 사라짐, 저장/API/시험관리 sync diff가 함께 생김.
+- 검증: `node --check src/domains/schoolCalendar/schoolCalendarUtils.js` 통과, `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
+
 ### 2026-07-16 P1. App.jsx 리팩터링 6번 - 특강 회차 카드 editor 분리
 
 - 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능

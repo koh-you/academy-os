@@ -34,6 +34,11 @@ import {
   SpecialLecturePublicPage
 } from "../domains/specialLectures/SpecialLecturePublicPage.jsx";
 import {
+  getSchoolCalendarEventColor,
+  getSchoolCalendarSchoolColor,
+  normalizeSchoolName
+} from "../domains/schoolCalendar/schoolCalendarUtils.js";
+import {
   assignmentStatusLabels,
   assignmentStatusOptions,
   assignmentStatusParentMessages,
@@ -134,8 +139,6 @@ import {
   noticeWithdrawnClassFilterId,
   regularLessonClassColors,
   schoolCalendarGradeOptions,
-  schoolCalendarKnownColors,
-  schoolCalendarLegacyColorMap,
   schoolCalendarMathSubjectOptions,
   schoolCalendarSchoolColorPalette,
   storageKeys,
@@ -4160,35 +4163,6 @@ function normalizeGradeLabel(grade = "") {
   if (value.includes("2")) return value.includes("중") ? "중2" : "고2";
   if (value.includes("3")) return value.includes("중") ? "중3" : "고3";
   return value;
-}
-
-function normalizeSchoolName(value = "") {
-  return String(value || "")
-    .trim()
-    .replace(/\s+/g, "")
-    .replace(/[·ㆍ.,_/\\-]/g, "")
-    .replace(/여자고등학교/g, "여고")
-    .replace(/여자고/g, "여고")
-    .replace(/남자고등학교/g, "남고")
-    .replace(/남자고/g, "남고")
-    .replace(/고등학교/g, "고")
-    .replace(/중학교/g, "중");
-}
-
-function getSchoolCalendarSchoolColor(schoolName = "") {
-  const key = normalizeSchoolName(schoolName) || "학교미입력";
-  if (schoolCalendarKnownColors[key]) return schoolCalendarKnownColors[key];
-  const hash = [...key].reduce((total, character) => total + character.charCodeAt(0), 0);
-  return schoolCalendarSchoolColorPalette[hash % schoolCalendarSchoolColorPalette.length];
-}
-
-function normalizeSchoolCalendarColor(color = "") {
-  const key = String(color || "").trim().toLowerCase();
-  return schoolCalendarLegacyColorMap[key] || color;
-}
-
-function getSchoolCalendarEventColor(event = {}) {
-  return normalizeSchoolCalendarColor(event.color) || getSchoolCalendarSchoolColor(event.schoolName);
 }
 
 function schoolNamesMatch(firstSchool = "", secondSchool = "", { allowBlank = true } = {}) {

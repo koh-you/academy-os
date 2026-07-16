@@ -4,6 +4,7 @@ const path = require("path");
 const root = path.resolve(__dirname, "..");
 const appPath = path.join(root, "src", "app", "App.jsx");
 const appConfigPath = path.join(root, "src", "app", "appConfig.js");
+const schoolCalendarUtilsPath = path.join(root, "src", "domains", "schoolCalendar", "schoolCalendarUtils.js");
 const studentManagerPath = path.join(root, "src", "domains", "students", "StudentManager.jsx");
 const examQuestionClassificationPath = path.join(root, "src", "domains", "exams", "questionClassification.js");
 const examQuestionItemsPath = path.join(root, "src", "domains", "exams", "questionItems.js");
@@ -66,7 +67,8 @@ const slackDailyScheduleWorkflowPath = path.join(root, ".github", "workflows", "
 
 const app = fs.readFileSync(appPath, "utf8");
 const appConfigSource = fs.existsSync(appConfigPath) ? fs.readFileSync(appConfigPath, "utf8") : "";
-const appWithConfig = `${app}\n${appConfigSource}`;
+const schoolCalendarUtilsSource = fs.existsSync(schoolCalendarUtilsPath) ? fs.readFileSync(schoolCalendarUtilsPath, "utf8") : "";
+const appWithConfig = `${app}\n${appConfigSource}\n${schoolCalendarUtilsSource}`;
 const apiClientSource = fs.existsSync(apiClientPath) ? fs.readFileSync(apiClientPath, "utf8") : "";
 const appWithApiClient = `${app}\n${apiClientSource}`;
 const materialManagerSource = sourceBetween(app, "function MaterialManager({", "function CandidatePanel({");
@@ -340,7 +342,7 @@ check("43 school calendar can edit derived exam dates", hasAll(app, ["onUpdateEx
 check("44 exam periods render as clickable neutral overview cards outside the calendar cells", hasAll(app, ["createSchoolCalendarPeriodCards", "examPeriodCards", "schoolAcademicOverviewPanel", "examPeriodGallery", "examPeriodOverviewCard", "onClick={() => openEventEditForm(event)}", "수학시험 날짜 미입력"]) && hasAll(css, [".schoolAcademicOverviewPanel", ".schoolAcademicStatsGrid", ".examPeriodGallery", ".examPeriodOverviewCard", "background: #ffffff", "border-left: 4px solid var(--school-color", ".examPeriodMathChips span::before", ".examPeriodOverviewCard:hover"]) && !app.includes("getPeriodBarClass(day.date, event)") && !css.includes(".schoolEventPill.periodBar") && !css.includes("background: color-mix(in srgb, var(--school-color"));
 check("45 math exam calendar supports index tabs", hasAll(app, ["normalizeMathExamEntries", "mathExamTab", "mathExamEntryChip", "mathExamEntryEditor"]) && css.includes(".schoolEventPill.mathExamTab"));
 check("46 school calendar syncs manual exam inputs to exam prep", hasAll(app, ["syncSchoolCalendarEventToExamPrepRows", "getSchoolCalendarTargetRows", "upsertMathExamEntryFromSchoolEvent", "schoolCalendarGradeOptions"]));
-check("46a school and exam matching normalizes Notion-style school names", hasAll(app, ["function normalizeSchoolName", "function schoolNamesMatch", "replace(/고등학교/g, \"고\")", "schoolNamesMatch(rowSchool, eventSchool", "schoolNamesMatch(row.schoolName, student.schoolName)", "schoolNamesMatch(item.schoolName, student.schoolName)"]) && hasAll(serverSource, ["function normalizeSchoolName", "function schoolNamesMatch", "gradesMatch(row.grade, student.grade)", "schoolNamesMatch(event.schoolName, student.schoolName)"]) && hasAll(coreDataRoute, ["function normalizeSchoolName", "normalizeSchoolName(row.schoolName || \"\") || compactExamPrepKeyPart"]));
+check("46a school and exam matching normalizes Notion-style school names", hasAll(appWithConfig, ["function normalizeSchoolName", "function schoolNamesMatch", "replace(/고등학교/g, \"고\")", "schoolNamesMatch(rowSchool, eventSchool", "schoolNamesMatch(row.schoolName, student.schoolName)", "schoolNamesMatch(item.schoolName, student.schoolName)"]) && hasAll(serverSource, ["function normalizeSchoolName", "function schoolNamesMatch", "gradesMatch(row.grade, student.grade)", "schoolNamesMatch(event.schoolName, student.schoolName)"]) && hasAll(coreDataRoute, ["function normalizeSchoolName", "normalizeSchoolName(row.schoolName || \"\") || compactExamPrepKeyPart"]));
 check("47 school calendar supports bundled math exam inputs", hasAll(app, ["mathExamItems", "addMathExamItem", "removeMathExamItem", "시험일정 묶음 등록"]) && css.includes(".mathExamItemRow"));
 check("48 school calendar creates pre-exam lessons", hasAll(app, ["createPreExamLessonFromSchoolEvent", "onSyncPreExamLesson", "sourceSchoolEventId", "preExam"]));
 check("48a pre-exam generated lessons exclude inactive students", hasAll(app, ["function getStudentsForSchoolCalendarEvent", "if (!isActiveStudent(student)) return false;", "lessonStudents.map((student) => student.studentId)"]));
