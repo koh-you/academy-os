@@ -123,3 +123,24 @@ export function SchoolCalendarFilterBar({
     </div>
   );
 }
+
+export function SchoolMonthHeader({
+  formatMonthTitle,
+  onOpenEventForm,
+  onShiftMonth,
+  selectedDate = "",
+  selectedMonth = ""
+}) {
+  return (
+    <div className="schoolMonthHeader">
+      <button className="iconButton" onClick={() => onShiftMonth?.(-1)} type="button">‹</button>
+      <div className="schoolMonthTitleBlock">
+        <h2>{formatMonthTitle?.(selectedMonth)}</h2>
+        <button className="primaryButton compact schoolMonthAddButton" onClick={() => onOpenEventForm?.(selectedDate)} type="button">
+          + 일정 등록
+        </button>
+      </div>
+      <button className="iconButton" onClick={() => onShiftMonth?.(1)} type="button">›</button>
+    </div>
+  );
+}

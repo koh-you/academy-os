@@ -37,7 +37,8 @@ import {
   SchoolAcademicOverviewPanel,
   SchoolCalendarFilterBar,
   SchoolCalendarHeader,
-  SchoolCalendarSaveNotice
+  SchoolCalendarSaveNotice,
+  SchoolMonthHeader
 } from "../domains/schoolCalendar/SchoolCalendarComponents.jsx";
 import {
   compactCalendarLabel,
@@ -19952,16 +19953,13 @@ function SchoolCalendarCenter({
         />
 
         <section className="panel schoolCalendarMainPanel">
-          <div className="schoolMonthHeader">
-            <button className="iconButton" onClick={() => shiftMonth(-1)} type="button">‹</button>
-            <div className="schoolMonthTitleBlock">
-              <h2>{formatMonthTitle(selectedMonth)}</h2>
-              <button className="primaryButton compact schoolMonthAddButton" onClick={() => openEventForm(selectedDate)} type="button">
-                + 일정 등록
-              </button>
-            </div>
-            <button className="iconButton" onClick={() => shiftMonth(1)} type="button">›</button>
-          </div>
+          <SchoolMonthHeader
+            formatMonthTitle={formatMonthTitle}
+            onOpenEventForm={openEventForm}
+            onShiftMonth={shiftMonth}
+            selectedDate={selectedDate}
+            selectedMonth={selectedMonth}
+          />
           <SchoolCalendarFilterBar
             calendarFilter={calendarFilter}
             filters={calendarFilters}
