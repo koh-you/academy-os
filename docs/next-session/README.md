@@ -37,6 +37,9 @@ E:\academy-os 작업을 이어가겠습니다.
    - 순서는 `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`입니다.
    - 기능 변경과 리팩터링 범위를 섞지 않습니다.
    - 아래 18개 기준 로드맵을 공통 후보 목록으로 사용합니다. 실제 착수 전에는 최신 `docs/current-worklog.md`와 `git status --short`를 보고 이미 완료된 하위 작업과 남은 하위 작업을 먼저 구분합니다.
+   - 다음 리팩터링은 9번 `test manager`부터 이어갑니다. 1~8번은 완료 또는 충분히 진행된 것으로 보고 10번으로 넘어가지 마세요.
+   - 코드 수정 전 사용자에게 먼저 최근 리팩터링 결과를 요약하고 `9번 test manager의 남은 학생별 history list 분리부터 이어갈까요?`라고 물어봐 주세요.
+   - 사용자가 재개하라고 답하면 9번의 남은 작업부터 진행합니다.
 
 App.jsx 리팩터링 18개 기준 로드맵:
 1. `specialLecture helpers/config` - 특강 안내문 계산, URL, 회차 normalize, Tally query helper.
@@ -63,6 +66,16 @@ App.jsx 리팩터링 18개 기준 로드맵:
 - 5~10은 중간
 - 11~18은 높음 또는 매우 높음
 - 11~18은 Supabase 원천, `notification_jobs`, Solapi, 출결, 수업일지 저장 side effect를 먼저 inventory로 확인한 뒤 진행합니다.
+
+현재 리팩터링 이어받을 지점:
+- 다음 시작점은 9번 `test manager`입니다. 10번으로 넘어가지 않습니다.
+- 6번 `specialLecture management` 분리 완료.
+- 7번 `school calendar helpers` 분리 완료.
+- 8번 `school calendar components` 분리 완료.
+- 9번 `test manager` 진행 중: `src/domains/tests/testManagerUtils.js` 분리, `src/domains/tests/TestManagerPanels.jsx`에 탭/header/form grid/meta/table/action/recent session list 분리 완료.
+- 남은 9번 우선 후보: 학생별 history list 분리.
+- 최신 리팩터링 커밋 기준: `0bf68633 Extract recent test session list`. 새 세션은 `git log -1 --oneline`으로 실제 최신 커밋을 다시 확인하세요.
+- 먼저 사용자에게 `9번 test manager의 남은 학생별 history list 분리부터 이어갈까요?`라고 물어보고, 사용자가 재개하라고 답하면 진행하세요.
 4. Solapi 특강 템플릿 검수 후 연결
    - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인합니다.
    - 검수 완료 전에는 임시 특강 알림톡 구조를 유지합니다.
@@ -97,11 +110,12 @@ App.jsx 리팩터링 18개 기준 로드맵:
    - 기존 예약된 `notification_jobs`와 사용자 편집 초안은 자동 변경되지 않고, 새로 생성/변경 예약되는 job부터 새 문구를 사용합니다.
    - 관련 기능 커밋: `58728cb0 Clarify supplement homework reminder labels`
 8. App.jsx 리팩터링과 18개 기준 로드맵을 최신 문서에 반영했습니다.
-   - 시험분석 최종 미리보기 패널 분리 커밋: `364e52e9 Extract exam analysis final preview panel`
-   - shared `MetricCard` 분리 커밋: `87eab282 Extract shared metric card`
-   - 리팩터링 18개 기준 로드맵 문서화 커밋: `f2c6aab5 Document App.jsx refactoring roadmap`
-   - 다른 세션에서 붙여넣은 `AGENTS.md`, `docs/current-worklog.md`, `docs/next-session/README.md` 내용은 현재 repo 문서와 줄 단위로 동일함을 확인했습니다. 해시 차이는 줄바꿈/인코딩 차이로 보고, 빠진 항목은 이 README와 worklog에 보강합니다.
-   - 다음에 "다음 세션에 넘길 프롬프트"를 요청하면 이 README의 붙여넣기 프롬프트가 미룬 작업 큐, 18개 로드맵, 최근 리팩터링 커밋을 함께 넘깁니다.
+   - 6번 `specialLecture management` 분리 완료.
+   - 7번 `school calendar helpers` 분리 완료.
+   - 8번 `school calendar components` 분리 완료.
+   - 9번 `test manager` 진행 중: `src/domains/tests/testManagerUtils.js`와 `src/domains/tests/TestManagerPanels.jsx` 일부 분리 완료.
+   - 9번 최신 리팩터링 커밋 기준: `0bf68633 Extract recent test session list`
+   - 다음에 "다음 세션에 넘길 프롬프트"를 요청하면 이 README의 붙여넣기 프롬프트가 미룬 작업 큐, 18개 로드맵, 최근 리팩터링 결과, 9번 재개 질문을 함께 넘깁니다.
 9. 최신 검증 결과
    - `node --check scripts/scenario-tests-production.cjs` 통과
    - `npm run test:production` 309개 통과
@@ -132,7 +146,8 @@ App.jsx 리팩터링 18개 기준 로드맵:
 
 - 미룬 작업 큐의 source of truth는 `AGENTS.md` 최상단과 `docs/current-worklog.md` 최상단입니다.
 - App.jsx 리팩터링 18개 기준 로드맵은 `AGENTS.md`, `docs/current-worklog.md`, 이 README에 함께 기록되어 있습니다. 다른 세션이 목록을 못 찾으면 먼저 이 세 파일의 최상단 큐와 `App.jsx Refactoring Roadmap - 18 Units`를 확인하게 하세요.
-- 최근 리팩터링 흐름은 `364e52e9` 시험분석 최종 미리보기 패널 분리, `87eab282` shared `MetricCard` 분리, `f2c6aab5` 리팩터링 18개 로드맵 문서화입니다. 실제 최신 커밋은 새 세션에서 반드시 `git log -1 --oneline`으로 다시 확인하세요.
+- 다음 리팩터링 시작점은 9번 `test manager`입니다. 다음 세션은 코드 수정 전에 리팩터링 결과를 요약하고 `9번 test manager의 남은 학생별 history list 분리부터 이어갈까요?`라고 사용자에게 먼저 물어봐야 합니다.
+- 최근 리팩터링 흐름은 6번 특강관리 분리, 7번 학사일정 helper 분리, 8번 학사일정 컴포넌트 분리 완료 후 9번 `test manager` 진행 중입니다. 최신 리팩터링 커밋 기준은 `0bf68633 Extract recent test session list`이며, 실제 최신 커밋은 새 세션에서 반드시 `git log -1 --oneline`으로 다시 확인하세요.
 - 이 README는 붙여넣기 편의를 위한 사본입니다. 세션 종료 시 새로 미룬 작업이 생기면 세 곳을 함께 갱신하세요.
 - 보충 알림톡 라벨 정리 기능 커밋은 `58728cb0 Clarify supplement homework reminder labels`입니다. handoff 문서 갱신 커밋이 뒤에 올 수 있으므로 새 세션에서 반드시 `git log -1 --oneline`으로 최신 커밋을 다시 확인하세요.
 - 현재 로컬에 남을 수 있는 미추적 항목: `.codex-temp/`. 커밋하지 않습니다.
