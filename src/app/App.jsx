@@ -125,7 +125,11 @@ import {
   schoolCalendarLegacyColorMap,
   schoolCalendarMathSubjectOptions,
   schoolCalendarSchoolColorPalette,
-  storageKeys
+  storageKeys,
+  testAttemptStatusOptions,
+  testPaperKindOptions,
+  testPaperPreparationOptions,
+  testPaperProgressOptions
 } from "./appConfig.js";
 
 function getAssignmentStatusForMessage(record, previousHomework) {
@@ -4876,36 +4880,6 @@ function buildSsenTypeCatalog(rows = []) {
 
 const ssenTypeCatalog = buildSsenTypeCatalog(ssenTypeIndex);
 const testPaperSubjectOptions = Object.keys(ssenTypeCatalog);
-
-const testPaperKindOptions = [
-  { id: "daily", label: "데일리 테스트", description: "오늘 배운 유형을 바로 확인" },
-  { id: "cumulative", label: "누적테스트", description: "지난 유형을 섞어 망각 방지" },
-  { id: "unit", label: "단원테스트", description: "중단원/대단원 마무리" }
-];
-
-const testPaperPreparationOptions = [
-  { id: "draft", label: "준비중" },
-  { id: "review", label: "검토필요" },
-  { id: "ready", label: "준비완료" },
-  { id: "active", label: "사용중" },
-  { id: "hold", label: "보류" }
-];
-
-const testPaperProgressOptions = [
-  { id: "waiting", label: "대기" },
-  { id: "scheduled", label: "예정" },
-  { id: "passed", label: "통과" },
-  { id: "failed", label: "미통과" },
-  { id: "retest1", label: "재시험1" },
-  { id: "retest2", label: "재시험2" },
-  { id: "hold", label: "강사확인" }
-];
-
-const testAttemptStatusOptions = [
-  { id: "", label: "미입력" },
-  { id: "taken", label: "응시" },
-  { id: "not_taken", label: "미응시" }
-];
 
 function getTestPaperKindLabel(value = "") {
   return testPaperKindOptions.find((option) => option.id === value)?.label ?? "데일리";

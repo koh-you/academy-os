@@ -79,6 +79,20 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 4번 - 테스트관리 option 상수 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
+- 범위 선택: 4번 `storageKeys/config/constants`의 네 번째 작은 단위로, 테스트관리의 고정 option 배열만 분리했다. `testPaperSubjectOptions`는 `ssenTypeCatalog`에서 파생되는 값이므로 9번 `test manager` 범위로 커지지 않게 이번 분리에서 제외했다.
+- 구현 결과: `testPaperKindOptions`, `testPaperPreparationOptions`, `testPaperProgressOptions`, `testAttemptStatusOptions`를 `src/app/appConfig.js`로 이동했다. `App.jsx`는 같은 이름을 import해 기존 label helper, 기본값, select 렌더링을 유지한다.
+- 테스트 갱신: production scenario가 `testPaperKindOptions`를 `App.jsx` 선언 위치에 고정하지 않고 `appConfig.js`까지 함께 검사하도록 `appWithConfig` 기준을 적용했다. 시험지관리에서 현재 테스트 결과 데이터만 기록해야 한다는 기존 금지 조건은 유지했다.
+- 저장 원천: 없음. 기존 테스트/응시 기록 원본은 app state/API 흐름의 `academyTests`, `problemBooks`, 학생별 테스트 결과 구조이며 이번 작업은 option 배열 위치만 바꿨다. 저장 key, payload, API 호출은 변경하지 않았다.
+- 외부 side effect: 없음. API 호출, Solapi 실제 발송/예약, `notification_jobs`, Tally, Slack, AI 호출 없음.
+- AI 검수 결과: option id/label/description 값을 그대로 이동했고, 테스트 기록 생성/저장 함수 diff가 없다. `npm run test:production`의 `70o test manager records only current test-result data`가 통과했고 build도 통과해 사람 gate 없이 다음 낮은 위험 상수 분리로 넘어갈 수 있다.
+- 남은 4번 후보: lesson research option list, notice withdrawn class filter, 화면 내부 동적 option은 각 화면 범위와 섞이지 않게 판단 후 진행한다.
+- 사람 검토 필요 여부: 선택 사항. 화면 확인을 한다면 시험지관리/응시 기록 입력의 테스트 종류와 응시 상태 select 라벨이 이전과 같은지만 보면 된다. 운영 데이터 변경 검토는 필요 없다.
+- 중단 조건: 테스트 종류/응시 상태 라벨이 바뀜, 응시 기록 저장 payload가 함께 바뀜, 시험지관리에서 PDF/보관함/진도 트랙 같은 제거된 기능이 되살아남, `ssenTypeCatalog` 파생 과목 원천을 무리하게 config로 옮기려 함.
+- 검증: `node --check src/app/appConfig.js` 통과, `node --check scripts/scenario-tests-production.cjs` 통과, `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
+
 ### 2026-07-16 P1. App.jsx 리팩터링 4번 - 학사일정 option/color 상수 분리
 
 - 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
