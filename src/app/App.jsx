@@ -122,6 +122,7 @@ import {
   lessonResearchCategories,
   lessonResearchStatuses,
   lessonResearchSubjects,
+  noticeWithdrawnClassFilterId,
   regularLessonClassColors,
   schoolCalendarGradeOptions,
   schoolCalendarKnownColors,
@@ -9669,8 +9670,6 @@ const noticeMessageTemplates = [
     body: "#{학원명} 재원생 보호자님께 드리는 특강 안내입니다.\n\n안녕하세요. #{학원명}입니다.\n#{학생명} 학생 보호자님께 특강 일정을 안내드립니다.\n\n특강명: #{특강명}\n대상: #{대상}\n요일: #{요일}\n시간: #{시간}\n\n세부 시수와 수강료, 회차별 일정은 아래 버튼에서 확인해 주세요.\n수강을 원하시거나 문의사항이 있으신 경우 아래 버튼을 눌러 안내문에서 신청해 주세요."
   }
 ];
-
-const noticeWithdrawnClassFilterId = "withdrawn_students";
 
 function isNoticeWithdrawnStudent(student = {}) {
   return ["paused", "withdrawn"].includes(student.status ?? "active") || Boolean(student.withdrawnAt);

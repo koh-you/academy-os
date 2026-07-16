@@ -79,6 +79,20 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 4번 - 공지 퇴원학생 필터 id 상수 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
+- 범위 선택: 4번 `storageKeys/config/constants`의 여섯 번째 작은 단위로, 알림관리 공지 수신자 필터의 퇴원학생 sentinel id 한 줄만 분리했다. 공지 작성, 수신자 계산, Solapi 발송/예약, `notification_jobs` 저장 흐름은 건드리지 않았다.
+- 구현 결과: `noticeWithdrawnClassFilterId`를 `src/app/appConfig.js`로 이동했다. `App.jsx`는 같은 이름을 import해 기존 퇴원학생반 option, 필터 predicate, 선택 학생 정리 흐름을 유지한다.
+- 테스트 갱신: production scenario가 `noticeWithdrawnClassFilterId`/`withdrawn_students` 값을 `App.jsx` 선언 위치에 고정하지 않고 `appConfig.js`까지 함께 검사하도록 `appWithConfig` 기준을 적용했다. 실제 퇴원학생 필터링 조건과 `const sourceStudents = classFilter === noticeWithdrawnClassFilterId ? withdrawnStudents : activeStudents` 불변식은 계속 `App.jsx`에서 확인한다.
+- 저장 원천: 없음. 기존 공지 발송 원본/이력은 `notification_jobs`와 Solapi 경로이며 이번 작업은 UI 필터 sentinel 문자열 위치만 바꿨다. 저장 key, job payload, 예약/취소 API는 변경하지 않았다.
+- 외부 side effect: 없음. API 호출, Solapi 실제 발송/예약, `notification_jobs`, Tally, Slack, AI 호출 없음.
+- AI 검수 결과: diff가 import 1줄, App.jsx 상수 선언 제거 1줄, config export 1줄, scenario 위치 보정으로 제한됐다. `npm run test:production`의 `20a-3 notice class filter exposes withdrawn students only through withdrawn class`와 build가 통과해 사람 gate 없이 다음 리팩터링으로 넘어갈 수 있다.
+- 남은 4번 후보: 화면 내부 동적 option 또는 exam-analysis 관련 상수는 범위가 커질 수 있어 4번을 계속할지, 5번 `specialLecture preview/public`로 넘어갈지 최신 diff 기준으로 다시 판단한다.
+- 사람 검토 필요 여부: 선택 사항. 화면 확인을 한다면 알림관리 > 공지에서 반 필터의 `퇴원학생반`이 계속 보이고, 선택 시 퇴원/휴원 학생만 보이는지만 보면 된다. 실제 발송 테스트는 필요 없다.
+- 중단 조건: 공지 수신자 수가 달라짐, 퇴원학생반 외 필터에서 퇴원학생이 섞임, Solapi 발송/예약 함수나 `notification_jobs` payload diff가 함께 생김, 실제 발송 문구/템플릿 원천이 같이 바뀜.
+- 검증: `node --check src/app/appConfig.js` 통과, `node --check scripts/scenario-tests-production.cjs` 통과, `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
+
 ### 2026-07-16 P1. App.jsx 리팩터링 4번 - 교안연구 option 상수 분리
 
 - 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
