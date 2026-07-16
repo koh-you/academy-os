@@ -21,6 +21,7 @@ import {
   SpecialLectureGuideSelector,
   SpecialLectureGuideTextFields,
   SpecialLectureHighlightEditor,
+  SpecialLectureSpecialNotesField,
   SpecialLectureManagementBar
 } from "../domains/specialLectures/SpecialLectureManagementPanel.jsx";
 import {
@@ -10942,15 +10943,10 @@ function SpecialLectureNoticePanel({
             onUpdateHighlight={updateSpecialLectureHighlight}
           />
 
-          <label className="specialLectureWideField specialLectureNotesField">
-            특이사항
-            <textarea
-              placeholder="예: 창일중은 학교 일정상 5회만 수강합니다."
-              rows="3"
-              value={selectedGuide.specialNotes}
-              onChange={(event) => updateSelectedGuide("specialNotes", event.target.value)}
-            />
-          </label>
+          <SpecialLectureSpecialNotesField
+            guide={selectedGuide}
+            onUpdateGuide={updateSelectedGuide}
+          />
 
           <section className={`specialLectureCalculator ${isScheduleBuilderOpen ? "open" : "collapsed"}`}>
             <div className="sectionHeader slim specialLectureCalculatorHeader">

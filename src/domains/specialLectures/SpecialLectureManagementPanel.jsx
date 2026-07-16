@@ -192,6 +192,27 @@ export function SpecialLectureHighlightEditor({
   );
 }
 
+export function SpecialLectureSpecialNotesField({
+  guide,
+  onUpdateGuide
+}) {
+  if (!guide) {
+    return null;
+  }
+
+  return (
+    <label className="specialLectureWideField specialLectureNotesField">
+      특이사항
+      <textarea
+        placeholder="예: 창일중은 학교 일정상 5회만 수강합니다."
+        rows="3"
+        value={guide.specialNotes}
+        onChange={(event) => onUpdateGuide?.("specialNotes", event.target.value)}
+      />
+    </label>
+  );
+}
+
 export function SpecialLectureGuideSelector({
   onSelectGuide,
   onToggleStoredGuides,
