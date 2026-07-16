@@ -79,6 +79,20 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 9번 - 응시 기록 action bar 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
+- 범위 선택: 9번 `test manager`의 일곱 번째 작은 단위로, `새 회차 입력`, `이 회차 삭제`, `응시 기록 저장` 버튼 영역 렌더만 분리했다. 저장/삭제 함수 본문은 `App.jsx`에 그대로 남겼다.
+- 착수 전 inventory: reset은 `resetAttemptForm`, 저장은 `saveAttemptSession`, 삭제는 외부 callback `onDeleteTestSession(currentTestSession.testSessionId)`이며, 실제 Supabase 원천 변경은 기존 `postTestSession`/`deleteTestSessionFromApi` 경로다. 이번 작업은 이 함수들을 변경하지 않았다.
+- 구현 결과: `TestAttemptActions`를 `src/domains/tests/TestManagerPanels.jsx`에 추가하고, `App.jsx`는 `attemptError`, `normalizedAttemptTitle` 기반 저장 가능 여부, `testResultSaveState`, `currentTestSession`, reset/save/delete callback만 props로 넘긴다.
+- 저장 원천: 변경 없음. `test_sessions`, `test_attempts`, `MaterialManager` draft state, `app_state.academyTests` 저장 구조를 변경하지 않았다.
+- 외부 side effect: 변경 없음. API 호출, Supabase 저장/삭제, 알림톡/notification_jobs, 수업일지 반영 로직 추가/삭제 없음.
+- AI 검수 결과: `saveAttemptSession`, `postTestSession`, `handleSaveTestSession`, `handleDeleteTestSession` 함수 본문 diff가 없다. production scenario와 build가 통과했다.
+- 남은 9번 후보: 최근 회차 list, 학생별 history list를 한 번에 하나씩 분리한다. 각 list는 표시/선택만 이동하고 저장 handler는 고정한다.
+- 사람 검토 필요 여부: 없음. 버튼 렌더 이동이며 저장/삭제 함수 본문은 자동검증으로 고정 확인했다.
+- 중단 조건: 저장 버튼 disabled 조건이 바뀜, 삭제 callback 대상 id가 바뀜, 저장/삭제 handler diff가 함께 생김.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과, `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
+
 ### 2026-07-16 P1. App.jsx 리팩터링 9번 - 학생별 응시 table 분리
 
 - 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능

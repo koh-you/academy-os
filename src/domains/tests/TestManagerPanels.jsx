@@ -161,3 +161,28 @@ export function TestAttemptTable({
     </div>
   );
 }
+
+export function TestAttemptActions({
+  attemptError = "",
+  canSave = false,
+  currentTestSession = null,
+  isSaving = false,
+  onDeleteTestSession,
+  onResetAttemptForm,
+  onSaveAttemptSession
+}) {
+  return (
+    <div className="testAttemptActions">
+      {attemptError ? <span className="saveState save-failed">{attemptError}</span> : null}
+      <button className="softButton" onClick={onResetAttemptForm} type="button">새 회차 입력</button>
+      {currentTestSession ? (
+        <button className="dangerSoftButton" onClick={() => onDeleteTestSession?.(currentTestSession.testSessionId)} type="button">
+          이 회차 삭제
+        </button>
+      ) : null}
+      <button className="saveDraftButton" disabled={!canSave || isSaving} onClick={onSaveAttemptSession} type="button">
+        {isSaving ? "저장 중" : "응시 기록 저장"}
+      </button>
+    </div>
+  );
+}

@@ -22,6 +22,7 @@ import {
   getTestPaperKindLabel
 } from "../domains/tests/testManagerUtils.js";
 import {
+  TestAttemptActions,
   TestAttemptFormGrid,
   TestAttemptMeta,
   TestAttemptPanelHeader,
@@ -24326,18 +24327,15 @@ function MaterialManager({
             statusOptions={testAttemptStatusOptions}
             students={attemptStudents}
           />
-          <div className="testAttemptActions">
-            {attemptError ? <span className="saveState save-failed">{attemptError}</span> : null}
-            <button className="softButton" onClick={resetAttemptForm} type="button">새 회차 입력</button>
-            {currentTestSession ? (
-              <button className="dangerSoftButton" onClick={() => onDeleteTestSession?.(currentTestSession.testSessionId)} type="button">
-                이 회차 삭제
-              </button>
-            ) : null}
-            <button className="saveDraftButton" disabled={!normalizedAttemptTitle || testResultSaveState === "saving"} onClick={saveAttemptSession} type="button">
-              {testResultSaveState === "saving" ? "저장 중" : "응시 기록 저장"}
-            </button>
-          </div>
+          <TestAttemptActions
+            attemptError={attemptError}
+            canSave={Boolean(normalizedAttemptTitle)}
+            currentTestSession={currentTestSession}
+            isSaving={testResultSaveState === "saving"}
+            onDeleteTestSession={onDeleteTestSession}
+            onResetAttemptForm={resetAttemptForm}
+            onSaveAttemptSession={saveAttemptSession}
+          />
           <section className="testSessionList">
             <div className="sectionHeader slim">
               <div>
