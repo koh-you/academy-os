@@ -34,9 +34,13 @@ import {
   SpecialLecturePublicPage
 } from "../domains/specialLectures/SpecialLecturePublicPage.jsx";
 import {
+  formatDateRangeText,
+  getDateRangeField,
   getSchoolCalendarEventColor,
   getSchoolCalendarSchoolColor,
-  normalizeSchoolName
+  normalizeSchoolName,
+  parseDateRangeText,
+  updateDateRangeField
 } from "../domains/schoolCalendar/schoolCalendarUtils.js";
 import {
   assignmentStatusLabels,
@@ -4439,35 +4443,6 @@ function createSchoolEventFromExamPrepRow(row, index = 0) {
 
 function createDefaultSchoolEvents(rows) {
   return rows.map((row, index) => createSchoolEventFromExamPrepRow(row, index));
-}
-
-function parseDateRangeText(value = "") {
-  const text = String(value).trim();
-  if (!text) return null;
-  const match = text.match(/(\d{4})-(\d{2})-(\d{2})\s*[~\-–]\s*(?:(\d{4})-)?(\d{2})-(\d{2})/);
-  if (!match) return null;
-  const [, startYear, startMonth, startDay, endYear, endMonth, endDay] = match;
-  return {
-    date: `${startYear}-${startMonth}-${startDay}`,
-    endDate: `${endYear || startYear}-${endMonth}-${endDay}`
-  };
-}
-
-function formatDateRangeText(date = "", endDate = "") {
-  if (date && endDate) return `${date} ~ ${endDate}`;
-  return date || endDate || "";
-}
-
-function getDateRangeField(value = "", field) {
-  const parsed = parseDateRangeText(value);
-  if (!parsed) return "";
-  return field === "endDate" ? parsed.endDate : parsed.date;
-}
-
-function updateDateRangeField(value = "", field, nextValue = "") {
-  const parsed = parseDateRangeText(value) ?? { date: "", endDate: "" };
-  const nextRange = { ...parsed, [field]: nextValue };
-  return formatDateRangeText(nextRange.date, nextRange.endDate);
 }
 
 function getSchoolCalendarTargetRows(rows = [], event = {}) {

@@ -32,3 +32,32 @@ export function normalizeSchoolCalendarColor(color = "") {
 export function getSchoolCalendarEventColor(event = {}) {
   return normalizeSchoolCalendarColor(event.color) || getSchoolCalendarSchoolColor(event.schoolName);
 }
+
+export function parseDateRangeText(value = "") {
+  const text = String(value).trim();
+  if (!text) return null;
+  const match = text.match(/(\d{4})-(\d{2})-(\d{2})\s*[~\-–]\s*(?:(\d{4})-)?(\d{2})-(\d{2})/);
+  if (!match) return null;
+  const [, startYear, startMonth, startDay, endYear, endMonth, endDay] = match;
+  return {
+    date: `${startYear}-${startMonth}-${startDay}`,
+    endDate: `${endYear || startYear}-${endMonth}-${endDay}`
+  };
+}
+
+export function formatDateRangeText(date = "", endDate = "") {
+  if (date && endDate) return `${date} ~ ${endDate}`;
+  return date || endDate || "";
+}
+
+export function getDateRangeField(value = "", field) {
+  const parsed = parseDateRangeText(value);
+  if (!parsed) return "";
+  return field === "endDate" ? parsed.endDate : parsed.date;
+}
+
+export function updateDateRangeField(value = "", field, nextValue = "") {
+  const parsed = parseDateRangeText(value) ?? { date: "", endDate: "" };
+  const nextRange = { ...parsed, [field]: nextValue };
+  return formatDateRangeText(nextRange.date, nextRange.endDate);
+}
