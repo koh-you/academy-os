@@ -79,6 +79,20 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 5번 - 특강 공개 안내문 페이지 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
+- 범위 선택: 5번 `specialLecture preview/public`의 첫 작은 단위로, 공개 안내문 렌더링과 공개 라우트 전용 페이지를 분리했다. 특강 안내문 저장, 알림톡 발송 준비, 신청자 연결, 특강 수업 생성 gate는 건드리지 않았다.
+- 구현 결과: `SpecialLectureGuidePreview`와 `SpecialLecturePublicPage`를 `src/domains/specialLectures/SpecialLecturePublicPage.jsx`로 이동했다. `App.jsx`는 공개 라우트에서 `<SpecialLecturePublicPage />`를 렌더하고, 편집 화면의 오른쪽 미리보기는 `<SpecialLectureGuidePreview />` import를 계속 사용한다.
+- 테스트 갱신: production scenario의 `specialLectureFrontendSource`가 새 `SpecialLecturePublicPage.jsx`까지 함께 읽도록 확장했다. 공개 안내문/방향 카드/신청 버튼/중복 footer 금지 검사는 유지하고, 파일 위치 가정만 보정했다.
+- 저장 원천: 변경 없음. 공개 페이지는 기존처럼 `/api/special-lecture-guides`에서 `specialLectureGuides` 저장본을 읽고, 실패 시 기본 안내문 fallback을 표시한다. `app_state.specialLectureGuides`, Supabase/API payload, localStorage key는 변경하지 않았다.
+- 외부 side effect: 없음. Solapi 실제 발송/예약, `notification_jobs`, Tally webhook, 특강 신청자 저장, 수업 생성 API 호출 없음.
+- AI 검수 결과: 분리 파일은 기존 JSX와 API fetch/document title 동작을 그대로 옮겼고, `App.jsx`의 `prepareSpecialLectureNotice`, `persistDraftGuides`, `handleSaveSpecialLectureGuides`, 신청자/수업 생성 함수 diff가 없다. `npm run test:production` 309개와 build가 통과해 사람 gate 없이 다음 하위 단위로 넘어갈 수 있다.
+- 남은 5번 후보: 특강 편집 화면의 preview column/복사 상태/공개 URL 표시를 더 작은 컴포넌트로 분리할 수 있다. 단, `persistDraftGuides`와 `prepareSpecialLectureNotice`를 건드리면 저장/발송 준비 gate로 분리한다.
+- 사람 검토 필요 여부: 선택 사항. 화면 확인을 한다면 `/special-lecture?guide=<slug>` 공개 안내문과 특강관리 오른쪽 `공개 안내문 미리보기`가 이전과 같은 레이아웃/문구/신청 버튼으로 보이는지만 보면 된다. 실제 알림톡 발송 테스트는 필요 없다.
+- 중단 조건: 공개 링크가 저장본을 못 읽음, 기본 안내문 fallback만 계속 보임, 특강 신청 버튼 URL parameter가 빠짐, `알림톡 발송 준비`가 저장 없이 발송 경로로 이어짐, 신청자/수업 생성 gate diff가 함께 생김.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과, `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. `.jsx` 파일은 이 환경의 `node --check`가 확장자를 직접 처리하지 못해 Vite build로 JSX 파싱을 검증했다. 빌드는 기존 Vite chunk size 경고만 남았다.
+
 ### 2026-07-16 P1. App.jsx 리팩터링 4번 - 공지 퇴원학생 필터 id 상수 분리
 
 - 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
