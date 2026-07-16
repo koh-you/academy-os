@@ -38,6 +38,7 @@ import {
   SchoolCalendarFilterBar,
   SchoolCalendarHeader,
   SchoolCalendarSaveNotice,
+  SchoolDateScheduleModal,
   SchoolMonthGrid,
   SchoolMonthHeader
 } from "../domains/schoolCalendar/SchoolCalendarComponents.jsx";
@@ -19978,6 +19979,9 @@ function SchoolCalendarCenter({
           eventColorOptions={eventColorOptions}
           eventTypeLabels={eventTypeLabels}
           events={selectedDateEvents}
+          gradeOptions={schoolCalendarGradeOptions}
+          mathSubjectOptions={schoolCalendarMathSubjectOptions}
+          normalizeMathSubject={normalizeMathSubject}
           onClose={() => setIsDateModalOpen(false)}
           onDeleteEvent={deleteAcademicEvent}
           onCreateEvent={openEventForm}
@@ -19987,183 +19991,6 @@ function SchoolCalendarCenter({
         />
       ) : null}
     </section>
-  );
-}
-
-function SchoolDateScheduleModal({
-  eventColorOptions,
-  eventTypeLabels,
-  events,
-  onClose,
-  onCreateEvent,
-  onDeleteEvent,
-  onSaveEvent,
-  schools,
-  selectedDate
-}) {
-  const groupedEvents = events.reduce((groups, event) => {
-    const schoolName = event.schoolName || "학교 미입력";
-    const previous = groups.get(schoolName) ?? [];
-    groups.set(schoolName, [...previous, event]);
-    return groups;
-  }, new Map());
-  const groupedEventEntries = [...groupedEvents.entries()].sort(([schoolA], [schoolB]) => schoolA.localeCompare(schoolB));
-  const [draftEvents, setDraftEvents] = useState({});
-
-  useEffect(() => {
-    setDraftEvents(Object.fromEntries(events.map((event) => [event.eventId, { ...event }])));
-  }, [events]);
-
-  function getDraftEvent(event) {
-    return draftEvents[event.eventId] ?? event;
-  }
-
-  function updateDraftEvent(eventId, field, value) {
-    setDraftEvents((current) => ({
-      ...current,
-      [eventId]: {
-        ...(current[eventId] ?? events.find((event) => event.eventId === eventId) ?? {}),
-        [field]: value
-      }
-    }));
-  }
-
-  return (
-    <Modal className="schoolDateScheduleModal" title={`${selectedDate} 일정`} subtitle="일정 내용과 색상을 확인하고 수정합니다." onClose={onClose}>
-      <div className="schoolDateModalToolbar">
-        <button className="primaryButton compact" onClick={() => onCreateEvent(selectedDate)} type="button">
-          이 날짜에 일정 등록
-        </button>
-      </div>
-      {events.length === 0 ? (
-        <EmptyState className="emptyState schoolDateEmptyState">선택한 날짜에 등록된 일정이 없습니다.</EmptyState>
-      ) : (
-        <div className="schoolDateEventStack">
-          {groupedEventEntries.map(([schoolName, schoolEvents]) => (
-            <section
-              className="schoolDateGroup"
-              key={schoolName}
-              style={{ "--school-color": getSchoolCalendarSchoolColor(schoolName) }}
-            >
-              <div className="schoolDateGroupHeader">
-                <strong>{schoolName}</strong>
-                <span>{schoolEvents.length}건</span>
-              </div>
-              {schoolEvents.map((event) => {
-                const draftEvent = getDraftEvent(event);
-                const isReadonlyEvent = Boolean(event.readonly);
-                const canEditDerivedDate = !isReadonlyEvent && event.derived && ["examPeriod", "mathExam"].includes(event.type);
-                const canEditDerivedSubject = !isReadonlyEvent && event.derived && event.type === "mathExam";
-                const canEditEventDetails = !event.derived && !isReadonlyEvent;
-                const eventColor = getSchoolCalendarEventColor(draftEvent);
-                const eventColorOptionsForDisplay = eventColorOptions.includes(eventColor)
-                  ? eventColorOptions
-                  : [eventColor, ...eventColorOptions];
-                return (
-                  <article className="schoolDateEventEditor" key={event.eventId} style={{ "--school-color": eventColor }}>
-                    <div className="schoolDateEventEditorTop">
-                      <div>
-                        <strong>{formatCalendarSummaryLabel(draftEvent)}</strong>
-                        <span>{event.type === "examPeriod" ? `${draftEvent.date} ~ ${draftEvent.endDate || draftEvent.date}` : draftEvent.date}</span>
-                      </div>
-                      <div className="schoolDateEventActions">
-                        {isReadonlyEvent ? (
-                          <span>읽기 전용 일정</span>
-                        ) : event.derived ? (
-                          <span>시험관리 연동</span>
-                        ) : (
-                          <button className="dangerSoftButton" onClick={() => onDeleteEvent(event.eventId)} type="button">삭제</button>
-                        )}
-                        {!isReadonlyEvent ? (
-                          <button className="primaryButton compact" onClick={() => onSaveEvent(event, draftEvent)} type="button">저장</button>
-                        ) : null}
-                      </div>
-                    </div>
-                    <div className="fieldGrid two">
-                      <label>
-                        {event.type === "examPeriod" ? "시작일" : "날짜"}
-                        <input disabled={!canEditEventDetails && !canEditDerivedDate} type="date" value={draftEvent.date} onChange={(change) => updateDraftEvent(event.eventId, "date", change.target.value)} />
-                      </label>
-                      {event.type === "examPeriod" ? (
-                        <label>
-                          종료일
-                          <input disabled={!canEditEventDetails && !canEditDerivedDate} type="date" value={draftEvent.endDate ?? ""} onChange={(change) => updateDraftEvent(event.eventId, "endDate", change.target.value)} />
-                        </label>
-                      ) : event.type === "mathExam" ? (
-                        <label>
-                          과목
-                          <select disabled={!canEditEventDetails && !canEditDerivedSubject} value={normalizeMathSubject(draftEvent.examSubject ?? "공통수학1")} onChange={(change) => updateDraftEvent(event.eventId, "examSubject", change.target.value)}>
-                            {schoolCalendarMathSubjectOptions.map((subject) => (
-                              <option key={subject} value={subject}>{subject}</option>
-                            ))}
-                          </select>
-                        </label>
-                      ) : (
-                        <label>
-                          종료일
-                          <input disabled={!canEditEventDetails} type="date" value={draftEvent.endDate || draftEvent.date || ""} onChange={(change) => updateDraftEvent(event.eventId, "endDate", change.target.value)} />
-                        </label>
-                      )}
-                      <label>
-                        학교
-                        <select disabled={!canEditEventDetails} value={draftEvent.schoolName} onChange={(change) => updateDraftEvent(event.eventId, "schoolName", change.target.value)}>
-                          {[draftEvent.schoolName, ...schools].filter(Boolean).filter((school, index, array) => array.indexOf(school) === index).map((school) => (
-                            <option key={school} value={school}>{school}</option>
-                          ))}
-                        </select>
-                      </label>
-                      <label>
-                        학년
-                        <select disabled={!canEditEventDetails} value={draftEvent.grade ?? ""} onChange={(change) => updateDraftEvent(event.eventId, "grade", change.target.value)}>
-                          <option value="">전체 학년</option>
-                          {schoolCalendarGradeOptions.map((grade) => (
-                            <option key={grade} value={grade}>{grade}</option>
-                          ))}
-                        </select>
-                      </label>
-                      <label>
-                        일정 종류
-                        <select disabled={!canEditEventDetails} value={draftEvent.type} onChange={(change) => updateDraftEvent(event.eventId, "type", change.target.value)}>
-                          {Object.entries(eventTypeLabels)
-                            .filter(([value]) => !["examPeriod", "mathExam"].includes(value) || value === event.type)
-                            .map(([value, label]) => (
-                              <option key={value} value={value}>{label}</option>
-                            ))}
-                        </select>
-                      </label>
-                      <label>
-                        일정명
-                        <input disabled={!canEditEventDetails} value={draftEvent.title} onChange={(change) => updateDraftEvent(event.eventId, "title", change.target.value)} />
-                      </label>
-                    </div>
-                    <label>
-                      메모
-                      <textarea disabled={!canEditEventDetails} value={draftEvent.memo ?? ""} onChange={(change) => updateDraftEvent(event.eventId, "memo", change.target.value)} rows="3" />
-                    </label>
-                    <label>
-                      일정 색상
-                      <div className="calendarColorPicker">
-                        {eventColorOptionsForDisplay.map((color) => (
-                          <button
-                            aria-label={`색상 ${color}`}
-                            className={eventColor === color ? "active" : ""}
-                            disabled={!canEditEventDetails}
-                            key={color}
-                            onClick={() => updateDraftEvent(event.eventId, "color", color)}
-                            style={{ backgroundColor: color }}
-                            type="button"
-                          />
-                        ))}
-                      </div>
-                    </label>
-                  </article>
-                );
-              })}
-            </section>
-          ))}
-        </div>
-      )}
-    </Modal>
   );
 }
 
