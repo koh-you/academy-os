@@ -53,6 +53,19 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 - shared MetricCard 분리
+
+- 상태: 완료 - 구현/자동검증 완료
+- 사용자 요청: 리팩터링 다음 작업을 진행한다. 사용자가 `리팩터링 후보 18개` 순서가 있는지 물었고, repo에는 App.jsx 리팩터링 후보 18개 목록이 명시되어 있지 않음을 확인했다. 현재 기준은 문서 지침대로 매번 side effect가 낮은 helper/config/API/client/component 중 하나를 고르는 방식이다.
+- 범위 선택: 여러 화면에서 재사용되지만 저장/API/Solapi/출결/수업일지 알림톡과 무관한 순수 표시 단위인 `MetricCard`를 분리했다.
+- 구현 결과: `App.jsx` 안에 있던 `MetricCard` 컴포넌트를 `src/shared/components/MetricCard.jsx`로 이동했다. `App.jsx`는 새 컴포넌트를 import해서 기존 사용처를 유지한다. CSS class와 호출부 props는 그대로다.
+- 테스트 갱신: production scenario 30번이 `metricButton` 문자열을 `App.jsx`에서만 찾지 않고, 새 shared `MetricCard.jsx` 파일까지 함께 검사하도록 갱신했다. 테스트 의도는 유지하고 파일 위치 가정만 바꿨다.
+- 저장 원천: 없음. 순수 UI 컴포넌트 파일 분리이며 Supabase, `app_state`, Storage, localStorage 저장 경로는 변경하지 않았다.
+- 외부 side effect: 없음. Solapi 실제 발송/예약, `notification_jobs`, Tally, Slack, AI 호출 없음.
+- 사람 검토 gate: 학생 화면/보충관리/수업 연구 화면 중 metric 카드가 보이는 화면을 열어 카드 레이아웃, 클릭 가능한 보충관리 metric, active 상태가 이전처럼 보이는지 확인한다.
+- 중단 조건: metric 카드가 보이지 않음, 클릭 가능한 metric이 버튼처럼 동작하지 않음, 보충관리 filter metric 클릭 결과가 달라짐, 학생 화면/수업 연구 화면 카드 레이아웃이 깨짐.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과, `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite 번들 크기 경고만 남았다.
+
 ### 2026-07-16 P1. App.jsx 리팩터링 - 시험분석 최종 미리보기 패널 분리
 
 - 상태: 완료 - 구현/자동검증 완료

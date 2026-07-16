@@ -29,6 +29,7 @@ const lessonLabelsPath = path.join(root, "src", "domains", "lessons", "labels.js
 const specialLectureApplicationPanelPath = path.join(root, "src", "domains", "specialLectures", "SpecialLectureApplicationPanel.jsx");
 const specialLectureGuideUtilsPath = path.join(root, "src", "domains", "specialLectures", "specialLectureGuideUtils.js");
 const sharedModalPath = path.join(root, "src", "shared", "components", "Modal.jsx");
+const sharedMetricCardPath = path.join(root, "src", "shared", "components", "MetricCard.jsx");
 const sharedIdPath = path.join(root, "src", "shared", "utils", "id.js");
 const studentSchedulePath = path.join(root, "src", "shared", "utils", "studentSchedule.js");
 const apiClientPath = path.join(root, "src", "shared", "utils", "apiClient.js");
@@ -90,6 +91,7 @@ const lessonLabelsSource = fs.existsSync(lessonLabelsPath) ? fs.readFileSync(les
 const specialLectureApplicationPanelSource = fs.existsSync(specialLectureApplicationPanelPath) ? fs.readFileSync(specialLectureApplicationPanelPath, "utf8") : "";
 const specialLectureGuideUtilsSource = fs.existsSync(specialLectureGuideUtilsPath) ? fs.readFileSync(specialLectureGuideUtilsPath, "utf8") : "";
 const sharedModalSource = fs.existsSync(sharedModalPath) ? fs.readFileSync(sharedModalPath, "utf8") : "";
+const sharedMetricCardSource = fs.existsSync(sharedMetricCardPath) ? fs.readFileSync(sharedMetricCardPath, "utf8") : "";
 const sharedIdSource = fs.existsSync(sharedIdPath) ? fs.readFileSync(sharedIdPath, "utf8") : "";
 const studentScheduleSource = fs.existsSync(studentSchedulePath) ? fs.readFileSync(studentSchedulePath, "utf8") : "";
 const examFrontendSource = [app, examQuestionClassificationSource, examQuestionItemsSource, examFinalDocumentSource, examFinalDocumentEditorSource, examSourceMediaSource, examLibrarySource, examAnalysisStateSource, examDefaultsSource, examDetailSectionsSource, examOutputLayoutsSource, examOutputPreviewSource, examFinalPreviewSource, examFinalPreviewPanelSource, examReportPreviewSource, examQuestionInsightSource, examQuestionCropViewSource, examPostSubmissionOptionsSource, examApiSource, sharedIdSource].join("\n");
@@ -286,7 +288,7 @@ check("26 ai variant draft shortcut is removed", !app.includes("variantHeroActio
 check("27 ai variant workspace is two column", css.includes(".aiVariantWorkspace") && css.includes(".aiVariantResultPanel"));
 check("28 ai variant hwpx export modal exists", hasAll(app, ["handleDownloadHwpx", ".hwpx", "hwpxExportModal"]));
 check("29 ai variant selected export flow exists", hasAll(app, ["selectedVariantIds", "selectedVariantCount", "handleToggleVariantSelection"]));
-check("30 homework status uses supplement candidate source and clickable metrics", hasAll(app, ["const makeupCandidateHomeworks = homeworks.filter((homework) => isHomeworkMakeupCandidate(homework, records, lessons))", "const actionableHomeworks = dedupeActionableHomeworks(makeupCandidateHomeworks)", "보충 대상 전체", "지연 보충 학생", "activeMetric", "handleMetricClick", "metricButton"]));
+check("30 homework status uses supplement candidate source and clickable metrics", hasAll(`${app}\n${sharedMetricCardSource}`, ["const makeupCandidateHomeworks = homeworks.filter((homework) => isHomeworkMakeupCandidate(homework, records, lessons))", "const actionableHomeworks = dedupeActionableHomeworks(makeupCandidateHomeworks)", "보충 대상 전체", "지연 보충 학생", "activeMetric", "handleMetricClick", "metricButton"]));
 check("31 supplement task progress is visible", hasAll(app, ["getSupplementTaskProgress", "needsLessonResync", "supplementProgressBadge"]));
 check("32 resource upload and grouped student picker exist", hasAll(app, ["resourceDropZone", "resourceStudentGroups", "selectAllResourceStudents", "clearAllResourceStudents"]));
 check("32b lesson modal grade groups can select and clear all students", hasAll(app, ["const groupedStudents = orderedStudentGrades.map", "전체 선택", "전체 해제", "const groupIds = new Set(group.students.map((student) => student.studentId))", "current.filter((studentId) => !groupIds.has(studentId))"]));
