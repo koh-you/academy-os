@@ -24,6 +24,7 @@ import {
   SpecialLectureNoSelection,
   SpecialLectureNoticeMemoField,
   SpecialLectureScheduleCalculator,
+  SpecialLectureSessionPlanEditor,
   SpecialLectureSpecialNotesField,
   SpecialLectureManagementBar
 } from "../domains/specialLectures/SpecialLectureManagementPanel.jsx";
@@ -10967,90 +10968,19 @@ function SpecialLectureNoticePanel({
             onUpdateScheduleRule={updateScheduleRule}
           />
 
-          <section className="specialLectureSessionCards">
-            <div className="sectionHeader slim">
-              <div>
-                <p className="eyebrow">SESSION PLAN</p>
-                <h3>회차별 일정</h3>
-                <span>카드 수정은 오른쪽 미리보기에 즉시 반영되고, 저장본/공개 링크에는 `안내문 저장` 후 반영됩니다.</span>
-              </div>
-              <div className="specialLectureSessionHeaderActions">
-                <button
-                  aria-expanded={isSessionPlanOpen}
-                  className="softButton compact"
-                  onClick={() => setIsSessionPlanOpen((current) => !current)}
-                  type="button"
-                >
-                  {isSessionPlanOpen ? "접기" : "펼치기"}
-                </button>
-                <button
-                  className="softButton compact"
-                  onClick={() => {
-                    addSpecialLectureSessionCard();
-                    setIsSessionPlanOpen(true);
-                  }}
-                  type="button"
-                >
-                  회차 추가
-                </button>
-              </div>
-            </div>
-            {!isSessionPlanOpen ? (
-              <div className="specialLectureSessionCollapsedSummary">
-                <strong>{sessionPlanSummaryText}</strong>
-                <span>세부 날짜/시간/주제는 펼치면 수정할 수 있습니다.</span>
-              </div>
-            ) : selectedGuideSessions.length ? (
-              <div className="specialLectureSessionCardList">
-                {selectedGuideSessions.map((session, index) => (
-                  <article className="specialLectureSessionCard" key={`${selectedGuide.specialLectureGuideId}_session_${index}`}>
-                    <div className="specialLectureSessionCardHeader">
-                      <strong>{index + 1}회차</strong>
-                      <span>{session.day || getWeekdayLabel(createDateFromKey(session.dateKey)?.getDay()) || "요일 없음"}</span>
-                      <button className="dangerSoftButton compact" onClick={() => removeSpecialLectureSessionCard(index)} type="button">삭제</button>
-                    </div>
-                    <div className="specialLectureSessionCardGrid">
-                      <label>
-                        날짜
-                        <input
-                          type="date"
-                          value={session.dateKey || ""}
-                          onChange={(event) => updateSpecialLectureSessionCard(index, "dateKey", event.target.value)}
-                        />
-                      </label>
-                      <label>
-                        시작
-                        <input
-                          type="time"
-                          value={session.startTime || ""}
-                          onChange={(event) => updateSpecialLectureSessionCard(index, "startTime", event.target.value)}
-                        />
-                      </label>
-                      <label>
-                        종료
-                        <input
-                          type="time"
-                          value={session.endTime || ""}
-                          onChange={(event) => updateSpecialLectureSessionCard(index, "endTime", event.target.value)}
-                        />
-                      </label>
-                      <label className="specialLectureSessionTopicInput">
-                        회차 주제
-                        <input
-                          value={session.topic || ""}
-                          onChange={(event) => updateSpecialLectureSessionCard(index, "topic", event.target.value)}
-                        />
-                      </label>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <div className="specialLectureSessionEmpty">
-                일정 계산을 펼쳐 요일/시간을 정한 뒤 `일정 계산 적용`을 누르거나, `회차 추가`로 직접 회차를 만드세요.
-              </div>
-            )}
-          </section>
+          <SpecialLectureSessionPlanEditor
+            guide={selectedGuide}
+            isOpen={isSessionPlanOpen}
+            onAddSession={() => {
+              addSpecialLectureSessionCard();
+              setIsSessionPlanOpen(true);
+            }}
+            onRemoveSession={removeSpecialLectureSessionCard}
+            onToggleOpen={() => setIsSessionPlanOpen((current) => !current)}
+            onUpdateSession={updateSpecialLectureSessionCard}
+            sessionPlanSummaryText={sessionPlanSummaryText}
+            sessions={selectedGuideSessions}
+          />
           <SpecialLectureNoticeMemoField
             guide={selectedGuide}
             onUpdateGuide={updateSelectedGuide}

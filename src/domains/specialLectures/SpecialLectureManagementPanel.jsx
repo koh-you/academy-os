@@ -1,9 +1,11 @@
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { SpecialLectureCalendarPreview } from "./SpecialLecturePublicPage.jsx";
 import {
+  createDateFromKey,
   formatCurrencyWon,
   formatSpecialLectureHours,
   getSpecialLectureStatusBadge,
+  getWeekdayLabel,
   isSpecialLectureArchived,
   specialLectureSeasonOptions,
   specialLectureWeekdayOptions
@@ -369,6 +371,105 @@ export function SpecialLectureScheduleCalculator({
           <span>요일별 {calculatedWeekdaySummaryText}</span>
           <span>규칙 {normalizedScheduleRules.length}개</span>
           <span>달력과 요금 설정은 펼치면 보입니다.</span>
+        </div>
+      )}
+    </section>
+  );
+}
+
+export function SpecialLectureSessionPlanEditor({
+  guide,
+  isOpen = false,
+  onAddSession,
+  onRemoveSession,
+  onToggleOpen,
+  onUpdateSession,
+  sessionPlanSummaryText = "",
+  sessions = []
+}) {
+  if (!guide) {
+    return null;
+  }
+
+  return (
+    <section className="specialLectureSessionCards">
+      <div className="sectionHeader slim">
+        <div>
+          <p className="eyebrow">SESSION PLAN</p>
+          <h3>회차별 일정</h3>
+          <span>카드 수정은 오른쪽 미리보기에 즉시 반영되고, 저장본/공개 링크에는 `안내문 저장` 후 반영됩니다.</span>
+        </div>
+        <div className="specialLectureSessionHeaderActions">
+          <button
+            aria-expanded={isOpen}
+            className="softButton compact"
+            onClick={onToggleOpen}
+            type="button"
+          >
+            {isOpen ? "접기" : "펼치기"}
+          </button>
+          <button
+            className="softButton compact"
+            onClick={onAddSession}
+            type="button"
+          >
+            회차 추가
+          </button>
+        </div>
+      </div>
+      {!isOpen ? (
+        <div className="specialLectureSessionCollapsedSummary">
+          <strong>{sessionPlanSummaryText}</strong>
+          <span>세부 날짜/시간/주제는 펼치면 수정할 수 있습니다.</span>
+        </div>
+      ) : sessions.length ? (
+        <div className="specialLectureSessionCardList">
+          {sessions.map((session, index) => (
+            <article className="specialLectureSessionCard" key={`${guide.specialLectureGuideId}_session_${index}`}>
+              <div className="specialLectureSessionCardHeader">
+                <strong>{index + 1}회차</strong>
+                <span>{session.day || getWeekdayLabel(createDateFromKey(session.dateKey)?.getDay()) || "요일 없음"}</span>
+                <button className="dangerSoftButton compact" onClick={() => onRemoveSession?.(index)} type="button">삭제</button>
+              </div>
+              <div className="specialLectureSessionCardGrid">
+                <label>
+                  날짜
+                  <input
+                    type="date"
+                    value={session.dateKey || ""}
+                    onChange={(event) => onUpdateSession?.(index, "dateKey", event.target.value)}
+                  />
+                </label>
+                <label>
+                  시작
+                  <input
+                    type="time"
+                    value={session.startTime || ""}
+                    onChange={(event) => onUpdateSession?.(index, "startTime", event.target.value)}
+                  />
+                </label>
+                <label>
+                  종료
+                  <input
+                    type="time"
+                    value={session.endTime || ""}
+                    onChange={(event) => onUpdateSession?.(index, "endTime", event.target.value)}
+                  />
+                </label>
+                <label className="specialLectureSessionTopicInput">
+                  회차 주제
+                  <input
+                    value={session.topic || ""}
+                    onChange={(event) => onUpdateSession?.(index, "topic", event.target.value)}
+                  />
+                </label>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="specialLectureSessionEmpty">
+          일정 계산을 펼쳐 요일/시간을 정한 뒤 `일정 계산 적용`을 누르거나, `회차 추가`로 직접 회차를 만드세요.
         </div>
       )}
     </section>

@@ -79,6 +79,20 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 6번 - 특강 회차 카드 editor 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
+- 범위 선택: 6번 `specialLecture management`의 열 번째 단위로, 특강관리의 `회차별 일정` 카드 editor 렌더만 분리했다. 회차 추가/삭제/update 함수 본문과 저장 함수는 `App.jsx`에 그대로 두었다.
+- 구현 결과: `SpecialLectureSessionPlanEditor`를 `src/domains/specialLectures/SpecialLectureManagementPanel.jsx`에 추가하고, `App.jsx`는 `selectedGuide`, `selectedGuideSessions`, `sessionPlanSummaryText`, open 상태, 기존 callback(`addSpecialLectureSessionCard`, `updateSpecialLectureSessionCard`, `removeSpecialLectureSessionCard`)을 props로 넘긴다.
+- 저장 원천: 변경 없음. 회차 카드 입력은 기존과 같이 `draftGuides` local draft만 갱신하고, 실제 저장은 기존 `안내문 저장`/`saveGuides` 흐름을 거친다. 특강 수업 생성은 여전히 신청자/수강명단 gate 쪽 흐름을 따른다.
+- 외부 side effect: 없음. 새 API 호출, Solapi 실제 발송/예약, `notification_jobs`, Tally webhook, 특강 신청자 저장, 특강 수업 생성 API 호출 없음.
+- AI 검수 결과: `addSpecialLectureSessionCard`, `updateSpecialLectureSessionCard`, `removeSpecialLectureSessionCard`, `replaceSelectedGuideSessions`, `persistDraftGuides`, `prepareSpecialLectureNotice`, 신청자/수업 생성 함수 diff가 없다. 기존 회차 카드 class, field, empty/collapsed 문구, 회차 추가 시 펼침 동작을 유지했고, production scenario와 build가 통과했다.
+- 6번 현재 상태: 특강관리 편집 화면의 큰 렌더 단위(selector, 관리 bar, 기본 필드, textarea, 방향 카드, 특이사항, 일정 계산, 회차 카드, 알림톡 안내 문장, 미선택 안내)는 분리 완료했다. 신청자 연결/특강 수업 생성 gate는 이미 `SpecialLectureApplicationPanel.jsx`에 분리되어 있고, 저장/발송/수업 생성 함수 본문은 보존했다.
+- 다음 후보: 7번 `school calendar helpers`로 넘어가되, 학사일정 저장/시험관리 sync/시험대비 자동 후보 생성이 섞이면 즉시 별도 gate로 분리한다.
+- 사람 검토 필요 여부: 선택 사항. 화면 확인을 한다면 회차별 일정 펼침/접힘, 회차 추가, 날짜/시간/주제 입력, 삭제, 오른쪽 미리보기 반영이 이전과 같은지만 보면 된다. 실제 저장/수업 생성은 필수 검토가 아니다.
+- 중단 조건: 회차 날짜 변경 후 요일이 달라짐, 회차 추가 후 패널이 펼쳐지지 않음, 회차 삭제 index가 어긋남, 저장/API/특강 수업 생성 함수 diff가 함께 생김.
+- 검증: `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
+
 ### 2026-07-16 P1. App.jsx 리팩터링 6번 - 특강 일정 계산 panel 분리
 
 - 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
