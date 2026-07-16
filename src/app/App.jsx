@@ -21,6 +21,7 @@ import {
   SpecialLectureGuideSelector,
   SpecialLectureGuideTextFields,
   SpecialLectureHighlightEditor,
+  SpecialLectureNoticeMemoField,
   SpecialLectureSpecialNotesField,
   SpecialLectureManagementBar
 } from "../domains/specialLectures/SpecialLectureManagementPanel.jsx";
@@ -11150,10 +11151,10 @@ function SpecialLectureNoticePanel({
               </div>
             )}
           </section>
-          <label className="specialLectureWideField">
-            알림톡 링크 안내 문장
-            <input value={selectedGuide.noticeMemo} onChange={(event) => updateSelectedGuide("noticeMemo", event.target.value)} />
-          </label>
+          <SpecialLectureNoticeMemoField
+            guide={selectedGuide}
+            onUpdateGuide={updateSelectedGuide}
+          />
 
           <SpecialLectureNoticeActionPanel
             copyMessage={copyMessage}

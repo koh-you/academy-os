@@ -213,6 +213,22 @@ export function SpecialLectureSpecialNotesField({
   );
 }
 
+export function SpecialLectureNoticeMemoField({
+  guide,
+  onUpdateGuide
+}) {
+  if (!guide) {
+    return null;
+  }
+
+  return (
+    <label className="specialLectureWideField">
+      알림톡 링크 안내 문장
+      <input value={guide.noticeMemo} onChange={(event) => onUpdateGuide?.("noticeMemo", event.target.value)} />
+    </label>
+  );
+}
+
 export function SpecialLectureGuideSelector({
   onSelectGuide,
   onToggleStoredGuides,
