@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { academyBrandName } from "../../app/appConfig.js";
 import { apiUrl } from "../../shared/utils/apiClient.js";
 import {
+  createSpecialLectureCalendarMonths,
   defaultSpecialLectureGuides,
   getSpecialLectureApplicationUrl,
   getSpecialLectureGuideSlug,
@@ -12,6 +13,62 @@ import {
   normalizeSpecialLectureGuide,
   normalizeSpecialLectureGuides
 } from "./specialLectureGuideUtils.js";
+
+export function SpecialLectureCalendarPreview({ guide }) {
+  const months = createSpecialLectureCalendarMonths(guide);
+  if (!months.length) {
+    return (
+      <div className="specialLectureCalendarPreview empty">
+        <strong>계산 달력</strong>
+        <p>기간을 입력하면 특강 날짜가 달력으로 표시됩니다.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="specialLectureCalendarPreview">
+      <div className="specialLectureCalendarHeader">
+        <strong>계산 달력</strong>
+        <span>파란 날짜가 특강 회차입니다.</span>
+      </div>
+      <div className="specialLectureMonthGrid">
+        {months.map((month) => (
+          <section className="specialLectureMonth" key={month.key}>
+            <h4>{month.label}</h4>
+            <div className="specialLectureCalendarWeekdays">
+              {["월", "화", "수", "목", "금", "토", "일"].map((day) => (
+                <span key={day}>{day}</span>
+              ))}
+            </div>
+            <div className="specialLectureCalendarDays">
+              {month.days.map((day) => {
+                const hasSession = day.sessions.length > 0;
+                return (
+                  <div
+                    className={[
+                      "specialLectureCalendarDay",
+                      day.isCurrentMonth ? "" : "muted",
+                      day.inRange ? "inRange" : "",
+                      hasSession ? "hasSession" : ""
+                    ].filter(Boolean).join(" ")}
+                    key={day.dateKey}
+                  >
+                    <span>{day.day}</span>
+                    {hasSession ? (
+                      <small>
+                        {day.sessions.length > 1 ? `${day.sessions.length}회` : `${day.sessions[0].startTime || ""}${day.sessions[0].endTime ? `-${day.sessions[0].endTime}` : ""}`.trim()}
+                      </small>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
   const normalizedGuide = normalizeSpecialLectureGuide(guide);

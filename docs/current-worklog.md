@@ -79,6 +79,20 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 5번 - 특강 일정 달력 preview 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
+- 범위 선택: 5번 `specialLecture preview/public`의 네 번째 작은 단위로, 특강 일정 계산 결과를 보여주는 달력 preview 컴포넌트만 분리했다. 일정 계산/적용 로직, 회차 편집, 저장 흐름은 건드리지 않았다.
+- 구현 결과: `SpecialLectureCalendarPreview`를 `src/domains/specialLectures/SpecialLecturePublicPage.jsx`로 이동하고, `App.jsx`는 같은 컴포넌트를 import해 기존 위치에서 렌더한다. `createSpecialLectureCalendarMonths` import는 새 파일로 이동했다.
+- 테스트 갱신: production scenario의 특강 planner/calendar preview 검사가 `specialLectureFrontendSource` 기준으로 새 파일까지 함께 보도록 갱신했다. 계산/회차/요일/가격/기간 불변식과 CSS 확인은 유지했다.
+- 저장 원천: 변경 없음. calendar preview는 `selectedGuide`와 `generatedSessionsPreview`를 렌더링만 하며, `specialLectureGuides` 저장본, `/api/special-lecture-guides`, local draft, Supabase/API payload는 변경하지 않았다.
+- 외부 side effect: 없음. Solapi 실제 발송/예약, `notification_jobs`, Tally webhook, 특강 신청자 저장, 수업 생성 API 호출 없음.
+- AI 검수 결과: `applyCalculatedSchedule`, `replaceSelectedGuideSessions`, `updateSpecialLectureSessionCard`, `persistDraftGuides`, `prepareSpecialLectureNotice` 함수 diff가 없고, 달력 렌더 JSX와 테스트 위치 가정만 이동했다. `npm run test:production` 309개와 build가 통과해 사람 gate 없이 다음 작업으로 넘어갈 수 있다.
+- 남은 후보: 5번의 순수 public/preview 렌더 분리는 대부분 완료했다. 다음은 6번 `specialLecture management`로 넘어가되, 신청자 연결/수업 생성/저장 side effect가 섞이면 즉시 작은 gate로 나눈다.
+- 사람 검토 필요 여부: 선택 사항. 화면 확인을 한다면 특강관리 > 일정 계산을 펼쳤을 때 계산 달력의 월/요일/파란 날짜 표시가 이전과 같은지만 보면 된다. 실제 저장/수업 생성은 누르지 않아도 된다.
+- 중단 조건: 계산 달력이 비어 보임, 특강 회차 날짜 표시가 사라짐, 일정 계산 적용/회차 편집/저장 함수 diff가 함께 생김, 저장 없이 공개 링크가 바뀜.
+- 검증: `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. `.jsx` 파일은 이 환경의 `node --check`가 확장자를 직접 처리하지 못해 Vite build로 JSX 파싱을 검증했다. 빌드는 기존 Vite chunk size 경고만 남았다.
+
 ### 2026-07-16 P1. App.jsx 리팩터링 5번 - 특강 안내문 액션/본문 미리보기 패널 분리
 
 - 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
