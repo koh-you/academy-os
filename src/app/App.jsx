@@ -25,6 +25,7 @@ import {
   TestAttemptFormGrid,
   TestAttemptMeta,
   TestAttemptPanelHeader,
+  TestAttemptTable,
   TestManagerTabs
 } from "../domains/tests/TestManagerPanels.jsx";
 import {
@@ -24319,46 +24320,12 @@ function MaterialManager({
             subject={attemptSubject}
             totalQuestions={attemptTotalQuestions}
           />
-          {attemptStudents.length ? (
-            <div className="testAttemptTable">
-              <div className="testAttemptRow head">
-                <span>학생</span>
-                <span>응시 상태</span>
-                <span>정답 수</span>
-                <span>미응시 사유</span>
-              </div>
-              {attemptStudents.map((student) => {
-                const draft = attemptDrafts[student.studentId] ?? {};
-                return (
-                  <div className="testAttemptRow" key={student.studentId}>
-                    <strong>{student.name}</strong>
-                    <select value={draft.status ?? ""} onChange={(event) => updateAttemptDraft(student.studentId, "status", event.target.value)}>
-                      {testAttemptStatusOptions.map((option) => <option key={option.id || "blank"} value={option.id}>{option.label}</option>)}
-                    </select>
-                    <input
-                      disabled={draft.status === "not_taken"}
-                      min="0"
-                      type="number"
-                      value={draft.correctCount ?? ""}
-                      onChange={(event) => updateAttemptDraft(student.studentId, "correctCount", event.target.value)}
-                      placeholder="정답"
-                    />
-                    <input
-                      disabled={draft.status === "taken"}
-                      value={draft.notTakenReason ?? ""}
-                      onChange={(event) => updateAttemptDraft(student.studentId, "notTakenReason", event.target.value)}
-                      placeholder="예: 결석, 다음 시간 응시"
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <EmptyState className="examPrepEmptyState">
-              <strong>대상 학생이 없습니다.</strong>
-              <span>반 선택 또는 학생관리의 기본 반 배정을 확인해 주세요.</span>
-            </EmptyState>
-          )}
+          <TestAttemptTable
+            attemptDrafts={attemptDrafts}
+            onUpdateAttemptDraft={updateAttemptDraft}
+            statusOptions={testAttemptStatusOptions}
+            students={attemptStudents}
+          />
           <div className="testAttemptActions">
             {attemptError ? <span className="saveState save-failed">{attemptError}</span> : null}
             <button className="softButton" onClick={resetAttemptForm} type="button">새 회차 입력</button>

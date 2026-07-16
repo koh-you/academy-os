@@ -79,6 +79,20 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 9번 - 학생별 응시 table 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
+- 범위 선택: 9번 `test manager`의 여섯 번째 작은 단위로, 학생별 응시 상태/정답 수/미응시 사유 입력 table과 대상 학생 없음 empty state만 분리했다. 저장 action과 저장 handler는 건드리지 않았다.
+- 착수 전 inventory: table draft 원천은 `MaterialManager` 내부 `attemptDrafts`, 학생 목록은 `attemptStudents`, 입력 변경은 `updateAttemptDraft` callback으로 local draft만 수정한다. Supabase 저장은 `saveAttemptSession`에서만 실행된다.
+- 구현 결과: `TestAttemptTable`을 `src/domains/tests/TestManagerPanels.jsx`에 추가하고, `App.jsx`는 `attemptDrafts`, `attemptStudents`, `testAttemptStatusOptions`, `updateAttemptDraft`만 props로 넘긴다.
+- 저장 원천: 변경 없음. `test_sessions`, `test_attempts`, `MaterialManager` draft state, `app_state.academyTests` 저장 구조를 변경하지 않았다.
+- 외부 side effect: 없음. API 호출, Supabase 저장/삭제, 알림톡/notification_jobs, 수업일지 반영 로직 변경 없음.
+- AI 검수 결과: `saveAttemptSession`, `postTestSession`, `handleSaveTestSession`, `handleDeleteTestSession` 함수 본문 diff가 없다. production scenario와 build가 통과했다.
+- 남은 9번 후보: action bar, 최근 회차 list, 학생별 history list를 한 번에 하나씩 분리한다. 저장/삭제 버튼이 포함된 action 영역은 함수 본문 고정 여부를 먼저 확인한다.
+- 사람 검토 필요 여부: 없음. local draft 입력 table 이동만으로 UI/저장 흐름은 자동검증으로 확인 가능하다.
+- 중단 조건: 학생별 응시 상태/정답 수/미응시 사유 입력이 draft에 반영되지 않음, 대상 학생 없음 안내가 사라짐, 저장/삭제 handler diff가 함께 생김.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과, `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
+
 ### 2026-07-16 P1. App.jsx 리팩터링 9번 - 응시 기록 meta 렌더 분리
 
 - 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
