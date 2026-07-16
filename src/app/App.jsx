@@ -17,6 +17,11 @@ import {
 import { StudentManager } from "../domains/students/StudentManager.jsx";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
+  createTestAttemptId,
+  createTestSessionIdForPaper,
+  getTestPaperKindLabel
+} from "../domains/tests/testManagerUtils.js";
+import {
   SpecialLectureGuideBasicFields,
   SpecialLectureGuideSelector,
   SpecialLectureGuideTextFields,
@@ -4784,10 +4789,6 @@ function buildSsenTypeCatalog(rows = []) {
 const ssenTypeCatalog = buildSsenTypeCatalog(ssenTypeIndex);
 const testPaperSubjectOptions = Object.keys(ssenTypeCatalog);
 
-function getTestPaperKindLabel(value = "") {
-  return testPaperKindOptions.find((option) => option.id === value)?.label ?? "데일리";
-}
-
 function getTestPaperPreparationLabel(value = "") {
   return testPaperPreparationOptions.find((option) => option.id === value)?.label ?? "준비중";
 }
@@ -4798,22 +4799,6 @@ function getTestPaperProgressLabel(value = "") {
 
 function getTestAttemptStatusLabel(value = "") {
   return testAttemptStatusOptions.find((option) => option.id === value)?.label ?? "미입력";
-}
-
-function createTestSessionIdForPaper({
-  classTemplateId = "",
-  problemBookId = "",
-  subject = "",
-  testDate = "",
-  testKind = "",
-  testTitle = ""
-} = {}) {
-  const sourceKey = problemBookId || [testKind, subject, testTitle].filter(Boolean).join("_");
-  return `test_session_${safeIdPart(testDate || "date")}_${safeIdPart(classTemplateId || "all")}_${safeIdPart(sourceKey || "test")}`;
-}
-
-function createTestAttemptId(testSessionId = "", studentId = "") {
-  return `test_attempt_${safeIdPart(testSessionId)}_${safeIdPart(studentId)}`;
 }
 
 function getProblemBookTotalQuestions(book = {}) {
