@@ -21,6 +21,7 @@ import {
   SpecialLectureGuideSelector,
   SpecialLectureGuideTextFields,
   SpecialLectureHighlightEditor,
+  SpecialLectureNoSelection,
   SpecialLectureNoticeMemoField,
   SpecialLectureSpecialNotesField,
   SpecialLectureManagementBar
@@ -11170,10 +11171,7 @@ function SpecialLectureNoticePanel({
         <SpecialLecturePreviewColumn guide={selectedGuide} guideUrl={selectedGuideUrl} />
       </div>
       ) : (
-        <div className="specialLectureNoSelection">
-          <strong>편집할 특강을 선택하세요.</strong>
-          <p>진행/예정 특강이 없으면 `새 특강 만들기`로 새 방학 특강을 시작하거나, 지난/보관 특강을 펼쳐 기존 안내문을 복원할 수 있습니다.</p>
-        </div>
+        <SpecialLectureNoSelection />
       )}
     </section>
   );
