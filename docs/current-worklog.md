@@ -79,6 +79,20 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 4번 - app config 상수 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
+- 범위 선택: 4번 `storageKeys/config/constants`의 첫 안전 단위로, `App.jsx` 상단에 있던 저장 키와 앱 전역 상수 묶음을 분리했다. option list 전체 분리는 범위가 넓어 이번 단위에 섞지 않았다.
+- 구현 결과: `src/app/appConfig.js`를 추가하고 `storageKeys`, `legacySensitiveStorageKeys`, `academyBrandName`, `academyOperationalStartDate`, `lessonDeleteRetentionMs`, `lessonCalendarColors`, `regularLessonClassColors`, `fallbackRegularLessonColors`, `classTemplateScheduleRules`를 이동했다. `App.jsx`는 같은 이름을 import해 기존 호출부를 유지한다.
+- 테스트 갱신: production scenario가 `teacherSession`, `lessonDeleteRetentionMs`, lesson color, 토요일 시간 규칙, `academyReminders` storage key를 `App.jsx`에서만 찾지 않고 `appConfig.js`까지 함께 검사하도록 갱신했다. 테스트 기대값과 금지 조건은 유지하고 파일 위치 가정만 바꿨다.
+- 저장 원천: 런타임 저장 key 문자열은 기존과 동일하다. Supabase, `app_state`, Storage, localStorage 저장 경로의 이름/버전은 바꾸지 않았다.
+- 외부 side effect: 없음. API 호출, Solapi 실제 발송/예약, `notification_jobs`, Tally, Slack, AI 호출 없음.
+- AI 검수 결과: 새 config 파일의 값은 기존 `App.jsx` 상수와 동일하고, `App.jsx`에는 import만 남았다. `npm run test:production`이 저장 키/색상/시간 규칙 불변식을 통과했으며 build도 통과해 사람 gate 없이 다음 낮은 위험 분리로 넘어갈 수 있다.
+- 남은 4번 후보: 화면별 option list와 view id 상수는 아직 `App.jsx`에 남아 있다. 다음 작업은 한 번에 전체 option list를 옮기기보다 작은 묶음 단위로 분리한다.
+- 사람 검토 필요 여부: 선택 사항. 화면 확인을 한다면 로그인 유지, 수업 달력 색상, 화목토 수업 시간 기본값이 이전과 같은지만 보면 된다. 운영 데이터 변경 검토는 필요 없다.
+- 중단 조건: localStorage key 버전이 바뀜, 로그인 세션 유지가 풀림, 수업 달력 색상이 바뀜, 화목토 토요일 시간이 바뀜, 테스트가 `App.jsx` 위치 가정을 낮추는 방식으로 삭제됨.
+- 검증: `node --check src/app/appConfig.js` 통과, `node --check scripts/scenario-tests-production.cjs` 통과, `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
+
 ### 2026-07-16 P1. App.jsx 리팩터링 2번 - shared EmptyState 분리
 
 - 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
