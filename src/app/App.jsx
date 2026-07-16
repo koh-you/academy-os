@@ -10311,9 +10311,7 @@ function NotificationCenter({
         {[
           ["scheduled", "예약", scheduledNoticeJobs.length, "공지 예약 대기"],
           ["sent", "발송 완료", sentNoticeJobs.length, "공지 발송 완료"],
-          ["pending", "확인 필요", pendingNoticeJobs.length, "응답 지연 공지"],
-          ["failed", "실패", failedNoticeJobs.length, "재확인 필요"],
-          ["draft", "정리함", draftNoticeJobs.length, "취소/초안"]
+          ["pending", "확인 필요", pendingNoticeJobs.length, "응답 지연 공지"]
         ].map(([id, label, count, detail]) => (
           <button className={jobFilter === id ? "active" : ""} key={id} onClick={() => selectJobFilter(id)} type="button">
             <span>{label}</span>
