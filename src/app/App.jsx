@@ -21,7 +21,10 @@ import {
   createTestSessionIdForPaper,
   getTestPaperKindLabel
 } from "../domains/tests/testManagerUtils.js";
-import { TestManagerTabs } from "../domains/tests/TestManagerPanels.jsx";
+import {
+  TestAttemptPanelHeader,
+  TestManagerTabs
+} from "../domains/tests/TestManagerPanels.jsx";
 import {
   SpecialLectureGuideBasicFields,
   SpecialLectureGuideSelector,
@@ -24286,13 +24289,7 @@ function MaterialManager({
 
       {activeTab === "attempts" ? (
         <section className="panel materialPanel testAttemptPanel">
-          <div className="sectionHeader">
-            <div>
-              <h1>응시 기록</h1>
-              <p className="muted">오늘 본 데일리/단원/누적 테스트와 학생별 결과만 기록합니다. 저장된 결과는 같은 날짜 수업 알림톡에 반영됩니다.</p>
-            </div>
-            <InlineSaveStatus label="응시 기록" saveState={testResultSaveState} />
-          </div>
+          <TestAttemptPanelHeader testResultSaveState={testResultSaveState} />
           <div className="testAttemptFormGrid">
             <label>
               응시일
