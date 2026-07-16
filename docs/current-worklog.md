@@ -81,6 +81,20 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. 알림관리 Solapi 발송결과 직접 대조/반영
+
+- 사용자 요청: 알림관리에서 알림톡을 예약한 뒤 예약 시각이 지나 `확인 필요`가 떠도 Solapi 결과와 직접 매칭해 OS 상태를 업데이트할 방법이 없었다. 수업일지의 Solapi 발송결과 업데이트처럼 알림관리에서도 확인/반영할 수 있게 한다.
+- 범위 선택: 기존 서버 `/api/notification-jobs/reconcile-solapi`와 `handleReconcileSolapiNotificationResults`를 재사용했다. 새 예약 생성, 즉시 발송, 알림톡 문구, 템플릿 원천은 변경하지 않았다.
+- 구현 결과: 알림관리/특강관리의 `NotificationCenter`에 `결과 확인일` date input과 `Solapi 결과 확인` 버튼을 추가했다. 버튼을 누르면 선택일의 `scheduled`/`send_unconfirmed` Solapi job을 Solapi 그룹/메시지와 대조하고, `notification_jobs.status/error/result`를 갱신한다.
+- 확인성 보강: 공지 발송 기록의 종류 칸에 Solapi group/message 참조값을 함께 표시해 OS 기록과 Solapi 결과를 직접 매칭할 수 있게 했다.
+- 저장 원천: Supabase `notification_jobs`가 주 원천이다. 수업일지 코멘트 알림톡 job이 같은 날짜에 포함되면 기존 reconcile 로직에 따라 `lesson_student_records`의 코멘트 발송 상태도 함께 갱신될 수 있다.
+- 외부 side effect: Solapi 그룹/메시지 조회만 수행한다. 예약 생성/취소/발송은 수행하지 않는다.
+- AI 검수 결과: 수업일지의 기존 `솔라피 발송결과` 버튼은 같은 handler를 계속 사용한다. 알림관리 버튼은 날짜 기반으로 같은 API를 호출하며, `updatedCount`/`checkedCount`/조회 실패 건수를 화면 메시지로 보여준다.
+- 테스트 보강: production scenario `20e-3 notification center reconciles scheduled notice Solapi results`를 추가했다.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과, `node --check api/server.js` 통과, `npm run test:production` 310개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
+- 사람 gate: 운영 알림관리 화면에서 예약 시각이 지난 공지 알림톡이 `확인 필요`로 보일 때 `결과 확인일`을 해당 예약일로 맞추고 `Solapi 결과 확인`을 눌러 상태가 `발송 완료`/`실패`/`확인 필요`로 갱신되는지 확인한다.
+- 중단 조건: 버튼 클릭으로 새 알림톡이 발송/예약됨, 예약 문구가 바뀜, Solapi 참조값이 없는 job을 매칭한 것처럼 표시됨, 수업일지 코멘트 상태가 예상 밖으로 바뀜.
+
 ### 2026-07-16 P1. 다음 세션 리팩터링 시작 지점 9번 고정
 
 - 사용자 요청: 다음 세션부터 리팩터링은 반드시 9번 `test manager`부터 이어가고, 다음 세션 프롬프트에는 지금까지의 리팩터링 결과가 넘어가야 하며, 새 세션이 사용자에게 먼저 확인 질문을 해야 한다.

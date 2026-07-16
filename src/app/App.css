@@ -478,6 +478,18 @@ button {
   color: #be123c;
 }
 
+.inlineNotice.ok {
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.inlineNotice.warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
 .autosaveRiskNotice {
   background: var(--status-danger-bg);
   border: 1px solid var(--status-danger-border);
@@ -7214,6 +7226,29 @@ button:disabled {
   justify-content: flex-end;
 }
 
+.solapiResultSyncControl {
+  align-items: center;
+  color: #475569;
+  display: flex;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 6px;
+}
+
+.solapiResultSyncControl input {
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  color: #17213d;
+  font-size: 13px;
+  font-weight: 800;
+  min-height: 32px;
+  padding: 0 8px;
+}
+
+.noticeSolapiResultNotice {
+  line-height: 1.45;
+}
+
 .noticeHistoryCollapsedSummary {
   background: #f8fafc;
   border: 1px dashed #cbd5e1;
@@ -7369,6 +7404,18 @@ button:disabled {
   line-height: 1.5;
   margin: 0;
   white-space: pre-wrap;
+}
+
+.notificationJobTypeCell {
+  display: grid;
+  gap: 4px;
+}
+
+.notificationJobTypeCell small {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 900;
+  overflow-wrap: anywhere;
 }
 
 .notificationJobActions {

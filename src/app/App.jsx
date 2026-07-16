@@ -6008,10 +6008,10 @@ export function App() {
     ]);
   }
 
-  async function handleReconcileSolapiNotificationResults({ lessonId = "", date = "" } = {}) {
+  async function handleReconcileSolapiNotificationResults({ lessonId = "", date = "", scheduledFrom = "", scheduledTo = "" } = {}) {
     const result = await postJsonWithTimeout(
       "/api/notification-jobs/reconcile-solapi",
-      { date, lessonId, limit: 500 },
+      { date, lessonId, scheduledFrom, scheduledTo, limit: 500 },
       30000,
       "Solapi 발송결과 조회가 30초를 넘었습니다. 예약 확인에서 다시 시도해 주세요."
     );
@@ -8484,6 +8484,7 @@ export function App() {
             specialLectureGuideSaveState={specialLectureGuideSaveState}
             showSpecialLectureTab={false}
             onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
+            onReconcileSolapiNotificationResults={handleReconcileSolapiNotificationResults}
             onSaveSpecialLectureGuides={handleSaveSpecialLectureGuides}
             onUpdateLessonNotificationPlan={handleUpdateLessonNotificationPlan}
             students={students}
@@ -8509,6 +8510,7 @@ export function App() {
             specialLectureGuideSaveState={specialLectureGuideSaveState}
             onCreateSpecialLectureLessons={handleCreateSpecialLectureLessons}
             onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
+            onReconcileSolapiNotificationResults={handleReconcileSolapiNotificationResults}
             onSaveSpecialLectureEnrollment={handleSaveSpecialLectureEnrollment}
             onSaveSpecialLectureEnrollments={handleSaveSpecialLectureEnrollments}
             onSaveSpecialLectureGuides={handleSaveSpecialLectureGuides}
@@ -9582,6 +9584,7 @@ function NotificationCenter({
   notificationJobsStatus = { state: "idle", message: "" },
   onCreateSpecialLectureLessons,
   onRefresh,
+  onReconcileSolapiNotificationResults,
   onSaveSpecialLectureEnrollment,
   onSaveSpecialLectureEnrollments,
   onSaveSpecialLectureGuides,
@@ -9614,6 +9617,8 @@ function NotificationCenter({
   const [scheduleTime, setScheduleTime] = useState("18:00");
   const [searchText, setSearchText] = useState("");
   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
+  const [solapiResultSyncDate, setSolapiResultSyncDate] = useState(today);
+  const [solapiResultSyncState, setSolapiResultSyncState] = useState({ state: "idle", message: "" });
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
   const notificationStatus = integrationStatus?.notifications;
@@ -9627,6 +9632,11 @@ function NotificationCenter({
     ...notificationJobs
   ];
   const noticeJobs = mergedNotificationJobs.filter((job) => String(job.notificationType ?? "").startsWith("notice_"));
+  const noticeSolapiResultTargets = noticeJobs.filter((job) =>
+    job.provider === "solapi" &&
+    getNotificationJobProviderReference(job) &&
+    (job.status === "send_unconfirmed" || (job.status === "scheduled" && isNotificationSchedulePast(job.scheduledAt, 0)))
+  );
   const pastScheduledNoticeJobs = noticeJobs.filter((job) => job.status === "scheduled" && isNotificationSchedulePast(job.scheduledAt));
   const scheduledNoticeJobs = noticeJobs.filter((job) => job.status === "scheduled" && !isNotificationSchedulePast(job.scheduledAt));
   const sentNoticeJobs = noticeJobs.filter((job) => job.status === "sent");
@@ -9719,6 +9729,9 @@ function NotificationCenter({
   const studentRecipientCount = noticeRecipients.filter((recipient) => recipient.audience === "student").length;
   const noticeText = [noticeTitle.trim() ? `[${noticeTitle.trim()}]` : "", noticeBody.trim()].filter(Boolean).join("\n\n");
   const scheduledAt = scheduleDate && scheduleTime ? new Date(`${scheduleDate}T${scheduleTime}:00+09:00`).toISOString() : "";
+  const solapiResultSyncTargetsForDate = noticeSolapiResultTargets.filter((job) =>
+    solapiResultSyncDate && job.scheduledAt && toKoreaDateString(new Date(job.scheduledAt)) === solapiResultSyncDate
+  );
 
   useEffect(() => {
     setSelectedStudentIds((current) => current.filter((studentId) => classFilteredStudents.some((student) => student.studentId === studentId)));
@@ -9968,6 +9981,29 @@ function NotificationCenter({
       refreshNoticeJobsInBackground();
     } finally {
       setIsSendingNotice(false);
+    }
+  }
+
+  async function reconcileSolapiResultsForNoticeDate() {
+    if (!onReconcileSolapiNotificationResults || !solapiResultSyncDate || solapiResultSyncState.state === "loading") return;
+    setSolapiResultSyncState({
+      state: "loading",
+      message: `${solapiResultSyncDate} Solapi 결과를 조회하고 OS 기록과 대조하는 중입니다.`
+    });
+    try {
+      const result = await onReconcileSolapiNotificationResults({ date: solapiResultSyncDate });
+      const checkedCount = result?.checkedCount ?? 0;
+      const updatedCount = result?.updatedCount ?? 0;
+      const failedCount = (result?.checked ?? []).filter((item) => item.status === "failed_to_check").length;
+      setSolapiResultSyncState({
+        state: failedCount ? "partial" : "saved",
+        message: `Solapi 결과 대조 완료: 조회 ${checkedCount}건 · OS 반영 ${updatedCount}건${failedCount ? ` · 조회 실패 ${failedCount}건` : ""}`
+      });
+      if (updatedCount || solapiResultSyncTargetsForDate.length) setJobFilter("pending");
+      setIsNoticeHistoryOpen(true);
+      refreshNoticeJobsInBackground();
+    } catch (error) {
+      setSolapiResultSyncState({ state: "failed", message: `Solapi 결과 대조 실패: ${error.message}` });
     }
   }
 
@@ -10324,6 +10360,18 @@ function NotificationCenter({
             <h2>공지 발송 기록 · {filterLabels[jobFilter]}</h2>
           </div>
           <div className="notificationQueueActions">
+            <label className="solapiResultSyncControl">
+              <span>결과 확인일</span>
+              <input type="date" value={solapiResultSyncDate} onChange={(event) => setSolapiResultSyncDate(event.target.value)} />
+            </label>
+            <button
+              className="softButton compact"
+              disabled={!onReconcileSolapiNotificationResults || !solapiResultSyncDate || solapiResultSyncState.state === "loading"}
+              onClick={reconcileSolapiResultsForNoticeDate}
+              type="button"
+            >
+              {solapiResultSyncState.state === "loading" ? "확인 중" : "Solapi 결과 확인"}
+            </button>
             {jobFilter !== "all" ? (
               <button className="softButton compact" onClick={() => setJobFilter("all")} type="button">전체 보기</button>
             ) : null}
@@ -10338,6 +10386,19 @@ function NotificationCenter({
             </button>
           </div>
         </div>
+        <p className={[
+          "inlineNotice",
+          "noticeSolapiResultNotice",
+          solapiResultSyncState.state === "failed" ? "danger" : "",
+          solapiResultSyncState.state === "saved" ? "ok" : "",
+          solapiResultSyncState.state === "partial" ? "warning" : ""
+        ].filter(Boolean).join(" ")}>
+          {solapiResultSyncState.message || (
+            solapiResultSyncTargetsForDate.length
+              ? `${solapiResultSyncDate} 확인 필요 Solapi 예약 ${solapiResultSyncTargetsForDate.length}건이 있습니다. 버튼을 누르면 Solapi 그룹/메시지 결과와 직접 대조해 OS 상태를 갱신합니다.`
+              : "예약 시각이 지난 Solapi 알림톡은 결과 확인일을 선택해 OS 상태와 직접 대조할 수 있습니다."
+          )}
+        </p>
         {isNoticeHistoryOpen ? (
         <div className="notificationTable noticeHistoryTable">
           <div className="notificationTableHead">
@@ -10355,7 +10416,10 @@ function NotificationCenter({
             filteredNoticeJobs.map((job) => (
               <article className="notificationTableRow" key={job.notificationJobId}>
                 <span className={`statusPill status-${getNotificationJobStatusClass(job)}`}>{formatNotificationJobStatus(job) || getNotificationStatusLabel(job.status)}</span>
-                <strong>{getNotificationJobLabel(job.notificationType)}</strong>
+                <span className="notificationJobTypeCell">
+                  <strong>{getNotificationJobLabel(job.notificationType)}</strong>
+                  {getNotificationJobProviderReference(job) ? <small>Solapi {getNotificationJobProviderReference(job)}</small> : null}
+                </span>
                 <span>{studentName(job.studentId, job.payload)}</span>
                 <span>{job.scheduledAt ? formatKoreaTimeLabel(job.scheduledAt) : job.createdAt ? formatKoreaTimeLabel(job.createdAt) : "-"}</span>
                 <span>{job.recipient || "번호 없음"}</span>
