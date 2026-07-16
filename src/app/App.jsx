@@ -38,9 +38,11 @@ import {
   formatCalendarEventLabel,
   formatCalendarSummaryLabel,
   formatDateRangeText,
+  formatPeriodSummaryLabel,
   getDateRangeField,
   getMonthCellDisplayEvents,
   getSchoolCalendarEventColor,
+  getSchoolCalendarFilterGroup,
   getSchoolCalendarSchoolColor,
   isDateWithinEvent,
   joinCalendarLabel,
@@ -4314,14 +4316,6 @@ function dedupeExamPrepRowsForDisplay(rows = []) {
   return [...grouped.values()];
 }
 
-function getSchoolCalendarFilterGroup(event = {}) {
-  if (event.type === "examPeriod") return "examPeriod";
-  if (event.type === "mathExam") return "mathExam";
-  if (event.type === "vacation") return "vacation";
-  if (event.type === "schoolEvent") return "schoolEvent";
-  return "custom";
-}
-
 function syncPrimaryMathExamDate(entries = []) {
   return entries.find((entry) => entry.date)?.date || "";
 }
@@ -4503,13 +4497,6 @@ function groupExamPeriodEventsForMonth(events = []) {
     ...event,
     schoolNames: [...event.schoolNames]
   }));
-}
-
-function formatPeriodSummaryLabel(event = {}) {
-  const schools = Array.isArray(event.schoolNames) ? event.schoolNames.filter(Boolean) : [];
-  if (!schools.length) return event.schoolName || "시험기간";
-  if (schools.length <= 2) return schools.join(", ");
-  return `${schools.slice(0, 2).join(", ")} 외 ${schools.length - 2}`;
 }
 
 function getMonthDateRange(monthString = today) {

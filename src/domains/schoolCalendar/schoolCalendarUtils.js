@@ -122,3 +122,18 @@ export function formatCalendarSummaryLabel(event = {}) {
     .join(" ")
     .trim() || formatCalendarEventLabel(event);
 }
+
+export function getSchoolCalendarFilterGroup(event = {}) {
+  if (event.type === "examPeriod") return "examPeriod";
+  if (event.type === "mathExam") return "mathExam";
+  if (event.type === "vacation") return "vacation";
+  if (event.type === "schoolEvent") return "schoolEvent";
+  return "custom";
+}
+
+export function formatPeriodSummaryLabel(event = {}) {
+  const schools = Array.isArray(event.schoolNames) ? event.schoolNames.filter(Boolean) : [];
+  if (!schools.length) return event.schoolName || "시험기간";
+  if (schools.length <= 2) return schools.join(", ");
+  return `${schools.slice(0, 2).join(", ")} 외 ${schools.length - 2}`;
+}
