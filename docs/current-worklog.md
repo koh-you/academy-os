@@ -79,6 +79,19 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 6번 - 특강 일정 계산 panel 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
+- 범위 선택: 6번 `specialLecture management`의 아홉 번째 단위로, 특강관리의 `일정 계산` panel 렌더만 분리했다. 일정 계산값 생성 함수, 일정 계산 적용 함수, 저장 함수는 `App.jsx`에 그대로 두었다.
+- 구현 결과: `SpecialLectureScheduleCalculator`를 `src/domains/specialLectures/SpecialLectureManagementPanel.jsx`에 추가하고, `App.jsx`는 계산 결과, open 상태, schedule rule 목록, 기존 callback(`applyCalculatedSchedule`, `updateSelectedGuide`, `updateScheduleRule`, `toggleScheduleRuleDay`, `addScheduleRule`, `removeScheduleRule`)을 props로 넘긴다. 달력 preview 렌더는 새 컴포넌트에서 `SpecialLectureCalendarPreview`를 재사용한다.
+- 저장 원천: 변경 없음. 기간/요금/rule 입력과 `일정 계산 적용`은 기존과 같이 `draftGuides` local draft만 갱신하며, 실제 저장은 기존 `안내문 저장`/`saveGuides` 흐름을 거친다. `/api/special-lecture-guides` payload, Supabase/app_state 원천은 변경하지 않았다.
+- 외부 side effect: 없음. 새 API 호출, Solapi 실제 발송/예약, `notification_jobs`, Tally webhook, 특강 신청자 저장, 특강 수업 생성 API 호출 없음.
+- AI 검수 결과: `applyCalculatedSchedule`, `updateScheduleRule`, `toggleScheduleRuleDay`, `persistDraftGuides`, `prepareSpecialLectureNotice`, 신청자/수업 생성 함수 diff가 없다. 기존 period/price/rule field와 button 문구를 그대로 이동했고, production scenario와 build가 통과했다.
+- 남은 6번 후보: 회차 카드 editor. 회차 추가/삭제/update 함수 본문을 건드리거나 신청자/수업 생성 gate와 섞이면 별도 gate로 분리한다.
+- 사람 검토 필요 여부: 선택 사항. 화면 확인을 한다면 일정 계산 펼침/접힘, 기간/요금/rule 입력, 요일 toggle, `일정 계산 적용`, 달력 preview가 이전처럼 보이는지만 보면 된다. 실제 `안내문 저장`은 필수 검토가 아니다.
+- 중단 조건: 일정 계산 적용 후 회차가 달라짐, 요일 toggle index가 어긋남, 계산 수강료/총 시간이 달라짐, 저장/API/수업 생성 함수 diff가 함께 생김.
+- 검증: `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
+
 ### 2026-07-16 P1. App.jsx 리팩터링 6번 - 특강 미선택 안내 분리
 
 - 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능

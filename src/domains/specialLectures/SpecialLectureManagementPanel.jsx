@@ -1,8 +1,12 @@
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { SpecialLectureCalendarPreview } from "./SpecialLecturePublicPage.jsx";
 import {
+  formatCurrencyWon,
+  formatSpecialLectureHours,
   getSpecialLectureStatusBadge,
   isSpecialLectureArchived,
-  specialLectureSeasonOptions
+  specialLectureSeasonOptions,
+  specialLectureWeekdayOptions
 } from "./specialLectureGuideUtils.js";
 
 export function SpecialLectureManagementBar({
@@ -226,6 +230,148 @@ export function SpecialLectureNoticeMemoField({
       알림톡 링크 안내 문장
       <input value={guide.noticeMemo} onChange={(event) => onUpdateGuide?.("noticeMemo", event.target.value)} />
     </label>
+  );
+}
+
+export function SpecialLectureScheduleCalculator({
+  calculatedSessionCount = 0,
+  calculatedTotalHours = 0,
+  calculatedTuition = 0,
+  calculatedWeekdaySummaryText = "",
+  generatedSessionsPreview = [],
+  guide,
+  isOpen = false,
+  normalizedScheduleRules = [],
+  onAddScheduleRule,
+  onApplyCalculatedSchedule,
+  onRemoveScheduleRule,
+  onToggleOpen,
+  onToggleScheduleRuleDay,
+  onUpdateGuide,
+  onUpdateScheduleRule
+}) {
+  if (!guide) {
+    return null;
+  }
+
+  return (
+    <section className={`specialLectureCalculator ${isOpen ? "open" : "collapsed"}`}>
+      <div className="sectionHeader slim specialLectureCalculatorHeader">
+        <div>
+          <p className="eyebrow">SCHEDULE BUILDER</p>
+          <h3>일정 계산</h3>
+          <p className="specialLectureCalculatorSummary">
+            {calculatedSessionCount}회 · {formatSpecialLectureHours(calculatedTotalHours) || "0시간"} · {formatCurrencyWon(calculatedTuition)}
+          </p>
+        </div>
+        <div className="specialLectureCalculatorHeaderActions">
+          {isOpen ? (
+            <button className="softButton compact" onClick={onApplyCalculatedSchedule} type="button">일정 계산 적용</button>
+          ) : null}
+          <button
+            aria-expanded={isOpen}
+            className="softButton compact"
+            onClick={onToggleOpen}
+            type="button"
+          >
+            {isOpen ? "접기" : "펼치기"}
+          </button>
+        </div>
+      </div>
+
+      {isOpen ? (
+        <>
+          <div className="specialLecturePeriodGrid">
+            <label>
+              기간 시작
+              <input type="date" value={guide.periodStart} onChange={(event) => onUpdateGuide?.("periodStart", event.target.value)} />
+            </label>
+            <label>
+              기간 종료
+              <input type="date" value={guide.periodEnd} onChange={(event) => onUpdateGuide?.("periodEnd", event.target.value)} />
+            </label>
+          </div>
+          <div className="specialLectureCalcStats">
+            <div>
+              <span>계산 회차</span>
+              <strong>{calculatedSessionCount}회</strong>
+            </div>
+            <div>
+              <span>총 시간</span>
+              <strong>{formatSpecialLectureHours(calculatedTotalHours) || "-"}</strong>
+            </div>
+            <div>
+              <span>계산 수강료</span>
+              <strong>{formatCurrencyWon(calculatedTuition)}</strong>
+            </div>
+          </div>
+          <div className="specialLectureWeekdaySummary">
+            <span>요일별 회차</span>
+            <strong>{calculatedWeekdaySummaryText}</strong>
+          </div>
+          <div className="specialLecturePriceGrid">
+            <label>
+              요금 기준
+              <select value={guide.pricingMode} onChange={(event) => onUpdateGuide?.("pricingMode", event.target.value)}>
+                <option value="perSession">회당 금액</option>
+                <option value="perHour">시간당 금액</option>
+              </select>
+            </label>
+            <label>
+              회당 금액
+              <input
+                type="number"
+                value={guide.pricePerSession}
+                onChange={(event) => onUpdateGuide?.("pricePerSession", Number(event.target.value))}
+              />
+            </label>
+            <label>
+              시간당 금액
+              <input
+                type="number"
+                value={guide.pricePerHour}
+                onChange={(event) => onUpdateGuide?.("pricePerHour", Number(event.target.value))}
+              />
+            </label>
+          </div>
+          <div className="specialLectureRuleList">
+            {normalizedScheduleRules.map((rule, index) => (
+              <div className="specialLectureRuleRow" key={`${index}_${rule.startTime}_${rule.endTime}`}>
+                <div className="specialLectureWeekdayToggles">
+                  {specialLectureWeekdayOptions.map((day) => (
+                    <button
+                      className={rule.days.includes(day.value) ? "active" : ""}
+                      key={day.value}
+                      onClick={() => onToggleScheduleRuleDay?.(index, day.value)}
+                      type="button"
+                    >
+                      {day.label}
+                    </button>
+                  ))}
+                </div>
+                <label>
+                  시작
+                  <input type="time" value={rule.startTime} onChange={(event) => onUpdateScheduleRule?.(index, { startTime: event.target.value })} />
+                </label>
+                <label>
+                  종료
+                  <input type="time" value={rule.endTime} onChange={(event) => onUpdateScheduleRule?.(index, { endTime: event.target.value })} />
+                </label>
+                <button className="dangerSoftButton compact" onClick={() => onRemoveScheduleRule?.(index)} type="button">삭제</button>
+              </div>
+            ))}
+          </div>
+          <button className="softButton compact" onClick={onAddScheduleRule} type="button">요일/시간 추가</button>
+          <SpecialLectureCalendarPreview guide={{ ...guide, sessions: generatedSessionsPreview }} />
+        </>
+      ) : (
+        <div className="specialLectureCalculatorCollapsedSummary">
+          <span>요일별 {calculatedWeekdaySummaryText}</span>
+          <span>규칙 {normalizedScheduleRules.length}개</span>
+          <span>달력과 요금 설정은 펼치면 보입니다.</span>
+        </div>
+      )}
+    </section>
   );
 }
 

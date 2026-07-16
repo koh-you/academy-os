@@ -23,11 +23,11 @@ import {
   SpecialLectureHighlightEditor,
   SpecialLectureNoSelection,
   SpecialLectureNoticeMemoField,
+  SpecialLectureScheduleCalculator,
   SpecialLectureSpecialNotesField,
   SpecialLectureManagementBar
 } from "../domains/specialLectures/SpecialLectureManagementPanel.jsx";
 import {
-  SpecialLectureCalendarPreview,
   SpecialLectureNoticeActionPanel,
   SpecialLecturePreviewColumn,
   SpecialLecturePublicPage
@@ -92,7 +92,6 @@ import {
   replaceSpecialLectureToken,
   replaceSpecialLectureYearInDateKey,
   replaceSpecialLectureYearToken,
-  specialLectureWeekdayOptions
 } from "../domains/specialLectures/specialLectureGuideUtils.js";
 import { AutosaveRiskNotice } from "../shared/components/AutosaveRiskNotice.jsx";
 import { EmptyState } from "../shared/components/EmptyState.jsx";
@@ -10950,123 +10949,23 @@ function SpecialLectureNoticePanel({
             onUpdateGuide={updateSelectedGuide}
           />
 
-          <section className={`specialLectureCalculator ${isScheduleBuilderOpen ? "open" : "collapsed"}`}>
-            <div className="sectionHeader slim specialLectureCalculatorHeader">
-              <div>
-                <p className="eyebrow">SCHEDULE BUILDER</p>
-                <h3>일정 계산</h3>
-                <p className="specialLectureCalculatorSummary">
-                  {calculatedSessionCount}회 · {formatSpecialLectureHours(calculatedTotalHours) || "0시간"} · {formatCurrencyWon(calculatedTuition)}
-                </p>
-              </div>
-              <div className="specialLectureCalculatorHeaderActions">
-                {isScheduleBuilderOpen ? (
-                  <button className="softButton compact" onClick={applyCalculatedSchedule} type="button">일정 계산 적용</button>
-                ) : null}
-                <button
-                  aria-expanded={isScheduleBuilderOpen}
-                  className="softButton compact"
-                  onClick={() => setIsScheduleBuilderOpen((current) => !current)}
-                  type="button"
-                >
-                  {isScheduleBuilderOpen ? "접기" : "펼치기"}
-                </button>
-              </div>
-            </div>
-
-            {isScheduleBuilderOpen ? (
-              <>
-                <div className="specialLecturePeriodGrid">
-                  <label>
-                    기간 시작
-                    <input type="date" value={selectedGuide.periodStart} onChange={(event) => updateSelectedGuide("periodStart", event.target.value)} />
-                  </label>
-                  <label>
-                    기간 종료
-                    <input type="date" value={selectedGuide.periodEnd} onChange={(event) => updateSelectedGuide("periodEnd", event.target.value)} />
-                  </label>
-                </div>
-                <div className="specialLectureCalcStats">
-                  <div>
-                    <span>계산 회차</span>
-                    <strong>{calculatedSessionCount}회</strong>
-                  </div>
-                  <div>
-                    <span>총 시간</span>
-                    <strong>{formatSpecialLectureHours(calculatedTotalHours) || "-"}</strong>
-                  </div>
-                  <div>
-                    <span>계산 수강료</span>
-                    <strong>{formatCurrencyWon(calculatedTuition)}</strong>
-                  </div>
-                </div>
-                <div className="specialLectureWeekdaySummary">
-                  <span>요일별 회차</span>
-                  <strong>{calculatedWeekdaySummaryText}</strong>
-                </div>
-                <div className="specialLecturePriceGrid">
-                  <label>
-                    요금 기준
-                    <select value={selectedGuide.pricingMode} onChange={(event) => updateSelectedGuide("pricingMode", event.target.value)}>
-                      <option value="perSession">회당 금액</option>
-                      <option value="perHour">시간당 금액</option>
-                    </select>
-                  </label>
-                  <label>
-                    회당 금액
-                    <input
-                      type="number"
-                      value={selectedGuide.pricePerSession}
-                      onChange={(event) => updateSelectedGuide("pricePerSession", Number(event.target.value))}
-                    />
-                  </label>
-                  <label>
-                    시간당 금액
-                    <input
-                      type="number"
-                      value={selectedGuide.pricePerHour}
-                      onChange={(event) => updateSelectedGuide("pricePerHour", Number(event.target.value))}
-                    />
-                  </label>
-                </div>
-                <div className="specialLectureRuleList">
-                  {normalizedScheduleRules.map((rule, index) => (
-                    <div className="specialLectureRuleRow" key={`${index}_${rule.startTime}_${rule.endTime}`}>
-                      <div className="specialLectureWeekdayToggles">
-                        {specialLectureWeekdayOptions.map((day) => (
-                          <button
-                            className={rule.days.includes(day.value) ? "active" : ""}
-                            key={day.value}
-                            onClick={() => toggleScheduleRuleDay(index, day.value)}
-                            type="button"
-                          >
-                            {day.label}
-                          </button>
-                        ))}
-                      </div>
-                      <label>
-                        시작
-                        <input type="time" value={rule.startTime} onChange={(event) => updateScheduleRule(index, { startTime: event.target.value })} />
-                      </label>
-                      <label>
-                        종료
-                        <input type="time" value={rule.endTime} onChange={(event) => updateScheduleRule(index, { endTime: event.target.value })} />
-                      </label>
-                      <button className="dangerSoftButton compact" onClick={() => removeScheduleRule(index)} type="button">삭제</button>
-                    </div>
-                  ))}
-                </div>
-                <button className="softButton compact" onClick={addScheduleRule} type="button">요일/시간 추가</button>
-                <SpecialLectureCalendarPreview guide={{ ...selectedGuide, sessions: generatedSessionsPreview }} />
-              </>
-            ) : (
-              <div className="specialLectureCalculatorCollapsedSummary">
-                <span>요일별 {calculatedWeekdaySummaryText}</span>
-                <span>규칙 {normalizedScheduleRules.length}개</span>
-                <span>달력과 요금 설정은 펼치면 보입니다.</span>
-              </div>
-            )}
-          </section>
+          <SpecialLectureScheduleCalculator
+            calculatedSessionCount={calculatedSessionCount}
+            calculatedTotalHours={calculatedTotalHours}
+            calculatedTuition={calculatedTuition}
+            calculatedWeekdaySummaryText={calculatedWeekdaySummaryText}
+            generatedSessionsPreview={generatedSessionsPreview}
+            guide={selectedGuide}
+            isOpen={isScheduleBuilderOpen}
+            normalizedScheduleRules={normalizedScheduleRules}
+            onAddScheduleRule={addScheduleRule}
+            onApplyCalculatedSchedule={applyCalculatedSchedule}
+            onRemoveScheduleRule={removeScheduleRule}
+            onToggleOpen={() => setIsScheduleBuilderOpen((current) => !current)}
+            onToggleScheduleRuleDay={toggleScheduleRuleDay}
+            onUpdateGuide={updateSelectedGuide}
+            onUpdateScheduleRule={updateScheduleRule}
+          />
 
           <section className="specialLectureSessionCards">
             <div className="sectionHeader slim">
