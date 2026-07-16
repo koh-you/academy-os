@@ -36,6 +36,33 @@ E:\academy-os 작업을 이어가겠습니다.
    - 한 번에 하나의 의미 단위만 진행합니다.
    - 순서는 `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`입니다.
    - 기능 변경과 리팩터링 범위를 섞지 않습니다.
+   - 아래 18개 기준 로드맵을 공통 후보 목록으로 사용합니다. 실제 착수 전에는 최신 `docs/current-worklog.md`와 `git status --short`를 보고 이미 완료된 하위 작업과 남은 하위 작업을 먼저 구분합니다.
+
+App.jsx 리팩터링 18개 기준 로드맵:
+1. `specialLecture helpers/config` - 특강 안내문 계산, URL, 회차 normalize, Tally query helper.
+2. `shared UI primitives` - `InlineSaveStatus`, `MetricCard`, `Modal`, `EmptyState`, 단순 카드/상태 표시 컴포넌트.
+3. `API client wrappers` - `fetchJson`, `getJsonWithTimeout`, `postJsonWithTimeout`, 공통 API 에러/timeout 처리.
+4. `storageKeys/config/constants` - storage key, view id, option list, 상수/설정 묶음.
+5. `specialLecture preview/public` - 특강 공개 안내문 미리보기, 공개 URL 렌더링, 복사 문구.
+6. `specialLecture management` - 운영 > 특강관리 편집 화면, 신청자 연결, 특강 수업 생성 gate.
+7. `school calendar helpers` - 학사일정/시험기간 날짜 계산, 표시 색상, 월간 요약 helper.
+8. `school calendar components` - 학사일정 카드/달력/모달 UI.
+9. `test manager` - 시험지관리, 테스트 회차, 학생별 테스트 결과 입력/조회.
+10. `student-parent portals` - 학생/학부모 포털, 공개 링크, 모바일 표시 컴포넌트.
+11. `supplement job builders` - 숙제보충/결석보강 11시 예약, 일정 변경 알림, `notification_jobs` payload 생성.
+12. `supplement center/modals` - 보충관리 화면, 숙제보충/결석보강 상세, 완료 처리.
+13. `notification center` - 일반공지, 알림톡 관리, Solapi 발송/예약/결과 확인 UI.
+14. `exam prep center` - 시험관리, 직전수업/시험대비 후보, 실제 수업 반영 gate.
+15. `lesson hub/calendar` - 수업 달력, 수업 생성/수정/상세 모달, 자동 후보 표시.
+16. `attendance` - 출결 입력, 태블릿/수업일지 출결 패널, 등하원 알림톡 연결.
+17. `LessonJournalDetail` - 수업일지 상세, 학생별 기록, 숙제/코멘트/알림톡 미리보기.
+18. `App shell/hooks/context` - App 초기화, activeView 라우팅, 전역 상태/context/hooks 분리.
+
+위험도 기본값:
+- 1~4는 낮음
+- 5~10은 중간
+- 11~18은 높음 또는 매우 높음
+- 11~18은 Supabase 원천, `notification_jobs`, Solapi, 출결, 수업일지 저장 side effect를 먼저 inventory로 확인한 뒤 진행합니다.
 4. Solapi 특강 템플릿 검수 후 연결
    - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인합니다.
    - 검수 완료 전에는 임시 특강 알림톡 구조를 유지합니다.
@@ -98,6 +125,7 @@ E:\academy-os 작업을 이어가겠습니다.
 ## Handoff Notes
 
 - 미룬 작업 큐의 source of truth는 `AGENTS.md` 최상단과 `docs/current-worklog.md` 최상단입니다.
+- App.jsx 리팩터링 18개 기준 로드맵은 `AGENTS.md`, `docs/current-worklog.md`, 이 README에 함께 기록되어 있습니다. 다른 세션이 목록을 못 찾으면 먼저 이 세 파일의 최상단 큐와 `App.jsx Refactoring Roadmap - 18 Units`를 확인하게 하세요.
 - 이 README는 붙여넣기 편의를 위한 사본입니다. 세션 종료 시 새로 미룬 작업이 생기면 세 곳을 함께 갱신하세요.
 - 보충 알림톡 라벨 정리 기능 커밋은 `58728cb0 Clarify supplement homework reminder labels`입니다. handoff 문서 갱신 커밋이 뒤에 올 수 있으므로 새 세션에서 반드시 `git log -1 --oneline`으로 최신 커밋을 다시 확인하세요.
 - 현재 로컬에 남을 수 있는 미추적 항목: `.codex-temp/`. 커밋하지 않습니다.

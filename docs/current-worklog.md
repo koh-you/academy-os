@@ -22,10 +22,36 @@
    - 목표: App.jsx를 의미 단위로 계속 분리하되, 기능 변경과 리팩터링 범위를 섞지 않는다.
    - 순서: `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`.
    - 다음 후보는 매번 현재 diff와 최신 작업로그를 보고 다시 제안한다. 위험이 낮은 helper/config/API/client/component부터 진행하고, 수업일지/출결/Solapi/보충관리처럼 side effect가 큰 영역은 충분한 gate 이후 진행한다.
+   - 기준 로드맵: 아래 `App.jsx 리팩터링 18개 기준 로드맵`을 다음 세션들의 공통 후보 목록으로 사용한다. 이미 일부 분리된 항목도 남은 하위 컴포넌트/헬퍼가 있으면 같은 묶음 안에서 계속 진행한다.
 4. `Solapi 특강 템플릿 검수 후 연결`
    - 상태: 외부 검수 대기.
    - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다.
    - 검수 전에는 임시 특강 알림톡 구조를 유지하고, 검수 완료 확인 후에만 템플릿 ID/변수 연결, 테스트 데이터 발송, 링크/문구 검수를 진행한다.
+
+## App.jsx 리팩터링 18개 기준 로드맵
+
+이 목록은 코드 색인화/리팩터링 논의에서 만든 기준 순서다. 다른 세션이 `18개 목록이 없다`고 판단하지 않도록 `AGENTS.md`, 이 worklog, `docs/next-session/README.md`에 같은 목록을 남긴다. 실제 착수 전에는 최신 worklog와 git diff를 보고 이미 끝난 하위 작업, 남은 하위 작업, 사람 gate 통과 여부를 먼저 확인한다.
+
+1. `specialLecture helpers/config` - 특강 안내문 계산, URL, 회차 normalize, Tally query helper.
+2. `shared UI primitives` - `InlineSaveStatus`, `MetricCard`, `Modal`, `EmptyState`, 단순 카드/상태 표시 컴포넌트.
+3. `API client wrappers` - `fetchJson`, `getJsonWithTimeout`, `postJsonWithTimeout`, 공통 API 에러/timeout 처리.
+4. `storageKeys/config/constants` - storage key, view id, option list, 상수/설정 묶음.
+5. `specialLecture preview/public` - 특강 공개 안내문 미리보기, 공개 URL 렌더링, 복사 문구.
+6. `specialLecture management` - 운영 > 특강관리 편집 화면, 신청자 연결, 특강 수업 생성 gate.
+7. `school calendar helpers` - 학사일정/시험기간 날짜 계산, 표시 색상, 월간 요약 helper.
+8. `school calendar components` - 학사일정 카드/달력/모달 UI.
+9. `test manager` - 시험지관리, 테스트 회차, 학생별 테스트 결과 입력/조회.
+10. `student-parent portals` - 학생/학부모 포털, 공개 링크, 모바일 표시 컴포넌트.
+11. `supplement job builders` - 숙제보충/결석보강 11시 예약, 일정 변경 알림, `notification_jobs` payload 생성.
+12. `supplement center/modals` - 보충관리 화면, 숙제보충/결석보강 상세, 완료 처리.
+13. `notification center` - 일반공지, 알림톡 관리, Solapi 발송/예약/결과 확인 UI.
+14. `exam prep center` - 시험관리, 직전수업/시험대비 후보, 실제 수업 반영 gate.
+15. `lesson hub/calendar` - 수업 달력, 수업 생성/수정/상세 모달, 자동 후보 표시.
+16. `attendance` - 출결 입력, 태블릿/수업일지 출결 패널, 등하원 알림톡 연결.
+17. `LessonJournalDetail` - 수업일지 상세, 학생별 기록, 숙제/코멘트/알림톡 미리보기.
+18. `App shell/hooks/context` - App 초기화, activeView 라우팅, 전역 상태/context/hooks 분리.
+
+위험도 기본값: 1~4는 낮음, 5~10은 중간, 11~18은 높음 또는 매우 높음으로 본다. 11~18은 Supabase 원천, `notification_jobs`, Solapi, 출결, 수업일지 저장 side effect를 inventory로 확인한 뒤에만 진행한다.
 
 ## 2026-07-15 세션 마무리 요약
 
@@ -52,6 +78,15 @@
 - AI 자기검토 기본값: 완료 답변에는 사용자가 검토할 절차뿐 아니라 AI가 스스로 답한 전체 맥락/사용자 의도/변경 이유/저장 원천/사용자 편집본 보호/중단 조건을 포함한다. 단계별 버튼 안내가 맞아도 이 질문에 답할 수 없으면 작업 완료로 보지 않는다.
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
+
+### 2026-07-16 P1. App.jsx 리팩터링 18개 로드맵 문서화
+
+- 상태: 완료 - 문서 정정
+- 사용자 요청: 다른 세션에서 리팩터링 18개 순차 진행을 하려는데 18개 목록이 없다고 한다. 코드 색인화로 만든 리팩터링 작업절차가 왜 지침에 없는지 확인한다.
+- 확인 결과: `AGENTS.md`와 `docs/current-worklog.md`에는 리팩터링 원칙과 낮은 위험부터 진행한다는 방향만 있었고, 18개 후보 목록 자체는 고정 지침으로 남아 있지 않았다. 다른 세션이 목록을 못 찾는 것이 맞다.
+- 정정 결과: `AGENTS.md`, `docs/current-worklog.md`, `docs/next-session/README.md`에 `App.jsx 리팩터링 18개 기준 로드맵`을 명시한다. 다음 세션은 이 목록을 공통 후보 목록으로 쓰되, 착수 전 최신 worklog와 git diff를 보고 이미 끝난 하위 작업과 남은 하위 작업을 먼저 구분한다.
+- 저장 원천: 문서/작업지침만 갱신했다. 런타임 저장 원천, Supabase, `app_state`, `notification_jobs`, Solapi/Tally/Slack 동작은 변경하지 않는다.
+- 검증: 문서 변경 후 `git diff --check`로 공백/문법 수준을 확인한다. 코드 변경이 아니므로 build/test는 필요하지 않다.
 
 ### 2026-07-16 P1. App.jsx 리팩터링 - shared MetricCard 분리
 

@@ -29,6 +29,7 @@
    - 목표: App.jsx를 의미 단위로 계속 분리하되, 기능 변경과 리팩터링 범위를 섞지 않는다.
    - 순서: `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`.
    - 우선순위: 위험이 낮은 helper/config/API/client/component부터 진행하고, `LessonJournalDetail`, 출결, Solapi 예약, 보충관리처럼 저장/발송 side effect가 큰 영역은 충분한 gate 이후 진행한다.
+   - 기준 로드맵: 아래 `App.jsx Refactoring Roadmap - 18 Units`를 다음 세션의 리팩터링 후보 목록으로 사용한다. 이미 일부 분리된 항목도 남은 하위 컴포넌트/헬퍼가 있으면 같은 묶음 안에서 계속 쪼갠다.
 4. `Solapi 특강 템플릿 검수 후 연결`
    - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 확인한다.
    - 검수 완료 전에는 현재 임시 특강 알림톡 구조를 유지하고, 검수 완료 확인 후에만 템플릿 ID/변수 연결, 테스트 데이터 발송, 링크/문구 검수를 진행한다.
@@ -67,6 +68,31 @@ App.jsx 리팩터링은 별도 일회성 프로젝트가 아니라 앞으로의 
 - 새 기능 개발 중에도 다음을 함께 남긴다: 저장 원천, local draft 여부, API/DB 원천, notification/Solapi/Tally/Slack 같은 외부 side effect, 나중에 분리할 후보 파일명.
 - 테스트 스크립트가 특정 문자열을 `App.jsx`에서만 찾고 있어 리팩터링을 막는 경우, 테스트의 의도는 유지하되 새 분리 파일까지 검사하도록 갱신한다. 테스트를 삭제하거나 기대 동작을 낮추지 않는다.
 - App.jsx 리팩터링 우선순위는 위험이 낮은 helper/config/API/client/component 순서로 진행한다. `LessonJournalDetail`, 출결, Solapi 예약, 보충관리처럼 저장/발송 side effect가 큰 영역은 앞 단계의 gate가 충분히 쌓인 뒤 진행한다.
+
+### App.jsx Refactoring Roadmap - 18 Units
+
+이 목록은 다음 세션들이 공유하는 App.jsx 리팩터링 기준 순서다. 각 단계는 그대로 구현 지시가 아니라 `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시` 절차를 적용할 후보 묶음이다. 실제 착수 전에는 최신 `docs/current-worklog.md`와 `git status --short`를 보고 이미 끝난 하위 작업과 남은 하위 작업을 먼저 구분한다.
+
+1. `specialLecture helpers/config` - 특강 안내문 계산, URL, 회차 normalize, Tally query helper.
+2. `shared UI primitives` - `InlineSaveStatus`, `MetricCard`, `Modal`, `EmptyState`, 단순 카드/상태 표시 컴포넌트.
+3. `API client wrappers` - `fetchJson`, `getJsonWithTimeout`, `postJsonWithTimeout`, 공통 API 에러/timeout 처리.
+4. `storageKeys/config/constants` - storage key, view id, option list, 상수/설정 묶음.
+5. `specialLecture preview/public` - 특강 공개 안내문 미리보기, 공개 URL 렌더링, 복사 문구.
+6. `specialLecture management` - 운영 > 특강관리 편집 화면, 신청자 연결, 특강 수업 생성 gate.
+7. `school calendar helpers` - 학사일정/시험기간 날짜 계산, 표시 색상, 월간 요약 helper.
+8. `school calendar components` - 학사일정 카드/달력/모달 UI.
+9. `test manager` - 시험지관리, 테스트 회차, 학생별 테스트 결과 입력/조회.
+10. `student-parent portals` - 학생/학부모 포털, 공개 링크, 모바일 표시 컴포넌트.
+11. `supplement job builders` - 숙제보충/결석보강 11시 예약, 일정 변경 알림, `notification_jobs` payload 생성.
+12. `supplement center/modals` - 보충관리 화면, 숙제보충/결석보강 상세, 완료 처리.
+13. `notification center` - 일반공지, 알림톡 관리, Solapi 발송/예약/결과 확인 UI.
+14. `exam prep center` - 시험관리, 직전수업/시험대비 후보, 실제 수업 반영 gate.
+15. `lesson hub/calendar` - 수업 달력, 수업 생성/수정/상세 모달, 자동 후보 표시.
+16. `attendance` - 출결 입력, 태블릿/수업일지 출결 패널, 등하원 알림톡 연결.
+17. `LessonJournalDetail` - 수업일지 상세, 학생별 기록, 숙제/코멘트/알림톡 미리보기.
+18. `App shell/hooks/context` - App 초기화, activeView 라우팅, 전역 상태/context/hooks 분리.
+
+위험도 기본값: 1~4는 낮음, 5~10은 중간, 11~18은 높음 또는 매우 높음으로 본다. 특히 11~18은 Supabase 원천, `notification_jobs`, Solapi, 출결, 수업일지 저장 side effect를 먼저 inventory로 확인하지 못하면 착수하지 않는다.
 
 ## Project Essential Practices - Required
 
