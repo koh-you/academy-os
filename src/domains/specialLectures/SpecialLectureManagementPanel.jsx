@@ -150,6 +150,48 @@ export function SpecialLectureGuideTextFields({
   );
 }
 
+export function SpecialLectureHighlightEditor({
+  highlights = [],
+  onAddHighlight,
+  onRemoveHighlight,
+  onUpdateHighlight
+}) {
+  return (
+    <section className="specialLectureWideField specialLectureHighlightField">
+      <div className="specialLectureFieldHeader">
+        <strong>수업 방향 카드</strong>
+        <button
+          className="softButton compact"
+          disabled={highlights.length >= 6}
+          onClick={onAddHighlight}
+          type="button"
+        >
+          카드 추가
+        </button>
+      </div>
+      <div className="specialLectureHighlightEditorList">
+        {highlights.map((highlight, index) => (
+          <div className="specialLectureHighlightEditorCard" key={`special_lecture_highlight_${index}`}>
+            <input
+              aria-label={`수업 방향 카드 ${index + 1}`}
+              placeholder={`수업 방향 카드 ${index + 1}`}
+              value={highlight}
+              onChange={(event) => onUpdateHighlight?.(index, event.target.value)}
+            />
+            <button
+              className="dangerSoftButton compact"
+              onClick={() => onRemoveHighlight?.(index)}
+              type="button"
+            >
+              삭제
+            </button>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function SpecialLectureGuideSelector({
   onSelectGuide,
   onToggleStoredGuides,

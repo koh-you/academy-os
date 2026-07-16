@@ -20,6 +20,7 @@ import {
   SpecialLectureGuideBasicFields,
   SpecialLectureGuideSelector,
   SpecialLectureGuideTextFields,
+  SpecialLectureHighlightEditor,
   SpecialLectureManagementBar
 } from "../domains/specialLectures/SpecialLectureManagementPanel.jsx";
 import {
@@ -10934,38 +10935,12 @@ function SpecialLectureNoticePanel({
             onUpdateGuide={updateSelectedGuide}
           />
 
-          <section className="specialLectureWideField specialLectureHighlightField">
-            <div className="specialLectureFieldHeader">
-              <strong>수업 방향 카드</strong>
-              <button
-                className="softButton compact"
-                disabled={selectedGuideHighlights.length >= 6}
-                onClick={addSpecialLectureHighlight}
-                type="button"
-              >
-                카드 추가
-              </button>
-            </div>
-            <div className="specialLectureHighlightEditorList">
-              {selectedGuideHighlights.map((highlight, index) => (
-                <div className="specialLectureHighlightEditorCard" key={`special_lecture_highlight_${index}`}>
-                  <input
-                    aria-label={`수업 방향 카드 ${index + 1}`}
-                    placeholder={`수업 방향 카드 ${index + 1}`}
-                    value={highlight}
-                    onChange={(event) => updateSpecialLectureHighlight(index, event.target.value)}
-                  />
-                  <button
-                    className="dangerSoftButton compact"
-                    onClick={() => removeSpecialLectureHighlight(index)}
-                    type="button"
-                  >
-                    삭제
-                  </button>
-                </div>
-              ))}
-            </div>
-          </section>
+          <SpecialLectureHighlightEditor
+            highlights={selectedGuideHighlights}
+            onAddHighlight={addSpecialLectureHighlight}
+            onRemoveHighlight={removeSpecialLectureHighlight}
+            onUpdateHighlight={updateSpecialLectureHighlight}
+          />
 
           <label className="specialLectureWideField specialLectureNotesField">
             특이사항
