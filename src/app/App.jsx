@@ -33,6 +33,7 @@ import {
   SpecialLecturePreviewColumn,
   SpecialLecturePublicPage
 } from "../domains/specialLectures/SpecialLecturePublicPage.jsx";
+import { SchoolCalendarSaveNotice } from "../domains/schoolCalendar/SchoolCalendarComponents.jsx";
 import {
   compactCalendarLabel,
   formatCalendarEventLabel,
@@ -19757,10 +19758,7 @@ function SchoolCalendarCenter({
       </header>
 
       <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...schoolCalendarAutosaveRisk} />
-      <div className={`schoolCalendarSaveNotice ${schoolCalendarSaveState.state}`} role="status">
-        <strong>학사일정 저장</strong>
-        <span>{schoolCalendarSaveState.message}</span>
-      </div>
+      <SchoolCalendarSaveNotice saveState={schoolCalendarSaveState} />
 
       <div className="schoolCalendarLayout">
         {isFormModalOpen ? (
