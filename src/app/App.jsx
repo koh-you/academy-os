@@ -22702,11 +22702,14 @@ const supplementSaveStatusLabels = {
   empty: "아직 없음",
   failed: "저장 실패",
   idle: "대기",
+  noScheduleChange: "변경 없음",
   notApplied: "반영 안 함",
   ready: "일정 만들 수 있음",
+  reserveReady: "예약 예정",
   resultDue: "발송 결과 확인 필요",
   saved: "저장 완료",
   scheduled: "예약 완료",
+  scheduleInputNeeded: "시간 필요",
   saving: "저장 중",
   canceled: "취소됨",
   synced: "반영 완료"
@@ -23169,14 +23172,29 @@ function SupplementStudentModal({
               const hasScheduleDraft = Boolean(draftValues.scheduledDate && draftValues.scheduledTime);
               const hasScheduleDiff = draftDiff.some((item) => ["scheduledDate", "scheduledTime"].includes(item.field));
               const hasNotificationDiff = draftDiff.some((item) => item.field === "notificationDraft");
+              const isScheduleChangeMode = Boolean(task.linkedLessonId);
+              const scheduleNoticeActionLabel = isScheduleChangeMode ? "변경 안내" : "확정 안내";
+              const pendingScheduleNoticeStatus = !hasScheduleDraft
+                ? "scheduleInputNeeded"
+                : isScheduleChangeMode && !hasScheduleDiff
+                  ? "noScheduleChange"
+                  : "reserveReady";
               const makeupStatus = saveStatus.makeupTask || (draftDiff.length ? "changed" : "saved");
               const lessonStatus = saveStatus.lesson || (hasScheduleDiff ? "changed" : task.linkedLessonId ? "synced" : hasScheduleDraft ? "ready" : "empty");
               const notificationStatus = saveStatus.notificationDraft || (hasNotificationDiff ? "changed" : draftValues.notificationDraft ? "saved" : "empty");
-              const parentChangeNoticeStatus = saveStatus.parentChangeNotice;
-              const studentChangeNoticeStatus = saveStatus.studentChangeNotice;
-              const parentScheduleNoticeLabel = saveStatus.parentScheduleNoticeLabel || "학부모 일정 안내";
-              const studentScheduleNoticeLabel = saveStatus.studentScheduleNoticeLabel || "학생 일정 안내";
+              const parentChangeNoticeStatus = saveStatus.parentChangeNotice || pendingScheduleNoticeStatus;
+              const studentChangeNoticeStatus = saveStatus.studentChangeNotice || pendingScheduleNoticeStatus;
+              const parentScheduleNoticeLabel = saveStatus.parentScheduleNoticeLabel || `학부모 ${scheduleNoticeActionLabel}`;
+              const studentScheduleNoticeLabel = saveStatus.studentScheduleNoticeLabel || `학생 ${scheduleNoticeActionLabel}`;
               const studentReminderStatus = saveStatus.studentReminder || getSupplementStudentReminderSaveStatus(task, notificationJobs);
+              const scheduleGateTitle = isScheduleChangeMode ? "기존 일정 변경" : "최초 일정 확정";
+              const scheduleGateBody = isScheduleChangeMode
+                ? hasScheduleDiff
+                  ? "수업일지 일정 변경을 누르면 학생·학부모 변경 안내를 다음 정각에 예약하고, 보강 당일 학생 11시 예약을 갱신합니다."
+                  : "날짜나 시간이 바뀌지 않으면 변경 안내 예약은 새로 만들지 않습니다. 일정만 다시 저장됩니다."
+                : hasScheduleDraft
+                  ? "수업일지 일정 만들기를 누르면 학생·학부모 확정 안내를 다음 정각에 예약하고, 보강 당일 학생 11시 예약을 만듭니다."
+                  : "시간까지 입력하면 수업일지 일정 만들기 버튼으로 확정 안내 예약을 만들 수 있습니다.";
               return (
                 <article className="taskCard" key={task.makeupTaskId}>
                   <div className="taskCardTop">
@@ -23318,8 +23336,10 @@ function SupplementStudentModal({
                       onChange={(event) => updateTaskDraft(task, "notificationDraft", event.target.value)}
                     />
                   </label>
-                  <div className="supplementSendGateNote">
-                    알림톡 주의: 보충 내용 저장은 발송/예약을 만들지 않습니다. 수업일지 일정 만들기는 학생·학부모 다음 정각 안내와 보강 당일 학생 11시 예약을 함께 확인합니다. 기존 일정 변경은 알림톡 예약 여부를 먼저 묻습니다.
+                  <div className={`supplementSendGateNote ${isScheduleChangeMode ? "changeNotice" : "confirmNotice"}`}>
+                    <strong>{scheduleGateTitle}</strong>
+                    <span>보충 내용 저장: 보충 대상과 당일 11시 학생 안내 문구만 저장하고, 발송/예약은 만들지 않습니다.</span>
+                    <span>{isScheduleChangeMode ? "수업일지 일정 변경" : "수업일지 일정 만들기"}: {scheduleGateBody}</span>
                   </div>
                   <div className="modalActions supplementSplitActions">
                     <button className="softButton primarySoft" disabled={isTaskBusy} onClick={() => handleSaveTask(task)} type="button">

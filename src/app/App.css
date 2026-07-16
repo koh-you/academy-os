@@ -14269,7 +14269,8 @@ textarea.profileEditInput {
 }
 
 .supplementSaveStatusPill.changed,
-.supplementSaveStatusPill.ready {
+.supplementSaveStatusPill.ready,
+.supplementSaveStatusPill.reserveReady {
   background: #fff7ed;
   border-color: #fed7aa;
   color: #9a3412;
@@ -14303,7 +14304,9 @@ textarea.profileEditInput {
 }
 
 .supplementSaveStatusPill.empty,
-.supplementSaveStatusPill.notApplied {
+.supplementSaveStatusPill.noScheduleChange,
+.supplementSaveStatusPill.notApplied,
+.supplementSaveStatusPill.scheduleInputNeeded {
   background: #f8fafc;
   border-color: #e2e8f0;
   color: #64748b;
@@ -14318,6 +14321,33 @@ textarea.profileEditInput {
   font-weight: 800;
   line-height: 1.5;
   padding: 10px 12px;
+}
+
+.supplementSendGateNote.confirmNotice {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #166534;
+}
+
+.supplementSendGateNote.changeNotice {
+  background: #fff7ed;
+  border-color: #fdba74;
+  color: #9a3412;
+}
+
+.supplementSendGateNote strong,
+.supplementSendGateNote span {
+  display: block;
+}
+
+.supplementSendGateNote strong {
+  color: #17213d;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.supplementSendGateNote span + span {
+  margin-top: 3px;
 }
 
 .supplementSplitActions {
