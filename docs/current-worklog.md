@@ -79,6 +79,19 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 5번 - 특강 공개 미리보기 column 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
+- 범위 선택: 5번 `specialLecture preview/public`의 두 번째 작은 단위로, 특강 편집 화면 오른쪽 `공개 안내문 미리보기` column만 렌더 전용 컴포넌트로 분리했다. 링크 복사, 안내문 저장, 알림톡 발송 준비 함수는 건드리지 않았다.
+- 구현 결과: `SpecialLecturePreviewColumn`을 `src/domains/specialLectures/SpecialLecturePublicPage.jsx`에 추가하고, `App.jsx`의 오른쪽 preview JSX를 `<SpecialLecturePreviewColumn guide={selectedGuide} guideUrl={selectedGuideUrl} />` 호출로 교체했다. `SpecialLectureGuidePreview`는 새 파일 내부에서만 사용되므로 `App.jsx` import에서 제거했다.
+- 저장 원천: 변경 없음. preview column은 현재 local draft인 `selectedGuide`와 `selectedGuideUrl`을 렌더링만 한다. `app_state.specialLectureGuides`, `/api/special-lecture-guides`, localStorage key, Supabase row payload는 변경하지 않았다.
+- 외부 side effect: 없음. Solapi 실제 발송/예약, `notification_jobs`, Tally webhook, 특강 신청자 저장, 수업 생성 API 호출 없음.
+- AI 검수 결과: diff가 렌더 JSX 이동과 import 정리에 제한됐고, `copyGuideUrl`, `persistDraftGuides`, `prepareSpecialLectureNotice`, `handleSaveSpecialLectureGuides` diff가 없다. `npm run test:production` 309개와 build가 통과해 사람 gate 없이 다음 하위 단위로 넘어갈 수 있다.
+- 남은 5번 후보: 링크 복사 UI/상태를 작은 컴포넌트로 분리할 수 있지만, 복사 함수 자체와 저장/발송 준비 버튼을 함께 옮기면 행동 범위가 커지므로 별도 gate가 필요하다.
+- 사람 검토 필요 여부: 선택 사항. 화면 확인을 한다면 특강관리 오른쪽 `공개 안내문 미리보기` 제목/문구와 안내문 내용이 이전처럼 보이는지만 보면 된다. 실제 알림톡 발송 테스트는 필요 없다.
+- 중단 조건: 미리보기 column이 사라짐, 왼쪽 입력값이 오른쪽 preview에 반영되지 않음, 링크 URL이 preview 하단에서 빠짐, 저장/발송 준비/복사 동작 diff가 같이 생김.
+- 검증: `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. `.jsx` 파일은 이 환경의 `node --check`가 확장자를 직접 처리하지 못해 Vite build로 JSX 파싱을 검증했다. 빌드는 기존 Vite chunk size 경고만 남았다.
+
 ### 2026-07-16 P1. App.jsx 리팩터링 5번 - 특강 공개 안내문 페이지 분리
 
 - 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
