@@ -92,3 +92,19 @@ export function TestAttemptFormGrid({
     </div>
   );
 }
+
+export function TestAttemptMeta({
+  isEditing = false,
+  kindLabel = "",
+  subject = "",
+  totalQuestions = ""
+}) {
+  return (
+    <div className="testAttemptMeta">
+      <span>{kindLabel}</span>
+      <span>{subject}</span>
+      <span>{totalQuestions || "-"}문항</span>
+      {isEditing ? <span>기존 기록 수정 중</span> : <span>새 응시 회차</span>}
+    </div>
+  );
+}

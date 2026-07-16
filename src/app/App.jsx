@@ -23,6 +23,7 @@ import {
 } from "../domains/tests/testManagerUtils.js";
 import {
   TestAttemptFormGrid,
+  TestAttemptMeta,
   TestAttemptPanelHeader,
   TestManagerTabs
 } from "../domains/tests/TestManagerPanels.jsx";
@@ -24312,12 +24313,12 @@ function MaterialManager({
             templates={templates}
             testKindOptions={testPaperKindOptions}
           />
-          <div className="testAttemptMeta">
-            <span>{getTestPaperKindLabel(attemptTestKind)}</span>
-            <span>{attemptSubject}</span>
-            <span>{attemptTotalQuestions || "-"}문항</span>
-            {currentTestSession ? <span>기존 기록 수정 중</span> : <span>새 응시 회차</span>}
-          </div>
+          <TestAttemptMeta
+            isEditing={Boolean(currentTestSession)}
+            kindLabel={getTestPaperKindLabel(attemptTestKind)}
+            subject={attemptSubject}
+            totalQuestions={attemptTotalQuestions}
+          />
           {attemptStudents.length ? (
             <div className="testAttemptTable">
               <div className="testAttemptRow head">
