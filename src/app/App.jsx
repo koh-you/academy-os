@@ -86,6 +86,7 @@ import {
   specialLectureWeekdayOptions
 } from "../domains/specialLectures/specialLectureGuideUtils.js";
 import { AutosaveRiskNotice } from "../shared/components/AutosaveRiskNotice.jsx";
+import { EmptyState } from "../shared/components/EmptyState.jsx";
 import {
   getAggregateSaveState,
   InlineSaveStatus,
@@ -10580,7 +10581,7 @@ function NotificationCenter({
             <span>관리</span>
           </div>
           {filteredNoticeJobs.length === 0 ? (
-            <p className="emptyState">공지 발송 기록이 없습니다.</p>
+            <EmptyState as="p" className="emptyState">공지 발송 기록이 없습니다.</EmptyState>
           ) : (
             filteredNoticeJobs.map((job) => (
               <article className="notificationTableRow" key={job.notificationJobId}>
@@ -11035,9 +11036,9 @@ function SpecialLectureNoticePanel({
             {primaryGuides.map((guide) => renderGuideCard(guide))}
           </div>
         ) : (
-          <div className="specialLectureEmptyState">
+          <EmptyState className="specialLectureEmptyState">
             진행/예정 특강이 없습니다. 새 방학 특강을 만들거나 지난 특강을 펼쳐 복원하세요.
-          </div>
+          </EmptyState>
         )}
         {storedGuides.length ? (
           <div className="specialLectureStoredPanel">
@@ -12976,7 +12977,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
               </div>
               <div className="examAnalysisColumnList">
                 {schoolCards.length === 0 ? (
-                  <div className="emptyState compact">학교 없음</div>
+                  <EmptyState className="emptyState compact">학교 없음</EmptyState>
                 ) : schoolCards.map((school) => (
                   <button
                     className={selectedSchoolName === school.name ? "examAnalysisColumnCard active" : "examAnalysisColumnCard"}
@@ -13000,7 +13001,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
               </div>
               <div className="examAnalysisColumnList">
                 {gradeCards.length === 0 ? (
-                  <div className="emptyState compact">학년 없음</div>
+                  <EmptyState className="emptyState compact">학년 없음</EmptyState>
                 ) : gradeCards.map((grade) => (
                   <button
                     className={selectedGrade === grade.name ? "examAnalysisColumnCard active" : "examAnalysisColumnCard"}
@@ -13056,7 +13057,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
               </div>
               <div className="examAnalysisColumnList">
                 {scopedRuns.length === 0 ? (
-                  <div className="emptyState compact">PDF를 업로드하면 분석이 생성됩니다.</div>
+                  <EmptyState className="emptyState compact">PDF를 업로드하면 분석이 생성됩니다.</EmptyState>
                 ) : scopedRuns.map((run) => (
                   <button
                     className={selectedRunId === run.analysisRunId ? "examAnalysisColumnCard active" : "examAnalysisColumnCard"}
@@ -13171,7 +13172,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
             </div>
             <div className="examAnalysisSourceList">
               {sourceFiles.length === 0 ? (
-                <div className="emptyState compact">PDF 원본 없음</div>
+                <EmptyState className="emptyState compact">PDF 원본 없음</EmptyState>
               ) : sourceFiles.map((file) => {
                 const extractionCheck = buildExamAnalysisExtractionCheck(file);
                 const extractionSummary = getExamAnalysisExtractionSummary(activeRun, file.sourceId);
@@ -13392,7 +13393,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                     ))}
                   </div>
                 ) : (
-                  <div className="emptyState compact">고정 문항 행 없음</div>
+                  <EmptyState className="emptyState compact">고정 문항 행 없음</EmptyState>
                 )}
               </>
             )}
@@ -13452,7 +13453,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                     })}
                   </div>
                 ) : (
-                  <div className="emptyState compact">고정 문항 행 없음</div>
+                  <EmptyState className="emptyState compact">고정 문항 행 없음</EmptyState>
                 )}
                 {aiNeedsReviewRows.length ? (
                   <p className="examAnalysisReviewNotice">재확인 문항 {aiNeedsReviewRows.map((question) => question.questionNumber).join(", ")}번은 다음 검수 단계에서 확인해야 합니다.</p>
@@ -13727,7 +13728,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                 </table>
               </div>
                 ) : (
-                  <div className="emptyState compact">AI 행 채움 후 검수할 수 있습니다.</div>
+                  <EmptyState className="emptyState compact">AI 행 채움 후 검수할 수 있습니다.</EmptyState>
                 )}
               </>
             )}
@@ -13803,7 +13804,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
             </div>
             <div className="examAnalysisEventList">
               {events.length === 0 ? (
-                <div className="emptyState compact">이벤트 없음</div>
+                <EmptyState className="emptyState compact">이벤트 없음</EmptyState>
               ) : events.slice(0, 8).map((event) => (
                 <div className="examAnalysisEventItem" key={event.eventId}>
                   <strong>{event.message || event.eventType}</strong>
@@ -14099,7 +14100,7 @@ function AcademyReminderList({
   }
 
   if (!safeReminders.length) {
-    return <div className="emptyState academyReminderEmpty">{emptyText}</div>;
+    return <EmptyState className="emptyState academyReminderEmpty">{emptyText}</EmptyState>;
   }
 
   return (
@@ -14786,7 +14787,7 @@ function ExamPrepLessonDetail({ lesson, onDeleteLesson, onEditLesson }) {
             ))}
           </div>
         ) : (
-          <p className="examPrepEmptyState">연결된 시험정보가 없습니다. 필요한 경우 일정 수정에서 수업명과 학생 명단을 직접 정리하세요.</p>
+          <EmptyState as="p" className="examPrepEmptyState">연결된 시험정보가 없습니다. 필요한 경우 일정 수정에서 수업명과 학생 명단을 직접 정리하세요.</EmptyState>
         )}
       </section>
     </div>
@@ -16382,7 +16383,7 @@ function LessonJournalDetail({
                   </div>
                 );
               }) : (
-                <p className="emptyState compact">해당 조건의 학생 예약이 없습니다.</p>
+                <EmptyState as="p" className="emptyState compact">해당 조건의 학생 예약이 없습니다.</EmptyState>
               )}
             </div>
           ) : null}
@@ -16400,7 +16401,7 @@ function LessonJournalDetail({
                     <small>{job.notificationJobId}</small>
                   </article>
                 )) : (
-                  <p className="emptyState compact">취소/실패한 OS 예약이 없습니다.</p>
+                  <EmptyState as="p" className="emptyState compact">취소/실패한 OS 예약이 없습니다.</EmptyState>
                 )}
               </div>
             </section>
@@ -16430,7 +16431,7 @@ function LessonJournalDetail({
                     ) : null}
                   </article>
                 )) : (
-                  <p className="emptyState compact">Solapi 그룹 이력이 없습니다.</p>
+                  <EmptyState as="p" className="emptyState compact">Solapi 그룹 이력이 없습니다.</EmptyState>
                 )}
               </div>
             </section>
@@ -16447,7 +16448,7 @@ function LessonJournalDetail({
                     <small>{message.messageId || message.groupId}</small>
                   </article>
                 )) : (
-                  <p className="emptyState compact">이 수업 학생과 매칭되는 Solapi 메시지가 없습니다.</p>
+                  <EmptyState as="p" className="emptyState compact">이 수업 학생과 매칭되는 Solapi 메시지가 없습니다.</EmptyState>
                 )}
               </div>
             </section>
@@ -16967,7 +16968,7 @@ function PreparationMemoModal({
               <pre>{visiblePreviousMemo}</pre>
             </>
           ) : (
-            !hasCheckedPriorMemo ? <div className="emptyState compact">직전 수업메모가 없습니다.</div> : null
+            !hasCheckedPriorMemo ? <EmptyState className="emptyState compact">직전 수업메모가 없습니다.</EmptyState> : null
           )}
           {visibleReferenceMemo ? (
             <div className="prepMemoReference">
@@ -17800,7 +17801,7 @@ function TeacherLessonHub({
             />
           </>
         ) : (
-          <div className="panel emptyState">{selectedDate}에 등록된 수업이 없습니다.</div>
+          <EmptyState className="panel emptyState">{selectedDate}에 등록된 수업이 없습니다.</EmptyState>
         )}
       </section>
     </>
@@ -17924,7 +17925,7 @@ function LessonHub({
             onSaveRecord={onSaveRecord}
           />
         ) : (
-          <div className="panel emptyState">선택한 날짜에 등록된 수업이 없습니다.</div>
+          <EmptyState className="panel emptyState">선택한 날짜에 등록된 수업이 없습니다.</EmptyState>
         )}
       </section>
     </>
@@ -18779,10 +18780,10 @@ function ExamPrepCenter({
               );
             })}
             {filteredRows.length === 0 ? (
-              <div className="examPrepEmptyState">
+              <EmptyState className="examPrepEmptyState">
                 <strong>표시할 시험정보가 없습니다.</strong>
                 <span>반 또는 고사를 바꾸면 해당 조건의 시험정보가 표시됩니다.</span>
-              </div>
+              </EmptyState>
             ) : null}
           </div>
         </>
@@ -19081,7 +19082,7 @@ function ExamPostSubmissionManager({
 
       <div className="examPostTargetList">
         {rows.length === 0 ? (
-          <div className="emptyState">현재 반에 연결된 시험정보가 없습니다.</div>
+          <EmptyState className="emptyState">현재 반에 연결된 시험정보가 없습니다.</EmptyState>
         ) : null}
         {rows.map((row) => {
           const candidates = getRowCandidateStudents(row);
@@ -19119,7 +19120,7 @@ function ExamPostSubmissionManager({
 
       <div className="examPostList">
         {targets.length === 0 ? (
-          <div className="emptyState">선택된 셀프체크 대상이 없습니다. 위에서 제출 받을 학생을 체크하세요.</div>
+          <EmptyState className="emptyState">선택된 셀프체크 대상이 없습니다. 위에서 제출 받을 학생을 체크하세요.</EmptyState>
         ) : null}
         {targets.map((target) => {
           const submission = target.submission;
@@ -20939,7 +20940,7 @@ function SchoolDateScheduleModal({
         </button>
       </div>
       {events.length === 0 ? (
-        <div className="emptyState schoolDateEmptyState">선택한 날짜에 등록된 일정이 없습니다.</div>
+        <EmptyState className="emptyState schoolDateEmptyState">선택한 날짜에 등록된 일정이 없습니다.</EmptyState>
       ) : (
         <div className="schoolDateEventStack">
           {groupedEventEntries.map(([schoolName, schoolEvents]) => (
@@ -21179,7 +21180,7 @@ function ClassManager({ students, templates, onUpdateClassRoster }) {
         </div>
         <div className="classStudentGrid">
           {classStudents.length === 0 ? (
-            <div className="emptyState">아직 이 반에 배정된 학생이 없습니다.</div>
+            <EmptyState className="emptyState">아직 이 반에 배정된 학생이 없습니다.</EmptyState>
           ) : (
             classStudents.map((student) => (
               <div className="classStudentCard" key={student.studentId}>
@@ -21391,7 +21392,7 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
 
           <div className="researchCardList">
             {filteredItems.length === 0 ? (
-              <div className="emptyState">아직 이 과목에 정리된 연구 항목이 없습니다.</div>
+              <EmptyState className="emptyState">아직 이 과목에 정리된 연구 항목이 없습니다.</EmptyState>
             ) : (
               filteredItems.map((item) => (
                 <button
@@ -21536,7 +21537,7 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
               </div>
             </>
           ) : (
-            <div className="emptyState">왼쪽에서 항목을 추가하거나 선택해주세요.</div>
+            <EmptyState className="emptyState">왼쪽에서 항목을 추가하거나 선택해주세요.</EmptyState>
           )}
         </section>
       </div>
@@ -24930,7 +24931,7 @@ function StudentWrongProblemBoard({ selectedStudent, wrongProblems, onAddWrongPr
           <span>메모</span>
         </div>
         {wrongProblems.length === 0 ? (
-          <div className="emptyState">아직 입력된 학생별 오답이 없습니다.</div>
+          <EmptyState className="emptyState">아직 입력된 학생별 오답이 없습니다.</EmptyState>
         ) : (
           wrongProblems.map((item) => (
             <div className="managementRow wrongProblemProfileRow" key={item.wrongProblemId}>
@@ -25630,10 +25631,10 @@ function MaterialManager({
               })}
             </div>
           ) : (
-            <div className="examPrepEmptyState">
+            <EmptyState className="examPrepEmptyState">
               <strong>대상 학생이 없습니다.</strong>
               <span>반 선택 또는 학생관리의 기본 반 배정을 확인해 주세요.</span>
-            </div>
+            </EmptyState>
           )}
           <div className="testAttemptActions">
             {attemptError ? <span className="saveState save-failed">{attemptError}</span> : null}
@@ -25666,7 +25667,7 @@ function MaterialManager({
                 <span>{session.className || "전체 학생"} · {getTestPaperKindLabel(session.testKind)} · {session.totalQuestions || "-"}문항</span>
               </button>
             ))}
-            {!testSessions.length ? <div className="emptyState compact">저장된 응시 회차가 없습니다.</div> : null}
+            {!testSessions.length ? <EmptyState className="emptyState compact">저장된 응시 회차가 없습니다.</EmptyState> : null}
           </section>
         </section>
       ) : null}
@@ -25698,10 +25699,10 @@ function MaterialManager({
               </article>
             ))}
             {!historyRows.length ? (
-              <div className="examPrepEmptyState">
+              <EmptyState className="examPrepEmptyState">
                 <strong>테스트 이력이 없습니다.</strong>
                 <span>응시 기록 탭에서 학생별 결과를 저장하면 여기에 누적됩니다.</span>
-              </div>
+              </EmptyState>
             ) : null}
           </div>
         </section>
@@ -26185,7 +26186,7 @@ function StudentModal({
             <span>등록 완료 {registeredApplicants.length}명</span>
           </div>
           {activeApplicants.length === 0 ? (
-            <div className="emptyState">아직 확인할 Tally 접수 후보가 없습니다.</div>
+            <EmptyState className="emptyState">아직 확인할 Tally 접수 후보가 없습니다.</EmptyState>
           ) : null}
           <div className="studentIntakeList">
             {activeApplicants.map((applicant) => (

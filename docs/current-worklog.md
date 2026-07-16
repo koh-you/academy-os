@@ -79,6 +79,19 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 2번 - shared EmptyState 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
+- 사용자 요청: 18개 리팩터링 순서를 앞에서부터 반복 진행한다. 각 단위는 리팩터링 후 AI가 먼저 검수하고, 문제가 없으면 다음 리팩터링으로 넘어가며, 사람이 확인해야 하는 순간에는 멈춘다.
+- 범위 선택: 2번 `shared UI primitives`에서 아직 남아 있던 `EmptyState`를 분리했다. 기존 완료 항목은 `InlineSaveStatus`, `Modal`, `MetricCard`였고, 이번 작업으로 shared UI primitive의 명시 항목 4개를 모두 파일 분리했다.
+- 구현 결과: `src/shared/components/EmptyState.jsx`를 추가하고, `App.jsx`에 흩어진 빈 상태 표시 JSX를 `EmptyState` 컴포넌트 호출로 교체했다. 기존 `p` 태그가 의미 있던 위치는 `as="p"`로 유지했고, 기존 className(`emptyState`, `emptyState compact`, `examPrepEmptyState`, `schoolDateEmptyState`, `specialLectureEmptyState`, `panel emptyState`)은 그대로 넘겨 스타일과 레이아웃을 보존했다.
+- 저장 원천: 없음. 순수 UI 컴포넌트 파일 분리이며 Supabase, `app_state`, Storage, localStorage 저장 경로는 변경하지 않았다.
+- 외부 side effect: 없음. API 호출, Solapi 실제 발송/예약, `notification_jobs`, Tally, Slack, AI 호출 없음.
+- AI 검수 결과: 직접 `<div>/<p className=...emptyState>` 패턴이 `App.jsx`에 남지 않았고, 새 컴포넌트는 children/className/as만 렌더하는 얇은 wrapper다. 저장/발송/예약/출결/수업일지 데이터 흐름을 건드리지 않아 사람 gate 없이 다음 4번 `storageKeys/config/constants`로 넘어갈 수 있다.
+- 사람 검토 필요 여부: 선택 사항. 화면 확인을 한다면 공지관리, 특강관리, 시험분석, 시험관리, 학사일정, 수업 달력에서 빈 목록 메시지가 기존처럼 보이는지만 보면 된다. 운영 데이터 변경 검토는 필요 없다.
+- 중단 조건: 빈 목록 메시지가 사라짐, `p`였던 안내문이 레이아웃상 어색해짐, empty state class가 누락돼 CSS가 적용되지 않음, 저장/발송/예약 기능 diff가 함께 보임.
+- 검증: `node --check scripts/scenario-tests-production.cjs` 통과, `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
+
 ### 2026-07-16 P1. 다른 세션 문서 3종 확인 및 handoff 병합
 
 - 상태: 완료 - 문서 병합/최신화
