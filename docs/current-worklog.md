@@ -79,6 +79,19 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 6번 - 특강 선택 관리 bar 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
+- 범위 선택: 6번 `specialLecture management`의 두 번째 작은 단위로, 선택된 특강의 제목/상태/기간과 보관/보관 해제/삭제 버튼을 보여주는 상단 관리 bar만 분리했다. 버튼이 호출하는 보관/복원/삭제 함수 본문은 건드리지 않았다.
+- 구현 결과: `SpecialLectureManagementBar`를 `src/domains/specialLectures/SpecialLectureManagementPanel.jsx`에 추가하고, `App.jsx`는 `selectedGuide`, `isManagingSelectedGuide`, `archiveSelectedGuide`, `restoreSelectedGuide`, `deleteSelectedGuide`를 props로 넘긴다.
+- 저장 원천: 변경 없음. 기존 보관/삭제 동작은 계속 `draftGuides` local draft를 거쳐 `saveGuides`/`persistDraftGuides`로 저장되는 구조이며, 이번 작업은 button 렌더 위치만 이동했다.
+- 외부 side effect: 없음. 새 API 호출, Solapi 실제 발송/예약, `notification_jobs`, Tally webhook, 특강 신청자 저장, 특강 수업 생성 API 호출 없음. 기존 보관/복원/삭제 callback 연결만 유지했다.
+- AI 검수 결과: `archiveSelectedGuide`, `restoreSelectedGuide`, `deleteSelectedGuide`, `persistDraftGuides`, `prepareSpecialLectureNotice`, 신청자/수업 생성 함수 diff가 없다. `getSpecialLectureStatusBadge`와 `isSpecialLectureArchived` 사용 위치만 새 렌더 컴포넌트로 이동했고, `npm run test:production` 309개와 build가 통과했다.
+- 남은 6번 후보: 안내문 기본 입력 폼, 수업 방향 카드 editor, 일정 계산 panel, 회차 카드 editor를 작은 렌더 단위로 분리할 수 있다. 단, 저장 함수/회차 계산 적용/신청자 연결/수업 생성 흐름을 건드리게 되면 별도 gate로 분리한다.
+- 사람 검토 필요 여부: 선택 사항. 화면 확인을 한다면 선택된 특강 상단의 제목/상태/기간, 보관/삭제 버튼 위치와 disabled 문구가 이전과 같은지만 보면 된다. 실제 삭제 버튼 클릭은 필수 검토가 아니며 운영 데이터에서는 누르지 않는다.
+- 중단 조건: 보관/삭제 버튼 클릭 대상이 달라짐, disabled 상태 문구가 바뀜, 선택 안내문 제목/기간이 이전과 다르게 표시됨, 저장/삭제 함수 본문 diff가 함께 생김, 실제 발송/예약 경로가 섞임.
+- 검증: `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
+
 ### 2026-07-16 P1. App.jsx 리팩터링 6번 - 특강 선택 selector UI 분리
 
 - 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능

@@ -16,7 +16,10 @@ import {
 } from "../domains/exams/postSubmissionOptions.js";
 import { StudentManager } from "../domains/students/StudentManager.jsx";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
-import { SpecialLectureGuideSelector } from "../domains/specialLectures/SpecialLectureManagementPanel.jsx";
+import {
+  SpecialLectureGuideSelector,
+  SpecialLectureManagementBar
+} from "../domains/specialLectures/SpecialLectureManagementPanel.jsx";
 import {
   SpecialLectureCalendarPreview,
   SpecialLectureNoticeActionPanel,
@@ -66,11 +69,9 @@ import {
   getSpecialLectureLessonTrackId,
   getSpecialLecturePublicUrl,
   getSpecialLectureSeasonShortLabel,
-  getSpecialLectureStatusBadge,
   getSpecialLectureTotalHours,
   getSpecialLectureWeekdayCounts,
   getWeekdayLabel,
-  isSpecialLectureArchived,
   isSpecialLecturePrimaryGuide,
   isSpecialLectureRoute,
   normalizeSpecialLectureApplication,
@@ -10554,7 +10555,6 @@ function SpecialLectureNoticePanel({
   const calculatedWeekdaySummaryText = calculatedWeekdayCounts.length
     ? calculatedWeekdayCounts.map((item) => `${item.label} ${item.count}회`).join(" · ")
     : "기간과 요일을 선택하면 표시됩니다.";
-  const selectedGuideStatus = selectedGuide ? getSpecialLectureStatusBadge(selectedGuide) : null;
   const isManagingSelectedGuide = Boolean(selectedGuide && managementGuideId === selectedGuide.specialLectureGuideId);
   const selectedGuideHighlights = selectedGuide
     ? (Array.isArray(selectedGuide.highlights) && selectedGuide.highlights.length ? selectedGuide.highlights : [""])
@@ -10915,27 +10915,13 @@ function SpecialLectureNoticePanel({
             <strong>입력 내용은 오른쪽 미리보기에 바로 반영됩니다.</strong>
             <span>공개 링크에는 `안내문 저장` 후 적용됩니다.</span>
           </div>
-          <div className="specialLectureManagementBar">
-            <div>
-              <span>선택 안내문</span>
-              <strong>{selectedGuide.title || "제목 미입력"}</strong>
-              {selectedGuideStatus ? <small>{selectedGuideStatus.label} · {selectedGuide.periodStart || "시작일 미입력"} ~ {selectedGuide.periodEnd || "종료일 미입력"}</small> : null}
-            </div>
-            <div>
-              {isSpecialLectureArchived(selectedGuide) ? (
-                <button className="softButton compact" disabled={isManagingSelectedGuide} onClick={restoreSelectedGuide} type="button">
-                  {isManagingSelectedGuide ? "저장 중" : "보관 해제"}
-                </button>
-              ) : (
-                <button className="softButton compact" disabled={isManagingSelectedGuide} onClick={archiveSelectedGuide} type="button">
-                  {isManagingSelectedGuide ? "저장 중" : "보관"}
-                </button>
-              )}
-              <button className="dangerSoftButton compact" disabled={isManagingSelectedGuide} onClick={deleteSelectedGuide} type="button">
-                {isManagingSelectedGuide ? "삭제 중" : "삭제"}
-              </button>
-            </div>
-          </div>
+          <SpecialLectureManagementBar
+            guide={selectedGuide}
+            isManaging={isManagingSelectedGuide}
+            onArchive={archiveSelectedGuide}
+            onDelete={deleteSelectedGuide}
+            onRestore={restoreSelectedGuide}
+          />
 
           <div className="specialLectureFormGrid">
             <label>
