@@ -5053,13 +5053,19 @@ const defaultNotificationTemplates = {
     "#{밀린숙제}",
     "#{보충메모}"
   ].join("\n"),
-  supplementScheduleNotice: [
-    "#{일정제목} 일정이 #{상태}되었습니다.",
+  supplementScheduleConfirmNotice: [
+    "#{일정제목} 일정이 확정되었습니다.",
+    "",
+    "#{보충내역}",
+    "일정: #{보강일정}"
+  ].join("\n"),
+  supplementScheduleChangeNotice: [
+    "#{일정제목} 일정이 변경되었습니다.",
     "",
     "#{보충내역}",
     "#{변경사유}",
     "#{변경전}",
-    "#{일정라벨}: #{보강일정}"
+    "변경 후: #{보강일정}"
   ].join("\n")
 };
 
@@ -5082,11 +5088,19 @@ const notificationTemplateRows = [
   },
   {
     audience: "학생/학부모",
-    callSite: "보충관리 수업일지 일정 만들기/변경 · 다음 정각 일정 안내",
-    key: "supplementScheduleNotice",
+    callSite: "보충관리 수업일지 일정 만들기 · 다음 정각 확정 안내",
+    key: "supplementScheduleConfirmNotice",
     source: "Supabase app_state.aiSettings.notificationTemplates",
-    title: "보충 일정 확정/변경 안내",
-    variables: "#{일정제목}, #{상태}, #{보충내역}, #{변경사유}, #{변경전}, #{일정라벨}, #{보강일정}"
+    title: "보충 일정 확정 안내",
+    variables: "#{일정제목}, #{보충내역}, #{보강일정}"
+  },
+  {
+    audience: "학생/학부모",
+    callSite: "보충관리 수업일지 일정 변경 · 다음 정각 변경 안내",
+    key: "supplementScheduleChangeNotice",
+    source: "Supabase app_state.aiSettings.notificationTemplates",
+    title: "보충 일정 변경 안내",
+    variables: "#{일정제목}, #{보충내역}, #{변경사유}, #{변경전}, #{보강일정}"
   }
 ];
 
@@ -7613,7 +7627,9 @@ export function App() {
     const reservedJob = await reserveNotificationJob(notificationJob, "보충관리 학생·학부모 다음 정각 안내 예약");
     const scheduledLabel = formatKoreaTimeLabel(reservedJob?.scheduledAt || notificationJob.scheduledAt);
     const isReserved = reservedJob?.status === "scheduled" || reservedJob?.status === "dry_run";
-    const noticeLabel = notificationJob.target === "parent" ? "학부모 보충 일정 안내" : "학생 보충 일정 안내";
+    const isScheduleChange = notificationJob.payload?.noticeKind === "supplement_schedule_change";
+    const noticeKindLabel = isScheduleChange ? "변경 안내" : "확정 안내";
+    const noticeLabel = `${notificationJob.target === "parent" ? "학부모 보충 일정" : "학생 보충 일정"} ${noticeKindLabel}`;
     return {
       notificationJob: reservedJob,
       skipped: false,
@@ -9308,8 +9324,10 @@ export function App() {
 
     const lessonId = taskForSchedule.linkedLessonId || createSupplementLessonId(taskForSchedule);
     const scheduleTime = normalizeTimeInput(taskForSchedule.scheduledTime);
-    const previousScheduleText = formatSupplementScheduleDateTime(taskForSchedule.linkedLessonDate || "", taskForSchedule.linkedLessonTime || "");
     const hasExistingLinkedSchedule = Boolean(taskForSchedule.linkedLessonId);
+    const previousScheduleText = hasExistingLinkedSchedule
+      ? formatSupplementScheduleDateTime(taskForSchedule.linkedLessonDate || "", taskForSchedule.linkedLessonTime || "")
+      : "";
     const hasScheduleChanged =
       hasExistingLinkedSchedule &&
       (taskForSchedule.scheduledDate !== taskForSchedule.linkedLessonDate ||
@@ -9402,6 +9420,14 @@ export function App() {
         };
     const scheduleChangeNotice = scheduleNotice.student;
     const parentScheduleChangeNotice = scheduleNotice.parent;
+    const scheduleNoticeKind =
+      scheduleChangeNotice.notificationJob?.payload?.noticeKind ||
+      scheduleChangeNotice.notificationJob?.result?.noticeKind ||
+      "";
+    const parentScheduleNoticeKind =
+      parentScheduleChangeNotice.notificationJob?.payload?.noticeKind ||
+      parentScheduleChangeNotice.notificationJob?.result?.noticeKind ||
+      "";
     return {
       lesson: savedLesson,
       makeupTask: savedTask,
@@ -9409,10 +9435,12 @@ export function App() {
       scheduleChangeNoticeMessage: scheduleChangeNotice.message ?? "",
       scheduleChangeNoticeSkipped: Boolean(scheduleChangeNotice.skipped),
       scheduleChangeNoticeStatus: scheduleChangeNotice.status || (scheduleChangeNotice.skipped ? "notApplied" : "sent"),
+      scheduleNoticeKind,
       parentScheduleChangeNoticeJob: parentScheduleChangeNotice.notificationJob ?? null,
       parentScheduleChangeNoticeMessage: parentScheduleChangeNotice.message ?? "",
       parentScheduleChangeNoticeSkipped: Boolean(parentScheduleChangeNotice.skipped),
       parentScheduleChangeNoticeStatus: parentScheduleChangeNotice.status || (parentScheduleChangeNotice.skipped ? "notApplied" : "sent"),
+      parentScheduleNoticeKind,
       supplementReminderJob: supplementReminder.notificationJob ?? null,
       supplementReminderMessage: supplementReminder.message ?? "",
       supplementReminderSkipped: Boolean(supplementReminder.skipped),
@@ -23000,13 +23028,16 @@ function SupplementStudentModal({
     try {
       const result = await onScheduleTask?.(taskWithDraft);
       const nextTask = result?.makeupTask ?? taskWithDraft;
+      const scheduleNoticeLabel = task.linkedLessonId ? "변경 안내" : "확정 안내";
       markTaskDraftSaved(task.makeupTaskId, nextTask);
       setTaskSaveStatusPatch(task.makeupTaskId, {
         lesson: "synced",
         makeupTask: "saved",
         notificationDraft: "saved",
         parentChangeNotice: getSupplementImmediateNoticeSaveStatus(result?.parentScheduleChangeNoticeStatus, result?.parentScheduleChangeNoticeSkipped),
+        parentScheduleNoticeLabel: `학부모 ${scheduleNoticeLabel}`,
         studentChangeNotice: getSupplementImmediateNoticeSaveStatus(result?.scheduleChangeNoticeStatus, result?.scheduleChangeNoticeSkipped),
+        studentScheduleNoticeLabel: `학생 ${scheduleNoticeLabel}`,
         studentReminder: result?.supplementReminderStatus || (result?.supplementReminderSkipped ? "resultDue" : "scheduled")
       });
       setScheduleConfirmTask(null);
@@ -23143,6 +23174,8 @@ function SupplementStudentModal({
               const notificationStatus = saveStatus.notificationDraft || (hasNotificationDiff ? "changed" : draftValues.notificationDraft ? "saved" : "empty");
               const parentChangeNoticeStatus = saveStatus.parentChangeNotice;
               const studentChangeNoticeStatus = saveStatus.studentChangeNotice;
+              const parentScheduleNoticeLabel = saveStatus.parentScheduleNoticeLabel || "학부모 일정 안내";
+              const studentScheduleNoticeLabel = saveStatus.studentScheduleNoticeLabel || "학생 일정 안내";
               const studentReminderStatus = saveStatus.studentReminder || getSupplementStudentReminderSaveStatus(task, notificationJobs);
               return (
                 <article className="taskCard" key={task.makeupTaskId}>
@@ -23273,8 +23306,8 @@ function SupplementStudentModal({
                     {renderSaveStatusPill("보충 내용", makeupStatus)}
                     {renderSaveStatusPill("수업일지 일정", lessonStatus)}
                     {renderSaveStatusPill("알림톡 문구", notificationStatus)}
-                    {studentChangeNoticeStatus ? renderSaveStatusPill("학생 변경 안내", studentChangeNoticeStatus) : null}
-                    {parentChangeNoticeStatus ? renderSaveStatusPill("학부모 변경 안내", parentChangeNoticeStatus) : null}
+                    {studentChangeNoticeStatus ? renderSaveStatusPill(studentScheduleNoticeLabel, studentChangeNoticeStatus) : null}
+                    {parentChangeNoticeStatus ? renderSaveStatusPill(parentScheduleNoticeLabel, parentChangeNoticeStatus) : null}
                     {renderSaveStatusPill("학생 11시 예약", studentReminderStatus)}
                   </div>
                   <label className="notificationDraftField supplementReadableField">
@@ -26805,13 +26838,14 @@ function buildSupplementScheduleNoticeBody(task = {}, previousScheduleText = "",
   const templates = normalizeNotificationTemplates(notificationTemplates);
   const scheduleTitle = getSupplementStudentReminderTitle(task) || followUpTypeLabel(task.taskType);
   const isScheduleChange = Boolean(normalizeMessageText(previousScheduleText));
+  const templateKey = isScheduleChange ? "supplementScheduleChangeNotice" : "supplementScheduleConfirmNotice";
   const changeDetailSource = Object.prototype.hasOwnProperty.call(task, "scheduleChangeDetail")
     ? task.scheduleChangeDetail
     : getSupplementScheduleChangeDetailSeed(task);
   const changeDetail = normalizeMessageText(changeDetailSource).trim();
   const changeReason = normalizeMessageText(task.scheduleChangeReason || "").trim();
   const nextScheduleText = formatSupplementScheduleDateTime(task);
-  return renderNotificationTemplate(templates.supplementScheduleNotice, {
+  return renderNotificationTemplate(templates[templateKey], {
     "변경사유": isScheduleChange && changeReason ? `변경 사유:\n${changeReason}` : "",
     "변경전": isScheduleChange && previousScheduleText ? `변경 전: ${previousScheduleText}` : "",
     "보강일정": nextScheduleText,
@@ -26864,6 +26898,8 @@ function buildSupplementStudentReminderJob(task = {}, student = {}, scheduledAt 
 function buildSupplementScheduleNoticeJob(task = {}, student = {}, scheduledAt = "", target = "student", previousScheduleText = "", notificationTemplates = {}) {
   const now = Date.now();
   const isParent = target === "parent";
+  const isScheduleChange = Boolean(normalizeMessageText(previousScheduleText));
+  const noticeKind = isScheduleChange ? "supplement_schedule_change" : "supplement_schedule_confirm";
   const notificationType = isParent ? "notice_parent" : "schedule_reminder";
   const scheduleTitle = getSupplementStudentReminderTitle(task);
   const reminderBody = buildSupplementScheduleNoticeBody(task, previousScheduleText, notificationTemplates);
@@ -26877,7 +26913,7 @@ function buildSupplementScheduleNoticeJob(task = {}, student = {}, scheduledAt =
         makeupTaskId: task.makeupTaskId,
         message: reminderBody,
         noticeBody: reminderBody,
-        noticeKind: "supplement_schedule",
+        noticeKind,
         noticeTitle: scheduleNoticeTitle,
         notificationType,
         parentPhone: student.parentPhone,
@@ -26895,6 +26931,7 @@ function buildSupplementScheduleNoticeJob(task = {}, student = {}, scheduledAt =
     : {
         academyName: academyBrandName,
         makeupTaskId: task.makeupTaskId,
+        noticeKind,
         notificationType,
         reminderBody,
         scheduleDate: task.scheduledDate,
@@ -26923,6 +26960,7 @@ function buildSupplementScheduleNoticeJob(task = {}, student = {}, scheduledAt =
     provider: "academy-os-reserving",
     result: {
       makeupTaskId: task.makeupTaskId,
+      noticeKind,
       previousScheduleText,
       reservationPending: true,
       scheduleNotice: true
