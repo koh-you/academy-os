@@ -79,6 +79,19 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-16 P1. App.jsx 리팩터링 5번 - 특강 안내문 액션/본문 미리보기 패널 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능
+- 범위 선택: 5번 `specialLecture preview/public`의 세 번째 작은 단위로, 특강 안내문 편집 하단의 저장/발송 준비/링크 복사 버튼과 알림톡 본문 미리보기 렌더를 패널 컴포넌트로 분리했다. 버튼이 호출하는 저장/발송 준비/복사 함수 본문은 건드리지 않았다.
+- 구현 결과: `SpecialLectureNoticeActionPanel`을 `src/domains/specialLectures/SpecialLecturePublicPage.jsx`에 추가하고, `App.jsx`는 `copyMessage`, `noticeText`, `panelMessage`, `saveState`, `copyGuideUrl`, `prepareSpecialLectureNotice`, `saveGuides`를 props로 넘긴다.
+- 저장 원천: 변경 없음. `saveGuides`/`persistDraftGuides`는 기존처럼 `specialLectureGuides` 저장본을 저장하고, `prepareSpecialLectureNotice`는 저장 후 알림톡 준비 화면으로 넘긴다. 이번 작업은 렌더 wrapper만 분리했다.
+- 외부 side effect: 없음. 새 API 호출, Solapi 실제 발송/예약, `notification_jobs`, Tally webhook, 특강 신청자 저장, 수업 생성 API 호출 없음.
+- AI 검수 결과: `copyGuideUrl`, `persistDraftGuides`, `prepareSpecialLectureNotice`, `handleSaveSpecialLectureGuides` 함수 diff가 없고, 기존 onClick 대상은 props로 그대로 전달됐다. `npm run test:production` 309개와 build가 통과해 사람 gate 없이 다음 하위 단위로 넘어갈 수 있다.
+- 남은 5번 후보: 특강 안내문 편집 폼 내부 일부 렌더 분리가 가능하지만, schedule builder/회차 편집은 6번 management 성격이 강해 착수 전 범위를 다시 좁혀야 한다.
+- 사람 검토 필요 여부: 선택 사항. 화면 확인을 한다면 `안내문 저장`, `알림톡 발송 준비`, `링크 복사`, `알림톡 본문 미리보기`가 이전과 같은 위치와 문구로 보이는지만 보면 된다. 실제 저장/발송 준비 클릭은 필수 검토가 아니다.
+- 중단 조건: 버튼 disabled 상태가 달라짐, 클릭 대상이 바뀜, 복사/저장/발송 준비 메시지가 사라짐, 저장 없이 실제 발송 경로가 실행됨, 알림톡 본문 미리보기 문구가 바뀜.
+- 검증: `npm run test:production` 309개 통과, `npm run build` 통과, `git diff --check` 통과. `.jsx` 파일은 이 환경의 `node --check`가 확장자를 직접 처리하지 못해 Vite build로 JSX 파싱을 검증했다. 빌드는 기존 Vite chunk size 경고만 남았다.
+
 ### 2026-07-16 P1. App.jsx 리팩터링 5번 - 특강 공개 미리보기 column 분리
 
 - 상태: 완료 - 구현/자동검증/AI 검수 완료, 사람 gate 없이 다음 리팩터링 진행 가능

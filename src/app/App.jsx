@@ -17,6 +17,7 @@ import {
 import { StudentManager } from "../domains/students/StudentManager.jsx";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
+  SpecialLectureNoticeActionPanel,
   SpecialLecturePreviewColumn,
   SpecialLecturePublicPage
 } from "../domains/specialLectures/SpecialLecturePublicPage.jsx";
@@ -11299,27 +11300,15 @@ function SpecialLectureNoticePanel({
             <input value={selectedGuide.noticeMemo} onChange={(event) => updateSelectedGuide("noticeMemo", event.target.value)} />
           </label>
 
-          <div className="specialLectureActionBar">
-            <button className="softButton" onClick={saveGuides} type="button">
-              {saveState === "saving" ? "저장 중" : "안내문 저장"}
-            </button>
-            <button
-              className="sendButton"
-              disabled={saveState === "saving"}
-              onClick={prepareSpecialLectureNotice}
-              type="button"
-            >
-              {saveState === "saving" ? "저장 중" : "알림톡 발송 준비"}
-            </button>
-            <button className="softButton" onClick={copyGuideUrl} type="button">링크 복사</button>
-          </div>
-          {copyMessage ? <p className="inlineNotice">{copyMessage}</p> : null}
-          {panelMessage ? <p className={panelMessage.includes("실패") ? "inlineNotice danger" : "inlineNotice"}>{panelMessage}</p> : null}
-
-          <div className="specialLectureNoticePreview">
-            <strong>알림톡 본문 미리보기</strong>
-            <p>{noticeText}</p>
-          </div>
+          <SpecialLectureNoticeActionPanel
+            copyMessage={copyMessage}
+            noticeText={noticeText}
+            onCopyGuideUrl={copyGuideUrl}
+            onPrepareNotice={prepareSpecialLectureNotice}
+            onSaveGuides={saveGuides}
+            panelMessage={panelMessage}
+            saveState={saveState}
+          />
         </div>
 
         <SpecialLecturePreviewColumn guide={selectedGuide} guideUrl={selectedGuideUrl} />
