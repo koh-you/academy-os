@@ -9578,7 +9578,6 @@ function NotificationCenter({
   aiSettings = defaultAiSettings,
   classTemplates = [],
   initialNotificationTab = "notice",
-  integrationStatus,
   lessons = [],
   notificationJobs,
   notificationJobsStatus = { state: "idle", message: "" },
@@ -9620,7 +9619,6 @@ function NotificationCenter({
   const [solapiResultSyncState, setSolapiResultSyncState] = useState({ checkedAt: "", state: "idle", message: "" });
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
-  const notificationStatus = integrationStatus?.notifications;
   const isNotificationJobsLoading = notificationJobsStatus?.state === "loading";
   const notificationJobsNoticeClass = notificationJobsStatus?.state === "failed"
     ? "inlineNotice danger"
@@ -9790,7 +9788,7 @@ function NotificationCenter({
     setNoticeTitle(normalizedGuide.title || "특강 안내");
     setNoticeBody(noticeBodyText);
     setActiveNotificationTab("notice");
-    setDispatchMessage("특강 안내문을 저장한 뒤 공지 발송 화면에 반영했습니다. 수신 대상을 선택한 뒤 테스트 발송으로 먼저 확인하세요.");
+    setDispatchMessage("특강 안내문을 저장한 뒤 공지 발송 화면에 반영했습니다. 수신 대상을 확인한 뒤 예약 발송 또는 즉시 발송으로 진행하세요.");
   }
 
   function selectJobFilter(nextFilter) {
@@ -10007,36 +10005,6 @@ function NotificationCenter({
       refreshNoticeJobsInBackground();
     } catch (error) {
       setSolapiResultSyncState((current) => ({ ...current, state: "failed", message: `Solapi 결과 대조 실패: ${error.message}` }));
-    }
-  }
-
-  async function sendTestNotice() {
-    if (!noticeText || isSendingNotice) return;
-    setIsSendingNotice(true);
-    setDispatchMessage("공지 테스트 발송을 요청하는 중입니다.");
-    const fallbackStudent = noticeRecipients[0]?.student ?? searchableStudents[0] ?? students[0] ?? { name: "테스트학생", studentId: "test" };
-    const testRecipient = {
-      audience: noticeRecipientMode === "student" ? "student" : "parent",
-      phone: notificationStatus?.testRecipient,
-      student: fallbackStudent
-    };
-    try {
-      await postJsonWithTimeout(
-        "/api/notifications/comment-alimtalk",
-        {
-          ...buildNoticePayload(testRecipient),
-          forceTestRecipient: true
-        },
-        30000,
-        "테스트 발송 요청이 30초를 넘었습니다. 실제 수신 여부를 확인해 주세요."
-      );
-      setDispatchMessage(`테스트 번호(${notificationStatus?.testRecipient || "설정값"})로 공지 테스트를 요청했습니다.`);
-    } catch (error) {
-      setDispatchMessage(isRequestTimeoutError(error)
-        ? `공지 테스트 확인 필요: ${error.message}`
-        : `공지 테스트 실패: ${error.message}`);
-    } finally {
-      setIsSendingNotice(false);
     }
   }
 
@@ -10329,7 +10297,6 @@ function NotificationCenter({
               <button className="softButton" disabled={!noticeBody.trim() || isPolishingNotice} onClick={polishNoticeMessage} type="button">
                 {isPolishingNotice ? "AI 수정 중" : "AI 수정"}
               </button>
-              <button className="softButton" disabled={!noticeText || isSendingNotice} onClick={sendTestNotice} type="button">테스트 발송</button>
               <button className="softButton" disabled={!noticeText || !noticeRecipients.length || !scheduledAt || isSendingNotice} onClick={scheduleNotice} type="button">예약 발송</button>
               <button className="sendButton" disabled={!noticeText || !noticeRecipients.length || isSendingNotice} onClick={sendNoticeNow} type="button">
                 {isSendingNotice ? "처리 중..." : "즉시 발송"}
@@ -10346,7 +10313,7 @@ function NotificationCenter({
           ["sent", "발송 완료", sentNoticeJobs.length, "공지 발송 완료"],
           ["pending", "확인 필요", pendingNoticeJobs.length, "응답 지연 공지"],
           ["failed", "실패", failedNoticeJobs.length, "재확인 필요"],
-          ["draft", "정리함", draftNoticeJobs.length, "테스트/취소/초안"]
+          ["draft", "정리함", draftNoticeJobs.length, "취소/초안"]
         ].map(([id, label, count, detail]) => (
           <button className={jobFilter === id ? "active" : ""} key={id} onClick={() => selectJobFilter(id)} type="button">
             <span>{label}</span>
@@ -10869,7 +10836,7 @@ function SpecialLectureNoticePanel({
         <div className="specialLectureEditor">
           <div className="noticeBox specialLectureNoticeBox">
             <strong>저장/발송 분리</strong>
-            <p>이 탭은 안내문과 링크를 준비합니다. 실제 발송은 `알림톡 발송 준비` 후 공지 발송 화면에서 테스트 발송과 수신 대상 확인을 거쳐 진행합니다.</p>
+            <p>이 탭은 안내문과 링크를 준비합니다. 실제 발송은 `알림톡 발송 준비` 후 공지 발송 화면에서 수신 대상을 확인한 뒤 진행합니다.</p>
           </div>
           <div className="specialLecturePreviewSyncNotice">
             <strong>입력 내용은 오른쪽 미리보기에 바로 반영됩니다.</strong>
