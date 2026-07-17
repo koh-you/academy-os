@@ -82,6 +82,14 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-17 P0. 운영 프론트 API base fallback 복구
+
+- 사용자 증상: 보충관리 결석 처리 취소뿐 아니라 보충 완료 처리 등 다른 저장 버튼도 `Failed to fetch`로 실패했다.
+- 원인 확인: 운영 API `https://koh-you-math-academy-os-api.onrender.com`의 `/health`, `/api/integrations/status`, `/api/lesson-records`, `/api/makeup-tasks` GET과 CORS preflight는 정상이었다. 반면 운영 프론트 번들 `academy-os-blue.vercel.app/assets/main-BXXzX2Cd.js`가 API base를 `http://127.0.0.1:8787`로 빌드하고 있어 브라우저가 사용자 PC의 로컬 API로 요청을 보내고 있었다.
+- 구현 결과: `src/shared/utils/apiClient.js`에서 `localhost`/`127.0.0.1` 화면은 로컬 API를 쓰고, 그 외 운영/배포 도메인은 `VITE_API_BASE_URL`이 비어 있거나 로컬 주소로 잘못 들어가도 Render API `https://koh-you-math-academy-os-api.onrender.com`을 쓰게 했다.
+- 검증 gate: 배포 후 운영 번들의 API base 초기화 부분에 `127.0.0.1:8787`이 실제 기본값으로 남지 않고, 운영 화면 버튼들이 Render API로 POST되는지 확인한다. Vercel 환경변수 `VITE_API_BASE_URL`도 Render API로 설정되어 있는지 별도 확인하면 더 안전하다.
+- 범위 제한: 저장/보충/알림톡 비즈니스 로직은 바꾸지 않았고, API 주소 선택 fallback만 수정했다.
+
 ### 2026-07-17 P1. 보충 생성 모달에서 결석 처리 취소 추가
 
 - 사용자 요청: 수업일지에서 미래 결석으로 저장한 학생을 원래 상태로 되돌릴 수 있게, 보충관리의 결석보강 보충 생성 모달에 취소 버튼을 추가한다.

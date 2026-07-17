@@ -1,4 +1,24 @@
-export const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8787").replace(/\/$/, "");
+const localApiBaseUrl = "http://127.0.0.1:8787";
+const productionApiBaseUrl = "https://koh-you-math-academy-os-api.onrender.com";
+const configuredApiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "").trim();
+
+function isLocalBrowser() {
+  if (typeof window === "undefined") return true;
+  return ["localhost", "127.0.0.1"].includes(window.location.hostname);
+}
+
+function isLocalApiBaseUrl(value) {
+  return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(value);
+}
+
+function getApiBaseUrl() {
+  if (typeof window === "undefined") return localApiBaseUrl;
+  if (!isLocalBrowser() && isLocalApiBaseUrl(configuredApiBaseUrl)) return productionApiBaseUrl;
+  if (configuredApiBaseUrl) return configuredApiBaseUrl;
+  return isLocalBrowser() ? localApiBaseUrl : productionApiBaseUrl;
+}
+
+export const apiBaseUrl = getApiBaseUrl().replace(/\/$/, "");
 
 export function apiUrl(path) {
   return `${apiBaseUrl}${path}`;
