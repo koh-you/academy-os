@@ -1242,6 +1242,7 @@ function createAcademyReminderDraft(date = today, studentId = "") {
     title: "",
     reminderDate: date || today,
     reminderTime: "",
+    classTemplateId: "",
     studentId,
     lessonId: "",
     schoolEventId: "",
@@ -1249,8 +1250,43 @@ function createAcademyReminderDraft(date = today, studentId = "") {
     status: "pending",
     priority: "normal",
     slackNotify: true,
-    source: "manual"
+    source: "manual",
+    sourcePayload: {}
   };
+}
+
+function getAcademyReminderSourcePayload(reminder = {}) {
+  const sourcePayload = reminder.sourcePayload ?? reminder.source_payload ?? {};
+  return sourcePayload && typeof sourcePayload === "object" && !Array.isArray(sourcePayload) ? sourcePayload : {};
+}
+
+function getAcademyReminderClassTemplateId(reminder = {}) {
+  const sourcePayload = getAcademyReminderSourcePayload(reminder);
+  return String(
+    reminder.classTemplateId ??
+    reminder.classId ??
+    sourcePayload.classTemplateId ??
+    sourcePayload.classId ??
+    ""
+  ).trim();
+}
+
+function getLessonClassTemplateId(lesson = {}) {
+  return String(
+    lesson.classTemplateId ??
+    lesson.classId ??
+    lesson.sourcePayload?.classTemplateId ??
+    ""
+  ).trim();
+}
+
+function getAcademyReminderClassName(reminder = {}, templates = []) {
+  const classTemplateId = getAcademyReminderClassTemplateId(reminder);
+  if (!classTemplateId) return "";
+  const sourcePayload = getAcademyReminderSourcePayload(reminder);
+  return templates.find((template) => template.classTemplateId === classTemplateId)?.name ??
+    sourcePayload.className ??
+    "";
 }
 
 function normalizeAcademyReminderDraft(reminder = {}) {
@@ -1258,6 +1294,15 @@ function normalizeAcademyReminderDraft(reminder = {}) {
   const reminderDate = reminder.reminderDate || reminder.date || today;
   const title = String(reminder.title ?? "").trim() || getAcademyReminderTypeLabel(reminderType);
   const nowIso = new Date().toISOString();
+  const sourcePayload = { ...getAcademyReminderSourcePayload(reminder) };
+  const classTemplateId = getAcademyReminderClassTemplateId({ ...reminder, sourcePayload });
+  if (classTemplateId) {
+    sourcePayload.classTemplateId = classTemplateId;
+  } else {
+    delete sourcePayload.classTemplateId;
+    delete sourcePayload.classId;
+    delete sourcePayload.className;
+  }
   return {
     reminderId: reminder.reminderId || reminder.id || `reminder_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
     reminderType,
@@ -1266,7 +1311,8 @@ function normalizeAcademyReminderDraft(reminder = {}) {
     date: reminderDate,
     reminderTime: normalizeTimeInput(reminder.reminderTime ?? reminder.time ?? ""),
     time: normalizeTimeInput(reminder.reminderTime ?? reminder.time ?? ""),
-    studentId: reminder.studentId ?? "",
+    classTemplateId,
+    studentId: classTemplateId ? "" : reminder.studentId ?? "",
     lessonId: reminder.lessonId ?? "",
     schoolEventId: reminder.schoolEventId ?? "",
     content: String(reminder.content ?? reminder.memo ?? "").trim(),
@@ -1275,7 +1321,7 @@ function normalizeAcademyReminderDraft(reminder = {}) {
     priority: normalizeAcademyReminderPriority(reminder.priority),
     slackNotify: reminder.slackNotify !== false,
     source: reminder.source || "manual",
-    sourcePayload: reminder.sourcePayload ?? {},
+    sourcePayload,
     completedAt: reminder.completedAt ?? "",
     createdAt: reminder.createdAt || nowIso,
     updatedAt: nowIso
@@ -1314,11 +1360,13 @@ function formatAcademyReminderDateTime(reminder = {}) {
     .join(" ");
 }
 
-function getAcademyReminderSummary(reminder = {}, students = []) {
+function getAcademyReminderSummary(reminder = {}, students = [], templates = []) {
   const studentName = getAcademyReminderStudentName(reminder, students);
+  const className = getAcademyReminderClassName(reminder, templates);
   return [
     getAcademyReminderTypeLabel(reminder.reminderType ?? reminder.type),
     studentName,
+    className ? `반 ${className}` : "",
     reminder.title,
     formatAcademyReminderDateTime(reminder)
   ].filter(Boolean).join(" · ");
@@ -1339,10 +1387,15 @@ function getAcademyRemindersForStudent(reminders = [], studentId = "") {
 
 function getAcademyRemindersForLesson(reminders = [], lesson = {}, lessonStudents = []) {
   const lessonStudentIds = new Set(lessonStudents.map((student) => student.studentId));
-  return getAcademyRemindersForDate(reminders, lesson.date).filter((reminder) => (
-    reminder.lessonId === lesson.lessonId ||
-    (reminder.studentId && lessonStudentIds.has(reminder.studentId))
-  ));
+  const lessonClassTemplateId = getLessonClassTemplateId(lesson);
+  return getAcademyRemindersForDate(reminders, lesson.date).filter((reminder) => {
+    const reminderClassTemplateId = getAcademyReminderClassTemplateId(reminder);
+    return (
+      reminder.lessonId === lesson.lessonId ||
+      (reminder.studentId && lessonStudentIds.has(reminder.studentId)) ||
+      (reminderClassTemplateId && reminderClassTemplateId === lessonClassTemplateId)
+    );
+  });
 }
 
 function getAlimtalkSafetyTone(notificationStatus, forceDryRun = false, forceTestRecipient = false) {
@@ -8268,6 +8321,7 @@ export function App() {
             selectedLesson={selectedLesson}
             selectedLessonId={selectedLessonId}
             students={students}
+            templates={classTemplates}
             testAttempts={testAttempts}
             testSessions={testSessions}
             homeworks={homeworks}
@@ -13361,7 +13415,8 @@ function AcademyReminderList({
   onSaveAcademyReminder,
   reminders = [],
   showActions = false,
-  students = []
+  students = [],
+  templates = []
 }) {
   const [busyReminderId, setBusyReminderId] = useState("");
   const [actionError, setActionError] = useState("");
@@ -13423,6 +13478,7 @@ function AcademyReminderList({
         const reminder = normalizeAcademyReminderDraft(reminderId ? { ...rawReminder, reminderId, id: reminderId } : rawReminder);
         const status = normalizeAcademyReminderStatus(reminder.status);
         const studentName = getAcademyReminderStudentName(reminder, students);
+        const className = getAcademyReminderClassName(reminder, templates);
         return (
           <article className={`academyReminderItem status-${status} priority-${reminder.priority || "normal"}`} key={reminderId || reminder.reminderId}>
             <div className="academyReminderItemMain">
@@ -13433,7 +13489,8 @@ function AcademyReminderList({
               </div>
               <p>{reminder.content || reminder.memo || "내용 없음"}</p>
               <div className="academyReminderMeta">
-                {studentName ? <span>{studentName}</span> : null}
+                {studentName ? <span>학생 {studentName}</span> : null}
+                {className ? <span>반 {className}</span> : null}
                 <span>{getAcademyReminderPriorityLabel(reminder.priority)}</span>
                 <span>{academyReminderStatusLabels[status]}</span>
                 <span>{reminder.slackNotify === false ? "슬랙 제외" : "09:00 슬랙 포함"}</span>
@@ -13478,6 +13535,7 @@ function AcademyReminderPanel({
   reminders = [],
   selectedDate = today,
   students = [],
+  templates = [],
   onDeleteAcademyReminder,
   onSaveAcademyReminder
 }) {
@@ -13489,6 +13547,9 @@ function AcademyReminderPanel({
   const isEditingReminder = Boolean(editingReminderId);
   const shouldShowReminderForm = isReminderFormOpen || isEditingReminder;
   const activeStudents = students.filter(isActiveStudent);
+  const activeClassTemplates = templates.filter((template) => template?.classTemplateId);
+  const isClassReminderDraft = draft.reminderType === "class_notice";
+  const selectedClassTemplateId = getAcademyReminderClassTemplateId(draft);
   const overdueReminders = sortAcademyReminders(reminders).filter((reminder) => isAcademyReminderOverdue(reminder));
   const selectedDateReminders = getAcademyRemindersForDate(reminders, selectedDate)
     .filter((reminder) => !isAcademyReminderOverdue(reminder));
@@ -13509,11 +13570,76 @@ function AcademyReminderPanel({
     setDraft((current) => ({ ...current, [field]: value }));
   }
 
+  function updateReminderType(nextType) {
+    setSaveState(isEditingReminder ? "dirty" : "idle");
+    setSaveMessage(isEditingReminder ? "운영 알림 수정 중 · 저장 전" : "");
+    setDraft((current) => {
+      const sourcePayload = { ...getAcademyReminderSourcePayload(current) };
+      if (nextType === "class_notice") {
+        return {
+          ...current,
+          reminderType: nextType,
+          studentId: "",
+          sourcePayload
+        };
+      }
+      delete sourcePayload.classTemplateId;
+      delete sourcePayload.classId;
+      delete sourcePayload.className;
+      return {
+        ...current,
+        reminderType: nextType,
+        classTemplateId: "",
+        sourcePayload
+      };
+    });
+  }
+
+  function updateReminderStudentTarget(studentId) {
+    setSaveState(isEditingReminder ? "dirty" : "idle");
+    setSaveMessage(isEditingReminder ? "운영 알림 수정 중 · 저장 전" : "");
+    setDraft((current) => {
+      const sourcePayload = { ...getAcademyReminderSourcePayload(current) };
+      delete sourcePayload.classTemplateId;
+      delete sourcePayload.classId;
+      delete sourcePayload.className;
+      return {
+        ...current,
+        classTemplateId: "",
+        studentId,
+        sourcePayload
+      };
+    });
+  }
+
+  function updateReminderClassTarget(classTemplateId) {
+    const selectedTemplate = activeClassTemplates.find((template) => template.classTemplateId === classTemplateId);
+    setSaveState(isEditingReminder ? "dirty" : "idle");
+    setSaveMessage(isEditingReminder ? "운영 알림 수정 중 · 저장 전" : "");
+    setDraft((current) => {
+      const sourcePayload = { ...getAcademyReminderSourcePayload(current) };
+      if (classTemplateId) {
+        sourcePayload.classTemplateId = classTemplateId;
+        sourcePayload.className = selectedTemplate?.name ?? sourcePayload.className ?? "";
+      } else {
+        delete sourcePayload.classTemplateId;
+        delete sourcePayload.classId;
+        delete sourcePayload.className;
+      }
+      return {
+        ...current,
+        classTemplateId,
+        studentId: "",
+        sourcePayload
+      };
+    });
+  }
+
   function startEditReminder(reminder) {
     const normalized = normalizeAcademyReminderDraft(reminder);
     setEditingReminderId(normalized.reminderId);
     setIsReminderFormOpen(true);
-    setDraft(normalized);
+    setDraft(getAcademyReminderClassTemplateId(normalized) ? { ...normalized, reminderType: "class_notice" } : normalized);
     setSaveState("dirty");
     setSaveMessage("운영 알림 수정 중 · 저장 전");
   }
@@ -13528,10 +13654,28 @@ function AcademyReminderPanel({
 
   async function saveDraft() {
     const status = normalizeAcademyReminderStatus(draft.status);
+    if (draft.reminderType === "class_notice" && !selectedClassTemplateId) {
+      setSaveState("failed");
+      setSaveMessage("반 알림 저장 실패 · 반을 선택하세요.");
+      return;
+    }
+    const selectedTemplate = activeClassTemplates.find((template) => template.classTemplateId === selectedClassTemplateId);
+    const sourcePayload = { ...getAcademyReminderSourcePayload(draft) };
+    if (draft.reminderType === "class_notice" && selectedClassTemplateId) {
+      sourcePayload.classTemplateId = selectedClassTemplateId;
+      sourcePayload.className = selectedTemplate?.name ?? sourcePayload.className ?? "";
+    } else {
+      delete sourcePayload.classTemplateId;
+      delete sourcePayload.classId;
+      delete sourcePayload.className;
+    }
     const reminderToSave = normalizeAcademyReminderDraft({
       ...draft,
+      classTemplateId: draft.reminderType === "class_notice" ? selectedClassTemplateId : "",
       reminderId: editingReminderId || draft.reminderId,
       id: editingReminderId || draft.reminderId,
+      sourcePayload,
+      studentId: draft.reminderType === "class_notice" ? "" : draft.studentId,
       completedAt: status === "done" ? (draft.completedAt || new Date().toISOString()) : "",
       status
     });
@@ -13586,6 +13730,7 @@ function AcademyReminderPanel({
             reminders={overdueReminders}
             showActions
             students={students}
+            templates={templates}
           />
         </section>
       ) : null}
@@ -13602,17 +13747,26 @@ function AcademyReminderPanel({
       ) : null}
       {shouldShowReminderForm ? (
         <div className="academyReminderForm">
-          <select value={draft.reminderType} onChange={(event) => updateDraft("reminderType", event.target.value)}>
+          <select value={draft.reminderType} onChange={(event) => updateReminderType(event.target.value)}>
             {academyReminderTypeOptions.map((option) => (
               <option key={option.value} value={option.value}>{option.label}</option>
             ))}
           </select>
-          <select value={draft.studentId} onChange={(event) => updateDraft("studentId", event.target.value)}>
-            <option value="">학생 선택 없음</option>
-            {activeStudents.map((student) => (
-              <option key={student.studentId} value={student.studentId}>{student.name}</option>
-            ))}
-          </select>
+          {isClassReminderDraft ? (
+            <select value={selectedClassTemplateId} onChange={(event) => updateReminderClassTarget(event.target.value)}>
+              <option value="">반 선택</option>
+              {activeClassTemplates.map((template) => (
+                <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
+              ))}
+            </select>
+          ) : (
+            <select value={draft.studentId} onChange={(event) => updateReminderStudentTarget(event.target.value)}>
+              <option value="">학생 선택 없음</option>
+              {activeStudents.map((student) => (
+                <option key={student.studentId} value={student.studentId}>{student.name}</option>
+              ))}
+            </select>
+          )}
           <input
             value={draft.title}
             onChange={(event) => updateDraft("title", event.target.value)}
@@ -13646,7 +13800,7 @@ function AcademyReminderPanel({
           />
           <button
             className="primaryButton"
-            disabled={!String(draft.title || draft.content).trim() || saveState === "saving"}
+            disabled={!String(draft.title || draft.content).trim() || saveState === "saving" || (isClassReminderDraft && !selectedClassTemplateId)}
             onClick={saveDraft}
             type="button"
           >
@@ -13667,6 +13821,7 @@ function AcademyReminderPanel({
             reminders={selectedDateReminders}
             showActions
             students={students}
+            templates={templates}
           />
         </section>
         <section>
@@ -13682,6 +13837,7 @@ function AcademyReminderPanel({
             reminders={upcomingReminders}
             showActions
             students={students}
+            templates={templates}
           />
         </section>
       </div>
@@ -13709,6 +13865,7 @@ function TeacherLessonHubV2({
   selectedLesson,
   selectedLessonId,
   students,
+  templates = [],
   testAttempts = [],
   testSessions = [],
   homeworks,
@@ -13916,6 +14073,7 @@ function TeacherLessonHubV2({
             records={records}
             saveStates={saveStates}
             students={students}
+            templates={templates}
             testAttempts={testAttempts}
             testSessions={testSessions}
           />
@@ -13949,6 +14107,7 @@ function TeacherLessonHubV2({
         reminders={academyReminders}
         selectedDate={selectedDate}
         students={students}
+        templates={templates}
       />
 
       {shouldShowGeneratedLessonSaveNotice ? (
@@ -14735,6 +14894,7 @@ function LessonJournalDetail({
   records,
   saveStates,
   students,
+  templates = [],
   testAttempts = [],
   testSessions = []
 }) {
@@ -15506,7 +15666,7 @@ function LessonJournalDetail({
             </div>
             <span className="countBadge">{lessonAcademyReminders.length}건</span>
           </div>
-          <AcademyReminderList reminders={lessonAcademyReminders} students={students} />
+          <AcademyReminderList reminders={lessonAcademyReminders} students={students} templates={templates} />
         </section>
       ) : null}
 

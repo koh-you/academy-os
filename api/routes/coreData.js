@@ -919,6 +919,7 @@ function fromSchoolEventRow(row) {
 const academyReminderTypes = new Set([
   "consultation",
   "student_consultation",
+  "class_notice",
   "parent_consultation",
   "student_intake",
   "special_note",

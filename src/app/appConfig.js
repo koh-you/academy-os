@@ -83,6 +83,7 @@ export const classTemplateScheduleRules = {
 
 export const academyReminderTypeOptions = [
   { value: "student_consultation", label: "학생 상담" },
+  { value: "class_notice", label: "반 알림" },
   { value: "parent_consultation", label: "학부모 상담" },
   { value: "consultation", label: "상담 일정" },
   { value: "student_intake", label: "신입생 일정" },

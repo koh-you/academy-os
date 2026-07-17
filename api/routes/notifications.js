@@ -260,6 +260,7 @@ function reminderTypeLabel(type = "") {
   return {
     consultation: "상담",
     student_consultation: "학생 상담",
+    class_notice: "반 알림",
     parent_consultation: "학부모 상담",
     student_intake: "신입생 일정",
     special_note: "특이사항",
@@ -275,6 +276,7 @@ function formatAcademyReminderItem(item) {
   const parts = [
     reminderTypeLabel(item.reminderType ?? item.type),
     item.studentName,
+    item.className ? `반 ${item.className}` : "",
     item.title,
     item.date ?? item.reminderDate,
     item.time ?? item.reminderTime,

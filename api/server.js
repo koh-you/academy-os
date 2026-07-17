@@ -4849,11 +4849,13 @@ function formatTeacherScheduleItem(lesson = {}, students = []) {
 
 function formatAcademyReminderSlackItem(reminder = {}, students = []) {
   const student = students.find((item) => item.studentId === reminder.studentId);
+  const sourcePayload = reminder.sourcePayload && typeof reminder.sourcePayload === "object" ? reminder.sourcePayload : {};
   return {
     ...reminder,
     date: reminder.reminderDate || reminder.date,
     time: reminder.reminderTime || reminder.time,
     memo: reminder.content || reminder.memo,
+    className: sourcePayload.className || reminder.className || "",
     studentName: student?.name || reminder.studentName || "",
     lessonName: reminder.title
   };
