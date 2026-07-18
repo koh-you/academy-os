@@ -15,6 +15,7 @@ import {
   examPostStudyDifficultyOptions
 } from "../domains/exams/postSubmissionOptions.js";
 import { StudentManager } from "../domains/students/StudentManager.jsx";
+import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
   createTestAttemptId,
@@ -619,19 +620,11 @@ function formatSupplementScheduleLine(task = {}) {
   return `${schedulePrefix}${source} 일정을 진행하겠습니다.`;
 }
 
-function isLessonCommentSupplementSchedule(task = {}, lesson = null) {
-  if (!isSupplementStudentReminderTask(task)) return false;
-  if (task.status !== "scheduled") return false;
-  if (task.supplementProcessStatus === "completed") return false;
-  if (task.linkedLessonId) return true;
-  return Boolean(lesson?.sourceMakeupTaskId && lesson.sourceMakeupTaskId === task.makeupTaskId);
-}
-
 function getStudentSupplementSchedules(makeupTasks = [], studentId = "", options = {}) {
   const { lesson = null, mode = "all" } = options;
   return makeupTasks
     .filter((task) => task.studentId === studentId && task.status !== "done")
-    .filter((task) => (mode === "lesson_comment" ? isLessonCommentSupplementSchedule(task, lesson) : true))
+    .filter((task) => (mode === "lesson_comment" ? isSupplementScheduleForLessonComment(task, lesson) : true))
     .filter((task) => task.scheduledDate || task.scheduledTime || task.notificationDraft || task.supplementHomeworkNote || task.sourceLabel)
     .sort((a, b) => `${a.scheduledDate || "9999-99-99"} ${a.scheduledTime || ""}`.localeCompare(`${b.scheduledDate || "9999-99-99"} ${b.scheduledTime || ""}`))
     .map(formatSupplementScheduleLine);

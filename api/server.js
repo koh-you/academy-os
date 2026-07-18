@@ -75,6 +75,7 @@ import {
   normalizeAssignmentStatusValue
 } from "../src/domains/lessons/assignmentStatus.js";
 import { applyStudentScheduleToLesson } from "../src/shared/utils/studentSchedule.js";
+import { isSupplementScheduleForLessonComment } from "../src/domains/notifications/supplementSchedule.js";
 import { normalizeSpecialLectureTallySessionRequests } from "../src/domains/specialLectures/tallySessionRequests.js";
 import {
   confirmExamAnalysisQuestionCount,
@@ -1654,23 +1655,11 @@ function formatSupplementScheduleLineForNotification(task = {}) {
   return `${schedulePrefix}${source} 일정을 진행하겠습니다.`;
 }
 
-function isSupplementStudentReminderTaskForNotification(task = {}) {
-  return ["homework_makeup", "absence_makeup"].includes(task.taskType);
-}
-
-function isLessonCommentSupplementScheduleForNotification(task = {}, lesson = null) {
-  if (!isSupplementStudentReminderTaskForNotification(task)) return false;
-  if (task.status !== "scheduled") return false;
-  if (task.supplementProcessStatus === "completed") return false;
-  if (task.linkedLessonId) return true;
-  return Boolean(lesson?.sourceMakeupTaskId && lesson.sourceMakeupTaskId === task.makeupTaskId);
-}
-
 function getStudentSupplementSchedulesForNotification(makeupTasks = [], studentId = "", options = {}) {
   const { lesson = null, mode = "all" } = options;
   return makeupTasks
     .filter((task) => task.studentId === studentId && task.status !== "done")
-    .filter((task) => (mode === "lesson_comment" ? isLessonCommentSupplementScheduleForNotification(task, lesson) : true))
+    .filter((task) => (mode === "lesson_comment" ? isSupplementScheduleForLessonComment(task, lesson) : true))
     .filter((task) => task.scheduledDate || task.scheduledTime || task.notificationDraft || task.supplementHomeworkNote || task.sourceLabel)
     .sort((a, b) => `${a.scheduledDate || "9999-99-99"} ${a.scheduledTime || ""}`.localeCompare(`${b.scheduledDate || "9999-99-99"} ${b.scheduledTime || ""}`))
     .map(formatSupplementScheduleLineForNotification);
