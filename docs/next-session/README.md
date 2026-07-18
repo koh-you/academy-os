@@ -15,7 +15,7 @@ E:\academy-os 작업을 이어가겠습니다.
 5. git log -1 --oneline
 
 중요:
-코드를 바로 수정하지 말고, `AGENTS.md`와 `docs/current-worklog.md` 최상단의 `미룬 작업 큐`를 먼저 읽은 뒤 다음에 해야 할 작업을 우선순위로 정리해서 세션에 보여주세요.
+코드를 바로 수정하지 말고, `AGENTS.md`와 `docs/current-worklog.md` 최상단의 `미룬 작업 큐`를 먼저 읽은 뒤 현재 미룬 작업과 새 요청의 우선순위를 짧게 정리해서 세션에 보여주세요.
 다음 세션용 프롬프트에 일부 항목이 빠져 있어도, `AGENTS.md`와 `docs/current-worklog.md`의 큐에 있으면 계속 살아 있는 작업으로 취급해주세요.
 
 현재 미룬 작업 우선순위:
@@ -30,18 +30,21 @@ E:\academy-os 작업을 이어가겠습니다.
    - 실제 발송/예약되는 모든 알림톡 템플릿과 문구 원천을 `설정 > 알림톡`에서 확인하고 수정할 수 있게 합니다.
    - 보충관리의 결석보강 학생 11시 리마인더, 숙제보충 학생 11시 리마인더, 보충 일정 확정 안내/변경 안내 문구는 `app_state.aiSettings.notificationTemplates` 원천으로 `설정 > 알림톡`에 노출 완료됐습니다.
    - 다음 후속으로 수업 알림톡/데일리 리포트의 `⭐ 보충/확인 안내` 블록 문구를 수정해야 합니다.
-   - 착수 전에 현재 문구 후보(`다음 수업 때 ... 함께 확인`, `오늘 수업 후 ... 보충`, 확정 보충/결석보강/재시험 일정 문구), 프론트 미리보기 경로, 서버 발송 직전 refresh 경로, 설정 화면 노출 여부를 먼저 표로 정리합니다.
+   - 착수 전에 현재 문구 후보, 프론트 미리보기 경로, 서버 발송 직전 refresh 경로, 설정 화면 노출 여부를 먼저 표로 정리합니다.
    - 출결, 수업일지, 숙제보충, 결석보강, 재시험, 공지, 특강, 일정 변경, 학생 11시 리마인더 등 Solapi 경로를 inventory로 정리합니다.
-   - 각 템플릿의 현재 원천(하드코딩/app_state/env/Supabase), 변수, 대상(학생/학부모), 즉시발송/예약 여부를 표로 정리합니다.
    - 실제 발송 문구가 설정 화면 미리보기/편집값과 다르거나 코드 상수만 수정해야 하는 구조면 즉시 중단하고 별도 gate로 나눕니다.
 3. App.jsx 리팩터링 연속 작업
    - 한 번에 하나의 의미 단위만 진행합니다.
    - 순서는 `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`입니다.
    - 기능 변경과 리팩터링 범위를 섞지 않습니다.
-   - 아래 18개 기준 로드맵을 공통 후보 목록으로 사용합니다. 실제 착수 전에는 최신 `docs/current-worklog.md`와 `git status --short`를 보고 이미 완료된 하위 작업과 남은 하위 작업을 먼저 구분합니다.
+   - 아래 18개 기준 로드맵을 공통 후보 목록으로 사용합니다.
    - 다음 리팩터링은 9번 `test manager`부터 이어갑니다. 1~8번은 완료 또는 충분히 진행된 것으로 보고 10번으로 넘어가지 마세요.
    - 코드 수정 전 사용자에게 먼저 최근 리팩터링 결과를 요약하고 `9번 test manager의 남은 학생별 history list 분리부터 이어갈까요?`라고 물어봐 주세요.
    - 사용자가 재개하라고 답하면 9번의 남은 작업부터 진행합니다.
+4. Solapi 특강 템플릿 검수 후 연결
+   - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인합니다.
+   - 검수 완료 전에는 임시 특강 알림톡 구조를 유지합니다.
+   - 검수 완료 확인 후에만 템플릿 ID/변수 연결, 테스트 데이터 발송, 링크/문구 검수를 진행합니다.
 
 App.jsx 리팩터링 18개 기준 로드맵:
 1. `specialLecture helpers/config` - 특강 안내문 계산, URL, 회차 normalize, Tally query helper.
@@ -63,12 +66,6 @@ App.jsx 리팩터링 18개 기준 로드맵:
 17. `LessonJournalDetail` - 수업일지 상세, 학생별 기록, 숙제/코멘트/알림톡 미리보기.
 18. `App shell/hooks/context` - App 초기화, activeView 라우팅, 전역 상태/context/hooks 분리.
 
-위험도 기본값:
-- 1~4는 낮음
-- 5~10은 중간
-- 11~18은 높음 또는 매우 높음
-- 11~18은 Supabase 원천, `notification_jobs`, Solapi, 출결, 수업일지 저장 side effect를 먼저 inventory로 확인한 뒤 진행합니다.
-
 현재 리팩터링 이어받을 지점:
 - 다음 시작점은 9번 `test manager`입니다. 10번으로 넘어가지 않습니다.
 - 6번 `specialLecture management` 분리 완료.
@@ -76,80 +73,61 @@ App.jsx 리팩터링 18개 기준 로드맵:
 - 8번 `school calendar components` 분리 완료.
 - 9번 `test manager` 진행 중: `src/domains/tests/testManagerUtils.js` 분리, `src/domains/tests/TestManagerPanels.jsx`에 탭/header/form grid/meta/table/action/recent session list 분리 완료.
 - 남은 9번 우선 후보: 학생별 history list 분리.
-- 최신 리팩터링 커밋 기준: `0bf68633 Extract recent test session list`. 새 세션은 `git log -1 --oneline`으로 실제 최신 커밋을 다시 확인하세요.
-- 먼저 사용자에게 `9번 test manager의 남은 학생별 history list 분리부터 이어갈까요?`라고 물어보고, 사용자가 재개하라고 답하면 진행하세요.
-4. Solapi 특강 템플릿 검수 후 연결
-   - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인합니다.
-   - 검수 완료 전에는 임시 특강 알림톡 구조를 유지합니다.
-   - 검수 완료 확인 후에만 템플릿 ID/변수 연결, 테스트 데이터 발송, 링크/문구 검수를 진행합니다.
+- 최신 리팩터링 커밋 기준은 `0bf68633 Extract recent test session list`이지만, 실제 최신 커밋은 새 세션에서 반드시 `git log -1 --oneline`으로 다시 확인하세요.
 
-오늘 완료/확인된 작업:
-1. 기존 일요보강/일요시험보강 runtime을 clean-slate `시험대비` 구조로 전환했습니다.
-   - 새 정상 원천은 Supabase `lessons.lesson_type=examPrep`입니다.
-   - legacy `examSundayMakeup`을 `examPrep`으로 자동 변환하지 않습니다.
-   - 관련 코드 커밋: `43adb9be Clean up legacy Sunday makeup runtime`
-2. 미룬 작업 큐를 `AGENTS.md`, `docs/current-worklog.md`, `docs/next-session/README.md` 최상단 흐름으로 고정했습니다.
-   - 관련 커밋: `ba348ad8 Record deferred work queue in handoff docs`
-3. 운영 Supabase SQL Editor에서 기존 legacy 일요보강 cleanup을 사용자가 실행했습니다.
-   - 삭제 전 preview 대상은 2건: `2026-06-21`, `2026-06-28`
-   - `lesson_record_count`, `homework_count`, `notification_job_count`, `active_notification_job_count` 모두 0
-   - cleanup 후 legacy 조회는 `Success. No rows returned`
-4. 새 `examPrep` 수업 조회도 `Success. No rows returned`였습니다.
-   - 즉 시험대비 수업은 아직 Supabase `lessons`에 저장되지 않았습니다.
-   - 달력에 보였던 `시험대비`는 저장된 수업이 아니라 시험관리 데이터에서 계산된 자동 후보/미리보기였습니다.
-   - 사용자가 자동생성 시험대비 후보를 화면에서 수동삭제했습니다. 이는 `app_state.generatedLessonControls.suppressedKeys` 기반 후보 제외로 이해합니다.
-5. 보충관리 숙제보충/결석보강 모달 1차 정리를 진행했습니다.
-   - 숙제보충 등원보충 상세는 원 숙제 배정일/마감일과 `그날까지 해야 했던 숙제`, `등원해서 확인할 숙제`로 분리했습니다.
-   - 결석보강 생성/상세는 `원 결석 수업`, `그날 수업 내용`, `그날 확인할 지난 숙제`, `그날 새로 나간 숙제` 맥락을 표시합니다.
-6. 결석보강 알림톡 seed와 실제 보강 수업 상세 문구를 통일했습니다.
-   - 결석보강 학생 11시 제목은 `결석보강 · <결석한 수업>`을 우선 사용합니다.
-   - 본문/일정 안내는 `결석한 수업`과 `확인할 숙제`를 분리합니다.
-   - `설정 > 알림톡`에서 `결석보강 학생 11시 알림톡`, `보충 일정 확정 안내`, `보충 일정 변경 안내` 템플릿을 확인/수정할 수 있습니다.
-   - 기존 예약된 `notification_jobs`는 자동 변경되지 않고, 새로 생성/변경 예약되는 job부터 새 seed를 사용합니다.
-7. 숙제보충 학생 11시 알림톡 문구도 결석보충과 같은 라벨 구조로 정리했습니다.
-   - 새 초안은 `일시: 7/17(금) 오전 04:00`, `밀린 숙제: 7/15(수) 숙제 · <등원해서 확인할 숙제>`처럼 표시합니다.
-   - `설정 > 알림톡`에서 `숙제보충 학생 11시 알림톡` 템플릿을 확인/수정할 수 있습니다.
-   - 기존 예약된 `notification_jobs`와 사용자 편집 초안은 자동 변경되지 않고, 새로 생성/변경 예약되는 job부터 새 문구를 사용합니다.
-   - 관련 기능 커밋: `58728cb0 Clarify supplement homework reminder labels`
-8. App.jsx 리팩터링과 18개 기준 로드맵을 최신 문서에 반영했습니다.
-   - 6번 `specialLecture management` 분리 완료.
-   - 7번 `school calendar helpers` 분리 완료.
-   - 8번 `school calendar components` 분리 완료.
-   - 9번 `test manager` 진행 중: `src/domains/tests/testManagerUtils.js`와 `src/domains/tests/TestManagerPanels.jsx` 일부 분리 완료.
-   - 9번 최신 리팩터링 커밋 기준: `0bf68633 Extract recent test session list`
-   - 다음에 "다음 세션에 넘길 프롬프트"를 요청하면 이 README의 붙여넣기 프롬프트가 미룬 작업 큐, 18개 로드맵, 최근 리팩터링 결과, 9번 재개 질문을 함께 넘깁니다.
-9. 최신 검증 결과
-   - `node --check scripts/scenario-tests-production.cjs` 통과
-   - `npm run test:production` 309개 통과
-   - `npm run build` 통과, 기존 Vite chunk size 경고만 남음
-   - `git diff --check` 통과
+오늘/최근 완료된 작업:
+1. 운영 프론트 API base fallback 복구
+   - 증상: 운영 화면 버튼들이 `Failed to fetch`로 실패.
+   - 원인: 운영 프론트 번들이 `http://127.0.0.1:8787`을 API base로 들고 있었다.
+   - 결과: 운영/배포 도메인은 `VITE_API_BASE_URL`이 비어 있거나 로컬 주소여도 Render API `https://koh-you-math-academy-os-api.onrender.com`을 쓰도록 수정.
+   - 커밋: `ae49ea74 Fix production API base fallback`
+2. 보충 생성 모달에서 결석 처리 취소 추가
+   - 미래 결석 저장을 보충관리 결석보강 생성 모달에서 `결석 처리 취소`로 되돌릴 수 있게 함.
+   - `lesson_student_records`만 되돌리고 `makeup_tasks`, `lessons`, `notification_jobs`, Solapi 예약/발송은 건드리지 않음.
+   - 커밋: `db047b39 Add absence cancellation from supplement draft`
+3. 운영 알림에 반 알림 대상 추가
+   - `운영 알림 원본`의 첫 드롭다운에 `반 알림`을 추가.
+   - `반 알림` 선택 시 오른쪽 대상 드롭다운이 현재 반 템플릿 4개 목록으로 전환.
+   - 저장 원천은 기존 Supabase `academy_reminders`; 반 대상은 새 SQL 없이 `source_payload.classTemplateId`와 `source_payload.className`에 저장.
+   - 수업일지 상단 `수업 관련 운영 알림`은 기존 `lessonId`/학생 ID 매칭에 더해 `lesson.classTemplateId === reminder.sourcePayload.classTemplateId`도 매칭.
+   - `notification_jobs`, Solapi 예약/발송, 출결, 수업일지 저장 로직은 변경하지 않음.
+   - 커밋: `888d5c41 Add class-scoped academy reminders`
+4. 알림관리 Solapi 발송결과 직접 대조/반영
+   - 알림관리에서 예약/확인 필요 알림톡을 Solapi 결과와 직접 매칭해 `notification_jobs` 상태를 갱신할 수 있게 함.
+   - 날짜/시간으로 조회 대상을 좁히지 않고, 화면에 잡힌 예약/확인 필요 목록 전체를 대상으로 함.
+   - 외부 side effect는 Solapi 조회만 수행. 새 예약/발송은 만들지 않음.
+5. 공지 발송 화면 정리
+   - `테스트 발송` 제거.
+   - 상단 요약 카드는 `예약`, `발송 완료`, `확인 필요` 3개만 노출. 실패/취소/초안 기록은 이력 로직에는 남김.
+6. 보충 최초 일정 안내가 일정 변경 문구로 나가는 문제 수정
+   - 최초 일정 만들기는 `확정 안내`, 기존 연결 일정 변경은 `변경 안내`로 분리.
+   - `notification_jobs.payload.noticeKind`/`result.noticeKind`에 확정/변경 구분을 남김.
+7. `⭐ 보충/확인 안내` 문구 수정 후속 등록
+   - 다음 착수 전 프론트 미리보기, 서버 발송 직전 refresh, Solapi route body 원천과 중복 제거 조건을 표로 정리해야 함.
+   - 이번 세션에서는 실제 발송 문구/템플릿/Solapi API를 바꾸지 않음.
+
+최신 검증 결과:
+- `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs` 통과
+- `node scripts/scenario-tests-production.cjs` 통과, 312개
+- `npm run test:production` 통과, 312개
+- `npm run build` 통과, 기존 Vite chunk size 경고만 남음
+- `git diff --check` 통과
+- 참고: `node --check src/app/App.jsx`는 Node가 `.jsx` 확장자를 직접 검사하지 못해 도구 한계로 실패할 수 있음. JSX 검사는 Vite build로 확인.
 
 다음 세션 주의사항:
 - 사용자가 명시적으로 요청하기 전까지 새 시험대비 수업을 생성/반영하지 마세요. 아직 시험대비를 시작하지 않았습니다.
 - 나중에 시험대비를 실제로 시작할 때는 `시험관리/학사일정`의 자동 수업 후보에서 필요한 항목만 반영합니다.
 - 이미 수동삭제한 시험대비 후보가 필요해지면 `제외 해제` 가능 여부를 먼저 확인합니다.
 - 저장 전 자동 후보가 실제 수업처럼 달력에 보여 헷갈리는 문제가 계속되면 `시험대비 자동 후보와 실제 저장 수업 표시 분리`를 별도 UI 개선 작업으로 제안하세요.
-
-계속 커밋하지 말 것:
-- `.codex-temp/`
-- `.env`
-- PDF/HWP/HWPX/ZIP/대용량 자료
-- Slack/Supabase/Solapi/Tally/OpenAI 등 비밀값
-
-작업 원칙:
+- `.codex-temp/`, `.env`, PDF/HWP/HWPX/ZIP/대용량 자료, Slack/Supabase/Solapi/Tally/OpenAI 등 비밀값은 커밋하지 마세요.
 - 운영 Supabase SQL edit 적용은 사용자가 직접 합니다. SQL 자동 적용을 위해 DB URL, DB password, access token을 묻지 않습니다.
-- 한 번에 하나의 우선순위 작업만 진행합니다.
-- 운영 흐름에 영향이 있으면 `npm run test:production`, `npm run build`, `git diff --check`를 실행합니다.
-- 완료 후 `docs/current-worklog.md`와 필요 시 `AGENTS.md`, `docs/next-session/README.md`의 미룬 작업 큐를 갱신합니다.
 - 작업 완료 답변에는 `사람 검토 절차`와 `AI 자기검토`를 포함합니다.
 ```
 
 ## Handoff Notes
 
 - 미룬 작업 큐의 source of truth는 `AGENTS.md` 최상단과 `docs/current-worklog.md` 최상단입니다.
-- App.jsx 리팩터링 18개 기준 로드맵은 `AGENTS.md`, `docs/current-worklog.md`, 이 README에 함께 기록되어 있습니다. 다른 세션이 목록을 못 찾으면 먼저 이 세 파일의 최상단 큐와 `App.jsx Refactoring Roadmap - 18 Units`를 확인하게 하세요.
+- App.jsx 리팩터링 18개 기준 로드맵은 `AGENTS.md`, `docs/current-worklog.md`, 이 README에 함께 기록되어 있습니다.
 - 다음 리팩터링 시작점은 9번 `test manager`입니다. 다음 세션은 코드 수정 전에 리팩터링 결과를 요약하고 `9번 test manager의 남은 학생별 history list 분리부터 이어갈까요?`라고 사용자에게 먼저 물어봐야 합니다.
-- 최근 리팩터링 흐름은 6번 특강관리 분리, 7번 학사일정 helper 분리, 8번 학사일정 컴포넌트 분리 완료 후 9번 `test manager` 진행 중입니다. 최신 리팩터링 커밋 기준은 `0bf68633 Extract recent test session list`이며, 실제 최신 커밋은 새 세션에서 반드시 `git log -1 --oneline`으로 다시 확인하세요.
-- 이 README는 붙여넣기 편의를 위한 사본입니다. 세션 종료 시 새로 미룬 작업이 생기면 세 곳을 함께 갱신하세요.
-- 보충 알림톡 라벨 정리 기능 커밋은 `58728cb0 Clarify supplement homework reminder labels`입니다. handoff 문서 갱신 커밋이 뒤에 올 수 있으므로 새 세션에서 반드시 `git log -1 --oneline`으로 최신 커밋을 다시 확인하세요.
+- 최신 기능 커밋은 `888d5c41 Add class-scoped academy reminders`입니다. handoff 문서 갱신 커밋이 뒤에 올 수 있으므로 새 세션에서 반드시 `git log -1 --oneline`으로 실제 최신 커밋을 다시 확인하세요.
 - 현재 로컬에 남을 수 있는 미추적 항목: `.codex-temp/`. 커밋하지 않습니다.
