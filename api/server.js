@@ -75,6 +75,7 @@ import {
   normalizeAssignmentStatusValue
 } from "../src/domains/lessons/assignmentStatus.js";
 import { applyStudentScheduleToLesson } from "../src/shared/utils/studentSchedule.js";
+import { normalizeSpecialLectureTallySessionRequests } from "../src/domains/specialLectures/tallySessionRequests.js";
 import {
   confirmExamAnalysisQuestionCount,
   deleteExamAnalysisRun,
@@ -1046,6 +1047,14 @@ function normalizeTallyApplicantPayload(payload = {}) {
   };
 }
 
+function normalizeTallyRequestedSessionPlans(fields = []) {
+  const entries = fields.map((field) => ({
+    label: getTallyFieldLabel(field),
+    value: getTallyFieldText(field)
+  }));
+  return normalizeSpecialLectureTallySessionRequests(entries);
+}
+
 function normalizeSpecialLectureApplicationPayload(payload = {}) {
   const data = payload.data ?? payload;
   const fields = Array.isArray(data.fields) ? data.fields : [];
@@ -1088,6 +1097,7 @@ function normalizeSpecialLectureApplicationPayload(payload = {}) {
     studentPhone: normalizePhone(getValue([/학생.*전화/i, /학생.*휴대/i, /student.*phone/i]) || getHidden(["studentPhone"])),
     parentPhone: normalizePhone(getValue([/학부모.*전화/i, /보호자.*전화/i, /부모.*전화/i, /parent.*phone/i, /guardian.*phone/i]) || getHidden(["parentPhone"])),
     selectedSession: getValue([/희망.*시간/i, /신청.*시간/i, /신청.*반/i, /희망.{0,12}반/i, /회차/i, /요일/i]) || getHidden(["selectedSession", "session", "classTime"]),
+    requestedSessionPlans: normalizeTallyRequestedSessionPlans(fields),
     memo: getValue([/요청/i, /문의/i, /메모/i, /기타/i, /특이/i]) || getHidden(["memo"]),
     rawPayload: payload,
     createdAt: compactText(data.createdAt ?? payload.createdAt) || new Date().toISOString()

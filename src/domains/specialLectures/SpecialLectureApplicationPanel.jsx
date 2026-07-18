@@ -165,8 +165,55 @@ function getSpecialLectureSessionPlanError(plan = {}, session = {}) {
   return "";
 }
 
-function buildEnrollmentFromMatchRow(row, guide, sessionIds = [], existingEnrollment = null) {
+function getEnrollmentPlansFromApplication(application = {}, guideSessions = []) {
+  if (!application.requestedSessionPlans?.length) {
+    if (application.source !== "tally") return null;
+    return guideSessions.map((session) => ({
+      sessionId: session.sessionId,
+      status: "excluded",
+      effectiveStartTime: "",
+      effectiveEndTime: "",
+      overrideReason: ""
+    }));
+  }
+  const requestedPlanByIndex = new Map(application.requestedSessionPlans.map((plan) => [plan.sessionIndex, plan]));
+  return guideSessions.map((session) => {
+    const requestedPlan = requestedPlanByIndex.get(session.sessionIndex);
+    if (!requestedPlan) {
+      return {
+        sessionId: session.sessionId,
+        status: "excluded",
+        effectiveStartTime: "",
+        effectiveEndTime: "",
+        overrideReason: ""
+      };
+    }
+    const requestedStartTime = requestedPlan.requestedStartTime || session.startTime;
+    const requestedEndTime = requestedPlan.requestedEndTime || session.endTime;
+    const isOfficialTime = requestedStartTime === session.startTime && requestedEndTime === session.endTime;
+    return {
+      sessionId: session.sessionId,
+      status: "active",
+      effectiveStartTime: isOfficialTime ? "" : requestedPlan.requestedStartTime || "",
+      effectiveEndTime: isOfficialTime ? "" : requestedPlan.requestedEndTime || "",
+      overrideReason: isOfficialTime ? "" : requestedPlan.overrideReason || ""
+    };
+  });
+}
+
+function buildEnrollmentFromMatchRow(row, guide, guideSessions = [], existingEnrollment = null) {
   const studentId = row.student?.studentId ?? "";
+  const requestedPlans = getEnrollmentPlansFromApplication(row.application, guideSessions);
+  const defaultSessionIds = guideSessions.map((session) => session.sessionId);
+  const sessionPlans = existingEnrollment?.sessionPlans?.length
+    ? existingEnrollment.sessionPlans
+    : requestedPlans ?? defaultSessionIds.map((sessionId) => ({
+        sessionId,
+        status: "active",
+        effectiveStartTime: "",
+        effectiveEndTime: "",
+        overrideReason: ""
+      }));
   return normalizeSpecialLectureEnrollment({
     ...(existingEnrollment ?? {}),
     enrollmentId: existingEnrollment?.enrollmentId || createSpecialLectureEnrollmentId(guide, studentId),
@@ -175,16 +222,10 @@ function buildEnrollmentFromMatchRow(row, guide, sessionIds = [], existingEnroll
     applicationId: row.application.applicationId,
     studentId,
     status: "active",
-    sessionIds: existingEnrollment?.sessionIds?.length ? existingEnrollment.sessionIds : sessionIds,
-    sessionPlans: existingEnrollment?.sessionPlans?.length
-      ? existingEnrollment.sessionPlans
-      : sessionIds.map((sessionId) => ({
-          sessionId,
-          status: "active",
-          effectiveStartTime: "",
-          effectiveEndTime: "",
-          overrideReason: ""
-        })),
+    sessionIds: sessionPlans.filter((plan) => plan.status === "active").map((plan) => plan.sessionId),
+    sessionPlans,
+    planSource: existingEnrollment?.planSource || (requestedPlans ? "tally_request" : "manual"),
+    planReviewedAt: existingEnrollment?.planReviewedAt || (requestedPlans ? "" : new Date().toISOString()),
     memo: existingEnrollment?.memo || row.application.selectedSession || row.application.memo || "",
     createdAt: existingEnrollment?.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -327,6 +368,7 @@ export function SpecialLectureApplicationPanel({
   const guideSessions = useMemo(() => getSpecialLectureGuideSessions(selectedGuide), [selectedGuide]);
   const guideSessionIds = guideSessions.map((session) => session.sessionId);
   const activeEnrollments = selectedGuideEnrollments.filter((enrollment) => enrollment.status === "active");
+  const unreviewedEnrollmentRows = activeEnrollments.filter((enrollment) => enrollment.planSource === "tally_request" && !enrollment.planReviewedAt);
   const enrollmentByStudentId = new Map(selectedGuideEnrollments.map((enrollment) => [enrollment.studentId, enrollment]));
   const missingEnrollmentRows = matchedRows.filter((row) => row.student?.studentId && !enrollmentByStudentId.has(row.student.studentId));
   const lessonDrafts = useMemo(
@@ -366,7 +408,7 @@ export function SpecialLectureApplicationPanel({
     })).filter((row) => row.error);
   });
   const canCreateLessons = Boolean(
-    isGuideSaved && selectedGuide && activeEnrollments.length && newLessonDrafts.length && !needsReviewRows.length && !conflictingLessonRows.length && !staleLessonRows.length && !invalidPlanRows.length
+    isGuideSaved && selectedGuide && activeEnrollments.length && newLessonDrafts.length && !needsReviewRows.length && !unreviewedEnrollmentRows.length && !conflictingLessonRows.length && !staleLessonRows.length && !invalidPlanRows.length
   );
   const webhookUrl = apiUrl("/api/special-lecture-applications/tally");
 
@@ -461,7 +503,7 @@ export function SpecialLectureApplicationPanel({
     setSavingEnrollmentId("bulk");
     try {
       const nextEnrollments = missingEnrollmentRows.map((row) =>
-        buildEnrollmentFromMatchRow(row, selectedGuide, guideSessionIds)
+        buildEnrollmentFromMatchRow(row, selectedGuide, guideSessions)
       );
       await onSaveEnrollments(nextEnrollments);
       setPanelMessage(`확정 수강명단 ${nextEnrollments.length}건을 저장했습니다. 학생별 회차를 확인한 뒤 수업일지를 생성하세요.`);
@@ -488,6 +530,7 @@ export function SpecialLectureApplicationPanel({
       ...draft,
       specialLectureGuideId: selectedGuide.specialLectureGuideId,
       guideSlug: getSpecialLectureGuideSlug(selectedGuide),
+      planReviewedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
     setPanelMessage("");
@@ -538,6 +581,9 @@ export function SpecialLectureApplicationPanel({
         <div>
           <strong>별도 원천</strong>
           <span>Supabase `special_lecture_applications`에 저장합니다. 신입생 상담 접수와 섞지 않습니다.</span>
+          <small className="specialLectureTallyQuestionGuide">
+            Tally 질문명: `수강 회차`(복수 선택), `1회차 시작 시간`, `1회차 종료 시간`, `1회차 시간 조정 사유` 형식 · 날짜 변경 항목 없음
+          </small>
         </div>
         <code>{webhookUrl}</code>
       </div>
@@ -633,6 +679,11 @@ export function SpecialLectureApplicationPanel({
                     <strong>{student?.name || enrollment.studentId || "학생 미매칭"}</strong>
                     <small>{student ? [student.schoolName, student.grade].filter(Boolean).join(" · ") || "학교/학년 미입력" : "기존 학생 원천에서 찾지 못했습니다."}</small>
                     <small className="specialLectureEnrollmentSessionCount">총 {guideSessions.length}회 중 {selectedSessionCount}회 수강</small>
+                    {enrollment.planSource === "tally_request" ? (
+                      <small className={enrollment.planReviewedAt ? "specialLectureEnrollmentReviewStatus reviewed" : "specialLectureEnrollmentReviewStatus pending"}>
+                        {enrollment.planReviewedAt ? "Tally 신청 · 선생님 검토 완료" : "Tally 신청 초안 · 회차 계획 저장 필요"}
+                      </small>
+                    ) : null}
                   </div>
                   <div className="specialLectureSessionToggleGrid">
                     {guideSessions.map((session) => {
@@ -742,6 +793,7 @@ export function SpecialLectureApplicationPanel({
             <span>신규 {newLessonDrafts.length}</span>
             <span>기존 {lessonDrafts.length - newLessonDrafts.length}</span>
             <span className={emptySessionCount ? "danger" : ""}>빈 회차 {emptySessionCount}</span>
+            <span className={unreviewedEnrollmentRows.length ? "danger" : ""}>미검토 {unreviewedEnrollmentRows.length}</span>
             <span className={needsReviewRows.length ? "danger" : ""}>검토 {needsReviewRows.length}</span>
           </div>
         </div>
@@ -774,6 +826,9 @@ export function SpecialLectureApplicationPanel({
         )}
         {needsReviewRows.length ? (
           <p className="inlineNotice danger">확정 신청자 중 기존 학생 매칭이 필요한 건이 있어 수업일지 생성을 막았습니다.</p>
+        ) : null}
+        {unreviewedEnrollmentRows.length ? (
+          <p className="inlineNotice danger">Tally 신청 초안 {unreviewedEnrollmentRows.length}명의 회차와 시간을 확인한 뒤 각 학생 카드에서 `회차 계획 저장`을 눌러 주세요.</p>
         ) : null}
         {invalidPlanRows.length ? (
           <p className="inlineNotice danger">시간 또는 조정 사유를 확인해야 하는 학생별 회차가 {invalidPlanRows.length}건 있습니다.</p>
@@ -840,6 +895,24 @@ export function SpecialLectureApplicationPanel({
                   {application.selectedSession || "신청 회차 미입력"}
                   {application.createdAt ? ` · ${formatKoreaTimeLabel(application.createdAt)}` : ""}
                 </small>
+                {application.requestedSessionPlans?.length ? (
+                  <div className="specialLectureApplicationRequestedPlans">
+                    {application.requestedSessionPlans.map((plan) => {
+                      const session = guideSessions[plan.sessionIndex];
+                      return (
+                        <span key={`${application.applicationId}_requested_${plan.sessionIndex}`}>
+                          {plan.sessionIndex + 1}회차
+                          {plan.requestedStartTime || plan.requestedEndTime
+                            ? ` · ${plan.requestedStartTime || session?.startTime || "?"}-${plan.requestedEndTime || session?.endTime || "?"}`
+                            : " · 공식 시간"}
+                          {plan.overrideReason ? ` · ${plan.overrideReason}` : ""}
+                        </span>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <small className="specialLectureApplicationRequestWarning">구조화된 회차 신청 없음 · 확정 전 회차를 직접 확인하세요.</small>
+                )}
               </div>
               <div className="specialLectureApplicationMeta">
                 <span>학생 {application.studentPhone || "-"}</span>

@@ -7864,6 +7864,12 @@ button:disabled {
   line-height: 1.5;
 }
 
+.specialLectureTallyQuestionGuide {
+  color: #1d4ed8;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
 .specialLectureWebhookBox code {
   overflow-wrap: anywhere;
   border: 1px solid #bfdbfe;
@@ -8128,6 +8134,24 @@ button:disabled {
   font-weight: 900;
 }
 
+.specialLectureEnrollmentReviewStatus {
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 3px 7px;
+  width: fit-content;
+}
+
+.specialLectureEnrollmentReviewStatus.pending {
+  background: #fff7ed;
+  color: #b45309;
+}
+
+.specialLectureEnrollmentReviewStatus.reviewed {
+  background: #ecfdf5;
+  color: #047857;
+}
+
 .specialLectureSessionOverrideGrid label {
   color: #52627a;
   display: grid;
@@ -8317,6 +8341,29 @@ button:disabled {
 .specialLectureApplicationMeta {
   display: grid;
   gap: 4px;
+}
+
+.specialLectureApplicationRequestedPlans {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 7px;
+}
+
+.specialLectureApplicationRequestedPlans span {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 7px;
+}
+
+.specialLectureApplicationRequestWarning {
+  color: #b45309 !important;
+  display: block;
+  margin-top: 6px;
 }
 
 .specialLectureApplicationMeta em {

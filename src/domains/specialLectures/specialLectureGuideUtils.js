@@ -681,6 +681,17 @@ export function normalizeSpecialLectureApplication(application = {}, index = 0) 
   const status = specialLectureApplicationStatusOptions.some((option) => option.value === application.status)
     ? application.status
     : "received";
+  const rawRequestedSessionPlans = Array.isArray(application.requestedSessionPlans)
+    ? application.requestedSessionPlans
+    : Array.isArray(application.requested_session_plans)
+      ? application.requested_session_plans
+      : [];
+  const requestedSessionPlans = rawRequestedSessionPlans.map((plan) => ({
+    sessionIndex: Number(plan?.sessionIndex ?? plan?.session_index),
+    requestedStartTime: String(plan?.requestedStartTime ?? plan?.requested_start_time ?? "").slice(0, 5),
+    requestedEndTime: String(plan?.requestedEndTime ?? plan?.requested_end_time ?? "").slice(0, 5),
+    overrideReason: String(plan?.overrideReason ?? plan?.override_reason ?? "").trim()
+  })).filter((plan) => Number.isInteger(plan.sessionIndex) && plan.sessionIndex >= 0);
   return {
     applicationId: id,
     specialLectureGuideId: String(
@@ -710,6 +721,7 @@ export function normalizeSpecialLectureApplication(application = {}, index = 0) 
     studentPhone: String(application.studentPhone || application.student_phone || "").trim(),
     parentPhone: String(application.parentPhone || application.parent_phone || "").trim(),
     selectedSession: String(application.selectedSession || application.selected_session || "").trim(),
+    requestedSessionPlans,
     memo: String(application.memo || "").trim(),
     rawPayload: application.rawPayload ?? application.raw_payload ?? null,
     createdAt: application.createdAt || application.created_at || nowIso,
@@ -754,6 +766,8 @@ export function normalizeSpecialLectureEnrollment(enrollment = {}, index = 0) {
     status,
     sessionIds: [...new Set(sessionIds.map((sessionId) => String(sessionId ?? "").trim()).filter(Boolean))],
     sessionPlans,
+    planSource: String(enrollment.planSource || enrollment.plan_source || "").trim(),
+    planReviewedAt: enrollment.planReviewedAt || enrollment.plan_reviewed_at || "",
     memo: String(enrollment.memo || "").replace(/\r\n?/g, "\n"),
     createdAt: enrollment.createdAt || enrollment.created_at || nowIso,
     updatedAt: enrollment.updatedAt || enrollment.updated_at || nowIso

@@ -49,6 +49,10 @@ function throwSpecialLectureLessonTrackSchemaError() {
   throw new Error("특강 수업일지 반영을 위해 supabase/20260715_special_lecture_lesson_tracks.sql과 supabase/20260718_special_lecture_enrollment_session_plans.sql 적용이 필요합니다.");
 }
 
+function throwSpecialLectureTallySessionRequestSchemaError() {
+  throw new Error("Tally 특강 회차/시간 신청을 저장하려면 supabase/20260718_special_lecture_tally_session_requests.sql 적용이 필요합니다.");
+}
+
 function hasMeaningfulValue(value) {
   if (typeof value === "boolean") return value;
   return Boolean(String(value ?? "").trim());
@@ -177,6 +181,18 @@ function normalizeSpecialLectureEnrollmentStatus(value = "active") {
   return ["active", "canceled"].includes(status) ? status : "active";
 }
 
+function normalizeSpecialLectureRequestedSessionPlans(value) {
+  const source = Array.isArray(value) ? value : [];
+  return source
+    .map((plan) => ({
+      sessionIndex: Number(plan?.sessionIndex ?? plan?.session_index),
+      requestedStartTime: compact(normalizeClockTime(plan?.requestedStartTime ?? plan?.requested_start_time)),
+      requestedEndTime: compact(normalizeClockTime(plan?.requestedEndTime ?? plan?.requested_end_time)),
+      overrideReason: compact(plan?.overrideReason ?? plan?.override_reason)
+    }))
+    .filter((plan) => Number.isInteger(plan.sessionIndex) && plan.sessionIndex >= 0);
+}
+
 function toSpecialLectureApplicationRow(application) {
   return {
     application_id: application.applicationId || application.id || createSpecialLectureApplicationId(),
@@ -194,6 +210,9 @@ function toSpecialLectureApplicationRow(application) {
     student_phone: compact(application.studentPhone),
     parent_phone: compact(application.parentPhone),
     selected_session: compact(application.selectedSession),
+    ...(application.requestedSessionPlans?.length
+      ? { requested_session_plans: normalizeSpecialLectureRequestedSessionPlans(application.requestedSessionPlans) }
+      : {}),
     memo: compact(application.memo),
     raw_payload: application.rawPayload ?? null,
     created_at: application.createdAt ?? new Date().toISOString(),
@@ -218,6 +237,9 @@ function fromSpecialLectureApplicationRow(row) {
     studentPhone: row.student_phone ?? "",
     parentPhone: row.parent_phone ?? "",
     selectedSession: row.selected_session ?? "",
+    ...(row.requested_session_plans !== undefined
+      ? { requestedSessionPlans: normalizeSpecialLectureRequestedSessionPlans(row.requested_session_plans) }
+      : {}),
     memo: row.memo ?? "",
     rawPayload: row.raw_payload ?? null,
     createdAt: row.created_at ?? "",
@@ -266,6 +288,12 @@ function toSpecialLectureEnrollmentRow(enrollment) {
     status: normalizeSpecialLectureEnrollmentStatus(enrollment.status),
     session_ids: normalizeSpecialLectureEnrollmentSessionIds(enrollment.sessionIds),
     session_plans: normalizeSpecialLectureEnrollmentSessionPlans(enrollment.sessionPlans),
+    ...(enrollment.planSource || enrollment.planReviewedAt
+      ? {
+          plan_source: compact(enrollment.planSource),
+          plan_reviewed_at: compact(enrollment.planReviewedAt)
+        }
+      : {}),
     memo: compact(enrollment.memo),
     created_at: enrollment.createdAt ?? new Date().toISOString(),
     updated_at: new Date().toISOString()
@@ -282,6 +310,12 @@ function fromSpecialLectureEnrollmentRow(row) {
     status: normalizeSpecialLectureEnrollmentStatus(row.status),
     sessionIds: Array.isArray(row.session_ids) ? row.session_ids : [],
     sessionPlans: normalizeSpecialLectureEnrollmentSessionPlans(row.session_plans),
+    ...(row.plan_source !== undefined || row.plan_reviewed_at !== undefined
+      ? {
+          planSource: row.plan_source ?? "",
+          planReviewedAt: row.plan_reviewed_at ?? ""
+        }
+      : {}),
     memo: row.memo ?? "",
     createdAt: row.created_at ?? "",
     updatedAt: row.updated_at ?? ""
@@ -1531,9 +1565,15 @@ export async function upsertSpecialLectureApplication(application) {
     return { source: fallbackSource, application: normalizedApplication };
   }
 
-  const [row] = await upsertRows("special_lecture_applications", [toSpecialLectureApplicationRow(normalizedApplication)], {
-    onConflict: "application_id"
-  });
+  let row;
+  try {
+    [row] = await upsertRows("special_lecture_applications", [toSpecialLectureApplicationRow(normalizedApplication)], {
+      onConflict: "application_id"
+    });
+  } catch (error) {
+    if (errorMentionsAnyColumn(error, ["requested_session_plans"])) throwSpecialLectureTallySessionRequestSchemaError();
+    throw error;
+  }
   return { source: databaseSource, application: fromSpecialLectureApplicationRow(row) };
 }
 
@@ -1552,9 +1592,15 @@ export async function upsertSpecialLectureEnrollment(enrollment) {
     return { source: fallbackSource, enrollment: normalizedEnrollment };
   }
 
-  const [row] = await upsertRows("special_lecture_enrollments", [toSpecialLectureEnrollmentRow(normalizedEnrollment)], {
-    onConflict: "enrollment_id"
-  });
+  let row;
+  try {
+    [row] = await upsertRows("special_lecture_enrollments", [toSpecialLectureEnrollmentRow(normalizedEnrollment)], {
+      onConflict: "enrollment_id"
+    });
+  } catch (error) {
+    if (errorMentionsAnyColumn(error, ["plan_source", "plan_reviewed_at"])) throwSpecialLectureTallySessionRequestSchemaError();
+    throw error;
+  }
   return { source: databaseSource, enrollment: fromSpecialLectureEnrollmentRow(row) };
 }
 
@@ -1576,11 +1622,17 @@ export async function upsertSpecialLectureEnrollments(enrollments) {
     return { source: fallbackSource, enrollments: normalizedEnrollments };
   }
 
-  const rows = await upsertRows(
-    "special_lecture_enrollments",
-    normalizedEnrollments.map(toSpecialLectureEnrollmentRow),
-    { onConflict: "enrollment_id" }
-  );
+  let rows;
+  try {
+    rows = await upsertRows(
+      "special_lecture_enrollments",
+      normalizedEnrollments.map(toSpecialLectureEnrollmentRow),
+      { onConflict: "enrollment_id" }
+    );
+  } catch (error) {
+    if (errorMentionsAnyColumn(error, ["plan_source", "plan_reviewed_at"])) throwSpecialLectureTallySessionRequestSchemaError();
+    throw error;
+  }
   return { source: databaseSource, enrollments: rows.map(fromSpecialLectureEnrollmentRow) };
 }
 
