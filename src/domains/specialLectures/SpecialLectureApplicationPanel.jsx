@@ -582,7 +582,7 @@ export function SpecialLectureApplicationPanel({
           <strong>별도 원천</strong>
           <span>Supabase `special_lecture_applications`에 저장합니다. 신입생 상담 접수와 섞지 않습니다.</span>
           <small className="specialLectureTallyQuestionGuide">
-            Tally 질문명: `수강 회차`(복수 선택), `1회차 시작 시간`, `1회차 종료 시간`, `1회차 시간 조정 사유` 형식 · 날짜 변경 항목 없음
+            Tally 폼 `eql9aJ`를 신청 원천으로 사용합니다. 제출 내용은 참고값이며, 최종 수강 회차와 시간은 확정 명단에서 선생님이 확인·수정합니다.
           </small>
         </div>
         <code>{webhookUrl}</code>

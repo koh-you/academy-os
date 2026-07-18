@@ -85,7 +85,7 @@
 ### 2026-07-18 P0-1. Tally 특강 회차/시간 신청 초안 연결
 
 - 사용자 의도: 학생이 Tally에서 수강 회차를 복수 선택하고 필요한 회차의 시간을 조정해 제출하면, 특강관리에서 그 신청을 검토한 뒤 확정 수강계획과 수업일지에 반영한다.
-- Tally 질문 규칙: 회차 선택 질문명은 `수강 회차`, 선택지는 `1회차`, `2회차`처럼 회차 번호를 포함한다. 조건부 시간 질문은 `1회차 시작 시간`, `1회차 종료 시간`, `1회차 시간 조정 사유` 형식을 사용한다. 날짜 변경 질문은 두지 않는다. 현재 Tally 폼 자체 수정은 외부 사람 gate이며 Academy OS 화면에 필요한 질문명을 표시했다.
+- Tally 폼 기준: 기존 폼 `https://tally.so/forms/eql9aJ/edit` / 공개 폼 `https://tally.so/r/eql9aJ`을 고정 신청 원천으로 사용한다. 폼의 현재 제출 내용은 신청 참고값으로 보관하고, 세부 수강 회차와 시간은 Academy OS 확정 명단에서 선생님이 최종 확인·수정한다. 질문명이 구조화 규칙과 맞으면 회차/시간을 초안으로 seed하지만, 폼 수정을 기능의 전제조건으로 두지 않는다.
 - 신청 초안 저장: webhook은 Tally label/value를 구조화해 Supabase `special_lecture_applications.requested_session_plans` JSONB에 `sessionIndex`, 신청 시작/종료 시간, 조정 사유로 저장한다. 원본 webhook은 기존 `raw_payload`에도 유지한다.
 - 사람 확정 gate: Tally 제출값은 직접 `lessons`를 만들지 않는다. 신청자 상태를 `확정`으로 바꾸고 기존 학생 매칭을 통과한 뒤 `확정 명단에 추가`할 때만 신청 초안이 `special_lecture_enrollments.session_plans`의 시작값이 된다. 구조화 회차를 읽지 못한 Tally 신청은 전 회차 제외 상태로 시작해 전체 수강으로 오인되지 않게 한다. 이후 선생님이 학생별 회차 계획을 확인·수정·저장해야 수업 생성 원천이 된다.
 - 수업일지 연결: 확정된 `session_plans`는 기존 회차별 단일 수업일지 생성 흐름을 사용한다. 선택하지 않은 회차에는 학생이 나타나지 않고, 조정 시간은 `lessons.special_lecture_student_schedules` 스냅샷을 거쳐 수업일지/출결에 표시된다.
