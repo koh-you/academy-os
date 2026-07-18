@@ -324,6 +324,7 @@ export function SpecialLectureApplicationPanel({
   const [lessonCreateState, setLessonCreateState] = useState({ state: "idle", message: "" });
   const [savingEnrollmentId, setSavingEnrollmentId] = useState("");
   const [updatingApplicationId, setUpdatingApplicationId] = useState("");
+  const [applicationGuideDrafts, setApplicationGuideDrafts] = useState({});
   const normalizedGuides = useMemo(() => normalizeSpecialLectureGuides(guides), [guides]);
   const normalizedApplications = useMemo(
     () => normalizeSpecialLectureApplications(applications)
@@ -432,14 +433,23 @@ export function SpecialLectureApplicationPanel({
     }
   }
 
-  async function matchApplicationToCurrentGuide(application) {
-    if (!onUpdateApplication || !application.applicationId || !selectedGuide) return;
-    const guideId = String(selectedGuide.specialLectureGuideId ?? "").trim();
-    const guideSlug = getSpecialLectureGuideSlug(selectedGuide);
+  async function updateApplicationGuide(application, targetGuide) {
+    if (!onUpdateApplication || !application.applicationId || !targetGuide) return;
+    const linkedEnrollment = normalizedEnrollments.find((enrollment) => enrollment.applicationId === application.applicationId);
+    if (linkedEnrollment) {
+      setPanelMessage(`${application.studentName || "신청자"} 신청은 이미 확정 명단에 추가되어 연결을 자동 변경할 수 없습니다. 수업일지·출결·알림톡 영향을 먼저 확인해 주세요.`);
+      return;
+    }
+    const guideId = String(targetGuide.specialLectureGuideId ?? "").trim();
+    const guideSlug = getSpecialLectureGuideSlug(targetGuide);
+    if (!guideId || !guideSlug) {
+      setPanelMessage("연결할 특강의 저장 식별자를 확인할 수 없습니다.");
+      return;
+    }
     const campaign = [
-      selectedGuide.year,
-      selectedGuide.season,
-      selectedGuide.title
+      targetGuide.year,
+      targetGuide.season,
+      targetGuide.title
     ].filter(Boolean).join("_").replace(/\s+/g, "_") || application.campaign || "special_lecture";
     setPanelMessage("");
     setUpdatingApplicationId(application.applicationId);
@@ -449,12 +459,34 @@ export function SpecialLectureApplicationPanel({
         guideSlug,
         campaign
       });
-      setPanelMessage(`${application.studentName || "신청자"} 신청을 현재 안내문에 연결했습니다.`);
+      setApplicationGuideDrafts((current) => {
+        const next = { ...current };
+        delete next[application.applicationId];
+        return next;
+      });
+      setPanelMessage(`${application.studentName || "신청자"} 신청을 '${targetGuide.title || guideSlug}' 특강으로 수정했습니다.`);
     } catch (error) {
-      setPanelMessage(`신청자 안내문 연결 실패: ${error.message}`);
+      setPanelMessage(`신청 특강 연결 수정 실패: ${error.message}`);
     } finally {
       setUpdatingApplicationId("");
     }
+  }
+
+  async function matchApplicationToCurrentGuide(application) {
+    await updateApplicationGuide(application, selectedGuide);
+  }
+
+  function getApplicationGuideDraftId(application) {
+    return applicationGuideDrafts[application.applicationId]
+      ?? application.specialLectureGuideId
+      ?? normalizedGuides.find((guide) => getSpecialLectureGuideSlug(guide) === application.guideSlug)?.specialLectureGuideId
+      ?? "";
+  }
+
+  function saveApplicationGuideDraft(application) {
+    const targetGuideId = getApplicationGuideDraftId(application);
+    const targetGuide = normalizedGuides.find((guide) => guide.specialLectureGuideId === targetGuideId);
+    return updateApplicationGuide(application, targetGuide);
   }
 
   function getEnrollmentDraft(enrollment) {
@@ -919,18 +951,47 @@ export function SpecialLectureApplicationPanel({
                 <span>학부모 {application.parentPhone || "-"}</span>
                 {application.memo ? <em>{application.memo}</em> : null}
               </div>
-              <label>
-                처리 상태
-                <select
-                  disabled={!onUpdateApplication || updatingApplicationId === application.applicationId}
-                  onChange={(event) => updateApplicationStatus(application, event.target.value)}
-                  value={application.status}
+              <div className="specialLectureApplicationControls">
+                <label>
+                  연결 특강
+                  <select
+                    disabled={!onUpdateApplication || updatingApplicationId === application.applicationId}
+                    onChange={(event) => setApplicationGuideDrafts((current) => ({
+                      ...current,
+                      [application.applicationId]: event.target.value
+                    }))}
+                    value={getApplicationGuideDraftId(application)}
+                  >
+                    {normalizedGuides.map((guide) => (
+                      <option key={guide.specialLectureGuideId} value={guide.specialLectureGuideId}>{guide.title}</option>
+                    ))}
+                  </select>
+                </label>
+                <button
+                  className="softButton compact"
+                  disabled={
+                    !onUpdateApplication ||
+                    updatingApplicationId === application.applicationId ||
+                    getApplicationGuideDraftId(application) === application.specialLectureGuideId
+                  }
+                  onClick={() => saveApplicationGuideDraft(application)}
+                  type="button"
                 >
-                  {specialLectureApplicationStatusOptions.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </label>
+                  {updatingApplicationId === application.applicationId ? "저장 중" : "연결 수정 저장"}
+                </button>
+                <label>
+                  처리 상태
+                  <select
+                    disabled={!onUpdateApplication || updatingApplicationId === application.applicationId}
+                    onChange={(event) => updateApplicationStatus(application, event.target.value)}
+                    value={application.status}
+                  >
+                    {specialLectureApplicationStatusOptions.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
             </article>
           ))}
         </div>

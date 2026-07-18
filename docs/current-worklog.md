@@ -94,6 +94,15 @@
 - 검증: 1·3회차 선택, 3회차 `12:00~15:00`, 2회차 조건부 빈 응답 fixture의 직접 assertion 통과. `npm run test:production` 315개, `npm run build`, `git diff --check` 통과. build에는 기존 Vite chunk size 경고만 남았다.
 - 사람 gate: SQL 적용 후 Tally 테스트 제출에서 1·3회차만 선택하고 3회차 시간을 조정한다. 특강 신청자 카드에 1·3회차만 보이고, 상태 확정/학생 매칭/확정 명단 추가 후 해당 학생 카드가 `총 N회 중 2회 수강`인지 확인한다. 2회차는 제외, 3회차는 조정 시간과 사유가 seed되어야 한다. 선생님 확인 없이 수업이 자동 생성되면 중단한다.
 
+### 2026-07-18 P0-2. 잘못 연결된 Tally 특강 신청 정정 gate
+
+- 확인한 운영 상태: 운영 API의 신청 3건은 모두 `2026 여름 개별 진도 클리닉`에 연결되어 있고, 다른 활성 안내문은 `2026 고1 공통수학2 유형 문제풀이`다. 아직 `special_lecture_enrollments` 확정 명단은 없어 신청 원본만 정정할 수 있는 단계다.
+- 구현 결과: 특강관리의 연결된 신청 카드에도 `연결 특강` 선택값과 `연결 수정 저장` 버튼을 추가했다. 선택은 local draft로만 유지되고 버튼을 눌렀을 때 Supabase `special_lecture_applications`의 `special_lecture_guide_id`, `guide_slug`, `campaign`을 함께 갱신한다.
+- 보호 gate: 같은 `applicationId`가 이미 `special_lecture_enrollments`에 존재하면 자동 재연결을 차단한다. 이 경우 수업일지·출결·알림톡 영향을 별도로 확인해야 하며 기존 확정 명단이나 수업을 자동 이동·삭제하지 않는다.
+- 외부 side effect: 이번 변경은 `notification_jobs`, Solapi 예약/발송, 출결, `lessons`, 수업일지 기록을 변경하지 않는다. DB 스키마 변경과 추가 SQL도 없다.
+- 검증: `node scripts/scenario-tests-production.cjs` 및 `npm run test:production` 316개, `npm run build`, `git diff --check` 통과. build에는 기존 Vite chunk size 경고만 남았다.
+- 남은 사람 gate: 배포 후 잘못 연결된 학생 신청 카드에서 올바른 특강을 선택해 저장한다. 해당 카드는 기존 특강 목록에서 사라지고 대상 특강 목록에 나타나야 하며, 새로고침 후에도 연결이 유지되어야 한다. 실제 변경할 학생명은 운영 데이터만으로 단정하지 않고 사용자 확인 후 선택한다.
+
 ### 2026-07-18 P0. 특강 회차별 단일 수업일지와 학생별 시간
 
 - 사용자 의도: 공식 특강 시간표는 공통 원본으로 유지하되, 학교 일정 등으로 일부 회차만 듣거나 `13:00~16:00` 회차를 `12:00~15:00`으로 옮기는 학생별 예외를 운영 화면에서 저장한다.

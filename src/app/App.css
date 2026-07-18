@@ -8380,6 +8380,15 @@ button:disabled {
   font-weight: 700;
 }
 
+.specialLectureApplicationControls {
+  display: grid;
+  gap: 8px;
+}
+
+.specialLectureApplicationControls .softButton {
+  justify-self: stretch;
+}
+
 .specialLectureApplicationCard select {
   min-height: 36px;
   border: 1px solid #c7d2fe;
