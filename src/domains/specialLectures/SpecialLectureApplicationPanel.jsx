@@ -331,6 +331,7 @@ export function SpecialLectureApplicationPanel({
       .sort((first, second) => new Date(second.createdAt).getTime() - new Date(first.createdAt).getTime()),
     [applications]
   );
+  const activeApplications = normalizedApplications.filter((application) => application.status !== "canceled");
   const normalizedEnrollments = useMemo(
     () => normalizeSpecialLectureEnrollments(enrollments)
       .sort((first, second) => new Date(first.createdAt).getTime() - new Date(second.createdAt).getTime()),
@@ -341,12 +342,12 @@ export function SpecialLectureApplicationPanel({
     getSpecialLectureGuideSlug(guide)
   ]).filter(Boolean)), [normalizedGuides]);
   const selectedGuideApplications = selectedGuide
-    ? normalizedApplications.filter((application) => doesSpecialLectureApplicationMatchGuide(application, selectedGuide))
-    : normalizedApplications;
+    ? activeApplications.filter((application) => doesSpecialLectureApplicationMatchGuide(application, selectedGuide))
+    : activeApplications;
   const selectedGuideEnrollments = selectedGuide
     ? normalizedEnrollments.filter((enrollment) => doesSpecialLectureEnrollmentMatchGuide(enrollment, selectedGuide))
     : normalizedEnrollments;
-  const unmatchedApplications = normalizedApplications.filter((application) => {
+  const unmatchedApplications = activeApplications.filter((application) => {
     const keys = [application.specialLectureGuideId, application.guideSlug].filter(Boolean);
     return !keys.length || keys.every((key) => !knownGuideKeys.has(key));
   });
@@ -354,13 +355,15 @@ export function SpecialLectureApplicationPanel({
     ...counts,
     [application.status]: (counts[application.status] ?? 0) + 1
   }), {});
-  const statusSummary = specialLectureApplicationStatusOptions.map((option) => ({
-    ...option,
-    count: statusCounts[option.value] ?? 0
-  }));
+  const statusSummary = specialLectureApplicationStatusOptions
+    .filter((option) => option.value !== "canceled")
+    .map((option) => ({
+      ...option,
+      count: statusCounts[option.value] ?? 0
+    }));
   const confirmedMatchRows = useMemo(
-    () => buildSpecialLectureMatchRows(normalizedApplications, selectedGuide, students),
-    [normalizedApplications, selectedGuide, students]
+    () => buildSpecialLectureMatchRows(activeApplications, selectedGuide, students),
+    [activeApplications, selectedGuide, students]
   );
   const matchedRows = confirmedMatchRows.filter((row) => row.status === "matched" && row.student);
   const needsReviewRows = confirmedMatchRows.filter((row) => row.status !== "matched" || !row.student);
@@ -603,7 +606,7 @@ export function SpecialLectureApplicationPanel({
           <p className="eyebrow">APPLICATION SOURCE</p>
           <h3>특강 신청자</h3>
           <span>
-            전체 {normalizedApplications.length}건 · 현재 안내문 {selectedGuideApplications.length}건
+            전체 {activeApplications.length}건 · 현재 안내문 {selectedGuideApplications.length}건
           </span>
         </div>
         <button className="softButton compact" onClick={copyWebhookUrl} type="button">Tally 웹훅 복사</button>
