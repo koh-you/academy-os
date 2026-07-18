@@ -181,6 +181,12 @@ export const defaultSpecialLectureGuides = [
 
 export function normalizeSpecialLectureSession(session = {}, index = 0) {
   return {
+    sessionId: String(
+      session.sessionId ??
+      session.specialLectureSessionId ??
+      session.special_lecture_session_id ??
+      ""
+    ).trim(),
     date: String(session.date ?? "").trim(),
     dateKey: String(session.dateKey ?? session.date_key ?? "").trim(),
     day: String(session.day ?? "").trim(),
@@ -398,10 +404,18 @@ export function applySpecialLectureCalculatedScheduleDraft(guide = {}, previousG
     : [];
   const replaceDefaultTopics = shouldReplaceSpecialLectureDefaultTopics(existingSessions, previousGuide?.defaultSessionTopic);
   const sessions = generatedSessions.length
-    ? generatedSessions.map((session, index) => ({
-        ...session,
-        topic: replaceDefaultTopics ? session.topic : existingSessions[index]?.topic || session.topic
-      }))
+    ? generatedSessions.map((session, index) => {
+        const matchingSession = existingSessions.find((existing) =>
+          existing.dateKey === session.dateKey &&
+          existing.startTime === session.startTime &&
+          existing.endTime === session.endTime
+        ) || existingSessions[index];
+        return {
+          ...session,
+          sessionId: matchingSession?.sessionId || "",
+          topic: replaceDefaultTopics ? session.topic : matchingSession?.topic || session.topic
+        };
+      })
     : normalizedGuide.sessions;
   const totalHours = getSpecialLectureTotalHours(sessions);
   const tuition = calculateSpecialLectureTuition({
@@ -561,9 +575,23 @@ export function normalizeSpecialLectureGuide(guide = {}, fallback = defaultSpeci
   const id = String(source.specialLectureGuideId || source.id || `special_lecture_${index + 1}`).trim();
   const slug = String(source.slug || id).trim().replaceAll(/\s+/g, "-").toLowerCase();
   const scheduleRules = normalizeSpecialLectureScheduleRules(source.scheduleRules);
-  const sessions = Array.isArray(source.sessions)
+  const normalizedSessions = Array.isArray(source.sessions)
     ? source.sessions.map(normalizeSpecialLectureSession).filter((session) => session.date || session.topic)
     : [];
+  const usedSessionIds = new Set();
+  const sessions = normalizedSessions.map((session, sessionIndex) => {
+    let sessionId = session.sessionId || getSpecialLectureSessionId({ specialLectureGuideId: id, slug }, session, sessionIndex);
+    if (usedSessionIds.has(sessionId)) {
+      const baseSessionId = sessionId;
+      let duplicateIndex = sessionIndex + 1;
+      while (usedSessionIds.has(sessionId)) {
+        sessionId = `${baseSessionId}_duplicate_${duplicateIndex}`;
+        duplicateIndex += 1;
+      }
+    }
+    usedSessionIds.add(sessionId);
+    return { ...session, sessionId };
+  });
   const calculated = getSpecialLectureCalculatedFields({
     ...source,
     sessions,
@@ -705,6 +733,19 @@ export function normalizeSpecialLectureEnrollment(enrollment = {}, index = 0) {
     : Array.isArray(enrollment.session_ids)
       ? enrollment.session_ids
       : [];
+  const rawSessionPlans = Array.isArray(enrollment.sessionPlans)
+    ? enrollment.sessionPlans
+    : Array.isArray(enrollment.session_plans)
+      ? enrollment.session_plans
+      : [];
+  const sessionPlans = rawSessionPlans.map((plan) => ({
+    sessionId: String(plan?.sessionId ?? plan?.session_id ?? "").trim(),
+    status: plan?.status === "excluded" ? "excluded" : "active",
+    effectiveDate: String(plan?.effectiveDate ?? plan?.effective_date ?? "").trim(),
+    effectiveStartTime: String(plan?.effectiveStartTime ?? plan?.effective_start_time ?? "").slice(0, 5),
+    effectiveEndTime: String(plan?.effectiveEndTime ?? plan?.effective_end_time ?? "").slice(0, 5),
+    overrideReason: String(plan?.overrideReason ?? plan?.override_reason ?? "").replace(/\r\n?/g, "\n")
+  })).filter((plan) => plan.sessionId);
   return {
     enrollmentId: String(enrollment.enrollmentId || enrollment.enrollment_id || `special_lecture_enrollment_${index + 1}`).trim(),
     specialLectureGuideId: String(enrollment.specialLectureGuideId || enrollment.special_lecture_guide_id || "").trim(),
@@ -713,6 +754,7 @@ export function normalizeSpecialLectureEnrollment(enrollment = {}, index = 0) {
     studentId: String(enrollment.studentId || enrollment.student_id || "").trim(),
     status,
     sessionIds: [...new Set(sessionIds.map((sessionId) => String(sessionId ?? "").trim()).filter(Boolean))],
+    sessionPlans,
     memo: String(enrollment.memo || "").replace(/\r\n?/g, "\n"),
     createdAt: enrollment.createdAt || enrollment.created_at || nowIso,
     updatedAt: enrollment.updatedAt || enrollment.updated_at || nowIso

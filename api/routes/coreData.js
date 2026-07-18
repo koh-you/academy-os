@@ -229,6 +229,20 @@ function normalizeSpecialLectureEnrollmentSessionIds(value) {
   return [...new Set(source.map((sessionId) => compact(sessionId)).filter(Boolean))];
 }
 
+function normalizeSpecialLectureEnrollmentSessionPlans(value) {
+  const source = Array.isArray(value) ? value : [];
+  return source
+    .map((plan) => ({
+      sessionId: compact(plan?.sessionId ?? plan?.session_id),
+      status: plan?.status === "excluded" ? "excluded" : "active",
+      effectiveDate: compact(plan?.effectiveDate ?? plan?.effective_date),
+      effectiveStartTime: compact(normalizeClockTime(plan?.effectiveStartTime ?? plan?.effective_start_time)),
+      effectiveEndTime: compact(normalizeClockTime(plan?.effectiveEndTime ?? plan?.effective_end_time)),
+      overrideReason: compact(plan?.overrideReason ?? plan?.override_reason)
+    }))
+    .filter((plan) => plan.sessionId);
+}
+
 function toSpecialLectureEnrollmentRow(enrollment) {
   return {
     enrollment_id: enrollment.enrollmentId || enrollment.id || createSpecialLectureEnrollmentId(),
@@ -238,6 +252,7 @@ function toSpecialLectureEnrollmentRow(enrollment) {
     student_id: compact(enrollment.studentId),
     status: normalizeSpecialLectureEnrollmentStatus(enrollment.status),
     session_ids: normalizeSpecialLectureEnrollmentSessionIds(enrollment.sessionIds),
+    session_plans: normalizeSpecialLectureEnrollmentSessionPlans(enrollment.sessionPlans),
     memo: compact(enrollment.memo),
     created_at: enrollment.createdAt ?? new Date().toISOString(),
     updated_at: new Date().toISOString()
@@ -253,6 +268,7 @@ function fromSpecialLectureEnrollmentRow(row) {
     studentId: row.student_id ?? "",
     status: normalizeSpecialLectureEnrollmentStatus(row.status),
     sessionIds: Array.isArray(row.session_ids) ? row.session_ids : [],
+    sessionPlans: normalizeSpecialLectureEnrollmentSessionPlans(row.session_plans),
     memo: row.memo ?? "",
     createdAt: row.created_at ?? "",
     updatedAt: row.updated_at ?? ""

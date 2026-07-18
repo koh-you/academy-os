@@ -6,6 +6,7 @@ create table if not exists public.special_lecture_enrollments (
   student_id text not null,
   status text not null default 'active',
   session_ids jsonb not null default '[]'::jsonb,
+  session_plans jsonb not null default '[]'::jsonb,
   memo text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -18,6 +19,7 @@ alter table public.special_lecture_enrollments
   add column if not exists student_id text,
   add column if not exists status text not null default 'active',
   add column if not exists session_ids jsonb not null default '[]'::jsonb,
+  add column if not exists session_plans jsonb not null default '[]'::jsonb,
   add column if not exists memo text,
   add column if not exists created_at timestamptz not null default now(),
   add column if not exists updated_at timestamptz not null default now();

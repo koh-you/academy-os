@@ -97,7 +97,6 @@ import {
 import { LessonJournalErrorBoundary } from "../domains/lessons/LessonJournalErrorBoundary.jsx";
 import { attendanceLabels, dayLabels, homeworkLabels } from "../domains/lessons/labels.js";
 import {
-  applySpecialLectureCalculatedScheduleDraft,
   buildSpecialLectureNoticeText,
   calculateSpecialLectureTuition,
   createDateFromKey,
@@ -10573,6 +10572,10 @@ function SpecialLectureNoticePanel({
   const primaryGuides = draftGuides.filter(isSpecialLecturePrimaryGuide);
   const storedGuides = draftGuides.filter((guide) => !isSpecialLecturePrimaryGuide(guide));
   const selectedGuide = draftGuides.find((guide) => guide.specialLectureGuideId === selectedGuideId) ?? null;
+  const savedSelectedGuide = normalizedGuides.find((guide) => guide.specialLectureGuideId === selectedGuideId) ?? null;
+  const isSelectedGuideSaved = Boolean(
+    selectedGuide && savedSelectedGuide && JSON.stringify(selectedGuide) === JSON.stringify(savedSelectedGuide)
+  );
   const selectedGuideUrl = selectedGuide ? getSpecialLecturePublicUrl(selectedGuide) : "";
   const noticeText = selectedGuide ? buildSpecialLectureNoticeText(selectedGuide, selectedGuideUrl) : "";
   const selectedGuideSessions = selectedGuide ? (selectedGuide.sessions ?? []).map(normalizeSpecialLectureSession) : [];
@@ -10618,16 +10621,6 @@ function SpecialLectureNoticePanel({
 
   function updateSelectedGuide(field, value) {
     if (!selectedGuide) return;
-    const shouldRefreshCalculatedSchedule = [
-      "year",
-      "periodStart",
-      "periodEnd",
-      "defaultSessionTopic",
-      "scheduleRules",
-      "pricingMode",
-      "pricePerSession",
-      "pricePerHour"
-    ].includes(field);
     let nextSource = { ...selectedGuide, [field]: value, updatedAt: new Date().toISOString() };
     if (field === "year") {
       nextSource = {
@@ -10647,9 +10640,7 @@ function SpecialLectureNoticePanel({
         slug: replaceSpecialLectureToken(nextSource.slug, selectedGuide.season, value)
       };
     }
-    const nextGuide = shouldRefreshCalculatedSchedule
-      ? applySpecialLectureCalculatedScheduleDraft(nextSource, selectedGuide)
-      : normalizeSpecialLectureGuide(nextSource, selectedGuide);
+    const nextGuide = normalizeSpecialLectureGuide(nextSource, selectedGuide);
     setDraftGuides((current) =>
       current.map((guide) =>
         guide.specialLectureGuideId === selectedGuide.specialLectureGuideId ? nextGuide : guide
@@ -10830,10 +10821,18 @@ function SpecialLectureNoticePanel({
       return;
     }
     const existingSessions = selectedGuide.sessions ?? [];
-    const sessions = generatedSessions.map((session, index) => ({
-      ...session,
-      topic: existingSessions[index]?.topic || session.topic
-    }));
+    const sessions = generatedSessions.map((session, index) => {
+      const matchingSession = existingSessions.find((existing) =>
+        existing.dateKey === session.dateKey &&
+        existing.startTime === session.startTime &&
+        existing.endTime === session.endTime
+      ) || existingSessions[index];
+      return {
+        ...session,
+        sessionId: matchingSession?.sessionId || "",
+        topic: matchingSession?.topic || session.topic
+      };
+    });
     const totalHours = getSpecialLectureTotalHours(sessions);
     const tuition = calculateSpecialLectureTuition({
       pricingMode: selectedGuide.pricingMode,
@@ -10936,6 +10935,7 @@ function SpecialLectureNoticePanel({
         onSaveEnrollment={onSaveEnrollment}
         onSaveEnrollments={onSaveEnrollments}
         onUpdateApplication={onUpdateApplication}
+        isGuideSaved={isSelectedGuideSaved}
         selectedGuide={selectedGuide}
         students={students}
       />
