@@ -142,12 +142,25 @@ function haveSameStudentIds(left = [], right = []) {
   return [...new Set(left)].sort().join("|") === [...new Set(right)].sort().join("|");
 }
 
+function haveSameSpecialLectureStudentSchedules(left = [], right = []) {
+  const normalize = (items) => (Array.isArray(items) ? items : [])
+    .map((item) => ({
+      studentId: item.studentId || "",
+      startTime: item.startTime || "",
+      endTime: item.endTime || "",
+      scheduleType: item.scheduleType === "adjusted" ? "adjusted" : "official",
+      overrideReason: item.overrideReason || ""
+    }))
+    .sort((a, b) => a.studentId.localeCompare(b.studentId));
+  return JSON.stringify(normalize(left)) === JSON.stringify(normalize(right));
+}
+
 function getSpecialLectureSessionPlanError(plan = {}, session = {}) {
   if (plan.status !== "active") return "";
   const effective = getEffectiveSpecialLectureSession(session, plan);
-  if (!effective.dateKey || !effective.startTime || !effective.endTime) return "실제 날짜와 시간을 확인해 주세요.";
+  if (!effective.startTime || !effective.endTime) return "실제 시간을 확인해 주세요.";
   if (effective.startTime >= effective.endTime) return "종료 시간은 시작 시간보다 늦어야 합니다.";
-  const hasOverride = Boolean(plan.effectiveDate || plan.effectiveStartTime || plan.effectiveEndTime);
+  const hasOverride = Boolean(plan.effectiveStartTime || plan.effectiveEndTime);
   if (hasOverride && !String(plan.overrideReason || "").trim()) return "시간을 조정한 회차는 조정 사유가 필요합니다.";
   return "";
 }
@@ -168,7 +181,6 @@ function buildEnrollmentFromMatchRow(row, guide, sessionIds = [], existingEnroll
       : sessionIds.map((sessionId) => ({
           sessionId,
           status: "active",
-          effectiveDate: "",
           effectiveStartTime: "",
           effectiveEndTime: "",
           overrideReason: ""
@@ -189,7 +201,6 @@ function getSpecialLectureEnrollmentSessionPlans(enrollment = {}, guideSessions 
       status: savedPlan?.status === "excluded" || (!savedPlan && !selectedSessionIds.has(session.sessionId))
         ? "excluded"
         : "active",
-      effectiveDate: savedPlan?.effectiveDate || "",
       effectiveStartTime: savedPlan?.effectiveStartTime || "",
       effectiveEndTime: savedPlan?.effectiveEndTime || "",
       overrideReason: savedPlan?.overrideReason || ""
@@ -199,21 +210,9 @@ function getSpecialLectureEnrollmentSessionPlans(enrollment = {}, guideSessions 
 
 function getEffectiveSpecialLectureSession(session = {}, plan = {}) {
   return {
-    dateKey: plan.effectiveDate || session.dateKey,
     startTime: plan.effectiveStartTime || session.startTime,
     endTime: plan.effectiveEndTime || session.endTime
   };
-}
-
-function getSpecialLectureOccurrenceSessionId(session = {}, effectiveSession = {}) {
-  const isDefaultSchedule = effectiveSession.dateKey === session.dateKey &&
-    effectiveSession.startTime === session.startTime &&
-    effectiveSession.endTime === session.endTime;
-  if (isDefaultSchedule) return session.sessionId;
-  const variant = [effectiveSession.dateKey, effectiveSession.startTime, effectiveSession.endTime]
-    .join("_")
-    .replace(/[^a-zA-Z0-9_-]+/g, "_");
-  return `${session.sessionId}_variant_${variant}`;
 }
 
 function buildSpecialLectureLessonDrafts({ enrollments = [], guide = null, lessons = [], students = [] } = {}) {
@@ -222,51 +221,46 @@ function buildSpecialLectureLessonDrafts({ enrollments = [], guide = null, lesso
     .filter((enrollment) => enrollment.status === "active")
     .filter((enrollment) => getEnrollmentStudent(enrollment, students));
   const lessonTrackId = getSpecialLectureLessonTrackId(guide);
-  const occurrenceGroups = new Map();
-  guideSessions.forEach((session) => {
-    activeEnrollments.forEach((enrollment) => {
+  return guideSessions.map((session) => {
+    const specialLectureStudentSchedules = activeEnrollments.flatMap((enrollment) => {
       const plan = getSpecialLectureEnrollmentSessionPlans(enrollment, guideSessions)
         .find((item) => item.sessionId === session.sessionId);
-      if (!plan || plan.status !== "active") return;
+      if (!plan || plan.status !== "active") return [];
       const effectiveSession = getEffectiveSpecialLectureSession(session, plan);
-      if (!effectiveSession.dateKey || !effectiveSession.startTime || !effectiveSession.endTime) return;
-      const occurrenceSessionId = getSpecialLectureOccurrenceSessionId(session, effectiveSession);
-      const key = `${occurrenceSessionId}`;
-      const current = occurrenceGroups.get(key) ?? {
-        ...session,
-        ...effectiveSession,
-        occurrenceSessionId,
-        studentIds: []
-      };
-      current.studentIds.push(enrollment.studentId);
-      occurrenceGroups.set(key, current);
+      if (!effectiveSession.startTime || !effectiveSession.endTime) return [];
+      const isAdjusted = effectiveSession.startTime !== session.startTime || effectiveSession.endTime !== session.endTime;
+      return [{
+        studentId: enrollment.studentId,
+        startTime: effectiveSession.startTime,
+        endTime: effectiveSession.endTime,
+        scheduleType: isAdjusted ? "adjusted" : "official",
+        overrideReason: isAdjusted ? plan.overrideReason || "" : ""
+      }];
     });
-  });
-  return [...occurrenceGroups.values()]
-    .map((session) => {
-      const occurrenceSession = { ...session, sessionId: session.occurrenceSessionId };
-      const lessonId = createSpecialLectureLessonId(guide, occurrenceSession, session.sessionIndex);
-      const existingLesson = lessons.find((lesson) => lesson.lessonId === lessonId);
-      return {
-        ...(existingLesson ?? {}),
-        lessonId,
-        classTemplateId: "",
-        className: guide.title || "특강",
-        lessonType: "specialLecture",
-        lessonTopic: session.topic || guide.defaultSessionTopic || guide.title || "특강 수업",
-        date: session.dateKey,
-        startTime: session.startTime,
-        endTime: session.endTime,
-        color: existingLesson?.color || "#93c5fd",
-        studentIds: [...new Set(session.studentIds)],
-        lessonTrackId,
-        lessonTrackType: "specialLecture",
-        specialLectureGuideId: guide.specialLectureGuideId,
-        specialLectureSessionId: session.occurrenceSessionId,
-        specialLectureSessionIndex: session.sessionIndex,
-        status: existingLesson?.status || "scheduled"
-      };
-    })
+    if (!specialLectureStudentSchedules.length) return null;
+    const lessonId = createSpecialLectureLessonId(guide, session, session.sessionIndex);
+    const existingLesson = lessons.find((lesson) => lesson.lessonId === lessonId);
+    return {
+      ...(existingLesson ?? {}),
+      lessonId,
+      classTemplateId: "",
+      className: guide.title || "특강",
+      lessonType: "specialLecture",
+      lessonTopic: session.topic || guide.defaultSessionTopic || guide.title || "특강 수업",
+      date: session.dateKey,
+      startTime: session.startTime,
+      endTime: session.endTime,
+      color: existingLesson?.color || "#93c5fd",
+      studentIds: specialLectureStudentSchedules.map((schedule) => schedule.studentId),
+      specialLectureStudentSchedules,
+      lessonTrackId,
+      lessonTrackType: "specialLecture",
+      specialLectureGuideId: guide.specialLectureGuideId,
+      specialLectureSessionId: session.sessionId,
+      specialLectureSessionIndex: session.sessionIndex,
+      status: existingLesson?.status || "scheduled"
+    };
+  })
     .filter(Boolean)
     .sort((left, right) => String(left.date).localeCompare(String(right.date)) || String(left.startTime).localeCompare(String(right.startTime)));
 }
@@ -355,7 +349,8 @@ export function SpecialLectureApplicationPanel({
     row.existingLesson.date !== row.date ||
     row.existingLesson.startTime !== row.startTime ||
     row.existingLesson.endTime !== row.endTime ||
-    !haveSameStudentIds(row.existingLesson.studentIds, row.studentIds)
+    !haveSameStudentIds(row.existingLesson.studentIds, row.studentIds) ||
+    !haveSameSpecialLectureStudentSchedules(row.existingLesson.specialLectureStudentSchedules, row.specialLectureStudentSchedules)
   ));
   const staleLessonRows = lessons.filter((lesson) =>
     lesson.specialLectureGuideId === selectedGuide?.specialLectureGuideId &&
@@ -628,6 +623,7 @@ export function SpecialLectureApplicationPanel({
             {selectedGuideEnrollments.map((enrollment) => {
               const student = getEnrollmentStudent(enrollment, students);
               const draft = getEnrollmentDraft(enrollment);
+              const selectedSessionCount = draft.sessionPlans.filter((plan) => plan.status === "active").length;
               return (
                 <article className="specialLectureEnrollmentCard" key={enrollment.enrollmentId}>
                   <div className="specialLectureEnrollmentIdentity">
@@ -636,12 +632,13 @@ export function SpecialLectureApplicationPanel({
                     </span>
                     <strong>{student?.name || enrollment.studentId || "학생 미매칭"}</strong>
                     <small>{student ? [student.schoolName, student.grade].filter(Boolean).join(" · ") || "학교/학년 미입력" : "기존 학생 원천에서 찾지 못했습니다."}</small>
+                    <small className="specialLectureEnrollmentSessionCount">총 {guideSessions.length}회 중 {selectedSessionCount}회 수강</small>
                   </div>
                   <div className="specialLectureSessionToggleGrid">
                     {guideSessions.map((session) => {
                       const plan = draft.sessionPlans.find((item) => item.sessionId === session.sessionId);
                       const isActive = plan?.status === "active";
-                      const hasOverride = Boolean(plan?.effectiveDate || plan?.effectiveStartTime || plan?.effectiveEndTime);
+                      const hasOverride = Boolean(plan?.effectiveStartTime || plan?.effectiveEndTime);
                       return (
                         <article className={`specialLectureSessionPlan ${isActive ? "active" : "excluded"}`} key={`${enrollment.enrollmentId}_${session.sessionId}`}>
                           <label className="specialLectureSessionToggle">
@@ -655,14 +652,6 @@ export function SpecialLectureApplicationPanel({
                           </label>
                           {isActive ? (
                             <div className="specialLectureSessionOverrideGrid">
-                              <label>
-                                실제 날짜 (기본 {session.dateKey})
-                                <input
-                                  type="date"
-                                  value={plan?.effectiveDate || ""}
-                                  onChange={(event) => updateEnrollmentSessionPlan(enrollment, session.sessionId, { effectiveDate: event.target.value })}
-                                />
-                              </label>
                               <label>
                                 시작 (기본 {session.startTime})
                                 <input
@@ -691,7 +680,6 @@ export function SpecialLectureApplicationPanel({
                                 <button
                                   className="softButton compact"
                                   onClick={() => updateEnrollmentSessionPlan(enrollment, session.sessionId, {
-                                    effectiveDate: "",
                                     effectiveStartTime: "",
                                     effectiveEndTime: "",
                                     overrideReason: ""
@@ -748,7 +736,7 @@ export function SpecialLectureApplicationPanel({
         <div className="specialLectureGateHeader">
           <div>
             <strong>특강 수업일지 생성 preview gate</strong>
-            <span>저장된 학생별 수강계획을 날짜·시간별로 묶어 신규 `lessons`만 생성합니다. 기존 수업은 자동 변경하지 않습니다.</span>
+            <span>공식 회차마다 수업일지 하나를 만들고, 선택한 학생과 학생별 실제 시간을 함께 저장합니다. 기존 수업은 자동 변경하지 않습니다.</span>
           </div>
           <div className="specialLectureGateStats">
             <span>신규 {newLessonDrafts.length}</span>
@@ -764,7 +752,7 @@ export function SpecialLectureApplicationPanel({
                 <div>
                   <span>
                     {row.specialLectureSessionIndex + 1}회차
-                    {String(row.specialLectureSessionId).includes("_variant_") ? " · 학생별 조정" : " · 공식 시간"}
+                    {row.specialLectureStudentSchedules.some((schedule) => schedule.scheduleType === "adjusted") ? " · 개별 시간 있음" : " · 전원 공식 시간"}
                     {row.existingLesson ? " · 생성됨" : " · 신규"}
                   </span>
                   <strong>{row.dateKey || row.date} {row.startTime}-{row.endTime}</strong>
@@ -772,7 +760,10 @@ export function SpecialLectureApplicationPanel({
                 </div>
                 <p>
                   {row.attendees.length
-                    ? row.attendees.map((student) => student.name).join(", ")
+                    ? row.attendees.map((student) => {
+                        const schedule = row.specialLectureStudentSchedules.find((item) => item.studentId === student.studentId);
+                        return `${student.name} ${schedule?.startTime || row.startTime}-${schedule?.endTime || row.endTime}${schedule?.scheduleType === "adjusted" ? "(조정)" : ""}`;
+                      }).join(", ")
                     : "수강 학생 없음 - 저장 제외"}
                 </p>
               </article>
@@ -785,7 +776,7 @@ export function SpecialLectureApplicationPanel({
           <p className="inlineNotice danger">확정 신청자 중 기존 학생 매칭이 필요한 건이 있어 수업일지 생성을 막았습니다.</p>
         ) : null}
         {invalidPlanRows.length ? (
-          <p className="inlineNotice danger">날짜·시간 또는 조정 사유를 확인해야 하는 학생별 회차가 {invalidPlanRows.length}건 있습니다.</p>
+          <p className="inlineNotice danger">시간 또는 조정 사유를 확인해야 하는 학생별 회차가 {invalidPlanRows.length}건 있습니다.</p>
         ) : null}
         {conflictingLessonRows.length ? (
           <p className="inlineNotice danger">이미 생성된 특강 수업과 학생별 계획이 다른 회차가 {conflictingLessonRows.length}건 있습니다. 기존 수업일지·출결·알림톡 보호를 위해 자동 갱신을 막았습니다.</p>

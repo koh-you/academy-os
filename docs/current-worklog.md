@@ -82,17 +82,18 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
-### 2026-07-18 P0. 특강 학생별 회차 선택/시간 조정 계획 저장
+### 2026-07-18 P0. 특강 회차별 단일 수업일지와 학생별 시간
 
 - 사용자 의도: 공식 특강 시간표는 공통 원본으로 유지하되, 학교 일정 등으로 일부 회차만 듣거나 `13:00~16:00` 회차를 `12:00~15:00`으로 옮기는 학생별 예외를 운영 화면에서 저장한다.
-- 저장 원천: 공식 회차는 기존 `app_state.specialLectureGuides`를 유지한다. 학생별 선택/예외는 Supabase `special_lecture_enrollments.session_plans`에 `sessionId`, 수강/제외 상태, 실제 날짜, 실제 시작/종료 시간, 조정 사유로 저장한다. 편집 중 값은 `SpecialLectureApplicationPanel`의 학생별 local draft이며 `회차 계획 저장` 성공 후 서버 응답이 원본이다.
+- 저장 원천: 공식 날짜/회차는 기존 `app_state.specialLectureGuides`를 유지한다. 학생별 선택/예외는 Supabase `special_lecture_enrollments.session_plans`에 `sessionId`, 수강/제외 상태, 실제 시작/종료 시간, 조정 사유로 저장한다. 날짜 변경은 허용하지 않는다. 편집 중 값은 `SpecialLectureApplicationPanel`의 학생별 local draft이며 `회차 계획 저장` 성공 후 서버 응답이 원본이다.
 - 회차 ID 보호: 공식 회차에 저장되는 불변 `sessionId`를 보존한다. 일정 계산 조건을 입력하는 동안 회차 배열을 자동 덮어쓰지 않고, `일정 계산 적용`을 눌렀을 때만 공식 회차를 바꾼다.
-- 수업 생성: 저장된 학생별 계획을 최종 날짜/시간별로 묶어 신규 `lessons`만 생성한다. 같은 공식 회차라도 시간이 다른 학생은 별도 특강 수업으로 미리보기에 나타난다.
+- 수업 생성: 공식 회차마다 신규 `lesson` 하나만 생성한다. 해당 회차를 선택한 학생만 `studentIds`에 포함하고, 공식/조정 실제 시간과 사유는 `lessons.special_lecture_student_schedules` JSONB에 생성 시점 스냅샷으로 저장한다. 시간이 다른 학생도 같은 회차의 같은 수업일지를 사용한다.
+- 수업일지/출결: 수업일지 상단은 공식 시간, 학생 행은 각 학생의 실제 시간을 표시한다. 조정 학생은 `시간 조정`과 사유를 함께 표시한다. 기존 `applyStudentScheduleToLesson`이 특강 스냅샷을 학생 프로필의 상시 시간보다 우선하므로 수업일지 출결, 수동 출결, 태블릿 출결 매칭과 지각 기준도 학생별 특강 시간을 사용한다.
 - 기존 데이터 보호: 저장하지 않은 안내문 초안으로 수강명단/수업을 만들 수 없게 했다. 기존 특강 수업과 학생/시간이 다르거나 현재 계획에서 빠진 기존 수업이 있으면 자동 갱신·추가 생성을 막는다. 따라서 `lesson_student_records`, 출결, `notification_jobs`, Solapi 예약/발송을 이번 작업에서 자동 삭제·취소·변경하지 않는다.
 - 입력 gate: 조정 시간이 있으면 조정 사유를 필수로 하고, 종료 시간이 시작 시간보다 빠르거나 같으면 저장/수업 생성을 막는다.
-- 운영 SQL 필요: `supabase/20260718_special_lecture_enrollment_session_plans.sql`을 사용자가 Supabase SQL Editor에서 직접 적용해야 학생별 회차 계획 저장이 열린다.
-- 검증: `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `node scripts/scenario-tests-production.cjs` 313개, `npm run test:production` 313개, `npm run build` 통과. build에는 기존 Vite chunk size 경고만 남았다.
-- 사람 gate: 테스트 학생 1명은 일부 회차를 제외하고, 다른 회차는 실제 시간을 변경한 뒤 사유와 함께 저장한다. 새로고침 후 같은 계획이 유지되고, 실제 수업 미리보기에서 공식 시간 학생과 조정 시간 학생이 서로 다른 수업 카드로 묶이는지 확인한다. 기존 수업이 있는 회차를 바꾸면 자동 갱신 대신 보호 경고가 보여야 한다.
+- 운영 SQL 필요: `supabase/20260718_special_lecture_enrollment_session_plans.sql`을 사용자가 Supabase SQL Editor에서 직접 적용해야 `session_plans`와 `lessons.special_lecture_student_schedules` 저장이 열린다.
+- 검증: 학생별 특강 시간이 학생 프로필 시간보다 우선하는 직접 assertion 통과, `node scripts/scenario-tests-production.cjs` 314개, `npm run test:production` 314개, `npm run build`, `git diff --check` 통과. build에는 기존 Vite chunk size 경고만 남았다.
+- 사람 gate: 테스트 학생 A는 일부 회차를 제외하고, 학생 B는 같은 날짜 회차를 `13:00~16:00`에서 `12:00~15:00`으로 조정해 사유와 함께 저장한다. 새로고침 후 `총 N회 중 M회 수강`과 시간이 유지되어야 한다. 수업 미리보기는 회차당 카드 하나만 보여야 하고, 수업일지에는 그 회차 선택 학생만 나타나며 B의 행에는 `12:00-15:00 · 시간 조정 · 사유`가 보여야 한다. 기존 수업이 있는 회차 계획을 바꾸면 자동 갱신 대신 보호 경고가 보여야 한다.
 
 ### 2026-07-17 P0. 운영 프론트 API base fallback 복구
 

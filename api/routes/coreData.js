@@ -14,7 +14,8 @@ const specialLectureLessonTrackColumns = [
   "lesson_track_type",
   "special_lecture_guide_id",
   "special_lecture_session_id",
-  "special_lecture_session_index"
+  "special_lecture_session_index",
+  "special_lecture_student_schedules"
 ];
 
 function compact(value) {
@@ -45,7 +46,7 @@ function isSpecialLectureTrackedLesson(lesson = {}) {
 }
 
 function throwSpecialLectureLessonTrackSchemaError() {
-  throw new Error("특강 수업일지 반영을 위해 supabase/20260715_special_lecture_lesson_tracks.sql 적용이 필요합니다.");
+  throw new Error("특강 수업일지 반영을 위해 supabase/20260715_special_lecture_lesson_tracks.sql과 supabase/20260718_special_lecture_enrollment_session_plans.sql 적용이 필요합니다.");
 }
 
 function hasMeaningfulValue(value) {
@@ -235,12 +236,24 @@ function normalizeSpecialLectureEnrollmentSessionPlans(value) {
     .map((plan) => ({
       sessionId: compact(plan?.sessionId ?? plan?.session_id),
       status: plan?.status === "excluded" ? "excluded" : "active",
-      effectiveDate: compact(plan?.effectiveDate ?? plan?.effective_date),
       effectiveStartTime: compact(normalizeClockTime(plan?.effectiveStartTime ?? plan?.effective_start_time)),
       effectiveEndTime: compact(normalizeClockTime(plan?.effectiveEndTime ?? plan?.effective_end_time)),
       overrideReason: compact(plan?.overrideReason ?? plan?.override_reason)
     }))
     .filter((plan) => plan.sessionId);
+}
+
+function normalizeSpecialLectureStudentSchedules(value) {
+  const source = Array.isArray(value) ? value : [];
+  return source
+    .map((schedule) => ({
+      studentId: compact(schedule?.studentId ?? schedule?.student_id),
+      startTime: compact(normalizeClockTime(schedule?.startTime ?? schedule?.start_time)),
+      endTime: compact(normalizeClockTime(schedule?.endTime ?? schedule?.end_time)),
+      scheduleType: schedule?.scheduleType === "adjusted" || schedule?.schedule_type === "adjusted" ? "adjusted" : "official",
+      overrideReason: compact(schedule?.overrideReason ?? schedule?.override_reason)
+    }))
+    .filter((schedule) => schedule.studentId && schedule.startTime && schedule.endTime);
 }
 
 function toSpecialLectureEnrollmentRow(enrollment) {
@@ -326,6 +339,9 @@ function toLessonRow(lesson, { includeScheduleMetadata = true } = {}) {
     row.special_lecture_session_index = lesson.specialLectureSessionIndex === undefined || lesson.specialLectureSessionIndex === ""
       ? null
       : Number(lesson.specialLectureSessionIndex);
+    if (lesson.specialLectureStudentSchedules !== undefined) {
+      row.special_lecture_student_schedules = normalizeSpecialLectureStudentSchedules(lesson.specialLectureStudentSchedules);
+    }
   }
   return row;
 }
@@ -350,6 +366,9 @@ function fromLessonRow(row) {
     specialLectureGuideId: row.special_lecture_guide_id ?? "",
     specialLectureSessionId: row.special_lecture_session_id ?? "",
     specialLectureSessionIndex: row.special_lecture_session_index ?? null,
+    ...(row.special_lecture_student_schedules !== undefined
+      ? { specialLectureStudentSchedules: normalizeSpecialLectureStudentSchedules(row.special_lecture_student_schedules) }
+      : {}),
     status: row.status
   };
 }

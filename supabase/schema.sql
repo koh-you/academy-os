@@ -56,6 +56,7 @@ create table if not exists lessons (
   special_lecture_guide_id text,
   special_lecture_session_id text,
   special_lecture_session_index integer,
+  special_lecture_student_schedules jsonb not null default '[]'::jsonb,
   status text not null default 'scheduled' check (status in ('scheduled', 'completed', 'canceled')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()

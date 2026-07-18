@@ -5606,6 +5606,15 @@ button {
   display: block;
 }
 
+.specialLectureStudentTime {
+  color: #2563eb;
+  font-weight: 800;
+}
+
+.specialLectureStudentTime.adjusted {
+  color: #b45309;
+}
+
 .schoolCalendarSaveNotice {
   align-items: center;
   background: #f8fafc;
@@ -8110,8 +8119,13 @@ button:disabled {
   border-top: 1px solid #e2e8f0;
   display: grid;
   gap: 7px;
-  grid-template-columns: minmax(120px, 1.3fr) repeat(2, minmax(88px, 0.8fr));
+  grid-template-columns: repeat(2, minmax(110px, 1fr));
   padding-top: 8px;
+}
+
+.specialLectureEnrollmentSessionCount {
+  color: #2563eb;
+  font-weight: 900;
 }
 
 .specialLectureSessionOverrideGrid label {

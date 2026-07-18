@@ -92,10 +92,24 @@ export function parseStudentScheduleOverride(scheduleOverride = "") {
 }
 
 export function getStudentScheduleForLesson(lesson = {}, student = {}) {
+  const specialLectureSchedule = Array.isArray(lesson?.specialLectureStudentSchedules)
+    ? lesson.specialLectureStudentSchedules.find((schedule) => schedule?.studentId === student?.studentId)
+    : null;
+  if (specialLectureSchedule?.startTime && specialLectureSchedule?.endTime) {
+    return {
+      endTime: specialLectureSchedule.endTime,
+      label: `${specialLectureSchedule.startTime}-${specialLectureSchedule.endTime}`,
+      overrideReason: specialLectureSchedule.overrideReason || "",
+      scheduleType: specialLectureSchedule.scheduleType === "adjusted" ? "adjusted" : "official",
+      source: "specialLecture",
+      startTime: specialLectureSchedule.startTime
+    };
+  }
   const rules = parseStudentScheduleOverride(student?.scheduleOverride);
   if (!rules.length) return null;
   const lessonDayKey = getLessonDayKey(lesson);
-  return rules.find((rule) => !rule.days.length || rule.days.includes(lessonDayKey)) ?? null;
+  const rule = rules.find((item) => !item.days.length || item.days.includes(lessonDayKey)) ?? null;
+  return rule ? { ...rule, scheduleType: "profile", source: "studentProfile" } : null;
 }
 
 export function applyStudentScheduleToLesson(lesson = {}, student = {}) {
@@ -106,7 +120,9 @@ export function applyStudentScheduleToLesson(lesson = {}, student = {}) {
     endTime: rule.endTime,
     startTime: rule.startTime,
     studentScheduleLabel: `${rule.startTime}-${rule.endTime}`,
-    studentScheduleOverride: true,
-    studentScheduleSource: student?.scheduleOverride ?? ""
+    studentScheduleOverride: rule.scheduleType === "adjusted" || rule.scheduleType === "profile",
+    studentScheduleReason: rule.overrideReason || "",
+    studentScheduleSource: rule.source === "specialLecture" ? "specialLectureStudentSchedules" : student?.scheduleOverride ?? "",
+    studentScheduleType: rule.scheduleType
   };
 }

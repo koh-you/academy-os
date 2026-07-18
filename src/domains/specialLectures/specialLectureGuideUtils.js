@@ -741,7 +741,6 @@ export function normalizeSpecialLectureEnrollment(enrollment = {}, index = 0) {
   const sessionPlans = rawSessionPlans.map((plan) => ({
     sessionId: String(plan?.sessionId ?? plan?.session_id ?? "").trim(),
     status: plan?.status === "excluded" ? "excluded" : "active",
-    effectiveDate: String(plan?.effectiveDate ?? plan?.effective_date ?? "").trim(),
     effectiveStartTime: String(plan?.effectiveStartTime ?? plan?.effective_start_time ?? "").slice(0, 5),
     effectiveEndTime: String(plan?.effectiveEndTime ?? plan?.effective_end_time ?? "").slice(0, 5),
     overrideReason: String(plan?.overrideReason ?? plan?.override_reason ?? "").replace(/\r\n?/g, "\n")

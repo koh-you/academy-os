@@ -16000,6 +16000,13 @@ function LessonJournalDetail({
                     </button>
                   </span>
                   <small>{student.grade || "고1"} · {student.schoolName || "학교 미입력"}</small>
+                  {attendanceLesson.studentScheduleType === "official" || attendanceLesson.studentScheduleType === "adjusted" ? (
+                    <small className={attendanceLesson.studentScheduleType === "adjusted" ? "specialLectureStudentTime adjusted" : "specialLectureStudentTime"}>
+                      {attendanceLesson.startTime}-{attendanceLesson.endTime}
+                      {attendanceLesson.studentScheduleType === "adjusted" ? " · 시간 조정" : ""}
+                      {attendanceLesson.studentScheduleReason ? ` · ${attendanceLesson.studentScheduleReason}` : ""}
+                    </small>
+                  ) : null}
                 </span>
                 <div className="journalPrepCell">
                   <button
