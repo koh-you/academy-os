@@ -124,6 +124,7 @@
 | 외부 side effect | `notification_jobs`, Solapi 예약/발송 | 새 예약·취소·발송 없음 |
 
 - 운영 데이터 확인: 김한영 task는 `sourceLessonId=2026-07-16 수업`, `scheduledDate=2026-07-17`, `linkedLessonDate=2026-07-17`로 이미 정확히 저장되어 있어 데이터 마이그레이션이나 SQL이 필요 없다.
+- 운영 예약 확인: 7월 18일 김한영 학부모 수업 알림톡 예약 snapshot에도 7월 17일 등원보충 문구가 남아 있었다. 예약 자체를 취소하지 않고 서버 발송 직전 refresh가 최신 `sourceLessonId` 판정으로 `supplementSchedule`과 `previewBody`를 다시 만들게 해 정상 수업 알림톡 본문은 유지한다.
 - 기대 결과: 7월 17일 보충 일정 문구는 7월 16일 원 수업 알림톡에만 나타난다. 7월 17일 보충 수업 및 이후 정규수업 알림톡에는 나타나지 않는다. 별도의 `다음 수업 때 확인` 메모는 기존 수업일지 follow-up 원천을 유지한다.
 - 검증: 김한영 형태 fixture에서 7월 16일 source lesson만 `true`, 7월 17일 linked lesson·이후 수업·source 없는 legacy·완료 task는 `false` 직접 assertion 통과. `node --check api/server.js`, `npm run test:production` 317개, `npm run build`, `git diff --check` 통과. build에는 기존 Vite chunk size 경고만 남았다.
 
