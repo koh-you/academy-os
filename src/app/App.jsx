@@ -20,6 +20,7 @@ import { StudentEmptyTab, StudentEvaluationTab } from "../domains/portals/Portal
 import { parentPortalTabs, PortalTabBar, studentPortalTabs } from "../domains/portals/PortalTabBar.jsx";
 import { PortalReportCards } from "../domains/portals/PortalReportCards.jsx";
 import { StudentPortalMetrics } from "../domains/portals/StudentPortalMetrics.jsx";
+import { ParentPortalAlertsTab } from "../domains/portals/ParentPortalAlertsTab.jsx";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
@@ -21954,17 +21955,7 @@ function ParentPortal({ homeworks, lessons = [], materials = [], records = [], r
       <section className="panel studentWorkPanel">
         <PortalTabBar activeTab={activeTab} className="parentTabs" onChange={setActiveTab} tabs={parentPortalTabs} />
 
-        {activeTab === "alerts" ? (
-          <div className="portalNoticeStack">
-            {parentPrepNotices.length === 0 ? <div className="emptyPortalPanel">아직 새 알림이 없습니다.</div> : null}
-            {parentPrepNotices.map((notice) => (
-              <article className="portalNoticeCard" key={`parent_prep_${notice.lessonStudentRecordId}`}>
-                <strong>{notice.lesson?.date ?? "수업"} · {notice.lesson?.className ?? "수업 준비"}</strong>
-                <p>{notice.prepParentNotice}</p>
-              </article>
-            ))}
-          </div>
-        ) : null}
+        {activeTab === "alerts" ? <ParentPortalAlertsTab notices={parentPrepNotices} /> : null}
 
         {activeTab === "reports" ? (
           <div className="homeworkStack">
