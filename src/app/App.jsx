@@ -5803,7 +5803,15 @@ export function App() {
       });
   }
 
-  function handleCreateSpecialLectureLessons(lessonDrafts = []) {
+  function openSpecialLectureLesson(lesson) {
+    if (!lesson?.lessonId) return;
+    setActiveView("lessons");
+    setSelectedDate(lesson.date);
+    setSelectedLessonId(lesson.lessonId);
+    setIsLessonJournalOpen(true);
+  }
+
+  function handleCreateSpecialLectureLessons(lessonDrafts = [], { openFirstLesson = true } = {}) {
     const normalizedLessons = lessonDrafts
       .filter((lesson) => lesson?.lessonId && lesson?.date)
       .map((lesson) => ({
@@ -5821,12 +5829,7 @@ export function App() {
           current
         )));
         const firstLesson = [...savedLessons].sort(sortByTime)[0];
-        if (firstLesson?.lessonId) {
-          setActiveView("lessons");
-          setSelectedDate(firstLesson.date);
-          setSelectedLessonId(firstLesson.lessonId);
-          setIsLessonJournalOpen(true);
-        }
+        if (openFirstLesson && firstLesson?.lessonId) openSpecialLectureLesson(firstLesson);
         return savedLessons;
       });
   }
@@ -8571,6 +8574,7 @@ export function App() {
             specialLectureGuides={specialLectureGuides}
             specialLectureGuideSaveState={specialLectureGuideSaveState}
             onCreateSpecialLectureLessons={handleCreateSpecialLectureLessons}
+            onOpenSpecialLectureLesson={openSpecialLectureLesson}
             onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
             onReconcileSolapiNotificationResults={handleReconcileSolapiNotificationResults}
             onSaveSpecialLectureEnrollment={handleSaveSpecialLectureEnrollment}
@@ -8578,6 +8582,7 @@ export function App() {
             onSaveSpecialLectureGuides={handleSaveSpecialLectureGuides}
             onUpdateLessonNotificationPlan={handleUpdateLessonNotificationPlan}
             onUpdateSpecialLectureApplication={handleUpdateSpecialLectureApplication}
+            records={records}
             students={students}
             onRefresh={refreshNotificationJobs}
           />
@@ -9685,6 +9690,7 @@ function NotificationCenter({
   notificationJobs,
   notificationJobsStatus = { state: "idle", message: "" },
   onCreateSpecialLectureLessons,
+  onOpenSpecialLectureLesson,
   onRefresh,
   onReconcileSolapiNotificationResults,
   onSaveSpecialLectureEnrollment,
@@ -9698,6 +9704,7 @@ function NotificationCenter({
   specialLectureEnrollments = [],
   specialLectureGuides = defaultSpecialLectureGuides,
   specialLectureGuideSaveState = "idle",
+  records = [],
   students = []
 }) {
   const [activeNotificationTab, setActiveNotificationTab] = useState(showSpecialLectureTab ? initialNotificationTab : "notice");
@@ -10248,9 +10255,12 @@ function NotificationCenter({
           enrollments={specialLectureEnrollments}
           guides={specialLectureGuides}
           lessons={lessons}
+          notificationJobs={notificationJobs}
+          records={records}
           saveState={specialLectureGuideSaveState}
           onApplyToNotice={applySpecialLectureGuideToNotice}
           onCreateSpecialLectureLessons={onCreateSpecialLectureLessons}
+          onOpenLesson={onOpenSpecialLectureLesson}
           onSaveEnrollment={onSaveSpecialLectureEnrollment}
           onSaveEnrollments={onSaveSpecialLectureEnrollments}
           onSaveGuides={onSaveSpecialLectureGuides}
@@ -10544,12 +10554,15 @@ function SpecialLectureNoticePanel({
   enrollments = [],
   guides = defaultSpecialLectureGuides,
   lessons = [],
+  notificationJobs = [],
   onApplyToNotice,
   onCreateSpecialLectureLessons,
+  onOpenLesson,
   onSaveEnrollment,
   onSaveEnrollments,
   onUpdateApplication,
   onSaveGuides,
+  records = [],
   saveState = "idle",
   students = []
 }) {
@@ -10924,10 +10937,13 @@ function SpecialLectureNoticePanel({
         enrollments={enrollments}
         guides={draftGuides}
         lessons={lessons}
+        notificationJobs={notificationJobs}
         onCreateSpecialLectureLessons={onCreateSpecialLectureLessons}
+        onOpenLesson={onOpenLesson}
         onSaveEnrollment={onSaveEnrollment}
         onSaveEnrollments={onSaveEnrollments}
         onUpdateApplication={onUpdateApplication}
+        records={records}
         isGuideSaved={isSelectedGuideSaved}
         selectedGuide={selectedGuide}
         students={students}
