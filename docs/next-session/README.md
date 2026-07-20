@@ -76,40 +76,40 @@ App.jsx 리팩터링 18개 기준 로드맵:
 - 최신 리팩터링 커밋 기준은 `0bf68633 Extract recent test session list`이지만, 실제 최신 커밋은 새 세션에서 반드시 `git log -1 --oneline`으로 다시 확인하세요.
 
 오늘/최근 완료된 작업:
-1. 운영 프론트 API base fallback 복구
-   - 증상: 운영 화면 버튼들이 `Failed to fetch`로 실패.
-   - 원인: 운영 프론트 번들이 `http://127.0.0.1:8787`을 API base로 들고 있었다.
-   - 결과: 운영/배포 도메인은 `VITE_API_BASE_URL`이 비어 있거나 로컬 주소여도 Render API `https://koh-you-math-academy-os-api.onrender.com`을 쓰도록 수정.
-   - 커밋: `ae49ea74 Fix production API base fallback`
-2. 보충 생성 모달에서 결석 처리 취소 추가
-   - 미래 결석 저장을 보충관리 결석보강 생성 모달에서 `결석 처리 취소`로 되돌릴 수 있게 함.
-   - `lesson_student_records`만 되돌리고 `makeup_tasks`, `lessons`, `notification_jobs`, Solapi 예약/발송은 건드리지 않음.
-   - 커밋: `db047b39 Add absence cancellation from supplement draft`
-3. 운영 알림에 반 알림 대상 추가
-   - `운영 알림 원본`의 첫 드롭다운에 `반 알림`을 추가.
-   - `반 알림` 선택 시 오른쪽 대상 드롭다운이 현재 반 템플릿 4개 목록으로 전환.
-   - 저장 원천은 기존 Supabase `academy_reminders`; 반 대상은 새 SQL 없이 `source_payload.classTemplateId`와 `source_payload.className`에 저장.
-   - 수업일지 상단 `수업 관련 운영 알림`은 기존 `lessonId`/학생 ID 매칭에 더해 `lesson.classTemplateId === reminder.sourcePayload.classTemplateId`도 매칭.
-   - `notification_jobs`, Solapi 예약/발송, 출결, 수업일지 저장 로직은 변경하지 않음.
-   - 커밋: `888d5c41 Add class-scoped academy reminders`
-4. 알림관리 Solapi 발송결과 직접 대조/반영
-   - 알림관리에서 예약/확인 필요 알림톡을 Solapi 결과와 직접 매칭해 `notification_jobs` 상태를 갱신할 수 있게 함.
-   - 날짜/시간으로 조회 대상을 좁히지 않고, 화면에 잡힌 예약/확인 필요 목록 전체를 대상으로 함.
-   - 외부 side effect는 Solapi 조회만 수행. 새 예약/발송은 만들지 않음.
-5. 공지 발송 화면 정리
-   - `테스트 발송` 제거.
-   - 상단 요약 카드는 `예약`, `발송 완료`, `확인 필요` 3개만 노출. 실패/취소/초안 기록은 이력 로직에는 남김.
-6. 보충 최초 일정 안내가 일정 변경 문구로 나가는 문제 수정
-   - 최초 일정 만들기는 `확정 안내`, 기존 연결 일정 변경은 `변경 안내`로 분리.
-   - `notification_jobs.payload.noticeKind`/`result.noticeKind`에 확정/변경 구분을 남김.
-7. `⭐ 보충/확인 안내` 문구 수정 후속 등록
-   - 다음 착수 전 프론트 미리보기, 서버 발송 직전 refresh, Solapi route body 원천과 중복 제거 조건을 표로 정리해야 함.
-   - 이번 세션에서는 실제 발송 문구/템플릿/Solapi API를 바꾸지 않음.
+1. 특강 학생별 회차/시간 확정과 회차별 단일 수업일지
+   - 공식 날짜는 옮기지 않고 학생마다 수강 회차와 실제 시간을 수정·저장할 수 있음.
+   - 같은 공식 회차는 수업일지 하나를 사용하며, 그 회차 수강 학생만 명단에 표시하고 시간 조정 학생은 개별 시간을 표시함.
+   - 다른 정규반 학생도 전체 학생 원천에서 매칭 가능함. 반 소속으로 제한하지 않음.
+   - 사용자가 `supabase/20260718_special_lecture_enrollment_session_plans.sql`, `supabase/20260718_special_lecture_tally_session_requests.sql`을 운영 SQL Editor에 적용 완료함.
+   - 최종 수업일지 반영은 특강별 인원, 학생별 수업 시수/시간, 최종 반 구성이 모두 확정된 뒤 한 번에 진행함. 그전에는 신규 특강 수업을 생성하지 않음.
+   - 커밋: `e643b7cf`, `6e06629a`, `1d15240b`
+2. Tally 신청 원천과 교사 확정 gate
+   - 고정 폼은 `https://tally.so/forms/eql9aJ/edit` / 공개 폼 `https://tally.so/r/eql9aJ`.
+   - Tally 회차/시간은 신청 초안이며, 특강관리에서 교사가 최종 수정·저장한 `special_lecture_enrollments.session_plans`가 수업 생성 원천임.
+   - 신청 카드에서 잘못 연결된 특강을 `연결 특강 -> 연결 수정 저장`으로 고칠 수 있음. 이미 확정 명단이 있으면 자동 이동을 차단함.
+   - `status=canceled` 신청은 화면/건수/미매칭/확정 gate에서 숨기되 Supabase row는 이력으로 보존함.
+   - 커밋: `8cb22d7c`, `0f59364b`
+3. 학부모 수업 알림톡의 보충 안내를 발생 수업 당일로 제한
+   - 원인: `linkedLessonId`가 존재하는 보충 task가 학생의 이후 모든 수업 알림톡에 반복 포함됨.
+   - 수정: 프론트 미리보기와 서버 발송 직전 refresh 모두 `task.sourceLessonId === lesson.lessonId`일 때만 `⭐ 보충/확인 안내`를 포함함.
+   - 예: 7월 16일 발생한 7월 17일 등원보충 안내는 7월 16일 수업 알림톡에만 나타나고 17일 보충수업/18일 이후 정규수업에는 나타나지 않음.
+   - 7월 18일 김한영 운영 예약은 확인 시 `payload.supplementSchedule=""`, 기존 문구가 `previewBody`에 없음. 다만 OS status는 과거 시각인데도 `scheduled`로 남아 있어 필요하면 알림관리 `Solapi 결과 확인`으로 실제 결과를 대조함.
+   - 문구 템플릿, `notification_jobs` 예약 자체, Solapi 예약/발송, 출결 저장은 변경하지 않음.
+   - 기능 커밋: `e114a9ea`; 기록 커밋: `4692f7d6`
+4. 계속 유효한 최근 운영 수정
+   - 운영 프론트 API base fallback 복구: `ae49ea74`
+   - 보충 생성 모달 결석 처리 취소: `db047b39`
+   - 운영 알림 반 대상 추가: `888d5c41`
+   - 알림관리 Solapi 발송결과 직접 대조, 공지 테스트 발송 제거, 보충 최초 확정/변경 안내 분리는 `docs/current-worklog.md` 상세 기록을 따름.
+5. `⭐ 보충/확인 안내` 문구 수정 후속은 여전히 미완료
+   - 이번에 고친 것은 포함되는 수업 범위이며 실제 문구/템플릿은 바꾸지 않았음.
+   - 다음 착수 전 프론트 미리보기, 서버 발송 직전 refresh, Solapi route body 원천과 설정 화면 노출 여부를 표로 정리해야 함.
 
 최신 검증 결과:
 - `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs` 통과
-- `node scripts/scenario-tests-production.cjs` 통과, 312개
-- `npm run test:production` 통과, 312개
+- 보충 안내 source lesson fixture 직접 assertion 통과
+- `node scripts/scenario-tests-production.cjs` 통과, 317개
+- `npm run test:production` 통과, 317개
 - `npm run build` 통과, 기존 Vite chunk size 경고만 남음
 - `git diff --check` 통과
 - 참고: `node --check src/app/App.jsx`는 Node가 `.jsx` 확장자를 직접 검사하지 못해 도구 한계로 실패할 수 있음. JSX 검사는 Vite build로 확인.
@@ -121,6 +121,8 @@ App.jsx 리팩터링 18개 기준 로드맵:
 - 저장 전 자동 후보가 실제 수업처럼 달력에 보여 헷갈리는 문제가 계속되면 `시험대비 자동 후보와 실제 저장 수업 표시 분리`를 별도 UI 개선 작업으로 제안하세요.
 - `.codex-temp/`, `.env`, PDF/HWP/HWPX/ZIP/대용량 자료, Slack/Supabase/Solapi/Tally/OpenAI 등 비밀값은 커밋하지 마세요.
 - 운영 Supabase SQL edit 적용은 사용자가 직접 합니다. SQL 자동 적용을 위해 DB URL, DB password, access token을 묻지 않습니다.
+- 특강 SQL 2개는 이미 적용 완료됐으므로 재적용을 요청하지 마세요.
+- 최종 특강 수업일지 생성은 인원/회차/시간/최종 반이 모두 확정됐다는 사용자 확인 전에는 실행하지 마세요.
 - 작업 완료 답변에는 `사람 검토 절차`와 `AI 자기검토`를 포함합니다.
 ```
 
@@ -129,5 +131,5 @@ App.jsx 리팩터링 18개 기준 로드맵:
 - 미룬 작업 큐의 source of truth는 `AGENTS.md` 최상단과 `docs/current-worklog.md` 최상단입니다.
 - App.jsx 리팩터링 18개 기준 로드맵은 `AGENTS.md`, `docs/current-worklog.md`, 이 README에 함께 기록되어 있습니다.
 - 다음 리팩터링 시작점은 9번 `test manager`입니다. 다음 세션은 코드 수정 전에 리팩터링 결과를 요약하고 `9번 test manager의 남은 학생별 history list 분리부터 이어갈까요?`라고 사용자에게 먼저 물어봐야 합니다.
-- 최신 기능 커밋은 `888d5c41 Add class-scoped academy reminders`입니다. handoff 문서 갱신 커밋이 뒤에 올 수 있으므로 새 세션에서 반드시 `git log -1 --oneline`으로 실제 최신 커밋을 다시 확인하세요.
+- 최신 기능 커밋은 `e114a9ea Limit supplement notices to source lesson`, 현재 최신 기록 커밋은 `4692f7d6 Document stale supplement reservation check`입니다. handoff 문서 갱신 커밋이 뒤에 오므로 새 세션에서 반드시 `git log -1 --oneline`으로 실제 최신 커밋을 다시 확인하세요.
 - 현재 로컬에 남을 수 있는 미추적 항목: `.codex-temp/`. 커밋하지 않습니다.
