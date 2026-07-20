@@ -90,6 +90,7 @@
 - 저장 검증: POST가 성공해도 완료 처리하지 않고 `/api/special-lecture-enrollments`를 `cache: no-store`로 재조회한다. 원천이 `supabase`인지, 같은 enrollment가 존재하는지, `sessionIds/sessionPlans/status/memo`가 수정본과 정확히 같은지 확인한 뒤에만 화면 원천을 재조회 결과로 교체하고 `새로고침 후에도 유지됩니다`를 표시한다. 불일치 시 저장 완료로 처리하지 않고 모달 안에 실패 원인을 표시한다.
 - 저장 원천/side effect: 최종 원천은 기존 Supabase `special_lecture_enrollments.session_ids`, `session_plans`, `status`, `memo`, `plan_reviewed_at`다. local draft는 모달 편집 중에만 존재하며 검증 성공 후 제거된다. 새 SQL은 없고 `lessons`, `lesson_student_records`, `notification_jobs`, Solapi는 변경하지 않는다.
 - 자동 검증: `git diff --check`, `npm run build`, `npm run test:production` 323/323 통과. 기존 Vite chunk size 경고만 남았다.
+- 운영 배포 확인: `main` 커밋 `ba50c625` 푸시 후 Vercel이 `main-BUaiYQAY.js`로 전환됐고, 새 저장 완료 문구와 Supabase 재조회 불일치 차단 문구가 운영 번들에 포함된 것을 확인했다. 운영 학생 데이터를 임의 저장하지 않았으므로 실제 회차 변경/새로고침 확인은 아래 사람 gate로 남긴다.
 - 사람 검토 gate: 테스트 학생 회차 모달에서 미래 회차 하나를 수강으로 바꾸고 필요하면 시간을 조정한다. 하단이 `변경됨`으로 바뀌는지 확인한 뒤 저장해 `저장 중 -> 저장 완료`, `새로고침 후에도 유지됩니다`를 확인한다. 페이지 새로고침 후 같은 학생 모달을 다시 열어 회차/시간/메모가 동일한지 확인한다.
 - 중단 조건: POST만 성공하고 Supabase 재조회 값이 다름, 저장 완료 뒤 새로고침 시 값이 돌아감, 실패인데 완료로 표시됨, 회차 저장만으로 특강 lesson/알림 예약이 생성·변경되면 다음 작업을 중단한다.
 
