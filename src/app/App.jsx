@@ -16,6 +16,7 @@ import {
 } from "../domains/exams/postSubmissionOptions.js";
 import { StudentManager } from "../domains/students/StudentManager.jsx";
 import { PortalMaterialsTab } from "../domains/portals/PortalMaterialsTab.jsx";
+import { StudentEmptyTab, StudentEvaluationTab } from "../domains/portals/PortalStaticTabs.jsx";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
@@ -22099,10 +22100,6 @@ function StudentAllHomeworkTab({ homeworks, records = [] }) {
   );
 }
 
-function StudentEmptyTab({ message }) {
-  return <div className="emptyPortalPanel">{message}</div>;
-}
-
 function filterVisibleMaterials(materials = [], student, audience) {
   if (!student) return [];
   return materials.filter((material) => {
@@ -22118,16 +22115,6 @@ function filterVisibleMaterials(materials = [], student, audience) {
 
     return audienceAllowed && studentAllowed;
   });
-}
-
-function StudentEvaluationTab() {
-  return (
-    <div className="evaluationPanel">
-      <strong>진단평가</strong>
-      <strong>내신기출 모의평가</strong>
-      <div className="emptyPortalPanel">배정된 시험이 없습니다.</div>
-    </div>
-  );
 }
 
 function StudentMyPageTab({
