@@ -95,6 +95,17 @@
 - 사람 검토 gate: 저장된 미래 특강을 선택해 학생 없는 상태에서 공식 회차별 preview가 보이고 `특강 개설 및 미래 명단 반영`으로 빈 특강 lesson이 생성되는지 확인한다. `학생 수동 접수`에서 테스트 학생을 체크하면 회차 미확정으로 추가되고 회차 모달이 열려야 한다. 일부 미래 회차와 조정 시간을 저장한 뒤 `미래 명단 변경 반영`을 누르면 해당 회차 lesson에만 학생/시간이 반영되어야 한다. Tally 테스트 신청도 `확정 및 회차 설정`에서 같은 모달이 열리고 Tally 초안이 seed되어야 한다. `진행 보기`에서 특강 수업일지 기록이 회차별로 보이고 `수업일지 열기`가 정확한 특강 lesson을 열어야 한다.
 - 중단 조건: 수동 접수만으로 전 회차가 자동 선택됨, 회차 계획 저장만으로 lesson/알림톡이 자동 생성됨, 과거 lesson 명단이나 기록이 바뀜, 제거 학생의 과거 `lesson_student_records`가 사라짐, 대기 알림 예약이 자동 취소됨, 특강 진행 모달이 별도 중복 진행값을 저장함, 특강 lesson이 정규수업 그룹에 섞임.
 
+### 2026-07-20 P0-1. 공통수학2 특강 선택 시 빈 화면 런타임 오류 수정
+
+- 운영 재현: 최신 운영 번들에서 `특강관리 -> 공통수학2 유형 문제풀이` 카드를 클릭하면 카드 클릭과 ID 전달은 성공하지만, `ReferenceError: getSpecialLectureGuideSlug is not defined`가 발생하며 특강 콘텐츠가 비어 보였다.
+- 원인: 확정 명단 1명이 첫 번째 개별 진도 특강에 연결되어 있어 첫 카드에서는 `||` 단축 평가로 누락 함수가 호출되지 않았다. 두 번째 공통수학2 카드를 선택하면 첫 조건이 거짓이 되어 누락된 `getSpecialLectureGuideSlug` 호출에 도달했다. 그래서 정적 클릭 테스트와 첫 카드 화면은 통과했지만 두 번째 카드에서만 런타임 오류가 발생했다.
+- 수정: `App.jsx`가 `specialLectureGuideUtils.js`의 `getSpecialLectureGuideSlug`를 명시적으로 import하게 했다. 선택/명단 계산식과 저장 원천은 변경하지 않았다.
+- 운영 데이터 확인: 두 안내문의 `specialLectureGuideId`와 `slug`는 서로 다르고 정상이다. 운영 공통수학2 안내문의 10회차 데이터도 실제 신청/명단/수업/기록과 함께 별도 렌더링에 성공했다.
+- 저장 원천/side effect: 읽기 및 화면 렌더 import 수정만 수행했다. `app_state.specialLectureGuides`, `special_lecture_enrollments`, `lessons`, `lesson_student_records`, `notification_jobs`, Solapi에는 쓰기나 구조 변경이 없다. 새 SQL도 없다.
+- 자동 검증: 누락 helper import 회귀 시나리오를 추가했고 `npm run test:production` 321/321, `npm run build`, `git diff --check`를 통과했다. build에는 기존 Vite chunk size 경고만 남았다.
+- 사람 검토 gate: 배포 후 공통수학2 카드를 클릭했을 때 해당 카드만 파란 선택 상태가 되고 특강 콘텐츠가 유지되어야 한다. 다시 개별 진도 특강과 왕복해도 빈 화면이나 첫 카드 강제 복귀가 없어야 한다.
+- 중단 조건: 공통수학2 클릭 후 콘텐츠가 비거나 브라우저 콘솔에 `getSpecialLectureGuideSlug` 오류가 남으면 다음 운영 작업을 중단한다.
+
 ### 2026-07-20 P0-1. 특강 선택 카드 복구 및 페이지 상위 탭 이동
 
 - 사용자 요청: `공통수학2 유형 문제풀이` 특강 카드가 선택되지 않는 문제를 고치고, `특강 수업`/`특강 안내문` 버튼을 콘텐츠 패널 내부가 아닌 페이지 상위 탭으로 올린다.

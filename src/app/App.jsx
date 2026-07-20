@@ -113,6 +113,7 @@ import {
   generateSpecialLectureSessions,
   getDefaultSpecialLectureGuideId,
   getSpecialLectureCalculatedFields,
+  getSpecialLectureGuideSlug,
   getSpecialLectureLessonTrackId,
   getSpecialLecturePublicUrl,
   getSpecialLectureSeasonShortLabel,
