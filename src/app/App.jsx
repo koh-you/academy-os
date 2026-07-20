@@ -22,6 +22,7 @@ import { PortalReportCards } from "../domains/portals/PortalReportCards.jsx";
 import { StudentPortalMetrics } from "../domains/portals/StudentPortalMetrics.jsx";
 import { ParentPortalAlertsTab } from "../domains/portals/ParentPortalAlertsTab.jsx";
 import { ParentPortalHomeworkTab } from "../domains/portals/ParentPortalHomeworkTab.jsx";
+import { StudentAllHomeworkTab } from "../domains/portals/StudentAllHomeworkTab.jsx";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
@@ -21326,7 +21327,11 @@ function StudentPortalV2({
 
         {activeTab === "all" ? (
           <StudentAllHomeworkTab
+            getStatusLabel={getHomeworkStatusLabel}
+            getStatusTone={getHomeworkStatusTone}
             homeworks={studentHomeworks}
+            isCompleted={isHomeworkCompletedForStudent}
+            isOverdue={isHomeworkOverdue}
             records={studentRecordsWithLessons}
           />
         ) : null}
@@ -21989,48 +21994,6 @@ function ParentPortal({ homeworks, lessons = [], materials = [], records = [], r
         ) : null}
       </section>
     </section>
-  );
-}
-
-function StudentAllHomeworkTab({ homeworks, records = [] }) {
-  const sortedHomeworks = [...homeworks].sort((a, b) => b.assignedDate.localeCompare(a.assignedDate));
-
-  return (
-    <div className="studentAllPanel">
-      <div>
-        <h2>등록된 숙제 전체</h2>
-        <p className="muted">선생님이 등록한 숙제를 확인합니다. 수정과 삭제는 선생님 화면에서만 가능합니다.</p>
-      </div>
-      {sortedHomeworks.length === 0 ? <div className="emptyHomeworkBox">등록된 숙제가 없습니다.</div> : null}
-      {sortedHomeworks.map((homework) => {
-        const completed = isHomeworkCompletedForStudent(homework) ? 1 : 0;
-        const totalDays = Math.max(1, isHomeworkOverdue(homework) ? 5 : 2);
-        const progress = Math.round((completed / totalDays) * 100);
-        return (
-          <article className="studentHomeworkCard" key={homework.homeworkId}>
-            <div className="homeworkCardTop">
-              <div>
-                <strong>{homework.title}</strong>
-                <span>{homework.subject ?? "공통수학1"}</span>
-                <span className={isHomeworkOverdue(homework) ? "statusRed" : "statusBlue"}>
-                  {isHomeworkOverdue(homework) ? "밀림" : "현행"}
-                </span>
-              </div>
-            </div>
-            <p>{homework.assignedDate} ~ {homework.dueDate} · 총 {homework.totalProblems ?? "-"}문제</p>
-            <div className={`homeworkStatusBadge ${getHomeworkStatusTone(homework, records)}`}>
-              {getHomeworkStatusLabel(homework, records)}
-            </div>
-            <div className="progressRail"><span style={{ width: `${progress}%` }} /></div>
-            <small>{completed}/{totalDays}일 완료 ({progress}%)</small>
-            <div className={`dateStrip ${isHomeworkOverdue(homework) ? "danger" : "safe"}`}>
-              <span>{homework.dueDate}</span>
-              <b>{getHomeworkStatusLabel(homework, records)}</b>
-            </div>
-          </article>
-        );
-      })}
-    </div>
   );
 }
 
