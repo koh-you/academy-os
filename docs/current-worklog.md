@@ -103,6 +103,7 @@
 - 운영 데이터 확인: 두 안내문의 `specialLectureGuideId`와 `slug`는 서로 다르고 정상이다. 운영 공통수학2 안내문의 10회차 데이터도 실제 신청/명단/수업/기록과 함께 별도 렌더링에 성공했다.
 - 저장 원천/side effect: 읽기 및 화면 렌더 import 수정만 수행했다. `app_state.specialLectureGuides`, `special_lecture_enrollments`, `lessons`, `lesson_student_records`, `notification_jobs`, Solapi에는 쓰기나 구조 변경이 없다. 새 SQL도 없다.
 - 자동 검증: 누락 helper import 회귀 시나리오를 추가했고 `npm run test:production` 321/321, `npm run build`, `git diff --check`를 통과했다. build에는 기존 Vite chunk size 경고만 남았다.
+- 운영 배포 검증: Vercel 새 번들 `main-CvxC6_Um.js`에서 자동 브라우저로 `특강관리 -> 개별 진도 특강 -> 공통수학2 특강`을 연속 클릭했다. 최종 활성 ID는 `special_lecture_2026_summer_high1_common_math2_tts`, 특강 콘텐츠 길이는 2318자로 유지됐고 새 클릭 구간의 런타임 예외는 0건이었다.
 - 사람 검토 gate: 배포 후 공통수학2 카드를 클릭했을 때 해당 카드만 파란 선택 상태가 되고 특강 콘텐츠가 유지되어야 한다. 다시 개별 진도 특강과 왕복해도 빈 화면이나 첫 카드 강제 복귀가 없어야 한다.
 - 중단 조건: 공통수학2 클릭 후 콘텐츠가 비거나 브라우저 콘솔에 `getSpecialLectureGuideSlug` 오류가 남으면 다음 운영 작업을 중단한다.
 
