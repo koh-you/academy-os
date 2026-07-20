@@ -10577,7 +10577,7 @@ function SpecialLectureNoticePanel({
   const [managementGuideId, setManagementGuideId] = useState("");
   const [isScheduleBuilderOpen, setIsScheduleBuilderOpen] = useState(false);
   const [isSessionPlanOpen, setIsSessionPlanOpen] = useState(false);
-  const [activeSpecialLectureWorkspaceTab, setActiveSpecialLectureWorkspaceTab] = useState("guide");
+  const [activeSpecialLectureWorkspaceTab, setActiveSpecialLectureWorkspaceTab] = useState("roster");
   const primaryGuides = draftGuides.filter(isSpecialLecturePrimaryGuide);
   const storedGuides = draftGuides.filter((guide) => !isSpecialLecturePrimaryGuide(guide));
   const selectedGuide = draftGuides.find((guide) => guide.specialLectureGuideId === selectedGuideId) ?? null;
@@ -10915,10 +10915,33 @@ function SpecialLectureNoticePanel({
 
   return (
     <section className="notificationPanel specialLecturePanel">
+      <div className="specialLectureWorkspaceTabs" role="tablist" aria-label="특강관리 작업 구분">
+        <button
+          aria-selected={activeSpecialLectureWorkspaceTab === "roster"}
+          className={activeSpecialLectureWorkspaceTab === "roster" ? "active" : ""}
+          onClick={() => setActiveSpecialLectureWorkspaceTab("roster")}
+          role="tab"
+          type="button"
+        >
+          <strong>특강 수업</strong>
+          <span>Tally/수동 접수·학생별 회차·특강 진행</span>
+        </button>
+        <button
+          aria-selected={activeSpecialLectureWorkspaceTab === "guide"}
+          className={activeSpecialLectureWorkspaceTab === "guide" ? "active" : ""}
+          onClick={() => setActiveSpecialLectureWorkspaceTab("guide")}
+          role="tab"
+          type="button"
+        >
+          <strong>특강 안내문</strong>
+          <span>소개·일정·수강료·공개 미리보기</span>
+        </button>
+      </div>
+
       <div className="sectionHeader slim">
         <div>
           <p className="eyebrow">SPECIAL LECTURE</p>
-          <h2>{activeSpecialLectureWorkspaceTab === "guide" ? "특강 안내문" : "특강 명단·회차 관리"}</h2>
+          <h2>{activeSpecialLectureWorkspaceTab === "guide" ? "특강 안내문" : "특강 수업"}</h2>
         </div>
         <div className="specialLectureHeaderActions">
           {activeSpecialLectureWorkspaceTab === "guide" ? (
@@ -10941,29 +10964,6 @@ function SpecialLectureNoticePanel({
         showStoredGuides={showStoredGuides}
         storedGuides={storedGuides}
       />
-
-      <div className="specialLectureWorkspaceTabs" role="tablist" aria-label="특강관리 작업 구분">
-        <button
-          aria-selected={activeSpecialLectureWorkspaceTab === "guide"}
-          className={activeSpecialLectureWorkspaceTab === "guide" ? "active" : ""}
-          onClick={() => setActiveSpecialLectureWorkspaceTab("guide")}
-          role="tab"
-          type="button"
-        >
-          <strong>특강 안내문</strong>
-          <span>소개·일정·수강료·공개 미리보기</span>
-        </button>
-        <button
-          aria-selected={activeSpecialLectureWorkspaceTab === "roster"}
-          className={activeSpecialLectureWorkspaceTab === "roster" ? "active" : ""}
-          onClick={() => setActiveSpecialLectureWorkspaceTab("roster")}
-          role="tab"
-          type="button"
-        >
-          <strong>명단·회차 관리</strong>
-          <span>Tally/수동 접수·학생별 시간·특강 진행</span>
-        </button>
-      </div>
 
       {activeSpecialLectureWorkspaceTab === "roster" ? (
         <SpecialLectureApplicationPanel

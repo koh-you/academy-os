@@ -283,6 +283,7 @@ function getEffectiveSpecialLectureSession(session = {}, plan = {}) {
 }
 
 function buildSpecialLectureLessonDrafts({ enrollments = [], guide = null, lessons = [], students = [] } = {}) {
+  if (!guide) return [];
   const guideSessions = getSpecialLectureGuideSessions(guide);
   const activeEnrollments = normalizeSpecialLectureEnrollments(enrollments)
     .filter((enrollment) => enrollment.status === "active")
