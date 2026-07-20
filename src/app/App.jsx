@@ -5456,7 +5456,7 @@ export function App() {
           fetch(apiUrl("/api/students")),
           fetch(apiUrl("/api/student-intake-applicants")),
           fetch(apiUrl("/api/special-lecture-applications")),
-          fetch(apiUrl("/api/special-lecture-enrollments")),
+          fetch(apiUrl("/api/special-lecture-enrollments"), { cache: "no-store" }),
           fetch(apiUrl("/api/classes")),
           fetch(apiUrl("/api/lessons")),
           fetch(apiUrl("/api/lesson-records")),
@@ -5776,7 +5776,30 @@ export function App() {
     return savedStudent;
   }
 
-  function handleSaveSpecialLectureEnrollment(enrollment) {
+  function getSpecialLectureEnrollmentSaveSnapshot(enrollment) {
+    const normalized = normalizeSpecialLectureEnrollment(enrollment);
+    return JSON.stringify({
+      enrollmentId: normalized.enrollmentId,
+      memo: normalized.memo,
+      sessionIds: normalized.sessionIds,
+      sessionPlans: normalized.sessionPlans,
+      status: normalized.status
+    });
+  }
+
+  async function readPersistedSpecialLectureEnrollments() {
+    const response = await fetch(apiUrl("/api/special-lecture-enrollments"), { cache: "no-store" });
+    const result = await response.json();
+    if (!response.ok || !result.ok) {
+      throw new Error(result.error || "특강 회차 저장 결과를 다시 확인하지 못했습니다.");
+    }
+    if (result.source !== "supabase") {
+      throw new Error("특강 회차가 Supabase가 아닌 임시 원천에 저장되어 완료할 수 없습니다.");
+    }
+    return normalizeSpecialLectureEnrollments(result.enrollments ?? []);
+  }
+
+  async function handleSaveSpecialLectureEnrollment(enrollment) {
     const previousEnrollments = specialLectureEnrollments;
     const nextEnrollment = normalizeSpecialLectureEnrollment({
       ...enrollment,
@@ -5785,19 +5808,30 @@ export function App() {
     setSpecialLectureEnrollments((current) =>
       normalizeSpecialLectureEnrollments(upsertById(current, nextEnrollment, "enrollmentId"))
     );
-    return postJson("/api/special-lecture-enrollments", { enrollment: nextEnrollment })
-      .then((result) => {
-        if (!result.ok) throw new Error(result.error || "특강 수강명단 저장 실패");
-        const savedEnrollment = normalizeSpecialLectureEnrollment(result.enrollment ?? nextEnrollment);
-        setSpecialLectureEnrollments((current) =>
-          normalizeSpecialLectureEnrollments(upsertById(current, savedEnrollment, "enrollmentId"))
-        );
-        return savedEnrollment;
-      })
-      .catch((error) => {
+    let postSucceeded = false;
+    try {
+      const result = await postJson("/api/special-lecture-enrollments", { enrollment: nextEnrollment });
+      if (!result.ok) throw new Error(result.error || "특강 수강명단 저장 실패");
+      if (result.source !== "supabase") {
+        throw new Error("특강 회차가 Supabase가 아닌 임시 원천에 저장되어 완료할 수 없습니다.");
+      }
+      postSucceeded = true;
+      const persistedEnrollments = await readPersistedSpecialLectureEnrollments();
+      const persistedEnrollment = persistedEnrollments.find((item) => item.enrollmentId === nextEnrollment.enrollmentId);
+      if (!persistedEnrollment) {
+        throw new Error("Supabase 재조회에서 저장한 학생의 회차 계획을 찾지 못했습니다.");
+      }
+      if (getSpecialLectureEnrollmentSaveSnapshot(persistedEnrollment) !== getSpecialLectureEnrollmentSaveSnapshot(nextEnrollment)) {
+        throw new Error("Supabase 재조회 값이 수정한 회차 계획과 다릅니다. 저장 완료로 처리하지 않았습니다.");
+      }
+      setSpecialLectureEnrollments(persistedEnrollments);
+      return persistedEnrollment;
+    } catch (error) {
+      if (!postSucceeded) {
         setSpecialLectureEnrollments(previousEnrollments);
-        throw error;
-      });
+      }
+      throw error;
+    }
   }
 
   function handleSaveSpecialLectureEnrollments(enrollments) {

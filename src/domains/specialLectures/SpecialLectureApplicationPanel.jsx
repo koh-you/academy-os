@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { copyTextToClipboard } from "../exams/outputPreview.js";
 import { Modal } from "../../shared/components/Modal.jsx";
+import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { apiUrl } from "../../shared/utils/apiClient.js";
 import {
   createSpecialLectureEnrollmentId,
@@ -362,6 +363,7 @@ export function SpecialLectureApplicationPanel({
   const [matchSearchText, setMatchSearchText] = useState("");
   const [matchStudentId, setMatchStudentId] = useState("");
   const [planModalEnrollment, setPlanModalEnrollment] = useState(null);
+  const [planSaveState, setPlanSaveState] = useState({ message: "", state: "idle" });
   const [progressModalEnrollment, setProgressModalEnrollment] = useState(null);
   const normalizedGuides = useMemo(() => normalizeSpecialLectureGuides(guides), [guides]);
   const normalizedApplications = useMemo(
@@ -553,7 +555,7 @@ export function SpecialLectureApplicationPanel({
         existingEnrollment
       );
       const savedEnrollment = await onSaveEnrollment(enrollment);
-      setPlanModalEnrollment(savedEnrollment ?? enrollment);
+      openPlanModal(savedEnrollment ?? enrollment);
       setMatchApplication(null);
       setMatchSearchText("");
       setMatchStudentId("");
@@ -568,7 +570,7 @@ export function SpecialLectureApplicationPanel({
   async function confirmApplicationAndOpenPlan(application) {
     const linkedEnrollment = enrollmentByApplicationId.get(application.applicationId);
     if (linkedEnrollment) {
-      setPlanModalEnrollment(linkedEnrollment);
+      openPlanModal(linkedEnrollment);
       return;
     }
     const match = getSpecialLectureStudentMatch(application, students);
@@ -672,6 +674,16 @@ export function SpecialLectureApplicationPanel({
     };
   }
 
+  function openPlanModal(enrollment) {
+    setPlanModalEnrollment(enrollment);
+    setPlanSaveState({ message: "", state: "idle" });
+  }
+
+  function closePlanModal() {
+    setPlanModalEnrollment(null);
+    setPlanSaveState({ message: "", state: "idle" });
+  }
+
   function updateEnrollmentDraft(enrollmentId, patch) {
     setEnrollmentDrafts((current) => ({
       ...current,
@@ -680,6 +692,7 @@ export function SpecialLectureApplicationPanel({
         ...patch
       }
     }));
+    setPlanSaveState({ message: "수정한 회차 계획을 저장해 주세요.", state: "dirty" });
   }
 
   function toggleEnrollmentSession(enrollment, sessionId) {
@@ -751,7 +764,7 @@ export function SpecialLectureApplicationPanel({
       const firstEnrollment = savedEnrollments?.[0] ?? enrollmentsToSave[0];
       setManualSelectedStudentIds([]);
       setManualPickerOpen(false);
-      setPlanModalEnrollment(firstEnrollment);
+      openPlanModal(firstEnrollment);
       setPanelMessage(`수동 접수 ${enrollmentsToSave.length}명을 추가했습니다. 학생별 회차 설정을 저장해 주세요.`);
     } catch (error) {
       setPanelMessage(`수동 접수 저장 실패: ${error.message}`);
@@ -768,7 +781,9 @@ export function SpecialLectureApplicationPanel({
       guideSessions.find((session) => session.sessionId === plan.sessionId)
     ));
     if (invalidPlan) {
-      setPanelMessage(`특강 회차 계획 저장 실패: ${getSpecialLectureSessionPlanError(invalidPlan, guideSessions.find((session) => session.sessionId === invalidPlan.sessionId))}`);
+      const message = `특강 회차 계획 저장 실패: ${getSpecialLectureSessionPlanError(invalidPlan, guideSessions.find((session) => session.sessionId === invalidPlan.sessionId))}`;
+      setPanelMessage(message);
+      setPlanSaveState({ message, state: "failed" });
       return;
     }
     const nextEnrollment = normalizeSpecialLectureEnrollment({
@@ -781,6 +796,7 @@ export function SpecialLectureApplicationPanel({
     });
     setPanelMessage("");
     setSavingEnrollmentId(enrollment.enrollmentId);
+    setPlanSaveState({ message: "Supabase에 회차 계획을 저장하고 있습니다.", state: "saving" });
     try {
       const savedEnrollment = await onSaveEnrollment(nextEnrollment);
       setEnrollmentDrafts((current) => {
@@ -789,9 +805,13 @@ export function SpecialLectureApplicationPanel({
         return nextDrafts;
       });
       setPlanModalEnrollment(savedEnrollment ?? nextEnrollment);
-      setPanelMessage(`${getEnrollmentStudent(enrollment, students)?.name || "학생"} 특강 회차 계획을 저장했습니다.`);
+      const message = `${getEnrollmentStudent(enrollment, students)?.name || "학생"} 회차 계획을 저장했습니다. 새로고침 후에도 유지됩니다.`;
+      setPanelMessage(message);
+      setPlanSaveState({ message, state: "saved" });
     } catch (error) {
-      setPanelMessage(`특강 회차 계획 저장 실패: ${error.message}`);
+      const message = `특강 회차 계획 저장 실패: ${error.message}`;
+      setPanelMessage(message);
+      setPlanSaveState({ message, state: "failed" });
     } finally {
       setSavingEnrollmentId("");
     }
@@ -994,7 +1014,7 @@ export function SpecialLectureApplicationPanel({
                     <button
                       className="primaryButton compact"
                       disabled={!isGuideSaved}
-                      onClick={() => setPlanModalEnrollment(enrollment)}
+                      onClick={() => openPlanModal(enrollment)}
                       type="button"
                     >
                       회차 설정
@@ -1347,7 +1367,7 @@ export function SpecialLectureApplicationPanel({
         return (
           <Modal
             className="specialLectureSessionModal"
-            onClose={() => setPlanModalEnrollment(null)}
+            onClose={closePlanModal}
             subtitle={`${selectedGuide?.title || "특강"} · ${enrollment.planSource === "tally_request" ? "Tally 접수" : "수동 접수"}`}
             title={`${student?.name || "학생"} 회차 설정`}
           >
@@ -1411,11 +1431,17 @@ export function SpecialLectureApplicationPanel({
                   <textarea onChange={(event) => updateEnrollmentDraft(enrollment.enrollmentId, { memo: event.target.value })} value={draft.memo} />
                 </label>
               </div>
-              <div className="specialLectureModalActions">
-                <button className="softButton" onClick={() => setPlanModalEnrollment(null)} type="button">닫기</button>
-                <button className="primaryButton" disabled={!onSaveEnrollment || !isGuideSaved || savingEnrollmentId === enrollment.enrollmentId} onClick={() => saveEnrollmentDraft(enrollment)} type="button">
-                  {savingEnrollmentId === enrollment.enrollmentId ? "회차 계획 저장 중" : "회차 계획 저장"}
-                </button>
+              <div className="specialLectureModalActions specialLecturePlanSaveActions">
+                <div className={`specialLecturePlanSaveFeedback ${planSaveState.state}`} aria-live="polite" role="status">
+                  <InlineSaveStatus label="회차 계획" saveState={planSaveState.state} />
+                  <span>{planSaveState.message || "회차와 시간을 확인한 뒤 저장해 주세요."}</span>
+                </div>
+                <div className="specialLecturePlanSaveButtons">
+                  <button className="softButton" onClick={closePlanModal} type="button">닫기</button>
+                  <button className="primaryButton" disabled={!onSaveEnrollment || !isGuideSaved || savingEnrollmentId === enrollment.enrollmentId} onClick={() => saveEnrollmentDraft(enrollment)} type="button">
+                    {savingEnrollmentId === enrollment.enrollmentId ? "회차 계획 저장 중" : planSaveState.state === "saved" ? "저장 완료" : "회차 계획 저장"}
+                  </button>
+                </div>
               </div>
             </div>
           </Modal>
@@ -1456,7 +1482,7 @@ export function SpecialLectureApplicationPanel({
             </div>
             <div className="specialLectureModalActions">
               <button className="softButton" onClick={() => setProgressModalEnrollment(null)} type="button">닫기</button>
-              <button className="primaryButton" onClick={() => { setProgressModalEnrollment(null); setPlanModalEnrollment(progressEnrollment); }} type="button">회차 계획 수정</button>
+              <button className="primaryButton" onClick={() => { setProgressModalEnrollment(null); openPlanModal(progressEnrollment); }} type="button">회차 계획 수정</button>
             </div>
           </div>
         </Modal>

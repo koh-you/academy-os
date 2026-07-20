@@ -7851,6 +7851,36 @@ button:disabled {
   justify-content: flex-end;
 }
 
+.specialLecturePlanSaveActions {
+  justify-content: space-between;
+}
+
+.specialLecturePlanSaveFeedback {
+  display: grid;
+  gap: 3px;
+  min-width: min(100%, 320px);
+}
+
+.specialLecturePlanSaveFeedback > span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.specialLecturePlanSaveFeedback.saved > span {
+  color: #047857;
+}
+
+.specialLecturePlanSaveFeedback.failed > span {
+  color: #b91c1c;
+}
+
+.specialLecturePlanSaveButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .specialLectureWebhookBox {
   display: grid;
   grid-template-columns: minmax(220px, 0.9fr) minmax(280px, 1.1fr);
