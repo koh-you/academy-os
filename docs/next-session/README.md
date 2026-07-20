@@ -48,7 +48,7 @@ E:\academy-os 작업을 이어가겠습니다.
    - 순서는 `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`입니다.
    - 기능 변경과 리팩터링 범위를 섞지 않습니다.
    - 아래 18개 기준 로드맵을 공통 후보 목록으로 사용합니다.
-   - 9번 `test manager`는 완료됐습니다. 10번 `student-parent portals` inventory와 자료함/정적 탭/내비게이션/리포트/지표/학부모 알림 표시 분리를 완료했으며, 다음은 학부모 숙제 탭의 상태 helper 경계를 확인합니다.
+   - 9번 `test manager`는 완료됐습니다. 10번 `student-parent portals`의 저위험 표시 영역과 학부모 숙제 탭 분리를 완료했으며, 다음은 학생 전체 숙제 탭을 같은 helper 주입 경계로 분리합니다.
    - 코드 수정 전 최근 리팩터링 결과를 요약하고 학생/학부모 포털의 공개 링크·인증·저장 원천·모바일 표시 side effect inventory를 먼저 만듭니다.
    - inventory 뒤 가장 낮은 위험의 표시 전용 컴포넌트 한 단위를 제안하고, 사용자가 재개하라고 답하면 진행합니다.
 5. Solapi 특강 템플릿 검수 후 연결
@@ -77,12 +77,12 @@ App.jsx 리팩터링 18개 기준 로드맵:
 18. `App shell/hooks/context` - App 초기화, activeView 라우팅, 전역 상태/context/hooks 분리.
 
 현재 리팩터링 이어받을 지점:
-- 9번 `test manager`는 완료됐습니다. 10번 `student-parent portals` inventory와 자료함/정적 탭/내비게이션/리포트/지표/학부모 알림 표시 분리도 완료했고, 다음 시작점은 학부모 숙제 탭 helper 경계 확인입니다.
+- 9번 `test manager`는 완료됐습니다. 10번 `student-parent portals`의 저위험 표시 영역과 학부모 숙제 탭 분리도 완료했고, 다음 시작점은 학생 전체 숙제 탭입니다.
 - 6번 `specialLecture management` 분리 완료.
 - 7번 `school calendar helpers` 분리 완료.
 - 8번 `school calendar components` 분리 완료.
 - 9번 `test manager` 완료: `src/domains/tests/testManagerUtils.js`와 `TestManagerPanels.jsx`에 탭/header/form grid/meta/table/action/recent session list/student history panel 분리 완료.
-- 다음 후보: 10번 `student-parent portals`의 학부모 숙제 탭 표시 영역. 숙제 상태 판정 helper와 필터는 상위 또는 공용 원천에 유지하고 포털 shell·인증·학생 쓰기 기능은 뒤로 둡니다.
+- 다음 후보: 10번 `student-parent portals`의 학생 전체 숙제 탭. 숙제 상태 판정 helper는 `App.jsx` 원천을 주입하고 포털 shell·인증·학생 쓰기 기능은 뒤로 둡니다.
 - 실제 최신 커밋은 새 세션에서 반드시 `git log -1 --oneline`으로 다시 확인하세요.
 
 오늘/최근 완료된 작업:
@@ -150,6 +150,6 @@ App.jsx 리팩터링 18개 기준 로드맵:
 
 - 미룬 작업 큐의 source of truth는 `AGENTS.md` 최상단과 `docs/current-worklog.md` 최상단입니다.
 - App.jsx 리팩터링 18개 기준 로드맵은 `AGENTS.md`, `docs/current-worklog.md`, 이 README에 함께 기록되어 있습니다.
-- 다음 리팩터링 시작점은 10번 `student-parent portals`의 학부모 숙제 탭 helper 경계 확인입니다. 포털 공개 링크·인증·저장 원천·모바일 표시 inventory와 자료함/정적 탭/내비게이션/리포트/지표/학부모 알림 표시 분리는 완료됐습니다.
+- 다음 리팩터링 시작점은 10번 `student-parent portals`의 학생 전체 숙제 탭입니다. 포털 공개 링크·인증·저장 원천·모바일 표시 inventory와 저위험 표시 영역/학부모 숙제 탭 분리는 완료됐습니다.
 - 최신 기능 커밋은 `e114a9ea Limit supplement notices to source lesson`, 현재 최신 기록 커밋은 `4692f7d6 Document stale supplement reservation check`입니다. handoff 문서 갱신 커밋이 뒤에 오므로 새 세션에서 반드시 `git log -1 --oneline`으로 실제 최신 커밋을 다시 확인하세요.
 - 현재 로컬에 남을 수 있는 미추적 항목: `.codex-temp/`. 커밋하지 않습니다.
