@@ -217,3 +217,47 @@ export function RecentTestSessionList({
     </section>
   );
 }
+
+export function StudentTestHistoryPanel({
+  getKindLabel,
+  onStudentChange,
+  rows = [],
+  selectedStudentId = "",
+  students = []
+}) {
+  return (
+    <section className="panel materialPanel testHistoryPanel">
+      <div className="sectionHeader">
+        <div>
+          <h1>학생별 테스트 이력</h1>
+          <p className="muted">학생이 지금까지 본 데일리/단원/누적 테스트 결과를 한곳에서 확인합니다.</p>
+        </div>
+        <select value={selectedStudentId} onChange={(event) => onStudentChange?.(event.target.value)}>
+          {students.map((student) => (
+            <option key={student.studentId} value={student.studentId}>{student.name}</option>
+          ))}
+        </select>
+      </div>
+      <div className="testHistoryList">
+        {rows.map(({ session, attempt }) => (
+          <article className="testHistoryItem" key={attempt.testAttemptId}>
+            <div>
+              <strong>{session.testDate} · {session.testTitle}</strong>
+              <span>{session.className || "전체 학생"} · {getKindLabel?.(session.testKind)} · {session.totalQuestions || "-"}문항</span>
+            </div>
+            <div>
+              <b>{attempt.status === "not_taken" ? "미응시" : `${session.totalQuestions || "-"}문항 중 ${attempt.correctCount || "-"}문항 정답`}</b>
+              <small>{attempt.status === "not_taken" ? (attempt.notTakenReason || "사유 미입력") : (session.unit || session.subject || "범위 미입력")}</small>
+            </div>
+          </article>
+        ))}
+        {!rows.length ? (
+          <EmptyState className="examPrepEmptyState">
+            <strong>테스트 이력이 없습니다.</strong>
+            <span>응시 기록 탭에서 학생별 결과를 저장하면 여기에 누적됩니다.</span>
+          </EmptyState>
+        ) : null}
+      </div>
+    </section>
+  );
+}

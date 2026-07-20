@@ -34,8 +34,8 @@
    - 순서: `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`.
    - 다음 후보는 매번 현재 diff와 최신 작업로그를 보고 다시 제안한다. 위험이 낮은 helper/config/API/client/component부터 진행하고, 수업일지/출결/Solapi/보충관리처럼 side effect가 큰 영역은 충분한 gate 이후 진행한다.
    - 기준 로드맵: 아래 `App.jsx 리팩터링 18개 기준 로드맵`을 다음 세션들의 공통 후보 목록으로 사용한다. 이미 일부 분리된 항목도 남은 하위 컴포넌트/헬퍼가 있으면 같은 묶음 안에서 계속 진행한다.
-   - 현재 이어받을 지점: 다음 리팩터링 세션은 9번 `test manager`부터 이어간다. 1~8번은 완료 또는 충분히 진행된 것으로 보고, 10번으로 넘어가기 전에 9번의 남은 하위 작업을 먼저 확인한다.
-   - 다음 세션 시작 규칙: 코드 수정 전에 최근 리팩터링 결과(8번 완료, 9번 진행 중, 최신 완료 커밋)를 사용자에게 요약하고 `9번 test manager의 남은 학생별 history list 분리부터 이어갈까요?`라고 확인한다. 사용자가 재개하라고 답하면 진행한다.
+   - 현재 이어받을 지점: 9번 `test manager`는 학생별 history panel까지 분리 완료했다. 다음 리팩터링은 10번 `student-parent portals` inventory부터 이어간다.
+   - 다음 세션 시작 규칙: 코드 수정 전에 최근 리팩터링 결과(9번 완료, 10번 시작 전, 최신 완료 커밋)를 사용자에게 요약하고, 학생/학부모 포털의 공개 링크·인증·저장 원천·모바일 표시 side effect inventory를 먼저 만든다. 그 뒤 가장 낮은 위험의 표시 전용 컴포넌트 한 단위를 제안하고 사용자 재개 의사를 확인한다.
 5. `Solapi 특강 템플릿 검수 후 연결`
    - 상태: 외부 검수 대기.
    - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다.
@@ -376,6 +376,19 @@
 - 구현 결과: 하단 안내문을 `최초 일정 확정`과 `기존 일정 변경` 모드로 분리했다. `보충 내용 저장`은 발송/예약을 만들지 않고, `수업일지 일정 만들기`는 학생·학부모 확정 안내 다음 정각 예약과 학생 11시 예약을 만든다는 점을 직접 표시한다. 기존 일정 변경 화면은 변경 안내 예약/11시 갱신 기준을 따로 표시한다.
 - 범위 제한: `makeup_tasks`, `lessons`, `notification_jobs`, Solapi 예약 API, 확정/변경 템플릿 선택 로직은 바꾸지 않았다. 이번 작업은 UI 문구/상태 표시와 정적 시나리오 테스트만 변경했다.
 - 사람 gate: 최초 숙제보충 화면에서 시간 미입력 시 `학생 확정 안내`/`학부모 확정 안내`가 `시간 필요`로 보여야 하고, 시간 입력 후에는 `예약 예정`으로 바뀌어야 한다. 이미 연결된 보충 일정 수정 화면에서는 같은 위치가 `변경 안내` 기준으로 보여야 한다.
+
+### 2026-07-20 P1. App.jsx 리팩터링 9번 - 학생별 테스트 history panel 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 표시 전용 이동이라 사람 gate 없이 10번 inventory로 진행 가능.
+- 범위 선택: 9번 `test manager`의 마지막 작은 단위로, 학생 선택 select, 학생별 응시/미응시 history list, empty state 렌더만 `StudentTestHistoryPanel`로 분리했다.
+- 착수 전 inventory: 표시 원천은 Supabase `test_sessions`/`test_attempts`를 상위 `MaterialManager`에서 조합한 `historyRows`; local state는 `selectedHistoryStudentId`; 기본 학생 선택 effect와 날짜 역순 정렬도 상위에 유지했다.
+- 구현 결과: `src/domains/tests/TestManagerPanels.jsx`에 `StudentTestHistoryPanel`을 추가하고, `App.jsx`는 `historyRows`, 선택 학생 id, 활성 학생 목록, 학생 변경 callback, 종류 label helper만 전달한다.
+- 저장 원천/side effect: 변경 없음. `saveAttemptSession`, `openTestSession`, `resetAttemptForm`, `onSaveTestSession`, `onDeleteTestSession`, API/Supabase 저장·삭제, 수업일지 테스트 결과 블록, 알림톡/`notification_jobs`를 건드리지 않았다.
+- 테스트 보정: 기존 `41e`가 화면 문자열을 `App.jsx`에서만 찾던 위치 의존을 `appWithConfig`로 넓혔고, 저장→알림톡 연결 기대는 그대로 유지했다. `70o-1`로 새 컴포넌트 연결, 학생 변경, 응시/미응시 표시, empty state를 고정했다.
+- AI 검수 결과: diff는 동일 JSX 이동과 props wiring, 테스트 위치 보정뿐이다. `git diff --check`, 시나리오 문법 검사, `npm run build`, `npm run test:production` 326/326 통과. 기존 Vite chunk size 경고만 남았다.
+- 사람 검토 필요 여부: 없음. 텍스트·className·정렬 계산·선택 state가 그대로이고 저장/외부 side effect diff가 없어 자동검증으로 닫는다.
+- 다음 순서: 9번 완료. 10번 `student-parent portals`는 공개 링크·인증·저장 원천·모바일 표시 inventory를 먼저 만들고 가장 낮은 위험의 표시 컴포넌트부터 한 단위씩 분리한다.
+- 중단 조건: 학생 선택 시 다른 학생 history가 섞임, 응시/미응시 문구 또는 empty state 변경, 테스트 결과 저장·삭제나 알림톡 반영 함수 diff 발생.
 
 ### 2026-07-16 P1. 다음 세션 리팩터링 시작 지점 9번 고정
 
