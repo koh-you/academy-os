@@ -289,7 +289,16 @@ function buildSpecialLectureLessonDrafts({ enrollments = [], guide = null, lesso
   const activeEnrollments = normalizeSpecialLectureEnrollments(enrollments)
     .filter((enrollment) => enrollment.status === "active")
     .filter((enrollment) => enrollment.planReviewedAt)
-    .filter((enrollment) => getEnrollmentStudent(enrollment, students));
+    .filter((enrollment) => getEnrollmentStudent(enrollment, students))
+    .sort((left, right) => {
+      const leftStudent = getEnrollmentStudent(left, students);
+      const rightStudent = getEnrollmentStudent(right, students);
+      const nameCompare = String(leftStudent?.name ?? "").localeCompare(String(rightStudent?.name ?? ""), "ko", {
+        numeric: true,
+        sensitivity: "base"
+      });
+      return nameCompare || String(left.studentId ?? "").localeCompare(String(right.studentId ?? ""));
+    });
   const lessonTrackId = getSpecialLectureLessonTrackId(guide);
   return guideSessions.map((session) => {
     const specialLectureStudentSchedules = activeEnrollments.flatMap((enrollment) => {

@@ -338,16 +338,28 @@ function isActiveStudent(student = {}) {
   return student && !isWithdrawnStudent(student);
 }
 
+function compareStudentsByName(left = {}, right = {}) {
+  const nameCompare = String(left.name ?? "").localeCompare(String(right.name ?? ""), "ko", {
+    numeric: true,
+    sensitivity: "base"
+  });
+  return nameCompare || String(left.studentId ?? "").localeCompare(String(right.studentId ?? ""));
+}
+
+function sortStudentsByName(students = []) {
+  return [...students].sort(compareStudentsByName);
+}
+
 function getActiveLessonStudents(lesson = {}, students = []) {
-  return getLessonStudentIds(lesson)
+  return sortStudentsByName(getLessonStudentIds(lesson)
     .map((studentId) => students.find((student) => student.studentId === studentId))
-    .filter(isActiveStudent);
+    .filter(isActiveStudent));
 }
 
 function getActiveStudentIdsFromSelection(studentIds = [], students = []) {
   const selectedStudentIds = new Set(studentIds);
-  return students
-    .filter((student) => isActiveStudent(student) && selectedStudentIds.has(student.studentId))
+  return sortStudentsByName(students
+    .filter((student) => isActiveStudent(student) && selectedStudentIds.has(student.studentId)))
     .map((student) => student.studentId);
 }
 
@@ -6839,7 +6851,7 @@ export function App() {
       )
       .map((lesson) => ({
         ...lesson,
-        studentIds: [...(lesson.studentIds ?? []), student.studentId]
+        studentIds: getActiveStudentIdsFromSelection([...(lesson.studentIds ?? []), student.studentId], students)
       }));
     applyLessonRosterChanges(changedLessons);
     return changedLessons;
@@ -6867,8 +6879,9 @@ export function App() {
           nextStudentIds = [...nextStudentIds, student.studentId];
         }
       });
-      if (JSON.stringify(nextStudentIds) === JSON.stringify(lesson.studentIds ?? [])) return [];
-      return [{ ...lesson, studentIds: nextStudentIds }];
+      const sortedStudentIds = getActiveStudentIdsFromSelection(nextStudentIds, students);
+      if (JSON.stringify(sortedStudentIds) === JSON.stringify(lesson.studentIds ?? [])) return [];
+      return [{ ...lesson, studentIds: sortedStudentIds }];
     });
     applyLessonRosterChanges(changedLessons);
     return changedLessons;
@@ -14411,9 +14424,7 @@ function SupplementMakeupLessonDetail({
     scheduledTime: task?.scheduledTime || lesson.startTime || ""
   });
   const [scheduleSaveState, setScheduleSaveState] = useState({ message: "", state: "idle" });
-  const lessonStudents = (lesson.studentIds ?? [])
-    .map((studentId) => students.find((student) => student.studentId === studentId))
-    .filter(Boolean);
+  const lessonStudents = getActiveLessonStudents(lesson, students);
   const student = lessonStudents[0] ?? students.find((item) => item.studentId === task?.studentId);
   const isAbsenceMakeup = task?.taskType === "absence_makeup";
   const taskLabel = followUpTypeLabel(task?.taskType);
@@ -14943,9 +14954,7 @@ function EditableMemoCard({ className = "", disabled = false, editKey, editingKe
 }
 
 function LessonJournalFallback({ error, lesson, onBack, onDeleteLesson, onEditLesson, students = [] }) {
-  const lessonStudents = (lesson?.studentIds ?? [])
-    .map((studentId) => students.find((student) => student.studentId === studentId))
-    .filter(Boolean);
+  const lessonStudents = getActiveLessonStudents(lesson, students);
   return (
     <section className="lessonJournalPage">
       <header className="pageTop lessonJournalHeader">
@@ -25412,7 +25421,7 @@ function inferGradeFromBirthYear(birthYear) {
 function ReportCenter({ lessons, records, reportLesson, selectedReportLessonId, snapshots, students, onSaveSnapshot, onSelectLesson }) {
   const [selectedStudentId, setSelectedStudentId] = useState("");
   const lessonStudents = reportLesson
-    ? reportLesson.studentIds.map((studentId) => students.find((student) => student.studentId === studentId)).filter(Boolean)
+    ? getActiveLessonStudents(reportLesson, students)
     : [];
   const activeStudent = lessonStudents.find((student) => student.studentId === selectedStudentId) ?? lessonStudents[0];
   const activeRecord = activeStudent ? records.find((record) => record.studentId === activeStudent.studentId) : null;
