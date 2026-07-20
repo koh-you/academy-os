@@ -5748,6 +5748,34 @@ export function App() {
       });
   }
 
+  async function handleCreateSpecialLectureStudent(application = {}) {
+    if (!String(application.studentName ?? "").trim()) throw new Error("특강생 이름이 필요합니다.");
+    const applicationId = String(application.applicationId || "").trim();
+    if (!applicationId) throw new Error("특강 신청 원본 ID가 필요합니다.");
+    const sourceNote = `특강 전용 등록 · Tally 신청 ${applicationId}`;
+    const existingStudent = students.find((student) => student.specialNote === sourceNote);
+    if (existingStudent) return existingStudent;
+    const sourceKey = applicationId.replace(/[^a-zA-Z0-9_-]+/g, "_").slice(-48) || Date.now().toString(36);
+    const student = createStudentFromFormValues({
+      studentId: `student_special_lecture_${sourceKey}`,
+      loginId: `sl-${sourceKey}`,
+      name: String(application.studentName).trim(),
+      schoolName: application.schoolName || "",
+      grade: application.grade || "",
+      studentPhone: application.studentPhone || "",
+      parentPhone: application.parentPhone || "",
+      defaultClassTemplateId: "",
+      specialNote: sourceNote
+    });
+    const result = await postJson("/api/students", { student });
+    if (!result.ok) throw new Error(result.error || "특강 전용 학생 등록 실패");
+    const savedStudent = result.student ?? student;
+    setStudents((current) => current.some((item) => item.studentId === savedStudent.studentId)
+      ? current.map((item) => item.studentId === savedStudent.studentId ? savedStudent : item)
+      : [...current, savedStudent]);
+    return savedStudent;
+  }
+
   function handleSaveSpecialLectureEnrollment(enrollment) {
     const previousEnrollments = specialLectureEnrollments;
     const nextEnrollment = normalizeSpecialLectureEnrollment({
@@ -8575,6 +8603,7 @@ export function App() {
             specialLectureEnrollments={specialLectureEnrollments}
             specialLectureGuides={specialLectureGuides}
             specialLectureGuideSaveState={specialLectureGuideSaveState}
+            onCreateSpecialLectureStudent={handleCreateSpecialLectureStudent}
             onCreateSpecialLectureLessons={handleCreateSpecialLectureLessons}
             onOpenSpecialLectureLesson={openSpecialLectureLesson}
             onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
@@ -9692,6 +9721,7 @@ function NotificationCenter({
   lessons = [],
   notificationJobs,
   notificationJobsStatus = { state: "idle", message: "" },
+  onCreateSpecialLectureStudent,
   onCreateSpecialLectureLessons,
   onOpenSpecialLectureLesson,
   onRefresh,
@@ -10286,6 +10316,7 @@ function NotificationCenter({
           records={records}
           saveState={specialLectureGuideSaveState}
           onApplyToNotice={applySpecialLectureGuideToNotice}
+          onCreateStudent={onCreateSpecialLectureStudent}
           onCreateSpecialLectureLessons={onCreateSpecialLectureLessons}
           onOpenLesson={onOpenSpecialLectureLesson}
           onSaveEnrollment={onSaveSpecialLectureEnrollment}
@@ -10584,6 +10615,7 @@ function SpecialLectureNoticePanel({
   lessons = [],
   notificationJobs = [],
   onApplyToNotice,
+  onCreateStudent,
   onCreateSpecialLectureLessons,
   onOpenLesson,
   onSaveEnrollment,
@@ -10982,6 +11014,7 @@ function SpecialLectureNoticePanel({
         guides={draftGuides}
         lessons={lessons}
         notificationJobs={notificationJobs}
+        onCreateStudent={onCreateStudent}
         onCreateSpecialLectureLessons={onCreateSpecialLectureLessons}
         onOpenLesson={onOpenLesson}
         onSaveEnrollment={onSaveEnrollment}

@@ -341,6 +341,7 @@ export function SpecialLectureApplicationPanel({
   records = [],
   isGuideSaved = false,
   onCreateSpecialLectureLessons,
+  onCreateStudent,
   onOpenLesson,
   onSaveEnrollment,
   onSaveEnrollments,
@@ -357,6 +358,9 @@ export function SpecialLectureApplicationPanel({
   const [manualPickerOpen, setManualPickerOpen] = useState(false);
   const [manualSearchText, setManualSearchText] = useState("");
   const [manualSelectedStudentIds, setManualSelectedStudentIds] = useState([]);
+  const [matchApplication, setMatchApplication] = useState(null);
+  const [matchSearchText, setMatchSearchText] = useState("");
+  const [matchStudentId, setMatchStudentId] = useState("");
   const [planModalEnrollment, setPlanModalEnrollment] = useState(null);
   const [progressModalEnrollment, setProgressModalEnrollment] = useState(null);
   const normalizedGuides = useMemo(() => normalizeSpecialLectureGuides(guides), [guides]);
@@ -395,10 +399,25 @@ export function SpecialLectureApplicationPanel({
       ...option,
       count: statusCounts[option.value] ?? 0
     }));
-  const confirmedMatchRows = useMemo(
+  const enrollmentByStudentId = new Map(selectedGuideEnrollments.map((enrollment) => [enrollment.studentId, enrollment]));
+  const enrollmentByApplicationId = new Map(selectedGuideEnrollments
+    .filter((enrollment) => enrollment.applicationId)
+    .map((enrollment) => [enrollment.applicationId, enrollment]));
+  const automaticConfirmedMatchRows = useMemo(
     () => buildSpecialLectureMatchRows(activeApplications, selectedGuide, students),
     [activeApplications, selectedGuide, students]
   );
+  const confirmedMatchRows = automaticConfirmedMatchRows.map((row) => {
+    const linkedEnrollment = enrollmentByApplicationId.get(row.application.applicationId);
+    const linkedStudent = linkedEnrollment ? getEnrollmentStudent(linkedEnrollment, students) : null;
+    return linkedStudent ? {
+      ...row,
+      status: "matched",
+      student: linkedStudent,
+      candidates: [linkedStudent],
+      reason: "선생님 직접 연결"
+    } : row;
+  });
   const matchedRows = confirmedMatchRows.filter((row) => row.status === "matched" && row.student);
   const needsReviewRows = confirmedMatchRows.filter((row) => row.status !== "matched" || !row.student);
   const visibleApplications = selectedGuideApplications.slice(0, 8);
@@ -407,8 +426,9 @@ export function SpecialLectureApplicationPanel({
   const guideSessionIds = guideSessions.map((session) => session.sessionId);
   const activeEnrollments = selectedGuideEnrollments.filter((enrollment) => enrollment.status === "active");
   const unreviewedEnrollmentRows = activeEnrollments.filter((enrollment) => !enrollment.planReviewedAt);
-  const enrollmentByStudentId = new Map(selectedGuideEnrollments.map((enrollment) => [enrollment.studentId, enrollment]));
-  const missingEnrollmentRows = matchedRows.filter((row) => row.student?.studentId && !enrollmentByStudentId.has(row.student.studentId));
+  const missingEnrollmentRows = matchedRows.filter((row) => row.student?.studentId &&
+    !enrollmentByStudentId.has(row.student.studentId) &&
+    !enrollmentByApplicationId.has(row.application.applicationId));
   const lessonDrafts = useMemo(
     () => buildSpecialLectureLessonDrafts({ enrollments: selectedGuideEnrollments, guide: selectedGuide, lessons, students }),
     [selectedGuideEnrollments, selectedGuide, lessons, students]
@@ -469,6 +489,14 @@ export function SpecialLectureApplicationPanel({
       return [student.name, student.schoolName, student.grade, student.className]
         .some((value) => String(value ?? "").toLowerCase().includes(query));
     });
+  const availableMatchStudents = students
+    .filter(isActiveRosterStudent)
+    .filter((student) => {
+      const query = matchSearchText.trim().toLowerCase();
+      if (!query) return true;
+      return [student.name, student.schoolName, student.grade, student.className]
+        .some((value) => String(value ?? "").toLowerCase().includes(query));
+    });
   const progressEnrollment = progressModalEnrollment
     ? selectedGuideEnrollments.find((item) => item.enrollmentId === progressModalEnrollment.enrollmentId) ?? progressModalEnrollment
     : null;
@@ -505,16 +533,11 @@ export function SpecialLectureApplicationPanel({
     }
   }
 
-  async function confirmApplicationAndOpenPlan(application) {
+  async function confirmApplicationWithStudent(application, student) {
     if (!onUpdateApplication || !onSaveEnrollment || !selectedGuide || !isGuideSaved) return;
-    const match = getSpecialLectureStudentMatch(application, students);
-    if (match.status !== "matched" || !match.student) {
-      setPanelMessage(`${application.studentName || "신청자"} 학생 매칭을 먼저 확인해 주세요. ${match.reason || "기존 학생을 찾지 못했습니다."}`);
-      return;
-    }
-    const existingEnrollment = enrollmentByStudentId.get(match.student.studentId);
-    if (existingEnrollment) {
-      setPlanModalEnrollment(existingEnrollment);
+    const existingEnrollment = enrollmentByStudentId.get(student.studentId);
+    if (existingEnrollment?.applicationId && existingEnrollment.applicationId !== application.applicationId) {
+      setPanelMessage(`${student.name} 학생은 이미 다른 신청 원본으로 이 특강 명단에 연결되어 있습니다.`);
       return;
     }
     setUpdatingApplicationId(application.applicationId);
@@ -523,12 +546,61 @@ export function SpecialLectureApplicationPanel({
       const confirmedApplication = application.status === "confirmed"
         ? application
         : await onUpdateApplication(application.applicationId, { status: "confirmed" });
-      const enrollment = buildEnrollmentFromMatchRow({ application: confirmedApplication ?? { ...application, status: "confirmed" }, student: match.student }, selectedGuide, guideSessions);
+      const enrollment = buildEnrollmentFromMatchRow(
+        { application: confirmedApplication ?? { ...application, status: "confirmed" }, student },
+        selectedGuide,
+        guideSessions,
+        existingEnrollment
+      );
       const savedEnrollment = await onSaveEnrollment(enrollment);
       setPlanModalEnrollment(savedEnrollment ?? enrollment);
-      setPanelMessage(`${match.student.name} 학생을 확정 명단에 추가했습니다. 모달에서 수강 회차와 시간을 확인해 주세요.`);
+      setMatchApplication(null);
+      setMatchSearchText("");
+      setMatchStudentId("");
+      setPanelMessage(`${student.name} 학생을 확정 명단에 연결했습니다. 모달에서 수강 회차와 시간을 확인해 주세요.`);
     } catch (error) {
       setPanelMessage(`특강 확정 준비 실패: ${error.message}`);
+    } finally {
+      setUpdatingApplicationId("");
+    }
+  }
+
+  async function confirmApplicationAndOpenPlan(application) {
+    const linkedEnrollment = enrollmentByApplicationId.get(application.applicationId);
+    if (linkedEnrollment) {
+      setPlanModalEnrollment(linkedEnrollment);
+      return;
+    }
+    const match = getSpecialLectureStudentMatch(application, students);
+    if (match.status === "matched" && match.student) {
+      await confirmApplicationWithStudent(application, match.student);
+      return;
+    }
+    setMatchApplication(application);
+    setMatchStudentId(match.candidates?.length === 1 ? match.candidates[0].studentId : "");
+    setMatchSearchText(application.studentName || "");
+    setPanelMessage(`${application.studentName || "신청자"} 학생을 전체 학생 명단에서 직접 선택하거나 특강 전용 학생으로 등록해 주세요.`);
+  }
+
+  async function confirmManualStudentMatch() {
+    if (!matchApplication || !matchStudentId) return;
+    const student = students.find((item) => item.studentId === matchStudentId);
+    if (!student) {
+      setPanelMessage("연결할 학생을 찾지 못했습니다.");
+      return;
+    }
+    await confirmApplicationWithStudent(matchApplication, student);
+  }
+
+  async function registerSpecialLectureStudent() {
+    if (!matchApplication || !onCreateStudent) return;
+    setUpdatingApplicationId(matchApplication.applicationId);
+    setPanelMessage("");
+    try {
+      const student = await onCreateStudent(matchApplication);
+      await confirmApplicationWithStudent(matchApplication, student);
+    } catch (error) {
+      setPanelMessage(`특강 전용 학생 등록 실패: ${error.message}`);
     } finally {
       setUpdatingApplicationId("");
     }
@@ -820,7 +892,7 @@ export function SpecialLectureApplicationPanel({
         <div className="specialLectureGateHeader">
           <div>
             <strong>특강 확정 명단 매칭 gate</strong>
-            <span>확정 신청자만 기존 학생과 매칭합니다. 미매칭/복수 후보가 있으면 저장을 막습니다.</span>
+            <span>전체 반의 학생을 자동 확인하고, 찾지 못하면 선생님이 기존 학생을 직접 선택하거나 특강 전용 학생으로 등록합니다.</span>
           </div>
           <div className="specialLectureGateStats">
             <span>확정 {confirmedMatchRows.length}</span>
@@ -845,6 +917,9 @@ export function SpecialLectureApplicationPanel({
                   {row.reason}
                   {row.candidates?.length ? ` · 후보 ${row.candidates.map((student) => student.name).join(", ")}` : ""}
                 </small>
+                <button className="softButton compact" onClick={() => confirmApplicationAndOpenPlan(row.application)} type="button">
+                  전체 학생에서 직접 연결
+                </button>
               </article>
             ))}
           </div>
@@ -988,7 +1063,7 @@ export function SpecialLectureApplicationPanel({
           <p className="specialLectureGateEmpty">회차별 계획을 먼저 저장해 주세요.</p>
         )}
         {needsReviewRows.length ? (
-          <p className="inlineNotice danger">확정 신청자 중 기존 학생 매칭이 필요한 건이 있어 수업일지 생성을 막았습니다.</p>
+          <p className="inlineNotice danger">확정 신청자 중 학생 직접 연결이 필요한 건이 있어 수업일지 생성을 막았습니다.</p>
         ) : null}
         {unreviewedEnrollmentRows.length ? (
           <p className="inlineNotice danger">회차 미확정 학생 {unreviewedEnrollmentRows.length}명은 특강 lesson 명단에 아직 반영하지 않습니다. 학생별 `회차 설정`을 저장해 주세요.</p>
@@ -1092,7 +1167,11 @@ export function SpecialLectureApplicationPanel({
                   onClick={() => confirmApplicationAndOpenPlan(application)}
                   type="button"
                 >
-                  {updatingApplicationId === application.applicationId ? "준비 중" : enrollmentByStudentId.has(getSpecialLectureStudentMatch(application, students).student?.studentId) ? "회차 설정 열기" : "확정 및 회차 설정"}
+                  {updatingApplicationId === application.applicationId
+                    ? "준비 중"
+                    : enrollmentByApplicationId.has(application.applicationId) || enrollmentByStudentId.has(getSpecialLectureStudentMatch(application, students).student?.studentId)
+                      ? "회차 설정 열기"
+                      : "확정 및 학생 연결"}
                 </button>
                 <label>
                   연결 특강
@@ -1146,6 +1225,70 @@ export function SpecialLectureApplicationPanel({
         </div>
       )}
       {panelMessage ? <p className={panelMessage.includes("실패") ? "inlineNotice danger" : "inlineNotice"}>{panelMessage}</p> : null}
+
+      {matchApplication ? (
+        <Modal
+          className="specialLectureRosterModal"
+          onClose={() => {
+            setMatchApplication(null);
+            setMatchSearchText("");
+            setMatchStudentId("");
+          }}
+          subtitle={`${matchApplication.studentName || "신청자"} · ${matchApplication.schoolName || "학교 미입력"} ${matchApplication.grade || ""}`}
+          title="특강 신청 학생 연결"
+        >
+          <div className="specialLectureModalBody">
+            <div className="noticeBox specialLectureNoticeBox">
+              <strong>다른 반 학생도 연결할 수 있습니다.</strong>
+              <p>현재 특강이나 정규반 소속과 관계없이 Academy OS 전체 학생에서 선택합니다. 목록에 없다면 아래 버튼으로 특강 전용 학생을 먼저 등록합니다.</p>
+            </div>
+            <div className="specialLectureRosterSearch">
+              <label>
+                전체 학생 검색
+                <input
+                  autoFocus
+                  onChange={(event) => setMatchSearchText(event.target.value)}
+                  placeholder="이름, 학교, 학년, 반"
+                  value={matchSearchText}
+                />
+              </label>
+              <span>{matchStudentId ? "학생 1명 선택" : "연결할 학생을 선택하세요."}</span>
+            </div>
+            <div className="specialLectureRosterPickerList">
+              {availableMatchStudents.length ? availableMatchStudents.map((student) => (
+                <label className="specialLectureRosterPickerItem" key={`match_${student.studentId}`}>
+                  <input
+                    checked={matchStudentId === student.studentId}
+                    name={`special_lecture_match_${matchApplication.applicationId}`}
+                    onChange={() => setMatchStudentId(student.studentId)}
+                    type="radio"
+                  />
+                  <strong>{student.name}</strong>
+                  <span>{[student.schoolName, student.grade, student.className].filter(Boolean).join(" · ") || "학생 정보 미입력"}</span>
+                </label>
+              )) : <p className="specialLectureGateEmpty">검색 결과가 없습니다. 신청자를 특강 전용 학생으로 등록할 수 있습니다.</p>}
+            </div>
+            <div className="specialLectureModalActions specialLectureMatchActions">
+              <button
+                className="softButton"
+                disabled={!onCreateStudent || updatingApplicationId === matchApplication.applicationId}
+                onClick={registerSpecialLectureStudent}
+                type="button"
+              >
+                {updatingApplicationId === matchApplication.applicationId ? "등록 중" : "신청자를 특강 전용 학생으로 등록"}
+              </button>
+              <button
+                className="primaryButton"
+                disabled={!matchStudentId || updatingApplicationId === matchApplication.applicationId}
+                onClick={confirmManualStudentMatch}
+                type="button"
+              >
+                {updatingApplicationId === matchApplication.applicationId ? "연결 중" : "선택 학생 연결 및 회차 설정"}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      ) : null}
 
       {manualPickerOpen ? (
         <Modal

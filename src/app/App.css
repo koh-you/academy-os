@@ -8305,6 +8305,10 @@ button:disabled {
   font-size: 12px;
 }
 
+.specialLectureMatchActions {
+  justify-content: space-between;
+}
+
 .specialLectureSessionModalSummary {
   background: #eff6ff;
   border: 1px solid #bfdbfe;
