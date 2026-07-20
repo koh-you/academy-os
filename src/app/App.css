@@ -8357,6 +8357,23 @@ button:disabled {
   font-size: 12px;
 }
 
+.specialLectureSessionBulkActions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.specialLectureSessionBulkActions > span {
+  color: #52627a;
+  font-size: 12px;
+}
+
+.specialLectureSessionBulkActions > div {
+  display: flex;
+  gap: 7px;
+}
+
 .specialLectureSessionModalControls {
   grid-template-columns: minmax(140px, 0.35fr) minmax(260px, 1fr);
 }
@@ -17424,6 +17441,19 @@ body.attendanceOnlyBody {
 
   .specialLectureRosterPickerItem span {
     grid-column: 2;
+  }
+
+  .specialLectureSessionBulkActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .specialLectureSessionBulkActions > div {
+    width: 100%;
+  }
+
+  .specialLectureSessionBulkActions button {
+    flex: 1;
   }
 
   .notificationControlActions,

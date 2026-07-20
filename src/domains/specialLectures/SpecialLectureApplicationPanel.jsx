@@ -706,6 +706,23 @@ export function SpecialLectureApplicationPanel({
     });
   }
 
+  function isEnrollmentSessionLocked(session) {
+    return (session.dateKey || session.date) <= todayDateKey &&
+      lessons.some((lesson) => lesson.specialLectureSessionId === session.sessionId);
+  }
+
+  function setAllEnrollmentSessions(enrollment, status) {
+    const draft = getEnrollmentDraft(enrollment);
+    const sessionPlans = draft.sessionPlans.map((plan) => {
+      const session = guideSessions.find((item) => item.sessionId === plan.sessionId);
+      return session && !isEnrollmentSessionLocked(session) ? { ...plan, status } : plan;
+    });
+    updateEnrollmentDraft(enrollment.enrollmentId, {
+      sessionIds: sessionPlans.filter((plan) => plan.status === "active").map((plan) => plan.sessionId),
+      sessionPlans
+    });
+  }
+
   function updateEnrollmentSessionPlan(enrollment, sessionId, patch) {
     const draft = getEnrollmentDraft(enrollment);
     const sessionPlans = draft.sessionPlans.map((plan) => plan.sessionId === sessionId ? { ...plan, ...patch } : plan);
@@ -1376,12 +1393,33 @@ export function SpecialLectureApplicationPanel({
                 <strong>총 {guideSessions.length}회 중 {draft.sessionPlans.filter((plan) => plan.status === "active").length}회 수강</strong>
                 <span>공식 날짜는 유지하고 학생별 실제 시간만 조정합니다. 오늘/지난 회차는 기록 보호를 위해 잠깁니다.</span>
               </div>
+              <div className="specialLectureSessionBulkActions">
+                <span>체크한 회차가 수강 신청으로 저장됩니다.</span>
+                <div>
+                  <button
+                    className="softButton compact"
+                    disabled={savingEnrollmentId === enrollment.enrollmentId}
+                    onClick={() => setAllEnrollmentSessions(enrollment, "active")}
+                    type="button"
+                  >
+                    전체 선택
+                  </button>
+                  <button
+                    className="softButton compact subtle"
+                    disabled={savingEnrollmentId === enrollment.enrollmentId}
+                    onClick={() => setAllEnrollmentSessions(enrollment, "excluded")}
+                    type="button"
+                  >
+                    전체 해제
+                  </button>
+                </div>
+              </div>
               <div className="specialLectureSessionToggleGrid">
                 {guideSessions.map((session) => {
                   const plan = draft.sessionPlans.find((item) => item.sessionId === session.sessionId);
                   const isActive = plan?.status === "active";
                   const hasOverride = Boolean(plan?.effectiveStartTime || plan?.effectiveEndTime);
-                  const isLocked = (session.dateKey || session.date) <= todayDateKey && lessons.some((lesson) => lesson.specialLectureSessionId === session.sessionId);
+                  const isLocked = isEnrollmentSessionLocked(session);
                   return (
                     <article className={`specialLectureSessionPlan ${isActive ? "active" : "excluded"} ${isLocked ? "locked" : ""}`} key={`${enrollment.enrollmentId}_${session.sessionId}`}>
                       <label className="specialLectureSessionToggle">
@@ -1391,7 +1429,7 @@ export function SpecialLectureApplicationPanel({
                           onChange={() => toggleEnrollmentSession(enrollment, session.sessionId)}
                           type="checkbox"
                         />
-                        <span>{session.sessionIndex + 1}회차 {isActive ? "수강" : "제외"}{isLocked ? " · 잠금" : ""}</span>
+                        <span>{session.sessionIndex + 1}회차 신청{isLocked ? " · 잠금" : ""}</span>
                         <small>공식 {session.dateKey || session.date} {session.startTime}-{session.endTime}</small>
                       </label>
                       {isActive ? (
