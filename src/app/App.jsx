@@ -22748,7 +22748,7 @@ function SupplementCenter({
           sourceLabel: homework.title,
           supplementHomeworkNote: homework.title,
           reason: getHomeworkMakeupReason(homework, records),
-          supplementMethod: "stay_after"
+          supplementMethod: "arrival_makeup"
         }
       }))
     },
@@ -26726,7 +26726,7 @@ function isHomeworkMakeupCandidate(homework, records = [], lessons = []) {
   const recordRequiresMakeup = assignmentStatus ? isAssignmentStatusHomeworkMakeupCandidate(assignmentStatus) : false;
   if (assignmentStatus) {
     const followupMethod = getHomeworkFollowupMethodFromRecord(record);
-    if (["stay_after", "next_lesson"].includes(followupMethod)) return false;
+    if (followupMethod !== "arrival_makeup") return false;
     return isHomeworkActionRequired(homework) && recordRequiresMakeup;
   }
   return (

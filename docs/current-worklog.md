@@ -102,6 +102,17 @@
 - 자동 검증: `git diff --check`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 325/325 통과. 기존 Vite chunk size 경고만 남았다.
 - 사람 검토 gate: 정규수업과 특강 수업일지를 각각 열고 가나다순인지 확인한 뒤 새로고침해도 같은 순서인지 확인한다. 학생 누락·중복 또는 퇴원 학생 재노출이 있으면 중단한다.
 
+### 2026-07-20 P0-1. 숙제 처리 방식과 보충관리 후보 일치
+
+- 사용자 요청: 수업일지에서 `다음시간까지` 또는 `남아서 하고 가기`로 정한 숙제는 별도 등원 일정이 필요한 항목이 아니므로 보충관리에 나타나면 안 된다.
+- 원인: 과제 상태가 미완료/부분완료이면 처리 방식 미선택 상태도 보충 후보가 됐고, 후보 draft의 기본 방식도 `stay_after`로 지정되어 버튼 의미와 후보 판정이 달랐다.
+- 수정: 과제 상태가 저장된 수업일지 숙제는 `needsMakeup=true`, 즉 `등원보충(arrival_makeup)`을 명시적으로 선택한 경우에만 보충관리 후보가 된다. `다음시간까지`, `남아서 하고 가기`, 처리 방식 미선택은 제외한다. 후보 draft 기본 방식도 `arrival_makeup`으로 맞췄다.
+- legacy 보존: 과제 상태 record가 없는 과거 숙제는 기존 `teacherStatus=missing/partial` fallback을 유지한다.
+- 저장 원천/side effect: 판정 원천은 기존 Supabase `lesson_student_records.assignment_status/needs_makeup/preparation_memo`와 `homeworks`다. 기존 `makeup_tasks` 삭제, `notification_jobs`, Solapi 예약·발송은 변경하지 않는다. 새 SQL은 없다.
+- 운영 read-only 확인: 스크린샷 날짜인 2026-07-20의 처리 방식 비등원 항목 11건은 `needsMakeup=false`여서 새 판정에서 제외된다. 운영 row를 수정하거나 삭제하지 않았다.
+- 자동 검증: `git diff --check`, 시나리오 스크립트 문법 검사, `npm run build`, `npm run test:production` 325/325 통과. 기존 Vite chunk size 경고만 남았다.
+- 사람 검토 gate: 같은 미완료/부분완료 숙제에서 세 처리 방식을 각각 저장하고 새로고침한다. 앞의 두 방식은 보충관리에서 사라지고 `등원보충`만 나타나야 한다. 학생/숙제 누락 또는 기존 확정 보충 일정 변경이 보이면 중단한다.
+
 ### 2026-07-20 P0-1. 특강 미래 명단 반영 버튼을 수업일지 기준으로 정리
 
 - 사용자 요청: `미래 명단 변경 반영`은 내부 데이터 표현이라 실제 결과가 무엇인지 알기 어렵기 때문에 `수업일지 반영`으로 바꾼다.
