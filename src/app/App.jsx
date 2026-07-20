@@ -19,6 +19,7 @@ import { PortalMaterialsTab } from "../domains/portals/PortalMaterialsTab.jsx";
 import { StudentEmptyTab, StudentEvaluationTab } from "../domains/portals/PortalStaticTabs.jsx";
 import { parentPortalTabs, PortalTabBar, studentPortalTabs } from "../domains/portals/PortalTabBar.jsx";
 import { PortalReportCards } from "../domains/portals/PortalReportCards.jsx";
+import { StudentPortalMetrics } from "../domains/portals/StudentPortalMetrics.jsx";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
@@ -21155,11 +21156,7 @@ function StudentPortal({ homeworks, reportSnapshots, students, onStudentCheckHom
         </div>
       </header>
 
-      <div className="metricGrid">
-        <MetricCard icon="📖" label="오늘 할 숙제" value={`${todayHomeworks.length}개`} hint="오늘 배정된 숙제 수" />
-        <MetricCard icon="⚠️" label="밀린 숙제" value={`${overdueHomeworks.length}개`} hint="완료 못한 지난 날짜 숙제" tone="warning" />
-        <MetricCard icon="🔥" label="연속 수행일" value={`${streakDays}일`} hint="매일 체크하는 습관 지표" tone="success" />
-      </div>
+      <StudentPortalMetrics overdueCount={overdueHomeworks.length} streakDays={streakDays} todayCount={todayHomeworks.length} />
 
       <section className="panel studentWorkPanel">
         <div className="portalTabs">
@@ -21299,11 +21296,7 @@ function StudentPortalV2({
         </div>
       </header>
 
-      <div className="metricGrid">
-        <MetricCard icon="📖" label="오늘 할 숙제" value={`${todayHomeworks.length}개`} hint="오늘 배정된 숙제 수" />
-        <MetricCard icon="⚠️" label="밀린 숙제" value={`${overdueHomeworks.length}개`} hint="완료 못한 지난 날짜 숙제" tone="warning" />
-        <MetricCard icon="🔥" label="연속 수행일" value={`${streakDays}일`} hint="매일 체크하는 습관 지표" tone="success" />
-      </div>
+      <StudentPortalMetrics overdueCount={overdueHomeworks.length} streakDays={streakDays} todayCount={todayHomeworks.length} />
 
       <section className="panel studentWorkPanel">
         <PortalTabBar activeTab={activeTab} onChange={setActiveTab} tabs={studentPortalTabs} />
