@@ -1060,7 +1060,7 @@ export function SpecialLectureApplicationPanel({
       <div className="specialLectureLessonPreviewGate">
         <div className="specialLectureGateHeader">
           <div>
-            <strong>특강 개설 · 미래 명단 반영 gate</strong>
+            <strong>특강 수업일지 반영</strong>
             <span>학생이 없어도 공식 회차별 특강 수업을 먼저 개설합니다. 이후 저장한 학생별 계획은 안전한 미래 회차에만 반영합니다.</span>
           </div>
           <div className="specialLectureGateStats">
@@ -1127,7 +1127,7 @@ export function SpecialLectureApplicationPanel({
             onClick={createSpecialLectureLessons}
             type="button"
           >
-            {lessonCreateState.state === "saving" ? "반영 중" : newLessonDrafts.length ? "특강 개설 및 미래 명단 반영" : "미래 명단 변경 반영"}
+            {lessonCreateState.state === "saving" ? "수업일지 반영 중" : newLessonDrafts.length ? "특강 개설 및 수업일지 반영" : "수업일지 반영"}
           </button>
           <span>저장 대상: Supabase `lessons` · 과거 수업/기록/출결/알림톡 예약은 자동 변경하지 않음</span>
         </div>
