@@ -11,6 +11,7 @@ const testManagerUtilsPath = path.join(root, "src", "domains", "tests", "testMan
 const portalMaterialsTabPath = path.join(root, "src", "domains", "portals", "PortalMaterialsTab.jsx");
 const portalStaticTabsPath = path.join(root, "src", "domains", "portals", "PortalStaticTabs.jsx");
 const portalTabBarPath = path.join(root, "src", "domains", "portals", "PortalTabBar.jsx");
+const portalReportCardsPath = path.join(root, "src", "domains", "portals", "PortalReportCards.jsx");
 const studentManagerPath = path.join(root, "src", "domains", "students", "StudentManager.jsx");
 const examQuestionClassificationPath = path.join(root, "src", "domains", "exams", "questionClassification.js");
 const examQuestionItemsPath = path.join(root, "src", "domains", "exams", "questionItems.js");
@@ -84,6 +85,7 @@ const testManagerUtilsSource = fs.existsSync(testManagerUtilsPath) ? fs.readFile
 const portalMaterialsTabSource = fs.existsSync(portalMaterialsTabPath) ? fs.readFileSync(portalMaterialsTabPath, "utf8") : "";
 const portalStaticTabsSource = fs.existsSync(portalStaticTabsPath) ? fs.readFileSync(portalStaticTabsPath, "utf8") : "";
 const portalTabBarSource = fs.existsSync(portalTabBarPath) ? fs.readFileSync(portalTabBarPath, "utf8") : "";
+const portalReportCardsSource = fs.existsSync(portalReportCardsPath) ? fs.readFileSync(portalReportCardsPath, "utf8") : "";
 const appWithConfig = `${app}\n${appConfigSource}\n${schoolCalendarComponentsSource}\n${schoolCalendarUtilsSource}\n${testManagerPanelsSource}\n${testManagerUtilsSource}`;
 const apiClientSource = fs.existsSync(apiClientPath) ? fs.readFileSync(apiClientPath, "utf8") : "";
 const appWithApiClient = `${app}\n${apiClientSource}`;
@@ -329,6 +331,7 @@ check("23 parent portal is mobile first", hasAll(app, ["parentPortalMobileFirst"
 check("23a student and parent portals share an extracted read-only materials tab", hasAll(app, ["import { PortalMaterialsTab }", "<PortalMaterialsTab materials={studentMaterials}", "<PortalMaterialsTab materials={parentMaterials}", "function filterVisibleMaterials"]) && hasAll(portalMaterialsTabSource, ["export function PortalMaterialsTab", "portalMaterialsList", "portalMaterialCard", "materials.length === 0", "rel=\"noreferrer\"", "target=\"_blank\""]) && !portalMaterialsTabSource.includes("fetch(") && !portalMaterialsTabSource.includes("postJson"));
 check("23b static student portal tabs stay extracted and side-effect free", hasAll(app, ["import { StudentEmptyTab, StudentEvaluationTab }", "<StudentEmptyTab message=", "<StudentEvaluationTab />"]) && hasAll(portalStaticTabsSource, ["export function StudentEmptyTab", "emptyPortalPanel", "export function StudentEvaluationTab", "evaluationPanel", "진단평가", "내신기출 모의평가", "배정된 시험이 없습니다."]) && !portalStaticTabsSource.includes("fetch(") && !portalStaticTabsSource.includes("postJson") && !portalStaticTabsSource.includes("useState"));
 check("23c student and parent portal tab bars stay extracted and controlled", hasAll(app, ["import { parentPortalTabs, PortalTabBar, studentPortalTabs }", "<PortalTabBar activeTab={activeTab} onChange={setActiveTab} tabs={studentPortalTabs} />", "className=\"parentTabs\"", "tabs={parentPortalTabs}"]) && hasAll(portalTabBarSource, ["export const studentPortalTabs", "[\"today\", \"오늘\"]", "[\"curriculum\", \"커리큘럼\"]", "export const parentPortalTabs", "[\"reports\", \"보고서\"]", "[\"attendance\", \"출결\"]", "export function PortalTabBar", "activeTab === id", "onChange(id)", "type=\"button\""]) && !portalTabBarSource.includes("useState") && !portalTabBarSource.includes("fetch(") && !portalTabBarSource.includes("postJson"));
+check("23d student and parent report cards share a read-only renderer", hasAll(app, ["import { PortalReportCards }", "<PortalReportCards reports={studentReports.slice(0, 3)} />", "<PortalReportCards reports={studentReports} />", "아직 공개된 리포트 초안이 없습니다.", "아직 발송된 보고서가 없습니다."]) && hasAll(portalReportCardsSource, ["export function PortalReportCards", "reports.map", "className=\"snapshotCard\"", "key={report.reportId}", "{report.title}", "{report.body}"]) && !portalReportCardsSource.includes("useState") && !portalReportCardsSource.includes("fetch(") && !portalReportCardsSource.includes("postJson"));
 check("24 responsive layout principles doc exists", fs.existsSync(path.join(root, "docs", "responsive-layout-principles.md")));
 check("25 ai tools menu replaces ai variant label", hasAll(app, ['id: "aiVariants"', "AIVariantProblemCenter"]));
 check("26 ai variant draft shortcut is removed", !app.includes("variantHeroActions") && app.includes("handleGenerateVariant"));

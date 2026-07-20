@@ -18,6 +18,7 @@ import { StudentManager } from "../domains/students/StudentManager.jsx";
 import { PortalMaterialsTab } from "../domains/portals/PortalMaterialsTab.jsx";
 import { StudentEmptyTab, StudentEvaluationTab } from "../domains/portals/PortalStaticTabs.jsx";
 import { parentPortalTabs, PortalTabBar, studentPortalTabs } from "../domains/portals/PortalTabBar.jsx";
+import { PortalReportCards } from "../domains/portals/PortalReportCards.jsx";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
@@ -21195,12 +21196,7 @@ function StudentPortal({ homeworks, reportSnapshots, students, onStudentCheckHom
       <section className="panel">
         <h2>최근 리포트</h2>
         {studentReports.length === 0 ? <p className="muted">아직 공개된 리포트 스냅샷이 없습니다.</p> : null}
-        {studentReports.slice(0, 3).map((report) => (
-          <article className="snapshotCard" key={report.reportId}>
-            <strong>{report.title}</strong>
-            <p>{report.body}</p>
-          </article>
-        ))}
+        <PortalReportCards reports={studentReports.slice(0, 3)} />
       </section>
     </section>
   );
@@ -21982,12 +21978,7 @@ function ParentPortal({ homeworks, lessons = [], materials = [], records = [], r
             {studentReports.length === 0 ? (
               <div className="emptyPortalPanel">아직 발송된 보고서가 없습니다. 수업 후 선생님이 보고서를 발송하면 여기에 표시됩니다.</div>
             ) : null}
-            {studentReports.map((report) => (
-              <article className="snapshotCard" key={report.reportId}>
-                <strong>{report.title}</strong>
-                <p>{report.body}</p>
-              </article>
-            ))}
+            <PortalReportCards reports={studentReports} />
           </div>
         ) : null}
 
