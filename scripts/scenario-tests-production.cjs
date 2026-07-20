@@ -8,6 +8,7 @@ const schoolCalendarComponentsPath = path.join(root, "src", "domains", "schoolCa
 const schoolCalendarUtilsPath = path.join(root, "src", "domains", "schoolCalendar", "schoolCalendarUtils.js");
 const testManagerPanelsPath = path.join(root, "src", "domains", "tests", "TestManagerPanels.jsx");
 const testManagerUtilsPath = path.join(root, "src", "domains", "tests", "testManagerUtils.js");
+const portalMaterialsTabPath = path.join(root, "src", "domains", "portals", "PortalMaterialsTab.jsx");
 const studentManagerPath = path.join(root, "src", "domains", "students", "StudentManager.jsx");
 const examQuestionClassificationPath = path.join(root, "src", "domains", "exams", "questionClassification.js");
 const examQuestionItemsPath = path.join(root, "src", "domains", "exams", "questionItems.js");
@@ -78,6 +79,7 @@ const schoolCalendarComponentsSource = fs.existsSync(schoolCalendarComponentsPat
 const schoolCalendarUtilsSource = fs.existsSync(schoolCalendarUtilsPath) ? fs.readFileSync(schoolCalendarUtilsPath, "utf8") : "";
 const testManagerPanelsSource = fs.existsSync(testManagerPanelsPath) ? fs.readFileSync(testManagerPanelsPath, "utf8") : "";
 const testManagerUtilsSource = fs.existsSync(testManagerUtilsPath) ? fs.readFileSync(testManagerUtilsPath, "utf8") : "";
+const portalMaterialsTabSource = fs.existsSync(portalMaterialsTabPath) ? fs.readFileSync(portalMaterialsTabPath, "utf8") : "";
 const appWithConfig = `${app}\n${appConfigSource}\n${schoolCalendarComponentsSource}\n${schoolCalendarUtilsSource}\n${testManagerPanelsSource}\n${testManagerUtilsSource}`;
 const apiClientSource = fs.existsSync(apiClientPath) ? fs.readFileSync(apiClientPath, "utf8") : "";
 const appWithApiClient = `${app}\n${apiClientSource}`;
@@ -320,6 +322,7 @@ check("22k exam post form includes all Tally self-check fields", hasAll(examFron
 check("22l exam post form is readable on mobile and tablet", hasAll(css, [".studentExamPostForm > label", "border-left: 4px solid #172554", ".studentPortalTabletFirst .studentExamPostForm .fieldGrid.two", ".studentPortalTabletFirst .examPostChoiceGroup > div", "min-height: 44px"]));
 check("22m exam post submission requires every field before submit", hasAll(app, ["validationMessage", "getMissingRequiredFields", "아직 작성하지 않은 항목이 있습니다", "!selectedFiles.length && !submittedFiles.length", "required value={draft.score}", "required value={draft.goodPart}", "required value={draft.fileMemo}"]) && css.includes(".examPostValidationMessage"));
 check("23 parent portal is mobile first", hasAll(app, ["parentPortalMobileFirst", "parentPortal"]) && css.includes(".parentPortalMobileFirst .metricGrid"));
+check("23a student and parent portals share an extracted read-only materials tab", hasAll(app, ["import { PortalMaterialsTab }", "<PortalMaterialsTab materials={studentMaterials}", "<PortalMaterialsTab materials={parentMaterials}", "function filterVisibleMaterials"]) && hasAll(portalMaterialsTabSource, ["export function PortalMaterialsTab", "portalMaterialsList", "portalMaterialCard", "materials.length === 0", "rel=\"noreferrer\"", "target=\"_blank\""]) && !portalMaterialsTabSource.includes("fetch(") && !portalMaterialsTabSource.includes("postJson"));
 check("24 responsive layout principles doc exists", fs.existsSync(path.join(root, "docs", "responsive-layout-principles.md")));
 check("25 ai tools menu replaces ai variant label", hasAll(app, ['id: "aiVariants"', "AIVariantProblemCenter"]));
 check("26 ai variant draft shortcut is removed", !app.includes("variantHeroActions") && app.includes("handleGenerateVariant"));
