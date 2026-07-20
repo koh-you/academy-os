@@ -9710,6 +9710,7 @@ function NotificationCenter({
   students = []
 }) {
   const [activeNotificationTab, setActiveNotificationTab] = useState(showSpecialLectureTab ? initialNotificationTab : "notice");
+  const [activeSpecialLectureWorkspaceTab, setActiveSpecialLectureWorkspaceTab] = useState("roster");
   const [classFilter, setClassFilter] = useState("all");
   const [deletingJobId, setDeletingJobId] = useState("");
   const [dispatchMessage, setDispatchMessage] = useState("");
@@ -10250,9 +10251,32 @@ function NotificationCenter({
         </button>
       </div>
       ) : null}
+      {activeNotificationTab === "specialLecture" && hideNotificationSectionTabs ? (
+        <div className="notificationSectionTabs specialLectureTopTabs" role="tablist" aria-label="특강관리 작업 구분">
+          <button
+            aria-selected={activeSpecialLectureWorkspaceTab === "roster"}
+            className={activeSpecialLectureWorkspaceTab === "roster" ? "active" : ""}
+            onClick={() => setActiveSpecialLectureWorkspaceTab("roster")}
+            role="tab"
+            type="button"
+          >
+            특강 수업
+          </button>
+          <button
+            aria-selected={activeSpecialLectureWorkspaceTab === "guide"}
+            className={activeSpecialLectureWorkspaceTab === "guide" ? "active" : ""}
+            onClick={() => setActiveSpecialLectureWorkspaceTab("guide")}
+            role="tab"
+            type="button"
+          >
+            특강 안내문
+          </button>
+        </div>
+      ) : null}
 
       {activeNotificationTab === "specialLecture" ? (
         <SpecialLectureNoticePanel
+          activeWorkspaceTab={activeSpecialLectureWorkspaceTab}
           applications={specialLectureApplications}
           enrollments={specialLectureEnrollments}
           guides={specialLectureGuides}
@@ -10552,6 +10576,7 @@ function NotificationCenter({
 }
 
 function SpecialLectureNoticePanel({
+  activeWorkspaceTab = "roster",
   applications = [],
   enrollments = [],
   guides = defaultSpecialLectureGuides,
@@ -10577,7 +10602,6 @@ function SpecialLectureNoticePanel({
   const [managementGuideId, setManagementGuideId] = useState("");
   const [isScheduleBuilderOpen, setIsScheduleBuilderOpen] = useState(false);
   const [isSessionPlanOpen, setIsSessionPlanOpen] = useState(false);
-  const [activeSpecialLectureWorkspaceTab, setActiveSpecialLectureWorkspaceTab] = useState("roster");
   const primaryGuides = draftGuides.filter(isSpecialLecturePrimaryGuide);
   const storedGuides = draftGuides.filter((guide) => !isSpecialLecturePrimaryGuide(guide));
   const selectedGuide = draftGuides.find((guide) => guide.specialLectureGuideId === selectedGuideId) ?? null;
@@ -10627,6 +10651,14 @@ function SpecialLectureNoticePanel({
   useEffect(() => {
     if (selectedGuide && !isSpecialLecturePrimaryGuide(selectedGuide)) setShowStoredGuides(true);
   }, [selectedGuide]);
+
+  function selectSpecialLectureGuide(guideId) {
+    const nextGuideId = String(guideId ?? "").trim();
+    if (!nextGuideId || !draftGuides.some((guide) => guide.specialLectureGuideId === nextGuideId)) return;
+    setSelectedGuideId(nextGuideId);
+    setPanelMessage("");
+    setCopyMessage("");
+  }
 
   function updateSelectedGuide(field, value) {
     if (!selectedGuide) return;
@@ -10915,36 +10947,13 @@ function SpecialLectureNoticePanel({
 
   return (
     <section className="notificationPanel specialLecturePanel">
-      <div className="specialLectureWorkspaceTabs" role="tablist" aria-label="특강관리 작업 구분">
-        <button
-          aria-selected={activeSpecialLectureWorkspaceTab === "roster"}
-          className={activeSpecialLectureWorkspaceTab === "roster" ? "active" : ""}
-          onClick={() => setActiveSpecialLectureWorkspaceTab("roster")}
-          role="tab"
-          type="button"
-        >
-          <strong>특강 수업</strong>
-          <span>Tally/수동 접수·학생별 회차·특강 진행</span>
-        </button>
-        <button
-          aria-selected={activeSpecialLectureWorkspaceTab === "guide"}
-          className={activeSpecialLectureWorkspaceTab === "guide" ? "active" : ""}
-          onClick={() => setActiveSpecialLectureWorkspaceTab("guide")}
-          role="tab"
-          type="button"
-        >
-          <strong>특강 안내문</strong>
-          <span>소개·일정·수강료·공개 미리보기</span>
-        </button>
-      </div>
-
       <div className="sectionHeader slim">
         <div>
           <p className="eyebrow">SPECIAL LECTURE</p>
-          <h2>{activeSpecialLectureWorkspaceTab === "guide" ? "특강 안내문" : "특강 수업"}</h2>
+          <h2>{activeWorkspaceTab === "guide" ? "특강 안내문" : "특강 수업"}</h2>
         </div>
         <div className="specialLectureHeaderActions">
-          {activeSpecialLectureWorkspaceTab === "guide" ? (
+          {activeWorkspaceTab === "guide" ? (
             <>
               <button className="softButton compact" onClick={createNewGuide} type="button">새 특강 만들기</button>
               <InlineSaveStatus label="특강 안내문" saveState={saveState} />
@@ -10957,7 +10966,7 @@ function SpecialLectureNoticePanel({
       </div>
 
       <SpecialLectureGuideSelector
-        onSelectGuide={setSelectedGuideId}
+        onSelectGuide={selectSpecialLectureGuide}
         onToggleStoredGuides={() => setShowStoredGuides((current) => !current)}
         primaryGuides={primaryGuides}
         selectedGuideId={selectedGuideId}
@@ -10965,7 +10974,7 @@ function SpecialLectureNoticePanel({
         storedGuides={storedGuides}
       />
 
-      {activeSpecialLectureWorkspaceTab === "roster" ? (
+      {activeWorkspaceTab === "roster" ? (
         <SpecialLectureApplicationPanel
         applications={applications}
         enrollments={enrollments}
@@ -10984,7 +10993,7 @@ function SpecialLectureNoticePanel({
       />
       ) : null}
 
-      {activeSpecialLectureWorkspaceTab === "guide" && selectedGuide ? (
+      {activeWorkspaceTab === "guide" && selectedGuide ? (
       <div className="specialLectureEditorGrid">
         <div className="specialLectureEditor">
           <div className="noticeBox specialLectureNoticeBox">
@@ -11074,7 +11083,7 @@ function SpecialLectureNoticePanel({
 
         <SpecialLecturePreviewColumn guide={selectedGuide} guideUrl={selectedGuideUrl} />
       </div>
-      ) : activeSpecialLectureWorkspaceTab === "guide" ? (
+      ) : activeWorkspaceTab === "guide" ? (
         <SpecialLectureNoSelection />
       ) : null}
     </section>

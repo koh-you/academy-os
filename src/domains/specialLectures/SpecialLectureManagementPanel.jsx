@@ -497,12 +497,14 @@ export function SpecialLectureGuideSelector({
     const status = getSpecialLectureStatusBadge(guide);
     return (
       <button
+        aria-pressed={guide.specialLectureGuideId === selectedGuideId}
         className={[
           guide.specialLectureGuideId === selectedGuideId ? "active" : "",
           extraClass
         ].filter(Boolean).join(" ")}
         key={guide.specialLectureGuideId}
         onClick={() => onSelectGuide?.(guide.specialLectureGuideId)}
+        data-guide-id={guide.specialLectureGuideId}
         type="button"
       >
         <span className={`specialLectureStatusPill ${status.tone}`}>{status.label}</span>
