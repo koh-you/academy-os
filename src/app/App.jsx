@@ -17,6 +17,7 @@ import {
 import { StudentManager } from "../domains/students/StudentManager.jsx";
 import { PortalMaterialsTab } from "../domains/portals/PortalMaterialsTab.jsx";
 import { StudentEmptyTab, StudentEvaluationTab } from "../domains/portals/PortalStaticTabs.jsx";
+import { parentPortalTabs, PortalTabBar, studentPortalTabs } from "../domains/portals/PortalTabBar.jsx";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
@@ -21309,20 +21310,7 @@ function StudentPortalV2({
       </div>
 
       <section className="panel studentWorkPanel">
-        <div className="portalTabs">
-          {[
-            ["today", "오늘"],
-            ["all", "전체"],
-            ["materials", "자료함"],
-            ["evaluation", "평가"],
-            ["mypage", "마이 페이지"],
-            ["curriculum", "커리큘럼"]
-          ].map(([id, label]) => (
-            <button className={activeTab === id ? "active" : ""} key={id} onClick={() => setActiveTab(id)} type="button">
-              {label}
-            </button>
-          ))}
-        </div>
+        <PortalTabBar activeTab={activeTab} onChange={setActiveTab} tabs={studentPortalTabs} />
 
         {activeTab === "today" ? (
           <StudentTodayTab
@@ -21975,20 +21963,7 @@ function ParentPortal({ homeworks, lessons = [], materials = [], records = [], r
       </header>
 
       <section className="panel studentWorkPanel">
-        <div className="portalTabs parentTabs">
-          {[
-            ["alerts", "알림"],
-            ["reports", "보고서"],
-            ["homework", "숙제"],
-            ["materials", "자료함"],
-            ["attendance", "출결"],
-            ["curriculum", "커리큘럼"]
-          ].map(([id, label]) => (
-            <button className={activeTab === id ? "active" : ""} key={id} onClick={() => setActiveTab(id)} type="button">
-              {label}
-            </button>
-          ))}
-        </div>
+        <PortalTabBar activeTab={activeTab} className="parentTabs" onChange={setActiveTab} tabs={parentPortalTabs} />
 
         {activeTab === "alerts" ? (
           <div className="portalNoticeStack">
