@@ -118,6 +118,8 @@
 
 11B-7에서는 학생·학부모 pair 예약의 대상·학생 검증, 기존 활성 안내 취소, 공통 시각 job 생성과 병렬 예약을 같은 모듈로 분리했다. 대상별 서로 다른 payload 필드도 fixture로 고정했다.
 
+11B-8에서는 개별 control 취소 가능성 검증, 기존 취소 wrapper 호출, 결과 조립을 같은 모듈로 분리했다. 실제 취소 함수는 주입하며 fixture만 실행했다.
+
 - builder 추출에 `/api/notification-jobs/*`, `setNotificationJobs`, Solapi 호출이 함께 이동함.
 - 학생/학부모 번호 또는 `notificationType`이 바뀜.
 - 선생님 수정본보다 설정 템플릿/자동 seed가 우선함.

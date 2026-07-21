@@ -43,6 +43,7 @@ import {
   sortNotificationJobsForCurrentStatus
 } from "../domains/notifications/notificationJobSelectors.js";
 import {
+  cancelSupplementNotificationControlRequest,
   reserveSupplementScheduleNoticeJobRequest,
   reserveSupplementScheduleNoticesRequest,
   reserveSupplementStudentReminderJobRequest
@@ -8015,15 +8016,11 @@ export function App() {
   }
 
   async function handleCancelSupplementNotificationControl(notificationJob) {
-    if (!notificationJob || !canCancelNotificationJob(notificationJob)) {
-      throw new Error("현재 취소할 수 있는 Solapi 예약이 없습니다.");
-    }
-    const result = await handleCancelNotificationJob(notificationJob, "보충관리 개별 알림톡 예약 취소");
-    return {
-      notificationJob: result.notificationJob,
-      status: result.notificationJob?.status || "canceled",
-      message: "Solapi 예약을 취소했습니다."
-    };
+    return cancelSupplementNotificationControlRequest({
+      canCancelNotificationJob,
+      cancelNotificationJob: handleCancelNotificationJob,
+      notificationJob
+    });
   }
 
   function persistSupplementScheduleNoticeFailure(notificationJob, messagePrefix, errorMessage) {
