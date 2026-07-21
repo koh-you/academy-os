@@ -60,6 +60,7 @@ import { SupplementTaskSourceContext } from "../domains/supplements/SupplementTa
 import { SupplementTaskScheduleEditor } from "../domains/supplements/SupplementTaskScheduleEditor.jsx";
 import { SupplementTaskSaveSummary, SupplementTaskScheduleGateNote } from "../domains/supplements/SupplementTaskSaveSummary.jsx";
 import { SupplementTaskCardHeader } from "../domains/supplements/SupplementTaskCardHeader.jsx";
+import { SupplementTaskActionBar } from "../domains/supplements/SupplementTaskActionBar.jsx";
 import {
   getSupplementImmediateNoticeSaveStatus,
   getSupplementNotificationControlDisplay
@@ -23261,35 +23262,21 @@ function SupplementStudentModal({
                     isScheduleChangeMode={isScheduleChangeMode}
                     title={scheduleGateTitle}
                   />
-                  <div className="modalActions supplementSplitActions supplementTaskActions">
-                    {canCancelAbsenceSource ? (
-                      <button
-                        className="dangerSoftButton"
-                        disabled={isTaskBusy}
-                        onClick={() => handleCancelAbsenceSourceTask(task)}
-                        type="button"
-                      >
-                        {isCancelAbsenceBusy ? "취소 중" : "결석 처리 취소"}
-                      </button>
-                    ) : null}
-                    <button className="softButton primarySoft" disabled={isTaskBusy} onClick={() => handleSaveTask(task)} type="button">
-                      {isContentBusy ? "저장 중" : "보충 내용·알림톡 저장"}
-                    </button>
-                    <button className="softButton scheduleApplyButton" disabled={isTaskBusy || !hasScheduleDraft} onClick={() => requestApplyScheduleTask(task)} type="button">
-                      {isScheduleBusy ? "일정 저장 중" : task.linkedLessonId ? "수업일지 일정 변경" : "수업일지 일정 만들기"}
-                    </button>
-                    {!isLocalDraftTask ? (
-                      <button
-                        className="passButton"
-                        disabled={isTaskBusy}
-                        onClick={() => setPassConfirmTask(buildTaskWithDraft(task))}
-                        title="보충 완료 처리"
-                        type="button"
-                      >
-                        {busyTaskId === `${task.makeupTaskId}:pass` ? "처리 중" : "보충 완료 처리"}
-                      </button>
-                    ) : null}
-                  </div>
+                  <SupplementTaskActionBar
+                    canCancelAbsenceSource={canCancelAbsenceSource}
+                    hasScheduleDraft={hasScheduleDraft}
+                    isCancelAbsenceBusy={isCancelAbsenceBusy}
+                    isContentBusy={isContentBusy}
+                    isLocalDraftTask={isLocalDraftTask}
+                    isPassBusy={busyTaskId === `${task.makeupTaskId}:pass`}
+                    isScheduleBusy={isScheduleBusy}
+                    isTaskBusy={isTaskBusy}
+                    linkedLessonId={task.linkedLessonId}
+                    onCancelAbsenceSource={() => handleCancelAbsenceSourceTask(task)}
+                    onPass={() => setPassConfirmTask(buildTaskWithDraft(task))}
+                    onSave={() => handleSaveTask(task)}
+                    onSchedule={() => requestApplyScheduleTask(task)}
+                  />
                 </article>
               );
             })}

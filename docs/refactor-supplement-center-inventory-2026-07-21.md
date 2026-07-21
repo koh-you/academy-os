@@ -40,8 +40,9 @@
 8. 완료: 방법·날짜·시간 local draft controlled editor를 분리했다.
 9. 완료: 변경 diff·저장 상태·저장/일정 gate 안내 표시를 분리했다.
 10. 완료: task 카드 상단 메타를 읽기 전용 컴포넌트로 분리했다.
-11. 다음: task 카드 하단 action bar를 callback-only 표시로 분리한다.
-12. `SupplementStudentModal` 전체와 실제 저장·예약 orchestration은 위 조각 분리 이후 별도 gate로 판단한다.
+11. 완료: task 카드 하단 action bar를 callback-only 표시로 분리했다.
+12. 다음: 분리된 조각을 감싸는 task 카드 또는 modal shell 경계를 검토한다.
+13. `SupplementStudentModal` 전체와 실제 저장·예약 orchestration은 위 조각 분리 이후 별도 gate로 판단한다.
 
 ## 12B 구현 결과 — 완료 확인 모달
 
@@ -105,6 +106,12 @@
 - 유형·처리 메타, 수정 중/알림 문구 저장 완료, 결석 사유, 최근 보충 숙제, 연결 수업일지 표시를 `SupplementTaskCardHeader.jsx`로 옮겼다.
 - 유형 label과 문구 저장 완료 여부는 App에서 기존 방식으로 계산해 전달한다.
 - header는 task를 읽어 조건부 표시만 하며 callback·hook·API·알림 side effect를 소유하지 않는다.
+
+## 12L 구현 결과 — task action bar
+
+- 결석 처리 취소, 보충 내용·알림톡 저장, 수업일지 일정 만들기/변경, 보충 완료 처리 버튼을 `SupplementTaskActionBar.jsx`로 옮겼다.
+- App이 busy/local draft/일정 여부를 전달하고 네 기존 handler를 callback으로 연결한다.
+- action bar는 버튼 문구·disabled·조건부 노출만 소유하며 API·React state·알림 orchestration을 직접 소유하지 않는다.
 
 ## 즉시 중단 조건
 

@@ -348,6 +348,14 @@
 - 운영 저장 검증: `special_lecture_enrollments` 재조회에서 중3 신초봄은 active 5회, 각 13:00~15:00이고 고3 enrollment는 canceled 0회다. 1~5회차 lessons 모두 중3 ID/13:00~15:00을 포함하고 고3 ID는 없다. 1회차 기존 출결·수업기록은 저장 전후 2건, `notification_jobs`는 0건으로 유지됐다.
 - 사람 gate: 배포 후 클리닉 특강 명단에서 `창일중 · 중3` 신초봄이 1~5회차, 각 13:00~15:00으로 보이는지 확인한다. 잘못 입력한 고3 enrollment는 활성 수강 명단에서 제외되어야 한다. 1회차 수업일지에는 신초봄 행이 추가되되 기존 학생의 출결·시간은 그대로여야 한다.
 - 중단 조건: 올바른 신초봄 원천이 불명확함, 기존 학생이 빠짐, 기존 학생 시간이 바뀜, 출결 record가 자동 생성/변경됨, 알림톡 예약/발송 발생, Supabase 재조회 불일치인데 완료 표시, 새로고침 후 공통 시간이 사라짐.
+## 2026-07-21 P1. 12L 보충 task action bar 분리
+
+- 상태: 결석 처리 취소, 보충 내용·알림톡 저장, 수업일지 일정 만들기/변경, 보충 완료 처리 버튼을 `SupplementTaskActionBar.jsx`로 분리했다.
+- 동작 보존: App이 busy/local draft/일정 존재 여부를 계산하고 네 callback을 전달한다. local draft에서는 완료 버튼을 숨기고 일정이 비면 일정 버튼을 막는 기존 계약과 모든 문구를 유지한다.
+- 저장 원천/side effect: action bar는 callback만 호출하며 실제 결석 취소·task 저장·일정 확인 modal·완료 확인 modal state와 API/알림 orchestration은 App에 남아 있다.
+- 검증/gate: production 88/88b/88b-12가 기존 local draft 흐름, disabled 조건, 네 callback 연결과 hook/API 비소유를 검사한다. 추가 사람 gate는 없다.
+- 다음 단위: 최신 `origin/main` rebase 후 분리된 조각을 감싸는 task 카드 또는 modal shell 경계를 검토한다.
+
 ## 2026-07-21 P1. 12K 보충 task 카드 상단 메타 분리
 
 - 상태: task 유형·처리 메타, 수정 중/알림 문구 저장 완료, 결석 사유, 최근 보충 숙제, 연결 수업일지 표시를 `SupplementTaskCardHeader.jsx`로 분리했다.
