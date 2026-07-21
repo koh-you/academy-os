@@ -2,6 +2,7 @@ import {
   buildSupplementScheduleNoticeJob,
   buildSupplementStudentReminderJob,
   getNextHourlyAlimtalkReservationAt,
+  getSupplementStudentReminderJobId,
   getSupplementStudentReminderScheduledAt,
   isSupplementStudentReminderTask
 } from "./supplementJobBuilders.js";
@@ -84,6 +85,28 @@ export async function reserveSupplementNotificationControlRequest({
   );
   if (result.status !== "scheduled") throw new Error(result.message || "알림톡을 예약하지 못했습니다.");
   return result;
+}
+
+export async function cancelSupplementStudentReminderRequest({
+  cancelNotificationJob,
+  isActiveNotificationJob,
+  notificationJobs = [],
+  onError = () => {},
+  reason = "보충 완료 처리",
+  task
+} = {}) {
+  if (!isSupplementStudentReminderTask(task)) return null;
+  const notificationJobId = getSupplementStudentReminderJobId(task);
+  if (!notificationJobId) return null;
+  const existingJob = notificationJobs.find((job) => job.notificationJobId === notificationJobId);
+  if (existingJob && !isActiveNotificationJob(existingJob)) return existingJob;
+  try {
+    const result = await cancelNotificationJob(existingJob || { notificationJobId }, reason);
+    return result.notificationJob ?? null;
+  } catch (error) {
+    onError(error);
+    return null;
+  }
 }
 
 export async function cancelSupplementNotificationControlRequest({
