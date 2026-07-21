@@ -116,7 +116,7 @@
 - 예약 시각 안전장치: 기존 보충 다음 정각 안내와 같은 계산을 재사용한다. 다음 정각까지 5분 미만이면 Solapi 예약 여유를 위해 그다음 정각을 사용한다.
 - 저장/UI 결과: 결석 확인 버튼은 `저장 후 다음 정각 알림톡 예약`, 나머지 출결은 `저장 후 출결 알림톡 즉시 발송`으로 실제 범위를 표시한다. 결석 row 저장 후 예약이 실패하면 모달과 입력을 유지하고 `결석 출결은 저장됐지만 ... 예약에 실패`한 부분 성공을 표시한다. 생성된 예약 job은 현재 알림관리 React 상태에도 반영한다.
 - 원천/외부 영향: 직접 원천은 Supabase `lesson_student_records`, 예약 원천은 `notification_jobs`, 외부 side effect는 Solapi 예약이다. 실제 본문은 출결 템플릿의 `buildAttendanceBody` 결과를 `previewBody`와 예약 payload에 함께 사용한다. 새 SQL은 없다. 자동검증 중 운영 출결 row나 실제 Solapi 예약은 만들지 않았다.
-- AI 검증: `git diff --check`, `node --check api/server.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 355/355, `npm run build`를 통과했다. 기존 Vite 500KB chunk 경고만 남는다.
+- AI 검증: `git diff --check`, `node --check api/server.js`, `node --check api/routes/notifications.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 355/355, `npm run build`를 통과했다. 운영 Render의 읽기 전용 `/health`에서 새 서버 계약을 구분할 수 있도록 `manualAbsenceAttendanceDelivery=next_available_hour` feature marker도 추가했다. 기존 Vite 500KB chunk 경고만 남는다.
 - 사람 검토 gate: 삭제/취소 가능한 미래 테스트 수업과 통제된 학부모 번호로 학생 한 명의 결석 모달을 연다. `저장 후 다음 정각 알림톡 예약` 문구와 예약 안내를 확인한 뒤 승인하면 `lesson_student_records.attendance_status=absent`, `notification_jobs`의 `attendance` row, Solapi 예약 그룹의 수신번호·예약시각·본문이 모두 일치해야 한다. 알림관리 새로고침 후 예약 행이 유지되는지 확인하고 필요하면 발송 시각 전에 UI의 실제 Solapi 취소 흐름으로 취소한다. 등원·지각·하원 버튼은 즉시 발송 문구를 유지해야 한다.
 - 중단 조건: 결석 알림이 즉시 발송됨, 출결 저장 실패인데 예약이 생성됨, OS row와 Solapi 그룹의 수신번호·예약시각·본문이 다름, 예약 실패인데 모달이 닫힘, 같은 결석 저장으로 중복 그룹이 생김, 등원·지각·하원까지 정각 예약으로 바뀌면 다음 출결/알림 작업을 중단한다.
 

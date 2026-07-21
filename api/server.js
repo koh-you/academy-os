@@ -5474,7 +5474,13 @@ const server = http.createServer(async (request, response) => {
   }
 
   if (request.method === "GET" && requestUrl.pathname === "/health") {
-    sendJson(request, response, 200, { ok: true, service: "academy-os-api" });
+    sendJson(request, response, 200, {
+      features: {
+        manualAbsenceAttendanceDelivery: "next_available_hour"
+      },
+      ok: true,
+      service: "academy-os-api"
+    });
     return;
   }
 
