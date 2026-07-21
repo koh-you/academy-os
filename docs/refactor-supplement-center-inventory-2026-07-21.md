@@ -42,8 +42,9 @@
 10. 완료: task 카드 상단 메타를 읽기 전용 컴포넌트로 분리했다.
 11. 완료: task 카드 하단 action bar를 callback-only 표시로 분리했다.
 12. 완료: 분리된 일곱 조각을 감싸는 `SupplementTaskCard` 조립 경계를 만들었다.
-13. 다음: App에 남은 task별 표시 계산을 순수 view-model helper로 분리할 수 있는지 검토한다.
-14. `SupplementStudentModal` 전체와 실제 저장·예약 orchestration은 위 조각 분리 이후 별도 gate로 판단한다.
+13. 완료: 알림 draft config·선생님 최종본 판정·task→draft·dirty/diff·source version/fingerprint·persistable 변환을 순수 모델로 분리했다.
+14. 다음: App에 남은 task별 표시 계산을 순수 view-model helper로 한 단위씩 분리한다.
+15. `SupplementStudentModal` 전체와 실제 저장·예약 orchestration은 위 조각 분리 이후 별도 gate로 판단한다.
 
 ## 12B 구현 결과 — 완료 확인 모달
 
@@ -119,6 +120,13 @@
 - `SupplementTaskCard.jsx`가 header, source context, schedule editor, save summary, notification workspace, schedule gate, action bar를 기존 순서로 조립한다.
 - App은 task별 표시 계산과 local draft/action callback을 객체 props로 전달하므로 state·저장·알림 경계는 이동하지 않았다.
 - 새 wrapper에는 hook/API/`notification_jobs`/Solapi 참조가 없고 DOM class도 기존 `taskCard`를 유지한다.
+
+## 12N 구현 결과 — task local draft 순수 모델
+
+- 세 알림 문구 config와 선생님 최종본 field 집합, edited field 정리·병합을 `supplementTaskDraft.js`로 옮겼다.
+- task의 저장값과 자동 문구 seed를 local draft로 조립하고, dirty 비교·표시 diff·source version·저장 재조회 fingerprint·persistable 객체 변환을 같은 순수 경계로 옮겼다.
+- 알림 문구 생성과 보충 방법 normalize는 App 함수를 의존성으로 주입해 기존 문구 원천과 동작을 유지한다.
+- fixture와 production check는 빈 선생님 최종본 보호, 세 독립 문구, diff 순서, fingerprint 안정성 및 React/API/`notification_jobs`/Solapi 비소유를 고정한다.
 
 ## 즉시 중단 조건
 
