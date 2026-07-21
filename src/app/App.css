@@ -8994,6 +8994,96 @@ button:disabled {
   padding: 14px;
 }
 
+/* Keep the recipient picker dense without changing shared form controls. */
+.noticeComposerPanel {
+  gap: 10px;
+  padding: 14px;
+}
+
+.noticeComposerPanel > .sectionHeader .eyebrow {
+  font-size: 11px;
+  margin-bottom: 3px;
+}
+
+.noticeComposerPanel > .sectionHeader h2 {
+  font-size: 22px;
+}
+
+.noticeTargetPanel {
+  align-content: start;
+  gap: 9px;
+}
+
+.noticeTargetPanel .noticeModeTabs.compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.noticeTargetPanel .noticeModeTabs.compact button {
+  flex: 1 1 86px;
+  min-height: 34px;
+  padding: 6px 10px;
+}
+
+.noticeTargetPanel .noticeModeTabs.compact strong {
+  font-size: 13px;
+}
+
+.noticeTargetPanel .noticeFilterGrid label {
+  font-size: 12px;
+  gap: 4px;
+}
+
+.noticeTargetPanel .noticeFilterGrid input,
+.noticeTargetPanel .noticeFilterGrid select {
+  font-size: 14px;
+  min-height: 38px;
+  padding: 0 11px;
+}
+
+.noticeTargetPanel .noticeTargetSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.noticeTargetPanel .noticeTargetSummary div {
+  align-items: center;
+  display: flex;
+  flex: 1 1 110px;
+  gap: 6px;
+  justify-content: space-between;
+  min-height: 36px;
+  padding: 7px 9px;
+}
+
+.noticeTargetPanel .noticeTargetSummary strong {
+  font-size: 15px;
+}
+
+.noticeTargetPanel .noticeStudentPicker {
+  gap: 5px;
+  max-height: 430px;
+  padding: 7px;
+}
+
+.noticeTargetPanel .noticeStudentOption {
+  gap: 7px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  min-height: 54px;
+  padding: 7px 9px;
+}
+
+.noticeTargetPanel .noticeRecipientBadges {
+  grid-column: auto;
+  justify-content: flex-end;
+}
+
+.noticeTargetPanel .noticeRecipientBadges small {
+  padding: 3px 6px;
+}
+
 .specialLectureCalculator.collapsed {
   gap: 8px;
 }
@@ -17985,10 +18075,17 @@ body.attendanceOnlyBody {
   .notificationLessonItem,
   .noticeComposerGrid,
   .noticeFilterGrid,
-  .noticeModeTabs,
-  .noticeScheduleGrid,
-  .noticeTargetSummary {
+  .noticeScheduleGrid {
     grid-template-columns: 1fr;
+  }
+
+  .noticeTargetPanel .noticeStudentOption {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .noticeTargetPanel .noticeRecipientBadges {
+    grid-column: 2;
+    justify-content: flex-start;
   }
 
   .specialLectureEnrollmentCard,
