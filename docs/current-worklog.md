@@ -348,6 +348,14 @@
 - 운영 저장 검증: `special_lecture_enrollments` 재조회에서 중3 신초봄은 active 5회, 각 13:00~15:00이고 고3 enrollment는 canceled 0회다. 1~5회차 lessons 모두 중3 ID/13:00~15:00을 포함하고 고3 ID는 없다. 1회차 기존 출결·수업기록은 저장 전후 2건, `notification_jobs`는 0건으로 유지됐다.
 - 사람 gate: 배포 후 클리닉 특강 명단에서 `창일중 · 중3` 신초봄이 1~5회차, 각 13:00~15:00으로 보이는지 확인한다. 잘못 입력한 고3 enrollment는 활성 수강 명단에서 제외되어야 한다. 1회차 수업일지에는 신초봄 행이 추가되되 기존 학생의 출결·시간은 그대로여야 한다.
 - 중단 조건: 올바른 신초봄 원천이 불명확함, 기존 학생이 빠짐, 기존 학생 시간이 바뀜, 출결 record가 자동 생성/변경됨, 알림톡 예약/발송 발생, Supabase 재조회 불일치인데 완료 표시, 새로고침 후 공통 시간이 사라짐.
+## 2026-07-21 P1. 12P 보충 알림 control 순수 view-model 분리
+
+- 상태: 개별 학생/학부모 일정·학생 11시 control의 config, 예약 차단 사유, 과거 이력 preview 우선순위, 수신 번호 선택, 예약/취소 가능 여부와 저장 문구 차이 판정을 `supplementNotificationControlModel.js`로 분리했다.
+- 동작 보존: App이 현재 task/job, 현재 저장 원천으로 생성한 preview와 취소 가능 판정·문구 normalize 함수를 전달한다. 예약/취소 handler, busy/feedback state와 job status patch는 App에 그대로 남는다.
+- 저장 원천/side effect: 새 모델은 순수 계산만 수행하며 API, Supabase, `notification_jobs` 갱신, Solapi 호출이 없다.
+- 검증/gate: fixture가 차단 우선순위, 빈 선생님 최종본, 일정 누락, scheduled/queued/sent/canceled/failed preview·가능 여부, 대상 번호와 문구 diff를 고정한다. production 380/380과 build가 통과했으며 추가 사람 gate·유료 호출은 없다.
+- 다음 단위: 최신 `origin/main` rebase 후 `SupplementStudentModal` shell을 state/action 소유권 그대로 분리할 수 있는지 검토한다.
+
 ## 2026-07-21 P1. 12O 보충 task 카드 순수 view-model 분리
 
 - 상태: task 카드의 원천 표시 props, 방법·일정 editor 값, 메타 문자열, 일정/알림 diff 판정, 저장 상태와 최초 확정·변경 gate 문구를 `supplementTaskCardModel.js`로 분리했다.

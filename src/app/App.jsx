@@ -55,6 +55,7 @@ import { SupplementPassConfirmModal } from "../domains/supplements/SupplementPas
 import { SupplementScheduleChangeConfirmModal } from "../domains/supplements/SupplementScheduleChangeConfirmModal.jsx";
 import { SupplementHistoryModal } from "../domains/supplements/SupplementHistoryModal.jsx";
 import { SupplementNotificationControlModal } from "../domains/supplements/SupplementNotificationControlModal.jsx";
+import { createSupplementNotificationControlViewModel } from "../domains/supplements/supplementNotificationControlModel.js";
 import { SupplementTaskCard } from "../domains/supplements/SupplementTaskCard.jsx";
 import { createSupplementTaskCardViewModel } from "../domains/supplements/supplementTaskCardModel.js";
 import {
@@ -22894,9 +22895,6 @@ function SupplementStudentModal({
   const notificationControlTask = notificationControl
     ? tasks.find((task) => task.makeupTaskId === notificationControl.taskId) ?? null
     : null;
-  const notificationControlConfig = notificationControl
-    ? supplementNotificationControlConfig[notificationControl.controlType]
-    : null;
   const notificationControlJob = notificationControlTask && notificationControl
     ? getSupplementNotificationControlJob(notificationControlTask, notificationJobs, notificationControl.controlType)
     : null;
@@ -22909,29 +22907,6 @@ function SupplementStudentModal({
       student,
       normalizedNotificationTemplates
     ).length);
-  const notificationControlHasEmptyFinalDraft = Boolean(
-    notificationControlTask &&
-    notificationControl &&
-    isSupplementTeacherEditedField(
-      notificationControlTask,
-      getSupplementNotificationDraftFieldForControl(notificationControl.controlType)
-    ) &&
-    !String(
-      notificationControlTask[getSupplementNotificationDraftFieldForControl(notificationControl.controlType)] ?? ""
-    ).trim()
-  );
-  const notificationControlBlockReason = !notificationControlTask?.linkedLessonId
-    ? "수업일지 일정을 먼저 만들어야 알림톡을 예약할 수 있습니다."
-    : notificationControlHasUnsavedChanges
-      ? "수정 중인 보충 내용·일정을 먼저 저장해야 현재 원본으로 알림톡을 예약할 수 있습니다."
-      : notificationControlHasEmptyFinalDraft
-        ? "선생님 최종 알림톡 문구가 비어 있습니다. 문구를 입력하고 저장한 뒤 예약해 주세요."
-      : !notificationControlTask.scheduledDate || !notificationControlTask.scheduledTime
-        ? "저장된 보충 날짜와 시간이 없습니다."
-        : "";
-  const notificationControlHasHistoricalJob = Boolean(
-    notificationControlJob && ["canceled", "failed"].includes(notificationControlJob.status)
-  );
   const notificationControlCurrentPreview = notificationControlTask && notificationControl
     ? notificationControl.controlType === "studentReminder"
       ? createSupplementTaskDraft(notificationControlTask, student, normalizedNotificationTemplates).notificationDraft
@@ -22942,33 +22917,26 @@ function SupplementStudentModal({
           normalizedNotificationTemplates
         )
     : "";
-  const notificationControlPreview = notificationControlTask && notificationControl
-    ? notificationControlHasHistoricalJob
-      ? notificationControlCurrentPreview
-      : notificationControlJob?.previewBody || notificationControlCurrentPreview
-    : "";
-  const notificationControlPreviewLabel = notificationControlJob?.status === "sent"
-    ? "발송된 문구"
-    : notificationControlHasHistoricalJob
-      ? "다시 예약할 현재 문구"
-      : notificationControlJob
-        ? "현재 예약 문구"
-        : "예약할 현재 문구";
-  const notificationControlSavedDraftDiffers = Boolean(
-    notificationControlJob &&
-    canCancelNotificationJob(notificationControlJob) &&
-    normalizeMessageText(notificationControlJob.previewBody || "").trim() !==
-      normalizeMessageText(notificationControlCurrentPreview || "").trim()
-  );
-  const notificationControlRecipient = notificationControlTask && notificationControl
-    ? notificationControl.controlType === "parentSchedule" ? student.parentPhone : student.studentPhone
-    : "";
-  const canCancelNotificationControl = Boolean(notificationControlJob && canCancelNotificationJob(notificationControlJob));
-  const canReserveNotificationControl = Boolean(
-    notificationControlTask &&
-    !notificationControlBlockReason &&
-    (!notificationControlJob || ["canceled", "failed"].includes(notificationControlJob.status))
-  );
+  const notificationControlViewModel = createSupplementNotificationControlViewModel({
+    controlType: notificationControl?.controlType,
+    currentPreview: notificationControlCurrentPreview,
+    hasUnsavedChanges: notificationControlHasUnsavedChanges,
+    job: notificationControlJob,
+    student,
+    task: notificationControlTask
+  }, {
+    canCancelJob: canCancelNotificationJob,
+    normalizeMessage: normalizeMessageText
+  });
+  const notificationControlConfig = notificationControlViewModel.config;
+  const notificationControlBlockReason = notificationControlViewModel.blockReason;
+  const notificationControlHasHistoricalJob = notificationControlViewModel.hasHistoricalJob;
+  const notificationControlPreview = notificationControlViewModel.preview;
+  const notificationControlPreviewLabel = notificationControlViewModel.previewLabel;
+  const notificationControlSavedDraftDiffers = notificationControlViewModel.savedDraftDiffers;
+  const notificationControlRecipient = notificationControlViewModel.recipient;
+  const canCancelNotificationControl = notificationControlViewModel.canCancel;
+  const canReserveNotificationControl = notificationControlViewModel.canReserve;
 
   async function handleNotificationControlAction(action) {
     if (!notificationControlTask || !notificationControl || notificationControlBusy) return;
@@ -26501,12 +26469,6 @@ function getSupplementScheduleNoticeDraft(task = {}, target = "student", previou
   if (isSupplementTeacherEditedField(task, field)) return String(task[field] ?? "");
   return buildSupplementScheduleNoticeBody(task, previousScheduleText, notificationTemplates);
 }
-
-const supplementNotificationControlConfig = {
-  studentSchedule: { label: "학생 알림톡", targetLabel: "학생", statusField: "studentChangeNotice" },
-  parentSchedule: { label: "학부모 알림톡", targetLabel: "학부모", statusField: "parentChangeNotice" },
-  studentReminder: { label: "당일 학생 11시 알림톡", targetLabel: "학생", statusField: "studentReminder" }
-};
 
 const supplementStatusDisplayDependencies = {
   formatJobStatus: formatNotificationJobStatus,

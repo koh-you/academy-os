@@ -44,8 +44,9 @@
 12. 완료: 분리된 일곱 조각을 감싸는 `SupplementTaskCard` 조립 경계를 만들었다.
 13. 완료: 알림 draft config·선생님 최종본 판정·task→draft·dirty/diff·source version/fingerprint·persistable 변환을 순수 모델로 분리했다.
 14. 완료: task 카드 원천 props·editor 값·메타·diff 기반 저장 상태·일정 gate 문구를 순수 view-model로 분리했다.
-15. 다음: 알림 control 표시 계산 또는 modal shell 중 state/API를 움직이지 않는 경계를 한 단위씩 검토한다.
-16. `SupplementStudentModal` 전체와 실제 저장·예약 orchestration은 위 조각 분리 이후 별도 gate로 판단한다.
+15. 완료: 알림 control config·예약 차단·과거 preview 차단·대상·예약/취소 가능 여부를 순수 view-model로 분리했다.
+16. 다음: `SupplementStudentModal` shell을 state/action 소유권 그대로 분리할 수 있는지 검토한다.
+17. shell 분리에 action 이동이 필요하면 실제 저장·예약 orchestration은 별도 사람 gate로 판단한다.
 
 ## 12B 구현 결과 — 완료 확인 모달
 
@@ -135,6 +136,13 @@
 - App이 task/local draft/diff/save status와 기존 방법 label 함수를 전달하고 반환된 표시 props에 callback을 결합한다.
 - fixture는 원천 fallback, 저장된 세 문구 표시, 일정 유무/변경, 외부 save status override와 최초 확정·기존 변경 안내의 모든 분기를 고정한다.
 - 모델에는 hook/API/`notification_jobs`/Supabase/Solapi가 없고 실제 action 순서도 바뀌지 않았다.
+
+## 12P 구현 결과 — 알림 control 순수 view-model
+
+- 학생 일정·학부모 일정·학생 11시 config와 저장 전 변경, 빈 선생님 최종 문구, 연결 수업/일정 누락 차단 순서를 순수 모델로 옮겼다.
+- 취소·실패 이력은 과거 preview 대신 현재 저장 원천으로 다시 만든 preview를 사용하고, sent/현재 예약/새 예약 label과 대상 번호를 같은 모델에서 계산한다.
+- App이 현재 task/job/preview와 기존 취소 가능·문구 normalize 함수를 주입하며 실제 예약·취소 action, busy/feedback, job status patch는 계속 소유한다.
+- fixture와 production check는 hook/API/`notification_jobs`/Solapi 및 action callback이 모델로 들어오지 못하게 고정한다.
 
 ## 즉시 중단 조건
 
