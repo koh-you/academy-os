@@ -43,10 +43,6 @@ import {
   updateStudentQuestion
 } from "../domains/portals/studentPortalApi.js";
 import {
-  buildSupplementScheduleNoticeJob,
-  buildSupplementStudentReminderJob,
-  getNextHourlyAlimtalkReservationAt,
-  getSupplementStudentReminderJobId,
   getSupplementStudentReminderScheduledAt,
   isSupplementStudentReminderTask
 } from "../domains/notifications/supplementJobBuilders.js";
@@ -62,6 +58,7 @@ import { ParentResponseContextPanel } from "../domains/notifications/ParentRespo
 import { getParentResponseContexts } from "../domains/notifications/parentResponseContext.js";
 import {
   cancelSupplementNotificationControlRequest,
+  cancelSupplementStudentReminderRequest,
   reserveSupplementNotificationControlRequest,
   reserveSupplementScheduleNoticeJobRequest,
   reserveSupplementScheduleNoticesRequest,
@@ -9208,18 +9205,14 @@ export function App() {
   }
 
   async function cancelSupplementStudentReminder(task, reason = "보충 완료 처리") {
-    if (!isSupplementStudentReminderTask(task)) return null;
-    const notificationJobId = getSupplementStudentReminderJobId(task);
-    if (!notificationJobId) return null;
-    const existingJob = notificationJobs.find((job) => job.notificationJobId === notificationJobId);
-    if (existingJob && !isActiveNotificationJob(existingJob)) return existingJob;
-    try {
-      const result = await handleCancelNotificationJob(existingJob || { notificationJobId }, reason);
-      return result.notificationJob ?? null;
-    } catch (error) {
-      console.error("Failed to cancel supplement student reminder", error);
-      return null;
-    }
+    return cancelSupplementStudentReminderRequest({
+      cancelNotificationJob: handleCancelNotificationJob,
+      isActiveNotificationJob,
+      notificationJobs,
+      onError: (error) => console.error("Failed to cancel supplement student reminder", error),
+      reason,
+      task
+    });
   }
 
   async function persistCanceledNotificationJob(notificationJob, reason = "알림 제외") {

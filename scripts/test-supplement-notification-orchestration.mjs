@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   cancelSupplementNotificationControlRequest,
+  cancelSupplementStudentReminderRequest,
   reserveSupplementNotificationControlRequest,
   reserveSupplementScheduleNoticeJobRequest,
   reserveSupplementScheduleNoticesRequest,
@@ -108,6 +109,54 @@ await assert.rejects(
   }),
   /현재 취소할 수 있는 Solapi 예약이 없습니다/
 );
+
+const reminderCancellationJob = {
+  notificationJobId: "supplement_student_reminder_makeup-1_student-1",
+  status: "scheduled"
+};
+const reminderCancellationCalls = [];
+const canceledReminder = await cancelSupplementStudentReminderRequest({
+  cancelNotificationJob: async (job, reason) => {
+    reminderCancellationCalls.push([job, reason]);
+    return { notificationJob: { ...job, status: "canceled" } };
+  },
+  isActiveNotificationJob: (job) => job.status === "scheduled",
+  notificationJobs: [reminderCancellationJob],
+  reason: "완료 취소",
+  task: reminderTask
+});
+assert.deepEqual(reminderCancellationCalls, [[reminderCancellationJob, "완료 취소"]]);
+assert.equal(canceledReminder.status, "canceled");
+
+const inactiveReminderJob = { ...reminderCancellationJob, status: "sent" };
+assert.equal(await cancelSupplementStudentReminderRequest({
+  cancelNotificationJob: () => assert.fail("inactive history must not be canceled"),
+  isActiveNotificationJob: () => false,
+  notificationJobs: [inactiveReminderJob],
+  task: reminderTask
+}), inactiveReminderJob);
+
+let fallbackJobId = "";
+await cancelSupplementStudentReminderRequest({
+  cancelNotificationJob: async (job) => {
+    fallbackJobId = job.notificationJobId;
+    return { notificationJob: { ...job, status: "canceled" } };
+  },
+  isActiveNotificationJob: () => true,
+  task: reminderTask
+});
+assert.equal(fallbackJobId, reminderCancellationJob.notificationJobId);
+
+const cancellationError = new Error("fixture cancel failure");
+let capturedCancellationError = null;
+assert.equal(await cancelSupplementStudentReminderRequest({
+  cancelNotificationJob: async () => { throw cancellationError; },
+  isActiveNotificationJob: () => true,
+  onError: (error) => { capturedCancellationError = error; },
+  task: reminderTask
+}), null);
+assert.equal(capturedCancellationError, cancellationError);
+assert.equal(await cancelSupplementStudentReminderRequest({ task: { taskType: "retest" } }), null);
 
 const controlTask = { ...reminderTask, studentScheduleNotificationDraft: "학생 일정 최종본" };
 const controlEvents = [];
