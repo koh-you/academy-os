@@ -27,6 +27,8 @@ import { calculateAttendanceStats, StudentMyPageTab } from "../domains/portals/S
 import { StudentLessonHistoryCalendar } from "../domains/portals/StudentLessonHistoryCalendar.jsx";
 import { StudentPrepNotices } from "../domains/portals/StudentPrepNotices.jsx";
 import { StudentSupplementSchedules, StudentTopNotice } from "../domains/portals/StudentTodayReadOnlyPanels.jsx";
+import { StudentHomeworkActionCard } from "../domains/portals/StudentHomeworkActionCard.jsx";
+import { completeStudentHomework } from "../domains/portals/studentPortalApi.js";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
@@ -5335,6 +5337,8 @@ export function App() {
   const [academyTestSaveState, setAcademyTestSaveState] = useState("idle");
   const [studentConsultationSaveState, setStudentConsultationSaveState] = useState("idle");
   const [specialLectureGuideSaveState, setSpecialLectureGuideSaveState] = useState("idle");
+  const [studentHomeworkSaveStates, setStudentHomeworkSaveStates] = useState({});
+  const studentHomeworkSavingIdsRef = useRef(new Set());
   const [examPrepRowSaveStates, setExamPrepRowSaveStates] = useState({});
   const [studentProfileSaveStates, setStudentProfileSaveStates] = useState({});
   const [studentIntakeSaveStates, setStudentIntakeSaveStates] = useState({});
@@ -6575,6 +6579,7 @@ export function App() {
         examPostSubmissions={examPostSubmissions}
         examPostTargetStudentIds={examPostTargetStudentIds}
         homeworks={homeworks}
+        homeworkSaveStates={studentHomeworkSaveStates}
         lessons={lessons}
         materials={resourceMaterials}
         makeupTasks={makeupTasks}
@@ -8567,6 +8572,7 @@ export function App() {
             examPostSubmissions={examPostSubmissions}
             examPostTargetStudentIds={examPostTargetStudentIds}
             homeworks={homeworks}
+            homeworkSaveStates={studentHomeworkSaveStates}
             lessons={lessons}
             materials={resourceMaterials}
             makeupTasks={makeupTasks}
@@ -9361,21 +9367,49 @@ export function App() {
     }
   }
 
-  function handleStudentCheckHomework(homeworkId) {
-    setHomeworks((current) =>
-      current.map((homework) => {
-        if (homework.homeworkId !== homeworkId) return homework;
-        const nextHomework = {
-          ...homework,
-          status: "submitted",
-          studentStatus: "checked_done",
-          teacherStatus: homework.teacherStatus === "verified" ? "verified" : "unverified",
-          checkedAt: new Date().toISOString()
-        };
-        postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
-        return nextHomework;
-      })
-    );
+  async function handleStudentCheckHomework(homeworkId) {
+    if (studentHomeworkSavingIdsRef.current.has(homeworkId)) return { ok: false };
+    if (session?.role !== "student" || !session?.sessionToken) {
+      setStudentHomeworkSaveStates((current) => ({
+        ...current,
+        [homeworkId]: { message: "실제 학생 계정으로 로그인한 화면에서만 저장할 수 있습니다.", state: "failed" }
+      }));
+      return { ok: false };
+    }
+
+    const targetHomework = homeworks.find((homework) => homework.homeworkId === homeworkId);
+    if (!targetHomework || targetHomework.studentId !== session.studentId) {
+      setStudentHomeworkSaveStates((current) => ({
+        ...current,
+        [homeworkId]: { message: "현재 학생의 숙제를 찾지 못했습니다.", state: "failed" }
+      }));
+      return { ok: false };
+    }
+
+    setStudentHomeworkSaveStates((current) => ({
+      ...current,
+      [homeworkId]: { message: "Supabase에 저장하고 다시 확인하는 중입니다.", state: "saving" }
+    }));
+    studentHomeworkSavingIdsRef.current.add(homeworkId);
+    try {
+      const savedHomework = await completeStudentHomework(session.sessionToken, homeworkId);
+      setHomeworks((current) => current.map((homework) =>
+        homework.homeworkId === savedHomework.homeworkId ? savedHomework : homework
+      ));
+      setStudentHomeworkSaveStates((current) => ({
+        ...current,
+        [homeworkId]: { message: "Supabase 저장 및 재조회 확인 완료", state: "saved" }
+      }));
+      return { ok: true, homework: savedHomework };
+    } catch (error) {
+      setStudentHomeworkSaveStates((current) => ({
+        ...current,
+        [homeworkId]: { message: error.message || "숙제 완료 저장에 실패했습니다.", state: "failed" }
+      }));
+      return { ok: false, error };
+    } finally {
+      studentHomeworkSavingIdsRef.current.delete(homeworkId);
+    }
   }
 
   function handleStudentAddQuestion(question) {
@@ -21372,6 +21406,7 @@ function StudentPortalV2({
   examPostSubmissions = [],
   examPostTargetStudentIds = {},
   homeworks,
+  homeworkSaveStates = {},
   lessons = [],
   materials = [],
   makeupTasks = [],
@@ -21433,6 +21468,7 @@ function StudentPortalV2({
     .filter((question) => question.studentId === selectedStudent?.studentId)
     .sort((a, b) => String(b.updatedAt ?? b.createdAt ?? "").localeCompare(String(a.updatedAt ?? a.createdAt ?? "")));
   const examPostTargets = buildExamPostTargetsForStudent(selectedStudent, examPrepRows, examPostSubmissions, examPostTargetStudentIds);
+  const studentHomeworkWriteEnabled = !previewMode && Boolean(sessionStudentId);
 
   useEffect(() => {
     if (sessionStudentId) setSelectedStudentId(sessionStudentId);
@@ -21473,12 +21509,14 @@ function StudentPortalV2({
         {activeTab === "today" ? (
           <StudentTodayTab
             homeworks={homeworks}
+            homeworkSaveStates={homeworkSaveStates}
             lessons={lessons}
             overdueHomeworks={overdueHomeworks}
             prepNotices={studentPrepNotices}
             questions={selectedStudentQuestions}
             recordsWithLessons={studentRecordsWithLessons}
             selectedStudent={selectedStudent}
+            studentHomeworkWriteEnabled={studentHomeworkWriteEnabled}
             studentNotice={upcomingStudentNotice}
             supplementSchedules={studentSupplementScheduleTasks}
             todayHomeworks={todayHomeworks}
@@ -21533,6 +21571,7 @@ function StudentPortalV2({
 
 function StudentTodayTab({
   homeworks = [],
+  homeworkSaveStates = {},
   lessons = [],
   overdueHomeworks,
   prepNotices = [],
@@ -21540,6 +21579,7 @@ function StudentTodayTab({
   examPostTargets = [],
   recordsWithLessons = [],
   selectedStudent,
+  studentHomeworkWriteEnabled = false,
   studentNotice,
   supplementSchedules = [],
   todayHomeworks,
@@ -21626,17 +21666,21 @@ function StudentTodayTab({
       <div className="sectionHeader">
         <div>
           <h2>오늘 해야 할 숙제</h2>
-          <p className="muted">완료 체크하면 선생님 화면에 즉시 반영됩니다.</p>
+          <p className="muted">저장 완료가 표시되면 선생님 화면과 새로고침 후에도 유지됩니다.</p>
         </div>
       </div>
       <div className="homeworkStack">
         {todayHomeworks.length === 0 ? <div className="emptyHomeworkBox">오늘 배정된 숙제가 없습니다.</div> : null}
         {todayHomeworks.map((homework) => (
-          <HomeworkActionCard
+          <StudentHomeworkActionCard
+            completed={isHomeworkCompletedForStudent(homework)}
             homework={homework}
             key={homework.homeworkId}
-            records={recordsWithLessons}
-            onStudentCheckHomework={onStudentCheckHomework}
+            onComplete={onStudentCheckHomework}
+            saveState={homeworkSaveStates[homework.homeworkId]}
+            statusLabel={getHomeworkStatusLabel(homework, recordsWithLessons)}
+            statusTone={getHomeworkStatusTone(homework, recordsWithLessons)}
+            writeEnabled={studentHomeworkWriteEnabled}
           />
         ))}
       </div>
@@ -22049,30 +22093,6 @@ function filterVisibleMaterials(materials = [], student, audience) {
 
     return audienceAllowed && studentAllowed;
   });
-}
-
-function HomeworkActionCard({ homework, records = [], onStudentCheckHomework }) {
-  const isChecked = isHomeworkCompletedForStudent(homework);
-  return (
-    <article className="homeworkActionCard">
-      <div>
-        <strong>{homework.title}</strong>
-        <p>{homework.assignedDate} → {homework.dueDate}</p>
-        <small>{isChecked ? "완료 처리됨" : "완료 전"}</small>
-        <span className={`homeworkStatusBadge ${getHomeworkStatusTone(homework, records)}`}>
-          {getHomeworkStatusLabel(homework, records)}
-        </span>
-      </div>
-      <button
-        className={isChecked ? "softButton" : "primaryButton"}
-        disabled={isChecked}
-        onClick={() => onStudentCheckHomework(homework.homeworkId)}
-        type="button"
-      >
-        {isChecked ? "완료 체크됨" : "완료 체크"}
-      </button>
-    </article>
-  );
 }
 
 function SupplementCenter({

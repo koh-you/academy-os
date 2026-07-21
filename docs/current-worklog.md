@@ -34,11 +34,11 @@
    - 순서: `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`.
    - 다음 후보는 매번 현재 diff와 최신 작업로그를 보고 다시 제안한다. 위험이 낮은 helper/config/API/client/component부터 진행하고, 수업일지/출결/Solapi/보충관리처럼 side effect가 큰 영역은 충분한 gate 이후 진행한다.
    - 기준 로드맵: 아래 `App.jsx 리팩터링 18개 기준 로드맵`을 다음 세션들의 공통 후보 목록으로 사용한다. 이미 일부 분리된 항목도 남은 하위 컴포넌트/헬퍼가 있으면 같은 묶음 안에서 계속 진행한다.
-   - 현재 이어받을 지점: 9번 `test manager`는 완료했다. 10번 `student-parent portals`의 읽기 전용 표시 영역 분리를 완료했다. 다음 경계는 `StudentTodayTab`의 시험 후 제출, 질문 추가·상태변경·삭제, 숙제 완료 체크이며 저장 신뢰성 선행 여부에 대한 사람 gate 전에는 이동하지 않는다.
-   - 현재 사람 gate: 숙제 체크는 낙관적 UI 뒤 `/api/homeworks` 실패를 콘솔에만 남긴다. 질문/시험 제출은 local state를 먼저 바꾸고 전역 effect가 두 배열을 함께 `/api/portal-state`에 저장하며 실패 UI, rollback, read-after-write가 없다. 시험 제출은 업로드 뒤 draft까지 지운다. 권장 순서는 세 쓰기 기능을 각각 `local draft -> 저장 중 -> API 성공 -> 서버 재조회 -> 완료/실패` 계약으로 보강한 뒤 컴포넌트를 분리하는 것이다.
+   - 현재 이어받을 지점: 9번 `test manager`, 10번 `student-parent portals` 읽기 전용 표시, 첫 쓰기 단위인 학생 숙제 완료 체크의 세션 소유권·Supabase 재조회·카드 상태 UI·컴포넌트 분리와 AI 검증 344개까지 완료했다. 2026-07-21 사용자가 실제 학생 테스트 결과를 보류하고 계속 진행하라고 지시했으므로 다음은 질문 CRUD 저장 계약이다.
+   - 보류된 사람 gate: 테스트 학생의 미완료 숙제 1건에서 저장 중/완료 표시, 새로고침·재로그인 유지, 강사 미리보기 쓰기 차단을 나중에 확인한다. 보류는 통과 판정이 아니며 회귀 발견 시 즉시 별도 수정한다.
    - 확인된 후속 이슈: 학생 수업 준비 안내 목록은 현재 `prepStudentNotice` 존재 여부만 필터하고 `prepStudentVisible`을 확인하지 않는다. 이번 리팩터링에서는 기존 동작을 보존했으며, 공개 플래그 계약을 별도 기능 작업에서 확인해야 한다.
    - 확인된 후속 이슈: 학생 마이페이지 `비밀번호 변경`은 callback/API가 없는 기존 미연결 UI다. 이번 리팩터링에서는 보존했고, 숨김/비활성 안내/실제 PIN 변경 구현은 저장 신뢰성의 오작동 버튼 정리 작업에서 별도 결정한다.
-   - 다음 세션 시작 규칙: 코드 수정 전에 최근 리팩터링 결과(9번 완료, 10번 시작 전, 최신 완료 커밋)를 사용자에게 요약하고, 학생/학부모 포털의 공개 링크·인증·저장 원천·모바일 표시 side effect inventory를 먼저 만든다. 그 뒤 가장 낮은 위험의 표시 전용 컴포넌트 한 단위를 제안하고 사용자 재개 의사를 확인한다.
+   - 다음 세션 시작 규칙: 최신 커밋과 git diff를 확인하고 학생 숙제 완료 사람 gate가 보류 중임을 알린 뒤, 질문 CRUD의 학생 범위 명시 API·draft 보호·재조회 계약 inventory부터 제안한다.
 5. `Solapi 특강 템플릿 검수 후 연결`
    - 상태: 외부 검수 대기.
    - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다.
@@ -478,6 +478,20 @@
 - 권장 선행 작업: (1) 숙제 체크를 await 가능한 명시 handler와 카드 내 상태/rollback/read-after-write로 보강, (2) 질문 CRUD를 행 단위 명시 저장 및 입력 draft 보존으로 분리, (3) 시험 제출을 업로드와 제출 row 저장의 단계별 상태/부분 실패/재시도 구조로 보강한다. 그 뒤 각각의 컴포넌트를 파일로 이동한다.
 - 사람 확인 질문: 기능 변경 없이 현재 취약한 저장 흐름을 그대로 파일 분리할지, 권장대로 저장 신뢰성 보강을 먼저 한 뒤 리팩터링을 계속할지 결정이 필요하다. 프로젝트 원칙상 후자를 권장한다.
 - 중단 조건: 저장 실패인데 완료 UI 표시, 질문 draft 소실, Storage 업로드만 성공하고 제출 row 누락, 여러 쓰기 배열의 전역 snapshot effect 유지 상태에서 컴포넌트만 이동.
+
+### 2026-07-21 P1. App.jsx 리팩터링 10번 - 학생 숙제 완료 저장 신뢰성 및 카드 분리
+
+- 상태: 구현·AI 자동검증 완료. 실제 학생 사람 gate는 2026-07-21 사용자 지시로 결과 보류하고, 이 단위를 커밋·푸시한 뒤 질문 CRUD 리팩터링을 계속한다.
+- 사용자 문제/목표: 기존 `완료 체크`는 화면을 먼저 완료로 바꾸고 `/api/homeworks` 실패를 콘솔에만 남겨 새로고침 후 되돌아갈 수 있었다. 버튼이 말하는 완료와 실제 Supabase 원본을 같게 만든다.
+- 저장 계약: 실제 학생 bearer session만 `POST /api/portal-homeworks/complete`를 호출한다. 서버는 `session.role=student`, `homework.studentId=session.studentId`를 확인하고 Supabase `homeworks` 한 건을 `status=submitted`, `studentStatus=checked_done`, `checkedAt`으로 저장한다. 그 뒤 `listHomeworks()`로 다시 읽어 학생 ID/상태/시각이 일치할 때만 `verified=true`를 반환한다.
+- UI 계약: 카드 상태는 낙관적으로 바뀌지 않는다. `저장 중`에는 중복 클릭을 막고, 서버 재조회가 확인된 뒤에만 서버가 돌려준 row로 화면을 갱신해 `숙제 완료 · 저장 완료`를 표시한다. 실패 시 기존 미완료 카드와 버튼을 유지하고 카드 안에 `숙제 완료 · 저장 실패`와 원인을 표시한다.
+- 권한/미리보기: 강사 관리 화면의 학생 미리보기는 같은 카드를 렌더하지만 버튼을 비활성화하고 `강사 미리보기에서는 변경되지 않습니다.`를 표시한다. 실제 학생 세션이 아니면 프론트와 서버 양쪽에서 저장을 차단한다.
+- 파일 분리: `src/domains/portals/StudentHomeworkActionCard.jsx`에 카드 표시/상태 UI를, `src/domains/portals/studentPortalApi.js`에 bearer API 호출을 분리했다. `App.jsx`에는 세션·현재 학생 검증과 저장 후 root state 반영 orchestration만 남겼다.
+- 원천/side effect: 원본은 Supabase `homeworks`. localStorage/app_state/로컬 optimistic snapshot은 저장 완료 근거로 쓰지 않는다. `notification_jobs`, Solapi, 수업일지, 보충 일정, Storage 업로드 side effect는 없다. 새 SQL도 없다.
+- AI 검수 결과: `git diff --check`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `node --check src/domains/portals/studentPortalApi.js`, `npm run build`, `npm run test:production` 344/344 통과. 기존 Vite chunk size 경고만 남았다.
+- 보류된 사람 gate: 지정한 테스트 학생의 미완료 숙제 1건에서 `완료 체크`를 누른다. 같은 카드가 `저장 중` 뒤 `저장 완료`가 되고 완료 체크됨으로 바뀌어야 한다. 새로고침·로그아웃/재로그인 후에도 유지돼야 하며 강사 미리보기에서는 버튼이 비활성이어야 한다. 실제 운영 학생의 숙제나 이미 검수된 숙제는 테스트에 쓰지 않는다.
+- 중단 조건: 저장 완료 없이 카드가 먼저 완료됨, 완료 표시 뒤 새로고침하면 되돌아감, 다른 학생 숙제 변경, 강사 미리보기에서 저장됨, 실패 후 카드가 완료로 남음, 알림/수업일지/보충 데이터 변동.
+- 다음 순서: 사용자 지시에 따라 사람 gate 결과는 보류한 채 이 단위만 커밋·푸시한다. 이후 질문 추가·상태변경·삭제를 별도 학생 범위 API, draft 보존, read-after-write, 행/입력 영역 상태 UI 계약으로 먼저 설계한다.
 
 ### 2026-07-21 P1. App.jsx 리팩터링 10번 - 학생 오늘 탭 읽기 전용 일정 패널 분리
 

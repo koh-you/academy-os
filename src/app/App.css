@@ -13301,6 +13301,33 @@ textarea.profileEditInput {
   margin: 5px 0;
 }
 
+.studentHomeworkActionControls {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 220px;
+}
+
+.studentHomeworkSaveFeedback {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+}
+
+.studentHomeworkSaveFeedback > span,
+.studentHomeworkPreviewNotice {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.studentHomeworkSaveFeedback.failed > span {
+  color: #b91c1c;
+}
+
 .homeworkStatusBadge {
   align-items: center;
   border-radius: 999px;
@@ -17412,6 +17439,13 @@ body.attendanceOnlyBody {
   .homeworkActionCard {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .studentHomeworkActionControls,
+  .studentHomeworkSaveFeedback {
+    align-items: stretch;
+    min-width: 0;
+    text-align: left;
   }
 
   .sourceAnalysisButton {

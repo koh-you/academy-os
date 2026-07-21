@@ -1314,6 +1314,63 @@ async function upsertPortalState(session, scopedStates = {}) {
   return upsertAppState(nextStates);
 }
 
+async function completePortalHomework(session, homeworkId) {
+  if (session?.role !== "student") {
+    const error = new Error("학생 계정에서만 숙제 완료를 저장할 수 있습니다.");
+    error.statusCode = 403;
+    throw error;
+  }
+  const normalizedHomeworkId = String(homeworkId ?? "").trim();
+  if (!normalizedHomeworkId) {
+    const error = new Error("완료할 숙제 ID가 필요합니다.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const beforeResult = await listHomeworks();
+  const existingHomework = (beforeResult.homeworks ?? []).find((homework) => homework.homeworkId === normalizedHomeworkId);
+  if (!existingHomework) {
+    const error = new Error("숙제를 찾지 못했습니다.");
+    error.statusCode = 404;
+    throw error;
+  }
+  if (existingHomework.studentId !== session.studentId) {
+    const error = new Error("다른 학생의 숙제는 변경할 수 없습니다.");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  const checkedAt = existingHomework.checkedAt || new Date().toISOString();
+  await upsertHomework({
+    ...existingHomework,
+    status: "submitted",
+    studentStatus: "checked_done",
+    teacherStatus: existingHomework.teacherStatus === "verified" ? "verified" : "unverified",
+    checkedAt
+  });
+
+  const verifiedResult = await listHomeworks();
+  const verifiedHomework = (verifiedResult.homeworks ?? []).find((homework) => homework.homeworkId === normalizedHomeworkId);
+  const isVerified = Boolean(
+    verifiedHomework &&
+    verifiedHomework.studentId === session.studentId &&
+    verifiedHomework.status === "submitted" &&
+    verifiedHomework.studentStatus === "checked_done" &&
+    verifiedHomework.checkedAt
+  );
+  if (!isVerified) {
+    const error = new Error("Supabase 저장 후 숙제 완료 상태를 다시 확인하지 못했습니다.");
+    error.statusCode = 500;
+    throw error;
+  }
+
+  return {
+    source: verifiedResult.source,
+    homework: verifiedHomework,
+    verified: true
+  };
+}
+
 function readJsonBody(request, options = {}) {
   const limitBytes = options.limitBytes ?? 2_000_000;
   return new Promise((resolve, reject) => {
@@ -5031,6 +5088,23 @@ const server = http.createServer(async (request, response) => {
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/portal-homeworks/complete") {
+    try {
+      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
+      const portalSession = verifyPortalSessionToken(token);
+      if (!portalSession) {
+        sendJson(request, response, 401, { ok: false, error: "학생 세션 인증이 필요합니다." });
+        return;
+      }
+      const payload = await readJsonBody(request);
+      const result = await completePortalHomework(portalSession, payload.homeworkId);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, Number(error.statusCode) || 500, { ok: false, error: error.message });
     }
     return;
   }
