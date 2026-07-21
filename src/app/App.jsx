@@ -64,6 +64,7 @@ import { ParentResponseContextPanel } from "../domains/notifications/ParentRespo
 import { getParentResponseContexts } from "../domains/notifications/parentResponseContext.js";
 import {
   cancelNotificationJobRequest,
+  cancelNotificationJobsRequest,
   persistFailedNotificationJobRequest,
   reserveNotificationJobRequest
 } from "../domains/notifications/notificationJobApi.js";
@@ -9154,9 +9155,11 @@ export function App() {
 
   async function cancelActiveSupplementScheduleNoticeJobs(task, reason = "보충 일정 안내 예약 갱신") {
     const activeNoticeJobs = getCancelableSupplementScheduleNoticeJobs(task, notificationJobs);
-    if (activeNoticeJobs.length === 0) return [];
-    const canceledJobs = await Promise.all(activeNoticeJobs.map((job) => handleCancelNotificationJob(job, reason)));
-    return canceledJobs.map((result) => result.notificationJob).filter(Boolean);
+    return cancelNotificationJobsRequest({
+      cancelNotificationJob: handleCancelNotificationJob,
+      notificationJobs: activeNoticeJobs,
+      reason
+    });
   }
 
   async function reserveSupplementScheduleNoticeJob(notificationJob, missingMessagePrefix) {
@@ -9259,7 +9262,11 @@ export function App() {
     }
 
     const activeTargetJobs = getCancelableSupplementTargetJobs(task, notificationJobs, target);
-    await Promise.all(activeTargetJobs.map((job) => handleCancelNotificationJob(job, "보충관리 개별 알림톡 재예약")));
+    await cancelNotificationJobsRequest({
+      cancelNotificationJob: handleCancelNotificationJob,
+      notificationJobs: activeTargetJobs,
+      reason: "보충관리 개별 알림톡 재예약"
+    });
 
     const scheduledAt = getNextHourlyAlimtalkReservationAt();
     const notificationJob = buildSupplementScheduleNoticeJob({

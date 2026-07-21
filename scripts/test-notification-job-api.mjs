@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   cancelNotificationJobRequest,
+  cancelNotificationJobsRequest,
   persistFailedNotificationJobRequest,
   reserveNotificationJobRequest
 } from "../src/domains/notifications/notificationJobApi.js";
@@ -100,6 +101,26 @@ assert.deepEqual(cancelCalls, [{
 }]);
 assert.deepEqual(cancelState, [canceledJob]);
 assert.equal(cancelResult.notificationJob, canceledJob);
+
+const batchCancelCalls = [];
+const batchCanceledJobs = await cancelNotificationJobsRequest({
+  cancelNotificationJob: async (job, reason) => {
+    batchCancelCalls.push({ job, reason });
+    return { notificationJob: job.keepResult === false ? null : { ...job, status: "canceled" } };
+  },
+  notificationJobs: [
+    { notificationJobId: "student-schedule" },
+    { notificationJobId: "parent-schedule", keepResult: false }
+  ],
+  reason: "보충 일정 안내 예약 갱신"
+});
+
+assert.deepEqual(batchCancelCalls.map(({ job, reason }) => [job.notificationJobId, reason]), [
+  ["student-schedule", "보충 일정 안내 예약 갱신"],
+  ["parent-schedule", "보충 일정 안내 예약 갱신"]
+]);
+assert.deepEqual(batchCanceledJobs, [{ notificationJobId: "student-schedule", status: "canceled" }]);
+assert.deepEqual(await cancelNotificationJobsRequest({ notificationJobs: [] }), []);
 
 await assert.rejects(
   cancelNotificationJobRequest({ notificationJob: {}, request: async () => ({}) }),
