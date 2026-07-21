@@ -81,6 +81,7 @@ import {
 import { createSupplementSchedulePersistencePlan } from "../domains/supplements/supplementSchedulePlan.js";
 import { SupplementPassConfirmModal } from "../domains/supplements/SupplementPassConfirmModal.jsx";
 import { SupplementScheduleChangeConfirmModal } from "../domains/supplements/SupplementScheduleChangeConfirmModal.jsx";
+import { SupplementHistoryModal } from "../domains/supplements/SupplementHistoryModal.jsx";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import { isSpecialLectureStudentScheduleSynced } from "../domains/specialLectures/specialLecturePlanSync.js";
 import {
@@ -24431,6 +24432,8 @@ function SupplementCenter({
       ) : null}
       {isHistoryModalOpen ? (
         <SupplementHistoryModal
+          getMethodLabel={supplementMethodLabel}
+          getTypeLabel={followUpTypeLabel}
           onChangeQuery={setHistoryQuery}
           onClose={() => setIsHistoryModalOpen(false)}
           onUndoPassTask={onUndoPassTask}
@@ -25692,109 +25695,6 @@ function SupplementStudentModal({
           </section>
         </div>
       ) : null}
-    </Modal>
-  );
-}
-
-function SupplementHistoryModal({ onChangeQuery, onClose, onUndoPassTask, query, students, tasks }) {
-  const normalizedQuery = query.trim().toLowerCase();
-  const filteredTasks = tasks.filter((task) => {
-    const student = students.find((item) => item.studentId === task.studentId);
-    const haystack = [
-      student?.name,
-      student?.schoolName,
-      student?.grade,
-      followUpTypeLabel(task.taskType),
-      task.sourceLabel,
-      task.reason,
-      supplementMethodLabel(task),
-      task.status
-    ].join(" ").toLowerCase();
-    return !normalizedQuery || haystack.includes(normalizedQuery);
-  });
-
-  function statusLabel(task) {
-    if (task.status === "done") return "보충 완료";
-    if (task.status === "canceled") {
-      return task.cancellationMode === "keep_source_absence"
-        ? "보강 취소 · 결석 유지"
-        : "보강 취소";
-    }
-    if (task.status === "scheduled") return "일정 확정";
-    return "진행 중";
-  }
-
-  function historyDate(task) {
-    return String(task.canceledAt || task.completedAt || task.passedAt || task.lastScheduledAt || task.touchedAt || task.scheduledDate || task.createdAt || "").slice(0, 10) || "-";
-  }
-
-  return (
-    <Modal
-      className="supplementHistoryModal"
-      title="최근 한 달 보충관리 내역"
-      subtitle="보충 완료, 보강 취소, 일정 확정, 진행 중 항목을 학생별로 확인합니다."
-      onClose={onClose}
-      scrollable
-    >
-      <div className="supplementHistoryToolbar">
-        <SearchField
-          autoFocus
-          label="학생/학교/항목 검색"
-          onChange={onChangeQuery}
-          placeholder="예: 최선호, 창동고, 숙제보충"
-          result={`${filteredTasks.length}건`}
-          value={query}
-        />
-      </div>
-
-      {filteredTasks.length === 0 ? (
-        <EmptyState
-          action={query.trim() ? (
-            <button className="softButton compact" onClick={() => onChangeQuery?.("")} type="button">검색어 지우기</button>
-          ) : null}
-          className="emptyHomeworkBox"
-          description={query.trim() ? "학생명·학교·보충 항목을 다시 확인하세요." : "보충 완료·취소·일정 확정 이력이 생기면 여기에 표시됩니다."}
-          title={query.trim() ? "검색 결과가 없습니다." : "최근 한 달 보충관리 내역이 없습니다."}
-        />
-      ) : (
-        <div className="supplementHistoryList">
-          {filteredTasks.map((task) => {
-            const student = students.find((item) => item.studentId === task.studentId);
-            return (
-              <ListCard className="supplementHistoryItem" density="compact" key={task.makeupTaskId}>
-                <div>
-                  <strong>{student?.name ?? "미등록 학생"}</strong>
-                  <span>{student?.schoolName || "학교 미입력"} · {student?.grade || "-"}</span>
-                </div>
-                <div>
-                  <b>{followUpTypeLabel(task.taskType)}</b>
-                  <span>{task.sourceLabel || task.reason || "보충 항목"}</span>
-                </div>
-                <div>
-                  <span>{historyDate(task)}</span>
-                  <small>{task.scheduledDate || "-"} {task.scheduledTime || ""}</small>
-                </div>
-                <span className={`supplementProgressBadge ${task.status === "done" ? "done" : task.status === "canceled" ? "canceled" : task.status === "scheduled" ? "scheduled" : "draft"}`}>
-                  {statusLabel(task)}
-                </span>
-                <ListCardActions className="supplementHistoryActions">
-                  {task.status === "done" ? (
-                    <button className="softButton subtle" onClick={() => onUndoPassTask(task)} type="button">
-                      보충관리로 복귀
-                    </button>
-                  ) : task.status === "canceled" ? (
-                    <span className="historyActionHint">
-                      {task.cancellationMode === "keep_source_absence" ? "원 결석기록 유지" : "취소 내역 보존"}
-                    </span>
-                  ) : (
-                    <span className="historyActionHint">관리 중</span>
-                  )}
-                </ListCardActions>
-              </ListCard>
-            );
-          })}
-        </div>
-      )}
     </Modal>
   );
 }
