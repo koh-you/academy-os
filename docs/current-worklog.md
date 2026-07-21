@@ -142,6 +142,7 @@
 - 저장 검증/UI: `보충 내용 저장`은 POST 성공만으로 완료하지 않고 `/api/makeup-tasks`를 `cache: no-store`로 다시 조회해 숙제 확인 내용, 알림 문구, 편집 원본 marker, 일정·상태가 요청값과 같은지 대조한 뒤에만 저장 완료 처리한다. 불일치/조회 실패 시 local draft를 유지한다. 편집 영역에는 `선생님 수정본` 배지를 표시한다.
 - 저장 원천/side effect: local draft는 `taskDrafts`, 최종 원천은 Supabase `makeup_tasks.note`의 필드와 `supplementTeacherEditedFields`다. `notification_jobs`와 Solapi 예약/발송은 이번 수정·자동검증에서 건드리지 않았다. 스키마 변경과 SQL 적용은 없다.
 - AI 검증: 운영 row read-only 원인 확인, `git diff --check`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 340/340 통과.
+- 배포 확인: `main` 커밋 `e708d57f`를 푸시했고 Vercel 운영 번들이 `/assets/main-DQEUisDM.js`로 전환됐다. 운영 번들에서 Supabase 재조회 불일치 차단, 빈 알림 문구 예약 차단, `선생님 수정본` 표시를 확인했다. Render `/health`와 `/api/core/status`는 200 및 Supabase service role configured로 응답했다. 운영 row 수정과 `notification_jobs`/Solapi 예약·발송은 실행하지 않았다.
 - 사람 검토 gate: 배포 후 김예나 7/17 결석보강에서 `보강 때 확인할 지난 숙제`를 비우고 `보충 내용 저장`을 누른다. 저장 완료와 `선생님 수정본` 표시를 확인하고 모달 닫기·재열기·전체 새로고침 후에도 빈 값인지 확인한다. 이어 알림톡 문구 한 줄을 수정해 저장하고 같은 방식으로 유지되는지 확인한다. 원 숙제가 다시 채워지거나 알림 문구가 자동본으로 돌아오거나 저장 완료 뒤 새로고침에서 달라지면 즉시 중단한다.
 
 ### 2026-07-20 P0-1. 수업일지 학생 명단 가나다순 통일
