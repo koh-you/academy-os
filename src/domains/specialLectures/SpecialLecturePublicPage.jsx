@@ -73,10 +73,9 @@ export function SpecialLectureCalendarPreview({ guide }) {
 export function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
   const normalizedGuide = normalizeSpecialLectureGuide(guide);
   const applicationUrl = getSpecialLectureApplicationUrl(normalizedGuide);
-  const summary = normalizedGuide.summary.trim();
   const highlightCards = normalizedGuide.highlights.map((highlight) => highlight.trim()).filter(Boolean);
   const specialNotes = normalizedGuide.specialNotes.trim();
-  const hasOverview = Boolean(summary || highlightCards.length || specialNotes);
+  const hasOverview = Boolean(highlightCards.length || specialNotes);
   const primaryFacts = [
     ["대상", normalizedGuide.audience],
     ["요일", normalizedGuide.days],
@@ -113,7 +112,6 @@ export function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
             <span>OVERVIEW</span>
             <h2>수업 방향</h2>
           </div>
-          {summary ? <p>{summary}</p> : null}
           {highlightCards.length ? (
             <ul className="specialLectureDirectionCards">
               {highlightCards.map((highlight) => (
