@@ -729,72 +729,6 @@ function buildInitialCommentDraft({ audience, existingComment, record, supplemen
   ]);
 }
 
-function getPreparationMemoCommentDraftUpdate({ existingComment, previousMemo, nextMemo, shouldInclude }) {
-  const commentText = compactDuplicateMessageBlocks(existingComment);
-  const previousText = normalizeMessageText(previousMemo);
-  const nextText = normalizeMessageText(nextMemo);
-  const commentKey = getMessageDedupeKey(commentText);
-  const previousKey = getMessageDedupeKey(previousText);
-  const nextKey = getMessageDedupeKey(nextText);
-
-  if (!shouldInclude || !nextText) {
-    if (previousKey && commentKey === previousKey) {
-      return { changed: true, value: "" };
-    }
-    return { changed: false, value: commentText };
-  }
-
-  if (!commentText) {
-    return { changed: true, value: nextText };
-  }
-
-  if (nextKey && commentKey === nextKey) {
-    return { changed: false, value: commentText };
-  }
-
-  if (previousKey && commentKey === previousKey) {
-    return { changed: true, value: nextText };
-  }
-
-  const commentBlocks = commentText.split(/\n\s*\n+/g).map(normalizeMessageText).filter(Boolean);
-  const hasPreviousBlock = Boolean(previousKey && commentBlocks.some((block) => getMessageDedupeKey(block) === previousKey));
-  if (!hasPreviousBlock) {
-    return { changed: false, value: commentText };
-  }
-
-  const nextBlocks = commentBlocks.map((block) => (
-    getMessageDedupeKey(block) === previousKey ? nextText : block
-  ));
-  return { changed: true, value: compactDuplicateMessageBlocks(nextBlocks.join("\n\n")) };
-}
-
-function getPreparationMemoCommentDraftUpdates(record = {}, nextMemo = "", options = {}) {
-  const parentDraft = getPreparationMemoCommentDraftUpdate({
-    existingComment: record.teacherComment,
-    previousMemo: record.preparationMemo,
-    nextMemo,
-    shouldInclude: Boolean(options.parentVisible)
-  });
-  const studentDraft = getPreparationMemoCommentDraftUpdate({
-    existingComment: record.studentComment,
-    previousMemo: record.preparationMemo,
-    nextMemo,
-    shouldInclude: Boolean(options.studentVisible)
-  });
-  const updates = {};
-
-  if (parentDraft.changed) {
-    updates.teacherComment = parentDraft.value;
-    updates.teacherCommentSendStatus = "";
-  }
-  if (studentDraft.changed) {
-    updates.studentComment = studentDraft.value;
-    updates.studentCommentSendStatus = "";
-  }
-
-  return updates;
-}
-
 function normalizeExamReviewDraftValue(value = "") {
   const lines = String(value ?? "")
     .replace(/\r\n/g, "\n")
@@ -15948,10 +15882,16 @@ function LessonJournalDetail({
       record: baseRecord,
       supplementSchedules
     });
-    const shouldSeedDraft = draft && draft !== normalizeMessageText(baseRecord?.[field] ?? "");
-    const nextRecord = shouldSeedDraft ? { ...baseRecord, [field]: draft } : baseRecord;
-
-    setCommentModal({ audience, nextHomework, previousHomework, record: nextRecord, student: targetStudent, supplementSchedules, testResultLines });
+    setCommentModal({
+      audience,
+      initialCommentDraft: draft,
+      nextHomework,
+      previousHomework,
+      record: baseRecord,
+      student: targetStudent,
+      supplementSchedules,
+      testResultLines
+    });
   }
 
   function getCommentModalRecord() {
@@ -15962,7 +15902,7 @@ function LessonJournalDetail({
 
     return {
       ...(latestRecord ?? {}),
-      [field]: latestRecord?.[field]?.trim() ? latestRecord[field] : commentModal.record?.[field] ?? latestRecord?.[field] ?? ""
+      [field]: commentModal.initialCommentDraft ?? latestRecord?.[field] ?? commentModal.record?.[field] ?? ""
     };
   }
 
@@ -16629,12 +16569,12 @@ function LessonJournalDetail({
               ? "이전 메모 확인 완료"
               : "직전 메모 없음";
             const memoAudienceStatus = record.prepStudentVisible && record.prepParentVisible
-              ? "알림톡 학생·학부모 포함"
+              ? "작성창 학생·학부모 가져오기"
               : record.prepStudentVisible
-              ? "알림톡 학생 포함"
+              ? "작성창 학생 가져오기"
               : record.prepParentVisible
-              ? "알림톡 학부모 포함"
-              : "알림톡 미포함";
+              ? "작성창 학부모 가져오기"
+              : "작성창 가져오기 안 함";
             const parentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "parent");
             const studentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "student");
             const parentCommentState = getCommentButtonState(record.teacherComment, parentCommentSendStatus);
@@ -16992,13 +16932,8 @@ function PreparationMemoModal({
       return Promise.resolve();
     }
     const nowIso = new Date().toISOString();
-    const commentDraftUpdates = getPreparationMemoCommentDraftUpdates(currentRecord, draftMemo, {
-      parentVisible: draftParentVisible,
-      studentVisible: draftStudentVisible
-    });
     return onSaveRecord(recordId, lesson, student, {
       ...currentRecord,
-      ...commentDraftUpdates,
       preparationMemo: draftMemo,
       prepMemoCheckedAt: localCheckedMemo.checkedAt || currentRecord.prepMemoCheckedAt || "",
       prepMemoCheckedSourceDate: localCheckedMemo.sourceDate || currentRecord.prepMemoCheckedSourceDate || "",
@@ -17024,13 +16959,8 @@ function PreparationMemoModal({
     };
     setLocalCheckedMemo(checkedMemo);
     const draftSnapshot = createMemoSnapshot(checkedMemo);
-    const commentDraftUpdates = getPreparationMemoCommentDraftUpdates(currentRecord, draftMemo, {
-      parentVisible: draftParentVisible,
-      studentVisible: draftStudentVisible
-    });
     return onSaveRecord(recordId, lesson, student, {
       ...currentRecord,
-      ...commentDraftUpdates,
       preparationMemo: draftMemo,
       prepMemoCheckedAt: checkedMemo.checkedAt,
       prepMemoCheckedSourceDate: checkedMemo.sourceDate,
@@ -17132,14 +17062,14 @@ function PreparationMemoModal({
             />
           </label>
           <div className="prepMemoIncludeBox">
-            <strong>알림톡 초안 포함</strong>
+            <strong>알림톡 작성창에서 가져오기</strong>
             <label className="checkboxLine">
               <input
                 checked={draftStudentVisible}
                 onChange={(event) => updateDraft("prepStudentVisible", event.target.checked)}
                 type="checkbox"
               />
-              학생 알림톡 초안에 포함
+              학생 알림톡 작성창에 메모 가져오기
             </label>
             <label className="checkboxLine">
               <input
@@ -17147,10 +17077,10 @@ function PreparationMemoModal({
                 onChange={(event) => updateDraft("prepParentVisible", event.target.checked)}
                 type="checkbox"
               />
-              학부모 알림톡 초안에 포함
+              학부모 알림톡 작성창에 메모 가져오기
             </label>
             <p className="muted">
-              체크한 대상의 알림톡 초안을 열 때 이 메모가 한 번만 반영됩니다. AI 수정은 알림톡 작성 화면에서 수신인에 맞게 실행합니다.
+              수업메모를 저장해도 저장된 학생·학부모 최종 문구는 바뀌지 않습니다. 체크한 대상의 알림톡 작성창을 열 때 이 메모를 local draft로 가져오며, `최종 문구 저장`을 눌러야 알림톡 원본이 변경됩니다. 예약 발송 본문 고정은 다음 검토 단계에서 별도로 정리합니다.
             </p>
           </div>
           <div className="prepMemoSaveBar">
