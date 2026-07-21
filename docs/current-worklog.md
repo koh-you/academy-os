@@ -276,6 +276,18 @@
 - 사람 검수 gate: 먼저 `설정 > 알림톡`에서 두 숙제 후속 문구를 확인하고 `기본값`을 눌러 설정 자동저장 완료 후 새로고침 유지와 app_state 키 생성을 확인한다. 이어 테스트 학생의 학생·학부모 최종 문구를 각각 저장하고, 수업메모 포함 체크를 켠 뒤 수업메모만 다른 값으로 수정한다. 새로고침 후 최종 문구가 그대로이고 예약 미리보기에 새 수업메모가 자동 추가되지 않아야 한다. `다음시간까지` 또는 `남아서 하고 가기`를 저장하면 설정 문구와 숙제명이 별표 블록에만 보여야 한다. 통제된 미래 예약에서 `Solapi 예약 반영` 후 `notification_jobs.preview_body/payload`, Solapi 그룹 수신번호·예약시각·본문이 일치하는지 확인한다. 이후 수업메모만 바꿔도 기존 예약은 바뀌지 않아야 하며, 최종 문구나 후속처리/설정 문구를 저장하면 `Solapi 예약 업데이트 필요`가 보여야 한다.
 - 중단 조건: 수업메모 저장만으로 최종 문구/기존 예약 변경, 저장하지 않은 작성창 draft 발송, 설정 문구와 미리보기/서버 본문 불일치, 별표 문구의 코멘트 중복, OS row와 Solapi 본문 불일치, 명시적 예약 반영 없이 그룹 생성·취소, 업데이트 재시도 후 중복 그룹이 보이면 5단계로 넘어가지 않는다.
 
+### 2026-07-21 P0. 수업메모 원천·알림톡 책임 분리 4단계 - 고태영 실제 Solapi gate 통과
+
+- 테스트 범위/권한: 사용자가 학생·학부모 번호가 모두 본인 번호인 활성 `고태영(student_1784094921261)`을 실제 과금 가능한 전용 테스터로 지정했다. 해당 학생은 반 미지정이며 기존 연결 수업과 활성 notification job이 0건임을 확인한 뒤 격리된 미래 테스트 수업만 사용했다. 다른 학생·운영 수업은 쓰지 않았다.
+- Supabase 원천 확인: 테스트 lesson, 지난/다음 homework, lesson record를 저장하고 재조회했다. record에는 `preparationMemo=GATE4_MEMO_NOT_FINAL`, 학생 최종문구 `GATE4_STUDENT_FINAL_ONLY`, 학부모 최종문구 `GATE4_PARENT_FINAL_ONLY`, 구조화 후속처리 `next_lesson/GATE4 지난 숙제`가 서로 분리돼 있었다. `app_state.aiSettings.notificationTemplates`의 `lessonNextHomeworkFollowup`, `lessonStayAfterHomeworkFollowup` 두 키도 Supabase 재조회로 확인했다.
+- 첫 실제 gate에서 발견한 문제: 학생·학부모 Solapi 예약 본문은 저장 최종문구와 구조화 후속처리를 올바르게 사용하고 수업메모를 포함하지 않았지만, `notification_jobs.preview_body`는 provider 템플릿이 붙이는 학원명·머리말·최종 줄바꿈 전의 로컬 조립본이었다. 따라서 OS 미리보기와 실제 Solapi `message.text` 정확 일치 gate는 실패로 판정했다. 두 예약은 발송 전에 즉시 취소하고 테스트 원천을 삭제했다.
+- 보강 계약: Solapi 예약 성공 응답의 `messageList`는 본문 없이 message ID/상태만 반환하므로, 예약 그룹을 다시 읽어 실제 `message.text`를 `notification_jobs.preview_body`에 저장한다. provider 조회가 잠시 늦으면 같은 그룹을 최대 3회 짧게 재조회하며 예약을 다시 만들지 않는다. provider가 렌더한 `previewBody`는 결과 표시값이므로 예약 동일성 fingerprint에서는 제외하고, 실제 본문 원천인 payload 필드 전체로 동일성을 판정한다.
+- 최종 실제 gate: 2026-07-22 00:30 KST 미래 예약으로 학생용 그룹 `G4V202607212310373NBIGEEOD8HCSDY`, 학부모용 그룹 `G4V20260721231056BKEFQEF3JBKELS8`를 생성했다. 두 job 모두 `provider=solapi`, `status=scheduled`였고 OS `previewBody`와 Solapi `message.text`가 줄바꿈 정규화 후 정확히 일치했다(학생 282자, 학부모 255자). 대상별 최종문구는 서로 섞이지 않았고 `GATE4_MEMO_NOT_FINAL`은 없으며 `GATE4 지난 숙제` 후속 안내는 별도 블록에 포함됐다.
+- 취소/정리: 대조 직후 두 예약을 모두 취소했다. 두 Solapi message는 `statusCode=1070`, `reason=예약취소`, `dateProcessed/dateReported` 공란, 그룹 `sentSuccess=0`을 확인했다. 테스트 lesson/record/homework/notification job row를 삭제한 뒤 각각 잔여 0건을 재조회했다. 운영에 남긴 값은 설정의 두 숙제 후속 문구 키뿐이다.
+- AI 검증: `node --check`와 `git diff --check`, `npm run test:production` 364/364, `npm run build`를 통과했다. 최종 서버 보강 커밋은 `e0d698c0`이며 기존 Vite 500KB chunk 경고만 남는다.
+- 사람 검토 gate: 운영 `수업일지 > 예약 확인` 또는 `알림관리`에서 다음 실제 수업의 학생·학부모 예약 한 쌍을 열어, 예약 후 표시되는 미리보기가 Solapi 템플릿의 학원명/머리말까지 포함한 최종 문구인지 확인한다. 수업메모는 작성창 seed로만 쓰이고, 저장된 대상별 최종문구와 `⭐ 보충/확인 안내`만 포함돼야 한다. 이 확인 전에는 5단계로 넘어가지 않는다.
+- 중단 조건: 예약 직후에도 로컬 제목으로 시작하는 이전 미리보기가 보임, 학생/학부모 문구가 교차됨, 저장하지 않은 수업메모 seed가 포함됨, 구조화 후속 안내가 코멘트와 중복됨, provider 조회 실패로 로컬 미리보기가 남음, 취소한 그룹이 발송 처리되면 즉시 다음 단계를 중단한다.
+
 ### 2026-07-21 P0. 수업일지 결석 출결 알림톡 다음 정각 예약
 
 - 사용자 요청: 수업일지에서 결석을 저장하며 학부모 출결 알림톡을 선택한 경우 즉시 발송하지 않고 다음 정각에 예약한다.
