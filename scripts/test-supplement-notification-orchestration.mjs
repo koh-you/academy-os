@@ -4,6 +4,7 @@ import {
   cancelActiveSupplementScheduleNoticesRequest,
   cancelSupplementNotificationControlRequest,
   cancelSupplementStudentReminderRequest,
+  createSupplementScheduleNotificationPlan,
   reserveSupplementNotificationControlRequest,
   reserveSupplementScheduleNoticeJobRequest,
   reserveSupplementScheduleNoticesRequest,
@@ -116,6 +117,59 @@ const reminderCancellationJob = {
   notificationJobId: "supplement_student_reminder_makeup-1_student-1",
   status: "scheduled"
 };
+
+const normalizeTime = (value = "") => String(value).slice(0, 5);
+const newSchedulePlan = createSupplementScheduleNotificationPlan({
+  formatScheduleDateTime: () => assert.fail("new schedules have no previous schedule text"),
+  normalizeTime,
+  notificationJobs: [],
+  task: { ...reminderTask, keepLessonJournalOpen: true }
+});
+assert.equal(newSchedulePlan.keepLessonJournalOpen, true);
+assert.equal(newSchedulePlan.previousScheduleText, "");
+assert.equal(newSchedulePlan.shouldUpdateStudentReminder, true);
+assert.equal(newSchedulePlan.shouldReserveScheduleNotice, true);
+assert.equal(Object.prototype.hasOwnProperty.call(newSchedulePlan.taskForSchedule, "keepLessonJournalOpen"), false);
+
+const linkedScheduleTask = {
+  ...reminderTask,
+  linkedLessonId: "lesson-1",
+  linkedLessonDate: reminderTask.scheduledDate,
+  linkedLessonTime: "15:00:00"
+};
+const currentPairJobs = [
+  { notificationJobId: "student-current", notificationType: "schedule_reminder", status: "scheduled", payload: { makeupTaskId: "makeup-1", scheduleType: "supplement", scheduleDate: reminderTask.scheduledDate, scheduleTime: "15:00" } },
+  { notificationJobId: "parent-current", notificationType: "notice_parent", status: "scheduled", payload: { makeupTaskId: "makeup-1", scheduleType: "supplement", scheduleDate: reminderTask.scheduledDate, scheduleTime: "15:00" } }
+];
+const reusedSchedulePlan = createSupplementScheduleNotificationPlan({
+  formatScheduleDateTime: (date, time) => `${date} ${normalizeTime(time)}`,
+  normalizeTime,
+  notificationJobs: currentPairJobs,
+  task: linkedScheduleTask
+});
+assert.equal(reusedSchedulePlan.hasExistingLinkedSchedule, true);
+assert.equal(reusedSchedulePlan.hasScheduleChanged, false);
+assert.equal(reusedSchedulePlan.hasCurrentScheduleNoticePair, true);
+assert.equal(reusedSchedulePlan.shouldReserveScheduleNotice, false);
+
+const changedSchedulePlan = createSupplementScheduleNotificationPlan({
+  formatScheduleDateTime: (date, time) => `${date} ${normalizeTime(time)}`,
+  normalizeTime,
+  notificationJobs: currentPairJobs,
+  task: { ...linkedScheduleTask, scheduledTime: "16:00", skipStudentReminder: false }
+});
+assert.equal(changedSchedulePlan.hasScheduleChanged, true);
+assert.equal(changedSchedulePlan.shouldReserveScheduleNotice, true);
+
+const suppressedSchedulePlan = createSupplementScheduleNotificationPlan({
+  formatScheduleDateTime: () => "이전 일정",
+  normalizeTime,
+  notificationJobs: [],
+  task: { ...linkedScheduleTask, suppressStudentReminder: true }
+});
+assert.equal(suppressedSchedulePlan.shouldUpdateStudentReminder, false);
+assert.equal(suppressedSchedulePlan.shouldReserveScheduleNotice, false);
+assert.equal(Object.prototype.hasOwnProperty.call(suppressedSchedulePlan.taskForSchedule, "suppressStudentReminder"), false);
 
 const scheduleNotificationEvents = [];
 const scheduleNotificationResult = await applySupplementScheduleNotificationsRequest({

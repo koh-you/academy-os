@@ -10,8 +10,41 @@ import {
   canCancelNotificationJob,
   getCancelableSupplementScheduleNoticeJobs,
   getCancelableSupplementTargetJobs,
+  getCurrentSupplementScheduleNoticeTargets,
   getSupplementScheduleNoticeJob
 } from "./notificationJobSelectors.js";
+
+export function createSupplementScheduleNotificationPlan({
+  formatScheduleDateTime,
+  normalizeTime,
+  notificationJobs = [],
+  task
+} = {}) {
+  const { keepLessonJournalOpen, skipStudentReminder, suppressStudentReminder, ...taskForSchedule } = task ?? {};
+  const shouldUpdateStudentReminder = !skipStudentReminder && !suppressStudentReminder;
+  const hasExistingLinkedSchedule = Boolean(taskForSchedule.linkedLessonId);
+  const previousScheduleText = hasExistingLinkedSchedule
+    ? formatScheduleDateTime(taskForSchedule.linkedLessonDate || "", taskForSchedule.linkedLessonTime || "")
+    : "";
+  const hasScheduleChanged =
+    hasExistingLinkedSchedule &&
+    (taskForSchedule.scheduledDate !== taskForSchedule.linkedLessonDate ||
+      normalizeTime(taskForSchedule.scheduledTime) !== normalizeTime(taskForSchedule.linkedLessonTime));
+  const currentScheduleNoticeTargets = getCurrentSupplementScheduleNoticeTargets(taskForSchedule, notificationJobs);
+  const hasCurrentScheduleNoticePair = currentScheduleNoticeTargets.has("student") && currentScheduleNoticeTargets.has("parent");
+  const shouldReserveScheduleNotice = shouldUpdateStudentReminder &&
+    (!hasExistingLinkedSchedule || hasScheduleChanged || !hasCurrentScheduleNoticePair);
+  return {
+    hasCurrentScheduleNoticePair,
+    hasExistingLinkedSchedule,
+    hasScheduleChanged,
+    keepLessonJournalOpen,
+    previousScheduleText,
+    shouldReserveScheduleNotice,
+    shouldUpdateStudentReminder,
+    taskForSchedule
+  };
+}
 
 export async function applySupplementScheduleNotificationsRequest({
   previousScheduleText = "",
