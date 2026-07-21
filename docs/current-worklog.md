@@ -168,6 +168,17 @@
 - 사람 검토 gate: 좁은 수업메모 열에서 세 행이 서로 겹치거나 열 밖으로 나오지 않고, `현재=작성됨/미작성`, `이전=직전 확인 필요/참고 확인 필요/확인 완료/없음`, `작성창=학생+학부모/학생/학부모/가져오지 않음`이 실제 모달 상태와 일치하는지 확인한다. 버튼 자체는 모든 행에서 같은 회색이어야 한다. 실제 발송·예약은 실행하지 않는다.
 - 중단 조건: 상태값이 잘리거나 행이 겹침, 모달의 메모/체크 상태와 다른 값이 표시됨, 확인할 이전 메모가 없는데 주의색이 보임, 버튼 색이 상태별로 달라짐, 저장 또는 알림 side effect가 생기면 다음 원천 분리 단계로 넘어가지 않는다.
 
+### 2026-07-21 P0. 숙제 후속처리 구조화 3단계 - Supabase 원천 계약 준비
+
+- 사용자 결정: 수업메모 하단 상태표는 여전히 글이 많아 불편하지만 차후 수정하기로 하고, 현재 UI를 더 손대지 않은 채 다음 목표인 숙제 후속처리 원천 분리를 우선한다.
+- 기존 원천: `다음시간까지`와 `남아서 하고 가기`는 각각 `다음 수업 확인: ...`, `수업 후 보충: ...` 기계 문구를 강사용 자유 메모인 `lesson_student_records.preparation_memo`에 섞어 저장한다. `assignmentStatus`와 `needsMakeup`만으로는 두 방식을 구분하거나 당시 선생님이 확정한 숙제 문구를 보존할 수 없다.
+- 새 원천 계약: `lesson_student_records.homework_followup_method`, `homework_followup_text`, `homework_followup_source_homework_id` 세 컬럼을 추가하는 `supabase/20260721_lesson_homework_followup_fields.sql`을 만들었다. 방식은 `next_lesson` 또는 `stay_after`만 허용하고, 문구는 당시 확정 snapshot, source ID는 원 숙제와의 soft reference다. `arrival_makeup`은 기존처럼 `makeup_tasks`가 원천이므로 이 컬럼에 넣지 않는다.
+- 이번 gate 범위: canonical `supabase/schema.sql`과 migration만 추가했다. 프론트와 API는 아직 새 컬럼을 읽거나 쓰지 않으므로 SQL 적용 전후 모두 현재 운영 저장·알림 동작은 그대로다. 기존 `preparation_memo` 데이터 마이그레이션, 운영 row 수정, `notification_jobs`, Solapi 예약·발송·취소는 실행하지 않았다.
+- 다음 구현 계약: SQL 적용 확인 후 API read/write mapping과 read-after-write 대조를 먼저 추가한다. 새 선택은 구조화 필드에만 저장하면서 `preparation_memo`의 legacy marker를 제거하고, 기존 row는 구조화 필드가 비어 있을 때만 marker를 읽는 fallback으로 보존한다. 알림톡 미리보기/실제 발송 본문 변경은 4단계 gate 전에는 하지 않는다.
+- 사람 SQL gate: Supabase SQL Editor에서 `supabase/20260721_lesson_homework_followup_fields.sql`을 실행한다. 이후 `information_schema.columns`에서 세 컬럼이 존재하고, 허용되지 않은 method를 막는 check constraint가 생성됐는지 확인한다. 이 gate 전에는 프론트/API 구조화 쓰기 구현을 배포하지 않는다.
+- AI 검증/동시 작업 주의: migration 필수 구문 검사와 대상 파일 `git diff --check`를 통과했다. `npm run test:production` 358/358과 `npm run build`도 통과했지만, 검증 중 main worktree에 다른 세션의 `App.jsx`, `App.css`, 시험분석 시나리오 변경이 새로 나타났다. 해당 변경은 이번 커밋에 stage하지 않았으며 테스트 통과는 현재 혼합 worktree 기준임을 남긴다.
+- 중단 조건: 기존 `preparation_memo` 값이 변경됨, 컬럼 추가 중 기존 row가 삭제/갱신됨, 허용값 check가 빠짐, 앱 저장 오류가 발생함, 알림 예약 또는 Solapi 그룹이 변경되면 API 연결 단계로 넘어가지 않는다.
+
 ### 2026-07-21 P0. 수업일지 결석 출결 알림톡 다음 정각 예약
 
 - 사용자 요청: 수업일지에서 결석을 저장하며 학부모 출결 알림톡을 선택한 경우 즉시 발송하지 않고 다음 정각에 예약한다.
