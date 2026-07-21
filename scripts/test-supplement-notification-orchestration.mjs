@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  cancelSupplementNotificationControlRequest,
   reserveSupplementScheduleNoticeJobRequest,
   reserveSupplementScheduleNoticesRequest,
   reserveSupplementStudentReminderJobRequest
@@ -83,6 +84,29 @@ assert.equal(pairResult.student.notificationJob.scheduledAt, pairResult.parent.n
 
 assert.equal((await reserveSupplementScheduleNoticesRequest({ task: { taskType: "retest" } })).student.status, "notApplied");
 assert.equal((await reserveSupplementScheduleNoticesRequest({ task: reminderTask })).parent.status, "failed");
+
+const controlCancelCalls = [];
+const controlCancelResult = await cancelSupplementNotificationControlRequest({
+  canCancelNotificationJob: (job) => job.status === "scheduled",
+  cancelNotificationJob: async (job, reason) => {
+    controlCancelCalls.push({ job, reason });
+    return { notificationJob: { ...job, status: "canceled" } };
+  },
+  notificationJob: { notificationJobId: "control-1", status: "scheduled" }
+});
+assert.deepEqual(controlCancelCalls, [{
+  job: { notificationJobId: "control-1", status: "scheduled" },
+  reason: "보충관리 개별 알림톡 예약 취소"
+}]);
+assert.equal(controlCancelResult.status, "canceled");
+assert.equal(controlCancelResult.message, "Solapi 예약을 취소했습니다.");
+await assert.rejects(
+  cancelSupplementNotificationControlRequest({
+    canCancelNotificationJob: () => false,
+    notificationJob: { status: "sent" }
+  }),
+  /현재 취소할 수 있는 Solapi 예약이 없습니다/
+);
 
 const baseJob = {
   notificationJobId: "student-schedule",

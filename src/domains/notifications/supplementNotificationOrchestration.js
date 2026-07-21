@@ -6,6 +6,22 @@ import {
   isSupplementStudentReminderTask
 } from "./supplementJobBuilders.js";
 
+export async function cancelSupplementNotificationControlRequest({
+  canCancelNotificationJob,
+  cancelNotificationJob,
+  notificationJob
+} = {}) {
+  if (!notificationJob || !canCancelNotificationJob(notificationJob)) {
+    throw new Error("현재 취소할 수 있는 Solapi 예약이 없습니다.");
+  }
+  const result = await cancelNotificationJob(notificationJob, "보충관리 개별 알림톡 예약 취소");
+  return {
+    notificationJob: result.notificationJob,
+    status: result.notificationJob?.status || "canceled",
+    message: "Solapi 예약을 취소했습니다."
+  };
+}
+
 export async function reserveSupplementScheduleNoticesRequest({
   academyName,
   cancelActiveNotices,
