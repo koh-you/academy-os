@@ -1577,6 +1577,47 @@ export async function upsertSpecialLectureApplication(application) {
   return { source: databaseSource, application: fromSpecialLectureApplicationRow(row) };
 }
 
+export async function deleteSpecialLectureApplication(applicationId) {
+  const normalizedApplicationId = String(applicationId ?? "").trim();
+  if (!normalizedApplicationId) throw new Error("삭제할 특강 신청 원본 ID가 필요합니다.");
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, applicationId: normalizedApplicationId, deleted: false, linkedEnrollmentIds: [] };
+  }
+
+  const encodedApplicationId = encodeURIComponent(normalizedApplicationId);
+  const linkedEnrollmentRows = await listRows(
+    "special_lecture_enrollments",
+    `select=enrollment_id&application_id=eq.${encodedApplicationId}`,
+    { requireServiceRole: true }
+  );
+  const linkedEnrollmentIds = linkedEnrollmentRows.map((row) => row.enrollment_id).filter(Boolean);
+  if (linkedEnrollmentIds.length) {
+    return { source: databaseSource, applicationId: normalizedApplicationId, deleted: false, linkedEnrollmentIds };
+  }
+
+  const existingRows = await listRows(
+    "special_lecture_applications",
+    `select=application_id&application_id=eq.${encodedApplicationId}`,
+    { requireServiceRole: true }
+  );
+  if (!existingRows.length) {
+    return { source: databaseSource, applicationId: normalizedApplicationId, deleted: false, linkedEnrollmentIds: [] };
+  }
+
+  await deleteRows("special_lecture_applications", `application_id=eq.${encodedApplicationId}`);
+  const remainingRows = await listRows(
+    "special_lecture_applications",
+    `select=application_id&application_id=eq.${encodedApplicationId}`,
+    { requireServiceRole: true }
+  );
+  return {
+    source: databaseSource,
+    applicationId: normalizedApplicationId,
+    deleted: remainingRows.length === 0,
+    linkedEnrollmentIds: []
+  };
+}
+
 export async function upsertSpecialLectureEnrollment(enrollment) {
   const now = new Date().toISOString();
   const normalizedEnrollment = {
