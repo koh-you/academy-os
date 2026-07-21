@@ -479,7 +479,7 @@ function getPreparationNoticeForTarget(record = {}, target = "parent") {
 function getHomeworkFollowupNoticeForTarget(record = {}, target = "parent") {
   const shouldIncludePrepMemo =
     target === "student" ? Boolean(record?.prepStudentVisible) : Boolean(record?.prepParentVisible);
-  return shouldIncludePrepMemo ? formatHomeworkFollowupMemoForNotice(record?.preparationMemo) : "";
+  return shouldIncludePrepMemo ? formatHomeworkFollowupForNotice(record) : "";
 }
 
 const homeworkFollowupMemoPrefixes = {
@@ -501,10 +501,6 @@ function getHomeworkFollowupOptionsForAssignmentStatus(status = "") {
   return isAssignmentStatusHomeworkMakeupCandidate(normalizedStatus) ? homeworkFollowupMethods : [];
 }
 
-function getHomeworkFollowupMemoPrefix(method = "") {
-  return homeworkFollowupMemoPrefixes[method] || "";
-}
-
 function parseHomeworkFollowupMemoLine(line = "") {
   const text = normalizeMessageText(line);
   const match = text.match(/^(다음 수업 확인|수업 후 보충)\s*:\s*(.+)$/);
@@ -513,19 +509,32 @@ function parseHomeworkFollowupMemoLine(line = "") {
   return { method, text: match[2].trim() };
 }
 
-function formatHomeworkFollowupMemoForNotice(value = "") {
-  const lines = normalizeMessageText(value).split("\n").flatMap((line) => {
-    const parsed = parseHomeworkFollowupMemoLine(line);
-    if (!parsed) return [];
-    if (parsed.method === "next_lesson") {
-      return [`- 다음 수업 때 ${parsed.text}를 함께 확인하겠습니다.`];
-    }
-    if (parsed.method === "stay_after") {
-      return [`- 오늘 수업 후 ${parsed.text} 보충을 마무리합니다.`];
-    }
-    return [];
-  });
-  return normalizeMessageText(lines.join("\n"));
+function getHomeworkFollowupFromRecord(record = {}) {
+  const method = normalizeMessageText(record?.homeworkFollowupMethod);
+  const text = normalizeMessageText(record?.homeworkFollowupText);
+  if (["next_lesson", "stay_after"].includes(method) && text) {
+    return {
+      method,
+      sourceHomeworkId: normalizeMessageText(record?.homeworkFollowupSourceHomeworkId),
+      text
+    };
+  }
+  return normalizeMessageText(record?.preparationMemo)
+    .split("\n")
+    .map(parseHomeworkFollowupMemoLine)
+    .find(Boolean) ?? null;
+}
+
+function formatHomeworkFollowupForNotice(record = {}) {
+  const followup = getHomeworkFollowupFromRecord(record);
+  if (!followup) return "";
+  if (followup.method === "next_lesson") {
+    return `- 다음 수업 때 ${followup.text}를 함께 확인하겠습니다.`;
+  }
+  if (followup.method === "stay_after") {
+    return `- 오늘 수업 후 ${followup.text} 보충을 마무리합니다.`;
+  }
+  return "";
 }
 
 function removeHomeworkFollowupMemoLines(value = "") {
@@ -536,27 +545,26 @@ function removeHomeworkFollowupMemoLines(value = "") {
     .trim();
 }
 
-function upsertHomeworkFollowupMemo(value = "", method = "", homeworkTitle = "") {
-  const baseMemo = removeHomeworkFollowupMemoLines(value);
-  const prefix = getHomeworkFollowupMemoPrefix(method);
-  const nextLine = prefix && homeworkTitle ? `${prefix}: ${homeworkTitle}` : "";
-  return [baseMemo, nextLine].filter(Boolean).join("\n");
-}
-
 function getHomeworkFollowupMethodFromRecord(record = {}) {
   if (record?.needsMakeup) return "arrival_makeup";
-  const parsed = normalizeMessageText(record?.preparationMemo)
-    .split("\n")
-    .map(parseHomeworkFollowupMemoLine)
-    .find(Boolean);
-  return parsed?.method || "";
+  return getHomeworkFollowupFromRecord(record)?.method || "";
 }
 
-function getHomeworkFollowupSummaryFromMemo(value = "") {
-  return normalizeMessageText(value)
-    .split("\n")
-    .map(parseHomeworkFollowupMemoLine)
-    .find(Boolean);
+function getHomeworkFollowupPatch(record = {}, method = "", homework = null) {
+  const homeworkText = normalizeMessageText(homework?.title || homework?.sourceLabel);
+  const structuredMethod = ["next_lesson", "stay_after"].includes(method) && homeworkText ? method : "";
+  return {
+    homeworkFollowupMethod: structuredMethod,
+    homeworkFollowupSourceHomeworkId: structuredMethod ? normalizeMessageText(homework?.homeworkId) : "",
+    homeworkFollowupText: structuredMethod ? homeworkText : "",
+    preparationMemo: removeHomeworkFollowupMemoLines(record?.preparationMemo)
+  };
+}
+
+function hasMatchingHomeworkFollowupFields(expectedRecord = {}, savedRecord = {}) {
+  return ["homeworkFollowupMethod", "homeworkFollowupText", "homeworkFollowupSourceHomeworkId"]
+    .filter((field) => Object.prototype.hasOwnProperty.call(expectedRecord, field))
+    .every((field) => normalizeMessageText(expectedRecord[field]) === normalizeMessageText(savedRecord?.[field]));
 }
 
 function buildCommentPreviewLines({ audience, comment, nextHomework, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
@@ -8406,7 +8414,11 @@ export function App() {
             (homework) => homework.lessonId === record.lessonId && homework.studentId === record.studentId
           );
 
-      await postJson("/api/lesson-records", { record });
+      const saveResult = await postJson("/api/lesson-records", { record });
+      const savedRecord = saveResult?.record;
+      if (!savedRecord || !hasMatchingHomeworkFollowupFields(record, savedRecord)) {
+        throw new Error("수업기록 저장 후 Supabase 재조회에서 숙제 후속처리 값이 일치하지 않습니다.");
+      }
       if (relatedHomeworks.length > 0) {
         await postJson("/api/homeworks/bulk", { homeworks: relatedHomeworks });
       }
@@ -8415,7 +8427,7 @@ export function App() {
       const savedTime = record.updatedAt ? Date.parse(record.updatedAt) : Date.now();
       const isLatestRecord = !recordOverride || !latestRecord || !latestTime || !savedTime || latestTime <= savedTime;
       if (isLatestRecord) {
-        const nextRecords = upsertLessonStudentRecord(recordsRef.current, record);
+        const nextRecords = upsertLessonStudentRecord(recordsRef.current, savedRecord);
         recordsRef.current = nextRecords;
         setRecords(nextRecords);
       }
@@ -8425,7 +8437,7 @@ export function App() {
         setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "saved" }));
       }
       if (!skipNotificationRefresh) {
-        refreshLessonNotificationJobsForRecord(record, lessonForRecord);
+        refreshLessonNotificationJobsForRecord(savedRecord, lessonForRecord);
       }
       return true;
     } catch (error) {
@@ -16091,18 +16103,25 @@ function LessonJournalDetail({
     const normalizedValue = normalizeAssignmentStatusValue(value);
     const homeworkTitle = previousHomework?.title || previousHomework?.sourceLabel || "";
     if (normalizedValue === "not_checked" && homeworkTitle) {
-      const nextMemo = upsertHomeworkFollowupMemo(baseRecord.preparationMemo ?? "", "next_lesson", homeworkTitle);
       updateJournalRecordDraftPatch(student, baseRecord, {
         assignmentStatus: normalizedValue,
         incompleteHomework: normalizedValue,
         needsMakeup: false,
-        preparationMemo: nextMemo,
+        ...getHomeworkFollowupPatch(baseRecord, "next_lesson", previousHomework),
         prepParentVisible: true,
         prepStudentVisible: true,
         teacherCommentSendStatus: "",
         studentCommentSendStatus: ""
       });
       setJournalManualSaveMessage("수업일지 · 미검사는 다음 정규수업 확인 문구를 오늘 알림톡에 반영합니다.");
+      return;
+    }
+    if (!getHomeworkFollowupOptionsForAssignmentStatus(normalizedValue).length) {
+      updateJournalRecordDraftPatch(student, baseRecord, {
+        assignmentStatus: normalizedValue,
+        incompleteHomework: normalizedValue,
+        ...getHomeworkFollowupPatch(baseRecord)
+      });
       return;
     }
     updateJournalRecordDraft(student, baseRecord, "assignmentStatus", normalizedValue);
@@ -16129,7 +16148,7 @@ function LessonJournalDetail({
   function applyHomeworkFollowupMethod(student, baseRecord, previousHomework, method) {
     if (!journalEditMode || !previousHomework) return;
     const homeworkTitle = previousHomework.title || previousHomework.sourceLabel || "지난 숙제";
-    const clearFollowupMemo = removeHomeworkFollowupMemoLines(baseRecord.preparationMemo ?? "");
+    const clearFollowupPatch = getHomeworkFollowupPatch(baseRecord);
     const commonPatch = {
       assignmentStatus: normalizeAssignmentStatusValue(baseRecord.assignmentStatus ?? baseRecord.incompleteHomework ?? ""),
       incompleteHomework: normalizeAssignmentStatusValue(baseRecord.assignmentStatus ?? baseRecord.incompleteHomework ?? ""),
@@ -16155,19 +16174,18 @@ function LessonJournalDetail({
       updateJournalRecordDraftPatch(student, baseRecord, {
         ...commonPatch,
         needsMakeup: true,
-        preparationMemo: clearFollowupMemo,
-        prepParentVisible: Boolean(clearFollowupMemo && baseRecord.prepParentVisible),
-        prepStudentVisible: Boolean(clearFollowupMemo && baseRecord.prepStudentVisible)
+        ...clearFollowupPatch,
+        prepParentVisible: Boolean(clearFollowupPatch.preparationMemo && baseRecord.prepParentVisible),
+        prepStudentVisible: Boolean(clearFollowupPatch.preparationMemo && baseRecord.prepStudentVisible)
       });
       setJournalManualSaveMessage("수업일지 · 등원보충을 보충관리로 보냈습니다. 변경 저장이 필요합니다.");
       return;
     }
 
-    const nextMemo = upsertHomeworkFollowupMemo(baseRecord.preparationMemo ?? "", method, homeworkTitle);
     updateJournalRecordDraftPatch(student, baseRecord, {
       ...commonPatch,
       needsMakeup: false,
-      preparationMemo: nextMemo,
+      ...getHomeworkFollowupPatch(baseRecord, method, previousHomework),
       prepParentVisible: true,
       prepStudentVisible: true
     });
@@ -16637,7 +16655,8 @@ function LessonJournalDetail({
             const previousLessonContent = getLessonContent(previousRecord);
             const previousPreparationMemo = previousMemoRecord?.preparationMemo?.trim() ?? "";
             const referencePreparationMemo = referenceRecord?.preparationMemo?.trim() ?? "";
-            const pendingHomeworkFollowup = getHomeworkFollowupSummaryFromMemo(previousPreparationMemo || referencePreparationMemo);
+            const pendingHomeworkFollowup = getHomeworkFollowupFromRecord(previousRecord ?? {})
+              ?? getHomeworkFollowupFromRecord(referenceRecord ?? {});
             const hasCheckedPriorPrepMemo = Boolean(previousMemoContext.acknowledgedMemoCutoffDate);
             const currentMemoStatus = record.preparationMemo?.trim() ? "작성됨" : "미작성";
             const priorMemoStatus = previousPreparationMemo
@@ -26354,6 +26373,9 @@ function createEmptyRecord(lesson, student) {
     checkOutAt: "",
     checkOutTime: "",
     homeworkStatus: "not_started",
+    homeworkFollowupMethod: "",
+    homeworkFollowupSourceHomeworkId: "",
+    homeworkFollowupText: "",
     lessonMaterial: "",
     lessonProgress: "",
     preparationMemo: "",

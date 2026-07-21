@@ -193,6 +193,17 @@
 - AI 검증/동시 작업 주의: migration 필수 구문 검사와 대상 파일 `git diff --check`를 통과했다. `npm run test:production` 358/358과 `npm run build`도 통과했지만, 검증 중 main worktree에 다른 세션의 `App.jsx`, `App.css`, 시험분석 시나리오 변경이 새로 나타났다. 해당 변경은 이번 커밋에 stage하지 않았으며 테스트 통과는 현재 혼합 worktree 기준임을 남긴다.
 - 중단 조건: 기존 `preparation_memo` 값이 변경됨, 컬럼 추가 중 기존 row가 삭제/갱신됨, 허용값 check가 빠짐, 앱 저장 오류가 발생함, 알림 예약 또는 Solapi 그룹이 변경되면 API 연결 단계로 넘어가지 않는다.
 
+### 2026-07-21 P0. 숙제 후속처리 구조화 3단계 - API/UI 연결
+
+- SQL gate: 사용자가 Supabase SQL Editor에서 `supabase/20260721_lesson_homework_followup_fields.sql` 적용을 완료했다고 확인했다.
+- 새 저장 계약: 수업일지에서 `미검사/다음시간까지` 또는 `남아서 하고 가기`를 선택하면 `homeworkFollowupMethod`, `homeworkFollowupText`, `homeworkFollowupSourceHomeworkId`를 local journal draft에 넣는다. 동시에 강사용 `preparationMemo`에서 `다음 수업 확인:`/`수업 후 보충:` legacy marker를 제거한다. `등원보충`은 구조화 세 필드를 비우고 기존 `makeup_tasks` 원천을 유지한다.
+- 과거 기록 보호: 읽기와 알림 문장 조립은 구조화 필드를 우선한다. 세 필드가 비어 있는 과거 row만 기존 `preparation_memo` marker를 fallback으로 읽으므로 일괄 운영 데이터 마이그레이션이나 기존 사람 메모 수정은 하지 않는다. 새 후속처리 선택이 없는 일반 수업메모 저장도 기존 구조화 필드를 보존한다.
+- 저장 확인: API는 Supabase upsert 후 같은 lesson/student row를 다시 조회하고 구조화 세 필드를 요청값과 대조한다. 프론트도 API가 돌려준 재조회 record를 다시 대조하고 그 record로 현재 state를 갱신한 뒤에만 `저장 완료`를 표시한다. 불일치나 재조회 누락은 저장 실패로 남고 수업일지 draft와 편집 모드를 유지한다.
+- 알림 경계: 학생·학부모 미리보기와 서버의 발송 직전 refresh는 구조화 값을 읽되 기존 `다음 수업 때 ... 함께 확인`, `오늘 수업 후 ... 보충` 문장 형식을 그대로 유지한다. 수업일지 저장은 계속 `skipNotificationRefresh: true`이므로 `notification_jobs`나 Solapi 예약을 자동 수정하지 않는다. 예약 본문 고정·OS row/Solapi 대조는 다음 4단계 사람 gate로 남긴다.
+- AI 검증: `git diff --check`, `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 359/359, `npm run build`를 통과했다. 기존 Vite 500KB chunk 경고만 남는다. 운영 Supabase row 쓰기와 실제 알림 발송·예약·취소는 실행하지 않았다.
+- 사람 검토 gate: 삭제 가능한 미래 테스트 수업의 학생 한 명을 사용한다. 기존 강사용 수업메모를 적어 둔 뒤 `미검사` 또는 미완료 숙제의 `다음시간까지`를 선택하고 `변경 저장`한다. Supabase row에서 method=`next_lesson`, text=숙제명, source ID=원 homework ID이고 `preparation_memo`에는 사람 메모만 남아야 한다. 새로고침 후 선택 상태와 다음 수업의 `확인할 숙제`가 유지돼야 한다. 같은 방식으로 `남아서 하고 가기`의 method=`stay_after`를 확인하고, `등원보충`은 세 필드가 비면서 `makeup_tasks`에만 생성되는지 확인한다. 실제 알림 발송·예약은 실행하지 않는다.
+- 회귀/중단 조건: 사람 메모가 삭제됨, marker가 새로 저장됨, API 성공인데 재조회 세 필드가 다름, 새로고침 후 방식이 사라짐, 과거 legacy row의 확인할 숙제가 사라짐, 등원보충이 구조화 record와 task에 중복 저장됨, 수업일지 저장만으로 `notification_jobs`나 Solapi 그룹이 변경되면 4단계로 넘어가지 않는다.
+
 ### 2026-07-21 P0. 수업일지 결석 출결 알림톡 다음 정각 예약
 
 - 사용자 요청: 수업일지에서 결석을 저장하며 학부모 출결 알림톡을 선택한 경우 즉시 발송하지 않고 다음 정각에 예약한다.

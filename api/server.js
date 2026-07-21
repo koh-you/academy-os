@@ -2220,7 +2220,7 @@ function getPreparationNoticeForNotification(record = {}, target = "parent") {
 
 function getHomeworkFollowupNoticeForNotification(record = {}, target = "parent") {
   const shouldInclude = target === "student" ? Boolean(record.prepStudentVisible) : Boolean(record.prepParentVisible);
-  return shouldInclude ? formatHomeworkFollowupMemoForNotification(record.preparationMemo) : "";
+  return shouldInclude ? formatHomeworkFollowupForNotification(record) : "";
 }
 
 function parseHomeworkFollowupMemoLineForNotification(line = "") {
@@ -2231,19 +2231,28 @@ function parseHomeworkFollowupMemoLineForNotification(line = "") {
   return { method, text: match[2].trim() };
 }
 
-function formatHomeworkFollowupMemoForNotification(value = "") {
-  const lines = normalizeNotificationText(value).split("\n").flatMap((line) => {
-    const parsed = parseHomeworkFollowupMemoLineForNotification(line);
-    if (!parsed) return [];
-    if (parsed.method === "next_lesson") {
-      return [`- 다음 수업 때 ${parsed.text}를 함께 확인하겠습니다.`];
-    }
-    if (parsed.method === "stay_after") {
-      return [`- 오늘 수업 후 ${parsed.text} 보충을 마무리합니다.`];
-    }
-    return [];
-  });
-  return normalizeNotificationText(lines.join("\n"));
+function getHomeworkFollowupForNotification(record = {}) {
+  const method = normalizeNotificationText(record.homeworkFollowupMethod);
+  const text = normalizeNotificationText(record.homeworkFollowupText);
+  if (["next_lesson", "stay_after"].includes(method) && text) {
+    return { method, text };
+  }
+  return normalizeNotificationText(record.preparationMemo)
+    .split("\n")
+    .map(parseHomeworkFollowupMemoLineForNotification)
+    .find(Boolean) ?? null;
+}
+
+function formatHomeworkFollowupForNotification(record = {}) {
+  const followup = getHomeworkFollowupForNotification(record);
+  if (!followup) return "";
+  if (followup.method === "next_lesson") {
+    return `- 다음 수업 때 ${followup.text}를 함께 확인하겠습니다.`;
+  }
+  if (followup.method === "stay_after") {
+    return `- 오늘 수업 후 ${followup.text} 보충을 마무리합니다.`;
+  }
+  return "";
 }
 
 function removeHomeworkFollowupMemoLinesForNotification(value = "") {

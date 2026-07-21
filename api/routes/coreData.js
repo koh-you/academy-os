@@ -435,6 +435,9 @@ function toLessonRecordRow(record, { includeExtendedFields = true, includeAttend
     lesson_material: compact(record.lessonMaterial),
     lesson_content: compact(record.lessonContent),
     assignment_status: compact(record.assignmentStatus),
+    homework_followup_method: compact(record.homeworkFollowupMethod),
+    homework_followup_text: compact(record.homeworkFollowupText),
+    homework_followup_source_homework_id: compact(record.homeworkFollowupSourceHomeworkId),
     preparation_memo: compact(record.preparationMemo),
     prep_student_notice: compact(record.prepStudentNotice),
     prep_student_visible: Boolean(record.prepStudentVisible),
@@ -485,6 +488,9 @@ function fromLessonRecordRow(row) {
     lessonMaterial: row.lesson_material ?? "",
     lessonContent: row.lesson_content ?? "",
     assignmentStatus: row.assignment_status ?? "",
+    homeworkFollowupMethod: row.homework_followup_method ?? "",
+    homeworkFollowupText: row.homework_followup_text ?? "",
+    homeworkFollowupSourceHomeworkId: row.homework_followup_source_homework_id ?? "",
     preparationMemo: row.preparation_memo ?? "",
     prepMemoCheckedAt: row.prep_memo_checked_at ?? "",
     prepMemoCheckedSourceDate: row.prep_memo_checked_source_date ?? "",
@@ -2476,6 +2482,39 @@ function mergeExistingAttendanceForNonAttendanceSave(nextRecord = {}, existingRe
   };
 }
 
+function mergeExistingHomeworkFollowupForSave(nextRecord = {}, existingRecord = null) {
+  if (!existingRecord) return nextRecord;
+  const fields = ["homeworkFollowupMethod", "homeworkFollowupText", "homeworkFollowupSourceHomeworkId"];
+  return fields.reduce((record, field) => (
+    Object.prototype.hasOwnProperty.call(nextRecord, field)
+      ? record
+      : { ...record, [field]: existingRecord[field] ?? "" }
+  ), nextRecord);
+}
+
+function normalizeLessonRecordVerificationValue(value) {
+  return String(value ?? "").trim();
+}
+
+async function requeryVerifiedLessonStudentRecord(expectedRecord = {}) {
+  const rows = await listRows(
+    "lesson_student_records",
+    `select=*&lesson_id=eq.${encodeURIComponent(expectedRecord.lessonId)}&student_id=eq.${encodeURIComponent(expectedRecord.studentId)}&limit=1`,
+    { requireServiceRole: true }
+  );
+  if (!rows[0]) throw new Error("수업기록 저장 후 Supabase 재조회에서 행을 찾지 못했습니다.");
+  const savedRecord = fromLessonRecordRow(rows[0]);
+  const fields = ["homeworkFollowupMethod", "homeworkFollowupText", "homeworkFollowupSourceHomeworkId"];
+  const mismatch = fields.find((field) => (
+    normalizeLessonRecordVerificationValue(savedRecord[field]) !==
+    normalizeLessonRecordVerificationValue(expectedRecord[field])
+  ));
+  if (mismatch) {
+    throw new Error(`수업기록 저장 후 Supabase 재조회 값이 일치하지 않습니다: ${mismatch}`);
+  }
+  return savedRecord;
+}
+
 export async function upsertLessonStudentRecord(record) {
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
     return { source: fallbackSource, record };
@@ -2491,7 +2530,8 @@ export async function upsertLessonStudentRecord(record) {
   const stableRecord = existingRows[0]
     ? { ...record, lessonStudentRecordId: existingRows[0].lesson_student_record_id }
     : record;
-  const recordToSave = mergeExistingAttendanceForNonAttendanceSave(stableRecord, existingRecord);
+  const attendanceStableRecord = mergeExistingAttendanceForNonAttendanceSave(stableRecord, existingRecord);
+  const recordToSave = mergeExistingHomeworkFollowupForSave(attendanceStableRecord, existingRecord);
   let row;
   try {
     [row] = await upsertRows("lesson_student_records", [toLessonRecordRow(recordToSave)], { onConflict: "lesson_id,student_id" });
@@ -2506,6 +2546,9 @@ export async function upsertLessonStudentRecord(record) {
       message.includes("lesson_material") ||
       message.includes("lesson_content") ||
       message.includes("assignment_status") ||
+      message.includes("homework_followup_method") ||
+      message.includes("homework_followup_text") ||
+      message.includes("homework_followup_source_homework_id") ||
       message.includes("behavior_tag") ||
       message.includes("homework_status") ||
       message.includes("needs_makeup") ||
@@ -2524,6 +2567,9 @@ export async function upsertLessonStudentRecord(record) {
       recordToSave.lessonMaterial,
       recordToSave.lessonContent,
       recordToSave.assignmentStatus,
+      recordToSave.homeworkFollowupMethod,
+      recordToSave.homeworkFollowupText,
+      recordToSave.homeworkFollowupSourceHomeworkId,
       recordToSave.preparationMemo,
       recordToSave.prepMemoCheckedAt,
       recordToSave.prepMemoCheckedSourceDate,
@@ -2549,11 +2595,11 @@ export async function upsertLessonStudentRecord(record) {
         [toLessonRecordRow(recordToSave, { includeAttendanceTimeFields: false })],
         { onConflict: "lesson_id,student_id" }
       );
-      return { source: databaseSource, record: fromLessonRecordRow(row) };
+      return { source: databaseSource, record: await requeryVerifiedLessonStudentRecord(recordToSave) };
     }
     if (hasExtendedValues) {
       throw new Error(
-        "Supabase lesson_student_records 확장 컬럼 migration이 필요합니다. supabase/20260708_prep_memo_acknowledgements.sql 또는 기존 lesson_student_records 확장 SQL을 실행한 뒤 다시 저장하세요."
+        "Supabase lesson_student_records 확장 컬럼 migration이 필요합니다. 수업메모 확인 컬럼은 supabase/20260708_prep_memo_acknowledgements.sql, 숙제 후속처리 컬럼은 supabase/20260721_lesson_homework_followup_fields.sql을 실행한 뒤 다시 저장하세요."
       );
     }
     [row] = await upsertRows(
@@ -2562,7 +2608,7 @@ export async function upsertLessonStudentRecord(record) {
       { onConflict: "lesson_id,student_id" }
     );
   }
-  return { source: databaseSource, record: fromLessonRecordRow(row) };
+  return { source: databaseSource, record: await requeryVerifiedLessonStudentRecord(recordToSave) };
 }
 
 export async function upsertHomework(homework) {
