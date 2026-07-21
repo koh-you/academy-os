@@ -57,6 +57,7 @@ import { SupplementHistoryModal } from "../domains/supplements/SupplementHistory
 import { SupplementNotificationDraftWorkspace } from "../domains/supplements/SupplementNotificationDraftWorkspace.jsx";
 import { SupplementNotificationControlModal } from "../domains/supplements/SupplementNotificationControlModal.jsx";
 import { SupplementTaskSourceContext } from "../domains/supplements/SupplementTaskSourceContext.jsx";
+import { SupplementTaskScheduleEditor } from "../domains/supplements/SupplementTaskScheduleEditor.jsx";
 import {
   getSupplementImmediateNoticeSaveStatus,
   getSupplementNotificationControlDisplay,
@@ -23248,35 +23249,14 @@ function SupplementStudentModal({
                     supplementHomeworkNote={supplementHomeworkNote}
                     taskType={task.taskType}
                   />
-                  <div className="supplementSchedulePanel">
-                    {shouldShowMethodOptions ? (
-                      <label className="taskOptionBlock">
-                        <strong>보충을 어떻게 처리할까요?</strong>
-                        <div className="taskChoiceGrid">
-                          {methodOptions.map((option) => (
-                            <button
-                              className={draftValues.supplementMethod === option.id ? "active" : ""}
-                              key={option.id}
-                              onClick={() => updateTaskDraft(task, "supplementMethod", option.id)}
-                              type="button"
-                            >
-                              {option.label}
-                            </button>
-                          ))}
-                        </div>
-                      </label>
-                    ) : null}
-                    <div className="fieldGrid two supplementDateGrid">
-                      <label>
-                        <strong>배정일</strong>
-                        <input type="date" value={draftValues.scheduledDate} onChange={(event) => updateTaskDraft(task, "scheduledDate", event.target.value)} />
-                      </label>
-                      <label>
-                        <strong>시간</strong>
-                        <input type="time" value={draftValues.scheduledTime} onChange={(event) => updateTaskDraft(task, "scheduledTime", event.target.value)} />
-                      </label>
-                    </div>
-                  </div>
+                  <SupplementTaskScheduleEditor
+                    methodOptions={methodOptions}
+                    onChange={(field, value) => updateTaskDraft(task, field, value)}
+                    scheduledDate={draftValues.scheduledDate}
+                    scheduledTime={draftValues.scheduledTime}
+                    selectedMethod={draftValues.supplementMethod}
+                    showMethodOptions={shouldShowMethodOptions}
+                  />
                   {draftDiff.length ? (
                     <div className="supplementDraftDiff" data-state="dirty">
                       <strong>저장하면 바뀌는 내용</strong>

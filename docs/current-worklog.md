@@ -348,6 +348,14 @@
 - 운영 저장 검증: `special_lecture_enrollments` 재조회에서 중3 신초봄은 active 5회, 각 13:00~15:00이고 고3 enrollment는 canceled 0회다. 1~5회차 lessons 모두 중3 ID/13:00~15:00을 포함하고 고3 ID는 없다. 1회차 기존 출결·수업기록은 저장 전후 2건, `notification_jobs`는 0건으로 유지됐다.
 - 사람 gate: 배포 후 클리닉 특강 명단에서 `창일중 · 중3` 신초봄이 1~5회차, 각 13:00~15:00으로 보이는지 확인한다. 잘못 입력한 고3 enrollment는 활성 수강 명단에서 제외되어야 한다. 1회차 수업일지에는 신초봄 행이 추가되되 기존 학생의 출결·시간은 그대로여야 한다.
 - 중단 조건: 올바른 신초봄 원천이 불명확함, 기존 학생이 빠짐, 기존 학생 시간이 바뀜, 출결 record가 자동 생성/변경됨, 알림톡 예약/발송 발생, Supabase 재조회 불일치인데 완료 표시, 새로고침 후 공통 시간이 사라짐.
+## 2026-07-21 P1. 12I 보충 방법·일정 controlled editor 분리
+
+- 상태: 보충 처리 방법 버튼과 배정일·시간 input을 `SupplementTaskScheduleEditor.jsx`로 분리했다.
+- 동작 보존: 선택값은 App의 `draftValues`를 그대로 받고 모든 변경은 `(field, value)` 형태로 기존 `updateTaskDraft` callback에 반환한다. 방법 옵션 노출 조건과 active 표시, date/time input type을 유지한다.
+- 저장 원천/side effect: 새 editor는 자체 hook이나 저장을 소유하지 않는다. local draft state, dirty 계산, Supabase 저장, 수업일지 일정 반영과 알림 예약은 App에 남아 있다.
+- 검증/gate: production 87/88b-9가 세 필드 callback 매핑과 App 소유 draft 계약, API/알림 side-effect 비소유를 검사한다. 추가 사람 gate는 없다.
+- 다음 단위: 최신 `origin/main` rebase 후 변경 diff·저장 상태·저장/일정 gate 안내 표시를 분리한다.
+
 ## 2026-07-21 P1. 12H 보충 task 원천 맥락 읽기 카드 분리
 
 - 상태: 숙제보충의 원 숙제 배정일·마감·제목과 결석보강의 원 수업·교재·지난/다음 숙제, 하단 확인용 숙제 카드를 `SupplementTaskSourceContext.jsx`로 분리했다.
