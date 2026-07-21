@@ -9125,17 +9125,41 @@ button:disabled {
 @media (min-width: 981px) {
   .noticeComposerGrid {
     align-items: stretch;
+    height: clamp(560px, calc(100dvh - 170px), 760px);
+    min-height: 0;
+  }
+
+  .noticeTargetPanel,
+  .noticeWritePanel {
+    min-height: 0;
   }
 
   .noticeTargetPanel {
     grid-template-rows: auto auto auto minmax(0, 1fr);
     height: 100%;
-    min-height: 0;
   }
 
   .noticeTargetPanel .noticeStudentPicker {
     max-height: none;
     min-height: 0;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+
+  .noticeTargetPanel .noticeListHeader {
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 7px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  .noticeWritePanel {
+    align-content: start;
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-gutter: stable;
   }
 }
 
