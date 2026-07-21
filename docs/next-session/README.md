@@ -167,7 +167,8 @@ Git 충돌 방지 규칙:
 - 12G에서 `SupplementNotificationControlModal`을 callback-only 표시 컴포넌트로 분리했습니다. 현재 job/preview/가능 여부 계산과 실제 action은 App이 계속 소유합니다.
 - 12H에서 `SupplementTaskSourceContext`로 원 숙제/원 결석 수업 맥락과 확인용 숙제 읽기 카드를 분리했습니다. 저장·입력·알림 side effect는 없습니다.
 - 12I에서 `SupplementTaskScheduleEditor`로 방법·배정일·시간 controlled input을 분리했습니다. local draft와 dirty/save/notification state는 App이 계속 소유합니다.
-- 다음은 최신 `origin/main`을 rebase한 뒤 변경 diff·저장 상태·저장/일정 gate 안내 표시를 분리합니다. 남은 사람 gate 3개는 통과로 바꾸지 않습니다.
+- 12J에서 `SupplementTaskSaveSummary`와 일정 gate 안내를 분리해 diff/status→문구 편집→gate 안내 순서를 고정했습니다. 실제 action은 없습니다.
+- 다음은 최신 `origin/main`을 rebase한 뒤 task 카드 상단 메타 또는 하단 action bar를 callback-only 표시로 분리합니다. 남은 사람 gate 3개는 통과로 바꾸지 않습니다.
 
 통과한 11B-1 사람 gate 기록:
 1. 삭제 가능한 미래 보충 task와 통제된 학생/학부모 전화번호를 준비합니다.
