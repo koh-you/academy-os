@@ -48,7 +48,6 @@ import {
 } from "../domains/notifications/supplementJobBuilders.js";
 import {
   canCancelNotificationJob,
-  getCancelableSupplementScheduleNoticeJobs,
   getCurrentSupplementScheduleNoticeTargets,
   getSupplementNotificationControlJob,
   getSupplementStudentReminderJob,
@@ -57,6 +56,7 @@ import {
 import { ParentResponseContextPanel } from "../domains/notifications/ParentResponseContextPanel.jsx";
 import { getParentResponseContexts } from "../domains/notifications/parentResponseContext.js";
 import {
+  cancelActiveSupplementScheduleNoticesRequest,
   cancelSupplementNotificationControlRequest,
   cancelSupplementStudentReminderRequest,
   reserveSupplementNotificationControlRequest,
@@ -9128,11 +9128,12 @@ export function App() {
   }
 
   async function cancelActiveSupplementScheduleNoticeJobs(task, reason = "보충 일정 안내 예약 갱신") {
-    const activeNoticeJobs = getCancelableSupplementScheduleNoticeJobs(task, notificationJobs);
-    return cancelNotificationJobsRequest({
+    return cancelActiveSupplementScheduleNoticesRequest({
       cancelNotificationJob: handleCancelNotificationJob,
-      notificationJobs: activeNoticeJobs,
-      reason
+      cancelNotificationJobs: cancelNotificationJobsRequest,
+      notificationJobs,
+      reason,
+      task
     });
   }
 
