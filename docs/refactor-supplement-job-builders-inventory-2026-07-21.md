@@ -64,7 +64,8 @@
 - 완료: 예약시각, deterministic ID, 학생 11시 job payload, 학생·학부모 일정 안내 job payload를 `src/domains/notifications/supplementJobBuilders.js`로 분리했다.
 - 입력 경계: `academyName`, `now`, 완성된 `scheduleTitle`과 `reminderBody`를 명시적으로 받는다. 템플릿 seed와 선생님 수정본 우선순위는 `App.jsx`가 계속 소유한다.
 - 자동검증: `scripts/test-supplement-job-builders.mjs`를 `npm run test:production`에 연결했다. fixture는 실제 API와 Solapi를 호출하지 않는다.
-- 다음 저위험 단위: 현재 `notificationJobs` 배열에서 job을 찾는 selector만 11A-2로 분리한다. 예약·취소·상태 저장은 포함하지 않는다.
+- 완료: 현재 `notificationJobs` 배열의 우선순위와 학생 11시·학생 일정·학부모 일정 job 선택을 `src/domains/notifications/notificationJobSelectors.js`로 11A-2 분리했다. 일정·유형·대상·상태 우선순위 fixture를 같은 deterministic 테스트에 추가했다.
+- 다음 경계: 순수 builder/selector 분리는 완료했다. 다음은 예약·취소·상태 저장이 포함되는 11B이므로 아래 사람 gate 전에는 코드 이동을 시작하지 않는다.
 
 ## AI 자동검증 범위
 

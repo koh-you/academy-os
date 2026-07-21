@@ -8100,82 +8100,57 @@ button:disabled {
   padding: 10px;
 }
 
-.specialLectureAttentionPanel {
-  background: #fff;
-  border: 1px solid #bfdbfe;
+.specialLectureMatchQueue {
+  background: #fff7ed;
+  border: 1px solid #fdba74;
   border-radius: 8px;
   display: grid;
-  gap: 8px;
+  gap: 10px;
   padding: 10px;
 }
 
-.specialLectureAttentionPanel.hasDanger {
-  border-color: #fecaca;
-}
-
-.specialLectureAttentionHeader {
+.specialLectureMatchQueueHeader {
   display: grid;
-  gap: 2px;
+  gap: 3px;
 }
 
-.specialLectureAttentionHeader strong {
-  color: #1d4ed8;
-  font-size: 14px;
+.specialLectureMatchQueueHeader strong {
+  color: #9a3412;
+  font-size: 13px;
 }
 
-.specialLectureAttentionPanel.hasDanger .specialLectureAttentionHeader strong {
-  color: #991b1b;
-}
-
-.specialLectureAttentionHeader span {
-  color: #64748b;
+.specialLectureMatchQueueHeader span,
+.specialLectureMatchQueueItem span {
+  color: #7c2d12;
   font-size: 12px;
   line-height: 1.45;
 }
 
-.specialLectureAttentionList {
+.specialLectureMatchQueueList {
   display: grid;
-  gap: 6px;
+  gap: 7px;
 }
 
-.specialLectureAttentionItem {
+.specialLectureMatchQueueItem {
   align-items: center;
-  background: #f8fafc;
-  border: 1px solid #dbeafe;
+  background: #ffffff;
+  border: 1px solid #fed7aa;
   border-radius: 7px;
   display: flex;
   gap: 10px;
   justify-content: space-between;
-  padding: 8px 10px;
+  padding: 9px 10px;
 }
 
-.specialLectureAttentionItem.danger {
-  background: #fff7f7;
-  border-color: #fecaca;
-}
-
-.specialLectureAttentionItem > div:first-child {
+.specialLectureMatchQueueItem > div {
   display: grid;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
 }
 
-.specialLectureAttentionItem strong {
+.specialLectureMatchQueueItem strong {
   color: #0f172a;
   font-size: 13px;
-}
-
-.specialLectureAttentionItem span {
-  color: #7f1d1d;
-  font-size: 12px;
-  line-height: 1.45;
-}
-
-.specialLectureAttentionActions {
-  display: flex;
-  flex: 0 0 auto;
-  flex-wrap: wrap;
-  gap: 6px;
 }
 
 .specialLectureEnrollmentSync span,
@@ -18121,14 +18096,12 @@ body.attendanceOnlyBody {
     grid-template-columns: 1fr;
   }
 
-  .specialLectureAttentionItem {
+  .specialLectureMatchQueueItem {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .specialLectureAttentionActions,
-  .specialLectureAttentionActions button,
-  .specialLectureAttentionItem > button {
+  .specialLectureMatchQueueItem .primaryButton {
     width: 100%;
   }
 

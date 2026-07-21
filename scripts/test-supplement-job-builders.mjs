@@ -7,6 +7,13 @@ import {
   getSupplementStudentReminderScheduledAt,
   isSupplementStudentReminderTask
 } from "../src/domains/notifications/supplementJobBuilders.js";
+import {
+  getNotificationJobPriority,
+  getSupplementNotificationControlJob,
+  getSupplementScheduleNoticeJob,
+  getSupplementStudentReminderJob,
+  sortNotificationJobsForCurrentStatus
+} from "../src/domains/notifications/notificationJobSelectors.js";
 
 const now = new Date("2026-07-21T05:12:34.000Z");
 const scheduledAt = "2026-07-22T02:00:00.000Z";
@@ -136,4 +143,71 @@ assert.equal(parentScheduleJob.payload.noticeBody, "");
 assert.equal(parentScheduleJob.payload.parentPhone, "01099998888");
 assert.equal(parentScheduleJob.result.previousScheduleText, "2026-07-21 13:00");
 
-console.log("supplement job builders: deterministic contract passed");
+const reminderHistory = [
+  { notificationJobId: "other", status: "scheduled" },
+  { ...studentReminderJob, status: "canceled" }
+];
+assert.equal(getSupplementStudentReminderJob(task, reminderHistory)?.status, "canceled");
+assert.equal(getSupplementStudentReminderJob({ ...task, taskType: "retest" }, reminderHistory), null);
+
+const scheduleHistory = [
+  {
+    notificationJobId: "student-canceled-newer",
+    notificationType: "schedule_reminder",
+    status: "canceled",
+    updatedAt: "2026-07-21T08:00:00.000Z",
+    payload: {
+      makeupTaskId: task.makeupTaskId,
+      scheduleDate: task.scheduledDate,
+      scheduleTime: "13:00",
+      scheduleType: "supplement"
+    }
+  },
+  {
+    notificationJobId: "student-scheduled-older",
+    notificationType: "schedule_reminder",
+    status: "scheduled",
+    updatedAt: "2026-07-21T06:00:00.000Z",
+    payload: {
+      makeupTaskId: task.makeupTaskId,
+      scheduleDate: task.scheduledDate,
+      scheduleTime: "13:00:00",
+      scheduleType: "supplement"
+    }
+  },
+  {
+    notificationJobId: "parent-sent",
+    notificationType: "parent_comment",
+    status: "sent",
+    updatedAt: "2026-07-21T07:00:00.000Z",
+    payload: {
+      scheduleDate: task.scheduledDate,
+      scheduleTime: "13:00",
+      scheduleType: "supplement"
+    },
+    result: { makeupTaskId: task.makeupTaskId }
+  },
+  {
+    notificationJobId: "wrong-date",
+    notificationType: "schedule_reminder",
+    status: "scheduled",
+    payload: {
+      makeupTaskId: task.makeupTaskId,
+      scheduleDate: "2026-07-23",
+      scheduleTime: "13:00",
+      scheduleType: "supplement"
+    }
+  }
+];
+
+assert.equal(getNotificationJobPriority({ status: "scheduled" }), 0);
+assert.equal(getNotificationJobPriority({ status: "canceled" }), 4);
+assert.equal(sortNotificationJobsForCurrentStatus(scheduleHistory[0], scheduleHistory[1]) > 0, true);
+assert.equal(getSupplementScheduleNoticeJob(task, scheduleHistory, "student")?.notificationJobId, "student-scheduled-older");
+assert.equal(getSupplementScheduleNoticeJob(task, scheduleHistory, "parent")?.notificationJobId, "parent-sent");
+assert.equal(getSupplementScheduleNoticeJob({ ...task, scheduledTime: "" }, scheduleHistory, "student"), null);
+assert.equal(getSupplementNotificationControlJob(task, reminderHistory, "studentReminder")?.status, "canceled");
+assert.equal(getSupplementNotificationControlJob(task, scheduleHistory, "studentSchedule")?.notificationJobId, "student-scheduled-older");
+assert.equal(getSupplementNotificationControlJob(task, scheduleHistory, "parentSchedule")?.notificationJobId, "parent-sent");
+
+console.log("supplement job builders and selectors: deterministic contract passed");

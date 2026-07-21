@@ -34,12 +34,12 @@
    - 순서: `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`.
    - 다음 후보는 매번 현재 diff와 최신 작업로그를 보고 다시 제안한다. 위험이 낮은 helper/config/API/client/component부터 진행하고, 수업일지/출결/Solapi/보충관리처럼 side effect가 큰 영역은 충분한 gate 이후 진행한다.
    - 기준 로드맵: 아래 `App.jsx 리팩터링 18개 기준 로드맵`을 다음 세션들의 공통 후보 목록으로 사용한다. 이미 일부 분리된 항목도 남은 하위 컴포넌트/헬퍼가 있으면 같은 묶음 안에서 계속 진행한다.
-   - 현재 이어받을 지점: 10번 `student-parent portals` 표시 구조 리팩터링은 완료 audit까지 끝냈다. `StudentTodayTab`, `ParentPortal`, `StudentPortalShell`을 분리하고 미사용 legacy `StudentPortal`을 제거했다. 학생 쓰기 사람 gate와 교사 bearer/Storage 권한 보안 gate는 별도 보류다. 11번 `supplement job builders` inventory를 `docs/refactor-supplement-job-builders-inventory-2026-07-21.md`에 기록했고, 11A 첫 단위로 예약시각·ID·job payload builder를 `src/domains/notifications/supplementJobBuilders.js`로 분리했다. 문구 선택과 실제 예약·취소 orchestration은 `App.jsx`에 남아 있다. 다음은 현재 job 선택 helper만 옮기는 11A-2이며 11B side effect 이동은 사람 gate 전 착수하지 않는다.
+   - 현재 이어받을 지점: 10번 `student-parent portals` 표시 구조 리팩터링은 완료 audit까지 끝냈다. `StudentTodayTab`, `ParentPortal`, `StudentPortalShell`을 분리하고 미사용 legacy `StudentPortal`을 제거했다. 학생 쓰기 사람 gate와 교사 bearer/Storage 권한 보안 gate는 별도 보류다. 11A에서 예약시각·ID·job payload builder를 `supplementJobBuilders.js`로, 현재 job 우선순위와 학생 11시·학생 일정·학부모 일정 selector를 `notificationJobSelectors.js`로 분리했다. 문구 선택과 실제 예약·취소 orchestration은 `App.jsx`에 남아 있다. 다음 11B는 외부 side effect가 있으므로 OS row/Solapi 그룹 사람 gate 전에는 착수하지 않는다.
    - 보류된 사람 gate: 2026-07-21 사용자 지시로 숙제 완료, 질문 CRUD, 시험 후 제출의 실제 학생 테스트를 보류했다. 보류는 통과 판정이 아니며 나중에 저장/새로고침/재로그인/강사 미리보기 차단과 교사 확인 저장을 확인하고 회귀 발견 시 즉시 별도 수정한다.
    - 확인된 보안 후속 gate: 교사 로그인에 서버 서명 bearer token이 없어 시험 후 제출 교사 확인 API도 기존 교사 관리 API와 같은 인증 공백이 있다. 시험지 Storage 열기 API도 요청자의 교사/학생 소유권을 검증하지 않는다. 포털 shell 분리와 섞지 않고 `교사 세션 인증 + 파일 열람 권한` 별도 고위험 작업으로 진행한다.
    - 확인된 후속 이슈: 학생 수업 준비 안내 목록은 현재 `prepStudentNotice` 존재 여부만 필터하고 `prepStudentVisible`을 확인하지 않는다. 이번 리팩터링에서는 기존 동작을 보존했으며, 공개 플래그 계약을 별도 기능 작업에서 확인해야 한다.
    - 확인된 후속 이슈: 학생 마이페이지 `비밀번호 변경`은 callback/API가 없는 기존 미연결 UI다. 이번 리팩터링에서는 보존했고, 숨김/비활성 안내/실제 PIN 변경 구현은 저장 신뢰성의 오작동 버튼 정리 작업에서 별도 결정한다.
-   - 다음 세션 시작 규칙: 최신 커밋과 git diff를 확인하고 학생 포털 사람 gate와 보안 gate가 보류 중임을 알린 뒤, `docs/refactor-supplement-job-builders-inventory-2026-07-21.md` 기준 현재 job 선택 helper를 분리하는 11A-2부터 제안한다.
+   - 다음 세션 시작 규칙: 최신 커밋과 git diff를 확인하고 학생 포털 사람 gate와 보안 gate가 보류 중임을 알린 뒤, 11B 예약·취소 orchestration의 OS row/Solapi 그룹 사람 gate를 먼저 사용자에게 띄운다. 승인·검증 전에는 외부 side effect 코드를 옮기지 않는다.
 5. `Solapi 특강 템플릿 검수 후 연결`
    - 상태: 외부 검수 대기.
    - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다.
@@ -96,16 +96,6 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
-### 2026-07-21 P0. 특강 상태 알림 상단 이동 및 오류 Tally 신청 삭제 gate
-
-- 사용자 요청: 특강 수업일지 반영 하단에 흩어진 학생 연결/회차 미확정/반영 상태 알림을 화면 상단에서 먼저 확인하게 하고, Tally로 들어온 잘못된 신청 원본은 삭제할 수 있게 한다.
-- UI 결과: `특강 수업` 최상단에 `특강 상태 알림`을 추가했다. 학생 연결 전 신청, 안내문 연결이 없는 신청, 회차 미확정 학생, 잠긴/지난/남은 수업일지 상태와 처리 결과가 접힌 명단·수업일지 영역보다 먼저 보인다. 연결 전 신청은 `학생 연결`, 회차 미확정 학생은 `회차 설정`, 연결되지 않은 Tally/오류 원본은 `오류 신청 삭제`를 같은 행에서 실행한다.
-- 삭제 계약: 브라우저 확인창과 `confirm=true` 요청을 모두 거쳐야 하며, 서버가 `special_lecture_enrollments.application_id` 연결을 먼저 조회한다. 확정 명단과 연결된 신청은 409로 차단하고, 연결되지 않은 `special_lecture_applications` 한 건만 삭제한다. 삭제 후 서버와 프론트가 각각 Supabase를 재조회해 같은 application ID가 사라진 뒤에만 화면에서 제거하고 완료를 표시한다.
-- 보존 범위: `special_lecture_enrollments`, `lessons`, 수업기록, 출결, `notification_jobs`, Solapi/Tally 외부 동작은 삭제하지 않거나 변경하지 않는다. 새 SQL은 없다.
-- AI 검증: `node --check api/server.js`, `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 354/354, `git diff --check`를 통과했다. 기존 Vite 500KB chunk 경고만 남는다.
-- 사람 검토 gate: `Lesson Hub > 특강관리 > 특강 수업` 첫 화면에서 상태 알림이 명단/수업일지 카드보다 위에 보이는지 확인한다. 삭제 가능한 테스트용 오류 신청의 이름·학교·`Tally 신청` 표시를 확인한 뒤 `오류 신청 삭제`를 누르고 확인창에서 취소했을 때 아무 변화가 없는지 먼저 확인한다. 실제 삭제는 복구가 필요 없는 테스트 원본 하나로만 진행하고, 완료 후 새로고침해 같은 신청이 다시 나타나지 않는지 확인한다. 확정 명단에 연결된 신청은 삭제 버튼이 보이지 않거나 API가 차단해야 한다.
-- 중단 조건: 다른 신청이 삭제됨, 확정 명단 학생·회차가 사라짐, 삭제 후 새로고침에서 원본이 다시 나타남, 연결된 신청이 삭제됨, 수업일지/출결/알림 예약이 변경되면 즉시 중단한다.
-
 ### 2026-07-21 P1. 알림관리 개별 발송 대상 선택 compact CSS
 
 - 사용자 요청: 개별 발송의 수신 범위 버튼, 반/검색 입력, 대상 집계, 학생 선택 카드가 세로로 과도하게 커서 한 화면에 보이는 정보가 적은 문제를 CSS로 정리한다.
@@ -125,6 +115,15 @@
 - AI 검증: `npm run build`, `npm run test:production` 352/352, `git diff --check`를 통과했다. 기존 Vite 500KB chunk 경고만 남는다.
 - 사람 검토 gate: `Lesson Hub > 특강관리 > 특강 수업`에서 명단을 펼쳐 `연결 필요` 신청자의 이름과 `학생 연결` 버튼이 보이는지 확인한다. 버튼을 눌러 기존 학생 선택/특강 전용 학생 등록 모달이 열리는지만 확인하고 운영 학생 연결 저장은 테스트 대상이 확실할 때만 진행한다. 회차 미확정 학생은 `회차 설정` 저장 전 수업일지 명단에서 제외되고, 모든 회차가 이미 반영된 경우 `현재 새로 만들 수업이나 안전하게 반영할 미래 명단 변경이 없습니다`가 보여야 한다. 상단의 삭제 요청 설명과 불필요한 빈 높이가 없어야 한다.
 - 중단 조건: 다른 신청자가 연결됨, 모달을 열기만 했는데 명단/lesson이 저장됨, 기존 확정 명단이 사라짐, 과거·오늘 수업이나 알림 예약이 자동 변경됨, 작은 화면에서 연결 버튼이 잘리면 다음 단계로 진행하지 않는다.
+
+### 2026-07-21 P1. 11A-2 보충 알림 현재 job selector 분리
+
+- 범위: `getNotificationJobPriority`, `sortNotificationJobsForCurrentStatus`, 학생 11시 job 선택, 학생·학부모 일정 job 선택, 알림 제어 대상 선택을 `src/domains/notifications/notificationJobSelectors.js`로 옮겼다.
+- 동작 보존: 같은 보충 task·날짜·정규화된 시간·대상만 고르고 `scheduled -> queued/pending -> sent/unconfirmed -> failed -> canceled` 우선순위를 그대로 사용한다. 같은 상태에서는 최신 `updatedAt/createdAt/scheduledAt`을 고른다.
+- 저장/외부 영향: 이미 화면이 로드한 배열만 읽는 순수 selector다. API, Supabase, Solapi, React state, 예약·취소 함수는 새 파일에 없다.
+- AI 검수: 학생 11시 고정 ID, 학생/학부모 대상 분리, 다른 날짜 제외, 초 단위 시간 정규화, 상태 우선순위 fixture 통과. `npm run test:production`, `npm run build`, `git diff --check` 통과. 기존 Vite chunk 경고만 남는다.
+- 사람 검수: 이 단위는 저장·발송을 만들지 않아 새 운영 데이터 검수는 필요 없다. 다음 11B부터는 아래 inventory의 사람 gate를 먼저 통과해야 한다.
+- 다음 순서: 삭제 가능한 테스트 보충 task로 학생 일정·학부모 일정·당일 학생 11시의 OS `notification_jobs` row와 Solapi 그룹을 대조한다. 통과 전에는 예약/취소 orchestration 리팩터링을 시작하지 않는다.
 
 ### 2026-07-21 P1. 11A 보충 알림 순수 예약시각·ID·job payload builder 분리
 
