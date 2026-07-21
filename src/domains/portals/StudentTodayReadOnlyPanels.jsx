@@ -21,6 +21,7 @@ export function StudentSupplementSchedules({ getTypeLabel, schedules = [] }) {
             <strong>{getTypeLabel(task.taskType)}</strong>
             <span>{task.scheduledDate || "일정 미정"} {task.scheduledTime || ""}</span>
             <small>{task.sourceLabel || task.reason || "선생님과 확인 예정"}</small>
+            {task.linkedLessonId ? <em>수업일지 일정 반영됨</em> : null}
           </article>
         ))}
       </div>

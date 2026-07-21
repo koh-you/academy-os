@@ -646,14 +646,17 @@ function formatSupplementScheduleLine(task = {}) {
   return `${schedulePrefix}${source} 일정을 진행하겠습니다.`;
 }
 
-function getStudentSupplementSchedules(makeupTasks = [], studentId = "", options = {}) {
+function getStudentSupplementScheduleTasks(makeupTasks = [], studentId = "", options = {}) {
   const { lesson = null, mode = "all" } = options;
   return makeupTasks
     .filter((task) => task.studentId === studentId && task.status !== "done")
     .filter((task) => (mode === "lesson_comment" ? isSupplementScheduleForLessonComment(task, lesson) : true))
     .filter((task) => task.scheduledDate || task.scheduledTime || task.notificationDraft || task.supplementHomeworkNote || task.sourceLabel)
-    .sort((a, b) => `${a.scheduledDate || "9999-99-99"} ${a.scheduledTime || ""}`.localeCompare(`${b.scheduledDate || "9999-99-99"} ${b.scheduledTime || ""}`))
-    .map(formatSupplementScheduleLine);
+    .sort((a, b) => `${a.scheduledDate || "9999-99-99"} ${a.scheduledTime || ""}`.localeCompare(`${b.scheduledDate || "9999-99-99"} ${b.scheduledTime || ""}`));
+}
+
+function getStudentSupplementSchedules(makeupTasks = [], studentId = "", options = {}) {
+  return getStudentSupplementScheduleTasks(makeupTasks, studentId, options).map(formatSupplementScheduleLine);
 }
 
 function formatTestAttemptMessageLine(session = {}, attempt = {}) {
@@ -21422,7 +21425,8 @@ function StudentPortalV2({
   );
   const studentScoreRecords = scoreRecords.filter((score) => score.studentId === selectedStudent?.studentId);
   const upcomingStudentNotice = getStudentTopNotice(selectedStudent, examPrepRows, schoolEvents, makeupTasks);
-  const studentSupplementSchedules = getStudentSupplementSchedules(makeupTasks, selectedStudent?.studentId);
+  const studentSupplementScheduleTasks = getStudentSupplementScheduleTasks(makeupTasks, selectedStudent?.studentId)
+    .filter((task) => task.status !== "canceled");
   const selectedStudentQuestions = studentQuestions
     .filter((question) => question.studentId === selectedStudent?.studentId)
     .sort((a, b) => String(b.updatedAt ?? b.createdAt ?? "").localeCompare(String(a.updatedAt ?? a.createdAt ?? "")));
@@ -21474,7 +21478,7 @@ function StudentPortalV2({
             recordsWithLessons={studentRecordsWithLessons}
             selectedStudent={selectedStudent}
             studentNotice={upcomingStudentNotice}
-            supplementSchedules={studentSupplementSchedules}
+            supplementSchedules={studentSupplementScheduleTasks}
             todayHomeworks={todayHomeworks}
             onAddQuestion={onStudentAddQuestion}
             onDeleteQuestion={onStudentDeleteQuestion}
@@ -21557,6 +21561,8 @@ function StudentTodayTab({
     <>
       <StudentTopNotice notice={studentNotice} />
 
+      <StudentSupplementSchedules getTypeLabel={followUpTypeLabel} schedules={supplementSchedules} />
+
       <StudentExamPostSubmissionPanel
         targets={examPostTargets}
         selectedStudent={selectedStudent}
@@ -21614,8 +21620,6 @@ function StudentTodayTab({
           ))}
         </div>
       </section>
-
-      <StudentSupplementSchedules getTypeLabel={followUpTypeLabel} schedules={supplementSchedules} />
 
       <div className="sectionHeader">
         <div>

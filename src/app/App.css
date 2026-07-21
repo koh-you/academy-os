@@ -13249,6 +13249,13 @@ textarea.profileEditInput {
   font-weight: 800;
 }
 
+.studentSpecialList em {
+  color: #2563eb;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+}
+
 .studentQuestionItem > div:last-child {
   display: flex;
   flex-wrap: wrap;
