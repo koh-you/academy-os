@@ -353,6 +353,7 @@ export function SpecialLectureApplicationPanel({
   manualIntakeRequest = 0,
   onCreateSpecialLectureLessons,
   onCreateStudent,
+  onDeleteApplication,
   onOpenLesson,
   onSaveEnrollment,
   onSaveEnrollments,
@@ -365,6 +366,7 @@ export function SpecialLectureApplicationPanel({
   const [lessonCreateState, setLessonCreateState] = useState({ state: "idle", message: "" });
   const [savingEnrollmentId, setSavingEnrollmentId] = useState("");
   const [updatingApplicationId, setUpdatingApplicationId] = useState("");
+  const [deletingApplicationId, setDeletingApplicationId] = useState("");
   const [applicationGuideDrafts, setApplicationGuideDrafts] = useState({});
   const [manualPickerOpen, setManualPickerOpen] = useState(false);
   const [manualSearchText, setManualSearchText] = useState("");
@@ -439,6 +441,18 @@ export function SpecialLectureApplicationPanel({
   });
   const matchedRows = confirmedMatchRows.filter((row) => row.status === "matched" && row.student);
   const needsReviewRows = confirmedMatchRows.filter((row) => row.status !== "matched" || !row.student);
+  const needsReviewApplicationIds = new Set(needsReviewRows.map((row) => row.application.applicationId));
+  const linkedApplicationIds = new Set(normalizedEnrollments.map((enrollment) => enrollment.applicationId).filter(Boolean));
+  const attentionApplicationRows = [
+    ...needsReviewRows.map((row) => ({ ...row, attentionType: "student_match" })),
+    ...unmatchedApplications
+      .filter((application) => !needsReviewApplicationIds.has(application.applicationId))
+      .map((application) => ({
+        application,
+        attentionType: "guide_match",
+        reason: "연결된 특강 안내문 없음"
+      }))
+  ].filter((row) => !linkedApplicationIds.has(row.application.applicationId));
   const visibleApplications = selectedGuideApplications.slice(0, 8);
   const visibleUnmatchedApplications = unmatchedApplications.slice(0, 3);
   const guideSessions = useMemo(() => getSpecialLectureGuideSessions(selectedGuide), [selectedGuide]);
@@ -609,6 +623,30 @@ export function SpecialLectureApplicationPanel({
       return;
     }
     await confirmApplicationWithStudent(matchApplication, student);
+  }
+
+  async function deleteErrorApplication(application) {
+    if (!onDeleteApplication || !application?.applicationId) return;
+    const studentName = application.studentName || "이름 미입력 신청자";
+    const confirmed = window.confirm(
+      `${studentName}의 Tally 특강 신청 원본을 삭제할까요?\n\n확정 명단에 연결된 신청은 삭제되지 않으며, 삭제한 오류 원본은 복구할 수 없습니다.`
+    );
+    if (!confirmed) return;
+    setDeletingApplicationId(application.applicationId);
+    setPanelMessage("");
+    try {
+      await onDeleteApplication(application.applicationId);
+      if (matchApplication?.applicationId === application.applicationId) {
+        setMatchApplication(null);
+        setMatchSearchText("");
+        setMatchStudentId("");
+      }
+      setPanelMessage(`${studentName}의 오류 신청 원본을 Supabase에서 삭제하고 재조회로 확인했습니다.`);
+    } catch (error) {
+      setPanelMessage(`특강 신청 원본 삭제 실패: ${error.message}`);
+    } finally {
+      setDeletingApplicationId("");
+    }
   }
 
   async function registerSpecialLectureStudent() {
@@ -899,6 +937,65 @@ export function SpecialLectureApplicationPanel({
 
   return (
     <section className="specialLectureApplicationsPanel">
+      {(attentionApplicationRows.length || unreviewedEnrollmentRows.length || invalidPlanRows.length || lockedLessonRows.length || pastMissingLessonRows.length || staleLessonRows.length || panelMessage || lessonCreateState.message || (!lessonSyncDrafts.length && !invalidPlanRows.length)) ? (
+        <div className={(attentionApplicationRows.length || unreviewedEnrollmentRows.length || invalidPlanRows.length || lockedLessonRows.length || pastMissingLessonRows.length || staleLessonRows.length) ? "specialLectureAttentionPanel hasDanger" : "specialLectureAttentionPanel"}>
+          <div className="specialLectureAttentionHeader">
+            <strong>특강 상태 알림</strong>
+            <span>Tally 신청, 학생 연결, 회차 설정과 수업일지 반영 상태를 먼저 확인해 주세요.</span>
+          </div>
+          {panelMessage ? <p className={panelMessage.includes("실패") ? "inlineNotice danger" : "inlineNotice"}>{panelMessage}</p> : null}
+          {attentionApplicationRows.length ? (
+            <div className="specialLectureAttentionList">
+              {attentionApplicationRows.map((row) => (
+                <div className="specialLectureAttentionItem danger" key={`attention_${row.application.applicationId}`}>
+                  <div>
+                    <strong>{row.application.studentName || "이름 미입력 신청자"}</strong>
+                    <span>{[row.application.schoolName, row.application.grade, row.reason, row.application.source === "tally" ? "Tally 신청" : "신청 원본"].filter(Boolean).join(" · ")}</span>
+                  </div>
+                  <div className="specialLectureAttentionActions">
+                    {row.attentionType === "student_match" ? (
+                      <button
+                        className="primaryButton compact"
+                        disabled={!isGuideSaved || updatingApplicationId === row.application.applicationId || deletingApplicationId === row.application.applicationId}
+                        onClick={() => confirmApplicationAndOpenPlan(row.application)}
+                        type="button"
+                      >
+                        학생 연결
+                      </button>
+                    ) : null}
+                    <button
+                      className="dangerSoftButton compact"
+                      disabled={!onDeleteApplication || updatingApplicationId === row.application.applicationId || deletingApplicationId === row.application.applicationId}
+                      onClick={() => deleteErrorApplication(row.application)}
+                      type="button"
+                    >
+                      {deletingApplicationId === row.application.applicationId ? "삭제 확인 중" : "오류 신청 삭제"}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null}
+          {unreviewedEnrollmentRows.map((enrollment) => {
+            const student = getEnrollmentStudent(enrollment, students);
+            return (
+              <div className="specialLectureAttentionItem danger" key={`unreviewed_${enrollment.enrollmentId}`}>
+                <div>
+                  <strong>{student?.name || enrollment.studentId || "학생 미확인"}</strong>
+                  <span>회차 미확정 · 수업일지 명단 반영 대상에서 제외됨</span>
+                </div>
+                <button className="primaryButton compact" disabled={!isGuideSaved} onClick={() => openPlanModal(enrollment)} type="button">회차 설정</button>
+              </div>
+            );
+          })}
+          {invalidPlanRows.length ? <p className="inlineNotice danger">시간 또는 조정 사유를 확인해야 하는 학생별 회차가 {invalidPlanRows.length}건 있습니다.</p> : null}
+          {lockedLessonRows.length ? <p className="inlineNotice danger">과거/오늘 수업, 완료 수업, 수업기록 또는 알림 예약이 있는 변경 {lockedLessonRows.length}건은 자동 반영하지 않습니다.</p> : null}
+          {pastMissingLessonRows.length ? <p className="inlineNotice danger">이미 지난 공식 회차 중 수업일지가 없는 {pastMissingLessonRows.length}건은 자동 생성하지 않습니다.</p> : null}
+          {staleLessonRows.length ? <p className="inlineNotice danger">현재 공식 회차에서 빠졌지만 기존 달력에 남아 있는 특강 수업이 {staleLessonRows.length}건 있습니다.</p> : null}
+          {lessonCreateState.message ? <p className={lessonCreateState.state === "failed" ? "inlineNotice danger" : "inlineNotice"}>{lessonCreateState.message}</p> : null}
+          {!lessonSyncDrafts.length && !invalidPlanRows.length ? <p className="inlineNotice">현재 새로 만들 수업이나 안전하게 반영할 미래 명단 변경이 없습니다.</p> : null}
+        </div>
+      ) : null}
       <div className="specialLectureEnrollmentPanel">
         <div className="specialLectureGateHeader">
           <div>
@@ -924,32 +1021,6 @@ export function SpecialLectureApplicationPanel({
           <>
         {!isGuideSaved ? (
           <p className="inlineNotice danger">현재 특강 안내문에 저장하지 않은 변경이 있습니다. `안내문 저장` 후 학생별 수강계획을 수정하세요.</p>
-        ) : null}
-        {needsReviewRows.length ? (
-          <div className="specialLectureMatchQueue">
-            <div className="specialLectureMatchQueueHeader">
-              <strong>신청 학생 연결 필요</strong>
-              <span>자동으로 확인하지 못한 확정 신청자만 표시합니다. 기존 학생을 선택하거나 특강 전용 학생으로 등록해 주세요.</span>
-            </div>
-            <div className="specialLectureMatchQueueList">
-              {needsReviewRows.map((row) => (
-                <div className="specialLectureMatchQueueItem" key={row.application.applicationId}>
-                  <div>
-                    <strong>{row.application.studentName || "이름 미입력 신청자"}</strong>
-                    <span>{[row.application.schoolName, row.application.grade, row.reason].filter(Boolean).join(" · ") || "학생 정보를 확인해 주세요."}</span>
-                  </div>
-                  <button
-                    className="primaryButton compact"
-                    disabled={!isGuideSaved || updatingApplicationId === row.application.applicationId}
-                    onClick={() => confirmApplicationAndOpenPlan(row.application)}
-                    type="button"
-                  >
-                    {updatingApplicationId === row.application.applicationId ? "연결 준비 중" : "학생 연결"}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
         ) : null}
         {missingEnrollmentRows.length ? (
           <div className="specialLectureEnrollmentSync">
@@ -1082,30 +1153,6 @@ export function SpecialLectureApplicationPanel({
         ) : (
           <p className="specialLectureGateEmpty">회차별 계획을 먼저 저장해 주세요.</p>
         )}
-        {needsReviewRows.length ? (
-          <p className="inlineNotice danger">학생 연결 전인 확정 신청자 {needsReviewRows.length}명은 수업일지 명단 반영 대상에서 제외되어 있습니다. 위 명단 영역에서 학생을 연결해 주세요.</p>
-        ) : null}
-        {unreviewedEnrollmentRows.length ? (
-          <p className="inlineNotice danger">회차 미확정 학생 {unreviewedEnrollmentRows.length}명은 수업일지 명단 반영 대상에서 제외되어 있습니다. 위 명단 영역에서 회차 설정을 저장해 주세요.</p>
-        ) : null}
-        {invalidPlanRows.length ? (
-          <p className="inlineNotice danger">시간 또는 조정 사유를 확인해야 하는 학생별 회차가 {invalidPlanRows.length}건 있습니다.</p>
-        ) : null}
-        {lockedLessonRows.length ? (
-          <p className="inlineNotice danger">과거/오늘 수업, 완료 수업, 수업기록 또는 알림 예약이 있는 변경 {lockedLessonRows.length}건은 자동 반영하지 않습니다. 기존 기록을 보존한 채 별도 검토해야 합니다.</p>
-        ) : null}
-        {pastMissingLessonRows.length ? (
-          <p className="inlineNotice danger">이미 지난 공식 회차 중 수업일지가 없는 {pastMissingLessonRows.length}건은 새로 만들지 않습니다. 과거 기록을 소급 생성하려면 별도 검토가 필요합니다.</p>
-        ) : null}
-        {staleLessonRows.length ? (
-          <p className="inlineNotice danger">현재 공식 회차에서 빠졌지만 기존 달력에 남아 있는 특강 수업이 {staleLessonRows.length}건 있습니다. 자동 삭제하지 않으므로 기록·출결·알림톡을 확인한 뒤 별도로 처리해 주세요.</p>
-        ) : null}
-        {lessonCreateState.message ? (
-          <p className={lessonCreateState.state === "failed" ? "inlineNotice danger" : "inlineNotice"}>{lessonCreateState.message}</p>
-        ) : null}
-        {!lessonSyncDrafts.length && !invalidPlanRows.length ? (
-          <p className="inlineNotice">현재 새로 만들 수업이나 안전하게 반영할 미래 명단 변경이 없습니다.</p>
-        ) : null}
         <div className="specialLectureLessonCreateActions">
           <button
             className="primaryButton"
@@ -1120,8 +1167,6 @@ export function SpecialLectureApplicationPanel({
           </>
         ) : null}
       </div>
-      {panelMessage ? <p className={panelMessage.includes("실패") ? "inlineNotice danger" : "inlineNotice"}>{panelMessage}</p> : null}
-
       {matchApplication ? (
         <Modal
           className="specialLectureRosterModal"

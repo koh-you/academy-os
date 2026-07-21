@@ -5762,7 +5762,7 @@ export function App() {
   async function handleDeleteSpecialLectureApplication(applicationId) {
     const normalizedApplicationId = String(applicationId ?? "").trim();
     if (!normalizedApplicationId) throw new Error("삭제할 특강 신청 원본 ID가 필요합니다.");
-    const response = await fetch(apiUrl(`/api/special-lecture-applications?id=${encodeURIComponent(normalizedApplicationId)}`), {
+    const response = await fetch(apiUrl(`/api/special-lecture-applications?id=${encodeURIComponent(normalizedApplicationId)}&confirm=true`), {
       method: "DELETE"
     });
     const result = await response.json();
