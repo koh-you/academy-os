@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   areSupplementTaskDraftValuesEqual,
+  buildSupplementTaskWithDraft,
   createPersistableSupplementTask,
   createSupplementTaskDraft,
   getSupplementHomeworkNoteValue,
@@ -12,7 +13,8 @@ import {
   getSupplementTeacherEditedFields,
   isSupplementTeacherEditedField,
   mergeSupplementTeacherEditedFields,
-  supplementNotificationDraftConfigs
+  supplementNotificationDraftConfigs,
+  updateSupplementTaskDraftEntry
 } from "../src/domains/supplements/supplementTaskDraft.js";
 
 assert.equal(supplementNotificationDraftConfigs.length, 3);
@@ -110,5 +112,63 @@ assert.deepEqual(createPersistableSupplementTask({ makeupTaskId: "task-1", isLoc
   makeupTaskId: "task-1",
   keep: 1
 });
+
+const transitionDependencies = {
+  ...dependencies,
+  normalizeTime: (value) => String(value ?? "").slice(0, 5)
+};
+const generatedEntry = {
+  dirty: false,
+  editedFields: [],
+  sourceVersion: "old",
+  values: generatedDraft
+};
+const changedScheduleEntry = updateSupplementTaskDraftEntry({
+  existing: generatedEntry,
+  field: "scheduledTime",
+  notificationTemplates: { marker: "template" },
+  student,
+  task: sourceTask,
+  value: "16:00"
+}, transitionDependencies);
+assert.equal(changedScheduleEntry.dirty, true);
+assert.equal(changedScheduleEntry.values.scheduledTime, "16:00");
+assert.equal(changedScheduleEntry.values.notificationDraft, "11시:absence_makeup:기본");
+assert.deepEqual(changedScheduleEntry.editedFields, []);
+
+const teacherEntry = updateSupplementTaskDraftEntry({
+  existing: generatedEntry,
+  field: "notificationDraft",
+  notificationTemplates: { marker: "template" },
+  student,
+  task: sourceTask,
+  value: "선생님 최종본"
+}, transitionDependencies);
+assert.deepEqual(teacherEntry.editedFields, ["notificationDraft"]);
+assert.equal(teacherEntry.values.notificationDraft, "선생님 최종본");
+
+const builtTask = buildSupplementTaskWithDraft({
+  notificationTemplates: { marker: "template" },
+  student,
+  task: {
+    ...sourceTask,
+    linkedLessonDate: "2026-07-23",
+    linkedLessonId: "lesson-1",
+    linkedLessonTime: "15:00"
+  },
+  taskDraftState: teacherEntry
+}, transitionDependencies);
+assert.equal(builtTask.notificationDraft, "선생님 최종본");
+assert.equal(builtTask.studentScheduleNotificationDraft, "일정:absence_makeup:기본");
+assert.deepEqual(builtTask.supplementTeacherEditedFields, ["notificationDraft"]);
+assert.equal(builtTask.needsLessonResync, undefined);
+
+const resyncTask = buildSupplementTaskWithDraft({
+  notificationTemplates: { marker: "template" },
+  student,
+  task: { ...sourceTask, linkedLessonDate: "2026-07-23", linkedLessonId: "lesson-1", linkedLessonTime: "15:00" },
+  taskDraftState: changedScheduleEntry
+}, transitionDependencies);
+assert.equal(resyncTask.needsLessonResync, true);
 
 console.log("supplement task draft: deterministic contract passed");
