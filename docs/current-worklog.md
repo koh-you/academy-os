@@ -348,6 +348,14 @@
 - 운영 저장 검증: `special_lecture_enrollments` 재조회에서 중3 신초봄은 active 5회, 각 13:00~15:00이고 고3 enrollment는 canceled 0회다. 1~5회차 lessons 모두 중3 ID/13:00~15:00을 포함하고 고3 ID는 없다. 1회차 기존 출결·수업기록은 저장 전후 2건, `notification_jobs`는 0건으로 유지됐다.
 - 사람 gate: 배포 후 클리닉 특강 명단에서 `창일중 · 중3` 신초봄이 1~5회차, 각 13:00~15:00으로 보이는지 확인한다. 잘못 입력한 고3 enrollment는 활성 수강 명단에서 제외되어야 한다. 1회차 수업일지에는 신초봄 행이 추가되되 기존 학생의 출결·시간은 그대로여야 한다.
 - 중단 조건: 올바른 신초봄 원천이 불명확함, 기존 학생이 빠짐, 기존 학생 시간이 바뀜, 출결 record가 자동 생성/변경됨, 알림톡 예약/발송 발생, Supabase 재조회 불일치인데 완료 표시, 새로고침 후 공통 시간이 사라짐.
+## 2026-07-21 P1. 12M 보충 task 카드 조립 경계 분리
+
+- 상태: 이미 분리한 header, 원천 맥락, 일정 editor, save summary, 알림 draft workspace, 일정 gate, action bar를 `SupplementTaskCard.jsx`가 같은 순서로 조립하도록 분리했다.
+- 동작 보존: App은 모든 task별 계산값과 local draft/action callback을 props 묶음으로 구성한다. DOM class와 표시 순서는 그대로이며 새 wrapper는 props를 하위 컴포넌트에 전달하기만 한다.
+- 저장 원천/side effect: wrapper는 hook/API/job state/Solapi를 소유하지 않는다. local state와 실제 저장·예약·취소·완료 handler는 App에 남아 있다.
+- 검증/gate: production 87/88/88b-6~13/88d-1이 새 조립 파일까지 source와 callback 연결을 추적하며 377개가 통과한다. 추가 사람 gate는 없다.
+- 다음 단위: 최신 `origin/main` rebase 후 App에 남은 task별 표시 계산을 순수 view-model helper로 분리할 수 있는지 검토한다.
+
 ## 2026-07-21 P1. 12L 보충 task action bar 분리
 
 - 상태: 결석 처리 취소, 보충 내용·알림톡 저장, 수업일지 일정 만들기/변경, 보충 완료 처리 버튼을 `SupplementTaskActionBar.jsx`로 분리했다.

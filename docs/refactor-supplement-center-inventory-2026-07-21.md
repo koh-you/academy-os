@@ -41,8 +41,9 @@
 9. 완료: 변경 diff·저장 상태·저장/일정 gate 안내 표시를 분리했다.
 10. 완료: task 카드 상단 메타를 읽기 전용 컴포넌트로 분리했다.
 11. 완료: task 카드 하단 action bar를 callback-only 표시로 분리했다.
-12. 다음: 분리된 조각을 감싸는 task 카드 또는 modal shell 경계를 검토한다.
-13. `SupplementStudentModal` 전체와 실제 저장·예약 orchestration은 위 조각 분리 이후 별도 gate로 판단한다.
+12. 완료: 분리된 일곱 조각을 감싸는 `SupplementTaskCard` 조립 경계를 만들었다.
+13. 다음: App에 남은 task별 표시 계산을 순수 view-model helper로 분리할 수 있는지 검토한다.
+14. `SupplementStudentModal` 전체와 실제 저장·예약 orchestration은 위 조각 분리 이후 별도 gate로 판단한다.
 
 ## 12B 구현 결과 — 완료 확인 모달
 
@@ -112,6 +113,12 @@
 - 결석 처리 취소, 보충 내용·알림톡 저장, 수업일지 일정 만들기/변경, 보충 완료 처리 버튼을 `SupplementTaskActionBar.jsx`로 옮겼다.
 - App이 busy/local draft/일정 여부를 전달하고 네 기존 handler를 callback으로 연결한다.
 - action bar는 버튼 문구·disabled·조건부 노출만 소유하며 API·React state·알림 orchestration을 직접 소유하지 않는다.
+
+## 12M 구현 결과 — task 카드 조립 경계
+
+- `SupplementTaskCard.jsx`가 header, source context, schedule editor, save summary, notification workspace, schedule gate, action bar를 기존 순서로 조립한다.
+- App은 task별 표시 계산과 local draft/action callback을 객체 props로 전달하므로 state·저장·알림 경계는 이동하지 않았다.
+- 새 wrapper에는 hook/API/`notification_jobs`/Solapi 참조가 없고 DOM class도 기존 `taskCard`를 유지한다.
 
 ## 즉시 중단 조건
 

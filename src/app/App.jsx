@@ -54,13 +54,8 @@ import { createSupplementSchedulePersistencePlan } from "../domains/supplements/
 import { SupplementPassConfirmModal } from "../domains/supplements/SupplementPassConfirmModal.jsx";
 import { SupplementScheduleChangeConfirmModal } from "../domains/supplements/SupplementScheduleChangeConfirmModal.jsx";
 import { SupplementHistoryModal } from "../domains/supplements/SupplementHistoryModal.jsx";
-import { SupplementNotificationDraftWorkspace } from "../domains/supplements/SupplementNotificationDraftWorkspace.jsx";
 import { SupplementNotificationControlModal } from "../domains/supplements/SupplementNotificationControlModal.jsx";
-import { SupplementTaskSourceContext } from "../domains/supplements/SupplementTaskSourceContext.jsx";
-import { SupplementTaskScheduleEditor } from "../domains/supplements/SupplementTaskScheduleEditor.jsx";
-import { SupplementTaskSaveSummary, SupplementTaskScheduleGateNote } from "../domains/supplements/SupplementTaskSaveSummary.jsx";
-import { SupplementTaskCardHeader } from "../domains/supplements/SupplementTaskCardHeader.jsx";
-import { SupplementTaskActionBar } from "../domains/supplements/SupplementTaskActionBar.jsx";
+import { SupplementTaskCard } from "../domains/supplements/SupplementTaskCard.jsx";
 import {
   getSupplementImmediateNoticeSaveStatus,
   getSupplementNotificationControlDisplay
@@ -23207,77 +23202,69 @@ function SupplementStudentModal({
                   ? "수업일지 일정 만들기를 누르면 학생·학부모 확정 안내를 다음 정각에 예약하고, 보강 당일 학생 11시 예약을 만듭니다."
                   : "시간까지 입력하면 수업일지 일정 만들기 버튼으로 확정 안내 예약을 만들 수 있습니다.";
               return (
-                <article className="taskCard" key={task.makeupTaskId}>
-                  <SupplementTaskCardHeader
-                    hasSavedNotificationDrafts={supplementNotificationDraftConfigs.every((config) => String(task[config.field] ?? "").trim())}
-                    task={task}
-                    taskMeta={taskMetaParts.join(" · ")}
-                    typeLabel={followUpTypeLabel(task.taskType)}
-                  />
-                  <SupplementTaskSourceContext
-                    absenceLessonContent={absenceLessonContent}
-                    absenceLessonMaterial={absenceLessonMaterial}
-                    absenceNextHomework={absenceNextHomework}
-                    absencePreviousHomework={absencePreviousHomework}
-                    absenceSourceDate={absenceSourceDate}
-                    absenceSourceLabel={absenceSourceLabel}
-                    sourceDate={sourceDate}
-                    sourceDueDate={sourceDueDate}
-                    sourceHomeworkTitle={sourceHomeworkTitle}
-                    supplementHomeworkNote={supplementHomeworkNote}
-                    taskType={task.taskType}
-                  />
-                  <SupplementTaskScheduleEditor
-                    methodOptions={methodOptions}
-                    onChange={(field, value) => updateTaskDraft(task, field, value)}
-                    scheduledDate={draftValues.scheduledDate}
-                    scheduledTime={draftValues.scheduledTime}
-                    selectedMethod={draftValues.supplementMethod}
-                    showMethodOptions={shouldShowMethodOptions}
-                  />
-                  <SupplementTaskSaveSummary
-                    draftDiff={draftDiff}
-                    lessonStatus={lessonStatus}
-                    makeupStatus={makeupStatus}
-                    notificationStatus={notificationStatus}
-                  />
-                  <SupplementNotificationDraftWorkspace
-                    activeConfig={activeNotificationDraftConfig}
-                    activeDisplay={activeNotificationDisplay}
-                    activeDraft={activeNotificationDraft}
-                    activeField={activeNotificationDraftField}
-                    configs={notificationDraftTabConfigs}
-                    hasUnsavedChanges={draftDiff.length > 0}
-                    isBusy={isTaskBusy}
-                    isTeacherFinal={activeNotificationDraftIsTeacherFinal}
-                    onChangeDraft={(value) => updateTaskDraft(task, activeNotificationDraftField, value)}
-                    onOpenControl={(controlType) => openNotificationControl(task, controlType)}
-                    onSelectField={(field) => setActiveNotificationDraftFields((current) => ({
+                <SupplementTaskCard
+                  actionProps={{
+                    canCancelAbsenceSource,
+                    hasScheduleDraft,
+                    isCancelAbsenceBusy,
+                    isContentBusy,
+                    isLocalDraftTask,
+                    isPassBusy: busyTaskId === `${task.makeupTaskId}:pass`,
+                    isScheduleBusy,
+                    isTaskBusy,
+                    linkedLessonId: task.linkedLessonId,
+                    onCancelAbsenceSource: () => handleCancelAbsenceSourceTask(task),
+                    onPass: () => setPassConfirmTask(buildTaskWithDraft(task)),
+                    onSave: () => handleSaveTask(task),
+                    onSchedule: () => requestApplyScheduleTask(task)
+                  }}
+                  headerProps={{
+                    hasSavedNotificationDrafts: supplementNotificationDraftConfigs.every((config) => String(task[config.field] ?? "").trim()),
+                    task,
+                    taskMeta: taskMetaParts.join(" · "),
+                    typeLabel: followUpTypeLabel(task.taskType)
+                  }}
+                  key={task.makeupTaskId}
+                  notificationProps={{
+                    activeConfig: activeNotificationDraftConfig,
+                    activeDisplay: activeNotificationDisplay,
+                    activeDraft: activeNotificationDraft,
+                    activeField: activeNotificationDraftField,
+                    configs: notificationDraftTabConfigs,
+                    hasUnsavedChanges: draftDiff.length > 0,
+                    isBusy: isTaskBusy,
+                    isTeacherFinal: activeNotificationDraftIsTeacherFinal,
+                    onChangeDraft: (value) => updateTaskDraft(task, activeNotificationDraftField, value),
+                    onOpenControl: (controlType) => openNotificationControl(task, controlType),
+                    onSelectField: (field) => setActiveNotificationDraftFields((current) => ({
                       ...current,
                       [task.makeupTaskId]: field
-                    }))}
-                  />
-                  <SupplementTaskScheduleGateNote
-                    body={scheduleGateBody}
-                    isScheduleChangeMode={isScheduleChangeMode}
-                    title={scheduleGateTitle}
-                  />
-                  <SupplementTaskActionBar
-                    canCancelAbsenceSource={canCancelAbsenceSource}
-                    hasScheduleDraft={hasScheduleDraft}
-                    isCancelAbsenceBusy={isCancelAbsenceBusy}
-                    isContentBusy={isContentBusy}
-                    isLocalDraftTask={isLocalDraftTask}
-                    isPassBusy={busyTaskId === `${task.makeupTaskId}:pass`}
-                    isScheduleBusy={isScheduleBusy}
-                    isTaskBusy={isTaskBusy}
-                    linkedLessonId={task.linkedLessonId}
-                    onCancelAbsenceSource={() => handleCancelAbsenceSourceTask(task)}
-                    onPass={() => setPassConfirmTask(buildTaskWithDraft(task))}
-                    onSave={() => handleSaveTask(task)}
-                    onSchedule={() => requestApplyScheduleTask(task)}
-                  />
-                </article>
+                    }))
+                  }}
+                  saveSummaryProps={{ draftDiff, lessonStatus, makeupStatus, notificationStatus }}
+                  scheduleEditorProps={{
+                    methodOptions,
+                    onChange: (field, value) => updateTaskDraft(task, field, value),
+                    scheduledDate: draftValues.scheduledDate,
+                    scheduledTime: draftValues.scheduledTime,
+                    selectedMethod: draftValues.supplementMethod,
+                    showMethodOptions: shouldShowMethodOptions
+                  }}
+                  scheduleGateProps={{ body: scheduleGateBody, isScheduleChangeMode, title: scheduleGateTitle }}
+                  sourceContextProps={{
+                    absenceLessonContent,
+                    absenceLessonMaterial,
+                    absenceNextHomework,
+                    absencePreviousHomework,
+                    absenceSourceDate,
+                    absenceSourceLabel,
+                    sourceDate,
+                    sourceDueDate,
+                    sourceHomeworkTitle,
+                    supplementHomeworkNote,
+                    taskType: task.taskType
+                  }}
+                />
               );
             })}
           </div>

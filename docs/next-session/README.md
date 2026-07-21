@@ -170,7 +170,8 @@ Git 충돌 방지 규칙:
 - 12J에서 `SupplementTaskSaveSummary`와 일정 gate 안내를 분리해 diff/status→문구 편집→gate 안내 순서를 고정했습니다. 실제 action은 없습니다.
 - 12K에서 `SupplementTaskCardHeader`로 유형·메타·결석 사유·연결 수업일지 등의 읽기 전용 표시를 분리했습니다.
 - 12L에서 `SupplementTaskActionBar`를 callback-only로 분리했고 실제 결석 취소·저장·일정·완료 action은 App에 유지했습니다.
-- 다음은 최신 `origin/main`을 rebase한 뒤 분리된 조각을 감싸는 task 카드 또는 modal shell 경계를 검토합니다. 남은 사람 gate 3개는 통과로 바꾸지 않습니다.
+- 12M에서 `SupplementTaskCard`가 분리된 일곱 조각을 기존 순서로 조립하도록 묶었습니다. App은 계산값과 callback을 계속 소유합니다.
+- 다음은 최신 `origin/main`을 rebase한 뒤 App에 남은 task별 표시 계산을 순수 view-model helper로 분리할 수 있는지 검토합니다. 남은 사람 gate 3개는 통과로 바꾸지 않습니다.
 
 통과한 11B-1 사람 gate 기록:
 1. 삭제 가능한 미래 보충 task와 통제된 학생/학부모 전화번호를 준비합니다.
