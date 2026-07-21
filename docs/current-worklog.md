@@ -130,6 +130,7 @@
 - 운영 데이터 보정: 저장 전 exact read guard로 task ID, `2026-07-22 13:00` 일정, 기존 `7/21(화)` 자동 문구, 기존 `updatedAt`이 모두 같은지 확인한 뒤 `notificationDraft`의 일시만 `7/22(수) 오후 01:00`으로 수정했다. 재조회에서 `makeup_tasks` 일정, 연결 lesson 일정, 문구가 모두 7월 22일 13:00으로 일치했다. 이 작업은 `notification_jobs`나 Solapi를 건드리지 않았다.
 - 저장 원천/side effect: 일정·문구 원천은 Supabase `makeup_tasks`와 `lessons`, 예약 원천은 `notification_jobs`와 Solapi다. 코드 배포·자동검증 중에는 김예나 운영 예약을 생성하지 않으며, 배포 후 새 개별 버튼의 사람 gate에서만 실제 외부 예약을 실행한다. 새 SQL은 없다.
 - AI 검증: `git diff --check`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 339/339를 통과했다. 실제 Solapi 예약/취소는 자동검증하지 않았다.
+- 배포 확인: `main` 커밋 `bfc0431a`를 푸시했다. Vercel 운영 번들 `/assets/main-DKQ8T7hO.js`에서 세 새 버튼명과 `Solapi 예약 취소` 모달 문구를 확인했다. Render는 기존 학생 FK를 사용한 고유 `forceDryRun` probe에서 `status: dry_run`, `provider: solapi`, `reservationPending: false`를 반환해 새 pending claim 완료 로직이 반영됐음을 확인했고, probe row는 즉시 삭제했다. 실제 Solapi 예약/발송은 생성하지 않았다.
 - 사람 검토 gate: 배포 후 `보충관리 -> 결석보강 -> 김예나 7/15 결석`을 열어 세 버튼이 꺼져 있는지 확인한다. 각 버튼을 열어 일정 `7/22(수) 13:00`, 대상 번호, 실제 문구를 확인한 뒤 필요한 알림만 예약한다. 예약 후 불이 켜지고 `알림관리`의 예약 행과 Solapi 예약이 일치하는지, 취소 후 불이 꺼지고 실제 Solapi 그룹도 취소되는지 확인한다. 날짜가 7/21로 보이거나, 한 버튼이 다른 대상까지 함께 예약하거나, 불과 알림관리/Solapi 상태가 다르면 즉시 중단한다.
 
 ### 2026-07-20 P0-1. 수업일지 학생 명단 가나다순 통일
