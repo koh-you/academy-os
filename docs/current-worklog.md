@@ -239,6 +239,18 @@
 - 사람 검토 gate: 삭제 가능한 미래 테스트 수업의 학생 한 명을 사용한다. 기존 강사용 수업메모를 적어 둔 뒤 `미검사` 또는 미완료 숙제의 `다음시간까지`를 선택하고 `변경 저장`한다. Supabase row에서 method=`next_lesson`, text=숙제명, source ID=원 homework ID이고 `preparation_memo`에는 사람 메모만 남아야 한다. 새로고침 후 선택 상태와 다음 수업의 `확인할 숙제`가 유지돼야 한다. 같은 방식으로 `남아서 하고 가기`의 method=`stay_after`를 확인하고, `등원보충`은 세 필드가 비면서 `makeup_tasks`에만 생성되는지 확인한다. 실제 알림 발송·예약은 실행하지 않는다.
 - 회귀/중단 조건: 사람 메모가 삭제됨, marker가 새로 저장됨, API 성공인데 재조회 세 필드가 다름, 새로고침 후 방식이 사라짐, 과거 legacy row의 확인할 숙제가 사라짐, 등원보충이 구조화 record와 task에 중복 저장됨, 수업일지 저장만으로 `notification_jobs`나 Solapi 그룹이 변경되면 4단계로 넘어가지 않는다.
 
+### 2026-07-21 P0. 숙제 후속처리 구조화 3단계 - AI 검토 지적 보강
+
+- AI 운영 read-only 검토: 운영 `/api/lesson-records` 244건 모두 새 필드가 노출됐다. 구조화 row는 아직 0건이고 기존 marker는 8건(`next_lesson` 5, `stay_after` 3), 복수 marker와 불완전 구조화 row는 0건이었다. 배포만으로 기존 데이터가 바뀌지 않았음을 확인했지만 실제 쓰기 round-trip은 사람 gate로 남겼다.
+- 다음 수업 표시 보강: 이전 record의 구조화/legacy 후속처리를 읽은 뒤 method가 `next_lesson`인 경우만 다음 수업의 `확인할 숙제`로 표시한다. `stay_after`는 오늘 수업 후 처리이므로 다음 수업에 넘기지 않는다.
+- 사람 메모 저장 확인 보강: 서버와 프론트의 저장 후 재조회 대조 필드에 `preparationMemo`를 추가했다. 구조화 세 필드가 맞더라도 legacy marker가 강사용 메모에 남아 있으면 저장 완료로 처리하지 않는다. 부분 payload 저장은 기존 구조화 값과 사람 메모를 보존한다.
+- 등원보충 draft 보강: 수업일지에서 `등원보충`을 선택해도 더 이상 `postMakeupTask`를 즉시 호출하지 않는다. `journalMakeupTaskDrafts` local state에 보관하고 `변경 저장`에 포함한다. 수업을 바꾸거나 다른 처리 방식을 선택하면 해당 local draft를 제거한다.
+- 다중 원천 저장 보강: `변경 저장`은 숙제 bulk 저장·Supabase 재조회, 등원보충 bulk 저장·Supabase 재조회, 수업기록 저장·재조회를 순서대로 실행한다. 검증된 원천만 root state에 반영한다. 일부 수업기록만 실패하거나 앞 원천까지 저장된 뒤 다음 원천이 실패하면 `부분 저장 · 숙제 N건 · 등원보충 N건 · 수업기록 N건`처럼 완료 원천과 실패 위치를 현재 수업일지 상태에 표시하고 모든 local draft를 유지해 idempotent 재시도가 가능하다.
+- 알림/외부 영향: 모든 수업기록 저장은 계속 `skipNotificationRefresh: true`이고 이번 보강은 `notification_jobs`, Solapi 예약·발송·취소를 호출하지 않는다. 실제 발송 본문 고정은 4단계 gate로 유지한다.
+- AI 검증: `git diff --check`, `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 361/361, `npm run build`를 통과했다. 기존 Vite 500KB chunk 경고만 남는다. AI는 운영 Supabase 쓰기, 실제 알림 발송·예약·취소를 실행하지 않았다.
+- 사람 검수 gate: 삭제 가능한 미래 테스트 수업/학생 한 명에서만 진행한다. (1) 사람 메모를 입력하고 `다음시간까지` 저장 후 Supabase 구조화 세 필드, marker 제거, 새로고침 유지, 다음 수업 `확인할 숙제`를 확인한다. (2) 같은 테스트에서 `남아서 하고 가기` 저장 후 method=`stay_after`, marker 제거, 새로고침 유지, 다음 수업에는 `확인할 숙제`가 나타나지 않는지 확인한다. (3) `등원보충`을 선택만 한 상태에서는 Supabase `makeup_tasks`가 생기지 않고 `저장 전 변경`에 포함돼야 한다. `변경 저장` 후에만 task 1건과 record의 빈 구조화 세 필드가 재조회 확인돼야 한다. 실제 알림 발송·예약은 실행하지 않는다.
+- 회귀/중단 조건: 선택만으로 task 생성, 사람 메모/기존 구조화 값 소실, marker 잔존인데 저장 완료, `stay_after`가 다음 수업에 표시, 부분 실패인데 전체 저장 완료, 재시도로 task 중복, 수업일지 저장만으로 알림 job/Solapi 그룹 변경이 보이면 4단계로 넘어가지 않는다.
+
 ### 2026-07-21 P0. 수업일지 결석 출결 알림톡 다음 정각 예약
 
 - 사용자 요청: 수업일지에서 결석을 저장하며 학부모 출결 알림톡을 선택한 경우 즉시 발송하지 않고 다음 정각에 예약한다.

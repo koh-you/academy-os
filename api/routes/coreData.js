@@ -2485,7 +2485,7 @@ function mergeExistingAttendanceForNonAttendanceSave(nextRecord = {}, existingRe
 
 function mergeExistingHomeworkFollowupForSave(nextRecord = {}, existingRecord = null) {
   if (!existingRecord) return nextRecord;
-  const fields = ["homeworkFollowupMethod", "homeworkFollowupText", "homeworkFollowupSourceHomeworkId"];
+  const fields = ["homeworkFollowupMethod", "homeworkFollowupText", "homeworkFollowupSourceHomeworkId", "preparationMemo"];
   return fields.reduce((record, field) => (
     Object.prototype.hasOwnProperty.call(nextRecord, field)
       ? record
@@ -2505,7 +2505,7 @@ async function requeryVerifiedLessonStudentRecord(expectedRecord = {}) {
   );
   if (!rows[0]) throw new Error("수업기록 저장 후 Supabase 재조회에서 행을 찾지 못했습니다.");
   const savedRecord = fromLessonRecordRow(rows[0]);
-  const fields = ["homeworkFollowupMethod", "homeworkFollowupText", "homeworkFollowupSourceHomeworkId"];
+  const fields = ["homeworkFollowupMethod", "homeworkFollowupText", "homeworkFollowupSourceHomeworkId", "preparationMemo"];
   const mismatch = fields.find((field) => (
     normalizeLessonRecordVerificationValue(savedRecord[field]) !==
     normalizeLessonRecordVerificationValue(expectedRecord[field])

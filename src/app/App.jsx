@@ -562,7 +562,7 @@ function getHomeworkFollowupPatch(record = {}, method = "", homework = null) {
 }
 
 function hasMatchingHomeworkFollowupFields(expectedRecord = {}, savedRecord = {}) {
-  return ["homeworkFollowupMethod", "homeworkFollowupText", "homeworkFollowupSourceHomeworkId"]
+  return ["homeworkFollowupMethod", "homeworkFollowupText", "homeworkFollowupSourceHomeworkId", "preparationMemo"]
     .filter((field) => Object.prototype.hasOwnProperty.call(expectedRecord, field))
     .every((field) => normalizeMessageText(expectedRecord[field]) === normalizeMessageText(savedRecord?.[field]));
 }
@@ -8383,8 +8383,86 @@ export function App() {
     return true;
   }
 
-  async function handleSaveLessonJournalDrafts(lesson, recordDrafts = [], homeworkDrafts = []) {
-    if (!lesson?.lessonId) return false;
+  function getLessonJournalHomeworkSaveFingerprint(homework = {}) {
+    return JSON.stringify({
+      assignmentStatus: homework.assignmentStatus ?? "",
+      checkedAt: homework.checkedAt ?? "",
+      dueDate: homework.dueDate ?? "",
+      homeworkId: homework.homeworkId ?? "",
+      incompleteHomework: homework.incompleteHomework ?? "",
+      status: homework.status ?? "",
+      teacherStatus: homework.teacherStatus ?? "",
+      title: homework.title ?? ""
+    });
+  }
+
+  async function saveLessonJournalHomeworksWithVerification(homeworksToSave = []) {
+    if (!homeworksToSave.length) return [];
+    await postJson("/api/homeworks/bulk", { homeworks: homeworksToSave });
+    const verification = await getJsonWithTimeout(
+      `/api/homeworks?verify=lesson-journal-${Date.now()}`,
+      15000,
+      "숙제 저장 후 Supabase 확인이 15초를 넘었습니다. 수업일지 수정본을 유지합니다."
+    );
+    const verifiedById = new Map((verification.homeworks ?? []).map((homework) => [homework.homeworkId, homework]));
+    return homeworksToSave.map((homework) => {
+      const verified = verifiedById.get(homework.homeworkId);
+      if (!verified || getLessonJournalHomeworkSaveFingerprint(verified) !== getLessonJournalHomeworkSaveFingerprint(homework)) {
+        throw new Error(`숙제 저장 후 Supabase 재조회 값이 일치하지 않습니다: ${homework.homeworkId}`);
+      }
+      return verified;
+    });
+  }
+
+  async function saveLessonJournalMakeupTasksWithVerification(taskDrafts = []) {
+    if (!taskDrafts.length) return [];
+    const taskIdSeed = Date.now();
+    const requestedTasks = taskDrafts.map((task, index) => {
+      const existingTask = makeupTasks.find((item) => (
+        item.studentId === task.studentId &&
+        item.sourceId === task.sourceId &&
+        item.taskType === task.taskType
+      ));
+      return existingTask
+        ? {
+            ...existingTask,
+            ...task,
+            makeupTaskId: existingTask.makeupTaskId,
+            status: existingTask.status === "done" ? "scheduled" : existingTask.status,
+            touchedAt: new Date().toISOString()
+          }
+        : {
+            makeupTaskId: `makeup_${taskIdSeed}_${task.studentId}_${index}`,
+            status: "draft",
+            scheduledDate: today,
+            scheduledTime: "",
+            notificationDraft: "",
+            attemptCount: 0,
+            childHomeworkIds: [],
+            createdAt: new Date().toISOString(),
+            ...task
+          };
+    });
+    await postMakeupTasks(requestedTasks);
+    const verification = await getJsonWithTimeout(
+      `/api/makeup-tasks?verify=lesson-journal-${taskIdSeed}-${Date.now()}`,
+      12000,
+      "등원보충 저장 후 Supabase 확인이 지연되고 있습니다. 수업일지 수정본을 유지합니다."
+    );
+    const verifiedById = new Map((verification.makeupTasks ?? []).map((task) => [task.makeupTaskId, task]));
+    return requestedTasks.map((requestedTask) => {
+      const verifiedTask = verifiedById.get(requestedTask.makeupTaskId);
+      const identityFields = ["studentId", "sourceId", "sourceHomeworkId", "taskType", "supplementMethod", "supplementHomeworkNote"];
+      const mismatch = identityFields.find((field) => String(verifiedTask?.[field] ?? "") !== String(requestedTask[field] ?? ""));
+      if (!verifiedTask || mismatch) {
+        throw new Error(`등원보충 저장 후 Supabase 재조회 값이 일치하지 않습니다: ${mismatch || requestedTask.makeupTaskId}`);
+      }
+      return verifiedTask;
+    });
+  }
+
+  async function handleSaveLessonJournalDrafts(lesson, recordDrafts = [], homeworkDrafts = [], makeupTaskDrafts = []) {
+    if (!lesson?.lessonId) return { ok: false, message: "수업일지 · 저장 실패 · 수업 ID 없음" };
     let nextHomeworks = homeworksRef.current;
     const changedHomeworkMap = new Map();
 
@@ -8395,14 +8473,8 @@ export function App() {
       nextHomeworks = result.homeworks;
       result.changedHomeworks.forEach((homework) => {
         changedHomeworkMap.set(homework.homeworkId, homework);
-        dirtyHomeworkIdsRef.current.add(homework.homeworkId);
       });
     });
-
-    if (changedHomeworkMap.size) {
-      homeworksRef.current = nextHomeworks;
-      setHomeworks(nextHomeworks);
-    }
 
     const recordsToSave = recordDrafts
       .filter((record) => record?.lessonStudentRecordId)
@@ -8451,10 +8523,8 @@ export function App() {
           }
         : null;
       changedHomeworkMap.set(nextHomework.homeworkId, nextHomework);
-      dirtyHomeworkIdsRef.current.add(nextHomework.homeworkId);
       if (updatedSourceHomework) {
         changedHomeworkMap.set(updatedSourceHomework.homeworkId, updatedSourceHomework);
-        dirtyHomeworkIdsRef.current.add(updatedSourceHomework.homeworkId);
       }
       nextHomeworks = nextHomeworks.map((homework) => {
         if (homework.homeworkId === nextHomework.homeworkId) return nextHomework;
@@ -8463,17 +8533,31 @@ export function App() {
       });
     });
 
-    if (changedHomeworkMap.size) {
-      homeworksRef.current = nextHomeworks;
-      setHomeworks(nextHomeworks);
-    }
-
     const savingStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "saving"]));
     if (recordsToSave.length) {
       setSaveStates((currentStates) => ({ ...currentStates, ...savingStates }));
     }
 
+    const completedSources = [];
     try {
+      const verifiedHomeworks = await saveLessonJournalHomeworksWithVerification([...changedHomeworkMap.values()]);
+      if (verifiedHomeworks.length) {
+        const verifiedById = new Map(verifiedHomeworks.map((homework) => [homework.homeworkId, homework]));
+        nextHomeworks = nextHomeworks.map((homework) => verifiedById.get(homework.homeworkId) ?? homework);
+        homeworksRef.current = nextHomeworks;
+        setHomeworks(nextHomeworks);
+        completedSources.push(`숙제 ${verifiedHomeworks.length}건`);
+      }
+
+      const verifiedTasks = await saveLessonJournalMakeupTasksWithVerification(makeupTaskDrafts);
+      if (verifiedTasks.length) {
+        setMakeupTasks((current) => verifiedTasks.reduce(
+          (tasks, task) => upsertById(tasks, task, "makeupTaskId"),
+          current
+        ));
+        completedSources.push(`등원보충 ${verifiedTasks.length}건`);
+      }
+
       const results = await Promise.all(recordsToSave.map((record) => {
         const student = students.find((item) => item.studentId === record.studentId) ?? null;
         return handleSaveRecord(record.lessonStudentRecordId, lesson, student, record, {
@@ -8481,15 +8565,25 @@ export function App() {
           skipRelatedHomeworks: true
         });
       }));
-      await saveDirtyHomeworks();
-      return results.every(Boolean);
+      const savedRecordCount = results.filter(Boolean).length;
+      if (savedRecordCount) completedSources.push(`수업기록 ${savedRecordCount}건`);
+      if (!results.every(Boolean)) {
+        return {
+          ok: false,
+          message: `수업일지 · 부분 저장 · ${completedSources.join(" · ") || "저장 확인 없음"} · 실패한 수업기록 수정본 유지`
+        };
+      }
+      return { ok: true, message: `수업일지 · 저장 완료 · ${completedSources.join(" · ") || "변경 없음"}` };
     } catch (error) {
       console.error(error);
       const failedStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "failed"]));
       if (recordsToSave.length) {
         setSaveStates((currentStates) => ({ ...currentStates, ...failedStates }));
       }
-      return false;
+      return {
+        ok: false,
+        message: `수업일지 · ${completedSources.length ? `부분 저장 · ${completedSources.join(" · ")} · ` : ""}저장 실패 · ${error.message || "수정본 유지"}`
+      };
     }
   }
 
@@ -8641,7 +8735,6 @@ export function App() {
             onPolishComment={handlePolishLessonComment}
             onPolishPreparationNotice={handlePolishPreparationNotice}
             onPassMakeupTask={handlePassSupplementTask}
-            onCreateMakeupTask={handleCreateMakeupTask}
             onReconcileSolapiNotificationResults={handleReconcileSolapiNotificationResults}
             onRetryGeneratedLessonSave={handleRetryGeneratedLessonSave}
             onScheduleMakeupTask={handleScheduleSupplementTask}
@@ -14671,7 +14764,6 @@ function TeacherLessonHubV2({
   onCancelNotificationJob,
   onChangeRecord,
   onCopyLesson,
-  onCreateMakeupTask,
   onDateSelect,
   onDeleteLesson,
   onDeleteAcademyReminder,
@@ -14847,7 +14939,6 @@ function TeacherLessonHubV2({
             onBack={onBackToCalendar}
             onCancelNotificationJob={onCancelNotificationJob}
             onChangeRecord={onChangeRecord}
-            onCreateMakeupTask={onCreateMakeupTask}
             onDeleteLesson={onDeleteLesson}
             onEditLesson={onEditLesson}
             onOpenAttendance={onOpenAttendance}
@@ -15663,7 +15754,6 @@ function LessonJournalDetail({
   onBack,
   onCancelNotificationJob,
   onChangeRecord,
-  onCreateMakeupTask,
   onDeleteLesson,
   onEditLesson,
   onOpenAttendance,
@@ -15696,6 +15786,7 @@ function LessonJournalDetail({
   const [journalEditMode, setJournalEditMode] = useState(false);
   const [journalRecordDrafts, setJournalRecordDrafts] = useState({});
   const [journalHomeworkDrafts, setJournalHomeworkDrafts] = useState({});
+  const [journalMakeupTaskDrafts, setJournalMakeupTaskDrafts] = useState({});
   const [journalManualSaveMessage, setJournalManualSaveMessage] = useState("");
   const [reservationModalOpen, setReservationModalOpen] = useState(false);
   const [reservationAudit, setReservationAudit] = useState({
@@ -15795,6 +15886,7 @@ function LessonJournalDetail({
     setJournalEditMode(false);
     setJournalRecordDrafts({});
     setJournalHomeworkDrafts({});
+    setJournalMakeupTaskDrafts({});
     setJournalManualSaveMessage("");
     setReservationApplyState("idle");
     setSolapiResultRefreshState("idle");
@@ -15806,7 +15898,8 @@ function LessonJournalDetail({
 
   const journalRecordDraftCount = Object.keys(journalRecordDrafts).length;
   const journalHomeworkDraftCount = Object.keys(journalHomeworkDrafts).length;
-  const hasJournalDraftChanges = journalRecordDraftCount > 0 || journalHomeworkDraftCount > 0;
+  const journalMakeupTaskDraftCount = Object.keys(journalMakeupTaskDrafts).length;
+  const hasJournalDraftChanges = journalRecordDraftCount > 0 || journalHomeworkDraftCount > 0 || journalMakeupTaskDraftCount > 0;
   const activeLessonReservationJobs = lessonNotificationJobs.filter(isActiveNotificationJobStatus);
   const currentPlanScheduledDate = notificationPlanMode === "manual"
     ? lessonNotificationPlan?.scheduledAt
@@ -16232,6 +16325,7 @@ function LessonJournalDetail({
   function handleAssignmentStatusChange(student, baseRecord, previousHomework, value) {
     const normalizedValue = normalizeAssignmentStatusValue(value);
     const homeworkTitle = previousHomework?.title || previousHomework?.sourceLabel || "";
+    removeJournalMakeupTaskDraft(student);
     if (normalizedValue === "not_checked" && homeworkTitle) {
       updateJournalRecordDraftPatch(student, baseRecord, {
         assignmentStatus: normalizedValue,
@@ -16275,6 +16369,16 @@ function LessonJournalDetail({
     setJournalManualSaveMessage("수업일지 · 저장 필요");
   }
 
+  function removeJournalMakeupTaskDraft(student) {
+    const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+    setJournalMakeupTaskDrafts((current) => {
+      if (!current[recordId]) return current;
+      const next = { ...current };
+      delete next[recordId];
+      return next;
+    });
+  }
+
   function applyHomeworkFollowupMethod(student, baseRecord, previousHomework, method) {
     if (!journalEditMode || !previousHomework) return;
     const homeworkTitle = previousHomework.title || previousHomework.sourceLabel || "지난 숙제";
@@ -16287,6 +16391,7 @@ function LessonJournalDetail({
     };
 
     if (method === "arrival_makeup") {
+      const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
       const makeupTask = {
         taskType: "homework_makeup",
         studentId: student.studentId,
@@ -16300,7 +16405,7 @@ function LessonJournalDetail({
         supplementHomeworkNote: homeworkTitle,
         supplementMethod: "arrival_makeup"
       };
-      onCreateMakeupTask?.(makeupTask);
+      setJournalMakeupTaskDrafts((current) => ({ ...current, [recordId]: makeupTask }));
       updateJournalRecordDraftPatch(student, baseRecord, {
         ...commonPatch,
         needsMakeup: true,
@@ -16308,10 +16413,11 @@ function LessonJournalDetail({
         prepParentVisible: Boolean(clearFollowupPatch.preparationMemo && baseRecord.prepParentVisible),
         prepStudentVisible: Boolean(clearFollowupPatch.preparationMemo && baseRecord.prepStudentVisible)
       });
-      setJournalManualSaveMessage("수업일지 · 등원보충을 보충관리로 보냈습니다. 변경 저장이 필요합니다.");
+      setJournalManualSaveMessage("수업일지 · 등원보충 초안 · 변경 저장 후 Supabase 반영");
       return;
     }
 
+    removeJournalMakeupTaskDraft(student);
     updateJournalRecordDraftPatch(student, baseRecord, {
       ...commonPatch,
       needsMakeup: false,
@@ -16354,16 +16460,18 @@ function LessonJournalDetail({
     const saved = await onSaveLessonJournalDrafts?.(
       lesson,
       Object.values(journalRecordDrafts),
-      Object.values(journalHomeworkDrafts)
+      Object.values(journalHomeworkDrafts),
+      Object.values(journalMakeupTaskDrafts)
     );
-    if (saved === false) {
-      setJournalManualSaveMessage("수업일지 · 저장 실패");
+    if (!saved?.ok) {
+      setJournalManualSaveMessage(saved?.message || "수업일지 · 저장 실패 · 수정본 유지");
       return;
     }
     setJournalRecordDrafts({});
     setJournalHomeworkDrafts({});
+    setJournalMakeupTaskDrafts({});
     setJournalEditMode(false);
-    setJournalManualSaveMessage("수업일지 · 저장 완료");
+    setJournalManualSaveMessage(saved.message || "수업일지 · 저장 완료");
     setReservationApplyState("idle");
   }
 
@@ -16514,7 +16622,7 @@ function LessonJournalDetail({
           {journalManualSaveMessage || lessonJournalSaveStatus.label || defaultScheduleHintText}
         </span>
         {hasJournalDraftChanges ? (
-          <span className="manualSaveDraftSummary">저장 전 변경 {journalRecordDraftCount + journalHomeworkDraftCount}건</span>
+          <span className="manualSaveDraftSummary">저장 전 변경 {journalRecordDraftCount + journalHomeworkDraftCount + journalMakeupTaskDraftCount}건</span>
         ) : null}
         {checkoutMissingStudents.length > 0 ? (
           <span className="checkoutMissingSummary" title={checkoutMissingStudents.map((student) => student.name).join(", ")}>
@@ -16785,8 +16893,11 @@ function LessonJournalDetail({
             const previousLessonContent = getLessonContent(previousRecord);
             const previousPreparationMemo = previousMemoRecord?.preparationMemo?.trim() ?? "";
             const referencePreparationMemo = referenceRecord?.preparationMemo?.trim() ?? "";
-            const pendingHomeworkFollowup = getHomeworkFollowupFromRecord(previousRecord ?? {})
+            const previousHomeworkFollowup = getHomeworkFollowupFromRecord(previousRecord ?? {})
               ?? getHomeworkFollowupFromRecord(referenceRecord ?? {});
+            const pendingHomeworkFollowup = previousHomeworkFollowup?.method === "next_lesson"
+              ? previousHomeworkFollowup
+              : null;
             const hasCheckedPriorPrepMemo = Boolean(previousMemoContext.acknowledgedMemoCutoffDate);
             const currentMemoStatus = record.preparationMemo?.trim() ? "작성됨" : "미작성";
             const priorMemoStatus = previousPreparationMemo
