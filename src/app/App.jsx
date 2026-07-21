@@ -16011,11 +16011,18 @@ function LessonJournalDetail({
         `${lessonB.date} ${lessonB.startTime ?? ""}`.localeCompare(`${lessonA.date} ${lessonA.startTime ?? ""}`)
       ));
 
-    const previousLessonRecord = previousLessons
+    const previousLessonRecordInCurrentGroup = previousLessons
       .map((previousLesson) =>
         sourceRecords.find((item) => item.lessonId === previousLesson.lessonId && item.studentId === student.studentId)
       )
       .find(Boolean);
+    const bridgedPreviousLesson = previousLessons.length === 0
+      ? findPreviousLessonForStudent(lessons, lesson, student.studentId, { allowRegularClassFallback: true })
+      : null;
+    const bridgedPreviousLessonRecord = bridgedPreviousLesson
+      ? sourceRecords.find((item) => item.lessonId === bridgedPreviousLesson.lessonId && item.studentId === student.studentId) ?? null
+      : null;
+    const previousLessonRecord = previousLessonRecordInCurrentGroup ?? bridgedPreviousLessonRecord;
     const visiblePreviousMemoRecord = previousLessonRecord?.preparationMemo?.trim() && !isMemoRecordAcknowledged(previousLessonRecord)
       ? previousLessonRecord
       : null;
@@ -25429,14 +25436,18 @@ function findNextLessonForStudent(lessons, lesson, studentId) {
     .sort((a, b) => getLessonSortValue(a).localeCompare(getLessonSortValue(b)))[0];
 }
 
-function findPreviousLessonForStudent(lessons, lesson, studentId) {
+function findPreviousLessonForStudent(lessons, lesson, studentId, { allowRegularClassFallback = false } = {}) {
   const currentSortValue = getLessonSortValue(lesson);
-  return [...lessons]
+  const previousLessons = [...lessons]
     .filter((candidate) => candidate.lessonId !== lesson.lessonId)
-    .filter((candidate) => isSameLessonGroup(lesson, candidate))
     .filter((candidate) => candidate.studentIds?.includes(studentId))
     .filter((candidate) => getLessonSortValue(candidate) < currentSortValue)
-    .sort((a, b) => getLessonSortValue(b).localeCompare(getLessonSortValue(a)))[0];
+    .sort((a, b) => getLessonSortValue(b).localeCompare(getLessonSortValue(a)));
+  const previousLessonInCurrentGroup = previousLessons.find((candidate) => isSameLessonGroup(lesson, candidate));
+  if (previousLessonInCurrentGroup || !allowRegularClassFallback || isSpecialLectureLesson(lesson)) {
+    return previousLessonInCurrentGroup;
+  }
+  return previousLessons.find((candidate) => !isSpecialLectureLesson(candidate));
 }
 
 function createLinkedPreviousHomework(homeworks, lessons, lesson, student, sourceHomework) {
@@ -26407,15 +26418,12 @@ function getLessonHomework(homeworks, lesson, student, homeworkType, lessons = [
     return directHomework;
   }
 
-  const previousLesson = [...lessons]
-    .filter(
-      (item) =>
-        item.lessonId !== lesson.lessonId &&
-        item.date < lesson.date &&
-        item.studentIds?.includes(student.studentId) &&
-        isSameLessonGroup(lesson, item)
-    )
-    .sort((a, b) => b.date.localeCompare(a.date) || b.startTime.localeCompare(a.startTime))[0];
+  const previousLesson = findPreviousLessonForStudent(
+    lessons,
+    lesson,
+    student.studentId,
+    { allowRegularClassFallback: true }
+  );
 
   if (!previousLesson) return null;
 
