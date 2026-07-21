@@ -35,8 +35,9 @@
 3. 완료: 읽기 중심 `SupplementHistoryModal`의 query 필터와 표시 경계를 분리했다.
 4. 완료: 저장 pill·예약 control·학생 11시·즉시 안내 상태 helper를 분리했다.
 5. 완료: `SupplementStudentModal` 내부의 알림 draft workspace 표시 조각을 분리했다.
-6. 다음: 개별 Solapi 예약·취소 확인 모달의 표시 JSX만 callback-only 컴포넌트로 분리한다.
-7. `SupplementStudentModal` 전체와 실제 저장·예약 orchestration은 위 조각 분리 이후 별도 gate로 판단한다.
+6. 완료: 개별 Solapi 예약·취소 확인 모달의 표시 JSX를 callback-only 컴포넌트로 분리했다.
+7. 다음: task 카드의 원천 맥락·일정 입력·상태 표시 중 callback-only 조각을 하나씩 분리한다.
+8. `SupplementStudentModal` 전체와 실제 저장·예약 orchestration은 위 조각 분리 이후 별도 gate로 판단한다.
 
 ## 12B 구현 결과 — 완료 확인 모달
 
@@ -68,6 +69,13 @@
 - App이 각 control의 현재 job을 선택하고 display를 계산해 config에 붙이며 local draft와 활성 필드 state도 계속 소유한다.
 - 새 컴포넌트는 편집·탭 선택·control 열기 callback만 호출하고 API, hook, Supabase, `notification_jobs`, Solapi를 직접 참조하지 않는다.
 - 저장하지 않은 변경이 하나라도 있으면 `수정본 저장 후 예약 확인`으로 막히고, 저장된 선생님 최종본이 자동 초안보다 우선하는 기존 계약을 production check로 유지한다.
+
+## 12G 구현 결과 — 개별 알림 control 모달 표시
+
+- 수신 대상, 예약시각, Solapi 상태, preview, 차단·피드백, 예약·취소 action UI를 `SupplementNotificationControlModal.jsx`로 옮겼다.
+- App이 task/job/config와 마스킹 번호·시각·job status·preview label을 계산해 전달하고 실제 action callback과 busy/feedback state도 계속 소유한다.
+- 취소·실패 이력은 현재 저장 문구로 다시 만들고, 현재 예약 문구와 저장 수정본이 다르면 취소 후 재예약 안내를 표시하는 기존 계약을 유지한다.
+- 새 모달은 hook/API/`notification_jobs`/Supabase state를 직접 소유하지 않는다.
 
 ## 즉시 중단 조건
 
