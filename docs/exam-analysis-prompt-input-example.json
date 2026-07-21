@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "exampleOnly": true,
+  "schoolLevel": "high",
+  "schoolName": "OO고",
+  "grade": "1학년",
+  "examName": "1학기 기말고사",
+  "subject": "수학",
+  "canvas": { "width": 1080, "height": 1350, "ratio": "4:5" },
+  "style": {
+    "palette": { "primary": "#173B6C", "secondary": "#E8F0FA", "accent": "#F2B84B", "background": "#F8FAFD", "text": "#18212F" },
+    "visualMotif": "얇은 좌표 격자와 단정한 노트 프레임",
+    "characterOrPhotoPolicy": "none",
+    "cornerStyle": "soft",
+    "decorationLevel": "low",
+    "tone": "정확하고 차분한 고등부 시험분석 보고서"
+  },
+  "brand": {
+    "name": "수학의기술",
+    "logoInstruction": "제공된 로고 파일만 사용하고 새 로고를 만들지 않는다.",
+    "footer": "검수된 Academy OS 데이터 기반"
+  },
+  "slides": [
+    {
+      "id": "slide-01",
+      "role": "cover",
+      "title": "표지",
+      "status": "human_confirmed",
+      "data": { "schoolName": "OO고", "grade": "1학년", "examName": "1학기 기말고사", "subject": "수학", "headline": "기출 분석" }
+    },
+    {
+      "id": "slide-02",
+      "role": "exam_structure",
+      "title": "시험 구조",
+      "status": "human_confirmed",
+      "data": {
+        "questionCount": "[Academy OS 확정값]",
+        "scoreStructure": "[Academy OS 확정값]",
+        "scope": "[Academy OS 확정값]",
+        "summary": "[교사 검수 요약]"
+      }
+    },
+    {
+      "id": "slide-03",
+      "role": "key_question",
+      "title": "주요문항 1",
+      "status": "human_confirmed",
+      "data": {
+        "questionNumber": "[확정 문항 번호]",
+        "sourceAssetId": "exam-q-source-01",
+        "concepts": ["[핵심 개념 1]", "[핵심 개념 2]"],
+        "strategy": "[검수된 풀이 전략]",
+        "errorPoint": "[자주 틀리는 지점]"
+      },
+      "sourceAssets": [
+        { "id": "exam-q-source-01", "fileName": "question-01.png", "usage": "원본 문제 프레임에 그대로 삽입", "crop": "문항 번호와 보기 전체를 포함" }
+      ]
+    },
+    {
+      "id": "slide-04",
+      "role": "next_preparation",
+      "title": "다음 시험 대비",
+      "status": "human_confirmed",
+      "data": { "actionItems": ["[실행 항목 1]", "[실행 항목 2]", "[실행 항목 3]"] }
+    }
+  ]
+}

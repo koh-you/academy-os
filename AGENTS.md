@@ -52,11 +52,10 @@
    - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 확인한다.
    - 검수 완료 전에는 현재 임시 특강 알림톡 구조를 유지하고, 검수 완료 확인 후에만 템플릿 ID/변수 연결, 테스트 데이터 발송, 링크/문구 검수를 진행한다.
 6. `시험분석 슬라이드별 상세 프롬프트 시스템`
-   - 상태: 별도 `codex/exam-analysis-gpt-image` 브랜치에서 Gate 1 블로그 전수 목록과 Gate 2 이미지 원본 manifest를 완료했다. 기준 문서는 `docs/exam-analysis-blog-corpus-gate1-2026-07-21.md`, `docs/exam-analysis-blog-image-inventory-gate2-2026-07-21.md`, `docs/exam-analysis-blog-image-manifest-gate2-2026-07-21.json`이다.
+   - 상태: 별도 `codex/exam-analysis-gpt-image` 브랜치에서 Gate 1~6 설계를 완료했다. 30페이지·893건 전수 목록, 24개 관련 글·221개 첨부/215개 고유 이미지 전수 분류, 중·고등 시퀀스, 역할 라이브러리, 장별 프롬프트 생성기와 예제를 갖췄다. 새 유료 Vision 호출은 0회다.
    - 목표: Academy OS의 교사 확정 시험분석을 입력으로 학교 스타일·카드 역할·레이아웃 계약을 조합해, 1번부터 마지막 장까지 ChatGPT에 복사할 수 있는 완성형 이미지 생성 프롬프트와 수정 프롬프트를 만든다.
-   - 현재 코퍼스: 전체 블로그 30페이지·893건을 대조해 1차 코퍼스 21건·202장, 파생 종합글 3건·19장, 과거 형식 보류 25건·50장으로 분류했다. 기존 Vision 12건·116장은 재사용하고 신규 상세 분석 후보는 9건·86장이다. `224156001862`는 목록 썸네일 10장과 현재 본문 9장이 달라 본문 원본을 기준으로 한다.
-   - Gate 2 결과: 1차 21건·202장과 파생 3건·19장을 원본 본문으로 재수집했다. 전체 221개 첨부는 SHA-256 기준 215개 고유 이미지이며, 파생 글 19장 중 18장은 1차 코퍼스에 없는 독립 이미지다. `224156001862`는 목록 10장과 본문 9장이 달라 본문 기준으로 정정했다.
-   - 다음 Gate: 215개 고유 이미지를 슬라이드 역할·레이아웃·컴포넌트·텍스트 밀도·원본 문제/풀이 여부로 분류한다. 기존 Vision 12건·116장은 재사용하고 신규 유료 Vision 호출이나 2023~2024 범위 확대 전에 사람 gate를 거친다.
+   - 기준 문서: Gate 1 `docs/exam-analysis-blog-corpus-gate1-2026-07-21.md`, Gate 2 `docs/exam-analysis-blog-image-inventory-gate2-2026-07-21.md`, Gate 3 `docs/exam-analysis-blog-slide-analysis-gate3-2026-07-21.md`, Gate 4 `docs/exam-analysis-middle-high-patterns-gate4-2026-07-21.md`, Gate 5 `docs/exam-analysis-slide-role-library-gate5-2026-07-21.md`, Gate 6 `docs/academy-os-exam-slide-prompt-rules-gate6-2026-07-21.md`다.
+   - 다음 구현 Gate: 실제 Academy OS 코드에 연결하기 전에 교사가 역할·장수·검수 데이터를 확정하는 입력 화면과 `final_fields > teacher_fields > ai_fields` 저장 계약을 먼저 설계한다. 현재 생성기는 확정 JSON을 받아 마스터/1번~마지막 장/수정 프롬프트 Markdown을 만들며 이미지 API는 호출하지 않는다.
    - 작업 경계: 현재 목표는 Academy OS가 상세 프롬프트를 생성하고 사람이 ChatGPT 프로젝트에 복사해 한 장씩 제작·수정하는 구조다. 별도 재승인 전에는 이미지 생성 API, 이미지 버전 DB, Storage 자동 저장 UI를 만들지 않는다.
 
 ## Parallel Refactoring + Maintenance Sessions - Required

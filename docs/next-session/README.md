@@ -1,6 +1,6 @@
 # Next Session Handoff
 
-> 2026-07-21 시험분석 방향 정정: Academy OS 안에 GPT Image 생성 API·버전 DB·Storage 제작실을 먼저 만드는 것이 아니다. Academy OS의 교사 확정 데이터를 바탕으로 `전체 구성안 -> 1번 슬라이드 상세 프롬프트 -> 2번 슬라이드 상세 프롬프트 -> ... -> 장별 수정 프롬프트`를 출력하고, 사용자가 ChatGPT 프로젝트에 복사해 한 장씩 생성·수정하는 것이 현재 목표다. Gate 1 전수 목록과 Gate 2 원본 manifest를 완료했다. 현재 기준은 `docs/exam-analysis-blog-corpus-gate1-2026-07-21.md`, `docs/exam-analysis-blog-image-inventory-gate2-2026-07-21.md`, `docs/exam-analysis-blog-image-manifest-gate2-2026-07-21.json`이며 다음은 215개 고유 이미지의 Gate 3 역할·레이아웃 전수 분석이다.
+> 2026-07-21 시험분석 방향 정정 및 Gate 1~6 완료: Academy OS 안에 GPT Image 생성 API·버전 DB·Storage 제작실을 먼저 만드는 것이 아니다. 30페이지·893건을 전수 목록화하고 24개 관련 글·221개 첨부/215개 고유 이미지를 역할·레이아웃·자산 방식으로 전수 분류했다. 중·고등 시퀀스, 역할 라이브러리, Academy OS 확정 JSON에서 `마스터 -> 1번 -> 2번 -> ... -> 장별 수정 프롬프트`를 만드는 로컬 생성기와 예제를 완성했다. 다음 구현 Gate는 교사 확정 입력/저장 계약을 Academy OS에 연결하는 것이며, 별도 승인 전 이미지 API·DB·Storage 제작실은 만들지 않는다. 최신 기준은 `docs/academy-os-exam-slide-prompt-rules-gate6-2026-07-21.md`다.
 
 이 폴더 하나만 다음 Codex 세션에 넘기면 됩니다. 리팩터링과 유지보수는 아래처럼 별도 Git worktree/브랜치에서 진행합니다. 두 세션 모두 `AGENTS.md`와 `docs/current-worklog.md` 최상단의 `미룬 작업 큐`를 먼저 사용자에게 요약해야 합니다.
 

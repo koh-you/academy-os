@@ -59,14 +59,15 @@ const derivativePosts = [
 const posts = [...primaryPosts, ...derivativePosts];
 
 function parseArgs(argv) {
-  const args = { output: defaultOutput, concurrency: 4 };
+  const args = { output: defaultOutput, concurrency: 4, cacheDir: "" };
   for (let index = 2; index < argv.length; index += 1) {
     const token = argv[index];
     if (token === "--out") args.output = argv[++index];
     else if (token === "--concurrency") args.concurrency = Number(argv[++index]);
+    else if (token === "--cache-dir") args.cacheDir = argv[++index];
     else if (token === "--stdout") args.output = "";
     else if (token === "--help") {
-      console.log("node scripts/inventory-exam-analysis-blog-images.mjs [--out path] [--concurrency 4] [--stdout]");
+      console.log("node scripts/inventory-exam-analysis-blog-images.mjs [--out path] [--concurrency 4] [--cache-dir path] [--stdout]");
       process.exit(0);
     } else throw new Error(`Unknown argument: ${token}`);
   }
@@ -192,7 +193,7 @@ async function fetchPost(post) {
   return { ...post, postUrl, imageUrls };
 }
 
-async function fetchImage(post, sourceUrl, slideOrder) {
+async function fetchImage(post, sourceUrl, slideOrder, cacheDir = "") {
   const fetchUrl = largestAccessibleUrl(sourceUrl);
   const response = await fetchWithRetry(fetchUrl, {
     headers: {
@@ -205,6 +206,12 @@ async function fetchImage(post, sourceUrl, slideOrder) {
   const contentType = response.headers.get("content-type") || "";
   const dimensions = dimensionsFromBuffer(buffer, contentType);
   const filename = filenameFromUrl(sourceUrl);
+  if (cacheDir) {
+    const extension = dimensions.format === "jpeg" ? ".jpg" : `.${dimensions.format === "unknown" ? "bin" : dimensions.format}`;
+    const postDir = path.resolve(cacheDir, post.logNo);
+    await fs.mkdir(postDir, { recursive: true });
+    await fs.writeFile(path.join(postDir, `${String(slideOrder).padStart(2, "0")}${extension}`), buffer);
+  }
   return {
     imageId: `${post.logNo}-${String(slideOrder).padStart(2, "0")}`,
     slideOrder,
@@ -299,7 +306,7 @@ async function main() {
   })));
   let completed = 0;
   const imageResults = await mapWithConcurrency(imageTasks, args.concurrency, async (task) => {
-    const result = await fetchImage(task.post, task.sourceUrl, task.slideOrder);
+    const result = await fetchImage(task.post, task.sourceUrl, task.slideOrder, args.cacheDir);
     completed += 1;
     if (completed % 10 === 0 || completed === imageTasks.length) {
       console.error(`[image ${completed}/${imageTasks.length}]`);

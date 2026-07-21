@@ -17,6 +17,9 @@
     "check:encoding": "node scripts/check-encoding.cjs",
     "inventory:exam-blog": "node scripts/inventory-exam-analysis-blog-images.mjs",
     "verify:exam-blog-inventory": "node scripts/verify-exam-analysis-blog-manifest.mjs",
+    "analyze:exam-blog-slides": "node scripts/build-exam-analysis-slide-analysis.mjs",
+    "verify:exam-blog-slides": "node scripts/verify-exam-analysis-slide-analysis.mjs",
+    "generate:exam-slide-prompts": "node scripts/generate-exam-analysis-slide-prompts.mjs",
     "test:supplement-builders": "node scripts/test-supplement-job-builders.mjs",
     "test:production": "npm run test:supplement-builders && node scripts/scenario-tests-production.cjs"
   },
