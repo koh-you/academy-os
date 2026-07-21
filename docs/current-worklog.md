@@ -348,6 +348,13 @@
 - 운영 저장 검증: `special_lecture_enrollments` 재조회에서 중3 신초봄은 active 5회, 각 13:00~15:00이고 고3 enrollment는 canceled 0회다. 1~5회차 lessons 모두 중3 ID/13:00~15:00을 포함하고 고3 ID는 없다. 1회차 기존 출결·수업기록은 저장 전후 2건, `notification_jobs`는 0건으로 유지됐다.
 - 사람 gate: 배포 후 클리닉 특강 명단에서 `창일중 · 중3` 신초봄이 1~5회차, 각 13:00~15:00으로 보이는지 확인한다. 잘못 입력한 고3 enrollment는 활성 수강 명단에서 제외되어야 한다. 1회차 수업일지에는 신초봄 행이 추가되되 기존 학생의 출결·시간은 그대로여야 한다.
 - 중단 조건: 올바른 신초봄 원천이 불명확함, 기존 학생이 빠짐, 기존 학생 시간이 바뀜, 출결 record가 자동 생성/변경됨, 알림톡 예약/발송 발생, Supabase 재조회 불일치인데 완료 표시, 새로고침 후 공통 시간이 사라짐.
+## 2026-07-21 P1. 12D 최근 보충내역 모달·순수 필터 분리
+
+- 상태: `SupplementHistoryModal`을 별도 JSX로, 날짜/status/view item과 query 필터를 `supplementHistory.js`로 분리했다.
+- 동작 보존: 전달된 task 순서, 학생명·학교·학년·유형·방법·원천·상태 검색, 날짜 fallback 우선순위, 완료 항목만 복귀 callback 노출을 유지한다. 유형/방법 라벨은 App에서 주입한다.
+- 검증/gate: 세 상태 표시, 날짜 fallback, 미등록 학생, 검색 trim/case/학교/방법, 순서 보존 fixture를 `npm run test:production`에 연결했다. production check는 API/notification/Solapi와 local hook이 없는 읽기 경계를 확인한다. 추가 사람 gate는 없다.
+- 다음 단위: 최신 `origin/main` rebase 후 `SupplementStudentModal` 내부의 읽기 전용 알림 상태/탭 표시 조각을 하나씩 분리한다.
+
 ## 2026-07-21 P1. 12C 보충 일정 변경 확인 모달 분리
 
 - 상태: `SupplementScheduleChangeConfirmModal`을 별도 JSX 파일로, 항목 fallback·초기 local draft·confirm patch를 `supplementScheduleChangeDraft.js`로 분리했다.

@@ -34,7 +34,8 @@
     "test:supplement-notification-orchestration": "node scripts/test-supplement-notification-orchestration.mjs",
     "test:supplement-schedule-plan": "node scripts/test-supplement-schedule-plan.mjs",
     "test:supplement-modal-drafts": "node scripts/test-supplement-modal-drafts.mjs",
-    "test:production": "npm run test:exam-prompt-studio && npm run test:exam-final-preview && npm run test:supplement-builders && npm run test:notification-job-api && npm run test:supplement-notification-orchestration && npm run test:supplement-schedule-plan && npm run test:supplement-modal-drafts && node scripts/scenario-tests-production.cjs"
+    "test:supplement-history": "node scripts/test-supplement-history.mjs",
+    "test:production": "npm run test:exam-prompt-studio && npm run test:exam-final-preview && npm run test:supplement-builders && npm run test:notification-job-api && npm run test:supplement-notification-orchestration && npm run test:supplement-schedule-plan && npm run test:supplement-modal-drafts && npm run test:supplement-history && node scripts/scenario-tests-production.cjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.0",

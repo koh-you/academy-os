@@ -32,8 +32,9 @@
 
 1. 완료: `SupplementPassConfirmModal`을 callback-only 표시 컴포넌트로 별도 파일에 옮겼다.
 2. 완료: `SupplementScheduleChangeConfirmModal`과 local reason/detail 초기화·confirm patch helper를 분리했다.
-3. 다음: 읽기 중심 `SupplementHistoryModal`의 query 필터와 표시 경계를 분리한다.
-4. `SupplementStudentModal` 전체와 실제 저장·예약 orchestration은 위 조각 분리 이후 별도 gate로 판단한다.
+3. 완료: 읽기 중심 `SupplementHistoryModal`의 query 필터와 표시 경계를 분리했다.
+4. 다음: `SupplementStudentModal` 내부의 읽기 전용 알림 상태/탭 표시 조각을 분리한다.
+5. `SupplementStudentModal` 전체와 실제 저장·예약 orchestration은 위 조각 분리 이후 별도 gate로 판단한다.
 
 ## 12B 구현 결과 — 완료 확인 모달
 
@@ -46,6 +47,12 @@
 - 초기 `scheduleChangeDetail`은 기존 원 수업/숙제 seed를 우선하고 없으면 현재 보충 항목을 사용하며, `scheduleChangeReason`은 빈 값으로 시작한다.
 - 두 confirm 버튼은 각각 기존 App callback을 호출하되 같은 현재 local draft의 두 필드만 patch로 전달한다.
 - 모달 파일은 local `useState`만 소유하고 API, notification jobs, Solapi를 소유하지 않는다.
+
+## 12D 구현 결과 — 최근 보충내역 모달
+
+- task 입력 순서를 유지한 채 학생·학교·학년·유형·방법·원천·상태를 소문자 검색 haystack으로 필터한다.
+- 완료/일정 확정/진행 중 label과 tone, 완료일→통과일→마지막 일정일→수정일→배정일→생성일 날짜 fallback을 순수 helper로 고정했다.
+- 모달은 query callback과 완료 항목 복귀 callback만 호출하며 API·알림 side effect를 소유하지 않는다.
 
 ## 즉시 중단 조건
 
