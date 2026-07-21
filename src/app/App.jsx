@@ -8,8 +8,6 @@ import {
 } from "../domains/exams/finalPreview.js";
 import { ExamAnalysisFinalPreviewPanel } from "../domains/exams/ExamAnalysisFinalPreviewPanel.jsx";
 import { StudentManager } from "../domains/students/StudentManager.jsx";
-import { PortalReportCards } from "../domains/portals/PortalReportCards.jsx";
-import { StudentPortalMetrics } from "../domains/portals/StudentPortalMetrics.jsx";
 import { ParentPortal } from "../domains/portals/ParentPortal.jsx";
 import { calculateAttendanceStats } from "../domains/portals/StudentMyPageTab.jsx";
 import { StudentPortalShell } from "../domains/portals/StudentPortalShell.jsx";
@@ -21618,87 +21616,6 @@ function AIVariantProblemCenter({ aiSettings = defaultAiSettings }) {
           </div>
         </Modal>
       ) : null}
-    </section>
-  );
-}
-
-function StudentPortal({ homeworks, reportSnapshots, students, onStudentCheckHomework }) {
-  const [selectedStudentId, setSelectedStudentId] = useState(
-    students.find((student) => student.name === "TestS12")?.studentId ?? students[0]?.studentId ?? ""
-  );
-  const selectedStudent = students.find((student) => student.studentId === selectedStudentId) ?? students[0];
-  const selectedStudentHomeworks = homeworks.filter((homework) => homework.studentId === selectedStudent?.studentId);
-  const studentHomeworks = selectedStudentHomeworks
-    .filter(isStudentVisibleHomework)
-    .map((homework) => mergeHomeworkStatusFromLinkedPrevious(homework, selectedStudentHomeworks));
-  const todayHomeworks = studentHomeworks.filter((homework) => homework.assignedDate === today);
-  const overdueHomeworks = studentHomeworks.filter((homework) => isHomeworkOverdue(homework));
-  const studentReports = reportSnapshots.filter((snapshot) => snapshot.studentId === selectedStudent?.studentId);
-  const streakDays = calculateStreak(studentHomeworks);
-
-  return (
-    <section className="studentPortal">
-      <header className="portalHeader">
-        <div>
-          <h1>{academyBrandName} <span>학생</span></h1>
-          <p>{selectedStudent?.name} ({selectedStudent?.grade})</p>
-        </div>
-        <div className="portalActions">
-          <button className="portalIconButton" type="button">💬</button>
-          <span className="portalDate">▦ {today}</span>
-          <button className="logoutButton" onClick={onLogout} type="button">로그아웃</button>
-          {previewMode ? (
-          <label className="compactSelect">
-            학생 선택
-            <select value={selectedStudent?.studentId ?? ""} onChange={(event) => setSelectedStudentId(event.target.value)}>
-              {students.map((student) => (
-                <option key={student.studentId} value={student.studentId}>{student.name}</option>
-              ))}
-            </select>
-          </label>
-          ) : null}
-        </div>
-      </header>
-
-      <StudentPortalMetrics overdueCount={overdueHomeworks.length} streakDays={streakDays} todayCount={todayHomeworks.length} />
-
-      <section className="panel studentWorkPanel">
-        <div className="portalTabs">
-          <button className="active" type="button">오늘</button>
-          <button type="button">등록</button>
-          <button type="button">전체</button>
-          <button type="button">커리큘럼</button>
-          <button type="button">평가</button>
-          <button type="button">마이페이지</button>
-        </div>
-        <div className="sectionHeader">
-          <div>
-            <h2>오늘 해야 할 숙제</h2>
-            <p className="muted">완료 체크하면 선생님 화면에 즉시 반영됩니다.</p>
-          </div>
-        </div>
-        <div className="homeworkStack">
-          {todayHomeworks.length === 0 ? (
-            <div className="emptyHomeworkBox">오늘 배정된 숙제가 없습니다.</div>
-          ) : null}
-          {todayHomeworks.map((homework) => (
-            <HomeworkActionCard
-              homework={homework}
-              key={homework.homeworkId}
-              onStudentCheckHomework={onStudentCheckHomework}
-            />
-          ))}
-        </div>
-        {overdueHomeworks.length ? (
-          <div className="warningBand">⚠️ 밀린 숙제가 있습니다. 오늘 카드나 전체 탭에서 확인하세요.</div>
-        ) : null}
-      </section>
-
-      <section className="panel">
-        <h2>최근 리포트</h2>
-        {studentReports.length === 0 ? <p className="muted">아직 공개된 리포트 스냅샷이 없습니다.</p> : null}
-        <PortalReportCards reports={studentReports.slice(0, 3)} />
-      </section>
     </section>
   );
 }
