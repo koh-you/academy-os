@@ -8,9 +8,25 @@ import {
 } from "./supplementJobBuilders.js";
 import {
   canCancelNotificationJob,
+  getCancelableSupplementScheduleNoticeJobs,
   getCancelableSupplementTargetJobs,
   getSupplementScheduleNoticeJob
 } from "./notificationJobSelectors.js";
+
+export function cancelActiveSupplementScheduleNoticesRequest({
+  cancelNotificationJob,
+  cancelNotificationJobs,
+  notificationJobs = [],
+  reason = "보충 일정 안내 예약 갱신",
+  task
+} = {}) {
+  const activeNoticeJobs = getCancelableSupplementScheduleNoticeJobs(task, notificationJobs);
+  return cancelNotificationJobs({
+    cancelNotificationJob,
+    notificationJobs: activeNoticeJobs,
+    reason
+  });
+}
 
 export async function reserveSupplementNotificationControlRequest({
   academyName,

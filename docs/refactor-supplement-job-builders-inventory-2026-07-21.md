@@ -124,6 +124,8 @@
 
 11B-10에서는 보충 완료 시 학생 11시 deterministic job ID 계산, 기존 비활성 이력 재사용, 기존 취소 wrapper 호출과 오류 시 null 복구를 `cancelSupplementStudentReminderRequest`로 분리했다. 완료 task 저장 순서와 실제 API/Solapi 취소 경계는 바꾸지 않았다. 활성·비활성·목록에 없는 ID·오류·비대상 fixture를 추가했고, 동일 외부 취소 경로는 11B-9 고태영 운영 검증으로 이미 확인했다.
 
+11B-11에서는 같은 보충 task의 활성 학생 일정·학부모 일정·legacy 학부모 안내를 selector로 고른 뒤 기존 배치 취소 함수에 전달하는 경계를 `cancelActiveSupplementScheduleNoticesRequest`로 분리했다. 다른 task와 발송 완료 이력 제외, 취소 사유와 실제 취소 함수 주입을 fixture로 고정했으며 외부 호출 계약은 바꾸지 않았다.
+
 - builder 추출에 `/api/notification-jobs/*`, `setNotificationJobs`, Solapi 호출이 함께 이동함.
 - 학생/학부모 번호 또는 `notificationType`이 바뀜.
 - 선생님 수정본보다 설정 템플릿/자동 seed가 우선함.

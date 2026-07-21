@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  cancelActiveSupplementScheduleNoticesRequest,
   cancelSupplementNotificationControlRequest,
   cancelSupplementStudentReminderRequest,
   reserveSupplementNotificationControlRequest,
@@ -114,6 +115,30 @@ const reminderCancellationJob = {
   notificationJobId: "supplement_student_reminder_makeup-1_student-1",
   status: "scheduled"
 };
+
+const activeScheduleCancellationEvents = [];
+const activeScheduleCancellationResult = await cancelActiveSupplementScheduleNoticesRequest({
+  cancelNotificationJob: async () => ({}),
+  cancelNotificationJobs: async ({ cancelNotificationJob, notificationJobs, reason }) => {
+    activeScheduleCancellationEvents.push([typeof cancelNotificationJob, notificationJobs.map((job) => job.notificationJobId), reason]);
+    return notificationJobs;
+  },
+  notificationJobs: [
+    { notificationJobId: "student-current", notificationType: "schedule_reminder", status: "scheduled", payload: { makeupTaskId: "makeup-1", scheduleType: "supplement" } },
+    { notificationJobId: "parent-current", notificationType: "notice_parent", status: "queued", payload: { makeupTaskId: "makeup-1", scheduleType: "supplement" } },
+    { notificationJobId: "parent-legacy", notificationType: "parent_comment", status: "pending_send", payload: { makeupTaskId: "makeup-1", scheduleType: "supplement" } },
+    { notificationJobId: "other-task", notificationType: "schedule_reminder", status: "scheduled", payload: { makeupTaskId: "makeup-2", scheduleType: "supplement" } },
+    { notificationJobId: "already-sent", notificationType: "schedule_reminder", status: "sent", payload: { makeupTaskId: "makeup-1", scheduleType: "supplement" } }
+  ],
+  reason: "일정 변경",
+  task: reminderTask
+});
+assert.deepEqual(activeScheduleCancellationEvents, [[
+  "function",
+  ["student-current", "parent-current", "parent-legacy"],
+  "일정 변경"
+]]);
+assert.deepEqual(activeScheduleCancellationResult.map((job) => job.notificationJobId), ["student-current", "parent-current", "parent-legacy"]);
 const reminderCancellationCalls = [];
 const canceledReminder = await cancelSupplementStudentReminderRequest({
   cancelNotificationJob: async (job, reason) => {
