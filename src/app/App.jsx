@@ -8,15 +8,11 @@ import {
 } from "../domains/exams/finalPreview.js";
 import { ExamAnalysisFinalPreviewPanel } from "../domains/exams/ExamAnalysisFinalPreviewPanel.jsx";
 import { StudentManager } from "../domains/students/StudentManager.jsx";
-import { PortalMaterialsTab } from "../domains/portals/PortalMaterialsTab.jsx";
-import { StudentEmptyTab, StudentEvaluationTab } from "../domains/portals/PortalStaticTabs.jsx";
-import { PortalTabBar, studentPortalTabs } from "../domains/portals/PortalTabBar.jsx";
 import { PortalReportCards } from "../domains/portals/PortalReportCards.jsx";
 import { StudentPortalMetrics } from "../domains/portals/StudentPortalMetrics.jsx";
 import { ParentPortal } from "../domains/portals/ParentPortal.jsx";
-import { StudentAllHomeworkTab } from "../domains/portals/StudentAllHomeworkTab.jsx";
-import { calculateAttendanceStats, StudentMyPageTab } from "../domains/portals/StudentMyPageTab.jsx";
-import { StudentTodayTab } from "../domains/portals/StudentTodayTab.jsx";
+import { calculateAttendanceStats } from "../domains/portals/StudentMyPageTab.jsx";
+import { StudentPortalShell } from "../domains/portals/StudentPortalShell.jsx";
 import {
   cleanupStudentExamPostFiles,
   confirmTeacherExamPostSubmission,
@@ -21785,110 +21781,74 @@ function StudentPortalV2({
   }, [sessionStudentId]);
 
   return (
-    <section className={previewMode ? "studentPortal studentPortalTabletFirst teacherPreviewPortal" : "studentPortal studentPortalTabletFirst"}>
-      <header className="portalHeader">
-        <div>
-          <h1>{academyBrandName} <span>학생</span></h1>
-          <p>{selectedStudent?.name} ({selectedStudent?.grade})</p>
-        </div>
-        <div className="portalActions">
-          {previewMode ? (
-            <button className="logoutButton" onClick={onLogout} type="button">관리 화면으로</button>
-          ) : null}
-          <button className="portalIconButton" type="button">💬</button>
-          <span className="portalDate">🗓 {today}</span>
-          <button className="logoutButton" onClick={onLogout} type="button">로그아웃</button>
-          {!previewMode ? (
-            <label className="compactSelect">
-              학생 선택
-              <select value={selectedStudent?.studentId ?? ""} onChange={(event) => setSelectedStudentId(event.target.value)}>
-                {students.map((student) => (
-                  <option key={student.studentId} value={student.studentId}>{student.name}</option>
-                ))}
-              </select>
-            </label>
-          ) : null}
-        </div>
-      </header>
-
-      <StudentPortalMetrics overdueCount={overdueHomeworks.length} streakDays={streakDays} todayCount={todayHomeworks.length} />
-
-      <section className="panel studentWorkPanel">
-        <PortalTabBar activeTab={activeTab} onChange={setActiveTab} tabs={studentPortalTabs} />
-
-        {activeTab === "today" ? (
-          <StudentTodayTab
-            buildCalendarDays={buildMonthDays}
-            examPostTargets={examPostTargets}
-            getHomework={getLessonHomework}
-            getHomeworkStatusLabel={getHomeworkStatusLabel}
-            getHomeworkStatusTone={getHomeworkStatusTone}
-            getLessonContent={getLessonContent}
-            getLessonMaterial={getLessonMaterial}
-            getSupplementTypeLabel={followUpTypeLabel}
-            homeworks={homeworks}
-            homeworkSaveStates={homeworkSaveStates}
-            lessons={lessons}
-            overdueHomeworks={overdueHomeworks}
-            prepNotices={studentPrepNotices}
-            questionSaveState={questionSaveState}
-            questions={selectedStudentQuestions}
-            referenceDate={today}
-            recordsWithLessons={studentRecordsWithLessons}
-            selectedStudent={selectedStudent}
-            isHomeworkCompleted={isHomeworkCompletedForStudent}
-            studentExamPostSaveStates={examPostSaveStates}
-            studentExamPostWriteEnabled={studentExamPostWriteEnabled}
-            studentHomeworkWriteEnabled={studentHomeworkWriteEnabled}
-            studentQuestionWriteEnabled={studentQuestionWriteEnabled}
-            studentNotice={upcomingStudentNotice}
-            supplementSchedules={studentSupplementScheduleTasks}
-            todayHomeworks={todayHomeworks}
-            onAddQuestion={onStudentAddQuestion}
-            onDeleteQuestion={onStudentDeleteQuestion}
-            onSubmitExamPostSubmission={onSubmitExamPostSubmission}
-            onUpdateQuestion={onStudentUpdateQuestion}
-            onStudentCheckHomework={onStudentCheckHomework}
-          />
-        ) : null}
-
-        {activeTab === "all" ? (
-          <StudentAllHomeworkTab
-            getStatusLabel={getHomeworkStatusLabel}
-            getStatusTone={getHomeworkStatusTone}
-            homeworks={studentHomeworks}
-            isCompleted={isHomeworkCompletedForStudent}
-            isOverdue={isHomeworkOverdue}
-            records={studentRecordsWithLessons}
-          />
-        ) : null}
-        {activeTab === "materials" ? <PortalMaterialsTab materials={studentMaterials} emptyMessage="아직 공개된 자료가 없습니다." /> : null}
-        {activeTab === "curriculum" ? <StudentEmptyTab message="아직 커리큘럼이 설정되지 않았습니다. 선생님께 문의하세요." /> : null}
-        {activeTab === "evaluation" ? <StudentEvaluationTab /> : null}
-        {activeTab === "mypage" ? (
-          <StudentMyPageTab
-            myPageTab={myPageTab}
-            selectedStudent={selectedStudent}
-            scoreRecords={studentScoreRecords}
-            stats={stats}
-            attendanceStats={attendanceStats}
-            studentLessonComments={studentLessonComments}
-            onChangeTab={setMyPageTab}
-          />
-        ) : null}
-      </section>
-
-      <section className="panel">
-        <h2>최근 리포트</h2>
-        {studentReports.length === 0 ? <p className="muted">아직 공개된 리포트 초안이 없습니다.</p> : null}
-        {studentReports.slice(0, 3).map((report) => (
-          <article className="snapshotCard" key={report.reportId}>
-            <strong>{report.title}</strong>
-            <p>{report.body}</p>
-          </article>
-        ))}
-      </section>
-    </section>
+    <StudentPortalShell
+      academyName={academyBrandName}
+      activeTab={activeTab}
+      allHomework={{
+        getStatusLabel: getHomeworkStatusLabel,
+        getStatusTone: getHomeworkStatusTone,
+        homeworks: studentHomeworks,
+        isCompleted: isHomeworkCompletedForStudent,
+        isOverdue: isHomeworkOverdue,
+        records: studentRecordsWithLessons
+      }}
+      currentDate={today}
+      materials={studentMaterials}
+      metrics={{
+        overdueCount: overdueHomeworks.length,
+        streakDays,
+        todayCount: todayHomeworks.length
+      }}
+      myPage={{
+        attendanceStats,
+        myPageTab,
+        onChangeTab: setMyPageTab,
+        scoreRecords: studentScoreRecords,
+        selectedStudent,
+        stats,
+        studentLessonComments
+      }}
+      onChangeActiveTab={setActiveTab}
+      onChangeSelectedStudentId={setSelectedStudentId}
+      onLogout={onLogout}
+      previewMode={previewMode}
+      reports={studentReports}
+      selectedStudent={selectedStudent}
+      students={students}
+      today={{
+        buildCalendarDays: buildMonthDays,
+        examPostTargets: examPostTargets,
+        getHomework: getLessonHomework,
+        getHomeworkStatusLabel,
+        getHomeworkStatusTone,
+        getLessonContent,
+        getLessonMaterial,
+        getSupplementTypeLabel: followUpTypeLabel,
+        homeworks,
+        homeworkSaveStates,
+        isHomeworkCompleted: isHomeworkCompletedForStudent,
+        lessons,
+        onAddQuestion: onStudentAddQuestion,
+        onDeleteQuestion: onStudentDeleteQuestion,
+        onStudentCheckHomework,
+        onSubmitExamPostSubmission,
+        onUpdateQuestion: onStudentUpdateQuestion,
+        overdueHomeworks,
+        prepNotices: studentPrepNotices,
+        questionSaveState,
+        questions: selectedStudentQuestions,
+        recordsWithLessons: studentRecordsWithLessons,
+        referenceDate: today,
+        selectedStudent,
+        studentExamPostSaveStates: examPostSaveStates,
+        studentExamPostWriteEnabled,
+        studentHomeworkWriteEnabled,
+        studentNotice: upcomingStudentNotice,
+        studentQuestionWriteEnabled,
+        supplementSchedules: studentSupplementScheduleTasks,
+        todayHomeworks
+      }}
+    />
   );
 }
 
