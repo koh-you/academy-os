@@ -1108,6 +1108,11 @@ function buildLessonReservationPayloadSnapshot({
 }
 
 function getLessonReservationPayloadFingerprint(payload = {}) {
+  const scheduledDateSource = String(payload.scheduledDate ?? "").trim();
+  const scheduledDateTimestamp = Date.parse(scheduledDateSource);
+  const normalizedScheduledDate = scheduledDateSource && Number.isFinite(scheduledDateTimestamp)
+    ? new Date(scheduledDateTimestamp).toISOString()
+    : scheduledDateSource;
   return JSON.stringify({
     assignmentStatus: String(payload.assignmentStatus ?? ""),
     attendanceReason: String(payload.attendanceReason ?? payload.reason ?? ""),
@@ -1123,7 +1128,7 @@ function getLessonReservationPayloadFingerprint(payload = {}) {
     preparationNotice: normalizeMessageText(payload.preparationNotice ?? ""),
     previousHomework: normalizeMessageText(payload.previousHomework ?? ""),
     recipient: normalizePhoneNumber(payload.recipient ?? (payload.target === "student" ? payload.studentPhone : payload.parentPhone) ?? ""),
-    scheduledDate: String(payload.scheduledDate ?? ""),
+    scheduledDate: normalizedScheduledDate,
     scheduleMode: String(payload.scheduleMode ?? ""),
     studentId: String(payload.studentId ?? ""),
     supplementSchedule: normalizeMessageText(payload.supplementSchedule ?? ""),
