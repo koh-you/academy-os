@@ -1,5 +1,57 @@
 import assert from "node:assert/strict";
-import { reserveSupplementScheduleNoticeJobRequest } from "../src/domains/notifications/supplementNotificationOrchestration.js";
+import {
+  reserveSupplementScheduleNoticeJobRequest,
+  reserveSupplementStudentReminderJobRequest
+} from "../src/domains/notifications/supplementNotificationOrchestration.js";
+
+const reminderTask = {
+  makeupTaskId: "makeup-1",
+  studentId: "student-1",
+  taskType: "absence_makeup",
+  scheduledDate: "2026-07-23",
+  scheduledTime: "15:00",
+  notificationDraft: "저장된 11시 최종 문구"
+};
+const reminderStudent = {
+  studentId: "student-1",
+  name: "고태영",
+  studentPhone: "01011112222"
+};
+const reminderReserveCalls = [];
+const reminderResult = await reserveSupplementStudentReminderJobRequest({
+  academyName: "으뜸수학",
+  formatScheduledAt: (value) => `KST:${value}`,
+  getScheduleTitle: () => "결석보강",
+  isSchedulePast: () => false,
+  normalizeMessage: (value) => value.trim(),
+  reserveNotificationJob: async (job, reason) => {
+    reminderReserveCalls.push({ job, reason });
+    return { ...job, status: "scheduled" };
+  },
+  student: reminderStudent,
+  task: reminderTask
+});
+assert.equal(reminderResult.status, "scheduled");
+assert.equal(reminderResult.message, "학생 11시 알림톡 예약 완료 · KST:2026-07-23T02:00:00.000Z");
+assert.equal(reminderReserveCalls[0].reason, "보충관리 학생 11시 알림톡 예약");
+assert.equal(reminderReserveCalls[0].job.payload.reminderBody, "저장된 11시 최종 문구");
+
+assert.equal((await reserveSupplementStudentReminderJobRequest({ task: { taskType: "retest" } })).skipped, true);
+assert.equal((await reserveSupplementStudentReminderJobRequest({
+  task: { ...reminderTask, notificationDraft: "" },
+  teacherEditedDraft: true
+})).status, "notApplied");
+assert.match((await reserveSupplementStudentReminderJobRequest({ task: reminderTask })).message, /학생 정보를 찾지 못해/);
+assert.match((await reserveSupplementStudentReminderJobRequest({
+  isSchedulePast: () => false,
+  student: reminderStudent,
+  task: { ...reminderTask, scheduledDate: "" }
+})).message, /배정일이 없어/);
+assert.match((await reserveSupplementStudentReminderJobRequest({
+  isSchedulePast: () => true,
+  student: reminderStudent,
+  task: reminderTask
+})).message, /11:00이 이미 지나/);
 
 const baseJob = {
   notificationJobId: "student-schedule",

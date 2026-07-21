@@ -114,6 +114,8 @@
 
 11B-5에서는 학생·학부모 단일 일정 안내의 연락처 검사, reserve 호출, 확정/변경 결과 조립을 `supplementNotificationOrchestration.js`로 분리했다. 외부 함수는 명시적으로 주입하며 실제 네트워크 없는 fixture로 네 경로를 고정했다.
 
+11B-6에서는 학생 11시 예약의 대상·빈 최종 문구·학생·배정일·과거시각 검증, builder 호출, 예약 결과 조립을 같은 orchestration 모듈로 분리했다. 정상과 차단 분기는 deterministic fixture로 고정했다.
+
 - builder 추출에 `/api/notification-jobs/*`, `setNotificationJobs`, Solapi 호출이 함께 이동함.
 - 학생/학부모 번호 또는 `notificationType`이 바뀜.
 - 선생님 수정본보다 설정 템플릿/자동 seed가 우선함.

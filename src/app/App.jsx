@@ -42,7 +42,10 @@ import {
   getSupplementStudentReminderJob,
   sortNotificationJobsForCurrentStatus
 } from "../domains/notifications/notificationJobSelectors.js";
-import { reserveSupplementScheduleNoticeJobRequest } from "../domains/notifications/supplementNotificationOrchestration.js";
+import {
+  reserveSupplementScheduleNoticeJobRequest,
+  reserveSupplementStudentReminderJobRequest
+} from "../domains/notifications/supplementNotificationOrchestration.js";
 import {
   cancelNotificationJobRequest,
   cancelNotificationJobsRequest,
@@ -7903,46 +7906,18 @@ export function App() {
   }
 
   async function reserveSupplementStudentReminder(task) {
-    if (!isSupplementStudentReminderTask(task)) {
-      return { skipped: true, message: "학생 11시 알림톡 대상이 아닙니다." };
-    }
-    if (isSupplementTeacherEditedField(task, "notificationDraft") && !String(task.notificationDraft ?? "").trim()) {
-      return {
-        skipped: true,
-        status: "notApplied",
-        message: "선생님 최종 알림톡 문구가 비어 있어 학생 11시 알림톡을 예약하지 않았습니다."
-      };
-    }
     const student = students.find((item) => item.studentId === task.studentId);
-    const scheduledAt = getSupplementStudentReminderScheduledAt(task);
-    if (!student) {
-      return { skipped: true, message: "학생 정보를 찾지 못해 11시 알림톡을 예약하지 않았습니다." };
-    }
-    if (!scheduledAt) {
-      return { skipped: true, message: "배정일이 없어 11시 알림톡을 예약하지 않았습니다." };
-    }
-    if (isNotificationSchedulePast(scheduledAt, 0)) {
-      return { skipped: true, message: "보강 당일 11:00이 이미 지나 새 예약을 만들지 않았습니다." };
-    }
-    const notificationJob = buildSupplementStudentReminderJob({
+    return reserveSupplementStudentReminderJobRequest({
       academyName: academyBrandName,
-      reminderBody: normalizeMessageText(task.notificationDraft),
-      scheduledAt,
-      scheduleTitle: getSupplementStudentReminderTitle(task),
+      formatScheduledAt: formatKoreaTimeLabel,
+      getScheduleTitle: getSupplementStudentReminderTitle,
+      isSchedulePast: isNotificationSchedulePast,
+      normalizeMessage: normalizeMessageText,
+      reserveNotificationJob,
       student,
-      task
+      task,
+      teacherEditedDraft: isSupplementTeacherEditedField(task, "notificationDraft")
     });
-    const reservedJob = await reserveNotificationJob(notificationJob, "보충관리 학생 11시 알림톡 예약");
-    return {
-      notificationJob: reservedJob,
-      skipped: false,
-      status: reservedJob?.status === "scheduled" || reservedJob?.status === "dry_run"
-        ? "scheduled"
-        : reservedJob?.status || "resultDue",
-      message: reservedJob?.status === "scheduled" || reservedJob?.status === "dry_run"
-        ? `학생 11시 알림톡 예약 완료 · ${formatKoreaTimeLabel(reservedJob.scheduledAt)}`
-        : reservedJob?.error || "학생 11시 알림톡 예약 상태를 확인하세요."
-    };
   }
 
   async function cancelActiveSupplementScheduleNoticeJobs(task, reason = "보충 일정 안내 예약 갱신") {
