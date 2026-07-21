@@ -164,6 +164,7 @@
 - 저장 원천: 세 필드는 각각 `studentScheduleNotificationDraft`, `parentScheduleNotificationDraft`, `notificationDraft`로 Supabase `makeup_tasks.note`에 저장하고 `supplementTeacherEditedFields`로 선생님 최종본을 구분한다. 저장은 기존 read-after-write fingerprint에 세 필드를 모두 포함한다. 빈 수정본도 최종본으로 보존하되 Solapi 예약은 차단한다. SQL 변경은 없다.
 - 실제 예약 연결: 학생/학부모 schedule job builder는 선택 대상에 맞는 저장 문구를 `notification_jobs.previewBody`와 Solapi payload에 그대로 사용하고, 당일 학생 11시는 기존 `notificationDraft`를 사용한다. 활성 Solapi 예약과 새 저장본이 다르면 자동 덮어쓰지 않고 `기존 예약 취소 -> 다시 예약` 안내를 표시한다.
 - side effect/AI 검증 범위: 코드 수정과 자동검증에서는 운영 `makeup_tasks`, `notification_jobs`, Solapi 예약·발송을 변경하지 않았다. `git diff --check`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production`을 통과했고 운영 시나리오는 341/341이다. `api/routes/coreData.js`의 `makeup_tasks.note` JSON 왕복도 다시 확인했으며 실제 세 문구 저장 및 예약은 사람 gate로 남긴다.
+- 배포 확인: `main` 기능 커밋 `b7c6825`을 푸시했고 Vercel 운영 번들이 `/assets/main-1Az7u7Ae.js`, `/assets/main-BtsNPo0K.css`로 전환됐다. 운영 번들에서 원 숙제 읽기 전용 카드, 알림톡 문구 3종 탭, 두 신규 저장 필드, 수정본 저장 전 예약 차단, 기존 활성 예약과 수정본 불일치 경고를 확인했다.
 - 사람 검토 gate: 배포 후 김예나 결석보강을 열어 원 숙제가 textarea가 아닌 카드인지 확인한다. 세 탭을 순서대로 열어 서로 다른 초안을 확인하고 각 끝에 안전한 검수 표식을 하나씩 추가한 뒤 `보충 내용·알림톡 저장`을 누른다. 모달 재진입·전체 새로고침 후 세 표식이 각각 유지되는지 확인한다. 그다음 예약이 취소 상태인 한 탭만 `Solapi 예약·취소 확인`으로 열어 실제 예약 문구에 해당 표식만 들어가는지 확인하되, 사람의 최종 승인 전에는 `Solapi 예약`을 누르지 않는다. 원 숙제가 편집 가능하거나 세 문구가 서로 복사되거나 옛 예약 문구가 나오면 즉시 중단한다.
 
 ### 2026-07-20 P0-1. 수업일지 학생 명단 가나다순 통일
