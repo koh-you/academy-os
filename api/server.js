@@ -6040,6 +6040,13 @@ const server = http.createServer(async (request, response) => {
       const notificationJobId = requestUrl.searchParams.get("id");
       if (!notificationJobId) throw new Error("삭제할 알림톡 기록 ID가 필요합니다.");
       const result = await deleteNotificationJob(notificationJobId);
+      if (!result.deletedNotificationJobIds?.includes(notificationJobId)) {
+        sendJson(request, response, 409, {
+          ok: false,
+          error: "삭제 가능한 알림 이력이 아니거나 이미 삭제된 기록입니다."
+        });
+        return;
+      }
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });

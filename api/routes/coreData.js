@@ -2348,11 +2348,24 @@ export async function deleteNotificationJob(notificationJobId) {
     return { source: fallbackSource, deletedNotificationJobIds: [notificationJobId] };
   }
 
+  const existing = await getNotificationJob(notificationJobId);
+  const notificationJob = existing.notificationJob;
+  const standardDeletableStatuses = new Set(["failed", "draft", "dry_run", "canceled"]);
+  const scheduledTime = notificationJob?.scheduledAt ? new Date(notificationJob.scheduledAt).getTime() : NaN;
+  const isPastUnconfirmed = notificationJob?.status === "send_unconfirmed" &&
+    Number.isFinite(scheduledTime) &&
+    scheduledTime < Date.now();
+  if (!notificationJob || (!standardDeletableStatuses.has(notificationJob.status) && !isPastUnconfirmed)) {
+    return { source: databaseSource, deletedNotificationJobIds: [] };
+  }
+
   const encodedId = encodeURIComponent(notificationJobId);
-  const deletableStatuses = "failed,draft,dry_run,canceled";
+  const statusFilter = isPastUnconfirmed
+    ? "status=eq.send_unconfirmed"
+    : `status=in.(${[...standardDeletableStatuses].join(",")})`;
   const rows = await deleteRows(
     "notification_jobs",
-    `notification_job_id=eq.${encodedId}&status=in.(${deletableStatuses})`
+    `notification_job_id=eq.${encodedId}&${statusFilter}`
   );
   return {
     source: databaseSource,
