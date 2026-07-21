@@ -16221,18 +16221,7 @@ function LessonJournalDetail({
   function getCommentModalRecord() {
     if (!commentModal) return null;
     const recordId = createLessonStudentRecordId(lesson.lessonId, commentModal.student.studentId);
-    const latestRecord = records.find((item) => item.lessonStudentRecordId === recordId) ?? commentModal.record;
-    const field = commentModal.audience === "student" ? "studentComment" : "teacherComment";
-    const originalComment = commentModal.record?.[field] ?? "";
-    const latestComment = latestRecord?.[field] ?? "";
-    const hasPersistedCommentChange = latestComment !== originalComment;
-
-    return {
-      ...(latestRecord ?? {}),
-      [field]: hasPersistedCommentChange
-        ? latestComment
-        : commentModal.initialCommentDraft ?? latestComment ?? originalComment
-    };
+    return records.find((item) => item.lessonStudentRecordId === recordId) ?? commentModal.record;
   }
 
   function getPreviousLessonMemoContext(student) {
@@ -17144,6 +17133,7 @@ function LessonJournalDetail({
           aiProvider={commentAiProvider}
           audience={commentModal.audience}
           integrationStatus={integrationStatus}
+          initialCommentDraft={commentModal.initialCommentDraft}
           initialSendTiming={notificationPlanMode}
           lesson={lesson}
           onChangeRecord={onChangeRecord}
@@ -17472,6 +17462,7 @@ function CommentComposerModal({
   aiProvider,
   audience,
   integrationStatus,
+  initialCommentDraft,
   initialSendTiming = "default",
   lesson,
   nextHomework,
@@ -17498,7 +17489,7 @@ function CommentComposerModal({
   const field = isParent ? "teacherComment" : "studentComment";
   const comment = record?.[field] ?? "";
   const aiStatus = isParent ? record?.teacherCommentAiStatus : record?.studentCommentAiStatus;
-  const [draftComment, setDraftComment] = useState(comment);
+  const [draftComment, setDraftComment] = useState(initialCommentDraft ?? comment);
   const [localAiStatus, setLocalAiStatus] = useState(aiStatus || "AI 대기");
   const [draftSaveState, setDraftSaveState] = useState("idle");
   const lastSavedDraftRef = useRef(comment);
@@ -17573,7 +17564,7 @@ function CommentComposerModal({
   });
   useEffect(() => {
     const nextComment = record?.[field] ?? "";
-    setDraftComment(nextComment);
+    setDraftComment(initialCommentDraft ?? nextComment);
     lastSavedDraftRef.current = nextComment;
     previousAiStatusRef.current = aiStatus;
     setDraftSaveState("idle");

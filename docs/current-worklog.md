@@ -266,6 +266,7 @@
 
 - 원인: 2단계에서 수업메모 저장이 최종 문구를 덮어쓰는 동작은 제거했지만, 프론트 예약 payload와 서버 예약 직전 refresh가 `prepStudentVisible/prepParentVisible`을 다시 읽어 최신 수업메모를 저장된 최종 문구 앞에 자동 합쳤다. 따라서 저장된 최종 문구와 실제 예약 본문이 다른 원천을 가질 수 있었다.
 - 본문 계약: 수업메모 포함 체크는 작성창을 열 때 local draft seed를 만드는 용도로만 사용한다. 예약/수동 발송/서버 예약 직전 refresh의 코멘트 원천은 Supabase에 저장된 대상별 최종 문구만 사용하고 `preparationNotice`는 비운다. 메모나 최종 문구를 저장해도 기존 Solapi 그룹은 자동 변경하지 않으며, 현재 저장본과 예약 fingerprint가 다르면 화면에서 `Solapi 예약 업데이트 필요`를 표시하고 사람이 명시적으로 반영한다.
+- local draft 보강: 배포 직후 AI 자기검토에서 작성창 seed가 `record[field]`처럼 전달돼 아직 저장하지 않은 수업메모 seed도 저장본으로 오인할 수 있는 경계를 발견했다. 모달에는 Supabase 최종 문구 record와 `initialCommentDraft`를 별도로 전달하고, `lastSavedDraftRef`는 저장된 record 값만 가리키게 고쳤다. seed가 저장본과 다르면 즉시 `저장 필요`이며 발송/예약 버튼은 `저장 후 가능`으로 잠긴다.
 - 숙제 후속처리: 구조화된 `next_lesson/stay_after`는 메모 포함 체크와 분리해 학생·학부모 `⭐ 보충/확인 안내`에 유지한다. 기존 legacy marker는 구조화 필드가 비어 있을 때만 fallback으로 읽는다.
 - 설정 관리: 하드코딩되어 있던 `다음 수업 때 #{숙제}를 함께 확인하겠습니다.`와 `오늘 수업 후 #{숙제} 보충을 마무리합니다.`를 `설정 > 알림톡`의 `lessonNextHomeworkFollowup`, `lessonStayAfterHomeworkFollowup`으로 노출했다. 프론트 미리보기와 서버 예약 직전 refresh가 모두 Supabase `app_state.aiSettings.notificationTemplates`를 읽는다. 새 SQL은 없다.
 - 운영 read-only 확인: 운영 `/api/app-state`는 Supabase 응답이 정상이고 `aiSettings`도 존재하지만 `notificationTemplates` 저장 키는 아직 없었다. 배포 직후에는 프론트·서버가 같은 코드 기본값을 사용한다. 사람 gate에서 설정 화면의 두 기본값을 확인하고 `기본값` 또는 실제 편집으로 app_state 자동저장을 발생시킨 뒤 API 재조회에서 두 키가 생겼는지 확인한다. AI는 운영 app_state를 쓰지 않았다.
