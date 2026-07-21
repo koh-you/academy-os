@@ -76,6 +76,7 @@ import {
   normalizeAssignmentStatusValue
 } from "../src/domains/lessons/assignmentStatus.js";
 import { applyStudentScheduleToLesson } from "../src/shared/utils/studentSchedule.js";
+import { getNextHourlyAlimtalkReservationAt } from "../src/domains/notifications/supplementJobBuilders.js";
 import { isSupplementScheduleForLessonComment } from "../src/domains/notifications/supplementSchedule.js";
 import { normalizeSpecialLectureTallySessionRequests } from "../src/domains/specialLectures/tallySessionRequests.js";
 import {
@@ -97,6 +98,7 @@ import {
   upsertExamAnalysisRun
 } from "./routes/examAnalysisPipeline.js";
 import {
+  buildAttendanceBody,
   cancelSolapiReservationGroup,
   getNotificationStatus,
   listSolapiGroups,
@@ -483,6 +485,41 @@ function queueKioskAttendanceAlimtalk(attendanceEvent, alimtalkPayload) {
     .catch((error) => console.error("Queued attendance Alimtalk failed.", error));
 }
 
+function buildManualAbsenceAttendanceJob({ alimtalkPayload, lesson, now, record, student }) {
+  const scheduledAt = getNextHourlyAlimtalkReservationAt(now);
+  if (!scheduledAt) throw new Error("결석 알림톡 다음 정각을 계산하지 못했습니다.");
+  const scheduledHourKey = scheduledAt.replaceAll(/\D/g, "").slice(0, 10);
+  const attendanceBody = buildAttendanceBody(alimtalkPayload);
+  return {
+    notificationJobId: `attendance_absence_${record.lessonStudentRecordId}_${scheduledHourKey}`,
+    notificationType: "attendance",
+    studentId: student.studentId,
+    lessonId: lesson.lessonId,
+    lessonStudentRecordId: record.lessonStudentRecordId,
+    target: "parent",
+    recipient: student.parentPhone,
+    scheduledAt,
+    payload: {
+      ...alimtalkPayload,
+      attendanceBody,
+      lessonDate: lesson.date,
+      notificationType: "attendance",
+      scheduledDate: scheduledAt,
+      sendMode: "scheduled",
+      target: "parent"
+    },
+    previewBody: attendanceBody,
+    status: "scheduled",
+    provider: "academy-os-reserving",
+    result: {
+      attendanceSource: "manual_journal",
+      reservationPending: true
+    },
+    error: "",
+    createdAt: new Date(now).toISOString()
+  };
+}
+
 async function handleAttendanceCheck(payload = {}) {
   const source = String(payload.source || "kiosk");
   const now = new Date();
@@ -753,10 +790,36 @@ async function handleAttendanceCheck(payload = {}) {
   };
 
   const shouldQueueKioskAlimtalk = sendAlimtalk && source === "kiosk";
+  const shouldReserveManualAbsenceAlimtalk = sendAlimtalk && source === "manual" && nextStatus === "absent";
   let alimtalkStatus = shouldQueueKioskAlimtalk ? "queued" : "skipped";
   let alimtalkResult = null;
   let alimtalkError = "";
-  if (sendAlimtalk && !shouldQueueKioskAlimtalk) {
+  if (shouldReserveManualAbsenceAlimtalk) {
+    const notificationJob = buildManualAbsenceAttendanceJob({ alimtalkPayload, lesson, now, record: savedRecord, student });
+    try {
+      const reservation = await reserveNotificationJobInSolapi(notificationJob, {
+        reason: "수업일지 결석 출결 다음 정각 예약"
+      });
+      alimtalkResult = reservation;
+      alimtalkStatus = reservation.notificationJob?.status || (reservation.reserved ? "scheduled" : "failed");
+    } catch (error) {
+      const failedJob = {
+        ...notificationJob,
+        error: `Solapi 예약 실패: ${error.message}`,
+        provider: "academy-os",
+        result: {
+          ...(notificationJob.result ?? {}),
+          reservationPending: false
+        },
+        status: "failed",
+        updatedAt: new Date().toISOString()
+      };
+      await upsertNotificationJob(failedJob);
+      alimtalkStatus = "failed";
+      alimtalkResult = { notificationJob: failedJob, reserved: false, source: "supabase" };
+      alimtalkError = error.message;
+    }
+  } else if (sendAlimtalk && !shouldQueueKioskAlimtalk) {
     try {
       alimtalkResult = await sendAttendanceAlimtalkOnce(alimtalkPayload);
       alimtalkStatus = alimtalkResult?.duplicateSuppressed ? "duplicate_suppressed" : "sent";
@@ -808,7 +871,8 @@ async function handleAttendanceCheck(payload = {}) {
       status: alimtalkStatus,
       result: alimtalkResult,
       error: alimtalkError,
-      queued: shouldQueueKioskAlimtalk
+      queued: shouldQueueKioskAlimtalk,
+      scheduled: shouldReserveManualAbsenceAlimtalk && ["scheduled", "dry_run"].includes(alimtalkStatus)
     }
   };
 }

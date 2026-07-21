@@ -7457,7 +7457,16 @@ export function App() {
     const nextRecords = upsertLessonStudentRecord(recordsRef.current, nextRecord);
     recordsRef.current = nextRecords;
     setRecords(nextRecords);
-    return { record: nextRecord, saved: true };
+    const attendanceNotificationJob = result.alimtalk?.result?.notificationJob;
+    if (attendanceNotificationJob) upsertNotificationJobState(attendanceNotificationJob);
+    if (
+      options.sendAlimtalk &&
+      nextAttendanceStatus === "absent" &&
+      !["scheduled", "dry_run"].includes(attendanceNotificationJob?.status)
+    ) {
+      throw new Error(`결석 출결은 저장됐지만 다음 정각 알림톡 예약에 실패했습니다. ${result.alimtalk?.error || attendanceNotificationJob?.error || "알림관리에서 상태를 확인해 주세요."}`);
+    }
+    return { alimtalk: result.alimtalk, record: nextRecord, saved: true };
   }
 
   function handleChangeRecord(lesson, student, field, value) {
@@ -17483,7 +17492,11 @@ function AttendanceModal({ item, lateGraceMinutes = 5, onClose, onSave }) {
         setSaveError("출결 저장에 실패했습니다. 잠시 후 다시 눌러 주세요.");
       }
     } catch (error) {
-      setSaveError(`출결 저장에 실패했습니다. ${error.message}`);
+      setSaveError(
+        String(error.message || "").startsWith("결석 출결은 저장됐지만")
+          ? error.message
+          : `출결 저장에 실패했습니다. ${error.message}`
+      );
     } finally {
       setIsSaving(false);
     }
@@ -17559,14 +17572,22 @@ function AttendanceModal({ item, lateGraceMinutes = 5, onClose, onSave }) {
       {confirmStep === "saveMode" ? (
         <div className="attendanceConfirmPanel">
           <strong>출결을 어떻게 저장할까요?</strong>
-          <p>출결 기록만 저장하거나, 저장 후 학부모에게 출결 알림톡까지 발송할 수 있습니다.</p>
+          <p>
+            {values.attendanceStatus === "absent"
+              ? "결석 기록만 저장하거나, 저장 후 학부모 결석 알림톡을 다음 예약 가능한 정각에 예약할 수 있습니다."
+              : "출결 기록만 저장하거나, 저장 후 학부모에게 출결 알림톡까지 즉시 발송할 수 있습니다."}
+          </p>
           {saveError ? <p className="apiErrorBox">{saveError}</p> : null}
           <div className="attendanceConfirmActions">
             <button className="softButton" disabled={isSaving} onClick={() => finishConfirmedSave(false)} type="button">
               {isSaving ? "저장 중..." : "저장만"}
             </button>
             <button className="primaryButton" disabled={isSaving} onClick={() => finishConfirmedSave(true)} type="button">
-              {isSaving ? "저장 중..." : "저장 후 출결 알림톡 발송"}
+              {isSaving
+                ? "저장 중..."
+                : values.attendanceStatus === "absent"
+                  ? "저장 후 다음 정각 알림톡 예약"
+                  : "저장 후 출결 알림톡 즉시 발송"}
             </button>
           </div>
         </div>

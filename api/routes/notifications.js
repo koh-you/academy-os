@@ -287,7 +287,7 @@ function formatAcademyReminderItem(item) {
   return parts.filter(Boolean).join(" · ");
 }
 
-function buildAttendanceBody({ attendanceStatus, checkedAt, checkInTime, checkOutTime, lessonName, lateMinutes, reason }) {
+export function buildAttendanceBody({ attendanceStatus, checkedAt, checkInTime, checkOutTime, lessonName, lateMinutes, reason }) {
   const timeSource = attendanceStatus === "checkout" ? checkOutTime || checkedAt : checkInTime || checkedAt;
   const time = formatAttendanceTime(timeSource);
   const lines = [
