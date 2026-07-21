@@ -8,6 +8,10 @@ import {
   isSupplementStudentReminderTask
 } from "../src/domains/notifications/supplementJobBuilders.js";
 import {
+  canCancelNotificationJob,
+  getCancelableSupplementScheduleNoticeJobs,
+  getCancelableSupplementTargetJobs,
+  getCurrentSupplementScheduleNoticeTargets,
   getNotificationJobPriority,
   getSupplementNotificationControlJob,
   getSupplementScheduleNoticeJob,
@@ -209,5 +213,47 @@ assert.equal(getSupplementScheduleNoticeJob({ ...task, scheduledTime: "" }, sche
 assert.equal(getSupplementNotificationControlJob(task, reminderHistory, "studentReminder")?.status, "canceled");
 assert.equal(getSupplementNotificationControlJob(task, scheduleHistory, "studentSchedule")?.notificationJobId, "student-scheduled-older");
 assert.equal(getSupplementNotificationControlJob(task, scheduleHistory, "parentSchedule")?.notificationJobId, "parent-sent");
+
+const activeScheduleHistory = [
+  ...scheduleHistory,
+  {
+    notificationJobId: "parent-queued",
+    notificationType: "notice_parent",
+    status: "queued",
+    payload: { makeupTaskId: task.makeupTaskId, scheduleType: "supplement" }
+  },
+  {
+    notificationJobId: "legacy-parent-comment",
+    notificationType: "parent_comment",
+    status: "scheduled",
+    payload: { makeupTaskId: task.makeupTaskId, scheduleType: "lesson" }
+  },
+  {
+    notificationJobId: "other-task-student",
+    notificationType: "schedule_reminder",
+    status: "scheduled",
+    payload: { makeupTaskId: "other-task", scheduleType: "supplement" }
+  }
+];
+
+assert.equal(canCancelNotificationJob({ status: "scheduled" }), true);
+assert.equal(canCancelNotificationJob({ status: "sent" }), false);
+assert.equal(canCancelNotificationJob(null), false);
+assert.deepEqual(
+  getCancelableSupplementScheduleNoticeJobs(task, activeScheduleHistory).map((job) => job.notificationJobId).sort(),
+  ["parent-queued", "student-scheduled-older", "wrong-date"].sort()
+);
+assert.deepEqual(
+  [...getCurrentSupplementScheduleNoticeTargets(task, activeScheduleHistory)].sort(),
+  ["parent", "student"]
+);
+assert.deepEqual(
+  getCancelableSupplementTargetJobs(task, activeScheduleHistory, "student").map((job) => job.notificationJobId),
+  ["student-scheduled-older", "wrong-date"]
+);
+assert.deepEqual(
+  getCancelableSupplementTargetJobs(task, activeScheduleHistory, "parent").map((job) => job.notificationJobId),
+  ["parent-queued"]
+);
 
 console.log("supplement job builders and selectors: deterministic contract passed");

@@ -33,6 +33,10 @@ import {
   isSupplementStudentReminderTask
 } from "../domains/notifications/supplementJobBuilders.js";
 import {
+  canCancelNotificationJob,
+  getCancelableSupplementScheduleNoticeJobs,
+  getCancelableSupplementTargetJobs,
+  getCurrentSupplementScheduleNoticeTargets,
   getSupplementNotificationControlJob,
   getSupplementScheduleNoticeJob,
   getSupplementStudentReminderJob,
@@ -1074,8 +1078,6 @@ function formatNotificationJobStatus(job) {
 }
 
 const deletableNotificationJobStatuses = new Set(["failed", "draft", "dry_run", "canceled"]);
-const cancelableNotificationJobStatuses = new Set(["scheduled", "queued", "pending_send"]);
-const reusableSupplementScheduleNoticeStatuses = new Set(["scheduled", "queued", "pending_send", "sent", "send_unconfirmed", "dry_run"]);
 
 function canDeleteNotificationJob(job) {
   const isNoticeDraft = String(job?.notificationType ?? "").startsWith("notice_") &&
@@ -1084,10 +1086,6 @@ function canDeleteNotificationJob(job) {
     Boolean(job?.scheduledAt) &&
     isNotificationSchedulePast(job.scheduledAt, 0);
   return isNoticeDraft || isPastUnconfirmed;
-}
-
-function canCancelNotificationJob(job) {
-  return cancelableNotificationJobStatuses.has(job?.status);
 }
 
 function createLessonNotificationJobId(lessonId, studentId, target) {
@@ -7945,38 +7943,10 @@ export function App() {
   }
 
   async function cancelActiveSupplementScheduleNoticeJobs(task, reason = "보충 일정 안내 예약 갱신") {
-    const makeupTaskId = task?.makeupTaskId || "";
-    if (!makeupTaskId) return [];
-    const activeNoticeJobs = notificationJobs.filter((job) => {
-      const payload = job.payload ?? {};
-      const result = job.result && typeof job.result === "object" ? job.result : {};
-      const jobMakeupTaskId = payload.makeupTaskId || result.makeupTaskId || "";
-      if (jobMakeupTaskId !== makeupTaskId) return false;
-      if (!["notice_parent", "parent_comment", "schedule_reminder"].includes(job.notificationType)) return false;
-      if (job.notificationType === "parent_comment" && payload.scheduleType !== "supplement") return false;
-      return canCancelNotificationJob(job);
-    });
+    const activeNoticeJobs = getCancelableSupplementScheduleNoticeJobs(task, notificationJobs);
     if (activeNoticeJobs.length === 0) return [];
     const canceledJobs = await Promise.all(activeNoticeJobs.map((job) => handleCancelNotificationJob(job, reason)));
     return canceledJobs.map((result) => result.notificationJob).filter(Boolean);
-  }
-
-  function getCurrentSupplementScheduleNoticeTargets(task) {
-    const makeupTaskId = task?.makeupTaskId || "";
-    const scheduleTime = normalizeTimeInput(task?.scheduledTime);
-    if (!makeupTaskId || !task?.scheduledDate || !scheduleTime) return new Set();
-    return new Set(notificationJobs.flatMap((job) => {
-      const payload = job.payload ?? {};
-      const result = job.result && typeof job.result === "object" ? job.result : {};
-      const jobMakeupTaskId = payload.makeupTaskId || result.makeupTaskId || "";
-      if (jobMakeupTaskId !== makeupTaskId) return [];
-      if (!reusableSupplementScheduleNoticeStatuses.has(job.status)) return [];
-      if (payload.scheduleType !== "supplement") return [];
-      if (payload.scheduleDate !== task.scheduledDate || normalizeTimeInput(payload.scheduleTime) !== scheduleTime) return [];
-      if (job.notificationType === "schedule_reminder") return ["student"];
-      if (["notice_parent", "parent_comment"].includes(job.notificationType)) return ["parent"];
-      return [];
-    }));
   }
 
   async function reserveSupplementScheduleNoticeJob(notificationJob, missingMessagePrefix) {
@@ -8078,16 +8048,7 @@ export function App() {
       };
     }
 
-    const activeTargetJobs = notificationJobs.filter((job) => {
-      const payload = job.payload ?? {};
-      const result = job.result && typeof job.result === "object" ? job.result : {};
-      const jobMakeupTaskId = payload.makeupTaskId || result.makeupTaskId || "";
-      if (jobMakeupTaskId !== task.makeupTaskId || payload.scheduleType !== "supplement") return false;
-      const isTargetJob = target === "parent"
-        ? ["notice_parent", "parent_comment"].includes(job.notificationType)
-        : job.notificationType === "schedule_reminder";
-      return isTargetJob && canCancelNotificationJob(job);
-    });
+    const activeTargetJobs = getCancelableSupplementTargetJobs(task, notificationJobs, target);
     await Promise.all(activeTargetJobs.map((job) => handleCancelNotificationJob(job, "보충관리 개별 알림톡 재예약")));
 
     const scheduledAt = getNextHourlyAlimtalkReservationAt();
@@ -10098,7 +10059,7 @@ export function App() {
       hasExistingLinkedSchedule &&
       (taskForSchedule.scheduledDate !== taskForSchedule.linkedLessonDate ||
         scheduleTime !== normalizeTimeInput(taskForSchedule.linkedLessonTime));
-    const currentScheduleNoticeTargets = getCurrentSupplementScheduleNoticeTargets(taskForSchedule);
+    const currentScheduleNoticeTargets = getCurrentSupplementScheduleNoticeTargets(taskForSchedule, notificationJobs);
     const hasCurrentScheduleNoticePair = currentScheduleNoticeTargets.has("student") && currentScheduleNoticeTargets.has("parent");
     const shouldReserveScheduleNotice = shouldUpdateStudentReminder &&
       (!hasExistingLinkedSchedule || hasScheduleChanged || !hasCurrentScheduleNoticePair);

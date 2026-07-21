@@ -98,6 +98,14 @@
 
 11B-1은 위 항목을 모두 통과했다. Solapi는 예약 취소 그룹을 `FAILED`로 집계하지만 연결 메시지의 `reason=예약취소`, `statusCode=1070`, 발송 0건으로 취소 완료를 표현하므로 그룹 상태 문자열 하나만으로 실패 판정하지 않는다.
 
+## 11B-2 구현 결과 — 활성·취소 대상 selector
+
+- `canCancelNotificationJob`, task 전체 활성 일정 안내 취소 대상, 현재 일정의 학생·학부모 재사용 대상, 개별 학생/학부모 재예약 취소 대상을 `notificationJobSelectors.js`로 이동했다.
+- 이전 날짜라도 같은 task ID의 활성 예약은 일정 갱신 시 정리하는 기존 계약과, 현재 날짜·시간이 같은 pair만 중복 방지에 재사용하는 계약을 각각 보존했다.
+- selector는 배열/Set만 반환하며 API, Supabase, React 상태, Solapi를 호출하지 않는다. 실제 예약·취소 orchestration은 계속 `App.jsx`와 11B-1 API 어댑터 경계에 남는다.
+- deterministic fixture에 학생·학부모 교차, 다른 task, legacy parent comment, 이전 날짜 활성 예약을 추가했다. 순수 이동이므로 추가 운영 사람 gate는 없다.
+- 자동검증: 최신 `origin/main` `db420137` 기준 production 364/364, build, `git diff --check` 통과. 기존 Vite 500KB chunk 경고만 남는다.
+
 ## 즉시 중단 조건
 
 - builder 추출에 `/api/notification-jobs/*`, `setNotificationJobs`, Solapi 호출이 함께 이동함.
