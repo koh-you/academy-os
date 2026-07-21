@@ -348,6 +348,14 @@
 - 운영 저장 검증: `special_lecture_enrollments` 재조회에서 중3 신초봄은 active 5회, 각 13:00~15:00이고 고3 enrollment는 canceled 0회다. 1~5회차 lessons 모두 중3 ID/13:00~15:00을 포함하고 고3 ID는 없다. 1회차 기존 출결·수업기록은 저장 전후 2건, `notification_jobs`는 0건으로 유지됐다.
 - 사람 gate: 배포 후 클리닉 특강 명단에서 `창일중 · 중3` 신초봄이 1~5회차, 각 13:00~15:00으로 보이는지 확인한다. 잘못 입력한 고3 enrollment는 활성 수강 명단에서 제외되어야 한다. 1회차 수업일지에는 신초봄 행이 추가되되 기존 학생의 출결·시간은 그대로여야 한다.
 - 중단 조건: 올바른 신초봄 원천이 불명확함, 기존 학생이 빠짐, 기존 학생 시간이 바뀜, 출결 record가 자동 생성/변경됨, 알림톡 예약/발송 발생, Supabase 재조회 불일치인데 완료 표시, 새로고침 후 공통 시간이 사라짐.
+## 2026-07-21 P1. 11B-9 개별 알림 예약 control orchestration 분리
+
+- 상태: control/task/student 검증, 선생님 최종 문구 빈 값 차단, 기존 예약 재사용, 같은 대상의 활성 예약 취소, job 생성·예약과 결과 조립을 `reserveSupplementNotificationControlRequest`로 분리했다.
+- 동작 보존: 학생 일정·학부모 일정·학생 11시의 대상 선택, 기존 문구/제목/시각 builder, 취소 사유, 실제 API·React 상태 wrapper를 그대로 주입한다. 문구·운영 기능은 바꾸지 않았다.
+- 자동검증: 새 예약, 기존 예약 재사용, 학생 11시 위임, 잘못된 task·학생 없음·빈 선생님 최종 문구 차단을 deterministic fixture로 고정했다.
+- 운영 gate: 승인된 미배정 고태영 데이터로 학생 일정·학부모 일정·학생 11시를 각각 실제 예약했다. 세 건 모두 OS `notification_jobs`와 Solapi 그룹의 대상·예약시각·최종 문구가 일치했고, 개별 취소 후 OS `canceled`와 Solapi `예약취소/1070`을 확인했다. 임시 미래 결석보강 task는 삭제 후 재조회에서 없음을 확인했다. 취소 감사 row는 이력으로 유지한다.
+- 다음 단위: 최신 `origin/main` rebase 후 `cancelSupplementStudentReminder`처럼 App에 남은 보충 알림 orchestration을 한 단위씩 계속 분리한다.
+
 ## 2026-07-21 P1. 11B-8 개별 알림 취소 control orchestration 분리
 
 - 상태: 취소 가능성 검증, 기존 취소 wrapper 호출, control 결과 조립을 `cancelSupplementNotificationControlRequest`로 분리했다.

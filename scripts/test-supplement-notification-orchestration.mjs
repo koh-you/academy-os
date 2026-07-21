@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   cancelSupplementNotificationControlRequest,
+  reserveSupplementNotificationControlRequest,
   reserveSupplementScheduleNoticeJobRequest,
   reserveSupplementScheduleNoticesRequest,
   reserveSupplementStudentReminderJobRequest
@@ -107,6 +108,81 @@ await assert.rejects(
   }),
   /현재 취소할 수 있는 Solapi 예약이 없습니다/
 );
+
+const controlTask = { ...reminderTask, studentScheduleNotificationDraft: "학생 일정 최종본" };
+const controlEvents = [];
+const controlReserveResult = await reserveSupplementNotificationControlRequest({
+  academyName: "으뜸수학",
+  cancelNotificationJob: async () => ({}),
+  cancelNotificationJobs: async ({ notificationJobs, reason }) => controlEvents.push(["cancel", notificationJobs.length, reason]),
+  controlType: "studentSchedule",
+  getDraftField: () => "studentScheduleNotificationDraft",
+  getNoticeDraft: (task) => task.studentScheduleNotificationDraft,
+  getScheduleTitle: () => "결석보강",
+  getScheduledAt: () => "2026-07-22T06:00:00.000Z",
+  isTeacherEditedField: () => true,
+  notificationJobs: [{
+    notificationJobId: "old-student",
+    notificationType: "schedule_reminder",
+    status: "scheduled",
+    payload: { makeupTaskId: controlTask.makeupTaskId, scheduleType: "supplement", scheduleDate: "2026-07-20", scheduleTime: "14:00" }
+  }],
+  reserveScheduleNoticeJob: async (job, prefix) => {
+    controlEvents.push(["reserve", job.target, prefix]);
+    return { notificationJob: job, status: "scheduled" };
+  },
+  reserveStudentReminder: () => assert.fail("schedule control must not reserve the 11am job"),
+  student: reminderStudent,
+  task: controlTask
+});
+assert.deepEqual(controlEvents, [
+  ["cancel", 1, "보충관리 개별 알림톡 재예약"],
+  ["reserve", "student", "학생 보충 일정 안내 예약 실패"]
+]);
+assert.equal(controlReserveResult.status, "scheduled");
+assert.equal(controlReserveResult.notificationJob.payload.reminderBody, "학생 일정 최종본");
+
+const existingControlJob = {
+  notificationJobId: "existing-parent",
+  notificationType: "notice_parent",
+  status: "scheduled",
+  payload: {
+    makeupTaskId: controlTask.makeupTaskId,
+    scheduleDate: controlTask.scheduledDate,
+    scheduleTime: controlTask.scheduledTime,
+    scheduleType: "supplement"
+  }
+};
+const existingControlResult = await reserveSupplementNotificationControlRequest({
+  controlType: "parentSchedule",
+  getDraftField: () => "parentScheduleNotificationDraft",
+  isTeacherEditedField: () => false,
+  notificationJobs: [existingControlJob],
+  student: reminderStudent,
+  task: controlTask
+});
+assert.equal(existingControlResult.notificationJob, existingControlJob);
+assert.equal(existingControlResult.message, "학부모 알림톡이 이미 예약되어 있습니다.");
+
+const reminderControlResult = await reserveSupplementNotificationControlRequest({
+  controlType: "studentReminder",
+  getDraftField: () => "notificationDraft",
+  isTeacherEditedField: () => false,
+  reserveStudentReminder: async () => ({ skipped: false, status: "scheduled", message: "11시 완료" }),
+  student: reminderStudent,
+  task: reminderTask
+});
+assert.equal(reminderControlResult.message, "11시 완료");
+
+await assert.rejects(reserveSupplementNotificationControlRequest({ task: {} }), /예약할 보충 일정 정보를 찾지 못했습니다/);
+await assert.rejects(reserveSupplementNotificationControlRequest({ task: reminderTask }), /학생 정보를 찾지 못했습니다/);
+await assert.rejects(reserveSupplementNotificationControlRequest({
+  controlType: "studentSchedule",
+  getDraftField: () => "studentScheduleNotificationDraft",
+  isTeacherEditedField: () => true,
+  student: reminderStudent,
+  task: { ...controlTask, studentScheduleNotificationDraft: "" }
+}), /선생님 최종 알림톡 문구가 비어 있습니다/);
 
 const baseJob = {
   notificationJobId: "student-schedule",

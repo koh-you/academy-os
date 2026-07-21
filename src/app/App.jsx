@@ -35,15 +35,14 @@ import {
 import {
   canCancelNotificationJob,
   getCancelableSupplementScheduleNoticeJobs,
-  getCancelableSupplementTargetJobs,
   getCurrentSupplementScheduleNoticeTargets,
   getSupplementNotificationControlJob,
-  getSupplementScheduleNoticeJob,
   getSupplementStudentReminderJob,
   sortNotificationJobsForCurrentStatus
 } from "../domains/notifications/notificationJobSelectors.js";
 import {
   cancelSupplementNotificationControlRequest,
+  reserveSupplementNotificationControlRequest,
   reserveSupplementScheduleNoticeJobRequest,
   reserveSupplementScheduleNoticesRequest,
   reserveSupplementStudentReminderJobRequest
@@ -7957,62 +7956,23 @@ export function App() {
   }
 
   async function handleReserveSupplementNotificationControl(task, controlType) {
-    if (!task?.makeupTaskId || !isSupplementStudentReminderTask(task)) {
-      throw new Error("예약할 보충 일정 정보를 찾지 못했습니다.");
-    }
     const student = students.find((item) => item.studentId === task.studentId);
-    if (!student) throw new Error("학생 정보를 찾지 못했습니다.");
-    const notificationDraftField = getSupplementNotificationDraftFieldForControl(controlType);
-    if (isSupplementTeacherEditedField(task, notificationDraftField) && !String(task[notificationDraftField] ?? "").trim()) {
-      throw new Error("선생님 최종 알림톡 문구가 비어 있습니다. 문구를 입력하고 저장한 뒤 예약해 주세요.");
-    }
-
-    if (controlType === "studentReminder") {
-      const result = await reserveSupplementStudentReminder(task);
-      if (result.skipped || result.status !== "scheduled") {
-        throw new Error(result.message || "당일 학생 11시 알림톡을 예약하지 못했습니다.");
-      }
-      return result;
-    }
-
-    const target = controlType === "parentSchedule" ? "parent" : "student";
-    const existingJob = getSupplementScheduleNoticeJob(task, notificationJobs, target);
-    if (existingJob?.status === "sent") {
-      throw new Error("현재 일정 안내는 이미 발송 완료되어 다시 예약하지 않습니다.");
-    }
-    if (existingJob && canCancelNotificationJob(existingJob)) {
-      return {
-        notificationJob: existingJob,
-        skipped: false,
-        status: "scheduled",
-        message: `${target === "parent" ? "학부모" : "학생"} 알림톡이 이미 예약되어 있습니다.`
-      };
-    }
-
-    const activeTargetJobs = getCancelableSupplementTargetJobs(task, notificationJobs, target);
-    await cancelNotificationJobsRequest({
-      cancelNotificationJob: handleCancelNotificationJob,
-      notificationJobs: activeTargetJobs,
-      reason: "보충관리 개별 알림톡 재예약"
-    });
-
-    const scheduledAt = getNextHourlyAlimtalkReservationAt();
-    const notificationJob = buildSupplementScheduleNoticeJob({
+    return reserveSupplementNotificationControlRequest({
       academyName: academyBrandName,
-      previousScheduleText: "",
-      reminderBody: getSupplementScheduleNoticeDraft(task, target, "", aiSettings.notificationTemplates),
-      scheduledAt,
-      scheduleTitle: getSupplementStudentReminderTitle(task),
+      cancelNotificationJob: handleCancelNotificationJob,
+      cancelNotificationJobs: cancelNotificationJobsRequest,
+      controlType,
+      getDraftField: getSupplementNotificationDraftFieldForControl,
+      getNoticeDraft: getSupplementScheduleNoticeDraft,
+      getScheduleTitle: getSupplementStudentReminderTitle,
+      isTeacherEditedField: isSupplementTeacherEditedField,
+      notificationJobs,
+      notificationTemplates: aiSettings.notificationTemplates,
+      reserveScheduleNoticeJob: reserveSupplementScheduleNoticeJob,
+      reserveStudentReminder: reserveSupplementStudentReminder,
       student,
-      target,
       task
     });
-    const result = await reserveSupplementScheduleNoticeJob(
-      notificationJob,
-      `${target === "parent" ? "학부모" : "학생"} 보충 일정 안내 예약 실패`
-    );
-    if (result.status !== "scheduled") throw new Error(result.message || "알림톡을 예약하지 못했습니다.");
-    return result;
   }
 
   async function handleCancelSupplementNotificationControl(notificationJob) {
