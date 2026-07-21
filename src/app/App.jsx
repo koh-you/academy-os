@@ -44,6 +44,7 @@ import {
 } from "../domains/notifications/notificationJobSelectors.js";
 import {
   reserveSupplementScheduleNoticeJobRequest,
+  reserveSupplementScheduleNoticesRequest,
   reserveSupplementStudentReminderJobRequest
 } from "../domains/notifications/supplementNotificationOrchestration.js";
 import {
@@ -7941,48 +7942,17 @@ export function App() {
   }
 
   async function reserveSupplementScheduleNotices(task, student, previousScheduleText = "") {
-    if (!isSupplementStudentReminderTask(task)) {
-      return {
-        parent: { skipped: true, status: "notApplied", message: "학부모 보충 일정 안내 대상이 아닙니다." },
-        scheduledAt: "",
-        student: { skipped: true, status: "notApplied", message: "학생 보충 일정 안내 대상이 아닙니다." }
-      };
-    }
-    if (!student) {
-      return {
-        parent: { skipped: true, status: "failed", message: "학생 정보를 찾지 못해 학부모 보충 일정 안내를 예약하지 않았습니다." },
-        scheduledAt: "",
-        student: { skipped: true, status: "failed", message: "학생 정보를 찾지 못해 학생 보충 일정 안내를 예약하지 않았습니다." }
-      };
-    }
-    await cancelActiveSupplementScheduleNoticeJobs(task);
-    const scheduledAt = getNextHourlyAlimtalkReservationAt();
-    const scheduleTitle = getSupplementStudentReminderTitle(task);
-    const studentJob = buildSupplementScheduleNoticeJob({
+    return reserveSupplementScheduleNoticesRequest({
       academyName: academyBrandName,
+      cancelActiveNotices: cancelActiveSupplementScheduleNoticeJobs,
+      getNoticeDraft: getSupplementScheduleNoticeDraft,
+      getScheduleTitle: getSupplementStudentReminderTitle,
+      notificationTemplates: aiSettings.notificationTemplates,
       previousScheduleText,
-      reminderBody: getSupplementScheduleNoticeDraft(task, "student", previousScheduleText, aiSettings.notificationTemplates),
-      scheduledAt,
-      scheduleTitle,
+      reserveScheduleNoticeJob: reserveSupplementScheduleNoticeJob,
       student,
-      target: "student",
       task
     });
-    const parentJob = buildSupplementScheduleNoticeJob({
-      academyName: academyBrandName,
-      previousScheduleText,
-      reminderBody: getSupplementScheduleNoticeDraft(task, "parent", previousScheduleText, aiSettings.notificationTemplates),
-      scheduledAt,
-      scheduleTitle,
-      student,
-      target: "parent",
-      task
-    });
-    const [studentNotice, parentNotice] = await Promise.all([
-      reserveSupplementScheduleNoticeJob(studentJob, "학생 보충 일정 안내 예약 실패"),
-      reserveSupplementScheduleNoticeJob(parentJob, "학부모 보충 일정 안내 예약 실패")
-    ]);
-    return { parent: parentNotice, scheduledAt, student: studentNotice };
   }
 
   async function handleReserveSupplementNotificationControl(task, controlType) {

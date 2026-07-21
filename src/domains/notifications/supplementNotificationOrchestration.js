@@ -1,8 +1,67 @@
 import {
+  buildSupplementScheduleNoticeJob,
   buildSupplementStudentReminderJob,
+  getNextHourlyAlimtalkReservationAt,
   getSupplementStudentReminderScheduledAt,
   isSupplementStudentReminderTask
 } from "./supplementJobBuilders.js";
+
+export async function reserveSupplementScheduleNoticesRequest({
+  academyName,
+  cancelActiveNotices,
+  getNoticeDraft,
+  getScheduleTitle,
+  getScheduledAt = getNextHourlyAlimtalkReservationAt,
+  notificationTemplates = {},
+  previousScheduleText = "",
+  reserveScheduleNoticeJob,
+  student,
+  task
+} = {}) {
+  if (!isSupplementStudentReminderTask(task)) {
+    return {
+      parent: { skipped: true, status: "notApplied", message: "학부모 보충 일정 안내 대상이 아닙니다." },
+      scheduledAt: "",
+      student: { skipped: true, status: "notApplied", message: "학생 보충 일정 안내 대상이 아닙니다." }
+    };
+  }
+  if (!student) {
+    return {
+      parent: { skipped: true, status: "failed", message: "학생 정보를 찾지 못해 학부모 보충 일정 안내를 예약하지 않았습니다." },
+      scheduledAt: "",
+      student: { skipped: true, status: "failed", message: "학생 정보를 찾지 못해 학생 보충 일정 안내를 예약하지 않았습니다." }
+    };
+  }
+
+  await cancelActiveNotices(task);
+  const scheduledAt = getScheduledAt();
+  const scheduleTitle = getScheduleTitle(task);
+  const studentJob = buildSupplementScheduleNoticeJob({
+    academyName,
+    previousScheduleText,
+    reminderBody: getNoticeDraft(task, "student", previousScheduleText, notificationTemplates),
+    scheduledAt,
+    scheduleTitle,
+    student,
+    target: "student",
+    task
+  });
+  const parentJob = buildSupplementScheduleNoticeJob({
+    academyName,
+    previousScheduleText,
+    reminderBody: getNoticeDraft(task, "parent", previousScheduleText, notificationTemplates),
+    scheduledAt,
+    scheduleTitle,
+    student,
+    target: "parent",
+    task
+  });
+  const [studentNotice, parentNotice] = await Promise.all([
+    reserveScheduleNoticeJob(studentJob, "학생 보충 일정 안내 예약 실패"),
+    reserveScheduleNoticeJob(parentJob, "학부모 보충 일정 안내 예약 실패")
+  ]);
+  return { parent: parentNotice, scheduledAt, student: studentNotice };
+}
 
 export async function reserveSupplementStudentReminderJobRequest({
   academyName,
