@@ -1,5 +1,16 @@
 # Academy OS Current Worklog
 
+## 2026-07-21 P1. 최종 알림톡 저장 후 닫기 오경고 수정
+
+- 상태: 원인 확인/코드 수정/자동검증 완료, 배포 후 운영 사람 검토 대기.
+- 증상: 학부모/학생 알림톡 모달에서 AI 수정 후 `최종 문구 저장`을 눌러 저장 완료가 보였는데도 X로 닫으면 `저장하지 않은 최종 문구` 브라우저 경고가 나타났다. 경고에서 닫아도 다시 열면 문구는 저장돼 있었다.
+- 원인: 모달의 `lastSavedDraftRef`는 저장 문구로 정상 갱신됐지만 `hasUnsavedDraft`가 현재 draft를 모달을 열 때의 `comment/initialCommentDraft`와도 비교했다. 부모의 `getCommentModalRecord()` 역시 최신 저장 row보다 열린 시점 `initialCommentDraft`를 계속 우선해 저장 후에도 오래된 비교값이 남았다.
+- 수정: 미저장 판정의 원본을 `draftComment !== lastSavedDraftRef.current` 하나로 통일했다. 부모 record는 열린 시점 원문과 최신 persisted comment가 달라졌으면 최신 comment를 우선한다. 최종 문구 저장은 `verifyFields: [teacherComment|studentComment]`를 전달하고 `/api/lesson-records`를 no-store 재조회해 정확한 문구가 일치한 뒤에만 저장 완료로 처리한다.
+- 저장 원천/side effect: `lesson_student_records.teacher_comment` 또는 `student_comment`만 저장·재조회한다. `notification_jobs`, Solapi 예약/발송, 수업 발송 계획, 숙제 원천은 변경하지 않는다.
+- 검증: `git diff --check`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 360개 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
+- 사람 gate: 알림톡 모달에서 AI 수정 또는 직접 수정 -> `최종 문구 저장` -> `최종 문구 · 저장 완료` 확인 -> X 닫기를 진행한다. 경고 없이 닫혀야 하며 다시 열었을 때 같은 문구가 보여야 한다. 저장 후 문자를 한 글자 더 바꾸고 X를 누르면 그때만 미저장 경고가 떠야 한다.
+- 중단 조건: 저장 완료 뒤에도 경고가 뜸, 재조회 불일치인데 저장 완료 표시, 다시 열면 과거 문구, 저장만 했는데 알림 예약/발송 발생, 저장 전 변경인데 경고가 사라짐.
+
 ## 2026-07-21 P1. Tally 등록확정과 학생명단 미반영 복구
 
 - 상태: 원인 확인/코드 수정/자동검증 완료, 배포 후 운영 사람 검토 대기. 운영 원천을 읽기 전용으로 확인했으며 김지민 학생 row를 이 세션에서 자동 생성하지 않았다.

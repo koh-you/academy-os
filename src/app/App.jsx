@@ -8489,7 +8489,7 @@ export function App() {
   }
 
   async function handleSaveRecord(recordId, lessonForRecord = null, studentForRecord = null, recordOverride = null, options = {}) {
-    const { skipNotificationRefresh = true, skipRelatedHomeworks = false } = options;
+    const { skipNotificationRefresh = true, skipRelatedHomeworks = false, verifyFields = [] } = options;
     const existingTimerId = autoSaveTimersRef.current.get(recordId);
     if (existingTimerId) {
       clearTimeout(existingTimerId);
@@ -8517,9 +8517,24 @@ export function App() {
           );
 
       const saveResult = await postJson("/api/lesson-records", { record });
-      const savedRecord = saveResult?.record;
+      let savedRecord = saveResult?.record;
       if (!savedRecord || !hasMatchingHomeworkFollowupFields(record, savedRecord)) {
         throw new Error("수업기록 저장 후 Supabase 재조회에서 숙제 후속처리 값이 일치하지 않습니다.");
+      }
+      if (verifyFields.length > 0) {
+        const recordsAfterResult = await getJsonWithTimeout(
+          "/api/lesson-records",
+          15000,
+          "수업기록 저장 확인이 15초를 넘었습니다. 중복 저장하지 말고 잠시 뒤 다시 확인해 주세요."
+        );
+        const requeriedRecord = (recordsAfterResult.records ?? []).find((item) => item.lessonStudentRecordId === recordId);
+        const mismatchedField = verifyFields.find((fieldKey) => (
+          String(requeriedRecord?.[fieldKey] ?? "") !== String(record?.[fieldKey] ?? "")
+        ));
+        if (!requeriedRecord || mismatchedField) {
+          throw new Error(`수업기록 저장 후 Supabase 재조회에서 ${mismatchedField || "최종 문구"} 값이 일치하지 않습니다.`);
+        }
+        savedRecord = requeriedRecord;
       }
       if (relatedHomeworks.length > 0) {
         await postJson("/api/homeworks/bulk", { homeworks: relatedHomeworks });
@@ -16095,10 +16110,15 @@ function LessonJournalDetail({
     const recordId = createLessonStudentRecordId(lesson.lessonId, commentModal.student.studentId);
     const latestRecord = records.find((item) => item.lessonStudentRecordId === recordId) ?? commentModal.record;
     const field = commentModal.audience === "student" ? "studentComment" : "teacherComment";
+    const originalComment = commentModal.record?.[field] ?? "";
+    const latestComment = latestRecord?.[field] ?? "";
+    const hasPersistedCommentChange = latestComment !== originalComment;
 
     return {
       ...(latestRecord ?? {}),
-      [field]: commentModal.initialCommentDraft ?? latestRecord?.[field] ?? commentModal.record?.[field] ?? ""
+      [field]: hasPersistedCommentChange
+        ? latestComment
+        : commentModal.initialCommentDraft ?? latestComment ?? originalComment
     };
   }
 
@@ -17351,7 +17371,7 @@ function CommentComposerModal({
   const lastSavedDraftRef = useRef(comment);
   const previousAiStatusRef = useRef(aiStatus);
   const normalizedDraftSaveState = normalizeSaveState(saveState);
-  const hasUnsavedDraft = draftComment !== lastSavedDraftRef.current || draftComment !== comment;
+  const hasUnsavedDraft = draftComment !== lastSavedDraftRef.current;
   const visibleDraftSaveState =
     hasUnsavedDraft && !["dirty", "saving"].includes(normalizeSaveState(draftSaveState))
       ? "dirty"
@@ -17472,7 +17492,8 @@ function CommentComposerModal({
     setDraftSaveState("saving");
     const saved = await onSaveRecord?.(recordId, lesson, student, recordToSave, {
       skipNotificationRefresh: true,
-      skipRelatedHomeworks: true
+      skipRelatedHomeworks: true,
+      verifyFields: [field]
     });
     if (saved === false) {
       setDraftSaveState("failed");
