@@ -379,10 +379,15 @@ export function SpecialLectureApplicationPanel({
   const [progressModalEnrollment, setProgressModalEnrollment] = useState(null);
   const [isEnrollmentPanelOpen, setIsEnrollmentPanelOpen] = useState(false);
   const [isLessonPreviewOpen, setIsLessonPreviewOpen] = useState(false);
+  const [hasDismissedNoLessonChanges, setHasDismissedNoLessonChanges] = useState(false);
 
   useEffect(() => {
     if (manualIntakeRequest > 0) setManualPickerOpen(true);
   }, [manualIntakeRequest]);
+
+  useEffect(() => {
+    setHasDismissedNoLessonChanges(false);
+  }, [selectedGuide?.specialLectureGuideId]);
 
   const normalizedGuides = useMemo(() => normalizeSpecialLectureGuides(guides), [guides]);
   const normalizedApplications = useMemo(
@@ -935,15 +940,31 @@ export function SpecialLectureApplicationPanel({
     }
   }
 
+  const hasActionableAttention = Boolean(
+    attentionApplicationRows.length ||
+    unreviewedEnrollmentRows.length ||
+    invalidPlanRows.length ||
+    lockedLessonRows.length ||
+    pastMissingLessonRows.length ||
+    staleLessonRows.length
+  );
+  const showNoLessonChangesNotice = !hasDismissedNoLessonChanges && !lessonSyncDrafts.length && !invalidPlanRows.length;
+  const showAttentionPanel = hasActionableAttention || Boolean(panelMessage) || Boolean(lessonCreateState.message) || showNoLessonChangesNotice;
+
   return (
     <section className="specialLectureApplicationsPanel">
-      {(attentionApplicationRows.length || unreviewedEnrollmentRows.length || invalidPlanRows.length || lockedLessonRows.length || pastMissingLessonRows.length || staleLessonRows.length || panelMessage || lessonCreateState.message || (!lessonSyncDrafts.length && !invalidPlanRows.length)) ? (
-        <div className={(attentionApplicationRows.length || unreviewedEnrollmentRows.length || invalidPlanRows.length || lockedLessonRows.length || pastMissingLessonRows.length || staleLessonRows.length) ? "specialLectureAttentionPanel hasDanger" : "specialLectureAttentionPanel"}>
+      {showAttentionPanel ? (
+        <div className={hasActionableAttention ? "specialLectureAttentionPanel hasDanger" : "specialLectureAttentionPanel"}>
           <div className="specialLectureAttentionHeader">
             <strong>특강 상태 알림</strong>
             <span>Tally 신청, 학생 연결, 회차 설정과 수업일지 반영 상태를 먼저 확인해 주세요.</span>
           </div>
-          {panelMessage ? <p className={panelMessage.includes("실패") ? "inlineNotice danger" : "inlineNotice"}>{panelMessage}</p> : null}
+          {panelMessage ? (
+            <div className="specialLectureDismissibleNotice">
+              <p className={panelMessage.includes("실패") ? "inlineNotice danger" : "inlineNotice"}>{panelMessage}</p>
+              <button className="softButton compact" onClick={() => setPanelMessage("")} type="button">확인</button>
+            </div>
+          ) : null}
           {attentionApplicationRows.length ? (
             <div className="specialLectureAttentionList">
               {attentionApplicationRows.map((row) => (
@@ -992,8 +1013,26 @@ export function SpecialLectureApplicationPanel({
           {lockedLessonRows.length ? <p className="inlineNotice danger">과거/오늘 수업, 완료 수업, 수업기록 또는 알림 예약이 있는 변경 {lockedLessonRows.length}건은 자동 반영하지 않습니다.</p> : null}
           {pastMissingLessonRows.length ? <p className="inlineNotice danger">이미 지난 공식 회차 중 수업일지가 없는 {pastMissingLessonRows.length}건은 자동 생성하지 않습니다.</p> : null}
           {staleLessonRows.length ? <p className="inlineNotice danger">현재 공식 회차에서 빠졌지만 기존 달력에 남아 있는 특강 수업이 {staleLessonRows.length}건 있습니다.</p> : null}
-          {lessonCreateState.message ? <p className={lessonCreateState.state === "failed" ? "inlineNotice danger" : "inlineNotice"}>{lessonCreateState.message}</p> : null}
-          {!lessonSyncDrafts.length && !invalidPlanRows.length ? <p className="inlineNotice">현재 새로 만들 수업이나 안전하게 반영할 미래 명단 변경이 없습니다.</p> : null}
+          {lessonCreateState.message ? (
+            <div className="specialLectureDismissibleNotice">
+              <p className={lessonCreateState.state === "failed" ? "inlineNotice danger" : "inlineNotice"}>{lessonCreateState.message}</p>
+              {lessonCreateState.state !== "saving" ? (
+                <button
+                  className="softButton compact"
+                  onClick={() => setLessonCreateState({ state: "idle", message: "" })}
+                  type="button"
+                >
+                  확인
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+          {showNoLessonChangesNotice ? (
+            <div className="specialLectureDismissibleNotice">
+              <p className="inlineNotice">현재 새로 만들 수업이나 안전하게 반영할 미래 명단 변경이 없습니다.</p>
+              <button className="softButton compact" onClick={() => setHasDismissedNoLessonChanges(true)} type="button">확인</button>
+            </div>
+          ) : null}
         </div>
       ) : null}
       <div className="specialLectureEnrollmentPanel">

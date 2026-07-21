@@ -8146,6 +8146,21 @@ button:disabled {
   line-height: 1.45;
 }
 
+.specialLectureDismissibleNotice {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.specialLectureDismissibleNotice .inlineNotice {
+  min-width: 0;
+}
+
+.specialLectureDismissibleNotice .softButton {
+  min-width: 58px;
+}
+
 .specialLectureAttentionList {
   display: grid;
   gap: 6px;
@@ -18182,8 +18197,14 @@ body.attendanceOnlyBody {
 
   .specialLectureAttentionActions,
   .specialLectureAttentionActions button,
-  .specialLectureAttentionItem > button {
+  .specialLectureAttentionItem > button,
+  .specialLectureDismissibleNotice {
     width: 100%;
+  }
+
+  .specialLectureDismissibleNotice {
+    align-items: stretch;
+    grid-template-columns: 1fr;
   }
 
   .specialLectureRosterPickerItem {
