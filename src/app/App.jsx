@@ -13670,6 +13670,7 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle, su
       title: "Lesson Hub",
       items: [
         { id: "lessons", label: "수업일지", icon: "📓" },
+        { id: "specialLectureManagement", label: "특강관리", icon: "🎓" },
         { id: "overdue", label: "숙제현황", icon: "📊" },
         { id: "followups", label: "오답관리", icon: "✕" },
         {
@@ -13708,7 +13709,6 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle, su
     {
       title: "운영",
       items: [
-        { id: "specialLectureManagement", label: "특강관리", icon: "🎓" },
         { id: "notifications", label: "알림관리", icon: "📣" },
         { id: "settings", label: "설정", icon: "⚙️" }
       ]

@@ -62,7 +62,7 @@ App.jsx 리팩터링 18개 기준 로드맵:
 3. `API client wrappers` - `fetchJson`, `getJsonWithTimeout`, `postJsonWithTimeout`, 공통 API 에러/timeout 처리.
 4. `storageKeys/config/constants` - storage key, view id, option list, 상수/설정 묶음.
 5. `specialLecture preview/public` - 특강 공개 안내문 미리보기, 공개 URL 렌더링, 복사 문구.
-6. `specialLecture management` - 운영 > 특강관리 편집 화면, 신청자 연결, 특강 수업 생성 gate.
+6. `specialLecture management` - Lesson Hub > 특강관리 편집 화면, 확정 명단, 특강 수업 생성 gate.
 7. `school calendar helpers` - 학사일정/시험기간 날짜 계산, 표시 색상, 월간 요약 helper.
 8. `school calendar components` - 학사일정 카드/달력/모달 UI.
 9. `test manager` - 시험지관리, 테스트 회차, 학생별 테스트 결과 입력/조회.

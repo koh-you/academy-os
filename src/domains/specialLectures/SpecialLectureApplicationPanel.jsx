@@ -374,6 +374,8 @@ export function SpecialLectureApplicationPanel({
   const [planModalEnrollment, setPlanModalEnrollment] = useState(null);
   const [planSaveState, setPlanSaveState] = useState({ message: "", state: "idle" });
   const [progressModalEnrollment, setProgressModalEnrollment] = useState(null);
+  const [isEnrollmentPanelOpen, setIsEnrollmentPanelOpen] = useState(false);
+  const [isLessonPreviewOpen, setIsLessonPreviewOpen] = useState(false);
   const normalizedGuides = useMemo(() => normalizeSpecialLectureGuides(guides), [guides]);
   const normalizedApplications = useMemo(
     () => normalizeSpecialLectureApplications(applications)
@@ -891,89 +893,6 @@ export function SpecialLectureApplicationPanel({
 
   return (
     <section className="specialLectureApplicationsPanel">
-      <div className="sectionHeader slim">
-        <div>
-          <p className="eyebrow">APPLICATION SOURCE</p>
-          <h3>특강 신청자</h3>
-          <span>
-            전체 {activeApplications.length}건 · 현재 안내문 {selectedGuideApplications.length}건
-          </span>
-        </div>
-        <div className="specialLectureRosterHeaderActions">
-          <button
-            className="primaryButton compact"
-            disabled={!selectedGuide || !isGuideSaved || !guideSessions.length}
-            onClick={() => setManualPickerOpen(true)}
-            type="button"
-          >
-            학생 수동 접수
-          </button>
-          <button className="softButton compact" onClick={copyWebhookUrl} type="button">Tally 웹훅 복사</button>
-        </div>
-      </div>
-
-      <div className="specialLectureWebhookBox">
-        <div>
-          <strong>별도 원천</strong>
-          <span>Supabase `special_lecture_applications`에 저장합니다. 신입생 상담 접수와 섞지 않습니다.</span>
-          <small className="specialLectureTallyQuestionGuide">
-            Tally 폼 `eql9aJ`를 신청 원천으로 사용합니다. 제출 내용은 참고값이며, 최종 수강 회차와 시간은 확정 명단에서 선생님이 확인·수정합니다.
-          </small>
-        </div>
-        <code>{webhookUrl}</code>
-      </div>
-
-      <div className="specialLectureApplicationStatusSummary">
-        {statusSummary.map((item) => (
-          <span className={`specialLectureApplicationStatus ${item.value}`} key={item.value}>
-            {item.label} {item.count}
-          </span>
-        ))}
-        {unmatchedApplications.length ? (
-          <span className="specialLectureApplicationStatus unmatched">미매칭 {unmatchedApplications.length}</span>
-        ) : null}
-      </div>
-
-      <div className="specialLectureLessonGate">
-        <div className="specialLectureGateHeader">
-          <div>
-            <strong>특강 확정 명단 매칭 gate</strong>
-            <span>전체 반의 학생을 자동 확인하고, 찾지 못하면 선생님이 기존 학생을 직접 선택하거나 특강 전용 학생으로 등록합니다.</span>
-          </div>
-          <div className="specialLectureGateStats">
-            <span>확정 {confirmedMatchRows.length}</span>
-            <span>매칭 {matchedRows.length}</span>
-            <span className={needsReviewRows.length ? "danger" : ""}>검토 {needsReviewRows.length}</span>
-          </div>
-        </div>
-        {confirmedMatchRows.length ? (
-          <div className="specialLectureMatchGrid">
-            {matchedRows.slice(0, 6).map((row) => (
-              <article className="specialLectureMatchCard matched" key={row.application.applicationId}>
-                <span>매칭</span>
-                <strong>{row.application.studentName || "이름 미입력"} → {row.student.name}</strong>
-                <small>{row.reason} · {row.student.schoolName || "-"} {row.student.grade || ""}</small>
-              </article>
-            ))}
-            {needsReviewRows.slice(0, 6).map((row) => (
-              <article className="specialLectureMatchCard review" key={row.application.applicationId}>
-                <span>검토</span>
-                <strong>{row.application.studentName || "이름 미입력"}</strong>
-                <small>
-                  {row.reason}
-                  {row.candidates?.length ? ` · 후보 ${row.candidates.map((student) => student.name).join(", ")}` : ""}
-                </small>
-                <button className="softButton compact" onClick={() => confirmApplicationAndOpenPlan(row.application)} type="button">
-                  전체 학생에서 직접 연결
-                </button>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <p className="specialLectureGateEmpty">현재 안내문에 연결된 확정 신청자가 없습니다. 신청자 상태를 `확정`으로 바꾸면 이 gate에 나타납니다.</p>
-        )}
-      </div>
-
       <div className="specialLectureEnrollmentPanel">
         <div className="specialLectureGateHeader">
           <div>
@@ -984,8 +903,26 @@ export function SpecialLectureApplicationPanel({
             <span>수강 {activeEnrollments.length}</span>
             <span>추가 필요 {missingEnrollmentRows.length}</span>
             <span>회차 {guideSessions.length}</span>
+            <button
+              className="primaryButton compact"
+              disabled={!selectedGuide || !isGuideSaved || !guideSessions.length}
+              onClick={() => setManualPickerOpen(true)}
+              type="button"
+            >
+              학생 수동 접수
+            </button>
+            <button
+              aria-expanded={isEnrollmentPanelOpen}
+              className="softButton compact"
+              onClick={() => setIsEnrollmentPanelOpen((current) => !current)}
+              type="button"
+            >
+              {isEnrollmentPanelOpen ? "접기" : "펼치기"}
+            </button>
           </div>
         </div>
+        {isEnrollmentPanelOpen ? (
+          <>
         {!isGuideSaved ? (
           <p className="inlineNotice danger">현재 특강 안내문에 저장하지 않은 변경이 있습니다. `안내문 저장` 후 학생별 수강계획을 수정하세요.</p>
         ) : null}
@@ -1064,6 +1001,8 @@ export function SpecialLectureApplicationPanel({
         ) : (
           <p className="specialLectureGateEmpty">아직 저장된 확정 수강명단이 없습니다. 확정 신청자를 기존 학생과 매칭한 뒤 명단에 추가하세요.</p>
         )}
+          </>
+        ) : null}
       </div>
 
       <div className="specialLectureLessonPreviewGate">
@@ -1079,8 +1018,18 @@ export function SpecialLectureApplicationPanel({
             <span className={emptySessionCount ? "danger" : ""}>빈 회차 {emptySessionCount}</span>
             <span className={unreviewedEnrollmentRows.length ? "danger" : ""}>미검토 {unreviewedEnrollmentRows.length}</span>
             <span className={needsReviewRows.length ? "danger" : ""}>검토 {needsReviewRows.length}</span>
+            <button
+              aria-expanded={isLessonPreviewOpen}
+              className="softButton compact"
+              onClick={() => setIsLessonPreviewOpen((current) => !current)}
+              type="button"
+            >
+              {isLessonPreviewOpen ? "접기" : "펼치기"}
+            </button>
           </div>
         </div>
+        {isLessonPreviewOpen ? (
+          <>
         {lessonPreviewRows.length ? (
           <div className="specialLectureLessonPreviewList">
             {lessonPreviewRows.map((row) => (
@@ -1140,136 +1089,9 @@ export function SpecialLectureApplicationPanel({
           </button>
           <span>저장 대상: Supabase `lessons` · 과거 수업/기록/출결/알림톡 예약은 자동 변경하지 않음</span>
         </div>
+          </>
+        ) : null}
       </div>
-
-      {visibleUnmatchedApplications.length ? (
-        <div className="specialLectureApplicationUnmatched">
-          <strong>미매칭 신청 {unmatchedApplications.length}건</strong>
-          <p>Tally hidden field의 안내문 식별자가 비어 있거나 현재 안내문과 다른 제출입니다. 필요한 경우 현재 안내문에 연결한 뒤 상태를 확정으로 바꾸세요.</p>
-          <div className="specialLectureApplicationUnmatchedList">
-            {visibleUnmatchedApplications.map((application) => (
-              <article className="specialLectureApplicationUnmatchedItem" key={`unmatched_${application.applicationId}`}>
-                <span>
-                  {application.studentName || "이름 미입력"} · {application.guideSlug || application.specialLectureGuideId || "guide 없음"}
-                </span>
-                {selectedGuide ? (
-                  <button
-                    className="softButton compact"
-                    disabled={!onUpdateApplication || updatingApplicationId === application.applicationId}
-                    onClick={() => matchApplicationToCurrentGuide(application)}
-                    type="button"
-                  >
-                    {updatingApplicationId === application.applicationId ? "연결 중" : "현재 안내문에 연결"}
-                  </button>
-                ) : null}
-              </article>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      {visibleApplications.length ? (
-        <div className="specialLectureApplicationList">
-          {visibleApplications.map((application) => (
-            <article className="specialLectureApplicationCard" key={application.applicationId}>
-              <div>
-                <span className={`specialLectureApplicationStatus ${application.status}`}>
-                  {getSpecialLectureApplicationStatusLabel(application.status)}
-                </span>
-                <strong>{application.studentName || "이름 미입력"}</strong>
-                <p>{[application.schoolName, application.grade].filter(Boolean).join(" · ") || "학교/학년 미입력"}</p>
-                <small>
-                  {application.selectedSession || "신청 회차 미입력"}
-                  {application.createdAt ? ` · ${formatKoreaTimeLabel(application.createdAt)}` : ""}
-                </small>
-                {application.requestedSessionPlans?.length ? (
-                  <div className="specialLectureApplicationRequestedPlans">
-                    {application.requestedSessionPlans.map((plan) => {
-                      const session = guideSessions[plan.sessionIndex];
-                      return (
-                        <span key={`${application.applicationId}_requested_${plan.sessionIndex}`}>
-                          {plan.sessionIndex + 1}회차
-                          {plan.requestedStartTime || plan.requestedEndTime
-                            ? ` · ${plan.requestedStartTime || session?.startTime || "?"}-${plan.requestedEndTime || session?.endTime || "?"}`
-                            : " · 공식 시간"}
-                          {plan.overrideReason ? ` · ${plan.overrideReason}` : ""}
-                        </span>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <small className="specialLectureApplicationRequestWarning">구조화된 회차 신청 없음 · 확정 전 회차를 직접 확인하세요.</small>
-                )}
-              </div>
-              <div className="specialLectureApplicationMeta">
-                <span>학생 {application.studentPhone || "-"}</span>
-                <span>학부모 {application.parentPhone || "-"}</span>
-                {application.memo ? <em>{application.memo}</em> : null}
-              </div>
-              <div className="specialLectureApplicationControls">
-                <button
-                  className="primaryButton compact"
-                  disabled={!onUpdateApplication || !onSaveEnrollment || !isGuideSaved || updatingApplicationId === application.applicationId}
-                  onClick={() => confirmApplicationAndOpenPlan(application)}
-                  type="button"
-                >
-                  {updatingApplicationId === application.applicationId
-                    ? "준비 중"
-                    : enrollmentByApplicationId.has(application.applicationId) || enrollmentByStudentId.has(getSpecialLectureStudentMatch(application, students).student?.studentId)
-                      ? "회차 설정 열기"
-                      : "확정 및 학생 연결"}
-                </button>
-                <label>
-                  연결 특강
-                  <select
-                    disabled={!onUpdateApplication || updatingApplicationId === application.applicationId}
-                    onChange={(event) => setApplicationGuideDrafts((current) => ({
-                      ...current,
-                      [application.applicationId]: event.target.value
-                    }))}
-                    value={getApplicationGuideDraftId(application)}
-                  >
-                    {normalizedGuides.map((guide) => (
-                      <option key={guide.specialLectureGuideId} value={guide.specialLectureGuideId}>{guide.title}</option>
-                    ))}
-                  </select>
-                </label>
-                <button
-                  className="softButton compact"
-                  disabled={
-                    !onUpdateApplication ||
-                    updatingApplicationId === application.applicationId ||
-                    getApplicationGuideDraftId(application) === application.specialLectureGuideId
-                  }
-                  onClick={() => saveApplicationGuideDraft(application)}
-                  type="button"
-                >
-                  {updatingApplicationId === application.applicationId ? "저장 중" : "연결 수정 저장"}
-                </button>
-                <label>
-                  처리 상태
-                  <select
-                    disabled={!onUpdateApplication || updatingApplicationId === application.applicationId}
-                    onChange={(event) => event.target.value === "confirmed"
-                      ? confirmApplicationAndOpenPlan(application)
-                      : updateApplicationStatus(application, event.target.value)}
-                    value={application.status}
-                  >
-                    {specialLectureApplicationStatusOptions.map((option) => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-            </article>
-          ))}
-        </div>
-      ) : (
-        <div className="specialLectureApplicationEmpty">
-          <strong>아직 연결된 특강 신청자가 없습니다.</strong>
-          <p>SQL 적용 후 Tally Webhook에 위 URL을 연결하면 신청자가 이 영역에 쌓입니다.</p>
-        </div>
-      )}
       {panelMessage ? <p className={panelMessage.includes("실패") ? "inlineNotice danger" : "inlineNotice"}>{panelMessage}</p> : null}
 
       {matchApplication ? (
