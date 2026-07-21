@@ -30,7 +30,6 @@ import {
 } from "../domains/notifications/supplementJobBuilders.js";
 import {
   canCancelNotificationJob,
-  getCurrentSupplementScheduleNoticeTargets,
   getSupplementNotificationControlJob,
   getSupplementStudentReminderJob,
   sortNotificationJobsForCurrentStatus
@@ -40,6 +39,7 @@ import {
   cancelActiveSupplementScheduleNoticesRequest,
   cancelSupplementNotificationControlRequest,
   cancelSupplementStudentReminderRequest,
+  createSupplementScheduleNotificationPlan,
   reserveSupplementNotificationControlRequest,
   reserveSupplementScheduleNoticeJobRequest,
   reserveSupplementScheduleNoticesRequest,
@@ -9935,8 +9935,18 @@ export function App() {
   }
 
   async function handleScheduleSupplementTask(task) {
-    const { keepLessonJournalOpen, skipStudentReminder, suppressStudentReminder, ...taskForSchedule } = task ?? {};
-    const shouldUpdateStudentReminder = !skipStudentReminder && !suppressStudentReminder;
+    const {
+      keepLessonJournalOpen,
+      previousScheduleText,
+      shouldReserveScheduleNotice,
+      shouldUpdateStudentReminder,
+      taskForSchedule
+    } = createSupplementScheduleNotificationPlan({
+      formatScheduleDateTime: formatSupplementScheduleDateTime,
+      normalizeTime: normalizeTimeInput,
+      notificationJobs,
+      task
+    });
     const student = students.find((item) => item.studentId === taskForSchedule.studentId);
     if (!student) throw new Error("보충 일정을 반영할 학생 정보를 찾을 수 없습니다.");
     if (!taskForSchedule?.makeupTaskId) throw new Error("보충관리 ID가 없어 일정을 반영할 수 없습니다.");
@@ -9944,18 +9954,6 @@ export function App() {
 
     const lessonId = taskForSchedule.linkedLessonId || createSupplementLessonId(taskForSchedule);
     const scheduleTime = normalizeTimeInput(taskForSchedule.scheduledTime);
-    const hasExistingLinkedSchedule = Boolean(taskForSchedule.linkedLessonId);
-    const previousScheduleText = hasExistingLinkedSchedule
-      ? formatSupplementScheduleDateTime(taskForSchedule.linkedLessonDate || "", taskForSchedule.linkedLessonTime || "")
-      : "";
-    const hasScheduleChanged =
-      hasExistingLinkedSchedule &&
-      (taskForSchedule.scheduledDate !== taskForSchedule.linkedLessonDate ||
-        scheduleTime !== normalizeTimeInput(taskForSchedule.linkedLessonTime));
-    const currentScheduleNoticeTargets = getCurrentSupplementScheduleNoticeTargets(taskForSchedule, notificationJobs);
-    const hasCurrentScheduleNoticePair = currentScheduleNoticeTargets.has("student") && currentScheduleNoticeTargets.has("parent");
-    const shouldReserveScheduleNotice = shouldUpdateStudentReminder &&
-      (!hasExistingLinkedSchedule || hasScheduleChanged || !hasCurrentScheduleNoticePair);
     const duplicateLesson = lessons.find((lesson) => {
       if (!lesson || lesson.lessonId === lessonId || lesson.status === "canceled") return false;
       const lessonTime = normalizeTimeInput(lesson.startTime);
