@@ -1874,13 +1874,22 @@ function getProviderMessageId(result) {
 }
 
 function getProviderRenderedMessageText(result = {}) {
-  return String(
-    result?.response?.messageList?.[0]?.text ??
-    result?.response?.messages?.[0]?.text ??
-    result?.messageList?.[0]?.text ??
-    result?.messages?.[0]?.text ??
-    ""
-  ).trim();
+  const collections = [
+    result?.response?.messageList,
+    result?.response?.messages,
+    result?.messageList,
+    result?.messages
+  ];
+  for (const collection of collections) {
+    const messages = Array.isArray(collection)
+      ? collection
+      : collection && typeof collection === "object"
+        ? Object.values(collection)
+        : [];
+    const renderedText = messages.find((message) => typeof message?.text === "string")?.text;
+    if (renderedText) return renderedText.trim();
+  }
+  return "";
 }
 
 function getKoreaDayUtcRange(dateText = "") {
