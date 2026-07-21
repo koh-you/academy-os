@@ -59,6 +59,7 @@ import { SupplementNotificationControlModal } from "../domains/supplements/Suppl
 import { SupplementTaskSourceContext } from "../domains/supplements/SupplementTaskSourceContext.jsx";
 import { SupplementTaskScheduleEditor } from "../domains/supplements/SupplementTaskScheduleEditor.jsx";
 import { SupplementTaskSaveSummary, SupplementTaskScheduleGateNote } from "../domains/supplements/SupplementTaskSaveSummary.jsx";
+import { SupplementTaskCardHeader } from "../domains/supplements/SupplementTaskCardHeader.jsx";
 import {
   getSupplementImmediateNoticeSaveStatus,
   getSupplementNotificationControlDisplay
@@ -23206,26 +23207,12 @@ function SupplementStudentModal({
                   : "시간까지 입력하면 수업일지 일정 만들기 버튼으로 확정 안내 예약을 만들 수 있습니다.";
               return (
                 <article className="taskCard" key={task.makeupTaskId}>
-                  <div className="taskCardTop">
-                    <div>
-                      <strong>{followUpTypeLabel(task.taskType)}</strong>
-                      <small>{taskMetaParts.join(" · ")}</small>
-                      {task.linkedLessonId ? (
-                        <span className="taskLinkedLesson">수업일지에 반영되었습니다.</span>
-                      ) : (
-                        <>
-                          <span className="taskLinkedLesson draftMode">수정 중</span>
-                          {supplementNotificationDraftConfigs.every((config) => String(task[config.field] ?? "").trim()) ? (
-                            <span className="taskLinkedLesson draftReady">알림톡 문구 3종 저장 완료</span>
-                          ) : null}
-                          {task.taskType === "absence_makeup" ? (
-                            <small className="taskReasonLine">결석사유: {task.absenceReason || "사유 미입력"}</small>
-                          ) : null}
-                          {task.lastHomeworkId ? <small>최근 보충 숙제: {task.lastHomeworkId}</small> : null}
-                        </>
-                      )}
-                    </div>
-                  </div>
+                  <SupplementTaskCardHeader
+                    hasSavedNotificationDrafts={supplementNotificationDraftConfigs.every((config) => String(task[config.field] ?? "").trim())}
+                    task={task}
+                    taskMeta={taskMetaParts.join(" · ")}
+                    typeLabel={followUpTypeLabel(task.taskType)}
+                  />
                   <SupplementTaskSourceContext
                     absenceLessonContent={absenceLessonContent}
                     absenceLessonMaterial={absenceLessonMaterial}
