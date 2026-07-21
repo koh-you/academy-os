@@ -23295,13 +23295,26 @@ function SupplementStudentModal({
       : !notificationControlTask.scheduledDate || !notificationControlTask.scheduledTime
         ? "저장된 보충 날짜와 시간이 없습니다."
         : "";
-  const notificationControlPreview = notificationControlTask && notificationControl
-    ? notificationControlJob?.previewBody || (
-        notificationControl.controlType === "studentReminder"
-          ? createSupplementTaskDraft(notificationControlTask, student, normalizedNotificationTemplates).notificationDraft
-          : buildSupplementScheduleNoticeBody(notificationControlTask, "", normalizedNotificationTemplates)
-      )
+  const notificationControlHasHistoricalJob = Boolean(
+    notificationControlJob && ["canceled", "failed"].includes(notificationControlJob.status)
+  );
+  const notificationControlCurrentPreview = notificationControlTask && notificationControl
+    ? notificationControl.controlType === "studentReminder"
+      ? createSupplementTaskDraft(notificationControlTask, student, normalizedNotificationTemplates).notificationDraft
+      : buildSupplementScheduleNoticeBody(notificationControlTask, "", normalizedNotificationTemplates)
     : "";
+  const notificationControlPreview = notificationControlTask && notificationControl
+    ? notificationControlHasHistoricalJob
+      ? notificationControlCurrentPreview
+      : notificationControlJob?.previewBody || notificationControlCurrentPreview
+    : "";
+  const notificationControlPreviewLabel = notificationControlJob?.status === "sent"
+    ? "발송된 문구"
+    : notificationControlHasHistoricalJob
+      ? "다시 예약할 현재 문구"
+      : notificationControlJob
+        ? "현재 예약 문구"
+        : "예약할 현재 문구";
   const notificationControlRecipient = notificationControlTask && notificationControl
     ? notificationControl.controlType === "parentSchedule" ? student.parentPhone : student.studentPhone
     : "";
@@ -23545,8 +23558,8 @@ function SupplementStudentModal({
                     {renderNotificationControlButton(task, "studentReminder")}
                   </div>
                   <label className="notificationDraftField supplementReadableField">
-                    <strong>알림톡 문구</strong>
-                    <span>학생에게 보낼 당일 11시 보충 안내 문구입니다. 수업일지 일정 만들기를 누르면 학생·학부모 일정 안내도 다음 정각으로 예약합니다.</span>
+                    <strong>당일 학생 11시 알림톡 문구</strong>
+                    <span>이 문구는 ‘당일 학생 11시 알림톡’ 버튼에만 사용합니다. 학생·학부모 일정 확정 문구는 각 알림톡 버튼에서 현재 저장된 보충 내용으로 확인합니다.</span>
                     {notificationDraftIsTeacherFinal ? (
                       <small className="supplementTeacherFinalNotice">선생님 수정본 · 자동 초안이 다시 덮어쓰지 않습니다.</small>
                     ) : null}
@@ -23636,7 +23649,7 @@ function SupplementStudentModal({
             <div className="supplementNotificationControlFacts">
               <span>수신 대상</span>
               <strong>{notificationControlConfig.targetLabel} · {maskPhoneForDisplay(notificationControlRecipient)}</strong>
-              <span>예약 시각</span>
+              <span>{notificationControlHasHistoricalJob ? "이전 예약 시각" : "예약 시각"}</span>
               <strong>
                 {notificationControlJob?.scheduledAt
                   ? formatKoreaTimeLabel(notificationControlJob.scheduledAt)
@@ -23648,7 +23661,10 @@ function SupplementStudentModal({
               <strong>{notificationControlJob ? formatNotificationJobStatus(notificationControlJob) : "예약 기록 없음"}</strong>
             </div>
             <div className="supplementNotificationControlPreview">
-              <strong>실제 예약 문구</strong>
+              <strong>{notificationControlPreviewLabel}</strong>
+              {notificationControlHasHistoricalJob ? (
+                <small>취소·실패한 과거 문구는 재사용하지 않고, 현재 저장된 보충 내용으로 다시 만들었습니다.</small>
+              ) : null}
               <pre>{notificationControlPreview || "저장된 알림톡 문구가 없습니다."}</pre>
             </div>
             {notificationControlBlockReason && !canCancelNotificationControl ? (

@@ -14819,6 +14819,13 @@ textarea.profileEditInput {
   font-size: 13px;
 }
 
+.supplementNotificationControlPreview > small {
+  color: #b45309;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
 .supplementNotificationControlPreview pre {
   background: #f8fafc;
   border: 1px solid #dbe5f6;
