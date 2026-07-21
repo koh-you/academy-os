@@ -9,6 +9,13 @@
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 4. `12R SupplementStudentModal action ownership gate` — 다음 단계는 local state와 task/lesson 저장, notification/Solapi action 소유권 이동이다. 코드 이동 후 고태영으로 저장·일정·세 예약/취소·완료·새로고침·중복/대상 교차를 확인해야 한다.
 
+## 2026-07-22 P1. 12R-2 보충 draft collection sync 순수 분리
+
+- 상태: task 목록과 기존 draft collection을 대조해 dirty draft 보존, 변경 없는 entry 재사용, 원천 변경 reseed, 제거된 task 정리를 수행하는 함수를 `supplementTaskDraft.js`로 분리했다.
+- 동작 보존: App의 기존 effect와 dependency key는 유지하고 state updater 내부에서 순수 sync 함수를 호출한다.
+- 검증/gate: identity 재사용, dirty 보존, 최초 seed, 제거 정리 fixture와 production 381/381, build가 통과했다. API/Solapi 호출은 없어 12R 운영 gate는 아직 실행 전이다.
+- 다음 단위: 최신 `origin/main` rebase 후 local draft React state controller 또는 실제 저장 action 소유권을 분리한다.
+
 ## 2026-07-22 P1. 12R-1 보충 local draft 전환·payload 순수 분리
 
 - 상태: 필드 변경, 자동 문구 재생성, dirty/edited field 계산, 저장 payload와 lesson resync 판정을 `supplementTaskDraft.js`의 순수 함수로 분리했다.

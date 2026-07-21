@@ -60,7 +60,6 @@ import { SupplementTaskCard } from "../domains/supplements/SupplementTaskCard.js
 import { createSupplementTaskCardViewModel } from "../domains/supplements/supplementTaskCardModel.js";
 import { SupplementStudentModalShell } from "../domains/supplements/SupplementStudentModalShell.jsx";
 import {
-  areSupplementTaskDraftValuesEqual,
   buildSupplementTaskWithDraft as buildSupplementTaskWithDraftModel,
   createPersistableSupplementTask,
   createSupplementTaskDraft as createSupplementTaskDraftModel,
@@ -73,6 +72,7 @@ import {
   isSupplementTeacherEditedField,
   supplementNotificationDraftConfigs,
   supplementTeacherFinalFields,
+  syncSupplementTaskDraftEntries,
   updateSupplementTaskDraftEntry
 } from "../domains/supplements/supplementTaskDraft.js";
 import {
@@ -22546,42 +22546,12 @@ function SupplementStudentModal({
   const taskDraftSyncKey = tasks.map((task) => `${task.makeupTaskId}:${getSupplementTaskSourceVersion(task)}`).join("||");
 
   useEffect(() => {
-    setTaskDrafts((current) => {
-      const next = {};
-      let changed = Object.keys(current).length !== tasks.filter((task) => task.makeupTaskId).length;
-
-      tasks.forEach((task) => {
-        if (!task.makeupTaskId) return;
-        const existing = current[task.makeupTaskId];
-        if (existing?.dirty) {
-          next[task.makeupTaskId] = existing;
-          return;
-        }
-
-        const sourceVersion = getSupplementTaskSourceVersion(task);
-        const seededValues = createSupplementTaskDraft(task, student, normalizedNotificationTemplates);
-        if (
-          existing &&
-          existing.sourceVersion === sourceVersion &&
-          areSupplementTaskDraftValuesEqual(existing.values, seededValues)
-        ) {
-          next[task.makeupTaskId] = existing;
-          return;
-        }
-
-        changed = true;
-        next[task.makeupTaskId] = {
-          dirty: false,
-          editedFields: [],
-          sourceVersion,
-          values: seededValues
-        };
-      });
-
-      const nextIds = Object.keys(next);
-      if (!changed && nextIds.every((taskId) => current[taskId] === next[taskId])) return current;
-      return next;
-    });
+    setTaskDrafts((current) => syncSupplementTaskDraftEntries({
+      current,
+      notificationTemplates: normalizedNotificationTemplates,
+      student,
+      tasks
+    }, supplementTaskDraftDependencies));
   }, [normalizedNotificationTemplates, student, taskDraftSyncKey, tasks]);
 
   function showFeedback(title, message, tone = "success") {

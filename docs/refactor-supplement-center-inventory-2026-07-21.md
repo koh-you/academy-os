@@ -49,6 +49,8 @@
 17. 다음 12R: local draft state와 task/lesson 저장, notification/Solapi action 소유권 이동. 코드 이동 후 고태영 운영 검증 사람 gate가 필요하다.
 18. 완료 12R-1: local draft field transition, 자동 문구 재생성, 저장 payload와 lesson resync 판정을 순수 모델로 분리했다.
 19. 다음: draft collection sync/state 경계를 분리한 뒤 실제 action 소유권 이동으로 진행한다.
+20. 완료 12R-2: draft collection의 dirty 보존·원천 reseed·동일 entry 재사용·삭제 정리를 순수 sync 함수로 분리했다.
+21. 다음: local draft React state controller 또는 실제 저장 action 소유권을 분리한다.
 
 ## 12B 구현 결과 — 완료 확인 모달
 
@@ -158,6 +160,12 @@
 - non-final 필드 변경 시 이전 값이 자동 생성본과 같을 때만 세 알림 초안을 재생성하고, 선생님 최종본은 보존하는 규칙을 순수 함수로 옮겼다.
 - draft values와 edited field를 최종 task payload로 합치고 linked lesson 일정 차이만 `needsLessonResync`로 표시하는 계산도 같은 모델로 옮겼다.
 - App의 state updater와 저장·일정 handler signature는 유지했고 외부 side effect는 이동하지 않았다.
+
+## 12R-2 구현 결과 — draft collection sync 순수 모델
+
+- task 목록 변경 시 dirty entry는 그대로 보존하고, 원천 version과 seed가 같으면 기존 객체를 재사용하며, 달라진 원천만 reseed한다.
+- 목록에서 제거된 task draft는 collection에서 제거하고 불필요한 state update는 동일 객체 반환으로 막는다.
+- App의 effect dependency와 React state 소유권, 실제 저장·예약 action은 그대로 유지했다.
 
 ## 즉시 중단 조건
 

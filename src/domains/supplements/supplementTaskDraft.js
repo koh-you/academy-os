@@ -233,3 +233,45 @@ export function buildSupplementTaskWithDraft({
   }
   return nextTask;
 }
+
+export function syncSupplementTaskDraftEntries({
+  current = {},
+  notificationTemplates = {},
+  student = null,
+  tasks = []
+} = {}, dependencies = {}) {
+  const next = {};
+  let changed = Object.keys(current).length !== tasks.filter((task) => task.makeupTaskId).length;
+
+  tasks.forEach((task) => {
+    if (!task.makeupTaskId) return;
+    const existing = current[task.makeupTaskId];
+    if (existing?.dirty) {
+      next[task.makeupTaskId] = existing;
+      return;
+    }
+
+    const sourceVersion = getSupplementTaskSourceVersion(task);
+    const seededValues = createSupplementTaskDraft(task, student, notificationTemplates, dependencies);
+    if (
+      existing &&
+      existing.sourceVersion === sourceVersion &&
+      areSupplementTaskDraftValuesEqual(existing.values, seededValues)
+    ) {
+      next[task.makeupTaskId] = existing;
+      return;
+    }
+
+    changed = true;
+    next[task.makeupTaskId] = {
+      dirty: false,
+      editedFields: [],
+      sourceVersion,
+      values: seededValues
+    };
+  });
+
+  const nextIds = Object.keys(next);
+  if (!changed && nextIds.every((taskId) => current[taskId] === next[taskId])) return current;
+  return next;
+}
