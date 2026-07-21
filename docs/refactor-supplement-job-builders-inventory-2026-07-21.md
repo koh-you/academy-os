@@ -110,6 +110,8 @@
 
 11B-3에서는 연락처 누락과 예약 예외의 실패 감사 row 생성·상태 반영·API 저장을 `persistFailedNotificationJobRequest`로 통합했다. 정상 예약·취소 및 Solapi 호출은 바꾸지 않았고 실제 발송 없는 deterministic fixture만 추가했다.
 
+11B-4에서는 활성 job 배열을 기존 취소 함수와 사유로 병렬 처리하고 반환 job만 수집하는 경계를 `cancelNotificationJobsRequest`로 분리했다. 대상 selector와 실제 `/cancel` 호출 계약은 변경하지 않았다.
+
 - builder 추출에 `/api/notification-jobs/*`, `setNotificationJobs`, Solapi 호출이 함께 이동함.
 - 학생/학부모 번호 또는 `notificationType`이 바뀜.
 - 선생님 수정본보다 설정 템플릿/자동 seed가 우선함.

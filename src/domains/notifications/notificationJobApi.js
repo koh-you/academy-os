@@ -53,3 +53,13 @@ export async function cancelNotificationJobRequest({
   if (result.notificationJob) onNotificationJob(result.notificationJob);
   return result;
 }
+
+export async function cancelNotificationJobsRequest({
+  cancelNotificationJob,
+  notificationJobs = [],
+  reason = "알림톡 예약 취소"
+} = {}) {
+  if (notificationJobs.length === 0) return [];
+  const results = await Promise.all(notificationJobs.map((job) => cancelNotificationJob(job, reason)));
+  return results.map((result) => result.notificationJob).filter(Boolean);
+}

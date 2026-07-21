@@ -348,6 +348,12 @@
 - 운영 저장 검증: `special_lecture_enrollments` 재조회에서 중3 신초봄은 active 5회, 각 13:00~15:00이고 고3 enrollment는 canceled 0회다. 1~5회차 lessons 모두 중3 ID/13:00~15:00을 포함하고 고3 ID는 없다. 1회차 기존 출결·수업기록은 저장 전후 2건, `notification_jobs`는 0건으로 유지됐다.
 - 사람 gate: 배포 후 클리닉 특강 명단에서 `창일중 · 중3` 신초봄이 1~5회차, 각 13:00~15:00으로 보이는지 확인한다. 잘못 입력한 고3 enrollment는 활성 수강 명단에서 제외되어야 한다. 1회차 수업일지에는 신초봄 행이 추가되되 기존 학생의 출결·시간은 그대로여야 한다.
 - 중단 조건: 올바른 신초봄 원천이 불명확함, 기존 학생이 빠짐, 기존 학생 시간이 바뀜, 출결 record가 자동 생성/변경됨, 알림톡 예약/발송 발생, Supabase 재조회 불일치인데 완료 표시, 새로고침 후 공통 시간이 사라짐.
+## 2026-07-21 P1. 11B-4 notification job 배치 취소 orchestration 분리
+
+- 상태: 여러 활성 job의 병렬 취소와 반환 job 수집을 `cancelNotificationJobsRequest`로 분리했다.
+- 동작 보존: selector가 고른 같은 배열, 기존 취소 함수, 기존 사유를 주입한다. 빈 배열은 API 호출 없이 빈 결과를 반환하고 개별 응답에 job이 없는 항목은 기존처럼 제외한다.
+- side effect/gate: 실제 API/Solapi는 fixture에서 호출하지 않았다. 기존 취소 호출의 얇은 이동이므로 추가 사람 gate는 없고 11B-1 실제 예약·취소 gate 결과를 유지한다.
+
 ## 2026-07-21 P1. 11B-3 notification job 실패 감사 row 어댑터 통합
 
 - 상태: 연락처 누락과 예약 예외가 만드는 실패 job의 생성·React 상태 반영·`/api/notification-jobs` 저장을 `persistFailedNotificationJobRequest`로 통합했다.
