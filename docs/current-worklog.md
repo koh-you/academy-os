@@ -7,6 +7,15 @@
 1. `학생 포털 실제 쓰기 검수` — 숙제 완료, 질문 CRUD, 시험 후 제출의 실제 학생 저장/재조회/재로그인/권한을 확인한다. 사용자 보류이며 통과가 아니다.
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
+4. `12R SupplementStudentModal action ownership gate` — 다음 단계는 local state와 task/lesson 저장, notification/Solapi action 소유권 이동이다. 코드 이동 후 고태영으로 저장·일정·세 예약/취소·완료·새로고침·중복/대상 교차를 확인해야 한다.
+
+## 2026-07-21 P1. 12Q 보충 학생 모달 presentational shell 분리
+
+- 상태: 바깥 공통 Modal, 학생 제목/부제, feedback, 빈 상태, task stack과 overlay slot을 `SupplementStudentModalShell.jsx`로 분리했다.
+- 동작 보존: App이 task map과 완료/일정/알림 control overlay를 기존 state와 callback으로 구성해 children/slot으로 전달한다. DOM class, 표시 순서와 닫기 동작을 유지한다.
+- 저장 원천/side effect: shell은 표시와 feedback dismiss callback만 소유한다. local draft, API, Supabase, `notification_jobs`, Solapi와 모든 실제 action은 App에 남아 있다.
+- 검증/gate: production 381/381과 build가 통과했고 shell의 hook/API/job/Solapi 비소유를 고정했다. 12Q 자체 추가 사람 검수는 없다.
+- 중단 지점: 다음 12R은 `SupplementStudentModal`의 state/action 소유권 이동으로 실제 저장·예약 경계를 건드린다. 코드 이동 후 승인된 고태영 운영 검증 사람 gate가 필요하다.
 
 ## 2026-07-23 P3. 시험분석 프롬프트 3단계 사용 UI
 

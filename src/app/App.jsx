@@ -58,6 +58,7 @@ import { SupplementNotificationControlModal } from "../domains/supplements/Suppl
 import { createSupplementNotificationControlViewModel } from "../domains/supplements/supplementNotificationControlModel.js";
 import { SupplementTaskCard } from "../domains/supplements/SupplementTaskCard.jsx";
 import { createSupplementTaskCardViewModel } from "../domains/supplements/supplementTaskCardModel.js";
+import { SupplementStudentModalShell } from "../domains/supplements/SupplementStudentModalShell.jsx";
 import {
   areSupplementTaskDraftValuesEqual,
   createPersistableSupplementTask,
@@ -22962,29 +22963,70 @@ function SupplementStudentModal({
   }
 
   return (
-    <Modal
-      className="supplementStudentModal"
-      title={`${student.name} ${tabTitle}`}
-      subtitle={`${student.grade ?? "-"} · ${student.schoolName ?? "학교 미입력"}`}
+    <SupplementStudentModalShell
+      feedback={feedback}
+      isEmpty={tasks.length === 0}
       onClose={onClose}
-    >
-      {feedback ? (
-        <div className={`supplementFeedbackPopup ${feedback.tone || "success"}`} role="status" aria-live="polite">
-          <div>
-            <strong>{feedback.title}</strong>
-            <p>{feedback.message}</p>
-          </div>
-          <button className="iconButton" onClick={() => setFeedback(null)} type="button">×</button>
-        </div>
-      ) : null}
-      <div className="supplementModalLayout single">
-        <section className="supplementModalMain">
-          {tasks.length === 0 ? (
-            <div className="emptyHomeworkBox">아직 생성된 보충관리 항목이 없습니다.</div>
+      onDismissFeedback={() => setFeedback(null)}
+      overlays={(
+        <>
+          {passConfirmTask ? (
+            <SupplementPassConfirmModal
+              getTypeLabel={followUpTypeLabel}
+              isBusy={busyTaskId === `${passConfirmTask.makeupTaskId}:pass`}
+              onCancel={() => setPassConfirmTask(null)}
+              onConfirm={confirmPassTask}
+              studentName={student.name}
+              task={passConfirmTask}
+            />
           ) : null}
-
-          <div className="taskStack">
-            {tasks.map((task) => {
+          {scheduleConfirmTask ? (
+            <SupplementScheduleChangeConfirmModal
+              getDetailSeed={getSupplementScheduleChangeDetailSeed}
+              getTypeLabel={followUpTypeLabel}
+              isBusy={busyTaskId === `${scheduleConfirmTask.makeupTaskId}:schedule`}
+              onCancel={() => setScheduleConfirmTask(null)}
+              onConfirmWithReminder={(noticePatch) => confirmScheduleTask(true, noticePatch)}
+              onConfirmWithoutReminder={(noticePatch) => confirmScheduleTask(false, noticePatch)}
+              studentName={student.name}
+              task={scheduleConfirmTask}
+            />
+          ) : null}
+          {notificationControlTask && notificationControlConfig ? (
+            <SupplementNotificationControlModal
+              blockReason={notificationControlBlockReason}
+              canCancel={canCancelNotificationControl}
+              canReserve={canReserveNotificationControl}
+              config={notificationControlConfig}
+              display={notificationControlDisplay}
+              feedback={notificationControlFeedback}
+              hasHistoricalJob={notificationControlHasHistoricalJob}
+              isBusy={notificationControlBusy}
+              jobStatusLabel={notificationControlJob ? formatNotificationJobStatus(notificationControlJob) : "예약 기록 없음"}
+              onCancel={() => handleNotificationControlAction("cancel")}
+              onClose={closeNotificationControl}
+              onReserve={() => handleNotificationControlAction("reserve")}
+              preview={notificationControlPreview}
+              previewLabel={notificationControlPreviewLabel}
+              recipientLabel={maskPhoneForDisplay(notificationControlRecipient)}
+              savedDraftDiffers={notificationControlSavedDraftDiffers}
+              scheduleLabel={formatSupplementScheduleDateTime(notificationControlTask)}
+              scheduledAtLabel={notificationControlJob?.scheduledAt
+                ? formatKoreaTimeLabel(notificationControlJob.scheduledAt)
+                : notificationControl.controlType === "studentReminder"
+                  ? formatKoreaTimeLabel(getSupplementStudentReminderScheduledAt(notificationControlTask))
+                  : "예약 버튼을 누른 뒤 다음 정각"}
+              studentName={student.name}
+            />
+          ) : null}
+        </>
+      )}
+      studentGrade={student.grade}
+      studentName={student.name}
+      studentSchool={student.schoolName}
+      tabTitle={tabTitle}
+    >
+      {tasks.map((task) => {
               const taskDraftState = getTaskDraftState(task);
               const draftValues = taskDraftState.values;
               const draftDiff = getSupplementTaskDraftDiff(task, draftValues, student, normalizedNotificationTemplates);
@@ -23071,60 +23113,8 @@ function SupplementStudentModal({
                   sourceContextProps={taskCardViewModel.sourceContextProps}
                 />
               );
-            })}
-          </div>
-        </section>
-      </div>
-      {passConfirmTask ? (
-        <SupplementPassConfirmModal
-          getTypeLabel={followUpTypeLabel}
-          isBusy={busyTaskId === `${passConfirmTask.makeupTaskId}:pass`}
-          onCancel={() => setPassConfirmTask(null)}
-          onConfirm={confirmPassTask}
-          studentName={student.name}
-          task={passConfirmTask}
-        />
-      ) : null}
-      {scheduleConfirmTask ? (
-        <SupplementScheduleChangeConfirmModal
-          getDetailSeed={getSupplementScheduleChangeDetailSeed}
-          getTypeLabel={followUpTypeLabel}
-          isBusy={busyTaskId === `${scheduleConfirmTask.makeupTaskId}:schedule`}
-          onCancel={() => setScheduleConfirmTask(null)}
-          onConfirmWithReminder={(noticePatch) => confirmScheduleTask(true, noticePatch)}
-          onConfirmWithoutReminder={(noticePatch) => confirmScheduleTask(false, noticePatch)}
-          studentName={student.name}
-          task={scheduleConfirmTask}
-        />
-      ) : null}
-      {notificationControlTask && notificationControlConfig ? (
-        <SupplementNotificationControlModal
-          blockReason={notificationControlBlockReason}
-          canCancel={canCancelNotificationControl}
-          canReserve={canReserveNotificationControl}
-          config={notificationControlConfig}
-          display={notificationControlDisplay}
-          feedback={notificationControlFeedback}
-          hasHistoricalJob={notificationControlHasHistoricalJob}
-          isBusy={notificationControlBusy}
-          jobStatusLabel={notificationControlJob ? formatNotificationJobStatus(notificationControlJob) : "예약 기록 없음"}
-          onCancel={() => handleNotificationControlAction("cancel")}
-          onClose={closeNotificationControl}
-          onReserve={() => handleNotificationControlAction("reserve")}
-          preview={notificationControlPreview}
-          previewLabel={notificationControlPreviewLabel}
-          recipientLabel={maskPhoneForDisplay(notificationControlRecipient)}
-          savedDraftDiffers={notificationControlSavedDraftDiffers}
-          scheduleLabel={formatSupplementScheduleDateTime(notificationControlTask)}
-          scheduledAtLabel={notificationControlJob?.scheduledAt
-            ? formatKoreaTimeLabel(notificationControlJob.scheduledAt)
-            : notificationControl.controlType === "studentReminder"
-              ? formatKoreaTimeLabel(getSupplementStudentReminderScheduledAt(notificationControlTask))
-              : "예약 버튼을 누른 뒤 다음 정각"}
-          studentName={student.name}
-        />
-      ) : null}
-    </Modal>
+      })}
+    </SupplementStudentModalShell>
   );
 }
 

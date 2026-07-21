@@ -45,8 +45,8 @@
 13. 완료: 알림 draft config·선생님 최종본 판정·task→draft·dirty/diff·source version/fingerprint·persistable 변환을 순수 모델로 분리했다.
 14. 완료: task 카드 원천 props·editor 값·메타·diff 기반 저장 상태·일정 gate 문구를 순수 view-model로 분리했다.
 15. 완료: 알림 control config·예약 차단·과거 preview 차단·대상·예약/취소 가능 여부를 순수 view-model로 분리했다.
-16. 다음: `SupplementStudentModal` shell을 state/action 소유권 그대로 분리할 수 있는지 검토한다.
-17. shell 분리에 action 이동이 필요하면 실제 저장·예약 orchestration은 별도 사람 gate로 판단한다.
+16. 완료: `SupplementStudentModal`의 바깥 Modal·feedback·빈 상태·task stack·overlay slot을 presentational shell로 분리했다.
+17. 다음 12R: local draft state와 task/lesson 저장, notification/Solapi action 소유권 이동. 코드 이동 후 고태영 운영 검증 사람 gate가 필요하다.
 
 ## 12B 구현 결과 — 완료 확인 모달
 
@@ -143,6 +143,13 @@
 - 취소·실패 이력은 과거 preview 대신 현재 저장 원천으로 다시 만든 preview를 사용하고, sent/현재 예약/새 예약 label과 대상 번호를 같은 모델에서 계산한다.
 - App이 현재 task/job/preview와 기존 취소 가능·문구 normalize 함수를 주입하며 실제 예약·취소 action, busy/feedback, job status patch는 계속 소유한다.
 - fixture와 production check는 hook/API/`notification_jobs`/Solapi 및 action callback이 모델로 들어오지 못하게 고정한다.
+
+## 12Q 구현 결과 — 학생 모달 presentational shell
+
+- 공통 Modal 제목/부제, feedback dismiss, 빈 상태, task stack과 overlay 표시 위치를 `SupplementStudentModalShell.jsx`로 옮겼다.
+- App이 기존 task 카드 map과 완료 확인·일정 확인·개별 알림 control overlay를 그대로 생성해 slot으로 전달한다.
+- shell에는 hook/API/`notification_jobs`/Solapi가 없으며 DOM class와 렌더 순서는 유지된다.
+- 이 단위 뒤 남은 `SupplementStudentModal` 본체는 local draft state와 실제 저장·예약·취소·완료 handler를 함께 소유하므로 다음 이동은 고태영 운영 검증을 요구하는 별도 고위험 gate다.
 
 ## 즉시 중단 조건
 

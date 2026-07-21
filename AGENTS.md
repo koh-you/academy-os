@@ -17,6 +17,7 @@
 1. `학생 포털 실제 쓰기 검수` — 숙제 완료, 질문 CRUD, 시험 후 제출의 저장·새로고침·재로그인·강사 미리보기 차단·교사 확인을 실제 학생으로 검수한다. 사용자 보류 상태이며 11B 리팩터링과는 별개다.
 2. `교사 bearer session + Storage 소유권 보안 gate` — 교사 API 인증과 시험지 파일 열람 권한을 별도 고위험 작업으로 검증한다. 포털 표시 리팩터링이나 11B와 섞지 않으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 검수 완료 여부를 사용자에게 확인한다. 완료 전에는 템플릿 ID/변수 연결이나 테스트 발송을 진행하지 않으며, 이 리팩터링 세션에서는 완료 여부와 관계없이 연결 작업을 하지 않는다.
+4. `12R SupplementStudentModal action ownership gate` — 12Q까지 표시·순수 계산·shell 분리는 완료했다. 다음은 local draft state와 makeup task/lesson 저장, `notification_jobs`/Solapi 예약·취소 handler 소유권을 App 밖으로 옮기는 고위험 단계다. 코드 이동 후 승인된 고태영 데이터로 저장·일정 생성/변경·세 알림 예약/취소·완료 처리와 새로고침 유지·중복 없음·대상 교차 없음을 다시 확인하기 전 다음 단위로 진행하지 않는다.
 
 ## Deferred Work Queue - Always Show First
 
@@ -60,7 +61,7 @@
    - 순서: `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`.
    - 우선순위: 위험이 낮은 helper/config/API/client/component부터 진행하고, `LessonJournalDetail`, 출결, Solapi 예약, 보충관리처럼 저장/발송 side effect가 큰 영역은 충분한 gate 이후 진행한다.
    - 기준 로드맵: 아래 `App.jsx Refactoring Roadmap - 18 Units`를 다음 세션의 리팩터링 후보 목록으로 사용한다. 이미 일부 분리된 항목도 남은 하위 컴포넌트/헬퍼가 있으면 같은 묶음 안에서 계속 쪼갠다.
-   - 현재 이어받을 지점: 10번 포털 표시 구조 audit와 11A, 11B-1~13을 완료했다. OS row/Solapi 사람 gate도 통과했고 승인된 미배정 고태영 데이터로 학생 일정·학부모 일정·학생 11시의 실제 예약·대조·취소와 임시 task 삭제까지 확인했다. 12번 inventory는 `docs/refactor-supplement-center-inventory-2026-07-21.md`에 기록했다. 12A lesson/task persistence plan, 12B 완료 확인, 12C 일정 변경 확인, 12D 최근 내역, 12E 저장·예약 상태 helper, 12F 알림 draft workspace, 12G 개별 알림 control 모달, 12H 원천 맥락 읽기 카드, 12I 방법·일정 editor, 12J 변경 diff·저장 상태·gate 안내, 12K task 카드 상단 메타, 12L task action bar, 12M task 카드 조립, 12N task local draft 순수 모델, 12O task 카드 순수 view-model, 12P 알림 control 순수 view-model 경계를 완료했다. 학생 포털 실제 쓰기와 교사 bearer/Storage gate는 별도 보류다. 다음은 `SupplementStudentModal` shell을 state/action 소유권 그대로 분리할 수 있는지 검토하며, action 이동이 필요하면 새 사람 gate 전 중단한다.
+   - 현재 이어받을 지점: 10번 포털 표시 구조 audit와 11A, 11B-1~13을 완료했다. OS row/Solapi 사람 gate도 통과했고 승인된 미배정 고태영 데이터로 학생 일정·학부모 일정·학생 11시의 실제 예약·대조·취소와 임시 task 삭제까지 확인했다. 12번 inventory는 `docs/refactor-supplement-center-inventory-2026-07-21.md`에 기록했다. 12A lesson/task persistence plan, 12B 완료 확인, 12C 일정 변경 확인, 12D 최근 내역, 12E 저장·예약 상태 helper, 12F 알림 draft workspace, 12G 개별 알림 control 모달, 12H 원천 맥락 읽기 카드, 12I 방법·일정 editor, 12J 변경 diff·저장 상태·gate 안내, 12K task 카드 상단 메타, 12L task action bar, 12M task 카드 조립, 12N task local draft 순수 모델, 12O task 카드 순수 view-model, 12P 알림 control 순수 view-model, 12Q presentational modal shell을 완료했다. 학생 포털 실제 쓰기와 교사 bearer/Storage gate는 별도 보류다. 다음 12R은 local state와 실제 저장·예약 action 소유권 이동이므로 코드 이동 후 고태영 운영 검증 사람 gate를 통과해야 한다.
    - 보류된 사람 gate: 2026-07-21 사용자 지시로 학생 숙제 완료, 질문 CRUD, 시험 후 제출의 실제 학생 테스트 결과를 보류했다. 시험 후 제출은 실제 대상 학생의 입력/파일 선택, Storage 업로드, 제출 저장, 새로고침·재로그인 유지, 교사 확인 저장을 나중에 확인한다. 보류는 통과 판정이 아니며 회귀 발견 시 즉시 별도 수정한다.
    - 확인된 보안 후속 gate: 교사 로그인은 아직 서버 서명 bearer token을 발급하지 않아 시험 후 제출의 교사 확인 전용 API도 기존 교사 관리 API와 같은 인증 공백이 있다. Storage 파일 열기 API도 경로를 아는 요청자의 교사/학생 소유권을 검증하지 않는다. 이 둘은 표시 shell 분리와 섞지 말고 `교사 세션 인증 + 파일 열람 권한` 별도 고위험 gate로 진행한다.
    - 확인된 후속 이슈: 학생 수업 준비 안내 목록은 현재 `prepStudentNotice` 존재 여부만 필터하고 `prepStudentVisible`을 확인하지 않는다. 이번 리팩터링에서는 기존 동작을 보존했으며, 공개 플래그 계약을 별도 기능 작업에서 확인해야 한다.
