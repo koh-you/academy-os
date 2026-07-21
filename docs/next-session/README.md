@@ -1,8 +1,111 @@
 # Next Session Handoff
 
-이 폴더 하나만 다음 Codex 세션에 넘기면 됩니다. 새 세션은 아래 프롬프트를 붙여넣은 뒤, `AGENTS.md`와 `docs/current-worklog.md` 최상단의 `미룬 작업 큐`를 먼저 사용자에게 요약해야 합니다.
+이 폴더 하나만 다음 Codex 세션에 넘기면 됩니다. 리팩터링과 유지보수는 아래처럼 별도 Git worktree/브랜치에서 진행합니다. 두 세션 모두 `AGENTS.md`와 `docs/current-worklog.md` 최상단의 `미룬 작업 큐`를 먼저 사용자에게 요약해야 합니다.
 
-## 바로 붙여넣을 프롬프트
+## 세션 충돌 방지 원칙
+
+- 유지보수 세션만 `E:\academy-os`의 `main` worktree와 `origin/main` 통합을 소유합니다.
+- 리팩터링 세션은 `E:\academy-os-refactor` 같은 별도 worktree와 `codex/refactor-supplement-11b` 같은 전용 브랜치를 사용합니다. 같은 `E:\academy-os` 폴더에서 두 세션을 동시에 실행하지 않습니다.
+- 리팩터링 세션은 전용 브랜치만 commit/push하고 `main`에 직접 merge/push하지 않습니다. 유지보수 세션 또는 사용자가 지정한 단일 통합 세션만 최신 `origin/main` 위에서 병합합니다.
+- 각 세션은 작업 전후 `git status --short`를 확인하고 다른 세션의 파일을 stage/commit/revert하지 않습니다. 예상하지 못한 변경이나 충돌이 있으면 작업을 멈추고 사용자에게 알립니다.
+
+## 리팩터링 세션에 바로 붙여넣을 프롬프트
+
+```text
+Academy OS 리팩터링 전용 세션입니다. 기능 유지보수와 운영 버그 수정은 다른 세션에서 진행하므로 이 세션에서는 App.jsx 의미 단위 분리만 수행하세요.
+
+Git 충돌 방지 규칙:
+- `E:\academy-os` main worktree는 유지보수 세션 소유입니다. 여기서 코드를 수정하지 마세요.
+- 리팩터링은 별도 worktree `E:\academy-os-refactor`와 `codex/` 전용 브랜치에서만 진행합니다. 권장 브랜치는 `codex/refactor-supplement-11b`입니다.
+- worktree/브랜치가 없으면 최신 `origin/main`을 기준으로 별도 worktree를 준비하고, 이미 있으면 재사용하세요. 같은 worktree를 두 세션이 공유하면 안 됩니다.
+- 첫 작업과 새 의미 단위마다 `git fetch origin` 후 최신 `origin/main`을 rebase/동기화하세요. 예상하지 못한 파일, 충돌, staged 변경이 보이면 수정하지 말고 사용자에게 보고하세요.
+- 전용 브랜치만 commit/push하고 `main`에는 직접 merge/push하지 마세요. 통합은 유지보수 세션 또는 사용자가 지정한 한 세션만 합니다.
+
+작업 전에 반드시 아래를 읽고 상태를 사용자에게 먼저 요약하세요.
+1. AGENTS.md
+2. docs/current-worklog.md
+3. docs/next-session/README.md
+4. docs/refactor-supplement-job-builders-inventory-2026-07-21.md
+5. git status --short
+6. git log -8 --oneline
+
+공유 미룬 작업 큐는 `운영 OS 저장 신뢰성 보강 -> 모달 통일 -> 발송 알림톡 템플릿 설정 관리 -> App.jsx 리팩터링 -> Solapi 특강 템플릿 검수 후 연결` 순서입니다. 다만 이 세션의 권한은 4번 App.jsx 리팩터링뿐입니다. 다른 큐의 기능 수정이 필요해 보이면 구현하지 말고 유지보수 세션에 넘길 진단만 기록하세요.
+
+현재 리팩터링 상태:
+- 10번 `student-parent portals` 표시 구조 audit까지 완료했습니다.
+- 11번 `supplement job builders`의 11A는 완료했습니다. `supplementJobBuilders.js`에 순수 예약시각/ID/payload builder, `notificationJobSelectors.js`에 순수 현재 job selector가 있고 deterministic fixture가 `npm run test:production`에 연결돼 있습니다.
+- 문구 seed/선생님 수정본 선택과 실제 `/api/notification-jobs/reserve|cancel`, React 상태, Supabase `notification_jobs`, Solapi 예약/취소 orchestration은 아직 App.jsx와 서버 경계에 남아 있습니다.
+- 다음 11B는 외부 side effect가 있는 고위험 단계입니다. 아래 사람 gate가 통과됐다는 사용자 확인 전에는 코드를 옮기지 마세요.
+
+11B 사람 gate:
+1. 삭제 가능한 미래 보충 task와 통제된 학생/학부모 전화번호를 준비합니다.
+2. 학생 일정, 학부모 일정, 당일 학생 11시 알림톡을 각각 열어 대상, 예약시각, 저장된 선생님 최종 문구를 확인합니다.
+3. 하나씩 예약하고 OS/Supabase `notification_jobs` row와 Solapi 예약 그룹의 type, recipient, scheduledAt, message를 대조합니다.
+4. 하나씩 취소하고 OS와 Solapi 모두 취소됐는지 확인합니다.
+5. 새로고침 후 상태 유지, 중복 row/group 없음, 학생/학부모 대상 교차 없음까지 확인합니다.
+6. 하나라도 다르면 11B를 시작하지 말고 원인과 유지보수 세션에 넘길 수정 범위를 정리합니다.
+
+앞서 보류한 사람 gate도 통과로 간주하지 마세요:
+- 학생 숙제 완료 저장/새로고침/재로그인/강사 미리보기 쓰기 차단
+- 질문 추가/상태 변경/삭제/새로고침/재로그인/다른 학생 데이터 비노출
+- 시험 후 기록 입력, 테스트 파일 제출, 부분 실패 정리, 새로고침/재로그인, 교사 확인 저장
+- 교사 서버 서명 bearer session과 시험지 Storage 소유권 검증은 별도 보안 gate
+
+사람이 11B gate 통과를 확인하면 한 번에 하나의 의미 단위만 진행하세요. `원천/동작 보존 -> 파일 분리 -> production test/build -> AI 검수 + 사람 gate -> 전용 브랜치 commit/push` 순서를 지킵니다. 기능 변경, 문구 변경, 운영 데이터 수정, 실제 발송/예약은 리팩터링에 섞지 마세요. 유지보수 main이 새로 바뀌면 다음 단위 전에 rebase하고, 충돌을 임의로 덮어쓰지 마세요.
+
+새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`도 확인하되, 이 리팩터링 세션에서는 완료 여부와 관계없이 템플릿 연결/테스트 발송을 하지 마세요.
+```
+
+## 유지보수 세션에 바로 붙여넣을 프롬프트
+
+```text
+Academy OS 운영 유지보수 전용 세션입니다. App.jsx 연속 리팩터링은 다른 별도 worktree/브랜치 세션에서 진행하므로 이 세션에서는 사용자 요청의 버그 수정, 저장 신뢰성, UI/운영 기능만 처리하세요.
+
+Git 충돌 방지 규칙:
+- 이 세션은 `E:\academy-os`의 `main` worktree와 `origin/main` 통합을 소유합니다.
+- 리팩터링 세션은 별도 `E:\academy-os-refactor` 및 `codex/` 브랜치를 사용합니다. 리팩터링 브랜치 파일이나 worktree를 stage/commit/revert하지 마세요.
+- 작업 시작/커밋 전 `git status --short`와 `git log -1 --oneline`을 확인하세요. 예상하지 못한 변경이 있으면 그것이 다른 세션 작업인지 먼저 구분하고, 임의로 덮거나 되돌리지 마세요.
+- 유지보수 변경을 검증해 main에 commit/push한 뒤 리팩터링 세션이 최신 `origin/main`을 rebase하도록 커밋 해시와 겹친 파일을 알려주세요.
+- 리팩터링 브랜치 통합은 사람 gate 통과와 최신 main 기준 전체 검증 후 이 세션 또는 사용자가 지정한 한 세션에서만 수행합니다.
+
+작업 전에 반드시 아래를 읽고 현재 큐와 새 요청의 우선순위를 사용자에게 먼저 요약하세요.
+1. AGENTS.md
+2. docs/current-worklog.md
+3. docs/next-session/README.md
+4. docs/save-persistence-audit-2026-07-20.md
+5. git status --short
+6. git log -8 --oneline
+
+공유 미룬 작업 큐:
+1. 운영 OS 저장 신뢰성 보강
+2. 모달 통일 작업
+3. 발송 알림톡 템플릿 설정 관리
+4. App.jsx 리팩터링 연속 작업 - 이 세션에서는 구현하지 않고 별도 세션에 넘김
+5. Solapi 특강 템플릿 검수 후 연결
+
+유지보수 원칙:
+- 한 번에 하나의 요청만 처리하고 저장 원천, local draft, Supabase/app_state/API, 외부 side effect, 사람 gate를 먼저 정리하세요.
+- App.jsx를 수정할 수는 있지만 기능 수정에 필요한 최소 범위로 제한하고, 이미 분리된 `supplementJobBuilders.js`, `notificationJobSelectors.js`, 포털 shell/component를 다시 App.jsx에 합치거나 구조 이동하지 마세요.
+- API 성공과 필요한 Supabase 재조회 전에는 저장 완료를 표시하지 말고, 실패 시 사용자 draft와 모달을 유지하세요.
+- 실제 Solapi 발송/예약/취소, 운영 데이터 삭제, 출결/수업일지 원천 변경은 삭제 가능한 테스트 데이터와 명시적 사람 gate 없이 실행하지 마세요.
+- 유지보수 수정이 리팩터링 대상 코드와 겹치면 유지보수 변경을 main에 먼저 확정하고, 리팩터링 세션이 rebase할 수 있도록 변경 파일과 계약을 worklog에 남기세요.
+
+현재 보류된 사람 검토를 통과로 바꾸지 마세요:
+- 학생 숙제 완료, 질문 CRUD, 시험 후 제출의 실제 학생 저장/새로고침/재로그인/강사 미리보기 차단 및 교사 확인
+- 보충 알림 11B의 학생 일정/학부모 일정/당일 학생 11시 OS `notification_jobs` row와 Solapi 그룹 예약·취소 대조
+- 교사 bearer session과 시험지 Storage 소유권 검증 보안 gate
+
+현재 UI 유지보수 사람 gate:
+- 보충관리: 붉은 자동저장 경고가 사라졌고 상세의 세 저장/처리 버튼 및 상태 표시가 유지되는지 확인. 실제 예약/완료는 누르지 않음.
+- 알림관리 개별 발송: 데스크톱에서 왼쪽 학생 목록과 오른쪽 작성 패널 하단 정렬, 작은 화면 내부 스크롤, compact 필터/집계/학생 카드 확인. 실제 발송/예약은 누르지 않음.
+- 특강관리: 상단 상태 알림과 학생 연결/회차 설정 진입 확인. 오류 Tally 신청 삭제는 복구 불필요한 미연결 테스트 원본에서만 취소 확인 -> 실제 삭제 -> 새로고침 유지 순으로 검수. 연결된 신청/명단/lesson/출결/알림 예약이 바뀌면 즉시 중단.
+
+새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 확인하세요. 완료 전에는 임시 구조를 유지하고 템플릿 ID/변수 연결 또는 테스트 발송을 하지 마세요.
+
+구현 후 범위에 맞는 production test/build, Supabase 재조회, 새로고침 유지까지 검증하고 `docs/current-worklog.md`를 갱신한 뒤 main에 commit/push하세요. 완료 답변에는 사람 검토 절차와 AI 자기검토를 포함하세요.
+```
+
+## 기존 전체맥락 통합 프롬프트
 
 ```text
 E:\academy-os 작업을 이어가겠습니다.

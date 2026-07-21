@@ -52,6 +52,17 @@
    - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 확인한다.
    - 검수 완료 전에는 현재 임시 특강 알림톡 구조를 유지하고, 검수 완료 확인 후에만 템플릿 ID/변수 연결, 테스트 데이터 발송, 링크/문구 검수를 진행한다.
 
+## Parallel Refactoring + Maintenance Sessions - Required
+
+사용자가 리팩터링과 유지보수를 별도 Codex 세션으로 나누는 동안에는 두 세션이 같은 Git worktree/index를 공유하지 않는다. 프롬프트만으로 같은 `E:\academy-os` 폴더의 동시 수정을 안전하게 만들 수 없으므로 아래 소유권을 우선한다.
+
+- 유지보수 세션은 `E:\academy-os`의 `main` worktree와 `origin/main` 통합을 소유한다. 사용자 요청의 버그 수정/운영 개선만 진행하고 App.jsx 의미 단위 분리는 리팩터링 큐로 넘긴다.
+- 리팩터링 세션은 별도 worktree(기본 예시 `E:\academy-os-refactor`)와 `codex/` 접두사의 전용 브랜치를 사용한다. 현재 이어받을 브랜치 예시는 `codex/refactor-supplement-11b`다. 이 세션은 유지보수 변경을 직접 만들거나 `main`에 merge/push하지 않고 전용 브랜치만 commit/push한다.
+- 리팩터링 세션은 첫 작업과 각 새 의미 단위 시작 전에 `git fetch origin` 후 최신 `origin/main`을 기준으로 rebase/동기화한다. 예상하지 못한 변경, 충돌, 다른 세션의 staged 파일이 보이면 코드를 수정하지 말고 현재 상태와 충돌 파일을 사용자에게 보고한다.
+- 두 세션 모두 다른 세션이 만든 파일을 stage/commit/revert하지 않는다. 특히 `src/app/App.jsx`, `src/app/App.css`, `package.json`, `scripts/scenario-tests-production.cjs`, `AGENTS.md`, `docs/current-worklog.md`, `docs/next-session/README.md`는 충돌 가능성이 높은 공유 파일로 취급한다.
+- 리팩터링 브랜치의 통합은 유지보수 세션 또는 사용자가 명시적으로 맡은 한 세션만 수행한다. 통합 전 최신 `origin/main` 위에서 전체 production test와 build를 다시 실행하고, 리팩터링의 사람 gate가 보류라면 보류 상태를 그대로 유지한다.
+- 기능 수정과 리팩터링이 같은 코드에 필요하면 유지보수 수정이 먼저 `main`에 들어간 뒤 리팩터링 브랜치가 이를 rebase한다. 리팩터링 브랜치가 유지보수 변경을 덮어쓰거나 과거 구현으로 되돌리면 안 된다.
+
 ## Read First
 
 1. `docs/current-worklog.md`
