@@ -34,7 +34,7 @@
    - 순서: `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`.
    - 다음 후보는 매번 현재 diff와 최신 작업로그를 보고 다시 제안한다. 위험이 낮은 helper/config/API/client/component부터 진행하고, 수업일지/출결/Solapi/보충관리처럼 side effect가 큰 영역은 충분한 gate 이후 진행한다.
    - 기준 로드맵: 아래 `App.jsx 리팩터링 18개 기준 로드맵`을 다음 세션들의 공통 후보 목록으로 사용한다. 이미 일부 분리된 항목도 남은 하위 컴포넌트/헬퍼가 있으면 같은 묶음 안에서 계속 진행한다.
-   - 현재 이어받을 지점: 9번 `test manager`는 완료했다. 10번 `student-parent portals`의 저위험 표시 영역, 학생 수업 이력 달력, 수업 준비 안내 카드 분리를 완료했다. 다음은 `StudentTodayTab`의 남은 읽기/쓰기 경계를 inventory하며, 숙제 체크/질문/시험 제출은 별도 저장 gate 전까지 이동하지 않는다.
+   - 현재 이어받을 지점: 9번 `test manager`는 완료했다. 10번 `student-parent portals`의 읽기 전용 표시 영역 분리를 완료했다. 다음 경계는 `StudentTodayTab`의 시험 후 제출, 질문 추가·상태변경·삭제, 숙제 완료 체크이며 저장 원천/실패 UI 사람 gate 전에는 이동하지 않는다.
    - 확인된 후속 이슈: 학생 수업 준비 안내 목록은 현재 `prepStudentNotice` 존재 여부만 필터하고 `prepStudentVisible`을 확인하지 않는다. 이번 리팩터링에서는 기존 동작을 보존했으며, 공개 플래그 계약을 별도 기능 작업에서 확인해야 한다.
    - 확인된 후속 이슈: 학생 마이페이지 `비밀번호 변경`은 callback/API가 없는 기존 미연결 UI다. 이번 리팩터링에서는 보존했고, 숨김/비활성 안내/실제 PIN 변경 구현은 저장 신뢰성의 오작동 버튼 정리 작업에서 별도 결정한다.
    - 다음 세션 시작 규칙: 코드 수정 전에 최근 리팩터링 결과(9번 완료, 10번 시작 전, 최신 완료 커밋)를 사용자에게 요약하고, 학생/학부모 포털의 공개 링크·인증·저장 원천·모바일 표시 side effect inventory를 먼저 만든다. 그 뒤 가장 낮은 위험의 표시 전용 컴포넌트 한 단위를 제안하고 사용자 재개 의사를 확인한다.
@@ -378,6 +378,17 @@
 - 구현 결과: 하단 안내문을 `최초 일정 확정`과 `기존 일정 변경` 모드로 분리했다. `보충 내용 저장`은 발송/예약을 만들지 않고, `수업일지 일정 만들기`는 학생·학부모 확정 안내 다음 정각 예약과 학생 11시 예약을 만든다는 점을 직접 표시한다. 기존 일정 변경 화면은 변경 안내 예약/11시 갱신 기준을 따로 표시한다.
 - 범위 제한: `makeup_tasks`, `lessons`, `notification_jobs`, Solapi 예약 API, 확정/변경 템플릿 선택 로직은 바꾸지 않았다. 이번 작업은 UI 문구/상태 표시와 정적 시나리오 테스트만 변경했다.
 - 사람 gate: 최초 숙제보충 화면에서 시간 미입력 시 `학생 확정 안내`/`학부모 확정 안내`가 `시간 필요`로 보여야 하고, 시간 입력 후에는 `예약 예정`으로 바뀌어야 한다. 이미 연결된 보충 일정 수정 화면에서는 같은 위치가 `변경 안내` 기준으로 보여야 한다.
+
+### 2026-07-21 P1. App.jsx 리팩터링 10번 - 학생 오늘 탭 읽기 전용 일정 패널 분리
+
+- 상태: 완료 - 구현/자동검증/AI 검수 완료, 읽기 전용 이동이라 사람 gate 없이 커밋/푸시 가능.
+- 범위 선택: `StudentTodayTab`의 상단 중요 일정과 보충/재시험 일정 최근 3개 렌더를 `src/domains/portals/StudentTodayReadOnlyPanels.jsx`의 `StudentTopNotice`/`StudentSupplementSchedules`로 분리했다.
+- 원천/동작 보존: `getStudentTopNotice`, `supplementSchedules` 필터/정렬, `followUpTypeLabel` 원천은 상위에 유지하고 결과와 label helper만 전달한다. tone/title/detail, 일정 미정 fallback, sourceLabel/reason fallback을 그대로 유지했다.
+- 저장 원천/side effect: 없음. 새 파일에 state/API/onClick/onSubmit이 없다.
+- AI 검수 결과: `git diff --check`, 시나리오 문법 검사, `npm run build`, `npm run test:production` 338/338 통과. 기존 Vite chunk size 경고만 남았다.
+- 사람 검토 필요 여부: 없음. props 연결, 최근 3개 제한, fallback 문구, 무상태·무 API 구조를 정적 시나리오 `23l`로 검증했다.
+- 다음 gate: `StudentTodayTab`에 남은 시험 후 제출, 질문 추가/변경/삭제, 숙제 완료 체크의 `/api/portal-state` 저장 계약과 현재 작업 영역 실패 UI를 확인한 뒤 이동 범위를 정한다.
+- 중단 조건: 일정 필터/순서/문구 변경, 새 컴포넌트에 저장 callback 유입, 쓰기 기능을 저장 gate 없이 함께 이동.
 
 ### 2026-07-21 P1. App.jsx 리팩터링 10번 - 학생 수업 준비 안내 카드 분리
 

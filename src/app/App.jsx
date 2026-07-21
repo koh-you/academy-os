@@ -26,6 +26,7 @@ import { StudentAllHomeworkTab } from "../domains/portals/StudentAllHomeworkTab.
 import { calculateAttendanceStats, StudentMyPageTab } from "../domains/portals/StudentMyPageTab.jsx";
 import { StudentLessonHistoryCalendar } from "../domains/portals/StudentLessonHistoryCalendar.jsx";
 import { StudentPrepNotices } from "../domains/portals/StudentPrepNotices.jsx";
+import { StudentSupplementSchedules, StudentTopNotice } from "../domains/portals/StudentTodayReadOnlyPanels.jsx";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
@@ -21398,12 +21399,7 @@ function StudentTodayTab({
 
   return (
     <>
-      {studentNotice ? (
-        <div className={`studentTopNotice ${studentNotice.tone}`}>
-          <strong>{studentNotice.title}</strong>
-          <span>{studentNotice.detail}</span>
-        </div>
-      ) : null}
+      <StudentTopNotice notice={studentNotice} />
 
       <StudentExamPostSubmissionPanel
         targets={examPostTargets}
@@ -21463,20 +21459,7 @@ function StudentTodayTab({
         </div>
       </section>
 
-      {supplementSchedules.length ? (
-        <section className="studentSpecialSchedule">
-          <h2>보충/재시험 일정</h2>
-          <div className="studentSpecialList">
-            {supplementSchedules.slice(0, 3).map((task) => (
-              <article key={task.makeupTaskId}>
-                <strong>{followUpTypeLabel(task.taskType)}</strong>
-                <span>{task.scheduledDate || "일정 미정"} {task.scheduledTime || ""}</span>
-                <small>{task.sourceLabel || task.reason || "선생님과 확인 예정"}</small>
-              </article>
-            ))}
-          </div>
-        </section>
-      ) : null}
+      <StudentSupplementSchedules getTypeLabel={followUpTypeLabel} schedules={supplementSchedules} />
 
       <div className="sectionHeader">
         <div>
