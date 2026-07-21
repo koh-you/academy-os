@@ -56,6 +56,7 @@ import { SupplementScheduleChangeConfirmModal } from "../domains/supplements/Sup
 import { SupplementHistoryModal } from "../domains/supplements/SupplementHistoryModal.jsx";
 import { SupplementNotificationControlModal } from "../domains/supplements/SupplementNotificationControlModal.jsx";
 import { SupplementTaskCard } from "../domains/supplements/SupplementTaskCard.jsx";
+import { createSupplementTaskCardViewModel } from "../domains/supplements/supplementTaskCardModel.js";
 import {
   areSupplementTaskDraftValuesEqual,
   createPersistableSupplementTask,
@@ -23019,33 +23020,22 @@ function SupplementStudentModal({
               const taskDraftState = getTaskDraftState(task);
               const draftValues = taskDraftState.values;
               const draftDiff = getSupplementTaskDraftDiff(task, draftValues, student, normalizedNotificationTemplates);
-              const supplementHomeworkNote = draftValues.supplementHomeworkNote ?? "";
               const methodOptions = supplementMethodOptions(task.taskType);
-              const shouldShowMethodOptions = methodOptions.length > 1;
-              const sourceDate = task.sourceDate || task.sourceAssignedDate || task.lessonDate || "";
-              const sourceDueDate = task.sourceDueDate || task.homeworkDueDate || "";
-              const sourceHomeworkTitle = task.sourceLabel || task.title || task.reason || "기록 없음";
-              const absenceSourceDate = task.sourceDate || task.lessonDate || "";
-              const absenceSourceLabel = task.sourceLessonLabel || task.sourceLabel || "원 결석 수업";
-              const absenceLessonMaterial = task.sourceLessonMaterial || "";
-              const absenceLessonContent = task.sourceLessonContent || "";
-              const absencePreviousHomework = task.sourcePreviousHomework || supplementHomeworkNote || "";
-              const absenceNextHomework = task.sourceNextHomework || "";
-              const taskMetaParts = [
-                task.reason,
-                shouldShowMethodOptions ? supplementMethodLabel({ ...task, supplementMethod: draftValues.supplementMethod }) : "",
-                `배정 ${task.attemptCount ?? 0}회`
-              ].filter(Boolean);
               const saveStatus = taskSaveStatus[task.makeupTaskId] ?? {};
+              const taskCardViewModel = createSupplementTaskCardViewModel({
+                draftDiff,
+                draftValues,
+                getMethodLabel: supplementMethodLabel,
+                methodOptions,
+                saveStatus,
+                task
+              });
               const isTaskBusy = busyTaskId.startsWith(`${task.makeupTaskId}:`);
               const isContentBusy = busyTaskId === `${task.makeupTaskId}:content`;
               const isScheduleBusy = busyTaskId === `${task.makeupTaskId}:schedule`;
               const isLocalDraftTask = Boolean(task.isLocalDraftTask);
               const canCancelAbsenceSource = isLocalDraftTask && task.taskType === "absence_makeup";
               const isCancelAbsenceBusy = busyTaskId === `${task.makeupTaskId}:cancelAbsence`;
-              const hasScheduleDraft = Boolean(draftValues.scheduledDate && draftValues.scheduledTime);
-              const hasScheduleDiff = draftDiff.some((item) => ["scheduledDate", "scheduledTime"].includes(item.field));
-              const hasNotificationDiff = draftDiff.some((item) => supplementTeacherFinalFields.has(item.field));
               const activeNotificationDraftField = activeNotificationDraftFields[task.makeupTaskId] || supplementNotificationDraftConfigs[0].field;
               const activeNotificationDraftConfig = getSupplementNotificationDraftConfig(activeNotificationDraftField);
               const activeNotificationDraft = draftValues[activeNotificationDraftField] ?? "";
@@ -23064,24 +23054,11 @@ function SupplementStudentModal({
                   getSupplementNotificationControlJob(task, notificationJobs, config.controlType)
                 )
               }));
-              const isScheduleChangeMode = Boolean(task.linkedLessonId);
-              const makeupStatus = saveStatus.makeupTask || (draftDiff.length ? "changed" : "saved");
-              const lessonStatus = saveStatus.lesson || (hasScheduleDiff ? "changed" : task.linkedLessonId ? "synced" : hasScheduleDraft ? "ready" : "empty");
-              const hasAnyNotificationDraft = supplementNotificationDraftConfigs.some((config) => draftValues[config.field]);
-              const notificationStatus = saveStatus.notificationDraft || (hasNotificationDiff ? "changed" : hasAnyNotificationDraft ? "saved" : "empty");
-              const scheduleGateTitle = isScheduleChangeMode ? "기존 일정 변경" : "최초 일정 확정";
-              const scheduleGateBody = isScheduleChangeMode
-                ? hasScheduleDiff
-                  ? "수업일지 일정 변경을 누르면 학생·학부모 변경 안내를 다음 정각에 예약하고, 보강 당일 학생 11시 예약을 갱신합니다."
-                  : "날짜나 시간이 바뀌지 않으면 변경 안내 예약은 새로 만들지 않습니다. 일정만 다시 저장됩니다."
-                : hasScheduleDraft
-                  ? "수업일지 일정 만들기를 누르면 학생·학부모 확정 안내를 다음 정각에 예약하고, 보강 당일 학생 11시 예약을 만듭니다."
-                  : "시간까지 입력하면 수업일지 일정 만들기 버튼으로 확정 안내 예약을 만들 수 있습니다.";
               return (
                 <SupplementTaskCard
                   actionProps={{
                     canCancelAbsenceSource,
-                    hasScheduleDraft,
+                    hasScheduleDraft: taskCardViewModel.hasScheduleDraft,
                     isCancelAbsenceBusy,
                     isContentBusy,
                     isLocalDraftTask,
@@ -23095,9 +23072,9 @@ function SupplementStudentModal({
                     onSchedule: () => requestApplyScheduleTask(task)
                   }}
                   headerProps={{
-                    hasSavedNotificationDrafts: supplementNotificationDraftConfigs.every((config) => String(task[config.field] ?? "").trim()),
+                    hasSavedNotificationDrafts: taskCardViewModel.hasSavedNotificationDrafts,
                     task,
-                    taskMeta: taskMetaParts.join(" · "),
+                    taskMeta: taskCardViewModel.taskMeta,
                     typeLabel: followUpTypeLabel(task.taskType)
                   }}
                   key={task.makeupTaskId}
@@ -23117,29 +23094,13 @@ function SupplementStudentModal({
                       [task.makeupTaskId]: field
                     }))
                   }}
-                  saveSummaryProps={{ draftDiff, lessonStatus, makeupStatus, notificationStatus }}
+                  saveSummaryProps={taskCardViewModel.saveSummaryProps}
                   scheduleEditorProps={{
-                    methodOptions,
+                    ...taskCardViewModel.scheduleEditorProps,
                     onChange: (field, value) => updateTaskDraft(task, field, value),
-                    scheduledDate: draftValues.scheduledDate,
-                    scheduledTime: draftValues.scheduledTime,
-                    selectedMethod: draftValues.supplementMethod,
-                    showMethodOptions: shouldShowMethodOptions
                   }}
-                  scheduleGateProps={{ body: scheduleGateBody, isScheduleChangeMode, title: scheduleGateTitle }}
-                  sourceContextProps={{
-                    absenceLessonContent,
-                    absenceLessonMaterial,
-                    absenceNextHomework,
-                    absencePreviousHomework,
-                    absenceSourceDate,
-                    absenceSourceLabel,
-                    sourceDate,
-                    sourceDueDate,
-                    sourceHomeworkTitle,
-                    supplementHomeworkNote,
-                    taskType: task.taskType
-                  }}
+                  scheduleGateProps={taskCardViewModel.scheduleGateProps}
+                  sourceContextProps={taskCardViewModel.sourceContextProps}
                 />
               );
             })}

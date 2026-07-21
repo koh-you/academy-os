@@ -172,7 +172,8 @@ Git 충돌 방지 규칙:
 - 12L에서 `SupplementTaskActionBar`를 callback-only로 분리했고 실제 결석 취소·저장·일정·완료 action은 App에 유지했습니다.
 - 12M에서 `SupplementTaskCard`가 분리된 일곱 조각을 기존 순서로 조립하도록 묶었습니다. App은 계산값과 callback을 계속 소유합니다.
 - 12N에서 알림 draft config, 선생님 최종본 판정, task→local draft, dirty/diff, source version/fingerprint, persistable 변환을 `supplementTaskDraft.js` 순수 모델로 분리했습니다. 메시지 생성 함수는 App에서 주입하며 state/API/Solapi는 이동하지 않았습니다.
-- 다음은 최신 `origin/main`을 rebase한 뒤 App에 남은 task별 표시 계산을 순수 view-model helper로 한 단위씩 분리합니다. 남은 사람 gate 3개는 통과로 바꾸지 않습니다.
+- 12O에서 task 카드 원천 props, editor 값, 메타, diff 기반 저장 상태와 일정 gate 안내를 `supplementTaskCardModel.js` 순수 view-model로 분리했습니다. App은 local state/job 선택/action을 계속 소유합니다.
+- 다음은 최신 `origin/main`을 rebase한 뒤 알림 control 표시 계산 또는 modal shell 중 state/API를 움직이지 않는 경계를 한 단위씩 검토합니다. 남은 사람 gate 3개는 통과로 바꾸지 않습니다.
 
 통과한 11B-1 사람 gate 기록:
 1. 삭제 가능한 미래 보충 task와 통제된 학생/학부모 전화번호를 준비합니다.

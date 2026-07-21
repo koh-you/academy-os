@@ -43,8 +43,9 @@
 11. 완료: task 카드 하단 action bar를 callback-only 표시로 분리했다.
 12. 완료: 분리된 일곱 조각을 감싸는 `SupplementTaskCard` 조립 경계를 만들었다.
 13. 완료: 알림 draft config·선생님 최종본 판정·task→draft·dirty/diff·source version/fingerprint·persistable 변환을 순수 모델로 분리했다.
-14. 다음: App에 남은 task별 표시 계산을 순수 view-model helper로 한 단위씩 분리한다.
-15. `SupplementStudentModal` 전체와 실제 저장·예약 orchestration은 위 조각 분리 이후 별도 gate로 판단한다.
+14. 완료: task 카드 원천 props·editor 값·메타·diff 기반 저장 상태·일정 gate 문구를 순수 view-model로 분리했다.
+15. 다음: 알림 control 표시 계산 또는 modal shell 중 state/API를 움직이지 않는 경계를 한 단위씩 검토한다.
+16. `SupplementStudentModal` 전체와 실제 저장·예약 orchestration은 위 조각 분리 이후 별도 gate로 판단한다.
 
 ## 12B 구현 결과 — 완료 확인 모달
 
@@ -127,6 +128,13 @@
 - task의 저장값과 자동 문구 seed를 local draft로 조립하고, dirty 비교·표시 diff·source version·저장 재조회 fingerprint·persistable 객체 변환을 같은 순수 경계로 옮겼다.
 - 알림 문구 생성과 보충 방법 normalize는 App 함수를 의존성으로 주입해 기존 문구 원천과 동작을 유지한다.
 - fixture와 production check는 빈 선생님 최종본 보호, 세 독립 문구, diff 순서, fingerprint 안정성 및 React/API/`notification_jobs`/Solapi 비소유를 고정한다.
+
+## 12O 구현 결과 — task 카드 순수 view-model
+
+- task 원천 표시 props, 방법·일정 editor 값, 메타 문자열, 일정·알림 변경 여부, 세 저장 상태와 일정 gate 안내를 `supplementTaskCardModel.js`로 옮겼다.
+- App이 task/local draft/diff/save status와 기존 방법 label 함수를 전달하고 반환된 표시 props에 callback을 결합한다.
+- fixture는 원천 fallback, 저장된 세 문구 표시, 일정 유무/변경, 외부 save status override와 최초 확정·기존 변경 안내의 모든 분기를 고정한다.
+- 모델에는 hook/API/`notification_jobs`/Supabase/Solapi가 없고 실제 action 순서도 바뀌지 않았다.
 
 ## 즉시 중단 조건
 
