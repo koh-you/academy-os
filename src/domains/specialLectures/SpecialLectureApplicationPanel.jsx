@@ -908,6 +908,7 @@ export function SpecialLectureApplicationPanel({
           <div className="specialLectureGateStats">
             <span>수강 {activeEnrollments.length}</span>
             <span>추가 필요 {missingEnrollmentRows.length}</span>
+            <span className={needsReviewRows.length ? "danger" : ""}>연결 필요 {needsReviewRows.length}</span>
             <span>회차 {guideSessions.length}</span>
             <button
               aria-expanded={isEnrollmentPanelOpen}
@@ -923,6 +924,32 @@ export function SpecialLectureApplicationPanel({
           <>
         {!isGuideSaved ? (
           <p className="inlineNotice danger">현재 특강 안내문에 저장하지 않은 변경이 있습니다. `안내문 저장` 후 학생별 수강계획을 수정하세요.</p>
+        ) : null}
+        {needsReviewRows.length ? (
+          <div className="specialLectureMatchQueue">
+            <div className="specialLectureMatchQueueHeader">
+              <strong>신청 학생 연결 필요</strong>
+              <span>자동으로 확인하지 못한 확정 신청자만 표시합니다. 기존 학생을 선택하거나 특강 전용 학생으로 등록해 주세요.</span>
+            </div>
+            <div className="specialLectureMatchQueueList">
+              {needsReviewRows.map((row) => (
+                <div className="specialLectureMatchQueueItem" key={row.application.applicationId}>
+                  <div>
+                    <strong>{row.application.studentName || "이름 미입력 신청자"}</strong>
+                    <span>{[row.application.schoolName, row.application.grade, row.reason].filter(Boolean).join(" · ") || "학생 정보를 확인해 주세요."}</span>
+                  </div>
+                  <button
+                    className="primaryButton compact"
+                    disabled={!isGuideSaved || updatingApplicationId === row.application.applicationId}
+                    onClick={() => confirmApplicationAndOpenPlan(row.application)}
+                    type="button"
+                  >
+                    {updatingApplicationId === row.application.applicationId ? "연결 준비 중" : "학생 연결"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
         ) : null}
         {missingEnrollmentRows.length ? (
           <div className="specialLectureEnrollmentSync">
@@ -1056,10 +1083,10 @@ export function SpecialLectureApplicationPanel({
           <p className="specialLectureGateEmpty">회차별 계획을 먼저 저장해 주세요.</p>
         )}
         {needsReviewRows.length ? (
-          <p className="inlineNotice danger">확정 신청자 중 학생 직접 연결이 필요한 건이 있어 수업일지 생성을 막았습니다.</p>
+          <p className="inlineNotice danger">학생 연결 전인 확정 신청자 {needsReviewRows.length}명은 수업일지 명단 반영 대상에서 제외되어 있습니다. 위 명단 영역에서 학생을 연결해 주세요.</p>
         ) : null}
         {unreviewedEnrollmentRows.length ? (
-          <p className="inlineNotice danger">회차 미확정 학생 {unreviewedEnrollmentRows.length}명은 특강 lesson 명단에 아직 반영하지 않습니다. 학생별 `회차 설정`을 저장해 주세요.</p>
+          <p className="inlineNotice danger">회차 미확정 학생 {unreviewedEnrollmentRows.length}명은 수업일지 명단 반영 대상에서 제외되어 있습니다. 위 명단 영역에서 회차 설정을 저장해 주세요.</p>
         ) : null}
         {invalidPlanRows.length ? (
           <p className="inlineNotice danger">시간 또는 조정 사유를 확인해야 하는 학생별 회차가 {invalidPlanRows.length}건 있습니다.</p>
@@ -1075,6 +1102,9 @@ export function SpecialLectureApplicationPanel({
         ) : null}
         {lessonCreateState.message ? (
           <p className={lessonCreateState.state === "failed" ? "inlineNotice danger" : "inlineNotice"}>{lessonCreateState.message}</p>
+        ) : null}
+        {!lessonSyncDrafts.length && !invalidPlanRows.length ? (
+          <p className="inlineNotice">현재 새로 만들 수업이나 안전하게 반영할 미래 명단 변경이 없습니다.</p>
         ) : null}
         <div className="specialLectureLessonCreateActions">
           <button

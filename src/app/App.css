@@ -7156,6 +7156,15 @@ button:disabled {
   gap: 18px;
 }
 
+.notificationCenterPage.compactPageHeader .pageTop {
+  min-height: 0;
+  padding: 10px 14px;
+}
+
+.notificationCenterPage.compactPageHeader .pageTop h1 {
+  font-size: 24px;
+}
+
 .notificationStatsGrid {
   display: grid;
   gap: 12px;
@@ -8089,6 +8098,59 @@ button:disabled {
   gap: 10px;
   justify-content: space-between;
   padding: 10px;
+}
+
+.specialLectureMatchQueue {
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+}
+
+.specialLectureMatchQueueHeader {
+  display: grid;
+  gap: 3px;
+}
+
+.specialLectureMatchQueueHeader strong {
+  color: #9a3412;
+  font-size: 13px;
+}
+
+.specialLectureMatchQueueHeader span,
+.specialLectureMatchQueueItem span {
+  color: #7c2d12;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.specialLectureMatchQueueList {
+  display: grid;
+  gap: 7px;
+}
+
+.specialLectureMatchQueueItem {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #fed7aa;
+  border-radius: 7px;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 9px 10px;
+}
+
+.specialLectureMatchQueueItem > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.specialLectureMatchQueueItem strong {
+  color: #0f172a;
+  font-size: 13px;
 }
 
 .specialLectureEnrollmentSync span,
@@ -17935,6 +17997,15 @@ body.attendanceOnlyBody {
   .specialLectureRosterSearch,
   .specialLectureSessionModalControls {
     grid-template-columns: 1fr;
+  }
+
+  .specialLectureMatchQueueItem {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .specialLectureMatchQueueItem .primaryButton {
+    width: 100%;
   }
 
   .specialLectureRosterPickerItem {

@@ -8745,6 +8745,7 @@ export function App() {
           <NotificationCenter
             aiSettings={aiSettings}
             classTemplates={classTemplates}
+            compactPageHeader
             hideNotificationSectionTabs
             initialNotificationTab="specialLecture"
             integrationStatus={integrationStatus}
@@ -8752,7 +8753,6 @@ export function App() {
             notificationJobs={notificationJobs}
             notificationJobsStatus={notificationJobsStatus}
             notificationLogs={notificationLogs}
-            pageDescription="방학 특강 안내문을 만들고, Tally 신청자 원천을 분리해 확인합니다. 실제 발송은 발송 준비 후 수신 대상 검수를 거칩니다."
             pageTitle="특강관리"
             specialLectureApplications={specialLectureApplications}
             specialLectureEnrollments={specialLectureEnrollments}
@@ -10124,6 +10124,7 @@ function isNoticeWithdrawnStudent(student = {}) {
 function NotificationCenter({
   aiSettings = defaultAiSettings,
   classTemplates = [],
+  compactPageHeader = false,
   hideNotificationSectionTabs = false,
   initialNotificationTab = "notice",
   lessons = [],
@@ -10672,7 +10673,7 @@ function NotificationCenter({
   }
 
   return (
-    <section className="notificationCenterPage">
+    <section className={compactPageHeader ? "notificationCenterPage compactPageHeader" : "notificationCenterPage"}>
       <div className="pageTop">
         <div>
           <h1>{pageTitle}</h1>
