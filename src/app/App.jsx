@@ -19595,6 +19595,7 @@ function SettingsCenter({
   teacherAccountSettings = defaultTeacherAccountSettings,
   onUpdateTeacherAccountSettings
 }) {
+  const [activeSettingsSection, setActiveSettingsSection] = useState("account");
   const [activePromptKey, setActivePromptKey] = useState("commentPolish");
   const account = { ...defaultTeacherAccountSettings, ...teacherAccountSettings };
   const [accountForm, setAccountForm] = useState({
@@ -19659,6 +19660,14 @@ function SettingsCenter({
   ];
   const activePrompt = promptRows.find((row) => row.key === activePromptKey) ?? promptRows[0];
   const normalizedPromptSettings = normalizeAiPrompts(settings.prompts);
+  const settingsSections = [
+    { id: "account", label: "계정" },
+    { id: "notification", label: "알림톡 연결" },
+    { id: "notificationTemplates", label: "알림톡 문구" },
+    { id: "ai", label: "AI 모델" },
+    { id: "prompts", label: "AI 프롬프트" },
+    { id: "attendance", label: "출결" }
+  ];
 
   useEffect(() => {
     setAccountForm((current) => ({
@@ -19790,6 +19799,22 @@ function SettingsCenter({
 
       <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...appStateAutosaveRisk} />
 
+      <div className="notificationSectionTabs settingsSectionTabs" role="tablist" aria-label="설정 항목 선택">
+        {settingsSections.map((section) => (
+          <button
+            aria-selected={activeSettingsSection === section.id}
+            className={activeSettingsSection === section.id ? "active" : ""}
+            key={section.id}
+            onClick={() => setActiveSettingsSection(section.id)}
+            role="tab"
+            type="button"
+          >
+            {section.label}
+          </button>
+        ))}
+      </div>
+
+      {activeSettingsSection === "account" ? (
       <section className="panel settingsCard">
         <div className="sectionTitle">
           <div>
@@ -19835,9 +19860,13 @@ function SettingsCenter({
           </div>
         </form>
       </section>
+      ) : null}
 
-      <NotificationSettingsSection integrationStatus={integrationStatus} />
+      {activeSettingsSection === "notification" ? (
+        <NotificationSettingsSection integrationStatus={integrationStatus} />
+      ) : null}
 
+      {activeSettingsSection === "notificationTemplates" ? (
       <section className="panel settingsCard">
         <div className="sectionTitle">
           <div>
@@ -19880,7 +19909,9 @@ function SettingsCenter({
           ))}
         </div>
       </section>
+      ) : null}
 
+      {activeSettingsSection === "ai" ? (
       <section className="panel settingsCard">
         <div className="sectionTitle">
           <div>
@@ -19915,7 +19946,9 @@ function SettingsCenter({
           })}
         </div>
       </section>
+      ) : null}
 
+      {activeSettingsSection === "prompts" ? (
       <section className="panel settingsCard">
         <div className="sectionTitle">
           <div>
@@ -19977,7 +20010,9 @@ function SettingsCenter({
           </label>
         </div>
       </section>
+      ) : null}
 
+      {activeSettingsSection === "attendance" ? (
       <section className="panel settingsCard">
         <div className="sectionTitle">
           <div>
@@ -20014,6 +20049,7 @@ function SettingsCenter({
           </div>
         </div>
       </section>
+      ) : null}
     </section>
   );
 }

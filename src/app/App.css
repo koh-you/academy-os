@@ -7690,6 +7690,15 @@ button:disabled {
   padding: 7px 10px;
 }
 
+.settingsSectionTabs {
+  margin: 0;
+}
+
+.settingsSectionTabs button {
+  font-size: 12px;
+  padding: 7px 11px;
+}
+
 .specialLecturePanel {
   display: grid;
   gap: 16px;
