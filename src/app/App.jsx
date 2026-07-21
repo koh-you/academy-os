@@ -16620,6 +16620,21 @@ function LessonJournalDetail({
             const referencePreparationMemo = referenceRecord?.preparationMemo?.trim() ?? "";
             const pendingHomeworkFollowup = getHomeworkFollowupSummaryFromMemo(previousPreparationMemo || referencePreparationMemo);
             const hasCheckedPriorPrepMemo = Boolean(previousMemoContext.acknowledgedMemoCutoffDate);
+            const currentMemoStatus = record.preparationMemo?.trim() ? "현재 메모 작성됨" : "현재 메모 미작성";
+            const priorMemoStatus = previousPreparationMemo
+              ? "직전 메모 확인 필요"
+              : referencePreparationMemo
+              ? "참고 메모 확인 필요"
+              : hasCheckedPriorPrepMemo
+              ? "이전 메모 확인 완료"
+              : "직전 메모 없음";
+            const memoAudienceStatus = record.prepStudentVisible && record.prepParentVisible
+              ? "알림톡 학생·학부모 포함"
+              : record.prepStudentVisible
+              ? "알림톡 학생 포함"
+              : record.prepParentVisible
+              ? "알림톡 학부모 포함"
+              : "알림톡 미포함";
             const parentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "parent");
             const studentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "student");
             const parentCommentState = getCommentButtonState(record.teacherComment, parentCommentSendStatus);
@@ -16667,13 +16682,7 @@ function LessonJournalDetail({
                 </span>
                 <div className="journalPrepCell">
                   <button
-                    className={[
-                      "prepMemoButton",
-                      record.preparationMemo || record.prepStudentVisible || record.prepParentVisible ? "filled" : "",
-                      hasCheckedPriorPrepMemo && !previousPreparationMemo && !referencePreparationMemo ? "checked" : "",
-                      previousPreparationMemo ? "hasPrevious" : "",
-                      !previousPreparationMemo && referencePreparationMemo ? "hasReference" : ""
-                    ].filter(Boolean).join(" ")}
+                    className="prepMemoButton"
                     onClick={() => setPrepMemoModal({
                       acknowledgedMemoCutoff: previousMemoContext.acknowledgedMemoCutoff,
                       nextHomework,
@@ -16688,14 +16697,8 @@ function LessonJournalDetail({
                   >
                     수업메모
                   </button>
-                  <small>
-                    {[
-                      previousPreparationMemo ? "직전 메모 있음" : "",
-                      !previousPreparationMemo && referencePreparationMemo ? "참고 메모 있음" : "",
-                      hasCheckedPriorPrepMemo && !previousPreparationMemo && !referencePreparationMemo ? "이전 메모 확인됨" : "",
-                      record.prepStudentVisible ? "학생 알림톡 포함" : "",
-                      record.prepParentVisible ? "학부모 알림톡 포함" : ""
-                    ].filter(Boolean).join(" · ") || "알림톡 미포함"}
+                  <small className="prepMemoStatusText">
+                    {[currentMemoStatus, priorMemoStatus, memoAudienceStatus].join(" · ")}
                   </small>
                 </div>
                 <button
