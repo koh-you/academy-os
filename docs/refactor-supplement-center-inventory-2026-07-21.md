@@ -51,6 +51,8 @@
 19. 다음: draft collection sync/state 경계를 분리한 뒤 실제 action 소유권 이동으로 진행한다.
 20. 완료 12R-2: draft collection의 dirty 보존·원천 reseed·동일 entry 재사용·삭제 정리를 순수 sync 함수로 분리했다.
 21. 다음: local draft React state controller 또는 실제 저장 action 소유권을 분리한다.
+22. 완료 12R-3: draft 전용 React state/effect와 get/update/mark/build controller를 분리했다.
+23. 다음: 보충 내용 저장 action을 첫 실제 action 소유권 단위로 분리하고 고태영 저장·재조회 gate를 진행한다.
 
 ## 12B 구현 결과 — 완료 확인 모달
 
@@ -166,6 +168,12 @@
 - task 목록 변경 시 dirty entry는 그대로 보존하고, 원천 version과 seed가 같으면 기존 객체를 재사용하며, 달라진 원천만 reseed한다.
 - 목록에서 제거된 task draft는 collection에서 제거하고 불필요한 state update는 동일 객체 반환으로 막는다.
 - App의 effect dependency와 React state 소유권, 실제 저장·예약 action은 그대로 유지했다.
+
+## 12R-3 구현 결과 — local draft React controller
+
+- draft collection state와 task 원천 변경 effect, get/update/mark/build 함수를 전용 hook으로 옮겼다.
+- hook은 순수 draft 모델만 호출하고 App은 field 변경 후 저장 상태 pill 갱신을 계속 소유한다.
+- API·Supabase·notification job·Solapi와 실제 action callback이 hook에 들어오지 않는 production check를 추가했다.
 
 ## 즉시 중단 조건
 
