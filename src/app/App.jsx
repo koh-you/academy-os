@@ -44,12 +44,10 @@ import {
 } from "../domains/portals/studentPortalApi.js";
 import {
   getSupplementStudentReminderScheduledAt,
-  isSupplementStudentReminderTask
 } from "../domains/notifications/supplementJobBuilders.js";
 import {
   canCancelNotificationJob,
   getSupplementNotificationControlJob,
-  getSupplementStudentReminderJob,
   sortNotificationJobsForCurrentStatus
 } from "../domains/notifications/notificationJobSelectors.js";
 import { ParentResponseContextPanel } from "../domains/notifications/ParentResponseContextPanel.jsx";
@@ -82,6 +80,11 @@ import { createSupplementSchedulePersistencePlan } from "../domains/supplements/
 import { SupplementPassConfirmModal } from "../domains/supplements/SupplementPassConfirmModal.jsx";
 import { SupplementScheduleChangeConfirmModal } from "../domains/supplements/SupplementScheduleChangeConfirmModal.jsx";
 import { SupplementHistoryModal } from "../domains/supplements/SupplementHistoryModal.jsx";
+import {
+  getSupplementImmediateNoticeSaveStatus,
+  getSupplementNotificationControlDisplay,
+  getSupplementSaveStatusLabel
+} from "../domains/supplements/supplementStatus.js";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import { isSpecialLectureStudentScheduleSynced } from "../domains/specialLectures/specialLecturePlanSync.js";
 import {
@@ -24606,24 +24609,6 @@ function getSupplementPersistedEditFingerprint(task = {}) {
   });
 }
 
-const supplementSaveStatusLabels = {
-  changed: "저장 필요",
-  empty: "아직 없음",
-  failed: "저장 실패",
-  idle: "대기",
-  noScheduleChange: "변경 없음",
-  notApplied: "반영 안 함",
-  ready: "일정 만들 수 있음",
-  reserveReady: "예약 예정",
-  resultDue: "발송 결과 확인 필요",
-  saved: "저장 완료",
-  scheduled: "예약 완료",
-  scheduleInputNeeded: "시간 필요",
-  saving: "저장 중",
-  canceled: "취소됨",
-  synced: "반영 완료"
-};
-
 function normalizeSupplementDraftValue(value) {
   return String(value ?? "");
 }
@@ -24704,10 +24689,6 @@ function getSupplementTaskDraftDiff(task = {}, draft = {}, student = null, notif
       label
     }];
   });
-}
-
-function getSupplementSaveStatusLabel(status) {
-  return supplementSaveStatusLabels[status] || supplementSaveStatusLabels.idle;
 }
 
 function createPersistableSupplementTask(task = {}) {
@@ -25137,7 +25118,7 @@ function SupplementStudentModal({
 
   function renderNotificationDraftTab(task, config, activeField) {
     const job = getSupplementNotificationControlJob(task, notificationJobs, config.controlType);
-    const display = getSupplementNotificationControlDisplay(job);
+    const display = getSupplementNotificationControlDisplayForApp(job);
     return (
       <button
         aria-selected={activeField === config.field}
@@ -25167,7 +25148,7 @@ function SupplementStudentModal({
     ? getSupplementNotificationControlJob(notificationControlTask, notificationJobs, notificationControl.controlType)
     : null;
   const notificationControlProviderReference = getSolapiNotificationJobProviderReference(notificationControlJob);
-  const notificationControlDisplay = getSupplementNotificationControlDisplay(notificationControlJob);
+  const notificationControlDisplay = getSupplementNotificationControlDisplayForApp(notificationControlJob);
   const notificationControlDraftState = notificationControlTask ? getTaskDraftState(notificationControlTask) : null;
   const notificationControlHasUnsavedChanges = Boolean(notificationControlTask && notificationControlDraftState &&
     getSupplementTaskDraftDiff(
@@ -25331,7 +25312,7 @@ function SupplementStudentModal({
                 notificationJobs,
                 activeNotificationDraftConfig.controlType
               );
-              const activeNotificationDisplay = getSupplementNotificationControlDisplay(activeNotificationJob);
+              const activeNotificationDisplay = getSupplementNotificationControlDisplayForApp(activeNotificationJob);
               const isScheduleChangeMode = Boolean(task.linkedLessonId);
               const makeupStatus = saveStatus.makeupTask || (draftDiff.length ? "changed" : "saved");
               const lessonStatus = saveStatus.lesson || (hasScheduleDiff ? "changed" : task.linkedLessonId ? "synced" : hasScheduleDraft ? "ready" : "empty");
@@ -29193,48 +29174,19 @@ function getSupplementScheduleNoticeDraft(task = {}, target = "student", previou
   return buildSupplementScheduleNoticeBody(task, previousScheduleText, notificationTemplates, student);
 }
 
-function getSupplementNotificationControlDisplay(job = null) {
-  if (!job) return { label: "예약 없음", tone: "off" };
-  if (canCancelNotificationJob(job)) {
-    return {
-      label: isNotificationSchedulePast(job.scheduledAt, 0) ? "예약 시각 확인" : "예약됨",
-      tone: isNotificationSchedulePast(job.scheduledAt, 0) ? "warning" : "on"
-    };
-  }
-  if (job.status === "sent") return { label: "발송 완료", tone: "done" };
-  if (job.status === "canceled") return { label: "취소됨", tone: "off" };
-  if (job.status === "failed") return { label: "예약 실패", tone: "failed" };
-  if (["send_unconfirmed", "dry_run"].includes(job.status)) return { label: "확인 필요", tone: "warning" };
-  return { label: formatNotificationJobStatus(job), tone: "off" };
-}
-
 const supplementNotificationControlConfig = {
   studentSchedule: { label: "학생 알림톡", targetLabel: "학생", statusField: "studentChangeNotice" },
   parentSchedule: { label: "학부모 알림톡", targetLabel: "학부모", statusField: "parentChangeNotice" },
   studentReminder: { label: "당일 학생 11시 알림톡", targetLabel: "학생", statusField: "studentReminder" }
 };
 
-function getSupplementStudentReminderSaveStatus(task = {}, notificationJobs = []) {
-  if (!isSupplementStudentReminderTask(task)) return "notApplied";
-  if (!task.scheduledDate) return "empty";
-  const scheduledAt = getSupplementStudentReminderScheduledAt(task);
-  const job = getSupplementStudentReminderJob(task, notificationJobs);
-  if (job?.status === "scheduled") return isNotificationSchedulePast(job.scheduledAt, 0) ? "resultDue" : "scheduled";
-  if (job?.status === "dry_run") return "scheduled";
-  if (job?.status === "sent") return "synced";
-  if (job?.status === "send_unconfirmed") return "resultDue";
-  if (job?.status === "failed") return "failed";
-  if (job?.status === "canceled") return "canceled";
-  if (scheduledAt && isNotificationSchedulePast(scheduledAt, 0)) return "resultDue";
-  return "ready";
-}
+const supplementStatusDisplayDependencies = {
+  formatJobStatus: formatNotificationJobStatus,
+  isSchedulePast: isNotificationSchedulePast
+};
 
-function getSupplementImmediateNoticeSaveStatus(status, skipped = false) {
-  if (skipped) return "notApplied";
-  if (status === "sent" || status === "dry_run") return "synced";
-  if (status === "send_unconfirmed") return "resultDue";
-  if (status === "failed") return "failed";
-  return status || "idle";
+function getSupplementNotificationControlDisplayForApp(job) {
+  return getSupplementNotificationControlDisplay(job, supplementStatusDisplayDependencies);
 }
 
 function getSupplementTaskProgress(task, lessons = []) {

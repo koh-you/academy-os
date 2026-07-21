@@ -33,8 +33,9 @@
 1. 완료: `SupplementPassConfirmModal`을 callback-only 표시 컴포넌트로 별도 파일에 옮겼다.
 2. 완료: `SupplementScheduleChangeConfirmModal`과 local reason/detail 초기화·confirm patch helper를 분리했다.
 3. 완료: 읽기 중심 `SupplementHistoryModal`의 query 필터와 표시 경계를 분리했다.
-4. 다음: `SupplementStudentModal` 내부의 읽기 전용 알림 상태/탭 표시 조각을 분리한다.
-5. `SupplementStudentModal` 전체와 실제 저장·예약 orchestration은 위 조각 분리 이후 별도 gate로 판단한다.
+4. 완료: 저장 pill·예약 control·학생 11시·즉시 안내 상태 helper를 분리했다.
+5. 다음: `SupplementStudentModal` 내부의 알림 draft tab/control 표시 조각을 분리한다.
+6. `SupplementStudentModal` 전체와 실제 저장·예약 orchestration은 위 조각 분리 이후 별도 gate로 판단한다.
 
 ## 12B 구현 결과 — 완료 확인 모달
 
@@ -53,6 +54,12 @@
 - task 입력 순서를 유지한 채 학생·학교·학년·유형·방법·원천·상태를 소문자 검색 haystack으로 필터한다.
 - 완료/일정 확정/진행 중 label과 tone, 완료일→통과일→마지막 일정일→수정일→배정일→생성일 날짜 fallback을 순수 helper로 고정했다.
 - 모달은 query callback과 완료 항목 복귀 callback만 호출하며 API·알림 side effect를 소유하지 않는다.
+
+## 12E 구현 결과 — 저장·예약 상태 helper
+
+- 저장 pill label과 예약 control label/tone을 순수 상태 mapping으로 옮겼다.
+- 학생 11시 deterministic job의 scheduled/dry-run/sent/unconfirmed/failed/canceled/과거시각 상태와 즉시 안내 mapping을 fixture로 고정했다.
+- App은 기존 공통 시각 판정과 일반 job status formatter만 작은 adapter로 주입하며 job 원천과 callback을 계속 소유한다.
 
 ## 즉시 중단 조건
 
