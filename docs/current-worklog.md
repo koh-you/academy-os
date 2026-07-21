@@ -12,6 +12,7 @@
 - 검증: `git diff --check`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 358개 통과, `npm run build` 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
 - 사람 검토 gate: 최신 배포의 `시험 > 시험분석`에서 7개 탭이 한 줄 버튼으로 보이고, 선택 탭의 영역만 표시되는지 확인한다. `선생님 검수`에서 저장 전 메모를 입력하고 다른 탭에 갔다 돌아와 내용이 유지되는지, `산출물` 입력도 같은지 확인한다. 학교/학년/고사/분석 목록이 내부 스크롤되고 카드 선택이 정상인지 확인한다.
 - 중단 조건: 탭 전환으로 입력이 초기화됨, 숨긴 탭의 실행 버튼이 동작하지 않음, 모바일에서 탭 버튼이 찌그러짐, 목록 카드가 잘려 선택할 수 없음, 기존 저장/AI 실행 상태가 다른 탭에서 사라짐.
+- 전체 세션 프롬프트: `docs/next-session/exam-analysis-gpt-image-full-session-prompt.md`를 추가했다. 마스터 이미지 프롬프트, 8개 카드 역할 모듈, 학교별 style brief, 부모 버전 기반 수정 프롬프트, 웹앱 A~H 작업 흐름, 권장 테이블/API/상태 계약, 블로그 10건과 공개 RSS/PostView 재접속 주소, 원문 복제 없이 후킹 패턴을 우리 데이터로 다시 쓰는 구조를 포함한다. 이 문서 작성은 코드/API/DB/Storage/유료 호출을 변경하지 않았다.
 
 ## 미룬 작업 큐 - 새 세션 최상단 표시
 
