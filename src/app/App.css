@@ -11360,9 +11360,11 @@ textarea {
   cursor: pointer;
   display: inline-flex;
   font-weight: 900;
+  gap: 5px;
   justify-content: center;
   min-height: 38px;
   padding: 8px 10px;
+  width: 100%;
 }
 
 .prepMemoButton:hover,
@@ -11372,46 +11374,28 @@ textarea {
   color: #3730a3;
 }
 
-.prepMemoStatusList {
-  display: grid;
-  gap: 4px;
-  margin: 7px 0 0;
-  width: 100%;
-}
-
-.prepMemoStatusList > div {
+.prepMemoWrittenMark {
   align-items: center;
-  display: grid;
-  gap: 6px;
-  grid-template-columns: 38px minmax(0, 1fr);
-}
-
-.prepMemoStatusList dt,
-.prepMemoStatusList dd {
-  margin: 0;
-}
-
-.prepMemoStatusList dt {
-  color: #64748b;
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.prepMemoStatusList dd {
-  background: #f1f5f9;
+  background: #e2e8f0;
   border-radius: 999px;
   color: #334155;
+  display: inline-flex;
   font-size: 10px;
-  font-weight: 800;
-  line-height: 1.2;
-  padding: 3px 6px;
-  text-align: center;
-  white-space: nowrap;
+  height: 17px;
+  justify-content: center;
+  width: 17px;
 }
 
-.prepMemoStatusList dd.needsAttention {
+.prepMemoAttentionMark {
   background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 999px;
   color: #9a3412;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.2;
+  padding: 2px 5px;
+  white-space: nowrap;
 }
 
 .modalCard.preparationMemoModal {
