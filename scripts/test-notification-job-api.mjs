@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   cancelNotificationJobRequest,
+  persistFailedNotificationJobRequest,
   reserveNotificationJobRequest
 } from "../src/domains/notifications/notificationJobApi.js";
 
@@ -52,6 +53,30 @@ assert.equal(failedJob.updatedAt, "2026-07-21T12:34:56.000Z");
 assert.deepEqual(failureState, [failedJob]);
 assert.equal(failureCalls[1].path, "/api/notification-jobs");
 assert.equal(failureCalls[1].body.notificationJob, failedJob);
+
+const missingRecipientCalls = [];
+const missingRecipientState = [];
+const missingRecipientJob = persistFailedNotificationJobRequest({
+  errorMessage: "수신 연락처가 없습니다.",
+  notificationJob: draftJob,
+  now: () => "2026-07-21T13:00:00.000Z",
+  onNotificationJob: (job) => missingRecipientState.push(job),
+  request: async (path, body) => {
+    missingRecipientCalls.push({ path, body });
+    return { notificationJob: body.notificationJob };
+  }
+});
+
+await Promise.resolve();
+assert.equal(missingRecipientJob.error, "수신 연락처가 없습니다.");
+assert.equal(missingRecipientJob.provider, "academy-os");
+assert.equal(missingRecipientJob.status, "failed");
+assert.equal(missingRecipientJob.updatedAt, "2026-07-21T13:00:00.000Z");
+assert.deepEqual(missingRecipientState, [missingRecipientJob]);
+assert.deepEqual(missingRecipientCalls, [{
+  path: "/api/notification-jobs",
+  body: { notificationJob: missingRecipientJob }
+}]);
 
 const cancelCalls = [];
 const cancelState = [];

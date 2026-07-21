@@ -64,6 +64,7 @@ import { ParentResponseContextPanel } from "../domains/notifications/ParentRespo
 import { getParentResponseContexts } from "../domains/notifications/parentResponseContext.js";
 import {
   cancelNotificationJobRequest,
+  persistFailedNotificationJobRequest,
   reserveNotificationJobRequest
 } from "../domains/notifications/notificationJobApi.js";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
@@ -9292,15 +9293,12 @@ export function App() {
   }
 
   function persistSupplementScheduleNoticeFailure(notificationJob, messagePrefix, errorMessage) {
-    const failedJob = {
-      ...notificationJob,
-      error: errorMessage,
-      provider: "academy-os",
-      status: "failed",
-      updatedAt: new Date().toISOString()
-    };
-    upsertNotificationJobState(failedJob);
-    postJson("/api/notification-jobs", { notificationJob: failedJob }).catch((persistError) => console.error(persistError));
+    const failedJob = persistFailedNotificationJobRequest({
+      errorMessage,
+      notificationJob,
+      onNotificationJob: upsertNotificationJobState,
+      request: postJson
+    });
     return {
       notificationJob: failedJob,
       skipped: false,
