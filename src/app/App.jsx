@@ -80,13 +80,8 @@ import { createSupplementSchedulePersistencePlan } from "../domains/supplements/
 import { SupplementPassConfirmModal } from "../domains/supplements/SupplementPassConfirmModal.jsx";
 import { SupplementScheduleChangeConfirmModal } from "../domains/supplements/SupplementScheduleChangeConfirmModal.jsx";
 import { SupplementHistoryModal } from "../domains/supplements/SupplementHistoryModal.jsx";
-import { SupplementNotificationDraftWorkspace } from "../domains/supplements/SupplementNotificationDraftWorkspace.jsx";
 import { SupplementNotificationControlModal } from "../domains/supplements/SupplementNotificationControlModal.jsx";
-import { SupplementTaskSourceContext } from "../domains/supplements/SupplementTaskSourceContext.jsx";
-import { SupplementTaskScheduleEditor } from "../domains/supplements/SupplementTaskScheduleEditor.jsx";
-import { SupplementTaskSaveSummary, SupplementTaskScheduleGateNote } from "../domains/supplements/SupplementTaskSaveSummary.jsx";
-import { SupplementTaskCardHeader } from "../domains/supplements/SupplementTaskCardHeader.jsx";
-import { SupplementTaskActionBar } from "../domains/supplements/SupplementTaskActionBar.jsx";
+import { SupplementTaskCard } from "../domains/supplements/SupplementTaskCard.jsx";
 import {
   getSupplementImmediateNoticeSaveStatus,
   getSupplementNotificationControlDisplay
@@ -25307,116 +25302,112 @@ function SupplementStudentModal({
                   ? "수업일지 일정 만들기를 누르면 학생·학부모 확정 안내를 다음 정각에 예약하고, 보강 당일 학생 11시 예약을 만듭니다."
                   : "시간까지 입력하면 수업일지 일정 만들기 버튼으로 확정 안내 예약을 만들 수 있습니다.";
               return (
-                <article className="taskCard" key={task.makeupTaskId}>
-                  <SupplementTaskCardHeader
-                    hasSavedNotificationDrafts={supplementNotificationDraftConfigs.every((config) => String(task[config.field] ?? "").trim())}
-                    task={task}
-                    taskMeta={taskMetaParts.join(" · ")}
-                    typeLabel={followUpTypeLabel(task.taskType)}
-                  />
-                  <SupplementTaskSourceContext
-                    absenceLessonContent={absenceLessonContent}
-                    absenceLessonMaterial={absenceLessonMaterial}
-                    absenceNextHomework={absenceNextHomework}
-                    absencePreviousHomework={absencePreviousHomework}
-                    absenceSourceDate={absenceSourceDate}
-                    absenceSourceLabel={absenceSourceLabel}
-                    sourceDate={sourceDate}
-                    sourceDueDate={sourceDueDate}
-                    sourceHomeworkTitle={sourceHomeworkTitle}
-                    supplementHomeworkNote={supplementHomeworkNote}
-                    taskType={task.taskType}
-                  />
-                  <SupplementTaskScheduleEditor
-                    methodOptions={methodOptions}
-                    onChange={(field, value) => updateTaskDraft(task, field, value)}
-                    scheduledDate={draftValues.scheduledDate}
-                    scheduledTime={draftValues.scheduledTime}
-                    selectedMethod={draftValues.supplementMethod}
-                    showMethodOptions={shouldShowMethodOptions}
-                  />
-                  <SupplementTaskSaveSummary
-                    draftDiff={draftDiff}
-                    lessonStatus={lessonStatus}
-                    makeupStatus={makeupStatus}
-                    notificationStatus={notificationStatus}
-                  />
-                  <SupplementNotificationDraftWorkspace
-                    activeConfig={activeNotificationDraftConfig}
-                    activeDisplay={activeNotificationDisplay}
-                    activeDraft={activeNotificationDraft}
-                    activeField={activeNotificationDraftField}
-                    configs={notificationDraftTabConfigs}
-                    hasUnsavedChanges={draftDiff.length > 0}
-                    isBusy={isTaskBusy}
-                    isTeacherFinal={activeNotificationDraftIsTeacherFinal}
-                    onChangeDraft={(value) => updateTaskDraft(task, activeNotificationDraftField, value)}
-                    onOpenControl={(controlType) => openNotificationControl(task, controlType)}
-                    onSelectField={(field) => setActiveNotificationDraftFields((current) => ({
+                <SupplementTaskCard
+                  actionProps={{
+                    hasScheduleDraft,
+                    isContentBusy,
+                    isLocalDraftTask,
+                    isPassBusy: busyTaskId === `${task.makeupTaskId}:pass`,
+                    isScheduleBusy,
+                    isTaskBusy,
+                    linkedLessonId: task.linkedLessonId,
+                    onPass: () => setPassConfirmTask(buildTaskWithDraft(task)),
+                    onSave: () => handleSaveTask(task),
+                    onSchedule: () => requestApplyScheduleTask(task)
+                  }}
+                  cancellationSlot={(
+                    <>
+                      {canCancelAbsenceSource || canCancelAbsenceMakeup ? (
+                        <section className={`supplementCancellationZone ${canCancelAbsenceMakeup ? "keepAbsence" : "cancelAbsence"}`}>
+                          <div>
+                            <strong>{isLocalDraftTask ? "보강만 취소 · 결석기록 유지" : "보강 일정만 취소"}</strong>
+                            <span>
+                              {isLocalDraftTask
+                                ? "아직 일정이 없는 보강 후보를 취소 이력으로 저장해 다시 나타나지 않게 하고, 원 결석 상태·사유는 유지합니다."
+                                : "원 수업일지의 결석 상태·사유는 유지하고, 보강 항목과 연결 일정 및 미발송 예약만 취소합니다."}
+                            </span>
+                          </div>
+                          <button
+                            className="dangerSoftButton"
+                            disabled={isTaskBusy}
+                            onClick={() => setCancellationConfirm({
+                              mode: "cancelMakeupKeepAbsence",
+                              task
+                            })}
+                            type="button"
+                          >
+                            {isCancelMakeupBusy ? "보강 취소 중" : "보강만 취소"}
+                          </button>
+                        </section>
+                      ) : null}
+                      {canCancelAbsenceSource ? (
+                        <section className="supplementCancellationZone cancelAbsence">
+                          <div>
+                            <strong>결석 원본 자체를 취소</strong>
+                            <span>결석 입력 자체가 잘못된 경우에만 원 수업일지의 결석을 대기 상태로 되돌립니다.</span>
+                          </div>
+                          <button
+                            className="dangerSoftButton"
+                            disabled={isTaskBusy}
+                            onClick={() => setCancellationConfirm({
+                              mode: "cancelAbsenceSource",
+                              task
+                            })}
+                            type="button"
+                          >
+                            {isCancelAbsenceBusy ? "결석 취소 중" : "결석 기록 취소"}
+                          </button>
+                        </section>
+                      ) : null}
+                    </>
+                  )}
+                  headerProps={{
+                    hasSavedNotificationDrafts: supplementNotificationDraftConfigs.every((config) => String(task[config.field] ?? "").trim()),
+                    task,
+                    taskMeta: taskMetaParts.join(" · "),
+                    typeLabel: followUpTypeLabel(task.taskType)
+                  }}
+                  key={task.makeupTaskId}
+                  notificationProps={{
+                    activeConfig: activeNotificationDraftConfig,
+                    activeDisplay: activeNotificationDisplay,
+                    activeDraft: activeNotificationDraft,
+                    activeField: activeNotificationDraftField,
+                    configs: notificationDraftTabConfigs,
+                    hasUnsavedChanges: draftDiff.length > 0,
+                    isBusy: isTaskBusy,
+                    isTeacherFinal: activeNotificationDraftIsTeacherFinal,
+                    onChangeDraft: (value) => updateTaskDraft(task, activeNotificationDraftField, value),
+                    onOpenControl: (controlType) => openNotificationControl(task, controlType),
+                    onSelectField: (field) => setActiveNotificationDraftFields((current) => ({
                       ...current,
                       [task.makeupTaskId]: field
-                    }))}
-                  />
-                  <SupplementTaskScheduleGateNote
-                    body={scheduleGateBody}
-                    isScheduleChangeMode={isScheduleChangeMode}
-                    title={scheduleGateTitle}
-                  />
-                  <SupplementTaskActionBar
-                    hasScheduleDraft={hasScheduleDraft}
-                    isContentBusy={isContentBusy}
-                    isLocalDraftTask={isLocalDraftTask}
-                    isPassBusy={busyTaskId === `${task.makeupTaskId}:pass`}
-                    isScheduleBusy={isScheduleBusy}
-                    isTaskBusy={isTaskBusy}
-                    linkedLessonId={task.linkedLessonId}
-                    onPass={() => setPassConfirmTask(buildTaskWithDraft(task))}
-                    onSave={() => handleSaveTask(task)}
-                    onSchedule={() => requestApplyScheduleTask(task)}
-                  />
-                  {canCancelAbsenceSource || canCancelAbsenceMakeup ? (
-                    <section className={`supplementCancellationZone ${canCancelAbsenceMakeup ? "keepAbsence" : "cancelAbsence"}`}>
-                      <div>
-                        <strong>{isLocalDraftTask ? "보강만 취소 · 결석기록 유지" : "보강 일정만 취소"}</strong>
-                        <span>
-                          {isLocalDraftTask
-                            ? "아직 일정이 없는 보강 후보를 취소 이력으로 저장해 다시 나타나지 않게 하고, 원 결석 상태·사유는 유지합니다."
-                            : "원 수업일지의 결석 상태·사유는 유지하고, 보강 항목과 연결 일정 및 미발송 예약만 취소합니다."}
-                        </span>
-                      </div>
-                      <button
-                        className="dangerSoftButton"
-                        disabled={isTaskBusy}
-                        onClick={() => setCancellationConfirm({
-                          mode: "cancelMakeupKeepAbsence",
-                          task
-                        })}
-                        type="button"
-                      >
-                        {isCancelMakeupBusy ? "보강 취소 중" : "보강만 취소"}
-                      </button>
-                    </section>
-                  ) : null}
-                  {canCancelAbsenceSource ? (
-                    <section className="supplementCancellationZone cancelAbsence">
-                      <div>
-                        <strong>결석 원본 자체를 취소</strong>
-                        <span>결석 입력 자체가 잘못된 경우에만 원 수업일지의 결석을 대기 상태로 되돌립니다.</span>
-                      </div>
-                      <button
-                        className="dangerSoftButton"
-                        disabled={isTaskBusy}
-                        onClick={() => setCancellationConfirm({
-                          mode: "cancelAbsenceSource",
-                          task
-                        })}
-                        type="button"
-                      >
-                        {isCancelAbsenceBusy ? "결석 취소 중" : "결석 기록 취소"}
-                      </button>
-                    </section>
-                  ) : null}
-                </article>
+                    }))
+                  }}
+                  saveSummaryProps={{ draftDiff, lessonStatus, makeupStatus, notificationStatus }}
+                  scheduleEditorProps={{
+                    methodOptions,
+                    onChange: (field, value) => updateTaskDraft(task, field, value),
+                    scheduledDate: draftValues.scheduledDate,
+                    scheduledTime: draftValues.scheduledTime,
+                    selectedMethod: draftValues.supplementMethod,
+                    showMethodOptions: shouldShowMethodOptions
+                  }}
+                  scheduleGateProps={{ body: scheduleGateBody, isScheduleChangeMode, title: scheduleGateTitle }}
+                  sourceContextProps={{
+                    absenceLessonContent,
+                    absenceLessonMaterial,
+                    absenceNextHomework,
+                    absencePreviousHomework,
+                    absenceSourceDate,
+                    absenceSourceLabel,
+                    sourceDate,
+                    sourceDueDate,
+                    sourceHomeworkTitle,
+                    supplementHomeworkNote,
+                    taskType: task.taskType
+                  }}
+                />
               );
             })}
           </div>
