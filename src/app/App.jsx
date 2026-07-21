@@ -84,10 +84,10 @@ import { SupplementNotificationDraftWorkspace } from "../domains/supplements/Sup
 import { SupplementNotificationControlModal } from "../domains/supplements/SupplementNotificationControlModal.jsx";
 import { SupplementTaskSourceContext } from "../domains/supplements/SupplementTaskSourceContext.jsx";
 import { SupplementTaskScheduleEditor } from "../domains/supplements/SupplementTaskScheduleEditor.jsx";
+import { SupplementTaskSaveSummary, SupplementTaskScheduleGateNote } from "../domains/supplements/SupplementTaskSaveSummary.jsx";
 import {
   getSupplementImmediateNoticeSaveStatus,
-  getSupplementNotificationControlDisplay,
-  getSupplementSaveStatusLabel
+  getSupplementNotificationControlDisplay
 } from "../domains/supplements/supplementStatus.js";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import { isSpecialLectureStudentScheduleSynced } from "../domains/specialLectures/specialLecturePlanSync.js";
@@ -25099,16 +25099,6 @@ function SupplementStudentModal({
     });
   }
 
-  function renderSaveStatusPill(label, status) {
-    const state = status || "idle";
-    return (
-      <span className={`supplementSaveStatusPill ${state}`} key={label}>
-        <b>{label}</b>
-        {getSupplementSaveStatusLabel(state)}
-      </span>
-    );
-  }
-
   function openNotificationControl(task, controlType) {
     setNotificationControl({ controlType, taskId: task.makeupTaskId });
     setNotificationControlFeedback(null);
@@ -25357,26 +25347,12 @@ function SupplementStudentModal({
                     selectedMethod={draftValues.supplementMethod}
                     showMethodOptions={shouldShowMethodOptions}
                   />
-                  {draftDiff.length ? (
-                    <div className="supplementDraftDiff" data-state="dirty">
-                      <strong>저장하면 바뀌는 내용</strong>
-                      <ul>
-                        {draftDiff.map((item) => (
-                          <li key={item.field}>
-                            <b>{item.label}</b>
-                            <span>{item.before}</span>
-                            <em>→</em>
-                            <span>{item.after}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
-                  <div className="supplementSaveStatusGrid">
-                    {renderSaveStatusPill("보충 내용", makeupStatus)}
-                    {renderSaveStatusPill("수업일지 일정", lessonStatus)}
-                    {renderSaveStatusPill("알림톡 문구 3종", notificationStatus)}
-                  </div>
+                  <SupplementTaskSaveSummary
+                    draftDiff={draftDiff}
+                    lessonStatus={lessonStatus}
+                    makeupStatus={makeupStatus}
+                    notificationStatus={notificationStatus}
+                  />
                   <SupplementNotificationDraftWorkspace
                     activeConfig={activeNotificationDraftConfig}
                     activeDisplay={activeNotificationDisplay}
@@ -25393,11 +25369,11 @@ function SupplementStudentModal({
                       [task.makeupTaskId]: field
                     }))}
                   />
-                  <div className={`supplementSendGateNote ${isScheduleChangeMode ? "changeNotice" : "confirmNotice"}`}>
-                    <strong>{scheduleGateTitle}</strong>
-                    <span>보충 내용 저장: 원 숙제 카드와 알림톡 문구 3종을 저장하고, 발송/예약은 만들지 않습니다.</span>
-                    <span>{isScheduleChangeMode ? "수업일지 일정 변경" : "수업일지 일정 만들기"}: {scheduleGateBody}</span>
-                  </div>
+                  <SupplementTaskScheduleGateNote
+                    body={scheduleGateBody}
+                    isScheduleChangeMode={isScheduleChangeMode}
+                    title={scheduleGateTitle}
+                  />
                   <div className="modalActions supplementSplitActions supplementTaskActions">
                     <button className="softButton primarySoft" disabled={isTaskBusy} onClick={() => handleSaveTask(task)} type="button">
                       {isContentBusy ? "저장 중" : "보충 내용·알림톡 저장"}

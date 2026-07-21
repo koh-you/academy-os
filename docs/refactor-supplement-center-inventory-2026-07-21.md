@@ -38,8 +38,9 @@
 6. 완료: 개별 Solapi 예약·취소 확인 모달의 표시 JSX를 callback-only 컴포넌트로 분리했다.
 7. 완료: task 카드의 원 숙제·원 결석 수업 맥락과 확인용 숙제 읽기 카드를 분리했다.
 8. 완료: 방법·날짜·시간 local draft controlled editor를 분리했다.
-9. 다음: 변경 diff·저장 상태·저장/일정 gate 안내 표시를 분리한다.
-10. `SupplementStudentModal` 전체와 실제 저장·예약 orchestration은 위 조각 분리 이후 별도 gate로 판단한다.
+9. 완료: 변경 diff·저장 상태·저장/일정 gate 안내 표시를 분리했다.
+10. 다음: task 카드 상단 메타 또는 하단 action bar를 callback-only 표시로 분리한다.
+11. `SupplementStudentModal` 전체와 실제 저장·예약 orchestration은 위 조각 분리 이후 별도 gate로 판단한다.
 
 ## 12B 구현 결과 — 완료 확인 모달
 
@@ -90,6 +91,13 @@
 - 보충 처리 방법 옵션과 배정일·시간 입력을 `SupplementTaskScheduleEditor.jsx`로 옮겼다.
 - App의 현재 local draft를 controlled value로 전달하고 세 변경은 기존 `updateTaskDraft`로 되돌려 보내므로 draft 우선순위와 dirty 계산은 바뀌지 않는다.
 - editor는 자체 state/API/저장/알림 side effect를 소유하지 않는다.
+
+## 12J 구현 결과 — 변경 diff·저장 상태·gate 안내
+
+- 저장 전 field diff와 세 원천 상태 pill을 `SupplementTaskSaveSummary`로 옮기고 상태 문구는 분리된 `supplementStatus.js` helper를 재사용한다.
+- 저장과 수업일지 일정 반영의 실제 범위를 설명하는 안내는 같은 파일의 `SupplementTaskScheduleGateNote`로 옮겼다.
+- App에서 기존 계산값을 전달하며 표시 순서를 `diff/status -> 알림 문구 편집 -> 일정 gate 안내`로 유지했다.
+- 두 컴포넌트 모두 callback, hook, API, 알림 side effect를 소유하지 않는다.
 
 ## 즉시 중단 조건
 
