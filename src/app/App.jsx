@@ -6131,7 +6131,7 @@ export function App() {
     setNotificationJobsStatus({ state: "loading", message: "알림 기록을 불러오는 중입니다." });
     try {
       const result = await getJsonWithTimeout(
-        "/api/notification-jobs?limit=300",
+        "/api/notification-jobs?limit=1000",
         12000,
         "알림 기록 조회가 12초를 넘었습니다. 발송 기능은 사용할 수 있고, 기록만 새로고침으로 다시 확인해 주세요."
       );
@@ -8634,6 +8634,7 @@ export function App() {
             notificationJobs={notificationJobs}
             notificationJobsStatus={notificationJobsStatus}
             notificationLogs={notificationLogs}
+            onCancelNotificationJob={handleCancelNotificationJob}
             specialLectureGuides={specialLectureGuides}
             specialLectureGuideSaveState={specialLectureGuideSaveState}
             showSpecialLectureTab={false}
@@ -9781,6 +9782,7 @@ function NotificationCenter({
   lessons = [],
   notificationJobs,
   notificationJobsStatus = { state: "idle", message: "" },
+  onCancelNotificationJob,
   onCreateSpecialLectureStudent,
   onCreateSpecialLectureLessons,
   onOpenSpecialLectureLesson,
@@ -9808,6 +9810,7 @@ function NotificationCenter({
   const [isPolishingNotice, setIsPolishingNotice] = useState(false);
   const [isSendingNotice, setIsSendingNotice] = useState(false);
   const [isNoticeHistoryOpen, setIsNoticeHistoryOpen] = useState(false);
+  const [notificationJobAction, setNotificationJobAction] = useState({ message: "", state: "idle" });
   const [jobFilter, setJobFilter] = useState("all");
   const [localNoticeJobs, setLocalNoticeJobs] = useState([]);
   const [noticeBody, setNoticeBody] = useState("");
@@ -9832,28 +9835,35 @@ function NotificationCenter({
     ...localNoticeJobs.filter((job) => !persistedNotificationJobIds.has(job.notificationJobId)),
     ...notificationJobs
   ];
-  const noticeJobs = mergedNotificationJobs.filter((job) => String(job.notificationType ?? "").startsWith("notice_"));
-  const noticeSolapiResultTargets = noticeJobs.filter((job) =>
+  const managedNotificationJobs = mergedNotificationJobs;
+  const solapiResultTargets = managedNotificationJobs.filter((job) =>
     job.provider === "solapi" &&
     getNotificationJobProviderReference(job) &&
     ["scheduled", "send_unconfirmed"].includes(job.status)
   );
-  const pastScheduledNoticeJobs = noticeJobs.filter((job) => job.status === "scheduled" && isNotificationSchedulePast(job.scheduledAt));
-  const scheduledNoticeJobs = noticeJobs.filter((job) => job.status === "scheduled" && !isNotificationSchedulePast(job.scheduledAt));
-  const sentNoticeJobs = noticeJobs.filter((job) => job.status === "sent");
-  const pendingNoticeJobs = noticeJobs.filter((job) => job.status === "send_unconfirmed").concat(pastScheduledNoticeJobs);
-  const failedNoticeJobs = noticeJobs.filter((job) => job.status === "failed");
-  const draftNoticeJobs = noticeJobs.filter((job) => job.status === "draft" || job.status === "dry_run" || job.status === "canceled");
-  const filteredNoticeJobs = {
-    all: noticeJobs.slice(0, 40),
-    scheduled: scheduledNoticeJobs,
-    sent: sentNoticeJobs,
-    pending: pendingNoticeJobs,
-    failed: failedNoticeJobs,
-    draft: draftNoticeJobs
-  }[jobFilter] ?? noticeJobs.slice(0, 40);
+  const pastScheduledJobs = managedNotificationJobs.filter((job) =>
+    canCancelNotificationJob(job) &&
+    job.scheduledAt &&
+    isNotificationSchedulePast(job.scheduledAt)
+  );
+  const scheduledJobs = managedNotificationJobs.filter((job) =>
+    canCancelNotificationJob(job) &&
+    (!job.scheduledAt || !isNotificationSchedulePast(job.scheduledAt))
+  );
+  const sentJobs = managedNotificationJobs.filter((job) => job.status === "sent");
+  const pendingJobs = managedNotificationJobs.filter((job) => job.status === "send_unconfirmed").concat(pastScheduledJobs);
+  const failedJobs = managedNotificationJobs.filter((job) => job.status === "failed");
+  const archivedJobs = managedNotificationJobs.filter((job) => job.status === "draft" || job.status === "dry_run" || job.status === "canceled");
+  const filteredNotificationJobs = {
+    all: managedNotificationJobs.slice(0, 40),
+    scheduled: scheduledJobs,
+    sent: sentJobs,
+    pending: pendingJobs,
+    failed: failedJobs,
+    draft: archivedJobs
+  }[jobFilter] ?? managedNotificationJobs.slice(0, 40);
   const filterLabels = {
-    all: "최근 공지",
+    all: "최근 알림",
     scheduled: "예약",
     sent: "발송 완료",
     pending: "확인 필요",
@@ -9930,7 +9940,7 @@ function NotificationCenter({
   const studentRecipientCount = noticeRecipients.filter((recipient) => recipient.audience === "student").length;
   const noticeText = [noticeTitle.trim() ? `[${noticeTitle.trim()}]` : "", noticeBody.trim()].filter(Boolean).join("\n\n");
   const scheduledAt = scheduleDate && scheduleTime ? new Date(`${scheduleDate}T${scheduleTime}:00+09:00`).toISOString() : "";
-  const solapiResultSyncTargetIds = [...new Set(noticeSolapiResultTargets.map((job) => job.notificationJobId).filter(Boolean))];
+  const solapiResultSyncTargetIds = [...new Set(solapiResultTargets.map((job) => job.notificationJobId).filter(Boolean))];
   const solapiResultLastCheckedLabel = solapiResultSyncState.checkedAt
     ? formatKoreaTimeLabel(solapiResultSyncState.checkedAt)
     : "아직 없음";
@@ -10204,7 +10214,7 @@ function NotificationCenter({
         state: failedCount ? "partial" : "saved",
         message: `Solapi 결과 대조 완료: 대상 ${solapiResultSyncTargetIds.length}건 · 조회 ${checkedCount}건 · OS 반영 ${updatedCount}건${failedCount ? ` · 조회 실패 ${failedCount}건` : ""}`
       });
-      if (updatedCount || noticeSolapiResultTargets.length) setJobFilter("pending");
+      if (updatedCount || solapiResultTargets.length) setJobFilter("pending");
       setIsNoticeHistoryOpen(true);
       refreshNoticeJobsInBackground();
     } catch (error) {
@@ -10252,9 +10262,9 @@ function NotificationCenter({
   }
 
   async function deleteNotificationJob(job) {
-    if (!canDeleteNotificationJob(job) || deletingJobId) return;
+    if (!String(job?.notificationType ?? "").startsWith("notice_") || !canDeleteNotificationJob(job) || deletingJobId) return;
     setDeletingJobId(job.notificationJobId);
-    setDispatchMessage("");
+    setNotificationJobAction({ message: "발송하지 않은 공지 기록을 삭제하는 중입니다.", state: "saving" });
     try {
       const response = await fetch(apiUrl(`/api/notification-jobs?id=${encodeURIComponent(job.notificationJobId)}`), {
         method: "DELETE"
@@ -10263,10 +10273,10 @@ function NotificationCenter({
       if (!response.ok || !result.ok) {
         throw new Error(result.error || `삭제 실패: ${response.status}`);
       }
-      setDispatchMessage("발송하지 않은 공지 기록 1건을 삭제했습니다.");
+      setNotificationJobAction({ message: "발송하지 않은 공지 기록 1건을 삭제했습니다.", state: "saved" });
       await onRefresh?.();
     } catch (error) {
-      setDispatchMessage(`공지 기록 삭제 실패: ${error.message}`);
+      setNotificationJobAction({ message: `공지 기록 삭제 실패: ${error.message}`, state: "failed" });
     } finally {
       setDeletingJobId("");
     }
@@ -10274,30 +10284,27 @@ function NotificationCenter({
 
   async function cancelNotificationJob(job) {
     if (!canCancelNotificationJob(job) || deletingJobId) return;
-    if (typeof window !== "undefined" && !window.confirm("이 예약 발송 1건을 취소할까요? 취소한 기록은 이력에 남습니다.")) return;
-    const canceledAt = new Date().toISOString();
-    const canceledJob = {
-      ...job,
-      status: "canceled",
-      error: "",
-      result: {
-        ...(job.result && typeof job.result === "object" ? job.result : {}),
-        canceledAt,
-        canceledBy: "teacher"
-      },
-      updatedAt: canceledAt
-    };
+    if (typeof window !== "undefined" && !window.confirm("이 알림톡 예약 1건을 취소할까요? Solapi 실제 예약도 함께 취소하며, 취소 이력은 남습니다.")) return;
     setDeletingJobId(job.notificationJobId);
-    setDispatchMessage("");
+    setNotificationJobAction({ message: "Solapi 실제 예약과 Academy OS 기록을 함께 취소하는 중입니다.", state: "saving" });
     try {
-      await persistNoticeJob(canceledJob);
-      upsertLocalNoticeJob(canceledJob);
-      setDispatchMessage("공지 예약 1건을 취소했습니다.");
+      if (!onCancelNotificationJob) throw new Error("Solapi 실제 예약 취소 경로가 연결되어 있지 않습니다.");
+      const result = await onCancelNotificationJob(job, "알림관리에서 예약 취소");
+      if (!result?.notificationJob || result.notificationJob.status !== "canceled") {
+        throw new Error("OS 취소 상태를 확인하지 못했습니다.");
+      }
+      upsertLocalNoticeJob(result.notificationJob);
+      setNotificationJobAction({
+        message: result.solapiCancellation
+          ? "Solapi 실제 예약과 Academy OS 기록을 함께 취소했습니다."
+          : "Academy OS 예약을 취소했습니다. Solapi 예약 그룹이 없는 알림입니다.",
+        state: "saved"
+      });
       setJobFilter("draft");
       setIsNoticeHistoryOpen(true);
       refreshNoticeJobsInBackground();
     } catch (error) {
-      setDispatchMessage(`공지 예약 취소 실패: ${error.message}`);
+      setNotificationJobAction({ message: `알림톡 예약 취소 실패: ${error.message}`, state: "failed" });
     } finally {
       setDeletingJobId("");
     }
@@ -10540,9 +10547,9 @@ function NotificationCenter({
 
       <div className="notificationStatsGrid noticeStatsGrid">
         {[
-          ["scheduled", "예약", scheduledNoticeJobs.length, "공지 예약 대기"],
-          ["sent", "발송 완료", sentNoticeJobs.length, "공지 발송 완료"],
-          ["pending", "확인 필요", pendingNoticeJobs.length, "응답 지연 공지"]
+          ["scheduled", "예약", scheduledJobs.length, "전체 알림 예약 대기"],
+          ["sent", "발송 완료", sentJobs.length, "전체 알림 발송 완료"],
+          ["pending", "확인 필요", pendingJobs.length, "응답 지연·지난 예약"]
         ].map(([id, label, count, detail]) => (
           <button className={jobFilter === id ? "active" : ""} key={id} onClick={() => selectJobFilter(id)} type="button">
             <span>{label}</span>
@@ -10555,8 +10562,8 @@ function NotificationCenter({
       <section className="notificationPanel notificationQueuePanel">
         <div className="sectionHeader slim">
           <div>
-            <p className="eyebrow">NOTICE HISTORY</p>
-            <h2>공지 발송 기록 · {filterLabels[jobFilter]}</h2>
+            <p className="eyebrow">NOTIFICATION HISTORY</p>
+            <h2>알림톡 발송 기록 · {filterLabels[jobFilter]}</h2>
           </div>
           <div className="notificationQueueActions">
             <span className="solapiResultSyncControl">
@@ -10574,7 +10581,7 @@ function NotificationCenter({
             {jobFilter !== "all" ? (
               <button className="softButton compact" onClick={() => setJobFilter("all")} type="button">전체 보기</button>
             ) : null}
-            <span className="countBadge">{filteredNoticeJobs.length}건</span>
+            <span className="countBadge">{filteredNotificationJobs.length}건</span>
             <button
               aria-expanded={isNoticeHistoryOpen}
               className="softButton compact"
@@ -10585,6 +10592,19 @@ function NotificationCenter({
             </button>
           </div>
         </div>
+        {notificationJobAction.message ? (
+          <p
+            className={[
+              "inlineNotice",
+              "notificationJobActionNotice",
+              notificationJobAction.state === "failed" ? "danger" : "",
+              notificationJobAction.state === "saved" ? "ok" : ""
+            ].filter(Boolean).join(" ")}
+            role="status"
+          >
+            {notificationJobAction.message}
+          </p>
+        ) : null}
         <p className={[
           "inlineNotice",
           "noticeSolapiResultNotice",
@@ -10593,8 +10613,8 @@ function NotificationCenter({
           solapiResultSyncState.state === "partial" ? "warning" : ""
         ].filter(Boolean).join(" ")}>
           {solapiResultSyncState.message || (
-            noticeSolapiResultTargets.length
-              ? `Solapi 예약/확인필요 알림톡 ${noticeSolapiResultTargets.length}건이 있습니다. 버튼을 누르면 예약했던 목록 전체를 Solapi 그룹/메시지 결과와 직접 대조해 OS 상태를 갱신합니다.`
+            solapiResultTargets.length
+              ? `Solapi 예약/확인필요 알림톡 ${solapiResultTargets.length}건이 있습니다. 버튼을 누르면 모든 알림 유형의 예약 목록을 Solapi 그룹/메시지 결과와 직접 대조해 OS 상태를 갱신합니다.`
               : "Solapi 예약 또는 확인필요 알림톡이 있으면 이곳에서 OS 상태와 직접 대조할 수 있습니다."
           )}
         </p>
@@ -10609,10 +10629,10 @@ function NotificationCenter({
             <span>미리보기</span>
             <span>관리</span>
           </div>
-          {filteredNoticeJobs.length === 0 ? (
-            <EmptyState as="p" className="emptyState">공지 발송 기록이 없습니다.</EmptyState>
+          {filteredNotificationJobs.length === 0 ? (
+            <EmptyState as="p" className="emptyState">알림톡 발송 기록이 없습니다.</EmptyState>
           ) : (
-            filteredNoticeJobs.map((job) => (
+            filteredNotificationJobs.map((job) => (
               <article className="notificationTableRow" key={job.notificationJobId}>
                 <span className={`statusPill status-${getNotificationJobStatusClass(job)}`}>{formatNotificationJobStatus(job) || getNotificationStatusLabel(job.status)}</span>
                 <span className="notificationJobTypeCell">
@@ -10636,7 +10656,7 @@ function NotificationCenter({
                       {deletingJobId === job.notificationJobId ? "취소 중" : "예약 취소"}
                     </button>
                   ) : null}
-                  {canDeleteNotificationJob(job) ? (
+                  {String(job.notificationType ?? "").startsWith("notice_") && canDeleteNotificationJob(job) ? (
                     <button
                       className="dangerSoftButton compact"
                       disabled={deletingJobId === job.notificationJobId}
@@ -10646,7 +10666,7 @@ function NotificationCenter({
                       {deletingJobId === job.notificationJobId ? "삭제 중" : "삭제"}
                     </button>
                   ) : null}
-                  {!canCancelNotificationJob(job) && !canDeleteNotificationJob(job) ? (
+                  {!canCancelNotificationJob(job) && !(String(job.notificationType ?? "").startsWith("notice_") && canDeleteNotificationJob(job)) ? (
                     <small>보관</small>
                   ) : null}
                 </span>
@@ -10656,7 +10676,7 @@ function NotificationCenter({
         </div>
         ) : (
           <div className="noticeHistoryCollapsedSummary">
-            <strong>{filterLabels[jobFilter]} {filteredNoticeJobs.length}건</strong>
+            <strong>{filterLabels[jobFilter]} {filteredNotificationJobs.length}건</strong>
             <span>상세 발송 기록은 펼치면 확인할 수 있습니다.</span>
           </div>
         )}
