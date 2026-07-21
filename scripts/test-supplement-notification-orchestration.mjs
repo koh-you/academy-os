@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  applySupplementScheduleNotificationsRequest,
   cancelActiveSupplementScheduleNoticesRequest,
   cancelSupplementNotificationControlRequest,
   cancelSupplementStudentReminderRequest,
@@ -115,6 +116,64 @@ const reminderCancellationJob = {
   notificationJobId: "supplement_student_reminder_makeup-1_student-1",
   status: "scheduled"
 };
+
+const scheduleNotificationEvents = [];
+const scheduleNotificationResult = await applySupplementScheduleNotificationsRequest({
+  previousScheduleText: "7/21 15:00",
+  reserveScheduleNotices: async (task, student, previous) => {
+    scheduleNotificationEvents.push(["schedule", task.makeupTaskId, student.studentId, previous]);
+    return {
+      student: { notificationJob: { notificationJobId: "student-notice", payload: { noticeKind: "supplement_schedule_change" } }, message: "학생 완료", status: "scheduled" },
+      parent: { notificationJob: { notificationJobId: "parent-notice", result: { noticeKind: "supplement_schedule_change" } }, message: "학부모 완료", status: "scheduled" }
+    };
+  },
+  reserveStudentReminder: async (task) => {
+    scheduleNotificationEvents.push(["reminder", task.makeupTaskId]);
+    return { notificationJob: { notificationJobId: "student-11" }, message: "11시 완료", status: "scheduled" };
+  },
+  shouldReserveScheduleNotice: true,
+  shouldUpdateStudentReminder: true,
+  student: { studentId: "student-1" },
+  task: reminderTask
+});
+assert.deepEqual(scheduleNotificationEvents, [
+  ["reminder", "makeup-1"],
+  ["schedule", "makeup-1", "student-1", "7/21 15:00"]
+]);
+assert.deepEqual({
+  studentJob: scheduleNotificationResult.scheduleChangeNoticeJob.notificationJobId,
+  studentKind: scheduleNotificationResult.scheduleNoticeKind,
+  parentJob: scheduleNotificationResult.parentScheduleChangeNoticeJob.notificationJobId,
+  parentKind: scheduleNotificationResult.parentScheduleNoticeKind,
+  reminderJob: scheduleNotificationResult.supplementReminderJob.notificationJobId,
+  reminderStatus: scheduleNotificationResult.supplementReminderStatus
+}, {
+  studentJob: "student-notice",
+  studentKind: "supplement_schedule_change",
+  parentJob: "parent-notice",
+  parentKind: "supplement_schedule_change",
+  reminderJob: "student-11",
+  reminderStatus: "scheduled"
+});
+
+const skippedScheduleNotifications = await applySupplementScheduleNotificationsRequest({
+  shouldReserveScheduleNotice: false,
+  shouldUpdateStudentReminder: false,
+  task: reminderTask
+});
+assert.equal(skippedScheduleNotifications.supplementReminderStatus, "notApplied");
+assert.equal(skippedScheduleNotifications.scheduleChangeNoticeStatus, "notApplied");
+assert.equal(skippedScheduleNotifications.parentScheduleChangeNoticeStatus, "notApplied");
+assert.match(skippedScheduleNotifications.supplementReminderMessage, /갱신하지 않았습니다/);
+
+const existingPairNotifications = await applySupplementScheduleNotificationsRequest({
+  reserveStudentReminder: async () => ({ skipped: false, status: "scheduled" }),
+  shouldReserveScheduleNotice: false,
+  shouldUpdateStudentReminder: true,
+  task: reminderTask
+});
+assert.match(existingPairNotifications.scheduleChangeNoticeMessage, /이미 예약 또는 발송/);
+assert.match(existingPairNotifications.parentScheduleChangeNoticeMessage, /이미 예약 또는 발송/);
 
 const activeScheduleCancellationEvents = [];
 const activeScheduleCancellationResult = await cancelActiveSupplementScheduleNoticesRequest({

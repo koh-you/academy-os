@@ -348,6 +348,13 @@
 - 운영 저장 검증: `special_lecture_enrollments` 재조회에서 중3 신초봄은 active 5회, 각 13:00~15:00이고 고3 enrollment는 canceled 0회다. 1~5회차 lessons 모두 중3 ID/13:00~15:00을 포함하고 고3 ID는 없다. 1회차 기존 출결·수업기록은 저장 전후 2건, `notification_jobs`는 0건으로 유지됐다.
 - 사람 gate: 배포 후 클리닉 특강 명단에서 `창일중 · 중3` 신초봄이 1~5회차, 각 13:00~15:00으로 보이는지 확인한다. 잘못 입력한 고3 enrollment는 활성 수강 명단에서 제외되어야 한다. 1회차 수업일지에는 신초봄 행이 추가되되 기존 학생의 출결·시간은 그대로여야 한다.
 - 중단 조건: 올바른 신초봄 원천이 불명확함, 기존 학생이 빠짐, 기존 학생 시간이 바뀜, 출결 record가 자동 생성/변경됨, 알림톡 예약/발송 발생, Supabase 재조회 불일치인데 완료 표시, 새로고침 후 공통 시간이 사라짐.
+## 2026-07-21 P1. 11B-12 보충 일정 저장 후 알림 적용·결과 조립 분리
+
+- 상태: 저장된 보충 task에 학생 11시 예약을 먼저 적용하고, 필요할 때 학생·학부모 일정 안내를 이어서 예약한 뒤 화면용 job/message/status/noticeKind를 조립하는 경계를 `applySupplementScheduleNotificationsRequest`로 분리했다.
+- 동작 보존: lesson과 makeup task 저장이 끝난 뒤 알림을 실행하는 순서, 11시→일정 pair의 직렬 순서, 중복 방지 시 안내 문구, status fallback을 유지한다. 실제 예약 함수는 기존 wrapper를 주입한다.
+- 검증/gate: 전체 예약, 모두 미적용, 11시는 갱신하지만 현재 일정 pair를 재사용하는 세 분기를 fixture로 고정했다. production 정적 검사는 App 고정 문자열 대신 새 orchestration의 주입 호출까지 추적하게 갱신했다. 기존 11B-9 운영 gate와 같은 실제 예약 함수만 사용하므로 추가 과금 검증은 하지 않는다.
+- 다음 단위: 최신 `origin/main` rebase 후 보충 일정 저장 전 검증·중복 판정·lesson/task plan을 별도 의미 단위로 좁혀 분리한다.
+
 ## 2026-07-21 P1. 11B-11 활성 보충 일정 안내 일괄 취소 orchestration 분리
 
 - 상태: 같은 보충 task의 취소 가능한 학생 일정·학부모 일정·legacy 학부모 안내를 선택해 기존 배치 취소 함수로 넘기는 경계를 `cancelActiveSupplementScheduleNoticesRequest`로 분리했다.

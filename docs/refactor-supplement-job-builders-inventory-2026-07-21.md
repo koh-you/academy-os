@@ -126,6 +126,8 @@
 
 11B-11에서는 같은 보충 task의 활성 학생 일정·학부모 일정·legacy 학부모 안내를 selector로 고른 뒤 기존 배치 취소 함수에 전달하는 경계를 `cancelActiveSupplementScheduleNoticesRequest`로 분리했다. 다른 task와 발송 완료 이력 제외, 취소 사유와 실제 취소 함수 주입을 fixture로 고정했으며 외부 호출 계약은 바꾸지 않았다.
 
+11B-12에서는 lesson과 makeup task 저장 뒤 학생 11시 예약, 학생·학부모 일정 pair 예약, 화면 반환용 job/message/status/noticeKind 조립을 `applySupplementScheduleNotificationsRequest`로 분리했다. 기존 11시→pair 실행 순서, 중복 방지 문구와 fallback을 fixture로 고정했고 실제 예약 wrapper와 저장 원천은 App에 유지했다.
+
 - builder 추출에 `/api/notification-jobs/*`, `setNotificationJobs`, Solapi 호출이 함께 이동함.
 - 학생/학부모 번호 또는 `notificationType`이 바뀜.
 - 선생님 수정본보다 설정 템플릿/자동 seed가 우선함.
