@@ -112,15 +112,37 @@ export function SpecialLectureGuideBasicFields({
         교재
         <input value={guide.textbook} onChange={updateField("textbook")} />
       </label>
-      <label>
-        공개 URL slug
-        <input value={guide.slug} onChange={updateField("slug")} />
-      </label>
-      <label className="specialLectureFullInput">
-        신청폼 URL
-        <input value={guide.applicationUrl} onChange={updateField("applicationUrl")} />
-      </label>
     </div>
+  );
+}
+
+export function SpecialLectureGuideLinkFields({
+  guide,
+  onUpdateGuide
+}) {
+  if (!guide) {
+    return null;
+  }
+
+  return (
+    <section className="specialLectureLinkSettings">
+      <div className="sectionTitle">
+        <div>
+          <h3>링크 설정</h3>
+          <p>공개 안내문 주소와 Tally 신청 버튼 연결을 관리합니다.</p>
+        </div>
+      </div>
+      <div className="specialLectureFormGrid">
+        <label>
+          공개 URL slug
+          <input value={guide.slug} onChange={(event) => onUpdateGuide?.("slug", event.target.value)} />
+        </label>
+        <label className="specialLectureFullInput">
+          신청폼 URL
+          <input value={guide.applicationUrl} onChange={(event) => onUpdateGuide?.("applicationUrl", event.target.value)} />
+        </label>
+      </div>
+    </section>
   );
 }
 
@@ -250,7 +272,8 @@ export function SpecialLectureScheduleCalculator({
   onToggleOpen,
   onToggleScheduleRuleDay,
   onUpdateGuide,
-  onUpdateScheduleRule
+  onUpdateScheduleRule,
+  showToggle = true
 }) {
   if (!guide) {
     return null;
@@ -270,14 +293,16 @@ export function SpecialLectureScheduleCalculator({
           {isOpen ? (
             <button className="softButton compact" onClick={onApplyCalculatedSchedule} type="button">일정 계산 적용</button>
           ) : null}
-          <button
-            aria-expanded={isOpen}
-            className="softButton compact"
-            onClick={onToggleOpen}
-            type="button"
-          >
-            {isOpen ? "접기" : "펼치기"}
-          </button>
+          {showToggle ? (
+            <button
+              aria-expanded={isOpen}
+              className="softButton compact"
+              onClick={onToggleOpen}
+              type="button"
+            >
+              {isOpen ? "접기" : "펼치기"}
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -385,7 +410,8 @@ export function SpecialLectureSessionPlanEditor({
   onToggleOpen,
   onUpdateSession,
   sessionPlanSummaryText = "",
-  sessions = []
+  sessions = [],
+  showToggle = true
 }) {
   if (!guide) {
     return null;
@@ -400,14 +426,16 @@ export function SpecialLectureSessionPlanEditor({
           <span>카드 수정은 오른쪽 미리보기에 즉시 반영되고, 저장본/공개 링크에는 `안내문 저장` 후 반영됩니다.</span>
         </div>
         <div className="specialLectureSessionHeaderActions">
-          <button
-            aria-expanded={isOpen}
-            className="softButton compact"
-            onClick={onToggleOpen}
-            type="button"
-          >
-            {isOpen ? "접기" : "펼치기"}
-          </button>
+          {showToggle ? (
+            <button
+              aria-expanded={isOpen}
+              className="softButton compact"
+              onClick={onToggleOpen}
+              type="button"
+            >
+              {isOpen ? "접기" : "펼치기"}
+            </button>
+          ) : null}
           <button
             className="softButton compact"
             onClick={onAddSession}

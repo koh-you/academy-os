@@ -7716,6 +7716,26 @@ button:disabled {
   margin-top: 0;
 }
 
+.specialLectureGuideWorkspace,
+.specialLectureGuideTabPanel {
+  display: grid;
+  gap: 14px;
+}
+
+.specialLectureGuideTabs {
+  margin: 0;
+}
+
+.specialLectureGuideTabs button {
+  font-size: 12px;
+  padding: 7px 10px;
+}
+
+.specialLectureLinkSettings {
+  display: grid;
+  gap: 12px;
+}
+
 .specialLectureSelector {
   display: grid;
   gap: 10px;
@@ -8777,33 +8797,6 @@ button:disabled {
   margin: 0;
 }
 
-.specialLecturePreviewSyncNotice {
-  align-items: center;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: 8px;
-  color: #1d4ed8;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 12px;
-  justify-content: space-between;
-  padding: 11px 13px;
-}
-
-.specialLecturePreviewSyncNotice strong,
-.specialLectureLivePreviewLabel strong {
-  color: #0f172a;
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.specialLecturePreviewSyncNotice span,
-.specialLectureLivePreviewLabel span {
-  color: #64748b;
-  font-size: 12px;
-  font-weight: 900;
-}
-
 .specialLectureManagementBar {
   align-items: center;
   background: #f8fafc;
@@ -9367,18 +9360,6 @@ button:disabled {
 .specialLecturePreviewColumn {
   display: grid;
   gap: 10px;
-}
-
-.specialLectureLivePreviewLabel {
-  align-items: center;
-  background: #f8fafc;
-  border: 1px solid #d8e3f8;
-  border-radius: 8px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 12px;
-  justify-content: space-between;
-  padding: 11px 13px;
 }
 
 .specialLectureGuidePreview {

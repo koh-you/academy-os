@@ -49,6 +49,7 @@ import {
 } from "../domains/tests/TestManagerPanels.jsx";
 import {
   SpecialLectureGuideBasicFields,
+  SpecialLectureGuideLinkFields,
   SpecialLectureGuideSelector,
   SpecialLectureGuideTextFields,
   SpecialLectureHighlightEditor,
@@ -11095,8 +11096,8 @@ function SpecialLectureNoticePanel({
   const [selectedGuideId, setSelectedGuideId] = useState(getDefaultSpecialLectureGuideId(normalizedGuides));
   const [showStoredGuides, setShowStoredGuides] = useState(false);
   const [managementGuideId, setManagementGuideId] = useState("");
-  const [isScheduleBuilderOpen, setIsScheduleBuilderOpen] = useState(false);
-  const [isSessionPlanOpen, setIsSessionPlanOpen] = useState(false);
+  const [activeGuideEditorTab, setActiveGuideEditorTab] = useState("content");
+  const [manualIntakeRequest, setManualIntakeRequest] = useState(0);
   const primaryGuides = draftGuides.filter(isSpecialLecturePrimaryGuide);
   const storedGuides = draftGuides.filter((guide) => !isSpecialLecturePrimaryGuide(guide));
   const selectedGuide = draftGuides.find((guide) => guide.specialLectureGuideId === selectedGuideId) ?? null;
@@ -11453,10 +11454,22 @@ function SpecialLectureNoticePanel({
               <button className="softButton compact" onClick={createNewGuide} type="button">새 특강 만들기</button>
               <InlineSaveStatus label="특강 안내문" saveState={saveState} />
             </>
-          ) : <span className="countBadge">확정 명단 {selectedGuide ? enrollments.filter((enrollment) =>
-            enrollment.specialLectureGuideId === selectedGuide.specialLectureGuideId ||
-            enrollment.guideSlug === getSpecialLectureGuideSlug(selectedGuide)
-          ).length : 0}명</span>}
+          ) : (
+            <>
+              <span className="countBadge">확정 명단 {selectedGuide ? enrollments.filter((enrollment) =>
+                enrollment.specialLectureGuideId === selectedGuide.specialLectureGuideId ||
+                enrollment.guideSlug === getSpecialLectureGuideSlug(selectedGuide)
+              ).length : 0}명</span>
+              <button
+                className="softButton compact"
+                disabled={!selectedGuide || !isSelectedGuideSaved || !selectedGuideSessions.length}
+                onClick={() => setManualIntakeRequest((current) => current + 1)}
+                type="button"
+              >
+                학생 수동 접수
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -11484,30 +11497,46 @@ function SpecialLectureNoticePanel({
         onUpdateApplication={onUpdateApplication}
         records={records}
         isGuideSaved={isSelectedGuideSaved}
+        manualIntakeRequest={manualIntakeRequest}
         selectedGuide={selectedGuide}
         students={students}
       />
       ) : null}
 
       {activeWorkspaceTab === "guide" && selectedGuide ? (
-      <div className="specialLectureEditorGrid">
-        <div className="specialLectureEditor">
-          <div className="noticeBox specialLectureNoticeBox">
-            <strong>저장/발송 분리</strong>
-            <p>이 탭은 안내문과 링크를 준비합니다. 실제 발송은 `알림톡 발송 준비` 후 공지 발송 화면에서 수신 대상을 확인한 뒤 진행합니다.</p>
-          </div>
-          <div className="specialLecturePreviewSyncNotice">
-            <strong>입력 내용은 오른쪽 미리보기에 바로 반영됩니다.</strong>
-            <span>공개 링크에는 `안내문 저장` 후 적용됩니다.</span>
-          </div>
-          <SpecialLectureManagementBar
-            guide={selectedGuide}
-            isManaging={isManagingSelectedGuide}
-            onArchive={archiveSelectedGuide}
-            onDelete={deleteSelectedGuide}
-            onRestore={restoreSelectedGuide}
-          />
+      <div className="specialLectureGuideWorkspace">
+        <div className="notificationSectionTabs specialLectureGuideTabs" role="tablist" aria-label="특강 안내문 편집 항목">
+          {[
+            ["content", "안내문 편집"],
+            ["links", "링크 설정"],
+            ["schedule", "일정 계산"],
+            ["sessions", "회차별 일정"],
+            ["notice", "알림톡 미리보기"]
+          ].map(([id, label]) => (
+            <button
+              aria-selected={activeGuideEditorTab === id}
+              className={activeGuideEditorTab === id ? "active" : ""}
+              key={id}
+              onClick={() => setActiveGuideEditorTab(id)}
+              role="tab"
+              type="button"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
 
+        <SpecialLectureManagementBar
+          guide={selectedGuide}
+          isManaging={isManagingSelectedGuide}
+          onArchive={archiveSelectedGuide}
+          onDelete={deleteSelectedGuide}
+          onRestore={restoreSelectedGuide}
+        />
+
+        {activeGuideEditorTab === "content" ? (
+        <div className="specialLectureEditorGrid">
+          <div className="specialLectureEditor">
           <SpecialLectureGuideBasicFields
             guide={selectedGuide}
             onUpdateGuide={updateSelectedGuide}
@@ -11529,7 +11558,20 @@ function SpecialLectureNoticePanel({
             guide={selectedGuide}
             onUpdateGuide={updateSelectedGuide}
           />
+          </div>
 
+          <SpecialLecturePreviewColumn guide={selectedGuide} guideUrl={selectedGuideUrl} />
+        </div>
+        ) : null}
+
+        {activeGuideEditorTab === "links" ? (
+          <div className="specialLectureEditor specialLectureGuideTabPanel">
+            <SpecialLectureGuideLinkFields guide={selectedGuide} onUpdateGuide={updateSelectedGuide} />
+          </div>
+        ) : null}
+
+        {activeGuideEditorTab === "schedule" ? (
+          <div className="specialLectureEditor specialLectureGuideTabPanel">
           <SpecialLectureScheduleCalculator
             calculatedSessionCount={calculatedSessionCount}
             calculatedTotalHours={calculatedTotalHours}
@@ -11537,30 +11579,36 @@ function SpecialLectureNoticePanel({
             calculatedWeekdaySummaryText={calculatedWeekdaySummaryText}
             generatedSessionsPreview={generatedSessionsPreview}
             guide={selectedGuide}
-            isOpen={isScheduleBuilderOpen}
+            isOpen
             normalizedScheduleRules={normalizedScheduleRules}
             onAddScheduleRule={addScheduleRule}
             onApplyCalculatedSchedule={applyCalculatedSchedule}
             onRemoveScheduleRule={removeScheduleRule}
-            onToggleOpen={() => setIsScheduleBuilderOpen((current) => !current)}
             onToggleScheduleRuleDay={toggleScheduleRuleDay}
             onUpdateGuide={updateSelectedGuide}
             onUpdateScheduleRule={updateScheduleRule}
+            showToggle={false}
           />
+          </div>
+        ) : null}
 
+        {activeGuideEditorTab === "sessions" ? (
+          <div className="specialLectureEditor specialLectureGuideTabPanel">
           <SpecialLectureSessionPlanEditor
             guide={selectedGuide}
-            isOpen={isSessionPlanOpen}
-            onAddSession={() => {
-              addSpecialLectureSessionCard();
-              setIsSessionPlanOpen(true);
-            }}
+            isOpen
+            onAddSession={addSpecialLectureSessionCard}
             onRemoveSession={removeSpecialLectureSessionCard}
-            onToggleOpen={() => setIsSessionPlanOpen((current) => !current)}
             onUpdateSession={updateSpecialLectureSessionCard}
             sessionPlanSummaryText={sessionPlanSummaryText}
             sessions={selectedGuideSessions}
+            showToggle={false}
           />
+          </div>
+        ) : null}
+
+        {activeGuideEditorTab === "notice" ? (
+          <div className="specialLectureEditor specialLectureGuideTabPanel">
           <SpecialLectureNoticeMemoField
             guide={selectedGuide}
             onUpdateGuide={updateSelectedGuide}
@@ -11575,9 +11623,8 @@ function SpecialLectureNoticePanel({
             panelMessage={panelMessage}
             saveState={saveState}
           />
-        </div>
-
-        <SpecialLecturePreviewColumn guide={selectedGuide} guideUrl={selectedGuideUrl} />
+          </div>
+        ) : null}
       </div>
       ) : activeWorkspaceTab === "guide" ? (
         <SpecialLectureNoSelection />

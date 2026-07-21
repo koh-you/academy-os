@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { copyTextToClipboard } from "../exams/outputPreview.js";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
@@ -350,6 +350,7 @@ export function SpecialLectureApplicationPanel({
   notificationJobs = [],
   records = [],
   isGuideSaved = false,
+  manualIntakeRequest = 0,
   onCreateSpecialLectureLessons,
   onCreateStudent,
   onOpenLesson,
@@ -376,6 +377,11 @@ export function SpecialLectureApplicationPanel({
   const [progressModalEnrollment, setProgressModalEnrollment] = useState(null);
   const [isEnrollmentPanelOpen, setIsEnrollmentPanelOpen] = useState(false);
   const [isLessonPreviewOpen, setIsLessonPreviewOpen] = useState(false);
+
+  useEffect(() => {
+    if (manualIntakeRequest > 0) setManualPickerOpen(true);
+  }, [manualIntakeRequest]);
+
   const normalizedGuides = useMemo(() => normalizeSpecialLectureGuides(guides), [guides]);
   const normalizedApplications = useMemo(
     () => normalizeSpecialLectureApplications(applications)
@@ -903,14 +909,6 @@ export function SpecialLectureApplicationPanel({
             <span>수강 {activeEnrollments.length}</span>
             <span>추가 필요 {missingEnrollmentRows.length}</span>
             <span>회차 {guideSessions.length}</span>
-            <button
-              className="primaryButton compact"
-              disabled={!selectedGuide || !isGuideSaved || !guideSessions.length}
-              onClick={() => setManualPickerOpen(true)}
-              type="button"
-            >
-              학생 수동 접수
-            </button>
             <button
               aria-expanded={isEnrollmentPanelOpen}
               className="softButton compact"

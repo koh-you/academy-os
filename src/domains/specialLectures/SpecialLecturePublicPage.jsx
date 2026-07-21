@@ -169,10 +169,6 @@ export function SpecialLectureGuidePreview({ guide, guideUrl = "" }) {
 export function SpecialLecturePreviewColumn({ guide, guideUrl = "" }) {
   return (
     <div className="specialLecturePreviewColumn">
-      <div className="specialLectureLivePreviewLabel">
-        <strong>공개 안내문 미리보기</strong>
-        <span>왼쪽 입력값 실시간 반영</span>
-      </div>
       <SpecialLectureGuidePreview guide={guide} guideUrl={guideUrl} />
     </div>
   );
