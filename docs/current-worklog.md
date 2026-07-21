@@ -348,6 +348,14 @@
 - 운영 저장 검증: `special_lecture_enrollments` 재조회에서 중3 신초봄은 active 5회, 각 13:00~15:00이고 고3 enrollment는 canceled 0회다. 1~5회차 lessons 모두 중3 ID/13:00~15:00을 포함하고 고3 ID는 없다. 1회차 기존 출결·수업기록은 저장 전후 2건, `notification_jobs`는 0건으로 유지됐다.
 - 사람 gate: 배포 후 클리닉 특강 명단에서 `창일중 · 중3` 신초봄이 1~5회차, 각 13:00~15:00으로 보이는지 확인한다. 잘못 입력한 고3 enrollment는 활성 수강 명단에서 제외되어야 한다. 1회차 수업일지에는 신초봄 행이 추가되되 기존 학생의 출결·시간은 그대로여야 한다.
 - 중단 조건: 올바른 신초봄 원천이 불명확함, 기존 학생이 빠짐, 기존 학생 시간이 바뀜, 출결 record가 자동 생성/변경됨, 알림톡 예약/발송 발생, Supabase 재조회 불일치인데 완료 표시, 새로고침 후 공통 시간이 사라짐.
+## 2026-07-21 P1. 12H 보충 task 원천 맥락 읽기 카드 분리
+
+- 상태: 숙제보충의 원 숙제 배정일·마감·제목과 결석보강의 원 수업·교재·지난/다음 숙제, 하단 확인용 숙제 카드를 `SupplementTaskSourceContext.jsx`로 분리했다.
+- 동작 보존: App에서 기존 방식으로 원천 값을 계산해 props로 전달하며 빈 값 fallback과 숙제/결석 유형별 문구를 그대로 유지한다. 원천 숙제 카드는 계속 읽기 전용이다.
+- 저장 원천/side effect: 새 컴포넌트에는 hook, 입력 event, callback, API, 알림/Solapi 참조가 없다. local draft·저장·예약 로직은 App에 남아 있다.
+- 검증/gate: production 87/88b-8이 원천 fallback, 읽기 전용 안내와 side-effect 비소유를 분리 파일에서 검사한다. 추가 사람 gate는 없다.
+- 다음 단위: 최신 `origin/main` rebase 후 방법·날짜·시간 local draft 입력 또는 변경 diff·상태 표시를 callback-only 조각으로 분리한다.
+
 ## 2026-07-21 P1. 12G 개별 보충 알림 control 모달 표시 분리
 
 - 상태: 수신 대상, 예약시각, Solapi 상태, 현재/과거 preview, 차단·피드백, 예약·취소 버튼을 `SupplementNotificationControlModal.jsx`로 분리했다.
