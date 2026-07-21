@@ -130,6 +130,8 @@
 
 11B-13에서는 UI 전용 skip/suppress 플래그 제거, 기존 연결 일정 문구, 일정 변경 여부, 현재 학생·학부모 pair 재사용, 11시·pair 예약 필요 여부를 `createSupplementScheduleNotificationPlan`으로 분리했다. 신규·동일+pair·변경·suppress fixture를 추가했으며 lesson/task 저장과 외부 예약은 포함하지 않는다.
 
+11번은 11B-13까지로 닫고 12번 supplement center/modals로 넘어간다. 이후 inventory와 구현 기록은 `docs/refactor-supplement-center-inventory-2026-07-21.md`를 기준으로 한다.
+
 - builder 추출에 `/api/notification-jobs/*`, `setNotificationJobs`, Solapi 호출이 함께 이동함.
 - 학생/학부모 번호 또는 `notificationType`이 바뀜.
 - 선생님 수정본보다 설정 템플릿/자동 seed가 우선함.

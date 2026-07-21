@@ -52,6 +52,7 @@ import {
   reserveNotificationJobRequest
 } from "../domains/notifications/notificationJobApi.js";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
+import { createSupplementSchedulePersistencePlan } from "../domains/supplements/supplementSchedulePlan.js";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
   createTestAttemptId,
@@ -9947,59 +9948,19 @@ export function App() {
       notificationJobs,
       task
     });
-    const student = students.find((item) => item.studentId === taskForSchedule.studentId);
-    if (!student) throw new Error("보충 일정을 반영할 학생 정보를 찾을 수 없습니다.");
-    if (!taskForSchedule?.makeupTaskId) throw new Error("보충관리 ID가 없어 일정을 반영할 수 없습니다.");
-    if (!taskForSchedule.scheduledDate || !taskForSchedule.scheduledTime) throw new Error("배정일과 시간을 입력해야 일정을 반영할 수 있습니다.");
-
-    const lessonId = taskForSchedule.linkedLessonId || createSupplementLessonId(taskForSchedule);
-    const scheduleTime = normalizeTimeInput(taskForSchedule.scheduledTime);
-    const duplicateLesson = lessons.find((lesson) => {
-      if (!lesson || lesson.lessonId === lessonId || lesson.status === "canceled") return false;
-      const lessonTime = normalizeTimeInput(lesson.startTime);
-      const lessonStudentIds = getLessonStudentIds(lesson);
-      const sameSourceTask = lesson.sourceMakeupTaskId && lesson.sourceMakeupTaskId === taskForSchedule.makeupTaskId;
-      const sameStudentSchedule =
-        lesson.lessonType === "makeup" &&
-        lesson.date === taskForSchedule.scheduledDate &&
-        lessonTime === scheduleTime &&
-        lessonStudentIds.includes(student.studentId);
-      return sameSourceTask || sameStudentSchedule;
+    const { lesson, nextTask, student } = createSupplementSchedulePersistencePlan({
+      addMinutes: addMinutesToTime,
+      createLessonId: createSupplementLessonId,
+      createLessonName: createSupplementLessonName,
+      followUpTypeLabel,
+      getDayKey,
+      getLessonColor: getSupplementLessonColor,
+      getLessonStudentIds,
+      lessons,
+      normalizeTime: normalizeTimeInput,
+      students,
+      task: taskForSchedule
     });
-    if (duplicateLesson) {
-      throw new Error(
-        `이미 같은 학생의 보충 일정이 있습니다: ${duplicateLesson.date} ${duplicateLesson.startTime || ""} ${duplicateLesson.className || ""}`.trim()
-      );
-    }
-    const className = createSupplementLessonName(taskForSchedule, student);
-    const lesson = {
-      lessonId,
-      classTemplateId: "",
-      className,
-      lessonType: "makeup",
-      date: taskForSchedule.scheduledDate,
-      dayOfWeek: getDayKey(taskForSchedule.scheduledDate),
-      startTime: taskForSchedule.scheduledTime,
-      endTime: addMinutesToTime(taskForSchedule.scheduledTime, 60),
-      color: getSupplementLessonColor(taskForSchedule.taskType),
-      teacherId: "instructor_owner_001",
-      studentIds: [student.studentId],
-      status: "scheduled",
-      lessonTopic: `${followUpTypeLabel(taskForSchedule.taskType)} 일정`,
-      sourceMakeupTaskId: taskForSchedule.makeupTaskId,
-      sourceLabel: taskForSchedule.sourceLabel
-    };
-    const nextTask = {
-      ...taskForSchedule,
-      status: "scheduled",
-      scheduledDate: lesson.date,
-      scheduledTime: lesson.startTime,
-      linkedLessonId: lessonId,
-      linkedLessonDate: lesson.date,
-      linkedLessonTime: lesson.startTime,
-      needsLessonResync: false,
-      lastScheduledAt: new Date().toISOString()
-    };
 
     const lessonResult = await postJson("/api/lessons", { lesson });
     const savedLesson = lessonResult.lesson ?? lesson;

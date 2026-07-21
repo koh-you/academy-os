@@ -348,6 +348,14 @@
 - 운영 저장 검증: `special_lecture_enrollments` 재조회에서 중3 신초봄은 active 5회, 각 13:00~15:00이고 고3 enrollment는 canceled 0회다. 1~5회차 lessons 모두 중3 ID/13:00~15:00을 포함하고 고3 ID는 없다. 1회차 기존 출결·수업기록은 저장 전후 2건, `notification_jobs`는 0건으로 유지됐다.
 - 사람 gate: 배포 후 클리닉 특강 명단에서 `창일중 · 중3` 신초봄이 1~5회차, 각 13:00~15:00으로 보이는지 확인한다. 잘못 입력한 고3 enrollment는 활성 수강 명단에서 제외되어야 한다. 1회차 수업일지에는 신초봄 행이 추가되되 기존 학생의 출결·시간은 그대로여야 한다.
 - 중단 조건: 올바른 신초봄 원천이 불명확함, 기존 학생이 빠짐, 기존 학생 시간이 바뀜, 출결 record가 자동 생성/변경됨, 알림톡 예약/발송 발생, Supabase 재조회 불일치인데 완료 표시, 새로고침 후 공통 시간이 사라짐.
+## 2026-07-21 P1. 12A 보충 lesson/task persistence plan 분리
+
+- 상태: 학생·필수 ID·일시 검증, 같은 원천 또는 같은 학생/일시 중복 lesson 차단, 저장할 lesson과 연결 makeup task 객체 생성을 `src/domains/supplements/supplementSchedulePlan.js`로 분리했다.
+- 동작 보존: `/api/lessons` → `/api/makeup-tasks` 저장 순서, React 상태 반영, 이후 알림 적용은 App에 그대로 남는다. 시간·색상·이름·학생 ID helper를 주입하며 외부 호출이 없는 순수 plan이다.
+- 검증/gate: 신규/기존 ID, 필수값 오류 3종, 원천 중복, 학생·일시 중복, 자기 lesson·취소 lesson·정규 lesson 제외 fixture를 `npm run test:production`에 연결했다. 추가 사람 gate는 없다.
+- inventory: `docs/refactor-supplement-center-inventory-2026-07-21.md`에 모달별 원천·side effect·분리 순서를 기록했다.
+- 다음 단위: 최신 `origin/main` rebase 후 callback-only `SupplementPassConfirmModal`을 표시 컴포넌트로 분리한다.
+
 ## 2026-07-21 P1. 11B-13 보충 일정 알림 plan 분리
 
 - 상태: UI 전용 skip/suppress 플래그 제거, 기존 연결 일정 문구, 일정 변경 여부, 현재 학생·학부모 pair 존재 여부, 11시·pair 예약 필요 여부를 `createSupplementScheduleNotificationPlan`으로 분리했다.
