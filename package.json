@@ -30,7 +30,8 @@
     "test:exam-prompt-e2e": "node scripts/test-exam-analysis-prompt-e2e.mjs",
     "test:exam-prompt-studio": "npm run test:exam-phrase-library && npm run test:exam-prompt-inputs && npm run test:exam-prompt-studio-draft && npm run test:exam-prompt-studio-ui && npm run test:exam-slide-sequence && npm run test:exam-prompt-pack && npm run test:exam-prompt-e2e",
     "test:supplement-builders": "node scripts/test-supplement-job-builders.mjs",
-    "test:production": "npm run test:exam-prompt-studio && npm run test:exam-final-preview && npm run test:supplement-builders && node scripts/scenario-tests-production.cjs"
+    "test:notification-job-api": "node scripts/test-notification-job-api.mjs",
+    "test:production": "npm run test:exam-prompt-studio && npm run test:exam-final-preview && npm run test:supplement-builders && npm run test:notification-job-api && node scripts/scenario-tests-production.cjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.0",

@@ -67,6 +67,16 @@
 - 완료: 현재 `notificationJobs` 배열의 우선순위와 학생 11시·학생 일정·학부모 일정 job 선택을 `src/domains/notifications/notificationJobSelectors.js`로 11A-2 분리했다. 일정·유형·대상·상태 우선순위 fixture를 같은 deterministic 테스트에 추가했다.
 - 다음 경계: 순수 builder/selector 분리는 완료했다. 다음은 예약·취소·상태 저장이 포함되는 11B이므로 아래 사람 gate 전에는 코드 이동을 시작하지 않는다.
 
+## 11B-1 구현 결과 — API orchestration 어댑터
+
+- 착수 확인: 사용자가 기존 결석보충 예약·취소 흐름이 정상이라고 확인하고 11B 진행을 승인했다.
+- 분리 범위: 예약 API, 예약 실패 row 저장, 취소 API, 반환 job의 React 상태 반영을 `src/domains/notifications/notificationJobApi.js`로 옮겼다.
+- App 경계: `App.jsx`가 공용 `postJson`과 `upsertNotificationJobState`를 주입한다. 보충 task/student 조회, 문구 seed와 선생님 수정본 선택, 예약시각, 현재 job 선택은 기존 위치와 11A 모듈에 그대로 남는다.
+- 서버 경계: Supabase `notification_jobs` upsert/cancel, Solapi 그룹 예약·취소, fingerprint/pending reuse/canceled-during-reserve 보호는 이동하거나 수정하지 않았다.
+- 결정론적 fixture: `scripts/test-notification-job-api.mjs`가 성공·실패·취소 계약과 상태 callback을 실제 네트워크 없이 검증하며 `npm run test:production`에 포함된다.
+- 자동검증: 최신 `origin/main` `41a31943` 기준 production 364/364, build, `git diff --check` 통과. 기존 Vite 500KB chunk 경고만 남는다.
+- 운영 gate 통과: 반 미지정 고태영 테스트 학생과 동일한 사용자 통제 번호를 사용해 학생 일정, 학부모 일정, 학생 11시를 하나씩 실제 Solapi 예약·취소했다. 최종 검증 세 건 모두 OS row와 Solapi의 대상·시각·본문 marker가 일치했고 예약 그룹은 `SCHEDULED`였다. 취소 후 OS는 `canceled`, Solapi 메시지는 `예약취소/1070`, 발송 0건이었다. 중복 job은 없었고 테스트 task는 삭제했다. 첫 취소 표현 진단 1건을 포함해 취소된 테스트 `notification_jobs` 감사 row는 총 4건이다.
+
 ## AI 자동검증 범위
 
 - 결석보강 11시, 숙제보충 11시, 학생 확정/변경, 학부모 확정/변경 fixture의 old contract를 정적/동적 assertion으로 고정한다.
@@ -76,7 +86,7 @@
 - `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 테스트 중 `/api/notification-jobs/reserve`, `/cancel`, Solapi를 호출하지 않는다.
 
-## 사람 gate — 11B 이후에만
+## 사람 gate — 11B-1 통과 기록
 
 11A 순수 builder 추출 자체는 외부 발송을 만들지 않는다. 실제 예약 orchestration을 이동하거나 수정하는 11B부터 다음을 사람이 확인해야 한다.
 
@@ -85,6 +95,8 @@
 3. 한 종류만 예약했을 때 다른 대상 job이 생성되지 않는지 확인한다.
 4. `notification_jobs` row와 Solapi 그룹의 상태·시각·수신번호가 일치하는지 확인한다.
 5. 취소 후 OS만 꺼지거나 Solapi만 남지 않는지 확인한다.
+
+11B-1은 위 항목을 모두 통과했다. Solapi는 예약 취소 그룹을 `FAILED`로 집계하지만 연결 메시지의 `reason=예약취소`, `statusCode=1070`, 발송 0건으로 취소 완료를 표현하므로 그룹 상태 문자열 하나만으로 실패 판정하지 않는다.
 
 ## 즉시 중단 조건
 

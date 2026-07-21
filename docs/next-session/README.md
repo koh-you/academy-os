@@ -8,6 +8,12 @@
 
 이 폴더 하나만 다음 Codex 세션에 넘기면 됩니다. 리팩터링과 유지보수는 아래처럼 별도 Git worktree/브랜치에서 진행합니다. 두 세션 모두 `AGENTS.md`와 `docs/current-worklog.md` 최상단의 `미룬 작업 큐`를 먼저 사용자에게 요약해야 합니다.
 
+## 상태 보고 시 남은 사람 gate 우선 표시
+
+다음 세션은 `어디까지 진행됐나요`, 중간 진행, 작업 완료 답변에서 완료 항목보다 먼저 `남은 사람 gate`를 표시합니다. 각 gate의 검토 순서, 통과 기준, 중단 조건, 통과 전 금지되는 commit/push/배포/다음 작업을 함께 씁니다. 보류·미실시는 통과로 바꾸지 않으며 gate가 없으면 `남은 사람 gate: 없음`이라고 명시합니다.
+
+11B-1 코드 이동 후 학생 일정·학부모 일정·학생 11시의 OS row/Solapi 그룹 예약·취소 대조는 반 미지정 고태영 테스트 학생과 사용자 통제 번호로 통과했습니다. 학생 포털 실제 쓰기 검수, 교사 bearer/Storage 소유권 보안 gate, Solapi 특강 템플릿 외부 검수는 별도 보류 상태입니다.
+
 ## 시험분석 GPT Image 전용 세션 참고 자료
 
 과거 완전판 `docs/next-session/exam-analysis-gpt-image-full-session-prompt.md`에는 API·DB·Storage 제작실 방향이 포함돼 있으므로 그대로 구현하지 않는다. 블로그 조사 주소와 카드 역할 참고 자료로만 사용하고, 최신 작업 경계는 Gate 1 문서와 이 README 최상단을 따른다.
@@ -137,17 +143,17 @@ Git 충돌 방지 규칙:
 
 현재 리팩터링 상태:
 - 10번 `student-parent portals` 표시 구조 audit까지 완료했습니다.
-- 11번 `supplement job builders`의 11A는 완료했습니다. `supplementJobBuilders.js`에 순수 예약시각/ID/payload builder, `notificationJobSelectors.js`에 순수 현재 job selector가 있고 deterministic fixture가 `npm run test:production`에 연결돼 있습니다.
-- 문구 seed/선생님 수정본 선택과 실제 `/api/notification-jobs/reserve|cancel`, React 상태, Supabase `notification_jobs`, Solapi 예약/취소 orchestration은 아직 App.jsx와 서버 경계에 남아 있습니다.
-- 다음 11B는 외부 side effect가 있는 고위험 단계입니다. 아래 사람 gate가 통과됐다는 사용자 확인 전에는 코드를 옮기지 마세요.
+- 11A 순수 builder/selector 분리는 완료했습니다. 사용자가 기존 결석보충 예약·취소 흐름이 정상이라고 확인해 11B 착수 gate도 통과했습니다.
+- 11B-1에서 `/api/notification-jobs/reserve|cancel`, 예약 실패 row 저장, 반환 job React 상태 반영을 `notificationJobApi.js`로 분리하고 deterministic fixture를 `npm run test:production`에 연결했습니다. Supabase/Solapi 서버 orchestration과 보충 문구·대상·시각 결정은 변경하지 않았습니다.
+- 실제 OS row/Solapi 그룹 예약·취소 사람 gate는 통과했습니다. 최신 `origin/main` `41a31943` 기준 production 364/364와 build도 통과했습니다. 11B-1 전용 브랜치 commit/push 후 다음 11B 단위는 새 범위 확정부터 시작하세요. 첫 진단 1건과 최종 검증 3건의 취소 감사 row 총 4건은 `notification_jobs`에 남아 있습니다.
 
-11B 사람 gate:
+통과한 11B-1 사람 gate 기록:
 1. 삭제 가능한 미래 보충 task와 통제된 학생/학부모 전화번호를 준비합니다.
 2. 학생 일정, 학부모 일정, 당일 학생 11시 알림톡을 각각 열어 대상, 예약시각, 저장된 선생님 최종 문구를 확인합니다.
 3. 하나씩 예약하고 OS/Supabase `notification_jobs` row와 Solapi 예약 그룹의 type, recipient, scheduledAt, message를 대조합니다.
 4. 하나씩 취소하고 OS와 Solapi 모두 취소됐는지 확인합니다.
 5. 새로고침 후 상태 유지, 중복 row/group 없음, 학생/학부모 대상 교차 없음까지 확인합니다.
-6. 하나라도 다르면 11B를 시작하지 말고 원인과 유지보수 세션에 넘길 수정 범위를 정리합니다.
+6. 하나라도 다르면 11B를 중단하고 원인과 유지보수 세션에 넘길 수정 범위를 정리합니다. 이번 11B-1에서는 모두 일치해 통과했습니다.
 
 앞서 보류한 사람 gate도 통과로 간주하지 마세요:
 - 학생 숙제 완료 저장/새로고침/재로그인/강사 미리보기 쓰기 차단
@@ -258,7 +264,7 @@ E:\academy-os 작업을 이어가겠습니다.
    - 9번 `test manager`, 10번 `student-parent portals` 읽기 전용 표시와 학생 쓰기 단위 세 개를 완료했습니다. 숙제 완료·질문 CRUD·시험 후 제출은 학생 bearer session 소유권, 전용 API, Supabase 재조회, local draft 보호와 패널 내부 상태를 사용합니다.
    - 실제 학생 사람 gate는 2026-07-21 사용자 지시로 결과 보류했습니다. 숙제 완료와 질문 추가/상태/삭제의 저장·새로고침 유지·강사 미리보기 차단은 미통과가 아니라 미실시 상태로 계속 기록합니다.
    - 10번 `student-parent portals` 표시 구조 리팩터링은 완료 audit까지 끝냈습니다. 학생 쓰기 사람 gate와 교사 bearer/Storage 권한 보안 gate는 별도 보류입니다.
-   - 11번 `supplement job builders` inventory는 `docs/refactor-supplement-job-builders-inventory-2026-07-21.md`에 있습니다. 11A에서 예약시각·ID·job payload builder와 현재 job selector를 각각 `supplementJobBuilders.js`, `notificationJobSelectors.js`로 분리하고 deterministic fixture를 `npm run test:production`에 연결했습니다. 다음 11B는 예약/취소 side effect가 있으므로 OS row와 Solapi 그룹 사람 gate 전에는 착수하지 않습니다.
+- 11번 `supplement job builders` inventory는 `docs/refactor-supplement-job-builders-inventory-2026-07-21.md`에 있습니다. 11A에서 예약시각·ID·job payload builder와 현재 job selector를 각각 `supplementJobBuilders.js`, `notificationJobSelectors.js`로 분리했고, 11B-1에서 예약·취소 API 어댑터를 `notificationJobApi.js`로 분리했습니다. OS row와 Solapi 그룹 사람 gate도 통과했으며 다음 11B 단위는 별도 범위·gate 확정 후 진행합니다.
 5. Solapi 특강 템플릿 검수 후 연결
    - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인합니다.
    - 검수 완료 전에는 임시 특강 알림톡 구조를 유지합니다.
@@ -361,6 +367,6 @@ App.jsx 리팩터링 18개 기준 로드맵:
 - 10번 포털의 세 학생 쓰기 단위는 저장 신뢰성 보강을 완료했습니다. 숙제 완료, 질문 CRUD, 시험 후 제출이 각각 학생 bearer session 소유권, 전용 API, Supabase 재조회, 패널 내부 상태, 실패 시 draft 보호를 사용합니다. 시험 후 제출은 Storage 전부 성공 후에만 `app_state.examPostSubmissions`를 만들며 부분 실패 시 성공 업로드분을 정리합니다.
 - 사람 검수는 사용자 지시로 보류 상태입니다. 숙제 완료·질문 CRUD·시험 후 제출의 실제 학생 저장/새로고침/재로그인/강사 미리보기 차단과 교사 확인 저장을 나중에 검수해야 하며, 보류는 통과가 아닙니다.
 - 10번 `student-parent portals` 표시 구조 리팩터링은 완료 audit까지 끝났습니다. shell은 화면 조합만 담당하고 `StudentPortalV2` controller가 파생 데이터·상태·쓰기 권한/callback을 계속 소유합니다. 교사 확인 API와 시험지 Storage 열기 권한은 별도 고위험 gate입니다.
-- 다음 리팩터링 시작점은 `docs/refactor-supplement-job-builders-inventory-2026-07-21.md`의 11B 사람 gate입니다. 삭제 가능한 테스트 보충 task로 학생 일정·학부모 일정·당일 학생 11시의 OS `notification_jobs` row와 Solapi 그룹을 먼저 대조하고, 통과 확인 전에는 `/api/notification-jobs/*`, React 상태, Supabase, Solapi 예약/취소 orchestration을 옮기지 마세요.
+- 다음 리팩터링 시작점은 `docs/refactor-supplement-job-builders-inventory-2026-07-21.md`의 11B-1 통과 기록 다음입니다. 예약·취소 API 어댑터까지 분리했으므로, 다음 11B 의미 단위의 원천·외부 side effect·추가 사람 gate 필요 여부를 먼저 정하고 한 단위만 진행하세요.
 - 최신 기능 커밋은 작업 시작 시 반드시 `git log -1 --oneline`으로 다시 확인하세요. 이 README의 해시는 작업 중 변경될 수 있습니다.
 - 현재 로컬에 남을 수 있는 미추적 항목: `.codex-temp/`. 커밋하지 않습니다.

@@ -38,6 +38,10 @@ import {
   getSupplementStudentReminderJob,
   sortNotificationJobsForCurrentStatus
 } from "../domains/notifications/notificationJobSelectors.js";
+import {
+  cancelNotificationJobRequest,
+  reserveNotificationJobRequest
+} from "../domains/notifications/notificationJobApi.js";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
@@ -6249,18 +6253,12 @@ export function App() {
   }
 
   async function handleCancelNotificationJob(notificationJob, reason = "선생님 예약 취소") {
-    if (!notificationJob?.notificationJobId) throw new Error("취소할 알림톡 예약 ID가 없습니다.");
-    const result = await postJson("/api/notification-jobs/cancel", {
-      notificationJobId: notificationJob.notificationJobId,
-      reason
+    return cancelNotificationJobRequest({
+      notificationJob,
+      reason,
+      onNotificationJob: upsertNotificationJobState,
+      request: postJson
     });
-    if (result.notificationJob) {
-      setNotificationJobs((current) => [
-        result.notificationJob,
-        ...current.filter((job) => job.notificationJobId !== result.notificationJob.notificationJobId)
-      ]);
-    }
-    return result;
   }
 
   useEffect(() => {
@@ -7891,22 +7889,12 @@ export function App() {
   }
 
   async function reserveNotificationJob(notificationJob, reason = "알림톡 예약") {
-    try {
-      const result = await postJson("/api/notification-jobs/reserve", { notificationJob, reason });
-      if (result.notificationJob) upsertNotificationJobState(result.notificationJob);
-      return result.notificationJob ?? notificationJob;
-    } catch (error) {
-      const failedJob = {
-        ...notificationJob,
-        error: `Solapi 예약 실패: ${error.message}`,
-        provider: "academy-os",
-        status: "failed",
-        updatedAt: new Date().toISOString()
-      };
-      upsertNotificationJobState(failedJob);
-      postJson("/api/notification-jobs", { notificationJob: failedJob }).catch((persistError) => console.error(persistError));
-      return failedJob;
-    }
+    return reserveNotificationJobRequest({
+      notificationJob,
+      reason,
+      onNotificationJob: upsertNotificationJobState,
+      request: postJson
+    });
   }
 
   async function reserveLessonNotificationJob(notificationJob, reason = "수업일지 예약") {

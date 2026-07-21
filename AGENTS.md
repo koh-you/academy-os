@@ -2,6 +2,22 @@
 
 이 파일은 Codex 새 세션이 이 저장소에서 작업할 때 가장 먼저 읽는 프로젝트 지침입니다.
 
+## Remaining Human Gates - Always Report Before Saying Work Is Done
+
+상태 보고, 진행 보고, 작업 완료 답변에서는 완료한 항목만 나열하지 않는다. 답변 상단에 `남은 사람 gate`를 별도 제목으로 먼저 표시하고, 각 gate가 무엇을 막고 있는지까지 명시한다.
+
+- 새 세션 시작 답변에서는 `미룬 작업 큐`를 먼저 보여준 직후 `남은 사람 gate`를 이어서 표시한다. 사용자가 `어디까지 진행됐나요`, `현재 상태`, `다음은 무엇인가요`처럼 상태를 물으면 답변 첫 부분에 남은 gate부터 표시한다.
+- gate마다 `검토 대상`, `사용자가 실제로 확인할 순서`, `통과 기준`, `실패/중단 조건`, `통과 전 금지되는 다음 단계(commit/push/배포/다음 의미 단위)`를 짧고 구체적으로 쓴다.
+- `착수 전 gate`, `코드 이동 후 gate`, `배포 후 운영 gate`, `별도 보안 gate`, `사용자가 보류한 gate`를 구분한다. 보류나 미실시는 통과로 표현하지 않는다.
+- AI 자동검증이 모두 통과해도 사람 gate가 남아 있으면 `완료`라고만 말하지 않는다. `코드/자동검증 완료 · 사람 gate 대기 · commit/push 대기`처럼 현재 단계와 blocked next action을 함께 말한다.
+- 남은 gate가 없다면 `남은 사람 gate: 없음`이라고 명시한다. 새 gate가 생기거나 통과하면 이 섹션의 현재 목록, `docs/current-worklog.md`, 필요 시 `docs/next-session/README.md`를 함께 갱신한다.
+
+현재 리팩터링 세션의 남은 사람 gate:
+
+1. `학생 포털 실제 쓰기 검수` — 숙제 완료, 질문 CRUD, 시험 후 제출의 저장·새로고침·재로그인·강사 미리보기 차단·교사 확인을 실제 학생으로 검수한다. 사용자 보류 상태이며 11B 리팩터링과는 별개다.
+2. `교사 bearer session + Storage 소유권 보안 gate` — 교사 API 인증과 시험지 파일 열람 권한을 별도 고위험 작업으로 검증한다. 포털 표시 리팩터링이나 11B와 섞지 않으며 현재 통과가 아니다.
+3. `Solapi 특강 템플릿 외부 검수` — 검수 완료 여부를 사용자에게 확인한다. 완료 전에는 템플릿 ID/변수 연결이나 테스트 발송을 진행하지 않으며, 이 리팩터링 세션에서는 완료 여부와 관계없이 연결 작업을 하지 않는다.
+
 ## Deferred Work Queue - Always Show First
 
 새 세션은 아래 미룬 작업 큐를 최우선 최상단 작업지침으로 취급한다. 사용자가 별도 작업을 바로 요청하더라도, 코드 수정 전에 `AGENTS.md`, `docs/current-worklog.md`, `docs/next-session/README.md`, `git status --short`, `git log -1 --oneline`을 확인한 뒤 현재 미룬 작업과 새 요청의 우선순위를 먼저 짧게 정리해서 사용자에게 보여준다.
@@ -44,12 +60,12 @@
    - 순서: `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`.
    - 우선순위: 위험이 낮은 helper/config/API/client/component부터 진행하고, `LessonJournalDetail`, 출결, Solapi 예약, 보충관리처럼 저장/발송 side effect가 큰 영역은 충분한 gate 이후 진행한다.
    - 기준 로드맵: 아래 `App.jsx Refactoring Roadmap - 18 Units`를 다음 세션의 리팩터링 후보 목록으로 사용한다. 이미 일부 분리된 항목도 남은 하위 컴포넌트/헬퍼가 있으면 같은 묶음 안에서 계속 쪼갠다.
-   - 현재 이어받을 지점: 10번 `student-parent portals` 표시 구조 리팩터링은 완료 audit까지 끝냈다. `StudentTodayTab`, `ParentPortal`, `StudentPortalShell`을 분리하고 미사용 legacy `StudentPortal`을 제거했다. 학생 숙제 완료·질문 CRUD·시험 제출 사람 gate와 교사 bearer/Storage 권한 보안 gate는 별도 보류다. 11번 `supplement job builders` inventory는 `docs/refactor-supplement-job-builders-inventory-2026-07-21.md`에 기록했다. 11A에서 예약시각·ID·job payload builder를 `supplementJobBuilders.js`로, 현재 job 우선순위와 학생 11시·학생 일정·학부모 일정 selector를 `notificationJobSelectors.js`로 분리하고 deterministic fixture를 `npm run test:production`에 연결했다. 문구 seed/선생님 수정본 선택과 실제 예약·취소 orchestration은 계속 `App.jsx`에 남아 있다. 다음 단계는 side effect가 있는 11B이므로 코드 이동 전에 학생·학부모·11시 예약과 취소의 OS row/Solapi 그룹 사람 gate를 먼저 통과해야 한다.
+   - 현재 이어받을 지점: 10번 `student-parent portals` 표시 구조 리팩터링은 완료 audit까지 끝냈다. `StudentTodayTab`, `ParentPortal`, `StudentPortalShell`을 분리하고 미사용 legacy `StudentPortal`을 제거했다. 학생 숙제 완료·질문 CRUD·시험 제출 사람 gate와 교사 bearer/Storage 권한 보안 gate는 별도 보류다. 11A 순수 builder/selector 분리를 완료했다. 11B-1에서 예약·취소 API 호출과 반환 job 상태 반영을 `notificationJobApi.js`로 분리하고 deterministic fixture를 `npm run test:production`에 연결했다. 반 미지정 고태영 테스트 학생과 사용자 통제 번호로 학생 일정·학부모 일정·학생 11시의 OS row/Solapi 그룹 예약·취소 대조까지 통과했으며 테스트 task는 삭제했다. 다음 11B 의미 단위는 최신 main rebase 후 새 범위와 gate를 다시 정한다.
    - 보류된 사람 gate: 2026-07-21 사용자 지시로 학생 숙제 완료, 질문 CRUD, 시험 후 제출의 실제 학생 테스트 결과를 보류했다. 시험 후 제출은 실제 대상 학생의 입력/파일 선택, Storage 업로드, 제출 저장, 새로고침·재로그인 유지, 교사 확인 저장을 나중에 확인한다. 보류는 통과 판정이 아니며 회귀 발견 시 즉시 별도 수정한다.
    - 확인된 보안 후속 gate: 교사 로그인은 아직 서버 서명 bearer token을 발급하지 않아 시험 후 제출의 교사 확인 전용 API도 기존 교사 관리 API와 같은 인증 공백이 있다. Storage 파일 열기 API도 경로를 아는 요청자의 교사/학생 소유권을 검증하지 않는다. 이 둘은 표시 shell 분리와 섞지 말고 `교사 세션 인증 + 파일 열람 권한` 별도 고위험 gate로 진행한다.
    - 확인된 후속 이슈: 학생 수업 준비 안내 목록은 현재 `prepStudentNotice` 존재 여부만 필터하고 `prepStudentVisible`을 확인하지 않는다. 이번 리팩터링에서는 기존 동작을 보존했으며, 공개 플래그 계약을 별도 기능 작업에서 확인해야 한다.
    - 확인된 후속 이슈: 학생 마이페이지 `비밀번호 변경`은 callback/API가 없는 기존 미연결 UI다. 이번 리팩터링에서는 보존했고, 숨김/비활성 안내/실제 PIN 변경 구현은 저장 신뢰성의 오작동 버튼 정리 작업에서 별도 결정한다.
-   - 다음 세션 시작 규칙: 최신 커밋과 git diff를 확인하고 학생 포털 사람 gate와 보안 gate가 보류 중임을 짧게 알린다. 11A builder/selector fixture를 재확인한 뒤 11B 예약·취소 orchestration의 사람 gate를 먼저 사용자에게 띄운다. 승인·검증 없이 `/api/notification-jobs/*`, React 상태, Supabase, Solapi를 이동하지 않는다.
+   - 다음 세션 시작 규칙: 최신 커밋과 git diff를 확인하고 학생 포털 사람 gate와 보안 gate가 보류 중임을 짧게 알린다. 11B-1 예약·취소 API 어댑터와 통과한 OS row/Solapi 그룹 gate를 재확인한 뒤, 다음 11B 의미 단위의 원천·외부 side effect·추가 사람 gate 필요 여부를 먼저 정한다. 한 번에 한 단위만 이동한다.
 5. `Solapi 특강 템플릿 검수 후 연결`
    - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 확인한다.
    - 검수 완료 전에는 현재 임시 특강 알림톡 구조를 유지하고, 검수 완료 확인 후에만 템플릿 ID/변수 연결, 테스트 데이터 발송, 링크/문구 검수를 진행한다.

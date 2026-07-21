@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 남은 사람 gate - 상태 보고 최상단 표시
+
+모든 상태/진행/완료 답변은 완료 목록보다 먼저 남은 사람 gate와 blocked next action을 표시한다. 세부 보고 규칙의 source of truth는 `AGENTS.md` 최상단 `Remaining Human Gates` 섹션이다.
+
+1. `학생 포털 실제 쓰기 검수` — 숙제 완료, 질문 CRUD, 시험 후 제출의 실제 학생 저장/재조회/재로그인/권한을 확인한다. 사용자 보류이며 통과가 아니다.
+2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
+3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
+
 ## 2026-07-23 P3. 시험분석 프롬프트 3단계 사용 UI
 
 - 상태: 구현·검증·운영 배포 완료. `58ddee0d`를 `origin/main`에 푸시했고 운영 Vercel 번들 `/assets/main-Cr9Mkky5.js`, `/assets/main-Bz4qkPw7.css`에서 세 단계 버튼·임시 입력 안내·14px 단계 CSS 포함을 확인했다. 사람 화면 gate 대기.
@@ -207,7 +215,6 @@
 - 사람 gate: 삭제 가능한 미래 테스트 수업의 학생 한 명에서 메모와 학생·학부모 가져오기 체크를 바꿔 저장한 뒤 `저장 완료`를 확인하고 새로고침한다. 메모와 두 체크가 그대로여야 한다. 이어 확인할 이전 메모가 있는 학생에서 `확인 후 숨기기`를 누르고 저장 완료 후 새로고침해 `!`가 다시 나타나지 않는지 확인한다. 이 과정에서 저장된 학생·학부모 최종 문구와 기존 Solapi 예약은 그대로여야 한다.
 - 중단 조건: 저장 완료인데 메모/체크/확인값이 새로고침 후 되돌아감, 같은 시각 형식 차이만으로 저장 실패, 실패 시 draft나 모달이 사라짐, 메모 저장만으로 최종 문구나 notification job/Solapi 그룹이 바뀌면 다음 보강으로 넘어가지 않는다.
 - 다음 보강 순서: 이번 gate 통과 후 `이전 메모 확인 범위를 수업 연속성 그룹별로 제한할지 결정 + 잘못 확인한 메모 다시 표시`, 그다음 `X 닫기/저장 의미 분리`, `새로고침 draft 복구`, `다중 탭 updatedAt/version 충돌 방지`, 마지막으로 `!` 의미와 긴 안내문 compact화`를 한 단위씩 진행한다.
-
 ## 2026-07-22 P1. 시험분석 GPT Image 프롬프트 제작실 main 통합
 
 - 상태: 사용자 요청으로 리팩터링을 일시 중단하고 `codex/exam-analysis-gpt-image`의 I1~I7을 최신 `main`에 충돌 없이 fast-forward 통합했다. 전체 검증까지 통과했으며 통합 기록 커밋·`origin/main` 푸시 후 자동 배포를 확인한다.
@@ -307,7 +314,6 @@
 - AI 검수: 모든 provenance가 primary 코퍼스 내부이고 역할/필드·중고등 필터가 일치한다. 사실 필드 침범, 파생 코퍼스 혼입, 원문과 동일한 draft, ID 중복, 빈/과도하게 긴 문구는 없다.
 - 다음 Gate: I2에서 Academy OS의 `ai_fields`, `teacher_fields`, `final_fields`, 원본 문제/풀이/표 자산을 역할별 입력으로 매핑하고 누락·확정 상태를 정의한다. 리팩터링 세션 통합 전에는 `App.jsx`를 수정하지 않는다.
 - 중단 조건: 사실값을 문구 사례로 채움, 선택 즉시 최종 저장, 교사 저장본 자동 덮어쓰기, 출처 없는 문구 추가, 유료 AI 호출.
-
 ## 2026-07-22 P2. 수업일지 학생별 변경 시간만 표시
 
 - 상태: 코드 수정/자동검증 완료, 배포 후 화면 사람 검토 대기.
@@ -342,6 +348,18 @@
 - 운영 저장 검증: `special_lecture_enrollments` 재조회에서 중3 신초봄은 active 5회, 각 13:00~15:00이고 고3 enrollment는 canceled 0회다. 1~5회차 lessons 모두 중3 ID/13:00~15:00을 포함하고 고3 ID는 없다. 1회차 기존 출결·수업기록은 저장 전후 2건, `notification_jobs`는 0건으로 유지됐다.
 - 사람 gate: 배포 후 클리닉 특강 명단에서 `창일중 · 중3` 신초봄이 1~5회차, 각 13:00~15:00으로 보이는지 확인한다. 잘못 입력한 고3 enrollment는 활성 수강 명단에서 제외되어야 한다. 1회차 수업일지에는 신초봄 행이 추가되되 기존 학생의 출결·시간은 그대로여야 한다.
 - 중단 조건: 올바른 신초봄 원천이 불명확함, 기존 학생이 빠짐, 기존 학생 시간이 바뀜, 출결 record가 자동 생성/변경됨, 알림톡 예약/발송 발생, Supabase 재조회 불일치인데 완료 표시, 새로고침 후 공통 시간이 사라짐.
+
+## 2026-07-21 P1. 11B-1 notification_jobs 예약·취소 API orchestration 분리
+
+- 상태: 코드 분리, 자동검증, 리팩터링 후 운영 사람 gate 완료. 전용 브랜치 commit/push 진행.
+- 착수 gate: 사용자가 결석보충 작업의 기존 예약·취소 흐름이 정상이라고 확인하고 11B 진행을 승인했다. 코드 이동 전에는 이 리팩터링 세션에서 실제 운영 예약·취소를 실행하지 않았다.
+- 범위: `/api/notification-jobs/reserve`, 예약 실패 row 저장, `/api/notification-jobs/cancel` 호출과 반환 job의 React 상태 반영을 `src/domains/notifications/notificationJobApi.js`로 분리했다. `App.jsx`는 기존 `postJson`과 `upsertNotificationJobState`를 명시적으로 주입한다.
+- 동작 보존: 학생 11시·학생 일정·학부모 일정의 대상, 예약시각, 선생님 최종 문구 우선순위, job ID/payload, 실패 문구, Solapi 서버 fingerprint/pending reuse/canceled-during-reserve 계약은 변경하지 않았다. 수업일지 예약도 같은 기존 wrapper를 통해 새 API 어댑터를 사용하지만 payload와 서버 경계는 동일하다.
+- 회귀 고정: `scripts/test-notification-job-api.mjs`가 예약 성공 payload/상태 반영, 예약 실패 row와 오류 문구, 취소 payload/상태 반영, ID 없는 취소 차단을 네트워크 없이 검증한다. `npm run test:production`에 연결했다.
+- 테스트 하네스 보강: Windows CRLF에서만 실패하던 04d-1의 다중 행 문자열 검사를 줄바꿈 정규화 후 같은 기대 문자열로 비교하게 했다. 기대 동작이나 검사 항목은 낮추지 않았다. 최신 main의 54b 계약은 그대로 보존했다.
+- 검증: 최신 `origin/main` `41a31943` 기준 `node --check`, `npm run test:production` 364/364, `npm run build`, `git diff --check` 통과. 기존 Vite 500KB chunk 경고만 남는다.
+- 운영 사람 gate: 반 미지정 `고태영` 테스트 학생의 학생·학부모 번호가 같은 사용자 통제 번호임을 재확인했다. `11B-1 검증용` 미래 결석보충 task를 만들고 학생 일정(`schedule_reminder`), 학부모 일정(`notice_parent`), 당일 학생 11시(`student_reminder`)를 하나씩 실제 Solapi 예약했다. 최종 검증 세 건 모두 OS row의 type/target/recipient/scheduledAt/previewBody와 Solapi 수신번호·본문 marker가 일치했고 예약 전 그룹 상태는 `SCHEDULED`였다. 취소 후 OS는 세 건 모두 `canceled`, Solapi는 `reason=예약취소`, `statusCode=1070`, 발송 성공 0건이었다. job ID 중복은 없었고 테스트 task는 삭제 후 재조회에서 0건을 확인했다. 첫 취소 표현 진단 1건과 최종 검증 3건을 합친 취소 `notification_jobs` 총 4건은 감사 이력으로 유지한다.
+- 다음: `codex/refactor-supplement-11b`에 commit/push한다. 다음 11B 의미 단위는 다시 최신 `origin/main` rebase와 별도 범위·외부 side effect gate 확정부터 시작한다.
 
 ## 2026-07-21 P1. 수업메모 버튼 줄바꿈과 이전 메모 중복 카드 정리
 
@@ -478,12 +496,12 @@
    - 순서: `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`.
    - 다음 후보는 매번 현재 diff와 최신 작업로그를 보고 다시 제안한다. 위험이 낮은 helper/config/API/client/component부터 진행하고, 수업일지/출결/Solapi/보충관리처럼 side effect가 큰 영역은 충분한 gate 이후 진행한다.
    - 기준 로드맵: 아래 `App.jsx 리팩터링 18개 기준 로드맵`을 다음 세션들의 공통 후보 목록으로 사용한다. 이미 일부 분리된 항목도 남은 하위 컴포넌트/헬퍼가 있으면 같은 묶음 안에서 계속 진행한다.
-   - 현재 이어받을 지점: 10번 `student-parent portals` 표시 구조 리팩터링은 완료 audit까지 끝냈다. `StudentTodayTab`, `ParentPortal`, `StudentPortalShell`을 분리하고 미사용 legacy `StudentPortal`을 제거했다. 학생 쓰기 사람 gate와 교사 bearer/Storage 권한 보안 gate는 별도 보류다. 11A에서 예약시각·ID·job payload builder를 `supplementJobBuilders.js`로, 현재 job 우선순위와 학생 11시·학생 일정·학부모 일정 selector를 `notificationJobSelectors.js`로 분리했다. 문구 선택과 실제 예약·취소 orchestration은 `App.jsx`에 남아 있다. 다음 11B는 외부 side effect가 있으므로 OS row/Solapi 그룹 사람 gate 전에는 착수하지 않는다.
+   - 현재 이어받을 지점: 10번 `student-parent portals` 표시 구조 리팩터링은 완료 audit까지 끝냈다. `StudentTodayTab`, `ParentPortal`, `StudentPortalShell`을 분리하고 미사용 legacy `StudentPortal`을 제거했다. 학생 쓰기 사람 gate와 교사 bearer/Storage 권한 보안 gate는 별도 보류다. 11A의 순수 builder/selector 분리를 완료했고, 11B-1에서 예약·취소 API 호출과 반환 job 상태 반영을 `notificationJobApi.js`로 분리했다. 반 미지정 고태영 테스트 학생과 사용자 통제 번호로 OS row/Solapi 예약·취소 사람 gate도 통과했다. 최신 main 기준 재검증 후 전용 브랜치 commit/push하고 다음 11B 의미 단위의 범위와 gate를 새로 확정한다.
    - 보류된 사람 gate: 2026-07-21 사용자 지시로 숙제 완료, 질문 CRUD, 시험 후 제출의 실제 학생 테스트를 보류했다. 보류는 통과 판정이 아니며 나중에 저장/새로고침/재로그인/강사 미리보기 차단과 교사 확인 저장을 확인하고 회귀 발견 시 즉시 별도 수정한다.
    - 확인된 보안 후속 gate: 교사 로그인에 서버 서명 bearer token이 없어 시험 후 제출 교사 확인 API도 기존 교사 관리 API와 같은 인증 공백이 있다. 시험지 Storage 열기 API도 요청자의 교사/학생 소유권을 검증하지 않는다. 포털 shell 분리와 섞지 않고 `교사 세션 인증 + 파일 열람 권한` 별도 고위험 작업으로 진행한다.
    - 확인된 후속 이슈: 학생 수업 준비 안내 목록은 현재 `prepStudentNotice` 존재 여부만 필터하고 `prepStudentVisible`을 확인하지 않는다. 이번 리팩터링에서는 기존 동작을 보존했으며, 공개 플래그 계약을 별도 기능 작업에서 확인해야 한다.
    - 확인된 후속 이슈: 학생 마이페이지 `비밀번호 변경`은 callback/API가 없는 기존 미연결 UI다. 이번 리팩터링에서는 보존했고, 숨김/비활성 안내/실제 PIN 변경 구현은 저장 신뢰성의 오작동 버튼 정리 작업에서 별도 결정한다.
-   - 다음 세션 시작 규칙: 최신 커밋과 git diff를 확인하고 학생 포털 사람 gate와 보안 gate가 보류 중임을 알린 뒤, 11B 예약·취소 orchestration의 OS row/Solapi 그룹 사람 gate를 먼저 사용자에게 띄운다. 승인·검증 전에는 외부 side effect 코드를 옮기지 않는다.
+   - 다음 세션 시작 규칙: 최신 커밋과 git diff를 확인하고 학생 포털 사람 gate와 보안 gate가 보류 중임을 알린다. 11B-1의 OS row/Solapi 그룹 gate는 통과했으므로 다음 11B 의미 단위의 원천·외부 side effect·추가 사람 gate 필요 여부를 먼저 정하고, 한 단위만 진행한다.
 5. `Solapi 특강 템플릿 검수 후 연결`
    - 상태: 외부 검수 대기.
    - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다.
@@ -519,8 +537,8 @@
 - 사용자 결정: 리팩터링과 운영 유지보수를 서로 다른 Codex 세션에서 진행한다. 전체 제품 맥락과 미룬 작업 큐는 공유하되 같은 Git worktree/index를 동시에 사용하지 않는다.
 - 기준 소유권: 유지보수 세션은 `E:\academy-os`의 `main`과 운영 배포 통합을 소유한다. 리팩터링 세션은 별도 worktree(기본 예시 `E:\academy-os-refactor`)와 `codex/refactor-supplement-11b` 같은 전용 브랜치만 사용하고 `main`에 직접 merge/push하지 않는다.
 - 동기화 규칙: 리팩터링 세션은 첫 작업과 새 의미 단위마다 최신 `origin/main`을 fetch/rebase한다. 유지보수와 겹치는 변경이 발견되면 유지보수 커밋을 먼저 보존하고, 충돌을 임의로 덮지 말고 사용자에게 보고한다. 통합은 한 세션만 담당한다.
-- 리팩터링 중단 지점: 10번 포털 표시 구조 audit와 11A 보충 알림 순수 builder/selector 분리는 완료했다. 다음 11B는 `/api/notification-jobs/*`, React 상태, Supabase `notification_jobs`, Solapi 예약/취소가 함께 움직이는 고위험 단계라 아래 실제 사람 gate 통과 전에는 시작하지 않는다.
-- 리팩터링 사람 gate 1: 삭제 가능한 미래 보충 task와 통제된 학생/학부모 번호로 `학생 알림톡`, `학부모 알림톡`, `당일 학생 11시 알림톡`을 각각 열어 대상·예약시각·선생님 최종 문구를 확인한다. 각 예약 뒤 OS/Supabase `notification_jobs` row와 Solapi 예약 그룹을 대조하고, 취소 뒤 양쪽 모두 취소됐는지 확인한다. 새로고침 후 상태 유지, 중복 없음, 학생/학부모 대상 교차 없음까지 확인한다.
+- 리팩터링 중단 지점: 10번 포털 표시 구조 audit, 11A 보충 알림 순수 builder/selector 분리, 11B-1 예약·취소 API orchestration 어댑터 분리와 실제 OS row/Solapi 예약·취소 gate까지 완료했다. 다음 11B 의미 단위는 최신 main 위에서 범위와 추가 gate를 새로 확정한다.
+- 통과한 리팩터링 사람 gate 1: 삭제 가능한 미래 보충 task와 통제된 학생/학부모 번호로 `학생 알림톡`, `학부모 알림톡`, `당일 학생 11시 알림톡`의 대상·예약시각·선생님 최종 문구, OS/Supabase row, Solapi 그룹, 취소, 새로고침 유지, 중복 없음, 대상 교차 없음을 확인했다.
 - 앞서 보류한 포털 사람 gate: 실제 학생 로그인으로 숙제 완료 저장, 질문 추가/상태 변경/삭제, 시험 후 기록 입력·파일 제출·교사 확인을 각각 수행하고 새로고침·재로그인 유지, 강사 미리보기 쓰기 차단, 다른 학생 데이터 비노출을 확인한다. 이 검수는 미실시이며 통과로 간주하지 않는다.
 - 별도 보안 gate: 교사 서버 서명 bearer session과 시험지 Storage 열람 소유권 검증은 아직 해결되지 않았다. 포털 표시 리팩터링과 섞지 않고 별도 고위험 유지보수/보안 작업으로 다룬다.
 - 현재 유지보수 사람 gate: 보충관리의 오래된 붉은 자동저장 경고 제거 후 세 개 저장/처리 버튼과 상태 UI가 유지되는지, 알림관리 개별 발송의 compact/하단 정렬이 데스크톱·작은 화면에서 자연스러운지, 특강 상태 알림과 오류 Tally 신청 삭제가 테스트 원본에서만 안전하게 동작하는지 확인한다. 실제 발송·예약과 운영 연결 신청 삭제는 이 UI gate에서 실행하지 않는다.
