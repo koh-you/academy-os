@@ -175,6 +175,7 @@ Git 충돌 방지 규칙:
 - 12O에서 task 카드 원천 props, editor 값, 메타, diff 기반 저장 상태와 일정 gate 안내를 `supplementTaskCardModel.js` 순수 view-model로 분리했습니다. App은 local state/job 선택/action을 계속 소유합니다.
 - 12P에서 알림 control config, 예약 차단, 과거 preview 차단, 대상 번호와 예약/취소 가능 여부를 `supplementNotificationControlModel.js` 순수 view-model로 분리했습니다. 실제 action과 job state는 App에 남았습니다.
 - 12Q에서 학생 모달 바깥 구조·feedback·빈 상태·task stack·overlay slot을 `SupplementStudentModalShell.jsx` presentational shell로 분리했습니다. task map과 모든 state/action은 App에 남았습니다.
+- 12R-1에서 local draft 필드 변경·자동 문구 재생성·dirty/edited field·저장 payload·lesson resync 계산을 `supplementTaskDraft.js` 순수 전환으로 분리했습니다. React state와 실제 action은 App에 남았습니다.
 - 다음 12R은 local draft state와 task/lesson 저장, notification/Solapi action 소유권 이동입니다. 코드 이동 후 고태영으로 저장·일정 생성/변경·세 예약/취소·완료·새로고침·중복/대상 교차를 다시 확인하는 새 사람 gate 전에는 다음 단위로 넘어가지 않습니다. 기존 사람 gate 3개도 통과로 바꾸지 않습니다.
 
 통과한 11B-1 사람 gate 기록:

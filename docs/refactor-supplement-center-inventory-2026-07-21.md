@@ -47,6 +47,8 @@
 15. 완료: 알림 control config·예약 차단·과거 preview 차단·대상·예약/취소 가능 여부를 순수 view-model로 분리했다.
 16. 완료: `SupplementStudentModal`의 바깥 Modal·feedback·빈 상태·task stack·overlay slot을 presentational shell로 분리했다.
 17. 다음 12R: local draft state와 task/lesson 저장, notification/Solapi action 소유권 이동. 코드 이동 후 고태영 운영 검증 사람 gate가 필요하다.
+18. 완료 12R-1: local draft field transition, 자동 문구 재생성, 저장 payload와 lesson resync 판정을 순수 모델로 분리했다.
+19. 다음: draft collection sync/state 경계를 분리한 뒤 실제 action 소유권 이동으로 진행한다.
 
 ## 12B 구현 결과 — 완료 확인 모달
 
@@ -150,6 +152,12 @@
 - App이 기존 task 카드 map과 완료 확인·일정 확인·개별 알림 control overlay를 그대로 생성해 slot으로 전달한다.
 - shell에는 hook/API/`notification_jobs`/Solapi가 없으며 DOM class와 렌더 순서는 유지된다.
 - 이 단위 뒤 남은 `SupplementStudentModal` 본체는 local draft state와 실제 저장·예약·취소·완료 handler를 함께 소유하므로 다음 이동은 고태영 운영 검증을 요구하는 별도 고위험 gate다.
+
+## 12R-1 구현 결과 — local draft 전환·payload 순수 모델
+
+- non-final 필드 변경 시 이전 값이 자동 생성본과 같을 때만 세 알림 초안을 재생성하고, 선생님 최종본은 보존하는 규칙을 순수 함수로 옮겼다.
+- draft values와 edited field를 최종 task payload로 합치고 linked lesson 일정 차이만 `needsLessonResync`로 표시하는 계산도 같은 모델로 옮겼다.
+- App의 state updater와 저장·일정 handler signature는 유지했고 외부 side effect는 이동하지 않았다.
 
 ## 즉시 중단 조건
 

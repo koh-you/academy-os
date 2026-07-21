@@ -148,3 +148,88 @@ export function createPersistableSupplementTask(task = {}) {
   const { isLocalDraftTask, ...persistableTask } = task;
   return persistableTask;
 }
+
+export function updateSupplementTaskDraftEntry({
+  existing = null,
+  field = "",
+  notificationTemplates = {},
+  student = null,
+  task = {},
+  value
+} = {}, dependencies = {}) {
+  const previousValues = existing?.values ?? createSupplementTaskDraft(task, student, notificationTemplates, dependencies);
+  const values = { ...previousValues, [field]: value };
+  const editedFields = supplementTeacherFinalFields.has(field)
+    ? [...new Set([...(existing?.editedFields ?? []), field])]
+    : existing?.editedFields ?? [];
+
+  if (!supplementTeacherFinalFields.has(field)) {
+    const normalizeTime = dependencies.normalizeTime;
+    const previousTaskValues = {
+      ...task,
+      ...previousValues,
+      scheduledTime: normalizeTime(previousValues.scheduledTime) || previousValues.scheduledTime
+    };
+    const nextTaskValues = {
+      ...task,
+      ...values,
+      scheduledTime: normalizeTime(values.scheduledTime) || values.scheduledTime
+    };
+    supplementNotificationDraftConfigs.forEach((config) => {
+      const isTeacherFinal = isSupplementTeacherEditedField(task, config.field) || editedFields.includes(config.field);
+      if (isTeacherFinal) return;
+      const previousGeneratedDraft = config.controlType === "studentReminder"
+        ? dependencies.createNotificationDraft(previousTaskValues, student ? [student] : [], notificationTemplates)
+        : dependencies.buildScheduleNoticeBody(previousTaskValues, "", notificationTemplates);
+      if (normalizeSupplementDraftValue(previousValues[config.field]) !== normalizeSupplementDraftValue(previousGeneratedDraft)) return;
+      values[config.field] = config.controlType === "studentReminder"
+        ? dependencies.createNotificationDraft(nextTaskValues, student ? [student] : [], notificationTemplates)
+        : dependencies.buildScheduleNoticeBody(nextTaskValues, "", notificationTemplates);
+    });
+  }
+
+  const diff = getSupplementTaskDraftDiff(task, values, {
+    createTaskDraft: (sourceTask) => createSupplementTaskDraft(sourceTask, student, notificationTemplates, dependencies)
+  });
+  return {
+    ...(existing ?? { sourceVersion: getSupplementTaskSourceVersion(task) }),
+    dirty: diff.length > 0,
+    editedFields,
+    values
+  };
+}
+
+export function buildSupplementTaskWithDraft({
+  notificationTemplates = {},
+  student = null,
+  task = {},
+  taskDraftState = {}
+} = {}, dependencies = {}) {
+  const draftValues = taskDraftState.values ?? {};
+  const supplementTeacherEditedFields = mergeSupplementTeacherEditedFields(task, taskDraftState.editedFields ?? []);
+  const normalizedScheduledTime = dependencies.normalizeTime(draftValues.scheduledTime) || draftValues.scheduledTime;
+  const taskWithDraftValues = { ...task, ...draftValues, scheduledTime: normalizedScheduledTime };
+  const resolvedNotificationDrafts = supplementNotificationDraftConfigs.reduce((result, config) => {
+    const generatedDraft = config.controlType === "studentReminder"
+      ? dependencies.createNotificationDraft(taskWithDraftValues, student ? [student] : [], notificationTemplates)
+      : dependencies.buildScheduleNoticeBody(taskWithDraftValues, "", notificationTemplates);
+    result[config.field] = supplementTeacherEditedFields.includes(config.field)
+      ? String(draftValues[config.field] ?? "")
+      : generatedDraft;
+    return result;
+  }, {});
+  const nextTask = {
+    ...taskWithDraftValues,
+    ...resolvedNotificationDrafts,
+    supplementTeacherEditedFields
+  };
+
+  if (
+    task.linkedLessonId &&
+    (nextTask.scheduledDate !== task.linkedLessonDate ||
+      dependencies.normalizeTime(nextTask.scheduledTime) !== dependencies.normalizeTime(task.linkedLessonTime))
+  ) {
+    nextTask.needsLessonResync = true;
+  }
+  return nextTask;
+}

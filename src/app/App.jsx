@@ -61,6 +61,7 @@ import { createSupplementTaskCardViewModel } from "../domains/supplements/supple
 import { SupplementStudentModalShell } from "../domains/supplements/SupplementStudentModalShell.jsx";
 import {
   areSupplementTaskDraftValuesEqual,
+  buildSupplementTaskWithDraft as buildSupplementTaskWithDraftModel,
   createPersistableSupplementTask,
   createSupplementTaskDraft as createSupplementTaskDraftModel,
   getSupplementHomeworkNoteValue,
@@ -70,10 +71,9 @@ import {
   getSupplementTaskDraftDiff as getSupplementTaskDraftDiffModel,
   getSupplementTaskSourceVersion,
   isSupplementTeacherEditedField,
-  mergeSupplementTeacherEditedFields,
-  normalizeSupplementDraftValue,
   supplementNotificationDraftConfigs,
-  supplementTeacherFinalFields
+  supplementTeacherFinalFields,
+  updateSupplementTaskDraftEntry
 } from "../domains/supplements/supplementTaskDraft.js";
 import {
   getSupplementImmediateNoticeSaveStatus,
@@ -22499,11 +22499,7 @@ function SupplementCenter({
 }
 
 function createSupplementTaskDraft(task = {}, student = null, notificationTemplates = {}) {
-  return createSupplementTaskDraftModel(task, student, notificationTemplates, {
-    buildScheduleNoticeBody: buildSupplementScheduleNoticeBody,
-    createNotificationDraft,
-    normalizeMethodForTask: normalizeSupplementMethodForTask
-  });
+  return createSupplementTaskDraftModel(task, student, notificationTemplates, supplementTaskDraftDependencies);
 }
 
 function getSupplementTaskDraftDiff(task = {}, draft = {}, student = null, notificationTemplates = {}) {
@@ -22511,6 +22507,13 @@ function getSupplementTaskDraftDiff(task = {}, draft = {}, student = null, notif
     createTaskDraft: (sourceTask) => createSupplementTaskDraft(sourceTask, student, notificationTemplates)
   });
 }
+
+const supplementTaskDraftDependencies = {
+  buildScheduleNoticeBody: buildSupplementScheduleNoticeBody,
+  createNotificationDraft,
+  normalizeMethodForTask: normalizeSupplementMethodForTask,
+  normalizeTime: normalizeTimeInput
+};
 
 function SupplementStudentModal({
   notificationTemplates = {},
@@ -22608,46 +22611,16 @@ function SupplementStudentModal({
     if (!task?.makeupTaskId) return;
     setTaskDrafts((current) => {
       const existing = current[task.makeupTaskId];
-      const previousValues = existing?.values ?? createSupplementTaskDraft(task, student, normalizedNotificationTemplates);
-      const values = {
-        ...previousValues,
-        [field]: value
-      };
-      const editedFields = supplementTeacherFinalFields.has(field)
-        ? [...new Set([...(existing?.editedFields ?? []), field])]
-        : existing?.editedFields ?? [];
-      if (!supplementTeacherFinalFields.has(field)) {
-        const previousTaskValues = {
-          ...task,
-          ...previousValues,
-          scheduledTime: normalizeTimeInput(previousValues.scheduledTime) || previousValues.scheduledTime
-        };
-        const nextTaskValues = {
-          ...task,
-          ...values,
-          scheduledTime: normalizeTimeInput(values.scheduledTime) || values.scheduledTime
-        };
-        supplementNotificationDraftConfigs.forEach((config) => {
-          const isTeacherFinal = isSupplementTeacherEditedField(task, config.field) || editedFields.includes(config.field);
-          if (isTeacherFinal) return;
-          const previousGeneratedDraft = config.controlType === "studentReminder"
-            ? createNotificationDraft(previousTaskValues, [student], normalizedNotificationTemplates)
-            : buildSupplementScheduleNoticeBody(previousTaskValues, "", normalizedNotificationTemplates);
-          if (normalizeSupplementDraftValue(previousValues[config.field]) !== normalizeSupplementDraftValue(previousGeneratedDraft)) return;
-          values[config.field] = config.controlType === "studentReminder"
-            ? createNotificationDraft(nextTaskValues, [student], normalizedNotificationTemplates)
-            : buildSupplementScheduleNoticeBody(nextTaskValues, "", normalizedNotificationTemplates);
-        });
-      }
-      const diff = getSupplementTaskDraftDiff(task, values, student, normalizedNotificationTemplates);
       return {
         ...current,
-        [task.makeupTaskId]: {
-          ...(existing ?? { sourceVersion: getSupplementTaskSourceVersion(task) }),
-          dirty: diff.length > 0,
-          editedFields,
-          values
-        }
+        [task.makeupTaskId]: updateSupplementTaskDraftEntry({
+          existing,
+          field,
+          notificationTemplates: normalizedNotificationTemplates,
+          student,
+          task,
+          value
+        }, supplementTaskDraftDependencies)
       };
     });
     setTaskSaveStatusPatch(task.makeupTaskId, {
@@ -22672,37 +22645,12 @@ function SupplementStudentModal({
 
   function buildTaskWithDraft(task) {
     const taskDraftState = getTaskDraftState(task);
-    const draftValues = taskDraftState.values;
-    const supplementTeacherEditedFields = mergeSupplementTeacherEditedFields(task, taskDraftState.editedFields ?? []);
-    const normalizedScheduledTime = normalizeTimeInput(draftValues.scheduledTime) || draftValues.scheduledTime;
-    const taskWithDraftValues = {
-      ...task,
-      ...draftValues,
-      scheduledTime: normalizedScheduledTime
-    };
-    const resolvedNotificationDrafts = supplementNotificationDraftConfigs.reduce((result, config) => {
-      const generatedDraft = config.controlType === "studentReminder"
-        ? createNotificationDraft(taskWithDraftValues, [student], normalizedNotificationTemplates)
-        : buildSupplementScheduleNoticeBody(taskWithDraftValues, "", normalizedNotificationTemplates);
-      result[config.field] = supplementTeacherEditedFields.includes(config.field)
-        ? String(draftValues[config.field] ?? "")
-        : generatedDraft;
-      return result;
-    }, {});
-    const nextTask = {
-      ...taskWithDraftValues,
-      ...resolvedNotificationDrafts,
-      supplementTeacherEditedFields
-    };
-
-    if (
-      task.linkedLessonId &&
-      (nextTask.scheduledDate !== task.linkedLessonDate ||
-        normalizeTimeInput(nextTask.scheduledTime) !== normalizeTimeInput(task.linkedLessonTime))
-    ) {
-      nextTask.needsLessonResync = true;
-    }
-    return nextTask;
+    return buildSupplementTaskWithDraftModel({
+      notificationTemplates: normalizedNotificationTemplates,
+      student,
+      task,
+      taskDraftState
+    }, supplementTaskDraftDependencies);
   }
 
   async function handleSaveTask(task) {
