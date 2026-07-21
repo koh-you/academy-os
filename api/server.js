@@ -1873,6 +1873,16 @@ function getProviderMessageId(result) {
   );
 }
 
+function getProviderRenderedMessageText(result = {}) {
+  return String(
+    result?.response?.messageList?.[0]?.text ??
+    result?.response?.messages?.[0]?.text ??
+    result?.messageList?.[0]?.text ??
+    result?.messages?.[0]?.text ??
+    ""
+  ).trim();
+}
+
 function getKoreaDayUtcRange(dateText = "") {
   const date = String(dateText || "").trim();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { startIso: "", endIso: "" };
@@ -2628,7 +2638,6 @@ function getNotificationReservationFingerprint(job = {}) {
   const payload = job.payload ?? {};
   return JSON.stringify({
     notificationType: job.notificationType,
-    previewBody: job.previewBody ?? "",
     recipient: job.recipient ?? "",
     scheduledAt: job.scheduledAt ?? "",
     target: job.target ?? "",
@@ -2757,6 +2766,7 @@ async function reserveNotificationJobInSolapi(job, { forceDryRun = false, reason
 
   const result = await sendScheduledNotificationJobToSolapi(reservingJob, { forceDryRun });
   const status = result?.dryRun ? "dry_run" : "scheduled";
+  const providerPreviewBody = getProviderRenderedMessageText(result);
   const latest = await getNotificationJob(nextJob.notificationJobId);
   if (latest.notificationJob?.status === "canceled") {
     const reservedGroupId = getProviderMessageId(result);
@@ -2780,6 +2790,7 @@ async function reserveNotificationJobInSolapi(job, { forceDryRun = false, reason
   const updatedJob = {
     ...reservingJob,
     error: "",
+    previewBody: providerPreviewBody || reservingJob.previewBody,
     payload: {
       ...(reservingJob.payload ?? {}),
       scheduledDate: reservingJob.scheduledAt,
