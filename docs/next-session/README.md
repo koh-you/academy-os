@@ -1,10 +1,12 @@
 # Next Session Handoff
 
+> 2026-07-21 시험분석 방향 정정: Academy OS 안에 GPT Image 생성 API·버전 DB·Storage 제작실을 먼저 만드는 것이 아니다. Academy OS의 교사 확정 데이터를 바탕으로 `전체 구성안 -> 1번 슬라이드 상세 프롬프트 -> 2번 슬라이드 상세 프롬프트 -> ... -> 장별 수정 프롬프트`를 출력하고, 사용자가 ChatGPT 프로젝트에 복사해 한 장씩 생성·수정하는 것이 현재 목표다. 블로그 Gate 1 전수 목록은 `docs/exam-analysis-blog-corpus-gate1-2026-07-21.md`가 기준이며, 다음은 Gate 2 원본 이미지 메타데이터·중복 해시 확정이다.
+
 이 폴더 하나만 다음 Codex 세션에 넘기면 됩니다. 리팩터링과 유지보수는 아래처럼 별도 Git worktree/브랜치에서 진행합니다. 두 세션 모두 `AGENTS.md`와 `docs/current-worklog.md` 최상단의 `미룬 작업 큐`를 먼저 사용자에게 요약해야 합니다.
 
-## 시험분석 GPT Image 전용 세션에 바로 붙여넣을 프롬프트
+## 시험분석 GPT Image 전용 세션 참고 자료
 
-마스터 프롬프트 전체, 카드 역할별 모듈, 웹앱 제작 흐름, 버전 저장 구조, 블로그 재접속 주소와 후킹 패턴 작업까지 포함한 완전판은 `docs/next-session/exam-analysis-gpt-image-full-session-prompt.md`입니다. 다음 시험분석 세션에는 요약본 대신 이 파일 전체를 복사해 붙여넣는 것을 우선합니다.
+과거 완전판 `docs/next-session/exam-analysis-gpt-image-full-session-prompt.md`에는 API·DB·Storage 제작실 방향이 포함돼 있으므로 그대로 구현하지 않는다. 블로그 조사 주소와 카드 역할 참고 자료로만 사용하고, 최신 작업 경계는 Gate 1 문서와 이 README 최상단을 따른다.
 
 ```text
 Academy OS 시험분석 GPT Image 전용 세션입니다.
