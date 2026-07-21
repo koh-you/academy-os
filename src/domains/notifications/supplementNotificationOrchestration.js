@@ -13,6 +13,71 @@ import {
   getSupplementScheduleNoticeJob
 } from "./notificationJobSelectors.js";
 
+export async function applySupplementScheduleNotificationsRequest({
+  previousScheduleText = "",
+  reserveScheduleNotices,
+  reserveStudentReminder,
+  shouldReserveScheduleNotice = false,
+  shouldUpdateStudentReminder = false,
+  student,
+  task
+} = {}) {
+  const supplementReminder = shouldUpdateStudentReminder
+    ? await reserveStudentReminder(task)
+    : {
+        skipped: true,
+        status: "notApplied",
+        message: "학생 11시 알림톡 예약은 갱신하지 않았습니다. 예약 확인에서 기존 예약이 맞는지 확인하세요."
+      };
+  const scheduleNotice = shouldReserveScheduleNotice
+    ? await reserveScheduleNotices(task, student, previousScheduleText)
+    : {
+        parent: {
+          skipped: true,
+          status: "notApplied",
+          message: shouldUpdateStudentReminder
+            ? "현재 일정의 학부모 보충 안내가 이미 예약 또는 발송되어 중복 예약하지 않았습니다."
+            : "학부모 보충 일정 안내 예약은 갱신하지 않았습니다."
+        },
+        scheduledAt: "",
+        student: {
+          skipped: true,
+          status: "notApplied",
+          message: shouldUpdateStudentReminder
+            ? "현재 일정의 학생 보충 안내가 이미 예약 또는 발송되어 중복 예약하지 않았습니다."
+            : "학생 보충 일정 안내 예약은 갱신하지 않았습니다."
+        }
+      };
+  const scheduleChangeNotice = scheduleNotice.student;
+  const parentScheduleChangeNotice = scheduleNotice.parent;
+  const scheduleNoticeKind =
+    scheduleChangeNotice.notificationJob?.payload?.noticeKind ||
+    scheduleChangeNotice.notificationJob?.result?.noticeKind ||
+    "";
+  const parentScheduleNoticeKind =
+    parentScheduleChangeNotice.notificationJob?.payload?.noticeKind ||
+    parentScheduleChangeNotice.notificationJob?.result?.noticeKind ||
+    "";
+  return {
+    scheduleChangeNoticeJob: scheduleChangeNotice.notificationJob ?? null,
+    scheduleChangeNoticeMessage: scheduleChangeNotice.message ?? "",
+    scheduleChangeNoticeSkipped: Boolean(scheduleChangeNotice.skipped),
+    scheduleChangeNoticeStatus: scheduleChangeNotice.status || (scheduleChangeNotice.skipped ? "notApplied" : "sent"),
+    scheduleNoticeKind,
+    parentScheduleChangeNoticeJob: parentScheduleChangeNotice.notificationJob ?? null,
+    parentScheduleChangeNoticeMessage: parentScheduleChangeNotice.message ?? "",
+    parentScheduleChangeNoticeSkipped: Boolean(parentScheduleChangeNotice.skipped),
+    parentScheduleChangeNoticeStatus: parentScheduleChangeNotice.status || (parentScheduleChangeNotice.skipped ? "notApplied" : "sent"),
+    parentScheduleNoticeKind,
+    supplementReminderJob: supplementReminder.notificationJob ?? null,
+    supplementReminderMessage: supplementReminder.message ?? "",
+    supplementReminderSkipped: Boolean(supplementReminder.skipped),
+    supplementReminderStatus: shouldUpdateStudentReminder
+      ? supplementReminder.status || (supplementReminder.skipped ? "resultDue" : "scheduled")
+      : "notApplied"
+  };
+}
+
 export function cancelActiveSupplementScheduleNoticesRequest({
   cancelNotificationJob,
   cancelNotificationJobs,
