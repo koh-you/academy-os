@@ -17,12 +17,7 @@ import { ParentPortalAlertsTab } from "../domains/portals/ParentPortalAlertsTab.
 import { ParentPortalHomeworkTab } from "../domains/portals/ParentPortalHomeworkTab.jsx";
 import { StudentAllHomeworkTab } from "../domains/portals/StudentAllHomeworkTab.jsx";
 import { calculateAttendanceStats, StudentMyPageTab } from "../domains/portals/StudentMyPageTab.jsx";
-import { StudentLessonHistoryCalendar } from "../domains/portals/StudentLessonHistoryCalendar.jsx";
-import { StudentPrepNotices } from "../domains/portals/StudentPrepNotices.jsx";
-import { StudentSupplementSchedules, StudentTopNotice } from "../domains/portals/StudentTodayReadOnlyPanels.jsx";
-import { StudentHomeworkActionCard } from "../domains/portals/StudentHomeworkActionCard.jsx";
-import { StudentQuestionPanel } from "../domains/portals/StudentQuestionPanel.jsx";
-import { StudentExamPostSubmissionPanel } from "../domains/portals/StudentExamPostSubmissionPanel.jsx";
+import { StudentTodayTab } from "../domains/portals/StudentTodayTab.jsx";
 import {
   cleanupStudentExamPostFiles,
   confirmTeacherExamPostSubmission,
@@ -21771,6 +21766,14 @@ function StudentPortalV2({
 
         {activeTab === "today" ? (
           <StudentTodayTab
+            buildCalendarDays={buildMonthDays}
+            examPostTargets={examPostTargets}
+            getHomework={getLessonHomework}
+            getHomeworkStatusLabel={getHomeworkStatusLabel}
+            getHomeworkStatusTone={getHomeworkStatusTone}
+            getLessonContent={getLessonContent}
+            getLessonMaterial={getLessonMaterial}
+            getSupplementTypeLabel={followUpTypeLabel}
             homeworks={homeworks}
             homeworkSaveStates={homeworkSaveStates}
             lessons={lessons}
@@ -21778,8 +21781,10 @@ function StudentPortalV2({
             prepNotices={studentPrepNotices}
             questionSaveState={questionSaveState}
             questions={selectedStudentQuestions}
+            referenceDate={today}
             recordsWithLessons={studentRecordsWithLessons}
             selectedStudent={selectedStudent}
+            isHomeworkCompleted={isHomeworkCompletedForStudent}
             studentExamPostSaveStates={examPostSaveStates}
             studentExamPostWriteEnabled={studentExamPostWriteEnabled}
             studentHomeworkWriteEnabled={studentHomeworkWriteEnabled}
@@ -21789,7 +21794,6 @@ function StudentPortalV2({
             todayHomeworks={todayHomeworks}
             onAddQuestion={onStudentAddQuestion}
             onDeleteQuestion={onStudentDeleteQuestion}
-            examPostTargets={examPostTargets}
             onSubmitExamPostSubmission={onSubmitExamPostSubmission}
             onUpdateQuestion={onStudentUpdateQuestion}
             onStudentCheckHomework={onStudentCheckHomework}
@@ -21833,97 +21837,6 @@ function StudentPortalV2({
         ))}
       </section>
     </section>
-  );
-}
-
-function StudentTodayTab({
-  homeworks = [],
-  homeworkSaveStates = {},
-  lessons = [],
-  overdueHomeworks,
-  prepNotices = [],
-  questionSaveState = { state: "idle", targetId: "" },
-  questions = [],
-  examPostTargets = [],
-  recordsWithLessons = [],
-  selectedStudent,
-  studentExamPostSaveStates = {},
-  studentExamPostWriteEnabled = false,
-  studentHomeworkWriteEnabled = false,
-  studentQuestionWriteEnabled = false,
-  studentNotice,
-  supplementSchedules = [],
-  todayHomeworks,
-  onAddQuestion,
-  onDeleteQuestion,
-  onSubmitExamPostSubmission,
-  onUpdateQuestion,
-  onStudentCheckHomework
-}) {
-  return (
-    <>
-      <StudentTopNotice notice={studentNotice} />
-
-      <StudentSupplementSchedules getTypeLabel={followUpTypeLabel} schedules={supplementSchedules} />
-
-      <StudentExamPostSubmissionPanel
-        referenceDate={today}
-        saveStates={studentExamPostSaveStates}
-        targets={examPostTargets}
-        selectedStudent={selectedStudent}
-        onSubmitExamPostSubmission={onSubmitExamPostSubmission}
-        writeEnabled={studentExamPostWriteEnabled}
-      />
-
-      <StudentPrepNotices notices={prepNotices} />
-
-      <StudentLessonHistoryCalendar
-        buildCalendarDays={buildMonthDays}
-        getHomework={getLessonHomework}
-        getLessonContent={getLessonContent}
-        getLessonMaterial={getLessonMaterial}
-        homeworks={homeworks}
-        lessons={lessons}
-        recordsWithLessons={recordsWithLessons}
-        referenceDate={today}
-        selectedStudent={selectedStudent}
-      />
-
-      <StudentQuestionPanel
-        onAddQuestion={onAddQuestion}
-        onDeleteQuestion={onDeleteQuestion}
-        onUpdateQuestion={onUpdateQuestion}
-        questions={questions}
-        saveState={questionSaveState}
-        selectedStudent={selectedStudent}
-        writeEnabled={studentQuestionWriteEnabled}
-      />
-
-      <div className="sectionHeader">
-        <div>
-          <h2>오늘 해야 할 숙제</h2>
-          <p className="muted">저장 완료가 표시되면 선생님 화면과 새로고침 후에도 유지됩니다.</p>
-        </div>
-      </div>
-      <div className="homeworkStack">
-        {todayHomeworks.length === 0 ? <div className="emptyHomeworkBox">오늘 배정된 숙제가 없습니다.</div> : null}
-        {todayHomeworks.map((homework) => (
-          <StudentHomeworkActionCard
-            completed={isHomeworkCompletedForStudent(homework)}
-            homework={homework}
-            key={homework.homeworkId}
-            onComplete={onStudentCheckHomework}
-            saveState={homeworkSaveStates[homework.homeworkId]}
-            statusLabel={getHomeworkStatusLabel(homework, recordsWithLessons)}
-            statusTone={getHomeworkStatusTone(homework, recordsWithLessons)}
-            writeEnabled={studentHomeworkWriteEnabled}
-          />
-        ))}
-      </div>
-      {overdueHomeworks.length ? (
-        <div className="warningBand">⚠️ 확인이 필요한 숙제가 있습니다. 선생님과 수업 시간에 확인하세요.</div>
-      ) : null}
-    </>
   );
 }
 
