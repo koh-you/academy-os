@@ -25,6 +25,7 @@ import { ParentPortalHomeworkTab } from "../domains/portals/ParentPortalHomework
 import { StudentAllHomeworkTab } from "../domains/portals/StudentAllHomeworkTab.jsx";
 import { calculateAttendanceStats, StudentMyPageTab } from "../domains/portals/StudentMyPageTab.jsx";
 import { StudentLessonHistoryCalendar } from "../domains/portals/StudentLessonHistoryCalendar.jsx";
+import { StudentPrepNotices } from "../domains/portals/StudentPrepNotices.jsx";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
@@ -21410,17 +21411,7 @@ function StudentTodayTab({
         onSubmitExamPostSubmission={onSubmitExamPostSubmission}
       />
 
-      {prepNotices.length ? (
-        <div className="portalNoticeStack">
-          <h2>수업 준비 안내</h2>
-          {prepNotices.slice(0, 3).map((notice) => (
-            <article className="portalNoticeCard" key={`prep_${notice.lessonStudentRecordId}`}>
-              <strong>{notice.lesson?.date ?? "수업"} · {notice.lesson?.className ?? "수업 준비"}</strong>
-              <p>{notice.prepStudentNotice}</p>
-            </article>
-          ))}
-        </div>
-      ) : null}
+      <StudentPrepNotices notices={prepNotices} />
 
       <StudentLessonHistoryCalendar
         buildCalendarDays={buildMonthDays}
