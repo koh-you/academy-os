@@ -149,6 +149,7 @@ Git 충돌 방지 규칙:
 - 11B-2에서 취소 가능 상태, task별 활성 일정 안내, 현재 일정 학생·학부모 pair, 개별 재예약 취소 대상을 `notificationJobSelectors.js`로 분리했습니다. 순수 배열/Set selector라 실제 예약·취소와 운영 데이터 변경은 없으며 deterministic fixture가 이전 날짜 활성 예약 정리와 대상 교차 방지를 고정합니다. 최신 `origin/main` `db420137` 기준 production 364/364와 build를 통과했습니다.
 - 11B-3에서 연락처 누락과 예약 예외의 실패 감사 row 생성·상태 반영·API 저장을 `persistFailedNotificationJobRequest`로 통합했습니다. 정상 예약·취소·Solapi 호출은 변경하지 않았습니다.
 - 11B-4에서 여러 활성 예약의 병렬 취소와 반환 job 수집을 `cancelNotificationJobsRequest`로 분리했습니다. 대상 selector, 취소 사유, 실제 API/Solapi 계약은 그대로입니다.
+- 11B-5에서 학생·학부모 단일 일정 안내의 연락처 검사, reserve 호출, 확정/변경 결과 조립을 `supplementNotificationOrchestration.js`로 분리하고 네트워크 없는 fixture를 production test에 연결했습니다.
 
 통과한 11B-1 사람 gate 기록:
 1. 삭제 가능한 미래 보충 task와 통제된 학생/학부모 전화번호를 준비합니다.
