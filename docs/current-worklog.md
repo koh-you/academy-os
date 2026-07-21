@@ -115,6 +115,7 @@
 - 삭제 범위: 공지 작성기의 기존 미발송 공지 삭제와 함께, `scheduledAt`이 현재보다 과거인 `send_unconfirmed`만 삭제할 수 있다. `scheduled/queued/pending_send` 예약, `sent` 발송 완료, 미래 시각의 확인 필요 이력에는 삭제 버튼을 표시하지 않는다.
 - 저장 원천/side effect: 삭제는 `DELETE /api/notification-jobs?id=...`가 Supabase `notification_jobs` row를 실제 삭제하고 `deletedNotificationJobIds`에 요청 ID가 포함된 경우에만 완료 처리한다. 삭제 불가/이미 삭제된 row는 서버가 409를 반환한다. Solapi 과거 발송 결과·예약에는 별도 요청을 보내지 않는다.
 - UI 상태: 삭제 전 복구 불가와 Solapi 과거 결과 비변경을 확인창에서 알리고, 현재 기록 영역에 `삭제 중 -> 삭제 완료/삭제 실패`를 표시한다. 완료 후 서버 목록을 다시 조회하므로 새로고침 뒤에도 삭제된 row가 돌아오지 않아야 한다.
+- 자동 검증/배포: `git diff --check`, API·시나리오 스크립트 문법 검사, `npm run test:production` 338/338, `npm run build`를 통과했다. `main` 커밋 `6d70a00f` 푸시 후 Vercel `main-BogEKiar.js`에 삭제 UI가 반영됐고, Render 운영 API가 존재하지 않는 probe ID 삭제 요청을 새 안전 응답 `409`와 `삭제 가능한 알림 이력이 아니거나 이미 삭제된 기록입니다.`로 거절하는 것을 확인했다. probe는 운영 row를 변경하지 않는다.
 - 사람 검토 gate: 배포 후 `알림관리 -> 확인 필요`에서 8개 행 모두 `삭제` 버튼이 보이는지 확인한다. 한 건을 삭제해 확인창, 삭제 중, 삭제 완료를 확인하고 새로고침 후 7건인지 확인한다. 이어서 나머지를 삭제할 수 있다. 예약/발송 완료 행에 삭제가 보이거나, 성공 표시 뒤 새로고침하면 row가 복원되거나, Solapi 취소/발송 요청이 발생하면 즉시 중단한다.
 
 ### 2026-07-20 P0-1. 수업일지 학생 명단 가나다순 통일
