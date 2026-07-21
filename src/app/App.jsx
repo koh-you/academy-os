@@ -55,6 +55,7 @@ import { SupplementPassConfirmModal } from "../domains/supplements/SupplementPas
 import { SupplementScheduleChangeConfirmModal } from "../domains/supplements/SupplementScheduleChangeConfirmModal.jsx";
 import { SupplementHistoryModal } from "../domains/supplements/SupplementHistoryModal.jsx";
 import { SupplementNotificationDraftWorkspace } from "../domains/supplements/SupplementNotificationDraftWorkspace.jsx";
+import { SupplementNotificationControlModal } from "../domains/supplements/SupplementNotificationControlModal.jsx";
 import {
   getSupplementImmediateNoticeSaveStatus,
   getSupplementNotificationControlDisplay,
@@ -23412,81 +23413,31 @@ function SupplementStudentModal({
         />
       ) : null}
       {notificationControlTask && notificationControlConfig ? (
-        <div className="supplementNotificationControlBackdrop" role="presentation">
-          <section
-            aria-labelledby="supplement-notification-control-title"
-            aria-modal="true"
-            className="supplementNotificationControlModal"
-            role="dialog"
-          >
-            <div className="supplementNotificationControlHeader">
-              <div>
-                <span className={`supplementNotificationControlState ${notificationControlDisplay.tone}`}>
-                  <i aria-hidden="true" />
-                  {notificationControlDisplay.label}
-                </span>
-                <h3 id="supplement-notification-control-title">{notificationControlConfig.label}</h3>
-                <p>{student.name} · {formatSupplementScheduleDateTime(notificationControlTask)}</p>
-              </div>
-              <button className="iconButton" disabled={notificationControlBusy} onClick={closeNotificationControl} type="button">×</button>
-            </div>
-            <div className="supplementNotificationControlFacts">
-              <span>수신 대상</span>
-              <strong>{notificationControlConfig.targetLabel} · {maskPhoneForDisplay(notificationControlRecipient)}</strong>
-              <span>{notificationControlHasHistoricalJob ? "이전 예약 시각" : "예약 시각"}</span>
-              <strong>
-                {notificationControlJob?.scheduledAt
-                  ? formatKoreaTimeLabel(notificationControlJob.scheduledAt)
-                  : notificationControl.controlType === "studentReminder"
-                    ? formatKoreaTimeLabel(getSupplementStudentReminderScheduledAt(notificationControlTask))
-                    : "예약 버튼을 누른 뒤 다음 정각"}
-              </strong>
-              <span>Solapi 상태</span>
-              <strong>{notificationControlJob ? formatNotificationJobStatus(notificationControlJob) : "예약 기록 없음"}</strong>
-            </div>
-            <div className="supplementNotificationControlPreview">
-              <strong>{notificationControlPreviewLabel}</strong>
-              {notificationControlHasHistoricalJob ? (
-                <small>취소·실패한 과거 문구는 재사용하지 않고, 현재 저장된 보충 내용으로 다시 만들었습니다.</small>
-              ) : null}
-              <pre>{notificationControlPreview || "저장된 알림톡 문구가 없습니다."}</pre>
-              {notificationControlSavedDraftDiffers ? (
-                <small className="savedDraftDiffers">저장한 수정본이 현재 Solapi 예약 문구와 다릅니다. 기존 예약을 취소한 뒤 다시 예약해야 수정본이 반영됩니다.</small>
-              ) : null}
-            </div>
-            {notificationControlBlockReason && !canCancelNotificationControl ? (
-              <p className="supplementNotificationControlBlock">{notificationControlBlockReason}</p>
-            ) : null}
-            {notificationControlFeedback ? (
-              <p className={`supplementNotificationControlFeedback ${notificationControlFeedback.tone}`}>
-                {notificationControlFeedback.message}
-              </p>
-            ) : null}
-            <div className="modalActions supplementNotificationControlActions">
-              <button className="softButton" disabled={notificationControlBusy} onClick={closeNotificationControl} type="button">닫기</button>
-              {canCancelNotificationControl ? (
-                <button
-                  className="dangerSoftButton"
-                  disabled={notificationControlBusy}
-                  onClick={() => handleNotificationControlAction("cancel")}
-                  type="button"
-                >
-                  {notificationControlBusy ? "취소 중" : "Solapi 예약 취소"}
-                </button>
-              ) : null}
-              {canReserveNotificationControl ? (
-                <button
-                  className="primaryButton"
-                  disabled={notificationControlBusy}
-                  onClick={() => handleNotificationControlAction("reserve")}
-                  type="button"
-                >
-                  {notificationControlBusy ? "예약 중" : "Solapi 예약"}
-                </button>
-              ) : null}
-            </div>
-          </section>
-        </div>
+        <SupplementNotificationControlModal
+          blockReason={notificationControlBlockReason}
+          canCancel={canCancelNotificationControl}
+          canReserve={canReserveNotificationControl}
+          config={notificationControlConfig}
+          display={notificationControlDisplay}
+          feedback={notificationControlFeedback}
+          hasHistoricalJob={notificationControlHasHistoricalJob}
+          isBusy={notificationControlBusy}
+          jobStatusLabel={notificationControlJob ? formatNotificationJobStatus(notificationControlJob) : "예약 기록 없음"}
+          onCancel={() => handleNotificationControlAction("cancel")}
+          onClose={closeNotificationControl}
+          onReserve={() => handleNotificationControlAction("reserve")}
+          preview={notificationControlPreview}
+          previewLabel={notificationControlPreviewLabel}
+          recipientLabel={maskPhoneForDisplay(notificationControlRecipient)}
+          savedDraftDiffers={notificationControlSavedDraftDiffers}
+          scheduleLabel={formatSupplementScheduleDateTime(notificationControlTask)}
+          scheduledAtLabel={notificationControlJob?.scheduledAt
+            ? formatKoreaTimeLabel(notificationControlJob.scheduledAt)
+            : notificationControl.controlType === "studentReminder"
+              ? formatKoreaTimeLabel(getSupplementStudentReminderScheduledAt(notificationControlTask))
+              : "예약 버튼을 누른 뒤 다음 정각"}
+          studentName={student.name}
+        />
       ) : null}
     </Modal>
   );
