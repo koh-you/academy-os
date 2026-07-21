@@ -1019,14 +1019,6 @@ const schoolCalendarAutosaveRisk = {
   recommendation: "시험정보 원본을 먼저 확인하고, 일정 등록과 수업 반영은 저장 결과를 화면에서 확인한 뒤 진행합니다."
 };
 
-const supplementAutosaveRisk = {
-  title: "보충관리 후보 검토와 완료 처리 분리",
-  storage: "Supabase makeup_tasks, lessons, homeworks(후보 원천), notificationLogs",
-  risk: "후보 목록은 보충이 필요한 대상을 보여주는 진입 화면입니다. 초안 저장, 수업일지 일정 반영, 완료 처리는 상세 검토 gate를 거쳐야 보충 원천과 일정 데이터가 안전하게 바뀝니다.",
-  stopCondition: "목록에서 바로 보충 항목 저장, 수업일지 일정 생성, 원본 숙제 상태 변경, 알림톡 발송/예약이 발생하면 다음 단계로 가지 않습니다.",
-  recommendation: "후보는 상세 검토로 열고, local draft 확인 후 내용 저장, 일정 반영, 완료 처리를 순서대로 진행합니다."
-};
-
 function getSaveButtonLabel(saveState) {
   if (saveState === "saving") return "저장 중";
   if (saveState === "failed") return "다시 저장";
@@ -22268,8 +22260,6 @@ function SupplementCenter({
         </button>
       </div>
 
-      <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...supplementAutosaveRisk} />
-
       <div className="supplementOverviewGrid">
         {supplementTabs.map((tab) => (
           <button
@@ -23198,7 +23188,6 @@ function SupplementStudentModal({
           <button className="iconButton" onClick={() => setFeedback(null)} type="button">×</button>
         </div>
       ) : null}
-      <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...supplementAutosaveRisk} />
       <div className="supplementModalLayout single">
         <section className="supplementModalMain">
           {tasks.length === 0 ? (
