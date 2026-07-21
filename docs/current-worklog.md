@@ -251,6 +251,30 @@
 - 사람 검수 gate: 삭제 가능한 미래 테스트 수업/학생 한 명에서만 진행한다. (1) 사람 메모를 입력하고 `다음시간까지` 저장 후 Supabase 구조화 세 필드, marker 제거, 새로고침 유지, 다음 수업 `확인할 숙제`를 확인한다. (2) 같은 테스트에서 `남아서 하고 가기` 저장 후 method=`stay_after`, marker 제거, 새로고침 유지, 다음 수업에는 `확인할 숙제`가 나타나지 않는지 확인한다. (3) `등원보충`을 선택만 한 상태에서는 Supabase `makeup_tasks`가 생기지 않고 `저장 전 변경`에 포함돼야 한다. `변경 저장` 후에만 task 1건과 record의 빈 구조화 세 필드가 재조회 확인돼야 한다. 실제 알림 발송·예약은 실행하지 않는다.
 - 회귀/중단 조건: 선택만으로 task 생성, 사람 메모/기존 구조화 값 소실, marker 잔존인데 저장 완료, `stay_after`가 다음 수업에 표시, 부분 실패인데 전체 저장 완료, 재시도로 task 중복, 수업일지 저장만으로 알림 job/Solapi 그룹 변경이 보이면 4단계로 넘어가지 않는다.
 
+### 2026-07-21 P0. 수업메모 원천·알림톡 책임 분리 4단계 - 예약 본문 계약 고정
+
+- 3단계 gate: 사용자가 보강 후 `다음 단계 진행`을 지시해 숙제 후속처리 구조화 사람 gate를 통과한 것으로 기록했다.
+- 착수 inventory:
+
+| 구간 | 직접 원천 | local draft | Supabase/API | 외부 side effect |
+| --- | --- | --- | --- | --- |
+| 수업메모 작성 | 강사용 `preparationMemo` | 수업메모 모달 state | `lesson_student_records` | 없음 |
+| 학생·학부모 최종 문구 | `studentComment` / `teacherComment` | 알림톡 작성창 `draftComment` | `lesson_student_records` 저장·재조회 | 저장만으로 없음 |
+| 숙제 후속 문구 | `homeworkFollowupMethod/Text/SourceHomeworkId` + 설정 문구 | 수업일지 record draft | `lesson_student_records` + `app_state.aiSettings.notificationTemplates` | 저장만으로 없음 |
+| 예약 미리보기/OS row | 저장된 최종 문구 + 구조화 후속처리 + 보충/시험 원천 | 없음 | `notification_jobs.payload/previewBody` | `Solapi 예약 반영/업데이트`에서만 예약·기존 그룹 취소 |
+| 실제 Solapi 본문 | 서버 예약 직전 재조회한 위 원천 | 없음 | `/api/notification-jobs/reserve` | 사람의 명시적 예약 반영 때만 Solapi 그룹 생성 |
+
+- 원인: 2단계에서 수업메모 저장이 최종 문구를 덮어쓰는 동작은 제거했지만, 프론트 예약 payload와 서버 예약 직전 refresh가 `prepStudentVisible/prepParentVisible`을 다시 읽어 최신 수업메모를 저장된 최종 문구 앞에 자동 합쳤다. 따라서 저장된 최종 문구와 실제 예약 본문이 다른 원천을 가질 수 있었다.
+- 본문 계약: 수업메모 포함 체크는 작성창을 열 때 local draft seed를 만드는 용도로만 사용한다. 예약/수동 발송/서버 예약 직전 refresh의 코멘트 원천은 Supabase에 저장된 대상별 최종 문구만 사용하고 `preparationNotice`는 비운다. 메모나 최종 문구를 저장해도 기존 Solapi 그룹은 자동 변경하지 않으며, 현재 저장본과 예약 fingerprint가 다르면 화면에서 `Solapi 예약 업데이트 필요`를 표시하고 사람이 명시적으로 반영한다.
+- 숙제 후속처리: 구조화된 `next_lesson/stay_after`는 메모 포함 체크와 분리해 학생·학부모 `⭐ 보충/확인 안내`에 유지한다. 기존 legacy marker는 구조화 필드가 비어 있을 때만 fallback으로 읽는다.
+- 설정 관리: 하드코딩되어 있던 `다음 수업 때 #{숙제}를 함께 확인하겠습니다.`와 `오늘 수업 후 #{숙제} 보충을 마무리합니다.`를 `설정 > 알림톡`의 `lessonNextHomeworkFollowup`, `lessonStayAfterHomeworkFollowup`으로 노출했다. 프론트 미리보기와 서버 예약 직전 refresh가 모두 Supabase `app_state.aiSettings.notificationTemplates`를 읽는다. 새 SQL은 없다.
+- 운영 read-only 확인: 운영 `/api/app-state`는 Supabase 응답이 정상이고 `aiSettings`도 존재하지만 `notificationTemplates` 저장 키는 아직 없었다. 배포 직후에는 프론트·서버가 같은 코드 기본값을 사용한다. 사람 gate에서 설정 화면의 두 기본값을 확인하고 `기본값` 또는 실제 편집으로 app_state 자동저장을 발생시킨 뒤 API 재조회에서 두 키가 생겼는지 확인한다. AI는 운영 app_state를 쓰지 않았다.
+- 대조 보강: 프론트/서버 예약 fingerprint에 `homeworkFollowupNotice`, `preparationNotice`, `supplementSchedule`, `testResult`를 모두 포함했다. 본문 구성 원천 하나라도 달라지면 기존 Solapi 예약을 같은 예약으로 재사용하지 않는다.
+- 외부 영향: 구현·자동검증 중 운영 `notification_jobs` 쓰기, Solapi 실제 발송·예약·취소는 실행하지 않았다. 실제 OS row/Solapi 본문 대조는 삭제·취소 가능한 테스트 수업의 사람 gate로 남긴다.
+- AI 검증: `git diff --check`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 363/363, `npm run build`를 통과했다. 기존 Vite 500KB chunk 경고만 남는다. 배포 확인은 push 후 이어서 수행한다.
+- 사람 검수 gate: 먼저 `설정 > 알림톡`에서 두 숙제 후속 문구를 확인하고 `기본값`을 눌러 설정 자동저장 완료 후 새로고침 유지와 app_state 키 생성을 확인한다. 이어 테스트 학생의 학생·학부모 최종 문구를 각각 저장하고, 수업메모 포함 체크를 켠 뒤 수업메모만 다른 값으로 수정한다. 새로고침 후 최종 문구가 그대로이고 예약 미리보기에 새 수업메모가 자동 추가되지 않아야 한다. `다음시간까지` 또는 `남아서 하고 가기`를 저장하면 설정 문구와 숙제명이 별표 블록에만 보여야 한다. 통제된 미래 예약에서 `Solapi 예약 반영` 후 `notification_jobs.preview_body/payload`, Solapi 그룹 수신번호·예약시각·본문이 일치하는지 확인한다. 이후 수업메모만 바꿔도 기존 예약은 바뀌지 않아야 하며, 최종 문구나 후속처리/설정 문구를 저장하면 `Solapi 예약 업데이트 필요`가 보여야 한다.
+- 중단 조건: 수업메모 저장만으로 최종 문구/기존 예약 변경, 저장하지 않은 작성창 draft 발송, 설정 문구와 미리보기/서버 본문 불일치, 별표 문구의 코멘트 중복, OS row와 Solapi 본문 불일치, 명시적 예약 반영 없이 그룹 생성·취소, 업데이트 재시도 후 중복 그룹이 보이면 5단계로 넘어가지 않는다.
+
 ### 2026-07-21 P0. 수업일지 결석 출결 알림톡 다음 정각 예약
 
 - 사용자 요청: 수업일지에서 결석을 저장하며 학부모 출결 알림톡을 선택한 경우 즉시 발송하지 않고 다음 정각에 예약한다.

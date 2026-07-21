@@ -2218,9 +2218,25 @@ function getPreparationNoticeForNotification(record = {}, target = "parent") {
   return shouldInclude ? removeHomeworkFollowupMemoLinesForNotification(record.preparationMemo) : "";
 }
 
-function getHomeworkFollowupNoticeForNotification(record = {}, target = "parent") {
-  const shouldInclude = target === "student" ? Boolean(record.prepStudentVisible) : Boolean(record.prepParentVisible);
-  return shouldInclude ? formatHomeworkFollowupForNotification(record) : "";
+const defaultLessonHomeworkFollowupTemplates = {
+  lessonNextHomeworkFollowup: "- 다음 수업 때 #{숙제}를 함께 확인하겠습니다.",
+  lessonStayAfterHomeworkFollowup: "- 오늘 수업 후 #{숙제} 보충을 마무리합니다."
+};
+
+function getLessonHomeworkFollowupTemplates(states = {}) {
+  const configured = states?.aiSettings?.notificationTemplates;
+  return {
+    ...defaultLessonHomeworkFollowupTemplates,
+    ...(configured && typeof configured === "object" && !Array.isArray(configured) ? configured : {})
+  };
+}
+
+function renderLessonHomeworkFollowupTemplate(template = "", homeworkText = "") {
+  return normalizeNotificationText(String(template ?? "").split("#{숙제}").join(homeworkText));
+}
+
+function getHomeworkFollowupNoticeForNotification(record = {}, target = "parent", notificationTemplates = {}) {
+  return formatHomeworkFollowupForNotification(record, notificationTemplates);
 }
 
 function parseHomeworkFollowupMemoLineForNotification(line = "") {
@@ -2243,14 +2259,15 @@ function getHomeworkFollowupForNotification(record = {}) {
     .find(Boolean) ?? null;
 }
 
-function formatHomeworkFollowupForNotification(record = {}) {
+function formatHomeworkFollowupForNotification(record = {}, notificationTemplates = {}) {
   const followup = getHomeworkFollowupForNotification(record);
   if (!followup) return "";
+  const templates = { ...defaultLessonHomeworkFollowupTemplates, ...notificationTemplates };
   if (followup.method === "next_lesson") {
-    return `- 다음 수업 때 ${followup.text}를 함께 확인하겠습니다.`;
+    return renderLessonHomeworkFollowupTemplate(templates.lessonNextHomeworkFollowup, followup.text);
   }
   if (followup.method === "stay_after") {
-    return `- 오늘 수업 후 ${followup.text} 보충을 마무리합니다.`;
+    return renderLessonHomeworkFollowupTemplate(templates.lessonStayAfterHomeworkFollowup, followup.text);
   }
   return "";
 }
@@ -2263,22 +2280,8 @@ function removeHomeworkFollowupMemoLinesForNotification(value = "") {
     .trim();
 }
 
-function buildInitialNotificationComment({ audience, existingComment, record, supplementSchedules }) {
-  const commentText = compactDuplicateNotificationBlocks(existingComment);
-  const prepMemo = getPreparationNoticeForNotification(record, audience);
-  const shouldAddPrepMemo = prepMemo && !notificationTextIncludesBlock(commentText, prepMemo);
-
-  if (commentText) {
-    return joinNotificationBlocks([
-      shouldAddPrepMemo ? prepMemo : "",
-      commentText
-    ]);
-  }
-
-  return joinNotificationBlocks([
-    shouldAddPrepMemo ? prepMemo : "",
-    commentText
-  ]);
+function buildInitialNotificationComment({ existingComment }) {
+  return compactDuplicateNotificationBlocks(existingComment);
 }
 
 function formatNotificationAttendance(record = {}) {
@@ -2337,7 +2340,8 @@ async function createLessonNotificationDispatchContext(jobs = []) {
     homeworksResult,
     makeupTasksResult,
     testSessionsResult,
-    testAttemptsResult
+    testAttemptsResult,
+    appStateResult
   ] = await Promise.all([
     listLessons(),
     listLessonStudentRecords(),
@@ -2345,7 +2349,8 @@ async function createLessonNotificationDispatchContext(jobs = []) {
     listHomeworks(),
     listMakeupTasks(),
     listTestSessions(),
-    listTestAttempts()
+    listTestAttempts(),
+    listAppState()
   ]);
   const lessons = lessonsResult.lessons ?? [];
   const records = recordsResult.records ?? [];
@@ -2357,6 +2362,7 @@ async function createLessonNotificationDispatchContext(jobs = []) {
     makeupTasks: makeupTasksResult.makeupTasks ?? [],
     records,
     students,
+    notificationTemplates: getLessonHomeworkFollowupTemplates(appStateResult.states ?? {}),
     testAttempts: testAttemptsResult.testAttempts ?? [],
     testSessions: testSessionsResult.testSessions ?? [],
     lessonById: new Map(lessons.map((lesson) => [lesson.lessonId, lesson])),
@@ -2436,13 +2442,10 @@ function refreshLessonCommentJobBeforeSend(job = {}, context = null) {
   const testResultLines = getStudentTestResultLinesForNotification(context.testSessions, context.testAttempts, lesson, student);
   const sourceField = audience === "student" ? "studentComment" : "teacherComment";
   const commentBody = buildInitialNotificationComment({
-    audience,
-    existingComment: record[sourceField] ?? "",
-    record,
-    supplementSchedules
+    existingComment: record[sourceField] ?? ""
   });
-  const homeworkFollowupNotice = getHomeworkFollowupNoticeForNotification(record, audience);
-  const preparationNotice = getPreparationNoticeForNotification(record, audience);
+  const homeworkFollowupNotice = getHomeworkFollowupNoticeForNotification(record, audience, context.notificationTemplates);
+  const preparationNotice = "";
   const assignmentStatus = getAssignmentStatusForNotification(record, previousHomework, context.records);
   const payload = {
     ...(job.payload ?? {}),
@@ -2636,6 +2639,7 @@ function getNotificationReservationFingerprint(job = {}) {
       checkInTime: payload.checkInTime ?? "",
       checkOutTime: payload.checkOutTime ?? "",
       commentBodyOverride: payload.commentBodyOverride ?? "",
+      homeworkFollowupNotice: payload.homeworkFollowupNotice ?? "",
       lateMinutes: payload.lateMinutes ?? "",
       lessonContent: payload.lessonContent ?? "",
       lessonDate: payload.lessonDate ?? "",
@@ -2643,6 +2647,7 @@ function getNotificationReservationFingerprint(job = {}) {
       message: payload.message ?? "",
       makeupTaskId: payload.makeupTaskId ?? "",
       nextHomework: payload.nextHomework ?? "",
+      preparationNotice: payload.preparationNotice ?? "",
       previousHomework: payload.previousHomework ?? "",
       reminderBody: payload.reminderBody ?? "",
       scheduleDate: payload.scheduleDate ?? "",
@@ -2650,7 +2655,9 @@ function getNotificationReservationFingerprint(job = {}) {
       scheduleTitle: payload.scheduleTitle ?? "",
       scheduleType: payload.scheduleType ?? "",
       studentName: payload.studentName ?? "",
-      target: payload.target ?? ""
+      supplementSchedule: payload.supplementSchedule ?? "",
+      target: payload.target ?? "",
+      testResult: payload.testResult ?? ""
     }
   });
 }

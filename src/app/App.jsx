@@ -476,10 +476,8 @@ function getPreparationNoticeForTarget(record = {}, target = "parent") {
   return shouldIncludePrepMemo ? removeHomeworkFollowupMemoLines(record?.preparationMemo) : "";
 }
 
-function getHomeworkFollowupNoticeForTarget(record = {}, target = "parent") {
-  const shouldIncludePrepMemo =
-    target === "student" ? Boolean(record?.prepStudentVisible) : Boolean(record?.prepParentVisible);
-  return shouldIncludePrepMemo ? formatHomeworkFollowupForNotice(record) : "";
+function getHomeworkFollowupNoticeForTarget(record = {}, target = "parent", notificationTemplates = {}) {
+  return formatHomeworkFollowupForNotice(record, notificationTemplates);
 }
 
 const homeworkFollowupMemoPrefixes = {
@@ -525,14 +523,15 @@ function getHomeworkFollowupFromRecord(record = {}) {
     .find(Boolean) ?? null;
 }
 
-function formatHomeworkFollowupForNotice(record = {}) {
+function formatHomeworkFollowupForNotice(record = {}, notificationTemplates = {}) {
   const followup = getHomeworkFollowupFromRecord(record);
   if (!followup) return "";
+  const templates = normalizeNotificationTemplates(notificationTemplates);
   if (followup.method === "next_lesson") {
-    return `- 다음 수업 때 ${followup.text}를 함께 확인하겠습니다.`;
+    return renderNotificationTemplate(templates.lessonNextHomeworkFollowup, { "숙제": followup.text });
   }
   if (followup.method === "stay_after") {
-    return `- 오늘 수업 후 ${followup.text} 보충을 마무리합니다.`;
+    return renderNotificationTemplate(templates.lessonStayAfterHomeworkFollowup, { "숙제": followup.text });
   }
   return "";
 }
@@ -567,13 +566,13 @@ function hasMatchingHomeworkFollowupFields(expectedRecord = {}, savedRecord = {}
     .every((field) => normalizeMessageText(expectedRecord[field]) === normalizeMessageText(savedRecord?.[field]));
 }
 
-function buildCommentPreviewLines({ audience, comment, nextHomework, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
+function buildCommentPreviewLines({ audience, comment, nextHomework, notificationTemplates = {}, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
   const lessonMaterial = getLessonMaterial(record, student);
   const lessonContent = getLessonContent(record);
   const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
   const attendance = formatAttendanceForMessage(record);
   const commentText = normalizeMessageText(comment);
-  const homeworkFollowupNotice = getHomeworkFollowupNoticeForTarget(record, audience);
+  const homeworkFollowupNotice = getHomeworkFollowupNoticeForTarget(record, audience, notificationTemplates);
   const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
   const supplementAndFollowupText = [homeworkFollowupNotice, supplementText].filter(Boolean).join("\n");
   const testResultText = testResultLines.length ? testResultLines.map((item) => `- ${item}`).join("\n") : "";
@@ -601,12 +600,13 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, previousHom
   return lines.filter(Boolean);
 }
 
-function buildCommentPreviewText({ audience, comment, lesson, nextHomework, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
+function buildCommentPreviewText({ audience, comment, lesson, nextHomework, notificationTemplates = {}, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
   const isParent = audience === "parent";
   const previewLines = buildCommentPreviewLines({
     audience,
     comment,
     nextHomework,
+    notificationTemplates,
     previousHomework,
     record,
     student,
@@ -623,8 +623,8 @@ function buildCommentPreviewText({ audience, comment, lesson, nextHomework, prev
   ]);
 }
 
-function buildCommentSourceText({ audience = "parent", lesson, nextHomework, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
-  const homeworkFollowupNotice = getHomeworkFollowupNoticeForTarget(record, audience);
+function buildCommentSourceText({ audience = "parent", lesson, nextHomework, notificationTemplates = {}, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
+  const homeworkFollowupNotice = getHomeworkFollowupNoticeForTarget(record, audience, notificationTemplates);
   const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
   return joinMessageBlocks([
     createMessageLine("수신 학생", student.name),
@@ -1068,6 +1068,7 @@ function buildLessonReservationPayloadSnapshot({
   lesson,
   mode,
   nextHomework,
+  notificationTemplates = {},
   previousHomework,
   record,
   scheduledDate,
@@ -1076,13 +1077,8 @@ function buildLessonReservationPayloadSnapshot({
   testResultLines = []
 }) {
   const sourceField = audience === "student" ? "studentComment" : "teacherComment";
-  const commentBody = buildInitialCommentDraft({
-    audience,
-    existingComment: record?.[sourceField] ?? "",
-    record,
-    supplementSchedules
-  });
-  const homeworkFollowupNotice = getHomeworkFollowupNoticeForTarget(record, audience);
+  const commentBody = compactDuplicateMessageBlocks(record?.[sourceField] ?? "");
+  const homeworkFollowupNotice = getHomeworkFollowupNoticeForTarget(record, audience, notificationTemplates);
   return {
     assignmentStatus: getAssignmentStatusForMessage(record, previousHomework),
     attendanceReason: record?.attendanceReason ?? "",
@@ -1095,7 +1091,7 @@ function buildLessonReservationPayloadSnapshot({
     lessonMaterial: getLessonMaterial(record, student),
     homeworkFollowupNotice,
     nextHomework: nextHomework?.title ?? "",
-    preparationNotice: getPreparationNoticeForTarget(record, audience),
+    preparationNotice: "",
     previousHomework: previousHomework?.title ?? "",
     recipient: audience === "student" ? student.studentPhone : student.parentPhone,
     scheduledDate,
@@ -5023,6 +5019,8 @@ const defaultAiPrompts = {
 };
 
 const defaultNotificationTemplates = {
+  lessonNextHomeworkFollowup: "- 다음 수업 때 #{숙제}를 함께 확인하겠습니다.",
+  lessonStayAfterHomeworkFollowup: "- 오늘 수업 후 #{숙제} 보충을 마무리합니다.",
   absenceMakeupStudentReminder: [
     "#{학생명} 학생 결석 보강 안내입니다.",
     "",
@@ -5056,6 +5054,22 @@ const defaultNotificationTemplates = {
 };
 
 const notificationTemplateRows = [
+  {
+    audience: "학생/학부모",
+    callSite: "수업일지 과제 상태 · 다음시간까지 · 수업 알림톡 별표 블록",
+    key: "lessonNextHomeworkFollowup",
+    source: "Supabase app_state.aiSettings.notificationTemplates",
+    title: "다음 수업 숙제 확인 안내",
+    variables: "#{숙제}"
+  },
+  {
+    audience: "학생/학부모",
+    callSite: "수업일지 과제 상태 · 남아서 하고 가기 · 수업 알림톡 별표 블록",
+    key: "lessonStayAfterHomeworkFollowup",
+    source: "Supabase app_state.aiSettings.notificationTemplates",
+    title: "수업 후 숙제 보충 안내",
+    variables: "#{숙제}"
+  },
   {
     audience: "학생",
     callSite: "보충관리 결석보강 · 학생 당일 11시 리마인더",
@@ -7623,6 +7637,7 @@ export function App() {
       lesson,
       mode,
       nextHomework,
+      notificationTemplates: aiSettings.notificationTemplates,
       previousHomework,
       record,
       scheduledDate,
@@ -7682,6 +7697,7 @@ export function App() {
         comment: commentBody,
         lesson,
         nextHomework,
+        notificationTemplates: aiSettings.notificationTemplates,
         previousHomework,
         record,
         student,
@@ -9404,13 +9420,11 @@ export function App() {
     if (isRecordNotificationMuted(record, target)) return;
     const sourceField = target === "student" ? "studentComment" : "teacherComment";
     const message = normalizeMessageText(record?.[sourceField]);
-    const preparationNotice = getPreparationNoticeForTarget(record, target);
-    const homeworkFollowupNotice = getHomeworkFollowupNoticeForTarget(record, target);
-    const prepMessage = preparationNotice && !textIncludesMessageBlock(message, preparationNotice) ? preparationNotice : "";
-    const composedMessage = joinMessageBlocks([prepMessage, message]);
+    const preparationNotice = "";
+    const homeworkFollowupNotice = getHomeworkFollowupNoticeForTarget(record, target, aiSettings.notificationTemplates);
     const manualCommentBody = normalizeMessageText(options.manualCommentBody);
     const manualPreviewBody = normalizeMessageText(options.manualPreviewBody);
-    const finalMessage = manualCommentBody || composedMessage;
+    const finalMessage = manualCommentBody || message;
     const hasSendContent = Boolean(finalMessage || homeworkFollowupNotice);
     const channel = target === "student" ? "student_alimtalk" : "parent_alimtalk";
     const statusField = target === "student" ? "studentCommentSendStatus" : "teacherCommentSendStatus";
@@ -15937,6 +15951,7 @@ function LessonJournalDetail({
           lesson,
           mode: notificationPlanMode,
           nextHomework,
+          notificationTemplates: aiSettings.notificationTemplates,
           previousHomework,
           record,
           scheduledDate,
@@ -17139,6 +17154,7 @@ function LessonJournalDetail({
           record={getCommentModalRecord()}
           saveState={saveStates[createLessonStudentRecordId(lesson.lessonId, commentModal.student.studentId)] ?? "idle"}
           nextHomework={commentModal.nextHomework}
+          notificationTemplates={aiSettings.notificationTemplates}
           previousHomework={commentModal.previousHomework}
           student={commentModal.student}
           supplementSchedules={commentModal.supplementSchedules}
@@ -17431,7 +17447,7 @@ function PreparationMemoModal({
               학부모 알림톡 작성창에 메모 가져오기
             </label>
             <p className="muted">
-              수업메모를 저장해도 저장된 학생·학부모 최종 문구는 바뀌지 않습니다. 체크한 대상의 알림톡 작성창을 열 때 이 메모를 local draft로 가져오며, `최종 문구 저장`을 눌러야 알림톡 원본이 변경됩니다. 예약 발송 본문 고정은 다음 검토 단계에서 별도로 정리합니다.
+              수업메모를 저장해도 저장된 학생·학부모 최종 문구와 기존 예약 본문은 바뀌지 않습니다. 체크한 대상의 알림톡 작성창을 열 때 이 메모를 local draft로 가져오며, `최종 문구 저장` 후 `Solapi 예약 업데이트`를 눌러야 실제 예약 본문이 변경됩니다.
             </p>
           </div>
           <div className="prepMemoSaveBar">
@@ -17459,6 +17475,7 @@ function CommentComposerModal({
   initialSendTiming = "default",
   lesson,
   nextHomework,
+  notificationTemplates = {},
   onChangeRecord,
   onClose,
   onPolishComment,
@@ -17535,6 +17552,7 @@ function CommentComposerModal({
     audience,
     lesson,
     nextHomework,
+    notificationTemplates,
     previousHomework,
     record,
     student,
@@ -17546,6 +17564,7 @@ function CommentComposerModal({
     comment: draftComment,
     lesson,
     nextHomework,
+    notificationTemplates,
     previousHomework,
     record,
     student,
