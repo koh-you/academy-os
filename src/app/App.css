@@ -13213,6 +13213,26 @@ textarea.profileEditInput {
   padding: 0 14px;
 }
 
+.studentQuestionPreviewNotice,
+.studentQuestionSaveFeedback > span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.studentQuestionSaveFeedback {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+
+.studentQuestionSaveFeedback.failed > span {
+  color: #b91c1c;
+}
+
 .studentQuestionList,
 .studentSpecialList {
   display: grid;
@@ -13256,10 +13276,21 @@ textarea.profileEditInput {
   font-weight: 900;
 }
 
-.studentQuestionItem > div:last-child {
+.studentQuestionItem > .studentQuestionItemActions {
+  align-items: flex-end;
+  display: grid;
+  gap: 7px;
+  justify-items: end;
+}
+
+.studentQuestionItemActions > div:first-child {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.studentQuestionItemActions .studentQuestionSaveFeedback {
+  justify-content: flex-end;
 }
 
 .studentQuestionItem.resolved {
@@ -17751,6 +17782,15 @@ body.attendanceOnlyBody {
 
   .studentQuestionItem {
     display: grid;
+  }
+
+  .studentQuestionItem > .studentQuestionItemActions {
+    align-items: stretch;
+    justify-items: stretch;
+  }
+
+  .studentQuestionItemActions .studentQuestionSaveFeedback {
+    justify-content: flex-start;
   }
 
   .studentPortalTabletFirst .portalTabs,

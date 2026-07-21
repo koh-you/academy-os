@@ -28,7 +28,13 @@ import { StudentLessonHistoryCalendar } from "../domains/portals/StudentLessonHi
 import { StudentPrepNotices } from "../domains/portals/StudentPrepNotices.jsx";
 import { StudentSupplementSchedules, StudentTopNotice } from "../domains/portals/StudentTodayReadOnlyPanels.jsx";
 import { StudentHomeworkActionCard } from "../domains/portals/StudentHomeworkActionCard.jsx";
-import { completeStudentHomework } from "../domains/portals/studentPortalApi.js";
+import { StudentQuestionPanel } from "../domains/portals/StudentQuestionPanel.jsx";
+import {
+  completeStudentHomework,
+  createStudentQuestion,
+  deleteStudentQuestion,
+  updateStudentQuestion
+} from "../domains/portals/studentPortalApi.js";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
@@ -5339,6 +5345,14 @@ export function App() {
   const [specialLectureGuideSaveState, setSpecialLectureGuideSaveState] = useState("idle");
   const [studentHomeworkSaveStates, setStudentHomeworkSaveStates] = useState({});
   const studentHomeworkSavingIdsRef = useRef(new Set());
+  const [studentQuestionSaveState, setStudentQuestionSaveState] = useState({
+    action: "",
+    label: "",
+    message: "",
+    state: "idle",
+    targetId: ""
+  });
+  const studentQuestionMutationRef = useRef(false);
   const [examPrepRowSaveStates, setExamPrepRowSaveStates] = useState({});
   const [studentProfileSaveStates, setStudentProfileSaveStates] = useState({});
   const [studentIntakeSaveStates, setStudentIntakeSaveStates] = useState({});
@@ -5381,7 +5395,6 @@ export function App() {
     reportSnapshots,
     examPostSubmissions,
     examPostTargetStudentIds,
-    studentQuestions,
     tallySubmissions,
     tallySummaries,
     wrongProblems
@@ -5396,7 +5409,6 @@ export function App() {
     reportSnapshots,
     examPostSubmissions,
     examPostTargetStudentIds,
-    studentQuestions,
     tallySubmissions,
     tallySummaries,
     wrongProblems
@@ -5988,10 +6000,9 @@ export function App() {
   useEffect(() => {
     if (!isPortalDataReady || !["student", "parent"].includes(session?.role) || !session?.sessionToken) return;
     postPortalState(session.sessionToken, {
-      examPostSubmissions,
-      studentQuestions
+      examPostSubmissions
     }).catch((error) => console.error(error));
-  }, [examPostSubmissions, isPortalDataReady, session?.role, session?.sessionToken, studentQuestions]);
+  }, [examPostSubmissions, isPortalDataReady, session?.role, session?.sessionToken]);
 
   useEffect(() => {
     setDeletedLessonBundles((current) => pruneExpiredLessonDeletes(current));
@@ -6587,6 +6598,7 @@ export function App() {
         reportSnapshots={reportSnapshots}
         schoolEvents={schoolEvents}
         sessionStudentId={session.studentId}
+        questionSaveState={studentQuestionSaveState}
         studentQuestions={studentQuestions}
         students={students.filter((student) => student.studentId === session.studentId)}
         onLogout={handleLogout}
@@ -8580,6 +8592,7 @@ export function App() {
             reportSnapshots={reportSnapshots}
             schoolEvents={schoolEvents}
             previewMode
+            questionSaveState={studentQuestionSaveState}
             scoreRecords={scoreRecords}
             studentQuestions={studentQuestions}
             students={students}
@@ -9412,33 +9425,156 @@ export function App() {
     }
   }
 
-  function handleStudentAddQuestion(question) {
+  async function handleStudentAddQuestion(question) {
     const text = String(question?.text ?? "").trim();
-    if (!text || !question?.studentId) return;
-    const nextQuestion = {
-      questionId: `student_question_${Date.now()}`,
-      studentId: question.studentId,
-      text,
-      source: question.source ?? "student",
-      status: "ready",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    setStudentQuestions((current) => [nextQuestion, ...current]);
+    if (studentQuestionMutationRef.current) return { ok: false };
+    if (session?.role !== "student" || !session?.sessionToken || question?.studentId !== session.studentId) {
+      setStudentQuestionSaveState({
+        action: "create",
+        label: "질문 추가",
+        message: "실제 학생 계정으로 로그인한 화면에서만 저장할 수 있습니다.",
+        state: "failed",
+        targetId: "create"
+      });
+      return { ok: false };
+    }
+    if (!text) return { ok: false };
+
+    studentQuestionMutationRef.current = true;
+    setStudentQuestionSaveState({
+      action: "create",
+      label: "질문 추가",
+      message: "Supabase에 저장하고 다시 확인하는 중입니다.",
+      state: "saving",
+      targetId: "create"
+    });
+    try {
+      const result = await createStudentQuestion(session.sessionToken, text);
+      setStudentQuestions(result.questions);
+      setStudentQuestionSaveState({
+        action: "create",
+        label: "질문 추가",
+        message: "Supabase 저장 및 재조회 확인 완료",
+        state: "saved",
+        targetId: "create"
+      });
+      return { ok: true, question: result.question };
+    } catch (error) {
+      setStudentQuestionSaveState({
+        action: "create",
+        label: "질문 추가",
+        message: error.message || "질문 저장에 실패했습니다.",
+        state: "failed",
+        targetId: "create"
+      });
+      return { ok: false, error };
+    } finally {
+      studentQuestionMutationRef.current = false;
+    }
   }
 
-  function handleStudentUpdateQuestion(questionId, updates) {
-    setStudentQuestions((current) =>
-      current.map((question) =>
-        question.questionId === questionId
-          ? { ...question, ...updates, updatedAt: new Date().toISOString() }
-          : question
-      )
-    );
+  async function handleStudentUpdateQuestion(questionId, updates) {
+    if (studentQuestionMutationRef.current) return { ok: false };
+    const targetQuestion = studentQuestions.find((question) => question.questionId === questionId);
+    if (
+      session?.role !== "student" ||
+      !session?.sessionToken ||
+      !targetQuestion ||
+      targetQuestion.studentId !== session.studentId
+    ) {
+      setStudentQuestionSaveState({
+        action: "update",
+        label: "질문 상태",
+        message: "현재 학생의 질문을 찾지 못했습니다.",
+        state: "failed",
+        targetId: questionId
+      });
+      return { ok: false };
+    }
+
+    studentQuestionMutationRef.current = true;
+    setStudentQuestionSaveState({
+      action: "update",
+      label: "질문 상태",
+      message: "Supabase에 저장하고 다시 확인하는 중입니다.",
+      state: "saving",
+      targetId: questionId
+    });
+    try {
+      const result = await updateStudentQuestion(session.sessionToken, questionId, updates?.status);
+      setStudentQuestions(result.questions);
+      setStudentQuestionSaveState({
+        action: "update",
+        label: "질문 상태",
+        message: "Supabase 저장 및 재조회 확인 완료",
+        state: "saved",
+        targetId: questionId
+      });
+      return { ok: true, question: result.question };
+    } catch (error) {
+      setStudentQuestionSaveState({
+        action: "update",
+        label: "질문 상태",
+        message: error.message || "질문 상태 저장에 실패했습니다.",
+        state: "failed",
+        targetId: questionId
+      });
+      return { ok: false, error };
+    } finally {
+      studentQuestionMutationRef.current = false;
+    }
   }
 
-  function handleStudentDeleteQuestion(questionId) {
-    setStudentQuestions((current) => current.filter((question) => question.questionId !== questionId));
+  async function handleStudentDeleteQuestion(questionId) {
+    if (studentQuestionMutationRef.current) return { ok: false };
+    const targetQuestion = studentQuestions.find((question) => question.questionId === questionId);
+    if (
+      session?.role !== "student" ||
+      !session?.sessionToken ||
+      !targetQuestion ||
+      targetQuestion.studentId !== session.studentId
+    ) {
+      setStudentQuestionSaveState({
+        action: "delete",
+        label: "질문 삭제",
+        message: "현재 학생의 질문을 찾지 못했습니다.",
+        state: "failed",
+        targetId: questionId
+      });
+      return { ok: false };
+    }
+
+    studentQuestionMutationRef.current = true;
+    setStudentQuestionSaveState({
+      action: "delete",
+      label: "질문 삭제",
+      message: "Supabase에서 삭제하고 다시 확인하는 중입니다.",
+      state: "saving",
+      targetId: questionId
+    });
+    try {
+      const result = await deleteStudentQuestion(session.sessionToken, questionId);
+      setStudentQuestions(result.questions);
+      setStudentQuestionSaveState({
+        action: "delete",
+        label: "질문 삭제",
+        message: "Supabase 삭제 및 재조회 확인 완료",
+        state: "saved",
+        targetId: questionId
+      });
+      return { ok: true };
+    } catch (error) {
+      setStudentQuestionSaveState({
+        action: "delete",
+        label: "질문 삭제",
+        message: error.message || "질문 삭제에 실패했습니다.",
+        state: "failed",
+        targetId: questionId
+      });
+      return { ok: false, error };
+    } finally {
+      studentQuestionMutationRef.current = false;
+    }
   }
 
   function handleSubmitExamPostSubmission(target, student, values) {
@@ -21410,6 +21546,7 @@ function StudentPortalV2({
   lessons = [],
   materials = [],
   makeupTasks = [],
+  questionSaveState = { state: "idle", targetId: "" },
   records = [],
   reportSnapshots,
   schoolEvents = [],
@@ -21469,6 +21606,7 @@ function StudentPortalV2({
     .sort((a, b) => String(b.updatedAt ?? b.createdAt ?? "").localeCompare(String(a.updatedAt ?? a.createdAt ?? "")));
   const examPostTargets = buildExamPostTargetsForStudent(selectedStudent, examPrepRows, examPostSubmissions, examPostTargetStudentIds);
   const studentHomeworkWriteEnabled = !previewMode && Boolean(sessionStudentId);
+  const studentQuestionWriteEnabled = !previewMode && Boolean(sessionStudentId);
 
   useEffect(() => {
     if (sessionStudentId) setSelectedStudentId(sessionStudentId);
@@ -21513,10 +21651,12 @@ function StudentPortalV2({
             lessons={lessons}
             overdueHomeworks={overdueHomeworks}
             prepNotices={studentPrepNotices}
+            questionSaveState={questionSaveState}
             questions={selectedStudentQuestions}
             recordsWithLessons={studentRecordsWithLessons}
             selectedStudent={selectedStudent}
             studentHomeworkWriteEnabled={studentHomeworkWriteEnabled}
+            studentQuestionWriteEnabled={studentQuestionWriteEnabled}
             studentNotice={upcomingStudentNotice}
             supplementSchedules={studentSupplementScheduleTasks}
             todayHomeworks={todayHomeworks}
@@ -21575,11 +21715,13 @@ function StudentTodayTab({
   lessons = [],
   overdueHomeworks,
   prepNotices = [],
+  questionSaveState = { state: "idle", targetId: "" },
   questions = [],
   examPostTargets = [],
   recordsWithLessons = [],
   selectedStudent,
   studentHomeworkWriteEnabled = false,
+  studentQuestionWriteEnabled = false,
   studentNotice,
   supplementSchedules = [],
   todayHomeworks,
@@ -21589,16 +21731,6 @@ function StudentTodayTab({
   onUpdateQuestion,
   onStudentCheckHomework
 }) {
-  const [questionText, setQuestionText] = useState("");
-
-  function submitQuestion(event) {
-    event.preventDefault();
-    const text = questionText.trim();
-    if (!text || !selectedStudent) return;
-    onAddQuestion?.({ studentId: selectedStudent.studentId, text });
-    setQuestionText("");
-  }
-
   return (
     <>
       <StudentTopNotice notice={studentNotice} />
@@ -21625,43 +21757,15 @@ function StudentTodayTab({
         selectedStudent={selectedStudent}
       />
 
-      <section className="studentQuestionPanel">
-        <div className="sectionHeader compact">
-          <div>
-            <h2>수업 전에 정리할 질문</h2>
-            <p className="muted">막힌 문제나 헷갈린 개념을 짧게 적어두면 수업 시작이 훨씬 빨라집니다.</p>
-          </div>
-        </div>
-        <form className="studentQuestionForm" onSubmit={submitQuestion}>
-          <input
-            value={questionText}
-            onChange={(event) => setQuestionText(event.target.value)}
-            placeholder="예: 2차함수 최대최소에서 범위가 있을 때가 헷갈려요"
-          />
-          <button className="primaryButton" type="submit">질문 추가</button>
-        </form>
-        <div className="studentQuestionList">
-          {questions.length === 0 ? <div className="emptyHomeworkBox compact">아직 정리한 질문이 없습니다.</div> : null}
-          {questions.slice(0, 6).map((question) => (
-            <article className={`studentQuestionItem ${question.status === "resolved" ? "resolved" : ""}`} key={question.questionId}>
-              <div>
-                <strong>{question.text}</strong>
-                <small>{question.status === "resolved" ? "해결됨" : "수업 질문 준비"}</small>
-              </div>
-              <div>
-                <button
-                  className="softButton"
-                  onClick={() => onUpdateQuestion?.(question.questionId, { status: question.status === "resolved" ? "ready" : "resolved" })}
-                  type="button"
-                >
-                  {question.status === "resolved" ? "다시 질문" : "해결 체크"}
-                </button>
-                <button className="dangerSoftButton" onClick={() => onDeleteQuestion?.(question.questionId)} type="button">삭제</button>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+      <StudentQuestionPanel
+        onAddQuestion={onAddQuestion}
+        onDeleteQuestion={onDeleteQuestion}
+        onUpdateQuestion={onUpdateQuestion}
+        questions={questions}
+        saveState={questionSaveState}
+        selectedStudent={selectedStudent}
+        writeEnabled={studentQuestionWriteEnabled}
+      />
 
       <div className="sectionHeader">
         <div>

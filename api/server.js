@@ -1301,7 +1301,7 @@ async function upsertPortalState(session, scopedStates = {}) {
   const appState = await listAppState();
   const currentStates = appState.states ?? {};
   const nextStates = {};
-  for (const key of ["studentQuestions", "examPostSubmissions"]) {
+  for (const key of ["examPostSubmissions"]) {
     if (!Array.isArray(scopedStates[key])) continue;
     const currentRows = Array.isArray(currentStates[key]) ? currentStates[key] : [];
     const scopedRows = scopedStates[key].filter((item) => item.studentId === session.studentId);
@@ -1369,6 +1369,126 @@ async function completePortalHomework(session, homeworkId) {
     homework: verifiedHomework,
     verified: true
   };
+}
+
+let portalQuestionMutationQueue = Promise.resolve();
+
+function withPortalQuestionMutationLock(task) {
+  const pendingMutation = portalQuestionMutationQueue.then(task, task);
+  portalQuestionMutationQueue = pendingMutation.then(() => undefined, () => undefined);
+  return pendingMutation;
+}
+
+async function mutatePortalQuestion(session, payload = {}) {
+  if (session?.role !== "student") {
+    const error = new Error("학생 계정에서만 질문을 저장할 수 있습니다.");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  const action = String(payload.action ?? "").trim();
+  if (!["create", "update", "delete"].includes(action)) {
+    const error = new Error("지원하지 않는 질문 저장 동작입니다.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  return withPortalQuestionMutationLock(async () => {
+    const beforeResult = await listAppState();
+    const currentQuestions = Array.isArray(beforeResult.states?.studentQuestions)
+      ? beforeResult.states.studentQuestions
+      : [];
+    const nowIso = new Date().toISOString();
+    const normalizedQuestionId = String(payload.questionId ?? "").trim();
+    let savedQuestion = null;
+    let nextQuestions = currentQuestions;
+
+    if (action === "create") {
+      const text = String(payload.text ?? "").trim();
+      if (!text) {
+        const error = new Error("질문 내용을 입력해 주세요.");
+        error.statusCode = 400;
+        throw error;
+      }
+      if (text.length > 1000) {
+        const error = new Error("질문은 1000자 이내로 입력해 주세요.");
+        error.statusCode = 400;
+        throw error;
+      }
+      savedQuestion = {
+        questionId: `student_question_${crypto.randomUUID()}`,
+        studentId: session.studentId,
+        text,
+        source: "student",
+        status: "ready",
+        createdAt: nowIso,
+        updatedAt: nowIso
+      };
+      nextQuestions = [savedQuestion, ...currentQuestions];
+    } else {
+      if (!normalizedQuestionId) {
+        const error = new Error("저장할 질문 ID가 필요합니다.");
+        error.statusCode = 400;
+        throw error;
+      }
+      const existingQuestion = currentQuestions.find((question) => question.questionId === normalizedQuestionId);
+      if (!existingQuestion) {
+        const error = new Error("질문을 찾지 못했습니다.");
+        error.statusCode = 404;
+        throw error;
+      }
+      if (existingQuestion.studentId !== session.studentId) {
+        const error = new Error("다른 학생의 질문은 변경할 수 없습니다.");
+        error.statusCode = 403;
+        throw error;
+      }
+
+      if (action === "update") {
+        const status = String(payload.status ?? "").trim();
+        if (!["ready", "resolved"].includes(status)) {
+          const error = new Error("질문 상태가 올바르지 않습니다.");
+          error.statusCode = 400;
+          throw error;
+        }
+        savedQuestion = { ...existingQuestion, status, updatedAt: nowIso };
+        nextQuestions = currentQuestions.map((question) =>
+          question.questionId === normalizedQuestionId ? savedQuestion : question
+        );
+      } else {
+        nextQuestions = currentQuestions.filter((question) => question.questionId !== normalizedQuestionId);
+      }
+    }
+
+    await upsertAppState({ studentQuestions: nextQuestions });
+    const verifiedResult = await listAppState();
+    const verifiedAllQuestions = Array.isArray(verifiedResult.states?.studentQuestions)
+      ? verifiedResult.states.studentQuestions
+      : [];
+    const verifiedQuestion = savedQuestion
+      ? verifiedAllQuestions.find((question) => question.questionId === savedQuestion.questionId)
+      : null;
+    const isVerified = action === "delete"
+      ? !verifiedAllQuestions.some((question) => question.questionId === normalizedQuestionId)
+      : Boolean(
+          verifiedQuestion &&
+          verifiedQuestion.studentId === session.studentId &&
+          verifiedQuestion.text === savedQuestion.text &&
+          verifiedQuestion.status === savedQuestion.status &&
+          verifiedQuestion.updatedAt === savedQuestion.updatedAt
+        );
+    if (!isVerified) {
+      const error = new Error("Supabase 저장 후 질문 상태를 다시 확인하지 못했습니다.");
+      error.statusCode = 500;
+      throw error;
+    }
+
+    return {
+      source: verifiedResult.source,
+      question: action === "delete" ? null : verifiedQuestion,
+      questions: verifiedAllQuestions.filter((question) => question.studentId === session.studentId),
+      verified: true
+    };
+  });
 }
 
 function readJsonBody(request, options = {}) {
@@ -5109,6 +5229,23 @@ const server = http.createServer(async (request, response) => {
     return;
   }
 
+  if (request.method === "POST" && requestUrl.pathname === "/api/portal-questions") {
+    try {
+      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
+      const portalSession = verifyPortalSessionToken(token);
+      if (!portalSession) {
+        sendJson(request, response, 401, { ok: false, error: "학생 세션 인증이 필요합니다." });
+        return;
+      }
+      const payload = await readJsonBody(request);
+      const result = await mutatePortalQuestion(portalSession, payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, Number(error.statusCode) || 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
   if (request.method === "POST" && requestUrl.pathname === "/api/auth/teacher-account") {
     try {
       if (!isSupabaseConfigured({ requireServiceRole: true })) {
@@ -5177,7 +5314,9 @@ const server = http.createServer(async (request, response) => {
   if (request.method === "POST" && requestUrl.pathname === "/api/app-state") {
     try {
       const payload = await readJsonBody(request);
-      const result = await upsertAppState(payload.states ?? payload);
+      const requestedStates = payload.states ?? payload;
+      const { studentQuestions: _studentQuestions, ...safeStates } = requestedStates;
+      const result = await upsertAppState(safeStates);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });

@@ -34,11 +34,11 @@
    - 순서: `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`.
    - 다음 후보는 매번 현재 diff와 최신 작업로그를 보고 다시 제안한다. 위험이 낮은 helper/config/API/client/component부터 진행하고, 수업일지/출결/Solapi/보충관리처럼 side effect가 큰 영역은 충분한 gate 이후 진행한다.
    - 기준 로드맵: 아래 `App.jsx 리팩터링 18개 기준 로드맵`을 다음 세션들의 공통 후보 목록으로 사용한다. 이미 일부 분리된 항목도 남은 하위 컴포넌트/헬퍼가 있으면 같은 묶음 안에서 계속 진행한다.
-   - 현재 이어받을 지점: 9번 `test manager`, 10번 `student-parent portals` 읽기 전용 표시, 첫 쓰기 단위인 학생 숙제 완료 체크의 세션 소유권·Supabase 재조회·카드 상태 UI·컴포넌트 분리와 AI 검증 344개까지 완료했다. 2026-07-21 사용자가 실제 학생 테스트 결과를 보류하고 계속 진행하라고 지시했으므로 다음은 질문 CRUD 저장 계약이다.
-   - 보류된 사람 gate: 테스트 학생의 미완료 숙제 1건에서 저장 중/완료 표시, 새로고침·재로그인 유지, 강사 미리보기 쓰기 차단을 나중에 확인한다. 보류는 통과 판정이 아니며 회귀 발견 시 즉시 별도 수정한다.
+   - 현재 이어받을 지점: 9번 `test manager`, 10번 `student-parent portals` 읽기 전용 표시, 학생 숙제 완료 체크를 완료했다. 두 번째 쓰기 단위인 질문 CRUD도 학생 세션 소유권·`app_state.studentQuestions` 전용 저장·재조회·draft 보호·상태 UI·컴포넌트 분리와 AI 검증 345개까지 완료했다. 다음은 시험 후 제출의 Storage/제출 row 단계 분리 inventory다.
+   - 보류된 사람 gate: 2026-07-21 사용자 지시로 숙제 완료와 질문 CRUD 실제 학생 테스트를 보류했다. 보류는 통과 판정이 아니며 나중에 저장/새로고침/강사 미리보기 차단을 확인하고 회귀 발견 시 즉시 별도 수정한다.
    - 확인된 후속 이슈: 학생 수업 준비 안내 목록은 현재 `prepStudentNotice` 존재 여부만 필터하고 `prepStudentVisible`을 확인하지 않는다. 이번 리팩터링에서는 기존 동작을 보존했으며, 공개 플래그 계약을 별도 기능 작업에서 확인해야 한다.
    - 확인된 후속 이슈: 학생 마이페이지 `비밀번호 변경`은 callback/API가 없는 기존 미연결 UI다. 이번 리팩터링에서는 보존했고, 숨김/비활성 안내/실제 PIN 변경 구현은 저장 신뢰성의 오작동 버튼 정리 작업에서 별도 결정한다.
-   - 다음 세션 시작 규칙: 최신 커밋과 git diff를 확인하고 학생 숙제 완료 사람 gate가 보류 중임을 알린 뒤, 질문 CRUD의 학생 범위 명시 API·draft 보호·재조회 계약 inventory부터 제안한다.
+   - 다음 세션 시작 규칙: 최신 커밋과 git diff를 확인하고 숙제 완료·질문 CRUD 사람 gate가 보류 중임을 알린 뒤, 시험 후 제출의 Storage 업로드·학생 범위 제출 row 저장·부분 실패 계약 inventory부터 제안한다.
 5. `Solapi 특강 템플릿 검수 후 연결`
    - 상태: 외부 검수 대기.
    - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다.
@@ -492,6 +492,20 @@
 - 보류된 사람 gate: 지정한 테스트 학생의 미완료 숙제 1건에서 `완료 체크`를 누른다. 같은 카드가 `저장 중` 뒤 `저장 완료`가 되고 완료 체크됨으로 바뀌어야 한다. 새로고침·로그아웃/재로그인 후에도 유지돼야 하며 강사 미리보기에서는 버튼이 비활성이어야 한다. 실제 운영 학생의 숙제나 이미 검수된 숙제는 테스트에 쓰지 않는다.
 - 중단 조건: 저장 완료 없이 카드가 먼저 완료됨, 완료 표시 뒤 새로고침하면 되돌아감, 다른 학생 숙제 변경, 강사 미리보기에서 저장됨, 실패 후 카드가 완료로 남음, 알림/수업일지/보충 데이터 변동.
 - 다음 순서: 사용자 지시에 따라 사람 gate 결과는 보류한 채 이 단위만 커밋·푸시한다. 이후 질문 추가·상태변경·삭제를 별도 학생 범위 API, draft 보존, read-after-write, 행/입력 영역 상태 UI 계약으로 먼저 설계한다.
+
+### 2026-07-21 P1. App.jsx 리팩터링 10번 - 학생 질문 CRUD 저장 신뢰성 및 패널 분리
+
+- 상태: 구현·AI 자동검증 완료. 실제 학생 사람 gate는 사용자 지시에 따라 결과 보류하고 리팩터링을 계속한다.
+- 기존 문제: 질문 추가·상태변경·삭제가 local state를 먼저 바꾸고, `studentQuestions`와 `examPostSubmissions` 전체 배열을 하나의 `/api/portal-state` effect가 자동저장했다. 실패 UI와 rollback/read-after-write가 없고 추가 form은 즉시 비워졌으며, 강사 전역 `sharedAppState` 저장도 오래된 질문 배열을 덮어쓸 수 있었다.
+- 저장 계약: `POST /api/portal-questions`만 질문을 쓴다. 서버는 실제 학생 bearer session과 질문 소유권을 확인하고 create/update/delete를 `app_state.studentQuestions` 한 key에 반영한 뒤 다시 읽어 ID/학생/본문/상태/updatedAt 또는 삭제 여부가 일치할 때만 `verified=true`를 반환한다.
+- 경쟁 방지: 서버 프로세스 안에서 질문 key read-modify-write를 직렬화한다. 기존 `/api/portal-state`는 시험 제출만 저장하고, 일반 `/api/app-state` 요청에서는 `studentQuestions`를 제거하며, 강사 `sharedAppState` snapshot에서도 질문을 제외해 오래된 번들의 자동 덮어쓰기 경로를 줄였다.
+- UI/draft 계약: `StudentQuestionPanel`의 입력값은 안정적인 local draft다. 입력 즉시 `변경됨`을 표시하며 저장 성공 전에는 비우지 않는다. 추가·상태변경·삭제는 `저장 중 -> Supabase 재조회 -> 저장 완료/실패`를 form 또는 해당 행 가까이에 표시하고, 실패 시 질문/draft를 유지한다. 강사 미리보기는 모든 질문 쓰기 버튼을 비활성화한다.
+- 파일 분리: `src/domains/portals/StudentQuestionPanel.jsx`에 draft와 질문 목록/상태 UI를 분리했고, `src/domains/portals/studentPortalApi.js`에 질문 create/update/delete bearer 호출을 추가했다. `App.jsx`에는 실제 학생 세션 검증과 서버 확인 결과를 root state에 반영하는 orchestration만 남겼다.
+- 원천/side effect: 원본은 Supabase `app_state.studentQuestions`. localStorage는 화면 캐시일 뿐 완료 근거가 아니다. `notification_jobs`, Solapi, 수업일지, 숙제, 보충 일정, Storage 업로드 side effect는 없다. 새 SQL도 없다.
+- AI 검수 결과: `git diff --check`, 서버/client 문법 검사, `npm run build`, `npm run test:production` 345/345 통과. 기존 Vite chunk size 경고만 남았다.
+- 보류된 사람 gate: 테스트 학생으로 질문을 입력했을 때 `변경됨`이 보이고, 실패 시 입력이 남으며, 성공 시에만 입력이 비워지고 질문이 추가돼야 한다. 해결/다시 질문과 삭제도 저장 상태 뒤 반영되고 새로고침·재로그인 후 유지돼야 한다. 강사 미리보기에서는 입력과 버튼이 비활성이어야 한다.
+- 중단 조건: 저장 전에 질문/draft가 사라짐, 저장 완료 후 새로고침하면 되돌아감, 다른 학생 질문 변경, 강사 미리보기 쓰기, 질문 조작이 시험 제출 배열을 덮어씀, 실패인데 완료 UI 표시.
+- 다음 순서: 이 단위를 별도 커밋·푸시한 뒤 시험 후 제출을 `파일 업로드 -> 제출 row 저장 -> 재조회` 단계로 inventory한다. Storage만 성공하고 제출 row가 실패했을 때 draft/file 선택/재시도 방법을 먼저 정한다.
 
 ### 2026-07-21 P1. App.jsx 리팩터링 10번 - 학생 오늘 탭 읽기 전용 일정 패널 분리
 

@@ -48,9 +48,9 @@ E:\academy-os 작업을 이어가겠습니다.
    - 순서는 `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`입니다.
    - 기능 변경과 리팩터링 범위를 섞지 않습니다.
    - 아래 18개 기준 로드맵을 공통 후보 목록으로 사용합니다.
-   - 9번 `test manager`와 10번 `student-parent portals`의 읽기 전용 표시는 완료됐습니다. 첫 쓰기 단위인 학생 숙제 완료 체크도 학생 bearer session 소유권, Supabase `homeworks` 저장 후 재조회 대조, 카드 내부 상태 UI, 카드/API client 분리와 AI 검증 344개까지 완료했습니다.
-   - 실제 학생 사람 gate는 2026-07-21 사용자 지시로 결과 보류했습니다. 테스트 학생 1건의 저장 중/완료 표시, 새로고침·재로그인 유지, 강사 미리보기 쓰기 차단은 미통과가 아니라 미실시 상태로 계속 기록합니다.
-   - 다음 단위는 질문 추가·상태변경·삭제입니다. `local draft -> 학생 범위 명시 API -> Supabase app_state 저장 -> 서버 재조회 -> 완료/실패` 계약 inventory를 먼저 제안합니다.
+   - 9번 `test manager`, 10번 `student-parent portals` 읽기 전용 표시, 학생 숙제 완료 체크를 완료했습니다. 질문 CRUD도 학생 bearer session 소유권, Supabase `app_state.studentQuestions` key 전용 저장 후 재조회, local draft 보호, 상태 UI, 패널/API client 분리와 AI 검증 345개까지 완료했습니다.
+   - 실제 학생 사람 gate는 2026-07-21 사용자 지시로 결과 보류했습니다. 숙제 완료와 질문 추가/상태/삭제의 저장·새로고침 유지·강사 미리보기 차단은 미통과가 아니라 미실시 상태로 계속 기록합니다.
+   - 다음 단위는 시험 후 제출입니다. `local draft -> Supabase Storage 업로드 -> 학생 범위 app_state 제출 row 저장 -> 서버 재조회 -> 단계별 완료/부분 실패` 계약 inventory를 먼저 제안합니다.
 5. Solapi 특강 템플릿 검수 후 연결
    - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인합니다.
    - 검수 완료 전에는 임시 특강 알림톡 구조를 유지합니다.
