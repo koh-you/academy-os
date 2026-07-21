@@ -16634,10 +16634,17 @@ function LessonJournalDetail({
                     </button>
                   </span>
                   <small>{student.grade || "고1"} · {student.schoolName || "학교 미입력"}</small>
-                  {attendanceLesson.studentScheduleType === "official" || attendanceLesson.studentScheduleType === "adjusted" ? (
-                    <small className={attendanceLesson.studentScheduleType === "adjusted" ? "specialLectureStudentTime adjusted" : "specialLectureStudentTime"}>
+                  {attendanceLesson.studentScheduleType === "official" ||
+                  attendanceLesson.studentScheduleType === "adjusted" ||
+                  attendanceLesson.studentScheduleType === "profile" ? (
+                    <small className={[
+                      "specialLectureStudentTime",
+                      attendanceLesson.studentScheduleType === "adjusted" ? "adjusted" : "",
+                      attendanceLesson.studentScheduleType === "profile" ? "profile" : ""
+                    ].filter(Boolean).join(" ")}>
                       {attendanceLesson.startTime}-{attendanceLesson.endTime}
                       {attendanceLesson.studentScheduleType === "adjusted" ? " · 시간 조정" : ""}
+                      {attendanceLesson.studentScheduleType === "profile" ? " · 개별 시간" : ""}
                       {attendanceLesson.studentScheduleReason ? ` · ${attendanceLesson.studentScheduleReason}` : ""}
                     </small>
                   ) : null}
@@ -16682,7 +16689,6 @@ function LessonJournalDetail({
                 >
                   <span>{attendanceDisplay.label}</span>
                   {attendanceDisplay.detail ? <small>{attendanceDisplay.detail}</small> : null}
-                  {attendanceLesson.studentScheduleOverride ? <small>기준 {attendanceLesson.startTime}-{attendanceLesson.endTime}</small> : null}
                   {attendanceDisplay.dateMismatch ? <small className="attendanceMismatchText">확인 필요</small> : null}
                   {checkoutMissing ? <small className="checkoutMissingText">하원 미체크</small> : null}
                 </button>

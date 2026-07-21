@@ -4763,6 +4763,15 @@ button {
   place-items: center;
 }
 
+.journalRow > .attendanceBadge {
+  padding: 6px 8px;
+}
+
+.journalRow > .attendanceBadge > span {
+  font-size: 14px;
+  line-height: 1.15;
+}
+
 .attendanceBadge small {
   font-size: 11px;
   font-weight: 700;
@@ -5613,6 +5622,10 @@ button {
 
 .specialLectureStudentTime.adjusted {
   color: #b45309;
+}
+
+.specialLectureStudentTime.profile {
+  color: #2563eb;
 }
 
 .schoolCalendarSaveNotice {
