@@ -297,6 +297,7 @@
 - 보존 계약: 수업메모 모달, 직전/참고 메모 확인, 작성창 가져오기 체크, 학생·학부모 최종문구 저장, 구조화 숙제 후속처리, 포털의 저장된 학생 코멘트, notification job/Solapi 예약·발송 본문은 변경하지 않는다. `preparationNotice` payload는 기존 예약 호환용 빈 필드로 유지한다.
 - 저장/외부 영향: 운영 API는 record/app_state 개수 확인을 위한 GET만 호출했다. Supabase row, app_state, localStorage를 쓰거나 삭제하지 않았고 AI 호출, notification job 생성, Solapi 예약·발송·취소도 실행하지 않았다. 새 SQL은 없다.
 - AI 검증: active portal import 0건, active portal prep notice field 0건, active prep AI writer/settings key 0건을 확인했다. `git diff --check`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 365/365, `npm run build`를 통과했다. Vite의 기존 500KB chunk 경고만 남는다.
+- 배포 확인: 운영 Vercel 번들 `/assets/main-abFziGVC.js`에서 미연결 수업메모 AI 안내, 학생 `수업 준비 안내`, 학부모 legacy 빈 알림 문구가 모두 사라졌고, 현재 `알림톡 작성창에서 가져오기`와 학생 포털 `선생님 코멘트` 경로는 남아 있음을 확인했다.
 - 사람 검토 gate: 수업일지의 수업메모 모달에서 강사용 메모, 직전/참고 메모, 학생·학부모 작성창 가져오기 체크가 그대로 보이고 저장·새로고침 후 유지되는지 확인한다. 학생 포털 오늘/수업기록에는 별도 `수업 준비 안내/준비 메모`가 중복 노출되지 않고 저장된 `선생님 코멘트`만 보이는지 확인한다. 학부모 포털은 빈 legacy `알림` 탭 없이 `보고서`부터 시작해야 한다. 설정 > AI에는 호출부가 없는 `수업메모 AI` 항목이 없어야 한다. 실제 발송·예약은 이 UI gate에서 실행하지 않는다.
 - 중단 조건: 수업메모/작성창 체크 저장이 사라짐, 학생·학부모 최종문구가 변경됨, 학생 포털 선생님 코멘트가 사라짐, 학부모 보고서·숙제 탭이 깨짐, 설정의 실제 코멘트 AI까지 사라짐, 단순 화면 확인 중 API write·AI 호출·notification job/Solapi side effect가 발생하면 다음 단계를 중단한다.
 
