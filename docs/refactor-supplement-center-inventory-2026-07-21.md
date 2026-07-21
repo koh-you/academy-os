@@ -30,9 +30,15 @@
 
 ## 다음 안전 단위
 
-1. `SupplementPassConfirmModal`처럼 callback만 호출하는 표시 컴포넌트를 별도 파일로 옮긴다.
-2. 그다음 `SupplementScheduleChangeConfirmModal`의 local reason/detail 초기화와 confirm payload를 fixture로 고정한 뒤 이동한다.
+1. 완료: `SupplementPassConfirmModal`을 callback-only 표시 컴포넌트로 별도 파일에 옮겼다.
+2. 다음: `SupplementScheduleChangeConfirmModal`의 local reason/detail 초기화와 confirm payload를 fixture로 고정한 뒤 이동한다.
 3. `SupplementStudentModal` 전체와 실제 저장·예약 orchestration은 위 조각 분리 이후 별도 gate로 판단한다.
+
+## 12B 구현 결과 — 완료 확인 모달
+
+- `SupplementPassConfirmModal`은 task/studentName/error/busy와 유형 라벨·confirm/cancel callback만 받는다.
+- 숙제보충 항목 fallback과 완료 후 최근 내역 복귀 안내, busy 버튼 상태를 그대로 유지했다.
+- 새 production check는 hook, API, notification/Solapi 참조가 이 표시 파일에 들어오지 못하게 고정한다.
 
 ## 즉시 중단 조건
 

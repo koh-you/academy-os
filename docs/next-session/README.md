@@ -159,7 +159,8 @@ Git 충돌 방지 규칙:
 - 11B-12에서 보충 일정 저장 후 학생 11시, 학생·학부모 일정 안내를 순서대로 적용하고 화면 반환 상태를 조립하는 경계를 같은 모듈로 분리했습니다. 저장 원천과 실제 예약 wrapper는 App에 유지합니다.
 - 11B-13에서 skip/suppress 플래그, 기존 일정·변경 여부, 현재 pair 재사용, 11시·pair 예약 필요 여부를 순수 plan으로 분리했습니다.
 - 12번 inventory는 `docs/refactor-supplement-center-inventory-2026-07-21.md`에 기록했습니다. 12A에서 학생·필수값·중복 검증과 저장할 lesson/task 객체 생성을 순수 persistence plan으로 분리했고 실제 저장·상태·알림은 App에 유지했습니다.
-- 다음은 최신 `origin/main`을 rebase한 뒤 callback-only `SupplementPassConfirmModal`부터 표시 컴포넌트로 분리합니다. 남은 사람 gate 3개는 통과로 바꾸지 않습니다.
+- 12B에서 callback-only `SupplementPassConfirmModal`을 별도 파일로 분리했습니다. 두 호출부가 유형 라벨과 기존 callback을 주입하며 API·알림 side effect는 없습니다.
+- 다음은 최신 `origin/main`을 rebase한 뒤 `SupplementScheduleChangeConfirmModal`의 local reason/detail과 confirm payload 계약을 fixture로 고정하고 분리합니다. 남은 사람 gate 3개는 통과로 바꾸지 않습니다.
 
 통과한 11B-1 사람 gate 기록:
 1. 삭제 가능한 미래 보충 task와 통제된 학생/학부모 전화번호를 준비합니다.
