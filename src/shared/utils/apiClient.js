@@ -108,6 +108,11 @@ export async function postJsonWithHeaders(path, body, headers = {}) {
     body: JSON.stringify(body)
   });
   const result = await response.json();
-  if (!response.ok || result.ok === false) throw new Error(result.error || "요청에 실패했습니다.");
+  if (!response.ok || result.ok === false) {
+    const error = new Error(result.error || "요청에 실패했습니다.");
+    error.responseReceived = true;
+    error.statusCode = response.status;
+    throw error;
+  }
   return result;
 }

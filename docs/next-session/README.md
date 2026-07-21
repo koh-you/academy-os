@@ -150,6 +150,8 @@ App.jsx 리팩터링 18개 기준 로드맵:
 
 - 미룬 작업 큐의 source of truth는 `AGENTS.md` 최상단과 `docs/current-worklog.md` 최상단입니다.
 - App.jsx 리팩터링 18개 기준 로드맵은 `AGENTS.md`, `docs/current-worklog.md`, 이 README에 함께 기록되어 있습니다.
-- 다음 리팩터링 시작점은 `StudentTodayTab` 쓰기 기능의 저장 신뢰성 선행 여부 확인입니다. 현재 숙제 체크는 `/api/homeworks` 실패를 콘솔에만 남기고, 질문/시험 제출은 두 배열을 전역 `/api/portal-state` effect로 함께 저장하며 실패 UI/read-after-write가 없습니다. 시험 제출은 업로드 후 draft도 지웁니다. 권장 방향은 세 쓰기 기능의 저장 계약을 먼저 보강한 뒤 컴포넌트를 분리하는 것입니다.
-- 최신 기능 커밋은 `e114a9ea Limit supplement notices to source lesson`, 현재 최신 기록 커밋은 `4692f7d6 Document stale supplement reservation check`입니다. handoff 문서 갱신 커밋이 뒤에 오므로 새 세션에서 반드시 `git log -1 --oneline`으로 실제 최신 커밋을 다시 확인하세요.
+- 10번 포털의 세 학생 쓰기 단위는 저장 신뢰성 보강을 완료했습니다. 숙제 완료, 질문 CRUD, 시험 후 제출이 각각 학생 bearer session 소유권, 전용 API, Supabase 재조회, 패널 내부 상태, 실패 시 draft 보호를 사용합니다. 시험 후 제출은 Storage 전부 성공 후에만 `app_state.examPostSubmissions`를 만들며 부분 실패 시 성공 업로드분을 정리합니다.
+- 사람 검수는 사용자 지시로 보류 상태입니다. 숙제 완료·질문 CRUD·시험 후 제출의 실제 학생 저장/새로고침/재로그인/강사 미리보기 차단과 교사 확인 저장을 나중에 검수해야 하며, 보류는 통과가 아닙니다.
+- 다음 리팩터링 시작점은 10번의 남은 `StudentPortalV2`/`StudentTodayTab`/`ParentPortal` shell inventory입니다. 저장/API/인증을 건드리지 않는 표시 shell부터 분리하세요. 교사 확인 API와 시험지 Storage 열기 권한은 현재 교사 bearer session이 없는 기존 인증 공백이 있으므로 별도 `교사 세션 인증 + 파일 열람 권한` 고위험 gate로 분리합니다.
+- 최신 기능 커밋은 작업 시작 시 반드시 `git log -1 --oneline`으로 다시 확인하세요. 이 README의 해시는 작업 중 변경될 수 있습니다.
 - 현재 로컬에 남을 수 있는 미추적 항목: `.codex-temp/`. 커밋하지 않습니다.

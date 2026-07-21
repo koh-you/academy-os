@@ -1297,21 +1297,9 @@ async function getPortalData(session) {
   };
 }
 
-async function upsertPortalState(session, scopedStates = {}) {
+async function upsertPortalState() {
   const appState = await listAppState();
-  const currentStates = appState.states ?? {};
-  const nextStates = {};
-  for (const key of ["examPostSubmissions"]) {
-    if (!Array.isArray(scopedStates[key])) continue;
-    const currentRows = Array.isArray(currentStates[key]) ? currentStates[key] : [];
-    const scopedRows = scopedStates[key].filter((item) => item.studentId === session.studentId);
-    nextStates[key] = [
-      ...scopedRows,
-      ...currentRows.filter((item) => item.studentId !== session.studentId)
-    ];
-  }
-  if (Object.keys(nextStates).length === 0) return { states: {} };
-  return upsertAppState(nextStates);
+  return { source: appState.source, states: {} };
 }
 
 async function completePortalHomework(session, homeworkId) {
@@ -1486,6 +1474,281 @@ async function mutatePortalQuestion(session, payload = {}) {
       source: verifiedResult.source,
       question: action === "delete" ? null : verifiedQuestion,
       questions: verifiedAllQuestions.filter((question) => question.studentId === session.studentId),
+      verified: true
+    };
+  });
+}
+
+let portalExamPostMutationQueue = Promise.resolve();
+
+function withPortalExamPostMutationLock(task) {
+  const pendingMutation = portalExamPostMutationQueue.then(task, task);
+  portalExamPostMutationQueue = pendingMutation.then(() => undefined, () => undefined);
+  return pendingMutation;
+}
+
+function addDateDays(dateString = "", days = 0) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateString))) return "";
+  const date = new Date(`${dateString}T00:00:00.000Z`);
+  date.setUTCDate(date.getUTCDate() + Number(days || 0));
+  return date.toISOString().slice(0, 10);
+}
+
+async function getPortalExamPostContext(session, payload = {}) {
+  if (session?.role !== "student") {
+    const error = new Error("학생 계정에서만 시험 후 제출을 저장할 수 있습니다.");
+    error.statusCode = 403;
+    throw error;
+  }
+  const targetId = String(payload.targetId ?? "").trim();
+  const examPrepId = String(payload.examPrepId ?? "").trim();
+  if (!targetId || !examPrepId) {
+    const error = new Error("시험 후 제출 대상을 찾지 못했습니다.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const [studentsResult, examPrepRowsResult, appStateResult] = await Promise.all([
+    listStudents(),
+    listExamPrepRows(),
+    listAppState()
+  ]);
+  const student = (studentsResult.students ?? []).find((item) => item.studentId === session.studentId);
+  const examPrepRow = (examPrepRowsResult.examPrepRows ?? []).find((row) => row.examPrepId === examPrepId);
+  const assignedStudentIds = appStateResult.states?.examPostTargetStudentIds?.[examPrepId];
+  const expectedTargetId = `exam_post_${examPrepId}_${session.studentId}`;
+  if (!student || !examPrepRow || targetId !== expectedTargetId) {
+    const error = new Error("시험 후 제출 대상을 찾지 못했습니다.");
+    error.statusCode = 404;
+    throw error;
+  }
+  if (
+    !Array.isArray(assignedStudentIds) ||
+    !assignedStudentIds.includes(session.studentId) ||
+    !schoolNamesMatch(examPrepRow.schoolName, student.schoolName) ||
+    !gradesMatch(examPrepRow.grade, student.grade)
+  ) {
+    const error = new Error("현재 학생에게 배정된 시험 후 제출이 아닙니다.");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  const examEntries = (Array.isArray(examPrepRow.mathExamDates) ? examPrepRow.mathExamDates : [])
+    .filter((entry) => entry?.date)
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  const examDate = examEntries.at(-1)?.date || examPrepRow.mathExamDate || "";
+  const subjects = Array.from(new Set(examEntries.map((entry) => String(entry.subject || entry.label || "").trim()).filter(Boolean)));
+  const subject = subjects.length ? subjects.join(", ") : examPrepRow.subject || "수학";
+  const examCycle = examPrepRow.examCycle || examPrepRow.examTerm || "";
+  const schoolName = examPrepRow.schoolName || student.schoolName || "";
+  const grade = examEntries[0]?.grade || examPrepRow.grade || student.grade || "";
+  const storagePrefix = [
+    "exam-post",
+    sanitizeStorageSegment(examCycle, "cycle"),
+    sanitizeStorageSegment(schoolName, "school"),
+    sanitizeStorageSegment(grade, "grade"),
+    sanitizeStorageSegment(student.name, student.studentId),
+    sanitizeStorageSegment(targetId, "target")
+  ].join("/") + "/";
+
+  return {
+    appStateResult,
+    dueDate: addDateDays(examDate, 1),
+    examCycle,
+    examDate,
+    examPrepId,
+    grade,
+    schoolName,
+    storagePrefix,
+    student,
+    subject,
+    targetId
+  };
+}
+
+function normalizeExamPostSubmissionValues(values = {}) {
+  const textFields = [
+    "score", "feeling", "difficulty", "preparation", "goodPart", "strongUnit",
+    "regretReasonOther", "regretMoment", "studyDifficultyOther", "neededMore",
+    "academyHelp", "academyFeedback", "nextGoal", "changeForNextExam", "wantedHelp",
+    "freeComment", "fileMemo"
+  ];
+  const normalized = Object.fromEntries(textFields.map((field) => [field, String(values[field] ?? "").trim()]));
+  normalized.regretReasons = Array.isArray(values.regretReasons)
+    ? values.regretReasons.map((item) => String(item).trim()).filter(Boolean)
+    : [];
+  normalized.studyDifficulties = Array.isArray(values.studyDifficulties)
+    ? values.studyDifficulties.map((item) => String(item).trim()).filter(Boolean)
+    : [];
+  return normalized;
+}
+
+function normalizeExamPostAttachments(attachments = [], context) {
+  if (!Array.isArray(attachments) || attachments.length === 0) {
+    const error = new Error("시험지 사진 또는 PDF를 한 개 이상 업로드해 주세요.");
+    error.statusCode = 400;
+    throw error;
+  }
+  return attachments.map((attachment) => {
+    const bucketId = String(attachment?.bucketId || "exam-submissions");
+    const storagePath = String(attachment?.storagePath || "");
+    if (bucketId !== "exam-submissions" || !storagePath.startsWith(context.storagePrefix)) {
+      const error = new Error("현재 학생의 제출 파일 경로가 아닙니다.");
+      error.statusCode = 403;
+      throw error;
+    }
+    return {
+      bucketId,
+      storagePath,
+      fileName: String(attachment.fileName || "시험지 파일"),
+      fileType: String(attachment.fileType || "application/octet-stream"),
+      fileSize: Number(attachment.fileSize || 0),
+      uploadedAt: String(attachment.uploadedAt || new Date().toISOString()),
+      uploadStatus: "uploaded",
+      source: "student_camera"
+    };
+  });
+}
+
+async function savePortalExamPostSubmission(session, payload = {}) {
+  return withPortalExamPostMutationLock(async () => {
+    const context = await getPortalExamPostContext(session, payload);
+    const currentSubmissions = Array.isArray(context.appStateResult.states?.examPostSubmissions)
+      ? context.appStateResult.states.examPostSubmissions
+      : [];
+    const existingSubmission = currentSubmissions.find((submission) =>
+      submission.targetId === context.targetId ||
+      (submission.studentId === session.studentId && submission.examPrepId === context.examPrepId)
+    );
+    if (existingSubmission?.submittedAt) {
+      const retryAttachments = normalizeExamPostAttachments(payload.fileAttachments, context);
+      const existingPaths = new Set(
+        (existingSubmission.fileAttachments ?? []).map((attachment) => String(attachment.storagePath || ""))
+      );
+      await Promise.allSettled(
+        retryAttachments
+          .filter((attachment) => !existingPaths.has(attachment.storagePath))
+          .map((attachment) => deleteStorageObject(attachment.bucketId, attachment.storagePath))
+      );
+      return {
+        duplicate: true,
+        source: context.appStateResult.source,
+        submission: existingSubmission,
+        submissions: currentSubmissions.filter((item) => item.studentId === session.studentId),
+        verified: true
+      };
+    }
+
+    const values = normalizeExamPostSubmissionValues(payload.values);
+    const missingTextFields = Object.entries(values)
+      .filter(([field, value]) => !["regretReasons", "studyDifficulties"].includes(field) && !value)
+      .map(([field]) => field);
+    if (missingTextFields.length || !values.regretReasons.length || !values.studyDifficulties.length) {
+      const error = new Error("시험 후 제출의 필수 응답을 모두 입력해 주세요.");
+      error.statusCode = 400;
+      throw error;
+    }
+    const fileAttachments = normalizeExamPostAttachments(payload.fileAttachments, context);
+    const nowIso = new Date().toISOString();
+    const submission = {
+      targetId: context.targetId,
+      submissionId: existingSubmission?.submissionId || `exam_post_submission_${crypto.randomUUID()}`,
+      studentId: context.student.studentId,
+      studentName: context.student.name,
+      grade: context.grade,
+      schoolName: context.schoolName,
+      examPrepId: context.examPrepId,
+      examCycle: context.examCycle,
+      examDate: context.examDate,
+      dueDate: context.dueDate,
+      subject: context.subject,
+      ...values,
+      regretReason: [...values.regretReasons, values.regretReasonOther].filter(Boolean).join(", "),
+      fileAttachments,
+      teacherConfirmed: false,
+      submittedAt: nowIso,
+      updatedAt: nowIso
+    };
+    const nextSubmissions = [
+      submission,
+      ...currentSubmissions.filter((item) =>
+        item.submissionId !== submission.submissionId && item.targetId !== submission.targetId
+      )
+    ];
+    await upsertAppState({ examPostSubmissions: nextSubmissions });
+    const verifiedResult = await listAppState();
+    const verifiedAllSubmissions = Array.isArray(verifiedResult.states?.examPostSubmissions)
+      ? verifiedResult.states.examPostSubmissions
+      : [];
+    const verifiedSubmission = verifiedAllSubmissions.find((item) => item.submissionId === submission.submissionId);
+    const verified = Boolean(
+      verifiedSubmission &&
+      verifiedSubmission.studentId === session.studentId &&
+      verifiedSubmission.targetId === context.targetId &&
+      verifiedSubmission.updatedAt === submission.updatedAt &&
+      verifiedSubmission.fileAttachments?.length === fileAttachments.length
+    );
+    if (!verified) {
+      const error = new Error("Supabase 저장 후 시험 후 제출을 다시 확인하지 못했습니다.");
+      error.statusCode = 500;
+      throw error;
+    }
+    return {
+      source: verifiedResult.source,
+      submission: verifiedSubmission,
+      submissions: verifiedAllSubmissions.filter((item) => item.studentId === session.studentId),
+      verified: true
+    };
+  });
+}
+
+async function confirmExamPostSubmission(payload = {}) {
+  return withPortalExamPostMutationLock(async () => {
+    const submissionId = String(payload.submissionId ?? "").trim();
+    if (!submissionId) {
+      const error = new Error("확인할 시험 후 제출 ID가 필요합니다.");
+      error.statusCode = 400;
+      throw error;
+    }
+    const beforeResult = await listAppState();
+    const currentSubmissions = Array.isArray(beforeResult.states?.examPostSubmissions)
+      ? beforeResult.states.examPostSubmissions
+      : [];
+    const existingSubmission = currentSubmissions.find((submission) => submission.submissionId === submissionId);
+    if (!existingSubmission) {
+      const error = new Error("시험 후 제출을 찾지 못했습니다.");
+      error.statusCode = 404;
+      throw error;
+    }
+    const updatedAt = new Date().toISOString();
+    const nextSubmission = {
+      ...existingSubmission,
+      teacherConfirmed: Boolean(payload.teacherConfirmed),
+      updatedAt
+    };
+    await upsertAppState({
+      examPostSubmissions: currentSubmissions.map((submission) =>
+        submission.submissionId === submissionId ? nextSubmission : submission
+      )
+    });
+    const verifiedResult = await listAppState();
+    const verifiedSubmissions = Array.isArray(verifiedResult.states?.examPostSubmissions)
+      ? verifiedResult.states.examPostSubmissions
+      : [];
+    const verifiedSubmission = verifiedSubmissions.find((submission) => submission.submissionId === submissionId);
+    if (
+      !verifiedSubmission ||
+      verifiedSubmission.teacherConfirmed !== nextSubmission.teacherConfirmed ||
+      verifiedSubmission.updatedAt !== updatedAt
+    ) {
+      const error = new Error("Supabase 저장 후 확인 상태를 다시 확인하지 못했습니다.");
+      error.statusCode = 500;
+      throw error;
+    }
+    return {
+      source: verifiedResult.source,
+      submission: verifiedSubmission,
+      submissions: verifiedSubmissions,
       verified: true
     };
   });
@@ -4537,25 +4800,23 @@ async function extractPdfTextPages(buffer) {
   };
 }
 
-async function uploadExamPostFile(payload) {
+async function uploadExamPostFile(session, payload) {
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
     throw new Error("Supabase Storage 업로드에는 service role 설정이 필요합니다.");
   }
+  if (!payload?.dataUrl) {
+    const error = new Error("업로드할 시험지 파일이 없습니다.");
+    error.statusCode = 400;
+    throw error;
+  }
+  const context = await getPortalExamPostContext(session, payload);
   const bucketId = "exam-submissions";
   await ensureStorageBucket(bucketId);
   const { mimeType, buffer } = parseDataUrl(payload.dataUrl);
   if (buffer.length > 20 * 1024 * 1024) throw new Error("파일은 20MB 이하만 업로드할 수 있습니다.");
   const fileName = String(payload.fileName || `submission-${Date.now()}`).trim();
   const storageFileName = getStorageSafeFileName(fileName, mimeType, "submission");
-  const storagePath = [
-    "exam-post",
-    sanitizeStorageSegment(payload.examCycle, "cycle"),
-    sanitizeStorageSegment(payload.schoolName, "school"),
-    sanitizeStorageSegment(payload.grade, "grade"),
-    sanitizeStorageSegment(payload.studentName, payload.studentId || "student"),
-    sanitizeStorageSegment(payload.targetId, "target"),
-    `${Date.now()}-${storageFileName}`
-  ].join("/");
+  const storagePath = `${context.storagePrefix}${Date.now()}-${storageFileName}`;
 
   await uploadStorageObjectWithBucketRetry(bucketId, storagePath, { contentType: mimeType, body: buffer });
 
@@ -4568,6 +4829,27 @@ async function uploadExamPostFile(payload) {
     signedUrl: await createSignedStorageUrl(bucketId, storagePath),
     uploadedAt: new Date().toISOString(),
     source: "student_camera"
+  };
+}
+
+async function deletePortalExamPostFiles(session, payload = {}) {
+  const context = await getPortalExamPostContext(session, payload);
+  const attachments = Array.isArray(payload.attachments) ? payload.attachments : [];
+  const results = [];
+  for (const attachment of attachments) {
+    const bucketId = String(attachment?.bucketId || "exam-submissions");
+    const storagePath = String(attachment?.storagePath || "");
+    if (bucketId !== "exam-submissions" || !storagePath.startsWith(context.storagePrefix)) {
+      const error = new Error("현재 학생의 정리 대상 파일 경로가 아닙니다.");
+      error.statusCode = 403;
+      throw error;
+    }
+    const deleted = await deleteStorageObject(bucketId, storagePath);
+    results.push({ bucketId, deleted, storagePath });
+  }
+  return {
+    cleaned: results.every((result) => result.deleted),
+    results
   };
 }
 
@@ -5246,6 +5528,34 @@ const server = http.createServer(async (request, response) => {
     return;
   }
 
+  if (request.method === "POST" && requestUrl.pathname === "/api/portal-exam-post-submissions") {
+    try {
+      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
+      const portalSession = verifyPortalSessionToken(token);
+      if (!portalSession) {
+        sendJson(request, response, 401, { ok: false, error: "학생 세션 인증이 필요합니다." });
+        return;
+      }
+      const payload = await readJsonBody(request);
+      const result = await savePortalExamPostSubmission(portalSession, payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, Number(error.statusCode) || 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/exam-post-submissions/confirm") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await confirmExamPostSubmission(payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, Number(error.statusCode) || 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
   if (request.method === "POST" && requestUrl.pathname === "/api/auth/teacher-account") {
     try {
       if (!isSupabaseConfigured({ requireServiceRole: true })) {
@@ -5315,7 +5625,11 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const requestedStates = payload.states ?? payload;
-      const { studentQuestions: _studentQuestions, ...safeStates } = requestedStates;
+      const {
+        examPostSubmissions: _examPostSubmissions,
+        studentQuestions: _studentQuestions,
+        ...safeStates
+      } = requestedStates;
       const result = await upsertAppState(safeStates);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
@@ -5631,11 +5945,34 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-post-files") {
     try {
+      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
+      const portalSession = verifyPortalSessionToken(token);
+      if (!portalSession) {
+        sendJson(request, response, 401, { ok: false, error: "학생 세션 인증이 필요합니다." });
+        return;
+      }
       const payload = await readJsonBody(request, { limitBytes: 28 * 1024 * 1024 });
-      const file = await uploadExamPostFile(payload);
+      const file = await uploadExamPostFile(portalSession, payload);
       sendJson(request, response, 200, { ok: true, file });
     } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
+      sendJson(request, response, Number(error.statusCode) || 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/exam-post-files/cleanup") {
+    try {
+      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
+      const portalSession = verifyPortalSessionToken(token);
+      if (!portalSession) {
+        sendJson(request, response, 401, { ok: false, error: "학생 세션 인증이 필요합니다." });
+        return;
+      }
+      const payload = await readJsonBody(request);
+      const result = await deletePortalExamPostFiles(portalSession, payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, Number(error.statusCode) || 500, { ok: false, error: error.message });
     }
     return;
   }

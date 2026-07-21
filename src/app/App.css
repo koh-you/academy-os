@@ -13412,6 +13412,51 @@ textarea.profileEditInput {
   gap: 14px;
 }
 
+.studentExamPostFieldset {
+  border: 0;
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  min-width: 0;
+  padding: 0;
+}
+
+.studentExamPostPreviewNotice,
+.studentExamPostSaveFeedback > span,
+.examPostConfirmSaveFeedback > span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.studentExamPostSaveFeedback,
+.examPostConfirmSaveFeedback {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+
+.studentExamPostSaveFeedback.failed > span,
+.examPostConfirmSaveFeedback.failed > span {
+  color: #b91c1c;
+}
+
+.examPostConfirmAction {
+  align-items: flex-end;
+  display: grid;
+  gap: 7px;
+  justify-items: end;
+}
+
+.examPostConfirmSaveFeedback {
+  justify-content: flex-end;
+  max-width: 260px;
+  text-align: right;
+}
+
 .studentExamPostForm > label,
 .studentExamPostForm .fieldGrid label {
   background: #ffffff;
@@ -17793,6 +17838,17 @@ body.attendanceOnlyBody {
 
   .studentQuestionItemActions .studentQuestionSaveFeedback {
     justify-content: flex-start;
+  }
+
+  .examPostConfirmAction {
+    align-items: stretch;
+    justify-items: stretch;
+  }
+
+  .examPostConfirmSaveFeedback {
+    justify-content: flex-start;
+    max-width: none;
+    text-align: left;
   }
 
   .studentPortalTabletFirst .portalTabs,
