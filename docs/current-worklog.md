@@ -103,6 +103,7 @@
 - 수정: `getStudentSupplementScheduleTasks`에서 포털용 원본 task 목록을 만들고, 기존 `getStudentSupplementSchedules`는 그 목록을 알림 문장으로 변환하는 파생 함수로 분리했다. 학생 포털은 취소되지 않은 원본 task를 받아 화면 상단에 표시하고, 연결 lesson이 있으면 `수업일지 일정 반영됨`을 보여준다. 과거 실제 기록을 보여주는 `StudentLessonHistoryCalendar` 계약은 바꾸지 않는다.
 - 저장 원천/side effect: 직접 원천은 기존 Supabase `makeup_tasks`와 `lessons.studentIds/sourceMakeupTaskId`, 실제 수업 기록 원천은 `lesson_student_records`다. 이번 변경은 읽기·표시만 바꾸며 DB 저장, lesson/record 생성, `notification_jobs`, Solapi 동작은 없다. SQL 변경도 없다.
 - AI 검증: 운영 원천 read-only 대조, `git diff --check`, 시나리오 스크립트 문법 검사, `npm run build`, `npm run test:production` 342/342를 통과했다.
+- 배포 확인: `main` 기능 커밋 `5859403`을 푸시했고 Vercel 운영 번들이 `/assets/main-BYQObBzu.js`, `/assets/main-3JsStj_E.css`로 전환됐다. 운영 번들에서 `보충/재시험 일정`, `수업일지 일정 반영됨`, 일정 상태 CSS를 확인했고 Render API의 Supabase 응답에서 김예나의 7월 22일·24일 결석보강과 연결 lesson이 그대로 유지되는 것을 재확인했다.
 - 사람 검토 gate: 운영 학생 화면에서 김예나로 로그인하면 화면 상단 `보충/재시험 일정`에 `결석보강`, `2026-07-22 13:00`, `2026-07-24 13:00`, `수업일지 일정 반영됨`이 보여야 한다. 수업 기록 캘린더에는 아직 기록이 없는 22일·24일이 완료 기록처럼 표시되지 않아야 한다. 다른 학생 일정이 섞이거나 취소된 일정이 보이거나 알림톡/수업 데이터가 새로 생성되면 중단한다. 사용자가 계속 완료를 지시해 자동검증 통과 후 커밋·배포하고 운영 화면에서 최종 확인한다.
 
 ### 2026-07-21 P0. 김예나 결석보강 오예약 취소 및 알림관리 전체 예약 조회·실제 취소 연결
