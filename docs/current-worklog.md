@@ -156,6 +156,16 @@
 - 배포 확인: `main` 커밋 `cfb41228`을 푸시했고 Vercel 운영 번들이 `/assets/main-C_OhQXTh.js`로 전환됐다. 운영 번들에서 `다시 예약할 현재 문구`, 취소·실패 문구 비재사용 안내, `당일 학생 11시 알림톡 문구` 구분을 확인했다. 운영 데이터 수정과 Solapi 예약은 실행하지 않았다.
 - 사람 검토 gate: 배포 후 김예나 7/17 결석보강의 `학생 알림톡`과 `학부모 알림톡`을 각각 연다. 상태가 `취소됨`, 시각 라벨이 `이전 예약 시각`, 본문 제목이 `다시 예약할 현재 문구`인지 확인하고 `확인할 숙제` 줄이 없는지 본다. `당일 학생 11시 알림톡`에서는 별도 저장된 김예나 안내 문구가 보여야 한다. 세 모달 검수 중에는 `Solapi 예약`을 누르지 않는다. 취소된 옛 문구가 다시 보이거나 세 버튼의 문구 원천이 섞이면 즉시 중단한다.
 
+### 2026-07-21 P0. 보충 원 숙제 카드와 알림톡 문구 3종 독립 편집
+
+- 사용자 의도 정정: `보강 때 확인할 지난 숙제`는 선생님이 지우거나 수정하는 최종 문구가 아니라, 원 결석수업에 지난 숙제가 있으면 항상 가져오는 사실 카드다. 실제로 수정할 원본은 `학생 알림톡`, `학부모 알림톡`, `당일 학생 11시 알림톡` 세 문구이며 서로 독립돼야 한다.
+- 원 숙제 카드: 결석보강은 `getAbsenceHomeworkCheckLabel -> sourcePreviousHomework -> sourceContext.sourcePreviousHomework` 순서로 원 수업의 지난 숙제를 항상 읽는다. 기존 textarea와 선생님 수정본 marker를 제거하고 읽기 전용 카드로 표시한다. 숙제보충도 연결된 원 숙제를 같은 카드 구조로 표시한다.
+- 알림톡 편집 UI: 하단에 `학생 알림톡 -> 학부모 알림톡 -> 당일 학생 11시 알림톡` 순서의 탭을 두고, 선택한 문구만 textarea에 보여준다. 자동 초안을 수정하면 해당 탭만 선생님 최종본이 되며 다른 두 문구는 덮어쓰지 않는다. 수정사항이 있으면 예약 확인 버튼을 잠그고 `보충 내용·알림톡 저장` 후에만 선택한 Solapi 예약·취소 모달로 이동한다.
+- 저장 원천: 세 필드는 각각 `studentScheduleNotificationDraft`, `parentScheduleNotificationDraft`, `notificationDraft`로 Supabase `makeup_tasks.note`에 저장하고 `supplementTeacherEditedFields`로 선생님 최종본을 구분한다. 저장은 기존 read-after-write fingerprint에 세 필드를 모두 포함한다. 빈 수정본도 최종본으로 보존하되 Solapi 예약은 차단한다. SQL 변경은 없다.
+- 실제 예약 연결: 학생/학부모 schedule job builder는 선택 대상에 맞는 저장 문구를 `notification_jobs.previewBody`와 Solapi payload에 그대로 사용하고, 당일 학생 11시는 기존 `notificationDraft`를 사용한다. 활성 Solapi 예약과 새 저장본이 다르면 자동 덮어쓰지 않고 `기존 예약 취소 -> 다시 예약` 안내를 표시한다.
+- side effect/AI 검증 범위: 코드 수정과 자동검증에서는 운영 `makeup_tasks`, `notification_jobs`, Solapi 예약·발송을 변경하지 않았다. `git diff --check`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production`을 통과했고 운영 시나리오는 341/341이다. `api/routes/coreData.js`의 `makeup_tasks.note` JSON 왕복도 다시 확인했으며 실제 세 문구 저장 및 예약은 사람 gate로 남긴다.
+- 사람 검토 gate: 배포 후 김예나 결석보강을 열어 원 숙제가 textarea가 아닌 카드인지 확인한다. 세 탭을 순서대로 열어 서로 다른 초안을 확인하고 각 끝에 안전한 검수 표식을 하나씩 추가한 뒤 `보충 내용·알림톡 저장`을 누른다. 모달 재진입·전체 새로고침 후 세 표식이 각각 유지되는지 확인한다. 그다음 예약이 취소 상태인 한 탭만 `Solapi 예약·취소 확인`으로 열어 실제 예약 문구에 해당 표식만 들어가는지 확인하되, 사람의 최종 승인 전에는 `Solapi 예약`을 누르지 않는다. 원 숙제가 편집 가능하거나 세 문구가 서로 복사되거나 옛 예약 문구가 나오면 즉시 중단한다.
+
 ### 2026-07-20 P0-1. 수업일지 학생 명단 가나다순 통일
 
 - 사용자 요청: 수업일지 학생 명단을 생성·추가·신청 순서가 아닌 이름 가나다순으로 통일한다.

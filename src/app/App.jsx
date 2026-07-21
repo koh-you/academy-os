@@ -7840,6 +7840,10 @@ export function App() {
     }
     const student = students.find((item) => item.studentId === task.studentId);
     if (!student) throw new Error("학생 정보를 찾지 못했습니다.");
+    const notificationDraftField = getSupplementNotificationDraftFieldForControl(controlType);
+    if (isSupplementTeacherEditedField(task, notificationDraftField) && !String(task[notificationDraftField] ?? "").trim()) {
+      throw new Error("선생님 최종 알림톡 문구가 비어 있습니다. 문구를 입력하고 저장한 뒤 예약해 주세요.");
+    }
 
     if (controlType === "studentReminder") {
       const result = await reserveSupplementStudentReminder(task);
@@ -22170,12 +22174,11 @@ function SupplementCenter({
     const sourceRecord = records.find((record) => record.lessonStudentRecordId === task.sourceId);
     const sourceContext = sourceRecord ? createAbsenceSourceContext(sourceRecord) : {};
     const homeworkCheckLabel = getAbsenceHomeworkCheckLabel(sourceRecord, homeworks, lessons, students);
-    const hasSavedHomeworkNote =
-      Object.prototype.hasOwnProperty.call(task, "supplementHomeworkNote") ||
-      isSupplementTeacherEditedField(task, "supplementHomeworkNote");
-    const homeworkCheckSeed = hasSavedHomeworkNote
-      ? String(task.supplementHomeworkNote ?? "")
-      : homeworkCheckLabel || task.sourcePreviousHomework || sourceContext.sourcePreviousHomework || "";
+    const homeworkCheckSeed = homeworkCheckLabel ||
+      task.sourcePreviousHomework ||
+      sourceContext.sourcePreviousHomework ||
+      task.supplementHomeworkNote ||
+      "";
     return {
       ...task,
       sourceDate: task.sourceDate || sourceContext.sourceDate || task.lessonDate || "",
@@ -22716,14 +22719,29 @@ function SupplementScheduleChangeConfirmModal({
 }
 
 const supplementDraftFieldLabels = {
-  supplementHomeworkNote: "보충 대상",
   supplementMethod: "처리 방법",
   scheduledDate: "배정일",
   scheduledTime: "시간",
-  notificationDraft: "알림톡 문구"
+  studentScheduleNotificationDraft: "학생 알림톡 문구",
+  parentScheduleNotificationDraft: "학부모 알림톡 문구",
+  notificationDraft: "당일 학생 11시 알림톡 문구"
 };
 
-const supplementTeacherFinalFields = new Set(["supplementHomeworkNote", "notificationDraft"]);
+const supplementNotificationDraftConfigs = [
+  { controlType: "studentSchedule", field: "studentScheduleNotificationDraft", label: "학생 알림톡", target: "student" },
+  { controlType: "parentSchedule", field: "parentScheduleNotificationDraft", label: "학부모 알림톡", target: "parent" },
+  { controlType: "studentReminder", field: "notificationDraft", label: "당일 학생 11시 알림톡", target: "student" }
+];
+
+const supplementTeacherFinalFields = new Set(supplementNotificationDraftConfigs.map((config) => config.field));
+
+function getSupplementNotificationDraftConfig(field = "") {
+  return supplementNotificationDraftConfigs.find((config) => config.field === field) ?? supplementNotificationDraftConfigs[0];
+}
+
+function getSupplementNotificationDraftFieldForControl(controlType = "studentSchedule") {
+  return supplementNotificationDraftConfigs.find((config) => config.controlType === controlType)?.field ?? "studentScheduleNotificationDraft";
+}
 
 function getSupplementTeacherEditedFields(task = {}) {
   return [...new Set(
@@ -22756,9 +22774,11 @@ function getSupplementPersistedEditFingerprint(task = {}) {
   return JSON.stringify({
     makeupTaskId: task.makeupTaskId || "",
     notificationDraft: String(task.notificationDraft ?? ""),
+    parentScheduleNotificationDraft: String(task.parentScheduleNotificationDraft ?? ""),
     scheduledDate: String(task.scheduledDate ?? ""),
     scheduledTime: String(task.scheduledTime ?? ""),
     status: String(task.status ?? "draft"),
+    studentScheduleNotificationDraft: String(task.studentScheduleNotificationDraft ?? ""),
     supplementHomeworkNote: String(task.supplementHomeworkNote ?? ""),
     supplementMethod: String(task.supplementMethod ?? ""),
     supplementProgressMemo: String(task.supplementProgressMemo ?? ""),
@@ -22804,6 +22824,8 @@ function getSupplementTaskSourceVersion(task = {}) {
     task.supplementMethod,
     task.scheduledDate,
     task.scheduledTime,
+    task.studentScheduleNotificationDraft,
+    task.parentScheduleNotificationDraft,
     task.notificationDraft,
     getSupplementTeacherEditedFields(task).join(",")
   ].map((value) => normalizeSupplementDraftValue(value)).join("|");
@@ -22818,6 +22840,17 @@ function createSupplementTaskDraft(task = {}, student = null, notificationTempla
   const notificationDraft = isSupplementTeacherEditedField(task, "notificationDraft")
     ? String(task.notificationDraft ?? "")
     : task.notificationDraft || generatedNotificationDraft;
+  const generatedScheduleNotificationDraft = buildSupplementScheduleNoticeBody(
+    taskWithDefaultMethod,
+    "",
+    notificationTemplates
+  );
+  const studentScheduleNotificationDraft = isSupplementTeacherEditedField(task, "studentScheduleNotificationDraft")
+    ? String(task.studentScheduleNotificationDraft ?? "")
+    : generatedScheduleNotificationDraft;
+  const parentScheduleNotificationDraft = isSupplementTeacherEditedField(task, "parentScheduleNotificationDraft")
+    ? String(task.parentScheduleNotificationDraft ?? "")
+    : generatedScheduleNotificationDraft;
   return {
     status: task.status || "draft",
     supplementHomeworkNote: task.supplementHomeworkNote ?? task.sourceLabel ?? "",
@@ -22825,6 +22858,8 @@ function createSupplementTaskDraft(task = {}, student = null, notificationTempla
     supplementMethod: taskWithDefaultMethod.supplementMethod,
     scheduledDate: task.scheduledDate || "",
     scheduledTime: task.scheduledTime || "",
+    studentScheduleNotificationDraft,
+    parentScheduleNotificationDraft,
     notificationDraft
   };
 }
@@ -22883,6 +22918,7 @@ function SupplementStudentModal({
   const [busyTaskId, setBusyTaskId] = useState("");
   const [taskDrafts, setTaskDrafts] = useState({});
   const [taskSaveStatus, setTaskSaveStatus] = useState({});
+  const [activeNotificationDraftFields, setActiveNotificationDraftFields] = useState({});
   const [notificationControl, setNotificationControl] = useState(null);
   const [notificationControlBusy, setNotificationControlBusy] = useState(false);
   const [notificationControlFeedback, setNotificationControlFeedback] = useState(null);
@@ -22962,26 +22998,28 @@ function SupplementStudentModal({
       const editedFields = supplementTeacherFinalFields.has(field)
         ? [...new Set([...(existing?.editedFields ?? []), field])]
         : existing?.editedFields ?? [];
-      const hasTeacherFinalNotificationDraft =
-        isSupplementTeacherEditedField(task, "notificationDraft") ||
-        editedFields.includes("notificationDraft");
-      const shouldRefreshGeneratedDraft =
-        field !== "notificationDraft" &&
-        !hasTeacherFinalNotificationDraft &&
-        ["supplementHomeworkNote", "supplementProgressMemo", "supplementMethod", "scheduledDate", "scheduledTime"].includes(field);
-      if (shouldRefreshGeneratedDraft) {
-        const previousGeneratedDraft = createNotificationDraft(
-          { ...task, ...previousValues, scheduledTime: normalizeTimeInput(previousValues.scheduledTime) || previousValues.scheduledTime },
-          [student],
-          normalizedNotificationTemplates
-        );
-        if (normalizeSupplementDraftValue(previousValues.notificationDraft) === normalizeSupplementDraftValue(previousGeneratedDraft)) {
-          values.notificationDraft = createNotificationDraft(
-            { ...task, ...values, scheduledTime: normalizeTimeInput(values.scheduledTime) || values.scheduledTime },
-            [student],
-            normalizedNotificationTemplates
-          );
-        }
+      if (!supplementTeacherFinalFields.has(field)) {
+        const previousTaskValues = {
+          ...task,
+          ...previousValues,
+          scheduledTime: normalizeTimeInput(previousValues.scheduledTime) || previousValues.scheduledTime
+        };
+        const nextTaskValues = {
+          ...task,
+          ...values,
+          scheduledTime: normalizeTimeInput(values.scheduledTime) || values.scheduledTime
+        };
+        supplementNotificationDraftConfigs.forEach((config) => {
+          const isTeacherFinal = isSupplementTeacherEditedField(task, config.field) || editedFields.includes(config.field);
+          if (isTeacherFinal) return;
+          const previousGeneratedDraft = config.controlType === "studentReminder"
+            ? createNotificationDraft(previousTaskValues, [student], normalizedNotificationTemplates)
+            : buildSupplementScheduleNoticeBody(previousTaskValues, "", normalizedNotificationTemplates);
+          if (normalizeSupplementDraftValue(previousValues[config.field]) !== normalizeSupplementDraftValue(previousGeneratedDraft)) return;
+          values[config.field] = config.controlType === "studentReminder"
+            ? createNotificationDraft(nextTaskValues, [student], normalizedNotificationTemplates)
+            : buildSupplementScheduleNoticeBody(nextTaskValues, "", normalizedNotificationTemplates);
+        });
       }
       const diff = getSupplementTaskDraftDiff(task, values, student, normalizedNotificationTemplates);
       return {
@@ -22997,7 +23035,7 @@ function SupplementStudentModal({
     setTaskSaveStatusPatch(task.makeupTaskId, {
       lesson: ["scheduledDate", "scheduledTime"].includes(field) ? "changed" : taskSaveStatus[task.makeupTaskId]?.lesson,
       makeupTask: "changed",
-      notificationDraft: field === "notificationDraft" ? "changed" : taskSaveStatus[task.makeupTaskId]?.notificationDraft
+      notificationDraft: supplementTeacherFinalFields.has(field) ? "changed" : taskSaveStatus[task.makeupTaskId]?.notificationDraft
     });
   }
 
@@ -23024,14 +23062,18 @@ function SupplementStudentModal({
       ...draftValues,
       scheduledTime: normalizedScheduledTime
     };
-    const notificationDraft = supplementTeacherEditedFields.includes("notificationDraft")
-      ? String(draftValues.notificationDraft ?? "")
-      : draftValues.notificationDraft?.trim()
-        ? draftValues.notificationDraft
-        : createNotificationDraft(taskWithDraftValues, [student], normalizedNotificationTemplates);
+    const resolvedNotificationDrafts = supplementNotificationDraftConfigs.reduce((result, config) => {
+      const generatedDraft = config.controlType === "studentReminder"
+        ? createNotificationDraft(taskWithDraftValues, [student], normalizedNotificationTemplates)
+        : buildSupplementScheduleNoticeBody(taskWithDraftValues, "", normalizedNotificationTemplates);
+      result[config.field] = supplementTeacherEditedFields.includes(config.field)
+        ? String(draftValues[config.field] ?? "")
+        : generatedDraft;
+      return result;
+    }, {});
     const nextTask = {
       ...taskWithDraftValues,
-      notificationDraft,
+      ...resolvedNotificationDrafts,
       supplementTeacherEditedFields
     };
 
@@ -23054,7 +23096,7 @@ function SupplementStudentModal({
       makeupTask: "saving",
       notificationDraft: "saving"
     });
-    showFeedback("보충 내용 저장 중", "보충 대상과 알림톡 문구만 저장합니다. 수업일지 일정은 아직 만들지 않습니다.", "saving");
+    showFeedback("보충 내용·알림톡 저장 중", "원 숙제 카드와 알림톡 문구 3종을 저장합니다. 수업일지 일정과 Solapi 예약은 아직 변경하지 않습니다.", "saving");
 
     try {
       const savedTask = await onSaveTask?.(taskWithDraft);
@@ -23065,7 +23107,7 @@ function SupplementStudentModal({
         makeupTask: "saved",
         notificationDraft: "saved"
       });
-      showFeedback("보충 내용 저장 완료", "보충 대상과 알림톡 문구가 저장되었습니다. 수업일지 일정은 별도 버튼으로 진행합니다.");
+      showFeedback("보충 내용·알림톡 저장 완료", "원 숙제 카드와 알림톡 문구 3종을 저장하고 Supabase 재확인까지 마쳤습니다. Solapi 예약은 별도 확인 버튼으로 진행합니다.");
     } catch (error) {
       console.error("Failed to save supplement task", error);
       setTaskSaveStatusPatch(task.makeupTaskId, {
@@ -23243,16 +23285,19 @@ function SupplementStudentModal({
     setNotificationControlFeedback(null);
   }
 
-  function renderNotificationControlButton(task, controlType) {
-    const config = supplementNotificationControlConfig[controlType];
-    const job = getSupplementNotificationControlJob(task, notificationJobs, controlType);
+  function renderNotificationDraftTab(task, config, activeField) {
+    const job = getSupplementNotificationControlJob(task, notificationJobs, config.controlType);
     const display = getSupplementNotificationControlDisplay(job);
     return (
       <button
-        aria-pressed={display.tone === "on"}
-        className={`supplementNotificationControlButton ${display.tone}`}
-        key={controlType}
-        onClick={() => openNotificationControl(task, controlType)}
+        aria-selected={activeField === config.field}
+        className={`supplementNotificationDraftTab ${display.tone} ${activeField === config.field ? "active" : ""}`}
+        key={config.field}
+        onClick={() => setActiveNotificationDraftFields((current) => ({
+          ...current,
+          [task.makeupTaskId]: config.field
+        }))}
+        role="tab"
         type="button"
       >
         <span className="supplementNotificationControlLight" aria-hidden="true" />
@@ -23282,9 +23327,14 @@ function SupplementStudentModal({
     ).length);
   const notificationControlHasEmptyFinalDraft = Boolean(
     notificationControlTask &&
-    notificationControl?.controlType === "studentReminder" &&
-    isSupplementTeacherEditedField(notificationControlTask, "notificationDraft") &&
-    !String(notificationControlTask.notificationDraft ?? "").trim()
+    notificationControl &&
+    isSupplementTeacherEditedField(
+      notificationControlTask,
+      getSupplementNotificationDraftFieldForControl(notificationControl.controlType)
+    ) &&
+    !String(
+      notificationControlTask[getSupplementNotificationDraftFieldForControl(notificationControl.controlType)] ?? ""
+    ).trim()
   );
   const notificationControlBlockReason = !notificationControlTask?.linkedLessonId
     ? "수업일지 일정을 먼저 만들어야 알림톡을 예약할 수 있습니다."
@@ -23301,7 +23351,12 @@ function SupplementStudentModal({
   const notificationControlCurrentPreview = notificationControlTask && notificationControl
     ? notificationControl.controlType === "studentReminder"
       ? createSupplementTaskDraft(notificationControlTask, student, normalizedNotificationTemplates).notificationDraft
-      : buildSupplementScheduleNoticeBody(notificationControlTask, "", normalizedNotificationTemplates)
+      : getSupplementScheduleNoticeDraft(
+          notificationControlTask,
+          notificationControl.controlType === "parentSchedule" ? "parent" : "student",
+          "",
+          normalizedNotificationTemplates
+        )
     : "";
   const notificationControlPreview = notificationControlTask && notificationControl
     ? notificationControlHasHistoricalJob
@@ -23315,6 +23370,12 @@ function SupplementStudentModal({
       : notificationControlJob
         ? "현재 예약 문구"
         : "예약할 현재 문구";
+  const notificationControlSavedDraftDiffers = Boolean(
+    notificationControlJob &&
+    canCancelNotificationJob(notificationControlJob) &&
+    normalizeMessageText(notificationControlJob.previewBody || "").trim() !==
+      normalizeMessageText(notificationControlCurrentPreview || "").trim()
+  );
   const notificationControlRecipient = notificationControlTask && notificationControl
     ? notificationControl.controlType === "parentSchedule" ? student.parentPhone : student.studentPhone
     : "";
@@ -23402,17 +23463,24 @@ function SupplementStudentModal({
               const isCancelAbsenceBusy = busyTaskId === `${task.makeupTaskId}:cancelAbsence`;
               const hasScheduleDraft = Boolean(draftValues.scheduledDate && draftValues.scheduledTime);
               const hasScheduleDiff = draftDiff.some((item) => ["scheduledDate", "scheduledTime"].includes(item.field));
-              const hasNotificationDiff = draftDiff.some((item) => item.field === "notificationDraft");
-              const homeworkNoteIsTeacherFinal =
-                isSupplementTeacherEditedField(task, "supplementHomeworkNote") ||
-                taskDraftState.editedFields?.includes("supplementHomeworkNote");
-              const notificationDraftIsTeacherFinal =
-                isSupplementTeacherEditedField(task, "notificationDraft") ||
-                taskDraftState.editedFields?.includes("notificationDraft");
+              const hasNotificationDiff = draftDiff.some((item) => supplementTeacherFinalFields.has(item.field));
+              const activeNotificationDraftField = activeNotificationDraftFields[task.makeupTaskId] || supplementNotificationDraftConfigs[0].field;
+              const activeNotificationDraftConfig = getSupplementNotificationDraftConfig(activeNotificationDraftField);
+              const activeNotificationDraft = draftValues[activeNotificationDraftField] ?? "";
+              const activeNotificationDraftIsTeacherFinal =
+                isSupplementTeacherEditedField(task, activeNotificationDraftField) ||
+                taskDraftState.editedFields?.includes(activeNotificationDraftField);
+              const activeNotificationJob = getSupplementNotificationControlJob(
+                task,
+                notificationJobs,
+                activeNotificationDraftConfig.controlType
+              );
+              const activeNotificationDisplay = getSupplementNotificationControlDisplay(activeNotificationJob);
               const isScheduleChangeMode = Boolean(task.linkedLessonId);
               const makeupStatus = saveStatus.makeupTask || (draftDiff.length ? "changed" : "saved");
               const lessonStatus = saveStatus.lesson || (hasScheduleDiff ? "changed" : task.linkedLessonId ? "synced" : hasScheduleDraft ? "ready" : "empty");
-              const notificationStatus = saveStatus.notificationDraft || (hasNotificationDiff ? "changed" : draftValues.notificationDraft ? "saved" : "empty");
+              const hasAnyNotificationDraft = supplementNotificationDraftConfigs.some((config) => draftValues[config.field]);
+              const notificationStatus = saveStatus.notificationDraft || (hasNotificationDiff ? "changed" : hasAnyNotificationDraft ? "saved" : "empty");
               const scheduleGateTitle = isScheduleChangeMode ? "기존 일정 변경" : "최초 일정 확정";
               const scheduleGateBody = isScheduleChangeMode
                 ? hasScheduleDiff
@@ -23430,9 +23498,9 @@ function SupplementStudentModal({
                       <span className="taskLinkedLesson draftMode">
                         수정 중
                       </span>
-                      {task.notificationDraft?.trim() ? (
+                      {supplementNotificationDraftConfigs.every((config) => String(task[config.field] ?? "").trim()) ? (
                         <span className="taskLinkedLesson draftReady">
-                          알림톡 초안 반영 완료
+                          알림톡 문구 3종 저장 완료
                         </span>
                       ) : null}
                       {task.taskType === "absence_makeup" ? (
@@ -23457,7 +23525,7 @@ function SupplementStudentModal({
                       <div>
                         <span>그날까지 해야 했던 숙제</span>
                         <strong>{sourceHomeworkTitle}</strong>
-                        <small>아래에서 실제 등원해서 확인할 남은 부분만 수정합니다.</small>
+                        <small>원 숙제 기록을 아래 확인 카드에 그대로 사용합니다.</small>
                       </div>
                     </div>
                   ) : null}
@@ -23476,7 +23544,7 @@ function SupplementStudentModal({
                       <div>
                         <span>그날 확인할 지난 숙제</span>
                         <strong>{absencePreviousHomework || "기록 없음"}</strong>
-                        <small>아래에서 이번 보강 때 실제 확인할 부분만 수정합니다.</small>
+                        <small>지난 숙제가 있으면 아래 확인 카드와 알림톡 초안에 자동 반영합니다.</small>
                       </div>
                       <div>
                         <span>그날 새로 나간 숙제</span>
@@ -23516,22 +23584,15 @@ function SupplementStudentModal({
                   </div>
                   <div className="supplementReadableGrid">
                     {task.taskType === "homework_makeup" || task.taskType === "absence_makeup" ? (
-                      <label className="supplementHomeworkField supplementReadableField">
+                      <div className="supplementHomeworkSourceCard">
                         <strong>{task.taskType === "absence_makeup" ? "보강 때 확인할 지난 숙제" : "등원해서 확인할 숙제"}</strong>
                         <span>
                           {task.taskType === "absence_makeup"
-                            ? "원 결석 수업에서 확인하지 못한 지난 숙제 중, 이번 보강 때 실제 확인할 부분만 수정합니다."
-                            : "원 숙제에서 실제 남은 부분만 수정해서 보충일지와 알림톡 문구에 반영합니다."}
+                            ? "원 결석 수업의 지난 숙제를 자동으로 가져옵니다. 이 카드에서는 수정하지 않습니다."
+                            : "보충관리로 연결된 원 숙제를 자동으로 가져옵니다. 이 카드에서는 수정하지 않습니다."}
                         </span>
-                        {homeworkNoteIsTeacherFinal ? (
-                          <small className="supplementTeacherFinalNotice">선생님 수정본 · 빈 값도 최종본으로 저장됩니다.</small>
-                        ) : null}
-                        <textarea
-                          value={supplementHomeworkNote}
-                          onChange={(event) => updateTaskDraft(task, "supplementHomeworkNote", event.target.value)}
-                          placeholder={task.taskType === "absence_makeup" ? "예: 지난 숙제 중 개념원리 p.18~19 오답, 곱셈공식 프린트 10문항" : "예: 개념원리 p.34~46 중 남은 12문제, RPM 104~127 중 오답"}
-                        />
-                      </label>
+                        <p>{supplementHomeworkNote || "지난 숙제 기록 없음"}</p>
+                      </div>
                     ) : null}
                   </div>
                   {draftDiff.length ? (
@@ -23552,25 +23613,56 @@ function SupplementStudentModal({
                   <div className="supplementSaveStatusGrid">
                     {renderSaveStatusPill("보충 내용", makeupStatus)}
                     {renderSaveStatusPill("수업일지 일정", lessonStatus)}
-                    {renderSaveStatusPill("알림톡 문구", notificationStatus)}
-                    {renderNotificationControlButton(task, "studentSchedule")}
-                    {renderNotificationControlButton(task, "parentSchedule")}
-                    {renderNotificationControlButton(task, "studentReminder")}
+                    {renderSaveStatusPill("알림톡 문구 3종", notificationStatus)}
                   </div>
-                  <label className="notificationDraftField supplementReadableField">
-                    <strong>당일 학생 11시 알림톡 문구</strong>
-                    <span>이 문구는 ‘당일 학생 11시 알림톡’ 버튼에만 사용합니다. 학생·학부모 일정 확정 문구는 각 알림톡 버튼에서 현재 저장된 보충 내용으로 확인합니다.</span>
-                    {notificationDraftIsTeacherFinal ? (
-                      <small className="supplementTeacherFinalNotice">선생님 수정본 · 자동 초안이 다시 덮어쓰지 않습니다.</small>
-                    ) : null}
-                    <textarea
-                      value={draftValues.notificationDraft}
-                      onChange={(event) => updateTaskDraft(task, "notificationDraft", event.target.value)}
-                    />
-                  </label>
+                  <section className="supplementNotificationDraftWorkspace">
+                    <div className="supplementNotificationDraftHeader">
+                      <div>
+                        <strong>알림톡 문구 편집</strong>
+                        <span>버튼을 순서대로 눌러 학생·학부모·당일 학생 문구를 각각 확인하고 수정합니다.</span>
+                      </div>
+                      <small>각 수정본은 서로 덮어쓰지 않습니다.</small>
+                    </div>
+                    <div className="supplementNotificationDraftTabs" role="tablist" aria-label="보충 알림톡 문구 선택">
+                      {supplementNotificationDraftConfigs.map((config) => (
+                        renderNotificationDraftTab(task, config, activeNotificationDraftField)
+                      ))}
+                    </div>
+                    <label className="notificationDraftField supplementReadableField">
+                      <strong>{activeNotificationDraftConfig.label} 문구</strong>
+                      <span>
+                        {activeNotificationDraftConfig.controlType === "studentReminder"
+                          ? "보강 당일 오전 11시에 학생에게 예약할 문구입니다."
+                          : `${activeNotificationDraftConfig.label} 버튼으로 다음 정각에 예약할 일정 안내 문구입니다.`}
+                      </span>
+                      {activeNotificationDraftIsTeacherFinal ? (
+                        <small className="supplementTeacherFinalNotice">선생님 수정본 · 자동 초안이 다시 덮어쓰지 않습니다.</small>
+                      ) : (
+                        <small className="supplementNotificationAutoDraftNotice">자동 초안 · 수정하면 선생님 최종본으로 저장됩니다.</small>
+                      )}
+                      <textarea
+                        value={activeNotificationDraft}
+                        onChange={(event) => updateTaskDraft(task, activeNotificationDraftField, event.target.value)}
+                      />
+                    </label>
+                    <div className="supplementNotificationDraftActions">
+                      <span className={`supplementNotificationControlState ${activeNotificationDisplay.tone}`}>
+                        <i aria-hidden="true" />
+                        {activeNotificationDisplay.label}
+                      </span>
+                      <button
+                        className="softButton"
+                        disabled={isTaskBusy || draftDiff.length > 0}
+                        onClick={() => openNotificationControl(task, activeNotificationDraftConfig.controlType)}
+                        type="button"
+                      >
+                        {draftDiff.length > 0 ? "수정본 저장 후 예약 확인" : "Solapi 예약·취소 확인"}
+                      </button>
+                    </div>
+                  </section>
                   <div className={`supplementSendGateNote ${isScheduleChangeMode ? "changeNotice" : "confirmNotice"}`}>
                     <strong>{scheduleGateTitle}</strong>
-                    <span>보충 내용 저장: 보충 대상과 당일 11시 학생 안내 문구만 저장하고, 발송/예약은 만들지 않습니다.</span>
+                    <span>보충 내용 저장: 원 숙제 카드와 알림톡 문구 3종을 저장하고, 발송/예약은 만들지 않습니다.</span>
                     <span>{isScheduleChangeMode ? "수업일지 일정 변경" : "수업일지 일정 만들기"}: {scheduleGateBody}</span>
                   </div>
                   <div className="modalActions supplementSplitActions">
@@ -23585,7 +23677,7 @@ function SupplementStudentModal({
                       </button>
                     ) : null}
                     <button className="softButton primarySoft" disabled={isTaskBusy} onClick={() => handleSaveTask(task)} type="button">
-                      {isContentBusy ? "저장 중" : "보충 내용 저장"}
+                      {isContentBusy ? "저장 중" : "보충 내용·알림톡 저장"}
                     </button>
                     <button className="softButton scheduleApplyButton" disabled={isTaskBusy || !hasScheduleDraft} onClick={() => requestApplyScheduleTask(task)} type="button">
                       {isScheduleBusy ? "일정 저장 중" : task.linkedLessonId ? "수업일지 일정 변경" : "수업일지 일정 만들기"}
@@ -23666,6 +23758,9 @@ function SupplementStudentModal({
                 <small>취소·실패한 과거 문구는 재사용하지 않고, 현재 저장된 보충 내용으로 다시 만들었습니다.</small>
               ) : null}
               <pre>{notificationControlPreview || "저장된 알림톡 문구가 없습니다."}</pre>
+              {notificationControlSavedDraftDiffers ? (
+                <small className="savedDraftDiffers">저장한 수정본이 현재 Solapi 예약 문구와 다릅니다. 기존 예약을 취소한 뒤 다시 예약해야 수정본이 반영됩니다.</small>
+              ) : null}
             </div>
             {notificationControlBlockReason && !canCancelNotificationControl ? (
               <p className="supplementNotificationControlBlock">{notificationControlBlockReason}</p>
@@ -27128,6 +27223,12 @@ function buildSupplementScheduleNoticeBody(task = {}, previousScheduleText = "",
   });
 }
 
+function getSupplementScheduleNoticeDraft(task = {}, target = "student", previousScheduleText = "", notificationTemplates = {}) {
+  const field = target === "parent" ? "parentScheduleNotificationDraft" : "studentScheduleNotificationDraft";
+  if (isSupplementTeacherEditedField(task, field)) return String(task[field] ?? "");
+  return buildSupplementScheduleNoticeBody(task, previousScheduleText, notificationTemplates);
+}
+
 function buildSupplementStudentReminderJob(task = {}, student = {}, scheduledAt = "", notificationTemplates = {}) {
   const notificationJobId = getSupplementStudentReminderJobId(task);
   const scheduleTitle = getSupplementStudentReminderTitle(task);
@@ -27174,7 +27275,7 @@ function buildSupplementScheduleNoticeJob(task = {}, student = {}, scheduledAt =
   const noticeKind = isScheduleChange ? "supplement_schedule_change" : "supplement_schedule_confirm";
   const notificationType = isParent ? "notice_parent" : "schedule_reminder";
   const scheduleTitle = getSupplementStudentReminderTitle(task);
-  const reminderBody = buildSupplementScheduleNoticeBody(task, previousScheduleText, notificationTemplates);
+  const reminderBody = getSupplementScheduleNoticeDraft(task, target, previousScheduleText, notificationTemplates);
   const scheduleNoticeTitle = `${scheduleTitle} 일정 안내`;
   const payload = isParent
     ? {
