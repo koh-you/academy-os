@@ -16877,7 +16877,7 @@ function LessonJournalDetail({
                   >
                     <span>수업메모</span>
                     {hasCurrentMemo ? <span aria-hidden="true" className="prepMemoWrittenMark">✓</span> : null}
-                    {priorMemoNeedsAttention ? <span aria-hidden="true" className="prepMemoAttentionMark">이전 확인</span> : null}
+                    {priorMemoNeedsAttention ? <span aria-hidden="true" className="prepMemoAttentionMark">!</span> : null}
                   </button>
                 </div>
                 <button
@@ -17134,6 +17134,11 @@ function PreparationMemoModal({
   );
   const visiblePreviousMemo = isPriorMemoChecked ? "" : previousMemo;
   const visibleReferenceMemo = isPriorMemoChecked ? "" : referenceMemo;
+  const priorMemoKind = previousMemo ? "previous" : referenceMemo ? "reference" : "";
+  const visiblePriorMemo = visiblePreviousMemo || visibleReferenceMemo;
+  const visiblePriorLessonLabel = visiblePreviousMemo ? previousLessonLabel : referenceLessonLabel;
+  const priorMemoEyebrow = priorMemoKind === "reference" ? "REFERENCE" : "PREVIOUS";
+  const priorMemoTitle = priorMemoKind === "reference" ? "최근 참고 메모" : "직전 수업메모";
   const checkedMemoDate = localCheckedMemo.sourceDate || acknowledgedMemoCutoff?.prepMemoCheckedSourceDate || "";
   const checkedMemoAt = localCheckedMemo.checkedAt || acknowledgedMemoCutoff?.prepMemoCheckedAt || "";
   const hasCheckedPriorMemo = Boolean(checkedMemoDate || isPriorMemoChecked);
@@ -17245,11 +17250,11 @@ function PreparationMemoModal({
       onClose={closeMemo}
     >
       <div className="prepMemoColumns">
-        <section className="prepMemoPrevious">
+        <section className={["prepMemoPrevious", priorMemoKind === "reference" ? "referenceOnly" : ""].filter(Boolean).join(" ")}>
           <div className="sectionHeader slim">
             <div>
-              <p className="eyebrow">PREVIOUS</p>
-              <h2>직전 수업메모</h2>
+              <p className="eyebrow">{priorMemoEyebrow}</p>
+              <h2>{priorMemoTitle}</h2>
             </div>
             {canCheckPriorMemo ? (
               <label className="prepMemoAcknowledgeLine">
@@ -17265,33 +17270,21 @@ function PreparationMemoModal({
               </label>
             ) : null}
           </div>
-          {hasCheckedPriorMemo && !visiblePreviousMemo && !visibleReferenceMemo ? (
+          {hasCheckedPriorMemo && !visiblePriorMemo ? (
             <div className="prepMemoCheckedState">
               <strong>✓ 이전 수업메모 확인 완료</strong>
               <span>{checkedMemoDate ? `${checkedMemoDate}까지의 메모는 다시 표시하지 않습니다.` : "확인한 이전 메모는 다시 표시하지 않습니다."}</span>
               {checkedMemoAt ? <small>{formatKoreaTimeLabel(checkedMemoAt)}</small> : null}
             </div>
           ) : null}
-          {visiblePreviousMemo ? (
+          {visiblePriorMemo ? (
             <>
-              <span>{previousLessonLabel}</span>
-              <pre>{visiblePreviousMemo}</pre>
+              <span>{visiblePriorLessonLabel}</span>
+              <pre>{visiblePriorMemo}</pre>
             </>
           ) : (
-            !hasCheckedPriorMemo ? <EmptyState className="emptyState compact">직전 수업메모가 없습니다.</EmptyState> : null
+            !hasCheckedPriorMemo ? <EmptyState className="emptyState compact">이전 수업메모가 없습니다.</EmptyState> : null
           )}
-          {visibleReferenceMemo ? (
-            <div className="prepMemoReference">
-              <div className="sectionHeader slim">
-                <div>
-                  <p className="eyebrow">REFERENCE</p>
-                  <h2>최근 참고 메모</h2>
-                </div>
-              </div>
-              <span>{referenceLessonLabel}</span>
-              <pre>{visibleReferenceMemo}</pre>
-            </div>
-          ) : null}
         </section>
         <section className="prepMemoDraft">
           <label>

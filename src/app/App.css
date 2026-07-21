@@ -11364,6 +11364,7 @@ textarea {
   justify-content: center;
   min-height: 38px;
   padding: 8px 10px;
+  white-space: nowrap;
   width: 100%;
 }
 
@@ -11387,15 +11388,19 @@ textarea {
 }
 
 .prepMemoAttentionMark {
+  align-items: center;
   background: #fff7ed;
   border: 1px solid #fed7aa;
   border-radius: 999px;
   color: #9a3412;
-  font-size: 9px;
+  display: inline-flex;
+  flex: 0 0 17px;
+  font-size: 11px;
   font-weight: 800;
-  line-height: 1.2;
-  padding: 2px 5px;
-  white-space: nowrap;
+  height: 17px;
+  justify-content: center;
+  line-height: 1;
+  width: 17px;
 }
 
 .modalCard.preparationMemoModal {
@@ -11428,6 +11433,24 @@ textarea {
   color: #9a3412;
   font-size: 13px;
   font-weight: 900;
+}
+
+.prepMemoPrevious.referenceOnly {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.prepMemoPrevious.referenceOnly > span {
+  color: #1d4ed8;
+}
+
+.prepMemoPrevious.referenceOnly pre,
+.prepMemoPrevious.referenceOnly .prepMemoAcknowledgeLine {
+  border-color: #bfdbfe;
+}
+
+.prepMemoPrevious.referenceOnly .prepMemoAcknowledgeLine {
+  color: #1d4ed8;
 }
 
 .prepMemoPrevious pre {
@@ -11495,32 +11518,6 @@ textarea {
 .prepMemoCheckedState small {
   color: #15803d;
   font-weight: 800;
-}
-
-.prepMemoReference {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: 8px;
-  display: grid;
-  gap: 8px;
-  padding: 12px;
-}
-
-.prepMemoReference h2 {
-  font-size: 16px;
-  margin: 0;
-}
-
-.prepMemoReference > span {
-  color: #1d4ed8;
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.prepMemoReference pre {
-  border-color: #bfdbfe;
-  max-height: 180px;
-  min-height: 120px;
 }
 
 .prepMemoDraft {
