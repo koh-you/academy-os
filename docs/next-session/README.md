@@ -147,6 +147,7 @@ Git 충돌 방지 규칙:
 - 11B-1에서 `/api/notification-jobs/reserve|cancel`, 예약 실패 row 저장, 반환 job React 상태 반영을 `notificationJobApi.js`로 분리하고 deterministic fixture를 `npm run test:production`에 연결했습니다. Supabase/Solapi 서버 orchestration과 보충 문구·대상·시각 결정은 변경하지 않았습니다.
 - 실제 OS row/Solapi 그룹 예약·취소 사람 gate는 통과했습니다. 최신 `origin/main` `41a31943` 기준 production 364/364와 build도 통과했습니다. 11B-1 전용 브랜치 commit/push 후 다음 11B 단위는 새 범위 확정부터 시작하세요. 첫 진단 1건과 최종 검증 3건의 취소 감사 row 총 4건은 `notification_jobs`에 남아 있습니다.
 - 11B-2에서 취소 가능 상태, task별 활성 일정 안내, 현재 일정 학생·학부모 pair, 개별 재예약 취소 대상을 `notificationJobSelectors.js`로 분리했습니다. 순수 배열/Set selector라 실제 예약·취소와 운영 데이터 변경은 없으며 deterministic fixture가 이전 날짜 활성 예약 정리와 대상 교차 방지를 고정합니다. 최신 `origin/main` `db420137` 기준 production 364/364와 build를 통과했습니다.
+- 11B-3에서 연락처 누락과 예약 예외의 실패 감사 row 생성·상태 반영·API 저장을 `persistFailedNotificationJobRequest`로 통합했습니다. 정상 예약·취소·Solapi 호출은 변경하지 않았습니다.
 
 통과한 11B-1 사람 gate 기록:
 1. 삭제 가능한 미래 보충 task와 통제된 학생/학부모 전화번호를 준비합니다.

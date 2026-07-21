@@ -348,6 +348,13 @@
 - 운영 저장 검증: `special_lecture_enrollments` 재조회에서 중3 신초봄은 active 5회, 각 13:00~15:00이고 고3 enrollment는 canceled 0회다. 1~5회차 lessons 모두 중3 ID/13:00~15:00을 포함하고 고3 ID는 없다. 1회차 기존 출결·수업기록은 저장 전후 2건, `notification_jobs`는 0건으로 유지됐다.
 - 사람 gate: 배포 후 클리닉 특강 명단에서 `창일중 · 중3` 신초봄이 1~5회차, 각 13:00~15:00으로 보이는지 확인한다. 잘못 입력한 고3 enrollment는 활성 수강 명단에서 제외되어야 한다. 1회차 수업일지에는 신초봄 행이 추가되되 기존 학생의 출결·시간은 그대로여야 한다.
 - 중단 조건: 올바른 신초봄 원천이 불명확함, 기존 학생이 빠짐, 기존 학생 시간이 바뀜, 출결 record가 자동 생성/변경됨, 알림톡 예약/발송 발생, Supabase 재조회 불일치인데 완료 표시, 새로고침 후 공통 시간이 사라짐.
+## 2026-07-21 P1. 11B-3 notification job 실패 감사 row 어댑터 통합
+
+- 상태: 연락처 누락과 예약 예외가 만드는 실패 job의 생성·React 상태 반영·`/api/notification-jobs` 저장을 `persistFailedNotificationJobRequest`로 통합했다.
+- 동작 보존: 기존 `academy-os` provider, `failed` status, 오류 문구, updatedAt, fire-and-forget 감사 row 저장과 화면 결과 문구를 그대로 유지한다.
+- side effect: 기존 실패 경로의 같은 API 저장만 이동했으며 실제 Solapi 예약·취소·발송은 실행하지 않는다. deterministic fixture가 일반 예약 실패와 연락처 누락 실패를 각각 검증한다.
+- 사람 gate: 없음. 정상 예약 경로와 운영 데이터는 변경하지 않는다.
+
 ## 2026-07-21 P1. 11B-2 보충 알림 활성·취소 대상 selector 분리
 
 - 상태: 코드 분리, deterministic fixture, 최신 main 기준 자동검증 완료. 전용 브랜치 commit/push한다.

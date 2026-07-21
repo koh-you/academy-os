@@ -1,3 +1,22 @@
+export function persistFailedNotificationJobRequest({
+  errorMessage,
+  notificationJob,
+  onNotificationJob = () => {},
+  request,
+  now = () => new Date().toISOString()
+} = {}) {
+  const failedJob = {
+    ...notificationJob,
+    error: errorMessage,
+    provider: "academy-os",
+    status: "failed",
+    updatedAt: now()
+  };
+  onNotificationJob(failedJob);
+  request("/api/notification-jobs", { notificationJob: failedJob }).catch((persistError) => console.error(persistError));
+  return failedJob;
+}
+
 export async function reserveNotificationJobRequest({
   notificationJob,
   reason = "알림톡 예약",
@@ -10,16 +29,13 @@ export async function reserveNotificationJobRequest({
     if (result.notificationJob) onNotificationJob(result.notificationJob);
     return result.notificationJob ?? notificationJob;
   } catch (error) {
-    const failedJob = {
-      ...notificationJob,
-      error: `Solapi 예약 실패: ${error.message}`,
-      provider: "academy-os",
-      status: "failed",
-      updatedAt: now()
-    };
-    onNotificationJob(failedJob);
-    request("/api/notification-jobs", { notificationJob: failedJob }).catch((persistError) => console.error(persistError));
-    return failedJob;
+    return persistFailedNotificationJobRequest({
+      errorMessage: `Solapi 예약 실패: ${error.message}`,
+      notificationJob,
+      onNotificationJob,
+      request,
+      now
+    });
   }
 }
 

@@ -60,7 +60,7 @@
    - 순서: `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`.
    - 우선순위: 위험이 낮은 helper/config/API/client/component부터 진행하고, `LessonJournalDetail`, 출결, Solapi 예약, 보충관리처럼 저장/발송 side effect가 큰 영역은 충분한 gate 이후 진행한다.
    - 기준 로드맵: 아래 `App.jsx Refactoring Roadmap - 18 Units`를 다음 세션의 리팩터링 후보 목록으로 사용한다. 이미 일부 분리된 항목도 남은 하위 컴포넌트/헬퍼가 있으면 같은 묶음 안에서 계속 쪼갠다.
-   - 현재 이어받을 지점: 10번 `student-parent portals` 표시 구조 리팩터링은 완료 audit까지 끝냈다. `StudentTodayTab`, `ParentPortal`, `StudentPortalShell`을 분리하고 미사용 legacy `StudentPortal`을 제거했다. 학생 숙제 완료·질문 CRUD·시험 제출 사람 gate와 교사 bearer/Storage 권한 보안 gate는 별도 보류다. 11A 순수 builder/selector와 11B-1 예약·취소 API 어댑터 분리를 완료했고, 반 미지정 고태영 테스트 학생과 사용자 통제 번호로 OS row/Solapi 예약·취소 대조도 통과했다. 11B-2에서는 취소 가능 상태와 보충 task의 활성·재사용·대상별 취소 판정을 `notificationJobSelectors.js`로 분리했다. 다음 side-effect orchestration 의미 단위는 최신 main rebase 후 새 범위와 gate를 다시 정한다.
+   - 현재 이어받을 지점: 10번 포털 표시 구조 audit, 11A 순수 builder/selector, 11B-1 예약·취소 API 어댑터, 11B-2 활성·재사용·취소 대상 selector를 완료했고 OS row/Solapi 사람 gate도 통과했다. 11B-3에서는 연락처 누락과 예약 예외의 실패 감사 row 저장을 공용 API 어댑터로 통합했다. 학생 포털 실제 쓰기와 교사 bearer/Storage gate는 별도 보류다. 다음 side-effect orchestration 단위는 최신 main rebase 후 범위와 gate를 다시 정한다.
    - 보류된 사람 gate: 2026-07-21 사용자 지시로 학생 숙제 완료, 질문 CRUD, 시험 후 제출의 실제 학생 테스트 결과를 보류했다. 시험 후 제출은 실제 대상 학생의 입력/파일 선택, Storage 업로드, 제출 저장, 새로고침·재로그인 유지, 교사 확인 저장을 나중에 확인한다. 보류는 통과 판정이 아니며 회귀 발견 시 즉시 별도 수정한다.
    - 확인된 보안 후속 gate: 교사 로그인은 아직 서버 서명 bearer token을 발급하지 않아 시험 후 제출의 교사 확인 전용 API도 기존 교사 관리 API와 같은 인증 공백이 있다. Storage 파일 열기 API도 경로를 아는 요청자의 교사/학생 소유권을 검증하지 않는다. 이 둘은 표시 shell 분리와 섞지 말고 `교사 세션 인증 + 파일 열람 권한` 별도 고위험 gate로 진행한다.
    - 확인된 후속 이슈: 학생 수업 준비 안내 목록은 현재 `prepStudentNotice` 존재 여부만 필터하고 `prepStudentVisible`을 확인하지 않는다. 이번 리팩터링에서는 기존 동작을 보존했으며, 공개 플래그 계약을 별도 기능 작업에서 확인해야 한다.
