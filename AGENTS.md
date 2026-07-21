@@ -42,7 +42,8 @@
    - 순서: `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`.
    - 우선순위: 위험이 낮은 helper/config/API/client/component부터 진행하고, `LessonJournalDetail`, 출결, Solapi 예약, 보충관리처럼 저장/발송 side effect가 큰 영역은 충분한 gate 이후 진행한다.
    - 기준 로드맵: 아래 `App.jsx Refactoring Roadmap - 18 Units`를 다음 세션의 리팩터링 후보 목록으로 사용한다. 이미 일부 분리된 항목도 남은 하위 컴포넌트/헬퍼가 있으면 같은 묶음 안에서 계속 쪼갠다.
-   - 현재 이어받을 지점: 9번 `test manager`는 완료했다. 10번 `student-parent portals`의 읽기 전용 표시 영역 분리를 완료했다. 다음 경계는 `StudentTodayTab`의 시험 후 제출, 질문 추가·상태변경·삭제, 숙제 완료 체크이며 저장 원천/실패 UI 사람 gate 전에는 이동하지 않는다.
+   - 현재 이어받을 지점: 9번 `test manager`는 완료했다. 10번 `student-parent portals`의 읽기 전용 표시 영역 분리를 완료했다. 다음 경계는 `StudentTodayTab`의 시험 후 제출, 질문 추가·상태변경·삭제, 숙제 완료 체크이며 저장 신뢰성 선행 여부에 대한 사람 gate 전에는 이동하지 않는다.
+   - 현재 사람 gate: 숙제 체크는 낙관적 UI 뒤 `/api/homeworks` 실패를 콘솔에만 남긴다. 질문/시험 제출은 local state를 먼저 바꾸고 전역 effect가 두 배열을 함께 `/api/portal-state`에 저장하며 실패 UI, rollback, read-after-write가 없다. 시험 제출은 업로드 뒤 draft까지 지운다. 권장 순서는 세 쓰기 기능을 각각 `local draft -> 저장 중 -> API 성공 -> 서버 재조회 -> 완료/실패` 계약으로 보강한 뒤 컴포넌트를 분리하는 것이다.
    - 확인된 후속 이슈: 학생 수업 준비 안내 목록은 현재 `prepStudentNotice` 존재 여부만 필터하고 `prepStudentVisible`을 확인하지 않는다. 이번 리팩터링에서는 기존 동작을 보존했으며, 공개 플래그 계약을 별도 기능 작업에서 확인해야 한다.
    - 확인된 후속 이슈: 학생 마이페이지 `비밀번호 변경`은 callback/API가 없는 기존 미연결 UI다. 이번 리팩터링에서는 보존했고, 숨김/비활성 안내/실제 PIN 변경 구현은 저장 신뢰성의 오작동 버튼 정리 작업에서 별도 결정한다.
    - 다음 세션 시작 규칙: 코드 수정 전에 최근 리팩터링 결과(9번 완료, 10번 시작 전, 최신 완료 커밋)를 사용자에게 요약하고, 학생/학부모 포털의 공개 링크·인증·저장 원천·모바일 표시 side effect inventory를 먼저 만든다. 그 뒤 가장 낮은 위험의 표시 전용 컴포넌트 한 단위를 제안하고 사용자 재개 의사를 확인한다.
