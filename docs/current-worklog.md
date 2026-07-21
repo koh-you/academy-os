@@ -1,5 +1,18 @@
 # Academy OS Current Worklog
 
+## 2026-07-21 P1. Tally 등록확정과 학생명단 미반영 복구
+
+- 상태: 원인 확인/코드 수정/자동검증 완료, 배포 후 운영 사람 검토 대기. 운영 원천을 읽기 전용으로 확인했으며 김지민 학생 row를 이 세션에서 자동 생성하지 않았다.
+- 실제 증상: `신도봉중 · 중3 · 김지민` 후보는 `student_intake_applicants`에서 `registered`였지만 `students`에는 같은 학생이 없었고, 반 배정과 정식 등록 메모도 비어 있었다.
+- 원인: Tally 카드 상단 상태 선택의 `등록확정`은 후보 status만 저장하고 학생 생성은 하지 않았다. 별도 하단 `정식 학생 등록`은 `students`, 후보, 미래 `lessons`를 화면에서 먼저 바꾼 뒤 fire-and-forget으로 따로 저장해 부분 성공과 실패를 숨겼다. 또한 후보의 반 선택 `defaultClassTemplateId`는 API row 변환에서 누락돼 새로고침 후 사라졌다.
+- 수정: 수동 상태 선택에서 `등록확정`을 제거하고 실제 버튼을 `등원 확정 및 학생명단 등록`으로 통합했다. 학생은 `student_intake_<applicantId>` 안정 ID로 upsert한 뒤 `/api/students` 재조회, 반이 있으면 미래 `/api/lessons/bulk` 저장과 재조회, 마지막으로 후보 `registered`+학생 ID 메모 저장과 재조회를 순서대로 통과해야 완료 표시한다. 실패 시 모달과 상세 오류를 유지한다.
+- 기존 오류 복구: 등록완료 후보와 실제 학생을 학생 ID 메모 또는 이름·학교·학년으로 대조한다. 학생이 없으면 붉은 `학생명단 미반영` 카드와 `학생명단에 반영` 버튼을 표시한다. 반 미배정 후보는 학생명단까지만 복구하고, 임의의 반/미래 수업에는 넣지 않는다.
+- 반 저장 호환: 새 SQL 없이 기존 `student_intake_applicants.desired_class`에 `template_*` 반 ID를 저장하고 `defaultClassTemplateId`로 다시 읽는다.
+- side effect 경계: 학생/후보/미래 수업 명단만 대상이며 알림톡, Solapi, 출결, 과거 수업일지, 삭제는 실행하지 않는다.
+- 검증: `git diff --check`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 360개 통과. 빌드는 기존 Vite chunk size 경고만 남았다.
+- 사람 gate: 배포 후 `학생 추가 > Tally 접수 > 등록 완료 후보`에서 김지민 카드가 `학생명단 미반영`으로 보이는지 확인한다. 반을 지금 정하지 않을 경우 `학생명단에 반영`을 한 번 누르고 `학생명단 반영 완료 · 반 미배정`을 확인한 뒤 학생관리 `미배정`에서 김지민을 확인한다. 반을 먼저 정하면 해당 반의 오늘 이후 수업 명단까지 확인한다.
+- 중단 조건: 같은 학생이 두 명 생김, 버튼이 완료인데 새로고침 후 사라짐, 반 선택이 사라짐, 과거 수업 명단 변경, 알림 발송 발생, 학생은 저장됐지만 후보/미래 수업 재조회가 불일치함.
+
 ## 2026-07-21 P1. 시험분석 상단 작업 탭 UI와 GPT Image 벤치마크 조사
 
 - 상태: UI 구현/자동검증 완료, 운영 사람 검토 대기. GPT Image는 조사와 다음 세션 설계만 완료했으며 실제 생성 API/DB/Storage는 변경하지 않았다.

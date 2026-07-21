@@ -5253,6 +5253,8 @@ export function App() {
   const [examPrepRowSaveStates, setExamPrepRowSaveStates] = useState({});
   const [studentProfileSaveStates, setStudentProfileSaveStates] = useState({});
   const [studentIntakeSaveStates, setStudentIntakeSaveStates] = useState({});
+  const [studentIntakeRegistrationStates, setStudentIntakeRegistrationStates] = useState({});
+  const [studentIntakeRegistrationMessages, setStudentIntakeRegistrationMessages] = useState({});
   const [reportModal, setReportModal] = useState(null);
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
   const [editingLesson, setEditingLesson] = useState(null);
@@ -6911,35 +6913,135 @@ export function App() {
       });
   }
 
-  function handleRegisterStudentIntakeApplicant(applicantId, values) {
+  async function handleRegisterStudentIntakeApplicant(applicantId, values) {
     const applicant = studentIntakeApplicants.find((item) => item.applicantId === applicantId);
-    if (!applicant) return;
-    const student = createStudentFromFormValues({
-      ...values,
-      name: values.name || applicant.name,
-      birthYear: values.birthYear || applicant.birthYear,
-      grade: values.grade || applicant.grade,
-      schoolName: values.schoolName || applicant.schoolName,
-      studentPhone: values.studentPhone || applicant.studentPhone,
-      parentPhone: values.parentPhone || applicant.parentPhone,
-      specialNote: values.specialNote || applicant.memo,
-      defaultClassTemplateId: values.defaultClassTemplateId ?? ""
-    });
-    const registeredApplicant = {
-      ...applicant,
-      ...values,
-      status: "registered",
-      memo: [applicant.memo, `정식 학생 등록: ${student.loginId}`].filter(Boolean).join("\n"),
-      updatedAt: new Date().toISOString()
-    };
-    setStudents((current) => [...current, student]);
-    addStudentToFutureClassLessons(student, today);
-    setStudentIntakeApplicants((current) =>
-      current.map((item) => (item.applicantId === applicantId ? registeredApplicant : item))
-    );
-    setIsStudentModalOpen(false);
-    postJson("/api/students", { student }).catch((error) => console.error(error));
-    postJson("/api/student-intake-applicants", { applicant: registeredApplicant }).catch((error) => console.error(error));
+    if (!applicant) throw new Error("등록할 Tally 후보를 찾지 못했습니다.");
+    if (studentIntakeRegistrationStates[applicantId] === "saving") return;
+
+    setStudentIntakeRegistrationStates((current) => ({ ...current, [applicantId]: "saving" }));
+    setStudentIntakeRegistrationMessages((current) => ({ ...current, [applicantId]: "학생 원천 저장 중" }));
+
+    try {
+      const studentId = `student_intake_${safeIdPart(applicantId)}`;
+      const studentsBeforeResult = await getJsonWithTimeout(
+        "/api/students",
+        15000,
+        "학생 원천 확인이 15초를 넘었습니다. 잠시 뒤 다시 시도해 주세요."
+      );
+      const existingStudent = (studentsBeforeResult.students ?? []).find((item) => item.studentId === studentId);
+      const studentDraft = createStudentFromFormValues({
+        ...values,
+        studentId,
+        loginId: existingStudent?.loginId,
+        name: values.name || applicant.name,
+        birthYear: values.birthYear || applicant.birthYear,
+        grade: values.grade || applicant.grade,
+        schoolName: values.schoolName || applicant.schoolName,
+        studentPhone: values.studentPhone || applicant.studentPhone,
+        parentPhone: values.parentPhone || applicant.parentPhone,
+        specialNote: values.specialNote || applicant.specialNote || applicant.memo,
+        defaultClassTemplateId: values.defaultClassTemplateId ?? applicant.defaultClassTemplateId ?? ""
+      });
+      const studentSaveResult = await postJsonWithTimeout(
+        "/api/students",
+        { student: studentDraft },
+        15000,
+        "학생 저장이 15초를 넘었습니다. 중복 등록하지 말고 저장 상태를 다시 확인해 주세요."
+      );
+      const savedStudentId = studentSaveResult.student?.studentId || studentId;
+
+      setStudentIntakeRegistrationMessages((current) => ({ ...current, [applicantId]: "학생 원천 반영 확인 중" }));
+      const studentsAfterResult = await getJsonWithTimeout(
+        "/api/students",
+        15000,
+        "학생 저장 확인이 15초를 넘었습니다. 중복 등록하지 말고 잠시 뒤 다시 확인해 주세요."
+      );
+      const savedStudent = (studentsAfterResult.students ?? []).find((item) => item.studentId === savedStudentId);
+      if (!savedStudent) throw new Error("학생 저장 응답은 받았지만 Supabase 재조회에서 학생을 찾지 못했습니다.");
+      setStudents(studentsAfterResult.students ?? []);
+
+      const changedLessons = savedStudent.defaultClassTemplateId
+        ? lessons
+          .filter((lesson) =>
+            isActiveLessonForRosterSync(lesson) &&
+            lesson.classTemplateId === savedStudent.defaultClassTemplateId &&
+            String(lesson.date) >= today &&
+            !(lesson.studentIds ?? []).includes(savedStudent.studentId)
+          )
+          .map((lesson) => ({
+            ...lesson,
+            studentIds: getActiveStudentIdsFromSelection(
+              [...(lesson.studentIds ?? []), savedStudent.studentId],
+              studentsAfterResult.students ?? []
+            )
+          }))
+        : [];
+
+      if (changedLessons.length > 0) {
+        setStudentIntakeRegistrationMessages((current) => ({ ...current, [applicantId]: "미래 수업 명단 저장 중" }));
+        await postJsonWithTimeout(
+          "/api/lessons/bulk",
+          { lessons: changedLessons },
+          20000,
+          "미래 수업 명단 저장이 20초를 넘었습니다. 학생 원천은 저장됐을 수 있으니 상태를 확인해 주세요."
+        );
+        const lessonsAfterResult = await getJsonWithTimeout(
+          "/api/lessons",
+          20000,
+          "미래 수업 명단 확인이 20초를 넘었습니다."
+        );
+        const changedLessonIds = new Set(changedLessons.map((lesson) => lesson.lessonId));
+        const unmatchedLessons = (lessonsAfterResult.lessons ?? []).filter((lesson) => (
+          changedLessonIds.has(lesson.lessonId) && !(lesson.studentIds ?? []).includes(savedStudent.studentId)
+        ));
+        if (unmatchedLessons.length > 0) {
+          throw new Error(`학생은 저장됐지만 미래 수업 명단 ${unmatchedLessons.length}건이 재조회와 일치하지 않습니다.`);
+        }
+        setLessons(lessonsAfterResult.lessons ?? []);
+      }
+
+      setStudentIntakeRegistrationMessages((current) => ({ ...current, [applicantId]: "Tally 후보 완료 상태 저장 중" }));
+      const registrationMemo = `정식 학생 등록: ${savedStudent.loginId} (${savedStudent.studentId})`;
+      const registeredApplicantMemo = String(applicant.memo ?? "").includes(savedStudent.studentId)
+        ? applicant.memo
+        : [applicant.memo, registrationMemo].filter(Boolean).join("\n");
+      const registeredApplicant = {
+        ...applicant,
+        ...values,
+        defaultClassTemplateId: savedStudent.defaultClassTemplateId ?? "",
+        status: "registered",
+        memo: registeredApplicantMemo,
+        updatedAt: new Date().toISOString()
+      };
+      await postJsonWithTimeout(
+        "/api/student-intake-applicants",
+        { applicant: registeredApplicant },
+        15000,
+        "Tally 후보 완료 상태 저장이 15초를 넘었습니다. 학생 원천은 이미 저장됐을 수 있습니다."
+      );
+      const applicantsAfterResult = await getJsonWithTimeout(
+        "/api/student-intake-applicants",
+        15000,
+        "Tally 후보 완료 상태 확인이 15초를 넘었습니다."
+      );
+      const verifiedApplicant = (applicantsAfterResult.applicants ?? []).find((item) => item.applicantId === applicantId);
+      if (verifiedApplicant?.status !== "registered" || !String(verifiedApplicant.memo ?? "").includes(savedStudent.studentId)) {
+        throw new Error("학생은 저장됐지만 Tally 후보의 등록완료 상태가 재조회와 일치하지 않습니다.");
+      }
+      setStudentIntakeApplicants(applicantsAfterResult.applicants ?? []);
+      setStudentIntakeRegistrationStates((current) => ({ ...current, [applicantId]: "saved" }));
+      setStudentIntakeRegistrationMessages((current) => ({
+        ...current,
+        [applicantId]: savedStudent.defaultClassTemplateId
+          ? "학생명단과 미래 수업 명단 반영 확인 완료"
+          : "학생명단 반영 완료 · 반 미배정"
+      }));
+    } catch (error) {
+      console.error(error);
+      setStudentIntakeRegistrationStates((current) => ({ ...current, [applicantId]: "failed" }));
+      setStudentIntakeRegistrationMessages((current) => ({ ...current, [applicantId]: error.message }));
+      throw error;
+    }
   }
 
   function handleUpdateStudent(studentId, field, value) {
@@ -8901,6 +9003,9 @@ export function App() {
         <StudentModal
           intakeApplicants={studentIntakeApplicants}
           applicantSaveStates={studentIntakeSaveStates}
+          applicantRegistrationMessages={studentIntakeRegistrationMessages}
+          applicantRegistrationStates={studentIntakeRegistrationStates}
+          students={students}
           templates={classTemplates}
           onClose={() => setIsStudentModalOpen(false)}
           onRegisterApplicant={handleRegisterStudentIntakeApplicant}
@@ -25037,7 +25142,6 @@ const intakeStatusOptions = [
   { value: "received", label: "문의접수" },
   { value: "consulting", label: "상담중" },
   { value: "trial", label: "체험예정" },
-  { value: "registered", label: "등록확정" },
   { value: "canceled", label: "등록취소" },
   { value: "paused", label: "보류" },
   { value: "lost", label: "연락두절" }
@@ -25045,7 +25149,10 @@ const intakeStatusOptions = [
 
 function StudentModal({
   applicantSaveStates = {},
+  applicantRegistrationMessages = {},
+  applicantRegistrationStates = {},
   intakeApplicants = [],
+  students = [],
   templates,
   onClose,
   onRegisterApplicant,
@@ -25097,6 +25204,24 @@ function StudentModal({
       defaultClassTemplateId: applicant.defaultClassTemplateId || "",
       scheduleOverride: ""
     };
+  }
+
+  function getRegisteredStudentForApplicant(applicant) {
+    const linkedStudentId = String(applicant.memo ?? "").match(/\((student_intake_[^)]+)\)/)?.[1] ?? "";
+    if (linkedStudentId) return students.find((student) => student.studentId === linkedStudentId) ?? null;
+    return students.find((student) => (
+      String(student.name ?? "").trim() === String(applicant.name ?? "").trim() &&
+      String(student.schoolName ?? "").trim() === String(applicant.schoolName ?? "").trim() &&
+      String(student.grade ?? "").trim() === String(applicant.grade ?? "").trim()
+    )) ?? null;
+  }
+
+  async function registerApplicant(applicant) {
+    try {
+      await onRegisterApplicant(applicant.applicantId, getApplicantRegisterValues(applicant));
+    } catch {
+      // The parent keeps the modal open and renders the detailed failure message.
+    }
   }
 
   function renderTallyQuestionFields(applicant) {
@@ -25215,40 +25340,72 @@ function StudentModal({
                   ) : null}
                   <button
                     className="primaryButton"
-                    disabled={!applicant.name}
-                    onClick={() => onRegisterApplicant(applicant.applicantId, getApplicantRegisterValues(applicant))}
+                    disabled={!applicant.name || applicantRegistrationStates[applicant.applicantId] === "saving"}
+                    onClick={() => registerApplicant(applicant)}
                     type="button"
                   >
-                    정식 학생 등록
+                    {applicantRegistrationStates[applicant.applicantId] === "saving" ? "반영 중" : "등원 확정 및 학생명단 등록"}
                   </button>
                 </div>
+                {applicantRegistrationStates[applicant.applicantId] ? (
+                  <div className={`studentIntakeRegistrationStatus ${applicantRegistrationStates[applicant.applicantId]}`}>
+                    <InlineSaveStatus label="학생 등록" saveState={applicantRegistrationStates[applicant.applicantId]} />
+                    <span>{applicantRegistrationMessages[applicant.applicantId]}</span>
+                  </div>
+                ) : null}
               </article>
             ))}
             {registeredApplicants.length > 0 ? (
               <div className="studentIntakeRegisteredList">
                 <strong>등록 완료 후보</strong>
-                {registeredApplicants.map((applicant) => (
-                  <article className="studentIntakeCard registered" key={applicant.applicantId}>
-                    <div className="studentIntakeCardHeader">
-                      <div>
-                        <strong>{applicant.name || "이름 미입력"}</strong>
-                        <span>{[applicant.grade || inferGradeFromBirthYear(applicant.birthYear), applicant.schoolName, applicant.defaultClassTemplateId ? templates.find((template) => template.classTemplateId === applicant.defaultClassTemplateId)?.name : "미배정"].filter(Boolean).join(" · ") || "기본 정보 미입력"}</span>
+                {registeredApplicants.map((applicant) => {
+                  const registeredStudent = getRegisteredStudentForApplicant(applicant);
+                  const registrationState = applicantRegistrationStates[applicant.applicantId];
+                  return (
+                    <article className={`studentIntakeCard registered ${registeredStudent ? "linked" : "unlinked"}`} key={applicant.applicantId}>
+                      <div className="studentIntakeCardHeader">
+                        <div>
+                          <strong>{applicant.name || "이름 미입력"}</strong>
+                          <span>{[applicant.grade || inferGradeFromBirthYear(applicant.birthYear), applicant.schoolName, applicant.defaultClassTemplateId ? templates.find((template) => template.classTemplateId === applicant.defaultClassTemplateId)?.name : "미배정"].filter(Boolean).join(" · ") || "기본 정보 미입력"}</span>
+                        </div>
+                        <span className={`statusPill ${registeredStudent ? "status-sent" : "status-failed"}`}>
+                          {registeredStudent ? "학생명단 반영 완료" : "학생명단 미반영"}
+                        </span>
                       </div>
-                      <span className="statusPill status-sent">등록완료</span>
-                    </div>
-                    <div className="studentIntakeAnswerList">
-                      {[
-                        ["재원생 여부", applicant.enrollmentStatus],
-                        ["현재 학습 과정", applicant.currentLearningProcess],
-                        ["직전학기 내신 성적", applicant.previousSemesterScore],
-                        ["특이사항", applicant.specialNote],
-                        ["추가 메모", applicant.memo]
-                      ].filter(([, value]) => value).map(([label, value]) => (
-                        <span key={label}><b>{label}</b>{value}</span>
-                      ))}
-                    </div>
-                  </article>
-                ))}
+                      <div className="studentIntakeAnswerList">
+                        {[
+                          ["재원생 여부", applicant.enrollmentStatus],
+                          ["현재 학습 과정", applicant.currentLearningProcess],
+                          ["직전학기 내신 성적", applicant.previousSemesterScore],
+                          ["특이사항", applicant.specialNote],
+                          ["추가 메모", applicant.memo]
+                        ].filter(([, value]) => value).map(([label, value]) => (
+                          <span key={label}><b>{label}</b>{value}</span>
+                        ))}
+                      </div>
+                      {!registeredStudent ? (
+                        <div className="studentIntakeRegistrationRecovery">
+                          <strong>등록확정 상태만 저장되고 학생 원천에는 반영되지 않았습니다.</strong>
+                          <span>반을 선택하지 않은 후보는 미배정 학생으로 등록되며, 반 배정 후 미래 수업 명단에 반영됩니다.</span>
+                          <button
+                            className="primaryButton"
+                            disabled={registrationState === "saving"}
+                            onClick={() => registerApplicant(applicant)}
+                            type="button"
+                          >
+                            {registrationState === "saving" ? "학생명단 반영 중" : "학생명단에 반영"}
+                          </button>
+                        </div>
+                      ) : null}
+                      {registrationState ? (
+                        <div className={`studentIntakeRegistrationStatus ${registrationState}`}>
+                          <InlineSaveStatus label="학생 등록" saveState={registrationState} />
+                          <span>{applicantRegistrationMessages[applicant.applicantId]}</span>
+                        </div>
+                      ) : null}
+                    </article>
+                  );
+                })}
               </div>
             ) : null}
           </div>
