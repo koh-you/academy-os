@@ -11670,6 +11670,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const [isSavingReviews, setIsSavingReviews] = useState(false);
   const [editingSsenQuestionNumber, setEditingSsenQuestionNumber] = useState("");
   const [examAnalysisStageCollapseOverrides, setExamAnalysisStageCollapseOverrides] = useState({});
+  const [examAnalysisWorkspaceTab, setExamAnalysisWorkspaceTab] = useState("source");
   const [isPdfDropActive, setIsPdfDropActive] = useState(false);
   const [ssenCatalog, setSsenCatalog] = useState(() => createEmptyExamAnalysisSsenCatalog());
   const [ssenCatalogStatus, setSsenCatalogStatus] = useState({ state: "idle", message: "" });
@@ -12852,6 +12853,50 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   const boundaryStageComplete = Boolean(boundaryDetection && boundaryDetection.status !== "needs_review");
   const rowFillStageComplete = Boolean(rowFill && rowFill.status !== "needs_review");
   const reviewStageComplete = teacherReview?.status === "completed";
+  const examAnalysisWorkspaceTabs = [
+    {
+      id: "source",
+      label: "원본·PDF",
+      meta: sourceFiles.length > 0 ? `${sourceFiles.length}개 저장` : "준비",
+      tone: sourceFiles.length > 0 ? "complete" : "idle"
+    },
+    {
+      id: "structure",
+      label: "문항 구조",
+      meta: boundaryStageComplete ? `${confirmedQuestionCount}문항` : questionCountStageComplete ? "경계 확인" : "대기",
+      tone: boundaryStageComplete ? "complete" : questionCountStageComplete ? "attention" : "idle"
+    },
+    {
+      id: "analysis",
+      label: "AI 분석",
+      meta: rowFillStageComplete ? `${aiFilledRows.length}/${questionRows.length}` : "대기",
+      tone: rowFillStageComplete ? (aiNeedsReviewRows.length > 0 ? "attention" : "complete") : "idle"
+    },
+    {
+      id: "review",
+      label: "선생님 검수",
+      meta: reviewStageComplete ? "완료" : reviewRowsReady ? `${confirmedReviewCount}/${questionRows.length}` : "대기",
+      tone: reviewStageComplete ? "complete" : reviewRowsReady ? "attention" : "idle"
+    },
+    {
+      id: "preview",
+      label: "최종 미리보기",
+      meta: reviewStageComplete ? "확인 가능" : "검수 후",
+      tone: reviewStageComplete ? "complete" : "idle"
+    },
+    {
+      id: "output",
+      label: "산출물",
+      meta: outputStatus.state === "dirty" ? "저장 필요" : outputStatus.state === "success" ? "저장 완료" : "초안",
+      tone: outputStatus.state === "dirty" ? "attention" : outputStatus.state === "success" ? "complete" : "idle"
+    },
+    {
+      id: "history",
+      label: "기록",
+      meta: events.length > 0 ? `${events.length}건` : "없음",
+      tone: events.length > 0 ? "complete" : "idle"
+    }
+  ];
   const questionCountStageCollapsed = isExamAnalysisStageCollapsed("question-count", questionCountStageComplete);
   const boundaryStageCollapsed = isExamAnalysisStageCollapsed("boundary", boundaryStageComplete);
   const rowFillStageCollapsed = isExamAnalysisStageCollapsed("row-fill", rowFillStageComplete);
@@ -12877,6 +12922,24 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
         ...current,
         [overrideKey]: !currentCollapsed
       };
+    });
+  }
+
+  function selectExamAnalysisWorkspaceTab(tabId) {
+    setExamAnalysisWorkspaceTab(tabId);
+    const stagesByTab = {
+      structure: ["question-count", "boundary"],
+      analysis: ["row-fill"],
+      review: ["review"]
+    };
+    const stageKeys = stagesByTab[tabId] ?? [];
+    if (stageKeys.length === 0) return;
+    setExamAnalysisStageCollapseOverrides((current) => {
+      const next = { ...current };
+      stageKeys.forEach((stageKey) => {
+        next[`${examAnalysisStageCollapseKey}:${stageKey}`] = false;
+      });
+      return next;
     });
   }
 
@@ -12911,6 +12974,22 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
           <span className={`saveStateBadge ${item.state}`} key={`${item.message}-${index}`}>{item.message}</span>
         ))}
       </div>
+
+      <nav aria-label="시험분석 작업 단계" className="examAnalysisWorkspaceTabs" role="tablist">
+        {examAnalysisWorkspaceTabs.map((tab) => (
+          <button
+            aria-selected={examAnalysisWorkspaceTab === tab.id}
+            className={examAnalysisWorkspaceTab === tab.id ? "active" : ""}
+            key={tab.id}
+            onClick={() => selectExamAnalysisWorkspaceTab(tab.id)}
+            role="tab"
+            type="button"
+          >
+            <span>{tab.label}</span>
+            <small className={tab.tone}>{tab.meta}</small>
+          </button>
+        ))}
+      </nav>
 
       <div className="examAnalysisGrid">
         <section className="examAnalysisLibraryPanel panel">
@@ -13021,7 +13100,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
           </div>
         </section>
 
-        <section className="examAnalysisWorkPanel">
+        <section className="examAnalysisWorkPanel" data-active-tab={examAnalysisWorkspaceTab}>
           <div className="panel examAnalysisFormPanel">
             <div className="sectionHeader slim">
               <div>

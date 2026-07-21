@@ -2,6 +2,102 @@
 
 이 폴더 하나만 다음 Codex 세션에 넘기면 됩니다. 리팩터링과 유지보수는 아래처럼 별도 Git worktree/브랜치에서 진행합니다. 두 세션 모두 `AGENTS.md`와 `docs/current-worklog.md` 최상단의 `미룬 작업 큐`를 먼저 사용자에게 요약해야 합니다.
 
+## 시험분석 GPT Image 전용 세션에 바로 붙여넣을 프롬프트
+
+```text
+Academy OS 시험분석 GPT Image 전용 세션입니다.
+
+프로젝트 전체 미룬 작업 큐는 `운영 OS 저장 신뢰성 보강 -> 모달 통일 -> 발송 알림톡 템플릿 관리 -> App.jsx 리팩터링 -> Solapi 특강 템플릿 검수 후 연결` 순서입니다. 이번 세션은 사용자가 별도로 승인한 시험분석 GPT Image 설계/구현만 담당합니다. 시작 답변 최상단에 전체 큐와 이번 세션 범위를 함께 보여주세요.
+
+Git 충돌 방지:
+- `E:\academy-os` main worktree는 유지보수 세션 소유입니다.
+- 시험분석 작업은 별도 worktree `E:\academy-os-exam-analysis`와 `codex/exam-analysis-gpt-image` 브랜치를 사용하세요.
+- 최신 `origin/main`을 fetch한 뒤 시작하고, 기존 worktree/브랜치가 있으면 상태를 먼저 확인하세요.
+- 예상하지 못한 diff나 충돌이 있으면 수정하지 말고 사용자에게 보고하세요.
+- 전용 브랜치만 commit/push하고 main에는 직접 merge하지 마세요.
+
+먼저 반드시 읽을 파일:
+1. AGENTS.md
+2. docs/current-worklog.md
+3. docs/next-session/README.md
+4. docs/exam-analysis-gpt-image-benchmark-2026-07-21.md
+5. docs/next-session/2026-07-04-ai-collaboration-retrospective.md
+6. docs/save-persistence-audit-2026-07-20.md
+7. supabase/20260703_exam_analysis_pipeline.sql
+8. api/routes/examAnalysisPipeline.js
+9. src/app/App.jsx의 ExamAnalysisPipelineCenter/ExamAnalysisOutputDraftPanel
+10. src/domains/exams/finalPreview.js와 ExamAnalysisFinalPreviewPanel.jsx
+
+현재 상태:
+- 시험분석 핵심 v2는 PDF→문항 수 선생님 확정→고정 행→AI 채움→선생님 검수→최종 미리보기까지 구현돼 있습니다.
+- main에는 `원본·PDF`, `문항 구조`, `AI 분석`, `선생님 검수`, `최종 미리보기`, `산출물`, `기록` 상단 탭 UI가 구현됐습니다. 먼저 운영 화면에서 탭 전환과 local draft 유지 사람 gate를 확인하세요. 이 UI를 다시 설계하거나 App.jsx 일반 리팩터링을 섞지 마세요.
+- 현재 산출물은 GPT 기획 패킷/블로그·인스타 초안/Canva 계획 TXT와 ZIP 중심이며 실제 GPT Image 생성·수정 버전 저장은 없습니다.
+- 과거 웹앱 HTML/CSS 카드 렌더러 Gate 3는 의도적으로 삭제됐습니다. 되살리지 마세요.
+
+벤치마크에서 실제 확인된 사실:
+- `https://blog.naver.com/skills_in_math2`의 공개 RSS와 개별 PostView에서 시험분석 게시물 10건을 조사했습니다.
+- 혜성여고, 불암중2, 중계중3 등은 게시물 이미지 10장 모두 파일명이 `ChatGPT_Image_...png`입니다.
+- 혜성여고와 불암중2는 초기 생성 세트 중 특정 장만 수 시간 뒤 이미지로 교체돼 반복 수정한 흔적이 있습니다.
+- 학교별로 녹색 2:3, 보라색 4:5, 분홍색 정사각형 등 디자인과 비율을 바꾸지만, 표지→시험 구조→총평→주요문항 원문→손풀이→다음 대비 역할은 반복됩니다.
+- 주요문항 카드는 문제 원문/선생님 손풀이를 생성하지 않고 원본 이미지로 넣고, GPT Image가 제목·테두리·요약·아이콘을 조립하는 하이브리드에 가깝습니다.
+- 동일 카드 번호 중복 사례도 있어 번호, 한글, 수학식, 학교명, 로고를 사람이 검수해야 합니다.
+
+이번 세션의 목표:
+Canva/미리캔버스가 원본인 템플릿 편집기가 아니라 `GPT Image 장별 생성 -> 반복 수정 -> 버전 비교 -> 선생님 최종 선택` 제작실을 설계하고 작은 gate로 구현합니다. Canva/미리캔버스는 필요할 때 최종 선택 이미지를 배치하는 보조 수단일 뿐입니다.
+
+코딩 전 먼저 아래를 표로 답하세요:
+1. 이미지 생성에 사용할 final_fields/teacher_fields/outputDrafts 입력
+2. 문제 원문과 손풀이 이미지의 업로드·저장 원천
+3. 장 구성 초안과 선생님 확정값의 저장 위치
+4. 생성 프롬프트와 수정 지시 local draft
+5. 이미지 set/version/parent version/final selection 저장 모델
+6. 비공개 Storage bucket과 삭제 범위
+7. OpenAI 이미지 생성·편집 API 과금과 실패/재시도 경계
+8. 분석 원천이 변경됐을 때 기존 이미지 보호 방식
+9. 번호·학교명·수학식·로고·CTA 사람 검수 gate
+10. 개인정보·시험지 저작권·외부 전송 범위
+
+OpenAI API를 구현할 때는 openai-docs skill로 최신 공식 문서를 먼저 확인하세요. 오래된 모델명이나 요청 형식을 기억으로 고정하지 마세요.
+
+권장 저장 구조:
+- `exam_analysis_image_sets`: run 연결, 학교별 style brief, 선생님이 확정한 장 구성, 상태
+- `exam_analysis_image_versions`: slide role/order, version, parent version, source snapshot, generation prompt, revision instruction, provider/model, Storage path, status, final 선택 여부
+- 비공개 Storage bucket: 생성 원본과 수정본
+
+DB가 필요하면 새 Supabase SQL 파일만 만들고 운영 SQL은 사용자가 직접 적용하게 하세요. base64 이미지나 전체 버전 이력을 `app_state`/localStorage/`audit_summary` 한 row에 넣지 마세요.
+
+권장 UI:
+- 기존 시험분석 상단 탭에 `GPT 이미지`를 추가하거나 현재 `산출물` 내부에서 `글 초안`과 `GPT 이미지` 하위 탭으로 분리
+- 상단: 세트 상태, 학교 포인트 컬러/비율/style brief, 원천 변경 경고
+- 좌측/상단: 선생님이 확정한 8~14장 카드 역할 목록
+- 중앙: 선택 장의 현재 이미지와 원본 문제/손풀이 slot
+- 우측: 생성 프롬프트와 수정 요청 local draft
+- 하단: v1/v2/v3 버전 타임라인, 부모 버전, 최종 선택 표시
+- 버튼: 장 구성 저장, 초안 생성, 선택 버전 수정 생성, 최종 선택, 다운로드, 버전 삭제
+- 같은 영역 안에 저장 중/생성 중/서버 반영 확인/완료/실패 표시
+
+필수 원칙:
+- 유료 이미지 호출은 장별 명시적 버튼으로만 실행하고 자동 10장 일괄 생성 금지
+- 기본 카드 역할은 제안하되 선생님이 주요문항 수에 맞춰 8~14장 구성을 확정
+- AI는 문항 수, 문항번호, 점수, 등급컷, 유사문항, 정답, 풀이를 새로 추측하지 않음
+- 문제 원문과 손풀이는 검수된 업로드 이미지 사용
+- 선생님 최종 선택본은 재생성으로 덮어쓰지 않음
+- 분석 데이터 변경 시 자동 재생성하지 않고 `원천 변경됨` 경고만 표시
+- GPT Image의 직전 선택 버전을 reference로 넘겨 수정 요청만 반영하고 version chain 유지
+- 공식 로고는 GPT가 다시 그리게 두지 말고 reference 고정 또는 생성 후 결정론적 합성을 검토
+- 벤치마크 디자인을 그대로 복제하지 말고 `으뜸수학 고태영T` 브랜드로 재설계
+
+한 번에 하나의 gate만 진행하세요:
+Gate 0 저장/비용/권한/삭제 설계와 사람 승인
+Gate 1 SQL·Storage·버전 CRUD, 실제 유료 호출 없음
+Gate 2 한 장 초안 생성, 비용 승인 후 통제된 테스트 데이터만 사용
+Gate 3 같은 장 반복 수정과 parent/version/final 선택 검증
+Gate 4 문제/손풀이 원본 slot을 포함한 주요문항 카드
+Gate 5 확정 장 묶음 다운로드와 블로그 글 조립 안내
+
+각 Gate마다 production test/build, AI 자기검토, 사람 검토 절차, 중단 조건을 제시하세요. 운영 데이터 삭제나 유료 호출은 사용자 확인 없이 실행하지 마세요.
+```
+
 ## 세션 충돌 방지 원칙
 
 - 유지보수 세션만 `E:\academy-os`의 `main` worktree와 `origin/main` 통합을 소유합니다.
