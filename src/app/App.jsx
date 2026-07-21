@@ -1091,6 +1091,7 @@ function formatNotificationJobStatus(job) {
 
 const deletableNotificationJobStatuses = new Set(["failed", "draft", "dry_run", "canceled"]);
 const cancelableNotificationJobStatuses = new Set(["scheduled", "queued", "pending_send"]);
+const reusableSupplementScheduleNoticeStatuses = new Set(["scheduled", "queued", "pending_send", "sent", "send_unconfirmed", "dry_run"]);
 
 function canDeleteNotificationJob(job) {
   const isNoticeDraft = String(job?.notificationType ?? "").startsWith("notice_") &&
@@ -7754,11 +7755,29 @@ export function App() {
       if (jobMakeupTaskId !== makeupTaskId) return false;
       if (!["notice_parent", "parent_comment", "schedule_reminder"].includes(job.notificationType)) return false;
       if (job.notificationType === "parent_comment" && payload.scheduleType !== "supplement") return false;
-      return isActiveNotificationJob(job);
+      return canCancelNotificationJob(job);
     });
     if (activeNoticeJobs.length === 0) return [];
     const canceledJobs = await Promise.all(activeNoticeJobs.map((job) => handleCancelNotificationJob(job, reason)));
     return canceledJobs.map((result) => result.notificationJob).filter(Boolean);
+  }
+
+  function getCurrentSupplementScheduleNoticeTargets(task) {
+    const makeupTaskId = task?.makeupTaskId || "";
+    const scheduleTime = normalizeTimeInput(task?.scheduledTime);
+    if (!makeupTaskId || !task?.scheduledDate || !scheduleTime) return new Set();
+    return new Set(notificationJobs.flatMap((job) => {
+      const payload = job.payload ?? {};
+      const result = job.result && typeof job.result === "object" ? job.result : {};
+      const jobMakeupTaskId = payload.makeupTaskId || result.makeupTaskId || "";
+      if (jobMakeupTaskId !== makeupTaskId) return [];
+      if (!reusableSupplementScheduleNoticeStatuses.has(job.status)) return [];
+      if (payload.scheduleType !== "supplement") return [];
+      if (payload.scheduleDate !== task.scheduledDate || normalizeTimeInput(payload.scheduleTime) !== scheduleTime) return [];
+      if (job.notificationType === "schedule_reminder") return ["student"];
+      if (["notice_parent", "parent_comment"].includes(job.notificationType)) return ["parent"];
+      return [];
+    }));
   }
 
   async function reserveSupplementScheduleNoticeJob(notificationJob, missingMessagePrefix) {
@@ -7806,6 +7825,76 @@ export function App() {
       reserveSupplementScheduleNoticeJob(parentJob, "학부모 보충 일정 안내 예약 실패")
     ]);
     return { parent: parentNotice, scheduledAt, student: studentNotice };
+  }
+
+  async function handleReserveSupplementNotificationControl(task, controlType) {
+    if (!task?.makeupTaskId || !isSupplementStudentReminderTask(task)) {
+      throw new Error("예약할 보충 일정 정보를 찾지 못했습니다.");
+    }
+    const student = students.find((item) => item.studentId === task.studentId);
+    if (!student) throw new Error("학생 정보를 찾지 못했습니다.");
+
+    if (controlType === "studentReminder") {
+      const result = await reserveSupplementStudentReminder(task);
+      if (result.skipped || result.status !== "scheduled") {
+        throw new Error(result.message || "당일 학생 11시 알림톡을 예약하지 못했습니다.");
+      }
+      return result;
+    }
+
+    const target = controlType === "parentSchedule" ? "parent" : "student";
+    const existingJob = getSupplementScheduleNoticeJob(task, notificationJobs, target);
+    if (existingJob?.status === "sent") {
+      throw new Error("현재 일정 안내는 이미 발송 완료되어 다시 예약하지 않습니다.");
+    }
+    if (existingJob && canCancelNotificationJob(existingJob)) {
+      return {
+        notificationJob: existingJob,
+        skipped: false,
+        status: "scheduled",
+        message: `${target === "parent" ? "학부모" : "학생"} 알림톡이 이미 예약되어 있습니다.`
+      };
+    }
+
+    const activeTargetJobs = notificationJobs.filter((job) => {
+      const payload = job.payload ?? {};
+      const result = job.result && typeof job.result === "object" ? job.result : {};
+      const jobMakeupTaskId = payload.makeupTaskId || result.makeupTaskId || "";
+      if (jobMakeupTaskId !== task.makeupTaskId || payload.scheduleType !== "supplement") return false;
+      const isTargetJob = target === "parent"
+        ? ["notice_parent", "parent_comment"].includes(job.notificationType)
+        : job.notificationType === "schedule_reminder";
+      return isTargetJob && canCancelNotificationJob(job);
+    });
+    await Promise.all(activeTargetJobs.map((job) => handleCancelNotificationJob(job, "보충관리 개별 알림톡 재예약")));
+
+    const scheduledAt = getNextHourlyAlimtalkReservationAt();
+    const notificationJob = buildSupplementScheduleNoticeJob(
+      task,
+      student,
+      scheduledAt,
+      target,
+      "",
+      aiSettings.notificationTemplates
+    );
+    const result = await reserveSupplementScheduleNoticeJob(
+      notificationJob,
+      `${target === "parent" ? "학부모" : "학생"} 보충 일정 안내 예약 실패`
+    );
+    if (result.status !== "scheduled") throw new Error(result.message || "알림톡을 예약하지 못했습니다.");
+    return result;
+  }
+
+  async function handleCancelSupplementNotificationControl(notificationJob) {
+    if (!notificationJob || !canCancelNotificationJob(notificationJob)) {
+      throw new Error("현재 취소할 수 있는 Solapi 예약이 없습니다.");
+    }
+    const result = await handleCancelNotificationJob(notificationJob, "보충관리 개별 알림톡 예약 취소");
+    return {
+      notificationJob: result.notificationJob,
+      status: result.notificationJob?.status || "canceled",
+      message: "Solapi 예약을 취소했습니다."
+    };
   }
 
   function persistSupplementScheduleNoticeFailure(notificationJob, messagePrefix, errorMessage) {
@@ -8738,7 +8827,9 @@ export function App() {
             students={students}
             tasks={makeupTasks}
             onCancelAbsenceSource={handleCancelAbsenceMakeupSource}
+            onCancelNotification={handleCancelSupplementNotificationControl}
             onPassTask={handlePassSupplementTask}
+            onReserveNotification={handleReserveSupplementNotificationControl}
             onSaveTask={handleSaveMakeupTask}
             onScheduleTask={handleScheduleSupplementTask}
             onUndoPassTask={handleUndoPassSupplementTask}
@@ -9509,7 +9600,10 @@ export function App() {
       hasExistingLinkedSchedule &&
       (taskForSchedule.scheduledDate !== taskForSchedule.linkedLessonDate ||
         scheduleTime !== normalizeTimeInput(taskForSchedule.linkedLessonTime));
-    const shouldReserveScheduleNotice = shouldUpdateStudentReminder && (!hasExistingLinkedSchedule || hasScheduleChanged);
+    const currentScheduleNoticeTargets = getCurrentSupplementScheduleNoticeTargets(taskForSchedule);
+    const hasCurrentScheduleNoticePair = currentScheduleNoticeTargets.has("student") && currentScheduleNoticeTargets.has("parent");
+    const shouldReserveScheduleNotice = shouldUpdateStudentReminder &&
+      (!hasExistingLinkedSchedule || hasScheduleChanged || !hasCurrentScheduleNoticePair);
     const duplicateLesson = lessons.find((lesson) => {
       if (!lesson || lesson.lessonId === lessonId || lesson.status === "canceled") return false;
       const lessonTime = normalizeTimeInput(lesson.startTime);
@@ -9583,7 +9677,7 @@ export function App() {
             skipped: true,
             status: "notApplied",
             message: shouldUpdateStudentReminder
-              ? "일정 변경이 없어 학부모 보충 일정 안내는 예약하지 않았습니다."
+              ? "현재 일정의 학부모 보충 안내가 이미 예약 또는 발송되어 중복 예약하지 않았습니다."
               : "학부모 보충 일정 안내 예약은 갱신하지 않았습니다."
           },
           scheduledAt: "",
@@ -9591,7 +9685,7 @@ export function App() {
             skipped: true,
             status: "notApplied",
             message: shouldUpdateStudentReminder
-              ? "일정 변경이 없어 학생 보충 일정 안내는 예약하지 않았습니다."
+              ? "현재 일정의 학생 보충 안내가 이미 예약 또는 발송되어 중복 예약하지 않았습니다."
               : "학생 보충 일정 안내 예약은 갱신하지 않았습니다."
           }
         };
@@ -14784,7 +14878,7 @@ function SupplementMakeupLessonDetail({
             </button>
           </div>
           <p className="supplementScheduleActionHint">
-            기존 일정 변경 시 학생·학부모에게 보충 일정 안내를 다음 정각으로 예약하고, 보강 당일 오전 11시 학생 알림톡 예약을 갱신합니다.
+            현재 일정의 학생·학부모 안내가 없으면 다음 정각으로 예약하고, 보강 당일 오전 11시 학생 알림톡 예약도 갱신합니다. 이미 같은 일정 안내가 있으면 중복 예약하지 않습니다.
           </p>
         </section>
       ) : null}
@@ -21961,7 +22055,9 @@ function SupplementCenter({
   students,
   tasks,
   onCancelAbsenceSource,
+  onCancelNotification,
   onPassTask,
+  onReserveNotification,
   onSaveTask,
   onScheduleTask,
   onUndoPassTask
@@ -22433,8 +22529,10 @@ function SupplementCenter({
         <SupplementStudentModal
           notificationTemplates={notificationTemplates}
           onCancelAbsenceSource={handleCancelAbsenceSourceFromModal}
+          onCancelNotification={onCancelNotification}
           onClose={closeSupplementStudentModal}
           onPassTask={handlePassSupplementTaskFromModal}
+          onReserveNotification={onReserveNotification}
           onSaveTask={handleSaveSupplementTaskFromModal}
           onScheduleTask={handleScheduleSupplementTaskFromModal}
           notificationJobs={notificationJobs}
@@ -22695,8 +22793,10 @@ function SupplementStudentModal({
   notificationTemplates = {},
   notificationJobs = [],
   onCancelAbsenceSource,
+  onCancelNotification,
   onClose,
   onPassTask,
+  onReserveNotification,
   onSaveTask,
   onScheduleTask,
   student,
@@ -22713,6 +22813,9 @@ function SupplementStudentModal({
   const [busyTaskId, setBusyTaskId] = useState("");
   const [taskDrafts, setTaskDrafts] = useState({});
   const [taskSaveStatus, setTaskSaveStatus] = useState({});
+  const [notificationControl, setNotificationControl] = useState(null);
+  const [notificationControlBusy, setNotificationControlBusy] = useState(false);
+  const [notificationControlFeedback, setNotificationControlFeedback] = useState(null);
   const taskDraftSyncKey = tasks.map((task) => `${task.makeupTaskId}:${getSupplementTaskSourceVersion(task)}`).join("||");
 
   useEffect(() => {
@@ -22786,8 +22889,7 @@ function SupplementStudentModal({
       };
       const shouldRefreshGeneratedDraft =
         field !== "notificationDraft" &&
-        ["supplementHomeworkNote", "supplementProgressMemo", "supplementMethod", "scheduledDate", "scheduledTime"].includes(field) &&
-        !task.notificationDraft?.trim();
+        ["supplementHomeworkNote", "supplementProgressMemo", "supplementMethod", "scheduledDate", "scheduledTime"].includes(field);
       if (shouldRefreshGeneratedDraft) {
         const previousGeneratedDraft = createNotificationDraft(
           { ...task, ...previousValues, scheduledTime: normalizeTimeInput(previousValues.scheduledTime) || previousValues.scheduledTime },
@@ -23044,6 +23146,101 @@ function SupplementStudentModal({
     );
   }
 
+  function openNotificationControl(task, controlType) {
+    setNotificationControl({ controlType, taskId: task.makeupTaskId });
+    setNotificationControlFeedback(null);
+  }
+
+  function closeNotificationControl() {
+    if (notificationControlBusy) return;
+    setNotificationControl(null);
+    setNotificationControlFeedback(null);
+  }
+
+  function renderNotificationControlButton(task, controlType) {
+    const config = supplementNotificationControlConfig[controlType];
+    const job = getSupplementNotificationControlJob(task, notificationJobs, controlType);
+    const display = getSupplementNotificationControlDisplay(job);
+    return (
+      <button
+        aria-pressed={display.tone === "on"}
+        className={`supplementNotificationControlButton ${display.tone}`}
+        key={controlType}
+        onClick={() => openNotificationControl(task, controlType)}
+        type="button"
+      >
+        <span className="supplementNotificationControlLight" aria-hidden="true" />
+        <b>{config.label}</b>
+        <span>{display.label}</span>
+      </button>
+    );
+  }
+
+  const notificationControlTask = notificationControl
+    ? tasks.find((task) => task.makeupTaskId === notificationControl.taskId) ?? null
+    : null;
+  const notificationControlConfig = notificationControl
+    ? supplementNotificationControlConfig[notificationControl.controlType]
+    : null;
+  const notificationControlJob = notificationControlTask && notificationControl
+    ? getSupplementNotificationControlJob(notificationControlTask, notificationJobs, notificationControl.controlType)
+    : null;
+  const notificationControlDisplay = getSupplementNotificationControlDisplay(notificationControlJob);
+  const notificationControlDraftState = notificationControlTask ? getTaskDraftState(notificationControlTask) : null;
+  const notificationControlHasUnsavedChanges = Boolean(notificationControlTask && notificationControlDraftState &&
+    getSupplementTaskDraftDiff(
+      notificationControlTask,
+      notificationControlDraftState.values,
+      student,
+      normalizedNotificationTemplates
+    ).length);
+  const notificationControlBlockReason = !notificationControlTask?.linkedLessonId
+    ? "수업일지 일정을 먼저 만들어야 알림톡을 예약할 수 있습니다."
+    : notificationControlHasUnsavedChanges
+      ? "수정 중인 보충 내용·일정을 먼저 저장해야 현재 원본으로 알림톡을 예약할 수 있습니다."
+      : !notificationControlTask.scheduledDate || !notificationControlTask.scheduledTime
+        ? "저장된 보충 날짜와 시간이 없습니다."
+        : "";
+  const notificationControlPreview = notificationControlTask && notificationControl
+    ? notificationControlJob?.previewBody || (
+        notificationControl.controlType === "studentReminder"
+          ? notificationControlTask.notificationDraft || createNotificationDraft(notificationControlTask, [student], normalizedNotificationTemplates)
+          : buildSupplementScheduleNoticeBody(notificationControlTask, "", normalizedNotificationTemplates)
+      )
+    : "";
+  const notificationControlRecipient = notificationControlTask && notificationControl
+    ? notificationControl.controlType === "parentSchedule" ? student.parentPhone : student.studentPhone
+    : "";
+  const canCancelNotificationControl = Boolean(notificationControlJob && canCancelNotificationJob(notificationControlJob));
+  const canReserveNotificationControl = Boolean(
+    notificationControlTask &&
+    !notificationControlBlockReason &&
+    (!notificationControlJob || ["canceled", "failed"].includes(notificationControlJob.status))
+  );
+
+  async function handleNotificationControlAction(action) {
+    if (!notificationControlTask || !notificationControl || notificationControlBusy) return;
+    setNotificationControlBusy(true);
+    setNotificationControlFeedback({ message: action === "cancel" ? "Solapi 예약 취소 중입니다." : "Solapi 예약 생성 중입니다.", tone: "saving" });
+    try {
+      const result = action === "cancel"
+        ? await onCancelNotification?.(notificationControlJob)
+        : await onReserveNotification?.(notificationControlTask, notificationControl.controlType);
+      const nextStatus = action === "cancel" ? "canceled" : result?.status || "scheduled";
+      setTaskSaveStatusPatch(notificationControlTask.makeupTaskId, {
+        [notificationControlConfig.statusField]: nextStatus
+      });
+      setNotificationControlFeedback({
+        message: result?.message || (action === "cancel" ? "Solapi 예약을 취소했습니다." : "Solapi 예약을 완료했습니다."),
+        tone: "success"
+      });
+    } catch (error) {
+      setNotificationControlFeedback({ message: error?.message || "알림톡 작업에 실패했습니다.", tone: "failed" });
+    } finally {
+      setNotificationControlBusy(false);
+    }
+  }
+
   return (
     <Modal
       className="supplementStudentModal"
@@ -23100,20 +23297,9 @@ function SupplementStudentModal({
               const hasScheduleDiff = draftDiff.some((item) => ["scheduledDate", "scheduledTime"].includes(item.field));
               const hasNotificationDiff = draftDiff.some((item) => item.field === "notificationDraft");
               const isScheduleChangeMode = Boolean(task.linkedLessonId);
-              const scheduleNoticeActionLabel = isScheduleChangeMode ? "변경 안내" : "확정 안내";
-              const pendingScheduleNoticeStatus = !hasScheduleDraft
-                ? "scheduleInputNeeded"
-                : isScheduleChangeMode && !hasScheduleDiff
-                  ? "noScheduleChange"
-                  : "reserveReady";
               const makeupStatus = saveStatus.makeupTask || (draftDiff.length ? "changed" : "saved");
               const lessonStatus = saveStatus.lesson || (hasScheduleDiff ? "changed" : task.linkedLessonId ? "synced" : hasScheduleDraft ? "ready" : "empty");
               const notificationStatus = saveStatus.notificationDraft || (hasNotificationDiff ? "changed" : draftValues.notificationDraft ? "saved" : "empty");
-              const parentChangeNoticeStatus = saveStatus.parentChangeNotice || pendingScheduleNoticeStatus;
-              const studentChangeNoticeStatus = saveStatus.studentChangeNotice || pendingScheduleNoticeStatus;
-              const parentScheduleNoticeLabel = saveStatus.parentScheduleNoticeLabel || `학부모 ${scheduleNoticeActionLabel}`;
-              const studentScheduleNoticeLabel = saveStatus.studentScheduleNoticeLabel || `학생 ${scheduleNoticeActionLabel}`;
-              const studentReminderStatus = saveStatus.studentReminder || getSupplementStudentReminderSaveStatus(task, notificationJobs);
               const scheduleGateTitle = isScheduleChangeMode ? "기존 일정 변경" : "최초 일정 확정";
               const scheduleGateBody = isScheduleChangeMode
                 ? hasScheduleDiff
@@ -23251,9 +23437,9 @@ function SupplementStudentModal({
                     {renderSaveStatusPill("보충 내용", makeupStatus)}
                     {renderSaveStatusPill("수업일지 일정", lessonStatus)}
                     {renderSaveStatusPill("알림톡 문구", notificationStatus)}
-                    {studentChangeNoticeStatus ? renderSaveStatusPill(studentScheduleNoticeLabel, studentChangeNoticeStatus) : null}
-                    {parentChangeNoticeStatus ? renderSaveStatusPill(parentScheduleNoticeLabel, parentChangeNoticeStatus) : null}
-                    {renderSaveStatusPill("학생 11시 예약", studentReminderStatus)}
+                    {renderNotificationControlButton(task, "studentSchedule")}
+                    {renderNotificationControlButton(task, "parentSchedule")}
+                    {renderNotificationControlButton(task, "studentReminder")}
                   </div>
                   <label className="notificationDraftField supplementReadableField">
                     <strong>알림톡 문구</strong>
@@ -23321,6 +23507,77 @@ function SupplementStudentModal({
           studentName={student.name}
           task={scheduleConfirmTask}
         />
+      ) : null}
+      {notificationControlTask && notificationControlConfig ? (
+        <div className="supplementNotificationControlBackdrop" role="presentation">
+          <section
+            aria-labelledby="supplement-notification-control-title"
+            aria-modal="true"
+            className="supplementNotificationControlModal"
+            role="dialog"
+          >
+            <div className="supplementNotificationControlHeader">
+              <div>
+                <span className={`supplementNotificationControlState ${notificationControlDisplay.tone}`}>
+                  <i aria-hidden="true" />
+                  {notificationControlDisplay.label}
+                </span>
+                <h3 id="supplement-notification-control-title">{notificationControlConfig.label}</h3>
+                <p>{student.name} · {formatSupplementScheduleDateTime(notificationControlTask)}</p>
+              </div>
+              <button className="iconButton" disabled={notificationControlBusy} onClick={closeNotificationControl} type="button">×</button>
+            </div>
+            <div className="supplementNotificationControlFacts">
+              <span>수신 대상</span>
+              <strong>{notificationControlConfig.targetLabel} · {maskPhoneForDisplay(notificationControlRecipient)}</strong>
+              <span>예약 시각</span>
+              <strong>
+                {notificationControlJob?.scheduledAt
+                  ? formatKoreaTimeLabel(notificationControlJob.scheduledAt)
+                  : notificationControl.controlType === "studentReminder"
+                    ? formatKoreaTimeLabel(getSupplementStudentReminderScheduledAt(notificationControlTask))
+                    : "예약 버튼을 누른 뒤 다음 정각"}
+              </strong>
+              <span>Solapi 상태</span>
+              <strong>{notificationControlJob ? formatNotificationJobStatus(notificationControlJob) : "예약 기록 없음"}</strong>
+            </div>
+            <div className="supplementNotificationControlPreview">
+              <strong>실제 예약 문구</strong>
+              <pre>{notificationControlPreview || "저장된 알림톡 문구가 없습니다."}</pre>
+            </div>
+            {notificationControlBlockReason && !canCancelNotificationControl ? (
+              <p className="supplementNotificationControlBlock">{notificationControlBlockReason}</p>
+            ) : null}
+            {notificationControlFeedback ? (
+              <p className={`supplementNotificationControlFeedback ${notificationControlFeedback.tone}`}>
+                {notificationControlFeedback.message}
+              </p>
+            ) : null}
+            <div className="modalActions supplementNotificationControlActions">
+              <button className="softButton" disabled={notificationControlBusy} onClick={closeNotificationControl} type="button">닫기</button>
+              {canCancelNotificationControl ? (
+                <button
+                  className="dangerSoftButton"
+                  disabled={notificationControlBusy}
+                  onClick={() => handleNotificationControlAction("cancel")}
+                  type="button"
+                >
+                  {notificationControlBusy ? "취소 중" : "Solapi 예약 취소"}
+                </button>
+              ) : null}
+              {canReserveNotificationControl ? (
+                <button
+                  className="primaryButton"
+                  disabled={notificationControlBusy}
+                  onClick={() => handleNotificationControlAction("reserve")}
+                  type="button"
+                >
+                  {notificationControlBusy ? "예약 중" : "Solapi 예약"}
+                </button>
+              ) : null}
+            </div>
+          </section>
+        </div>
       ) : null}
     </Modal>
   );
@@ -26866,6 +27123,49 @@ function getSupplementStudentReminderJob(task = {}, notificationJobs = []) {
   if (!notificationJobId) return null;
   return notificationJobs.find((job) => job.notificationJobId === notificationJobId) ?? null;
 }
+
+function getSupplementScheduleNoticeJob(task = {}, notificationJobs = [], target = "student") {
+  const makeupTaskId = task.makeupTaskId || "";
+  const scheduleTime = normalizeTimeInput(task.scheduledTime);
+  if (!makeupTaskId || !task.scheduledDate || !scheduleTime) return null;
+  return notificationJobs
+    .filter((job) => {
+      const payload = job.payload ?? {};
+      const result = job.result && typeof job.result === "object" ? job.result : {};
+      const jobMakeupTaskId = payload.makeupTaskId || result.makeupTaskId || "";
+      if (jobMakeupTaskId !== makeupTaskId || payload.scheduleType !== "supplement") return false;
+      if (payload.scheduleDate !== task.scheduledDate || normalizeTimeInput(payload.scheduleTime) !== scheduleTime) return false;
+      if (target === "parent") return ["notice_parent", "parent_comment"].includes(job.notificationType);
+      return job.notificationType === "schedule_reminder";
+    })
+    .sort(sortNotificationJobsForCurrentStatus)[0] ?? null;
+}
+
+function getSupplementNotificationControlJob(task = {}, notificationJobs = [], controlType = "studentSchedule") {
+  if (controlType === "studentReminder") return getSupplementStudentReminderJob(task, notificationJobs);
+  return getSupplementScheduleNoticeJob(task, notificationJobs, controlType === "parentSchedule" ? "parent" : "student");
+}
+
+function getSupplementNotificationControlDisplay(job = null) {
+  if (!job) return { label: "예약 없음", tone: "off" };
+  if (canCancelNotificationJob(job)) {
+    return {
+      label: isNotificationSchedulePast(job.scheduledAt, 0) ? "예약 시각 확인" : "예약됨",
+      tone: isNotificationSchedulePast(job.scheduledAt, 0) ? "warning" : "on"
+    };
+  }
+  if (job.status === "sent") return { label: "발송 완료", tone: "done" };
+  if (job.status === "canceled") return { label: "취소됨", tone: "off" };
+  if (job.status === "failed") return { label: "예약 실패", tone: "failed" };
+  if (["send_unconfirmed", "dry_run"].includes(job.status)) return { label: "확인 필요", tone: "warning" };
+  return { label: formatNotificationJobStatus(job), tone: "off" };
+}
+
+const supplementNotificationControlConfig = {
+  studentSchedule: { label: "학생 알림톡", targetLabel: "학생", statusField: "studentChangeNotice" },
+  parentSchedule: { label: "학부모 알림톡", targetLabel: "학부모", statusField: "parentChangeNotice" },
+  studentReminder: { label: "당일 학생 11시 알림톡", targetLabel: "학생", statusField: "studentReminder" }
+};
 
 function getSupplementStudentReminderSaveStatus(task = {}, notificationJobs = []) {
   if (!isSupplementStudentReminderTask(task)) return "notApplied";

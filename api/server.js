@@ -2146,6 +2146,21 @@ function isSameSolapiReservation(existingJob = {}, nextJob = {}) {
   );
 }
 
+const notificationReservationPendingReuseMs = 2 * 60 * 1000;
+
+function isSameSolapiReservationPending(existingJob = {}, nextJob = {}, now = new Date()) {
+  if (!existingJob) return false;
+  const pendingAt = new Date(existingJob.result?.reservationStartedAt || existingJob.updatedAt || 0).getTime();
+  return (
+    existingJob.status === "scheduled" &&
+    existingJob.provider === "academy-os-reserving" &&
+    existingJob.result?.reservationPending === true &&
+    Number.isFinite(pendingAt) &&
+    now.getTime() - pendingAt < notificationReservationPendingReuseMs &&
+    getNotificationReservationFingerprint(existingJob) === getNotificationReservationFingerprint(nextJob)
+  );
+}
+
 async function sendScheduledNotificationJobToSolapi(job, { forceDryRun = false } = {}) {
   const scheduledDate = job.scheduledAt || job.payload?.scheduledDate || "";
   if (!scheduledDate) throw new Error("Solapi 예약 발송 시각이 필요합니다.");
@@ -2186,7 +2201,7 @@ async function reserveNotificationJobInSolapi(job, { forceDryRun = false, reason
   const nextJob = prepared.job;
   const existing = await getNotificationJob(nextJob.notificationJobId);
   const existingJob = existing.notificationJob;
-  if (isSameSolapiReservation(existingJob, nextJob)) {
+  if (isSameSolapiReservation(existingJob, nextJob) || isSameSolapiReservationPending(existingJob, nextJob)) {
     return { notificationJob: existingJob, reserved: false, reused: true, source: existing.source };
   }
 
@@ -2199,7 +2214,22 @@ async function reserveNotificationJobInSolapi(job, { forceDryRun = false, reason
     solapiCancellation = await cancelSolapiReservationGroup(existingProviderGroupId);
   }
 
-  const result = await sendScheduledNotificationJobToSolapi(nextJob, { forceDryRun });
+  const reservationStartedAt = new Date().toISOString();
+  const reservingJob = {
+    ...nextJob,
+    provider: "academy-os-reserving",
+    result: {
+      ...(nextJob.result && typeof nextJob.result === "object" ? nextJob.result : {}),
+      reservationPending: true,
+      reservationReason: reason,
+      reservationStartedAt
+    },
+    status: "scheduled",
+    updatedAt: reservationStartedAt
+  };
+  await upsertNotificationJob(reservingJob);
+
+  const result = await sendScheduledNotificationJobToSolapi(reservingJob, { forceDryRun });
   const status = result?.dryRun ? "dry_run" : "scheduled";
   const latest = await getNotificationJob(nextJob.notificationJobId);
   if (latest.notificationJob?.status === "canceled") {
@@ -2222,17 +2252,19 @@ async function reserveNotificationJobInSolapi(job, { forceDryRun = false, reason
     return { notificationJob: canceledJob, reserved: false, canceledAfterReserve: true, source: "solapi" };
   }
   const updatedJob = {
-    ...nextJob,
+    ...reservingJob,
     error: "",
     payload: {
-      ...(nextJob.payload ?? {}),
-      scheduledDate: nextJob.scheduledAt,
+      ...(reservingJob.payload ?? {}),
+      scheduledDate: reservingJob.scheduledAt,
       sendMode: "scheduled"
     },
     provider: "solapi",
     providerMessageId: getProviderMessageId(result),
     result: {
+      ...(nextJob.result && typeof nextJob.result === "object" ? nextJob.result : {}),
       ...(result && typeof result === "object" ? result : {}),
+      reservationPending: false,
       reservedAt: new Date().toISOString(),
       reservationReason: reason
     },
