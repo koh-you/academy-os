@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { ParentPortalAlertsTab } from "./ParentPortalAlertsTab.jsx";
 import { ParentPortalHomeworkTab } from "./ParentPortalHomeworkTab.jsx";
 import { PortalMaterialsTab } from "./PortalMaterialsTab.jsx";
 import { parentPortalTabs, PortalTabBar } from "./PortalTabBar.jsx";
@@ -26,10 +25,6 @@ export function ParentPortal({
   const studentHomeworks = homeworks.filter((homework) => homework.studentId === student?.studentId);
   const studentReports = reportSnapshots.filter((snapshot) => snapshot.studentId === student?.studentId);
   const overdueHomeworks = studentHomeworks.filter((homework) => isHomeworkOverdue(homework));
-  const parentPrepNotices = records
-    .filter((record) => record.studentId === student?.studentId && record.prepParentVisible && record.prepParentNotice?.trim())
-    .map((record) => ({ ...record, lesson: lessons.find((lesson) => lesson.lessonId === record.lessonId) }))
-    .sort((a, b) => String(b.lesson?.date ?? "").localeCompare(String(a.lesson?.date ?? "")));
   const parentMaterials = filterMaterials(materials, student, "parent");
 
   return (
@@ -47,8 +42,6 @@ export function ParentPortal({
 
       <section className="panel studentWorkPanel">
         <PortalTabBar activeTab={activeTab} className="parentTabs" onChange={setActiveTab} tabs={parentPortalTabs} />
-
-        {activeTab === "alerts" ? <ParentPortalAlertsTab notices={parentPrepNotices} /> : null}
 
         {activeTab === "reports" ? (
           <div className="homeworkStack">

@@ -1,7 +1,6 @@
 import { StudentExamPostSubmissionPanel } from "./StudentExamPostSubmissionPanel.jsx";
 import { StudentHomeworkActionCard } from "./StudentHomeworkActionCard.jsx";
 import { StudentLessonHistoryCalendar } from "./StudentLessonHistoryCalendar.jsx";
-import { StudentPrepNotices } from "./StudentPrepNotices.jsx";
 import { StudentQuestionPanel } from "./StudentQuestionPanel.jsx";
 import { StudentSupplementSchedules, StudentTopNotice } from "./StudentTodayReadOnlyPanels.jsx";
 
@@ -19,7 +18,6 @@ export function StudentTodayTab({
   isHomeworkCompleted,
   lessons = [],
   overdueHomeworks = [],
-  prepNotices = [],
   questionSaveState = { state: "idle", targetId: "" },
   questions = [],
   recordsWithLessons = [],
@@ -52,8 +50,6 @@ export function StudentTodayTab({
         targets={examPostTargets}
         writeEnabled={studentExamPostWriteEnabled}
       />
-
-      <StudentPrepNotices notices={prepNotices} />
 
       <StudentLessonHistoryCalendar
         buildCalendarDays={buildCalendarDays}

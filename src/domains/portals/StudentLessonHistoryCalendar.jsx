@@ -105,9 +105,6 @@ export function StudentLessonHistoryCalendar({
                 {selectedRecord.studentComment?.trim() ? (
                   <div><dt>선생님 코멘트</dt><dd>{selectedRecord.studentComment}</dd></div>
                 ) : null}
-                {selectedRecord.prepStudentVisible && selectedRecord.prepStudentNotice?.trim() ? (
-                  <div><dt>준비 메모</dt><dd>{selectedRecord.prepStudentNotice}</dd></div>
-                ) : null}
               </dl>
             </>
           ) : (

@@ -8,7 +8,6 @@ export const studentPortalTabs = [
 ];
 
 export const parentPortalTabs = [
-  ["alerts", "알림"],
   ["reports", "보고서"],
   ["homework", "숙제"],
   ["materials", "자료함"],

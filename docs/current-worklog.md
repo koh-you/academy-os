@@ -288,6 +288,18 @@
 - 사람 검토 gate: 운영 `수업일지 > 예약 확인` 또는 `알림관리`에서 다음 실제 수업의 학생·학부모 예약 한 쌍을 열어, 예약 후 표시되는 미리보기가 Solapi 템플릿의 학원명/머리말까지 포함한 최종 문구인지 확인한다. 수업메모는 작성창 seed로만 쓰이고, 저장된 대상별 최종문구와 `⭐ 보충/확인 안내`만 포함돼야 한다. 이 확인 전에는 5단계로 넘어가지 않는다.
 - 중단 조건: 예약 직후에도 로컬 제목으로 시작하는 이전 미리보기가 보임, 학생/학부모 문구가 교차됨, 저장하지 않은 수업메모 seed가 포함됨, 구조화 후속 안내가 코멘트와 중복됨, provider 조회 실패로 로컬 미리보기가 남음, 취소한 그룹이 발송 처리되면 즉시 다음 단계를 중단한다.
 
+### 2026-07-21 P1. 수업메모 원천·알림톡 책임 분리 5단계 - 미사용 prep notice/포털 경로 정리
+
+- 착수 inventory: 현재 강사용 `preparationMemo`는 수업메모 모달 local draft에서 `lesson_student_records.preparation_memo`로 저장되고, `prepStudentVisible/prepParentVisible`은 대상별 알림톡 작성창 local draft seed 여부에만 사용한다. 학생·학부모 최종문구는 `studentComment/teacherComment`, 숙제 후속처리는 구조화 세 필드, 예약 본문은 저장 최종문구와 서버 직전 재조회 원천으로 이미 분리됐다.
+- 발견한 legacy 경로: `handlePolishPreparationNotice`는 학생·학부모용 `prepStudentNotice/prepParentNotice`를 만들도록 구현돼 있었지만 실제 버튼·호출부 없이 prop만 세 단계로 전달됐다. 설정의 `수업메모 AI` 행도 존재하지 않는 호출 위치를 안내했다. 학생 포털은 legacy 학생 준비 안내 목록/캘린더 행을, 학부모 포털은 이 값만 표시하는 `알림` 탭을 남기고 있었다.
+- 운영 read-only 대조: 운영 Supabase `lesson_student_records` 245건에서 `prepStudentNotice`, `prepParentNotice`, 두 AI status 값은 모두 0건이었다. `app_state.aiSettings.prompts.preparationNotice` legacy 설정값은 존재하지만 active writer가 없으므로 삭제하거나 다른 prompt로 이관하지 않고 그대로 보존했다.
+- 구현 결과: 미사용 준비 안내 AI writer와 전달 prop, 설정의 미연결 `수업메모 AI` 행을 제거했다. 학생 포털의 legacy 준비 안내 목록과 수업기록 `준비 메모` 행, 학부모 포털의 legacy 준비 안내 `알림` 탭 소비 경로도 제거했다. 기존 미사용 컴포넌트 파일과 Supabase 호환 컬럼/mapping은 과거 배포·리팩터링 브랜치 호환을 위해 이번 유지보수 단위에서 삭제하지 않았다.
+- 보존 계약: 수업메모 모달, 직전/참고 메모 확인, 작성창 가져오기 체크, 학생·학부모 최종문구 저장, 구조화 숙제 후속처리, 포털의 저장된 학생 코멘트, notification job/Solapi 예약·발송 본문은 변경하지 않는다. `preparationNotice` payload는 기존 예약 호환용 빈 필드로 유지한다.
+- 저장/외부 영향: 운영 API는 record/app_state 개수 확인을 위한 GET만 호출했다. Supabase row, app_state, localStorage를 쓰거나 삭제하지 않았고 AI 호출, notification job 생성, Solapi 예약·발송·취소도 실행하지 않았다. 새 SQL은 없다.
+- AI 검증: active portal import 0건, active portal prep notice field 0건, active prep AI writer/settings key 0건을 확인했다. `git diff --check`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 365/365, `npm run build`를 통과했다. Vite의 기존 500KB chunk 경고만 남는다.
+- 사람 검토 gate: 수업일지의 수업메모 모달에서 강사용 메모, 직전/참고 메모, 학생·학부모 작성창 가져오기 체크가 그대로 보이고 저장·새로고침 후 유지되는지 확인한다. 학생 포털 오늘/수업기록에는 별도 `수업 준비 안내/준비 메모`가 중복 노출되지 않고 저장된 `선생님 코멘트`만 보이는지 확인한다. 학부모 포털은 빈 legacy `알림` 탭 없이 `보고서`부터 시작해야 한다. 설정 > AI에는 호출부가 없는 `수업메모 AI` 항목이 없어야 한다. 실제 발송·예약은 이 UI gate에서 실행하지 않는다.
+- 중단 조건: 수업메모/작성창 체크 저장이 사라짐, 학생·학부모 최종문구가 변경됨, 학생 포털 선생님 코멘트가 사라짐, 학부모 보고서·숙제 탭이 깨짐, 설정의 실제 코멘트 AI까지 사라짐, 단순 화면 확인 중 API write·AI 호출·notification job/Solapi side effect가 발생하면 다음 단계를 중단한다.
+
 ### 2026-07-21 P0. 수업일지 결석 출결 알림톡 다음 정각 예약
 
 - 사용자 요청: 수업일지에서 결석을 저장하며 학부모 출결 알림톡을 선택한 경우 즉시 발송하지 않고 다음 정각에 예약한다.

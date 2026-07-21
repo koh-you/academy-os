@@ -4997,15 +4997,6 @@ const defaultAiPrompts = {
     "- 수정할 곳이 없으면 원문을 그대로 반환한다.",
     "- 최종 교정문만 반환한다."
   ].join("\n"),
-  preparationNotice: [
-    "역할: 으뜸수학 고태영T의 수업메모 알림톡 편집자",
-    "목표: 강사용 수업메모를 학생 또는 학부모에게 보낼 짧고 정중한 안내문으로 다듬는다.",
-    "작성 원칙:",
-    "- 메모에 없는 사실을 만들지 않는다.",
-    "- 수신자가 바로 이해할 수 있게 한두 문단으로 정리한다.",
-    "- 학생용은 분명하고 부담 없는 말투, 학부모용은 정중한 말투를 사용한다.",
-    "- 최종 문장만 반환한다."
-  ].join("\n"),
   noticeMessage: [
     "역할: 으뜸수학 고태영T의 알림톡 공지문 편집자",
     "목표: 강사가 입력한 교재/보강/공지 초안을 실제 발송 가능한 짧고 명료한 알림톡 문장으로 다듬는다.",
@@ -8749,7 +8740,6 @@ export function App() {
             onPasteLesson={handlePasteLessonToSelectedDate}
             onOpenReport={handleOpenReport}
             onPolishComment={handlePolishLessonComment}
-            onPolishPreparationNotice={handlePolishPreparationNotice}
             onPassMakeupTask={handlePassSupplementTask}
             onReconcileSolapiNotificationResults={handleReconcileSolapiNotificationResults}
             onRetryGeneratedLessonSave={handleRetryGeneratedLessonSave}
@@ -9318,100 +9308,6 @@ export function App() {
         );
       }
       return { error: error.message, ok: false };
-    }
-  }
-
-  async function handlePolishPreparationNotice(lesson, student, record, target, aiProvider, aiModel) {
-    const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
-    const statusField = target === "student" ? "prepStudentAiStatus" : "prepParentAiStatus";
-    const resultField = target === "student" ? "prepStudentNotice" : "prepParentNotice";
-    const audienceLabel = target === "student" ? "학생" : "학부모";
-    const rawText = record?.preparationMemo?.trim() || record?.[resultField]?.trim() || "";
-
-    setRecords((current) =>
-      upsertById(
-        current,
-        {
-          ...createEmptyRecord(lesson, student),
-          ...(record ?? {}),
-          lessonStudentRecordId: recordId,
-          [statusField]: "AI 정제 중"
-        },
-        "lessonStudentRecordId"
-      )
-    );
-
-    if (!rawText) {
-      setRecords((current) =>
-        upsertById(
-          current,
-          {
-            ...createEmptyRecord(lesson, student),
-            ...(record ?? {}),
-            lessonStudentRecordId: recordId,
-            [statusField]: "메모 없음"
-          },
-          "lessonStudentRecordId"
-        )
-      );
-      return;
-    }
-
-    try {
-      const response = await fetch(apiUrl("/api/ai/comment-polish"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          aiProvider,
-          aiModel,
-          aiPrompt: getAiPrompt(aiSettings, "preparationNotice"),
-          audience: target === "student" ? "student" : "parent",
-          attendanceStatus: attendanceLabels[record?.attendanceStatus ?? "pending"],
-          assignmentStatus: getAssignmentStatusMessage(target === "student" ? "student" : "parent", record?.assignmentStatus ?? record?.incompleteHomework ?? ""),
-          grade: student.grade,
-          homeworkStatus: "수업 준비 안내",
-          lessonDate: lesson.date,
-          lessonContent: getLessonContent(record),
-          lessonMaterial: getLessonMaterial(record, student),
-          lessonName: lesson.className,
-          rawText: `${audienceLabel}에게 안내할 수업메모입니다. 짧고 정중하게 다듬어 주세요.\n${rawText}`,
-          schoolName: student.schoolName,
-          studentName: student.name
-        })
-      });
-      const result = await response.json();
-      if (!response.ok || !result.ok) {
-        throw new Error(result.error || "수업메모 AI 정제에 실패했습니다.");
-      }
-
-      setRecords((current) =>
-        upsertById(
-          current,
-          {
-            ...createEmptyRecord(lesson, student),
-            ...(record ?? {}),
-            lessonStudentRecordId: recordId,
-            [resultField]: result.result.polishedText,
-            [statusField]: `완료 · ${result.result.provider}`,
-            updatedAt: new Date().toISOString()
-          },
-          "lessonStudentRecordId"
-        )
-      );
-      setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "dirty" }));
-    } catch (error) {
-      setRecords((current) =>
-        upsertById(
-          current,
-          {
-            ...createEmptyRecord(lesson, student),
-            ...(record ?? {}),
-            lessonStudentRecordId: recordId,
-            [statusField]: `실패 · ${error.message}`
-          },
-          "lessonStudentRecordId"
-        )
-      );
     }
   }
 
@@ -14791,7 +14687,6 @@ function TeacherLessonHubV2({
   onPasteLesson,
   onPassMakeupTask,
   onPolishComment,
-  onPolishPreparationNotice,
   onReconcileSolapiNotificationResults,
   onRetryGeneratedLessonSave,
   onApplyLessonNotificationPlan,
@@ -14960,7 +14855,6 @@ function TeacherLessonHubV2({
             onOpenReport={onOpenReport}
             onPassMakeupTask={onPassMakeupTask}
             onPolishComment={onPolishComment}
-            onPolishPreparationNotice={onPolishPreparationNotice}
             onReconcileSolapiNotificationResults={onReconcileSolapiNotificationResults}
             onApplyLessonNotificationPlan={onApplyLessonNotificationPlan}
             onSaveRecord={onSaveRecord}
@@ -15775,7 +15669,6 @@ function LessonJournalDetail({
   onOpenReport,
   onPassMakeupTask,
   onPolishComment,
-  onPolishPreparationNotice,
   onReconcileSolapiNotificationResults,
   onApplyLessonNotificationPlan,
   onSaveRecord,
@@ -20058,15 +19951,6 @@ function SettingsCenter({
       title: "시험 후 총평 맞춤법 AI"
     },
     {
-      appendedData: "학생/학부모 대상, 수업일, 출결, 과제 상태, 강사용 수업메모",
-      callSite: "수업 준비 메모의 학생/학부모 안내문 AI 정제 버튼",
-      description: "수업메모를 학생/학부모 안내문으로 바꿀 때 사용합니다.",
-      endpoint: "/api/ai/comment-polish",
-      key: "preparationNotice",
-      serverPrompt: "buildCommentPrompt",
-      title: "수업메모 AI"
-    },
-    {
       appendedData: "공지 제목, 작성 날짜, 공지 본문",
       callSite: "알림관리 공지 작성 영역의 AI 수정 버튼",
       description: "알림관리의 교재/보강/공지 문자 초안을 다듬을 때 사용합니다.",
@@ -22046,10 +21930,6 @@ function StudentPortalV2({
     .filter((record) => record.studentId === selectedStudent?.studentId && record.studentCommentSendStatus)
     .map((record) => ({ ...record, lesson: lessons.find((lesson) => lesson.lessonId === record.lessonId) }))
     .sort((a, b) => String(b.lesson?.date ?? "").localeCompare(String(a.lesson?.date ?? "")));
-  const studentPrepNotices = records
-    .filter((record) => record.studentId === selectedStudent?.studentId && record.prepStudentNotice?.trim())
-    .map((record) => ({ ...record, lesson: lessons.find((lesson) => lesson.lessonId === record.lessonId) }))
-    .sort((a, b) => String(b.lesson?.date ?? "").localeCompare(String(a.lesson?.date ?? "")));
   const studentMaterials = filterVisibleMaterials(materials, selectedStudent, "student");
   const streakDays = calculateStreak(studentHomeworks);
   const stats = calculateHomeworkStats(studentHomeworks);
@@ -22128,7 +22008,6 @@ function StudentPortalV2({
         onSubmitExamPostSubmission,
         onUpdateQuestion: onStudentUpdateQuestion,
         overdueHomeworks,
-        prepNotices: studentPrepNotices,
         questionSaveState,
         questions: selectedStudentQuestions,
         recordsWithLessons: studentRecordsWithLessons,
