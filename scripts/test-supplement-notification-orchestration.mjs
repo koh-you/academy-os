@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   reserveSupplementScheduleNoticeJobRequest,
+  reserveSupplementScheduleNoticesRequest,
   reserveSupplementStudentReminderJobRequest
 } from "../src/domains/notifications/supplementNotificationOrchestration.js";
 
@@ -52,6 +53,36 @@ assert.match((await reserveSupplementStudentReminderJobRequest({
   student: reminderStudent,
   task: reminderTask
 })).message, /11:00이 이미 지나/);
+
+const pairEvents = [];
+const pairResult = await reserveSupplementScheduleNoticesRequest({
+  academyName: "으뜸수학",
+  cancelActiveNotices: async (task) => pairEvents.push(["cancel", task.makeupTaskId]),
+  getNoticeDraft: (_task, target, previous) => `${target}:${previous}`,
+  getScheduleTitle: () => "결석보강",
+  getScheduledAt: () => "2026-07-22T06:00:00.000Z",
+  notificationTemplates: { fixture: true },
+  previousScheduleText: "7/21 15:00",
+  reserveScheduleNoticeJob: async (job, prefix) => {
+    pairEvents.push(["reserve", job.target, prefix]);
+    return { notificationJob: job, status: "scheduled" };
+  },
+  student: reminderStudent,
+  task: reminderTask
+});
+assert.deepEqual(pairEvents, [
+  ["cancel", "makeup-1"],
+  ["reserve", "student", "학생 보충 일정 안내 예약 실패"],
+  ["reserve", "parent", "학부모 보충 일정 안내 예약 실패"]
+]);
+assert.equal(pairResult.scheduledAt, "2026-07-22T06:00:00.000Z");
+assert.equal(pairResult.student.notificationJob.payload.reminderBody, "student:7/21 15:00");
+assert.equal(pairResult.parent.notificationJob.payload.commentBodyOverride, "parent:7/21 15:00");
+assert.equal(pairResult.parent.notificationJob.payload.message, "parent:7/21 15:00");
+assert.equal(pairResult.student.notificationJob.scheduledAt, pairResult.parent.notificationJob.scheduledAt);
+
+assert.equal((await reserveSupplementScheduleNoticesRequest({ task: { taskType: "retest" } })).student.status, "notApplied");
+assert.equal((await reserveSupplementScheduleNoticesRequest({ task: reminderTask })).parent.status, "failed");
 
 const baseJob = {
   notificationJobId: "student-schedule",
