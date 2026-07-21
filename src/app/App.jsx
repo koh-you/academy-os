@@ -8590,6 +8590,7 @@ export function App() {
             homeworks={homeworks}
             lessons={lessons}
             materials={resourceMaterials}
+            makeupTasks={makeupTasks}
             records={records}
             reportSnapshots={reportSnapshots}
             scoreRecords={scoreRecords}
@@ -16531,6 +16532,7 @@ function LessonJournalDetail({
             homeworks={homeworks}
             lessons={lessons}
             materials={materials}
+            makeupTasks={makeupTasks}
             records={records}
             reportSnapshots={[]}
             scoreRecords={[]}
@@ -24873,6 +24875,7 @@ function OverdueHomework({
   homeworks,
   lessons = [],
   materials = [],
+  makeupTasks = [],
   records = [],
   reportSnapshots = [],
   scoreRecords = [],
@@ -25181,6 +25184,7 @@ function OverdueHomework({
             homeworks={homeworks}
             lessons={lessons}
             materials={materials}
+            makeupTasks={makeupTasks}
             records={records}
             reportSnapshots={reportSnapshots}
             scoreRecords={scoreRecords}
