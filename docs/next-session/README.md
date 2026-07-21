@@ -163,7 +163,8 @@ Git 충돌 방지 규칙:
 - 12C에서 `SupplementScheduleChangeConfirmModal`과 항목 fallback·초기 local draft·confirm patch helper를 분리했습니다. 두 저장 버튼은 같은 현재 local patch를 기존 App callback에 넘깁니다.
 - 12D에서 `SupplementHistoryModal`과 날짜/status/query filter view model을 분리했습니다. 전달 순서와 완료 항목 복귀 callback만 유지하며 API·알림 side effect는 없습니다.
 - 12E에서 저장 pill, 개별 예약 control, 학생 11시, 즉시 안내 상태 계산을 `supplementStatus.js`로 분리하고 모든 상태 분기를 fixture로 고정했습니다.
-- 다음은 최신 `origin/main`을 rebase한 뒤 `SupplementStudentModal` 내부의 알림 draft tab/control 표시 조각부터 callback props 기반으로 분리합니다. 남은 사람 gate 3개는 통과로 바꾸지 않습니다.
+- 12F에서 `SupplementNotificationDraftWorkspace`를 callback-only 표시 컴포넌트로 분리했습니다. local draft, 현재 job 표시 계산, 저장·예약·취소는 App이 계속 소유합니다.
+- 다음은 최신 `origin/main`을 rebase한 뒤 개별 Solapi 예약·취소 확인 모달의 표시 JSX만 callback props 기반으로 분리합니다. 남은 사람 gate 3개는 통과로 바꾸지 않습니다.
 
 통과한 11B-1 사람 gate 기록:
 1. 삭제 가능한 미래 보충 task와 통제된 학생/학부모 전화번호를 준비합니다.

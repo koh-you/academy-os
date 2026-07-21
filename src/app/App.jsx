@@ -54,6 +54,7 @@ import { createSupplementSchedulePersistencePlan } from "../domains/supplements/
 import { SupplementPassConfirmModal } from "../domains/supplements/SupplementPassConfirmModal.jsx";
 import { SupplementScheduleChangeConfirmModal } from "../domains/supplements/SupplementScheduleChangeConfirmModal.jsx";
 import { SupplementHistoryModal } from "../domains/supplements/SupplementHistoryModal.jsx";
+import { SupplementNotificationDraftWorkspace } from "../domains/supplements/SupplementNotificationDraftWorkspace.jsx";
 import {
   getSupplementImmediateNoticeSaveStatus,
   getSupplementNotificationControlDisplay,
@@ -23023,28 +23024,6 @@ function SupplementStudentModal({
     setNotificationControlFeedback(null);
   }
 
-  function renderNotificationDraftTab(task, config, activeField) {
-    const job = getSupplementNotificationControlJob(task, notificationJobs, config.controlType);
-    const display = getSupplementNotificationControlDisplayForApp(job);
-    return (
-      <button
-        aria-selected={activeField === config.field}
-        className={`supplementNotificationDraftTab ${display.tone} ${activeField === config.field ? "active" : ""}`}
-        key={config.field}
-        onClick={() => setActiveNotificationDraftFields((current) => ({
-          ...current,
-          [task.makeupTaskId]: config.field
-        }))}
-        role="tab"
-        type="button"
-      >
-        <span className="supplementNotificationControlLight" aria-hidden="true" />
-        <b>{config.label}</b>
-        <span>{display.label}</span>
-      </button>
-    );
-  }
-
   const notificationControlTask = notificationControl
     ? tasks.find((task) => task.makeupTaskId === notificationControl.taskId) ?? null
     : null;
@@ -23213,6 +23192,12 @@ function SupplementStudentModal({
                 activeNotificationDraftConfig.controlType
               );
               const activeNotificationDisplay = getSupplementNotificationControlDisplayForApp(activeNotificationJob);
+              const notificationDraftTabConfigs = supplementNotificationDraftConfigs.map((config) => ({
+                ...config,
+                display: getSupplementNotificationControlDisplayForApp(
+                  getSupplementNotificationControlJob(task, notificationJobs, config.controlType)
+                )
+              }));
               const isScheduleChangeMode = Boolean(task.linkedLessonId);
               const makeupStatus = saveStatus.makeupTask || (draftDiff.length ? "changed" : "saved");
               const lessonStatus = saveStatus.lesson || (hasScheduleDiff ? "changed" : task.linkedLessonId ? "synced" : hasScheduleDraft ? "ready" : "empty");
@@ -23348,51 +23333,22 @@ function SupplementStudentModal({
                     {renderSaveStatusPill("수업일지 일정", lessonStatus)}
                     {renderSaveStatusPill("알림톡 문구 3종", notificationStatus)}
                   </div>
-                  <section className="supplementNotificationDraftWorkspace">
-                    <div className="supplementNotificationDraftHeader">
-                      <div>
-                        <strong>알림톡 문구 편집</strong>
-                        <span>버튼을 순서대로 눌러 학생·학부모·당일 학생 문구를 각각 확인하고 수정합니다.</span>
-                      </div>
-                      <small>각 수정본은 서로 덮어쓰지 않습니다.</small>
-                    </div>
-                    <div className="supplementNotificationDraftTabs" role="tablist" aria-label="보충 알림톡 문구 선택">
-                      {supplementNotificationDraftConfigs.map((config) => (
-                        renderNotificationDraftTab(task, config, activeNotificationDraftField)
-                      ))}
-                    </div>
-                    <label className="notificationDraftField supplementReadableField">
-                      <strong>{activeNotificationDraftConfig.label} 문구</strong>
-                      <span>
-                        {activeNotificationDraftConfig.controlType === "studentReminder"
-                          ? "보강 당일 오전 11시에 학생에게 예약할 문구입니다."
-                          : `${activeNotificationDraftConfig.label} 버튼으로 다음 정각에 예약할 일정 안내 문구입니다.`}
-                      </span>
-                      {activeNotificationDraftIsTeacherFinal ? (
-                        <small className="supplementTeacherFinalNotice">선생님 수정본 · 자동 초안이 다시 덮어쓰지 않습니다.</small>
-                      ) : (
-                        <small className="supplementNotificationAutoDraftNotice">자동 초안 · 수정하면 선생님 최종본으로 저장됩니다.</small>
-                      )}
-                      <textarea
-                        value={activeNotificationDraft}
-                        onChange={(event) => updateTaskDraft(task, activeNotificationDraftField, event.target.value)}
-                      />
-                    </label>
-                    <div className="supplementNotificationDraftActions">
-                      <span className={`supplementNotificationControlState ${activeNotificationDisplay.tone}`}>
-                        <i aria-hidden="true" />
-                        {activeNotificationDisplay.label}
-                      </span>
-                      <button
-                        className="softButton"
-                        disabled={isTaskBusy || draftDiff.length > 0}
-                        onClick={() => openNotificationControl(task, activeNotificationDraftConfig.controlType)}
-                        type="button"
-                      >
-                        {draftDiff.length > 0 ? "수정본 저장 후 예약 확인" : "Solapi 예약·취소 확인"}
-                      </button>
-                    </div>
-                  </section>
+                  <SupplementNotificationDraftWorkspace
+                    activeConfig={activeNotificationDraftConfig}
+                    activeDisplay={activeNotificationDisplay}
+                    activeDraft={activeNotificationDraft}
+                    activeField={activeNotificationDraftField}
+                    configs={notificationDraftTabConfigs}
+                    hasUnsavedChanges={draftDiff.length > 0}
+                    isBusy={isTaskBusy}
+                    isTeacherFinal={activeNotificationDraftIsTeacherFinal}
+                    onChangeDraft={(value) => updateTaskDraft(task, activeNotificationDraftField, value)}
+                    onOpenControl={(controlType) => openNotificationControl(task, controlType)}
+                    onSelectField={(field) => setActiveNotificationDraftFields((current) => ({
+                      ...current,
+                      [task.makeupTaskId]: field
+                    }))}
+                  />
                   <div className={`supplementSendGateNote ${isScheduleChangeMode ? "changeNotice" : "confirmNotice"}`}>
                     <strong>{scheduleGateTitle}</strong>
                     <span>보충 내용 저장: 원 숙제 카드와 알림톡 문구 3종을 저장하고, 발송/예약은 만들지 않습니다.</span>

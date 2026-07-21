@@ -348,6 +348,14 @@
 - 운영 저장 검증: `special_lecture_enrollments` 재조회에서 중3 신초봄은 active 5회, 각 13:00~15:00이고 고3 enrollment는 canceled 0회다. 1~5회차 lessons 모두 중3 ID/13:00~15:00을 포함하고 고3 ID는 없다. 1회차 기존 출결·수업기록은 저장 전후 2건, `notification_jobs`는 0건으로 유지됐다.
 - 사람 gate: 배포 후 클리닉 특강 명단에서 `창일중 · 중3` 신초봄이 1~5회차, 각 13:00~15:00으로 보이는지 확인한다. 잘못 입력한 고3 enrollment는 활성 수강 명단에서 제외되어야 한다. 1회차 수업일지에는 신초봄 행이 추가되되 기존 학생의 출결·시간은 그대로여야 한다.
 - 중단 조건: 올바른 신초봄 원천이 불명확함, 기존 학생이 빠짐, 기존 학생 시간이 바뀜, 출결 record가 자동 생성/변경됨, 알림톡 예약/발송 발생, Supabase 재조회 불일치인데 완료 표시, 새로고침 후 공통 시간이 사라짐.
+## 2026-07-21 P1. 12F 보충 알림 draft workspace 표시 분리
+
+- 상태: 학생·학부모 일정 및 당일 학생 11시 탭, 현재 문구 textarea, 선생님 최종본 안내, 예약 상태 배지와 예약·취소 확인 진입 버튼을 `SupplementNotificationDraftWorkspace.jsx`로 분리했다.
+- 동작 보존: App이 local draft, 활성 필드, 현재 `notification_jobs` 표시 상태를 계산해 전달하며 편집·탭 전환·control 열기 callback도 계속 소유한다. 저장 전 변경이 있으면 예약 확인 버튼을 막는 계약과 세 수정본 독립성은 그대로다.
+- 저장 원천/side effect: 새 컴포넌트는 API, React hook, `notificationJobs`, Supabase, Solapi를 소유하지 않는다. 실제 저장·예약·취소와 피드백 상태는 모두 App에 남아 있다.
+- 검증/gate: production check 88/88b-6/88d-1/88e가 분리 파일까지 기존 편집 원천·예약 연결·최종본 우선 계약을 검사한다. 추가 사람 gate나 실제 유료 호출은 없다.
+- 다음 단위: 최신 `origin/main` rebase 후 개별 Solapi 예약·취소 확인 모달의 표시 JSX만 callback-only 컴포넌트로 분리한다.
+
 ## 2026-07-21 P1. 12E 보충 저장·예약 상태 helper 분리
 
 - 상태: 저장 pill label, 개별 예약 control display, 학생 11시 save status, 즉시 안내 save status를 `supplementStatus.js`로 분리했다.
