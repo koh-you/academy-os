@@ -133,6 +133,17 @@
 - 배포 확인: `main` 커밋 `bfc0431a`를 푸시했다. Vercel 운영 번들 `/assets/main-DKQ8T7hO.js`에서 세 새 버튼명과 `Solapi 예약 취소` 모달 문구를 확인했다. Render는 기존 학생 FK를 사용한 고유 `forceDryRun` probe에서 `status: dry_run`, `provider: solapi`, `reservationPending: false`를 반환해 새 pending claim 완료 로직이 반영됐음을 확인했고, probe row는 즉시 삭제했다. 실제 Solapi 예약/발송은 생성하지 않았다.
 - 사람 검토 gate: 배포 후 `보충관리 -> 결석보강 -> 김예나 7/15 결석`을 열어 세 버튼이 꺼져 있는지 확인한다. 각 버튼을 열어 일정 `7/22(수) 13:00`, 대상 번호, 실제 문구를 확인한 뒤 필요한 알림만 예약한다. 예약 후 불이 켜지고 `알림관리`의 예약 행과 Solapi 예약이 일치하는지, 취소 후 불이 꺼지고 실제 Solapi 그룹도 취소되는지 확인한다. 날짜가 7/21로 보이거나, 한 버튼이 다른 대상까지 함께 예약하거나, 불과 알림관리/Solapi 상태가 다르면 즉시 중단한다.
 
+### 2026-07-21 P0. 보충 자동 초안의 선생님 수정본 원본화
+
+- 사용자 문제: 자동 생성된 `보강 때 확인할 지난 숙제`를 지우고 `보충 내용 저장`을 눌러도 원 숙제 초안이 다시 연결됐다. 자동 초안을 선생님이 수정하거나 삭제하면 그 수정본이 최종 원본이어야 한다.
+- 운영 read-only 확인: 김예나 7/17 결석보강 task의 Supabase `makeup_tasks.note`에는 이미 `supplementHomeworkNote: ""`, 일정 `2026-07-24 13:00`, 수정된 알림 문구가 저장돼 있었다. 저장 실패가 아니라 `hydrateSupplementTask`가 빈 문자열을 미입력으로 간주해 원 수업 숙제를 다시 seed한 화면 재구성 오류였다.
+- 수정: `supplementHomeworkNote` 속성이 저장돼 있으면 빈 문자열도 그대로 읽고 원 수업 seed를 재적용하지 않는다. `supplementHomeworkNote`와 `notificationDraft`를 사용자가 편집하면 `supplementTeacherEditedFields`를 task metadata에 저장해 선생님 최종본으로 구분한다. 이후 다른 필드 변경, 모달 재진입, 새로고침에서도 자동 초안은 이 필드를 덮어쓰지 않는다. 프론트 알림 미리보기·일정 안내 초안과 서버 수업 알림의 보충 문장도 같은 최종본 판정을 사용해, 지운 숙제 내용이 `sourcePreviousHomework/sourceLabel`에서 다시 붙지 않게 했다.
+- 빈 문구 안전장치: 선생님이 알림톡 문구 전체를 비운 것도 최종본으로 보존하지만, 빈 알림톡을 Solapi에 예약하지는 않는다. 당일 학생 11시 알림톡 제어 모달은 문구 입력·저장을 요구하고, 일정 통합 저장 경로도 해당 학생 예약을 `notApplied`로 건너뛴다.
+- 저장 검증/UI: `보충 내용 저장`은 POST 성공만으로 완료하지 않고 `/api/makeup-tasks`를 `cache: no-store`로 다시 조회해 숙제 확인 내용, 알림 문구, 편집 원본 marker, 일정·상태가 요청값과 같은지 대조한 뒤에만 저장 완료 처리한다. 불일치/조회 실패 시 local draft를 유지한다. 편집 영역에는 `선생님 수정본` 배지를 표시한다.
+- 저장 원천/side effect: local draft는 `taskDrafts`, 최종 원천은 Supabase `makeup_tasks.note`의 필드와 `supplementTeacherEditedFields`다. `notification_jobs`와 Solapi 예약/발송은 이번 수정·자동검증에서 건드리지 않았다. 스키마 변경과 SQL 적용은 없다.
+- AI 검증: 운영 row read-only 원인 확인, `git diff --check`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 340/340 통과.
+- 사람 검토 gate: 배포 후 김예나 7/17 결석보강에서 `보강 때 확인할 지난 숙제`를 비우고 `보충 내용 저장`을 누른다. 저장 완료와 `선생님 수정본` 표시를 확인하고 모달 닫기·재열기·전체 새로고침 후에도 빈 값인지 확인한다. 이어 알림톡 문구 한 줄을 수정해 저장하고 같은 방식으로 유지되는지 확인한다. 원 숙제가 다시 채워지거나 알림 문구가 자동본으로 돌아오거나 저장 완료 뒤 새로고침에서 달라지면 즉시 중단한다.
+
 ### 2026-07-20 P0-1. 수업일지 학생 명단 가나다순 통일
 
 - 사용자 요청: 수업일지 학생 명단을 생성·추가·신청 순서가 아닌 이름 가나다순으로 통일한다.

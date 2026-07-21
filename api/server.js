@@ -1618,7 +1618,12 @@ function supplementMethodLabelForNotification(task = {}) {
 
 function getSupplementTaskSourceLabelForNotification(task = {}) {
   if (task.taskType === "homework_makeup") {
-    return task.supplementHomeworkNote || task.sourceLabel || "";
+    const hasSavedHomeworkNote =
+      Object.prototype.hasOwnProperty.call(task, "supplementHomeworkNote") ||
+      (Array.isArray(task.supplementTeacherEditedFields) && task.supplementTeacherEditedFields.includes("supplementHomeworkNote"));
+    return hasSavedHomeworkNote
+      ? normalizeNotificationText(task.supplementHomeworkNote || "")
+      : task.sourceLabel || "";
   }
   return task.sourceLabel || "";
 }

@@ -14431,6 +14431,19 @@ textarea.profileEditInput {
   line-height: 1.45;
 }
 
+.supplementTeacherFinalNotice {
+  align-items: center;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 999px;
+  color: #047857;
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 900;
+  justify-self: start;
+  padding: 4px 8px;
+}
+
 .supplementHomeworkField textarea,
 .supplementMemoField textarea,
 .notificationDraftField textarea {
