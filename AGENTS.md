@@ -61,7 +61,7 @@
    - 순서: `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`.
    - 우선순위: 위험이 낮은 helper/config/API/client/component부터 진행하고, `LessonJournalDetail`, 출결, Solapi 예약, 보충관리처럼 저장/발송 side effect가 큰 영역은 충분한 gate 이후 진행한다.
    - 기준 로드맵: 아래 `App.jsx Refactoring Roadmap - 18 Units`를 다음 세션의 리팩터링 후보 목록으로 사용한다. 이미 일부 분리된 항목도 남은 하위 컴포넌트/헬퍼가 있으면 같은 묶음 안에서 계속 쪼갠다.
-   - 현재 이어받을 지점: 10번 포털 표시 구조 audit와 11A, 11B-1~13을 완료했다. OS row/Solapi 사람 gate도 통과했고 승인된 미배정 고태영 데이터로 실제 예약·대조·취소까지 확인했다. 12A~12Q와 12R-1~2를 완료했다. 12R-1은 local draft 전환·payload를, 12R-2는 dirty 보존·원천 reseed·삭제 정리 collection sync를 `supplementTaskDraft.js` 순수 경계로 옮겼다. 학생 포털 실제 쓰기와 교사 bearer/Storage gate는 별도 보류다. 다음은 local draft React state controller 또는 실제 저장 action 소유권을 한 단위씩 옮기고 고태영 운영 검증 gate를 통과해야 한다.
+   - 현재 이어받을 지점: 10번 포털 표시 구조 audit와 11A, 11B-1~13, 12A~12Q, 12R-1~3을 완료했다. 12R-1~2의 순수 draft 전환/sync 위에 12R-3 `useSupplementTaskDraftController.js`가 draft 전용 state/effect와 get/update/mark/build를 소유한다. 저장 상태와 task/lesson/notification/Solapi action은 App에 남아 있다. 학생 포털 실제 쓰기와 교사 bearer/Storage gate는 별도 보류다. 다음은 보충 내용 저장 action을 첫 실제 action 소유권 단위로 옮기고 고태영 저장·재조회 검증을 진행한다.
    - 보류된 사람 gate: 2026-07-21 사용자 지시로 학생 숙제 완료, 질문 CRUD, 시험 후 제출의 실제 학생 테스트 결과를 보류했다. 시험 후 제출은 실제 대상 학생의 입력/파일 선택, Storage 업로드, 제출 저장, 새로고침·재로그인 유지, 교사 확인 저장을 나중에 확인한다. 보류는 통과 판정이 아니며 회귀 발견 시 즉시 별도 수정한다.
    - 확인된 보안 후속 gate: 교사 로그인은 아직 서버 서명 bearer token을 발급하지 않아 시험 후 제출의 교사 확인 전용 API도 기존 교사 관리 API와 같은 인증 공백이 있다. Storage 파일 열기 API도 경로를 아는 요청자의 교사/학생 소유권을 검증하지 않는다. 이 둘은 표시 shell 분리와 섞지 말고 `교사 세션 인증 + 파일 열람 권한` 별도 고위험 gate로 진행한다.
    - 확인된 후속 이슈: 학생 수업 준비 안내 목록은 현재 `prepStudentNotice` 존재 여부만 필터하고 `prepStudentVisible`을 확인하지 않는다. 이번 리팩터링에서는 기존 동작을 보존했으며, 공개 플래그 계약을 별도 기능 작업에서 확인해야 한다.

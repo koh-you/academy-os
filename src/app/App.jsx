@@ -59,8 +59,8 @@ import { createSupplementNotificationControlViewModel } from "../domains/supplem
 import { SupplementTaskCard } from "../domains/supplements/SupplementTaskCard.jsx";
 import { createSupplementTaskCardViewModel } from "../domains/supplements/supplementTaskCardModel.js";
 import { SupplementStudentModalShell } from "../domains/supplements/SupplementStudentModalShell.jsx";
+import { useSupplementTaskDraftController } from "../domains/supplements/useSupplementTaskDraftController.js";
 import {
-  buildSupplementTaskWithDraft as buildSupplementTaskWithDraftModel,
   createPersistableSupplementTask,
   createSupplementTaskDraft as createSupplementTaskDraftModel,
   getSupplementHomeworkNoteValue,
@@ -68,12 +68,9 @@ import {
   getSupplementNotificationDraftFieldForControl,
   getSupplementPersistedEditFingerprint,
   getSupplementTaskDraftDiff as getSupplementTaskDraftDiffModel,
-  getSupplementTaskSourceVersion,
   isSupplementTeacherEditedField,
   supplementNotificationDraftConfigs,
-  supplementTeacherFinalFields,
-  syncSupplementTaskDraftEntries,
-  updateSupplementTaskDraftEntry
+  supplementTeacherFinalFields
 } from "../domains/supplements/supplementTaskDraft.js";
 import {
   getSupplementImmediateNoticeSaveStatus,
@@ -22537,34 +22534,25 @@ function SupplementStudentModal({
   const [passConfirmTask, setPassConfirmTask] = useState(null);
   const [scheduleConfirmTask, setScheduleConfirmTask] = useState(null);
   const [busyTaskId, setBusyTaskId] = useState("");
-  const [taskDrafts, setTaskDrafts] = useState({});
   const [taskSaveStatus, setTaskSaveStatus] = useState({});
   const [activeNotificationDraftFields, setActiveNotificationDraftFields] = useState({});
   const [notificationControl, setNotificationControl] = useState(null);
   const [notificationControlBusy, setNotificationControlBusy] = useState(false);
   const [notificationControlFeedback, setNotificationControlFeedback] = useState(null);
-  const taskDraftSyncKey = tasks.map((task) => `${task.makeupTaskId}:${getSupplementTaskSourceVersion(task)}`).join("||");
-
-  useEffect(() => {
-    setTaskDrafts((current) => syncSupplementTaskDraftEntries({
-      current,
-      notificationTemplates: normalizedNotificationTemplates,
-      student,
-      tasks
-    }, supplementTaskDraftDependencies));
-  }, [normalizedNotificationTemplates, student, taskDraftSyncKey, tasks]);
+  const {
+    buildTaskWithDraft,
+    getTaskDraftState,
+    markTaskDraftSaved,
+    updateTaskDraftValues
+  } = useSupplementTaskDraftController({
+    dependencies: supplementTaskDraftDependencies,
+    notificationTemplates: normalizedNotificationTemplates,
+    student,
+    tasks
+  });
 
   function showFeedback(title, message, tone = "success") {
     setFeedback({ title, message, tone });
-  }
-
-  function getTaskDraftState(task) {
-    return taskDrafts[task.makeupTaskId] ?? {
-      dirty: false,
-      editedFields: [],
-      sourceVersion: getSupplementTaskSourceVersion(task),
-      values: createSupplementTaskDraft(task, student, normalizedNotificationTemplates)
-    };
   }
 
   function setTaskSaveStatusPatch(taskId, patch) {
@@ -22579,48 +22567,12 @@ function SupplementStudentModal({
 
   function updateTaskDraft(task, field, value) {
     if (!task?.makeupTaskId) return;
-    setTaskDrafts((current) => {
-      const existing = current[task.makeupTaskId];
-      return {
-        ...current,
-        [task.makeupTaskId]: updateSupplementTaskDraftEntry({
-          existing,
-          field,
-          notificationTemplates: normalizedNotificationTemplates,
-          student,
-          task,
-          value
-        }, supplementTaskDraftDependencies)
-      };
-    });
+    updateTaskDraftValues(task, field, value);
     setTaskSaveStatusPatch(task.makeupTaskId, {
       lesson: ["scheduledDate", "scheduledTime"].includes(field) ? "changed" : taskSaveStatus[task.makeupTaskId]?.lesson,
       makeupTask: "changed",
       notificationDraft: supplementTeacherFinalFields.has(field) ? "changed" : taskSaveStatus[task.makeupTaskId]?.notificationDraft
     });
-  }
-
-  function markTaskDraftSaved(taskId, savedTask) {
-    const sourceVersion = getSupplementTaskSourceVersion(savedTask);
-    setTaskDrafts((current) => ({
-      ...current,
-      [taskId]: {
-        dirty: false,
-        editedFields: [],
-        sourceVersion,
-        values: createSupplementTaskDraft(savedTask, student, normalizedNotificationTemplates)
-      }
-    }));
-  }
-
-  function buildTaskWithDraft(task) {
-    const taskDraftState = getTaskDraftState(task);
-    return buildSupplementTaskWithDraftModel({
-      notificationTemplates: normalizedNotificationTemplates,
-      student,
-      task,
-      taskDraftState
-    }, supplementTaskDraftDependencies);
   }
 
   async function handleSaveTask(task) {
