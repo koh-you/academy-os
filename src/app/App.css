@@ -7463,10 +7463,9 @@ button:disabled {
   border-radius: 8px;
   color: #334155;
   display: grid;
-  gap: 5px;
-  min-height: 74px;
-  padding: 14px;
-  text-align: left;
+  min-height: 42px;
+  padding: 9px 12px;
+  text-align: center;
 }
 
 .noticeModeTabs button.active {
@@ -7476,13 +7475,7 @@ button:disabled {
 }
 
 .noticeModeTabs strong {
-  font-size: 18px;
-}
-
-.noticeModeTabs span {
-  color: #64748b;
-  font-size: 13px;
-  font-weight: 800;
+  font-size: 15px;
 }
 
 .noticeComposerGrid {
@@ -7686,6 +7679,15 @@ button:disabled {
   background: #1d4ed8;
   border-color: #1d4ed8;
   color: #ffffff;
+}
+
+.noticeWorkspaceTabs {
+  margin: 0;
+}
+
+.noticeWorkspaceTabs button {
+  font-size: 12px;
+  padding: 7px 10px;
 }
 
 .specialLecturePanel {

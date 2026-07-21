@@ -10088,7 +10088,7 @@ function NotificationCenter({
   onSaveSpecialLectureEnrollments,
   onSaveSpecialLectureGuides,
   onUpdateSpecialLectureApplication,
-  pageDescription = "수업일지 밖에서 필요한 연락을 한 화면에서 작성하고, 수신 범위만 선택해 발송합니다.",
+  pageDescription = "",
   pageTitle = "알림관리",
   showSpecialLectureTab = true,
   specialLectureApplications = [],
@@ -10100,6 +10100,7 @@ function NotificationCenter({
 }) {
   const [activeNotificationTab, setActiveNotificationTab] = useState(showSpecialLectureTab ? initialNotificationTab : "notice");
   const [activeSpecialLectureWorkspaceTab, setActiveSpecialLectureWorkspaceTab] = useState("roster");
+  const [activeNoticeWorkspace, setActiveNoticeWorkspace] = useState("compose");
   const [classFilter, setClassFilter] = useState("all");
   const [deletingJobId, setDeletingJobId] = useState("");
   const [dispatchMessage, setDispatchMessage] = useState("");
@@ -10167,10 +10168,10 @@ function NotificationCenter({
     draft: "정리함"
   };
   const noticeRecipientModes = [
-    { id: "selected", label: "선택", description: "체크한 학생에게 발송" },
-    { id: "all", label: "전체", description: "선택 학생의 학부모+학생" },
-    { id: "parent", label: "학부모", description: "선택 학생의 학부모" },
-    { id: "student", label: "학생", description: "선택 학생에게만" }
+    { id: "selected", label: "선택" },
+    { id: "all", label: "전체" },
+    { id: "parent", label: "학부모" },
+    { id: "student", label: "학생" }
   ];
   const activeStudents = useMemo(
     () => students.filter((student) => !isNoticeWithdrawnStudent(student)),
@@ -10298,15 +10299,14 @@ function NotificationCenter({
     setNoticeTitle(normalizedGuide.title || "특강 안내");
     setNoticeBody(noticeBodyText);
     setActiveNotificationTab("notice");
+    setActiveNoticeWorkspace("compose");
     setDispatchMessage("특강 안내문을 저장한 뒤 공지 발송 화면에 반영했습니다. 수신 대상을 확인한 뒤 예약 발송 또는 즉시 발송으로 진행하세요.");
   }
 
   function selectJobFilter(nextFilter) {
     setJobFilter(nextFilter);
+    setActiveNoticeWorkspace("history");
     setIsNoticeHistoryOpen(true);
-    window.setTimeout(() => {
-      document.querySelector(".notificationQueuePanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 0);
   }
 
   function upsertLocalNoticeJob(job) {
@@ -10625,7 +10625,7 @@ function NotificationCenter({
       <div className="pageTop">
         <div>
           <h1>{pageTitle}</h1>
-          <p className="muted">{pageDescription}</p>
+          {pageDescription ? <p className="muted">{pageDescription}</p> : null}
         </div>
         <div className="pageActions">
           <button className="softButton" disabled={isNotificationJobsLoading} onClick={onRefresh} type="button">
@@ -10704,6 +10704,35 @@ function NotificationCenter({
         />
       ) : (
         <>
+      <div className="notificationSectionTabs noticeWorkspaceTabs" role="tablist" aria-label="알림관리 작업 구분">
+        <button
+          aria-selected={activeNoticeWorkspace === "compose"}
+          className={activeNoticeWorkspace === "compose" ? "active" : ""}
+          onClick={() => setActiveNoticeWorkspace("compose")}
+          role="tab"
+          type="button"
+        >
+          개별 발송
+        </button>
+        {[
+          ["scheduled", "예약", scheduledJobs.length],
+          ["sent", "발송 완료", sentJobs.length],
+          ["pending", "확인 필요", pendingJobs.length],
+          ["all", "전체 기록", managedNotificationJobs.length]
+        ].map(([id, label, count]) => (
+          <button
+            aria-selected={activeNoticeWorkspace === "history" && jobFilter === id}
+            className={activeNoticeWorkspace === "history" && jobFilter === id ? "active" : ""}
+            key={id}
+            onClick={() => selectJobFilter(id)}
+            role="tab"
+            type="button"
+          >
+            {label} {count}건
+          </button>
+        ))}
+      </div>
+      {activeNoticeWorkspace === "compose" ? (
       <section className="notificationPanel noticeComposerPanel">
         <div className="sectionHeader slim">
           <div>
@@ -10724,7 +10753,6 @@ function NotificationCenter({
                   type="button"
                 >
                   <strong>{mode.label}</strong>
-                  <span>{mode.description}</span>
                 </button>
               ))}
             </div>
@@ -10854,21 +10882,8 @@ function NotificationCenter({
           </div>
         </div>
       </section>
-
-      <div className="notificationStatsGrid noticeStatsGrid">
-        {[
-          ["scheduled", "예약", scheduledJobs.length, "전체 알림 예약 대기"],
-          ["sent", "발송 완료", sentJobs.length, "전체 알림 발송 완료"],
-          ["pending", "확인 필요", pendingJobs.length, "응답 지연·지난 예약"]
-        ].map(([id, label, count, detail]) => (
-          <button className={jobFilter === id ? "active" : ""} key={id} onClick={() => selectJobFilter(id)} type="button">
-            <span>{label}</span>
-            <strong>{count}건</strong>
-            <small>{detail}</small>
-          </button>
-        ))}
-      </div>
-
+      ) : null}
+      {activeNoticeWorkspace === "history" ? (
       <section className="notificationPanel notificationQueuePanel">
         <div className="sectionHeader slim">
           <div>
@@ -10991,6 +11006,7 @@ function NotificationCenter({
           </div>
         )}
       </section>
+      ) : null}
         </>
       )}
     </section>
