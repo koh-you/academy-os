@@ -309,6 +309,7 @@
 - 저장 원천: 직접 원천은 계속 Supabase `lesson_student_records.preparation_memo`, `prep_student_visible`, `prep_parent_visible`, 이전 메모 확인 세 필드다. 모달 local draft, 명시적 저장, API 완료와 재조회 대조, 실패 시 draft/모달 유지 흐름은 변경하지 않았다.
 - 외부 영향: 표시 JSX/CSS와 회귀검사만 수정했다. 학생·학부모 최종문구, 숙제 후속처리, portal, app_state, notification job, Solapi 예약·발송·취소를 변경하거나 실행하지 않았다. 새 SQL은 없다.
 - AI 검증: 기존 상태별 버튼 class가 다시 생기지 않고 `prepMemoStatusList`가 JSX/CSS에서 제거됐으며, 작성됨/이전 확인 신호와 전체 `aria-label` 상태가 존재함을 회귀검사로 고정했다. `git diff --check`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 365/365, `npm run build`를 통과했다. 기존 Vite 500KB chunk 경고만 남는다.
+- 배포 확인: 운영 Vercel 번들 `/assets/main-Qma_dYkE.js`에서 `prepMemoWrittenMark`, `prepMemoAttentionMark`, 작성창 대상 접근성 설명이 존재하고 기존 `prepMemoStatusList`는 사라진 것을 확인했다.
 - 사람 검토 gate: 운영 수업일지에서 메모 없음, 현재 메모 작성됨, 직전 또는 참고 메모 확인 필요인 학생을 각각 본다. 모든 버튼은 같은 중립색이어야 하며 메모 작성 학생만 `✓`, 확인할 과거 메모가 있는 학생만 `이전 확인`이 버튼 안에 보여야 한다. 버튼 아래에는 3행 상태 문구가 없어야 한다. 버튼을 열면 기존 강사용 메모, 직전/참고 메모, 확인 후 숨기기, 학생·학부모 작성창 가져오기 체크와 저장 상태가 그대로 보여야 한다. 실제 발송·예약은 실행하지 않는다.
 - 중단 조건: 상태별로 버튼 전체 색이 달라짐, 모든 행에 `이전 확인`이 보임, 저장된 메모인데 `✓`가 없음, 확인 후 숨겼는데 배지가 남음, 작성창 체크/수업메모 저장값이 바뀜, 버튼 클릭만으로 저장/API/알림 side effect가 발생하면 목표 완료 판정을 중단한다.
 
