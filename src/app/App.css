@@ -11212,8 +11212,46 @@ textarea {
   color: #3730a3;
 }
 
-.prepMemoStatusText {
-  line-height: 1.45;
+.prepMemoStatusList {
+  display: grid;
+  gap: 4px;
+  margin: 7px 0 0;
+  width: 100%;
+}
+
+.prepMemoStatusList > div {
+  align-items: center;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: 38px minmax(0, 1fr);
+}
+
+.prepMemoStatusList dt,
+.prepMemoStatusList dd {
+  margin: 0;
+}
+
+.prepMemoStatusList dt {
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.prepMemoStatusList dd {
+  background: #f1f5f9;
+  border-radius: 999px;
+  color: #334155;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.2;
+  padding: 3px 6px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.prepMemoStatusList dd.needsAttention {
+  background: #fff7ed;
+  color: #9a3412;
 }
 
 .modalCard.preparationMemoModal {

@@ -16560,21 +16560,22 @@ function LessonJournalDetail({
             const referencePreparationMemo = referenceRecord?.preparationMemo?.trim() ?? "";
             const pendingHomeworkFollowup = getHomeworkFollowupSummaryFromMemo(previousPreparationMemo || referencePreparationMemo);
             const hasCheckedPriorPrepMemo = Boolean(previousMemoContext.acknowledgedMemoCutoffDate);
-            const currentMemoStatus = record.preparationMemo?.trim() ? "현재 메모 작성됨" : "현재 메모 미작성";
+            const currentMemoStatus = record.preparationMemo?.trim() ? "작성됨" : "미작성";
             const priorMemoStatus = previousPreparationMemo
-              ? "직전 메모 확인 필요"
+              ? "직전 확인 필요"
               : referencePreparationMemo
-              ? "참고 메모 확인 필요"
+              ? "참고 확인 필요"
               : hasCheckedPriorPrepMemo
-              ? "이전 메모 확인 완료"
-              : "직전 메모 없음";
+              ? "확인 완료"
+              : "없음";
+            const priorMemoNeedsAttention = Boolean(previousPreparationMemo || referencePreparationMemo);
             const memoAudienceStatus = record.prepStudentVisible && record.prepParentVisible
-              ? "작성창 학생·학부모 가져오기"
+              ? "학생 + 학부모"
               : record.prepStudentVisible
-              ? "작성창 학생 가져오기"
+              ? "학생"
               : record.prepParentVisible
-              ? "작성창 학부모 가져오기"
-              : "작성창 가져오기 안 함";
+              ? "학부모"
+              : "가져오지 않음";
             const parentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "parent");
             const studentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "student");
             const parentCommentState = getCommentButtonState(record.teacherComment, parentCommentSendStatus);
@@ -16637,9 +16638,20 @@ function LessonJournalDetail({
                   >
                     수업메모
                   </button>
-                  <small className="prepMemoStatusText">
-                    {[currentMemoStatus, priorMemoStatus, memoAudienceStatus].join(" · ")}
-                  </small>
+                  <dl className="prepMemoStatusList">
+                    <div>
+                      <dt title="현재 수업메모">현재</dt>
+                      <dd>{currentMemoStatus}</dd>
+                    </div>
+                    <div>
+                      <dt title="이전 수업메모">이전</dt>
+                      <dd className={priorMemoNeedsAttention ? "needsAttention" : ""}>{priorMemoStatus}</dd>
+                    </div>
+                    <div>
+                      <dt title="알림톡 작성창으로 가져올 대상">작성창</dt>
+                      <dd>{memoAudienceStatus}</dd>
+                    </div>
+                  </dl>
                 </div>
                 <button
                   className={`attendanceBadge attendance-${attendanceDisplay.statusClass ?? record.attendanceStatus ?? "pending"}`}
