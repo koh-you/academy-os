@@ -1873,7 +1873,7 @@ function getProviderMessageId(result) {
   );
 }
 
-function getProviderRenderedMessageText(result = {}) {
+function getProviderRenderedMessageTextFromResponse(result = {}) {
   const collections = [
     result?.response?.messageList,
     result?.response?.messages,
@@ -1888,6 +1888,25 @@ function getProviderRenderedMessageText(result = {}) {
         : [];
     const renderedText = messages.find((message) => typeof message?.text === "string")?.text;
     if (renderedText) return renderedText.trim();
+  }
+  return "";
+}
+
+async function getProviderRenderedMessageText(result = {}) {
+  const responseText = getProviderRenderedMessageTextFromResponse(result);
+  if (responseText || result?.dryRun) return responseText;
+
+  const groupId = getProviderMessageId(result);
+  if (!groupId) return "";
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const listed = await listSolapiMessages({ groupId, limit: 10 });
+      const providerText = String(listed.messages?.find((message) => typeof message?.text === "string")?.text ?? "").trim();
+      if (providerText) return providerText;
+    } catch {
+      // The reservation itself succeeded; keep its local preview if the provider read-back is temporarily unavailable.
+    }
+    if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 250));
   }
   return "";
 }
@@ -2775,7 +2794,7 @@ async function reserveNotificationJobInSolapi(job, { forceDryRun = false, reason
 
   const result = await sendScheduledNotificationJobToSolapi(reservingJob, { forceDryRun });
   const status = result?.dryRun ? "dry_run" : "scheduled";
-  const providerPreviewBody = getProviderRenderedMessageText(result);
+  const providerPreviewBody = await getProviderRenderedMessageText(result);
   const latest = await getNotificationJob(nextJob.notificationJobId);
   if (latest.notificationJob?.status === "canceled") {
     const reservedGroupId = getProviderMessageId(result);
