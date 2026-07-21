@@ -36,8 +36,9 @@
 4. 완료: 저장 pill·예약 control·학생 11시·즉시 안내 상태 helper를 분리했다.
 5. 완료: `SupplementStudentModal` 내부의 알림 draft workspace 표시 조각을 분리했다.
 6. 완료: 개별 Solapi 예약·취소 확인 모달의 표시 JSX를 callback-only 컴포넌트로 분리했다.
-7. 다음: task 카드의 원천 맥락·일정 입력·상태 표시 중 callback-only 조각을 하나씩 분리한다.
-8. `SupplementStudentModal` 전체와 실제 저장·예약 orchestration은 위 조각 분리 이후 별도 gate로 판단한다.
+7. 완료: task 카드의 원 숙제·원 결석 수업 맥락과 확인용 숙제 읽기 카드를 분리했다.
+8. 다음: 방법·날짜·시간 local draft 입력 또는 변경 diff·상태 표시를 callback-only 조각으로 분리한다.
+9. `SupplementStudentModal` 전체와 실제 저장·예약 orchestration은 위 조각 분리 이후 별도 gate로 판단한다.
 
 ## 12B 구현 결과 — 완료 확인 모달
 
@@ -76,6 +77,12 @@
 - App이 task/job/config와 마스킹 번호·시각·job status·preview label을 계산해 전달하고 실제 action callback과 busy/feedback state도 계속 소유한다.
 - 취소·실패 이력은 현재 저장 문구로 다시 만들고, 현재 예약 문구와 저장 수정본이 다르면 취소 후 재예약 안내를 표시하는 기존 계약을 유지한다.
 - 새 모달은 hook/API/`notification_jobs`/Supabase state를 직접 소유하지 않는다.
+
+## 12H 구현 결과 — task 원천 맥락 읽기 카드
+
+- 숙제보충 원 숙제의 배정일·마감·제목, 결석보강 원 수업의 날짜·교재·수업 내용·지난/다음 숙제를 `SupplementTaskSourceContext.jsx`로 옮겼다.
+- 하단의 보강/등원 때 확인할 숙제 카드와 유형별 읽기 전용 안내도 같은 원천 표시 경계에 포함했다.
+- App이 기존에 계산하던 값을 그대로 전달하고, 새 컴포넌트는 input·callback·hook·API·알림 side effect 없이 표시만 한다.
 
 ## 즉시 중단 조건
 
