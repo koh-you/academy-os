@@ -51,7 +51,7 @@ E:\academy-os 작업을 이어가겠습니다.
    - 9번 `test manager`, 10번 `student-parent portals` 읽기 전용 표시와 학생 쓰기 단위 세 개를 완료했습니다. 숙제 완료·질문 CRUD·시험 후 제출은 학생 bearer session 소유권, 전용 API, Supabase 재조회, local draft 보호와 패널 내부 상태를 사용합니다.
    - 실제 학생 사람 gate는 2026-07-21 사용자 지시로 결과 보류했습니다. 숙제 완료와 질문 추가/상태/삭제의 저장·새로고침 유지·강사 미리보기 차단은 미통과가 아니라 미실시 상태로 계속 기록합니다.
    - 10번 `student-parent portals` 표시 구조 리팩터링은 완료 audit까지 끝냈습니다. 학생 쓰기 사람 gate와 교사 bearer/Storage 권한 보안 gate는 별도 보류입니다.
-   - 11번 `supplement job builders` inventory는 `docs/refactor-supplement-job-builders-inventory-2026-07-21.md`에 있습니다. 다음은 예약/취소 side effect를 옮기지 않고 순수 문구·시각·ID·payload builder만 분리하는 11A입니다.
+   - 11번 `supplement job builders` inventory는 `docs/refactor-supplement-job-builders-inventory-2026-07-21.md`에 있습니다. 11A 첫 단위로 예약시각·ID·job payload builder를 `src/domains/notifications/supplementJobBuilders.js`로 분리하고 deterministic fixture를 `npm run test:production`에 연결했습니다. 다음은 예약/취소 side effect를 옮기지 않고 현재 job selector만 분리하는 11A-2입니다.
 5. Solapi 특강 템플릿 검수 후 연결
    - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인합니다.
    - 검수 완료 전에는 임시 특강 알림톡 구조를 유지합니다.
@@ -154,6 +154,6 @@ App.jsx 리팩터링 18개 기준 로드맵:
 - 10번 포털의 세 학생 쓰기 단위는 저장 신뢰성 보강을 완료했습니다. 숙제 완료, 질문 CRUD, 시험 후 제출이 각각 학생 bearer session 소유권, 전용 API, Supabase 재조회, 패널 내부 상태, 실패 시 draft 보호를 사용합니다. 시험 후 제출은 Storage 전부 성공 후에만 `app_state.examPostSubmissions`를 만들며 부분 실패 시 성공 업로드분을 정리합니다.
 - 사람 검수는 사용자 지시로 보류 상태입니다. 숙제 완료·질문 CRUD·시험 후 제출의 실제 학생 저장/새로고침/재로그인/강사 미리보기 차단과 교사 확인 저장을 나중에 검수해야 하며, 보류는 통과가 아닙니다.
 - 10번 `student-parent portals` 표시 구조 리팩터링은 완료 audit까지 끝났습니다. shell은 화면 조합만 담당하고 `StudentPortalV2` controller가 파생 데이터·상태·쓰기 권한/callback을 계속 소유합니다. 교사 확인 API와 시험지 Storage 열기 권한은 별도 고위험 gate입니다.
-- 다음 리팩터링 시작점은 `docs/refactor-supplement-job-builders-inventory-2026-07-21.md`의 11A입니다. 순수 문구·시각·ID·payload builder만 분리하고 `/api/notification-jobs/*`, React 상태, Supabase, Solapi 예약/취소는 옮기지 마세요.
+- 다음 리팩터링 시작점은 `docs/refactor-supplement-job-builders-inventory-2026-07-21.md`의 11A-2입니다. 현재 `notificationJobs`에서 학생 11시·학생 일정·학부모 일정 job을 고르는 순수 selector만 분리하고 `/api/notification-jobs/*`, React 상태, Supabase, Solapi 예약/취소는 옮기지 마세요.
 - 최신 기능 커밋은 작업 시작 시 반드시 `git log -1 --oneline`으로 다시 확인하세요. 이 README의 해시는 작업 중 변경될 수 있습니다.
 - 현재 로컬에 남을 수 있는 미추적 항목: `.codex-temp/`. 커밋하지 않습니다.

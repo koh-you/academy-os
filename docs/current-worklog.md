@@ -34,12 +34,12 @@
    - 순서: `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`.
    - 다음 후보는 매번 현재 diff와 최신 작업로그를 보고 다시 제안한다. 위험이 낮은 helper/config/API/client/component부터 진행하고, 수업일지/출결/Solapi/보충관리처럼 side effect가 큰 영역은 충분한 gate 이후 진행한다.
    - 기준 로드맵: 아래 `App.jsx 리팩터링 18개 기준 로드맵`을 다음 세션들의 공통 후보 목록으로 사용한다. 이미 일부 분리된 항목도 남은 하위 컴포넌트/헬퍼가 있으면 같은 묶음 안에서 계속 진행한다.
-   - 현재 이어받을 지점: 10번 `student-parent portals` 표시 구조 리팩터링은 완료 audit까지 끝냈다. `StudentTodayTab`, `ParentPortal`, `StudentPortalShell`을 분리하고 미사용 legacy `StudentPortal`을 제거했다. 학생 쓰기 사람 gate와 교사 bearer/Storage 권한 보안 gate는 별도 보류다. 11번 `supplement job builders` inventory를 `docs/refactor-supplement-job-builders-inventory-2026-07-21.md`에 기록했다. 다음은 네트워크 호출 없는 순수 문구·시각·ID·payload builder만 옮기는 11A다.
+   - 현재 이어받을 지점: 10번 `student-parent portals` 표시 구조 리팩터링은 완료 audit까지 끝냈다. `StudentTodayTab`, `ParentPortal`, `StudentPortalShell`을 분리하고 미사용 legacy `StudentPortal`을 제거했다. 학생 쓰기 사람 gate와 교사 bearer/Storage 권한 보안 gate는 별도 보류다. 11번 `supplement job builders` inventory를 `docs/refactor-supplement-job-builders-inventory-2026-07-21.md`에 기록했고, 11A 첫 단위로 예약시각·ID·job payload builder를 `src/domains/notifications/supplementJobBuilders.js`로 분리했다. 문구 선택과 실제 예약·취소 orchestration은 `App.jsx`에 남아 있다. 다음은 현재 job 선택 helper만 옮기는 11A-2이며 11B side effect 이동은 사람 gate 전 착수하지 않는다.
    - 보류된 사람 gate: 2026-07-21 사용자 지시로 숙제 완료, 질문 CRUD, 시험 후 제출의 실제 학생 테스트를 보류했다. 보류는 통과 판정이 아니며 나중에 저장/새로고침/재로그인/강사 미리보기 차단과 교사 확인 저장을 확인하고 회귀 발견 시 즉시 별도 수정한다.
    - 확인된 보안 후속 gate: 교사 로그인에 서버 서명 bearer token이 없어 시험 후 제출 교사 확인 API도 기존 교사 관리 API와 같은 인증 공백이 있다. 시험지 Storage 열기 API도 요청자의 교사/학생 소유권을 검증하지 않는다. 포털 shell 분리와 섞지 않고 `교사 세션 인증 + 파일 열람 권한` 별도 고위험 작업으로 진행한다.
    - 확인된 후속 이슈: 학생 수업 준비 안내 목록은 현재 `prepStudentNotice` 존재 여부만 필터하고 `prepStudentVisible`을 확인하지 않는다. 이번 리팩터링에서는 기존 동작을 보존했으며, 공개 플래그 계약을 별도 기능 작업에서 확인해야 한다.
    - 확인된 후속 이슈: 학생 마이페이지 `비밀번호 변경`은 callback/API가 없는 기존 미연결 UI다. 이번 리팩터링에서는 보존했고, 숨김/비활성 안내/실제 PIN 변경 구현은 저장 신뢰성의 오작동 버튼 정리 작업에서 별도 결정한다.
-   - 다음 세션 시작 규칙: 최신 커밋과 git diff를 확인하고 학생 포털 사람 gate와 보안 gate가 보류 중임을 알린 뒤, `docs/refactor-supplement-job-builders-inventory-2026-07-21.md` 기준 11A 순수 builder 추출부터 제안한다.
+   - 다음 세션 시작 규칙: 최신 커밋과 git diff를 확인하고 학생 포털 사람 gate와 보안 gate가 보류 중임을 알린 뒤, `docs/refactor-supplement-job-builders-inventory-2026-07-21.md` 기준 현재 job 선택 helper를 분리하는 11A-2부터 제안한다.
 5. `Solapi 특강 템플릿 검수 후 연결`
    - 상태: 외부 검수 대기.
    - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다.
@@ -115,6 +115,16 @@
 - AI 검증: `npm run build`, `npm run test:production` 352/352, `git diff --check`를 통과했다. 기존 Vite 500KB chunk 경고만 남는다.
 - 사람 검토 gate: `Lesson Hub > 특강관리 > 특강 수업`에서 명단을 펼쳐 `연결 필요` 신청자의 이름과 `학생 연결` 버튼이 보이는지 확인한다. 버튼을 눌러 기존 학생 선택/특강 전용 학생 등록 모달이 열리는지만 확인하고 운영 학생 연결 저장은 테스트 대상이 확실할 때만 진행한다. 회차 미확정 학생은 `회차 설정` 저장 전 수업일지 명단에서 제외되고, 모든 회차가 이미 반영된 경우 `현재 새로 만들 수업이나 안전하게 반영할 미래 명단 변경이 없습니다`가 보여야 한다. 상단의 삭제 요청 설명과 불필요한 빈 높이가 없어야 한다.
 - 중단 조건: 다른 신청자가 연결됨, 모달을 열기만 했는데 명단/lesson이 저장됨, 기존 확정 명단이 사라짐, 과거·오늘 수업이나 알림 예약이 자동 변경됨, 작은 화면에서 연결 버튼이 잘리면 다음 단계로 진행하지 않는다.
+
+### 2026-07-21 P1. 11A 보충 알림 순수 예약시각·ID·job payload builder 분리
+
+- 범위: `getSupplementStudentReminderJobId`, `getSupplementStudentReminderScheduledAt`, `getNextHourlyAlimtalkReservationAt`, 학생 11시 job과 학생·학부모 일정 안내 job 객체 생성을 `src/domains/notifications/supplementJobBuilders.js`로 옮겼다.
+- 동작 보존: `App.jsx`가 `app_state.aiSettings.notificationTemplates`와 선생님 수정본 우선순위로 제목·본문을 완성한 뒤 builder에 명시적으로 넘긴다. 새 모듈은 `academyBrandName`과 현재 시각도 인자로 받아 전역 원천을 읽지 않는다.
+- 저장/외부 영향: 새 모듈에는 fetch/API/Supabase/Solapi/React state가 없다. `/api/notification-jobs/reserve|cancel`, `setNotificationJobs`, 서버 fingerprint/pending claim과 Solapi 그룹 예약·취소는 기존 위치 그대로다.
+- 회귀 고정: `scripts/test-supplement-job-builders.mjs`가 한국시간 11시, 다음 정각 lead time, 고정 ID, 학생·학부모 번호와 유형, 확정/변경 noticeKind, 빈 선생님 최종본문을 deterministic 입력으로 검증한다. `npm run test:production`의 선행 단계로 연결했다.
+- AI 검수: fixture 통과, 운영 시나리오 353/353 통과, `npm run build` 통과, `git diff --check` 통과. Vite의 기존 500KB chunk 경고만 남는다.
+- 사람 검수: 이 단위는 운영 row나 Solapi를 만들지 않아 새 사람 발송 gate가 없다. 기존 포털/보충 실제 화면 검수 보류는 통과로 바꾸지 않는다.
+- 다음 순서: 기존 `notificationJobs` 배열에서 현재 학생 11시·학생 일정·학부모 일정 job을 고르는 순수 selector만 11A-2로 분리한다. 예약/취소 orchestration을 이동하는 11B는 별도 사람 gate다.
 
 ### 2026-07-21 P1. 10번 포털 완료 audit 및 11번 보충 job builder inventory
 

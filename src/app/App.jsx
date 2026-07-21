@@ -24,6 +24,14 @@ import {
   deleteStudentQuestion,
   updateStudentQuestion
 } from "../domains/portals/studentPortalApi.js";
+import {
+  buildSupplementScheduleNoticeJob,
+  buildSupplementStudentReminderJob,
+  getNextHourlyAlimtalkReservationAt,
+  getSupplementStudentReminderJobId,
+  getSupplementStudentReminderScheduledAt,
+  isSupplementStudentReminderTask
+} from "../domains/notifications/supplementJobBuilders.js";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
@@ -5762,6 +5770,31 @@ export function App() {
       });
   }
 
+  async function handleDeleteSpecialLectureApplication(applicationId) {
+    const normalizedApplicationId = String(applicationId ?? "").trim();
+    if (!normalizedApplicationId) throw new Error("삭제할 특강 신청 원본 ID가 필요합니다.");
+    const response = await fetch(apiUrl(`/api/special-lecture-applications?id=${encodeURIComponent(normalizedApplicationId)}`), {
+      method: "DELETE"
+    });
+    const result = await response.json();
+    if (!response.ok || !result.ok) throw new Error(result.error || "특강 신청 원본 삭제 실패");
+    if (result.source !== "supabase" || !result.deleted) {
+      throw new Error("Supabase에서 특강 신청 원본 삭제를 확인하지 못했습니다.");
+    }
+
+    const verifyResponse = await fetch(apiUrl("/api/special-lecture-applications"), { cache: "no-store" });
+    const verifyResult = await verifyResponse.json();
+    if (!verifyResponse.ok || !verifyResult.ok || verifyResult.source !== "supabase") {
+      throw new Error(verifyResult.error || "삭제 후 특강 신청 원본을 다시 확인하지 못했습니다.");
+    }
+    const persistedApplications = normalizeSpecialLectureApplications(verifyResult.applications ?? []);
+    if (persistedApplications.some((application) => application.applicationId === normalizedApplicationId)) {
+      throw new Error("Supabase 재조회에서 삭제한 신청 원본이 남아 있습니다.");
+    }
+    setSpecialLectureApplications(persistedApplications);
+    return normalizedApplicationId;
+  }
+
   async function handleCreateSpecialLectureStudent(application = {}) {
     if (!String(application.studentName ?? "").trim()) throw new Error("특강생 이름이 필요합니다.");
     const applicationId = String(application.applicationId || "").trim();
@@ -7722,7 +7755,14 @@ export function App() {
     if (isNotificationSchedulePast(scheduledAt, 0)) {
       return { skipped: true, message: "보강 당일 11:00이 이미 지나 새 예약을 만들지 않았습니다." };
     }
-    const notificationJob = buildSupplementStudentReminderJob(task, student, scheduledAt, aiSettings.notificationTemplates);
+    const notificationJob = buildSupplementStudentReminderJob({
+      academyName: academyBrandName,
+      reminderBody: normalizeMessageText(task.notificationDraft),
+      scheduledAt,
+      scheduleTitle: getSupplementStudentReminderTitle(task),
+      student,
+      task
+    });
     const reservedJob = await reserveNotificationJob(notificationJob, "보충관리 학생 11시 알림톡 예약");
     return {
       notificationJob: reservedJob,
@@ -7809,8 +7849,27 @@ export function App() {
     }
     await cancelActiveSupplementScheduleNoticeJobs(task);
     const scheduledAt = getNextHourlyAlimtalkReservationAt();
-    const studentJob = buildSupplementScheduleNoticeJob(task, student, scheduledAt, "student", previousScheduleText, aiSettings.notificationTemplates);
-    const parentJob = buildSupplementScheduleNoticeJob(task, student, scheduledAt, "parent", previousScheduleText, aiSettings.notificationTemplates);
+    const scheduleTitle = getSupplementStudentReminderTitle(task);
+    const studentJob = buildSupplementScheduleNoticeJob({
+      academyName: academyBrandName,
+      previousScheduleText,
+      reminderBody: getSupplementScheduleNoticeDraft(task, "student", previousScheduleText, aiSettings.notificationTemplates),
+      scheduledAt,
+      scheduleTitle,
+      student,
+      target: "student",
+      task
+    });
+    const parentJob = buildSupplementScheduleNoticeJob({
+      academyName: academyBrandName,
+      previousScheduleText,
+      reminderBody: getSupplementScheduleNoticeDraft(task, "parent", previousScheduleText, aiSettings.notificationTemplates),
+      scheduledAt,
+      scheduleTitle,
+      student,
+      target: "parent",
+      task
+    });
     const [studentNotice, parentNotice] = await Promise.all([
       reserveSupplementScheduleNoticeJob(studentJob, "학생 보충 일정 안내 예약 실패"),
       reserveSupplementScheduleNoticeJob(parentJob, "학부모 보충 일정 안내 예약 실패")
@@ -7864,14 +7923,16 @@ export function App() {
     await Promise.all(activeTargetJobs.map((job) => handleCancelNotificationJob(job, "보충관리 개별 알림톡 재예약")));
 
     const scheduledAt = getNextHourlyAlimtalkReservationAt();
-    const notificationJob = buildSupplementScheduleNoticeJob(
-      task,
-      student,
+    const notificationJob = buildSupplementScheduleNoticeJob({
+      academyName: academyBrandName,
+      previousScheduleText: "",
+      reminderBody: getSupplementScheduleNoticeDraft(task, target, "", aiSettings.notificationTemplates),
       scheduledAt,
+      scheduleTitle: getSupplementStudentReminderTitle(task),
+      student,
       target,
-      "",
-      aiSettings.notificationTemplates
-    );
+      task
+    });
     const result = await reserveSupplementScheduleNoticeJob(
       notificationJob,
       `${target === "parent" ? "학부모" : "학생"} 보충 일정 안내 예약 실패`
@@ -8759,6 +8820,7 @@ export function App() {
             specialLectureGuides={specialLectureGuides}
             specialLectureGuideSaveState={specialLectureGuideSaveState}
             onCreateSpecialLectureStudent={handleCreateSpecialLectureStudent}
+            onDeleteSpecialLectureApplication={handleDeleteSpecialLectureApplication}
             onCreateSpecialLectureLessons={handleCreateSpecialLectureLessons}
             onOpenSpecialLectureLesson={openSpecialLectureLesson}
             onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
@@ -10133,6 +10195,7 @@ function NotificationCenter({
   onCancelNotificationJob,
   onCreateSpecialLectureStudent,
   onCreateSpecialLectureLessons,
+  onDeleteSpecialLectureApplication,
   onOpenSpecialLectureLesson,
   onRefresh,
   onReconcileSolapiNotificationResults,
@@ -10747,6 +10810,7 @@ function NotificationCenter({
           onApplyToNotice={applySpecialLectureGuideToNotice}
           onCreateStudent={onCreateSpecialLectureStudent}
           onCreateSpecialLectureLessons={onCreateSpecialLectureLessons}
+          onDeleteApplication={onDeleteSpecialLectureApplication}
           onOpenLesson={onOpenSpecialLectureLesson}
           onSaveEnrollment={onSaveSpecialLectureEnrollment}
           onSaveEnrollments={onSaveSpecialLectureEnrollments}
@@ -11075,6 +11139,7 @@ function SpecialLectureNoticePanel({
   onApplyToNotice,
   onCreateStudent,
   onCreateSpecialLectureLessons,
+  onDeleteApplication,
   onOpenLesson,
   onSaveEnrollment,
   onSaveEnrollments,
@@ -11486,6 +11551,7 @@ function SpecialLectureNoticePanel({
         notificationJobs={notificationJobs}
         onCreateStudent={onCreateStudent}
         onCreateSpecialLectureLessons={onCreateSpecialLectureLessons}
+        onDeleteApplication={onDeleteApplication}
         onOpenLesson={onOpenLesson}
         onSaveEnrollment={onSaveEnrollment}
         onSaveEnrollments={onSaveEnrollments}
@@ -26822,23 +26888,6 @@ function createNotificationDraft(task, students, notificationTemplates = {}) {
   return `${studentName} 학생 ${followUpTypeLabel(task.taskType)} 안내입니다.\n\n${scheduleText}\n${sourceText} 일정을 진행합니다.${progressMemoBlock}`;
 }
 
-function isSupplementStudentReminderTask(task = {}) {
-  return ["homework_makeup", "absence_makeup"].includes(task.taskType);
-}
-
-function getSupplementStudentReminderJobId(task = {}) {
-  if (!isSupplementStudentReminderTask(task)) return "";
-  const taskId = task.makeupTaskId || task.sourceId || "";
-  if (!taskId || !task.studentId) return "";
-  return `supplement_student_reminder_${safeIdPart(taskId)}_${safeIdPart(task.studentId)}`;
-}
-
-function getSupplementStudentReminderScheduledAt(task = {}) {
-  if (!isSupplementStudentReminderTask(task) || !task.scheduledDate) return "";
-  const scheduledAt = new Date(`${task.scheduledDate}T11:00:00+09:00`);
-  return Number.isNaN(scheduledAt.getTime()) ? "" : scheduledAt.toISOString();
-}
-
 function getSupplementStudentReminderTitle(task = {}) {
   const methodId = task.supplementMethod || supplementDefaultMethod(task.taskType);
   const taskLabel = task.taskType === "absence_makeup"
@@ -26869,18 +26918,6 @@ function formatSupplementScheduleDateTime(taskOrDate = {}, maybeTime = "") {
   return formatSupplementDateTimeText(date, time) || "미확정";
 }
 
-function getNextHourlyAlimtalkReservationAt(now = new Date(), minimumLeadMinutes = 5) {
-  const base = new Date(now);
-  if (Number.isNaN(base.getTime())) return "";
-  const scheduled = new Date(base);
-  scheduled.setUTCMinutes(0, 0, 0);
-  scheduled.setUTCHours(scheduled.getUTCHours() + 1);
-  if (scheduled.getTime() - base.getTime() < Math.max(1, minimumLeadMinutes) * 60 * 1000) {
-    scheduled.setUTCHours(scheduled.getUTCHours() + 1);
-  }
-  return scheduled.toISOString();
-}
-
 function buildSupplementScheduleNoticeBody(task = {}, previousScheduleText = "", notificationTemplates = {}) {
   const templates = normalizeNotificationTemplates(notificationTemplates);
   const scheduleTitle = getSupplementStudentReminderTitle(task) || followUpTypeLabel(task.taskType);
@@ -26907,120 +26944,6 @@ function getSupplementScheduleNoticeDraft(task = {}, target = "student", previou
   const field = target === "parent" ? "parentScheduleNotificationDraft" : "studentScheduleNotificationDraft";
   if (isSupplementTeacherEditedField(task, field)) return String(task[field] ?? "");
   return buildSupplementScheduleNoticeBody(task, previousScheduleText, notificationTemplates);
-}
-
-function buildSupplementStudentReminderJob(task = {}, student = {}, scheduledAt = "", notificationTemplates = {}) {
-  const notificationJobId = getSupplementStudentReminderJobId(task);
-  const scheduleTitle = getSupplementStudentReminderTitle(task);
-  const reminderBody = normalizeMessageText(task.notificationDraft);
-  const payload = {
-    academyName: academyBrandName,
-    makeupTaskId: task.makeupTaskId,
-    notificationType: "student_reminder",
-    reminderBody,
-    scheduleDate: task.scheduledDate,
-    scheduledDate: scheduledAt,
-    scheduleTime: task.scheduledTime,
-    scheduleTitle,
-    scheduleType: "supplement",
-    sendMode: "scheduled",
-    studentId: student.studentId,
-    studentName: student.name,
-    studentPhone: student.studentPhone,
-    target: "student"
-  };
-  return {
-    notificationJobId,
-    notificationType: "student_reminder",
-    studentId: student.studentId,
-    lessonId: task.linkedLessonId || "",
-    lessonStudentRecordId: "",
-    target: "student",
-    recipient: student.studentPhone,
-    scheduledAt,
-    payload,
-    previewBody: reminderBody || `오늘 ${scheduleTitle} 일정이 있습니다. ${task.scheduledDate} ${task.scheduledTime || ""}`.trim(),
-    status: "scheduled",
-    provider: "academy-os-reserving",
-    result: { reservationPending: true, makeupTaskId: task.makeupTaskId },
-    error: "",
-    createdAt: new Date().toISOString()
-  };
-}
-
-function buildSupplementScheduleNoticeJob(task = {}, student = {}, scheduledAt = "", target = "student", previousScheduleText = "", notificationTemplates = {}) {
-  const now = Date.now();
-  const isParent = target === "parent";
-  const isScheduleChange = Boolean(normalizeMessageText(previousScheduleText));
-  const noticeKind = isScheduleChange ? "supplement_schedule_change" : "supplement_schedule_confirm";
-  const notificationType = isParent ? "notice_parent" : "schedule_reminder";
-  const scheduleTitle = getSupplementStudentReminderTitle(task);
-  const reminderBody = getSupplementScheduleNoticeDraft(task, target, previousScheduleText, notificationTemplates);
-  const scheduleNoticeTitle = `${scheduleTitle} 일정 안내`;
-  const payload = isParent
-    ? {
-        academyName: academyBrandName,
-        commentBodyOverride: reminderBody,
-        lessonDate: task.scheduledDate,
-        lessonName: scheduleNoticeTitle,
-        makeupTaskId: task.makeupTaskId,
-        message: reminderBody,
-        noticeBody: reminderBody,
-        noticeKind,
-        noticeTitle: scheduleNoticeTitle,
-        notificationType,
-        parentPhone: student.parentPhone,
-        scheduleDate: task.scheduledDate,
-        scheduledDate: scheduledAt,
-        scheduleTime: task.scheduledTime,
-        scheduleTitle: scheduleNoticeTitle,
-        scheduleType: "supplement",
-        sendMode: "scheduled",
-        studentId: student.studentId,
-        studentName: student.name,
-        studentPhone: student.studentPhone,
-        target: "parent"
-      }
-    : {
-        academyName: academyBrandName,
-        makeupTaskId: task.makeupTaskId,
-        noticeKind,
-        notificationType,
-        reminderBody,
-        scheduleDate: task.scheduledDate,
-        scheduledDate: scheduledAt,
-        scheduleTime: task.scheduledTime,
-        scheduleTitle: scheduleNoticeTitle,
-        scheduleType: "supplement",
-        sendMode: "scheduled",
-        studentId: student.studentId,
-        studentName: student.name,
-        studentPhone: student.studentPhone,
-        target: "student"
-      };
-  return {
-    notificationJobId: `supplement_${target}_schedule_notice_${safeIdPart(task.makeupTaskId || task.sourceId || "task")}_${safeIdPart(student.studentId || "student")}_${now}`,
-    notificationType,
-    studentId: student.studentId,
-    lessonId: task.linkedLessonId || "",
-    lessonStudentRecordId: "",
-    target: isParent ? "parent" : "student",
-    recipient: isParent ? student.parentPhone : student.studentPhone,
-    scheduledAt,
-    payload,
-    previewBody: reminderBody,
-    status: "scheduled",
-    provider: "academy-os-reserving",
-    result: {
-      makeupTaskId: task.makeupTaskId,
-      noticeKind,
-      previousScheduleText,
-      reservationPending: true,
-      scheduleNotice: true
-    },
-    error: "",
-    createdAt: new Date(now).toISOString()
-  };
 }
 
 function getSupplementStudentReminderJob(task = {}, notificationJobs = []) {

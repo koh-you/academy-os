@@ -15,7 +15,8 @@
     "dispatch:notifications": "node scripts/dispatch-due-notifications.cjs",
     "slack:daily-schedule": "node scripts/send-slack-daily-schedule.cjs",
     "check:encoding": "node scripts/check-encoding.cjs",
-    "test:production": "node scripts/scenario-tests-production.cjs"
+    "test:supplement-builders": "node scripts/test-supplement-job-builders.mjs",
+    "test:production": "npm run test:supplement-builders && node scripts/scenario-tests-production.cjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.0",

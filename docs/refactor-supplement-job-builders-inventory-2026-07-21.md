@@ -59,6 +59,13 @@
 5. 기존 job의 `notificationType`, `target`, `recipient`, `scheduledAt`, `payload`, `previewBody`, `provider`, `status`, `result` 구조를 그대로 유지한다.
 6. 기존 App 호출부는 builder import로만 교체한다. 예약/취소 orchestration은 기존 위치에 둔다.
 
+### 11A 첫 단위 구현 결과
+
+- 완료: 예약시각, deterministic ID, 학생 11시 job payload, 학생·학부모 일정 안내 job payload를 `src/domains/notifications/supplementJobBuilders.js`로 분리했다.
+- 입력 경계: `academyName`, `now`, 완성된 `scheduleTitle`과 `reminderBody`를 명시적으로 받는다. 템플릿 seed와 선생님 수정본 우선순위는 `App.jsx`가 계속 소유한다.
+- 자동검증: `scripts/test-supplement-job-builders.mjs`를 `npm run test:production`에 연결했다. fixture는 실제 API와 Solapi를 호출하지 않는다.
+- 다음 저위험 단위: 현재 `notificationJobs` 배열에서 job을 찾는 selector만 11A-2로 분리한다. 예약·취소·상태 저장은 포함하지 않는다.
+
 ## AI 자동검증 범위
 
 - 결석보강 11시, 숙제보충 11시, 학생 확정/변경, 학부모 확정/변경 fixture의 old contract를 정적/동적 assertion으로 고정한다.
