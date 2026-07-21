@@ -34,12 +34,12 @@
    - 순서: `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`.
    - 다음 후보는 매번 현재 diff와 최신 작업로그를 보고 다시 제안한다. 위험이 낮은 helper/config/API/client/component부터 진행하고, 수업일지/출결/Solapi/보충관리처럼 side effect가 큰 영역은 충분한 gate 이후 진행한다.
    - 기준 로드맵: 아래 `App.jsx 리팩터링 18개 기준 로드맵`을 다음 세션들의 공통 후보 목록으로 사용한다. 이미 일부 분리된 항목도 남은 하위 컴포넌트/헬퍼가 있으면 같은 묶음 안에서 계속 진행한다.
-   - 현재 이어받을 지점: 9번 `test manager`, 10번 `student-parent portals` 읽기 전용 표시와 세 개의 학생 쓰기 단위를 완료했다. 숙제 완료·질문 CRUD에 이어 시험 후 제출도 학생 bearer session 소유권, 단계별 Storage 업로드, 부분 실패 정리, `app_state.examPostSubmissions` 전용 저장·재조회, draft 보호, 교사 확인 재조회, 상태 UI, 패널 분리를 완료했다. 저장/API가 없는 `StudentTodayTab`, `ParentPortal`, `StudentPortalShell`도 분리했고 미사용 legacy `StudentPortal`을 제거했다. AI 검증은 현재 351개다. 다음은 10번 포털 완료 audit다.
+   - 현재 이어받을 지점: 10번 `student-parent portals` 표시 구조 리팩터링은 완료 audit까지 끝냈다. `StudentTodayTab`, `ParentPortal`, `StudentPortalShell`을 분리하고 미사용 legacy `StudentPortal`을 제거했다. 학생 쓰기 사람 gate와 교사 bearer/Storage 권한 보안 gate는 별도 보류다. 11번 `supplement job builders` inventory를 `docs/refactor-supplement-job-builders-inventory-2026-07-21.md`에 기록했다. 다음은 네트워크 호출 없는 순수 문구·시각·ID·payload builder만 옮기는 11A다.
    - 보류된 사람 gate: 2026-07-21 사용자 지시로 숙제 완료, 질문 CRUD, 시험 후 제출의 실제 학생 테스트를 보류했다. 보류는 통과 판정이 아니며 나중에 저장/새로고침/재로그인/강사 미리보기 차단과 교사 확인 저장을 확인하고 회귀 발견 시 즉시 별도 수정한다.
    - 확인된 보안 후속 gate: 교사 로그인에 서버 서명 bearer token이 없어 시험 후 제출 교사 확인 API도 기존 교사 관리 API와 같은 인증 공백이 있다. 시험지 Storage 열기 API도 요청자의 교사/학생 소유권을 검증하지 않는다. 포털 shell 분리와 섞지 않고 `교사 세션 인증 + 파일 열람 권한` 별도 고위험 작업으로 진행한다.
    - 확인된 후속 이슈: 학생 수업 준비 안내 목록은 현재 `prepStudentNotice` 존재 여부만 필터하고 `prepStudentVisible`을 확인하지 않는다. 이번 리팩터링에서는 기존 동작을 보존했으며, 공개 플래그 계약을 별도 기능 작업에서 확인해야 한다.
    - 확인된 후속 이슈: 학생 마이페이지 `비밀번호 변경`은 callback/API가 없는 기존 미연결 UI다. 이번 리팩터링에서는 보존했고, 숨김/비활성 안내/실제 PIN 변경 구현은 저장 신뢰성의 오작동 버튼 정리 작업에서 별도 결정한다.
-   - 다음 세션 시작 규칙: 최신 커밋과 git diff를 확인하고 숙제 완료·질문 CRUD·시험 후 제출 사람 gate가 보류 중임을 알린 뒤, 10번 포털 완료 audit부터 제안한다.
+   - 다음 세션 시작 규칙: 최신 커밋과 git diff를 확인하고 학생 포털 사람 gate와 보안 gate가 보류 중임을 알린 뒤, `docs/refactor-supplement-job-builders-inventory-2026-07-21.md` 기준 11A 순수 builder 추출부터 제안한다.
 5. `Solapi 특강 템플릿 검수 후 연결`
    - 상태: 외부 검수 대기.
    - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다.
@@ -106,6 +106,15 @@
 - AI 검증: `npm run build`, `npm run test:production` 352/352, `git diff --check`를 통과했다. 기존 Vite 500KB chunk 경고만 남는다.
 - 사람 검토 gate: `Lesson Hub > 특강관리 > 특강 수업`에서 명단을 펼쳐 `연결 필요` 신청자의 이름과 `학생 연결` 버튼이 보이는지 확인한다. 버튼을 눌러 기존 학생 선택/특강 전용 학생 등록 모달이 열리는지만 확인하고 운영 학생 연결 저장은 테스트 대상이 확실할 때만 진행한다. 회차 미확정 학생은 `회차 설정` 저장 전 수업일지 명단에서 제외되고, 모든 회차가 이미 반영된 경우 `현재 새로 만들 수업이나 안전하게 반영할 미래 명단 변경이 없습니다`가 보여야 한다. 상단의 삭제 요청 설명과 불필요한 빈 높이가 없어야 한다.
 - 중단 조건: 다른 신청자가 연결됨, 모달을 열기만 했는데 명단/lesson이 저장됨, 기존 확정 명단이 사라짐, 과거·오늘 수업이나 알림 예약이 자동 변경됨, 작은 화면에서 연결 버튼이 잘리면 다음 단계로 진행하지 않는다.
+
+### 2026-07-21 P1. 10번 포털 완료 audit 및 11번 보충 job builder inventory
+
+- 10번 판단: 표시 구조는 `StudentPortalV2 controller -> StudentPortalShell -> tab components`와 `ParentPortal`로 분리됐다. 남은 controller 코드는 학생 선택·탭 state, Supabase 범위 파생, 쓰기 권한/callback이므로 표시 리팩터링에서 더 이동하면 인증·Storage 경계가 함께 움직인다. 10번은 여기서 닫고 보안 후속은 별도 gate로 유지한다.
+- 11번 inventory: `docs/refactor-supplement-job-builders-inventory-2026-07-21.md`에 task/template 원천, 당일 학생 11시·학생 일정·학부모 일정 job 계약, 프론트 예약 orchestration, 서버 fingerprint/pending claim, Supabase `notification_jobs`, Solapi side effect를 표로 정리했다.
+- 첫 안전 단위: `buildSupplementStudentReminderJob`, `buildSupplementScheduleNoticeJob`과 필요한 순수 문구·시각·ID helper만 별도 모듈 후보로 둔다. `academyName`과 `now`를 명시적 입력으로 바꾸되 산출 payload는 그대로 유지한다.
+- 제외 범위: `/api/notification-jobs/reserve|cancel`, `setNotificationJobs`, `reserveNotificationJobInSolapi`, Supabase upsert/cancel, Solapi 그룹 예약/취소는 11A에서 이동하지 않는다.
+- 사람 gate: 11A는 외부 호출이 없어 AI fixture 검증으로 진행 가능하다. 실제 예약 orchestration을 이동하는 11B부터 학생/학부모/11시 각각의 OS row와 Solapi 그룹을 사람이 대조한다.
+- 중단 조건: 순수 builder 추출에 예약/취소 side effect가 섞임, 학생/학부모 대상이나 문구 우선순위가 바뀜, canceled-during-reserve/pending reuse를 건드려야 함, 테스트 기대값을 낮춰야 함.
 
 ### 2026-07-21 P1. 미사용 legacy 학생 포털 제거
 
