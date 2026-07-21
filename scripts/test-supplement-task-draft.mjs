@@ -14,6 +14,7 @@ import {
   isSupplementTeacherEditedField,
   mergeSupplementTeacherEditedFields,
   supplementNotificationDraftConfigs,
+  syncSupplementTaskDraftEntries,
   updateSupplementTaskDraftEntry
 } from "../src/domains/supplements/supplementTaskDraft.js";
 
@@ -170,5 +171,36 @@ const resyncTask = buildSupplementTaskWithDraft({
   taskDraftState: changedScheduleEntry
 }, transitionDependencies);
 assert.equal(resyncTask.needsLessonResync, true);
+
+const syncTask = { ...sourceTask, makeupTaskId: "task-sync" };
+const firstSync = syncSupplementTaskDraftEntries({
+  current: {},
+  notificationTemplates: { marker: "template" },
+  student,
+  tasks: [syncTask]
+}, transitionDependencies);
+assert.equal(firstSync["task-sync"].dirty, false);
+const unchangedSync = syncSupplementTaskDraftEntries({
+  current: firstSync,
+  notificationTemplates: { marker: "template" },
+  student,
+  tasks: [syncTask]
+}, transitionDependencies);
+assert.equal(unchangedSync, firstSync);
+const dirtySync = { ...firstSync, "task-sync": { ...firstSync["task-sync"], dirty: true, values: { ...firstSync["task-sync"].values, scheduledTime: "17:00" } } };
+const preservedDirtySync = syncSupplementTaskDraftEntries({
+  current: dirtySync,
+  notificationTemplates: { marker: "template" },
+  student,
+  tasks: [{ ...syncTask, updatedAt: "new" }]
+}, transitionDependencies);
+assert.equal(preservedDirtySync["task-sync"], dirtySync["task-sync"]);
+const removedSync = syncSupplementTaskDraftEntries({
+  current: firstSync,
+  notificationTemplates: { marker: "template" },
+  student,
+  tasks: []
+}, transitionDependencies);
+assert.deepEqual(removedSync, {});
 
 console.log("supplement task draft: deterministic contract passed");
