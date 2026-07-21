@@ -34,12 +34,12 @@
    - 순서: `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`.
    - 다음 후보는 매번 현재 diff와 최신 작업로그를 보고 다시 제안한다. 위험이 낮은 helper/config/API/client/component부터 진행하고, 수업일지/출결/Solapi/보충관리처럼 side effect가 큰 영역은 충분한 gate 이후 진행한다.
    - 기준 로드맵: 아래 `App.jsx 리팩터링 18개 기준 로드맵`을 다음 세션들의 공통 후보 목록으로 사용한다. 이미 일부 분리된 항목도 남은 하위 컴포넌트/헬퍼가 있으면 같은 묶음 안에서 계속 진행한다.
-   - 현재 이어받을 지점: 9번 `test manager`, 10번 `student-parent portals` 읽기 전용 표시와 세 개의 학생 쓰기 단위를 완료했다. 숙제 완료·질문 CRUD에 이어 시험 후 제출도 학생 bearer session 소유권, 단계별 Storage 업로드, 부분 실패 정리, `app_state.examPostSubmissions` 전용 저장·재조회, draft 보호, 교사 확인 재조회, 상태 UI, 패널 분리를 완료했다. 저장/API가 없는 `StudentTodayTab` composition shell도 분리했고 AI 검증은 현재 348개다. 다음은 `StudentPortalV2`와 `ParentPortal` shell inventory다.
+   - 현재 이어받을 지점: 9번 `test manager`, 10번 `student-parent portals` 읽기 전용 표시와 세 개의 학생 쓰기 단위를 완료했다. 숙제 완료·질문 CRUD에 이어 시험 후 제출도 학생 bearer session 소유권, 단계별 Storage 업로드, 부분 실패 정리, `app_state.examPostSubmissions` 전용 저장·재조회, draft 보호, 교사 확인 재조회, 상태 UI, 패널 분리를 완료했다. 저장/API가 없는 `StudentTodayTab` composition shell과 `ParentPortal` shell도 분리했고 AI 검증은 현재 349개다. 다음은 `StudentPortalV2` controller/shell inventory다.
    - 보류된 사람 gate: 2026-07-21 사용자 지시로 숙제 완료, 질문 CRUD, 시험 후 제출의 실제 학생 테스트를 보류했다. 보류는 통과 판정이 아니며 나중에 저장/새로고침/재로그인/강사 미리보기 차단과 교사 확인 저장을 확인하고 회귀 발견 시 즉시 별도 수정한다.
    - 확인된 보안 후속 gate: 교사 로그인에 서버 서명 bearer token이 없어 시험 후 제출 교사 확인 API도 기존 교사 관리 API와 같은 인증 공백이 있다. 시험지 Storage 열기 API도 요청자의 교사/학생 소유권을 검증하지 않는다. 포털 shell 분리와 섞지 않고 `교사 세션 인증 + 파일 열람 권한` 별도 고위험 작업으로 진행한다.
    - 확인된 후속 이슈: 학생 수업 준비 안내 목록은 현재 `prepStudentNotice` 존재 여부만 필터하고 `prepStudentVisible`을 확인하지 않는다. 이번 리팩터링에서는 기존 동작을 보존했으며, 공개 플래그 계약을 별도 기능 작업에서 확인해야 한다.
    - 확인된 후속 이슈: 학생 마이페이지 `비밀번호 변경`은 callback/API가 없는 기존 미연결 UI다. 이번 리팩터링에서는 보존했고, 숨김/비활성 안내/실제 PIN 변경 구현은 저장 신뢰성의 오작동 버튼 정리 작업에서 별도 결정한다.
-   - 다음 세션 시작 규칙: 최신 커밋과 git diff를 확인하고 숙제 완료·질문 CRUD·시험 후 제출 사람 gate가 보류 중임을 알린 뒤, `StudentPortalV2`/`ParentPortal` shell inventory부터 제안한다.
+   - 다음 세션 시작 규칙: 최신 커밋과 git diff를 확인하고 숙제 완료·질문 CRUD·시험 후 제출 사람 gate가 보류 중임을 알린 뒤, `StudentPortalV2` controller/shell inventory부터 제안한다.
 5. `Solapi 특강 템플릿 검수 후 연결`
    - 상태: 외부 검수 대기.
    - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다.
@@ -96,6 +96,16 @@
 - 알림톡 템플릿 관리 원칙: 실제 발송/예약되는 알림톡 템플릿은 모두 `설정 > 알림톡`에서 확인하고 수정 가능해야 한다. 화면 미리보기와 실제 Solapi 발송 문구가 달라지면 운영 위험으로 보고, 코드 상수만 수정하는 방식은 중단한다.
 - 특강 알림톡 최우선 확인: 새 세션은 작업 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인한다. 검수 전에는 임시 템플릿 기반 특강 발송 구조를 유지하고, 검수 완료 확인을 받은 뒤에만 Solapi 특강 템플릿 연결, 테스트 데이터 발송, 최종 작업로그 마무리를 진행한다. 다음 세션으로 넘길 붙여넣기 프롬프트를 만들 때도 이 질문과 후속 순서를 반드시 포함한다.
 
+### 2026-07-21 P1. 학부모 포털 shell 분리
+
+- 범위: 10번 `student-parent portals`에서 학부모 화면의 탭 상태와 학생별 읽기 전용 파생 목록 조합을 `ParentPortal.jsx`로 옮겼다. 실제 로그인 경계와 전체 포털 데이터 로딩은 상위 `App`에 그대로 둔다.
+- 구현 결과: 새 shell이 선택 학생, 숙제/밀린 숙제, 리포트, 학부모 공개 준비 안내, 학부모 자료 목록을 계산하고 `PortalTabBar`, `PortalReportCards`, `ParentPortalAlertsTab`, `ParentPortalHomeworkTab`, `PortalMaterialsTab`을 조합한다. 로컬 탭 상태만 새 컴포넌트가 소유한다.
+- 원천/동작 보존: 학생·수업·기록·숙제·자료·리포트 원천은 기존 `/api/portal-data`로 받은 Supabase 범위 데이터이며, 필터·숙제 상태 helper는 `App.jsx`에서 props로 주입한다. 새 shell에는 fetch, POST, API 경로, Supabase/app_state/localStorage 저장, Solapi/notification_jobs side effect가 없다.
+- 테스트 갱신: 기존 학부모 포털 회귀 검사는 `App.jsx`와 새 shell을 함께 검사하게 바꾸고, 학부모 공개 플래그·읽기 전용·상태 helper·모바일 구조 기대값은 유지했다. 새 `23n`은 shell 분리, 로컬 탭 상태, API 부재를 고정한다.
+- AI 검증: `node --check scripts/scenario-tests-production.cjs`, `git diff --check`, `npm run test:production` 349/349, `npm run build` 통과. Vite의 기존 500KB chunk 경고만 남는다.
+- 사람 검수: 사용자 지시로 포털 실제 테스트는 계속 보류다. 나중에 학부모 로그인 또는 강사 미리보기에서 학생 이름, 리포트/알림/숙제/자료 탭, 학부모 공개 준비 안내, 밀린 숙제 수, 로그아웃이 기존과 같은지 모바일 폭에서 확인한다. 보류는 통과가 아니다.
+- 다음: `StudentPortalV2`의 데이터 파생, 탭 상태, 미리보기/실제 로그인 권한, 세 쓰기 callback 경계를 inventory한다. 저장/API/인증을 함께 이동해야 하면 표시 shell 분리를 중단하고 별도 gate로 나눈다.
+
 ### 2026-07-21 P1. 학생 오늘 탭 composition shell 분리
 
 - 범위: 10번 `student-parent portals`에서 숙제 완료, 질문 CRUD, 시험 후 제출의 저장 계약을 먼저 닫은 뒤, 이 세 쓰기 패널과 읽기 전용 안내/보충일정/수업기록을 조합하는 `StudentTodayTab`만 분리했다.
@@ -137,6 +147,15 @@
 - AI 검증: `npm run build`와 설정 탭 전용 회귀 검사를 통과했다. 전체 `npm run test:production` 실행 시 병행 리팩터링 중인 `StudentTodayTab` 분리 변경 때문에 포털 관련 기존 검사 8개가 실패했으며, 새 설정 검사 `20c-2`는 통과했다. 이 병행 변경은 이번 커밋 범위에서 제외하고 해당 리팩터링 세션의 gate로 유지한다.
 - 사람 검토 gate: 설정 첫 진입에서 상단 6개 탭과 `계정` 내용만 보이는지 확인한다. 각 탭을 차례로 눌러 해당 설정만 나타나고 긴 세로 중복 배치가 없어지는지 확인한다. `알림톡 문구`나 `AI 프롬프트`의 기존 값이 보이는지만 확인하고 수정·테스트 발송·계정 저장은 하지 않는다.
 - 중단 조건: 탭 클릭만으로 설정값이 저장/초기화되거나 알림톡 테스트가 발송됨, 기존 저장값이 빈 값으로 바뀜, 자동저장 상태가 사라짐, 한 탭에서 여러 설정 영역이 동시에 나타나면 중단한다.
+
+### 2026-07-21 P1. 특강관리 안내문·회차 상단 탭 정리
+
+- 사용자 요청: 특강 수업의 `학생 수동 접수`를 상단 소형 버튼으로 옮기고, 안내문 편집의 불필요한 설명 바와 미리보기 제목 바를 삭제한다. 공개 URL slug/신청폼 URL은 본문 편집과 분리하고, 일정 계산·회차별 일정·알림톡 미리보기를 상단 탭으로 전환한다.
+- 구현 결과: `학생 수동 접수`는 확정 명단 수 옆의 상단 `softButton compact`로 옮겼으며 기존 모달을 그대로 연다. 특강 안내문에는 `안내문 편집`, `링크 설정`, `일정 계산`, `회차별 일정`, `알림톡 미리보기` 탭을 추가해 선택한 영역만 표시한다. slug와 Tally 신청폼 URL은 `링크 설정`으로 분리했고 일정·회차 탭은 기존 내부 접기 버튼 없이 전체 편집 내용을 바로 보여준다. `저장/발송 분리`, 실시간 반영 설명 바, `공개 안내문 미리보기` 제목 바는 제거했다.
+- 저장 원천/side effect: 탭 선택과 수동 접수 열기 요청은 React local UI state다. 안내문 draft와 slug/applicationUrl/sessions/scheduleRules는 기존 `app_state.specialLectureGuides` 저장 흐름, 수동 접수는 기존 `special_lecture_enrollments` API와 Supabase 원천을 그대로 사용한다. 탭/상단 버튼 클릭만으로 저장, Tally 전송, Solapi 발송, lesson 생성은 실행되지 않으며 새 SQL도 없다.
+- AI 검증: `npm run build`, `npm run test:production` 349/349, `git diff --check`를 통과했다. 기존 안내문 저장·공개 링크·Tally 연결·일정 계산 적용·회차 수정·수동 접수·Supabase 저장 계약 검사를 유지하고 새 상단 탭/링크 분리/삭제 문구 비노출 기준으로 갱신했다. Vite의 기존 500KB chunk 경고만 남는다.
+- 사람 검토 gate: `특강 수업` 상단에서 `학생 수동 접수`가 얇은 소형 버튼으로 보이고 기존 학생 선택 모달을 여는지 확인한다. `특강 안내문`에서 5개 탭을 순서대로 눌러 한 영역만 표시되는지, slug/신청폼 URL이 `링크 설정`에만 있는지, 안내문 편집 오른쪽 공개 미리보기에는 삭제 요청한 제목 바가 없는지 확인한다. 검토 중 `안내문 저장`, `일정 계산 적용`, `알림톡 발송 준비`, 실제 수동 접수 저장은 실행하지 않는다.
+- 중단 조건: 탭 클릭만으로 draft가 저장/초기화됨, 수동 접수 버튼만 눌렀는데 학생이 등록됨, slug/신청폼 URL이 사라지거나 기존 값이 비어 보임, 일정/회차 수정값이 다른 탭 이동만으로 사라짐, Solapi/lesson side effect가 실행되면 중단한다.
 
 ### 2026-07-21 P1. 특강관리 Lesson Hub 이동 및 신청자 UI 정리
 

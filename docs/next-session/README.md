@@ -48,9 +48,9 @@ E:\academy-os 작업을 이어가겠습니다.
    - 순서는 `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`입니다.
    - 기능 변경과 리팩터링 범위를 섞지 않습니다.
    - 아래 18개 기준 로드맵을 공통 후보 목록으로 사용합니다.
-   - 9번 `test manager`, 10번 `student-parent portals` 읽기 전용 표시, 학생 숙제 완료 체크를 완료했습니다. 질문 CRUD도 학생 bearer session 소유권, Supabase `app_state.studentQuestions` key 전용 저장 후 재조회, local draft 보호, 상태 UI, 패널/API client 분리와 AI 검증 345개까지 완료했습니다.
+   - 9번 `test manager`, 10번 `student-parent portals` 읽기 전용 표시와 학생 쓰기 단위 세 개를 완료했습니다. 숙제 완료·질문 CRUD·시험 후 제출은 학생 bearer session 소유권, 전용 API, Supabase 재조회, local draft 보호와 패널 내부 상태를 사용합니다.
    - 실제 학생 사람 gate는 2026-07-21 사용자 지시로 결과 보류했습니다. 숙제 완료와 질문 추가/상태/삭제의 저장·새로고침 유지·강사 미리보기 차단은 미통과가 아니라 미실시 상태로 계속 기록합니다.
-   - 다음 단위는 시험 후 제출입니다. `local draft -> Supabase Storage 업로드 -> 학생 범위 app_state 제출 row 저장 -> 서버 재조회 -> 단계별 완료/부분 실패` 계약 inventory를 먼저 제안합니다.
+   - `StudentTodayTab` composition shell과 `ParentPortal` shell도 저장/API 없이 분리했습니다. 다음 단위는 `StudentPortalV2` controller/shell inventory입니다. 데이터 파생, 탭 상태, 실제 로그인/강사 미리보기 권한, 세 쓰기 callback 경계를 먼저 정리하고 저장/API/인증을 함께 이동해야 하면 중단합니다.
 5. Solapi 특강 템플릿 검수 후 연결
    - 새 세션 시작 초기에 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 먼저 확인합니다.
    - 검수 완료 전에는 임시 특강 알림톡 구조를 유지합니다.
@@ -152,7 +152,7 @@ App.jsx 리팩터링 18개 기준 로드맵:
 - App.jsx 리팩터링 18개 기준 로드맵은 `AGENTS.md`, `docs/current-worklog.md`, 이 README에 함께 기록되어 있습니다.
 - 10번 포털의 세 학생 쓰기 단위는 저장 신뢰성 보강을 완료했습니다. 숙제 완료, 질문 CRUD, 시험 후 제출이 각각 학생 bearer session 소유권, 전용 API, Supabase 재조회, 패널 내부 상태, 실패 시 draft 보호를 사용합니다. 시험 후 제출은 Storage 전부 성공 후에만 `app_state.examPostSubmissions`를 만들며 부분 실패 시 성공 업로드분을 정리합니다.
 - 사람 검수는 사용자 지시로 보류 상태입니다. 숙제 완료·질문 CRUD·시험 후 제출의 실제 학생 저장/새로고침/재로그인/강사 미리보기 차단과 교사 확인 저장을 나중에 검수해야 하며, 보류는 통과가 아닙니다.
-- `StudentTodayTab` composition shell도 분리됐습니다. 이 파일은 상단 일정, 보충/재시험, 시험 후 제출, 준비 안내, 수업 기록, 질문, 오늘 숙제의 순서만 조합하고 저장/API는 소유하지 않습니다.
-- 다음 리팩터링 시작점은 `StudentPortalV2`/`ParentPortal` shell inventory입니다. 파생 데이터 계산, 탭 상태, 미리보기/실제 로그인 경계를 먼저 표로 확인하고 저장/API/인증을 건드리지 않는 표시 shell부터 분리하세요. 교사 확인 API와 시험지 Storage 열기 권한은 현재 교사 bearer session이 없는 기존 인증 공백이 있으므로 별도 `교사 세션 인증 + 파일 열람 권한` 고위험 gate로 분리합니다.
+- `StudentTodayTab` composition shell과 `ParentPortal` shell도 분리됐습니다. 둘 다 화면 순서·탭·읽기 전용 파생 목록만 조합하고 저장/API는 소유하지 않습니다.
+- 다음 리팩터링 시작점은 `StudentPortalV2` controller/shell inventory입니다. 파생 데이터 계산, 탭 상태, 미리보기/실제 로그인 경계, 숙제·질문·시험 제출 callback을 먼저 표로 확인하고, 저장/API/인증 경계를 옮기지 않는 표시 shell만 분리하세요. 교사 확인 API와 시험지 Storage 열기 권한은 현재 교사 bearer session이 없는 기존 인증 공백이 있으므로 별도 `교사 세션 인증 + 파일 열람 권한` 고위험 gate로 분리합니다.
 - 최신 기능 커밋은 작업 시작 시 반드시 `git log -1 --oneline`으로 다시 확인하세요. 이 README의 해시는 작업 중 변경될 수 있습니다.
 - 현재 로컬에 남을 수 있는 미추적 항목: `.codex-temp/`. 커밋하지 않습니다.
