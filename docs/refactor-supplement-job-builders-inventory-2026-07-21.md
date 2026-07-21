@@ -120,6 +120,8 @@
 
 11B-8에서는 개별 control 취소 가능성 검증, 기존 취소 wrapper 호출, 결과 조립을 같은 모듈로 분리했다. 실제 취소 함수는 주입하며 fixture만 실행했다.
 
+11B-9에서는 개별 예약 control의 task/student/선생님 최종 문구 검증, 기존 예약 재사용, 같은 대상의 활성 예약 취소, 일정 job 생성·예약과 학생 11시 예약 위임을 `reserveSupplementNotificationControlRequest`로 분리했다. 실제 API·React 상태 함수와 문구/제목/시각 원천은 주입해 기존 경계를 보존했다. 승인된 미배정 고태영 데이터로 학생 일정·학부모 일정·학생 11시를 각각 예약해 OS row와 Solapi 그룹의 대상·예약시각·최종 문구를 대조했고, 모두 취소한 뒤 OS `canceled`, Solapi `예약취소/1070`, 임시 task 삭제를 확인했다.
+
 - builder 추출에 `/api/notification-jobs/*`, `setNotificationJobs`, Solapi 호출이 함께 이동함.
 - 학생/학부모 번호 또는 `notificationType`이 바뀜.
 - 선생님 수정본보다 설정 템플릿/자동 seed가 우선함.
