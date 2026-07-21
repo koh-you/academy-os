@@ -6,7 +6,7 @@
 - 실제 증상: `신도봉중 · 중3 · 김지민` 후보는 `student_intake_applicants`에서 `registered`였지만 `students`에는 같은 학생이 없었고, 반 배정과 정식 등록 메모도 비어 있었다.
 - 원인: Tally 카드 상단 상태 선택의 `등록확정`은 후보 status만 저장하고 학생 생성은 하지 않았다. 별도 하단 `정식 학생 등록`은 `students`, 후보, 미래 `lessons`를 화면에서 먼저 바꾼 뒤 fire-and-forget으로 따로 저장해 부분 성공과 실패를 숨겼다. 또한 후보의 반 선택 `defaultClassTemplateId`는 API row 변환에서 누락돼 새로고침 후 사라졌다.
 - 수정: 수동 상태 선택에서 `등록확정`을 제거하고 실제 버튼을 `등원 확정 및 학생명단 등록`으로 통합했다. 학생은 `student_intake_<applicantId>` 안정 ID로 upsert한 뒤 `/api/students` 재조회, 반이 있으면 미래 `/api/lessons/bulk` 저장과 재조회, 마지막으로 후보 `registered`+학생 ID 메모 저장과 재조회를 순서대로 통과해야 완료 표시한다. 실패 시 모달과 상세 오류를 유지한다.
-- 기존 오류 복구: 등록완료 후보와 실제 학생을 학생 ID 메모 또는 이름·학교·학년으로 대조한다. 학생이 없으면 붉은 `학생명단 미반영` 카드와 `학생명단에 반영` 버튼을 표시한다. 반 미배정 후보는 학생명단까지만 복구하고, 임의의 반/미래 수업에는 넣지 않는다.
+- 기존 오류 복구: 등록완료 후보와 실제 학생을 학생 ID 메모 또는 이름·학교·학년으로 대조한다. 학생이 없으면 붉은 `학생명단 미반영` 카드, `복구 배정 반` 선택, `학생명단에 반영` 버튼을 표시한다. 반 미배정 후보는 학생명단까지만 복구하고, 임의의 반/미래 수업에는 넣지 않는다.
 - 반 저장 호환: 새 SQL 없이 기존 `student_intake_applicants.desired_class`에 `template_*` 반 ID를 저장하고 `defaultClassTemplateId`로 다시 읽는다.
 - side effect 경계: 학생/후보/미래 수업 명단만 대상이며 알림톡, Solapi, 출결, 과거 수업일지, 삭제는 실행하지 않는다.
 - 검증: `git diff --check`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 360개 통과. 빌드는 기존 Vite chunk size 경고만 남았다.

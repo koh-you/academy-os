@@ -10230,6 +10230,23 @@ button:disabled {
   font-weight: 800;
 }
 
+.studentIntakeRegistrationRecovery label {
+  color: #334155;
+  display: grid;
+  font-weight: 900;
+  gap: 6px;
+  max-width: 320px;
+}
+
+.studentIntakeRegistrationRecovery select {
+  background: #ffffff;
+  border: 1px solid #fda4af;
+  border-radius: 8px;
+  color: #0f172a;
+  min-height: 40px;
+  padding: 0 12px;
+}
+
 .studentIntakeRegistrationRecovery button {
   justify-self: start;
 }

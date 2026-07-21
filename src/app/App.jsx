@@ -25387,6 +25387,18 @@ function StudentModal({
                         <div className="studentIntakeRegistrationRecovery">
                           <strong>등록확정 상태만 저장되고 학생 원천에는 반영되지 않았습니다.</strong>
                           <span>반을 선택하지 않은 후보는 미배정 학생으로 등록되며, 반 배정 후 미래 수업 명단에 반영됩니다.</span>
+                          <label>
+                            복구 배정 반
+                            <select
+                              value={applicant.defaultClassTemplateId ?? ""}
+                              onChange={(event) => updateApplicant(applicant.applicantId, "defaultClassTemplateId", event.target.value)}
+                            >
+                              <option value="">미배정</option>
+                              {templates.map((template) => (
+                                <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
+                              ))}
+                            </select>
+                          </label>
                           <button
                             className="primaryButton"
                             disabled={registrationState === "saving"}
