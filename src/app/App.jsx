@@ -79,6 +79,7 @@ import {
   getCanceledAbsenceMakeupSaveSnapshot
 } from "../domains/supplements/supplementCancellation.js";
 import { createSupplementSchedulePersistencePlan } from "../domains/supplements/supplementSchedulePlan.js";
+import { SupplementPassConfirmModal } from "../domains/supplements/SupplementPassConfirmModal.jsx";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import { isSpecialLectureStudentScheduleSynced } from "../domains/specialLectures/specialLecturePlanSync.js";
 import {
@@ -24440,6 +24441,7 @@ function SupplementCenter({
       {passConfirmTask ? (
         <SupplementPassConfirmModal
           errorMessage={passActionError}
+          getTypeLabel={followUpTypeLabel}
           isBusy={passBusyTaskId === (passConfirmTask.makeupTaskId || passConfirmTask.sourceId)}
           onCancel={() => setPassConfirmTask(null)}
           onConfirm={confirmPassTask}
@@ -24528,49 +24530,6 @@ function SupplementCancellationConfirmModal({
             : keepsSourceAbsence ? "보강만 취소" : "결석 기록 취소"}
         </button>
       </ModalFooter>
-    </Modal>
-  );
-}
-
-function SupplementPassConfirmModal({ errorMessage = "", isBusy = false, onCancel, onConfirm, studentName, task }) {
-  const targetLabel = task.taskType === "homework_makeup"
-    ? task.supplementHomeworkNote || task.sourceLabel || task.reason || "보충 항목"
-    : task.sourceLabel || task.reason || "보충 항목";
-  return (
-    <Modal
-      className="supplementPassConfirmModal"
-      title="보충 완료 처리 확인"
-      subtitle="완료 처리하면 보충관리 후보에서 제외되고, 최근 보충내역에서 다시 복귀할 수 있습니다."
-      onClose={onCancel}
-    >
-      <div className="supplementPassConfirmBody">
-        <p>
-          <strong>{studentName}</strong> 학생의 보충 항목을 완료 처리할까요?
-        </p>
-        <dl className="supplementPassConfirmSummary">
-          <div>
-            <dt>구분</dt>
-            <dd>{followUpTypeLabel(task.taskType)}</dd>
-          </div>
-          <div>
-            <dt>항목</dt>
-            <dd>{targetLabel}</dd>
-          </div>
-          <div>
-            <dt>일정</dt>
-            <dd>{task.scheduledDate || "미확정"} {task.scheduledTime || ""}</dd>
-          </div>
-        </dl>
-        {errorMessage ? <div className="supplementPassError">{errorMessage}</div> : null}
-      </div>
-      <div className="modalActions confirmActions">
-        <button className="softButton" disabled={isBusy} onClick={onCancel} type="button">
-          취소
-        </button>
-        <button className="passButton" disabled={isBusy} onClick={onConfirm} type="button">
-          {isBusy ? "처리 중" : "보충 완료 처리"}
-        </button>
-      </div>
     </Modal>
   );
 }
@@ -25718,6 +25677,7 @@ function SupplementStudentModal({
       ) : null}
       {passConfirmTask ? (
         <SupplementPassConfirmModal
+          getTypeLabel={followUpTypeLabel}
           isBusy={busyTaskId === `${passConfirmTask.makeupTaskId}:pass`}
           onCancel={() => setPassConfirmTask(null)}
           onConfirm={confirmPassTask}
