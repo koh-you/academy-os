@@ -8,6 +8,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-22 P1. 12R-10 보충 draft 저장상태 계산 분리
+
+- 코드: 보충 상세 필드 변경 후 `lesson / makeupTask / notificationDraft` 상태 patch를 만드는 규칙을 `supplementTaskDraft.js`의 순수 helper로 분리했다. App은 local draft 변경과 React 상태 적용을 계속 소유한다.
+- 동작 보존: 일정 날짜·시간은 lesson과 task를, 알림톡 3종 문구는 task와 notification draft를, 그 외 필드는 task만 `changed`로 만드는 기존 규칙을 그대로 유지한다.
+- 저장 원천/side effect: local React 표시 상태 계산만 다룬다. API, Supabase, `notification_jobs`, Solapi 예약·취소, 문구, 운영 데이터는 변경하거나 호출하지 않는다.
+- 검증/gate: 세 필드 유형 deterministic fixture와 production scenario `88b-25`를 추가한다. 전체 production test/build/diff 검증 후 순수 계산 분리이므로 추가 운영 조작은 요구하지 않는다.
+
 ## 2026-07-22 P1. 12R-9 보충 일정 요청 분기 action 분리
 
 - 코드: `requestSupplementScheduleAction`이 배정일/시간 누락의 실패 feedback·lesson status, 연결 lesson이 있는 일정의 변경 확인창, 신규 일정의 기존 생성 callback 호출을 세 분기로 소유한다.

@@ -15,6 +15,14 @@ export const supplementNotificationDraftConfigs = [
 
 export const supplementTeacherFinalFields = new Set(supplementNotificationDraftConfigs.map((config) => config.field));
 
+export function createSupplementDraftSaveStatusPatch(field = "", currentStatus = {}) {
+  return {
+    lesson: ["scheduledDate", "scheduledTime"].includes(field) ? "changed" : currentStatus.lesson,
+    makeupTask: "changed",
+    notificationDraft: supplementTeacherFinalFields.has(field) ? "changed" : currentStatus.notificationDraft
+  };
+}
+
 export function getSupplementNotificationDraftConfig(field = "") {
   return supplementNotificationDraftConfigs.find((config) => config.field === field) ?? supplementNotificationDraftConfigs[0];
 }

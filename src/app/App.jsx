@@ -70,6 +70,7 @@ import { SupplementStudentModalShell } from "../domains/supplements/SupplementSt
 import { useSupplementTaskDraftController } from "../domains/supplements/useSupplementTaskDraftController.js";
 import {
   createPersistableSupplementTask,
+  createSupplementDraftSaveStatusPatch,
   createSupplementTaskDraft as createSupplementTaskDraftModel,
   getSupplementHomeworkNoteValue,
   getSupplementNotificationDraftConfig,
@@ -77,8 +78,7 @@ import {
   getSupplementPersistedEditFingerprint,
   getSupplementTaskDraftDiff as getSupplementTaskDraftDiffModel,
   isSupplementTeacherEditedField,
-  supplementNotificationDraftConfigs,
-  supplementTeacherFinalFields
+  supplementNotificationDraftConfigs
 } from "../domains/supplements/supplementTaskDraft.js";
 import {
   getSupplementImmediateNoticeSaveStatus,
@@ -22576,11 +22576,10 @@ function SupplementStudentModal({
   function updateTaskDraft(task, field, value) {
     if (!task?.makeupTaskId) return;
     updateTaskDraftValues(task, field, value);
-    setTaskSaveStatusPatch(task.makeupTaskId, {
-      lesson: ["scheduledDate", "scheduledTime"].includes(field) ? "changed" : taskSaveStatus[task.makeupTaskId]?.lesson,
-      makeupTask: "changed",
-      notificationDraft: supplementTeacherFinalFields.has(field) ? "changed" : taskSaveStatus[task.makeupTaskId]?.notificationDraft
-    });
+    setTaskSaveStatusPatch(
+      task.makeupTaskId,
+      createSupplementDraftSaveStatusPatch(field, taskSaveStatus[task.makeupTaskId])
+    );
   }
 
   async function handleSaveTask(task) {

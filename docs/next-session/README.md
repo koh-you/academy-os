@@ -14,6 +14,8 @@
 
 11B-1 코드 이동 후 학생 일정·학부모 일정·학생 11시의 OS row/Solapi 그룹 예약·취소 대조는 반 미지정 고태영 테스트 학생과 사용자 통제 번호로 통과했습니다. 학생 포털 실제 쓰기 검수, 교사 bearer/Storage 소유권 보안 gate, Solapi 특강 템플릿 외부 검수는 별도 보류 상태입니다.
 
+App.jsx 보충관리 리팩터링은 `12R-9` 일정 요청 분기까지 완료한 뒤 최신 `origin/main`에 rebase했다. `12R-10`에서는 필드 변경에 따른 `lesson / makeupTask / notificationDraft` 저장상태 patch 계산을 `supplementTaskDraft.js`의 순수 helper로 분리했다. API·Supabase·Solapi·React 상태 소유권은 계속 기존 경계에 둔다.
+
 ## 시험분석 GPT Image 전용 세션 참고 자료
 
 과거 완전판 `docs/next-session/exam-analysis-gpt-image-full-session-prompt.md`에는 API·DB·Storage 제작실 방향이 포함돼 있으므로 그대로 구현하지 않는다. 블로그 조사 주소와 카드 역할 참고 자료로만 사용하고, 최신 작업 경계는 Gate 1 문서와 이 README 최상단을 따른다.
