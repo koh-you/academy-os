@@ -23,6 +23,16 @@ export function createSupplementDraftSaveStatusPatch(field = "", currentStatus =
   };
 }
 
+export function mergeSupplementTaskSaveStatus(current = {}, taskId = "", patch = {}) {
+  return {
+    ...current,
+    [taskId]: {
+      ...(current[taskId] ?? {}),
+      ...patch
+    }
+  };
+}
+
 export function getSupplementNotificationDraftConfig(field = "") {
   return supplementNotificationDraftConfigs.find((config) => config.field === field) ?? supplementNotificationDraftConfigs[0];
 }

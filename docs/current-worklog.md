@@ -8,6 +8,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-22 P1. 12R-11 보충 task 저장상태 map 병합 분리
+
+- 코드: task ID별 기존 `lesson / makeupTask / notificationDraft` 상태를 보존하면서 전달된 patch만 덮는 map 병합 규칙을 `supplementTaskDraft.js`의 순수 함수로 분리했다.
+- 동작 보존: App의 React setter는 함수형 갱신을 계속 사용한다. 다른 task 상태와 같은 task의 patch 미포함 필드는 기존처럼 유지한다.
+- 저장 원천/side effect: 화면용 local React 상태만 계산한다. API, Supabase, `notification_jobs`, Solapi, 운영 데이터는 읽거나 쓰지 않는다.
+- 검증/gate: 기존 task 병합·신규 task 추가·원본 불변 fixture와 production scenario `88b-26`을 추가한다. 전체 production test/build/diff 검증 후 별도 사람 조작은 요구하지 않는다.
+
 ## 2026-07-22 P1. 12R-10 보충 draft 저장상태 계산 분리
 
 - 코드: 보충 상세 필드 변경 후 `lesson / makeupTask / notificationDraft` 상태 patch를 만드는 규칙을 `supplementTaskDraft.js`의 순수 helper로 분리했다. App은 local draft 변경과 React 상태 적용을 계속 소유한다.
