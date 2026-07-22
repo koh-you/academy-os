@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  applySupplementNotificationControlAction,
   applySupplementScheduleAction,
   cancelSupplementAbsenceSourceAction,
   passSupplementTaskAction,
@@ -189,5 +190,66 @@ assert.deepEqual(scheduleFailureEvents[4][1], {
   title: "수업일지 일정 저장 실패",
   tone: "failed"
 });
+
+const notificationReserveEvents = [];
+const notificationReserveResult = await applySupplementNotificationControlAction({
+  action: "reserve",
+  controlType: "studentSchedule",
+  notificationJob: null,
+  onCancelNotification: async () => notificationReserveEvents.push(["cancel"]),
+  onFeedback: (value) => notificationReserveEvents.push(["feedback", value]),
+  onReserveNotification: async (payload, controlType) => {
+    notificationReserveEvents.push(["reserve", payload, controlType]);
+    return { message: "학생 예약 완료", status: "scheduled" };
+  },
+  onSaveStatus: (value) => notificationReserveEvents.push(["status", value]),
+  statusField: "studentChangeNotice",
+  task
+});
+assert.equal(notificationReserveResult.status, "scheduled");
+assert.deepEqual(notificationReserveEvents.map(([type]) => type), ["feedback", "reserve", "status", "feedback"]);
+assert.deepEqual(notificationReserveEvents[1].slice(1), [task, "studentSchedule"]);
+assert.deepEqual(notificationReserveEvents[2][1], { studentChangeNotice: "scheduled" });
+assert.deepEqual(notificationReserveEvents[3][1], { message: "학생 예약 완료", tone: "success" });
+
+const notificationCancelEvents = [];
+const cancelJob = { notificationJobId: "job-cancel" };
+await applySupplementNotificationControlAction({
+  action: "cancel",
+  controlType: "parentSchedule",
+  notificationJob: cancelJob,
+  onCancelNotification: async (job) => {
+    notificationCancelEvents.push(["cancel", job]);
+    return {};
+  },
+  onFeedback: (value) => notificationCancelEvents.push(["feedback", value]),
+  onReserveNotification: async () => notificationCancelEvents.push(["reserve"]),
+  onSaveStatus: (value) => notificationCancelEvents.push(["status", value]),
+  statusField: "parentChangeNotice",
+  task
+});
+assert.deepEqual(notificationCancelEvents.map(([type]) => type), ["feedback", "cancel", "status", "feedback"]);
+assert.equal(notificationCancelEvents[1][1], cancelJob);
+assert.deepEqual(notificationCancelEvents[2][1], { parentChangeNotice: "canceled" });
+assert.equal(notificationCancelEvents[3][1].message, "Solapi 예약을 취소했습니다.");
+
+const notificationFailureEvents = [];
+const notificationFailureResult = await applySupplementNotificationControlAction({
+  action: "reserve",
+  controlType: "studentReminder",
+  notificationJob: null,
+  onCancelNotification: async () => {},
+  onFeedback: (value) => notificationFailureEvents.push(["feedback", value]),
+  onReserveNotification: async () => {
+    notificationFailureEvents.push(["reserve"]);
+    throw new Error("Solapi 서명 실패");
+  },
+  onSaveStatus: (value) => notificationFailureEvents.push(["status", value]),
+  statusField: "studentReminder",
+  task
+});
+assert.equal(notificationFailureResult, null);
+assert.deepEqual(notificationFailureEvents.map(([type]) => type), ["feedback", "reserve", "feedback"]);
+assert.deepEqual(notificationFailureEvents[2][1], { message: "Solapi 서명 실패", tone: "failed" });
 
 console.log("supplement task actions: deterministic contract passed");

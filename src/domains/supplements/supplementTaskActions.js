@@ -179,3 +179,36 @@ export async function applySupplementScheduleAction({
     throw error;
   }
 }
+
+export async function applySupplementNotificationControlAction({
+  action,
+  controlType,
+  notificationJob,
+  onCancelNotification,
+  onFeedback,
+  onReserveNotification,
+  onSaveStatus,
+  statusField,
+  task
+}) {
+  const isCancel = action === "cancel";
+  onFeedback({
+    message: isCancel ? "Solapi 예약 취소 중입니다." : "Solapi 예약 생성 중입니다.",
+    tone: "saving"
+  });
+  try {
+    const result = isCancel
+      ? await onCancelNotification(notificationJob)
+      : await onReserveNotification(task, controlType);
+    const nextStatus = isCancel ? "canceled" : result?.status || "scheduled";
+    onSaveStatus({ [statusField]: nextStatus });
+    onFeedback({
+      message: result?.message || (isCancel ? "Solapi 예약을 취소했습니다." : "Solapi 예약을 완료했습니다."),
+      tone: "success"
+    });
+    return result;
+  } catch (error) {
+    onFeedback({ message: error?.message || "알림톡 작업에 실패했습니다.", tone: "failed" });
+    return null;
+  }
+}
