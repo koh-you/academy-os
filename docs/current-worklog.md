@@ -7,7 +7,15 @@
 1. `학생 포털 실제 쓰기 검수` — 숙제 완료, 질문 CRUD, 시험 후 제출의 실제 학생 저장/재조회/재로그인/권한을 확인한다. 사용자 보류이며 통과가 아니다.
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
-4. `12R SupplementStudentModal action ownership gate` — 다음 단계는 local state와 task/lesson 저장, notification/Solapi action 소유권 이동이다. 코드 이동 후 고태영으로 저장·일정·세 예약/취소·완료·새로고침·중복/대상 교차를 확인해야 한다.
+
+## 2026-07-22 P1. 12R-4 보충 내용 저장 action 분리 — 사람 gate 통과
+
+- 코드: `saveSupplementTaskContentAction`이 saving feedback/status, 주입된 `onSaveTask` await, 저장 결과/fallback, draft saved 반영, success/failure 상태와 재throw를 소유한다. App은 busy guard/finally와 UI callback adapter를 유지한다.
+- 자동검증: 성공 callback 순서, undefined 응답 fallback, lesson resync 상태, 오류 상태/rethrow fixture와 production 383/383, build가 통과했다.
+- AI 운영검증: 고태영 `student_1784094921261`에 임시 task `codex_12r4_save_1784648605002`를 만들고 marker 1→2를 각각 저장·no-store 재조회했다. 매번 정확히 1건과 최신 marker가 일치했으며 linked lesson은 없었다. 삭제 후 재조회 0건을 확인했다. notification/Solapi 호출은 없었다.
+- 사람 화면 gate: 고태영에게만 미래 임시 수업 `codex_12r4_ui_lesson_1784704321338`과 미완료 숙제 `codex_12r4_ui_homework_1784704321338`를 만들었다. 사용자가 학생 일정 알림톡 문구에 고정 marker `12R-4 화면검수`를 입력하고 저장·새로고침 유지를 확인했다. AI 재조회에서 marker, `supplementTeacherEditedFields=[studentScheduleNotificationDraft]`, 연결 notification job 0건을 확인했다.
+- 정리: 생성된 makeup task를 먼저 삭제하고 임시 수업 DELETE로 연결 숙제까지 제거했다. task·lesson·homework·관련 notification job이 모두 0건임을 재조회했다.
+- 사람 gate 운영 원칙: AI가 원천을 재대조할 수 있는 화면 gate는 앞으로도 격리 테스트 데이터와 고정 marker를 먼저 준비하고, 사용자에게 최소 화면 조작과 금지 버튼을 제시한 뒤 AI가 저장·중복·외부 side effect·정리를 직접 확인한다.
 
 ## 2026-07-22 P1. 12R-3 보충 local draft React controller 분리
 

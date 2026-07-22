@@ -178,6 +178,8 @@ Git 충돌 방지 규칙:
 - 12R-1에서 local draft 필드 변경·자동 문구 재생성·dirty/edited field·저장 payload·lesson resync 계산을 `supplementTaskDraft.js` 순수 전환으로 분리했습니다. React state와 실제 action은 App에 남았습니다.
 - 12R-2에서 task 목록과 draft collection의 dirty 보존·원천 reseed·동일 entry 재사용·삭제 정리를 순수 sync 함수로 분리했습니다. App effect는 state updater 호출만 소유합니다.
 - 12R-3에서 draft 전용 state/effect와 get/update/mark/build를 `useSupplementTaskDraftController.js`로 옮겼습니다. 실제 저장·예약 action은 App에 남았습니다.
+- 12R-4에서 보충 내용 저장 action을 `supplementTaskActions.js`로 옮기고 fixture/production/build 및 고태영 화면 gate를 통과했습니다. 사용자 저장·새로고침 뒤 AI가 고정 marker, 선생님 수정 필드, 예약 0건을 재조회했고 임시 task·수업·숙제를 모두 삭제해 0건으로 정리했습니다.
+- 앞으로 AI가 저장 원천을 재대조할 수 있는 사람 gate는 격리 테스트 데이터와 고정 marker를 AI가 먼저 준비하고, 사용자에게 최소 화면 조작·금지 버튼을 안내한 뒤 AI가 저장·중복·외부 side effect와 정리를 직접 확인합니다.
 - 다음 12R은 local draft state와 task/lesson 저장, notification/Solapi action 소유권 이동입니다. 코드 이동 후 고태영으로 저장·일정 생성/변경·세 예약/취소·완료·새로고침·중복/대상 교차를 다시 확인하는 새 사람 gate 전에는 다음 단위로 넘어가지 않습니다. 기존 사람 gate 3개도 통과로 바꾸지 않습니다.
 
 통과한 11B-1 사람 gate 기록:

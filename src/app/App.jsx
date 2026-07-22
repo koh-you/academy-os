@@ -58,6 +58,7 @@ import { SupplementNotificationControlModal } from "../domains/supplements/Suppl
 import { createSupplementNotificationControlViewModel } from "../domains/supplements/supplementNotificationControlModel.js";
 import { SupplementTaskCard } from "../domains/supplements/SupplementTaskCard.jsx";
 import { createSupplementTaskCardViewModel } from "../domains/supplements/supplementTaskCardModel.js";
+import { saveSupplementTaskContentAction } from "../domains/supplements/supplementTaskActions.js";
 import { SupplementStudentModalShell } from "../domains/supplements/SupplementStudentModalShell.jsx";
 import { useSupplementTaskDraftController } from "../domains/supplements/useSupplementTaskDraftController.js";
 import {
@@ -22580,29 +22581,18 @@ function SupplementStudentModal({
     const taskWithDraft = createPersistableSupplementTask(buildTaskWithDraft(task));
     const actionKey = `${task.makeupTaskId}:content`;
     setBusyTaskId(actionKey);
-    setTaskSaveStatusPatch(task.makeupTaskId, {
-      makeupTask: "saving",
-      notificationDraft: "saving"
-    });
-    showFeedback("보충 내용·알림톡 저장 중", "원 숙제 카드와 알림톡 문구 3종을 저장합니다. 수업일지 일정과 Solapi 예약은 아직 변경하지 않습니다.", "saving");
-
     try {
-      const savedTask = await onSaveTask?.(taskWithDraft);
-      const nextTask = savedTask ?? taskWithDraft;
-      markTaskDraftSaved(task.makeupTaskId, nextTask);
-      setTaskSaveStatusPatch(task.makeupTaskId, {
-        lesson: nextTask.linkedLessonId && nextTask.needsLessonResync ? "changed" : taskSaveStatus[task.makeupTaskId]?.lesson,
-        makeupTask: "saved",
-        notificationDraft: "saved"
+      await saveSupplementTaskContentAction({
+        currentLessonStatus: taskSaveStatus[task.makeupTaskId]?.lesson,
+        onFeedback: ({ message, title, tone }) => showFeedback(title, message, tone),
+        onMarkSaved: (nextTask) => markTaskDraftSaved(task.makeupTaskId, nextTask),
+        onSaveStatus: (patch) => setTaskSaveStatusPatch(task.makeupTaskId, patch),
+        saveTask: (payload) => onSaveTask?.(payload),
+        task,
+        taskWithDraft
       });
-      showFeedback("보충 내용·알림톡 저장 완료", "원 숙제 카드와 알림톡 문구 3종을 저장하고 Supabase 재확인까지 마쳤습니다. Solapi 예약은 별도 확인 버튼으로 진행합니다.");
     } catch (error) {
       console.error("Failed to save supplement task", error);
-      setTaskSaveStatusPatch(task.makeupTaskId, {
-        makeupTask: "failed",
-        notificationDraft: "failed"
-      });
-      showFeedback("보충 저장 실패", error?.message || "알 수 없는 오류가 발생했습니다.", "failed");
     } finally {
       setBusyTaskId("");
     }
