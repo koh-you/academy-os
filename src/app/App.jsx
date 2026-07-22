@@ -5856,7 +5856,29 @@ export function App() {
     setIsLessonJournalOpen(true);
   }
 
-  function handleCreateSpecialLectureLessons(lessonDrafts = [], { openFirstLesson = true } = {}) {
+  function getSpecialLectureLessonSaveSnapshot(lesson = {}) {
+    const schedules = (Array.isArray(lesson.specialLectureStudentSchedules) ? lesson.specialLectureStudentSchedules : [])
+      .map((schedule) => ({
+        endTime: schedule.endTime || "",
+        overrideReason: schedule.overrideReason || "",
+        scheduleType: schedule.scheduleType === "adjusted" ? "adjusted" : "official",
+        startTime: schedule.startTime || "",
+        studentId: schedule.studentId || ""
+      }))
+      .sort((left, right) => left.studentId.localeCompare(right.studentId));
+    return JSON.stringify({
+      date: lesson.date || "",
+      endTime: lesson.endTime || "",
+      lessonId: lesson.lessonId || "",
+      specialLectureGuideId: lesson.specialLectureGuideId || "",
+      specialLectureSessionId: lesson.specialLectureSessionId || "",
+      specialLectureStudentSchedules: schedules,
+      startTime: lesson.startTime || "",
+      studentIds: [...new Set(lesson.studentIds ?? [])].sort()
+    });
+  }
+
+  async function handleCreateSpecialLectureLessons(lessonDrafts = [], { openFirstLesson = true } = {}) {
     const normalizedLessons = lessonDrafts
       .filter((lesson) => lesson?.lessonId && lesson?.date)
       .map((lesson) => ({
@@ -5865,18 +5887,25 @@ export function App() {
         status: lesson.status ?? "scheduled"
       }));
     if (!normalizedLessons.length) return Promise.reject(new Error("생성할 특강 회차가 없습니다."));
-    return postJson("/api/lessons/bulk", { lessons: normalizedLessons })
-      .then((result) => {
-        if (!result.ok) throw new Error(result.error || "특강 수업일지 생성 실패");
-        const savedLessons = Array.isArray(result.lessons) && result.lessons.length ? result.lessons : normalizedLessons;
-        setLessons((current) => filterActiveLessons(savedLessons.reduce(
-          (nextLessons, lesson) => upsertById(nextLessons, lesson, "lessonId"),
-          current
-        )));
-        const firstLesson = [...savedLessons].sort(sortByTime)[0];
-        if (openFirstLesson && firstLesson?.lessonId) openSpecialLectureLesson(firstLesson);
-        return savedLessons;
-      });
+    const result = await postJson("/api/lessons/bulk", { lessons: normalizedLessons });
+    if (!result.ok) throw new Error(result.error || "특강 수업일지 생성 실패");
+    const verificationResponse = await fetch(apiUrl(`/api/lessons?verify=special-lecture-${Date.now()}`), { cache: "no-store" });
+    const verification = await verificationResponse.json();
+    if (!verificationResponse.ok || !verification.ok || verification.source !== "supabase") {
+      throw new Error(verification.error || "특강 수업 저장 후 Supabase 재조회에 실패했습니다. 저장됐을 수 있으므로 다시 누르기 전에 확인해 주세요.");
+    }
+    const persistedLessons = Array.isArray(verification.lessons) ? verification.lessons : [];
+    const verifiedLessons = normalizedLessons.map((expectedLesson) => {
+      const persistedLesson = persistedLessons.find((lesson) => lesson.lessonId === expectedLesson.lessonId);
+      if (!persistedLesson || getSpecialLectureLessonSaveSnapshot(persistedLesson) !== getSpecialLectureLessonSaveSnapshot(expectedLesson)) {
+        throw new Error(`특강 수업 저장 후 Supabase 값이 일치하지 않습니다: ${expectedLesson.lessonId}`);
+      }
+      return persistedLesson;
+    });
+    setLessons(filterActiveLessons(persistedLessons));
+    const firstLesson = [...verifiedLessons].sort(sortByTime)[0];
+    if (openFirstLesson && firstLesson?.lessonId) openSpecialLectureLesson(firstLesson);
+    return verifiedLessons;
   }
 
   async function handleAddProblemBookFolder(folderName, testKind, subject) {

@@ -8403,9 +8403,66 @@ button:disabled {
   opacity: 0.78;
 }
 
-.specialLectureSessionPlan.locked {
+.specialLectureSessionPlan.linked {
   background: #f8fafc;
   border-color: #cbd5e1;
+}
+
+.specialLectureCommonTimePanel {
+  align-items: end;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  display: grid;
+  gap: 9px;
+  grid-template-columns: minmax(220px, 1.3fr) repeat(2, minmax(105px, 0.55fr)) minmax(150px, 0.8fr) auto;
+  padding: 11px 12px;
+}
+
+.specialLectureCommonTimePanel > div:first-child,
+.specialLectureCommonTimePanel label {
+  display: grid;
+  gap: 4px;
+}
+
+.specialLectureCommonTimePanel strong {
+  color: #17213d;
+}
+
+.specialLectureCommonTimePanel span,
+.specialLectureCommonTimePanel label {
+  color: #52627a;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.specialLectureCommonTimePanel input {
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  color: #0f172a;
+  font: inherit;
+  min-height: 38px;
+  padding: 7px 9px;
+}
+
+.specialLectureCommonTimeActions {
+  display: flex;
+  gap: 7px;
+}
+
+.specialLectureSessionTimeSummary {
+  align-items: center;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  padding-top: 8px;
+}
+
+.specialLectureSessionTimeSummary > span {
+  color: #1e3a8a;
+  font-size: 12px;
+  font-weight: 900;
 }
 
 .specialLectureSessionToggle {
@@ -17875,6 +17932,7 @@ body.attendanceOnlyBody {
   .specialLectureLessonPreviewCard,
   .specialLectureSessionCardGrid,
   .specialLectureSessionOverrideGrid,
+  .specialLectureCommonTimePanel,
   .followCandidateGrid,
   .supplementOverviewGrid,
   .profileSummary,
@@ -18061,6 +18119,14 @@ body.attendanceOnlyBody {
 @media (max-width: 767px) {
   .supplementNotificationDraftTabs {
     grid-template-columns: 1fr;
+  }
+
+  .specialLectureCommonTimeActions {
+    flex-wrap: wrap;
+  }
+
+  .specialLectureCommonTimeActions button {
+    flex: 1;
   }
 
   .supplementNotificationDraftHeader,
