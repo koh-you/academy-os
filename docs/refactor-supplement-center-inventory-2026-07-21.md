@@ -53,6 +53,7 @@
 21. 다음: local draft React state controller 또는 실제 저장 action 소유권을 분리한다.
 22. 완료 12R-3: draft 전용 React state/effect와 get/update/mark/build controller를 분리했다.
 23. 다음: 보충 내용 저장 action을 첫 실제 action 소유권 단위로 분리하고 고태영 저장·재조회 gate를 진행한다.
+24. 진행 12R-4: 저장 action 코드·fixture·고태영 API 저장/재조회/삭제 AI 검증 완료. 사람 화면 gate 전 uncommitted 상태다.
 
 ## 12B 구현 결과 — 완료 확인 모달
 
@@ -174,6 +175,13 @@
 - draft collection state와 task 원천 변경 effect, get/update/mark/build 함수를 전용 hook으로 옮겼다.
 - hook은 순수 draft 모델만 호출하고 App은 field 변경 후 저장 상태 pill 갱신을 계속 소유한다.
 - API·Supabase·notification job·Solapi와 실제 action callback이 hook에 들어오지 않는 production check를 추가했다.
+
+## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
+
+- saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.
+- App은 busy 중복 방지와 finally 해제, 화면 state adapter를 유지하며 일정·알림 action은 이동하지 않았다.
+- 고태영 임시 task를 실제 운영 API에 생성해 두 번 저장·재조회하고 삭제 후 0건을 확인했다. Solapi 예약은 생성하지 않았다.
+- 고태영 화면에서 학생 일정 문구에 고정 marker를 저장하고 새로고침 유지까지 사람이 확인했다. AI가 marker와 선생님 수정 필드, 예약 0건을 재조회했고 임시 task·수업·숙제를 삭제해 모두 0건으로 정리했다.
 
 ## 즉시 중단 조건
 
