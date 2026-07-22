@@ -6,6 +6,7 @@ import {
   EXAM_ANALYSIS_PROMPT_SAVE_STATUS,
   getExamAnalysisPromptStudioDraftFromRun,
   normalizeExamAnalysisPromptStudioDraft,
+  seedExamAnalysisPromptStudioDraftFromSnapshot,
   updateExamAnalysisPromptStudioLocalDraft,
   verifyExamAnalysisPromptStudioSave,
 } from "../src/domains/exams/examAnalysisPromptStudioDraft.js";
@@ -93,6 +94,25 @@ const limited = normalizeExamAnalysisPromptStudioDraft({
 });
 assert.equal(limited.roleInputs.nextPreparation.actionItems.length, 5);
 assert.equal(limited.assets[0].kind, "source_reference");
+
+const seededMiddle = seedExamAnalysisPromptStudioDraftFromSnapshot({
+  sourceUpdatedAt: "2026-07-22T02:00:00.000Z",
+  roles: {
+    common: {
+      schoolName: { value: "창일중", promptEligible: true },
+      grade: { value: "중3", promptEligible: true },
+      examName: { value: "기말고사", promptEligible: true },
+      subject: { value: "수학", promptEligible: true },
+      schoolStyle: { value: "", promptEligible: false },
+    },
+    examAnalysis: {},
+    keyQuestions: [],
+    nextPreparation: {},
+    cta: {},
+  },
+});
+assert.equal(seededMiddle.sequence.schoolLevel, "middle");
+assert.equal(seededMiddle.roleInputs.common.schoolName, "창일중");
 
 console.log(JSON.stringify({
   initialRevision: local.draft.revision,

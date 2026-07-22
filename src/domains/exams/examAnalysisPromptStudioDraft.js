@@ -134,6 +134,70 @@ export function createExamAnalysisPromptStudioLocalState(analysisRun = {}) {
   };
 }
 
+function snapshotValue(state, fallback = "") {
+  return state?.promptEligible ? state.value : fallback;
+}
+
+export function seedExamAnalysisPromptStudioDraftFromSnapshot(snapshot = {}, savedDraft = {}) {
+  const saved = normalizeExamAnalysisPromptStudioDraft(savedDraft);
+  if (saved.revision > 0) return saved;
+  const common = snapshot.roles?.common ?? {};
+  const examAnalysis = snapshot.roles?.examAnalysis ?? {};
+  const keyQuestions = Array.isArray(snapshot.roles?.keyQuestions) ? snapshot.roles.keyQuestions : [];
+  const nextPreparation = snapshot.roles?.nextPreparation ?? {};
+  const cta = snapshot.roles?.cta ?? {};
+  const schoolText = `${snapshotValue(common.schoolName)} ${snapshotValue(common.grade)}`;
+  const inferredSchoolLevel = /중학교|중\d|중등/.test(schoolText) ? "middle" : "high";
+  const actionValue = snapshotValue(nextPreparation.actionItems, "");
+  const actions = Array.isArray(actionValue)
+    ? actionValue
+    : cleanText(actionValue, 4000).split(/\r?\n|[•·]\s*/).map((item) => item.trim()).filter(Boolean);
+  return normalizeExamAnalysisPromptStudioDraft({
+    ...saved,
+    sequence: { ...saved.sequence, schoolLevel: inferredSchoolLevel },
+    sourceSnapshotUpdatedAt: cleanText(snapshot.sourceUpdatedAt, 80),
+    roleInputs: {
+      common: {
+        schoolName: snapshotValue(common.schoolName),
+        grade: snapshotValue(common.grade),
+        examName: snapshotValue(common.examName),
+        subject: snapshotValue(common.subject),
+        schoolStyle: snapshotValue(common.schoolStyle),
+      },
+      examAnalysis: {
+        questionCount: snapshotValue(examAnalysis.questionCount),
+        scoreStructure: snapshotValue(examAnalysis.scoreStructure),
+        scope: snapshotValue(examAnalysis.scope),
+        unitDistributionNote: Array.isArray(snapshotValue(examAnalysis.unitDistribution, []))
+          ? snapshotValue(examAnalysis.unitDistribution, []).map((item) => `${item.label} ${item.count}문항(${item.percent}%)`).join(", ")
+          : "",
+        difficultyNote: Array.isArray(snapshotValue(examAnalysis.difficultyDistribution, []))
+          ? snapshotValue(examAnalysis.difficultyDistribution, []).map((item) => `${item.label} ${item.count}문항(${item.percent}%)`).join(", ")
+          : "",
+        overallReview: snapshotValue(examAnalysis.overallReview),
+      },
+      keyQuestions: keyQuestions.map((question, index) => ({
+        blockId: question.blockId || `key-question-${index + 1}`,
+        questionNumber: snapshotValue(question.fields?.questionNumber),
+        title: snapshotValue(question.fields?.title),
+        selectionReason: snapshotValue(question.fields?.selectionReason),
+        concepts: snapshotValue(question.fields?.concepts, []),
+        strategy: snapshotValue(question.fields?.strategy),
+        errorPoint: snapshotValue(question.fields?.errorPoint),
+        similarTypeEvidence: snapshotValue(question.fields?.similarTypeEvidence),
+        sourceAssetId: snapshotValue(question.fields?.sourceAsset),
+        solutionAssetId: snapshotValue(question.fields?.solutionAsset),
+        sourceCaption: "",
+      })),
+      nextPreparation: { actionItems: actions.slice(0, 5) },
+      cta: {
+        valueStatement: snapshotValue(cta.valueStatement),
+        contactOrNextAction: snapshotValue(cta.contactOrNextAction),
+      },
+    },
+  });
+}
+
 export function updateExamAnalysisPromptStudioLocalDraft(localState, updater) {
   const current = localState?.draft ?? normalizeExamAnalysisPromptStudioDraft();
   const candidate = typeof updater === "function" ? updater(current) : updater;

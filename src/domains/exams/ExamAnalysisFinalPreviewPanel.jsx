@@ -1,4 +1,5 @@
 import { examAnalysisPreviewPalette } from "./finalPreview.js";
+import { ExamAnalysisPromptStudioPanel } from "./ExamAnalysisPromptStudioPanel.jsx";
 
 function formatExamAnalysisPreviewEventTime(value) {
   if (!value) return "";
@@ -250,6 +251,7 @@ export function ExamAnalysisFinalPreviewPanel({ model }) {
         <span>{model.notes.formulaPolicy}</span>
         <span>{model.notes.publicOutputPolicy}</span>
       </div>
+      <ExamAnalysisPromptStudioPanel analysisRunId={model.meta.analysisRunId} />
     </div>
   );
 }

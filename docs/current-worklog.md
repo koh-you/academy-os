@@ -1,5 +1,18 @@
 # Academy OS Current Worklog
 
+## 2026-07-22 P1. 시험분석 구현 I4 역할 입력·문구 드롭다운 UI
+
+- 상태: 구현·AI 자동검증 완료. 데이터/DOM/빌드 계약이 통과해 I5로 진행하며, 실제 화면의 밀도·모바일 사용감은 I6까지 연결한 뒤 한 번의 사람 검수 Gate로 묶는다.
+- 사용자 의도: 웹 OS의 확정 데이터를 시작점으로 중·고 학교급, 역할별 입력, 블로그 문구 사례를 선택·수정해 반복 가능한 슬라이드 프롬프트 작업본을 만든다.
+- 구현: `ExamAnalysisPromptStudioPanel`을 최종 미리보기 아래에 연결했다. 공통/시험 분석/주요문항/다음 대비/CTA 입력, 중·고 전환, 주요문항 추가·삭제, 문제 crop·검증 손풀이 ID의 명시적 빈칸을 제공한다.
+- 문구 UX: I1 문구를 학교급·필드별로 필터한다. 드롭다운 선택만으로는 값을 바꾸지 않고 적용 버튼을 눌러야 local draft에 이어 붙인다. 사실 필드에는 문구 드롭다운이 없다.
+- 저장 UX: 패널 안에서 saved/dirty/saving/verifying/verified/failed 상태를 표시하고 I3 API 재조회 검증을 사용한다. 실패하면 local draft를 유지한다.
+- 충돌 회피: 병렬 리팩터링 세션의 dirty `App.jsx`, `App.css`, scenario test를 수정하지 않았다. 독립 컴포넌트/CSS와 기존 최종 미리보기 연결점만 사용했다.
+- 저장 원천/side effect: 저장 버튼만 `audit_summary.promptStudio`를 변경한다. 기존 final/teacher/AI/outputDrafts, Storage, AI, 이미지 생성, 알림은 변경하지 않는다.
+- 검증: phrase/input/save unit fixture, UI 계약 검사, `git diff --check`, `npm run build` 통과. 중·고 문구 필터, 사실 필드 옵션 0건, 명시 적용 버튼, 저장 재조회 함수 연결, 반응형 CSS를 확인했다. 빌드는 기존 chunk size 경고만 남았다.
+- 다음 Gate: I5에서 중·고 기본 시퀀스와 조건부 주요문항/손풀이 역할을 실제 데이터에 따라 조립하고 슬라이드 번호를 연속 생성한다.
+- 중단 조건: 선택만으로 기존 문구 덮어쓰기, AI 후보 자동 입력, crop ID 없는 이미지를 있는 것으로 표시, 저장 실패 시 draft 소실, App 리팩터링 파일 충돌.
+
 ## 2026-07-22 P1. 시험분석 구현 I3 프롬프트 작업본 저장 계약
 
 - 상태: 구현·AI 자동검증 완료. 실제 운영 write 없이 저장 계약과 실패 복구를 검증했으며, 별도 사람 검수 없이 I4 UI로 진행한다.

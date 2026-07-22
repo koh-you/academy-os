@@ -1,0 +1,45 @@
+.examPromptStudio { display: grid; gap: 16px; }
+.examPromptStudioHeader { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
+.examPromptStudioHeader > div:first-child { display: grid; gap: 5px; }
+.examPromptStudioHeader strong { font-size: 18px; }
+.examPromptStudioHeader span { color: var(--text-muted, #64748b); font-size: 13px; }
+.examPromptSaveBadge { min-width: 190px; border: 1px solid #cbd5e1; border-radius: 12px; padding: 9px 12px; display: grid; gap: 3px; background: #f8fafc; }
+.examPromptSaveBadge.dirty { border-color: #f59e0b; background: #fffbeb; }
+.examPromptSaveBadge.saving, .examPromptSaveBadge.verifying { border-color: #3b82f6; background: #eff6ff; }
+.examPromptSaveBadge.verified { border-color: #10b981; background: #ecfdf5; }
+.examPromptSaveBadge.failed { border-color: #ef4444; background: #fef2f2; }
+.examPromptSaveBadge small { font-size: 11px; color: #64748b; }
+.examPromptMissingNotice, .examPromptReadyNotice { border-radius: 12px; padding: 12px 14px; display: grid; gap: 5px; font-size: 12px; }
+.examPromptMissingNotice { border: 1px solid #f5c26b; background: #fffaf0; }
+.examPromptReadyNotice { border: 1px solid #86efac; background: #f0fdf4; }
+.examPromptMissingNotice > span { color: #7c2d12; }
+.examPromptMissingNotice small { color: #92400e; }
+.examPromptLevelSwitch { display: flex; gap: 8px; }
+.examPromptLevelSwitch button { border: 1px solid #cbd5e1; border-radius: 999px; background: white; padding: 8px 14px; cursor: pointer; }
+.examPromptLevelSwitch button.active { border-color: #2563eb; color: #1d4ed8; background: #eff6ff; font-weight: 700; }
+.examPromptRoleGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.examPromptRoleCard { border: 1px solid #dbe3ee; border-radius: 16px; padding: 15px; display: grid; gap: 12px; background: #fff; }
+.examPromptRoleCard.wide { grid-column: 1 / -1; }
+.examPromptRoleCard h4 { margin: 0; display: grid; gap: 3px; }
+.examPromptRoleCard h4 small { color: #64748b; font-weight: 500; }
+.examPromptRoleHeading { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.examPromptFieldGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.examPromptField { display: grid; gap: 6px; }
+.examPromptField > span { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.examPromptField small { color: #94a3b8; font-size: 10px; }
+.examPromptField input, .examPromptField textarea, .examPromptPhrasePicker select { width: 100%; border: 1px solid #cbd5e1; border-radius: 9px; padding: 9px 10px; background: #fff; color: inherit; box-sizing: border-box; }
+.examPromptField textarea { resize: vertical; min-height: 76px; }
+.examPromptPhrasePicker { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 7px; align-items: center; padding: 8px; border-radius: 10px; background: #f8fafc; }
+.examPromptPhrasePicker small { grid-column: 1 / -1; color: #64748b; }
+.examPromptQuestionCard { border-top: 1px dashed #cbd5e1; padding-top: 14px; display: grid; gap: 10px; }
+.examPromptQuestionTitle { display: flex; justify-content: flex-start; gap: 10px; align-items: center; }
+.examPromptQuestionTitle span { font-size: 11px; color: #b45309; }
+.examPromptQuestionTitle button { margin-left: auto; }
+.examPromptSaveBar { position: sticky; bottom: 10px; z-index: 4; border: 1px solid #bfdbfe; background: rgba(239,246,255,.96); border-radius: 14px; padding: 11px 13px; display: flex; justify-content: space-between; gap: 12px; align-items: center; box-shadow: 0 8px 28px rgba(15,23,42,.12); }
+@media (max-width: 900px) {
+  .examPromptStudioHeader, .examPromptSaveBar { align-items: stretch; flex-direction: column; }
+  .examPromptRoleGrid, .examPromptFieldGrid { grid-template-columns: 1fr; }
+  .examPromptRoleCard.wide { grid-column: auto; }
+  .examPromptPhrasePicker { grid-template-columns: 1fr; }
+  .examPromptPhrasePicker small { grid-column: auto; }
+}

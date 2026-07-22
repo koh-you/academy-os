@@ -152,6 +152,7 @@ export function createExamAnalysisFinalPreviewModel({ analysisRun = {}, question
 
   return {
     meta: {
+      analysisRunId: analysisRun?.analysisRunId || "",
       title: analysisRun?.title || "시험분석 최종 미리보기",
       schoolName: analysisRun?.schoolName || "",
       grade: analysisRun?.grade || "",
