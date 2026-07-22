@@ -13,6 +13,7 @@ import {
   getSupplementTaskSourceVersion,
   getSupplementTeacherEditedFields,
   isSupplementTeacherEditedField,
+  mergeSupplementTaskSaveStatus,
   mergeSupplementTeacherEditedFields,
   supplementNotificationDraftConfigs,
   syncSupplementTaskDraftEntries,
@@ -36,6 +37,22 @@ assert.deepEqual(
   createSupplementDraftSaveStatusPatch("supplementMethod", { lesson: "saved", notificationDraft: "saved" }),
   { lesson: "saved", makeupTask: "changed", notificationDraft: "saved" }
 );
+const saveStatusMap = {
+  "task-1": { lesson: "saved", makeupTask: "saved" },
+  "task-2": { lesson: "changed" }
+};
+assert.deepEqual(mergeSupplementTaskSaveStatus(saveStatusMap, "task-1", { makeupTask: "saving" }), {
+  "task-1": { lesson: "saved", makeupTask: "saving" },
+  "task-2": { lesson: "changed" }
+});
+assert.deepEqual(mergeSupplementTaskSaveStatus(saveStatusMap, "task-3", { notificationDraft: "changed" }), {
+  ...saveStatusMap,
+  "task-3": { notificationDraft: "changed" }
+});
+assert.deepEqual(saveStatusMap, {
+  "task-1": { lesson: "saved", makeupTask: "saved" },
+  "task-2": { lesson: "changed" }
+});
 
 const editedTask = {
   supplementTeacherEditedFields: ["notificationDraft", "invalid", "notificationDraft", "parentScheduleNotificationDraft"]

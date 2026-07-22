@@ -104,6 +104,7 @@ import {
   getSupplementPersistedEditFingerprint,
   getSupplementTaskDraftDiff as getSupplementTaskDraftDiffModel,
   isSupplementTeacherEditedField,
+  mergeSupplementTaskSaveStatus,
   supplementNotificationDraftConfigs
 } from "../domains/supplements/supplementTaskDraft.js";
 import {
@@ -24629,13 +24630,7 @@ function SupplementStudentModal({
   }
 
   function setTaskSaveStatusPatch(taskId, patch) {
-    setTaskSaveStatus((current) => ({
-      ...current,
-      [taskId]: {
-        ...(current[taskId] ?? {}),
-        ...patch
-      }
-    }));
+    setTaskSaveStatus((current) => mergeSupplementTaskSaveStatus(current, taskId, patch));
   }
 
   function updateTaskDraft(task, field, value) {
