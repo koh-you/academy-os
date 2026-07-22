@@ -184,6 +184,7 @@ Git 충돌 방지 규칙:
 - 12R-6에서 결석 원천 취소 UI action을 `supplementTaskActions.js`로 옮기고 production 386/386, build, 고태영 격리 결석 화면 gate를 통과했습니다. AI가 record pending과 사유·시간 초기화, task/job 0건을 재대조했고 임시 수업·record를 모두 0건으로 정리했습니다.
 - 12R-7에서 보충 일정 생성의 UI status/feedback/draft saved/confirm reset 순서를 `supplementTaskActions.js`로 옮기고 production 387/387, build, diff 검사를 통과했습니다. 실제 lesson/task/notification/Solapi callback은 App에 유지합니다.
 - 12R-7은 사용자가 일정 생성·새로고침과 18시 학생·학부모 알림톡 2건 수신을 통과했습니다. 사용자가 남은 Solapi 예약을 처리한 뒤 AI가 OS row 3건 `canceled`를 확인했고, task·연결/원천 lesson·homework를 정리해 모두 0건으로 재조회했습니다. canceled 감사 row 3건은 보존합니다. 자동검증 후 12R-7을 commit/push하고 다음 의미 단위는 다시 최신 `origin/main` fetch/rebase로 시작합니다. 기존 사람 gate 3개는 통과로 바꾸지 않습니다.
+- 12R-8에서 개별 알림 control의 예약/취소 중·성공·실패 feedback과 task status field 반영 순서를 `supplementTaskActions.js`로 옮겼습니다. 실제 notification API/Supabase/Solapi/React job state는 App이 주입하는 기존 callback에 남았습니다. deterministic 예약·취소·실패 fixture, production 388/388, build를 통과했고, 11B-9/12R-7의 동일 callback 실검수를 유지해 추가 유료 사람 gate는 생성하지 않습니다.
 
 통과한 11B-1 사람 gate 기록:
 1. 삭제 가능한 미래 보충 task와 통제된 학생/학부모 전화번호를 준비합니다.

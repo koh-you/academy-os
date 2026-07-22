@@ -59,6 +59,7 @@ import { createSupplementNotificationControlViewModel } from "../domains/supplem
 import { SupplementTaskCard } from "../domains/supplements/SupplementTaskCard.jsx";
 import { createSupplementTaskCardViewModel } from "../domains/supplements/supplementTaskCardModel.js";
 import {
+  applySupplementNotificationControlAction,
   applySupplementScheduleAction,
   cancelSupplementAbsenceSourceAction,
   passSupplementTaskAction,
@@ -22767,21 +22768,18 @@ function SupplementStudentModal({
   async function handleNotificationControlAction(action) {
     if (!notificationControlTask || !notificationControl || notificationControlBusy) return;
     setNotificationControlBusy(true);
-    setNotificationControlFeedback({ message: action === "cancel" ? "Solapi 예약 취소 중입니다." : "Solapi 예약 생성 중입니다.", tone: "saving" });
     try {
-      const result = action === "cancel"
-        ? await onCancelNotification?.(notificationControlJob)
-        : await onReserveNotification?.(notificationControlTask, notificationControl.controlType);
-      const nextStatus = action === "cancel" ? "canceled" : result?.status || "scheduled";
-      setTaskSaveStatusPatch(notificationControlTask.makeupTaskId, {
-        [notificationControlConfig.statusField]: nextStatus
+      await applySupplementNotificationControlAction({
+        action,
+        controlType: notificationControl.controlType,
+        notificationJob: notificationControlJob,
+        onCancelNotification: (job) => onCancelNotification?.(job),
+        onFeedback: setNotificationControlFeedback,
+        onReserveNotification: (task, controlType) => onReserveNotification?.(task, controlType),
+        onSaveStatus: (patch) => setTaskSaveStatusPatch(notificationControlTask.makeupTaskId, patch),
+        statusField: notificationControlConfig.statusField,
+        task: notificationControlTask
       });
-      setNotificationControlFeedback({
-        message: result?.message || (action === "cancel" ? "Solapi 예약을 취소했습니다." : "Solapi 예약을 완료했습니다."),
-        tone: "success"
-      });
-    } catch (error) {
-      setNotificationControlFeedback({ message: error?.message || "알림톡 작업에 실패했습니다.", tone: "failed" });
     } finally {
       setNotificationControlBusy(false);
     }

@@ -8,6 +8,14 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-22 P1. 12R-8 개별 알림 예약·취소 UI action 분리
+
+- 코드: `applySupplementNotificationControlAction`이 예약/취소 중 feedback, 주입된 reserve/cancel callback, task status field 반영, 성공/실패 feedback 순서를 소유한다. App은 busy guard/finally, 현재 task/job/control 선택과 실제 notification callback을 유지한다.
+- 원천/side effect 보존: `/api/notification-jobs/reserve|cancel`, Supabase `notification_jobs`, Solapi 그룹, React 전역 job state, 대상·문구·시각 결정은 이동하지 않았다. 새 action은 App이 주입한 기존 callback만 await한다.
+- 검증: 예약 성공, 취소 fallback 문구, 예약 실패의 event 순서와 status field를 deterministic fixture로 고정했다. production 388/388, build, `git diff --check`를 통과했고 기존 Vite 500KB chunk 경고만 남는다.
+- 테스트 하네스: 88b-19의 내용 저장 action 무부작용 검사를 공유 파일 전체에서 해당 함수 본문으로 좁혔다. 기존 기대를 삭제하지 않고 저장 action에 reserve/cancel callback이 없는지 계속 검사한다.
+- 사람 gate: 추가 유료 호출 없음. 11B-9의 개별 예약/취소 실검수와 12R-7의 실제 예약·발송·취소 gate가 동일 주입 callback 경계를 이미 통과했고, 이번 변경은 그 경계 밖 UI feedback/status 순서만 이동했다.
+
 ## 2026-07-22 P1. 12R-7 보충 일정 생성 UI action 분리 — 사람 gate 통과
 
 - 코드: `applySupplementScheduleAction`이 일정 저장 중/성공/실패의 6개 UI status, feedback, draft saved, 확인창 reset 순서를 소유한다. App은 유효성 검사, draft payload, busy guard/finally와 실제 lesson/task/Solapi callback을 유지한다.
