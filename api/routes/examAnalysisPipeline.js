@@ -1,5 +1,10 @@
 import crypto from "node:crypto";
 import { callRpc, deleteRows, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
+import {
+  areExamAnalysisPromptStudioDraftsEqual,
+  getExamAnalysisPromptStudioDraftFromRun,
+  normalizeExamAnalysisPromptStudioDraft
+} from "../../src/domains/exams/examAnalysisPromptStudioDraft.js";
 
 const fallbackSource = "local_sample";
 const databaseSource = "supabase";
@@ -405,6 +410,63 @@ export async function updateExamAnalysisRun(analysisRunId, patch = {}) {
     toRunRow({ ...patch, analysisRunId })
   );
   return { source: databaseSource, analysisRun: rows[0] ? fromRunRow(rows[0]) : null };
+}
+
+export async function saveExamAnalysisPromptStudioDraft({
+  analysisRunId,
+  promptStudioDraft = {},
+  expectedRevision = 0
+} = {}) {
+  if (!analysisRunId) throw new Error("analysisRunId가 필요합니다.");
+  requireServiceRole();
+  const detail = await getExamAnalysisRun(analysisRunId);
+  if (!detail.analysisRun?.analysisRunId) throw new Error("시험분석 작업을 찾지 못했습니다.");
+
+  const previousDraft = getExamAnalysisPromptStudioDraftFromRun(detail.analysisRun);
+  const expected = Math.max(0, Number.parseInt(expectedRevision, 10) || 0);
+  if (previousDraft.revision !== expected) {
+    const error = new Error(`다른 화면에서 프롬프트 작업본이 변경되었습니다. 현재 revision ${previousDraft.revision}을 다시 불러와 주세요.`);
+    error.statusCode = 409;
+    throw error;
+  }
+
+  const savedAt = new Date().toISOString();
+  const nextDraft = normalizeExamAnalysisPromptStudioDraft({
+    ...promptStudioDraft,
+    revision: previousDraft.revision + 1,
+    savedAt
+  });
+  await updateExamAnalysisRun(analysisRunId, {
+    auditSummary: {
+      ...(detail.analysisRun.auditSummary ?? {}),
+      promptStudio: nextDraft
+    }
+  });
+
+  const reread = await getExamAnalysisRun(analysisRunId);
+  const rereadDraft = getExamAnalysisPromptStudioDraftFromRun(reread.analysisRun);
+  const verified = areExamAnalysisPromptStudioDraftsEqual(nextDraft, rereadDraft)
+    && rereadDraft.revision === nextDraft.revision
+    && rereadDraft.savedAt === nextDraft.savedAt
+    && rereadDraft.savedBy === nextDraft.savedBy;
+  if (!verified) throw new Error("프롬프트 작업본 저장 후 Supabase 재조회 검증에 실패했습니다.");
+
+  await recordExamAnalysisEvent({
+    analysisRunId,
+    eventType: "exam_analysis_prompt_studio_saved",
+    message: `시험분석 프롬프트 작업본 revision ${nextDraft.revision} 저장을 확인했습니다.`,
+    payload: {
+      revision: nextDraft.revision,
+      keyQuestionCount: nextDraft.roleInputs.keyQuestions.length,
+      assetCount: nextDraft.assets.length
+    }
+  });
+
+  return {
+    ...reread,
+    promptStudioDraft: rereadDraft,
+    saveVerification: { verified: true, revision: rereadDraft.revision, verifiedAt: new Date().toISOString() }
+  };
 }
 
 export async function getExamAnalysisSource(sourceId) {

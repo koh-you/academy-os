@@ -93,6 +93,7 @@ import {
   saveExamAnalysisQuestionBoundaries,
   saveExamAnalysisQuestionRowFill,
   saveExamAnalysisQuestionTeacherReviews,
+  saveExamAnalysisPromptStudioDraft,
   updateExamAnalysisRun,
   updateExamAnalysisSource,
   upsertExamAnalysisRun
@@ -5940,6 +5941,21 @@ const server = http.createServer(async (request, response) => {
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-prompt-studio") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await saveExamAnalysisPromptStudioDraft({
+        analysisRunId: payload.analysisRunId,
+        promptStudioDraft: payload.promptStudioDraft,
+        expectedRevision: payload.expectedRevision
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, error.statusCode || 500, { ok: false, error: error.message });
     }
     return;
   }

@@ -1,5 +1,19 @@
 # Academy OS Current Worklog
 
+## 2026-07-22 P1. 시험분석 구현 I3 프롬프트 작업본 저장 계약
+
+- 상태: 구현·AI 자동검증 완료. 실제 운영 write 없이 저장 계약과 실패 복구를 검증했으며, 별도 사람 검수 없이 I4 UI로 진행한다.
+- 사용자 의도: 문구 선택과 슬라이드 입력을 편집하는 중에는 local draft를 유지하고, 저장 버튼을 누른 뒤 Supabase 재조회까지 일치해야만 저장 완료로 판단한다.
+- 구현: `examAnalysisPromptStudioDraft.js`에 정규화 schema, local saved/dirty 상태, 저장 payload, 재조회 검증 함수를 추가했다. 서버는 `/api/exam-analysis-runs/save-prompt-studio`에서 `audit_summary.promptStudio`만 병합 저장하고 다시 조회해 전체 값과 revision 메타를 검증한다.
+- 경쟁 방지: 저장 payload의 `expectedRevision`이 서버 최신 revision과 다르면 409로 중단한다. 오래된 탭이 최신 교사 작업본을 덮어쓰지 않는다.
+- 저장 상태: UI가 연결할 상태를 `saved -> dirty -> saving -> verifying -> verified` 및 `failed`로 정의했다. API 성공만으로 완료 처리하지 않는다.
+- 저장 원천/side effect: `exam_analysis_runs.audit_summary.promptStudio`가 프롬프트 작업본 원천이다. 기존 final/teacher/AI 필드와 outputDrafts를 보존한다. 새 DB/Storage/AI/이미지 생성/알림 side effect는 없다.
+- 검증: 문법 검사, `npm run test:exam-prompt-studio-draft`, `git diff --check`, `npm run build` 통과. revision 2→3 저장 payload, 재조회 일치 성공, 불일치 실패, 실패 시 local draft 유지, 다른 audit summary 보존을 fixture로 확인했다. 빌드는 기존 chunk size 경고만 남았다.
+- 전체 회귀 참고: `npm run test:production` 366건 중 시험분석과 무관한 기존 `04d-1 student schedule override...` 문자열 검사가 1건 실패했다. 현재 Windows checkout의 `api/server.js` CRLF와 테스트의 LF 포함 문자열 비교 차이로 재현되며 I3 변경 파일/동작과 무관하다. 병렬 유지보수·리팩터링 소유 파일은 이 Gate에서 수정하지 않는다.
+- AI 검수: API 성공만으로 완료 처리하지 않고 실제 run 재조회와 전체 정규화 값·revision·savedAt·savedBy 일치를 요구한다. 재조회 실패/경쟁 revision에서는 최신 서버값으로 local draft를 자동 덮어쓰지 않는다. I3 자체에서 사람이 판정할 화면은 아직 없다.
+- 다음 Gate: I4에서 중·고 시퀀스, 역할별 입력, 문구 드롭다운을 이 local/save 계약에 연결한다.
+- 중단 조건: revision 불일치 무시, API 응답만으로 완료 표시, local draft 유실, 기존 audit_summary 키 덮어쓰기, 자산 메타데이터를 실제 업로드로 오인.
+
 ## 2026-07-22 P1. 시험분석 구현 I2 저장 원천·누락 상태 매핑
 
 - 상태: 구현·AI 자동검증 완료. 순수 데이터 계약이고 실제 화면·운영 데이터 판단이 없어 별도 사람 검수 없이 I3로 진행한다.
