@@ -201,8 +201,6 @@ function getSpecialLectureSessionPlanError(plan = {}, session = {}) {
   const effective = getEffectiveSpecialLectureSession(session, plan);
   if (!effective.startTime || !effective.endTime) return "실제 시간을 확인해 주세요.";
   if (effective.startTime >= effective.endTime) return "종료 시간은 시작 시간보다 늦어야 합니다.";
-  const hasOverride = Boolean(plan.effectiveStartTime || plan.effectiveEndTime);
-  if (hasOverride && !String(plan.overrideReason || "").trim()) return "시간을 조정한 회차는 조정 사유가 필요합니다.";
   return "";
 }
 
@@ -390,7 +388,7 @@ export function SpecialLectureApplicationPanel({
   const [matchStudentId, setMatchStudentId] = useState("");
   const [planModalEnrollment, setPlanModalEnrollment] = useState(null);
   const [planSaveState, setPlanSaveState] = useState({ message: "", state: "idle" });
-  const [commonSessionTimeDraft, setCommonSessionTimeDraft] = useState({ endTime: "", overrideReason: "개인 일정", startTime: "" });
+  const [commonSessionTimeDraft, setCommonSessionTimeDraft] = useState({ endTime: "", overrideReason: "", startTime: "" });
   const [editingSessionOverrideId, setEditingSessionOverrideId] = useState("");
   const [progressModalEnrollment, setProgressModalEnrollment] = useState(null);
   const [isEnrollmentPanelOpen, setIsEnrollmentPanelOpen] = useState(false);
@@ -767,12 +765,12 @@ export function SpecialLectureApplicationPanel({
       .filter((plan) => plan.status === "active" && plan.effectiveStartTime && plan.effectiveEndTime);
     const commonTimeCounts = new Map();
     activeAdjustedPlans.forEach((plan) => {
-      const key = `${plan.effectiveStartTime}|${plan.effectiveEndTime}|${plan.overrideReason || "개인 일정"}`;
+      const key = `${plan.effectiveStartTime}|${plan.effectiveEndTime}|${plan.overrideReason || ""}`;
       commonTimeCounts.set(key, (commonTimeCounts.get(key) ?? 0) + 1);
     });
     const commonTimeKey = [...commonTimeCounts.entries()].sort((left, right) => right[1] - left[1])[0]?.[0] ?? "";
-    const [startTime = "", endTime = "", overrideReason = "개인 일정"] = commonTimeKey.split("|");
-    setCommonSessionTimeDraft({ startTime, endTime, overrideReason: overrideReason || "개인 일정" });
+    const [startTime = "", endTime = "", overrideReason = ""] = commonTimeKey.split("|");
+    setCommonSessionTimeDraft({ startTime, endTime, overrideReason });
     setEditingSessionOverrideId("");
     setPlanModalEnrollment(enrollment);
     setPlanSaveState({ message: "", state: "idle" });
@@ -833,10 +831,6 @@ export function SpecialLectureApplicationPanel({
     const { startTime, endTime, overrideReason } = commonSessionTimeDraft;
     if (!startTime || !endTime || startTime >= endTime) {
       setPlanSaveState({ message: "공통 시작·종료 시간을 확인해 주세요.", state: "failed" });
-      return;
-    }
-    if (!String(overrideReason || "").trim()) {
-      setPlanSaveState({ message: "공식 시간과 다른 공통 시간에는 조정 사유가 필요합니다.", state: "failed" });
       return;
     }
     const draft = getEnrollmentDraft(enrollment);
@@ -1110,7 +1104,7 @@ export function SpecialLectureApplicationPanel({
               </div>
             </div>
           ))}
-          {invalidPlanRows.length ? <p className="inlineNotice danger">시간 또는 조정 사유를 확인해야 하는 학생별 회차가 {invalidPlanRows.length}건 있습니다.</p> : null}
+          {invalidPlanRows.length ? <p className="inlineNotice danger">시작·종료 시간을 확인해야 하는 학생별 회차가 {invalidPlanRows.length}건 있습니다.</p> : null}
           {additiveLockedLessonRows.length ? <p className="inlineNotice">오늘/과거 수업 중 기존 기록을 건드리지 않고 학생만 추가할 수 있는 회차가 {additiveLockedLessonRows.length}건 있습니다. 아래 `특강 수업일지 반영`에서 확인 후 추가하세요.</p> : null}
           {protectedLockedLessonRows.length ? <p className="inlineNotice danger">완료 수업, 기존 학생의 시간·명단 변경 또는 알림 예약이 포함된 {protectedLockedLessonRows.length}건은 자동 반영하지 않습니다.</p> : null}
           {pastMissingLessonRows.length ? <p className="inlineNotice danger">이미 지난 공식 회차 중 수업일지가 없는 {pastMissingLessonRows.length}건은 자동 생성하지 않습니다.</p> : null}
@@ -1484,8 +1478,8 @@ export function SpecialLectureApplicationPanel({
                   <input type="time" value={commonSessionTimeDraft.endTime} onChange={(event) => setCommonSessionTimeDraft((current) => ({ ...current, endTime: event.target.value }))} />
                 </label>
                 <label className="specialLectureCommonTimeReason">
-                  조정 사유
-                  <input placeholder="예: 개인 일정" value={commonSessionTimeDraft.overrideReason} onChange={(event) => setCommonSessionTimeDraft((current) => ({ ...current, overrideReason: event.target.value }))} />
+                  조정 사유 (선택)
+                  <input placeholder="필요한 경우에만 입력" value={commonSessionTimeDraft.overrideReason} onChange={(event) => setCommonSessionTimeDraft((current) => ({ ...current, overrideReason: event.target.value }))} />
                 </label>
                 <div className="specialLectureCommonTimeActions">
                   <button className="primaryButton compact" onClick={() => applyCommonTimeToSelectedSessions(enrollment)} type="button">선택 회차에 적용</button>
@@ -1530,8 +1524,8 @@ export function SpecialLectureApplicationPanel({
                             <input type="time" value={plan?.effectiveEndTime || ""} onChange={(event) => updateEnrollmentSessionPlan(enrollment, session.sessionId, { effectiveEndTime: event.target.value })} />
                           </label>
                           <label className="specialLectureSessionOverrideReason">
-                            조정 사유
-                            <input placeholder="예: 학교 일정으로 12시 시작" value={plan?.overrideReason || ""} onChange={(event) => updateEnrollmentSessionPlan(enrollment, session.sessionId, { overrideReason: event.target.value })} />
+                            조정 사유 (선택)
+                            <input placeholder="필요한 경우에만 입력" value={plan?.overrideReason || ""} onChange={(event) => updateEnrollmentSessionPlan(enrollment, session.sessionId, { overrideReason: event.target.value })} />
                           </label>
                           {hasOverride ? (
                             <button className="softButton compact" onClick={() => updateEnrollmentSessionPlan(enrollment, session.sessionId, { effectiveStartTime: "", effectiveEndTime: "", overrideReason: "" })} type="button">
