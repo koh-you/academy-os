@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  cancelSupplementAbsenceSourceAction,
   passSupplementTaskAction,
   saveSupplementTaskContentAction
 } from "../src/domains/supplements/supplementTaskActions.js";
@@ -91,6 +92,39 @@ assert.deepEqual(passFailureEvents.map(([type]) => type), ["feedback", "pass", "
 assert.deepEqual(passFailureEvents[2][1], {
   message: "완료 재조회 불일치",
   title: "보충 완료 처리 실패",
+  tone: "failed"
+});
+
+const absenceCancelEvents = [];
+const sourceRecord = { attendanceStatus: "pending", lessonStudentRecordId: "record-1" };
+const absenceCancelResult = await cancelSupplementAbsenceSourceAction({
+  cancelSource: async (payload) => {
+    absenceCancelEvents.push(["cancel", payload]);
+    return sourceRecord;
+  },
+  onClose: () => absenceCancelEvents.push(["close"]),
+  onFeedback: (value) => absenceCancelEvents.push(["feedback", value]),
+  task
+});
+assert.equal(absenceCancelResult, sourceRecord);
+assert.deepEqual(absenceCancelEvents.map(([type]) => type), ["feedback", "cancel", "feedback", "close"]);
+assert.equal(absenceCancelEvents[0][1].tone, "saving");
+assert.equal(absenceCancelEvents[2][1].tone, "success");
+
+const absenceCancelFailureEvents = [];
+await assert.rejects(() => cancelSupplementAbsenceSourceAction({
+  cancelSource: async () => {
+    absenceCancelFailureEvents.push(["cancel"]);
+    throw new Error("출결 재조회 불일치");
+  },
+  onClose: () => absenceCancelFailureEvents.push(["close"]),
+  onFeedback: (value) => absenceCancelFailureEvents.push(["feedback", value]),
+  task
+}), /출결 재조회 불일치/);
+assert.deepEqual(absenceCancelFailureEvents.map(([type]) => type), ["feedback", "cancel", "feedback"]);
+assert.deepEqual(absenceCancelFailureEvents[2][1], {
+  message: "출결 재조회 불일치",
+  title: "결석 처리 취소 실패",
   tone: "failed"
 });
 

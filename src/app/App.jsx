@@ -58,7 +58,11 @@ import { SupplementNotificationControlModal } from "../domains/supplements/Suppl
 import { createSupplementNotificationControlViewModel } from "../domains/supplements/supplementNotificationControlModel.js";
 import { SupplementTaskCard } from "../domains/supplements/SupplementTaskCard.jsx";
 import { createSupplementTaskCardViewModel } from "../domains/supplements/supplementTaskCardModel.js";
-import { passSupplementTaskAction, saveSupplementTaskContentAction } from "../domains/supplements/supplementTaskActions.js";
+import {
+  cancelSupplementAbsenceSourceAction,
+  passSupplementTaskAction,
+  saveSupplementTaskContentAction
+} from "../domains/supplements/supplementTaskActions.js";
 import { SupplementStudentModalShell } from "../domains/supplements/SupplementStudentModalShell.jsx";
 import { useSupplementTaskDraftController } from "../domains/supplements/useSupplementTaskDraftController.js";
 import {
@@ -22688,15 +22692,15 @@ function SupplementStudentModal({
     if (!task || busyTaskId) return;
     const actionKey = `${task.makeupTaskId}:cancelAbsence`;
     setBusyTaskId(actionKey);
-    showFeedback("결석 처리 취소 중", "원 수업일지 출결을 대기 상태로 되돌리고 보충 생성 후보를 정리합니다.", "saving");
-
     try {
-      await onCancelAbsenceSource?.(task);
-      showFeedback("결석 처리 취소 완료", "원 수업일지 출결이 대기 상태로 돌아갔습니다. 이 결석보강 후보는 목록에서 사라집니다.");
-      onClose?.();
+      await cancelSupplementAbsenceSourceAction({
+        cancelSource: (payload) => onCancelAbsenceSource?.(payload),
+        onClose: () => onClose?.(),
+        onFeedback: ({ message, title, tone }) => showFeedback(title, message, tone),
+        task
+      });
     } catch (error) {
       console.error("Failed to cancel absence source", error);
-      showFeedback("결석 처리 취소 실패", error?.message || "원 수업일지 출결을 되돌리지 못했습니다.", "failed");
     } finally {
       setBusyTaskId("");
     }

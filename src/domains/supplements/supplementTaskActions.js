@@ -73,3 +73,34 @@ export async function passSupplementTaskAction({
     throw error;
   }
 }
+
+export async function cancelSupplementAbsenceSourceAction({
+  cancelSource,
+  onClose,
+  onFeedback,
+  task
+}) {
+  onFeedback({
+    message: "원 수업일지 출결을 대기 상태로 되돌리고 보충 생성 후보를 정리합니다.",
+    title: "결석 처리 취소 중",
+    tone: "saving"
+  });
+
+  try {
+    const savedRecord = await cancelSource(task);
+    onFeedback({
+      message: "원 수업일지 출결이 대기 상태로 돌아갔습니다. 이 결석보강 후보는 목록에서 사라집니다.",
+      title: "결석 처리 취소 완료",
+      tone: "success"
+    });
+    onClose();
+    return savedRecord;
+  } catch (error) {
+    onFeedback({
+      message: error?.message || "원 수업일지 출결을 되돌리지 못했습니다.",
+      title: "결석 처리 취소 실패",
+      tone: "failed"
+    });
+    throw error;
+  }
+}

@@ -190,6 +190,13 @@
 - fixture와 production check는 저장 callback이 성공 feedback/close보다 먼저 실행되고 실패 시 확인창과 모달을 닫지 않는 계약을 고정한다.
 - 고태영 격리 `retest` task로 화면 완료·active 제외·새로고침 유지를 사람이 확인했다. AI가 task done, 원 record 불변, 알림 job 0건을 재대조하고 task·수업·record를 모두 0건으로 정리했다.
 
+## 12R-6 구현 결과 — 결석 원천 취소 action (사람 gate 통과)
+
+- 진행/성공/실패 feedback, 주입된 출결 취소 callback, 성공 후 모달 close 순서를 `supplementTaskActions.js`로 옮겼다.
+- App은 local draft 제한, busy guard/finally와 실제 `lesson_student_records` 저장·전역 record 갱신을 유지한다. notification/Solapi action은 없다.
+- fixture와 production check는 저장 callback이 성공 feedback/close보다 먼저 실행되고 실패 시 모달을 닫지 않는 계약을 고정한다.
+- 고태영 격리 결석 record를 화면에서 취소해 후보 제거·새로고침 유지를 사람이 확인했다. AI가 pending, 사유·시간 초기화, task/job 0건을 재대조하고 임시 수업·record를 0건으로 정리했다.
+
 ## 즉시 중단 조건
 
 - 분리 중 `/api/lessons`, `/api/makeup-tasks`, `/api/lesson-records` 호출 순서가 바뀐다.

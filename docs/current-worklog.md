@@ -8,6 +8,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-22 P1. 12R-6 결석 원천 취소 action 분리 — 사람 gate 통과
+
+- 코드: `cancelSupplementAbsenceSourceAction`이 진행 feedback, 주입된 출결 취소 callback await, 성공 feedback/모달 close, 실패 feedback/rethrow 순서를 소유한다. App은 busy guard/finally와 실제 `lesson_student_records` 저장·React 목록 갱신을 유지한다.
+- 자동검증: 성공 callback/close 순서, 실패 시 모달 유지와 rethrow fixture, production 386/386, build를 통과했다.
+- 사람 화면 gate: 고태영 전용 수업 `codex_12r6_ui_lesson_1784706991130`과 결석 record `codex_12r6_ui_record_1784706991130`를 만들었다. 사용자가 `보충관리 > 결석보강 > 보충 생성 > 결석 처리 취소` 후 모달 close와 후보 제거·새로고침 유지를 확인했다.
+- AI 재대조/정리: record pending, 사유·등하원 시간·지각 분 초기화, 관련 task/job 0건을 확인했다. 임시 lesson DELETE 후 lesson·record·task·job이 모두 0건임을 재조회했다.
+
 ## 2026-07-22 P1. 12R-5 보충 완료 처리 action 분리 — 사람 gate 통과
 
 - 코드: `passSupplementTaskAction`이 진행 feedback, 주입된 완료 callback await, 성공 feedback, 확인창 reset, 모달 close, 실패 feedback/rethrow 순서를 소유한다. App은 local draft 저장 가능 payload 구성, busy guard/finally, 실제 API·전역 상태·학생 11시 취소 callback을 유지한다.
