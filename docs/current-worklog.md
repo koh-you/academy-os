@@ -1,5 +1,16 @@
 # Academy OS Current Worklog
 
+## 2026-07-22 P1. 시험분석 GPT Image 프롬프트 제작실 main 통합
+
+- 상태: 사용자 요청으로 리팩터링을 일시 중단하고 `codex/exam-analysis-gpt-image`의 I1~I7을 최신 `main`에 충돌 없이 fast-forward 통합했다. 전체 검증까지 통과했으며 통합 기록 커밋·`origin/main` 푸시 후 자동 배포를 확인한다.
+- 통합 범위: 21건·202장 코퍼스 문구, 확정/교사/AI/누락 매핑, `audit_summary.promptStudio` 저장·revision·재조회 계약, 중·고 입력 UI, 조건부 연속 시퀀스, 마스터/장별/수정/QA 프롬프트, TXT/JSON, 상계고1 비운영 fixture다.
+- 리팩터링 보존: `E:\academy-os-refactor`의 `codex/refactor-supplement-11b`는 clean 상태의 최신 커밋 `7464d1b7`에 그대로 보존했다. 보충 예약/취소 side effect 사람 Gate가 없으므로 이번 main 통합에 포함하지 않았다. 재개 시 새 `origin/main` 위에서 rebase해야 한다.
+- 통합 검증 보정: Windows CRLF 때문에 실제 출결 코드는 존재해도 실패하던 scenario `04d-1`의 줄바꿈 포함 문자열을 의미가 같은 두 개의 안정적인 코드 토큰 검사로 바꿨다. 제품 동작이나 기대 수준은 변경하지 않았다.
+- 검증: `npm run test:production` 전체 366건과 신규 시험분석 suite 7종, `npm run build`, `git diff --check`가 모두 통과했다. 빌드는 기존 Vite chunk size 경고만 남았다.
+- 저장 원천/side effect: 시험분석 작업본만 `exam_analysis_runs.audit_summary.promptStudio`에 명시 저장한다. DB 스키마 변경, Storage 업로드, GPT Image 호출, 알림 예약/발송은 없다.
+- 사람 Gate: 배포 후 시험분석 `최종 미리보기`와 기존 `블로그/인스타 산출물 초안` 사이에 `GPT Image 슬라이드 프롬프트 제작실`이 보이는지 확인하고, 테스트 run에서 저장→재조회→새로고침과 복사/TXT/JSON을 검수한다.
+- 중단 조건: production test/build 실패, 배포 번들 미전환, 기존 산출물 초안 소실, 저장 재조회 불일치, 리팩터링 branch의 미검수 변경 혼입.
+
 ## 2026-07-22 P1. 시험분석 구현 I7 현실형 E2E·최종 AI 검수
 
 - 상태: I1~I7 구현·AI 자동검증 완료, 사람 검수 Gate 대기. 코드 브랜치는 통합 준비 상태이며 실제 화면/브라우저/Supabase 검수 전 운영 통과로 판정하지 않는다.
