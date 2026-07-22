@@ -212,3 +212,28 @@ export async function applySupplementNotificationControlAction({
     return null;
   }
 }
+
+export function requestSupplementScheduleAction({
+  onFeedback,
+  onOpenConfirmation,
+  onSaveStatus,
+  onSchedule,
+  task,
+  taskWithDraft
+}) {
+  if (!taskWithDraft.scheduledDate || !taskWithDraft.scheduledTime) {
+    onFeedback({
+      message: "배정일과 시간을 먼저 입력해야 합니다.",
+      title: "수업일지 일정 만들기 실패",
+      tone: "failed"
+    });
+    onSaveStatus({ lesson: "failed" });
+    return "invalid";
+  }
+  if (task.linkedLessonId) {
+    onOpenConfirmation(taskWithDraft);
+    return "confirm";
+  }
+  onSchedule(task);
+  return "schedule";
+}

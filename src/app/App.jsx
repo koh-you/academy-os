@@ -63,6 +63,7 @@ import {
   applySupplementScheduleAction,
   cancelSupplementAbsenceSourceAction,
   passSupplementTaskAction,
+  requestSupplementScheduleAction,
   saveSupplementTaskContentAction
 } from "../domains/supplements/supplementTaskActions.js";
 import { SupplementStudentModalShell } from "../domains/supplements/SupplementStudentModalShell.jsx";
@@ -22607,16 +22608,14 @@ function SupplementStudentModal({
   function requestApplyScheduleTask(task) {
     if (!task?.makeupTaskId || busyTaskId) return;
     const taskWithDraft = createPersistableSupplementTask(buildTaskWithDraft(task));
-    if (!taskWithDraft.scheduledDate || !taskWithDraft.scheduledTime) {
-      showFeedback("수업일지 일정 만들기 실패", "배정일과 시간을 먼저 입력해야 합니다.", "failed");
-      setTaskSaveStatusPatch(task.makeupTaskId, { lesson: "failed" });
-      return;
-    }
-    if (task.linkedLessonId) {
-      setScheduleConfirmTask(taskWithDraft);
-      return;
-    }
-    handleApplyScheduleTask(task);
+    requestSupplementScheduleAction({
+      onFeedback: ({ message, title, tone }) => showFeedback(title, message, tone),
+      onOpenConfirmation: setScheduleConfirmTask,
+      onSaveStatus: (patch) => setTaskSaveStatusPatch(task.makeupTaskId, patch),
+      onSchedule: handleApplyScheduleTask,
+      task,
+      taskWithDraft
+    });
   }
 
   async function handleApplyScheduleTask(task) {

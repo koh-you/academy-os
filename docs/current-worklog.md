@@ -8,6 +8,12 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-22 P1. 12R-9 보충 일정 요청 분기 action 분리
+
+- 코드: `requestSupplementScheduleAction`이 배정일/시간 누락의 실패 feedback·lesson status, 연결 lesson이 있는 일정의 변경 확인창, 신규 일정의 기존 생성 callback 호출을 세 분기로 소유한다.
+- 동작 보존: App은 makeup task ID/busy guard, local draft→persistable payload 생성, 확인창 React state와 실제 `handleApplyScheduleTask`를 유지한다. 신규 분기는 기존처럼 원 task를, 변경 분기는 draft 반영 task를 각각 동일하게 넘긴다.
+- 검증/gate: 누락 시 feedback→status 순서, 연결 일정의 confirm-only, 신규 일정의 schedule-only fixture를 추가했다. production 389/389, build, `git diff --check`를 통과했다. 저장·예약 실행 경계를 바꾸지 않은 순수 UI 분기 이동이며 12R-7 신규 일정 사람 gate가 이미 통과해 추가 사람 gate는 없다.
+
 ## 2026-07-22 P1. 12R-8 개별 알림 예약·취소 UI action 분리
 
 - 코드: `applySupplementNotificationControlAction`이 예약/취소 중 feedback, 주입된 reserve/cancel callback, task status field 반영, 성공/실패 feedback 순서를 소유한다. App은 busy guard/finally, 현재 task/job/control 선택과 실제 notification callback을 유지한다.

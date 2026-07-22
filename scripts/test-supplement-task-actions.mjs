@@ -4,6 +4,7 @@ import {
   applySupplementScheduleAction,
   cancelSupplementAbsenceSourceAction,
   passSupplementTaskAction,
+  requestSupplementScheduleAction,
   saveSupplementTaskContentAction
 } from "../src/domains/supplements/supplementTaskActions.js";
 
@@ -251,5 +252,43 @@ const notificationFailureResult = await applySupplementNotificationControlAction
 assert.equal(notificationFailureResult, null);
 assert.deepEqual(notificationFailureEvents.map(([type]) => type), ["feedback", "reserve", "feedback"]);
 assert.deepEqual(notificationFailureEvents[2][1], { message: "Solapi 서명 실패", tone: "failed" });
+
+const invalidScheduleRequestEvents = [];
+const invalidScheduleRequest = requestSupplementScheduleAction({
+  onFeedback: (value) => invalidScheduleRequestEvents.push(["feedback", value]),
+  onOpenConfirmation: (value) => invalidScheduleRequestEvents.push(["confirm", value]),
+  onSaveStatus: (value) => invalidScheduleRequestEvents.push(["status", value]),
+  onSchedule: (value) => invalidScheduleRequestEvents.push(["schedule", value]),
+  task,
+  taskWithDraft: { ...task, scheduledDate: "", scheduledTime: "" }
+});
+assert.equal(invalidScheduleRequest, "invalid");
+assert.deepEqual(invalidScheduleRequestEvents.map(([type]) => type), ["feedback", "status"]);
+assert.deepEqual(invalidScheduleRequestEvents[1][1], { lesson: "failed" });
+
+const linkedScheduleRequestEvents = [];
+const linkedScheduleTask = { ...scheduledTask, linkedLessonId: "lesson-linked" };
+const linkedScheduleRequest = requestSupplementScheduleAction({
+  onFeedback: (value) => linkedScheduleRequestEvents.push(["feedback", value]),
+  onOpenConfirmation: (value) => linkedScheduleRequestEvents.push(["confirm", value]),
+  onSaveStatus: (value) => linkedScheduleRequestEvents.push(["status", value]),
+  onSchedule: (value) => linkedScheduleRequestEvents.push(["schedule", value]),
+  task: linkedScheduleTask,
+  taskWithDraft: linkedScheduleTask
+});
+assert.equal(linkedScheduleRequest, "confirm");
+assert.deepEqual(linkedScheduleRequestEvents, [["confirm", linkedScheduleTask]]);
+
+const newScheduleRequestEvents = [];
+const newScheduleRequest = requestSupplementScheduleAction({
+  onFeedback: (value) => newScheduleRequestEvents.push(["feedback", value]),
+  onOpenConfirmation: (value) => newScheduleRequestEvents.push(["confirm", value]),
+  onSaveStatus: (value) => newScheduleRequestEvents.push(["status", value]),
+  onSchedule: (value) => newScheduleRequestEvents.push(["schedule", value]),
+  task,
+  taskWithDraft: scheduledTask
+});
+assert.equal(newScheduleRequest, "schedule");
+assert.deepEqual(newScheduleRequestEvents, [["schedule", task]]);
 
 console.log("supplement task actions: deterministic contract passed");
