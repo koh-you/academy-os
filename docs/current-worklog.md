@@ -8,6 +8,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-22 P1. 12R-5 보충 완료 처리 action 분리 — 사람 gate 통과
+
+- 코드: `passSupplementTaskAction`이 진행 feedback, 주입된 완료 callback await, 성공 feedback, 확인창 reset, 모달 close, 실패 feedback/rethrow 순서를 소유한다. App은 local draft 저장 가능 payload 구성, busy guard/finally, 실제 API·전역 상태·학생 11시 취소 callback을 유지한다.
+- 자동검증: 성공 callback 순서와 반환값, 실패 시 확인창/모달 유지와 rethrow fixture, production 385/385, build를 통과했다.
+- 사람 화면 gate: 고태영 전용 미래 수업 `codex_12r5_ui_lesson_1784705343861`, 재시험 원 record `codex_12r5_ui_record_1784705343861`, 저장 task `codex_12r5_ui_task_1784705343861`를 만들었다. 사용자가 `보충관리 > 재시험 > 상세 검토 > 보충 완료 처리` 후 active 목록 제외와 새로고침 유지를 확인했다.
+- AI 재대조/정리: task `done/completed`, completedAt·passedAt 저장, 원 record `needsRetest=true`와 출결 `pending` 불변, 관련 notification job 0건을 확인했다. task 삭제와 임시 lesson DELETE 후 task·lesson·record·관련 job이 모두 0건임을 재조회했다.
+
 ## 2026-07-22 P1. 12R-4 보충 내용 저장 action 분리 — 사람 gate 통과
 
 - 코드: `saveSupplementTaskContentAction`이 saving feedback/status, 주입된 `onSaveTask` await, 저장 결과/fallback, draft saved 반영, success/failure 상태와 재throw를 소유한다. App은 busy guard/finally와 UI callback adapter를 유지한다.

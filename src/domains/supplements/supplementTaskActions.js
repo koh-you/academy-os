@@ -39,3 +39,37 @@ export async function saveSupplementTaskContentAction({
     throw error;
   }
 }
+
+export async function passSupplementTaskAction({
+  onClose,
+  onFeedback,
+  onResetConfirmation,
+  passTask,
+  studentName,
+  taskWithDraft
+}) {
+  onFeedback({
+    message: `${studentName} 학생의 보충 항목을 완료 처리하고 있습니다.`,
+    title: "보충 완료 처리 중",
+    tone: "saving"
+  });
+
+  try {
+    const savedTask = await passTask(taskWithDraft);
+    onFeedback({
+      message: `${studentName} 학생의 보충 항목을 완료 처리했습니다.`,
+      title: "보충 완료 처리 완료",
+      tone: "success"
+    });
+    onResetConfirmation();
+    onClose();
+    return savedTask ?? taskWithDraft;
+  } catch (error) {
+    onFeedback({
+      message: error?.message || "알 수 없는 오류가 발생했습니다.",
+      title: "보충 완료 처리 실패",
+      tone: "failed"
+    });
+    throw error;
+  }
+}

@@ -58,7 +58,7 @@ import { SupplementNotificationControlModal } from "../domains/supplements/Suppl
 import { createSupplementNotificationControlViewModel } from "../domains/supplements/supplementNotificationControlModel.js";
 import { SupplementTaskCard } from "../domains/supplements/SupplementTaskCard.jsx";
 import { createSupplementTaskCardViewModel } from "../domains/supplements/supplementTaskCardModel.js";
-import { saveSupplementTaskContentAction } from "../domains/supplements/supplementTaskActions.js";
+import { passSupplementTaskAction, saveSupplementTaskContentAction } from "../domains/supplements/supplementTaskActions.js";
 import { SupplementStudentModalShell } from "../domains/supplements/SupplementStudentModalShell.jsx";
 import { useSupplementTaskDraftController } from "../domains/supplements/useSupplementTaskDraftController.js";
 import {
@@ -22714,15 +22714,17 @@ function SupplementStudentModal({
     }
     const taskWithDraft = createPersistableSupplementTask(buildTaskWithDraft(task));
     setBusyTaskId(`${task.makeupTaskId}:pass`);
-    showFeedback("보충 완료 처리 중", `${student.name} 학생의 보충 항목을 완료 처리하고 있습니다.`, "saving");
     try {
-      await onPassTask?.(taskWithDraft);
-      showFeedback("보충 완료 처리 완료", `${student.name} 학생의 보충 항목을 완료 처리했습니다.`);
-      setPassConfirmTask(null);
-      onClose?.();
+      await passSupplementTaskAction({
+        onClose: () => onClose?.(),
+        onFeedback: ({ message, title, tone }) => showFeedback(title, message, tone),
+        onResetConfirmation: () => setPassConfirmTask(null),
+        passTask: (payload) => onPassTask?.(payload),
+        studentName: student.name,
+        taskWithDraft
+      });
     } catch (error) {
       console.error("Failed to pass supplement task", error);
-      showFeedback("보충 완료 처리 실패", error?.message || "알 수 없는 오류가 발생했습니다.", "failed");
     } finally {
       setBusyTaskId("");
     }

@@ -183,6 +183,13 @@
 - 고태영 임시 task를 실제 운영 API에 생성해 두 번 저장·재조회하고 삭제 후 0건을 확인했다. Solapi 예약은 생성하지 않았다.
 - 고태영 화면에서 학생 일정 문구에 고정 marker를 저장하고 새로고침 유지까지 사람이 확인했다. AI가 marker와 선생님 수정 필드, 예약 0건을 재조회했고 임시 task·수업·숙제를 삭제해 모두 0건으로 정리했다.
 
+## 12R-5 구현 결과 — 보충 완료 처리 action (사람 gate 통과)
+
+- 진행/성공/실패 feedback, 주입된 완료 callback, 확인창 reset, 모달 close 순서를 `supplementTaskActions.js`로 옮겼다.
+- App은 완료 payload draft 반영, busy guard/finally와 실제 `makeup_tasks` 저장·전역 state·학생 11시 취소 callback을 유지한다.
+- fixture와 production check는 저장 callback이 성공 feedback/close보다 먼저 실행되고 실패 시 확인창과 모달을 닫지 않는 계약을 고정한다.
+- 고태영 격리 `retest` task로 화면 완료·active 제외·새로고침 유지를 사람이 확인했다. AI가 task done, 원 record 불변, 알림 job 0건을 재대조하고 task·수업·record를 모두 0건으로 정리했다.
+
 ## 즉시 중단 조건
 
 - 분리 중 `/api/lessons`, `/api/makeup-tasks`, `/api/lesson-records` 호출 순서가 바뀐다.
