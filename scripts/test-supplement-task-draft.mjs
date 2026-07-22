@@ -3,6 +3,7 @@ import {
   areSupplementTaskDraftValuesEqual,
   buildSupplementTaskWithDraft,
   createPersistableSupplementTask,
+  createSupplementDraftSaveStatusPatch,
   createSupplementTaskDraft,
   getSupplementHomeworkNoteValue,
   getSupplementNotificationDraftConfig,
@@ -23,6 +24,18 @@ assert.equal(getSupplementNotificationDraftConfig("notificationDraft").controlTy
 assert.equal(getSupplementNotificationDraftConfig("missing").controlType, "studentSchedule");
 assert.equal(getSupplementNotificationDraftFieldForControl("parentSchedule"), "parentScheduleNotificationDraft");
 assert.equal(getSupplementNotificationDraftFieldForControl("missing"), "studentScheduleNotificationDraft");
+assert.deepEqual(
+  createSupplementDraftSaveStatusPatch("scheduledDate", { lesson: "saved", notificationDraft: "saved" }),
+  { lesson: "changed", makeupTask: "changed", notificationDraft: "saved" }
+);
+assert.deepEqual(
+  createSupplementDraftSaveStatusPatch("notificationDraft", { lesson: "saved", notificationDraft: "saved" }),
+  { lesson: "saved", makeupTask: "changed", notificationDraft: "changed" }
+);
+assert.deepEqual(
+  createSupplementDraftSaveStatusPatch("supplementMethod", { lesson: "saved", notificationDraft: "saved" }),
+  { lesson: "saved", makeupTask: "changed", notificationDraft: "saved" }
+);
 
 const editedTask = {
   supplementTeacherEditedFields: ["notificationDraft", "invalid", "notificationDraft", "parentScheduleNotificationDraft"]
