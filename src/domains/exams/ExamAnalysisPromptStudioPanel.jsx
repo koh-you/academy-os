@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { getJsonWithTimeout, postJsonWithTimeout } from "../../shared/utils/apiClient.js";
+import { copyTextToClipboard } from "./outputPreview.js";
 import { createExamAnalysisPromptInputSnapshot } from "./examAnalysisPromptInputMapping.js";
 import {
   applyExamAnalysisPromptStudioSaveVerification,
@@ -18,6 +19,7 @@ import {
   getExamAnalysisEffectiveRoleIds,
   getExamAnalysisSequenceRoleOptions,
 } from "./examAnalysisSlideSequence.js";
+import { createExamAnalysisPromptPack } from "./examAnalysisPromptPack.js";
 import "./examAnalysisPromptStudio.css";
 
 const roleLabels = {
@@ -97,6 +99,7 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
   const [detail, setDetail] = useState(null);
   const [localState, setLocalState] = useState(null);
   const [loadError, setLoadError] = useState("");
+  const [copyStatus, setCopyStatus] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -127,6 +130,7 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
   const sequenceModel = useMemo(() => buildExamAnalysisSlideSequence(draft ?? {}), [draft]);
   const sequenceRoleOptions = useMemo(() => getExamAnalysisSequenceRoleOptions(schoolLevel), [schoolLevel]);
   const effectiveRoleIds = useMemo(() => getExamAnalysisEffectiveRoleIds(draft?.sequence), [draft?.sequence]);
+  const promptPack = useMemo(() => createExamAnalysisPromptPack(draft ?? {}), [draft]);
   const editDraft = (updater) => setLocalState((current) => updateExamAnalysisPromptStudioLocalDraft(current, updater));
   const updateRoleField = (role, field, value) => editDraft((current) => ({
     ...current,
@@ -194,6 +198,27 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
     } catch (error) {
       setLocalState((current) => ({ ...current, status: EXAM_ANALYSIS_PROMPT_SAVE_STATUS.FAILED, error: error.message }));
     }
+  }
+
+  async function copyPrompt(label, text) {
+    const copied = await copyTextToClipboard(text);
+    setCopyStatus(copied ? `${label} 복사 완료` : `${label} 복사 실패`);
+  }
+
+  function downloadPromptFile(kind) {
+    const school = (draft.roleInputs.common.schoolName || "school").replace(/[^0-9A-Za-z가-힣_-]+/g, "-");
+    const examName = (draft.roleInputs.common.examName || "exam").replace(/[^0-9A-Za-z가-힣_-]+/g, "-");
+    const isJson = kind === "json";
+    const content = isJson ? JSON.stringify(promptPack, null, 2) : promptPack.text;
+    const blob = new Blob([content], { type: isJson ? "application/json;charset=utf-8" : "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${school}-${examName}-gpt-image-prompts.${isJson ? "json" : "txt"}`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
   }
 
   if (!analysisRunId) return null;
@@ -315,6 +340,46 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
           <PhrasePicker field="valueStatement" schoolLevel={schoolLevel} targetPath="roleInputs.cta.valueStatement" currentValue={draft.roleInputs.cta.valueStatement} onApply={applyPhrase} />
           <PromptField label="연락/다음 행동" value={draft.roleInputs.cta.contactOrNextAction} onChange={(value) => updateRoleField("cta", "contactOrNextAction", value)} multiline placeholder="검수된 상담 문구·연락처·링크" />
         </article>
+      </div>
+
+      <div className="examPromptOutputPanel">
+        <div className="examPromptRoleHeading">
+          <div><strong>복붙용 프롬프트</strong><small>프로젝트 공통 지침을 먼저 붙이고, 아래 슬라이드를 1장씩 생성합니다.</small></div>
+          <div className="examPromptOutputActions">
+            <button className="ghostButton" disabled={!promptPack.readyForAllGeneration} onClick={() => copyPrompt("전체 프롬프트", promptPack.text)} type="button">전체 복사</button>
+            <button className="ghostButton" onClick={() => downloadPromptFile("txt")} type="button">TXT</button>
+            <button className="ghostButton" onClick={() => downloadPromptFile("json")} type="button">JSON</button>
+          </div>
+        </div>
+        <div className={`examPromptGenerationStatus ${promptPack.readyForAllGeneration ? "ready" : "blocked"}`}>
+          {promptPack.readyForAllGeneration
+            ? `전체 ${promptPack.slides.length}장 생성 준비 완료`
+            : `입력 필요 슬라이드 ${promptPack.slides.filter((slide) => !slide.generationAllowed).length}장 · 해당 상세 프롬프트 복사 잠금`}
+          {copyStatus ? <small>{copyStatus}</small> : null}
+        </div>
+        <details className="examPromptOutputItem" open>
+          <summary><b>프로젝트 마스터 프롬프트</b><span>모든 슬라이드 공통</span></summary>
+          <pre>{promptPack.masterPrompt}</pre>
+          <button className="ghostButton" onClick={() => copyPrompt("마스터 프롬프트", promptPack.masterPrompt)} type="button">마스터 복사</button>
+        </details>
+        {promptPack.slides.map((slide) => (
+          <details className={`examPromptOutputItem ${slide.generationAllowed ? "ready" : "blocked"}`} key={slide.roleId}>
+            <summary>
+              <b>{slide.slideNumber}. {slide.title}</b>
+              <span>{slide.generationAllowed ? "복사 가능" : `입력 필요 · ${slide.missingFields.join(", ")}`}</span>
+            </summary>
+            <div className="examPromptOutputColumns">
+              <section><strong>상세 생성 프롬프트</strong><pre>{slide.prompt}</pre><button className="ghostButton" disabled={!slide.generationAllowed} onClick={() => copyPrompt(`${slide.slideNumber}번 상세`, `${promptPack.masterPrompt}\n\n${slide.prompt}`)} type="button">마스터+상세 복사</button></section>
+              <section><strong>수정 프롬프트</strong><pre>{slide.revisionPrompt}</pre><button className="ghostButton" onClick={() => copyPrompt(`${slide.slideNumber}번 수정`, slide.revisionPrompt)} type="button">수정 복사</button></section>
+              <section><strong>QA 프롬프트</strong><pre>{slide.qaPrompt}</pre><button className="ghostButton" onClick={() => copyPrompt(`${slide.slideNumber}번 QA`, slide.qaPrompt)} type="button">QA 복사</button></section>
+            </div>
+          </details>
+        ))}
+        <details className="examPromptOutputItem">
+          <summary><b>전체 시리즈 수정 프롬프트</b><span>스타일 일괄 보정</span></summary>
+          <pre>{promptPack.globalRevisionPrompt}</pre>
+          <button className="ghostButton" onClick={() => copyPrompt("전체 수정", promptPack.globalRevisionPrompt)} type="button">전체 수정 복사</button>
+        </details>
       </div>
 
       <div className="examPromptSaveBar">
