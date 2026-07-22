@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  applySupplementScheduleAction,
   cancelSupplementAbsenceSourceAction,
   passSupplementTaskAction,
   saveSupplementTaskContentAction
@@ -125,6 +126,67 @@ assert.deepEqual(absenceCancelFailureEvents.map(([type]) => type), ["feedback", 
 assert.deepEqual(absenceCancelFailureEvents[2][1], {
   message: "출결 재조회 불일치",
   title: "결석 처리 취소 실패",
+  tone: "failed"
+});
+
+const scheduleEvents = [];
+const scheduledTask = { ...taskWithDraft, scheduledDate: "2026-08-31", scheduledTime: "14:00" };
+const scheduleResult = {
+  makeupTask: { ...scheduledTask, linkedLessonId: "lesson-supplement" },
+  parentScheduleChangeNoticeStatus: "scheduled",
+  scheduleChangeNoticeStatus: "scheduled",
+  supplementReminderStatus: "scheduled",
+  scheduleChangeNoticeMessage: "학생 안내 예약 완료",
+  parentScheduleChangeNoticeMessage: "학부모 안내 예약 완료",
+  supplementReminderMessage: "학생 11시 예약 완료"
+};
+const returnedScheduleResult = await applySupplementScheduleAction({
+  getImmediateNoticeStatus: (status, skipped) => skipped ? "notApplied" : status || "idle",
+  onFeedback: (value) => scheduleEvents.push(["feedback", value]),
+  onMarkSaved: (value) => scheduleEvents.push(["mark", value]),
+  onResetConfirmation: () => scheduleEvents.push(["reset"]),
+  onSaveStatus: (value) => scheduleEvents.push(["status", value]),
+  scheduleTask: async (payload) => {
+    scheduleEvents.push(["schedule", payload]);
+    return scheduleResult;
+  },
+  task,
+  taskWithDraft: scheduledTask
+});
+assert.equal(returnedScheduleResult, scheduleResult);
+assert.deepEqual(scheduleEvents.map(([type]) => type), ["status", "feedback", "schedule", "mark", "status", "reset", "feedback"]);
+assert.equal(scheduleEvents[0][1].lesson, "saving");
+assert.deepEqual(scheduleEvents[4][1], {
+  lesson: "synced",
+  makeupTask: "saved",
+  notificationDraft: "saved",
+  parentChangeNotice: "scheduled",
+  parentScheduleNoticeLabel: "학부모 확정 안내",
+  studentChangeNotice: "scheduled",
+  studentScheduleNoticeLabel: "학생 확정 안내",
+  studentReminder: "scheduled"
+});
+assert.equal(scheduleEvents[6][1].title, "수업일지 일정 만들기 완료");
+
+const scheduleFailureEvents = [];
+await assert.rejects(() => applySupplementScheduleAction({
+  getImmediateNoticeStatus: (status) => status || "idle",
+  onFeedback: (value) => scheduleFailureEvents.push(["feedback", value]),
+  onMarkSaved: () => scheduleFailureEvents.push(["mark"]),
+  onResetConfirmation: () => scheduleFailureEvents.push(["reset"]),
+  onSaveStatus: (value) => scheduleFailureEvents.push(["status", value]),
+  scheduleTask: async () => {
+    scheduleFailureEvents.push(["schedule"]);
+    throw new Error("일정 저장 불일치");
+  },
+  task,
+  taskWithDraft: scheduledTask
+}), /일정 저장 불일치/);
+assert.deepEqual(scheduleFailureEvents.map(([type]) => type), ["status", "feedback", "schedule", "status", "feedback"]);
+assert.equal(scheduleFailureEvents[3][1].studentReminder, "failed");
+assert.deepEqual(scheduleFailureEvents[4][1], {
+  message: "일정 저장 불일치",
+  title: "수업일지 일정 저장 실패",
   tone: "failed"
 });
 

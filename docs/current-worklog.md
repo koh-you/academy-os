@@ -8,6 +8,19 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-22 P1. 12R-7 보충 일정 생성 UI action 분리 — 사람 gate 통과
+
+- 코드: `applySupplementScheduleAction`이 일정 저장 중/성공/실패의 6개 UI status, feedback, draft saved, 확인창 reset 순서를 소유한다. App은 유효성 검사, draft payload, busy guard/finally와 실제 lesson/task/Solapi callback을 유지한다.
+- 자동검증: 성공/실패 callback 순서와 6개 status fixture, production 387/387, build, `git diff --check`를 통과했다. 기존 Vite 500KB chunk 경고만 남는다.
+- 격리 데이터: 원천 lesson `codex_12r7_ui_source_lesson_1784707880445`, homework `codex_12r7_ui_homework_1784707880445`, task `codex_12r7_ui_task_1784707880445`. 배정일시는 `2026-08-31 14:00`, marker는 `[삭제 예정] 12R-7 화면검수 1784707880445`이다. 연결 lesson/job은 gate 전 0건이다.
+- 사람 gate: `보충관리 > 숙제보충 > 고태영 > 상세 검토`에서 `수업일지 일정 만들기`를 한 번만 누르고 성공 표시와 새로고침 유지를 확인한다. 개별 예약/취소·완료 처리는 누르지 않는다.
+- 화면 결과: 사용자가 일정 생성과 새로고침 유지를 확인했다. AI 재조회에서 task `scheduled`, 연결 lesson `lesson_supplement_codex_12r7_ui_task_1784707880445` 1건, 고태영 단일 명단, 원천 task ID, `2026-08-31 14:00`을 확인했다.
+- 예약 대조: `notice_parent`, `schedule_reminder`, `student_reminder` 각 1건으로 중복/대상 교차가 없고 수신번호도 통제 번호와 일치했다. 예약 응답의 Solapi 원문은 세 그룹 모두 `SCHEDULED`, `registeredSuccess=1`, `sentSuccess=0`이었다.
+- 중단 원인: `/api/solapi/groups`, `/api/solapi/messages`, `/api/notification-jobs/cancel`과 SDK와 동일한 raw DELETE 시도가 모두 `SignatureDoesNotMatch`를 반환했다. 예약 POST는 정상이고 조회/취소만 실패하는 서명 경계다. 이는 App.jsx 분리에 섞지 않고 유지보수 세션에서 수정한다.
+- 남은 운영 상태: 그룹 `G4V20260722175342DCGHWCM1QLSYDHO`(학부모 일정, 2026-07-22 18:00), `G4V20260722175341UCHNSWJ7WMPPIBL`(학생 일정, 2026-07-22 18:00), `G4V20260722175340JRWXEZ0NKLX2XYW`(학생 11시, 2026-08-31 11:00). OS row·task·연결 lesson·원천 lesson/homework는 삭제하지 않았다.
+- 사용자 발송 확인: 2026-07-22 18:00 학생 일정·학부모 일정 알림톡 2건은 사용자 통제 번호로 실제 수신했고, 사용자가 과금·수신 모두 괜찮다고 확인했다. 두 건의 발송 자체는 통과로 본다. 2026-08-31 11:00 학생 예약은 초기 취소 서명 오류로 gate를 중단했으나, 이후 사용자 처리와 OS `canceled` 재조회를 거쳐 정리했다.
+- 취소/정리 통과: 사용자가 Solapi 예약을 처리했다고 확인했고, AI 재조회에서 학생·학부모 일정과 학생 11시 OS row 3건이 모두 `canceled`임을 확인했다. task 삭제로 연결 lesson을 함께 정리하고 원천 lesson을 삭제한 뒤 task·연결/원천 lesson·homework가 모두 0건임을 재조회했다. canceled 감사 row 3건은 보존했다.
+
 ## 2026-07-22 P1. 12R-6 결석 원천 취소 action 분리 — 사람 gate 통과
 
 - 코드: `cancelSupplementAbsenceSourceAction`이 진행 feedback, 주입된 출결 취소 callback await, 성공 feedback/모달 close, 실패 feedback/rethrow 순서를 소유한다. App은 busy guard/finally와 실제 `lesson_student_records` 저장·React 목록 갱신을 유지한다.

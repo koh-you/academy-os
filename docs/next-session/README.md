@@ -182,7 +182,8 @@ Git 충돌 방지 규칙:
 - 앞으로 AI가 저장 원천을 재대조할 수 있는 사람 gate는 격리 테스트 데이터와 고정 marker를 AI가 먼저 준비하고, 사용자에게 최소 화면 조작·금지 버튼을 안내한 뒤 AI가 저장·중복·외부 side effect와 정리를 직접 확인합니다.
 - 12R-5에서 보충 완료 처리 UI action을 `supplementTaskActions.js`로 옮기고 production 385/385, build, 고태영 격리 재시험 화면 gate를 통과했습니다. AI가 task done, 원 record 불변, 알림 job 0건을 재대조했고 task·수업·record를 모두 0건으로 정리했습니다.
 - 12R-6에서 결석 원천 취소 UI action을 `supplementTaskActions.js`로 옮기고 production 386/386, build, 고태영 격리 결석 화면 gate를 통과했습니다. AI가 record pending과 사유·시간 초기화, task/job 0건을 재대조했고 임시 수업·record를 모두 0건으로 정리했습니다.
-- 다음 12R은 local draft state와 task/lesson 저장, notification/Solapi action 소유권 이동입니다. 코드 이동 후 고태영으로 저장·일정 생성/변경·세 예약/취소·완료·새로고침·중복/대상 교차를 다시 확인하는 새 사람 gate 전에는 다음 단위로 넘어가지 않습니다. 기존 사람 gate 3개도 통과로 바꾸지 않습니다.
+- 12R-7에서 보충 일정 생성의 UI status/feedback/draft saved/confirm reset 순서를 `supplementTaskActions.js`로 옮기고 production 387/387, build, diff 검사를 통과했습니다. 실제 lesson/task/notification/Solapi callback은 App에 유지합니다.
+- 12R-7은 사용자가 일정 생성·새로고침과 18시 학생·학부모 알림톡 2건 수신을 통과했습니다. 사용자가 남은 Solapi 예약을 처리한 뒤 AI가 OS row 3건 `canceled`를 확인했고, task·연결/원천 lesson·homework를 정리해 모두 0건으로 재조회했습니다. canceled 감사 row 3건은 보존합니다. 자동검증 후 12R-7을 commit/push하고 다음 의미 단위는 다시 최신 `origin/main` fetch/rebase로 시작합니다. 기존 사람 gate 3개는 통과로 바꾸지 않습니다.
 
 통과한 11B-1 사람 gate 기록:
 1. 삭제 가능한 미래 보충 task와 통제된 학생/학부모 전화번호를 준비합니다.

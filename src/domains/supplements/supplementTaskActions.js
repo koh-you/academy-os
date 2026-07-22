@@ -104,3 +104,78 @@ export async function cancelSupplementAbsenceSourceAction({
     throw error;
   }
 }
+
+export async function applySupplementScheduleAction({
+  getImmediateNoticeStatus,
+  onFeedback,
+  onMarkSaved,
+  onResetConfirmation,
+  onSaveStatus,
+  scheduleTask,
+  task,
+  taskWithDraft
+}) {
+  const isScheduleChange = Boolean(task.linkedLessonId);
+  const shouldUpdateStudentReminder = !taskWithDraft.skipStudentReminder && !taskWithDraft.suppressStudentReminder;
+  onSaveStatus({
+    lesson: "saving",
+    makeupTask: "saving",
+    notificationDraft: "saving",
+    parentChangeNotice: "saving",
+    studentChangeNotice: "saving",
+    studentReminder: "saving"
+  });
+  onFeedback({
+    message: shouldUpdateStudentReminder
+      ? isScheduleChange
+        ? "보충관리 저장 후 학생·학부모에게 다음 정각 일정 안내를 예약하고, 보강 당일 11시 학생 알림톡 예약도 함께 갱신합니다."
+        : "보충관리 저장 후 수업일지 일정을 만들고, 학생·학부모 다음 정각 안내와 보강 당일 11시 학생 예약을 함께 확인합니다."
+      : "보충관리 저장 후 수업일지 일정만 저장합니다. 학생 11시 알림톡 예약은 변경하지 않습니다.",
+    title: "수업일지 일정 저장 중",
+    tone: "saving"
+  });
+
+  try {
+    const result = await scheduleTask(taskWithDraft);
+    const nextTask = result?.makeupTask ?? taskWithDraft;
+    const scheduleNoticeLabel = isScheduleChange ? "변경 안내" : "확정 안내";
+    onMarkSaved(nextTask);
+    onSaveStatus({
+      lesson: "synced",
+      makeupTask: "saved",
+      notificationDraft: "saved",
+      parentChangeNotice: getImmediateNoticeStatus(result?.parentScheduleChangeNoticeStatus, result?.parentScheduleChangeNoticeSkipped),
+      parentScheduleNoticeLabel: `학부모 ${scheduleNoticeLabel}`,
+      studentChangeNotice: getImmediateNoticeStatus(result?.scheduleChangeNoticeStatus, result?.scheduleChangeNoticeSkipped),
+      studentScheduleNoticeLabel: `학생 ${scheduleNoticeLabel}`,
+      studentReminder: result?.supplementReminderStatus || (result?.supplementReminderSkipped ? "resultDue" : "scheduled")
+    });
+    onResetConfirmation();
+    onFeedback({
+      message: [
+        `${nextTask.scheduledDate} ${nextTask.scheduledTime} 보충 일정이 수업일지에 반영되었습니다.`,
+        result?.scheduleChangeNoticeSkipped ? "" : result?.scheduleChangeNoticeMessage,
+        result?.parentScheduleChangeNoticeSkipped ? "" : result?.parentScheduleChangeNoticeMessage,
+        result?.supplementReminderMessage || "학생 11시 알림톡 예약 상태를 확인하세요."
+      ].filter(Boolean).join(" "),
+      title: isScheduleChange ? "수업일지 일정 변경 완료" : "수업일지 일정 만들기 완료",
+      tone: "success"
+    });
+    return result;
+  } catch (error) {
+    onSaveStatus({
+      lesson: "failed",
+      makeupTask: "failed",
+      notificationDraft: "failed",
+      parentChangeNotice: "failed",
+      studentChangeNotice: "failed",
+      studentReminder: "failed"
+    });
+    onFeedback({
+      message: error?.message || "알 수 없는 오류가 발생했습니다.",
+      title: "수업일지 일정 저장 실패",
+      tone: "failed"
+    });
+    throw error;
+  }
+}

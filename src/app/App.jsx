@@ -59,6 +59,7 @@ import { createSupplementNotificationControlViewModel } from "../domains/supplem
 import { SupplementTaskCard } from "../domains/supplements/SupplementTaskCard.jsx";
 import { createSupplementTaskCardViewModel } from "../domains/supplements/supplementTaskCardModel.js";
 import {
+  applySupplementScheduleAction,
   cancelSupplementAbsenceSourceAction,
   passSupplementTaskAction,
   saveSupplementTaskContentAction
@@ -22620,7 +22621,6 @@ function SupplementStudentModal({
   async function handleApplyScheduleTask(task) {
     if (!task?.makeupTaskId || busyTaskId) return;
     const taskWithDraft = createPersistableSupplementTask(buildTaskWithDraft(task));
-    const shouldUpdateStudentReminder = !taskWithDraft.skipStudentReminder && !taskWithDraft.suppressStudentReminder;
     if (!taskWithDraft.scheduledDate || !taskWithDraft.scheduledTime) {
       showFeedback("수업일지 일정 만들기 실패", "배정일과 시간을 먼저 입력해야 합니다.", "failed");
       setTaskSaveStatusPatch(task.makeupTaskId, { lesson: "failed" });
@@ -22629,60 +22629,19 @@ function SupplementStudentModal({
 
     const actionKey = `${task.makeupTaskId}:schedule`;
     setBusyTaskId(actionKey);
-    setTaskSaveStatusPatch(task.makeupTaskId, {
-      lesson: "saving",
-      makeupTask: "saving",
-      notificationDraft: "saving",
-      parentChangeNotice: "saving",
-      studentChangeNotice: "saving",
-      studentReminder: "saving"
-    });
-    showFeedback(
-      "수업일지 일정 저장 중",
-      shouldUpdateStudentReminder
-        ? task.linkedLessonId
-          ? "보충관리 저장 후 학생·학부모에게 다음 정각 일정 안내를 예약하고, 보강 당일 11시 학생 알림톡 예약도 함께 갱신합니다."
-          : "보충관리 저장 후 수업일지 일정을 만들고, 학생·학부모 다음 정각 안내와 보강 당일 11시 학생 예약을 함께 확인합니다."
-        : "보충관리 저장 후 수업일지 일정만 저장합니다. 학생 11시 알림톡 예약은 변경하지 않습니다.",
-      "saving"
-    );
-
     try {
-      const result = await onScheduleTask?.(taskWithDraft);
-      const nextTask = result?.makeupTask ?? taskWithDraft;
-      const scheduleNoticeLabel = task.linkedLessonId ? "변경 안내" : "확정 안내";
-      markTaskDraftSaved(task.makeupTaskId, nextTask);
-      setTaskSaveStatusPatch(task.makeupTaskId, {
-        lesson: "synced",
-        makeupTask: "saved",
-        notificationDraft: "saved",
-        parentChangeNotice: getSupplementImmediateNoticeSaveStatus(result?.parentScheduleChangeNoticeStatus, result?.parentScheduleChangeNoticeSkipped),
-        parentScheduleNoticeLabel: `학부모 ${scheduleNoticeLabel}`,
-        studentChangeNotice: getSupplementImmediateNoticeSaveStatus(result?.scheduleChangeNoticeStatus, result?.scheduleChangeNoticeSkipped),
-        studentScheduleNoticeLabel: `학생 ${scheduleNoticeLabel}`,
-        studentReminder: result?.supplementReminderStatus || (result?.supplementReminderSkipped ? "resultDue" : "scheduled")
+      await applySupplementScheduleAction({
+        getImmediateNoticeStatus: getSupplementImmediateNoticeSaveStatus,
+        onFeedback: ({ message, title, tone }) => showFeedback(title, message, tone),
+        onMarkSaved: (nextTask) => markTaskDraftSaved(task.makeupTaskId, nextTask),
+        onResetConfirmation: () => setScheduleConfirmTask(null),
+        onSaveStatus: (patch) => setTaskSaveStatusPatch(task.makeupTaskId, patch),
+        scheduleTask: (payload) => onScheduleTask?.(payload),
+        task,
+        taskWithDraft
       });
-      setScheduleConfirmTask(null);
-      showFeedback(
-        task.linkedLessonId ? "수업일지 일정 변경 완료" : "수업일지 일정 만들기 완료",
-        [
-          `${nextTask.scheduledDate} ${nextTask.scheduledTime} 보충 일정이 수업일지에 반영되었습니다.`,
-          result?.scheduleChangeNoticeSkipped ? "" : result?.scheduleChangeNoticeMessage,
-          result?.parentScheduleChangeNoticeSkipped ? "" : result?.parentScheduleChangeNoticeMessage,
-          result?.supplementReminderMessage || "학생 11시 알림톡 예약 상태를 확인하세요."
-        ].filter(Boolean).join(" ")
-      );
     } catch (error) {
       console.error("Failed to apply supplement schedule", error);
-      setTaskSaveStatusPatch(task.makeupTaskId, {
-        lesson: "failed",
-        makeupTask: "failed",
-        notificationDraft: "failed",
-        parentChangeNotice: "failed",
-        studentChangeNotice: "failed",
-        studentReminder: "failed"
-      });
-      showFeedback("수업일지 일정 저장 실패", error?.message || "알 수 없는 오류가 발생했습니다.", "failed");
     } finally {
       setBusyTaskId("");
     }
