@@ -1,5 +1,18 @@
 # Academy OS Current Worklog
 
+## 2026-07-22 P1. 시험분석 구현 I2 저장 원천·누락 상태 매핑
+
+- 상태: 구현·AI 자동검증 완료. 순수 데이터 계약이고 실제 화면·운영 데이터 판단이 없어 별도 사람 검수 없이 I3로 진행한다.
+- 사용자 의도: 웹 OS에서 확정한 시험분석 데이터를 슬라이드별 상세 프롬프트에 재사용하되, AI 추측값이나 PDF 페이지 정보가 확정 사실·실제 이미지 자산으로 섞이지 않게 한다.
+- 구현: `examAnalysisPromptInputMapping.js`에서 `final_fields > teacher_fields/outputDrafts.inputs > ai_fields` 우선순위와 `confirmed/teacher_saved/derived_confirmed/ai_candidate/source_reference/missing` 상태를 정의했다. 공통, 시험 분석, 주요문항, 다음 대비, CTA 역할별 snapshot과 누락 목록을 만든다.
+- 확정 경계: 확정 문항만 단원·난이도 분포에 포함한다. AI 후보는 자동 프롬프트에서 제외한다. PDF `pageImageManifest`는 페이지 치수 참조일 뿐 crop 파일이 아니므로 실제 문제 crop·검증 손풀이는 누락으로 유지한다.
+- 확인된 스키마 공백: 학교 스타일, 정규화 배점 구조, 실제 문제 crop, 검증 손풀이 파일, 구조화된 연락처는 현재 시험분석 스키마에 없다. 화면 문구나 메모를 원본 자산으로 오인하지 않는다.
+- 저장 원천/side effect: 읽기 전용 순수 매핑이다. Supabase, app_state, Storage, API, AI 호출, 이미지 생성, 알림 발송을 실행하지 않는다. `App.jsx`도 수정하지 않는다.
+- 검증: 문법 검사, `npm run test:exam-prompt-inputs`, `git diff --check`, `npm run build` 통과. fixture에서 final 값 우선, 미확정 교사값과 AI 후보 구분, 확정 문항만 집계, false 교사 선택 보존, PDF 페이지와 crop 구분, 스키마 공백 누락 처리를 확인했다. 빌드는 기존 chunk size 경고만 남았다.
+- AI 검수: 현재 스키마에 실제 존재하는 값만 연결했고, 확인되지 않은 문항 수·AI 값·페이지 manifest를 자동 프롬프트에 넣지 않는다. I2 범위에서 사람이 추가로 판정할 화면이나 외부 서비스 상태는 없다.
+- 다음 Gate: 자동검증 통과 후 I3에서 local draft와 명시적 저장·API 완료·Supabase 재조회 일치 계약을 구현한다.
+- 중단 조건: AI 후보 자동 사용, 미확정 문항의 집계 포함, 페이지 manifest를 crop으로 오인, 사람 저장본 덮어쓰기.
+
 ## 2026-07-22 P1. 시험분석 구현 I1 벤치마크 문구 라이브러리
 
 - 상태: I1 구현·AI 검수 완료. 실제 화면이나 운영 데이터 판단이 없는 정적 라이브러리 Gate라 별도 사람 검수 없이 I2 입력 매핑으로 진행한다.

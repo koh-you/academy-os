@@ -21,6 +21,7 @@
     "verify:exam-blog-slides": "node scripts/verify-exam-analysis-slide-analysis.mjs",
     "generate:exam-slide-prompts": "node scripts/generate-exam-analysis-slide-prompts.mjs",
     "test:exam-phrase-library": "node scripts/test-exam-analysis-phrase-library.mjs",
+    "test:exam-prompt-inputs": "node scripts/test-exam-analysis-prompt-input-mapping.mjs",
     "test:supplement-builders": "node scripts/test-supplement-job-builders.mjs",
     "test:production": "npm run test:supplement-builders && node scripts/scenario-tests-production.cjs"
   },
