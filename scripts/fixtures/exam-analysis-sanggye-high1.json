@@ -1,0 +1,94 @@
+{
+  "analysisRun": {
+    "analysisRunId": "fixture-sanggye-high1-2026-final",
+    "title": "2026 상계고 1학년 1학기 기말고사",
+    "schoolName": "상계고",
+    "grade": "고1",
+    "subject": "수학",
+    "examCycle": "1학기 기말고사",
+    "questionCountStatus": "teacher_confirmed",
+    "confirmedQuestionCount": 22,
+    "rowsLocked": true,
+    "updatedAt": "2026-07-22T03:00:00.000Z",
+    "auditSummary": {
+      "teacherReview": {
+        "status": "completed",
+        "confirmedCount": 22,
+        "totalQuestionCount": 22,
+        "importantQuestionNumbers": [18, 22]
+      },
+      "outputDrafts": {
+        "inputs": {
+          "checklistExamRange": "다항식의 연산부터 여러 가지 방정식까지",
+          "blogBlockOverallReview": "전반부는 기본 계산을 확인하고 후반부는 조건 해석과 풀이 순서에서 점수 차이가 난 시험이었습니다.",
+          "blogBlockNextStudy": "조건 표시와 식 세우기를 먼저 연습합니다.\n18번과 22번을 오답 노트 없이 다시 풉니다.\n후반 5문항을 20분 안에 푸는 훈련을 반복합니다.",
+          "blogBlockAcademyTrust": "학교별 기출의 반복 유형과 실제 오답 지점을 다음 수업과 보충에 연결합니다.",
+          "blogBlockCta": "2학기 내신 대비 상담 · 02-000-0000",
+          "keyQuestionBlocks": [
+            {
+              "blockId": "key-question-18",
+              "questionNumber": "18번",
+              "title": "조건을 식으로 바꾸는 문항",
+              "selectionReason": "조건을 빠짐없이 정리해야 식을 세울 수 있어 중상위권의 점수 차이를 만든 문항입니다.",
+              "similarTypeEvidence": "교사가 확인한 학교 학습지의 조건 해석 유형",
+              "questionMemo": "조건을 표로 정리한 뒤 식을 세우는 순서가 핵심입니다.",
+              "mistakePoint": "두 조건 중 하나만 반영하거나 부호를 반대로 세우기 쉽습니다.",
+              "solutionMemo": "조건을 표로 분리하고 미지수를 정한 뒤 두 식을 차례로 세웁니다.",
+              "imageSlotMemo": "sanggye-high1-q18-crop.png / sanggye-high1-q18-solution.png"
+            },
+            {
+              "blockId": "key-question-22",
+              "questionNumber": "22번",
+              "title": "경우를 빠짐없이 나누는 문항",
+              "selectionReason": "경우 분류 기준이 겹치면 중복과 누락이 생겨 최상위권 변별이 가능한 문항입니다.",
+              "similarTypeEvidence": "교사가 확인한 유사 기출의 경우 분류 유형",
+              "questionMemo": "경우를 먼저 분류하고 각 경우의 조건을 확인해야 합니다.",
+              "mistakePoint": "같은 경우를 두 번 세거나 경계 조건을 빠뜨리기 쉽습니다.",
+              "solutionMemo": "겹치지 않는 기준으로 경우를 나눈 뒤 합이 전체 경우와 맞는지 검산합니다.",
+              "imageSlotMemo": "sanggye-high1-q22-crop.png / sanggye-high1-q22-solution.png"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "questions": [
+    {
+      "questionRowId": "fixture-q18",
+      "questionNumber": 18,
+      "rowStatus": "confirmed",
+      "sourcePage": 4,
+      "sourceEvidence": { "boundary": { "pageStart": 4, "pageEnd": 4 } },
+      "aiFields": { "unitName": "방정식", "mainType": "조건 해석", "difficulty": "상" },
+      "teacherFields": { "unitName": "여러 가지 방정식", "mainType": "조건을 식으로 표현", "subTypes": ["연립방정식"], "difficulty": "중상" },
+      "finalFields": { "unitName": "여러 가지 방정식", "mainType": "조건을 식으로 표현", "subTypes": ["연립방정식"], "difficulty": "중상", "isImportantQuestion": true, "confirmedAt": "2026-07-22T02:00:00.000Z" },
+      "confirmedAt": "2026-07-22T02:00:00.000Z"
+    },
+    {
+      "questionRowId": "fixture-q22",
+      "questionNumber": 22,
+      "rowStatus": "confirmed",
+      "sourcePage": 5,
+      "sourceEvidence": { "boundary": { "pageStart": 5, "pageEnd": 5 } },
+      "aiFields": { "unitName": "경우의 수", "mainType": "경우 나누기", "difficulty": "상" },
+      "teacherFields": { "unitName": "경우의 수", "mainType": "경우 분류", "subTypes": ["중복·누락 검산"], "difficulty": "상" },
+      "finalFields": { "unitName": "경우의 수", "mainType": "경우 분류", "subTypes": ["중복·누락 검산"], "difficulty": "상", "isImportantQuestion": true, "confirmedAt": "2026-07-22T02:00:00.000Z" },
+      "confirmedAt": "2026-07-22T02:00:00.000Z"
+    }
+  ],
+  "sources": [
+    {
+      "sourceId": "fixture-source-pdf",
+      "sourceType": "pdf",
+      "bucketId": "exam-analysis-pipeline-sources",
+      "storagePath": "fixtures/sanggye-high1/exam.pdf",
+      "originalFileName": "2026-상계고1-1학기-기말.pdf",
+      "pageCount": 5,
+      "extractionStatus": "extracted",
+      "pageImageManifest": [
+        { "pageNumber": 4, "width": 595, "height": 842, "rotation": 0 },
+        { "pageNumber": 5, "width": 595, "height": 842, "rotation": 0 }
+      ]
+    }
+  ]
+}

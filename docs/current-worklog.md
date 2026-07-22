@@ -1,5 +1,17 @@
 # Academy OS Current Worklog
 
+## 2026-07-22 P1. 시험분석 구현 I7 현실형 E2E·최종 AI 검수
+
+- 상태: I1~I7 구현·AI 자동검증 완료, 사람 검수 Gate 대기. 코드 브랜치는 통합 준비 상태이며 실제 화면/브라우저/Supabase 검수 전 운영 통과로 판정하지 않는다.
+- 현실형 fixture: 상계고 고1 2026년 1학기 기말, 확정 주요문항 18·22번, 교사 총평/다음 대비/CTA, 원본 PDF 페이지 참조, 수동 첨부할 문제 crop·검증 손풀이 파일명을 사용했다.
+- E2E 결과: 원천 상태 분리 -> 확정값 local seed -> 교사 누락 보완/문구 적용 -> revision 저장 payload -> Supabase 재조회 응답 모사 -> 고등 시퀀스 12장 -> 마스터/상세 12/수정 12/QA 12/전체수정 생성이 모두 통과했다. 운영 write와 유료 AI 호출은 0회다.
+- 자동검증: `npm run test:exam-prompt-studio`, `git diff --check`, `npm run build` 통과. 신규 suite는 코퍼스 21건·202장, 42문구/8필드, 원천 매핑, 저장 검증/실패 복구, UI 계약, 조건부 번호, 프롬프트 팩, 상계고 fixture를 포함한다. 빌드는 기존 chunk 경고만 남았다.
+- 전체 회귀: `npm run test:production`은 신규 시험분석 suite와 supplement builder를 통과한 뒤 기존 `04d-1` Windows CRLF 문자열 검사 1건만 실패했다. 시험분석 실패가 아니고 병렬 세션 소유 파일이라 이 브랜치에서 수정하지 않았다.
+- 사람 Gate 필요 판정: 필요. 실제 화면 밀도/모바일 가독성, 브라우저 복사·다운로드, 운영 Supabase 저장→재조회→새로고침은 AI fixture만으로 확정할 수 없다. 절차는 `docs/exam-analysis-prompt-studio-i7-validation-2026-07-22.md`에 기록했다.
+- 저장 원천/side effect: 프롬프트 작업본만 `exam_analysis_runs.audit_summary.promptStudio`에 명시 저장한다. 기존 분석 확정값, PDF, 수업/학생/알림 원천을 변경하지 않는다. OpenAI/GPT Image, Canva, Storage 업로드, 알림 발송은 실행하지 않는다.
+- 병렬 리팩터링 경계: `E:\academy-os-refactor`가 `App.jsx`, worklog, scenario test 등 dirty 변경을 보유 중이므로 이 브랜치는 독립 컴포넌트로 구현했고 main merge/deploy는 하지 않는다. 리팩터링 통합 담당 세션이 최신 main 위에서 충돌 검토 후 통합한다.
+- 중단 조건: 사람 Gate 실패, 재조회 불일치, clipboard/내보내기 손상, 자산 미첨부 생성 허용, 번호 불연속, 병렬 shared-file 충돌, 유료 이미지 호출 요구.
+
 ## 2026-07-22 P1. 시험분석 구현 I6 마스터·슬라이드별·수정·QA 프롬프트
 
 - 상태: 구현·AI 자동검증 완료. 프롬프트 내용·복사 잠금·내보내기 계약이 통과했으며 I7 현실형 fixture와 최종 사람 Gate 설계로 진행한다.
