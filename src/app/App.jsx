@@ -16882,9 +16882,6 @@ function LessonJournalDetail({
                       attendanceLesson.studentScheduleType === "profile" ? "profile" : ""
                     ].filter(Boolean).join(" ")}>
                       {attendanceLesson.startTime}-{attendanceLesson.endTime}
-                      {attendanceLesson.studentScheduleType === "adjusted" ? " · 시간 조정" : ""}
-                      {attendanceLesson.studentScheduleType === "profile" ? " · 개별 시간" : ""}
-                      {attendanceLesson.studentScheduleReason ? ` · ${attendanceLesson.studentScheduleReason}` : ""}
                     </small>
                   ) : null}
                 </span>

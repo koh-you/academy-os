@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-22 P2. 수업일지 학생별 변경 시간만 표시
+
+- 상태: 코드 수정/자동검증 완료, 배포 후 화면 사람 검토 대기.
+- 사용자 요청: 특강 수업일지 학생명 아래에는 변경된 실제 시간만 표시하고 `시간 조정`, `개별 시간`, 변경 사유는 표시하지 않는다.
+- 수정: 학생별 시간 행은 `13:00-15:00` 같은 적용 시간만 렌더한다. adjusted/profile CSS tone과 저장된 `scheduleType`, `overrideReason` 데이터는 유지해 계산·운영 원천을 잃지 않는다.
+- 저장 원천/side effect: 표시 전용 변경이다. `special_lecture_enrollments`, `lessons.specialLectureStudentSchedules`, 출결, 수업기록, 알림톡은 변경하지 않는다.
+- 검증: `git diff --check`, `node --check scripts/scenario-tests-production.cjs`, `npm run build`, `npm run test:production` 366건을 통과했다. 1차 운영 테스트에서 제거 대상 `개별 시간` 문구를 기대한 1건은 출결 계산 검증을 유지한 채 시간 전용 표시 계약으로 갱신했다.
+- 사람 gate: 특강 1회차 수업일지에서 신초봄 행이 `13:00-15:00`만 표시하고 뒤의 `시간 조정 · 선생님 수기 입력 정정`이 사라졌는지 확인한다. 이윤성 등 다른 학생별 시간도 같은 형식이어야 한다.
+- 중단 조건: 시간 자체가 사라짐, 학생별 적용 시간이 아닌 공식 수업시간이 표시됨, 출결 시간 계산이 바뀜, 저장 원천의 사유가 삭제됨.
+
 ## 2026-07-22 P1. 특강 시간 변경 사유 선택 입력
 
 - 상태: 코드 수정/자동검증 완료, 배포 후 화면 사람 검토 대기.
