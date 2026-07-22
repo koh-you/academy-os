@@ -13,6 +13,11 @@ import {
   createExamAnalysisPhraseDraft,
   getExamAnalysisPhraseOptions,
 } from "./examAnalysisPhraseLibrary.js";
+import {
+  buildExamAnalysisSlideSequence,
+  getExamAnalysisEffectiveRoleIds,
+  getExamAnalysisSequenceRoleOptions,
+} from "./examAnalysisSlideSequence.js";
 import "./examAnalysisPromptStudio.css";
 
 const roleLabels = {
@@ -119,6 +124,9 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
 
   const draft = localState?.draft;
   const schoolLevel = draft?.sequence?.schoolLevel || "high";
+  const sequenceModel = useMemo(() => buildExamAnalysisSlideSequence(draft ?? {}), [draft]);
+  const sequenceRoleOptions = useMemo(() => getExamAnalysisSequenceRoleOptions(schoolLevel), [schoolLevel]);
+  const effectiveRoleIds = useMemo(() => getExamAnalysisEffectiveRoleIds(draft?.sequence), [draft?.sequence]);
   const editDraft = (updater) => setLocalState((current) => updateExamAnalysisPromptStudioLocalDraft(current, updater));
   const updateRoleField = (role, field, value) => editDraft((current) => ({
     ...current,
@@ -160,6 +168,13 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
       keyQuestions: current.roleInputs.keyQuestions.filter((_question, questionIndex) => questionIndex !== index),
     },
   }));
+  const toggleSequenceRole = (roleId) => editDraft((current) => {
+    const currentEffective = getExamAnalysisEffectiveRoleIds(current.sequence);
+    const nextEnabled = currentEffective.includes(roleId)
+      ? currentEffective.filter((item) => item !== roleId)
+      : [...currentEffective, roleId];
+    return { ...current, sequence: { ...current.sequence, enabledRoleIds: nextEnabled } };
+  });
   const applyPhrase = ({ targetPath, phraseId, value }) => {
     const [, role, fieldOrIndex, nestedField] = targetPath.split(".");
     if (role === "keyQuestions") updateKeyQuestion(Number(fieldOrIndex), nestedField, value);
@@ -199,10 +214,40 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
           <button
             className={schoolLevel === value ? "active" : ""}
             key={value}
-            onClick={() => editDraft((current) => ({ ...current, sequence: { ...current.sequence, schoolLevel: value } }))}
+            onClick={() => editDraft((current) => ({ ...current, sequence: { ...current.sequence, schoolLevel: value, presetId: `${value}_core`, enabledRoleIds: [] } }))}
             type="button"
           >{label}</button>
         ))}
+      </div>
+
+      <div className="examPromptSequencePanel">
+        <div className="examPromptRoleHeading">
+          <div><strong>{sequenceModel.presetLabel}</strong><small>입력 유무에 따라 조건부 역할을 건너뛰고 번호를 다시 계산합니다.</small></div>
+          <span>총 {sequenceModel.slides.length}장 · 준비 {sequenceModel.readyCount} · 입력 필요 {sequenceModel.needsInputCount}</span>
+        </div>
+        <div className="examPromptRoleToggles">
+          {sequenceRoleOptions.map((role) => (
+            <label key={role.roleId}>
+              <input
+                checked={effectiveRoleIds.includes(role.roleId)}
+                disabled={role.fixed}
+                onChange={() => toggleSequenceRole(role.roleId)}
+                type="checkbox"
+              />
+              <span>{role.label}{role.fixed ? " · 필수" : ""}</span>
+            </label>
+          ))}
+        </div>
+        <ol className="examPromptSlideSequence">
+          {sequenceModel.slides.map((slide) => (
+            <li className={slide.status} key={slide.roleId}>
+              <b>{slide.slideNumber}</b>
+              <span><strong>{slide.title}</strong><small>{slide.roleId}</small></span>
+              <em>{slide.status === "ready" ? "준비됨" : `입력 필요 · ${slide.missingFields.join(", ")}`}</em>
+            </li>
+          ))}
+        </ol>
+        {sequenceModel.skipped.length ? <details className="examPromptSkipped"><summary>제외된 조건부 역할 {sequenceModel.skipped.length}개</summary>{sequenceModel.skipped.map((item) => <span key={item.roleId}>{item.roleId} · {item.reason}</span>)}</details> : null}
       </div>
 
       <div className="examPromptRoleGrid">

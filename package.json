@@ -24,6 +24,7 @@
     "test:exam-prompt-inputs": "node scripts/test-exam-analysis-prompt-input-mapping.mjs",
     "test:exam-prompt-studio-draft": "node scripts/test-exam-analysis-prompt-studio-draft.mjs",
     "test:exam-prompt-studio-ui": "node scripts/test-exam-analysis-prompt-studio-ui.mjs",
+    "test:exam-slide-sequence": "node scripts/test-exam-analysis-slide-sequence.mjs",
     "test:supplement-builders": "node scripts/test-supplement-job-builders.mjs",
     "test:production": "npm run test:supplement-builders && node scripts/scenario-tests-production.cjs"
   },

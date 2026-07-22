@@ -17,6 +17,21 @@
 .examPromptLevelSwitch { display: flex; gap: 8px; }
 .examPromptLevelSwitch button { border: 1px solid #cbd5e1; border-radius: 999px; background: white; padding: 8px 14px; cursor: pointer; }
 .examPromptLevelSwitch button.active { border-color: #2563eb; color: #1d4ed8; background: #eff6ff; font-weight: 700; }
+.examPromptSequencePanel { border: 1px solid #cbd5e1; border-radius: 16px; padding: 14px; display: grid; gap: 12px; background: #f8fafc; }
+.examPromptSequencePanel .examPromptRoleHeading > div { display: grid; gap: 3px; }
+.examPromptSequencePanel small { color: #64748b; }
+.examPromptRoleToggles { display: flex; flex-wrap: wrap; gap: 7px; }
+.examPromptRoleToggles label { display: flex; gap: 5px; align-items: center; border: 1px solid #dbe3ee; border-radius: 999px; padding: 6px 9px; background: #fff; font-size: 12px; }
+.examPromptSlideSequence { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+.examPromptSlideSequence li { border: 1px solid #dbe3ee; border-radius: 10px; padding: 8px; display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 8px; align-items: center; background: #fff; }
+.examPromptSlideSequence li > b { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: #e2e8f0; }
+.examPromptSlideSequence li > span { display: grid; }
+.examPromptSlideSequence li small { font-size: 10px; }
+.examPromptSlideSequence li em { font-style: normal; font-size: 10px; color: #047857; }
+.examPromptSlideSequence li.needs_input { border-color: #f5c26b; background: #fffaf0; }
+.examPromptSlideSequence li.needs_input em { color: #b45309; }
+.examPromptSkipped { font-size: 12px; color: #64748b; }
+.examPromptSkipped > span { display: block; padding: 3px 0 0 12px; }
 .examPromptRoleGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .examPromptRoleCard { border: 1px solid #dbe3ee; border-radius: 16px; padding: 15px; display: grid; gap: 12px; background: #fff; }
 .examPromptRoleCard.wide { grid-column: 1 / -1; }
@@ -38,7 +53,7 @@
 .examPromptSaveBar { position: sticky; bottom: 10px; z-index: 4; border: 1px solid #bfdbfe; background: rgba(239,246,255,.96); border-radius: 14px; padding: 11px 13px; display: flex; justify-content: space-between; gap: 12px; align-items: center; box-shadow: 0 8px 28px rgba(15,23,42,.12); }
 @media (max-width: 900px) {
   .examPromptStudioHeader, .examPromptSaveBar { align-items: stretch; flex-direction: column; }
-  .examPromptRoleGrid, .examPromptFieldGrid { grid-template-columns: 1fr; }
+  .examPromptRoleGrid, .examPromptFieldGrid, .examPromptSlideSequence { grid-template-columns: 1fr; }
   .examPromptRoleCard.wide { grid-column: auto; }
   .examPromptPhrasePicker { grid-template-columns: 1fr; }
   .examPromptPhrasePicker small { grid-column: auto; }

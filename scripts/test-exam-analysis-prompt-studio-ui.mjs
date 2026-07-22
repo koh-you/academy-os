@@ -24,6 +24,8 @@ const css = fs.readFileSync(new URL("../src/domains/exams/examAnalysisPromptStud
   "Supabase 재조회 확인",
   "문제 crop 자산 ID",
   "검증 손풀이 자산 ID",
+  "입력 유무에 따라 조건부 역할을 건너뛰고 번호를 다시 계산합니다.",
+  "제외된 조건부 역할",
 ].forEach((text) => assert(component.includes(text), `UI 계약 누락: ${text}`));
 
 assert(finalPanel.includes("ExamAnalysisPromptStudioPanel"));
@@ -34,6 +36,7 @@ assert(component.includes("getExamAnalysisPhraseOptions"));
 assert(component.includes("createExamAnalysisPhraseDraft"));
 assert(component.includes("disabled={!selectedId}"));
 assert(component.includes("schoolLevel={schoolLevel}"));
+assert(component.includes("buildExamAnalysisSlideSequence"));
 assert(css.includes(".examPromptSaveBadge.failed"));
 assert(css.includes("@media (max-width: 900px)"));
 
