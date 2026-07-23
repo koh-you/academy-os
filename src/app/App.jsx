@@ -50,6 +50,7 @@ import {
   NotificationSectionTabs,
   NoticeWorkspaceTabs
 } from "../domains/notifications/NotificationCenterNavigation.jsx";
+import { NotificationRecipientPanel } from "../domains/notifications/NotificationRecipientPanel.jsx";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { createSupplementSchedulePersistencePlan } from "../domains/supplements/supplementSchedulePlan.js";
 import { SupplementCenter } from "../domains/supplements/SupplementCenter.jsx";
@@ -10248,12 +10249,6 @@ function NotificationCenter({
     failed: "실패",
     draft: "정리함"
   };
-  const noticeRecipientModes = [
-    { id: "selected", label: "선택" },
-    { id: "all", label: "전체" },
-    { id: "parent", label: "학부모" },
-    { id: "student", label: "학생" }
-  ];
   const activeStudents = useMemo(
     () => students.filter((student) => !isNoticeWithdrawnStudent(student)),
     [students]
@@ -10301,10 +10296,6 @@ function NotificationCenter({
       ? ["student"]
       : ["parent", "student"];
   const visibleNoticeStudents = searchableStudents;
-  const noticeAudienceLabels = {
-    parent: "학부모",
-    student: "학생"
-  };
   const noticeRecipients = targetStudents.flatMap((student) =>
     targetAudiences
       .map((audience) => ({
@@ -10762,99 +10753,29 @@ function NotificationCenter({
         </div>
 
         <div className="noticeComposerGrid">
-          <div className="noticeTargetPanel">
-            <div className="noticeModeTabs compact">
-              {noticeRecipientModes.map((mode) => (
-                <button
-                  className={noticeRecipientMode === mode.id ? "active" : ""}
-                  key={mode.id}
-                  onClick={() => setNoticeRecipientMode(mode.id)}
-                  type="button"
-                >
-                  <strong>{mode.label}</strong>
-                </button>
-              ))}
-            </div>
-            <div className="noticeFilterGrid">
-              <label>
-                반
-                <select value={classFilter} onChange={(event) => setClassFilter(event.target.value)}>
-                  <option value="all">전체 반</option>
-                  {classTemplates.map((template) => (
-                    <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
-                  ))}
-                  <option value={noticeWithdrawnClassFilterId}>퇴원학생반 ({withdrawnStudents.length}명)</option>
-                </select>
-              </label>
-              <label>
-                학생 검색
-                <input value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder="이름, 학교, 전화번호" />
-              </label>
-            </div>
-
-            <div className="noticeTargetSummary">
-              <div>
-                <span>대상 학생</span>
-                <strong>{targetStudents.length}명</strong>
-              </div>
-              <div>
-                <span>학부모</span>
-                <strong>{parentRecipientCount}건</strong>
-              </div>
-              <div>
-                <span>학생</span>
-                <strong>{studentRecipientCount}건</strong>
-              </div>
-            </div>
-
-            <div className="noticeStudentPicker">
-              <div className="noticePickerActions noticeListHeader">
-                <div>
-                  <strong>학생 선택</strong>
-                  <span>선택한 학생 {targetStudents.length}명 · 수신 {noticeRecipients.length}건</span>
-                </div>
-                <div>
-                  <button className="softButton compact" onClick={selectAllVisibleStudents} type="button">보이는 학생 전체</button>
-                  <button className="softButton compact subtle" onClick={clearSelectedStudents} type="button">선택 해제</button>
-                </div>
-              </div>
-              {visibleNoticeStudents.length ? (
-                visibleNoticeStudents.map((student) => {
-                  const checked = selectedStudentIds.includes(student.studentId);
-                  return (
-                    <label className={checked ? "noticeStudentOption active" : "noticeStudentOption"} key={student.studentId}>
-                      <input checked={checked} onChange={() => toggleStudentSelection(student.studentId)} type="checkbox" />
-                      <span>
-                        <strong>{student.name}</strong>
-                        <small>
-                          {[
-                            student.grade,
-                            student.schoolName,
-                            classFilter === noticeWithdrawnClassFilterId
-                              ? `퇴원${student.withdrawnAt ? ` ${String(student.withdrawnAt).slice(0, 10)}` : ""}`
-                              : ""
-                          ].filter(Boolean).join(" · ") || "기본 정보 없음"}
-                        </small>
-                      </span>
-                      <span className="noticeRecipientBadges">
-                        {targetAudiences.map((audience) => {
-                          const phone = getNoticeAudiencePhone(student, audience);
-                          const hasPhone = Boolean(normalizePhoneNumber(phone));
-                          return (
-                            <small className={hasPhone ? "available" : "missing"} key={audience}>
-                              {noticeAudienceLabels[audience]} {hasPhone ? "등록" : "번호 없음"}
-                            </small>
-                          );
-                        })}
-                      </span>
-                    </label>
-                  );
-                })
-              ) : (
-                <div className="noticeStudentEmpty">조건에 맞는 학생이 없습니다.</div>
-              )}
-            </div>
-          </div>
+          <NotificationRecipientPanel
+            classFilter={classFilter}
+            classTemplates={classTemplates}
+            getAudiencePhone={getNoticeAudiencePhone}
+            normalizePhoneNumber={normalizePhoneNumber}
+            noticeRecipientCount={noticeRecipients.length}
+            noticeRecipientMode={noticeRecipientMode}
+            noticeWithdrawnClassFilterId={noticeWithdrawnClassFilterId}
+            onClassFilterChange={setClassFilter}
+            onClearSelectedStudents={clearSelectedStudents}
+            onNoticeRecipientModeChange={setNoticeRecipientMode}
+            onSearchTextChange={setSearchText}
+            onSelectAllVisibleStudents={selectAllVisibleStudents}
+            onToggleStudentSelection={toggleStudentSelection}
+            parentRecipientCount={parentRecipientCount}
+            searchText={searchText}
+            selectedStudentIds={selectedStudentIds}
+            studentRecipientCount={studentRecipientCount}
+            targetAudiences={targetAudiences}
+            targetStudentCount={targetStudents.length}
+            visibleStudents={visibleNoticeStudents}
+            withdrawnStudentCount={withdrawnStudents.length}
+          />
 
           <div className="noticeWritePanel">
             <label>

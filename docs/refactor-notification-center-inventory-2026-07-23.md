@@ -30,9 +30,14 @@
 - 컴포넌트는 표시값과 callback만 받고 state/API/Supabase/Solapi를 직접 소유하지 않는다.
 - App은 기존 탭 state와 `onRefresh`, filter 선택을 계속 소유한다.
 
+## 13A-2 안전 단위
+
+- 수신 모드, 반/검색 filter, 대상 건수, 학생 선택 목록을 `NotificationRecipientPanel.jsx`로 이동했다.
+- `students`, `classTemplates`, 선택 state, 학생 filter/수신 대상 계산과 selection callback은 App이 계속 소유한다.
+- 컴포넌트는 controlled 값과 callback만 사용하며 API/Supabase/Solapi 또는 실제 발송 action을 소유하지 않는다.
+
 ## 다음 후보
 
-1. 수신자 검색/선택 표시 패널을 controlled callback-only 컴포넌트로 분리한다.
-2. 공지 작성/미리보기 UI를 controlled 컴포넌트로 분리하되 AI 수정·예약·즉시발송 handlers는 App에 남긴다.
-3. 발송 기록 table을 read-only row + cancel/delete callbacks 경계로 분리한다.
-4. payload builder와 실제 API orchestration은 별도 inventory/fixture와 사람 gate 필요성을 다시 판정한다.
+1. 공지 작성/미리보기 UI를 controlled 컴포넌트로 분리하되 AI 수정·예약·즉시발송 handlers는 App에 남긴다.
+2. 발송 기록 table을 read-only row + cancel/delete callbacks 경계로 분리한다.
+3. payload builder와 실제 API orchestration은 별도 inventory/fixture와 사람 gate 필요성을 다시 판정한다.

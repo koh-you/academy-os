@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13A-2 알림센터 수신자 선택 패널 분리 — AI gate 통과
+
+- 코드: 공지 수신 모드, 반/퇴원학생반 filter, 학생 검색, 대상 건수 요약, 학생 체크 목록과 번호 등록 badge를 `NotificationRecipientPanel.jsx`로 이동했다.
+- 동작 보존: 기존 수신 모드 순서, 반 option, 검색 placeholder, 선택/전체선택/해제, 퇴원일 표시, 학부모·학생 번호 유무 badge와 빈 상태 문구를 그대로 유지한다.
+- 저장 원천/side effect: `students`, `classTemplates`, 선택 state, class/search derivation, `noticeRecipients`와 학부모/학생 대상 계산, selection 정리 effect와 모든 callback은 App이 소유한다. 새 패널에는 hook, API, Supabase, Solapi, 즉시발송·예약 함수가 없다.
+- 자동검증: 기존 `20a-2`, `20a-3`이 새 소유 파일까지 같은 수신자 계약을 검사하도록 확장하고 App wiring과 callback-only 경계를 고정하는 `20a-4`를 추가했다. production scenario 422/422와 build, `git diff --check`가 통과했다.
+- gate 판정: controlled 표시 컴포넌트 이동이고 실제 학생 row를 쓰거나 알림을 발송하지 않는다. 테스트 데이터·사람 조작 없이 AI gate로 통과했다.
+- 다음 경계: 공지 작성/미리보기 UI를 controlled 컴포넌트로 분리하되 AI 수정·예약·즉시발송 handler와 초안 state는 App에 남긴다.
+
 ## 2026-07-23 P1. 13A-1 알림센터 내비게이션 shell 분리 — AI gate 통과
 
 - 코드: 알림센터의 페이지 제목/설명, 기록 로딩·실패·재시도 표시, 공지/특강 상위 탭, 특강 수업/안내문 탭, 개별 발송/기록 필터 탭을 `NotificationCenterNavigation.jsx`의 세 callback-only 컴포넌트로 이동했다.
