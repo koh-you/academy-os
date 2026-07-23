@@ -211,6 +211,13 @@
 - App은 실제 action과 API callback을 계속 소유하며, hook에는 API·Supabase·`notification_jobs`·Solapi가 없다.
 - deterministic fixture, production scenario `88b-32`, production 398/398, build, diff 검사를 통과했다. local 동시 작업 방지 상태이므로 사용자 지시에 따라 AI gate로 통과했다.
 
+## 12R-18 구현 결과 — 알림톡 draft 탭 표시 모델
+
+- 문구 탭 설정 배열에 각 control의 현재 job display를 붙이는 계산을 `createSupplementNotificationDraftTabConfigs`로 분리했다.
+- 설정 순서·필드·label을 보존하고 주입된 현재 job selector와 display formatter를 사용하며 원본 설정은 변경하지 않는다.
+- App은 실제 job 원천과 예약·취소 action을 계속 소유하고, 모델은 렌더 props만 반환한다.
+- deterministic fixture, production scenario `88b-33`, production 399/399, build, diff 검사를 통과했다. 순수 표시 계산이므로 사용자 지시에 따라 AI gate로 통과했다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.

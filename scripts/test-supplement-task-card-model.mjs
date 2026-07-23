@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
-import { createSupplementTaskCardViewModel } from "../src/domains/supplements/supplementTaskCardModel.js";
+import {
+  createSupplementNotificationDraftTabConfigs,
+  createSupplementTaskCardViewModel
+} from "../src/domains/supplements/supplementTaskCardModel.js";
 
 const baseTask = {
   attemptCount: 2,
@@ -119,5 +122,37 @@ assert.equal(emptyModel.saveSummaryProps.notificationStatus, "empty");
 assert.equal(emptyModel.scheduleGateProps.body, "시간까지 입력하면 수업일지 일정 만들기 버튼으로 확정 안내 예약을 만들 수 있습니다.");
 assert.equal(emptyModel.sourceContextProps.sourceHomeworkTitle, "기록 없음");
 assert.equal(emptyModel.sourceContextProps.absenceSourceLabel, "원 결석 수업");
+
+const notificationConfigs = [
+  { controlType: "studentSchedule", field: "studentScheduleNotificationDraft", label: "학생 알림톡" },
+  { controlType: "parentSchedule", field: "parentScheduleNotificationDraft", label: "학부모 알림톡" }
+];
+const notificationJobs = [
+  { id: "student-job", controlType: "studentSchedule", status: "scheduled" },
+  { id: "parent-job", controlType: "parentSchedule", status: "sent" }
+];
+const notificationTabs = createSupplementNotificationDraftTabConfigs({
+  configs: notificationConfigs,
+  notificationJobs,
+  task: { makeupTaskId: "task-1" }
+}, {
+  getControlDisplay: (job) => ({ jobId: job?.id ?? "", status: job?.status ?? "none" }),
+  getControlJob: (_task, jobs, controlType) => jobs.find((job) => job.controlType === controlType)
+});
+assert.deepEqual(notificationTabs, [
+  {
+    controlType: "studentSchedule",
+    display: { jobId: "student-job", status: "scheduled" },
+    field: "studentScheduleNotificationDraft",
+    label: "학생 알림톡"
+  },
+  {
+    controlType: "parentSchedule",
+    display: { jobId: "parent-job", status: "sent" },
+    field: "parentScheduleNotificationDraft",
+    label: "학부모 알림톡"
+  }
+]);
+assert.equal(Object.prototype.hasOwnProperty.call(notificationConfigs[0], "display"), false);
 
 console.log("supplement task card model: deterministic contract passed");

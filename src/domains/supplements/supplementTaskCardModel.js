@@ -3,6 +3,20 @@ import {
   supplementTeacherFinalFields
 } from "./supplementTaskDraft.js";
 
+export function createSupplementNotificationDraftTabConfigs({
+  configs = supplementNotificationDraftConfigs,
+  notificationJobs = [],
+  task = {}
+} = {}, {
+  getControlDisplay,
+  getControlJob
+} = {}) {
+  return configs.map((config) => ({
+    ...config,
+    display: getControlDisplay(getControlJob(task, notificationJobs, config.controlType))
+  }));
+}
+
 export function createSupplementTaskCardViewModel({
   draftDiff = [],
   draftValues = {},

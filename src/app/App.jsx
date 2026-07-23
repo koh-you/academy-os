@@ -83,7 +83,10 @@ import { SupplementHistoryModal } from "../domains/supplements/SupplementHistory
 import { SupplementNotificationControlModal } from "../domains/supplements/SupplementNotificationControlModal.jsx";
 import { createSupplementNotificationControlViewModel } from "../domains/supplements/supplementNotificationControlModel.js";
 import { SupplementTaskCard } from "../domains/supplements/SupplementTaskCard.jsx";
-import { createSupplementTaskCardViewModel } from "../domains/supplements/supplementTaskCardModel.js";
+import {
+  createSupplementNotificationDraftTabConfigs,
+  createSupplementTaskCardViewModel
+} from "../domains/supplements/supplementTaskCardModel.js";
 import {
   applySupplementNotificationControlAction,
   applySupplementScheduleAction,
@@ -24996,12 +24999,13 @@ function SupplementStudentModal({
                 activeNotificationDraftConfig.controlType
               );
               const activeNotificationDisplay = getSupplementNotificationControlDisplayForApp(activeNotificationJob);
-              const notificationDraftTabConfigs = supplementNotificationDraftConfigs.map((config) => ({
-                ...config,
-                display: getSupplementNotificationControlDisplayForApp(
-                  getSupplementNotificationControlJob(task, notificationJobs, config.controlType)
-                )
-              }));
+              const notificationDraftTabConfigs = createSupplementNotificationDraftTabConfigs({
+                notificationJobs,
+                task
+              }, {
+                getControlDisplay: getSupplementNotificationControlDisplayForApp,
+                getControlJob: getSupplementNotificationControlJob
+              });
               return (
                 <SupplementTaskCard
                   actionProps={{
