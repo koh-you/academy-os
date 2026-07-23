@@ -293,10 +293,19 @@
 
 - App.jsx의 334줄 규모 `SupplementStudentModal` 본체를 `src/domains/supplements/SupplementStudentModal.jsx`로 이동했다.
 - 기존 hook/controller/model/UI 조합은 새 파일이 소유하고 App 전용 표시·draft helper는 단일 dependency object로 전달한다. 학생별 task 순서, 저장 상태, 세 알림 탭, 완료·일정·알림 제어 확인창과 action callback 연결은 보존했다.
-- 실제 task/lesson/출결 저장·Supabase 재조회·React 전역 갱신·notification job/Solapi 예약·취소는 `FollowUpCenter`와 App callback 경계에 남겼다. 새 모달 파일에는 직접 `fetch`, API path, Supabase/notification state mutation이 없다.
+- 실제 task/lesson/출결 저장·Supabase 재조회·React 전역 갱신·notification job/Solapi 예약·취소는 `SupplementCenter`와 App callback 경계에 남겼다. 새 모달 파일에는 직접 `fetch`, API path, Supabase/notification state mutation이 없다.
 - production scenario `88b-43`, production 409/409, build, diff 검사를 통과했다.
 - 이미 사람 검수한 action 경계를 그대로 조합하는 구조 이동이므로 새 운영 데이터나 사람 조작 없이 AI gate로 통과했다.
-- 다음은 `FollowUpCenter`의 보충 목록·선택·실제 callback adapter 경계를 inventory해 12번의 남은 분리 범위를 판정한다.
+- 다음은 `SupplementCenter`의 보충 목록·선택·실제 callback adapter 경계를 inventory해 12번의 남은 분리 범위를 판정한다.
+
+## 12R-29 구현 결과 — 보충 센터 모달 callback adapter
+
+- `SupplementCenter`의 모달 저장·일정·결석 원천 취소·완료 callback adapter 네 개를 `supplementCenterModalActionController.js`로 이동했다.
+- 각 action의 `saving -> callback await -> pending draft 정리 -> saved` 순서와 실패 row 문구·rethrow를 유지한다.
+- 실제 task/lesson/출결 저장·Supabase 재조회·React 전역 갱신·notification job/Solapi 작업은 App callback에 남겼고 새 controller에는 직접 API·Supabase·notification/Solapi 호출이 없다.
+- 네 성공·네 실패 fixture, production scenario `88b-44`, 기존 `88b`의 분리 파일 탐색 보강, production 410/410, build, diff 검사를 통과했다.
+- 이미 검수한 callback 경계의 얇은 adapter 이동이므로 재시험 데이터나 새 운영 조작 없이 AI gate로 통과했다.
+- 다음은 목록 카드의 별도 완료 확인 adapter와 후보·탭 표시 모델을 한 의미 단위씩 inventory한다.
 
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
