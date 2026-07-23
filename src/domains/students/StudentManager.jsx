@@ -1,5 +1,6 @@
 import { Component, useEffect, useState } from "react";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
+import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { parseStudentScheduleOverride } from "../../shared/utils/studentSchedule.js";
 
 const withdrawalReasonOptions = [
@@ -829,13 +830,15 @@ function StudentProfileModal({
       const defaultScoreDraft = createScoreDraft(student.studentId);
       const defaultAcademyTestDraft = createAcademyTestDraft(student.studentId);
       const defaultConsultationDraft = createConsultationDraft(student.studentId);
+      const defaultReminderDraft = createStudentReminderDraft(student.studentId);
       const hasOtherDraftChanges =
         Object.keys(scoreDrafts).length > 0 ||
         Object.keys(academyTestDrafts).length > 0 ||
         Object.keys(consultationDrafts).length > 0 ||
         JSON.stringify(newScoreDraft) !== JSON.stringify(defaultScoreDraft) ||
         JSON.stringify(newAcademyTestDraft) !== JSON.stringify(defaultAcademyTestDraft) ||
-        JSON.stringify(newConsultationDraft) !== JSON.stringify(defaultConsultationDraft);
+        JSON.stringify(newConsultationDraft) !== JSON.stringify(defaultConsultationDraft) ||
+        JSON.stringify(newReminderDraft) !== JSON.stringify(defaultReminderDraft);
       if (!hasOtherDraftChanges) setIsEditingProfile(false);
     } catch (error) {
       setProfileSaveError(error?.message || "기본정보 저장에 실패했습니다.");
@@ -989,6 +992,15 @@ function StudentProfileModal({
   const hasNewReminderDraftChanges = JSON.stringify(newReminderDraft) !== JSON.stringify(defaultNewReminderDraft);
   const hasNewReminderContent = Boolean(String(newReminderDraft.title || newReminderDraft.content || "").trim());
   const isProfileDirty = hasStudentProfileDraftChanges(student, profileDraft);
+  const profileDirtyFieldCount = studentProfileFields.filter(
+    (field) => String(student[field] ?? "") !== String(profileDraft[field] ?? "")
+  ).length;
+  const separateDirtyLabels = [
+    hasNewReminderDraftChanges ? "운영 알림" : "",
+    Object.keys(consultationDrafts).length > 0 || hasNewConsultationDraftChanges ? "상담" : "",
+    Object.keys(scoreDrafts).length > 0 || hasNewScoreDraftChanges ? "성적" : "",
+    Object.keys(academyTestDrafts).length > 0 || hasNewAcademyTestDraftChanges ? "테스트" : ""
+  ].filter(Boolean);
   const hasRecordDraftChanges =
     Object.keys(scoreDrafts).length > 0 ||
     Object.keys(academyTestDrafts).length > 0 ||
@@ -1031,14 +1043,6 @@ function StudentProfileModal({
               <>
                 <button className="softButton" onClick={cancelProfileEdit} type="button">
                   {hasAnyEditingDraftChanges ? "취소" : "수정 종료"}
-                </button>
-                <button
-                  className="saveButton"
-                  disabled={!isProfileDirty || isProfileSaving}
-                  onClick={saveProfileDraft}
-                  type="button"
-                >
-                  {saveActionLabel("기본정보 저장", effectiveProfileSaveState)}
                 </button>
               </>
             ) : (
@@ -1586,6 +1590,29 @@ function StudentProfileModal({
             </div>
           </div>
         </details>
+        {isEditingProfile ? (
+          <StickySaveBar
+            className="studentProfileStickySaveBar"
+            label="기본정보"
+            message={
+              isProfileDirty
+                ? `기본정보 변경 ${profileDirtyFieldCount}개 · 상담·성적·테스트·운영 알림은 각 영역에서 별도 저장`
+                : separateDirtyLabels.length
+                  ? `기본정보 변경 없음 · ${separateDirtyLabels.join("·")}은 각 영역에서 별도 저장 필요`
+                  : "기본정보 변경 없음 · 상담·성적·테스트·운영 알림은 각 영역에서 별도 저장"
+            }
+            saveState={effectiveProfileSaveState}
+          >
+            <button
+              className="saveButton"
+              disabled={!isProfileDirty || isProfileSaving}
+              onClick={saveProfileDraft}
+              type="button"
+            >
+              {saveActionLabel("기본정보만 저장", effectiveProfileSaveState)}
+            </button>
+          </StickySaveBar>
+        ) : null}
       </div>
     </ModalComponent>
   );
