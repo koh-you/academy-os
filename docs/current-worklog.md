@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13D-4 알림센터 history filter local action 분리 — AI gate 통과
+
+- 코드: 발송 기록 요약 filter 선택 시 `jobFilter` 변경, `history` workspace 전환, 기록 영역 펼침을 `notificationNoticeActions.js`의 `selectNoticeHistoryFilterAction`으로 이동했다. App은 선택 filter와 기존 local setter를 주입한다.
+- 동작 보존: filter가 먼저 반영되고 workspace가 `history`로 바뀐 뒤 `isNoticeHistoryOpen=true`가 되는 기존 호출 순서를 그대로 유지했다. 기존 공지 발송 진행 scenario도 이동한 `setActiveWorkspace("history")` 경계를 추적하도록 갱신했다.
+- 저장 원천/side effect: action은 NotificationCenter local UI state만 바꾸며 API/Supabase/notification job/Solapi side effect가 없다.
+- 자동검증: `failed` fixture에서 filter/workspace/open setter 호출값과 순서를 `test:notification-notice-actions`로 고정했다. production scenario 443/443과 build, `git diff --check`가 통과했다.
+- gate 판정: local UI 전환 전체를 injected setter fixture로 재현했다. 화면이나 재시험/고태영 운영 데이터의 사람 조작이 필요하지 않은 AI gate다.
+- 다음 경계: 예약 성공·취소 결과를 local 기록 배열 맨 앞에 중복 없이 반영하고 80건으로 제한하는 upsert 계산을 순수 model로 분리한다.
+
 ## 2026-07-23 P1. 13D-3 알림센터 일반 template local action 분리 — AI gate 통과
 
 - 코드: 일반 공지 template 선택 시 template 조회, 선택 ID, notice kind, special-lecture meta 초기화, 제목·본문 local draft 반영을 `notificationNoticeActions.js`의 `applyNoticeTemplateAction`으로 이동했다. App은 13D-1 config와 기존 local setter를 주입한다.

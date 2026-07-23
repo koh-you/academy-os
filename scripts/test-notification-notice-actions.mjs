@@ -7,6 +7,7 @@ import {
   reconcileNoticeResultsAction,
   refreshNoticeJobsInBackgroundAction,
   scheduleNoticeAction,
+  selectNoticeHistoryFilterAction,
   sendNoticeNowAction
 } from "../src/domains/notifications/notificationNoticeActions.js";
 
@@ -933,4 +934,17 @@ assert.deepEqual(missingTemplateEvents, [
   ["meta", null]
 ]);
 
-console.log("notification notice actions including background refresh and template fixtures passed");
+const historyFilterEvents = [];
+selectNoticeHistoryFilterAction({
+  nextFilter: "failed",
+  setActiveWorkspace: (value) => historyFilterEvents.push(["workspace", value]),
+  setIsHistoryOpen: (value) => historyFilterEvents.push(["open", value]),
+  setJobFilter: (value) => historyFilterEvents.push(["filter", value])
+});
+assert.deepEqual(historyFilterEvents, [
+  ["filter", "failed"],
+  ["workspace", "history"],
+  ["open", true]
+]);
+
+console.log("notification notice actions including background refresh template and filter fixtures passed");

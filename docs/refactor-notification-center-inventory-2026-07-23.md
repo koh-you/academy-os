@@ -150,8 +150,14 @@
 - App이 13D-1 config와 local setter를 주입한다.
 - 일반·특강·알 수 없는 template의 호출값과 순서를 fixture로 고정했으며 외부 template 연결이나 발송은 없다.
 
+## 13D-4 history filter local action 단위
+
+- 발송 기록 filter 선택의 filter/workspace/open local state 전환을 `selectNoticeHistoryFilterAction`으로 이동했다.
+- App이 선택 filter와 기존 setter를 주입한다.
+- setter 호출값과 순서를 fixture로 고정했으며 외부 조회나 mutation은 없다.
+
 ## 다음 후보
 
-1. history filter 선택의 filter/workspace/open local action을 분리한다.
-2. 그다음 local notice job upsert 배열 계산을 순수 model로 분리한다.
+1. local notice job upsert의 중복 제거·최신 우선·80건 제한을 순수 model로 분리한다.
+2. 그다음 NotificationCenter에 남은 local wrapper/effect 경계를 다시 inventory한다.
 3. 특강 안내문 적용 handler는 Solapi 특강 템플릿 외부 검수와 기능 경계를 바꾸지 않는 범위만 다룬다.

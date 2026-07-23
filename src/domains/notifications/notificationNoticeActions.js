@@ -340,3 +340,14 @@ export function applyNoticeTemplateAction({
   setNoticeTitle(template.title);
   setNoticeBody(template.body);
 }
+
+export function selectNoticeHistoryFilterAction({
+  nextFilter,
+  setActiveWorkspace,
+  setIsHistoryOpen,
+  setJobFilter
+}) {
+  setJobFilter(nextFilter);
+  setActiveWorkspace("history");
+  setIsHistoryOpen(true);
+}
