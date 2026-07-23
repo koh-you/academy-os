@@ -70,6 +70,7 @@ import {
   reserveNoticeJobRequest
 } from "../domains/notifications/notificationNoticeApi.js";
 import {
+  applyNoticeTemplateAction,
   cancelNoticeJobAction,
   deleteNoticeJobAction,
   polishNoticeMessageAction,
@@ -10266,17 +10267,15 @@ function NotificationCenter({
   }
 
   function applyNoticeTemplate(templateId) {
-    const template = noticeMessageTemplates.find((item) => item.id === templateId);
-    setNoticeTemplateId(templateId);
-    if (!template) {
-      setNoticeKind("general");
-      setNoticeSpecialLectureMeta(null);
-      return;
-    }
-    setNoticeKind(templateId === "specialLecture" ? "special_lecture" : "general");
-    setNoticeSpecialLectureMeta(null);
-    setNoticeTitle(template.title);
-    setNoticeBody(template.body);
+    applyNoticeTemplateAction({
+      setNoticeBody,
+      setNoticeKind,
+      setNoticeSpecialLectureMeta,
+      setNoticeTemplateId,
+      setNoticeTitle,
+      templateId,
+      templates: noticeMessageTemplates
+    });
   }
 
   function applySpecialLectureGuideToNotice(guide, noticeBodyText, guideUrl) {

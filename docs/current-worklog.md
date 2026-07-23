@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13D-3 알림센터 일반 template local action 분리 — AI gate 통과
+
+- 코드: 일반 공지 template 선택 시 template 조회, 선택 ID, notice kind, special-lecture meta 초기화, 제목·본문 local draft 반영을 `notificationNoticeActions.js`의 `applyNoticeTemplateAction`으로 이동했다. App은 13D-1 config와 기존 local setter를 주입한다.
+- 동작 보존: 일반 템플릿은 `general`, 특강 템플릿은 `special_lecture`, 모든 선택에서 기존 special meta를 null로 초기화하고, 유효 템플릿만 제목·본문을 덮는 순서를 그대로 유지했다. 알 수 없는 template ID도 선택 ID와 general/meta만 바꾸고 기존 제목·본문은 보존한다.
+- 저장 원천/side effect: action은 NotificationCenter local draft setter만 호출하며 API/Supabase/notification job/Solapi side effect가 없다. 특강 템플릿 원문·외부 템플릿 ID·발송 경로는 변경하지 않았다.
+- 자동검증: 일반/특강/알 수 없는 템플릿의 setter 호출값과 순서, 미확인 template의 제목·본문 무변경을 `test:notification-notice-actions`로 고정했다. production scenario 442/442와 build, `git diff --check`가 통과했다.
+- gate 판정: local state 전환 전체를 injected setter fixture로 재현했다. 화면이나 재시험/고태영 운영 데이터의 사람 조작이 필요하지 않은 AI gate다.
+- 다음 경계: 발송 기록 filter 선택 시 filter 변경·기록 workspace 전환·history 펼침을 주입형 local action으로 분리한다.
+
 ## 2026-07-23 P1. 13D-2 알림센터 학생 선택 순수 model 분리 — AI gate 통과
 
 - 코드: 반/퇴원 필터 변경 시 현재 선택 ID 정리, 학생 한 명 toggle, 현재 검색 결과 전체 선택의 배열 계산을 `notificationCenterModel.js`의 `filterNoticeSelectedStudentIds`, `toggleNoticeSelectedStudentId`, `selectAllNoticeStudentIds`로 이동했다. App은 기존 `useEffect`와 `setSelectedStudentIds`를 유지하고 순수 함수 결과만 반영한다.

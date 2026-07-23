@@ -144,8 +144,14 @@
 - App은 React effect/setter를 유지하고 순수 함수 결과만 반영한다.
 - 순서 보존·추가·전체 제거·전체 선택을 deterministic fixture로 고정했으며 local state 밖 side effect는 없다.
 
+## 13D-3 일반 template local action 단위
+
+- template 조회, 선택 ID/kind/meta/title/body local state 전환을 `applyNoticeTemplateAction`으로 이동했다.
+- App이 13D-1 config와 local setter를 주입한다.
+- 일반·특강·알 수 없는 template의 호출값과 순서를 fixture로 고정했으며 외부 template 연결이나 발송은 없다.
+
 ## 다음 후보
 
-1. 일반 공지 template 적용의 template ID/kind/meta/title/body local action을 분리한다.
-2. 그다음 history filter/open local action을 검토한다.
+1. history filter 선택의 filter/workspace/open local action을 분리한다.
+2. 그다음 local notice job upsert 배열 계산을 순수 model로 분리한다.
 3. 특강 안내문 적용 handler는 Solapi 특강 템플릿 외부 검수와 기능 경계를 바꾸지 않는 범위만 다룬다.
