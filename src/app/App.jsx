@@ -560,10 +560,36 @@ function getHomeworkFollowupPatch(record = {}, method = "", homework = null) {
   };
 }
 
-function hasMatchingHomeworkFollowupFields(expectedRecord = {}, savedRecord = {}) {
-  return ["homeworkFollowupMethod", "homeworkFollowupText", "homeworkFollowupSourceHomeworkId", "preparationMemo"]
+const lessonRecordRequeryVerificationFields = [
+  "homeworkFollowupMethod",
+  "homeworkFollowupText",
+  "homeworkFollowupSourceHomeworkId",
+  "preparationMemo",
+  "prepStudentVisible",
+  "prepParentVisible",
+  "prepMemoCheckedAt",
+  "prepMemoCheckedSourceDate",
+  "prepMemoCheckedSourceRecordId"
+];
+
+function normalizeLessonRecordVerificationValue(field, value) {
+  if (["prepStudentVisible", "prepParentVisible"].includes(field)) {
+    return Boolean(value) ? "true" : "false";
+  }
+  if (field === "prepMemoCheckedAt" && value) {
+    const timestamp = Date.parse(value);
+    if (Number.isFinite(timestamp)) return new Date(timestamp).toISOString();
+  }
+  return normalizeMessageText(value);
+}
+
+function hasMatchingVerifiedLessonRecordFields(expectedRecord = {}, savedRecord = {}) {
+  return lessonRecordRequeryVerificationFields
     .filter((field) => Object.prototype.hasOwnProperty.call(expectedRecord, field))
-    .every((field) => normalizeMessageText(expectedRecord[field]) === normalizeMessageText(savedRecord?.[field]));
+    .every((field) => (
+      normalizeLessonRecordVerificationValue(field, expectedRecord[field]) ===
+      normalizeLessonRecordVerificationValue(field, savedRecord?.[field])
+    ));
 }
 
 function buildCommentPreviewLines({ audience, comment, nextHomework, notificationTemplates = {}, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
@@ -8653,8 +8679,8 @@ export function App() {
 
       const saveResult = await postJson("/api/lesson-records", { record });
       let savedRecord = saveResult?.record;
-      if (!savedRecord || !hasMatchingHomeworkFollowupFields(record, savedRecord)) {
-        throw new Error("수업기록 저장 후 Supabase 재조회에서 숙제 후속처리 값이 일치하지 않습니다.");
+      if (!savedRecord || !hasMatchingVerifiedLessonRecordFields(record, savedRecord)) {
+        throw new Error("수업기록 저장 후 Supabase 재조회 값이 일치하지 않습니다.");
       }
       if (verifyFields.length > 0) {
         const recordsAfterResult = await getJsonWithTimeout(

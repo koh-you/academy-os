@@ -1,5 +1,17 @@
 # Academy OS Current Worklog
 
+## 2026-07-23 P1. 수업메모 저장 Supabase 재조회 검증 완결
+
+- 책임 분리 설명: 수업메모 저장은 `lesson_student_records.preparation_memo`와 작성창 가져오기 설정만 저장한다. 학생·학부모 알림톡 작성창을 열 때 체크된 메모가 local draft의 재료가 되지만, `student_comment/teacher_comment`는 작성창의 `최종 문구 저장`을 눌러야 바뀐다. 두 저장 모두 기존 `notification_jobs`/Solapi 그룹을 자동 변경하지 않으며, 저장본과 예약 지문이 달라진 경우 사람이 `Solapi 예약 업데이트`를 눌러야 외부 예약이 변경된다.
+- 발견한 빈틈: 서버는 수업기록 upsert 뒤 Supabase를 재조회했지만 `preparationMemo`와 숙제 후속처리 세 필드만 요청값과 대조했다. `prepStudentVisible`, `prepParentVisible`, `prepMemoCheckedAt`, `prepMemoCheckedSourceDate`, `prepMemoCheckedSourceRecordId`는 반환 row에 포함돼도 불일치를 실패로 판정하지 않았다.
+- 보강 결과: 프론트와 서버가 같은 재조회 검증 필드 목록을 사용해 숙제 후속처리 3개, 수업메모, 작성창 가져오기 2개, 이전 메모 확인 3개를 모두 대조한다. payload에 포함된 필드만 검증해 부분 저장을 깨뜨리지 않는다. boolean은 실제 참/거짓으로, 확인 시각은 ISO 시각으로 정규화해 `Z`와 `+00:00`처럼 같은 시각의 표현 차이는 허용하고 의미가 다른 값만 실패시킨다.
+- 완료/실패 계약: API는 Supabase 재조회 row와 요청값이 모두 일치한 뒤에만 성공 record를 반환하고, 프론트도 같은 필드가 일치해야 `저장 완료`로 전환한다. 하나라도 다르면 `저장 실패`로 남기고 수업메모 local draft와 모달을 유지한다.
+- 저장 원천/외부 영향: 직접 원천은 기존 `lesson_student_records`이며 새 SQL은 없다. `student_comment/teacher_comment`, `notification_jobs`, Solapi 예약·발송·취소, 출결, 숙제 원천은 변경하거나 실행하지 않았다.
+- AI 검증: `git diff --check`, `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 366/366, `npm run build`를 통과했다. 기존 Vite chunk size 경고만 남았다.
+- 사람 gate: 삭제 가능한 미래 테스트 수업의 학생 한 명에서 메모와 학생·학부모 가져오기 체크를 바꿔 저장한 뒤 `저장 완료`를 확인하고 새로고침한다. 메모와 두 체크가 그대로여야 한다. 이어 확인할 이전 메모가 있는 학생에서 `확인 후 숨기기`를 누르고 저장 완료 후 새로고침해 `!`가 다시 나타나지 않는지 확인한다. 이 과정에서 저장된 학생·학부모 최종 문구와 기존 Solapi 예약은 그대로여야 한다.
+- 중단 조건: 저장 완료인데 메모/체크/확인값이 새로고침 후 되돌아감, 같은 시각 형식 차이만으로 저장 실패, 실패 시 draft나 모달이 사라짐, 메모 저장만으로 최종 문구나 notification job/Solapi 그룹이 바뀌면 다음 보강으로 넘어가지 않는다.
+- 다음 보강 순서: 이번 gate 통과 후 `이전 메모 확인 범위를 수업 연속성 그룹별로 제한할지 결정 + 잘못 확인한 메모 다시 표시`, 그다음 `X 닫기/저장 의미 분리`, `새로고침 draft 복구`, `다중 탭 updatedAt/version 충돌 방지`, 마지막으로 `!` 의미와 긴 안내문 compact화`를 한 단위씩 진행한다.
+
 ## 2026-07-22 P1. 시험분석 GPT Image 프롬프트 제작실 main 통합
 
 - 상태: 사용자 요청으로 리팩터링을 일시 중단하고 `codex/exam-analysis-gpt-image`의 I1~I7을 최신 `main`에 충돌 없이 fast-forward 통합했다. 전체 검증까지 통과했으며 통합 기록 커밋·`origin/main` 푸시 후 자동 배포를 확인한다.

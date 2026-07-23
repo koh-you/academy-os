@@ -2493,7 +2493,26 @@ function mergeExistingHomeworkFollowupForSave(nextRecord = {}, existingRecord = 
   ), nextRecord);
 }
 
-function normalizeLessonRecordVerificationValue(value) {
+const lessonRecordRequeryVerificationFields = [
+  "homeworkFollowupMethod",
+  "homeworkFollowupText",
+  "homeworkFollowupSourceHomeworkId",
+  "preparationMemo",
+  "prepStudentVisible",
+  "prepParentVisible",
+  "prepMemoCheckedAt",
+  "prepMemoCheckedSourceDate",
+  "prepMemoCheckedSourceRecordId"
+];
+
+function normalizeLessonRecordVerificationValue(field, value) {
+  if (["prepStudentVisible", "prepParentVisible"].includes(field)) {
+    return Boolean(value) ? "true" : "false";
+  }
+  if (field === "prepMemoCheckedAt" && value) {
+    const timestamp = Date.parse(value);
+    if (Number.isFinite(timestamp)) return new Date(timestamp).toISOString();
+  }
   return String(value ?? "").trim();
 }
 
@@ -2505,10 +2524,12 @@ async function requeryVerifiedLessonStudentRecord(expectedRecord = {}) {
   );
   if (!rows[0]) throw new Error("수업기록 저장 후 Supabase 재조회에서 행을 찾지 못했습니다.");
   const savedRecord = fromLessonRecordRow(rows[0]);
-  const fields = ["homeworkFollowupMethod", "homeworkFollowupText", "homeworkFollowupSourceHomeworkId", "preparationMemo"];
+  const fields = lessonRecordRequeryVerificationFields.filter((field) => (
+    Object.prototype.hasOwnProperty.call(expectedRecord, field)
+  ));
   const mismatch = fields.find((field) => (
-    normalizeLessonRecordVerificationValue(savedRecord[field]) !==
-    normalizeLessonRecordVerificationValue(expectedRecord[field])
+    normalizeLessonRecordVerificationValue(field, savedRecord[field]) !==
+    normalizeLessonRecordVerificationValue(field, expectedRecord[field])
   ));
   if (mismatch) {
     throw new Error(`수업기록 저장 후 Supabase 재조회 값이 일치하지 않습니다: ${mismatch}`);
