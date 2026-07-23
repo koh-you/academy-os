@@ -96,6 +96,7 @@ import { SupplementStudentModalShell } from "../domains/supplements/SupplementSt
 import { useSupplementNotificationControlState } from "../domains/supplements/useSupplementNotificationControlState.js";
 import { useSupplementConfirmationState } from "../domains/supplements/useSupplementConfirmationState.js";
 import { useSupplementFeedbackState } from "../domains/supplements/useSupplementFeedbackState.js";
+import { useSupplementNotificationDraftSelectionState } from "../domains/supplements/useSupplementNotificationDraftSelectionState.js";
 import { useSupplementTaskDraftController } from "../domains/supplements/useSupplementTaskDraftController.js";
 import {
   createPersistableSupplementTask,
@@ -24609,12 +24610,15 @@ function SupplementStudentModal({
   const [cancellationConfirm, setCancellationConfirm] = useState(null);
   const [busyTaskId, setBusyTaskId] = useState("");
   const [taskSaveStatus, setTaskSaveStatus] = useState({});
-  const [activeNotificationDraftFields, setActiveNotificationDraftFields] = useState({});
   const {
     dismissFeedback,
     feedback,
     showFeedback
   } = useSupplementFeedbackState();
+  const {
+    getActiveNotificationDraftField,
+    selectNotificationDraftField
+  } = useSupplementNotificationDraftSelectionState();
   const {
     closePassConfirmation,
     closeScheduleConfirmation,
@@ -24976,7 +24980,10 @@ function SupplementStudentModal({
                 !["done", "canceled"].includes(task.status);
               const isCancelAbsenceBusy = busyTaskId === `${task.makeupTaskId}:cancelAbsence`;
               const isCancelMakeupBusy = busyTaskId === `${task.makeupTaskId}:cancelMakeup`;
-              const activeNotificationDraftField = activeNotificationDraftFields[task.makeupTaskId] || supplementNotificationDraftConfigs[0].field;
+              const activeNotificationDraftField = getActiveNotificationDraftField(
+                task.makeupTaskId,
+                supplementNotificationDraftConfigs[0].field
+              );
               const activeNotificationDraftConfig = getSupplementNotificationDraftConfig(activeNotificationDraftField);
               const activeNotificationDraft = draftValues[activeNotificationDraftField] ?? "";
               const activeNotificationDraftIsTeacherFinal =
@@ -25072,10 +25079,7 @@ function SupplementStudentModal({
                     isTeacherFinal: activeNotificationDraftIsTeacherFinal,
                     onChangeDraft: (value) => updateTaskDraft(task, activeNotificationDraftField, value),
                     onOpenControl: (controlType) => openNotificationControl(task, controlType),
-                    onSelectField: (field) => setActiveNotificationDraftFields((current) => ({
-                      ...current,
-                      [task.makeupTaskId]: field
-                    }))
+                    onSelectField: (field) => selectNotificationDraftField(task.makeupTaskId, field)
                   }}
                   saveSummaryProps={taskCardViewModel.saveSummaryProps}
                   scheduleEditorProps={{

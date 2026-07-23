@@ -190,6 +190,13 @@
 - App은 실제 저장·완료·일정·결석취소 action과 callback을 계속 소유하며, hook에는 API·Supabase·`notification_jobs`·Solapi가 없다.
 - deterministic fixture, production scenario `88b-29`, production 395/395, build, diff 검사를 통과했다. 운영 데이터나 외부 side effect가 없는 local 표시 상태이므로 사용자 지시에 따라 AI gate로 통과했고 별도 사람 검수 데이터는 만들지 않았다.
 
+## 12R-15 구현 결과 — 알림톡 draft 탭 선택 local state
+
+- task별 알림톡 문구 3종의 현재 선택 필드를 기억하는 map과 조회·갱신을 `useSupplementNotificationDraftSelectionState.js`로 분리했다.
+- 기존 선택 우선, 선택이 없으면 첫 탭 fallback, 다른 task 선택 보존 계약을 유지한다.
+- App은 문구 draft와 저장·예약·취소 callback을 계속 소유하며, hook에는 API·Supabase·`notification_jobs`·Solapi가 없다.
+- deterministic fixture, production scenario `88b-30`, production 396/396, build, diff 검사를 통과했다. 운영 데이터와 무관한 local 탭 선택이므로 사용자 지시에 따라 AI gate로 통과했다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.
