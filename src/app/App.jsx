@@ -97,6 +97,7 @@ import {
   reconcileNoticeResultsAction,
   refreshNoticeJobsInBackgroundAction,
   scheduleNoticeAction,
+  selectNoticeHistoryFilterAction,
   sendNoticeNowAction
 } from "../domains/notifications/notificationNoticeActions.js";
 import { buildNoticeJob as createNotificationNoticeJob } from "../domains/notifications/notificationNoticeBuilders.js";
@@ -11778,9 +11779,12 @@ function NotificationCenter({
   }
 
   function selectJobFilter(nextFilter) {
-    setJobFilter(nextFilter);
-    setActiveNoticeWorkspace("history");
-    setIsNoticeHistoryOpen(true);
+    selectNoticeHistoryFilterAction({
+      nextFilter,
+      setActiveWorkspace: setActiveNoticeWorkspace,
+      setIsHistoryOpen: setIsNoticeHistoryOpen,
+      setJobFilter
+    });
   }
 
   function refreshHistoryForDate(nextDate = historyDate) {
