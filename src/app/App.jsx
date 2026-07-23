@@ -50,6 +50,7 @@ import {
   NotificationSectionTabs,
   NoticeWorkspaceTabs
 } from "../domains/notifications/NotificationCenterNavigation.jsx";
+import { NotificationComposerPanel } from "../domains/notifications/NotificationComposerPanel.jsx";
 import { NotificationRecipientPanel } from "../domains/notifications/NotificationRecipientPanel.jsx";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { createSupplementSchedulePersistencePlan } from "../domains/supplements/supplementSchedulePlan.js";
@@ -10777,49 +10778,28 @@ function NotificationCenter({
             withdrawnStudentCount={withdrawnStudents.length}
           />
 
-          <div className="noticeWritePanel">
-            <label>
-              템플릿
-              <select value={noticeTemplateId} onChange={(event) => applyNoticeTemplate(event.target.value)}>
-                <option value="">직접 작성</option>
-                {noticeMessageTemplates.map((template) => (
-                  <option key={template.id} value={template.id}>{template.label}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              제목
-              <input value={noticeTitle} onChange={(event) => setNoticeTitle(event.target.value)} placeholder="예: 휴원 안내, 보강 안내" />
-            </label>
-            <label>
-              본문
-              <textarea value={noticeBody} onChange={(event) => setNoticeBody(event.target.value)} rows="10" placeholder="보낼 공지 내용을 입력하세요." />
-            </label>
-            <div className="noticeScheduleGrid">
-              <label>
-                예약일
-                <input type="date" value={scheduleDate} onChange={(event) => setScheduleDate(event.target.value)} />
-              </label>
-              <label>
-                예약시간
-                <input type="time" value={scheduleTime} onChange={(event) => setScheduleTime(event.target.value)} />
-              </label>
-            </div>
-            <div className="noticePreviewBox">
-              <strong>미리보기</strong>
-              <p>{noticeText || "제목과 본문을 입력하면 이곳에 발송 문구가 표시됩니다."}</p>
-            </div>
-            <div className="noticeSendActions">
-              <button className="softButton" disabled={!noticeBody.trim() || isPolishingNotice} onClick={polishNoticeMessage} type="button">
-                {isPolishingNotice ? "AI 수정 중" : "AI 수정"}
-              </button>
-              <button className="softButton" disabled={!noticeText || !noticeRecipients.length || !scheduledAt || isSendingNotice} onClick={scheduleNotice} type="button">예약 발송</button>
-              <button className="sendButton" disabled={!noticeText || !noticeRecipients.length || isSendingNotice} onClick={sendNoticeNow} type="button">
-                {isSendingNotice ? "처리 중..." : "즉시 발송"}
-              </button>
-            </div>
-            {dispatchMessage ? <p className="inlineNotice noticeDispatchMessage">{dispatchMessage}</p> : null}
-          </div>
+          <NotificationComposerPanel
+            dispatchMessage={dispatchMessage}
+            isPolishingNotice={isPolishingNotice}
+            isSendingNotice={isSendingNotice}
+            noticeBody={noticeBody}
+            noticeMessageTemplates={noticeMessageTemplates}
+            noticeRecipientCount={noticeRecipients.length}
+            noticeTemplateId={noticeTemplateId}
+            noticeText={noticeText}
+            noticeTitle={noticeTitle}
+            onApplyTemplate={applyNoticeTemplate}
+            onBodyChange={setNoticeBody}
+            onPolishNotice={polishNoticeMessage}
+            onScheduleDateChange={setScheduleDate}
+            onScheduleNotice={scheduleNotice}
+            onScheduleTimeChange={setScheduleTime}
+            onSendNoticeNow={sendNoticeNow}
+            onTitleChange={setNoticeTitle}
+            scheduleDate={scheduleDate}
+            scheduledAt={scheduledAt}
+            scheduleTime={scheduleTime}
+          />
         </div>
       </section>
       ) : null}

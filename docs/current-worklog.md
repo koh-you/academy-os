@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13A-3 알림센터 공지 작성 패널 분리 — AI gate 통과
+
+- 코드: 공지 템플릿 선택, 제목/본문, 예약일·시간, 미리보기, AI 수정·예약·즉시발송 버튼과 진행 문구 표시를 `NotificationComposerPanel.jsx`로 이동했다.
+- 동작 보존: 모든 input/textarea/select 값과 기존 문구, 미리보기 fallback, AI/발송 loading 문구, 본문·수신 건수·예약시각 기반 disabled 조건과 CSS class를 그대로 유지한다.
+- 저장 원천/side effect: 공지 초안과 예약시각 state, `noticeText`/`scheduledAt` 계산, 템플릿 적용, AI 수정, 예약·즉시발송 함수는 App이 계속 소유하고 callback으로만 주입한다. 새 패널에는 hook, API, Supabase, Solapi 또는 실제 handler 구현이 없다.
+- 자동검증: 기존 공지/AI/지연응답 시나리오가 새 소유 파일까지 검사하도록 source 범위를 확장하고 App wiring·disabled 조건·callback-only 경계를 `20b-2`로 고정했다. production scenario 423/423과 build, `git diff --check`가 통과했다.
+- gate 판정: 실제 side-effect 함수는 이동하지 않은 controlled UI 분리다. 테스트 발송이나 사람 조작 없이 AI gate로 통과했다.
+- 다음 경계: 발송 기록 table을 read-only row와 App-owned cancel/delete callback 경계로 나눌 수 있는지 inventory한다.
+
 ## 2026-07-23 P1. 13A-2 알림센터 수신자 선택 패널 분리 — AI gate 통과
 
 - 코드: 공지 수신 모드, 반/퇴원학생반 filter, 학생 검색, 대상 건수 요약, 학생 체크 목록과 번호 등록 badge를 `NotificationRecipientPanel.jsx`로 이동했다.
