@@ -9,6 +9,7 @@ import {
 import { ExamAnalysisFinalPreviewPanel } from "../domains/exams/ExamAnalysisFinalPreviewPanel.jsx";
 import { ExamPrepEditModal } from "../domains/exams/ExamPrepEditModal.jsx";
 import { ExamPrepPastPaperPanel } from "../domains/exams/ExamPrepPastPaperPanel.jsx";
+import { createExamPrepCenterDisplayModel } from "../domains/exams/examPrepCenterModel.js";
 import { StudentManager } from "../domains/students/StudentManager.jsx";
 import { ParentPortal } from "../domains/portals/ParentPortal.jsx";
 import { calculateAttendanceStats } from "../domains/portals/StudentMyPageTab.jsx";
@@ -18138,37 +18139,30 @@ function ExamPrepCenter({
   const setTallySummaries = onSetTallySummaries ?? (() => {});
   const pastPaperArchiveUrl =
     "https://script.google.com/macros/s/AKfycbyYi-NUHHzb9vrBl4Adj6Pq9zXIZJ9oR97g-uQyAf7up7AGVzeRdBUqfVcUZ1zjQiug/exec";
-  const classStudents = students.filter(
-    (student) => (student.status ?? "active") === "active" && student.defaultClassTemplateId === selectedClassTemplateId
-  );
-  const classSchoolGradeKeys = new Set(classStudents.map(getStudentSchoolGradeKey).filter(Boolean));
-  const displayRows = dedupeExamPrepRowsForDisplay(rows);
-  const visibleRows = displayRows.filter((row) => {
-    const rowCycle = row.examCycle ?? currentExamCycle;
-    const matchesCycle = rowCycle === selectedExamCycle;
-    const matchesClass = classSchoolGradeKeys.has(getExamPrepSchoolGradeKey(row));
-    return matchesCycle && matchesClass;
+  const {
+    classStudents,
+    editingExamPrepRow,
+    examPrepSaveState,
+    filteredRows,
+    reviewModalRow,
+    selectedClass
+  } = createExamPrepCenterDisplayModel({
+    currentExamCycle,
+    dedupeRows: dedupeExamPrepRowsForDisplay,
+    editingExamPrepId,
+    getAggregateSaveState,
+    getMathExamEntries: normalizeMathExamEntries,
+    getRowSchoolGradeKey: getExamPrepSchoolGradeKey,
+    getStudentSchoolGradeKey,
+    query,
+    reviewModalRowId,
+    rowSaveStates,
+    rows,
+    selectedClassTemplateId,
+    selectedExamCycle,
+    students,
+    templates
   });
-  const filteredRows = visibleRows.filter((row) => {
-    const haystack = [
-      row.schoolName,
-      row.grade,
-      row.subject,
-      row.publisher,
-      row.scope,
-      row.subTextbook,
-      row.examPeriod,
-      normalizeMathExamEntries(row).map((entry) => `${entry.date} ${entry.grade} ${entry.subject} ${entry.label}`).join(" "),
-      row.mathExamDate,
-      row.specialNote,
-      row.memo
-    ].join(" ");
-    return haystack.toLowerCase().includes(query.toLowerCase());
-  });
-  const examPrepSaveState = getAggregateSaveState(filteredRows.map((row) => rowSaveStates[row.examPrepId]));
-  const selectedClass = templates.find((template) => template.classTemplateId === selectedClassTemplateId);
-  const editingExamPrepRow = visibleRows.find((row) => row.examPrepId === editingExamPrepId) ?? null;
-  const reviewModalRow = visibleRows.find((row) => row.examPrepId === reviewModalRowId) ?? null;
   const visibleTallySubmissions = tallySubmissions.filter(
     (submission) => submission.examCycle === selectedExamCycle && submission.classTemplateId === selectedClassTemplateId
   );

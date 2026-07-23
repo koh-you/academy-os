@@ -8,6 +8,14 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 14A-3 시험관리 목록 display model 분리 — AI gate 통과
+
+- 코드: 활성 학생·선택 반 학교/학년·고사·검색 조건, 수정/총평 modal row, 선택 반과 표시 row aggregate 저장 상태 계산을 `src/domains/exams/examPrepCenterModel.js`로 이동했다.
+- 경계: App은 기존 dedupe, 학교/학년 key, 수학 일정 normalize, aggregate save-state helper를 주입한다. model에는 React state/effect와 fetch/postJson이 없고 시험정보/API 원천을 변경하지 않는다.
+- 자동검증: deterministic fixture가 퇴원/다른 반/다른 고사 제외, cycle fallback, dedupe, 수학 일정·일반 문구 검색, 숨은 modal row 차단, 표시 row만의 저장 상태 집계를 검증한다. production에 새 fixture를 연결했고 scenario 468/468, build, `git diff --check`가 통과했다.
+- 사람 gate: 순수 배열/선택 계산만 이동했으므로 운영 데이터·재시험·화면 조작이 필요하지 않다.
+- 다음: 시험 후 제출 teacher 화면을 callback-only 표시 shell로 분리하되 학생 저장/Storage/교사 확인 API와 기존 미통과 gate는 그대로 보존 가능한지 확인한다.
+
 ## 2026-07-23 P1. 14A-2 기출문제 iframe 표시 분리 — AI gate 통과
 
 - 코드: 기출문제 toolbar·다시 불러오기·새 창 링크·loading·iframe·도움말을 `src/domains/exams/ExamPrepPastPaperPanel.jsx`로 이동했다.
