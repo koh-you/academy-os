@@ -3299,6 +3299,7 @@ function ExamAnalysisOutputDraftPanel({
         : lastSavedAt
         ? `마지막 저장 ${formatExamAnalysisEventTime(lastSavedAt)} · 새로고침 유지`
         : "산출물 저장을 누르면 입력칸과 선생님 수정본이 저장됩니다.";
+  const outputStickySaveState = outputStatus.state === "success" ? "saved" : outputStatus.state;
   const [collapsedOutputSections, setCollapsedOutputSections] = useState({
     topSummary: false,
     guide: true,
@@ -3323,7 +3324,6 @@ function ExamAnalysisOutputDraftPanel({
           <span>선생님 총평 입력 · AI 초안 · 선생님 수정본 저장</span>
         </div>
         <div className="headerActions">
-          {outputStatus.message ? <span className={`saveStateBadge ${outputStatus.state}`}>{outputStatus.message}</span> : null}
           <button
             className="secondaryButton"
             disabled={!hasRun || !hasReviewModel || isOutputBusy}
@@ -3347,14 +3347,6 @@ function ExamAnalysisOutputDraftPanel({
             type="button"
           >
             {exportingOutputType === "package" ? "패키지 생성 중" : "산출물 ZIP"}
-          </button>
-          <button
-            className="primaryButton"
-            disabled={!hasRun || isOutputBusy}
-            onClick={onSaveOutputDrafts}
-            type="button"
-          >
-            {isSavingOutputDrafts ? "저장 중" : "산출물 저장"}
           </button>
         </div>
       </div>
@@ -3685,7 +3677,6 @@ function ExamAnalysisOutputDraftPanel({
                 <span>{getExamAnalysisOutputSectionLabel(outputDrafts.blog)}</span>
               </div>
               <div className="examAnalysisOutputEditorActions">
-                <button disabled={isOutputBusy} onClick={onSaveOutputDrafts} type="button">저장</button>
                 <button disabled={!blogText.trim()} onClick={() => onCopyOutputDraft("blog", blogText)} type="button">복사</button>
                 <button disabled={!blogText.trim()} onClick={() => onDownloadOutputDraft("blog", blogText)} type="button">TXT</button>
               </div>
@@ -3704,7 +3695,6 @@ function ExamAnalysisOutputDraftPanel({
                 <span>{getExamAnalysisOutputSectionLabel(outputDrafts.instagram)}</span>
               </div>
               <div className="examAnalysisOutputEditorActions">
-                <button disabled={isOutputBusy} onClick={onSaveOutputDrafts} type="button">저장</button>
                 <button disabled={!instagramText.trim()} onClick={() => onCopyOutputDraft("instagram", instagramText)} type="button">복사</button>
                 <button disabled={!instagramText.trim()} onClick={() => onDownloadOutputDraft("instagram", instagramText)} type="button">TXT</button>
               </div>
@@ -3724,6 +3714,21 @@ function ExamAnalysisOutputDraftPanel({
         <span>읽기 우선순위: 선생님 수정본 &gt; AI 초안 &gt; 빈 값입니다.</span>
         <span>AI 재생성은 AI 초안만 갱신하고, 저장된 선생님 수정본은 덮어쓰지 않습니다.</span>
       </div>
+      <StickySaveBar
+        className="examAnalysisOutputStickySaveBar"
+        label="산출물 작업본"
+        message={outputStatus.message || saveCheckpointText}
+        saveState={outputStickySaveState}
+      >
+        <button
+          className="primaryButton"
+          disabled={!hasRun || isOutputBusy}
+          onClick={onSaveOutputDrafts}
+          type="button"
+        >
+          {isSavingOutputDrafts ? "저장 중" : "산출물 작업본 저장"}
+        </button>
+      </StickySaveBar>
     </div>
   );
 }
@@ -13713,7 +13718,6 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
               </div>
               <div className="headerActions">
                 {rowRefineStatus.message ? <span className={`saveStateBadge ${rowRefineStatus.state}`}>{rowRefineStatus.message}</span> : null}
-                {reviewStatus.message ? <span className={`saveStateBadge ${reviewStatus.state}`}>{reviewStatus.message}</span> : null}
                 <button
                   className="secondaryButton"
                   disabled={!reviewRowsReady || isSavingReviews || isRefiningRows || !refineTargetCount}
@@ -13729,14 +13733,6 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   type="button"
                 >
                   모두 확정
-                </button>
-                <button
-                  className="primaryButton"
-                  disabled={!reviewRowsReady || isSavingReviews || isRefiningRows}
-                  onClick={saveQuestionReviews}
-                  type="button"
-                >
-                  {isSavingReviews ? "저장 중" : "검수 저장"}
                 </button>
                 <button
                   className="secondaryButton compact examAnalysisStageToggleButton"
@@ -13973,6 +13969,21 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                 ) : (
                   <EmptyState className="emptyState compact">AI 행 채움 후 검수할 수 있습니다.</EmptyState>
                 )}
+                <StickySaveBar
+                  className="examAnalysisReviewStickySaveBar"
+                  label="문항 검수"
+                  message={reviewStatus.message || `${confirmedReviewCount}/${questionRows.length}개 확정 · AI 2차 수정과 모두 확정은 별도 작업입니다.`}
+                  saveState={reviewStatus.state === "success" ? "saved" : reviewStatus.state}
+                >
+                  <button
+                    className="primaryButton"
+                    disabled={!reviewRowsReady || isSavingReviews || isRefiningRows}
+                    onClick={saveQuestionReviews}
+                    type="button"
+                  >
+                    {isSavingReviews ? "저장 중" : "문항 검수본 저장"}
+                  </button>
+                </StickySaveBar>
               </>
             )}
           </div>

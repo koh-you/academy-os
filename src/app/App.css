@@ -4270,6 +4270,11 @@ button {
   margin-inline: 2px;
 }
 
+.examAnalysisReviewStickySaveBar,
+.examAnalysisOutputStickySaveBar {
+  margin-inline: 2px;
+}
+
 @media (max-width: 640px) {
   .stickySaveBar {
     gap: 8px;
