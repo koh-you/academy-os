@@ -75,10 +75,18 @@
 - 새 component에는 state/effect/fetch/postJson/API 경로가 없고 기존 callback만 호출한다. 학생 제출·Storage 업로드/열기·교사 확인 API 구현은 원래 경계에 남는다.
 - production scenario 469/469, build, `git diff --check`를 통과했다. 실제 학생/Storage 작업을 하지 않았으므로 기존 학생 포털 실제 쓰기와 bearer/Storage 사람 gate는 통과로 바꾸지 않는다.
 
+## 14A-5 시험 후 총평 순수 draft helper
+
+- 완료: 10개 체크리스트 config, 초안 생성/normalize, row scope·부교재 동기화, section 읽기/쓰기와 블로그 발췌 계산을 `examReviewDraft.js`로 이동했다.
+- deterministic fixture를 `npm run test:production`에 연결했고 자유 형식 보존, 학교명/title 갱신, multi-line normalize, scope·부교재 동기화, section/블로그 발췌를 검증한다.
+- 새 module에는 React state/effect, timer, API/AI/Supabase 호출이 없다. production scenario 470/470, build, `git diff --check`를 통과했다.
+- 기능 불일치 진단: 2번 config의 title은 `난이도/체감`인데 실제 draft label은 `2. 난이도 :`라서 현재 `getExamReviewSectionValue`/`setExamReviewSectionValue`의 정규식과 매칭되지 않는다. 구조화 textarea가 기존 난이도 값을 읽지 못하고 수정 시 별도 2번 항목을 덧붙일 수 있다.
+- 이번 리팩터링은 기존 문자열과 동작을 보존했으며 불일치를 수정하지 않았다. 유지보수 세션에서 title/label/migration 계약을 먼저 정한 뒤 반영해야 하므로 다음 local state/AI action 분리는 중단한다.
+
 ## 이후 후보와 중단 조건
 
-1. 시험 후 총평 순수 draft helper
-2. 시험 후 총평 local state/AI action
+1. 유지보수 세션: 2번 `난이도/체감` title과 `2. 난이도 :` 저장 label 불일치 수정·기존 row 검증
+2. 수정이 main에 반영된 뒤 시험 후 총평 local state/AI action
 3. 시험정보 저장·삭제·수업 reconcile orchestration
 
 학생 제출·교사 확인·Storage 파일 열기 경계를 건드리면 기존 학생 포털 실제 쓰기와 bearer/Storage gate에서 중단한다. 시험정보 삭제나 시험대비 수업 생성·삭제를 옮길 때는 별도의 격리 데이터와 사람 gate가 필요하다. 순수 표시/model 단위는 deterministic fixture와 production test/build로 검증하고 운영 데이터를 만들지 않는다.
