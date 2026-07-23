@@ -281,6 +281,14 @@
 - 순수 patch helper를 그대로 사용하는 local adapter이므로 새 운영 데이터나 사람 조작 없이 AI gate로 통과했다.
 - 다음은 완료·일정 확인창 submit adapter를 분리한 뒤 `SupplementStudentModal` 본체 파일 분리를 검토한다.
 
+## 12R-27 구현 결과 — 완료·일정 확인창 submit adapter
+
+- 완료 확인 대상 유무와 일정 확정 payload 유무를 검사해 기존 완료·일정 handler에 전달하는 두 함수를 `createSupplementConfirmationSubmitHandlers`로 분리했다.
+- 현재 확인 대상과 주입된 callback만 다루며 API·Supabase·`notification_jobs`·Solapi와 실제 action 구현은 없다.
+- 완료/일정 대상 유무와 patch 전달 fixture, production scenario `88b-42`, production 408/408, build, diff 검사를 통과했다.
+- local callback orchestration이므로 새 운영 데이터나 사람 조작 없이 AI gate로 통과했다.
+- 다음은 `SupplementStudentModal` 본체의 App 전용 helper 의존성을 inventory하고 파일 분리 가능 여부와 검수 gate를 정한다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.
