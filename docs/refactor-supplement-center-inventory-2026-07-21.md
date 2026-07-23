@@ -176,6 +176,13 @@
 - hook은 순수 draft 모델만 호출하고 App은 field 변경 후 저장 상태 pill 갱신을 계속 소유한다.
 - API·Supabase·notification job·Solapi와 실제 action callback이 hook에 들어오지 않는 production check를 추가했다.
 
+## 12R-13 구현 결과 — 완료·일정 확인창 local state
+
+- 완료 확인 대상과 일정 변경 확인 대상을 독립 local state로 소유하고 열기·취소 함수를 제공하는 `useSupplementConfirmationState.js`를 분리했다.
+- 일정 확인 payload는 확인창의 내역·사유 patch를 기존 task에 합친 뒤 `skipStudentReminder`를 선택값에 맞춰 마지막에 확정한다.
+- App은 실제 완료·일정 action, busy guard, 저장 callback과 외부 side effect를 계속 소유한다.
+- hook에는 API·Supabase·`notification_jobs`·Solapi·실제 완료/일정 callback이 없다. 재시험 독립 탭이 없어 준비한 고태영 task가 사람 화면에 노출되지 않았고, 사용자의 AI 검토 pass 지시에 따라 deterministic payload·production scenario와 앞선 12R-5·12R-7 실제 action gate를 근거로 통과 처리했다. 검수용 task·lesson·job 잔여는 모두 0건으로 정리했다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.

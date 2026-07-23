@@ -94,6 +94,7 @@ import {
 } from "../domains/supplements/supplementTaskActions.js";
 import { SupplementStudentModalShell } from "../domains/supplements/SupplementStudentModalShell.jsx";
 import { useSupplementNotificationControlState } from "../domains/supplements/useSupplementNotificationControlState.js";
+import { useSupplementConfirmationState } from "../domains/supplements/useSupplementConfirmationState.js";
 import { useSupplementTaskDraftController } from "../domains/supplements/useSupplementTaskDraftController.js";
 import {
   createPersistableSupplementTask,
@@ -24606,11 +24607,18 @@ function SupplementStudentModal({
   );
   const [feedback, setFeedback] = useState(null);
   const [cancellationConfirm, setCancellationConfirm] = useState(null);
-  const [passConfirmTask, setPassConfirmTask] = useState(null);
-  const [scheduleConfirmTask, setScheduleConfirmTask] = useState(null);
   const [busyTaskId, setBusyTaskId] = useState("");
   const [taskSaveStatus, setTaskSaveStatus] = useState({});
   const [activeNotificationDraftFields, setActiveNotificationDraftFields] = useState({});
+  const {
+    closePassConfirmation,
+    closeScheduleConfirmation,
+    getConfirmedScheduleTask,
+    openPassConfirmation,
+    openScheduleConfirmation,
+    passConfirmTask,
+    scheduleConfirmTask
+  } = useSupplementConfirmationState();
   const {
     closeNotificationControl,
     notificationControl,
@@ -24676,7 +24684,7 @@ function SupplementStudentModal({
     const taskWithDraft = createPersistableSupplementTask(buildTaskWithDraft(task));
     requestSupplementScheduleAction({
       onFeedback: ({ message, title, tone }) => showFeedback(title, message, tone),
-      onOpenConfirmation: setScheduleConfirmTask,
+      onOpenConfirmation: openScheduleConfirmation,
       onSaveStatus: (patch) => setTaskSaveStatusPatch(task.makeupTaskId, patch),
       onSchedule: handleApplyScheduleTask,
       task,
@@ -24700,7 +24708,7 @@ function SupplementStudentModal({
         getImmediateNoticeStatus: getSupplementImmediateNoticeSaveStatus,
         onFeedback: ({ message, title, tone }) => showFeedback(title, message, tone),
         onMarkSaved: (nextTask) => markTaskDraftSaved(task.makeupTaskId, nextTask),
-        onResetConfirmation: () => setScheduleConfirmTask(null),
+        onResetConfirmation: closeScheduleConfirmation,
         onSaveStatus: (patch) => setTaskSaveStatusPatch(task.makeupTaskId, patch),
         scheduleTask: (payload) => onScheduleTask?.(payload),
         task,
@@ -24777,7 +24785,7 @@ function SupplementStudentModal({
       await passSupplementTaskAction({
         onClose: () => onClose?.(),
         onFeedback: ({ message, title, tone }) => showFeedback(title, message, tone),
-        onResetConfirmation: () => setPassConfirmTask(null),
+        onResetConfirmation: closePassConfirmation,
         passTask: (payload) => onPassTask?.(payload),
         studentName: student.name,
         taskWithDraft
@@ -24795,12 +24803,9 @@ function SupplementStudentModal({
   }
 
   function confirmScheduleTask(updateStudentReminder, noticePatch = {}) {
-    if (!scheduleConfirmTask) return;
-    handleApplyScheduleTask({
-      ...scheduleConfirmTask,
-      ...noticePatch,
-      skipStudentReminder: !updateStudentReminder
-    });
+    const confirmedTask = getConfirmedScheduleTask(updateStudentReminder, noticePatch);
+    if (!confirmedTask) return;
+    handleApplyScheduleTask(confirmedTask);
   }
 
   const notificationControlTask = notificationControl
@@ -24893,7 +24898,7 @@ function SupplementStudentModal({
             <SupplementPassConfirmModal
               getTypeLabel={followUpTypeLabel}
               isBusy={busyTaskId === `${passConfirmTask.makeupTaskId}:pass`}
-              onCancel={() => setPassConfirmTask(null)}
+              onCancel={closePassConfirmation}
               onConfirm={confirmPassTask}
               studentName={student.name}
               task={passConfirmTask}
@@ -24904,7 +24909,7 @@ function SupplementStudentModal({
               getDetailSeed={getSupplementScheduleChangeDetailSeed}
               getTypeLabel={followUpTypeLabel}
               isBusy={busyTaskId === `${scheduleConfirmTask.makeupTaskId}:schedule`}
-              onCancel={() => setScheduleConfirmTask(null)}
+              onCancel={closeScheduleConfirmation}
               onConfirmWithReminder={(noticePatch) => confirmScheduleTask(true, noticePatch)}
               onConfirmWithoutReminder={(noticePatch) => confirmScheduleTask(false, noticePatch)}
               studentName={student.name}
@@ -24998,7 +25003,7 @@ function SupplementStudentModal({
                     isScheduleBusy,
                     isTaskBusy,
                     linkedLessonId: task.linkedLessonId,
-                    onPass: () => setPassConfirmTask(buildTaskWithDraft(task)),
+                    onPass: () => openPassConfirmation(buildTaskWithDraft(task)),
                     onSave: () => handleSaveTask(task),
                     onSchedule: () => requestApplyScheduleTask(task)
                   }}
