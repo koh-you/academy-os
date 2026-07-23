@@ -43,9 +43,29 @@
 .examPromptOutputItem summary { cursor: pointer; display: flex; justify-content: space-between; gap: 10px; }
 .examPromptOutputItem summary span { color: #64748b; font-size: 11px; }
 .examPromptOutputItem.blocked summary span { color: #c2410c; }
-.examPromptOutputItem > pre, .examPromptOutputColumns pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 340px; overflow: auto; border: 1px solid #e2e8f0; border-radius: 9px; background: #f8fafc; padding: 10px; font: 11px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace; }
-.examPromptOutputColumns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; margin-top: 10px; }
-.examPromptOutputColumns section { min-width: 0; display: grid; align-content: start; gap: 7px; }
+.examPromptOutputItem > pre, .examPromptWorkflowStep pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 340px; overflow: auto; border: 1px solid #e2e8f0; border-radius: 9px; background: #f8fafc; padding: 12px; font: 14px/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; }
+.examPromptWorkflowGuide { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.examPromptWorkflowGuide li { align-items: center; background: #fff; border: 1px solid #bfdbfe; border-radius: 12px; display: flex; gap: 9px; min-width: 0; padding: 10px; }
+.examPromptWorkflowGuide li > b, .examPromptWorkflowStepHeader > b, .examPromptWorkflowStep > summary > b { align-items: center; background: #2563eb; border-radius: 50%; color: #fff; display: flex; flex: 0 0 28px; height: 28px; justify-content: center; }
+.examPromptWorkflowGuide span, .examPromptWorkflowStepHeader span, .examPromptWorkflowStep > summary span { display: grid; gap: 2px; min-width: 0; }
+.examPromptWorkflowGuide strong, .examPromptWorkflowStepHeader strong, .examPromptWorkflowStep > summary strong { color: #0f172a; font-size: 14px; }
+.examPromptWorkflowGuide small, .examPromptWorkflowStepHeader small, .examPromptWorkflowStep > summary small { color: #64748b; font-size: 11px; line-height: 1.4; }
+.examPromptWorkflowSteps { display: grid; gap: 9px; margin-top: 10px; }
+.examPromptWorkflowStep { background: #f8fafc; border: 1px solid #dbe3ee; border-radius: 12px; min-width: 0; overflow: clip; }
+.examPromptWorkflowStep.primary { background: #fff; border-color: #93c5fd; display: grid; gap: 10px; padding: 12px; }
+.examPromptWorkflowStepHeader, .examPromptWorkflowStep > summary { align-items: center; display: flex; gap: 9px; }
+.examPromptWorkflowStep > summary { cursor: pointer; list-style: none; padding: 12px; }
+.examPromptWorkflowStep > summary::-webkit-details-marker { display: none; }
+.examPromptWorkflowStep > summary::after { color: #64748b; content: "펼치기"; font-size: 11px; font-weight: 700; }
+.examPromptWorkflowStep[open] > summary { border-bottom: 1px solid #dbe3ee; }
+.examPromptWorkflowStep[open] > summary::after { content: "접기"; }
+.examPromptWorkflowStep em { background: #e0e7ff; border-radius: 999px; color: #3730a3; font-size: 11px; font-style: normal; font-weight: 700; margin-left: auto; padding: 4px 8px; white-space: nowrap; }
+.examPromptWorkflowStepBody { display: grid; gap: 10px; padding: 12px; }
+.examPromptWorkflowStepBody > p { color: #475569; font-size: 12px; margin: 0; }
+.examPromptRevisionRequest { display: grid; gap: 6px; }
+.examPromptRevisionRequest > span { align-items: baseline; display: flex; justify-content: space-between; gap: 8px; }
+.examPromptRevisionRequest small { color: #64748b; font-size: 11px; }
+.examPromptRevisionRequest textarea { background: #fff; border: 1px solid #93c5fd; border-radius: 9px; box-sizing: border-box; color: inherit; font: inherit; min-height: 78px; padding: 10px; resize: vertical; width: 100%; }
 .examPromptRoleGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .examPromptRoleCard { border: 1px solid #dbe3ee; border-radius: 16px; padding: 0; background: #fff; overflow: clip; }
 .examPromptRoleCard.wide { grid-column: 1 / -1; }
@@ -75,9 +95,10 @@
 .examPromptSaveBar { position: sticky; bottom: 10px; z-index: 4; border: 1px solid #bfdbfe; background: rgba(239,246,255,.96); border-radius: 14px; padding: 11px 13px; display: flex; justify-content: space-between; gap: 12px; align-items: center; box-shadow: 0 8px 28px rgba(15,23,42,.12); }
 @media (max-width: 900px) {
   .examPromptStudioHeader, .examPromptSaveBar { align-items: stretch; flex-direction: column; }
-  .examPromptRoleGrid, .examPromptFieldGrid, .examPromptSlideSequence, .examPromptOutputColumns { grid-template-columns: 1fr; }
+  .examPromptRoleGrid, .examPromptFieldGrid, .examPromptSlideSequence, .examPromptWorkflowGuide { grid-template-columns: 1fr; }
   .examPromptRoleHeading, .examPromptRoleCard > summary { flex-wrap: wrap; }
   .examPromptRoleHeading > *, .examPromptRoleCard > summary > span, .examPromptPhrasePicker select { min-width: 0; }
+  .examPromptWorkflowStepHeader, .examPromptWorkflowStep > summary { flex-wrap: wrap; }
   .examPromptRoleCard.wide { grid-column: auto; }
   .examPromptPhrasePicker { grid-template-columns: 1fr; }
   .examPromptPhrasePicker small { grid-column: auto; }

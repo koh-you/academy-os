@@ -31,9 +31,11 @@ const css = fs.readFileSync(new URL("../src/domains/exams/examAnalysisPromptStud
   "제외된 조건부 역할",
   "복붙용 프롬프트",
   "프로젝트 마스터 프롬프트",
-  "마스터+상세 복사",
-  "수정 프롬프트",
-  "QA 프롬프트",
+  "처음 만들기 프롬프트 복사",
+  "결과 검사 프롬프트 복사",
+  "수정할 내용",
+  "수정 프롬프트 복사",
+  "이 입력은 저장되지 않는 임시 메모입니다.",
   "전체 시리즈 수정 프롬프트",
   "TXT",
   "JSON",
@@ -53,10 +55,15 @@ assert(component.includes("schoolLevel={schoolLevel}"));
 assert(component.includes("buildExamAnalysisSlideSequence"));
 assert(component.includes("createExamAnalysisPromptPack"));
 assert(component.includes("disabled={!promptPack.readyForAllGeneration}"));
+assert(component.includes("getRevisionPrompt(slide)"));
+assert(component.includes("disabled={!String(revisionRequests[slide.roleId] || \"\").trim()}"));
 assert(css.includes(".examPromptSaveBadge.failed"));
 assert(css.includes('.examPromptRoleToggles input[type="checkbox"]'));
 assert(css.includes("height: 17px"));
 assert(css.includes(".examPromptRoleCard > summary"));
+assert(css.includes(".examPromptWorkflowGuide"));
+assert(css.includes(".examPromptWorkflowSteps"));
+assert(css.includes("font: 14px/1.6"));
 assert(css.includes("@media (max-width: 900px)"));
 
 for (const factualField of EXAM_ANALYSIS_FACTUAL_ONLY_FIELDS) {

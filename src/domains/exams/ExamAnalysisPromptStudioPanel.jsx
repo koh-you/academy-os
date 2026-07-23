@@ -101,6 +101,7 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
   const [localState, setLocalState] = useState(null);
   const [loadError, setLoadError] = useState("");
   const [copyStatus, setCopyStatus] = useState("");
+  const [revisionRequests, setRevisionRequests] = useState({});
 
   useEffect(() => {
     let active = true;
@@ -108,6 +109,7 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
     setDetail(null);
     setLocalState(null);
     setLoadError("");
+    setRevisionRequests({});
     getJsonWithTimeout(`/api/exam-analysis-runs?id=${encodeURIComponent(analysisRunId)}`, 12000, "프롬프트 작업본 조회가 지연되고 있습니다.")
       .then((result) => {
         if (!active) return;
@@ -204,6 +206,13 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
   async function copyPrompt(label, text) {
     const copied = await copyTextToClipboard(text);
     setCopyStatus(copied ? `${label} 복사 완료` : `${label} 복사 실패`);
+  }
+
+  function getRevisionPrompt(slide) {
+    const request = String(revisionRequests[slide.roleId] || "").trim();
+    return request
+      ? slide.revisionPrompt.replace("[여기에 수정할 내용만 입력]", request)
+      : slide.revisionPrompt;
   }
 
   function downloadPromptFile(kind) {
@@ -389,6 +398,11 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
             : `입력 필요 슬라이드 ${promptPack.slides.filter((slide) => !slide.generationAllowed).length}장 · 해당 상세 프롬프트 복사 잠금`}
           {copyStatus ? <small>{copyStatus}</small> : null}
         </div>
+        <ol className="examPromptWorkflowGuide" aria-label="프롬프트 사용 순서">
+          <li><b>1</b><span><strong>처음 만들기</strong><small>마스터와 상세 프롬프트로 이미지를 생성합니다.</small></span></li>
+          <li><b>2</b><span><strong>결과 검사</strong><small>생성된 이미지를 첨부하고 오류를 검사합니다.</small></span></li>
+          <li><b>3</b><span><strong>필요한 부분만 수정</strong><small>문제가 있을 때만 수정 요청을 입력합니다.</small></span></li>
+        </ol>
         <details className="examPromptOutputItem" open>
           <summary><b>프로젝트 마스터 프롬프트</b><span>모든 슬라이드 공통</span></summary>
           <pre>{promptPack.masterPrompt}</pre>
@@ -400,10 +414,48 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
               <b>{slide.slideNumber}. {slide.title}</b>
               <span>{slide.generationAllowed ? "복사 가능" : `입력 필요 · ${slide.missingFields.join(", ")}`}</span>
             </summary>
-            <div className="examPromptOutputColumns">
-              <section><strong>상세 생성 프롬프트</strong><pre>{slide.prompt}</pre><button className="ghostButton" disabled={!slide.generationAllowed} onClick={() => copyPrompt(`${slide.slideNumber}번 상세`, `${promptPack.masterPrompt}\n\n${slide.prompt}`)} type="button">마스터+상세 복사</button></section>
-              <section><strong>수정 프롬프트</strong><pre>{slide.revisionPrompt}</pre><button className="ghostButton" onClick={() => copyPrompt(`${slide.slideNumber}번 수정`, slide.revisionPrompt)} type="button">수정 복사</button></section>
-              <section><strong>QA 프롬프트</strong><pre>{slide.qaPrompt}</pre><button className="ghostButton" onClick={() => copyPrompt(`${slide.slideNumber}번 QA`, slide.qaPrompt)} type="button">QA 복사</button></section>
+            <div className="examPromptWorkflowSteps">
+              <section className="examPromptWorkflowStep primary">
+                <div className="examPromptWorkflowStepHeader">
+                  <b>1</b>
+                  <span><strong>처음 만들기</strong><small>이 슬라이드를 처음 생성할 때 사용</small></span>
+                  <em>필수</em>
+                </div>
+                <pre>{slide.prompt}</pre>
+                <button className="primaryButton" disabled={!slide.generationAllowed} onClick={() => copyPrompt(`${slide.slideNumber}번 생성`, `${promptPack.masterPrompt}\n\n${slide.prompt}`)} type="button">처음 만들기 프롬프트 복사</button>
+              </section>
+              <details className="examPromptWorkflowStep">
+                <summary>
+                  <b>2</b>
+                  <span><strong>결과 검사</strong><small>생성된 이미지를 ChatGPT에 첨부한 뒤 사용</small></span>
+                  <em>항상 권장</em>
+                </summary>
+                <div className="examPromptWorkflowStepBody">
+                  <p>이미지를 수정하지 않고 오탈자·숫자·잘림·원본 훼손 여부만 검사합니다.</p>
+                  <pre>{slide.qaPrompt}</pre>
+                  <button className="ghostButton" onClick={() => copyPrompt(`${slide.slideNumber}번 결과 검사`, slide.qaPrompt)} type="button">결과 검사 프롬프트 복사</button>
+                </div>
+              </details>
+              <details className="examPromptWorkflowStep">
+                <summary>
+                  <b>3</b>
+                  <span><strong>필요한 부분만 수정</strong><small>검사에서 문제가 있거나 바꾸고 싶을 때만 사용</small></span>
+                  <em>선택</em>
+                </summary>
+                <div className="examPromptWorkflowStepBody">
+                  <label className="examPromptRevisionRequest">
+                    <span><b>수정할 내용</b><small>이 입력은 저장되지 않는 임시 메모입니다.</small></span>
+                    <textarea
+                      onChange={(event) => setRevisionRequests((current) => ({ ...current, [slide.roleId]: event.target.value }))}
+                      placeholder="예: 제목의 학교명을 창동고로 고치고, 하단에서 잘린 문장을 모두 보이게 해주세요."
+                      rows={3}
+                      value={revisionRequests[slide.roleId] || ""}
+                    />
+                  </label>
+                  <pre>{getRevisionPrompt(slide)}</pre>
+                  <button className="ghostButton" disabled={!String(revisionRequests[slide.roleId] || "").trim()} onClick={() => copyPrompt(`${slide.slideNumber}번 수정`, getRevisionPrompt(slide))} type="button">수정 프롬프트 복사</button>
+                </div>
+              </details>
             </div>
           </details>
         ))}
