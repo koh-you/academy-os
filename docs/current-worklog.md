@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-34 결석보강 source·candidate·hydrate 모델 분리 — AI gate 통과
+
+- 코드: 결석 당시 수업·학생·지난/다음 숙제를 조합하는 source context, 결석보강 candidate item, 저장된 absence task의 누락 source field hydrate를 `createAbsenceSupplementCandidateModel`로 `supplementCenterCandidateModel.js`에 이동했다.
+- 동작 보존: 수업일·수업내용·교재·수업 라벨, 지난/다음 숙제 fallback, 출결 상태/사유 meta, 지난 숙제 확인 문구, 미래 결석 D-day·7일 안내, `onsite_makeup`, 저장된 task 값 우선과 누락값 source 보완 순서를 그대로 유지한다.
+- 저장 원천/side effect: App이 현재 records/homeworks/lessons/students를 읽는 callback을 주입하고 모델은 계산만 한다. 출결 저장·취소, task 저장, React state, clock, API, Supabase, notification/Solapi 호출이 없다.
+- 자동검증: 고태영 이름의 격리 fixture로 결석 record·lesson·학생·지난/다음 숙제를 조합해 source context와 candidate 전체 object를 검증했다. 미래 결석 표시와 선생님 저장 수업내용/지난 숙제 우선, source fallback, 비결석 task identity도 고정했다. 기존 scenario `87`, `88a-2` 탐색 범위를 모델까지 확장하고 `88b-49`를 추가했다. production 415/415, build, `git diff --check`가 통과했고 기존 대형 chunk 경고만 남았다.
+- gate 판정: 읽기 전용 순수 모델이며 실제 출결 원천·운영 데이터·Solapi를 건드리지 않는다. 사람 조작 없이 AI gate로 통과했다.
+- 다음 경계: `SupplementCenter`의 최근 한 달 history derivation과 row 표시를 분리한 뒤 컴포넌트 본체 이동 가능 여부를 inventory한다.
+
 ## 2026-07-23 P1. 12R-33 숙제보충·재시험 candidate builder 분리 — AI gate 통과
 
 - 코드: 숙제보충 candidate의 ID·학생·제목·날짜/사유 meta·task payload와 재시험 candidate의 수업 라벨·고정 meta·task payload를 `createHomeworkSupplementItems`와 `createRetestSupplementItems`로 `supplementCenterCandidateModel.js`에 이동했다.

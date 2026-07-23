@@ -342,6 +342,15 @@
 - 순수 builder이므로 운영 재시험 데이터나 사람 조작 없이 AI gate로 통과했다.
 - 다음은 결석보강 source context·candidate item·persisted task hydrate를 순수 모델로 분리할 수 있는지 inventory한다.
 
+## 12R-34 구현 결과 — 결석보강 source·candidate·hydrate 모델
+
+- 결석 당시 수업·학생·지난/다음 숙제 source context, 결석보강 candidate item, 저장 task의 누락 source field hydrate를 `createAbsenceSupplementCandidateModel`로 이동했다.
+- 수업일·내용·교재·라벨, 숙제 fallback, 출결 meta, 미래 결석 안내, `onsite_makeup`, 선생님 저장값 우선순위를 보존했다.
+- 모델은 App이 주입한 읽기 callback만 사용하며 출결/task 저장·React state·clock·API·Supabase·notification/Solapi 호출이 없다.
+- 고태영 이름의 격리 fixture로 source/candidate 전체 object, 미래 결석, 저장값 우선, fallback과 비결석 identity를 검증했다. production scenario `88b-49`, production 415/415, build, diff 검사를 통과했다.
+- 읽기 전용 순수 모델이므로 운영 데이터나 사람 조작 없이 AI gate로 통과했다.
+- 다음은 최근 한 달 history derivation과 row 표시를 분리한 뒤 `SupplementCenter` 본체 이동 가능 여부를 inventory한다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.

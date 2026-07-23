@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  createAbsenceSupplementCandidateModel,
   createHomeworkSupplementItems,
   createRetestSupplementItems
 } from "../src/domains/supplements/supplementCenterCandidateModel.js";
@@ -94,5 +95,98 @@ assert.deepEqual(retestItems, [
 
 assert.deepEqual(createHomeworkSupplementItems(), []);
 assert.deepEqual(createRetestSupplementItems(), []);
+
+const absenceRecord = {
+  attendanceReason: "독감",
+  attendanceStatus: "absent",
+  lessonId: "lesson-absence",
+  lessonMaterial: "개념서 3단원",
+  lessonStudentRecordId: "record-absence",
+  nextHomework: "record 다음 숙제 fallback",
+  previousHomework: "record 지난 숙제 fallback",
+  studentId: "student-absence"
+};
+const absenceLesson = {
+  className: "중3A",
+  date: "2026-07-30",
+  lessonId: "lesson-absence"
+};
+const absenceModel = createAbsenceSupplementCandidateModel({
+  attendanceLabels: { absent: "결석" },
+  formatDdayLabel: (days) => `D-${days}`,
+  futureAbsenceMakeupVisibleDays: 7,
+  getAvailability: () => ({
+    daysUntilLesson: 7,
+    isDeferred: true,
+    lessonDate: "2026-07-30"
+  }),
+  getHomeworkCheckLabel: (record) => record?.lessonStudentRecordId === "record-absence"
+    ? "교재 10~12쪽"
+    : "",
+  getLesson: (record) => record?.lessonId === absenceLesson.lessonId ? absenceLesson : null,
+  getLessonContent: () => "이차방정식",
+  getLessonDate: () => "2026-07-30",
+  getLessonLabel: () => "연결 수업 없음",
+  getNextHomework: () => ({ title: "개념서 40~42쪽" }),
+  getPreviousHomework: () => ({ title: "개념서 35~37쪽" }),
+  getStudent: () => ({ name: "고태영", studentId: "student-absence" }),
+  records: [absenceRecord]
+});
+const absenceSourceContext = absenceModel.createSourceContext(absenceRecord);
+assert.deepEqual(absenceSourceContext, {
+  sourceDate: "2026-07-30",
+  sourceLessonContent: "이차방정식",
+  sourceLessonId: "lesson-absence",
+  sourceLessonLabel: "2026-07-30 중3A",
+  sourceLessonMaterial: "개념서 3단원",
+  sourceNextHomework: "개념서 40~42쪽",
+  sourcePreviousHomework: "개념서 35~37쪽"
+});
+
+const absenceItem = absenceModel.createItem(absenceRecord);
+assert.deepEqual(absenceItem, {
+  futureMeta: "D-7 · 7일 전부터 기본 목록에 표시",
+  id: "record-absence",
+  isFutureDeferred: true,
+  lessonDate: "2026-07-30",
+  meta: "결석 · 독감 · 지난 숙제 확인: 교재 10~12쪽",
+  studentId: "student-absence",
+  task: {
+    absenceReason: "독감",
+    reason: "결석 보강 · 지난 숙제 확인",
+    sourceDate: "2026-07-30",
+    sourceId: "record-absence",
+    sourceLabel: "2026-07-30 중3A",
+    sourceLessonContent: "이차방정식",
+    sourceLessonId: "lesson-absence",
+    sourceLessonLabel: "2026-07-30 중3A",
+    sourceLessonMaterial: "개념서 3단원",
+    sourceNextHomework: "개념서 40~42쪽",
+    sourcePreviousHomework: "개념서 35~37쪽",
+    studentId: "student-absence",
+    supplementHomeworkNote: "교재 10~12쪽",
+    supplementMethod: "onsite_makeup",
+    taskType: "absence_makeup"
+  },
+  title: "2026-07-30 중3A"
+});
+
+const hydratedAbsence = absenceModel.hydrateTask({
+  makeupTaskId: "task-absence",
+  sourceId: "record-absence",
+  sourceLessonContent: "선생님 저장 수업내용",
+  sourcePreviousHomework: "선생님 저장 지난 숙제",
+  studentId: "student-absence",
+  supplementHomeworkNote: "",
+  taskType: "absence_makeup"
+});
+assert.equal(hydratedAbsence.sourceLessonContent, "선생님 저장 수업내용");
+assert.equal(hydratedAbsence.sourcePreviousHomework, "선생님 저장 지난 숙제");
+assert.equal(hydratedAbsence.sourceNextHomework, "개념서 40~42쪽");
+assert.equal(hydratedAbsence.supplementHomeworkNote, "교재 10~12쪽");
+assert.equal(hydratedAbsence.sourceLessonLabel, "2026-07-30 중3A");
+
+const homeworkTask = { makeupTaskId: "task-homework", taskType: "homework_makeup" };
+assert.equal(absenceModel.hydrateTask(homeworkTask), homeworkTask);
 
 console.log("supplement center candidate model fixture passed");

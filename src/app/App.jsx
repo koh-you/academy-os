@@ -52,6 +52,7 @@ import {
   createSupplementCenterPassConfirmationHandler
 } from "../domains/supplements/supplementCenterModalActionController.js";
 import {
+  createAbsenceSupplementCandidateModel,
   createHomeworkSupplementItems,
   createRetestSupplementItems
 } from "../domains/supplements/supplementCenterCandidateModel.js";
@@ -22013,77 +22014,24 @@ function SupplementCenter({
     return lesson ? `${lesson.date} ${lesson.className}` : "연결 수업 없음";
   }
 
-  function createAbsenceSourceContext(record = {}) {
-    const sourceLesson = getRecordLesson(record, lessons);
-    const student = getRecordStudent(record, students);
-    const sourcePreviousHomework = getRecordPreviousHomework(record, homeworks, lessons, students);
-    const sourceNextHomework = sourceLesson && student
-      ? getLessonHomework(homeworks, sourceLesson, student, "next", lessons)
-      : null;
-    return {
-      sourceDate: getRecordLessonDate(record, lessons),
-      sourceLessonContent: getLessonContent(record),
-      sourceLessonId: record.lessonId || "",
-      sourceLessonLabel: sourceLesson ? `${sourceLesson.date} ${sourceLesson.className}` : lessonLabel(record.lessonId),
-      sourceLessonMaterial: record.lessonMaterial || "",
-      sourceNextHomework: sourceNextHomework?.title || record.nextHomework || "",
-      sourcePreviousHomework: sourcePreviousHomework?.title || record.previousHomework || ""
-    };
-  }
-
-  function createAbsenceSupplementItem(record) {
-    const homeworkCheckLabel = getAbsenceHomeworkCheckLabel(record, homeworks, lessons, students);
-    const availability = getAbsenceMakeupAvailability(record, lessons);
-    const sourceContext = createAbsenceSourceContext(record);
-    return {
-      id: record.lessonStudentRecordId,
-      studentId: record.studentId,
-      title: sourceContext.sourceLessonLabel || lessonLabel(record.lessonId),
-      meta: [
-        `${attendanceLabels[record.attendanceStatus] ?? record.attendanceStatus} · ${record.attendanceReason || "사유 미입력"}`,
-        homeworkCheckLabel ? `지난 숙제 확인: ${homeworkCheckLabel}` : ""
-      ].filter(Boolean).join(" · "),
-      futureMeta: availability.isDeferred
-        ? `${formatDdayLabel(availability.daysUntilLesson)} · ${futureAbsenceMakeupVisibleDays}일 전부터 기본 목록에 표시`
-        : "",
-      isFutureDeferred: availability.isDeferred,
-      lessonDate: availability.lessonDate,
-      task: {
-        taskType: "absence_makeup",
-        studentId: record.studentId,
-        sourceId: record.lessonStudentRecordId,
-        ...sourceContext,
-        sourceLabel: sourceContext.sourceLessonLabel || lessonLabel(record.lessonId),
-        reason: homeworkCheckLabel ? "결석 보강 · 지난 숙제 확인" : "결석 보강",
-        absenceReason: record.attendanceReason || "사유 미입력",
-        supplementHomeworkNote: homeworkCheckLabel,
-        supplementMethod: "onsite_makeup"
-      }
-    };
-  }
-
-  function hydrateSupplementTask(task = {}) {
-    if (task.taskType !== "absence_makeup") return task;
-    const sourceRecord = records.find((record) => record.lessonStudentRecordId === task.sourceId);
-    const sourceContext = sourceRecord ? createAbsenceSourceContext(sourceRecord) : {};
-    const homeworkCheckLabel = getAbsenceHomeworkCheckLabel(sourceRecord, homeworks, lessons, students);
-    const homeworkCheckSeed = homeworkCheckLabel ||
-      task.sourcePreviousHomework ||
-      sourceContext.sourcePreviousHomework ||
-      task.supplementHomeworkNote ||
-      "";
-    return {
-      ...task,
-      sourceDate: task.sourceDate || sourceContext.sourceDate || task.lessonDate || "",
-      sourceLessonContent: task.sourceLessonContent || sourceContext.sourceLessonContent || "",
-      sourceLessonId: task.sourceLessonId || sourceContext.sourceLessonId || "",
-      sourceLessonLabel: task.sourceLessonLabel || sourceContext.sourceLessonLabel || task.sourceLabel || "",
-      sourceLessonMaterial: task.sourceLessonMaterial || sourceContext.sourceLessonMaterial || "",
-      sourceNextHomework: task.sourceNextHomework || sourceContext.sourceNextHomework || "",
-      sourcePreviousHomework: task.sourcePreviousHomework || sourceContext.sourcePreviousHomework || homeworkCheckLabel || "",
-      supplementHomeworkNote: homeworkCheckSeed
-    };
-  }
+  const {
+    createItem: createAbsenceSupplementItem,
+    hydrateTask: hydrateSupplementTask
+  } = createAbsenceSupplementCandidateModel({
+    attendanceLabels,
+    formatDdayLabel,
+    futureAbsenceMakeupVisibleDays,
+    getAvailability: (record) => getAbsenceMakeupAvailability(record, lessons),
+    getHomeworkCheckLabel: (record) => getAbsenceHomeworkCheckLabel(record, homeworks, lessons, students),
+    getLesson: (record) => getRecordLesson(record, lessons),
+    getLessonContent,
+    getLessonDate: (record) => getRecordLessonDate(record, lessons),
+    getLessonLabel: lessonLabel,
+    getNextHomework: (lesson, student) => getLessonHomework(homeworks, lesson, student, "next", lessons),
+    getPreviousHomework: (record) => getRecordPreviousHomework(record, homeworks, lessons, students),
+    getStudent: (record) => getRecordStudent(record, students),
+    records
+  });
 
   function setSupplementRowAction(task, state, message) {
     const key = getSupplementActionKey(task);
