@@ -8,6 +8,16 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13B-1 알림센터 발송 기록 순수 모델 분리 — AI gate 통과
+
+- 코드: 로컬/서버 job 중복 제거·병합, Solapi 결과 대조 대상, 지난 예약, 예약/완료/확인필요/실패/보관 분류, 현재 filter 목록과 label 계산을 `notificationCenterModel.js`의 `createNotificationHistoryViewModel`로 이동했다.
+- 동작 보존: persisted job이 같은 ID의 local optimistic job보다 우선하고, 과거 예약은 예약 목록에서 빠져 확인필요 목록 뒤에 합쳐지며, 전체/알 수 없는 filter는 앞 40건을 표시하는 기존 순서를 유지한다.
+- 저장 원천/side effect: model은 전달된 배열과 `canCancelJob`/provider reference/과거시각 판정 callback만 읽는다. React state, clock, API, Supabase, notification job mutation 또는 Solapi 호출이 없다.
+- 자동검증: 중복 remote 우선, 미래/과거 예약 분리, send_unconfirmed+과거 예약 순서, Solapi target, sent/failed/archive, unknown filter 40건 fallback fixture를 `test:notification-center-model`로 production test에 연결했다. scenario `20b-5`가 App wiring과 순수 경계를 고정하며 production scenario 426/426과 build, `git diff --check`가 통과했다.
+- main 통합: 최신 `origin/main`의 시험분석 최종 미리보기 fixture와 리팩터링의 모든 보충/알림 fixture를 `test:production`에 함께 보존해 통합 검증했다.
+- gate 판정: 읽기 전용 순수 derivation이며 운영 job이나 외부 서비스를 조작하지 않는다. 사람 검수 없이 AI gate로 통과했다.
+- 다음 경계: 수신자 반/검색/선택/번호 유효성 derivation을 별도 순수 모델로 분리한 뒤, 실제 payload builder/orchestration gate를 다시 판정한다.
+
 ## 2026-07-23 P1. 13A-5 알림센터 발송 기록 shell 분리 — AI gate 통과
 
 - 코드: 발송 기록 header, 결과 확인 시각/action 상태, Solapi 대조 안내, table header/empty/list, 접힌 요약을 `NotificationHistoryPanel.jsx`로 이동하고 13A-4의 `NotificationHistoryRow`를 조합했다.
