@@ -46,6 +46,16 @@ export function upsertLocalNoticeJobList(
   ].slice(0, limit);
 }
 
+export function resolveNotificationStudentName({
+  payload,
+  studentId,
+  students = []
+}) {
+  return payload?.studentName
+    || students.find((student) => student.studentId === studentId)?.name
+    || "학생";
+}
+
 export function createNotificationComposerViewModel({
   formatKoreaTimeLabel,
   noticeBody = "",

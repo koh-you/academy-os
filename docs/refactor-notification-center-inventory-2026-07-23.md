@@ -168,8 +168,14 @@
 - App이 local draft·결과 대상·시간 formatter를 주입한다.
 - text trim/결합, KST ISO, ID 중복 제거, 빈 값 fallback을 fixture로 고정했으며 외부 예약·조회는 없다.
 
+## 13D-7 알림 기록 학생 이름 fallback model 단위
+
+- 기록 payload 이름, 현재 학생 원천 이름, 일반 `학생` label의 우선순위를 `resolveNotificationStudentName`으로 이동했다.
+- App은 history row callback에서 payload·studentId·students를 주입한다.
+- 세 fallback 경로를 equality fixture로 고정했으며 외부 조회·mutation은 없다.
+
 ## 다음 후보
 
-1. NotificationCenter 잔여 함수·effect·JSX와 특강 panel 결합을 다시 inventory한다.
-2. 사람 gate 없이 이동 가능한 마지막 low-risk 단위를 한 번에 하나씩 분리한다.
+1. 수신 대상 카드가 학생/학부모 번호를 고르는 단순 accessor를 순수 model로 이동한다.
+2. 이후 NotificationCenter 잔여 local setter wrapper·effect·JSX와 특강 panel 결합을 다시 inventory한다.
 3. 특강 안내문 적용/컴포넌트 이동이 Solapi 특강 템플릿 외부 검수 경계를 건드리면 중단하고 보류 상태를 기록한다.
