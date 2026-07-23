@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13D-1 알림센터 template/display config 분리 — AI gate 통과
+
+- 코드: 공지 기본 템플릿 4종과 알림 job 종류 label, 상태 label, 과거 예약 status class 계산을 새 `notificationCenterConfig.js`로 이동했다. App은 config를 import하고 과거시각 판정이 필요한 status-class helper에 기존 `isNotificationSchedulePast`를 주입하는 얇은 adapter만 유지한다.
+- 동작 보존: 교재·보강·공지·특강 템플릿의 ID/label/title/body 전체, 알림 종류·상태 fallback, null/빈 상태의 draft fallback, 지난 scheduled job의 `send_unconfirmed` 변환을 그대로 유지했다. Solapi 특강 템플릿 외부 검수 전이므로 특강 문구·변수·연결은 변경하지 않았다.
+- 저장 원천/side effect: config는 고정 문자열과 주입된 시간 판정만 읽으며 clock/React/API/Supabase/Solapi를 소유하지 않는다. 운영 데이터·실제 발송·예약·취소는 0건이다.
+- 자동검증: 템플릿 4종의 순서·메타·body 전체 문자열, 알려진/알 수 없는/null label, null·과거·미래·빈 status class를 `test:notification-center-model` fixture로 고정했다. production scenario 440/440과 build, `git diff --check`가 통과했다.
+- gate 판정: 모든 표시 매핑과 템플릿 원문을 deterministic equality로 검증했다. 화면이나 재시험/고태영 운영 데이터의 사람 조작이 필요하지 않은 AI gate다.
+- 다음 경계: 선택 학생 toggle/select-all/clear와 반 변경 시 유효 선택 ID 정리를 순수 selection model로 분리하고 App의 React effect/setter는 유지한다.
+
 ## 2026-07-23 P1. 13C-11 알림센터 background refresh action 분리 — AI gate 통과
 
 - 코드: 발송·예약·대조·취소 완료 후 실행되는 발송 기록 background refresh와 비동기 실패 feedback append를 `notificationNoticeActions.js`의 `refreshNoticeJobsInBackgroundAction`으로 이동했다. App은 기존 `onRefresh`와 `setDispatchMessage`를 주입하는 얇은 wrapper만 유지한다.
