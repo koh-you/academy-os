@@ -2642,7 +2642,7 @@ const examAnalysisCardNewsModel = createExamAnalysisCardNewsModel();
 const examAnalysisCanvaCardPlan = examAnalysisCardNewsModel;
 
 function getExamAnalysisChartPartLabel(question = {}) {
-  return String(question.partName || question.unitName || "미입력").trim() || "미입력";
+  return String(question.unitName || "중단원 미입력").trim() || "중단원 미입력";
 }
 
 function countExamAnalysisChartLabels(values = []) {
@@ -2748,19 +2748,19 @@ function createExamAnalysisPartDistributionSvg(model = {}) {
     slices,
     `<circle cx="${cx}" cy="${cy}" r="${r - strokeWidth / 2 + 4}" fill="#ffffff"/>`,
     `<text class="title" x="${cx}" y="${cy - 8}" text-anchor="middle">${segments.length}</text>`,
-    `<text class="muted" x="${cx}" y="${cy + 26}" text-anchor="middle">단원</text>`,
+    `<text class="muted" x="${cx}" y="${cy + 26}" text-anchor="middle">쎈 중단원</text>`,
     `<text class="small" x="${cx}" y="${cy + 56}" text-anchor="middle">${total}문항 기준</text>`,
     detailRows || `<text class="muted" x="500" y="240">단원 데이터 없음</text>`
   ].join("");
   return {
     key: "part-distribution",
-    label: "단원별 출제 비중",
+    label: "쎈 중단원별 출제 비중",
     fileName: "01-part-distribution.png",
     width,
     height,
     svg: createExamAnalysisChartSvgShell({
-      title: "단원별 출제 비중",
-      subtitle: "문항 비중 · 단원별 난이도 · 대표 주요유형",
+      title: "쎈 중단원별 출제 비중",
+      subtitle: "문항 비중 · 쎈 중단원별 난이도 · 대표 주요유형",
       width,
       height,
       body
@@ -2825,13 +2825,13 @@ function createExamAnalysisPartDifficultySvg(model = {}) {
   }).join("");
   return {
     key: "part-difficulty",
-    label: "단원별 난이도",
+    label: "쎈 중단원별 난이도",
     fileName: "03-part-difficulty.png",
     width,
     height,
     svg: createExamAnalysisChartSvgShell({
-      title: "단원별 난이도",
-      subtitle: "단원마다 난이도 분포를 누적 막대로 표시",
+      title: "쎈 중단원별 난이도",
+      subtitle: "쎈 중단원마다 난이도 분포를 누적 막대로 표시",
       width,
       height,
       body

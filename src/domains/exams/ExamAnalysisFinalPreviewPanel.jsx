@@ -84,14 +84,14 @@ function ExamAnalysisBarList({ items = [], emptyLabel = "데이터 없음" }) {
 }
 
 function ExamAnalysisUnitBreakdownList({ items = [] }) {
-  const visibleItems = items.filter((item) => item.units?.length);
+  const visibleItems = items.filter((item) => item.mainTypes?.length);
   if (!visibleItems.length) return null;
   return (
     <div className="examAnalysisUnitBreakdown">
-      {visibleItems.map((part) => (
-        <div key={part.label}>
-          <strong>{part.label}</strong>
-          <span>{part.units.map((unit) => `${unit.label} ${unit.count}`).join(" · ")}</span>
+      {visibleItems.map((unit) => (
+        <div key={unit.label}>
+          <strong>{unit.label}</strong>
+          <span>{unit.mainTypes.map((mainType) => `${mainType.label} ${mainType.count}`).join(" · ")}</span>
         </div>
       ))}
     </div>
@@ -177,7 +177,7 @@ export function ExamAnalysisFinalPreviewPanel({ model }) {
         </div>
         <div className="examAnalysisPreviewMetricGrid">
           <span><b>{meta.totalQuestions}</b><small>문항</small></span>
-          <span><b>{model.partDistribution.length}</b><small>단원</small></span>
+          <span><b>{model.partDistribution.length}</b><small>쎈 중단원</small></span>
           <span><b>{model.importantQuestions.length}</b><small>주요문항</small></span>
         </div>
       </div>
@@ -185,11 +185,11 @@ export function ExamAnalysisFinalPreviewPanel({ model }) {
       <div className="examAnalysisPreviewGrid">
         <section className="examAnalysisPreviewCard wide">
           <div className="examAnalysisPreviewCardHeader">
-            <strong>단원별 출제 비중</strong>
-            <span>주요유형 breakdown</span>
+            <strong>쎈 중단원별 출제 비중</strong>
+            <span>주요유형 분포</span>
           </div>
           <div className="examAnalysisPreviewDonutLayout">
-            <ExamAnalysisMiniDonut segments={model.partDistribution} centerLabel="단원" ariaLabel="단원별 출제 비중" />
+            <ExamAnalysisMiniDonut segments={model.partDistribution} centerLabel="중단원" ariaLabel="쎈 중단원별 출제 비중" />
             <div>
               <ExamAnalysisLegendList items={model.partDistribution} />
               <ExamAnalysisUnitBreakdownList items={model.unitBreakdown} />
@@ -207,7 +207,7 @@ export function ExamAnalysisFinalPreviewPanel({ model }) {
 
         <section className="examAnalysisPreviewCard">
           <div className="examAnalysisPreviewCardHeader">
-            <strong>단원별 난이도</strong>
+            <strong>쎈 중단원별 난이도</strong>
             <span>검수 저장본</span>
           </div>
           <ExamAnalysisPartDifficultyList items={model.difficultyByPart} />
