@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13E-4 알림 composer local state hook 분리 — AI gate 통과
+
+- 코드: 공지 안내 메시지, AI 수정/발송 busy, 제목·본문·kind·특강 meta·template ID, 예약일·예약시간 local state와 기존 순수 composer view model을 새 `useNotificationComposerState.js`로 이동했다.
+- 동작 보존: 모든 state 초기값과 `today` 기반 예약일 초기화, 제목/본문 text·KST ISO 예약시각·Solapi 대조 ID·마지막 확인 label 계산을 그대로 유지했다. App은 반환된 state/setter를 기존 template 적용, 특강 안내문 적용, 발송·예약·AI 수정 action과 표시 panel에 주입한다.
+- 저장 원천/side effect: hook은 React local state와 순수 model만 소유한다. template 원문, 특강 적용 문구·handler, API/Supabase/notification job/Solapi/AI 요청을 실행하거나 변경하지 않는다.
+- 자동검증: 기존 composer model equality fixture를 유지하고, hook의 열 state·model 조합·App 연결과 fetch/postJson/API/notification_jobs 부재를 production scenario 454개로 고정했다. production scenario 454/454와 build, `git diff --check`가 통과했다.
+- gate 판정: draft 초기값과 모든 파생값은 deterministic fixture·정적 hook 경계로 재현되며 외부 action은 App에 남아 있다. 재시험/고태영 운영 데이터나 실제 알림 발송, 사람 화면 검수가 필요하지 않은 AI gate다.
+- 다음 경계: NotificationCenter에 남은 identity wrapper, template local action adapter, job builder/request/action adapter와 `SpecialLectureNoticePanel` 결합을 다시 inventory한다. 특강 안내문 적용은 외부 template gate 전 이동하지 않는다.
+
 ## 2026-07-23 P1. 13E-3 알림 기록 local state hook 분리 — AI gate 통과
 
 - 코드: 삭제 중 job ID, 기록 펼침, 작업 상태, 기록 filter, 서버 재조회 전 local job, Solapi 대조 표시 상태와 기존 history view model·filter local action·local job upsert를 새 `useNotificationHistoryState.js`로 이동했다.
