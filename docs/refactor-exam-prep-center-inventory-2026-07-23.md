@@ -117,9 +117,17 @@
 - production 계약이 AI/clipboard/status 순서와 App legacy handler 제거를 검사한다. 실제 AI·clipboard 실행은 0회다.
 - production scenario 473/473, build, `git diff --check`를 통과했다.
 
+## 14A-10 시험 후 총평 작성 모달 DOM
+
+- modal DOM과 14A-8 draft state hook, 14A-9 AI/clipboard action hook 조립을 `ExamReviewComposerModal.jsx`로 이동했다.
+- App은 resolved AI 설정, autosave 위험 정보, 현재 날짜, row/save state와 실제 row update callback만 주입한다.
+- 닫기 전 pending save flush, `InlineSaveStatus`, autosave 위험 안내를 보존했고 시험정보 저장·삭제·수업 reconcile orchestration은 이동하지 않았다.
+- production 계약이 App legacy DOM 제거, 전용 파일의 hook/DOM 조립과 App 소유 설정·저장 callback 주입을 검사한다. 실제 AI·clipboard·Supabase·운영 데이터 호출은 0회다.
+- production scenario 474/474, build, `git diff --check`를 통과했다.
+
 ## 이후 후보와 중단 조건
 
-1. `ExamReviewComposerModal` DOM 전용 파일
-2. 시험정보 저장·삭제·수업 reconcile orchestration
+1. 시험정보 row 저장 원천과 save-state orchestration
+2. 시험정보 삭제와 연결 수업 reconcile orchestration
 
 학생 제출·교사 확인·Storage 파일 열기 경계를 건드리면 기존 학생 포털 실제 쓰기와 bearer/Storage gate에서 중단한다. 시험정보 삭제나 시험대비 수업 생성·삭제를 옮길 때는 별도의 격리 데이터와 사람 gate가 필요하다. 순수 표시/model 단위는 deterministic fixture와 production test/build로 검증하고 운영 데이터를 만들지 않는다.
