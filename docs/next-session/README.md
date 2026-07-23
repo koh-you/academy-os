@@ -14,7 +14,7 @@
 
 11B-1 코드 이동 후 학생 일정·학부모 일정·학생 11시의 OS row/Solapi 그룹 예약·취소 대조는 반 미지정 고태영 테스트 학생과 사용자 통제 번호로 통과했습니다. 학생 포털 실제 쓰기 검수, 교사 bearer/Storage 소유권 보안 gate, Solapi 특강 템플릿 외부 검수는 별도 보류 상태입니다.
 
-App.jsx 보충관리 리팩터링은 최신 `origin/main`에 rebase한 뒤 `12R-10~20` local state/표시 모델, `12R-21~25` modal action adapter, `12R-26~30` modal 본체와 나머지 modal/list adapter를 분리했다. 12R-31~32에서는 후보 selection과 세 탭 표시를 순수 모델로 옮겼고, 12R-33~34에서는 세 task type의 candidate/source/hydrate를 분리했다. 12R-35에서는 최근 한 달 history selector를, 12R-36에서는 보충 후보 행 JSX를 callback-only `SupplementCandidateRow`로 분리했다. 실제 task/lesson/출결 저장·Supabase 재조회·React 전역 갱신·notification/Solapi 작업은 App callback 경계에 남고 새 행 컴포넌트에는 hook·API·외부 side effect가 없다. production 417/417, build를 근거로 AI gate를 통과했다. 다음은 `SupplementCenter` 본체의 props·local state·App helper 의존성을 inventory하고 안전한 본체 이동 경계를 판정한다.
+App.jsx 보충관리 리팩터링은 최신 `origin/main`에 rebase한 뒤 `12R-10~20` local state/표시 모델, `12R-21~25` modal action adapter, `12R-26~30` modal 본체와 나머지 modal/list adapter를 분리했다. 12R-31~36에서는 후보 selection·탭·candidate/source/hydrate·history selector·후보 행 UI를 분리했고, 12R-37에서 local UI state와 세 탭/목록/overlay를 포함한 `SupplementCenter` 본체를 전용 파일로 이동했다. 실제 task/lesson/출결 저장·Supabase 재조회·React 전역 갱신·notification/Solapi 작업은 App callback 경계에 남는다. production 418/418, build를 근거로 AI gate를 통과해 로드맵 12 `supplement center/modals`의 App 본체 분리를 완료했다. 다음은 로드맵 13 `notification center`의 원천·발송/예약 side effect·안전한 표시 하위 컴포넌트를 inventory한다.
 
 ## 시험분석 GPT Image 전용 세션 참고 자료
 

@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-37 SupplementCenter 본체 분리 — AI gate 통과
+
+- 코드: `SupplementCenter`의 local UI state, 후보 조합, 탭/목록/미래 결석 패널, 학생 상세·최근 내역·완료 확인 overlay 구성을 `SupplementCenter.jsx`로 이동했다. App은 `supplementCenterDependencies`와 기존 저장/예약/취소/완료 callback을 명시적으로 주입한다.
+- 동작 보존: 숙제보충·결석보강·재시험 원천 필터, local draft ID/오늘 기본일, 선택 row와 modal, 최근 30일 내역, 미래 결석 접기/펼치기, 완료 busy/error 상태와 기존 문구·CSS class를 그대로 유지한다.
+- 저장 원천/side effect: 실제 task/lesson/출결 저장, Supabase 재조회, notification_jobs/Solapi 예약·취소, React 전역 갱신 callback은 모두 App에 남는다. 새 본체에는 `fetch/postJson`, `/api/`, Supabase, Solapi, notification state mutation이 없다.
+- 자동검증: 기존 `88b-43~51` 탐색 경계를 실제 소유 파일로 갱신하고 App wiring·dependency 주입·side-effect callback 소유권을 고정하는 `88b-52`를 추가했다. production scenario 418/418과 build가 통과했다.
+- gate 판정: 동일한 컴포넌트 본체와 local UI state의 파일 이동이고 운영 데이터나 외부 발송을 실행하지 않는다. 자동검증으로 동작·소유권 경계가 충분해 사람 조작 없이 AI gate로 통과했다.
+- 다음 경계: 로드맵 12 `supplement center/modals`의 App 본체 분리를 완료했다. 다음은 로드맵 13 `notification center`의 원천·실제 발송/예약 side effect·안전한 표시 하위 컴포넌트를 먼저 inventory한다.
+
 ## 2026-07-23 P1. 12R-36 보충 후보 행 표시 컴포넌트 분리 — AI gate 통과
 
 - 코드: 보충 후보의 학생명·제목·meta·미래 결석 안내·진행 badge·메모·행 action 상태와 `상세 검토/보충 생성`, `보충 완료 처리` 버튼 JSX를 `SupplementCandidateRow.jsx`로 이동했다. App은 기존 task 탐색, 진행 상태 계산, busy 판정과 open/pass callback을 계속 소유한다.
