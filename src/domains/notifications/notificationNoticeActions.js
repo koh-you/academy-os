@@ -129,3 +129,45 @@ export async function scheduleNoticeAction({
     setIsSending(false);
   }
 }
+
+export async function reconcileNoticeResultsAction({
+  isLoading,
+  now,
+  reconcileResults,
+  refreshJobs,
+  resultTargetCount,
+  setIsHistoryOpen,
+  setJobFilter,
+  setSyncState,
+  syncCheckedAt,
+  targetIds = []
+}) {
+  if (!reconcileResults || !targetIds.length || isLoading) return;
+  setSyncState({
+    checkedAt: syncCheckedAt,
+    state: "loading",
+    message: `Solapi 예약 ${targetIds.length}건을 조회하고 OS 기록과 대조하는 중입니다.`
+  });
+  try {
+    const result = await reconcileResults({ notificationJobIds: targetIds });
+    const checkedCount = result?.checkedCount ?? 0;
+    const updatedCount = result?.updatedCount ?? 0;
+    const failedCount = (result?.checked ?? []).filter(
+      (item) => item.status === "failed_to_check"
+    ).length;
+    setSyncState({
+      checkedAt: now(),
+      state: failedCount ? "partial" : "saved",
+      message: `Solapi 결과 대조 완료: 대상 ${targetIds.length}건 · 조회 ${checkedCount}건 · OS 반영 ${updatedCount}건${failedCount ? ` · 조회 실패 ${failedCount}건` : ""}`
+    });
+    if (updatedCount || resultTargetCount) setJobFilter("pending");
+    setIsHistoryOpen(true);
+    refreshJobs();
+  } catch (error) {
+    setSyncState((current) => ({
+      ...current,
+      state: "failed",
+      message: `Solapi 결과 대조 실패: ${error.message}`
+    }));
+  }
+}

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  reconcileNoticeResultsAction,
   scheduleNoticeAction,
   sendNoticeNowAction
 } from "../src/domains/notifications/notificationNoticeActions.js";
@@ -280,4 +281,123 @@ await scheduleNoticeAction({
 });
 assert.deepEqual(successfulScheduleFilters, ["scheduled"]);
 
-console.log("notification notice immediate and scheduled action fixtures passed");
+const reconcileRequests = [];
+const reconcileStates = [];
+const reconcileFilters = [];
+const reconcileHistoryStates = [];
+let reconcileRefreshCount = 0;
+await reconcileNoticeResultsAction({
+  isLoading: false,
+  now: () => "2026-07-23T12:34:56.000Z",
+  reconcileResults: async (payload) => {
+    reconcileRequests.push(payload);
+    return {
+      checkedCount: 1,
+      updatedCount: 0,
+      checked: [
+        { notificationJobId: "notice-1", status: "failed_to_check" },
+        { notificationJobId: "notice-2", status: "scheduled" }
+      ]
+    };
+  },
+  refreshJobs: () => {
+    reconcileRefreshCount += 1;
+  },
+  resultTargetCount: 2,
+  setIsHistoryOpen: (value) => reconcileHistoryStates.push(value),
+  setJobFilter: (value) => reconcileFilters.push(value),
+  setSyncState: (value) => reconcileStates.push(value),
+  syncCheckedAt: "2026-07-22T10:00:00.000Z",
+  targetIds: ["notice-1", "notice-2"]
+});
+assert.deepEqual(reconcileRequests, [
+  { notificationJobIds: ["notice-1", "notice-2"] }
+]);
+assert.deepEqual(reconcileStates, [
+  {
+    checkedAt: "2026-07-22T10:00:00.000Z",
+    state: "loading",
+    message: "Solapi 예약 2건을 조회하고 OS 기록과 대조하는 중입니다."
+  },
+  {
+    checkedAt: "2026-07-23T12:34:56.000Z",
+    state: "partial",
+    message: "Solapi 결과 대조 완료: 대상 2건 · 조회 1건 · OS 반영 0건 · 조회 실패 1건"
+  }
+]);
+assert.deepEqual(reconcileFilters, ["pending"]);
+assert.deepEqual(reconcileHistoryStates, [true]);
+assert.equal(reconcileRefreshCount, 1);
+
+const successfulReconcileStates = [];
+const successfulReconcileFilters = [];
+await reconcileNoticeResultsAction({
+  isLoading: false,
+  now: () => "2026-07-23T13:00:00.000Z",
+  reconcileResults: async () => ({
+    checkedCount: 1,
+    updatedCount: 1,
+    checked: [{ notificationJobId: "notice-updated", status: "sent" }]
+  }),
+  refreshJobs: () => {},
+  resultTargetCount: 0,
+  setIsHistoryOpen: () => {},
+  setJobFilter: (value) => successfulReconcileFilters.push(value),
+  setSyncState: (value) => successfulReconcileStates.push(value),
+  syncCheckedAt: "",
+  targetIds: ["notice-updated"]
+});
+assert.deepEqual(successfulReconcileStates[1], {
+  checkedAt: "2026-07-23T13:00:00.000Z",
+  state: "saved",
+  message: "Solapi 결과 대조 완료: 대상 1건 · 조회 1건 · OS 반영 1건"
+});
+assert.deepEqual(successfulReconcileFilters, ["pending"]);
+
+let failedReconcileState = {
+  checkedAt: "2026-07-22T10:00:00.000Z",
+  state: "idle",
+  message: ""
+};
+await reconcileNoticeResultsAction({
+  isLoading: false,
+  reconcileResults: async () => {
+    throw new Error("fixture reconcile failure");
+  },
+  setSyncState: (value) => {
+    failedReconcileState = typeof value === "function" ? value(failedReconcileState) : value;
+  },
+  syncCheckedAt: failedReconcileState.checkedAt,
+  targetIds: ["notice-failed"]
+});
+assert.deepEqual(failedReconcileState, {
+  checkedAt: "2026-07-22T10:00:00.000Z",
+  state: "failed",
+  message: "Solapi 결과 대조 실패: fixture reconcile failure"
+});
+
+let reconcileGuardCallCount = 0;
+const guardSetter = () => {
+  reconcileGuardCallCount += 1;
+};
+await reconcileNoticeResultsAction({
+  isLoading: false,
+  reconcileResults: async () => {},
+  setSyncState: guardSetter,
+  targetIds: []
+});
+await reconcileNoticeResultsAction({
+  isLoading: true,
+  reconcileResults: async () => {},
+  setSyncState: guardSetter,
+  targetIds: ["notice-loading"]
+});
+await reconcileNoticeResultsAction({
+  isLoading: false,
+  reconcileResults: null,
+  setSyncState: guardSetter,
+  targetIds: ["notice-missing-callback"]
+});
+assert.equal(reconcileGuardCallCount, 0);
+
+console.log("notification notice immediate scheduled and reconcile action fixtures passed");
