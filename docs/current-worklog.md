@@ -8,6 +8,16 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13A-1 알림센터 내비게이션 shell 분리 — AI gate 통과
+
+- 코드: 알림센터의 페이지 제목/설명, 기록 로딩·실패·재시도 표시, 공지/특강 상위 탭, 특강 수업/안내문 탭, 개별 발송/기록 필터 탭을 `NotificationCenterNavigation.jsx`의 세 callback-only 컴포넌트로 이동했다.
+- 동작 보존: 기존 제목·문구·CSS class·탭 순서·건수·활성 상태·새로고침/재시도/filter callback을 그대로 유지하고 App의 기존 state/setter를 주입한다.
+- 저장 원천/side effect: 새 컴포넌트에는 state hook, API, Supabase, Solapi 호출이 없다. 수신자/초안, 즉시발송·예약·취소·삭제·결과 대조, AI 수정과 특강관리 callback은 모두 App 경계에 남는다.
+- inventory: `docs/refactor-notification-center-inventory-2026-07-23.md`에 원천, local state, 실제 외부 side effect, 고위험 orchestration 경계를 기록했다.
+- 자동검증: 이동된 표시/탭 계약과 callback-only 경계를 `20b-1`로 추가하고, 기존 `20h`, `20j-4a`가 새 소유 파일과 App 배치 관계를 계속 검사하도록 갱신했다. production scenario 421/421과 build, `git diff --check`가 통과했다.
+- gate 판정: 표시 shell 이동이며 운영 데이터·실제 발송/예약을 실행하지 않는다. 테스트 데이터나 사람 조작 없이 AI gate로 통과했다.
+- 다음 경계: 공지 수신자 검색/선택 패널을 controlled callback-only 컴포넌트로 분리한다. 대상 계산과 선택 state는 App에 남긴다.
+
 ## 2026-07-23 P1. 12R-37 SupplementCenter 본체 분리 — AI gate 통과
 
 - 코드: `SupplementCenter`의 local UI state, 후보 조합, 탭/목록/미래 결석 패널, 학생 상세·최근 내역·완료 확인 overlay 구성을 `SupplementCenter.jsx`로 이동했다. App은 `supplementCenterDependencies`와 기존 저장/예약/취소/완료 callback을 명시적으로 주입한다.

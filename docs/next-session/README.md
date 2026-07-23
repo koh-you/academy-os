@@ -14,7 +14,7 @@
 
 11B-1 코드 이동 후 학생 일정·학부모 일정·학생 11시의 OS row/Solapi 그룹 예약·취소 대조는 반 미지정 고태영 테스트 학생과 사용자 통제 번호로 통과했습니다. 학생 포털 실제 쓰기 검수, 교사 bearer/Storage 소유권 보안 gate, Solapi 특강 템플릿 외부 검수는 별도 보류 상태입니다.
 
-App.jsx 보충관리 리팩터링은 최신 `origin/main`에 rebase한 뒤 `12R-10~20` local state/표시 모델, `12R-21~25` modal action adapter, `12R-26~30` modal 본체와 나머지 modal/list adapter를 분리했다. 12R-31~36에서는 후보 selection·탭·candidate/source/hydrate·history selector·후보 행 UI를 분리했고, 12R-37에서 local UI state와 세 탭/목록/overlay를 포함한 `SupplementCenter` 본체를 전용 파일로 이동했다. 실제 task/lesson/출결 저장·Supabase 재조회·React 전역 갱신·notification/Solapi 작업은 App callback 경계에 남는다. production 418/418, build를 근거로 AI gate를 통과해 로드맵 12 `supplement center/modals`의 App 본체 분리를 완료했다. 다음은 로드맵 13 `notification center`의 원천·발송/예약 side effect·안전한 표시 하위 컴포넌트를 inventory한다.
+App.jsx 보충관리 리팩터링은 `12R-37`에서 `SupplementCenter` 본체를 전용 파일로 이동해 로드맵 12 `supplement center/modals`의 App 본체 분리를 완료했다. 13A-1에서는 `docs/refactor-notification-center-inventory-2026-07-23.md`에 알림센터 원천과 실제 발송/예약 side effect를 정리하고, 페이지 header/status와 공지·특강·기록 navigation shell을 `NotificationCenterNavigation.jsx`의 callback-only 컴포넌트로 이동했다. 실제 수신자/초안 state와 즉시발송·예약·취소·삭제·결과 대조·AI 수정·특강관리 callback은 App에 남는다. 최신 `origin/main` rebase 후 production 421/421과 build를 통과했다. 다음은 공지 수신자 검색/선택 패널을 controlled callback-only 컴포넌트로 분리한다.
 
 ## 시험분석 GPT Image 전용 세션 참고 자료
 
@@ -338,6 +338,7 @@ App.jsx 리팩터링 18개 기준 로드맵:
 - 7번 `school calendar helpers` 분리 완료.
 - 8번 `school calendar components` 분리 완료.
 - 9번 `test manager` 완료: `src/domains/tests/testManagerUtils.js`와 `TestManagerPanels.jsx`에 탭/header/form grid/meta/table/action/recent session list/student history panel 분리 완료.
+- 12번 `supplement center/modals` App 본체 분리 완료. 13번 `notification center`는 13A-1 navigation shell까지 완료했고, 다음은 수신자 검색/선택 controlled panel입니다.
 - 확인된 후속 이슈: 학생 포털 `비밀번호 변경`은 callback/API 없는 기존 미연결 UI입니다. 이번 리팩터링에서는 보존했고 오작동 버튼 정리에서 별도 결정합니다.
 - 실제 최신 커밋은 새 세션에서 반드시 `git log -1 --oneline`으로 다시 확인하세요.
 

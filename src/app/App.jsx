@@ -45,6 +45,11 @@ import {
   persistFailedNotificationJobRequest,
   reserveNotificationJobRequest
 } from "../domains/notifications/notificationJobApi.js";
+import {
+  NotificationCenterHeader,
+  NotificationSectionTabs,
+  NoticeWorkspaceTabs
+} from "../domains/notifications/NotificationCenterNavigation.jsx";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { createSupplementSchedulePersistencePlan } from "../domains/supplements/supplementSchedulePlan.js";
 import { SupplementCenter } from "../domains/supplements/SupplementCenter.jsx";
@@ -10203,10 +10208,6 @@ function NotificationCenter({
   const [solapiResultSyncState, setSolapiResultSyncState] = useState({ checkedAt: "", state: "idle", message: "" });
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
-  const isNotificationJobsLoading = notificationJobsStatus?.state === "loading";
-  const notificationJobsNoticeClass = notificationJobsStatus?.state === "failed"
-    ? "inlineNotice danger"
-    : "inlineNotice";
   const persistedNotificationJobIds = new Set(notificationJobs.map((job) => job.notificationJobId));
   const mergedNotificationJobs = [
     ...localNoticeJobs.filter((job) => !persistedNotificationJobIds.has(job.notificationJobId)),
@@ -10702,65 +10703,20 @@ function NotificationCenter({
 
   return (
     <section className={compactPageHeader ? "notificationCenterPage compactPageHeader" : "notificationCenterPage"}>
-      <div className="pageTop">
-        <div>
-          <h1>{pageTitle}</h1>
-          {pageDescription ? <p className="muted">{pageDescription}</p> : null}
-        </div>
-        <div className="pageActions">
-          <button className="softButton" disabled={isNotificationJobsLoading} onClick={onRefresh} type="button">
-            {isNotificationJobsLoading ? "기록 불러오는 중" : "기록 새로고침"}
-          </button>
-        </div>
-      </div>
-      {["loading", "failed"].includes(notificationJobsStatus?.state) ? (
-        <div className={`${notificationJobsNoticeClass} notificationJobsStatusNotice`}>
-          <span>{notificationJobsStatus.message}</span>
-          {notificationJobsStatus.state === "failed" ? (
-            <button className="softButton compact" onClick={onRefresh} type="button">다시 시도</button>
-          ) : null}
-        </div>
-      ) : null}
-      {showSpecialLectureTab && !hideNotificationSectionTabs ? (
-      <div className="notificationSectionTabs">
-        <button
-          className={activeNotificationTab === "notice" ? "active" : ""}
-          onClick={() => setActiveNotificationTab("notice")}
-          type="button"
-        >
-          공지 발송
-        </button>
-        <button
-          className={activeNotificationTab === "specialLecture" ? "active" : ""}
-          onClick={() => setActiveNotificationTab("specialLecture")}
-          type="button"
-        >
-          특강 안내문
-        </button>
-      </div>
-      ) : null}
-      {activeNotificationTab === "specialLecture" && hideNotificationSectionTabs ? (
-        <div className="notificationSectionTabs specialLectureTopTabs" role="tablist" aria-label="특강관리 작업 구분">
-          <button
-            aria-selected={activeSpecialLectureWorkspaceTab === "roster"}
-            className={activeSpecialLectureWorkspaceTab === "roster" ? "active" : ""}
-            onClick={() => setActiveSpecialLectureWorkspaceTab("roster")}
-            role="tab"
-            type="button"
-          >
-            특강 수업
-          </button>
-          <button
-            aria-selected={activeSpecialLectureWorkspaceTab === "guide"}
-            className={activeSpecialLectureWorkspaceTab === "guide" ? "active" : ""}
-            onClick={() => setActiveSpecialLectureWorkspaceTab("guide")}
-            role="tab"
-            type="button"
-          >
-            특강 안내문
-          </button>
-        </div>
-      ) : null}
+      <NotificationCenterHeader
+        notificationJobsStatus={notificationJobsStatus}
+        onRefresh={onRefresh}
+        pageDescription={pageDescription}
+        pageTitle={pageTitle}
+      />
+      <NotificationSectionTabs
+        activeNotificationTab={activeNotificationTab}
+        activeSpecialLectureWorkspaceTab={activeSpecialLectureWorkspaceTab}
+        hideNotificationSectionTabs={hideNotificationSectionTabs}
+        onSelectNotificationTab={setActiveNotificationTab}
+        onSelectSpecialLectureWorkspaceTab={setActiveSpecialLectureWorkspaceTab}
+        showSpecialLectureTab={showSpecialLectureTab}
+      />
 
       {activeNotificationTab === "specialLecture" ? (
         <SpecialLectureNoticePanel
@@ -10785,34 +10741,16 @@ function NotificationCenter({
         />
       ) : (
         <>
-      <div className="notificationSectionTabs noticeWorkspaceTabs" role="tablist" aria-label="알림관리 작업 구분">
-        <button
-          aria-selected={activeNoticeWorkspace === "compose"}
-          className={activeNoticeWorkspace === "compose" ? "active" : ""}
-          onClick={() => setActiveNoticeWorkspace("compose")}
-          role="tab"
-          type="button"
-        >
-          개별 발송
-        </button>
-        {[
-          ["scheduled", "예약", scheduledJobs.length],
-          ["sent", "발송 완료", sentJobs.length],
-          ["pending", "확인 필요", pendingJobs.length],
-          ["all", "전체 기록", managedNotificationJobs.length]
-        ].map(([id, label, count]) => (
-          <button
-            aria-selected={activeNoticeWorkspace === "history" && jobFilter === id}
-            className={activeNoticeWorkspace === "history" && jobFilter === id ? "active" : ""}
-            key={id}
-            onClick={() => selectJobFilter(id)}
-            role="tab"
-            type="button"
-          >
-            {label} {count}건
-          </button>
-        ))}
-      </div>
+      <NoticeWorkspaceTabs
+        activeNoticeWorkspace={activeNoticeWorkspace}
+        jobFilter={jobFilter}
+        managedCount={managedNotificationJobs.length}
+        onSelectCompose={() => setActiveNoticeWorkspace("compose")}
+        onSelectJobFilter={selectJobFilter}
+        pendingCount={pendingJobs.length}
+        scheduledCount={scheduledJobs.length}
+        sentCount={sentJobs.length}
+      />
       {activeNoticeWorkspace === "compose" ? (
       <section className="notificationPanel noticeComposerPanel">
         <div className="sectionHeader slim">
