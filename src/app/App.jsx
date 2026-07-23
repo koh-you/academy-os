@@ -65,10 +65,10 @@ import {
   applySupplementNotificationControlAction,
   applySupplementScheduleAction,
   cancelSupplementAbsenceSourceAction,
-  passSupplementTaskAction,
   requestSupplementScheduleAction
 } from "../domains/supplements/supplementTaskActions.js";
 import { createSupplementTaskContentSaveHandler } from "../domains/supplements/supplementTaskContentSaveController.js";
+import { createSupplementTaskPassHandler } from "../domains/supplements/supplementTaskPassController.js";
 import { SupplementStudentModalShell } from "../domains/supplements/SupplementStudentModalShell.jsx";
 import { useSupplementNotificationControlState } from "../domains/supplements/useSupplementNotificationControlState.js";
 import { useSupplementConfirmationState } from "../domains/supplements/useSupplementConfirmationState.js";
@@ -22675,33 +22675,17 @@ function SupplementStudentModal({
     }
   }
 
-  async function handlePassTask(task) {
-    if (!task?.makeupTaskId || hasBusyTask) return;
-    if (task.isLocalDraftTask) {
-      showFeedback("보충 완료 처리 전 저장 필요", "보충 생성 화면에서는 먼저 보충 내용 저장을 눌러 보충 항목을 생성해야 합니다.", "failed");
-      return;
-    }
-    if (task.status === "done") {
-      showFeedback("이미 보충 완료 처리됨", "이미 완료된 보충 항목입니다. 목록에서 새로고침 후에도 제외됩니다.");
-      return;
-    }
-    const taskWithDraft = createPersistableSupplementTask(buildTaskWithDraft(task));
-    beginTaskAction(task.makeupTaskId, "pass");
-    try {
-      await passSupplementTaskAction({
-        onClose: () => onClose?.(),
-        onFeedback: ({ message, title, tone }) => showFeedback(title, message, tone),
-        onResetConfirmation: closePassConfirmation,
-        passTask: (payload) => onPassTask?.(payload),
-        studentName: student.name,
-        taskWithDraft
-      });
-    } catch (error) {
-      console.error("Failed to pass supplement task", error);
-    } finally {
-      finishTaskAction();
-    }
-  }
+  const handlePassTask = createSupplementTaskPassHandler({
+    beginTaskAction,
+    buildTaskWithDraft,
+    closePassConfirmation,
+    finishTaskAction,
+    hasBusyTask,
+    onClose,
+    onPassTask,
+    showFeedback,
+    studentName: student.name
+  });
 
   function confirmPassTask() {
     if (!passConfirmTask) return;

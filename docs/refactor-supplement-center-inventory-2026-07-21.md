@@ -241,6 +241,14 @@
 - 실제 저장과 새로고침은 12R-4 고태영 사람 gate에서 이미 통과한 동일 action 경계다. 이번에는 얇은 adapter만 이동했으므로 사용자 지시에 따라 새 운영 데이터를 만들지 않고 AI gate로 통과했다.
 - 다음은 완료 처리 modal adapter 한 단위다. 새 사람 검수가 필요하면 독립 `재시험` 탭이 아닌 `숙제보충` 또는 `결석보강`에서 볼 수 있는 격리 고태영 데이터를 사용한다.
 
+## 12R-22 구현 결과 — 보충 완료 처리 modal adapter
+
+- task ID/전체 busy guard, 저장 전 local draft와 이미 완료된 task 차단, persistable payload, `pass` busy 시작, 12R-5 완료 action 호출, 오류 log와 `finally` 해제를 `createSupplementTaskPassHandler`로 분리했다.
+- 실제 완료 저장·Supabase 재조회·React 목록 갱신·학생 11시 job 취소는 App이 전달하는 `onPassTask` callback에 남겼고, controller에는 직접 API·`notification_jobs`·Solapi와 저장·일정·개별 예약취소 callback이 없다.
+- 성공·4종 guard·실패 시 확인창/모달 유지 fixture와 production scenario `88b-37`, production 403/403, build, diff 검사를 통과했다.
+- 사용자가 앞서 완료 처리·새로고침을 정상 확인한 동일 action 경계이며 이번에는 얇은 adapter만 이동했다. 새 운영 데이터나 Solapi 호출 없이 AI gate로 통과했다.
+- 다음은 일정 생성·변경 modal adapter 한 단위다. 12R-7의 실제 일정·예약 gate와 동일 callback 경계인지 먼저 대조한다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.

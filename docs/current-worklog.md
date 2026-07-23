@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-22 보충 완료 처리 modal adapter 분리 — AI gate 통과
+
+- 코드: `SupplementStudentModal` 안의 보충 완료 처리 handler를 `createSupplementTaskPassHandler`로 `supplementTaskPassController.js`에 이동했다.
+- 동작 보존: task ID/전체 busy guard, 아직 저장하지 않은 생성 draft 차단, 이미 완료된 task 차단, persistable local draft payload, `pass` busy 시작, 기존 `passSupplementTaskAction` 호출, 오류 log, `finally` busy 해제 순서를 그대로 유지한다.
+- 저장 원천/side effect: 실제 task 완료 저장·Supabase 재조회·React 목록 갱신·학생 11시 예약 취소는 App이 전달하는 `onPassTask` callback에 남는다. controller에는 직접 API, Supabase, `notification_jobs`, Solapi 호출과 저장·일정·개별 예약취소 callback이 없다.
+- 자동검증: 성공 시 action→feedback→확인창 reset→모달 close→busy 해제, busy/ID/local draft/done guard, 실패 시 확인창·모달 유지와 log/finally fixture를 `npm run test:production`에 연결했다. production scenario `88b-37`, production 403/403, build, `git diff --check`가 통과했고 기존 대형 chunk 경고만 남았다.
+- gate 판정: 사용자가 앞서 완료 처리와 새로고침을 정상 확인한 동일 action 경계이고 이번에는 그 action을 호출하는 얇은 adapter만 이동했다. 사용자 지시에 따라 새 운영 데이터를 만들지 않고 AI gate로 통과했다. notification/Solapi 호출과 과금은 0건이다.
+- 다음 경계: 일정 생성·변경 modal adapter 한 단위만 분리한다. 12R-7에서 일정 저장과 실제 예약 결과까지 검수한 범위로 AI 판정 가능한지 먼저 확인한다.
+
 ## 2026-07-23 P1. 12R-21 보충 내용 저장 modal adapter 분리 — AI gate 통과
 
 - 코드: `SupplementStudentModal` 안의 보충 내용 저장 handler를 `createSupplementTaskContentSaveHandler`로 `supplementTaskContentSaveController.js`에 이동했다.
