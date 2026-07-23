@@ -61,6 +61,7 @@ import {
   reserveNoticeJobRequest
 } from "../domains/notifications/notificationNoticeApi.js";
 import {
+  cancelNoticeJobAction,
   deleteNoticeJobAction,
   polishNoticeMessageAction,
   reconcileNoticeResultsAction,
@@ -10496,31 +10497,19 @@ function NotificationCenter({
   }
 
   async function cancelNotificationJob(job) {
-    if (!canCancelNotificationJob(job) || deletingJobId) return;
-    if (typeof window !== "undefined" && !window.confirm("이 알림톡 예약 1건을 취소할까요? Solapi 실제 예약도 함께 취소하며, 취소 이력은 남습니다.")) return;
-    setDeletingJobId(job.notificationJobId);
-    setNotificationJobAction({ message: "Solapi 실제 예약과 Academy OS 기록을 함께 취소하는 중입니다.", state: "saving" });
-    try {
-      if (!onCancelNotificationJob) throw new Error("Solapi 실제 예약 취소 경로가 연결되어 있지 않습니다.");
-      const result = await onCancelNotificationJob(job, "알림관리에서 예약 취소");
-      if (!result?.notificationJob || result.notificationJob.status !== "canceled") {
-        throw new Error("OS 취소 상태를 확인하지 못했습니다.");
-      }
-      upsertLocalNoticeJob(result.notificationJob);
-      setNotificationJobAction({
-        message: result.solapiCancellation
-          ? "Solapi 실제 예약과 Academy OS 기록을 함께 취소했습니다."
-          : "Academy OS 예약을 취소했습니다. Solapi 예약 그룹이 없는 알림입니다.",
-        state: "saved"
-      });
-      setJobFilter("draft");
-      setIsNoticeHistoryOpen(true);
-      refreshNoticeJobsInBackground();
-    } catch (error) {
-      setNotificationJobAction({ message: `알림톡 예약 취소 실패: ${error.message}`, state: "failed" });
-    } finally {
-      setDeletingJobId("");
-    }
+    return cancelNoticeJobAction({
+      canCancelJob: canCancelNotificationJob,
+      cancelJob: onCancelNotificationJob,
+      confirmAction: (message) => typeof window === "undefined" || window.confirm(message),
+      deletingJobId,
+      job,
+      refreshJobs: refreshNoticeJobsInBackground,
+      setDeletingJobId,
+      setIsHistoryOpen: setIsNoticeHistoryOpen,
+      setJobAction: setNotificationJobAction,
+      setJobFilter,
+      upsertLocalJob: upsertLocalNoticeJob
+    });
   }
 
   return (

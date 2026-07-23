@@ -14,7 +14,7 @@
 
 11B-1 코드 이동 후 학생 일정·학부모 일정·학생 11시의 OS row/Solapi 그룹 예약·취소 대조는 반 미지정 고태영 테스트 학생과 사용자 통제 번호로 통과했습니다. 학생 포털 실제 쓰기 검수, 교사 bearer/Storage 소유권 보안 gate, Solapi 특강 템플릿 외부 검수는 별도 보류 상태입니다.
 
-App.jsx 보충관리 리팩터링은 `12R-37`에서 `SupplementCenter` 본체를 전용 파일로 이동해 로드맵 12 `supplement center/modals`의 App 본체 분리를 완료했다. 알림센터는 13A-1~5 표시, 13B-1 기록·13B-2 수신자 모델, 13C-1 builder, 13C-2 request adapter를 분리했다. 13C-3 즉시발송, 13C-4 예약, 13C-5 Solapi 결과 대조, 13C-6~7 AI 수정, 13C-8 삭제 request adapter에 이어 13C-9에서 삭제 가능/confirm/문구/busy/request/refresh/finally를 `deleteNoticeJobAction`으로 옮기고 mock fixture와 production scenario 437/437로 AI gate를 통과했다. 실제 학생/반 원천과 local 선택/초안/filter/open state, selection 정리 effect, Solapi 취소·특강관리 handler는 App에 남는다. 다음은 실제 취소 callback은 그대로 둔 채 Solapi 취소 UI action을 injected action으로 분리 가능한지 inventory한다. fixture로 검증 가능한 단위에는 재시험 등 운영 데이터를 만들지 않는다.
+App.jsx 보충관리 리팩터링은 `12R-37`에서 `SupplementCenter` 본체를 전용 파일로 이동해 로드맵 12 `supplement center/modals`의 App 본체 분리를 완료했다. 알림센터는 13A-1~5 표시, 13B-1 기록·13B-2 수신자 모델, 13C-1 builder, 13C-2 request adapter를 분리했다. 13C-3 즉시발송, 13C-4 예약, 13C-5 Solapi 결과 대조, 13C-6~7 AI 수정, 13C-8 삭제 request adapter, 13C-9 삭제 action에 이어 13C-10에서 취소 guard/confirm/callback 결과/local 반영/filter/history/refresh/finally를 `cancelNoticeJobAction`으로 옮기고 mock fixture와 production scenario 438/438로 AI gate를 통과했다. 실제 Supabase/Solapi 취소 orchestration은 callback 경계에 남고, 학생/반 원천과 local 선택/초안/filter/open state, selection 정리 effect, 특강관리 handler는 App이 소유한다. 다음은 background 발송 기록 refresh 오류 처리, 공지 template/config, local selection helper를 낮은 위험도부터 분리한다. fixture로 검증 가능한 단위에는 재시험 등 운영 데이터를 만들지 않는다.
 
 ## 시험분석 GPT Image 전용 세션 참고 자료
 
@@ -338,7 +338,7 @@ App.jsx 리팩터링 18개 기준 로드맵:
 - 7번 `school calendar helpers` 분리 완료.
 - 8번 `school calendar components` 분리 완료.
 - 9번 `test manager` 완료: `src/domains/tests/testManagerUtils.js`와 `TestManagerPanels.jsx`에 탭/header/form grid/meta/table/action/recent session list/student history panel 분리 완료.
-- 12번 `supplement center/modals` App 본체 분리 완료. 13번 `notification center`는 13A-1~5 표시, 13B-1 기록·13B-2 수신자 모델, 13C-1 builder·13C-2 request adapter·13C-3 즉시발송 action·13C-4 예약 action·13C-5 결과 reconcile action·13C-6~7 AI 수정·13C-8 삭제 request adapter·13C-9 삭제 action까지 완료했고, 다음은 Solapi 취소 UI action 경계 재평가입니다.
+- 12번 `supplement center/modals` App 본체 분리 완료. 13번 `notification center`는 13A-1~5 표시, 13B-1 기록·13B-2 수신자 모델, 13C-1 builder·13C-2 request adapter·13C-3 즉시발송 action·13C-4 예약 action·13C-5 결과 reconcile action·13C-6~7 AI 수정·13C-8 삭제 request adapter·13C-9 삭제 action·13C-10 Solapi 취소 UI action까지 완료했고, 다음은 background refresh 오류 처리와 공지 local/config 경계입니다.
 - 확인된 후속 이슈: 학생 포털 `비밀번호 변경`은 callback/API 없는 기존 미연결 UI입니다. 이번 리팩터링에서는 보존했고 오작동 버튼 정리에서 별도 결정합니다.
 - 실제 최신 커밋은 새 세션에서 반드시 `git log -1 --oneline`으로 다시 확인하세요.
 
