@@ -72,7 +72,10 @@ import {
 } from "../domains/notifications/NotificationCenterNavigation.jsx";
 import {
   createNotificationHistoryViewModel,
-  createNotificationRecipientViewModel
+  createNotificationRecipientViewModel,
+  filterNoticeSelectedStudentIds,
+  selectAllNoticeStudentIds,
+  toggleNoticeSelectedStudentId
 } from "../domains/notifications/notificationCenterModel.js";
 import {
   getNotificationJobLabel,
@@ -11715,7 +11718,9 @@ function NotificationCenter({
   }[solapiResultSyncState.state] ?? "idle";
 
   useEffect(() => {
-    setSelectedStudentIds((current) => current.filter((studentId) => classFilteredStudents.some((student) => student.studentId === studentId)));
+    setSelectedStudentIds((current) =>
+      filterNoticeSelectedStudentIds(current, classFilteredStudents)
+    );
   }, [classFilteredStudents]);
 
   function studentName(studentId, payload) {
@@ -11724,14 +11729,12 @@ function NotificationCenter({
 
   function toggleStudentSelection(studentId) {
     setSelectedStudentIds((current) =>
-      current.includes(studentId)
-        ? current.filter((item) => item !== studentId)
-        : [...current, studentId]
+      toggleNoticeSelectedStudentId(current, studentId)
     );
   }
 
   function selectAllVisibleStudents() {
-    setSelectedStudentIds(searchableStudents.map((student) => student.studentId));
+    setSelectedStudentIds(selectAllNoticeStudentIds(searchableStudents));
   }
 
   function clearSelectedStudents() {

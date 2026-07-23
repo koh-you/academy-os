@@ -11,6 +11,28 @@ export function isNoticeWithdrawnStudent(student = {}) {
   return ["paused", "withdrawn"].includes(student.status ?? "active") || Boolean(student.withdrawnAt);
 }
 
+export function filterNoticeSelectedStudentIds(
+  selectedStudentIds = [],
+  classFilteredStudents = []
+) {
+  return selectedStudentIds.filter((studentId) =>
+    classFilteredStudents.some((student) => student.studentId === studentId)
+  );
+}
+
+export function toggleNoticeSelectedStudentId(
+  selectedStudentIds = [],
+  studentId
+) {
+  return selectedStudentIds.includes(studentId)
+    ? selectedStudentIds.filter((item) => item !== studentId)
+    : [...selectedStudentIds, studentId];
+}
+
+export function selectAllNoticeStudentIds(students = []) {
+  return students.map((student) => student.studentId);
+}
+
 export function createNotificationRecipientViewModel({
   classFilter = "all",
   classTemplates = [],
