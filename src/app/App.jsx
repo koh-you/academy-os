@@ -20,6 +20,10 @@ import {
   normalizeExamReviewDraftText,
   setExamReviewSectionValue
 } from "../domains/exams/examReviewDraft.js";
+import {
+  buildExamReviewPolishPayload,
+  polishExamReviewRequest
+} from "../domains/exams/examReviewApi.js";
 import { createExamReviewDraftSaveController } from "../domains/exams/examReviewDraftSaveController.js";
 import { StudentManager } from "../domains/students/StudentManager.jsx";
 import { ParentPortal } from "../domains/portals/ParentPortal.jsx";
@@ -18303,30 +18307,22 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
   async function polishReview() {
     onUpdateRow(row.examPrepId, "reviewAiStatus", "AI 수정 중");
     try {
-      const response = await fetch(apiUrl("/api/ai/comment-polish"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const result = await polishExamReviewRequest({
+        fetchImpl: fetch,
+        resolveApiUrl: apiUrl,
+        payload: buildExamReviewPolishPayload({
           aiProvider: commentAiProvider,
           aiModel: commentAiModel,
           aiPrompt: getAiPrompt(aiSettings, "examReviewSpelling"),
-          audience: "teacher",
           grade: row.grade,
-          homeworkStatus: "시험 후 총평",
           lessonDate: row.mathExamDate || row.examPeriod || today,
           lessonName: `${row.schoolName} ${row.subject} 시험 총평`,
-          polishMode: "spellingOnly",
           rawText: reviewDraft,
-          schoolName: row.schoolName,
-          studentName: "시험관리"
+          schoolName: row.schoolName
         })
       });
-      const result = await response.json();
-      if (!response.ok || !result.ok) {
-        throw new Error(result.error || "시험 후 총평 AI 수정에 실패했습니다.");
-      }
-      onUpdateRow(row.examPrepId, "revisedReview", result.result.polishedText);
-      onUpdateRow(row.examPrepId, "reviewAiStatus", `완료 · ${result.result.provider}`);
+      onUpdateRow(row.examPrepId, "revisedReview", result.polishedText);
+      onUpdateRow(row.examPrepId, "reviewAiStatus", `완료 · ${result.provider}`);
     } catch (error) {
       onUpdateRow(row.examPrepId, "reviewAiStatus", `실패 · ${error.message}`);
     }
