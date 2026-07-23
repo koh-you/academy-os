@@ -8,6 +8,7 @@
 - 저장 원천/완료 계약: 버튼의 기존 `special_lecture_enrollments 저장·재조회 대조 -> 안전한 미래 lessons.studentIds/specialLectureStudentSchedules 반영·재조회 대조` 2단계 계약은 그대로다. 두 원천이 모두 일치해야 완료이며, 지난 회차·완료 수업·수업기록 또는 대기 알림이 있는 잠긴 회차는 자동 변경하지 않고 부분 실패/확인 필요 상태로 남긴다.
 - 부작용 경계: 고정 바는 새 저장 동작을 추가하지 않는다. 특강 취소, 출결·수업기록, `notification_jobs`, Solapi 예약·발송·취소, Tally 원본을 실행하거나 변경하지 않는다. `닫기`는 저장으로 간주하지 않고 기존 모달 닫기 동작만 수행한다.
 - AI 검증: 기존 2단계 저장·재조회·잠금 검사를 유지한 채 UI 계약만 공통 `StickySaveBar` 기준으로 갱신했다. `git diff --check`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 369건, `npm run build`를 통과했다. 실제 모달 스크롤 컨테이너와 `App.css`를 사용한 Chrome fixture에서 데스크톱 1280×720, 모바일 390×844의 첫 화면·중간·맨 아래 모두 바 전체와 두 버튼이 viewport 안에 유지되는 것을 좌표와 스크린샷으로 확인했다. 모바일의 긴 실행 버튼은 두 줄로 접혀 넘침을 막았고 기존 Vite chunk size 경고만 남았다.
+- 배포 확인: 기능 커밋 `c8064960`을 `origin/main`에 푸시했고 운영 프론트가 JS `/assets/main-DMtIPBWz.js`, CSS `/assets/main-BsYTJ2b3.css`로 전환된 뒤 `.specialLecturePlanStickySaveBar`, 공통 저장 바 구조, `회차 계획 및 미래 수업일지 반영` 문구가 포함된 것을 확인했다.
 - 사람 gate: 운영에서 테스트 가능한 특강 학생의 `회차·진행 관리`를 열어 ① 긴 회차 목록을 중간과 하단까지 스크롤해도 바가 따라오는지, ② 회차 시간을 바꾸면 `변경됨` 상태가 보이는지, ③ `회차 계획 및 미래 수업일지 반영` 후 `1/2 -> 2/2 -> 저장 완료`가 표시되는지, ④ 모달을 닫고 새로고침한 뒤 회차 계획과 안전한 미래 수업일지 시간이 모두 유지되는지 확인한다. ⑤ 잠긴 회차가 있으면 자동 덮어쓰지 않고 확인 필요로 구분되며, 저장만으로 알림톡·Solapi·취소·출결 상태가 바뀌지 않아야 한다.
 - 중단 조건: enrollment만 저장됐는데 전체 완료 표시, 미래 수업일지 재조회 불일치인데 완료 표시, 잠긴 회차 자동 변경, 실패 후 draft 소실, 스크롤 시 바 이탈, 모바일 버튼 잘림, 저장만으로 알림톡/Solapi/취소/출결 변화. 이 gate 통과 전 시험분석 검수·산출물 적용으로 넘어가지 않는다.
 
