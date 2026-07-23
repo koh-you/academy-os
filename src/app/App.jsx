@@ -55,6 +55,7 @@ import {
   createNotificationHistoryViewModel,
   createNotificationRecipientViewModel,
   filterNoticeSelectedStudentIds,
+  resolveNotificationStudentName,
   selectAllNoticeStudentIds,
   toggleNoticeSelectedStudentId,
   upsertLocalNoticeJobList
@@ -10256,7 +10257,11 @@ function NotificationCenter({
   }, [classFilteredStudents]);
 
   function studentName(studentId, payload) {
-    return payload?.studentName || students.find((student) => student.studentId === studentId)?.name || "학생";
+    return resolveNotificationStudentName({
+      payload,
+      studentId,
+      students
+    });
   }
 
   function toggleStudentSelection(studentId) {

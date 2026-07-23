@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13D-7 알림 기록 학생 이름 fallback model 분리 — AI gate 통과
+
+- 코드: 알림 기록의 학생 표시 이름을 `payload.studentName -> 현재 students 원천의 name -> 학생` 순서로 해석하는 계산을 `notificationCenterModel.js`의 `resolveNotificationStudentName`으로 이동했다. App은 기존 history callback에서 payload·studentId·students만 주입한다.
+- 동작 보존: 발송 당시 payload 이름을 현재 학생 이름보다 우선하고, payload 이름이 없을 때만 같은 studentId의 현재 이름을 사용하며, 학생 row까지 찾지 못하면 `학생`으로 표시하는 기존 fallback을 그대로 유지했다.
+- 저장 원천/side effect: payload와 현재 학생 배열을 읽어 문자열 하나만 반환한다. local state 변경, API/Supabase 조회·저장, notification job 변경, Solapi 발송·예약 side effect가 없다.
+- 자동검증: payload 우선, 현재 학생 fallback, 미확인 학생 fallback의 세 경로를 `test:notification-center-model` equality fixture로 고정했다. production scenario 446/446와 build, `git diff --check`가 통과했다.
+- gate 판정: 세 입력 우선순위를 순수 fixture로 모두 재현할 수 있어 재시험/고태영 운영 데이터나 사람 화면 검수가 필요하지 않은 AI gate다.
+- 다음 경계: 수신 대상 카드가 학생/학부모 번호를 고르는 단순 accessor를 같은 순수 model 경계로 이동할지 확인한다. 실제 발송 handler와 특강 안내문 적용은 계속 건드리지 않는다.
+
 ## 2026-07-23 P1. 13D-6 알림센터 composer 파생 model 분리 — AI gate 통과
 
 - 코드: 제목·본문에서 최종 `noticeText`, 한국 날짜·시간 입력에서 ISO `scheduledAt`, Solapi 결과 대조 대상의 중복 없는 job ID 배열, 마지막 확인 시각 label을 `notificationCenterModel.js`의 `createNotificationComposerViewModel`로 이동했다. App은 현재 local state·결과 대상과 기존 시간 formatter를 주입한다.

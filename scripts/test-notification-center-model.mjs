@@ -4,6 +4,7 @@ import {
   createNotificationHistoryViewModel,
   createNotificationRecipientViewModel,
   filterNoticeSelectedStudentIds,
+  resolveNotificationStudentName,
   selectAllNoticeStudentIds,
   toggleNoticeSelectedStudentId,
   upsertLocalNoticeJobList
@@ -158,6 +159,34 @@ assert.deepEqual(
     solapiResultLastCheckedLabel: "아직 없음",
     solapiResultSyncTargetIds: []
   }
+);
+
+const notificationStudents = [
+  { studentId: "student-a", name: "현재 이름" }
+];
+assert.equal(
+  resolveNotificationStudentName({
+    payload: { studentName: "발송 당시 이름" },
+    studentId: "student-a",
+    students: notificationStudents
+  }),
+  "발송 당시 이름"
+);
+assert.equal(
+  resolveNotificationStudentName({
+    payload: {},
+    studentId: "student-a",
+    students: notificationStudents
+  }),
+  "현재 이름"
+);
+assert.equal(
+  resolveNotificationStudentName({
+    payload: null,
+    studentId: "missing-student",
+    students: notificationStudents
+  }),
+  "학생"
 );
 
 const futureAt = "2026-08-01T09:00:00.000Z";
