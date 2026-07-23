@@ -65,6 +65,11 @@ import {
   persistFailedNotificationJobRequest,
   reserveNotificationJobRequest
 } from "../domains/notifications/notificationJobApi.js";
+import {
+  NotificationCenterHeader,
+  NotificationSectionTabs,
+  NoticeWorkspaceTabs
+} from "../domains/notifications/NotificationCenterNavigation.jsx";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import {
   createCanceledAbsenceMakeupTask,
@@ -12193,73 +12198,20 @@ function NotificationCenter({
 
   return (
     <section className={compactPageHeader ? "notificationCenterPage compactPageHeader" : "notificationCenterPage"}>
-      <PageHeader
-        actions={(
-          <button className="softButton" disabled={isNotificationJobsLoading} onClick={() => refreshHistoryForDate()} type="button">
-            {isNotificationJobsLoading ? "기록 불러오는 중" : "기록 새로고침"}
-          </button>
-        )}
-        description={pageDescription}
-        title={pageTitle}
+      <NotificationCenterHeader
+        notificationJobsStatus={notificationJobsStatus}
+        onRefresh={() => refreshHistoryForDate()}
+        pageDescription={pageDescription}
+        pageTitle={pageTitle}
       />
-      {["loading", "failed"].includes(notificationJobsStatus?.state) ? (
-        <EmptyState
-          action={notificationJobsStatus.state === "failed" ? (
-            <button className="softButton compact" onClick={() => refreshHistoryForDate()} type="button">다시 시도</button>
-          ) : null}
-          aria-busy={isNotificationJobsLoading ? "true" : undefined}
-          aria-live="polite"
-          className="inlineNotice notificationJobsStatusNotice"
-          role={notificationJobsStatus.state === "failed" ? "alert" : "status"}
-          title={notificationJobsStatus.message || (isNotificationJobsLoading ? "알림 기록을 불러오는 중입니다." : "알림 기록을 불러오지 못했습니다.")}
-          tone={notificationJobsStatus.state === "failed" ? "error" : "loading"}
-        />
-      ) : null}
-      {showSpecialLectureTab && !hideNotificationSectionTabs ? (
-      <WorkspaceTabs className="notificationSectionTabs" label="알림관리 영역 선택">
-        <button
-          aria-selected={activeNotificationTab === "notice"}
-          className={activeNotificationTab === "notice" ? "active" : ""}
-          onClick={() => setActiveNotificationTab("notice")}
-          role="tab"
-          type="button"
-        >
-          공지 발송
-        </button>
-        <button
-          aria-selected={activeNotificationTab === "specialLecture"}
-          className={activeNotificationTab === "specialLecture" ? "active" : ""}
-          onClick={() => setActiveNotificationTab("specialLecture")}
-          role="tab"
-          type="button"
-        >
-          특강 안내문
-        </button>
-      </WorkspaceTabs>
-      ) : null}
-
-      {activeNotificationTab === "specialLecture" && hideNotificationSectionTabs ? (
-        <WorkspaceTabs className="notificationSectionTabs specialLectureTopTabs" label="특강관리 작업 구분">
-          <button
-            aria-selected={activeSpecialLectureWorkspaceTab === "roster"}
-            className={activeSpecialLectureWorkspaceTab === "roster" ? "active" : ""}
-            onClick={() => setActiveSpecialLectureWorkspaceTab("roster")}
-            role="tab"
-            type="button"
-          >
-            특강 수업
-          </button>
-          <button
-            aria-selected={activeSpecialLectureWorkspaceTab === "guide"}
-            className={activeSpecialLectureWorkspaceTab === "guide" ? "active" : ""}
-            onClick={() => setActiveSpecialLectureWorkspaceTab("guide")}
-            role="tab"
-            type="button"
-          >
-            특강 안내문
-          </button>
-        </WorkspaceTabs>
-      ) : null}
+      <NotificationSectionTabs
+        activeNotificationTab={activeNotificationTab}
+        activeSpecialLectureWorkspaceTab={activeSpecialLectureWorkspaceTab}
+        hideNotificationSectionTabs={hideNotificationSectionTabs}
+        onSelectNotificationTab={setActiveNotificationTab}
+        onSelectSpecialLectureWorkspaceTab={setActiveSpecialLectureWorkspaceTab}
+        showSpecialLectureTab={showSpecialLectureTab}
+      />
 
       {activeNotificationTab === "specialLecture" ? (
         <SpecialLectureNoticePanel
@@ -12286,35 +12238,18 @@ function NotificationCenter({
         />
       ) : (
         <>
-      <WorkspaceTabs className="notificationSectionTabs noticeWorkspaceTabs" label="알림관리 작업 구분">
-        <button
-          aria-selected={activeNoticeWorkspace === "compose"}
-          className={activeNoticeWorkspace === "compose" ? "active" : ""}
-          onClick={() => setActiveNoticeWorkspace("compose")}
-          role="tab"
-          type="button"
-        >
-          개별 발송
-        </button>
-        {[
-          ["parent_context", "학부모 응대", parentResponseContextCount],
-          ["scheduled", "예약", scheduledJobs.length],
-          ["sent", "발송 완료", sentJobs.length],
-          ["pending", "확인 필요", pendingJobs.length],
-          ["all", "전체 기록", managedNotificationJobs.length]
-        ].map(([id, label, count]) => (
-          <button
-            aria-selected={id === "parent_context" ? activeNoticeWorkspace === "parent_context" : activeNoticeWorkspace === "history" && jobFilter === id}
-            className={id === "parent_context" ? activeNoticeWorkspace === "parent_context" ? "active" : "" : activeNoticeWorkspace === "history" && jobFilter === id ? "active" : ""}
-            key={id}
-            onClick={() => id === "parent_context" ? setActiveNoticeWorkspace("parent_context") : selectJobFilter(id)}
-            role="tab"
-            type="button"
-          >
-            {label} {count}건
-          </button>
-        ))}
-      </WorkspaceTabs>
+      <NoticeWorkspaceTabs
+        activeNoticeWorkspace={activeNoticeWorkspace}
+        jobFilter={jobFilter}
+        managedCount={managedNotificationJobs.length}
+        onSelectCompose={() => setActiveNoticeWorkspace("compose")}
+        onSelectJobFilter={selectJobFilter}
+        onSelectParentContext={() => setActiveNoticeWorkspace("parent_context")}
+        parentContextCount={parentResponseContextCount}
+        pendingCount={pendingJobs.length}
+        scheduledCount={scheduledJobs.length}
+        sentCount={sentJobs.length}
+      />
       {activeNoticeWorkspace === "compose" ? (
       <section className="notificationPanel noticeComposerPanel">
         <SectionHeader
