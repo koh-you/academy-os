@@ -54,12 +54,18 @@
 - 새 파일에는 React state/effect와 fetch/postJson이 없고 Supabase/app_state/lessons/AI/Storage를 직접 참조하지 않는다.
 - production scenario 466/466, build, `git diff --check`를 통과했다. 운영 데이터와 외부 요청은 없었으므로 추가 사람 gate는 없다.
 
+## 14A-2 기출문제 표시 panel
+
+- 완료: 기출문제 toolbar, 다시 불러오기, 새 창 링크, loading 표시, iframe과 도움말을 `ExamPrepPastPaperPanel.jsx`로 이동했다.
+- App은 고정 archive URL, frame key/load state와 reload/load callback을 계속 소유한다.
+- 새 panel에는 state/effect/fetch/postJson이 없고 Google Apps Script iframe을 전달받은 URL로 표시할 뿐이다.
+- production scenario 467/467, build, `git diff --check`를 통과했다. 외부 iframe 실제 접속이나 사람 화면 gate는 필요하지 않았다.
+
 ## 이후 후보와 중단 조건
 
-1. 기출문제 iframe 표시 panel
-2. 목록 filter/선택 row/save-state 파생 model
-3. 시험 후 제출 teacher 표시 shell
-4. 시험 후 총평 draft/action
-5. 시험정보 저장·삭제·수업 reconcile orchestration
+1. 목록 filter/선택 row/save-state 파생 model
+2. 시험 후 제출 teacher 표시 shell
+3. 시험 후 총평 draft/action
+4. 시험정보 저장·삭제·수업 reconcile orchestration
 
 학생 제출·교사 확인·Storage 파일 열기 경계를 건드리면 기존 학생 포털 실제 쓰기와 bearer/Storage gate에서 중단한다. 시험정보 삭제나 시험대비 수업 생성·삭제를 옮길 때는 별도의 격리 데이터와 사람 gate가 필요하다. 순수 표시/model 단위는 deterministic fixture와 production test/build로 검증하고 운영 데이터를 만들지 않는다.

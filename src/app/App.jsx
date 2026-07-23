@@ -8,6 +8,7 @@ import {
 } from "../domains/exams/finalPreview.js";
 import { ExamAnalysisFinalPreviewPanel } from "../domains/exams/ExamAnalysisFinalPreviewPanel.jsx";
 import { ExamPrepEditModal } from "../domains/exams/ExamPrepEditModal.jsx";
+import { ExamPrepPastPaperPanel } from "../domains/exams/ExamPrepPastPaperPanel.jsx";
 import { StudentManager } from "../domains/students/StudentManager.jsx";
 import { ParentPortal } from "../domains/portals/ParentPortal.jsx";
 import { calculateAttendanceStats } from "../domains/portals/StudentMyPageTab.jsx";
@@ -18429,44 +18430,16 @@ function ExamPrepCenter({
       ) : null}
 
       {activeTab === "pastPapers" ? (
-        <section className="pastPaperFramePanel">
-          <div className="pastPaperToolbar">
-            <div>
-              <h2>기출문제 아카이브</h2>
-              <p className="muted">외부 Google Apps Script 웹앱을 academy-os 안에서 엽니다.</p>
-            </div>
-            <div className="pastPaperActions">
-              <button
-                className="softButton"
-                onClick={() => {
-                  setPastPaperLoadState("loading");
-                  setPastPaperFrameKey((current) => current + 1);
-                }}
-                type="button"
-              >
-                다시 불러오기
-              </button>
-              <a className="softButton" href={pastPaperArchiveUrl} rel="noreferrer" target="_blank">
-                새 창에서 열기
-              </a>
-            </div>
-          </div>
-          <div className="pastPaperFrameWrap">
-            {pastPaperLoadState === "loading" ? (
-              <div className="pastPaperLoading">기출문제 아카이브를 불러오는 중입니다.</div>
-            ) : null}
-            <iframe
-              className="pastPaperFrame"
-              key={pastPaperFrameKey}
-              onLoad={() => setPastPaperLoadState("loaded")}
-              src={pastPaperArchiveUrl}
-              title="으뜸수학 기출아카이브"
-            />
-          </div>
-          <p className="pastPaperHelp">
-            화면이 비어 있으면 Google Apps Script가 iframe 표시를 제한한 상태일 수 있습니다. 이 경우 새 창에서 열기를 사용하세요.
-          </p>
-        </section>
+        <ExamPrepPastPaperPanel
+          archiveUrl={pastPaperArchiveUrl}
+          frameKey={pastPaperFrameKey}
+          loadState={pastPaperLoadState}
+          onFrameLoad={() => setPastPaperLoadState("loaded")}
+          onReload={() => {
+            setPastPaperLoadState("loading");
+            setPastPaperFrameKey((current) => current + 1);
+          }}
+        />
       ) : null}
 
       {reviewModalRow ? (

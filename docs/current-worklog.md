@@ -8,6 +8,14 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 14A-2 기출문제 iframe 표시 분리 — AI gate 통과
+
+- 코드: 기출문제 toolbar·다시 불러오기·새 창 링크·loading·iframe·도움말을 `src/domains/exams/ExamPrepPastPaperPanel.jsx`로 이동했다.
+- 경계: App이 고정 Google Apps Script URL, frame key/load state와 reload/load callback을 계속 소유한다. 새 panel은 전달받은 값을 표시할 뿐 state/effect/fetch/postJson이 없다.
+- 자동검증: 새 파일과 App callback 연결, 기존 문구/iframe title/link, App의 legacy DOM 제거, side effect 부재를 production scenario `70a`로 추가했다. production 467/467, build, `git diff --check`가 통과했다.
+- 사람 gate: 외부 URL·callback·DOM을 바꾸지 않은 표시 이동이며 실제 iframe 접속이나 운영 데이터 검수 없이 AI fixture로 충분하다.
+- 다음: 반·고사·검색에 따른 목록, 선택 row와 aggregate save state를 계산하는 순수 display model 범위를 확인한다.
+
 ## 2026-07-23 P1. 14A-1 시험정보 수정 modal 표시 분리 — AI gate 통과
 
 - 코드: App의 controlled `ExamPrepEditModal`을 `src/domains/exams/ExamPrepEditModal.jsx`로 이동했다. 기본 정보·시험기간·수학 시험 일정·시험 내용·저장 상태·닫기 DOM과 callback 인수를 그대로 보존했다.
