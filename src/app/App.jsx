@@ -23501,24 +23501,20 @@ function SupplementStudentModal({
                     <div>
                       <strong>{followUpTypeLabel(task.taskType)}</strong>
                       <small>{taskMetaParts.join(" · ")}</small>
-                      <span className="taskLinkedLesson draftMode">
-                        수정 중
-                      </span>
-                      {supplementNotificationDraftConfigs.every((config) => String(task[config.field] ?? "").trim()) ? (
-                        <span className="taskLinkedLesson draftReady">
-                          알림톡 문구 3종 저장 완료
-                        </span>
-                      ) : null}
-                      {task.taskType === "absence_makeup" ? (
-                        <small className="taskReasonLine">결석사유: {task.absenceReason || "사유 미입력"}</small>
-                      ) : null}
-                      {task.lastHomeworkId ? <small>최근 보충 숙제: {task.lastHomeworkId}</small> : null}
                       {task.linkedLessonId ? (
-                        <span className="taskLinkedLesson">
-                          수업일지 반영 완료
-                          <b>{task.linkedLessonDate} {task.linkedLessonTime}</b>
-                        </span>
-                      ) : null}
+                        <span className="taskLinkedLesson">수업일지에 반영되었습니다.</span>
+                      ) : (
+                        <>
+                          <span className="taskLinkedLesson draftMode">수정 중</span>
+                          {supplementNotificationDraftConfigs.every((config) => String(task[config.field] ?? "").trim()) ? (
+                            <span className="taskLinkedLesson draftReady">알림톡 문구 3종 저장 완료</span>
+                          ) : null}
+                          {task.taskType === "absence_makeup" ? (
+                            <small className="taskReasonLine">결석사유: {task.absenceReason || "사유 미입력"}</small>
+                          ) : null}
+                          {task.lastHomeworkId ? <small>최근 보충 숙제: {task.lastHomeworkId}</small> : null}
+                        </>
+                      )}
                     </div>
                   </div>
                   {task.taskType === "homework_makeup" ? (
@@ -23671,7 +23667,7 @@ function SupplementStudentModal({
                     <span>보충 내용 저장: 원 숙제 카드와 알림톡 문구 3종을 저장하고, 발송/예약은 만들지 않습니다.</span>
                     <span>{isScheduleChangeMode ? "수업일지 일정 변경" : "수업일지 일정 만들기"}: {scheduleGateBody}</span>
                   </div>
-                  <div className="modalActions supplementSplitActions">
+                  <div className="modalActions supplementSplitActions supplementTaskActions">
                     {canCancelAbsenceSource ? (
                       <button
                         className="dangerSoftButton"
