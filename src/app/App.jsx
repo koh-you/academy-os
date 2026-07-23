@@ -10,6 +10,10 @@ import {
 import { ExamAnalysisFinalPreviewPanel } from "../domains/exams/ExamAnalysisFinalPreviewPanel.jsx";
 import { ExamPrepEditModal } from "../domains/exams/ExamPrepEditModal.jsx";
 import {
+  deleteExamPrepLessonRequest,
+  saveExamPrepLessonsRequest
+} from "../domains/exams/examPrepLessonApi.js";
+import {
   createExamPrepLessonReconcilePlan
 } from "../domains/exams/examPrepLessonReconcilePlan.js";
 import { ExamPrepPastPaperPanel } from "../domains/exams/ExamPrepPastPaperPanel.jsx";
@@ -3899,23 +3903,6 @@ function deleteAcademyReminderFromApi(reminderId) {
 
 function postMakeupTasks(makeupTasks) {
   return postJson("/api/makeup-tasks/bulk", { makeupTasks });
-}
-
-function deleteExamPrepLessonRequest(lessonId, auditId) {
-  return fetch(
-    apiUrl(
-      `/api/lessons?id=${encodeURIComponent(lessonId)}&mode=exam-prep-reconcile&auditId=${encodeURIComponent(auditId)}`
-    ),
-    { method: "DELETE" }
-  ).then(async (response) => {
-    const result = await response.json();
-    if (!response.ok || !result.ok) {
-      const error = new Error(result.error || "시험대비 수업 삭제 실패");
-      error.audit = result.audit;
-      throw error;
-    }
-    return result;
-  });
 }
 
 function deleteExamAnalysisRunRequest(analysisRunId) {
@@ -8271,10 +8258,18 @@ export function App() {
 
   async function applyExamPrepLessonDeletePlan({ auditId, plan }) {
     if (plan.lessonsToSave.length > 0) {
-      await postJson("/api/lessons/bulk", { lessons: plan.lessonsToSave });
+      await saveExamPrepLessonsRequest({
+        lessons: plan.lessonsToSave,
+        request: postJson
+      });
     }
     for (const lessonId of plan.lessonIdsToDelete) {
-      await deleteExamPrepLessonRequest(lessonId, auditId);
+      await deleteExamPrepLessonRequest({
+        auditId,
+        fetchImpl: fetch,
+        lessonId,
+        resolveApiUrl: apiUrl
+      });
     }
   }
 

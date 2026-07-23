@@ -30,8 +30,7 @@ const buildCandidates = () => [
       lessonId: "lesson-same",
       identityKeys: ["identity:same"],
       isExamPrep: true,
-      sourceLabel: "동일",
-      studentIds: []
+      sourceLabel: "동일"
     }
   }
 ];
@@ -49,8 +48,7 @@ const lessons = [
     lessonId: "lesson-same",
     identityKeys: ["identity:same"],
     isExamPrep: true,
-    sourceLabel: "동일",
-    studentIds: []
+    sourceLabel: "동일"
   },
   {
     lessonId: "persisted-delete",
@@ -81,6 +79,13 @@ assert.deepEqual(plan.lessonsToSave, [
     isExamPrep: true,
     sourceLabel: "변경된 범위",
     studentIds: ["persisted-student"]
+  },
+  {
+    lessonId: "lesson-same",
+    identityKeys: ["identity:same"],
+    isExamPrep: true,
+    sourceLabel: "동일",
+    studentIds: []
   }
 ]);
 
