@@ -157,6 +157,6 @@
 
 1. 시험정보 삭제와 연결 수업 reconcile side-effect orchestration
 
-다음 단위 착수 gate: AI가 고정 marker를 가진 삭제 가능한 미래 시험정보 row와 그 row에만 연결된 시험대비 수업을 준비한다. 사용자가 해당 row 하나만 삭제하고 새로고침한 뒤 row와 연결 수업만 사라지고 다른 시험정보·정규수업·시험대비 수업이 유지되며 Supabase 재조회와 일치해야 한다. 하나라도 다르면 14C-3을 중단하고 유지보수 진단으로 넘긴다.
+다음 단위 착수 gate: 2026-07-23 AI가 학생 연결 0건인 `REF-GATE-14C3-TARGET`/`REF-GATE-14C3-CONTROL` 시험정보 row와 각각의 미래 시험대비 수업 4건을 운영 원천에 준비하고 재조회했다. 사용자는 `시험관리`에서 TARGET row만 삭제·확인·새로고침하고 CONTROL은 삭제하지 않는다. 완료 보고 뒤 AI가 TARGET row/수업 4건 삭제, CONTROL row/수업 4건과 기존 정규수업 유지를 Supabase 원천에서 대조하고 CONTROL 테스트 데이터를 정리한다. 하나라도 다르면 14C-3을 중단하고 유지보수 진단으로 넘긴다.
 
 학생 제출·교사 확인·Storage 파일 열기 경계를 건드리면 기존 학생 포털 실제 쓰기와 bearer/Storage gate에서 중단한다. 시험정보 삭제나 시험대비 수업 생성·삭제를 옮길 때는 별도의 격리 데이터와 사람 gate가 필요하다. 순수 표시/model 단위는 deterministic fixture와 production test/build로 검증하고 운영 데이터를 만들지 않는다.

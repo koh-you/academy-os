@@ -18,7 +18,7 @@
 1. `학생 포털 실제 쓰기 검수` — 숙제 완료, 질문 CRUD, 시험 후 제출의 저장·새로고침·재로그인·강사 미리보기 차단·교사 확인을 실제 학생으로 검수한다. 사용자 보류 상태이며 11B 리팩터링과는 별개다.
 2. `교사 bearer session + Storage 소유권 보안 gate` — 교사 API 인증과 시험지 파일 열람 권한을 별도 고위험 작업으로 검증한다. 포털 표시 리팩터링이나 11B와 섞지 않으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 검수 완료 여부를 사용자에게 확인한다. 완료 전에는 템플릿 ID/변수 연결이나 테스트 발송을 진행하지 않으며, 이 리팩터링 세션에서는 완료 여부와 관계없이 연결 작업을 하지 않는다.
-4. `시험정보 삭제·연결 수업 reconcile 사람 gate` — 14C-3 실제 orchestration 이동 전에 AI가 삭제 가능한 미래 시험정보 row와 연결 시험대비 수업을 고정 marker로 준비한다. 사용자는 표시된 row 하나만 `시험관리 > 삭제`하고 새로고침한다. 해당 row와 그 row에만 연결된 시험대비 수업만 사라지고 다른 시험정보·정규수업·다른 시험대비 수업이 유지되며 Supabase 재조회와 일치해야 통과다. 하나라도 다르면 중단하고 원인을 유지보수 세션에 넘긴다. 통과 전에는 낙관적 row 삭제·lesson reconcile·실패 복구 orchestration을 App 밖으로 이동하거나 그 단위를 commit/push하지 않는다.
+4. `시험정보 삭제·연결 수업 reconcile 사람 gate` — 2026-07-23 AI가 학생 연결 0건인 `REF-GATE-14C3-TARGET`/`REF-GATE-14C3-CONTROL` 시험정보 row와 각각의 미래 시험대비 수업 4건을 운영 원천에 준비하고 재조회했다. 사용자는 `시험관리`에서 `REF-GATE-14C3-TARGET` row의 `삭제`만 누르고 확인창을 승인한 뒤 새로고침한다. `CONTROL`은 삭제하지 않는다. TARGET row/수업 4건만 사라지고 CONTROL row/수업 4건과 기존 정규수업이 유지되어야 한다. 사용자 완료 보고 뒤 AI가 Supabase 원천을 재조회해 판정하고 CONTROL 테스트 데이터를 정리한다. 하나라도 다르면 14C-3을 중단하고 원인을 유지보수 세션에 넘긴다. 통과 전에는 낙관적 row 삭제·lesson reconcile·실패 복구 orchestration을 App 밖으로 이동하거나 그 단위를 commit/push하지 않는다.
 
 ## Deferred Work Queue - Always Show First
 
