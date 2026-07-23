@@ -67,8 +67,7 @@ import {
 } from "../domains/notifications/notificationJobApi.js";
 import {
   NotificationCenterHeader,
-  NotificationSectionTabs,
-  NoticeWorkspaceTabs
+  NotificationSectionTabs
 } from "../domains/notifications/NotificationCenterNavigation.jsx";
 import {
   createNotificationComposerViewModel,
@@ -105,8 +104,7 @@ import {
   sendNoticeNowAction
 } from "../domains/notifications/notificationNoticeActions.js";
 import { buildNoticeJob as createNotificationNoticeJob } from "../domains/notifications/notificationNoticeBuilders.js";
-import { NotificationComposeWorkspace } from "../domains/notifications/NotificationComposeWorkspace.jsx";
-import { NotificationHistoryPanel } from "../domains/notifications/NotificationHistoryPanel.jsx";
+import { NotificationNoticeWorkspace } from "../domains/notifications/NotificationNoticeWorkspace.jsx";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import {
   createCanceledAbsenceMakeupTask,
@@ -12018,111 +12016,108 @@ function NotificationCenter({
           students={students}
         />
       ) : (
-        <>
-      <NoticeWorkspaceTabs
-        activeNoticeWorkspace={activeNoticeWorkspace}
-        jobFilter={jobFilter}
-        managedCount={managedNotificationJobs.length}
-        onSelectCompose={() => setActiveNoticeWorkspace("compose")}
-        onSelectJobFilter={selectJobFilter}
-        onSelectParentContext={() => setActiveNoticeWorkspace("parent_context")}
-        parentContextCount={parentResponseContextCount}
-        pendingCount={pendingJobs.length}
-        scheduledCount={scheduledJobs.length}
-        sentCount={sentJobs.length}
-      />
-      {activeNoticeWorkspace === "compose" ? (
-        <NotificationComposeWorkspace
-          composerPanelProps={{
-            dispatchMessage,
-            isPolishingNotice,
-            isSendingNotice,
-            noticeBody,
-            noticeMessageTemplates,
+        <NotificationNoticeWorkspace
+          activeNoticeWorkspace={activeNoticeWorkspace}
+          composeWorkspaceProps={{
+            composerPanelProps: {
+              dispatchMessage,
+              isPolishingNotice,
+              isSendingNotice,
+              noticeBody,
+              noticeMessageTemplates,
+              noticeRecipientCount: noticeRecipients.length,
+              noticeTemplateId,
+              noticeText,
+              noticeTitle,
+              onApplyTemplate: applyNoticeTemplate,
+              onBodyChange: setNoticeBody,
+              onPolishNotice: polishNoticeMessage,
+              onScheduleDateChange: setScheduleDate,
+              onScheduleNotice: scheduleNotice,
+              onScheduleTimeChange: setScheduleTime,
+              onSendNoticeNow: sendNoticeNow,
+              onTitleChange: setNoticeTitle,
+              scheduleDate,
+              scheduledAt,
+              scheduleTime
+            },
             noticeRecipientCount: noticeRecipients.length,
-            noticeTemplateId,
-            noticeText,
-            noticeTitle,
-            onApplyTemplate: applyNoticeTemplate,
-            onBodyChange: setNoticeBody,
-            onPolishNotice: polishNoticeMessage,
-            onScheduleDateChange: setScheduleDate,
-            onScheduleNotice: scheduleNotice,
-            onScheduleTimeChange: setScheduleTime,
-            onSendNoticeNow: sendNoticeNow,
-            onTitleChange: setNoticeTitle,
-            scheduleDate,
-            scheduledAt,
-            scheduleTime
+            recipientPanelProps: {
+              classFilter,
+              classTemplates,
+              getAudiencePhone: getNoticeAudiencePhone,
+              normalizePhoneNumber,
+              noticeRecipientCount: noticeRecipients.length,
+              noticeRecipientMode,
+              noticeWithdrawnClassFilterId,
+              onClassFilterChange: setClassFilter,
+              onClearSelectedStudents: clearSelectedStudents,
+              onNoticeRecipientModeChange: setNoticeRecipientMode,
+              onSearchTextChange: setSearchText,
+              onSelectAllVisibleStudents: selectAllVisibleStudents,
+              onToggleStudentSelection: toggleStudentSelection,
+              parentRecipientCount,
+              searchText,
+              selectedStudentIds,
+              studentRecipientCount,
+              targetAudiences,
+              targetStudentCount: targetStudents.length,
+              visibleStudents: visibleNoticeStudents,
+              withdrawnStudentCount: withdrawnStudents.length
+            }
           }}
-          noticeRecipientCount={noticeRecipients.length}
-          recipientPanelProps={{
-            classFilter,
-            classTemplates,
-            getAudiencePhone: getNoticeAudiencePhone,
-            normalizePhoneNumber,
-            noticeRecipientCount: noticeRecipients.length,
-            noticeRecipientMode,
-            noticeWithdrawnClassFilterId,
-            onClassFilterChange: setClassFilter,
-            onClearSelectedStudents: clearSelectedStudents,
-            onNoticeRecipientModeChange: setNoticeRecipientMode,
-            onSearchTextChange: setSearchText,
-            onSelectAllVisibleStudents: selectAllVisibleStudents,
-            onToggleStudentSelection: toggleStudentSelection,
-            parentRecipientCount,
-            searchText,
-            selectedStudentIds,
-            studentRecipientCount,
-            targetAudiences,
-            targetStudentCount: targetStudents.length,
-            visibleStudents: visibleNoticeStudents,
-            withdrawnStudentCount: withdrawnStudents.length
+          historyPanelProps={{
+            canCancelJob: canCancelNotificationJob,
+            canDeleteJob: canDeleteNotificationJob,
+            canReconcileSolapiResults: Boolean(onReconcileSolapiNotificationResults && solapiResultSyncTargetIds.length),
+            deletingJobId,
+            filteredJobs: filteredNotificationJobs,
+            filterLabel,
+            formatJobStatus: formatNotificationJobStatus,
+            formatTimeLabel: formatKoreaTimeLabel,
+            getJobLabel: getNotificationJobLabel,
+            getProviderReference: getSolapiNotificationJobProviderReference,
+            getStatusClass: getNotificationJobStatusClass,
+            getStatusLabel: getNotificationStatusLabel,
+            historyDate,
+            isHistoryOpen: isNoticeHistoryOpen,
+            isLoading: isNotificationJobsLoading,
+            isShowingAll: jobFilter === "all",
+            notificationJobAction,
+            notificationJobActionOperationState,
+            onCancelJob: cancelNotificationJob,
+            onChangeHistoryDate: changeHistoryDate,
+            onDeleteJob: deleteNotificationJob,
+            onReconcileSolapiResults: reconcileSolapiResultsForNoticeJobs,
+            onShowAll: () => setJobFilter("all"),
+            onToggleHistory: () => setIsNoticeHistoryOpen((current) => !current),
+            solapiResultLastCheckedLabel,
+            solapiResultOperationState,
+            solapiResultSyncState,
+            solapiResultTargetCount: solapiResultTargets.length,
+            studentName
           }}
-        />
-      ) : null}
-      {activeNoticeWorkspace === "parent_context" ? (
-        <ParentResponseContextPanel
-          formatDateTime={formatKoreaTimeLabel}
-          notificationJobs={managedNotificationJobs}
-          onCopy={copyTextToClipboard}
-          students={students}
-        />
-      ) : null}
-      {activeNoticeWorkspace === "history" ? (
-      <NotificationHistoryPanel
-        canCancelJob={canCancelNotificationJob}
-        canDeleteJob={canDeleteNotificationJob}
-        canReconcileSolapiResults={Boolean(onReconcileSolapiNotificationResults && solapiResultSyncTargetIds.length)}
-        deletingJobId={deletingJobId}
-        filteredJobs={filteredNotificationJobs}
-        filterLabel={filterLabel}
-        formatJobStatus={formatNotificationJobStatus}
-        formatTimeLabel={formatKoreaTimeLabel}
-        getJobLabel={getNotificationJobLabel}
-        getProviderReference={getSolapiNotificationJobProviderReference}
-        getStatusClass={getNotificationJobStatusClass}
-        getStatusLabel={getNotificationStatusLabel}
-        historyDate={historyDate}
-        isHistoryOpen={isNoticeHistoryOpen}
-        isLoading={isNotificationJobsLoading}
-        isShowingAll={jobFilter === "all"}
-        notificationJobAction={notificationJobAction}
-        notificationJobActionOperationState={notificationJobActionOperationState}
-        onCancelJob={cancelNotificationJob}
-        onChangeHistoryDate={changeHistoryDate}
-        onDeleteJob={deleteNotificationJob}
-        onReconcileSolapiResults={reconcileSolapiResultsForNoticeJobs}
-        onShowAll={() => setJobFilter("all")}
-        onToggleHistory={() => setIsNoticeHistoryOpen((current) => !current)}
-        solapiResultLastCheckedLabel={solapiResultLastCheckedLabel}
-        solapiResultOperationState={solapiResultOperationState}
-        solapiResultSyncState={solapiResultSyncState}
-        solapiResultTargetCount={solapiResultTargets.length}
-        studentName={studentName}
-      />
-      ) : null}
-        </>
+           noticeWorkspaceTabsProps={{
+             activeNoticeWorkspace,
+             jobFilter,
+             managedCount: managedNotificationJobs.length,
+             onSelectCompose: () => setActiveNoticeWorkspace("compose"),
+             onSelectJobFilter: selectJobFilter,
+             onSelectParentContext: () => setActiveNoticeWorkspace("parent_context"),
+             parentContextCount: parentResponseContextCount,
+             pendingCount: pendingJobs.length,
+             scheduledCount: scheduledJobs.length,
+             sentCount: sentJobs.length
+           }}
+           parentResponseContextPanel={(
+             <ParentResponseContextPanel
+               formatDateTime={formatKoreaTimeLabel}
+               notificationJobs={managedNotificationJobs}
+               onCopy={copyTextToClipboard}
+               students={students}
+             />
+           )}
+         />
       )}
     </section>
   );
