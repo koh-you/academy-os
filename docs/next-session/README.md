@@ -14,7 +14,7 @@
 
 11B-1 코드 이동 후 학생 일정·학부모 일정·학생 11시의 OS row/Solapi 그룹 예약·취소 대조는 반 미지정 고태영 테스트 학생과 사용자 통제 번호로 통과했습니다. 학생 포털 실제 쓰기 검수, 교사 bearer/Storage 소유권 보안 gate, Solapi 특강 템플릿 외부 검수는 별도 보류 상태입니다.
 
-App.jsx 보충관리 리팩터링은 최신 `origin/main`에 rebase한 뒤 `12R-10~20` local state/표시 모델, `12R-21~25` 다섯 실제 action의 modal adapter를 분리했고, `12R-26`에서 local draft 변경과 필드별 저장상태 patch adapter를 `supplementTaskDraftChangeController.js`로 이동했다. 실제 task/lesson/출결 저장·Supabase 재조회·React 전역 갱신·notification/Solapi 작업은 App이 주입하는 callback 경계에 남고 controller에는 직접 API/notification/Solapi 호출이 없다. production 407/407, build를 근거로 AI gate를 통과했다. 다음은 완료·일정 확인창 submit adapter를 분리한 뒤 `SupplementStudentModal` 본체 파일 분리를 검토한다.
+App.jsx 보충관리 리팩터링은 최신 `origin/main`에 rebase한 뒤 `12R-10~20` local state/표시 모델, `12R-21~25` 다섯 실제 action의 modal adapter, `12R-26~27` local draft 변경과 완료·일정 확인창 submit adapter를 분리했다. 실제 task/lesson/출결 저장·Supabase 재조회·React 전역 갱신·notification/Solapi 작업은 App이 주입하는 callback 경계에 남고 controller에는 직접 API/notification/Solapi 호출이 없다. production 408/408, build를 근거로 AI gate를 통과했다. 다음은 `SupplementStudentModal` 본체의 App 전용 helper 의존성을 inventory한 뒤 파일 분리 가능 여부와 검수 gate를 정한다.
 
 ## 시험분석 GPT Image 전용 세션 참고 자료
 

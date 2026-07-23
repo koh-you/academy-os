@@ -62,6 +62,7 @@ import {
   createSupplementTaskCardViewModel
 } from "../domains/supplements/supplementTaskCardModel.js";
 import { createSupplementAbsenceCancelHandler } from "../domains/supplements/supplementAbsenceCancelController.js";
+import { createSupplementConfirmationSubmitHandlers } from "../domains/supplements/supplementConfirmationSubmitController.js";
 import { createSupplementNotificationControlActionHandler } from "../domains/supplements/supplementNotificationControlController.js";
 import { createSupplementTaskContentSaveHandler } from "../domains/supplements/supplementTaskContentSaveController.js";
 import { createSupplementTaskPassHandler } from "../domains/supplements/supplementTaskPassController.js";
@@ -22649,16 +22650,15 @@ function SupplementStudentModal({
     studentName: student.name
   });
 
-  function confirmPassTask() {
-    if (!passConfirmTask) return;
-    handlePassTask(passConfirmTask);
-  }
-
-  function confirmScheduleTask(updateStudentReminder, noticePatch = {}) {
-    const confirmedTask = getConfirmedScheduleTask(updateStudentReminder, noticePatch);
-    if (!confirmedTask) return;
-    handleApplyScheduleTask(confirmedTask);
-  }
+  const {
+    confirmPassTask,
+    confirmScheduleTask
+  } = createSupplementConfirmationSubmitHandlers({
+    getConfirmedScheduleTask,
+    handleApplyScheduleTask,
+    handlePassTask,
+    passConfirmTask
+  });
 
   const notificationControlViewModel = createSupplementNotificationControlModalViewModel({
     notificationControl,
