@@ -324,6 +324,15 @@
 - 순수 derivation을 fixture가 전부 검증하므로 새 운영 데이터나 사람 조작 없이 AI gate로 통과했다.
 - 다음은 숙제보충·결석보강·재시험 후보와 탭 표시 derivation을 순수 모델로 분리할 수 있는지 inventory한다.
 
+## 12R-32 구현 결과 — 보충관리 세 탭 표시 모델
+
+- 세 탭의 ID·제목·설명·빈 문구, 완료 task 제외, count, 활성 탭과 fallback을 `supplementCenterTabModel.js`로 이동했다.
+- 미래 결석 수에 따른 설명, 세 탭 순서와 완료 제외, `재시험이 없습니다.` 빈 상태를 유지한다.
+- 모델에는 React state·clock·API·Supabase·notification/Solapi 호출이 없다.
+- 숙제 완료 제외·결석 활성·미래 결석 설명·재시험 0건/1건·잘못된 탭 fallback fixture, production scenario `88b-47`, production 413/413, build, diff 검사를 통과했다.
+- 순수 표시 모델이므로 운영 데이터 생성이나 사람 조작 없이 AI gate로 통과했다.
+- 다음은 세 task type의 candidate item builder를 순수 모델로 분리할 수 있는지 inventory한다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.
