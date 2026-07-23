@@ -56,6 +56,7 @@ import {
 } from "../domains/notifications/notificationCenterModel.js";
 import {
   persistNoticeJobRequest,
+  polishNoticeMessageRequest,
   reserveNoticeJobRequest
 } from "../domains/notifications/notificationNoticeApi.js";
 import {
@@ -10457,10 +10458,8 @@ function NotificationCenter({
     setIsPolishingNotice(true);
     setDispatchMessage("");
     try {
-      const response = await fetch(apiUrl("/api/ai/comment-polish"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const result = await polishNoticeMessageRequest({
+        payload: {
           aiProvider: commentAiProvider,
           aiModel: commentAiModel,
           aiPrompt: getAiPrompt(aiSettings, "noticeMessage"),
@@ -10476,12 +10475,10 @@ function NotificationCenter({
           attendanceStatus: "",
           homeworkStatus: "",
           assignmentStatus: ""
-        })
+        },
+        request: fetch,
+        resolveApiUrl: apiUrl
       });
-      const result = await response.json();
-      if (!response.ok || !result.ok) {
-        throw new Error(result.error || "공지 AI 수정에 실패했습니다.");
-      }
       setNoticeBody(result.polishedText ?? noticeBody);
       setDispatchMessage("공지 문구를 AI로 다듬었습니다.");
     } catch (error) {

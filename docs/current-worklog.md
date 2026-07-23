@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13C-6 알림센터 공지 AI 수정 request adapter 분리 — AI gate 통과
+
+- 코드: 공지 AI 수정의 `/api/ai/comment-polish` URL 해석, POST JSON 요청, 응답 JSON 파싱, HTTP/body 성공 판정과 오류 fallback을 `notificationNoticeApi.js`의 `polishNoticeMessageRequest`로 이동했다. App은 기존 `fetch`, `apiUrl`, 현재 payload를 주입한다.
+- 동작 보존: 기존 `Content-Type`, payload 전체, `response.ok && result.ok` 성공 조건, 서버 오류 우선과 `공지 AI 수정에 실패했습니다.` 기본 오류, 전체 result 반환 후 `polishedText ?? noticeBody` 적용을 그대로 유지한다.
+- 저장 원천/side effect: adapter는 전달된 request를 한 번 호출하지만 fetch/API URL/React state를 직접 import하지 않는다. local draft, busy/feedback과 payload 조립은 App에 남는다. fixture에서는 네트워크·유료 AI 호출·운영 데이터 변경이 0건이다.
+- 자동검증: 해석된 URL, method/header/body 전체, 성공 result 동일성, HTTP 실패의 서버 오류, body `ok:false`의 기본 오류를 `test:notification-notice-api`로 고정했다. production scenario 434/434와 build, `git diff --check`가 통과했다.
+- gate 판정: 실제 AI 호출 없이 request와 response/error 계약 전체를 injected fixture로 검증했다. 재시험/고태영 운영 데이터나 사람 조작이 필요하지 않은 AI gate다.
+- 다음 경계: `polishNoticeMessage`의 guard, payload 생성, busy/feedback, 성공 draft 반영과 실패/finally 순서를 `polishNoticeMessageAction`으로 분리한다.
+
 ## 2026-07-23 P1. 13C-5 알림센터 Solapi 결과 대조 injected action 분리 — AI gate 통과
 
 - 코드: `reconcileSolapiResultsForNoticeJobs`의 callback/대상/loading guard, 조회 중 상태, 결과 집계, saved/partial/failed 상태, pending filter, 기록 펼침과 background refresh를 `notificationNoticeActions.js`의 `reconcileNoticeResultsAction`으로 이동했다. App은 기존 결과 대조 callback·대상 ID·clock·setter를 주입한다.
