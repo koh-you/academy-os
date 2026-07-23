@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { createNotificationComposerViewModel } from "./notificationCenterModel.js";
 import { applyNoticeTemplateAction } from "./notificationNoticeActions.js";
+import { buildNoticeJob as createNotificationNoticeJob } from "./notificationNoticeBuilders.js";
 
 export function useNotificationComposerState({
+  academyName,
   formatKoreaTimeLabel,
   solapiResultSyncCheckedAt,
   solapiResultTargets,
@@ -41,9 +43,31 @@ export function useNotificationComposerState({
     });
   }
 
+  function buildNoticeJob(recipient, mode = "scheduled") {
+    const idTimestamp = Date.now();
+    const idSuffix = Math.random().toString(36).slice(2, 7);
+    const createdAt = new Date().toISOString();
+    return createNotificationNoticeJob({
+      academyName,
+      createdAt,
+      idSuffix,
+      idTimestamp,
+      mode,
+      noticeBody,
+      noticeKind,
+      noticeSpecialLectureMeta,
+      noticeText: composerViewModel.noticeText,
+      noticeTitle,
+      recipient,
+      scheduledAt: composerViewModel.scheduledAt,
+      today
+    });
+  }
+
   return {
     ...composerViewModel,
     applyNoticeTemplate,
+    buildNoticeJob,
     dispatchMessage,
     isPolishingNotice,
     isSendingNotice,

@@ -90,7 +90,6 @@ import {
   scheduleNoticeAction,
   sendNoticeNowAction
 } from "../domains/notifications/notificationNoticeActions.js";
-import { buildNoticeJob as createNotificationNoticeJob } from "../domains/notifications/notificationNoticeBuilders.js";
 import { NotificationNoticeWorkspace } from "../domains/notifications/NotificationNoticeWorkspace.jsx";
 import { useNotificationCenterNavigationState } from "../domains/notifications/useNotificationCenterNavigationState.js";
 import { useNotificationComposerState } from "../domains/notifications/useNotificationComposerState.js";
@@ -11691,6 +11690,7 @@ function NotificationCenter({
   });
   const {
     applyNoticeTemplate,
+    buildNoticeJob,
     dispatchMessage,
     isPolishingNotice,
     isSendingNotice,
@@ -11716,6 +11716,7 @@ function NotificationCenter({
     solapiResultLastCheckedLabel,
     solapiResultSyncTargetIds
   } = useNotificationComposerState({
+    academyName: academyBrandName,
     formatKoreaTimeLabel,
     solapiResultSyncCheckedAt: solapiResultSyncState.checkedAt,
     solapiResultTargets,
@@ -11766,27 +11767,6 @@ function NotificationCenter({
     setActiveNotificationTab("notice");
     setActiveNoticeWorkspace("compose");
     setDispatchMessage("특강 안내문을 저장한 뒤 공지 발송 화면에 반영했습니다. 수신 대상을 확인한 뒤 예약 발송 또는 즉시 발송으로 진행하세요.");
-  }
-
-  function buildNoticeJob(recipient, mode = "scheduled") {
-    const idTimestamp = Date.now();
-    const idSuffix = Math.random().toString(36).slice(2, 7);
-    const createdAt = new Date().toISOString();
-    return createNotificationNoticeJob({
-      academyName: academyBrandName,
-      createdAt,
-      idSuffix,
-      idTimestamp,
-      mode,
-      noticeBody,
-      noticeKind,
-      noticeSpecialLectureMeta,
-      noticeText,
-      noticeTitle,
-      recipient,
-      scheduledAt,
-      today
-    });
   }
 
   async function persistNoticeJob(notificationJob) {
