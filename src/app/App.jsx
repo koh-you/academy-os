@@ -65,6 +65,7 @@ import {
   deleteNoticeJobAction,
   polishNoticeMessageAction,
   reconcileNoticeResultsAction,
+  refreshNoticeJobsInBackgroundAction,
   scheduleNoticeAction,
   sendNoticeNowAction
 } from "../domains/notifications/notificationNoticeActions.js";
@@ -10393,8 +10394,9 @@ function NotificationCenter({
   }
 
   function refreshNoticeJobsInBackground() {
-    Promise.resolve(onRefresh?.()).catch((error) => {
-      setDispatchMessage((current) => `${current || "처리는 완료됐습니다."} 발송 기록 새로고침 실패: ${error.message}`);
+    refreshNoticeJobsInBackgroundAction({
+      refreshJobs: onRefresh,
+      setDispatchMessage
     });
   }
 

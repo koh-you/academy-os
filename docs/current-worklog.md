@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13C-11 알림센터 background refresh action 분리 — AI gate 통과
+
+- 코드: 발송·예약·대조·취소 완료 후 실행되는 발송 기록 background refresh와 비동기 실패 feedback append를 `notificationNoticeActions.js`의 `refreshNoticeJobsInBackgroundAction`으로 이동했다. App은 기존 `onRefresh`와 `setDispatchMessage`를 주입하는 얇은 wrapper만 유지한다.
+- 동작 보존: callback 결과를 `Promise.resolve`로 감싸고 기다리지 않는 background 실행, 비동기 실패 시 기존 완료 문구 뒤에 오류를 붙이는 방식, 기존 문구가 없을 때 `처리는 완료됐습니다.` fallback, callback 없음의 무동작을 그대로 유지했다. 기존 동기 throw가 즉시 전파되는 계약도 바꾸지 않았다.
+- 저장 원천/side effect: action은 React/API/Supabase/Solapi를 직접 소유하지 않는다. 실제 재조회 callback은 App에서 주입된다. fixture는 resolved/rejected/undefined/synchronous throw callback만 사용해 네트워크·운영 데이터 변경이 0건이다.
+- 자동검증: refresh 성공, 비동기 reject의 함수형 feedback과 기존/빈 문구, callback 없음, 동기 throw 전파를 `test:notification-notice-actions`로 고정했다. production scenario 439/439과 build, `git diff --check`가 통과했다.
+- gate 판정: background Promise와 feedback 계약 전체를 mock으로 재현했다. 재시험/고태영 운영 데이터나 사람 조작이 필요하지 않은 AI gate다.
+- 다음 경계: App에 남은 `noticeMessageTemplates`와 알림 job label/status/status-class helper를 notification config/model 파일로 이동하고 deterministic fixture를 보강한다. 특강 템플릿 문구 자체는 변경하지 않는다.
+
 ## 2026-07-23 P1. 13C-10 알림센터 Solapi 취소 UI injected action 분리 — AI gate 통과
 
 - 코드: 알림 예약 취소의 취소 가능/중복 guard, confirm, busy/진행 상태, callback 연결·취소 결과 검증, canceled job local 반영, Solapi 그룹 유무별 완료 문구, draft filter/history/refresh, 실패 feedback과 `finally`를 `notificationNoticeActions.js`의 `cancelNoticeJobAction`으로 이동했다. App은 기존 취소 판정·브라우저 confirm·실제 `onCancelNotificationJob` callback·setter를 주입한다.

@@ -4,6 +4,7 @@ import {
   deleteNoticeJobAction,
   polishNoticeMessageAction,
   reconcileNoticeResultsAction,
+  refreshNoticeJobsInBackgroundAction,
   scheduleNoticeAction,
   sendNoticeNowAction
 } from "../src/domains/notifications/notificationNoticeActions.js";
@@ -815,4 +816,56 @@ await cancelNoticeJobAction({
 });
 assert.deepEqual(rejectedCancelEvents, []);
 
-console.log("notification notice immediate scheduled reconcile polish delete and cancel action fixtures passed");
+let backgroundRefreshCount = 0;
+const successfulBackgroundMessages = [];
+refreshNoticeJobsInBackgroundAction({
+  refreshJobs: async () => {
+    backgroundRefreshCount += 1;
+  },
+  setDispatchMessage: (value) => successfulBackgroundMessages.push(value)
+});
+await Promise.resolve();
+assert.equal(backgroundRefreshCount, 1);
+assert.deepEqual(successfulBackgroundMessages, []);
+
+const failedBackgroundUpdaters = [];
+refreshNoticeJobsInBackgroundAction({
+  refreshJobs: async () => {
+    throw new Error("fixture refresh failure");
+  },
+  setDispatchMessage: (value) => failedBackgroundUpdaters.push(value)
+});
+await Promise.resolve();
+await Promise.resolve();
+assert.equal(failedBackgroundUpdaters.length, 1);
+assert.equal(
+  failedBackgroundUpdaters[0]("기존 완료 문구"),
+  "기존 완료 문구 발송 기록 새로고침 실패: fixture refresh failure"
+);
+assert.equal(
+  failedBackgroundUpdaters[0](""),
+  "처리는 완료됐습니다. 발송 기록 새로고침 실패: fixture refresh failure"
+);
+
+const missingBackgroundMessages = [];
+refreshNoticeJobsInBackgroundAction({
+  refreshJobs: null,
+  setDispatchMessage: (value) => missingBackgroundMessages.push(value)
+});
+await Promise.resolve();
+assert.deepEqual(missingBackgroundMessages, []);
+
+assert.throws(
+  () =>
+    refreshNoticeJobsInBackgroundAction({
+      refreshJobs: () => {
+        throw new Error("fixture synchronous refresh failure");
+      },
+      setDispatchMessage: () => {
+        throw new Error("synchronous failure must not reach async feedback");
+      }
+    }),
+  /fixture synchronous refresh failure/
+);
+
+console.log("notification notice actions including background refresh fixtures passed");
