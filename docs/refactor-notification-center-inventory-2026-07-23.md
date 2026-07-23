@@ -84,7 +84,13 @@
 - App이 builder, 실제 45초 request, persist, timeout 판정, state setter와 refresh를 모두 주입한다.
 - 4개 결과 분기와 기록 실패, filter 우선순위, guard/finally를 mock fixture로 고정했고 실제 발송·운영 row 변경은 없다.
 
+## 13C-4 예약 action 단위
+
+- 예약 guard와 과거시각 차단, 순차 예약, 성공 job local 반영, 실패 job 생성·기록 fallback, 집계와 UI 완료 순서를 `scheduleNoticeAction`으로 이동했다.
+- App이 builder, 과거시각/표시시각 함수, 실제 reserve/persist wrapper, clock, state setter와 refresh를 모두 주입한다.
+- 과거시각, 예약 성공·실패, 실패 row 기록 실패, `failed`/`scheduled` filter, guard/finally를 mock fixture로 고정했고 실제 예약·운영 row 변경은 없다. 재시험 운영 데이터도 필요하지 않다.
+
 ## 다음 후보
 
-1. `scheduleNotice`의 과거시각 차단, 예약 성공/실패, 실패 job 기록, local update와 완료 UI 순서를 injected action으로 분리한다.
-2. 취소·삭제·결과 reconcile과 AI 수정은 서로 다른 side effect이므로 각각 별도 단위로 판정한다.
+1. `reconcileSolapiResultsForNoticeJobs`의 대상 guard, loading, 성공·부분실패·실패와 refresh 순서를 injected action으로 분리한다.
+2. 취소·삭제와 AI 수정은 서로 다른 side effect이므로 각각 별도 단위로 판정한다.

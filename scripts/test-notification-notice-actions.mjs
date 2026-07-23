@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
-import { sendNoticeNowAction } from "../src/domains/notifications/notificationNoticeActions.js";
+import {
+  scheduleNoticeAction,
+  sendNoticeNowAction
+} from "../src/domains/notifications/notificationNoticeActions.js";
 
 const recipients = [
   { audience: "parent", student: { studentId: "sent", name: "성공학생" } },
@@ -149,4 +152,132 @@ await assert.rejects(
 );
 assert.deepEqual(buildFailureSendingStates, [true, false]);
 
-console.log("notification notice immediate action fixture passed");
+const pastScheduleMessages = [];
+const pastScheduleBusyStates = [];
+await scheduleNoticeAction({
+  isSchedulePast: () => true,
+  isSending: false,
+  noticeRecipients: [recipients[0]],
+  noticeText: "고정 공지",
+  scheduledAt: "2026-07-20T09:00:00.000Z",
+  setDispatchMessage: (message) => pastScheduleMessages.push(message),
+  setIsSending: (value) => pastScheduleBusyStates.push(value)
+});
+assert.deepEqual(pastScheduleMessages, [
+  "예약 시각이 이미 지났습니다. 새 예약 시각을 선택하거나 즉시 발송을 사용해 주세요."
+]);
+assert.deepEqual(pastScheduleBusyStates, []);
+
+const scheduleMessages = [];
+const scheduleBusyStates = [];
+const scheduleFilters = [];
+const scheduleHistoryStates = [];
+const reservedJobIds = [];
+const upsertedJobs = [];
+const persistedFailedJobs = [];
+const reportedErrors = [];
+let scheduleRefreshCount = 0;
+const scheduleRecipients = recipients.slice(0, 3);
+
+await scheduleNoticeAction({
+  buildJob: (recipient, mode) => ({
+    notificationJobId: `scheduled-${recipient.student.studentId}`,
+    payload: { studentId: recipient.student.studentId },
+    status: "scheduled",
+    mode
+  }),
+  formatScheduledAt: (value) => `표시:${value}`,
+  isSchedulePast: () => false,
+  isSending: false,
+  noticeRecipients: scheduleRecipients,
+  noticeText: "고정 공지",
+  now: () => "2026-07-23T11:00:00.000Z",
+  persistJob: async (job) => {
+    persistedFailedJobs.push(job);
+    throw new Error("fixture persist failure");
+  },
+  refreshJobs: () => {
+    scheduleRefreshCount += 1;
+  },
+  reportError: (error) => reportedErrors.push(error.message),
+  reserveJob: async (job) => {
+    reservedJobIds.push(job.notificationJobId);
+    if (job.payload.studentId === "dry-run") throw new Error("fixture reserve failure");
+    return { ...job, provider: "solapi", providerGroupId: `group-${job.payload.studentId}` };
+  },
+  scheduledAt: "2026-07-30T09:00:00.000Z",
+  setDispatchMessage: (message) => scheduleMessages.push(message),
+  setIsHistoryOpen: (value) => scheduleHistoryStates.push(value),
+  setIsSending: (value) => scheduleBusyStates.push(value),
+  setJobFilter: (value) => scheduleFilters.push(value),
+  upsertLocalJob: (job) => upsertedJobs.push(job)
+});
+
+assert.deepEqual(reservedJobIds, ["scheduled-sent", "scheduled-dry-run", "scheduled-timeout"]);
+assert.deepEqual(scheduleBusyStates, [true, false]);
+assert.deepEqual(scheduleMessages, [
+  "Solapi 공지 예약 중: 0/3건",
+  "Solapi 공지 예약 중: 1/3건",
+  "Solapi 공지 예약 중: 2/3건",
+  "Solapi 공지 예약 중: 3/3건",
+  "표시:2026-07-30T09:00:00.000Z Solapi 공지 예약 완료: 성공 2건, 실패 1건"
+]);
+assert.deepEqual(
+  upsertedJobs.map((job) => ({
+    error: job.error,
+    id: job.notificationJobId,
+    provider: job.provider,
+    status: job.status,
+    updatedAt: job.updatedAt
+  })),
+  [
+    {
+      error: undefined,
+      id: "scheduled-sent",
+      provider: "solapi",
+      status: "scheduled",
+      updatedAt: undefined
+    },
+    {
+      error: "Solapi 예약 실패: fixture reserve failure",
+      id: "scheduled-dry-run",
+      provider: undefined,
+      status: "failed",
+      updatedAt: "2026-07-23T11:00:00.000Z"
+    },
+    {
+      error: undefined,
+      id: "scheduled-timeout",
+      provider: "solapi",
+      status: "scheduled",
+      updatedAt: undefined
+    }
+  ]
+);
+assert.equal(persistedFailedJobs.length, 1);
+assert.equal(persistedFailedJobs[0], upsertedJobs[1]);
+assert.deepEqual(reportedErrors, ["fixture persist failure"]);
+assert.deepEqual(scheduleFilters, ["failed"]);
+assert.deepEqual(scheduleHistoryStates, [true]);
+assert.equal(scheduleRefreshCount, 1);
+
+const successfulScheduleFilters = [];
+await scheduleNoticeAction({
+  buildJob: (recipient) => ({ notificationJobId: recipient.student.studentId }),
+  formatScheduledAt: () => "예약시각",
+  isSchedulePast: () => false,
+  isSending: false,
+  noticeRecipients: [recipients[0]],
+  noticeText: "고정 공지",
+  refreshJobs: () => {},
+  reserveJob: async (job) => job,
+  scheduledAt: "2026-07-30T09:00:00.000Z",
+  setDispatchMessage: () => {},
+  setIsHistoryOpen: () => {},
+  setIsSending: () => {},
+  setJobFilter: (value) => successfulScheduleFilters.push(value),
+  upsertLocalJob: () => {}
+});
+assert.deepEqual(successfulScheduleFilters, ["scheduled"]);
+
+console.log("notification notice immediate and scheduled action fixtures passed");
