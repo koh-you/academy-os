@@ -249,6 +249,14 @@
 - 사용자가 앞서 완료 처리·새로고침을 정상 확인한 동일 action 경계이며 이번에는 얇은 adapter만 이동했다. 새 운영 데이터나 Solapi 호출 없이 AI gate로 통과했다.
 - 다음은 일정 생성·변경 modal adapter 한 단위다. 12R-7의 실제 일정·예약 gate와 동일 callback 경계인지 먼저 대조한다.
 
+## 12R-23 구현 결과 — 보충 일정 생성·변경 modal adapter
+
+- task ID/전체 busy guard, persistable payload, 일정 누락 차단, 기존 일정 확인창과 신규 직접 실행 분기, `schedule` busy 시작, 12R-7 request/apply action, 오류 log와 `finally` 해제를 `createSupplementTaskScheduleHandlers`로 분리했다.
+- 실제 lesson/task 저장·Supabase 재조회·React 전역 갱신·학생 11시와 학생/학부모 일정 알림 예약은 App이 전달하는 `onScheduleTask` callback에 남겼고, controller에는 직접 API·`notification_jobs`·Solapi와 저장·완료·개별 예약취소 callback이 없다.
+- 성공·누락·confirm/direct·busy·실패 fixture와 production scenario `88b-38`, production 404/404, build, diff 검사를 통과했다.
+- 12R-7에서 동일 callback의 실제 일정 생성·새로고침·알림 예약 결과를 검수했으므로 새 운영 데이터나 Solapi 호출 없이 AI gate로 통과했다.
+- 다음은 결석 원천 취소 modal adapter 한 단위다. 12R-6의 실제 결석취소 gate와 동일 callback 경계인지 먼저 대조한다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.
