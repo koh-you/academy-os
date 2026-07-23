@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-30 보충 목록 완료 확인 submit adapter 분리 — AI gate 통과
+
+- 코드: `SupplementCenter` 목록 카드의 `보충 완료 처리` 확인창 submit 함수를 `createSupplementCenterPassConfirmationHandler`로 기존 `supplementCenterModalActionController.js`에 이동했다.
+- 동작 보존: 확인 대상 guard, task/source ID 기반 busy 시작, 오류 초기화, row `saving`, 기존 `onPassTask` await, 성공 row·확인창 닫기, 실패 log·row·확인창 오류, `finally` busy 해제 순서를 그대로 유지한다.
+- 저장 원천/side effect: 실제 `makeup_tasks` 완료 저장·재조회·React 전역 갱신·학생 11시 취소는 App이 주입하는 `onPassTask`에 남는다. controller에는 직접 API, Supabase, notification/Solapi 호출이 없다.
+- 자동검증: 성공 호출 순서와 확인창 닫기, 대상 없음 guard, 실패 시 확인창 유지·오류 표시·busy 해제 fixture를 기존 controller test에 추가했다. production scenario `88b-45`, production 411/411, build, `git diff --check`가 통과했고 기존 대형 chunk 경고만 남았다.
+- gate 판정: 동일 완료 callback은 이전 고태영 완료·새로고침 검수와 12R-5/22/29 자동검증을 통과했다. 이번에는 확인창 submit adapter만 이동해 새 운영 데이터나 사람 조작 없이 AI gate로 통과했다.
+- 다음 경계: `SupplementCenter`의 후보·탭 표시 모델을 순수 함수로 분리할 수 있는지 inventory한다.
+
 ## 2026-07-23 P1. 12R-29 보충 센터 모달 callback adapter 분리 — AI gate 통과
 
 - 코드: `SupplementCenter`의 모달 저장·일정·결석 원천 취소·완료 callback adapter 네 개를 `createSupplementCenterModalActionHandlers`로 `supplementCenterModalActionController.js`에 이동했다.

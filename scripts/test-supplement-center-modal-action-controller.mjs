@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
-import { createSupplementCenterModalActionHandlers } from "../src/domains/supplements/supplementCenterModalActionController.js";
+import {
+  createSupplementCenterModalActionHandlers,
+  createSupplementCenterPassConfirmationHandler
+} from "../src/domains/supplements/supplementCenterModalActionController.js";
 
 function taskKey(task = {}) {
   return [task.taskType, task.studentId, task.sourceId].filter(Boolean).join(":");
@@ -92,5 +95,75 @@ for (const [handlerName, callbackName, failureMessage] of [
   assert.deepEqual(failed.events.map(([type]) => type), ["row", "row"]);
   assert.deepEqual(failed.events.at(-1), ["row", failed.task, "failed", failureMessage]);
 }
+
+const passConfirmationEvents = [];
+const passConfirmationTask = {
+  makeupTaskId: "task-confirm",
+  sourceId: "source-confirm"
+};
+const confirmPassTask = createSupplementCenterPassConfirmationHandler({
+  logError: (...args) => passConfirmationEvents.push(["error", ...args]),
+  onPassTask: async (task) => passConfirmationEvents.push(["pass", task]),
+  passConfirmTask: passConfirmationTask,
+  setPassActionError: (value) => passConfirmationEvents.push(["actionError", value]),
+  setPassBusyTaskId: (value) => passConfirmationEvents.push(["busy", value]),
+  setPassConfirmTask: (value) => passConfirmationEvents.push(["confirmTask", value]),
+  setSupplementRowAction: (...args) => passConfirmationEvents.push(["row", ...args])
+});
+await confirmPassTask();
+assert.deepEqual(passConfirmationEvents.map(([type]) => type), [
+  "busy",
+  "actionError",
+  "row",
+  "pass",
+  "row",
+  "confirmTask",
+  "busy"
+]);
+assert.deepEqual(passConfirmationEvents[0], ["busy", "task-confirm"]);
+assert.deepEqual(passConfirmationEvents.at(-1), ["busy", ""]);
+
+const noPassConfirmationEvents = [];
+const confirmMissingPassTask = createSupplementCenterPassConfirmationHandler({
+  onPassTask: async () => noPassConfirmationEvents.push(["pass"]),
+  passConfirmTask: null,
+  setPassActionError: (value) => noPassConfirmationEvents.push(["actionError", value]),
+  setPassBusyTaskId: (value) => noPassConfirmationEvents.push(["busy", value]),
+  setPassConfirmTask: (value) => noPassConfirmationEvents.push(["confirmTask", value]),
+  setSupplementRowAction: (...args) => noPassConfirmationEvents.push(["row", ...args])
+});
+assert.equal(await confirmMissingPassTask(), undefined);
+assert.deepEqual(noPassConfirmationEvents, []);
+
+const failedPassConfirmationEvents = [];
+const confirmFailedPassTask = createSupplementCenterPassConfirmationHandler({
+  logError: (...args) => failedPassConfirmationEvents.push(["error", ...args]),
+  onPassTask: async () => {
+    throw new Error("완료 저장 재조회 실패");
+  },
+  passConfirmTask: passConfirmationTask,
+  setPassActionError: (value) => failedPassConfirmationEvents.push(["actionError", value]),
+  setPassBusyTaskId: (value) => failedPassConfirmationEvents.push(["busy", value]),
+  setPassConfirmTask: (value) => failedPassConfirmationEvents.push(["confirmTask", value]),
+  setSupplementRowAction: (...args) => failedPassConfirmationEvents.push(["row", ...args])
+});
+await confirmFailedPassTask();
+assert.deepEqual(failedPassConfirmationEvents.map(([type]) => type), [
+  "busy",
+  "actionError",
+  "row",
+  "error",
+  "row",
+  "actionError",
+  "busy"
+]);
+assert.deepEqual(failedPassConfirmationEvents[4], [
+  "row",
+  passConfirmationTask,
+  "failed",
+  "완료 저장 재조회 실패"
+]);
+assert.deepEqual(failedPassConfirmationEvents[5], ["actionError", "완료 저장 재조회 실패"]);
+assert.deepEqual(failedPassConfirmationEvents.at(-1), ["busy", ""]);
 
 console.log("supplement center modal action controller fixture passed");

@@ -72,3 +72,31 @@ export function createSupplementCenterModalActionHandlers({
     handleScheduleSupplementTaskFromModal
   };
 }
+
+export function createSupplementCenterPassConfirmationHandler({
+  logError = (...args) => console.error(...args),
+  onPassTask,
+  passConfirmTask,
+  setPassActionError,
+  setPassBusyTaskId,
+  setPassConfirmTask,
+  setSupplementRowAction
+}) {
+  return async function confirmPassTask() {
+    if (!passConfirmTask) return;
+    setPassBusyTaskId(passConfirmTask.makeupTaskId || passConfirmTask.sourceId || "");
+    setPassActionError("");
+    setSupplementRowAction(passConfirmTask, "saving", "보충 완료 처리 중");
+    try {
+      await onPassTask(passConfirmTask);
+      setSupplementRowAction(passConfirmTask, "saved", "보충 완료 처리 완료");
+      setPassConfirmTask(null);
+    } catch (error) {
+      logError("Failed to pass supplement task", error);
+      setSupplementRowAction(passConfirmTask, "failed", error?.message || "보충 완료 처리 실패");
+      setPassActionError(error?.message || "보충 완료 처리에 실패했습니다.");
+    } finally {
+      setPassBusyTaskId("");
+    }
+  };
+}
