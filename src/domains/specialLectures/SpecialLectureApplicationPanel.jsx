@@ -1242,33 +1242,41 @@ export function SpecialLectureApplicationPanel({
                     ) : <span className="pending">수강 회차 미확정</span>}
                   </div>
                   <div className="specialLectureEnrollmentControls">
-                    <button
-                      className="primaryButton compact"
-                      disabled={!isGuideSaved}
-                      onClick={() => openPlanModal(enrollment)}
-                      type="button"
-                    >
-                      회차 설정
-                    </button>
-                    <button className="softButton compact" onClick={() => setProgressModalEnrollment(enrollment)} type="button">
-                      진행 보기
-                    </button>
-                    <button
-                      className="softButton compact subtle"
-                      disabled={!onSaveEnrollment || !isGuideSaved || savingEnrollmentId === enrollment.enrollmentId}
-                      onClick={() => excludeRemainingSessions(enrollment)}
-                      type="button"
-                    >
-                      {savingEnrollmentId === enrollment.enrollmentId ? "저장 중" : "남은 회차 취소"}
-                    </button>
-                    <button
-                      className="dangerSoftButton compact"
-                      disabled={!onSaveEnrollment || !isGuideSaved || savingEnrollmentId === enrollment.enrollmentId}
-                      onClick={() => cancelEnrollment(enrollment)}
-                      type="button"
-                    >
-                      {savingEnrollmentId === enrollment.enrollmentId ? "취소 저장 중" : "특강 신청 전체 취소"}
-                    </button>
+                    <div className="specialLectureEnrollmentPrimaryActions">
+                      <button
+                        className="primaryButton compact"
+                        disabled={!isGuideSaved}
+                        onClick={() => openPlanModal(enrollment)}
+                        type="button"
+                      >
+                        회차 설정
+                      </button>
+                      <button className="softButton compact" onClick={() => setProgressModalEnrollment(enrollment)} type="button">
+                        진행 보기
+                      </button>
+                    </div>
+                    <details className="specialLectureCancellationActions">
+                      <summary>취소 관리</summary>
+                      <div>
+                        <p>남은 회차만 취소하거나 특강 신청 전체를 취소할 수 있습니다.</p>
+                        <button
+                          className="softButton compact subtle"
+                          disabled={!onSaveEnrollment || !isGuideSaved || savingEnrollmentId === enrollment.enrollmentId}
+                          onClick={() => excludeRemainingSessions(enrollment)}
+                          type="button"
+                        >
+                          {savingEnrollmentId === enrollment.enrollmentId ? "저장 중" : "남은 회차 취소"}
+                        </button>
+                        <button
+                          className="dangerSoftButton compact"
+                          disabled={!onSaveEnrollment || !isGuideSaved || savingEnrollmentId === enrollment.enrollmentId}
+                          onClick={() => cancelEnrollment(enrollment)}
+                          type="button"
+                        >
+                          {savingEnrollmentId === enrollment.enrollmentId ? "취소 저장 중" : "특강 신청 전체 취소"}
+                        </button>
+                      </div>
+                    </details>
                   </div>
                 </article>
               );

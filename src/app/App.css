@@ -8609,6 +8609,62 @@ button:disabled {
   gap: 8px;
 }
 
+.specialLectureEnrollmentPrimaryActions {
+  display: grid;
+  gap: 7px;
+}
+
+.specialLectureCancellationActions {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 7px;
+}
+
+.specialLectureCancellationActions > summary {
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #dbe3ef;
+  border-radius: 7px;
+  color: #52627a;
+  cursor: pointer;
+  display: flex;
+  font-size: 11px;
+  font-weight: 900;
+  justify-content: space-between;
+  min-height: 34px;
+  padding: 6px 9px;
+}
+
+.specialLectureCancellationActions > summary::after {
+  content: "⌄";
+  font-size: 14px;
+  line-height: 1;
+}
+
+.specialLectureCancellationActions[open] > summary::after {
+  content: "⌃";
+}
+
+.specialLectureCancellationActions > summary::marker {
+  content: "";
+}
+
+.specialLectureCancellationActions > div {
+  background: #fffafa;
+  border: 1px solid #fecaca;
+  border-radius: 7px;
+  display: grid;
+  gap: 7px;
+  margin-top: 6px;
+  padding: 8px;
+}
+
+.specialLectureCancellationActions p {
+  color: #7f1d1d;
+  font-size: 10px;
+  line-height: 1.45;
+  margin: 0;
+}
+
 .specialLectureRosterModal,
 .specialLectureSessionModal,
 .specialLectureProgressModal {
@@ -18023,6 +18079,10 @@ body.attendanceOnlyBody {
   .promptSettingsLayout,
   .tallyAiGrid {
     grid-template-columns: 1fr;
+  }
+
+  .specialLectureEnrollmentPrimaryActions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .materialFolderBar,

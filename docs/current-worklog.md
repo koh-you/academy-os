@@ -1,5 +1,16 @@
 # Academy OS Current Worklog
 
+## 2026-07-23 P2. 특강 학생 카드 작업 버튼 compact 정리
+
+- 상태: UI 수정과 자동검증 완료. 운영 배포 후 사람 화면 검토 대기.
+- 사용자 문제: 특강 명단의 각 학생 카드마다 `회차 설정`, `진행 보기`, `남은 회차 취소`, `특강 신청 전체 취소`가 같은 위계로 세로 반복돼 카드가 길고 복잡했다.
+- 구현: 자주 쓰는 `회차 설정`과 `진행 보기`만 기본 작업으로 노출하고, 위험 작업 두 개는 기본 접힘인 `취소 관리` 안으로 이동했다. 좁은 화면에서는 기본 작업 두 개를 한 줄로 배치해 반복 카드 높이를 줄였다. 접힘 내부에는 남은 회차 취소와 전체 신청 취소의 차이를 짧게 안내한다.
+- 기능/저장 계약 보존: 기존 `openPlanModal`, 진행 모달, `excludeRemainingSessions`, `cancelEnrollment` 함수와 확인창을 그대로 사용한다. 직접 저장 원천 `special_lecture_enrollments`, Supabase 재조회 검증, 미래 `lessons` 명단의 별도 `특강 수업일지 반영` 계약은 바꾸지 않았다.
+- 외부 영향: 이번 UI 정리만으로 운영 데이터, `lesson_student_records`, 출결, `notification_jobs`, Solapi, Tally 원본을 생성·변경·취소하지 않는다. Solapi 특강 템플릿은 사용자 요청에 따라 임시 구조를 유지한다. 새 SQL은 없다.
+- AI 검증: `git diff --check`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 366건, `npm run build` 통과. 기존 Vite chunk size 경고만 남았다. 로컬 Chrome 390px 렌더 fixture에서 기본 작업 2개 한 줄 배치와 접힌 `취소 관리`를 확인했다.
+- 사람 gate: 운영 `Lesson Hub > 특강관리 > 특강 수업 > 특강 명단 펼치기`에서 각 활성 학생 카드에 기본 버튼 두 개와 접힌 `취소 관리`만 보이는지 확인한다. `취소 관리`를 펼쳤을 때 기존 두 취소 버튼이 나타나는지 확인하되, 이번 UI gate에서는 실제 취소 확인창의 최종 확인을 누르지 않는다. 데스크톱과 휴대폰 폭에서 버튼 글자가 잘리거나 카드 밖으로 넘치지 않으면 통과다.
+- 중단 조건: 취소 기능이 사라짐, 접힘 상태에서 위험 버튼이 실행됨, 버튼 대상 학생이 바뀜, 좁은 화면에서 버튼/카드가 가로로 넘침, 단순 펼치기만으로 저장·수업일지 반영·알림 예약 변화가 발생함.
+
 ## 2026-07-23 P1. 다음 유지보수 세션 및 코딩 에이전트 확장 인수인계
 
 - 사용자 요청에 따라 다음 유지보수 세션에서 그대로 사용할 프롬프트를 `docs/next-session/maintenance-session-prompt-2026-07-23.md`에 작성했다.
