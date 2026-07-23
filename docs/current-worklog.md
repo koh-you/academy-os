@@ -8,6 +8,14 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 14A-8 시험 후 총평 draft React state hook 분리 — AI gate 통과
+
+- 코드: 총평 draft 초기화, examPrepId 전환 동기화, normalize 결과 callback, section/원문 변경과 14A-6 save controller 연결을 `src/domains/exams/useExamReviewDraftState.js`로 이동했다.
+- 경계: hook은 주입된 `onUpdateRow`만 호출한다. App의 `handleUpdateExamPrepRow`, Supabase 저장/save state, AI/clipboard action과 modal DOM은 그대로다.
+- 동작 보존: 저장된 review가 없으면 기존 초안을 만들고, 있으면 기존 normalize를 적용한다. 입력은 local state를 먼저 바꾸고 500ms debounce하며 blur/닫기 flush 계약을 유지한다.
+- 자동검증: production 계약이 hook 연결, 기존 draft/section 함수와 controller 사용, App 내부 legacy state 제거, hook의 fetch/postJson 부재를 검증한다. production scenario 472/472, build, `git diff --check`가 통과했다.
+- 사람 gate: 기존 controller/draft fixture와 정적 hook 경계로 검증 가능하고 운영 row를 직접 쓰지 않아 사람 화면 조작은 필요하지 않다. 다음은 AI/clipboard action과 총평 modal DOM의 파일 분리 경계를 확인한다.
+
 ## 2026-07-23 P1. 14A-7 시험 후 총평 AI request adapter 분리 — AI gate 통과
 
 - 코드: 맞춤법 전용 payload builder와 `/api/ai/comment-polish` POST·JSON·오류 계약을 `src/domains/exams/examReviewApi.js`로 분리했다.

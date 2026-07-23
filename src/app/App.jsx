@@ -13,18 +13,15 @@ import { createExamPrepCenterDisplayModel } from "../domains/exams/examPrepCente
 import { ExamPostSubmissionManager } from "../domains/exams/ExamPostSubmissionManager.jsx";
 import {
   buildExamReviewBlogSourceText,
-  createExamReviewDraft,
   examReviewChecklistSections,
   getExamReviewSectionValue,
-  normalizeExamPrepRowReviewDraft,
-  normalizeExamReviewDraftText,
-  setExamReviewSectionValue
+  normalizeExamPrepRowReviewDraft
 } from "../domains/exams/examReviewDraft.js";
 import {
   buildExamReviewPolishPayload,
   polishExamReviewRequest
 } from "../domains/exams/examReviewApi.js";
-import { createExamReviewDraftSaveController } from "../domains/exams/examReviewDraftSaveController.js";
+import { useExamReviewDraftState } from "../domains/exams/useExamReviewDraftState.js";
 import { StudentManager } from "../domains/students/StudentManager.jsx";
 import { ParentPortal } from "../domains/portals/ParentPortal.jsx";
 import { calculateAttendanceStats } from "../domains/portals/StudentMyPageTab.jsx";
@@ -18240,54 +18237,17 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
   const copyStatusTimerRef = useRef(null);
-  const reviewDraftSaveControllerRef = useRef(null);
-  if (!reviewDraftSaveControllerRef.current) {
-    reviewDraftSaveControllerRef.current = createExamReviewDraftSaveController();
-  }
   const [reviewCopyStatus, setReviewCopyStatus] = useState("");
-  const [reviewDraft, setReviewDraft] = useState(() => {
-    const currentReview = String(row.review ?? "");
-    const initialReview = currentReview.trim() ? normalizeExamReviewDraftText(currentReview, row) : createExamReviewDraft(row);
-    reviewDraftSaveControllerRef.current.setLatestValue(initialReview);
-    return initialReview;
-  });
-
-  useEffect(() => {
-    if (!row.examPrepId) return;
-    const currentReview = String(row.review ?? "");
-    const nextReview = currentReview.trim() ? normalizeExamReviewDraftText(currentReview, row) : createExamReviewDraft(row);
-    reviewDraftSaveControllerRef.current.setLatestValue(nextReview);
-    setReviewDraft(nextReview);
-    if (nextReview === currentReview) return;
-    onUpdateRow(row.examPrepId, "review", nextReview);
-  }, [row.examPrepId]);
+  const {
+    flushPendingReviewSave,
+    reviewDraft,
+    updateReviewDraft,
+    updateReviewSection
+  } = useExamReviewDraftState({ onUpdateRow, row });
 
   useEffect(() => () => {
     if (copyStatusTimerRef.current) clearTimeout(copyStatusTimerRef.current);
-    reviewDraftSaveControllerRef.current?.cancel();
   }, []);
-
-  function flushPendingReviewSave() {
-    reviewDraftSaveControllerRef.current.flush((value) => {
-      onUpdateRow(row.examPrepId, "review", value);
-    });
-  }
-
-  function scheduleReviewDraftSave(value) {
-    reviewDraftSaveControllerRef.current.schedule(value, (latestValue) => {
-      onUpdateRow(row.examPrepId, "review", latestValue);
-    });
-  }
-
-  function updateReviewDraft(value) {
-    setReviewDraft(value);
-    scheduleReviewDraftSave(value);
-  }
-
-  function updateReviewSection(section, value) {
-    const nextReview = setExamReviewSectionValue(reviewDraft, section, value);
-    updateReviewDraft(nextReview);
-  }
 
   function handleClose() {
     flushPendingReviewSave();

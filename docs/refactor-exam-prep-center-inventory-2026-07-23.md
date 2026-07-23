@@ -103,9 +103,16 @@
 - fake fetch fixture가 전체 payload, URL/header/body, 성공 result와 서버/기본 오류를 검증한다. 실제 유료 AI 호출은 0회다.
 - production scenario 471/471, build, `git diff --check`를 통과했다.
 
+## 14A-8 시험 후 총평 draft React state hook
+
+- draft 초기화, examPrepId 전환 동기화, normalize callback, section/원문 변경과 save controller 연결을 `useExamReviewDraftState.js`로 이동했다.
+- hook은 주입된 `onUpdateRow`만 호출하고 App의 실제 row persistence/save state, AI/clipboard action, modal DOM은 계속 외부에 둔다.
+- production 계약이 App의 legacy state/timer 연결 제거와 hook 내부 fetch/postJson 부재를 검사한다.
+- production scenario 472/472, build, `git diff --check`를 통과했고 운영 row를 쓰지 않았다.
+
 ## 이후 후보와 중단 조건
 
-1. 총평 modal local React state/action
+1. 총평 modal AI/clipboard action과 DOM
 2. 시험정보 저장·삭제·수업 reconcile orchestration
 
 학생 제출·교사 확인·Storage 파일 열기 경계를 건드리면 기존 학생 포털 실제 쓰기와 bearer/Storage gate에서 중단한다. 시험정보 삭제나 시험대비 수업 생성·삭제를 옮길 때는 별도의 격리 데이터와 사람 gate가 필요하다. 순수 표시/model 단위는 deterministic fixture와 production test/build로 검증하고 운영 데이터를 만들지 않는다.
