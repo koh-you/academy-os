@@ -64,3 +64,68 @@ export async function sendNoticeNowAction({
     setIsSending(false);
   }
 }
+
+export async function scheduleNoticeAction({
+  buildJob,
+  formatScheduledAt,
+  isSchedulePast,
+  isSending,
+  noticeRecipients = [],
+  noticeText,
+  now,
+  persistJob,
+  refreshJobs,
+  reportError,
+  reserveJob,
+  scheduledAt,
+  setDispatchMessage,
+  setIsHistoryOpen,
+  setIsSending,
+  setJobFilter,
+  upsertLocalJob
+}) {
+  if (!noticeText || noticeRecipients.length === 0 || !scheduledAt || isSending) return;
+  if (isSchedulePast(scheduledAt, 0)) {
+    setDispatchMessage(
+      "예약 시각이 이미 지났습니다. 새 예약 시각을 선택하거나 즉시 발송을 사용해 주세요."
+    );
+    return;
+  }
+  setIsSending(true);
+  setDispatchMessage(`Solapi 공지 예약 중: 0/${noticeRecipients.length}건`);
+  let savedCount = 0;
+  let failedCount = 0;
+  try {
+    const jobs = noticeRecipients.map((recipient) => buildJob(recipient, "scheduled"));
+    for (const [index, notificationJob] of jobs.entries()) {
+      setDispatchMessage(`Solapi 공지 예약 중: ${index + 1}/${jobs.length}건`);
+      try {
+        const reservedJob = await reserveJob(notificationJob);
+        upsertLocalJob(reservedJob);
+        savedCount += 1;
+      } catch (error) {
+        const failedJob = {
+          ...notificationJob,
+          status: "failed",
+          error: `Solapi 예약 실패: ${error.message}`,
+          updatedAt: now()
+        };
+        upsertLocalJob(failedJob);
+        try {
+          await persistJob(failedJob);
+        } catch (persistError) {
+          reportError(persistError);
+        }
+        failedCount += 1;
+      }
+    }
+    setDispatchMessage(
+      `${formatScheduledAt(scheduledAt)} Solapi 공지 예약 완료: 성공 ${savedCount}건${failedCount ? `, 실패 ${failedCount}건` : ""}`
+    );
+    setJobFilter(failedCount ? "failed" : "scheduled");
+    setIsHistoryOpen(true);
+    refreshJobs();
+  } finally {
+    setIsSending(false);
+  }
+}
