@@ -57,6 +57,7 @@ import {
   findSupplementTaskForCandidate,
   getSupplementActionKey
 } from "../domains/supplements/supplementCenterSelectionModel.js";
+import { createSupplementCenterTabViewModel } from "../domains/supplements/supplementCenterTabModel.js";
 import { SupplementPassConfirmModal } from "../domains/supplements/SupplementPassConfirmModal.jsx";
 import { SupplementHistoryModal } from "../domains/supplements/SupplementHistoryModal.jsx";
 import { SupplementStudentModal } from "../domains/supplements/SupplementStudentModal.jsx";
@@ -22234,67 +22235,47 @@ function SupplementCenter({
   const activeDeferredAbsenceItems = deferredAbsenceSupplementItems
     .filter((item) => findSupplementTaskForCandidate(tasks, item.task)?.status !== "done")
     .sort((a, b) => String(a.lessonDate || "").localeCompare(String(b.lessonDate || "")));
-  const supplementTabDefinitions = [
-    {
-      id: "homework_makeup",
-      title: "숙제보충",
-      subtitle: "미완료/부분완료 숙제를 보충 과제로 전환합니다.",
-      count: makeupHomeworks.length,
-      emptyText: "미완료/부분완료 숙제가 없습니다.",
-      items: makeupHomeworks.map((homework) => ({
-        id: homework.homeworkId,
-        studentId: homework.studentId,
-        title: homework.title,
-        meta: `${homework.dueDate || homework.assignedDate || "-"} 기준 · ${getHomeworkMakeupReason(homework, records)}`,
-        task: {
-          taskType: "homework_makeup",
-          studentId: homework.studentId,
-          sourceId: homework.homeworkId,
-          sourceDate: homework.assignedDate || homework.dueDate || "",
-          sourceDueDate: homework.dueDate || "",
-          sourceLabel: homework.title,
-          supplementHomeworkNote: homework.title,
-          reason: getHomeworkMakeupReason(homework, records),
-          supplementMethod: "arrival_makeup"
-        }
-      }))
-    },
-    {
-      id: "absence_makeup",
-      title: "결석보강",
-      subtitle: activeDeferredAbsenceItems.length
-        ? `7일 초과 미래 결석 ${activeDeferredAbsenceItems.length}건은 접어두었습니다.`
-        : "결석 기록을 보강 일정으로 전환합니다.",
-      count: visibleAbsenceSupplementItems.length,
-      emptyText: "지금 처리할 결석 보강이 없습니다.",
-      items: visibleAbsenceSupplementItems
-    },
-    {
-      id: "retest",
-      title: "재시험",
-      subtitle: "오답/평가 기준으로 재시험 일정을 잡습니다.",
-      count: retestRecords.length,
-      emptyText: "재시험이 없습니다.",
-      items: retestRecords.map((record) => ({
-        id: record.lessonStudentRecordId,
-        studentId: record.studentId,
-        title: lessonLabel(record.lessonId),
-        meta: "재시험 필요",
-        task: {
-          taskType: "retest",
-          studentId: record.studentId,
-          sourceId: record.lessonStudentRecordId,
-          sourceLabel: lessonLabel(record.lessonId),
-          reason: "재시험 필요"
-        }
-      }))
+  const homeworkSupplementItems = makeupHomeworks.map((homework) => ({
+    id: homework.homeworkId,
+    studentId: homework.studentId,
+    title: homework.title,
+    meta: `${homework.dueDate || homework.assignedDate || "-"} 기준 · ${getHomeworkMakeupReason(homework, records)}`,
+    task: {
+      taskType: "homework_makeup",
+      studentId: homework.studentId,
+      sourceId: homework.homeworkId,
+      sourceDate: homework.assignedDate || homework.dueDate || "",
+      sourceDueDate: homework.dueDate || "",
+      sourceLabel: homework.title,
+      supplementHomeworkNote: homework.title,
+      reason: getHomeworkMakeupReason(homework, records),
+      supplementMethod: "arrival_makeup"
     }
-  ];
-  const supplementTabs = supplementTabDefinitions.map((tab) => {
-    const items = tab.items.filter((item) => findSupplementTaskForCandidate(tasks, item.task)?.status !== "done");
-    return { ...tab, count: items.length, items };
+  }));
+  const retestSupplementItems = retestRecords.map((record) => ({
+    id: record.lessonStudentRecordId,
+    studentId: record.studentId,
+    title: lessonLabel(record.lessonId),
+    meta: "재시험 필요",
+    task: {
+      taskType: "retest",
+      studentId: record.studentId,
+      sourceId: record.lessonStudentRecordId,
+      sourceLabel: lessonLabel(record.lessonId),
+      reason: "재시험 필요"
+    }
+  }));
+  const {
+    activeTab: activeTabData,
+    tabs: supplementTabs
+  } = createSupplementCenterTabViewModel({
+    absenceItems: visibleAbsenceSupplementItems,
+    activeDeferredAbsenceCount: activeDeferredAbsenceItems.length,
+    activeTabId: activeSupplementTab,
+    homeworkItems: homeworkSupplementItems,
+    retestItems: retestSupplementItems,
+    tasks
   });
-  const activeTabData = supplementTabs.find((tab) => tab.id === activeSupplementTab) ?? supplementTabs[0];
   const historyCutoffDate = addDaysInKorea(today, -30);
   const recentSupplementTasks = tasks
     .filter((task) => {

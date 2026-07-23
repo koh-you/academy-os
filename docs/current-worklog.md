@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-32 보충관리 세 탭 표시 모델 분리 — AI gate 통과
+
+- 코드: 숙제보충·결석보강·재시험의 탭 ID/제목/설명/빈 문구, 완료된 기존 task 제외, count 재계산, 활성 탭 선택과 잘못된 ID의 숙제보충 fallback을 `createSupplementCenterTabViewModel`로 `supplementCenterTabModel.js`에 이동했다.
+- 동작 보존: 7일 초과 미래 결석 수에 따른 결석보강 설명, 세 탭 순서, identity가 같은 완료 task의 목록 제외, 재시험 빈 문구 `재시험이 없습니다.`를 그대로 유지한다.
+- 저장 원천/side effect: 모델은 이미 계산된 candidate item과 task 배열만 읽는다. React state, clock, API, Supabase, notification/Solapi 호출이 없다.
+- 자동검증: 숙제 완료 제외, 활성 결석 유지, 미래 결석 2건 설명, 재시험 fixture 1건, 재시험 0건 빈 상태, 잘못된 탭 fallback을 fixture로 검증했다. production scenario `88b-47`, production 413/413, build, `git diff --check`가 통과했고 기존 대형 chunk 경고만 남았다.
+- gate 판정: 실제 화면의 재시험 0건 상태와 fixture 1건을 모두 순수 계산으로 검증했다. 운영 데이터 생성이나 사람 조작 없이 AI gate로 통과했다.
+- 다음 경계: 숙제보충·결석보강·재시험 candidate item builder를 순수 모델로 분리할 수 있는지 inventory한다.
+
 ## 2026-07-23 P1. 12R-31 보충 후보 identity·상세 선택 모델 분리 — AI gate 통과
 
 - 코드: 보충 후보의 `taskType:studentId:sourceId` key, 기존 task 탐색, 로컬 생성 초안 object, 선택 학생·탭·row key에 맞는 상세 task 조합을 `supplementCenterSelectionModel.js`의 순수 함수로 이동했다. 내비 배지와 보충 목록은 같은 `findSupplementTaskForCandidate`를 공유한다.

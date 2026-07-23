@@ -14,7 +14,7 @@
 
 11B-1 코드 이동 후 학생 일정·학부모 일정·학생 11시의 OS row/Solapi 그룹 예약·취소 대조는 반 미지정 고태영 테스트 학생과 사용자 통제 번호로 통과했습니다. 학생 포털 실제 쓰기 검수, 교사 bearer/Storage 소유권 보안 gate, Solapi 특강 템플릿 외부 검수는 별도 보류 상태입니다.
 
-App.jsx 보충관리 리팩터링은 최신 `origin/main`에 rebase한 뒤 `12R-10~20` local state/표시 모델, `12R-21~25` 다섯 실제 action의 modal adapter, `12R-26~27` local draft 변경과 완료·일정 확인창 submit adapter를 분리했다. 12R-28에서는 334줄 규모의 `SupplementStudentModal` 본체를 전용 파일로 옮겼고, 12R-29~30에서는 `SupplementCenter`의 모달 action adapter 네 개와 목록 카드 완료 확인 submit adapter를 분리했다. 12R-31에서는 후보 key·기존 task 찾기·로컬 생성 초안·선택된 상세 task 조합을 순수 모델로 이동했다. 실제 task/lesson/출결 저장·Supabase 재조회·React 전역 갱신·notification/Solapi 작업은 App callback 경계에 남고 모델에는 React state·clock·API·외부 side effect가 없다. 재시험 fixture를 포함한 production 412/412, build를 근거로 AI gate를 통과했다. 다음은 숙제보충·결석보강·재시험 후보와 탭 표시 derivation의 순수 분리 가능성을 inventory한다.
+App.jsx 보충관리 리팩터링은 최신 `origin/main`에 rebase한 뒤 `12R-10~20` local state/표시 모델, `12R-21~25` 다섯 실제 action의 modal adapter, `12R-26~27` local draft 변경과 완료·일정 확인창 submit adapter를 분리했다. 12R-28에서는 334줄 규모의 `SupplementStudentModal` 본체를 전용 파일로 옮겼고, 12R-29~30에서는 `SupplementCenter`의 modal/list action adapter를 분리했다. 12R-31에서는 후보 identity·로컬 초안·상세 선택을 순수 모델로 옮겼고, 12R-32에서는 세 탭 정의·완료 제외·활성 탭 fallback을 순수 탭 모델로 분리했다. 실제 task/lesson/출결 저장·Supabase 재조회·React 전역 갱신·notification/Solapi 작업은 App callback 경계에 남고 모델에는 React state·clock·API·외부 side effect가 없다. 재시험 0건/1건 fixture를 포함한 production 413/413, build를 근거로 AI gate를 통과했다. 다음은 숙제보충·결석보강·재시험 candidate item builder의 순수 분리 가능성을 inventory한다.
 
 ## 시험분석 GPT Image 전용 세션 참고 자료
 
