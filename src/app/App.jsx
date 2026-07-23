@@ -51,6 +51,7 @@ import {
   NoticeWorkspaceTabs
 } from "../domains/notifications/NotificationCenterNavigation.jsx";
 import { NotificationComposerPanel } from "../domains/notifications/NotificationComposerPanel.jsx";
+import { NotificationHistoryRow } from "../domains/notifications/NotificationHistoryRow.jsx";
 import { NotificationRecipientPanel } from "../domains/notifications/NotificationRecipientPanel.jsx";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { createSupplementSchedulePersistencePlan } from "../domains/supplements/supplementSchedulePlan.js";
@@ -10878,44 +10879,22 @@ function NotificationCenter({
             <EmptyState as="p" className="emptyState">알림톡 발송 기록이 없습니다.</EmptyState>
           ) : (
             filteredNotificationJobs.map((job) => (
-              <article className="notificationTableRow" key={job.notificationJobId}>
-                <span className={`statusPill status-${getNotificationJobStatusClass(job)}`}>{formatNotificationJobStatus(job) || getNotificationStatusLabel(job.status)}</span>
-                <span className="notificationJobTypeCell">
-                  <strong>{getNotificationJobLabel(job.notificationType)}</strong>
-                  {getNotificationJobProviderReference(job) ? <small>Solapi {getNotificationJobProviderReference(job)}</small> : null}
-                </span>
-                <span>{studentName(job.studentId, job.payload)}</span>
-                <span>{job.scheduledAt ? formatKoreaTimeLabel(job.scheduledAt) : job.createdAt ? formatKoreaTimeLabel(job.createdAt) : "-"}</span>
-                <span>{job.recipient || "번호 없음"}</span>
-                <p>
-                  {job.error ? `오류: ${job.error}` : job.previewBody || job.payload?.message || "미리보기 없음"}
-                </p>
-                <span className="notificationJobActions">
-                  {canCancelNotificationJob(job) ? (
-                    <button
-                      className="dangerSoftButton compact"
-                      disabled={deletingJobId === job.notificationJobId}
-                      onClick={() => cancelNotificationJob(job)}
-                      type="button"
-                    >
-                      {deletingJobId === job.notificationJobId ? "취소 중" : "예약 취소"}
-                    </button>
-                  ) : null}
-                  {canDeleteNotificationJob(job) ? (
-                    <button
-                      className="dangerSoftButton compact"
-                      disabled={deletingJobId === job.notificationJobId}
-                      onClick={() => deleteNotificationJob(job)}
-                      type="button"
-                    >
-                      {deletingJobId === job.notificationJobId ? "삭제 중" : "삭제"}
-                    </button>
-                  ) : null}
-                  {!canCancelNotificationJob(job) && !canDeleteNotificationJob(job) ? (
-                    <small>보관</small>
-                  ) : null}
-                </span>
-              </article>
+              <NotificationHistoryRow
+                canCancelJob={canCancelNotificationJob}
+                canDeleteJob={canDeleteNotificationJob}
+                deletingJobId={deletingJobId}
+                formatJobStatus={formatNotificationJobStatus}
+                formatTimeLabel={formatKoreaTimeLabel}
+                getJobLabel={getNotificationJobLabel}
+                getProviderReference={getNotificationJobProviderReference}
+                getStatusClass={getNotificationJobStatusClass}
+                getStatusLabel={getNotificationStatusLabel}
+                job={job}
+                key={job.notificationJobId}
+                onCancelJob={cancelNotificationJob}
+                onDeleteJob={deleteNotificationJob}
+                studentName={studentName}
+              />
             ))
           )}
         </div>
