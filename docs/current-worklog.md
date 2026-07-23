@@ -7,7 +7,7 @@
 - 보강 결과: 프론트와 서버가 같은 재조회 검증 필드 목록을 사용해 숙제 후속처리 3개, 수업메모, 작성창 가져오기 2개, 이전 메모 확인 3개를 모두 대조한다. payload에 포함된 필드만 검증해 부분 저장을 깨뜨리지 않는다. boolean은 실제 참/거짓으로, 확인 시각은 ISO 시각으로 정규화해 `Z`와 `+00:00`처럼 같은 시각의 표현 차이는 허용하고 의미가 다른 값만 실패시킨다.
 - 완료/실패 계약: API는 Supabase 재조회 row와 요청값이 모두 일치한 뒤에만 성공 record를 반환하고, 프론트도 같은 필드가 일치해야 `저장 완료`로 전환한다. 하나라도 다르면 `저장 실패`로 남기고 수업메모 local draft와 모달을 유지한다.
 - 저장 원천/외부 영향: 직접 원천은 기존 `lesson_student_records`이며 새 SQL은 없다. `student_comment/teacher_comment`, `notification_jobs`, Solapi 예약·발송·취소, 출결, 숙제 원천은 변경하거나 실행하지 않았다.
-- AI 검증: `git diff --check`, `node --check api/routes/coreData.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 366/366, `npm run build`를 통과했다. 기존 Vite chunk size 경고만 남았다.
+- AI 검증: `git diff --check`, `node --check api/routes/coreData.js`, `node --check api/server.js`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 366/366, `npm run build`를 통과했다. 운영 서버 반영을 읽기 전용으로 구분할 수 있도록 `/health.features.lessonMemoSaveVerification=memo_flags_ack_requery` marker도 추가했다. 기존 Vite chunk size 경고만 남았다.
 - 사람 gate: 삭제 가능한 미래 테스트 수업의 학생 한 명에서 메모와 학생·학부모 가져오기 체크를 바꿔 저장한 뒤 `저장 완료`를 확인하고 새로고침한다. 메모와 두 체크가 그대로여야 한다. 이어 확인할 이전 메모가 있는 학생에서 `확인 후 숨기기`를 누르고 저장 완료 후 새로고침해 `!`가 다시 나타나지 않는지 확인한다. 이 과정에서 저장된 학생·학부모 최종 문구와 기존 Solapi 예약은 그대로여야 한다.
 - 중단 조건: 저장 완료인데 메모/체크/확인값이 새로고침 후 되돌아감, 같은 시각 형식 차이만으로 저장 실패, 실패 시 draft나 모달이 사라짐, 메모 저장만으로 최종 문구나 notification job/Solapi 그룹이 바뀌면 다음 보강으로 넘어가지 않는다.
 - 다음 보강 순서: 이번 gate 통과 후 `이전 메모 확인 범위를 수업 연속성 그룹별로 제한할지 결정 + 잘못 확인한 메모 다시 표시`, 그다음 `X 닫기/저장 의미 분리`, `새로고침 draft 복구`, `다중 탭 updatedAt/version 충돌 방지`, 마지막으로 `!` 의미와 긴 안내문 compact화`를 한 단위씩 진행한다.
