@@ -78,7 +78,13 @@
 - 예약 응답 job 우선, 원본 fallback, 예외 전파를 네트워크 없는 injected request fixture로 고정했다.
 - 실제 즉시발송·예약 loop, 실패 job 조립, local state/feedback/requery는 App에 유지한다.
 
+## 13C-3 즉시발송 action 단위
+
+- 즉시발송 guard, 순차 대상 처리, 성공/dry-run/timeout/실패 기록, 집계와 UI 완료 순서를 `sendNoticeNowAction`으로 이동했다.
+- App이 builder, 실제 45초 request, persist, timeout 판정, state setter와 refresh를 모두 주입한다.
+- 4개 결과 분기와 기록 실패, filter 우선순위, guard/finally를 mock fixture로 고정했고 실제 발송·운영 row 변경은 없다.
+
 ## 다음 후보
 
-1. `sendNoticeNow`의 success/timeout/failure/record failure 순서를 주입형 action으로 분리하고 mock fixture로 고정한다.
-2. 예약 loop는 즉시발송 action과 별도 단위로 분리해 외부 side effect와 사람 gate 필요성을 다시 판정한다.
+1. `scheduleNotice`의 과거시각 차단, 예약 성공/실패, 실패 job 기록, local update와 완료 UI 순서를 injected action으로 분리한다.
+2. 취소·삭제·결과 reconcile과 AI 수정은 서로 다른 side effect이므로 각각 별도 단위로 판정한다.
