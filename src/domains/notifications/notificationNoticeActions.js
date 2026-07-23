@@ -306,3 +306,15 @@ export async function cancelNoticeJobAction({
     setDeletingJobId("");
   }
 }
+
+export function refreshNoticeJobsInBackgroundAction({
+  refreshJobs,
+  setDispatchMessage
+}) {
+  Promise.resolve(refreshJobs?.()).catch((error) => {
+    setDispatchMessage(
+      (current) =>
+        `${current || "처리는 완료됐습니다."} 발송 기록 새로고침 실패: ${error.message}`
+    );
+  });
+}

@@ -85,6 +85,7 @@ import {
   deleteNoticeJobAction,
   polishNoticeMessageAction,
   reconcileNoticeResultsAction,
+  refreshNoticeJobsInBackgroundAction,
   scheduleNoticeAction,
   sendNoticeNowAction
 } from "../domains/notifications/notificationNoticeActions.js";
@@ -11886,7 +11887,10 @@ function NotificationCenter({
   }
 
   function refreshNoticeJobsInBackground() {
-    refreshHistoryForDate();
+    refreshNoticeJobsInBackgroundAction({
+      refreshJobs: refreshHistoryForDate,
+      setDispatchMessage
+    });
   }
 
   async function sendNoticeNow() {

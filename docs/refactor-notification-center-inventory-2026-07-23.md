@@ -126,8 +126,14 @@
 - App이 취소 가능 판정, 브라우저 confirm, 실제 취소 callback과 local/UI setter를 주입한다. 실제 API/Supabase/Solapi orchestration은 callback 경계에 남는다.
 - Solapi 그룹 취소, OS-only 취소, 잘못된 결과, callback 미연결, guard와 confirm 거절을 mock fixture로 고정했고 실제 외부 취소는 없다.
 
+## 13C-11 background refresh action 단위
+
+- 발송 기록 background refresh와 비동기 실패 feedback append를 `refreshNoticeJobsInBackgroundAction`으로 이동했다.
+- App이 실제 refresh callback과 dispatch setter를 주입하고 action은 React/API를 직접 소유하지 않는다.
+- 성공·비동기 실패·callback 없음·기존 동기 throw 계약을 mock fixture로 고정했고 실제 재조회는 없다.
+
 ## 다음 후보
 
-1. background 발송 기록 refresh의 Promise 오류 처리와 feedback append를 injected action/helper로 분리한다.
-2. 그다음 공지 template/config와 local selection helper를 낮은 위험도부터 분리한다.
+1. `noticeMessageTemplates`와 notification job label/status/status-class helper를 config/model 파일로 이동한다.
+2. 그다음 local selection helper를 낮은 위험도로 분리한다.
 3. 특강 안내문 적용 handler는 Solapi 특강 템플릿 외부 검수와 기능 경계를 바꾸지 않는 범위만 다룬다.
