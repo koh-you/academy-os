@@ -68,10 +68,17 @@
 - deterministic fixture는 퇴원/다른 반 제외, 고사 fallback, dedupe, 수학 일정·일반 문구 검색, 보이지 않는 modal row 차단, 표시 row만의 저장 상태 집계를 검증한다.
 - 새 model에는 React state/effect와 fetch/postJson이 없다. production scenario 468/468, build, `git diff --check`를 통과했고 추가 사람 gate는 없다.
 
+## 14A-4 시험 후 제출 teacher manager
+
+- 완료: 교사의 셀프체크 대상 선택, 제출 통계·내용·첨부 링크, 교사 확인 버튼과 저장 feedback을 `ExamPostSubmissionManager.jsx`로 이동했다.
+- App이 대상 builder, 학교/학년 match, 수학 일정/label formatter, 파일 URL builder, 대상 app_state setter와 교사 확인 callback을 모두 주입한다.
+- 새 component에는 state/effect/fetch/postJson/API 경로가 없고 기존 callback만 호출한다. 학생 제출·Storage 업로드/열기·교사 확인 API 구현은 원래 경계에 남는다.
+- production scenario 469/469, build, `git diff --check`를 통과했다. 실제 학생/Storage 작업을 하지 않았으므로 기존 학생 포털 실제 쓰기와 bearer/Storage 사람 gate는 통과로 바꾸지 않는다.
+
 ## 이후 후보와 중단 조건
 
-1. 시험 후 제출 teacher 표시 shell
-2. 시험 후 총평 draft/action
+1. 시험 후 총평 순수 draft helper
+2. 시험 후 총평 local state/AI action
 3. 시험정보 저장·삭제·수업 reconcile orchestration
 
 학생 제출·교사 확인·Storage 파일 열기 경계를 건드리면 기존 학생 포털 실제 쓰기와 bearer/Storage gate에서 중단한다. 시험정보 삭제나 시험대비 수업 생성·삭제를 옮길 때는 별도의 격리 데이터와 사람 gate가 필요하다. 순수 표시/model 단위는 deterministic fixture와 production test/build로 검증하고 운영 데이터를 만들지 않는다.
