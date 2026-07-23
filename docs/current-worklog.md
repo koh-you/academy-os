@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13F-11 알림 Solapi 예약 취소 binding 분리 — AI gate 통과
+
+- 코드: App의 `cancelNotificationJob` wrapper를 `createCancelNoticeJobBinding`으로 이동했다. history hook의 busy/feedback/filter/local job 상태와 composer hook의 background refresh를 한 hook에 합쳐 순환시키지 않고, 독립 factory가 현재 action option을 캡처한다.
+- 동작 보존: 취소 가능/busy guard, 브라우저 confirm, 기존 `onCancelNotificationJob` 호출 사유, OS `canceled` 상태 재확인, local upsert, draft filter/history open, background refresh, Solapi 그룹 유무별 완료 문구, 실패와 `finally` busy 해제를 그대로 유지했다.
+- 저장 원천/side effect: 실제 버튼을 누르면 기존 서버 callback이 Solapi 예약 그룹과 Supabase `notification_jobs`를 취소하지만 이번 검증은 injected cancel callback mock만 사용했다. 운영 예약 취소, 운영 데이터 생성, 재시험/고태영 데이터, 실제 번호·발송은 실행하지 않았다.
+- 자동검증: factory가 선택한 job과 고정 취소 사유를 기존 action으로 전달하는지 직접 fixture를 추가하고 기존 성공·OS-only·잘못된 취소 결과·callback 누락·guard·confirm 취소를 재검증했다. production scenario 466/466와 build, `git diff --check`가 통과했다.
+- gate 판정: 외부 callback과 상태 전이를 전부 mock으로 재현했고 실제 예약·문구·화면 구조를 바꾸지 않았으므로 새 사람 검수는 필요하지 않다.
+- 다음 경계: `NotificationCenter`의 남은 App 소유 로직을 다시 inventory한다. 특강 안내문 적용 handler는 Solapi 특강 템플릿 외부 검수 gate 때문에 이동하지 않으며, 그 외 독립 의미 단위가 없으면 로드맵 13의 안전 경계를 닫는다.
+
 ## 2026-07-23 P1. 13F-10 알림 이력 삭제 binding 분리 — AI gate 통과
 
 - 코드: App의 `deleteNotificationJob` wrapper를 `useNotificationHistoryState`로 이동했다. App은 삭제 가능 판정, 브라우저 confirm, 기존 `deleteNoticeJobRequest` callback과 기록 refresh만 주입하고 hook은 자신이 소유한 `deletingJobId`·결과 상태 setter와 `deleteNoticeJobAction`을 결합한다.

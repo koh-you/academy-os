@@ -276,8 +276,14 @@
 - App은 삭제 가능 판정, 브라우저 confirm, 기존 delete request와 refresh callback만 주입하고 hook이 local busy/feedback 상태와 기존 action을 결합한다.
 - 삭제 가능/중복 guard, 일반·확인 필요 이력별 문구, confirm 취소, DELETE 성공·재조회, 실패와 busy 복구를 기존 action/API mock fixture로 검증했다. 실제 운영 이력 삭제는 없다.
 
+## 13F-11 Solapi 예약 취소 action binding 단위
+
+- App의 알림 이력 Solapi 예약 취소 wrapper를 독립 `createCancelNoticeJobBinding` factory로 이동했다.
+- history hook의 busy/feedback/local job 상태와 composer hook의 background refresh를 한쪽 hook에 합치지 않고 현재 action option만 캡처해 hook 순환을 피했다.
+- 선택 job과 고정 취소 사유 전달, 성공·Solapi 그룹 없음·결과 불일치·callback 누락·guard·confirm 취소를 mock fixture로 검증했다. 실제 Solapi/Supabase 취소는 없다.
+
 ## 다음 후보
 
-1. App의 Solapi 예약 취소 wrapper는 history state와 composer background refresh를 함께 사용하므로 hook 순환을 만들지 않는 독립 binding으로 기존 action option을 캡처한다.
+1. `NotificationCenter`에 남은 App 소유 함수·상태·외부 callback을 다시 inventory하고 추가 독립 단위가 있는지 확인한다.
 2. 특강 안내문 적용 문구와 handler는 외부 템플릿 gate 때문에 App에 그대로 둔다.
-3. 이후 action adapter 이동은 기존 mock fixture가 충분한지 먼저 확인하고, 충분하지 않으면 로드맵 13의 안전한 경계를 닫는다.
+3. 남은 로직이 특강 gate 또는 화면 전체 조립뿐이면 로드맵 13의 안전한 경계를 닫고 로드맵 14 착수 전 source/side-effect inventory로 넘어간다.
