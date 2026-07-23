@@ -56,6 +56,7 @@ import {
   createHomeworkSupplementItems,
   createRetestSupplementItems
 } from "../domains/supplements/supplementCenterCandidateModel.js";
+import { SupplementCandidateRow } from "../domains/supplements/SupplementCandidateRow.jsx";
 import {
   createPendingSupplementTask,
   createSelectedSupplementTasksViewModel,
@@ -22128,46 +22129,17 @@ function SupplementCenter({
     const taskProgress = getSupplementTaskProgress(existingTask, lessons);
     const rowAction = supplementRowActions[getSupplementActionKey(existingTask ?? item.task)];
     return (
-      <article className={item.isFutureDeferred ? "candidateItem supplementRowItem futureDeferred" : "candidateItem supplementRowItem"} key={item.id}>
-        <div>
-          <button className="textLinkButton" onClick={() => openCandidateReview(item)} type="button">
-            {studentName(item.studentId)}
-          </button>
-          <span>{item.title}</span>
-          <small>{item.meta}</small>
-          {item.futureMeta ? <small className="supplementFutureHint">{item.futureMeta}</small> : null}
-          {existingTask ? (
-            <span className={`supplementProgressBadge ${taskProgress.tone}`}>
-              {taskProgress.label}
-              {taskProgress.detail ? <b>{taskProgress.detail}</b> : null}
-            </span>
-          ) : null}
-          {existingTask?.supplementProgressMemo?.trim() ? (
-            <small className="supplementMemoPreview">메모: {existingTask.supplementProgressMemo}</small>
-          ) : null}
-          {rowAction?.message ? (
-            <small className={`supplementRowActionState ${rowAction.state}`}>{rowAction.message}</small>
-          ) : null}
-        </div>
-        <button
-          className={existingTask ? "softButton subtle" : "softButton"}
-          onClick={() => openCandidateReview(item)}
-          type="button"
-        >
-          {existingTask ? "상세 검토" : "보충 생성"}
-        </button>
-        {existingTask ? (
-          <button
-            className="passButton"
-            disabled={passBusyTaskId === (existingTask.makeupTaskId || "")}
-            onClick={() => openPassConfirm(existingTask, item)}
-            title="보충 완료 처리"
-            type="button"
-          >
-            보충 완료 처리
-          </button>
-        ) : null}
-      </article>
+      <SupplementCandidateRow
+        existingTask={existingTask}
+        isPassBusy={passBusyTaskId === (existingTask?.makeupTaskId || "")}
+        item={item}
+        key={item.id}
+        onOpen={() => openCandidateReview(item)}
+        onPass={() => openPassConfirm(existingTask, item)}
+        rowAction={rowAction}
+        studentName={studentName(item.studentId)}
+        taskProgress={taskProgress}
+      />
     );
   }
 

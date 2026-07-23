@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-36 보충 후보 행 표시 컴포넌트 분리 — AI gate 통과
+
+- 코드: 보충 후보의 학생명·제목·meta·미래 결석 안내·진행 badge·메모·행 action 상태와 `상세 검토/보충 생성`, `보충 완료 처리` 버튼 JSX를 `SupplementCandidateRow.jsx`로 이동했다. App은 기존 task 탐색, 진행 상태 계산, busy 판정과 open/pass callback을 계속 소유한다.
+- 동작 보존: 미래 결석 class, 학생명과 주 action의 같은 상세 열기 callback, 기존 task일 때만 진행·메모·완료 버튼 표시, task ID별 완료 busy disabled, 모든 문구와 CSS class를 그대로 유지한다.
+- 저장 원천/side effect: 새 컴포넌트는 전달된 표시값과 callback만 사용한다. React state/hook, API, Supabase, notification/Solapi, clock 호출이 없고 실제 저장·완료 처리는 App callback 경계에 남는다.
+- 자동검증: 기존 scenario `21`, `31`, `88b`, `88b-1`이 새 파일까지 같은 계약을 검사하도록 갱신하고 callback-only scenario `88b-51`을 추가했다. production scenario 417/417, build, `git diff --check`가 통과했고 기존 대형 chunk 경고만 남았다.
+- gate 판정: 표시 JSX 이동이며 운영 데이터·재시험 데이터 생성·외부 발송이 필요 없다. 사람 조작 없이 AI gate로 통과했다.
+- 다음 경계: `SupplementCenter` 본체의 props·local state·App helper 의존성을 inventory하고, side effect callback을 주입한 채 안전하게 컴포넌트 본체를 이동할 수 있는지 판정한다.
+
 ## 2026-07-23 P1. 12R-35 최근 한 달 보충내역 selector 분리 — AI gate 통과
 
 - 코드: history 기준 timestamp 우선순위를 `getSupplementHistoryTimestamp`로 명시하고, 30일 cutoff 필터와 최신순 정렬을 `selectRecentSupplementTasks`로 기존 `supplementHistory.js`에 이동했다. App은 오늘에서 30일 전 날짜만 계산해 전달한다.
