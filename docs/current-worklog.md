@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-31 보충 후보 identity·상세 선택 모델 분리 — AI gate 통과
+
+- 코드: 보충 후보의 `taskType:studentId:sourceId` key, 기존 task 탐색, 로컬 생성 초안 object, 선택 학생·탭·row key에 맞는 상세 task 조합을 `supplementCenterSelectionModel.js`의 순수 함수로 이동했다. 내비 배지와 보충 목록은 같은 `findSupplementTaskForCandidate`를 공유한다.
+- 동작 보존: 기존 task는 세 identity 필드가 모두 같은 첫 항목을 선택한다. 로컬 초안의 ID·상태·일정 기본값·숙제 seed·생성시각·local flag와 task override 순서, 완료 task 제외, pending 초안과 persisted task 중복 차단을 그대로 유지한다.
+- 저장 원천/side effect: 모델은 전달받은 배열·문자열만 계산한다. React state, clock, API, Supabase, notification/Solapi 호출이 없으며 `Date.now`와 생성시각은 App 경계에서 주입한다.
+- 자동검증: 실제 화면에 현재 없는 `retest` fixture로 key·기존 task 찾기·로컬 초안 전체 필드·선택 학생/탭/row 일치·완료 제외·pending 중복·불일치를 검증했다. 기존 scenario `88b`, `88b-1`, `88c`의 탐색 범위를 분리 파일까지 확장하고 `88b-46` 순수 경계 검사를 추가했다. production 412/412, build, `git diff --check`가 통과했고 기존 대형 chunk 경고만 남았다.
+- gate 판정: 순수 derivation이고 fixture가 재시험 빈 화면을 대신해 모든 분기를 검증한다. 새 운영 데이터나 사람 조작 없이 AI gate로 통과했다.
+- 다음 경계: 숙제보충·결석보강·재시험 후보와 탭 표시 derivation을 순수 모델로 분리할 수 있는지 inventory한다.
+
 ## 2026-07-23 P1. 12R-30 보충 목록 완료 확인 submit adapter 분리 — AI gate 통과
 
 - 코드: `SupplementCenter` 목록 카드의 `보충 완료 처리` 확인창 submit 함수를 `createSupplementCenterPassConfirmationHandler`로 기존 `supplementCenterModalActionController.js`에 이동했다.

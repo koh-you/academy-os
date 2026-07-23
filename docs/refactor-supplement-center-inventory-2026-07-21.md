@@ -315,6 +315,15 @@
 - 이전 실제 완료·새로고침 사람 gate와 동일 callback 경계이므로 새 운영 데이터나 사람 조작 없이 AI gate로 통과했다.
 - 다음은 후보·탭 표시 모델의 순수 함수 분리 가능성을 inventory한다.
 
+## 12R-31 구현 결과 — 보충 후보 identity·상세 선택 모델
+
+- 후보의 세 필드 key, 기존 task 탐색, 로컬 생성 초안 object, 선택 학생·탭·row key에 맞는 persisted/pending 상세 task 조합을 `supplementCenterSelectionModel.js`로 이동했다.
+- 기존 task 첫 일치, 로컬 초안 기본값과 task override, 완료 제외, pending/persisted 중복 차단을 보존했다. ID와 생성시각 clock은 App에서 계산해 순수 모델에 전달한다.
+- 모델에는 React state·API·Supabase·notification/Solapi와 clock 호출이 없다. 내비 배지와 보충 목록은 같은 기존 task selector를 공유한다.
+- 현재 운영 화면에 없는 재시험을 fixture로 만들어 key·초안·선택·완료 제외·중복·불일치를 검증했다. production scenario `88b-46`, production 412/412, build, diff 검사를 통과했다.
+- 순수 derivation을 fixture가 전부 검증하므로 새 운영 데이터나 사람 조작 없이 AI gate로 통과했다.
+- 다음은 숙제보충·결석보강·재시험 후보와 탭 표시 derivation을 순수 모델로 분리할 수 있는지 inventory한다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.
