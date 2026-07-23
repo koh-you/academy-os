@@ -222,8 +222,14 @@
 - hook은 기존 `applyNoticeTemplateAction`을 local setter와만 결합한다.
 - 특강 적용 handler·외부 template ID·발송 경로는 변경하지 않았다.
 
+## 13F-2 identity bound callback 단위
+
+- 학생 이름과 audience 전화번호 resolver의 App wrapper를 recipient hook으로 이동했다.
+- hook은 주입된 students와 pure resolver를 결합해 panel callback을 반환한다.
+- 학생/전화번호 원천이나 발송 경로를 쓰지 않는다.
+
 ## 다음 후보
 
-1. 학생 이름·audience 전화번호 순수 resolver를 recipient/history hook의 bound callback으로 제공한다.
+1. clock/random/현재시각을 순수 notice job builder에 주입하는 binding을 composer hook으로 이동한다.
 2. 특강 안내문 적용 문구와 handler는 외부 템플릿 gate 때문에 App에 그대로 둔다.
-3. 이후 job builder/request/action adapter 이동은 기존 mock fixture가 충분한지 먼저 확인하고, 충분하지 않으면 로드맵 13의 안전한 경계를 닫는다.
+3. 이후 request/action adapter 이동은 기존 mock fixture가 충분한지 먼저 확인하고, 충분하지 않으면 로드맵 13의 안전한 경계를 닫는다.

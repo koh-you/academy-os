@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import {
   createNotificationRecipientViewModel,
   filterNoticeSelectedStudentIds,
+  resolveNotificationAudiencePhone,
+  resolveNotificationStudentName,
   selectAllNoticeStudentIds,
   toggleNoticeSelectedStudentId
 } from "./notificationCenterModel.js";
@@ -58,10 +60,23 @@ export function useNotificationRecipientState({
     setSelectedStudentIds([]);
   }
 
+  function studentName(studentId, payload) {
+    return resolveNotificationStudentName({
+      payload,
+      studentId,
+      students
+    });
+  }
+
+  function getNoticeAudiencePhone(student, audience) {
+    return resolveNotificationAudiencePhone(student, audience);
+  }
+
   return {
     ...recipientViewModel,
     classFilter,
     clearSelectedStudents,
+    getNoticeAudiencePhone,
     noticeRecipientMode,
     searchText,
     selectAllVisibleStudents,
@@ -69,6 +84,7 @@ export function useNotificationRecipientState({
     setClassFilter,
     setNoticeRecipientMode,
     setSearchText,
+    studentName,
     toggleStudentSelection
   };
 }

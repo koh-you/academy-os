@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13F-2 알림 identity bound callback 분리 — AI gate 통과
+
+- 코드: App의 `studentName(studentId, payload)`와 `getNoticeAudiencePhone(student, audience)` wrapper를 `useNotificationRecipientState`로 이동했다. hook은 이미 주입받은 students 원천과 기존 순수 resolver를 결합해 두 callback을 반환한다.
+- 동작 보존: 발송 당시 payload 이름→현재 학생 이름→`학생` fallback과, audience가 `student`일 때 학생 번호·그 외 학부모 번호를 선택하는 기존 우선순위를 그대로 유지했다.
+- 저장 원천/side effect: callback은 payload/students/전화 필드를 읽어 문자열만 반환한다. 학생 원천·전화번호·local state·API/Supabase/notification job/Solapi를 변경하지 않는다.
+- 자동검증: 세 이름 fallback과 학생/학부모/default 번호 분기 equality fixture를 유지하고, hook binding→App panel callback 경계와 외부 호출 부재를 production scenario 456개로 고정했다. production scenario 456/456와 build, `git diff --check`가 통과했다.
+- gate 판정: resolver 입력 전 범위가 deterministic fixture로 재현되고 callback은 read-only다. 재시험/고태영 운영 데이터, 실제 번호 사용·발송, 사람 화면 검수가 필요하지 않은 AI gate다.
+- 다음 경계: clock/random을 App에서 생성해 순수 `createNotificationNoticeJob`에 주입하는 `buildNoticeJob` binding을 composer hook으로 이동할 수 있는지 확인한다.
+
 ## 2026-07-23 P1. 13F-1 알림 template local action adapter 분리 — AI gate 통과
 
 - 코드: App의 `applyNoticeTemplate` wrapper를 `useNotificationComposerState` 안으로 이동하고, App이 `noticeMessageTemplates` config를 hook에 주입해 반환된 handler를 사용하도록 정리했다.
