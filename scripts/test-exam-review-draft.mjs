@@ -42,13 +42,21 @@ const difficultySection = examReviewChecklistSections[1];
 assert.equal(difficultySection.title, "난이도/체감");
 assert.equal(draft.includes("2. 난이도 :"), true);
 assert.equal(getExamReviewSectionValue(draft, difficultySection), "");
+const withDifficulty = setExamReviewSectionValue(draft, difficultySection, "후반 조건 해석에서 체감 난도가 높았음");
+assert.equal(
+  getExamReviewSectionValue(withDifficulty, difficultySection),
+  "후반 조건 해석에서 체감 난도가 높았음"
+);
+assert.equal(withDifficulty.match(/^2\.\s*난이도\s*:/gm)?.length, 1);
+assert.equal(withDifficulty.includes("2. 난이도/체감 :"), false);
 
-let blogDraft = setExamReviewSectionValue(draft, scoreSplitSection, "18~21번");
+let blogDraft = setExamReviewSectionValue(withDifficulty, scoreSplitSection, "18~21번");
 blogDraft = setExamReviewSectionValue(blogDraft, mistakeSection, "부호와 계산 실수");
 blogDraft = setExamReviewSectionValue(blogDraft, lessonSection, "오답 보충에서 재확인");
 assert.equal(
   buildExamReviewBlogSourceText(blogDraft),
   [
+    "첫 문단 총평: 후반 조건 해석에서 체감 난도가 높았음",
     "변별 포인트: 18~21번",
     "자주 틀릴 이유: 부호와 계산 실수",
     "수업/보충 연결: 오답 보충에서 재확인"

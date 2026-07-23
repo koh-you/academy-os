@@ -8,13 +8,20 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 14A-5F 시험 후 총평 난이도 저장 label 호환 수정 — AI gate 통과
+
+- 사용자 승인: 이번 리팩터링 세션에서 14A-5 fixture가 발견한 기능 불일치를 수정한 뒤 다음 의미 단위를 계속 진행한다.
+- 원인/수정: 체크리스트의 표시 title `난이도/체감`을 저장 행 탐색 정규식에도 사용해 기존 `2. 난이도 :`를 찾지 못했다. section getter/setter가 저장 원천인 `section.label`에서 항목명을 해석하도록 바꿨다.
+- 호환성: 기존 `exam_prep_rows.review` 문자열이나 문구를 migration하지 않는다. 기존 `2. 난이도 :` 값을 읽고 같은 행을 수정하며 `2. 난이도/체감 :` 중복 행을 추가하지 않는다.
+- 자동검증: 기존 label 읽기·수정, 2번 행 단일 유지, 블로그 발췌의 난이도 반영 fixture를 추가했다. production scenario 470/470, build, `git diff --check`가 통과했다.
+- 사람 gate: 순수 문자열 fixture로 기존/수정 계약을 재현했으므로 운영 시험 row 생성은 필요하지 않다. 다음은 총평 modal의 local state와 500ms 저장/AI action 경계를 다시 inventory한다.
+
 ## 2026-07-23 P1. 14A-5 시험 후 총평 순수 draft helper 분리 — AI gate 통과, 기능 불일치 발견
 
 - 코드: 체크리스트 config, 초안 생성/normalize, row scope·부교재 동기화, section 읽기/쓰기와 블로그 발췌 계산을 `src/domains/exams/examReviewDraft.js`로 이동했다.
 - 경계: 새 module에는 React state/effect, save timer, fetch/postJson, AI/Supabase 호출이 없다. 총평 modal의 local draft, 500ms 저장 callback과 `/api/ai/comment-polish`는 App에 남았다.
 - 자동검증: 자유 형식 보존, title/scope/부교재 갱신, multi-line normalize, section/블로그 발췌를 deterministic fixture로 고정했다. production 470/470, build, `git diff --check`가 통과했다.
-- 유지보수 진단: 2번 section의 title `난이도/체감`과 저장 label `2. 난이도 :`가 달라 section getter/setter 정규식이 기존 2번 줄을 찾지 못한다. 구조화 textarea에서 난이도 값이 비어 보이고 수정 시 별도 2번 줄이 추가될 수 있다.
-- 중단: 기능/문구 수정 권한이 없는 리팩터링 세션에서는 고치지 않았다. 유지보수 세션이 title/label과 기존 `exam_prep_rows.review` migration 여부를 결정해 main에 반영하기 전 총평 local state/AI action 분리를 중단한다. 사람 검수 데이터는 진단에 필요하지 않다.
+- 후속 해결: 사용자 승인으로 14A-5F에서 getter/setter가 저장 label을 기준으로 탐색하게 수정했다. 기존 row migration 없이 기존 `2. 난이도 :` 값을 읽고 같은 행을 수정하는 fixture를 통과했다.
 
 ## 2026-07-23 P1. 14A-4 시험 후 제출 teacher manager 분리 — AI gate 통과
 
