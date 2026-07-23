@@ -56,6 +56,12 @@ export function resolveNotificationStudentName({
     || "학생";
 }
 
+export function resolveNotificationAudiencePhone(student, audience) {
+  return audience === "student"
+    ? student.studentPhone
+    : student.parentPhone;
+}
+
 export function createNotificationComposerViewModel({
   formatKoreaTimeLabel,
   noticeBody = "",

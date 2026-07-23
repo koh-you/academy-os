@@ -75,6 +75,7 @@ import {
   createNotificationHistoryViewModel,
   createNotificationRecipientViewModel,
   filterNoticeSelectedStudentIds,
+  resolveNotificationAudiencePhone,
   resolveNotificationStudentName,
   selectAllNoticeStudentIds,
   toggleNoticeSelectedStudentId,
@@ -11759,7 +11760,7 @@ function NotificationCenter({
   }
 
   function getNoticeAudiencePhone(student, audience) {
-    return audience === "student" ? student.studentPhone : student.parentPhone;
+    return resolveNotificationAudiencePhone(student, audience);
   }
 
   function applyNoticeTemplate(templateId) {
