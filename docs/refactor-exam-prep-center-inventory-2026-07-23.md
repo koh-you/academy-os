@@ -61,11 +61,17 @@
 - 새 panel에는 state/effect/fetch/postJson이 없고 Google Apps Script iframe을 전달받은 URL로 표시할 뿐이다.
 - production scenario 467/467, build, `git diff --check`를 통과했다. 외부 iframe 실제 접속이나 사람 화면 gate는 필요하지 않았다.
 
+## 14A-3 시험관리 목록 display model
+
+- 완료: 활성 학생·선택 반의 학교/학년 key, 고사, 검색어로 표시 row를 고르고 수정/총평 modal row, 선택 반, 표시 row aggregate 저장 상태를 만드는 계산을 `examPrepCenterModel.js`로 이동했다.
+- App은 기존 dedupe, 학교/학년 key, 수학 일정 normalize, aggregate save-state helper를 주입하고 model 결과만 화면에 사용한다.
+- deterministic fixture는 퇴원/다른 반 제외, 고사 fallback, dedupe, 수학 일정·일반 문구 검색, 보이지 않는 modal row 차단, 표시 row만의 저장 상태 집계를 검증한다.
+- 새 model에는 React state/effect와 fetch/postJson이 없다. production scenario 468/468, build, `git diff --check`를 통과했고 추가 사람 gate는 없다.
+
 ## 이후 후보와 중단 조건
 
-1. 목록 filter/선택 row/save-state 파생 model
-2. 시험 후 제출 teacher 표시 shell
-3. 시험 후 총평 draft/action
-4. 시험정보 저장·삭제·수업 reconcile orchestration
+1. 시험 후 제출 teacher 표시 shell
+2. 시험 후 총평 draft/action
+3. 시험정보 저장·삭제·수업 reconcile orchestration
 
 학생 제출·교사 확인·Storage 파일 열기 경계를 건드리면 기존 학생 포털 실제 쓰기와 bearer/Storage gate에서 중단한다. 시험정보 삭제나 시험대비 수업 생성·삭제를 옮길 때는 별도의 격리 데이터와 사람 gate가 필요하다. 순수 표시/model 단위는 deterministic fixture와 production test/build로 검증하고 운영 데이터를 만들지 않는다.
