@@ -8,6 +8,14 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-14 보충 상세 feedback local state hook 분리 — AI gate 통과
+
+- 코드: 보충 상세 상단 성공·실패 feedback의 local React state, 기본 `success` tone 생성, 표시, 닫기 초기화를 `useSupplementFeedbackState.js`로 이동했다. App의 저장·완료·일정·결석취소 action은 기존 `showFeedback` adapter만 호출한다.
+- 동작 보존: 제목·본문·tone 객체 형태, tone 미지정 시 `success`, 닫기 시 `null` 초기화가 기존과 같다. 표시 컴포넌트와 문구는 바꾸지 않았다.
+- 저장 원천/side effect: 화면 메모리상 feedback만 소유한다. API, Supabase, `notification_jobs`, Solapi와 실제 action callback은 hook에 없다.
+- 자동검증: 기본/실패 tone fixture, production scenario `88b-29`, production 395/395, build, `git diff --check`를 통과했다. 기존 대형 chunk 경고만 남았다.
+- gate 판정: 운영 데이터·저장·발송과 무관한 local 표시 상태 분리이고 문구와 렌더 구조도 보존됐다. 사용자 지시에 따라 AI 검토로 통과하며 별도 사람 조작이나 검수 데이터는 요구하지 않는다.
+
 ## 2026-07-23 P1. 12R-13 보충 완료·일정 확인창 local state hook 분리 — AI gate 통과
 
 - 코드: 보충 완료 확인 대상과 일정 변경 확인 대상의 local React state, 열기·취소, 일정 확인 payload 조립을 `useSupplementConfirmationState.js`로 이동했다. App은 실제 완료/일정 action 호출, busy guard, API·전역 상태 adapter를 유지한다.
