@@ -77,6 +77,12 @@ import {
   createSupplementCenterModalActionHandlers,
   createSupplementCenterPassConfirmationHandler
 } from "../domains/supplements/supplementCenterModalActionController.js";
+import {
+  createPendingSupplementTask,
+  createSelectedSupplementTasksViewModel,
+  findSupplementTaskForCandidate,
+  getSupplementActionKey
+} from "../domains/supplements/supplementCenterSelectionModel.js";
 import { SupplementPassConfirmModal } from "../domains/supplements/SupplementPassConfirmModal.jsx";
 import { SupplementHistoryModal } from "../domains/supplements/SupplementHistoryModal.jsx";
 import { SupplementStudentModal } from "../domains/supplements/SupplementStudentModal.jsx";
@@ -24006,15 +24012,6 @@ function SupplementCenter({
     };
   }
 
-  function findTaskForCandidate(candidateTask) {
-    return tasks.find(
-      (task) =>
-        task.studentId === candidateTask.studentId &&
-        task.sourceId === candidateTask.sourceId &&
-        task.taskType === candidateTask.taskType
-    );
-  }
-
   function hydrateSupplementTask(task = {}) {
     if (task.taskType !== "absence_makeup") return task;
     const sourceRecord = records.find((record) => record.lessonStudentRecordId === task.sourceId);
@@ -24038,10 +24035,6 @@ function SupplementCenter({
     };
   }
 
-  function getSupplementActionKey(task = {}) {
-    return [task.taskType, task.studentId, task.sourceId].filter(Boolean).join(":");
-  }
-
   function setSupplementRowAction(task, state, message) {
     const key = getSupplementActionKey(task);
     if (!key) return;
@@ -24052,23 +24045,17 @@ function SupplementCenter({
   }
 
   function createPendingMakeupTask(task) {
-    return {
-      makeupTaskId: `makeup_${Date.now()}_${safeIdPart(task.taskType)}_${safeIdPart(task.studentId)}_${safeIdPart(task.sourceId)}`,
-      status: "draft",
+    const taskId = `makeup_${Date.now()}_${safeIdPart(task.taskType)}_${safeIdPart(task.studentId)}_${safeIdPart(task.sourceId)}`;
+    const createdAt = new Date().toISOString();
+    return createPendingSupplementTask(task, {
+      createdAt,
       scheduledDate: today,
-      scheduledTime: "",
-      supplementHomeworkNote: task.supplementHomeworkNote || task.sourceLabel || "",
-      notificationDraft: "",
-      attemptCount: 0,
-      childHomeworkIds: [],
-      createdAt: new Date().toISOString(),
-      isLocalDraftTask: true,
-      ...task
-    };
+      taskId
+    });
   }
 
   function openCandidateReview(item) {
-    const existingTask = findTaskForCandidate(item.task);
+    const existingTask = findSupplementTaskForCandidate(tasks, item.task);
     const selectedTaskKey = getSupplementActionKey(existingTask ?? item.task);
     setActiveSupplementTab(item.task.taskType);
     setSelectedSupplementStudentId(item.studentId);
@@ -24140,7 +24127,7 @@ function SupplementCenter({
   });
 
   function renderSupplementRow(item) {
-    const existingTask = findTaskForCandidate(item.task);
+    const existingTask = findSupplementTaskForCandidate(tasks, item.task);
     const taskProgress = getSupplementTaskProgress(existingTask, lessons);
     const rowAction = supplementRowActions[getSupplementActionKey(existingTask ?? item.task)];
     return (
@@ -24192,29 +24179,23 @@ function SupplementCenter({
   }
 
   const selectedSupplementStudent = students.find((student) => student.studentId === selectedSupplementStudentId);
-  const persistedSelectedSupplementTasks = tasks.filter((task) => task.studentId === selectedSupplementStudentId && task.taskType === activeSupplementTab)
-    .map(hydrateSupplementTask);
-  const focusedPersistedSupplementTasks = selectedSupplementTaskKey
-    ? persistedSelectedSupplementTasks.filter((task) =>
-        getSupplementActionKey(task) === selectedSupplementTaskKey &&
-        !["done", "canceled"].includes(task.status)
-      )
-    : [];
-  const shouldShowPendingCandidate =
-    pendingCandidateTask &&
-    pendingCandidateTask.studentId === selectedSupplementStudentId &&
-    pendingCandidateTask.taskType === activeSupplementTab &&
-    (!selectedSupplementTaskKey || getSupplementActionKey(pendingCandidateTask) === selectedSupplementTaskKey) &&
-    !focusedPersistedSupplementTasks.some((task) => getSupplementActionKey(task) === getSupplementActionKey(pendingCandidateTask));
-  const selectedSupplementTasks = pendingCandidateTask &&
-    shouldShowPendingCandidate
-    ? [pendingCandidateTask, ...focusedPersistedSupplementTasks]
-    : focusedPersistedSupplementTasks;
+  const {
+    selectedTasks: selectedSupplementTasks
+  } = createSelectedSupplementTasksViewModel({
+    activeTaskType: activeSupplementTab,
+    hydrateTask: hydrateSupplementTask,
+    pendingTask: pendingCandidateTask,
+    selectedStudentId: selectedSupplementStudentId,
+    selectedTaskKey: selectedSupplementTaskKey,
+    tasks
+  });
   const absenceSupplementItems = absentRecords.map(createAbsenceSupplementItem);
   const visibleAbsenceSupplementItems = absenceSupplementItems.filter((item) => !item.isFutureDeferred);
   const deferredAbsenceSupplementItems = absenceSupplementItems.filter((item) => item.isFutureDeferred);
   const activeDeferredAbsenceItems = deferredAbsenceSupplementItems
-    .filter((item) => !["done", "canceled"].includes(findTaskForCandidate(item.task)?.status))
+    .filter((item) =>
+      !["done", "canceled"].includes(findSupplementTaskForCandidate(tasks, item.task)?.status)
+    )
     .sort((a, b) => String(a.lessonDate || "").localeCompare(String(b.lessonDate || "")));
   const supplementTabDefinitions = [
     {
@@ -24274,7 +24255,7 @@ function SupplementCenter({
   ];
   const supplementTabs = supplementTabDefinitions.map((tab) => {
     const items = tab.items.filter((item) =>
-      !["done", "canceled"].includes(findTaskForCandidate(item.task)?.status)
+      !["done", "canceled"].includes(findSupplementTaskForCandidate(tasks, item.task)?.status)
     );
     return { ...tab, count: items.length, items };
   });
@@ -27463,15 +27444,6 @@ function isHomeworkMakeupCandidate(homework, records = [], lessons = []) {
   return (
     isHomeworkActionRequired(homework) &&
     ["missing", "partial"].includes(homework.teacherStatus)
-  );
-}
-
-function findSupplementTaskForCandidate(tasks = [], candidateTask = {}) {
-  return tasks.find(
-    (task) =>
-      task.studentId === candidateTask.studentId &&
-      task.sourceId === candidateTask.sourceId &&
-      task.taskType === candidateTask.taskType
   );
 }
 
