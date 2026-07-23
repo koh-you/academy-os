@@ -70,6 +70,7 @@ import {
   NotificationSectionTabs,
   NoticeWorkspaceTabs
 } from "../domains/notifications/NotificationCenterNavigation.jsx";
+import { createNotificationHistoryViewModel } from "../domains/notifications/notificationCenterModel.js";
 import { NotificationComposerPanel } from "../domains/notifications/NotificationComposerPanel.jsx";
 import { NotificationHistoryPanel } from "../domains/notifications/NotificationHistoryPanel.jsx";
 import { NotificationRecipientPanel } from "../domains/notifications/NotificationRecipientPanel.jsx";
@@ -11677,53 +11678,28 @@ function NotificationCenter({
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
   const isNotificationJobsLoading = notificationJobsStatus?.state === "loading";
-  const persistedNotificationJobIds = new Set(notificationJobs.map((job) => job.notificationJobId));
-  const mergedNotificationJobs = [
-    ...localNoticeJobs.filter((job) => !persistedNotificationJobIds.has(job.notificationJobId)),
-    ...notificationJobs
-  ];
-  const managedNotificationJobs = mergedNotificationJobs;
-  const historyJobs = historyDate
-    ? managedNotificationJobs.filter((job) => {
-        const dateSource = job.scheduledAt || job.createdAt;
-        return dateSource && getKoreaDateString(new Date(dateSource)) === historyDate;
-      })
-    : managedNotificationJobs;
-  const solapiResultTargets = managedNotificationJobs.filter((job) =>
-    job.provider === "solapi" &&
-    getNotificationJobProviderReference(job) &&
-    ["scheduled", "send_unconfirmed"].includes(job.status)
-  );
-  const pastScheduledJobs = historyJobs.filter((job) =>
-    canCancelNotificationJob(job) &&
-    job.scheduledAt &&
-    isNotificationSchedulePast(job.scheduledAt)
-  );
-  const scheduledJobs = historyJobs.filter((job) =>
-    canCancelNotificationJob(job) &&
-    (!job.scheduledAt || !isNotificationSchedulePast(job.scheduledAt))
-  );
-  const sentJobs = historyJobs.filter((job) => job.status === "sent");
-  const pendingJobs = historyJobs.filter((job) => job.status === "send_unconfirmed").concat(pastScheduledJobs);
-  const failedJobs = historyJobs.filter((job) => job.status === "failed");
-  const archivedJobs = historyJobs.filter((job) => job.status === "draft" || job.status === "dry_run" || job.status === "canceled");
+  const {
+    archivedJobs,
+    failedJobs,
+    filteredNotificationJobs,
+    filterLabel,
+    managedNotificationJobs,
+    pastScheduledJobs,
+    pendingJobs,
+    scheduledJobs,
+    sentJobs,
+    solapiResultTargets
+  } = createNotificationHistoryViewModel({
+    canCancelJob: canCancelNotificationJob,
+    getDateString: getKoreaDateString,
+    getProviderReference: getSolapiNotificationJobProviderReference,
+    historyDate,
+    isSchedulePast: isNotificationSchedulePast,
+    jobFilter,
+    localNoticeJobs,
+    notificationJobs
+  });
   const parentResponseContextCount = getParentResponseContexts(managedNotificationJobs, students).length;
-  const filteredNotificationJobs = {
-    all: historyJobs.slice(0, 40),
-    scheduled: scheduledJobs,
-    sent: sentJobs,
-    pending: pendingJobs,
-    failed: failedJobs,
-    draft: archivedJobs
-  }[jobFilter] ?? historyJobs.slice(0, 40);
-  const filterLabels = {
-    all: "최근 알림",
-    scheduled: "예약",
-    sent: "발송 완료",
-    pending: "확인 필요",
-    failed: "실패",
-    draft: "정리함"
-  };
   const activeStudents = useMemo(
     () => students.filter((student) => !isNoticeWithdrawnStudent(student)),
     [students]
@@ -12317,7 +12293,7 @@ function NotificationCenter({
         canReconcileSolapiResults={Boolean(onReconcileSolapiNotificationResults && solapiResultSyncTargetIds.length)}
         deletingJobId={deletingJobId}
         filteredJobs={filteredNotificationJobs}
-        filterLabel={filterLabels[jobFilter]}
+        filterLabel={filterLabel}
         formatJobStatus={formatNotificationJobStatus}
         formatTimeLabel={formatKoreaTimeLabel}
         getJobLabel={getNotificationJobLabel}

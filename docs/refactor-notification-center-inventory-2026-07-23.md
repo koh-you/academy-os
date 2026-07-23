@@ -54,7 +54,13 @@
 - filter/open state, 결과 대조 대상 계산과 실제 reconcile/cancel/delete handler는 App이 계속 소유한다.
 - shell은 controlled 값과 callback만 사용하며 API/Supabase/Solapi mutation을 직접 수행하지 않는다.
 
+## 13B-1 순수 모델 단위
+
+- 로컬/서버 job 병합, Solapi 결과 대조 대상, 지난 예약과 상태별 목록, 현재 filter 목록/label을 `notificationCenterModel.js`로 이동했다.
+- persisted ID 우선, 과거 예약의 확인필요 편입, 전체 40건 제한을 deterministic fixture로 고정했다.
+- 기존 취소 가능/과거시각/provider reference 판정 함수를 주입하며 React/API/Supabase/Solapi mutation은 소유하지 않는다.
+
 ## 다음 후보
 
-1. 13A 표시 컴포넌트 분리 audit으로 App에 남은 표시 JSX와 handler 경계를 재확인한다.
+1. 수신자 반/검색/선택/번호 유효성 derivation을 별도 순수 모델로 분리한다.
 2. payload builder와 실제 API orchestration은 별도 inventory/fixture와 사람 gate 필요성을 다시 판정한다.
