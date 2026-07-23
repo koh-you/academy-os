@@ -1,5 +1,16 @@
 # Academy OS Current Worklog
 
+## 2026-07-23 P1. 다음 유지보수 세션 및 코딩 에이전트 확장 인수인계
+
+- 사용자 요청에 따라 다음 유지보수 세션에서 그대로 사용할 프롬프트를 `docs/next-session/maintenance-session-prompt-2026-07-23.md`에 작성했다.
+- 유지보수(`E:\academy-os`/`main`), 리팩터링(`E:\academy-os-refactor`/`codex/refactor-supplement-11b`), 시험지분석(`E:\academy-os-exam-analysis`/`codex/exam-analysis-gpt-image`)의 소유권을 분리하고, `main` 통합 담당은 항상 단일 세션/에이전트만 맡도록 명시했다.
+- 향후 코딩 에이전트 확장을 위해 작업 ID, owner, worktree, branch, base commit, 허용·금지 파일, 저장 원천, 외부 side effect, 자동검증, 사람 gate를 작업 계약의 필수 항목으로 정했다.
+- 다음 유지보수 첫 gate는 수업메모 저장의 Supabase read-after-write와 알림톡 최종 문구·예약 분리 검증이다. 특강 신청 취소, 시험분석 프롬프트 스튜디오, 리팩터링 11B의 사람 gate는 각각 별도 보류 상태를 유지한다.
+- `docs/next-session/README.md` 상단에 새 유지보수 프롬프트와 현재 `main` 기준을 연결했다. 다음 세션은 문서에 적힌 커밋을 고정값으로 믿지 않고 착수 직전 `git status`와 최신 로그를 다시 확인해야 한다.
+- 이번 작업은 문서만 변경했으며 운영 데이터, Supabase, `notification_jobs`, Solapi, 시험분석 생성 API를 호출하지 않았다.
+- AI 검증: `git diff --check` 통과. 코드 변경이 없어 production test/build 대상은 아니다.
+- 사람 gate: 새 프롬프트에서 세 작업 세션의 worktree·branch가 겹치지 않는지, 첫 유지보수 gate와 나머지 보류 gate가 분리되어 있는지, 향후 코딩 에이전트가 같은 index나 `main` 통합 권한을 공유하지 않도록 되어 있는지 확인한다.
+
 ## 2026-07-23 P2. 특강 부분·전체 취소 흐름과 취소 기록 분리
 
 - 상태: 코드 수정/자동검증 완료, 배포 후 운영 화면 사람 검토 대기.

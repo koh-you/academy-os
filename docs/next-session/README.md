@@ -1,5 +1,9 @@
 # Next Session Handoff
 
+> 2026-07-23 운영 유지보수 최신 인수인계: 바로 붙여넣을 프롬프트는 `docs/next-session/maintenance-session-prompt-2026-07-23.md`다. 현재 유지보수·리팩터링·시험분석을 각각 독립 worktree/branch로 분리하고, 향후 코딩 에이전트도 task owner/worktree/branch/허용 파일/side effect/사람 gate 계약을 가진 뒤 전용 브랜치만 사용한다. main 통합 owner는 항상 하나만 둔다.
+
+> 현재 main 기준은 `0ced3d32 Add safe special lecture cancellation flow`이다. 수업메모 전체 필드 Supabase 재조회 검증은 `5b6b98c2`, 배포 marker는 `05ed38b0`, 기록은 `a8890a02`다. 다음 유지보수 첫 gate는 수업메모·작성창 체크·이전 확인 저장 후 새로고침 유지이며, 통과 후에만 이전 메모 확인 범위/복구 보강을 시작한다. 특강 부분·전체 취소와 시험분석 GPT Image 프롬프트 제작실도 각각 사람 gate 대기다. 새 세션은 시작 시 최신 `origin/main`을 다시 확인한다.
+
 > 2026-07-21 시험분석 방향 정정 및 Gate 1~6 완료: Academy OS 안에 GPT Image 생성 API·버전 DB·Storage 제작실을 먼저 만드는 것이 아니다. 30페이지·893건을 전수 목록화하고 24개 관련 글·221개 첨부/215개 고유 이미지를 역할·레이아웃·자산 방식으로 전수 분류했다. 중·고등 시퀀스, 역할 라이브러리, Academy OS 확정 JSON에서 `마스터 -> 1번 -> 2번 -> ... -> 장별 수정 프롬프트`를 만드는 로컬 생성기와 예제를 완성했다. 다음 구현 Gate는 교사 확정 입력/저장 계약을 Academy OS에 연결하는 것이며, 별도 승인 전 이미지 API·DB·Storage 제작실은 만들지 않는다. 최신 기준은 `docs/academy-os-exam-slide-prompt-rules-gate6-2026-07-21.md`다.
 
 이 폴더 하나만 다음 Codex 세션에 넘기면 됩니다. 리팩터링과 유지보수는 아래처럼 별도 Git worktree/브랜치에서 진행합니다. 두 세션 모두 `AGENTS.md`와 `docs/current-worklog.md` 최상단의 `미룬 작업 큐`를 먼저 사용자에게 요약해야 합니다.
