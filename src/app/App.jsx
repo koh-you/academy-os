@@ -7131,20 +7131,41 @@ export function App() {
     if (!studentDraft?.studentId) throw new Error("저장할 학생을 찾지 못했습니다.");
     const currentStudent = students.find((item) => item.studentId === studentDraft.studentId);
     const nextStudent = { ...(currentStudent ?? {}), ...studentDraft };
+    const verificationFields = [
+      "schoolName",
+      "grade",
+      "textbook",
+      "studentPhone",
+      "parentPhone",
+      "loginId",
+      "pin",
+      "specialNote",
+      "scheduleOverride"
+    ];
     const requestId = (studentProfileSaveRequestRef.current[nextStudent.studentId] ?? 0) + 1;
     studentProfileSaveRequestRef.current[nextStudent.studentId] = requestId;
     setStudentProfileSaveStates((current) => ({ ...current, [nextStudent.studentId]: "saving" }));
     try {
-      const result = await postJsonWithTimeout(
+      await postJsonWithTimeout(
         "/api/students",
         { student: nextStudent },
         15000,
         "학생 기본정보 저장 요청이 15초를 넘었습니다. 저장 상태를 확인한 뒤 다시 시도해 주세요."
       );
-      const savedStudent = result.student ?? nextStudent;
-      setStudents((current) =>
-        current.map((student) => (student.studentId === savedStudent.studentId ? { ...student, ...savedStudent } : student))
+      const studentsAfterResult = await getJsonWithTimeout(
+        "/api/students",
+        15000,
+        "학생 기본정보 저장 확인이 15초를 넘었습니다. 다시 저장하지 말고 잠시 뒤 새로고침해 주세요."
       );
+      const savedStudent = (studentsAfterResult.students ?? []).find((student) => student.studentId === nextStudent.studentId);
+      if (!savedStudent) throw new Error("저장 응답은 받았지만 Supabase 재조회에서 학생을 찾지 못했습니다.");
+      const mismatchedFields = verificationFields.filter(
+        (field) => String(savedStudent[field] ?? "") !== String(nextStudent[field] ?? "")
+      );
+      if (mismatchedFields.length > 0) {
+        throw new Error(`Supabase 재조회 값이 저장 요청과 다릅니다: ${mismatchedFields.join(", ")}`);
+      }
+      setStudents(studentsAfterResult.students ?? []);
       if (studentProfileSaveRequestRef.current[nextStudent.studentId] === requestId) {
         setStudentProfileSaveStates((current) => ({ ...current, [nextStudent.studentId]: "saved" }));
       }

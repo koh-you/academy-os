@@ -1012,7 +1012,7 @@ function StudentProfileModal({
     <ModalComponent
       className="wideModal"
       title={`${student.name} 학생 프로파일`}
-      subtitle="기본정보와 성적 기록을 한 번에 확인합니다."
+      subtitle="학생 메모와 기본정보를 먼저 보고, 필요한 기록만 펼쳐서 확인합니다."
       onClose={onClose}
     >
       <div className="studentProfileModalWrap">
@@ -1056,119 +1056,132 @@ function StudentProfileModal({
             {profileActionError}
           </div>
         ) : null}
-        <div className="studentProfileGrid">
-          {renderProfileField("학교", "schoolName")}
-          {renderProfileField("학년", "grade")}
-          {renderProfileField("교재", "textbook", "미입력")}
-          {renderProfileField("학생 전화", "studentPhone", "미입력")}
-          {renderProfileField("학부모 전화", "parentPhone", "미입력")}
-          <div>
-            <small>로그인</small>
-            {isEditingProfile ? (
-              <div className="profileLoginEdit">
-                <input
-                  className="profileEditInput"
-                  value={profileDraft.loginId ?? ""}
-                  onChange={(event) => updateProfile("loginId", event.target.value)}
-                  placeholder="아이디"
-                />
-                <input
-                  className="profileEditInput"
-                  value={profileDraft.pin ?? ""}
-                  onChange={(event) => updateProfile("pin", event.target.value)}
-                  placeholder="PIN"
-                />
+        <details className="studentProfileSection" open>
+          <summary>
+            <div>
+              <strong>기본정보와 학생 메모</strong>
+              <p>자주 확인하는 메모, 연락처, 로그인, 개별 스케줄을 관리합니다.</p>
+            </div>
+          </summary>
+          <div className="studentProfileSectionBody">
+            <section className="studentProfileMemo">
+              <div className="studentProfileMemoHeader">
+                <strong>학생 메모</strong>
+                <span>선생님이 프로파일에서 확인하는 메모 · 기존 특이사항 원천에 저장됩니다.</span>
               </div>
-            ) : (
-              <strong>{student.loginId} / {student.pin}</strong>
-            )}
-          </div>
-          <div className="wideProfileItem">
-            <small>특이사항</small>
-            {isEditingProfile ? (
-              <textarea
-                className="profileEditInput"
-                value={profileDraft.specialNote ?? ""}
-                onChange={(event) => updateProfile("specialNote", event.target.value)}
-                placeholder="없음"
-                rows="2"
-              />
-            ) : (
-              <strong>{student.specialNote || "없음"}</strong>
-            )}
-          </div>
-          <div className="wideProfileItem">
-            <small>개별 스케줄</small>
-            {isEditingProfile ? (
-              <div className="studentScheduleEditor">
-                {hasUnparsedScheduleText ? (
-                  <div className="studentScheduleLegacyText">
-                    <strong>기존 입력값을 시간표 행으로 해석하지 못했습니다.</strong>
-                    <span>{profileDraft.scheduleOverride}</span>
-                    <button className="softButton compact" onClick={clearProfileScheduleRows} type="button">초기화 후 다시 입력</button>
-                  </div>
-                ) : null}
-                {profileScheduleRows.map((row, rowIndex) => (
-                  <div className="studentScheduleRow" key={row.rowId}>
-                    <div className="studentScheduleDayButtons" aria-label="개별 스케줄 요일">
-                      {studentScheduleDayOptions.map((day) => (
-                        <button
-                          className={row.days.includes(day.value) ? "active" : ""}
-                          key={day.value}
-                          onClick={() => toggleProfileScheduleDay(rowIndex, day.value)}
-                          type="button"
-                        >
-                          {day.label}
-                        </button>
-                      ))}
-                    </div>
-                    <label>
-                      시작
-                      <input
-                        type="time"
-                        value={row.startTime}
-                        onChange={(event) => updateProfileScheduleRow(rowIndex, { startTime: event.target.value || row.startTime })}
-                      />
-                    </label>
-                    <label>
-                      종료
-                      <input
-                        type="time"
-                        value={row.endTime}
-                        onChange={(event) => updateProfileScheduleRow(rowIndex, { endTime: event.target.value || row.endTime })}
-                      />
-                    </label>
-                    <button className="dangerSoftButton compact" onClick={() => removeProfileScheduleRow(rowIndex)} type="button">삭제</button>
-                  </div>
-                ))}
-                {profileScheduleRows.length ? (
-                  <div className="studentSchedulePreview">
-                    저장값: <strong>{formatStudentScheduleRows(profileScheduleRows)}</strong>
+              {isEditingProfile ? (
+                <textarea
+                  value={profileDraft.specialNote ?? ""}
+                  onChange={(event) => updateProfile("specialNote", event.target.value)}
+                  placeholder="학습 성향, 지도할 때 유의할 점, 학부모 요청사항 등 선생님이 계속 확인할 메모"
+                />
+              ) : (
+                <p className="studentProfileMemoText">{student.specialNote || "등록된 학생 메모가 없습니다."}</p>
+              )}
+            </section>
+            <div className="studentProfileGrid">
+              {renderProfileField("학교", "schoolName")}
+              {renderProfileField("학년", "grade")}
+              {renderProfileField("교재", "textbook", "미입력")}
+              {renderProfileField("학생 전화", "studentPhone", "미입력")}
+              {renderProfileField("학부모 전화", "parentPhone", "미입력")}
+              <div>
+                <small>로그인</small>
+                {isEditingProfile ? (
+                  <div className="profileLoginEdit">
+                    <input
+                      className="profileEditInput"
+                      value={profileDraft.loginId ?? ""}
+                      onChange={(event) => updateProfile("loginId", event.target.value)}
+                      placeholder="아이디"
+                    />
+                    <input
+                      className="profileEditInput"
+                      value={profileDraft.pin ?? ""}
+                      onChange={(event) => updateProfile("pin", event.target.value)}
+                      placeholder="PIN"
+                    />
                   </div>
                 ) : (
-                  <div className="studentScheduleEmpty">개별 스케줄을 쓰지 않으면 기본 반 스케줄이 적용됩니다.</div>
+                  <strong>{student.loginId} / {student.pin}</strong>
                 )}
-                <div className="studentScheduleActions">
-                  <button className="softButton compact" onClick={addProfileScheduleRow} type="button">시간표 추가</button>
-                  <button className="softButton compact" disabled={!profileScheduleRows.length && !profileDraft.scheduleOverride} onClick={clearProfileScheduleRows} type="button">기본 반 스케줄 사용</button>
-                </div>
               </div>
-            ) : (
-              <strong>{student.scheduleOverride || "기본 반 스케줄"}</strong>
-            )}
-            <span className="muted">반 이름과 실제 등원 시간이 다를 때 설정합니다. 저장 후 출결 수업 매칭과 지각 판정에 반영됩니다.</span>
+              <div className="wideProfileItem">
+                <small>개별 스케줄</small>
+                {isEditingProfile ? (
+                  <div className="studentScheduleEditor">
+                    {hasUnparsedScheduleText ? (
+                      <div className="studentScheduleLegacyText">
+                        <strong>기존 입력값을 시간표 행으로 해석하지 못했습니다.</strong>
+                        <span>{profileDraft.scheduleOverride}</span>
+                        <button className="softButton compact" onClick={clearProfileScheduleRows} type="button">초기화 후 다시 입력</button>
+                      </div>
+                    ) : null}
+                    {profileScheduleRows.map((row, rowIndex) => (
+                      <div className="studentScheduleRow" key={row.rowId}>
+                        <div className="studentScheduleDayButtons" aria-label="개별 스케줄 요일">
+                          {studentScheduleDayOptions.map((day) => (
+                            <button
+                              className={row.days.includes(day.value) ? "active" : ""}
+                              key={day.value}
+                              onClick={() => toggleProfileScheduleDay(rowIndex, day.value)}
+                              type="button"
+                            >
+                              {day.label}
+                            </button>
+                          ))}
+                        </div>
+                        <label>
+                          시작
+                          <input
+                            type="time"
+                            value={row.startTime}
+                            onChange={(event) => updateProfileScheduleRow(rowIndex, { startTime: event.target.value || row.startTime })}
+                          />
+                        </label>
+                        <label>
+                          종료
+                          <input
+                            type="time"
+                            value={row.endTime}
+                            onChange={(event) => updateProfileScheduleRow(rowIndex, { endTime: event.target.value || row.endTime })}
+                          />
+                        </label>
+                        <button className="dangerSoftButton compact" onClick={() => removeProfileScheduleRow(rowIndex)} type="button">삭제</button>
+                      </div>
+                    ))}
+                    {profileScheduleRows.length ? (
+                      <div className="studentSchedulePreview">
+                        저장값: <strong>{formatStudentScheduleRows(profileScheduleRows)}</strong>
+                      </div>
+                    ) : (
+                      <div className="studentScheduleEmpty">개별 스케줄을 쓰지 않으면 기본 반 스케줄이 적용됩니다.</div>
+                    )}
+                    <div className="studentScheduleActions">
+                      <button className="softButton compact" onClick={addProfileScheduleRow} type="button">시간표 추가</button>
+                      <button className="softButton compact" disabled={!profileScheduleRows.length && !profileDraft.scheduleOverride} onClick={clearProfileScheduleRows} type="button">기본 반 스케줄 사용</button>
+                    </div>
+                  </div>
+                ) : (
+                  <strong>{student.scheduleOverride || "기본 반 스케줄"}</strong>
+                )}
+                <span className="muted">반 이름과 실제 등원 시간이 다를 때 설정합니다. 저장 후 출결 수업 매칭과 지각 판정에 반영됩니다.</span>
+              </div>
+            </div>
           </div>
-        </div>
+        </details>
 
-        <div className="sectionHeader slim">
-          <div>
-            <h2>학생별 운영 알림</h2>
-            <p className="muted">상담 일정, 학부모 연락, 특이사항 알림을 대시보드 원본과 같이 봅니다.</p>
-          </div>
-          <span className="saveState save-idle inlineSaveStatus">09:00 슬랙 원본</span>
-        </div>
-        {isEditingProfile ? (
-          <section className="studentReminderComposer">
+        <details className="studentProfileSection">
+          <summary>
+            <div>
+              <strong>학생별 운영 알림</strong>
+              <p>상담 일정, 학부모 연락, 특이사항 알림을 대시보드 원본과 같이 봅니다.</p>
+            </div>
+            <span className="saveState save-idle inlineSaveStatus">09:00 슬랙 원본</span>
+          </summary>
+          <div className="studentProfileSectionBody">
+            {isEditingProfile ? (
+              <section className="studentReminderComposer">
             <div className="studentReminderControls">
               <select
                 value={newReminderDraft.reminderType}
@@ -1223,16 +1236,16 @@ function StudentProfileModal({
               onChange={(event) => updateNewReminderDraft("content", event.target.value)}
               placeholder="예: 상담에서 확인할 내용, 학부모 요청, 다음 수업 전 확인할 특이사항"
             />
-          </section>
-        ) : (
-          <div className="profileEditHint">수정 버튼을 누르면 이 학생의 운영 알림을 추가할 수 있습니다.</div>
-        )}
-        <div className="studentReminderList">
-          {academyReminders.length === 0 ? (
-            <div className="emptyState">이 학생에게 연결된 운영 알림이 없습니다.</div>
-          ) : (
-            academyReminders.map((reminder) => (
-              <article className={`studentReminderItem status-${reminder.status || "pending"}`} key={reminder.reminderId}>
+              </section>
+            ) : (
+              <div className="profileEditHint">수정 버튼을 누르면 이 학생의 운영 알림을 추가할 수 있습니다.</div>
+            )}
+            <div className="studentReminderList">
+              {academyReminders.length === 0 ? (
+                <div className="emptyState">이 학생에게 연결된 운영 알림이 없습니다.</div>
+              ) : (
+                academyReminders.map((reminder) => (
+                  <article className={`studentReminderItem status-${reminder.status || "pending"}`} key={reminder.reminderId}>
                 <div className="studentConsultationMeta">
                   <span className="studentConsultationDate">{formatStudentReminderDateTime(reminder)}</span>
                   <span className="studentConsultationType">{studentReminderTypeLabel(reminder.reminderType ?? reminder.type)}</span>
@@ -1266,20 +1279,24 @@ function StudentProfileModal({
                     </button>
                   </div>
                 ) : null}
-              </article>
-            ))
-          )}
-        </div>
-
-        <div className="sectionHeader slim">
-          <div>
-            <h2>상담 기록</h2>
-            <p className="muted">학생 상담과 학부모 상담을 날짜별로 구분해 남깁니다.</p>
+                  </article>
+                ))
+              )}
+            </div>
           </div>
-          <InlineSaveStatus label="상담기록" saveState={studentConsultationSaveState} />
-        </div>
-        {isEditingProfile ? (
-          <section className="studentConsultationComposer">
+        </details>
+
+        <details className="studentProfileSection">
+          <summary>
+            <div>
+              <strong>상담 기록</strong>
+              <p>학생 상담과 학부모 상담을 날짜별로 구분해 남깁니다.</p>
+            </div>
+            <InlineSaveStatus label="상담기록" saveState={studentConsultationSaveState} />
+          </summary>
+          <div className="studentProfileSectionBody">
+            {isEditingProfile ? (
+              <section className="studentConsultationComposer">
             <div className="studentConsultationControls">
               <select
                 value={newConsultationDraft.consultationType}
@@ -1308,15 +1325,15 @@ function StudentProfileModal({
               onChange={(event) => updateNewConsultationDraft("content", event.target.value)}
               placeholder="상담 내용을 정리하세요. 예: 학습 태도, 숙제 습관, 학부모 요청사항, 다음 조치"
             />
-          </section>
-        ) : (
-          <div className="profileEditHint">수정 버튼을 누르면 새 상담 입력과 기존 상담 수정이 열립니다.</div>
-        )}
-        <div className="studentConsultationList">
-          {consultations.length === 0 ? (
-            <div className="emptyState">아직 상담 기록이 없습니다.</div>
-          ) : (
-            consultations.map((item) => {
+              </section>
+            ) : (
+              <div className="profileEditHint">수정 버튼을 누르면 새 상담 입력과 기존 상담 수정이 열립니다.</div>
+            )}
+            <div className="studentConsultationList">
+              {consultations.length === 0 ? (
+                <div className="emptyState">아직 상담 기록이 없습니다.</div>
+              ) : (
+                consultations.map((item) => {
               const draft = consultationDrafts[item.consultationId] ?? item;
               const isDirty = Boolean(consultationDrafts[item.consultationId]);
               return (
@@ -1374,19 +1391,23 @@ function StudentProfileModal({
                   ) : null}
                 </article>
               );
-            })
-          )}
-        </div>
-
-        <div className="sectionHeader slim">
-          <div>
-            <h2>성적 기록</h2>
-            <p className="muted">학교 내신 시험과 모의고사 성적을 초안으로 입력한 뒤 저장합니다.</p>
+                })
+              )}
+            </div>
           </div>
-          <InlineSaveStatus label="성적" saveState={scoreRecordSaveState} />
-        </div>
-        <div className="managementTable studentScoreModalTable">
-          <div className="managementRow scoreRow managementHead">
+        </details>
+
+        <details className="studentProfileSection">
+          <summary>
+            <div>
+              <strong>성적 기록</strong>
+              <p>학교 내신 시험과 모의고사 성적을 초안으로 입력한 뒤 저장합니다.</p>
+            </div>
+            <InlineSaveStatus label="성적" saveState={scoreRecordSaveState} />
+          </summary>
+          <div className="studentProfileSectionBody">
+            <div className="managementTable studentScoreModalTable">
+              <div className="managementRow scoreRow managementHead">
             <span>구분</span>
             <span>날짜</span>
             <span>과목</span>
@@ -1394,9 +1415,9 @@ function StudentProfileModal({
             <span>등급</span>
             <span>메모</span>
             <span>관리</span>
-          </div>
-          {isEditingProfile ? (
-            <div className="managementRow studentScoreRow draftRow">
+              </div>
+              {isEditingProfile ? (
+                <div className="managementRow studentScoreRow draftRow">
               <select value={newScoreDraft.examType} onChange={(event) => updateNewScoreDraft("examType", event.target.value)}>
                 <option value="내신">내신</option>
                 <option value="모의고사">모의고사</option>
@@ -1414,14 +1435,14 @@ function StudentProfileModal({
               >
                 {hasNewScoreDraftChanges ? saveActionLabel("성적 저장", scoreRecordSaveState) : "성적 저장"}
               </button>
-            </div>
-          ) : (
-            <div className="profileEditHint">수정 버튼을 누르면 성적 입력과 기존 성적 수정이 열립니다.</div>
-          )}
-          {scores.length === 0 ? (
-            <div className="emptyState">아직 저장된 성적이 없습니다.</div>
-          ) : (
-            scores.map((item) => {
+                </div>
+              ) : (
+                <div className="profileEditHint">수정 버튼을 누르면 성적 입력과 기존 성적 수정이 열립니다.</div>
+              )}
+              {scores.length === 0 ? (
+                <div className="emptyState">아직 저장된 성적이 없습니다.</div>
+              ) : (
+                scores.map((item) => {
               const draft = scoreDrafts[item.scoreRecordId] ?? item;
               const isDirty = Boolean(scoreDrafts[item.scoreRecordId]);
               return (
@@ -1468,19 +1489,23 @@ function StudentProfileModal({
                   )}
                 </div>
               );
-            })
-          )}
-        </div>
-
-        <div className="sectionHeader slim">
-          <div>
-            <h2>테스트 성적</h2>
-            <p className="muted">학원 데일리/단원/누적 테스트 성적을 초안으로 입력한 뒤 저장합니다.</p>
+                })
+              )}
+            </div>
           </div>
-          <InlineSaveStatus label="테스트" saveState={academyTestSaveState} />
-        </div>
-        <div className="managementTable studentProfileDataTable">
-          <div className="managementRow academyTestProfileRow managementHead">
+        </details>
+
+        <details className="studentProfileSection">
+          <summary>
+            <div>
+              <strong>테스트 성적</strong>
+              <p>학원 데일리/단원/누적 테스트 성적을 초안으로 입력한 뒤 저장합니다.</p>
+            </div>
+            <InlineSaveStatus label="테스트" saveState={academyTestSaveState} />
+          </summary>
+          <div className="studentProfileSectionBody">
+            <div className="managementTable studentProfileDataTable">
+              <div className="managementRow academyTestProfileRow managementHead">
             <span>날짜</span>
             <span>테스트명</span>
             <span>범위</span>
@@ -1488,9 +1513,9 @@ function StudentProfileModal({
             <span>평균</span>
             <span>메모</span>
             <span>관리</span>
-          </div>
-          {isEditingProfile ? (
-            <div className="managementRow academyTestProfileRow draftRow">
+              </div>
+              {isEditingProfile ? (
+                <div className="managementRow academyTestProfileRow draftRow">
               <input type="date" value={newAcademyTestDraft.testDate} onChange={(event) => updateNewAcademyTestDraft("testDate", event.target.value)} />
               <input value={newAcademyTestDraft.title} onChange={(event) => updateNewAcademyTestDraft("title", event.target.value)} />
               <input value={newAcademyTestDraft.scope} onChange={(event) => updateNewAcademyTestDraft("scope", event.target.value)} placeholder="범위" />
@@ -1505,14 +1530,14 @@ function StudentProfileModal({
               >
                 {hasNewAcademyTestDraftChanges ? saveActionLabel("테스트 저장", academyTestSaveState) : "테스트 저장"}
               </button>
-            </div>
-          ) : (
-            <div className="profileEditHint">수정 버튼을 누르면 테스트 입력과 기존 테스트 수정이 열립니다.</div>
-          )}
-          {academyTests.length === 0 ? (
-            <div className="emptyState">아직 저장된 테스트 성적이 없습니다.</div>
-          ) : (
-            academyTests.map((item) => {
+                </div>
+              ) : (
+                <div className="profileEditHint">수정 버튼을 누르면 테스트 입력과 기존 테스트 수정이 열립니다.</div>
+              )}
+              {academyTests.length === 0 ? (
+                <div className="emptyState">아직 저장된 테스트 성적이 없습니다.</div>
+              ) : (
+                academyTests.map((item) => {
               const draft = academyTestDrafts[item.testId] ?? item;
               const isDirty = Boolean(academyTestDrafts[item.testId]);
               return (
@@ -1556,9 +1581,11 @@ function StudentProfileModal({
                   )}
                 </div>
               );
-            })
-          )}
-        </div>
+                })
+              )}
+            </div>
+          </div>
+        </details>
       </div>
     </ModalComponent>
   );
