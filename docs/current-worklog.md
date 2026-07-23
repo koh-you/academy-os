@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13C-7 알림센터 공지 AI 수정 injected action 분리 — AI gate 통과
+
+- 코드: `polishNoticeMessage`의 빈 본문/중복 guard, payload 조립, busy/feedback, 성공 draft 반영, 실패 문구와 `finally` 해제를 `notificationNoticeActions.js`의 `polishNoticeMessageAction`으로 이동했다. App은 현재 AI 설정·초안·setter와 13C-6 request adapter callback을 주입한다.
+- 동작 보존: 제목 trim과 `알림관리 공지` fallback, 학부모 audience, 수신자·빈 수업 필드, `polishedText ?? noticeBody`, 성공/실패 문구, 요청 전 feedback 초기화와 성공·실패 모두 busy 해제를 그대로 유지한다.
+- 저장 원천/side effect: action은 endpoint/fetch/React/API client를 직접 소유하지 않는다. 실제 AI 요청은 App이 주입하는 `polishNoticeMessageRequest` callback에 남고 결과는 local `noticeBody` draft만 바꾼다. fixture에서는 네트워크·유료 AI 호출·운영 데이터 변경이 0건이다.
+- 자동검증: payload 전체, 성공 draft와 상태 순서, `polishedText` 누락 원문 fallback, callback 오류 feedback/finally, 빈 본문·이미 처리 중 guard를 `test:notification-notice-actions`로 고정했다. production scenario 435/435와 build, `git diff --check`가 통과했다.
+- gate 판정: 실제 AI request를 mock하고 payload·draft·UI 상태의 모든 분기를 재현했다. 재시험/고태영 운영 데이터나 사람 조작이 필요하지 않은 AI gate다.
+- 다음 경계: 알림 이력 삭제의 URL/DELETE/응답·삭제 ID 검증을 실제 삭제 없는 request adapter로 먼저 분리한다. confirm·busy·feedback·refresh action은 그다음 별도 단위다.
+
 ## 2026-07-23 P1. 13C-6 알림센터 공지 AI 수정 request adapter 분리 — AI gate 통과
 
 - 코드: 공지 AI 수정의 `/api/ai/comment-polish` URL 해석, POST JSON 요청, 응답 JSON 파싱, HTTP/body 성공 판정과 오류 fallback을 `notificationNoticeApi.js`의 `polishNoticeMessageRequest`로 이동했다. App은 기존 `fetch`, `apiUrl`, 현재 payload를 주입한다.

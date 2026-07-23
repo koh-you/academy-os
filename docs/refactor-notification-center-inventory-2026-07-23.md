@@ -102,7 +102,13 @@
 - App이 fetch/API URL/payload를 주입하고 adapter는 전체 result를 반환한다. local draft/busy/feedback은 App에 남는다.
 - 성공·서버 오류·기본 오류를 mock response fixture로 고정했고 실제 네트워크·유료 AI 호출은 없다.
 
+## 13C-7 공지 AI 수정 action 단위
+
+- 빈 본문/중복 guard, payload 조립, busy/feedback, 성공 draft와 원문 fallback, 실패/finally를 `polishNoticeMessageAction`으로 이동했다.
+- App이 AI 설정·초안·setter와 13C-6 request adapter callback을 주입한다.
+- 성공·fallback·실패·guard를 mock fixture로 고정했고 실제 네트워크·유료 AI 호출은 없다.
+
 ## 다음 후보
 
-1. `polishNoticeMessage`의 guard, payload, busy/feedback, 성공 draft 반영과 실패/finally 순서를 injected action으로 분리한다.
-2. 취소와 삭제는 서로 다른 destructive side effect이므로 각각 별도 단위로 판정한다.
+1. 알림 이력 삭제의 URL/DELETE/응답·삭제 ID 검증을 실제 삭제 없는 request adapter로 먼저 분리한다.
+2. 삭제 action과 실제 Solapi 취소 action은 서로 다른 destructive side effect이므로 각각 별도 단위로 판정한다.

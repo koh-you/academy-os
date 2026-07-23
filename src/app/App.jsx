@@ -60,6 +60,7 @@ import {
   reserveNoticeJobRequest
 } from "../domains/notifications/notificationNoticeApi.js";
 import {
+  polishNoticeMessageAction,
   reconcileNoticeResultsAction,
   scheduleNoticeAction,
   sendNoticeNowAction
@@ -10454,38 +10455,24 @@ function NotificationCenter({
   }
 
   async function polishNoticeMessage() {
-    if (!noticeBody.trim() || isPolishingNotice) return;
-    setIsPolishingNotice(true);
-    setDispatchMessage("");
-    try {
-      const result = await polishNoticeMessageRequest({
-        payload: {
-          aiProvider: commentAiProvider,
-          aiModel: commentAiModel,
-          aiPrompt: getAiPrompt(aiSettings, "noticeMessage"),
-          audience: "parent",
-          lessonName: noticeTitle.trim() || "알림관리 공지",
-          lessonDate: today,
-          rawText: noticeBody,
-          studentName: "수신자",
-          schoolName: "",
-          grade: "",
-          lessonMaterial: "",
-          lessonContent: "",
-          attendanceStatus: "",
-          homeworkStatus: "",
-          assignmentStatus: ""
-        },
-        request: fetch,
-        resolveApiUrl: apiUrl
-      });
-      setNoticeBody(result.polishedText ?? noticeBody);
-      setDispatchMessage("공지 문구를 AI로 다듬었습니다.");
-    } catch (error) {
-      setDispatchMessage(`AI 수정 실패: ${error.message}`);
-    } finally {
-      setIsPolishingNotice(false);
-    }
+    return polishNoticeMessageAction({
+      aiModel: commentAiModel,
+      aiPrompt: getAiPrompt(aiSettings, "noticeMessage"),
+      aiProvider: commentAiProvider,
+      isPolishing: isPolishingNotice,
+      noticeBody,
+      noticeTitle,
+      polishMessage: (payload) =>
+        polishNoticeMessageRequest({
+          payload,
+          request: fetch,
+          resolveApiUrl: apiUrl
+        }),
+      setDispatchMessage,
+      setIsPolishing: setIsPolishingNotice,
+      setNoticeBody,
+      today
+    });
   }
 
   async function deleteNotificationJob(job) {

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  polishNoticeMessageAction,
   reconcileNoticeResultsAction,
   scheduleNoticeAction,
   sendNoticeNowAction
@@ -400,4 +401,95 @@ await reconcileNoticeResultsAction({
 });
 assert.equal(reconcileGuardCallCount, 0);
 
-console.log("notification notice immediate scheduled and reconcile action fixtures passed");
+const polishPayloads = [];
+const polishMessages = [];
+const polishBusyStates = [];
+const polishedBodies = [];
+await polishNoticeMessageAction({
+  aiModel: "fixture-model",
+  aiPrompt: "fixture-prompt",
+  aiProvider: "fixture-provider",
+  isPolishing: false,
+  noticeBody: "원문 공지",
+  noticeTitle: "  공지 제목  ",
+  polishMessage: async (payload) => {
+    polishPayloads.push(payload);
+    return { polishedText: "다듬은 공지" };
+  },
+  setDispatchMessage: (value) => polishMessages.push(value),
+  setIsPolishing: (value) => polishBusyStates.push(value),
+  setNoticeBody: (value) => polishedBodies.push(value),
+  today: "2026-07-23"
+});
+assert.deepEqual(polishPayloads, [{
+  aiProvider: "fixture-provider",
+  aiModel: "fixture-model",
+  aiPrompt: "fixture-prompt",
+  audience: "parent",
+  lessonName: "공지 제목",
+  lessonDate: "2026-07-23",
+  rawText: "원문 공지",
+  studentName: "수신자",
+  schoolName: "",
+  grade: "",
+  lessonMaterial: "",
+  lessonContent: "",
+  attendanceStatus: "",
+  homeworkStatus: "",
+  assignmentStatus: ""
+}]);
+assert.deepEqual(polishMessages, ["", "공지 문구를 AI로 다듬었습니다."]);
+assert.deepEqual(polishBusyStates, [true, false]);
+assert.deepEqual(polishedBodies, ["다듬은 공지"]);
+
+const fallbackBodies = [];
+await polishNoticeMessageAction({
+  isPolishing: false,
+  noticeBody: "fallback 원문",
+  noticeTitle: "",
+  polishMessage: async () => ({}),
+  setDispatchMessage: () => {},
+  setIsPolishing: () => {},
+  setNoticeBody: (value) => fallbackBodies.push(value)
+});
+assert.deepEqual(fallbackBodies, ["fallback 원문"]);
+
+const failedPolishMessages = [];
+const failedPolishBusyStates = [];
+await polishNoticeMessageAction({
+  isPolishing: false,
+  noticeBody: "실패 원문",
+  noticeTitle: "",
+  polishMessage: async () => {
+    throw new Error("fixture action failure");
+  },
+  setDispatchMessage: (value) => failedPolishMessages.push(value),
+  setIsPolishing: (value) => failedPolishBusyStates.push(value),
+  setNoticeBody: () => {
+    throw new Error("failure must not update body");
+  }
+});
+assert.deepEqual(failedPolishMessages, ["", "AI 수정 실패: fixture action failure"]);
+assert.deepEqual(failedPolishBusyStates, [true, false]);
+
+let polishGuardCallCount = 0;
+const polishGuardSetter = () => {
+  polishGuardCallCount += 1;
+};
+await polishNoticeMessageAction({
+  isPolishing: false,
+  noticeBody: "   ",
+  polishMessage: polishGuardSetter,
+  setDispatchMessage: polishGuardSetter,
+  setIsPolishing: polishGuardSetter
+});
+await polishNoticeMessageAction({
+  isPolishing: true,
+  noticeBody: "중복 요청",
+  polishMessage: polishGuardSetter,
+  setDispatchMessage: polishGuardSetter,
+  setIsPolishing: polishGuardSetter
+});
+assert.equal(polishGuardCallCount, 0);
+
+console.log("notification notice immediate scheduled reconcile and polish action fixtures passed");
