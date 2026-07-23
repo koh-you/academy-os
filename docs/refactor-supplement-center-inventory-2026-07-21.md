@@ -369,6 +369,15 @@
 - 표시 JSX만 이동해 운영 데이터나 사람 조작 없이 AI gate로 통과했다.
 - 다음은 `SupplementCenter` 본체 props·local state·App helper 의존성을 inventory하고 side effect callback 주입 경계로 본체를 이동할 수 있는지 판정한다.
 
+## 12R-37 구현 결과 — SupplementCenter 본체
+
+- local UI state, 세 candidate source 조합, 탭/목록/미래 결석 패널, 학생 상세·최근 내역·완료 확인 overlay를 `SupplementCenter.jsx`로 이동했다.
+- App은 날짜·원천 조회·표시 helper를 `supplementCenterDependencies`로, 실제 task/lesson/출결 저장·Supabase 재조회·notification/Solapi 작업을 기존 callback props로 주입한다.
+- 새 본체에는 `fetch/postJson`, `/api/`, Supabase, Solapi, notification state mutation이 없다. local draft ID와 modal/tab UI state만 소유한다.
+- 기존 scenario `88b-43~51`의 소유 파일 탐색을 갱신하고 App wiring·dependency·side-effect callback 경계를 확인하는 `88b-52`를 추가했다. production 418/418과 build를 통과했다.
+- 동일 본체 이동이고 운영 데이터·외부 발송이 없어 사람 조작 없이 AI gate로 통과했다.
+- 로드맵 12 `supplement center/modals`의 App 본체 분리를 완료했다. 다음은 로드맵 13 `notification center` inventory다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.
