@@ -138,8 +138,14 @@
 - App은 config를 import하고 status-class helper에 기존 과거시각 판정을 주입한다.
 - 템플릿 전체 문자열과 label/status fallback을 deterministic fixture로 고정했으며 특강 문구·연결과 운영 side effect는 변경하지 않았다.
 
+## 13D-2 학생 선택 순수 model 단위
+
+- 반 변경 시 선택 ID 정리, 한 학생 toggle, 현재 검색 결과 전체 선택 배열 계산을 `notificationCenterModel.js`로 이동했다.
+- App은 React effect/setter를 유지하고 순수 함수 결과만 반영한다.
+- 순서 보존·추가·전체 제거·전체 선택을 deterministic fixture로 고정했으며 local state 밖 side effect는 없다.
+
 ## 다음 후보
 
-1. 선택 학생 toggle/select-all/clear와 반 변경 시 유효 ID 정리를 순수 selection model로 분리한다.
-2. 그다음 template 적용과 history filter/open local action을 검토한다.
+1. 일반 공지 template 적용의 template ID/kind/meta/title/body local action을 분리한다.
+2. 그다음 history filter/open local action을 검토한다.
 3. 특강 안내문 적용 handler는 Solapi 특강 템플릿 외부 검수와 기능 경계를 바꾸지 않는 범위만 다룬다.

@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import {
   createNotificationHistoryViewModel,
-  createNotificationRecipientViewModel
+  createNotificationRecipientViewModel,
+  filterNoticeSelectedStudentIds,
+  selectAllNoticeStudentIds,
+  toggleNoticeSelectedStudentId
 } from "../src/domains/notifications/notificationCenterModel.js";
 import {
   getNotificationJobLabel,
@@ -61,6 +64,30 @@ assert.equal(
   "scheduled"
 );
 assert.equal(resolveNotificationJobStatusClass({ status: "" }, () => false), "draft");
+
+const selectionStudents = [
+  { studentId: "student-a" },
+  { studentId: "student-b" }
+];
+assert.deepEqual(
+  filterNoticeSelectedStudentIds(
+    ["student-b", "outside", "student-a"],
+    selectionStudents
+  ),
+  ["student-b", "student-a"]
+);
+assert.deepEqual(
+  toggleNoticeSelectedStudentId(["student-a"], "student-b"),
+  ["student-a", "student-b"]
+);
+assert.deepEqual(
+  toggleNoticeSelectedStudentId(["student-a", "student-b", "student-a"], "student-a"),
+  ["student-b"]
+);
+assert.deepEqual(
+  selectAllNoticeStudentIds(selectionStudents),
+  ["student-a", "student-b"]
+);
 
 const futureAt = "2026-08-01T09:00:00.000Z";
 const pastAt = "2026-07-01T09:00:00.000Z";
