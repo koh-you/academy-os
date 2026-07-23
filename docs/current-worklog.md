@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13E-1 알림센터 navigation local state hook 분리 — AI gate 통과
+
+- 코드: 공지/특강 활성 탭, 특강 수업/안내문 workspace, 공지 작성/기록 workspace의 local state와 `initialNotificationTab`·`showSpecialLectureTab` prop 동기화 effect를 새 `useNotificationCenterNavigationState.js`로 이동했다. 활성 탭 선택 계산은 `resolveNotificationCenterActiveTab` 순수 model로 분리했다.
+- 동작 보존: 특강 탭을 노출할 때 initial tab을 사용하고 숨길 때 항상 `notice`를 선택하며, 관련 prop이 바뀔 때 active tab을 다시 동기화한다. 특강 내부 초기값 `roster`, 공지 내부 초기값 `compose`를 그대로 유지했다.
+- 저장 원천/side effect: hook은 컴포넌트 local navigation state만 소유한다. API/Supabase/notification job/Solapi 조회·저장·발송·예약 side effect가 없다.
+- 자동검증: 특강 노출/숨김의 활성 탭 결과를 equality fixture로 고정하고, hook의 세 state·prop effect·App 연결과 외부 호출 부재를 production scenario 450개로 고정했다. production scenario 450/450와 build, `git diff --check`가 통과했다.
+- gate 판정: state 초기값과 prop 동기화 입력 전체를 순수 fixture·정적 경계 검사로 재현했다. 재시험/고태영 운영 데이터나 실제 발송, 사람 화면 검수가 필요하지 않은 AI gate다.
+- 다음 경계: 수신자 filter/search/mode/선택 local state와 기존 순수 recipient model·선택 정리 effect를 전용 hook으로 묶을 수 있는지 확인한다.
+
 ## 2026-07-23 P1. 13D-10 알림 notice presentational shell 분리 — AI gate 통과
 
 - 코드: notice 탭, 공지 작성 workspace, 발송 기록 panel의 조건부 조합을 새 `NotificationNoticeWorkspace.jsx`로 이동했다. App은 탭·작성·기록별 기존 props/callback 객체와 현재 workspace 값만 전달한다.

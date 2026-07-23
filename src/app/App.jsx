@@ -85,6 +85,7 @@ import {
 } from "../domains/notifications/notificationNoticeActions.js";
 import { buildNoticeJob as createNotificationNoticeJob } from "../domains/notifications/notificationNoticeBuilders.js";
 import { NotificationNoticeWorkspace } from "../domains/notifications/NotificationNoticeWorkspace.jsx";
+import { useNotificationCenterNavigationState } from "../domains/notifications/useNotificationCenterNavigationState.js";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { createSupplementSchedulePersistencePlan } from "../domains/supplements/supplementSchedulePlan.js";
 import { SupplementCenter } from "../domains/supplements/SupplementCenter.jsx";
@@ -10158,9 +10159,17 @@ function NotificationCenter({
   records = [],
   students = []
 }) {
-  const [activeNotificationTab, setActiveNotificationTab] = useState(showSpecialLectureTab ? initialNotificationTab : "notice");
-  const [activeSpecialLectureWorkspaceTab, setActiveSpecialLectureWorkspaceTab] = useState("roster");
-  const [activeNoticeWorkspace, setActiveNoticeWorkspace] = useState("compose");
+  const {
+    activeNotificationTab,
+    activeNoticeWorkspace,
+    activeSpecialLectureWorkspaceTab,
+    setActiveNotificationTab,
+    setActiveNoticeWorkspace,
+    setActiveSpecialLectureWorkspaceTab
+  } = useNotificationCenterNavigationState({
+    initialNotificationTab,
+    showSpecialLectureTab
+  });
   const [classFilter, setClassFilter] = useState("all");
   const [deletingJobId, setDeletingJobId] = useState("");
   const [dispatchMessage, setDispatchMessage] = useState("");
@@ -10202,9 +10211,6 @@ function NotificationCenter({
     localNoticeJobs,
     notificationJobs
   });
-  useEffect(() => {
-    setActiveNotificationTab(showSpecialLectureTab ? initialNotificationTab : "notice");
-  }, [initialNotificationTab, showSpecialLectureTab]);
   const {
     classFilteredStudents,
     noticeRecipients,

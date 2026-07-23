@@ -62,6 +62,15 @@ export function resolveNotificationAudiencePhone(student, audience) {
     : student.parentPhone;
 }
 
+export function resolveNotificationCenterActiveTab({
+  initialNotificationTab,
+  showSpecialLectureTab
+}) {
+  return showSpecialLectureTab
+    ? initialNotificationTab
+    : "notice";
+}
+
 export function createNotificationComposerViewModel({
   formatKoreaTimeLabel,
   noticeBody = "",

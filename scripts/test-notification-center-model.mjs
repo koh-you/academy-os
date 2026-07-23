@@ -5,6 +5,7 @@ import {
   createNotificationRecipientViewModel,
   filterNoticeSelectedStudentIds,
   resolveNotificationAudiencePhone,
+  resolveNotificationCenterActiveTab,
   resolveNotificationStudentName,
   selectAllNoticeStudentIds,
   toggleNoticeSelectedStudentId,
@@ -205,6 +206,21 @@ assert.equal(
 assert.equal(
   resolveNotificationAudiencePhone(notificationAudienceStudent, "unknown"),
   "010-2222-2222"
+);
+
+assert.equal(
+  resolveNotificationCenterActiveTab({
+    initialNotificationTab: "specialLecture",
+    showSpecialLectureTab: true
+  }),
+  "specialLecture"
+);
+assert.equal(
+  resolveNotificationCenterActiveTab({
+    initialNotificationTab: "specialLecture",
+    showSpecialLectureTab: false
+  }),
+  "notice"
 );
 
 const futureAt = "2026-08-01T09:00:00.000Z";
