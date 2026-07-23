@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   createSupplementNotificationDraftTabConfigs,
+  createSupplementNotificationDraftWorkspaceViewModel,
   createSupplementTaskCardViewModel
 } from "../src/domains/supplements/supplementTaskCardModel.js";
 
@@ -154,5 +155,30 @@ assert.deepEqual(notificationTabs, [
   }
 ]);
 assert.equal(Object.prototype.hasOwnProperty.call(notificationConfigs[0], "display"), false);
+
+const workspaceModel = createSupplementNotificationDraftWorkspaceViewModel({
+  activeField: "studentScheduleNotificationDraft",
+  draftState: {
+    editedFields: ["studentScheduleNotificationDraft"],
+    values: {
+      notificationDraft: "11시 초안",
+      parentScheduleNotificationDraft: "학부모 초안",
+      studentScheduleNotificationDraft: "학생 수정본"
+    }
+  },
+  notificationJobs,
+  task: { makeupTaskId: "task-1" }
+}, {
+  getControlDisplay: (job) => ({ jobId: job?.id ?? "", status: job?.status ?? "none" }),
+  getControlJob: (_task, jobs, controlType) => jobs.find((job) => job.controlType === controlType)
+});
+assert.equal(workspaceModel.activeConfig.controlType, "studentSchedule");
+assert.equal(workspaceModel.activeDraft, "학생 수정본");
+assert.deepEqual(workspaceModel.activeDisplay, {
+  jobId: "student-job",
+  status: "scheduled"
+});
+assert.equal(workspaceModel.isTeacherFinal, true);
+assert.equal(workspaceModel.tabConfigs.length, 3);
 
 console.log("supplement task card model: deterministic contract passed");

@@ -1,4 +1,6 @@
 import {
+  getSupplementNotificationDraftConfig,
+  isSupplementTeacherEditedField,
   supplementNotificationDraftConfigs,
   supplementTeacherFinalFields
 } from "./supplementTaskDraft.js";
@@ -15,6 +17,32 @@ export function createSupplementNotificationDraftTabConfigs({
     ...config,
     display: getControlDisplay(getControlJob(task, notificationJobs, config.controlType))
   }));
+}
+
+export function createSupplementNotificationDraftWorkspaceViewModel({
+  activeField = "",
+  draftState = {},
+  notificationJobs = [],
+  task = {}
+} = {}, dependencies = {}) {
+  const activeConfig = getSupplementNotificationDraftConfig(activeField);
+  const activeJob = dependencies.getControlJob(
+    task,
+    notificationJobs,
+    activeConfig.controlType
+  );
+  return {
+    activeConfig,
+    activeDisplay: dependencies.getControlDisplay(activeJob),
+    activeDraft: draftState.values?.[activeField] ?? "",
+    isTeacherFinal:
+      isSupplementTeacherEditedField(task, activeField) ||
+      draftState.editedFields?.includes(activeField),
+    tabConfigs: createSupplementNotificationDraftTabConfigs({
+      notificationJobs,
+      task
+    }, dependencies)
+  };
 }
 
 export function createSupplementTaskCardViewModel({

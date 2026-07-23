@@ -218,6 +218,13 @@
 - App은 실제 job 원천과 예약·취소 action을 계속 소유하고, 모델은 렌더 props만 반환한다.
 - deterministic fixture, production scenario `88b-33`, production 399/399, build, diff 검사를 통과했다. 순수 표시 계산이므로 사용자 지시에 따라 AI gate로 통과했다.
 
+## 12R-19 구현 결과 — 알림톡 draft workspace view model
+
+- 선택 field의 config·draft·teacher-final 여부·현재 job display·전체 탭 config를 `createSupplementNotificationDraftWorkspaceViewModel`로 묶었다.
+- 저장된 teacher-edited field와 local edited field를 같은 확정 수정본 판정에 사용하고, 현재 job selector/display formatter는 주입한다.
+- App은 문구 변경 callback과 실제 저장·예약·취소 action을 계속 소유하며, 모델은 렌더 props만 반환한다.
+- deterministic fixture, production scenario `88b-34`, production 400/400, build, diff 검사를 통과했다. 순수 workspace 표시 계산이므로 사용자 지시에 따라 AI gate로 통과했다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.
