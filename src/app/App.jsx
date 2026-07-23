@@ -70,7 +70,6 @@ import {
   NotificationSectionTabs
 } from "../domains/notifications/NotificationCenterNavigation.jsx";
 import {
-  createNotificationComposerViewModel,
   resolveNotificationAudiencePhone,
   resolveNotificationStudentName
 } from "../domains/notifications/notificationCenterModel.js";
@@ -99,6 +98,7 @@ import {
 import { buildNoticeJob as createNotificationNoticeJob } from "../domains/notifications/notificationNoticeBuilders.js";
 import { NotificationNoticeWorkspace } from "../domains/notifications/NotificationNoticeWorkspace.jsx";
 import { useNotificationCenterNavigationState } from "../domains/notifications/useNotificationCenterNavigationState.js";
+import { useNotificationComposerState } from "../domains/notifications/useNotificationComposerState.js";
 import { useNotificationHistoryState } from "../domains/notifications/useNotificationHistoryState.js";
 import { useNotificationRecipientState } from "../domains/notifications/useNotificationRecipientState.js";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
@@ -11629,22 +11629,11 @@ function NotificationCenter({
     initialNotificationTab,
     showSpecialLectureTab
   });
-  const [dispatchMessage, setDispatchMessage] = useState("");
-  const [isPolishingNotice, setIsPolishingNotice] = useState(false);
-  const [isSendingNotice, setIsSendingNotice] = useState(false);
-  const [noticeBody, setNoticeBody] = useState("");
-  const [noticeKind, setNoticeKind] = useState("general");
-  const [noticeSpecialLectureMeta, setNoticeSpecialLectureMeta] = useState(null);
-  const [noticeTemplateId, setNoticeTemplateId] = useState("notice");
-  const [noticeTitle, setNoticeTitle] = useState("");
-  const [scheduleDate, setScheduleDate] = useState(today);
-  const [scheduleTime, setScheduleTime] = useState("18:00");
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
   const isNotificationJobsLoading = notificationJobsStatus?.state === "loading";
   const {
     archivedJobs,
-    changeHistoryDate,
     deletingJobId,
     failedJobs,
     filteredNotificationJobs,
@@ -11656,10 +11645,10 @@ function NotificationCenter({
     notificationJobAction,
     pastScheduledJobs,
     pendingJobs,
-    refreshHistoryForDate,
     scheduledJobs,
     selectJobFilter,
     setDeletingJobId,
+    setHistoryDate,
     setIsNoticeHistoryOpen,
     setJobFilter,
     setNotificationJobAction,
@@ -11675,8 +11664,6 @@ function NotificationCenter({
     initialHistoryDate: today,
     isSchedulePast: isNotificationSchedulePast,
     notificationJobs,
-    onRefresh,
-    setDispatchMessage,
     setActiveWorkspace: setActiveNoticeWorkspace
   });
   const parentResponseContextCount = getParentResponseContexts(managedNotificationJobs, students).length;
@@ -11706,19 +11693,51 @@ function NotificationCenter({
     students
   });
   const {
-    noticeText,
-    scheduledAt,
-    solapiResultLastCheckedLabel,
-    solapiResultSyncTargetIds
-  } = createNotificationComposerViewModel({
-    formatKoreaTimeLabel,
+    dispatchMessage,
+    isPolishingNotice,
+    isSendingNotice,
     noticeBody,
+    noticeKind,
+    noticeSpecialLectureMeta,
+    noticeTemplateId,
+    noticeText,
     noticeTitle,
     scheduleDate,
+    scheduledAt,
     scheduleTime,
+    setDispatchMessage,
+    setIsPolishingNotice,
+    setIsSendingNotice,
+    setNoticeBody,
+    setNoticeKind,
+    setNoticeSpecialLectureMeta,
+    setNoticeTemplateId,
+    setNoticeTitle,
+    setScheduleDate,
+    setScheduleTime,
+    solapiResultLastCheckedLabel,
+    solapiResultSyncTargetIds
+  } = useNotificationComposerState({
+    formatKoreaTimeLabel,
     solapiResultSyncCheckedAt: solapiResultSyncState.checkedAt,
-    solapiResultTargets
+    solapiResultTargets,
+    today
   });
+
+  function refreshHistoryForDate(nextDate = historyDate) {
+    Promise.resolve(onRefresh?.({ date: nextDate })).catch((error) => {
+      setDispatchMessage((current) =>
+        `${current || "알림 기록"} 새로고침 실패: ${error.message}`
+      );
+    });
+  }
+
+  function changeHistoryDate(nextDate) {
+    setHistoryDate(nextDate);
+    setActiveNoticeWorkspace("history");
+    setIsNoticeHistoryOpen(true);
+    refreshHistoryForDate(nextDate);
+  }
   const notificationJobActionOperationState = {
     failed: "error",
     saved: "success",

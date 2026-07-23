@@ -210,8 +210,14 @@
 - App은 hook 결과와 setter를 기존 외부 action에 주입한다.
 - hook은 local state와 순수 model/action만 소유하고 API/Supabase/Solapi 요청은 없다.
 
+## 13E-4 composer local state hook 단위
+
+- 안내 메시지·AI/발송 busy·제목/본문/kind/meta/template/예약일시 state와 composer view model을 `useNotificationComposerState`로 이동했다.
+- App은 hook 결과와 setter를 기존 local/external action에 주입한다.
+- hook은 local state와 순수 model만 소유하고 특강 적용 handler·외부 요청은 없다.
+
 ## 다음 후보
 
-1. 공지 제목·본문·template/meta·예약일시 draft와 busy/message state를 composer state hook으로 묶는다.
+1. NotificationCenter 잔여 identity wrapper, template local action adapter, job builder/request/action adapter를 다시 inventory한다.
 2. 특강 안내문 적용 문구와 handler는 외부 템플릿 gate 때문에 App에 그대로 둔다.
-3. 이후 NotificationCenter 잔여 adapter와 `SpecialLectureNoticePanel` 결합을 다시 inventory하고, 실제 발송 orchestration을 건드려야 하면 로드맵 13의 안전한 경계를 닫는다.
+3. 실제 발송 orchestration 이동이 필요하면 기존 mock fixture가 충분한지 먼저 확인하고, 충분하지 않으면 로드맵 13의 안전한 경계를 닫는다.

@@ -12,8 +12,6 @@ export function useNotificationHistoryState({
   initialHistoryDate = "",
   isSchedulePast,
   notificationJobs,
-  onRefresh,
-  setDispatchMessage,
   setActiveWorkspace
 }) {
   const [deletingJobId, setDeletingJobId] = useState("");
@@ -49,32 +47,16 @@ export function useNotificationHistoryState({
     );
   }
 
-  function refreshHistoryForDate(nextDate = historyDate) {
-    Promise.resolve(onRefresh?.({ date: nextDate })).catch((error) => {
-      setDispatchMessage((current) =>
-        `${current || "알림 기록"} 새로고침 실패: ${error.message}`
-      );
-    });
-  }
-
-  function changeHistoryDate(nextDate) {
-    setHistoryDate(nextDate);
-    setActiveWorkspace("history");
-    setIsNoticeHistoryOpen(true);
-    refreshHistoryForDate(nextDate);
-  }
-
   return {
     ...historyViewModel,
-    changeHistoryDate,
     deletingJobId,
     historyDate,
     isNoticeHistoryOpen,
     jobFilter,
     notificationJobAction,
-    refreshHistoryForDate,
     selectJobFilter,
     setDeletingJobId,
+    setHistoryDate,
     setIsNoticeHistoryOpen,
     setJobFilter,
     setNotificationJobAction,
