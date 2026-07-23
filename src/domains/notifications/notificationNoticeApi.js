@@ -27,3 +27,20 @@ export async function reserveNoticeJobRequest({
   );
   return result.notificationJob ?? notificationJob;
 }
+
+export async function polishNoticeMessageRequest({
+  payload,
+  request,
+  resolveApiUrl
+}) {
+  const response = await request(resolveApiUrl("/api/ai/comment-polish"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  const result = await response.json();
+  if (!response.ok || !result.ok) {
+    throw new Error(result.error || "공지 AI 수정에 실패했습니다.");
+  }
+  return result;
+}

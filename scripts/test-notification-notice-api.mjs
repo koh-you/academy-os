@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   persistNoticeJobRequest,
+  polishNoticeMessageRequest,
   reserveNoticeJobRequest
 } from "../src/domains/notifications/notificationNoticeApi.js";
 
@@ -66,4 +67,59 @@ await assert.rejects(
   (error) => error === reserveError
 );
 
-console.log("notification notice API adapters fixture passed");
+const polishPayload = {
+  aiProvider: "fixture-provider",
+  aiModel: "fixture-model",
+  rawText: "원문"
+};
+const polishCalls = [];
+const polishResultFixture = {
+  ok: true,
+  polishedText: "다듬은 문구"
+};
+const polishResult = await polishNoticeMessageRequest({
+  payload: polishPayload,
+  request: async (...args) => {
+    polishCalls.push(args);
+    return {
+      ok: true,
+      json: async () => polishResultFixture
+    };
+  },
+  resolveApiUrl: (path) => `https://fixture.test${path}`
+});
+assert.equal(polishResult, polishResultFixture);
+assert.deepEqual(polishCalls, [[
+  "https://fixture.test/api/ai/comment-polish",
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(polishPayload)
+  }
+]]);
+
+await assert.rejects(
+  polishNoticeMessageRequest({
+    payload: polishPayload,
+    request: async () => ({
+      ok: false,
+      json: async () => ({ ok: false, error: "fixture polish failure" })
+    }),
+    resolveApiUrl: (path) => path
+  }),
+  /fixture polish failure/
+);
+
+await assert.rejects(
+  polishNoticeMessageRequest({
+    payload: polishPayload,
+    request: async () => ({
+      ok: true,
+      json: async () => ({ ok: false })
+    }),
+    resolveApiUrl: (path) => path
+  }),
+  /공지 AI 수정에 실패했습니다./
+);
+
+console.log("notification notice API adapters including AI polish fixture passed");

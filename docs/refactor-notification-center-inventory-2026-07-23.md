@@ -96,7 +96,13 @@
 - App이 실제 reconcile callback, 대상 ID/count, clock과 state setter를 모두 주입한다.
 - partial·실패·guard를 mock fixture로 고정했고 실제 Solapi 조회나 운영 row 변경은 없다. 재시험/고태영 운영 데이터도 필요하지 않다.
 
+## 13C-6 공지 AI 수정 request adapter 단위
+
+- `/api/ai/comment-polish` URL 해석, POST JSON, 응답 파싱, HTTP/body 성공 판정과 오류 fallback을 `polishNoticeMessageRequest`로 이동했다.
+- App이 fetch/API URL/payload를 주입하고 adapter는 전체 result를 반환한다. local draft/busy/feedback은 App에 남는다.
+- 성공·서버 오류·기본 오류를 mock response fixture로 고정했고 실제 네트워크·유료 AI 호출은 없다.
+
 ## 다음 후보
 
-1. `polishNoticeMessage`의 AI request와 local draft 상태 전환을 실제 호출 없는 request adapter/action 단위로 나눌 수 있는지 inventory한다.
+1. `polishNoticeMessage`의 guard, payload, busy/feedback, 성공 draft 반영과 실패/finally 순서를 injected action으로 분리한다.
 2. 취소와 삭제는 서로 다른 destructive side effect이므로 각각 별도 단위로 판정한다.
