@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13F-1 알림 template local action adapter 분리 — AI gate 통과
+
+- 코드: App의 `applyNoticeTemplate` wrapper를 `useNotificationComposerState` 안으로 이동하고, App이 `noticeMessageTemplates` config를 hook에 주입해 반환된 handler를 사용하도록 정리했다.
+- 동작 보존: template 선택 ID 반영, general/special lecture kind 선택, 기존 special meta 초기화, 유효 template 제목·본문 반영과 알 수 없는 ID fallback 순서를 기존 `applyNoticeTemplateAction` 그대로 유지했다.
+- 저장 원천/side effect: adapter는 composer local setter만 호출한다. template 원문·외부 template ID·특강 안내문 적용 handler·API/Supabase/notification job/Solapi/AI 호출을 변경하거나 실행하지 않는다.
+- 자동검증: 일반·특강·알 수 없는 template의 setter 호출 순서 mock fixture를 유지하고, config 주입→hook adapter→local action 경계와 외부 호출 부재를 production scenario 455개로 고정했다. production scenario 455/455와 build, `git diff --check`가 통과했다.
+- gate 판정: 모든 분기와 setter 순서를 mock fixture로 재현했고 외부 요청 경계가 없다. 재시험/고태영 운영 데이터, 실제 template 연결·발송, 사람 화면 검수가 필요하지 않은 AI gate다.
+- 다음 경계: 학생 이름·audience 전화번호의 순수 resolver를 App wrapper 없이 recipient/history hook에서 bound callback으로 제공할 수 있는지 확인한다.
+
 ## 2026-07-23 P1. 13E-4 알림 composer local state hook 분리 — AI gate 통과
 
 - 코드: 공지 안내 메시지, AI 수정/발송 busy, 제목·본문·kind·특강 meta·template ID, 예약일·예약시간 local state와 기존 순수 composer view model을 새 `useNotificationComposerState.js`로 이동했다.

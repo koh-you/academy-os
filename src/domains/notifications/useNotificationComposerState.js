@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { createNotificationComposerViewModel } from "./notificationCenterModel.js";
+import { applyNoticeTemplateAction } from "./notificationNoticeActions.js";
 
 export function useNotificationComposerState({
   formatKoreaTimeLabel,
   solapiResultSyncCheckedAt,
   solapiResultTargets,
+  templates,
   today
 }) {
   const [dispatchMessage, setDispatchMessage] = useState("");
@@ -27,8 +29,21 @@ export function useNotificationComposerState({
     solapiResultTargets
   });
 
+  function applyNoticeTemplate(templateId) {
+    applyNoticeTemplateAction({
+      setNoticeBody,
+      setNoticeKind,
+      setNoticeSpecialLectureMeta,
+      setNoticeTemplateId,
+      setNoticeTitle,
+      templateId,
+      templates
+    });
+  }
+
   return {
     ...composerViewModel,
+    applyNoticeTemplate,
     dispatchMessage,
     isPolishingNotice,
     isSendingNotice,
