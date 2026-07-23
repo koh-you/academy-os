@@ -866,6 +866,86 @@ export function SpecialLectureApplicationPanel({
     updateEnrollmentDraft(enrollment.enrollmentId, { sessionPlans });
   }
 
+  function getChangedEnrollmentSessionIds(previousEnrollment, nextEnrollment) {
+    const previousPlans = new Map(getSpecialLectureEnrollmentSessionPlans(previousEnrollment, guideSessions)
+      .map((plan) => [plan.sessionId, plan]));
+    const nextPlans = getSpecialLectureEnrollmentSessionPlans(nextEnrollment, guideSessions);
+    if (!previousEnrollment?.planReviewedAt) {
+      return new Set(nextPlans.filter((plan) => plan.status === "active").map((plan) => plan.sessionId));
+    }
+    return new Set(nextPlans.filter((plan) => {
+      const previousPlan = previousPlans.get(plan.sessionId);
+      return !previousPlan ||
+        previousPlan.status !== plan.status ||
+        previousPlan.effectiveStartTime !== plan.effectiveStartTime ||
+        previousPlan.effectiveEndTime !== plan.effectiveEndTime ||
+        previousPlan.overrideReason !== plan.overrideReason;
+    }).map((plan) => plan.sessionId));
+  }
+
+  function getSafeFutureLessonSync(savedEnrollment, previousEnrollment) {
+    const changedSessionIds = getChangedEnrollmentSessionIds(previousEnrollment, savedEnrollment);
+    const targetSessionIds = changedSessionIds.size
+      ? changedSessionIds
+      : new Set(guideSessions.map((session) => session.sessionId));
+    const nextEnrollments = selectedGuideEnrollments.some((item) => item.enrollmentId === savedEnrollment.enrollmentId)
+      ? selectedGuideEnrollments.map((item) => item.enrollmentId === savedEnrollment.enrollmentId ? savedEnrollment : item)
+      : [...selectedGuideEnrollments, savedEnrollment];
+    const changedDrafts = buildSpecialLectureLessonDrafts({
+      enrollments: nextEnrollments,
+      guide: selectedGuide,
+      lessons,
+      students
+    }).filter((draft) => {
+      if (!targetSessionIds.has(draft.specialLectureSessionId)) return false;
+      const existingLesson = lessons.find((lesson) => lesson.lessonId === draft.lessonId);
+      const expectedSchedule = (draft.specialLectureStudentSchedules ?? [])
+        .find((schedule) => schedule.studentId === savedEnrollment.studentId) ?? null;
+      const existingSchedule = (existingLesson?.specialLectureStudentSchedules ?? [])
+        .find((schedule) => schedule.studentId === savedEnrollment.studentId) ?? null;
+      if (!existingLesson) return Boolean(expectedSchedule);
+      if (Boolean(expectedSchedule) !== Boolean(existingSchedule)) return true;
+      if (!expectedSchedule || !existingSchedule) return false;
+      return expectedSchedule.startTime !== existingSchedule.startTime ||
+        expectedSchedule.endTime !== existingSchedule.endTime ||
+        expectedSchedule.scheduleType !== existingSchedule.scheduleType ||
+        (expectedSchedule.overrideReason || "") !== (existingSchedule.overrideReason || "");
+    });
+    const blockedDrafts = changedDrafts.filter((draft) => {
+      const existingLesson = lessons.find((lesson) => lesson.lessonId === draft.lessonId);
+      const hasRecords = records.some((record) => record.lessonId === draft.lessonId);
+      const hasPendingNotifications = notificationJobs.some((job) =>
+        job.lessonId === draft.lessonId && pendingNotificationStatuses.has(job.status)
+      );
+      return draft.date <= todayDateKey || existingLesson?.status === "completed" || hasRecords || hasPendingNotifications;
+    });
+    const blockedLessonIds = new Set(blockedDrafts.map((draft) => draft.lessonId));
+    return {
+      blockedDrafts,
+      safeDrafts: changedDrafts
+        .filter((draft) => !blockedLessonIds.has(draft.lessonId))
+        .map((draft) => {
+          const existingLesson = lessons.find((lesson) => lesson.lessonId === draft.lessonId);
+          if (!existingLesson) return draft;
+          const expectedSchedule = (draft.specialLectureStudentSchedules ?? [])
+            .find((schedule) => schedule.studentId === savedEnrollment.studentId) ?? null;
+          const preservedStudentSchedules = (existingLesson.specialLectureStudentSchedules ?? [])
+            .filter((schedule) => schedule.studentId !== savedEnrollment.studentId);
+          const studentIds = new Set(existingLesson.studentIds ?? []);
+          if (expectedSchedule) studentIds.add(savedEnrollment.studentId);
+          else studentIds.delete(savedEnrollment.studentId);
+          return {
+            ...existingLesson,
+            studentIds: [...studentIds],
+            specialLectureStudentSchedules: [
+              ...preservedStudentSchedules,
+              ...(expectedSchedule ? [expectedSchedule] : [])
+            ]
+          };
+        })
+    };
+  }
+
   async function addMatchedRowsToEnrollmentSource() {
     if (!onSaveEnrollments || !isGuideSaved || !selectedGuide || !guideSessionIds.length || !missingEnrollmentRows.length) return;
     setPanelMessage("");
@@ -947,20 +1027,45 @@ export function SpecialLectureApplicationPanel({
     });
     setPanelMessage("");
     setSavingEnrollmentId(enrollment.enrollmentId);
-    setPlanSaveState({ message: "Supabase에 회차 계획을 저장하고 있습니다.", state: "saving" });
+    setPlanSaveState({ message: "1/2 · Supabase에 회차 계획을 저장하고 있습니다.", state: "saving" });
+    let enrollmentSaved = false;
     try {
       const savedEnrollment = await onSaveEnrollment(nextEnrollment);
+      const persistedEnrollment = savedEnrollment ?? nextEnrollment;
+      enrollmentSaved = true;
       setEnrollmentDrafts((current) => {
         const nextDrafts = { ...current };
         delete nextDrafts[enrollment.enrollmentId];
         return nextDrafts;
       });
-      setPlanModalEnrollment(savedEnrollment ?? nextEnrollment);
-      const message = `${getEnrollmentStudent(enrollment, students)?.name || "학생"} 회차 계획을 저장했습니다. 새로고침 후에도 유지됩니다.`;
+      setPlanModalEnrollment(persistedEnrollment);
+      const { blockedDrafts, safeDrafts } = getSafeFutureLessonSync(persistedEnrollment, enrollment);
+      if (safeDrafts.length) {
+        if (!onCreateSpecialLectureLessons) {
+          throw new Error("회차 계획은 저장됐지만 미래 수업일지 반영 기능이 연결되지 않았습니다.");
+        }
+        setPlanSaveState({
+          message: `2/2 · 미래 특강 수업일지 ${safeDrafts.length}개를 반영하고 Supabase에서 확인하고 있습니다.`,
+          state: "saving"
+        });
+        await onCreateSpecialLectureLessons(safeDrafts, { openFirstLesson: false });
+      }
+      if (blockedDrafts.length) {
+        const message = `회차 계획은 저장했지만 보호된 수업 ${blockedDrafts.length}개는 자동 반영하지 않았습니다. 오늘/과거 수업, 기존 기록·출결 또는 대기 알림을 확인해 주세요.`;
+        setPanelMessage(message);
+        setPlanSaveState({ message, state: "failed" });
+        return;
+      }
+      const studentName = getEnrollmentStudent(enrollment, students)?.name || "학생";
+      const message = safeDrafts.length
+        ? `${studentName} 회차 계획과 미래 수업일지 ${safeDrafts.length}개를 Supabase 재조회로 확인했습니다.`
+        : `${studentName} 회차 계획을 저장했습니다. 수업일지에 새로 반영할 변경은 없습니다.`;
       setPanelMessage(message);
       setPlanSaveState({ message, state: "saved" });
     } catch (error) {
-      const message = `특강 회차 계획 저장 실패: ${error.message}`;
+      const message = enrollmentSaved
+        ? `1/2 회차 계획은 저장됐지만 2/2 미래 수업일지 반영에 실패했습니다. 다시 누르면 저장본 기준으로 재시도합니다: ${error.message}`
+        : `특강 회차 계획 저장 실패: ${error.message}`;
       setPanelMessage(message);
       setPlanSaveState({ message, state: "failed" });
     } finally {
@@ -1525,7 +1630,7 @@ export function SpecialLectureApplicationPanel({
             <div className="specialLectureModalBody">
               <div className="specialLectureSessionModalSummary">
                 <strong>총 {guideSessions.length}회 중 {draft.sessionPlans.filter((plan) => plan.status === "active").length}회 수강</strong>
-                <span>회차 신청 원천은 오늘/지난 회차도 수정할 수 있습니다. 이미 생성된 수업일지는 별도 확인 후 누락 학생만 안전하게 추가합니다.</span>
+                <span>회차 신청 원천은 오늘/지난 회차도 수정할 수 있습니다. 저장 후 기록·출결·대기 알림이 없는 미래 수업일지까지 함께 반영하며, 보호된 수업은 자동 변경하지 않습니다.</span>
               </div>
               <section className="specialLecturePlanProgress">
                 <div className="specialLecturePlanProgressHeader">
@@ -1574,7 +1679,7 @@ export function SpecialLectureApplicationPanel({
               </section>
               <div className="specialLecturePlanEditHeader">
                 <strong>회차 신청 수정</strong>
-                <span>아래 변경은 `회차 계획 저장`을 눌러 Supabase 재조회가 끝난 뒤 확정됩니다.</span>
+                <span>아래 변경은 `회차 계획 및 미래 수업일지 반영` 후 두 원천의 Supabase 재조회가 끝나야 완료됩니다.</span>
               </div>
               <div className="specialLectureSessionBulkActions">
                 <span>체크한 회차가 수강 신청으로 저장됩니다.</span>
@@ -1683,13 +1788,13 @@ export function SpecialLectureApplicationPanel({
               </div>
               <div className="specialLectureModalActions specialLecturePlanSaveActions">
                 <div className={`specialLecturePlanSaveFeedback ${planSaveState.state}`} aria-live="polite" role="status">
-                  <InlineSaveStatus label="회차 계획" saveState={planSaveState.state} />
-                  <span>{planSaveState.message || "회차와 시간을 확인한 뒤 저장해 주세요."}</span>
+                  <InlineSaveStatus label="회차·수업일지" saveState={planSaveState.state} />
+                  <span>{planSaveState.message || "회차와 시간을 확인한 뒤 미래 수업일지까지 함께 반영해 주세요."}</span>
                 </div>
                 <div className="specialLecturePlanSaveButtons">
                   <button className="softButton" onClick={closePlanModal} type="button">닫기</button>
                   <button className="primaryButton" disabled={!onSaveEnrollment || !isGuideSaved || savingEnrollmentId === enrollment.enrollmentId} onClick={() => saveEnrollmentDraft(enrollment)} type="button">
-                    {savingEnrollmentId === enrollment.enrollmentId ? "회차 계획 저장 중" : planSaveState.state === "saved" ? "저장 완료" : "회차 계획 저장"}
+                    {savingEnrollmentId === enrollment.enrollmentId ? "저장·반영 중" : planSaveState.state === "saved" ? "저장 완료" : "회차 계획 및 미래 수업일지 반영"}
                   </button>
                 </div>
               </div>
