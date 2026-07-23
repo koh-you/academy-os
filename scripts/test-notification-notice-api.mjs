@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  deleteNoticeJobRequest,
   persistNoticeJobRequest,
   polishNoticeMessageRequest,
   reserveNoticeJobRequest
@@ -122,4 +123,54 @@ await assert.rejects(
   /공지 AI 수정에 실패했습니다./
 );
 
-console.log("notification notice API adapters including AI polish fixture passed");
+const deleteCalls = [];
+const deleteResultFixture = {
+  ok: true,
+  deletedNotificationJobIds: ["notice-delete-fixed"]
+};
+const deleteResult = await deleteNoticeJobRequest({
+  notificationJobId: "notice-delete-fixed",
+  request: async (...args) => {
+    deleteCalls.push(args);
+    return {
+      ok: true,
+      json: async () => deleteResultFixture
+    };
+  },
+  resolveApiUrl: (path) => `https://fixture.test${path}`
+});
+assert.equal(deleteResult, deleteResultFixture);
+assert.deepEqual(deleteCalls, [[
+  "https://fixture.test/api/notification-jobs?id=notice-delete-fixed",
+  { method: "DELETE" }
+]]);
+
+await assert.rejects(
+  deleteNoticeJobRequest({
+    notificationJobId: "notice-delete-error",
+    request: async () => ({
+      ok: false,
+      status: 503,
+      json: async () => ({ ok: false })
+    }),
+    resolveApiUrl: (path) => path
+  }),
+  /삭제 실패: 503/
+);
+
+await assert.rejects(
+  deleteNoticeJobRequest({
+    notificationJobId: "notice-delete-missing",
+    request: async () => ({
+      ok: true,
+      json: async () => ({
+        ok: true,
+        deletedNotificationJobIds: ["different-job"]
+      })
+    }),
+    resolveApiUrl: (path) => path
+  }),
+  /Supabase에서 삭제된 알림 이력을 확인하지 못했습니다./
+);
+
+console.log("notification notice API adapters including AI polish and delete fixtures passed");

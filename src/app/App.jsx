@@ -55,6 +55,7 @@ import {
   createNotificationRecipientViewModel
 } from "../domains/notifications/notificationCenterModel.js";
 import {
+  deleteNoticeJobRequest,
   persistNoticeJobRequest,
   polishNoticeMessageRequest,
   reserveNoticeJobRequest
@@ -10488,16 +10489,11 @@ function NotificationCenter({
       state: "saving"
     });
     try {
-      const response = await fetch(apiUrl(`/api/notification-jobs?id=${encodeURIComponent(job.notificationJobId)}`), {
-        method: "DELETE"
+      await deleteNoticeJobRequest({
+        notificationJobId: job.notificationJobId,
+        request: fetch,
+        resolveApiUrl: apiUrl
       });
-      const result = await response.json();
-      if (!response.ok || !result.ok) {
-        throw new Error(result.error || `삭제 실패: ${response.status}`);
-      }
-      if (!Array.isArray(result.deletedNotificationJobIds) || !result.deletedNotificationJobIds.includes(job.notificationJobId)) {
-        throw new Error("Supabase에서 삭제된 알림 이력을 확인하지 못했습니다.");
-      }
       setNotificationJobAction({
         message: isPastUnconfirmed ? "확인 필요 알림 이력 1건을 삭제했습니다." : "발송하지 않은 공지 기록 1건을 삭제했습니다.",
         state: "saved"

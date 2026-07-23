@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13C-8 알림센터 이력 삭제 request adapter 분리 — AI gate 통과
+
+- 코드: 알림 이력 삭제의 query URL/ID 인코딩, DELETE 요청, 응답 JSON/HTTP 성공 판정, 삭제 ID 포함 재확인과 오류 fallback을 `notificationNoticeApi.js`의 `deleteNoticeJobRequest`로 이동했다. App은 기존 `fetch`, `apiUrl`, 대상 job ID를 주입한다.
+- 동작 보존: `/api/notification-jobs?id=...`, body 없는 DELETE, 서버 오류 우선과 status fallback, `deletedNotificationJobIds` 배열에 정확한 ID가 있어야만 성공하는 Supabase 재확인 계약을 그대로 유지한다.
+- 저장 원천/side effect: adapter는 전달된 request를 한 번 호출하지만 fetch/API URL/React state를 직접 import하지 않는다. 삭제 가능 판정, confirm, busy/feedback, refresh는 App에 남는다. fixture에서는 네트워크·운영 row 삭제가 0건이다.
+- 자동검증: URL/method 전체, 성공 result 동일성, HTTP 오류 status fallback, 성공 응답이지만 대상 ID가 없는 재확인 실패를 `test:notification-notice-api`로 고정했다. 기존 삭제 scenario도 새 API 경계를 추적하도록 갱신했고 production scenario 436/436과 build, `git diff --check`가 통과했다.
+- gate 판정: 실제 DELETE 없이 request/response/재확인 계약 전체를 injected fixture로 검증했다. 재시험/고태영 운영 데이터나 사람 조작이 필요하지 않은 AI gate다.
+- 다음 경계: `deleteNotificationJob`의 guard, confirm, 대상별 문구, busy, request 성공/실패, refresh/finally 순서를 실제 삭제 없는 injected action으로 분리한다.
+
 ## 2026-07-23 P1. 13C-7 알림센터 공지 AI 수정 injected action 분리 — AI gate 통과
 
 - 코드: `polishNoticeMessage`의 빈 본문/중복 guard, payload 조립, busy/feedback, 성공 draft 반영, 실패 문구와 `finally` 해제를 `notificationNoticeActions.js`의 `polishNoticeMessageAction`으로 이동했다. App은 현재 AI 설정·초안·setter와 13C-6 request adapter callback을 주입한다.
