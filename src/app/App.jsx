@@ -70,10 +70,6 @@ import {
   NotificationSectionTabs
 } from "../domains/notifications/NotificationCenterNavigation.jsx";
 import {
-  resolveNotificationAudiencePhone,
-  resolveNotificationStudentName
-} from "../domains/notifications/notificationCenterModel.js";
-import {
   getNotificationJobLabel,
   getNotificationStatusLabel,
   noticeMessageTemplates,
@@ -11669,6 +11665,7 @@ function NotificationCenter({
   const {
     classFilter,
     clearSelectedStudents,
+    getNoticeAudiencePhone,
     noticeRecipients,
     noticeRecipientMode,
     parentRecipientCount,
@@ -11678,6 +11675,7 @@ function NotificationCenter({
     setClassFilter,
     setNoticeRecipientMode,
     setSearchText,
+    studentName,
     studentRecipientCount,
     targetAudiences,
     targetStudents,
@@ -11750,18 +11748,6 @@ function NotificationCenter({
     partial: "partial",
     saved: "success"
   }[solapiResultSyncState.state] ?? "idle";
-
-  function studentName(studentId, payload) {
-    return resolveNotificationStudentName({
-      payload,
-      studentId,
-      students
-    });
-  }
-
-  function getNoticeAudiencePhone(student, audience) {
-    return resolveNotificationAudiencePhone(student, audience);
-  }
 
   function applySpecialLectureGuideToNotice(guide, noticeBodyText, guideUrl) {
     const normalizedGuide = normalizeSpecialLectureGuide(guide);
