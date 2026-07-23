@@ -40,6 +40,12 @@ function withPercent(items = [], total = 0, colorFor = () => "#94a3b8") {
   }));
 }
 
+function getSsenUnitNoFromTypeCode(value = "") {
+  const parts = cleanText(value).split("-").filter(Boolean);
+  const candidate = parts.at(-2) || "";
+  return /^\d+$/.test(candidate) ? candidate : "";
+}
+
 function getFinalQuestionFields(question = {}) {
   const finalFields = question.finalFields && typeof question.finalFields === "object" ? question.finalFields : {};
   const teacherFields = question.teacherFields && typeof question.teacherFields === "object" ? question.teacherFields : {};
@@ -50,14 +56,15 @@ function getFinalQuestionFields(question = {}) {
       : {};
   const mainTypeMeta = ssenMeta.mainType && typeof ssenMeta.mainType === "object" ? ssenMeta.mainType : {};
   const subTypes = toArray(finalFields.subTypes?.length ? finalFields.subTypes : teacherFields.subTypes?.length ? teacherFields.subTypes : question.subTypes);
+  const mainTypeCode = cleanText(finalFields.mainTypeCode || teacherFields.mainTypeCode || mainTypeMeta.typeCode || question.aiFields?.mainTypeCode);
   return {
     questionRowId: question.questionRowId,
     questionNumber: Number(question.questionNumber),
     partName: cleanText(finalFields.partName || teacherFields.partName || mainTypeMeta.partName),
-    unitNo: cleanText(finalFields.unitNo || teacherFields.unitNo || mainTypeMeta.unitNo),
+    unitNo: cleanText(finalFields.unitNo || teacherFields.unitNo || mainTypeMeta.unitNo) || getSsenUnitNoFromTypeCode(mainTypeCode),
     unitName: cleanText(finalFields.unitName || teacherFields.unitName || mainTypeMeta.unitName || question.unitName),
     mainType: cleanText(finalFields.mainType || teacherFields.mainType || mainTypeMeta.typeName || question.mainType),
-    mainTypeCode: cleanText(finalFields.mainTypeCode || teacherFields.mainTypeCode || mainTypeMeta.typeCode || question.aiFields?.mainTypeCode),
+    mainTypeCode,
     subTypeCodes: toArray(finalFields.subTypeCodes?.length ? finalFields.subTypeCodes : teacherFields.subTypeCodes?.length ? teacherFields.subTypeCodes : question.aiFields?.subTypeCodes),
     ssenMeta,
     subTypes,
@@ -75,6 +82,31 @@ function getFinalQuestionFields(question = {}) {
 
 function getQuestionSsenMiddleUnitLabel(question = {}) {
   return cleanText(question.unitName) || "중단원 미입력";
+}
+
+function compareSsenMiddleUnitOrder(left = {}, right = {}) {
+  const leftNumber = Number.parseInt(cleanText(left.unitNo), 10);
+  const rightNumber = Number.parseInt(cleanText(right.unitNo), 10);
+  const leftHasOrder = Number.isFinite(leftNumber);
+  const rightHasOrder = Number.isFinite(rightNumber);
+  if (leftHasOrder && rightHasOrder && leftNumber !== rightNumber) return leftNumber - rightNumber;
+  if (leftHasOrder !== rightHasOrder) return leftHasOrder ? -1 : 1;
+  return left.label.localeCompare(right.label, "ko");
+}
+
+function countBySsenMiddleUnit(questions = []) {
+  const units = new Map();
+  questions.forEach((question) => {
+    const label = getQuestionSsenMiddleUnitLabel(question);
+    const unitNo = cleanText(question.unitNo);
+    const current = units.get(label);
+    units.set(label, {
+      label,
+      count: (current?.count || 0) + 1,
+      unitNo: current?.unitNo || unitNo
+    });
+  });
+  return [...units.values()].sort(compareSsenMiddleUnitOrder);
 }
 
 function formatPageLabel(question = {}) {
@@ -100,7 +132,7 @@ export function createExamAnalysisFinalPreviewModel({ analysisRun = {}, question
     .sort((a, b) => a.questionNumber - b.questionNumber);
   const totalQuestions = finalQuestions.length;
   const partDistribution = withPercent(
-    countBy(finalQuestions, getQuestionSsenMiddleUnitLabel),
+    countBySsenMiddleUnit(finalQuestions),
     totalQuestions,
     (_item, index) => examAnalysisPreviewPalette.units[index % examAnalysisPreviewPalette.units.length]
   );

@@ -19,6 +19,9 @@ const css = fs.readFileSync(new URL("../src/domains/exams/examAnalysisPromptStud
   "중학교",
   "고등학교",
   "벤치마크 문구 사례 선택",
+  "자동 입력값을 확인하고 학교 분위기만 보완",
+  "어디서 시간이 걸렸고 어떤 문항이 점수 차이를 만들었는지 적습니다.",
+  "추상적인 다짐보다 실행할 행동을 한 줄에 하나씩 적습니다.",
   "선택만으로는 바뀌지 않습니다.",
   "프롬프트 작업본 저장",
   "Supabase 재조회 확인",
@@ -43,11 +46,17 @@ assert(component.includes("applyExamAnalysisPromptStudioSaveVerification"));
 assert(component.includes("getExamAnalysisPhraseOptions"));
 assert(component.includes("createExamAnalysisPhraseDraft"));
 assert(component.includes("disabled={!selectedId}"));
+assert(component.includes("{option.draft}"));
+assert(component.includes("<details className=\"examPromptRoleCard\" open>"));
+assert(component.includes("<details className=\"examPromptRoleCard wide\">"));
 assert(component.includes("schoolLevel={schoolLevel}"));
 assert(component.includes("buildExamAnalysisSlideSequence"));
 assert(component.includes("createExamAnalysisPromptPack"));
 assert(component.includes("disabled={!promptPack.readyForAllGeneration}"));
 assert(css.includes(".examPromptSaveBadge.failed"));
+assert(css.includes('.examPromptRoleToggles input[type="checkbox"]'));
+assert(css.includes("height: 17px"));
+assert(css.includes(".examPromptRoleCard > summary"));
 assert(css.includes("@media (max-width: 900px)"));
 
 for (const factualField of EXAM_ANALYSIS_FACTUAL_ONLY_FIELDS) {

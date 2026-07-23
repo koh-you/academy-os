@@ -39,12 +39,13 @@ const saveLabels = {
   failed: "저장 실패 · 작업본 유지",
 };
 
-function PromptField({ label, value, onChange, multiline = false, placeholder = "", sourceLabel = "프롬프트 작업본" }) {
+function PromptField({ hint = "", label, value, onChange, multiline = false, placeholder = "", sourceLabel = "프롬프트 작업본" }) {
   const Control = multiline ? "textarea" : "input";
   return (
     <label className="examPromptField">
       <span><b>{label}</b><small>{sourceLabel}</small></span>
-      <Control value={value ?? ""} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} rows={multiline ? 3 : undefined} />
+      <Control value={value ?? ""} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} rows={multiline ? 2 : undefined} />
+      {hint ? <small className="examPromptFieldHint">{hint}</small> : null}
     </label>
   );
 }
@@ -57,7 +58,7 @@ function PhrasePicker({ field, schoolLevel, targetPath, currentValue, onApply })
     <div className="examPromptPhrasePicker">
       <select aria-label={`${field} 벤치마크 문구`} value={selectedId} onChange={(event) => setSelectedId(event.target.value)}>
         <option value="">벤치마크 문구 사례 선택</option>
-        {options.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
+        {options.map((option) => <option key={option.id} value={option.id}>{option.draft}</option>)}
       </select>
       <button
         className="ghostButton"
@@ -276,37 +277,63 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
       </div>
 
       <div className="examPromptRoleGrid">
-        <article className="examPromptRoleCard">
-          <h4>공통 정보 <small>시험분석 원천에서 시작하며 수정값은 프롬프트 작업본에만 저장</small></h4>
-          <div className="examPromptFieldGrid compact">
-            {[['schoolName','학교명'],['grade','학년'],['examName','시험명'],['subject','과목']].map(([field, label]) => (
-              <PromptField key={field} label={label} value={draft.roleInputs.common[field]} onChange={(value) => updateRoleField("common", field, value)} sourceLabel="원천값 기반" />
-            ))}
+        <details className="examPromptRoleCard" open>
+          <summary><span><b>1. 공통 정보</b><small>자동 입력값을 확인하고 학교 분위기만 보완</small></span><em>기본 확인</em></summary>
+          <div className="examPromptRoleCardBody">
+            <div className="examPromptFieldGrid compact">
+              {[['schoolName','학교명'],['grade','학년'],['examName','시험명'],['subject','과목']].map(([field, label]) => (
+                <PromptField key={field} label={label} value={draft.roleInputs.common[field]} onChange={(value) => updateRoleField("common", field, value)} sourceLabel="원천값 기반" />
+              ))}
+            </div>
+            <PromptField
+              hint="카드뉴스의 말투와 색상 분위기에만 사용됩니다."
+              label="학교 스타일"
+              value={draft.roleInputs.common.schoolStyle}
+              onChange={(value) => updateRoleField("common", "schoolStyle", value)}
+              placeholder="예: 차분한 분석형 · 학교 대표색 남색 · 과장 표현 없이"
+            />
           </div>
-          <PromptField label="학교 스타일" value={draft.roleInputs.common.schoolStyle} onChange={(value) => updateRoleField("common", "schoolStyle", value)} placeholder="예: 차분한 분석형, 학교 대표색은 남색" />
-        </article>
+        </details>
 
-        <article className="examPromptRoleCard">
-          <h4>시험 분석 <small>문항 수·배점·범위·단원 비중·난이도·총평</small></h4>
-          <div className="examPromptFieldGrid compact">
-            <PromptField label="문항 수" value={draft.roleInputs.examAnalysis.questionCount} onChange={(value) => updateRoleField("examAnalysis", "questionCount", value)} sourceLabel="확정값 기반" />
-            <PromptField label="배점/문항 구조" value={draft.roleInputs.examAnalysis.scoreStructure} onChange={(value) => updateRoleField("examAnalysis", "scoreStructure", value)} placeholder="교사 확인 후 입력" />
+        <details className="examPromptRoleCard" open>
+          <summary><span><b>2. 시험 분석</b><small>숫자는 확인하고, 시험의 특징을 짧게 설명</small></span><em>필수 입력</em></summary>
+          <div className="examPromptRoleCardBody">
+            <div className="examPromptFieldGrid compact">
+              <PromptField label="문항 수" value={draft.roleInputs.examAnalysis.questionCount} onChange={(value) => updateRoleField("examAnalysis", "questionCount", value)} sourceLabel="확정값 기반" />
+              <PromptField label="배점/문항 구조" value={draft.roleInputs.examAnalysis.scoreStructure} onChange={(value) => updateRoleField("examAnalysis", "scoreStructure", value)} placeholder="예: 객관식 17문항 75점 · 서술형 3문항 25점" />
+            </div>
+            <PromptField label="시험 범위" value={draft.roleInputs.examAnalysis.scope} onChange={(value) => updateRoleField("examAnalysis", "scope", value)} placeholder="예: 복소수부터 행렬과 그 연산까지" />
+            <PromptField label="단원 비중" value={draft.roleInputs.examAnalysis.unitDistributionNote} onChange={(value) => updateRoleField("examAnalysis", "unitDistributionNote", value)} multiline sourceLabel="확정 문항 집계 기반" />
+            <PromptField
+              hint="어디서 시간이 걸렸고 어떤 문항이 점수 차이를 만들었는지 적습니다."
+              label="난이도 근거"
+              value={draft.roleInputs.examAnalysis.difficultyNote}
+              onChange={(value) => updateRoleField("examAnalysis", "difficultyNote", value)}
+              multiline
+              placeholder="예: 초반은 기본 확인, 후반 복합 조건 문항에서 시간 관리가 중요했습니다."
+            />
+            <PhrasePicker field="difficultyEvidence" schoolLevel={schoolLevel} targetPath="roleInputs.examAnalysis.difficultyNote" currentValue={draft.roleInputs.examAnalysis.difficultyNote} onApply={applyPhrase} />
+            <PromptField
+              hint="시험 전체를 한두 문장으로 요약합니다."
+              label="총평"
+              value={draft.roleInputs.examAnalysis.overallReview}
+              onChange={(value) => updateRoleField("examAnalysis", "overallReview", value)}
+              multiline
+              placeholder="예: 익숙한 유형도 조건을 바꾸어 출제해 개념 연결과 계산 정확도를 함께 확인했습니다."
+            />
+            <PhrasePicker field="reviewPoints" schoolLevel={schoolLevel} targetPath="roleInputs.examAnalysis.overallReview" currentValue={draft.roleInputs.examAnalysis.overallReview} onApply={applyPhrase} />
           </div>
-          <PromptField label="시험 범위" value={draft.roleInputs.examAnalysis.scope} onChange={(value) => updateRoleField("examAnalysis", "scope", value)} />
-          <PromptField label="단원 비중" value={draft.roleInputs.examAnalysis.unitDistributionNote} onChange={(value) => updateRoleField("examAnalysis", "unitDistributionNote", value)} multiline sourceLabel="확정 문항 집계 기반" />
-          <PromptField label="난이도 근거" value={draft.roleInputs.examAnalysis.difficultyNote} onChange={(value) => updateRoleField("examAnalysis", "difficultyNote", value)} multiline />
-          <PhrasePicker field="difficultyEvidence" schoolLevel={schoolLevel} targetPath="roleInputs.examAnalysis.difficultyNote" currentValue={draft.roleInputs.examAnalysis.difficultyNote} onApply={applyPhrase} />
-          <PromptField label="총평" value={draft.roleInputs.examAnalysis.overallReview} onChange={(value) => updateRoleField("examAnalysis", "overallReview", value)} multiline />
-          <PhrasePicker field="reviewPoints" schoolLevel={schoolLevel} targetPath="roleInputs.examAnalysis.overallReview" currentValue={draft.roleInputs.examAnalysis.overallReview} onApply={applyPhrase} />
-        </article>
+        </details>
 
-        <article className="examPromptRoleCard wide">
-          <div className="examPromptRoleHeading">
-            <h4>주요문항 <small>문항별 선정 이유·핵심 개념·풀이 전략·오답 지점·원본 자산</small></h4>
-            <button className="ghostButton" disabled={draft.roleInputs.keyQuestions.length >= 12} onClick={addKeyQuestion} type="button">주요문항 추가</button>
-          </div>
-          {draft.roleInputs.keyQuestions.length ? draft.roleInputs.keyQuestions.map((question, index) => (
-            <div className="examPromptQuestionCard" key={question.blockId || index}>
+        <details className="examPromptRoleCard wide">
+          <summary><span><b>3. 주요문항</b><small>선택 이유·핵심 개념·풀이 전략·오답 지점</small></span><em>{draft.roleInputs.keyQuestions.length}문항</em></summary>
+          <div className="examPromptRoleCardBody">
+            <div className="examPromptRoleHeading">
+              <small>주요문항으로 보여줄 문제만 펼쳐서 보완합니다.</small>
+              <button className="ghostButton" disabled={draft.roleInputs.keyQuestions.length >= 12} onClick={addKeyQuestion} type="button">주요문항 추가</button>
+            </div>
+            {draft.roleInputs.keyQuestions.length ? draft.roleInputs.keyQuestions.map((question, index) => (
+              <div className="examPromptQuestionCard" key={question.blockId || index}>
               <div className="examPromptQuestionTitle"><b>주요문항 {index + 1}</b><span>문제 crop·손풀이 ID가 없으면 누락으로 유지</span><button className="textButton danger" onClick={() => removeKeyQuestion(index)} type="button">삭제</button></div>
               <div className="examPromptFieldGrid compact">
                 <PromptField label="문항 번호" value={question.questionNumber} onChange={(value) => updateKeyQuestion(index, "questionNumber", value)} />
@@ -324,22 +351,27 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
                 <PromptField label="문제 crop 자산 ID" value={question.sourceAssetId} onChange={(value) => updateKeyQuestion(index, "sourceAssetId", value)} placeholder="실제 저장 자산 ID" />
                 <PromptField label="검증 손풀이 자산 ID" value={question.solutionAssetId} onChange={(value) => updateKeyQuestion(index, "solutionAssetId", value)} placeholder="실제 저장 자산 ID" />
               </div>
-            </div>
-          )) : <div className="emptyState compact">산출물 입력에서 주요문항을 선택한 뒤 다시 확인해 주세요.</div>}
-        </article>
+              </div>
+            )) : <div className="emptyState compact">산출물 입력에서 주요문항을 선택한 뒤 다시 확인해 주세요.</div>}
+          </div>
+        </details>
 
-        <article className="examPromptRoleCard">
-          <h4>다음 대비 <small>교사가 확정할 학습 행동 3~5개 · 현재 {draft.roleInputs.nextPreparation.actionItems.length}개</small></h4>
-          <PromptField label="학습 행동" value={draft.roleInputs.nextPreparation.actionItems.join("\n")} onChange={(value) => updateRoleField("nextPreparation", "actionItems", value.split(/\r?\n/).map((item) => item.trim()).filter(Boolean).slice(0, 5))} multiline placeholder="한 줄에 한 행동" />
-          <PhrasePicker field="actionItems" schoolLevel={schoolLevel} targetPath="roleInputs.nextPreparation.actionItems" currentValue={draft.roleInputs.nextPreparation.actionItems.join("\n")} onApply={({ value, ...selection }) => applyPhrase({ ...selection, value: value.split(/\r?\n/).filter(Boolean).slice(0, 5) })} />
-        </article>
+        <details className="examPromptRoleCard">
+          <summary><span><b>4. 다음 대비</b><small>학생이 앞으로 해야 할 구체적인 훈련</small></span><em>{draft.roleInputs.nextPreparation.actionItems.length}/5개</em></summary>
+          <div className="examPromptRoleCardBody">
+            <PromptField hint="추상적인 다짐보다 실행할 행동을 한 줄에 하나씩 적습니다." label="학습 행동" value={draft.roleInputs.nextPreparation.actionItems.join("\n")} onChange={(value) => updateRoleField("nextPreparation", "actionItems", value.split(/\r?\n/).map((item) => item.trim()).filter(Boolean).slice(0, 5))} multiline placeholder={"예: 복합 조건을 표로 정리한 뒤 식 세우기\n서술형 풀이에서 근거 문장까지 작성하기"} />
+            <PhrasePicker field="actionItems" schoolLevel={schoolLevel} targetPath="roleInputs.nextPreparation.actionItems" currentValue={draft.roleInputs.nextPreparation.actionItems.join("\n")} onApply={({ value, ...selection }) => applyPhrase({ ...selection, value: value.split(/\r?\n/).filter(Boolean).slice(0, 5) })} />
+          </div>
+        </details>
 
-        <article className="examPromptRoleCard">
-          <h4>CTA <small>검수된 학원 문구와 연락·다음 행동</small></h4>
-          <PromptField label="학원 가치 문장" value={draft.roleInputs.cta.valueStatement} onChange={(value) => updateRoleField("cta", "valueStatement", value)} multiline />
-          <PhrasePicker field="valueStatement" schoolLevel={schoolLevel} targetPath="roleInputs.cta.valueStatement" currentValue={draft.roleInputs.cta.valueStatement} onApply={applyPhrase} />
-          <PromptField label="연락/다음 행동" value={draft.roleInputs.cta.contactOrNextAction} onChange={(value) => updateRoleField("cta", "contactOrNextAction", value)} multiline placeholder="검수된 상담 문구·연락처·링크" />
-        </article>
+        <details className="examPromptRoleCard">
+          <summary><span><b>5. 마무리 안내</b><small>학원의 역할과 상담 연결 문구</small></span><em>마지막 장</em></summary>
+          <div className="examPromptRoleCardBody">
+            <PromptField hint="시험분석 뒤 학원이 어떤 도움을 줄지 한 문장으로 적습니다." label="학원 가치 문장" value={draft.roleInputs.cta.valueStatement} onChange={(value) => updateRoleField("cta", "valueStatement", value)} multiline placeholder="예: 결과보다 풀이 과정을 분석해 다음 시험의 학습 방향까지 연결합니다." />
+            <PhrasePicker field="valueStatement" schoolLevel={schoolLevel} targetPath="roleInputs.cta.valueStatement" currentValue={draft.roleInputs.cta.valueStatement} onApply={applyPhrase} />
+            <PromptField label="연락/다음 행동" value={draft.roleInputs.cta.contactOrNextAction} onChange={(value) => updateRoleField("cta", "contactOrNextAction", value)} multiline placeholder="예: 상담 문의 010-0000-0000 · 학원 채널 링크" />
+          </div>
+        </details>
       </div>
 
       <div className="examPromptOutputPanel">
