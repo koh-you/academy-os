@@ -3,13 +3,20 @@ import {
   createNotificationHistoryViewModel,
   upsertLocalNoticeJobList
 } from "./notificationCenterModel.js";
-import { selectNoticeHistoryFilterAction } from "./notificationNoticeActions.js";
+import {
+  deleteNoticeJobAction,
+  selectNoticeHistoryFilterAction
+} from "./notificationNoticeActions.js";
 
 export function useNotificationHistoryState({
   canCancelJob,
+  canDeleteJob,
+  confirmDeleteJob,
+  deleteJob,
   getProviderReference,
   isSchedulePast,
   notificationJobs,
+  refreshJobs,
   setActiveWorkspace
 }) {
   const [deletingJobId, setDeletingJobId] = useState("");
@@ -36,6 +43,19 @@ export function useNotificationHistoryState({
     });
   }
 
+  function deleteNotificationJob(job) {
+    return deleteNoticeJobAction({
+      canDeleteJob,
+      confirmAction: confirmDeleteJob,
+      deleteJob,
+      deletingJobId,
+      job,
+      refresh: refreshJobs,
+      setDeletingJobId,
+      setJobAction: setNotificationJobAction
+    });
+  }
+
   function upsertLocalNoticeJob(job) {
     setLocalNoticeJobs((current) =>
       upsertLocalNoticeJobList(current, job)
@@ -44,6 +64,7 @@ export function useNotificationHistoryState({
 
   return {
     ...historyViewModel,
+    deleteNotificationJob,
     deletingJobId,
     isNoticeHistoryOpen,
     jobFilter,

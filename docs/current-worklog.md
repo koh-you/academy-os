@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13F-10 알림 이력 삭제 binding 분리 — AI gate 통과
+
+- 코드: App의 `deleteNotificationJob` wrapper를 `useNotificationHistoryState`로 이동했다. App은 삭제 가능 판정, 브라우저 confirm, 기존 `deleteNoticeJobRequest` callback과 기록 refresh만 주입하고 hook은 자신이 소유한 `deletingJobId`·결과 상태 setter와 `deleteNoticeJobAction`을 결합한다.
+- 동작 보존: 삭제 가능/중복 guard, `send_unconfirmed`와 일반 이력의 서로 다른 확인·진행·완료 문구, DELETE 성공 후 전체 기록 재조회, 실패 feedback과 `finally` busy 해제를 그대로 유지했다.
+- 저장 원천/side effect: 실제 버튼을 누르면 기존 Supabase `notification_jobs` DELETE 경계가 실행되지만 이번 검증은 action/API mock만 사용했다. 운영 이력 삭제, 운영 데이터 생성, 재시험/고태영 데이터, Solapi 조회·예약·취소·발송은 실행하지 않았다.
+- 자동검증: 일반 draft와 과거 확인 필요 이력의 성공, 삭제 불가/busy guard, confirm 취소, 요청 실패, 삭제 ID 재확인 실패, refresh와 busy 복구를 fixture로 재검증했다. production scenario 465/465와 build, `git diff --check`가 통과했다.
+- gate 판정: 화면·문구·원천/API 계약을 바꾸지 않은 결합부 이동이고 모든 분기를 mock으로 재현했으므로 새 사람 검수는 필요하지 않다.
+- 다음 경계: App의 Solapi 예약 취소 wrapper는 history state와 composer background refresh를 함께 사용한다. hook 순환 없이 기존 action option을 캡처하는 독립 binding으로 이동 가능한지 inventory 후 진행한다.
+
 ## 2026-07-23 P1. 13F-9 알림 AI 문구 수정 action binding 분리 — AI gate 통과
 
 - 코드: App의 `polishNoticeMessage` wrapper를 `useNotificationComposerState`로 이동했다. App은 AI provider/model/prompt와 기존 `polishNoticeMessageRequest` callback을 주입하고 hook은 자신이 소유한 본문·제목·busy·feedback setter와 `polishNoticeMessageAction`을 결합한다.

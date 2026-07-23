@@ -62,8 +62,7 @@ import {
 } from "../domains/notifications/notificationNoticeApi.js";
 import {
   cancelNoticeJobAction,
-  createReconcileNoticeResultsBinding,
-  deleteNoticeJobAction
+  createReconcileNoticeResultsBinding
 } from "../domains/notifications/notificationNoticeActions.js";
 import { NotificationNoticeWorkspace } from "../domains/notifications/NotificationNoticeWorkspace.jsx";
 import { useNotificationCenterNavigationState } from "../domains/notifications/useNotificationCenterNavigationState.js";
@@ -10158,6 +10157,7 @@ function NotificationCenter({
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
   const {
     archivedJobs,
+    deleteNotificationJob,
     deletingJobId,
     failedJobs,
     filteredNotificationJobs,
@@ -10181,9 +10181,18 @@ function NotificationCenter({
     upsertLocalNoticeJob
   } = useNotificationHistoryState({
     canCancelJob: canCancelNotificationJob,
+    canDeleteJob: canDeleteNotificationJob,
+    confirmDeleteJob: (message) => typeof window === "undefined" || window.confirm(message),
+    deleteJob: (notificationJobId) =>
+      deleteNoticeJobRequest({
+        notificationJobId,
+        request: fetch,
+        resolveApiUrl: apiUrl
+      }),
     getProviderReference: getNotificationJobProviderReference,
     isSchedulePast: isNotificationSchedulePast,
     notificationJobs,
+    refreshJobs: onRefresh,
     setActiveWorkspace: setActiveNoticeWorkspace
   });
   const {
@@ -10313,24 +10322,6 @@ function NotificationCenter({
     setActiveNotificationTab("notice");
     setActiveNoticeWorkspace("compose");
     setDispatchMessage("특강 안내문을 저장한 뒤 공지 발송 화면에 반영했습니다. 수신 대상을 확인한 뒤 예약 발송 또는 즉시 발송으로 진행하세요.");
-  }
-
-  async function deleteNotificationJob(job) {
-    return deleteNoticeJobAction({
-      canDeleteJob: canDeleteNotificationJob,
-      confirmAction: (message) => typeof window === "undefined" || window.confirm(message),
-      deleteJob: (notificationJobId) =>
-        deleteNoticeJobRequest({
-          notificationJobId,
-          request: fetch,
-          resolveApiUrl: apiUrl
-        }),
-      deletingJobId,
-      job,
-      refresh: onRefresh,
-      setDeletingJobId,
-      setJobAction: setNotificationJobAction
-    });
   }
 
   async function cancelNotificationJob(job) {
