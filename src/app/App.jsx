@@ -87,10 +87,8 @@ import {
   createSupplementNotificationDraftWorkspaceViewModel,
   createSupplementTaskCardViewModel
 } from "../domains/supplements/supplementTaskCardModel.js";
-import {
-  applySupplementNotificationControlAction,
-  cancelSupplementAbsenceSourceAction
-} from "../domains/supplements/supplementTaskActions.js";
+import { applySupplementNotificationControlAction } from "../domains/supplements/supplementTaskActions.js";
+import { createSupplementCancellationHandler } from "../domains/supplements/supplementAbsenceCancelController.js";
 import { createSupplementTaskContentSaveHandler } from "../domains/supplements/supplementTaskContentSaveController.js";
 import { createSupplementTaskPassHandler } from "../domains/supplements/supplementTaskPassController.js";
 import { createSupplementTaskScheduleHandlers } from "../domains/supplements/supplementTaskScheduleController.js";
@@ -24698,50 +24696,17 @@ function SupplementStudentModal({
     showFeedback
   });
 
-  async function handleConfirmSupplementCancellation() {
-    const task = cancellationConfirm?.task;
-    const mode = cancellationConfirm?.mode;
-    if (!task || !mode || hasBusyTask) return;
-    const keepsSourceAbsence = mode === "cancelMakeupKeepAbsence";
-    beginTaskAction(task.makeupTaskId, keepsSourceAbsence ? "cancelMakeup" : "cancelAbsence");
-    try {
-      if (keepsSourceAbsence) {
-        showFeedback(
-          "보강만 취소 중",
-          "보강 항목·연결 수업일지·미발송 예약을 취소하고 원 결석기록 보존 여부를 확인합니다.",
-          "saving"
-        );
-        const result = await onCancelAbsenceMakeup?.(task);
-        setCancellationConfirm(null);
-        showFeedback(
-          "보강 취소 완료 · 결석기록 유지",
-          `원 수업일지의 결석 상태와 사유는 그대로 유지했습니다. 미발송 알림톡 예약 ${result?.canceledNotificationJobCount ?? 0}건을 취소했습니다.`
-        );
-        onClose?.();
-      } else {
-        await cancelSupplementAbsenceSourceAction({
-          cancelSource: (payload) => onCancelAbsenceSource?.(payload),
-          onClose: () => {
-            setCancellationConfirm(null);
-            onClose?.();
-          },
-          onFeedback: ({ message, title, tone }) => showFeedback(title, message, tone),
-          task
-        });
-      }
-    } catch (error) {
-      console.error("Failed to cancel supplement or absence source", error);
-      if (keepsSourceAbsence) {
-        showFeedback(
-          "보강 취소 실패",
-          error?.message || "보강을 취소하지 못했습니다. 원 결석기록과 예약 상태를 다시 확인해 주세요.",
-          "failed"
-        );
-      }
-    } finally {
-      finishTaskAction();
-    }
-  }
+  const handleConfirmSupplementCancellation = createSupplementCancellationHandler({
+    beginTaskAction,
+    clearConfirmation: () => setCancellationConfirm(null),
+    finishTaskAction,
+    getCancellation: () => cancellationConfirm,
+    hasBusyTask,
+    onCancelAbsenceMakeup,
+    onCancelAbsenceSource,
+    onClose,
+    showFeedback
+  });
 
   const handlePassTask = createSupplementTaskPassHandler({
     beginTaskAction,
