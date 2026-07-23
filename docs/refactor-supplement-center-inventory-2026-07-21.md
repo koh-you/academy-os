@@ -360,6 +360,15 @@
 - 순수 derivation이므로 사람 조작 없이 AI gate로 통과했다.
 - 다음은 보충 후보 row UI를 callback-only 컴포넌트로 분리한 뒤 `SupplementCenter` 본체 이동 가능 여부를 inventory한다.
 
+## 12R-36 구현 결과 — 보충 후보 행 표시 컴포넌트
+
+- 후보 행의 학생명·제목·meta·미래 결석 안내·진행 badge·메모·action 상태와 상세/생성·완료 버튼 JSX를 `SupplementCandidateRow.jsx`로 이동했다.
+- App은 기존 task 탐색, 진행 상태 계산, task ID별 busy 판정, 상세 열기와 완료 확인 callback을 계속 소유한다.
+- 새 컴포넌트에는 React state/hook·clock·API·Supabase·notification/Solapi 호출이 없다.
+- 기존 scenario `21`, `31`, `88b`, `88b-1`의 탐색 경계를 새 파일까지 확장하고 callback-only scenario `88b-51`을 추가했다. production 417/417, build, diff 검사를 통과했다.
+- 표시 JSX만 이동해 운영 데이터나 사람 조작 없이 AI gate로 통과했다.
+- 다음은 `SupplementCenter` 본체 props·local state·App helper 의존성을 inventory하고 side effect callback 주입 경계로 본체를 이동할 수 있는지 판정한다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.
