@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13F-9 알림 AI 문구 수정 action binding 분리 — AI gate 통과
+
+- 코드: App의 `polishNoticeMessage` wrapper를 `useNotificationComposerState`로 이동했다. App은 AI provider/model/prompt와 기존 `polishNoticeMessageRequest` callback을 주입하고 hook은 자신이 소유한 본문·제목·busy·feedback setter와 `polishNoticeMessageAction`을 결합한다.
+- 동작 보존: 빈 본문/busy guard, parent 공지용 prompt payload, 제목 fallback, AI 응답 본문 반영·응답 누락 시 기존 본문 유지, 성공/실패 feedback, 최종 busy 해제를 그대로 유지했다.
+- 저장 원천/side effect: callback을 실제로 누르면 기존 AI 문구 수정 API가 호출되지만 결과는 local draft만 갱신하고 자동 저장·예약·발송하지 않는다. 이번 검증은 injected AI request mock만 사용해 유료 AI/API/운영 데이터를 호출하지 않았다.
+- 자동검증: guard·정확한 prompt payload·성공·응답 fallback·실패·busy/feedback/body 상태 전이를 포함한 action/API fixture와 App→hook→action/request 경계를 production scenario 463개로 고정했다. production scenario 463/463와 build, `git diff --check`가 통과했다.
+- gate 판정: 입력 payload와 모든 결과 분기를 mock으로 재현했고 사람 저장본·외부 template·발송 경로는 바뀌지 않았다. 재시험/고태영 운영 데이터, 유료 AI 호출, 실제 번호·발송, 사람 화면 검수가 필요하지 않은 AI gate다.
+- 다음 경계: App의 알림 이력 삭제 wrapper를 history hook에서 기존 `deleteNoticeJobAction`과 injected delete request/confirm/refresh callback으로 결합할 수 있는지 확인한다.
+
 ## 2026-07-23 P1. 13F-8 알림 Solapi 결과 대조 binding 분리 — AI gate 통과
 
 - 코드: App의 `reconcileSolapiResultsForNoticeJobs` wrapper를 `notificationNoticeActions.js`의 `createReconcileNoticeResultsBinding`으로 이동했다. history 상태와 composer가 계산한 target ID가 현재 서로 다른 hook에 있어 순환 의존을 만들지 않도록 독립 binding이 기존 action option을 캡처한다.

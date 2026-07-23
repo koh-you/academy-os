@@ -63,8 +63,7 @@ import {
 import {
   cancelNoticeJobAction,
   createReconcileNoticeResultsBinding,
-  deleteNoticeJobAction,
-  polishNoticeMessageAction
+  deleteNoticeJobAction
 } from "../domains/notifications/notificationNoticeActions.js";
 import { NotificationNoticeWorkspace } from "../domains/notifications/NotificationNoticeWorkspace.jsx";
 import { useNotificationCenterNavigationState } from "../domains/notifications/useNotificationCenterNavigationState.js";
@@ -10232,6 +10231,7 @@ function NotificationCenter({
     noticeTemplateId,
     noticeText,
     noticeTitle,
+    polishNoticeMessage,
     refreshNoticeJobsInBackground,
     scheduleDate,
     scheduleNotice,
@@ -10252,11 +10252,20 @@ function NotificationCenter({
     solapiResultSyncTargetIds
   } = useNotificationComposerState({
     academyName: academyBrandName,
+    aiModel: commentAiModel,
+    aiPrompt: getAiPrompt(aiSettings, "noticeMessage"),
+    aiProvider: commentAiProvider,
     formatKoreaTimeLabel,
     isRequestTimeoutError,
     isSchedulePast: isNotificationSchedulePast,
     noticeRecipients,
     persistJob: persistNoticeJob,
+    polishMessage: (payload) =>
+      polishNoticeMessageRequest({
+        payload,
+        request: fetch,
+        resolveApiUrl: apiUrl
+      }),
     refreshJobs: onRefresh,
     reportError: (error) => console.error(error),
     reserveJob: reserveNoticeJob,
@@ -10304,27 +10313,6 @@ function NotificationCenter({
     setActiveNotificationTab("notice");
     setActiveNoticeWorkspace("compose");
     setDispatchMessage("특강 안내문을 저장한 뒤 공지 발송 화면에 반영했습니다. 수신 대상을 확인한 뒤 예약 발송 또는 즉시 발송으로 진행하세요.");
-  }
-
-  async function polishNoticeMessage() {
-    return polishNoticeMessageAction({
-      aiModel: commentAiModel,
-      aiPrompt: getAiPrompt(aiSettings, "noticeMessage"),
-      aiProvider: commentAiProvider,
-      isPolishing: isPolishingNotice,
-      noticeBody,
-      noticeTitle,
-      polishMessage: (payload) =>
-        polishNoticeMessageRequest({
-          payload,
-          request: fetch,
-          resolveApiUrl: apiUrl
-        }),
-      setDispatchMessage,
-      setIsPolishing: setIsPolishingNotice,
-      setNoticeBody,
-      today
-    });
   }
 
   async function deleteNotificationJob(job) {

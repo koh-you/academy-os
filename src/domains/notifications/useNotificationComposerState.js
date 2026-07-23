@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createNotificationComposerViewModel } from "./notificationCenterModel.js";
 import {
   applyNoticeTemplateAction,
+  polishNoticeMessageAction,
   refreshNoticeJobsInBackgroundAction,
   scheduleNoticeAction,
   sendNoticeNowAction
@@ -10,11 +11,15 @@ import { buildNoticeJob as createNotificationNoticeJob } from "./notificationNot
 
 export function useNotificationComposerState({
   academyName,
+  aiModel,
+  aiPrompt,
+  aiProvider,
   formatKoreaTimeLabel,
   isRequestTimeoutError,
   isSchedulePast,
   noticeRecipients,
   persistJob,
+  polishMessage,
   refreshJobs,
   reportError,
   reserveJob,
@@ -126,6 +131,22 @@ export function useNotificationComposerState({
     });
   }
 
+  function polishNoticeMessage() {
+    return polishNoticeMessageAction({
+      aiModel,
+      aiPrompt,
+      aiProvider,
+      isPolishing: isPolishingNotice,
+      noticeBody,
+      noticeTitle,
+      polishMessage,
+      setDispatchMessage,
+      setIsPolishing: setIsPolishingNotice,
+      setNoticeBody,
+      today
+    });
+  }
+
   return {
     ...composerViewModel,
     applyNoticeTemplate,
@@ -138,6 +159,7 @@ export function useNotificationComposerState({
     noticeSpecialLectureMeta,
     noticeTemplateId,
     noticeTitle,
+    polishNoticeMessage,
     refreshNoticeJobsInBackground,
     scheduleDate,
     scheduleNotice,

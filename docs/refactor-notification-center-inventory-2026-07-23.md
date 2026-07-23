@@ -264,8 +264,14 @@
 - history 상태와 composer target ID 사이에 hook 순환을 만들지 않고 기존 action option을 캡처한다.
 - guard, 성공, 부분 조회 실패, 전체 실패와 state/filter/history/refresh 전이를 mock fixture로 검증했다.
 
+## 13F-9 AI 문구 수정 action binding 단위
+
+- App의 AI 문구 수정 wrapper를 composer hook으로 이동했다.
+- App은 AI 설정과 request callback만 주입하고 hook이 local draft/busy/feedback setter와 action을 결합한다.
+- guard, prompt payload, 성공, 응답 fallback, 실패와 상태 전이를 mock fixture로 검증했다.
+
 ## 다음 후보
 
-1. App의 AI 문구 수정 wrapper를 composer hook에서 기존 action과 injected AI request callback으로 결합한다.
+1. App의 알림 이력 삭제 wrapper를 history hook에서 기존 action과 injected delete request/confirm/refresh callback으로 결합한다.
 2. 특강 안내문 적용 문구와 handler는 외부 템플릿 gate 때문에 App에 그대로 둔다.
 3. 이후 action adapter 이동은 기존 mock fixture가 충분한지 먼저 확인하고, 충분하지 않으면 로드맵 13의 안전한 경계를 닫는다.
