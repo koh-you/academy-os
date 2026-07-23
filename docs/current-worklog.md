@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13F-4 알림 persist/reserve request binding 분리 — AI gate 통과
+
+- 코드: App의 `persistNoticeJob`·`reserveNoticeJob` wrapper를 `notificationNoticeApi.js`의 `createNotificationNoticeJobRequestBindings`로 이동하고, App은 공통 `postJsonWithTimeout`만 주입해 두 callback을 사용하도록 정리했다.
+- 동작 보존: OS job 저장 URL·payload·15초 timeout/문구와 Solapi 예약 URL·reason·45초 timeout/문구, 예약 응답 job 우선·원본 fallback, request 예외 전달을 그대로 유지했다.
+- 저장 원천/side effect: binding 생성 자체는 요청을 실행하지 않는다. callback 호출 시의 기존 `notification_jobs` 저장·Solapi 예약 side effect는 동일하며, 이번 검증은 injected mock request만 사용해 운영 DB·번호·Solapi를 호출하지 않았다.
+- 자동검증: persist/reserve의 정확한 호출 인수·반환·fallback·예외 fixture에 factory callback 경로를 추가하고, App→factory→API adapter→schedule action 연결을 production scenario 458개로 고정했다. production scenario 458/458와 build, `git diff --check`가 통과했다.
+- gate 판정: 외부 요청 경계가 완전 주입형이고 성공·fallback·실패 계약을 mock으로 재현했다. 재시험/고태영 운영 데이터, 실제 번호·예약·발송, 사람 화면 검수가 필요하지 않은 AI gate다.
+- 다음 경계: App의 `refreshNoticeJobsInBackground` wrapper를 기존 background refresh action과 composer feedback setter를 결합하는 callback으로 이동할 수 있는지 확인한다.
+
 ## 2026-07-23 P1. 13F-3 알림 job builder binding 분리 — AI gate 통과
 
 - 코드: App의 `buildNoticeJob(recipient, mode)` wrapper를 `useNotificationComposerState`로 이동했다. hook이 `academyBrandName`, 현재 composer draft/view model, 실행 시점 clock/random 값을 기존 순수 `createNotificationNoticeJob`에 주입해 동일한 job을 반환한다.

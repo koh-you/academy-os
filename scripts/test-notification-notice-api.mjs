@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  createNotificationNoticeJobRequestBindings,
   deleteNoticeJobRequest,
   persistNoticeJobRequest,
   polishNoticeMessageRequest,
@@ -56,6 +57,35 @@ const fallbackResult = await reserveNoticeJobRequest({
   request: async () => ({})
 });
 assert.equal(fallbackResult, notificationJob);
+
+const bindingCalls = [];
+const {
+  persistNoticeJob,
+  reserveNoticeJob
+} = createNotificationNoticeJobRequestBindings({
+  request: async (...args) => {
+    bindingCalls.push(args);
+    return args[0].endsWith("/reserve")
+      ? { notificationJob: reservedJob }
+      : { notificationJob };
+  }
+});
+assert.equal(await persistNoticeJob(notificationJob), undefined);
+assert.equal(await reserveNoticeJob(notificationJob), reservedJob);
+assert.deepEqual(bindingCalls, [
+  [
+    "/api/notification-jobs",
+    { notificationJob },
+    15000,
+    "발송 기록 저장 요청이 15초를 넘었습니다. 새로고침 후 기록 반영 여부를 확인해 주세요."
+  ],
+  [
+    "/api/notification-jobs/reserve",
+    { notificationJob, reason: "공지 Solapi 예약" },
+    45000,
+    "Solapi 예약 요청이 45초를 넘었습니다. 실제 예약 여부는 발송 기록 또는 Solapi에서 확인해 주세요."
+  ]
+]);
 
 const reserveError = new Error("fixture reserve failure");
 await assert.rejects(

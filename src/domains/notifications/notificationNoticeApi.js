@@ -28,6 +28,23 @@ export async function reserveNoticeJobRequest({
   return result.notificationJob ?? notificationJob;
 }
 
+export function createNotificationNoticeJobRequestBindings({ request }) {
+  return {
+    persistNoticeJob(notificationJob) {
+      return persistNoticeJobRequest({
+        notificationJob,
+        request
+      });
+    },
+    reserveNoticeJob(notificationJob) {
+      return reserveNoticeJobRequest({
+        notificationJob,
+        request
+      });
+    }
+  };
+}
+
 export async function polishNoticeMessageRequest({
   payload,
   request,
