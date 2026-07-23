@@ -8,6 +8,14 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 14A ExamPrepCenter 원천·side effect inventory
+
+- inventory: `docs/refactor-exam-prep-center-inventory-2026-07-23.md`에 시험정보, 시험 후 제출, 총평 AI, Tally app_state, Google Apps Script 기출문제, 학사일정/시험대비 수업 연결을 분리해 기록했다.
+- 원천: 시험정보는 Supabase `exam_prep_rows`, 시험 후 제출 대상과 Tally 데이터는 `app_state`, 학생 제출은 인증 전용 API와 Storage를 사용한다. 시험정보 삭제는 연결된 시험대비 `lessons` upsert/DELETE까지 수행한다.
+- 유지보수 진단: 시험정보 입력은 local draft 없이 입력마다 bulk POST하고 API 성공만으로 저장 완료를 표시하며 Supabase 재조회 대조가 없다. 수학 일정 두 필드 연속 저장과 `sharedAppState` 전체 snapshot 자동저장도 리팩터링에서 고치지 않고 유지보수 큐로 남긴다.
+- 첫 안전 단위: state/effect/API가 없는 controlled `ExamPrepEditModal` 표시 컴포넌트만 전용 파일로 이동한다. production 검사는 새 파일까지 확장하고 기존 callback/문구/DOM 계약을 보존한다.
+- AI/사람 gate: inventory는 읽기 전용이므로 재시험·고태영 운영 데이터, 유료 AI, 파일 업로드가 필요하지 않다. 첫 표시 컴포넌트도 fixture와 production test/build로 검증 가능해 새 사람 검수 없이 진행한다.
+
 ## 2026-07-23 P1. 13G NotificationCenter 남은 경계 audit — 로드맵 13 안전 경계 종료
 
 - inventory: App의 `NotificationCenter`는 현재 navigation/recipient/history/composer hooks, request/action binding, 분리된 notice workspace와 특강 panel을 조립한다. 본체에 남은 독립 함수 선언은 `applySpecialLectureGuideToNotice` 하나다.
