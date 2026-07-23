@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  deleteNoticeJobAction,
   polishNoticeMessageAction,
   reconcileNoticeResultsAction,
   scheduleNoticeAction,
@@ -492,4 +493,146 @@ await polishNoticeMessageAction({
 });
 assert.equal(polishGuardCallCount, 0);
 
-console.log("notification notice immediate scheduled reconcile and polish action fixtures passed");
+const deleteConfirmationMessages = [];
+const deleteRequests = [];
+const deleteBusyStates = [];
+const deleteJobStates = [];
+let deleteRefreshCount = 0;
+await deleteNoticeJobAction({
+  canDeleteJob: () => true,
+  confirmAction: (message) => {
+    deleteConfirmationMessages.push(message);
+    return true;
+  },
+  deleteJob: async (notificationJobId) => {
+    deleteRequests.push(notificationJobId);
+  },
+  deletingJobId: "",
+  job: {
+    notificationJobId: "notice-delete-draft",
+    status: "draft"
+  },
+  refresh: async () => {
+    deleteRefreshCount += 1;
+  },
+  setDeletingJobId: (value) => deleteBusyStates.push(value),
+  setJobAction: (value) => deleteJobStates.push(value)
+});
+assert.deepEqual(deleteConfirmationMessages, [
+  "이 발송 전 공지 기록 1건을 Academy OS에서 삭제할까요? 삭제한 기록은 복구할 수 없습니다."
+]);
+assert.deepEqual(deleteRequests, ["notice-delete-draft"]);
+assert.deepEqual(deleteBusyStates, ["notice-delete-draft", ""]);
+assert.deepEqual(deleteJobStates, [
+  {
+    message: "발송하지 않은 공지 기록을 삭제하는 중입니다.",
+    state: "saving"
+  },
+  {
+    message: "발송하지 않은 공지 기록 1건을 삭제했습니다.",
+    state: "saved"
+  }
+]);
+assert.equal(deleteRefreshCount, 1);
+
+const pastDeleteConfirmationMessages = [];
+const pastDeleteJobStates = [];
+await deleteNoticeJobAction({
+  canDeleteJob: () => true,
+  confirmAction: (message) => {
+    pastDeleteConfirmationMessages.push(message);
+    return true;
+  },
+  deleteJob: async () => {},
+  deletingJobId: "",
+  job: {
+    notificationJobId: "notice-delete-unconfirmed",
+    status: "send_unconfirmed"
+  },
+  setDeletingJobId: () => {},
+  setJobAction: (value) => pastDeleteJobStates.push(value)
+});
+assert.deepEqual(pastDeleteConfirmationMessages, [
+  "이 '확인 필요' 알림 이력 1건을 Academy OS에서 삭제할까요? 과거 Solapi 발송 결과는 변경되지 않으며 삭제한 OS 이력은 복구할 수 없습니다."
+]);
+assert.deepEqual(pastDeleteJobStates, [
+  {
+    message: "확인 필요 알림 이력을 삭제하는 중입니다.",
+    state: "saving"
+  },
+  {
+    message: "확인 필요 알림 이력 1건을 삭제했습니다.",
+    state: "saved"
+  }
+]);
+
+const failedDeleteBusyStates = [];
+const failedDeleteJobStates = [];
+let failedDeleteRefreshCount = 0;
+await deleteNoticeJobAction({
+  canDeleteJob: () => true,
+  confirmAction: () => true,
+  deleteJob: async () => {
+    throw new Error("fixture delete failure");
+  },
+  deletingJobId: "",
+  job: {
+    notificationJobId: "notice-delete-failed",
+    status: "draft"
+  },
+  refresh: async () => {
+    failedDeleteRefreshCount += 1;
+  },
+  setDeletingJobId: (value) => failedDeleteBusyStates.push(value),
+  setJobAction: (value) => failedDeleteJobStates.push(value)
+});
+assert.deepEqual(failedDeleteBusyStates, ["notice-delete-failed", ""]);
+assert.deepEqual(failedDeleteJobStates, [
+  {
+    message: "발송하지 않은 공지 기록을 삭제하는 중입니다.",
+    state: "saving"
+  },
+  {
+    message: "알림 이력 삭제 실패: fixture delete failure",
+    state: "failed"
+  }
+]);
+assert.equal(failedDeleteRefreshCount, 0);
+
+let deleteGuardCallCount = 0;
+const deleteGuardCallback = () => {
+  deleteGuardCallCount += 1;
+};
+await deleteNoticeJobAction({
+  canDeleteJob: () => false,
+  confirmAction: deleteGuardCallback,
+  deleteJob: deleteGuardCallback,
+  deletingJobId: "",
+  job: { notificationJobId: "notice-not-deletable", status: "sent" },
+  setDeletingJobId: deleteGuardCallback,
+  setJobAction: deleteGuardCallback
+});
+await deleteNoticeJobAction({
+  canDeleteJob: () => true,
+  confirmAction: deleteGuardCallback,
+  deleteJob: deleteGuardCallback,
+  deletingJobId: "notice-busy",
+  job: { notificationJobId: "notice-busy-target", status: "draft" },
+  setDeletingJobId: deleteGuardCallback,
+  setJobAction: deleteGuardCallback
+});
+assert.equal(deleteGuardCallCount, 0);
+
+const canceledDeleteEvents = [];
+await deleteNoticeJobAction({
+  canDeleteJob: () => true,
+  confirmAction: () => false,
+  deleteJob: () => canceledDeleteEvents.push("delete"),
+  deletingJobId: "",
+  job: { notificationJobId: "notice-delete-canceled", status: "draft" },
+  setDeletingJobId: () => canceledDeleteEvents.push("busy"),
+  setJobAction: () => canceledDeleteEvents.push("state")
+});
+assert.deepEqual(canceledDeleteEvents, []);
+
+console.log("notification notice immediate scheduled reconcile polish and delete action fixtures passed");

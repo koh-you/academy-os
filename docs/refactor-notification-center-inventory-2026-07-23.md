@@ -114,7 +114,13 @@
 - App이 fetch/API URL/job ID를 주입하고 confirm/busy/feedback/refresh는 계속 소유한다.
 - 성공·HTTP 오류·삭제 ID 불일치를 mock response fixture로 고정했고 실제 네트워크·운영 row 삭제는 없다.
 
+## 13C-9 이력 삭제 action 단위
+
+- 삭제 가능/중복 guard, 상태별 confirm·진행·완료 문구, busy, request 성공·실패, refresh와 `finally`를 `deleteNoticeJobAction`으로 이동했다.
+- App이 삭제 가능 판정, 브라우저 confirm, 13C-8 request adapter callback, job·setter·refresh를 주입한다.
+- 일반 draft·과거 확인 필요 이력, 실패, guard, confirm 취소를 mock fixture로 고정했고 실제 네트워크·운영 row 삭제는 없다.
+
 ## 다음 후보
 
-1. `deleteNotificationJob`의 guard, confirm, 문구, busy, request 성공/실패, refresh/finally를 실제 삭제 없는 injected action으로 분리한다.
-2. 실제 Solapi 취소 action은 별도 destructive side effect 단위로 판정한다.
+1. `cancelNotificationJob`의 guard, confirm, callback 연결/결과 검증, local 반영, filter/history/refresh, 실패/finally를 실제 취소 없는 injected action으로 분리 가능한지 inventory한다.
+2. 취소 callback 자체의 Solapi/API orchestration은 기존 경계에 유지한다.
