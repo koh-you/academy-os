@@ -55,7 +55,8 @@ import {
   createNotificationRecipientViewModel,
   filterNoticeSelectedStudentIds,
   selectAllNoticeStudentIds,
-  toggleNoticeSelectedStudentId
+  toggleNoticeSelectedStudentId,
+  upsertLocalNoticeJobList
 } from "../domains/notifications/notificationCenterModel.js";
 import {
   getNotificationJobLabel,
@@ -10308,10 +10309,9 @@ function NotificationCenter({
   }
 
   function upsertLocalNoticeJob(job) {
-    setLocalNoticeJobs((current) => [
-      job,
-      ...current.filter((item) => item.notificationJobId !== job.notificationJobId)
-    ].slice(0, 80));
+    setLocalNoticeJobs((current) =>
+      upsertLocalNoticeJobList(current, job)
+    );
   }
 
   function buildNoticeJob(recipient, mode = "scheduled") {

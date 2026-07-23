@@ -4,7 +4,8 @@ import {
   createNotificationRecipientViewModel,
   filterNoticeSelectedStudentIds,
   selectAllNoticeStudentIds,
-  toggleNoticeSelectedStudentId
+  toggleNoticeSelectedStudentId,
+  upsertLocalNoticeJobList
 } from "../src/domains/notifications/notificationCenterModel.js";
 import {
   getNotificationJobLabel,
@@ -87,6 +88,35 @@ assert.deepEqual(
 assert.deepEqual(
   selectAllNoticeStudentIds(selectionStudents),
   ["student-a", "student-b"]
+);
+
+const currentLocalJobs = Array.from({ length: 85 }, (_, index) => ({
+  notificationJobId: `notice-${index}`,
+  status: "draft"
+}));
+const updatedLocalJob = {
+  notificationJobId: "notice-40",
+  status: "scheduled"
+};
+const upsertedLocalJobs = upsertLocalNoticeJobList(
+  currentLocalJobs,
+  updatedLocalJob
+);
+assert.equal(upsertedLocalJobs.length, 80);
+assert.equal(upsertedLocalJobs[0], updatedLocalJob);
+assert.equal(
+  upsertedLocalJobs.filter(
+    (job) => job.notificationJobId === updatedLocalJob.notificationJobId
+  ).length,
+  1
+);
+assert.deepEqual(
+  upsertLocalNoticeJobList(
+    [{ notificationJobId: "existing" }],
+    { notificationJobId: "new" },
+    2
+  ).map((job) => job.notificationJobId),
+  ["new", "existing"]
 );
 
 const futureAt = "2026-08-01T09:00:00.000Z";

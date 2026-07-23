@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13D-5 알림센터 local job upsert 순수 model 분리 — AI gate 통과
+
+- 코드: 예약 성공·예약 실패·취소 결과를 `localNoticeJobs` 맨 앞에 반영할 때 같은 `notificationJobId`를 제거하고 최신 80건으로 제한하는 배열 계산을 `notificationCenterModel.js`의 `upsertLocalNoticeJobList`로 이동했다. App은 기존 함수형 `setLocalNoticeJobs`에서 순수 model 결과만 반영한다.
+- 동작 보존: 새/갱신 job 객체를 배열 첫 항목으로 유지, 같은 ID의 이전 local row 전체 제거, 나머지 순서 보존, 기본 80건 제한을 그대로 유지했다.
+- 저장 원천/side effect: `localNoticeJobs`는 서버 `notificationJobs` 재조회 전 임시 화면 원천이며 이 model은 배열만 반환한다. API/Supabase/Solapi 예약·취소 side effect는 없다.
+- 자동검증: 85건 fixture의 80건 제한, 중간 ID 교체·중복 없음·객체 동일성, 신규 ID의 기존 순서 보존을 `test:notification-center-model`로 고정했다. production scenario 444/444와 build, `git diff --check`가 통과했다.
+- gate 판정: 순수 배열 변환을 deterministic equality로 검증했다. 화면이나 재시험/고태영 운영 데이터의 사람 조작이 필요하지 않은 AI gate다.
+- 다음 경계: 공지 제목·본문에서 최종 `noticeText`, 날짜·시간에서 ISO `scheduledAt`, Solapi 결과 대조 대상 ID와 마지막 확인 label을 만드는 파생 model을 분리한다.
+
 ## 2026-07-23 P1. 13D-4 알림센터 history filter local action 분리 — AI gate 통과
 
 - 코드: 발송 기록 요약 filter 선택 시 `jobFilter` 변경, `history` workspace 전환, 기록 영역 펼침을 `notificationNoticeActions.js`의 `selectNoticeHistoryFilterAction`으로 이동했다. App은 선택 filter와 기존 local setter를 주입한다.
