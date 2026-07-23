@@ -333,6 +333,15 @@
 - 순수 표시 모델이므로 운영 데이터 생성이나 사람 조작 없이 AI gate로 통과했다.
 - 다음은 세 task type의 candidate item builder를 순수 모델로 분리할 수 있는지 inventory한다.
 
+## 12R-33 구현 결과 — 숙제보충·재시험 candidate builder
+
+- 숙제보충 candidate의 날짜·사유 meta와 task payload, 재시험 candidate의 수업 라벨·고정 meta·task payload를 `supplementCenterCandidateModel.js`로 이동했다.
+- 숙제 dueDate/assignedDate fallback, source fields, 숙제명 seed, `arrival_makeup`, reason과 재시험 수업 라벨·`재시험 필요` 문구를 보존했다.
+- builder에는 React state·clock·API·Supabase·notification/Solapi 호출이 없다.
+- 숙제 날짜/reason 두 분기, 재시험 수업 라벨, 빈 배열 fixture, production scenario `88b-48`, production 414/414, build, diff 검사를 통과했다.
+- 순수 builder이므로 운영 재시험 데이터나 사람 조작 없이 AI gate로 통과했다.
+- 다음은 결석보강 source context·candidate item·persisted task hydrate를 순수 모델로 분리할 수 있는지 inventory한다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.
