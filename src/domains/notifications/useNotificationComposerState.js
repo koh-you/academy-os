@@ -3,6 +3,7 @@ import { createNotificationComposerViewModel } from "./notificationCenterModel.j
 import {
   applyNoticeTemplateAction,
   refreshNoticeJobsInBackgroundAction,
+  scheduleNoticeAction,
   sendNoticeNowAction
 } from "./notificationNoticeActions.js";
 import { buildNoticeJob as createNotificationNoticeJob } from "./notificationNoticeBuilders.js";
@@ -11,16 +12,20 @@ export function useNotificationComposerState({
   academyName,
   formatKoreaTimeLabel,
   isRequestTimeoutError,
+  isSchedulePast,
   noticeRecipients,
   persistJob,
   refreshJobs,
+  reportError,
+  reserveJob,
   sendNotification,
   setIsHistoryOpen,
   setJobFilter,
   solapiResultSyncCheckedAt,
   solapiResultTargets,
   templates,
-  today
+  today,
+  upsertLocalJob
 }) {
   const [dispatchMessage, setDispatchMessage] = useState("");
   const [isPolishingNotice, setIsPolishingNotice] = useState(false);
@@ -99,6 +104,28 @@ export function useNotificationComposerState({
     });
   }
 
+  function scheduleNotice() {
+    return scheduleNoticeAction({
+      buildJob: buildNoticeJob,
+      formatScheduledAt: formatKoreaTimeLabel,
+      isSchedulePast,
+      isSending: isSendingNotice,
+      noticeRecipients,
+      noticeText: composerViewModel.noticeText,
+      now: () => new Date().toISOString(),
+      persistJob,
+      refreshJobs: refreshNoticeJobsInBackground,
+      reportError,
+      reserveJob,
+      scheduledAt: composerViewModel.scheduledAt,
+      setDispatchMessage,
+      setIsHistoryOpen,
+      setIsSending: setIsSendingNotice,
+      setJobFilter,
+      upsertLocalJob
+    });
+  }
+
   return {
     ...composerViewModel,
     applyNoticeTemplate,
@@ -113,6 +140,7 @@ export function useNotificationComposerState({
     noticeTitle,
     refreshNoticeJobsInBackground,
     scheduleDate,
+    scheduleNotice,
     scheduleTime,
     sendNoticeNow,
     setDispatchMessage,

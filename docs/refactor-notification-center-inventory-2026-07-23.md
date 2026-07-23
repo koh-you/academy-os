@@ -252,8 +252,14 @@
 - App은 timeout 판별·persist·send request·history/filter setter만 주입하고 hook이 기존 local state/builder/refresh와 action을 결합한다.
 - 발송·저장 성공, dry-run, timeout, 일반 실패와 상태 전이를 mock fixture로 검증했다.
 
+## 13F-7 예약발송 action binding 단위
+
+- App의 예약발송 wrapper를 composer hook으로 이동했다.
+- App은 과거시각 판별·persist/reserve·오류 보고·local upsert만 주입하고 hook이 기존 local state/builder/refresh와 action을 결합한다.
+- 과거시각 guard, 예약 성공, 부분/전체 실패, 실패 job 저장 재실패와 상태 전이를 mock fixture로 검증했다.
+
 ## 다음 후보
 
-1. App의 예약발송 wrapper를 composer hook에서 기존 action과 injected persist/reserve callback으로 결합한다.
+1. App의 Solapi 결과 대조 wrapper를 history hook에서 기존 action과 injected reconcile/refresh callback으로 결합한다.
 2. 특강 안내문 적용 문구와 handler는 외부 템플릿 gate 때문에 App에 그대로 둔다.
 3. 이후 action adapter 이동은 기존 mock fixture가 충분한지 먼저 확인하고, 충분하지 않으면 로드맵 13의 안전한 경계를 닫는다.

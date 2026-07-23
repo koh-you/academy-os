@@ -84,8 +84,7 @@ import {
   cancelNoticeJobAction,
   deleteNoticeJobAction,
   polishNoticeMessageAction,
-  reconcileNoticeResultsAction,
-  scheduleNoticeAction
+  reconcileNoticeResultsAction
 } from "../domains/notifications/notificationNoticeActions.js";
 import { NotificationNoticeWorkspace } from "../domains/notifications/NotificationNoticeWorkspace.jsx";
 import { useNotificationCenterNavigationState } from "../domains/notifications/useNotificationCenterNavigationState.js";
@@ -11705,6 +11704,7 @@ function NotificationCenter({
     noticeTitle,
     refreshNoticeJobsInBackground,
     scheduleDate,
+    scheduleNotice,
     scheduledAt,
     scheduleTime,
     sendNoticeNow,
@@ -11724,9 +11724,12 @@ function NotificationCenter({
     academyName: academyBrandName,
     formatKoreaTimeLabel,
     isRequestTimeoutError,
+    isSchedulePast: isNotificationSchedulePast,
     noticeRecipients,
     persistJob: persistNoticeJob,
     refreshJobs: refreshHistoryForDate,
+    reportError: (error) => console.error(error),
+    reserveJob: reserveNoticeJob,
     sendNotification: (payload) => postJsonWithTimeout(
       "/api/notifications/comment-alimtalk",
       payload,
@@ -11738,7 +11741,8 @@ function NotificationCenter({
     solapiResultSyncCheckedAt: solapiResultSyncState.checkedAt,
     solapiResultTargets,
     templates: noticeMessageTemplates,
-    today
+    today,
+    upsertLocalJob: upsertLocalNoticeJob
   });
 
   function refreshHistoryForDate(nextDate = historyDate) {
@@ -11784,28 +11788,6 @@ function NotificationCenter({
     setActiveNotificationTab("notice");
     setActiveNoticeWorkspace("compose");
     setDispatchMessage("특강 안내문을 저장한 뒤 공지 발송 화면에 반영했습니다. 수신 대상을 확인한 뒤 예약 발송 또는 즉시 발송으로 진행하세요.");
-  }
-
-  async function scheduleNotice() {
-    return scheduleNoticeAction({
-      buildJob: buildNoticeJob,
-      formatScheduledAt: formatKoreaTimeLabel,
-      isSchedulePast: isNotificationSchedulePast,
-      isSending: isSendingNotice,
-      noticeRecipients,
-      noticeText,
-      now: () => new Date().toISOString(),
-      persistJob: persistNoticeJob,
-      refreshJobs: refreshNoticeJobsInBackground,
-      reportError: (error) => console.error(error),
-      reserveJob: reserveNoticeJob,
-      scheduledAt,
-      setDispatchMessage,
-      setIsHistoryOpen: setIsNoticeHistoryOpen,
-      setIsSending: setIsSendingNotice,
-      setJobFilter,
-      upsertLocalJob: upsertLocalNoticeJob
-    });
   }
 
   async function reconcileSolapiResultsForNoticeJobs() {
