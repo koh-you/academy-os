@@ -8,6 +8,14 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-15 보충 알림톡 draft 선택 local state hook 분리 — AI gate 통과
+
+- 코드: task별로 알림톡 문구 3종 중 현재 선택한 탭을 기억하는 local map과 조회·선택 갱신을 `useSupplementNotificationDraftSelectionState.js`로 이동했다.
+- 동작 보존: 선택 이력이 있으면 그 필드를, 없으면 기존 첫 탭 fallback을 사용한다. 한 task의 탭을 바꿔도 다른 task의 선택은 유지하며 원본 map을 변경하지 않는다.
+- 저장 원천/side effect: 화면 탭 선택 상태만 메모리에 둔다. 알림톡 문구 draft, API, Supabase, `notification_jobs`, Solapi 예약·취소는 읽거나 쓰지 않는다.
+- 자동검증: 선택/fallback/다른 task 보존/원본 불변 fixture, 기존 회귀검사의 새 파일 범위 확장, production scenario `88b-30`, production 396/396, build, `git diff --check`를 통과했다. 기존 대형 chunk 경고만 남았다.
+- gate 판정: 문구 값과 저장·발송 경로를 전혀 바꾸지 않는 local 탭 선택 분리다. 사용자 지시에 따라 AI 검토로 통과하며 별도 사람 조작이나 검수 데이터는 요구하지 않는다.
+
 ## 2026-07-23 P1. 12R-14 보충 상세 feedback local state hook 분리 — AI gate 통과
 
 - 코드: 보충 상세 상단 성공·실패 feedback의 local React state, 기본 `success` tone 생성, 표시, 닫기 초기화를 `useSupplementFeedbackState.js`로 이동했다. App의 저장·완료·일정·결석취소 action은 기존 `showFeedback` adapter만 호출한다.
