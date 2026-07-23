@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  createNotificationComposerViewModel,
   createNotificationHistoryViewModel,
   createNotificationRecipientViewModel,
   filterNoticeSelectedStudentIds,
@@ -117,6 +118,46 @@ assert.deepEqual(
     2
   ).map((job) => job.notificationJobId),
   ["new", "existing"]
+);
+
+const composerModel = createNotificationComposerViewModel({
+  formatKoreaTimeLabel: (value) => `표시:${value}`,
+  noticeBody: "  공지 본문  ",
+  noticeTitle: "  공지 제목  ",
+  scheduleDate: "2026-07-23",
+  scheduleTime: "18:00",
+  solapiResultSyncCheckedAt: "2026-07-23T08:00:00.000Z",
+  solapiResultTargets: [
+    { notificationJobId: "notice-a" },
+    { notificationJobId: "" },
+    { notificationJobId: "notice-b" },
+    { notificationJobId: "notice-a" },
+    {}
+  ]
+});
+assert.deepEqual(composerModel, {
+  noticeText: "[공지 제목]\n\n공지 본문",
+  scheduledAt: "2026-07-23T09:00:00.000Z",
+  solapiResultLastCheckedLabel: "표시:2026-07-23T08:00:00.000Z",
+  solapiResultSyncTargetIds: ["notice-a", "notice-b"]
+});
+assert.deepEqual(
+  createNotificationComposerViewModel({
+    formatKoreaTimeLabel: () => {
+      throw new Error("empty checkedAt must not format");
+    },
+    noticeBody: " 본문만 ",
+    noticeTitle: " ",
+    scheduleDate: "",
+    scheduleTime: "18:00",
+    solapiResultTargets: []
+  }),
+  {
+    noticeText: "본문만",
+    scheduledAt: "",
+    solapiResultLastCheckedLabel: "아직 없음",
+    solapiResultSyncTargetIds: []
+  }
 );
 
 const futureAt = "2026-08-01T09:00:00.000Z";

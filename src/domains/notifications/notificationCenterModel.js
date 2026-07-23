@@ -46,6 +46,41 @@ export function upsertLocalNoticeJobList(
   ].slice(0, limit);
 }
 
+export function createNotificationComposerViewModel({
+  formatKoreaTimeLabel,
+  noticeBody = "",
+  noticeTitle = "",
+  scheduleDate = "",
+  scheduleTime = "",
+  solapiResultSyncCheckedAt = "",
+  solapiResultTargets = []
+}) {
+  const noticeText = [
+    noticeTitle.trim() ? `[${noticeTitle.trim()}]` : "",
+    noticeBody.trim()
+  ].filter(Boolean).join("\n\n");
+  const scheduledAt = scheduleDate && scheduleTime
+    ? new Date(`${scheduleDate}T${scheduleTime}:00+09:00`).toISOString()
+    : "";
+  const solapiResultSyncTargetIds = [
+    ...new Set(
+      solapiResultTargets
+        .map((job) => job.notificationJobId)
+        .filter(Boolean)
+    )
+  ];
+  const solapiResultLastCheckedLabel = solapiResultSyncCheckedAt
+    ? formatKoreaTimeLabel(solapiResultSyncCheckedAt)
+    : "아직 없음";
+
+  return {
+    noticeText,
+    scheduledAt,
+    solapiResultLastCheckedLabel,
+    solapiResultSyncTargetIds
+  };
+}
+
 export function createNotificationRecipientViewModel({
   classFilter = "all",
   classTemplates = [],

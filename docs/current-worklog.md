@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13D-6 알림센터 composer 파생 model 분리 — AI gate 통과
+
+- 코드: 제목·본문에서 최종 `noticeText`, 한국 날짜·시간 입력에서 ISO `scheduledAt`, Solapi 결과 대조 대상의 중복 없는 job ID 배열, 마지막 확인 시각 label을 `notificationCenterModel.js`의 `createNotificationComposerViewModel`로 이동했다. App은 현재 local state·결과 대상과 기존 시간 formatter를 주입한다.
+- 동작 보존: 제목 trim 후 대괄호, 제목/본문 사이 빈 줄 1개, 본문 trim, `+09:00` 한국시간 ISO 변환, 빈 날짜/시간의 예약시각 없음, falsy ID 제거·첫 등장 순서 중복 제거, 확인 이력 없음의 `아직 없음`을 그대로 유지했다.
+- 저장 원천/side effect: model은 local draft와 이미 계산된 job 목록을 읽어 문자열·배열만 반환한다. clock/API/Supabase/Solapi 예약·발송·조회 side effect가 없다.
+- 자동검증: 제목+본문 전체 결합, `2026-07-23 18:00 KST -> 09:00Z`, 중복/falsy ID 정리, formatter 입력, 본문-only·빈 날짜·확인 이력 없음 fallback을 `test:notification-center-model`로 고정했다. production scenario 445/445와 build, `git diff --check`가 통과했다.
+- gate 판정: 실제 예약 payload에 들어갈 핵심 파생값을 deterministic equality로 검증했다. 실제 예약이나 재시험/고태영 운영 데이터의 사람 조작이 필요하지 않은 AI gate다.
+- 다음 경계: 최신 NotificationCenter 잔여 함수·effect·JSX와 특강 panel 결합을 다시 inventory해, 사람 gate 없이 이동 가능한 마지막 low-risk 단위와 외부 검수 때문에 멈춰야 하는 경계를 구분한다.
+
 ## 2026-07-23 P1. 13D-5 알림센터 local job upsert 순수 model 분리 — AI gate 통과
 
 - 코드: 예약 성공·예약 실패·취소 결과를 `localNoticeJobs` 맨 앞에 반영할 때 같은 `notificationJobId`를 제거하고 최신 80건으로 제한하는 배열 계산을 `notificationCenterModel.js`의 `upsertLocalNoticeJobList`로 이동했다. App은 기존 함수형 `setLocalNoticeJobs`에서 순수 model 결과만 반영한다.

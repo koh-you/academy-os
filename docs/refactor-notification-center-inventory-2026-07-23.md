@@ -162,8 +162,14 @@
 - App은 함수형 local setter에서 순수 model 결과만 반영한다.
 - 중간 ID 갱신, 신규 ID, 중복 제거와 limit을 fixture로 고정했으며 서버/외부 mutation은 없다.
 
+## 13D-6 composer 파생 model 단위
+
+- 제목·본문의 최종 text, 한국 날짜·시간의 ISO 예약시각, 대조 대상 ID, 마지막 확인 label 계산을 `createNotificationComposerViewModel`로 이동했다.
+- App이 local draft·결과 대상·시간 formatter를 주입한다.
+- text trim/결합, KST ISO, ID 중복 제거, 빈 값 fallback을 fixture로 고정했으며 외부 예약·조회는 없다.
+
 ## 다음 후보
 
-1. `noticeText`, `scheduledAt`, Solapi 결과 대조 ID, 마지막 확인 label 파생 계산을 model로 분리한다.
-2. 그다음 NotificationCenter에 남은 local wrapper/effect 경계를 다시 inventory한다.
-3. 특강 안내문 적용 handler는 Solapi 특강 템플릿 외부 검수와 기능 경계를 바꾸지 않는 범위만 다룬다.
+1. NotificationCenter 잔여 함수·effect·JSX와 특강 panel 결합을 다시 inventory한다.
+2. 사람 gate 없이 이동 가능한 마지막 low-risk 단위를 한 번에 하나씩 분리한다.
+3. 특강 안내문 적용/컴포넌트 이동이 Solapi 특강 템플릿 외부 검수 경계를 건드리면 중단하고 보류 상태를 기록한다.

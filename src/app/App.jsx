@@ -51,6 +51,7 @@ import {
   NoticeWorkspaceTabs
 } from "../domains/notifications/NotificationCenterNavigation.jsx";
 import {
+  createNotificationComposerViewModel,
   createNotificationHistoryViewModel,
   createNotificationRecipientViewModel,
   filterNoticeSelectedStudentIds,
@@ -10233,12 +10234,20 @@ function NotificationCenter({
     selectedStudentIds,
     students
   ]);
-  const noticeText = [noticeTitle.trim() ? `[${noticeTitle.trim()}]` : "", noticeBody.trim()].filter(Boolean).join("\n\n");
-  const scheduledAt = scheduleDate && scheduleTime ? new Date(`${scheduleDate}T${scheduleTime}:00+09:00`).toISOString() : "";
-  const solapiResultSyncTargetIds = [...new Set(solapiResultTargets.map((job) => job.notificationJobId).filter(Boolean))];
-  const solapiResultLastCheckedLabel = solapiResultSyncState.checkedAt
-    ? formatKoreaTimeLabel(solapiResultSyncState.checkedAt)
-    : "아직 없음";
+  const {
+    noticeText,
+    scheduledAt,
+    solapiResultLastCheckedLabel,
+    solapiResultSyncTargetIds
+  } = createNotificationComposerViewModel({
+    formatKoreaTimeLabel,
+    noticeBody,
+    noticeTitle,
+    scheduleDate,
+    scheduleTime,
+    solapiResultSyncCheckedAt: solapiResultSyncState.checkedAt,
+    solapiResultTargets
+  });
 
   useEffect(() => {
     setSelectedStudentIds((current) =>
