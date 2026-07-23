@@ -8,14 +8,23 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-29 보충 센터 모달 callback adapter 분리 — AI gate 통과
+
+- 코드: `SupplementCenter`의 모달 저장·일정·결석 원천 취소·완료 callback adapter 네 개를 `createSupplementCenterModalActionHandlers`로 `supplementCenterModalActionController.js`에 이동했다.
+- 동작 보존: 각 action의 row 상태를 `saving`으로 바꾼 뒤 기존 callback을 기다리고, 저장된 task/record 기준 pending draft 정리와 `saved` 표시를 적용한다. 실패 시 기존 오류 문구를 row에 남기고 같은 오류를 다시 throw하는 순서를 유지한다.
+- 저장 원천/side effect: 실제 task/lesson/출결 저장·Supabase 재조회·React 전역 갱신·notification job/Solapi 작업은 App이 전달하는 네 callback에 남는다. controller에는 직접 API, Supabase, notification/Solapi 호출이 없다.
+- 자동검증: 네 action 성공 반환값·호출 순서·pending 정리·성공 문구와 네 실패의 row 오류·rethrow fixture를 `npm run test:production`에 연결했다. 기존 scenario `88b`의 탐색 범위를 새 controller까지 확장하고 `88b-44` 경계 검사를 추가했다. production 410/410, build, `git diff --check`가 통과했고 기존 대형 chunk 경고만 남았다.
+- gate 판정: 12R-4~8과 12R-21~25에서 이미 사람/AI 검수한 실제 callback을 바꾸지 않은 얇은 adapter 이동이다. 재시험 데이터, 새 운영 데이터, Solapi 호출 없이 AI gate로 통과했다.
+- 다음 경계: `SupplementCenter` 목록 카드의 별도 완료 확인 adapter와 후보·탭 표시 모델을 한 의미 단위씩 inventory한다.
+
 ## 2026-07-23 P1. 12R-28 보충 학생 상세 모달 본체 분리 — AI gate 통과
 
 - 코드: App.jsx에 있던 334줄 규모의 `SupplementStudentModal` 본체를 `src/domains/supplements/SupplementStudentModal.jsx`로 이동했다. 기존 hook/controller/model/UI 조합은 새 파일이 소유하고, App 전용 표시·draft helper는 `supplementStudentModalDependencies` 한 객체로 주입한다.
 - 동작 보존: 학생별 task 목록, 저장 상태, 완료·일정 확인창, 결석 취소, 학생 11시·학생 일정·학부모 일정 탭, 개별 예약·취소 제어, modal overlay 순서와 기존 callback 연결을 그대로 유지한다.
-- 저장 원천/side effect: 새 모달 파일에는 직접 `fetch`, API path, Supabase 갱신, `setNotificationJobs`가 없다. 실제 task/lesson/출결 저장·재조회·React 전역 갱신·notification job/Solapi 예약·취소는 `FollowUpCenter`와 App이 주입하는 callback 경계에 남는다.
+- 저장 원천/side effect: 새 모달 파일에는 직접 `fetch`, API path, Supabase 갱신, `setNotificationJobs`가 없다. 실제 task/lesson/출결 저장·재조회·React 전역 갱신·notification job/Solapi 예약·취소는 `SupplementCenter`와 App이 주입하는 callback 경계에 남는다.
 - 자동검증: production scenario `88b-43`은 App의 dependency/callback 연결, 새 파일의 hook/controller/model/UI 조합, App 내 local 함수 제거, 새 파일의 직접 API·notification mutation 부재를 고정한다. `npm run test:production` 409/409, `npm run build`, `git diff --check`가 통과했고 기존 대형 chunk 경고만 남았다.
 - gate 판정: 이미 사람 검수한 저장·완료·일정·결석취소·예약취소 action의 경계를 바꾸지 않은 구조 이동이다. 새 운영 데이터·Solapi 호출·화면 조작 없이 AI gate로 통과했다.
-- 다음 경계: `FollowUpCenter`에 남은 보충 목록·선택·실제 callback adapter를 inventory하고, side effect를 이동하지 않는 다음 의미 단위가 있는지 판정한다.
+- 다음 경계: `SupplementCenter`에 남은 보충 목록·선택·실제 callback adapter를 inventory하고, side effect를 이동하지 않는 다음 의미 단위가 있는지 판정한다.
 
 ## 2026-07-23 P1. 12R-27 보충 확인창 submit adapter 분리 — AI gate 통과
 
