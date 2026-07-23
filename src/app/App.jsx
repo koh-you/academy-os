@@ -76,10 +76,9 @@ import {
   resolveNotificationJobStatusClass
 } from "../domains/notifications/notificationCenterConfig.js";
 import {
+  createNotificationNoticeJobRequestBindings,
   deleteNoticeJobRequest,
-  persistNoticeJobRequest,
-  polishNoticeMessageRequest,
-  reserveNoticeJobRequest
+  polishNoticeMessageRequest
 } from "../domains/notifications/notificationNoticeApi.js";
 import {
   cancelNoticeJobAction,
@@ -11723,6 +11722,12 @@ function NotificationCenter({
     templates: noticeMessageTemplates,
     today
   });
+  const {
+    persistNoticeJob,
+    reserveNoticeJob
+  } = createNotificationNoticeJobRequestBindings({
+    request: postJsonWithTimeout
+  });
 
   function refreshHistoryForDate(nextDate = historyDate) {
     Promise.resolve(onRefresh?.({ date: nextDate })).catch((error) => {
@@ -11767,20 +11772,6 @@ function NotificationCenter({
     setActiveNotificationTab("notice");
     setActiveNoticeWorkspace("compose");
     setDispatchMessage("특강 안내문을 저장한 뒤 공지 발송 화면에 반영했습니다. 수신 대상을 확인한 뒤 예약 발송 또는 즉시 발송으로 진행하세요.");
-  }
-
-  async function persistNoticeJob(notificationJob) {
-    await persistNoticeJobRequest({
-      notificationJob,
-      request: postJsonWithTimeout
-    });
-  }
-
-  async function reserveNoticeJob(notificationJob) {
-    return reserveNoticeJobRequest({
-      notificationJob,
-      request: postJsonWithTimeout
-    });
   }
 
   function refreshNoticeJobsInBackground() {
