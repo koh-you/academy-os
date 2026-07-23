@@ -44,3 +44,25 @@ export async function polishNoticeMessageRequest({
   }
   return result;
 }
+
+export async function deleteNoticeJobRequest({
+  notificationJobId,
+  request,
+  resolveApiUrl
+}) {
+  const response = await request(
+    resolveApiUrl(`/api/notification-jobs?id=${encodeURIComponent(notificationJobId)}`),
+    { method: "DELETE" }
+  );
+  const result = await response.json();
+  if (!response.ok || !result.ok) {
+    throw new Error(result.error || `삭제 실패: ${response.status}`);
+  }
+  if (
+    !Array.isArray(result.deletedNotificationJobIds) ||
+    !result.deletedNotificationJobIds.includes(notificationJobId)
+  ) {
+    throw new Error("Supabase에서 삭제된 알림 이력을 확인하지 못했습니다.");
+  }
+  return result;
+}

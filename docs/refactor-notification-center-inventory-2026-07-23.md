@@ -108,7 +108,13 @@
 - App이 AI 설정·초안·setter와 13C-6 request adapter callback을 주입한다.
 - 성공·fallback·실패·guard를 mock fixture로 고정했고 실제 네트워크·유료 AI 호출은 없다.
 
+## 13C-8 이력 삭제 request adapter 단위
+
+- 삭제 query URL/ID 인코딩, DELETE, 응답 성공 판정, 삭제 ID 재확인과 오류 fallback을 `deleteNoticeJobRequest`로 이동했다.
+- App이 fetch/API URL/job ID를 주입하고 confirm/busy/feedback/refresh는 계속 소유한다.
+- 성공·HTTP 오류·삭제 ID 불일치를 mock response fixture로 고정했고 실제 네트워크·운영 row 삭제는 없다.
+
 ## 다음 후보
 
-1. 알림 이력 삭제의 URL/DELETE/응답·삭제 ID 검증을 실제 삭제 없는 request adapter로 먼저 분리한다.
-2. 삭제 action과 실제 Solapi 취소 action은 서로 다른 destructive side effect이므로 각각 별도 단위로 판정한다.
+1. `deleteNotificationJob`의 guard, confirm, 문구, busy, request 성공/실패, refresh/finally를 실제 삭제 없는 injected action으로 분리한다.
+2. 실제 Solapi 취소 action은 별도 destructive side effect 단위로 판정한다.
