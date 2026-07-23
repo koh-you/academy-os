@@ -146,9 +146,17 @@
 - identity 매칭, persisted lessonId 보존, 변경/동일/삭제/정규수업 보존을 합성 fixture로 검증했다. 실제 row/lesson 요청은 0회다.
 - production scenario 477/477, build, `git diff --check`를 통과했다.
 
+## 14C-2 시험정보 연결 수업 API transport
+
+- `/api/lessons/bulk` 저장과 단일 lesson DELETE를 `examPrepLessonApi.js`로 이동했다.
+- App이 request/fetch/URL resolver를 주입하고 plan, React state, 오류 처리, 시험정보 row 삭제·복구를 계속 소유한다.
+- fake fixture가 bulk URL/payload, lessonId URL encoding, DELETE method와 응답 전달을 검증한다. 실제 row/lesson 요청은 0회다.
+- production scenario 478/478, build, `git diff --check`를 통과했다.
+
 ## 이후 후보와 중단 조건
 
-1. 연결 시험대비 수업 bulk 저장/단일 삭제 API transport
-2. 시험정보 삭제와 연결 수업 reconcile side-effect orchestration
+1. 시험정보 삭제와 연결 수업 reconcile side-effect orchestration
+
+다음 단위 착수 gate: AI가 고정 marker를 가진 삭제 가능한 미래 시험정보 row와 그 row에만 연결된 시험대비 수업을 준비한다. 사용자가 해당 row 하나만 삭제하고 새로고침한 뒤 row와 연결 수업만 사라지고 다른 시험정보·정규수업·시험대비 수업이 유지되며 Supabase 재조회와 일치해야 한다. 하나라도 다르면 14C-3을 중단하고 유지보수 진단으로 넘긴다.
 
 학생 제출·교사 확인·Storage 파일 열기 경계를 건드리면 기존 학생 포털 실제 쓰기와 bearer/Storage gate에서 중단한다. 시험정보 삭제나 시험대비 수업 생성·삭제를 옮길 때는 별도의 격리 데이터와 사람 gate가 필요하다. 순수 표시/model 단위는 deterministic fixture와 production test/build로 검증하고 운영 데이터를 만들지 않는다.

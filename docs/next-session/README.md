@@ -12,9 +12,9 @@
 
 다음 세션은 `어디까지 진행됐나요`, 중간 진행, 작업 완료 답변에서 완료 항목보다 먼저 `남은 사람 gate`를 표시합니다. 각 gate의 검토 순서, 통과 기준, 중단 조건, 통과 전 금지되는 commit/push/배포/다음 작업을 함께 씁니다. 보류·미실시는 통과로 바꾸지 않으며 gate가 없으면 `남은 사람 gate: 없음`이라고 명시합니다.
 
-11B-1 코드 이동 후 학생 일정·학부모 일정·학생 11시의 OS row/Solapi 그룹 예약·취소 대조는 반 미지정 고태영 테스트 학생과 사용자 통제 번호로 통과했습니다. 학생 포털 실제 쓰기 검수, 교사 bearer/Storage 소유권 보안 gate, Solapi 특강 템플릿 외부 검수는 별도 보류 상태입니다.
+11B-1 코드 이동 후 학생 일정·학부모 일정·학생 11시의 OS row/Solapi 그룹 예약·취소 대조는 반 미지정 고태영 테스트 학생과 사용자 통제 번호로 통과했습니다. 학생 포털 실제 쓰기 검수, 교사 bearer/Storage 소유권 보안 gate, Solapi 특강 템플릿 외부 검수는 별도 보류 상태입니다. 14C-3 시험정보 삭제·연결 수업 reconcile orchestration도 격리 미래 row/lesson 삭제·새로고침·Supabase 대조 사람 gate 전에는 착수하지 않습니다.
 
-App.jsx 보충관리 리팩터링은 `12R-37`에서 `SupplementCenter` 본체를 전용 파일로 이동해 로드맵 12 `supplement center/modals`의 App 본체 분리를 완료했다. 알림센터는 13A-1~5 표시, 13B-1~2 모델, 13C-1~11 builder/request/action, 13D-1~10 config/model/workspace/shell, 13E-1~4 hooks, 13F-1~11 adapter/action binding을 분리했다. 13G closeout audit에서 App의 `NotificationCenter`에 남은 독립 함수는 특강 안내문을 공지 local draft로 연결하는 `applySpecialLectureGuideToNotice` 하나뿐이고 나머지는 controlled 조립임을 확인해 로드맵 13의 안전 경계를 닫았다. 이 handler는 미통과인 Solapi 특강 템플릿 외부 검수 전 이동하지 않는다. 로드맵 14의 원천/local draft/API/Supabase/Tally/AI/수업 생성 side effect inventory는 `docs/refactor-exam-prep-center-inventory-2026-07-23.md`에 완료했고, 14A-1~10 표시·draft·AI adapter/modal, 14B-1 row API transport, 14B-2 request 순번/save-state controller를 분리했다. 14C-1은 연결 시험대비 수업의 save/delete plan과 local 배열 적용을 순수 함수로 옮기고 identity/persisted ID/변경·동일·삭제·정규수업 보존 fixture를 production test에 연결했다. 실제 유료 AI·clipboard·Supabase·운영 row/수업 호출 없이 production scenario 477개와 build를 통과했다. 다음은 lesson bulk 저장/단일 삭제 API transport이며, 낙관적 시험정보 row 삭제·실패 복구와 실제 lesson reconcile 이동 전에는 격리 데이터 사람 gate를 먼저 설계한다. fixture로 검증 가능한 단위에는 재시험 등 운영 데이터를 만들지 않는다.
+App.jsx 보충관리 리팩터링은 `12R-37`에서 `SupplementCenter` 본체를 전용 파일로 이동해 로드맵 12 `supplement center/modals`의 App 본체 분리를 완료했다. 알림센터는 13A~13G 안전 경계를 닫았고 미통과 특강 템플릿 gate의 handler만 App에 보존했다. 로드맵 14는 inventory, 14A-1~10 표시·draft·AI adapter/modal, 14B-1~2 row API/save-state, 14C-1 reconcile plan, 14C-2 lesson API transport를 분리했다. 실제 유료 AI·clipboard·Supabase·운영 row/수업 호출 없이 production scenario 478개와 build를 통과했다. 다음 14C-3 낙관적 row 삭제·lesson reconcile·실패 복구 orchestration은 위 사람 gate 통과 전 이동·commit/push하지 않는다. fixture로 검증 가능한 단위에는 운영 데이터를 만들지 않는다.
 
 ## 시험분석 GPT Image 전용 세션 참고 자료
 
@@ -338,7 +338,7 @@ App.jsx 리팩터링 18개 기준 로드맵:
 - 7번 `school calendar helpers` 분리 완료.
 - 8번 `school calendar components` 분리 완료.
 - 9번 `test manager` 완료: `src/domains/tests/testManagerUtils.js`와 `TestManagerPanels.jsx`에 탭/header/form grid/meta/table/action/recent session list/student history panel 분리 완료.
-- 12번 `supplement center/modals` App 본체 분리 완료. 13번 `notification center`는 13A~13F 분리와 13G closeout audit까지 완료해 안전 경계를 닫았습니다. 미통과 특강 템플릿 gate의 `applySpecialLectureGuideToNotice`만 App에 보존했습니다. 14번 `exam prep center`는 inventory, 14A-1~10, 14B-1~2, 14C-1 연결 수업 reconcile plan 순수 분리를 완료했습니다. 다음은 lesson API transport이고, 실제 시험정보 삭제·reconcile orchestration은 별도 사람 gate 전 이동하지 않습니다.
+- 12번 `supplement center/modals` App 본체 분리 완료. 13번 `notification center`는 13G closeout audit까지 안전 경계를 닫았습니다. 14번 `exam prep center`는 inventory, 14A-1~10, 14B-1~2, 14C-1~2 reconcile plan/API transport 분리를 완료했습니다. 다음 14C-3 실제 시험정보 삭제·lesson reconcile orchestration은 격리 데이터 사람 gate 전 이동하지 않습니다.
 - 확인된 후속 이슈: 학생 포털 `비밀번호 변경`은 callback/API 없는 기존 미연결 UI입니다. 이번 리팩터링에서는 보존했고 오작동 버튼 정리에서 별도 결정합니다.
 - 실제 최신 커밋은 새 세션에서 반드시 `git log -1 --oneline`으로 다시 확인하세요.
 

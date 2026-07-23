@@ -7,6 +7,14 @@
 1. `학생 포털 실제 쓰기 검수` — 숙제 완료, 질문 CRUD, 시험 후 제출의 실제 학생 저장/재조회/재로그인/권한을 확인한다. 사용자 보류이며 통과가 아니다.
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
+4. `시험정보 삭제·연결 수업 reconcile 사람 gate` — AI가 삭제 가능한 미래 시험정보 row/연결 시험대비 수업 marker를 준비하고, 사용자가 그 row만 삭제·새로고침한 뒤 해당 두 원천만 사라지고 다른 row/정규수업/시험대비 수업이 유지되는지 AI가 Supabase 재조회로 대조한다. 통과 전 14C-3 실제 orchestration 이동·commit/push 금지.
+
+## 2026-07-23 P1. 14C-2 시험정보 연결 수업 API transport 분리 — AI gate 통과
+
+- 코드: 연결 시험대비 수업의 `/api/lessons/bulk` 저장과 단일 lesson DELETE transport를 `src/domains/exams/examPrepLessonApi.js`로 이동했다.
+- 경계: App이 `postJson`, `fetch`, `apiUrl`을 주입하고 14C-1 plan, React `setLessons`, 오류 처리와 시험정보 row 삭제·실패 복구 순서를 계속 소유한다. 기존 DELETE가 응답 본문을 판정하지 않던 동작도 그대로 보존했다.
+- 자동검증: fake request fixture가 bulk URL/payload, lessonId URL encoding, DELETE method와 응답 전달을 검증한다. 실제 Supabase·운영 row/lesson 호출은 0회다. production scenario 478/478, build, `git diff --check`가 통과했다.
+- 사람 gate: transport 경계만 이동해 이 단위의 새 사람 조작은 필요하지 않다. 다음 14C-3 실제 orchestration은 최상단 `시험정보 삭제·연결 수업 reconcile 사람 gate` 통과 전 착수하지 않는다.
 
 ## 2026-07-23 P1. 14C-1 시험정보 연결 수업 reconcile plan 분리 — AI gate 통과
 

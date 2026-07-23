@@ -6,6 +6,10 @@ import {
 import { ExamAnalysisFinalPreviewPanel } from "../domains/exams/ExamAnalysisFinalPreviewPanel.jsx";
 import { ExamPrepEditModal } from "../domains/exams/ExamPrepEditModal.jsx";
 import {
+  deleteExamPrepLessonRequest,
+  saveExamPrepLessonsRequest
+} from "../domains/exams/examPrepLessonApi.js";
+import {
   applyExamPrepLessonReconcilePlan,
   createExamPrepLessonReconcilePlan
 } from "../domains/exams/examPrepLessonReconcilePlan.js";
@@ -7245,10 +7249,17 @@ export function App() {
     }));
 
     if (lessonsToSave.length > 0) {
-      postJson("/api/lessons/bulk", { lessons: lessonsToSave }).catch((error) => console.error(error));
+      saveExamPrepLessonsRequest({
+        lessons: lessonsToSave,
+        request: postJson
+      }).catch((error) => console.error(error));
     }
     lessonIdsToDelete.forEach((lessonId) => {
-      fetch(apiUrl(`/api/lessons?id=${encodeURIComponent(lessonId)}`), { method: "DELETE" })
+      deleteExamPrepLessonRequest({
+        fetchImpl: fetch,
+        lessonId,
+        resolveApiUrl: apiUrl
+      })
         .catch((error) => console.error(error));
     });
   }
