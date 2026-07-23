@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   applyNoticeTemplateAction,
   cancelNoticeJobAction,
+  createReconcileNoticeResultsBinding,
   deleteNoticeJobAction,
   polishNoticeMessageAction,
   reconcileNoticeResultsAction,
@@ -405,6 +406,37 @@ await reconcileNoticeResultsAction({
   targetIds: ["notice-missing-callback"]
 });
 assert.equal(reconcileGuardCallCount, 0);
+
+const bindingReconcileStates = [];
+const bindingReconcile = createReconcileNoticeResultsBinding({
+  isLoading: false,
+  now: () => "2026-07-23T14:00:00.000Z",
+  reconcileResults: async ({ notificationJobIds }) => ({
+    checked: [],
+    checkedCount: notificationJobIds.length,
+    updatedCount: 0
+  }),
+  refreshJobs: () => {},
+  resultTargetCount: 0,
+  setIsHistoryOpen: () => {},
+  setJobFilter: () => {},
+  setSyncState: (value) => bindingReconcileStates.push(value),
+  syncCheckedAt: "",
+  targetIds: ["notice-bound"]
+});
+await bindingReconcile();
+assert.deepEqual(bindingReconcileStates, [
+  {
+    checkedAt: "",
+    state: "loading",
+    message: "Solapi 예약 1건을 조회하고 OS 기록과 대조하는 중입니다."
+  },
+  {
+    checkedAt: "2026-07-23T14:00:00.000Z",
+    state: "saved",
+    message: "Solapi 결과 대조 완료: 대상 1건 · 조회 1건 · OS 반영 0건"
+  }
+]);
 
 const polishPayloads = [];
 const polishMessages = [];

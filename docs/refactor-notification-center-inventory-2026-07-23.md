@@ -258,8 +258,14 @@
 - App은 과거시각 판별·persist/reserve·오류 보고·local upsert만 주입하고 hook이 기존 local state/builder/refresh와 action을 결합한다.
 - 과거시각 guard, 예약 성공, 부분/전체 실패, 실패 job 저장 재실패와 상태 전이를 mock fixture로 검증했다.
 
+## 13F-8 Solapi 결과 대조 binding 단위
+
+- App의 Solapi 결과 대조 wrapper를 actions module의 독립 binding으로 이동했다.
+- history 상태와 composer target ID 사이에 hook 순환을 만들지 않고 기존 action option을 캡처한다.
+- guard, 성공, 부분 조회 실패, 전체 실패와 state/filter/history/refresh 전이를 mock fixture로 검증했다.
+
 ## 다음 후보
 
-1. App의 Solapi 결과 대조 wrapper를 history hook에서 기존 action과 injected reconcile/refresh callback으로 결합한다.
+1. App의 AI 문구 수정 wrapper를 composer hook에서 기존 action과 injected AI request callback으로 결합한다.
 2. 특강 안내문 적용 문구와 handler는 외부 템플릿 gate 때문에 App에 그대로 둔다.
 3. 이후 action adapter 이동은 기존 mock fixture가 충분한지 먼저 확인하고, 충분하지 않으면 로드맵 13의 안전한 경계를 닫는다.
