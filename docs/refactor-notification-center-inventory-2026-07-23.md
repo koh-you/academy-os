@@ -66,7 +66,13 @@
 - 전체 반의 퇴원 제외, 퇴원학생반의 별도 노출, 검색과 선택 범위의 차이, 반 밖 선택 제거, 번호 없는 대상 제외를 deterministic fixture로 고정했다.
 - selection 정리 effect와 local React state는 App에 남고 model은 학생·반·filter·selection 원천을 읽기만 한다. API/Supabase/notification job/Solapi mutation은 없다.
 
+## 13C-1 순수 builder 단위
+
+- 공지 payload와 notification job 조립을 `notificationNoticeBuilders.js`로 이동했다.
+- 학생/학부모 type·target, 즉시/예약 상태·시각, 빈 제목 fallback, 특강 변수 조건부 포함을 deterministic fixture로 고정했다.
+- App adapter가 현재시각·난수·생성시각을 기존 순서로 만들고 builder에 주입한다. builder에는 clock/random/API/Supabase/Solapi mutation이 없다.
+
 ## 다음 후보
 
-1. `buildNoticePayload`와 `buildNoticeJob`의 입력·ID·payload·시각 계약을 순수 builder로 분리하고 deterministic fixture로 고정한다.
-2. 실제 즉시발송·예약 API orchestration은 builder와 분리해 외부 side effect와 사람 gate 필요성을 다시 판정한다.
+1. `persistNoticeJob`과 `reserveNoticeJob`의 path/body/timeout/error 계약을 request 주입형 API adapter로 분리한다.
+2. 실제 즉시발송·예약 loop는 adapter와 분리해 외부 side effect와 사람 gate 필요성을 다시 판정한다.
