@@ -270,8 +270,14 @@
 - App은 AI 설정과 request callback만 주입하고 hook이 local draft/busy/feedback setter와 action을 결합한다.
 - guard, prompt payload, 성공, 응답 fallback, 실패와 상태 전이를 mock fixture로 검증했다.
 
+## 13F-10 알림 이력 삭제 action binding 단위
+
+- App의 알림 이력 삭제 wrapper를 history hook으로 이동했다.
+- App은 삭제 가능 판정, 브라우저 confirm, 기존 delete request와 refresh callback만 주입하고 hook이 local busy/feedback 상태와 기존 action을 결합한다.
+- 삭제 가능/중복 guard, 일반·확인 필요 이력별 문구, confirm 취소, DELETE 성공·재조회, 실패와 busy 복구를 기존 action/API mock fixture로 검증했다. 실제 운영 이력 삭제는 없다.
+
 ## 다음 후보
 
-1. App의 알림 이력 삭제 wrapper를 history hook에서 기존 action과 injected delete request/confirm/refresh callback으로 결합한다.
+1. App의 Solapi 예약 취소 wrapper는 history state와 composer background refresh를 함께 사용하므로 hook 순환을 만들지 않는 독립 binding으로 기존 action option을 캡처한다.
 2. 특강 안내문 적용 문구와 handler는 외부 템플릿 gate 때문에 App에 그대로 둔다.
 3. 이후 action adapter 이동은 기존 mock fixture가 충분한지 먼저 확인하고, 충분하지 않으면 로드맵 13의 안전한 경계를 닫는다.
