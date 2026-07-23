@@ -240,8 +240,14 @@
 - 공통 timeout client 주입과 저장·예약 URL/payload/timeout/fallback 계약을 유지했다.
 - factory 생성 시에는 외부 요청이 없고, mock request fixture로 두 callback을 검증했다.
 
+## 13F-5 background refresh binding 단위
+
+- App의 background refresh wrapper를 composer hook으로 이동했다.
+- 기존 action에 주입된 refresh callback과 composer dispatch feedback setter를 그대로 결합했다.
+- 성공·비동기 실패·동기 예외는 mock fixture로 검증하고 운영 API는 호출하지 않았다.
+
 ## 다음 후보
 
-1. App의 background refresh wrapper를 기존 action과 composer feedback setter를 결합하는 callback으로 이동한다.
+1. App의 즉시발송 wrapper를 composer hook에서 기존 action과 injected request callback으로 결합한다.
 2. 특강 안내문 적용 문구와 handler는 외부 템플릿 gate 때문에 App에 그대로 둔다.
 3. 이후 action adapter 이동은 기존 mock fixture가 충분한지 먼저 확인하고, 충분하지 않으면 로드맵 13의 안전한 경계를 닫는다.

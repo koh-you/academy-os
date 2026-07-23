@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { createNotificationComposerViewModel } from "./notificationCenterModel.js";
-import { applyNoticeTemplateAction } from "./notificationNoticeActions.js";
+import {
+  applyNoticeTemplateAction,
+  refreshNoticeJobsInBackgroundAction
+} from "./notificationNoticeActions.js";
 import { buildNoticeJob as createNotificationNoticeJob } from "./notificationNoticeBuilders.js";
 
 export function useNotificationComposerState({
   academyName,
   formatKoreaTimeLabel,
+  refreshJobs,
   solapiResultSyncCheckedAt,
   solapiResultTargets,
   templates,
@@ -64,6 +68,13 @@ export function useNotificationComposerState({
     });
   }
 
+  function refreshNoticeJobsInBackground() {
+    refreshNoticeJobsInBackgroundAction({
+      refreshJobs,
+      setDispatchMessage
+    });
+  }
+
   return {
     ...composerViewModel,
     applyNoticeTemplate,
@@ -76,6 +87,7 @@ export function useNotificationComposerState({
     noticeSpecialLectureMeta,
     noticeTemplateId,
     noticeTitle,
+    refreshNoticeJobsInBackground,
     scheduleDate,
     scheduleTime,
     setDispatchMessage,
