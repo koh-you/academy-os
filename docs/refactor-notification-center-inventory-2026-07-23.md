@@ -48,7 +48,13 @@
 - 상태/종류 helper, 취소·삭제 가능 판정과 실제 취소·삭제 handler는 App이 계속 소유한다.
 - 행은 전달받은 job을 표시하고 callback에 되돌려줄 뿐 API/Supabase/Solapi mutation을 직접 수행하지 않는다.
 
+## 13A-5 안전 단위
+
+- 발송 기록 header/status/Solapi 안내/table/collapsed shell을 `NotificationHistoryPanel.jsx`로 이동하고 분리된 row를 조합했다.
+- filter/open state, 결과 대조 대상 계산과 실제 reconcile/cancel/delete handler는 App이 계속 소유한다.
+- shell은 controlled 값과 callback만 사용하며 API/Supabase/Solapi mutation을 직접 수행하지 않는다.
+
 ## 다음 후보
 
-1. 발송 기록 header/status/table/collapsed shell을 controlled 컴포넌트로 분리한다.
+1. 13A 표시 컴포넌트 분리 audit으로 App에 남은 표시 JSX와 handler 경계를 재확인한다.
 2. payload builder와 실제 API orchestration은 별도 inventory/fixture와 사람 gate 필요성을 다시 판정한다.
