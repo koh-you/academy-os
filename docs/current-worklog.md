@@ -8,6 +8,14 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-18 보충 알림톡 draft 탭 표시 모델 분리 — AI gate 통과
+
+- 코드: task 카드의 알림톡 문구 탭 설정 3종에 현재 `notification_jobs` 표시값을 붙이는 순수 계산을 `createSupplementNotificationDraftTabConfigs`로 `supplementTaskCardModel.js`에 이동했다.
+- 동작 보존: 기존 설정의 순서·필드·label을 복사하고 각 `controlType`의 현재 job selector와 display formatter를 주입해 같은 `display`를 만든다. 원본 설정 배열은 변경하지 않는다.
+- 저장 원천/side effect: 전달받은 task/job을 읽어 렌더 props만 계산한다. job 생성·취소·수정, API, Supabase, Solapi 호출은 없다.
+- 자동검증: 학생·학부모 두 control의 job/display 매핑과 원본 불변 fixture, production scenario `88b-33`, production 399/399, build, `git diff --check`를 통과했다. 기존 대형 chunk 경고만 남았다.
+- gate 판정: 예약상태 표시 props만 순수 분리했고 실제 예약·취소 경계를 건드리지 않았다. 사용자 지시에 따라 AI 검토로 통과하며 별도 사람 조작이나 검수 데이터는 요구하지 않는다.
+
 ## 2026-07-23 P1. 12R-17 보충 task busy local state hook 분리 — AI gate 통과
 
 - 코드: 보충 상세의 단일 busy action key state, `taskId:action` 생성, task/action별 busy 판정, 시작·종료를 `useSupplementTaskBusyState.js`로 이동했다.
