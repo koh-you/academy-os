@@ -132,8 +132,14 @@
 - App이 실제 refresh callback과 dispatch setter를 주입하고 action은 React/API를 직접 소유하지 않는다.
 - 성공·비동기 실패·callback 없음·기존 동기 throw 계약을 mock fixture로 고정했고 실제 재조회는 없다.
 
+## 13D-1 template/display config 단위
+
+- 공지 기본 템플릿 4종과 알림 job 종류·상태 label, 과거 예약 status-class 계산을 `notificationCenterConfig.js`로 이동했다.
+- App은 config를 import하고 status-class helper에 기존 과거시각 판정을 주입한다.
+- 템플릿 전체 문자열과 label/status fallback을 deterministic fixture로 고정했으며 특강 문구·연결과 운영 side effect는 변경하지 않았다.
+
 ## 다음 후보
 
-1. `noticeMessageTemplates`와 notification job label/status/status-class helper를 config/model 파일로 이동한다.
-2. 그다음 local selection helper를 낮은 위험도로 분리한다.
+1. 선택 학생 toggle/select-all/clear와 반 변경 시 유효 ID 정리를 순수 selection model로 분리한다.
+2. 그다음 template 적용과 history filter/open local action을 검토한다.
 3. 특강 안내문 적용 handler는 Solapi 특강 템플릿 외부 검수와 기능 경계를 바꾸지 않는 범위만 다룬다.
