@@ -50,7 +50,10 @@ import {
   NotificationSectionTabs,
   NoticeWorkspaceTabs
 } from "../domains/notifications/NotificationCenterNavigation.jsx";
-import { createNotificationHistoryViewModel } from "../domains/notifications/notificationCenterModel.js";
+import {
+  createNotificationHistoryViewModel,
+  createNotificationRecipientViewModel
+} from "../domains/notifications/notificationCenterModel.js";
 import { NotificationComposerPanel } from "../domains/notifications/NotificationComposerPanel.jsx";
 import { NotificationHistoryPanel } from "../domains/notifications/NotificationHistoryPanel.jsx";
 import { NotificationRecipientPanel } from "../domains/notifications/NotificationRecipientPanel.jsx";
@@ -10153,10 +10156,6 @@ const noticeMessageTemplates = [
   }
 ];
 
-function isNoticeWithdrawnStudent(student = {}) {
-  return ["paused", "withdrawn"].includes(student.status ?? "active") || Boolean(student.withdrawnAt);
-}
-
 function NotificationCenter({
   aiSettings = defaultAiSettings,
   classTemplates = [],
@@ -10231,64 +10230,37 @@ function NotificationCenter({
     localNoticeJobs,
     notificationJobs
   });
-  const activeStudents = useMemo(
-    () => students.filter((student) => !isNoticeWithdrawnStudent(student)),
-    [students]
-  );
-  const withdrawnStudents = useMemo(
-    () => students.filter((student) => isNoticeWithdrawnStudent(student)),
-    [students]
-  );
-
   useEffect(() => {
     setActiveNotificationTab(showSpecialLectureTab ? initialNotificationTab : "notice");
   }, [initialNotificationTab, showSpecialLectureTab]);
-  const classTemplateById = useMemo(
-    () => new Map(classTemplates.map((template) => [template.classTemplateId, template])),
-    [classTemplates]
-  );
-  const studentMatchesNoticeClass = (student) => {
-    if (classFilter === noticeWithdrawnClassFilterId) return isNoticeWithdrawnStudent(student);
-    if (classFilter === "all") return true;
-    const template = classTemplateById.get(classFilter);
-    return (
-      student.defaultClassTemplateId === classFilter ||
-      student.classTemplateId === classFilter ||
-      student.classId === classFilter ||
-      (template?.name && [student.className, student.defaultClassName].includes(template.name))
-    );
-  };
-  const classFilteredStudents = useMemo(() => {
-    const sourceStudents = classFilter === noticeWithdrawnClassFilterId ? withdrawnStudents : activeStudents;
-    return sourceStudents.filter((student) => studentMatchesNoticeClass(student));
-  }, [activeStudents, withdrawnStudents, classFilter, classTemplateById]);
-  const searchableStudents = useMemo(() => classFilteredStudents.filter((student) => {
-    const keyword = normalizeMessageText(searchText).toLowerCase();
-    const matchesSearch =
-      !keyword ||
-      [student.name, student.schoolName, student.grade, student.studentPhone, student.parentPhone]
-        .some((value) => String(value ?? "").toLowerCase().includes(keyword));
-    return matchesSearch;
-  }), [classFilteredStudents, searchText]);
-  const selectedNoticeStudents = classFilteredStudents.filter((student) => selectedStudentIds.includes(student.studentId));
-  const targetStudents = selectedNoticeStudents;
-  const targetAudiences = noticeRecipientMode === "parent"
-    ? ["parent"]
-    : noticeRecipientMode === "student"
-      ? ["student"]
-      : ["parent", "student"];
-  const visibleNoticeStudents = searchableStudents;
-  const noticeRecipients = targetStudents.flatMap((student) =>
-    targetAudiences
-      .map((audience) => ({
-        audience,
-        phone: audience === "student" ? student.studentPhone : student.parentPhone,
-        student
-      }))
-      .filter((recipient) => normalizePhoneNumber(recipient.phone))
-  );
-  const parentRecipientCount = noticeRecipients.filter((recipient) => recipient.audience === "parent").length;
-  const studentRecipientCount = noticeRecipients.filter((recipient) => recipient.audience === "student").length;
+  const {
+    classFilteredStudents,
+    noticeRecipients,
+    parentRecipientCount,
+    searchableStudents,
+    studentRecipientCount,
+    targetAudiences,
+    targetStudents,
+    visibleNoticeStudents,
+    withdrawnStudents
+  } = useMemo(() => createNotificationRecipientViewModel({
+    classFilter,
+    classTemplates,
+    normalizePhoneNumber,
+    normalizeSearchText: normalizeMessageText,
+    noticeRecipientMode,
+    noticeWithdrawnClassFilterId,
+    searchText,
+    selectedStudentIds,
+    students
+  }), [
+    classFilter,
+    classTemplates,
+    noticeRecipientMode,
+    searchText,
+    selectedStudentIds,
+    students
+  ]);
   const noticeText = [noticeTitle.trim() ? `[${noticeTitle.trim()}]` : "", noticeBody.trim()].filter(Boolean).join("\n\n");
   const scheduledAt = scheduleDate && scheduleTime ? new Date(`${scheduleDate}T${scheduleTime}:00+09:00`).toISOString() : "";
   const solapiResultSyncTargetIds = [...new Set(solapiResultTargets.map((job) => job.notificationJobId).filter(Boolean))];

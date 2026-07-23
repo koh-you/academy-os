@@ -60,7 +60,13 @@
 - persisted ID 우선, 과거 예약의 확인필요 편입, 전체 40건 제한을 deterministic fixture로 고정했다.
 - 기존 취소 가능/과거시각/provider reference 판정 함수를 주입하며 React/API/Supabase/Solapi mutation은 소유하지 않는다.
 
+## 13B-2 순수 모델 단위
+
+- 활성/퇴원 학생, 반 ID·반 이름 매칭, 검색 표시 목록, 현재 반 선택 학생, 대상 모드, 유효 전화번호 수신자와 대상별 건수를 `createNotificationRecipientViewModel`로 이동했다.
+- 전체 반의 퇴원 제외, 퇴원학생반의 별도 노출, 검색과 선택 범위의 차이, 반 밖 선택 제거, 번호 없는 대상 제외를 deterministic fixture로 고정했다.
+- selection 정리 effect와 local React state는 App에 남고 model은 학생·반·filter·selection 원천을 읽기만 한다. API/Supabase/notification job/Solapi mutation은 없다.
+
 ## 다음 후보
 
-1. 수신자 반/검색/선택/번호 유효성 derivation을 별도 순수 모델로 분리한다.
-2. payload builder와 실제 API orchestration은 별도 inventory/fixture와 사람 gate 필요성을 다시 판정한다.
+1. `buildNoticePayload`와 `buildNoticeJob`의 입력·ID·payload·시각 계약을 순수 builder로 분리하고 deterministic fixture로 고정한다.
+2. 실제 즉시발송·예약 API orchestration은 builder와 분리해 외부 side effect와 사람 gate 필요성을 다시 판정한다.

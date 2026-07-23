@@ -7,6 +7,83 @@ const notificationHistoryFilterLabels = {
   draft: "정리함"
 };
 
+export function isNoticeWithdrawnStudent(student = {}) {
+  return ["paused", "withdrawn"].includes(student.status ?? "active") || Boolean(student.withdrawnAt);
+}
+
+export function createNotificationRecipientViewModel({
+  classFilter = "all",
+  classTemplates = [],
+  normalizePhoneNumber,
+  normalizeSearchText,
+  noticeRecipientMode = "selected",
+  noticeWithdrawnClassFilterId,
+  searchText = "",
+  selectedStudentIds = [],
+  students = []
+}) {
+  const activeStudents = students.filter((student) => !isNoticeWithdrawnStudent(student));
+  const withdrawnStudents = students.filter((student) => isNoticeWithdrawnStudent(student));
+  const classTemplateById = new Map(
+    classTemplates.map((template) => [template.classTemplateId, template])
+  );
+  const studentMatchesNoticeClass = (student) => {
+    if (classFilter === noticeWithdrawnClassFilterId) return isNoticeWithdrawnStudent(student);
+    if (classFilter === "all") return true;
+    const template = classTemplateById.get(classFilter);
+    return (
+      student.defaultClassTemplateId === classFilter ||
+      student.classTemplateId === classFilter ||
+      student.classId === classFilter ||
+      (template?.name && [student.className, student.defaultClassName].includes(template.name))
+    );
+  };
+  const sourceStudents =
+    classFilter === noticeWithdrawnClassFilterId ? withdrawnStudents : activeStudents;
+  const classFilteredStudents = sourceStudents.filter((student) =>
+    studentMatchesNoticeClass(student)
+  );
+  const keyword = normalizeSearchText(searchText).toLowerCase();
+  const searchableStudents = classFilteredStudents.filter((student) =>
+    !keyword ||
+    [student.name, student.schoolName, student.grade, student.studentPhone, student.parentPhone]
+      .some((value) => String(value ?? "").toLowerCase().includes(keyword))
+  );
+  const selectedNoticeStudents = classFilteredStudents.filter((student) =>
+    selectedStudentIds.includes(student.studentId)
+  );
+  const targetStudents = selectedNoticeStudents;
+  const targetAudiences = noticeRecipientMode === "parent"
+    ? ["parent"]
+    : noticeRecipientMode === "student"
+      ? ["student"]
+      : ["parent", "student"];
+  const visibleNoticeStudents = searchableStudents;
+  const noticeRecipients = targetStudents.flatMap((student) =>
+    targetAudiences
+      .map((audience) => ({
+        audience,
+        phone: audience === "student" ? student.studentPhone : student.parentPhone,
+        student
+      }))
+      .filter((recipient) => normalizePhoneNumber(recipient.phone))
+  );
+
+  return {
+    activeStudents,
+    classFilteredStudents,
+    noticeRecipients,
+    parentRecipientCount: noticeRecipients.filter((recipient) => recipient.audience === "parent").length,
+    searchableStudents,
+    selectedNoticeStudents,
+    studentRecipientCount: noticeRecipients.filter((recipient) => recipient.audience === "student").length,
+    targetAudiences,
+    targetStudents,
+    visibleNoticeStudents,
+    withdrawnStudents
+  };
+}
+
 export function createNotificationHistoryViewModel({
   canCancelJob,
   getProviderReference,
