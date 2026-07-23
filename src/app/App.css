@@ -8609,11 +8609,6 @@ button:disabled {
   gap: 8px;
 }
 
-.specialLectureEnrollmentPrimaryActions {
-  display: grid;
-  gap: 7px;
-}
-
 .specialLectureCancellationActions {
   border-top: 1px solid #e2e8f0;
   padding-top: 7px;
@@ -8764,6 +8759,160 @@ button:disabled {
 .specialLectureSessionModalSummary span {
   color: #475569;
   font-size: 12px;
+}
+
+.specialLecturePlanProgress {
+  background: #f8fbff;
+  border: 1px solid #bfdbfe;
+  border-radius: 9px;
+  display: grid;
+  gap: 10px;
+  padding: 11px;
+}
+
+.specialLecturePlanProgressHeader {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.specialLecturePlanProgressHeader > div {
+  display: grid;
+  gap: 3px;
+}
+
+.specialLecturePlanProgressHeader strong {
+  color: #17213d;
+  font-size: 14px;
+}
+
+.specialLecturePlanProgressHeader span {
+  color: #52627a;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.specialLecturePlanProgressHeader > small {
+  background: #ecfdf5;
+  border-radius: 999px;
+  color: #047857;
+  flex: 0 0 auto;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 4px 8px;
+}
+
+.specialLecturePlanProgressHeader > small.pending {
+  background: #fff7ed;
+  color: #b45309;
+}
+
+.specialLecturePlanProgressButtons {
+  display: grid;
+  gap: 7px;
+  grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+}
+
+.specialLecturePlanProgressButtons button {
+  background: #ffffff;
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  color: #334155;
+  cursor: pointer;
+  display: grid;
+  gap: 2px;
+  min-height: 64px;
+  padding: 8px 9px;
+  text-align: left;
+}
+
+.specialLecturePlanProgressButtons button:hover,
+.specialLecturePlanProgressButtons button:focus-visible,
+.specialLecturePlanProgressButtons button.active {
+  background: #eef2ff;
+  border-color: #6366f1;
+  outline: none;
+}
+
+.specialLecturePlanProgressButtons strong {
+  color: #17213d;
+  font-size: 12px;
+}
+
+.specialLecturePlanProgressButtons span,
+.specialLecturePlanProgressButtons small {
+  color: #64748b;
+  font-size: 10px;
+}
+
+.specialLecturePlanProgressDetail {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #a5b4fc;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(140px, 0.4fr) minmax(240px, 1fr) auto;
+  padding: 10px;
+}
+
+.specialLecturePlanProgressDetail > div {
+  display: grid;
+  gap: 3px;
+}
+
+.specialLecturePlanProgressDetail span,
+.specialLecturePlanProgressDetail small {
+  color: #64748b;
+  font-size: 11px;
+}
+
+.specialLecturePlanProgressDetail strong {
+  color: #17213d;
+  font-size: 13px;
+}
+
+.specialLecturePlanProgressDetail p {
+  color: #334155;
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.specialLecturePlanProgressHint,
+.specialLecturePlanProgressEmpty {
+  color: #64748b;
+  font-size: 11px;
+  margin: 0;
+}
+
+.specialLecturePlanProgressEmpty {
+  background: #ffffff;
+  border: 1px dashed #c7d2fe;
+  border-radius: 7px;
+  padding: 10px;
+}
+
+.specialLecturePlanEditHeader {
+  align-items: end;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  padding-bottom: 7px;
+}
+
+.specialLecturePlanEditHeader strong {
+  color: #17213d;
+  font-size: 14px;
+}
+
+.specialLecturePlanEditHeader span {
+  color: #64748b;
+  font-size: 11px;
+  text-align: right;
 }
 
 .specialLectureSessionBulkActions {
@@ -18081,10 +18230,6 @@ body.attendanceOnlyBody {
     grid-template-columns: 1fr;
   }
 
-  .specialLectureEnrollmentPrimaryActions {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .materialFolderBar,
   .specialLectureFormGrid,
   .specialLectureSelector,
@@ -18540,10 +18685,21 @@ body.attendanceOnlyBody {
   .specialLectureEnrollmentCard,
   .specialLectureCanceledEnrollmentCard,
   .specialLectureProgressRow,
+  .specialLecturePlanProgressDetail,
   .specialLectureProgressSummary,
   .specialLectureRosterSearch,
   .specialLectureSessionModalControls {
     grid-template-columns: 1fr;
+  }
+
+  .specialLecturePlanProgressHeader,
+  .specialLecturePlanEditHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .specialLecturePlanEditHeader span {
+    text-align: left;
   }
 
   .specialLectureAttentionItem {

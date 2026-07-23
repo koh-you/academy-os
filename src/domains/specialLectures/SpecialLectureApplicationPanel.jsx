@@ -389,6 +389,7 @@ export function SpecialLectureApplicationPanel({
   const [planSaveState, setPlanSaveState] = useState({ message: "", state: "idle" });
   const [commonSessionTimeDraft, setCommonSessionTimeDraft] = useState({ endTime: "", overrideReason: "", startTime: "" });
   const [editingSessionOverrideId, setEditingSessionOverrideId] = useState("");
+  const [selectedPlanProgressSessionId, setSelectedPlanProgressSessionId] = useState("");
   const [progressModalEnrollment, setProgressModalEnrollment] = useState(null);
   const [isEnrollmentPanelOpen, setIsEnrollmentPanelOpen] = useState(false);
   const [isLessonPreviewOpen, setIsLessonPreviewOpen] = useState(false);
@@ -561,19 +562,25 @@ export function SpecialLectureApplicationPanel({
       return [student.name, student.schoolName, student.grade, student.className]
         .some((value) => String(value ?? "").toLowerCase().includes(query));
     });
+  function getEnrollmentProgressRows(enrollment) {
+    if (!enrollment) return [];
+    const plans = getSpecialLectureEnrollmentSessionPlans(enrollment, guideSessions);
+    return guideSessions.map((session) => {
+      const lesson = lessons.find((item) => item.specialLectureGuideId === selectedGuide?.specialLectureGuideId && item.specialLectureSessionId === session.sessionId) ?? null;
+      const plan = plans.find((item) => item.sessionId === session.sessionId);
+      const record = lesson
+        ? records.find((item) => item.lessonId === lesson.lessonId && item.studentId === enrollment.studentId) ?? null
+        : null;
+      return { lesson, plan, record, session };
+    });
+  }
+
   const progressEnrollment = progressModalEnrollment
     ? selectedGuideEnrollments.find((item) => item.enrollmentId === progressModalEnrollment.enrollmentId) ?? progressModalEnrollment
     : null;
   const progressStudent = progressEnrollment ? getEnrollmentStudent(progressEnrollment, students) : null;
   const progressPlans = progressEnrollment ? getSpecialLectureEnrollmentSessionPlans(progressEnrollment, guideSessions) : [];
-  const progressRows = guideSessions.map((session) => {
-    const lesson = lessons.find((item) => item.specialLectureGuideId === selectedGuide?.specialLectureGuideId && item.specialLectureSessionId === session.sessionId) ?? null;
-    const plan = progressPlans.find((item) => item.sessionId === session.sessionId);
-    const record = lesson && progressEnrollment
-      ? records.find((item) => item.lessonId === lesson.lessonId && item.studentId === progressEnrollment.studentId) ?? null
-      : null;
-    return { lesson, plan, record, session };
-  });
+  const progressRows = getEnrollmentProgressRows(progressEnrollment);
   const webhookUrl = apiUrl("/api/special-lecture-applications/tally");
 
   async function copyWebhookUrl() {
@@ -772,6 +779,7 @@ export function SpecialLectureApplicationPanel({
     const [startTime = "", endTime = "", overrideReason = ""] = commonTimeKey.split("|");
     setCommonSessionTimeDraft({ startTime, endTime, overrideReason });
     setEditingSessionOverrideId("");
+    setSelectedPlanProgressSessionId("");
     setPlanModalEnrollment(enrollment);
     setPlanSaveState({ message: "", state: "idle" });
   }
@@ -779,6 +787,7 @@ export function SpecialLectureApplicationPanel({
   function closePlanModal() {
     setPlanModalEnrollment(null);
     setEditingSessionOverrideId("");
+    setSelectedPlanProgressSessionId("");
     setPlanSaveState({ message: "", state: "idle" });
   }
 
@@ -1242,19 +1251,14 @@ export function SpecialLectureApplicationPanel({
                     ) : <span className="pending">수강 회차 미확정</span>}
                   </div>
                   <div className="specialLectureEnrollmentControls">
-                    <div className="specialLectureEnrollmentPrimaryActions">
-                      <button
-                        className="primaryButton compact"
-                        disabled={!isGuideSaved}
-                        onClick={() => openPlanModal(enrollment)}
-                        type="button"
-                      >
-                        회차 설정
-                      </button>
-                      <button className="softButton compact" onClick={() => setProgressModalEnrollment(enrollment)} type="button">
-                        진행 보기
-                      </button>
-                    </div>
+                    <button
+                      className="primaryButton compact"
+                      disabled={!isGuideSaved}
+                      onClick={() => openPlanModal(enrollment)}
+                      type="button"
+                    >
+                      {enrollment.planReviewedAt ? "회차·진행 관리" : "회차 설정"}
+                    </button>
                     <details className="specialLectureCancellationActions">
                       <summary>취소 관리</summary>
                       <div>
@@ -1507,17 +1511,70 @@ export function SpecialLectureApplicationPanel({
         const enrollment = selectedGuideEnrollments.find((item) => item.enrollmentId === planModalEnrollment.enrollmentId) ?? planModalEnrollment;
         const student = getEnrollmentStudent(enrollment, students);
         const draft = getEnrollmentDraft(enrollment);
+        const confirmedProgressRows = enrollment.planReviewedAt
+          ? getEnrollmentProgressRows(enrollment).filter((row) => row.plan?.status === "active")
+          : [];
+        const selectedProgressRow = confirmedProgressRows.find((row) => row.session.sessionId === selectedPlanProgressSessionId) ?? null;
         return (
           <Modal
             className="specialLectureSessionModal"
             onClose={closePlanModal}
             subtitle={`${selectedGuide?.title || "특강"} · ${enrollment.planSource === "tally_request" ? "Tally 접수" : "수동 접수"}`}
-            title={`${student?.name || "학생"} 회차 설정`}
+            title={`${student?.name || "학생"} 회차·진행 관리`}
           >
             <div className="specialLectureModalBody">
               <div className="specialLectureSessionModalSummary">
                 <strong>총 {guideSessions.length}회 중 {draft.sessionPlans.filter((plan) => plan.status === "active").length}회 수강</strong>
                 <span>회차 신청 원천은 오늘/지난 회차도 수정할 수 있습니다. 이미 생성된 수업일지는 별도 확인 후 누락 학생만 안전하게 추가합니다.</span>
+              </div>
+              <section className="specialLecturePlanProgress">
+                <div className="specialLecturePlanProgressHeader">
+                  <div>
+                    <strong>확정 수업 진행</strong>
+                    <span>마지막으로 저장 완료한 회차 기준입니다. 수업 버튼을 눌러 진행상황을 확인하세요.</span>
+                  </div>
+                  {enrollment.planReviewedAt ? <small>회차 확정됨</small> : <small className="pending">회차 미확정</small>}
+                </div>
+                {confirmedProgressRows.length ? (
+                  <>
+                    <div className="specialLecturePlanProgressButtons">
+                      {confirmedProgressRows.map(({ lesson, record, session }) => (
+                        <button
+                          className={selectedPlanProgressSessionId === session.sessionId ? "active" : ""}
+                          key={`${enrollment.enrollmentId}_confirmed_progress_${session.sessionId}`}
+                          onClick={() => setSelectedPlanProgressSessionId((current) => current === session.sessionId ? "" : session.sessionId)}
+                          type="button"
+                        >
+                          <strong>{session.sessionIndex + 1}회차 수업</strong>
+                          <span>{session.dateKey || session.date}</span>
+                          <small>{lesson ? getAttendanceLabel(record?.attendanceStatus) : "수업 미개설"}</small>
+                        </button>
+                      ))}
+                    </div>
+                    {selectedProgressRow ? (
+                      <article className="specialLecturePlanProgressDetail">
+                        <div>
+                          <span>{selectedProgressRow.session.sessionIndex + 1}회차 · {selectedProgressRow.session.dateKey || selectedProgressRow.session.date}</span>
+                          <strong>{selectedProgressRow.plan?.effectiveStartTime || selectedProgressRow.session.startTime}-{selectedProgressRow.plan?.effectiveEndTime || selectedProgressRow.session.endTime}</strong>
+                          <small>{selectedProgressRow.lesson ? getAttendanceLabel(selectedProgressRow.record?.attendanceStatus) : "아직 수업일지가 개설되지 않았습니다."}</small>
+                        </div>
+                        <div>
+                          <p>{selectedProgressRow.record?.lessonProgress || selectedProgressRow.record?.progress || selectedProgressRow.record?.lessonContent || "아직 입력된 진행 기록이 없습니다."}</p>
+                          {selectedProgressRow.record?.nextHomework ? <small>다음 과제 · {selectedProgressRow.record.nextHomework}</small> : null}
+                        </div>
+                        <button className="softButton compact" disabled={!selectedProgressRow.lesson || !onOpenLesson} onClick={() => onOpenLesson?.(selectedProgressRow.lesson)} type="button">수업일지 열기</button>
+                      </article>
+                    ) : (
+                      <p className="specialLecturePlanProgressHint">확인할 수업을 선택해 주세요.</p>
+                    )}
+                  </>
+                ) : (
+                  <p className="specialLecturePlanProgressEmpty">회차 계획을 저장해 확정하면 수강하는 각 수업 버튼이 여기에 표시됩니다.</p>
+                )}
+              </section>
+              <div className="specialLecturePlanEditHeader">
+                <strong>회차 신청 수정</strong>
+                <span>아래 변경은 `회차 계획 저장`을 눌러 Supabase 재조회가 끝난 뒤 확정됩니다.</span>
               </div>
               <div className="specialLectureSessionBulkActions">
                 <span>체크한 회차가 수강 신청으로 저장됩니다.</span>
