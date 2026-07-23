@@ -171,3 +171,46 @@ export async function reconcileNoticeResultsAction({
     }));
   }
 }
+
+export async function polishNoticeMessageAction({
+  aiModel,
+  aiPrompt,
+  aiProvider,
+  isPolishing,
+  noticeBody,
+  noticeTitle,
+  polishMessage,
+  setDispatchMessage,
+  setIsPolishing,
+  setNoticeBody,
+  today
+}) {
+  if (!noticeBody.trim() || isPolishing) return;
+  setIsPolishing(true);
+  setDispatchMessage("");
+  try {
+    const result = await polishMessage({
+      aiProvider,
+      aiModel,
+      aiPrompt,
+      audience: "parent",
+      lessonName: noticeTitle.trim() || "알림관리 공지",
+      lessonDate: today,
+      rawText: noticeBody,
+      studentName: "수신자",
+      schoolName: "",
+      grade: "",
+      lessonMaterial: "",
+      lessonContent: "",
+      attendanceStatus: "",
+      homeworkStatus: "",
+      assignmentStatus: ""
+    });
+    setNoticeBody(result.polishedText ?? noticeBody);
+    setDispatchMessage("공지 문구를 AI로 다듬었습니다.");
+  } catch (error) {
+    setDispatchMessage(`AI 수정 실패: ${error.message}`);
+  } finally {
+    setIsPolishing(false);
+  }
+}
