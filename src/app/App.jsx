@@ -54,6 +54,10 @@ import {
   createNotificationHistoryViewModel,
   createNotificationRecipientViewModel
 } from "../domains/notifications/notificationCenterModel.js";
+import {
+  persistNoticeJobRequest,
+  reserveNoticeJobRequest
+} from "../domains/notifications/notificationNoticeApi.js";
 import { buildNoticeJob as createNotificationNoticeJob } from "../domains/notifications/notificationNoticeBuilders.js";
 import { NotificationComposerPanel } from "../domains/notifications/NotificationComposerPanel.jsx";
 import { NotificationHistoryPanel } from "../domains/notifications/NotificationHistoryPanel.jsx";
@@ -10365,22 +10369,17 @@ function NotificationCenter({
   }
 
   async function persistNoticeJob(notificationJob) {
-    await postJsonWithTimeout(
-      "/api/notification-jobs",
-      { notificationJob },
-      15000,
-      "발송 기록 저장 요청이 15초를 넘었습니다. 새로고침 후 기록 반영 여부를 확인해 주세요."
-    );
+    await persistNoticeJobRequest({
+      notificationJob,
+      request: postJsonWithTimeout
+    });
   }
 
   async function reserveNoticeJob(notificationJob) {
-    const result = await postJsonWithTimeout(
-      "/api/notification-jobs/reserve",
-      { notificationJob, reason: "공지 Solapi 예약" },
-      45000,
-      "Solapi 예약 요청이 45초를 넘었습니다. 실제 예약 여부는 발송 기록 또는 Solapi에서 확인해 주세요."
-    );
-    return result.notificationJob ?? notificationJob;
+    return reserveNoticeJobRequest({
+      notificationJob,
+      request: postJsonWithTimeout
+    });
   }
 
   function refreshNoticeJobsInBackground() {

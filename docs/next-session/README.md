@@ -14,7 +14,7 @@
 
 11B-1 코드 이동 후 학생 일정·학부모 일정·학생 11시의 OS row/Solapi 그룹 예약·취소 대조는 반 미지정 고태영 테스트 학생과 사용자 통제 번호로 통과했습니다. 학생 포털 실제 쓰기 검수, 교사 bearer/Storage 소유권 보안 gate, Solapi 특강 템플릿 외부 검수는 별도 보류 상태입니다.
 
-App.jsx 보충관리 리팩터링은 `12R-37`에서 `SupplementCenter` 본체를 전용 파일로 이동해 로드맵 12 `supplement center/modals`의 App 본체 분리를 완료했다. 알림센터는 13A-1~5에서 navigation·수신자·작성·발송 기록 표시를 callback-only 컴포넌트로 이동했다. 13B-1은 job 기록 계산, 13B-2는 수신자 계산을 순수 모델로 분리했다. 13C-1은 공지 payload/job 조립을 `notificationNoticeBuilders.js`의 순수 builder로 옮기고 clock/random을 App에서 주입해 deterministic fixture와 production scenario 428/428로 AI gate를 통과했다. 실제 학생/반 원천과 local 선택/초안/filter/open state, selection 정리 effect, 즉시발송·예약·취소·삭제·결과 대조·AI 수정·특강관리 handler는 App에 남는다. 다음은 `persistNoticeJob`/`reserveNoticeJob` request adapter를 분리하고 실제 발송 loop의 고위험 경계를 다시 판정한다.
+App.jsx 보충관리 리팩터링은 `12R-37`에서 `SupplementCenter` 본체를 전용 파일로 이동해 로드맵 12 `supplement center/modals`의 App 본체 분리를 완료했다. 알림센터는 13A-1~5에서 navigation·수신자·작성·발송 기록 표시를 callback-only 컴포넌트로 이동했다. 13B-1은 job 기록 계산, 13B-2는 수신자 계산을 순수 모델로 분리했다. 13C-1은 공지 payload/job builder를, 13C-2는 기록 저장·예약 timeout request adapter를 분리하고 deterministic fixture와 production scenario 429/429로 AI gate를 통과했다. 실제 학생/반 원천과 local 선택/초안/filter/open state, selection 정리 effect, 즉시발송·예약 loop, 취소·삭제·결과 대조·AI 수정·특강관리 handler는 App에 남는다. 다음은 `sendNoticeNow` injected action을 fixture로 분리하고 예약 loop의 고위험 경계를 다시 판정한다.
 
 ## 시험분석 GPT Image 전용 세션 참고 자료
 
@@ -338,7 +338,7 @@ App.jsx 리팩터링 18개 기준 로드맵:
 - 7번 `school calendar helpers` 분리 완료.
 - 8번 `school calendar components` 분리 완료.
 - 9번 `test manager` 완료: `src/domains/tests/testManagerUtils.js`와 `TestManagerPanels.jsx`에 탭/header/form grid/meta/table/action/recent session list/student history panel 분리 완료.
-- 12번 `supplement center/modals` App 본체 분리 완료. 13번 `notification center`는 13A-1~5 표시, 13B-1 기록·13B-2 수신자 모델, 13C-1 payload/job 순수 builder까지 완료했고, 다음은 request adapter와 고위험 orchestration 경계 재평가입니다.
+- 12번 `supplement center/modals` App 본체 분리 완료. 13번 `notification center`는 13A-1~5 표시, 13B-1 기록·13B-2 수신자 모델, 13C-1 builder·13C-2 request adapter까지 완료했고, 다음은 즉시발송 injected action과 예약 orchestration 경계 재평가입니다.
 - 확인된 후속 이슈: 학생 포털 `비밀번호 변경`은 callback/API 없는 기존 미연결 UI입니다. 이번 리팩터링에서는 보존했고 오작동 버튼 정리에서 별도 결정합니다.
 - 실제 최신 커밋은 새 세션에서 반드시 `git log -1 --oneline`으로 다시 확인하세요.
 

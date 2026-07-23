@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13C-2 알림센터 공지 기록·예약 API adapter 분리 — AI gate 통과
+
+- 코드: 공지 job 기록 저장과 Solapi 예약 request의 path/body/timeout/error 문구를 `notificationNoticeApi.js`의 `persistNoticeJobRequest`와 `reserveNoticeJobRequest`로 이동했다. App wrapper는 현재 `postJsonWithTimeout`을 주입한다.
+- 동작 보존: 기록 저장은 `/api/notification-jobs`·15초, 예약은 `/api/notification-jobs/reserve`·`공지 Solapi 예약`·45초 계약을 유지한다. 예약 응답 job이 있으면 반환하고 없으면 원본 job을 반환하며, 예외는 caller의 기존 실패 분기로 그대로 전파한다.
+- 저장 원천/side effect: adapter 자체는 React/Supabase/Solapi client를 소유하지 않고 전달된 request만 1회 호출한다. 실제 즉시발송·예약 loop, 실패 job 조립·local state·feedback·재조회는 App에 남는다.
+- 자동검증: 두 request의 전체 인자, 반환값/fallback, 예외 동일성 fixture를 `test:notification-notice-api`로 production test에 연결했다. scenario `20e-5`가 App request 주입과 timeout 계약을 고정하며 production scenario 429/429, build, `git diff --check`가 통과했다.
+- gate 판정: 실제 endpoint를 부르지 않는 주입형 fixture로 네트워크 계약 전체를 확인했다. 운영 row·발송·예약 없이 AI gate로 통과했다.
+- 다음 경계: `sendNoticeNow`의 성공·timeout 확인필요·실패·기록 저장 실패 순서를 주입형 action과 deterministic fixture로 분리할 수 있는지 inventory한다. 실제 호출은 하지 않는다.
+
 ## 2026-07-23 P1. 13C-1 알림센터 공지 payload/job 순수 builder 분리 — AI gate 통과
 
 - 코드: 학원/공지/학생/학부모/특강 변수와 즉시·예약 mode를 API payload로 조립하는 `buildNoticePayload`, payload와 ID·수신자·상태·시각을 job으로 조립하는 `buildNoticeJob`을 `notificationNoticeBuilders.js`로 이동했다.
