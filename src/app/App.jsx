@@ -109,6 +109,7 @@ import {
   getAssignmentStatusStudentMessage,
   getHomeworkStatusFromAssignmentStatus,
   isAssignmentStatusHomeworkMakeupCandidate,
+  isAssignmentStatusUnrecorded,
   normalizeAssignmentStatusValue
 } from "../domains/lessons/assignmentStatus.js";
 import {
@@ -597,9 +598,10 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, notificatio
   const lessonMaterial = getLessonMaterial(record, student);
   const lessonContent = getLessonContent(record);
   const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
+  const omitHomework = isAssignmentStatusUnrecorded(assignmentStatus);
   const attendance = formatAttendanceForMessage(record);
   const commentText = normalizeMessageText(comment);
-  const homeworkFollowupNotice = getHomeworkFollowupNoticeForTarget(record, audience, notificationTemplates);
+  const homeworkFollowupNotice = omitHomework ? "" : getHomeworkFollowupNoticeForTarget(record, audience, notificationTemplates);
   const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
   const supplementAndFollowupText = [homeworkFollowupNotice, supplementText].filter(Boolean).join("\n");
   const testResultText = testResultLines.length ? testResultLines.map((item) => `- ${item}`).join("\n") : "";
@@ -614,11 +616,11 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, notificatio
     : "";
   const lines = [
     createMessageLine("🏫 출결", attendance),
-    assignmentStatus ? createMessageLine("✅ 과제 상태", getAssignmentStatusMessage(audience, assignmentStatus)) : "",
+    assignmentStatus && !omitHomework ? createMessageLine("✅ 과제 상태", getAssignmentStatusMessage(audience, assignmentStatus)) : "",
     createMessageLine("📚 강의 교재", lessonMaterial),
     createMessageLine("🧭 강의 내용", lessonContent),
-    createMessageLine("📘 지난 과제", previousHomework?.title),
-    createMessageLine("➡️ 다음 과제", nextHomework?.title),
+    omitHomework ? "" : createMessageLine("📘 지난 과제", previousHomework?.title),
+    omitHomework ? "" : createMessageLine("➡️ 다음 과제", nextHomework?.title),
     testResultText ? createMessageBlock("📝 테스트", testResultText) : "",
     supplementNotice ? createMessageBlock("⭐ 보충/확인 안내", supplementNotice) : "",
     commentText ? createMessageBlock("💬 코멘트", commentText) : ""
@@ -651,17 +653,19 @@ function buildCommentPreviewText({ audience, comment, lesson, nextHomework, noti
 }
 
 function buildCommentSourceText({ audience = "parent", lesson, nextHomework, notificationTemplates = {}, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
-  const homeworkFollowupNotice = getHomeworkFollowupNoticeForTarget(record, audience, notificationTemplates);
+  const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
+  const omitHomework = isAssignmentStatusUnrecorded(assignmentStatus);
+  const homeworkFollowupNotice = omitHomework ? "" : getHomeworkFollowupNoticeForTarget(record, audience, notificationTemplates);
   const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
   return joinMessageBlocks([
     createMessageLine("수신 학생", student.name),
     createMessageLine("수업", `${lesson.date} ${lesson.className}`),
     createMessageLine("출결", formatAttendanceForMessage(record)),
-    createMessageLine("과제 상태", getAssignmentStatusMessage(audience, getAssignmentStatusForMessage(record, previousHomework))),
+    omitHomework ? "" : createMessageLine("과제 상태", getAssignmentStatusMessage(audience, assignmentStatus)),
     createMessageLine("강의 교재", getLessonMaterial(record, student)),
     createMessageLine("강의 내용", getLessonContent(record)),
-    createMessageLine("지난 과제", previousHomework?.title),
-    createMessageLine("다음 과제", nextHomework?.title),
+    omitHomework ? "" : createMessageLine("지난 과제", previousHomework?.title),
+    omitHomework ? "" : createMessageLine("다음 과제", nextHomework?.title),
     testResultLines.length ? createMessageBlock("테스트", testResultLines.map((item) => `- ${item}`).join("\n")) : "",
     homeworkFollowupNotice || supplementText ? createMessageBlock("보충/확인 안내", [homeworkFollowupNotice, supplementText].filter(Boolean).join("\n")) : "",
     createMessageBlock("수업메모", record?.preparationMemo)
@@ -1105,9 +1109,11 @@ function buildLessonReservationPayloadSnapshot({
 }) {
   const sourceField = audience === "student" ? "studentComment" : "teacherComment";
   const commentBody = compactDuplicateMessageBlocks(record?.[sourceField] ?? "");
-  const homeworkFollowupNotice = getHomeworkFollowupNoticeForTarget(record, audience, notificationTemplates);
+  const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
+  const omitHomework = isAssignmentStatusUnrecorded(assignmentStatus);
+  const homeworkFollowupNotice = omitHomework ? "" : getHomeworkFollowupNoticeForTarget(record, audience, notificationTemplates);
   return {
-    assignmentStatus: getAssignmentStatusForMessage(record, previousHomework),
+    assignmentStatus,
     attendanceReason: record?.attendanceReason ?? "",
     attendanceStatus: record?.attendanceStatus ?? "pending",
     checkInTime: record?.checkInTime ?? "",
@@ -1117,9 +1123,9 @@ function buildLessonReservationPayloadSnapshot({
     lessonContent: getLessonContent(record),
     lessonMaterial: getLessonMaterial(record, student),
     homeworkFollowupNotice,
-    nextHomework: nextHomework?.title ?? "",
+    nextHomework: omitHomework ? "" : nextHomework?.title ?? "",
     preparationNotice: "",
-    previousHomework: previousHomework?.title ?? "",
+    previousHomework: omitHomework ? "" : previousHomework?.title ?? "",
     recipient: audience === "student" ? student.studentPhone : student.parentPhone,
     scheduledDate,
     scheduleMode: mode,
@@ -8393,6 +8399,7 @@ export function App() {
   }
 
   function syncPreviousHomeworkStatusFromAssignment(lesson, student, assignmentStatus) {
+    if (isAssignmentStatusUnrecorded(assignmentStatus)) return;
     const homeworkStatus = getHomeworkStatusFromAssignmentStatus(assignmentStatus);
     const normalizedAssignmentStatus = normalizeAssignmentStatusValue(assignmentStatus);
     setHomeworks((current) => {
@@ -8622,6 +8629,7 @@ export function App() {
     recordsToSave.forEach((record) => {
       const assignmentStatus = record.assignmentStatus ?? record.incompleteHomework ?? "";
       if (!assignmentStatus) return;
+      if (isAssignmentStatusUnrecorded(assignmentStatus)) return;
       const student = students.find((item) => item.studentId === record.studentId);
       if (!student) return;
       const previousHomework = getLessonHomework(nextHomeworks, lesson, student, "previous", lessons);
@@ -15854,7 +15862,6 @@ function LessonJournalDetail({
   const [reservationApplyState, setReservationApplyState] = useState("idle");
   const [solapiResultRefreshState, setSolapiResultRefreshState] = useState("idle");
   const [editingMemoKey, setEditingMemoKey] = useState("");
-  const [showPreSendCheck, setShowPreSendCheck] = useState(false);
   const [studentPreviewId, setStudentPreviewId] = useState("");
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
@@ -15967,21 +15974,22 @@ function LessonJournalDetail({
     ? `저장 전 변경 ${journalDraftChangeCount}건`
     : journalManualSaveMessage || lessonJournalSaveStatus.label || "편집을 시작하면 변경 내용이 여기에 표시됩니다.";
   const activeLessonReservationJobs = lessonNotificationJobs.filter(isActiveNotificationJobStatus);
-  const currentPlanScheduledDate = notificationPlanMode === "manual"
-    ? lessonNotificationPlan?.scheduledAt
-    : notificationPlanMode === "none"
-      ? ""
-      : getLessonAlimtalkScheduledDate(lesson, notificationPlanMode === "delay30" ? 30 : 0, { allowPastFallback: false });
-  const isCurrentPlanResultRefreshDue = Boolean(
-    currentPlanScheduledDate &&
-    isNotificationSchedulePast(currentPlanScheduledDate, 0)
-  );
   const solapiResultRefreshTargetJobs = auditedLessonNotificationJobs.filter((job) =>
     job.provider === "solapi" &&
     getNotificationJobProviderReference(job) &&
     (job.status === "send_unconfirmed" || (job.status === "scheduled" && isNotificationSchedulePast(job.scheduledAt, 0)))
   );
-  const hasSolapiResultRefreshTarget = solapiResultRefreshTargetJobs.length > 0 || isCurrentPlanResultRefreshDue;
+  const completedSolapiResultJobs = auditedLessonNotificationJobs.filter((job) =>
+    job.provider === "solapi" &&
+    getNotificationJobProviderReference(job) &&
+    job.status === "sent"
+  );
+  const failedSolapiResultJobs = auditedLessonNotificationJobs.filter((job) =>
+    job.provider === "solapi" &&
+    getNotificationJobProviderReference(job) &&
+    job.status === "failed"
+  );
+  const hasSolapiResultRefreshTarget = solapiResultRefreshTargetJobs.length > 0;
 
   function getExpectedSolapiReservationItems() {
     if (notificationPlanMode === "none") return [];
@@ -16045,6 +16053,20 @@ function LessonJournalDetail({
             detail: "예약 시각이 지났습니다. 새 예약이 아니라 Solapi 발송결과를 OS 상태에 반영하세요.",
             state: "resultDue",
             label: "발송결과 확인 필요"
+          };
+        }
+        if (failedSolapiResultJobs.length) {
+          return {
+            detail: `Solapi 발송 실패 ${failedSolapiResultJobs.length}건이 반영되었습니다. 예약 확인에서 실패 내용을 확인하세요.`,
+            state: "failed",
+            label: `발송 실패 ${failedSolapiResultJobs.length}건`
+          };
+        }
+        if (completedSolapiResultJobs.length) {
+          return {
+            detail: `Solapi 발송 완료 ${completedSolapiResultJobs.length}건이 OS 상태에 반영되었습니다.`,
+            state: "synced",
+            label: "발송 결과 반영 완료"
           };
         }
         return { detail: "기본 예약 시각이 지나 수동 예약으로 다시 잡아야 합니다.", state: "failed", label: "예약 시간 지남" };
@@ -16239,22 +16261,6 @@ function LessonJournalDetail({
       />
     );
   }
-  function hasPreSendMissingRequiredData(record, student, previousHomework, nextHomework) {
-    const attendanceStatus = record?.attendanceStatus ?? "pending";
-    const attendanceDateMismatch = getAttendanceDateMismatch(record, lesson);
-    return (
-      attendanceDateMismatch ||
-      !attendanceStatus ||
-      attendanceStatus === "pending" ||
-      !String(record?.lessonMaterial ?? "").trim() ||
-      !String(getLessonContent(record) ?? "").trim() ||
-      !String(previousHomework?.title ?? "").trim() ||
-      !String(nextHomework?.title ?? "").trim() ||
-      hasIncompleteLessonTestAttempt(testSessions, testAttempts, lesson, student) ||
-      !normalizeAssignmentStatusValue(getAssignmentStatusForMessage(record, previousHomework))
-    );
-  }
-
   function openCommentComposer(audience, targetStudent, baseRecord, previousHomework, nextHomework) {
     const field = audience === "student" ? "studentComment" : "teacherComment";
     const supplementSchedules = getStudentSupplementSchedules(makeupTasks, targetStudent.studentId, { lesson, mode: "lesson_comment" });
@@ -16678,9 +16684,6 @@ function LessonJournalDetail({
           </span>
         </div>
         <div className="lessonNotificationActionRow">
-          <button className={showPreSendCheck ? "preSendCheckButton active" : "preSendCheckButton"} onClick={() => setShowPreSendCheck((current) => !current)} type="button">
-            {showPreSendCheck ? "점검 해제" : "발송 전 점검"}
-          </button>
           {!journalEditMode ? (
             <button className="schedulePlanButton" onClick={startJournalEditMode} type="button">
               수정 시작
@@ -16966,7 +16969,6 @@ function LessonJournalDetail({
             const studentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "student");
             const parentCommentState = getCommentButtonState(record.teacherComment, parentCommentSendStatus);
             const studentCommentState = getCommentButtonState(record.studentComment, studentCommentSendStatus);
-            const hasMissingPreSendData = hasPreSendMissingRequiredData(record, student, effectivePreviousHomework, effectiveNextHomework);
             const isParentNotificationOff = isLessonNotificationOff || record.notificationMutedParent;
             const isStudentNotificationOff = isLessonNotificationOff || record.notificationMutedStudent;
             const assignmentStatusValue = normalizeAssignmentStatusValue(record.assignmentStatus ?? record.incompleteHomework ?? "");
@@ -16978,7 +16980,7 @@ function LessonJournalDetail({
             const selectedHomeworkFollowupMethod = getHomeworkFollowupMethodFromRecord(record);
 
             return (
-              <div className={["journalRow", showPreSendCheck && hasMissingPreSendData ? "preSendMissing" : ""].filter(Boolean).join(" ")} key={student.studentId}>
+              <div className="journalRow" key={student.studentId}>
                 <span className="studentCell compact">
                   <span className="journalStudentTopLine">
                     <strong>{student.name}</strong>

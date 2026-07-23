@@ -73,6 +73,7 @@ import {
   getAssignmentStatusMessage,
   getAssignmentStatusParentMessage,
   getAssignmentStatusStudentMessage,
+  isAssignmentStatusUnrecorded,
   normalizeAssignmentStatusValue
 } from "../src/domains/lessons/assignmentStatus.js";
 import { applyStudentScheduleToLesson } from "../src/shared/utils/studentSchedule.js";
@@ -2339,8 +2340,9 @@ function formatNotificationAttendance(record = {}) {
 
 function buildLatestLessonCommentPreview({ audience, commentBody, homeworkFollowupNotice = "", lesson, nextHomework, previousHomework, record, student, supplementSchedules, testResultLines = [] }) {
   const assignmentStatus = getAssignmentStatusForNotification(record, previousHomework);
+  const omitHomework = isAssignmentStatusUnrecorded(assignmentStatus);
   const commentText = normalizeNotificationText(commentBody);
-  const homeworkFollowupText = normalizeNotificationText(homeworkFollowupNotice);
+  const homeworkFollowupText = omitHomework ? "" : normalizeNotificationText(homeworkFollowupNotice);
   const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
   const supplementAndFollowupText = [homeworkFollowupText, supplementText].filter(Boolean).join("\n");
   const testResultText = testResultLines.length ? testResultLines.map((item) => `- ${item}`).join("\n") : "";
@@ -2358,11 +2360,11 @@ function buildLatestLessonCommentPreview({ audience, commentBody, homeworkFollow
   return joinNotificationBlocks([
     `${student.name} 학생 ${audience === "student" ? "안내" : "수업 안내"}`,
     notificationLine("🏫 출결", formatNotificationAttendance(record)),
-    notificationLine("✅ 과제 상태", getAssignmentStatusMessage(audience, assignmentStatus)),
+    omitHomework ? "" : notificationLine("✅ 과제 상태", getAssignmentStatusMessage(audience, assignmentStatus)),
     notificationLine("📚 강의 교재", getNotificationLessonMaterial(record, student)),
     notificationLine("🧭 강의 내용", getNotificationLessonContent(record)),
-    notificationLine("📘 지난 과제", previousHomework?.title ?? ""),
-    notificationLine("➡️ 다음 과제", nextHomework?.title ?? ""),
+    omitHomework ? "" : notificationLine("📘 지난 과제", previousHomework?.title ?? ""),
+    omitHomework ? "" : notificationLine("➡️ 다음 과제", nextHomework?.title ?? ""),
     notificationBlock("📝 테스트", testResultText),
     notificationBlock("⭐ 보충/확인 안내", supplementNotice),
     notificationBlock("💬 코멘트", commentText),
@@ -2486,6 +2488,7 @@ function refreshLessonCommentJobBeforeSend(job = {}, context = null) {
   const homeworkFollowupNotice = getHomeworkFollowupNoticeForNotification(record, audience, context.notificationTemplates);
   const preparationNotice = "";
   const assignmentStatus = getAssignmentStatusForNotification(record, previousHomework, context.records);
+  const omitHomework = isAssignmentStatusUnrecorded(assignmentStatus);
   const payload = {
     ...(job.payload ?? {}),
     academyName: (job.payload ?? {}).academyName || "으뜸수학 고태영T",
@@ -2499,7 +2502,7 @@ function refreshLessonCommentJobBeforeSend(job = {}, context = null) {
     checkInTime: record.checkInTime ?? "",
     checkOutTime: record.checkOutTime ?? "",
     commentBodyOverride: commentBody,
-    homeworkFollowupNotice,
+    homeworkFollowupNotice: omitHomework ? "" : homeworkFollowupNotice,
     lateMinutes: record.lateMinutes ?? "",
     lessonContent: getNotificationLessonContent(record),
     lessonDate: lesson.date,
@@ -2507,11 +2510,11 @@ function refreshLessonCommentJobBeforeSend(job = {}, context = null) {
     lessonMaterial: getNotificationLessonMaterial(record, student),
     lessonName: lesson.className,
     message: commentBody,
-    nextHomework: nextHomework?.title ?? "",
+    nextHomework: omitHomework ? "" : nextHomework?.title ?? "",
     osScheduled: true,
     parentPhone: student.parentPhone,
     preparationNotice,
-    previousHomework: previousHomework?.title ?? "",
+    previousHomework: omitHomework ? "" : previousHomework?.title ?? "",
     scheduledDate: job.scheduledAt,
     sendMode: "scheduled",
     studentId: student.studentId,

@@ -1,5 +1,6 @@
 export const assignmentStatusOptions = [
   { value: "", label: "선택" },
+  { value: "not_entered", label: "미기재" },
   { value: "complete_thorough", label: "완료" },
   { value: "partial_80", label: "80%완료" },
   { value: "partial_50", label: "50%완료" },
@@ -15,6 +16,7 @@ export const assignmentStatusLabels = Object.fromEntries(
 );
 
 const assignmentStatusAliases = {
+  "미기재": "not_entered",
   "성실 완료": "complete_thorough",
   "완료": "complete_thorough",
   complete_easy: "complete_thorough",
@@ -79,6 +81,10 @@ export function getAssignmentStatusStudentMessage(value) {
 
 export function getAssignmentStatusMessage(audience, value) {
   return audience === "student" ? getAssignmentStatusStudentMessage(value) : getAssignmentStatusParentMessage(value);
+}
+
+export function isAssignmentStatusUnrecorded(value) {
+  return normalizeAssignmentStatusValue(value) === "not_entered";
 }
 
 export function getHomeworkStatusFromAssignmentStatus(value) {
