@@ -14,7 +14,7 @@
 
 11B-1 코드 이동 후 학생 일정·학부모 일정·학생 11시의 OS row/Solapi 그룹 예약·취소 대조는 반 미지정 고태영 테스트 학생과 사용자 통제 번호로 통과했습니다. 학생 포털 실제 쓰기 검수, 교사 bearer/Storage 소유권 보안 gate, Solapi 특강 템플릿 외부 검수는 별도 보류 상태입니다.
 
-App.jsx 보충관리 리팩터링은 최신 `origin/main`에 rebase한 뒤 `12R-10` 저장상태 patch 계산, `12R-11` task별 상태 map 병합, `12R-12` 알림톡 제어창 local state hook, `12R-13` 완료·일정 확인창 local state와 일정 확인 payload 조립, `12R-14` 상세 feedback local state, `12R-15` task별 알림톡 draft 탭 선택 local state, `12R-16` task 저장상태 local state, `12R-17` task busy local state, `12R-18` 알림톡 draft 탭 job 표시 모델, `12R-19` 알림톡 draft workspace view model, `12R-20` 알림톡 제어창 source view model까지 분리했다. API·Supabase·Solapi와 실제 저장·완료·일정·예약취소 action은 기존 App 경계에 둔다. 12R-20은 production 401/401와 build를 통과한 순수 계산이라 사용자 지시에 따라 AI gate로 통과했다. 다음 실제 action controller 이동은 운영 원천과 외부 side effect가 함께 있는 고위험 경계이므로 화면에 노출되는 격리 데이터와 새 사람 gate를 먼저 준비한다.
+App.jsx 보충관리 리팩터링은 최신 `origin/main`에 rebase한 뒤 `12R-10` 저장상태 patch 계산부터 `12R-20` 알림톡 제어창 source view model까지 분리했고, `12R-21`에서 보충 내용 저장 modal adapter를 `supplementTaskContentSaveController.js`로 이동했다. 실제 `/api/makeup-tasks` 저장·Supabase 재조회·React 전역 task 갱신은 App이 주입하는 `onSaveTask` 경계에 남고 notification/Solapi 호출은 controller에 없다. 12R-4의 고태영 저장·새로고침 사람 gate와 12R-21 deterministic fixture, production 402/402, build를 근거로 AI gate를 통과했다. 다음은 완료 처리 modal adapter 한 단위다. 새 화면 검수가 필요하면 독립 `재시험` 탭을 가정하지 말고 `숙제보충` 또는 `결석보강`에 노출되는 격리 고태영 데이터를 먼저 준비한다.
 
 ## 시험분석 GPT Image 전용 세션 참고 자료
 

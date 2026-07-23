@@ -66,9 +66,9 @@ import {
   applySupplementScheduleAction,
   cancelSupplementAbsenceSourceAction,
   passSupplementTaskAction,
-  requestSupplementScheduleAction,
-  saveSupplementTaskContentAction
+  requestSupplementScheduleAction
 } from "../domains/supplements/supplementTaskActions.js";
+import { createSupplementTaskContentSaveHandler } from "../domains/supplements/supplementTaskContentSaveController.js";
 import { SupplementStudentModalShell } from "../domains/supplements/SupplementStudentModalShell.jsx";
 import { useSupplementNotificationControlState } from "../domains/supplements/useSupplementNotificationControlState.js";
 import { useSupplementConfirmationState } from "../domains/supplements/useSupplementConfirmationState.js";
@@ -22605,26 +22605,17 @@ function SupplementStudentModal({
     );
   }
 
-  async function handleSaveTask(task) {
-    if (!task?.makeupTaskId || hasBusyTask) return;
-    const taskWithDraft = createPersistableSupplementTask(buildTaskWithDraft(task));
-    beginTaskAction(task.makeupTaskId, "content");
-    try {
-      await saveSupplementTaskContentAction({
-        currentLessonStatus: getTaskSaveStatus(task.makeupTaskId).lesson,
-        onFeedback: ({ message, title, tone }) => showFeedback(title, message, tone),
-        onMarkSaved: (nextTask) => markTaskDraftSaved(task.makeupTaskId, nextTask),
-        onSaveStatus: (patch) => setTaskSaveStatusPatch(task.makeupTaskId, patch),
-        saveTask: (payload) => onSaveTask?.(payload),
-        task,
-        taskWithDraft
-      });
-    } catch (error) {
-      console.error("Failed to save supplement task", error);
-    } finally {
-      finishTaskAction();
-    }
-  }
+  const handleSaveTask = createSupplementTaskContentSaveHandler({
+    beginTaskAction,
+    buildTaskWithDraft,
+    finishTaskAction,
+    getTaskSaveStatus,
+    hasBusyTask,
+    markTaskDraftSaved,
+    onSaveTask,
+    setTaskSaveStatusPatch,
+    showFeedback
+  });
 
   function requestApplyScheduleTask(task) {
     if (!task?.makeupTaskId || hasBusyTask) return;

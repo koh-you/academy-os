@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-21 보충 내용 저장 modal adapter 분리 — AI gate 통과
+
+- 코드: `SupplementStudentModal` 안의 보충 내용 저장 handler를 `createSupplementTaskContentSaveHandler`로 `supplementTaskContentSaveController.js`에 이동했다.
+- 동작 보존: task ID/전체 busy guard, local draft의 persistable payload 변환, `content` busy 시작, 기존 `saveSupplementTaskContentAction` 호출, 성공 반환, 오류 log, `finally` busy 해제 순서를 그대로 유지한다.
+- 저장 원천/side effect: 실제 `/api/makeup-tasks` 저장·Supabase 재조회·React 전역 task 갱신은 App이 전달하는 `onSaveTask` callback에 남는다. controller에는 직접 API, Supabase, `notification_jobs`, Solapi 호출과 일정·완료·예약취소 callback이 없다.
+- 자동검증: 성공 event 순서와 반환값, busy/ID guard, 오류 feedback·log·finally 해제 fixture를 `npm run test:production`에 연결했다. production scenario `88b-36`, production 402/402, build, `git diff --check`가 통과했고 기존 대형 chunk 경고만 남았다.
+- gate 판정: 실제 저장 action과 화면 저장·새로고침은 12R-4 고태영 사람 gate에서 이미 통과했고, 이번에는 동일 action을 부르는 얇은 주입형 adapter만 이동했다. 사용자 지시에 따라 운영 데이터를 다시 만들지 않고 AI gate로 통과했다. notification/Solapi 호출과 과금은 0건이다.
+- 다음 경계: 완료 처리 modal adapter 한 단위만 분리한다. 기존 12R-5 action gate로 AI 판정 가능한지 먼저 확인하고, 새 화면 검수가 필요하면 존재하지 않는 `재시험` 독립 탭을 가정하지 않고 `숙제보충` 또는 `결석보강`에 노출되는 격리 고태영 데이터를 준비한다.
+
 ## 2026-07-23 P1. 12R-20 보충 알림톡 제어창 source view model 분리 — AI gate 통과
 
 - 코드: 제어창 선택값으로 현재 task/job/local draft 차이/현재 문구를 모으고 기존 control view model과 job display를 조합하는 순수 계산을 `createSupplementNotificationControlModalViewModel`로 이동했다.
