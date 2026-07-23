@@ -11,6 +11,7 @@ import {
   deleteExamPrepRowRequest,
   saveExamPrepRowsRequest
 } from "../domains/exams/examPrepRowsApi.js";
+import { persistExamPrepRowsWithState } from "../domains/exams/examPrepRowSaveController.js";
 import { ExamPostSubmissionManager } from "../domains/exams/ExamPostSubmissionManager.jsx";
 import { ExamReviewComposerModal } from "../domains/exams/ExamReviewComposerModal.jsx";
 import { normalizeExamPrepRowReviewDraft } from "../domains/exams/examReviewDraft.js";
@@ -7192,45 +7193,16 @@ export function App() {
   }
 
   function persistExamPrepRows(rowsToPersist) {
-    const changedRows = rowsToPersist.filter(Boolean);
-    if (changedRows.length === 0) return Promise.resolve();
-    const rowIds = [...new Set(changedRows.map((row) => row.examPrepId).filter(Boolean))];
-    const requestIds = rowIds.reduce((acc, rowId) => {
-      const requestId = (examPrepRowSaveRequestRef.current[rowId] ?? 0) + 1;
-      examPrepRowSaveRequestRef.current[rowId] = requestId;
-      acc[rowId] = requestId;
-      return acc;
-    }, {});
-    setExamPrepRowSaveStates((current) => {
-      const next = { ...current };
-      rowIds.forEach((rowId) => {
-        next[rowId] = "saving";
-      });
-      return next;
+    return persistExamPrepRowsWithState({
+      onError: console.error,
+      request: (changedRows) => saveExamPrepRowsRequest({
+        examPrepRows: changedRows,
+        request: postJson
+      }),
+      requestIdsByRow: examPrepRowSaveRequestRef.current,
+      rowsToPersist,
+      setSaveStates: setExamPrepRowSaveStates
     });
-    return saveExamPrepRowsRequest({
-      examPrepRows: changedRows,
-      request: postJson
-    })
-      .then(() => {
-        setExamPrepRowSaveStates((current) => {
-          const next = { ...current };
-          rowIds.forEach((rowId) => {
-            if (examPrepRowSaveRequestRef.current[rowId] === requestIds[rowId]) next[rowId] = "saved";
-          });
-          return next;
-        });
-      })
-      .catch((error) => {
-        console.error(error);
-        setExamPrepRowSaveStates((current) => {
-          const next = { ...current };
-          rowIds.forEach((rowId) => {
-            if (examPrepRowSaveRequestRef.current[rowId] === requestIds[rowId]) next[rowId] = "failed";
-          });
-          return next;
-        });
-      });
   }
 
   function handleUpdateExamPrepRow(examPrepId, field, value) {

@@ -132,9 +132,16 @@
 - fake fixture가 bulk URL/payload, 삭제 URL encoding·DELETE method, 성공·서버 오류·기본 오류를 검증한다. 실제 Supabase·운영 row·lesson 요청은 0회다.
 - production scenario 475/475, build, `git diff --check`를 통과했다.
 
+## 14B-2 시험정보 row 저장 상태 controller
+
+- row별 request 순번과 `saving/saved/failed`, 최신 request 결과만 상태에 반영하는 조건을 `examPrepRowSaveController.js`로 이동했다.
+- App이 request ID map, React setter와 14B-1 API request callback을 주입한다. controller에는 row state, fetch/postJson, lesson reconcile이 없다.
+- 겹친 deferred 요청 fixture가 먼저 끝난 이전 요청의 결과 무시와 최신 요청의 완료/실패 상태를 검증한다. 실제 API 호출은 0회다.
+- production scenario 476/476, build, `git diff --check`를 통과했다.
+
 ## 이후 후보와 중단 조건
 
-1. 시험정보 row request 순번과 save-state orchestration
-2. 시험정보 삭제와 연결 수업 reconcile orchestration
+1. 시험정보 삭제 시 연결 수업 save/delete plan 순수 계산
+2. 시험정보 삭제와 연결 수업 reconcile side-effect orchestration
 
 학생 제출·교사 확인·Storage 파일 열기 경계를 건드리면 기존 학생 포털 실제 쓰기와 bearer/Storage gate에서 중단한다. 시험정보 삭제나 시험대비 수업 생성·삭제를 옮길 때는 별도의 격리 데이터와 사람 gate가 필요하다. 순수 표시/model 단위는 deterministic fixture와 production test/build로 검증하고 운영 데이터를 만들지 않는다.

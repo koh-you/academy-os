@@ -8,6 +8,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 14B-2 시험정보 row 저장 상태 controller 분리 — AI gate 통과
+
+- 코드: row별 request 순번, `saving/saved/failed` 상태 patch, 최신 요청만 결과를 반영하는 조건을 `src/domains/exams/examPrepRowSaveController.js`로 이동했다.
+- 경계: App은 `examPrepRowSaveRequestRef`, React save-state setter와 14B-1 API request callback을 주입한다. row 값 계산, Supabase transport, 삭제·lesson reconcile은 controller가 알지 못한다.
+- 자동검증: empty 입력, 복수/중복 row ID, 성공, 실패, 동일 row의 겹친 deferred 요청을 검증했다. 이전 요청이 먼저 끝나도 최신 `saving`을 덮지 않고 최신 요청 완료만 `saved`가 되는 fixture를 production test에 연결했다. 실제 API 호출은 0회다. production scenario 476/476, build, `git diff --check`가 통과했다.
+- 사람 gate: 순수 callback/request-order 경계라 새 사람 화면 조작은 필요하지 않다. 다음은 삭제 시 연결 시험대비 수업의 저장·삭제 계획을 순수 계산으로 먼저 분리하고, 실제 row/lesson mutation은 격리 사람 gate 전 이동하지 않는다.
+
 ## 2026-07-23 P1. 14B-1 시험정보 row API transport 분리 — AI gate 통과
 
 - 코드: `/api/exam-prep-rows/bulk` 저장과 단일 row `DELETE ...&confirm=true` transport를 `src/domains/exams/examPrepRowsApi.js`로 이동했다.
