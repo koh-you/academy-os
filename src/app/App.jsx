@@ -61,8 +61,8 @@ import {
   createSupplementNotificationDraftWorkspaceViewModel,
   createSupplementTaskCardViewModel
 } from "../domains/supplements/supplementTaskCardModel.js";
-import { applySupplementNotificationControlAction } from "../domains/supplements/supplementTaskActions.js";
 import { createSupplementAbsenceCancelHandler } from "../domains/supplements/supplementAbsenceCancelController.js";
+import { createSupplementNotificationControlActionHandler } from "../domains/supplements/supplementNotificationControlController.js";
 import { createSupplementTaskContentSaveHandler } from "../domains/supplements/supplementTaskContentSaveController.js";
 import { createSupplementTaskPassHandler } from "../domains/supplements/supplementTaskPassController.js";
 import { createSupplementTaskScheduleHandlers } from "../domains/supplements/supplementTaskScheduleController.js";
@@ -22702,25 +22702,18 @@ function SupplementStudentModal({
   const canCancelNotificationControl = notificationControlViewModel.canCancel;
   const canReserveNotificationControl = notificationControlViewModel.canReserve;
 
-  async function handleNotificationControlAction(action) {
-    if (!notificationControlTask || !notificationControl || notificationControlBusy) return;
-    setNotificationControlBusy(true);
-    try {
-      await applySupplementNotificationControlAction({
-        action,
-        controlType: notificationControl.controlType,
-        notificationJob: notificationControlJob,
-        onCancelNotification: (job) => onCancelNotification?.(job),
-        onFeedback: setNotificationControlFeedback,
-        onReserveNotification: (task, controlType) => onReserveNotification?.(task, controlType),
-        onSaveStatus: (patch) => setTaskSaveStatusPatch(notificationControlTask.makeupTaskId, patch),
-        statusField: notificationControlConfig.statusField,
-        task: notificationControlTask
-      });
-    } finally {
-      setNotificationControlBusy(false);
-    }
-  }
+  const handleNotificationControlAction = createSupplementNotificationControlActionHandler({
+    notificationControl,
+    notificationControlBusy,
+    notificationControlConfig,
+    notificationControlJob,
+    notificationControlTask,
+    onCancelNotification,
+    onReserveNotification,
+    setNotificationControlBusy,
+    setNotificationControlFeedback,
+    setTaskSaveStatusPatch
+  });
 
   return (
     <SupplementStudentModalShell

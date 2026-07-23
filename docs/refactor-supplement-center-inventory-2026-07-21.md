@@ -265,6 +265,14 @@
 - 12R-6에서 동일 callback의 실제 결석취소·후보 제거·새로고침을 검수했으므로 새 운영 데이터 없이 AI gate로 통과했다.
 - 다음은 개별 알림 예약·취소 modal adapter 한 단위다. 11B-9/12R-8의 실제 예약·취소 gate와 동일 callback 경계인지 먼저 대조한다.
 
+## 12R-25 구현 결과 — 개별 알림 예약·취소 modal adapter
+
+- 현재 task/control/busy guard, busy 시작, 12R-8 예약·취소 action, task별 status patch와 `finally` busy 해제를 `createSupplementNotificationControlActionHandler`로 분리했다.
+- 실제 notification job API·Supabase row·Solapi 그룹·React 전역 job state는 App이 전달하는 `onReserveNotification`/`onCancelNotification` callback에 남겼고, controller에는 직접 API·Supabase·Solapi와 task/lesson/출결 저장 callback이 없다.
+- 예약·취소·3종 guard·실패 busy 복구 fixture와 production scenario `88b-40`, production 406/406, build, diff 검사를 통과했다.
+- 11B-9에서 동일 callback의 고태영 실제 OS/Solapi 예약·취소를 검수했고 12R-8 action 순서도 고정했으므로 새 운영 데이터나 Solapi 호출 없이 AI gate로 통과했다.
+- 다음은 task draft 변경 adapter와 확인창 submit adapter를 한 의미 단위씩 정리한 뒤 `SupplementStudentModal` 본체 파일 분리를 검토한다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.

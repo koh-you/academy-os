@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-25 개별 알림 예약·취소 modal adapter 분리 — AI gate 통과
+
+- 코드: `SupplementStudentModal` 안의 개별 알림 제어 handler를 `createSupplementNotificationControlActionHandler`로 `supplementNotificationControlController.js`에 이동했다.
+- 동작 보존: 현재 task/control/busy guard, busy 시작, 기존 `applySupplementNotificationControlAction`의 예약·취소 분기, task별 status patch, 성공/실패 feedback, `finally` busy 해제 순서를 그대로 유지한다.
+- 저장 원천/side effect: 실제 `/api/notification-jobs/reserve|cancel`, Supabase `notification_jobs`, Solapi 그룹, React 전역 job state는 App이 전달하는 `onReserveNotification`/`onCancelNotification` callback에 남는다. controller에는 직접 API, Supabase, Solapi 호출과 task/lesson/출결 저장 callback이 없다.
+- 자동검증: 예약·취소 성공의 대상/control/job/status, task/control/busy guard, 예약 실패 시 `null`·실패 feedback·busy 복구 fixture를 `npm run test:production`에 연결했다. production scenario `88b-40`, production 406/406, build, `git diff --check`가 통과했고 기존 대형 chunk 경고만 남았다.
+- gate 판정: 11B-9에서 동일 주입 callback의 고태영 실제 OS/Solapi 예약·취소가 통과했고 12R-8에서 UI action 순서도 검증됐다. 이번에는 modal adapter만 이동했으므로 새 운영 데이터·Solapi 호출·과금 없이 AI gate로 통과했다.
+- 다음 경계: App에 남은 task draft 변경 adapter와 확인창 submit adapter를 한 의미 단위씩 정리한 뒤 `SupplementStudentModal` 본체 파일 분리를 검토한다.
+
 ## 2026-07-23 P1. 12R-24 결석 원천 취소 modal adapter 분리 — AI gate 통과
 
 - 코드: `SupplementStudentModal` 안의 결석 원천 취소 handler를 `createSupplementAbsenceCancelHandler`로 `supplementAbsenceCancelController.js`에 이동했다.
