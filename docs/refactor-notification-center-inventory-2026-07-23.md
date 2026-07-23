@@ -282,8 +282,9 @@
 - history hook의 busy/feedback/local job 상태와 composer hook의 background refresh를 한쪽 hook에 합치지 않고 현재 action option만 캡처해 hook 순환을 피했다.
 - 선택 job과 고정 취소 사유 전달, 성공·Solapi 그룹 없음·결과 불일치·callback 누락·guard·confirm 취소를 mock fixture로 검증했다. 실제 Solapi/Supabase 취소는 없다.
 
-## 다음 후보
+## 13G 남은 경계 closeout audit
 
-1. `NotificationCenter`에 남은 App 소유 함수·상태·외부 callback을 다시 inventory하고 추가 독립 단위가 있는지 확인한다.
-2. 특강 안내문 적용 문구와 handler는 외부 템플릿 gate 때문에 App에 그대로 둔다.
-3. 남은 로직이 특강 gate 또는 화면 전체 조립뿐이면 로드맵 13의 안전한 경계를 닫고 로드맵 14 착수 전 source/side-effect inventory로 넘어간다.
+- `NotificationCenter`는 App 기준 355줄이며 navigation/recipient/history/composer hooks, request/action binding, `NotificationNoticeWorkspace`, `SpecialLectureNoticePanel`을 조립한다.
+- 남은 독립 함수 선언은 `applySpecialLectureGuideToNotice` 하나다. 특강 guide를 local notice draft/template meta/title/body/workspace/feedback에 연결하므로 미통과인 Solapi 특강 템플릿 외부 검수와 같은 경계다.
+- Supabase/Solapi를 직접 호출하지 않더라도 외부 템플릿 검수 전 이동하지 않는다. 그 외 코드는 controlled prop 조립뿐이므로 추가 분리는 prop 운반만 늘린다.
+- 이 상태를 로드맵 13의 안전한 종료점으로 정한다. 특강 외부 gate가 통과되면 해당 handler만 별도 재개하고, 현재 연속 리팩터링은 로드맵 14 `exam prep center` inventory로 넘어간다.
