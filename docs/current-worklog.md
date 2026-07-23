@@ -8,6 +8,14 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 14A-1 시험정보 수정 modal 표시 분리 — AI gate 통과
+
+- 코드: App의 controlled `ExamPrepEditModal`을 `src/domains/exams/ExamPrepEditModal.jsx`로 이동했다. 기본 정보·시험기간·수학 시험 일정·시험 내용·저장 상태·닫기 DOM과 callback 인수를 그대로 보존했다.
+- 경계: App이 현재 row/save state, 자동저장 경고와 기존 update/add/remove/close callback을 주입한다. 새 component에는 state/effect/fetch/postJson이 없고 Supabase `exam_prep_rows`, app_state, lessons, AI, Storage를 직접 읽거나 쓰지 않는다.
+- 자동검증: production scenario가 새 파일의 존재, App 내 legacy 함수 제거, 기존 문구/CSS/callback 연결과 외부 side effect 부재를 검사한다. production 466/466, build, `git diff --check`가 통과했다.
+- 사람 gate: 화면 동작·문구·저장 callback을 바꾸지 않은 controlled 표시 이동이므로 새 운영 데이터나 사람 조작이 필요하지 않다. 재시험이 없는 상태도 그대로 보존했다.
+- 다음: 고정 URL과 local iframe load state만 쓰는 기출문제 표시 panel을 controlled component로 분리할 수 있는지 확인한다.
+
 ## 2026-07-23 P1. 14A ExamPrepCenter 원천·side effect inventory
 
 - inventory: `docs/refactor-exam-prep-center-inventory-2026-07-23.md`에 시험정보, 시험 후 제출, 총평 AI, Tally app_state, Google Apps Script 기출문제, 학사일정/시험대비 수업 연결을 분리해 기록했다.

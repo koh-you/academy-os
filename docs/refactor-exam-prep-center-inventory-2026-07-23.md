@@ -47,10 +47,17 @@
 - `exam_prep_rows`, `app_state`, lessons, AI, Storage, Google Apps Script를 직접 읽거나 쓰지 않는다.
 - production scenario의 `ExamPrepEditModal` 검사 원천을 새 파일까지 확장하되 기대 동작을 낮추지 않는다.
 
+### 14A-1 구현 결과
+
+- 완료: 기본 정보, 시험기간, 수학 시험 일정, 시험 내용, 저장 상태와 닫기 버튼 DOM을 전용 component로 이동했다.
+- App은 `examPrepAutosaveRisk`, 현재 row/save state와 기존 update/add/remove/close callback을 그대로 주입한다.
+- 새 파일에는 React state/effect와 fetch/postJson이 없고 Supabase/app_state/lessons/AI/Storage를 직접 참조하지 않는다.
+- production scenario 466/466, build, `git diff --check`를 통과했다. 운영 데이터와 외부 요청은 없었으므로 추가 사람 gate는 없다.
+
 ## 이후 후보와 중단 조건
 
-1. 목록 filter/선택 row/save-state 파생 model
-2. 기출문제 iframe 표시 panel
+1. 기출문제 iframe 표시 panel
+2. 목록 filter/선택 row/save-state 파생 model
 3. 시험 후 제출 teacher 표시 shell
 4. 시험 후 총평 draft/action
 5. 시험정보 저장·삭제·수업 reconcile orchestration
