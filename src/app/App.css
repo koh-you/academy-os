@@ -4202,6 +4202,73 @@ button {
   padding: 6px 10px;
 }
 
+.stickySaveBar {
+  align-items: center;
+  backdrop-filter: blur(12px);
+  background: rgba(239, 246, 255, 0.96);
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  bottom: max(10px, env(safe-area-inset-bottom));
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.16);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-top: 16px;
+  padding: 10px 12px;
+  position: sticky;
+  z-index: 20;
+}
+
+.stickySaveBarStatus {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+}
+
+.stickySaveBarStatus > span {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stickySaveBarActions {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.stickySaveBarActions button {
+  white-space: nowrap;
+}
+
+.stickySaveBar-failed {
+  background: rgba(254, 242, 242, 0.97);
+  border-color: #fecaca;
+}
+
+.lessonJournalStickySaveBar {
+  margin-inline: 2px;
+}
+
+@media (max-width: 640px) {
+  .stickySaveBar {
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .stickySaveBarStatus {
+    gap: 6px;
+  }
+
+  .stickySaveBarStatus .inlineSaveStatus {
+    flex: 0 0 auto;
+  }
+}
+
 .solapiReservationSync {
   border-radius: 999px;
   border: 1px solid #cbd5e1;

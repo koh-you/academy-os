@@ -170,6 +170,7 @@ import {
 } from "../shared/components/InlineSaveStatus.jsx";
 import { MetricCard } from "../shared/components/MetricCard.jsx";
 import { Modal } from "../shared/components/Modal.jsx";
+import { StickySaveBar } from "../shared/components/StickySaveBar.jsx";
 import { sampleData } from "../shared/data/sampleData.js";
 import {
   apiUrl,
@@ -15883,6 +15884,19 @@ function LessonJournalDetail({
   const journalHomeworkDraftCount = Object.keys(journalHomeworkDrafts).length;
   const journalMakeupTaskDraftCount = Object.keys(journalMakeupTaskDrafts).length;
   const hasJournalDraftChanges = journalRecordDraftCount > 0 || journalHomeworkDraftCount > 0 || journalMakeupTaskDraftCount > 0;
+  const journalDraftChangeCount = journalRecordDraftCount + journalHomeworkDraftCount + journalMakeupTaskDraftCount;
+  const journalStickySaveState = journalManualSaveMessage.includes("저장 실패")
+    ? "failed"
+    : journalManualSaveMessage.includes("저장 중")
+      ? "saving"
+      : hasJournalDraftChanges
+        ? "dirty"
+        : journalManualSaveMessage.includes("저장 완료")
+          ? "saved"
+          : lessonJournalSaveStatus.tone;
+  const journalStickySaveMessage = hasJournalDraftChanges
+    ? `저장 전 변경 ${journalDraftChangeCount}건`
+    : journalManualSaveMessage || lessonJournalSaveStatus.label || "편집을 시작하면 변경 내용이 여기에 표시됩니다.";
   const activeLessonReservationJobs = lessonNotificationJobs.filter(isActiveNotificationJobStatus);
   const currentPlanScheduledDate = notificationPlanMode === "manual"
     ? lessonNotificationPlan?.scheduledAt
@@ -16579,24 +16593,7 @@ function LessonJournalDetail({
         >
           {journalEditMode ? "수정 중" : "수정 시작"}
         </button>
-        <button
-          className="saveDraftButton"
-          disabled={!journalEditMode || !hasJournalDraftChanges}
-          onClick={saveJournalDrafts}
-          type="button"
-        >
-          변경 저장
-        </button>
-        <span
-          aria-live="polite"
-          className={`defaultScheduleHint journalAutoSaveStatus ${lessonJournalSaveStatus.tone}`}
-          title={defaultScheduleHintText}
-        >
-          {journalManualSaveMessage || lessonJournalSaveStatus.label || defaultScheduleHintText}
-        </span>
-        {hasJournalDraftChanges ? (
-          <span className="manualSaveDraftSummary">저장 전 변경 {journalRecordDraftCount + journalHomeworkDraftCount + journalMakeupTaskDraftCount}건</span>
-        ) : null}
+        <span className="defaultScheduleHint" title={defaultScheduleHintText}>{defaultScheduleHintText}</span>
         {checkoutMissingStudents.length > 0 ? (
           <span className="checkoutMissingSummary" title={checkoutMissingStudents.map((student) => student.name).join(", ")}>
             하원 미체크 {checkoutMissingStudents.length}명
@@ -17083,6 +17080,24 @@ function LessonJournalDetail({
           })}
         </div>
       </section>
+
+      {journalEditMode || journalManualSaveMessage ? (
+        <StickySaveBar
+          className="lessonJournalStickySaveBar"
+          label="수업일지"
+          message={journalStickySaveMessage}
+          saveState={journalStickySaveState}
+        >
+          <button
+            className="saveDraftButton"
+            disabled={!journalEditMode || !hasJournalDraftChanges || journalStickySaveState === "saving"}
+            onClick={saveJournalDrafts}
+            type="button"
+          >
+            {journalStickySaveState === "saving" ? "저장 중" : "변경 저장"}
+          </button>
+        </StickySaveBar>
+      ) : null}
 
       {commentModal ? (
         <CommentComposerModal
