@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-33 숙제보충·재시험 candidate builder 분리 — AI gate 통과
+
+- 코드: 숙제보충 candidate의 ID·학생·제목·날짜/사유 meta·task payload와 재시험 candidate의 수업 라벨·고정 meta·task payload를 `createHomeworkSupplementItems`와 `createRetestSupplementItems`로 `supplementCenterCandidateModel.js`에 이동했다.
+- 동작 보존: 숙제 dueDate 우선 표시와 assignedDate fallback, sourceDate/소스 마감일, 숙제명 seed, `arrival_makeup`, 기존 `getHomeworkMakeupReason` 결과를 보존한다. 재시험은 `lessonLabel` 결과를 title/sourceLabel에 함께 쓰고 `재시험 필요` meta/reason을 유지한다.
+- 저장 원천/side effect: builder는 전달된 배열과 reason/lesson label callback만 읽는다. React state, clock, API, Supabase, notification/Solapi 호출이 없다.
+- 자동검증: dueDate가 있는 숙제, assignedDate fallback 숙제, 서로 다른 reason, 재시험 수업 라벨, 빈 배열을 전체 object fixture로 검증했다. production scenario `88b-48`, production 414/414, build, `git diff --check`가 통과했고 기존 대형 chunk 경고만 남았다.
+- gate 판정: 순수 payload 표시 모델이고 운영 재시험 데이터가 없어도 fixture가 전체 결과를 고정한다. 사람 조작 없이 AI gate로 통과했다.
+- 다음 경계: 결석보강 source context·candidate item·persisted task hydrate를 순수 모델로 분리할 수 있는지 inventory한다.
+
 ## 2026-07-23 P1. 12R-32 보충관리 세 탭 표시 모델 분리 — AI gate 통과
 
 - 코드: 숙제보충·결석보강·재시험의 탭 ID/제목/설명/빈 문구, 완료된 기존 task 제외, count 재계산, 활성 탭 선택과 잘못된 ID의 숙제보충 fallback을 `createSupplementCenterTabViewModel`로 `supplementCenterTabModel.js`에 이동했다.

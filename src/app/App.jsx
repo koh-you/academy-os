@@ -52,6 +52,10 @@ import {
   createSupplementCenterPassConfirmationHandler
 } from "../domains/supplements/supplementCenterModalActionController.js";
 import {
+  createHomeworkSupplementItems,
+  createRetestSupplementItems
+} from "../domains/supplements/supplementCenterCandidateModel.js";
+import {
   createPendingSupplementTask,
   createSelectedSupplementTasksViewModel,
   findSupplementTaskForCandidate,
@@ -22235,36 +22239,12 @@ function SupplementCenter({
   const activeDeferredAbsenceItems = deferredAbsenceSupplementItems
     .filter((item) => findSupplementTaskForCandidate(tasks, item.task)?.status !== "done")
     .sort((a, b) => String(a.lessonDate || "").localeCompare(String(b.lessonDate || "")));
-  const homeworkSupplementItems = makeupHomeworks.map((homework) => ({
-    id: homework.homeworkId,
-    studentId: homework.studentId,
-    title: homework.title,
-    meta: `${homework.dueDate || homework.assignedDate || "-"} 기준 · ${getHomeworkMakeupReason(homework, records)}`,
-    task: {
-      taskType: "homework_makeup",
-      studentId: homework.studentId,
-      sourceId: homework.homeworkId,
-      sourceDate: homework.assignedDate || homework.dueDate || "",
-      sourceDueDate: homework.dueDate || "",
-      sourceLabel: homework.title,
-      supplementHomeworkNote: homework.title,
-      reason: getHomeworkMakeupReason(homework, records),
-      supplementMethod: "arrival_makeup"
-    }
-  }));
-  const retestSupplementItems = retestRecords.map((record) => ({
-    id: record.lessonStudentRecordId,
-    studentId: record.studentId,
-    title: lessonLabel(record.lessonId),
-    meta: "재시험 필요",
-    task: {
-      taskType: "retest",
-      studentId: record.studentId,
-      sourceId: record.lessonStudentRecordId,
-      sourceLabel: lessonLabel(record.lessonId),
-      reason: "재시험 필요"
-    }
-  }));
+  const homeworkSupplementItems = createHomeworkSupplementItems(makeupHomeworks, {
+    getReason: (homework) => getHomeworkMakeupReason(homework, records)
+  });
+  const retestSupplementItems = createRetestSupplementItems(retestRecords, {
+    getLessonLabel: lessonLabel
+  });
   const {
     activeTab: activeTabData,
     tabs: supplementTabs
