@@ -1821,6 +1821,27 @@ function buildExamAnalysisReviewDrafts(questions = []) {
   );
 }
 
+function getExamAnalysisReviewSaveMismatches(reviews = [], questions = []) {
+  const persistedByNumber = new Map(
+    (Array.isArray(questions) ? questions : []).map((question) => [Number(question.questionNumber), createExamAnalysisReviewDraft(question)])
+  );
+  return (Array.isArray(reviews) ? reviews : []).filter((review) => {
+    const persisted = persistedByNumber.get(Number(review.questionNumber));
+    if (!persisted) return true;
+    return (
+      String(persisted.unitName || "") !== String(review.unitName || "") ||
+      String(persisted.mainType || "") !== String(review.mainType || "") ||
+      parseExamAnalysisReviewSubTypes(persisted.subTypesText).join("|") !== parseExamAnalysisReviewSubTypes(review.subTypes).join("|") ||
+      String(persisted.mainTypeCode || "") !== String(review.mainTypeCode || "") ||
+      normalizeExamAnalysisSsenCodeList(persisted.subTypeCodes).join("|") !== normalizeExamAnalysisSsenCodeList(review.subTypeCodes).join("|") ||
+      String(persisted.difficulty || "") !== String(review.difficulty || "") ||
+      String(persisted.reviewNote || "") !== String(review.reviewNote || "") ||
+      Boolean(persisted.isImportantQuestion) !== Boolean(review.isImportantQuestion) ||
+      Boolean(persisted.confirmed) !== Boolean(review.confirmed)
+    );
+  }).map((review) => Number(review.questionNumber));
+}
+
 function isSameExamAnalysisReviewDraft(left = {}, right = {}) {
   return (
     String(left.unitName ?? "") === String(right.unitName ?? "") &&
@@ -2299,6 +2320,31 @@ function getExamAnalysisOutputDraftsFromRun(run = {}) {
     blog: normalizeExamAnalysisOutputDraftSection(stored.blog ?? {}),
     instagram: normalizeExamAnalysisOutputDraftSection(stored.instagram ?? {})
   };
+}
+
+function getExamAnalysisOutputPersistenceSnapshot(outputDrafts = {}) {
+  const inputs = outputDrafts.inputs ?? {};
+  return {
+    inputs: {
+      ...Object.fromEntries(examAnalysisOutputAllInputFields.map((field) => [field.key, String(inputs[field.key] || "")])),
+      keyQuestionBlocks: normalizeExamAnalysisKeyQuestionBlocks(inputs).map((block) => ({
+        blockId: String(block.blockId || ""),
+        ...Object.fromEntries(examAnalysisKeyQuestionBlockFields.map((field) => [field.key, String(block[field.key] || "")]))
+      }))
+    },
+    blogTeacherDraft: String(outputDrafts.blog?.teacherDraft || ""),
+    instagramTeacherDraft: String(outputDrafts.instagram?.teacherDraft || "")
+  };
+}
+
+function getExamAnalysisOutputSaveMismatches(requestedDrafts = {}, persistedDrafts = {}) {
+  const requested = getExamAnalysisOutputPersistenceSnapshot(requestedDrafts);
+  const persisted = getExamAnalysisOutputPersistenceSnapshot(persistedDrafts);
+  const mismatches = [];
+  if (JSON.stringify(requested.inputs) !== JSON.stringify(persisted.inputs)) mismatches.push("입력칸");
+  if (requestedDrafts.blog?.teacherTouched && requested.blogTeacherDraft !== persisted.blogTeacherDraft) mismatches.push("블로그 선생님 수정본");
+  if (requestedDrafts.instagram?.teacherTouched && requested.instagramTeacherDraft !== persisted.instagramTeacherDraft) mismatches.push("인스타 선생님 수정본");
+  return mismatches;
 }
 
 function getExamAnalysisOutputSectionText(section = {}) {
@@ -12795,10 +12841,16 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     setIsSavingReviews(true);
     setReviewStatus({ state: "saving", message: "시험분석 · 검수 저장 중" });
     try {
+      const requestedReviews = buildQuestionReviewPayload();
       const result = await saveExamAnalysisQuestionReviewsRequest({
         analysisRunId: activeRun.analysisRunId,
-        reviews: buildQuestionReviewPayload()
+        reviews: requestedReviews
       });
+      if (result.source !== "supabase") throw new Error("문항 검수 저장 후 Supabase 재조회 결과가 없습니다.");
+      const reviewMismatches = getExamAnalysisReviewSaveMismatches(requestedReviews, result.questions);
+      if (reviewMismatches.length) {
+        throw new Error(`Supabase 재조회 값이 문항 검수 요청과 다릅니다: ${reviewMismatches.join(", ")}번`);
+      }
       const totalCount = result.teacherReview?.totalQuestionCount || result.questions?.length || questionRows.length;
       const confirmedCount = result.teacherReview?.confirmedCount || result.questions?.filter((question) => question.rowStatus === "confirmed").length || 0;
       setSelectedDetail(result);
@@ -12812,7 +12864,6 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
       await loadRunDetail(activeRun.analysisRunId);
     } catch (error) {
       setReviewStatus({ state: "failed", message: `시험분석 · 검수 저장 실패 · ${error.message}` });
-      if (selectedRunId) await loadRunDetail(selectedRunId);
     } finally {
       setIsSavingReviews(false);
     }
@@ -12902,22 +12953,28 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
     setIsSavingOutputDrafts(true);
     setOutputStatus({ state: "saving", message: "시험분석 산출물 · 저장 중" });
     try {
+      const requestedDrafts = outputDrafts;
       const result = await saveExamAnalysisOutputDraftsRequest({
         analysisRunId: activeRun.analysisRunId,
-        outputInputs: outputDrafts.inputs,
-        blogTeacherDraft: outputDrafts.blog.teacherDraft,
-        instagramTeacherDraft: outputDrafts.instagram.teacherDraft,
-        blogTeacherDraftEdited: Boolean(outputDrafts.blog.teacherTouched),
-        instagramTeacherDraftEdited: Boolean(outputDrafts.instagram.teacherTouched)
+        outputInputs: requestedDrafts.inputs,
+        blogTeacherDraft: requestedDrafts.blog.teacherDraft,
+        instagramTeacherDraft: requestedDrafts.instagram.teacherDraft,
+        blogTeacherDraftEdited: Boolean(requestedDrafts.blog.teacherTouched),
+        instagramTeacherDraftEdited: Boolean(requestedDrafts.instagram.teacherTouched)
       });
+      if (result.source !== "supabase") throw new Error("산출물 저장 후 Supabase 재조회 결과가 없습니다.");
+      const persistedDrafts = getExamAnalysisOutputDraftsFromRun(result.analysisRun);
+      const outputMismatches = getExamAnalysisOutputSaveMismatches(requestedDrafts, persistedDrafts);
+      if (outputMismatches.length) {
+        throw new Error(`Supabase 재조회 값이 산출물 저장 요청과 다릅니다: ${outputMismatches.join(", ")}`);
+      }
       setSelectedDetail(result);
-      setOutputDrafts(getExamAnalysisOutputDraftsFromRun(result.analysisRun));
+      setOutputDrafts(persistedDrafts);
       setOutputStatus({ state: "success", message: "시험분석 산출물 · 저장 완료" });
       await loadRuns(activeRun.analysisRunId);
       await loadRunDetail(activeRun.analysisRunId);
     } catch (error) {
       setOutputStatus({ state: "failed", message: `시험분석 산출물 · 저장 실패 · ${error.message}` });
-      if (selectedRunId) await loadRunDetail(selectedRunId);
     } finally {
       setIsSavingOutputDrafts(false);
     }
