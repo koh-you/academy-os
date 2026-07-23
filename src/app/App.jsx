@@ -54,6 +54,7 @@ import {
   createNotificationHistoryViewModel,
   createNotificationRecipientViewModel
 } from "../domains/notifications/notificationCenterModel.js";
+import { buildNoticeJob as createNotificationNoticeJob } from "../domains/notifications/notificationNoticeBuilders.js";
 import { NotificationComposerPanel } from "../domains/notifications/NotificationComposerPanel.jsx";
 import { NotificationHistoryPanel } from "../domains/notifications/NotificationHistoryPanel.jsx";
 import { NotificationRecipientPanel } from "../domains/notifications/NotificationRecipientPanel.jsx";
@@ -10342,57 +10343,25 @@ function NotificationCenter({
     ].slice(0, 80));
   }
 
-  function buildNoticePayload(recipient, mode = "immediate") {
-    const audienceLabel = recipient.audience === "student" ? "학생" : "학부모";
-    return {
-      academyName: academyBrandName,
-      commentBodyOverride: noticeText,
-      forceDryRun: false,
-      lessonDate: today,
-      lessonName: noticeTitle.trim() || `${audienceLabel} 공지`,
-      message: noticeText,
-      noticeKind,
-      noticeAudience: recipient.audience,
-      noticeBody,
-      noticeTitle,
-      osScheduled: mode === "scheduled",
-      parentPhone: recipient.student.parentPhone,
-      scheduledDate: mode === "scheduled" ? scheduledAt : "",
-      sendMode: mode === "scheduled" ? "scheduled" : "immediate",
-      studentId: recipient.student.studentId,
-      studentName: recipient.student.name,
-      studentPhone: recipient.student.studentPhone,
-      target: recipient.audience,
-      ...(noticeKind === "special_lecture" && noticeSpecialLectureMeta
-        ? {
-            specialLectureAudience: noticeSpecialLectureMeta.audience,
-            specialLectureDays: noticeSpecialLectureMeta.days,
-            specialLectureGuideId: noticeSpecialLectureMeta.guideId,
-            specialLectureTime: noticeSpecialLectureMeta.time,
-            specialLectureTitle: noticeSpecialLectureMeta.title,
-            specialLectureUrl: noticeSpecialLectureMeta.guideUrl
-          }
-        : {})
-    };
-  }
-
   function buildNoticeJob(recipient, mode = "scheduled") {
-    const payload = buildNoticePayload(recipient, mode);
-    const notificationType = recipient.audience === "student" ? "notice_student" : "notice_parent";
-    return {
-      notificationJobId: `notice_${Date.now()}_${recipient.student.studentId}_${recipient.audience}_${Math.random().toString(36).slice(2, 7)}`,
-      notificationType,
-      studentId: recipient.student.studentId,
-      target: recipient.audience,
-      recipient: recipient.phone,
-      scheduledAt: mode === "scheduled" ? scheduledAt : "",
-      payload,
-      previewBody: noticeText,
-      status: mode === "scheduled" ? "scheduled" : "draft",
-      provider: "academy-os",
-      error: "",
-      createdAt: new Date().toISOString()
-    };
+    const idTimestamp = Date.now();
+    const idSuffix = Math.random().toString(36).slice(2, 7);
+    const createdAt = new Date().toISOString();
+    return createNotificationNoticeJob({
+      academyName: academyBrandName,
+      createdAt,
+      idSuffix,
+      idTimestamp,
+      mode,
+      noticeBody,
+      noticeKind,
+      noticeSpecialLectureMeta,
+      noticeText,
+      noticeTitle,
+      recipient,
+      scheduledAt,
+      today
+    });
   }
 
   async function persistNoticeJob(notificationJob) {

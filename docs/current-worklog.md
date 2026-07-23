@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13C-1 알림센터 공지 payload/job 순수 builder 분리 — AI gate 통과
+
+- 코드: 학원/공지/학생/학부모/특강 변수와 즉시·예약 mode를 API payload로 조립하는 `buildNoticePayload`, payload와 ID·수신자·상태·시각을 job으로 조립하는 `buildNoticeJob`을 `notificationNoticeBuilders.js`로 이동했다.
+- 동작 보존: 학생/학부모 알림 유형, 빈 제목의 대상별 공지 fallback, 즉시 `draft`/예약 `scheduled`, 예약시각과 `osScheduled`, 특강 6개 변수의 조건부 포함을 그대로 유지한다. `Date.now -> Math.random -> new Date` 호출 순서는 App adapter에서 유지하고 결과를 순수 builder에 주입한다.
+- 저장 원천/side effect: builder는 입력 객체만 읽고 현재시각·난수도 직접 생성하지 않는다. 즉시발송/예약 loop, API, Supabase 기록, Solapi, local job state와 feedback은 App에 남는다.
+- 자동검증: 일반 학부모 즉시 payload, 특강 학생 예약 job, 즉시 학부모 job fixture를 `test:notification-notice-builders`로 production test에 연결했다. scenario `20e-4`가 App identity source 주입과 builder의 무부작용 경계를 고정하며 production scenario 428/428, build, `git diff --check`가 통과했다.
+- gate 판정: 외부 호출 전의 객체 생성만 분리했고 fixture가 최종 구조 전체를 대조한다. 운영 데이터·발송·예약 없이 AI gate로 통과했다.
+- 다음 경계: `persistNoticeJob`과 `reserveNoticeJob`의 현재 timeout/error 계약을 request 주입형 API adapter로 분리하고, 즉시발송·예약 loop는 계속 App에 둔다.
+
 ## 2026-07-23 P1. 13B-2 알림센터 수신자 순수 모델 분리 — AI gate 통과
 
 - 코드: 활성/퇴원 학생 분리, 반 ID·반 이름 매칭, 검색, 현재 반에 남은 선택 학생, 학부모·학생 대상 모드, 유효 번호 수신자와 대상별 건수 계산을 `notificationCenterModel.js`의 `createNotificationRecipientViewModel`로 이동했다.
