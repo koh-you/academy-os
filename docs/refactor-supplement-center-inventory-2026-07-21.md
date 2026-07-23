@@ -231,7 +231,15 @@
 - 취소·실패 job의 과거 preview를 재사용하지 않고 현재 저장 원천을 쓰며, dirty draft는 예약을 차단하는 기존 계약을 유지한다.
 - App은 실제 예약·취소 action과 callback을 계속 소유하며, 모델에는 API·Supabase·`notification_jobs` mutation·Solapi가 없다.
 - deterministic fixture, production scenario `88b-35`, production 401/401, build, diff 검사를 통과했다. 순수 source/view model이므로 사용자 지시에 따라 AI gate로 통과했다.
-- 다음 실제 action controller 이동은 저장·완료·일정·결석취소·알림톡 side effect가 함께 있는 고위험 경계다. 화면에 노출되는 격리 데이터와 사람 gate를 먼저 준비한다.
+- 다음 실제 action controller 이동은 저장·완료·일정·결석취소·알림톡 side effect가 함께 있는 고위험 경계다. 한 번에 하나의 adapter만 이동하고, 화면 검수가 필요하면 실제 탭에 노출되는 격리 데이터를 먼저 준비한다.
+
+## 12R-21 구현 결과 — 보충 내용 저장 modal adapter
+
+- task ID/전체 busy guard, local draft의 persistable payload 변환, `content` busy 시작, 12R-4 저장 action 호출, 오류 log와 `finally` 해제를 `createSupplementTaskContentSaveHandler`로 분리했다.
+- 실제 `/api/makeup-tasks` 저장·Supabase 재조회·React 전역 task 갱신은 App이 전달하는 `onSaveTask` callback에 남겼고, controller에는 API·`notification_jobs`·Solapi와 일정·완료·예약취소 callback이 없다.
+- 성공·guard·실패 event fixture와 production scenario `88b-36`, production 402/402, build, diff 검사를 통과했다.
+- 실제 저장과 새로고침은 12R-4 고태영 사람 gate에서 이미 통과한 동일 action 경계다. 이번에는 얇은 adapter만 이동했으므로 사용자 지시에 따라 새 운영 데이터를 만들지 않고 AI gate로 통과했다.
+- 다음은 완료 처리 modal adapter 한 단위다. 새 사람 검수가 필요하면 독립 `재시험` 탭이 아닌 `숙제보충` 또는 `결석보강`에서 볼 수 있는 격리 고태영 데이터를 사용한다.
 
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
