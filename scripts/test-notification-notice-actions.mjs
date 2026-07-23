@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  cancelNoticeJobAction,
   deleteNoticeJobAction,
   polishNoticeMessageAction,
   reconcileNoticeResultsAction,
@@ -635,4 +636,183 @@ await deleteNoticeJobAction({
 });
 assert.deepEqual(canceledDeleteEvents, []);
 
-console.log("notification notice immediate scheduled reconcile polish and delete action fixtures passed");
+const cancelConfirmationMessages = [];
+const cancelRequests = [];
+const cancelBusyStates = [];
+const cancelJobStates = [];
+const cancelFilters = [];
+const cancelHistoryStates = [];
+const canceledLocalJobs = [];
+let cancelRefreshCount = 0;
+const cancelTargetJob = {
+  notificationJobId: "notice-cancel-solapi",
+  status: "scheduled"
+};
+const canceledJob = {
+  ...cancelTargetJob,
+  status: "canceled"
+};
+await cancelNoticeJobAction({
+  canCancelJob: () => true,
+  cancelJob: async (...args) => {
+    cancelRequests.push(args);
+    return {
+      notificationJob: canceledJob,
+      solapiCancellation: { groupId: "fixture-group" }
+    };
+  },
+  confirmAction: (message) => {
+    cancelConfirmationMessages.push(message);
+    return true;
+  },
+  deletingJobId: "",
+  job: cancelTargetJob,
+  refreshJobs: () => {
+    cancelRefreshCount += 1;
+  },
+  setDeletingJobId: (value) => cancelBusyStates.push(value),
+  setIsHistoryOpen: (value) => cancelHistoryStates.push(value),
+  setJobAction: (value) => cancelJobStates.push(value),
+  setJobFilter: (value) => cancelFilters.push(value),
+  upsertLocalJob: (job) => canceledLocalJobs.push(job)
+});
+assert.deepEqual(cancelConfirmationMessages, [
+  "이 알림톡 예약 1건을 취소할까요? Solapi 실제 예약도 함께 취소하며, 취소 이력은 남습니다."
+]);
+assert.deepEqual(cancelRequests, [[cancelTargetJob, "알림관리에서 예약 취소"]]);
+assert.deepEqual(cancelBusyStates, ["notice-cancel-solapi", ""]);
+assert.deepEqual(cancelJobStates, [
+  {
+    message: "Solapi 실제 예약과 Academy OS 기록을 함께 취소하는 중입니다.",
+    state: "saving"
+  },
+  {
+    message: "Solapi 실제 예약과 Academy OS 기록을 함께 취소했습니다.",
+    state: "saved"
+  }
+]);
+assert.deepEqual(canceledLocalJobs, [canceledJob]);
+assert.deepEqual(cancelFilters, ["draft"]);
+assert.deepEqual(cancelHistoryStates, [true]);
+assert.equal(cancelRefreshCount, 1);
+
+const osOnlyCancelStates = [];
+await cancelNoticeJobAction({
+  canCancelJob: () => true,
+  cancelJob: async () => ({
+    notificationJob: {
+      notificationJobId: "notice-cancel-os-only",
+      status: "canceled"
+    },
+    solapiCancellation: null
+  }),
+  confirmAction: () => true,
+  deletingJobId: "",
+  job: {
+    notificationJobId: "notice-cancel-os-only",
+    status: "scheduled"
+  },
+  refreshJobs: () => {},
+  setDeletingJobId: () => {},
+  setIsHistoryOpen: () => {},
+  setJobAction: (value) => osOnlyCancelStates.push(value),
+  setJobFilter: () => {},
+  upsertLocalJob: () => {}
+});
+assert.deepEqual(osOnlyCancelStates.at(-1), {
+  message: "Academy OS 예약을 취소했습니다. Solapi 예약 그룹이 없는 알림입니다.",
+  state: "saved"
+});
+
+const failedCancelBusyStates = [];
+const failedCancelJobStates = [];
+const failedCancelSideEffects = [];
+await cancelNoticeJobAction({
+  canCancelJob: () => true,
+  cancelJob: async () => ({
+    notificationJob: {
+      notificationJobId: "notice-cancel-invalid",
+      status: "scheduled"
+    }
+  }),
+  confirmAction: () => true,
+  deletingJobId: "",
+  job: {
+    notificationJobId: "notice-cancel-invalid",
+    status: "scheduled"
+  },
+  refreshJobs: () => failedCancelSideEffects.push("refresh"),
+  setDeletingJobId: (value) => failedCancelBusyStates.push(value),
+  setIsHistoryOpen: () => failedCancelSideEffects.push("history"),
+  setJobAction: (value) => failedCancelJobStates.push(value),
+  setJobFilter: () => failedCancelSideEffects.push("filter"),
+  upsertLocalJob: () => failedCancelSideEffects.push("upsert")
+});
+assert.deepEqual(failedCancelBusyStates, ["notice-cancel-invalid", ""]);
+assert.deepEqual(failedCancelJobStates, [
+  {
+    message: "Solapi 실제 예약과 Academy OS 기록을 함께 취소하는 중입니다.",
+    state: "saving"
+  },
+  {
+    message: "알림톡 예약 취소 실패: OS 취소 상태를 확인하지 못했습니다.",
+    state: "failed"
+  }
+]);
+assert.deepEqual(failedCancelSideEffects, []);
+
+const missingCancelJobStates = [];
+await cancelNoticeJobAction({
+  canCancelJob: () => true,
+  cancelJob: null,
+  confirmAction: () => true,
+  deletingJobId: "",
+  job: {
+    notificationJobId: "notice-cancel-missing",
+    status: "scheduled"
+  },
+  setDeletingJobId: () => {},
+  setJobAction: (value) => missingCancelJobStates.push(value)
+});
+assert.deepEqual(missingCancelJobStates.at(-1), {
+  message: "알림톡 예약 취소 실패: Solapi 실제 예약 취소 경로가 연결되어 있지 않습니다.",
+  state: "failed"
+});
+
+let cancelGuardCallCount = 0;
+const cancelGuardCallback = () => {
+  cancelGuardCallCount += 1;
+};
+await cancelNoticeJobAction({
+  canCancelJob: () => false,
+  cancelJob: cancelGuardCallback,
+  confirmAction: cancelGuardCallback,
+  deletingJobId: "",
+  job: { notificationJobId: "notice-not-cancelable", status: "sent" },
+  setDeletingJobId: cancelGuardCallback,
+  setJobAction: cancelGuardCallback
+});
+await cancelNoticeJobAction({
+  canCancelJob: () => true,
+  cancelJob: cancelGuardCallback,
+  confirmAction: cancelGuardCallback,
+  deletingJobId: "notice-cancel-busy",
+  job: { notificationJobId: "notice-cancel-busy-target", status: "scheduled" },
+  setDeletingJobId: cancelGuardCallback,
+  setJobAction: cancelGuardCallback
+});
+assert.equal(cancelGuardCallCount, 0);
+
+const rejectedCancelEvents = [];
+await cancelNoticeJobAction({
+  canCancelJob: () => true,
+  cancelJob: () => rejectedCancelEvents.push("cancel"),
+  confirmAction: () => false,
+  deletingJobId: "",
+  job: { notificationJobId: "notice-cancel-rejected", status: "scheduled" },
+  setDeletingJobId: () => rejectedCancelEvents.push("busy"),
+  setJobAction: () => rejectedCancelEvents.push("state")
+});
+assert.deepEqual(rejectedCancelEvents, []);
+
+console.log("notification notice immediate scheduled reconcile polish delete and cancel action fixtures passed");

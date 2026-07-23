@@ -120,7 +120,14 @@
 - App이 삭제 가능 판정, 브라우저 confirm, 13C-8 request adapter callback, job·setter·refresh를 주입한다.
 - 일반 draft·과거 확인 필요 이력, 실패, guard, confirm 취소를 mock fixture로 고정했고 실제 네트워크·운영 row 삭제는 없다.
 
+## 13C-10 Solapi 취소 UI action 단위
+
+- 취소 가능/중복 guard, confirm, callback 연결·결과 검증, canceled job local 반영, 완료 문구, filter/history/refresh와 실패/finally를 `cancelNoticeJobAction`으로 이동했다.
+- App이 취소 가능 판정, 브라우저 confirm, 실제 취소 callback과 local/UI setter를 주입한다. 실제 API/Supabase/Solapi orchestration은 callback 경계에 남는다.
+- Solapi 그룹 취소, OS-only 취소, 잘못된 결과, callback 미연결, guard와 confirm 거절을 mock fixture로 고정했고 실제 외부 취소는 없다.
+
 ## 다음 후보
 
-1. `cancelNotificationJob`의 guard, confirm, callback 연결/결과 검증, local 반영, filter/history/refresh, 실패/finally를 실제 취소 없는 injected action으로 분리 가능한지 inventory한다.
-2. 취소 callback 자체의 Solapi/API orchestration은 기존 경계에 유지한다.
+1. background 발송 기록 refresh의 Promise 오류 처리와 feedback append를 injected action/helper로 분리한다.
+2. 그다음 공지 template/config와 local selection helper를 낮은 위험도부터 분리한다.
+3. 특강 안내문 적용 handler는 Solapi 특강 템플릿 외부 검수와 기능 경계를 바꾸지 않는 범위만 다룬다.
