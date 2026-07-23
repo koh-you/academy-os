@@ -8,6 +8,14 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-17 보충 task busy local state hook 분리 — AI gate 통과
+
+- 코드: 보충 상세의 단일 busy action key state, `taskId:action` 생성, task/action별 busy 판정, 시작·종료를 `useSupplementTaskBusyState.js`로 이동했다.
+- 동작 보존: content/schedule/pass/cancelAbsence 작업 시작 전에 같은 key를 설정하고 각 async action의 `finally`에서 빈 값으로 해제한다. 기존 전체 busy 중복 방지, task별 버튼 disabled, 확인창 busy 표시와 실제 API callback 순서는 유지했다.
+- 저장 원천/side effect: 화면 메모리상 동시 작업 방지 상태만 소유한다. hook에는 API, Supabase, `notification_jobs`, Solapi 및 실제 action callback이 없다.
+- 자동검증: key 생성, 동일/다른 action 판정, 동일/다른 task 판정, idle fixture, production scenario `88b-32`, production 398/398, build, `git diff --check`를 통과했다. 기존 대형 chunk 경고만 남았다.
+- gate 판정: 실제 action 구현과 callback 순서를 바꾸지 않고 busy 표시·guard 상태만 이동했다. 사용자 지시에 따라 AI 검토로 통과하며 별도 사람 조작이나 검수 데이터는 요구하지 않는다.
+
 ## 2026-07-23 P1. 12R-16 보충 task 저장상태 local state hook 분리 — AI gate 통과
 
 - 코드: task별 `lesson / makeupTask / notificationDraft` 화면 상태 map의 React state, 조회, patch 적용을 `useSupplementTaskSaveStatusState.js`로 이동했다. 앞서 분리한 순수 `mergeSupplementTaskSaveStatus`를 그대로 사용한다.

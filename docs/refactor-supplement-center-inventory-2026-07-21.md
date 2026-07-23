@@ -204,6 +204,13 @@
 - App은 실제 저장 action과 read-after-write 성공·실패 판정을 계속 소유하며, hook에는 API·Supabase·`notification_jobs`·Solapi가 없다.
 - deterministic fixture, production scenario `88b-31`, production 397/397, build, diff 검사를 통과했다. local 표시 상태이므로 사용자 지시에 따라 AI gate로 통과했다.
 
+## 12R-17 구현 결과 — task busy local state
+
+- 단일 `taskId:action` busy key와 시작·종료, task/action별 판정을 `useSupplementTaskBusyState.js`로 분리했다.
+- content/schedule/pass/cancelAbsence의 기존 중복 guard, 버튼 disabled, 확인창 busy 표시와 `finally` 해제 순서를 유지한다.
+- App은 실제 action과 API callback을 계속 소유하며, hook에는 API·Supabase·`notification_jobs`·Solapi가 없다.
+- deterministic fixture, production scenario `88b-32`, production 398/398, build, diff 검사를 통과했다. local 동시 작업 방지 상태이므로 사용자 지시에 따라 AI gate로 통과했다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.

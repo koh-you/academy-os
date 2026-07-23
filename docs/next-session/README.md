@@ -14,7 +14,7 @@
 
 11B-1 코드 이동 후 학생 일정·학부모 일정·학생 11시의 OS row/Solapi 그룹 예약·취소 대조는 반 미지정 고태영 테스트 학생과 사용자 통제 번호로 통과했습니다. 학생 포털 실제 쓰기 검수, 교사 bearer/Storage 소유권 보안 gate, Solapi 특강 템플릿 외부 검수는 별도 보류 상태입니다.
 
-App.jsx 보충관리 리팩터링은 최신 `origin/main`에 rebase한 뒤 `12R-10` 저장상태 patch 계산, `12R-11` task별 상태 map 병합, `12R-12` 알림톡 제어창 local state hook, `12R-13` 완료·일정 확인창 local state와 일정 확인 payload 조립, `12R-14` 상세 feedback local state, `12R-15` task별 알림톡 draft 탭 선택 local state, `12R-16` task 저장상태 local state까지 분리했다. API·Supabase·Solapi와 실제 저장·완료·일정 action은 기존 App 경계에 둔다. 12R-16은 production 397/397와 build를 통과했고 실제 저장 판정과 무관한 local 표시 상태라 사용자 지시에 따라 AI gate로 통과했다. 별도 검수 데이터나 Solapi 호출은 없었다.
+App.jsx 보충관리 리팩터링은 최신 `origin/main`에 rebase한 뒤 `12R-10` 저장상태 patch 계산, `12R-11` task별 상태 map 병합, `12R-12` 알림톡 제어창 local state hook, `12R-13` 완료·일정 확인창 local state와 일정 확인 payload 조립, `12R-14` 상세 feedback local state, `12R-15` task별 알림톡 draft 탭 선택 local state, `12R-16` task 저장상태 local state, `12R-17` task busy local state까지 분리했다. API·Supabase·Solapi와 실제 저장·완료·일정 action은 기존 App 경계에 둔다. 12R-17은 production 398/398와 build를 통과했고 callback 순서를 유지한 local 동시 작업 방지 상태라 사용자 지시에 따라 AI gate로 통과했다. 별도 검수 데이터나 Solapi 호출은 없었다.
 
 ## 시험분석 GPT Image 전용 세션 참고 자료
 

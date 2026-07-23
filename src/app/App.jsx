@@ -71,6 +71,7 @@ import { useSupplementNotificationControlState } from "../domains/supplements/us
 import { useSupplementConfirmationState } from "../domains/supplements/useSupplementConfirmationState.js";
 import { useSupplementFeedbackState } from "../domains/supplements/useSupplementFeedbackState.js";
 import { useSupplementNotificationDraftSelectionState } from "../domains/supplements/useSupplementNotificationDraftSelectionState.js";
+import { useSupplementTaskBusyState } from "../domains/supplements/useSupplementTaskBusyState.js";
 import { useSupplementTaskDraftController } from "../domains/supplements/useSupplementTaskDraftController.js";
 import { useSupplementTaskSaveStatusState } from "../domains/supplements/useSupplementTaskSaveStatusState.js";
 import {
@@ -22543,7 +22544,6 @@ function SupplementStudentModal({
     () => normalizeNotificationTemplates(notificationTemplates),
     [notificationTemplates]
   );
-  const [busyTaskId, setBusyTaskId] = useState("");
   const {
     dismissFeedback,
     feedback,
@@ -22557,6 +22557,13 @@ function SupplementStudentModal({
     getTaskSaveStatus,
     setTaskSaveStatusPatch
   } = useSupplementTaskSaveStatusState();
+  const {
+    beginTaskAction,
+    finishTaskAction,
+    hasBusyTask,
+    isTaskActionBusy,
+    isTaskBusy
+  } = useSupplementTaskBusyState();
   const {
     closePassConfirmation,
     closeScheduleConfirmation,
@@ -22597,10 +22604,9 @@ function SupplementStudentModal({
   }
 
   async function handleSaveTask(task) {
-    if (!task?.makeupTaskId || busyTaskId) return;
+    if (!task?.makeupTaskId || hasBusyTask) return;
     const taskWithDraft = createPersistableSupplementTask(buildTaskWithDraft(task));
-    const actionKey = `${task.makeupTaskId}:content`;
-    setBusyTaskId(actionKey);
+    beginTaskAction(task.makeupTaskId, "content");
     try {
       await saveSupplementTaskContentAction({
         currentLessonStatus: getTaskSaveStatus(task.makeupTaskId).lesson,
@@ -22614,12 +22620,12 @@ function SupplementStudentModal({
     } catch (error) {
       console.error("Failed to save supplement task", error);
     } finally {
-      setBusyTaskId("");
+      finishTaskAction();
     }
   }
 
   function requestApplyScheduleTask(task) {
-    if (!task?.makeupTaskId || busyTaskId) return;
+    if (!task?.makeupTaskId || hasBusyTask) return;
     const taskWithDraft = createPersistableSupplementTask(buildTaskWithDraft(task));
     requestSupplementScheduleAction({
       onFeedback: ({ message, title, tone }) => showFeedback(title, message, tone),
@@ -22632,7 +22638,7 @@ function SupplementStudentModal({
   }
 
   async function handleApplyScheduleTask(task) {
-    if (!task?.makeupTaskId || busyTaskId) return;
+    if (!task?.makeupTaskId || hasBusyTask) return;
     const taskWithDraft = createPersistableSupplementTask(buildTaskWithDraft(task));
     if (!taskWithDraft.scheduledDate || !taskWithDraft.scheduledTime) {
       showFeedback("수업일지 일정 만들기 실패", "배정일과 시간을 먼저 입력해야 합니다.", "failed");
@@ -22640,8 +22646,7 @@ function SupplementStudentModal({
       return;
     }
 
-    const actionKey = `${task.makeupTaskId}:schedule`;
-    setBusyTaskId(actionKey);
+    beginTaskAction(task.makeupTaskId, "schedule");
     try {
       await applySupplementScheduleAction({
         getImmediateNoticeStatus: getSupplementImmediateNoticeSaveStatus,
@@ -22656,14 +22661,13 @@ function SupplementStudentModal({
     } catch (error) {
       console.error("Failed to apply supplement schedule", error);
     } finally {
-      setBusyTaskId("");
+      finishTaskAction();
     }
   }
 
   async function handleCancelAbsenceSourceTask(task) {
-    if (!task || busyTaskId) return;
-    const actionKey = `${task.makeupTaskId}:cancelAbsence`;
-    setBusyTaskId(actionKey);
+    if (!task || hasBusyTask) return;
+    beginTaskAction(task.makeupTaskId, "cancelAbsence");
     try {
       await cancelSupplementAbsenceSourceAction({
         cancelSource: (payload) => onCancelAbsenceSource?.(payload),
@@ -22674,12 +22678,12 @@ function SupplementStudentModal({
     } catch (error) {
       console.error("Failed to cancel absence source", error);
     } finally {
-      setBusyTaskId("");
+      finishTaskAction();
     }
   }
 
   async function handlePassTask(task) {
-    if (!task?.makeupTaskId || busyTaskId) return;
+    if (!task?.makeupTaskId || hasBusyTask) return;
     if (task.isLocalDraftTask) {
       showFeedback("보충 완료 처리 전 저장 필요", "보충 생성 화면에서는 먼저 보충 내용 저장을 눌러 보충 항목을 생성해야 합니다.", "failed");
       return;
@@ -22689,7 +22693,7 @@ function SupplementStudentModal({
       return;
     }
     const taskWithDraft = createPersistableSupplementTask(buildTaskWithDraft(task));
-    setBusyTaskId(`${task.makeupTaskId}:pass`);
+    beginTaskAction(task.makeupTaskId, "pass");
     try {
       await passSupplementTaskAction({
         onClose: () => onClose?.(),
@@ -22702,7 +22706,7 @@ function SupplementStudentModal({
     } catch (error) {
       console.error("Failed to pass supplement task", error);
     } finally {
-      setBusyTaskId("");
+      finishTaskAction();
     }
   }
 
@@ -22794,7 +22798,7 @@ function SupplementStudentModal({
           {passConfirmTask ? (
             <SupplementPassConfirmModal
               getTypeLabel={followUpTypeLabel}
-              isBusy={busyTaskId === `${passConfirmTask.makeupTaskId}:pass`}
+              isBusy={isTaskActionBusy(passConfirmTask.makeupTaskId, "pass")}
               onCancel={closePassConfirmation}
               onConfirm={confirmPassTask}
               studentName={student.name}
@@ -22805,7 +22809,7 @@ function SupplementStudentModal({
             <SupplementScheduleChangeConfirmModal
               getDetailSeed={getSupplementScheduleChangeDetailSeed}
               getTypeLabel={followUpTypeLabel}
-              isBusy={busyTaskId === `${scheduleConfirmTask.makeupTaskId}:schedule`}
+              isBusy={isTaskActionBusy(scheduleConfirmTask.makeupTaskId, "schedule")}
               onCancel={closeScheduleConfirmation}
               onConfirmWithReminder={(noticePatch) => confirmScheduleTask(true, noticePatch)}
               onConfirmWithoutReminder={(noticePatch) => confirmScheduleTask(false, noticePatch)}
@@ -22861,12 +22865,12 @@ function SupplementStudentModal({
                 saveStatus,
                 task
               });
-              const isTaskBusy = busyTaskId.startsWith(`${task.makeupTaskId}:`);
-              const isContentBusy = busyTaskId === `${task.makeupTaskId}:content`;
-              const isScheduleBusy = busyTaskId === `${task.makeupTaskId}:schedule`;
+              const taskBusy = isTaskBusy(task.makeupTaskId);
+              const isContentBusy = isTaskActionBusy(task.makeupTaskId, "content");
+              const isScheduleBusy = isTaskActionBusy(task.makeupTaskId, "schedule");
               const isLocalDraftTask = Boolean(task.isLocalDraftTask);
               const canCancelAbsenceSource = isLocalDraftTask && task.taskType === "absence_makeup";
-              const isCancelAbsenceBusy = busyTaskId === `${task.makeupTaskId}:cancelAbsence`;
+              const isCancelAbsenceBusy = isTaskActionBusy(task.makeupTaskId, "cancelAbsence");
               const activeNotificationDraftField = getActiveNotificationDraftField(
                 task.makeupTaskId,
                 supplementNotificationDraftConfigs[0].field
@@ -22896,9 +22900,9 @@ function SupplementStudentModal({
                     isCancelAbsenceBusy,
                     isContentBusy,
                     isLocalDraftTask,
-                    isPassBusy: busyTaskId === `${task.makeupTaskId}:pass`,
+                    isPassBusy: isTaskActionBusy(task.makeupTaskId, "pass"),
                     isScheduleBusy,
-                    isTaskBusy,
+                    isTaskBusy: taskBusy,
                     linkedLessonId: task.linkedLessonId,
                     onCancelAbsenceSource: () => handleCancelAbsenceSourceTask(task),
                     onPass: () => openPassConfirmation(buildTaskWithDraft(task)),
@@ -22919,7 +22923,7 @@ function SupplementStudentModal({
                     activeField: activeNotificationDraftField,
                     configs: notificationDraftTabConfigs,
                     hasUnsavedChanges: draftDiff.length > 0,
-                    isBusy: isTaskBusy,
+                    isBusy: taskBusy,
                     isTeacherFinal: activeNotificationDraftIsTeacherFinal,
                     onChangeDraft: (value) => updateTaskDraft(task, activeNotificationDraftField, value),
                     onOpenControl: (controlType) => openNotificationControl(task, controlType),
