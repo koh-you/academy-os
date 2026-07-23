@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13F-8 알림 Solapi 결과 대조 binding 분리 — AI gate 통과
+
+- 코드: App의 `reconcileSolapiResultsForNoticeJobs` wrapper를 `notificationNoticeActions.js`의 `createReconcileNoticeResultsBinding`으로 이동했다. history 상태와 composer가 계산한 target ID가 현재 서로 다른 hook에 있어 순환 의존을 만들지 않도록 독립 binding이 기존 action option을 캡처한다.
+- 동작 보존: callback/대상 없음·loading guard, loading 안내, Solapi 결과 조회, 조회 실패 수 기준 partial/saved, 현재시각 checkedAt, pending filter·history 펼침·background refresh, 실패 feedback을 그대로 유지했다.
+- 저장 원천/side effect: callback을 실제로 누르면 기존 Solapi 결과 조회와 서버의 OS job reconcile이 실행된다. 이번 리팩터링은 option과 호출 순서를 바꾸지 않았고, 검증은 injected reconcile/refresh/state mock만 사용해 운영 DB·Solapi를 호출하지 않았다.
+- 자동검증: guard·성공·OS 반영·부분 조회 실패·전체 실패·filter/history/refresh/state 전이를 포함한 action fixture에 factory callback 경로를 추가하고 App→binding→action 경계를 production scenario 462개로 고정했다. production scenario 462/462와 build, `git diff --check`가 통과했다.
+- gate 판정: 대상 ID·결과 count·상태 전이·실패 feedback을 mock으로 재현했고 화면 DOM/문구/서버 contract는 바뀌지 않았다. 재시험/고태영 운영 데이터, 실제 Solapi 조회, 사람 화면 검수가 필요하지 않은 AI gate다.
+- 다음 경계: App의 AI 문구 수정 wrapper를 composer hook에서 기존 `polishNoticeMessageAction`과 injected AI request callback으로 결합할 수 있는지 확인한다.
+
 ## 2026-07-23 P1. 13F-7 알림 예약발송 action binding 분리 — AI gate 통과
 
 - 코드: App의 `scheduleNotice` wrapper를 `useNotificationComposerState`로 이동했다. App은 과거시각 판별, persist/reserve, 오류 보고, local upsert callback을 주입하고 hook은 기존 builder·draft·busy·history/filter·refresh callback과 `scheduleNoticeAction`을 결합한다.

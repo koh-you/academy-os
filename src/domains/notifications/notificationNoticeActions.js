@@ -172,6 +172,12 @@ export async function reconcileNoticeResultsAction({
   }
 }
 
+export function createReconcileNoticeResultsBinding(options) {
+  return function reconcileSolapiResultsForNoticeJobs() {
+    return reconcileNoticeResultsAction(options);
+  };
+}
+
 export async function polishNoticeMessageAction({
   aiModel,
   aiPrompt,
