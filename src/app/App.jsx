@@ -9,6 +9,9 @@ import {
 } from "../domains/exams/examPrepDeleteOrchestration.js";
 import { ExamAnalysisFinalPreviewPanel } from "../domains/exams/ExamAnalysisFinalPreviewPanel.jsx";
 import { ExamPrepEditModal } from "../domains/exams/ExamPrepEditModal.jsx";
+import {
+  createExamPrepLessonReconcilePlan
+} from "../domains/exams/examPrepLessonReconcilePlan.js";
 import { ExamPrepPastPaperPanel } from "../domains/exams/ExamPrepPastPaperPanel.jsx";
 import { createExamPrepCenterDisplayModel } from "../domains/exams/examPrepCenterModel.js";
 import {
@@ -8233,37 +8236,13 @@ export function App() {
   }
 
   function createPersistedExamPrepLessonReconcilePlan(nextExamPrepRows) {
-    const examPrepCandidates = buildExamPrepLessonCandidates(nextExamPrepRows);
-    const candidateByIdentityKey = new Map();
-    examPrepCandidates.forEach((item) => {
-      [item.lesson.lessonId, item.generatedKey, ...getGeneratedLessonIdentityKeys(item.lesson)]
-        .filter(Boolean)
-        .forEach((key) => candidateByIdentityKey.set(key, item.lesson));
+    return createExamPrepLessonReconcilePlan({
+      buildCandidates: buildExamPrepLessonCandidates,
+      getIdentityKeys: getGeneratedLessonIdentityKeys,
+      isExamPrepLesson,
+      lessons,
+      nextExamPrepRows
     });
-    const existingExamPrepLessons = lessons.filter(isExamPrepLesson);
-    const lessonsToSave = [];
-    const lessonIdsToDelete = [];
-
-    existingExamPrepLessons.forEach((lesson) => {
-      const nextLesson = [lesson.lessonId, ...getGeneratedLessonIdentityKeys(lesson)]
-        .map((key) => candidateByIdentityKey.get(key))
-        .find(Boolean);
-      if (!nextLesson) {
-        lessonIdsToDelete.push(lesson.lessonId);
-        return;
-      }
-      const mergedLesson = {
-        ...lesson,
-        ...nextLesson,
-        lessonId: lesson.lessonId,
-        studentIds: lesson.studentIds ?? []
-      };
-      if (JSON.stringify(mergedLesson) !== JSON.stringify(lesson)) {
-        lessonsToSave.push(mergedLesson);
-      }
-    });
-
-    return { lessonIdsToDelete, lessonsToSave };
   }
 
   async function readExamPrepDeleteState(auditId) {
