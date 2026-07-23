@@ -52,12 +52,8 @@ import {
 import {
   createNotificationComposerViewModel,
   createNotificationHistoryViewModel,
-  createNotificationRecipientViewModel,
-  filterNoticeSelectedStudentIds,
   resolveNotificationAudiencePhone,
   resolveNotificationStudentName,
-  selectAllNoticeStudentIds,
-  toggleNoticeSelectedStudentId,
   upsertLocalNoticeJobList
 } from "../domains/notifications/notificationCenterModel.js";
 import {
@@ -86,6 +82,7 @@ import {
 import { buildNoticeJob as createNotificationNoticeJob } from "../domains/notifications/notificationNoticeBuilders.js";
 import { NotificationNoticeWorkspace } from "../domains/notifications/NotificationNoticeWorkspace.jsx";
 import { useNotificationCenterNavigationState } from "../domains/notifications/useNotificationCenterNavigationState.js";
+import { useNotificationRecipientState } from "../domains/notifications/useNotificationRecipientState.js";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { createSupplementSchedulePersistencePlan } from "../domains/supplements/supplementSchedulePlan.js";
 import { SupplementCenter } from "../domains/supplements/SupplementCenter.jsx";
@@ -10170,7 +10167,6 @@ function NotificationCenter({
     initialNotificationTab,
     showSpecialLectureTab
   });
-  const [classFilter, setClassFilter] = useState("all");
   const [deletingJobId, setDeletingJobId] = useState("");
   const [dispatchMessage, setDispatchMessage] = useState("");
   const [isPolishingNotice, setIsPolishingNotice] = useState(false);
@@ -10181,14 +10177,11 @@ function NotificationCenter({
   const [localNoticeJobs, setLocalNoticeJobs] = useState([]);
   const [noticeBody, setNoticeBody] = useState("");
   const [noticeKind, setNoticeKind] = useState("general");
-  const [noticeRecipientMode, setNoticeRecipientMode] = useState("selected");
   const [noticeSpecialLectureMeta, setNoticeSpecialLectureMeta] = useState(null);
   const [noticeTemplateId, setNoticeTemplateId] = useState("notice");
   const [noticeTitle, setNoticeTitle] = useState("");
   const [scheduleDate, setScheduleDate] = useState(today);
   const [scheduleTime, setScheduleTime] = useState("18:00");
-  const [searchText, setSearchText] = useState("");
-  const [selectedStudentIds, setSelectedStudentIds] = useState([]);
   const [solapiResultSyncState, setSolapiResultSyncState] = useState({ checkedAt: "", state: "idle", message: "" });
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
@@ -10212,33 +10205,30 @@ function NotificationCenter({
     notificationJobs
   });
   const {
-    classFilteredStudents,
+    classFilter,
+    clearSelectedStudents,
     noticeRecipients,
+    noticeRecipientMode,
     parentRecipientCount,
-    searchableStudents,
+    searchText,
+    selectAllVisibleStudents,
+    selectedStudentIds,
+    setClassFilter,
+    setNoticeRecipientMode,
+    setSearchText,
     studentRecipientCount,
     targetAudiences,
     targetStudents,
+    toggleStudentSelection,
     visibleNoticeStudents,
     withdrawnStudents
-  } = useMemo(() => createNotificationRecipientViewModel({
-    classFilter,
+  } = useNotificationRecipientState({
     classTemplates,
     normalizePhoneNumber,
     normalizeSearchText: normalizeMessageText,
-    noticeRecipientMode,
     noticeWithdrawnClassFilterId,
-    searchText,
-    selectedStudentIds,
     students
-  }), [
-    classFilter,
-    classTemplates,
-    noticeRecipientMode,
-    searchText,
-    selectedStudentIds,
-    students
-  ]);
+  });
   const {
     noticeText,
     scheduledAt,
@@ -10254,32 +10244,12 @@ function NotificationCenter({
     solapiResultTargets
   });
 
-  useEffect(() => {
-    setSelectedStudentIds((current) =>
-      filterNoticeSelectedStudentIds(current, classFilteredStudents)
-    );
-  }, [classFilteredStudents]);
-
   function studentName(studentId, payload) {
     return resolveNotificationStudentName({
       payload,
       studentId,
       students
     });
-  }
-
-  function toggleStudentSelection(studentId) {
-    setSelectedStudentIds((current) =>
-      toggleNoticeSelectedStudentId(current, studentId)
-    );
-  }
-
-  function selectAllVisibleStudents() {
-    setSelectedStudentIds(selectAllNoticeStudentIds(searchableStudents));
-  }
-
-  function clearSelectedStudents() {
-    setSelectedStudentIds([]);
   }
 
   function getNoticeAudiencePhone(student, audience) {

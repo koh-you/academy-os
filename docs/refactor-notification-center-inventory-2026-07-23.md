@@ -198,8 +198,14 @@
 - 특강 탭 노출 여부에 따른 active tab 계산은 `resolveNotificationCenterActiveTab` 순수 model로 이동했다.
 - hook은 local state/effect만 소유하고 외부 호출은 없다.
 
+## 13E-2 recipient local state hook 단위
+
+- class filter·검색·수신 mode·선택 ID state, recipient view model memo, 선택 정리 effect와 토글/전체선택/해제 handler를 `useNotificationRecipientState`로 이동했다.
+- App은 hook 결과를 recipient panel과 발송 action에 그대로 전달한다.
+- hook은 local state와 순수 model/helper만 사용하고 학생 원천이나 외부 시스템을 쓰지 않는다.
+
 ## 다음 후보
 
-1. 수신자 filter/search/mode/선택 local state와 순수 recipient model·선택 정리 effect를 전용 hook으로 묶는다.
-2. 이후 NotificationCenter 잔여 local state/adapter와 `SpecialLectureNoticePanel` 결합을 다시 inventory한다.
+1. 기록 filter/open/action/local job/Solapi 대조 표시 state와 기존 local action/model을 history state hook으로 묶는다.
+2. 이후 NotificationCenter 잔여 composer/busy state·adapter와 `SpecialLectureNoticePanel` 결합을 다시 inventory한다.
 3. 특강 안내문 적용/컴포넌트 이동이나 실제 발송 orchestration을 건드려야 하면 로드맵 13의 안전한 경계를 닫고 보류 상태를 기록한다.
