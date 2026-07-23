@@ -58,6 +58,7 @@ import {
   persistNoticeJobRequest,
   reserveNoticeJobRequest
 } from "../domains/notifications/notificationNoticeApi.js";
+import { sendNoticeNowAction } from "../domains/notifications/notificationNoticeActions.js";
 import { buildNoticeJob as createNotificationNoticeJob } from "../domains/notifications/notificationNoticeBuilders.js";
 import { NotificationComposerPanel } from "../domains/notifications/NotificationComposerPanel.jsx";
 import { NotificationHistoryPanel } from "../domains/notifications/NotificationHistoryPanel.jsx";
@@ -10389,58 +10390,25 @@ function NotificationCenter({
   }
 
   async function sendNoticeNow() {
-    if (!noticeText || noticeRecipients.length === 0 || isSendingNotice) return;
-    setIsSendingNotice(true);
-    setDispatchMessage(`공지 즉시 발송 중: 0/${noticeRecipients.length}건 요청 시작`);
-    let sentCount = 0;
-    let pendingCount = 0;
-    let failedCount = 0;
-    let recordFailedCount = 0;
-    try {
-      for (const [index, recipient] of noticeRecipients.entries()) {
-        const notificationJob = buildNoticeJob(recipient, "immediate");
-        const audienceLabel = recipient.audience === "student" ? "학생" : "학부모";
-        setDispatchMessage(`공지 즉시 발송 중: ${index + 1}/${noticeRecipients.length}건 · ${recipient.student.name} ${audienceLabel}`);
-        try {
-          const result = await postJsonWithTimeout(
-            "/api/notifications/comment-alimtalk",
-            notificationJob.payload,
-            45000,
-            "알림톡 발송 요청이 45초를 넘었습니다. 실제 발송 여부는 발송 기록 또는 Solapi에서 확인해 주세요."
-          );
-          sentCount += 1;
-          try {
-            await persistNoticeJob({
-              ...notificationJob,
-              status: result.result?.dryRun ? "dry_run" : "sent",
-              provider: result.provider ?? "solapi",
-              result: result.result ?? null
-            });
-          } catch (recordError) {
-            recordFailedCount += 1;
-          }
-        } catch (error) {
-          const timedOut = isRequestTimeoutError(error);
-          if (timedOut) pendingCount += 1;
-          else failedCount += 1;
-          try {
-            await persistNoticeJob({
-              ...notificationJob,
-              status: timedOut ? "send_unconfirmed" : "failed",
-              error: error.message
-            });
-          } catch (recordError) {
-            recordFailedCount += 1;
-          }
-        }
-      }
-      setDispatchMessage(`공지 발송 처리 완료: 성공 ${sentCount}건${pendingCount ? `, 확인 필요 ${pendingCount}건` : ""}${failedCount ? `, 실패 ${failedCount}건` : ""}${recordFailedCount ? `, 기록 저장 실패 ${recordFailedCount}건` : ""}`);
-      setJobFilter(pendingCount ? "pending" : failedCount ? "failed" : "sent");
-      setIsNoticeHistoryOpen(true);
-      refreshNoticeJobsInBackground();
-    } finally {
-      setIsSendingNotice(false);
-    }
+    return sendNoticeNowAction({
+      buildJob: buildNoticeJob,
+      isRequestTimeoutError,
+      isSending: isSendingNotice,
+      noticeRecipients,
+      noticeText,
+      persistJob: persistNoticeJob,
+      refreshJobs: refreshNoticeJobsInBackground,
+      sendNotification: (payload) => postJsonWithTimeout(
+        "/api/notifications/comment-alimtalk",
+        payload,
+        45000,
+        "알림톡 발송 요청이 45초를 넘었습니다. 실제 발송 여부는 발송 기록 또는 Solapi에서 확인해 주세요."
+      ),
+      setDispatchMessage,
+      setIsHistoryOpen: setIsNoticeHistoryOpen,
+      setIsSending: setIsSendingNotice,
+      setJobFilter
+    });
   }
 
   async function scheduleNotice() {

@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13C-3 알림센터 공지 즉시발송 injected action 분리 — AI gate 통과
+
+- 코드: `sendNoticeNow`의 guard, 대상별 job 생성·진행 문구, 즉시발송, 성공/dry-run/timeout/실패 job 기록, 집계 문구, filter/history/refresh, busy 해제를 `notificationNoticeActions.js`의 `sendNoticeNowAction`으로 이동했다. App은 기존 builder·API·setter를 주입한다.
+- 동작 보존: 순차 대상 처리, 학생/학부모 진행 라벨, 성공 provider/result, timeout의 `send_unconfirmed`, 일반 실패, 기록 저장 실패의 별도 집계, `pending > failed > sent` filter 우선순위와 `finally` busy 해제를 그대로 유지한다.
+- 저장 원천/side effect: action은 endpoint나 React/Supabase/Solapi client를 직접 소유하지 않는다. App이 기존 `/api/notifications/comment-alimtalk` 45초 request, job persist, state setter, background refresh를 주입한다.
+- 자동검증: 성공·dry-run·timeout·실패 4개 대상, 기록 실패 2건, persisted job 전체 구조, progress/final 문구, filter/history/refresh/busy 순서, guard 무동작, builder 예외의 finally를 `test:notification-notice-actions`로 고정했다. 실제 외부 호출은 0건이며 production scenario 430/430, build, `git diff --check`가 통과했다.
+- gate 판정: 외부 함수와 UI setter를 모두 mock해 기존 분기·순서를 재현했고 실제 발송 결과에 새 계약을 추가하지 않았다. 테스트 데이터·유료 발송 없이 AI gate로 통과했다.
+- 다음 경계: `scheduleNotice`의 과거시각 차단, 대상별 예약·실패 job/local state·기록 fallback·최종 filter/refresh 순서를 별도 injected action으로 분리한다.
+
 ## 2026-07-23 P1. 13C-2 알림센터 공지 기록·예약 API adapter 분리 — AI gate 통과
 
 - 코드: 공지 job 기록 저장과 Solapi 예약 request의 path/body/timeout/error 문구를 `notificationNoticeApi.js`의 `persistNoticeJobRequest`와 `reserveNoticeJobRequest`로 이동했다. App wrapper는 현재 `postJsonWithTimeout`을 주입한다.
