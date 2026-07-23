@@ -11,6 +11,10 @@ import { ExamAnalysisFinalPreviewPanel } from "../domains/exams/ExamAnalysisFina
 import { ExamPrepEditModal } from "../domains/exams/ExamPrepEditModal.jsx";
 import { ExamPrepPastPaperPanel } from "../domains/exams/ExamPrepPastPaperPanel.jsx";
 import { createExamPrepCenterDisplayModel } from "../domains/exams/examPrepCenterModel.js";
+import {
+  deleteExamPrepRowRequest,
+  saveExamPrepRowsRequest
+} from "../domains/exams/examPrepRowsApi.js";
 import { ExamPostSubmissionManager } from "../domains/exams/ExamPostSubmissionManager.jsx";
 import { ExamReviewComposerModal } from "../domains/exams/ExamReviewComposerModal.jsx";
 import { normalizeExamPrepRowReviewDraft } from "../domains/exams/examReviewDraft.js";
@@ -3891,32 +3895,6 @@ function deleteAcademyReminderFromApi(reminderId) {
 
 function postMakeupTasks(makeupTasks) {
   return postJson("/api/makeup-tasks/bulk", { makeupTasks });
-}
-
-function postExamPrepRow(examPrepRow) {
-  return postJson("/api/exam-prep-rows", { examPrepRow });
-}
-
-function postExamPrepRows(examPrepRows) {
-  return postJson("/api/exam-prep-rows/bulk", { examPrepRows });
-}
-
-function deleteExamPrepRowRequest(examPrepId, auditId) {
-  return fetch(
-    apiUrl(
-      `/api/exam-prep-rows?id=${encodeURIComponent(examPrepId)}&confirm=true&auditId=${encodeURIComponent(auditId)}`
-    ),
-    { method: "DELETE" }
-  )
-    .then(async (response) => {
-      const result = await response.json();
-      if (!response.ok || !result.ok) {
-        const error = new Error(result.error || "시험정보 삭제 실패");
-        error.audit = result.audit;
-        throw error;
-      }
-      return result;
-    });
 }
 
 function deleteExamPrepLessonRequest(lessonId, auditId) {
@@ -8238,7 +8216,10 @@ export function App() {
       });
       return next;
     });
-    return postExamPrepRows(changedRows)
+    return saveExamPrepRowsRequest({
+      examPrepRows: changedRows,
+      request: postJson
+    })
       .then(() => {
         setExamPrepRowSaveStates((current) => {
           const next = { ...current };
@@ -8366,10 +8347,19 @@ export function App() {
         originalLessons: lessons,
         plan,
         deleteRow: ({ auditId: requestAuditId, examPrepId: targetId }) =>
-          deleteExamPrepRowRequest(targetId, requestAuditId),
+          deleteExamPrepRowRequest({
+            auditId: requestAuditId,
+            examPrepId: targetId,
+            fetchImpl: fetch,
+            resolveApiUrl: apiUrl
+          }),
         applyLessonPlan: applyExamPrepLessonDeletePlan,
         readState: () => readExamPrepDeleteState(auditId),
-        restoreRows: (rows) => postExamPrepRows(rows),
+        restoreRows: (rows) =>
+          saveExamPrepRowsRequest({
+            examPrepRows: rows,
+            request: postJson
+          }),
         restoreLessons: (lessonsToRestore) =>
           postJson("/api/lessons/bulk", { lessons: lessonsToRestore })
       });
