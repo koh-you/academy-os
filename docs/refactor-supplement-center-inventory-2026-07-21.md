@@ -257,6 +257,14 @@
 - 12R-7에서 동일 callback의 실제 일정 생성·새로고침·알림 예약 결과를 검수했으므로 새 운영 데이터나 Solapi 호출 없이 AI gate로 통과했다.
 - 다음은 결석 원천 취소 modal adapter 한 단위다. 12R-6의 실제 결석취소 gate와 동일 callback 경계인지 먼저 대조한다.
 
+## 12R-24 구현 결과 — 결석 원천 취소 modal adapter
+
+- task 존재/전체 busy guard, `cancelAbsence` busy 시작, 12R-6 결석취소 action, 오류 log와 `finally` 해제를 `createSupplementAbsenceCancelHandler`로 분리했다.
+- 실제 `lesson_student_records` 저장·Supabase 재조회·React record 갱신·후보 제거는 App이 전달하는 `onCancelAbsenceSource` callback에 남겼고, controller에는 직접 API·`notification_jobs`·Solapi와 다른 action callback이 없다.
+- 성공·guard·실패 시 모달 유지 fixture와 production scenario `88b-39`, production 405/405, build, diff 검사를 통과했다.
+- 12R-6에서 동일 callback의 실제 결석취소·후보 제거·새로고침을 검수했으므로 새 운영 데이터 없이 AI gate로 통과했다.
+- 다음은 개별 알림 예약·취소 modal adapter 한 단위다. 11B-9/12R-8의 실제 예약·취소 gate와 동일 callback 경계인지 먼저 대조한다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.

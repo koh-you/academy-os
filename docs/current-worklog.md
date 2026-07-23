@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-24 결석 원천 취소 modal adapter 분리 — AI gate 통과
+
+- 코드: `SupplementStudentModal` 안의 결석 원천 취소 handler를 `createSupplementAbsenceCancelHandler`로 `supplementAbsenceCancelController.js`에 이동했다.
+- 동작 보존: task 존재/전체 busy guard, `cancelAbsence` busy 시작, 기존 `cancelSupplementAbsenceSourceAction` 호출, 성공 반환, 오류 log, `finally` busy 해제 순서를 그대로 유지한다.
+- 저장 원천/side effect: 실제 `lesson_student_records` 저장·Supabase 재조회·React record 갱신·후보 제거는 App이 전달하는 `onCancelAbsenceSource` callback에 남는다. controller에는 직접 API, Supabase, `notification_jobs`, Solapi 호출과 저장·완료·일정·예약취소 callback이 없다.
+- 자동검증: 성공 시 record callback→feedback→모달 close→busy 해제, busy/task guard, 실패 시 모달 유지·log/finally fixture를 `npm run test:production`에 연결했다. production scenario `88b-39`, production 405/405, build, `git diff --check`가 통과했고 기존 대형 chunk 경고만 남았다.
+- gate 판정: 12R-6에서 동일 callback 경계의 결석 처리 취소·후보 제거·새로고침을 사람/AI가 대조했다. 이번에는 guard와 화면 adapter만 이동했으므로 추가 운영 데이터 없이 AI gate로 통과했다. notification/Solapi 호출과 과금은 0건이다.
+- 다음 경계: 개별 알림 예약·취소 modal adapter 한 단위만 분리한다. 11B-9/12R-8의 실제 예약·취소 gate와 동일 callback 경계인지 먼저 대조한다.
+
 ## 2026-07-23 P1. 12R-23 보충 일정 생성·변경 modal adapter 분리 — AI gate 통과
 
 - 코드: `SupplementStudentModal` 안의 일정 요청·실행 handler를 `createSupplementTaskScheduleHandlers`로 `supplementTaskScheduleController.js`에 이동했다.

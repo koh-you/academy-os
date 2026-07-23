@@ -14,7 +14,7 @@
 
 11B-1 코드 이동 후 학생 일정·학부모 일정·학생 11시의 OS row/Solapi 그룹 예약·취소 대조는 반 미지정 고태영 테스트 학생과 사용자 통제 번호로 통과했습니다. 학생 포털 실제 쓰기 검수, 교사 bearer/Storage 소유권 보안 gate, Solapi 특강 템플릿 외부 검수는 별도 보류 상태입니다.
 
-App.jsx 보충관리 리팩터링은 최신 `origin/main`에 rebase한 뒤 `12R-10` 저장상태 patch 계산부터 `12R-20` 알림톡 제어창 source view model까지 분리했고, `12R-21~23`에서 보충 내용 저장·완료·일정 생성/변경 modal adapter를 각각 전용 controller로 이동했다. 실제 task/lesson 저장·Supabase 재조회·React 전역 갱신·학생 11시 및 학생/학부모 일정 알림 예약은 App이 주입하는 callback 경계에 남고 controller에는 직접 API/notification/Solapi 호출이 없다. 앞선 고태영 저장·완료·일정·새로고침 사람 확인과 새 deterministic fixture, production 404/404, build를 근거로 AI gate를 통과했다. 다음은 결석 원천 취소 modal adapter 한 단위다. 새 화면 검수가 필요하면 `결석보강`에 노출되는 격리 고태영 데이터를 먼저 준비한다.
+App.jsx 보충관리 리팩터링은 최신 `origin/main`에 rebase한 뒤 `12R-10` 저장상태 patch 계산부터 `12R-20` 알림톡 제어창 source view model까지 분리했고, `12R-21~24`에서 보충 내용 저장·완료·일정 생성/변경·결석 원천 취소 modal adapter를 각각 전용 controller로 이동했다. 실제 task/lesson/출결 저장·Supabase 재조회·React 전역 갱신·notification/Solapi 작업은 App이 주입하는 callback 경계에 남고 controller에는 직접 API/notification/Solapi 호출이 없다. 앞선 고태영 저장·완료·일정·결석취소·새로고침 사람 확인과 새 deterministic fixture, production 405/405, build를 근거로 AI gate를 통과했다. 다음은 개별 알림 예약·취소 modal adapter 한 단위다. 새 외부 검수가 필요할 때만 `숙제보충` 또는 `결석보강`에 노출되는 격리 고태영 데이터를 먼저 준비한다.
 
 ## 시험분석 GPT Image 전용 세션 참고 자료
 

@@ -61,10 +61,8 @@ import {
   createSupplementNotificationDraftWorkspaceViewModel,
   createSupplementTaskCardViewModel
 } from "../domains/supplements/supplementTaskCardModel.js";
-import {
-  applySupplementNotificationControlAction,
-  cancelSupplementAbsenceSourceAction
-} from "../domains/supplements/supplementTaskActions.js";
+import { applySupplementNotificationControlAction } from "../domains/supplements/supplementTaskActions.js";
+import { createSupplementAbsenceCancelHandler } from "../domains/supplements/supplementAbsenceCancelController.js";
 import { createSupplementTaskContentSaveHandler } from "../domains/supplements/supplementTaskContentSaveController.js";
 import { createSupplementTaskPassHandler } from "../domains/supplements/supplementTaskPassController.js";
 import { createSupplementTaskScheduleHandlers } from "../domains/supplements/supplementTaskScheduleController.js";
@@ -22633,22 +22631,14 @@ function SupplementStudentModal({
     showFeedback
   });
 
-  async function handleCancelAbsenceSourceTask(task) {
-    if (!task || hasBusyTask) return;
-    beginTaskAction(task.makeupTaskId, "cancelAbsence");
-    try {
-      await cancelSupplementAbsenceSourceAction({
-        cancelSource: (payload) => onCancelAbsenceSource?.(payload),
-        onClose: () => onClose?.(),
-        onFeedback: ({ message, title, tone }) => showFeedback(title, message, tone),
-        task
-      });
-    } catch (error) {
-      console.error("Failed to cancel absence source", error);
-    } finally {
-      finishTaskAction();
-    }
-  }
+  const handleCancelAbsenceSourceTask = createSupplementAbsenceCancelHandler({
+    beginTaskAction,
+    finishTaskAction,
+    hasBusyTask,
+    onCancelAbsenceSource,
+    onClose,
+    showFeedback
+  });
 
   const handlePassTask = createSupplementTaskPassHandler({
     beginTaskAction,
