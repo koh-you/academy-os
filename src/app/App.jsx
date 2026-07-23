@@ -71,10 +71,8 @@ import {
 } from "../domains/notifications/NotificationCenterNavigation.jsx";
 import {
   createNotificationComposerViewModel,
-  createNotificationHistoryViewModel,
   resolveNotificationAudiencePhone,
-  resolveNotificationStudentName,
-  upsertLocalNoticeJobList
+  resolveNotificationStudentName
 } from "../domains/notifications/notificationCenterModel.js";
 import {
   getNotificationJobLabel,
@@ -96,12 +94,12 @@ import {
   reconcileNoticeResultsAction,
   refreshNoticeJobsInBackgroundAction,
   scheduleNoticeAction,
-  selectNoticeHistoryFilterAction,
   sendNoticeNowAction
 } from "../domains/notifications/notificationNoticeActions.js";
 import { buildNoticeJob as createNotificationNoticeJob } from "../domains/notifications/notificationNoticeBuilders.js";
 import { NotificationNoticeWorkspace } from "../domains/notifications/NotificationNoticeWorkspace.jsx";
 import { useNotificationCenterNavigationState } from "../domains/notifications/useNotificationCenterNavigationState.js";
+import { useNotificationHistoryState } from "../domains/notifications/useNotificationHistoryState.js";
 import { useNotificationRecipientState } from "../domains/notifications/useNotificationRecipientState.js";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import {
@@ -11631,15 +11629,9 @@ function NotificationCenter({
     initialNotificationTab,
     showSpecialLectureTab
   });
-  const [deletingJobId, setDeletingJobId] = useState("");
   const [dispatchMessage, setDispatchMessage] = useState("");
   const [isPolishingNotice, setIsPolishingNotice] = useState(false);
   const [isSendingNotice, setIsSendingNotice] = useState(false);
-  const [historyDate, setHistoryDate] = useState(today);
-  const [isNoticeHistoryOpen, setIsNoticeHistoryOpen] = useState(false);
-  const [notificationJobAction, setNotificationJobAction] = useState({ message: "", state: "idle" });
-  const [jobFilter, setJobFilter] = useState("all");
-  const [localNoticeJobs, setLocalNoticeJobs] = useState([]);
   const [noticeBody, setNoticeBody] = useState("");
   const [noticeKind, setNoticeKind] = useState("general");
   const [noticeSpecialLectureMeta, setNoticeSpecialLectureMeta] = useState(null);
@@ -11647,30 +11639,45 @@ function NotificationCenter({
   const [noticeTitle, setNoticeTitle] = useState("");
   const [scheduleDate, setScheduleDate] = useState(today);
   const [scheduleTime, setScheduleTime] = useState("18:00");
-  const [solapiResultSyncState, setSolapiResultSyncState] = useState({ checkedAt: "", state: "idle", message: "" });
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
   const isNotificationJobsLoading = notificationJobsStatus?.state === "loading";
   const {
     archivedJobs,
+    changeHistoryDate,
+    deletingJobId,
     failedJobs,
     filteredNotificationJobs,
     filterLabel,
+    historyDate,
+    isNoticeHistoryOpen,
+    jobFilter,
     managedNotificationJobs,
+    notificationJobAction,
     pastScheduledJobs,
     pendingJobs,
+    refreshHistoryForDate,
     scheduledJobs,
+    selectJobFilter,
+    setDeletingJobId,
+    setIsNoticeHistoryOpen,
+    setJobFilter,
+    setNotificationJobAction,
+    setSolapiResultSyncState,
     sentJobs,
-    solapiResultTargets
-  } = createNotificationHistoryViewModel({
+    solapiResultSyncState,
+    solapiResultTargets,
+    upsertLocalNoticeJob
+  } = useNotificationHistoryState({
     canCancelJob: canCancelNotificationJob,
     getDateString: getKoreaDateString,
     getProviderReference: getSolapiNotificationJobProviderReference,
-    historyDate,
+    initialHistoryDate: today,
     isSchedulePast: isNotificationSchedulePast,
-    jobFilter,
-    localNoticeJobs,
-    notificationJobs
+    notificationJobs,
+    onRefresh,
+    setDispatchMessage,
+    setActiveWorkspace: setActiveNoticeWorkspace
   });
   const parentResponseContextCount = getParentResponseContexts(managedNotificationJobs, students).length;
   const {
@@ -11765,34 +11772,6 @@ function NotificationCenter({
     setActiveNotificationTab("notice");
     setActiveNoticeWorkspace("compose");
     setDispatchMessage("특강 안내문을 저장한 뒤 공지 발송 화면에 반영했습니다. 수신 대상을 확인한 뒤 예약 발송 또는 즉시 발송으로 진행하세요.");
-  }
-
-  function selectJobFilter(nextFilter) {
-    selectNoticeHistoryFilterAction({
-      nextFilter,
-      setActiveWorkspace: setActiveNoticeWorkspace,
-      setIsHistoryOpen: setIsNoticeHistoryOpen,
-      setJobFilter
-    });
-  }
-
-  function refreshHistoryForDate(nextDate = historyDate) {
-    Promise.resolve(onRefresh?.({ date: nextDate })).catch((error) => {
-      setDispatchMessage((current) => `${current || "알림 기록"} 새로고침 실패: ${error.message}`);
-    });
-  }
-
-  function changeHistoryDate(nextDate) {
-    setHistoryDate(nextDate);
-    setActiveNoticeWorkspace("history");
-    setIsNoticeHistoryOpen(true);
-    refreshHistoryForDate(nextDate);
-  }
-
-  function upsertLocalNoticeJob(job) {
-    setLocalNoticeJobs((current) =>
-      upsertLocalNoticeJobList(current, job)
-    );
   }
 
   function buildNoticeJob(recipient, mode = "scheduled") {

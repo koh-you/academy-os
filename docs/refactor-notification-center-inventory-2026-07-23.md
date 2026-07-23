@@ -204,8 +204,14 @@
 - App은 hook 결과를 recipient panel과 발송 action에 그대로 전달한다.
 - hook은 local state와 순수 model/helper만 사용하고 학생 원천이나 외부 시스템을 쓰지 않는다.
 
+## 13E-3 history local state hook 단위
+
+- 삭제 중 ID·기록 펼침·작업 상태·filter·local jobs·Solapi 대조 표시 state와 history model/filter action/local upsert를 `useNotificationHistoryState`로 이동했다.
+- App은 hook 결과와 setter를 기존 외부 action에 주입한다.
+- hook은 local state와 순수 model/action만 소유하고 API/Supabase/Solapi 요청은 없다.
+
 ## 다음 후보
 
-1. 기록 filter/open/action/local job/Solapi 대조 표시 state와 기존 local action/model을 history state hook으로 묶는다.
-2. 이후 NotificationCenter 잔여 composer/busy state·adapter와 `SpecialLectureNoticePanel` 결합을 다시 inventory한다.
-3. 특강 안내문 적용/컴포넌트 이동이나 실제 발송 orchestration을 건드려야 하면 로드맵 13의 안전한 경계를 닫고 보류 상태를 기록한다.
+1. 공지 제목·본문·template/meta·예약일시 draft와 busy/message state를 composer state hook으로 묶는다.
+2. 특강 안내문 적용 문구와 handler는 외부 템플릿 gate 때문에 App에 그대로 둔다.
+3. 이후 NotificationCenter 잔여 adapter와 `SpecialLectureNoticePanel` 결합을 다시 inventory하고, 실제 발송 orchestration을 건드려야 하면 로드맵 13의 안전한 경계를 닫는다.
