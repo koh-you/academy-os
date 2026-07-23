@@ -4250,11 +4250,23 @@ button {
   border-color: #fecaca;
 }
 
+.stickySaveBar-saved .stickySaveBarStatus > span {
+  color: #047857;
+}
+
+.stickySaveBar-failed .stickySaveBarStatus > span {
+  color: #b91c1c;
+}
+
 .lessonJournalStickySaveBar {
   margin-inline: 2px;
 }
 
 .studentProfileStickySaveBar {
+  margin-inline: 2px;
+}
+
+.specialLecturePlanStickySaveBar {
   margin-inline: 2px;
 }
 
@@ -4270,6 +4282,21 @@ button {
 
   .stickySaveBarStatus .inlineSaveStatus {
     flex: 0 0 auto;
+  }
+
+  .specialLecturePlanStickySaveBar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .specialLecturePlanStickySaveBar .stickySaveBarActions {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    width: 100%;
+  }
+
+  .specialLecturePlanStickySaveBar .stickySaveBarActions .primaryButton {
+    min-width: 0;
+    white-space: normal;
   }
 }
 
@@ -8098,36 +8125,6 @@ button:disabled {
   flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end;
-}
-
-.specialLecturePlanSaveActions {
-  justify-content: space-between;
-}
-
-.specialLecturePlanSaveFeedback {
-  display: grid;
-  gap: 3px;
-  min-width: min(100%, 320px);
-}
-
-.specialLecturePlanSaveFeedback > span {
-  color: #64748b;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.specialLecturePlanSaveFeedback.saved > span {
-  color: #047857;
-}
-
-.specialLecturePlanSaveFeedback.failed > span {
-  color: #b91c1c;
-}
-
-.specialLecturePlanSaveButtons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
 }
 
 .specialLectureWebhookBox {

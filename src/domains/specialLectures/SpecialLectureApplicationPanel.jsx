@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { copyTextToClipboard } from "../exams/outputPreview.js";
 import { Modal } from "../../shared/components/Modal.jsx";
-import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
+import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { apiUrl } from "../../shared/utils/apiClient.js";
 import {
   createSpecialLectureEnrollmentId,
@@ -1786,18 +1786,17 @@ export function SpecialLectureApplicationPanel({
                   <span>일부 회차는 카드의 `남은 회차 취소`, 전체 신청은 `특강 신청 전체 취소`로 구분합니다.</span>
                 </div>
               </div>
-              <div className="specialLectureModalActions specialLecturePlanSaveActions">
-                <div className={`specialLecturePlanSaveFeedback ${planSaveState.state}`} aria-live="polite" role="status">
-                  <InlineSaveStatus label="회차·수업일지" saveState={planSaveState.state} />
-                  <span>{planSaveState.message || "회차와 시간을 확인한 뒤 미래 수업일지까지 함께 반영해 주세요."}</span>
-                </div>
-                <div className="specialLecturePlanSaveButtons">
-                  <button className="softButton" onClick={closePlanModal} type="button">닫기</button>
-                  <button className="primaryButton" disabled={!onSaveEnrollment || !isGuideSaved || savingEnrollmentId === enrollment.enrollmentId} onClick={() => saveEnrollmentDraft(enrollment)} type="button">
-                    {savingEnrollmentId === enrollment.enrollmentId ? "저장·반영 중" : planSaveState.state === "saved" ? "저장 완료" : "회차 계획 및 미래 수업일지 반영"}
-                  </button>
-                </div>
-              </div>
+              <StickySaveBar
+                className="specialLecturePlanStickySaveBar"
+                label="회차·수업일지"
+                message={planSaveState.message || "회차와 시간을 확인한 뒤 미래 수업일지까지 함께 반영해 주세요."}
+                saveState={planSaveState.state}
+              >
+                <button className="softButton" onClick={closePlanModal} type="button">닫기</button>
+                <button className="primaryButton" disabled={!onSaveEnrollment || !isGuideSaved || savingEnrollmentId === enrollment.enrollmentId} onClick={() => saveEnrollmentDraft(enrollment)} type="button">
+                  {savingEnrollmentId === enrollment.enrollmentId ? "저장·반영 중" : planSaveState.state === "saved" ? "저장 완료" : "회차 계획 및 미래 수업일지 반영"}
+                </button>
+              </StickySaveBar>
             </div>
           </Modal>
         );
