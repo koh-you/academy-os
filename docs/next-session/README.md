@@ -14,7 +14,7 @@
 
 11B-1 코드 이동 후 학생 일정·학부모 일정·학생 11시의 OS row/Solapi 그룹 예약·취소 대조는 반 미지정 고태영 테스트 학생과 사용자 통제 번호로 통과했습니다. 학생 포털 실제 쓰기 검수, 교사 bearer/Storage 소유권 보안 gate, Solapi 특강 템플릿 외부 검수는 별도 보류 상태입니다.
 
-App.jsx 보충관리 리팩터링은 최신 `origin/main`에 rebase한 뒤 `12R-10`에서 필드 변경에 따른 저장상태 patch 계산을, `12R-11`에서 task ID별 저장상태 map 병합을 `supplementTaskDraft.js`의 순수 helper로 분리했다. API·Supabase·Solapi·React 상태 소유권은 계속 기존 경계에 둔다.
+App.jsx 보충관리 리팩터링은 최신 `origin/main`에 rebase한 뒤 `12R-10` 저장상태 patch 계산, `12R-11` task별 상태 map 병합, `12R-12` 알림톡 제어창 local state hook까지 분리했다. API·Supabase·Solapi와 실제 예약·취소 action은 계속 기존 경계에 둔다. 12R-12는 고태영 격리 데이터로 제어창 열기·닫기·다른 탭 재열기 사람 gate를 통과했고 예약·취소/과금은 0건이다. 검수용 task·숙제·수업은 모두 삭제해 0건으로 재조회했다.
 
 ## 시험분석 GPT Image 전용 세션 참고 자료
 

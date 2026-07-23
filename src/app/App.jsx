@@ -67,6 +67,7 @@ import {
   saveSupplementTaskContentAction
 } from "../domains/supplements/supplementTaskActions.js";
 import { SupplementStudentModalShell } from "../domains/supplements/SupplementStudentModalShell.jsx";
+import { useSupplementNotificationControlState } from "../domains/supplements/useSupplementNotificationControlState.js";
 import { useSupplementTaskDraftController } from "../domains/supplements/useSupplementTaskDraftController.js";
 import {
   createPersistableSupplementTask,
@@ -22545,9 +22546,15 @@ function SupplementStudentModal({
   const [busyTaskId, setBusyTaskId] = useState("");
   const [taskSaveStatus, setTaskSaveStatus] = useState({});
   const [activeNotificationDraftFields, setActiveNotificationDraftFields] = useState({});
-  const [notificationControl, setNotificationControl] = useState(null);
-  const [notificationControlBusy, setNotificationControlBusy] = useState(false);
-  const [notificationControlFeedback, setNotificationControlFeedback] = useState(null);
+  const {
+    closeNotificationControl,
+    notificationControl,
+    notificationControlBusy,
+    notificationControlFeedback,
+    openNotificationControl,
+    setNotificationControlBusy,
+    setNotificationControlFeedback
+  } = useSupplementNotificationControlState();
   const {
     buildTaskWithDraft,
     getTaskDraftState,
@@ -22699,17 +22706,6 @@ function SupplementStudentModal({
       ...noticePatch,
       skipStudentReminder: !updateStudentReminder
     });
-  }
-
-  function openNotificationControl(task, controlType) {
-    setNotificationControl({ controlType, taskId: task.makeupTaskId });
-    setNotificationControlFeedback(null);
-  }
-
-  function closeNotificationControl() {
-    if (notificationControlBusy) return;
-    setNotificationControl(null);
-    setNotificationControlFeedback(null);
   }
 
   const notificationControlTask = notificationControl

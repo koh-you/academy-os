@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-12 보충 알림톡 제어창 local state hook 분리 — 사람 gate 통과
+
+- 코드: 선택한 task/control, busy, feedback과 열기·닫기 규칙을 `useSupplementNotificationControlState.js`로 이동했다. App은 현재 task/job/view model 계산과 실제 예약·취소 action 호출을 유지한다.
+- 동작 보존: 열 때 이전 feedback을 지우고, busy 중에는 닫지 않으며, 정상 닫기에서는 선택과 feedback을 함께 지우는 기존 순서를 유지한다.
+- 저장 원천/side effect: 모달 local React 상태만 소유한다. API, Supabase, `notification_jobs`, Solapi 예약·취소 callback은 hook에 없다.
+- 자동검증: 선택값 fixture, production scenario `88b-27`, production 392/392, build, `git diff --check`를 통과했다.
+- 사람 gate: 반 미지정 고태영에게 marker `[삭제 예정] 12R-12 알림 제어창 검수`로 task 1건·숙제 1건·원천/연결 수업 2건을 준비했다. 사용자가 알림톡 제어창 열기·닫기·다른 탭 재열기를 정상 확인했고 예약·취소는 누르지 않았다.
+- AI 재대조/정리: 검수 직후 task `scheduled`, 숙제 1건, 수업 2건, 알림 job 0건을 확인했다. 이후 검수용 task·숙제·수업을 삭제하고 네 원천 모두 0건으로 재조회했다. Solapi 호출과 과금은 0건이다.
+
 ## 2026-07-22 P1. 12R-11 보충 task 저장상태 map 병합 분리
 
 - 코드: task ID별 기존 `lesson / makeupTask / notificationDraft` 상태를 보존하면서 전달된 patch만 덮는 map 병합 규칙을 `supplementTaskDraft.js`의 순수 함수로 분리했다.
