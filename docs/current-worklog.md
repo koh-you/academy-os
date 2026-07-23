@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-13 보충 완료·일정 확인창 local state hook 분리 — AI gate 통과
+
+- 코드: 보충 완료 확인 대상과 일정 변경 확인 대상의 local React state, 열기·취소, 일정 확인 payload 조립을 `useSupplementConfirmationState.js`로 이동했다. App은 실제 완료/일정 action 호출, busy guard, API·전역 상태 adapter를 유지한다.
+- 동작 보존: 완료와 일정 확인창은 각각 독립 state를 사용한다. 일정 확인 시 확인창에서 받은 내역·사유를 기존 task에 합치고 `skipStudentReminder`를 선택값의 반대로 덮는 기존 순서를 유지한다.
+- 저장 원천/side effect: hook은 local state와 순수 payload 조립만 소유한다. API, Supabase, `notification_jobs`, Solapi 및 완료·일정 callback은 참조하지 않는다.
+- 자동검증: 알림 갱신/미갱신 payload와 원본 불변 fixture, production scenario `88b-28`, production 394/394, build, `git diff --check`를 통과했다.
+- gate 판정: 고태영 격리 `retest` task와 연결 lesson을 준비했지만 현재 보충관리에는 `재시험` 독립 탭이 없어 사람이 해당 경로로 진입할 수 없었다. 사용자가 AI 검토 가능한 단위는 pass하고 다음 작업을 이어가라고 지시했다. 이 hook은 local state와 순수 payload만 소유하고 실제 확인창 action은 12R-5 완료 처리와 12R-7 일정 생성 사람 gate에서 이미 검수됐으므로 추가 사람 gate 없이 AI gate 통과로 판정했다.
+- AI 정리: 검수 시도 전 task 1건·lesson 1건·job 0건을 확인했다. task 삭제가 연결 lesson을 함께 정리한 뒤 task·lesson·관련 job과 `codex_12r13_confirm_` prefix 잔여가 모두 0건임을 재조회했다. Solapi 호출과 과금은 0건이다.
+
 ## 2026-07-23 P1. 12R-12 보충 알림톡 제어창 local state hook 분리 — 사람 gate 통과
 
 - 코드: 선택한 task/control, busy, feedback과 열기·닫기 규칙을 `useSupplementNotificationControlState.js`로 이동했다. App은 현재 task/job/view model 계산과 실제 예약·취소 action 호출을 유지한다.
