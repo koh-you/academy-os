@@ -225,6 +225,14 @@
 - App은 문구 변경 callback과 실제 저장·예약·취소 action을 계속 소유하며, 모델은 렌더 props만 반환한다.
 - deterministic fixture, production scenario `88b-34`, production 400/400, build, diff 검사를 통과했다. 순수 workspace 표시 계산이므로 사용자 지시에 따라 AI gate로 통과했다.
 
+## 12R-20 구현 결과 — 알림톡 제어창 source view model
+
+- 선택 control에서 task/job/local draft diff/현재 문구를 모아 기존 control view model과 job display를 조합하는 `createSupplementNotificationControlModalViewModel`을 분리했다.
+- 취소·실패 job의 과거 preview를 재사용하지 않고 현재 저장 원천을 쓰며, dirty draft는 예약을 차단하는 기존 계약을 유지한다.
+- App은 실제 예약·취소 action과 callback을 계속 소유하며, 모델에는 API·Supabase·`notification_jobs` mutation·Solapi가 없다.
+- deterministic fixture, production scenario `88b-35`, production 401/401, build, diff 검사를 통과했다. 순수 source/view model이므로 사용자 지시에 따라 AI gate로 통과했다.
+- 다음 실제 action controller 이동은 저장·완료·일정·결석취소·알림톡 side effect가 함께 있는 고위험 경계다. 화면에 노출되는 격리 데이터와 사람 gate를 먼저 준비한다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.

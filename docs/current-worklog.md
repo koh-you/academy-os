@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-20 보충 알림톡 제어창 source view model 분리 — AI gate 통과
+
+- 코드: 제어창 선택값으로 현재 task/job/local draft 차이/현재 문구를 모으고 기존 control view model과 job display를 조합하는 순수 계산을 `createSupplementNotificationControlModalViewModel`로 이동했다.
+- 동작 보존: 선택 task ID, control별 현재 job, local draft diff, 당일 11시 또는 학생·학부모 일정 문구 원천을 기존 함수로 읽는다. 취소·실패 job은 과거 preview 대신 현재 저장 원천을 쓰고, 미저장 변경이 있으면 예약을 막는 기존 규칙을 유지한다.
+- 저장 원천/side effect: 전달된 task/job/local draft selector를 읽어 제어창 렌더·버튼 상태만 계산한다. 실제 예약·취소 action, job mutation, API, Supabase, Solapi 호출은 없다.
+- 자동검증: task/job/display/현재 preview 선택과 dirty 예약 차단 fixture, 기존 통합 검사의 새 모델 범위 확장, production scenario `88b-35`, production 401/401, build, `git diff --check`를 통과했다. 기존 대형 chunk 경고만 남았다.
+- gate 판정: 실제 예약·취소 callback과 side effect 순서를 App에 유지한 순수 source/view model 분리다. 사용자 지시에 따라 AI 검토로 통과하며 별도 사람 조작이나 검수 데이터는 요구하지 않는다.
+- 다음 경계: `SupplementStudentModal`에 남은 주요 코드는 실제 저장·완료·일정·결석취소·알림톡 예약취소 action adapter다. 이를 한 controller로 이동하는 다음 단위는 운영 원천과 외부 side effect를 함께 건드리므로 새 사람 gate와 화면에 노출되는 격리 데이터 준비 후에만 진행한다.
+
 ## 2026-07-23 P1. 12R-19 보충 알림톡 draft workspace view model 분리 — AI gate 통과
 
 - 코드: 선택된 문구 탭의 config, local draft, 선생님 확정 여부, 현재 job display와 전체 탭 config를 `createSupplementNotificationDraftWorkspaceViewModel` 순수 모델로 이동했다.

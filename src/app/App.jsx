@@ -55,7 +55,7 @@ import { SupplementPassConfirmModal } from "../domains/supplements/SupplementPas
 import { SupplementScheduleChangeConfirmModal } from "../domains/supplements/SupplementScheduleChangeConfirmModal.jsx";
 import { SupplementHistoryModal } from "../domains/supplements/SupplementHistoryModal.jsx";
 import { SupplementNotificationControlModal } from "../domains/supplements/SupplementNotificationControlModal.jsx";
-import { createSupplementNotificationControlViewModel } from "../domains/supplements/supplementNotificationControlModel.js";
+import { createSupplementNotificationControlModalViewModel } from "../domains/supplements/supplementNotificationControlModel.js";
 import { SupplementTaskCard } from "../domains/supplements/SupplementTaskCard.jsx";
 import {
   createSupplementNotificationDraftWorkspaceViewModel,
@@ -22723,42 +22723,35 @@ function SupplementStudentModal({
     handleApplyScheduleTask(confirmedTask);
   }
 
-  const notificationControlTask = notificationControl
-    ? tasks.find((task) => task.makeupTaskId === notificationControl.taskId) ?? null
-    : null;
-  const notificationControlJob = notificationControlTask && notificationControl
-    ? getSupplementNotificationControlJob(notificationControlTask, notificationJobs, notificationControl.controlType)
-    : null;
-  const notificationControlDisplay = getSupplementNotificationControlDisplayForApp(notificationControlJob);
-  const notificationControlDraftState = notificationControlTask ? getTaskDraftState(notificationControlTask) : null;
-  const notificationControlHasUnsavedChanges = Boolean(notificationControlTask && notificationControlDraftState &&
-    getSupplementTaskDraftDiff(
-      notificationControlTask,
-      notificationControlDraftState.values,
-      student,
-      normalizedNotificationTemplates
-    ).length);
-  const notificationControlCurrentPreview = notificationControlTask && notificationControl
-    ? notificationControl.controlType === "studentReminder"
-      ? createSupplementTaskDraft(notificationControlTask, student, normalizedNotificationTemplates).notificationDraft
-      : getSupplementScheduleNoticeDraft(
-          notificationControlTask,
-          notificationControl.controlType === "parentSchedule" ? "parent" : "student",
-          "",
-          normalizedNotificationTemplates
-        )
-    : "";
-  const notificationControlViewModel = createSupplementNotificationControlViewModel({
-    controlType: notificationControl?.controlType,
-    currentPreview: notificationControlCurrentPreview,
-    hasUnsavedChanges: notificationControlHasUnsavedChanges,
-    job: notificationControlJob,
+  const notificationControlViewModel = createSupplementNotificationControlModalViewModel({
+    notificationControl,
+    notificationJobs,
     student,
-    task: notificationControlTask
+    tasks
   }, {
     canCancelJob: canCancelNotificationJob,
+    getControlDisplay: getSupplementNotificationControlDisplayForApp,
+    getControlJob: getSupplementNotificationControlJob,
+    getCurrentPreview: (task, controlType) => controlType === "studentReminder"
+      ? createSupplementTaskDraft(task, student, normalizedNotificationTemplates).notificationDraft
+      : getSupplementScheduleNoticeDraft(
+          task,
+          controlType === "parentSchedule" ? "parent" : "student",
+          "",
+          normalizedNotificationTemplates
+        ),
+    getTaskDraftDiff: (task, draftValues) => getSupplementTaskDraftDiff(
+      task,
+      draftValues,
+      student,
+      normalizedNotificationTemplates
+    ),
+    getTaskDraftState,
     normalizeMessage: normalizeMessageText
   });
+  const notificationControlTask = notificationControlViewModel.task;
+  const notificationControlJob = notificationControlViewModel.job;
+  const notificationControlDisplay = notificationControlViewModel.display;
   const notificationControlConfig = notificationControlViewModel.config;
   const notificationControlBlockReason = notificationControlViewModel.blockReason;
   const notificationControlHasHistoricalJob = notificationControlViewModel.hasHistoricalJob;

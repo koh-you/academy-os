@@ -66,3 +66,44 @@ export function createSupplementNotificationControlViewModel({
     )
   };
 }
+
+export function createSupplementNotificationControlModalViewModel({
+  notificationControl = null,
+  notificationJobs = [],
+  student = null,
+  tasks = []
+} = {}, dependencies = {}) {
+  const task = notificationControl
+    ? tasks.find((item) => item.makeupTaskId === notificationControl.taskId) ?? null
+    : null;
+  const job = task && notificationControl
+    ? dependencies.getControlJob(
+        task,
+        notificationJobs,
+        notificationControl.controlType
+      )
+    : null;
+  const draftState = task ? dependencies.getTaskDraftState(task) : null;
+  const hasUnsavedChanges = Boolean(
+    task &&
+    draftState &&
+    dependencies.getTaskDraftDiff(task, draftState.values).length
+  );
+  const currentPreview = task && notificationControl
+    ? dependencies.getCurrentPreview(task, notificationControl.controlType)
+    : "";
+
+  return {
+    ...createSupplementNotificationControlViewModel({
+      controlType: notificationControl?.controlType,
+      currentPreview,
+      hasUnsavedChanges,
+      job,
+      student,
+      task
+    }, dependencies),
+    display: dependencies.getControlDisplay(job),
+    job,
+    task
+  };
+}
