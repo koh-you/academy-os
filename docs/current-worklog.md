@@ -8,6 +8,14 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 14A-5 시험 후 총평 순수 draft helper 분리 — AI gate 통과, 기능 불일치 발견
+
+- 코드: 체크리스트 config, 초안 생성/normalize, row scope·부교재 동기화, section 읽기/쓰기와 블로그 발췌 계산을 `src/domains/exams/examReviewDraft.js`로 이동했다.
+- 경계: 새 module에는 React state/effect, save timer, fetch/postJson, AI/Supabase 호출이 없다. 총평 modal의 local draft, 500ms 저장 callback과 `/api/ai/comment-polish`는 App에 남았다.
+- 자동검증: 자유 형식 보존, title/scope/부교재 갱신, multi-line normalize, section/블로그 발췌를 deterministic fixture로 고정했다. production 470/470, build, `git diff --check`가 통과했다.
+- 유지보수 진단: 2번 section의 title `난이도/체감`과 저장 label `2. 난이도 :`가 달라 section getter/setter 정규식이 기존 2번 줄을 찾지 못한다. 구조화 textarea에서 난이도 값이 비어 보이고 수정 시 별도 2번 줄이 추가될 수 있다.
+- 중단: 기능/문구 수정 권한이 없는 리팩터링 세션에서는 고치지 않았다. 유지보수 세션이 title/label과 기존 `exam_prep_rows.review` migration 여부를 결정해 main에 반영하기 전 총평 local state/AI action 분리를 중단한다. 사람 검수 데이터는 진단에 필요하지 않다.
+
 ## 2026-07-23 P1. 14A-4 시험 후 제출 teacher manager 분리 — AI gate 통과
 
 - 코드: 셀프체크 대상 선택, 제출 통계·내용·첨부 링크, 교사 확인 버튼과 저장 feedback을 `src/domains/exams/ExamPostSubmissionManager.jsx`로 이동했다.
