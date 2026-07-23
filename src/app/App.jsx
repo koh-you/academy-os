@@ -7,6 +7,10 @@ import { ExamAnalysisFinalPreviewPanel } from "../domains/exams/ExamAnalysisFina
 import { ExamPrepEditModal } from "../domains/exams/ExamPrepEditModal.jsx";
 import { ExamPrepPastPaperPanel } from "../domains/exams/ExamPrepPastPaperPanel.jsx";
 import { createExamPrepCenterDisplayModel } from "../domains/exams/examPrepCenterModel.js";
+import {
+  deleteExamPrepRowRequest,
+  saveExamPrepRowsRequest
+} from "../domains/exams/examPrepRowsApi.js";
 import { ExamPostSubmissionManager } from "../domains/exams/ExamPostSubmissionManager.jsx";
 import { ExamReviewComposerModal } from "../domains/exams/ExamReviewComposerModal.jsx";
 import { normalizeExamPrepRowReviewDraft } from "../domains/exams/examReviewDraft.js";
@@ -3765,23 +3769,6 @@ function postMakeupTasks(makeupTasks) {
   return postJson("/api/makeup-tasks/bulk", { makeupTasks });
 }
 
-function postExamPrepRow(examPrepRow) {
-  return postJson("/api/exam-prep-rows", { examPrepRow });
-}
-
-function postExamPrepRows(examPrepRows) {
-  return postJson("/api/exam-prep-rows/bulk", { examPrepRows });
-}
-
-function deleteExamPrepRowRequest(examPrepId) {
-  return fetch(apiUrl(`/api/exam-prep-rows?id=${encodeURIComponent(examPrepId)}&confirm=true`), { method: "DELETE" })
-    .then(async (response) => {
-      const result = await response.json();
-      if (!response.ok || !result.ok) throw new Error(result.error || "시험정보 삭제 실패");
-      return result;
-    });
-}
-
 function deleteExamAnalysisRunRequest(analysisRunId) {
   return fetch(apiUrl(`/api/exam-analysis-runs?id=${encodeURIComponent(analysisRunId)}`), { method: "DELETE" })
     .then(async (response) => {
@@ -7221,7 +7208,10 @@ export function App() {
       });
       return next;
     });
-    return postExamPrepRows(changedRows)
+    return saveExamPrepRowsRequest({
+      examPrepRows: changedRows,
+      request: postJson
+    })
       .then(() => {
         setExamPrepRowSaveStates((current) => {
           const next = { ...current };
@@ -7318,7 +7308,11 @@ export function App() {
     const nextExamPrepRows = examPrepRows.filter((item) => item.examPrepId !== examPrepId);
     setExamPrepRows(nextExamPrepRows);
     reconcilePersistedExamPrepLessons(nextExamPrepRows);
-    deleteExamPrepRowRequest(examPrepId).catch((error) => {
+    deleteExamPrepRowRequest({
+      examPrepId,
+      fetchImpl: fetch,
+      resolveApiUrl: apiUrl
+    }).catch((error) => {
       console.error(error);
       setExamPrepRows((current) => upsertById(current, row, "examPrepId"));
       reconcilePersistedExamPrepLessons(examPrepRows);
