@@ -3,6 +3,7 @@ import {
   createSupplementNotificationControlViewModel,
   supplementNotificationControlConfigs
 } from "../src/domains/supplements/supplementNotificationControlModel.js";
+import { createSupplementNotificationControlSelection } from "../src/domains/supplements/useSupplementNotificationControlState.js";
 
 const dependencies = {
   canCancelJob: (job) => ["scheduled", "queued"].includes(job?.status),
@@ -14,6 +15,11 @@ const task = {
   scheduledDate: "2026-07-24",
   scheduledTime: "15:30"
 };
+
+assert.deepEqual(createSupplementNotificationControlSelection({ makeupTaskId: "task-1" }, "parentSchedule"), {
+  controlType: "parentSchedule",
+  taskId: "task-1"
+});
 
 assert.equal(supplementNotificationControlConfigs.studentReminder.statusField, "studentReminder");
 assert.deepEqual(
