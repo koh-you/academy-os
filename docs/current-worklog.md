@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13D-9 알림 공지 작성 workspace 조합 컴포넌트 분리 — AI gate 통과
+
+- 코드: 공지 작성 영역의 `MESSAGE CENTER` 헤더, 수신 건수, 수신자 패널·작성 패널 그리드 조합을 새 `NotificationComposeWorkspace.jsx`로 이동했다. App은 두 패널의 기존 props와 callback을 각각 객체로 전달한다.
+- 동작 보존: `notificationPanel noticeComposerPanel`, `sectionHeader slim`, `noticeComposerGrid` DOM 구조와 수신자 패널 뒤 작성 패널 순서, 모든 입력·선택·AI 수정·예약·즉시발송 callback 연결을 그대로 유지했다.
+- 저장 원천/side effect: 새 컴포넌트는 props를 표시 컴포넌트에 전달할 뿐 state/effect/API/Supabase/notification job/Solapi 호출이 없다. 발송·예약·AI handler와 local state는 계속 App이 소유한다.
+- 자동검증: 새 파일이 state/effect/외부 호출 없이 두 패널을 같은 순서로 조합하는지, 기존 recipient/composer scenario가 새 경계를 따라 모든 callback을 계속 확인하는지 production scenario 448개로 고정했다. production scenario 448/448와 build, `git diff --check`가 통과했다.
+- gate 판정: React 컴포넌트 경계만 이동했고 렌더 DOM과 callback identity를 정적으로 검증했다. 재시험/고태영 운영 데이터나 실제 발송, 사람 화면 검수가 필요하지 않은 AI gate다.
+- 다음 경계: notice 탭·작성 workspace·기록 panel의 조건부 조합을 별도 presentational shell로 이동할 수 있는지 확인한다. 모든 handler는 계속 App에 남긴다.
+
 ## 2026-07-23 P1. 13D-8 알림 수신 audience 번호 accessor 분리 — AI gate 통과
 
 - 코드: 알림 수신 카드에서 audience에 따라 학생 번호 또는 학부모 번호를 고르는 계산을 `notificationCenterModel.js`의 `resolveNotificationAudiencePhone`으로 이동했다. App의 기존 callback은 student와 audience를 그대로 전달한다.

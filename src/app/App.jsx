@@ -85,9 +85,8 @@ import {
   sendNoticeNowAction
 } from "../domains/notifications/notificationNoticeActions.js";
 import { buildNoticeJob as createNotificationNoticeJob } from "../domains/notifications/notificationNoticeBuilders.js";
-import { NotificationComposerPanel } from "../domains/notifications/NotificationComposerPanel.jsx";
+import { NotificationComposeWorkspace } from "../domains/notifications/NotificationComposeWorkspace.jsx";
 import { NotificationHistoryPanel } from "../domains/notifications/NotificationHistoryPanel.jsx";
-import { NotificationRecipientPanel } from "../domains/notifications/NotificationRecipientPanel.jsx";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { createSupplementSchedulePersistencePlan } from "../domains/supplements/supplementSchedulePlan.js";
 import { SupplementCenter } from "../domains/supplements/SupplementCenter.jsx";
@@ -10536,64 +10535,54 @@ function NotificationCenter({
         sentCount={sentJobs.length}
       />
       {activeNoticeWorkspace === "compose" ? (
-      <section className="notificationPanel noticeComposerPanel">
-        <div className="sectionHeader slim">
-          <div>
-            <p className="eyebrow">MESSAGE CENTER</p>
-            <h2>개별 발송</h2>
-          </div>
-          <span className="countBadge">수신 {noticeRecipients.length}건</span>
-        </div>
-
-        <div className="noticeComposerGrid">
-          <NotificationRecipientPanel
-            classFilter={classFilter}
-            classTemplates={classTemplates}
-            getAudiencePhone={getNoticeAudiencePhone}
-            normalizePhoneNumber={normalizePhoneNumber}
-            noticeRecipientCount={noticeRecipients.length}
-            noticeRecipientMode={noticeRecipientMode}
-            noticeWithdrawnClassFilterId={noticeWithdrawnClassFilterId}
-            onClassFilterChange={setClassFilter}
-            onClearSelectedStudents={clearSelectedStudents}
-            onNoticeRecipientModeChange={setNoticeRecipientMode}
-            onSearchTextChange={setSearchText}
-            onSelectAllVisibleStudents={selectAllVisibleStudents}
-            onToggleStudentSelection={toggleStudentSelection}
-            parentRecipientCount={parentRecipientCount}
-            searchText={searchText}
-            selectedStudentIds={selectedStudentIds}
-            studentRecipientCount={studentRecipientCount}
-            targetAudiences={targetAudiences}
-            targetStudentCount={targetStudents.length}
-            visibleStudents={visibleNoticeStudents}
-            withdrawnStudentCount={withdrawnStudents.length}
-          />
-
-          <NotificationComposerPanel
-            dispatchMessage={dispatchMessage}
-            isPolishingNotice={isPolishingNotice}
-            isSendingNotice={isSendingNotice}
-            noticeBody={noticeBody}
-            noticeMessageTemplates={noticeMessageTemplates}
-            noticeRecipientCount={noticeRecipients.length}
-            noticeTemplateId={noticeTemplateId}
-            noticeText={noticeText}
-            noticeTitle={noticeTitle}
-            onApplyTemplate={applyNoticeTemplate}
-            onBodyChange={setNoticeBody}
-            onPolishNotice={polishNoticeMessage}
-            onScheduleDateChange={setScheduleDate}
-            onScheduleNotice={scheduleNotice}
-            onScheduleTimeChange={setScheduleTime}
-            onSendNoticeNow={sendNoticeNow}
-            onTitleChange={setNoticeTitle}
-            scheduleDate={scheduleDate}
-            scheduledAt={scheduledAt}
-            scheduleTime={scheduleTime}
-          />
-        </div>
-      </section>
+        <NotificationComposeWorkspace
+          composerPanelProps={{
+            dispatchMessage,
+            isPolishingNotice,
+            isSendingNotice,
+            noticeBody,
+            noticeMessageTemplates,
+            noticeRecipientCount: noticeRecipients.length,
+            noticeTemplateId,
+            noticeText,
+            noticeTitle,
+            onApplyTemplate: applyNoticeTemplate,
+            onBodyChange: setNoticeBody,
+            onPolishNotice: polishNoticeMessage,
+            onScheduleDateChange: setScheduleDate,
+            onScheduleNotice: scheduleNotice,
+            onScheduleTimeChange: setScheduleTime,
+            onSendNoticeNow: sendNoticeNow,
+            onTitleChange: setNoticeTitle,
+            scheduleDate,
+            scheduledAt,
+            scheduleTime
+          }}
+          noticeRecipientCount={noticeRecipients.length}
+          recipientPanelProps={{
+            classFilter,
+            classTemplates,
+            getAudiencePhone: getNoticeAudiencePhone,
+            normalizePhoneNumber,
+            noticeRecipientCount: noticeRecipients.length,
+            noticeRecipientMode,
+            noticeWithdrawnClassFilterId,
+            onClassFilterChange: setClassFilter,
+            onClearSelectedStudents: clearSelectedStudents,
+            onNoticeRecipientModeChange: setNoticeRecipientMode,
+            onSearchTextChange: setSearchText,
+            onSelectAllVisibleStudents: selectAllVisibleStudents,
+            onToggleStudentSelection: toggleStudentSelection,
+            parentRecipientCount,
+            searchText,
+            selectedStudentIds,
+            studentRecipientCount,
+            targetAudiences,
+            targetStudentCount: targetStudents.length,
+            visibleStudents: visibleNoticeStudents,
+            withdrawnStudentCount: withdrawnStudents.length
+          }}
+        />
       ) : null}
       {activeNoticeWorkspace === "history" ? (
       <NotificationHistoryPanel

@@ -180,8 +180,14 @@
 - App은 recipient panel callback에서 student와 audience를 그대로 전달한다.
 - 학생·학부모·기존 default 분기를 equality fixture로 고정했으며 번호 정규화나 발송은 없다.
 
+## 13D-9 공지 작성 workspace 조합 컴포넌트 단위
+
+- 작성 영역 header·수신 건수·recipient/composer panel 순서와 grid를 `NotificationComposeWorkspace`로 이동했다.
+- App은 두 하위 패널의 기존 props/callback 객체만 전달한다.
+- 새 컴포넌트는 state/effect/외부 호출이 없고 발송·예약 handler는 App에 남는다.
+
 ## 다음 후보
 
-1. NotificationCenter 잔여 local setter wrapper·effect·JSX와 특강 panel 결합을 다시 inventory한다.
-2. 순수 model 또는 local-only state 단위가 남았을 때만 한 번에 하나씩 분리한다.
+1. notice 탭·작성 workspace·기록 panel의 조건부 조합을 presentational shell로 분리한다.
+2. 이후 NotificationCenter 잔여 local setter wrapper·effect와 특강 panel 결합을 다시 inventory한다.
 3. 특강 안내문 적용/컴포넌트 이동이 Solapi 특강 템플릿 외부 검수 경계를 건드리면 중단하고 보류 상태를 기록한다.
