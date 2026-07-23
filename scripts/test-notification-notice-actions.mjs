@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   applyNoticeTemplateAction,
   cancelNoticeJobAction,
+  createCancelNoticeJobBinding,
   createReconcileNoticeResultsBinding,
   deleteNoticeJobAction,
   polishNoticeMessageAction,
@@ -730,6 +731,40 @@ assert.deepEqual(canceledLocalJobs, [canceledJob]);
 assert.deepEqual(cancelFilters, ["draft"]);
 assert.deepEqual(cancelHistoryStates, [true]);
 assert.equal(cancelRefreshCount, 1);
+
+const bindingCancelRequests = [];
+const bindingCanceledJobs = [];
+const bindingCancelTarget = {
+  notificationJobId: "notice-cancel-binding",
+  status: "scheduled"
+};
+const cancelNotificationJob = createCancelNoticeJobBinding({
+  canCancelJob: () => true,
+  cancelJob: async (...args) => {
+    bindingCancelRequests.push(args);
+    return {
+      notificationJob: {
+        ...bindingCancelTarget,
+        status: "canceled"
+      },
+      solapiCancellation: { groupId: "fixture-binding-group" }
+    };
+  },
+  confirmAction: () => true,
+  deletingJobId: "",
+  refreshJobs: () => {},
+  setDeletingJobId: () => {},
+  setIsHistoryOpen: () => {},
+  setJobAction: () => {},
+  setJobFilter: () => {},
+  upsertLocalJob: (job) => bindingCanceledJobs.push(job)
+});
+await cancelNotificationJob(bindingCancelTarget);
+assert.deepEqual(bindingCancelRequests, [[bindingCancelTarget, "알림관리에서 예약 취소"]]);
+assert.deepEqual(bindingCanceledJobs, [{
+  ...bindingCancelTarget,
+  status: "canceled"
+}]);
 
 const osOnlyCancelStates = [];
 await cancelNoticeJobAction({

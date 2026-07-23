@@ -313,6 +313,15 @@ export async function cancelNoticeJobAction({
   }
 }
 
+export function createCancelNoticeJobBinding(options) {
+  return function cancelNotificationJob(job) {
+    return cancelNoticeJobAction({
+      ...options,
+      job
+    });
+  };
+}
+
 export function refreshNoticeJobsInBackgroundAction({
   refreshJobs,
   setDispatchMessage
