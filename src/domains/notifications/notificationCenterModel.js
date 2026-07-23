@@ -33,6 +33,19 @@ export function selectAllNoticeStudentIds(students = []) {
   return students.map((student) => student.studentId);
 }
 
+export function upsertLocalNoticeJobList(
+  currentJobs = [],
+  job,
+  limit = 80
+) {
+  return [
+    job,
+    ...currentJobs.filter(
+      (item) => item.notificationJobId !== job.notificationJobId
+    )
+  ].slice(0, limit);
+}
+
 export function createNotificationRecipientViewModel({
   classFilter = "all",
   classTemplates = [],

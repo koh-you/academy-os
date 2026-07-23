@@ -156,8 +156,14 @@
 - App이 선택 filter와 기존 setter를 주입한다.
 - setter 호출값과 순서를 fixture로 고정했으며 외부 조회나 mutation은 없다.
 
+## 13D-5 local job upsert 순수 model 단위
+
+- local notice job의 최신 우선·같은 ID 제거·기본 80건 제한 배열 계산을 `upsertLocalNoticeJobList`로 이동했다.
+- App은 함수형 local setter에서 순수 model 결과만 반영한다.
+- 중간 ID 갱신, 신규 ID, 중복 제거와 limit을 fixture로 고정했으며 서버/외부 mutation은 없다.
+
 ## 다음 후보
 
-1. local notice job upsert의 중복 제거·최신 우선·80건 제한을 순수 model로 분리한다.
+1. `noticeText`, `scheduledAt`, Solapi 결과 대조 ID, 마지막 확인 label 파생 계산을 model로 분리한다.
 2. 그다음 NotificationCenter에 남은 local wrapper/effect 경계를 다시 inventory한다.
 3. 특강 안내문 적용 handler는 Solapi 특강 템플릿 외부 검수와 기능 경계를 바꾸지 않는 범위만 다룬다.
