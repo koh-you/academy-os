@@ -42,7 +42,13 @@
 - 초안 state와 `noticeText`/`scheduledAt`, 템플릿 적용, AI 수정, 예약·즉시발송 handler는 App이 계속 소유한다.
 - 컴포넌트는 기존 disabled 조건과 callback 연결만 소유하고 API/Supabase/Solapi를 직접 호출하지 않는다.
 
+## 13A-4 안전 단위
+
+- 발송 기록 한 행의 상태·종류·수신자·시각·미리보기와 관리 버튼 표시를 `NotificationHistoryRow.jsx`로 이동했다.
+- 상태/종류 helper, 취소·삭제 가능 판정과 실제 취소·삭제 handler는 App이 계속 소유한다.
+- 행은 전달받은 job을 표시하고 callback에 되돌려줄 뿐 API/Supabase/Solapi mutation을 직접 수행하지 않는다.
+
 ## 다음 후보
 
-1. 발송 기록 table을 read-only row + cancel/delete callbacks 경계로 분리한다.
+1. 발송 기록 header/status/table/collapsed shell을 controlled 컴포넌트로 분리한다.
 2. payload builder와 실제 API orchestration은 별도 inventory/fixture와 사람 gate 필요성을 다시 판정한다.
