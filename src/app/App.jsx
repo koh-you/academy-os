@@ -86,7 +86,6 @@ import {
   reserveNoticeJobRequest
 } from "../domains/notifications/notificationNoticeApi.js";
 import {
-  applyNoticeTemplateAction,
   cancelNoticeJobAction,
   deleteNoticeJobAction,
   polishNoticeMessageAction,
@@ -11693,6 +11692,7 @@ function NotificationCenter({
     students
   });
   const {
+    applyNoticeTemplate,
     dispatchMessage,
     isPolishingNotice,
     isSendingNotice,
@@ -11721,6 +11721,7 @@ function NotificationCenter({
     formatKoreaTimeLabel,
     solapiResultSyncCheckedAt: solapiResultSyncState.checkedAt,
     solapiResultTargets,
+    templates: noticeMessageTemplates,
     today
   });
 
@@ -11760,18 +11761,6 @@ function NotificationCenter({
 
   function getNoticeAudiencePhone(student, audience) {
     return resolveNotificationAudiencePhone(student, audience);
-  }
-
-  function applyNoticeTemplate(templateId) {
-    applyNoticeTemplateAction({
-      setNoticeBody,
-      setNoticeKind,
-      setNoticeSpecialLectureMeta,
-      setNoticeTemplateId,
-      setNoticeTitle,
-      templateId,
-      templates: noticeMessageTemplates
-    });
   }
 
   function applySpecialLectureGuideToNotice(guide, noticeBodyText, guideUrl) {

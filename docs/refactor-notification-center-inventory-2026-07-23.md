@@ -216,8 +216,14 @@
 - App은 hook 결과와 setter를 기존 local/external action에 주입한다.
 - hook은 local state와 순수 model만 소유하고 특강 적용 handler·외부 요청은 없다.
 
+## 13F-1 template local action adapter 단위
+
+- `applyNoticeTemplate` wrapper를 composer hook으로 이동하고 App이 template config를 주입한다.
+- hook은 기존 `applyNoticeTemplateAction`을 local setter와만 결합한다.
+- 특강 적용 handler·외부 template ID·발송 경로는 변경하지 않았다.
+
 ## 다음 후보
 
-1. NotificationCenter 잔여 identity wrapper, template local action adapter, job builder/request/action adapter를 다시 inventory한다.
+1. 학생 이름·audience 전화번호 순수 resolver를 recipient/history hook의 bound callback으로 제공한다.
 2. 특강 안내문 적용 문구와 handler는 외부 템플릿 gate 때문에 App에 그대로 둔다.
-3. 실제 발송 orchestration 이동이 필요하면 기존 mock fixture가 충분한지 먼저 확인하고, 충분하지 않으면 로드맵 13의 안전한 경계를 닫는다.
+3. 이후 job builder/request/action adapter 이동은 기존 mock fixture가 충분한지 먼저 확인하고, 충분하지 않으면 로드맵 13의 안전한 경계를 닫는다.
