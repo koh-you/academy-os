@@ -273,6 +273,14 @@
 - 11B-9에서 동일 callback의 고태영 실제 OS/Solapi 예약·취소를 검수했고 12R-8 action 순서도 고정했으므로 새 운영 데이터나 Solapi 호출 없이 AI gate로 통과했다.
 - 다음은 task draft 변경 adapter와 확인창 submit adapter를 한 의미 단위씩 정리한 뒤 `SupplementStudentModal` 본체 파일 분리를 검토한다.
 
+## 12R-26 구현 결과 — task draft 변경 adapter
+
+- task ID guard, local draft 값 변경, 현재 저장상태 조회와 필드별 patch 적용을 `createSupplementTaskDraftChangeHandler`로 분리했다.
+- React 메모리의 local draft와 저장상태 표시만 갱신하며 API·Supabase·`notification_jobs`·Solapi와 실제 action callback은 없다.
+- 일정/알림/일반 필드와 update→status 순서, ID guard fixture, production scenario `88b-41`, production 407/407, build, diff 검사를 통과했다.
+- 순수 patch helper를 그대로 사용하는 local adapter이므로 새 운영 데이터나 사람 조작 없이 AI gate로 통과했다.
+- 다음은 완료·일정 확인창 submit adapter를 분리한 뒤 `SupplementStudentModal` 본체 파일 분리를 검토한다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.
