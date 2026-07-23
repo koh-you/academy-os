@@ -183,6 +183,13 @@
 - App은 실제 완료·일정 action, busy guard, 저장 callback과 외부 side effect를 계속 소유한다.
 - hook에는 API·Supabase·`notification_jobs`·Solapi·실제 완료/일정 callback이 없다. 재시험 독립 탭이 없어 준비한 고태영 task가 사람 화면에 노출되지 않았고, 사용자의 AI 검토 pass 지시에 따라 deterministic payload·production scenario와 앞선 12R-5·12R-7 실제 action gate를 근거로 통과 처리했다. 검수용 task·lesson·job 잔여는 모두 0건으로 정리했다.
 
+## 12R-14 구현 결과 — 상세 feedback local state
+
+- 상단 성공·실패 안내의 local state와 `show/dismiss`를 `useSupplementFeedbackState.js`로 분리했다.
+- feedback의 `{ title, message, tone }` 구조와 기본 `success` tone, 닫기 시 `null` 초기화를 그대로 유지한다.
+- App은 실제 저장·완료·일정·결석취소 action과 callback을 계속 소유하며, hook에는 API·Supabase·`notification_jobs`·Solapi가 없다.
+- deterministic fixture, production scenario `88b-29`, production 395/395, build, diff 검사를 통과했다. 운영 데이터나 외부 side effect가 없는 local 표시 상태이므로 사용자 지시에 따라 AI gate로 통과했고 별도 사람 검수 데이터는 만들지 않았다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.

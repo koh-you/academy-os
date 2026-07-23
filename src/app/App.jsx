@@ -95,6 +95,7 @@ import {
 import { SupplementStudentModalShell } from "../domains/supplements/SupplementStudentModalShell.jsx";
 import { useSupplementNotificationControlState } from "../domains/supplements/useSupplementNotificationControlState.js";
 import { useSupplementConfirmationState } from "../domains/supplements/useSupplementConfirmationState.js";
+import { useSupplementFeedbackState } from "../domains/supplements/useSupplementFeedbackState.js";
 import { useSupplementTaskDraftController } from "../domains/supplements/useSupplementTaskDraftController.js";
 import {
   createPersistableSupplementTask,
@@ -24605,11 +24606,15 @@ function SupplementStudentModal({
     () => normalizeNotificationTemplates(notificationTemplates),
     [notificationTemplates]
   );
-  const [feedback, setFeedback] = useState(null);
   const [cancellationConfirm, setCancellationConfirm] = useState(null);
   const [busyTaskId, setBusyTaskId] = useState("");
   const [taskSaveStatus, setTaskSaveStatus] = useState({});
   const [activeNotificationDraftFields, setActiveNotificationDraftFields] = useState({});
+  const {
+    dismissFeedback,
+    feedback,
+    showFeedback
+  } = useSupplementFeedbackState();
   const {
     closePassConfirmation,
     closeScheduleConfirmation,
@@ -24639,10 +24644,6 @@ function SupplementStudentModal({
     student,
     tasks
   });
-
-  function showFeedback(title, message, tone = "success") {
-    setFeedback({ title, message, tone });
-  }
 
   function setTaskSaveStatusPatch(taskId, patch) {
     setTaskSaveStatus((current) => mergeSupplementTaskSaveStatus(current, taskId, patch));
@@ -24881,7 +24882,7 @@ function SupplementStudentModal({
       feedback={feedback}
       isEmpty={tasks.length === 0}
       onClose={onClose}
-      onDismissFeedback={() => setFeedback(null)}
+      onDismissFeedback={dismissFeedback}
       overlays={(
         <>
           {cancellationConfirm ? (
