@@ -1,8 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  copyTextToClipboard
-} from "../domains/exams/outputPreview.js";
-import {
   createExamAnalysisFinalPreviewModel,
   examAnalysisPreviewPalette
 } from "../domains/exams/finalPreview.js";
@@ -17,10 +14,7 @@ import {
   getExamReviewSectionValue,
   normalizeExamPrepRowReviewDraft
 } from "../domains/exams/examReviewDraft.js";
-import {
-  buildExamReviewPolishPayload,
-  polishExamReviewRequest
-} from "../domains/exams/examReviewApi.js";
+import { useExamReviewComposerActions } from "../domains/exams/useExamReviewComposerActions.js";
 import { useExamReviewDraftState } from "../domains/exams/useExamReviewDraftState.js";
 import { StudentManager } from "../domains/students/StudentManager.jsx";
 import { ParentPortal } from "../domains/portals/ParentPortal.jsx";
@@ -18236,56 +18230,30 @@ function ExamPrepCenter({
 function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUpdateRow, row, saveState = "idle" }) {
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
-  const copyStatusTimerRef = useRef(null);
-  const [reviewCopyStatus, setReviewCopyStatus] = useState("");
   const {
     flushPendingReviewSave,
     reviewDraft,
     updateReviewDraft,
     updateReviewSection
   } = useExamReviewDraftState({ onUpdateRow, row });
-
-  useEffect(() => () => {
-    if (copyStatusTimerRef.current) clearTimeout(copyStatusTimerRef.current);
-  }, []);
+  const {
+    copyRevisedReview,
+    polishReview,
+    reviewCopyStatus,
+    updateRevisedReview
+  } = useExamReviewComposerActions({
+    aiModel: commentAiModel,
+    aiPrompt: getAiPrompt(aiSettings, "examReviewSpelling"),
+    aiProvider: commentAiProvider,
+    currentDate: today,
+    onUpdateRow,
+    reviewDraft,
+    row
+  });
 
   function handleClose() {
     flushPendingReviewSave();
     onClose();
-  }
-
-  async function copyRevisedReview() {
-    const copied = await copyTextToClipboard(row.revisedReview ?? "");
-    setReviewCopyStatus(copied ? "복사되었습니다." : "복사할 내용을 확인해 주세요.");
-    if (copyStatusTimerRef.current) clearTimeout(copyStatusTimerRef.current);
-    copyStatusTimerRef.current = setTimeout(() => {
-      copyStatusTimerRef.current = null;
-      setReviewCopyStatus("");
-    }, 1800);
-  }
-
-  async function polishReview() {
-    onUpdateRow(row.examPrepId, "reviewAiStatus", "AI 수정 중");
-    try {
-      const result = await polishExamReviewRequest({
-        fetchImpl: fetch,
-        resolveApiUrl: apiUrl,
-        payload: buildExamReviewPolishPayload({
-          aiProvider: commentAiProvider,
-          aiModel: commentAiModel,
-          aiPrompt: getAiPrompt(aiSettings, "examReviewSpelling"),
-          grade: row.grade,
-          lessonDate: row.mathExamDate || row.examPeriod || today,
-          lessonName: `${row.schoolName} ${row.subject} 시험 총평`,
-          rawText: reviewDraft,
-          schoolName: row.schoolName
-        })
-      });
-      onUpdateRow(row.examPrepId, "revisedReview", result.polishedText);
-      onUpdateRow(row.examPrepId, "reviewAiStatus", `완료 · ${result.provider}`);
-    } catch (error) {
-      onUpdateRow(row.examPrepId, "reviewAiStatus", `실패 · ${error.message}`);
-    }
   }
 
   return (
@@ -18358,10 +18326,7 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
           <textarea
             className="commentComposerTextarea"
             value={row.revisedReview ?? ""}
-            onChange={(event) => {
-              setReviewCopyStatus("");
-              onUpdateRow(row.examPrepId, "revisedReview", event.target.value);
-            }}
+            onChange={(event) => updateRevisedReview(event.target.value)}
             placeholder="AI가 다듬은 총평 또는 강사가 최종 수정한 총평이 들어갑니다."
           />
           {reviewCopyStatus ? (

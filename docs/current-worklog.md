@@ -8,6 +8,14 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 14A-9 시험 후 총평 AI/clipboard action hook 분리 — AI gate 통과
+
+- 코드: `AI 수정`의 진행/성공/실패 callback, 14A-7 request adapter 연결, `수정본 복사`와 1.8초 상태 timer, revisedReview 변경 callback을 `src/domains/exams/useExamReviewComposerActions.js`로 이동했다.
+- 경계: action은 사용자 클릭/입력 때만 실행된다. App은 resolved provider/model/prompt/date, row와 `onUpdateRow`를 주입하고 실제 exam row persistence/save state를 계속 소유한다.
+- 동작 보존: 맞춤법 AI payload·성공 provider·실패 문구, 복사 성공/실패 문구와 timer cleanup, 수정본 입력 시 복사 상태 초기화를 유지했다.
+- 자동검증: production 계약이 App-hook 연결, AI/clipboard/status callback 순서, App 내부 legacy handler 제거, hook의 postJson 부재를 검증한다. 실제 AI·clipboard 실행은 0회다. production scenario 473/473, build, `git diff --check`가 통과했다.
+- 사람 gate: 기존 fake request fixture와 정적 action 계약으로 확인 가능해 새 사람 조작은 필요하지 않다. 다음은 `ExamReviewComposerModal` DOM 자체를 전용 파일로 이동한다.
+
 ## 2026-07-23 P1. 14A-8 시험 후 총평 draft React state hook 분리 — AI gate 통과
 
 - 코드: 총평 draft 초기화, examPrepId 전환 동기화, normalize 결과 callback, section/원문 변경과 14A-6 save controller 연결을 `src/domains/exams/useExamReviewDraftState.js`로 이동했다.

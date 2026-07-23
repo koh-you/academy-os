@@ -110,9 +110,16 @@
 - production 계약이 App의 legacy state/timer 연결 제거와 hook 내부 fetch/postJson 부재를 검사한다.
 - production scenario 472/472, build, `git diff --check`를 통과했고 운영 row를 쓰지 않았다.
 
+## 14A-9 시험 후 총평 AI/clipboard action hook
+
+- AI 진행/완료/실패 callback과 request adapter 연결, 수정본 복사·1.8초 상태 timer, revisedReview 변경 callback을 `useExamReviewComposerActions.js`로 이동했다.
+- action은 사용자 클릭/입력으로만 실행되며 App이 provider/model/prompt/date, row와 실제 저장 callback을 주입한다.
+- production 계약이 AI/clipboard/status 순서와 App legacy handler 제거를 검사한다. 실제 AI·clipboard 실행은 0회다.
+- production scenario 473/473, build, `git diff --check`를 통과했다.
+
 ## 이후 후보와 중단 조건
 
-1. 총평 modal AI/clipboard action과 DOM
+1. `ExamReviewComposerModal` DOM 전용 파일
 2. 시험정보 저장·삭제·수업 reconcile orchestration
 
 학생 제출·교사 확인·Storage 파일 열기 경계를 건드리면 기존 학생 포털 실제 쓰기와 bearer/Storage gate에서 중단한다. 시험정보 삭제나 시험대비 수업 생성·삭제를 옮길 때는 별도의 격리 데이터와 사람 gate가 필요하다. 순수 표시/model 단위는 deterministic fixture와 production test/build로 검증하고 운영 데이터를 만들지 않는다.
