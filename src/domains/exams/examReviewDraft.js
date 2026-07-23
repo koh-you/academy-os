@@ -202,11 +202,18 @@ function escapeExamReviewRegExp(value = "") {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function getExamReviewSectionPattern(section = {}) {
+  const labelMatch = String(section.label ?? "").trim().match(/^(?:[1-9]|10)\.\s*(.*?)\s*:\s*$/);
+  const storedTitle = labelMatch?.[1] || section.title || "";
+  return new RegExp(`^${section.number}\\.\\s*${escapeExamReviewRegExp(storedTitle)}\\s*:`);
+}
+
 export function getExamReviewSectionValue(review = "", section = {}) {
   const lines = String(review ?? "").replace(/\r\n/g, "\n").split("\n");
-  const fieldIndex = lines.findIndex((line) => new RegExp(`^${section.number}\\.\\s*${escapeExamReviewRegExp(section.title)}\\s*:`).test(String(line).trim()));
+  const pattern = getExamReviewSectionPattern(section);
+  const fieldIndex = lines.findIndex((line) => pattern.test(String(line).trim()));
   if (fieldIndex < 0) return "";
-  const firstLine = String(lines[fieldIndex] ?? "").replace(new RegExp(`^${section.number}\\.\\s*${escapeExamReviewRegExp(section.title)}\\s*:\\s*`), "");
+  const firstLine = String(lines[fieldIndex] ?? "").replace(pattern, "").trim();
   const nextSectionIndex = getNextExamReviewDraftSectionIndex(lines, fieldIndex);
   return [firstLine, ...lines.slice(fieldIndex + 1, nextSectionIndex)]
     .join("\n")
@@ -215,7 +222,7 @@ export function getExamReviewSectionValue(review = "", section = {}) {
 
 export function setExamReviewSectionValue(review = "", section = {}, value = "") {
   const lines = String(review ?? "").replace(/\r\n/g, "\n").split("\n");
-  const pattern = new RegExp(`^${section.number}\\.\\s*${escapeExamReviewRegExp(section.title)}\\s*:`);
+  const pattern = getExamReviewSectionPattern(section);
   if (!lines.some((line) => pattern.test(String(line).trim()))) {
     return `${review.trim()}\n\n${formatExamReviewDraftLine(section.label, value)}`.trim();
   }
