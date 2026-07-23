@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13G NotificationCenter 남은 경계 audit — 로드맵 13 안전 경계 종료
+
+- inventory: App의 `NotificationCenter`는 현재 navigation/recipient/history/composer hooks, request/action binding, 분리된 notice workspace와 특강 panel을 조립한다. 본체에 남은 독립 함수 선언은 `applySpecialLectureGuideToNotice` 하나다.
+- 남은 함수 경계: 이 함수는 특강 안내문 저장 결과를 공지 local draft에 넣고 특강 template kind/meta, 제목·본문, 공지 탭·작성 workspace, 안내 feedback을 함께 바꾼다. Supabase/Solapi를 직접 호출하지 않지만 미통과인 `Solapi 특강 템플릿 외부 검수`와 같은 의미 경계다.
+- 판정: 외부 템플릿 검수 전에는 이 handler를 이동하거나 일반 공지 action과 합치지 않는다. 나머지는 이미 분리한 hooks/workspaces에 controlled 값과 callback을 전달하는 화면 전체 조립이라, 더 잘게 나누면 의미 단위보다 prop 운반만 늘어난다.
+- AI 검증: 최신 main rebase 후 production scenario 466/466, build, `git diff --check`를 통과했고 `NotificationCenter` 355줄의 함수 선언·state setter·외부 callback·자식 조립을 전수 대조했다. 운영 데이터, 재시험/고태영 데이터, AI/Solapi 요청은 없다.
+- 사람 gate: 새 코드나 화면 동작이 없으므로 이번 closeout에 추가 사람 검수는 없다. 특강 handler 후속은 외부 템플릿 검수 완료 확인 전 금지한다.
+- 다음: 로드맵 14 `exam prep center`의 원천, local draft, API/Supabase 저장, Tally/AI/수업 생성 side effect, 기존 분리 파일과 남은 App 경계를 먼저 inventory한다.
+
 ## 2026-07-23 P1. 13F-11 알림 Solapi 예약 취소 binding 분리 — AI gate 통과
 
 - 코드: App의 `cancelNotificationJob` wrapper를 `createCancelNoticeJobBinding`으로 이동했다. history hook의 busy/feedback/filter/local job 상태와 composer hook의 background refresh를 한 hook에 합쳐 순환시키지 않고, 독립 factory가 현재 action option을 캡처한다.
