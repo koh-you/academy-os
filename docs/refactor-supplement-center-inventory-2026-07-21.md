@@ -289,6 +289,15 @@
 - local callback orchestration이므로 새 운영 데이터나 사람 조작 없이 AI gate로 통과했다.
 - 다음은 `SupplementStudentModal` 본체의 App 전용 helper 의존성을 inventory하고 파일 분리 가능 여부와 검수 gate를 정한다.
 
+## 12R-28 구현 결과 — 보충 학생 상세 모달 본체
+
+- App.jsx의 334줄 규모 `SupplementStudentModal` 본체를 `src/domains/supplements/SupplementStudentModal.jsx`로 이동했다.
+- 기존 hook/controller/model/UI 조합은 새 파일이 소유하고 App 전용 표시·draft helper는 단일 dependency object로 전달한다. 학생별 task 순서, 저장 상태, 세 알림 탭, 완료·일정·알림 제어 확인창과 action callback 연결은 보존했다.
+- 실제 task/lesson/출결 저장·Supabase 재조회·React 전역 갱신·notification job/Solapi 예약·취소는 `FollowUpCenter`와 App callback 경계에 남겼다. 새 모달 파일에는 직접 `fetch`, API path, Supabase/notification state mutation이 없다.
+- production scenario `88b-43`, production 409/409, build, diff 검사를 통과했다.
+- 이미 사람 검수한 action 경계를 그대로 조합하는 구조 이동이므로 새 운영 데이터나 사람 조작 없이 AI gate로 통과했다.
+- 다음은 `FollowUpCenter`의 보충 목록·선택·실제 callback adapter 경계를 inventory해 12번의 남은 분리 범위를 판정한다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.

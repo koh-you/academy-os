@@ -25,11 +25,7 @@ import {
   updateStudentQuestion
 } from "../domains/portals/studentPortalApi.js";
 import {
-  getSupplementStudentReminderScheduledAt,
-} from "../domains/notifications/supplementJobBuilders.js";
-import {
   canCancelNotificationJob,
-  getSupplementNotificationControlJob,
   sortNotificationJobsForCurrentStatus
 } from "../domains/notifications/notificationJobSelectors.js";
 import {
@@ -52,44 +48,17 @@ import {
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { createSupplementSchedulePersistencePlan } from "../domains/supplements/supplementSchedulePlan.js";
 import { SupplementPassConfirmModal } from "../domains/supplements/SupplementPassConfirmModal.jsx";
-import { SupplementScheduleChangeConfirmModal } from "../domains/supplements/SupplementScheduleChangeConfirmModal.jsx";
 import { SupplementHistoryModal } from "../domains/supplements/SupplementHistoryModal.jsx";
-import { SupplementNotificationControlModal } from "../domains/supplements/SupplementNotificationControlModal.jsx";
-import { createSupplementNotificationControlModalViewModel } from "../domains/supplements/supplementNotificationControlModel.js";
-import { SupplementTaskCard } from "../domains/supplements/SupplementTaskCard.jsx";
+import { SupplementStudentModal } from "../domains/supplements/SupplementStudentModal.jsx";
 import {
-  createSupplementNotificationDraftWorkspaceViewModel,
-  createSupplementTaskCardViewModel
-} from "../domains/supplements/supplementTaskCardModel.js";
-import { createSupplementAbsenceCancelHandler } from "../domains/supplements/supplementAbsenceCancelController.js";
-import { createSupplementConfirmationSubmitHandlers } from "../domains/supplements/supplementConfirmationSubmitController.js";
-import { createSupplementNotificationControlActionHandler } from "../domains/supplements/supplementNotificationControlController.js";
-import { createSupplementTaskContentSaveHandler } from "../domains/supplements/supplementTaskContentSaveController.js";
-import { createSupplementTaskPassHandler } from "../domains/supplements/supplementTaskPassController.js";
-import { createSupplementTaskScheduleHandlers } from "../domains/supplements/supplementTaskScheduleController.js";
-import { createSupplementTaskDraftChangeHandler } from "../domains/supplements/supplementTaskDraftChangeController.js";
-import { SupplementStudentModalShell } from "../domains/supplements/SupplementStudentModalShell.jsx";
-import { useSupplementNotificationControlState } from "../domains/supplements/useSupplementNotificationControlState.js";
-import { useSupplementConfirmationState } from "../domains/supplements/useSupplementConfirmationState.js";
-import { useSupplementFeedbackState } from "../domains/supplements/useSupplementFeedbackState.js";
-import { useSupplementNotificationDraftSelectionState } from "../domains/supplements/useSupplementNotificationDraftSelectionState.js";
-import { useSupplementTaskBusyState } from "../domains/supplements/useSupplementTaskBusyState.js";
-import { useSupplementTaskDraftController } from "../domains/supplements/useSupplementTaskDraftController.js";
-import { useSupplementTaskSaveStatusState } from "../domains/supplements/useSupplementTaskSaveStatusState.js";
-import {
-  createPersistableSupplementTask,
   createSupplementTaskDraft as createSupplementTaskDraftModel,
   getSupplementHomeworkNoteValue,
   getSupplementNotificationDraftFieldForControl,
   getSupplementPersistedEditFingerprint,
   getSupplementTaskDraftDiff as getSupplementTaskDraftDiffModel,
-  isSupplementTeacherEditedField,
-  supplementNotificationDraftConfigs
+  isSupplementTeacherEditedField
 } from "../domains/supplements/supplementTaskDraft.js";
-import {
-  getSupplementImmediateNoticeSaveStatus,
-  getSupplementNotificationControlDisplay
-} from "../domains/supplements/supplementStatus.js";
+import { getSupplementNotificationControlDisplay } from "../domains/supplements/supplementStatus.js";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
   createTestAttemptId,
@@ -22468,6 +22437,7 @@ function SupplementCenter({
 
       {selectedSupplementStudent ? (
         <SupplementStudentModal
+          dependencies={supplementStudentModalDependencies}
           notificationTemplates={notificationTemplates}
           onCancelAbsenceSource={handleCancelAbsenceSourceFromModal}
           onCancelNotification={onCancelNotification}
@@ -22526,339 +22496,23 @@ const supplementTaskDraftDependencies = {
   normalizeTime: normalizeTimeInput
 };
 
-function SupplementStudentModal({
-  notificationTemplates = {},
-  notificationJobs = [],
-  onCancelAbsenceSource,
-  onCancelNotification,
-  onClose,
-  onPassTask,
-  onReserveNotification,
-  onSaveTask,
-  onScheduleTask,
-  student,
-  tabTitle,
-  tasks
-}) {
-  const normalizedNotificationTemplates = useMemo(
-    () => normalizeNotificationTemplates(notificationTemplates),
-    [notificationTemplates]
-  );
-  const {
-    dismissFeedback,
-    feedback,
-    showFeedback
-  } = useSupplementFeedbackState();
-  const {
-    getActiveNotificationDraftField,
-    selectNotificationDraftField
-  } = useSupplementNotificationDraftSelectionState();
-  const {
-    getTaskSaveStatus,
-    setTaskSaveStatusPatch
-  } = useSupplementTaskSaveStatusState();
-  const {
-    beginTaskAction,
-    finishTaskAction,
-    hasBusyTask,
-    isTaskActionBusy,
-    isTaskBusy
-  } = useSupplementTaskBusyState();
-  const {
-    closePassConfirmation,
-    closeScheduleConfirmation,
-    getConfirmedScheduleTask,
-    openPassConfirmation,
-    openScheduleConfirmation,
-    passConfirmTask,
-    scheduleConfirmTask
-  } = useSupplementConfirmationState();
-  const {
-    closeNotificationControl,
-    notificationControl,
-    notificationControlBusy,
-    notificationControlFeedback,
-    openNotificationControl,
-    setNotificationControlBusy,
-    setNotificationControlFeedback
-  } = useSupplementNotificationControlState();
-  const {
-    buildTaskWithDraft,
-    getTaskDraftState,
-    markTaskDraftSaved,
-    updateTaskDraftValues
-  } = useSupplementTaskDraftController({
-    dependencies: supplementTaskDraftDependencies,
-    notificationTemplates: normalizedNotificationTemplates,
-    student,
-    tasks
-  });
-
-  const updateTaskDraft = createSupplementTaskDraftChangeHandler({
-    getTaskSaveStatus,
-    setTaskSaveStatusPatch,
-    updateTaskDraftValues
-  });
-
-  const handleSaveTask = createSupplementTaskContentSaveHandler({
-    beginTaskAction,
-    buildTaskWithDraft,
-    finishTaskAction,
-    getTaskSaveStatus,
-    hasBusyTask,
-    markTaskDraftSaved,
-    onSaveTask,
-    setTaskSaveStatusPatch,
-    showFeedback
-  });
-
-  const {
-    handleApplyScheduleTask,
-    requestApplyScheduleTask
-  } = createSupplementTaskScheduleHandlers({
-    beginTaskAction,
-    buildTaskWithDraft,
-    closeScheduleConfirmation,
-    finishTaskAction,
-    getImmediateNoticeStatus: getSupplementImmediateNoticeSaveStatus,
-    hasBusyTask,
-    markTaskDraftSaved,
-    onScheduleTask,
-    openScheduleConfirmation,
-    setTaskSaveStatusPatch,
-    showFeedback
-  });
-
-  const handleCancelAbsenceSourceTask = createSupplementAbsenceCancelHandler({
-    beginTaskAction,
-    finishTaskAction,
-    hasBusyTask,
-    onCancelAbsenceSource,
-    onClose,
-    showFeedback
-  });
-
-  const handlePassTask = createSupplementTaskPassHandler({
-    beginTaskAction,
-    buildTaskWithDraft,
-    closePassConfirmation,
-    finishTaskAction,
-    hasBusyTask,
-    onClose,
-    onPassTask,
-    showFeedback,
-    studentName: student.name
-  });
-
-  const {
-    confirmPassTask,
-    confirmScheduleTask
-  } = createSupplementConfirmationSubmitHandlers({
-    getConfirmedScheduleTask,
-    handleApplyScheduleTask,
-    handlePassTask,
-    passConfirmTask
-  });
-
-  const notificationControlViewModel = createSupplementNotificationControlModalViewModel({
-    notificationControl,
-    notificationJobs,
-    student,
-    tasks
-  }, {
-    canCancelJob: canCancelNotificationJob,
-    getControlDisplay: getSupplementNotificationControlDisplayForApp,
-    getControlJob: getSupplementNotificationControlJob,
-    getCurrentPreview: (task, controlType) => controlType === "studentReminder"
-      ? createSupplementTaskDraft(task, student, normalizedNotificationTemplates).notificationDraft
-      : getSupplementScheduleNoticeDraft(
-          task,
-          controlType === "parentSchedule" ? "parent" : "student",
-          "",
-          normalizedNotificationTemplates
-        ),
-    getTaskDraftDiff: (task, draftValues) => getSupplementTaskDraftDiff(
-      task,
-      draftValues,
-      student,
-      normalizedNotificationTemplates
-    ),
-    getTaskDraftState,
-    normalizeMessage: normalizeMessageText
-  });
-  const notificationControlTask = notificationControlViewModel.task;
-  const notificationControlJob = notificationControlViewModel.job;
-  const notificationControlDisplay = notificationControlViewModel.display;
-  const notificationControlConfig = notificationControlViewModel.config;
-  const notificationControlBlockReason = notificationControlViewModel.blockReason;
-  const notificationControlHasHistoricalJob = notificationControlViewModel.hasHistoricalJob;
-  const notificationControlPreview = notificationControlViewModel.preview;
-  const notificationControlPreviewLabel = notificationControlViewModel.previewLabel;
-  const notificationControlSavedDraftDiffers = notificationControlViewModel.savedDraftDiffers;
-  const notificationControlRecipient = notificationControlViewModel.recipient;
-  const canCancelNotificationControl = notificationControlViewModel.canCancel;
-  const canReserveNotificationControl = notificationControlViewModel.canReserve;
-
-  const handleNotificationControlAction = createSupplementNotificationControlActionHandler({
-    notificationControl,
-    notificationControlBusy,
-    notificationControlConfig,
-    notificationControlJob,
-    notificationControlTask,
-    onCancelNotification,
-    onReserveNotification,
-    setNotificationControlBusy,
-    setNotificationControlFeedback,
-    setTaskSaveStatusPatch
-  });
-
-  return (
-    <SupplementStudentModalShell
-      feedback={feedback}
-      isEmpty={tasks.length === 0}
-      onClose={onClose}
-      onDismissFeedback={dismissFeedback}
-      overlays={(
-        <>
-          {passConfirmTask ? (
-            <SupplementPassConfirmModal
-              getTypeLabel={followUpTypeLabel}
-              isBusy={isTaskActionBusy(passConfirmTask.makeupTaskId, "pass")}
-              onCancel={closePassConfirmation}
-              onConfirm={confirmPassTask}
-              studentName={student.name}
-              task={passConfirmTask}
-            />
-          ) : null}
-          {scheduleConfirmTask ? (
-            <SupplementScheduleChangeConfirmModal
-              getDetailSeed={getSupplementScheduleChangeDetailSeed}
-              getTypeLabel={followUpTypeLabel}
-              isBusy={isTaskActionBusy(scheduleConfirmTask.makeupTaskId, "schedule")}
-              onCancel={closeScheduleConfirmation}
-              onConfirmWithReminder={(noticePatch) => confirmScheduleTask(true, noticePatch)}
-              onConfirmWithoutReminder={(noticePatch) => confirmScheduleTask(false, noticePatch)}
-              studentName={student.name}
-              task={scheduleConfirmTask}
-            />
-          ) : null}
-          {notificationControlTask && notificationControlConfig ? (
-            <SupplementNotificationControlModal
-              blockReason={notificationControlBlockReason}
-              canCancel={canCancelNotificationControl}
-              canReserve={canReserveNotificationControl}
-              config={notificationControlConfig}
-              display={notificationControlDisplay}
-              feedback={notificationControlFeedback}
-              hasHistoricalJob={notificationControlHasHistoricalJob}
-              isBusy={notificationControlBusy}
-              jobStatusLabel={notificationControlJob ? formatNotificationJobStatus(notificationControlJob) : "예약 기록 없음"}
-              onCancel={() => handleNotificationControlAction("cancel")}
-              onClose={closeNotificationControl}
-              onReserve={() => handleNotificationControlAction("reserve")}
-              preview={notificationControlPreview}
-              previewLabel={notificationControlPreviewLabel}
-              recipientLabel={maskPhoneForDisplay(notificationControlRecipient)}
-              savedDraftDiffers={notificationControlSavedDraftDiffers}
-              scheduleLabel={formatSupplementScheduleDateTime(notificationControlTask)}
-              scheduledAtLabel={notificationControlJob?.scheduledAt
-                ? formatKoreaTimeLabel(notificationControlJob.scheduledAt)
-                : notificationControl.controlType === "studentReminder"
-                  ? formatKoreaTimeLabel(getSupplementStudentReminderScheduledAt(notificationControlTask))
-                  : "예약 버튼을 누른 뒤 다음 정각"}
-              studentName={student.name}
-            />
-          ) : null}
-        </>
-      )}
-      studentGrade={student.grade}
-      studentName={student.name}
-      studentSchool={student.schoolName}
-      tabTitle={tabTitle}
-    >
-      {tasks.map((task) => {
-              const taskDraftState = getTaskDraftState(task);
-              const draftValues = taskDraftState.values;
-              const draftDiff = getSupplementTaskDraftDiff(task, draftValues, student, normalizedNotificationTemplates);
-              const methodOptions = supplementMethodOptions(task.taskType);
-              const saveStatus = getTaskSaveStatus(task.makeupTaskId);
-              const taskCardViewModel = createSupplementTaskCardViewModel({
-                draftDiff,
-                draftValues,
-                getMethodLabel: supplementMethodLabel,
-                methodOptions,
-                saveStatus,
-                task
-              });
-              const taskBusy = isTaskBusy(task.makeupTaskId);
-              const isContentBusy = isTaskActionBusy(task.makeupTaskId, "content");
-              const isScheduleBusy = isTaskActionBusy(task.makeupTaskId, "schedule");
-              const isLocalDraftTask = Boolean(task.isLocalDraftTask);
-              const canCancelAbsenceSource = isLocalDraftTask && task.taskType === "absence_makeup";
-              const isCancelAbsenceBusy = isTaskActionBusy(task.makeupTaskId, "cancelAbsence");
-              const activeNotificationDraftField = getActiveNotificationDraftField(
-                task.makeupTaskId,
-                supplementNotificationDraftConfigs[0].field
-              );
-              const notificationDraftViewModel = createSupplementNotificationDraftWorkspaceViewModel({
-                activeField: activeNotificationDraftField,
-                draftState: taskDraftState,
-                notificationJobs,
-                task
-              }, {
-                getControlDisplay: getSupplementNotificationControlDisplayForApp,
-                getControlJob: getSupplementNotificationControlJob
-              });
-              return (
-                <SupplementTaskCard
-                  actionProps={{
-                    canCancelAbsenceSource,
-                    hasScheduleDraft: taskCardViewModel.hasScheduleDraft,
-                    isCancelAbsenceBusy,
-                    isContentBusy,
-                    isLocalDraftTask,
-                    isPassBusy: isTaskActionBusy(task.makeupTaskId, "pass"),
-                    isScheduleBusy,
-                    isTaskBusy: taskBusy,
-                    linkedLessonId: task.linkedLessonId,
-                    onCancelAbsenceSource: () => handleCancelAbsenceSourceTask(task),
-                    onPass: () => openPassConfirmation(buildTaskWithDraft(task)),
-                    onSave: () => handleSaveTask(task),
-                    onSchedule: () => requestApplyScheduleTask(task)
-                  }}
-                  headerProps={{
-                    hasSavedNotificationDrafts: taskCardViewModel.hasSavedNotificationDrafts,
-                    task,
-                    taskMeta: taskCardViewModel.taskMeta,
-                    typeLabel: followUpTypeLabel(task.taskType)
-                  }}
-                  key={task.makeupTaskId}
-                  notificationProps={{
-                    activeConfig: notificationDraftViewModel.activeConfig,
-                    activeDisplay: notificationDraftViewModel.activeDisplay,
-                    activeDraft: notificationDraftViewModel.activeDraft,
-                    activeField: activeNotificationDraftField,
-                    configs: notificationDraftViewModel.tabConfigs,
-                    hasUnsavedChanges: draftDiff.length > 0,
-                    isBusy: taskBusy,
-                    isTeacherFinal: notificationDraftViewModel.isTeacherFinal,
-                    onChangeDraft: (value) => updateTaskDraft(task, activeNotificationDraftField, value),
-                    onOpenControl: (controlType) => openNotificationControl(task, controlType),
-                    onSelectField: (field) => selectNotificationDraftField(task.makeupTaskId, field)
-                  }}
-                  saveSummaryProps={taskCardViewModel.saveSummaryProps}
-                  scheduleEditorProps={{
-                    ...taskCardViewModel.scheduleEditorProps,
-                    onChange: (field, value) => updateTaskDraft(task, field, value),
-                  }}
-                  scheduleGateProps={taskCardViewModel.scheduleGateProps}
-                  sourceContextProps={taskCardViewModel.sourceContextProps}
-                />
-              );
-      })}
-    </SupplementStudentModalShell>
-  );
-}
+const supplementStudentModalDependencies = {
+  createSupplementTaskDraft,
+  followUpTypeLabel,
+  formatKoreaTimeLabel,
+  formatNotificationJobStatus,
+  formatSupplementScheduleDateTime,
+  getSupplementNotificationControlDisplayForApp,
+  getSupplementScheduleChangeDetailSeed,
+  getSupplementScheduleNoticeDraft,
+  getSupplementTaskDraftDiff,
+  maskPhoneForDisplay,
+  normalizeMessageText,
+  normalizeNotificationTemplates,
+  supplementMethodLabel,
+  supplementMethodOptions,
+  supplementTaskDraftDependencies
+};
 
 function FollowUpCenter({
   appStateSaveState = "idle",
