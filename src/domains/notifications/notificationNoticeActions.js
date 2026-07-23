@@ -318,3 +318,25 @@ export function refreshNoticeJobsInBackgroundAction({
     );
   });
 }
+
+export function applyNoticeTemplateAction({
+  setNoticeBody,
+  setNoticeKind,
+  setNoticeSpecialLectureMeta,
+  setNoticeTemplateId,
+  setNoticeTitle,
+  templateId,
+  templates = []
+}) {
+  const template = templates.find((item) => item.id === templateId);
+  setNoticeTemplateId(templateId);
+  if (!template) {
+    setNoticeKind("general");
+    setNoticeSpecialLectureMeta(null);
+    return;
+  }
+  setNoticeKind(templateId === "specialLecture" ? "special_lecture" : "general");
+  setNoticeSpecialLectureMeta(null);
+  setNoticeTitle(template.title);
+  setNoticeBody(template.body);
+}

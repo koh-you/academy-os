@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  applyNoticeTemplateAction,
   cancelNoticeJobAction,
   deleteNoticeJobAction,
   polishNoticeMessageAction,
@@ -868,4 +869,68 @@ assert.throws(
   /fixture synchronous refresh failure/
 );
 
-console.log("notification notice actions including background refresh fixtures passed");
+const templateFixtures = [
+  {
+    id: "notice",
+    title: "공지 안내",
+    body: "공지 원문"
+  },
+  {
+    id: "specialLecture",
+    title: "특강 안내",
+    body: "특강 원문"
+  }
+];
+const templateEvents = [];
+applyNoticeTemplateAction({
+  setNoticeBody: (value) => templateEvents.push(["body", value]),
+  setNoticeKind: (value) => templateEvents.push(["kind", value]),
+  setNoticeSpecialLectureMeta: (value) => templateEvents.push(["meta", value]),
+  setNoticeTemplateId: (value) => templateEvents.push(["template", value]),
+  setNoticeTitle: (value) => templateEvents.push(["title", value]),
+  templateId: "notice",
+  templates: templateFixtures
+});
+assert.deepEqual(templateEvents, [
+  ["template", "notice"],
+  ["kind", "general"],
+  ["meta", null],
+  ["title", "공지 안내"],
+  ["body", "공지 원문"]
+]);
+
+const specialTemplateEvents = [];
+applyNoticeTemplateAction({
+  setNoticeBody: (value) => specialTemplateEvents.push(["body", value]),
+  setNoticeKind: (value) => specialTemplateEvents.push(["kind", value]),
+  setNoticeSpecialLectureMeta: (value) => specialTemplateEvents.push(["meta", value]),
+  setNoticeTemplateId: (value) => specialTemplateEvents.push(["template", value]),
+  setNoticeTitle: (value) => specialTemplateEvents.push(["title", value]),
+  templateId: "specialLecture",
+  templates: templateFixtures
+});
+assert.deepEqual(specialTemplateEvents, [
+  ["template", "specialLecture"],
+  ["kind", "special_lecture"],
+  ["meta", null],
+  ["title", "특강 안내"],
+  ["body", "특강 원문"]
+]);
+
+const missingTemplateEvents = [];
+applyNoticeTemplateAction({
+  setNoticeBody: (value) => missingTemplateEvents.push(["body", value]),
+  setNoticeKind: (value) => missingTemplateEvents.push(["kind", value]),
+  setNoticeSpecialLectureMeta: (value) => missingTemplateEvents.push(["meta", value]),
+  setNoticeTemplateId: (value) => missingTemplateEvents.push(["template", value]),
+  setNoticeTitle: (value) => missingTemplateEvents.push(["title", value]),
+  templateId: "missing",
+  templates: templateFixtures
+});
+assert.deepEqual(missingTemplateEvents, [
+  ["template", "missing"],
+  ["kind", "general"],
+  ["meta", null]
+]);
+
+console.log("notification notice actions including background refresh and template fixtures passed");
