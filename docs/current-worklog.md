@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13A-5 알림센터 발송 기록 shell 분리 — AI gate 통과
+
+- 코드: 발송 기록 header, 결과 확인 시각/action 상태, Solapi 대조 안내, table header/empty/list, 접힌 요약을 `NotificationHistoryPanel.jsx`로 이동하고 13A-4의 `NotificationHistoryRow`를 조합했다.
+- 동작 보존: 전체 보기·접기/펼치기, action 성공/실패 class, Solapi 대조 loading/failed/saved/partial class와 안내 문구, 7개 table column, 빈 상태·접힌 요약을 그대로 유지한다.
+- 저장 원천/side effect: filter/open state, 결과 대조 가능 여부와 대상 계산, 실제 reconcile/cancel/delete handler, job filter와 모든 표시 helper는 App이 계속 소유한다. 새 shell에는 hook, API, Supabase 또는 실제 mutation 함수가 없다.
+- 자동검증: 기존 알림센터 목록 scenario가 새 `aria-expanded` 소유권을 검사하도록 갱신하고 App wiring·shell 문구·callback-only 경계를 `20b-4`로 추가했다. production scenario 425/425와 build, `git diff --check`가 통과했다.
+- gate 판정: 외부 작업의 실행 함수는 이동하지 않은 controlled shell 분리다. 운영 Solapi 대조·취소·삭제 조작 없이 AI gate로 통과했다.
+- 다음 경계: 알림센터 표시 컴포넌트 분리 audit 후 payload builder와 실제 API orchestration의 고위험 경계를 다시 inventory한다.
+
 ## 2026-07-23 P1. 13A-4 알림센터 발송 기록 행 분리 — AI gate 통과
 
 - 코드: 발송 기록 한 행의 상태·종류/Solapi reference·학생·시각·수신번호·미리보기·관리 action 표시를 `NotificationHistoryRow.jsx`로 이동했다.
