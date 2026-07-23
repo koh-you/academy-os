@@ -310,7 +310,7 @@ function buildDailyReportBody({
   lessonContent,
   lessonMaterial,
   nextHomework,
-  omitHomework = false,
+  omitPreviousHomework = false,
   previousHomework,
   preparationNotice,
   retestSchedule,
@@ -336,15 +336,15 @@ function buildDailyReportBody({
 
   return joinMessageBlocks([
     messageLine("🏫 출결", attendanceLabelWithDetail({ attendanceStatus, checkedAt, checkInTime, reason: attendanceReason })),
-    omitHomework ? "" : messageLine("✅ 과제 상태", assignmentStatusMessage),
+    omitPreviousHomework ? "" : messageLine("✅ 과제 상태", assignmentStatusMessage),
     messageLine("📚 강의 교재", lessonMaterial),
     messageLine("🧭 강의 내용", lessonContent),
-    omitHomework ? "" : messageLine("📘 지난 과제", previousHomework),
-    omitHomework ? "" : messageLine("➡️ 다음 과제", nextHomework),
+    omitPreviousHomework ? "" : messageLine("📘 지난 과제", previousHomework),
+    messageLine("➡️ 다음 과제", nextHomework),
     messageBlock("📝 테스트", testResult),
-    !omitHomework && incompleteList.length ? messageBlock("⚠️ 미완료 과제", incompleteList.map((item) => `- ${item}`).join("\n")) : "",
+    !omitPreviousHomework && incompleteList.length ? messageBlock("⚠️ 미완료 과제", incompleteList.map((item) => `- ${item}`).join("\n")) : "",
     messageBlock("⭐ 중요 · 재시험 일정", retestSchedule),
-    messageBlock("⭐ 보충/확인 안내", omitHomework ? supplementText : supplementNotice),
+    messageBlock("⭐ 보충/확인 안내", omitPreviousHomework ? supplementText : supplementNotice),
     messageBlock("💬 코멘트", commentText)
   ]);
 }
@@ -360,7 +360,7 @@ function buildLessonCommentBody(payload, audience) {
         ? payload.assignmentStatusStudentMessage || payload.assignmentStatusMessage || payload.assignmentStatus
         : payload.assignmentStatusParentMessage || payload.assignmentStatusMessage || payload.assignmentStatus,
     audience,
-    omitHomework: payload.assignmentStatus === "not_entered",
+    omitPreviousHomework: payload.assignmentStatus === "not_entered",
     homeworkFollowupNotice: payload.homeworkFollowupNotice,
     lessonContent: payload.lessonContent,
     lessonMaterial: payload.lessonMaterial,

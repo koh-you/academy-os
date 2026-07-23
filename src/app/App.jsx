@@ -598,10 +598,10 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, notificatio
   const lessonMaterial = getLessonMaterial(record, student);
   const lessonContent = getLessonContent(record);
   const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
-  const omitHomework = isAssignmentStatusUnrecorded(assignmentStatus);
+  const omitPreviousHomework = isAssignmentStatusUnrecorded(assignmentStatus);
   const attendance = formatAttendanceForMessage(record);
   const commentText = normalizeMessageText(comment);
-  const homeworkFollowupNotice = omitHomework ? "" : getHomeworkFollowupNoticeForTarget(record, audience, notificationTemplates);
+  const homeworkFollowupNotice = omitPreviousHomework ? "" : getHomeworkFollowupNoticeForTarget(record, audience, notificationTemplates);
   const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
   const supplementAndFollowupText = [homeworkFollowupNotice, supplementText].filter(Boolean).join("\n");
   const testResultText = testResultLines.length ? testResultLines.map((item) => `- ${item}`).join("\n") : "";
@@ -616,11 +616,11 @@ function buildCommentPreviewLines({ audience, comment, nextHomework, notificatio
     : "";
   const lines = [
     createMessageLine("🏫 출결", attendance),
-    assignmentStatus && !omitHomework ? createMessageLine("✅ 과제 상태", getAssignmentStatusMessage(audience, assignmentStatus)) : "",
+    assignmentStatus && !omitPreviousHomework ? createMessageLine("✅ 과제 상태", getAssignmentStatusMessage(audience, assignmentStatus)) : "",
     createMessageLine("📚 강의 교재", lessonMaterial),
     createMessageLine("🧭 강의 내용", lessonContent),
-    omitHomework ? "" : createMessageLine("📘 지난 과제", previousHomework?.title),
-    omitHomework ? "" : createMessageLine("➡️ 다음 과제", nextHomework?.title),
+    omitPreviousHomework ? "" : createMessageLine("📘 지난 과제", previousHomework?.title),
+    createMessageLine("➡️ 다음 과제", nextHomework?.title),
     testResultText ? createMessageBlock("📝 테스트", testResultText) : "",
     supplementNotice ? createMessageBlock("⭐ 보충/확인 안내", supplementNotice) : "",
     commentText ? createMessageBlock("💬 코멘트", commentText) : ""
@@ -654,18 +654,18 @@ function buildCommentPreviewText({ audience, comment, lesson, nextHomework, noti
 
 function buildCommentSourceText({ audience = "parent", lesson, nextHomework, notificationTemplates = {}, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
   const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
-  const omitHomework = isAssignmentStatusUnrecorded(assignmentStatus);
-  const homeworkFollowupNotice = omitHomework ? "" : getHomeworkFollowupNoticeForTarget(record, audience, notificationTemplates);
+  const omitPreviousHomework = isAssignmentStatusUnrecorded(assignmentStatus);
+  const homeworkFollowupNotice = omitPreviousHomework ? "" : getHomeworkFollowupNoticeForTarget(record, audience, notificationTemplates);
   const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
   return joinMessageBlocks([
     createMessageLine("수신 학생", student.name),
     createMessageLine("수업", `${lesson.date} ${lesson.className}`),
     createMessageLine("출결", formatAttendanceForMessage(record)),
-    omitHomework ? "" : createMessageLine("과제 상태", getAssignmentStatusMessage(audience, assignmentStatus)),
+    omitPreviousHomework ? "" : createMessageLine("과제 상태", getAssignmentStatusMessage(audience, assignmentStatus)),
     createMessageLine("강의 교재", getLessonMaterial(record, student)),
     createMessageLine("강의 내용", getLessonContent(record)),
-    omitHomework ? "" : createMessageLine("지난 과제", previousHomework?.title),
-    omitHomework ? "" : createMessageLine("다음 과제", nextHomework?.title),
+    omitPreviousHomework ? "" : createMessageLine("지난 과제", previousHomework?.title),
+    createMessageLine("다음 과제", nextHomework?.title),
     testResultLines.length ? createMessageBlock("테스트", testResultLines.map((item) => `- ${item}`).join("\n")) : "",
     homeworkFollowupNotice || supplementText ? createMessageBlock("보충/확인 안내", [homeworkFollowupNotice, supplementText].filter(Boolean).join("\n")) : "",
     createMessageBlock("수업메모", record?.preparationMemo)
@@ -1110,8 +1110,8 @@ function buildLessonReservationPayloadSnapshot({
   const sourceField = audience === "student" ? "studentComment" : "teacherComment";
   const commentBody = compactDuplicateMessageBlocks(record?.[sourceField] ?? "");
   const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
-  const omitHomework = isAssignmentStatusUnrecorded(assignmentStatus);
-  const homeworkFollowupNotice = omitHomework ? "" : getHomeworkFollowupNoticeForTarget(record, audience, notificationTemplates);
+  const omitPreviousHomework = isAssignmentStatusUnrecorded(assignmentStatus);
+  const homeworkFollowupNotice = omitPreviousHomework ? "" : getHomeworkFollowupNoticeForTarget(record, audience, notificationTemplates);
   return {
     assignmentStatus,
     attendanceReason: record?.attendanceReason ?? "",
@@ -1123,9 +1123,9 @@ function buildLessonReservationPayloadSnapshot({
     lessonContent: getLessonContent(record),
     lessonMaterial: getLessonMaterial(record, student),
     homeworkFollowupNotice,
-    nextHomework: omitHomework ? "" : nextHomework?.title ?? "",
+    nextHomework: nextHomework?.title ?? "",
     preparationNotice: "",
-    previousHomework: omitHomework ? "" : previousHomework?.title ?? "",
+    previousHomework: omitPreviousHomework ? "" : previousHomework?.title ?? "",
     recipient: audience === "student" ? student.studentPhone : student.parentPhone,
     scheduledDate,
     scheduleMode: mode,
