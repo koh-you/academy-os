@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  createSupplementNotificationControlModalViewModel,
   createSupplementNotificationControlViewModel,
   supplementNotificationControlConfigs
 } from "../src/domains/supplements/supplementNotificationControlModel.js";
@@ -115,5 +116,40 @@ assert.equal(sentModel.preview, "발송 문구");
 assert.equal(sentModel.previewLabel, "발송된 문구");
 assert.equal(sentModel.canCancel, false);
 assert.equal(sentModel.canReserve, false);
+
+const modalModel = createSupplementNotificationControlModalViewModel({
+  notificationControl: { controlType: "studentSchedule", taskId: "task-1" },
+  notificationJobs: [{ makeupTaskId: "task-1", status: "scheduled" }],
+  student,
+  tasks: [{ ...task, makeupTaskId: "task-1" }]
+}, {
+  ...dependencies,
+  getControlDisplay: (job) => ({ status: job?.status ?? "none" }),
+  getControlJob: (_task, jobs) => jobs[0] ?? null,
+  getCurrentPreview: (_task, controlType) => `${controlType} 현재 문구`,
+  getTaskDraftDiff: () => [],
+  getTaskDraftState: () => ({ values: { scheduledDate: "2026-07-24" } })
+});
+assert.equal(modalModel.task.makeupTaskId, "task-1");
+assert.equal(modalModel.job.status, "scheduled");
+assert.deepEqual(modalModel.display, { status: "scheduled" });
+assert.equal(modalModel.preview, "studentSchedule 현재 문구");
+assert.equal(modalModel.canCancel, true);
+
+const dirtyModalModel = createSupplementNotificationControlModalViewModel({
+  notificationControl: { controlType: "parentSchedule", taskId: "task-1" },
+  student,
+  tasks: [{ ...task, makeupTaskId: "task-1" }]
+}, {
+  ...dependencies,
+  getControlDisplay: (job) => ({ status: job?.status ?? "none" }),
+  getControlJob: () => null,
+  getCurrentPreview: () => "학부모 현재 문구",
+  getTaskDraftDiff: () => [{ field: "scheduledTime" }],
+  getTaskDraftState: () => ({ values: { scheduledTime: "16:00" } })
+});
+assert.equal(dirtyModalModel.blockReason, "수정 중인 보충 내용·일정을 먼저 저장해야 현재 원본으로 알림톡을 예약할 수 있습니다.");
+assert.equal(dirtyModalModel.canReserve, false);
+assert.deepEqual(dirtyModalModel.display, { status: "none" });
 
 console.log("supplement notification control model: deterministic contract passed");
