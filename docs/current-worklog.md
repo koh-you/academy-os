@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13C-9 알림센터 이력 삭제 injected action 분리 — AI gate 통과
+
+- 코드: 알림 이력 삭제의 삭제 가능/중복 guard, 상태별 confirm·진행·완료 문구, busy 상태, 삭제 request 실행, 성공 refresh, 실패 feedback과 `finally` 해제를 `notificationNoticeActions.js`의 `deleteNoticeJobAction`으로 이동했다. App은 기존 판정 함수, 브라우저 confirm, 13C-8 request adapter callback, job·setter·refresh를 주입한다.
+- 동작 보존: `send_unconfirmed`와 일반 발송 전 공지의 경고·진행·완료 문구, confirm 취소 시 무동작, 대상 ID busy 표시, 성공 뒤에만 `onRefresh`, 오류 흡수 후 실패 상태, 성공·실패 모두 busy 해제를 그대로 유지한다.
+- 저장 원천/side effect: action은 endpoint/fetch/React/Supabase/Solapi를 직접 소유하지 않는다. 실제 DELETE는 App이 주입하는 `deleteNoticeJobRequest`에 남는다. fixture에서는 confirm과 delete/refresh callback을 모두 mock해 네트워크·운영 row 삭제가 0건이다.
+- 자동검증: 일반 draft와 과거 확인 필요 이력의 문구·호출 순서, 삭제 실패와 refresh 차단, 삭제 불가·다른 삭제 진행 중 guard, confirm 취소, 성공·실패 `finally`를 `test:notification-notice-actions`로 고정했다. production scenario 437/437과 build, `git diff --check`가 통과했다.
+- gate 판정: destructive callback 전체를 주입해 실제 DELETE 없이 모든 action 분기를 재현했다. 재시험/고태영 운영 데이터나 사람 조작이 필요하지 않은 AI gate다.
+- 다음 경계: 실제 Solapi 예약 취소의 guard, confirm, callback 연결 검증, 취소 결과 검증, local 반영·filter/history/refresh와 실패/finally를 실제 취소 없는 injected action으로 분리 가능한지 inventory하고 진행한다.
+
 ## 2026-07-23 P1. 13C-8 알림센터 이력 삭제 request adapter 분리 — AI gate 통과
 
 - 코드: 알림 이력 삭제의 query URL/ID 인코딩, DELETE 요청, 응답 JSON/HTTP 성공 판정, 삭제 ID 포함 재확인과 오류 fallback을 `notificationNoticeApi.js`의 `deleteNoticeJobRequest`로 이동했다. App은 기존 `fetch`, `apiUrl`, 대상 job ID를 주입한다.

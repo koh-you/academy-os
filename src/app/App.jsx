@@ -61,6 +61,7 @@ import {
   reserveNoticeJobRequest
 } from "../domains/notifications/notificationNoticeApi.js";
 import {
+  deleteNoticeJobAction,
   polishNoticeMessageAction,
   reconcileNoticeResultsAction,
   scheduleNoticeAction,
@@ -10477,33 +10478,21 @@ function NotificationCenter({
   }
 
   async function deleteNotificationJob(job) {
-    if (!canDeleteNotificationJob(job) || deletingJobId) return;
-    const isPastUnconfirmed = job.status === "send_unconfirmed";
-    const confirmationMessage = isPastUnconfirmed
-      ? "이 '확인 필요' 알림 이력 1건을 Academy OS에서 삭제할까요? 과거 Solapi 발송 결과는 변경되지 않으며 삭제한 OS 이력은 복구할 수 없습니다."
-      : "이 발송 전 공지 기록 1건을 Academy OS에서 삭제할까요? 삭제한 기록은 복구할 수 없습니다.";
-    if (typeof window !== "undefined" && !window.confirm(confirmationMessage)) return;
-    setDeletingJobId(job.notificationJobId);
-    setNotificationJobAction({
-      message: isPastUnconfirmed ? "확인 필요 알림 이력을 삭제하는 중입니다." : "발송하지 않은 공지 기록을 삭제하는 중입니다.",
-      state: "saving"
+    return deleteNoticeJobAction({
+      canDeleteJob: canDeleteNotificationJob,
+      confirmAction: (message) => typeof window === "undefined" || window.confirm(message),
+      deleteJob: (notificationJobId) =>
+        deleteNoticeJobRequest({
+          notificationJobId,
+          request: fetch,
+          resolveApiUrl: apiUrl
+        }),
+      deletingJobId,
+      job,
+      refresh: onRefresh,
+      setDeletingJobId,
+      setJobAction: setNotificationJobAction
     });
-    try {
-      await deleteNoticeJobRequest({
-        notificationJobId: job.notificationJobId,
-        request: fetch,
-        resolveApiUrl: apiUrl
-      });
-      setNotificationJobAction({
-        message: isPastUnconfirmed ? "확인 필요 알림 이력 1건을 삭제했습니다." : "발송하지 않은 공지 기록 1건을 삭제했습니다.",
-        state: "saved"
-      });
-      await onRefresh?.();
-    } catch (error) {
-      setNotificationJobAction({ message: `알림 이력 삭제 실패: ${error.message}`, state: "failed" });
-    } finally {
-      setDeletingJobId("");
-    }
   }
 
   async function cancelNotificationJob(job) {

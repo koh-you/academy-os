@@ -214,3 +214,45 @@ export async function polishNoticeMessageAction({
     setIsPolishing(false);
   }
 }
+
+export async function deleteNoticeJobAction({
+  canDeleteJob,
+  confirmAction,
+  deleteJob,
+  deletingJobId,
+  job,
+  refresh,
+  setDeletingJobId,
+  setJobAction
+}) {
+  if (!canDeleteJob(job) || deletingJobId) return;
+  const isPastUnconfirmed = job.status === "send_unconfirmed";
+  const confirmationMessage = isPastUnconfirmed
+    ? "이 '확인 필요' 알림 이력 1건을 Academy OS에서 삭제할까요? 과거 Solapi 발송 결과는 변경되지 않으며 삭제한 OS 이력은 복구할 수 없습니다."
+    : "이 발송 전 공지 기록 1건을 Academy OS에서 삭제할까요? 삭제한 기록은 복구할 수 없습니다.";
+  if (confirmAction && !confirmAction(confirmationMessage)) return;
+  setDeletingJobId(job.notificationJobId);
+  setJobAction({
+    message: isPastUnconfirmed
+      ? "확인 필요 알림 이력을 삭제하는 중입니다."
+      : "발송하지 않은 공지 기록을 삭제하는 중입니다.",
+    state: "saving"
+  });
+  try {
+    await deleteJob(job.notificationJobId);
+    setJobAction({
+      message: isPastUnconfirmed
+        ? "확인 필요 알림 이력 1건을 삭제했습니다."
+        : "발송하지 않은 공지 기록 1건을 삭제했습니다.",
+      state: "saved"
+    });
+    await refresh?.();
+  } catch (error) {
+    setJobAction({
+      message: `알림 이력 삭제 실패: ${error.message}`,
+      state: "failed"
+    });
+  } finally {
+    setDeletingJobId("");
+  }
+}
