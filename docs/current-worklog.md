@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 14A-6 시험 후 총평 draft 저장 타이머 controller 분리 — AI gate 통과
+
+- 코드: 총평 local draft의 500ms debounce, 최신값 보관, blur/닫기 flush, unmount cancel을 `src/domains/exams/examReviewDraftSaveController.js`로 분리했다.
+- 경계: controller는 전달받은 `saveValue` callback만 호출한다. `handleUpdateExamPrepRow -> persistExamPrepRows -> /api/exam-prep-rows` 저장 원천과 save state, React state/effect, AI 요청은 App에 남았다.
+- 동작 보존: 연속 입력은 직전 timer를 취소하고 최신값 한 번만 저장한다. blur와 닫기는 pending timer를 지운 뒤 현재값을 즉시 전달하고, unmount는 저장 없이 timer만 취소한다.
+- 자동검증: fake timer fixture를 `npm run test:production`에 연결해 500ms, 재예약, 최신값, blur/close flush, unmount cancel을 고정했다. production scenario 470/470, build, `git diff --check`가 통과했다.
+- 동기화: 최신 `origin/main`의 시험분석 P3 기록과 리팩터링 사람 gate 기록 충돌을 모두 보존해 rebase했고, rebase 뒤 production/build를 재통과한 다음 전용 브랜치만 갱신했다.
+- 사람 gate: 순수 timer/callback 경계이고 운영 row·AI·Supabase를 직접 호출하지 않아 사람 화면 조작은 필요하지 않다. 다음은 `/api/ai/comment-polish` 시험 총평 요청 adapter를 fake fetch로 분리한다.
+
 ## 2026-07-23 P1. 14A-5F 시험 후 총평 난이도 저장 label 호환 수정 — AI gate 통과
 
 - 사용자 승인: 이번 리팩터링 세션에서 14A-5 fixture가 발견한 기능 불일치를 수정한 뒤 다음 의미 단위를 계속 진행한다.

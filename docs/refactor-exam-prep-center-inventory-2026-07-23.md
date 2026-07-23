@@ -89,9 +89,17 @@
 - deterministic fixture가 기존 label 읽기·수정, 2번 행 단일 유지, 블로그 발췌 반영을 검증한다. production scenario 470/470, build, `git diff --check`가 통과했다.
 - 순수 문자열 호환 수정이므로 운영 시험 row와 사람 화면 조작은 필요하지 않다.
 
+## 14A-6 시험 후 총평 draft 저장 타이머 controller
+
+- 500ms debounce, 최신값 보관, blur/닫기 flush, unmount cancel을 `examReviewDraftSaveController.js`로 이동했다.
+- controller는 전달받은 `saveValue` callback만 실행하고 React state/effect, `onUpdateRow`, `persistExamPrepRows`, API/Supabase, AI 요청을 소유하지 않는다.
+- fake timer fixture가 직전 timer 취소, 최신값 단일 저장, blur/close 즉시 flush, unmount cancel과 500ms 계약을 검증한다.
+- production scenario 470/470, build, `git diff --check`를 통과했으며 운영 row·AI·Supabase 호출은 없다.
+
 ## 이후 후보와 중단 조건
 
-1. 시험 후 총평 local state/AI action
-2. 시험정보 저장·삭제·수업 reconcile orchestration
+1. 시험 후 총평 AI request adapter
+2. 총평 modal local React state/action
+3. 시험정보 저장·삭제·수업 reconcile orchestration
 
 학생 제출·교사 확인·Storage 파일 열기 경계를 건드리면 기존 학생 포털 실제 쓰기와 bearer/Storage gate에서 중단한다. 시험정보 삭제나 시험대비 수업 생성·삭제를 옮길 때는 별도의 격리 데이터와 사람 gate가 필요하다. 순수 표시/model 단위는 deterministic fixture와 production test/build로 검증하고 운영 데이터를 만들지 않는다.
