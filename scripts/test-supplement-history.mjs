@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import {
   createSupplementHistoryItems,
   getSupplementHistoryDate,
-  getSupplementHistoryStatus
+  getSupplementHistoryStatus,
+  getSupplementHistoryTimestamp,
+  selectRecentSupplementTasks
 } from "../src/domains/supplements/supplementHistory.js";
 
 const students = [
@@ -39,5 +41,38 @@ assert.deepEqual(createSupplementHistoryItems({ ...dependencies, query: "RETEST"
 assert.equal(getSupplementHistoryDate({ passedAt: "2026-07-19T01:00:00Z" }), "2026-07-19");
 assert.equal(getSupplementHistoryDate({}), "-");
 assert.deepEqual(getSupplementHistoryStatus({ status: "other" }), { label: "진행 중", tone: "draft" });
+
+const recentTasks = selectRecentSupplementTasks({
+  cutoffDate: "2026-06-23",
+  tasks: [
+    {
+      createdAt: "2026-06-22T12:00:00.000Z",
+      makeupTaskId: "too-old",
+      status: "draft"
+    },
+    {
+      makeupTaskId: "scheduled",
+      scheduledDate: "2026-07-20",
+      status: "scheduled"
+    },
+    {
+      completedAt: "2026-07-21T11:00:00.000Z",
+      makeupTaskId: "completed",
+      scheduledDate: "2026-07-19",
+      status: "done"
+    },
+    {
+      makeupTaskId: "touched",
+      status: "draft",
+      touchedAt: "2026-07-21T15:00:00.000Z"
+    }
+  ]
+});
+assert.deepEqual(
+  recentTasks.map((task) => task.makeupTaskId),
+  ["touched", "completed", "scheduled"]
+);
+assert.equal(getSupplementHistoryTimestamp(recentTasks[0]), "2026-07-21T15:00:00.000Z");
+assert.equal(getSupplementHistoryDate(recentTasks[1]), "2026-07-21");
 
 console.log("supplement history: deterministic contract passed");

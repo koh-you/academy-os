@@ -65,6 +65,7 @@ import {
 import { createSupplementCenterTabViewModel } from "../domains/supplements/supplementCenterTabModel.js";
 import { SupplementPassConfirmModal } from "../domains/supplements/SupplementPassConfirmModal.jsx";
 import { SupplementHistoryModal } from "../domains/supplements/SupplementHistoryModal.jsx";
+import { selectRecentSupplementTasks } from "../domains/supplements/supplementHistory.js";
 import { SupplementStudentModal } from "../domains/supplements/SupplementStudentModal.jsx";
 import {
   createSupplementTaskDraft as createSupplementTaskDraftModel,
@@ -22204,16 +22205,10 @@ function SupplementCenter({
     retestItems: retestSupplementItems,
     tasks
   });
-  const historyCutoffDate = addDaysInKorea(today, -30);
-  const recentSupplementTasks = tasks
-    .filter((task) => {
-      const baseDate = String(task.completedAt || task.passedAt || task.lastScheduledAt || task.touchedAt || task.scheduledDate || task.createdAt || "").slice(0, 10);
-      return baseDate >= historyCutoffDate;
-    })
-    .sort((a, b) =>
-      String(b.completedAt || b.passedAt || b.lastScheduledAt || b.touchedAt || b.scheduledDate || b.createdAt || "")
-        .localeCompare(String(a.completedAt || a.passedAt || a.lastScheduledAt || a.touchedAt || a.scheduledDate || a.createdAt || ""))
-    );
+  const recentSupplementTasks = selectRecentSupplementTasks({
+    cutoffDate: addDaysInKorea(today, -30),
+    tasks
+  });
 
   return (
     <section className="followUpPage">

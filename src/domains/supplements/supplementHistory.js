@@ -1,4 +1,4 @@
-export function getSupplementHistoryDate(task = {}) {
+export function getSupplementHistoryTimestamp(task = {}) {
   return String(
     task.completedAt ||
     task.passedAt ||
@@ -7,7 +7,22 @@ export function getSupplementHistoryDate(task = {}) {
     task.scheduledDate ||
     task.createdAt ||
     ""
-  ).slice(0, 10) || "-";
+  );
+}
+
+export function getSupplementHistoryDate(task = {}) {
+  return getSupplementHistoryTimestamp(task).slice(0, 10) || "-";
+}
+
+export function selectRecentSupplementTasks({
+  cutoffDate = "",
+  tasks = []
+} = {}) {
+  return tasks
+    .filter((task) => getSupplementHistoryTimestamp(task).slice(0, 10) >= cutoffDate)
+    .sort((a, b) =>
+      getSupplementHistoryTimestamp(b).localeCompare(getSupplementHistoryTimestamp(a))
+    );
 }
 
 export function getSupplementHistoryStatus(task = {}) {

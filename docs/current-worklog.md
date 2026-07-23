@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-35 최근 한 달 보충내역 selector 분리 — AI gate 통과
+
+- 코드: history 기준 timestamp 우선순위를 `getSupplementHistoryTimestamp`로 명시하고, 30일 cutoff 필터와 최신순 정렬을 `selectRecentSupplementTasks`로 기존 `supplementHistory.js`에 이동했다. App은 오늘에서 30일 전 날짜만 계산해 전달한다.
+- 동작 보존: `completedAt -> passedAt -> lastScheduledAt -> touchedAt -> scheduledDate -> createdAt` 우선순위, 날짜 앞 10자리 cutoff 비교, 같은 timestamp 전체 문자열 내림차순을 그대로 유지한다.
+- 저장 원천/side effect: selector는 task 배열과 cutoff 문자열만 읽는다. React state, clock, API, Supabase, notification/Solapi 호출이 없다.
+- 자동검증: cutoff 이전 제외, scheduledDate fallback, completedAt 우선, touchedAt 최신 정렬을 기존 history fixture에 추가했다. production scenario `88b-50`, production 416/416, build, `git diff --check`가 통과했고 기존 대형 chunk 경고만 남았다.
+- gate 판정: 순수 history derivation이고 기존 `SupplementHistoryModal` 표시/복귀 callback을 바꾸지 않는다. 사람 조작 없이 AI gate로 통과했다.
+- 다음 경계: 보충 후보 row UI를 callback-only 컴포넌트로 분리한 뒤 `SupplementCenter` 본체 이동 가능 여부를 inventory한다.
+
 ## 2026-07-23 P1. 12R-34 결석보강 source·candidate·hydrate 모델 분리 — AI gate 통과
 
 - 코드: 결석 당시 수업·학생·지난/다음 숙제를 조합하는 source context, 결석보강 candidate item, 저장된 absence task의 누락 source field hydrate를 `createAbsenceSupplementCandidateModel`로 `supplementCenterCandidateModel.js`에 이동했다.

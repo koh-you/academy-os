@@ -351,6 +351,15 @@
 - 읽기 전용 순수 모델이므로 운영 데이터나 사람 조작 없이 AI gate로 통과했다.
 - 다음은 최근 한 달 history derivation과 row 표시를 분리한 뒤 `SupplementCenter` 본체 이동 가능 여부를 inventory한다.
 
+## 12R-35 구현 결과 — 최근 한 달 보충내역 selector
+
+- history timestamp 우선순위를 `getSupplementHistoryTimestamp`로 명시하고 30일 cutoff와 최신순 정렬을 `selectRecentSupplementTasks`로 이동했다.
+- 완료·통과·마지막 일정·수정·일정일·생성시각 우선순위와 날짜 cutoff·전체 timestamp 내림차순을 보존했다.
+- selector에는 React state·clock·API·Supabase·notification/Solapi 호출이 없다.
+- cutoff 이전 제외와 세 timestamp fallback/우선순위 fixture, production scenario `88b-50`, production 416/416, build, diff 검사를 통과했다.
+- 순수 derivation이므로 사람 조작 없이 AI gate로 통과했다.
+- 다음은 보충 후보 row UI를 callback-only 컴포넌트로 분리한 뒤 `SupplementCenter` 본체 이동 가능 여부를 inventory한다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.
