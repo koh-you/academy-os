@@ -4,6 +4,7 @@ import {
   createNotificationHistoryViewModel,
   createNotificationRecipientViewModel,
   filterNoticeSelectedStudentIds,
+  resolveNotificationAudiencePhone,
   resolveNotificationStudentName,
   selectAllNoticeStudentIds,
   toggleNoticeSelectedStudentId,
@@ -187,6 +188,23 @@ assert.equal(
     students: notificationStudents
   }),
   "학생"
+);
+
+const notificationAudienceStudent = {
+  parentPhone: "010-2222-2222",
+  studentPhone: "010-1111-1111"
+};
+assert.equal(
+  resolveNotificationAudiencePhone(notificationAudienceStudent, "student"),
+  "010-1111-1111"
+);
+assert.equal(
+  resolveNotificationAudiencePhone(notificationAudienceStudent, "parent"),
+  "010-2222-2222"
+);
+assert.equal(
+  resolveNotificationAudiencePhone(notificationAudienceStudent, "unknown"),
+  "010-2222-2222"
 );
 
 const futureAt = "2026-08-01T09:00:00.000Z";

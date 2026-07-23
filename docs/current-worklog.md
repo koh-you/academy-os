@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13D-8 알림 수신 audience 번호 accessor 분리 — AI gate 통과
+
+- 코드: 알림 수신 카드에서 audience에 따라 학생 번호 또는 학부모 번호를 고르는 계산을 `notificationCenterModel.js`의 `resolveNotificationAudiencePhone`으로 이동했다. App의 기존 callback은 student와 audience를 그대로 전달한다.
+- 동작 보존: audience가 정확히 `student`일 때만 `studentPhone`, `parent`를 포함한 나머지 값은 `parentPhone`을 반환하는 기존 삼항 분기를 그대로 유지했다.
+- 저장 원천/side effect: 이미 선택된 student 객체의 두 전화 필드 중 하나를 읽어 반환한다. 번호 정규화, 대상 선정, local state, API/Supabase, notification job, Solapi 발송·예약에는 관여하지 않는다.
+- 자동검증: 학생, 학부모, 기존 default 분기를 `test:notification-center-model` equality fixture로 고정했다. production scenario 447/447와 build, `git diff --check`가 통과했다.
+- gate 판정: 전체 분기를 순수 fixture로 재현할 수 있어 재시험/고태영 운영 데이터나 실제 발송, 사람 화면 검수가 필요하지 않은 AI gate다.
+- 다음 경계: NotificationCenter에 남은 local setter wrapper·effect·JSX와 `SpecialLectureNoticePanel` 결합을 다시 inventory한다. 특강 안내문 적용은 외부 템플릿 gate가 통과되기 전 이동하지 않는다.
+
 ## 2026-07-23 P1. 13D-7 알림 기록 학생 이름 fallback model 분리 — AI gate 통과
 
 - 코드: 알림 기록의 학생 표시 이름을 `payload.studentName -> 현재 students 원천의 name -> 학생` 순서로 해석하는 계산을 `notificationCenterModel.js`의 `resolveNotificationStudentName`으로 이동했다. App은 기존 history callback에서 payload·studentId·students만 주입한다.
