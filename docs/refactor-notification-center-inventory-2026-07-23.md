@@ -72,7 +72,13 @@
 - 학생/학부모 type·target, 즉시/예약 상태·시각, 빈 제목 fallback, 특강 변수 조건부 포함을 deterministic fixture로 고정했다.
 - App adapter가 현재시각·난수·생성시각을 기존 순서로 만들고 builder에 주입한다. builder에는 clock/random/API/Supabase/Solapi mutation이 없다.
 
+## 13C-2 request adapter 단위
+
+- 공지 job 기록 저장과 예약 request의 endpoint, body, 15초/45초 timeout, 안내 문구를 `notificationNoticeApi.js`로 이동했다.
+- 예약 응답 job 우선, 원본 fallback, 예외 전파를 네트워크 없는 injected request fixture로 고정했다.
+- 실제 즉시발송·예약 loop, 실패 job 조립, local state/feedback/requery는 App에 유지한다.
+
 ## 다음 후보
 
-1. `persistNoticeJob`과 `reserveNoticeJob`의 path/body/timeout/error 계약을 request 주입형 API adapter로 분리한다.
-2. 실제 즉시발송·예약 loop는 adapter와 분리해 외부 side effect와 사람 gate 필요성을 다시 판정한다.
+1. `sendNoticeNow`의 success/timeout/failure/record failure 순서를 주입형 action으로 분리하고 mock fixture로 고정한다.
+2. 예약 loop는 즉시발송 action과 별도 단위로 분리해 외부 side effect와 사람 gate 필요성을 다시 판정한다.
