@@ -5,6 +5,10 @@ import {
 } from "../domains/exams/finalPreview.js";
 import { ExamAnalysisFinalPreviewPanel } from "../domains/exams/ExamAnalysisFinalPreviewPanel.jsx";
 import { ExamPrepEditModal } from "../domains/exams/ExamPrepEditModal.jsx";
+import {
+  applyExamPrepLessonReconcilePlan,
+  createExamPrepLessonReconcilePlan
+} from "../domains/exams/examPrepLessonReconcilePlan.js";
 import { ExamPrepPastPaperPanel } from "../domains/exams/ExamPrepPastPaperPanel.jsx";
 import { createExamPrepCenterDisplayModel } from "../domains/exams/examPrepCenterModel.js";
 import {
@@ -7225,43 +7229,20 @@ export function App() {
   }
 
   function reconcilePersistedExamPrepLessons(nextExamPrepRows) {
-    const examPrepCandidates = buildExamPrepLessonCandidates(nextExamPrepRows);
-    const candidateByIdentityKey = new Map();
-    examPrepCandidates.forEach((item) => {
-      [item.lesson.lessonId, item.generatedKey, ...getGeneratedLessonIdentityKeys(item.lesson)]
-        .filter(Boolean)
-        .forEach((key) => candidateByIdentityKey.set(key, item.lesson));
-    });
-    const existingExamPrepLessons = lessons.filter(isExamPrepLesson);
-    const lessonsToSave = [];
-    const lessonIdsToDelete = [];
-
-    existingExamPrepLessons.forEach((lesson) => {
-      const nextLesson = [lesson.lessonId, ...getGeneratedLessonIdentityKeys(lesson)]
-        .map((key) => candidateByIdentityKey.get(key))
-        .find(Boolean);
-      if (!nextLesson) {
-        lessonIdsToDelete.push(lesson.lessonId);
-        return;
-      }
-      const mergedLesson = { ...lesson, ...nextLesson, lessonId: lesson.lessonId };
-      if (JSON.stringify(mergedLesson) !== JSON.stringify(lesson)) {
-        lessonsToSave.push(mergedLesson);
-      }
+    const { lessonIdsToDelete, lessonsToSave } = createExamPrepLessonReconcilePlan({
+      buildCandidates: buildExamPrepLessonCandidates,
+      getIdentityKeys: getGeneratedLessonIdentityKeys,
+      isExamPrepLesson,
+      lessons,
+      nextExamPrepRows
     });
 
     if (lessonsToSave.length === 0 && lessonIdsToDelete.length === 0) return;
 
-    setLessons((current) => {
-      const deletedIds = new Set(lessonIdsToDelete);
-      const next = current.filter((lesson) => !deletedIds.has(lesson.lessonId));
-      lessonsToSave.forEach((lesson) => {
-        const index = next.findIndex((item) => item.lessonId === lesson.lessonId);
-        if (index >= 0) next[index] = { ...next[index], ...lesson };
-        else next.push(lesson);
-      });
-      return next;
-    });
+    setLessons((current) => applyExamPrepLessonReconcilePlan(current, {
+      lessonIdsToDelete,
+      lessonsToSave
+    }));
 
     if (lessonsToSave.length > 0) {
       postJson("/api/lessons/bulk", { lessons: lessonsToSave }).catch((error) => console.error(error));

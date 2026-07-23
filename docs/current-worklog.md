@@ -8,6 +8,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 14C-1 시험정보 연결 수업 reconcile plan 분리 — AI gate 통과
+
+- 코드: 다음 시험정보 rows와 현재 lessons를 비교해 `lessonsToSave`/`lessonIdsToDelete`를 만드는 계산과 그 계획을 local lesson 배열에 적용하는 순수 함수를 `src/domains/exams/examPrepLessonReconcilePlan.js`로 이동했다.
+- 경계: App은 candidate builder, identity selector, 시험대비 수업 판정과 현재 원천을 주입한다. React `setLessons`, `/api/lessons/bulk`, lesson DELETE, 시험정보 row 삭제·실패 복구는 계속 App에 있다.
+- 자동검증: 합성 fixture로 identity 매칭, persisted lessonId 보존, 변경 수업만 저장 계획 포함, 후보가 사라진 시험대비 수업만 삭제, 동일 수업·정규수업 보존, local plan 적용을 검증했다. 실제 row/lesson 요청은 0회다. production scenario 477/477, build, `git diff --check`가 통과했다.
+- 사람 gate: 순수 plan만 이동했으므로 새 사람 조작은 필요하지 않다. 다음은 lesson bulk 저장/단일 삭제 transport를 fake request adapter로 분리할 수 있다. 낙관적 시험정보 row 삭제·실패 복구와 실제 lesson reconcile orchestration 이동 전에는 격리 시험정보/수업 사람 gate가 필요하다.
+
 ## 2026-07-23 P1. 14B-2 시험정보 row 저장 상태 controller 분리 — AI gate 통과
 
 - 코드: row별 request 순번, `saving/saved/failed` 상태 patch, 최신 요청만 결과를 반영하는 조건을 `src/domains/exams/examPrepRowSaveController.js`로 이동했다.
