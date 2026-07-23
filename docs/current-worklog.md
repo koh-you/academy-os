@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13D-10 알림 notice presentational shell 분리 — AI gate 통과
+
+- 코드: notice 탭, 공지 작성 workspace, 발송 기록 panel의 조건부 조합을 새 `NotificationNoticeWorkspace.jsx`로 이동했다. App은 탭·작성·기록별 기존 props/callback 객체와 현재 workspace 값만 전달한다.
+- 동작 보존: 탭을 먼저 렌더하고 `compose`에서만 작성 영역, `history`에서만 기록 영역을 렌더하는 fragment 구조를 그대로 유지했다. 작성·예약·즉시발송·취소·삭제·Solapi 결과 대조 handler는 계속 App이 소유한다.
+- 저장 원천/side effect: 새 shell은 props 전달과 조건부 렌더만 수행하며 state/effect/API/Supabase/notification job/Solapi 호출이 없다. special lecture 분기는 이동하지 않았다.
+- 자동검증: tabs→compose/history 조건, 모든 기존 callback 연결, 실제 Solapi 그룹 취소 경로의 App handler→history panel→row 버튼 연결을 새 파일 경계까지 추적하도록 production scenario를 갱신했다. production scenario 449/449와 build, `git diff --check`가 통과했다.
+- gate 판정: DOM wrapper가 생기지 않는 fragment 컴포넌트 이동이고 조건·연결을 정적으로 모두 검증했다. 재시험/고태영 운영 데이터나 실제 발송, 사람 화면 검수가 필요하지 않은 AI gate다.
+- 다음 경계: NotificationCenter에 남은 local state/effect/adapter와 `SpecialLectureNoticePanel` 결합을 다시 inventory한다. 특강 안내문 적용 또는 실제 발송 orchestration을 건드려야 하면 이 로드맵 단위를 닫고 보류 경계를 기록한다.
+
 ## 2026-07-23 P1. 13D-9 알림 공지 작성 workspace 조합 컴포넌트 분리 — AI gate 통과
 
 - 코드: 공지 작성 영역의 `MESSAGE CENTER` 헤더, 수신 건수, 수신자 패널·작성 패널 그리드 조합을 새 `NotificationComposeWorkspace.jsx`로 이동했다. App은 두 패널의 기존 props와 callback을 각각 객체로 전달한다.

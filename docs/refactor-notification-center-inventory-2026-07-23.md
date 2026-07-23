@@ -186,8 +186,14 @@
 - App은 두 하위 패널의 기존 props/callback 객체만 전달한다.
 - 새 컴포넌트는 state/effect/외부 호출이 없고 발송·예약 handler는 App에 남는다.
 
+## 13D-10 notice presentational shell 단위
+
+- notice tabs·compose workspace·history panel의 조건부 조합을 `NotificationNoticeWorkspace`로 이동했다.
+- App은 현재 workspace와 세 하위 영역의 props/callback 객체만 전달한다.
+- 새 shell은 fragment 조건부 렌더만 소유하고 발송·취소·삭제·대조 handler와 special lecture 분기는 App에 남는다.
+
 ## 다음 후보
 
-1. notice 탭·작성 workspace·기록 panel의 조건부 조합을 presentational shell로 분리한다.
-2. 이후 NotificationCenter 잔여 local setter wrapper·effect와 특강 panel 결합을 다시 inventory한다.
-3. 특강 안내문 적용/컴포넌트 이동이 Solapi 특강 템플릿 외부 검수 경계를 건드리면 중단하고 보류 상태를 기록한다.
+1. NotificationCenter 잔여 local state/effect/adapter와 `SpecialLectureNoticePanel` 결합을 다시 inventory한다.
+2. 순수 또는 local-only 경계가 독립적으로 남아 있을 때만 한 번에 하나씩 분리한다.
+3. 특강 안내문 적용/컴포넌트 이동이나 실제 발송 orchestration을 건드려야 하면 로드맵 13의 안전한 경계를 닫고 보류 상태를 기록한다.
