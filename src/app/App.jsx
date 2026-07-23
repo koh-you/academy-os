@@ -59,6 +59,7 @@ import {
   reserveNoticeJobRequest
 } from "../domains/notifications/notificationNoticeApi.js";
 import {
+  reconcileNoticeResultsAction,
   scheduleNoticeAction,
   sendNoticeNowAction
 } from "../domains/notifications/notificationNoticeActions.js";
@@ -10437,29 +10438,18 @@ function NotificationCenter({
   }
 
   async function reconcileSolapiResultsForNoticeJobs() {
-    if (!onReconcileSolapiNotificationResults || !solapiResultSyncTargetIds.length || solapiResultSyncState.state === "loading") return;
-    setSolapiResultSyncState({
-      checkedAt: solapiResultSyncState.checkedAt,
-      state: "loading",
-      message: `Solapi 예약 ${solapiResultSyncTargetIds.length}건을 조회하고 OS 기록과 대조하는 중입니다.`
+    return reconcileNoticeResultsAction({
+      isLoading: solapiResultSyncState.state === "loading",
+      now: () => new Date().toISOString(),
+      reconcileResults: onReconcileSolapiNotificationResults,
+      refreshJobs: refreshNoticeJobsInBackground,
+      resultTargetCount: solapiResultTargets.length,
+      setIsHistoryOpen: setIsNoticeHistoryOpen,
+      setJobFilter,
+      setSyncState: setSolapiResultSyncState,
+      syncCheckedAt: solapiResultSyncState.checkedAt,
+      targetIds: solapiResultSyncTargetIds
     });
-    try {
-      const result = await onReconcileSolapiNotificationResults({ notificationJobIds: solapiResultSyncTargetIds });
-      const checkedCount = result?.checkedCount ?? 0;
-      const updatedCount = result?.updatedCount ?? 0;
-      const failedCount = (result?.checked ?? []).filter((item) => item.status === "failed_to_check").length;
-      const checkedAt = new Date().toISOString();
-      setSolapiResultSyncState({
-        checkedAt,
-        state: failedCount ? "partial" : "saved",
-        message: `Solapi 결과 대조 완료: 대상 ${solapiResultSyncTargetIds.length}건 · 조회 ${checkedCount}건 · OS 반영 ${updatedCount}건${failedCount ? ` · 조회 실패 ${failedCount}건` : ""}`
-      });
-      if (updatedCount || solapiResultTargets.length) setJobFilter("pending");
-      setIsNoticeHistoryOpen(true);
-      refreshNoticeJobsInBackground();
-    } catch (error) {
-      setSolapiResultSyncState((current) => ({ ...current, state: "failed", message: `Solapi 결과 대조 실패: ${error.message}` }));
-    }
   }
 
   async function polishNoticeMessage() {

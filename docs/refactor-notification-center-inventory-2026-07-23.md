@@ -90,7 +90,13 @@
 - App이 builder, 과거시각/표시시각 함수, 실제 reserve/persist wrapper, clock, state setter와 refresh를 모두 주입한다.
 - 과거시각, 예약 성공·실패, 실패 row 기록 실패, `failed`/`scheduled` filter, guard/finally를 mock fixture로 고정했고 실제 예약·운영 row 변경은 없다. 재시험 운영 데이터도 필요하지 않다.
 
+## 13C-5 결과 대조 action 단위
+
+- 결과 대조 callback/대상/loading guard, 조회 중·saved/partial/failed 상태, 결과 집계, pending filter, history/refresh 순서를 `reconcileNoticeResultsAction`으로 이동했다.
+- App이 실제 reconcile callback, 대상 ID/count, clock과 state setter를 모두 주입한다.
+- partial·실패·guard를 mock fixture로 고정했고 실제 Solapi 조회나 운영 row 변경은 없다. 재시험/고태영 운영 데이터도 필요하지 않다.
+
 ## 다음 후보
 
-1. `reconcileSolapiResultsForNoticeJobs`의 대상 guard, loading, 성공·부분실패·실패와 refresh 순서를 injected action으로 분리한다.
-2. 취소·삭제와 AI 수정은 서로 다른 side effect이므로 각각 별도 단위로 판정한다.
+1. `polishNoticeMessage`의 AI request와 local draft 상태 전환을 실제 호출 없는 request adapter/action 단위로 나눌 수 있는지 inventory한다.
+2. 취소와 삭제는 서로 다른 destructive side effect이므로 각각 별도 단위로 판정한다.
