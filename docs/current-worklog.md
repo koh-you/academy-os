@@ -8,6 +8,7 @@
 - 수업일지 적용: `수정 시작` 후 수업일지 하단 고정 바가 나타나 `수업일지 · 변경됨/저장 중/저장 완료/저장 실패`, 저장 전 변경 건수와 `변경 저장`을 계속 표시한다. 기존 상단 점검 영역에서는 중복된 저장 버튼·저장 상태를 제거하고 편집 시작, 예약 확인, 기본/지연/알림 없음 계획, Solapi 반영·결과 확인만 유지했다.
 - 저장/부작용 경계: 고정 바의 대표 버튼은 기존 `saveJournalDrafts -> onSaveLessonJournalDrafts`만 호출하며 변경된 수업기록·숙제·보충 draft의 명시 저장과 기존 Supabase 검증 계약을 그대로 사용한다. `notification_jobs`, Solapi 예약·취소·발송, 출결 알림, 수업 취소는 고정 바에서 실행하지 않는다. 해당 기능은 기존 상단 점검 영역에 분리된 채 유지한다.
 - AI 검증: `git diff --check`, `node --check scripts/scenario-tests-production.cjs`, `npm run test:production` 369건, `npm run build`를 통과했다. 기존 Vite chunk size 경고만 남았다.
+- 배포 확인: 기능 커밋 `6be18ef5`를 `origin/main`에 푸시했고 운영 프론트가 JS `/assets/main-Cb69j2x8.js`, CSS `/assets/main-D_OzfChA.css`로 전환된 뒤 공통 `StickySaveBar` 렌더 문구와 `.stickySaveBar` 스타일이 포함된 것을 확인했다.
 - 사람 gate: 운영 수업일지에서 ① `수정 시작`을 누르면 하단 고정 바가 나타나는지, ② 페이지 중간과 하단으로 스크롤해도 같은 위치에서 상태와 `변경 저장` 버튼이 보이는지, ③ 학생 기록 하나를 수정하면 `변경됨 · 저장 전 변경 1건`처럼 표시되는지, ④ 저장하면 `저장 중 -> 저장 완료`로 바뀌고 새로고침 후 값이 유지되는지 확인한다. ⑤ 고정 바에 예약·Solapi·수업 취소 버튼이 없고 저장만으로 기존 알림 예약이 바뀌지 않는지 확인한다.
 - 중단 조건: 바가 본문을 과도하게 가림, 모바일에서 버튼/상태가 화면 밖으로 넘침, 스크롤 시 따라오지 않음, 변경 건수 불일치, 저장 실패인데 완료 표시, `변경 저장`만으로 `notification_jobs`/Solapi/출결 상태 변경. 이 gate 통과 전 학생 프로파일 적용으로 넘어가지 않는다.
 
