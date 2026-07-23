@@ -8,6 +8,14 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-16 보충 task 저장상태 local state hook 분리 — AI gate 통과
+
+- 코드: task별 `lesson / makeupTask / notificationDraft` 화면 상태 map의 React state, 조회, patch 적용을 `useSupplementTaskSaveStatusState.js`로 이동했다. 앞서 분리한 순수 `mergeSupplementTaskSaveStatus`를 그대로 사용한다.
+- 동작 보존: 없는 task는 빈 상태를 반환하고, patch 적용 시 같은 task의 미포함 필드와 다른 task 상태를 유지한다. App의 저장 action, read-after-write 결과, 성공·실패 판정은 바꾸지 않았다.
+- 저장 원천/side effect: 저장 진행 표시를 위한 메모리상 상태만 소유한다. API, Supabase, `notification_jobs`, Solapi 및 실제 action callback은 hook에 없다.
+- 자동검증: 기존/없는 task 조회와 원본 불변 fixture, 병합 회귀검사의 새 hook 범위 확장, production scenario `88b-31`, production 397/397, build, `git diff --check`를 통과했다. 기존 대형 chunk 경고만 남았다.
+- gate 판정: 실제 저장 원천이나 완료 판정을 변경하지 않는 local 표시 상태 분리다. 사용자 지시에 따라 AI 검토로 통과하며 별도 사람 조작이나 검수 데이터는 요구하지 않는다.
+
 ## 2026-07-23 P1. 12R-15 보충 알림톡 draft 선택 local state hook 분리 — AI gate 통과
 
 - 코드: task별로 알림톡 문구 3종 중 현재 선택한 탭을 기억하는 local map과 조회·선택 갱신을 `useSupplementNotificationDraftSelectionState.js`로 이동했다.

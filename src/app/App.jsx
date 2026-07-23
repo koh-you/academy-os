@@ -72,6 +72,7 @@ import { useSupplementConfirmationState } from "../domains/supplements/useSupple
 import { useSupplementFeedbackState } from "../domains/supplements/useSupplementFeedbackState.js";
 import { useSupplementNotificationDraftSelectionState } from "../domains/supplements/useSupplementNotificationDraftSelectionState.js";
 import { useSupplementTaskDraftController } from "../domains/supplements/useSupplementTaskDraftController.js";
+import { useSupplementTaskSaveStatusState } from "../domains/supplements/useSupplementTaskSaveStatusState.js";
 import {
   createPersistableSupplementTask,
   createSupplementDraftSaveStatusPatch,
@@ -82,7 +83,6 @@ import {
   getSupplementPersistedEditFingerprint,
   getSupplementTaskDraftDiff as getSupplementTaskDraftDiffModel,
   isSupplementTeacherEditedField,
-  mergeSupplementTaskSaveStatus,
   supplementNotificationDraftConfigs
 } from "../domains/supplements/supplementTaskDraft.js";
 import {
@@ -22544,7 +22544,6 @@ function SupplementStudentModal({
     [notificationTemplates]
   );
   const [busyTaskId, setBusyTaskId] = useState("");
-  const [taskSaveStatus, setTaskSaveStatus] = useState({});
   const {
     dismissFeedback,
     feedback,
@@ -22554,6 +22553,10 @@ function SupplementStudentModal({
     getActiveNotificationDraftField,
     selectNotificationDraftField
   } = useSupplementNotificationDraftSelectionState();
+  const {
+    getTaskSaveStatus,
+    setTaskSaveStatusPatch
+  } = useSupplementTaskSaveStatusState();
   const {
     closePassConfirmation,
     closeScheduleConfirmation,
@@ -22584,16 +22587,12 @@ function SupplementStudentModal({
     tasks
   });
 
-  function setTaskSaveStatusPatch(taskId, patch) {
-    setTaskSaveStatus((current) => mergeSupplementTaskSaveStatus(current, taskId, patch));
-  }
-
   function updateTaskDraft(task, field, value) {
     if (!task?.makeupTaskId) return;
     updateTaskDraftValues(task, field, value);
     setTaskSaveStatusPatch(
       task.makeupTaskId,
-      createSupplementDraftSaveStatusPatch(field, taskSaveStatus[task.makeupTaskId])
+      createSupplementDraftSaveStatusPatch(field, getTaskSaveStatus(task.makeupTaskId))
     );
   }
 
@@ -22604,7 +22603,7 @@ function SupplementStudentModal({
     setBusyTaskId(actionKey);
     try {
       await saveSupplementTaskContentAction({
-        currentLessonStatus: taskSaveStatus[task.makeupTaskId]?.lesson,
+        currentLessonStatus: getTaskSaveStatus(task.makeupTaskId).lesson,
         onFeedback: ({ message, title, tone }) => showFeedback(title, message, tone),
         onMarkSaved: (nextTask) => markTaskDraftSaved(task.makeupTaskId, nextTask),
         onSaveStatus: (patch) => setTaskSaveStatusPatch(task.makeupTaskId, patch),
@@ -22853,7 +22852,7 @@ function SupplementStudentModal({
               const draftValues = taskDraftState.values;
               const draftDiff = getSupplementTaskDraftDiff(task, draftValues, student, normalizedNotificationTemplates);
               const methodOptions = supplementMethodOptions(task.taskType);
-              const saveStatus = taskSaveStatus[task.makeupTaskId] ?? {};
+              const saveStatus = getTaskSaveStatus(task.makeupTaskId);
               const taskCardViewModel = createSupplementTaskCardViewModel({
                 draftDiff,
                 draftValues,

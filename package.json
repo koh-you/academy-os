@@ -42,8 +42,9 @@
     "test:supplement-confirmation-state": "node scripts/test-supplement-confirmation-state.mjs",
     "test:supplement-feedback-state": "node scripts/test-supplement-feedback-state.mjs",
     "test:supplement-notification-draft-selection-state": "node scripts/test-supplement-notification-draft-selection-state.mjs",
+    "test:supplement-task-save-status-state": "node scripts/test-supplement-task-save-status-state.mjs",
     "test:supplement-task-actions": "node scripts/test-supplement-task-actions.mjs",
-    "test:production": "npm run test:exam-prompt-studio && npm run test:exam-final-preview && npm run test:supplement-builders && npm run test:notification-job-api && npm run test:supplement-notification-orchestration && npm run test:supplement-schedule-plan && npm run test:supplement-modal-drafts && npm run test:supplement-history && npm run test:supplement-status && npm run test:supplement-task-draft && npm run test:supplement-task-card-model && npm run test:supplement-notification-control-model && npm run test:supplement-confirmation-state && npm run test:supplement-feedback-state && npm run test:supplement-notification-draft-selection-state && npm run test:supplement-task-actions && node scripts/scenario-tests-production.cjs"
+    "test:production": "npm run test:exam-prompt-studio && npm run test:exam-final-preview && npm run test:supplement-builders && npm run test:notification-job-api && npm run test:supplement-notification-orchestration && npm run test:supplement-schedule-plan && npm run test:supplement-modal-drafts && npm run test:supplement-history && npm run test:supplement-status && npm run test:supplement-task-draft && npm run test:supplement-task-card-model && npm run test:supplement-notification-control-model && npm run test:supplement-confirmation-state && npm run test:supplement-feedback-state && npm run test:supplement-notification-draft-selection-state && npm run test:supplement-task-save-status-state && npm run test:supplement-task-actions && node scripts/scenario-tests-production.cjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.0",
