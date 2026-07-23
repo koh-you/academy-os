@@ -192,8 +192,14 @@
 - App은 현재 workspace와 세 하위 영역의 props/callback 객체만 전달한다.
 - 새 shell은 fragment 조건부 렌더만 소유하고 발송·취소·삭제·대조 handler와 special lecture 분기는 App에 남는다.
 
+## 13E-1 navigation local state hook 단위
+
+- 공지/특강 탭, 특강 내부 workspace, 공지 내부 workspace state와 initial tab prop 동기화 effect를 `useNotificationCenterNavigationState`로 이동했다.
+- 특강 탭 노출 여부에 따른 active tab 계산은 `resolveNotificationCenterActiveTab` 순수 model로 이동했다.
+- hook은 local state/effect만 소유하고 외부 호출은 없다.
+
 ## 다음 후보
 
-1. NotificationCenter 잔여 local state/effect/adapter와 `SpecialLectureNoticePanel` 결합을 다시 inventory한다.
-2. 순수 또는 local-only 경계가 독립적으로 남아 있을 때만 한 번에 하나씩 분리한다.
+1. 수신자 filter/search/mode/선택 local state와 순수 recipient model·선택 정리 effect를 전용 hook으로 묶는다.
+2. 이후 NotificationCenter 잔여 local state/adapter와 `SpecialLectureNoticePanel` 결합을 다시 inventory한다.
 3. 특강 안내문 적용/컴포넌트 이동이나 실제 발송 orchestration을 건드려야 하면 로드맵 13의 안전한 경계를 닫고 보류 상태를 기록한다.
