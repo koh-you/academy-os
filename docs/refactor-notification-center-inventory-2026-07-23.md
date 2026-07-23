@@ -228,8 +228,14 @@
 - hook은 주입된 students와 pure resolver를 결합해 panel callback을 반환한다.
 - 학생/전화번호 원천이나 발송 경로를 쓰지 않는다.
 
+## 13F-3 job builder binding 단위
+
+- clock/random/현재시각과 현재 composer draft를 순수 notice job builder에 주입하는 App wrapper를 composer hook으로 이동했다.
+- 생성된 job의 ID, payload, preview, 상태와 provider 계약을 변경하지 않았다.
+- persist/reserve/send callback과 API/Supabase/Solapi 경계는 App에 그대로 남겼다.
+
 ## 다음 후보
 
-1. clock/random/현재시각을 순수 notice job builder에 주입하는 binding을 composer hook으로 이동한다.
+1. 같은 `postJsonWithTimeout`을 주입하는 persist/reserve request wrapper를 독립 request binding으로 이동한다.
 2. 특강 안내문 적용 문구와 handler는 외부 템플릿 gate 때문에 App에 그대로 둔다.
-3. 이후 request/action adapter 이동은 기존 mock fixture가 충분한지 먼저 확인하고, 충분하지 않으면 로드맵 13의 안전한 경계를 닫는다.
+3. 이후 action adapter 이동은 기존 mock fixture가 충분한지 먼저 확인하고, 충분하지 않으면 로드맵 13의 안전한 경계를 닫는다.

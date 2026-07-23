@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13F-3 알림 job builder binding 분리 — AI gate 통과
+
+- 코드: App의 `buildNoticeJob(recipient, mode)` wrapper를 `useNotificationComposerState`로 이동했다. hook이 `academyBrandName`, 현재 composer draft/view model, 실행 시점 clock/random 값을 기존 순수 `createNotificationNoticeJob`에 주입해 동일한 job을 반환한다.
+- 동작 보존: ID timestamp·5자리 random suffix·createdAt 생성 시점, 즉시/예약 mode, 제목·본문·특강 meta·수신자·KST 예약시각·오늘 날짜 전달을 그대로 유지했다.
+- 저장 원천/side effect: 이 callback은 메모리에서 job object만 만든다. API/Supabase/`notification_jobs`/Solapi 예약·발송을 실행하지 않으며, 실제 persist/reserve/send action은 기존 App callback 경계에 남겼다.
+- 자동검증: 고정 identity와 학생/학부모·즉시/예약 payload equality fixture를 유지하고 hook binding→기존 send/schedule action 주입 경계, 순수 builder의 clock/random 부재를 production scenario 457개로 고정했다. production scenario 457/457와 build, `git diff --check`가 통과했다.
+- gate 판정: job 전 필드를 deterministic fixture와 정적 경계 검사로 재현하고 외부 요청이 없다. 재시험/고태영 운영 데이터, 실제 번호·발송, 사람 화면 검수가 필요하지 않은 AI gate다.
+- 다음 경계: 같은 `postJsonWithTimeout`을 주입하는 persist/reserve request wrapper를 하나의 독립 request binding으로 분리할 수 있는지 확인한다.
+
 ## 2026-07-23 P1. 13F-2 알림 identity bound callback 분리 — AI gate 통과
 
 - 코드: App의 `studentName(studentId, payload)`와 `getNoticeAudiencePhone(student, audience)` wrapper를 `useNotificationRecipientState`로 이동했다. hook은 이미 주입받은 students 원천과 기존 순수 resolver를 결합해 두 callback을 반환한다.
