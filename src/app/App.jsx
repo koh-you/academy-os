@@ -73,7 +73,10 @@ import {
   getCanceledAbsenceMakeupSaveSnapshot
 } from "../domains/supplements/supplementCancellation.js";
 import { createSupplementSchedulePersistencePlan } from "../domains/supplements/supplementSchedulePlan.js";
-import { createSupplementCenterModalActionHandlers } from "../domains/supplements/supplementCenterModalActionController.js";
+import {
+  createSupplementCenterModalActionHandlers,
+  createSupplementCenterPassConfirmationHandler
+} from "../domains/supplements/supplementCenterModalActionController.js";
 import { SupplementPassConfirmModal } from "../domains/supplements/SupplementPassConfirmModal.jsx";
 import { SupplementHistoryModal } from "../domains/supplements/SupplementHistoryModal.jsx";
 import { SupplementStudentModal } from "../domains/supplements/SupplementStudentModal.jsx";
@@ -24127,23 +24130,14 @@ function SupplementCenter({
     });
   }
 
-  async function confirmPassTask() {
-    if (!passConfirmTask) return;
-    setPassBusyTaskId(passConfirmTask.makeupTaskId || passConfirmTask.sourceId || "");
-    setPassActionError("");
-    setSupplementRowAction(passConfirmTask, "saving", "보충 완료 처리 중");
-    try {
-      await onPassTask(passConfirmTask);
-      setSupplementRowAction(passConfirmTask, "saved", "보충 완료 처리 완료");
-      setPassConfirmTask(null);
-    } catch (error) {
-      console.error("Failed to pass supplement task", error);
-      setSupplementRowAction(passConfirmTask, "failed", error?.message || "보충 완료 처리 실패");
-      setPassActionError(error?.message || "보충 완료 처리에 실패했습니다.");
-    } finally {
-      setPassBusyTaskId("");
-    }
-  }
+  const confirmPassTask = createSupplementCenterPassConfirmationHandler({
+    onPassTask,
+    passConfirmTask,
+    setPassActionError,
+    setPassBusyTaskId,
+    setPassConfirmTask,
+    setSupplementRowAction
+  });
 
   function renderSupplementRow(item) {
     const existingTask = findTaskForCandidate(item.task);

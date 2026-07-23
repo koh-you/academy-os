@@ -307,6 +307,14 @@
 - 이미 검수한 callback 경계의 얇은 adapter 이동이므로 재시험 데이터나 새 운영 조작 없이 AI gate로 통과했다.
 - 다음은 목록 카드의 별도 완료 확인 adapter와 후보·탭 표시 모델을 한 의미 단위씩 inventory한다.
 
+## 12R-30 구현 결과 — 보충 목록 완료 확인 submit adapter
+
+- 목록 카드의 완료 확인 대상 guard, busy·오류·row 상태, 실제 완료 callback await, 성공 시 확인창 닫기와 실패 시 확인창 유지, `finally` busy 해제를 `createSupplementCenterPassConfirmationHandler`로 이동했다.
+- 실제 `makeup_tasks` 완료 저장·재조회·React 전역 갱신·학생 11시 취소는 App의 `onPassTask` callback에 남겼고 controller에는 직접 API·Supabase·notification/Solapi 호출이 없다.
+- 성공·대상 없음·실패 fixture, production scenario `88b-45`, production 411/411, build, diff 검사를 통과했다.
+- 이전 실제 완료·새로고침 사람 gate와 동일 callback 경계이므로 새 운영 데이터나 사람 조작 없이 AI gate로 통과했다.
+- 다음은 후보·탭 표시 모델의 순수 함수 분리 가능성을 inventory한다.
+
 ## 12R-4 구현 결과 — 보충 내용 저장 action (사람 gate 통과)
 
 - saving→save await→mark saved→saved feedback/status와 실패 status/rethrow를 `supplementTaskActions.js`로 옮겼다.
