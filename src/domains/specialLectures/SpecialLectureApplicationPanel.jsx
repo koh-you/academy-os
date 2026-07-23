@@ -16,8 +16,7 @@ import {
   normalizeSpecialLectureEnrollments,
   normalizeSpecialLectureApplications,
   normalizeSpecialLectureGuides,
-  specialLectureApplicationStatusOptions,
-  specialLectureEnrollmentStatusOptions
+  specialLectureApplicationStatusOptions
 } from "./specialLectureGuideUtils.js";
 
 function normalizePhoneNumber(value = "") {
@@ -477,6 +476,7 @@ export function SpecialLectureApplicationPanel({
   const guideSessions = useMemo(() => getSpecialLectureGuideSessions(selectedGuide), [selectedGuide]);
   const guideSessionIds = guideSessions.map((session) => session.sessionId);
   const activeEnrollments = selectedGuideEnrollments.filter((enrollment) => enrollment.status === "active");
+  const canceledEnrollments = selectedGuideEnrollments.filter((enrollment) => enrollment.status === "canceled");
   const duplicateEnrollmentIdentityRows = [...activeEnrollments.reduce((groups, enrollment) => {
     const student = getEnrollmentStudent(enrollment, students);
     const nameKey = normalizeSpecialLectureMatchText(student?.name);
@@ -961,6 +961,11 @@ export function SpecialLectureApplicationPanel({
 
   async function excludeRemainingSessions(enrollment) {
     if (!onSaveEnrollment || !selectedGuide || !isGuideSaved) return;
+    const studentName = getEnrollmentStudent(enrollment, students)?.name || "학생";
+    const confirmed = window.confirm(
+      `${studentName} 학생의 오늘 이후 남은 회차만 취소할까요?\n\n이미 지난 회차와 오늘 수업, 기존 수업일지·출결 기록은 유지됩니다. 저장 후 아래 특강 수업일지 반영에서 미래 명단 변경을 확인해야 합니다.`
+    );
+    if (!confirmed) return;
     const plans = getSpecialLectureEnrollmentSessionPlans(enrollment, guideSessions).map((plan) => {
       const session = guideSessions.find((item) => item.sessionId === plan.sessionId);
       if (!session || (session.dateKey || session.date) <= todayDateKey) return plan;
@@ -983,9 +988,40 @@ export function SpecialLectureApplicationPanel({
     setPanelMessage("");
     try {
       await onSaveEnrollment(nextEnrollment);
-      setPanelMessage(`${getEnrollmentStudent(enrollment, students)?.name || "학생"}의 남은 회차를 제외했습니다. 아래에서 미래 수업 반영을 확인해 주세요.`);
+      setPanelMessage(`${studentName}의 남은 회차 취소를 저장했습니다. 1/2 완료 · 아래 특강 수업일지 반영에서 미래 명단 변경을 확인해 주세요.`);
     } catch (error) {
-      setPanelMessage(`남은 회차 제외 실패: ${error.message}`);
+      setPanelMessage(`남은 회차 취소 저장 실패: ${error.message}`);
+    } finally {
+      setSavingEnrollmentId("");
+    }
+  }
+
+  async function cancelEnrollment(enrollment) {
+    if (!onSaveEnrollment || !selectedGuide || !isGuideSaved) return;
+    const studentName = getEnrollmentStudent(enrollment, students)?.name || "학생";
+    const confirmed = window.confirm(
+      `${studentName} 학생의 특강 신청 전체를 취소할까요?\n\n특강 신청과 학생별 회차 원본은 취소 기록으로 보존됩니다. 과거 수업일지·출결은 삭제하지 않으며, 저장 후 아래 특강 수업일지 반영에서 미래 명단 변경을 확인해야 합니다.`
+    );
+    if (!confirmed) return;
+    const nextEnrollment = normalizeSpecialLectureEnrollment({
+      ...enrollment,
+      status: "canceled",
+      planReviewedAt: enrollment.planReviewedAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+    setSavingEnrollmentId(enrollment.enrollmentId);
+    setPanelMessage("");
+    try {
+      await onSaveEnrollment(nextEnrollment);
+      setEnrollmentDrafts((current) => {
+        const nextDrafts = { ...current };
+        delete nextDrafts[enrollment.enrollmentId];
+        return nextDrafts;
+      });
+      if (planModalEnrollment?.enrollmentId === enrollment.enrollmentId) closePlanModal();
+      setPanelMessage(`${studentName}의 특강 신청 취소를 Supabase 재조회로 확인했습니다. 1/2 완료 · 취소 기록은 보존되며, 아래 특강 수업일지 반영에서 미래 명단 변경을 확인해 주세요.`);
+    } catch (error) {
+      setPanelMessage(`특강 신청 취소 저장 실패: ${error.message}`);
     } finally {
       setSavingEnrollmentId("");
     }
@@ -1139,6 +1175,7 @@ export function SpecialLectureApplicationPanel({
           </div>
           <div className="specialLectureGateStats">
             <span>수강 {activeEnrollments.length}</span>
+            <span>취소 {canceledEnrollments.length}</span>
             <span>추가 필요 {missingEnrollmentRows.length}</span>
             <span className={needsReviewRows.length ? "danger" : ""}>연결 필요 {needsReviewRows.length}</span>
             <span>회차 {guideSessions.length}</span>
@@ -1170,9 +1207,9 @@ export function SpecialLectureApplicationPanel({
             </button>
           </div>
         ) : null}
-        {selectedGuideEnrollments.length ? (
+        {activeEnrollments.length ? (
           <div className="specialLectureEnrollmentList">
-            {selectedGuideEnrollments.map((enrollment) => {
+            {activeEnrollments.map((enrollment) => {
               const student = getEnrollmentStudent(enrollment, students);
               const draft = getEnrollmentDraft(enrollment);
               const selectedSessionCount = draft.sessionPlans.filter((plan) => plan.status === "active").length;
@@ -1222,7 +1259,15 @@ export function SpecialLectureApplicationPanel({
                       onClick={() => excludeRemainingSessions(enrollment)}
                       type="button"
                     >
-                      {savingEnrollmentId === enrollment.enrollmentId ? "저장 중" : "남은 회차 제외"}
+                      {savingEnrollmentId === enrollment.enrollmentId ? "저장 중" : "남은 회차 취소"}
+                    </button>
+                    <button
+                      className="dangerSoftButton compact"
+                      disabled={!onSaveEnrollment || !isGuideSaved || savingEnrollmentId === enrollment.enrollmentId}
+                      onClick={() => cancelEnrollment(enrollment)}
+                      type="button"
+                    >
+                      {savingEnrollmentId === enrollment.enrollmentId ? "취소 저장 중" : "특강 신청 전체 취소"}
                     </button>
                   </div>
                 </article>
@@ -1230,8 +1275,31 @@ export function SpecialLectureApplicationPanel({
             })}
           </div>
         ) : (
-          <p className="specialLectureGateEmpty">아직 저장된 확정 수강명단이 없습니다. 확정 신청자를 기존 학생과 매칭한 뒤 명단에 추가하세요.</p>
+          <p className="specialLectureGateEmpty">현재 활성 수강명단이 없습니다. 확정 신청자를 기존 학생과 매칭한 뒤 명단에 추가하세요.</p>
         )}
+        {canceledEnrollments.length ? (
+          <details className="specialLectureCanceledEnrollments">
+            <summary>취소·오입력 기록 {canceledEnrollments.length}건</summary>
+            <p>활성 수강명단과 미래 특강 수업 반영에서는 제외되며, 신청 원본과 기존 수업 기록은 삭제하지 않습니다.</p>
+            <div className="specialLectureCanceledEnrollmentList">
+              {canceledEnrollments.map((enrollment) => {
+                const student = getEnrollmentStudent(enrollment, students);
+                return (
+                  <article className="specialLectureCanceledEnrollmentCard" key={`canceled_${enrollment.enrollmentId}`}>
+                    <div>
+                      <span className="specialLectureEnrollmentStatus canceled">특강 취소</span>
+                      <strong>{student?.name || enrollment.studentId || "학생 미매칭"}</strong>
+                      <small>{student ? [student.schoolName, student.grade].filter(Boolean).join(" · ") || "학교/학년 미입력" : "기존 학생 원천에서 찾지 못했습니다."}</small>
+                      <small>취소 저장 {formatKoreaTimeLabel(enrollment.updatedAt) || "시간 미확인"}</small>
+                    </div>
+                    <span>취소됨 · 기존 회차 계획과 과거 기록 보존</span>
+                    <button className="softButton compact" onClick={() => setProgressModalEnrollment(enrollment)} type="button">기존 기록 보기</button>
+                  </article>
+                );
+              })}
+            </div>
+          </details>
+        ) : null}
           </>
         ) : null}
       </div>
@@ -1540,15 +1608,13 @@ export function SpecialLectureApplicationPanel({
               </div>
               <div className="specialLectureEnrollmentControls specialLectureSessionModalControls">
                 <label>
-                  명단 상태
-                  <select onChange={(event) => updateEnrollmentDraft(enrollment.enrollmentId, { status: event.target.value })} value={draft.status}>
-                    {specialLectureEnrollmentStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-                  </select>
-                </label>
-                <label>
                   운영 메모
                   <textarea onChange={(event) => updateEnrollmentDraft(enrollment.enrollmentId, { memo: event.target.value })} value={draft.memo} />
                 </label>
+                <div className="specialLectureCancelGuide">
+                  <strong>수강 취소</strong>
+                  <span>일부 회차는 카드의 `남은 회차 취소`, 전체 신청은 `특강 신청 전체 취소`로 구분합니다.</span>
+                </div>
               </div>
               <div className="specialLectureModalActions specialLecturePlanSaveActions">
                 <div className={`specialLecturePlanSaveFeedback ${planSaveState.state}`} aria-live="polite" role="status">

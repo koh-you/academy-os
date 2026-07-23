@@ -29,7 +29,7 @@ export const specialLectureApplicationStatusOptions = [
 
 export const specialLectureEnrollmentStatusOptions = [
   { value: "active", label: "수강" },
-  { value: "canceled", label: "제외" }
+  { value: "canceled", label: "특강 취소" }
 ];
 
 export function getSpecialLectureSeasonShortLabel(season = "summer") {

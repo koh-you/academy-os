@@ -8314,6 +8314,60 @@ button:disabled {
   gap: 10px;
 }
 
+.specialLectureCanceledEnrollments {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-top: 10px;
+  padding: 10px 12px;
+}
+
+.specialLectureCanceledEnrollments > summary {
+  color: #475569;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.specialLectureCanceledEnrollments > p {
+  color: #64748b;
+  font-size: 11px;
+  line-height: 1.5;
+  margin: 8px 0 10px;
+}
+
+.specialLectureCanceledEnrollmentList {
+  display: grid;
+  gap: 7px;
+}
+
+.specialLectureCanceledEnrollmentCard {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(180px, 0.7fr) minmax(220px, 1fr) auto;
+  padding: 9px 10px;
+}
+
+.specialLectureCanceledEnrollmentCard > div {
+  display: grid;
+  gap: 3px;
+}
+
+.specialLectureCanceledEnrollmentCard strong {
+  color: #334155;
+  font-size: 13px;
+}
+
+.specialLectureCanceledEnrollmentCard small,
+.specialLectureCanceledEnrollmentCard > span {
+  color: #64748b;
+  font-size: 11px;
+}
+
 .specialLectureEnrollmentCard {
   background: #ffffff;
   border: 1px solid #d9f99d;
@@ -8675,6 +8729,27 @@ button:disabled {
 
 .specialLectureSessionModalControls {
   grid-template-columns: minmax(140px, 0.35fr) minmax(260px, 1fr);
+}
+
+.specialLectureCancelGuide {
+  align-content: center;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 7px;
+  display: grid;
+  gap: 4px;
+  padding: 9px 10px;
+}
+
+.specialLectureCancelGuide strong {
+  color: #9a3412;
+  font-size: 12px;
+}
+
+.specialLectureCancelGuide span {
+  color: #9a3412;
+  font-size: 11px;
+  line-height: 1.45;
 }
 
 .specialLectureProgressSummary {
@@ -17929,6 +18004,7 @@ body.attendanceOnlyBody {
   .specialLectureWebhookBox,
   .specialLectureApplicationCard,
   .specialLectureEnrollmentCard,
+  .specialLectureCanceledEnrollmentCard,
   .specialLectureLessonPreviewCard,
   .specialLectureSessionCardGrid,
   .specialLectureSessionOverrideGrid,
@@ -18402,6 +18478,7 @@ body.attendanceOnlyBody {
   }
 
   .specialLectureEnrollmentCard,
+  .specialLectureCanceledEnrollmentCard,
   .specialLectureProgressRow,
   .specialLectureProgressSummary,
   .specialLectureRosterSearch,
