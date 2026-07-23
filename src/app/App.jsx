@@ -66,6 +66,7 @@ import { createSupplementNotificationControlActionHandler } from "../domains/sup
 import { createSupplementTaskContentSaveHandler } from "../domains/supplements/supplementTaskContentSaveController.js";
 import { createSupplementTaskPassHandler } from "../domains/supplements/supplementTaskPassController.js";
 import { createSupplementTaskScheduleHandlers } from "../domains/supplements/supplementTaskScheduleController.js";
+import { createSupplementTaskDraftChangeHandler } from "../domains/supplements/supplementTaskDraftChangeController.js";
 import { SupplementStudentModalShell } from "../domains/supplements/SupplementStudentModalShell.jsx";
 import { useSupplementNotificationControlState } from "../domains/supplements/useSupplementNotificationControlState.js";
 import { useSupplementConfirmationState } from "../domains/supplements/useSupplementConfirmationState.js";
@@ -76,7 +77,6 @@ import { useSupplementTaskDraftController } from "../domains/supplements/useSupp
 import { useSupplementTaskSaveStatusState } from "../domains/supplements/useSupplementTaskSaveStatusState.js";
 import {
   createPersistableSupplementTask,
-  createSupplementDraftSaveStatusPatch,
   createSupplementTaskDraft as createSupplementTaskDraftModel,
   getSupplementHomeworkNoteValue,
   getSupplementNotificationDraftFieldForControl,
@@ -22593,14 +22593,11 @@ function SupplementStudentModal({
     tasks
   });
 
-  function updateTaskDraft(task, field, value) {
-    if (!task?.makeupTaskId) return;
-    updateTaskDraftValues(task, field, value);
-    setTaskSaveStatusPatch(
-      task.makeupTaskId,
-      createSupplementDraftSaveStatusPatch(field, getTaskSaveStatus(task.makeupTaskId))
-    );
-  }
+  const updateTaskDraft = createSupplementTaskDraftChangeHandler({
+    getTaskSaveStatus,
+    setTaskSaveStatusPatch,
+    updateTaskDraftValues
+  });
 
   const handleSaveTask = createSupplementTaskContentSaveHandler({
     beginTaskAction,

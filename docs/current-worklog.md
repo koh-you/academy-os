@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 12R-26 보충 task draft 변경 adapter 분리 — AI gate 통과
+
+- 코드: `SupplementStudentModal` 안의 field 변경 adapter를 `createSupplementTaskDraftChangeHandler`로 `supplementTaskDraftChangeController.js`에 이동했다.
+- 동작 보존: task ID guard, local draft 값 변경, 현재 task 저장상태 조회, 기존 `createSupplementDraftSaveStatusPatch` 계산, task별 상태 patch 적용 순서를 그대로 유지한다.
+- 저장 원천/side effect: React 메모리의 local draft와 저장상태 표시만 갱신한다. API, Supabase, `notification_jobs`, Solapi 및 저장·완료·일정·예약취소 callback을 호출하지 않는다.
+- 자동검증: 일정 필드, 알림 문구 필드, 일반 필드의 patch와 update→status 순서, ID guard fixture를 `npm run test:production`에 연결했다. production scenario `88b-41`, production 407/407, build, `git diff --check`가 통과했고 기존 대형 chunk 경고만 남았다.
+- gate 판정: 운영 데이터·저장·발송과 무관한 local adapter이고 기존 순수 patch helper를 그대로 사용한다. 사용자 지시에 따라 별도 테스트 데이터나 사람 조작 없이 AI gate로 통과했다.
+- 다음 경계: 완료·일정 확인창 submit adapter를 분리한 뒤 `SupplementStudentModal` 본체 파일 분리를 검토한다.
+
 ## 2026-07-23 P1. 12R-25 개별 알림 예약·취소 modal adapter 분리 — AI gate 통과
 
 - 코드: `SupplementStudentModal` 안의 개별 알림 제어 handler를 `createSupplementNotificationControlActionHandler`로 `supplementNotificationControlController.js`에 이동했다.
