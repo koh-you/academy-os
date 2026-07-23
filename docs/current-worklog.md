@@ -8,6 +8,15 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-23 P1. 13F-6 알림 즉시발송 action binding 분리 — AI gate 통과
+
+- 코드: App의 `sendNoticeNow` wrapper를 `useNotificationComposerState`로 이동했다. App은 timeout 판별, 수신자, persist callback, 45초 즉시발송 request, history/filter setter를 주입하고 hook은 기존 builder·draft·busy·refresh callback과 `sendNoticeNowAction`을 결합한다.
+- 동작 보존: 빈 본문/대상 없음/busy guard, 수신자별 immediate job 생성, 발송 성공·dry-run, 45초 timeout의 `send_unconfirmed`, 일반 실패, 결과 job 저장, 기록 화면/filter 전환, 최종 busy 해제를 그대로 유지했다.
+- 저장 원천/side effect: callback을 실제로 누르면 기존 알림톡 API와 `notification_jobs` 저장이 실행된다. 이번 리팩터링은 호출 순서·payload를 바꾸지 않았고, 검증은 injected send/persist/refresh mock만 사용해 운영 DB·번호·Solapi를 호출하지 않았다.
+- 자동검증: guard, 다중 수신자 성공·dry-run, timeout, 발송 실패, 기록 저장 실패, refresh, feedback/filter/busy 상태 전이를 포함한 action fixture와 App→hook→action 주입 경계를 production scenario 460개로 고정했다. production scenario 460/460와 build, `git diff --check`가 통과했다.
+- gate 판정: 외부 경계와 모든 주요 결과 분기를 mock으로 재현했고 화면 DOM/문구/payload 원천은 바뀌지 않았다. 재시험/고태영 운영 데이터, 실제 번호·발송, 사람 화면 검수가 필요하지 않은 AI gate다.
+- 다음 경계: App의 예약발송 wrapper를 composer hook에서 기존 `scheduleNoticeAction`과 injected persist/reserve callbacks로 결합할 수 있는지 확인한다.
+
 ## 2026-07-23 P1. 13F-5 알림 background refresh binding 분리 — AI gate 통과
 
 - 코드: App의 `refreshNoticeJobsInBackground` wrapper를 `useNotificationComposerState`로 이동했다. App은 `onRefresh`를 hook의 `refreshJobs`로 주입하고, hook은 기존 `refreshNoticeJobsInBackgroundAction`과 자신이 소유한 `setDispatchMessage`를 결합해 callback을 반환한다.

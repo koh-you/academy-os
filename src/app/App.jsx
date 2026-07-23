@@ -65,8 +65,7 @@ import {
   deleteNoticeJobAction,
   polishNoticeMessageAction,
   reconcileNoticeResultsAction,
-  scheduleNoticeAction,
-  sendNoticeNowAction
+  scheduleNoticeAction
 } from "../domains/notifications/notificationNoticeActions.js";
 import { NotificationNoticeWorkspace } from "../domains/notifications/NotificationNoticeWorkspace.jsx";
 import { useNotificationCenterNavigationState } from "../domains/notifications/useNotificationCenterNavigationState.js";
@@ -10217,6 +10216,12 @@ function NotificationCenter({
     students
   });
   const {
+    persistNoticeJob,
+    reserveNoticeJob
+  } = createNotificationNoticeJobRequestBindings({
+    request: postJsonWithTimeout
+  });
+  const {
     applyNoticeTemplate,
     buildNoticeJob,
     dispatchMessage,
@@ -10232,6 +10237,7 @@ function NotificationCenter({
     scheduleDate,
     scheduledAt,
     scheduleTime,
+    sendNoticeNow,
     setDispatchMessage,
     setIsPolishingNotice,
     setIsSendingNotice,
@@ -10247,17 +10253,22 @@ function NotificationCenter({
   } = useNotificationComposerState({
     academyName: academyBrandName,
     formatKoreaTimeLabel,
+    isRequestTimeoutError,
+    noticeRecipients,
+    persistJob: persistNoticeJob,
     refreshJobs: onRefresh,
+    sendNotification: (payload) => postJsonWithTimeout(
+      "/api/notifications/comment-alimtalk",
+      payload,
+      45000,
+      "알림톡 발송 요청이 45초를 넘었습니다. 실제 발송 여부는 발송 기록 또는 Solapi에서 확인해 주세요."
+    ),
+    setIsHistoryOpen: setIsNoticeHistoryOpen,
+    setJobFilter,
     solapiResultSyncCheckedAt: solapiResultSyncState.checkedAt,
     solapiResultTargets,
     templates: noticeMessageTemplates,
     today
-  });
-  const {
-    persistNoticeJob,
-    reserveNoticeJob
-  } = createNotificationNoticeJobRequestBindings({
-    request: postJsonWithTimeout
   });
 
   function applySpecialLectureGuideToNotice(guide, noticeBodyText, guideUrl) {
@@ -10277,28 +10288,6 @@ function NotificationCenter({
     setActiveNotificationTab("notice");
     setActiveNoticeWorkspace("compose");
     setDispatchMessage("특강 안내문을 저장한 뒤 공지 발송 화면에 반영했습니다. 수신 대상을 확인한 뒤 예약 발송 또는 즉시 발송으로 진행하세요.");
-  }
-
-  async function sendNoticeNow() {
-    return sendNoticeNowAction({
-      buildJob: buildNoticeJob,
-      isRequestTimeoutError,
-      isSending: isSendingNotice,
-      noticeRecipients,
-      noticeText,
-      persistJob: persistNoticeJob,
-      refreshJobs: refreshNoticeJobsInBackground,
-      sendNotification: (payload) => postJsonWithTimeout(
-        "/api/notifications/comment-alimtalk",
-        payload,
-        45000,
-        "알림톡 발송 요청이 45초를 넘었습니다. 실제 발송 여부는 발송 기록 또는 Solapi에서 확인해 주세요."
-      ),
-      setDispatchMessage,
-      setIsHistoryOpen: setIsNoticeHistoryOpen,
-      setIsSending: setIsSendingNotice,
-      setJobFilter
-    });
   }
 
   async function scheduleNotice() {
