@@ -58,7 +58,7 @@ import { SupplementNotificationControlModal } from "../domains/supplements/Suppl
 import { createSupplementNotificationControlViewModel } from "../domains/supplements/supplementNotificationControlModel.js";
 import { SupplementTaskCard } from "../domains/supplements/SupplementTaskCard.jsx";
 import {
-  createSupplementNotificationDraftTabConfigs,
+  createSupplementNotificationDraftWorkspaceViewModel,
   createSupplementTaskCardViewModel
 } from "../domains/supplements/supplementTaskCardModel.js";
 import {
@@ -82,7 +82,6 @@ import {
   createSupplementDraftSaveStatusPatch,
   createSupplementTaskDraft as createSupplementTaskDraftModel,
   getSupplementHomeworkNoteValue,
-  getSupplementNotificationDraftConfig,
   getSupplementNotificationDraftFieldForControl,
   getSupplementPersistedEditFingerprint,
   getSupplementTaskDraftDiff as getSupplementTaskDraftDiffModel,
@@ -22878,18 +22877,9 @@ function SupplementStudentModal({
                 task.makeupTaskId,
                 supplementNotificationDraftConfigs[0].field
               );
-              const activeNotificationDraftConfig = getSupplementNotificationDraftConfig(activeNotificationDraftField);
-              const activeNotificationDraft = draftValues[activeNotificationDraftField] ?? "";
-              const activeNotificationDraftIsTeacherFinal =
-                isSupplementTeacherEditedField(task, activeNotificationDraftField) ||
-                taskDraftState.editedFields?.includes(activeNotificationDraftField);
-              const activeNotificationJob = getSupplementNotificationControlJob(
-                task,
-                notificationJobs,
-                activeNotificationDraftConfig.controlType
-              );
-              const activeNotificationDisplay = getSupplementNotificationControlDisplayForApp(activeNotificationJob);
-              const notificationDraftTabConfigs = createSupplementNotificationDraftTabConfigs({
+              const notificationDraftViewModel = createSupplementNotificationDraftWorkspaceViewModel({
+                activeField: activeNotificationDraftField,
+                draftState: taskDraftState,
                 notificationJobs,
                 task
               }, {
@@ -22921,14 +22911,14 @@ function SupplementStudentModal({
                   }}
                   key={task.makeupTaskId}
                   notificationProps={{
-                    activeConfig: activeNotificationDraftConfig,
-                    activeDisplay: activeNotificationDisplay,
-                    activeDraft: activeNotificationDraft,
+                    activeConfig: notificationDraftViewModel.activeConfig,
+                    activeDisplay: notificationDraftViewModel.activeDisplay,
+                    activeDraft: notificationDraftViewModel.activeDraft,
                     activeField: activeNotificationDraftField,
-                    configs: notificationDraftTabConfigs,
+                    configs: notificationDraftViewModel.tabConfigs,
                     hasUnsavedChanges: draftDiff.length > 0,
                     isBusy: taskBusy,
-                    isTeacherFinal: activeNotificationDraftIsTeacherFinal,
+                    isTeacherFinal: notificationDraftViewModel.isTeacherFinal,
                     onChangeDraft: (value) => updateTaskDraft(task, activeNotificationDraftField, value),
                     onOpenControl: (controlType) => openNotificationControl(task, controlType),
                     onSelectField: (field) => selectNotificationDraftField(task.makeupTaskId, field)
