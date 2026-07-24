@@ -7,7 +7,7 @@
 1. `학생 포털 실제 쓰기 검수` — 숙제 완료, 질문 CRUD, 시험 후 제출의 실제 학생 저장/재조회/재로그인/권한을 확인한다. 사용자 보류이며 통과가 아니다.
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
-4. `시험정보 삭제·연결 수업 reconcile 사람 gate` — AI가 학생 연결 0건인 `REF-GATE-14C3-TARGET`/`CONTROL` row와 미래 시험대비 수업 각 4건을 준비·재조회했다. 사용자는 `시험관리`에서 TARGET row만 삭제·확인·새로고침하고 CONTROL은 건드리지 않는다. 완료 보고 뒤 AI가 TARGET row/수업 4건 삭제, CONTROL row/수업 4건과 기존 정규수업 유지를 Supabase에서 대조하고 CONTROL 데이터를 정리한다. 통과 전 14C-3 실제 orchestration 이동·commit/push 금지.
+4. `시험정보 삭제·연결 수업 reconcile 사람 gate` — 학생 연결 0건인 미래 row 2건과 시험대비 수업 각 4건을 준비했다. 최초 `테스트` 학년은 반 필터에서 숨겨져 2026-07-24 두 row를 `창동고 · 고1`로 수정·재조회했다. 사용자는 `시험관리 > 월수금 7-10반 > 2학기 중간고사`에서 과목 `REF-GATE-14C3-TARGET` row만 삭제·확인·새로고침하고 `CONTROL`은 건드리지 않는다. 완료 보고 뒤 AI가 TARGET row/수업 4건 삭제, CONTROL row/수업 4건과 기존 정규수업 유지를 Supabase에서 대조하고 CONTROL 데이터를 정리한다. 통과 전 14C-3 실제 orchestration 이동·commit/push 금지.
 
 ## 2026-07-23 P1. 14C-2 시험정보 연결 수업 API transport 분리 — AI gate 통과
 
