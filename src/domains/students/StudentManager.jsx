@@ -2,6 +2,7 @@ import { Component, useEffect, useState } from "react";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { parseStudentScheduleOverride } from "../../shared/utils/studentSchedule.js";
+import { buildStudentHandoverPdfModel, openStudentHandoverPdf } from "./studentHandoverPdf.js";
 
 const withdrawalReasonOptions = [
   { value: "graduation", label: "졸업" },
@@ -227,6 +228,11 @@ export function StudentManager({
   studentConsultationSaveState = "idle",
   studentConsultations = [],
   studentProfileSaveStates = {},
+  homeworks = [],
+  intakeApplicants = [],
+  lessons = [],
+  records = [],
+  specialLectureApplications = [],
   students,
   templates,
   ModalComponent,
@@ -264,12 +270,15 @@ export function StudentManager({
   const [permanentDeleteConfirmation, setPermanentDeleteConfirmation] = useState("");
   const [forceDeleteWithReferences, setForceDeleteWithReferences] = useState(false);
   const [studentPermanentDeleteNotice, setStudentPermanentDeleteNotice] = useState(null);
+  const [handoverStudentId, setHandoverStudentId] = useState("");
+  const [handoverComment, setHandoverComment] = useState("");
   const selectedClassTemplate = templates.find(
     (template) => template.classTemplateId === selectedClassTemplateId
   );
   const selectedStudent = students.find((student) => student.studentId === selectedStudentId) ?? null;
   const deleteStudent = students.find((student) => student.studentId === deleteStudentId) ?? null;
   const permanentDeleteStudent = students.find((student) => student.studentId === permanentDeleteStudentId) ?? null;
+  const handoverStudent = students.find((student) => student.studentId === handoverStudentId) ?? null;
   const selectedScores = scoreRecords.filter((score) => score.studentId === selectedStudent?.studentId);
   const selectedAcademyTests = academyTests.filter((item) => item.studentId === selectedStudent?.studentId);
   const selectedConsultations = studentConsultations
@@ -369,6 +378,26 @@ export function StudentManager({
       reason: student.withdrawalReason || "other"
     });
     setDeleteStudentId(student.studentId);
+  }
+
+  function openHandoverModal(student) {
+    setHandoverStudentId(student.studentId);
+    setHandoverComment("");
+  }
+
+  function printStudentHandover() {
+    if (!handoverStudent) return;
+    const model = buildStudentHandoverPdfModel({
+      comment: handoverComment,
+      homeworks,
+      intakeApplicants,
+      lessons,
+      records,
+      specialLectureApplications,
+      student: handoverStudent,
+      templates
+    });
+    openStudentHandoverPdf(model, handoverStudent);
   }
 
   async function restoreStudent(student) {
@@ -667,6 +696,7 @@ export function StudentManager({
                   >
                     {isDeleteAuditLoading ? "이력 점검 중" : "중복 데이터 삭제"}
                   </button>
+                  <button className="softButton compact" disabled={isRestoring || isDeleteAuditLoading} onClick={() => openHandoverModal(student)} type="button">인수인계서 PDF</button>
                 </div>
               </div>
             );
@@ -873,6 +903,16 @@ export function StudentManager({
             <button className="softButton" onClick={() => setDeleteStudentId("")} type="button">취소</button>
             <button className="dangerButton" onClick={confirmDeleteStudent} type="button">퇴원 처리</button>
           </div>
+        </ModalComponent>
+      ) : null}
+
+      {handoverStudent ? (
+        <ModalComponent className="studentHandoverModal" onClose={() => setHandoverStudentId("")} subtitle="수업·출결·숙제와 Tally 접수정보를 읽어 PDF 인쇄 창을 엽니다. 원천 데이터는 수정하지 않습니다." title={`${handoverStudent.name} 퇴원생 인수인계서`}>
+          <div className="deleteConfirmBody">
+            <p className="muted">등원일부터 퇴원일({String(handoverStudent.withdrawnAt || "").slice(0, 10) || "미입력"})까지의 수업만 포함합니다.</p>
+            <label>교사 인계 코멘트<textarea value={handoverComment} onChange={(event) => setHandoverComment(event.target.value)} placeholder="재등록 시 참고사항, 보호자 전달사항 등을 입력하세요. 이 코멘트는 이번 PDF에만 포함되며 저장하지 않습니다." rows={7} /></label>
+          </div>
+          <div className="deleteConfirmActions"><button className="softButton" onClick={() => setHandoverStudentId("")} type="button">닫기</button><button className="primaryButton" onClick={printStudentHandover} type="button">PDF 인쇄 창 열기</button></div>
         </ModalComponent>
       ) : null}
 

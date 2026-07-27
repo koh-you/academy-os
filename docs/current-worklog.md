@@ -1,5 +1,11 @@
 # Academy OS Current Worklog
 
+## 2026-07-27 P0. 퇴원생 수동 인수인계서 PDF
+
+- 기능: `학생관리 > 퇴원생 목록`에서 학생별 `인수인계서 PDF`를 수동으로 연다. 인쇄 창에서 `PDF로 저장`을 선택하면 학생·학부모 연락처, 학교·학년·반·퇴원일, 퇴원일까지의 회차별 수업/교재/진도/출결/숙제/다음 숙제, 일반·특강 Tally 접수정보, 교사 인계 코멘트를 출력한다.
+- 원천/보존: 학생, lessons, lesson_student_records, homeworks, student_intake_applicants, special_lecture_applications을 읽기만 한다. 미래 수업은 포함하지 않으며 교사 코멘트는 이번 PDF에만 포함되고 저장하지 않는다. 해당 원천과 `notification_jobs`/Solapi는 수정·발송·예약·취소하지 않는다.
+- AI 검증: `npm run test:student-handover-pdf`는 퇴원일까지의 수업·출석·숙제와 일반/특강 Tally 매칭, 미래 수업 제외, 코멘트를 검사한다. 이어 `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+
 ## 2026-07-27 P0. Solapi 예약 성공 뒤 업데이트 재촉 오판 수정
 
 - 증상/원인: 수업일지 하단은 `Solapi 예약 반영 완료`인데 상단은 계속 `Solapi 예약 업데이트 필요`를 표시했다. 화면의 기대 payload는 미확인 숙제일 때 이전 숙제를 빈값으로 정규화하지만, 예약 job payload에는 원래 숙제값이 남아 지문 비교가 `내용 변경`으로 오판될 수 있었다.

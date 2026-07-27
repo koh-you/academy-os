@@ -9634,13 +9634,18 @@ export function App() {
             academyReminders={academyReminders}
             academyTests={academyTests}
             academyTestSaveState={academyTestSaveState}
+            homeworks={homeworks}
+            intakeApplicants={studentIntakeApplicants}
+            lessons={lessons}
             ModalComponent={Modal}
+            records={records}
             scoreRecords={scoreRecords}
             scoreRecordSaveState={scoreRecordSaveState}
             studentConsultationSaveState={studentConsultationSaveState}
             studentConsultations={studentConsultations}
             studentProfileSaveStates={studentProfileSaveStates}
             students={students}
+            specialLectureApplications={specialLectureApplications}
             templates={classTemplates}
             onAddStudent={() => setIsStudentModalOpen(true)}
             onDeleteAcademyTest={handleDeleteAcademyTest}

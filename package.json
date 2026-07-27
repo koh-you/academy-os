@@ -38,9 +38,10 @@
     "test:special-lecture-plan-sync": "node scripts/test-special-lecture-plan-sync.mjs",
     "test:monthly-settlement": "node scripts/test-monthly-settlement.mjs",
     "test:student-withdrawal-boundary": "node scripts/test-student-withdrawal-boundary.mjs",
+    "test:student-handover-pdf": "node scripts/test-student-handover-pdf.mjs",
     "test:withdrawn-student-deletion": "node scripts/test-withdrawn-student-deletion.mjs",
     "test:exam-prep-deletion": "node scripts/test-exam-prep-delete-orchestration.mjs",
-    "test:production": "npm run test:exam-prompt-studio && npm run test:exam-final-preview && npm run test:supplement-builders && npm run test:supplement-cancellation && npm run test:tally-student-merge && npm run test:lesson-bulk-rows && npm run test:lesson-closure && npm run test:special-lecture-enrollment-save && npm run test:special-lecture-plan-sync && npm run test:monthly-settlement && npm run test:student-withdrawal-boundary && npm run test:withdrawn-student-deletion && npm run test:exam-prep-deletion && node scripts/scenario-tests-production.cjs"
+    "test:production": "npm run test:exam-prompt-studio && npm run test:exam-final-preview && npm run test:supplement-builders && npm run test:supplement-cancellation && npm run test:tally-student-merge && npm run test:lesson-bulk-rows && npm run test:lesson-closure && npm run test:special-lecture-enrollment-save && npm run test:special-lecture-plan-sync && npm run test:monthly-settlement && npm run test:student-withdrawal-boundary && npm run test:student-handover-pdf && npm run test:withdrawn-student-deletion && npm run test:exam-prep-deletion && node scripts/scenario-tests-production.cjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.0",
