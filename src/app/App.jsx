@@ -8324,7 +8324,7 @@ export function App() {
     }
 
     setStudents(studentsAfterResult.students ?? []);
-    if (options.forceDeleteWithReferences === true) {
+    if (options.forceDeleteWithReferences === true && options.deferReload !== true) {
       window.setTimeout(() => window.location.reload(), 1200);
     }
     return deleteResult;

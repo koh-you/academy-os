@@ -269,6 +269,12 @@ export function StudentManager({
   const [permanentDeleteError, setPermanentDeleteError] = useState("");
   const [permanentDeleteConfirmation, setPermanentDeleteConfirmation] = useState("");
   const [forceDeleteWithReferences, setForceDeleteWithReferences] = useState(false);
+  const [batchPermanentDeleteStudentIds, setBatchPermanentDeleteStudentIds] = useState([]);
+  const [batchPermanentDeleteAuditState, setBatchPermanentDeleteAuditState] = useState("idle");
+  const [batchPermanentDeleteAudits, setBatchPermanentDeleteAudits] = useState({});
+  const [batchPermanentDeleteConfirmation, setBatchPermanentDeleteConfirmation] = useState("");
+  const [batchForceDeleteWithReferences, setBatchForceDeleteWithReferences] = useState(false);
+  const [batchPermanentDeleteError, setBatchPermanentDeleteError] = useState("");
   const [studentPermanentDeleteNotice, setStudentPermanentDeleteNotice] = useState(null);
   const [handoverStudentId, setHandoverStudentId] = useState("");
   const [handoverComment, setHandoverComment] = useState("");
@@ -279,6 +285,9 @@ export function StudentManager({
   const selectedStudent = students.find((student) => student.studentId === selectedStudentId) ?? null;
   const deleteStudent = students.find((student) => student.studentId === deleteStudentId) ?? null;
   const permanentDeleteStudent = students.find((student) => student.studentId === permanentDeleteStudentId) ?? null;
+  const batchPermanentDeleteStudents = batchPermanentDeleteStudentIds
+    .map((studentId) => students.find((student) => student.studentId === studentId))
+    .filter(Boolean);
   const handoverStudent = students.find((student) => student.studentId === handoverStudentId) ?? null;
   const selectedScores = scoreRecords.filter((score) => score.studentId === selectedStudent?.studentId);
   const selectedAcademyTests = academyTests.filter((item) => item.studentId === selectedStudent?.studentId);
@@ -491,6 +500,29 @@ export function StudentManager({
     }
   }
 
+  async function openBatchPermanentDeleteModal(targetStudents) {
+    if (!targetStudents.length) return;
+    const studentIds = targetStudents.map((student) => student.studentId);
+    setBatchPermanentDeleteStudentIds(studentIds);
+    setBatchPermanentDeleteAuditState("saving");
+    setBatchPermanentDeleteAudits({});
+    setBatchPermanentDeleteConfirmation("");
+    setBatchForceDeleteWithReferences(false);
+    setBatchPermanentDeleteError("");
+    try {
+      const auditEntries = await Promise.all(targetStudents.map(async (student) => [
+        student.studentId,
+        await onAuditWithdrawnStudentDeletion(student.studentId)
+      ]));
+      setBatchPermanentDeleteAudits(Object.fromEntries(auditEntries));
+      setBatchPermanentDeleteAuditState("saved");
+    } catch (error) {
+      console.error(error);
+      setBatchPermanentDeleteAuditState("failed");
+      setBatchPermanentDeleteError(error.message || "선택 학생의 연결 기록 점검에 실패했습니다. 삭제하지 않았습니다.");
+    }
+  }
+
   function closePermanentDeleteModal() {
     if (permanentDeleteAuditState === "saving") return;
     setPermanentDeleteStudentId("");
@@ -499,6 +531,16 @@ export function StudentManager({
     setPermanentDeleteError("");
     setPermanentDeleteConfirmation("");
     setForceDeleteWithReferences(false);
+  }
+
+  function closeBatchPermanentDeleteModal() {
+    if (batchPermanentDeleteAuditState === "saving") return;
+    setBatchPermanentDeleteStudentIds([]);
+    setBatchPermanentDeleteAuditState("idle");
+    setBatchPermanentDeleteAudits({});
+    setBatchPermanentDeleteConfirmation("");
+    setBatchForceDeleteWithReferences(false);
+    setBatchPermanentDeleteError("");
   }
 
   async function permanentlyDeleteWithdrawnStudent() {
@@ -554,6 +596,46 @@ export function StudentManager({
         message: error.message || `${permanentDeleteStudent.name} 학생 영구 삭제에 실패했습니다.`,
         saveState: "failed"
       });
+    }
+  }
+
+  async function permanentlyDeleteSelectedWithdrawnStudents() {
+    const audits = batchPermanentDeleteStudents.map((student) => batchPermanentDeleteAudits[student.studentId]);
+    const hasBlockedReferences = audits.some((audit) => audit && !audit.allowed);
+    if (
+      batchPermanentDeleteStudents.length === 0 ||
+      audits.some((audit) => !audit) ||
+      (hasBlockedReferences && !batchForceDeleteWithReferences) ||
+      batchPermanentDeleteConfirmation.trim() !== "영구 삭제"
+    ) return;
+
+    const studentNames = batchPermanentDeleteStudents.map((student) => student.name).join(", ");
+    if (!window.confirm(`선택한 ${batchPermanentDeleteStudents.length}명(${studentNames})을 영구 삭제합니다.\n삭제 후 복구할 수 없습니다.\n\n그래도 삭제하시겠습니까?`)) return;
+
+    setBatchPermanentDeleteAuditState("saving");
+    setBatchPermanentDeleteError("");
+    try {
+      for (const student of batchPermanentDeleteStudents) {
+        const audit = batchPermanentDeleteAudits[student.studentId];
+        await onPermanentlyDeleteWithdrawnStudent(student.studentId, student.name?.trim(), {
+          deferReload: true,
+          forceDeleteWithReferences: !audit.allowed,
+          expectedReferenceFingerprint: audit.referenceFingerprint
+        });
+      }
+      setSelectedWithdrawnStudentIds(new Set());
+      setStudentPermanentDeleteNotice({
+        message: `선택한 ${batchPermanentDeleteStudents.length}명 삭제를 Supabase 재조회로 확인했습니다.${hasBlockedReferences ? " 연결 원천을 다시 불러오기 위해 화면을 새로고침합니다." : ""}`,
+        saveState: "saved"
+      });
+      if (hasBlockedReferences) {
+        window.setTimeout(() => window.location.reload(), 1200);
+      }
+      closeBatchPermanentDeleteModal();
+    } catch (error) {
+      console.error(error);
+      setBatchPermanentDeleteAuditState("failed");
+      setBatchPermanentDeleteError(error.message || "선택 학생 영구 삭제에 실패했습니다. 이미 삭제된 학생은 다시 실행하지 마세요.");
     }
   }
 
@@ -659,7 +741,10 @@ export function StudentManager({
             <button className="softButton compact" onClick={() => setSelectedWithdrawnStudentIds(new Set())} type="button">선택 해제</button>
             <button className="primaryButton compact" disabled={!selectedWithdrawnStudents.some((student) => dirtyStudentIds.has(student.studentId))} onClick={saveSelectedWithdrawnStudents} type="button">선택 저장</button>
             <button className="studentRestoreButton" disabled={selectedWithdrawnStudents.length !== 1} onClick={() => { const student = getSingleSelectedWithdrawnStudent("퇴원 취소"); if (student) restoreStudent(student); }} type="button">퇴원 취소</button>
-            <button className="studentPermanentDeleteButton" disabled={selectedWithdrawnStudents.length !== 1} onClick={() => { const student = getSingleSelectedWithdrawnStudent("영구 삭제"); if (student) openPermanentDeleteModal(student); }} type="button">영구 삭제</button>
+            <button className="studentPermanentDeleteButton" disabled={selectedWithdrawnStudents.length === 0} onClick={() => {
+              if (selectedWithdrawnStudents.length === 1) openPermanentDeleteModal(selectedWithdrawnStudents[0]);
+              else openBatchPermanentDeleteModal(selectedWithdrawnStudents);
+            }} type="button">영구 삭제</button>
             <button className="softButton compact" disabled={selectedWithdrawnStudents.length !== 1} onClick={() => { const student = getSingleSelectedWithdrawnStudent("인수인계서 PDF"); if (student) openHandoverModal(student); }} type="button">인수인계서 PDF</button>
           </div>
           <div className="studentListRow studentListHead withdrawnStudentRow">
@@ -1032,6 +1117,42 @@ export function StudentManager({
                     : "연결 기록 포함 강제 삭제"}
               </button>
             ) : null}
+          </div>
+        </ModalComponent>
+      ) : null}
+
+      {batchPermanentDeleteStudents.length ? (
+        <ModalComponent
+          className="studentPermanentDeleteModal"
+          onClose={closeBatchPermanentDeleteModal}
+          subtitle="선택한 학생별 연결 기록을 Supabase에서 먼저 점검합니다. 실제 삭제는 아래 최종 확인 뒤에만 실행됩니다."
+          title={`퇴원생 ${batchPermanentDeleteStudents.length}명 영구 삭제`}
+        >
+          {batchPermanentDeleteAuditState === "saving" ? (
+            <div className="permanentDeleteAuditStatus" role="status"><InlineSaveStatus label="선택 학생 연결 기록 점검" saveState="saving" /></div>
+          ) : null}
+          {batchPermanentDeleteAuditState !== "saving" ? (
+            <div className="permanentDeleteBlockedBox">
+              <strong>삭제 대상</strong>
+              <ul>{batchPermanentDeleteStudents.map((student) => {
+                const audit = batchPermanentDeleteAudits[student.studentId];
+                const referenceCount = (audit?.blockingReferences ?? []).reduce((sum, reference) => sum + Number(reference.count || 0), 0);
+                return <li key={student.studentId}>{student.name} · {audit?.allowed ? "연결 기록 0건" : `연결 기록 ${referenceCount}건`}</li>;
+              })}</ul>
+            </div>
+          ) : null}
+          {batchPermanentDeleteError ? <div className="permanentDeleteError" role="alert">{batchPermanentDeleteError}</div> : null}
+          {batchPermanentDeleteAuditState === "saved" ? (
+            <>
+              {batchPermanentDeleteStudents.some((student) => !batchPermanentDeleteAudits[student.studentId]?.allowed) ? (
+                <label className="permanentDeleteForceField"><input checked={batchForceDeleteWithReferences} onChange={(event) => setBatchForceDeleteWithReferences(event.target.checked)} type="checkbox" /><span>표시된 연결 기록이 함께 정리·삭제되거나 학생 연결이 해제될 수 있음을 확인했습니다.</span></label>
+              ) : null}
+              <label className="permanentDeleteConfirmationField">선택한 {batchPermanentDeleteStudents.length}명을 영구 삭제하려면 <strong>영구 삭제</strong>를 정확히 입력<input autoComplete="off" onChange={(event) => setBatchPermanentDeleteConfirmation(event.target.value)} placeholder="영구 삭제" value={batchPermanentDeleteConfirmation} /></label>
+            </>
+          ) : null}
+          <div className="deleteConfirmActions">
+            <button className="softButton" disabled={batchPermanentDeleteAuditState === "saving"} onClick={closeBatchPermanentDeleteModal} type="button">닫기</button>
+            <button className="dangerButton" disabled={batchPermanentDeleteAuditState !== "saved" || batchPermanentDeleteConfirmation.trim() !== "영구 삭제" || (batchPermanentDeleteStudents.some((student) => !batchPermanentDeleteAudits[student.studentId]?.allowed) && !batchForceDeleteWithReferences)} onClick={permanentlyDeleteSelectedWithdrawnStudents} type="button">선택 학생 영구 삭제</button>
           </div>
         </ModalComponent>
       ) : null}
