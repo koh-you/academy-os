@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-27 P1. 15E-1 수업 달력 keyboard action 모델 분리 — AI gate 통과
+
+- 코드: input/textarea/select/button/link/summary/role-button/contentEditable 예외, 수업일지 열림 차단, Ctrl/Cmd C·V·Z, Delete, 선택 수업 Enter, 방향키 날짜 이동 판정을 `src/domains/lessons/lessonCalendarKeyboardModel.js`로 이동했다. App effect는 action을 받아 기존 callback을 dispatch한다.
+- 경계: window listener 등록·해제, `preventDefault`, 복사·붙여넣기·undo·삭제·열기·날짜 이동 callback은 App에 남았다. 저장/API는 이동하지 않았다.
+- 자동검증: 합성 event로 modifier·대소문자·편집 target·빈 선택·수업일지 열림·모든 방향키를 검증했다. `test:production` 65개 명령, scenario 495/495, build, `git diff --check`가 통과했다.
+- 사람 gate: 없음. key 판정 위치만 이동했다. 다음은 최신 `origin/main` rebase 후 15E-2 listener hook 분리다.
+
 ## 2026-07-27 P1. 15D-10 수업 모달 local controller closeout — AI gate 통과
 
 - audit: inventory의 안전 계약은 local draft·진행 표시를 순수 모델/controlled UI로 분리하되 실제 저장 controller는 App에 두는 것이다. 15D-1~9 뒤 App의 `LessonModal`에는 React local state/effect, 순수 모델 조립, child component 조립과 주입된 `onSubmit` 호출만 남았다.

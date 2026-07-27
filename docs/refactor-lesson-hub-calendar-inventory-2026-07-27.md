@@ -103,8 +103,9 @@ Supabase lessons
    - 15D-9 완료: 저장 상태와 저장/취소 action footer JSX를 controlled `LessonModalActions`로 옮기고 submit·close callback은 App에 뒀다.
    - 15D-10 closeout 완료: App에 남은 `LessonModal`은 local React draft와 child composition, 주입된 `onSubmit` 호출만 소유한다. 직접 input/button JSX와 fetch/API/Supabase/알림 side effect가 없음을 production fixture로 고정했다. inventory의 원래 계약대로 실제 저장 controller와 App-local helper를 dependency container로 억지 이동하지 않는다.
    - local draft·진행 표시를 전용 파일로 옮기되 API와 저장 controller는 App에 둔다.
-5. **15E — 키보드 탐색 hook**
-   - 포커스 가능한 입력 요소 예외와 Ctrl/Cmd 단축키 계약을 fixture로 고정한 뒤 분리한다.
+5. **15E — 키보드 탐색 hook — 진행 중**
+   - 15E-1 완료: 입력 요소 예외, 수업일지 열림 차단, Ctrl/Cmd C·V·Z, Delete, Enter, 방향키 action 판정을 `lessonCalendarKeyboardModel.js` 순수 모델로 분리했다.
+   - 다음 15E-2: window keydown 등록·해제와 action callback dispatch를 전용 hook으로 옮긴다.
 6. **15F 이후 — 저장 orchestration**
    - 생성·수정 bulk 저장은 기존 read-after-write 계약을 먼저 fixture로 고정한다.
    - 복사·붙여넣기·undo·취소는 위 유지보수 진단이 main에서 해결되고 격리 gate를 통과하기 전 이동하지 않는다.
@@ -113,4 +114,4 @@ Supabase lessons
 
 - AI 검수: 활성/비활성 참조 수, 저장 원천, 외부 side effect, low-risk 첫 후보를 정적 분석으로 확인한다.
 - 사람 검수: 없음. 화면·운영 데이터·외부 서비스를 변경하지 않았다.
-- 다음 단계: 15D closeout 뒤 최신 `origin/main`을 다시 rebase하고, 15E 키보드 탐색 hook을 한 의미 단위로 진행한다. 입력 요소 예외와 Ctrl/Cmd 복사·붙여넣기·undo·수업 등록 shortcut을 먼저 fixture로 고정하며 저장 callback은 이동하지 않는다.
+- 다음 단계: 15E-1 완료 뒤 최신 `origin/main`을 다시 rebase하고, 15E-2 window keydown 등록·해제와 action dispatch를 전용 hook으로 옮긴다. 저장 callback은 이동하지 않는다.

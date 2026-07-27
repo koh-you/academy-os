@@ -219,6 +219,7 @@ import {
   shouldIgnoreLessonAttendance
 } from "../domains/lessons/lessonClosure.js";
 import { LessonCalendarView } from "../domains/lessons/LessonCalendarView.jsx";
+import { getLessonCalendarKeyboardAction } from "../domains/lessons/lessonCalendarKeyboardModel.js";
 import { createLessonCalendarViewModel } from "../domains/lessons/lessonCalendarModel.js";
 import {
   createLessonModalSubmitPayload,
@@ -15366,58 +15367,20 @@ function TeacherLessonHubV2({
   const [lessonTypeFilter, setLessonTypeFilter] = useState("all");
   const selectedCalendarDayRef = useRef(null);
   useEffect(() => {
-    function isInteractiveTarget(target) {
-      const tagName = target?.tagName?.toLowerCase();
-      return tagName === "input"
-        || tagName === "textarea"
-        || tagName === "select"
-        || tagName === "button"
-        || tagName === "a"
-        || tagName === "summary"
-        || target?.isContentEditable
-        || Boolean(target?.closest?.("[role=\"button\"]"));
-    }
-
     function handleKeyDown(event) {
-      if (isLessonJournalOpen || isInteractiveTarget(event.target)) return;
-      const key = event.key.toLowerCase();
-      const isControl = event.ctrlKey || event.metaKey;
-
-      if (isControl && key === "c") {
-        event.preventDefault();
-        onCopyLesson();
-        return;
-      }
-      if (isControl && key === "v") {
-        event.preventDefault();
-        onPasteLesson();
-        return;
-      }
-      if (isControl && key === "z") {
-        event.preventDefault();
-        onUndoLessonAction();
-        return;
-      }
-      if (event.key === "Delete") {
-        event.preventDefault();
-        onDeleteSelectedLesson();
-        return;
-      }
-      if (event.key === "Enter" && selectedLessonId) {
-        event.preventDefault();
-        onOpenLessonJournal(selectedLessonId);
-        return;
-      }
-      const movementMap = {
-        ArrowLeft: -1,
-        ArrowRight: 1,
-        ArrowUp: -7,
-        ArrowDown: 7
-      };
-      if (movementMap[event.key]) {
-        event.preventDefault();
-        onMoveDate(movementMap[event.key]);
-      }
+      const action = getLessonCalendarKeyboardAction({
+        event,
+        isLessonJournalOpen,
+        selectedLessonId
+      });
+      if (!action) return;
+      event.preventDefault();
+      if (action.type === "copy") onCopyLesson();
+      if (action.type === "paste") onPasteLesson();
+      if (action.type === "undo") onUndoLessonAction();
+      if (action.type === "delete") onDeleteSelectedLesson();
+      if (action.type === "open") onOpenLessonJournal(action.lessonId);
+      if (action.type === "move") onMoveDate(action.dayOffset);
     }
 
     window.addEventListener("keydown", handleKeyDown);

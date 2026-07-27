@@ -19,3 +19,4 @@ MVP 기준:
 - `LessonModalBasics.jsx`는 App이 소유한 수업 유형·반 템플릿·색상·이름·날짜·시간 값과 callback을 렌더링하며 휴강 panel의 DOM 순서를 children으로 보존합니다.
 - `LessonModalActions.jsx`는 App이 소유한 저장 상태와 submit·close callback으로 저장 안내와 하단 action만 렌더링합니다.
 - App의 `LessonModal` controller는 local React draft와 위 controlled component 조립, 주입된 `onSubmit` 호출만 소유하며 외부 저장 API를 직접 호출하지 않습니다.
+- `lessonCalendarKeyboardModel.js`는 편집 대상·수업일지 열림 예외와 달력 keyboard action만 순수하게 판정합니다.
