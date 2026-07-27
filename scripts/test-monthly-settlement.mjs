@@ -426,47 +426,142 @@ assert.equal(fixedRow.actualStatusCounts.pending, 4, "대기 출결은 수업일
 assert.equal(fixedRow.makeupCount, 1, "보충은 별도 횟수로 표시해야 합니다.");
 assert.equal(fixedRow.makeupHours, 2, "보충 시수는 별도 참고값이어야 합니다.");
 
+const newStudent = {
+  ...student,
+  name: "7월 신입생",
+  studentId: "student_settlement_new"
+};
+const newStudentLessons = [
+  {
+    className: "월수금반",
+    date: "2026-07-15",
+    endTime: "22:00",
+    lessonId: "lesson_new_july_15",
+    lessonType: "class",
+    startTime: "19:00",
+    status: "completed",
+    studentIds: [newStudent.studentId]
+  },
+  {
+    className: "월수금반",
+    date: "2026-07-29",
+    endTime: "22:00",
+    lessonId: "lesson_new_july_29",
+    lessonType: "class",
+    startTime: "19:00",
+    status: "scheduled",
+    studentIds: [newStudent.studentId]
+  }
+];
+const unevenScheduleText = "월 19:00-22:00 / 수금 19:00-20:00";
+const unevenScheduledEvents = buildMonthlyScheduleEvents(monthKey, unevenScheduleText);
 const newStudentRow = buildStudentSettlementRow({
   classTemplates,
-  lessons,
+  lessons: newStudentLessons,
   monthKey,
-  records,
+  records: [],
   setting: {
     adjustmentAmount: 0,
-    endDate: "2026-07-31",
+    endDate: "2026-07-20",
     fixedAmount: 450000,
     mode: "new",
-    scheduleText,
+    scheduleText: unevenScheduleText,
     specialGrossAmount: 0,
-    startDate: "2026-07-15"
+    startDate: "2026-07-05"
   },
-  student
+  student: newStudent
 });
-assert.ok(newStudentRow.partialRatio > 0 && newStudentRow.partialRatio < 1);
+const expectedNewCount = unevenScheduledEvents.filter((event) => event.date >= "2026-07-15").length;
+const fullUnevenHours = unevenScheduledEvents.reduce((sum, event) => sum + event.durationHours, 0);
+const recognizedUnevenHours = unevenScheduledEvents
+  .filter((event) => event.date >= "2026-07-15")
+  .reduce((sum, event) => sum + event.durationHours, 0);
+assert.equal(newStudentRow.periodStart, "2026-07-15", "신입생 시작일은 저장된 수기 날짜가 아니라 첫 정규 수업일지여야 합니다.");
+assert.equal(newStudentRow.periodEnd, "2026-07-31");
+assert.equal(newStudentRow.monthlyScheduleCount, unevenScheduledEvents.length);
+assert.equal(newStudentRow.prorationCount, expectedNewCount);
+assert.equal(newStudentRow.partialRatio, expectedNewCount / unevenScheduledEvents.length);
+assert.notEqual(
+  newStudentRow.partialRatio,
+  recognizedUnevenHours / fullUnevenHours,
+  "부분월 비율은 시수 비율이 아니라 수업 횟수 비율이어야 합니다."
+);
 assert.equal(
   newStudentRow.regularGrossAmount,
-  Math.round(450000 * newStudentRow.partialRatio),
-  "신입생은 해당 월 전체 수업일지 시수 대비 인정 기간 시수로 계산해야 합니다."
+  Math.round(450000 * expectedNewCount / unevenScheduledEvents.length),
+  "신입생은 첫 수업일부터 말일까지의 월별 스케줄 횟수 비율로 계산해야 합니다."
 );
 
+const withdrawnStudent = {
+  ...student,
+  name: "7월 퇴원생",
+  status: "paused",
+  studentId: "student_settlement_withdrawn",
+  withdrawnAt: "2026-07-18"
+};
+const withdrawnStudentLessons = [
+  {
+    className: "월수금반",
+    date: "2026-07-01",
+    endTime: "22:00",
+    lessonId: "lesson_withdrawn_july_01",
+    lessonType: "class",
+    startTime: "19:00",
+    status: "completed",
+    studentIds: [withdrawnStudent.studentId]
+  },
+  {
+    className: "월수금반",
+    date: "2026-07-15",
+    endTime: "22:00",
+    lessonId: "lesson_withdrawn_july_15",
+    lessonType: "class",
+    startTime: "19:00",
+    status: "completed",
+    studentIds: [withdrawnStudent.studentId]
+  }
+];
 const withdrawnRow = buildStudentSettlementRow({
   classTemplates,
-  lessons,
+  lessons: withdrawnStudentLessons,
   monthKey,
-  records,
+  records: [],
   setting: {
     adjustmentAmount: 0,
-    endDate: "2026-07-18",
+    endDate: "2026-07-30",
     fixedAmount: 450000,
     mode: "withdrawn",
     scheduleText,
-    specialGrossAmount: 0
+    specialGrossAmount: 0,
+    startDate: "2026-07-08"
   },
-  student
+  student: withdrawnStudent
 });
+const expectedWithdrawnCount = scheduledEvents.filter((event) => event.date <= "2026-07-15").length;
 assert.equal(withdrawnRow.periodStart, "2026-07-01", "퇴원생 인정 기간은 해당 월 1일부터 시작해야 합니다.");
-assert.equal(withdrawnRow.periodEnd, "2026-07-18");
-assert.ok(withdrawnRow.partialRatio > 0 && withdrawnRow.partialRatio < 1);
+assert.equal(withdrawnRow.periodEnd, "2026-07-15", "퇴원생 종료일은 퇴원일이나 수기 날짜가 아니라 마지막 정규 수업일지여야 합니다.");
+assert.equal(withdrawnRow.monthlyScheduleCount, scheduledEvents.length);
+assert.equal(withdrawnRow.prorationCount, expectedWithdrawnCount);
+assert.equal(withdrawnRow.partialRatio, expectedWithdrawnCount / scheduledEvents.length);
+assert.equal(
+  withdrawnRow.regularGrossAmount,
+  Math.round(450000 * expectedWithdrawnCount / scheduledEvents.length),
+  "퇴원생은 1일부터 마지막 수업일까지의 월별 스케줄 횟수 비율로 계산해야 합니다."
+);
+const missingScheduleRow = buildStudentSettlementRow({
+  classTemplates: [],
+  lessons: newStudentLessons,
+  monthKey,
+  records: [],
+  setting: {
+    fixedAmount: 450000,
+    mode: "new",
+    scheduleText: "형식 확인 필요"
+  },
+  student: newStudent
+});
+assert.equal(missingScheduleRow.monthlyScheduleCount, 0);
+assert.equal(missingScheduleRow.regularGrossAmount, 0, "월별 스케줄 횟수를 읽을 수 없으면 부분월 금액을 100%로 추정하지 않아야 합니다.");
 
 const excludedRow = buildStudentSettlementRow({
   classTemplates,

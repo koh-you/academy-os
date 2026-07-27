@@ -497,22 +497,39 @@ export function buildStudentSettlementRow({
   });
   const { endDate, startDate } = getMonthRange(monthKey);
   const weeklyScheduleHours = getWeeklyScheduleHours(normalizedSetting.scheduleText);
-  const periodStart = normalizedSetting.startDate || evidence.firstActualRegularDate || startDate;
-  const periodEnd = normalizedSetting.endDate || (
-    normalizedSetting.mode === "withdrawn"
-      ? normalizeMonthDate(student.withdrawnAt, monthKey) || evidence.lastActualRegularDate || endDate
-      : endDate
-  );
+  const periodStart = normalizedSetting.mode === "new"
+    ? evidence.firstActualRegularDate
+    : startDate;
+  const periodEnd = normalizedSetting.mode === "withdrawn"
+    ? evidence.lastActualRegularDate
+    : endDate;
+  const hasAutomaticBoundary = normalizedSetting.mode === "new"
+    ? Boolean(periodStart)
+    : normalizedSetting.mode === "withdrawn"
+      ? Boolean(periodEnd)
+      : true;
   const recognizedRegularEvents = evidence.regularEvents.filter((event) =>
+    hasAutomaticBoundary &&
     (!periodStart || event.date >= periodStart) &&
     (!periodEnd || event.date <= periodEnd)
   );
   const recognizedRegularHours = roundHours(
     recognizedRegularEvents.reduce((sum, event) => sum + event.durationHours, 0)
   );
-  const fullUnit = evidence.regularHours > 0 ? evidence.regularHours : evidence.regularCount;
-  const recognizedUnit = evidence.regularHours > 0 ? recognizedRegularHours : recognizedRegularEvents.length;
-  const partialRatio = fullUnit > 0 ? Math.max(0, Math.min(1, recognizedUnit / fullUnit)) : 0;
+  const monthlyScheduleEvents = buildMonthlyScheduleEvents(monthKey, normalizedSetting.scheduleText);
+  const proratedScheduleEvents = hasAutomaticBoundary
+    ? monthlyScheduleEvents.filter((event) =>
+      (!periodStart || event.date >= periodStart) &&
+      (!periodEnd || event.date <= periodEnd)
+    )
+    : [];
+  const monthlyScheduleCount = monthlyScheduleEvents.length;
+  const prorationCount = proratedScheduleEvents.length;
+  const partialRatio = normalizedSetting.mode === "fixed"
+    ? 1
+    : monthlyScheduleCount > 0
+      ? Math.max(0, Math.min(1, prorationCount / monthlyScheduleCount))
+      : 0;
   const hasFixedAmount = normalizedSetting.fixedAmount !== "";
   const hasRegularJournal = evidence.regularCount > 0;
   const calculatedBaseAmount = hasFixedAmount && hasRegularJournal
@@ -543,9 +560,12 @@ export function buildStudentSettlementRow({
       firstEverRegularDate.startsWith(`${monthKey}-`) &&
       firstEverRegularDate !== startDate
     ),
+    monthlyScheduleCount,
     partialRatio,
     periodEnd,
     periodStart,
+    prorationCount,
+    prorationSource: monthlyScheduleEvents.length ? "monthlySchedule" : "missingSchedule",
     recognizedRegularCount: recognizedRegularEvents.length,
     recognizedRegularEvents,
     recognizedRegularHours,
@@ -706,6 +726,12 @@ export function buildMonthlySettlementSummary(rows = [], specialLectureRows = []
     excludedStudentCount: rows.filter((row) => row.setting.excluded).length,
     pendingSpecialLectureCount: specialLectureRows.filter(
       (row) => !row.isConfirmed && !row.isExcluded
+    ).length,
+    prorationScheduleMissingCount: rows.filter((row) =>
+      !row.setting.excluded &&
+      row.setting.mode !== "fixed" &&
+      row.hasRegularJournal &&
+      row.monthlyScheduleCount === 0
     ).length,
     regularGrossAmount,
     regularNetAmount,
