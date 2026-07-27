@@ -134,6 +134,33 @@
   border-bottom: 0;
 }
 
+.monthlySettlementTable tr.monthlySettlementWarningRow > td {
+  background: #fff8e8;
+  border-bottom-color: #efcf88;
+}
+
+.monthlySettlementTable tr.monthlySettlementWarningRow > td:first-child {
+  background: #fff1d2;
+  border-left: 4px solid #d8860b;
+  padding-left: 7px;
+}
+
+.monthlySettlementTable tr.monthlySettlementWarningRow .monthlySettlementScheduleCell {
+  background: #fff3d9;
+}
+
+.monthlySettlementTable tr.monthlySettlementWarningRow .monthlySettlementScheduleCell input {
+  background: #fffdfa;
+  border-color: #d8860b;
+  box-shadow: 0 0 0 2px rgb(216 134 11 / 14%);
+}
+
+.monthlySettlementTable tr.monthlySettlementWarningRow .monthlySettlementScheduleCell small,
+.monthlySettlementTable tr.monthlySettlementWarningRow .monthlySettlementAmountCell span {
+  color: #925b08;
+  font-weight: 700;
+}
+
 .monthlySettlementTable td:nth-child(1) {
   background: #fff;
   left: 0;
@@ -224,6 +251,14 @@
   font-style: normal;
   font-weight: 700;
   margin-top: 6px;
+}
+
+.monthlySettlementStudentCell .monthlySettlementRowWarning {
+  background: #d8860b;
+  border-radius: 999px;
+  color: #fff;
+  padding: 3px 7px;
+  width: fit-content;
 }
 
 .monthlySettlementMoneyInput {

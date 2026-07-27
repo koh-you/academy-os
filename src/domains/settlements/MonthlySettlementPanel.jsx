@@ -465,11 +465,21 @@ export function MonthlySettlementPanel({
             {activeRows.map((row) => {
               const setting = row.setting;
               const parsedScheduleText = scheduleTextFromRules(setting.scheduleText);
+              const hasScheduleWarning =
+                setting.mode !== "fixed" &&
+                row.hasRegularJournal &&
+                row.monthlyScheduleCount === 0;
               return (
-                <tr key={row.student.studentId}>
+                <tr
+                  className={hasScheduleWarning ? "monthlySettlementWarningRow" : undefined}
+                  key={row.student.studentId}
+                >
                   <td className="monthlySettlementStudentCell">
                     <strong>{row.student.name}</strong>
                     <span>{row.student.grade || "학년 미입력"} · {row.student.schoolName || "학교 미입력"}</span>
+                    {hasScheduleWarning ? (
+                      <em className="monthlySettlementRowWarning">스케줄 수정 필요</em>
+                    ) : null}
                     {row.isNewCandidate && setting.mode === "fixed" ? <em>이번 달 최초 수업 · 신입 여부 확인</em> : null}
                     {row.student.withdrawnAt ? <em>퇴원일 {String(row.student.withdrawnAt).slice(0, 10)}</em> : null}
                   </td>
