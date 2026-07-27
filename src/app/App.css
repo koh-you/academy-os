@@ -11626,8 +11626,8 @@ textarea {
 }
 
 .studentListRow.withdrawnStudentRow {
-  grid-template-columns: 34px 190px 160px 80px 150px 150px 150px 104px 110px 130px minmax(260px, 1fr) 190px;
-  min-width: 1714px;
+  grid-template-columns: 48px 190px 160px 80px 150px 150px 150px 104px 110px 130px minmax(260px, 1fr);
+  min-width: 1510px;
 }
 
 .studentListRow:not(.studentListHead):hover {
@@ -11657,9 +11657,33 @@ textarea {
   width: 100%;
 }
 
-.withdrawnStudentActions {
-  display: grid;
-  gap: 6px;
+.withdrawnStudentBulkActions {
+  align-items: center;
+  background: #f8fbff;
+  border-bottom: 1px solid #dbeafe;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.withdrawnStudentBulkActions > span {
+  color: #1e3a8a;
+  font-size: 13px;
+  font-weight: 900;
+  margin-right: 4px;
+}
+
+.withdrawnStudentSelect {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+.withdrawnStudentSelect input {
+  accent-color: #2563eb;
+  height: 18px;
+  width: 18px;
 }
 
 .studentRestoreButton {

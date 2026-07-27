@@ -272,6 +272,7 @@ export function StudentManager({
   const [studentPermanentDeleteNotice, setStudentPermanentDeleteNotice] = useState(null);
   const [handoverStudentId, setHandoverStudentId] = useState("");
   const [handoverComment, setHandoverComment] = useState("");
+  const [selectedWithdrawnStudentIds, setSelectedWithdrawnStudentIds] = useState(() => new Set());
   const selectedClassTemplate = templates.find(
     (template) => template.classTemplateId === selectedClassTemplateId
   );
@@ -292,6 +293,7 @@ export function StudentManager({
     ));
   const activeStudents = students.filter((student) => !isWithdrawnStudent(student));
   const withdrawnStudents = students.filter(isWithdrawnStudent);
+  const selectedWithdrawnStudents = withdrawnStudents.filter((student) => selectedWithdrawnStudentIds.has(student.studentId));
   const visibleStudents =
     activeTab === "withdrawn"
       ? withdrawnStudents
@@ -316,6 +318,11 @@ export function StudentManager({
       setSelectedStudentId("");
     }
   }, [selectedStudentId, visibleStudents]);
+
+  useEffect(() => {
+    const validIds = new Set(withdrawnStudents.map((student) => student.studentId));
+    setSelectedWithdrawnStudentIds((current) => new Set([...current].filter((studentId) => validIds.has(studentId))));
+  }, [withdrawnStudents]);
 
   function confirmDeleteStudent() {
     if (!deleteStudent) return;
@@ -383,6 +390,38 @@ export function StudentManager({
   function openHandoverModal(student) {
     setHandoverStudentId(student.studentId);
     setHandoverComment("");
+  }
+
+  function toggleWithdrawnStudentSelection(studentId) {
+    setSelectedWithdrawnStudentIds((current) => {
+      const next = new Set(current);
+      if (next.has(studentId)) next.delete(studentId);
+      else next.add(studentId);
+      return next;
+    });
+  }
+
+  function selectAllVisibleWithdrawnStudents() {
+    setSelectedWithdrawnStudentIds(new Set(visibleStudents.map((student) => student.studentId)));
+  }
+
+  function getSingleSelectedWithdrawnStudent(actionLabel) {
+    if (selectedWithdrawnStudents.length !== 1) {
+      setStudentRestoreNotice({ message: `${actionLabel}은 퇴원생 1명을 선택한 뒤 실행해 주세요.`, saveState: "failed" });
+      return null;
+    }
+    return selectedWithdrawnStudents[0];
+  }
+
+  async function saveSelectedWithdrawnStudents() {
+    const dirtyIds = selectedWithdrawnStudents
+      .filter((student) => dirtyStudentIds.has(student.studentId))
+      .map((student) => student.studentId);
+    if (!dirtyIds.length) {
+      setStudentRestoreNotice({ message: "선택한 퇴원생 중 저장할 변경이 없습니다.", saveState: "saved" });
+      return;
+    }
+    for (const studentId of dirtyIds) await saveStudentRow(studentId);
   }
 
   function printStudentHandover() {
@@ -614,8 +653,17 @@ export function StudentManager({
 
       {activeTab === "withdrawn" ? (
         <div className="studentListTable">
+          <div className="withdrawnStudentBulkActions">
+            <span>선택 {selectedWithdrawnStudents.length}명</span>
+            <button className="softButton compact" onClick={selectAllVisibleWithdrawnStudents} type="button">전체 선택</button>
+            <button className="softButton compact" onClick={() => setSelectedWithdrawnStudentIds(new Set())} type="button">선택 해제</button>
+            <button className="primaryButton compact" disabled={!selectedWithdrawnStudents.some((student) => dirtyStudentIds.has(student.studentId))} onClick={saveSelectedWithdrawnStudents} type="button">선택 저장</button>
+            <button className="studentRestoreButton" disabled={selectedWithdrawnStudents.length !== 1} onClick={() => { const student = getSingleSelectedWithdrawnStudent("퇴원 취소"); if (student) restoreStudent(student); }} type="button">퇴원 취소</button>
+            <button className="studentPermanentDeleteButton" disabled={selectedWithdrawnStudents.length !== 1} onClick={() => { const student = getSingleSelectedWithdrawnStudent("영구 삭제"); if (student) openPermanentDeleteModal(student); }} type="button">영구 삭제</button>
+            <button className="softButton compact" disabled={selectedWithdrawnStudents.length !== 1} onClick={() => { const student = getSingleSelectedWithdrawnStudent("인수인계서 PDF"); if (student) openHandoverModal(student); }} type="button">인수인계서 PDF</button>
+          </div>
           <div className="studentListRow studentListHead withdrawnStudentRow">
-            <span>#</span>
+            <span>선택</span>
             <span>이름</span>
             <span>반</span>
             <span>학년</span>
@@ -626,19 +674,12 @@ export function StudentManager({
             <span>퇴원일</span>
             <span>퇴원 사유</span>
             <span>코멘트</span>
-            <span>저장 / 복원</span>
           </div>
           {visibleStudents.map((student, index) => {
-            const saveState = studentSaveStates[student.studentId];
             const isDirty = dirtyStudentIds.has(student.studentId);
-            const isSaving = saveState === "saving";
-            const isSaveDisabled = !isDirty || isSaving;
-            const restoreState = studentRestoreStates[student.studentId] ?? "idle";
-            const isRestoring = restoreState === "saving";
-            const isDeleteAuditLoading = permanentDeleteStudentId === student.studentId && permanentDeleteAuditState === "saving";
             return (
               <div className={["studentListRow", "withdrawnStudentRow", isDirty ? "dirtyStudentRow" : ""].filter(Boolean).join(" ")} key={student.studentId}>
-                <span>{index + 1}</span>
+                <label className="withdrawnStudentSelect"><input checked={selectedWithdrawnStudentIds.has(student.studentId)} onChange={() => toggleWithdrawnStudentSelection(student.studentId)} type="checkbox" /><span className="srOnly">{student.name} 선택</span></label>
                 <button
                   className={selectedStudentId === student.studentId ? "studentNameButton active" : "studentNameButton"}
                   onClick={() => setSelectedStudentId(student.studentId)}
@@ -671,33 +712,6 @@ export function StudentManager({
                   onChange={(event) => updateStudentField(student.studentId, "withdrawalComment", event.target.value)}
                   placeholder="퇴원 관련 코멘트"
                 />
-                <div className="withdrawnStudentActions">
-                  <button
-                    className={`studentSaveButton ${saveState ?? "clean"}`}
-                    disabled={isSaveDisabled || isRestoring}
-                    onClick={() => saveStudentRow(student.studentId)}
-                    type="button"
-                  >
-                    {getStudentSaveLabel(student.studentId)}
-                  </button>
-                  <button
-                    className={`studentRestoreButton ${restoreState}`}
-                    disabled={isRestoring || isDeleteAuditLoading}
-                    onClick={() => restoreStudent(student)}
-                    type="button"
-                  >
-                    {isRestoring ? "복원 중" : restoreState === "failed" ? "복원 재시도" : "퇴원 취소"}
-                  </button>
-                  <button
-                    className="studentPermanentDeleteButton"
-                    disabled={isRestoring || isDeleteAuditLoading}
-                    onClick={() => openPermanentDeleteModal(student)}
-                    type="button"
-                  >
-                    {isDeleteAuditLoading ? "이력 점검 중" : "중복 데이터 삭제"}
-                  </button>
-                  <button className="softButton compact" disabled={isRestoring || isDeleteAuditLoading} onClick={() => openHandoverModal(student)} type="button">인수인계서 PDF</button>
-                </div>
               </div>
             );
           })}
