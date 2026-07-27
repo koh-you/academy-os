@@ -11770,6 +11770,7 @@ textarea {
 .permanentDeleteAuditStatus,
 .permanentDeleteSafeBox,
 .permanentDeleteBlockedBox,
+.batchPermanentDeleteTargetList,
 .permanentDeleteError {
   border: 1px solid #cbd5e1;
   border-radius: 12px;
@@ -11804,6 +11805,50 @@ textarea {
   padding-left: 20px;
 }
 
+.batchPermanentDeleteTargetList {
+  background: #f8fbff;
+  border-color: #bfdbfe;
+  color: #17213d;
+}
+
+.batchPermanentDeleteTargetList > ul {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 10px 0 0;
+  max-height: min(42vh, 360px);
+  overflow: auto;
+  padding: 0;
+}
+
+.batchPermanentDeleteTargetList li {
+  background: #ffffff;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  padding: 9px 10px;
+}
+
+.batchPermanentDeleteTargetList li > div {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: space-between;
+}
+
+.batchPermanentDeleteTargetList li > div > span {
+  color: #9f1239;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.batchPermanentDeleteTargetList li > p {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 5px 0 0;
+}
+
 .permanentDeleteConfirmationField {
   display: grid;
   font-weight: 800;
@@ -11823,8 +11868,12 @@ textarea {
 }
 
 .permanentDeleteForceField input {
-  flex: 0 0 auto;
+  flex: 0 0 18px;
+  height: 18px;
   margin-top: 3px;
+  min-height: 18px;
+  padding: 0;
+  width: 18px;
 }
 
 .permanentDeleteConfirmationField input {

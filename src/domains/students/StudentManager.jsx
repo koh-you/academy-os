@@ -1134,12 +1134,18 @@ export function StudentManager({
             <div className="permanentDeleteAuditStatus" role="status"><InlineSaveStatus label="선택 학생 연결 기록 점검" saveState="saving" /></div>
           ) : null}
           {batchPermanentDeleteAuditState !== "saving" ? (
-            <div className="permanentDeleteBlockedBox">
-              <strong>삭제 대상</strong>
+            <div className="batchPermanentDeleteTargetList">
+              <strong>삭제 대상 및 연결 데이터</strong>
               <ul>{batchPermanentDeleteStudents.map((student) => {
                 const audit = batchPermanentDeleteAudits[student.studentId];
-                const referenceCount = (audit?.blockingReferences ?? []).reduce((sum, reference) => sum + Number(reference.count || 0), 0);
-                return <li key={student.studentId}>{student.name} · {audit?.allowed ? "연결 기록 0건" : `연결 기록 ${referenceCount}건`}</li>;
+                const references = audit?.blockingReferences ?? [];
+                const referenceCount = references.reduce((sum, reference) => sum + Number(reference.count || 0), 0);
+                return (
+                  <li key={student.studentId}>
+                    <div><strong>{student.name}</strong><span>{audit?.allowed ? "연결 기록 0건 · 학생 원천만 삭제 가능" : `연결 기록 ${referenceCount}건`}</span></div>
+                    {!audit?.allowed ? <p>{references.map((reference) => `${reference.label} ${reference.count}건`).join(" · ")}</p> : null}
+                  </li>
+                );
               })}</ul>
             </div>
           ) : null}
