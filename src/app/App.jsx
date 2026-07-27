@@ -7075,7 +7075,13 @@ export function App() {
       (item) => item.classTemplateId === formValues.classTemplateId
     );
     const classTemplateId = formValues.classTemplateId && template ? template.classTemplateId : "";
-    const studentIds = getActiveStudentIdsFromSelection(formValues.studentIds, students);
+    const activeStudentIds = getActiveStudentIdsFromSelection(formValues.studentIds, students);
+    const preservedHistoricalStudentIds = getLessonStudentIds(editingLesson)
+      .filter((studentId) => !students.some((student) => student.studentId === studentId && isActiveStudent(student)));
+    const studentIds = [...new Set([...activeStudentIds, ...preservedHistoricalStudentIds])];
+    const closureMakeupLessonId = formValues.lessonType === "closure" && formValues.closureMakeupEnabled
+      ? formValues.closureMakeupLessonId || createLessonId(formValues.closureMakeupDate, `${formValues.name}-휴강-보충`)
+      : "";
     const lesson = {
       ...editingLesson,
       isExamPrepAutoLesson: undefined,
@@ -7090,16 +7096,47 @@ export function App() {
       endTime: formValues.endTime,
       color: getStandardLessonColor({ ...editingLesson, lessonType: formValues.lessonType, classTemplateId, className: formValues.name }),
       studentIds,
+      sourceLabel: formValues.lessonType === "closure"
+        ? closureMakeupLessonId
+          ? `연결 휴강 보충 · ${closureMakeupLessonId}`
+          : editingLesson?.lessonType === "closure"
+            ? editingLesson.sourceLabel || "휴강 보충 없음"
+            : "휴강 보충 없음"
+        : editingLesson?.sourceLabel || "",
       status: editingLesson?.status ?? "scheduled"
     };
 
-    const [persistedLesson] = await saveLessonModalLessons([lesson], onProgress);
+    const lessonsToSave = [lesson];
+    if (closureMakeupLessonId) {
+      lessonsToSave.push({
+        lessonId: closureMakeupLessonId,
+        classTemplateId,
+        className: `${formValues.name} · 휴강 보충`,
+        lessonType: "makeup",
+        lessonTopic: "휴강 보충",
+        date: formValues.closureMakeupDate,
+        dayOfWeek: getDayKey(formValues.closureMakeupDate),
+        startTime: formValues.closureMakeupStartTime,
+        endTime: formValues.closureMakeupEndTime,
+        color: getStandardLessonColor({ lessonType: "makeup", classTemplateId, className: `${formValues.name} · 휴강 보충` }),
+        teacherId: "instructor_owner_001",
+        studentIds,
+        sourceLabel: `원 휴강 수업 · ${lesson.lessonId}`,
+        status: "scheduled"
+      });
+    }
+
+    const [persistedLesson] = await saveLessonModalLessons(lessonsToSave, onProgress);
     markGeneratedLessonManualOverride(editingLesson);
     setSelectedDate(lesson.date);
     setSelectedLessonId(lesson.lessonId);
     return {
       lessons: [persistedLesson],
-      message: "수업일지 수정 저장 완료"
+      message: closureMakeupLessonId
+        ? "과거 수업을 휴강으로 전환하고 연결 보충 수업일지까지 저장 완료"
+        : formValues.lessonType === "closure" && editingLesson?.lessonType !== "closure"
+          ? "과거 수업을 휴강으로 전환 저장 완료"
+          : "수업일지 수정 저장 완료"
     };
   }
 
@@ -19116,6 +19153,9 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
   const isSaving = saveState === "saving";
   const isSaved = saveState === "saved";
   const isFormLocked = isSaving || isSaved;
+  const isPersistedClosure = initialLesson?.lessonType === "closure";
+  const isHistoricalLesson = Boolean(initialLesson?.date && initialLesson.date < today);
+  const canConvertHistoricalLessonToClosure = Boolean(initialLesson && !isPersistedClosure && isHistoricalLesson);
   const regularClassColorOptions = normalizedTemplates.map((template) => ({
     id: `class-${template.classTemplateId}`,
     label: template.name,
@@ -19186,6 +19226,13 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
     setColor(getStandardLessonColor({ lessonType: nextLessonType, classTemplateId, className: name }));
   }
 
+  function isLessonTypeChoiceDisabled(nextLessonType) {
+    if (isFormLocked) return true;
+    if (!initialLesson) return false;
+    if (isPersistedClosure) return nextLessonType !== "closure";
+    return nextLessonType === "closure" && !canConvertHistoricalLessonToClosure;
+  }
+
   function handleColorOptionClick(item) {
     if (item.lessonType === "class" && item.classTemplateId) {
       setLessonType("class");
@@ -19240,7 +19287,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
       const result = await onSubmit({
         classTemplateId,
         closureMakeupDate,
-        closureMakeupEnabled: lessonType === "closure" && !initialLesson && closureMakeupEnabled,
+        closureMakeupEnabled: lessonType === "closure" && !isPersistedClosure && closureMakeupEnabled,
         closureMakeupEndTime,
         closureMakeupLessonId: draftClosureMakeupLessonId,
         closureMakeupStartTime,
@@ -19280,10 +19327,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
           ].map(([value, label]) => (
             <button
               className={lessonType === value ? "active" : ""}
-              disabled={isFormLocked || Boolean(
-                initialLesson &&
-                (initialLesson.lessonType === "closure" ? value !== "closure" : value === "closure")
-              )}
+              disabled={isLessonTypeChoiceDisabled(value)}
               key={value}
               onClick={() => handleLessonTypeChange(value)}
               type="button"
@@ -19299,8 +19343,11 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
           <div>
             <strong>휴강 보충이 있나요?</strong>
             <p className="muted">휴강은 수업일지에 남지만 실제 수업 횟수와 급여 정산에는 포함되지 않습니다.</p>
+            {canConvertHistoricalLessonToClosure ? (
+              <p className="muted">과거 수업은 기존 명단과 수업기록을 보존한 채 휴강으로 바꿀 수 있습니다.</p>
+            ) : null}
           </div>
-          {initialLesson ? (
+          {isPersistedClosure ? (
             <div className="closureMakeupEditNotice">
               기존 휴강을 수정할 때는 연결 보충을 중복 생성하지 않습니다. 새 보충이 필요하면 수업 등록에서 보강을 별도로 추가해 주세요.
             </div>
@@ -19375,7 +19422,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
             <button
               aria-label={`${item.label} 색상 미리보기`}
               className={color.toLowerCase() === item.color.toLowerCase() ? "active" : ""}
-              disabled={isFormLocked}
+              disabled={isLessonTypeChoiceDisabled(item.lessonType)}
               key={item.id}
               onClick={() => handleColorOptionClick(item)}
               style={{ background: item.color }}

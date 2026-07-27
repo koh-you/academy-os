@@ -643,6 +643,22 @@ check("90a lesson modal creates verified closure and optional linked makeup jour
   '{ id: "closure", label: "휴강" }',
   'lesson.lessonType === "closure" ? "closureLessonPill"'
 ]) && hasAll(serverSource, ['lesson.lessonType !== "closure"']) && hasAll(css, [".closureMakeupPanel", ".closureMakeupChoices", ".lessonModalSaveStatus", ".closureJournalNotice", ".closureLessonPill"]));
+check("90a-1 past lessons convert to closure without dropping historical students", hasAll(app, [
+  "const isPersistedClosure = initialLesson?.lessonType === \"closure\"",
+  "const isHistoricalLesson = Boolean(initialLesson?.date && initialLesson.date < today)",
+  "const canConvertHistoricalLessonToClosure = Boolean(initialLesson && !isPersistedClosure && isHistoricalLesson)",
+  "function isLessonTypeChoiceDisabled(nextLessonType)",
+  'return nextLessonType === "closure" && !canConvertHistoricalLessonToClosure',
+  "disabled={isLessonTypeChoiceDisabled(value)}",
+  "disabled={isLessonTypeChoiceDisabled(item.lessonType)}",
+  "과거 수업은 기존 명단과 수업기록을 보존한 채 휴강으로 바꿀 수 있습니다.",
+  "const preservedHistoricalStudentIds = getLessonStudentIds(editingLesson)",
+  "student.studentId === studentId && isActiveStudent(student)",
+  "const studentIds = [...new Set([...activeStudentIds, ...preservedHistoricalStudentIds])]",
+  'closureMakeupEnabled: lessonType === "closure" && !isPersistedClosure && closureMakeupEnabled',
+  "과거 수업을 휴강으로 전환하고 연결 보충 수업일지까지 저장 완료",
+  "과거 수업을 휴강으로 전환 저장 완료"
+]) && !app.includes('lessonType === "closure" && !initialLesson && closureMakeupEnabled'));
 check("90b tue thu sat classes use Saturday-specific times", hasAll(appWithConfig, ["const classTemplateScheduleRules = {", "template_tt_sat_front: {", "name: \"화목 4-7 / 토 10-1반\"", "saturdayStartTime: \"10:00\"", "saturdayEndTime: \"13:00\"", "template_tt_sat_back: {", "name: \"화목 7-10 / 토 1-4반\"", "saturdayStartTime: \"13:00\"", "saturdayEndTime: \"16:00\"", "function normalizeClassTemplateSchedule", "function getTemplateLessonTimes", "function normalizeLessonTemplateTimes", "function normalizeLessonCalendarRules", "normalizeClassTemplates(classesResult.classTemplates)", "normalizeLessonCalendarRules(lessonsResult.lessons", "setStartTime(templateTimes.startTime)", "setEndTime(templateTimes.endTime)"]) && hasAll(sampleDataSource, ["name: \"화목 4-7 / 토 10-1반\"", "saturdayStartTime: \"10:00\"", "saturdayEndTime: \"13:00\"", "name: \"화목 7-10 / 토 1-4반\"", "saturdayStartTime: \"13:00\"", "saturdayEndTime: \"16:00\""]));
 check("91 supplement lessons use task-specific standard colors", hasAll(app, ["function getSupplementLessonColor(taskType)", "if (taskType === \"homework_makeup\") return lessonCalendarColors.homeworkMakeup", "if (taskType === \"retest\") return lessonCalendarColors.retest", "color: getSupplementLessonColor(taskForSchedule.taskType)"]));
 check("92 existing lessons are normalized to standard calendar rules without legacy type conversion", hasAll(app, ["function normalizeLessonCalendarColors(lessons = [], makeupTasks = [])", "const standardColor = getStandardLessonColor(lesson, taskByLessonId.get(lesson.lessonId))", "return lesson.color === standardColor ? lesson : { ...lesson, color: standardColor }", "function normalizeLessonCalendarRules(lessons = [], makeupTasks = [], classTemplates = [])", "normalizeLessonTemplateTimes(", "normalizeLessonCalendarColors(lessons, makeupTasks)", "areLessonCalendarRuleFieldsEqual", "normalizeLessonCalendarRules(lessonsResult.lessons, makeupTasksResult.makeupTasks ?? [], normalizedClassTemplates)"]) && !app.includes("normalizeExamPrepLessonType"));
