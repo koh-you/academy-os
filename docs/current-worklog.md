@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-27 P1. 15A 비활성 Lesson Hub legacy 제거 — AI gate 통과
+
+- 코드: 활성 JSX 호출이 없던 `TeacherLessonHub`, `TeacherMonthCalendar`, `LessonHub`, `MonthCalendar`, `LessonDetail`과 해당 상세에서만 쓰던 `HomeworkCell`·`saveStateLabels` import를 제거했다. 실제 진입점 `TeacherLessonHubV2`, 수업 생성·수정 `LessonModal`, 활성 `ReportModal`은 유지했다.
+- 테스트 경계: `scripts/test-lesson-hub-legacy-boundary.mjs`가 활성 hub 정의/진입점 각 1개, legacy 정의 0개, 활성 두 모달 보존을 검사하며 `test:production`에 연결됐다. legacy `LessonHub`의 카드 문자열을 찾던 scenario 84g는 활성 V2 pill의 hover·focus·selected 계약을 직접 검사하도록 갱신했다.
+- 원천/side effect: React state, Supabase `lessons`, 수업기록, 숙제, `notification_jobs`, Solapi, 자동 생성 수업을 읽거나 쓰는 로직은 이동·변경하지 않았다.
+- 사람 gate: 없음. 비활성 코드 제거와 정적 fixture 단위라 운영 화면 조작이 필요하지 않다. 다음은 최신 `origin/main` rebase 후 15B 순수 달력 표시 모델이며 합성 수업으로 분류·필터·월 cell 값을 먼저 고정한다.
+
 ## 2026-07-27 P1. 로드맵 15 Lesson Hub / Calendar inventory — AI gate 통과
 
 - 기준 문서: `docs/refactor-lesson-hub-calendar-inventory-2026-07-27.md`에 활성 진입점, 표시/상세 라우팅, local/app_state/Supabase 원천, 외부 side effect, 동작별 위험도와 분리 순서를 기록했다.

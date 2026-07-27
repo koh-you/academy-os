@@ -82,7 +82,7 @@ Supabase lessons
 
 ## 분리 순서
 
-1. **15A — 비활성 legacy 묶음 제거**
+1. **15A — 비활성 legacy 묶음 제거 — 완료**
    - `TeacherLessonHub`, `TeacherMonthCalendar`, `LessonHub`, `MonthCalendar`, `LessonDetail`만 제거한다.
    - 원천·API·React state·화면 동작 변화가 없음을 정적 fixture와 production test/build로 확인한다.
    - 사람 gate는 필요하지 않다.
@@ -103,4 +103,4 @@ Supabase lessons
 
 - AI 검수: 활성/비활성 참조 수, 저장 원천, 외부 side effect, low-risk 첫 후보를 정적 분석으로 확인한다.
 - 사람 검수: 없음. 화면·운영 데이터·외부 서비스를 변경하지 않았다.
-- 다음 단계: 최신 `origin/main` rebase 후 15A만 구현하고 production test/build를 통과하면 별도 사람 조작 없이 커밋·푸시한다.
+- 다음 단계: 15A 완료 뒤 최신 `origin/main`을 다시 rebase하고, 15B 순수 달력 표시 모델을 합성 수업 fixture와 함께 한 의미 단위로 진행한다.
