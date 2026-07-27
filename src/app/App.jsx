@@ -12,6 +12,7 @@ import {
 } from "../domains/exams/examPrepDeleteOrchestration.js";
 import { ExamAnalysisFinalPreviewPanel } from "../domains/exams/ExamAnalysisFinalPreviewPanel.jsx";
 import { StudentManager } from "../domains/students/StudentManager.jsx";
+import { getWithdrawalFutureLessonStartDate } from "../domains/students/withdrawalLessonBoundary.js";
 import {
   getDefaultTallyStudentId,
   getTallyStudentMergeCandidates,
@@ -8184,8 +8185,10 @@ export function App() {
       withdrawalComment: withdrawalInfo.comment ?? removedStudent.withdrawalComment ?? "",
       withdrawnAt: new Date().toISOString()
     };
+    const withdrawalDate = getKoreaDateString(new Date(pausedStudent.withdrawnAt));
+    const futureLessonStartDate = getWithdrawalFutureLessonStartDate(withdrawalDate);
     setStudents((current) => current.map((student) => (student.studentId === studentId ? pausedStudent : student)));
-    removeStudentFromLessonsFromDate(studentId, today);
+    removeStudentFromLessonsFromDate(studentId, futureLessonStartDate);
     if (removedStudent) {
       postJson("/api/students", { student: pausedStudent }).catch((error) => console.error(error));
     }
