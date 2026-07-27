@@ -27,7 +27,7 @@ import "./monthlySettlement.css";
 
 const settlementModeOptions = [
   { label: "재원생 · 월정액", value: "fixed" },
-  { label: "신입생 · 첫 수업~말일", value: "new" },
+  { label: "신입생 · 첫 수업~말일/퇴원일", value: "new" },
   { label: "퇴원생 · 1일~마지막 수업", value: "withdrawn" }
 ];
 const calendarDayLabels = ["일", "월", "화", "수", "목", "금", "토"];
@@ -160,7 +160,7 @@ function MonthlySettlementCalendar({ monthKey, onClose, row }) {
       <div className="monthlySettlementCalendarSummary">
         <span>
           {row.setting.mode === "new"
-            ? `신입 정산 횟수: ${row.prorationCount}회`
+            ? `${row.isNewWithdrawnPeriod ? "신입·퇴원" : "신입"} 정산 횟수: ${row.prorationCount}회`
             : `정산 기준 횟수: ${row.prorationCount}/${row.monthlyScheduleCount}회`}
           {" · "}기간 내 수업일지 {row.recognizedRegularCount}회
         </span>
@@ -330,7 +330,8 @@ export function MonthlySettlementPanel({
           const row = rowByStudentId.get(student.studentId);
           return {
             ...normalizedSetting,
-            endDate: normalizedSetting.mode === "withdrawn"
+            endDate: normalizedSetting.mode === "withdrawn" ||
+              (normalizedSetting.mode === "new" && row?.isNewWithdrawnPeriod)
               ? row?.periodEnd || ""
               : monthRange.endDate,
             startDate: normalizedSetting.mode === "new"
@@ -368,6 +369,7 @@ export function MonthlySettlementPanel({
           <p className="muted">
             선택한 달의 수업일지 명단을 정산 원천으로 봅니다. 재원생은 수업 횟수·시수와 무관하게 월 고정금액,
             신입생은 첫 수업부터 말일까지의 수업 횟수에 회당 단가를 곱하고, 퇴원생은 1일부터 마지막 수업까지의 월별 스케줄 횟수 비율로 계산합니다.
+            같은 달에 첫 수업과 퇴원이 모두 있으면 첫 수업일부터 퇴원일까지의 수업 횟수만 계산합니다.
           </p>
         </div>
         <div className="monthlySettlementMonthControl">
@@ -384,7 +386,8 @@ export function MonthlySettlementPanel({
         <span>학생 상태 필터 없이 해당 월 수업일지 명단을 그대로 표시합니다.</span>
         <span>12회 또는 4.2주 환산을 사용하지 않습니다.</span>
         <span>신입생은 월 전체 횟수로 나누지 않고 첫 수업~말일 횟수 × 회당 단가로 계산합니다.</span>
-        <span>신입·퇴원 경계일은 수업일지의 첫 수업·마지막 수업에서 자동으로 정하며 직접 입력하지 않습니다.</span>
+        <span>신입생이 같은 달에 퇴원하면 첫 수업일~퇴원일 사이의 월별 스케줄 횟수 × 회당 단가로 계산합니다.</span>
+        <span>신입 시작일과 기존 퇴원생 마지막 수업일은 수업일지로 정하고, 같은 달 신입·퇴원생의 종료일은 학생 퇴원일을 사용합니다.</span>
         <span>출석·지각·대기는 정산 포함, 결석도 별도 차감 요청이 없으면 자동 차감하지 않습니다.</span>
         <span>보충은 달력에 별도로 남기되 정규 금액을 추가하지 않습니다.</span>
         <span>정산 제외한 행은 이 달 정산표에서 숨기며, 학생·수업일지 원천은 유지합니다.</span>
@@ -458,6 +461,7 @@ export function MonthlySettlementPanel({
             {activeRows.map((row) => {
               const setting = row.setting;
               const isNewMode = setting.mode === "new";
+              const isNewWithdrawnMode = isNewMode && row.isNewWithdrawnPeriod;
               const parsedScheduleText = scheduleTextFromRules(setting.scheduleText);
               const hasScheduleWarning =
                 setting.mode !== "fixed" &&
@@ -542,7 +546,12 @@ export function MonthlySettlementPanel({
                   <td>
                     <span className="monthlySettlementFixedPeriod">
                       {setting.mode === "new"
-                        ? <>첫 수업 {row.periodStart || "수업일지 없음"}<br />~ 말일 {getMonthRange(selectedMonth).endDate}</>
+                        ? (
+                          <>
+                            첫 수업 {row.periodStart || "수업일지 없음"}<br />
+                            ~ {isNewWithdrawnMode ? "퇴원일" : "말일"} {row.periodEnd}
+                          </>
+                        )
                         : setting.mode === "withdrawn"
                           ? <>1일 {getMonthRange(selectedMonth).startDate}<br />~ 마지막 수업 {row.periodEnd || "수업일지 없음"}</>
                           : <>{getMonthRange(selectedMonth).startDate}<br />~ {getMonthRange(selectedMonth).endDate}</>}
@@ -558,7 +567,7 @@ export function MonthlySettlementPanel({
                     </button>
                     <small>
                       {isNewMode && row.monthlyScheduleCount > 0
-                        ? `신입 정산 ${row.prorationCount}회`
+                        ? `${isNewWithdrawnMode ? "신입·퇴원" : "신입"} 정산 ${row.prorationCount}회`
                         : row.monthlyScheduleCount > 0
                         ? `정산 기준 ${row.prorationCount}/${row.monthlyScheduleCount}회`
                         : "정산 기준 횟수 계산 불가"}

@@ -702,6 +702,68 @@ assert.equal(
   35000 * expectedNewCount,
   "중등 신입생은 월 전체 횟수로 나누지 않고 첫 수업일부터 말일까지 횟수에 35,000원을 곱해야 합니다."
 );
+
+const newWithdrawnScheduleText = "화목 16:00-19:00 / 토 10:00-13:00";
+const newWithdrawnRegularDates = [
+  "2026-07-09",
+  "2026-07-11",
+  "2026-07-14",
+  "2026-07-16",
+  "2026-07-18",
+  "2026-07-21",
+  "2026-07-23",
+  "2026-07-25"
+];
+const newWithdrawnStudent = {
+  ...middleNewStudent,
+  name: "7월 신입·퇴원생",
+  status: "paused",
+  studentId: "student_settlement_new_withdrawn",
+  withdrawnAt: "2026-07-27T11:05:26.949+00:00"
+};
+const newWithdrawnLessons = newWithdrawnRegularDates.map((date, index) => ({
+  className: "화목토반",
+  date,
+  endTime: date === "2026-07-11" || date === "2026-07-18" || date === "2026-07-25"
+    ? "13:00"
+    : "19:00",
+  lessonId: `lesson_new_withdrawn_${index + 1}`,
+  lessonType: "class",
+  startTime: date === "2026-07-11" || date === "2026-07-18" || date === "2026-07-25"
+    ? "10:00"
+    : "16:00",
+  status: "completed",
+  studentIds: [newWithdrawnStudent.studentId]
+}));
+const newWithdrawnRow = buildStudentSettlementRow({
+  classTemplates,
+  lessons: newWithdrawnLessons,
+  monthKey,
+  records: [],
+  setting: {
+    adjustmentAmount: 0,
+    fixedAmount: 420000,
+    scheduleText: newWithdrawnScheduleText
+  },
+  student: newWithdrawnStudent
+});
+const expectedNewWithdrawnCount = buildMonthlyScheduleEvents(monthKey, newWithdrawnScheduleText)
+  .filter((event) => event.date >= "2026-07-09" && event.date <= "2026-07-27")
+  .length;
+assert.equal(newWithdrawnRow.setting.mode, "new", "첫 수업 월에 퇴원한 학생도 신입 회당 계산을 자동 적용해야 합니다.");
+assert.equal(newWithdrawnRow.setting.modeSource, "lesson_journal");
+assert.equal(newWithdrawnRow.isNewWithdrawnPeriod, true);
+assert.equal(newWithdrawnRow.periodStart, "2026-07-09");
+assert.equal(newWithdrawnRow.periodEnd, "2026-07-27", "신입·퇴원 중첩 학생의 종료일은 말일이 아니라 퇴원일이어야 합니다.");
+assert.equal(expectedNewWithdrawnCount, 8, "조소현 운영 사례의 화·목·토 스케줄은 첫 수업~퇴원일 사이 8회여야 합니다.");
+assert.equal(newWithdrawnRow.prorationCount, expectedNewWithdrawnCount);
+assert.equal(newWithdrawnRow.recognizedRegularCount, 8);
+assert.equal(
+  newWithdrawnRow.regularGrossAmount,
+  35000 * expectedNewWithdrawnCount,
+  "중등 신입·퇴원 학생은 첫 수업일부터 퇴원일까지의 횟수에 회당 35,000원을 곱해야 합니다."
+);
+
 assert.equal(
   JSON.parse(getMonthlySettlementMonthSaveSnapshot({
     monthKey,

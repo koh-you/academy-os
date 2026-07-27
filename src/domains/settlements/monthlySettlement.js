@@ -388,7 +388,11 @@ export function normalizeMonthlySettlementStudentSetting(
       : "";
   return {
     adjustmentAmount: normalizeSignedMoneyInput(setting.adjustmentAmount, 0),
-    endDate: normalizeMonthDate(setting.endDate, monthKey) || (mode === "withdrawn" ? withdrawnDate : endDate),
+    endDate: normalizeMonthDate(setting.endDate, monthKey) || (
+      mode === "withdrawn" || (mode === "new" && withdrawnDate)
+        ? withdrawnDate
+        : endDate
+    ),
     excluded: Boolean(setting.excluded),
     fixedAmount: normalizeMoneyInput(
       setting.fixedAmount,
@@ -549,7 +553,8 @@ export function applyMonthlySettlementJournalMode(
     student
   });
   const shouldApplyJournalNewMode =
-    normalizedSetting.mode === "fixed" &&
+    (normalizedSetting.mode === "fixed" ||
+      (normalizedSetting.mode === "withdrawn" && normalizedSetting.modeSource !== "teacher")) &&
     normalizedSetting.modeSource !== "teacher" &&
     isMonthlyFirstRegularLessonCandidate({
       lessons,
@@ -589,14 +594,18 @@ export function buildStudentSettlementRow({
   });
   const { endDate, startDate } = getMonthRange(monthKey);
   const weeklyScheduleHours = getWeeklyScheduleHours(normalizedSetting.scheduleText);
+  const withdrawnDate = normalizeMonthDate(student.withdrawnAt, monthKey);
+  const isNewWithdrawnPeriod = normalizedSetting.mode === "new" && Boolean(withdrawnDate);
   const periodStart = normalizedSetting.mode === "new"
     ? evidence.firstActualRegularDate
     : startDate;
   const periodEnd = normalizedSetting.mode === "withdrawn"
     ? evidence.lastActualRegularDate
-    : endDate;
+    : isNewWithdrawnPeriod
+      ? withdrawnDate
+      : endDate;
   const hasAutomaticBoundary = normalizedSetting.mode === "new"
-    ? Boolean(periodStart)
+    ? Boolean(periodStart) && (!periodEnd || periodStart <= periodEnd)
     : normalizedSetting.mode === "withdrawn"
       ? Boolean(periodEnd)
       : true;
@@ -653,6 +662,7 @@ export function buildStudentSettlementRow({
     hasRegularJournal,
     isJournalAutoNew: normalizedSetting.mode === "new" &&
       normalizedSetting.modeSource === "lesson_journal",
+    isNewWithdrawnPeriod,
     isNewCandidate: isMonthlyFirstRegularLessonCandidate({
       lessons,
       monthKey,
