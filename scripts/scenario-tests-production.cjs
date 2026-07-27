@@ -114,6 +114,7 @@ const supplementTaskCardModelPath = path.join(root, "src", "domains", "supplemen
 const supplementNotificationControlModelPath = path.join(root, "src", "domains", "supplements", "supplementNotificationControlModel.js");
 const supplementCancellationConfirmModalPath = path.join(root, "src", "domains", "supplements", "SupplementCancellationConfirmModal.jsx");
 const supplementStudentModalPath = path.join(root, "src", "domains", "supplements", "SupplementStudentModal.jsx");
+const supplementCancellationConfirmModalPath = path.join(root, "src", "domains", "supplements", "SupplementCancellationConfirmModal.jsx");
 const supplementStudentModalShellPath = path.join(root, "src", "domains", "supplements", "SupplementStudentModalShell.jsx");
 const supplementConfirmationStatePath = path.join(root, "src", "domains", "supplements", "useSupplementConfirmationState.js");
 const supplementFeedbackStatePath = path.join(root, "src", "domains", "supplements", "useSupplementFeedbackState.js");
@@ -218,6 +219,9 @@ const slackDailyScheduleReserveScriptPath = path.join(root, "scripts", "reserve-
 const appEntrySource = fs.readFileSync(appPath, "utf8");
 const supplementCancellationConfirmModalSource = fs.existsSync(supplementCancellationConfirmModalPath) ? fs.readFileSync(supplementCancellationConfirmModalPath, "utf8") : "";
 const supplementStudentModalSource = fs.existsSync(supplementStudentModalPath) ? fs.readFileSync(supplementStudentModalPath, "utf8") : "";
+const supplementCancellationConfirmModalSource = fs.existsSync(supplementCancellationConfirmModalPath)
+  ? fs.readFileSync(supplementCancellationConfirmModalPath, "utf8")
+  : "";
 const supplementCenterComponentSource = fs.existsSync(supplementCenterComponentPath) ? fs.readFileSync(supplementCenterComponentPath, "utf8") : "";
 const notificationCenterModelSource = fs.existsSync(notificationCenterModelPath) ? fs.readFileSync(notificationCenterModelPath, "utf8") : "";
 const notificationCenterConfigSource = fs.existsSync(notificationCenterConfigPath) ? fs.readFileSync(notificationCenterConfigPath, "utf8") : "";
@@ -424,7 +428,7 @@ const coreDataRoute = fs.readFileSync(coreDataRoutePath, "utf8");
 const serverSource = fs.readFileSync(serverPath, "utf8");
 const specialLectureStudentScheduleMutationSource =
   coreDataRoute.match(
-    /export async function syncSpecialLectureLessonStudentSchedule[\s\S]*?\n}\n\nexport async function deleteLesson/
+    /export async function syncSpecialLectureLessonStudentSchedule[\s\S]*?\r?\n}\r?\n\r?\nexport async function deleteLesson/
   )?.[0] ?? "";
 const supabaseRest = fs.readFileSync(supabaseRestPath, "utf8");
 const sampleDataSource = fs.readFileSync(sampleDataPath, "utf8");
@@ -1313,7 +1317,7 @@ check("88e all three supplement notification teacher edits including empty value
 check("88f canceled supplement notification previews cannot override the current saved selected draft", hasAll(`${app}\n${supplementNotificationControlModalSource}\n${supplementNotificationControlModelSource}`, ["const notificationControlHasHistoricalJob", "[\"canceled\", \"failed\"].includes(job.status)", "getCurrentPreview: (task, controlType)", "getSupplementScheduleNoticeDraft(", "notificationControlHasHistoricalJob", "? currentPreview", "const previewLabel", "다시 예약할 현재 문구", "취소·실패한 과거 문구는 재사용하지 않고, 현재 저장된 보충 내용으로 다시 만들었습니다.", "이전 예약 시각"]) && !app.includes("? notificationControlJob?.previewBody || (") && hasAll(css, [".supplementNotificationControlPreview > small"]));
 check("89 supplement progress memo is included in notification draft", hasAll(app, ["const progressMemo = normalizeMessageText(task.supplementProgressMemo)", "const progressMemoBlock = progressMemo ? `\\n\\n보충 메모:\\n${progressMemo}` : \"\"", "${progressMemoBlock}"]));
 check("90 lesson calendar uses pastel type colors and four regular class colors", hasAll(appWithConfig, ["const lessonCalendarColors = {", "regular: \"#bfdbfe\"", "preExam: \"#fed7aa\"", "exam: \"#fde68a\"", "examPrep: \"#bae6fd\"", "const regularLessonClassColors = {", "template_mwf_4_7: \"#bfdbfe\"", "template_mwf_7_10: \"#c7d2fe\"", "template_tt_sat_front: \"#bbf7d0\"", "template_tt_sat_back: \"#fbcfe8\"", "function getRegularLessonColor(lesson = {})", "return getRegularLessonColor(lesson)", "style={{ background: lesson.color }}", "lesson.lessonType === \"preExam\" ? \"preExamLessonPill\"", "lesson.lessonType === \"makeup\" ? \"makeupLessonPill\"", "isExamPrepType ? \"examPrepLessonPill\""]) && hasAll(css, [".lessonPill", "color: #17213d", "border: 1px solid rgba(15, 23, 42, 0.12)"]));
-check("90a lesson modal creates verified closure and optional linked makeup journals", hasAll(appWithConfig, [
+check("90a lesson modal creates verified closure and optional linked makeup journals", hasAllNormalizedNewlines(appWithConfig, [
   '["closure", "⏸ 휴강"]',
   'closure: "#e2e8f0"',
   "휴강 보충이 있나요?",
