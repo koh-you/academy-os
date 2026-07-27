@@ -12,7 +12,11 @@ import {
 } from "../domains/exams/examPrepDeleteOrchestration.js";
 import { ExamAnalysisFinalPreviewPanel } from "../domains/exams/ExamAnalysisFinalPreviewPanel.jsx";
 import { StudentManager } from "../domains/students/StudentManager.jsx";
-import { getWithdrawalFutureLessonStartDate } from "../domains/students/withdrawalLessonBoundary.js";
+import {
+  getWithdrawalDateKey,
+  getWithdrawalFutureLessonStartDate,
+  isStudentVisibleInLessonJournal
+} from "../domains/students/withdrawalLessonBoundary.js";
 import {
   getDefaultTallyStudentId,
   getTallyStudentMergeCandidates,
@@ -428,6 +432,12 @@ function getActiveLessonStudents(lesson = {}, students = []) {
   return sortStudentsByName(getLessonStudentIds(lesson)
     .map((studentId) => students.find((student) => student.studentId === studentId))
     .filter(isActiveStudent));
+}
+
+function getLessonJournalStudents(lesson = {}, students = []) {
+  return sortStudentsByName(getLessonStudentIds(lesson)
+    .map((studentId) => students.find((student) => student.studentId === studentId))
+    .filter((student) => student && isStudentVisibleInLessonJournal(student, lesson.date)));
 }
 
 function getActiveStudentIdsFromSelection(studentIds = [], students = []) {
@@ -6702,14 +6712,20 @@ export function App() {
     : [];
 
   const selectedStudents = selectedLesson
-    ? getActiveLessonStudents(selectedLesson, students)
+    ? getLessonJournalStudents(selectedLesson, students)
     : [];
 
   useEffect(() => {
     if (!isAppStateReady || session?.role !== "teacher") return;
-    const inactiveStudentIds = students.filter(isWithdrawnStudent).map((student) => student.studentId);
-    if (inactiveStudentIds.length === 0) return;
-    removeStudentsFromLessonsFromDate(inactiveStudentIds, today);
+    const withdrawalBoundaries = students
+      .filter(isWithdrawnStudent)
+      .map((student) => ({
+        studentId: student.studentId,
+        fromDate: getWithdrawalFutureLessonStartDate(getWithdrawalDateKey(student.withdrawnAt))
+      }))
+      .filter(({ studentId, fromDate }) => studentId && fromDate);
+    if (withdrawalBoundaries.length === 0) return;
+    removeWithdrawnStudentsFromFutureLessons(withdrawalBoundaries);
   }, [isAppStateReady, lessons, session?.role, students]);
 
   useEffect(() => {
@@ -7698,6 +7714,30 @@ export function App() {
       setStudentIntakeRegistrationMessages((current) => ({ ...current, [applicantId]: error.message }));
       throw error;
     }
+  }
+
+  function removeWithdrawnStudentsFromFutureLessons(withdrawalBoundaries = []) {
+    const removalStartByStudentId = new Map(
+      withdrawalBoundaries.map(({ studentId, fromDate }) => [studentId, fromDate])
+    );
+    if (removalStartByStudentId.size === 0) return [];
+    const changedLessons = lessons
+      .filter((lesson) =>
+        isActiveLessonForRosterSync(lesson) &&
+        (lesson.studentIds ?? []).some((studentId) => {
+          const fromDate = removalStartByStudentId.get(studentId);
+          return fromDate && String(lesson.date) >= fromDate;
+        })
+      )
+      .map((lesson) => ({
+        ...lesson,
+        studentIds: (lesson.studentIds ?? []).filter((studentId) => {
+          const fromDate = removalStartByStudentId.get(studentId);
+          return !fromDate || String(lesson.date) < fromDate;
+        })
+      }));
+    applyLessonRosterChanges(changedLessons);
+    return changedLessons;
   }
 
   function handleUpdateStudent(studentId, field, value) {
@@ -16685,7 +16725,7 @@ function EditableMemoCard({ className = "", disabled = false, editKey, editingKe
 }
 
 function LessonJournalFallback({ error, lesson, onBack, onDeleteLesson, onEditLesson, students = [] }) {
-  const lessonStudents = getActiveLessonStudents(lesson, students);
+  const lessonStudents = getLessonJournalStudents(lesson, students);
   return (
     <section className="lessonJournalPage">
       <header className="pageTop lessonJournalHeader">
@@ -16792,7 +16832,7 @@ function LessonJournalDetail({
   const auditedLessonNotificationJobs = Array.isArray(reservationAudit.osJobs) ? reservationAudit.osJobs : lessonNotificationJobs;
   const todayTwoPmIso = new Date(`${today}T14:00:00+09:00`).toISOString();
   const canScheduleTodayTwoPm = lesson.date < today && Boolean(onScheduleLessonNotificationsAt);
-  const lessonStudents = getActiveLessonStudents(lesson, students);
+  const lessonStudents = getLessonJournalStudents(lesson, students);
   const isClosureMakeupLesson = lesson.lessonType === "makeup" && lesson.lessonTopic === "휴강 보충";
   const linkedClosureMakeupLesson = isClosureLesson
     ? (Array.isArray(lessons) ? lessons : []).find((item) => item.sourceLabel === `원 휴강 수업 · ${lesson.lessonId}`)
