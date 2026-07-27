@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-27 P1. 15D-5 수업 모달 local save-state transition 분리 — AI gate 통과
+
+- 코드: 최초 저장 안내, validation 실패, 저장 실패 뒤 입력 변경 시 `dirty` 복귀, 일반/휴강+보충 저장 중, 저장 완료 fallback, 예외 실패 문구를 `src/domains/lessons/lessonModalSaveState.js` 순수 모델로 이동했다.
+- 경계: App의 React `saveState`/`saveMessage`, draft dependency effect, `onSubmit`, 진행 callback, API 결과·예외 순서는 유지했다. 수업 bulk API, Supabase 재조회, `notification_jobs`, Solapi는 이동하거나 실행하지 않았다.
+- 자동검증: idle 안내, failed→dirty, saving/saved 보존, validation 실패, 일반/휴강 보충 저장 중, 서버 완료문구/fallback, 예외/fallback을 합성 fixture로 검증했다. `test:production` 59개 명령, 최신 main이 추가한 scenario를 포함해 495/495, build, `git diff --check`가 통과했다.
+- 사람 gate: 없음. local 표시 상태 계산만 옮겼다. 다음은 최신 `origin/main` rebase 후 15D-6 학생 검색·학년 그룹·선택 chip JSX를 controlled component로 분리한다.
+
 ## 2026-07-27 P1. 15D-4 수업 모달 최초 draft·ID factory 분리 — AI gate 통과
 
 - 코드: 신규/기존 수업의 최초 이름·날짜·시간·휴강 보충일·색상·활성 학생 명단을 `createLessonModalInitialDraft`, 주 수업/연결 휴강 보충 ID 인자를 각각의 factory로 `src/domains/lessons/lessonModalInitialDraft.js`에 분리했다.

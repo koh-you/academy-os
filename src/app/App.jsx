@@ -235,6 +235,15 @@ import {
   createLessonModalDraftLessonId,
   createLessonModalInitialDraft
 } from "../domains/lessons/lessonModalInitialDraft.js";
+import {
+  createLessonModalFailedSaveState,
+  createLessonModalSavedSaveState,
+  createLessonModalSavingSaveState,
+  createLessonModalValidationFailureSaveState,
+  getLessonModalSaveMessageAfterDraftChange,
+  getLessonModalSaveStateAfterDraftChange,
+  lessonModalInitialSaveMessage
+} from "../domains/lessons/lessonModalSaveState.js";
 import { createLessonModalStudentSelectionModel } from "../domains/lessons/lessonModalStudentModel.js";
 import { LessonJournalErrorBoundary } from "../domains/lessons/LessonJournalErrorBoundary.jsx";
 import { attendanceLabels, dayLabels, homeworkLabels } from "../domains/lessons/labels.js";
@@ -18686,7 +18695,7 @@ function LessonModal({
   const [color, setColor] = useState(initialDraft.color);
   const [studentIds, setStudentIds] = useState(initialDraft.studentIds);
   const [saveState, setSaveState] = useState("idle");
-  const [saveMessage, setSaveMessage] = useState("수정 내용은 저장 버튼을 눌러야 Supabase에 반영됩니다.");
+  const [saveMessage, setSaveMessage] = useState(lessonModalInitialSaveMessage);
   const isSaving = saveState === "saving";
   const isSaved = saveState === "saved";
   const isFormLocked = isSaving || isSaved;
@@ -18705,10 +18714,13 @@ function LessonModal({
     templates: normalizedTemplates
   });
   useEffect(() => {
-    setSaveState((current) => current === "failed" ? "dirty" : current);
-    setSaveMessage((current) => saveState === "failed"
-      ? "입력 내용을 수정했습니다. 저장 버튼을 다시 눌러 주세요."
-      : current);
+    setSaveState(getLessonModalSaveStateAfterDraftChange);
+    setSaveMessage((current) =>
+      getLessonModalSaveMessageAfterDraftChange({
+        currentMessage: current,
+        saveState
+      })
+    );
   }, [
     classTemplateId,
     closureMakeupDate,
@@ -18787,6 +18799,11 @@ function LessonModal({
     }
   }
 
+  function applyLessonModalSaveState(nextSaveState) {
+    setSaveState(nextSaveState.state);
+    setSaveMessage(nextSaveState.message);
+  }
+
   async function submitLesson() {
     if (isSaving || isSaved) return;
     const validationError = getLessonModalValidationError({
@@ -18802,14 +18819,17 @@ function LessonModal({
       startTime
     });
     if (validationError) {
-      setSaveState("failed");
-      setSaveMessage(validationError);
+      applyLessonModalSaveState(
+        createLessonModalValidationFailureSaveState(validationError)
+      );
       return;
     }
-    setSaveState("saving");
-    setSaveMessage(lessonType === "closure" && closureMakeupEnabled
-      ? "휴강과 연결 보충 수업일지 저장 중"
-      : "수업일지 저장 중");
+    applyLessonModalSaveState(
+      createLessonModalSavingSaveState({
+        closureMakeupEnabled,
+        lessonType
+      })
+    );
     try {
       const result = await onSubmit(createLessonModalSubmitPayload({
         classTemplateId,
@@ -18831,12 +18851,10 @@ function LessonModal({
         setSaveState(nextState);
         setSaveMessage(nextMessage);
       });
-      setSaveState("saved");
-      setSaveMessage(result?.message || "수업일지 저장 완료");
+      applyLessonModalSaveState(createLessonModalSavedSaveState(result));
     } catch (error) {
       console.error(error);
-      setSaveState("failed");
-      setSaveMessage(`저장 실패 · ${error.message || "입력 내용은 그대로 유지됩니다."}`);
+      applyLessonModalSaveState(createLessonModalFailedSaveState(error));
     }
   }
 
