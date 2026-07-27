@@ -106,7 +106,7 @@
 .monthlySettlementTable {
   border-collapse: separate;
   border-spacing: 0;
-  min-width: 1880px;
+  min-width: 1720px;
   width: 100%;
 }
 
@@ -159,11 +159,11 @@
   min-width: 205px;
 }
 
-.monthlySettlementTable td:nth-child(10) {
+.monthlySettlementTable td:nth-child(9) {
   min-width: 180px;
 }
 
-.monthlySettlementTable td:nth-child(11) {
+.monthlySettlementTable td:nth-child(10) {
   min-width: 125px;
 }
 
@@ -290,20 +290,6 @@
   margin-top: 5px;
 }
 
-.monthlySettlementRowExcluded td {
-  background: #f8fafc;
-  color: #7b8798;
-}
-
-.monthlySettlementRowExcluded td:first-child {
-  background: #f3f6fa;
-}
-
-.monthlySettlementRowExcluded .monthlySettlementStudentCell strong,
-.monthlySettlementRowExcluded .monthlySettlementAmountCell strong {
-  color: #66758a;
-}
-
 .monthlySettlementExclusionCell button {
   border-radius: 8px;
   cursor: pointer;
@@ -332,6 +318,162 @@
 
 .monthlySettlementRestoreButton:hover {
   background: #dfedff;
+}
+
+.monthlySettlementSubsectionHeader {
+  align-items: flex-end;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.monthlySettlementSubsectionHeader h2 {
+  color: #263b55;
+  font-size: 18px;
+  margin: 0;
+}
+
+.monthlySettlementSubsectionHeader p {
+  color: #718096;
+  font-size: 12px;
+  margin: 5px 0 0;
+}
+
+.monthlySettlementSubsectionHeader > span {
+  background: #eaf4ff;
+  border: 1px solid #bad2f4;
+  border-radius: 999px;
+  color: #24528f;
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 6px 10px;
+}
+
+.monthlySettlementExcludedPanel {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.monthlySettlementExcludedPanel summary {
+  color: #52657e;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 11px 13px;
+}
+
+.monthlySettlementExcludedList {
+  border-top: 1px solid #dce4ee;
+  display: grid;
+}
+
+.monthlySettlementExcludedList > div {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 9px 13px;
+}
+
+.monthlySettlementExcludedList > div + div {
+  border-top: 1px solid #e7edf4;
+}
+
+.monthlySettlementExcludedList span,
+.monthlySettlementExcludedList strong,
+.monthlySettlementExcludedList small {
+  display: block;
+}
+
+.monthlySettlementExcludedList strong {
+  color: #34475f;
+  font-size: 13px;
+}
+
+.monthlySettlementExcludedList small {
+  color: #7a8797;
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.monthlySettlementExcludedList .monthlySettlementRestoreButton {
+  border-radius: 8px;
+  cursor: pointer;
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 800;
+  min-height: 34px;
+  padding: 6px 12px;
+}
+
+.monthlySettlementSpecialSection {
+  display: grid;
+  gap: 12px;
+}
+
+.monthlySettlementSpecialTable {
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 1040px;
+  width: 100%;
+}
+
+.monthlySettlementSpecialTable th {
+  background: #f0f8f5;
+  border-bottom: 1px solid #d7e1ef;
+  color: #42665a;
+  font-size: 12px;
+  padding: 11px 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.monthlySettlementSpecialTable td {
+  border-bottom: 1px solid #e7edf6;
+  min-width: 150px;
+  padding: 11px 10px;
+  vertical-align: top;
+}
+
+.monthlySettlementSpecialTable tr:last-child td {
+  border-bottom: 0;
+}
+
+.monthlySettlementSpecialTable td:nth-child(1) {
+  min-width: 150px;
+}
+
+.monthlySettlementSpecialTable td:nth-child(2) {
+  min-width: 230px;
+}
+
+.monthlySettlementSpecialTable td:nth-child(3) {
+  min-width: 360px;
+}
+
+.monthlySettlementSpecialTable strong,
+.monthlySettlementSpecialTable small {
+  display: block;
+}
+
+.monthlySettlementSpecialTable strong {
+  color: #2a4058;
+  font-size: 13px;
+}
+
+.monthlySettlementSpecialTable small {
+  color: #718096;
+  font-size: 11px;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.monthlySettlementSpecialTable .monthlySettlementSourceWarning {
+  color: #9a5d11;
+  font-weight: 700;
 }
 
 .monthlySettlementEmpty {
@@ -494,6 +636,11 @@
   .monthlySettlementRuleNotice span + span {
     border-left: 0;
     padding-left: 0;
+  }
+
+  .monthlySettlementSubsectionHeader {
+    align-items: flex-start;
+    display: grid;
   }
 }
 

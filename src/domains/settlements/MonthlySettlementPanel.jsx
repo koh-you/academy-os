@@ -4,6 +4,7 @@ import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import {
+  buildMonthlySpecialLectureSettlementRows,
   buildMonthlySettlementSummary,
   buildStudentSettlementRow,
   formatSettlementHours,
@@ -170,6 +171,8 @@ export function MonthlySettlementPanel({
   records = [],
   saveState = "idle",
   settlementState,
+  specialLectureEnrollments = [],
+  specialLectureGuides = [],
   students = []
 }) {
   const [selectedMonth, setSelectedMonth] = useState(getCurrentKoreaMonthKey);
@@ -222,7 +225,38 @@ export function MonthlySettlementPanel({
     setting: draftMonth?.studentSettings?.[student.studentId],
     student
   })), [classTemplates, draftMonth, lessons, records, selectedMonth, visibleStudents]);
-  const summary = useMemo(() => buildMonthlySettlementSummary(rows), [rows]);
+  const activeRows = useMemo(
+    () => rows.filter((row) => !row.setting.excluded),
+    [rows]
+  );
+  const excludedRows = useMemo(
+    () => rows.filter((row) => row.setting.excluded),
+    [rows]
+  );
+  const specialLectureRows = useMemo(
+    () => buildMonthlySpecialLectureSettlementRows({
+      excludedStudentIds: excludedRows.map((row) => row.student.studentId),
+      monthKey: selectedMonth,
+      specialLectureEnrollments,
+      specialLectureGuides,
+      students
+    }),
+    [
+      excludedRows,
+      selectedMonth,
+      specialLectureEnrollments,
+      specialLectureGuides,
+      students
+    ]
+  );
+  const visibleSpecialLectureRows = useMemo(
+    () => specialLectureRows.filter((row) => !row.isExcluded),
+    [specialLectureRows]
+  );
+  const summary = useMemo(
+    () => buildMonthlySettlementSummary(rows, specialLectureRows),
+    [rows, specialLectureRows]
+  );
   const selectedCalendarRow = rows.find((row) => row.student.studentId === selectedCalendarStudentId) ?? null;
   const effectiveSaveState = saveState === "saving"
     ? "saving"
@@ -342,7 +376,8 @@ export function MonthlySettlementPanel({
         <span>12회 또는 4.2주 환산을 사용하지 않습니다.</span>
         <span>출석·지각·대기는 정산 포함, 결석도 별도 차감 요청이 없으면 자동 차감하지 않습니다.</span>
         <span>보충은 달력에 별도로 남기되 정규 금액을 추가하지 않습니다.</span>
-        <span>정산 제외는 학생·수업일지를 삭제하지 않고 이 달 합계에서만 0원 처리합니다.</span>
+        <span>정산 제외한 행은 이 달 정산표에서 숨기며, 학생·수업일지 원천은 유지합니다.</span>
+        <span>특강비는 특강관리의 단가와 확정 수강 회차·시간을 별도 집계합니다.</span>
         <span>중등 기본 420,000원 · 중등 주 6시간 308,000원 · 고등 주 6시간 341,000원 · 고등 기본 450,000원</span>
       </div>
 
@@ -361,7 +396,7 @@ export function MonthlySettlementPanel({
           value={formatSettlementWon(summary.regularNetAmount)}
         />
         <MetricCard
-          hint="학생별 별도 입력한 특강 기준 총액"
+          hint="특강관리 확정 회차·시간과 안내문 단가 합계"
           icon="+"
           label="특강 기준 총액"
           value={formatSettlementWon(summary.specialGrossAmount)}
@@ -389,10 +424,21 @@ export function MonthlySettlementPanel({
       ) : null}
       {summary.excludedStudentCount > 0 ? (
         <div className="monthlySettlementExcludedNotice">
-          정산 제외 {summary.excludedStudentCount}명은 정규·특강·조정 합계에서 0원 처리됩니다. 행의 정산 복원으로 언제든 되돌릴 수 있습니다.
+          정산 제외 {summary.excludedStudentCount}명은 현재 표와 정규·특강·조정 합계에서 빠졌습니다. 아래 삭제한 정산 행에서 복원할 수 있습니다.
+        </div>
+      ) : null}
+      {summary.pendingSpecialLectureCount > 0 ? (
+        <div className="monthlySettlementRateWarning">
+          특강 회차 미확정 {summary.pendingSpecialLectureCount}건은 특강관리에서 회차 계획을 확정하기 전까지 0원입니다.
         </div>
       ) : null}
 
+      <div className="monthlySettlementSubsectionHeader">
+        <div>
+          <h2>정규 수업 정산</h2>
+          <p>선택 월의 정규 수업일지 명단과 학생별 월 고정금액을 기준으로 계산합니다.</p>
+        </div>
+      </div>
       <div className="monthlySettlementTableWrap">
         <table className="monthlySettlementTable">
           <thead>
@@ -404,21 +450,17 @@ export function MonthlySettlementPanel({
               <th>인정 기간</th>
               <th>횟수·시수 참고</th>
               <th>정규 적용금액</th>
-              <th>특강 총액</th>
               <th>조정</th>
               <th>메모</th>
               <th>정산 처리</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => {
+            {activeRows.map((row) => {
               const setting = row.setting;
               const parsedScheduleText = scheduleTextFromRules(setting.scheduleText);
               return (
-                <tr
-                  className={setting.excluded ? "monthlySettlementRowExcluded" : ""}
-                  key={row.student.studentId}
-                >
+                <tr key={row.student.studentId}>
                   <td className="monthlySettlementStudentCell">
                     <strong>{row.student.name}</strong>
                     <span>{row.student.grade || "학년 미입력"} · {row.student.schoolName || "학교 미입력"}</span>
@@ -427,7 +469,6 @@ export function MonthlySettlementPanel({
                   </td>
                   <td>
                     <select
-                      disabled={setting.excluded}
                       value={setting.mode}
                       onChange={(event) => handleModeChange(row, event.target.value)}
                     >
@@ -444,7 +485,6 @@ export function MonthlySettlementPanel({
                   <td>
                     <div className="monthlySettlementMoneyInput">
                       <input
-                        disabled={setting.excluded}
                         min="0"
                         placeholder="단가 미설정"
                         type="number"
@@ -461,7 +501,6 @@ export function MonthlySettlementPanel({
                   </td>
                   <td className="monthlySettlementScheduleCell">
                     <input
-                      disabled={setting.excluded}
                       placeholder="예: 월수금 19:00-22:00"
                       value={setting.scheduleText}
                       onChange={(event) => updateStudentSetting(row.student.studentId, "scheduleText", event.target.value)}
@@ -477,7 +516,6 @@ export function MonthlySettlementPanel({
                     ) : (
                       <div className="monthlySettlementPeriodInputs">
                         <input
-                          disabled={setting.excluded}
                           max={getMonthRange(selectedMonth).endDate}
                           min={getMonthRange(selectedMonth).startDate}
                           type="date"
@@ -485,7 +523,6 @@ export function MonthlySettlementPanel({
                           onChange={(event) => updateStudentSetting(row.student.studentId, "startDate", event.target.value)}
                         />
                         <input
-                          disabled={setting.excluded}
                           max={getMonthRange(selectedMonth).endDate}
                           min={getMonthRange(selectedMonth).startDate}
                           type="date"
@@ -510,35 +547,17 @@ export function MonthlySettlementPanel({
                   </td>
                   <td className="monthlySettlementAmountCell">
                     <strong>
-                      {setting.excluded
-                        ? "정산 제외"
-                        : row.hasFixedAmount ? formatSettlementWon(row.regularGrossAmount) : "단가 미설정"}
+                      {row.hasFixedAmount ? formatSettlementWon(row.regularGrossAmount) : "단가 미설정"}
                     </strong>
                     <span>
-                      {setting.excluded
-                        ? "이 달 합계 0원"
-                        : !row.hasRegularJournal
-                          ? "정규 수업일지 없음 · 0원"
-                          : setting.mode === "fixed" ? "월정액 전액" : `${formatSettlementWon(row.baseAmount)} + 조정`}
+                      {!row.hasRegularJournal
+                        ? "정규 수업일지 없음 · 0원"
+                        : setting.mode === "fixed" ? "월정액 전액" : `${formatSettlementWon(row.baseAmount)} + 조정`}
                     </span>
-                  </td>
-                  <td>
-                    <div className="monthlySettlementMoneyInput">
-                      <input
-                        disabled={setting.excluded}
-                        min="0"
-                        type="number"
-                        value={setting.specialGrossAmount}
-                        onChange={(event) => updateStudentSetting(row.student.studentId, "specialGrossAmount", event.target.value)}
-                      />
-                      <span>원</span>
-                    </div>
-                    <small>정규와 별도 집계</small>
                   </td>
                   <td>
                     <div className="monthlySettlementMoneyInput signed">
                       <input
-                        disabled={setting.excluded}
                         placeholder="+/-"
                         type="number"
                         value={setting.adjustmentAmount}
@@ -550,7 +569,6 @@ export function MonthlySettlementPanel({
                   </td>
                   <td>
                     <textarea
-                      disabled={setting.excluded}
                       placeholder="차감 사유·확인 메모"
                       rows="2"
                       value={setting.note}
@@ -559,18 +577,13 @@ export function MonthlySettlementPanel({
                   </td>
                   <td className="monthlySettlementExclusionCell">
                     <button
-                      aria-pressed={setting.excluded}
-                      className={setting.excluded ? "monthlySettlementRestoreButton" : "monthlySettlementExcludeButton"}
-                      onClick={() => updateStudentSetting(row.student.studentId, "excluded", !setting.excluded)}
+                      className="monthlySettlementExcludeButton"
+                      onClick={() => updateStudentSetting(row.student.studentId, "excluded", true)}
                       type="button"
                     >
-                      {setting.excluded ? "정산 복원" : "정산 제외"}
+                      정산 제외
                     </button>
-                    <small>
-                      {setting.excluded
-                        ? "학생·수업일지는 유지됨"
-                        : "이 달 정산에서만 제외"}
-                    </small>
+                    <small>이 달 정산표에서 숨김</small>
                   </td>
                 </tr>
               );
@@ -579,9 +592,104 @@ export function MonthlySettlementPanel({
         </table>
       </div>
 
-      {!rows.length ? (
-        <div className="monthlySettlementEmpty">이 달에 표시할 재원·수업 학생이 없습니다.</div>
+      {!activeRows.length ? (
+        <div className="monthlySettlementEmpty">
+          {rows.length
+            ? "이 달의 정규 정산 행이 모두 제외되었습니다."
+            : "이 달에 표시할 정규 수업일지 학생이 없습니다."}
+        </div>
       ) : null}
+
+      {excludedRows.length ? (
+        <details className="monthlySettlementExcludedPanel">
+          <summary>삭제한 정산 행 {excludedRows.length}명 · 복원</summary>
+          <div className="monthlySettlementExcludedList">
+            {excludedRows.map((row) => (
+              <div key={row.student.studentId}>
+                <span>
+                  <strong>{row.student.name}</strong>
+                  <small>{row.student.grade || "학년 미입력"} · {row.student.schoolName || "학교 미입력"}</small>
+                </span>
+                <button
+                  className="monthlySettlementRestoreButton"
+                  onClick={() => updateStudentSetting(row.student.studentId, "excluded", false)}
+                  type="button"
+                >
+                  행 복원
+                </button>
+              </div>
+            ))}
+          </div>
+        </details>
+      ) : null}
+
+      <section className="monthlySettlementSpecialSection">
+        <div className="monthlySettlementSubsectionHeader">
+          <div>
+            <h2>특강 정산</h2>
+            <p>특강관리의 학생별 확정 수강 회차와 안내문에 저장된 회차·시간 단가를 읽어 별도 계산합니다.</p>
+          </div>
+          <span>수기 입력 없음 · 특강관리 원천</span>
+        </div>
+        {visibleSpecialLectureRows.length ? (
+          <div className="monthlySettlementTableWrap">
+            <table className="monthlySettlementSpecialTable">
+              <thead>
+                <tr>
+                  <th>학생</th>
+                  <th>특강</th>
+                  <th>해당 월 회차·시간</th>
+                  <th>단가 기준</th>
+                  <th>특강 적용금액</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visibleSpecialLectureRows.map((row) => (
+                  <tr key={`${row.guide.specialLectureGuideId}_${row.student.studentId}`}>
+                    <td>
+                      <strong>{row.student.name}</strong>
+                      <small>{row.student.grade || "학년 미입력"} · {row.student.schoolName || "학교 미입력"}</small>
+                    </td>
+                    <td>
+                      <strong>{row.guide.shortTitle || row.guide.title}</strong>
+                      <small>{row.isConfirmed ? "회차 계획 확정" : "회차 계획 미확정 · 합계 제외"}</small>
+                      {row.sourceEnrollmentCount > 1 ? (
+                        <small className="monthlySettlementSourceWarning">
+                          중복 수강 원천 {row.sourceEnrollmentCount}건 · 같은 회차는 1회만 계산
+                        </small>
+                      ) : null}
+                    </td>
+                    <td>
+                      <strong>{row.sessionCount}회 · {formatSettlementHours(row.totalHours)}</strong>
+                      <small>
+                        {row.sessions.map((session) =>
+                          `${Number(session.dateKey.slice(5, 7))}/${Number(session.dateKey.slice(8, 10))} ${session.startTime}-${session.endTime}`
+                        ).join(" · ")}
+                      </small>
+                    </td>
+                    <td>
+                      <strong>
+                        {row.guide.pricingMode === "perHour"
+                          ? `${formatSettlementWon(row.guide.pricePerHour)}/시간`
+                          : `${formatSettlementWon(row.guide.pricePerSession)}/회`}
+                      </strong>
+                      <small>{row.guide.pricingMode === "perHour" ? "시간 단가" : "회차 단가"}</small>
+                    </td>
+                    <td className="monthlySettlementAmountCell">
+                      <strong>{formatSettlementWon(row.grossAmount)}</strong>
+                      <span>{row.isConfirmed ? "특강 기준 총액 반영" : "특강관리에서 회차 확정 필요"}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="monthlySettlementEmpty">
+            이 달에 특강관리에서 선택된 수강 회차가 없습니다.
+          </div>
+        )}
+      </section>
 
       <StickySaveBar
         className="monthlySettlementSaveBar"

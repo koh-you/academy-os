@@ -9472,6 +9472,8 @@ export function App() {
             records={records}
             saveState={monthlySettlementSaveState}
             settlementState={monthlyInstructorSettlements}
+            specialLectureEnrollments={specialLectureEnrollments}
+            specialLectureGuides={specialLectureGuides}
             students={students}
             onSaveMonth={handleSaveMonthlySettlementMonth}
           />
