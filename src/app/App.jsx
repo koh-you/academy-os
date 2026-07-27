@@ -220,6 +220,7 @@ import {
 } from "../domains/lessons/lessonClosure.js";
 import { LessonCalendarView } from "../domains/lessons/LessonCalendarView.jsx";
 import { createLessonCalendarViewModel } from "../domains/lessons/lessonCalendarModel.js";
+import { createLessonModalStudentSelectionModel } from "../domains/lessons/lessonModalStudentModel.js";
 import { LessonJournalErrorBoundary } from "../domains/lessons/LessonJournalErrorBoundary.jsx";
 import { attendanceLabels, dayLabels, homeworkLabels } from "../domains/lessons/labels.js";
 import {
@@ -18616,7 +18617,16 @@ function LessonModal({
   onClose,
   onSubmit
 }) {
-  const activeStudents = students.filter(isActiveStudent);
+  const [studentSearch, setStudentSearch] = useState("");
+  const {
+    activeStudents,
+    filteredStudents,
+    groupedStudents
+  } = createLessonModalStudentSelectionModel({
+    isActiveStudent,
+    search: studentSearch,
+    students
+  });
   const normalizedTemplates = normalizeClassTemplates(templates);
   const fallbackTemplate = normalizedTemplates[0] ?? { name: "", startTime: "16:00", endTime: "17:00", color: lessonCalendarColors.regular };
   const [lessonType, setLessonType] = useState(initialLesson?.lessonType ?? "class");
@@ -18646,7 +18656,6 @@ function LessonModal({
     const initialStudentIds = initialLesson?.studentIds ?? activeStudents.map((student) => student.studentId);
     return getActiveStudentIdsFromSelection(initialStudentIds, activeStudents);
   });
-  const [studentSearch, setStudentSearch] = useState("");
   const [saveState, setSaveState] = useState("idle");
   const [saveMessage, setSaveMessage] = useState("수정 내용은 저장 버튼을 눌러야 Supabase에 반영됩니다.");
   const isSaving = saveState === "saving";
@@ -18676,20 +18685,6 @@ function LessonModal({
     { id: "examPrep", label: "시험대비", lessonType: "examPrep", color: lessonCalendarColors.examPrep },
     { id: "exam", label: "평가", lessonType: "exam", color: lessonCalendarColors.exam }
   ];
-  const filteredStudents = activeStudents.filter((student) =>
-    [student.name, student.grade, student.schoolName].join(" ").toLowerCase().includes(studentSearch.toLowerCase())
-  );
-  const lessonStudentGradeOrder = ["고3", "고2", "고1", "중3", "중2", "중1"];
-  const studentGrades = Array.from(new Set(filteredStudents.map((student) => student.grade || "학년 미입력")));
-  const orderedStudentGrades = [
-    ...lessonStudentGradeOrder.filter((grade) => studentGrades.includes(grade)),
-    ...studentGrades.filter((grade) => !lessonStudentGradeOrder.includes(grade)).sort()
-  ];
-  const groupedStudents = orderedStudentGrades.map((grade) => ({
-    grade,
-    students: filteredStudents.filter((student) => (student.grade || "학년 미입력") === grade)
-  })).filter((group) => group.students.length > 0);
-
   useEffect(() => {
     setSaveState((current) => current === "failed" ? "dirty" : current);
     setSaveMessage((current) => saveState === "failed"

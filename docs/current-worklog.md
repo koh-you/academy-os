@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-27 P1. 15D-1 수업 모달 학생 선택 모델 분리 — AI gate 통과
+
+- 코드: `LessonModal`의 재원 학생 필터, 이름·학년·학교 검색, 고3→중1 우선순위, 기타 학년과 `학년 미입력` 그룹 생성을 `src/domains/lessons/lessonModalStudentModel.js`로 이동했다.
+- 경계: `studentSearch`와 선택 `studentIds` React state, 학년별 전체 선택/해제, 휴강 전환 명단 잠금, submit callback은 App의 모달에 남았다. 모델은 주입받은 `isActiveStudent`만 사용하고 API·저장·알림을 알지 못한다.
+- 자동검증: 활성/퇴원, 중1·고3·기타·미입력 합성 학생으로 제외·검색·그룹 순서를 검증했다. 기존 학년 그룹 scenario 2개는 App 고정 문자열 대신 새 모델까지 추적한다. `test:production` 55개 명령, scenario 494/494, build, `git diff --check`가 통과했다.
+- 사람 gate: 없음. 학생 목록 계산 위치만 옮겼고 선택·저장 동작은 보존했다. 다음은 최신 `origin/main` rebase 후 15D-2 시간/휴강 보충 validation과 submit payload 순수 경계를 분리한다.
+
 ## 2026-07-27 P1. 15C 활성 수업 달력 표시 컴포넌트 분리 — AI gate 통과
 
 - 코드: 공통 `NavigationHeader`·`FilterBar`, 월 건수, 접근 가능한 42일 grid와 수업 pill을 `src/domains/lessons/LessonCalendarView.jsx`로 이동했다. App은 15B view model과 `lessonTypeFilter`, 선택일 ref, 등록·날짜 선택·월 이동·수업 열기 callback을 주입한다.

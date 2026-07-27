@@ -91,8 +91,10 @@ Supabase lessons
    - 합성 수업 fixture로 정규·휴강·보충·시험대비·특강 분류를 고정한다.
 3. **15C — 활성 달력 presentational component — 완료**
    - 필터/header/grid 표시를 전용 파일로 옮기고 선택·월 이동 callback만 주입한다.
-4. **15D — `LessonModal` callback-only UI**
-   - local draft·검증·진행 표시를 전용 파일로 옮기되 API와 저장 controller는 App에 둔다.
+4. **15D — `LessonModal` callback-only UI — 진행 중**
+   - 15D-1 완료: 활성 학생 필터·검색·학년 순서·그룹 생성을 `lessonModalStudentModel.js` 순수 모델로 분리했다.
+   - 다음 15D-2: 시간·휴강 보충 입력 validation과 submit payload 계산을 순수 모델로 고정한다.
+   - local draft·진행 표시를 전용 파일로 옮기되 API와 저장 controller는 App에 둔다.
 5. **15E — 키보드 탐색 hook**
    - 포커스 가능한 입력 요소 예외와 Ctrl/Cmd 단축키 계약을 fixture로 고정한 뒤 분리한다.
 6. **15F 이후 — 저장 orchestration**
@@ -103,4 +105,4 @@ Supabase lessons
 
 - AI 검수: 활성/비활성 참조 수, 저장 원천, 외부 side effect, low-risk 첫 후보를 정적 분석으로 확인한다.
 - 사람 검수: 없음. 화면·운영 데이터·외부 서비스를 변경하지 않았다.
-- 다음 단계: 15C 완료 뒤 최신 `origin/main`을 다시 rebase하고, 15D `LessonModal`의 callback-only UI 이동 가능 범위를 다시 확인한다.
+- 다음 단계: 15D-1 완료 뒤 최신 `origin/main`을 다시 rebase하고, 15D-2 modal validation/payload 순수 경계를 한 의미 단위로 진행한다.
