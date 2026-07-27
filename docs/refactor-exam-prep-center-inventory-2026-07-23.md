@@ -128,8 +128,8 @@
 ## 14B-1 시험정보 row API transport
 
 - bulk row 저장과 단일 row 삭제 transport를 `examPrepRowsApi.js`로 이동했다.
-- App이 기존 `postJson`, `fetch`, `apiUrl`을 주입하고 request 순번/save state와 낙관적 삭제·실패 복구·lesson reconcile을 계속 소유한다.
-- fake fixture가 bulk URL/payload, 삭제 URL encoding·DELETE method, 성공·서버 오류·기본 오류를 검증한다. 실제 Supabase·운영 row·lesson 요청은 0회다.
+- App이 기존 `postJson`, `fetch`, `apiUrl`을 주입하고 request 순번/save state와 삭제·실패 복구·lesson reconcile을 계속 소유한다. 14C-3 통합 뒤 단일 삭제는 audit ID를 URL에 포함하고 성공·오류의 audit 정보를 호출자에게 보존한다.
+- fake fixture가 bulk URL/payload, 삭제 URL encoding·audit ID·DELETE method, 성공·서버 오류·기본 오류를 검증한다. 실제 Supabase·운영 row·lesson 요청은 0회다.
 - production scenario 475/475, build, `git diff --check`를 통과했다.
 
 ## 14B-2 시험정보 row 저장 상태 controller
@@ -143,20 +143,24 @@
 
 - 다음 시험정보 rows와 현재 lessons에서 `lessonsToSave`/`lessonIdsToDelete`를 계산하고 local 배열에 적용하는 순수 함수를 `examPrepLessonReconcilePlan.js`로 이동했다.
 - App이 candidate builder, identity selector, 시험대비 수업 판정과 현재 원천을 주입하며 React state, lesson API 요청, 시험정보 row 삭제·복구를 계속 소유한다.
-- identity 매칭, persisted lessonId 보존, 변경/동일/삭제/정규수업 보존을 합성 fixture로 검증했다. 실제 row/lesson 요청은 0회다.
+- identity 매칭, persisted lessonId와 기존 `studentIds` 보존, 신규 수업의 빈 학생 명단 정규화, 변경/동일/삭제/정규수업 보존을 합성 fixture로 검증했다. 실제 row/lesson 요청은 0회다.
 - production scenario 477/477, build, `git diff --check`를 통과했다.
 
 ## 14C-2 시험정보 연결 수업 API transport
 
 - `/api/lessons/bulk` 저장과 단일 lesson DELETE를 `examPrepLessonApi.js`로 이동했다.
 - App이 request/fetch/URL resolver를 주입하고 plan, React state, 오류 처리, 시험정보 row 삭제·복구를 계속 소유한다.
-- fake fixture가 bulk URL/payload, lessonId URL encoding, DELETE method와 응답 전달을 검증한다. 실제 row/lesson 요청은 0회다.
+- 14C-3 통합 뒤 단일 삭제는 `mode=exam-prep-reconcile`과 audit ID를 전달하고, 성공·오류 응답의 audit 정보를 보존한다. fake fixture가 bulk URL/payload, lessonId URL encoding, DELETE method와 응답 전달을 검증한다. 실제 row/lesson 요청은 0회다.
 - production scenario 478/478, build, `git diff --check`를 통과했다.
 
-## 이후 후보와 중단 조건
+## 14C-3 삭제·연결 수업 안전 orchestration 통합 및 closeout
 
-1. 시험정보 삭제와 연결 수업 reconcile side-effect orchestration
+- 최신 main의 audit ID, 삭제 전후 전체 row/lesson 대조, 예상 밖 삭제 복구, 응답 유실·lesson 실패 보상 복구 orchestration을 분리된 14B/14C transport와 plan에 연결했다.
+- 격리 TARGET 삭제 뒤 CONTROL row·CONTROL 시험대비 수업 4건·일반 CONTROL 수업 1건 보존과 새로고침을 사용자가 확인했고, AI Supabase 재조회가 일치했다. fixture는 모두 정리해 시험정보 39건·수업 108건의 생성 전 snapshot으로 복귀했다.
+- 최신 `origin/main` rebase 뒤 production test 51개 명령, scenario 494/494, build, `git diff --check`를 통과했다. 로드맵 14의 현재 안전 경계는 닫혔다.
 
-다음 단위 착수 gate: AI가 고정 marker를 가진 삭제 가능한 미래 시험정보 row와 그 row에만 연결된 시험대비 수업을 준비한다. 사용자가 해당 row 하나만 삭제하고 새로고침한 뒤 row와 연결 수업만 사라지고 다른 시험정보·정규수업·시험대비 수업이 유지되며 Supabase 재조회와 일치해야 한다. 하나라도 다르면 14C-3을 중단하고 유지보수 진단으로 넘긴다.
+## 다음 후보와 중단 조건
 
-학생 제출·교사 확인·Storage 파일 열기 경계를 건드리면 기존 학생 포털 실제 쓰기와 bearer/Storage gate에서 중단한다. 시험정보 삭제나 시험대비 수업 생성·삭제를 옮길 때는 별도의 격리 데이터와 사람 gate가 필요하다. 순수 표시/model 단위는 deterministic fixture와 production test/build로 검증하고 운영 데이터를 만들지 않는다.
+다음은 로드맵 15 `lesson hub/calendar` inventory다. 수업 달력 표시, 생성/수정/상세 모달, 자동 후보를 먼저 목록화하고 `lessons`, `lesson_student_records`, 출결, 숙제, `notification_jobs`, Solapi side effect를 표로 분리한다. 실제 수업 저장·삭제·출결·알림 예약 이동은 별도 gate 전 진행하지 않는다.
+
+학생 제출·교사 확인·Storage 파일 열기 경계를 건드리면 기존 학생 포털 실제 쓰기와 bearer/Storage gate에서 중단한다. 순수 표시/model 단위는 deterministic fixture와 production test/build로 검증하고 운영 데이터를 만들지 않는다.

@@ -1441,7 +1441,14 @@
 1. `학생 포털 실제 쓰기 검수` — 숙제 완료, 질문 CRUD, 시험 후 제출의 실제 학생 저장/재조회/재로그인/권한을 확인한다. 사용자 보류이며 통과가 아니다.
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
-4. `시험정보 삭제·연결 수업 reconcile 사람 gate` — AI가 삭제 가능한 미래 시험정보 row/연결 시험대비 수업 marker를 준비하고, 사용자가 그 row만 삭제·새로고침한 뒤 해당 두 원천만 사라지고 다른 row/정규수업/시험대비 수업이 유지되는지 AI가 Supabase 재조회로 대조한다. 통과 전 14C-3 실제 orchestration 이동·commit/push 금지.
+
+## 2026-07-27 P1. 최신 main rebase 및 로드맵 14 통합 확정 — AI gate 통과
+
+- 통합: `codex/refactor-supplement-11b`의 128개 리팩터링 커밋을 최신 `origin/main` 위로 rebase했다. 최신 main의 14C-3 시험정보 삭제 audit·실패 보상 복구와 퇴원일 다음 날부터 미래 수업 명단을 제외하는 경계를 모두 보존했다.
+- 충돌 처리: 반복 충돌은 각 의미 단위 fixture와 최신 main fixture가 `package.json`의 `test:production` 한 줄을 함께 수정한 것이 원인이었다. 리팩터링 fixture, `test:supplement-cancellation`, `test:lesson-closure`, `test:student-withdrawal-boundary`, `test:exam-prep-deletion`을 포함한 양쪽 테스트를 모두 유지했다. 충돌 표식과 누락된 npm script는 0건이다.
+- 14C-3 통합: 분리된 row/lesson transport가 audit ID와 오류 audit를 보존하고, reconcile plan은 기존 lesson 학생 명단을 보존한다. 실제 삭제·복구 순서는 최신 main의 안전 orchestration을 사용한다. 이미 통과한 TARGET 삭제·CONTROL 보존·새로고침 gate를 다시 요구하지 않는다.
+- AI 검증: `npm run test:production`의 51개 명령과 production scenario 494/494, `npm run build`, `git diff --check`를 통과했다. build에는 기존 Vite 대형 chunk 경고만 남았다. 검증 중 운영 Supabase, `notification_jobs`, Solapi, 유료 AI를 호출하지 않았다.
+- 사람 gate: rebase와 계약 보존 단위라 새 사람 조작은 필요하지 않다. 다음 의미 단위는 로드맵 15 `lesson hub/calendar` inventory이며, 저장·삭제·출결·알림 side effect를 먼저 표로 분리한 뒤 가장 낮은 위험의 표시/helper 단위부터 진행한다.
 
 ## 2026-07-23 P1. 14C-2 시험정보 연결 수업 API transport 분리 — AI gate 통과
 
