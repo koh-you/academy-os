@@ -19723,6 +19723,44 @@ body.attendanceOnlyBody {
   }
 }
 
+.monthlyRegularLessonOpenModal {
+  max-width: 680px;
+}
+
+.monthlyRegularLessonOpenBody {
+  display: grid;
+  gap: 14px;
+}
+
+.monthlyRegularLessonOpenSummary {
+  align-items: baseline;
+  background: #f2f7ff;
+  border: 1px solid #c9dcff;
+  border-radius: 10px;
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+}
+
+.monthlyRegularLessonOpenRows {
+  display: grid;
+  gap: 8px;
+}
+
+.monthlyRegularLessonOpenRows article {
+  background: #fff;
+  border: 1px solid #d8e2f3;
+  border-radius: 9px;
+  display: grid;
+  gap: 3px;
+  padding: 11px 13px;
+}
+
+.monthlyRegularLessonOpenRows span,
+.monthlyRegularLessonOpenRows small {
+  color: #61708a;
+}
+
 @media print {
   body * {
     visibility: hidden;
