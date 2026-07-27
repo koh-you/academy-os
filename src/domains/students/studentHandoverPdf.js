@@ -27,11 +27,9 @@ export function buildStudentHandoverPdfModel({
   homeworks = [],
   lessons = [],
   records = [],
-  student = {},
-  templates = []
+  student = {}
 } = {}) {
   const withdrawalDate = text(student.withdrawnAt).slice(0, 10);
-  const className = templates.find((item) => item.classTemplateId === student.defaultClassTemplateId)?.name || "미배정";
   const lessonRows = lessons
     .filter((lesson) => (lesson.studentIds ?? []).includes(student.studentId))
     .filter((lesson) => !withdrawalDate || text(lesson.date) <= withdrawalDate)
@@ -49,7 +47,7 @@ export function buildStudentHandoverPdfModel({
         progress: record.lessonContent || record.lessonProgress || lesson.lessonTopic || "-"
       };
     });
-  return { className, comment: text(comment), lessonRows, withdrawalDate };
+  return { comment: text(comment), lessonRows, withdrawalDate };
 }
 
 export function openStudentHandoverPdf(model = {}, student = {}) {
@@ -59,6 +57,6 @@ export function openStudentHandoverPdf(model = {}, student = {}) {
   const rowsHtml = model.lessonRows.length
     ? model.lessonRows.map((row) => `<tr><td>${escapeHtml(row.date)}</td><td>${escapeHtml(row.lesson)}</td><td>${escapeHtml(row.material)}</td><td>${escapeHtml(row.progress)}</td><td>${escapeHtml(row.attendance)}</td><td>${escapeHtml(row.homework)}</td><td>${escapeHtml(row.nextHomework)}</td></tr>`).join("")
     : "<tr><td colspan=\"7\">퇴원일까지 연결된 수업 기록이 없습니다.</td></tr>";
-  popup.document.write(`<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>${escapeHtml(student.name)} 퇴원생 인수인계서</title><style>@page{size:A4;margin:16mm}body{font-family:Arial,'Malgun Gothic',sans-serif;color:#172554;font-size:11px;line-height:1.5}h1{font-size:22px;margin:0 0 4px}h2{font-size:14px;border-bottom:1px solid #bfdbfe;padding-bottom:4px;margin:22px 0 8px}.meta{display:grid;grid-template-columns:repeat(2,1fr);gap:5px 24px;background:#f8fbff;padding:12px;border:1px solid #dbeafe}.meta b{color:#1d4ed8}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:6px;vertical-align:top}th{background:#eff6ff}section{break-inside:avoid}.comment{white-space:pre-wrap;min-height:52px;background:#fffbeb;border:1px solid #fde68a;padding:10px}.footer{margin-top:20px;color:#64748b;font-size:9px}</style></head><body><h1>퇴원생 인수인계서</h1><p>Academy OS · PDF 생성일 ${escapeHtml(new Date().toLocaleString("ko-KR"))}</p><div class="meta"><div><b>학생</b> ${escapeHtml(student.name)}</div><div><b>퇴원일</b> ${escapeHtml(model.withdrawalDate || "미입력")}</div><div><b>학생 번호</b> ${escapeHtml(student.studentPhone || "미입력")}</div><div><b>학부모 번호</b> ${escapeHtml(student.parentPhone || "미입력")}</div><div><b>학교·학년</b> ${escapeHtml([student.schoolName, student.grade].filter(Boolean).join(" · ") || "미입력")}</div><div><b>반</b> ${escapeHtml(model.className)}</div></div><section><h2>회차별 수업 및 숙제</h2><table><thead><tr><th>날짜</th><th>수업</th><th>교재</th><th>진도·강의 내용</th><th>출결</th><th>숙제</th><th>다음 숙제</th></tr></thead><tbody>${rowsHtml}</tbody></table></section><section><h2>교사 인계 코멘트</h2><div class="comment">${escapeHtml(model.comment || "코멘트 없음")}</div></section><p class="footer">이 문서는 퇴원일까지의 Academy OS 원천을 읽어 생성한 읽기 전용 인수인계서입니다.</p><script>window.onload=()=>window.print()</script></body></html>`);
+  popup.document.write(`<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>${escapeHtml(student.name)} 퇴원생 인수인계서</title><style>@page{size:A4;margin:16mm}body{font-family:Arial,'Malgun Gothic',sans-serif;color:#172554;font-size:11px;line-height:1.5}h1{font-size:22px;margin:0 0 4px}h2{font-size:14px;border-bottom:1px solid #bfdbfe;padding-bottom:4px;margin:22px 0 8px}.meta{display:grid;grid-template-columns:repeat(2,1fr);gap:5px 24px;background:#f8fbff;padding:12px;border:1px solid #dbeafe}.meta b{color:#1d4ed8}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:6px;vertical-align:top}th{background:#eff6ff}section{break-inside:avoid}.comment{white-space:pre-wrap;min-height:52px;background:#fffbeb;border:1px solid #fde68a;padding:10px}.footer{margin-top:20px;color:#64748b;font-size:9px}</style></head><body><h1>퇴원생 인수인계서</h1><p>Academy OS · PDF 생성일 ${escapeHtml(new Date().toLocaleString("ko-KR"))}</p><div class="meta"><div><b>학생</b> ${escapeHtml(student.name)}</div><div><b>학생 번호</b> ${escapeHtml(student.studentPhone || "미입력")}</div><div><b>학부모 번호</b> ${escapeHtml(student.parentPhone || "미입력")}</div><div><b>학교·학년</b> ${escapeHtml([student.schoolName, student.grade].filter(Boolean).join(" · ") || "미입력")}</div></div><section><h2>회차별 수업 및 숙제</h2><table><thead><tr><th>날짜</th><th>수업</th><th>교재</th><th>진도·강의 내용</th><th>출결</th><th>숙제</th><th>다음 숙제</th></tr></thead><tbody>${rowsHtml}</tbody></table></section><section><h2>교사 인계 코멘트</h2><div class="comment">${escapeHtml(model.comment || "코멘트 없음")}</div></section><p class="footer">이 문서는 퇴원일까지의 Academy OS 원천을 읽어 생성한 읽기 전용 인수인계서입니다.</p><script>window.onload=()=>window.print()</script></body></html>`);
   popup.document.close();
 }
