@@ -8634,6 +8634,87 @@ button:disabled {
   border-color: #cbd5e1;
 }
 
+.specialLectureSessionPlan.journal-missing,
+.specialLectureSessionPlan.journal-pendingRemoval {
+  background: #fff7ed;
+  border-color: #fb923c;
+  box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.14);
+}
+
+.specialLectureSessionPlan.journal-synced {
+  border-color: #86efac;
+}
+
+.specialLecturePlanSaveWorkflow {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.specialLecturePlanSaveWorkflow article {
+  align-items: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  display: grid;
+  gap: 9px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 10px 12px;
+}
+
+.specialLecturePlanSaveWorkflow article.draft {
+  background: #f8fafc;
+}
+
+.specialLecturePlanSaveWorkflow article.persist {
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+
+.specialLecturePlanSaveWorkflow b,
+.specialLecturePlanSaveWorkflow em {
+  border-radius: 999px;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.specialLecturePlanSaveWorkflow b {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.specialLecturePlanSaveWorkflow .persist b {
+  background: #1d4ed8;
+  color: #fff;
+}
+
+.specialLecturePlanSaveWorkflow div {
+  display: grid;
+  gap: 3px;
+}
+
+.specialLecturePlanSaveWorkflow strong {
+  color: #17213d;
+  font-size: 13px;
+}
+
+.specialLecturePlanSaveWorkflow span {
+  color: #52627a;
+  font-size: 11px;
+}
+
+.specialLecturePlanSaveWorkflow em {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.specialLecturePlanSaveWorkflow .persist em {
+  background: #dcfce7;
+  color: #047857;
+}
+
 .specialLectureCommonTimePanel {
   align-items: end;
   background: #f8fafc;
@@ -8676,6 +8757,12 @@ button:disabled {
   gap: 7px;
 }
 
+.specialLectureCommonTimeActions .specialLectureDraftAction {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
 .specialLectureSessionTimeSummary {
   align-items: center;
   border-top: 1px solid #e2e8f0;
@@ -8703,7 +8790,7 @@ button:disabled {
 }
 
 .specialLectureSessionToggle input {
-  grid-row: span 2;
+  grid-row: span 3;
   height: 18px;
   width: 18px;
 }
@@ -8716,6 +8803,23 @@ button:disabled {
 .specialLectureSessionToggle small {
   color: #52627a;
   font-size: 11px;
+}
+
+.specialLectureSessionJournalStatus {
+  font-weight: 900;
+}
+
+.specialLectureSessionJournalStatus.synced {
+  color: #047857;
+}
+
+.specialLectureSessionJournalStatus.missing,
+.specialLectureSessionJournalStatus.pendingRemoval {
+  color: #c2410c;
+}
+
+.specialLectureSessionJournalStatus.preserved {
+  color: #475569;
 }
 
 .specialLectureSessionOverrideGrid {
@@ -19136,6 +19240,10 @@ body.attendanceOnlyBody {
 
   .specialLectureCommonTimeActions button {
     flex: 1;
+  }
+
+  .specialLecturePlanSaveWorkflow {
+    grid-template-columns: 1fr;
   }
 
   .supplementNotificationDraftHeader,

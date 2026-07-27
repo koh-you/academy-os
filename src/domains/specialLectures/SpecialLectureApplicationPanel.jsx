@@ -887,7 +887,10 @@ export function SpecialLectureApplicationPanel({
         ...patch
       }
     }));
-    setPlanSaveState({ message: "수정한 회차 계획을 저장해 주세요.", state: "dirty" });
+    setPlanSaveState({
+      message: "1단계 화면 초안이 변경되었습니다. 아직 Supabase와 수업일지에는 반영되지 않았습니다. 하단 2단계를 실행해 주세요.",
+      state: "dirty"
+    });
   }
 
   function toggleEnrollmentSession(enrollment, sessionId) {
@@ -943,7 +946,10 @@ export function SpecialLectureApplicationPanel({
       };
     });
     updateEnrollmentDraft(enrollment.enrollmentId, { sessionPlans });
-    setPlanSaveState({ message: `선택한 회차에 ${startTime}-${endTime}을 적용했습니다. 저장해 주세요.`, state: "dirty" });
+    setPlanSaveState({
+      message: `1단계 화면 초안에 ${startTime}-${endTime}을 적용했습니다. 아직 Supabase와 수업일지에는 저장되지 않았습니다. 하단 2단계를 실행해 주세요.`,
+      state: "dirty"
+    });
   }
 
   function resetSelectedSessionsToOfficialTime(enrollment) {
@@ -1827,10 +1833,28 @@ export function SpecialLectureApplicationPanel({
               </section>
               <div className="specialLecturePlanEditHeader">
                 <strong>회차 신청 수정</strong>
-                <span>아래 변경은 `회차 계획 및 미래 수업일지 반영` 후 두 원천의 Supabase 재조회가 끝나야 완료됩니다.</span>
+                <span>화면 초안 적용은 저장이 아닙니다. 2단계의 Supabase 저장과 미래 수업일지 반영·재조회까지 끝나야 완료됩니다.</span>
+              </div>
+              <div className="specialLecturePlanSaveWorkflow" aria-label="회차 계획 저장 단계">
+                <article className="draft">
+                  <b>1단계</b>
+                  <div>
+                    <strong>화면 초안 편집</strong>
+                    <span>회차 선택·공통 시간·개별 시간·메모를 화면에만 적용합니다. 새로고침하면 사라질 수 있습니다.</span>
+                  </div>
+                  <em>서버 저장 아님</em>
+                </article>
+                <article className="persist">
+                  <b>2단계</b>
+                  <div>
+                    <strong>Supabase 저장 + 미래 수업일지 반영</strong>
+                    <span>하단의 진한 버튼을 눌러 회차 계획과 미래 수업일지를 각각 저장하고 두 원천을 다시 확인합니다.</span>
+                  </div>
+                  <em>실제 저장</em>
+                </article>
               </div>
               <div className="specialLectureSessionBulkActions">
-                <span>체크한 회차가 수강 신청으로 저장됩니다.</span>
+                <span>1단계 화면 초안: 체크한 회차를 편집합니다. 아직 서버에는 저장되지 않습니다.</span>
                 <div>
                   <button
                     className="softButton compact"
@@ -1853,7 +1877,7 @@ export function SpecialLectureApplicationPanel({
               <div className="specialLectureCommonTimePanel">
                 <div>
                   <strong>선택 회차 공통 시간</strong>
-                  <span>같은 시간으로 듣는 회차는 여기에서 한 번만 입력해 일괄 적용하세요.</span>
+                  <span>같은 시간으로 듣는 회차를 화면 초안에 한 번에 입력합니다. 이 버튼만으로는 저장되지 않습니다.</span>
                 </div>
                 <label>
                   시작
@@ -1868,8 +1892,8 @@ export function SpecialLectureApplicationPanel({
                   <input placeholder="필요한 경우에만 입력" value={commonSessionTimeDraft.overrideReason} onChange={(event) => setCommonSessionTimeDraft((current) => ({ ...current, overrideReason: event.target.value }))} />
                 </label>
                 <div className="specialLectureCommonTimeActions">
-                  <button className="primaryButton compact" onClick={() => applyCommonTimeToSelectedSessions(enrollment)} type="button">선택 회차에 적용</button>
-                  <button className="softButton compact" onClick={() => resetSelectedSessionsToOfficialTime(enrollment)} type="button">선택 회차 공식 시간</button>
+                  <button className="softButton compact specialLectureDraftAction" onClick={() => applyCommonTimeToSelectedSessions(enrollment)} type="button">1단계 · 화면 초안에 적용</button>
+                  <button className="softButton compact subtle" onClick={() => resetSelectedSessionsToOfficialTime(enrollment)} type="button">화면 초안: 공식 시간으로</button>
                 </div>
               </div>
               <div className="specialLectureSessionToggleGrid">
@@ -1877,19 +1901,44 @@ export function SpecialLectureApplicationPanel({
                   const plan = draft.sessionPlans.find((item) => item.sessionId === session.sessionId);
                   const isActive = plan?.status === "active";
                   const hasOverride = Boolean(plan?.effectiveStartTime || plan?.effectiveEndTime);
-                  const hasExistingLesson = isEnrollmentSessionLocked(session);
+                  const hasProtectedLesson = isEnrollmentSessionLocked(session);
+                  const linkedLesson = lessons.find((lesson) => lesson.specialLectureSessionId === session.sessionId);
+                  const isStudentInLinkedLesson = Boolean(
+                    linkedLesson &&
+                    (
+                      (linkedLesson.studentIds ?? []).includes(enrollment.studentId) ||
+                      (linkedLesson.specialLectureStudentSchedules ?? [])
+                        .some((schedule) => schedule.studentId === enrollment.studentId)
+                    )
+                  );
+                  const isPastOrToday = (session.dateKey || session.date) <= todayDateKey;
+                  const journalState = isActive
+                    ? isStudentInLinkedLesson ? "synced" : "missing"
+                    : isStudentInLinkedLesson && !isPastOrToday
+                      ? "pendingRemoval"
+                      : isStudentInLinkedLesson ? "preserved" : "excluded";
+                  const journalLabel = journalState === "synced"
+                    ? "수업일지 반영됨"
+                    : journalState === "missing"
+                      ? "수업일지 미반영 · 하단 2단계 필요"
+                      : journalState === "pendingRemoval"
+                        ? "제외 초안 · 하단 2단계 후 미래 명단 제외"
+                        : journalState === "preserved"
+                          ? "수강 제외 · 과거 수업일지 보존"
+                          : "수강 제외 · 수업일지 명단 없음";
                   const effectiveSession = getEffectiveSpecialLectureSession(session, plan);
                   const isOverrideEditorOpen = editingSessionOverrideId === session.sessionId;
                   return (
-                    <article className={`specialLectureSessionPlan ${isActive ? "active" : "excluded"} ${hasExistingLesson ? "linked" : ""}`} key={`${enrollment.enrollmentId}_${session.sessionId}`}>
+                    <article className={`specialLectureSessionPlan ${isActive ? "active" : "excluded"} journal-${journalState} ${hasProtectedLesson ? "linked" : ""}`} key={`${enrollment.enrollmentId}_${session.sessionId}`}>
                       <label className="specialLectureSessionToggle">
                         <input
                           checked={isActive}
                           onChange={() => toggleEnrollmentSession(enrollment, session.sessionId)}
                           type="checkbox"
                         />
-                        <span>{session.sessionIndex + 1}회차 신청{hasExistingLesson ? " · 수업일지 생성됨" : ""}</span>
+                        <span>{session.sessionIndex + 1}회차 신청{hasProtectedLesson ? " · 보호된 수업" : ""}</span>
                         <small>공식 {session.dateKey || session.date} {session.startTime}-{session.endTime}</small>
+                        <small className={`specialLectureSessionJournalStatus ${journalState}`}>{journalLabel}</small>
                       </label>
                       {isActive ? (
                         <div className="specialLectureSessionTimeSummary">
@@ -1936,13 +1985,17 @@ export function SpecialLectureApplicationPanel({
               </div>
               <StickySaveBar
                 className="specialLecturePlanStickySaveBar"
-                label="회차·수업일지"
-                message={planSaveState.message || "회차와 시간을 확인한 뒤 미래 수업일지까지 함께 반영해 주세요."}
+                label="2단계 · 실제 저장"
+                message={planSaveState.message || "회차 카드의 수업일지 상태를 확인하세요. 미반영 회차가 있으면 아래 버튼으로 저장·반영을 다시 확인합니다."}
                 saveState={planSaveState.state}
               >
-                <button className="softButton" onClick={closePlanModal} type="button">닫기</button>
+                <button className="softButton" onClick={closePlanModal} type="button">{planSaveState.state === "dirty" ? "서버 저장 없이 닫기" : "닫기"}</button>
                 <button className="primaryButton" disabled={!onSaveEnrollment || !isGuideSaved || savingEnrollmentId === enrollment.enrollmentId} onClick={() => saveEnrollmentDraft(enrollment)} type="button">
-                  {savingEnrollmentId === enrollment.enrollmentId ? "저장·반영 중" : planSaveState.state === "saved" ? "저장 완료" : "회차 계획 및 미래 수업일지 반영"}
+                  {savingEnrollmentId === enrollment.enrollmentId
+                    ? "Supabase 저장·수업일지 반영 중"
+                    : planSaveState.state === "saved"
+                      ? "저장·수업일지 반영 다시 확인"
+                      : "2단계 · Supabase 저장 + 미래 수업일지 반영"}
                 </button>
               </StickySaveBar>
             </div>
