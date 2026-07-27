@@ -904,9 +904,30 @@ export function SpecialLectureApplicationPanel({
     });
   }
 
-  function isEnrollmentSessionLocked(session) {
-    return (session.dateKey || session.date) <= todayDateKey &&
-      lessons.some((lesson) => lesson.specialLectureSessionId === session.sessionId);
+  function getEnrollmentLessonProtectionReasons({
+    lesson,
+    lessonDate,
+    studentId,
+    removesStudent = false
+  } = {}) {
+    const reasons = [];
+    if (lessonDate <= todayDateKey) reasons.push("오늘·과거 수업");
+    if (!lesson) return reasons;
+    if (lesson.status === "completed") reasons.push("완료 수업");
+    if (
+      removesStudent &&
+      records.some((record) => record.lessonId === lesson.lessonId && record.studentId === studentId)
+    ) {
+      reasons.push("해당 학생 기록");
+    }
+    if (
+      notificationJobs.some((job) =>
+        job.lessonId === lesson.lessonId && pendingNotificationStatuses.has(job.status)
+      )
+    ) {
+      reasons.push("대기 알림");
+    }
+    return [...new Set(reasons)];
   }
 
   function setAllEnrollmentSessions(enrollment, status) {
@@ -1005,17 +1026,25 @@ export function SpecialLectureApplicationPanel({
         expectedSchedule.scheduleType !== existingSchedule.scheduleType ||
         (expectedSchedule.overrideReason || "") !== (existingSchedule.overrideReason || "");
     });
-    const blockedDrafts = changedDrafts.filter((draft) => {
+    const blockedRows = changedDrafts.map((draft) => {
       const existingLesson = lessons.find((lesson) => lesson.lessonId === draft.lessonId);
-      const hasRecords = records.some((record) => record.lessonId === draft.lessonId);
-      const hasPendingNotifications = notificationJobs.some((job) =>
-        job.lessonId === draft.lessonId && pendingNotificationStatuses.has(job.status)
-      );
-      return draft.date <= todayDateKey || existingLesson?.status === "completed" || hasRecords || hasPendingNotifications;
-    });
+      const expectedSchedule = (draft.specialLectureStudentSchedules ?? [])
+        .find((schedule) => schedule.studentId === savedEnrollment.studentId) ?? null;
+      return {
+        draft,
+        reasons: getEnrollmentLessonProtectionReasons({
+          lesson: existingLesson,
+          lessonDate: draft.date,
+          studentId: savedEnrollment.studentId,
+          removesStudent: !expectedSchedule
+        })
+      };
+    }).filter((row) => row.reasons.length);
+    const blockedDrafts = blockedRows.map((row) => row.draft);
     const blockedLessonIds = new Set(blockedDrafts.map((draft) => draft.lessonId));
     return {
       blockedDrafts,
+      blockedRows,
       safeDrafts: changedDrafts
         .filter((draft) => !blockedLessonIds.has(draft.lessonId))
         .map((draft) => {
@@ -1141,7 +1170,7 @@ export function SpecialLectureApplicationPanel({
         return nextDrafts;
       });
       setPlanModalEnrollment(persistedEnrollment);
-      const { blockedDrafts, safeDrafts } = getSafeFutureLessonSync(persistedEnrollment, enrollment);
+      const { blockedDrafts, blockedRows, safeDrafts } = getSafeFutureLessonSync(persistedEnrollment, enrollment);
       if (safeDrafts.length) {
         if (!onCreateSpecialLectureLessons) {
           throw new Error("회차 계획은 저장됐지만 미래 수업일지 반영 기능이 연결되지 않았습니다.");
@@ -1153,7 +1182,10 @@ export function SpecialLectureApplicationPanel({
         await onCreateSpecialLectureLessons(safeDrafts, { openFirstLesson: false });
       }
       if (blockedDrafts.length) {
-        const message = `회차 계획은 저장했지만 보호된 수업 ${blockedDrafts.length}개는 자동 반영하지 않았습니다. 오늘/과거 수업, 기존 기록·출결 또는 대기 알림을 확인해 주세요.`;
+        const blockedSummary = blockedRows.map(({ draft, reasons }) =>
+          `${Number(draft.specialLectureSessionIndex ?? 0) + 1}회차(${reasons.join("·")})`
+        ).join(", ");
+        const message = `회차 계획은 저장했지만 ${blockedSummary}는 자동 반영하지 않았습니다. 표시된 보호 사유를 먼저 확인해 주세요.`;
         setPanelMessage(message);
         setPlanSaveState({ message, state: "failed" });
         return;
@@ -1786,7 +1818,7 @@ export function SpecialLectureApplicationPanel({
             <div className="specialLectureModalBody">
               <div className="specialLectureSessionModalSummary">
                 <strong>총 {guideSessions.length}회 중 {draft.sessionPlans.filter((plan) => plan.status === "active").length}회 수강</strong>
-                <span>회차 신청 원천은 오늘/지난 회차도 수정할 수 있습니다. 저장 후 기록·출결·대기 알림이 없는 미래 수업일지까지 함께 반영하며, 보호된 수업은 자동 변경하지 않습니다.</span>
+                <span>회차 신청 원천은 오늘/지난 회차도 수정할 수 있습니다. 미래 회차는 다른 학생의 출결을 보존한 채 이 학생의 명단·시간만 반영합니다. 오늘/과거·완료 수업, 대기 알림, 제외할 학생 본인의 기록은 보호합니다.</span>
               </div>
               <section className="specialLecturePlanProgress">
                 <div className="specialLecturePlanProgressHeader">
@@ -1903,24 +1935,44 @@ export function SpecialLectureApplicationPanel({
                   const plan = draft.sessionPlans.find((item) => item.sessionId === session.sessionId);
                   const isActive = plan?.status === "active";
                   const hasOverride = Boolean(plan?.effectiveStartTime || plan?.effectiveEndTime);
-                  const hasProtectedLesson = isEnrollmentSessionLocked(session);
                   const linkedLesson = lessons.find((lesson) => lesson.specialLectureSessionId === session.sessionId);
-                  const isStudentInLinkedLesson = Boolean(
-                    linkedLesson &&
-                    (
-                      (linkedLesson.studentIds ?? []).includes(enrollment.studentId) ||
-                      (linkedLesson.specialLectureStudentSchedules ?? [])
-                        .some((schedule) => schedule.studentId === enrollment.studentId)
-                    )
+                  const existingSchedule = (linkedLesson?.specialLectureStudentSchedules ?? [])
+                    .find((schedule) => schedule.studentId === enrollment.studentId) ?? null;
+                  const isStudentInLessonRoster = Boolean(
+                    linkedLesson && (linkedLesson.studentIds ?? []).includes(enrollment.studentId)
                   );
+                  const isStudentInLinkedLesson = Boolean(isStudentInLessonRoster || existingSchedule);
                   const isPastOrToday = (session.dateKey || session.date) <= todayDateKey;
+                  const effectiveSession = getEffectiveSpecialLectureSession(session, plan);
+                  const expectedScheduleType = (
+                    effectiveSession.startTime !== session.startTime ||
+                    effectiveSession.endTime !== session.endTime
+                  ) ? "adjusted" : "official";
+                  const expectedOverrideReason = expectedScheduleType === "adjusted" ? plan?.overrideReason || "" : "";
+                  const isStudentScheduleSynced = Boolean(
+                    isStudentInLessonRoster &&
+                    existingSchedule &&
+                    existingSchedule.startTime === effectiveSession.startTime &&
+                    existingSchedule.endTime === effectiveSession.endTime &&
+                    (existingSchedule.scheduleType === "adjusted" ? "adjusted" : "official") === expectedScheduleType &&
+                    (existingSchedule.overrideReason || "") === expectedOverrideReason
+                  );
+                  const protectionReasons = getEnrollmentLessonProtectionReasons({
+                    lesson: linkedLesson,
+                    lessonDate: session.dateKey || session.date,
+                    studentId: enrollment.studentId,
+                    removesStudent: !isActive && isStudentInLinkedLesson
+                  });
+                  const hasProtectedLesson = protectionReasons.length > 0;
                   const journalState = isActive
-                    ? isStudentInLinkedLesson ? "synced" : "missing"
+                    ? isStudentScheduleSynced ? "synced" : isStudentInLinkedLesson ? "outOfSync" : "missing"
                     : isStudentInLinkedLesson && !isPastOrToday
                       ? "pendingRemoval"
                       : isStudentInLinkedLesson ? "preserved" : "excluded";
                   const journalLabel = journalState === "synced"
-                    ? "수업일지 반영됨"
+                    ? `수업일지 시간 일치 · ${existingSchedule.startTime}-${existingSchedule.endTime}`
+                    : journalState === "outOfSync"
+                      ? `수업일지 시간 불일치 · 현재 ${existingSchedule?.startTime || "미입력"}-${existingSchedule?.endTime || "미입력"}`
                     : journalState === "missing"
                       ? "수업일지 미반영 · 하단 2단계 필요"
                       : journalState === "pendingRemoval"
@@ -1928,7 +1980,6 @@ export function SpecialLectureApplicationPanel({
                         : journalState === "preserved"
                           ? "수강 제외 · 과거 수업일지 보존"
                           : "수강 제외 · 수업일지 명단 없음";
-                  const effectiveSession = getEffectiveSpecialLectureSession(session, plan);
                   const isOverrideEditorOpen = editingSessionOverrideId === session.sessionId;
                   return (
                     <article className={`specialLectureSessionPlan ${isActive ? "active" : "excluded"} journal-${journalState} ${hasProtectedLesson ? "linked" : ""}`} key={`${enrollment.enrollmentId}_${session.sessionId}`}>
@@ -1938,7 +1989,7 @@ export function SpecialLectureApplicationPanel({
                           onChange={() => toggleEnrollmentSession(enrollment, session.sessionId)}
                           type="checkbox"
                         />
-                        <span>{session.sessionIndex + 1}회차 신청{hasProtectedLesson ? " · 보호된 수업" : ""}</span>
+                        <span>{session.sessionIndex + 1}회차 신청{hasProtectedLesson ? ` · 보호됨(${protectionReasons.join("·")})` : ""}</span>
                         <small>공식 {session.dateKey || session.date} {session.startTime}-{session.endTime}</small>
                         <small className={`specialLectureSessionJournalStatus ${journalState}`}>{journalLabel}</small>
                       </label>

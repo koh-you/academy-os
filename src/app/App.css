@@ -8635,6 +8635,7 @@ button:disabled {
 }
 
 .specialLectureSessionPlan.journal-missing,
+.specialLectureSessionPlan.journal-outOfSync,
 .specialLectureSessionPlan.journal-pendingRemoval {
   background: #fff7ed;
   border-color: #fb923c;
@@ -8814,6 +8815,7 @@ button:disabled {
 }
 
 .specialLectureSessionJournalStatus.missing,
+.specialLectureSessionJournalStatus.outOfSync,
 .specialLectureSessionJournalStatus.pendingRemoval {
   color: #c2410c;
 }
