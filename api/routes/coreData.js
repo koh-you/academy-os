@@ -6,6 +6,10 @@ import {
   mergeSpecialLectureStudentSchedule
 } from "../../src/domains/specialLectures/specialLecturePlanSync.js";
 import { deleteRows, getSupabaseStatus, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
+import {
+  getLessonClosureBlockingNotificationJobs,
+  isLessonClosureConversion
+} from "../../src/domains/lessons/lessonClosure.js";
 
 const fallbackSource = "local_sample";
 const databaseSource = "supabase";
@@ -1764,6 +1768,71 @@ export async function listLessons({ date, includeCanceled = false } = {}) {
   return { source: databaseSource, lessons: rows.map(fromLessonRow) };
 }
 
+export async function getLessonClosurePreflight(lessonId = "") {
+  const normalizedLessonId = String(lessonId || "").trim();
+  if (!normalizedLessonId) throw new Error("휴강 전환을 확인할 수업 ID가 필요합니다.");
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    const lesson = sampleData.lessons.find((item) => item.lessonId === normalizedLessonId) ?? null;
+    return {
+      source: fallbackSource,
+      blockingNotificationJobs: [],
+      canConvert: true,
+      isConversion: Boolean(lesson && lesson.lessonType !== "closure"),
+      lesson,
+      recordCount: 0,
+      recordStatuses: {}
+    };
+  }
+
+  const encodedLessonId = encodeURIComponent(normalizedLessonId);
+  const [lessonRows, recordRows, notificationRows] = await Promise.all([
+    listRows(
+      "lessons",
+      `select=*&lesson_id=eq.${encodedLessonId}&limit=1`,
+      { requireServiceRole: true }
+    ),
+    listRows(
+      "lesson_student_records",
+      `select=lesson_student_record_id,student_id,attendance_status&lesson_id=eq.${encodedLessonId}`,
+      { requireServiceRole: true }
+    ),
+    listRows(
+      "notification_jobs",
+      `select=notification_job_id,lesson_id,status,provider,provider_message_id,scheduled_at&lesson_id=eq.${encodedLessonId}`,
+      { requireServiceRole: true }
+    )
+  ]);
+  const lesson = lessonRows[0] ? fromLessonRow(lessonRows[0]) : null;
+  const notificationJobs = notificationRows.map(fromNotificationJobRow);
+  const blockingNotificationJobs = getLessonClosureBlockingNotificationJobs(notificationJobs, normalizedLessonId);
+  const isConversion = Boolean(lesson && lesson.lessonType !== "closure");
+  return {
+    source: databaseSource,
+    blockingNotificationJobs,
+    canConvert: !isConversion || blockingNotificationJobs.length === 0,
+    isConversion,
+    lesson,
+    recordCount: recordRows.length,
+    recordStatuses: recordRows.reduce((counts, row) => {
+      const status = row.attendance_status || "pending";
+      counts[status] = (counts[status] || 0) + 1;
+      return counts;
+    }, {})
+  };
+}
+
+async function assertLessonClosureConversionAllowed(lesson = {}) {
+  if (lesson.lessonType !== "closure" || !lesson.lessonId) return null;
+  const preflight = await getLessonClosurePreflight(lesson.lessonId);
+  if (!isLessonClosureConversion(preflight.lesson, lesson.lessonType)) return preflight;
+  if (!preflight.canConvert) {
+    throw new Error(
+      `휴강 전환 전에 발송 가능하거나 결과 확인이 필요한 알림 ${preflight.blockingNotificationJobs.length}건을 예약 확인에서 정리해 주세요.`
+    );
+  }
+  return preflight;
+}
+
 export async function upsertStudent(student) {
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
     return { source: fallbackSource, student };
@@ -1966,6 +2035,7 @@ export async function upsertLesson(lesson) {
     return { source: fallbackSource, lesson };
   }
 
+  await assertLessonClosureConversionAllowed(lesson);
   let row;
   try {
     [row] = await upsertRows("lessons", [toLessonRow(lesson)], { onConflict: "lesson_id" });
@@ -1993,6 +2063,9 @@ export async function upsertLessons(lessons) {
     return { source: fallbackSource, lessons };
   }
 
+  for (const lesson of lessons) {
+    await assertLessonClosureConversionAllowed(lesson);
+  }
   let rows;
   try {
     rows = await upsertRows("lessons", lessons.map((lesson) => toLessonRow(lesson)), { onConflict: "lesson_id" });

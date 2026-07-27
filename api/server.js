@@ -16,6 +16,7 @@ import {
   deleteSpecialLectureApplication,
   deleteWithdrawnStudent,
   getCoreDataStatus,
+  getLessonClosurePreflight,
   getLessonStudentRecordForAttendance,
   getNotificationJob,
   listAttendanceCandidateStudents,
@@ -2447,6 +2448,13 @@ function refreshLessonCommentJobBeforeSend(job = {}, context = null) {
     return {
       action: "cancel",
       job: cancelNotificationJobBeforeSend(job, "수업이 삭제되었거나 취소되어 발송하지 않았습니다.", "lesson_missing")
+    };
+  }
+
+  if (lesson.lessonType === "closure") {
+    return {
+      action: "cancel",
+      job: cancelNotificationJobBeforeSend(job, "휴강 수업으로 전환되어 발송하지 않았습니다.", "lesson_closure")
     };
   }
 
@@ -6394,6 +6402,17 @@ const server = http.createServer(async (request, response) => {
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/lessons/closure-preflight") {
+    try {
+      const lessonId = requestUrl.searchParams.get("lessonId") || "";
+      const result = await getLessonClosurePreflight(lessonId);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 400, { ok: false, error: error.message });
     }
     return;
   }

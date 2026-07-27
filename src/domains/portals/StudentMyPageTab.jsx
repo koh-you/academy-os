@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getCountableAttendanceRecords } from "../lessons/lessonClosure.js";
 
 function formatHomeworkDoneCount(value) {
   if (Number.isInteger(value)) return String(value);
@@ -6,7 +7,8 @@ function formatHomeworkDoneCount(value) {
 }
 
 export function calculateAttendanceStats(records = []) {
-  const counts = records.reduce(
+  const countableRecords = getCountableAttendanceRecords(records);
+  const counts = countableRecords.reduce(
     (acc, record) => {
       const status = record.attendanceStatus || "pending";
       if (status === "present") acc.present += 1;
@@ -20,7 +22,7 @@ export function calculateAttendanceStats(records = []) {
   const total = counts.present + counts.late + counts.absent + counts.unexcused;
   const rate = (value) => (total ? Math.round((value / total) * 100) : 0);
   const calendarDays = {};
-  records.forEach((record) => {
+  countableRecords.forEach((record) => {
     const day = Number(String(record.lesson?.date || "").split("-")[2]);
     if (!day) return;
     if (record.attendanceStatus === "present") calendarDays[day] = "present";

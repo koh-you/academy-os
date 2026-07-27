@@ -50,6 +50,7 @@ const examPostSubmissionOptionsPath = path.join(root, "src", "domains", "exams",
 const examApiPath = path.join(root, "src", "domains", "exams", "api.js");
 const lessonAssignmentStatusPath = path.join(root, "src", "domains", "lessons", "assignmentStatus.js");
 const lessonAttendancePath = path.join(root, "src", "domains", "lessons", "attendance.js");
+const lessonClosurePath = path.join(root, "src", "domains", "lessons", "lessonClosure.js");
 const lessonJournalErrorBoundaryPath = path.join(root, "src", "domains", "lessons", "LessonJournalErrorBoundary.jsx");
 const lessonLabelsPath = path.join(root, "src", "domains", "lessons", "labels.js");
 const notificationJobSelectorsPath = path.join(root, "src", "domains", "notifications", "notificationJobSelectors.js");
@@ -158,6 +159,7 @@ const examQuestionCropViewSource = fs.existsSync(examQuestionCropViewPath) ? fs.
 const examPostSubmissionOptionsSource = fs.existsSync(examPostSubmissionOptionsPath) ? fs.readFileSync(examPostSubmissionOptionsPath, "utf8") : "";
 const examApiSource = fs.existsSync(examApiPath) ? fs.readFileSync(examApiPath, "utf8") : "";
 const lessonAssignmentStatusSource = fs.existsSync(lessonAssignmentStatusPath) ? fs.readFileSync(lessonAssignmentStatusPath, "utf8") : "";
+const lessonClosureSource = fs.existsSync(lessonClosurePath) ? fs.readFileSync(lessonClosurePath, "utf8") : "";
 const lessonAttendanceSource = fs.existsSync(lessonAttendancePath) ? fs.readFileSync(lessonAttendancePath, "utf8") : "";
 const lessonJournalErrorBoundarySource = fs.existsSync(lessonJournalErrorBoundaryPath) ? fs.readFileSync(lessonJournalErrorBoundaryPath, "utf8") : "";
 const lessonLabelsSource = fs.existsSync(lessonLabelsPath) ? fs.readFileSync(lessonLabelsPath, "utf8") : "";
@@ -610,7 +612,7 @@ check("84d-1 lesson journal notification controls use two compact rows and one p
 check("84d-2 scheduled comment alimtalk requires scheduledDate", hasAll(serverSource, ['payload.sendMode === "scheduled"', "!payload.scheduledDate", "scheduledDate is required for scheduled comment Alimtalk sends."]));
 check("84d-2b default lesson notification plan selects OS plan before explicit Solapi apply", hasAll(app, ["if (!isLessonJournalOpen || !selectedLesson?.lessonId || !isAppStateReady || session?.role !== \"teacher\") return", "if (!currentPlan?.autoRebuildEnabled) return", "autoRebuildEnabled: false", "function persistLessonNotificationPlans", "postAppState({", "lessonNotificationPlans: nextPlans", "persistLessonNotificationPlans(nextPlans)", "function handleApplyLessonNotificationPlan", "onApplyLessonNotificationPlan", "Solapi 예약 반영", "Solapi 예약 업데이트", "getSolapiReservationSyncStatus", "buildLessonReservationPayloadSnapshot", "getLessonReservationPayloadFingerprint", "const scheduledDateTimestamp = Date.parse(scheduledDateSource)", "new Date(scheduledDateTimestamp).toISOString()", "scheduledDate: normalizedScheduledDate", "disabled={isDefaultScheduleExpired}", "disabled={isDelayedScheduleExpired}"]) && !app.includes("applyLessonNotificationPlan(lessonId, nextMode)") && hasAll(css, [".schedulePlanButton:disabled", "cursor: default", "opacity: 1", ".solapiReservationSync"]));
 check("84d-2b-1 zero-student lessons do not loop notification scheduling", hasAll(app, ["function getLessonStudentIds", "function cancelActiveLessonNotificationJobs", "if (lessonStudents.length === 0)", "cancelActiveLessonNotificationJobs(lesson, \"수업 학생 없음\")", "if (recordsToSave.length === 0) return", "getLessonStudentIds(lesson).length"]) && !app.includes("lesson.studentIds.length") && !app.includes("lesson.studentIds.forEach") && !app.includes("lesson.studentIds.map"));
-check("84d-2c delayed lesson notification plan can return to base schedule", hasAll(app, ["[lessonId]: {", "mode: nextMode", "autoRebuildEnabled: false", "persistLessonNotificationPlans(nextPlans)", "const delayMinutes = mode === \"delay30\" ? 30 : 0", "getLessonAlimtalkScheduledDate(lesson, delayMinutes)", "const baseTime = getDayKey(lesson?.date) === \"sat\" ? \"16:30\" : \"22:30\""]));
+check("84d-2c delayed lesson notification plan can return to base schedule", hasAll(app, ["[lessonId]: {", "mode: nextMode", "autoRebuildEnabled: false", "persistLessonNotificationPlans(nextPlans)", "const delayMinutes = effectiveMode === \"delay30\" ? 30 : 0", "getLessonAlimtalkScheduledDate(lesson, delayMinutes)", "const baseTime = getDayKey(lesson?.date) === \"sat\" ? \"16:30\" : \"22:30\""]));
 check("84d-3 lesson notification plan bulk-schedules parent and student jobs through Solapi reservations", hasAll(app, ["function applyLessonNotificationPlan", "buildLessonNotificationJob(lesson, student, \"parent\"", "buildLessonNotificationJob(lesson, student, \"student\"", "osScheduled: true", "status: \"scheduled\"", "getLessonNotificationJobId", "reserveLessonNotificationJob(notificationJob, \"수업일지 반 전체 예약\")", "postJson(\"/api/notification-jobs/reserve\"", "updateLessonNotificationRecordStatuses(lesson, `예약 중 · ${scheduledLabel}`)", "status: \"canceled\"", "persistCanceledNotificationJob(notificationJob, \"알림 제외\")", "updateLessonNotificationRecordStatuses(lesson, \"알림톡 없음\")"]) && hasAll(serverSource, ["function reserveNotificationJobInSolapi", "sendScheduledNotificationJobToSolapi", "requestUrl.pathname === \"/api/notification-jobs/reserve\"", "if (!existingJob) return false", "if (job.provider === \"solapi\") return false", "function isOsScheduledNotificationJob", "job.status !== \"scheduled\" || !isOsScheduledNotificationJob(job)", "claimNotificationJob(job, claimId)", "Invalid notification dispatch token.", "payload.now ? payload.now : new Date().toISOString()", "function runInternalNotificationDispatch", "NOTIFICATION_INTERNAL_DISPATCH_LOOP", "setInterval(() => runInternalNotificationDispatch(\"interval\"), 60 * 1000)"]) && hasAll(packageJson, ["dispatch:notifications"]) && hasAll(renderYaml, ["koh-you-math-academy-os-notification-dispatch", "npm run dispatch:notifications"]) && hasAll(dispatchWorkflow, ["cron: \"*/5 * * * *\"", "dispatch-due-notifications", "X-Dispatch-Token", "api/notification-jobs/dispatch-due"]));
 check("84d-3c scheduled lesson notifications refresh latest journal before dispatch", hasAll(serverSource, ["function createLessonNotificationDispatchContext", "function refreshLessonCommentJobBeforeSend", "const lessonNotificationContext = await createLessonNotificationDispatchContext(jobs)", "const prepared = refreshLessonCommentJobBeforeSend(claimedJob, lessonNotificationContext)", "getLatestNotificationRecord", "buildLatestLessonCommentPreview", "commentBodyOverride: commentBody", "student_removed_from_lesson", "record.notificationMutedParent"]) && hasAll(coreDataRoute, ["cancelPendingNotificationJobsForRemovedLessonStudents", "cancelPendingNotificationJobsForLesson", "pendingNotificationJobStatuses", "수업 명단에서 제외됨", "수업 삭제"]) && hasAll(app, ["function isActiveNotificationJob", "job.lessonId === lesson.lessonId && !nextJobIds.has(job.notificationJobId)", "!(job.lessonId === lesson.lessonId && isActiveNotificationJob(job))"]));
 check("84d-3c-1 lesson reservation fingerprint covers every composed message source", hasAll(serverSource, ["homeworkFollowupNotice: payload.homeworkFollowupNotice", "preparationNotice: payload.preparationNotice", "supplementSchedule: payload.supplementSchedule", "testResult: payload.testResult"]) && hasAll(app, ["homeworkFollowupNotice: normalizeMessageText(payload.homeworkFollowupNotice", "preparationNotice: normalizeMessageText(payload.preparationNotice", "supplementSchedule: normalizeMessageText(payload.supplementSchedule", "testResult: normalizeMessageText(payload.testResult"]));
@@ -668,22 +670,44 @@ check("90a lesson modal creates verified closure and optional linked makeup jour
   '{ id: "closure", label: "휴강" }',
   'lesson.lessonType === "closure" ? "closureLessonPill"'
 ]) && hasAll(serverSource, ['lesson.lessonType !== "closure"']) && hasAll(css, [".closureMakeupPanel", ".closureMakeupChoices", ".lessonModalSaveStatus", ".closureJournalNotice", ".closureLessonPill"]));
-check("90a-1 past lessons convert to closure without dropping historical students", hasAll(app, [
+check("90a-1 existing lessons convert to closure by live risk state without dropping records or special-lecture metadata", hasAll(app, [
   "const isPersistedClosure = initialLesson?.lessonType === \"closure\"",
-  "const isHistoricalLesson = Boolean(initialLesson?.date && initialLesson.date < today)",
-  "const canConvertHistoricalLessonToClosure = Boolean(initialLesson && !isPersistedClosure && isHistoricalLesson)",
+  "const isClosureConversion = isLessonClosureConversion(initialLesson, lessonType)",
+  "const isStudentRosterLocked = isFormLocked || isClosureConversion",
   "function isLessonTypeChoiceDisabled(nextLessonType)",
-  'return nextLessonType === "closure" && !canConvertHistoricalLessonToClosure',
+  "getIsLessonTypeChoiceDisabled",
   "disabled={isLessonTypeChoiceDisabled(value)}",
   "disabled={isLessonTypeChoiceDisabled(item.lessonType)}",
-  "과거 수업은 기존 명단과 수업기록을 보존한 채 휴강으로 바꿀 수 있습니다.",
-  "const preservedHistoricalStudentIds = getLessonStudentIds(editingLesson)",
-  "student.studentId === studentId && isActiveStudent(student)",
-  "const studentIds = [...new Set([...activeStudentIds, ...preservedHistoricalStudentIds])]",
+  "날짜와 관계없이 상황에 따라 휴강으로 전환할 수 있습니다.",
+  "/api/lessons/closure-preflight",
+  "휴강 전환 전 최신 수업기록·알림 예약 확인 중",
+  "getLessonClosureRoster(latestSourceLesson, editableStudentIds)",
+  "기존 명단·수업기록 보존",
+  ".filter((candidate) => !shouldIgnoreLessonAttendance(candidate))",
   'closureMakeupEnabled: lessonType === "closure" && !isPersistedClosure && closureMakeupEnabled',
-  "과거 수업을 휴강으로 전환하고 연결 보충 수업일지까지 저장 완료",
-  "과거 수업을 휴강으로 전환 저장 완료"
-]) && !app.includes('lessonType === "closure" && !initialLesson && closureMakeupEnabled'));
+  "수업을 휴강으로 전환하고 연결 보충 수업일지까지 저장 완료",
+  "수업을 휴강으로 전환 저장 완료"
+]) && hasAll(lessonClosureSource, [
+  '"pending_send"',
+  '"queued"',
+  '"scheduled"',
+  '"send_unconfirmed"',
+  "getLessonClosureBlockingNotificationJobs",
+  "getLessonClosureRoster",
+  "shouldIgnoreLessonAttendance"
+]) && hasAll(coreDataRoute, [
+  "export async function getLessonClosurePreflight",
+  "assertLessonClosureConversionAllowed",
+  "lesson_student_records",
+  "notification_jobs"
+]) && hasAll(serverSource, [
+  'requestUrl.pathname === "/api/lessons/closure-preflight"',
+  'lesson.lessonType === "closure"',
+  '"lesson_closure"'
+]) && hasAll(studentMyPageTabSource, ["getCountableAttendanceRecords", "const countableRecords"]) &&
+  hasAll(studentLessonHistoryCalendarSource, ['? { detail: "", label: "휴강" }']) &&
+  !app.includes("canConvertHistoricalLessonToClosure") &&
+  !app.includes('lessonType === "closure" && !initialLesson && closureMakeupEnabled'));
 check("90b tue thu sat classes use Saturday-specific times", hasAll(appWithConfig, ["const classTemplateScheduleRules = {", "template_tt_sat_front: {", "name: \"화목 4-7 / 토 10-1반\"", "saturdayStartTime: \"10:00\"", "saturdayEndTime: \"13:00\"", "template_tt_sat_back: {", "name: \"화목 7-10 / 토 1-4반\"", "saturdayStartTime: \"13:00\"", "saturdayEndTime: \"16:00\"", "function normalizeClassTemplateSchedule", "function getTemplateLessonTimes", "function normalizeLessonTemplateTimes", "function normalizeLessonCalendarRules", "normalizeClassTemplates(classesResult.classTemplates)", "normalizeLessonCalendarRules(lessonsResult.lessons", "setStartTime(templateTimes.startTime)", "setEndTime(templateTimes.endTime)"]) && hasAll(sampleDataSource, ["name: \"화목 4-7 / 토 10-1반\"", "saturdayStartTime: \"10:00\"", "saturdayEndTime: \"13:00\"", "name: \"화목 7-10 / 토 1-4반\"", "saturdayStartTime: \"13:00\"", "saturdayEndTime: \"16:00\""]));
 check("91 supplement lessons use task-specific standard colors", hasAll(app, ["function getSupplementLessonColor(taskType)", "if (taskType === \"homework_makeup\") return lessonCalendarColors.homeworkMakeup", "if (taskType === \"retest\") return lessonCalendarColors.retest", "color: getSupplementLessonColor(taskForSchedule.taskType)"]));
 check("92 existing lessons are normalized to standard calendar rules without legacy type conversion", hasAll(app, ["function normalizeLessonCalendarColors(lessons = [], makeupTasks = [])", "const standardColor = getStandardLessonColor(lesson, taskByLessonId.get(lesson.lessonId))", "return lesson.color === standardColor ? lesson : { ...lesson, color: standardColor }", "function normalizeLessonCalendarRules(lessons = [], makeupTasks = [], classTemplates = [])", "normalizeLessonTemplateTimes(", "normalizeLessonCalendarColors(lessons, makeupTasks)", "areLessonCalendarRuleFieldsEqual", "normalizeLessonCalendarRules(lessonsResult.lessons, makeupTasksResult.makeupTasks ?? [], normalizedClassTemplates)"]) && !app.includes("normalizeExamPrepLessonType"));

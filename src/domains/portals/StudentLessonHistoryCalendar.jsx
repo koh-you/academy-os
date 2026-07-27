@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { assignmentStatusLabels, normalizeAssignmentStatusValue } from "../lessons/assignmentStatus.js";
 import { getAttendanceDisplay } from "../lessons/attendance.js";
+import { isClosureLesson } from "../lessons/lessonClosure.js";
 import { applyStudentScheduleToLesson } from "../../shared/utils/studentSchedule.js";
 
 export function StudentLessonHistoryCalendar({
@@ -40,7 +41,9 @@ export function StudentLessonHistoryCalendar({
       : null;
   const previousHomeworkText = previousHomework?.title || selectedRecord?.previousHomework || "";
   const nextHomeworkText = nextHomework?.title || selectedRecord?.nextHomework || "";
-  const selectedAttendanceDisplay = getAttendanceDisplay(selectedRecord ?? {}, selectedAttendanceLesson);
+  const selectedAttendanceDisplay = isClosureLesson(selectedLesson)
+    ? { detail: "", label: "휴강" }
+    : getAttendanceDisplay(selectedRecord ?? {}, selectedAttendanceLesson);
   const selectedAttendanceTimeLabel = selectedAttendanceLesson?.startTime && selectedAttendanceLesson?.endTime
     ? `${selectedAttendanceLesson.startTime}-${selectedAttendanceLesson.endTime}`
     : selectedRecord?.lesson?.startTime && selectedRecord?.lesson?.endTime

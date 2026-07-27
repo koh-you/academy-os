@@ -137,6 +137,15 @@ import {
   hasMissingCheckOut,
   normalizeTimeInput
 } from "../domains/lessons/attendance.js";
+import {
+  getLessonClosureBlockingNotificationJobs,
+  getLessonClosureRoster,
+  getLessonClosureSourceSnapshot,
+  isClosureLesson as getIsClosureLesson,
+  isLessonClosureConversion,
+  isLessonTypeChoiceDisabled as getIsLessonTypeChoiceDisabled,
+  shouldIgnoreLessonAttendance
+} from "../domains/lessons/lessonClosure.js";
 import { LessonJournalErrorBoundary } from "../domains/lessons/LessonJournalErrorBoundary.jsx";
 import { attendanceLabels, dayLabels, homeworkLabels } from "../domains/lessons/labels.js";
 import {
@@ -7072,9 +7081,20 @@ export function App() {
       date: lesson.date || "",
       endTime: normalizeTimeInput(lesson.endTime),
       lessonId: lesson.lessonId || "",
+      lessonTrackId: lesson.lessonTrackId || "",
+      lessonTrackType: lesson.lessonTrackType || "",
       lessonTopic: lesson.lessonTopic || "",
       lessonType: lesson.lessonType || "",
+      sourceMakeupTaskId: lesson.sourceMakeupTaskId || "",
+      sourceSchoolEventId: lesson.sourceSchoolEventId || "",
       sourceLabel: lesson.sourceLabel || "",
+      specialLectureGuideId: lesson.specialLectureGuideId || "",
+      specialLectureSessionId: lesson.specialLectureSessionId || "",
+      specialLectureSessionIndex: lesson.specialLectureSessionIndex ?? null,
+      specialLectureStudentSchedules: Object.fromEntries(
+        Object.entries(lesson.specialLectureStudentSchedules ?? {})
+          .sort(([leftStudentId], [rightStudentId]) => leftStudentId.localeCompare(rightStudentId))
+      ),
       startTime: normalizeTimeInput(lesson.startTime),
       status: lesson.status || "scheduled",
       studentIds: [...new Set(lesson.studentIds ?? [])].sort()
@@ -7180,19 +7200,48 @@ export function App() {
   }
 
   async function handleUpdateLesson(formValues, onProgress = null) {
+    const isClosureConversion = isLessonClosureConversion(editingLesson, formValues.lessonType);
+    let latestSourceLesson = editingLesson;
+    if (isClosureConversion) {
+      onProgress?.("saving", "휴강 전환 전 최신 수업기록·알림 예약 확인 중");
+      const preflight = await getJsonWithTimeout(
+        `/api/lessons/closure-preflight?lessonId=${encodeURIComponent(editingLesson.lessonId)}&verify=${Date.now()}`,
+        20000,
+        "휴강 전환 사전 확인이 20초를 넘었습니다. 저장하지 말고 잠시 뒤 다시 확인해 주세요."
+      );
+      if (preflight.source !== "supabase") {
+        throw new Error("휴강 전환 전 최신 상태를 Supabase에서 확인하지 못했습니다.");
+      }
+      if (preflight.lesson) {
+        if (
+          getLessonClosureSourceSnapshot(preflight.lesson) !==
+          getLessonClosureSourceSnapshot(editingLesson)
+        ) {
+          throw new Error("수업을 연 뒤 명단·시간·특강 회차 정보가 변경되었습니다. 모달을 닫고 최신 수업을 다시 열어 주세요.");
+        }
+        latestSourceLesson = preflight.lesson;
+      }
+      if (!preflight.canConvert) {
+        const blockingCount = preflight.blockingNotificationJobs?.length ?? 0;
+        throw new Error(`발송 가능하거나 결과 확인이 필요한 알림 ${blockingCount}건이 남아 있습니다. 현재 수업일지의 예약 확인에서 정리한 뒤 다시 휴강 처리해 주세요.`);
+      }
+    }
     const template = classTemplates.find(
       (item) => item.classTemplateId === formValues.classTemplateId
     );
     const classTemplateId = formValues.classTemplateId && template ? template.classTemplateId : "";
     const activeStudentIds = getActiveStudentIdsFromSelection(formValues.studentIds, students);
-    const preservedHistoricalStudentIds = getLessonStudentIds(editingLesson)
+    const preservedHistoricalStudentIds = getLessonStudentIds(latestSourceLesson)
       .filter((studentId) => !students.some((student) => student.studentId === studentId && isActiveStudent(student)));
-    const studentIds = [...new Set([...activeStudentIds, ...preservedHistoricalStudentIds])];
+    const editableStudentIds = [...new Set([...activeStudentIds, ...preservedHistoricalStudentIds])];
+    const studentIds = isClosureConversion
+      ? getLessonClosureRoster(latestSourceLesson, editableStudentIds)
+      : editableStudentIds;
     const closureMakeupLessonId = formValues.lessonType === "closure" && formValues.closureMakeupEnabled
       ? formValues.closureMakeupLessonId || createLessonId(formValues.closureMakeupDate, `${formValues.name}-휴강-보충`)
       : "";
     const lesson = {
-      ...editingLesson,
+      ...latestSourceLesson,
       isExamPrepAutoLesson: undefined,
       isVirtualGeneratedLesson: undefined,
       classTemplateId,
@@ -7242,9 +7291,9 @@ export function App() {
     return {
       lessons: [persistedLesson],
       message: closureMakeupLessonId
-        ? "과거 수업을 휴강으로 전환하고 연결 보충 수업일지까지 저장 완료"
+        ? "수업을 휴강으로 전환하고 연결 보충 수업일지까지 저장 완료"
         : formValues.lessonType === "closure" && editingLesson?.lessonType !== "closure"
-          ? "과거 수업을 휴강으로 전환 저장 완료"
+          ? "수업을 휴강으로 전환 저장 완료 · 기존 명단·수업기록 보존"
           : "수업일지 수정 저장 완료"
     };
   }
@@ -8264,7 +8313,8 @@ export function App() {
 
   function handleUpdateLessonNotificationPlan(lessonId, mode) {
     if (!lessonId) return;
-    const nextMode = mode || "default";
+    const lesson = lessons.find((item) => item.lessonId === lessonId);
+    const nextMode = getIsClosureLesson(lesson) ? "none" : (mode || "default");
     const currentPlan = lessonNotificationPlans[lessonId];
     const nextPlans = {
       ...lessonNotificationPlans,
@@ -8805,6 +8855,7 @@ export function App() {
   }
 
   function buildLessonNotificationJobs(lesson, lessonStudents, scheduledDate, mode) {
+    if (getIsClosureLesson(lesson)) return [];
     return lessonStudents
       .flatMap((student) => [
         buildLessonNotificationJob(lesson, student, "parent", scheduledDate, mode),
@@ -8816,12 +8867,13 @@ export function App() {
   async function applyLessonNotificationPlan(lessonId, mode) {
     const lesson = lessons.find((item) => item.lessonId === lessonId);
     if (!lesson) return { ok: false, error: "수업을 찾지 못했습니다." };
+    const effectiveMode = getIsClosureLesson(lesson) ? "none" : mode;
     const lessonStudents = getActiveLessonStudents(lesson, students);
     if (lessonStudents.length === 0) {
       cancelActiveLessonNotificationJobs(lesson, "수업 학생 없음");
       return { ok: true, canceledCount: 0, reservedCount: 0 };
     }
-    if (mode === "none") {
+    if (effectiveMode === "none") {
       const canceledJobs = notificationJobs
         .filter((job) => job.lessonId === lesson.lessonId)
         .filter(isActiveNotificationJob)
@@ -8836,14 +8888,14 @@ export function App() {
       return { ok: true, canceledCount: canceledJobs.length, reservedCount: 0 };
     }
 
-    const delayMinutes = mode === "delay30" ? 30 : 0;
+    const delayMinutes = effectiveMode === "delay30" ? 30 : 0;
     if (isLessonAlimtalkScheduleExpired(lesson, delayMinutes)) {
       updateLessonNotificationRecordStatuses(lesson, "예약 시간 지남");
       return { ok: false, error: "예약 시간이 이미 지났습니다." };
     }
     const scheduledDate = getLessonAlimtalkScheduledDate(lesson, delayMinutes);
     const scheduledLabel = formatKoreaTimeLabel(scheduledDate);
-    const nextJobs = buildLessonNotificationJobs(lesson, lessonStudents, scheduledDate, mode);
+    const nextJobs = buildLessonNotificationJobs(lesson, lessonStudents, scheduledDate, effectiveMode);
     const nextJobIds = new Set(nextJobs.map((job) => job.notificationJobId));
     const canceledJobs = notificationJobs
       .filter((job) => job.lessonId === lesson.lessonId && !nextJobIds.has(job.notificationJobId))
@@ -8872,6 +8924,7 @@ export function App() {
 
   function scheduleLessonNotificationsAt(lesson, scheduledDate, mode = "manual") {
     if (!lesson?.lessonId || !scheduledDate) return;
+    if (getIsClosureLesson(lesson)) return;
     const lessonStudents = getActiveLessonStudents(lesson, students);
     if (lessonStudents.length === 0) {
       cancelActiveLessonNotificationJobs(lesson, "수업 학생 없음");
@@ -8904,7 +8957,7 @@ export function App() {
 
   function handleScheduleLessonNotificationsAt(lessonId, scheduledDate) {
     const lesson = calendarLessons.find((item) => item.lessonId === lessonId) ?? lessons.find((item) => item.lessonId === lessonId);
-    if (!lesson) return;
+    if (!lesson || getIsClosureLesson(lesson)) return;
     const nextPlans = {
       ...lessonNotificationPlans,
       [lesson.lessonId]: {
@@ -9815,6 +9868,8 @@ export function App() {
       {isLessonModalOpen ? (
         <LessonModal
           initialLesson={editingLesson}
+          notificationJobs={notificationJobs}
+          records={records}
           students={students}
           templates={classTemplates}
           onClose={() => {
@@ -16631,7 +16686,8 @@ function LessonJournalDetail({
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
   const linkedMakeupTask = makeupTasks.find((task) => task.makeupTaskId === lesson.sourceMakeupTaskId || task.linkedLessonId === lesson.lessonId);
-  const notificationPlanMode = lessonNotificationPlan?.mode || "default";
+  const isClosureLesson = getIsClosureLesson(lesson);
+  const notificationPlanMode = isClosureLesson ? "none" : (lessonNotificationPlan?.mode || "default");
   const defaultAlimtalkTimeLabel = formatKoreaTimeLabel(getLessonAlimtalkScheduledDate(lesson, 0, { allowPastFallback: false }));
   const delayedAlimtalkTimeLabel = formatKoreaTimeLabel(getLessonAlimtalkScheduledDate(lesson, 30, { allowPastFallback: false }));
   const isDefaultScheduleExpired = isLessonAlimtalkScheduleExpired(lesson, 0);
@@ -16641,7 +16697,6 @@ function LessonJournalDetail({
   const todayTwoPmIso = new Date(`${today}T14:00:00+09:00`).toISOString();
   const canScheduleTodayTwoPm = lesson.date < today && Boolean(onScheduleLessonNotificationsAt);
   const lessonStudents = getActiveLessonStudents(lesson, students);
-  const isClosureLesson = lesson.lessonType === "closure";
   const isClosureMakeupLesson = lesson.lessonType === "makeup" && lesson.lessonTopic === "휴강 보충";
   const linkedClosureMakeupLesson = isClosureLesson
     ? (Array.isArray(lessons) ? lessons : []).find((item) => item.sourceLabel === `원 휴강 수업 · ${lesson.lessonId}`)
@@ -17100,6 +17155,7 @@ function LessonJournalDetail({
         item.lessonId !== lesson.lessonId &&
         item.date < lesson.date &&
         item.status !== "canceled" &&
+        !getIsClosureLesson(item) &&
         item.studentIds?.includes(student.studentId) &&
         isSameLessonGroup(lesson, item)
       )
@@ -17491,6 +17547,7 @@ function LessonJournalDetail({
             <span>예약 설정</span>
             <select
               aria-label="알림톡 예약 설정"
+              disabled={isClosureLesson}
               onChange={(event) => onUpdateLessonNotificationPlan?.(lesson.lessonId, event.target.value)}
               value={notificationPlanMode}
             >
@@ -19415,7 +19472,15 @@ function ReportModal({ report, onClose, onMockSend, onSaveSnapshot }) {
   );
 }
 
-function LessonModal({ initialLesson = null, students, templates, onClose, onSubmit }) {
+function LessonModal({
+  initialLesson = null,
+  notificationJobs = [],
+  records = [],
+  students,
+  templates,
+  onClose,
+  onSubmit
+}) {
   const activeStudents = students.filter(isActiveStudent);
   const normalizedTemplates = normalizeClassTemplates(templates);
   const fallbackTemplate = normalizedTemplates[0] ?? { name: "", startTime: "16:00", endTime: "17:00", color: lessonCalendarColors.regular };
@@ -19453,8 +19518,14 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
   const isSaved = saveState === "saved";
   const isFormLocked = isSaving || isSaved;
   const isPersistedClosure = initialLesson?.lessonType === "closure";
-  const isHistoricalLesson = Boolean(initialLesson?.date && initialLesson.date < today);
-  const canConvertHistoricalLessonToClosure = Boolean(initialLesson && !isPersistedClosure && isHistoricalLesson);
+  const isClosureConversion = isLessonClosureConversion(initialLesson, lessonType);
+  const isStudentRosterLocked = isFormLocked || isClosureConversion;
+  const closureRecordCount = initialLesson?.lessonId
+    ? records.filter((record) => record.lessonId === initialLesson.lessonId).length
+    : 0;
+  const closureBlockingNotificationJobs = initialLesson?.lessonId
+    ? getLessonClosureBlockingNotificationJobs(notificationJobs, initialLesson.lessonId)
+    : [];
   const regularClassColorOptions = normalizedTemplates.map((template) => ({
     id: `class-${template.classTemplateId}`,
     label: template.name,
@@ -19526,10 +19597,11 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
   }
 
   function isLessonTypeChoiceDisabled(nextLessonType) {
-    if (isFormLocked) return true;
-    if (!initialLesson) return false;
-    if (isPersistedClosure) return nextLessonType !== "closure";
-    return nextLessonType === "closure" && !canConvertHistoricalLessonToClosure;
+    return getIsLessonTypeChoiceDisabled({
+      initialLesson,
+      isFormLocked,
+      nextLessonType
+    });
   }
 
   function handleColorOptionClick(item) {
@@ -19642,8 +19714,17 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
           <div>
             <strong>휴강 보충이 있나요?</strong>
             <p className="muted">휴강은 수업일지에 남지만 실제 수업 횟수와 급여 정산에는 포함되지 않습니다.</p>
-            {canConvertHistoricalLessonToClosure ? (
-              <p className="muted">과거 수업은 기존 명단과 수업기록을 보존한 채 휴강으로 바꿀 수 있습니다.</p>
+            {isClosureConversion ? (
+              <div className="closureMakeupEditNotice">
+                <strong>날짜와 관계없이 상황에 따라 휴강으로 전환할 수 있습니다.</strong>
+                <span>기존 명단 {getLessonStudentIds(initialLesson).length}명·수업기록 {closureRecordCount}건·특강 회차 연결은 삭제하지 않고 보존합니다.</span>
+                <span>보존된 출결은 학생 출결 통계와 결석보강 후보에서 제외되고, 저장 직전 Supabase 최신 상태를 다시 확인합니다.</span>
+                {closureBlockingNotificationJobs.length ? (
+                  <span className="warningText">현재 화면 기준 확인 필요한 알림 {closureBlockingNotificationJobs.length}건 · 수업일지의 예약 확인에서 정리 후 저장</span>
+                ) : (
+                  <span>현재 화면 기준 발송 가능한 예약 없음 · 저장할 때 서버에서 다시 확인</span>
+                )}
+              </div>
             ) : null}
           </div>
           {isPersistedClosure ? (
@@ -19758,16 +19839,20 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
         </div>
         <div className="lessonStudentSearchRow">
           <input
-            disabled={isFormLocked}
+            disabled={isStudentRosterLocked}
             value={studentSearch}
             onChange={(event) => setStudentSearch(event.target.value)}
             placeholder="학생 이름 또는 반으로 검색"
           />
-          <button className="softButton" disabled={isFormLocked} onClick={() => setStudentIds(filteredStudents.map((student) => student.studentId))} type="button">
+          <button className="softButton" disabled={isStudentRosterLocked} onClick={() => setStudentIds(filteredStudents.map((student) => student.studentId))} type="button">
             보이는 학생 선택
           </button>
         </div>
-        <small className="muted">전체 {activeStudents.length}명</small>
+        <small className="muted">
+          {isClosureConversion
+            ? `휴강 전환 중에는 기존 명단 ${getLessonStudentIds(initialLesson).length}명을 고정합니다.`
+            : `전체 ${activeStudents.length}명`}
+        </small>
         <div className="lessonStudentGroups">
           {groupedStudents.map((group) => (
             <div className="lessonStudentGroup" key={group.grade}>
@@ -19775,7 +19860,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
                 <strong>{group.grade}</strong>
                 <button
                   className="softButton mini"
-                  disabled={isFormLocked}
+                  disabled={isStudentRosterLocked}
                   onClick={() => {
                     const groupIds = group.students.map((student) => student.studentId);
                     setStudentIds((current) => Array.from(new Set([...current, ...groupIds])));
@@ -19786,7 +19871,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
                 </button>
                 <button
                   className="softButton mini"
-                  disabled={isFormLocked}
+                  disabled={isStudentRosterLocked}
                   onClick={() => {
                     const groupIds = new Set(group.students.map((student) => student.studentId));
                     setStudentIds((current) => current.filter((studentId) => !groupIds.has(studentId)));
@@ -19802,7 +19887,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
                   return (
                     <button
                       className={isSelected ? "lessonStudentChip selected" : "lessonStudentChip"}
-                      disabled={isFormLocked}
+                      disabled={isStudentRosterLocked}
                       key={student.studentId}
                       onClick={() =>
                         setStudentIds((current) =>
@@ -23214,9 +23299,11 @@ function SupplementCenter({
   const [isFutureAbsenceOpen, setIsFutureAbsenceOpen] = useState(false);
   const makeupHomeworks = homeworks.filter((homework) => isHomeworkMakeupCandidate(homework, records, lessons));
   const absentRecords = records
-    .filter((record) => isAbsenceLikeAttendanceStatus(record.attendanceStatus));
+    .filter((record) => isAbsenceLikeAttendanceStatus(record.attendanceStatus))
+    .filter((record) => !shouldIgnoreLessonAttendance(getRecordLesson(record, lessons)));
   const retestRecords = records
-    .filter((record) => record.needsRetest);
+    .filter((record) => record.needsRetest)
+    .filter((record) => !shouldIgnoreLessonAttendance(getRecordLesson(record, lessons)));
 
   function studentName(studentId) {
     return students.find((student) => student.studentId === studentId)?.name ?? "미등록 학생";
@@ -27110,6 +27197,7 @@ function findNextLessonForStudent(lessons, lesson, studentId) {
   const currentSortValue = getLessonSortValue(lesson);
   return [...lessons]
     .filter((candidate) => candidate.lessonId !== lesson.lessonId)
+    .filter((candidate) => !shouldIgnoreLessonAttendance(candidate))
     .filter((candidate) => isSameLessonGroup(lesson, candidate))
     .filter((candidate) => candidate.studentIds?.includes(studentId))
     .filter((candidate) => getLessonSortValue(candidate) > currentSortValue)
@@ -27120,6 +27208,7 @@ function findPreviousLessonForStudent(lessons, lesson, studentId, { allowRegular
   const currentSortValue = getLessonSortValue(lesson);
   const previousLessons = [...lessons]
     .filter((candidate) => candidate.lessonId !== lesson.lessonId)
+    .filter((candidate) => !shouldIgnoreLessonAttendance(candidate))
     .filter((candidate) => candidate.studentIds?.includes(studentId))
     .filter((candidate) => getLessonSortValue(candidate) < currentSortValue)
     .sort((a, b) => getLessonSortValue(b).localeCompare(getLessonSortValue(a)));
@@ -28216,6 +28305,7 @@ function getSupplementAttentionSummary({ homeworks = [], lessons = [], records =
     }));
   const absenceItems = records
     .filter((record) => isAbsenceLikeAttendanceStatus(record.attendanceStatus))
+    .filter((record) => !shouldIgnoreLessonAttendance(getRecordLesson(record, lessons)))
     .filter((record) => !getAbsenceMakeupAvailability(record, lessons).isDeferred)
     .map((record) => ({
       task: {
@@ -28227,6 +28317,7 @@ function getSupplementAttentionSummary({ homeworks = [], lessons = [], records =
     }));
   const futureAbsenceItems = records
     .filter((record) => isAbsenceLikeAttendanceStatus(record.attendanceStatus))
+    .filter((record) => !shouldIgnoreLessonAttendance(getRecordLesson(record, lessons)))
     .filter((record) => getAbsenceMakeupAvailability(record, lessons).isDeferred)
     .map((record) => ({
       task: {
@@ -28237,6 +28328,7 @@ function getSupplementAttentionSummary({ homeworks = [], lessons = [], records =
     }));
   const retestItems = records
     .filter((record) => record.needsRetest)
+    .filter((record) => !shouldIgnoreLessonAttendance(getRecordLesson(record, lessons)))
     .map((record) => ({
       task: {
         taskType: "retest",
