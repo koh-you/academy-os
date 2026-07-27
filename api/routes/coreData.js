@@ -348,7 +348,7 @@ function fromClassTemplateRow(row) {
   };
 }
 
-function toLessonRow(lesson, { includeScheduleMetadata = true } = {}) {
+export function toLessonRow(lesson, { includeScheduleMetadata = true } = {}) {
   const row = {
     lesson_id: lesson.lessonId,
     class_template_id: compact(lesson.classTemplateId),
@@ -374,9 +374,9 @@ function toLessonRow(lesson, { includeScheduleMetadata = true } = {}) {
     row.special_lecture_session_index = lesson.specialLectureSessionIndex === undefined || lesson.specialLectureSessionIndex === ""
       ? null
       : Number(lesson.specialLectureSessionIndex);
-    if (lesson.specialLectureStudentSchedules !== undefined) {
-      row.special_lecture_student_schedules = normalizeSpecialLectureStudentSchedules(lesson.specialLectureStudentSchedules);
-    }
+    row.special_lecture_student_schedules = normalizeSpecialLectureStudentSchedules(
+      lesson.specialLectureStudentSchedules
+    );
   }
   return row;
 }

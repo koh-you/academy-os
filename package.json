@@ -31,9 +31,10 @@
     "test:exam-prompt-studio": "npm run test:exam-phrase-library && npm run test:exam-prompt-inputs && npm run test:exam-prompt-studio-draft && npm run test:exam-prompt-studio-ui && npm run test:exam-slide-sequence && npm run test:exam-prompt-pack && npm run test:exam-prompt-e2e",
     "test:supplement-builders": "node scripts/test-supplement-job-builders.mjs",
     "test:tally-student-merge": "node scripts/test-tally-student-merge.mjs",
+    "test:lesson-bulk-rows": "node scripts/test-lesson-bulk-row-shapes.mjs",
     "test:monthly-settlement": "node scripts/test-monthly-settlement.mjs",
     "test:withdrawn-student-deletion": "node scripts/test-withdrawn-student-deletion.mjs",
-    "test:production": "npm run test:exam-prompt-studio && npm run test:exam-final-preview && npm run test:supplement-builders && npm run test:tally-student-merge && npm run test:monthly-settlement && npm run test:withdrawn-student-deletion && node scripts/scenario-tests-production.cjs"
+    "test:production": "npm run test:exam-prompt-studio && npm run test:exam-final-preview && npm run test:supplement-builders && npm run test:tally-student-merge && npm run test:lesson-bulk-rows && npm run test:monthly-settlement && npm run test:withdrawn-student-deletion && node scripts/scenario-tests-production.cjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.0",

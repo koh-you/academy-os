@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-27 P0. 수업 수정 bulk 저장 `All object keys must match` 복구
+
+- 상태: 저장 실패 원인 수정·자동검증 완료. 실패한 운영 요청은 Supabase가 JSON 행 구조 검사에서 거부해 저장 완료되지 않았고, 이번 수정 과정에서도 운영 lessons·수업일지·출결·알림 데이터는 변경하지 않았다.
+- 증상/원인: 기존 수업을 휴강으로 수정하면서 연결 보충 수업일지를 함께 저장하면 기존 lesson과 새 makeup lesson 두 행을 `/api/lessons/bulk`로 보낸다. 기존 행에는 API 조회에서 온 `specialLectureStudentSchedules=[]`가 있어 `special_lecture_student_schedules` JSON key가 생성되지만 새 행에는 해당 필드가 없어 key가 생기지 않았다. Supabase/PostgREST bulk upsert는 배열의 모든 객체 key가 같아야 하므로 저장 전에 `All object keys must match`로 전체 요청을 거부했다.
+- 수정: `toLessonRow`가 schedule metadata를 포함하는 모든 lesson에 `special_lecture_student_schedules`를 항상 넣고, 값이 없으면 빈 배열로 정규화하도록 했다. 특강 lesson의 실제 학생별 시간 배열은 그대로 보존하고 일반·휴강·보충 lesson은 빈 배열을 사용한다. 구형 스키마 fallback처럼 `includeScheduleMetadata=false`인 경로는 기존대로 해당 key를 모두 제외한다.
+- 저장 신뢰성: 기존 수업과 새 휴강 보충을 조합한 fixture가 동일한 JSON key 집합을 만드는지, 양쪽 schedule 값이 빈 배열인지, metadata 제외 fallback도 동일 key인지 전용 `test:lesson-bulk-rows`에서 검사한다. 기존 bulk POST 뒤 `/api/lessons` 재조회와 lesson ID·유형·주제·날짜·시간·명단 대조 계약은 유지한다.
+- 외부 영향: 새 SQL은 없다. 학생·수업·출결·숙제, `notification_jobs`, Solapi 예약·발송·취소를 실행하지 않았다. 실패 모달의 입력은 기존 로컬 draft에 남아 있으므로 배포 뒤 같은 입력으로 재시도할 수 있다.
+- AI 검증: `npm run test:lesson-bulk-rows`와 production 시나리오의 무조건 동일-key 계약 검사를 통과했다. `npm run test:production` 381건, `npm run build`, `git diff --check`도 통과했으며 빌드에는 기존 Vite chunk size 경고만 남았다.
+- 사람 gate: ① 배포 뒤 실패했던 수업 수정 모달을 다시 열고 학생·날짜·휴강 보충 설정이 맞는지 확인한다. ② `수업 수정 저장`을 한 번 누르고 `저장 중 -> Supabase 반영 확인 중 -> 저장 완료`가 되는지 본다. ③ 달력에서 기존 수업은 같은 lesson ID의 휴강으로, 연결 보충은 새 보강 수업으로 각각 한 건만 보이는지 확인한다. ④ 새로고침 뒤 두 수업이 유지되고 기존 학생 명단·과거 수업기록이 그대로인지 확인한다. ⑤ 새 알림 예약·발송이 생기지 않으면 통과다.
+
 ## 2026-07-27 P0. 특강 Tally 기본정보 교체·수업기록 보존 계약 정정
 
 - 상태: 사용자 의도 재확인에 따라 기존 특강 회차 초기화 동작을 철회하고 코드·안내·자동검증을 수정했다. 운영 학생·특강·수업일지·출결 데이터는 변경하지 않았다.
