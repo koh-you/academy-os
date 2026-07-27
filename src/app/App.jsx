@@ -218,6 +218,7 @@ import {
   isLessonTypeChoiceDisabled as getIsLessonTypeChoiceDisabled,
   shouldIgnoreLessonAttendance
 } from "../domains/lessons/lessonClosure.js";
+import { createLessonCalendarViewModel } from "../domains/lessons/lessonCalendarModel.js";
 import { LessonJournalErrorBoundary } from "../domains/lessons/LessonJournalErrorBoundary.jsx";
 import { attendanceLabels, dayLabels, homeworkLabels } from "../domains/lessons/labels.js";
 import {
@@ -15521,23 +15522,17 @@ function TeacherLessonHubV2({
       </Modal>
     )
   ) : null;
-  const lessonTypeFilterOptions = [
-    { id: "all", label: "전체" },
-    { id: "regular", label: "정규수업" },
-    { id: "preExam", label: "직전수업" },
-    { id: "closure", label: "휴강" },
-    { id: "makeup", label: "보충수업" },
-    { id: "examPrep", label: "시험대비" },
-    { id: "specialLecture", label: "특강" }
-  ];
-  const visibleLessons = lessons.filter((lesson) => {
-    if (isLegacyExamPrepLesson(lesson)) return false;
-    if (lessonTypeFilter === "all") return true;
-    if (lessonTypeFilter === "regular") return !["preExam", "closure", "makeup", "specialLecture"].includes(lesson.lessonType) && !isExamPrepLesson(lesson);
-    if (lessonTypeFilter === "examPrep") return isExamPrepLesson(lesson);
-    return lesson.lessonType === lessonTypeFilter;
+  const lessonCalendarViewModel = createLessonCalendarViewModel({
+    days: buildMonthDays(selectedDate),
+    getLessonStudentIds,
+    isExamPrepLesson,
+    isLegacyExamPrepLesson,
+    lessons,
+    lessonTypeFilter,
+    selectedDate,
+    selectedLessonId,
+    sortLessons: sortByTime
   });
-  const visibleLessonCount = visibleLessons.filter((lesson) => lesson.date.slice(0, 7) === selectedDate.slice(0, 7)).length;
   const shouldShowGeneratedLessonSaveNotice = generatedLessonSaveStatus?.state && generatedLessonSaveStatus.state !== "idle";
 
   return (
@@ -15579,9 +15574,9 @@ function TeacherLessonHubV2({
             <FilterBar
               className="lessonTypeFilterBar"
               label="수업일지 일정 종류 필터"
-              result={<span>{visibleLessonCount}개</span>}
+              result={<span>{lessonCalendarViewModel.visibleLessonCount}개</span>}
             >
-              {lessonTypeFilterOptions.map((option) => (
+              {lessonCalendarViewModel.filterOptions.map((option) => (
                 <button
                   aria-pressed={lessonTypeFilter === option.id}
                   className={`filterBarOption${lessonTypeFilter === option.id ? " active" : ""}`}
@@ -15622,18 +15617,15 @@ function TeacherLessonHubV2({
           {["일", "월", "화", "수", "목", "금", "토"].map((label) => (
             <div className="weekday" key={label} role="columnheader">{label}</div>
           ))}
-          {buildMonthDays(selectedDate).map((day) => {
-            const dayLessons = visibleLessons.filter((lesson) => lesson.date === day.date).sort(sortByTime);
-            const isSelectedDay = selectedDate === day.date;
-            return (
+          {lessonCalendarViewModel.calendarDays.map((day) => (
               <div
-                aria-label={`${day.date} · ${dayLessons.length ? `${dayLessons.length}개 수업` : "수업 없음"}`}
-                aria-selected={isSelectedDay}
+                aria-label={`${day.date} · ${day.lessons.length ? `${day.lessons.length}개 수업` : "수업 없음"}`}
+                aria-selected={day.isSelected}
                 className={[
                   "monthCell",
                   "teacherMonthCell",
                   day.inMonth ? "" : "outside",
-                  isSelectedDay ? "selected" : ""
+                  day.isSelected ? "selected" : ""
                 ].join(" ")}
                 key={day.date}
                 onClick={() => onDateSelect(day.date)}
@@ -15643,48 +15635,30 @@ function TeacherLessonHubV2({
                   event.stopPropagation();
                   onDateSelect(day.date);
                 }}
-                ref={isSelectedDay ? selectedCalendarDayRef : null}
+                ref={day.isSelected ? selectedCalendarDayRef : null}
                 role="gridcell"
-                tabIndex={isSelectedDay ? 0 : -1}
+                tabIndex={day.isSelected ? 0 : -1}
               >
                 <span className="dayNumber">{day.dayNumber}</span>
                 <span className="cellPlus">+</span>
                 <span className="lessonPills">
-                  {dayLessons.map((lesson) => {
-                    const isExamPrepType = isExamPrepLesson(lesson);
-                    const examPrepSourceLabel = isExamPrepType ? lesson.sourceLabel || "" : "";
-                    return (
+                  {day.lessons.map((pill) => (
                       <button
-                        className={[
-                          "lessonPill",
-                          lesson.lessonId === selectedLessonId ? "active" : "",
-                          lesson.lessonType === "preExam" ? "preExamLessonPill" : "",
-                          lesson.lessonType === "closure" ? "closureLessonPill" : "",
-                          lesson.lessonType === "makeup" ? "makeupLessonPill" : "",
-                          isExamPrepType ? "examPrepLessonPill" : "",
-                          lesson.lessonType === "specialLecture" ? "specialLectureLessonPill" : ""
-                        ].filter(Boolean).join(" ")}
-                        key={lesson.lessonId}
+                        className={pill.className}
+                        key={pill.lesson.lessonId}
                         onClick={(event) => {
                           event.stopPropagation();
-                          onOpenLessonJournal(lesson.lessonId);
+                          onOpenLessonJournal(pill.lesson.lessonId);
                         }}
-                        style={{ background: lesson.color }}
+                        style={{ background: pill.lesson.color }}
                         type="button"
                       >
-                        {lesson.startTime} {lesson.lessonType === "closure" ? `휴강 · ${lesson.className}` : lesson.className}
-                        {lesson.lessonType === "closure"
-                          ? ""
-                          : isExamPrepType
-                          ? examPrepSourceLabel ? ` · ${examPrepSourceLabel}` : ""
-                          : ` (${getLessonStudentIds(lesson).length}명)`}
+                        {pill.label}
                       </button>
-                    );
-                  })}
+                    ))}
                 </span>
               </div>
-            );
-          })}
+            ))}
         </div>
       </section>
       {lessonJournalDialog}

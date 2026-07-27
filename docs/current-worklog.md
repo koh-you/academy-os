@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-27 P1. 15B 순수 수업 달력 표시 모델 분리 — AI gate 통과
+
+- 코드: 유형 필터 옵션·legacy 시험대비 제외·정규/직전/휴강/보충/시험대비/특강 필터·선택 월 건수·날짜별 시간 정렬·선택/type pill class·표시 문구 계산을 `src/domains/lessons/lessonCalendarModel.js`의 `createLessonCalendarViewModel`로 이동했다.
+- 경계: App은 `buildMonthDays`, 시험대비/legacy 판정, 학생 ID selector, 시간 정렬 함수를 주입하고 반환된 view model을 렌더링한다. React filter state와 클릭 callback은 App에 남고 API·Supabase·app_state·출결·숙제·알림·Solapi는 모델이 알지 못한다.
+- 자동검증: 합성 정규·직전·휴강·보충·시험대비·특강·legacy 수업으로 전체/개별 필터, legacy 제외, 선택 월 5건, 날짜별 시간 정렬, 선택 pill, 휴강·시험대비 sourceLabel·학생 수 문구를 검증했다. `test:production` 53개 명령, scenario 494/494, build, `git diff --check`가 통과했고 기존 대형 chunk 경고만 남았다.
+- 사람 gate: 없음. 순수 계산 이동이며 운영 화면·데이터·외부 서비스를 변경하지 않았다. 다음은 최신 `origin/main` rebase 후 filter/header/grid만 전용 presentational component로 옮기는 15C다.
+
 ## 2026-07-27 P1. 15A 비활성 Lesson Hub legacy 제거 — AI gate 통과
 
 - 코드: 활성 JSX 호출이 없던 `TeacherLessonHub`, `TeacherMonthCalendar`, `LessonHub`, `MonthCalendar`, `LessonDetail`과 해당 상세에서만 쓰던 `HomeworkCell`·`saveStateLabels` import를 제거했다. 실제 진입점 `TeacherLessonHubV2`, 수업 생성·수정 `LessonModal`, 활성 `ReportModal`은 유지했다.

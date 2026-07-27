@@ -86,7 +86,7 @@ Supabase lessons
    - `TeacherLessonHub`, `TeacherMonthCalendar`, `LessonHub`, `MonthCalendar`, `LessonDetail`만 제거한다.
    - 원천·API·React state·화면 동작 변화가 없음을 정적 fixture와 production test/build로 확인한다.
    - 사람 gate는 필요하지 않다.
-2. **15B — 순수 달력 표시 모델**
+2. **15B — 순수 달력 표시 모델 — 완료**
    - 필터된 수업, 선택 월 건수, 월별 cell/pill 표시값 계산을 순수 함수로 분리한다.
    - 합성 수업 fixture로 정규·휴강·보충·시험대비·특강 분류를 고정한다.
 3. **15C — 활성 달력 presentational component**
@@ -103,4 +103,4 @@ Supabase lessons
 
 - AI 검수: 활성/비활성 참조 수, 저장 원천, 외부 side effect, low-risk 첫 후보를 정적 분석으로 확인한다.
 - 사람 검수: 없음. 화면·운영 데이터·외부 서비스를 변경하지 않았다.
-- 다음 단계: 15A 완료 뒤 최신 `origin/main`을 다시 rebase하고, 15B 순수 달력 표시 모델을 합성 수업 fixture와 함께 한 의미 단위로 진행한다.
+- 다음 단계: 15B 완료 뒤 최신 `origin/main`을 다시 rebase하고, 15C 활성 달력 presentational component만 한 의미 단위로 옮긴다.
