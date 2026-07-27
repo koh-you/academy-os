@@ -827,7 +827,7 @@ export function StudentManager({
         <ModalComponent
           className="studentDeleteModal"
           onClose={() => setDeleteStudentId("")}
-          subtitle="퇴원 처리하면 학생 목록과 내일 이후 수업 명단에서는 제외되고, 오늘까지의 수업기록은 보존됩니다."
+          subtitle="퇴원 처리하면 학생 목록과 다음 날 이후 수업 명단에서는 제외되고, 등원일부터 퇴원일까지의 수업기록은 보존됩니다."
           title="학생 퇴원 처리 확인"
         >
           <div className="deleteConfirmBody">
@@ -846,7 +846,7 @@ export function StudentManager({
               <span>PIN</span>
               <strong>{deleteStudent.pin || "-"}</strong>
             </div>
-            <p className="dangerCopy">정말 이 학생을 퇴원 처리할까요? 오늘까지의 수업기록은 보존하고, 내일 이후 수업 명단에서만 제외합니다.</p>
+            <p className="dangerCopy">정말 이 학생을 퇴원 처리할까요? 등원일부터 퇴원일까지의 학생·수업·수업기록·출결·숙제는 보존하고, 다음 날 이후 수업 명단에서만 제외합니다.</p>
             <div className="withdrawalReasonGrid">
               <label>
                 퇴원 사유
