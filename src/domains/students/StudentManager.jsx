@@ -679,7 +679,7 @@ export function StudentManager({
             const isDirty = dirtyStudentIds.has(student.studentId);
             return (
               <div className={["studentListRow", "withdrawnStudentRow", isDirty ? "dirtyStudentRow" : ""].filter(Boolean).join(" ")} key={student.studentId}>
-                <label className="withdrawnStudentSelect"><input checked={selectedWithdrawnStudentIds.has(student.studentId)} onChange={() => toggleWithdrawnStudentSelection(student.studentId)} type="checkbox" /><span className="srOnly">{student.name} 선택</span></label>
+                <label className="withdrawnStudentSelect"><input checked={selectedWithdrawnStudentIds.has(student.studentId)} onChange={() => toggleWithdrawnStudentSelection(student.studentId)} type="checkbox" /></label>
                 <button
                   className={selectedStudentId === student.studentId ? "studentNameButton active" : "studentNameButton"}
                   onClick={() => setSelectedStudentId(student.studentId)}
