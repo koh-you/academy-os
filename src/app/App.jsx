@@ -5996,6 +5996,8 @@ export function App() {
       applicationId: normalized.applicationId,
       enrollmentId: normalized.enrollmentId,
       memo: normalized.memo,
+      planReviewedAt: normalized.planReviewedAt,
+      planSource: normalized.planSource,
       sessionIds: normalized.sessionIds,
       sessionPlans: normalized.sessionPlans,
       specialLectureGuideId: normalized.specialLectureGuideId,

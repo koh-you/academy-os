@@ -126,17 +126,41 @@ assert.equal(specialLectureReplaced.specialNote, "");
 assert.equal(specialLectureReplaced.birthYear, "2010");
 assert.equal(specialLectureReplaced.defaultClassTemplateId, "template_existing");
 
-const clearedEnrollment = buildTallyEnrollmentReplacement({
+const preservedEnrollment = buildTallyEnrollmentReplacement({
   application: { selectedSession: "", memo: "" },
+  existingEnrollment: {
+    enrollmentId: "enrollment_existing",
+    memo: "선생님 수기 메모",
+    planReviewedAt: "2026-07-22T00:00:00.000Z",
+    planSource: "manual",
+    sessionIds: ["session_1"],
+    sessionPlans: [
+      {
+        sessionId: "session_1",
+        status: "active",
+        effectiveStartTime: "13:00",
+        effectiveEndTime: "15:00",
+        overrideReason: "수기 확정"
+      },
+      {
+        sessionId: "session_2",
+        status: "excluded",
+        effectiveStartTime: "",
+        effectiveEndTime: "",
+        overrideReason: ""
+      }
+    ]
+  },
   guideSessions: [{ sessionId: "session_1" }, { sessionId: "session_2" }],
   requestedPlans: []
 });
-assert.equal(clearedEnrollment.sessionPlans.length, 2);
-assert.ok(clearedEnrollment.sessionPlans.every((plan) => plan.status === "excluded"));
-assert.deepEqual(clearedEnrollment.sessionIds, []);
-assert.equal(clearedEnrollment.memo, "");
-assert.equal(clearedEnrollment.planSource, "tally_request");
-assert.equal(clearedEnrollment.planReviewedAt, "");
+assert.deepEqual(preservedEnrollment.sessionIds, ["session_1"]);
+assert.equal(preservedEnrollment.sessionPlans[0].status, "active");
+assert.equal(preservedEnrollment.sessionPlans[0].effectiveStartTime, "13:00");
+assert.equal(preservedEnrollment.sessionPlans[0].effectiveEndTime, "15:00");
+assert.equal(preservedEnrollment.memo, "선생님 수기 메모");
+assert.equal(preservedEnrollment.planSource, "manual");
+assert.equal(preservedEnrollment.planReviewedAt, "2026-07-22T00:00:00.000Z");
 
 const missingRequestEnrollment = buildTallyEnrollmentReplacement({
   application: {},
