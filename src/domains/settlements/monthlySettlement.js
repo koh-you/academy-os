@@ -17,6 +17,7 @@ export const monthlySettlementRateTable = {
 };
 
 const settlementModes = new Set(["fixed", "new", "withdrawn"]);
+const settlementModeSources = new Set(["lesson_journal", "teacher"]);
 const dayKeyOrder = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 const dayKeyLabels = {
   sun: "일",
@@ -360,6 +361,11 @@ export function normalizeMonthlySettlementStudentSetting(
   const mode = settlementModes.has(setting.mode)
     ? setting.mode
     : withdrawnDate ? "withdrawn" : "fixed";
+  const modeSource = settlementModeSources.has(setting.modeSource)
+    ? setting.modeSource
+    : settlementModes.has(setting.mode) && setting.mode !== "fixed"
+      ? "teacher"
+      : "";
   return {
     adjustmentAmount: normalizeSignedMoneyInput(setting.adjustmentAmount, 0),
     endDate: normalizeMonthDate(setting.endDate, monthKey) || (mode === "withdrawn" ? withdrawnDate : endDate),
@@ -371,6 +377,7 @@ export function normalizeMonthlySettlementStudentSetting(
         : getDefaultFixedAmountForStudent(student, scheduleText, classTemplates)
     ),
     mode,
+    modeSource,
     note: normalizeText(setting.note),
     scheduleText,
     specialGrossAmount: normalizeMoneyInput(setting.specialGrossAmount, 0),
@@ -402,9 +409,14 @@ export function normalizeMonthlySettlementMonth(
         scheduleText: sourceSettings[student.studentId]?.scheduleText,
         student
       });
-      const normalizedSetting = normalizeMonthlySettlementStudentSetting(
+      const normalizedSetting = applyMonthlySettlementJournalMode(
         sourceSettings[student.studentId],
-        { classTemplates, monthKey: normalizedMonthKey, student }
+        {
+          classTemplates,
+          lessons,
+          monthKey: normalizedMonthKey,
+          student
+        }
       );
       if (!normalizedSetting.startDate) {
         normalizedSetting.startDate = evidence.firstActualRegularDate;
@@ -468,6 +480,65 @@ export function getMonthlySettlementStudents({
     ));
 }
 
+export function getFirstEverRegularLessonDate({
+  lessons = [],
+  studentId = ""
+} = {}) {
+  return lessons
+    .filter((lesson) =>
+      isRegularSettlementLesson(lesson) &&
+      (Array.isArray(lesson.studentIds) ? lesson.studentIds : []).includes(studentId)
+    )
+    .map((lesson) => normalizeText(lesson.date).slice(0, 10))
+    .filter(Boolean)
+    .sort()[0] || "";
+}
+
+export function isMonthlyFirstRegularLessonCandidate({
+  lessons = [],
+  monthKey = "",
+  studentId = ""
+} = {}) {
+  const firstEverRegularDate = getFirstEverRegularLessonDate({ lessons, studentId });
+  const { startDate } = getMonthRange(monthKey);
+  return Boolean(
+    firstEverRegularDate &&
+    firstEverRegularDate.startsWith(`${monthKey}-`) &&
+    firstEverRegularDate !== startDate
+  );
+}
+
+export function applyMonthlySettlementJournalMode(
+  setting = {},
+  {
+    classTemplates = [],
+    lessons = [],
+    monthKey = "",
+    student = {}
+  } = {}
+) {
+  const normalizedSetting = normalizeMonthlySettlementStudentSetting(setting, {
+    classTemplates,
+    monthKey,
+    student
+  });
+  const shouldApplyJournalNewMode =
+    normalizedSetting.mode === "fixed" &&
+    normalizedSetting.modeSource !== "teacher" &&
+    isMonthlyFirstRegularLessonCandidate({
+      lessons,
+      monthKey,
+      studentId: student.studentId
+    });
+  return shouldApplyJournalNewMode
+    ? {
+        ...normalizedSetting,
+        mode: "new",
+        modeSource: "lesson_journal"
+      }
+    : normalizedSetting;
+}
+
 export function buildStudentSettlementRow({
   classTemplates = [],
   lessons = [],
@@ -476,8 +547,9 @@ export function buildStudentSettlementRow({
   setting = {},
   student = {}
 } = {}) {
-  const normalizedSetting = normalizeMonthlySettlementStudentSetting(setting, {
+  const normalizedSetting = applyMonthlySettlementJournalMode(setting, {
     classTemplates,
+    lessons,
     monthKey,
     student
   });
@@ -535,25 +607,23 @@ export function buildStudentSettlementRow({
   const regularGrossAmount = normalizedSetting.excluded
     ? 0
     : baseAmount + normalizedSetting.adjustmentAmount;
-  const firstEverRegularDate = lessons
-    .filter((lesson) =>
-      isRegularSettlementLesson(lesson) &&
-      (Array.isArray(lesson.studentIds) ? lesson.studentIds : []).includes(student.studentId)
-    )
-    .map((lesson) => lesson.date)
-    .filter(Boolean)
-    .sort()[0] || "";
+  const firstEverRegularDate = getFirstEverRegularLessonDate({
+    lessons,
+    studentId: student.studentId
+  });
   return {
     ...evidence,
     baseAmount,
     firstEverRegularDate,
     hasFixedAmount,
     hasRegularJournal,
-    isNewCandidate: Boolean(
-      firstEverRegularDate &&
-      firstEverRegularDate.startsWith(`${monthKey}-`) &&
-      firstEverRegularDate !== startDate
-    ),
+    isJournalAutoNew: normalizedSetting.mode === "new" &&
+      normalizedSetting.modeSource === "lesson_journal",
+    isNewCandidate: isMonthlyFirstRegularLessonCandidate({
+      lessons,
+      monthKey,
+      studentId: student.studentId
+    }),
     monthlyScheduleCount,
     partialRatio,
     periodEnd,
@@ -624,6 +694,7 @@ export function getMonthlySettlementMonthSaveSnapshot(month = {}) {
             excluded: Boolean(setting?.excluded),
             fixedAmount: normalizeMoneyInput(setting?.fixedAmount, ""),
             mode: settlementModes.has(setting?.mode) ? setting.mode : "fixed",
+            modeSource: settlementModeSources.has(setting?.modeSource) ? setting.modeSource : "",
             note: normalizeText(setting?.note),
             scheduleText: normalizeText(setting?.scheduleText),
             specialGrossAmount: normalizeMoneyInput(setting?.specialGrossAmount, 0),

@@ -253,6 +253,15 @@
   margin-top: 6px;
 }
 
+.monthlySettlementStudentCell .monthlySettlementAutoMode {
+  background: #e9f8f1;
+  border: 1px solid #a7dfc4;
+  border-radius: 999px;
+  color: #19704b;
+  padding: 3px 7px;
+  width: fit-content;
+}
+
 .monthlySettlementStudentCell .monthlySettlementRowWarning {
   background: #d8860b;
   border-radius: 999px;

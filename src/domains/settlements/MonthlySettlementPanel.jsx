@@ -4,6 +4,7 @@ import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import {
+  applyMonthlySettlementJournalMode,
   buildMonthlySettlementSummary,
   buildStudentSettlementRow,
   formatSettlementHours,
@@ -85,8 +86,9 @@ function createMonthDraft({
       ...sourceSettings,
       ...Object.fromEntries(visibleStudents.map((student) => [
         student.studentId,
-        normalizeMonthlySettlementStudentSetting(sourceSettings[student.studentId], {
+        applyMonthlySettlementJournalMode(sourceSettings[student.studentId], {
           classTemplates,
+          lessons,
           monthKey,
           student
         })
@@ -191,14 +193,35 @@ export function MonthlySettlementPanel({
     const recoveredDraft = typeof window !== "undefined"
       ? readLocalDraft(selectedMonth, savedUpdatedAt)
       : null;
+    const resolvedDraft = recoveredDraft
+      ? createMonthDraft({
+          classTemplates,
+          lessons,
+          monthKey: selectedMonth,
+          savedMonth: recoveredDraft,
+          students
+        })
+      : baseDraft;
     const hasNewStudents = Object.keys(baseDraft.studentSettings).some(
       (studentId) => !savedMonth?.studentSettings?.[studentId]
     );
-    setDraftMonth(recoveredDraft ?? baseDraft);
-    setIsDirty(Boolean(recoveredDraft || !savedMonth || hasNewStudents));
+    const hasJournalAutoModeChanges = Object.entries(resolvedDraft.studentSettings).some(
+      ([studentId, setting]) =>
+        setting.modeSource === "lesson_journal" &&
+        (
+          savedMonth?.studentSettings?.[studentId]?.mode !== "new" ||
+          savedMonth?.studentSettings?.[studentId]?.modeSource !== "lesson_journal"
+        )
+    );
+    setDraftMonth(resolvedDraft);
+    setIsDirty(Boolean(recoveredDraft || !savedMonth || hasNewStudents || hasJournalAutoModeChanges));
     setSaveMessage(
       recoveredDraft
-        ? "저장하지 않은 월별 정산 작업을 복구했습니다."
+        ? hasJournalAutoModeChanges
+          ? "저장하지 않은 월별 정산 작업을 복구하고, 수업일지 최초 수업 기준 신입생 계산을 자동 반영했습니다."
+          : "저장하지 않은 월별 정산 작업을 복구했습니다."
+        : hasJournalAutoModeChanges
+          ? "수업일지에서 이번 달 최초 정규수업이 확인된 학생을 신입생 부분월 계산으로 자동 반영했습니다. 확인 후 저장해 주세요."
         : !savedMonth
           ? "이 달의 기본 정산 스냅샷을 확인한 뒤 저장해 주세요."
           : hasNewStudents ? "이 달의 기존 스냅샷에 새 학생이 추가되었습니다. 확인 후 저장해 주세요." : ""
@@ -255,6 +278,9 @@ export function MonthlySettlementPanel({
         ...currentSetting,
         [field]: value
       };
+      if (field === "mode") {
+        nextSetting.modeSource = "teacher";
+      }
       if (field === "scheduleText") {
         nextSetting.fixedAmount = getFixedAmountAfterScheduleChange({
           classTemplates,
@@ -401,7 +427,7 @@ export function MonthlySettlementPanel({
       <div className="monthlySettlementSubsectionHeader">
         <div>
           <h2>정규 수업 정산</h2>
-          <p>선택 월의 정규 수업일지 명단과 학생별 월 고정금액을 기준으로 계산합니다.</p>
+          <p>선택 월의 정규 수업일지 명단과 학생별 월 고정금액을 기준으로 계산합니다. 전체 수업일지에서 이번 달이 첫 정규수업인 학생은 신입생 방식으로 자동 반영하며 수기로 바꿀 수 있습니다.</p>
         </div>
       </div>
       <div className="monthlySettlementTableWrap">
@@ -439,7 +465,14 @@ export function MonthlySettlementPanel({
                     {hasScheduleWarning ? (
                       <em className="monthlySettlementRowWarning">스케줄 수정 필요</em>
                     ) : null}
-                    {row.isNewCandidate && setting.mode === "fixed" ? <em>이번 달 최초 수업 · 신입 여부 확인</em> : null}
+                    {row.isJournalAutoNew ? (
+                      <em className="monthlySettlementAutoMode">
+                        수업일지 자동 · {row.firstEverRegularDate} 첫 수업
+                      </em>
+                    ) : null}
+                    {row.isNewCandidate && setting.mode === "fixed" ? (
+                      <em>수업일지 최초 수업 · 월정액 수기 적용</em>
+                    ) : null}
                     {row.student.withdrawnAt ? <em>퇴원일 {String(row.student.withdrawnAt).slice(0, 10)}</em> : null}
                   </td>
                   <td>

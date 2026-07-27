@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  applyMonthlySettlementJournalMode,
   buildMonthlyScheduleEvents,
   buildMonthlySettlementSummary,
   buildStudentSettlementRow,
@@ -581,6 +582,75 @@ const newStudentRow = buildStudentSettlementRow({
   },
   student: newStudent
 });
+const journalAutoNewSetting = applyMonthlySettlementJournalMode({
+  fixedAmount: 450000,
+  mode: "fixed",
+  scheduleText
+}, {
+  classTemplates,
+  lessons: newStudentLessons,
+  monthKey,
+  student: newStudent
+});
+assert.equal(
+  journalAutoNewSetting.mode,
+  "new",
+  "전체 정규 수업일지에서 이번 달이 최초 수업 월이면 신입생 부분월 방식을 자동 적용해야 합니다."
+);
+assert.equal(journalAutoNewSetting.modeSource, "lesson_journal");
+const journalAutoNewRow = buildStudentSettlementRow({
+  classTemplates,
+  lessons: newStudentLessons,
+  monthKey,
+  records: [],
+  setting: {
+    fixedAmount: 450000,
+    mode: "fixed",
+    scheduleText
+  },
+  student: newStudent
+});
+assert.equal(journalAutoNewRow.setting.mode, "new");
+assert.equal(journalAutoNewRow.isJournalAutoNew, true);
+const teacherFixedNewCandidate = applyMonthlySettlementJournalMode({
+  fixedAmount: 450000,
+  mode: "fixed",
+  modeSource: "teacher",
+  scheduleText
+}, {
+  classTemplates,
+  lessons: newStudentLessons,
+  monthKey,
+  student: newStudent
+});
+assert.equal(
+  teacherFixedNewCandidate.mode,
+  "fixed",
+  "선생님이 월정액을 수기로 선택한 뒤에는 수업일지 자동 판정이 다시 덮어쓰면 안 됩니다."
+);
+assert.equal(teacherFixedNewCandidate.modeSource, "teacher");
+const historicalStudentSetting = applyMonthlySettlementJournalMode({
+  fixedAmount: 450000,
+  mode: "fixed",
+  scheduleText
+}, {
+  classTemplates,
+  lessons: [
+    {
+      ...newStudentLessons[0],
+      date: "2026-06-29",
+      lessonId: "lesson_new_history_june_29"
+    },
+    ...newStudentLessons
+  ],
+  monthKey,
+  student: newStudent
+});
+assert.equal(
+  historicalStudentSetting.mode,
+  "fixed",
+  "이전 달 정규 수업일지가 있는 학생은 이번 달 첫 등장 학생으로 계산하면 안 됩니다."
+);
 const expectedNewCount = unevenScheduledEvents.filter((event) => event.date >= "2026-07-15").length;
 const fullUnevenHours = unevenScheduledEvents.reduce((sum, event) => sum + event.durationHours, 0);
 const recognizedUnevenHours = unevenScheduledEvents
@@ -699,6 +769,17 @@ assert.equal(
   })).studentSettings[student.studentId].excluded,
   true,
   "정산 제외 상태는 월별 Supabase 재조회 대조 스냅샷에 포함되어야 합니다."
+);
+assert.equal(
+  JSON.parse(getMonthlySettlementMonthSaveSnapshot({
+    monthKey,
+    studentSettings: {
+      [newStudent.studentId]: journalAutoNewSetting
+    },
+    updatedAt: "2026-07-27T00:00:00.000Z"
+  })).studentSettings[newStudent.studentId].modeSource,
+  "lesson_journal",
+  "수업일지 자동 판정 원천은 저장 후 Supabase 재조회 대조에 포함되어야 합니다."
 );
 
 const summary = buildMonthlySettlementSummary([fixedRow]);
