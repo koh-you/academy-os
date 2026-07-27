@@ -162,6 +162,7 @@ button {
 }
 
 .appFrame {
+  --academy-sidebar-width: 294px;
   display: grid;
   grid-template-columns: 294px minmax(0, 1fr);
   min-height: 100vh;
@@ -169,6 +170,7 @@ button {
 }
 
 .appFrame.sidebarCollapsed {
+  --academy-sidebar-width: 86px;
   grid-template-columns: 86px minmax(0, 1fr);
 }
 
@@ -11662,15 +11664,16 @@ textarea {
   background: rgba(248, 251, 255, 0.98);
   border: 1px solid #bfdbfe;
   border-radius: 10px;
-  bottom: 12px;
+  bottom: 16px;
   box-shadow: 0 10px 24px rgba(30, 64, 175, 0.16);
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 12px 0 0;
+  left: calc(var(--academy-sidebar-width) + 16px);
   padding: 10px 12px;
-  position: sticky;
-  z-index: 12;
+  position: fixed;
+  right: 24px;
+  z-index: 80;
 }
 
 .withdrawnStudentBulkActions > span {
@@ -19042,6 +19045,7 @@ body.attendanceOnlyBody {
 
 @media (max-width: 1100px) {
   .appFrame {
+    --academy-sidebar-width: 0px;
     grid-template-columns: 1fr;
   }
 
