@@ -45,6 +45,14 @@ const lesson = {
 
 const canceledTask = createCanceledAbsenceMakeupTask(task, canceledAt);
 const canceledLesson = createCanceledSupplementLesson(lesson, canceledAt);
+const canceledUnsavedCandidate = createCanceledAbsenceMakeupTask({
+  makeupTaskId: "makeup_absence_unsaved_candidate",
+  sourceId: sourceRecord.lessonStudentRecordId,
+  sourceLessonId: sourceRecord.lessonId,
+  status: "draft",
+  studentId: sourceRecord.studentId,
+  taskType: "absence_makeup"
+}, canceledAt);
 
 assert.equal(canceledTask.status, "canceled");
 assert.equal(canceledTask.cancellationMode, keepSourceAbsenceCancellationMode);
@@ -54,6 +62,10 @@ assert.equal(canceledTask.linkedLessonId, lesson.lessonId);
 assert.equal(canceledLesson.status, "canceled");
 assert.deepEqual(canceledLesson.studentIds, lesson.studentIds);
 assert.equal(canceledLesson.sourceMakeupTaskId, lesson.sourceMakeupTaskId);
+assert.equal(canceledUnsavedCandidate.status, "canceled");
+assert.equal(canceledUnsavedCandidate.cancellationMode, keepSourceAbsenceCancellationMode);
+assert.equal(canceledUnsavedCandidate.sourceAttendancePreserved, true);
+assert.equal(canceledUnsavedCandidate.linkedLessonId, undefined);
 assert.equal(
   getAbsenceSourcePreservationSnapshot(sourceRecord),
   sourceSnapshot,

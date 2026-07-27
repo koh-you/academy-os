@@ -10638,8 +10638,8 @@ export function App() {
     if (task?.taskType !== "absence_makeup") {
       throw new Error("결석보강 항목만 결석기록 유지 방식으로 취소할 수 있습니다.");
     }
-    if (!task.makeupTaskId || task.isLocalDraftTask) {
-      throw new Error("저장된 결석보강 항목만 보강 취소할 수 있습니다.");
+    if (!task.makeupTaskId) {
+      throw new Error("취소할 결석보강 ID가 없습니다.");
     }
     const sourceRecord = recordsRef.current.find(
       (record) => record.lessonStudentRecordId === task.sourceId
@@ -23678,12 +23678,15 @@ function SupplementCancellationConfirmModal({
   task
 }) {
   const keepsSourceAbsence = mode === "cancelMakeupKeepAbsence";
+  const closesUnsavedMakeupCandidate = keepsSourceAbsence && Boolean(task?.isLocalDraftTask);
   return (
     <Modal
       className="supplementPassConfirmModal supplementCancellationConfirmModal"
       title={keepsSourceAbsence ? "보강만 취소할까요?" : "결석 기록을 취소할까요?"}
       subtitle={keepsSourceAbsence
-        ? "보강 일정은 취소하지만 원 수업일지의 결석기록은 그대로 유지합니다."
+        ? closesUnsavedMakeupCandidate
+          ? "보강 후보를 닫고 원 수업일지의 결석기록은 그대로 유지합니다."
+          : "보강 일정은 취소하지만 원 수업일지의 결석기록은 그대로 유지합니다."
         : "원 수업일지의 결석 자체를 대기 상태로 되돌리는 별도 기능입니다."}
       onClose={onCancel}
     >
@@ -23700,20 +23703,26 @@ function SupplementCancellationConfirmModal({
           </div>
           <div>
             <dt>보강 항목</dt>
-            <dd>{keepsSourceAbsence ? "취소 내역으로 보존" : "미저장 초안 닫기"}</dd>
+            <dd>{keepsSourceAbsence
+              ? closesUnsavedMakeupCandidate ? "취소 이력을 저장하고 후보 닫음" : "취소 내역으로 보존"
+              : "미저장 초안 닫기"}</dd>
           </div>
           <div>
             <dt>보강 일정</dt>
             <dd>
-              {task.scheduledDate || "미확정"} {task.scheduledTime || ""}
-              {keepsSourceAbsence && task.linkedLessonId ? " · 연결 수업일지 취소" : ""}
+              {closesUnsavedMakeupCandidate
+                ? "아직 생성된 보강 수업일지 없음"
+                : `${task.scheduledDate || "미확정"} ${task.scheduledTime || ""}`}
+              {!closesUnsavedMakeupCandidate && keepsSourceAbsence && task.linkedLessonId ? " · 연결 수업일지 취소" : ""}
             </dd>
           </div>
           <div>
             <dt>알림톡</dt>
             <dd>
               {keepsSourceAbsence
-                ? "미발송 학생·학부모·당일 예약 취소"
+                ? closesUnsavedMakeupCandidate
+                  ? "새 예약·발송 없이 후보만 닫음"
+                  : "미발송 학생·학부모·당일 예약 취소"
                 : "발송·예약을 새로 만들지 않음"}
             </dd>
           </div>
@@ -24640,7 +24649,6 @@ function SupplementStudentModal({
               const isLocalDraftTask = Boolean(task.isLocalDraftTask);
               const canCancelAbsenceSource = isLocalDraftTask && task.taskType === "absence_makeup";
               const canCancelAbsenceMakeup =
-                !isLocalDraftTask &&
                 task.taskType === "absence_makeup" &&
                 !["done", "canceled"].includes(task.status);
               const isCancelAbsenceBusy = busyTaskId === `${task.makeupTaskId}:cancelAbsence`;
@@ -24864,30 +24872,45 @@ function SupplementStudentModal({
                       </button>
                     ) : null}
                   </div>
-                  {canCancelAbsenceSource || canCancelAbsenceMakeup ? (
-                    <section className={`supplementCancellationZone ${canCancelAbsenceMakeup ? "keepAbsence" : "cancelAbsence"}`}>
+                  {canCancelAbsenceMakeup ? (
+                    <section className="supplementCancellationZone keepAbsence">
                       <div>
-                        <strong>{canCancelAbsenceMakeup ? "보강 일정만 취소" : "결석 원본 자체를 취소"}</strong>
+                        <strong>{isLocalDraftTask ? "보강만 취소 · 결석기록 유지" : "보강 일정만 취소"}</strong>
                         <span>
-                          {canCancelAbsenceMakeup
-                            ? "원 수업일지의 결석 상태·사유는 유지하고, 보강 항목과 연결 일정 및 미발송 예약만 취소합니다."
-                            : "원 수업일지의 결석을 대기 상태로 되돌립니다. 아직 저장하지 않은 보강 초안도 함께 닫힙니다."}
+                          {isLocalDraftTask
+                            ? "아직 일정이 없는 보강 후보를 취소 이력으로 저장해 다시 나타나지 않게 하고, 원 결석 상태·사유는 유지합니다."
+                            : "원 수업일지의 결석 상태·사유는 유지하고, 보강 항목과 연결 일정 및 미발송 예약만 취소합니다."}
                         </span>
                       </div>
                       <button
                         className="dangerSoftButton"
                         disabled={isTaskBusy}
                         onClick={() => setCancellationConfirm({
-                          mode: canCancelAbsenceMakeup
-                            ? "cancelMakeupKeepAbsence"
-                            : "cancelAbsenceSource",
+                          mode: "cancelMakeupKeepAbsence",
                           task
                         })}
                         type="button"
                       >
-                        {canCancelAbsenceMakeup
-                          ? isCancelMakeupBusy ? "보강 취소 중" : "보강만 취소"
-                          : isCancelAbsenceBusy ? "결석 취소 중" : "결석 기록 취소"}
+                        {isCancelMakeupBusy ? "보강 취소 중" : "보강만 취소"}
+                      </button>
+                    </section>
+                  ) : null}
+                  {canCancelAbsenceSource ? (
+                    <section className="supplementCancellationZone cancelAbsence">
+                      <div>
+                        <strong>결석 원본 자체를 취소</strong>
+                        <span>결석 입력 자체가 잘못된 경우에만 원 수업일지의 결석을 대기 상태로 되돌립니다.</span>
+                      </div>
+                      <button
+                        className="dangerSoftButton"
+                        disabled={isTaskBusy}
+                        onClick={() => setCancellationConfirm({
+                          mode: "cancelAbsenceSource",
+                          task
+                        })}
+                        type="button"
+                      >
+                        {isCancelAbsenceBusy ? "결석 취소 중" : "결석 기록 취소"}
                       </button>
                     </section>
                   ) : null}
