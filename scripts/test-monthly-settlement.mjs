@@ -3,8 +3,13 @@ import {
   buildMonthlyScheduleEvents,
   buildMonthlySettlementSummary,
   buildStudentSettlementRow,
+  getDefaultFixedAmountForStudent,
+  getFixedAmountAfterScheduleChange,
   getMonthRange,
-  monthlySettlementFactor
+  getMonthlySettlementRateLabel,
+  getWeeklyScheduleHours,
+  monthlySettlementFactor,
+  normalizeMonthlySettlementStudentSetting
 } from "../src/domains/settlements/monthlySettlement.js";
 
 const monthKey = "2026-07";
@@ -72,6 +77,75 @@ assert.ok(scheduledEvents.length >= 12, "월별 일정은 실제 달력의 1일~
 assert.equal(
   scheduledEvents.every((event) => event.date >= "2026-07-01" && event.date <= "2026-07-31"),
   true
+);
+assert.equal(getWeeklyScheduleHours("월수 19:00-22:00"), 6);
+assert.equal(getWeeklyScheduleHours("월수금 19:00-22:00"), 9);
+assert.equal(
+  getDefaultFixedAmountForStudent({ grade: "중3" }, "월수 19:00-22:00"),
+  308000
+);
+assert.equal(
+  getDefaultFixedAmountForStudent({ grade: "중3" }, "월수금 19:00-22:00"),
+  420000
+);
+assert.equal(
+  getDefaultFixedAmountForStudent({ grade: "고1" }, "화목 16:00-19:00"),
+  341000
+);
+assert.equal(
+  getDefaultFixedAmountForStudent({ grade: "고1" }, "월수금 19:00-22:00"),
+  450000
+);
+assert.equal(
+  getMonthlySettlementRateLabel({ grade: "고1" }, "화목 16:00-19:00"),
+  "고등 주 6시간 기준"
+);
+assert.equal(
+  normalizeMonthlySettlementStudentSetting({}, {
+    classTemplates: [],
+    monthKey,
+    student: { grade: "중3" }
+  }).fixedAmount,
+  420000,
+  "저장 전 중등 학생은 기본 고정급 420,000원을 적용해야 합니다."
+);
+assert.equal(
+  normalizeMonthlySettlementStudentSetting({ fixedAmount: 399000 }, {
+    classTemplates: [],
+    monthKey,
+    student: { grade: "중3" }
+  }).fixedAmount,
+  399000,
+  "이미 저장된 학생별 금액은 새 기본 단가로 덮어쓰지 않아야 합니다."
+);
+assert.equal(
+  normalizeMonthlySettlementStudentSetting({ fixedAmount: "" }, {
+    classTemplates: [],
+    monthKey,
+    student: { grade: "중3" }
+  }).fixedAmount,
+  420000,
+  "과거 단가 미정으로 저장된 빈 값은 새 중등 기본 단가를 받아야 합니다."
+);
+assert.equal(
+  getFixedAmountAfterScheduleChange({
+    currentFixedAmount: 420000,
+    nextScheduleText: "월수 19:00-22:00",
+    previousScheduleText: "월수금 19:00-22:00",
+    student: { grade: "중3" }
+  }),
+  308000,
+  "기본 단가를 쓰는 행은 주 6시간 스케줄로 변경하면 새 기본 단가를 따라야 합니다."
+);
+assert.equal(
+  getFixedAmountAfterScheduleChange({
+    currentFixedAmount: 399000,
+    nextScheduleText: "월수 19:00-22:00",
+    previousScheduleText: "월수금 19:00-22:00",
+    student: { grade: "중3" }
+  }),
+  399000,
+  "학생별로 수정한 금액은 스케줄을 바꿔도 보존해야 합니다."
 );
 
 const fixedRow = buildStudentSettlementRow({

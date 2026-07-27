@@ -11,6 +11,8 @@ import {
   formatSettlementWon,
   getCurrentKoreaMonthKey,
   getDateDayKey,
+  getFixedAmountAfterScheduleChange,
+  getMonthlySettlementRateLabel,
   getMonthRange,
   getMonthlySettlementStudents,
   getSettlementAttendanceLabel,
@@ -241,14 +243,24 @@ export function MonthlySettlementPanel({
         current.studentSettings?.[studentId],
         { classTemplates, monthKey: selectedMonth, student }
       );
+      const nextSetting = {
+        ...currentSetting,
+        [field]: value
+      };
+      if (field === "scheduleText") {
+        nextSetting.fixedAmount = getFixedAmountAfterScheduleChange({
+          classTemplates,
+          currentFixedAmount: currentSetting.fixedAmount,
+          nextScheduleText: value,
+          previousScheduleText: currentSetting.scheduleText,
+          student
+        });
+      }
       const nextMonth = {
         ...current,
         studentSettings: {
           ...current.studentSettings,
-          [studentId]: {
-            ...currentSetting,
-            [field]: value
-          }
+          [studentId]: nextSetting
         }
       };
       writeLocalDraft(nextMonth, savedUpdatedAt);
@@ -332,6 +344,7 @@ export function MonthlySettlementPanel({
         <span>12회 또는 4.2주 환산을 사용하지 않습니다.</span>
         <span>출석·지각·대기는 정산 포함, 결석도 별도 차감 요청이 없으면 자동 차감하지 않습니다.</span>
         <span>보충은 달력에 별도로 남기되 정규 금액을 추가하지 않습니다.</span>
+        <span>중등 기본 420,000원 · 중등 주 6시간 308,000원 · 고등 주 6시간 341,000원 · 고등 기본 450,000원</span>
       </div>
 
       <div className="metricGrid monthlySettlementMetrics">
@@ -427,7 +440,11 @@ export function MonthlySettlementPanel({
                       />
                       <span>원</span>
                     </div>
-                    <small>{setting.fixedAmount === "" ? "중등 등 단가 입력 필요" : "학생별 수정 가능"}</small>
+                    <small>
+                      {setting.fixedAmount === ""
+                        ? "단가 미설정"
+                        : `${getMonthlySettlementRateLabel(row.student, setting.scheduleText)} · 학생별 수정 가능`}
+                    </small>
                   </td>
                   <td className="monthlySettlementScheduleCell">
                     <input
@@ -435,7 +452,10 @@ export function MonthlySettlementPanel({
                       value={setting.scheduleText}
                       onChange={(event) => updateStudentSetting(row.student.studentId, "scheduleText", event.target.value)}
                     />
-                    <small>{parsedScheduleText || "요일·시간 형식을 확인해 주세요."}</small>
+                    <small>
+                      {parsedScheduleText || "요일·시간 형식을 확인해 주세요."}
+                      {row.weeklyScheduleHours > 0 ? ` · 주 ${formatSettlementHours(row.weeklyScheduleHours)}` : ""}
+                    </small>
                   </td>
                   <td>
                     {setting.mode === "fixed" ? (

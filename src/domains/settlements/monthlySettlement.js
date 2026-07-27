@@ -5,6 +5,16 @@ import {
 
 export const monthlySettlementStateKey = "monthlyInstructorSettlements";
 export const monthlySettlementFactor = 0.5 * 0.967 * 0.985;
+export const monthlySettlementRateTable = {
+  high: {
+    defaultAmount: 450000,
+    sixHoursAmount: 341000
+  },
+  middle: {
+    defaultAmount: 420000,
+    sixHoursAmount: 308000
+  }
+};
 
 const settlementModes = new Set(["fixed", "new", "withdrawn"]);
 const dayKeyOrder = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
@@ -289,9 +299,69 @@ export function buildStudentMonthEvidence({
   };
 }
 
-export function getDefaultFixedAmountForStudent(student = {}) {
+export function getWeeklyScheduleHours(scheduleText = "") {
+  return roundHours(
+    parseStudentScheduleOverride(scheduleText).reduce((sum, rule) => {
+      const weeklyDays = Math.max(1, Array.isArray(rule.days) ? rule.days.length : 0);
+      return sum + getDurationHours(rule.startTime, rule.endTime) * weeklyDays;
+    }, 0)
+  );
+}
+
+export function getDefaultFixedAmountForStudent(
+  student = {},
+  scheduleText = "",
+  classTemplates = []
+) {
   const grade = normalizeText(student.grade);
-  return grade.startsWith("고") ? 450000 : "";
+  const resolvedScheduleText = normalizeText(scheduleText) ||
+    getDefaultStudentScheduleText(student, classTemplates);
+  const weeklyHours = getWeeklyScheduleHours(resolvedScheduleText);
+  const isSixHours = Math.abs(weeklyHours - 6) < 0.01;
+  if (grade.startsWith("중")) {
+    return isSixHours
+      ? monthlySettlementRateTable.middle.sixHoursAmount
+      : monthlySettlementRateTable.middle.defaultAmount;
+  }
+  if (grade.startsWith("고")) {
+    return isSixHours
+      ? monthlySettlementRateTable.high.sixHoursAmount
+      : monthlySettlementRateTable.high.defaultAmount;
+  }
+  return "";
+}
+
+export function getMonthlySettlementRateLabel(student = {}, scheduleText = "") {
+  const grade = normalizeText(student.grade);
+  const weeklyHours = getWeeklyScheduleHours(scheduleText);
+  if (!grade.startsWith("중") && !grade.startsWith("고")) return "학년별 단가 미설정";
+  const schoolLevel = grade.startsWith("중") ? "중등" : "고등";
+  return Math.abs(weeklyHours - 6) < 0.01
+    ? `${schoolLevel} 주 6시간 기준`
+    : `${schoolLevel} 기본 고정급`;
+}
+
+export function getFixedAmountAfterScheduleChange({
+  classTemplates = [],
+  currentFixedAmount = "",
+  nextScheduleText = "",
+  previousScheduleText = "",
+  student = {}
+} = {}) {
+  const previousDefault = getDefaultFixedAmountForStudent(
+    student,
+    previousScheduleText,
+    classTemplates
+  );
+  const nextDefault = getDefaultFixedAmountForStudent(
+    student,
+    nextScheduleText,
+    classTemplates
+  );
+  const normalizedCurrentAmount = normalizeMoneyInput(currentFixedAmount, "");
+  return normalizedCurrentAmount !== "" && normalizedCurrentAmount === previousDefault
+    ? nextDefault
+    : normalizedCurrentAmount;
 }
 
 export function normalizeMonthlySettlementStudentSetting(
@@ -300,6 +370,12 @@ export function normalizeMonthlySettlementStudentSetting(
 ) {
   const { endDate, startDate } = getMonthRange(monthKey);
   const withdrawnDate = normalizeMonthDate(student.withdrawnAt, monthKey);
+  const scheduleText = normalizeText(setting.scheduleText) ||
+    getDefaultStudentScheduleText(student, classTemplates);
+  const hasStoredFixedAmount = setting.fixedAmount !== "" &&
+    setting.fixedAmount !== null &&
+    setting.fixedAmount !== undefined &&
+    Number.isFinite(Number(setting.fixedAmount));
   const mode = settlementModes.has(setting.mode)
     ? setting.mode
     : withdrawnDate ? "withdrawn" : "fixed";
@@ -308,12 +384,13 @@ export function normalizeMonthlySettlementStudentSetting(
     endDate: normalizeMonthDate(setting.endDate, monthKey) || (mode === "withdrawn" ? withdrawnDate : endDate),
     fixedAmount: normalizeMoneyInput(
       setting.fixedAmount,
-      getDefaultFixedAmountForStudent(student)
+      hasStoredFixedAmount
+        ? ""
+        : getDefaultFixedAmountForStudent(student, scheduleText, classTemplates)
     ),
     mode,
     note: normalizeText(setting.note),
-    scheduleText: normalizeText(setting.scheduleText) ||
-      getDefaultStudentScheduleText(student, classTemplates),
+    scheduleText,
     specialGrossAmount: normalizeMoneyInput(setting.specialGrossAmount, 0),
     startDate: normalizeMonthDate(setting.startDate, monthKey) || (mode === "withdrawn" ? startDate : "")
   };
@@ -440,6 +517,7 @@ export function buildStudentSettlementRow({
     student
   });
   const { endDate, startDate } = getMonthRange(monthKey);
+  const weeklyScheduleHours = getWeeklyScheduleHours(normalizedSetting.scheduleText);
   const periodStart = normalizedSetting.startDate || evidence.firstActualRegularDate || startDate;
   const periodEnd = normalizedSetting.endDate || (
     normalizedSetting.mode === "withdrawn"
@@ -490,7 +568,8 @@ export function buildStudentSettlementRow({
     regularGrossAmount,
     setting: normalizedSetting,
     specialGrossAmount: Number(normalizedSetting.specialGrossAmount) || 0,
-    student
+    student,
+    weeklyScheduleHours
   };
 }
 
