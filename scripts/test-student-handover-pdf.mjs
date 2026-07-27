@@ -23,4 +23,27 @@ assert.equal(model.lessonRows[0].nextHomework, "오답 10문제");
 assert.equal(model.tally.length, 2, "일반 및 특강 Tally 정보를 포함해야 합니다.");
 assert.equal(model.comment, "재등록 시 진도 확인");
 
+const homeworkStatusModel = buildStudentHandoverPdfModel({
+  student: { studentId: "student_status", name: "상태테스트", withdrawnAt: "2026-07-27T12:00:00+09:00" },
+  lessons: [
+    { lessonId: "lesson_complete", date: "2026-07-20", studentIds: ["student_status"] },
+    { lessonId: "lesson_partial", date: "2026-07-21", studentIds: ["student_status"] },
+    { lessonId: "lesson_hard", date: "2026-07-22", studentIds: ["student_status"] },
+    { lessonId: "lesson_unchecked", date: "2026-07-23", studentIds: ["student_status"] }
+  ],
+  records: [
+    { lessonId: "lesson_complete", studentId: "student_status", assignmentStatus: "complete_thorough" },
+    { lessonId: "lesson_partial", studentId: "student_status", assignmentStatus: "partial_50" },
+    { lessonId: "lesson_hard", studentId: "student_status", assignmentStatus: "too_hard" },
+    { lessonId: "lesson_unchecked", studentId: "student_status", assignmentStatus: "not_checked" }
+  ],
+  homeworks: [
+    { lessonId: "lesson_complete", studentId: "student_status", homeworkType: "next", title: "숙제" },
+    { lessonId: "lesson_partial", studentId: "student_status", homeworkType: "next", title: "숙제" },
+    { lessonId: "lesson_hard", studentId: "student_status", homeworkType: "next", title: "숙제" },
+    { lessonId: "lesson_unchecked", studentId: "student_status", homeworkType: "next", title: "숙제" }
+  ]
+});
+assert.deepEqual(homeworkStatusModel.lessonRows.map((row) => row.homework), ["완료", "부분 완료 (50%)", "미완료 · 난이도 높음", "확인 필요"]);
+
 console.log("student handover PDF model tests passed");

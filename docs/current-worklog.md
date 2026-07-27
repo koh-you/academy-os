@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-27 P0. 퇴원생 중복 ID 연결 2건 확인·인수인계서 숙제 상태 보정
+
+- 운영 원천 읽기 전용 확인: 두 번째 조소현 중복 ID(`student_1783574098073`)의 연결 2건은 `attendance_events` 출결 변경 이력 1건과 `app_state.deletedLessonBundles` 삭제 수업 묶음 이력 1건이다. 수업기록·숙제·알림은 이 ID에 연결되지 않았다. 기존 조소현 ID의 64건은 수업기록 8·출결 이력 7·숙제 14·보충/재시험 3·알림 작업 23·수업 명단 9건이다. 실제 삭제는 실행하지 않았다.
+- 원인/수정: 인수인계서 PDF가 `complete_thorough`, `partial_50`, `too_hard`, `not_done` 같은 저장된 숙제 상태를 해석하지 못해, 다음 숙제 제목이 있는 행을 포괄적으로 `확인 필요`로 표시했다. 이제 완료·부분 완료(50/80%)·미완료·난이도 높음·확인 필요를 실제 상태값에 맞춰 출력한다.
+- 저장·부작용: PDF 출력 파생 문구만 변경하며 학생·수업·수업기록·숙제·알림 원천, Solapi를 수정·삭제·발송·예약·취소하지 않는다.
+- AI 검증: PDF fixture가 완료·부분 완료·난이도 높음·실제 미확인을 각각 구분하고, `npm run test:student-handover-pdf`, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+
 ## 2026-07-27 P0. 퇴원생 다중 영구 삭제 연결 데이터 가시화·모달 CSS 보정
 
 - 운영 원천 읽기 전용 확인: 영구 삭제 audit는 학생별 `lesson_student_records`, 출결 변경 이력, `homeworks`, 보충·재시험, `notification_jobs`, lessons/특강 회차 명단, 상담·질문·정산 등 app_state, 특강 수강 등록을 검사한다. 조소현의 기존 ID에는 수업기록 8건·출결 이력 7건·숙제 14건·보충/재시험 3건·알림 작업 23건·수업 명단 9건이 연결돼 있다. 실제 삭제는 실행하지 않았다.

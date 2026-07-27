@@ -25,8 +25,13 @@ function attendanceLabel(record = {}) {
 
 function homeworkLabel(record = {}, homework = null) {
   const status = record.assignmentStatus || record.homeworkStatus || homework?.status || "";
-  if (["complete", "done", "completed", "verified"].includes(status)) return "완료";
-  if (["incomplete", "not_started", "missing", "failed"].includes(status)) return "미완료";
+  if (["complete", "done", "completed", "verified", "complete_thorough"].includes(status)) return "완료";
+  if (status === "partial_80") return "부분 완료 (80%)";
+  if (status === "partial_50") return "부분 완료 (50%)";
+  if (["partial", "partial_complete"].includes(status)) return "부분 완료";
+  if (status === "too_hard") return "미완료 · 난이도 높음";
+  if (["incomplete", "not_started", "missing", "failed", "not_done"].includes(status)) return "미완료";
+  if (status === "not_checked") return "확인 필요";
   return homework?.title ? "확인 필요" : "미입력";
 }
 
