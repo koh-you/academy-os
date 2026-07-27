@@ -1,4 +1,10 @@
 import { sampleData } from "../../src/shared/data/sampleData.js";
+import {
+  getSpecialLectureStudentSyncOperation,
+  getSpecialLectureStudentSyncProtectionReasons,
+  isSpecialLectureStudentScheduleSynced,
+  mergeSpecialLectureStudentSchedule
+} from "../../src/domains/specialLectures/specialLecturePlanSync.js";
 import { deleteRows, getSupabaseStatus, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
 
 const fallbackSource = "local_sample";
@@ -2010,6 +2016,109 @@ export async function upsertLessons(lessons) {
     await deleteLessonStudentRecordsForRemovedLessonStudents(savedLesson);
   }
   return { source: databaseSource, lessons: savedLessons };
+}
+
+export async function syncSpecialLectureLessonStudentSchedule(payload = {}) {
+  const lessonId = String(payload.lessonId || "").trim();
+  const studentId = String(payload.studentId || "").trim();
+  if (!lessonId || !studentId) throw new Error("특강 학생별 시간 반영에 수업 ID와 학생 ID가 필요합니다.");
+  const expectedSchedule = payload.expectedSchedule
+    ? {
+        ...payload.expectedSchedule,
+        studentId,
+        startTime: normalizeClockTime(payload.expectedSchedule.startTime),
+        endTime: normalizeClockTime(payload.expectedSchedule.endTime),
+        scheduleType: payload.expectedSchedule.scheduleType === "adjusted" ? "adjusted" : "official",
+        overrideReason: String(payload.expectedSchedule.overrideReason || "")
+      }
+    : null;
+  if (
+    expectedSchedule &&
+    (
+      !expectedSchedule.startTime ||
+      !expectedSchedule.endTime ||
+      expectedSchedule.startTime >= expectedSchedule.endTime
+    )
+  ) {
+    throw new Error("특강 학생별 시작·종료 시간을 확인해 주세요.");
+  }
+
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    const lesson = sampleData.lessons.find((item) => item.lessonId === lessonId);
+    if (!lesson) throw new Error("특강 수업을 찾지 못했습니다.");
+    return {
+      source: fallbackSource,
+      lesson: mergeSpecialLectureStudentSchedule({ lesson, studentId, expectedSchedule }),
+      operation: getSpecialLectureStudentSyncOperation({ lesson, studentId, expectedSchedule })
+    };
+  }
+
+  const encodedLessonId = encodeURIComponent(lessonId);
+  const lessonRows = await listRows(
+    "lessons",
+    `select=*&lesson_id=eq.${encodedLessonId}&limit=1`,
+    { requireServiceRole: true }
+  );
+  const lessonRow = lessonRows[0];
+  if (!lessonRow) throw new Error("특강 수업을 찾지 못했습니다.");
+  if (!lessonRow.updated_at) throw new Error("특강 수업의 저장 버전을 확인할 수 없어 변경을 중단했습니다.");
+  const lesson = fromLessonRow(lessonRow);
+  if (!isSpecialLectureTrackedLesson(lesson)) throw new Error("특강 수업만 학생별 시간 반영을 사용할 수 있습니다.");
+
+  const encodedStudentId = encodeURIComponent(studentId);
+  const [recordRows, notificationRows] = await Promise.all([
+    listRows(
+      "lesson_student_records",
+      `select=lesson_student_record_id,lesson_id,student_id&lesson_id=eq.${encodedLessonId}&student_id=eq.${encodedStudentId}`,
+      { requireServiceRole: true }
+    ),
+    listRows(
+      "notification_jobs",
+      `select=notification_job_id,lesson_id,student_id,status&lesson_id=eq.${encodedLessonId}&status=in.(draft,queued,scheduled,pending_send)`,
+      { requireServiceRole: true }
+    )
+  ]);
+  const protectionReasons = getSpecialLectureStudentSyncProtectionReasons({
+    lesson,
+    lessonDate: lesson.date,
+    studentId,
+    expectedSchedule,
+    records: recordRows.map((row) => ({ lessonId: row.lesson_id, studentId: row.student_id })),
+    notificationJobs: notificationRows.map((row) => ({
+      lessonId: row.lesson_id,
+      studentId: row.student_id,
+      status: row.status
+    })),
+    pendingNotificationStatuses: new Set(["draft", "queued", "scheduled", "pending_send"]),
+    todayDateKey: getKoreaDateString()
+  });
+  if (protectionReasons.length) {
+    throw new Error(`특강 학생별 시간 자동 반영 보호: ${protectionReasons.join(", ")}`);
+  }
+
+  const operation = getSpecialLectureStudentSyncOperation({ lesson, studentId, expectedSchedule });
+  if (operation === "none") return { source: databaseSource, lesson, operation };
+  const nextLesson = mergeSpecialLectureStudentSchedule({ lesson, studentId, expectedSchedule });
+  const nextUpdatedAt = new Date().toISOString();
+  const savedRows = await patchRows(
+    "lessons",
+    `lesson_id=eq.${encodedLessonId}&updated_at=eq.${encodeURIComponent(lessonRow.updated_at)}`,
+    {
+      special_lecture_student_schedules: normalizeSpecialLectureStudentSchedules(
+        nextLesson.specialLectureStudentSchedules
+      ),
+      student_ids: nextLesson.studentIds,
+      updated_at: nextUpdatedAt
+    }
+  );
+  if (savedRows.length !== 1) {
+    throw new Error("다른 화면에서 특강 수업이 먼저 변경되어 학생별 시간 반영을 중단했습니다. 새로고침 후 다시 확인해 주세요.");
+  }
+  const savedLesson = fromLessonRow(savedRows[0]);
+  if (!isSpecialLectureStudentScheduleSynced({ lesson: savedLesson, studentId, expectedSchedule })) {
+    throw new Error("특강 학생별 시간 저장 후 Supabase 값이 계획과 일치하지 않습니다.");
+  }
+  return { source: databaseSource, lesson: savedLesson, operation };
 }
 
 export async function deleteLesson(lessonId) {

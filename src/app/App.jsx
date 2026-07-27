@@ -55,6 +55,7 @@ import {
   getCanceledAbsenceMakeupSaveSnapshot
 } from "../domains/supplements/supplementCancellation.js";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
+import { isSpecialLectureStudentScheduleSynced } from "../domains/specialLectures/specialLecturePlanSync.js";
 import {
   createTestAttemptId,
   createTestSessionIdForPaper,
@@ -6199,6 +6200,58 @@ export function App() {
     return verifiedLessons;
   }
 
+  async function handleSyncSpecialLectureStudentSchedules(syncRequests = []) {
+    const normalizedRequests = syncRequests
+      .filter((request) => request?.lessonId && request?.studentId)
+      .map((request) => ({
+        lessonId: request.lessonId,
+        studentId: request.studentId,
+        expectedSchedule: request.expectedSchedule ?? null
+      }));
+    if (!normalizedRequests.length) return [];
+    for (const request of normalizedRequests) {
+      const result = await postJson("/api/lessons/special-lecture-student-schedule", request);
+      if (result.source !== "supabase") {
+        throw new Error("특강 학생별 시간이 Supabase가 아닌 임시 원천에 저장되어 완료할 수 없습니다.");
+      }
+      if (
+        !result.lesson ||
+        !isSpecialLectureStudentScheduleSynced({
+          lesson: result.lesson,
+          studentId: request.studentId,
+          expectedSchedule: request.expectedSchedule
+        })
+      ) {
+        throw new Error(`특강 학생별 시간 저장 응답이 계획과 일치하지 않습니다: ${request.lessonId}`);
+      }
+    }
+    const verificationResponse = await fetch(
+      apiUrl(`/api/lessons?verify=special-lecture-student-${Date.now()}`),
+      { cache: "no-store" }
+    );
+    const verification = await verificationResponse.json();
+    if (!verificationResponse.ok || !verification.ok || verification.source !== "supabase") {
+      throw new Error(verification.error || "특강 학생별 시간 저장 후 Supabase 재조회에 실패했습니다.");
+    }
+    const persistedLessons = Array.isArray(verification.lessons) ? verification.lessons : [];
+    const verifiedLessons = normalizedRequests.map((request) => {
+      const persistedLesson = persistedLessons.find((lesson) => lesson.lessonId === request.lessonId);
+      if (
+        !persistedLesson ||
+        !isSpecialLectureStudentScheduleSynced({
+          lesson: persistedLesson,
+          studentId: request.studentId,
+          expectedSchedule: request.expectedSchedule
+        })
+      ) {
+        throw new Error(`특강 학생별 시간 저장 후 Supabase 값이 계획과 일치하지 않습니다: ${request.lessonId}`);
+      }
+      return persistedLesson;
+    });
+    setLessons(filterActiveLessons(persistedLessons));
+    return verifiedLessons;
+  }
+
   async function handleAddProblemBookFolder(folderName, testKind, subject) {
     const nextBooks = normalizeProblemBooks([createProblemBookFolder(folderName, testKind, subject), ...problemBooks]);
     setProblemBooks(nextBooks);
@@ -9637,6 +9690,7 @@ export function App() {
             onSaveSpecialLectureEnrollment={handleSaveSpecialLectureEnrollment}
             onSaveSpecialLectureEnrollments={handleSaveSpecialLectureEnrollments}
             onSaveSpecialLectureGuides={handleSaveSpecialLectureGuides}
+            onSyncSpecialLectureStudentSchedules={handleSyncSpecialLectureStudentSchedules}
             onUpdateLessonNotificationPlan={handleUpdateLessonNotificationPlan}
             onUpdateSpecialLectureApplication={handleUpdateSpecialLectureApplication}
             records={records}
@@ -11101,6 +11155,7 @@ function NotificationCenter({
   onSaveSpecialLectureEnrollment,
   onSaveSpecialLectureEnrollments,
   onSaveSpecialLectureGuides,
+  onSyncSpecialLectureStudentSchedules,
   onUpdateSpecialLectureApplication,
   pageDescription = "",
   pageTitle = "알림관리",
@@ -11715,6 +11770,7 @@ function NotificationCenter({
           onSaveEnrollment={onSaveSpecialLectureEnrollment}
           onSaveEnrollments={onSaveSpecialLectureEnrollments}
           onSaveGuides={onSaveSpecialLectureGuides}
+          onSyncSpecialLectureStudentSchedules={onSyncSpecialLectureStudentSchedules}
           onUpdateApplication={onUpdateSpecialLectureApplication}
           students={students}
         />
@@ -12044,6 +12100,7 @@ function SpecialLectureNoticePanel({
   onOpenLesson,
   onSaveEnrollment,
   onSaveEnrollments,
+  onSyncSpecialLectureStudentSchedules,
   onUpdateApplication,
   onSaveGuides,
   records = [],
@@ -12457,6 +12514,7 @@ function SpecialLectureNoticePanel({
         onOpenLesson={onOpenLesson}
         onSaveEnrollment={onSaveEnrollment}
         onSaveEnrollments={onSaveEnrollments}
+        onSyncSpecialLectureStudentSchedules={onSyncSpecialLectureStudentSchedules}
         onUpdateApplication={onUpdateApplication}
         records={records}
         isGuideSaved={isSelectedGuideSaved}

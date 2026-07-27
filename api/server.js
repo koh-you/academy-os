@@ -42,6 +42,7 @@ import {
   recordAttendanceEvent,
   claimNotificationJob,
   seedCoreData,
+  syncSpecialLectureLessonStudentSchedule,
   upsertAppState,
   upsertAcademyReminder,
   upsertHomework,
@@ -6393,6 +6394,17 @@ const server = http.createServer(async (request, response) => {
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/lessons/special-lecture-student-schedule") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await syncSpecialLectureLessonStudentSchedule(payload);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 409, { ok: false, error: error.message });
     }
     return;
   }

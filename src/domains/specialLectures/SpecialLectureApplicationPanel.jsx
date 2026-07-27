@@ -9,6 +9,11 @@ import {
 } from "../students/tallyStudentMerge.js";
 import { buildTallyEnrollmentReplacement } from "./tallyEnrollmentReplacement.js";
 import {
+  getSpecialLectureStudentSchedule,
+  getSpecialLectureStudentSyncProtectionReasons,
+  isSpecialLectureStudentScheduleSynced
+} from "./specialLecturePlanSync.js";
+import {
   createSpecialLectureEnrollmentId,
   createSpecialLectureLessonId,
   defaultSpecialLectureGuides,
@@ -397,6 +402,7 @@ export function SpecialLectureApplicationPanel({
   onOpenLesson,
   onSaveEnrollment,
   onSaveEnrollments,
+  onSyncSpecialLectureStudentSchedules,
   onUpdateApplication,
   selectedGuide = null,
   students = []
@@ -904,32 +910,6 @@ export function SpecialLectureApplicationPanel({
     });
   }
 
-  function getEnrollmentLessonProtectionReasons({
-    lesson,
-    lessonDate,
-    studentId,
-    removesStudent = false
-  } = {}) {
-    const reasons = [];
-    if (lessonDate <= todayDateKey) reasons.push("오늘·과거 수업");
-    if (!lesson) return reasons;
-    if (lesson.status === "completed") reasons.push("완료 수업");
-    if (
-      removesStudent &&
-      records.some((record) => record.lessonId === lesson.lessonId && record.studentId === studentId)
-    ) {
-      reasons.push("해당 학생 기록");
-    }
-    if (
-      notificationJobs.some((job) =>
-        job.lessonId === lesson.lessonId && pendingNotificationStatuses.has(job.status)
-      )
-    ) {
-      reasons.push("대기 알림");
-    }
-    return [...new Set(reasons)];
-  }
-
   function setAllEnrollmentSessions(enrollment, status) {
     const draft = getEnrollmentDraft(enrollment);
     const sessionPlans = draft.sessionPlans.map((plan) => ({ ...plan, status }));
@@ -1032,40 +1012,38 @@ export function SpecialLectureApplicationPanel({
         .find((schedule) => schedule.studentId === savedEnrollment.studentId) ?? null;
       return {
         draft,
-        reasons: getEnrollmentLessonProtectionReasons({
+        reasons: getSpecialLectureStudentSyncProtectionReasons({
           lesson: existingLesson,
           lessonDate: draft.date,
           studentId: savedEnrollment.studentId,
-          removesStudent: !expectedSchedule
+          expectedSchedule,
+          records,
+          notificationJobs,
+          pendingNotificationStatuses,
+          todayDateKey
         })
       };
     }).filter((row) => row.reasons.length);
     const blockedDrafts = blockedRows.map((row) => row.draft);
     const blockedLessonIds = new Set(blockedDrafts.map((draft) => draft.lessonId));
+    const safeDrafts = changedDrafts.filter((draft) => !blockedLessonIds.has(draft.lessonId));
     return {
       blockedDrafts,
       blockedRows,
-      safeDrafts: changedDrafts
-        .filter((draft) => !blockedLessonIds.has(draft.lessonId))
-        .map((draft) => {
-          const existingLesson = lessons.find((lesson) => lesson.lessonId === draft.lessonId);
-          if (!existingLesson) return draft;
-          const expectedSchedule = (draft.specialLectureStudentSchedules ?? [])
-            .find((schedule) => schedule.studentId === savedEnrollment.studentId) ?? null;
-          const preservedStudentSchedules = (existingLesson.specialLectureStudentSchedules ?? [])
-            .filter((schedule) => schedule.studentId !== savedEnrollment.studentId);
-          const studentIds = new Set(existingLesson.studentIds ?? []);
-          if (expectedSchedule) studentIds.add(savedEnrollment.studentId);
-          else studentIds.delete(savedEnrollment.studentId);
-          return {
-            ...existingLesson,
-            studentIds: [...studentIds],
-            specialLectureStudentSchedules: [
-              ...preservedStudentSchedules,
-              ...(expectedSchedule ? [expectedSchedule] : [])
-            ]
-          };
-        })
+      safeDrafts,
+      safeNewLessonDrafts: safeDrafts.filter((draft) =>
+        !lessons.some((lesson) => lesson.lessonId === draft.lessonId)
+      ),
+      safeStudentSyncRequests: safeDrafts.flatMap((draft) => {
+        if (!lessons.some((lesson) => lesson.lessonId === draft.lessonId)) return [];
+        const expectedSchedule = (draft.specialLectureStudentSchedules ?? [])
+          .find((schedule) => schedule.studentId === savedEnrollment.studentId) ?? null;
+        return [{
+          lessonId: draft.lessonId,
+          studentId: savedEnrollment.studentId,
+          expectedSchedule
+        }];
+      })
     };
   }
 
@@ -1170,16 +1148,32 @@ export function SpecialLectureApplicationPanel({
         return nextDrafts;
       });
       setPlanModalEnrollment(persistedEnrollment);
-      const { blockedDrafts, blockedRows, safeDrafts } = getSafeFutureLessonSync(persistedEnrollment, enrollment);
-      if (safeDrafts.length) {
+      const {
+        blockedDrafts,
+        blockedRows,
+        safeDrafts,
+        safeNewLessonDrafts,
+        safeStudentSyncRequests
+      } = getSafeFutureLessonSync(persistedEnrollment, enrollment);
+      if (safeNewLessonDrafts.length) {
         if (!onCreateSpecialLectureLessons) {
-          throw new Error("회차 계획은 저장됐지만 미래 수업일지 반영 기능이 연결되지 않았습니다.");
+          throw new Error("회차 계획은 저장됐지만 새 미래 수업일지 생성 기능이 연결되지 않았습니다.");
         }
         setPlanSaveState({
-          message: `2/2 · 미래 특강 수업일지 ${safeDrafts.length}개를 반영하고 Supabase에서 확인하고 있습니다.`,
+          message: `2/2 · 새 미래 특강 수업일지 ${safeNewLessonDrafts.length}개를 생성하고 Supabase에서 확인하고 있습니다.`,
           state: "saving"
         });
-        await onCreateSpecialLectureLessons(safeDrafts, { openFirstLesson: false });
+        await onCreateSpecialLectureLessons(safeNewLessonDrafts, { openFirstLesson: false });
+      }
+      if (safeStudentSyncRequests.length) {
+        if (!onSyncSpecialLectureStudentSchedules) {
+          throw new Error("회차 계획은 저장됐지만 학생별 시간 전용 반영 기능이 연결되지 않았습니다.");
+        }
+        setPlanSaveState({
+          message: `2/2 · 미래 특강 학생별 시간 ${safeStudentSyncRequests.length}개를 최신 수업 원천에 반영하고 있습니다.`,
+          state: "saving"
+        });
+        await onSyncSpecialLectureStudentSchedules(safeStudentSyncRequests);
       }
       if (blockedDrafts.length) {
         const blockedSummary = blockedRows.map(({ draft, reasons }) =>
@@ -1936,8 +1930,7 @@ export function SpecialLectureApplicationPanel({
                   const isActive = plan?.status === "active";
                   const hasOverride = Boolean(plan?.effectiveStartTime || plan?.effectiveEndTime);
                   const linkedLesson = lessons.find((lesson) => lesson.specialLectureSessionId === session.sessionId);
-                  const existingSchedule = (linkedLesson?.specialLectureStudentSchedules ?? [])
-                    .find((schedule) => schedule.studentId === enrollment.studentId) ?? null;
+                  const existingSchedule = getSpecialLectureStudentSchedule(linkedLesson, enrollment.studentId);
                   const isStudentInLessonRoster = Boolean(
                     linkedLesson && (linkedLesson.studentIds ?? []).includes(enrollment.studentId)
                   );
@@ -1949,19 +1942,27 @@ export function SpecialLectureApplicationPanel({
                     effectiveSession.endTime !== session.endTime
                   ) ? "adjusted" : "official";
                   const expectedOverrideReason = expectedScheduleType === "adjusted" ? plan?.overrideReason || "" : "";
-                  const isStudentScheduleSynced = Boolean(
-                    isStudentInLessonRoster &&
-                    existingSchedule &&
-                    existingSchedule.startTime === effectiveSession.startTime &&
-                    existingSchedule.endTime === effectiveSession.endTime &&
-                    (existingSchedule.scheduleType === "adjusted" ? "adjusted" : "official") === expectedScheduleType &&
-                    (existingSchedule.overrideReason || "") === expectedOverrideReason
-                  );
-                  const protectionReasons = getEnrollmentLessonProtectionReasons({
+                  const expectedSchedule = isActive ? {
+                    studentId: enrollment.studentId,
+                    startTime: effectiveSession.startTime,
+                    endTime: effectiveSession.endTime,
+                    scheduleType: expectedScheduleType,
+                    overrideReason: expectedOverrideReason
+                  } : null;
+                  const isStudentScheduleSynced = isActive && isSpecialLectureStudentScheduleSynced({
+                    lesson: linkedLesson,
+                    studentId: enrollment.studentId,
+                    expectedSchedule
+                  });
+                  const protectionReasons = getSpecialLectureStudentSyncProtectionReasons({
                     lesson: linkedLesson,
                     lessonDate: session.dateKey || session.date,
                     studentId: enrollment.studentId,
-                    removesStudent: !isActive && isStudentInLinkedLesson
+                    expectedSchedule,
+                    records,
+                    notificationJobs,
+                    pendingNotificationStatuses,
+                    todayDateKey
                   });
                   const hasProtectedLesson = protectionReasons.length > 0;
                   const journalState = isActive
