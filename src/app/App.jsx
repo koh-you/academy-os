@@ -171,6 +171,7 @@ import {
   replaceSpecialLectureYearToken,
 } from "../domains/specialLectures/specialLectureGuideUtils.js";
 import { MonthlySettlementPanel } from "../domains/settlements/MonthlySettlementPanel.jsx";
+import { SpecialLectureSettlementPanel } from "../domains/settlements/SpecialLectureSettlementPanel.jsx";
 import {
   createDefaultMonthlySettlementState,
   createMonthlySettlementStateWithMonth,
@@ -178,6 +179,13 @@ import {
   monthlySettlementStateKey,
   normalizeMonthlySettlementState
 } from "../domains/settlements/monthlySettlement.js";
+import {
+  createDefaultSpecialLectureSettlementState,
+  createSpecialLectureSettlementStateWithDraft,
+  getSpecialLectureSettlementSaveSnapshot,
+  normalizeSpecialLectureSettlementState,
+  specialLectureSettlementStateKey
+} from "../domains/settlements/specialLectureSettlement.js";
 import { AutosaveRiskNotice } from "../shared/components/AutosaveRiskNotice.jsx";
 import { EmptyState } from "../shared/components/EmptyState.jsx";
 import {
@@ -5329,6 +5337,10 @@ export function App() {
     storageKeys.monthlyInstructorSettlements,
     createDefaultMonthlySettlementState()
   );
+  const [specialLectureInstructorSettlements, setSpecialLectureInstructorSettlements] = useStoredState(
+    storageKeys.specialLectureInstructorSettlements,
+    createDefaultSpecialLectureSettlementState()
+  );
   const [teacherAccountSettings, setTeacherAccountSettings] = useState(defaultTeacherAccountSettings);
   const [lessonNotificationPlans, setLessonNotificationPlans] = useStoredState(storageKeys.lessonNotificationPlans, {});
   const [generatedLessonControls, setGeneratedLessonControls] = useStoredState(
@@ -5353,6 +5365,7 @@ export function App() {
   const [studentConsultationSaveState, setStudentConsultationSaveState] = useState("idle");
   const [specialLectureGuideSaveState, setSpecialLectureGuideSaveState] = useState("idle");
   const [monthlySettlementSaveState, setMonthlySettlementSaveState] = useState("idle");
+  const [specialLectureSettlementSaveState, setSpecialLectureSettlementSaveState] = useState("idle");
   const [studentHomeworkSaveStates, setStudentHomeworkSaveStates] = useState({});
   const studentHomeworkSavingIdsRef = useRef(new Set());
   const [studentQuestionSaveState, setStudentQuestionSaveState] = useState({
@@ -5656,6 +5669,13 @@ export function App() {
           } else {
             setMonthlyInstructorSettlements(createDefaultMonthlySettlementState());
           }
+          if (states[specialLectureSettlementStateKey]) {
+            setSpecialLectureInstructorSettlements(
+              normalizeSpecialLectureSettlementState(states[specialLectureSettlementStateKey])
+            );
+          } else {
+            setSpecialLectureInstructorSettlements(createDefaultSpecialLectureSettlementState());
+          }
           if (Array.isArray(states.tallySubmissions)) setTallySubmissions(states.tallySubmissions);
           if (states.tallySummaries && typeof states.tallySummaries === "object" && !Array.isArray(states.tallySummaries)) {
             setTallySummaries(states.tallySummaries);
@@ -5706,6 +5726,7 @@ export function App() {
     setSpecialLectureApplications,
     setSpecialLectureEnrollments,
     setSpecialLectureGuides,
+    setSpecialLectureInstructorSettlements,
     setStudents,
     setStudentConsultations,
     setStudentIntakeApplicants,
@@ -5828,6 +5849,47 @@ export function App() {
     } catch (error) {
       console.error(error);
       setMonthlySettlementSaveState("failed");
+      throw error;
+    }
+  }
+
+  async function handleSaveSpecialLectureSettlementState(draftState) {
+    setSpecialLectureSettlementSaveState("saving");
+    try {
+      const currentResponse = await fetch(apiUrl("/api/app-state"), { cache: "no-store" });
+      const currentResult = await currentResponse.json();
+      if (!currentResponse.ok || !currentResult.ok || currentResult.source !== "supabase") {
+        throw new Error(currentResult.error || "Supabase의 현재 특강 정산 원천을 불러오지 못했습니다.");
+      }
+      const currentState = normalizeSpecialLectureSettlementState(
+        currentResult.states?.[specialLectureSettlementStateKey]
+      );
+      const nextState = createSpecialLectureSettlementStateWithDraft(currentState, draftState);
+      const saveResult = await postAppState({ [specialLectureSettlementStateKey]: nextState });
+      if (!saveResult.ok || saveResult.source !== "supabase") {
+        throw new Error(saveResult.error || "특강 정산이 Supabase에 저장되지 않았습니다.");
+      }
+
+      const verifyResponse = await fetch(apiUrl("/api/app-state"), { cache: "no-store" });
+      const verifyResult = await verifyResponse.json();
+      if (!verifyResponse.ok || !verifyResult.ok || verifyResult.source !== "supabase") {
+        throw new Error(verifyResult.error || "특강 정산 저장 결과를 다시 확인하지 못했습니다.");
+      }
+      const persistedState = normalizeSpecialLectureSettlementState(
+        verifyResult.states?.[specialLectureSettlementStateKey]
+      );
+      if (
+        getSpecialLectureSettlementSaveSnapshot(persistedState) !==
+        getSpecialLectureSettlementSaveSnapshot(nextState)
+      ) {
+        throw new Error("Supabase 재조회 값이 수정한 특강 정산과 다릅니다. 저장 완료로 처리하지 않았습니다.");
+      }
+      setSpecialLectureInstructorSettlements(persistedState);
+      setSpecialLectureSettlementSaveState("saved");
+      return persistedState;
+    } catch (error) {
+      console.error(error);
+      setSpecialLectureSettlementSaveState("failed");
       throw error;
     }
   }
@@ -9511,10 +9573,19 @@ export function App() {
             records={records}
             saveState={monthlySettlementSaveState}
             settlementState={monthlyInstructorSettlements}
+            students={students}
+            onSaveMonth={handleSaveMonthlySettlementMonth}
+          />
+        ) : null}
+
+        {activeView === "specialLectureSettlements" ? (
+          <SpecialLectureSettlementPanel
+            saveState={specialLectureSettlementSaveState}
+            settlementState={specialLectureInstructorSettlements}
             specialLectureEnrollments={specialLectureEnrollments}
             specialLectureGuides={specialLectureGuides}
             students={students}
-            onSaveMonth={handleSaveMonthlySettlementMonth}
+            onSaveState={handleSaveSpecialLectureSettlementState}
           />
         ) : null}
 
@@ -14649,6 +14720,7 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle, su
       title: "운영",
       items: [
         { id: "monthlySettlements", label: "월별 수업 정산", icon: "₩" },
+        { id: "specialLectureSettlements", label: "특강 정산", icon: "₩" },
         { id: "notifications", label: "알림관리", icon: "📣" },
         { id: "settings", label: "설정", icon: "⚙️" }
       ]

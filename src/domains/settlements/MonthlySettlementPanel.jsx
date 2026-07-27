@@ -4,7 +4,6 @@ import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import {
-  buildMonthlySpecialLectureSettlementRows,
   buildMonthlySettlementSummary,
   buildStudentSettlementRow,
   formatSettlementHours,
@@ -171,8 +170,6 @@ export function MonthlySettlementPanel({
   records = [],
   saveState = "idle",
   settlementState,
-  specialLectureEnrollments = [],
-  specialLectureGuides = [],
   students = []
 }) {
   const [selectedMonth, setSelectedMonth] = useState(getCurrentKoreaMonthKey);
@@ -233,29 +230,9 @@ export function MonthlySettlementPanel({
     () => rows.filter((row) => row.setting.excluded),
     [rows]
   );
-  const specialLectureRows = useMemo(
-    () => buildMonthlySpecialLectureSettlementRows({
-      excludedStudentIds: excludedRows.map((row) => row.student.studentId),
-      monthKey: selectedMonth,
-      specialLectureEnrollments,
-      specialLectureGuides,
-      students
-    }),
-    [
-      excludedRows,
-      selectedMonth,
-      specialLectureEnrollments,
-      specialLectureGuides,
-      students
-    ]
-  );
-  const visibleSpecialLectureRows = useMemo(
-    () => specialLectureRows.filter((row) => !row.isExcluded),
-    [specialLectureRows]
-  );
   const summary = useMemo(
-    () => buildMonthlySettlementSummary(rows, specialLectureRows),
-    [rows, specialLectureRows]
+    () => buildMonthlySettlementSummary(rows),
+    [rows]
   );
   const selectedCalendarRow = rows.find((row) => row.student.studentId === selectedCalendarStudentId) ?? null;
   const effectiveSaveState = saveState === "saving"
@@ -378,7 +355,7 @@ export function MonthlySettlementPanel({
         <span>출석·지각·대기는 정산 포함, 결석도 별도 차감 요청이 없으면 자동 차감하지 않습니다.</span>
         <span>보충은 달력에 별도로 남기되 정규 금액을 추가하지 않습니다.</span>
         <span>정산 제외한 행은 이 달 정산표에서 숨기며, 학생·수업일지 원천은 유지합니다.</span>
-        <span>특강비는 특강관리의 단가와 확정 수강 회차·시간을 별도 집계합니다.</span>
+        <span>특강비는 이 월별 정산에서 제외하고 운영의 별도 특강 정산에서 전체 과정 기준으로 계산합니다.</span>
         <span>중등 기본 420,000원 · 중등 주 6시간 308,000원 · 고등 주 6시간 341,000원 · 고등 기본 450,000원</span>
       </div>
 
@@ -397,24 +374,11 @@ export function MonthlySettlementPanel({
           value={formatSettlementWon(summary.regularNetAmount)}
         />
         <MetricCard
-          hint="특강관리 확정 회차·시간과 안내문 단가 합계"
-          icon="+"
-          label="특강 기준 총액"
-          value={formatSettlementWon(summary.specialGrossAmount)}
-        />
-        <MetricCard
-          hint="비율 50% · 원천징수 3.3% · 카드수수료 1.5%"
-          icon="✓"
-          label="특강 예상 수령액"
-          tone="blue"
-          value={formatSettlementWon(summary.specialNetAmount)}
-        />
-        <MetricCard
           hint={`고정 상수 ${formatSettlementPercent(monthlySettlementFactor)}`}
           icon="="
-          label="이번 달 총 예상 수령액"
+          label="이번 달 예상 수령액"
           tone="green"
-          value={formatSettlementWon(summary.totalNetAmount)}
+          value={formatSettlementWon(summary.regularNetAmount)}
         />
       </div>
 
@@ -430,12 +394,7 @@ export function MonthlySettlementPanel({
       ) : null}
       {summary.excludedStudentCount > 0 ? (
         <div className="monthlySettlementExcludedNotice">
-          정산 제외 {summary.excludedStudentCount}명은 현재 표와 정규·특강·조정 합계에서 빠졌습니다. 아래 삭제한 정산 행에서 복원할 수 있습니다.
-        </div>
-      ) : null}
-      {summary.pendingSpecialLectureCount > 0 ? (
-        <div className="monthlySettlementRateWarning">
-          특강 회차 미확정 {summary.pendingSpecialLectureCount}건은 특강관리에서 회차 계획을 확정하기 전까지 0원입니다.
+          정산 제외 {summary.excludedStudentCount}명은 현재 표와 정규·조정 합계에서 빠졌습니다. 아래 삭제한 정산 행에서 복원할 수 있습니다.
         </div>
       ) : null}
 
@@ -634,74 +593,6 @@ export function MonthlySettlementPanel({
           </div>
         </details>
       ) : null}
-
-      <section className="monthlySettlementSpecialSection">
-        <div className="monthlySettlementSubsectionHeader">
-          <div>
-            <h2>특강 정산</h2>
-            <p>특강관리의 학생별 확정 수강 회차와 안내문에 저장된 회차·시간 단가를 읽어 별도 계산합니다.</p>
-          </div>
-          <span>수기 입력 없음 · 특강관리 원천</span>
-        </div>
-        {visibleSpecialLectureRows.length ? (
-          <div className="monthlySettlementTableWrap">
-            <table className="monthlySettlementSpecialTable">
-              <thead>
-                <tr>
-                  <th>학생</th>
-                  <th>특강</th>
-                  <th>해당 월 회차·시간</th>
-                  <th>단가 기준</th>
-                  <th>특강 적용금액</th>
-                </tr>
-              </thead>
-              <tbody>
-                {visibleSpecialLectureRows.map((row) => (
-                  <tr key={`${row.guide.specialLectureGuideId}_${row.student.studentId}`}>
-                    <td>
-                      <strong>{row.student.name}</strong>
-                      <small>{row.student.grade || "학년 미입력"} · {row.student.schoolName || "학교 미입력"}</small>
-                    </td>
-                    <td>
-                      <strong>{row.guide.shortTitle || row.guide.title}</strong>
-                      <small>{row.isConfirmed ? "회차 계획 확정" : "회차 계획 미확정 · 합계 제외"}</small>
-                      {row.sourceEnrollmentCount > 1 ? (
-                        <small className="monthlySettlementSourceWarning">
-                          중복 수강 원천 {row.sourceEnrollmentCount}건 · 같은 회차는 1회만 계산
-                        </small>
-                      ) : null}
-                    </td>
-                    <td>
-                      <strong>{row.sessionCount}회 · {formatSettlementHours(row.totalHours)}</strong>
-                      <small>
-                        {row.sessions.map((session) =>
-                          `${Number(session.dateKey.slice(5, 7))}/${Number(session.dateKey.slice(8, 10))} ${session.startTime}-${session.endTime}`
-                        ).join(" · ")}
-                      </small>
-                    </td>
-                    <td>
-                      <strong>
-                        {row.guide.pricingMode === "perHour"
-                          ? `${formatSettlementWon(row.guide.pricePerHour)}/시간`
-                          : `${formatSettlementWon(row.guide.pricePerSession)}/회`}
-                      </strong>
-                      <small>{row.guide.pricingMode === "perHour" ? "시간 단가" : "회차 단가"}</small>
-                    </td>
-                    <td className="monthlySettlementAmountCell">
-                      <strong>{formatSettlementWon(row.grossAmount)}</strong>
-                      <span>{row.isConfirmed ? "특강 기준 총액 반영" : "특강관리에서 회차 확정 필요"}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="monthlySettlementEmpty">
-            이 달에 특강관리에서 선택된 수강 회차가 없습니다.
-          </div>
-        )}
-      </section>
 
       <StickySaveBar
         className="monthlySettlementSaveBar"

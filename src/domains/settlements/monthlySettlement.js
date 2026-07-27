@@ -2,12 +2,6 @@ import {
   getStudentScheduleForLesson,
   parseStudentScheduleOverride
 } from "../../shared/utils/studentSchedule.js";
-import {
-  calculateSpecialLectureTuition,
-  getSpecialLectureSessionHours,
-  normalizeSpecialLectureEnrollments,
-  normalizeSpecialLectureGuides
-} from "../specialLectures/specialLectureGuideUtils.js";
 
 export const monthlySettlementStateKey = "monthlyInstructorSettlements";
 export const monthlySettlementFactor = 0.5 * 0.967 * 0.985;
@@ -576,157 +570,11 @@ export function buildStudentSettlementRow({
   };
 }
 
-function getSpecialLectureEnrollmentPlans(enrollment = {}) {
-  if (Array.isArray(enrollment.sessionPlans) && enrollment.sessionPlans.length) {
-    return enrollment.sessionPlans
-      .filter((plan) => plan.status !== "excluded")
-      .map((plan) => ({
-        effectiveEndTime: normalizeText(plan.effectiveEndTime),
-        effectiveStartTime: normalizeText(plan.effectiveStartTime),
-        sessionId: normalizeText(plan.sessionId)
-      }))
-      .filter((plan) => plan.sessionId);
-  }
-  return (Array.isArray(enrollment.sessionIds) ? enrollment.sessionIds : [])
-    .map((sessionId) => ({
-      effectiveEndTime: "",
-      effectiveStartTime: "",
-      sessionId: normalizeText(sessionId)
-    }))
-    .filter((plan) => plan.sessionId);
-}
-
-function getSpecialLectureEnrollmentRecency(enrollment = {}) {
-  return normalizeText(
-    enrollment.planReviewedAt ||
-    enrollment.updatedAt ||
-    enrollment.createdAt
-  );
-}
-
-export function buildMonthlySpecialLectureSettlementRows({
-  excludedStudentIds = [],
-  monthKey = "",
-  specialLectureEnrollments = [],
-  specialLectureGuides = [],
-  students = []
-} = {}) {
-  const excludedStudentIdSet = new Set(excludedStudentIds);
-  const studentById = new Map(students.map((student) => [student.studentId, student]));
-  const normalizedGuides = normalizeSpecialLectureGuides(specialLectureGuides);
-  const guideById = new Map(normalizedGuides.map((guide) => [guide.specialLectureGuideId, guide]));
-  const guideBySlug = new Map(normalizedGuides.map((guide) => [guide.slug, guide]));
-  const enrollmentGroups = new Map();
-
-  normalizeSpecialLectureEnrollments(specialLectureEnrollments)
-    .filter((enrollment) => enrollment.status === "active")
-    .forEach((enrollment) => {
-      const guide = guideById.get(enrollment.specialLectureGuideId) ||
-        guideBySlug.get(enrollment.guideSlug);
-      if (!guide || !enrollment.studentId) return;
-      const groupKey = `${guide.specialLectureGuideId}::${enrollment.studentId}`;
-      enrollmentGroups.set(groupKey, [
-        ...(enrollmentGroups.get(groupKey) ?? []),
-        enrollment
-      ]);
-    });
-
-  return [...enrollmentGroups.values()]
-    .map((enrollments) => {
-      const newestFirst = [...enrollments].sort((left, right) =>
-        getSpecialLectureEnrollmentRecency(right)
-          .localeCompare(getSpecialLectureEnrollmentRecency(left))
-      );
-      const confirmedEnrollments = newestFirst.filter((enrollment) => enrollment.planReviewedAt);
-      const sourceEnrollments = confirmedEnrollments.length ? confirmedEnrollments : newestFirst;
-      const primaryEnrollment = sourceEnrollments[0];
-      const guide = guideById.get(primaryEnrollment.specialLectureGuideId) ||
-        guideBySlug.get(primaryEnrollment.guideSlug);
-      const plansBySessionId = new Map();
-      sourceEnrollments.forEach((enrollment) => {
-        getSpecialLectureEnrollmentPlans(enrollment).forEach((plan) => {
-          if (!plansBySessionId.has(plan.sessionId)) {
-            plansBySessionId.set(plan.sessionId, plan);
-          }
-        });
-      });
-      const guideSessionsById = new Map(
-        (Array.isArray(guide?.sessions) ? guide.sessions : [])
-          .map((session) => [session.sessionId, session])
-      );
-      const sessions = [...plansBySessionId.values()]
-        .map((plan) => {
-          const guideSession = guideSessionsById.get(plan.sessionId);
-          if (!guideSession) return null;
-          const effectiveSession = {
-            ...guideSession,
-            endTime: plan.effectiveEndTime || guideSession.endTime,
-            startTime: plan.effectiveStartTime || guideSession.startTime
-          };
-          return {
-            ...effectiveSession,
-            durationHours: roundHours(getSpecialLectureSessionHours(effectiveSession))
-          };
-        })
-        .filter(Boolean)
-        .filter((session) => normalizeText(session.dateKey).startsWith(`${monthKey}-`))
-        .sort((left, right) =>
-          String(left.dateKey).localeCompare(String(right.dateKey)) ||
-          String(left.startTime).localeCompare(String(right.startTime))
-        );
-      if (!sessions.length) return null;
-
-      const isConfirmed = confirmedEnrollments.length > 0;
-      const isExcluded = excludedStudentIdSet.has(primaryEnrollment.studentId);
-      const totalHours = roundHours(
-        sessions.reduce((sum, session) => sum + session.durationHours, 0)
-      );
-      const grossAmount = isConfirmed && !isExcluded
-        ? Math.round(calculateSpecialLectureTuition({
-            pricePerHour: guide.pricePerHour,
-            pricePerSession: guide.pricePerSession,
-            pricingMode: guide.pricingMode,
-            sessionCount: sessions.length,
-            totalHours
-          }))
-        : 0;
-      return {
-        enrollment: primaryEnrollment,
-        grossAmount,
-        guide,
-        isConfirmed,
-        isExcluded,
-        sessionCount: sessions.length,
-        sessions,
-        sourceEnrollmentCount: enrollments.length,
-        student: studentById.get(primaryEnrollment.studentId) ?? {
-          grade: "",
-          name: "학생 연결 누락",
-          schoolName: "",
-          studentId: primaryEnrollment.studentId
-        },
-        totalHours
-      };
-    })
-    .filter(Boolean)
-    .sort((left, right) =>
-      String(left.student.name || "").localeCompare(String(right.student.name || ""), "ko") ||
-      String(left.guide.title || "").localeCompare(String(right.guide.title || ""), "ko")
-    );
-}
-
-export function buildMonthlySettlementSummary(rows = [], specialLectureRows = []) {
+export function buildMonthlySettlementSummary(rows = []) {
   const regularGrossAmount = Math.round(rows.reduce((sum, row) => sum + row.regularGrossAmount, 0));
-  const specialGrossAmount = Math.round(
-    specialLectureRows.reduce((sum, row) => sum + row.grossAmount, 0)
-  );
   const regularNetAmount = Math.round(regularGrossAmount * monthlySettlementFactor);
-  const specialNetAmount = Math.round(specialGrossAmount * monthlySettlementFactor);
   return {
     excludedStudentCount: rows.filter((row) => row.setting.excluded).length,
-    pendingSpecialLectureCount: specialLectureRows.filter(
-      (row) => !row.isConfirmed && !row.isExcluded
-    ).length,
     prorationScheduleMissingCount: rows.filter((row) =>
       !row.setting.excluded &&
       row.setting.mode !== "fixed" &&
@@ -735,9 +583,6 @@ export function buildMonthlySettlementSummary(rows = [], specialLectureRows = []
     ).length,
     regularGrossAmount,
     regularNetAmount,
-    specialGrossAmount,
-    specialNetAmount,
-    totalNetAmount: regularNetAmount + specialNetAmount,
     unsetRateCount: rows.filter((row) => !row.setting.excluded && !row.hasFixedAmount).length
   };
 }

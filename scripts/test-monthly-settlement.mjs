@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import {
   buildMonthlyScheduleEvents,
-  buildMonthlySpecialLectureSettlementRows,
   buildMonthlySettlementSummary,
   buildStudentSettlementRow,
   getDefaultFixedAmountForStudent,
@@ -14,6 +13,13 @@ import {
   monthlySettlementFactor,
   normalizeMonthlySettlementStudentSetting
 } from "../src/domains/settlements/monthlySettlement.js";
+import {
+  buildSpecialLectureSettlementRows,
+  buildSpecialLectureSettlementSummary,
+  createSpecialLectureSettlementStateWithDraft,
+  getSpecialLectureSettlementSaveSnapshot,
+  normalizeSpecialLectureSettlementState
+} from "../src/domains/settlements/specialLectureSettlement.js";
 
 const monthKey = "2026-07";
 const student = {
@@ -352,6 +358,10 @@ const specialLectureEnrollments = [
         status: "active",
         effectiveStartTime: "14:00",
         effectiveEndTime: "16:00"
+      },
+      {
+        sessionId: "hourly_session_august",
+        status: "active"
       }
     ]
   },
@@ -370,8 +380,7 @@ const specialLectureEnrollments = [
     sessionIds: ["hourly_session_1"]
   }
 ];
-const specialLectureRows = buildMonthlySpecialLectureSettlementRows({
-  monthKey,
+const specialLectureRows = buildSpecialLectureSettlementRows({
   specialLectureEnrollments,
   specialLectureGuides,
   students: [journalOnlyStudent, pendingSpecialStudent]
@@ -384,21 +393,122 @@ const pendingSpecialRow = specialLectureRows.find((row) =>
   row.student.studentId === pendingSpecialStudent.studentId
 );
 assert.equal(confirmedSpecialRow.sourceEnrollmentCount, 2, "같은 학생·특강의 중복 수강 원천은 한 행으로 묶어야 합니다.");
-assert.equal(confirmedSpecialRow.sessionCount, 2, "중복된 같은 회차는 한 번만 세고 서로 다른 확정 회차는 합쳐야 합니다.");
-assert.equal(confirmedSpecialRow.totalHours, 4, "학생별 유효 수업시간 변경을 특강 시수에 반영해야 합니다.");
-assert.equal(confirmedSpecialRow.grossAmount, 50000, "시간제 특강은 확정 시수와 특강관리 시간 단가로 계산해야 합니다.");
+assert.equal(confirmedSpecialRow.sessionCount, 3, "특강 정산은 월 경계를 두지 않고 7월·8월 전체 확정 회차를 합쳐야 합니다.");
+assert.equal(confirmedSpecialRow.totalHours, 7, "학생별 유효 수업시간 변경과 다른 달 회차를 전체 특강 시수에 반영해야 합니다.");
+assert.equal(confirmedSpecialRow.grossAmount, 87500, "시간제 특강은 전체 확정 시수와 특강관리 시간 단가로 계산해야 합니다.");
 assert.equal(pendingSpecialRow.isConfirmed, false);
 assert.equal(pendingSpecialRow.grossAmount, 0, "회차 계획 미확정 수강은 특강 합계에 넣지 않아야 합니다.");
+
+const clinicGuide = {
+  specialLectureGuideId: "guide_clinic",
+  slug: "guide-clinic",
+  title: "여름 개별 진도 클리닉",
+  pricingMode: "perSession",
+  pricePerSession: 37500,
+  sessions: [
+    "2026-07-22",
+    "2026-07-24",
+    "2026-07-27",
+    "2026-07-29",
+    "2026-07-31",
+    "2026-08-03",
+    "2026-08-05",
+    "2026-08-07"
+  ].map((dateKey, index) => ({
+    dateKey,
+    endTime: "16:00",
+    sessionId: `clinic_session_${index + 1}`,
+    startTime: "13:00",
+    topic: `${index + 1}회차`
+  }))
+};
+const clinicStudents = [
+  { grade: "중3", name: "김연우", studentId: "student_clinic_yeonwoo" },
+  { grade: "중3", name: "김보현", studentId: "student_clinic_bohyeon" },
+  { grade: "중3", name: "신초봄", studentId: "student_clinic_chobom" }
+];
+const clinicEnrollments = clinicStudents.map((clinicStudent, index) => {
+  const sessionCount = [7, 5, 5][index];
+  return {
+    enrollmentId: `enrollment_${clinicStudent.studentId}`,
+    planReviewedAt: "2026-07-27T00:00:00.000Z",
+    specialLectureGuideId: clinicGuide.specialLectureGuideId,
+    status: "active",
+    studentId: clinicStudent.studentId,
+    sessionIds: clinicGuide.sessions.slice(index === 0 ? 1 : 0, (index === 0 ? 1 : 0) + sessionCount)
+      .map((session) => session.sessionId)
+  };
+});
+const specialManualState = normalizeSpecialLectureSettlementState({
+  guideSettings: {
+    [clinicGuide.specialLectureGuideId]: {
+      studentSettings: {
+        student_clinic_bohyeon: {
+          billableSessionCount: 3,
+          mode: "sessionCount",
+          note: "특강 참여 중 정규 보강 대체분 2회를 제외하고 유료 3회 적용"
+        },
+        student_clinic_chobom: {
+          fixedAmount: 116000,
+          mode: "fixedAmount",
+          note: "선생님 확정 특강비"
+        }
+      }
+    }
+  },
+  updatedAt: "2026-07-27T00:00:00.000Z",
+  version: 2
+});
+const clinicRows = buildSpecialLectureSettlementRows({
+  settlementState: specialManualState,
+  specialLectureEnrollments: clinicEnrollments,
+  specialLectureGuides: [clinicGuide],
+  students: clinicStudents
+});
+const yeonwooClinicRow = clinicRows.find((row) => row.student.name === "김연우");
+const bohyeonClinicRow = clinicRows.find((row) => row.student.name === "김보현");
+const chobomClinicRow = clinicRows.find((row) => row.student.name === "신초봄");
+assert.equal(yeonwooClinicRow.sessionCount, 7, "김연우는 7월 24일부터 전체 7회 수강 원천을 표시해야 합니다.");
+assert.equal(yeonwooClinicRow.grossAmount, 262500, "김연우 7회는 회차당 37,500원으로 자동 계산해야 합니다.");
+assert.equal(bohyeonClinicRow.sessionCount, 5, "김보현 실제 특강 참여 5회 원천은 필터링하거나 삭제하지 않아야 합니다.");
+assert.equal(bohyeonClinicRow.billableSessionCount, 3, "김보현은 별도 수기값으로 유료 3회를 적용해야 합니다.");
+assert.equal(bohyeonClinicRow.grossAmount, 112500);
+assert.equal(chobomClinicRow.sessionCount, 5, "신초봄 실제 특강 회차는 직접 금액과 별개로 보존해야 합니다.");
+assert.equal(chobomClinicRow.grossAmount, 116000, "신초봄은 계산식 대신 직접 확정한 특강비를 사용해야 합니다.");
 assert.equal(
-  buildMonthlySpecialLectureSettlementRows({
-    excludedStudentIds: [journalOnlyStudent.studentId],
-    monthKey,
-    specialLectureEnrollments,
-    specialLectureGuides,
-    students: [journalOnlyStudent, pendingSpecialStudent]
-  }).find((row) => row.student.studentId === journalOnlyStudent.studentId).grossAmount,
-  0,
-  "월별 정산에서 제외한 학생은 특강관리 원천 금액도 이 달 합계에서 제외해야 합니다."
+  buildSpecialLectureSettlementSummary(clinicRows).manualOverrideCount,
+  2,
+  "회차 조정과 직접 금액 입력을 수동 정산으로 구분해야 합니다."
+);
+const mergedSpecialState = createSpecialLectureSettlementStateWithDraft(
+  {
+    guideSettings: {
+      [clinicGuide.specialLectureGuideId]: {
+        studentSettings: {
+          student_concurrent_saved: {
+            fixedAmount: 50000,
+            mode: "fixedAmount",
+            note: "다른 저장값"
+          }
+        }
+      }
+    },
+    updatedAt: "2026-07-26T00:00:00.000Z",
+    version: 4
+  },
+  specialManualState
+);
+assert.equal(mergedSpecialState.version, 5);
+assert.equal(
+  mergedSpecialState.guideSettings[clinicGuide.specialLectureGuideId]
+    .studentSettings.student_concurrent_saved.fixedAmount,
+  50000,
+  "저장 직전 재조회에서 발견한 같은 특강의 다른 학생 설정을 덮어쓰지 않아야 합니다."
+);
+assert.equal(
+  getSpecialLectureSettlementSaveSnapshot(mergedSpecialState),
+  getSpecialLectureSettlementSaveSnapshot(normalizeSpecialLectureSettlementState(mergedSpecialState)),
+  "특강 정산 저장 snapshot은 Supabase 재조회 정규화 뒤에도 같아야 합니다."
 );
 
 const fixedRow = buildStudentSettlementRow({
@@ -591,16 +701,12 @@ assert.equal(
   "정산 제외 상태는 월별 Supabase 재조회 대조 스냅샷에 포함되어야 합니다."
 );
 
-const summary = buildMonthlySettlementSummary([fixedRow], specialLectureRows);
+const summary = buildMonthlySettlementSummary([fixedRow]);
 assert.equal(summary.regularGrossAmount, 450000);
-assert.equal(summary.specialGrossAmount, 50000);
 assert.equal(summary.regularNetAmount, Math.round(450000 * monthlySettlementFactor));
-assert.equal(summary.specialNetAmount, Math.round(50000 * monthlySettlementFactor));
-assert.equal(summary.totalNetAmount, summary.regularNetAmount + summary.specialNetAmount);
-assert.equal(summary.pendingSpecialLectureCount, 1);
-const excludedSummary = buildMonthlySettlementSummary([fixedRow, excludedRow], []);
+assert.equal(summary.specialGrossAmount, undefined, "월별 정규 정산 summary에는 특강 금액을 섞지 않아야 합니다.");
+const excludedSummary = buildMonthlySettlementSummary([fixedRow, excludedRow]);
 assert.equal(excludedSummary.regularGrossAmount, fixedRow.regularGrossAmount);
-assert.equal(excludedSummary.specialGrossAmount, 0);
 assert.equal(excludedSummary.excludedStudentCount, 1);
 
 console.log("monthly settlement tests passed");

@@ -75,7 +75,7 @@
 }
 
 .metricGrid.monthlySettlementMetrics {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .monthlySettlementRateWarning {
@@ -442,73 +442,6 @@
   font-weight: 800;
   min-height: 34px;
   padding: 6px 12px;
-}
-
-.monthlySettlementSpecialSection {
-  display: grid;
-  gap: 12px;
-}
-
-.monthlySettlementSpecialTable {
-  border-collapse: separate;
-  border-spacing: 0;
-  min-width: 1040px;
-  width: 100%;
-}
-
-.monthlySettlementSpecialTable th {
-  background: #f0f8f5;
-  border-bottom: 1px solid #d7e1ef;
-  color: #42665a;
-  font-size: 12px;
-  padding: 11px 10px;
-  text-align: left;
-  white-space: nowrap;
-}
-
-.monthlySettlementSpecialTable td {
-  border-bottom: 1px solid #e7edf6;
-  min-width: 150px;
-  padding: 11px 10px;
-  vertical-align: top;
-}
-
-.monthlySettlementSpecialTable tr:last-child td {
-  border-bottom: 0;
-}
-
-.monthlySettlementSpecialTable td:nth-child(1) {
-  min-width: 150px;
-}
-
-.monthlySettlementSpecialTable td:nth-child(2) {
-  min-width: 230px;
-}
-
-.monthlySettlementSpecialTable td:nth-child(3) {
-  min-width: 360px;
-}
-
-.monthlySettlementSpecialTable strong,
-.monthlySettlementSpecialTable small {
-  display: block;
-}
-
-.monthlySettlementSpecialTable strong {
-  color: #2a4058;
-  font-size: 13px;
-}
-
-.monthlySettlementSpecialTable small {
-  color: #718096;
-  font-size: 11px;
-  line-height: 1.5;
-  margin-top: 4px;
-}
-
-.monthlySettlementSpecialTable .monthlySettlementSourceWarning {
-  color: #9a5d11;
-  font-weight: 700;
 }
 
 .monthlySettlementEmpty {
