@@ -8907,7 +8907,28 @@ button:disabled {
 }
 
 .specialLectureMatchActions {
+  flex-wrap: wrap;
   justify-content: space-between;
+}
+
+.specialLectureTallyMergePreview {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+}
+
+.specialLectureTallyMergePreview strong {
+  color: #1e3a8a;
+}
+
+.specialLectureTallyMergePreview span,
+.specialLectureTallyMergePreview small {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .specialLectureSessionModalSummary {
@@ -10836,6 +10857,54 @@ button:disabled {
   color: #0f172a;
   min-height: 40px;
   padding: 0 12px;
+}
+
+.studentIntakeMergeTarget {
+  align-items: end;
+  background: #f8fafc;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(280px, 1.1fr);
+  padding: 12px;
+}
+
+.studentIntakeMergeTarget.matched {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.studentIntakeMergeTarget label,
+.studentIntakeMergeTarget > div {
+  display: grid;
+  gap: 6px;
+}
+
+.studentIntakeMergeTarget label {
+  color: #334155;
+  font-weight: 900;
+}
+
+.studentIntakeMergeTarget select {
+  background: #ffffff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  color: #0f172a;
+  min-height: 42px;
+  padding: 0 12px;
+  width: 100%;
+}
+
+.studentIntakeMergeTarget strong {
+  color: #1e3a8a;
+}
+
+.studentIntakeMergeTarget span,
+.studentIntakeMergeTarget small {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .deleteConfirmBody {
@@ -19026,7 +19095,8 @@ body.attendanceOnlyBody {
   .specialLecturePlanProgressDetail,
   .specialLectureProgressSummary,
   .specialLectureRosterSearch,
-  .specialLectureSessionModalControls {
+  .specialLectureSessionModalControls,
+  .studentIntakeMergeTarget {
     grid-template-columns: 1fr;
   }
 
@@ -19048,6 +19118,7 @@ body.attendanceOnlyBody {
   .specialLectureAttentionActions,
   .specialLectureAttentionActions button,
   .specialLectureAttentionItem > button,
+  .specialLectureMatchActions button,
   .specialLectureDismissibleNotice {
     width: 100%;
   }

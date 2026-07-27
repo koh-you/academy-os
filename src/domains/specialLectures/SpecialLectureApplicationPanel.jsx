@@ -3,6 +3,7 @@ import { copyTextToClipboard } from "../exams/outputPreview.js";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { apiUrl } from "../../shared/utils/apiClient.js";
+import { getTallyStudentMergeChanges } from "../students/tallyStudentMerge.js";
 import {
   createSpecialLectureEnrollmentId,
   createSpecialLectureLessonId,
@@ -239,13 +240,20 @@ function getEnrollmentPlansFromApplication(application = {}, guideSessions = [])
   });
 }
 
-function buildEnrollmentFromMatchRow(row, guide, guideSessions = [], existingEnrollment = null) {
+function buildEnrollmentFromMatchRow(row, guide, guideSessions = [], existingEnrollment = null, options = {}) {
   const studentId = row.student?.studentId ?? "";
   const requestedPlans = getEnrollmentPlansFromApplication(row.application, guideSessions);
   const defaultSessionIds = guideSessions.map((session) => session.sessionId);
-  const sessionPlans = existingEnrollment?.sessionPlans?.length
+  const shouldUseTallyPlans = Boolean(requestedPlans) && (
+    options.applyTallyPlan ||
+    !existingEnrollment ||
+    !existingEnrollment.planReviewedAt
+  );
+  const sessionPlans = shouldUseTallyPlans
+    ? requestedPlans
+    : existingEnrollment?.sessionPlans?.length
     ? existingEnrollment.sessionPlans
-    : requestedPlans ?? defaultSessionIds.map((sessionId) => ({
+    : defaultSessionIds.map((sessionId) => ({
         sessionId,
         status: "excluded",
         effectiveStartTime: "",
@@ -262,8 +270,8 @@ function buildEnrollmentFromMatchRow(row, guide, guideSessions = [], existingEnr
     status: "active",
     sessionIds: sessionPlans.filter((plan) => plan.status === "active").map((plan) => plan.sessionId),
     sessionPlans,
-    planSource: existingEnrollment?.planSource || (requestedPlans ? "tally_request" : "manual"),
-    planReviewedAt: existingEnrollment?.planReviewedAt || "",
+    planSource: shouldUseTallyPlans ? "tally_request" : existingEnrollment?.planSource || "manual",
+    planReviewedAt: options.applyTallyPlan && shouldUseTallyPlans ? "" : existingEnrollment?.planReviewedAt || "",
     memo: existingEnrollment?.memo || row.application.selectedSession || row.application.memo || "",
     createdAt: existingEnrollment?.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -365,6 +373,7 @@ export function SpecialLectureApplicationPanel({
   onCreateSpecialLectureLessons,
   onCreateStudent,
   onDeleteApplication,
+  onMergeStudent,
   onOpenLesson,
   onSaveEnrollment,
   onSaveEnrollments,
@@ -562,6 +571,10 @@ export function SpecialLectureApplicationPanel({
       return [student.name, student.schoolName, student.grade, student.className]
         .some((value) => String(value ?? "").toLowerCase().includes(query));
     });
+  const matchSelectedStudent = students.find((student) => student.studentId === matchStudentId) ?? null;
+  const matchTallyChanges = matchApplication && matchSelectedStudent
+    ? getTallyStudentMergeChanges(matchSelectedStudent, matchApplication)
+    : [];
   function getEnrollmentProgressRows(enrollment) {
     if (!enrollment) return [];
     const plans = getSpecialLectureEnrollmentSessionPlans(enrollment, guideSessions);
@@ -604,7 +617,7 @@ export function SpecialLectureApplicationPanel({
     }
   }
 
-  async function confirmApplicationWithStudent(application, student) {
+  async function confirmApplicationWithStudent(application, student, options = {}) {
     if (!onUpdateApplication || !onSaveEnrollment || !selectedGuide || !isGuideSaved) return;
     const existingEnrollment = enrollmentByStudentId.get(student.studentId);
     if (existingEnrollment?.applicationId && existingEnrollment.applicationId !== application.applicationId) {
@@ -613,24 +626,36 @@ export function SpecialLectureApplicationPanel({
     }
     setUpdatingApplicationId(application.applicationId);
     setPanelMessage("");
+    let studentMergeSaved = false;
     try {
+      const confirmedStudent = options.overwriteTallyStudent
+        ? await onMergeStudent(student.studentId, application)
+        : student;
+      studentMergeSaved = Boolean(options.overwriteTallyStudent);
       const confirmedApplication = application.status === "confirmed"
         ? application
         : await onUpdateApplication(application.applicationId, { status: "confirmed" });
       const enrollment = buildEnrollmentFromMatchRow(
-        { application: confirmedApplication ?? { ...application, status: "confirmed" }, student },
+        { application: confirmedApplication ?? { ...application, status: "confirmed" }, student: confirmedStudent },
         selectedGuide,
         guideSessions,
-        existingEnrollment
+        existingEnrollment,
+        { applyTallyPlan: Boolean(options.applyTallyPlan) }
       );
       const savedEnrollment = await onSaveEnrollment(enrollment);
       openPlanModal(savedEnrollment ?? enrollment);
       setMatchApplication(null);
       setMatchSearchText("");
       setMatchStudentId("");
-      setPanelMessage(`${student.name} 학생을 확정 명단에 연결했습니다. 모달에서 수강 회차와 시간을 확인해 주세요.`);
+      setPanelMessage(
+        `${confirmedStudent.name} 학생${studentMergeSaved ? "의 Tally 기본정보를 반영하고" : "을"} 확정 명단에 연결했습니다. 모달에서 Tally 회차와 시간을 확인해 저장해 주세요.`
+      );
     } catch (error) {
-      setPanelMessage(`특강 확정 준비 실패: ${error.message}`);
+      setPanelMessage(
+        studentMergeSaved
+          ? `학생 Tally 정보는 저장됐지만 특강 연결에 실패했습니다: ${error.message}`
+          : `특강 확정 준비 실패: ${error.message}`
+      );
     } finally {
       setUpdatingApplicationId("");
     }
@@ -644,6 +669,13 @@ export function SpecialLectureApplicationPanel({
     }
     const match = getSpecialLectureStudentMatch(application, students);
     if (match.status === "matched" && match.student) {
+      if (application.source === "tally") {
+        setMatchApplication(application);
+        setMatchStudentId(match.student.studentId);
+        setMatchSearchText(application.studentName || "");
+        setPanelMessage(`${application.studentName || "신청자"}의 기존 학생을 확인했습니다. Tally 정보 덮어쓰기 여부를 선택해 주세요.`);
+        return;
+      }
       await confirmApplicationWithStudent(application, match.student);
       return;
     }
@@ -653,14 +685,24 @@ export function SpecialLectureApplicationPanel({
     setPanelMessage(`${application.studentName || "신청자"} 학생을 전체 학생 명단에서 직접 선택하거나 특강 전용 학생으로 등록해 주세요.`);
   }
 
-  async function confirmManualStudentMatch() {
+  async function confirmManualStudentMatch({ overwriteTallyStudent = false } = {}) {
     if (!matchApplication || !matchStudentId) return;
     const student = students.find((item) => item.studentId === matchStudentId);
     if (!student) {
       setPanelMessage("연결할 학생을 찾지 못했습니다.");
       return;
     }
-    await confirmApplicationWithStudent(matchApplication, student);
+    if (overwriteTallyStudent) {
+      const changeLabels = matchTallyChanges.map((change) => change.label).join(", ") || "변경할 기본정보 없음";
+      const confirmed = window.confirm(
+        `${student.name} 기존 학생에 Tally 정보를 덮어쓰고 특강 신청을 연결할까요?\n\n반영 항목: ${changeLabels}\n학생 ID, 로그인, PIN, 정규반, 교재, 개별 시간표와 기존 수업·출결은 유지됩니다. Tally 회차는 미검토 초안으로 저장해 확인 전 수업일지에 자동 반영하지 않습니다.`
+      );
+      if (!confirmed) return;
+    }
+    await confirmApplicationWithStudent(matchApplication, student, {
+      applyTallyPlan: overwriteTallyStudent,
+      overwriteTallyStudent
+    });
   }
 
   async function deleteErrorApplication(application) {
@@ -948,6 +990,14 @@ export function SpecialLectureApplicationPanel({
 
   async function addMatchedRowsToEnrollmentSource() {
     if (!onSaveEnrollments || !isGuideSaved || !selectedGuide || !guideSessionIds.length || !missingEnrollmentRows.length) return;
+    const firstTallyRow = missingEnrollmentRows.find((row) => row.application.source === "tally");
+    if (firstTallyRow) {
+      setMatchApplication(firstTallyRow.application);
+      setMatchStudentId(firstTallyRow.student?.studentId ?? "");
+      setMatchSearchText(firstTallyRow.application.studentName || "");
+      setPanelMessage(`${firstTallyRow.application.studentName || "신청자"}의 Tally 정보와 기존 학생을 먼저 확인해 주세요.`);
+      return;
+    }
     setPanelMessage("");
     setSavingEnrollmentId("bulk");
     try {
@@ -1317,7 +1367,11 @@ export function SpecialLectureApplicationPanel({
               onClick={addMatchedRowsToEnrollmentSource}
               type="button"
             >
-              {savingEnrollmentId === "bulk" ? "저장 중" : "확정 명단에 추가"}
+              {savingEnrollmentId === "bulk"
+                ? "저장 중"
+                : missingEnrollmentRows.some((row) => row.application.source === "tally")
+                  ? "Tally 학생 확인 후 연결"
+                  : "확정 명단에 추가"}
             </button>
           </div>
         ) : null}
@@ -1511,8 +1565,8 @@ export function SpecialLectureApplicationPanel({
         >
           <div className="specialLectureModalBody">
             <div className="noticeBox specialLectureNoticeBox">
-              <strong>다른 반 학생도 연결할 수 있습니다.</strong>
-              <p>현재 특강이나 정규반 소속과 관계없이 Academy OS 전체 학생에서 선택합니다. 목록에 없다면 아래 버튼으로 특강 전용 학생을 먼저 등록합니다.</p>
+              <strong>정규반 미배정 학생과 다른 반 학생도 연결할 수 있습니다.</strong>
+              <p>정규반 배정 여부와 관계없이 Academy OS의 모든 재원 학생에서 선택합니다. 이름만 먼저 등록한 학생이라면 Tally 기본정보를 같은 학생 ID에 덮어쓴 뒤 연결할 수 있습니다.</p>
             </div>
             <div className="specialLectureRosterSearch">
               <label>
@@ -1536,10 +1590,25 @@ export function SpecialLectureApplicationPanel({
                     type="radio"
                   />
                   <strong>{student.name}</strong>
-                  <span>{[student.schoolName, student.grade, student.className].filter(Boolean).join(" · ") || "학생 정보 미입력"}</span>
+                  <span>
+                    {[student.schoolName, student.grade].filter(Boolean).join(" · ") || "학생 정보 미입력"}
+                    {" · "}
+                    {student.defaultClassTemplateId ? "정규반 배정" : "정규반 미배정"}
+                  </span>
                 </label>
               )) : <p className="specialLectureGateEmpty">검색 결과가 없습니다. 신청자를 특강 전용 학생으로 등록할 수 있습니다.</p>}
             </div>
+            {matchApplication.source === "tally" && matchSelectedStudent ? (
+              <div className="specialLectureTallyMergePreview">
+                <strong>{matchSelectedStudent.name} 기존 학생에 Tally 정보 반영</strong>
+                <span>
+                  {matchTallyChanges.length
+                    ? `변경 예정: ${matchTallyChanges.map((change) => change.label).join(", ")}`
+                    : "학생 기본정보가 이미 Tally와 같습니다."}
+                </span>
+                <small>학생 ID·로그인·PIN·정규반·교재·개별 시간표·기존 수업/출결은 유지됩니다.</small>
+              </div>
+            ) : null}
             <div className="specialLectureModalActions specialLectureMatchActions">
               <button
                 className="softButton"
@@ -1550,13 +1619,23 @@ export function SpecialLectureApplicationPanel({
                 {updatingApplicationId === matchApplication.applicationId ? "등록 중" : "신청자를 특강 전용 학생으로 등록"}
               </button>
               <button
-                className="primaryButton"
+                className={matchApplication.source === "tally" ? "softButton" : "primaryButton"}
                 disabled={!matchStudentId || updatingApplicationId === matchApplication.applicationId}
-                onClick={confirmManualStudentMatch}
+                onClick={() => confirmManualStudentMatch()}
                 type="button"
               >
-                {updatingApplicationId === matchApplication.applicationId ? "연결 중" : "선택 학생 연결 및 회차 설정"}
+                {updatingApplicationId === matchApplication.applicationId ? "연결 중" : "학생정보 유지하고 연결"}
               </button>
+              {matchApplication.source === "tally" ? (
+                <button
+                  className="primaryButton"
+                  disabled={!matchStudentId || !onMergeStudent || updatingApplicationId === matchApplication.applicationId}
+                  onClick={() => confirmManualStudentMatch({ overwriteTallyStudent: true })}
+                  type="button"
+                >
+                  {updatingApplicationId === matchApplication.applicationId ? "덮어쓰기 중" : "Tally 정보 덮어쓰기 후 연결"}
+                </button>
+              ) : null}
             </div>
           </div>
         </Modal>
@@ -1593,7 +1672,11 @@ export function SpecialLectureApplicationPanel({
                     type="checkbox"
                   />
                   <strong>{student.name}</strong>
-                  <span>{[student.schoolName, student.grade, student.className].filter(Boolean).join(" · ") || "학생 정보 미입력"}</span>
+                  <span>
+                    {[student.schoolName, student.grade].filter(Boolean).join(" · ") || "학생 정보 미입력"}
+                    {" · "}
+                    {student.defaultClassTemplateId ? "정규반 배정" : "정규반 미배정"}
+                  </span>
                 </label>
               )) : <p className="specialLectureGateEmpty">추가할 수 있는 학생이 없습니다.</p>}
             </div>

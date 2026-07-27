@@ -8,6 +8,12 @@ import {
 } from "../domains/exams/finalPreview.js";
 import { ExamAnalysisFinalPreviewPanel } from "../domains/exams/ExamAnalysisFinalPreviewPanel.jsx";
 import { StudentManager } from "../domains/students/StudentManager.jsx";
+import {
+  getDefaultTallyStudentId,
+  getTallyStudentMergeCandidates,
+  getTallyStudentMergeChanges,
+  mergeTallyStudentValues
+} from "../domains/students/tallyStudentMerge.js";
 import { ParentPortal } from "../domains/portals/ParentPortal.jsx";
 import { calculateAttendanceStats } from "../domains/portals/StudentMyPageTab.jsx";
 import { StudentPortalShell } from "../domains/portals/StudentPortalShell.jsx";
@@ -5909,6 +5915,73 @@ export function App() {
     return savedStudent;
   }
 
+  async function handleMergeSpecialLectureStudent(studentId, application = {}) {
+    const normalizedStudentId = String(studentId ?? "").trim();
+    if (!normalizedStudentId) throw new Error("Tally 정보를 반영할 기존 학생을 선택해 주세요.");
+    const studentsBeforeResult = await getJsonWithTimeout(
+      "/api/students",
+      15000,
+      "기존 학생 확인이 15초를 넘었습니다. 중복 등록하지 말고 다시 확인해 주세요."
+    );
+    if (studentsBeforeResult.source !== "supabase") {
+      throw new Error("기존 학생을 Supabase에서 확인하지 못해 Tally 덮어쓰기를 중단했습니다.");
+    }
+    const existingStudent = (studentsBeforeResult.students ?? [])
+      .find((student) => student.studentId === normalizedStudentId);
+    if (!existingStudent) throw new Error("선택한 기존 학생을 Supabase에서 찾지 못했습니다.");
+    if (!isActiveStudent(existingStudent)) {
+      throw new Error("퇴원 학생에는 Tally 정보를 덮어쓸 수 없습니다. 퇴원 취소 또는 다른 학생을 선택해 주세요.");
+    }
+    const nextStudent = mergeTallyStudentValues(existingStudent, application);
+    const mergeChanges = getTallyStudentMergeChanges(existingStudent, application);
+    if (mergeChanges.length === 0) return existingStudent;
+
+    const saveResult = await postJsonWithTimeout(
+      "/api/students",
+      { student: nextStudent },
+      15000,
+      "Tally 학생정보 저장이 15초를 넘었습니다. 중복 실행하지 말고 상태를 다시 확인해 주세요."
+    );
+    if (saveResult.source !== "supabase") {
+      throw new Error("Tally 학생정보가 Supabase가 아닌 임시 원천에 저장되어 완료할 수 없습니다.");
+    }
+    const studentsAfterResult = await getJsonWithTimeout(
+      "/api/students",
+      15000,
+      "Tally 학생정보 저장 확인이 15초를 넘었습니다. 다시 실행하지 말고 잠시 뒤 새로고침해 주세요."
+    );
+    if (studentsAfterResult.source !== "supabase") {
+      throw new Error("Tally 학생정보 저장 결과를 Supabase에서 다시 확인하지 못했습니다.");
+    }
+    const savedStudent = (studentsAfterResult.students ?? [])
+      .find((student) => student.studentId === normalizedStudentId);
+    if (!savedStudent) throw new Error("저장 후 Supabase 재조회에서 기존 학생을 찾지 못했습니다.");
+    const verificationFields = [
+      "studentId",
+      "loginId",
+      "pin",
+      "name",
+      "birthYear",
+      "schoolName",
+      "grade",
+      "studentPhone",
+      "parentPhone",
+      "textbook",
+      "specialNote",
+      "defaultClassTemplateId",
+      "scheduleOverride",
+      "status"
+    ];
+    const mismatchedFields = verificationFields.filter((field) =>
+      String(savedStudent[field] ?? "") !== String(nextStudent[field] ?? "")
+    );
+    if (mismatchedFields.length > 0) {
+      throw new Error(`Tally 학생정보 재조회 값이 다릅니다: ${mismatchedFields.join(", ")}`);
+    }
+    setStudents(studentsAfterResult.students ?? []);
+    return savedStudent;
+  }
+
   function getSpecialLectureEnrollmentSaveSnapshot(enrollment) {
     const normalized = normalizeSpecialLectureEnrollment(enrollment);
     return JSON.stringify({
@@ -7106,26 +7179,37 @@ export function App() {
       });
   }
 
-  async function handleRegisterStudentIntakeApplicant(applicantId, values) {
+  async function handleRegisterStudentIntakeApplicant(applicantId, values, options = {}) {
     const applicant = studentIntakeApplicants.find((item) => item.applicantId === applicantId);
     if (!applicant) throw new Error("등록할 Tally 후보를 찾지 못했습니다.");
     if (studentIntakeRegistrationStates[applicantId] === "saving") return;
+    const targetStudentId = String(options.targetStudentId ?? "").trim();
 
     setStudentIntakeRegistrationStates((current) => ({ ...current, [applicantId]: "saving" }));
     setStudentIntakeRegistrationMessages((current) => ({ ...current, [applicantId]: "학생 원천 저장 중" }));
 
     try {
-      const studentId = `student_intake_${safeIdPart(applicantId)}`;
+      const generatedStudentId = `student_intake_${safeIdPart(applicantId)}`;
       const studentsBeforeResult = await getJsonWithTimeout(
         "/api/students",
         15000,
         "학생 원천 확인이 15초를 넘었습니다. 잠시 뒤 다시 시도해 주세요."
       );
-      const existingStudent = (studentsBeforeResult.students ?? []).find((item) => item.studentId === studentId);
-      const studentDraft = createStudentFromFormValues({
+      if (studentsBeforeResult.source !== "supabase") {
+        throw new Error("학생 원천을 Supabase에서 확인하지 못해 Tally 등록을 중단했습니다.");
+      }
+      const persistedStudentsBefore = studentsBeforeResult.students ?? [];
+      const existingStudent = persistedStudentsBefore.find((item) =>
+        item.studentId === (targetStudentId || generatedStudentId)
+      );
+      if (targetStudentId && !existingStudent) {
+        throw new Error("선택한 기존 학생을 Supabase 재조회에서 찾지 못했습니다.");
+      }
+      if (targetStudentId && !isActiveStudent(existingStudent)) {
+        throw new Error("퇴원 학생에는 Tally 정보를 덮어쓸 수 없습니다. 퇴원 취소 또는 다른 학생을 선택해 주세요.");
+      }
+      const tallyValues = {
         ...values,
-        studentId,
-        loginId: existingStudent?.loginId,
         name: values.name || applicant.name,
         birthYear: values.birthYear || applicant.birthYear,
         grade: values.grade || applicant.grade,
@@ -7134,14 +7218,24 @@ export function App() {
         parentPhone: values.parentPhone || applicant.parentPhone,
         specialNote: values.specialNote || applicant.specialNote || applicant.memo,
         defaultClassTemplateId: values.defaultClassTemplateId ?? applicant.defaultClassTemplateId ?? ""
-      });
+      };
+      const studentDraft = existingStudent
+        ? mergeTallyStudentValues(existingStudent, tallyValues)
+        : createStudentFromFormValues({
+            ...tallyValues,
+            studentId: generatedStudentId
+          });
+      const previousClassTemplateId = existingStudent?.defaultClassTemplateId ?? "";
       const studentSaveResult = await postJsonWithTimeout(
         "/api/students",
         { student: studentDraft },
         15000,
         "학생 저장이 15초를 넘었습니다. 중복 등록하지 말고 저장 상태를 다시 확인해 주세요."
       );
-      const savedStudentId = studentSaveResult.student?.studentId || studentId;
+      if (studentSaveResult.source !== "supabase") {
+        throw new Error("학생 정보가 Supabase가 아닌 임시 원천에 저장되어 완료할 수 없습니다.");
+      }
+      const savedStudentId = studentSaveResult.student?.studentId || studentDraft.studentId;
 
       setStudentIntakeRegistrationMessages((current) => ({ ...current, [applicantId]: "학생 원천 반영 확인 중" }));
       const studentsAfterResult = await getJsonWithTimeout(
@@ -7149,26 +7243,60 @@ export function App() {
         15000,
         "학생 저장 확인이 15초를 넘었습니다. 중복 등록하지 말고 잠시 뒤 다시 확인해 주세요."
       );
+      if (studentsAfterResult.source !== "supabase") {
+        throw new Error("학생 저장 결과를 Supabase에서 다시 확인하지 못했습니다.");
+      }
       const savedStudent = (studentsAfterResult.students ?? []).find((item) => item.studentId === savedStudentId);
       if (!savedStudent) throw new Error("학생 저장 응답은 받았지만 Supabase 재조회에서 학생을 찾지 못했습니다.");
+      const studentVerificationFields = [
+        "studentId",
+        "loginId",
+        "pin",
+        "name",
+        "birthYear",
+        "schoolName",
+        "grade",
+        "studentPhone",
+        "parentPhone",
+        "textbook",
+        "specialNote",
+        "defaultClassTemplateId",
+        "scheduleOverride",
+        "status"
+      ];
+      const mismatchedStudentFields = studentVerificationFields.filter((field) =>
+        String(savedStudent[field] ?? "") !== String(studentDraft[field] ?? "")
+      );
+      if (mismatchedStudentFields.length > 0) {
+        throw new Error(`학생 저장 재조회 값이 다릅니다: ${mismatchedStudentFields.join(", ")}`);
+      }
       setStudents(studentsAfterResult.students ?? []);
 
-      const changedLessons = savedStudent.defaultClassTemplateId
-        ? lessons
-          .filter((lesson) =>
-            isActiveLessonForRosterSync(lesson) &&
-            lesson.classTemplateId === savedStudent.defaultClassTemplateId &&
-            String(lesson.date) >= today &&
-            !(lesson.studentIds ?? []).includes(savedStudent.studentId)
-          )
-          .map((lesson) => ({
+      const affectedClassTemplateIds = new Set([
+        previousClassTemplateId,
+        savedStudent.defaultClassTemplateId
+      ].filter(Boolean));
+      const changedLessons = lessons
+        .filter((lesson) =>
+          isActiveLessonForRosterSync(lesson) &&
+          affectedClassTemplateIds.has(lesson.classTemplateId) &&
+          String(lesson.date) >= today
+        )
+        .map((lesson) => {
+          const currentStudentIds = (lesson.studentIds ?? []).filter((studentId) => studentId !== savedStudent.studentId);
+          const nextStudentIds = lesson.classTemplateId === savedStudent.defaultClassTemplateId
+            ? [...currentStudentIds, savedStudent.studentId]
+            : currentStudentIds;
+          return {
             ...lesson,
-            studentIds: getActiveStudentIdsFromSelection(
-              [...(lesson.studentIds ?? []), savedStudent.studentId],
-              studentsAfterResult.students ?? []
-            )
-          }))
-        : [];
+            studentIds: getActiveStudentIdsFromSelection(nextStudentIds, studentsAfterResult.students ?? [])
+          };
+        })
+        .filter((lesson) => {
+          const originalLesson = lessons.find((item) => item.lessonId === lesson.lessonId);
+          return [...new Set(originalLesson?.studentIds ?? [])].sort().join("|") !==
+            [...new Set(lesson.studentIds ?? [])].sort().join("|");
+        });
 
       if (changedLessons.length > 0) {
         setStudentIntakeRegistrationMessages((current) => ({ ...current, [applicantId]: "미래 수업 명단 저장 중" }));
@@ -7184,9 +7312,15 @@ export function App() {
           "미래 수업 명단 확인이 20초를 넘었습니다."
         );
         const changedLessonIds = new Set(changedLessons.map((lesson) => lesson.lessonId));
-        const unmatchedLessons = (lessonsAfterResult.lessons ?? []).filter((lesson) => (
-          changedLessonIds.has(lesson.lessonId) && !(lesson.studentIds ?? []).includes(savedStudent.studentId)
-        ));
+        const persistedLessonsById = new Map((lessonsAfterResult.lessons ?? [])
+          .filter((lesson) => changedLessonIds.has(lesson.lessonId))
+          .map((lesson) => [lesson.lessonId, lesson]));
+        const unmatchedLessons = changedLessons.filter((lesson) => {
+          const persistedLesson = persistedLessonsById.get(lesson.lessonId);
+          return !persistedLesson ||
+            [...new Set(persistedLesson.studentIds ?? [])].sort().join("|") !==
+              [...new Set(lesson.studentIds ?? [])].sort().join("|");
+        });
         if (unmatchedLessons.length > 0) {
           throw new Error(`학생은 저장됐지만 미래 수업 명단 ${unmatchedLessons.length}건이 재조회와 일치하지 않습니다.`);
         }
@@ -7225,9 +7359,13 @@ export function App() {
       setStudentIntakeRegistrationStates((current) => ({ ...current, [applicantId]: "saved" }));
       setStudentIntakeRegistrationMessages((current) => ({
         ...current,
-        [applicantId]: savedStudent.defaultClassTemplateId
-          ? "학생명단과 미래 수업 명단 반영 확인 완료"
-          : "학생명단 반영 완료 · 반 미배정"
+        [applicantId]: targetStudentId
+          ? savedStudent.defaultClassTemplateId
+            ? "기존 학생 Tally 정보와 미래 수업 명단 반영 확인 완료"
+            : "기존 학생 Tally 정보 반영 완료 · 정규반 미배정"
+          : savedStudent.defaultClassTemplateId
+            ? "학생명단과 미래 수업 명단 반영 확인 완료"
+            : "학생명단 반영 완료 · 정규반 미배정"
       }));
     } catch (error) {
       console.error(error);
@@ -9247,6 +9385,7 @@ export function App() {
             onCreateSpecialLectureStudent={handleCreateSpecialLectureStudent}
             onDeleteSpecialLectureApplication={handleDeleteSpecialLectureApplication}
             onCreateSpecialLectureLessons={handleCreateSpecialLectureLessons}
+            onMergeSpecialLectureStudent={handleMergeSpecialLectureStudent}
             onOpenSpecialLectureLesson={openSpecialLectureLesson}
             onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
             onReconcileSolapiNotificationResults={handleReconcileSolapiNotificationResults}
@@ -10528,6 +10667,7 @@ function NotificationCenter({
   onCreateSpecialLectureStudent,
   onCreateSpecialLectureLessons,
   onDeleteSpecialLectureApplication,
+  onMergeSpecialLectureStudent,
   onOpenSpecialLectureLesson,
   onRefresh,
   onReconcileSolapiNotificationResults,
@@ -11143,6 +11283,7 @@ function NotificationCenter({
           onCreateStudent={onCreateSpecialLectureStudent}
           onCreateSpecialLectureLessons={onCreateSpecialLectureLessons}
           onDeleteApplication={onDeleteSpecialLectureApplication}
+          onMergeStudent={onMergeSpecialLectureStudent}
           onOpenLesson={onOpenSpecialLectureLesson}
           onSaveEnrollment={onSaveSpecialLectureEnrollment}
           onSaveEnrollments={onSaveSpecialLectureEnrollments}
@@ -11472,6 +11613,7 @@ function SpecialLectureNoticePanel({
   onCreateStudent,
   onCreateSpecialLectureLessons,
   onDeleteApplication,
+  onMergeStudent,
   onOpenLesson,
   onSaveEnrollment,
   onSaveEnrollments,
@@ -11884,6 +12026,7 @@ function SpecialLectureNoticePanel({
         onCreateStudent={onCreateStudent}
         onCreateSpecialLectureLessons={onCreateSpecialLectureLessons}
         onDeleteApplication={onDeleteApplication}
+        onMergeStudent={onMergeStudent}
         onOpenLesson={onOpenLesson}
         onSaveEnrollment={onSaveEnrollment}
         onSaveEnrollments={onSaveEnrollments}
@@ -25477,6 +25620,7 @@ function StudentModal({
     defaultClassTemplateId: templates[0].classTemplateId,
     scheduleOverride: ""
   });
+  const [applicantTargetStudentIds, setApplicantTargetStudentIds] = useState({});
   const activeApplicants = intakeApplicants.filter((applicant) => applicant.status !== "registered");
   const registeredApplicants = intakeApplicants.filter((applicant) => applicant.status === "registered");
 
@@ -25511,7 +25655,8 @@ function StudentModal({
   }
 
   function getRegisteredStudentForApplicant(applicant) {
-    const linkedStudentId = String(applicant.memo ?? "").match(/\((student_intake_[^)]+)\)/)?.[1] ?? "";
+    const linkedStudentId = String(applicant.memo ?? "")
+      .match(/정식 학생 등록:[^\n]*\((student_[^)]+)\)/)?.[1] ?? "";
     if (linkedStudentId) return students.find((student) => student.studentId === linkedStudentId) ?? null;
     return students.find((student) => (
       String(student.name ?? "").trim() === String(applicant.name ?? "").trim() &&
@@ -25520,12 +25665,86 @@ function StudentModal({
     )) ?? null;
   }
 
+  function getApplicantTargetStudentId(applicant) {
+    if (Object.prototype.hasOwnProperty.call(applicantTargetStudentIds, applicant.applicantId)) {
+      return applicantTargetStudentIds[applicant.applicantId];
+    }
+    return getDefaultTallyStudentId(getApplicantRegisterValues(applicant), students);
+  }
+
+  function getApplicantTargetStudent(applicant) {
+    const targetStudentId = getApplicantTargetStudentId(applicant);
+    return students.find((student) => student.studentId === targetStudentId) ?? null;
+  }
+
   async function registerApplicant(applicant) {
+    const registerValues = getApplicantRegisterValues(applicant);
+    const targetStudent = getApplicantTargetStudent(applicant);
+    if (targetStudent) {
+      const changes = getTallyStudentMergeChanges(targetStudent, registerValues);
+      const changeLabels = changes.map((change) => change.label).join(", ") || "변경할 기본정보 없음";
+      const confirmed = window.confirm(
+        `${targetStudent.name} 기존 학생에 Tally 정보를 반영할까요?\n\n반영 항목: ${changeLabels}\n학생 ID, 로그인 ID, PIN, 교재, 개별 시간표와 기존 수업·출결 기록은 유지됩니다. Tally의 빈 값은 기존 정보를 지우지 않습니다.`
+      );
+      if (!confirmed) return;
+    }
     try {
-      await onRegisterApplicant(applicant.applicantId, getApplicantRegisterValues(applicant));
+      await onRegisterApplicant(applicant.applicantId, registerValues, {
+        targetStudentId: targetStudent?.studentId ?? ""
+      });
     } catch {
       // The parent keeps the modal open and renders the detailed failure message.
     }
+  }
+
+  function renderApplicantMergeTarget(applicant) {
+    const candidates = getTallyStudentMergeCandidates(getApplicantRegisterValues(applicant), students);
+    const targetStudentId = getApplicantTargetStudentId(applicant);
+    const targetStudent = students.find((student) => student.studentId === targetStudentId) ?? null;
+    const changes = targetStudent
+      ? getTallyStudentMergeChanges(targetStudent, getApplicantRegisterValues(applicant))
+      : [];
+    return (
+      <div className={targetStudent ? "studentIntakeMergeTarget matched" : "studentIntakeMergeTarget"}>
+        <label>
+          Tally 반영 대상
+          <select
+            value={targetStudentId}
+            onChange={(event) => setApplicantTargetStudentIds((current) => ({
+              ...current,
+              [applicant.applicantId]: event.target.value
+            }))}
+          >
+            <option value="">새 학생으로 등록</option>
+            {candidates.map((student) => (
+              <option key={`${applicant.applicantId}_target_${student.studentId}`} value={student.studentId}>
+                {student.name} · {student.schoolName || "학교 미입력"} · {student.grade || "학년 미입력"} · {
+                  student.defaultClassTemplateId
+                    ? templates.find((template) => template.classTemplateId === student.defaultClassTemplateId)?.name || "정규반 배정"
+                    : "정규반 미배정"
+                }
+              </option>
+            ))}
+          </select>
+        </label>
+        {targetStudent ? (
+          <div>
+            <strong>기존 학생을 유지하고 Tally 정보만 보강</strong>
+            <span>
+              {changes.length
+                ? `변경 예정: ${changes.map((change) => change.label).join(", ")}`
+                : "학생 기본정보가 이미 Tally와 같습니다."}
+            </span>
+            <small>학생 ID·로그인·PIN·교재·개별 시간표·기존 수업/출결은 유지됩니다.</small>
+          </div>
+        ) : (
+          <div>
+            <strong>새 학생 원천 생성</strong>
+            <span>같은 학생이 이미 있다면 위 목록에서 먼저 선택해 중복 생성을 막아 주세요.</span>
+          </div>
+        )}
+      </div>
+    );
   }
 
   function renderTallyQuestionFields(applicant) {
@@ -25637,6 +25856,7 @@ function StudentModal({
                   </label>
                   {renderTallyQuestionFields(applicant)}
                 </div>
+                {renderApplicantMergeTarget(applicant)}
                 <div className="studentIntakeActions">
                   <small>{applicant.formName || "Tally"} · {applicant.createdAt ? new Date(applicant.createdAt).toLocaleString("ko-KR") : "접수일 미확인"}</small>
                   {applicantSaveStates[applicant.applicantId] ? (
@@ -25648,7 +25868,11 @@ function StudentModal({
                     onClick={() => registerApplicant(applicant)}
                     type="button"
                   >
-                    {applicantRegistrationStates[applicant.applicantId] === "saving" ? "반영 중" : "등원 확정 및 학생명단 등록"}
+                    {applicantRegistrationStates[applicant.applicantId] === "saving"
+                      ? "반영 중"
+                      : getApplicantTargetStudent(applicant)
+                        ? "Tally 정보로 기존 학생 보강"
+                        : "새 학생으로 등록"}
                   </button>
                 </div>
                 {applicantRegistrationStates[applicant.applicantId] ? (
