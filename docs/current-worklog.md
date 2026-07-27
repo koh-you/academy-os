@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-27 P1. 15D-8 수업 모달 기본 입력 controlled component 분리 — AI gate 통과
+
+- 코드: 수업 유형 탭, 큰 수업 틀 select, 달력 색상 palette, 수업명·날짜·시작·종료 입력 JSX를 `src/domains/lessons/LessonModalBasics.jsx`로 이동했다. 기존 휴강 panel은 `children`으로 받아 유형 탭 뒤·반 템플릿 앞에 그대로 렌더링한다.
+- 경계: `lessonType`, `classTemplateId`, 색상·기본 입력 draft, 유형/반/색상/날짜 transition handler와 유형 비활성 판정은 App이 소유한다. 새 컴포넌트에는 state/effect, API·Supabase·알림·`onSubmit`이 없다.
+- 자동검증: 전용 boundary fixture가 6개 유형, 비활성 판정, children DOM 순서, 직접 입력 option, 색상/반/이름/날짜/시간 callback, App의 draft handler 소유와 side effect 금지를 검사한다. custom FK 방지 scenario는 새 option과 App 저장 정규화를 함께 추적한다. `test:production` 62개 명령, scenario 495/495, build, `git diff --check`가 통과했다.
+- 사람 gate: 없음. 기본 입력 DOM 위치만 이동했고 draft·저장 동작은 보존했다. 다음은 최신 `origin/main` rebase 후 15D-9 저장 상태와 저장/취소 action footer를 controlled component로 분리한다.
+
 ## 2026-07-27 P1. 15D-7 수업 모달 휴강 controlled panel 분리 — AI gate 통과
 
 - 코드: 휴강 횟수·정산 안내, 기존 수업의 명단·수업기록·알림 사전점검 안내, 기존 휴강의 중복 보충 차단 안내, 보충 없음/함께 생성 선택과 날짜·시간 입력 JSX를 `src/domains/lessons/LessonModalClosurePanel.jsx`로 이동했다.

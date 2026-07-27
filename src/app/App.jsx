@@ -230,6 +230,7 @@ import {
   createLessonModalTemplateChangePatch,
   createLessonModalTypeChangePatch
 } from "../domains/lessons/lessonModalDraftTransitions.js";
+import { LessonModalBasics } from "../domains/lessons/LessonModalBasics.jsx";
 import { LessonModalClosurePanel } from "../domains/lessons/LessonModalClosurePanel.jsx";
 import {
   createLessonModalClosureMakeupLessonId,
@@ -18891,99 +18892,45 @@ function LessonModal({
 
   return (
     <Modal className="lessonModal" title={initialLesson ? "수업 수정" : "수업 등록"} onClose={isSaving ? () => {} : onClose}>
-      <div className="modalSection lessonModalSection">
-        <label>수업 유형</label>
-        <div className="typeTabs">
-          {[
-            ["class", "🏹 수업"],
-            ["preExam", "📌 직전수업"],
-            ["exam", "📝 평가"],
-            ["makeup", "🔧 보강"],
-            ["examPrep", "🗓 시험대비"],
-            ["closure", "⏸ 휴강"]
-          ].map(([value, label]) => (
-            <button
-              className={lessonType === value ? "active" : ""}
-              disabled={isLessonTypeChoiceDisabled(value)}
-              key={value}
-              onClick={() => handleLessonTypeChange(value)}
-              type="button"
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {lessonType === "closure" ? (
-        <LessonModalClosurePanel
-          blockingNotificationJobCount={closureBlockingNotificationJobs.length}
-          closureMakeupDate={closureMakeupDate}
-          closureMakeupEnabled={closureMakeupEnabled}
-          closureMakeupEndTime={closureMakeupEndTime}
-          closureMakeupStartTime={closureMakeupStartTime}
-          closureRecordCount={closureRecordCount}
-          initialStudentCount={getLessonStudentIds(initialLesson).length}
-          isClosureConversion={isClosureConversion}
-          isFormLocked={isFormLocked}
-          isPersistedClosure={isPersistedClosure}
-          onClosureMakeupDateChange={handleClosureMakeupDateChange}
-          onClosureMakeupEnabledChange={setClosureMakeupEnabled}
-          onClosureMakeupEndTimeChange={setClosureMakeupEndTime}
-          onClosureMakeupStartTimeChange={setClosureMakeupStartTime}
-        />
-      ) : null}
-
-      <div className="modalSection lessonModalSection">
-        <label>
-          큰 수업 틀
-          <select disabled={isFormLocked} value={classTemplateId} onChange={(event) => handleTemplateChange(event.target.value)}>
-            <option value="">직접 입력 일정</option>
-            {normalizedTemplates.map((template) => (
-              <option key={template.classTemplateId} value={template.classTemplateId}>
-                {template.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      <div className="modalSection lessonModalSection">
-        <label>달력 색상</label>
-        <div className="lessonColorPalette">
-          {lessonColorOptions.map((item) => (
-            <button
-              aria-label={`${item.label} 색상 미리보기`}
-              className={color.toLowerCase() === item.color.toLowerCase() ? "active" : ""}
-              disabled={isLessonTypeChoiceDisabled(item.lessonType)}
-              key={item.id}
-              onClick={() => handleColorOptionClick(item)}
-              style={{ background: item.color }}
-              type="button"
-              title={item.label}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div className="fieldGrid two lessonModalFields">
-        <label>
-          수업명
-          <input disabled={isFormLocked} value={name} onChange={(event) => setName(event.target.value)} placeholder="예: 수학 특강" />
-        </label>
-        <label>
-          날짜
-          <input disabled={isFormLocked} type="date" value={date} onChange={(event) => handleDateChange(event.target.value)} />
-        </label>
-        <label>
-          시작
-          <input disabled={isFormLocked} type="time" value={startTime} onChange={(event) => setStartTime(event.target.value)} />
-        </label>
-        <label>
-          종료
-          <input disabled={isFormLocked} type="time" value={endTime} onChange={(event) => setEndTime(event.target.value)} />
-        </label>
-      </div>
+      <LessonModalBasics
+        classTemplateId={classTemplateId}
+        color={color}
+        date={date}
+        endTime={endTime}
+        isFormLocked={isFormLocked}
+        isLessonTypeChoiceDisabled={isLessonTypeChoiceDisabled}
+        lessonColorOptions={lessonColorOptions}
+        lessonType={lessonType}
+        name={name}
+        onClassTemplateChange={handleTemplateChange}
+        onColorOptionClick={handleColorOptionClick}
+        onDateChange={handleDateChange}
+        onEndTimeChange={setEndTime}
+        onLessonTypeChange={handleLessonTypeChange}
+        onNameChange={setName}
+        onStartTimeChange={setStartTime}
+        startTime={startTime}
+        templates={normalizedTemplates}
+      >
+        {lessonType === "closure" ? (
+          <LessonModalClosurePanel
+            blockingNotificationJobCount={closureBlockingNotificationJobs.length}
+            closureMakeupDate={closureMakeupDate}
+            closureMakeupEnabled={closureMakeupEnabled}
+            closureMakeupEndTime={closureMakeupEndTime}
+            closureMakeupStartTime={closureMakeupStartTime}
+            closureRecordCount={closureRecordCount}
+            initialStudentCount={getLessonStudentIds(initialLesson).length}
+            isClosureConversion={isClosureConversion}
+            isFormLocked={isFormLocked}
+            isPersistedClosure={isPersistedClosure}
+            onClosureMakeupDateChange={handleClosureMakeupDateChange}
+            onClosureMakeupEnabledChange={setClosureMakeupEnabled}
+            onClosureMakeupEndTimeChange={setClosureMakeupEndTime}
+            onClosureMakeupStartTimeChange={setClosureMakeupStartTime}
+          />
+        ) : null}
+      </LessonModalBasics>
 
       <LessonModalStudentPicker
         activeStudentCount={activeStudents.length}
