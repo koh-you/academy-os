@@ -75,7 +75,6 @@ function createMonthDraft({
     ? savedMonth.studentSettings
     : {};
   const visibleStudents = getMonthlySettlementStudents({
-    includedStudentIds: Object.keys(sourceSettings),
     lessons,
     monthKey,
     students
@@ -117,12 +116,11 @@ function MonthlySettlementCalendar({ monthKey, onClose, row }) {
     <Modal
       className="monthlySettlementCalendarModal"
       onClose={onClose}
-      subtitle={`${monthKey} · 정규 ${row.regularCount}회 ${formatSettlementHours(row.regularHours)} · 보충 ${row.makeupCount}회`}
+      subtitle={`${monthKey} 수업일지 기준 · 정규 ${row.regularCount}회 ${formatSettlementHours(row.regularHours)} · 보충 ${row.makeupCount}회`}
       title={`${row.student.name} 월별 출결·수업`}
     >
       <div className="monthlySettlementCalendarLegend">
         <span><i className="regular" />정규</span>
-        <span><i className="forecast" />말일까지 예정</span>
         <span><i className="makeup" />보충 · 계산 제외</span>
         <span><i className="special" />특강 · 별도 정산</span>
       </div>
@@ -210,12 +208,11 @@ export function MonthlySettlementPanel({
 
   const visibleStudents = useMemo(
     () => getMonthlySettlementStudents({
-      includedStudentIds: Object.keys(draftMonth?.studentSettings ?? savedMonth?.studentSettings ?? {}),
       lessons,
       monthKey: selectedMonth,
       students
     }),
-    [draftMonth?.studentSettings, lessons, savedMonth?.studentSettings, selectedMonth, students]
+    [lessons, selectedMonth, students]
   );
   const rows = useMemo(() => visibleStudents.map((student) => buildStudentSettlementRow({
     classTemplates,
@@ -326,8 +323,8 @@ export function MonthlySettlementPanel({
           <span className="eyebrow">운영</span>
           <h1>월별 수업 정산</h1>
           <p className="muted">
-            매월 1일부터 말일까지를 한 달로 봅니다. 재원생은 수업 횟수·시수와 무관하게 월 고정금액,
-            신입·퇴원생만 인정 기간의 회차·시수 비율로 계산합니다.
+            선택한 달의 수업일지 명단을 정산 원천으로 봅니다. 재원생은 수업 횟수·시수와 무관하게 월 고정금액,
+            신입·퇴원생만 수업일지의 인정 기간 회차·시수 비율로 계산합니다.
           </p>
         </div>
         <div className="monthlySettlementMonthControl">
@@ -341,9 +338,11 @@ export function MonthlySettlementPanel({
 
       <div className="monthlySettlementRuleNotice">
         <strong>계산 기준</strong>
+        <span>학생 상태 필터 없이 해당 월 수업일지 명단을 그대로 표시합니다.</span>
         <span>12회 또는 4.2주 환산을 사용하지 않습니다.</span>
         <span>출석·지각·대기는 정산 포함, 결석도 별도 차감 요청이 없으면 자동 차감하지 않습니다.</span>
         <span>보충은 달력에 별도로 남기되 정규 금액을 추가하지 않습니다.</span>
+        <span>정산 제외는 학생·수업일지를 삭제하지 않고 이 달 합계에서만 0원 처리합니다.</span>
         <span>중등 기본 420,000원 · 중등 주 6시간 308,000원 · 고등 주 6시간 341,000원 · 고등 기본 450,000원</span>
       </div>
 
@@ -388,6 +387,11 @@ export function MonthlySettlementPanel({
           단가 미설정 학생 {summary.unsetRateCount}명은 총액에서 0원으로 표시됩니다. 시수별 단가표를 받은 뒤 학생별 고정금액을 입력해 주세요.
         </div>
       ) : null}
+      {summary.excludedStudentCount > 0 ? (
+        <div className="monthlySettlementExcludedNotice">
+          정산 제외 {summary.excludedStudentCount}명은 정규·특강·조정 합계에서 0원 처리됩니다. 행의 정산 복원으로 언제든 되돌릴 수 있습니다.
+        </div>
+      ) : null}
 
       <div className="monthlySettlementTableWrap">
         <table className="monthlySettlementTable">
@@ -403,6 +407,7 @@ export function MonthlySettlementPanel({
               <th>특강 총액</th>
               <th>조정</th>
               <th>메모</th>
+              <th>정산 처리</th>
             </tr>
           </thead>
           <tbody>
@@ -410,7 +415,10 @@ export function MonthlySettlementPanel({
               const setting = row.setting;
               const parsedScheduleText = scheduleTextFromRules(setting.scheduleText);
               return (
-                <tr key={row.student.studentId}>
+                <tr
+                  className={setting.excluded ? "monthlySettlementRowExcluded" : ""}
+                  key={row.student.studentId}
+                >
                   <td className="monthlySettlementStudentCell">
                     <strong>{row.student.name}</strong>
                     <span>{row.student.grade || "학년 미입력"} · {row.student.schoolName || "학교 미입력"}</span>
@@ -418,7 +426,11 @@ export function MonthlySettlementPanel({
                     {row.student.withdrawnAt ? <em>퇴원일 {String(row.student.withdrawnAt).slice(0, 10)}</em> : null}
                   </td>
                   <td>
-                    <select value={setting.mode} onChange={(event) => handleModeChange(row, event.target.value)}>
+                    <select
+                      disabled={setting.excluded}
+                      value={setting.mode}
+                      onChange={(event) => handleModeChange(row, event.target.value)}
+                    >
                       {settlementModeOptions.map((option) => (
                         <option key={option.value} value={option.value}>{option.label}</option>
                       ))}
@@ -432,6 +444,7 @@ export function MonthlySettlementPanel({
                   <td>
                     <div className="monthlySettlementMoneyInput">
                       <input
+                        disabled={setting.excluded}
                         min="0"
                         placeholder="단가 미설정"
                         type="number"
@@ -448,6 +461,7 @@ export function MonthlySettlementPanel({
                   </td>
                   <td className="monthlySettlementScheduleCell">
                     <input
+                      disabled={setting.excluded}
                       placeholder="예: 월수금 19:00-22:00"
                       value={setting.scheduleText}
                       onChange={(event) => updateStudentSetting(row.student.studentId, "scheduleText", event.target.value)}
@@ -463,6 +477,7 @@ export function MonthlySettlementPanel({
                     ) : (
                       <div className="monthlySettlementPeriodInputs">
                         <input
+                          disabled={setting.excluded}
                           max={getMonthRange(selectedMonth).endDate}
                           min={getMonthRange(selectedMonth).startDate}
                           type="date"
@@ -470,6 +485,7 @@ export function MonthlySettlementPanel({
                           onChange={(event) => updateStudentSetting(row.student.studentId, "startDate", event.target.value)}
                         />
                         <input
+                          disabled={setting.excluded}
                           max={getMonthRange(selectedMonth).endDate}
                           min={getMonthRange(selectedMonth).startDate}
                           type="date"
@@ -493,12 +509,23 @@ export function MonthlySettlementPanel({
                     <small>보충 {row.makeupCount}회 · {formatSettlementHours(row.makeupHours)}</small>
                   </td>
                   <td className="monthlySettlementAmountCell">
-                    <strong>{row.hasFixedAmount ? formatSettlementWon(row.regularGrossAmount) : "단가 미설정"}</strong>
-                    <span>{setting.mode === "fixed" ? "월정액 전액" : `${formatSettlementWon(row.baseAmount)} + 조정`}</span>
+                    <strong>
+                      {setting.excluded
+                        ? "정산 제외"
+                        : row.hasFixedAmount ? formatSettlementWon(row.regularGrossAmount) : "단가 미설정"}
+                    </strong>
+                    <span>
+                      {setting.excluded
+                        ? "이 달 합계 0원"
+                        : !row.hasRegularJournal
+                          ? "정규 수업일지 없음 · 0원"
+                          : setting.mode === "fixed" ? "월정액 전액" : `${formatSettlementWon(row.baseAmount)} + 조정`}
+                    </span>
                   </td>
                   <td>
                     <div className="monthlySettlementMoneyInput">
                       <input
+                        disabled={setting.excluded}
                         min="0"
                         type="number"
                         value={setting.specialGrossAmount}
@@ -511,6 +538,7 @@ export function MonthlySettlementPanel({
                   <td>
                     <div className="monthlySettlementMoneyInput signed">
                       <input
+                        disabled={setting.excluded}
                         placeholder="+/-"
                         type="number"
                         value={setting.adjustmentAmount}
@@ -522,11 +550,27 @@ export function MonthlySettlementPanel({
                   </td>
                   <td>
                     <textarea
+                      disabled={setting.excluded}
                       placeholder="차감 사유·확인 메모"
                       rows="2"
                       value={setting.note}
                       onChange={(event) => updateStudentSetting(row.student.studentId, "note", event.target.value)}
                     />
+                  </td>
+                  <td className="monthlySettlementExclusionCell">
+                    <button
+                      aria-pressed={setting.excluded}
+                      className={setting.excluded ? "monthlySettlementRestoreButton" : "monthlySettlementExcludeButton"}
+                      onClick={() => updateStudentSetting(row.student.studentId, "excluded", !setting.excluded)}
+                      type="button"
+                    >
+                      {setting.excluded ? "정산 복원" : "정산 제외"}
+                    </button>
+                    <small>
+                      {setting.excluded
+                        ? "학생·수업일지는 유지됨"
+                        : "이 달 정산에서만 제외"}
+                    </small>
                   </td>
                 </tr>
               );

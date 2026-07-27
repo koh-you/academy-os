@@ -87,6 +87,15 @@
   padding: 10px 12px;
 }
 
+.monthlySettlementExcludedNotice {
+  background: #f3f6fa;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  color: #52657e;
+  font-size: 13px;
+  padding: 10px 12px;
+}
+
 .monthlySettlementTableWrap {
   border: 1px solid #d7e1ef;
   border-radius: 14px;
@@ -97,7 +106,7 @@
 .monthlySettlementTable {
   border-collapse: separate;
   border-spacing: 0;
-  min-width: 1740px;
+  min-width: 1880px;
   width: 100%;
 }
 
@@ -154,6 +163,10 @@
   min-width: 180px;
 }
 
+.monthlySettlementTable td:nth-child(11) {
+  min-width: 125px;
+}
+
 .monthlySettlementTable input,
 .monthlySettlementTable select,
 .monthlySettlementTable textarea {
@@ -165,6 +178,14 @@
   min-height: 36px;
   padding: 7px 8px;
   width: 100%;
+}
+
+.monthlySettlementTable input:disabled,
+.monthlySettlementTable select:disabled,
+.monthlySettlementTable textarea:disabled {
+  background: #eef2f6;
+  color: #8491a3;
+  cursor: not-allowed;
 }
 
 .monthlySettlementTable textarea {
@@ -267,6 +288,50 @@
   color: #718096;
   font-size: 11px;
   margin-top: 5px;
+}
+
+.monthlySettlementRowExcluded td {
+  background: #f8fafc;
+  color: #7b8798;
+}
+
+.monthlySettlementRowExcluded td:first-child {
+  background: #f3f6fa;
+}
+
+.monthlySettlementRowExcluded .monthlySettlementStudentCell strong,
+.monthlySettlementRowExcluded .monthlySettlementAmountCell strong {
+  color: #66758a;
+}
+
+.monthlySettlementExclusionCell button {
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  min-height: 36px;
+  padding: 7px 9px;
+  width: 100%;
+}
+
+.monthlySettlementExcludeButton {
+  background: #fff;
+  border: 1px solid #d9a2a2;
+  color: #a83e3e;
+}
+
+.monthlySettlementExcludeButton:hover {
+  background: #fff4f4;
+}
+
+.monthlySettlementRestoreButton {
+  background: #eef6ff;
+  border: 1px solid #9ec0e8;
+  color: #24588f;
+}
+
+.monthlySettlementRestoreButton:hover {
+  background: #dfedff;
 }
 
 .monthlySettlementEmpty {

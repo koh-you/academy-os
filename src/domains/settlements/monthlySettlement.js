@@ -91,9 +91,9 @@ function roundHours(value) {
   return Math.round((Number(value) || 0) * 100) / 100;
 }
 
-function hasStudent(lesson = {}, recordsByLessonStudent = new Map(), studentId = "") {
+function hasStudent(lesson = {}, studentId = "") {
   const studentIds = Array.isArray(lesson.studentIds) ? lesson.studentIds : [];
-  return studentIds.includes(studentId) || recordsByLessonStudent.has(`${lesson.lessonId}::${studentId}`);
+  return studentIds.includes(studentId);
 }
 
 function isCanceledLesson(lesson = {}) {
@@ -226,11 +226,9 @@ function buildActualLessonEvent(lesson = {}, record = null, student = {}) {
 }
 
 export function buildStudentMonthEvidence({
-  classTemplates = [],
   lessons = [],
   monthKey = "",
   records = [],
-  scheduleText = "",
   student = {}
 } = {}) {
   const recordsByLessonStudent = new Map(
@@ -240,7 +238,7 @@ export function buildStudentMonthEvidence({
     .filter((lesson) =>
       normalizeText(lesson.date).startsWith(`${monthKey}-`) &&
       !isCanceledLesson(lesson) &&
-      hasStudent(lesson, recordsByLessonStudent, student.studentId)
+      hasStudent(lesson, student.studentId)
     )
     .sort((a, b) => (
       String(a.date).localeCompare(String(b.date)) ||
@@ -254,27 +252,7 @@ export function buildStudentMonthEvidence({
     )
   );
   const actualRegularEvents = actualEvents.filter((event) => event.eventType === "regular");
-  const scheduleEvents = buildMonthlyScheduleEvents(
-    monthKey,
-    scheduleText || getDefaultStudentScheduleText(student, classTemplates)
-  );
-  const matchedActualEventIds = new Set();
-  const regularEvents = scheduleEvents.map((scheduleEvent) => {
-    const actualEvent = actualRegularEvents.find((event) =>
-      !matchedActualEventIds.has(event.eventId) &&
-      event.date === scheduleEvent.date
-    );
-    if (!actualEvent) return scheduleEvent;
-    matchedActualEventIds.add(actualEvent.eventId);
-    return actualEvent;
-  });
-  regularEvents.push(
-    ...actualRegularEvents.filter((event) => !matchedActualEventIds.has(event.eventId))
-  );
-  regularEvents.sort((a, b) => (
-    String(a.date).localeCompare(String(b.date)) ||
-    String(a.startTime || "").localeCompare(String(b.startTime || ""))
-  ));
+  const regularEvents = actualRegularEvents;
   const makeupEvents = actualEvents.filter((event) => event.eventType === "makeup");
   const specialEvents = actualEvents.filter((event) => event.eventType === "special");
   const actualStatusCounts = actualRegularEvents.reduce((counts, event) => {
@@ -382,6 +360,7 @@ export function normalizeMonthlySettlementStudentSetting(
   return {
     adjustmentAmount: normalizeSignedMoneyInput(setting.adjustmentAmount, 0),
     endDate: normalizeMonthDate(setting.endDate, monthKey) || (mode === "withdrawn" ? withdrawnDate : endDate),
+    excluded: Boolean(setting.excluded),
     fixedAmount: normalizeMoneyInput(
       setting.fixedAmount,
       hasStoredFixedAmount
@@ -466,12 +445,10 @@ export function normalizeMonthlySettlementState(state = {}) {
 }
 
 export function getMonthlySettlementStudents({
-  includedStudentIds = [],
   lessons = [],
   monthKey = "",
   students = []
 } = {}) {
-  const includedStudentIdSet = new Set(includedStudentIds);
   const monthStudentIds = new Set(
     lessons
       .filter((lesson) =>
@@ -481,14 +458,7 @@ export function getMonthlySettlementStudents({
       .flatMap((lesson) => Array.isArray(lesson.studentIds) ? lesson.studentIds : [])
   );
   return students
-    .filter((student) => {
-      const withdrawnAt = normalizeText(student.withdrawnAt).slice(0, 10);
-      const isActive = (student.status ?? "active") === "active" && !withdrawnAt;
-      return isActive ||
-        includedStudentIdSet.has(student.studentId) ||
-        monthStudentIds.has(student.studentId) ||
-        withdrawnAt.startsWith(`${monthKey}-`);
-    })
+    .filter((student) => monthStudentIds.has(student.studentId))
     .sort((a, b) => (
       String(a.defaultClassTemplateId || "").localeCompare(String(b.defaultClassTemplateId || "")) ||
       String(a.name || "").localeCompare(String(b.name || ""), "ko")
@@ -535,12 +505,16 @@ export function buildStudentSettlementRow({
   const recognizedUnit = evidence.regularHours > 0 ? recognizedRegularHours : recognizedRegularEvents.length;
   const partialRatio = fullUnit > 0 ? Math.max(0, Math.min(1, recognizedUnit / fullUnit)) : 0;
   const hasFixedAmount = normalizedSetting.fixedAmount !== "";
-  const baseAmount = hasFixedAmount
+  const hasRegularJournal = evidence.regularCount > 0;
+  const calculatedBaseAmount = hasFixedAmount && hasRegularJournal
     ? normalizedSetting.mode === "fixed"
       ? Number(normalizedSetting.fixedAmount)
       : Math.round(Number(normalizedSetting.fixedAmount) * partialRatio)
     : 0;
-  const regularGrossAmount = baseAmount + normalizedSetting.adjustmentAmount;
+  const baseAmount = normalizedSetting.excluded ? 0 : calculatedBaseAmount;
+  const regularGrossAmount = normalizedSetting.excluded
+    ? 0
+    : baseAmount + normalizedSetting.adjustmentAmount;
   const firstEverRegularDate = lessons
     .filter((lesson) =>
       isRegularSettlementLesson(lesson) &&
@@ -554,6 +528,7 @@ export function buildStudentSettlementRow({
     baseAmount,
     firstEverRegularDate,
     hasFixedAmount,
+    hasRegularJournal,
     isNewCandidate: Boolean(
       firstEverRegularDate &&
       firstEverRegularDate.startsWith(`${monthKey}-`) &&
@@ -567,7 +542,9 @@ export function buildStudentSettlementRow({
     recognizedRegularHours,
     regularGrossAmount,
     setting: normalizedSetting,
-    specialGrossAmount: Number(normalizedSetting.specialGrossAmount) || 0,
+    specialGrossAmount: normalizedSetting.excluded
+      ? 0
+      : Number(normalizedSetting.specialGrossAmount) || 0,
     student,
     weeklyScheduleHours
   };
@@ -579,12 +556,13 @@ export function buildMonthlySettlementSummary(rows = []) {
   const regularNetAmount = Math.round(regularGrossAmount * monthlySettlementFactor);
   const specialNetAmount = Math.round(specialGrossAmount * monthlySettlementFactor);
   return {
+    excludedStudentCount: rows.filter((row) => row.setting.excluded).length,
     regularGrossAmount,
     regularNetAmount,
     specialGrossAmount,
     specialNetAmount,
     totalNetAmount: regularNetAmount + specialNetAmount,
-    unsetRateCount: rows.filter((row) => !row.hasFixedAmount).length
+    unsetRateCount: rows.filter((row) => !row.setting.excluded && !row.hasFixedAmount).length
   };
 }
 
@@ -622,6 +600,7 @@ export function getMonthlySettlementMonthSaveSnapshot(month = {}) {
           {
             adjustmentAmount: normalizeSignedMoneyInput(setting?.adjustmentAmount, 0),
             endDate: normalizeText(setting?.endDate),
+            excluded: Boolean(setting?.excluded),
             fixedAmount: normalizeMoneyInput(setting?.fixedAmount, ""),
             mode: settlementModes.has(setting?.mode) ? setting.mode : "fixed",
             note: normalizeText(setting?.note),
