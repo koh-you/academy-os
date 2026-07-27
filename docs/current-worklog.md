@@ -7,6 +7,7 @@
 - 안전: 현시점 퇴원/비활성 학생은 새 월 명단에서만 제외한다. 7월 실제 원천이 없는 반이 하나라도 있으면 열기를 차단한다. 화목토 반은 토요일 개별 시간을 유지한다. 저장은 결정적 lesson ID로 수행해 재시도 시 중복 생성하지 않으며, bulk 저장 뒤 Supabase 전체 lessons 재조회에서 날짜·반·시간·명단을 대조한 뒤에만 완료를 표시한다.
 - 저장·부작용: 직접 원천은 Supabase `lessons`이며 `notification_jobs`/Solapi를 호출하지 않는다. 기존 lessons, `lesson_student_records`, homeworks는 수정하지 않는다.
 - AI 검증: `npm run test:monthly-regular-lesson-open` fixture가 기존 회차 유지, 퇴원생 제외, 토요일 시간, 기록/알림 필드 미복사를 검사한다. 이어 `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 운영 후속(2026-07-28): 첫 52회차 일괄 저장은 Supabase에 4개 반 × 13회차가 모두 반영됐지만 브라우저 20초 timeout이 먼저 발생해 실패로 표시됐다. 이후 열기는 반별 batch(각 13회차, 45초 제한)로 저장하고, timeout/응답 오류 뒤에도 Supabase 재조회에서 전체 일치하면 성공으로 확정한다. 일부만 있으면 이미 저장된 회차는 건드리지 않고 새로고침 뒤 남은 회차만 다시 열도록 안내한다.
 
 ## 2026-07-27 P1. 인수인계서 기본정보 퇴원일·반 제외
 
