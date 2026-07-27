@@ -6704,6 +6704,19 @@ export function App() {
     }),
     [classTemplates, lessons, selectedDate, students]
   );
+  const isMonthlyRegularLessonOpened = useMemo(() => {
+    const targetMonth = selectedDate.slice(0, 7);
+    const openedTemplateIds = new Set(
+      lessons
+        .filter((lesson) => lesson.lessonType === "class")
+        .filter((lesson) => lesson.date?.startsWith(`${targetMonth}-`))
+        .filter((lesson) => !["canceled", "deleted"].includes(lesson.status ?? "scheduled"))
+        .map((lesson) => lesson.classTemplateId)
+        .filter(Boolean)
+    );
+    const expectedTemplateIds = monthlyRegularLessonOpenPlan.rows.map((row) => row.classTemplateId).filter(Boolean);
+    return expectedTemplateIds.length > 0 && expectedTemplateIds.every((templateId) => openedTemplateIds.has(templateId));
+  }, [lessons, monthlyRegularLessonOpenPlan.rows, selectedDate]);
   const lessonsForDate = useMemo(
     () => calendarLessons.filter((lesson) => lesson.date === selectedDate).sort(sortByTime),
     [calendarLessons, selectedDate]
@@ -9672,6 +9685,7 @@ export function App() {
             students={students}
             templates={classTemplates}
             monthlyRegularLessonOpenPlan={monthlyRegularLessonOpenPlan}
+            isMonthlyRegularLessonOpened={isMonthlyRegularLessonOpened}
             testAttempts={testAttempts}
             testSessions={testSessions}
             homeworks={homeworks}
@@ -15900,6 +15914,7 @@ function TeacherLessonHubV2({
   attendanceSettings = defaultAttendanceSettings,
   generatedLessonSaveStatus = { lessons: [], message: "", state: "idle" },
   integrationStatus,
+  isMonthlyRegularLessonOpened = false,
   lessonNotificationPlans = {},
   monthlyRegularLessonOpenPlan = { errors: [], lessonsToCreate: [], rows: [] },
   clipboardCount,
@@ -16185,7 +16200,7 @@ function TeacherLessonHubV2({
           <span>{visibleLessonCount}개</span>
         </div>
         <button className="primaryButton" onClick={onAddLesson} type="button">+ 수업 등록</button>
-        {monthlyRegularLessonOpenPlan.lessonsToCreate.length > 0 ? (
+        {!isMonthlyRegularLessonOpened && monthlyRegularLessonOpenPlan.lessonsToCreate.length > 0 ? (
           <button
             className="softButton"
             onClick={onOpenMonthlyRegularLessons}
