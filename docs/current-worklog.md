@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-27 P1. 15C 활성 수업 달력 표시 컴포넌트 분리 — AI gate 통과
+
+- 코드: 공통 `NavigationHeader`·`FilterBar`, 월 건수, 접근 가능한 42일 grid와 수업 pill을 `src/domains/lessons/LessonCalendarView.jsx`로 이동했다. App은 15B view model과 `lessonTypeFilter`, 선택일 ref, 등록·날짜 선택·월 이동·수업 열기 callback을 주입한다.
+- 경계: 새 컴포넌트에는 `useState`/`useEffect`, API client, Supabase, `notification_jobs`, Solapi 참조가 없다. 상단 `AcademyReminderPanel`, 자동 생성 수업 저장 상태, 상세 모달 라우팅과 모든 저장 handler는 App에 남았다.
+- 자동검증: 전용 boundary fixture가 view model 소비, filter/날짜/pill/월 이동/등록 callback 연결과 side effect 금지를 검사한다. scenario의 달력 filter·hover/focus/selected·색상·운영 알림 상단 순서 검사는 새 컴포넌트까지 추적한다. `test:production` 54개 명령, scenario 494/494, build, `git diff --check`가 통과했다.
+- 사람 gate: 없음. 표시 DOM의 파일 위치만 이동하고 텍스트·class·callback을 보존했다. 다음은 최신 `origin/main` rebase 후 15D `LessonModal` callback-only UI 이동 가능 범위를 확인한다.
+
 ## 2026-07-27 P1. 15B 순수 수업 달력 표시 모델 분리 — AI gate 통과
 
 - 코드: 유형 필터 옵션·legacy 시험대비 제외·정규/직전/휴강/보충/시험대비/특강 필터·선택 월 건수·날짜별 시간 정렬·선택/type pill class·표시 문구 계산을 `src/domains/lessons/lessonCalendarModel.js`의 `createLessonCalendarViewModel`로 이동했다.

@@ -218,6 +218,7 @@ import {
   isLessonTypeChoiceDisabled as getIsLessonTypeChoiceDisabled,
   shouldIgnoreLessonAttendance
 } from "../domains/lessons/lessonClosure.js";
+import { LessonCalendarView } from "../domains/lessons/LessonCalendarView.jsx";
 import { createLessonCalendarViewModel } from "../domains/lessons/lessonCalendarModel.js";
 import { LessonJournalErrorBoundary } from "../domains/lessons/LessonJournalErrorBoundary.jsx";
 import { attendanceLabels, dayLabels, homeworkLabels } from "../domains/lessons/labels.js";
@@ -15557,110 +15558,28 @@ function TeacherLessonHubV2({
         </div>
       ) : null}
 
-      <NavigationHeader
-        actions={(
-          <>
-            <button className="primaryButton" onClick={onAddLesson} type="button">+ 수업 등록</button>
-            {!isMonthlyRegularLessonOpened && monthlyRegularLessonOpenPlan.lessonsToCreate.length > 0 ? (
-              <button className="softButton" onClick={onOpenMonthlyRegularLessons} type="button">
-                {formatMonthTitle(selectedDate)} 정규수업 열기
-              </button>
-            ) : null}
-          </>
-        )}
-        className="teacherCalendarTop"
-        context={(
-          <>
-            <FilterBar
-              className="lessonTypeFilterBar"
-              label="수업일지 일정 종류 필터"
-              result={<span>{lessonCalendarViewModel.visibleLessonCount}개</span>}
-            >
-              {lessonCalendarViewModel.filterOptions.map((option) => (
-                <button
-                  aria-pressed={lessonTypeFilter === option.id}
-                  className={`filterBarOption${lessonTypeFilter === option.id ? " active" : ""}`}
-                  key={option.id}
-                  onClick={() => setLessonTypeFilter(option.id)}
-                  type="button"
-                >
-                  {option.label}
-                </button>
-              ))}
-            </FilterBar>
-            <span
-              className={`attendanceSyncPill ${attendanceSyncStatus.state}`}
-              title={attendanceSyncStatus.message}
-            >
-              {attendanceSyncStatus.state === "syncing"
-                ? "출결 확인 중"
-                : attendanceSyncStatus.state === "failed"
-                  ? "출결 연결 지연"
-                  : attendanceSyncStatus.lastSyncedAt
-                    ? `출결 최신 ${formatKoreaTimeFromIso(attendanceSyncStatus.lastSyncedAt)}`
-                    : "출결 동기화 대기"}
-            </span>
-          </>
-        )}
-        leading={<button aria-label="이전 달" className="iconButton" onClick={() => onMoveDate(-30)} type="button">‹</button>}
-        title={formatMonthTitle(selectedDate)}
-        trailing={<button aria-label="다음 달" className="iconButton" onClick={() => onMoveDate(30)} type="button">›</button>}
+      <LessonCalendarView
+        attendanceSyncLabel={attendanceSyncStatus.state === "syncing"
+          ? "출결 확인 중"
+          : attendanceSyncStatus.state === "failed"
+            ? "출결 연결 지연"
+            : attendanceSyncStatus.lastSyncedAt
+              ? `출결 최신 ${formatKoreaTimeFromIso(attendanceSyncStatus.lastSyncedAt)}`
+              : "출결 동기화 대기"}
+        attendanceSyncStatus={attendanceSyncStatus}
+        lessonTypeFilter={lessonTypeFilter}
+        monthlyRegularLessonOpenLabel={`${formatMonthTitle(selectedDate)} 정규수업 열기`}
+        monthTitle={formatMonthTitle(selectedDate)}
+        onAddLesson={onAddLesson}
+        onDateSelect={onDateSelect}
+        onLessonTypeFilterChange={setLessonTypeFilter}
+        onMoveDate={onMoveDate}
+        onOpenMonthlyRegularLessons={onOpenMonthlyRegularLessons}
+        onOpenLessonJournal={onOpenLessonJournal}
+        selectedCalendarDayRef={selectedCalendarDayRef}
+        showMonthlyRegularLessonOpen={!isMonthlyRegularLessonOpened && monthlyRegularLessonOpenPlan.lessonsToCreate.length > 0}
+        viewModel={lessonCalendarViewModel}
       />
-
-      <section
-        aria-label={`${formatMonthTitle(selectedDate)} 수업 달력`}
-        className="calendarShell teacherCalendarShell"
-        role="region"
-        tabIndex={0}
-      >
-        <div aria-label="월간 수업 일정" className="calendarGrid teacherCalendarGrid" role="grid">
-          {["일", "월", "화", "수", "목", "금", "토"].map((label) => (
-            <div className="weekday" key={label} role="columnheader">{label}</div>
-          ))}
-          {lessonCalendarViewModel.calendarDays.map((day) => (
-              <div
-                aria-label={`${day.date} · ${day.lessons.length ? `${day.lessons.length}개 수업` : "수업 없음"}`}
-                aria-selected={day.isSelected}
-                className={[
-                  "monthCell",
-                  "teacherMonthCell",
-                  day.inMonth ? "" : "outside",
-                  day.isSelected ? "selected" : ""
-                ].join(" ")}
-                key={day.date}
-                onClick={() => onDateSelect(day.date)}
-                onKeyDown={(event) => {
-                  if (event.target !== event.currentTarget || !["Enter", " "].includes(event.key)) return;
-                  event.preventDefault();
-                  event.stopPropagation();
-                  onDateSelect(day.date);
-                }}
-                ref={day.isSelected ? selectedCalendarDayRef : null}
-                role="gridcell"
-                tabIndex={day.isSelected ? 0 : -1}
-              >
-                <span className="dayNumber">{day.dayNumber}</span>
-                <span className="cellPlus">+</span>
-                <span className="lessonPills">
-                  {day.lessons.map((pill) => (
-                      <button
-                        className={pill.className}
-                        key={pill.lesson.lessonId}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          onOpenLessonJournal(pill.lesson.lessonId);
-                        }}
-                        style={{ background: pill.lesson.color }}
-                        type="button"
-                      >
-                        {pill.label}
-                      </button>
-                    ))}
-                </span>
-              </div>
-            ))}
-        </div>
-      </section>
       {lessonJournalDialog}
     </>
   );

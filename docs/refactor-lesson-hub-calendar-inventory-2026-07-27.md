@@ -89,7 +89,7 @@ Supabase lessons
 2. **15B — 순수 달력 표시 모델 — 완료**
    - 필터된 수업, 선택 월 건수, 월별 cell/pill 표시값 계산을 순수 함수로 분리한다.
    - 합성 수업 fixture로 정규·휴강·보충·시험대비·특강 분류를 고정한다.
-3. **15C — 활성 달력 presentational component**
+3. **15C — 활성 달력 presentational component — 완료**
    - 필터/header/grid 표시를 전용 파일로 옮기고 선택·월 이동 callback만 주입한다.
 4. **15D — `LessonModal` callback-only UI**
    - local draft·검증·진행 표시를 전용 파일로 옮기되 API와 저장 controller는 App에 둔다.
@@ -103,4 +103,4 @@ Supabase lessons
 
 - AI 검수: 활성/비활성 참조 수, 저장 원천, 외부 side effect, low-risk 첫 후보를 정적 분석으로 확인한다.
 - 사람 검수: 없음. 화면·운영 데이터·외부 서비스를 변경하지 않았다.
-- 다음 단계: 15B 완료 뒤 최신 `origin/main`을 다시 rebase하고, 15C 활성 달력 presentational component만 한 의미 단위로 옮긴다.
+- 다음 단계: 15C 완료 뒤 최신 `origin/main`을 다시 rebase하고, 15D `LessonModal`의 callback-only UI 이동 가능 범위를 다시 확인한다.
