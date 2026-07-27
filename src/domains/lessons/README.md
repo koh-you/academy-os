@@ -15,3 +15,4 @@ MVP 기준:
 - `lessonModalInitialDraft.js`는 최초 입력값과 mount 시 한 번 생성할 수업·휴강 보충 ID 인자를 계산합니다. 실제 시간 기반 ID source는 App이 주입합니다.
 - `lessonModalSaveState.js`는 모달 local 저장 상태의 초기 안내, 실패 후 dirty 복귀, 저장 중·완료·실패 표시값만 계산합니다.
 - `LessonModalStudentPicker.jsx`는 App이 소유한 검색·선택값과 callback으로 학생 검색, 학년 그룹, 선택 chip만 렌더링합니다.
+- `LessonModalClosurePanel.jsx`는 App이 계산한 기존 명단·수업기록·알림 상태와 local callback으로 휴강 안내와 선택형 보충 입력만 렌더링합니다.

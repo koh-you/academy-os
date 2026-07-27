@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-27 P1. 15D-7 수업 모달 휴강 controlled panel 분리 — AI gate 통과
+
+- 코드: 휴강 횟수·정산 안내, 기존 수업의 명단·수업기록·알림 사전점검 안내, 기존 휴강의 중복 보충 차단 안내, 보충 없음/함께 생성 선택과 날짜·시간 입력 JSX를 `src/domains/lessons/LessonModalClosurePanel.jsx`로 이동했다.
+- 경계: `closureRecordCount`, 차단 notification job selector, 기존 명단 수, 휴강 전환/기존 휴강 판정과 보충 입력 state·setter는 App이 소유한다. 새 패널은 전달받은 값과 callback만 사용하며 API·Supabase·`notification_jobs` 직접 접근, Solapi, `onSubmit`이 없다.
+- 자동검증: 전용 boundary fixture가 안내 문구, 알림 건수, 기존 휴강 중복 방지, 보충 생성 선택과 날짜·시간 callback, App의 기록/job 계산과 touched-state 소유, side effect 금지를 검사한다. 기존 90a/90a-1 scenario는 App 저장 orchestration과 새 패널 표시를 함께 추적한다. `test:production` 61개 명령, scenario 495/495, build, `git diff --check`가 통과했다.
+- 사람 gate: 없음. 휴강 표시 DOM만 이동하고 사전점검·저장 동작은 보존했다. 다음은 최신 `origin/main` rebase 후 15D-8 수업 유형·반 템플릿·색상·이름·날짜·시간 기본 입력 JSX를 controlled component로 분리한다.
+
 ## 2026-07-27 P1. 15D-6 수업 모달 학생 선택 controlled component 분리 — AI gate 통과
 
 - 코드: 포함 학생 수, 검색 입력, 보이는 학생 선택, 휴강 전환 명단 잠금 안내, 학년 그룹 전체 선택·해제와 학생 chip JSX를 `src/domains/lessons/LessonModalStudentPicker.jsx`로 이동했다.
