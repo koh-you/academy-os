@@ -12,3 +12,4 @@ MVP 기준:
 - `lessonModalStudentModel.js`는 수업 등록·수정 모달의 재원 학생 검색과 학년 그룹만 계산합니다.
 - `lessonModalDraftModel.js`는 수업 등록·수정 모달의 입력 validation과 submit payload만 계산하며 API나 React 저장 상태를 소유하지 않습니다.
 - `lessonModalDraftTransitions.js`는 반 템플릿·수업 유형·날짜 변경에 따른 local draft patch와 색상 선택지만 계산합니다.
+- `lessonModalInitialDraft.js`는 최초 입력값과 mount 시 한 번 생성할 수업·휴강 보충 ID 인자를 계산합니다. 실제 시간 기반 ID source는 App이 주입합니다.

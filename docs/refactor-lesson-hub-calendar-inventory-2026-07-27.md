@@ -95,7 +95,8 @@ Supabase lessons
    - 15D-1 완료: 활성 학생 필터·검색·학년 순서·그룹 생성을 `lessonModalStudentModel.js` 순수 모델로 분리했다.
    - 15D-2 완료: 이름·날짜·시간·휴강 보충 입력 validation과 submit payload 계산을 `lessonModalDraftModel.js` 순수 모델로 분리했다.
    - 15D-3 완료: 반 템플릿 선택, 수업 유형 변경, 날짜 변경과 색상 선택지의 draft patch 계산을 `lessonModalDraftTransitions.js`로 분리했다.
-   - 다음 15D-4: 모달 최초 local draft 초기값과 고정 ID 생성을 순수 factory로 옮길 수 있는지 확인하되 `Date.now()`와 React mount 시점이 달라지지 않게 한다.
+   - 15D-4 완료: 모달 최초 local draft 초기값과 두 lesson ID factory를 `lessonModalInitialDraft.js`로 분리했다. `Date.now()`를 쓰는 기존 ID source는 App에 두고 각 factory를 기존 `useState` lazy initializer 안에서 한 번씩 호출한다.
+   - 다음 15D-5: 저장 실패 뒤 입력 변경 시 dirty 상태로 복귀하는 local save-state transition을 순수 모델 또는 전용 hook으로 분리한다.
    - local draft·진행 표시를 전용 파일로 옮기되 API와 저장 controller는 App에 둔다.
 5. **15E — 키보드 탐색 hook**
    - 포커스 가능한 입력 요소 예외와 Ctrl/Cmd 단축키 계약을 fixture로 고정한 뒤 분리한다.
@@ -107,4 +108,4 @@ Supabase lessons
 
 - AI 검수: 활성/비활성 참조 수, 저장 원천, 외부 side effect, low-risk 첫 후보를 정적 분석으로 확인한다.
 - 사람 검수: 없음. 화면·운영 데이터·외부 서비스를 변경하지 않았다.
-- 다음 단계: 15D-3 완료 뒤 최신 `origin/main`을 다시 rebase하고, 15D-4 최초 local draft 초기값·ID factory를 한 의미 단위로 검토한다. `Date.now()` 호출 횟수와 React mount 시점, API·React 저장 상태·Supabase 재조회는 바꾸지 않는다.
+- 다음 단계: 15D-4 완료 뒤 최신 `origin/main`을 다시 rebase하고, 15D-5 저장 실패 뒤 입력 변경의 local save-state transition을 한 의미 단위로 검토한다. 실제 `onSubmit`, API·Supabase 재조회는 이동하지 않는다.

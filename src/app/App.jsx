@@ -230,6 +230,11 @@ import {
   createLessonModalTemplateChangePatch,
   createLessonModalTypeChangePatch
 } from "../domains/lessons/lessonModalDraftTransitions.js";
+import {
+  createLessonModalClosureMakeupLessonId,
+  createLessonModalDraftLessonId,
+  createLessonModalInitialDraft
+} from "../domains/lessons/lessonModalInitialDraft.js";
 import { createLessonModalStudentSelectionModel } from "../domains/lessons/lessonModalStudentModel.js";
 import { LessonJournalErrorBoundary } from "../domains/lessons/LessonJournalErrorBoundary.jsx";
 import { attendanceLabels, dayLabels, homeworkLabels } from "../domains/lessons/labels.js";
@@ -18639,33 +18644,47 @@ function LessonModal({
   });
   const normalizedTemplates = normalizeClassTemplates(templates);
   const fallbackTemplate = normalizedTemplates[0] ?? { name: "", startTime: "16:00", endTime: "17:00", color: lessonCalendarColors.regular };
-  const [lessonType, setLessonType] = useState(initialLesson?.lessonType ?? "class");
   const [classTemplateId, setClassTemplateId] = useState(initialLesson ? initialLesson.classTemplateId || "" : normalizedTemplates[0]?.classTemplateId || "");
   const activeTemplate = normalizedTemplates.find((template) => template.classTemplateId === classTemplateId) ?? fallbackTemplate;
-  const initialDate = initialLesson?.date ?? today;
-  const initialTemplateTimes = getTemplateLessonTimes(activeTemplate, initialDate);
+  const initialDraft = createLessonModalInitialDraft({
+    activeStudents,
+    activeTemplate,
+    addDaysInKorea,
+    getActiveStudentIdsFromSelection,
+    getStandardLessonColor,
+    getTemplateLessonTimes,
+    initialLesson,
+    normalizeTimeInput,
+    today
+  });
+  const [lessonType, setLessonType] = useState(initialDraft.lessonType);
   const [draftLessonId] = useState(() =>
-    initialLesson?.lessonId || createLessonId(initialDate, initialLesson?.className || activeTemplate.name || "수업")
+    createLessonModalDraftLessonId({
+      activeTemplate,
+      createLessonId,
+      initialDraft,
+      initialLesson
+    })
   );
   const [draftClosureMakeupLessonId] = useState(() =>
-    createLessonId(addDaysInKorea(initialDate, 7), `${initialLesson?.className || activeTemplate.name || "수업"}-휴강-보충`)
+    createLessonModalClosureMakeupLessonId({
+      activeTemplate,
+      createLessonId,
+      initialDraft,
+      initialLesson
+    })
   );
-  const [name, setName] = useState(initialLesson?.className ?? activeTemplate.name);
-  const [date, setDate] = useState(initialDate);
-  const [startTime, setStartTime] = useState(normalizeTimeInput(initialLesson?.startTime) || initialTemplateTimes.startTime);
-  const [endTime, setEndTime] = useState(normalizeTimeInput(initialLesson?.endTime) || initialTemplateTimes.endTime);
+  const [name, setName] = useState(initialDraft.name);
+  const [date, setDate] = useState(initialDraft.date);
+  const [startTime, setStartTime] = useState(initialDraft.startTime);
+  const [endTime, setEndTime] = useState(initialDraft.endTime);
   const [closureMakeupEnabled, setClosureMakeupEnabled] = useState(false);
-  const [closureMakeupDate, setClosureMakeupDate] = useState(addDaysInKorea(initialDate, 7));
+  const [closureMakeupDate, setClosureMakeupDate] = useState(initialDraft.closureMakeupDate);
   const [closureMakeupDateTouched, setClosureMakeupDateTouched] = useState(false);
-  const [closureMakeupStartTime, setClosureMakeupStartTime] = useState(normalizeTimeInput(initialLesson?.startTime) || initialTemplateTimes.startTime);
-  const [closureMakeupEndTime, setClosureMakeupEndTime] = useState(normalizeTimeInput(initialLesson?.endTime) || initialTemplateTimes.endTime);
-  const [color, setColor] = useState(
-    getStandardLessonColor(initialLesson ?? { lessonType: "class", classTemplateId: activeTemplate.classTemplateId, className: activeTemplate.name })
-  );
-  const [studentIds, setStudentIds] = useState(() => {
-    const initialStudentIds = initialLesson?.studentIds ?? activeStudents.map((student) => student.studentId);
-    return getActiveStudentIdsFromSelection(initialStudentIds, activeStudents);
-  });
+  const [closureMakeupStartTime, setClosureMakeupStartTime] = useState(initialDraft.closureMakeupStartTime);
+  const [closureMakeupEndTime, setClosureMakeupEndTime] = useState(initialDraft.closureMakeupEndTime);
+  const [color, setColor] = useState(initialDraft.color);
+  const [studentIds, setStudentIds] = useState(initialDraft.studentIds);
   const [saveState, setSaveState] = useState("idle");
   const [saveMessage, setSaveMessage] = useState("수정 내용은 저장 버튼을 눌러야 Supabase에 반영됩니다.");
   const isSaving = saveState === "saving";
