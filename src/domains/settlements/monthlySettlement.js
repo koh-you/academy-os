@@ -8,10 +8,12 @@ export const monthlySettlementFactor = 0.5 * 0.967 * 0.985;
 export const monthlySettlementRateTable = {
   high: {
     defaultAmount: 450000,
+    newStudentSessionAmount: 37500,
     sixHoursAmount: 341000
   },
   middle: {
     defaultAmount: 420000,
+    newStudentSessionAmount: 35000,
     sixHoursAmount: 308000
   }
 };
@@ -323,6 +325,20 @@ export function getMonthlySettlementRateLabel(student = {}, scheduleText = "") {
     : `${schoolLevel} 기본 고정급`;
 }
 
+export function getDefaultNewStudentSessionAmount(student = {}) {
+  const grade = normalizeText(student.grade);
+  if (grade.startsWith("중")) return monthlySettlementRateTable.middle.newStudentSessionAmount;
+  if (grade.startsWith("고")) return monthlySettlementRateTable.high.newStudentSessionAmount;
+  return "";
+}
+
+export function getNewStudentSessionRateLabel(student = {}) {
+  const grade = normalizeText(student.grade);
+  if (grade.startsWith("중")) return "신입 중등 3타임 회당 단가";
+  if (grade.startsWith("고")) return "신입 고등 3타임 회당 단가";
+  return "신입 회당 단가 미설정";
+}
+
 export function getFixedAmountAfterScheduleChange({
   classTemplates = [],
   currentFixedAmount = "",
@@ -358,6 +374,10 @@ export function normalizeMonthlySettlementStudentSetting(
     setting.fixedAmount !== null &&
     setting.fixedAmount !== undefined &&
     Number.isFinite(Number(setting.fixedAmount));
+  const hasStoredNewStudentSessionAmount = setting.newStudentSessionAmount !== "" &&
+    setting.newStudentSessionAmount !== null &&
+    setting.newStudentSessionAmount !== undefined &&
+    Number.isFinite(Number(setting.newStudentSessionAmount));
   const mode = settlementModes.has(setting.mode)
     ? setting.mode
     : withdrawnDate ? "withdrawn" : "fixed";
@@ -378,6 +398,12 @@ export function normalizeMonthlySettlementStudentSetting(
     ),
     mode,
     modeSource,
+    newStudentSessionAmount: normalizeMoneyInput(
+      setting.newStudentSessionAmount,
+      hasStoredNewStudentSessionAmount
+        ? ""
+        : getDefaultNewStudentSessionAmount(student)
+    ),
     note: normalizeText(setting.note),
     scheduleText,
     specialGrossAmount: normalizeMoneyInput(setting.specialGrossAmount, 0),
@@ -597,11 +623,17 @@ export function buildStudentSettlementRow({
       ? Math.max(0, Math.min(1, prorationCount / monthlyScheduleCount))
       : 0;
   const hasFixedAmount = normalizedSetting.fixedAmount !== "";
+  const hasNewStudentSessionAmount = normalizedSetting.newStudentSessionAmount !== "";
+  const hasApplicableRate = normalizedSetting.mode === "new"
+    ? hasNewStudentSessionAmount
+    : hasFixedAmount;
   const hasRegularJournal = evidence.regularCount > 0;
-  const calculatedBaseAmount = hasFixedAmount && hasRegularJournal
+  const calculatedBaseAmount = hasApplicableRate && hasRegularJournal
     ? normalizedSetting.mode === "fixed"
       ? Number(normalizedSetting.fixedAmount)
-      : Math.round(Number(normalizedSetting.fixedAmount) * partialRatio)
+      : normalizedSetting.mode === "new"
+        ? Math.round(Number(normalizedSetting.newStudentSessionAmount) * prorationCount)
+        : Math.round(Number(normalizedSetting.fixedAmount) * partialRatio)
     : 0;
   const baseAmount = normalizedSetting.excluded ? 0 : calculatedBaseAmount;
   const regularGrossAmount = normalizedSetting.excluded
@@ -615,7 +647,9 @@ export function buildStudentSettlementRow({
     ...evidence,
     baseAmount,
     firstEverRegularDate,
+    hasApplicableRate,
     hasFixedAmount,
+    hasNewStudentSessionAmount,
     hasRegularJournal,
     isJournalAutoNew: normalizedSetting.mode === "new" &&
       normalizedSetting.modeSource === "lesson_journal",
@@ -653,7 +687,7 @@ export function buildMonthlySettlementSummary(rows = []) {
     ).length,
     regularGrossAmount,
     regularNetAmount,
-    unsetRateCount: rows.filter((row) => !row.setting.excluded && !row.hasFixedAmount).length
+    unsetRateCount: rows.filter((row) => !row.setting.excluded && !row.hasApplicableRate).length
   };
 }
 
@@ -695,6 +729,7 @@ export function getMonthlySettlementMonthSaveSnapshot(month = {}) {
             fixedAmount: normalizeMoneyInput(setting?.fixedAmount, ""),
             mode: settlementModes.has(setting?.mode) ? setting.mode : "fixed",
             modeSource: settlementModeSources.has(setting?.modeSource) ? setting.modeSource : "",
+            newStudentSessionAmount: normalizeMoneyInput(setting?.newStudentSessionAmount, ""),
             note: normalizeText(setting?.note),
             scheduleText: normalizeText(setting?.scheduleText),
             specialGrossAmount: normalizeMoneyInput(setting?.specialGrossAmount, 0),

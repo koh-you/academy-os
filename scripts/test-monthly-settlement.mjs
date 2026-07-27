@@ -5,6 +5,7 @@ import {
   buildMonthlySettlementSummary,
   buildStudentSettlementRow,
   getDefaultFixedAmountForStudent,
+  getDefaultNewStudentSessionAmount,
   getFixedAmountAfterScheduleChange,
   getMonthRange,
   getMonthlySettlementMonthSaveSnapshot,
@@ -661,15 +662,56 @@ assert.equal(newStudentRow.periodEnd, "2026-07-31");
 assert.equal(newStudentRow.monthlyScheduleCount, unevenScheduledEvents.length);
 assert.equal(newStudentRow.prorationCount, expectedNewCount);
 assert.equal(newStudentRow.partialRatio, expectedNewCount / unevenScheduledEvents.length);
+assert.equal(getDefaultNewStudentSessionAmount(newStudent), 37500);
+assert.equal(newStudentRow.setting.newStudentSessionAmount, 37500);
 assert.notEqual(
   newStudentRow.partialRatio,
   recognizedUnevenHours / fullUnevenHours,
-  "부분월 비율은 시수 비율이 아니라 수업 횟수 비율이어야 합니다."
+  "신입 정산 횟수는 서로 다른 수업 길이가 있어도 시수 비율로 바뀌면 안 됩니다."
 );
 assert.equal(
   newStudentRow.regularGrossAmount,
-  Math.round(450000 * expectedNewCount / unevenScheduledEvents.length),
-  "신입생은 첫 수업일부터 말일까지의 월별 스케줄 횟수 비율로 계산해야 합니다."
+  37500 * expectedNewCount,
+  "고등 신입생은 월 전체 횟수로 나누지 않고 첫 수업일부터 말일까지 횟수에 37,500원을 곱해야 합니다."
+);
+const middleNewStudent = {
+  ...newStudent,
+  grade: "중3",
+  studentId: "student_settlement_middle_new"
+};
+const middleNewStudentRow = buildStudentSettlementRow({
+  classTemplates,
+  lessons: newStudentLessons.map((lesson) => ({
+    ...lesson,
+    studentIds: [middleNewStudent.studentId]
+  })),
+  monthKey,
+  records: [],
+  setting: {
+    adjustmentAmount: 0,
+    fixedAmount: 420000,
+    mode: "new",
+    scheduleText: unevenScheduleText
+  },
+  student: middleNewStudent
+});
+assert.equal(getDefaultNewStudentSessionAmount(middleNewStudent), 35000);
+assert.equal(middleNewStudentRow.setting.newStudentSessionAmount, 35000);
+assert.equal(
+  middleNewStudentRow.regularGrossAmount,
+  35000 * expectedNewCount,
+  "중등 신입생은 월 전체 횟수로 나누지 않고 첫 수업일부터 말일까지 횟수에 35,000원을 곱해야 합니다."
+);
+assert.equal(
+  JSON.parse(getMonthlySettlementMonthSaveSnapshot({
+    monthKey,
+    studentSettings: {
+      [middleNewStudent.studentId]: middleNewStudentRow.setting
+    },
+    updatedAt: "2026-07-27T00:00:00.000Z"
+  })).studentSettings[middleNewStudent.studentId].newStudentSessionAmount,
+  35000,
+  "신입생 회당 단가는 월별 Supabase 재조회 대조 스냅샷에 포함되어야 합니다."
 );
 
 const withdrawnStudent = {

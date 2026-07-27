@@ -16,6 +16,7 @@ import {
   getMonthlySettlementRateLabel,
   getMonthRange,
   getMonthlySettlementStudents,
+  getNewStudentSessionRateLabel,
   getSettlementAttendanceLabel,
   listMonthDates,
   monthlySettlementFactor,
@@ -157,7 +158,12 @@ function MonthlySettlementCalendar({ monthKey, onClose, row }) {
         })}
       </div>
       <div className="monthlySettlementCalendarSummary">
-        <span>정산 기준 횟수: {row.prorationCount}/{row.monthlyScheduleCount}회 · 기간 내 수업일지 {row.recognizedRegularCount}회</span>
+        <span>
+          {row.setting.mode === "new"
+            ? `신입 정산 횟수: ${row.prorationCount}회`
+            : `정산 기준 횟수: ${row.prorationCount}/${row.monthlyScheduleCount}회`}
+          {" · "}기간 내 수업일지 {row.recognizedRegularCount}회
+        </span>
         <span>출석 {row.actualStatusCounts.present ?? 0} · 지각 {row.actualStatusCounts.late ?? 0} · 대기 {row.actualStatusCounts.pending ?? 0} · 결석 {(row.actualStatusCounts.absent ?? 0) + (row.actualStatusCounts.excused ?? 0)}</span>
         <span>보충: {row.makeupCount}회 · {formatSettlementHours(row.makeupHours)} · 정규 금액에는 추가하지 않음</span>
       </div>
@@ -221,7 +227,7 @@ export function MonthlySettlementPanel({
           ? "저장하지 않은 월별 정산 작업을 복구하고, 수업일지 최초 수업 기준 신입생 계산을 자동 반영했습니다."
           : "저장하지 않은 월별 정산 작업을 복구했습니다."
         : hasJournalAutoModeChanges
-          ? "수업일지에서 이번 달 최초 정규수업이 확인된 학생을 신입생 부분월 계산으로 자동 반영했습니다. 확인 후 저장해 주세요."
+          ? "수업일지에서 이번 달 최초 정규수업이 확인된 학생을 신입생 회당 계산으로 자동 반영했습니다. 확인 후 저장해 주세요."
         : !savedMonth
           ? "이 달의 기본 정산 스냅샷을 확인한 뒤 저장해 주세요."
           : hasNewStudents ? "이 달의 기존 스냅샷에 새 학생이 추가되었습니다. 확인 후 저장해 주세요." : ""
@@ -361,7 +367,7 @@ export function MonthlySettlementPanel({
           <h1>월별 수업 정산</h1>
           <p className="muted">
             선택한 달의 수업일지 명단을 정산 원천으로 봅니다. 재원생은 수업 횟수·시수와 무관하게 월 고정금액,
-            신입생은 첫 수업부터 말일까지, 퇴원생은 1일부터 마지막 수업까지의 월별 스케줄 횟수 비율로 계산합니다.
+            신입생은 첫 수업부터 말일까지의 수업 횟수에 회당 단가를 곱하고, 퇴원생은 1일부터 마지막 수업까지의 월별 스케줄 횟수 비율로 계산합니다.
           </p>
         </div>
         <div className="monthlySettlementMonthControl">
@@ -377,17 +383,19 @@ export function MonthlySettlementPanel({
         <strong>계산 기준</strong>
         <span>학생 상태 필터 없이 해당 월 수업일지 명단을 그대로 표시합니다.</span>
         <span>12회 또는 4.2주 환산을 사용하지 않습니다.</span>
+        <span>신입생은 월 전체 횟수로 나누지 않고 첫 수업~말일 횟수 × 회당 단가로 계산합니다.</span>
         <span>신입·퇴원 경계일은 수업일지의 첫 수업·마지막 수업에서 자동으로 정하며 직접 입력하지 않습니다.</span>
         <span>출석·지각·대기는 정산 포함, 결석도 별도 차감 요청이 없으면 자동 차감하지 않습니다.</span>
         <span>보충은 달력에 별도로 남기되 정규 금액을 추가하지 않습니다.</span>
         <span>정산 제외한 행은 이 달 정산표에서 숨기며, 학생·수업일지 원천은 유지합니다.</span>
         <span>특강비는 이 월별 정산에서 제외하고 운영의 별도 특강 정산에서 전체 과정 기준으로 계산합니다.</span>
         <span>중등 기본 420,000원 · 중등 주 6시간 308,000원 · 고등 주 6시간 341,000원 · 고등 기본 450,000원</span>
+        <span>신입생 3타임 회당 단가: 중등 35,000원 · 고등 37,500원</span>
       </div>
 
       <div className="metricGrid monthlySettlementMetrics">
         <MetricCard
-          hint="학생별 월정액·부분월 금액·수동 조정 합계"
+          hint="학생별 월정액·신입 회당 금액·퇴원 부분월 금액·수동 조정 합계"
           icon="₩"
           label="정규 기준 총액"
           value={formatSettlementWon(summary.regularGrossAmount)}
@@ -436,7 +444,7 @@ export function MonthlySettlementPanel({
             <tr>
               <th>학생</th>
               <th>계산 방식</th>
-              <th>월 고정금액</th>
+              <th>기준 금액</th>
               <th>월별 스케줄</th>
               <th>자동 정산 기간</th>
               <th>횟수·시수 참고</th>
@@ -449,6 +457,7 @@ export function MonthlySettlementPanel({
           <tbody>
             {activeRows.map((row) => {
               const setting = row.setting;
+              const isNewMode = setting.mode === "new";
               const parsedScheduleText = scheduleTextFromRules(setting.scheduleText);
               const hasScheduleWarning =
                 setting.mode !== "fixed" &&
@@ -487,7 +496,9 @@ export function MonthlySettlementPanel({
                     <small>
                       {setting.mode === "fixed"
                         ? "횟수와 무관하게 전액"
-                        : row.monthlyScheduleCount > 0
+                        : isNewMode && row.monthlyScheduleCount > 0
+                          ? `${row.prorationCount}회 × ${formatSettlementWon(setting.newStudentSessionAmount)}`
+                          : row.monthlyScheduleCount > 0
                           ? `횟수 비율 ${formatSettlementPercent(row.partialRatio)} · ${row.prorationCount}/${row.monthlyScheduleCount}회`
                           : "월별 스케줄 확인 필요"}
                     </small>
@@ -498,15 +509,23 @@ export function MonthlySettlementPanel({
                         min="0"
                         placeholder="단가 미설정"
                         type="number"
-                        value={setting.fixedAmount}
-                        onChange={(event) => updateStudentSetting(row.student.studentId, "fixedAmount", event.target.value)}
+                        value={isNewMode ? setting.newStudentSessionAmount : setting.fixedAmount}
+                        onChange={(event) => updateStudentSetting(
+                          row.student.studentId,
+                          isNewMode ? "newStudentSessionAmount" : "fixedAmount",
+                          event.target.value
+                        )}
                       />
                       <span>원</span>
                     </div>
                     <small>
-                      {setting.fixedAmount === ""
-                        ? "단가 미설정"
-                        : `${getMonthlySettlementRateLabel(row.student, setting.scheduleText)} · 학생별 수정 가능`}
+                      {isNewMode
+                        ? setting.newStudentSessionAmount === ""
+                          ? "신입 회당 단가 미설정"
+                          : `${getNewStudentSessionRateLabel(row.student)} · 학생별 수정 가능`
+                        : setting.fixedAmount === ""
+                          ? "단가 미설정"
+                          : `${getMonthlySettlementRateLabel(row.student, setting.scheduleText)} · 학생별 수정 가능`}
                     </small>
                   </td>
                   <td className="monthlySettlementScheduleCell">
@@ -538,7 +557,9 @@ export function MonthlySettlementPanel({
                       정규 {row.regularCount}회 · {formatSettlementHours(row.regularHours)}
                     </button>
                     <small>
-                      {row.monthlyScheduleCount > 0
+                      {isNewMode && row.monthlyScheduleCount > 0
+                        ? `신입 정산 ${row.prorationCount}회`
+                        : row.monthlyScheduleCount > 0
                         ? `정산 기준 ${row.prorationCount}/${row.monthlyScheduleCount}회`
                         : "정산 기준 횟수 계산 불가"}
                     </small>
@@ -547,13 +568,15 @@ export function MonthlySettlementPanel({
                   </td>
                   <td className="monthlySettlementAmountCell">
                     <strong>
-                      {row.hasFixedAmount ? formatSettlementWon(row.regularGrossAmount) : "단가 미설정"}
+                      {row.hasApplicableRate ? formatSettlementWon(row.regularGrossAmount) : "단가 미설정"}
                     </strong>
                     <span>
                       {!row.hasRegularJournal
                         ? "정규 수업일지 없음 · 0원"
                         : setting.mode === "fixed"
                           ? "월정액 전액"
+                          : isNewMode && row.monthlyScheduleCount > 0
+                            ? `${row.prorationCount}회 × ${formatSettlementWon(setting.newStudentSessionAmount)} + 조정`
                           : row.monthlyScheduleCount > 0
                             ? `${formatSettlementWon(row.baseAmount)} + 조정`
                             : "월별 스케줄 형식 확인 필요 · 0원"}
