@@ -93,7 +93,8 @@ Supabase lessons
    - 필터/header/grid 표시를 전용 파일로 옮기고 선택·월 이동 callback만 주입한다.
 4. **15D — `LessonModal` callback-only UI — 진행 중**
    - 15D-1 완료: 활성 학생 필터·검색·학년 순서·그룹 생성을 `lessonModalStudentModel.js` 순수 모델로 분리했다.
-   - 다음 15D-2: 시간·휴강 보충 입력 validation과 submit payload 계산을 순수 모델로 고정한다.
+   - 15D-2 완료: 이름·날짜·시간·휴강 보충 입력 validation과 submit payload 계산을 `lessonModalDraftModel.js` 순수 모델로 분리했다.
+   - 다음 15D-3: 모달 local draft 초기화·반 템플릿 적용·색상 선택 중 저장 side effect가 없는 계산 경계를 먼저 inventory하고 가장 작은 순수 단위만 분리한다.
    - local draft·진행 표시를 전용 파일로 옮기되 API와 저장 controller는 App에 둔다.
 5. **15E — 키보드 탐색 hook**
    - 포커스 가능한 입력 요소 예외와 Ctrl/Cmd 단축키 계약을 fixture로 고정한 뒤 분리한다.
@@ -105,4 +106,4 @@ Supabase lessons
 
 - AI 검수: 활성/비활성 참조 수, 저장 원천, 외부 side effect, low-risk 첫 후보를 정적 분석으로 확인한다.
 - 사람 검수: 없음. 화면·운영 데이터·외부 서비스를 변경하지 않았다.
-- 다음 단계: 15D-1 완료 뒤 최신 `origin/main`을 다시 rebase하고, 15D-2 modal validation/payload 순수 경계를 한 의미 단위로 진행한다.
+- 다음 단계: 15D-2 완료 뒤 최신 `origin/main`을 다시 rebase하고, 15D-3 local draft 초기화·반 템플릿·색상 계산 중 가장 작은 순수 경계를 한 의미 단위로 진행한다. API·React 저장 상태·Supabase 재조회는 이동하지 않는다.

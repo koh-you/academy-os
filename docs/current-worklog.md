@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-27 P1. 15D-2 수업 모달 validation·submit payload 분리 — AI gate 통과
+
+- 코드: `LessonModal`의 이름·날짜·시작/종료 시간과 휴강 보충 날짜·시간 validation을 `getLessonModalValidationError`, 최종 submit object 생성을 `createLessonModalSubmitPayload`로 옮겨 `src/domains/lessons/lessonModalDraftModel.js`에 분리했다.
+- 경계: `normalizeTimeInput`은 App이 주입한다. React draft/save state, `onSubmit`, 진행 callback, 수업 bulk API, Supabase 재조회·snapshot 대조, 휴강 사전점검은 모두 기존 App 경계에 남았다. 새 모델은 API·Supabase·`notification_jobs`·Solapi를 알지 못한다.
+- 자동검증: 정상 입력, 빈 이름/날짜, 주 수업 시간 누락·역전, 휴강 보충 날짜 누락·시간 역전, 비휴강의 비활성 보충 입력 무시와 신규/기존 휴강·비휴강 payload를 합성 fixture로 검증했다. `test:production` 56개 명령, scenario 494/494, build가 통과했다.
+- 사람 gate: 없음. 입력 판정과 같은 submit object의 계산 위치만 옮겼고 실제 저장이나 운영 데이터는 변경하지 않았다. 다음은 최신 `origin/main` rebase 후 15D-3 local draft 초기화·반 템플릿·색상 계산 중 가장 작은 순수 경계를 분리한다.
+
 ## 2026-07-27 P1. 15D-1 수업 모달 학생 선택 모델 분리 — AI gate 통과
 
 - 코드: `LessonModal`의 재원 학생 필터, 이름·학년·학교 검색, 고3→중1 우선순위, 기타 학년과 `학년 미입력` 그룹 생성을 `src/domains/lessons/lessonModalStudentModel.js`로 이동했다.

@@ -220,6 +220,10 @@ import {
 } from "../domains/lessons/lessonClosure.js";
 import { LessonCalendarView } from "../domains/lessons/LessonCalendarView.jsx";
 import { createLessonCalendarViewModel } from "../domains/lessons/lessonCalendarModel.js";
+import {
+  createLessonModalSubmitPayload,
+  getLessonModalValidationError
+} from "../domains/lessons/lessonModalDraftModel.js";
 import { createLessonModalStudentSelectionModel } from "../domains/lessons/lessonModalStudentModel.js";
 import { LessonJournalErrorBoundary } from "../domains/lessons/LessonJournalErrorBoundary.jsx";
 import { attendanceLabels, dayLabels, homeworkLabels } from "../domains/lessons/labels.js";
@@ -18753,28 +18757,20 @@ function LessonModal({
     }
   }
 
-  function getLessonModalValidationError() {
-    if (!name.trim()) return "수업명을 입력해 주세요.";
-    if (!date) return "수업 날짜를 입력해 주세요.";
-    if (!normalizeTimeInput(startTime) || !normalizeTimeInput(endTime) || endTime <= startTime) {
-      return "수업 시작·종료 시간을 올바르게 입력해 주세요.";
-    }
-    if (lessonType === "closure" && closureMakeupEnabled) {
-      if (!closureMakeupDate) return "휴강 보충 날짜를 입력해 주세요.";
-      if (
-        !normalizeTimeInput(closureMakeupStartTime) ||
-        !normalizeTimeInput(closureMakeupEndTime) ||
-        closureMakeupEndTime <= closureMakeupStartTime
-      ) {
-        return "휴강 보충 시작·종료 시간을 올바르게 입력해 주세요.";
-      }
-    }
-    return "";
-  }
-
   async function submitLesson() {
     if (isSaving || isSaved) return;
-    const validationError = getLessonModalValidationError();
+    const validationError = getLessonModalValidationError({
+      closureMakeupDate,
+      closureMakeupEnabled,
+      closureMakeupEndTime,
+      closureMakeupStartTime,
+      date,
+      endTime,
+      lessonType,
+      name,
+      normalizeTimeInput,
+      startTime
+    });
     if (validationError) {
       setSaveState("failed");
       setSaveMessage(validationError);
@@ -18785,22 +18781,23 @@ function LessonModal({
       ? "휴강과 연결 보충 수업일지 저장 중"
       : "수업일지 저장 중");
     try {
-      const result = await onSubmit({
+      const result = await onSubmit(createLessonModalSubmitPayload({
         classTemplateId,
         closureMakeupDate,
-        closureMakeupEnabled: lessonType === "closure" && !isPersistedClosure && closureMakeupEnabled,
+        closureMakeupEnabled,
         closureMakeupEndTime,
         closureMakeupLessonId: draftClosureMakeupLessonId,
         closureMakeupStartTime,
         color,
         date,
         endTime,
+        isPersistedClosure,
         lessonType,
         lessonId: draftLessonId,
-        name: name.trim(),
+        name,
         startTime,
         studentIds
-      }, (nextState, nextMessage) => {
+      }), (nextState, nextMessage) => {
         setSaveState(nextState);
         setSaveMessage(nextMessage);
       });

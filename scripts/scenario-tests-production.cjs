@@ -70,6 +70,7 @@ const lessonAssignmentStatusPath = path.join(root, "src", "domains", "lessons", 
 const lessonAttendancePath = path.join(root, "src", "domains", "lessons", "attendance.js");
 const lessonCalendarViewPath = path.join(root, "src", "domains", "lessons", "LessonCalendarView.jsx");
 const lessonCalendarModelPath = path.join(root, "src", "domains", "lessons", "lessonCalendarModel.js");
+const lessonModalDraftModelPath = path.join(root, "src", "domains", "lessons", "lessonModalDraftModel.js");
 const lessonModalStudentModelPath = path.join(root, "src", "domains", "lessons", "lessonModalStudentModel.js");
 const lessonClosurePath = path.join(root, "src", "domains", "lessons", "lessonClosure.js");
 const lessonJournalErrorBoundaryPath = path.join(root, "src", "domains", "lessons", "LessonJournalErrorBoundary.jsx");
@@ -325,6 +326,7 @@ const lessonClosureSource = fs.existsSync(lessonClosurePath) ? fs.readFileSync(l
 const lessonAttendanceSource = fs.existsSync(lessonAttendancePath) ? fs.readFileSync(lessonAttendancePath, "utf8") : "";
 const lessonCalendarViewSource = fs.existsSync(lessonCalendarViewPath) ? fs.readFileSync(lessonCalendarViewPath, "utf8") : "";
 const lessonCalendarModelSource = fs.existsSync(lessonCalendarModelPath) ? fs.readFileSync(lessonCalendarModelPath, "utf8") : "";
+const lessonModalDraftModelSource = fs.existsSync(lessonModalDraftModelPath) ? fs.readFileSync(lessonModalDraftModelPath, "utf8") : "";
 const lessonModalStudentModelSource = fs.existsSync(lessonModalStudentModelPath) ? fs.readFileSync(lessonModalStudentModelPath, "utf8") : "";
 const lessonJournalErrorBoundarySource = fs.existsSync(lessonJournalErrorBoundaryPath) ? fs.readFileSync(lessonJournalErrorBoundaryPath, "utf8") : "";
 const lessonLabelsSource = fs.existsSync(lessonLabelsPath) ? fs.readFileSync(lessonLabelsPath, "utf8") : "";
@@ -417,7 +419,7 @@ const sharedWorkspaceTabsCssSource = fs.existsSync(sharedWorkspaceTabsCssPath) ?
 const sharedIdSource = fs.existsSync(sharedIdPath) ? fs.readFileSync(sharedIdPath, "utf8") : "";
 const studentScheduleSource = fs.existsSync(studentSchedulePath) ? fs.readFileSync(studentSchedulePath, "utf8") : "";
 const examFrontendSource = [app, studentExamPostSubmissionPanelSource, examQuestionClassificationSource, examQuestionItemsSource, examFinalDocumentSource, examFinalDocumentEditorSource, examSourceMediaSource, examLibrarySource, examAnalysisStateSource, examDefaultsSource, examDetailSectionsSource, examOutputLayoutsSource, examOutputPreviewSource, examFinalPreviewSource, examFinalPreviewPanelSource, examReportPreviewSource, examQuestionInsightSource, examQuestionCropViewSource, examPostSubmissionOptionsSource, examApiSource, sharedIdSource].join("\n");
-const lessonFrontendSource = [app, lessonAssignmentStatusSource, lessonAttendanceSource, lessonCalendarViewSource, lessonCalendarModelSource, lessonModalStudentModelSource, lessonJournalErrorBoundarySource, lessonLabelsSource].join("\n");
+const lessonFrontendSource = [app, lessonAssignmentStatusSource, lessonAttendanceSource, lessonCalendarViewSource, lessonCalendarModelSource, lessonModalDraftModelSource, lessonModalStudentModelSource, lessonJournalErrorBoundarySource, lessonLabelsSource].join("\n");
 const specialLectureFrontendSource = [app, specialLectureApplicationPanelSource, specialLectureManagementPanelSource, specialLecturePublicPageSource, specialLectureGuideUtilsSource, specialLecturePlanSyncSource].join("\n");
 const css = fs.readFileSync(cssPath, "utf8");
 const indexHtml = fs.readFileSync(indexHtmlPath, "utf8");
@@ -1348,7 +1350,7 @@ check("90a lesson modal creates verified closure and optional linked makeup jour
   '{ id: "closure", label: "휴강" }',
   'lesson.lessonType === "closure" ? "closureLessonPill"'
 ]) && hasAll(serverSource, ['lesson.lessonType !== "closure"']) && hasAll(css, [".closureMakeupPanel", ".closureMakeupChoices", ".lessonModalSaveStatus", ".closureJournalNotice", ".closureLessonPill"]));
-check("90a-1 existing lessons convert to closure by live risk state without dropping records or special-lecture metadata", hasAll(app, [
+check("90a-1 existing lessons convert to closure by live risk state without dropping records or special-lecture metadata", hasAll(`${app}\n${lessonModalDraftModelSource}`, [
   "const isPersistedClosure = initialLesson?.lessonType === \"closure\"",
   "const isClosureConversion = isLessonClosureConversion(initialLesson, lessonType)",
   "const isStudentRosterLocked = isFormLocked || isClosureConversion",
@@ -1362,7 +1364,8 @@ check("90a-1 existing lessons convert to closure by live risk state without drop
   "getLessonClosureRoster(latestSourceLesson, editableStudentIds)",
   "기존 명단·수업기록 보존",
   ".filter((candidate) => !shouldIgnoreLessonAttendance(candidate))",
-  'closureMakeupEnabled: lessonType === "closure" && !isPersistedClosure && closureMakeupEnabled',
+  "closureMakeupEnabled:",
+  'lessonType === "closure" && !isPersistedClosure && closureMakeupEnabled',
   "수업을 휴강으로 전환하고 연결 보충 수업일지까지 저장 완료",
   "수업을 휴강으로 전환 저장 완료"
 ]) && hasAll(lessonClosureSource, [
