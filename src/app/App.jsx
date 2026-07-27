@@ -153,6 +153,7 @@ import {
   formatSpecialLectureTimeFromRules,
   generateSpecialLectureSessions,
   getDefaultSpecialLectureGuideId,
+  getSpecialLectureEnrollmentSaveSnapshot,
   getSpecialLectureCalculatedFields,
   getSpecialLectureGuideSlug,
   getSpecialLectureLessonTrackId,
@@ -6057,22 +6058,6 @@ export function App() {
     return savedStudent;
   }
 
-  function getSpecialLectureEnrollmentSaveSnapshot(enrollment) {
-    const normalized = normalizeSpecialLectureEnrollment(enrollment);
-    return JSON.stringify({
-      applicationId: normalized.applicationId,
-      enrollmentId: normalized.enrollmentId,
-      memo: normalized.memo,
-      planReviewedAt: normalized.planReviewedAt,
-      planSource: normalized.planSource,
-      sessionIds: normalized.sessionIds,
-      sessionPlans: normalized.sessionPlans,
-      specialLectureGuideId: normalized.specialLectureGuideId,
-      status: normalized.status,
-      studentId: normalized.studentId
-    });
-  }
-
   async function readPersistedSpecialLectureEnrollments() {
     const response = await fetch(apiUrl("/api/special-lecture-enrollments"), { cache: "no-store" });
     const result = await response.json();
@@ -6115,6 +6100,8 @@ export function App() {
     } catch (error) {
       if (!postSucceeded) {
         setSpecialLectureEnrollments(previousEnrollments);
+      } else if (error && typeof error === "object") {
+        error.specialLectureEnrollmentPostSucceeded = true;
       }
       throw error;
     }

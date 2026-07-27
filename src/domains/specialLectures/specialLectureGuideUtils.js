@@ -780,6 +780,29 @@ export function normalizeSpecialLectureEnrollments(enrollments = []) {
     : [];
 }
 
+function normalizeSpecialLectureSaveTimestamp(value = "") {
+  const text = String(value ?? "").trim();
+  if (!text) return "";
+  const timestamp = Date.parse(text);
+  return Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : text;
+}
+
+export function getSpecialLectureEnrollmentSaveSnapshot(enrollment = {}) {
+  const normalized = normalizeSpecialLectureEnrollment(enrollment);
+  return JSON.stringify({
+    applicationId: normalized.applicationId,
+    enrollmentId: normalized.enrollmentId,
+    memo: normalized.memo,
+    planReviewedAt: normalizeSpecialLectureSaveTimestamp(normalized.planReviewedAt),
+    planSource: normalized.planSource,
+    sessionIds: normalized.sessionIds,
+    sessionPlans: normalized.sessionPlans,
+    specialLectureGuideId: normalized.specialLectureGuideId,
+    status: normalized.status,
+    studentId: normalized.studentId
+  });
+}
+
 export function getSpecialLectureApplicationStatusLabel(status = "received") {
   return specialLectureApplicationStatusOptions.find((option) => option.value === status)?.label ?? "접수";
 }

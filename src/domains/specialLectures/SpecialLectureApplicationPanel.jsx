@@ -1167,6 +1167,8 @@ export function SpecialLectureApplicationPanel({
     } catch (error) {
       const message = enrollmentSaved
         ? `1/2 회차 계획은 저장됐지만 2/2 미래 수업일지 반영에 실패했습니다. 다시 누르면 저장본 기준으로 재시도합니다: ${error.message}`
+        : error?.specialLectureEnrollmentPostSucceeded
+          ? `1/2 Supabase 저장 요청은 성공했지만 재조회 확인을 끝내지 못해 2/2 수업일지는 실행하지 않았습니다. 다시 누르면 Supabase 저장값부터 재확인합니다: ${error.message}`
         : `특강 회차 계획 저장 실패: ${error.message}`;
       setPanelMessage(message);
       setPlanSaveState({ message, state: "failed" });
