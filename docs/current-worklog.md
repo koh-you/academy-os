@@ -1,5 +1,11 @@
 # Academy OS Current Worklog
 
+## 2026-07-27 P1. 인수인계서 Tally 접수 섹션 전체 제외
+
+- UI: 퇴원생 인수인계서 PDF에서 일반·특강 Tally 접수 섹션 전체를 제거했다. 학생 기본정보, 퇴원일까지의 회차별 수업·출결·숙제, 교사 인계 코멘트만 출력한다.
+- 저장·부작용: Tally 원천과 학생·수업·수업기록·숙제·알림 원천을 수정하지 않으며, PDF 출력 파생 내용만 변경한다. Solapi 호출은 없다.
+- AI 검증: PDF model fixture가 Tally 필드 부재를 검사하고 `npm run test:student-handover-pdf`, `npm run build`, `git diff --check`를 실행한다.
+
 ## 2026-07-27 P1. 인수인계서 Tally 내부 메모 제외
 
 - UI: 일반·특강 Tally 접수의 내부 `메모` 필드는 인수인계서 PDF에 출력하지 않는다. 현재 학습·성적·희망 반·특이사항, 특강 신청 회차·요청 시간처럼 인계에 필요한 구조화 정보만 표시한다.

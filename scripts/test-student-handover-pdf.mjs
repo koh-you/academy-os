@@ -20,8 +20,7 @@ assert.equal(model.lessonRows.length, 1, "퇴원일 이후 수업은 인수인�
 assert.equal(model.lessonRows[0].attendance, "출석");
 assert.equal(model.lessonRows[0].homework, "완료");
 assert.equal(model.lessonRows[0].nextHomework, "오답 10문제");
-assert.equal(model.tally.length, 2, "일반 및 특강 Tally 정보를 포함해야 합니다.");
-assert.equal(model.tally.some((section) => section.values.some(([label]) => label === "메모")), false, "Tally 내부 메모는 인수인계서에 포함하지 않아야 합니다.");
+assert.equal(Object.hasOwn(model, "tally"), false, "Tally 접수 정보는 인수인계서에 포함하지 않아야 합니다.");
 assert.equal(model.comment, "재등록 시 진도 확인");
 
 const homeworkStatusModel = buildStudentHandoverPdfModel({
