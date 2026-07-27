@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-27 P1. 15D-6 수업 모달 학생 선택 controlled component 분리 — AI gate 통과
+
+- 코드: 포함 학생 수, 검색 입력, 보이는 학생 선택, 휴강 전환 명단 잠금 안내, 학년 그룹 전체 선택·해제와 학생 chip JSX를 `src/domains/lessons/LessonModalStudentPicker.jsx`로 이동했다.
+- 경계: `studentSearch`, `studentIds`, 15D-1 검색·그룹 모델, 보이는 학생/그룹/개별 학생 ID patch handler와 휴강 전환 잠금 판정은 App에 남았다. 새 컴포넌트는 전달받은 값과 callback만 사용하며 React state/effect, `onSubmit`, API·Supabase·알림을 알지 못한다.
+- 자동검증: 전용 boundary fixture가 검색·보이는 학생·그룹 선택/해제·개별 toggle callback, 휴강 명단 문구, App의 4개 선택 handler 소유와 side effect 금지를 검사한다. 기존 학년 그룹 scenario는 모델·App handler·새 컴포넌트를 함께 추적한다. `test:production` 60개 명령, scenario 495/495, build, `git diff --check`가 통과했다.
+- 사람 gate: 없음. 학생 선택 DOM 위치만 이동했고 state·저장 동작은 보존했다. 다음은 최신 `origin/main` rebase 후 15D-7 휴강 전환 안내·선택형 보충 입력 JSX를 controlled component로 분리한다.
+
 ## 2026-07-27 P1. 15D-5 수업 모달 local save-state transition 분리 — AI gate 통과
 
 - 코드: 최초 저장 안내, validation 실패, 저장 실패 뒤 입력 변경 시 `dirty` 복귀, 일반/휴강+보충 저장 중, 저장 완료 fallback, 예외 실패 문구를 `src/domains/lessons/lessonModalSaveState.js` 순수 모델로 이동했다.

@@ -14,3 +14,4 @@ MVP 기준:
 - `lessonModalDraftTransitions.js`는 반 템플릿·수업 유형·날짜 변경에 따른 local draft patch와 색상 선택지만 계산합니다.
 - `lessonModalInitialDraft.js`는 최초 입력값과 mount 시 한 번 생성할 수업·휴강 보충 ID 인자를 계산합니다. 실제 시간 기반 ID source는 App이 주입합니다.
 - `lessonModalSaveState.js`는 모달 local 저장 상태의 초기 안내, 실패 후 dirty 복귀, 저장 중·완료·실패 표시값만 계산합니다.
+- `LessonModalStudentPicker.jsx`는 App이 소유한 검색·선택값과 callback으로 학생 검색, 학년 그룹, 선택 chip만 렌더링합니다.

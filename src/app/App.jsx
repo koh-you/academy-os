@@ -245,6 +245,7 @@ import {
   lessonModalInitialSaveMessage
 } from "../domains/lessons/lessonModalSaveState.js";
 import { createLessonModalStudentSelectionModel } from "../domains/lessons/lessonModalStudentModel.js";
+import { LessonModalStudentPicker } from "../domains/lessons/LessonModalStudentPicker.jsx";
 import { LessonJournalErrorBoundary } from "../domains/lessons/LessonJournalErrorBoundary.jsx";
 import { attendanceLabels, dayLabels, homeworkLabels } from "../domains/lessons/labels.js";
 import {
@@ -18799,6 +18800,30 @@ function LessonModal({
     }
   }
 
+  function selectVisibleLessonModalStudents() {
+    setStudentIds(filteredStudents.map((student) => student.studentId));
+  }
+
+  function selectLessonModalStudentGroup(groupStudents) {
+    const groupIds = groupStudents.map((student) => student.studentId);
+    setStudentIds((current) => Array.from(new Set([...current, ...groupIds])));
+  }
+
+  function deselectLessonModalStudentGroup(groupStudents) {
+    const groupIds = new Set(groupStudents.map((student) => student.studentId));
+    setStudentIds((current) =>
+      current.filter((studentId) => !groupIds.has(studentId))
+    );
+  }
+
+  function toggleLessonModalStudent(studentId, isSelected) {
+    setStudentIds((current) =>
+      isSelected
+        ? current.filter((currentStudentId) => currentStudentId !== studentId)
+        : [...current, studentId]
+    );
+  }
+
   function applyLessonModalSaveState(nextSaveState) {
     setSaveState(nextSaveState.state);
     setSaveMessage(nextSaveState.message);
@@ -19007,96 +19032,21 @@ function LessonModal({
         </label>
       </div>
 
-      <div className="modalSection lessonModalSection">
-        <SectionHeader
-          meta={<span className="muted">선택 {studentIds.length}명</span>}
-          title="포함 학생"
-          titleAs="strong"
-        />
-        <div className="lessonStudentSearchRow">
-          <SearchField
-            disabled={isStudentRosterLocked}
-            label="포함 학생 검색"
-            onChange={setStudentSearch}
-            placeholder="학생 이름 또는 반으로 검색"
-            result={`${filteredStudents.length}명`}
-            value={studentSearch}
-          />
-          <button className="softButton" disabled={isStudentRosterLocked} onClick={() => setStudentIds(filteredStudents.map((student) => student.studentId))} type="button">
-            보이는 학생 선택
-          </button>
-        </div>
-        <small className="muted">
-          {isClosureConversion
-            ? `휴강 전환 중에는 기존 명단 ${getLessonStudentIds(initialLesson).length}명을 고정합니다.`
-            : `전체 ${activeStudents.length}명`}
-        </small>
-        <div className="lessonStudentGroups">
-          {groupedStudents.length === 0 ? (
-            <EmptyState
-              action={studentSearch.trim() ? (
-                <button className="softButton compact" disabled={isStudentRosterLocked} onClick={() => setStudentSearch("")} type="button">검색어 지우기</button>
-              ) : null}
-              className="lessonStudentSearchEmpty"
-              description={studentSearch.trim()
-                ? "학생 이름·학년·학교를 다시 확인하세요."
-                : "학생관리에서 재원생을 등록하면 명단에 표시됩니다."}
-              title={studentSearch.trim() ? "검색 결과가 없습니다." : "선택 가능한 학생이 없습니다."}
-            />
-          ) : null}
-          {groupedStudents.map((group) => (
-            <div className="lessonStudentGroup" key={group.grade}>
-              <div>
-                <strong>{group.grade}</strong>
-                <button
-                  className="softButton mini"
-                  disabled={isStudentRosterLocked}
-                  onClick={() => {
-                    const groupIds = group.students.map((student) => student.studentId);
-                    setStudentIds((current) => Array.from(new Set([...current, ...groupIds])));
-                  }}
-                  type="button"
-                >
-                  전체 선택
-                </button>
-                <button
-                  className="softButton mini"
-                  disabled={isStudentRosterLocked}
-                  onClick={() => {
-                    const groupIds = new Set(group.students.map((student) => student.studentId));
-                    setStudentIds((current) => current.filter((studentId) => !groupIds.has(studentId)));
-                  }}
-                  type="button"
-                >
-                  전체 해제
-                </button>
-              </div>
-              <div className="studentChips">
-                {group.students.map((student) => {
-                  const isSelected = studentIds.includes(student.studentId);
-                  return (
-                    <button
-                      className={isSelected ? "lessonStudentChip selected" : "lessonStudentChip"}
-                      disabled={isStudentRosterLocked}
-                      key={student.studentId}
-                      onClick={() =>
-                        setStudentIds((current) =>
-                          isSelected
-                            ? current.filter((studentId) => studentId !== student.studentId)
-                            : [...current, student.studentId]
-                        )
-                      }
-                      type="button"
-                    >
-                      {student.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <LessonModalStudentPicker
+        activeStudentCount={activeStudents.length}
+        filteredStudents={filteredStudents}
+        groupedStudents={groupedStudents}
+        initialStudentCount={getLessonStudentIds(initialLesson).length}
+        isClosureConversion={isClosureConversion}
+        isRosterLocked={isStudentRosterLocked}
+        onDeselectGroup={deselectLessonModalStudentGroup}
+        onSearchChange={setStudentSearch}
+        onSelectGroup={selectLessonModalStudentGroup}
+        onSelectVisible={selectVisibleLessonModalStudents}
+        onToggleStudent={toggleLessonModalStudent}
+        search={studentSearch}
+        selectedStudentIds={studentIds}
+      />
 
       <div className="lessonModalSaveStatus" aria-live="polite">
         <InlineSaveStatus label="수업일지" saveState={saveState} />
