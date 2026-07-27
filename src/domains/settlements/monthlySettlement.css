@@ -1,0 +1,462 @@
+.monthlySettlementPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.monthlySettlementHeader {
+  align-items: flex-start;
+}
+
+.monthlySettlementHeader h1 {
+  margin-bottom: 6px;
+}
+
+.monthlySettlementHeader > div:first-child {
+  min-width: 0;
+}
+
+.monthlySettlementHeader .muted {
+  max-width: 920px;
+}
+
+.monthlySettlementMonthControl {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 190px;
+}
+
+.monthlySettlementMonthControl label {
+  color: #53657d;
+  display: grid;
+  font-size: 12px;
+  font-weight: 700;
+  gap: 5px;
+  width: 100%;
+}
+
+.monthlySettlementMonthControl input {
+  background: #fff;
+  border: 1px solid #c9d6e8;
+  border-radius: 10px;
+  min-height: 42px;
+  padding: 8px 10px;
+}
+
+.monthlySettlementRuleNotice {
+  align-items: center;
+  background: #f7faff;
+  border: 1px solid #cbdcf5;
+  border-radius: 14px;
+  color: #42536b;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 12px 14px;
+}
+
+.monthlySettlementRuleNotice strong {
+  color: #214c8a;
+}
+
+.monthlySettlementRuleNotice span {
+  font-size: 13px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.monthlySettlementRuleNotice span + span {
+  border-left: 1px solid #cbdcf5;
+  padding-left: 16px;
+}
+
+.metricGrid.monthlySettlementMetrics {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.monthlySettlementRateWarning {
+  background: #fff8e8;
+  border: 1px solid #f1d28b;
+  border-radius: 12px;
+  color: #7a5515;
+  font-size: 13px;
+  padding: 10px 12px;
+}
+
+.monthlySettlementTableWrap {
+  border: 1px solid #d7e1ef;
+  border-radius: 14px;
+  max-width: 100%;
+  overflow: auto;
+}
+
+.monthlySettlementTable {
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 1740px;
+  width: 100%;
+}
+
+.monthlySettlementTable th {
+  background: #f4f7fc;
+  border-bottom: 1px solid #d7e1ef;
+  color: #53657d;
+  font-size: 12px;
+  padding: 11px 9px;
+  position: sticky;
+  text-align: left;
+  top: 0;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.monthlySettlementTable td {
+  border-bottom: 1px solid #e7edf6;
+  min-width: 130px;
+  padding: 10px 9px;
+  vertical-align: top;
+}
+
+.monthlySettlementTable tr:last-child td {
+  border-bottom: 0;
+}
+
+.monthlySettlementTable td:nth-child(1) {
+  background: #fff;
+  left: 0;
+  min-width: 150px;
+  position: sticky;
+  z-index: 1;
+}
+
+.monthlySettlementTable th:nth-child(1) {
+  left: 0;
+  z-index: 3;
+}
+
+.monthlySettlementTable td:nth-child(4) {
+  min-width: 230px;
+}
+
+.monthlySettlementTable td:nth-child(5) {
+  min-width: 175px;
+}
+
+.monthlySettlementTable td:nth-child(6) {
+  min-width: 205px;
+}
+
+.monthlySettlementTable td:nth-child(10) {
+  min-width: 180px;
+}
+
+.monthlySettlementTable input,
+.monthlySettlementTable select,
+.monthlySettlementTable textarea {
+  background: #fff;
+  border: 1px solid #cbd7e7;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 12px;
+  min-height: 36px;
+  padding: 7px 8px;
+  width: 100%;
+}
+
+.monthlySettlementTable textarea {
+  min-height: 58px;
+  resize: vertical;
+}
+
+.monthlySettlementTable small {
+  color: #718096;
+  display: block;
+  font-size: 11px;
+  line-height: 1.45;
+  margin-top: 5px;
+}
+
+.monthlySettlementStudentCell strong,
+.monthlySettlementStudentCell span,
+.monthlySettlementStudentCell em {
+  display: block;
+}
+
+.monthlySettlementStudentCell strong {
+  color: #24364d;
+  font-size: 14px;
+}
+
+.monthlySettlementStudentCell span {
+  color: #718096;
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+.monthlySettlementStudentCell em {
+  color: #a25c13;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.monthlySettlementMoneyInput {
+  align-items: center;
+  display: grid;
+  grid-template-columns: minmax(90px, 1fr) auto;
+  gap: 5px;
+}
+
+.monthlySettlementMoneyInput span {
+  color: #64748b;
+  font-size: 11px;
+}
+
+.monthlySettlementScheduleCell small {
+  max-width: 230px;
+}
+
+.monthlySettlementPeriodInputs {
+  display: grid;
+  gap: 6px;
+}
+
+.monthlySettlementFixedPeriod {
+  color: #52657e;
+  display: block;
+  font-size: 12px;
+  line-height: 1.5;
+  padding-top: 7px;
+}
+
+.monthlySettlementCountButton {
+  background: #eef5ff;
+  border: 1px solid #bad2f4;
+  border-radius: 8px;
+  color: #24528f;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  padding: 7px 9px;
+  text-align: left;
+  width: 100%;
+}
+
+.monthlySettlementCountButton:hover {
+  background: #e1edff;
+}
+
+.monthlySettlementAmountCell strong,
+.monthlySettlementAmountCell span {
+  display: block;
+}
+
+.monthlySettlementAmountCell strong {
+  color: #174f37;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.monthlySettlementAmountCell span {
+  color: #718096;
+  font-size: 11px;
+  margin-top: 5px;
+}
+
+.monthlySettlementEmpty {
+  border: 1px dashed #cbd7e7;
+  border-radius: 12px;
+  color: #718096;
+  padding: 28px;
+  text-align: center;
+}
+
+.monthlySettlementSaveBar {
+  margin-top: 0;
+}
+
+.monthlySettlementCalendarModal {
+  max-width: 1120px;
+  width: min(1120px, calc(100vw - 36px));
+}
+
+.monthlySettlementCalendarLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.monthlySettlementCalendarLegend span {
+  align-items: center;
+  color: #596b82;
+  display: inline-flex;
+  font-size: 12px;
+  gap: 5px;
+}
+
+.monthlySettlementCalendarLegend i {
+  background: #dbeafe;
+  border-radius: 4px;
+  display: inline-block;
+  height: 10px;
+  width: 10px;
+}
+
+.monthlySettlementCalendarLegend i.forecast {
+  background: #fff;
+  border: 1px dashed #7aa7e8;
+}
+
+.monthlySettlementCalendarLegend i.makeup {
+  background: #ede9fe;
+}
+
+.monthlySettlementCalendarLegend i.special {
+  background: #d1fae5;
+}
+
+.monthlySettlementCalendar {
+  background: #dce5f1;
+  border: 1px solid #dce5f1;
+  display: grid;
+  gap: 1px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.monthlySettlementCalendarDayLabel {
+  background: #f4f7fb;
+  color: #607086;
+  font-size: 12px;
+  padding: 7px;
+  text-align: center;
+}
+
+.monthlySettlementCalendarBlank,
+.monthlySettlementCalendarDate {
+  background: #fff;
+  min-height: 106px;
+}
+
+.monthlySettlementCalendarDate {
+  min-width: 0;
+  padding: 7px;
+}
+
+.monthlySettlementCalendarDate > b {
+  color: #40546e;
+  display: block;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.monthlySettlementCalendarDate > div {
+  display: grid;
+  gap: 4px;
+}
+
+.monthlySettlementCalendarEvent {
+  background: #dbeafe;
+  border-radius: 5px;
+  color: #234a7d;
+  display: block;
+  font-size: 10px;
+  line-height: 1.3;
+  overflow: hidden;
+  padding: 3px 4px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.monthlySettlementCalendarEvent.forecast {
+  background: #f8fbff;
+  border: 1px dashed #8ab0e5;
+  padding: 2px 3px;
+}
+
+.monthlySettlementCalendarEvent.makeup {
+  background: #ede9fe;
+  color: #5b3b91;
+}
+
+.monthlySettlementCalendarEvent.special {
+  background: #d1fae5;
+  color: #17624a;
+}
+
+.monthlySettlementCalendarSummary {
+  background: #f6f8fc;
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 12px;
+  padding: 10px 12px;
+}
+
+.monthlySettlementCalendarSummary span {
+  color: #52657e;
+  font-size: 12px;
+}
+
+@media (max-width: 980px) {
+  .sectionHeader.monthlySettlementHeader {
+    align-items: stretch;
+    display: grid;
+    gap: 12px;
+  }
+
+  .monthlySettlementMonthControl {
+    align-items: stretch;
+    min-width: 0;
+  }
+
+  .metricGrid.monthlySettlementMetrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .monthlySettlementRuleNotice {
+    align-items: flex-start;
+    display: grid;
+  }
+
+  .monthlySettlementRuleNotice span + span {
+    border-left: 0;
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .metricGrid.monthlySettlementMetrics {
+    grid-template-columns: 1fr;
+  }
+
+  .monthlySettlementCalendarModal {
+    width: calc(100vw - 20px);
+  }
+
+  .monthlySettlementCalendarBlank,
+  .monthlySettlementCalendarDate {
+    min-height: 72px;
+  }
+
+  .monthlySettlementCalendarDate {
+    padding: 4px;
+  }
+
+  .monthlySettlementCalendarEvent {
+    font-size: 0;
+    min-height: 8px;
+    padding: 2px;
+  }
+
+  .monthlySettlementCalendarEvent::after {
+    content: "";
+  }
+}

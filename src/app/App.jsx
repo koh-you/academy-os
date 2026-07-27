@@ -161,6 +161,14 @@ import {
   replaceSpecialLectureYearInDateKey,
   replaceSpecialLectureYearToken,
 } from "../domains/specialLectures/specialLectureGuideUtils.js";
+import { MonthlySettlementPanel } from "../domains/settlements/MonthlySettlementPanel.jsx";
+import {
+  createDefaultMonthlySettlementState,
+  createMonthlySettlementStateWithMonth,
+  getMonthlySettlementMonthSaveSnapshot,
+  monthlySettlementStateKey,
+  normalizeMonthlySettlementState
+} from "../domains/settlements/monthlySettlement.js";
 import { AutosaveRiskNotice } from "../shared/components/AutosaveRiskNotice.jsx";
 import { EmptyState } from "../shared/components/EmptyState.jsx";
 import {
@@ -5307,6 +5315,10 @@ export function App() {
     storageKeys.attendanceSettings,
     defaultAttendanceSettings
   );
+  const [monthlyInstructorSettlements, setMonthlyInstructorSettlements] = useStoredState(
+    storageKeys.monthlyInstructorSettlements,
+    createDefaultMonthlySettlementState()
+  );
   const [teacherAccountSettings, setTeacherAccountSettings] = useState(defaultTeacherAccountSettings);
   const [lessonNotificationPlans, setLessonNotificationPlans] = useStoredState(storageKeys.lessonNotificationPlans, {});
   const [generatedLessonControls, setGeneratedLessonControls] = useStoredState(
@@ -5330,6 +5342,7 @@ export function App() {
   const [academyTestSaveState, setAcademyTestSaveState] = useState("idle");
   const [studentConsultationSaveState, setStudentConsultationSaveState] = useState("idle");
   const [specialLectureGuideSaveState, setSpecialLectureGuideSaveState] = useState("idle");
+  const [monthlySettlementSaveState, setMonthlySettlementSaveState] = useState("idle");
   const [studentHomeworkSaveStates, setStudentHomeworkSaveStates] = useState({});
   const studentHomeworkSavingIdsRef = useRef(new Set());
   const [studentQuestionSaveState, setStudentQuestionSaveState] = useState({
@@ -5628,6 +5641,11 @@ export function App() {
           if (Array.isArray(states.studentQuestions)) setStudentQuestions(states.studentQuestions);
           if (Array.isArray(states.studentConsultations)) setStudentConsultations(states.studentConsultations);
           if (Array.isArray(states.specialLectureGuides)) setSpecialLectureGuides(normalizeSpecialLectureGuides(states.specialLectureGuides));
+          if (states[monthlySettlementStateKey]) {
+            setMonthlyInstructorSettlements(normalizeMonthlySettlementState(states[monthlySettlementStateKey]));
+          } else {
+            setMonthlyInstructorSettlements(createDefaultMonthlySettlementState());
+          }
           if (Array.isArray(states.tallySubmissions)) setTallySubmissions(states.tallySubmissions);
           if (states.tallySummaries && typeof states.tallySummaries === "object" && !Array.isArray(states.tallySummaries)) {
             setTallySummaries(states.tallySummaries);
@@ -5667,6 +5685,7 @@ export function App() {
     setLessonResearchItems,
     setLessons,
     setMakeupTasks,
+    setMonthlyInstructorSettlements,
     setNotificationLogs,
     setProblemBooks,
     setRecords,
@@ -5753,6 +5772,54 @@ export function App() {
         setSpecialLectureGuideSaveState("failed");
         throw error;
       });
+  }
+
+  async function handleSaveMonthlySettlementMonth(month) {
+    const monthKey = String(month?.monthKey ?? "").slice(0, 7);
+    if (!/^\d{4}-\d{2}$/.test(monthKey)) throw new Error("저장할 정산월을 확인해 주세요.");
+    setMonthlySettlementSaveState("saving");
+    try {
+      const currentResponse = await fetch(apiUrl("/api/app-state"), { cache: "no-store" });
+      const currentResult = await currentResponse.json();
+      if (!currentResponse.ok || !currentResult.ok || currentResult.source !== "supabase") {
+        throw new Error(currentResult.error || "Supabase의 현재 월별 정산 원천을 불러오지 못했습니다.");
+      }
+      const currentState = normalizeMonthlySettlementState(
+        currentResult.states?.[monthlySettlementStateKey]
+      );
+      const nextState = createMonthlySettlementStateWithMonth(currentState, month);
+      const expectedMonth = nextState.months[monthKey];
+      const saveResult = await postAppState({ [monthlySettlementStateKey]: nextState });
+      if (!saveResult.ok || saveResult.source !== "supabase") {
+        throw new Error(saveResult.error || "월별 정산이 Supabase에 저장되지 않았습니다.");
+      }
+
+      const verifyResponse = await fetch(apiUrl("/api/app-state"), { cache: "no-store" });
+      const verifyResult = await verifyResponse.json();
+      if (!verifyResponse.ok || !verifyResult.ok || verifyResult.source !== "supabase") {
+        throw new Error(verifyResult.error || "월별 정산 저장 결과를 다시 확인하지 못했습니다.");
+      }
+      const persistedState = normalizeMonthlySettlementState(
+        verifyResult.states?.[monthlySettlementStateKey]
+      );
+      const persistedMonth = persistedState.months[monthKey];
+      if (!persistedMonth) {
+        throw new Error("Supabase 재조회에서 저장한 정산월을 찾지 못했습니다.");
+      }
+      if (
+        getMonthlySettlementMonthSaveSnapshot(persistedMonth) !==
+        getMonthlySettlementMonthSaveSnapshot(expectedMonth)
+      ) {
+        throw new Error("Supabase 재조회 값이 수정한 월별 정산과 다릅니다. 저장 완료로 처리하지 않았습니다.");
+      }
+      setMonthlyInstructorSettlements(persistedState);
+      setMonthlySettlementSaveState("saved");
+      return persistedMonth;
+    } catch (error) {
+      console.error(error);
+      setMonthlySettlementSaveState("failed");
+      throw error;
+    }
   }
 
   function handleUpdateSpecialLectureApplication(applicationId, updates = {}) {
@@ -9058,6 +9125,18 @@ export function App() {
 
         {activeView === "aiVariants" ? (
           <AIVariantProblemCenter aiSettings={aiSettings} students={students} />
+        ) : null}
+
+        {activeView === "monthlySettlements" ? (
+          <MonthlySettlementPanel
+            classTemplates={classTemplates}
+            lessons={lessons}
+            records={records}
+            saveState={monthlySettlementSaveState}
+            settlementState={monthlyInstructorSettlements}
+            students={students}
+            onSaveMonth={handleSaveMonthlySettlementMonth}
+          />
         ) : null}
 
         {activeView === "settings" ? (
@@ -14185,6 +14264,7 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle, su
     {
       title: "운영",
       items: [
+        { id: "monthlySettlements", label: "월별 수업 정산", icon: "₩" },
         { id: "notifications", label: "알림관리", icon: "📣" },
         { id: "settings", label: "설정", icon: "⚙️" }
       ]

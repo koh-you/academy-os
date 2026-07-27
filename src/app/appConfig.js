@@ -28,6 +28,7 @@ export const storageKeys = {
   specialLectureGuides: "academy-os.specialLectureGuides.v1",
   aiSettings: "academy-os.aiSettings.v1",
   attendanceSettings: "academy-os.attendanceSettings.v1",
+  monthlyInstructorSettlements: "academy-os.monthlyInstructorSettlements.v1",
   lessonNotificationPlans: "academy-os.lessonNotificationPlans.v1",
   deletedLessonBundles: "academy-os.deletedLessonBundles.v1",
   teacherSession: "academy-os.teacherSession.v1"

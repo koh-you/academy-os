@@ -59,6 +59,11 @@
    - 기준 문서: Gate 1 `docs/exam-analysis-blog-corpus-gate1-2026-07-21.md`, Gate 2 `docs/exam-analysis-blog-image-inventory-gate2-2026-07-21.md`, Gate 3 `docs/exam-analysis-blog-slide-analysis-gate3-2026-07-21.md`, Gate 4 `docs/exam-analysis-middle-high-patterns-gate4-2026-07-21.md`, Gate 5 `docs/exam-analysis-slide-role-library-gate5-2026-07-21.md`, Gate 6 `docs/academy-os-exam-slide-prompt-rules-gate6-2026-07-21.md`다.
    - 다음 구현 Gate: 실제 Academy OS 코드에 연결하기 전에 교사가 역할·장수·검수 데이터를 확정하는 입력 화면과 `final_fields > teacher_fields > ai_fields` 저장 계약을 먼저 설계한다. 현재 생성기는 확정 JSON을 받아 마스터/1번~마지막 장/수정 프롬프트 Markdown을 만들며 이미지 API는 호출하지 않는다.
    - 작업 경계: 현재 목표는 Academy OS가 상세 프롬프트를 생성하고 사람이 ChatGPT 프로젝트에 복사해 한 장씩 제작·수정하는 구조다. 별도 재승인 전에는 이미지 생성 API, 이미지 버전 DB, Storage 자동 저장 UI를 만들지 않는다.
+7. `월별 수업 정산 시수별 단가표 연결`
+   - 상태: `운영 > 월별 수업 정산` 1차 구현 완료. 재원생 월정액, 신입·퇴원생의 월 1일~말일 실제 달력 회차·시수 비율, 보충 별도 참고, 정규/특강 분리 합계와 고정 정산 상수, 월별 스케줄·금액 스냅샷 저장을 구현했다.
+   - 후속 입력: 사용자가 시수별 단가표를 나중에 제공하기로 했다. 현재 고등학생은 학생별 기본 450,000원, 중학생은 `단가 미설정`이며 임의 추정하지 않는다.
+   - 다음 Gate: 단가표를 받으면 학년·주간 시수별 기본금액 매핑과 기존 월별 학생 수정값의 우선순위를 먼저 표로 확정한다. 이미 저장한 월별 스냅샷을 새 단가표가 자동으로 덮어쓰지 않게 하고, 새 달의 초기값에만 적용하는 것이 기본 원칙이다.
+   - 저장/부작용 경계: 직접 원천은 `Supabase app_state.monthlyInstructorSettlements` 한 키다. `lessons`, `lesson_student_records`, 학생 출결, 보충, 특강 수업일지는 읽기만 하며 정산 저장으로 수정하거나 알림톡/Solapi 작업을 실행하지 않는다.
 
 ## Parallel Refactoring + Maintenance Sessions - Required
 
