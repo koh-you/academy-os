@@ -16185,13 +16185,15 @@ function TeacherLessonHubV2({
           <span>{visibleLessonCount}개</span>
         </div>
         <button className="primaryButton" onClick={onAddLesson} type="button">+ 수업 등록</button>
-        <button
-          className="softButton"
-          onClick={onOpenMonthlyRegularLessons}
-          type="button"
-        >
-          {formatMonthTitle(selectedDate)} 정규수업 열기
-        </button>
+        {monthlyRegularLessonOpenPlan.lessonsToCreate.length > 0 ? (
+          <button
+            className="softButton"
+            onClick={onOpenMonthlyRegularLessons}
+            type="button"
+          >
+            {formatMonthTitle(selectedDate)} 정규수업 열기
+          </button>
+        ) : null}
       </header>
 
       <section className="calendarShell teacherCalendarShell">
