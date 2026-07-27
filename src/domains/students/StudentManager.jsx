@@ -734,19 +734,8 @@ export function StudentManager({
       ) : null}
 
       {activeTab === "withdrawn" ? (
-        <div className="studentListTable">
-          <div className="withdrawnStudentBulkActions">
-            <span>선택 {selectedWithdrawnStudents.length}명</span>
-            <button className="softButton compact" onClick={selectAllVisibleWithdrawnStudents} type="button">전체 선택</button>
-            <button className="softButton compact" onClick={() => setSelectedWithdrawnStudentIds(new Set())} type="button">선택 해제</button>
-            <button className="primaryButton compact" disabled={!selectedWithdrawnStudents.some((student) => dirtyStudentIds.has(student.studentId))} onClick={saveSelectedWithdrawnStudents} type="button">선택 저장</button>
-            <button className="studentRestoreButton" disabled={selectedWithdrawnStudents.length !== 1} onClick={() => { const student = getSingleSelectedWithdrawnStudent("퇴원 취소"); if (student) restoreStudent(student); }} type="button">퇴원 취소</button>
-            <button className="studentPermanentDeleteButton" disabled={selectedWithdrawnStudents.length === 0} onClick={() => {
-              if (selectedWithdrawnStudents.length === 1) openPermanentDeleteModal(selectedWithdrawnStudents[0]);
-              else openBatchPermanentDeleteModal(selectedWithdrawnStudents);
-            }} type="button">영구 삭제</button>
-            <button className="softButton compact" disabled={selectedWithdrawnStudents.length !== 1} onClick={() => { const student = getSingleSelectedWithdrawnStudent("인수인계서 PDF"); if (student) openHandoverModal(student); }} type="button">인수인계서 PDF</button>
-          </div>
+        <>
+          <div className="studentListTable">
           <div className="studentListRow studentListHead withdrawnStudentRow">
             <span>선택</span>
             <span>이름</span>
@@ -803,7 +792,20 @@ export function StudentManager({
           {visibleStudents.length === 0 ? (
             <div className="emptyState studentListEmpty">퇴원생이 없습니다.</div>
           ) : null}
-        </div>
+          </div>
+          <div className="withdrawnStudentBulkActions">
+            <span>선택 {selectedWithdrawnStudents.length}명</span>
+            <button className="softButton compact" onClick={selectAllVisibleWithdrawnStudents} type="button">전체 선택</button>
+            <button className="softButton compact" onClick={() => setSelectedWithdrawnStudentIds(new Set())} type="button">선택 해제</button>
+            <button className="primaryButton compact" disabled={!selectedWithdrawnStudents.some((student) => dirtyStudentIds.has(student.studentId))} onClick={saveSelectedWithdrawnStudents} type="button">선택 저장</button>
+            <button className="studentRestoreButton" disabled={selectedWithdrawnStudents.length !== 1} onClick={() => { const student = getSingleSelectedWithdrawnStudent("퇴원 취소"); if (student) restoreStudent(student); }} type="button">퇴원 취소</button>
+            <button className="studentPermanentDeleteButton" disabled={selectedWithdrawnStudents.length === 0} onClick={() => {
+              if (selectedWithdrawnStudents.length === 1) openPermanentDeleteModal(selectedWithdrawnStudents[0]);
+              else openBatchPermanentDeleteModal(selectedWithdrawnStudents);
+            }} type="button">영구 삭제</button>
+            <button className="softButton compact" disabled={selectedWithdrawnStudents.length !== 1} onClick={() => { const student = getSingleSelectedWithdrawnStudent("인수인계서 PDF"); if (student) openHandoverModal(student); }} type="button">인수인계서 PDF</button>
+          </div>
+        </>
       ) : (
         <div className="studentListTable">
           <div className="studentListRow studentListHead">

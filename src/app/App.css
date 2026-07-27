@@ -11659,12 +11659,18 @@ textarea {
 
 .withdrawnStudentBulkActions {
   align-items: center;
-  background: #f8fbff;
-  border-bottom: 1px solid #dbeafe;
+  background: rgba(248, 251, 255, 0.98);
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  bottom: 12px;
+  box-shadow: 0 10px 24px rgba(30, 64, 175, 0.16);
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin: 12px 0 0;
   padding: 10px 12px;
+  position: sticky;
+  z-index: 12;
 }
 
 .withdrawnStudentBulkActions > span {
