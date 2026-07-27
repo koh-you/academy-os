@@ -618,6 +618,25 @@ check("88e all three supplement notification teacher edits including empty value
 check("88f canceled supplement notification previews cannot override the current saved selected draft", hasAll(app, ["const notificationControlHasHistoricalJob", "[\"canceled\", \"failed\"].includes(notificationControlJob.status)", "const notificationControlCurrentPreview", "getSupplementScheduleNoticeDraft(", "notificationControlHasHistoricalJob", "? notificationControlCurrentPreview", "const notificationControlPreviewLabel", "다시 예약할 현재 문구", "취소·실패한 과거 문구는 재사용하지 않고, 현재 저장된 보충 내용으로 다시 만들었습니다.", "이전 예약 시각"]) && !app.includes("? notificationControlJob?.previewBody || (") && hasAll(css, [".supplementNotificationControlPreview > small"]));
 check("89 supplement progress memo is included in notification draft", hasAll(app, ["const progressMemo = normalizeMessageText(task.supplementProgressMemo)", "const progressMemoBlock = progressMemo ? `\\n\\n보충 메모:\\n${progressMemo}` : \"\"", "${progressMemoBlock}"]));
 check("90 lesson calendar uses pastel type colors and four regular class colors", hasAll(appWithConfig, ["const lessonCalendarColors = {", "regular: \"#bfdbfe\"", "preExam: \"#fed7aa\"", "exam: \"#fde68a\"", "examPrep: \"#bae6fd\"", "const regularLessonClassColors = {", "template_mwf_4_7: \"#bfdbfe\"", "template_mwf_7_10: \"#c7d2fe\"", "template_tt_sat_front: \"#bbf7d0\"", "template_tt_sat_back: \"#fbcfe8\"", "function getRegularLessonColor(lesson = {})", "return getRegularLessonColor(lesson)", "style={{ background: lesson.color }}", "lesson.lessonType === \"preExam\" ? \"preExamLessonPill\"", "lesson.lessonType === \"makeup\" ? \"makeupLessonPill\"", "isExamPrepType ? \"examPrepLessonPill\""]) && hasAll(css, [".lessonPill", "color: #17213d", "border: 1px solid rgba(15, 23, 42, 0.12)"]));
+check("90a lesson modal creates verified closure and optional linked makeup journals", hasAll(appWithConfig, [
+  '["closure", "⏸ 휴강"]',
+  'closure: "#e2e8f0"',
+  "휴강 보충이 있나요?",
+  "보충 수업일지 함께 생성",
+  'formValues.lessonType === "closure"',
+  'formValues.lessonType === "closure" ? "휴강"',
+  'lessonTopic: "휴강 보충"',
+  "연결 휴강 보충 ·",
+  "원 휴강 수업 ·",
+  'postJsonWithTimeout(\n      "/api/lessons/bulk"',
+  "Supabase 반영 확인 중",
+  "getLessonModalSaveSnapshot",
+  "draftClosureMakeupLessonId",
+  "draftLessonId",
+  "closureJournalNotice",
+  '{ id: "closure", label: "휴강" }',
+  'lesson.lessonType === "closure" ? "closureLessonPill"'
+]) && hasAll(serverSource, ['lesson.lessonType !== "closure"']) && hasAll(css, [".closureMakeupPanel", ".closureMakeupChoices", ".lessonModalSaveStatus", ".closureJournalNotice", ".closureLessonPill"]));
 check("90b tue thu sat classes use Saturday-specific times", hasAll(appWithConfig, ["const classTemplateScheduleRules = {", "template_tt_sat_front: {", "name: \"화목 4-7 / 토 10-1반\"", "saturdayStartTime: \"10:00\"", "saturdayEndTime: \"13:00\"", "template_tt_sat_back: {", "name: \"화목 7-10 / 토 1-4반\"", "saturdayStartTime: \"13:00\"", "saturdayEndTime: \"16:00\"", "function normalizeClassTemplateSchedule", "function getTemplateLessonTimes", "function normalizeLessonTemplateTimes", "function normalizeLessonCalendarRules", "normalizeClassTemplates(classesResult.classTemplates)", "normalizeLessonCalendarRules(lessonsResult.lessons", "setStartTime(templateTimes.startTime)", "setEndTime(templateTimes.endTime)"]) && hasAll(sampleDataSource, ["name: \"화목 4-7 / 토 10-1반\"", "saturdayStartTime: \"10:00\"", "saturdayEndTime: \"13:00\"", "name: \"화목 7-10 / 토 1-4반\"", "saturdayStartTime: \"13:00\"", "saturdayEndTime: \"16:00\""]));
 check("91 supplement lessons use task-specific standard colors", hasAll(app, ["function getSupplementLessonColor(taskType)", "if (taskType === \"homework_makeup\") return lessonCalendarColors.homeworkMakeup", "if (taskType === \"retest\") return lessonCalendarColors.retest", "color: getSupplementLessonColor(taskForSchedule.taskType)"]));
 check("92 existing lessons are normalized to standard calendar rules without legacy type conversion", hasAll(app, ["function normalizeLessonCalendarColors(lessons = [], makeupTasks = [])", "const standardColor = getStandardLessonColor(lesson, taskByLessonId.get(lesson.lessonId))", "return lesson.color === standardColor ? lesson : { ...lesson, color: standardColor }", "function normalizeLessonCalendarRules(lessons = [], makeupTasks = [], classTemplates = [])", "normalizeLessonTemplateTimes(", "normalizeLessonCalendarColors(lessons, makeupTasks)", "areLessonCalendarRuleFieldsEqual", "normalizeLessonCalendarRules(lessonsResult.lessons, makeupTasksResult.makeupTasks ?? [], normalizedClassTemplates)"]) && !app.includes("normalizeExamPrepLessonType"));

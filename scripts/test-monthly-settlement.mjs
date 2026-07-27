@@ -82,6 +82,17 @@ const lessons = [
     startTime: "16:00",
     status: "completed",
     studentIds: [student.studentId]
+  },
+  {
+    className: "월수금반",
+    date: "2026-07-22",
+    endTime: "22:00",
+    lessonId: "lesson_closure",
+    lessonTopic: "휴강",
+    lessonType: "closure",
+    startTime: "19:00",
+    status: "scheduled",
+    studentIds: [student.studentId]
   }
 ];
 const records = [
@@ -186,6 +197,12 @@ const journalOnlyStudent = {
   status: "paused",
   studentId: "student_special_journal"
 };
+const closureOnlyStudent = {
+  grade: "고1",
+  name: "휴강일지만있는학생",
+  status: "active",
+  studentId: "student_closure_only"
+};
 const rosterStudents = getMonthlySettlementStudents({
   includedStudentIds: ["student_saved_without_journal"],
   lessons: [
@@ -196,12 +213,20 @@ const rosterStudents = getMonthlySettlementStudents({
       lessonType: "specialLecture",
       status: "scheduled",
       studentIds: [journalOnlyStudent.studentId]
+    },
+    {
+      date: "2026-07-21",
+      lessonId: "lesson_closure_only",
+      lessonType: "closure",
+      status: "scheduled",
+      studentIds: [closureOnlyStudent.studentId]
     }
   ],
   monthKey,
   students: [
     student,
     journalOnlyStudent,
+    closureOnlyStudent,
     {
       name: "수업일지없는재원생",
       status: "active",
@@ -223,7 +248,7 @@ const rosterStudents = getMonthlySettlementStudents({
 assert.deepEqual(
   rosterStudents.map((item) => item.studentId).sort(),
   [student.studentId, journalOnlyStudent.studentId].sort(),
-  "정산 대상은 학생 상태나 과거 저장 ID가 아니라 선택 월 수업일지 명단으로만 구성해야 합니다."
+  "정산 대상은 학생 상태나 과거 저장 ID가 아니라 선택 월 실제 수업일지 명단으로만 구성하고 휴강만 있는 학생은 제외해야 합니다."
 );
 const specialOnlyRow = buildStudentSettlementRow({
   classTemplates,
@@ -262,6 +287,11 @@ const fixedRow = buildStudentSettlementRow({
 });
 assert.equal(fixedRow.regularGrossAmount, 450000, "재원생 금액은 실제 횟수와 무관한 월 고정금액이어야 합니다.");
 assert.equal(fixedRow.regularCount, 4, "정규 회차는 월별 스케줄 예측이 아니라 7월 수업일지 4건이어야 합니다.");
+assert.equal(
+  fixedRow.regularEvents.some((event) => event.lessonType === "closure"),
+  false,
+  "휴강 수업일지는 명단·기록만 남기고 정규 횟수와 시수 계산에서 제외해야 합니다."
+);
 assert.equal(fixedRow.actualStatusCounts.pending, 4, "대기 출결은 수업일지 원천 상태를 유지한 채 집계되어야 합니다.");
 assert.equal(fixedRow.makeupCount, 1, "보충은 별도 횟수로 표시해야 합니다.");
 assert.equal(fixedRow.makeupHours, 2, "보충 시수는 별도 참고값이어야 합니다.");

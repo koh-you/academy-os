@@ -44,6 +44,7 @@ export const lessonCalendarColors = {
   regular: "#bfdbfe",
   preExam: "#fed7aa",
   exam: "#fde68a",
+  closure: "#e2e8f0",
   makeup: "#ddd6fe",
   homeworkMakeup: "#fecaca",
   absenceMakeup: "#e9d5ff",

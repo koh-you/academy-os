@@ -540,7 +540,11 @@ async function handleAttendanceCheck(payload = {}) {
     listLessons({ date: attendanceDate })
   ]);
   const students = studentsResult.students ?? [];
-  const lessons = (lessonsResult.lessons ?? []).filter((lesson) => lesson.date === attendanceDate && lesson.status !== "canceled");
+  const lessons = (lessonsResult.lessons ?? []).filter((lesson) =>
+    lesson.date === attendanceDate &&
+    lesson.status !== "canceled" &&
+    lesson.lessonType !== "closure"
+  );
 
   let student = null;
   if (payload.studentId) {

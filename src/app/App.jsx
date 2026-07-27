@@ -6954,17 +6954,75 @@ export function App() {
     setIsLessonJournalOpen(true);
   }
 
-  function handleAddLesson(formValues) {
+  function getLessonModalSaveSnapshot(lesson = {}) {
+    return JSON.stringify({
+      className: lesson.className || "",
+      classTemplateId: lesson.classTemplateId || "",
+      color: lesson.color || "",
+      date: lesson.date || "",
+      endTime: normalizeTimeInput(lesson.endTime),
+      lessonId: lesson.lessonId || "",
+      lessonTopic: lesson.lessonTopic || "",
+      lessonType: lesson.lessonType || "",
+      sourceLabel: lesson.sourceLabel || "",
+      startTime: normalizeTimeInput(lesson.startTime),
+      status: lesson.status || "scheduled",
+      studentIds: [...new Set(lesson.studentIds ?? [])].sort()
+    });
+  }
+
+  async function saveLessonModalLessons(lessonDrafts = [], onProgress = null) {
+    const expectedLessons = lessonDrafts.filter((lesson) => lesson?.lessonId && lesson?.date);
+    if (!expectedLessons.length) throw new Error("저장할 수업일지가 없습니다.");
+    const saveResult = await postJsonWithTimeout(
+      "/api/lessons/bulk",
+      { lessons: expectedLessons },
+      20000,
+      "수업일지 저장이 20초를 넘었습니다. 중복 등록하지 말고 잠시 뒤 달력을 확인해 주세요."
+    );
+    if (saveResult.source !== "supabase") {
+      throw new Error("수업일지가 Supabase가 아닌 임시 원천에 저장되어 완료할 수 없습니다.");
+    }
+    onProgress?.("saving", "Supabase 반영 확인 중");
+    const verification = await getJsonWithTimeout(
+      `/api/lessons?verify=lesson-modal-${Date.now()}`,
+      20000,
+      "수업일지 저장 확인이 20초를 넘었습니다. 다시 누르지 말고 잠시 뒤 새로고침해 주세요."
+    );
+    if (verification.source !== "supabase") {
+      throw new Error("저장 결과를 Supabase에서 다시 확인하지 못했습니다.");
+    }
+    const persistedLessons = Array.isArray(verification.lessons) ? verification.lessons : [];
+    const verifiedLessons = expectedLessons.map((expectedLesson) => {
+      const persistedLesson = persistedLessons.find((lesson) => lesson.lessonId === expectedLesson.lessonId);
+      if (!persistedLesson) {
+        throw new Error(`저장 후 수업일지를 찾지 못했습니다: ${expectedLesson.className}`);
+      }
+      if (getLessonModalSaveSnapshot(persistedLesson) !== getLessonModalSaveSnapshot(expectedLesson)) {
+        throw new Error(`저장 후 Supabase 값이 일치하지 않습니다: ${expectedLesson.className}`);
+      }
+      return persistedLesson;
+    });
+    setLessons(filterActiveLessons(persistedLessons));
+    return verifiedLessons;
+  }
+
+  async function handleAddLesson(formValues, onProgress = null) {
     const template = classTemplates.find(
       (item) => item.classTemplateId === formValues.classTemplateId
     );
     const classTemplateId = formValues.classTemplateId && template ? template.classTemplateId : "";
     const studentIds = getActiveStudentIdsFromSelection(formValues.studentIds, students);
+    const lessonId = formValues.lessonId || createLessonId(formValues.date, formValues.name);
+    const closureMakeupLessonId = formValues.lessonType === "closure" && formValues.closureMakeupEnabled
+      ? formValues.closureMakeupLessonId || createLessonId(formValues.closureMakeupDate, `${formValues.name}-휴강-보충`)
+      : "";
     const lesson = {
-      lessonId: createLessonId(formValues.date, formValues.name),
+      lessonId,
       classTemplateId,
       className: formValues.name,
       lessonType: formValues.lessonType,
+      lessonTopic: formValues.lessonType === "closure" ? "휴강" : "",
       date: formValues.date,
       dayOfWeek: getDayKey(formValues.date),
       startTime: formValues.startTime,
@@ -6972,20 +7030,46 @@ export function App() {
       color: getStandardLessonColor({ lessonType: formValues.lessonType, classTemplateId, className: formValues.name }),
       teacherId: "instructor_owner_001",
       studentIds,
+      sourceLabel: formValues.lessonType === "closure"
+        ? closureMakeupLessonId
+          ? `연결 휴강 보충 · ${closureMakeupLessonId}`
+          : "휴강 보충 없음"
+        : "",
       status: "scheduled"
     };
-
-    setLessons((current) => upsertById(current, lesson, "lessonId"));
+    const lessonsToSave = [lesson];
+    if (closureMakeupLessonId) {
+      lessonsToSave.push({
+        lessonId: closureMakeupLessonId,
+        classTemplateId,
+        className: `${formValues.name} · 휴강 보충`,
+        lessonType: "makeup",
+        lessonTopic: "휴강 보충",
+        date: formValues.closureMakeupDate,
+        dayOfWeek: getDayKey(formValues.closureMakeupDate),
+        startTime: formValues.closureMakeupStartTime,
+        endTime: formValues.closureMakeupEndTime,
+        color: getStandardLessonColor({ lessonType: "makeup", classTemplateId, className: `${formValues.name} · 휴강 보충` }),
+        teacherId: "instructor_owner_001",
+        studentIds,
+        sourceLabel: `원 휴강 수업 · ${lessonId}`,
+        status: "scheduled"
+      });
+    }
+    const verifiedLessons = await saveLessonModalLessons(lessonsToSave, onProgress);
     setSelectedDate(lesson.date);
     setSelectedLessonId(lesson.lessonId);
-    setIsLessonModalOpen(false);
-    postJson("/api/lessons", { lesson }).catch((error) => {
-      console.error(error);
-      window.alert(`수업 저장 실패: ${error.message}`);
-    });
+    return {
+      lessons: verifiedLessons,
+      message: closureMakeupLessonId
+        ? "휴강과 연결 보충 수업일지 저장 완료"
+        : formValues.lessonType === "closure"
+          ? "휴강 수업일지 저장 완료"
+          : "수업일지 저장 완료"
+    };
   }
 
-  function handleUpdateLesson(formValues) {
+  async function handleUpdateLesson(formValues, onProgress = null) {
     const template = classTemplates.find(
       (item) => item.classTemplateId === formValues.classTemplateId
     );
@@ -6998,6 +7082,7 @@ export function App() {
       classTemplateId,
       className: formValues.name,
       lessonType: formValues.lessonType,
+      lessonTopic: formValues.lessonType === "closure" ? "휴강" : editingLesson?.lessonTopic || "",
       date: formValues.date,
       dayOfWeek: getDayKey(formValues.date),
       startTime: formValues.startTime,
@@ -7007,16 +7092,14 @@ export function App() {
       status: editingLesson?.status ?? "scheduled"
     };
 
+    const [persistedLesson] = await saveLessonModalLessons([lesson], onProgress);
     markGeneratedLessonManualOverride(editingLesson);
-    setLessons((current) => upsertById(current, lesson, "lessonId"));
     setSelectedDate(lesson.date);
     setSelectedLessonId(lesson.lessonId);
-    setEditingLesson(null);
-    setIsLessonModalOpen(false);
-    postJson("/api/lessons", { lesson }).catch((error) => {
-      console.error(error);
-      window.alert(`수업 저장 실패: ${error.message}`);
-    });
+    return {
+      lessons: [persistedLesson],
+      message: "수업일지 수정 저장 완료"
+    };
   }
 
   function handleDeleteLesson(lessonId) {
@@ -15324,6 +15407,7 @@ function TeacherLessonHubV2({
     { id: "all", label: "전체" },
     { id: "regular", label: "정규수업" },
     { id: "preExam", label: "직전수업" },
+    { id: "closure", label: "휴강" },
     { id: "makeup", label: "보충수업" },
     { id: "examPrep", label: "시험대비" },
     { id: "specialLecture", label: "특강" }
@@ -15331,7 +15415,7 @@ function TeacherLessonHubV2({
   const visibleLessons = lessons.filter((lesson) => {
     if (isLegacyExamPrepLesson(lesson)) return false;
     if (lessonTypeFilter === "all") return true;
-    if (lessonTypeFilter === "regular") return !["preExam", "makeup", "specialLecture"].includes(lesson.lessonType) && !isExamPrepLesson(lesson);
+    if (lessonTypeFilter === "regular") return !["preExam", "closure", "makeup", "specialLecture"].includes(lesson.lessonType) && !isExamPrepLesson(lesson);
     if (lessonTypeFilter === "examPrep") return isExamPrepLesson(lesson);
     return lesson.lessonType === lessonTypeFilter;
   });
@@ -15410,6 +15494,7 @@ function TeacherLessonHubV2({
                           "lessonPill",
                           lesson.lessonId === selectedLessonId ? "active" : "",
                           lesson.lessonType === "preExam" ? "preExamLessonPill" : "",
+                          lesson.lessonType === "closure" ? "closureLessonPill" : "",
                           lesson.lessonType === "makeup" ? "makeupLessonPill" : "",
                           isExamPrepType ? "examPrepLessonPill" : "",
                           lesson.lessonType === "specialLecture" ? "specialLectureLessonPill" : ""
@@ -15422,8 +15507,10 @@ function TeacherLessonHubV2({
                         style={{ background: lesson.color }}
                         type="button"
                       >
-                        {lesson.startTime} {lesson.className}
-                        {isExamPrepType
+                        {lesson.startTime} {lesson.lessonType === "closure" ? `휴강 · ${lesson.className}` : lesson.className}
+                        {lesson.lessonType === "closure"
+                          ? ""
+                          : isExamPrepType
                           ? examPrepSourceLabel ? ` · ${examPrepSourceLabel}` : ""
                           : ` (${getLessonStudentIds(lesson).length}명)`}
                       </button>
@@ -16166,6 +16253,14 @@ function LessonJournalDetail({
   const todayTwoPmIso = new Date(`${today}T14:00:00+09:00`).toISOString();
   const canScheduleTodayTwoPm = lesson.date < today && Boolean(onScheduleLessonNotificationsAt);
   const lessonStudents = getActiveLessonStudents(lesson, students);
+  const isClosureLesson = lesson.lessonType === "closure";
+  const isClosureMakeupLesson = lesson.lessonType === "makeup" && lesson.lessonTopic === "휴강 보충";
+  const linkedClosureMakeupLesson = isClosureLesson
+    ? (Array.isArray(lessons) ? lessons : []).find((item) => item.sourceLabel === `원 휴강 수업 · ${lesson.lessonId}`)
+    : null;
+  const linkedClosureLesson = isClosureMakeupLesson
+    ? (Array.isArray(lessons) ? lessons : []).find((item) => item.sourceLabel === `연결 휴강 보충 · ${lesson.lessonId}`)
+    : null;
   const lessonAcademyReminders = getAcademyRemindersForLesson(academyReminders, lesson, lessonStudents);
   const lessonStudentIdSet = new Set(lessonStudents.map((student) => student.studentId));
   const scheduledParentCount = auditedLessonNotificationJobs.filter((job) => job.notificationType === "parent_comment" && job.status === "scheduled").length;
@@ -16224,7 +16319,7 @@ function LessonJournalDetail({
     ? `기본 예약 시간 지남 · ${defaultAlimtalkTimeLabel}`
     : `기본 예약 ${defaultAlimtalkTimeLabel}`;
   const isLessonNotificationOff = notificationPlanMode === "none";
-  const checkoutMissingStudents = lessonStudents.filter((student) => {
+  const checkoutMissingStudents = isClosureLesson ? [] : lessonStudents.filter((student) => {
     const record = findLessonStudentRecord(records, lesson, student);
     const attendanceLesson = applyStudentScheduleToLesson(lesson, student);
     return hasMissingCheckOut(record, attendanceLesson);
@@ -16941,6 +17036,31 @@ function LessonJournalDetail({
         <button className="dangerButton" onClick={() => onDeleteLesson(lesson.lessonId)} type="button">수업 취소 처리</button>
       </header>
 
+      {isClosureLesson || isClosureMakeupLesson ? (
+        <section className={`panel closureJournalNotice ${isClosureMakeupLesson ? "makeup" : ""}`}>
+          <div>
+            <strong>{isClosureMakeupLesson ? "휴강 보충 수업일지" : "휴강 수업일지"}</strong>
+            <p>
+              {isClosureMakeupLesson
+                ? "휴강과 연결해 생성한 실제 보충 수업입니다. 보충 횟수에는 표시되지만 정규 월 고정금액은 바꾸지 않습니다."
+                : "실제 수업을 진행하지 않은 일정입니다. 학생 명단과 휴강 기록은 보존되며 수업 횟수·시수·급여 정산에서는 제외됩니다."}
+            </p>
+          </div>
+          {isClosureLesson ? (
+            linkedClosureMakeupLesson ? (
+              <span>연결 보충 · {linkedClosureMakeupLesson.date} {formatLessonTimeRange(linkedClosureMakeupLesson)}</span>
+            ) : (
+              <span>연결 보충 없음</span>
+            )
+          ) : linkedClosureLesson ? (
+            <span>원 휴강 · {linkedClosureLesson.date} {linkedClosureLesson.className}</span>
+          ) : (
+            <span>원 휴강 연결 확인 필요</span>
+          )}
+          <small>이 일정 생성만으로 알림톡·문자는 발송되거나 예약되지 않습니다.</small>
+        </section>
+      ) : null}
+
       {lessonAcademyReminders.length > 0 ? (
         <section className="panel lessonReminderPanel">
           <div className="sectionHeader slim">
@@ -17221,8 +17341,10 @@ function LessonJournalDetail({
             const effectiveNextHomework = nextHomeworkTitle !== (nextHomework?.title ?? "")
               ? { ...(nextHomework ?? {}), title: nextHomeworkTitle }
               : nextHomework;
-            const attendanceDisplay = getAttendanceDisplay(record, attendanceLesson, attendanceSettings.lateGraceMinutes);
-            const checkoutMissing = hasMissingCheckOut(record, attendanceLesson);
+            const attendanceDisplay = isClosureLesson
+              ? { detail: "", label: "휴강", statusClass: "pending" }
+              : getAttendanceDisplay(record, attendanceLesson, attendanceSettings.lateGraceMinutes);
+            const checkoutMissing = !isClosureLesson && hasMissingCheckOut(record, attendanceLesson);
             const previousMemoContext = getPreviousLessonMemoContext(student);
             const previousRecord = previousMemoContext.previousRecord;
             const previousMemoRecord = previousMemoContext.previousMemoRecord;
@@ -17319,6 +17441,7 @@ function LessonJournalDetail({
                 </div>
                 <button
                   className={`attendanceBadge attendance-${attendanceDisplay.statusClass ?? record.attendanceStatus ?? "pending"}`}
+                  disabled={isClosureLesson}
                   onClick={() => onOpenAttendance({ lesson: attendanceLesson, record, student })}
                   type="button"
                 >
@@ -18913,10 +19036,21 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
   const activeTemplate = normalizedTemplates.find((template) => template.classTemplateId === classTemplateId) ?? fallbackTemplate;
   const initialDate = initialLesson?.date ?? today;
   const initialTemplateTimes = getTemplateLessonTimes(activeTemplate, initialDate);
+  const [draftLessonId] = useState(() =>
+    initialLesson?.lessonId || createLessonId(initialDate, initialLesson?.className || activeTemplate.name || "수업")
+  );
+  const [draftClosureMakeupLessonId] = useState(() =>
+    createLessonId(addDaysInKorea(initialDate, 7), `${initialLesson?.className || activeTemplate.name || "수업"}-휴강-보충`)
+  );
   const [name, setName] = useState(initialLesson?.className ?? activeTemplate.name);
   const [date, setDate] = useState(initialDate);
   const [startTime, setStartTime] = useState(normalizeTimeInput(initialLesson?.startTime) || initialTemplateTimes.startTime);
   const [endTime, setEndTime] = useState(normalizeTimeInput(initialLesson?.endTime) || initialTemplateTimes.endTime);
+  const [closureMakeupEnabled, setClosureMakeupEnabled] = useState(false);
+  const [closureMakeupDate, setClosureMakeupDate] = useState(addDaysInKorea(initialDate, 7));
+  const [closureMakeupDateTouched, setClosureMakeupDateTouched] = useState(false);
+  const [closureMakeupStartTime, setClosureMakeupStartTime] = useState(normalizeTimeInput(initialLesson?.startTime) || initialTemplateTimes.startTime);
+  const [closureMakeupEndTime, setClosureMakeupEndTime] = useState(normalizeTimeInput(initialLesson?.endTime) || initialTemplateTimes.endTime);
   const [color, setColor] = useState(
     getStandardLessonColor(initialLesson ?? { lessonType: "class", classTemplateId: activeTemplate.classTemplateId, className: activeTemplate.name })
   );
@@ -18925,6 +19059,11 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
     return getActiveStudentIdsFromSelection(initialStudentIds, activeStudents);
   });
   const [studentSearch, setStudentSearch] = useState("");
+  const [saveState, setSaveState] = useState("idle");
+  const [saveMessage, setSaveMessage] = useState("수정 내용은 저장 버튼을 눌러야 Supabase에 반영됩니다.");
+  const isSaving = saveState === "saving";
+  const isSaved = saveState === "saved";
+  const isFormLocked = isSaving || isSaved;
   const regularClassColorOptions = normalizedTemplates.map((template) => ({
     id: `class-${template.classTemplateId}`,
     label: template.name,
@@ -18935,6 +19074,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
   const lessonColorOptions = [
     ...regularClassColorOptions,
     { id: "preExam", label: "직전수업", lessonType: "preExam", color: lessonCalendarColors.preExam },
+    { id: "closure", label: "휴강", lessonType: "closure", color: lessonCalendarColors.closure },
     { id: "makeup", label: "보충수업", lessonType: "makeup", color: lessonCalendarColors.makeup },
     { id: "examPrep", label: "시험대비", lessonType: "examPrep", color: lessonCalendarColors.examPrep },
     { id: "exam", label: "평가", lessonType: "exam", color: lessonCalendarColors.exam }
@@ -18952,6 +19092,26 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
     grade,
     students: filteredStudents.filter((student) => (student.grade || "학년 미입력") === grade)
   })).filter((group) => group.students.length > 0);
+
+  useEffect(() => {
+    setSaveState((current) => current === "failed" ? "dirty" : current);
+    setSaveMessage((current) => saveState === "failed"
+      ? "입력 내용을 수정했습니다. 저장 버튼을 다시 눌러 주세요."
+      : current);
+  }, [
+    classTemplateId,
+    closureMakeupDate,
+    closureMakeupEnabled,
+    closureMakeupEndTime,
+    closureMakeupStartTime,
+    color,
+    date,
+    endTime,
+    lessonType,
+    name,
+    startTime,
+    studentIds
+  ]);
 
   function handleTemplateChange(nextTemplateId, nextLessonType = lessonType) {
     const template = normalizedTemplates.find((item) => item.classTemplateId === nextTemplateId);
@@ -18988,10 +19148,73 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
     const templateTimes = getTemplateLessonTimes(activeTemplate, nextDate);
     setStartTime(templateTimes.startTime);
     setEndTime(templateTimes.endTime);
+    if (!closureMakeupDateTouched) {
+      setClosureMakeupDate(addDaysInKorea(nextDate, 7));
+    }
+  }
+
+  function getLessonModalValidationError() {
+    if (!name.trim()) return "수업명을 입력해 주세요.";
+    if (!date) return "수업 날짜를 입력해 주세요.";
+    if (!normalizeTimeInput(startTime) || !normalizeTimeInput(endTime) || endTime <= startTime) {
+      return "수업 시작·종료 시간을 올바르게 입력해 주세요.";
+    }
+    if (lessonType === "closure" && closureMakeupEnabled) {
+      if (!closureMakeupDate) return "휴강 보충 날짜를 입력해 주세요.";
+      if (
+        !normalizeTimeInput(closureMakeupStartTime) ||
+        !normalizeTimeInput(closureMakeupEndTime) ||
+        closureMakeupEndTime <= closureMakeupStartTime
+      ) {
+        return "휴강 보충 시작·종료 시간을 올바르게 입력해 주세요.";
+      }
+    }
+    return "";
+  }
+
+  async function submitLesson() {
+    if (isSaving || isSaved) return;
+    const validationError = getLessonModalValidationError();
+    if (validationError) {
+      setSaveState("failed");
+      setSaveMessage(validationError);
+      return;
+    }
+    setSaveState("saving");
+    setSaveMessage(lessonType === "closure" && closureMakeupEnabled
+      ? "휴강과 연결 보충 수업일지 저장 중"
+      : "수업일지 저장 중");
+    try {
+      const result = await onSubmit({
+        classTemplateId,
+        closureMakeupDate,
+        closureMakeupEnabled: lessonType === "closure" && !initialLesson && closureMakeupEnabled,
+        closureMakeupEndTime,
+        closureMakeupLessonId: draftClosureMakeupLessonId,
+        closureMakeupStartTime,
+        color,
+        date,
+        endTime,
+        lessonType,
+        lessonId: draftLessonId,
+        name: name.trim(),
+        startTime,
+        studentIds
+      }, (nextState, nextMessage) => {
+        setSaveState(nextState);
+        setSaveMessage(nextMessage);
+      });
+      setSaveState("saved");
+      setSaveMessage(result?.message || "수업일지 저장 완료");
+    } catch (error) {
+      console.error(error);
+      setSaveState("failed");
+      setSaveMessage(`저장 실패 · ${error.message || "입력 내용은 그대로 유지됩니다."}`);
+    }
   }
 
   return (
-    <Modal className="lessonModal" title={initialLesson ? "수업 수정" : "수업 등록"} onClose={onClose}>
+    <Modal className="lessonModal" title={initialLesson ? "수업 수정" : "수업 등록"} onClose={isSaving ? () => {} : onClose}>
       <div className="modalSection lessonModalSection">
         <label>수업 유형</label>
         <div className="typeTabs">
@@ -19000,10 +19223,15 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
             ["preExam", "📌 직전수업"],
             ["exam", "📝 평가"],
             ["makeup", "🔧 보강"],
-            ["examPrep", "🗓 시험대비"]
+            ["examPrep", "🗓 시험대비"],
+            ["closure", "⏸ 휴강"]
           ].map(([value, label]) => (
             <button
               className={lessonType === value ? "active" : ""}
+              disabled={isFormLocked || Boolean(
+                initialLesson &&
+                (initialLesson.lessonType === "closure" ? value !== "closure" : value === "closure")
+              )}
               key={value}
               onClick={() => handleLessonTypeChange(value)}
               type="button"
@@ -19014,10 +19242,70 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
         </div>
       </div>
 
+      {lessonType === "closure" ? (
+        <div className="modalSection lessonModalSection closureMakeupPanel">
+          <div>
+            <strong>휴강 보충이 있나요?</strong>
+            <p className="muted">휴강은 수업일지에 남지만 실제 수업 횟수와 급여 정산에는 포함되지 않습니다.</p>
+          </div>
+          {initialLesson ? (
+            <div className="closureMakeupEditNotice">
+              기존 휴강을 수정할 때는 연결 보충을 중복 생성하지 않습니다. 새 보충이 필요하면 수업 등록에서 보강을 별도로 추가해 주세요.
+            </div>
+          ) : (
+            <>
+              <div className="closureMakeupChoices" role="group" aria-label="휴강 보충 생성 여부">
+                <button
+                  className={!closureMakeupEnabled ? "active" : ""}
+                  disabled={isFormLocked}
+                  onClick={() => setClosureMakeupEnabled(false)}
+                  type="button"
+                >
+                  보충 없음
+                </button>
+                <button
+                  className={closureMakeupEnabled ? "active" : ""}
+                  disabled={isFormLocked}
+                  onClick={() => setClosureMakeupEnabled(true)}
+                  type="button"
+                >
+                  보충 수업일지 함께 생성
+                </button>
+              </div>
+              {closureMakeupEnabled ? (
+                <div className="fieldGrid three closureMakeupFields">
+                  <label>
+                    보충 날짜
+                    <input
+                      disabled={isFormLocked}
+                      type="date"
+                      value={closureMakeupDate}
+                      onChange={(event) => {
+                        setClosureMakeupDate(event.target.value);
+                        setClosureMakeupDateTouched(true);
+                      }}
+                    />
+                  </label>
+                  <label>
+                    보충 시작
+                    <input disabled={isFormLocked} type="time" value={closureMakeupStartTime} onChange={(event) => setClosureMakeupStartTime(event.target.value)} />
+                  </label>
+                  <label>
+                    보충 종료
+                    <input disabled={isFormLocked} type="time" value={closureMakeupEndTime} onChange={(event) => setClosureMakeupEndTime(event.target.value)} />
+                  </label>
+                </div>
+              ) : null}
+              <small>알림톡·문자는 자동 발송하거나 예약하지 않습니다.</small>
+            </>
+          )}
+        </div>
+      ) : null}
+
       <div className="modalSection lessonModalSection">
         <label>
           큰 수업 틀
-          <select value={classTemplateId} onChange={(event) => handleTemplateChange(event.target.value)}>
+          <select disabled={isFormLocked} value={classTemplateId} onChange={(event) => handleTemplateChange(event.target.value)}>
             <option value="">직접 입력 일정</option>
             {normalizedTemplates.map((template) => (
               <option key={template.classTemplateId} value={template.classTemplateId}>
@@ -19035,6 +19323,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
             <button
               aria-label={`${item.label} 색상 미리보기`}
               className={color.toLowerCase() === item.color.toLowerCase() ? "active" : ""}
+              disabled={isFormLocked}
               key={item.id}
               onClick={() => handleColorOptionClick(item)}
               style={{ background: item.color }}
@@ -19048,19 +19337,19 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
       <div className="fieldGrid two lessonModalFields">
         <label>
           수업명
-          <input value={name} onChange={(event) => setName(event.target.value)} placeholder="예: 수학 특강" />
+          <input disabled={isFormLocked} value={name} onChange={(event) => setName(event.target.value)} placeholder="예: 수학 특강" />
         </label>
         <label>
           날짜
-          <input type="date" value={date} onChange={(event) => handleDateChange(event.target.value)} />
+          <input disabled={isFormLocked} type="date" value={date} onChange={(event) => handleDateChange(event.target.value)} />
         </label>
         <label>
           시작
-          <input type="time" value={startTime} onChange={(event) => setStartTime(event.target.value)} />
+          <input disabled={isFormLocked} type="time" value={startTime} onChange={(event) => setStartTime(event.target.value)} />
         </label>
         <label>
           종료
-          <input type="time" value={endTime} onChange={(event) => setEndTime(event.target.value)} />
+          <input disabled={isFormLocked} type="time" value={endTime} onChange={(event) => setEndTime(event.target.value)} />
         </label>
       </div>
 
@@ -19071,11 +19360,12 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
         </div>
         <div className="lessonStudentSearchRow">
           <input
+            disabled={isFormLocked}
             value={studentSearch}
             onChange={(event) => setStudentSearch(event.target.value)}
             placeholder="학생 이름 또는 반으로 검색"
           />
-          <button className="softButton" onClick={() => setStudentIds(filteredStudents.map((student) => student.studentId))} type="button">
+          <button className="softButton" disabled={isFormLocked} onClick={() => setStudentIds(filteredStudents.map((student) => student.studentId))} type="button">
             보이는 학생 선택
           </button>
         </div>
@@ -19087,6 +19377,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
                 <strong>{group.grade}</strong>
                 <button
                   className="softButton mini"
+                  disabled={isFormLocked}
                   onClick={() => {
                     const groupIds = group.students.map((student) => student.studentId);
                     setStudentIds((current) => Array.from(new Set([...current, ...groupIds])));
@@ -19097,6 +19388,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
                 </button>
                 <button
                   className="softButton mini"
+                  disabled={isFormLocked}
                   onClick={() => {
                     const groupIds = new Set(group.students.map((student) => student.studentId));
                     setStudentIds((current) => current.filter((studentId) => !groupIds.has(studentId)));
@@ -19112,6 +19404,7 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
                   return (
                     <button
                       className={isSelected ? "lessonStudentChip selected" : "lessonStudentChip"}
+                      disabled={isFormLocked}
                       key={student.studentId}
                       onClick={() =>
                         setStudentIds((current) =>
@@ -19132,15 +19425,27 @@ function LessonModal({ initialLesson = null, students, templates, onClose, onSub
         </div>
       </div>
 
+      <div className="lessonModalSaveStatus" aria-live="polite">
+        <InlineSaveStatus label="수업일지" saveState={saveState} />
+        <span>{saveMessage}</span>
+      </div>
+
       <div className="lessonModalActions">
         <button
           className="primaryButton full"
-          onClick={() => onSubmit({ classTemplateId, color, date, endTime, lessonType, name, startTime, studentIds })}
+          disabled={isSaving || isSaved}
+          onClick={submitLesson}
           type="button"
         >
-          ✅ {initialLesson ? "수업 수정 저장" : "수업 등록"}
+          {isSaving
+            ? "저장 중..."
+            : isSaved
+              ? "✅ 저장 완료"
+              : `✅ ${initialLesson ? "수업 수정 저장" : lessonType === "closure" && closureMakeupEnabled ? "휴강 · 보충 수업일지 등록" : "수업 등록"}`}
         </button>
-        <button className="softButton" onClick={onClose} type="button">취소</button>
+        <button className="softButton" disabled={isSaving} onClick={onClose} type="button">
+          {isSaved ? "달력에서 확인" : "취소"}
+        </button>
       </div>
     </Modal>
   );
@@ -26423,6 +26728,7 @@ function getStandardLessonColor(lesson = {}, linkedTask = null) {
   }
   if (lesson.lessonType === "preExam") return lessonCalendarColors.preExam;
   if (lesson.lessonType === "exam") return lessonCalendarColors.exam;
+  if (lesson.lessonType === "closure") return lessonCalendarColors.closure;
   if (isExamPrepLesson(lesson)) return lessonCalendarColors.examPrep;
   if (lesson.lessonType === "specialLecture" || lesson.lessonTrackType === "specialLecture") return lessonCalendarColors.specialLecture;
   if (lesson.lessonType === "makeup") {

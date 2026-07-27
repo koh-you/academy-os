@@ -39,6 +39,7 @@ const attendanceLabels = {
 };
 const makeupLessonTypes = new Set(["makeup", "homeworkMakeup", "absenceMakeup", "retest"]);
 const specialLectureLessonTypes = new Set(["specialLecture", "special_lecture"]);
+const nonTeachingLessonTypes = new Set(["closure"]);
 
 function normalizeText(value = "") {
   return String(value ?? "").trim();
@@ -112,6 +113,7 @@ export function isMakeupSettlementLesson(lesson = {}) {
 
 export function isRegularSettlementLesson(lesson = {}) {
   return !isCanceledLesson(lesson) &&
+    !nonTeachingLessonTypes.has(lesson.lessonType) &&
     !isMakeupSettlementLesson(lesson) &&
     !isSpecialLectureSettlementLesson(lesson);
 }
@@ -238,6 +240,7 @@ export function buildStudentMonthEvidence({
     .filter((lesson) =>
       normalizeText(lesson.date).startsWith(`${monthKey}-`) &&
       !isCanceledLesson(lesson) &&
+      !nonTeachingLessonTypes.has(lesson.lessonType) &&
       hasStudent(lesson, student.studentId)
     )
     .sort((a, b) => (
@@ -453,7 +456,8 @@ export function getMonthlySettlementStudents({
     lessons
       .filter((lesson) =>
         normalizeText(lesson.date).startsWith(`${monthKey}-`) &&
-        !isCanceledLesson(lesson)
+        !isCanceledLesson(lesson) &&
+        !nonTeachingLessonTypes.has(lesson.lessonType)
       )
       .flatMap((lesson) => Array.isArray(lesson.studentIds) ? lesson.studentIds : [])
   );

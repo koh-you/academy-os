@@ -3438,6 +3438,11 @@ button {
   border-left: 4px solid #fb923c;
 }
 
+.lessonPill.closureLessonPill {
+  border-left: 4px solid #64748b;
+  color: #334155;
+}
+
 .lessonPill.examPrepLessonPill {
   border-left: 4px solid #38bdf8;
 }
@@ -11083,6 +11088,55 @@ button:disabled {
   color: #ffffff;
 }
 
+.closureMakeupPanel {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.closureMakeupPanel p {
+  margin: 4px 0 0;
+}
+
+.closureMakeupChoices {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.closureMakeupChoices button {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #475569;
+  font-weight: 900;
+  min-height: 44px;
+}
+
+.closureMakeupChoices button.active {
+  background: #17213d;
+  border-color: #17213d;
+  color: #ffffff;
+}
+
+.closureMakeupEditNotice {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  color: #9a3412;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 10px 12px;
+}
+
+.closureMakeupFields {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+}
+
 .lessonColorPalette {
   align-items: center;
   display: flex;
@@ -11272,6 +11326,57 @@ textarea {
   gap: 12px;
   grid-template-columns: minmax(0, 1fr) auto;
   padding-top: 6px;
+}
+
+.lessonModalSaveStatus {
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.lessonModalSaveStatus > span {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.closureJournalNotice {
+  align-items: center;
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.closureJournalNotice.makeup {
+  background: #f5f3ff;
+  border-color: #ddd6fe;
+}
+
+.closureJournalNotice p {
+  color: #475569;
+  margin: 4px 0 0;
+}
+
+.closureJournalNotice > span {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 7px 10px;
+}
+
+.closureJournalNotice > small {
+  color: #64748b;
+  grid-column: 1 / -1;
 }
 
 .chipCheck {
@@ -18731,6 +18836,8 @@ body.attendanceOnlyBody {
 
   .fieldGrid,
   .fieldGrid.two,
+  .closureMakeupChoices,
+  .closureJournalNotice,
   .accountSettingsGrid,
   .settingsRow,
   .studentProfileGrid,
