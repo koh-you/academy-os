@@ -17,3 +17,4 @@ MVP 기준:
 - `LessonModalStudentPicker.jsx`는 App이 소유한 검색·선택값과 callback으로 학생 검색, 학년 그룹, 선택 chip만 렌더링합니다.
 - `LessonModalClosurePanel.jsx`는 App이 계산한 기존 명단·수업기록·알림 상태와 local callback으로 휴강 안내와 선택형 보충 입력만 렌더링합니다.
 - `LessonModalBasics.jsx`는 App이 소유한 수업 유형·반 템플릿·색상·이름·날짜·시간 값과 callback을 렌더링하며 휴강 panel의 DOM 순서를 children으로 보존합니다.
+- `LessonModalActions.jsx`는 App이 소유한 저장 상태와 submit·close callback으로 저장 안내와 하단 action만 렌더링합니다.

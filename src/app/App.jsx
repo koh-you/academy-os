@@ -230,6 +230,7 @@ import {
   createLessonModalTemplateChangePatch,
   createLessonModalTypeChangePatch
 } from "../domains/lessons/lessonModalDraftTransitions.js";
+import { LessonModalActions } from "../domains/lessons/LessonModalActions.jsx";
 import { LessonModalBasics } from "../domains/lessons/LessonModalBasics.jsx";
 import { LessonModalClosurePanel } from "../domains/lessons/LessonModalClosurePanel.jsx";
 import {
@@ -18948,28 +18949,17 @@ function LessonModal({
         selectedStudentIds={studentIds}
       />
 
-      <div className="lessonModalSaveStatus" aria-live="polite">
-        <InlineSaveStatus label="수업일지" saveState={saveState} />
-        <span>{saveMessage}</span>
-      </div>
-
-      <div className="lessonModalActions">
-        <button
-          className="primaryButton full"
-          disabled={isSaving || isSaved}
-          onClick={submitLesson}
-          type="button"
-        >
-          {isSaving
-            ? "저장 중..."
-            : isSaved
-              ? "✅ 저장 완료"
-              : `✅ ${initialLesson ? "수업 수정 저장" : lessonType === "closure" && closureMakeupEnabled ? "휴강 · 보충 수업일지 등록" : "수업 등록"}`}
-        </button>
-        <button className="softButton" disabled={isSaving} onClick={onClose} type="button">
-          {isSaved ? "달력에서 확인" : "취소"}
-        </button>
-      </div>
+      <LessonModalActions
+        closureMakeupEnabled={closureMakeupEnabled}
+        isEditing={Boolean(initialLesson)}
+        isSaved={isSaved}
+        isSaving={isSaving}
+        lessonType={lessonType}
+        onClose={onClose}
+        onSave={submitLesson}
+        saveMessage={saveMessage}
+        saveState={saveState}
+      />
     </Modal>
   );
 }
