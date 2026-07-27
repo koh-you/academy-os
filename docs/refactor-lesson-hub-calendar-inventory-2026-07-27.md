@@ -91,7 +91,7 @@ Supabase lessons
    - 합성 수업 fixture로 정규·휴강·보충·시험대비·특강 분류를 고정한다.
 3. **15C — 활성 달력 presentational component — 완료**
    - 필터/header/grid 표시를 전용 파일로 옮기고 선택·월 이동 callback만 주입한다.
-4. **15D — `LessonModal` callback-only UI — 진행 중**
+4. **15D — `LessonModal` callback-only UI — 완료**
    - 15D-1 완료: 활성 학생 필터·검색·학년 순서·그룹 생성을 `lessonModalStudentModel.js` 순수 모델로 분리했다.
    - 15D-2 완료: 이름·날짜·시간·휴강 보충 입력 validation과 submit payload 계산을 `lessonModalDraftModel.js` 순수 모델로 분리했다.
    - 15D-3 완료: 반 템플릿 선택, 수업 유형 변경, 날짜 변경과 색상 선택지의 draft patch 계산을 `lessonModalDraftTransitions.js`로 분리했다.
@@ -101,7 +101,7 @@ Supabase lessons
    - 15D-7 완료: 휴강 전환 안내·선택형 보충 입력 JSX를 controlled `LessonModalClosurePanel`로 옮기고 사전점검 계산과 state는 App에 뒀다.
    - 15D-8 완료: 수업 유형·반 템플릿·색상·이름·날짜·시간 JSX를 controlled `LessonModalBasics`로 옮기고 모든 draft state와 handler는 App에 뒀다. 휴강 panel은 `children`으로 유형 탭과 나머지 필드 사이의 기존 순서를 유지한다.
    - 15D-9 완료: 저장 상태와 저장/취소 action footer JSX를 controlled `LessonModalActions`로 옮기고 submit·close callback은 App에 뒀다.
-   - 다음 15D-10: fixture가 쌓인 `LessonModal` local controller와 child composition을 전용 파일로 옮긴다. App-local 날짜·색상·ID·휴강 helper는 dependency로 주입하고 실제 수업 저장 callback은 App에 둔다.
+   - 15D-10 closeout 완료: App에 남은 `LessonModal`은 local React draft와 child composition, 주입된 `onSubmit` 호출만 소유한다. 직접 input/button JSX와 fetch/API/Supabase/알림 side effect가 없음을 production fixture로 고정했다. inventory의 원래 계약대로 실제 저장 controller와 App-local helper를 dependency container로 억지 이동하지 않는다.
    - local draft·진행 표시를 전용 파일로 옮기되 API와 저장 controller는 App에 둔다.
 5. **15E — 키보드 탐색 hook**
    - 포커스 가능한 입력 요소 예외와 Ctrl/Cmd 단축키 계약을 fixture로 고정한 뒤 분리한다.
@@ -113,4 +113,4 @@ Supabase lessons
 
 - AI 검수: 활성/비활성 참조 수, 저장 원천, 외부 side effect, low-risk 첫 후보를 정적 분석으로 확인한다.
 - 사람 검수: 없음. 화면·운영 데이터·외부 서비스를 변경하지 않았다.
-- 다음 단계: 15D-9 완료 뒤 최신 `origin/main`을 다시 rebase하고, 15D-10 `LessonModal` local controller shell을 전용 파일로 한 의미 단위만 분리한다. 실제 수업 저장 `onSubmit`, 휴강 사전점검 API·Supabase 재조회는 App callback 경계에 둔다.
+- 다음 단계: 15D closeout 뒤 최신 `origin/main`을 다시 rebase하고, 15E 키보드 탐색 hook을 한 의미 단위로 진행한다. 입력 요소 예외와 Ctrl/Cmd 복사·붙여넣기·undo·수업 등록 shortcut을 먼저 fixture로 고정하며 저장 callback은 이동하지 않는다.

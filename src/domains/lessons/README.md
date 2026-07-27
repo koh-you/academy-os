@@ -18,3 +18,4 @@ MVP 기준:
 - `LessonModalClosurePanel.jsx`는 App이 계산한 기존 명단·수업기록·알림 상태와 local callback으로 휴강 안내와 선택형 보충 입력만 렌더링합니다.
 - `LessonModalBasics.jsx`는 App이 소유한 수업 유형·반 템플릿·색상·이름·날짜·시간 값과 callback을 렌더링하며 휴강 panel의 DOM 순서를 children으로 보존합니다.
 - `LessonModalActions.jsx`는 App이 소유한 저장 상태와 submit·close callback으로 저장 안내와 하단 action만 렌더링합니다.
+- App의 `LessonModal` controller는 local React draft와 위 controlled component 조립, 주입된 `onSubmit` 호출만 소유하며 외부 저장 API를 직접 호출하지 않습니다.

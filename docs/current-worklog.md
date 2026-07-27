@@ -1442,6 +1442,14 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-27 P1. 15D-10 수업 모달 local controller closeout — AI gate 통과
+
+- audit: inventory의 안전 계약은 local draft·진행 표시를 순수 모델/controlled UI로 분리하되 실제 저장 controller는 App에 두는 것이다. 15D-1~9 뒤 App의 `LessonModal`에는 React local state/effect, 순수 모델 조립, child component 조립과 주입된 `onSubmit` 호출만 남았다.
+- 경계 fixture: `scripts/test-lesson-modal-controller-boundary.mjs`가 controller 구간을 직접 잘라 input/button JSX 0건, fetch/postJson/apiUrl/API path/Supabase/notification_jobs/Solapi/localStorage 0건, 주입 `onSubmit`과 4개 controlled component 조립을 검사한다.
+- 판단: App-local 날짜·색상·ID·휴강 helper를 거대한 dependency 객체로 포장해 controller 파일만 이동하면 결합을 숨길 뿐 낮추지 않는다. 원래 inventory 경계를 지키고 로드맵 15D를 닫는다.
+- 자동검증: 전용 closeout fixture와 전체 `test:production` 64개 명령, scenario 495/495, build, `git diff --check`를 실행한다.
+- 사람 gate: 없음. production code와 운영 데이터는 변경하지 않는 경계 audit다. 다음은 최신 `origin/main` rebase 후 15E 키보드 탐색 hook이며 입력 요소 예외와 Ctrl/Cmd shortcut을 먼저 고정한다.
+
 ## 2026-07-27 P1. 15D-9 수업 모달 저장 action footer 분리 — AI gate 통과
 
 - 코드: `InlineSaveStatus`와 저장 메시지, 저장 중/완료/신규/수정/휴강+보충 버튼 문구, 저장/취소·달력 확인 버튼 JSX를 `src/domains/lessons/LessonModalActions.jsx`로 이동했다.
