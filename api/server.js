@@ -4,6 +4,7 @@ import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import {
   cancelNotificationJob,
   deleteLesson,
+  deleteExamPrepLessonForReconcile,
   deleteLessonsBefore,
   deleteDuplicateExamPrepRows,
   deleteExamPrepRow,
@@ -6432,10 +6433,26 @@ const server = http.createServer(async (request, response) => {
     try {
       const lessonId = requestUrl.searchParams.get("id");
       const beforeDate = requestUrl.searchParams.get("before");
-      const result = beforeDate ? await deleteLessonsBefore(beforeDate) : await deleteLesson(lessonId);
+      const mode = requestUrl.searchParams.get("mode");
+      const auditId = requestUrl.searchParams.get("auditId") || crypto.randomUUID();
+      const result = beforeDate
+        ? await deleteLessonsBefore(beforeDate)
+        : mode === "exam-prep-reconcile"
+          ? await deleteExamPrepLessonForReconcile(lessonId, { auditId })
+          : await deleteLesson(lessonId);
+      if (mode === "exam-prep-reconcile") {
+        console.info("[exam-prep-delete-audit]", JSON.stringify(result.audit));
+      }
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
+      if (error.audit?.operation === "delete_exam_prep_lesson") {
+        console.error("[exam-prep-delete-audit]", JSON.stringify(error.audit));
+      }
+      sendJson(request, response, error.audit ? 409 : 500, {
+        ok: false,
+        error: error.message,
+        ...(error.audit ? { audit: error.audit } : {})
+      });
     }
     return;
   }
@@ -6662,11 +6679,27 @@ const server = http.createServer(async (request, response) => {
       const deleteDuplicates = requestUrl.searchParams.get("duplicates") === "true";
       const confirmed = requestUrl.searchParams.get("confirm") === "true";
       const examPrepId = requestUrl.searchParams.get("id");
+      const auditId = requestUrl.searchParams.get("auditId") || crypto.randomUUID();
       if (!confirmed) throw new Error("시험정보 삭제는 confirm=true가 필요합니다.");
-      const result = deleteDuplicates ? await deleteDuplicateExamPrepRows() : await deleteExamPrepRow(examPrepId);
+      if (deleteDuplicates && examPrepId) {
+        throw new Error("단일 시험정보 삭제와 중복 일괄 삭제를 같은 요청에서 실행할 수 없습니다.");
+      }
+      const result = deleteDuplicates
+        ? await deleteDuplicateExamPrepRows()
+        : await deleteExamPrepRow(examPrepId, { auditId });
+      if (!deleteDuplicates) {
+        console.info("[exam-prep-delete-audit]", JSON.stringify(result.audit));
+      }
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
+      if (error.audit?.operation === "delete_exam_prep_row") {
+        console.error("[exam-prep-delete-audit]", JSON.stringify(error.audit));
+      }
+      sendJson(request, response, error.audit ? 409 : 500, {
+        ok: false,
+        error: error.message,
+        ...(error.audit ? { audit: error.audit } : {})
+      });
     }
     return;
   }

@@ -2,6 +2,21 @@
 
 이 파일은 Codex 새 세션이 이 저장소에서 작업할 때 가장 먼저 읽는 프로젝트 지침입니다.
 
+## Remaining Human Gates - Always Show
+
+새 작업을 시작하거나 완료 상태를 보고할 때 AI 자동검증 결과와 함께 아직 남은 사람 gate를 먼저 짧게 표시한다. AI가 deterministic fixture·정적검사·가상 데이터로 판정할 수 있는 항목은 먼저 끝내고, 운영 화면·실제 외부 원천처럼 사람만 확인할 수 있는 최소 항목만 요청한다.
+
+1. `14C-3 시험정보 삭제 격리 gate`
+   - 상태: 삭제 audit·단일 범위 검증·실패 보상 복구 구현과 TARGET/CONTROL/정규수업 가상 fixture는 통과했다.
+   - 남은 확인: 배포 뒤 격리 TARGET 한 건만 삭제하고 CONTROL row·CONTROL 수업·정규수업 보존, 새로고침 유지, 중복·교차 삭제 없음, 실패 시 audit ID와 원천 복구 안내를 실제 화면에서 확인한다.
+   - 통과 전에는 App.jsx 14C-3 side-effect orchestration 이동이나 다음 고위험 코드 이동을 진행하지 않는다.
+2. `학생 포털 실제 쓰기 gate`
+   - 학생 숙제 완료, 질문 CRUD, 시험 후 제출의 실제 학생 입력·파일 선택·Storage 업로드·새로고침/재로그인 유지·교사 확인 저장은 보류 상태이며 통과로 간주하지 않는다.
+3. `교사 bearer·Storage 소유권 보안 gate`
+   - 교사 서버 서명 세션과 파일 열람 소유권 검증은 별도 고위험 보안 작업이다.
+4. `Solapi 특강 템플릿 검수 gate`
+   - 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 확인한다. 완료 전에는 템플릿 연결·테스트 발송을 진행하지 않는다.
+
 ## Deferred Work Queue - Always Show First
 
 새 세션은 아래 미룬 작업 큐를 최우선 최상단 작업지침으로 취급한다. 사용자가 별도 작업을 바로 요청하더라도, 코드 수정 전에 `AGENTS.md`, `docs/current-worklog.md`, `docs/next-session/README.md`, `git status --short`, `git log -1 --oneline`을 확인한 뒤 현재 미룬 작업과 새 요청의 우선순위를 먼저 짧게 정리해서 사용자에게 보여준다.

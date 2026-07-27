@@ -6,6 +6,10 @@ import {
   createExamAnalysisFinalPreviewModel,
   examAnalysisPreviewPalette
 } from "../domains/exams/finalPreview.js";
+import {
+  createExamPrepDeleteAuditId,
+  executeExamPrepDeleteOrchestration
+} from "../domains/exams/examPrepDeleteOrchestration.js";
 import { ExamAnalysisFinalPreviewPanel } from "../domains/exams/ExamAnalysisFinalPreviewPanel.jsx";
 import { StudentManager } from "../domains/students/StudentManager.jsx";
 import {
@@ -4021,13 +4025,39 @@ function postExamPrepRows(examPrepRows) {
   return postJson("/api/exam-prep-rows/bulk", { examPrepRows });
 }
 
-function deleteExamPrepRowRequest(examPrepId) {
-  return fetch(apiUrl(`/api/exam-prep-rows?id=${encodeURIComponent(examPrepId)}&confirm=true`), { method: "DELETE" })
+function deleteExamPrepRowRequest(examPrepId, auditId) {
+  return fetch(
+    apiUrl(
+      `/api/exam-prep-rows?id=${encodeURIComponent(examPrepId)}&confirm=true&auditId=${encodeURIComponent(auditId)}`
+    ),
+    { method: "DELETE" }
+  )
     .then(async (response) => {
       const result = await response.json();
-      if (!response.ok || !result.ok) throw new Error(result.error || "시험정보 삭제 실패");
+      if (!response.ok || !result.ok) {
+        const error = new Error(result.error || "시험정보 삭제 실패");
+        error.audit = result.audit;
+        throw error;
+      }
       return result;
     });
+}
+
+function deleteExamPrepLessonRequest(lessonId, auditId) {
+  return fetch(
+    apiUrl(
+      `/api/lessons?id=${encodeURIComponent(lessonId)}&mode=exam-prep-reconcile&auditId=${encodeURIComponent(auditId)}`
+    ),
+    { method: "DELETE" }
+  ).then(async (response) => {
+    const result = await response.json();
+    if (!response.ok || !result.ok) {
+      const error = new Error(result.error || "시험대비 수업 삭제 실패");
+      error.audit = result.audit;
+      throw error;
+    }
+    return result;
+  });
 }
 
 function deleteExamAnalysisRunRequest(analysisRunId) {
@@ -5423,6 +5453,7 @@ export function App() {
   const academyTestSaveRequestRef = useRef(0);
   const studentConsultationSaveRequestRef = useRef(0);
   const examPrepRowSaveRequestRef = useRef({});
+  const examPrepDeleteRequestIdsRef = useRef(new Set());
   const studentProfileSaveRequestRef = useRef({});
   const studentIntakeSaveRequestRef = useRef({});
   const isApplyingRemoteAppStateRef = useRef(false);
@@ -7979,7 +8010,7 @@ export function App() {
     });
   }
 
-  function reconcilePersistedExamPrepLessons(nextExamPrepRows) {
+  function createPersistedExamPrepLessonReconcilePlan(nextExamPrepRows) {
     const examPrepCandidates = buildExamPrepLessonCandidates(nextExamPrepRows);
     const candidateByIdentityKey = new Map();
     examPrepCandidates.forEach((item) => {
@@ -7999,48 +8030,104 @@ export function App() {
         lessonIdsToDelete.push(lesson.lessonId);
         return;
       }
-      const mergedLesson = { ...lesson, ...nextLesson, lessonId: lesson.lessonId };
+      const mergedLesson = {
+        ...lesson,
+        ...nextLesson,
+        lessonId: lesson.lessonId,
+        studentIds: lesson.studentIds ?? []
+      };
       if (JSON.stringify(mergedLesson) !== JSON.stringify(lesson)) {
         lessonsToSave.push(mergedLesson);
       }
     });
 
-    if (lessonsToSave.length === 0 && lessonIdsToDelete.length === 0) return;
-
-    setLessons((current) => {
-      const deletedIds = new Set(lessonIdsToDelete);
-      const next = current.filter((lesson) => !deletedIds.has(lesson.lessonId));
-      lessonsToSave.forEach((lesson) => {
-        const index = next.findIndex((item) => item.lessonId === lesson.lessonId);
-        if (index >= 0) next[index] = { ...next[index], ...lesson };
-        else next.push(lesson);
-      });
-      return next;
-    });
-
-    if (lessonsToSave.length > 0) {
-      postJson("/api/lessons/bulk", { lessons: lessonsToSave }).catch((error) => console.error(error));
-    }
-    lessonIdsToDelete.forEach((lessonId) => {
-      fetch(apiUrl(`/api/lessons?id=${encodeURIComponent(lessonId)}`), { method: "DELETE" })
-        .catch((error) => console.error(error));
-    });
+    return { lessonIdsToDelete, lessonsToSave };
   }
 
-  function handleDeleteExamPrepRow(examPrepId) {
+  async function readExamPrepDeleteState(auditId) {
+    const [rowResult, lessonResult] = await Promise.all([
+      getJsonWithTimeout(
+        `/api/exam-prep-rows?verify=${encodeURIComponent(auditId)}-${Date.now()}`,
+        15000,
+        "시험정보 삭제 결과 확인이 15초를 넘었습니다."
+      ),
+      getJsonWithTimeout(
+        `/api/lessons?verify=${encodeURIComponent(auditId)}-${Date.now()}`,
+        15000,
+        "시험대비 수업 삭제 결과 확인이 15초를 넘었습니다."
+      )
+    ]);
+    if (!Array.isArray(rowResult.examPrepRows) || !Array.isArray(lessonResult.lessons)) {
+      throw new Error("시험정보 삭제 후 Supabase 재조회 형식이 올바르지 않습니다.");
+    }
+    return {
+      examPrepRows: normalizeExamPrepRows(rowResult.examPrepRows),
+      lessons: filterActiveLessons(
+        normalizeLessonCalendarRules(lessonResult.lessons, makeupTasks, classTemplates)
+      )
+    };
+  }
+
+  async function applyExamPrepLessonDeletePlan({ auditId, plan }) {
+    if (plan.lessonsToSave.length > 0) {
+      await postJson("/api/lessons/bulk", { lessons: plan.lessonsToSave });
+    }
+    for (const lessonId of plan.lessonIdsToDelete) {
+      await deleteExamPrepLessonRequest(lessonId, auditId);
+    }
+  }
+
+  async function handleDeleteExamPrepRow(examPrepId) {
     const row = examPrepRows.find((item) => item.examPrepId === examPrepId);
     if (!row) return;
+    if (examPrepDeleteRequestIdsRef.current.has(examPrepId)) return;
     const label = [row.schoolName, row.grade, row.subject, examCycleLabel(row.examCycle)].filter(Boolean).join(" · ");
     if (typeof window !== "undefined" && !window.confirm(`${label || "이 시험정보"} 행을 삭제할까요?`)) return;
     const nextExamPrepRows = examPrepRows.filter((item) => item.examPrepId !== examPrepId);
-    setExamPrepRows(nextExamPrepRows);
-    reconcilePersistedExamPrepLessons(nextExamPrepRows);
-    deleteExamPrepRowRequest(examPrepId).catch((error) => {
+    const plan = createPersistedExamPrepLessonReconcilePlan(nextExamPrepRows);
+    const auditId = createExamPrepDeleteAuditId(examPrepId);
+    examPrepDeleteRequestIdsRef.current.add(examPrepId);
+    setExamPrepRowSaveStates((current) => ({ ...current, [examPrepId]: "saving" }));
+
+    try {
+      const result = await executeExamPrepDeleteOrchestration({
+        auditId,
+        examPrepId,
+        originalRows: examPrepRows,
+        originalLessons: lessons,
+        plan,
+        deleteRow: ({ auditId: requestAuditId, examPrepId: targetId }) =>
+          deleteExamPrepRowRequest(targetId, requestAuditId),
+        applyLessonPlan: applyExamPrepLessonDeletePlan,
+        readState: () => readExamPrepDeleteState(auditId),
+        restoreRows: (rows) => postExamPrepRows(rows),
+        restoreLessons: (lessonsToRestore) =>
+          postJson("/api/lessons/bulk", { lessons: lessonsToRestore })
+      });
+      setExamPrepRows(result.state.examPrepRows);
+      setLessons(result.state.lessons);
+      setExamPrepRowSaveStates((current) => ({ ...current, [examPrepId]: "saved" }));
+      console.info("[exam-prep-delete-audit]", result.audit);
+    } catch (error) {
       console.error(error);
-      setExamPrepRows((current) => upsertById(current, row, "examPrepId"));
-      reconcilePersistedExamPrepLessons(examPrepRows);
-      if (typeof window !== "undefined") window.alert(`시험정보 삭제 실패: ${error.message}`);
-    });
+      console.error("[exam-prep-delete-audit]", error.audit);
+      try {
+        const restoredState = await readExamPrepDeleteState(auditId);
+        setExamPrepRows(restoredState.examPrepRows);
+        setLessons(restoredState.lessons);
+      } catch (readError) {
+        console.error(readError);
+      }
+      setExamPrepRowSaveStates((current) => ({ ...current, [examPrepId]: "failed" }));
+      const rollbackMessage = error.audit?.rollback?.verified
+        ? "원래 시험정보와 연결 수업은 재조회로 복구 확인했습니다."
+        : "복구 확인이 끝나지 않았습니다. 같은 삭제를 다시 누르지 말고 관리자에게 audit ID를 전달해 주세요.";
+      if (typeof window !== "undefined") {
+        window.alert(`시험정보 삭제 실패: ${error.message}\n${rollbackMessage}\naudit ID: ${auditId}`);
+      }
+    } finally {
+      examPrepDeleteRequestIdsRef.current.delete(examPrepId);
+    }
   }
 
   function handleSyncPreExamLessonFromSchoolEvent(event) {

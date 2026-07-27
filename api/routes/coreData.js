@@ -5,11 +5,12 @@ import {
   isSpecialLectureStudentScheduleSynced,
   mergeSpecialLectureStudentSchedule
 } from "../../src/domains/specialLectures/specialLecturePlanSync.js";
-import { deleteRows, getSupabaseStatus, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
 import {
   getLessonClosureBlockingNotificationJobs,
   isLessonClosureConversion
 } from "../../src/domains/lessons/lessonClosure.js";
+import { deleteExamPrepRowWithAudit } from "../domain/examPrepDeletion.js";
+import { deleteRows, getSupabaseStatus, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
 
 const fallbackSource = "local_sample";
 const databaseSource = "supabase";
@@ -2208,6 +2209,134 @@ export async function deleteLesson(lessonId) {
   return { source: databaseSource, lessonId };
 }
 
+export async function deleteExamPrepLessonForReconcile(lessonId, { auditId = "" } = {}) {
+  if (!lessonId) throw new Error("삭제할 시험대비 수업 ID가 필요합니다.");
+  const audit = {
+    auditId,
+    operation: "delete_exam_prep_lesson",
+    targetLessonId: lessonId,
+    stage: "before-read",
+    beforeLessonIds: [],
+    afterLessonIds: [],
+    deletedLessonIds: [],
+    protectionCounts: {
+      studentIds: 0,
+      records: 0,
+      homeworks: 0,
+      notificationJobs: 0
+    },
+    failureStage: "",
+    rollback: {
+      attempted: false,
+      restoredLessonIds: [],
+      verified: false
+    }
+  };
+  const throwAuditedError = (message, cause) => {
+    const error = new Error(message, cause ? { cause } : undefined);
+    error.audit = audit;
+    throw error;
+  };
+
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    audit.stage = "fallback";
+    audit.deletedLessonIds = [lessonId];
+    audit.rollback.verified = true;
+    return { source: fallbackSource, lessonId, audit };
+  }
+
+  let beforeRows = [];
+  try {
+    beforeRows = await listRows("lessons", "select=*", { requireServiceRole: true });
+    audit.beforeLessonIds = beforeRows.map((row) => row.lesson_id).filter(Boolean);
+    const targetRow = beforeRows.find((row) => row.lesson_id === lessonId);
+    if (!targetRow) throwAuditedError("삭제할 시험대비 수업을 Supabase에서 찾지 못했습니다.");
+    const isGeneratedExamPrepLesson = (
+      targetRow.lesson_type === "examPrep" &&
+      (
+        String(targetRow.source_school_event_id || "").startsWith("generated:exam_prep:") ||
+        String(targetRow.lesson_id || "").startsWith("lesson_exam_prep_")
+      )
+    );
+    if (!isGeneratedExamPrepLesson) {
+      throwAuditedError("자동 생성 시험대비 수업만 시험정보 삭제와 함께 정리할 수 있습니다.");
+    }
+
+    audit.stage = "protection-read";
+    const encodedLessonId = encodeURIComponent(lessonId);
+    const [recordRows, homeworkRows, notificationRows] = await Promise.all([
+      listRows(
+        "lesson_student_records",
+        `select=lesson_student_record_id&lesson_id=eq.${encodedLessonId}`,
+        { requireServiceRole: true }
+      ),
+      listRows(
+        "homeworks",
+        `select=homework_id&lesson_id=eq.${encodedLessonId}`,
+        { requireServiceRole: true }
+      ),
+      listRows(
+        "notification_jobs",
+        `select=notification_job_id&lesson_id=eq.${encodedLessonId}`,
+        { requireServiceRole: true }
+      )
+    ]);
+    audit.protectionCounts = {
+      studentIds: Array.isArray(targetRow.student_ids) ? targetRow.student_ids.length : 0,
+      records: recordRows.length,
+      homeworks: homeworkRows.length,
+      notificationJobs: notificationRows.length
+    };
+    if (Object.values(audit.protectionCounts).some((count) => count > 0)) {
+      throwAuditedError("시험대비 수업에 학생·수업기록·숙제·알림 예약 중 하나가 연결되어 자동 삭제를 중단했습니다.");
+    }
+
+    audit.stage = "delete-target";
+    await deleteRows("lessons", `lesson_id=eq.${encodedLessonId}`);
+    audit.stage = "after-read";
+    const afterRows = await listRows("lessons", "select=*", { requireServiceRole: true });
+    audit.afterLessonIds = afterRows.map((row) => row.lesson_id).filter(Boolean);
+    const afterIds = new Set(audit.afterLessonIds);
+    audit.deletedLessonIds = audit.beforeLessonIds.filter((id) => !afterIds.has(id));
+    if (
+      afterIds.has(lessonId) ||
+      audit.deletedLessonIds.length !== 1 ||
+      audit.deletedLessonIds[0] !== lessonId
+    ) {
+      throwAuditedError("시험대비 수업 단일 삭제 범위가 일치하지 않습니다.");
+    }
+
+    audit.stage = "completed";
+    audit.rollback.verified = true;
+    return { source: databaseSource, lessonId, audit };
+  } catch (error) {
+    if (!audit.failureStage) audit.failureStage = audit.stage;
+    if (beforeRows.length > 0 && audit.stage !== "completed") {
+      try {
+        audit.stage = "rollback-read";
+        const currentRows = await listRows("lessons", "select=*", { requireServiceRole: true });
+        const currentIds = new Set(currentRows.map((row) => row.lesson_id).filter(Boolean));
+        const missingRows = beforeRows.filter((row) => !currentIds.has(row.lesson_id));
+        audit.rollback.attempted = missingRows.length > 0;
+        if (missingRows.length > 0) {
+          audit.stage = "rollback-restore";
+          await upsertRows("lessons", missingRows, { onConflict: "lesson_id" });
+          audit.rollback.restoredLessonIds = missingRows.map((row) => row.lesson_id);
+        }
+        audit.stage = "rollback-verify";
+        const verifiedRows = await listRows("lessons", "select=lesson_id", { requireServiceRole: true });
+        const verifiedIds = new Set(verifiedRows.map((row) => row.lesson_id).filter(Boolean));
+        audit.rollback.verified = beforeRows.every((row) => verifiedIds.has(row.lesson_id));
+      } catch (rollbackError) {
+        audit.rollback.error = rollbackError.message;
+        audit.rollback.verified = false;
+      }
+    }
+    if (error?.audit === audit) throw error;
+    throwAuditedError(error.message || "시험대비 수업 삭제에 실패했습니다.", error);
+  }
+}
+
 export async function deleteLessonsBefore(cutoffDate) {
   if (!cutoffDate) throw new Error("삭제 기준일이 필요합니다.");
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
@@ -2414,14 +2543,40 @@ export async function listExamPrepRows() {
   return { source: databaseSource, examPrepRows: rows.map(fromExamPrepRow) };
 }
 
-export async function deleteExamPrepRow(examPrepId) {
+export async function deleteExamPrepRow(examPrepId, { auditId = "" } = {}) {
   if (!examPrepId) throw new Error("삭제할 시험정보 ID가 필요합니다.");
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
-    return { source: fallbackSource, deletedExamPrepRowIds: [examPrepId] };
+    return {
+      source: fallbackSource,
+      deletedExamPrepRowIds: [examPrepId],
+      audit: {
+        auditId,
+        operation: "delete_exam_prep_row",
+        targetExamPrepId: examPrepId,
+        stage: "fallback",
+        beforeRowIds: [],
+        afterRowIds: [],
+        deletedRowIds: [examPrepId],
+        rollback: { attempted: false, verified: true }
+      }
+    };
   }
 
-  await deleteRows("exam_prep_rows", `exam_prep_id=eq.${encodeURIComponent(examPrepId)}`);
-  return { source: databaseSource, deletedExamPrepRowIds: [examPrepId] };
+  const result = await deleteExamPrepRowWithAudit({
+    auditId,
+    examPrepId,
+    listRows: () => listRows("exam_prep_rows", "select=*", { requireServiceRole: true }),
+    deleteTargetRow: (targetId) => deleteRows(
+      "exam_prep_rows",
+      `exam_prep_id=eq.${encodeURIComponent(targetId)}`
+    ),
+    restoreRows: (rows) => upsertRows(
+      "exam_prep_rows",
+      rows,
+      { onConflict: "exam_prep_id" }
+    )
+  });
+  return { source: databaseSource, ...result };
 }
 
 export async function deleteDuplicateExamPrepRows() {
