@@ -176,8 +176,7 @@ import {
   replaceSpecialLectureYearInDateKey,
   replaceSpecialLectureYearToken,
 } from "../domains/specialLectures/specialLectureGuideUtils.js";
-import { MonthlySettlementPanel } from "../domains/settlements/MonthlySettlementPanel.jsx";
-import { SpecialLectureSettlementPanel } from "../domains/settlements/SpecialLectureSettlementPanel.jsx";
+import { SettlementWorkspace } from "../domains/settlements/SettlementWorkspace.jsx";
 import {
   createDefaultMonthlySettlementState,
   createMonthlySettlementStateWithMonth,
@@ -9572,26 +9571,20 @@ export function App() {
           <AIVariantProblemCenter aiSettings={aiSettings} students={students} />
         ) : null}
 
-        {activeView === "monthlySettlements" ? (
-          <MonthlySettlementPanel
+        {activeView === "settlements" ? (
+          <SettlementWorkspace
             classTemplates={classTemplates}
             lessons={lessons}
+            monthlySaveState={monthlySettlementSaveState}
+            monthlySettlementState={monthlyInstructorSettlements}
+            onSaveMonthlySettlement={handleSaveMonthlySettlementMonth}
+            onSaveSpecialLectureSettlement={handleSaveSpecialLectureSettlementState}
             records={records}
-            saveState={monthlySettlementSaveState}
-            settlementState={monthlyInstructorSettlements}
-            students={students}
-            onSaveMonth={handleSaveMonthlySettlementMonth}
-          />
-        ) : null}
-
-        {activeView === "specialLectureSettlements" ? (
-          <SpecialLectureSettlementPanel
-            saveState={specialLectureSettlementSaveState}
-            settlementState={specialLectureInstructorSettlements}
             specialLectureEnrollments={specialLectureEnrollments}
             specialLectureGuides={specialLectureGuides}
+            specialLectureSaveState={specialLectureSettlementSaveState}
+            specialLectureSettlementState={specialLectureInstructorSettlements}
             students={students}
-            onSaveState={handleSaveSpecialLectureSettlementState}
           />
         ) : null}
 
@@ -14907,8 +14900,7 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle, su
     {
       title: "운영",
       items: [
-        { id: "monthlySettlements", label: "월별 수업 정산", icon: "₩" },
-        { id: "specialLectureSettlements", label: "특강 정산", icon: "₩" },
+        { id: "settlements", label: "정산", icon: "₩" },
         { id: "notifications", label: "알림관리", icon: "📣" },
         { id: "settings", label: "설정", icon: "⚙️" }
       ]
