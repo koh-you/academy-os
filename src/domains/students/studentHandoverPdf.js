@@ -45,16 +45,14 @@ function tallyLines(student, intakeApplicants = [], specialLectureApplications =
         ["현재 학습", item.currentLearningProcess],
         ["전학기 성적", item.previousSemesterScore],
         ["희망 반", item.desiredClass],
-        ["특이사항", item.specialNote],
-        ["메모", item.memo]
+        ["특이사항", item.specialNote]
       ]
     })),
     ...special.map((item) => ({
       label: `특강 Tally · ${item.formName || item.campaign || item.source || "접수"}`,
       values: [
         ["신청 회차", item.selectedSession],
-        ["요청 시간", (item.requestedSessionPlans ?? []).map((plan) => `${plan.sessionIndex + 1}회차 ${plan.requestedStartTime}-${plan.requestedEndTime}`).join(", ")],
-        ["메모", item.memo]
+        ["요청 시간", (item.requestedSessionPlans ?? []).map((plan) => `${plan.sessionIndex + 1}회차 ${plan.requestedStartTime}-${plan.requestedEndTime}`).join(", ")]
       ]
     }))
   ].filter((item) => item.values.some(([, value]) => text(value)));

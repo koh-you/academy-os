@@ -1,5 +1,11 @@
 # Academy OS Current Worklog
 
+## 2026-07-27 P1. 인수인계서 Tally 내부 메모 제외
+
+- UI: 일반·특강 Tally 접수의 내부 `메모` 필드는 인수인계서 PDF에 출력하지 않는다. 현재 학습·성적·희망 반·특이사항, 특강 신청 회차·요청 시간처럼 인계에 필요한 구조화 정보만 표시한다.
+- 저장·부작용: Tally 원천 메모를 수정하거나 삭제하지 않으며, PDF 출력 파생 정보만 줄인다. 학생·수업·수업기록·알림 원천과 Solapi는 변경하지 않는다.
+- AI 검증: PDF model fixture가 Tally 메모 제외를 검사하고 `npm run test:student-handover-pdf`, `npm run build`, `git diff --check`를 실행한다.
+
 ## 2026-07-27 P0. 퇴원생 중복 ID 연결 2건 확인·인수인계서 숙제 상태 보정
 
 - 운영 원천 읽기 전용 확인: 두 번째 조소현 중복 ID(`student_1783574098073`)의 연결 2건은 `attendance_events` 출결 변경 이력 1건과 `app_state.deletedLessonBundles` 삭제 수업 묶음 이력 1건이다. 수업기록·숙제·알림은 이 ID에 연결되지 않았다. 기존 조소현 ID의 64건은 수업기록 8·출결 이력 7·숙제 14·보충/재시험 3·알림 작업 23·수업 명단 9건이다. 실제 삭제는 실행하지 않았다.
