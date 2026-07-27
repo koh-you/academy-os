@@ -14,6 +14,7 @@ import {
   deleteResourceMaterial,
   deleteSchoolEvent,
   deleteSpecialLectureApplication,
+  deleteWithdrawnStudent,
   getCoreDataStatus,
   getLessonStudentRecordForAttendance,
   getNotificationJob,
@@ -63,6 +64,7 @@ import {
   upsertStudents,
   upsertLessonStudentRecord,
   upsertTestSessionWithAttempts,
+  auditWithdrawnStudentDeletion,
   deleteTestSession
 } from "./routes/coreData.js";
 import crypto from "node:crypto";
@@ -6151,6 +6153,40 @@ const server = http.createServer(async (request, response) => {
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/students/delete-audit") {
+    try {
+      const result = await auditWithdrawnStudentDeletion(requestUrl.searchParams.get("studentId") || "");
+      sendJson(request, response, 200, { ok: true, audit: result });
+    } catch (error) {
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.audit ? { audit: error.audit } : {})
+      });
+    }
+    return;
+  }
+
+  if (request.method === "DELETE" && requestUrl.pathname === "/api/students") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await deleteWithdrawnStudent(
+        payload.studentId,
+        payload.confirmationName,
+        payload.forceDeleteWithReferences === true,
+        payload.expectedReferenceFingerprint
+      );
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.audit ? { audit: error.audit } : {})
+      });
     }
     return;
   }

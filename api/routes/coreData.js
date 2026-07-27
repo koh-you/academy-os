@@ -1362,6 +1362,274 @@ export async function listStudents() {
   return { source: databaseSource, students: rows.map(fromStudentRow) };
 }
 
+const withdrawnStudentDeletionDirectSources = [
+  { table: "lesson_student_records", idColumn: "lesson_student_record_id", label: "수업일지 학생 기록" },
+  { table: "attendance_events", idColumn: "attendance_event_id", label: "출결 변경 이력" },
+  { table: "homeworks", idColumn: "homework_id", label: "숙제" },
+  { table: "makeup_tasks", idColumn: "makeup_task_id", label: "보충·재시험" },
+  { table: "wrong_problem_statuses", idColumn: "wrong_problem_status_id", label: "오답 기록" },
+  { table: "score_records", idColumn: "score_record_id", label: "성적 기록" },
+  { table: "test_attempts", idColumn: "test_attempt_id", label: "테스트 응시 기록" },
+  { table: "academy_reminders", idColumn: "reminder_id", label: "운영 알림" },
+  { table: "notification_logs", idColumn: "notification_log_id", label: "발송 이력" },
+  { table: "notification_jobs", idColumn: "notification_job_id", label: "알림 예약·작업" },
+  { table: "exam_post_submissions", idColumn: "submission_id", label: "시험 후 제출", optional: true },
+  { table: "exam_submission_files", idColumn: "file_id", label: "시험 제출 파일", optional: true },
+  { table: "special_lecture_enrollments", idColumn: "enrollment_id", label: "특강 수강 등록", optional: true }
+];
+
+function valueContainsStudentId(value, studentId) {
+  if (value === studentId) return true;
+  if (Array.isArray(value)) return value.some((item) => valueContainsStudentId(item, studentId));
+  if (value && typeof value === "object") {
+    return Object.values(value).some((item) => valueContainsStudentId(item, studentId));
+  }
+  return false;
+}
+
+const removedStudentReference = Symbol("removedStudentReference");
+
+export function removeStudentIdFromValue(value, studentId) {
+  if (value === studentId) return removedStudentReference;
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => removeStudentIdFromValue(item, studentId))
+      .filter((item) => item !== removedStudentReference);
+  }
+  if (value && typeof value === "object") {
+    if (value.studentId === studentId || value.student_id === studentId) {
+      return removedStudentReference;
+    }
+    return Object.fromEntries(
+      Object.entries(value)
+        .filter(([key]) => key !== studentId)
+        .map(([key, item]) => [key, removeStudentIdFromValue(item, studentId)])
+        .filter(([, item]) => item !== removedStudentReference)
+    );
+  }
+  return value;
+}
+
+function createWithdrawnStudentDeletionError(message, statusCode = 400, audit = null) {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  error.audit = audit;
+  return error;
+}
+
+function createStudentReferenceFingerprint(references = []) {
+  return references
+    .filter((reference) => reference.count > 0)
+    .map((reference) => (
+      `${reference.table}:${reference.count}:${(reference.matchedKeys ?? []).slice().sort().join(",")}`
+    ))
+    .sort()
+    .join("|");
+}
+
+function isMissingSupabaseTableError(error, table) {
+  const message = String(error?.message ?? "");
+  return (
+    message.includes(`table 'public.${table}'`) ||
+    message.includes(`relation "public.${table}" does not exist`) ||
+    message.includes(`relation "${table}" does not exist`)
+  );
+}
+
+async function collectWithdrawnStudentReferences(studentId) {
+  const encodedStudentId = encodeURIComponent(studentId);
+  const [directSourceRows, lessonRows, resourceRows, appStateRows] = await Promise.all([
+    Promise.all(withdrawnStudentDeletionDirectSources.map(async (source) => {
+      try {
+        const rows = await listRows(
+          source.table,
+          `select=${source.idColumn}&student_id=eq.${encodedStudentId}&limit=1000`,
+          { requireServiceRole: true }
+        );
+        return { ...source, count: rows.length };
+      } catch (error) {
+        if (source.optional && isMissingSupabaseTableError(error, source.table)) {
+          return { ...source, count: 0, unavailable: true };
+        }
+        throw error;
+      }
+    })),
+    listRows(
+      "lessons",
+      "select=lesson_id,student_ids,special_lecture_student_schedules&limit=10000",
+      { requireServiceRole: true }
+    ),
+    listRows(
+      "resource_materials",
+      "select=resource_material_id,student_ids&limit=10000",
+      { requireServiceRole: true }
+    ),
+    listRows(
+      "app_state",
+      "select=state_key,state_value&limit=1000",
+      { requireServiceRole: true }
+    )
+  ]);
+
+  const matchedLessonRows = lessonRows.filter((row) => (
+    (Array.isArray(row.student_ids) && row.student_ids.includes(studentId)) ||
+    valueContainsStudentId(row.special_lecture_student_schedules, studentId)
+  ));
+  const matchedResourceRows = resourceRows
+    .filter((row) => Array.isArray(row.student_ids) && row.student_ids.includes(studentId));
+  const matchedAppStateRows = appStateRows
+    .filter((row) => valueContainsStudentId(row.state_value, studentId));
+  const references = [
+    ...directSourceRows,
+    { table: "lessons", label: "수업 명단·특강 회차", count: matchedLessonRows.length },
+    { table: "resource_materials", label: "학생 지정 자료", count: matchedResourceRows.length },
+    {
+      table: "app_state",
+      label: "상담·질문·정산 등 운영 저장 데이터",
+      count: matchedAppStateRows.length,
+      matchedKeys: matchedAppStateRows.map((row) => row.state_key)
+    }
+  ];
+
+  return {
+    directSourceRows,
+    references,
+    blockingReferences: references.filter((reference) => reference.count > 0),
+    matchedLessonRows,
+    matchedResourceRows,
+    matchedAppStateRows
+  };
+}
+
+async function removeWithdrawnStudentReferences(studentId, referenceRows) {
+  for (const row of referenceRows.matchedLessonRows) {
+    const nextSchedules = removeStudentIdFromValue(row.special_lecture_student_schedules ?? [], studentId);
+    await patchRows("lessons", `lesson_id=eq.${encodeURIComponent(row.lesson_id)}`, {
+      student_ids: (row.student_ids ?? []).filter((id) => id !== studentId),
+      special_lecture_student_schedules: nextSchedules === removedStudentReference ? [] : nextSchedules,
+      updated_at: new Date().toISOString()
+    });
+  }
+
+  for (const row of referenceRows.matchedResourceRows) {
+    await patchRows("resource_materials", `resource_material_id=eq.${encodeURIComponent(row.resource_material_id)}`, {
+      student_ids: (row.student_ids ?? []).filter((id) => id !== studentId),
+      updated_at: new Date().toISOString()
+    });
+  }
+
+  if (referenceRows.matchedAppStateRows.length > 0) {
+    await upsertRows(
+      "app_state",
+      referenceRows.matchedAppStateRows.map((row) => {
+        const nextValue = removeStudentIdFromValue(row.state_value, studentId);
+        return {
+          state_key: row.state_key,
+          state_value: nextValue === removedStudentReference ? null : nextValue,
+          updated_at: new Date().toISOString()
+        };
+      }),
+      { onConflict: "state_key" }
+    );
+  }
+
+  const specialLectureReference = referenceRows.directSourceRows
+    .find((reference) => reference.table === "special_lecture_enrollments");
+  if (specialLectureReference?.count > 0) {
+    await deleteRows("special_lecture_enrollments", `student_id=eq.${encodeURIComponent(studentId)}`);
+  }
+}
+
+export async function auditWithdrawnStudentDeletion(studentId) {
+  if (!studentId) throw createWithdrawnStudentDeletionError("삭제 점검할 학생 ID가 필요합니다.");
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    throw createWithdrawnStudentDeletionError("Supabase 원천을 확인할 수 없어 학생 삭제를 진행할 수 없습니다.", 503);
+  }
+
+  const encodedStudentId = encodeURIComponent(studentId);
+  const studentRows = await listRows(
+    "students",
+    `select=*&student_id=eq.${encodedStudentId}&limit=1`,
+    { requireServiceRole: true }
+  );
+  const studentRow = studentRows[0];
+  if (!studentRow) throw createWithdrawnStudentDeletionError("Supabase에서 삭제 점검할 학생을 찾지 못했습니다.", 404);
+  if ((studentRow.status ?? "active") === "active" && !studentRow.withdrawn_at) {
+    throw createWithdrawnStudentDeletionError("재원 학생은 영구 삭제할 수 없습니다. 먼저 퇴원 처리해 주세요.", 409);
+  }
+
+  const referenceRows = await collectWithdrawnStudentReferences(studentId);
+
+  return {
+    source: databaseSource,
+    allowed: referenceRows.blockingReferences.length === 0,
+    student: fromStudentRow(studentRow),
+    references: referenceRows.references,
+    blockingReferences: referenceRows.blockingReferences,
+    referenceFingerprint: createStudentReferenceFingerprint(referenceRows.references),
+    checkedAt: new Date().toISOString()
+  };
+}
+
+export async function deleteWithdrawnStudent(
+  studentId,
+  confirmationName,
+  forceDeleteWithReferences = false,
+  expectedReferenceFingerprint = ""
+) {
+  const audit = await auditWithdrawnStudentDeletion(studentId);
+  if (!audit.allowed && forceDeleteWithReferences !== true) {
+    throw createWithdrawnStudentDeletionError(
+      "연결된 운영 기록이 있습니다. 영향을 확인한 뒤 '그래도 삭제' 확인을 선택해야 합니다.",
+      409,
+      audit
+    );
+  }
+  if (String(confirmationName ?? "").trim() !== String(audit.student.name ?? "").trim()) {
+    throw createWithdrawnStudentDeletionError("삭제 확인을 위해 학생 이름을 정확히 입력해 주세요.", 400, audit);
+  }
+  if (
+    !audit.allowed &&
+    String(expectedReferenceFingerprint ?? "") !== audit.referenceFingerprint
+  ) {
+    throw createWithdrawnStudentDeletionError(
+      "확인 뒤 연결 기록이 달라졌습니다. 새 영향 범위를 다시 확인한 뒤 삭제해 주세요.",
+      409,
+      audit
+    );
+  }
+
+  if (!audit.allowed) {
+    const referenceRows = await collectWithdrawnStudentReferences(studentId);
+    await removeWithdrawnStudentReferences(studentId, referenceRows);
+  }
+  await deleteRows("students", `student_id=eq.${encodeURIComponent(studentId)}`);
+  const remainingRows = await listRows(
+    "students",
+    `select=student_id&student_id=eq.${encodeURIComponent(studentId)}&limit=1`,
+    { requireServiceRole: true }
+  );
+  if (remainingRows.length > 0) {
+    throw createWithdrawnStudentDeletionError("삭제 응답 후 Supabase 재조회에서 학생이 남아 있어 완료하지 않았습니다.", 500, audit);
+  }
+  const remainingReferences = await collectWithdrawnStudentReferences(studentId);
+  if (remainingReferences.blockingReferences.length > 0) {
+    throw createWithdrawnStudentDeletionError(
+      "학생 원천은 삭제됐지만 일부 연결 데이터가 남았습니다. 같은 삭제를 반복하지 말고 관리자 확인이 필요합니다.",
+      500,
+      { ...audit, blockingReferences: remainingReferences.blockingReferences }
+    );
+  }
+
+  return {
+    source: databaseSource,
+    deletedStudentId: studentId,
+    deletedStudentName: audit.student.name,
+    forced: !audit.allowed,
+    verified: true
+  };
+}
+
 export async function listAttendanceCandidateStudents({ phoneLast4 = "", studentId = "" } = {}) {
   const digits = String(phoneLast4 ?? "").replace(/\D/g, "").slice(-4);
   if (!isSupabaseConfigured()) {

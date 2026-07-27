@@ -240,7 +240,9 @@ export function StudentManager({
   onSaveScore,
   onSaveStudentProfile,
   onSaveStudentConsultation,
+  onAuditWithdrawnStudentDeletion,
   onDeleteStudent,
+  onPermanentlyDeleteWithdrawnStudent,
   onRestoreStudent,
   onSaveStudent,
   onUpdateStudent
@@ -255,11 +257,19 @@ export function StudentManager({
   const [studentSaveStates, setStudentSaveStates] = useState({});
   const [studentRestoreStates, setStudentRestoreStates] = useState({});
   const [studentRestoreNotice, setStudentRestoreNotice] = useState(null);
+  const [permanentDeleteStudentId, setPermanentDeleteStudentId] = useState("");
+  const [permanentDeleteAuditState, setPermanentDeleteAuditState] = useState("idle");
+  const [permanentDeleteAudit, setPermanentDeleteAudit] = useState(null);
+  const [permanentDeleteError, setPermanentDeleteError] = useState("");
+  const [permanentDeleteConfirmation, setPermanentDeleteConfirmation] = useState("");
+  const [forceDeleteWithReferences, setForceDeleteWithReferences] = useState(false);
+  const [studentPermanentDeleteNotice, setStudentPermanentDeleteNotice] = useState(null);
   const selectedClassTemplate = templates.find(
     (template) => template.classTemplateId === selectedClassTemplateId
   );
   const selectedStudent = students.find((student) => student.studentId === selectedStudentId) ?? null;
   const deleteStudent = students.find((student) => student.studentId === deleteStudentId) ?? null;
+  const permanentDeleteStudent = students.find((student) => student.studentId === permanentDeleteStudentId) ?? null;
   const selectedScores = scoreRecords.filter((score) => score.studentId === selectedStudent?.studentId);
   const selectedAcademyTests = academyTests.filter((item) => item.studentId === selectedStudent?.studentId);
   const selectedConsultations = studentConsultations
@@ -393,6 +403,92 @@ export function StudentManager({
     }
   }
 
+  async function openPermanentDeleteModal(student) {
+    if (!student?.studentId) return;
+    setPermanentDeleteStudentId(student.studentId);
+    setPermanentDeleteAuditState("saving");
+    setPermanentDeleteAudit(null);
+    setPermanentDeleteError("");
+    setPermanentDeleteConfirmation("");
+    setForceDeleteWithReferences(false);
+    try {
+      const audit = await onAuditWithdrawnStudentDeletion(student.studentId);
+      setPermanentDeleteAudit(audit);
+      setPermanentDeleteAuditState("saved");
+    } catch (error) {
+      console.error(error);
+      setPermanentDeleteAudit(error.audit ?? null);
+      setPermanentDeleteAuditState("failed");
+      setPermanentDeleteError(error.message || "학생 연결 기록 점검에 실패했습니다.");
+    }
+  }
+
+  function closePermanentDeleteModal() {
+    if (permanentDeleteAuditState === "saving") return;
+    setPermanentDeleteStudentId("");
+    setPermanentDeleteAuditState("idle");
+    setPermanentDeleteAudit(null);
+    setPermanentDeleteError("");
+    setPermanentDeleteConfirmation("");
+    setForceDeleteWithReferences(false);
+  }
+
+  async function permanentlyDeleteWithdrawnStudent() {
+    if (
+      !permanentDeleteStudent?.studentId ||
+      !permanentDeleteAudit ||
+      (!permanentDeleteAudit.allowed && !forceDeleteWithReferences) ||
+      permanentDeleteConfirmation.trim() !== permanentDeleteStudent.name?.trim()
+    ) return;
+
+    const blockingCount = (permanentDeleteAudit.blockingReferences ?? [])
+      .reduce((sum, reference) => sum + Number(reference.count || 0), 0);
+    const shouldDelete = window.confirm(
+      permanentDeleteAudit.allowed
+        ? `${permanentDeleteStudent.name} 학생 원천을 영구 삭제합니다.\n삭제 후 복구할 수 없습니다.\n\n그래도 삭제하시겠습니까?`
+        : `${permanentDeleteStudent.name} 학생과 연결된 기록 ${blockingCount}건을 함께 정리하거나 삭제합니다.\n수업일지·출결·숙제·특강·알림·상담 기록 등이 영향을 받을 수 있고 복구할 수 없습니다.\n\n그래도 삭제하시겠습니까?`
+    );
+    if (!shouldDelete) return;
+
+    setPermanentDeleteAuditState("saving");
+    setPermanentDeleteError("");
+    setStudentPermanentDeleteNotice({
+      message: `${permanentDeleteStudent.name} 학생 삭제 중 · Supabase 재조회 전`,
+      saveState: "saving"
+    });
+    try {
+      await onPermanentlyDeleteWithdrawnStudent(
+        permanentDeleteStudent.studentId,
+        permanentDeleteConfirmation.trim(),
+        {
+          forceDeleteWithReferences: !permanentDeleteAudit.allowed,
+          expectedReferenceFingerprint: permanentDeleteAudit.referenceFingerprint
+        }
+      );
+      setStudentPermanentDeleteNotice({
+        message: `${permanentDeleteStudent.name} 중복 학생 원천 삭제를 Supabase 재조회로 확인했습니다.${permanentDeleteAudit.allowed ? "" : " 정리된 연결 원천을 다시 불러오기 위해 화면을 새로고침합니다."}`,
+        saveState: "saved"
+      });
+      if (selectedStudentId === permanentDeleteStudent.studentId) {
+        setSelectedStudentId("");
+      }
+      setPermanentDeleteStudentId("");
+      setPermanentDeleteAuditState("idle");
+      setPermanentDeleteAudit(null);
+      setPermanentDeleteConfirmation("");
+      setForceDeleteWithReferences(false);
+    } catch (error) {
+      console.error(error);
+      setPermanentDeleteAudit(error.audit ?? permanentDeleteAudit);
+      setPermanentDeleteAuditState("failed");
+      setPermanentDeleteError(error.message || "학생 영구 삭제에 실패했습니다.");
+      setStudentPermanentDeleteNotice({
+        message: error.message || `${permanentDeleteStudent.name} 학생 영구 삭제에 실패했습니다.`,
+        saveState: "failed"
+      });
+    }
+  }
+
   return (
     <section className="panel fullPanel">
       <div className="sectionHeader">
@@ -444,6 +540,13 @@ export function StudentManager({
         <div className={`studentRestoreNotice ${studentRestoreNotice.saveState}`} role={studentRestoreNotice.saveState === "failed" ? "alert" : "status"}>
           <InlineSaveStatus label="퇴원 취소" saveState={studentRestoreNotice.saveState} />
           <span>{studentRestoreNotice.message}</span>
+        </div>
+      ) : null}
+
+      {studentPermanentDeleteNotice ? (
+        <div className={`studentRestoreNotice ${studentPermanentDeleteNotice.saveState}`} role={studentPermanentDeleteNotice.saveState === "failed" ? "alert" : "status"}>
+          <InlineSaveStatus label="중복 학생 삭제" saveState={studentPermanentDeleteNotice.saveState} />
+          <span>{studentPermanentDeleteNotice.message}</span>
         </div>
       ) : null}
 
@@ -503,6 +606,7 @@ export function StudentManager({
             const isSaveDisabled = !isDirty || isSaving;
             const restoreState = studentRestoreStates[student.studentId] ?? "idle";
             const isRestoring = restoreState === "saving";
+            const isDeleteAuditLoading = permanentDeleteStudentId === student.studentId && permanentDeleteAuditState === "saving";
             return (
               <div className={["studentListRow", "withdrawnStudentRow", isDirty ? "dirtyStudentRow" : ""].filter(Boolean).join(" ")} key={student.studentId}>
                 <span>{index + 1}</span>
@@ -549,11 +653,19 @@ export function StudentManager({
                   </button>
                   <button
                     className={`studentRestoreButton ${restoreState}`}
-                    disabled={isRestoring}
+                    disabled={isRestoring || isDeleteAuditLoading}
                     onClick={() => restoreStudent(student)}
                     type="button"
                   >
                     {isRestoring ? "복원 중" : restoreState === "failed" ? "복원 재시도" : "퇴원 취소"}
+                  </button>
+                  <button
+                    className="studentPermanentDeleteButton"
+                    disabled={isRestoring || isDeleteAuditLoading}
+                    onClick={() => openPermanentDeleteModal(student)}
+                    type="button"
+                  >
+                    {isDeleteAuditLoading ? "이력 점검 중" : "중복 데이터 삭제"}
                   </button>
                 </div>
               </div>
@@ -760,6 +872,112 @@ export function StudentManager({
           <div className="deleteConfirmActions">
             <button className="softButton" onClick={() => setDeleteStudentId("")} type="button">취소</button>
             <button className="dangerButton" onClick={confirmDeleteStudent} type="button">퇴원 처리</button>
+          </div>
+        </ModalComponent>
+      ) : null}
+
+      {permanentDeleteStudent ? (
+        <ModalComponent
+          className="studentPermanentDeleteModal"
+          onClose={closePermanentDeleteModal}
+          subtitle="연결 기록을 먼저 확인합니다. 기록이 있어도 영향 범위를 확인한 뒤 강제 삭제할 수 있으며, 삭제 후에는 복구할 수 없습니다."
+          title="퇴원 중복 데이터 영구 삭제"
+        >
+          <div className="permanentDeleteStudentSummary">
+            <span className="studentInitial">{permanentDeleteStudent.name?.[0] ?? "학"}</span>
+            <div>
+              <strong>{permanentDeleteStudent.name}</strong>
+              <p className="muted">
+                {[permanentDeleteStudent.grade, permanentDeleteStudent.schoolName, permanentDeleteStudent.studentId]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            </div>
+          </div>
+
+          {permanentDeleteAuditState === "saving" ? (
+            <div className="permanentDeleteAuditStatus" role="status">
+              <InlineSaveStatus label="연결 기록 점검 / 삭제" saveState="saving" />
+              <p>Supabase의 수업·출결·숙제·특강·알림·운영 저장 데이터를 확인하고 있습니다.</p>
+            </div>
+          ) : null}
+
+          {permanentDeleteAuditState !== "saving" && permanentDeleteAudit?.allowed ? (
+            <div className="permanentDeleteSafeBox">
+              <strong>삭제 가능 · 연결된 운영 기록 0건</strong>
+              <p>학생 원천 행만 삭제하며, 삭제 뒤 Supabase 학생 목록을 다시 조회해 사라진 것을 확인합니다.</p>
+            </div>
+          ) : null}
+
+          {permanentDeleteAuditState !== "saving" && permanentDeleteAudit && !permanentDeleteAudit.allowed ? (
+            <div className="permanentDeleteBlockedBox" role="alert">
+              <strong>주의 · 연결 기록이 있습니다</strong>
+              <ul>
+                {permanentDeleteAudit.blockingReferences.map((reference) => (
+                  <li key={reference.table}>
+                    {reference.label} {reference.count}건
+                    {reference.matchedKeys?.length ? ` (${reference.matchedKeys.join(", ")})` : ""}
+                  </li>
+                ))}
+              </ul>
+              <p>강제 삭제하면 수업 명단·자료·운영 저장 참조를 정리하고, DB 정책에 따라 수업일지·숙제·성적·시험 제출 등 연결 기록이 함께 삭제되거나 학생 연결이 해제됩니다.</p>
+            </div>
+          ) : null}
+
+          {permanentDeleteError ? (
+            <div className="permanentDeleteError" role="alert">{permanentDeleteError}</div>
+          ) : null}
+
+          {permanentDeleteAuditState !== "saving" && permanentDeleteAudit && !permanentDeleteAudit.allowed ? (
+            <label className="permanentDeleteForceField">
+              <input
+                checked={forceDeleteWithReferences}
+                onChange={(event) => setForceDeleteWithReferences(event.target.checked)}
+                type="checkbox"
+              />
+              <span>표시된 연결 기록이 함께 정리·삭제되거나 학생 연결이 해제될 수 있음을 확인했습니다.</span>
+            </label>
+          ) : null}
+
+          {permanentDeleteAuditState !== "saving" && permanentDeleteAudit ? (
+            <label className="permanentDeleteConfirmationField">
+              영구 삭제하려면 학생 이름 <strong>{permanentDeleteStudent.name}</strong>을 정확히 입력
+              <input
+                autoComplete="off"
+                value={permanentDeleteConfirmation}
+                onChange={(event) => setPermanentDeleteConfirmation(event.target.value)}
+                placeholder={permanentDeleteStudent.name}
+              />
+            </label>
+          ) : null}
+
+          <div className="deleteConfirmActions">
+            <button
+              className="softButton"
+              disabled={permanentDeleteAuditState === "saving"}
+              onClick={closePermanentDeleteModal}
+              type="button"
+            >
+              닫기
+            </button>
+            {permanentDeleteAudit ? (
+              <button
+                className="dangerButton"
+                disabled={
+                  permanentDeleteAuditState === "saving" ||
+                  (!permanentDeleteAudit.allowed && !forceDeleteWithReferences) ||
+                  permanentDeleteConfirmation.trim() !== permanentDeleteStudent.name?.trim()
+                }
+                onClick={permanentlyDeleteWithdrawnStudent}
+                type="button"
+              >
+                {permanentDeleteAuditState === "saving"
+                  ? "삭제 및 확인 중"
+                  : permanentDeleteAudit.allowed
+                    ? "학생 원천 영구 삭제"
+                    : "연결 기록 포함 강제 삭제"}
+              </button>
+            ) : null}
           </div>
         </ModalComponent>
       ) : null}

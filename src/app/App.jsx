@@ -192,6 +192,7 @@ import { StickySaveBar } from "../shared/components/StickySaveBar.jsx";
 import { sampleData } from "../shared/data/sampleData.js";
 import {
   apiUrl,
+  deleteJsonWithTimeout,
   getJsonWithTimeout,
   isRequestTimeoutError,
   postJson,
@@ -7957,6 +7958,53 @@ export function App() {
     return persistedStudent;
   }
 
+  async function handleAuditWithdrawnStudentDeletion(studentId) {
+    const result = await getJsonWithTimeout(
+      `/api/students/delete-audit?studentId=${encodeURIComponent(studentId)}`,
+      20000,
+      "학생 연결 기록 점검이 20초를 넘었습니다. 삭제하지 말고 잠시 뒤 다시 확인해 주세요."
+    );
+    if (result.audit?.source !== "supabase") {
+      throw new Error("학생 연결 기록을 Supabase에서 확인하지 못해 삭제할 수 없습니다.");
+    }
+    return result.audit;
+  }
+
+  async function handlePermanentlyDeleteWithdrawnStudent(studentId, confirmationName, options = {}) {
+    const deleteResult = await deleteJsonWithTimeout(
+      "/api/students",
+      {
+        studentId,
+        confirmationName,
+        forceDeleteWithReferences: options.forceDeleteWithReferences === true,
+        expectedReferenceFingerprint: options.expectedReferenceFingerprint ?? ""
+      },
+      20000,
+      "학생 삭제가 20초를 넘었습니다. 중복 실행하지 말고 새로고침해 상태를 확인해 주세요."
+    );
+    if (deleteResult.source !== "supabase" || deleteResult.verified !== true) {
+      throw new Error("학생 삭제를 Supabase 재조회로 확인하지 못했습니다.");
+    }
+
+    const studentsAfterResult = await getJsonWithTimeout(
+      "/api/students",
+      15000,
+      "학생 삭제 후 목록 확인이 15초를 넘었습니다. 다시 삭제하지 말고 잠시 뒤 새로고침해 주세요."
+    );
+    if (studentsAfterResult.source !== "supabase") {
+      throw new Error("학생 삭제 후 목록을 Supabase에서 다시 확인하지 못했습니다.");
+    }
+    if ((studentsAfterResult.students ?? []).some((student) => student.studentId === studentId)) {
+      throw new Error("삭제 응답은 받았지만 Supabase 학생 목록에 대상이 남아 있습니다.");
+    }
+
+    setStudents(studentsAfterResult.students ?? []);
+    if (options.forceDeleteWithReferences === true) {
+      window.setTimeout(() => window.location.reload(), 1200);
+    }
+    return deleteResult;
+  }
+
   function scheduleRecordAutoSave(record, lessonForRecord = null) {
     if (!record?.lessonStudentRecordId) return;
     const recordId = record.lessonStudentRecordId;
@@ -9315,6 +9363,8 @@ export function App() {
             onSaveStudentProfile={handleSaveStudentProfile}
             onSaveStudentConsultation={handleSaveStudentConsultation}
             onDeleteStudent={handleDeleteStudent}
+            onAuditWithdrawnStudentDeletion={handleAuditWithdrawnStudentDeletion}
+            onPermanentlyDeleteWithdrawnStudent={handlePermanentlyDeleteWithdrawnStudent}
             onRestoreStudent={handleRestoreStudent}
             onSaveStudent={handleSaveStudent}
             onUpdateStudent={handleUpdateStudent}

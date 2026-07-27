@@ -101,6 +101,34 @@ export async function postJsonWithTimeout(path, body, timeoutMs = 30000, timeout
   }
 }
 
+export async function deleteJsonWithTimeout(path, body, timeoutMs = 30000, timeoutMessage = "") {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(apiUrl(path), {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: controller.signal
+    });
+    const result = await response.json();
+    if (!response.ok || !result.ok) {
+      const error = new Error(result.error || "API 삭제 실패");
+      error.audit = result.audit;
+      error.statusCode = response.status;
+      throw error;
+    }
+    return result;
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw createRequestTimeoutError(timeoutMs, timeoutMessage);
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
+
 export async function postJsonWithHeaders(path, body, headers = {}) {
   const response = await fetch(apiUrl(path), {
     method: "POST",

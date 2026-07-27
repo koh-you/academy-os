@@ -11508,8 +11508,8 @@ textarea {
 }
 
 .studentListRow.withdrawnStudentRow {
-  grid-template-columns: 34px 190px 160px 80px 150px 150px 150px 104px 110px 130px minmax(260px, 1fr) 180px;
-  min-width: 1704px;
+  grid-template-columns: 34px 190px 160px 80px 150px 150px 150px 104px 110px 130px minmax(260px, 1fr) 190px;
+  min-width: 1714px;
 }
 
 .studentListRow:not(.studentListHead):hover {
@@ -11566,6 +11566,22 @@ textarea {
   color: #be123c;
 }
 
+.studentPermanentDeleteButton {
+  background: #fff1f2;
+  border: 1px solid #fda4af;
+  border-radius: 8px;
+  color: #be123c;
+  font-size: 12px;
+  font-weight: 900;
+  min-height: 32px;
+  padding: 0 8px;
+}
+
+.studentPermanentDeleteButton:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
 .studentRestoreNotice {
   align-items: center;
   background: #eff6ff;
@@ -11583,6 +11599,88 @@ textarea {
   background: #fff1f2;
   border-color: #fecdd3;
   color: #9f1239;
+}
+
+.modalCard.studentPermanentDeleteModal {
+  gap: 18px;
+  max-width: 620px;
+}
+
+.permanentDeleteStudentSummary {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.permanentDeleteStudentSummary p {
+  margin: 4px 0 0;
+}
+
+.permanentDeleteAuditStatus,
+.permanentDeleteSafeBox,
+.permanentDeleteBlockedBox,
+.permanentDeleteError {
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.permanentDeleteAuditStatus {
+  background: #f8fafc;
+}
+
+.permanentDeleteAuditStatus p,
+.permanentDeleteSafeBox p,
+.permanentDeleteBlockedBox p {
+  margin: 8px 0 0;
+}
+
+.permanentDeleteSafeBox {
+  background: #ecfdf5;
+  border-color: #86efac;
+  color: #166534;
+}
+
+.permanentDeleteBlockedBox,
+.permanentDeleteError {
+  background: #fff1f2;
+  border-color: #fda4af;
+  color: #9f1239;
+}
+
+.permanentDeleteBlockedBox ul {
+  margin: 10px 0 0;
+  padding-left: 20px;
+}
+
+.permanentDeleteConfirmationField {
+  display: grid;
+  font-weight: 800;
+  gap: 8px;
+}
+
+.permanentDeleteForceField {
+  align-items: start;
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  border-radius: 12px;
+  color: #9a3412;
+  display: flex;
+  font-weight: 800;
+  gap: 10px;
+  padding: 12px 14px;
+}
+
+.permanentDeleteForceField input {
+  flex: 0 0 auto;
+  margin-top: 3px;
+}
+
+.permanentDeleteConfirmationField input {
+  border: 1px solid #fda4af;
+  border-radius: 10px;
+  min-height: 42px;
+  padding: 0 12px;
 }
 
 .studentListEmpty {
