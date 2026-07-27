@@ -12,7 +12,10 @@ import {
   getDefaultTallyStudentId,
   getTallyStudentMergeCandidates,
   getTallyStudentMergeChanges,
-  mergeTallyStudentValues
+  getTallyStudentReplacementChanges,
+  mergeTallyStudentValues,
+  replaceTallyStudentValues,
+  specialLectureTallyStudentFields
 } from "../domains/students/tallyStudentMerge.js";
 import { ParentPortal } from "../domains/portals/ParentPortal.jsx";
 import { calculateAttendanceStats } from "../domains/portals/StudentMyPageTab.jsx";
@@ -5915,7 +5918,7 @@ export function App() {
     return savedStudent;
   }
 
-  async function handleMergeSpecialLectureStudent(studentId, application = {}) {
+  async function handleReplaceSpecialLectureStudent(studentId, application = {}) {
     const normalizedStudentId = String(studentId ?? "").trim();
     if (!normalizedStudentId) throw new Error("Tally 정보를 반영할 기존 학생을 선택해 주세요.");
     const studentsBeforeResult = await getJsonWithTimeout(
@@ -5932,9 +5935,13 @@ export function App() {
     if (!isActiveStudent(existingStudent)) {
       throw new Error("퇴원 학생에는 Tally 정보를 덮어쓸 수 없습니다. 퇴원 취소 또는 다른 학생을 선택해 주세요.");
     }
-    const nextStudent = mergeTallyStudentValues(existingStudent, application);
-    const mergeChanges = getTallyStudentMergeChanges(existingStudent, application);
-    if (mergeChanges.length === 0) return existingStudent;
+    const nextStudent = replaceTallyStudentValues(existingStudent, application, {
+      fields: specialLectureTallyStudentFields
+    });
+    const replacementChanges = getTallyStudentReplacementChanges(existingStudent, application, {
+      fields: specialLectureTallyStudentFields
+    });
+    if (replacementChanges.length === 0) return existingStudent;
 
     const saveResult = await postJsonWithTimeout(
       "/api/students",
@@ -7219,8 +7226,11 @@ export function App() {
         specialNote: values.specialNote || applicant.specialNote || applicant.memo,
         defaultClassTemplateId: values.defaultClassTemplateId ?? applicant.defaultClassTemplateId ?? ""
       };
+      const replaceExisting = Boolean(targetStudentId && options.replaceExisting);
       const studentDraft = existingStudent
-        ? mergeTallyStudentValues(existingStudent, tallyValues)
+        ? replaceExisting
+          ? replaceTallyStudentValues(existingStudent, tallyValues)
+          : mergeTallyStudentValues(existingStudent, tallyValues)
         : createStudentFromFormValues({
             ...tallyValues,
             studentId: generatedStudentId
@@ -7360,9 +7370,13 @@ export function App() {
       setStudentIntakeRegistrationMessages((current) => ({
         ...current,
         [applicantId]: targetStudentId
-          ? savedStudent.defaultClassTemplateId
-            ? "기존 학생 Tally 정보와 미래 수업 명단 반영 확인 완료"
-            : "기존 학생 Tally 정보 반영 완료 · 정규반 미배정"
+          ? replaceExisting
+            ? savedStudent.defaultClassTemplateId
+              ? "기존 기본정보 삭제 후 Tally 덮어쓰기와 미래 수업 명단 반영 확인 완료"
+              : "기존 기본정보 삭제 후 Tally 덮어쓰기 완료 · 정규반 미배정"
+            : savedStudent.defaultClassTemplateId
+              ? "기존 학생 Tally 정보와 미래 수업 명단 반영 확인 완료"
+              : "기존 학생 Tally 정보 반영 완료 · 정규반 미배정"
           : savedStudent.defaultClassTemplateId
             ? "학생명단과 미래 수업 명단 반영 확인 완료"
             : "학생명단 반영 완료 · 정규반 미배정"
@@ -9385,7 +9399,7 @@ export function App() {
             onCreateSpecialLectureStudent={handleCreateSpecialLectureStudent}
             onDeleteSpecialLectureApplication={handleDeleteSpecialLectureApplication}
             onCreateSpecialLectureLessons={handleCreateSpecialLectureLessons}
-            onMergeSpecialLectureStudent={handleMergeSpecialLectureStudent}
+            onReplaceSpecialLectureStudent={handleReplaceSpecialLectureStudent}
             onOpenSpecialLectureLesson={openSpecialLectureLesson}
             onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
             onReconcileSolapiNotificationResults={handleReconcileSolapiNotificationResults}
@@ -10667,7 +10681,7 @@ function NotificationCenter({
   onCreateSpecialLectureStudent,
   onCreateSpecialLectureLessons,
   onDeleteSpecialLectureApplication,
-  onMergeSpecialLectureStudent,
+  onReplaceSpecialLectureStudent,
   onOpenSpecialLectureLesson,
   onRefresh,
   onReconcileSolapiNotificationResults,
@@ -11283,7 +11297,7 @@ function NotificationCenter({
           onCreateStudent={onCreateSpecialLectureStudent}
           onCreateSpecialLectureLessons={onCreateSpecialLectureLessons}
           onDeleteApplication={onDeleteSpecialLectureApplication}
-          onMergeStudent={onMergeSpecialLectureStudent}
+          onReplaceStudent={onReplaceSpecialLectureStudent}
           onOpenLesson={onOpenSpecialLectureLesson}
           onSaveEnrollment={onSaveSpecialLectureEnrollment}
           onSaveEnrollments={onSaveSpecialLectureEnrollments}
@@ -11613,7 +11627,7 @@ function SpecialLectureNoticePanel({
   onCreateStudent,
   onCreateSpecialLectureLessons,
   onDeleteApplication,
-  onMergeStudent,
+  onReplaceStudent,
   onOpenLesson,
   onSaveEnrollment,
   onSaveEnrollments,
@@ -12026,7 +12040,7 @@ function SpecialLectureNoticePanel({
         onCreateStudent={onCreateStudent}
         onCreateSpecialLectureLessons={onCreateSpecialLectureLessons}
         onDeleteApplication={onDeleteApplication}
-        onMergeStudent={onMergeStudent}
+        onReplaceStudent={onReplaceStudent}
         onOpenLesson={onOpenLesson}
         onSaveEnrollment={onSaveEnrollment}
         onSaveEnrollments={onSaveEnrollments}
@@ -25677,19 +25691,28 @@ function StudentModal({
     return students.find((student) => student.studentId === targetStudentId) ?? null;
   }
 
-  async function registerApplicant(applicant) {
+  async function registerApplicant(applicant, options = {}) {
     const registerValues = getApplicantRegisterValues(applicant);
     const targetStudent = getApplicantTargetStudent(applicant);
     if (targetStudent) {
-      const changes = getTallyStudentMergeChanges(targetStudent, registerValues);
+      const changes = options.replaceExisting
+        ? getTallyStudentReplacementChanges(targetStudent, registerValues)
+        : getTallyStudentMergeChanges(targetStudent, registerValues);
       const changeLabels = changes.map((change) => change.label).join(", ") || "변경할 기본정보 없음";
+      const clearedLabels = changes
+        .filter((change) => change.clearsExistingValue)
+        .map((change) => change.label)
+        .join(", ");
       const confirmed = window.confirm(
-        `${targetStudent.name} 기존 학생에 Tally 정보를 반영할까요?\n\n반영 항목: ${changeLabels}\n학생 ID, 로그인 ID, PIN, 교재, 개별 시간표와 기존 수업·출결 기록은 유지됩니다. Tally의 빈 값은 기존 정보를 지우지 않습니다.`
+        options.replaceExisting
+          ? `${targetStudent.name} 기존 기본정보를 삭제하고 Tally 원본으로 덮어쓸까요?\n\n교체 항목: ${changeLabels}\n${clearedLabels ? `Tally가 비어 있어 삭제될 항목: ${clearedLabels}\n` : ""}학생 ID, 로그인 ID, PIN, 교재, 개별 시간표와 과거 수업·출결 기록은 유지됩니다. 정규반이 비어 있으면 안전한 미래 정규 수업 명단에서도 제외됩니다.`
+          : `${targetStudent.name} 기존 학생에 Tally 정보를 보강할까요?\n\n반영 항목: ${changeLabels}\n학생 ID, 로그인 ID, PIN, 교재, 개별 시간표와 기존 수업·출결 기록은 유지됩니다. Tally의 빈 값은 기존 정보를 지우지 않습니다.`
       );
       if (!confirmed) return;
     }
     try {
       await onRegisterApplicant(applicant.applicantId, registerValues, {
+        replaceExisting: Boolean(targetStudent && options.replaceExisting),
         targetStudentId: targetStudent?.studentId ?? ""
       });
     } catch {
@@ -25704,6 +25727,12 @@ function StudentModal({
     const changes = targetStudent
       ? getTallyStudentMergeChanges(targetStudent, getApplicantRegisterValues(applicant))
       : [];
+    const replacementChanges = targetStudent
+      ? getTallyStudentReplacementChanges(targetStudent, getApplicantRegisterValues(applicant))
+      : [];
+    const clearedLabels = replacementChanges
+      .filter((change) => change.clearsExistingValue)
+      .map((change) => change.label);
     return (
       <div className={targetStudent ? "studentIntakeMergeTarget matched" : "studentIntakeMergeTarget"}>
         <label>
@@ -25729,13 +25758,15 @@ function StudentModal({
         </label>
         {targetStudent ? (
           <div>
-            <strong>기존 학생을 유지하고 Tally 정보만 보강</strong>
+            <strong>기존 학생 반영 방식을 선택합니다</strong>
             <span>
               {changes.length
-                ? `변경 예정: ${changes.map((change) => change.label).join(", ")}`
+                ? `빈칸 보존·보강 시 변경: ${changes.map((change) => change.label).join(", ")}`
                 : "학생 기본정보가 이미 Tally와 같습니다."}
             </span>
-            <small>학생 ID·로그인·PIN·교재·개별 시간표·기존 수업/출결은 유지됩니다.</small>
+            <small>
+              완전 덮어쓰기 시 Tally 빈칸으로 삭제: {clearedLabels.length ? clearedLabels.join(", ") : "없음"} · 학생 ID/로그인/PIN과 과거 수업·출결은 유지
+            </small>
           </div>
         ) : (
           <div>
@@ -25862,18 +25893,35 @@ function StudentModal({
                   {applicantSaveStates[applicant.applicantId] ? (
                     <InlineSaveStatus label="접수정보" saveState={applicantSaveStates[applicant.applicantId]} />
                   ) : null}
-                  <button
-                    className="primaryButton"
-                    disabled={!applicant.name || applicantRegistrationStates[applicant.applicantId] === "saving"}
-                    onClick={() => registerApplicant(applicant)}
-                    type="button"
-                  >
-                    {applicantRegistrationStates[applicant.applicantId] === "saving"
-                      ? "반영 중"
-                      : getApplicantTargetStudent(applicant)
-                        ? "Tally 정보로 기존 학생 보강"
-                        : "새 학생으로 등록"}
-                  </button>
+                  {getApplicantTargetStudent(applicant) ? (
+                    <div className="studentIntakeActionButtons">
+                      <button
+                        className="softButton"
+                        disabled={!applicant.name || applicantRegistrationStates[applicant.applicantId] === "saving"}
+                        onClick={() => registerApplicant(applicant)}
+                        type="button"
+                      >
+                        {applicantRegistrationStates[applicant.applicantId] === "saving" ? "반영 중" : "빈칸 유지하고 보강"}
+                      </button>
+                      <button
+                        className="dangerButton"
+                        disabled={!applicant.name || applicantRegistrationStates[applicant.applicantId] === "saving"}
+                        onClick={() => registerApplicant(applicant, { replaceExisting: true })}
+                        type="button"
+                      >
+                        {applicantRegistrationStates[applicant.applicantId] === "saving" ? "덮어쓰기 중" : "기존 기본정보 삭제 후 Tally 덮어쓰기"}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      className="primaryButton"
+                      disabled={!applicant.name || applicantRegistrationStates[applicant.applicantId] === "saving"}
+                      onClick={() => registerApplicant(applicant)}
+                      type="button"
+                    >
+                      {applicantRegistrationStates[applicant.applicantId] === "saving" ? "반영 중" : "새 학생으로 등록"}
+                    </button>
+                  )}
                 </div>
                 {applicantRegistrationStates[applicant.applicantId] ? (
                   <div className={`studentIntakeRegistrationStatus ${applicantRegistrationStates[applicant.applicantId]}`}>

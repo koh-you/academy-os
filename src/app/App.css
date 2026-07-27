@@ -11767,6 +11767,17 @@ textarea {
   justify-content: space-between;
 }
 
+.studentIntakeActions {
+  flex-wrap: wrap;
+}
+
+.studentIntakeActionButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .studentProfileMemoHeader strong {
   color: #854d0e;
   font-size: 15px;
@@ -19119,6 +19130,8 @@ body.attendanceOnlyBody {
   .specialLectureAttentionActions button,
   .specialLectureAttentionItem > button,
   .specialLectureMatchActions button,
+  .studentIntakeActionButtons,
+  .studentIntakeActionButtons button,
   .specialLectureDismissibleNotice {
     width: 100%;
   }

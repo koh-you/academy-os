@@ -9,6 +9,15 @@ const tallyStudentMergeFields = [
   { field: "defaultClassTemplateId", label: "정규반" }
 ];
 
+export const specialLectureTallyStudentFields = [
+  "name",
+  "schoolName",
+  "grade",
+  "studentPhone",
+  "parentPhone",
+  "specialNote"
+];
+
 function normalizeText(value = "") {
   return String(value ?? "").trim();
 }
@@ -52,6 +61,30 @@ export function mergeTallyStudentValues(student = {}, source = {}) {
   return {
     ...student,
     ...updates
+  };
+}
+
+export function getTallyStudentReplacementChanges(student = {}, source = {}, options = {}) {
+  const values = getTallyStudentValues(source);
+  const ownedFields = new Set(options.fields ?? tallyStudentMergeFields.map(({ field }) => field));
+  return tallyStudentMergeFields
+    .filter(({ field }) => ownedFields.has(field) && normalizeText(student[field]) !== values[field])
+    .map(({ field, label }) => ({
+      field,
+      label,
+      previousValue: normalizeText(student[field]),
+      nextValue: values[field],
+      clearsExistingValue: Boolean(normalizeText(student[field]) && !values[field])
+    }));
+}
+
+export function replaceTallyStudentValues(student = {}, source = {}, options = {}) {
+  const values = getTallyStudentValues(source);
+  const ownedFields = options.fields ?? tallyStudentMergeFields.map(({ field }) => field);
+  const replacements = Object.fromEntries(ownedFields.map((field) => [field, values[field] ?? ""]));
+  return {
+    ...student,
+    ...replacements
   };
 }
 

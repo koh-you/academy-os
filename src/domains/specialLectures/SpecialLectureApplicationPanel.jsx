@@ -3,7 +3,11 @@ import { copyTextToClipboard } from "../exams/outputPreview.js";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { apiUrl } from "../../shared/utils/apiClient.js";
-import { getTallyStudentMergeChanges } from "../students/tallyStudentMerge.js";
+import {
+  getTallyStudentReplacementChanges,
+  specialLectureTallyStudentFields
+} from "../students/tallyStudentMerge.js";
+import { buildTallyEnrollmentReplacement } from "./tallyEnrollmentReplacement.js";
 import {
   createSpecialLectureEnrollmentId,
   createSpecialLectureLessonId,
@@ -244,22 +248,31 @@ function buildEnrollmentFromMatchRow(row, guide, guideSessions = [], existingEnr
   const studentId = row.student?.studentId ?? "";
   const requestedPlans = getEnrollmentPlansFromApplication(row.application, guideSessions);
   const defaultSessionIds = guideSessions.map((session) => session.sessionId);
-  const shouldUseTallyPlans = Boolean(requestedPlans) && (
-    options.applyTallyPlan ||
-    !existingEnrollment ||
-    !existingEnrollment.planReviewedAt
+  const emptySessionPlans = defaultSessionIds.map((sessionId) => ({
+    sessionId,
+    status: "excluded",
+    effectiveStartTime: "",
+    effectiveEndTime: "",
+    overrideReason: ""
+  }));
+  const replacement = options.replaceTallyData
+    ? buildTallyEnrollmentReplacement({
+        application: row.application,
+        guideSessions,
+        requestedPlans
+      })
+    : null;
+  const shouldUseTallyPlans = Boolean(replacement) || (
+    Boolean(requestedPlans) && (
+      !existingEnrollment ||
+      !existingEnrollment.planReviewedAt
+    )
   );
-  const sessionPlans = shouldUseTallyPlans
-    ? requestedPlans
+  const sessionPlans = replacement?.sessionPlans ?? (shouldUseTallyPlans
+    ? requestedPlans ?? emptySessionPlans
     : existingEnrollment?.sessionPlans?.length
     ? existingEnrollment.sessionPlans
-    : defaultSessionIds.map((sessionId) => ({
-        sessionId,
-        status: "excluded",
-        effectiveStartTime: "",
-        effectiveEndTime: "",
-        overrideReason: ""
-      }));
+    : emptySessionPlans);
   return normalizeSpecialLectureEnrollment({
     ...(existingEnrollment ?? {}),
     enrollmentId: existingEnrollment?.enrollmentId || createSpecialLectureEnrollmentId(guide, studentId),
@@ -268,11 +281,17 @@ function buildEnrollmentFromMatchRow(row, guide, guideSessions = [], existingEnr
     applicationId: row.application.applicationId,
     studentId,
     status: "active",
-    sessionIds: sessionPlans.filter((plan) => plan.status === "active").map((plan) => plan.sessionId),
+    sessionIds: replacement?.sessionIds ??
+      sessionPlans.filter((plan) => plan.status === "active").map((plan) => plan.sessionId),
     sessionPlans,
-    planSource: shouldUseTallyPlans ? "tally_request" : existingEnrollment?.planSource || "manual",
-    planReviewedAt: options.applyTallyPlan && shouldUseTallyPlans ? "" : existingEnrollment?.planReviewedAt || "",
-    memo: existingEnrollment?.memo || row.application.selectedSession || row.application.memo || "",
+    planSource: replacement?.planSource ??
+      (shouldUseTallyPlans ? "tally_request" : existingEnrollment?.planSource || "manual"),
+    planReviewedAt: replacement?.planReviewedAt ?? existingEnrollment?.planReviewedAt ?? "",
+    memo: replacement?.memo ??
+      existingEnrollment?.memo ??
+      row.application.selectedSession ??
+      row.application.memo ??
+      "",
     createdAt: existingEnrollment?.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString()
   });
@@ -373,7 +392,7 @@ export function SpecialLectureApplicationPanel({
   onCreateSpecialLectureLessons,
   onCreateStudent,
   onDeleteApplication,
-  onMergeStudent,
+  onReplaceStudent,
   onOpenLesson,
   onSaveEnrollment,
   onSaveEnrollments,
@@ -572,8 +591,10 @@ export function SpecialLectureApplicationPanel({
         .some((value) => String(value ?? "").toLowerCase().includes(query));
     });
   const matchSelectedStudent = students.find((student) => student.studentId === matchStudentId) ?? null;
-  const matchTallyChanges = matchApplication && matchSelectedStudent
-    ? getTallyStudentMergeChanges(matchSelectedStudent, matchApplication)
+  const matchTallyReplacementChanges = matchApplication && matchSelectedStudent
+    ? getTallyStudentReplacementChanges(matchSelectedStudent, matchApplication, {
+        fields: specialLectureTallyStudentFields
+      })
     : [];
   function getEnrollmentProgressRows(enrollment) {
     if (!enrollment) return [];
@@ -626,12 +647,12 @@ export function SpecialLectureApplicationPanel({
     }
     setUpdatingApplicationId(application.applicationId);
     setPanelMessage("");
-    let studentMergeSaved = false;
+    let studentReplacementSaved = false;
     try {
-      const confirmedStudent = options.overwriteTallyStudent
-        ? await onMergeStudent(student.studentId, application)
+      const confirmedStudent = options.replaceTallyData
+        ? await onReplaceStudent(student.studentId, application)
         : student;
-      studentMergeSaved = Boolean(options.overwriteTallyStudent);
+      studentReplacementSaved = Boolean(options.replaceTallyData);
       const confirmedApplication = application.status === "confirmed"
         ? application
         : await onUpdateApplication(application.applicationId, { status: "confirmed" });
@@ -640,7 +661,7 @@ export function SpecialLectureApplicationPanel({
         selectedGuide,
         guideSessions,
         existingEnrollment,
-        { applyTallyPlan: Boolean(options.applyTallyPlan) }
+        { replaceTallyData: Boolean(options.replaceTallyData) }
       );
       const savedEnrollment = await onSaveEnrollment(enrollment);
       openPlanModal(savedEnrollment ?? enrollment);
@@ -648,12 +669,12 @@ export function SpecialLectureApplicationPanel({
       setMatchSearchText("");
       setMatchStudentId("");
       setPanelMessage(
-        `${confirmedStudent.name} 학생${studentMergeSaved ? "의 Tally 기본정보를 반영하고" : "을"} 확정 명단에 연결했습니다. 모달에서 Tally 회차와 시간을 확인해 저장해 주세요.`
+        `${confirmedStudent.name} 학생${studentReplacementSaved ? "의 기존 기본정보·특강 계획을 지우고 Tally 원본으로 교체한 뒤" : "을"} 확정 명단에 연결했습니다. 모달에서 Tally 회차와 시간을 확인해 저장해 주세요.`
       );
     } catch (error) {
       setPanelMessage(
-        studentMergeSaved
-          ? `학생 Tally 정보는 저장됐지만 특강 연결에 실패했습니다: ${error.message}`
+        studentReplacementSaved
+          ? `학생 Tally 기본정보는 교체됐지만 특강 계획 덮어쓰기에 실패했습니다: ${error.message}`
           : `특강 확정 준비 실패: ${error.message}`
       );
     } finally {
@@ -685,24 +706,48 @@ export function SpecialLectureApplicationPanel({
     setPanelMessage(`${application.studentName || "신청자"} 학생을 전체 학생 명단에서 직접 선택하거나 특강 전용 학생으로 등록해 주세요.`);
   }
 
-  async function confirmManualStudentMatch({ overwriteTallyStudent = false } = {}) {
+  async function confirmManualStudentMatch({ replaceTallyData = false } = {}) {
     if (!matchApplication || !matchStudentId) return;
     const student = students.find((item) => item.studentId === matchStudentId);
     if (!student) {
       setPanelMessage("연결할 학생을 찾지 못했습니다.");
       return;
     }
-    if (overwriteTallyStudent) {
-      const changeLabels = matchTallyChanges.map((change) => change.label).join(", ") || "변경할 기본정보 없음";
+    if (replaceTallyData) {
+      const changeLabels = matchTallyReplacementChanges.map((change) => change.label).join(", ") || "변경할 기본정보 없음";
+      const clearedLabels = matchTallyReplacementChanges
+        .filter((change) => change.clearsExistingValue)
+        .map((change) => change.label)
+        .join(", ");
       const confirmed = window.confirm(
-        `${student.name} 기존 학생에 Tally 정보를 덮어쓰고 특강 신청을 연결할까요?\n\n반영 항목: ${changeLabels}\n학생 ID, 로그인, PIN, 정규반, 교재, 개별 시간표와 기존 수업·출결은 유지됩니다. Tally 회차는 미검토 초안으로 저장해 확인 전 수업일지에 자동 반영하지 않습니다.`
+        `${student.name}의 기존 기본정보와 특강 회차·시간·메모 초안을 삭제하고 Tally 원본으로 덮어쓸까요?\n\n교체 항목: ${changeLabels}\n${clearedLabels ? `Tally가 비어 있어 삭제될 기본정보: ${clearedLabels}\n` : ""}Tally에 회차 신청이 없으면 기존 회차도 모두 미선택으로 바뀝니다. 학생 ID, 로그인, PIN, 정규반, 교재, 개별 시간표와 과거 수업·출결은 유지되며 미래 수업일지는 회차 계획을 다시 저장하기 전까지 변경하지 않습니다.`
       );
       if (!confirmed) return;
     }
     await confirmApplicationWithStudent(matchApplication, student, {
-      applyTallyPlan: overwriteTallyStudent,
-      overwriteTallyStudent
+      replaceTallyData
     });
+  }
+
+  async function replaceLinkedEnrollmentWithTally(enrollment) {
+    const application = applications.find((item) => item.applicationId === enrollment.applicationId);
+    const student = students.find((item) => item.studentId === enrollment.studentId);
+    if (!application || application.source !== "tally" || !student) {
+      setPanelMessage("연결된 Tally 신청 원본 또는 학생을 찾지 못했습니다.");
+      return;
+    }
+    const replacementChanges = getTallyStudentReplacementChanges(student, application, {
+      fields: specialLectureTallyStudentFields
+    });
+    const clearedLabels = replacementChanges
+      .filter((change) => change.clearsExistingValue)
+      .map((change) => change.label)
+      .join(", ");
+    const confirmed = window.confirm(
+      `${student.name}의 현재 학생 기본정보와 특강 회차·시간·메모 초안을 삭제하고 연결된 Tally 원본으로 다시 덮어쓸까요?\n\n${clearedLabels ? `Tally가 비어 있어 삭제될 기본정보: ${clearedLabels}\n` : ""}Tally 신청 회차가 비어 있으면 현재 선택 회차도 모두 제거됩니다. 과거 수업일지·출결은 삭제하지 않고, 미래 수업일지는 새 회차 계획을 명시 저장하기 전까지 변경하지 않습니다.`
+    );
+    if (!confirmed) return;
+    await confirmApplicationWithStudent(application, student, { replaceTallyData: true });
   }
 
   async function deleteErrorApplication(application) {
@@ -1418,6 +1463,21 @@ export function SpecialLectureApplicationPanel({
                     >
                       {enrollment.planReviewedAt ? "회차·진행 관리" : "회차 설정"}
                     </button>
+                    {enrollment.applicationId &&
+                    applications.some((application) =>
+                      application.applicationId === enrollment.applicationId && application.source === "tally"
+                    ) ? (
+                      <button
+                        className="dangerButton compact"
+                        disabled={!onReplaceStudent || updatingApplicationId === enrollment.applicationId}
+                        onClick={() => replaceLinkedEnrollmentWithTally(enrollment)}
+                        type="button"
+                      >
+                        {updatingApplicationId === enrollment.applicationId
+                          ? "Tally 덮어쓰기 중"
+                          : "기존 데이터 삭제 후 Tally로 다시 덮어쓰기"}
+                      </button>
+                    ) : null}
                     <details className="specialLectureCancellationActions">
                       <summary>취소 관리</summary>
                       <div>
@@ -1600,13 +1660,15 @@ export function SpecialLectureApplicationPanel({
             </div>
             {matchApplication.source === "tally" && matchSelectedStudent ? (
               <div className="specialLectureTallyMergePreview">
-                <strong>{matchSelectedStudent.name} 기존 학생에 Tally 정보 반영</strong>
+                <strong>{matchSelectedStudent.name} 기존 데이터를 삭제하고 Tally로 교체</strong>
                 <span>
-                  {matchTallyChanges.length
-                    ? `변경 예정: ${matchTallyChanges.map((change) => change.label).join(", ")}`
+                  {matchTallyReplacementChanges.length
+                    ? `교체 예정: ${matchTallyReplacementChanges.map((change) => change.label).join(", ")}`
                     : "학생 기본정보가 이미 Tally와 같습니다."}
                 </span>
-                <small>학생 ID·로그인·PIN·정규반·교재·개별 시간표·기존 수업/출결은 유지됩니다.</small>
+                <small>
+                  Tally 빈칸은 기존 값을 삭제하고, 기존 특강 회차·시간·메모 초안도 Tally 원본으로 교체합니다. 학생 ID·로그인·PIN·정규반과 과거 수업/출결은 유지됩니다.
+                </small>
               </div>
             ) : null}
             <div className="specialLectureModalActions specialLectureMatchActions">
@@ -1628,12 +1690,14 @@ export function SpecialLectureApplicationPanel({
               </button>
               {matchApplication.source === "tally" ? (
                 <button
-                  className="primaryButton"
-                  disabled={!matchStudentId || !onMergeStudent || updatingApplicationId === matchApplication.applicationId}
-                  onClick={() => confirmManualStudentMatch({ overwriteTallyStudent: true })}
+                  className="dangerButton"
+                  disabled={!matchStudentId || !onReplaceStudent || updatingApplicationId === matchApplication.applicationId}
+                  onClick={() => confirmManualStudentMatch({ replaceTallyData: true })}
                   type="button"
                 >
-                  {updatingApplicationId === matchApplication.applicationId ? "덮어쓰기 중" : "Tally 정보 덮어쓰기 후 연결"}
+                  {updatingApplicationId === matchApplication.applicationId
+                    ? "덮어쓰기 중"
+                    : "기존 데이터 삭제 후 Tally 덮어쓰기"}
                 </button>
               ) : null}
             </div>
