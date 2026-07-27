@@ -11,3 +11,4 @@ MVP 기준:
 - `LessonCalendarView.jsx`는 계산된 달력 모델을 그리고 App이 주입한 탐색 callback만 호출합니다.
 - `lessonModalStudentModel.js`는 수업 등록·수정 모달의 재원 학생 검색과 학년 그룹만 계산합니다.
 - `lessonModalDraftModel.js`는 수업 등록·수정 모달의 입력 validation과 submit payload만 계산하며 API나 React 저장 상태를 소유하지 않습니다.
+- `lessonModalDraftTransitions.js`는 반 템플릿·수업 유형·날짜 변경에 따른 local draft patch와 색상 선택지만 계산합니다.

@@ -224,6 +224,12 @@ import {
   createLessonModalSubmitPayload,
   getLessonModalValidationError
 } from "../domains/lessons/lessonModalDraftModel.js";
+import {
+  createLessonModalColorOptions,
+  createLessonModalDateChangePatch,
+  createLessonModalTemplateChangePatch,
+  createLessonModalTypeChangePatch
+} from "../domains/lessons/lessonModalDraftTransitions.js";
 import { createLessonModalStudentSelectionModel } from "../domains/lessons/lessonModalStudentModel.js";
 import { LessonJournalErrorBoundary } from "../domains/lessons/LessonJournalErrorBoundary.jsx";
 import { attendanceLabels, dayLabels, homeworkLabels } from "../domains/lessons/labels.js";
@@ -18674,21 +18680,11 @@ function LessonModal({
   const closureBlockingNotificationJobs = initialLesson?.lessonId
     ? getLessonClosureBlockingNotificationJobs(notificationJobs, initialLesson.lessonId)
     : [];
-  const regularClassColorOptions = normalizedTemplates.map((template) => ({
-    id: `class-${template.classTemplateId}`,
-    label: template.name,
-    lessonType: "class",
-    classTemplateId: template.classTemplateId,
-    color: getRegularLessonColor(template)
-  }));
-  const lessonColorOptions = [
-    ...regularClassColorOptions,
-    { id: "preExam", label: "직전수업", lessonType: "preExam", color: lessonCalendarColors.preExam },
-    { id: "closure", label: "휴강", lessonType: "closure", color: lessonCalendarColors.closure },
-    { id: "makeup", label: "보충수업", lessonType: "makeup", color: lessonCalendarColors.makeup },
-    { id: "examPrep", label: "시험대비", lessonType: "examPrep", color: lessonCalendarColors.examPrep },
-    { id: "exam", label: "평가", lessonType: "exam", color: lessonCalendarColors.exam }
-  ];
+  const lessonColorOptions = createLessonModalColorOptions({
+    getRegularLessonColor,
+    lessonCalendarColors,
+    templates: normalizedTemplates
+  });
   useEffect(() => {
     setSaveState((current) => current === "failed" ? "dirty" : current);
     setSaveMessage((current) => saveState === "failed"
@@ -18710,24 +18706,33 @@ function LessonModal({
   ]);
 
   function handleTemplateChange(nextTemplateId, nextLessonType = lessonType) {
-    const template = normalizedTemplates.find((item) => item.classTemplateId === nextTemplateId);
-    setClassTemplateId(nextTemplateId);
-    if (!template) return;
-    const templateTimes = getTemplateLessonTimes(template, date);
-    setName(template.name);
-    setStartTime(templateTimes.startTime);
-    setEndTime(templateTimes.endTime);
-    setColor(getStandardLessonColor({ lessonType: nextLessonType, classTemplateId: nextTemplateId, className: template.name }));
-    setStudentIds(
-      activeStudents
-        .filter((student) => student.defaultClassTemplateId === nextTemplateId)
-        .map((student) => student.studentId)
-    );
+    const patch = createLessonModalTemplateChangePatch({
+      activeStudents,
+      date,
+      getStandardLessonColor,
+      getTemplateLessonTimes,
+      nextLessonType,
+      nextTemplateId,
+      templates: normalizedTemplates
+    });
+    setClassTemplateId(patch.classTemplateId);
+    if (!patch.hasTemplate) return;
+    setName(patch.name);
+    setStartTime(patch.startTime);
+    setEndTime(patch.endTime);
+    setColor(patch.color);
+    setStudentIds(patch.studentIds);
   }
 
   function handleLessonTypeChange(nextLessonType) {
-    setLessonType(nextLessonType);
-    setColor(getStandardLessonColor({ lessonType: nextLessonType, classTemplateId, className: name }));
+    const patch = createLessonModalTypeChangePatch({
+      classTemplateId,
+      getStandardLessonColor,
+      name,
+      nextLessonType
+    });
+    setLessonType(patch.lessonType);
+    setColor(patch.color);
   }
 
   function isLessonTypeChoiceDisabled(nextLessonType) {
@@ -18748,12 +18753,18 @@ function LessonModal({
   }
 
   function handleDateChange(nextDate) {
-    setDate(nextDate);
-    const templateTimes = getTemplateLessonTimes(activeTemplate, nextDate);
-    setStartTime(templateTimes.startTime);
-    setEndTime(templateTimes.endTime);
-    if (!closureMakeupDateTouched) {
-      setClosureMakeupDate(addDaysInKorea(nextDate, 7));
+    const patch = createLessonModalDateChangePatch({
+      activeTemplate,
+      addDaysInKorea,
+      closureMakeupDateTouched,
+      getTemplateLessonTimes,
+      nextDate
+    });
+    setDate(patch.date);
+    setStartTime(patch.startTime);
+    setEndTime(patch.endTime);
+    if (patch.closureMakeupDate !== undefined) {
+      setClosureMakeupDate(patch.closureMakeupDate);
     }
   }
 

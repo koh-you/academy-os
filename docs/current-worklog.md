@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-27 P1. 15D-3 수업 모달 local draft transition 분리 — AI gate 통과
+
+- 코드: 반 템플릿 선택 시 이름·시간·색상·학생 명단 patch, 수업 유형 변경 시 색상 patch, 날짜 변경 시 반 시간·자동 휴강 보충일 patch와 달력 색상 선택지 계산을 `src/domains/lessons/lessonModalDraftTransitions.js`로 이동했다.
+- 경계: App의 각 handler가 순수 patch를 해당 React setter에 적용한다. `useState`, 저장 상태, `onSubmit`, 수업 bulk API, Supabase 재조회, 휴강 사전점검, 알림 원천은 이동하지 않았다.
+- 자동검증: 합성 반 2개·학생 3명과 토요일 전용 시간으로 반 명단/시간/색상, 직접 입력 반 선택, 휴강 유형, 날짜 자동 변경과 사용자가 이미 만진 휴강 보충일 보존을 검증했다. scenario의 시험대비 색상·토요일 시간 검사는 새 모델까지 추적한다. `test:production` 57개 명령, scenario 494/494, build, `git diff --check`가 통과했다.
+- 사람 gate: 없음. local draft 계산 위치만 옮겼고 저장·운영 데이터·외부 서비스는 사용하지 않았다. 다음은 최신 `origin/main` rebase 후 15D-4 최초 local draft 초기값·고정 ID factory를 검토한다.
+
 ## 2026-07-27 P1. 15D-2 수업 모달 validation·submit payload 분리 — AI gate 통과
 
 - 코드: `LessonModal`의 이름·날짜·시작/종료 시간과 휴강 보충 날짜·시간 validation을 `getLessonModalValidationError`, 최종 submit object 생성을 `createLessonModalSubmitPayload`로 옮겨 `src/domains/lessons/lessonModalDraftModel.js`에 분리했다.
