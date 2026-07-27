@@ -6,16 +6,19 @@
 
 새 작업을 시작하거나 완료 상태를 보고할 때 AI 자동검증 결과와 함께 아직 남은 사람 gate를 먼저 짧게 표시한다. AI가 deterministic fixture·정적검사·가상 데이터로 판정할 수 있는 항목은 먼저 끝내고, 운영 화면·실제 외부 원천처럼 사람만 확인할 수 있는 최소 항목만 요청한다.
 
-1. `14C-3 시험정보 삭제 격리 gate`
-   - 상태: 삭제 audit·단일 범위 검증·실패 보상 복구 구현과 TARGET/CONTROL/정규수업 가상 fixture는 통과했다.
-   - 남은 확인: 배포 뒤 격리 TARGET 한 건만 삭제하고 CONTROL row·CONTROL 수업·정규수업 보존, 새로고침 유지, 중복·교차 삭제 없음, 실패 시 audit ID와 원천 복구 안내를 실제 화면에서 확인한다.
-   - 통과 전에는 App.jsx 14C-3 side-effect orchestration 이동이나 다음 고위험 코드 이동을 진행하지 않는다.
-2. `학생 포털 실제 쓰기 gate`
+1. `학생 포털 실제 쓰기 gate`
    - 학생 숙제 완료, 질문 CRUD, 시험 후 제출의 실제 학생 입력·파일 선택·Storage 업로드·새로고침/재로그인 유지·교사 확인 저장은 보류 상태이며 통과로 간주하지 않는다.
-3. `교사 bearer·Storage 소유권 보안 gate`
+2. `교사 bearer·Storage 소유권 보안 gate`
    - 교사 서버 서명 세션과 파일 열람 소유권 검증은 별도 고위험 보안 작업이다.
-4. `Solapi 특강 템플릿 검수 gate`
+3. `Solapi 특강 템플릿 검수 gate`
    - 사용자에게 `Solapi 특강 템플릿 검수가 완료됐나요?`를 확인한다. 완료 전에는 템플릿 연결·테스트 발송을 진행하지 않는다.
+
+완료한 사람 gate도 다음 세션이 다시 요구하지 않도록 최상단에 기록한다.
+
+- `14C-3 시험정보 삭제 격리 gate` — 2026-07-27 통과
+  - 배포된 운영 화면에서 격리 TARGET row를 한 번 삭제하고 CONTROL row·CONTROL 시험대비 수업 4건·일반 수업 1건 보존과 새로고침 유지를 사용자가 확인했다.
+  - AI가 Supabase를 재조회해 TARGET row/수업 0건, CONTROL row 1건, CONTROL 시험대비 4건, 일반 CONTROL 1건, 관련 수업기록·숙제·알림 0건을 대조했다.
+  - 검수 fixture를 모두 정리한 뒤 시험정보 39건·수업 108건의 생성 전 snapshot으로 복귀했다. 14C-3 때문에 다음 리팩터링을 더 막지 않는다.
 
 ## Deferred Work Queue - Always Show First
 

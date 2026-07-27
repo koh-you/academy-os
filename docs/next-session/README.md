@@ -1,5 +1,7 @@
 # Next Session Handoff
 
+> 2026-07-27 14C-3 시험정보 삭제 사람 gate 통과: 배포된 운영 화면에서 격리 TARGET만 삭제되고 CONTROL row·CONTROL 시험대비 수업 4건·일반 수업 1건이 보존되며 새로고침 후 유지되는 것을 확인했다. AI의 Supabase 재조회도 일치했고 관련 수업기록·숙제·알림은 0건이었다. 검수 fixture는 모두 정리해 시험정보 39건·수업 108건의 생성 전 snapshot으로 복귀했다. 14C-3 때문에 App.jsx 리팩터링을 더 막지 말고, 최신 `origin/main` rebase 후 다음 의미 단위를 진행한다.
+
 > 2026-07-23 운영 유지보수 최신 인수인계: 바로 붙여넣을 프롬프트는 `docs/next-session/maintenance-session-prompt-2026-07-23.md`다. 현재 유지보수·리팩터링·시험분석을 각각 독립 worktree/branch로 분리하고, 향후 코딩 에이전트도 task owner/worktree/branch/허용 파일/side effect/사람 gate 계약을 가진 뒤 전용 브랜치만 사용한다. main 통합 owner는 항상 하나만 둔다.
 
 > 현재 main 기준은 `0ced3d32 Add safe special lecture cancellation flow`이다. 수업메모 전체 필드 Supabase 재조회 검증은 `5b6b98c2`, 배포 marker는 `05ed38b0`, 기록은 `a8890a02`다. 다음 유지보수 첫 gate는 수업메모·작성창 체크·이전 확인 저장 후 새로고침 유지이며, 통과 후에만 이전 메모 확인 범위/복구 보강을 시작한다. 특강 부분·전체 취소와 시험분석 GPT Image 프롬프트 제작실도 각각 사람 gate 대기다. 새 세션은 시작 시 최신 `origin/main`을 다시 확인한다.

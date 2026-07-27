@@ -12,14 +12,16 @@
 
 ## 2026-07-27 P0. 14C-3 시험정보 삭제 audit·실패 보상 복구
 
+- 상태: 구현·자동검증·배포·운영 사람 gate 통과, 검수 fixture 정리 완료.
 - 중단 원인: 리팩터링 14C-3 격리 gate에서 TARGET 시험정보를 삭제한 뒤 CONTROL row/수업도 함께 사라진 운영 사례가 있었고, 기존 가상 실패 fixture에서는 row DELETE 실패 뒤 TARGET row만 돌아오고 이미 제거한 TARGET 수업은 복구되지 않았다. 삭제 요청·row/lesson 순서·실패 stage를 식별할 audit도 없었다.
 - row 삭제 안전: 단일 삭제마다 PII를 포함하지 않는 audit ID를 만들고 서버가 삭제 전후 `exam_prep_rows` ID 집합을 대조한다. TARGET 외 row가 사라지거나 TARGET이 남으면 성공으로 응답하지 않고, 삭제 전 raw row snapshot에서 누락된 모든 row를 복구한 뒤 재조회 결과와 rollback 상태를 audit에 남긴다. `duplicates=true` 일괄 정리와 단일 `id` 삭제는 같은 요청에서 실행할 수 없다.
 - 연결 수업 안전: row DELETE가 성공하기 전에는 local row/lesson을 낙관적으로 제거하지 않는다. row 단일 삭제가 검증된 뒤에만 연결 수업 plan을 실행한다. 자동 생성 `examPrep` lesson만 전용 경로에서 삭제하며 학생 명단, `lesson_student_records`, homeworks, `notification_jobs` 중 하나라도 연결돼 있으면 범용 수업 삭제·알림 취소를 호출하지 않고 전체 작업을 중단한다. source label 갱신 시에도 기존 학생 명단은 보존한다.
 - 실패 보상: row 응답 유실, 광범위 row 삭제, lesson 저장/삭제 실패, 삭제 후 Supabase 재조회 불일치 어느 단계든 원래 row와 영향 lesson snapshot을 다시 읽고 누락/변경 원천을 복구한다. lesson 단계에서 예상 밖 CONTROL/정규수업 누락이 발견되면 원래 lesson 전체 ID 집합을 기준으로 함께 복구한다. 복구 재조회가 끝나지 않으면 재시도를 유도하지 않고 audit ID를 표시한다.
 - 저장/부작용: 직접 원천은 Supabase `exam_prep_rows`와 안전 조건을 통과한 빈 자동 생성 `lessons`다. 보호 데이터가 있는 lesson은 삭제하지 않는다. 구현·AI 검증 중 운영 시험정보, lessons, 수업기록, 숙제, `notification_jobs`, Solapi를 수정하거나 발송·예약·취소하지 않았다. 새 SQL은 없다.
 - AI 검증: deterministic fixture가 TARGET만 삭제하고 CONTROL row·CONTROL 수업·정규수업을 보존하는 성공 경로, row DELETE 전 CONTROL까지 사라지는 광범위 실패 복구, 응답 유실 복구, lesson 단계에서 전체 lessons가 사라지는 실패 복구를 실행한다. 서버 row audit도 단일 성공·광범위 삭제·응답 유실을 별도 검증한다. `npm run test:exam-prep-deletion`, production 시나리오 385건, 전체 `npm run test:production`, `npm run build`, `git diff --check`를 통과했고 build에는 기존 Vite chunk size 경고만 남았다.
-- 사람 gate: ① 배포 후 격리 시험정보 TARGET/CONTROL과 각각의 빈 자동 시험대비 수업, 별도 정규수업이 보이는지 확인한다. ② TARGET 행의 삭제를 한 번만 확정한다. ③ TARGET row와 TARGET 전용 빈 수업만 사라지고 CONTROL row·CONTROL 수업·정규수업은 즉시 남는지 확인한다. ④ 새로고침 뒤에도 같은 상태이고 다른 시험정보·수업이 사라지지 않았는지 확인한다. ⑤ 보호 데이터가 연결된 시험대비 수업은 삭제가 차단되고 audit ID가 표시되며 원 row/lesson이 유지되면 통과다. 하나라도 다르면 같은 삭제를 반복하지 않고 audit ID와 화면 상태를 유지보수에 전달한다.
-- 다음 순서: 이 사람 gate 통과 확인 뒤에만 `E:\academy-os-refactor`를 최신 `origin/main`에 rebase하고 14C-3 side-effect orchestration 리팩터링 또는 다음 의미 단위를 진행한다.
+- 사람 gate 통과: 2026-07-27 운영 화면에서 `용화여고 고1 · 2026 1학기 기말`의 격리 `14C3 삭제검수 TARGET`만 한 번 삭제했다. 사용자가 `CONTROL 유지, 새로고침 정상`을 확인했고, AI 재조회에서도 TARGET row/시험대비 수업 4건은 0건, CONTROL row 1건·CONTROL 시험대비 수업 4건·일반 CONTROL 수업 1건은 그대로였다. 관련 수업기록·숙제·`notification_jobs`는 모두 0건이며 Solapi 호출은 없었다.
+- fixture 정리: 사람 gate 뒤 CONTROL row·빈 시험대비 수업 4건·일반 CONTROL 수업 1건만 고정 ID로 정리했다. 최종 재조회에서 14C-3 fixture row/lesson 0건, 전체 시험정보 39건·수업 108건으로 생성 전 snapshot과 일치했다.
+- 다음 순서: `E:\academy-os-refactor`를 최신 `origin/main`에 rebase하고, 14C-3 완료 상태를 보존한 채 다음 App.jsx 의미 단위를 진행한다.
 
 ## 2026-07-27 P0. 날짜 제한 대신 최신 위험상태로 휴강 전환
 
