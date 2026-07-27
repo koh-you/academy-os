@@ -5912,11 +5912,14 @@ export function App() {
   function getSpecialLectureEnrollmentSaveSnapshot(enrollment) {
     const normalized = normalizeSpecialLectureEnrollment(enrollment);
     return JSON.stringify({
+      applicationId: normalized.applicationId,
       enrollmentId: normalized.enrollmentId,
       memo: normalized.memo,
       sessionIds: normalized.sessionIds,
       sessionPlans: normalized.sessionPlans,
-      status: normalized.status
+      specialLectureGuideId: normalized.specialLectureGuideId,
+      status: normalized.status,
+      studentId: normalized.studentId
     });
   }
 
@@ -7670,6 +7673,55 @@ export function App() {
     }
   }
 
+  async function handleRestoreStudent(studentId) {
+    const withdrawnStudent = students.find((student) => student.studentId === studentId);
+    if (!withdrawnStudent) throw new Error("퇴원 취소할 학생을 찾지 못했습니다.");
+    if (isActiveStudent(withdrawnStudent)) {
+      throw new Error("이미 재원 상태인 학생입니다. 새로고침 후 다시 확인해 주세요.");
+    }
+
+    const restoredStudent = {
+      ...withdrawnStudent,
+      status: "active",
+      withdrawnAt: "",
+      withdrawalReason: "",
+      withdrawalComment: ""
+    };
+    const saveResult = await postJsonWithTimeout(
+      "/api/students",
+      { student: restoredStudent },
+      15000,
+      "퇴원 취소 저장이 15초를 넘었습니다. 중복 실행하지 말고 상태를 다시 확인해 주세요."
+    );
+    if (saveResult.source !== "supabase") {
+      throw new Error("퇴원 취소가 Supabase가 아닌 임시 원천에 저장되어 완료할 수 없습니다.");
+    }
+
+    const studentsAfterResult = await getJsonWithTimeout(
+      "/api/students",
+      15000,
+      "퇴원 취소 저장 확인이 15초를 넘었습니다. 다시 실행하지 말고 잠시 뒤 새로고침해 주세요."
+    );
+    if (studentsAfterResult.source !== "supabase") {
+      throw new Error("퇴원 취소 결과를 Supabase에서 다시 확인하지 못했습니다.");
+    }
+    const persistedStudent = (studentsAfterResult.students ?? []).find((student) => student.studentId === studentId);
+    if (!persistedStudent) {
+      throw new Error("저장 응답은 받았지만 Supabase 재조회에서 학생을 찾지 못했습니다.");
+    }
+    if (
+      !isActiveStudent(persistedStudent) ||
+      persistedStudent.withdrawnAt ||
+      persistedStudent.withdrawalReason ||
+      persistedStudent.withdrawalComment
+    ) {
+      throw new Error("Supabase 재조회 값이 퇴원 취소 요청과 다릅니다. 완료로 처리하지 않았습니다.");
+    }
+
+    setStudents(studentsAfterResult.students ?? []);
+    return persistedStudent;
+  }
+
   function scheduleRecordAutoSave(record, lessonForRecord = null) {
     if (!record?.lessonStudentRecordId) return;
     const recordId = record.lessonStudentRecordId;
@@ -9028,6 +9080,7 @@ export function App() {
             onSaveStudentProfile={handleSaveStudentProfile}
             onSaveStudentConsultation={handleSaveStudentConsultation}
             onDeleteStudent={handleDeleteStudent}
+            onRestoreStudent={handleRestoreStudent}
             onSaveStudent={handleSaveStudent}
             onUpdateStudent={handleUpdateStudent}
           />

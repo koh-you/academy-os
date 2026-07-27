@@ -241,6 +241,7 @@ export function StudentManager({
   onSaveStudentProfile,
   onSaveStudentConsultation,
   onDeleteStudent,
+  onRestoreStudent,
   onSaveStudent,
   onUpdateStudent
 }) {
@@ -252,6 +253,8 @@ export function StudentManager({
   const [dirtyStudentIds, setDirtyStudentIds] = useState(() => new Set());
   const [originalClassTemplateIds, setOriginalClassTemplateIds] = useState({});
   const [studentSaveStates, setStudentSaveStates] = useState({});
+  const [studentRestoreStates, setStudentRestoreStates] = useState({});
+  const [studentRestoreNotice, setStudentRestoreNotice] = useState(null);
   const selectedClassTemplate = templates.find(
     (template) => template.classTemplateId === selectedClassTemplateId
   );
@@ -358,6 +361,38 @@ export function StudentManager({
     setDeleteStudentId(student.studentId);
   }
 
+  async function restoreStudent(student) {
+    if (!student?.studentId || studentRestoreStates[student.studentId] === "saving") return;
+    const shouldRestore = window.confirm(
+      `${student.name} 학생의 퇴원 처리를 취소할까요?\n\n학생 상태만 재원으로 복원합니다. 퇴원 당시 제외된 반과 미래 수업 명단은 자동으로 되돌리지 않습니다.`
+    );
+    if (!shouldRestore) return;
+
+    setStudentRestoreStates((current) => ({ ...current, [student.studentId]: "saving" }));
+    setStudentRestoreNotice({
+      message: `${student.name} 학생 원천 저장 중`,
+      saveState: "saving"
+    });
+    try {
+      await onRestoreStudent(student.studentId);
+      setStudentRestoreStates((current) => ({ ...current, [student.studentId]: "saved" }));
+      setStudentRestoreNotice({
+        message: `${student.name} 학생의 퇴원 취소를 Supabase 재조회로 확인했습니다. 반·미래 수업 명단은 별도로 확인해 주세요.`,
+        saveState: "saved"
+      });
+      if (selectedStudentId === student.studentId) {
+        setSelectedStudentId("");
+      }
+    } catch (error) {
+      console.error(error);
+      setStudentRestoreStates((current) => ({ ...current, [student.studentId]: "failed" }));
+      setStudentRestoreNotice({
+        message: error.message || `${student.name} 학생의 퇴원 취소에 실패했습니다.`,
+        saveState: "failed"
+      });
+    }
+  }
+
   return (
     <section className="panel fullPanel">
       <div className="sectionHeader">
@@ -404,6 +439,13 @@ export function StudentManager({
           퇴원생 목록
         </button>
       </div>
+
+      {studentRestoreNotice ? (
+        <div className={`studentRestoreNotice ${studentRestoreNotice.saveState}`} role={studentRestoreNotice.saveState === "failed" ? "alert" : "status"}>
+          <InlineSaveStatus label="퇴원 취소" saveState={studentRestoreNotice.saveState} />
+          <span>{studentRestoreNotice.message}</span>
+        </div>
+      ) : null}
 
       {activeTab === "class" ? (
         <div className="classTabList">
@@ -452,13 +494,15 @@ export function StudentManager({
             <span>퇴원일</span>
             <span>퇴원 사유</span>
             <span>코멘트</span>
-            <span>저장</span>
+            <span>저장 / 복원</span>
           </div>
           {visibleStudents.map((student, index) => {
             const saveState = studentSaveStates[student.studentId];
             const isDirty = dirtyStudentIds.has(student.studentId);
             const isSaving = saveState === "saving";
             const isSaveDisabled = !isDirty || isSaving;
+            const restoreState = studentRestoreStates[student.studentId] ?? "idle";
+            const isRestoring = restoreState === "saving";
             return (
               <div className={["studentListRow", "withdrawnStudentRow", isDirty ? "dirtyStudentRow" : ""].filter(Boolean).join(" ")} key={student.studentId}>
                 <span>{index + 1}</span>
@@ -494,14 +538,24 @@ export function StudentManager({
                   onChange={(event) => updateStudentField(student.studentId, "withdrawalComment", event.target.value)}
                   placeholder="퇴원 관련 코멘트"
                 />
-                <button
-                  className={`studentSaveButton ${saveState ?? "clean"}`}
-                  disabled={isSaveDisabled}
-                  onClick={() => saveStudentRow(student.studentId)}
-                  type="button"
-                >
-                  {getStudentSaveLabel(student.studentId)}
-                </button>
+                <div className="withdrawnStudentActions">
+                  <button
+                    className={`studentSaveButton ${saveState ?? "clean"}`}
+                    disabled={isSaveDisabled || isRestoring}
+                    onClick={() => saveStudentRow(student.studentId)}
+                    type="button"
+                  >
+                    {getStudentSaveLabel(student.studentId)}
+                  </button>
+                  <button
+                    className={`studentRestoreButton ${restoreState}`}
+                    disabled={isRestoring}
+                    onClick={() => restoreStudent(student)}
+                    type="button"
+                  >
+                    {isRestoring ? "복원 중" : restoreState === "failed" ? "복원 재시도" : "퇴원 취소"}
+                  </button>
+                </div>
               </div>
             );
           })}

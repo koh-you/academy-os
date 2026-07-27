@@ -11334,8 +11334,8 @@ textarea {
 }
 
 .studentListRow.withdrawnStudentRow {
-  grid-template-columns: 34px 190px 160px 80px 150px 150px 150px 104px 110px 130px minmax(260px, 1fr) 86px;
-  min-width: 1610px;
+  grid-template-columns: 34px 190px 160px 80px 150px 150px 150px 104px 110px 130px minmax(260px, 1fr) 180px;
+  min-width: 1704px;
 }
 
 .studentListRow:not(.studentListHead):hover {
@@ -11363,6 +11363,52 @@ textarea {
 
 .withdrawalCommentInput {
   width: 100%;
+}
+
+.withdrawnStudentActions {
+  display: grid;
+  gap: 6px;
+}
+
+.studentRestoreButton {
+  background: #eef6ff;
+  border: 1px solid #93c5fd;
+  border-radius: 8px;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 900;
+  min-height: 32px;
+  padding: 0 8px;
+}
+
+.studentRestoreButton.saving {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.studentRestoreButton.failed {
+  background: #fff1f2;
+  border-color: #fda4af;
+  color: #be123c;
+}
+
+.studentRestoreNotice {
+  align-items: center;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  color: #1e3a8a;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+}
+
+.studentRestoreNotice.failed {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  color: #9f1239;
 }
 
 .studentListEmpty {
