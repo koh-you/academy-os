@@ -6364,7 +6364,10 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "GET" && requestUrl.pathname === "/api/lessons") {
     try {
-      const result = await listLessons({ date: requestUrl.searchParams.get("date") });
+      const result = await listLessons({
+        date: requestUrl.searchParams.get("date"),
+        includeCanceled: requestUrl.searchParams.get("includeCanceled") === "true"
+      });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });

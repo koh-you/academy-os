@@ -48,6 +48,12 @@ import {
   sortNotificationJobsForCurrentStatus
 } from "../domains/notifications/notificationJobSelectors.js";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
+import {
+  createCanceledAbsenceMakeupTask,
+  createCanceledSupplementLesson,
+  getAbsenceSourcePreservationSnapshot,
+  getCanceledAbsenceMakeupSaveSnapshot
+} from "../domains/supplements/supplementCancellation.js";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
   createTestAttemptId,
@@ -9711,6 +9717,7 @@ export function App() {
             records={records}
             students={students}
             tasks={makeupTasks}
+            onCancelAbsenceMakeup={handleCancelAbsenceMakeupKeepSource}
             onCancelAbsenceSource={handleCancelAbsenceMakeupSource}
             onCancelNotification={handleCancelSupplementNotificationControl}
             onPassTask={handlePassSupplementTask}
@@ -10615,11 +10622,192 @@ export function App() {
       updatedBy: "manual_attendance_cancel"
     };
     const cancelPayload = { record: nextRecord };
-    await postJson("/api/lesson-records", cancelPayload);
-    const nextRecords = upsertLessonStudentRecord(recordsRef.current, nextRecord);
+    const saveResult = await postJson("/api/lesson-records", cancelPayload);
+    if (saveResult.source !== "supabase") {
+      throw new Error("결석 기록 취소가 Supabase 원천에 저장되지 않았습니다.");
+    }
+    const verification = await getJsonWithTimeout(
+      `/api/lesson-records?verify=cancel-absence-source-${encodeURIComponent(task.sourceId)}-${Date.now()}`,
+      12000,
+      "결석 기록 취소 후 Supabase 재확인이 지연되고 있습니다."
+    );
+    if (verification.source !== "supabase") {
+      throw new Error("결석 기록 취소 결과를 Supabase에서 다시 확인하지 못했습니다.");
+    }
+    const verifiedRecord = (verification.records ?? []).find(
+      (record) => record.lessonStudentRecordId === task.sourceId
+    );
+    if (
+      !verifiedRecord ||
+      verifiedRecord.attendanceStatus !== "pending" ||
+      verifiedRecord.attendanceReason ||
+      verifiedRecord.checkInAt ||
+      verifiedRecord.checkInTime ||
+      verifiedRecord.checkOutAt ||
+      verifiedRecord.checkOutTime
+    ) {
+      throw new Error("Supabase 재조회 값이 결석 기록 취소 결과와 다릅니다.");
+    }
+    const nextRecords = upsertLessonStudentRecord(recordsRef.current, verifiedRecord);
     recordsRef.current = nextRecords;
     setRecords(nextRecords);
-    return nextRecord;
+    return verifiedRecord;
+  }
+
+  async function handleCancelAbsenceMakeupKeepSource(task) {
+    if (task?.taskType !== "absence_makeup") {
+      throw new Error("결석보강 항목만 결석기록 유지 방식으로 취소할 수 있습니다.");
+    }
+    if (!task.makeupTaskId || task.isLocalDraftTask) {
+      throw new Error("저장된 결석보강 항목만 보강 취소할 수 있습니다.");
+    }
+    const sourceRecord = recordsRef.current.find(
+      (record) => record.lessonStudentRecordId === task.sourceId
+    );
+    if (!sourceRecord) throw new Error("유지할 원 결석 수업일지 기록을 찾지 못했습니다.");
+    if (!isAbsenceLikeAttendanceStatus(sourceRecord.attendanceStatus)) {
+      throw new Error("원 수업일지의 현재 출결이 결석 상태가 아니어서 보강만 취소할 수 없습니다.");
+    }
+
+    const canceledAt = new Date().toISOString();
+    const sourceRecordSnapshot = getAbsenceSourcePreservationSnapshot(sourceRecord);
+    const requestedTask = createCanceledAbsenceMakeupTask(
+      createPersistableSupplementTask(task),
+      canceledAt
+    );
+    const taskSaveResult = await postMakeupTask(requestedTask);
+    if (taskSaveResult.source !== "supabase") {
+      throw new Error("보강 취소가 Supabase 보충 원천에 저장되지 않았습니다.");
+    }
+
+    let requestedCanceledLesson = null;
+    if (requestedTask.linkedLessonId) {
+      let linkedLesson = lessons.find(
+        (lesson) => lesson.lessonId === requestedTask.linkedLessonId
+      );
+      if (!linkedLesson) {
+        const currentLessonResult = await getJsonWithTimeout(
+          `/api/lessons?verify=cancel-makeup-source-${Date.now()}`,
+          12000,
+          "연결 보강 수업일지를 확인하는 데 시간이 걸리고 있습니다."
+        );
+        linkedLesson = (currentLessonResult.lessons ?? []).find(
+          (lesson) => lesson.lessonId === requestedTask.linkedLessonId
+        );
+      }
+      if (linkedLesson) {
+        requestedCanceledLesson = createCanceledSupplementLesson(linkedLesson, canceledAt);
+        const lessonSaveResult = await postJson("/api/lessons", {
+          lesson: requestedCanceledLesson
+        });
+        if (lessonSaveResult.source !== "supabase") {
+          throw new Error("보강 항목은 취소됐지만 연결 수업일지를 취소하지 못했습니다. 다시 확인해 주세요.");
+        }
+      }
+    }
+
+    const relatedActiveNotificationJobs = notificationJobs.filter((job) => {
+      const payload = job.payload ?? {};
+      const result = job.result && typeof job.result === "object" ? job.result : {};
+      const jobMakeupTaskId = payload.makeupTaskId || result.makeupTaskId || "";
+      const belongsToTask = jobMakeupTaskId === requestedTask.makeupTaskId;
+      const belongsToLesson = Boolean(
+        requestedTask.linkedLessonId &&
+        job.lessonId === requestedTask.linkedLessonId
+      );
+      return (belongsToTask || belongsToLesson) && canCancelNotificationJob(job);
+    });
+    try {
+      await Promise.all(
+        relatedActiveNotificationJobs.map((job) =>
+          handleCancelNotificationJob(job, "보강 취소 · 원 결석기록 유지")
+        )
+      );
+    } catch (error) {
+      throw new Error(
+        `보강과 연결 수업일지는 취소됐지만 알림톡 예약 취소 확인에 실패했습니다: ${error?.message || "알 수 없는 오류"}`
+      );
+    }
+
+    const [taskVerification, lessonVerification, recordVerification] = await Promise.all([
+      getJsonWithTimeout(
+        `/api/makeup-tasks?verify=cancel-makeup-task-${encodeURIComponent(requestedTask.makeupTaskId)}-${Date.now()}`,
+        12000,
+        "보강 취소 후 보충 원천 재확인이 지연되고 있습니다."
+      ),
+      requestedCanceledLesson
+        ? getJsonWithTimeout(
+            `/api/lessons?includeCanceled=true&verify=cancel-makeup-lesson-${encodeURIComponent(requestedCanceledLesson.lessonId)}-${Date.now()}`,
+            12000,
+            "보강 취소 후 연결 수업일지 재확인이 지연되고 있습니다."
+          )
+        : Promise.resolve({ lessons }),
+      getJsonWithTimeout(
+        `/api/lesson-records?verify=preserve-absence-${encodeURIComponent(sourceRecord.lessonStudentRecordId)}-${Date.now()}`,
+        12000,
+        "보강 취소 후 원 결석기록 보존 여부를 확인하는 데 시간이 걸리고 있습니다."
+      )
+    ]);
+    if (taskVerification.source !== "supabase" || recordVerification.source !== "supabase") {
+      throw new Error("보강 취소 결과와 원 결석기록을 Supabase에서 다시 확인하지 못했습니다.");
+    }
+    if (requestedCanceledLesson && lessonVerification.source !== "supabase") {
+      throw new Error("취소한 연결 수업일지를 Supabase에서 다시 확인하지 못했습니다.");
+    }
+
+    const verifiedTask = (taskVerification.makeupTasks ?? []).find(
+      (item) => item.makeupTaskId === requestedTask.makeupTaskId
+    );
+    if (
+      !verifiedTask ||
+      getCanceledAbsenceMakeupSaveSnapshot(verifiedTask) !==
+        getCanceledAbsenceMakeupSaveSnapshot(requestedTask)
+    ) {
+      throw new Error("Supabase 재조회 값이 보강 취소 원천과 다릅니다.");
+    }
+
+    const verifiedSourceRecord = (recordVerification.records ?? []).find(
+      (record) => record.lessonStudentRecordId === sourceRecord.lessonStudentRecordId
+    );
+    if (
+      !verifiedSourceRecord ||
+      getAbsenceSourcePreservationSnapshot(verifiedSourceRecord) !== sourceRecordSnapshot
+    ) {
+      throw new Error("보강 취소 과정에서 원 결석기록이 달라졌습니다. 완료로 처리하지 않았습니다.");
+    }
+
+    const persistedLessons = Array.isArray(lessonVerification.lessons)
+      ? lessonVerification.lessons
+      : lessons;
+    if (requestedCanceledLesson) {
+      const verifiedCanceledLesson = persistedLessons.find(
+        (lesson) => lesson.lessonId === requestedCanceledLesson.lessonId
+      );
+      if (
+        !verifiedCanceledLesson ||
+        getLessonModalSaveSnapshot(verifiedCanceledLesson) !==
+          getLessonModalSaveSnapshot(requestedCanceledLesson)
+      ) {
+        throw new Error("Supabase 재조회 값이 취소한 보강 수업일지와 다릅니다.");
+      }
+    }
+
+    setMakeupTasks((current) => upsertById(current, verifiedTask, "makeupTaskId"));
+    if (requestedCanceledLesson) {
+      setLessons(filterActiveLessons(persistedLessons));
+    }
+    const nextRecords = upsertLessonStudentRecord(
+      recordsRef.current,
+      verifiedSourceRecord
+    );
+    recordsRef.current = nextRecords;
+    setRecords(nextRecords);
+
+    return {
+      canceledNotificationJobCount: relatedActiveNotificationJobs.length,
+      makeupTask: verifiedTask,
+      sourceRecord: verifiedSourceRecord
+    };
   }
 
   async function handleScheduleSupplementTask(task) {
@@ -22967,6 +23155,7 @@ function SupplementCenter({
   records,
   students,
   tasks,
+  onCancelAbsenceMakeup,
   onCancelAbsenceSource,
   onCancelNotification,
   onPassTask,
@@ -23178,6 +23367,23 @@ function SupplementCenter({
     }
   }
 
+  async function handleCancelAbsenceMakeupFromModal(task) {
+    setSupplementRowAction(task, "saving", "보강만 취소 중 · 결석기록 유지");
+    try {
+      const result = await onCancelAbsenceMakeup?.(task);
+      const canceledTask = result?.makeupTask ?? task;
+      setSupplementRowAction(canceledTask, "saved", "보강 취소 완료 · 원 결석기록 유지");
+      return result;
+    } catch (error) {
+      setSupplementRowAction(
+        task,
+        "failed",
+        error?.message || "보강 취소 실패 · 원 결석기록을 다시 확인해 주세요."
+      );
+      throw error;
+    }
+  }
+
   async function handlePassSupplementTaskFromModal(task) {
     setSupplementRowAction(task, "saving", "보충 완료 처리 중");
     try {
@@ -23283,7 +23489,10 @@ function SupplementCenter({
   const persistedSelectedSupplementTasks = tasks.filter((task) => task.studentId === selectedSupplementStudentId && task.taskType === activeSupplementTab)
     .map(hydrateSupplementTask);
   const focusedPersistedSupplementTasks = selectedSupplementTaskKey
-    ? persistedSelectedSupplementTasks.filter((task) => getSupplementActionKey(task) === selectedSupplementTaskKey && task.status !== "done")
+    ? persistedSelectedSupplementTasks.filter((task) =>
+        getSupplementActionKey(task) === selectedSupplementTaskKey &&
+        !["done", "canceled"].includes(task.status)
+      )
     : [];
   const shouldShowPendingCandidate =
     pendingCandidateTask &&
@@ -23299,7 +23508,7 @@ function SupplementCenter({
   const visibleAbsenceSupplementItems = absenceSupplementItems.filter((item) => !item.isFutureDeferred);
   const deferredAbsenceSupplementItems = absenceSupplementItems.filter((item) => item.isFutureDeferred);
   const activeDeferredAbsenceItems = deferredAbsenceSupplementItems
-    .filter((item) => findTaskForCandidate(item.task)?.status !== "done")
+    .filter((item) => !["done", "canceled"].includes(findTaskForCandidate(item.task)?.status))
     .sort((a, b) => String(a.lessonDate || "").localeCompare(String(b.lessonDate || "")));
   const supplementTabDefinitions = [
     {
@@ -23358,19 +23567,21 @@ function SupplementCenter({
     }
   ];
   const supplementTabs = supplementTabDefinitions.map((tab) => {
-    const items = tab.items.filter((item) => findTaskForCandidate(item.task)?.status !== "done");
+    const items = tab.items.filter((item) =>
+      !["done", "canceled"].includes(findTaskForCandidate(item.task)?.status)
+    );
     return { ...tab, count: items.length, items };
   });
   const activeTabData = supplementTabs.find((tab) => tab.id === activeSupplementTab) ?? supplementTabs[0];
   const historyCutoffDate = addDaysInKorea(today, -30);
   const recentSupplementTasks = tasks
     .filter((task) => {
-      const baseDate = String(task.completedAt || task.passedAt || task.lastScheduledAt || task.touchedAt || task.scheduledDate || task.createdAt || "").slice(0, 10);
+      const baseDate = String(task.canceledAt || task.completedAt || task.passedAt || task.lastScheduledAt || task.touchedAt || task.scheduledDate || task.createdAt || "").slice(0, 10);
       return baseDate >= historyCutoffDate;
     })
     .sort((a, b) =>
-      String(b.completedAt || b.passedAt || b.lastScheduledAt || b.touchedAt || b.scheduledDate || b.createdAt || "")
-        .localeCompare(String(a.completedAt || a.passedAt || a.lastScheduledAt || a.touchedAt || a.scheduledDate || a.createdAt || ""))
+      String(b.canceledAt || b.completedAt || b.passedAt || b.lastScheduledAt || b.touchedAt || b.scheduledDate || b.createdAt || "")
+        .localeCompare(String(a.canceledAt || a.completedAt || a.passedAt || a.lastScheduledAt || a.touchedAt || a.scheduledDate || a.createdAt || ""))
     );
 
   return (
@@ -23441,6 +23652,7 @@ function SupplementCenter({
       {selectedSupplementStudent ? (
         <SupplementStudentModal
           notificationTemplates={notificationTemplates}
+          onCancelAbsenceMakeup={handleCancelAbsenceMakeupFromModal}
           onCancelAbsenceSource={handleCancelAbsenceSourceFromModal}
           onCancelNotification={onCancelNotification}
           onClose={closeSupplementStudentModal}
@@ -23475,6 +23687,78 @@ function SupplementCenter({
         />
       ) : null}
     </section>
+  );
+}
+
+function SupplementCancellationConfirmModal({
+  isBusy = false,
+  mode,
+  onCancel,
+  onConfirm,
+  studentName,
+  task
+}) {
+  const keepsSourceAbsence = mode === "cancelMakeupKeepAbsence";
+  return (
+    <Modal
+      className="supplementPassConfirmModal supplementCancellationConfirmModal"
+      title={keepsSourceAbsence ? "보강만 취소할까요?" : "결석 기록을 취소할까요?"}
+      subtitle={keepsSourceAbsence
+        ? "보강 일정은 취소하지만 원 수업일지의 결석기록은 그대로 유지합니다."
+        : "원 수업일지의 결석 자체를 대기 상태로 되돌리는 별도 기능입니다."}
+      onClose={onCancel}
+    >
+      <div className="supplementPassConfirmBody">
+        <p>
+          <strong>{studentName}</strong> 학생의 {keepsSourceAbsence ? "결석보강만" : "원 결석기록을"} 취소할까요?
+        </p>
+        <dl className="supplementPassConfirmSummary supplementCancellationSummary">
+          <div>
+            <dt>원 결석기록</dt>
+            <dd className={keepsSourceAbsence ? "preserved" : "changed"}>
+              {keepsSourceAbsence ? "결석 상태·사유 그대로 유지" : "결석 → 대기 상태로 변경"}
+            </dd>
+          </div>
+          <div>
+            <dt>보강 항목</dt>
+            <dd>{keepsSourceAbsence ? "취소 내역으로 보존" : "미저장 초안 닫기"}</dd>
+          </div>
+          <div>
+            <dt>보강 일정</dt>
+            <dd>
+              {task.scheduledDate || "미확정"} {task.scheduledTime || ""}
+              {keepsSourceAbsence && task.linkedLessonId ? " · 연결 수업일지 취소" : ""}
+            </dd>
+          </div>
+          <div>
+            <dt>알림톡</dt>
+            <dd>
+              {keepsSourceAbsence
+                ? "미발송 학생·학부모·당일 예약 취소"
+                : "발송·예약을 새로 만들지 않음"}
+            </dd>
+          </div>
+        </dl>
+        <div className={`supplementCancellationNotice ${keepsSourceAbsence ? "preserved" : "changed"}`}>
+          <strong>{keepsSourceAbsence ? "결석기록 유지" : "결석기록 변경"}</strong>
+          <span>
+            {keepsSourceAbsence
+              ? "완료 전 Supabase에서 원 결석 상태와 사유가 바뀌지 않았는지 다시 확인합니다."
+              : "이 동작은 보강만 취소하는 기능이 아닙니다. 원 결석을 잘못 입력했을 때만 사용하세요."}
+          </span>
+        </div>
+      </div>
+      <div className="modalActions confirmActions">
+        <button className="softButton" disabled={isBusy} onClick={onCancel} type="button">
+          돌아가기
+        </button>
+        <button className="dangerSoftButton" disabled={isBusy} onClick={onConfirm} type="button">
+          {isBusy
+            ? keepsSourceAbsence ? "보강 취소 중" : "결석 취소 중"
+            : keepsSourceAbsence ? "보강만 취소" : "결석 기록 취소"}
+        </button>
+      </div>
+    </Modal>
   );
 }
 
@@ -23785,6 +24069,7 @@ function createPersistableSupplementTask(task = {}) {
 function SupplementStudentModal({
   notificationTemplates = {},
   notificationJobs = [],
+  onCancelAbsenceMakeup,
   onCancelAbsenceSource,
   onCancelNotification,
   onClose,
@@ -23801,6 +24086,7 @@ function SupplementStudentModal({
     [notificationTemplates]
   );
   const [feedback, setFeedback] = useState(null);
+  const [cancellationConfirm, setCancellationConfirm] = useState(null);
   const [passConfirmTask, setPassConfirmTask] = useState(null);
   const [scheduleConfirmTask, setScheduleConfirmTask] = useState(null);
   const [busyTaskId, setBusyTaskId] = useState("");
@@ -24094,19 +24380,46 @@ function SupplementStudentModal({
     }
   }
 
-  async function handleCancelAbsenceSourceTask(task) {
-    if (!task || busyTaskId) return;
-    const actionKey = `${task.makeupTaskId}:cancelAbsence`;
+  async function handleConfirmSupplementCancellation() {
+    const task = cancellationConfirm?.task;
+    const mode = cancellationConfirm?.mode;
+    if (!task || !mode || busyTaskId) return;
+    const keepsSourceAbsence = mode === "cancelMakeupKeepAbsence";
+    const actionKey = keepsSourceAbsence
+      ? `${task.makeupTaskId}:cancelMakeup`
+      : `${task.makeupTaskId}:cancelAbsence`;
     setBusyTaskId(actionKey);
-    showFeedback("결석 처리 취소 중", "원 수업일지 출결을 대기 상태로 되돌리고 보충 생성 후보를 정리합니다.", "saving");
+    showFeedback(
+      keepsSourceAbsence ? "보강만 취소 중" : "결석 기록 취소 중",
+      keepsSourceAbsence
+        ? "보강 항목·연결 수업일지·미발송 예약을 취소하고 원 결석기록 보존 여부를 확인합니다."
+        : "원 수업일지 출결을 대기 상태로 되돌리고 보충 생성 후보를 정리합니다.",
+      "saving"
+    );
 
     try {
-      await onCancelAbsenceSource?.(task);
-      showFeedback("결석 처리 취소 완료", "원 수업일지 출결이 대기 상태로 돌아갔습니다. 이 결석보강 후보는 목록에서 사라집니다.");
+      const result = keepsSourceAbsence
+        ? await onCancelAbsenceMakeup?.(task)
+        : await onCancelAbsenceSource?.(task);
+      setCancellationConfirm(null);
+      showFeedback(
+        keepsSourceAbsence ? "보강 취소 완료 · 결석기록 유지" : "결석 기록 취소 완료",
+        keepsSourceAbsence
+          ? `원 수업일지의 결석 상태와 사유는 그대로 유지했습니다. 미발송 알림톡 예약 ${result?.canceledNotificationJobCount ?? 0}건을 취소했습니다.`
+          : "원 수업일지 출결이 대기 상태로 돌아갔습니다. 이 결석보강 후보는 목록에서 사라집니다."
+      );
       onClose?.();
     } catch (error) {
-      console.error("Failed to cancel absence source", error);
-      showFeedback("결석 처리 취소 실패", error?.message || "원 수업일지 출결을 되돌리지 못했습니다.", "failed");
+      console.error("Failed to cancel supplement or absence source", error);
+      showFeedback(
+        keepsSourceAbsence ? "보강 취소 실패" : "결석 기록 취소 실패",
+        error?.message || (
+          keepsSourceAbsence
+            ? "보강을 취소하지 못했습니다. 원 결석기록과 예약 상태를 다시 확인해 주세요."
+            : "원 수업일지 출결을 되돌리지 못했습니다."
+        ),
+        "failed"
+      );
     } finally {
       setBusyTaskId("");
     }
@@ -24347,7 +24660,12 @@ function SupplementStudentModal({
               const isScheduleBusy = busyTaskId === `${task.makeupTaskId}:schedule`;
               const isLocalDraftTask = Boolean(task.isLocalDraftTask);
               const canCancelAbsenceSource = isLocalDraftTask && task.taskType === "absence_makeup";
+              const canCancelAbsenceMakeup =
+                !isLocalDraftTask &&
+                task.taskType === "absence_makeup" &&
+                !["done", "canceled"].includes(task.status);
               const isCancelAbsenceBusy = busyTaskId === `${task.makeupTaskId}:cancelAbsence`;
+              const isCancelMakeupBusy = busyTaskId === `${task.makeupTaskId}:cancelMakeup`;
               const hasScheduleDraft = Boolean(draftValues.scheduledDate && draftValues.scheduledTime);
               const hasScheduleDiff = draftDiff.some((item) => ["scheduledDate", "scheduledTime"].includes(item.field));
               const hasNotificationDiff = draftDiff.some((item) => supplementTeacherFinalFields.has(item.field));
@@ -24549,16 +24867,6 @@ function SupplementStudentModal({
                     <span>{isScheduleChangeMode ? "수업일지 일정 변경" : "수업일지 일정 만들기"}: {scheduleGateBody}</span>
                   </div>
                   <div className="modalActions supplementSplitActions supplementTaskActions">
-                    {canCancelAbsenceSource ? (
-                      <button
-                        className="dangerSoftButton"
-                        disabled={isTaskBusy}
-                        onClick={() => handleCancelAbsenceSourceTask(task)}
-                        type="button"
-                      >
-                        {isCancelAbsenceBusy ? "취소 중" : "결석 처리 취소"}
-                      </button>
-                    ) : null}
                     <button className="softButton primarySoft" disabled={isTaskBusy} onClick={() => handleSaveTask(task)} type="button">
                       {isContentBusy ? "저장 중" : "보충 내용·알림톡 저장"}
                     </button>
@@ -24577,12 +24885,49 @@ function SupplementStudentModal({
                       </button>
                     ) : null}
                   </div>
+                  {canCancelAbsenceSource || canCancelAbsenceMakeup ? (
+                    <section className={`supplementCancellationZone ${canCancelAbsenceMakeup ? "keepAbsence" : "cancelAbsence"}`}>
+                      <div>
+                        <strong>{canCancelAbsenceMakeup ? "보강 일정만 취소" : "결석 원본 자체를 취소"}</strong>
+                        <span>
+                          {canCancelAbsenceMakeup
+                            ? "원 수업일지의 결석 상태·사유는 유지하고, 보강 항목과 연결 일정 및 미발송 예약만 취소합니다."
+                            : "원 수업일지의 결석을 대기 상태로 되돌립니다. 아직 저장하지 않은 보강 초안도 함께 닫힙니다."}
+                        </span>
+                      </div>
+                      <button
+                        className="dangerSoftButton"
+                        disabled={isTaskBusy}
+                        onClick={() => setCancellationConfirm({
+                          mode: canCancelAbsenceMakeup
+                            ? "cancelMakeupKeepAbsence"
+                            : "cancelAbsenceSource",
+                          task
+                        })}
+                        type="button"
+                      >
+                        {canCancelAbsenceMakeup
+                          ? isCancelMakeupBusy ? "보강 취소 중" : "보강만 취소"
+                          : isCancelAbsenceBusy ? "결석 취소 중" : "결석 기록 취소"}
+                      </button>
+                    </section>
+                  ) : null}
                 </article>
               );
             })}
           </div>
         </section>
       </div>
+      {cancellationConfirm ? (
+        <SupplementCancellationConfirmModal
+          isBusy={busyTaskId.endsWith(":cancelMakeup") || busyTaskId.endsWith(":cancelAbsence")}
+          mode={cancellationConfirm.mode}
+          onCancel={() => setCancellationConfirm(null)}
+          onConfirm={handleConfirmSupplementCancellation}
+          studentName={student.name}
+          task={cancellationConfirm.task}
+        />
+      ) : null}
       {passConfirmTask ? (
         <SupplementPassConfirmModal
           isBusy={busyTaskId === `${passConfirmTask.makeupTaskId}:pass`}
@@ -24702,19 +25047,24 @@ function SupplementHistoryModal({ onChangeQuery, onClose, onUndoPassTask, query,
 
   function statusLabel(task) {
     if (task.status === "done") return "보충 완료";
+    if (task.status === "canceled") {
+      return task.cancellationMode === "keep_source_absence"
+        ? "보강 취소 · 결석 유지"
+        : "보강 취소";
+    }
     if (task.status === "scheduled") return "일정 확정";
     return "진행 중";
   }
 
   function historyDate(task) {
-    return String(task.completedAt || task.passedAt || task.lastScheduledAt || task.touchedAt || task.scheduledDate || task.createdAt || "").slice(0, 10) || "-";
+    return String(task.canceledAt || task.completedAt || task.passedAt || task.lastScheduledAt || task.touchedAt || task.scheduledDate || task.createdAt || "").slice(0, 10) || "-";
   }
 
   return (
     <Modal
       className="supplementHistoryModal"
       title="최근 한 달 보충관리 내역"
-      subtitle="보충 완료, 일정 확정, 진행 중 항목을 학생별로 확인합니다."
+      subtitle="보충 완료, 보강 취소, 일정 확정, 진행 중 항목을 학생별로 확인합니다."
       onClose={onClose}
     >
       <div className="supplementHistoryToolbar">
@@ -24750,7 +25100,7 @@ function SupplementHistoryModal({ onChangeQuery, onClose, onUndoPassTask, query,
                   <span>{historyDate(task)}</span>
                   <small>{task.scheduledDate || "-"} {task.scheduledTime || ""}</small>
                 </div>
-                <span className={`supplementProgressBadge ${task.status === "done" ? "done" : task.status === "scheduled" ? "scheduled" : "draft"}`}>
+                <span className={`supplementProgressBadge ${task.status === "done" ? "done" : task.status === "canceled" ? "canceled" : task.status === "scheduled" ? "scheduled" : "draft"}`}>
                   {statusLabel(task)}
                 </span>
                 <div className="supplementHistoryActions">
@@ -24758,6 +25108,10 @@ function SupplementHistoryModal({ onChangeQuery, onClose, onUndoPassTask, query,
                     <button className="softButton subtle" onClick={() => onUndoPassTask(task)} type="button">
                       보충관리로 복귀
                     </button>
+                  ) : task.status === "canceled" ? (
+                    <span className="historyActionHint">
+                      {task.cancellationMode === "keep_source_absence" ? "원 결석기록 유지" : "취소 내역 보존"}
+                    </span>
                   ) : (
                     <span className="historyActionHint">관리 중</span>
                   )}
@@ -28276,6 +28630,13 @@ function getSupplementImmediateNoticeSaveStatus(status, skipped = false) {
 function getSupplementTaskProgress(task, lessons = []) {
   if (!task) return { label: "미생성", tone: "muted", detail: "" };
   if (task.status === "done") return { label: "보충 완료", tone: "done", detail: "" };
+  if (task.status === "canceled") {
+    return {
+      label: task.cancellationMode === "keep_source_absence" ? "보강 취소 · 결석 유지" : "보강 취소",
+      tone: "canceled",
+      detail: String(task.canceledAt || "").slice(0, 10)
+    };
+  }
   if (task.needsLessonResync) {
     return {
       label: "수업일지 재반영 필요",

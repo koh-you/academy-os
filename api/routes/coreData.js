@@ -1740,17 +1740,20 @@ export async function listClassTemplates() {
   return { source: databaseSource, classTemplates: rows.map(fromClassTemplateRow) };
 }
 
-export async function listLessons({ date } = {}) {
+export async function listLessons({ date, includeCanceled = false } = {}) {
   if (!isSupabaseConfigured()) {
-    const activeLessons = sampleData.lessons.filter((lesson) => (lesson.status ?? "scheduled") !== "canceled");
-    const lessons = date ? activeLessons.filter((lesson) => lesson.date === date) : activeLessons;
+    const sourceLessons = includeCanceled
+      ? sampleData.lessons
+      : sampleData.lessons.filter((lesson) => (lesson.status ?? "scheduled") !== "canceled");
+    const lessons = date ? sourceLessons.filter((lesson) => lesson.date === date) : sourceLessons;
     return { source: fallbackSource, lessons };
   }
 
   await deleteExpiredCanceledLessons();
+  const statusFilter = includeCanceled ? "" : "&status=neq.canceled";
   const query = date
-    ? `select=*&status=neq.canceled&lesson_date=eq.${encodeURIComponent(date)}&order=lesson_date.asc,start_time.asc`
-    : "select=*&status=neq.canceled&order=lesson_date.asc,start_time.asc";
+    ? `select=*${statusFilter}&lesson_date=eq.${encodeURIComponent(date)}&order=lesson_date.asc,start_time.asc`
+    : `select=*${statusFilter}&order=lesson_date.asc,start_time.asc`;
   const rows = await listRows("lessons", query, { requireServiceRole: true });
   return { source: databaseSource, lessons: rows.map(fromLessonRow) };
 }
