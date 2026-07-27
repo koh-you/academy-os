@@ -8484,7 +8484,8 @@ export function App() {
       osScheduled: true,
       parentPhone: student.parentPhone,
       preparationNotice: payloadSnapshot.preparationNotice,
-      previousHomework: previousHomework?.title ?? "",
+      previousHomework: payloadSnapshot.previousHomework,
+      reservationFingerprint: getLessonReservationPayloadFingerprint(payloadSnapshot),
       scheduledDate,
       scheduleMode: mode,
       sendMode: "scheduled",
@@ -17005,8 +17006,11 @@ function LessonJournalDetail({
       if (!job) return false;
       if (job.status !== "scheduled") return true;
       if (job.provider !== "solapi" || !getNotificationJobProviderReference(job)) return true;
-      const payloadFingerprint = getLessonReservationPayloadFingerprint({
+      const payloadFingerprint = String(job.payload?.reservationFingerprint ?? "") || getLessonReservationPayloadFingerprint({
         ...(job.payload ?? {}),
+        previousHomework: isAssignmentStatusUnrecorded(job.payload?.assignmentStatus)
+          ? ""
+          : job.payload?.previousHomework ?? "",
         recipient: job.recipient,
         scheduledDate: job.scheduledAt || job.payload?.scheduledDate || ""
       });
