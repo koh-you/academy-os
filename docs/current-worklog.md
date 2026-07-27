@@ -1442,6 +1442,14 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-27 P1. 로드맵 15 Lesson Hub / Calendar inventory — AI gate 통과
+
+- 기준 문서: `docs/refactor-lesson-hub-calendar-inventory-2026-07-27.md`에 활성 진입점, 표시/상세 라우팅, local/app_state/Supabase 원천, 외부 side effect, 동작별 위험도와 분리 순서를 기록했다.
+- 현재 구조: 실제 화면은 `TeacherLessonHubV2` 한 곳에서 열리고 `LessonModal`은 callback-only draft UI다. `TeacherLessonHub`, `TeacherMonthCalendar`, `LessonHub`, `MonthCalendar`, `LessonDetail`은 호출 경로가 없는 legacy 정의다.
+- 경계: 수업 생성·수정 bulk 저장과 휴강 전환은 현재 read-after-write 계약을 유지한다. 출결·숙제·알림은 로드맵 17, 자동 생성 수업은 별도 고위험 단위, 복사·붙여넣기·undo·취소는 저장 신뢰성 보강 전 이동하지 않는다.
+- 유지보수 진단: 붙여넣기에는 생성 모달과 같은 Supabase 재조회·상태 표시가 없고, 붙여넣기 `create` undo에는 성공한 서버 lesson을 취소/삭제하는 호출이 보이지 않는다. 리팩터링에서 고치지 않고 저장 신뢰성 큐로 넘긴다.
+- 사람 gate: inventory는 읽기 전용이라 없다. 다음은 최신 `origin/main` rebase 후 비활성 legacy 5개 함수만 제거하는 15A이며, 정적 fixture와 production test/build가 통과하면 사람 조작 없이 커밋·푸시한다.
+
 ## 2026-07-27 P1. 최신 main rebase 및 로드맵 14 통합 확정 — AI gate 통과
 
 - 통합: `codex/refactor-supplement-11b`의 128개 리팩터링 커밋을 최신 `origin/main` 위로 rebase했다. 최신 main의 14C-3 시험정보 삭제 audit·실패 보상 복구와 퇴원일 다음 날부터 미래 수업 명단을 제외하는 경계를 모두 보존했다.
