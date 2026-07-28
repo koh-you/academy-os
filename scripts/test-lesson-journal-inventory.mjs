@@ -82,6 +82,14 @@ const editableMemoCardModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalEditableMemoCardModel.js", import.meta.url),
   "utf8"
 );
+const editableFieldsSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalEditableFields.jsx", import.meta.url),
+  "utf8"
+);
+const editableFieldsModelSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalEditableFieldsModel.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -409,11 +417,6 @@ for (const extractedAttendanceButtonContract of [
     `missing extracted 17C-3 contract: ${extractedAttendanceButtonContract}`
   );
 }
-assert.equal(
-  (journalSource.match(/<LessonJournalEditableMemoCard/g) ?? []).length,
-  4,
-  "LessonJournalDetail must compose four extracted editable memo cards"
-);
 assert.ok(
   !appSource.includes("function EditableMemoCard("),
   "App must not retain the editable memo card implementation"
@@ -429,6 +432,28 @@ for (const extractedEditableMemoCardContract of [
   assert.ok(
     `${editableMemoCardSource}\n${editableMemoCardModelSource}`.includes(extractedEditableMemoCardContract),
     `missing extracted 17C-4 contract: ${extractedEditableMemoCardContract}`
+  );
+}
+assert.ok(
+  journalSource.includes("<LessonJournalEditableFields"),
+  "LessonJournalDetail must compose the extracted editable fields"
+);
+assert.equal(
+  (journalSource.match(/<LessonJournalEditableMemoCard/g) ?? []).length,
+  0,
+  "LessonJournalDetail must not compose the four memo cards directly"
+);
+for (const extractedEditableFieldsContract of [
+  "createLessonJournalEditableFieldsModel",
+  "<LessonJournalEditableMemoCard",
+  "field.source === \"record\"",
+  "onUpdateRecordDraft(field.field, value)",
+  "onUpdateHomeworkDraft(field.field, value)",
+  "previousLessonMaterial || student.textbook || student.currentTextbook || \"강의 교재\""
+]) {
+  assert.ok(
+    `${editableFieldsSource}\n${editableFieldsModelSource}`.includes(extractedEditableFieldsContract),
+    `missing extracted 17C-5 contract: ${extractedEditableFieldsContract}`
   );
 }
 

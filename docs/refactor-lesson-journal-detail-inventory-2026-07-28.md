@@ -58,10 +58,11 @@
 10. `17C-2` 완료: 학생 이름·학년·학교·특강/프로필 개별 시간과 학생 포털 미리보기 callback을 `LessonJournalStudentIdentity`로 분리했다.
 11. `17C-3` 완료: 출결 상태·날짜 불일치·하원 미체크·휴강 비활성 표시와 기존 `onOpenAttendance` callback을 `LessonJournalAttendanceButton`으로 분리했다.
 12. `17C-4` 완료: textarea 자동 높이·초점·키보드 blur와 읽기 전용 fallback을 가진 공통 `EditableMemoCard`를 `LessonJournalEditableMemoCard`로 분리했다.
-13. 다음: 교재·진도·지난/다음 숙제 네 입력을 App-owned local draft callback만 받는 component로 묶기
-14. 이후: 과제 상태·보충 선택은 기존 controller, 학부모·학생 알림은 composer/알림 제외 callback을 주입하는 순서로 분리
-15. 다중 원천 저장은 TARGET/CONTROL·부분 성공 fixture 뒤 주입형 controller로 분리
-16. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
+13. `17C-5` 완료: 교재·진도·지난/다음 숙제 네 입력을 App-owned record/homework draft callback만 받는 `LessonJournalEditableFields`로 묶었다.
+14. 다음: 과제 상태·보충 선택 표시를 기존 assignment/homework followup callback만 받는 component로 분리
+15. 이후: 학부모·학생 알림은 composer/알림 제외 callback을 주입하는 순서로 분리
+16. 다중 원천 저장은 TARGET/CONTROL·부분 성공 fixture 뒤 주입형 controller로 분리
+17. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -89,6 +90,7 @@
 - `17C-2` gate: 가상 official/adjusted/profile/일반 수업시간과 학생 기본정보 누락 조합으로 학년·학교 fallback, 시간 표시·class를 판정하고 포털 미리보기는 callback으로만 연결되는지 검사한다.
 - `17C-3` gate: 가상 정상 출결+날짜 불일치+하원 미체크 TARGET, 휴강 CONTROL, record status fallback, 빈 CONTROL로 class·상세·비활성·경고 표시를 판정하고 출결 저장은 기존 callback 뒤에 유지되는지 검사한다.
 - `17C-4` gate: 가상 편집·초점 TARGET, 잠긴 빈 CONTROL, 공백 값 CONTROL로 input/read class·placeholder fallback을 판정하고 자동 높이·Escape/Ctrl+Enter blur·local callback 계약을 정적으로 검사한다.
+- `17C-5` gate: 가상 현재/직전 교재·진도와 지난/다음 숙제 TARGET, legacy 진도·학생 교재 fallback CONTROL로 네 field 순서·value·placeholder·aria label·record/homework callback 라우팅을 판정한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
 - recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.
 - 학생 포털 실제 쓰기와 Solapi 특강 템플릿 검수는 사용자 지시로 목록에서 제거됐고, 교사 bearer/Storage 소유권 보안은 구현·배포 검증 완료다.

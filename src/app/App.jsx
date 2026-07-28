@@ -232,7 +232,7 @@ import { LessonJournalReservationModal } from "../domains/lessons/LessonJournalR
 import { createLessonJournalMemoIndicatorModel } from "../domains/lessons/lessonJournalMemoIndicatorModel.js";
 import { LessonJournalStudentIdentity } from "../domains/lessons/LessonJournalStudentIdentity.jsx";
 import { LessonJournalAttendanceButton } from "../domains/lessons/LessonJournalAttendanceButton.jsx";
-import { LessonJournalEditableMemoCard } from "../domains/lessons/LessonJournalEditableMemoCard.jsx";
+import { LessonJournalEditableFields } from "../domains/lessons/LessonJournalEditableFields.jsx";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -16745,45 +16745,21 @@ function LessonJournalDetail({
                   record={record}
                   student={student}
                 />
-                <LessonJournalEditableMemoCard
-                  ariaLabel={`${student.name} 강의 교재`}
-                  disabled={!journalEditMode}
-                  editKey={`${recordId}:lessonMaterial`}
-                  editingKey={editingMemoKey}
-                  onChange={(value) => updateJournalRecordDraft(student, record, "lessonMaterial", value)}
+                <LessonJournalEditableFields
+                  editingMemoKey={editingMemoKey}
                   onEdit={setEditingMemoKey}
-                  placeholder={previousLessonMaterial || student.textbook || student.currentTextbook || "강의 교재"}
-                  value={record.lessonMaterial ?? ""}
-                />
-                <LessonJournalEditableMemoCard
-                  ariaLabel={`${student.name} 오늘 강의 내용`}
-                  disabled={!journalEditMode}
-                  editKey={`${recordId}:lessonProgress`}
-                  editingKey={editingMemoKey}
-                  onChange={(value) => updateJournalRecordDraft(student, record, "lessonProgress", value)}
-                  onEdit={setEditingMemoKey}
-                  placeholder={previousLessonContent || "오늘 강의 내용"}
-                  value={getLessonContent(record)}
-                />
-                <LessonJournalEditableMemoCard
-                  ariaLabel={`${student.name} 지난 숙제`}
-                  disabled={!journalEditMode}
-                  editKey={`${recordId}:previousHomework`}
-                  editingKey={editingMemoKey}
-                  onChange={(value) => updateJournalHomeworkDraft(student, "previous", value)}
-                  onEdit={setEditingMemoKey}
-                  placeholder="지난 숙제"
-                  value={previousHomeworkTitle}
-                />
-                <LessonJournalEditableMemoCard
-                  ariaLabel={`${student.name} 다음 숙제`}
-                  disabled={!journalEditMode}
-                  editKey={`${recordId}:nextHomework`}
-                  editingKey={editingMemoKey}
-                  onChange={(value) => updateJournalHomeworkDraft(student, "next", value)}
-                  onEdit={setEditingMemoKey}
-                  placeholder="다음 숙제"
-                  value={nextHomeworkTitle}
+                  journalEditMode={journalEditMode}
+                  nextHomeworkTitle={nextHomeworkTitle}
+                  onUpdateHomeworkDraft={(homeworkType, value) =>
+                    updateJournalHomeworkDraft(student, homeworkType, value)}
+                  onUpdateRecordDraft={(field, value) =>
+                    updateJournalRecordDraft(student, record, field, value)}
+                  previousHomeworkTitle={previousHomeworkTitle}
+                  previousLessonContent={previousLessonContent}
+                  previousLessonMaterial={previousLessonMaterial}
+                  record={record}
+                  recordId={recordId}
+                  student={student}
                 />
                 <div className="assignmentStatusCell">
                   <select

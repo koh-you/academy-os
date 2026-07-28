@@ -48,8 +48,14 @@ const componentSource = await readFile(
   new URL("../src/domains/lessons/LessonJournalEditableMemoCard.jsx", import.meta.url),
   "utf8"
 );
+const editableFieldsSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalEditableFields.jsx", import.meta.url),
+  "utf8"
+);
 
-assert.equal((appSource.match(/<LessonJournalEditableMemoCard/g) ?? []).length, 4);
+assert.equal((appSource.match(/<LessonJournalEditableMemoCard/g) ?? []).length, 0);
+assert.equal((editableFieldsSource.match(/<LessonJournalEditableMemoCard/g) ?? []).length, 1);
+assert.match(editableFieldsSource, /fields\.map\(\(field\) =>/);
 assert.doesNotMatch(appSource, /function EditableMemoCard\(/);
 for (const contract of [
   "aria-label={ariaLabel}",
