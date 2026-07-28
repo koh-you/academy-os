@@ -238,6 +238,7 @@ import {
   getLessonJournalHomeworkDraftTitle
 } from "../domains/lessons/lessonJournalHomeworkDraft.js";
 import { createLessonJournalHomeworkFollowupPlan } from "../domains/lessons/lessonJournalHomeworkFollowupPlan.js";
+import { createLessonJournalAssignmentStatusPlan } from "../domains/lessons/lessonJournalAssignmentStatusPlan.js";
 import { saveLessonJournalMakeupTasksWithVerification } from "../domains/lessons/lessonJournalMakeupTaskBulkApi.js";
 import { createLessonJournalMakeupTaskRequests } from "../domains/lessons/lessonJournalMakeupTaskRequest.js";
 import { saveLessonJournalRecordsWithVerification } from "../domains/lessons/lessonJournalRecordBulkApi.js";
@@ -16174,32 +16175,30 @@ function LessonJournalDetail({
   }
 
   function handleAssignmentStatusChange(student, baseRecord, previousHomework, value) {
-    const normalizedValue = normalizeAssignmentStatusValue(value);
-    const homeworkTitle = previousHomework?.title || previousHomework?.sourceLabel || "";
-    removeJournalMakeupTaskDraft(student);
-    if (normalizedValue === "not_checked" && homeworkTitle) {
-      updateJournalRecordDraftPatch(student, baseRecord, {
-        assignmentStatus: normalizedValue,
-        incompleteHomework: normalizedValue,
-        needsMakeup: false,
-        ...getHomeworkFollowupPatch(baseRecord, "next_lesson", previousHomework),
-        prepParentVisible: true,
-        prepStudentVisible: true,
-        teacherCommentSendStatus: "",
-        studentCommentSendStatus: ""
-      });
-      setJournalManualSaveMessage("수업일지 · 미검사는 다음 정규수업 확인 문구를 오늘 알림톡에 반영합니다.");
-      return;
+    const plan = createLessonJournalAssignmentStatusPlan({
+      baseRecord,
+      getFollowupOptions: getHomeworkFollowupOptionsForAssignmentStatus,
+      getFollowupPatch: getHomeworkFollowupPatch,
+      normalizeAssignmentStatus: normalizeAssignmentStatusValue,
+      previousHomework,
+      value
+    });
+    if (plan.removeMakeupTask) {
+      removeJournalMakeupTaskDraft(student);
     }
-    if (!getHomeworkFollowupOptionsForAssignmentStatus(normalizedValue).length) {
-      updateJournalRecordDraftPatch(student, baseRecord, {
-        assignmentStatus: normalizedValue,
-        incompleteHomework: normalizedValue,
-        ...getHomeworkFollowupPatch(baseRecord)
-      });
-      return;
+    if (plan.recordUpdate.kind === "patch") {
+      updateJournalRecordDraftPatch(student, baseRecord, plan.recordUpdate.patch);
+    } else {
+      updateJournalRecordDraft(
+        student,
+        baseRecord,
+        plan.recordUpdate.field,
+        plan.recordUpdate.value
+      );
     }
-    updateJournalRecordDraft(student, baseRecord, "assignmentStatus", normalizedValue);
+    if (plan.message) {
+      setJournalManualSaveMessage(plan.message);
+    }
   }
 
   function updateJournalRecordDraftPatch(student, baseRecord, patch = {}) {

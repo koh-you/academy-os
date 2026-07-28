@@ -1425,6 +1425,14 @@
 - AI 가상검수: 등원보충 TARGET, 제목·원천 날짜 fallback TARGET, 다음 정규수업 CONTROL, 수업 후 보충 CONTROL을 가상 실행해 task·record patch·메시지·helper 호출 순서·입력 불변을 대조한다. 전용 fixture·정적 시나리오·build·diff 검사를 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17I-4`는 과제 상태 변경의 미검사 자동 후속·후속 선택 유지·후속 제거 record patch를 순수 plan으로 분리하고 React setter는 App에 유지한다.
 
+## 2026-07-28 P1. App.jsx 17I-4 수업일지 과제 상태 변경 plan 분리
+
+- 코드: 과제 상태 정규화 뒤 `미검사+지난 숙제 있음`의 다음 정규수업 자동 확인, 후속 선택지가 없는 완료 계열의 followup 초기화, 후속 선택지가 있는 미완료 계열의 field 갱신을 `lessonJournalAssignmentStatusPlan.js` 순수 모델로 분리했다.
+- 동작 보존: 미검사에 숙제 제목이 없으면 자동 followup을 만들지 않고 기존 선택지 분기로 간다. 자동 followup만 학부모/학생 공개 flag와 comment 발송상태를 초기화하며, 선택지가 없는 분기와 field 갱신 분기의 기존 patch 차이도 유지한다.
+- 경계: 등원보충 draft 제거, record patch/field React 반영과 자동 followup 안내 메시지는 계속 `App.jsx`가 소유한다. 실제 수업일지 저장·Supabase 재조회·알림톡 예약/발송은 이동하지 않았다.
+- AI 가상검수: 미검사+제목 TARGET, source label fallback TARGET, 숙제 없음 CONTROL, 후속 선택지 없음 CONTROL, 후속 선택지 있음 TARGET으로 patch/field action·helper 조기 호출·입력 불변을 대조한다. 전용 fixture·정적 시나리오·build·diff 검사를 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17I-5`는 현재 record draft 선택과 makeup draft 제거의 map selector/transition을 순수 모델로 분리하고 React setter는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

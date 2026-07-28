@@ -103,8 +103,9 @@
 55. `17I-1` 완료: record draft의 base/draft/patch 병합과 timestamp/ID metadata 생성을 순수 builder로 분리했다.
 56. `17I-2` 완료: homework draft key·표시 title fallback·업데이트 row 조합을 순수 모델로 분리했다.
 57. `17I-3` 완료: 등원보충/다음 정규수업 확인/수업 후 보충 선택의 record patch·makeup task·안내 메시지 plan을 순수 모델로 분리했다.
-58. 다음 `17I-4`: 과제 상태 변경의 미검사 자동 후속·후속 선택 유지·후속 제거 record patch plan을 순수 모델로 분리한다.
-59. `notification_jobs` 조회·OS job 취소·provider 예약 반영·발송결과 reconcile orchestration은 App callback에 남기고 순수 표시·판정만 분리
+58. `17I-4` 완료: 과제 상태 변경의 미검사 자동 후속·후속 선택 유지·후속 제거 record patch plan을 순수 모델로 분리했다.
+59. 다음 `17I-5`: 현재 record draft 선택과 makeup draft 제거의 map selector/transition을 순수 모델로 분리한다.
+60. `notification_jobs` 조회·OS job 취소·provider 예약 반영·발송결과 reconcile orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -172,6 +173,7 @@
 - `17I-1` gate: 빈 기본 record, base record, 현재 TARGET draft, identity field patch와 고정 timestamp를 조합해 `empty -> currentDraft ?? base -> identity -> patch -> updated metadata` 우선순위를 대조한다. base fallback·빈 CONTROL과 helper 호출 횟수·입력 불변을 확인하고 편집 guard·현재시각·React setter·저장 메시지는 App에 남는지 검사한다.
 - `17I-2` gate: deterministic lesson/student/homework type key와 현재 draft title TARGET, 빈 문자열 draft TARGET, 저장 homework CONTROL, 빈 CONTROL, 최종 row를 대조한다. record ID helper 호출 횟수·입력 불변을 확인하고 편집 guard·React map merge·저장 메시지는 App에 남는지 검사한다.
 - `17I-3` gate: 등원보충 TARGET, 원천 ID·날짜·숙제 제목 fallback TARGET, 다음 정규수업 CONTROL, 수업 후 보충 CONTROL로 makeup task·record patch·안내 메시지와 helper 호출 순서·입력 불변을 대조한다. 편집/이전 숙제 guard와 React draft map 추가·삭제, record patch·메시지 setter는 App에 남고 모델에 외부 side effect가 없는지 검사한다.
+- `17I-4` gate: 미검사+제목 TARGET, source label fallback TARGET, 숙제 없음 CONTROL, 후속 선택지 없음 CONTROL, 후속 선택지 있음 TARGET으로 patch/field action, helper 호출 순서·조기 종료, 입력 불변을 대조한다. makeup draft 제거와 record patch/field·메시지 React setter는 App에 남고 모델에 외부 side effect가 없는지 검사한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
 - recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.
 - 학생 포털 실제 쓰기와 Solapi 특강 템플릿 검수는 사용자 지시로 목록에서 제거됐고, 교사 bearer/Storage 소유권 보안은 구현·배포 검증 완료다.
