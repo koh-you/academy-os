@@ -1391,6 +1391,13 @@
 - AI 가상검수: App helper 주입, shell의 model·hook·controller·payload·view 조합, 미저장 닫기 확인, App wrapper action 제거와 직접 API/Solapi 경로 부재를 정적으로 대조하고 17E-1~6 TARGET/CONTROL fixture 전체를 재실행한다. 전용 shell fixture, 수업일지 inventory, build, diff check와 현재 rebase 중간 scenario 기준선을 통과한 뒤 커밋을 재적용한다. 전체 production 검증은 rebase 완료 뒤 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위는 `LessonJournalDetail`에 남은 다중 원천 저장의 TARGET/CONTROL·부분 성공 경계를 inventory하는 작업이다.
 
+## 2026-07-28 P1. App.jsx 17F-1 수업일지 다중 draft 저장 request 분리
+
+- 코드: `LessonJournalDetail`의 record/homework/makeup draft map을 key 삽입 순서를 보존한 배열과 전체 changeCount로 변환하는 `lessonJournalDraftSaveRequest.js` 순수 모델을 분리했다. 하단 저장 action은 이 request를 기존 `onSaveLessonJournalDrafts` callback에 그대로 전달한다.
+- 경계: 실제 다중 원천 저장 순서는 계속 App 상위의 `homeworks bulk+재조회 -> makeup_tasks+재조회 -> lesson_records bulk+재조회`다. 앞 원천 성공 뒤 뒤 원천 실패 시 이미 저장된 앞 단계와 `부분 저장` 메시지를 유지하며, 이 단위는 API·Supabase·React 상태 전환을 옮기지 않는다.
+- AI 가상검수: record 2건·homework 1건·makeup 1건 TARGET, 빈 CONTROL, 저장 차단 상태이지만 draft를 보존하는 CONTROL로 key 순서·원본 불변·changeCount·저장 차단을 대조한다. 전용 fixture, 수업일지 inventory, build, diff check와 현재 rebase 중간 scenario 기준선을 통과한 뒤 커밋을 재적용한다. 전체 production 검증은 rebase 완료 뒤 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위는 상위 `handleSaveLessonJournalDrafts`의 homework 변경 plan을 순수 builder로 분리하는 작업이다.
+
 ## 2026-07-28 P1. App.jsx 17D-2 수업일지 학생 표 shell 분리
 
 - 코드: 수업일지 학생 표의 panel, 읽기/편집 class, 학생·메모·출결·교재·진도·숙제·과제·알림톡 10개 고정 열 제목을 `lessonJournalTableModel.js`와 `LessonJournalTable.jsx`로 분리했다.

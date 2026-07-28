@@ -221,6 +221,7 @@ import {
   normalizeAttendanceSettings
 } from "../domains/lessons/attendanceSettings.js";
 import { useAttendanceRecordSync } from "../domains/lessons/useAttendanceRecordSync.js";
+import { createLessonJournalDraftSaveRequest } from "../domains/lessons/lessonJournalDraftSaveRequest.js";
 import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
 import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
 import { selectPreviousLessonMemoContext } from "../domains/lessons/lessonJournalPreviousMemoSelector.js";
@@ -16042,6 +16043,12 @@ function LessonJournalDetail({
     recordDrafts: journalRecordDrafts,
     recordSaveStates: lessonRecordSaveStates
   });
+  const journalDraftSaveRequest = createLessonJournalDraftSaveRequest({
+    hasDraftChanges: hasJournalDraftChanges,
+    homeworkDrafts: journalHomeworkDrafts,
+    makeupTaskDrafts: journalMakeupTaskDrafts,
+    recordDrafts: journalRecordDrafts
+  });
   const activeLessonReservationJobs = lessonNotificationJobs.filter(isActiveNotificationJobStatus);
   const solapiResultRefreshTargetJobs = auditedLessonNotificationJobs.filter((job) =>
     job.provider === "solapi" &&
@@ -16473,7 +16480,7 @@ function LessonJournalDetail({
   }
 
   async function saveJournalDrafts() {
-    if (!hasJournalDraftChanges) {
+    if (!journalDraftSaveRequest.hasDraftChanges) {
       setJournalEditMode(false);
       setJournalManualSaveMessage("수업일지 · 변경 없음");
       return;
@@ -16481,9 +16488,9 @@ function LessonJournalDetail({
     setJournalManualSaveMessage("수업일지 · 저장 중");
     const saved = await onSaveLessonJournalDrafts?.(
       lesson,
-      Object.values(journalRecordDrafts),
-      Object.values(journalHomeworkDrafts),
-      Object.values(journalMakeupTaskDrafts)
+      journalDraftSaveRequest.recordDrafts,
+      journalDraftSaveRequest.homeworkDrafts,
+      journalDraftSaveRequest.makeupTaskDrafts
     );
     if (!saved?.ok) {
       setJournalManualSaveMessage(saved?.message || "수업일지 · 저장 실패 · 수정본 유지");

@@ -75,9 +75,10 @@
 27. `17E-5` 완료: comment composer의 최종 문구 record payload·현재 audience 발송상태 초기화·단건 저장/재조회 option을 주입형 controller로 분리했다.
 28. `17E-6` 완료: comment composer의 발송 record·delay·dry-run/test recipient·미리보기·수동 재발송 사유 option을 순수 payload builder로 분리했다.
 29. `17E-7` 완료: comment composer의 model·local hook·AI/저장 controller·발송 payload·view 조합 shell을 domain component로 이동하고 App에는 기존 helper 주입 wrapper만 남겼다.
-30. 다음: `LessonJournalDetail`에 남은 다중 원천 저장의 TARGET/CONTROL·부분 성공 경계를 inventory
-31. 다중 원천 저장은 TARGET/CONTROL·부분 성공 fixture 뒤 주입형 controller로 분리
-32. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
+30. `17F-1` 완료: `LessonJournalDetail`의 record/homework/makeup draft map을 안정된 배열 request로 직렬화하는 순수 모델을 분리하고 현재 다중 원천 저장 순서를 고정했다.
+31. 다음: App 상위 `handleSaveLessonJournalDrafts`의 homework 변경 plan을 순수 builder로 분리
+32. 다중 원천 저장 controller는 TARGET/CONTROL·부분 성공 fixture 뒤 분리
+33. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -122,6 +123,8 @@
 - `17E-5` gate: 학부모 저장 성공 TARGET, 학생 저장 실패 TARGET, callback 없음 CONTROL을 가상 실행해 record ID·현재 field·현재 발송상태 초기화·다른 audience 보존·재조회 option·입력 불변과 App save 상태 전환을 대조한다.
 - `17E-6` gate: 학부모 30분 예약 TARGET, 학생 dry-run 수동 재발송 TARGET, 기본 CONTROL로 record field·delay·실제/테스트 수신 flag·최종/미리보기 문구·재발송 사유·sendTiming과 입력 불변을 대조하고 실제 callback은 App에 남는지 검사한다.
 - `17E-7` gate: App wrapper가 13개 legacy helper를 주입하고 domain shell이 model·hook·controller·payload·view를 조합하는지, App wrapper에 action이 남지 않는지, shell에 직접 API/Solapi 경로가 없는지 정적으로 대조한다. 하위 TARGET/CONTROL fixture 전체를 함께 재실행한다.
+- `17F-1` gate: record 2건·homework 1건·makeup 1건 TARGET, 빈 CONTROL, `hasDraftChanges=false`이지만 draft를 보존하는 CONTROL로 key 순서·원본 불변·changeCount·저장 차단 여부를 대조한다.
+- 현재 실제 다중 원천 저장 순서는 `homeworks bulk+재조회 -> makeup_tasks+재조회 -> lesson_records bulk+재조회`다. 뒤 단계 실패 시 앞 단계는 이미 저장되어 `부분 저장`으로 반환되므로, controller 이동 전 각 단계 성공/실패 조합과 재시도 중복 방지 fixture가 필요하다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
 - recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.
 - 학생 포털 실제 쓰기와 Solapi 특강 템플릿 검수는 사용자 지시로 목록에서 제거됐고, 교사 bearer/Storage 소유권 보안은 구현·배포 검증 완료다.

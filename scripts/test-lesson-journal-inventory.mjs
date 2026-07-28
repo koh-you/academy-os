@@ -174,6 +174,10 @@ const commentComposerSource = await readFile(
   new URL("../src/domains/lessons/LessonJournalCommentComposer.jsx", import.meta.url),
   "utf8"
 );
+const draftSaveRequestSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalDraftSaveRequest.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -236,10 +240,11 @@ for (const draftContract of [
   "hasDraftChanges: hasJournalDraftChanges",
   "stickySaveMessage: journalStickySaveMessage",
   "stickySaveState: journalStickySaveState",
+  "createLessonJournalDraftSaveRequest({",
   "async function saveJournalDrafts()",
-  "Object.values(journalRecordDrafts)",
-  "Object.values(journalHomeworkDrafts)",
-  "Object.values(journalMakeupTaskDrafts)",
+  "journalDraftSaveRequest.recordDrafts",
+  "journalDraftSaveRequest.homeworkDrafts",
+  "journalDraftSaveRequest.makeupTaskDrafts",
   "if (!saved?.ok)",
   "수정본 유지"
 ]) {
@@ -887,6 +892,28 @@ assert.ok(
 assert.ok(
   !commentComposerWrapperSource.includes("async function handlePolishClick()"),
   "App wrapper must not retain the extracted comment actions"
+);
+for (const extractedDraftSaveRequestContract of [
+  "createLessonJournalDraftSaveRequest",
+  "Object.values(drafts ?? {})",
+  "changeCount:",
+  "hasDraftChanges: Boolean(hasDraftChanges)",
+  "homeworkDrafts: homeworkDraftList",
+  "makeupTaskDrafts: makeupTaskDraftList",
+  "recordDrafts: recordDraftList"
+]) {
+  assert.ok(
+    draftSaveRequestSource.includes(extractedDraftSaveRequestContract),
+    `missing extracted 17F-1 contract: ${extractedDraftSaveRequestContract}`
+  );
+}
+assert.ok(
+  journalSource.includes("createLessonJournalDraftSaveRequest({"),
+  "LessonJournalDetail must compose the extracted draft save request"
+);
+assert.ok(
+  !journalSource.includes("Object.values(journalRecordDrafts)"),
+  "LessonJournalDetail must not retain direct draft map serialization"
 );
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");
