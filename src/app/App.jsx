@@ -28409,6 +28409,8 @@ function getLessonAlimtalkScheduledDate(lesson, delayMinutes = 0, options = {}) 
 
 function formatKoreaTimeLabel(dateString) {
   if (!dateString) return "";
+  const parsedDate = new Date(dateString);
+  if (Number.isNaN(parsedDate.getTime())) return "";
   return new Intl.DateTimeFormat("ko-KR", {
     timeZone: "Asia/Seoul",
     month: "2-digit",
@@ -28416,7 +28418,7 @@ function formatKoreaTimeLabel(dateString) {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false
-  }).format(new Date(dateString));
+  }).format(parsedDate);
 }
 
 function addDaysInKorea(dateString, days) {
