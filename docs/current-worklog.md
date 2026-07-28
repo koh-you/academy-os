@@ -1568,6 +1568,13 @@
 - AI 검수: 저장 TARGET, null/undefined fallback TARGET, false/0/빈 문자열 CONTROL을 가상 실행해 identity·find→create 순서·입력 불변을 확장 fixture·정적 시나리오·build·diff 검사로 대조한다.
 - 사람 gate: 새 항목 없음. 다음 `17L-5`는 예약 상태 일괄 갱신 row의 입력·출력·시계·저장 side effect 경계를 inventory하고 자동검증 가능한 순수 builder 범위만 정한다.
 
+## 2026-07-28 P1. App.jsx 17L-5 lesson notification record 상태 row inventory
+
+- 결과: 활성 학생 선택, 최신 record와 deterministic record ID, 학부모/학생별 알림 제외 상태, 고정 owner와 현재시각으로 `recordsToSave`를 만드는 계산 경계를 기록했다. 빈 배열 조기 종료 뒤 ref/state 낙관 반영, `saving`, record 상태 API 병렬 저장, `saved`/`failed` 전환은 App-owned side effect로 유지한다.
+- 호출 보존: `알림톡 없음`, `예약 시간 지남`, 기본/수동 예약의 `예약 중 · 시각` 네 경로가 같은 함수를 호출하며, row 계산 뒤 저장 순서와 API payload 6필드를 정적 fixture로 고정했다.
+- AI 검수: row plan에 setter/API/Solapi가 없고 persistence 구간에 ref→React state→saving→API→saved/failed 순서가 유지되는지 전용 fixture·정적 시나리오·build·diff 검사로 확인한다.
+- 사람 gate: 새 항목 없음. 다음 `17L-6`은 활성 학생별 예약 상태 row 계산만 고정 `updatedAt`과 helper 주입형 순수 builder로 분리하며 ref/state/API 저장은 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
