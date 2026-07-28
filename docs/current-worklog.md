@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-28 P1. 15F-0 수업 modal 저장 orchestration inventory·fixture — AI gate 통과
+
+- inventory: `docs/refactor-lesson-save-orchestration-inventory-2026-07-28.md`에 생성·수정 modal의 bulk POST, Supabase 원천 확인, 전체 lessons 재조회, ID·snapshot 대조, React state 교체 순서를 기록했다.
+- 발견한 side effect: 서버 `upsertLessons`는 lessons upsert 뒤 명단에서 제외된 학생의 발송 가능 알림을 취소하고 해당 `lesson_student_records`를 삭제한다. 따라서 실제 저장 orchestration은 단순 API adapter가 아니며 별도 gate 전 이동하지 않는다.
+- 자동검증: 전용 정적 fixture가 add/update/closure preflight와 서버 bulk side effect의 존재·순서를 고정한다.
+- 사람 gate: 없음. 운영 write 없이 현재 계약을 문서와 fixture로 고정했다. 다음 15F-1은 side effect가 없는 snapshot helper만 분리한다.
+
 ## 2026-07-28 P1. 15E-2 수업 달력 keyboard navigation hook 분리 — AI gate 통과
 
 - 코드: window keydown 등록·해제, action 존재 시 기본 동작 차단, 복사·붙여넣기·undo·삭제·수업 열기·날짜 이동 callback dispatch를 `src/domains/lessons/useLessonCalendarKeyboardNavigation.js`로 이동했다.
