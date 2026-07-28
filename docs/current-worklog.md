@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-28 P1. 16B-4 수동 출결 modal 컴포넌트 분리 — AI gate 통과
+
+- 코드: `AttendanceModal`을 `src/domains/lessons/AttendanceModal.jsx`로 이동했다. local 입력·confirm step·저장 중/오류 상태와 기존 문구를 그대로 유지한다.
+- 경계: 새 컴포넌트는 주입된 `onSave(lesson, student, values, { sendAlimtalk })`만 호출한다. 실제 `saveAttendanceRecord`, API, record/job state 적용과 modal close는 App에 남았다.
+- 자동검증: 전용 fixture가 저장만/알림 포함 두 callback, 태블릿 변경 확인, 결석 부분 성공 오류 문구와 API·Supabase·Solapi 의존성 0을 검사했다. scenario 501/501과 build도 통과했다.
+- 사람 gate: 없음. callback 경계와 화면 문구를 보존한 컴포넌트 위치 이동이다. 다음 16C-1은 kiosk 표시 모델이다.
+
 ## 2026-07-28 P1. 16B-3 수동 출결 지각분 계산 helper 분리 — AI gate 통과
 
 - 코드: 수업 시작·등원 시각을 분 단위로 정규화하고 유예시간을 뺀 지각분을 계산하는 helper를 `attendanceModalModel.js`로 이동했다.

@@ -103,7 +103,6 @@ for (const reservedAppBoundary of [
   "async function syncAttendanceRecords()",
   "async function handleAttendancePinPreview(",
   "async function handleAttendancePinCheck(",
-  "function AttendanceModal(",
   "function AttendanceKiosk(",
   "function LessonJournalDetail("
 ]) {
