@@ -12231,6 +12231,57 @@ textarea {
   padding: 14px;
 }
 
+.studentTallySubmissionPanel {
+  background: #f8fafc;
+  border: 1px solid #dbe7fb;
+  border-radius: 8px;
+  padding: 0 12px;
+}
+
+.studentTallySubmissionPanel > summary {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  min-height: 52px;
+}
+
+.studentTallySubmissionPanel > summary span,
+.studentTallySubmissionCard > p {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.studentTallySubmissionCard {
+  border-top: 1px solid #dbe7fb;
+  padding: 12px 0;
+}
+
+.studentTallySubmissionCard > p {
+  margin: 0 0 10px;
+}
+
+.studentTallySubmissionCard dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.studentTallySubmissionCard dl > div {
+  display: grid;
+  gap: 2px;
+}
+
+.studentTallySubmissionCard dt {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.studentTallySubmissionCard dd {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
 .studentProfileMemo {
   background: #fffdf5;
   border: 1px solid #fde68a;

@@ -220,6 +220,38 @@ function isWithdrawnStudent(student = {}) {
   return (student.status ?? "active") !== "active" || Boolean(student.withdrawnAt);
 }
 
+function getTallySubmissionFieldRows(applicant = {}) {
+  const fields = Array.isArray(applicant.rawPayload?.data?.fields) ? applicant.rawPayload.data.fields : [];
+  const rows = fields.map((field, index) => {
+    const label = String(field.label || field.title || field.name || field.key || `질문 ${index + 1}`).trim();
+    const value = [field.value, field.answer, field.inputValue, field.text]
+      .flatMap((item) => Array.isArray(item) ? item : [item])
+      .filter((item) => item !== undefined && item !== null && String(item).trim())
+      .map((item) => typeof item === "object" ? item.text || item.label || item.value || "" : item)
+      .filter(Boolean)
+      .join(", ");
+    return { label, value: String(value).trim() };
+  }).filter((row) => row.value);
+  if (rows.length) return rows;
+  return [
+    ["재원생 여부", applicant.enrollmentStatus],
+    ["현재 학습 과정", applicant.currentLearningProcess],
+    ["직전학기 내신 성적", applicant.previousSemesterScore],
+    ["특이사항", applicant.specialNote],
+    ["추가 메모", applicant.memo]
+  ].filter(([, value]) => String(value ?? "").trim()).map(([label, value]) => ({ label, value: String(value).trim() }));
+}
+
+function getStudentTallySubmissions(student = {}, intakeApplicants = []) {
+  return intakeApplicants.filter((applicant) => {
+    if (applicant.source !== "tally" || applicant.name !== student.name) return false;
+    const sameStudentPhone = applicant.studentPhone && applicant.studentPhone === student.studentPhone;
+    const sameParentPhone = applicant.parentPhone && applicant.parentPhone === student.parentPhone;
+    const sameSchoolAndGrade = applicant.schoolName && applicant.schoolName === student.schoolName && applicant.grade && applicant.grade === student.grade;
+    return sameStudentPhone || sameParentPhone || sameSchoolAndGrade;
+  }).sort((left, right) => String(right.createdAt || "").localeCompare(String(left.createdAt || "")));
+}
+
 export function StudentManager({
   academyReminders = [],
   academyTests,
@@ -960,6 +992,7 @@ export function StudentManager({
             scoreRecordSaveState={scoreRecordSaveState}
             studentConsultationSaveState={studentConsultationSaveState}
             consultations={selectedConsultations}
+            tallySubmissions={getStudentTallySubmissions(selectedStudent, intakeApplicants)}
             studentProfileSaveState={studentProfileSaveStates[selectedStudent.studentId] ?? "idle"}
             student={selectedStudent}
           />
@@ -1201,7 +1234,8 @@ function StudentProfileModal({
   scoreRecordSaveState = "idle",
   studentConsultationSaveState = "idle",
   studentProfileSaveState = "idle",
-  student
+  student,
+  tallySubmissions = []
 }) {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileDraft, setProfileDraft] = useState(() => createStudentProfileDraft(student));
@@ -1491,7 +1525,7 @@ function StudentProfileModal({
     <ModalComponent
       className="wideModal"
       title={`${student.name} 학생 프로파일`}
-      subtitle="학생 메모와 기본정보를 먼저 보고, 필요한 기록만 펼쳐서 확인합니다."
+      subtitle="기본정보를 먼저 보고, 필요한 기록만 펼쳐서 확인합니다."
       onClose={onClose}
     >
       <div className="studentProfileModalWrap">
@@ -1530,26 +1564,25 @@ function StudentProfileModal({
         <details className="studentProfileSection" open>
           <summary>
             <div>
-              <strong>기본정보와 학생 메모</strong>
-              <p>자주 확인하는 메모, 연락처, 로그인, 개별 스케줄을 관리합니다.</p>
+              <strong>기본정보</strong>
+              <p>연락처, 로그인, 개별 스케줄을 관리합니다.</p>
             </div>
           </summary>
           <div className="studentProfileSectionBody">
-            <section className="studentProfileMemo">
-              <div className="studentProfileMemoHeader">
-                <strong>학생 메모</strong>
-                <span>선생님이 프로파일에서 확인하는 메모 · 기존 특이사항 원천에 저장됩니다.</span>
-              </div>
-              {isEditingProfile ? (
-                <textarea
-                  value={profileDraft.specialNote ?? ""}
-                  onChange={(event) => updateProfile("specialNote", event.target.value)}
-                  placeholder="학습 성향, 지도할 때 유의할 점, 학부모 요청사항 등 선생님이 계속 확인할 메모"
-                />
-              ) : (
-                <p className="studentProfileMemoText">{student.specialNote || "등록된 학생 메모가 없습니다."}</p>
-              )}
-            </section>
+            <details className="studentTallySubmissionPanel">
+              <summary>
+                <strong>학생이 Tally로 제출한 데이터</strong>
+                <span>{tallySubmissions.length ? `${tallySubmissions.length}건` : "제출 데이터 없음"}</span>
+              </summary>
+              {tallySubmissions.length ? tallySubmissions.map((submission) => (
+                <article className="studentTallySubmissionCard" key={submission.applicantId}>
+                  <p>{submission.formName || "Tally"} · {submission.createdAt ? new Date(submission.createdAt).toLocaleString("ko-KR") : "제출 시각 미확인"}</p>
+                  <dl>
+                    {getTallySubmissionFieldRows(submission).map((row) => <div key={`${submission.applicantId}_${row.label}`}><dt>{row.label}</dt><dd>{row.value}</dd></div>)}
+                  </dl>
+                </article>
+              )) : <p className="muted">이 학생과 이름·연락처 또는 학교·학년이 일치하는 Tally 제출 원천이 없습니다.</p>}
+            </details>
             <div className="studentProfileGrid">
               {renderProfileField("학교", "schoolName")}
               {renderProfileField("학년", "grade")}
