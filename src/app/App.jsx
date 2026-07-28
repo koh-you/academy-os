@@ -225,6 +225,7 @@ import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJourn
 import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
 import { selectPreviousLessonMemoContext } from "../domains/lessons/lessonJournalPreviousMemoSelector.js";
 import { LessonJournalHeader } from "../domains/lessons/LessonJournalHeader.jsx";
+import { LessonJournalClosureNotice } from "../domains/lessons/LessonJournalClosureNotice.jsx";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -16630,30 +16631,13 @@ function LessonJournalDetail({
         studentCount={lessonStudents.length}
       />
 
-      {isClosureLesson || isClosureMakeupLesson ? (
-        <section className={`panel closureJournalNotice ${isClosureMakeupLesson ? "makeup" : ""}`}>
-          <div>
-            <strong>{isClosureMakeupLesson ? "휴강 보충 수업일지" : "휴강 수업일지"}</strong>
-            <p>
-              {isClosureMakeupLesson
-                ? "휴강과 연결해 생성한 실제 보충 수업입니다. 보충 횟수에는 표시되지만 정규 월 고정금액은 바꾸지 않습니다."
-                : "실제 수업을 진행하지 않은 일정입니다. 학생 명단과 휴강 기록은 보존되며 수업 횟수·시수·급여 정산에서는 제외됩니다."}
-            </p>
-          </div>
-          {isClosureLesson ? (
-            linkedClosureMakeupLesson ? (
-              <span>연결 보충 · {linkedClosureMakeupLesson.date} {formatLessonTimeRange(linkedClosureMakeupLesson)}</span>
-            ) : (
-              <span>연결 보충 없음</span>
-            )
-          ) : linkedClosureLesson ? (
-            <span>원 휴강 · {linkedClosureLesson.date} {linkedClosureLesson.className}</span>
-          ) : (
-            <span>원 휴강 연결 확인 필요</span>
-          )}
-          <small>이 일정 생성만으로 알림톡·문자는 발송되거나 예약되지 않습니다.</small>
-        </section>
-      ) : null}
+      <LessonJournalClosureNotice
+        formatLessonTimeRange={formatLessonTimeRange}
+        isClosureLesson={isClosureLesson}
+        isClosureMakeupLesson={isClosureMakeupLesson}
+        linkedClosureLesson={linkedClosureLesson}
+        linkedClosureMakeupLesson={linkedClosureMakeupLesson}
+      />
 
       {lessonAcademyReminders.length > 0 ? (
         <section className="panel lessonReminderPanel">

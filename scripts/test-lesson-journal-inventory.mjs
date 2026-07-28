@@ -22,6 +22,14 @@ const journalHeaderModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalHeaderModel.js", import.meta.url),
   "utf8"
 );
+const closureNoticeSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalClosureNotice.jsx", import.meta.url),
+  "utf8"
+);
+const closureNoticeModelSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalClosureNoticeModel.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -204,6 +212,26 @@ for (const extractedHeaderContract of [
   assert.ok(
     `${journalHeaderSource}\n${journalHeaderModelSource}`.includes(extractedHeaderContract),
     `missing extracted 17B-1 contract: ${extractedHeaderContract}`
+  );
+}
+assert.ok(
+  journalSource.includes("<LessonJournalClosureNotice"),
+  "LessonJournalDetail must compose the extracted closure notice"
+);
+assert.ok(
+  !journalSource.includes("<section className={`panel closureJournalNotice"),
+  "LessonJournalDetail must not retain the closure notice markup"
+);
+for (const extractedClosureContract of [
+  "createLessonJournalClosureNoticeModel",
+  "휴강 보충 수업일지",
+  "연결 보충 없음",
+  "원 휴강 연결 확인 필요",
+  "이 일정 생성만으로 알림톡·문자는 발송되거나 예약되지 않습니다."
+]) {
+  assert.ok(
+    `${closureNoticeSource}\n${closureNoticeModelSource}`.includes(extractedClosureContract),
+    `missing extracted 17B-2 contract: ${extractedClosureContract}`
   );
 }
 

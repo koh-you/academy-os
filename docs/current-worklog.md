@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-28 P1. 17B-2 수업일지 휴강 안내 panel 분리 — AI gate 통과
+
+- 코드: 일반 휴강·휴강 보충의 제목/설명, 연결 보충 또는 원 휴강 표시와 `이 일정 생성만으로 알림톡·문자는 발송되거나 예약되지 않습니다.` 안내를 `lessonJournalClosureNoticeModel.js`와 `LessonJournalClosureNotice.jsx`로 이동했다.
+- 가상 데이터: 일반 수업 숨김, 휴강의 연결 보충 있음/없음, 휴강 보충의 원 휴강 있음/없음 TARGET/CONTROL 5개 상태를 만들어 class·제목·연결 문구를 대조했다.
+- 경계: 읽기 전용 표시만 이동했다. callback, lesson 저장/삭제, 수업기록·숙제·보충, `notification_jobs`, Solapi와 운영 데이터 호출은 0건이다.
+- AI 검증: 전용 fixture, 로드맵 17 inventory chain, build, `git diff --check`로 표시-only 경계를 확인한다. 실제 외부 호출은 0건이고 사람 gate는 0건이다. 다음은 수업 관련 운영 알림 읽기 전용 panel이다.
+
 ## 2026-07-28 P1. 17B-1 수업일지 상단 controlled header 분리 — AI gate 통과
 
 - 코드: 수업명·날짜·시간·학생 수·주제 표시를 `lessonJournalHeaderModel.js`로, 뒤로가기·시험대비 열기·수업 수정·수업 취소 callback만 갖는 `NavigationHeader` 조립을 `LessonJournalHeader.jsx`로 이동했다. 최신 main의 뒤로가기 접근성 이름을 보존했다.
