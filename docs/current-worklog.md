@@ -1603,6 +1603,13 @@
 - AI 검수: 중복 TARGET ID와 CONTROL ID에 세 상태를 적용해 결과·빈 배열·입력 불변, App의 helper 호출 3개·inline map 0개·API/React effect 유지를 전용 fixture·정적 시나리오·build·diff 검사로 확인한다.
 - 사람 gate: 새 항목 없음. 다음 `17M-3`은 save-state helper 재사용과 App-owned API/React effect 경계를 closeout audit한다.
 
+## 2026-07-28 P1. App.jsx 17M-3 lesson notification record save-state 경계 closeout
+
+- 결과: `saving`/`saved`/`failed` 상태 map은 기존 순수 helper 세 호출로만 생성되고, React `setSaveStates` 세 번과 record 상태 API는 계속 App이 소유하는 경계를 closeout audit했다. 실제 소스 이동이나 상태·문구 변경은 없다.
+- 외부 경계: record 상태 API의 실행·성공·실패 순서는 그대로이며 `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 이 함수와 순수 helper에 들어오지 않았다.
+- AI 검수: TARGET/CONTROL 가상 record에 세 상태를 적용해 결과와 입력 불변, helper 3회·setter 3회·API 1회·inline map 0개 및 `saving → API → saved/failed` 순서를 전용 closeout fixture·정적 시나리오·build·diff 검사로 고정했다.
+- 사람 gate: 새 항목 없음. 다음 `17N-1`은 record 상태 API 호출 직전의 6필드 payload mapping을 inventory하며 실제 patch request와 React 상태는 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
