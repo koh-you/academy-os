@@ -1413,6 +1413,13 @@
 - 유지보수 진단: 부분 저장 후 재시도가 이미 성공한 원천까지 다시 요청하는 것은 멱등 저장으로 대체로 흡수되지만, 완료 원천별 재시도 생략/재조회 확인은 저장 신뢰성 보강 세션의 별도 개선 후보다. 이번 리팩터링에서는 구현하지 않는다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위는 다중 원천 저장 순차 실행을 주입형 controller로 분리하는 작업이다.
 
+## 2026-07-28 P1. App.jsx 17F-4 수업일지 다중 원천 저장 controller 분리
+
+- 코드: 숙제 → 등원보충 → 수업기록 순차 실행, 단계별 완료 원천 누적, 실패 후 후속 단계 중단과 부분 저장 outcome 조합을 `lessonJournalDraftPersistenceController.js` 주입형 controller로 분리했다.
+- 경계: 실제 homework/makeup/record API·Supabase 재조회, React ref/state, localStorage, record 저장 상태 변경은 모두 App의 주입 callback에 남겼다. 저장 순서·부분 성공·전체 draft 재시도 계약은 바꾸지 않았다.
+- AI 가상검수: 3원천 전체 성공 TARGET, 변경 없는 CONTROL, homework 첫 단계 실패, makeup 두 번째 단계 실패, record 세 번째 단계 실패를 실행해 정확한 호출 순서·후속 단계 중단·완료 원천 문구·failure callback error를 대조한다. 전용 fixture, 수업일지 inventory, build, diff check와 현재 rebase 중간 scenario 기준선을 통과한 뒤 커밋을 재적용한다. 전체 production 검증은 rebase 완료 뒤 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위는 수업기록 bulk 저장·Supabase 재조회 대조를 주입형 API adapter로 분리하는 작업이다.
+
 ## 2026-07-28 P1. App.jsx 17D-2 수업일지 학생 표 shell 분리
 
 - 코드: 수업일지 학생 표의 panel, 읽기/편집 class, 학생·메모·출결·교재·진도·숙제·과제·알림톡 10개 고정 열 제목을 `lessonJournalTableModel.js`와 `LessonJournalTable.jsx`로 분리했다.

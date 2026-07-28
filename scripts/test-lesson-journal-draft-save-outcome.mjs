@@ -63,6 +63,10 @@ const outcomeSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalDraftSaveOutcome.js", import.meta.url),
   "utf8"
 );
+const controllerSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalDraftPersistenceController.js", import.meta.url),
+  "utf8"
+);
 const handlerStart = appSource.indexOf("async function handleSaveLessonJournalDrafts(");
 const handlerEnd = appSource.indexOf("async function handleSaveRecord(", handlerStart);
 const handlerSource = appSource.slice(handlerStart, handlerEnd);
@@ -76,17 +80,21 @@ for (const outcomeBinding of [
   "completedSources,",
   "error"
 ]) {
-  assert.ok(handlerSource.includes(outcomeBinding), `missing save outcome binding: ${outcomeBinding}`);
+  assert.ok(controllerSource.includes(outcomeBinding), `missing save outcome binding: ${outcomeBinding}`);
 }
 assert.ok(
-  handlerSource.indexOf("saveLessonJournalHomeworksWithVerification(") <
-    handlerSource.indexOf("saveLessonJournalMakeupTasksWithVerification("),
+  controllerSource.indexOf("await persistHomeworks()") <
+    controllerSource.indexOf("await persistMakeupTasks()"),
   "homework save must remain before makeup save"
 );
 assert.ok(
-  handlerSource.indexOf("saveLessonJournalMakeupTasksWithVerification(") <
-    handlerSource.indexOf('postJson("/api/lesson-records/bulk"'),
+  controllerSource.indexOf("await persistMakeupTasks()") <
+    controllerSource.indexOf("await persistRecords()"),
   "makeup save must remain before record save"
+);
+assert.ok(
+  handlerSource.includes("executeLessonJournalDraftPersistence({"),
+  "App must delegate outcome composition to the persistence controller"
 );
 
 const failedGuardIndex = detailSource.indexOf("if (!saved?.ok)");

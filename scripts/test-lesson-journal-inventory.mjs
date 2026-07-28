@@ -186,6 +186,10 @@ const draftSaveOutcomeSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalDraftSaveOutcome.js", import.meta.url),
   "utf8"
 );
+const draftPersistenceControllerSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalDraftPersistenceController.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -294,7 +298,7 @@ const saveHandlerSource = section(
   "async function handleSaveLessonJournalDrafts",
   "async function handleSaveRecord"
 );
-const savePersistenceSource = `${saveHandlerSource}\n${draftSaveOutcomeSource}`;
+const savePersistenceSource = `${saveHandlerSource}\n${draftSaveOutcomeSource}\n${draftPersistenceControllerSource}`;
 for (const persistenceContract of [
   "saveLessonJournalHomeworksWithVerification",
   "saveLessonJournalMakeupTasksWithVerification",
@@ -961,12 +965,40 @@ for (const extractedDraftSaveOutcomeContract of [
   );
 }
 assert.ok(
-  appSource.includes("createLessonJournalDraftSaveOutcome({ completedSources })"),
-  "App save handler must compose the extracted success outcome"
+  draftPersistenceControllerSource.includes("createLessonJournalDraftSaveOutcome({ completedSources })"),
+  "persistence controller must compose the extracted success outcome"
 );
 assert.ok(
   !appSource.includes("message: `수업일지 · ${completedSources.length"),
   "App save handler must not retain the partial-save message composition"
+);
+for (const extractedDraftPersistenceControllerContract of [
+  "executeLessonJournalDraftPersistence",
+  "await persistHomeworks()",
+  "await persistMakeupTasks()",
+  "await persistRecords()",
+  "onFailure?.(error)"
+]) {
+  assert.ok(
+    draftPersistenceControllerSource.includes(extractedDraftPersistenceControllerContract),
+    `missing extracted 17F-4 contract: ${extractedDraftPersistenceControllerContract}`
+  );
+}
+for (const injectedDraftPersistenceContract of [
+  "executeLessonJournalDraftPersistence({",
+  "persistHomeworks: async () =>",
+  "persistMakeupTasks: async () =>",
+  "persistRecords: async () =>",
+  "onFailure: (error) =>"
+]) {
+  assert.ok(
+    saveHandlerSource.includes(injectedDraftPersistenceContract),
+    `missing App-owned 17F-4 injection: ${injectedDraftPersistenceContract}`
+  );
+}
+assert.ok(
+  !draftPersistenceControllerSource.includes('postJson("/api/lesson-records/bulk"'),
+  "persistence controller must not own the lesson record API"
 );
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");

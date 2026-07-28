@@ -221,8 +221,8 @@ import {
   normalizeAttendanceSettings
 } from "../domains/lessons/attendanceSettings.js";
 import { useAttendanceRecordSync } from "../domains/lessons/useAttendanceRecordSync.js";
+import { executeLessonJournalDraftPersistence } from "../domains/lessons/lessonJournalDraftPersistenceController.js";
 import { createLessonJournalDraftPersistencePlan } from "../domains/lessons/lessonJournalDraftPersistencePlan.js";
-import { createLessonJournalDraftSaveOutcome } from "../domains/lessons/lessonJournalDraftSaveOutcome.js";
 import { createLessonJournalDraftSaveRequest } from "../domains/lessons/lessonJournalDraftSaveRequest.js";
 import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
 import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
@@ -9168,27 +9168,29 @@ export function App() {
       setSaveStates((currentStates) => ({ ...currentStates, ...savingStates }));
     }
 
-    const completedSources = [];
-    try {
-      const verifiedHomeworks = await saveLessonJournalHomeworksWithVerification(persistencePlan.changedHomeworks);
-      if (verifiedHomeworks.length) {
-        const verifiedById = new Map(verifiedHomeworks.map((homework) => [homework.homeworkId, homework]));
-        nextHomeworks = nextHomeworks.map((homework) => verifiedById.get(homework.homeworkId) ?? homework);
-        homeworksRef.current = nextHomeworks;
-        setHomeworks(nextHomeworks);
-        completedSources.push(`숙제 ${verifiedHomeworks.length}건`);
-      }
-
-      const verifiedTasks = await saveLessonJournalMakeupTasksWithVerification(makeupTaskDrafts);
-      if (verifiedTasks.length) {
-        setMakeupTasks((current) => verifiedTasks.reduce(
-          (tasks, task) => upsertById(tasks, task, "makeupTaskId"),
-          current
-        ));
-        completedSources.push(`등원보충 ${verifiedTasks.length}건`);
-      }
-
-      if (recordsToSave.length) {
+    return executeLessonJournalDraftPersistence({
+      hasRecords: recordsToSave.length > 0,
+      persistHomeworks: async () => {
+        const verifiedHomeworks = await saveLessonJournalHomeworksWithVerification(persistencePlan.changedHomeworks);
+        if (verifiedHomeworks.length) {
+          const verifiedById = new Map(verifiedHomeworks.map((homework) => [homework.homeworkId, homework]));
+          nextHomeworks = nextHomeworks.map((homework) => verifiedById.get(homework.homeworkId) ?? homework);
+          homeworksRef.current = nextHomeworks;
+          setHomeworks(nextHomeworks);
+        }
+        return verifiedHomeworks.length;
+      },
+      persistMakeupTasks: async () => {
+        const verifiedTasks = await saveLessonJournalMakeupTasksWithVerification(makeupTaskDrafts);
+        if (verifiedTasks.length) {
+          setMakeupTasks((current) => verifiedTasks.reduce(
+            (tasks, task) => upsertById(tasks, task, "makeupTaskId"),
+            current
+          ));
+        }
+        return verifiedTasks.length;
+      },
+      persistRecords: async () => {
         const recordResult = await postJson("/api/lesson-records/bulk", { records: recordsToSave });
         if (recordResult.source !== "supabase") {
           throw new Error("수업기록을 Supabase에서 다시 확인하지 못했습니다.");
@@ -9210,20 +9212,16 @@ export function App() {
         writeStorageValue(window.localStorage, storageKeys.records, JSON.stringify(nextRecords));
         const savedStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "saved"]));
         setSaveStates((currentStates) => ({ ...currentStates, ...savedStates }));
-        completedSources.push(`수업기록 ${verifiedRecords.length}건`);
+        return verifiedRecords.length;
+      },
+      onFailure: (error) => {
+        console.error(error);
+        const failedStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "failed"]));
+        if (recordsToSave.length) {
+          setSaveStates((currentStates) => ({ ...currentStates, ...failedStates }));
+        }
       }
-      return createLessonJournalDraftSaveOutcome({ completedSources });
-    } catch (error) {
-      console.error(error);
-      const failedStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "failed"]));
-      if (recordsToSave.length) {
-        setSaveStates((currentStates) => ({ ...currentStates, ...failedStates }));
-      }
-      return createLessonJournalDraftSaveOutcome({
-        completedSources,
-        error
-      });
-    }
+    });
   }
 
   async function handleSaveRecord(recordId, lessonForRecord = null, studentForRecord = null, recordOverride = null, options = {}) {
