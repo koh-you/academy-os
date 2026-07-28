@@ -1836,6 +1836,12 @@
 - AI 가상검수: TARGET 두 번 교체·신규/ID 없는 응답·CONTROL 보존·빈 배열 참조·saved ID 중복 축약·입력 불변과 helper side effect 0건을 전용 fixture·정적 시나리오·build·`git diff --check`로 대조한다.
 - 사람 gate: 없음. 다음 `17Z-3`은 helper export/import/call 수와 App-owned effect 순서를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17Z-3 notification job reconcile record state boundary closeout
+
+- 완료: reconcile record state helper import 1개, 순차 merge/saved-state export와 App 호출 각 1개, reconcile callback 3곳을 고정했다. App의 request→notification job merge→record guard→record 계산→ref/React/localStorage→saved 계산/guard/setter→return 순서를 closeout했다.
+- AI 검수: TARGET/CONTROL 참조 보존과 중복 TARGET saved map, App inline reduce/Object.fromEntries 0건, helper side effect 0건을 전용 closeout fixture·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 없음. 다음 `17AA-1`은 reconcile 결과 처리 전체 경계를 aggregate audit하고, 새 이동 후보는 audit 결과에서 가장 낮은 위험의 순수 계산 하나만 고른다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
