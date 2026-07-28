@@ -1914,6 +1914,12 @@
 - AI 검수: update/create 선택→기존 patch/신규 append→세 상태 객체까지 전 흐름의 참조·문구·입력 불변을 실행하고 helper side effect 0건, App effect 순서를 대조한다. 전용 final audit와 시나리오 611/611, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AG-1`은 `generatedLessonPlanRows`가 현재 `examCycle` row만 원래 순서로 고르는 순수 계산을 inventory하며 useMemo와 이후 repair/save effect는 이동하지 않는다.
 
+## 2026-07-28 P3. App.jsx 17AG-1 generated lesson plan row selector inventory
+
+- inventory: `row.examCycle`이 현재 cycle과 같거나 값이 비어 현재 cycle로 fallback되는 row만 원래 순서·참조로 선택하는 계약을 고정했다. `useMemo`, 시험정보 repair/persist effect와 `buildGeneratedLessonPlan` 소비는 App 경계다.
+- AI 가상검수: 현재 cycle 명시 TARGET, 과거/미래 CONTROL, cycle 누락·빈 문자열 TARGET을 섞어 선택 순서·참조·입력 불변을 확인하고 다른 current cycle 및 빈/default 입력도 검증한다. 전용 inventory fixture와 시나리오 612/612, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AG-2`는 selector만 `generatedLessonPlanSelectors.js`로 분리하고 useMemo/repair/persist/plan build는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
