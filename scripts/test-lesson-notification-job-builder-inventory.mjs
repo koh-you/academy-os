@@ -2,6 +2,10 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const pureBuilderSource = await readFile(
+  new URL("../src/domains/lessons/lessonNotificationJobBuilder.js", import.meta.url),
+  "utf8"
+);
 const builderStart = appSource.indexOf(
   "function buildLessonNotificationJob(lesson, student, target, scheduledDate, mode)"
 );
@@ -10,7 +14,8 @@ const builderEnd = appSource.indexOf(
   builderStart
 );
 assert.ok(builderStart >= 0 && builderEnd > builderStart);
-const builderSource = appSource.slice(builderStart, builderEnd);
+const wrapperSource = appSource.slice(builderStart, builderEnd);
+const builderSource = `${wrapperSource}\n${pureBuilderSource}`;
 
 for (const sourceBinding of [
   "createLessonStudentRecordId(lesson.lessonId, student.studentId)",
@@ -21,13 +26,14 @@ for (const sourceBinding of [
   'target === "student" ? "student" : "parent"',
   "getStudentSupplementSchedules(makeupTasks, student.studentId",
   "getLessonTestResultLines(testSessions, testAttempts, lesson, student)",
-  "buildLessonReservationPayloadSnapshot({",
+  "buildPayloadSnapshot({",
   "notificationTemplates: aiSettings.notificationTemplates",
-  "getAssignmentStatusForMessage(record, previousHomework)",
-  "getLessonReservationPayloadFingerprint(payloadSnapshot)",
-  "getLessonNotificationJobId(lesson.lessonId, student.studentId, audience)",
-  "buildCommentPreviewText({",
-  "createdAt: new Date().toISOString()"
+  "getAssignmentStatus(record, previousHomework)",
+  "getPayloadFingerprint(payloadSnapshot)",
+  "getJobId(",
+  "buildCommentPreview({",
+  "nowIso: new Date().toISOString()",
+  "createdAt: nowIso"
 ]) {
   assert.ok(builderSource.includes(sourceBinding), `missing builder source: ${sourceBinding}`);
 }
@@ -92,10 +98,11 @@ for (const payloadField of [
 }
 
 assert.equal(
-  builderSource.split("new Date().toISOString()").length - 1,
+  wrapperSource.split("new Date().toISOString()").length - 1,
   1,
   "builder clock boundary must remain singular"
 );
+assert.ok(!pureBuilderSource.includes("new Date"));
 assert.equal(
   appSource.split('buildLessonNotificationJob(lesson, student, "parent", scheduledDate, mode)').length - 1,
   1
@@ -118,7 +125,7 @@ for (const forbiddenSideEffect of [
   "reserveLessonNotificationJobs"
 ]) {
   assert.ok(
-    !builderSource.includes(forbiddenSideEffect),
+    !pureBuilderSource.includes(forbiddenSideEffect),
     `builder inventory crossed an external boundary: ${forbiddenSideEffect}`
   );
 }

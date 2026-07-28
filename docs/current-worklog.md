@@ -1526,6 +1526,13 @@
 - AI 검수: builder 범위를 추출해 입력 helper, payload/job 필드, `new Date().toISOString()` 1회, 학부모→학생 호출 1회씩과 API·Supabase·Solapi·setter·persist/reserve 부재를 inventory fixture·정적 시나리오·build·diff 검사로 확인한다.
 - 사람 gate: 새 항목 없음. 다음 `17K-2`는 조회 완료 입력과 고정 `nowIso`를 받는 최종 job 순수 builder만 분리하고 App의 원천 조회와 실제 reserve/cancel action은 유지한다.
 
+## 2026-07-28 P1. App.jsx 17K-2 lesson notification 최종 job builder 분리
+
+- 코드: 조회가 끝난 record, 이전/다음 숙제, 보충 일정, 시험 결과, 설정과 고정 `nowIso`를 받아 payload·preview·job 전체 shape를 만드는 로직을 `lessonNotificationJobBuilder.js` 순수 builder로 분리했다.
+- App 경계: record ID/현재 record/homework/보충/시험 원천 조회, 학생·학부모 알림 제외 guard, audience 선택과 현재시각 생성은 App wrapper에 남겼다. 실제 bulk reserve, 취소 저장, plan 적용·결과 reconcile은 이동하지 않았다.
+- AI 검수: 학생 TARGET과 학부모 CONTROL을 고정 시각으로 생성해 전체 payload/job, 대상별 type·번호, nullish 출결 기본값, helper 호출 순서, snapshot·preview 인자와 입력 불변을 전용 fixture·정적 시나리오·build·diff 검사로 대조한다.
+- 사람 gate: 새 항목 없음. 다음 `17K-3`은 App 원천 조회·알림 제외 guard·builder 주입과 외부 action 경계를 closeout audit한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
