@@ -79,14 +79,14 @@ assert.deepEqual(defaultControl.record, {
   studentComment: ""
 });
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const modalSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalCommentComposer.jsx", import.meta.url),
+  "utf8"
+);
 const payloadSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalCommentSendPayload.js", import.meta.url),
   "utf8"
 );
-const modalStart = appSource.indexOf("function CommentComposerModal({");
-const modalEnd = appSource.indexOf("function ReportModal({", modalStart);
-const modalSource = appSource.slice(modalStart, modalEnd);
 
 for (const binding of [
   "createLessonJournalCommentSendPayload({",

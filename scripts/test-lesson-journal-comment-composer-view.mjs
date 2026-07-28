@@ -65,14 +65,14 @@ assert.equal(noSendControl.planMode, "none");
 assert.equal(noSendControl.actionLabel, "발송 안 함");
 assert.equal(noSendControl.forceTestRecipient, true);
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const modalSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalCommentComposer.jsx", import.meta.url),
+  "utf8"
+);
 const viewSource = await readFile(
   new URL("../src/domains/lessons/LessonJournalCommentComposerView.jsx", import.meta.url),
   "utf8"
 );
-const modalStart = appSource.indexOf("function CommentComposerModal({");
-const modalEnd = appSource.indexOf("function ReportModal({", modalStart);
-const modalSource = appSource.slice(modalStart, modalEnd);
 
 for (const appContract of [
   "<LessonJournalCommentComposerView",
@@ -96,7 +96,7 @@ for (const retainedControllerContract of [
 ]) {
   assert.ok(
     modalSource.includes(retainedControllerContract),
-    `comment composer controller must remain in App: ${retainedControllerContract}`
+    `comment composer controller must remain in the domain shell: ${retainedControllerContract}`
   );
 }
 assert.ok(

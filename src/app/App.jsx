@@ -235,15 +235,7 @@ import { LessonJournalTable } from "../domains/lessons/LessonJournalTable.jsx";
 import { LessonJournalStudentPreviewModal } from "../domains/lessons/LessonJournalStudentPreviewModal.jsx";
 import { createLessonJournalPreparationMemoModel } from "../domains/lessons/lessonJournalPreparationMemoModel.js";
 import { LessonJournalPreparationMemoView } from "../domains/lessons/LessonJournalPreparationMemoView.jsx";
-import {
-  createLessonJournalCommentAudienceModel,
-  createLessonJournalCommentComposerModel
-} from "../domains/lessons/lessonJournalCommentComposerModel.js";
-import { LessonJournalCommentComposerView } from "../domains/lessons/LessonJournalCommentComposerView.jsx";
-import { polishLessonJournalCommentDraft } from "../domains/lessons/lessonJournalCommentPolishController.js";
-import { saveLessonJournalCommentDraft } from "../domains/lessons/lessonJournalCommentSaveController.js";
-import { createLessonJournalCommentSendPayload } from "../domains/lessons/lessonJournalCommentSendPayload.js";
-import { useLessonJournalCommentComposerDraft } from "../domains/lessons/useLessonJournalCommentComposerDraft.js";
+import { LessonJournalCommentComposer } from "../domains/lessons/LessonJournalCommentComposer.jsx";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -17010,188 +17002,25 @@ function PreparationMemoModal({
   );
 }
 
-function CommentComposerModal({
-  aiModel,
-  aiProvider,
-  audience,
-  integrationStatus,
-  initialCommentDraft,
-  initialSendTiming = "default",
-  lesson,
-  nextHomework,
-  notificationTemplates = {},
-  onChangeRecord,
-  onClose,
-  onPolishComment,
-  onSaveRecord,
-  onSendComment,
-  previousHomework,
-  record,
-  saveState = "idle",
-  student,
-  supplementSchedules = [],
-  testResultLines = []
-}) {
-  const commentAudienceModel = createLessonJournalCommentAudienceModel({
-    audience,
-    record
-  });
-  const {
-    aiStatus,
-    comment,
-    field
-  } = commentAudienceModel;
-  const {
-    draftComment,
-    draftSaveState,
-    hasUnsavedDraft,
-    isSourceOpen,
-    localAiStatus,
-    markDraftSaved,
-    setDraftComment,
-    setDraftSaveState,
-    setLocalAiStatus,
-    toggleSource
-  } = useLessonJournalCommentComposerDraft({
-    aiStatus,
-    audience,
-    comment,
-    field,
-    initialCommentDraft,
-    record,
-    studentId: student.studentId
-  });
-  const commentComposerModel = createLessonJournalCommentComposerModel({
-    audience,
-    audienceModel: commentAudienceModel,
-    draftSaveState,
-    hasUnsavedDraft,
-    initialSendTiming,
-    integrationStatus,
-    lesson,
-    record,
-    saveState,
-    student,
-    dependencies: {
-      getAudienceStatus: getAlimtalkAudienceStatus,
-      isLessonScheduleExpired: isLessonAlimtalkScheduleExpired,
-      normalizeSaveState
-    }
-  });
-  const {
-    forceDryRun,
-    forceTestRecipient,
-    isManualResendAvailable,
-    sendDelayMinutes,
-    sendTiming
-  } = commentComposerModel;
-  const sourceText = buildCommentSourceText({
-    audience,
-    lesson,
-    nextHomework,
-    notificationTemplates,
-    previousHomework,
-    record,
-    student,
-    supplementSchedules,
-    testResultLines
-  });
-  const generatedPreviewText = buildCommentPreviewText({
-    audience,
-    comment: draftComment,
-    lesson,
-    nextHomework,
-    notificationTemplates,
-    previousHomework,
-    record,
-    student,
-    supplementSchedules,
-    testResultLines
-  });
-  function handleClose() {
-    if (hasUnsavedDraft && typeof window !== "undefined" && !window.confirm("저장하지 않은 최종 문구가 있습니다. 닫을까요?")) {
-      return;
-    }
-    onClose();
-  }
-
-  async function handlePolishClick() {
-    setLocalAiStatus("AI 수정 중");
-    const result = await polishLessonJournalCommentDraft({
-      aiModel,
-      aiProvider,
-      audience,
-      draftComment,
-      generatedPreviewText,
-      lesson,
-      normalizeText: normalizeMessageText,
-      record,
-      requestPolish: onPolishComment,
-      sourceText,
-      student
-    });
-    if (result.ok) {
-      setDraftComment(result.polishedText);
-      setDraftSaveState("dirty");
-      setLocalAiStatus(result.statusLabel);
-      return;
-    }
-    setLocalAiStatus(result.statusLabel);
-  }
-
-  async function handleSaveDraftClick() {
-    setDraftSaveState("saving");
-    const result = await saveLessonJournalCommentDraft({
-      createEmptyRecord,
-      createRecordId: createLessonStudentRecordId,
-      draftComment,
-      field,
-      lesson,
-      record,
-      saveRecord: onSaveRecord,
-      student
-    });
-    if (!result.ok) {
-      setDraftSaveState("failed");
-      return false;
-    }
-    markDraftSaved(draftComment);
-    return true;
-  }
-
-  function handleSendClick() {
-    if (hasUnsavedDraft) return;
-    const payload = createLessonJournalCommentSendPayload({
-      draftComment,
-      field,
-      forceDryRun,
-      forceTestRecipient,
-      generatedPreviewText,
-      isManualResendAvailable,
-      record,
-      sendDelayMinutes,
-      sendTiming
-    });
-    onSendComment(lesson, student, payload.record, audience, payload.options);
-  }
-
+function CommentComposerModal({ ...props }) {
   return (
-    <LessonJournalCommentComposerView
-      draftComment={draftComment}
-      draftSaveState={draftSaveState}
-      generatedPreviewText={generatedPreviewText}
-      hasUnsavedDraft={hasUnsavedDraft}
-      isSourceOpen={isSourceOpen}
-      lesson={lesson}
-      localAiStatus={localAiStatus}
-      model={commentComposerModel}
-      onChangeDraft={setDraftComment}
-      onClose={handleClose}
-      onPolish={handlePolishClick}
-      onSave={handleSaveDraftClick}
-      onSend={handleSendClick}
-      onToggleSource={toggleSource}
-      sourceText={sourceText}
+    <LessonJournalCommentComposer
+      {...props}
+      dependencies={{
+        buildPreviewText: buildCommentPreviewText,
+        buildSourceText: buildCommentSourceText,
+        createEmptyRecord,
+        createRecordId: createLessonStudentRecordId,
+        formatTimeLabel: formatKoreaTimeLabel,
+        getAudienceStatus: getAlimtalkAudienceStatus,
+        getDisplaySendStatus: getDisplayCommentSendStatus,
+        getSafetyText: getAlimtalkSafetyText,
+        getSafetyTone: getAlimtalkSafetyTone,
+        getScheduledDate: getLessonAlimtalkScheduledDate,
+        isLessonScheduleExpired: isLessonAlimtalkScheduleExpired,
+        normalizeSaveState,
+        normalizeText: normalizeMessageText
+      }}
     />
   );
 }

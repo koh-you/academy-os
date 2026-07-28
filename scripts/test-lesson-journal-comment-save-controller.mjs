@@ -107,19 +107,19 @@ const missingCallbackControl = await saveLessonJournalCommentDraft({
 });
 assert.equal(missingCallbackControl.ok, true);
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const modalSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalCommentComposer.jsx", import.meta.url),
+  "utf8"
+);
 const controllerSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalCommentSaveController.js", import.meta.url),
   "utf8"
 );
-const modalStart = appSource.indexOf("function CommentComposerModal({");
-const modalEnd = appSource.indexOf("function ReportModal({", modalStart);
-const modalSource = appSource.slice(modalStart, modalEnd);
 
 for (const binding of [
   "saveLessonJournalCommentDraft({",
   "createEmptyRecord,",
-  "createRecordId: createLessonStudentRecordId",
+  "createRecordId,",
   "saveRecord: onSaveRecord",
   'setDraftSaveState("saving")',
   'setDraftSaveState("failed")',
@@ -132,7 +132,7 @@ for (const retainedAction of [
   "function handleSendClick()",
   "onSendComment("
 ]) {
-  assert.ok(modalSource.includes(retainedAction), `non-save action must remain in App: ${retainedAction}`);
+  assert.ok(modalSource.includes(retainedAction), `non-save action must remain in the domain shell: ${retainedAction}`);
 }
 assert.ok(
   !modalSource.includes("const recordToSave = {"),

@@ -91,18 +91,18 @@ assert.deepEqual(failure, {
   statusLabel: "실패 · AI 수정 실패"
 });
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const modalSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalCommentComposer.jsx", import.meta.url),
+  "utf8"
+);
 const controllerSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalCommentPolishController.js", import.meta.url),
   "utf8"
 );
-const modalStart = appSource.indexOf("function CommentComposerModal({");
-const modalEnd = appSource.indexOf("function ReportModal({", modalStart);
-const modalSource = appSource.slice(modalStart, modalEnd);
 
 for (const binding of [
   "polishLessonJournalCommentDraft({",
-  "normalizeText: normalizeMessageText",
+  "normalizeText,",
   "requestPolish: onPolishComment",
   'setLocalAiStatus("AI 수정 중")',
   'setDraftSaveState("dirty")',
@@ -116,7 +116,7 @@ for (const retainedAction of [
   "saveRecord: onSaveRecord",
   "onSendComment("
 ]) {
-  assert.ok(modalSource.includes(retainedAction), `non-polish action must remain in App: ${retainedAction}`);
+  assert.ok(modalSource.includes(retainedAction), `non-polish action must remain in the domain shell: ${retainedAction}`);
 }
 assert.ok(
   !modalSource.includes("const rawText = normalizeMessageText(draftComment)"),

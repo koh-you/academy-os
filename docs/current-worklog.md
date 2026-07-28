@@ -1384,6 +1384,13 @@
 - AI 가상검수: 학부모 30분 예약 TARGET, 학생 dry-run 수동 재발송 TARGET, 기본 CONTROL로 record field·delay·수신 flag·최종/미리보기 문구·재발송 사유·sendTiming과 입력 record 불변을 대조한다. 전용 fixture, 수업일지 inventory, build, diff check와 현재 rebase 중간 scenario 기준선을 통과한 뒤 커밋을 재적용한다. 전체 production 검증은 rebase 완료 뒤 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위는 comment composer 전체 shell을 domain component로 이동할 수 있는지 callback 경계를 audit하는 작업이다.
 
+## 2026-07-28 P1. App.jsx 17E-7 알림톡 작성창 domain shell 분리
+
+- 코드: comment composer의 audience model, local draft hook, 표시 model, source/preview 계산, 닫기 확인, AI 수정·최종 문구 저장·발송 payload action과 callback-only view 조합을 `LessonJournalCommentComposer.jsx`로 이동했다. `App.jsx`에는 기존 helper 13개를 주입하는 얇은 wrapper만 남겼다.
+- 경계: domain shell은 직접 fetch/API 경로를 가지지 않고 기존 `onPolishComment`·`onSaveRecord`·`onSendComment` callback만 호출한다. 실제 Supabase 저장·재조회와 `/api/notification-jobs/*`·Solapi orchestration 구현은 계속 기존 App 상위 경계에 남아 있다.
+- AI 가상검수: App helper 주입, shell의 model·hook·controller·payload·view 조합, 미저장 닫기 확인, App wrapper action 제거와 직접 API/Solapi 경로 부재를 정적으로 대조하고 17E-1~6 TARGET/CONTROL fixture 전체를 재실행한다. 전용 shell fixture, 수업일지 inventory, build, diff check와 현재 rebase 중간 scenario 기준선을 통과한 뒤 커밋을 재적용한다. 전체 production 검증은 rebase 완료 뒤 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위는 `LessonJournalDetail`에 남은 다중 원천 저장의 TARGET/CONTROL·부분 성공 경계를 inventory하는 작업이다.
+
 ## 2026-07-28 P1. App.jsx 17D-2 수업일지 학생 표 shell 분리
 
 - 코드: 수업일지 학생 표의 panel, 읽기/편집 class, 학생·메모·출결·교재·진도·숙제·과제·알림톡 10개 고정 열 제목을 `lessonJournalTableModel.js`와 `LessonJournalTable.jsx`로 분리했다.

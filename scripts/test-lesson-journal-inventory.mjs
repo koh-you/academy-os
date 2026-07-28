@@ -170,6 +170,10 @@ const commentSendPayloadSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalCommentSendPayload.js", import.meta.url),
   "utf8"
 );
+const commentComposerSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalCommentComposer.jsx", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -184,7 +188,7 @@ const journalSource = section(
   "function LessonJournalDetail({",
   "function CommentComposerModal({"
 );
-const commentComposerSource = section(
+const commentComposerWrapperSource = section(
   appSource,
   "function CommentComposerModal({",
   "function ReportModal({"
@@ -861,6 +865,28 @@ assert.ok(
 assert.ok(
   !commentComposerSource.includes("manualCommentBody: draftComment"),
   "CommentComposerModal must not retain the extracted send options"
+);
+for (const extractedCommentComposerShellContract of [
+  "export function LessonJournalCommentComposer({",
+  "useLessonJournalCommentComposerDraft({",
+  "createLessonJournalCommentComposerModel({",
+  "polishLessonJournalCommentDraft({",
+  "saveLessonJournalCommentDraft({",
+  "createLessonJournalCommentSendPayload({",
+  "<LessonJournalCommentComposerView"
+]) {
+  assert.ok(
+    commentComposerSource.includes(extractedCommentComposerShellContract),
+    `missing extracted 17E-7 contract: ${extractedCommentComposerShellContract}`
+  );
+}
+assert.ok(
+  commentComposerWrapperSource.includes("<LessonJournalCommentComposer"),
+  "App wrapper must compose the extracted comment domain shell"
+);
+assert.ok(
+  !commentComposerWrapperSource.includes("async function handlePolishClick()"),
+  "App wrapper must not retain the extracted comment actions"
 );
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");

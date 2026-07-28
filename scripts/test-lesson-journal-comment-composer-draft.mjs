@@ -77,14 +77,14 @@ assert.equal(
   false
 );
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const modalSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalCommentComposer.jsx", import.meta.url),
+  "utf8"
+);
 const hookSource = await readFile(
   new URL("../src/domains/lessons/useLessonJournalCommentComposerDraft.js", import.meta.url),
   "utf8"
 );
-const modalStart = appSource.indexOf("function CommentComposerModal({");
-const modalEnd = appSource.indexOf("function ReportModal({", modalStart);
-const modalSource = appSource.slice(modalStart, modalEnd);
 
 for (const hookBinding of [
   "useLessonJournalCommentComposerDraft({",
@@ -108,7 +108,7 @@ for (const retainedAction of [
   "saveRecord: onSaveRecord",
   "onSendComment("
 ]) {
-  assert.ok(modalSource.includes(retainedAction), `comment action must remain in App: ${retainedAction}`);
+  assert.ok(modalSource.includes(retainedAction), `comment action must remain in the domain shell: ${retainedAction}`);
 }
 for (const removedLocalState of [
   "const [isSourceOpen, setIsSourceOpen]",
