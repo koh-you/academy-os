@@ -1890,6 +1890,12 @@
 - AI 검수: update/create TARGET 선택→기존 TARGET patch·신규 TARGET append→CONTROL 참조 보존과 입력 불변을 실행하고 두 helper의 side effect 0건, 전체 App effect 순서를 대조한다. 전용 aggregate audit와 시나리오 607/607, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AE-1`은 saving/saved/failed 세 상태 객체와 문구 생성만 inventory하고 React setter·error catch·bulk request는 이동하지 않는다.
 
+## 2026-07-28 P3. App.jsx 17AE-1 generated lesson save status inventory
+
+- inventory: saving은 원 lessons 참조와 `자동 수업 N건 저장 중...`, saved는 새 빈 배열과 `자동 수업 N건 저장 완료`, failed는 원 lessons 참조와 `자동 수업 저장 실패 · error.message`를 갖는 정확한 상태 계약을 고정했다. 세 React setter와 Promise 분기는 App 경계다.
+- AI 가상검수: TARGET/CONTROL 2건의 saving/saved/failed 객체, 배열 참조 차이, 정확한 문구, 입력 불변과 빈/default 입력을 검증하고 saving→request→saved→catch→failed 순서를 대조한다. 전용 inventory fixture와 시나리오 608/608, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AE-2`는 세 상태 factory만 `generatedLessonSaveStatus.js`로 분리하고 setter와 async orchestration은 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
