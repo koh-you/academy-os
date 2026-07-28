@@ -209,6 +209,7 @@ import {
   hasMissingCheckOut,
   normalizeTimeInput
 } from "../domains/lessons/attendance.js";
+import { mergeRemoteAttendanceRecord } from "../domains/lessons/attendanceSync.js";
 import {
   getLessonClosureBlockingNotificationJobs,
   getLessonClosureRoster,
@@ -652,26 +653,6 @@ function getPreparationNoticeForTarget(record = {}, target = "parent") {
   const shouldIncludePrepMemo =
     target === "student" ? Boolean(record?.prepStudentVisible) : Boolean(record?.prepParentVisible);
   return shouldIncludePrepMemo ? removeHomeworkFollowupMemoLines(record?.preparationMemo) : "";
-}
-
-const attendanceSyncFields = [
-  "attendanceStatus",
-  "attendanceReason",
-  "checkInAt",
-  "checkInTime",
-  "checkOutAt",
-  "checkOutTime",
-  "lateMinutes",
-  "updatedBy"
-];
-
-function mergeRemoteAttendanceRecord(localRecord = null, remoteRecord = {}, saveState = "saved") {
-  if (!localRecord) return remoteRecord;
-  if (!["dirty", "saving", "failed"].includes(saveState)) return remoteRecord;
-  return attendanceSyncFields.reduce(
-    (record, field) => ({ ...record, [field]: remoteRecord[field] }),
-    localRecord
-  );
 }
 
 function getHomeworkFollowupNoticeForTarget(record = {}, target = "parent", notificationTemplates = {}) {

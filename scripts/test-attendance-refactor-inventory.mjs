@@ -25,13 +25,16 @@ for (const request of [
 }
 
 assertOrdered(appSource, [
-  "const attendanceSyncFields = [",
-  "function mergeRemoteAttendanceRecord(",
-  'if (!["dirty", "saving", "failed"].includes(saveState)) return remoteRecord',
+  'import { mergeRemoteAttendanceRecord } from "../domains/lessons/attendanceSync.js"',
   "async function syncAttendanceRecords()",
   "mergeRemoteAttendanceRecord(",
   "window.setInterval(syncAttendanceRecords, 7_000)"
 ]);
+assert.equal(
+  appSource.includes("function mergeRemoteAttendanceRecord("),
+  false,
+  "attendance sync merge implementation must stay outside App"
+);
 
 assertOrdered(serverSource, [
   "async function handleAttendanceCheck(payload = {})",

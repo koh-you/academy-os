@@ -48,4 +48,6 @@
 
 ## 다음 단위
 
-`16B-1`: `attendanceSyncFields`와 `mergeRemoteAttendanceRecord`를 순수 출결 동기화 모델로 분리한다. 실제 polling effect, API, React state, 출결 저장·알림톡은 App에 남긴다. 가상 remote/local dirty·saving·failed·saved record로 자동검증하므로 사람 gate는 없다.
+- `16B-1` 완료: `attendanceSyncFields`와 `mergeRemoteAttendanceRecord`를 `attendanceSync.js` 순수 모델로 분리했다. 가상 remote/local record로 dirty/saving/failed 비출결 draft 보존과 saved/idle 전체 원격 반영을 검사한다.
+- 다음 `16B-2`: 수동 출결 modal의 태블릿 기록 판정, 초기 status, 변경 감지 helper를 순수 모델로 분리한다.
+- 실제 polling effect, API, React state, 출결 저장·알림톡은 App에 남긴다.
