@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { buildStudentHandoverPdfModel, getStudentHandoverTitle } from "../src/domains/students/studentHandoverPdf.js";
+import { buildStudentHandoverPdfModel, getStudentHandoverTitle, openStudentHandoverPdf } from "../src/domains/students/studentHandoverPdf.js";
 
 const student = { studentId: "student_1", name: "김테스트", studentPhone: "010-1111-2222", parentPhone: "010-3333-4444", withdrawnAt: "2026-07-27T10:00:00.000Z" };
 const model = buildStudentHandoverPdfModel({
@@ -24,6 +24,20 @@ assert.equal(Object.hasOwn(model, "tally"), false, "Tally 접수 정보는 인�
 assert.equal(model.comment, "재등록 시 진도 확인");
 assert.equal(getStudentHandoverTitle({ withdrawalReason: "class_move" }), "반이동생 인수인계서");
 assert.equal(getStudentHandoverTitle({ withdrawalReason: "withdrawal" }), "퇴원생 인수인계서");
+
+const printedHtml = [];
+globalThis.window = {
+  open: () => ({
+    document: { close() {}, write: (html) => printedHtml.push(html) },
+    opener: "origin"
+  })
+};
+openStudentHandoverPdf(model, { ...student, withdrawalReason: "class_move" });
+delete globalThis.window;
+assert.equal(printedHtml.length, 1);
+assert.match(printedHtml[0], /<h1>반이동생 인수인계서<\/h1>/);
+assert.doesNotMatch(printedHtml[0], /PDF 생성일/);
+assert.doesNotMatch(printedHtml[0], /원천을 읽어 생성한 읽기 전용/);
 
 const homeworkStatusModel = buildStudentHandoverPdfModel({
   student: { studentId: "student_status", name: "상태테스트", withdrawnAt: "2026-07-27T12:00:00+09:00" },
