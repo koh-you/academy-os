@@ -1378,6 +1378,14 @@
 - AI 가상검수: 기본·30분 지연·경과·수동 시각 있음/없음·알림 없음, applying/needs/failed/resultDue/draft, 결과조회 대상 0/2건과 loading/handler 없음 TARGET·CONTROL을 대조했다. App-owned action 4개와 외부 side effect 부재를 정적으로 검사하고 전용 fixture와 시나리오 527/527을 통과했다. 운영 API·Supabase·Solapi 호출은 0건이다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17H-4`는 예약 audit 조회 결과의 성공·부분 실패·전체 실패를 React 상태로 만들기 전 순수 응답 정규화로 분리할 수 있는지 inventory한다. 네트워크 요청과 취소 action은 이동하지 않는다.
 
+## 2026-07-28 P1. App.jsx 17H-4 수업일지 OS 예약 audit 응답 정규화 분리
+
+- 코드: OS `notification_jobs` 조회 성공 응답을 audit 배열, 건수 문구, `ready` 상태로 바꾸는 계산을 `lessonJournalReservationAuditResult.js` 순수 모델로 분리했다.
+- 동작 보존: 최신 main의 OS 전용 예약 확인 계약을 유지해 단일 요청 실패는 App의 기존 `failed` catch로 남긴다. 성공 응답 배열 identity와 필드 누락 시 빈 배열 fallback도 바꾸지 않았다.
+- 경계: 날짜/수업 ID가 포함된 OS API 경로, 12초 timeout, modal effect, React setter와 OS job 취소 action은 계속 `App.jsx`가 소유한다. raw Solapi group/message 조회와 group 취소 API는 다시 도입하지 않았다.
+- AI 가상검수: 2개 OS job 성공 TARGET과 빈 응답 CONTROL로 결과·배열 identity·입력 불변을 대조했다. 전용 fixture와 정적 시나리오를 실행하며 운영 API·Supabase·Solapi 호출은 0건이다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17H-5`는 OS 예약 1건 취소 성공 뒤 audit 배열을 갱신하는 순수 state transition을 분리한다. 확인창·취소 API·현재 시각 주입·React setter는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

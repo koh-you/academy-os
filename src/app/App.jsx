@@ -236,6 +236,7 @@ import { createLessonJournalMakeupTaskRequests } from "../domains/lessons/lesson
 import { saveLessonJournalRecordsWithVerification } from "../domains/lessons/lessonJournalRecordBulkApi.js";
 import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
 import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
+import { createLessonJournalReservationAuditResult } from "../domains/lessons/lessonJournalReservationAuditResult.js";
 import { createLessonJournalReservationControlModel } from "../domains/lessons/lessonJournalReservationControlModel.js";
 import { createLessonJournalReservationSyncStatus } from "../domains/lessons/lessonJournalReservationSyncModel.js";
 import { createLessonJournalExpectedReservationItems } from "../domains/lessons/lessonJournalExpectedReservationItems.js";
@@ -16051,12 +16052,7 @@ function LessonJournalDetail({
     const osPath = `/api/notification-jobs?date=${encodeURIComponent(lesson.date)}&lessonId=${encodeURIComponent(lesson.lessonId)}&limit=500`;
     try {
       const result = await getJsonWithTimeout(osPath, 12000, "OS 알림톡 예약 기록 조회가 12초를 넘었습니다.");
-      const osJobs = result.notificationJobs ?? [];
-      setReservationAudit({
-        message: `OS 예약 ${osJobs.length}건`,
-        osJobs,
-        state: "ready"
-      });
+      setReservationAudit(createLessonJournalReservationAuditResult(result));
     } catch (error) {
       setReservationAudit((current) => ({
         ...current,
