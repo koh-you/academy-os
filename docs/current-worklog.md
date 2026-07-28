@@ -1927,6 +1927,12 @@
 - AI 가상검수: 현재 cycle 명시 TARGET, 과거/미래 CONTROL, cycle 누락·빈 문자열 TARGET으로 추출 전후 결과·참조·순서·입력 불변을 대조한다. 전용 extraction fixture와 시나리오 613/613, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AG-3`은 import·호출 수와 App-owned repair/persist/plan 경계를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17AG-3 generated lesson plan row selector closeout
+
+- closeout: `generatedLessonPlanSelectors.js` import 1개·호출 1개·export 1개를 고정하고, App의 selector useMemo 뒤 시험정보 repair/persist effect와 plan build가 기존 순서로 남는 경계를 확정했다.
+- AI 가상검수: 명시 current TARGET, 누락·빈 cycle TARGET, 과거·미래 CONTROL의 선택·참조·순서·입력 불변을 다시 실행하고 selector→repair→persist→plan 순서 및 helper side effect 0건을 대조한다. 전용 closeout fixture와 시나리오 614/614, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AH-1`은 generated lesson plan을 소비하는 순수 display/status 계산 후보를 inventory하되 React state와 repair/persist/save effect는 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
