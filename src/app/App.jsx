@@ -70,6 +70,7 @@ import {
 } from "../domains/notifications/notificationJobState.js";
 import { ParentResponseContextPanel } from "../domains/notifications/ParentResponseContextPanel.jsx";
 import { getParentResponseContexts } from "../domains/notifications/parentResponseContext.js";
+import { createNotificationJobsQueryString } from "../domains/notifications/notificationJobLoadQuery.js";
 import { createNotificationJobsReadyStatus } from "../domains/notifications/notificationJobLoadStatus.js";
 import { formatNotificationJobStatusLabel } from "../domains/notifications/notificationJobStatusFormatter.js";
 import {
@@ -6417,27 +6418,25 @@ export function App() {
       setNotificationJobsStatus({ state: "loading", message: "알림 기록을 불러오는 중입니다." });
     }
     try {
-      const query = new URLSearchParams();
-      if (lessonId) {
-        query.set("lessonId", lessonId);
-        query.set("limit", "200");
-      } else if (scope === "history") {
-        query.set("limit", "300");
-        if (date) {
-          const dayStart = new Date(`${date}T00:00:00+09:00`);
-          const nextDayStart = new Date(`${date}T00:00:00+09:00`);
-          nextDayStart.setUTCDate(nextDayStart.getUTCDate() + 1);
-          if (!Number.isNaN(dayStart.getTime()) && !Number.isNaN(nextDayStart.getTime())) {
-            query.set("scheduledFrom", dayStart.toISOString());
-            query.set("scheduledTo", nextDayStart.toISOString());
-          }
+      let scheduledFrom = "";
+      let scheduledTo = "";
+      if (!lessonId && scope === "history" && date) {
+        const dayStart = new Date(`${date}T00:00:00+09:00`);
+        const nextDayStart = new Date(`${date}T00:00:00+09:00`);
+        nextDayStart.setUTCDate(nextDayStart.getUTCDate() + 1);
+        if (!Number.isNaN(dayStart.getTime()) && !Number.isNaN(nextDayStart.getTime())) {
+          scheduledFrom = dayStart.toISOString();
+          scheduledTo = nextDayStart.toISOString();
         }
-      } else {
-        query.set("limit", "300");
-        query.set("status", "draft,scheduled,failed,send_unconfirmed");
       }
+      const queryString = createNotificationJobsQueryString({
+        lessonId,
+        scheduledFrom,
+        scheduledTo,
+        scope
+      });
       const result = await getJsonWithTimeout(
-        `/api/notification-jobs?${query.toString()}`,
+        `/api/notification-jobs?${queryString}`,
         12000,
         "알림 기록 조회가 12초를 넘었습니다. 발송 기능은 사용할 수 있고, 기록만 새로고침으로 다시 확인해 주세요."
       );

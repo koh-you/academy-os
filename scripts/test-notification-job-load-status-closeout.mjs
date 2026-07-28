@@ -53,7 +53,9 @@ const functionSource = appSource.slice(functionStart, functionEnd);
 const loadingIndex = functionSource.indexOf(
   'setNotificationJobsStatus({ state: "loading", message: "알림 기록을 불러오는 중입니다." })'
 );
-const queryIndex = functionSource.indexOf("const query = new URLSearchParams()");
+const queryIndex = functionSource.indexOf(
+  "const queryString = createNotificationJobsQueryString({"
+);
 const requestIndex = functionSource.indexOf("getJsonWithTimeout(", queryIndex);
 const resultIndex = functionSource.indexOf(
   "if (result.ok && Array.isArray(result.notificationJobs))",

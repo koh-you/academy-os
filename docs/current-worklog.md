@@ -1785,6 +1785,13 @@
 - AI 검수: 공백·슬래시가 있는 수업 ID+history 우선순위, 날짜 지정/미지정 history, active, 예상 밖 scope, 기본 인자를 가상 실행해 URL 인코딩과 parameter 순서·입력 불변을 전용 fixture·정적 시나리오·build·`git diff --check`로 대조한다.
 - 사람 gate: 없음. 다음 `17W-2`는 query string 계산만 순수 helper로 분리하고 실제 request와 React 상태는 App에 유지한다.
 
+## 2026-07-28 P2. App.jsx 17W-2 notification job load query 분리
+
+- 코드: lesson/history/active query string 계산을 `notificationJobLoadQuery.js`의 `createNotificationJobsQueryString`으로 분리했다. App은 `lessonId`, `scope`와 선택 날짜에서 계산한 `scheduledFrom`/`scheduledTo`를 넘겨 기존 `/api/notification-jobs` endpoint에 붙인다.
+- 동작 보존: 수업 ID URL 인코딩, 수업 우선순위, 날짜 지정 history의 KST 일 범위, limit/status 값과 parameter 순서를 유지한다. 날짜 계산, silent loading/failed guard, timeout, request, 목록 반영, ready 상태는 App에 남는다.
+- AI 검수: 공백·슬래시 수업 ID, 날짜 지정/미지정 history, active, 예상 밖 scope, 기본 인자를 가상 실행해 query와 입력 불변을 검증하고 helper side effect 0건 및 App request 순서를 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 없음. 다음 `17W-3`은 query helper export/import/call 수와 request·React 경계를 closeout한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
