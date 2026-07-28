@@ -1860,6 +1860,12 @@
 - AI 가상검수: create/update TARGET 순서·객체 참조·입력 불변·빈 입력을 재실행하고 App inline filter/map 0건, helper의 React·network·Storage·Supabase·Solapi side effect 0건을 대조한다. 전용 fixture와 시나리오 602/602, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AB-3`은 helper export/import/call 각 1개와 App-owned bulk save 경계를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17AB-3 generated lesson save selector boundary closeout
+
+- 완료: selector export/import/App call 각 1개와 `saveGeneratedLessonsFromPlan` 정의 포함 5곳을 고정했다. 빈 배열 guard→optimistic merge→saving→20초 bulk request→서버 lesson merge→saved 또는 failed의 App-owned 순서를 closeout했다.
+- AI 검수: create/update TARGET 참조·순서·입력 불변을 재실행하고 adapter inline filter/map 0건, selector side effect 0건을 확인한다. 전용 closeout fixture와 시나리오 603/603, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AC-1`은 `mergeGeneratedLessonsIntoState` setter 내부의 ID 기준 merge/append 순수 계산을 inventory하고 React setter는 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
