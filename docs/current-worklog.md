@@ -1666,6 +1666,12 @@
 - AI 검수: 무효 row, TARGET 교체, batch 내부 중복 2건, 기존 중복 제거, CONTROL A/B 순서, 빈 현재 목록, 입력 불변을 가상 실행하고 기존 inline inventory 결과와 helper 결과를 전용 fixture·정적 시나리오·build·`git diff --check`로 대조한다.
 - 사람 gate: 없음. 다음 `17P-3`은 import/export/call 수와 side effect 부재를 다시 고정하고 batch 상태 병합 경계를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17P-3 notification job batch state boundary closeout
+
+- 완료: `selectValidNotificationJobs`·`mergeNotificationJobLists`의 export 각 1개, notification state 모듈 import 1개, helper 호출 각 1개, 선택→빈 batch guard→React setter 순서, 초기/이력 load·Solapi reconcile·bulk 성공/실패 네 호출부를 closeout fixture로 고정했다.
+- AI 검수: 중복 TARGET과 CONTROL 가상 목록으로 batch 내부 중복 유지·기존 TARGET 제거·CONTROL 보존·입력 불변을 재검증하고, App에 inline filter/Set 계산이 남지 않았으며 helper에 React/API/Supabase/Solapi side effect가 없음을 전용 closeout fixture·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 없음. 다음 `17Q-1`은 App에 남은 notification job 상태 변경 경계를 다시 inventory해 낮은 위험의 다음 순수 계산 후보를 한 단위만 선정한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
