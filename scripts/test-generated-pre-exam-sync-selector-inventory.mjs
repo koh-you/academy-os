@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { selectGeneratedPreExamLessonsToSync } from "../src/domains/lessons/generatedPreExamSyncSelector.js";
 
 function selectExistingPreExamLessonsToSync(planItems = []) {
   return planItems.filter(
@@ -59,11 +60,19 @@ const planItems = [
 const inputSnapshot = structuredClone(planItems);
 const preExamLessonsToSync =
   selectExistingPreExamLessonsToSync(planItems);
+const extractedPreExamLessonsToSync =
+  selectGeneratedPreExamLessonsToSync(planItems);
 
 assert.deepEqual(preExamLessonsToSync, [
   createTarget,
   updateTarget
 ]);
+assert.deepEqual(
+  extractedPreExamLessonsToSync,
+  preExamLessonsToSync
+);
+assert.equal(extractedPreExamLessonsToSync[0], createTarget);
+assert.equal(extractedPreExamLessonsToSync[1], updateTarget);
 assert.equal(preExamLessonsToSync[0], createTarget);
 assert.equal(preExamLessonsToSync[1], updateTarget);
 assert.deepEqual(planItems, inputSnapshot);
@@ -73,8 +82,15 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
+const helperSource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedPreExamSyncSelector.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const effectAnchor = appSource.indexOf(
-  "const preExamLessonsToSync = generatedLessonPlan.filter("
+  "selectGeneratedPreExamLessonsToSync(generatedLessonPlan)"
 );
 const effectStart = appSource.lastIndexOf(
   "  useEffect(() => {",
@@ -90,11 +106,10 @@ assert.ok(
     effectEnd > effectAnchor
 );
 const effectSource = appSource.slice(effectStart, effectEnd);
-const effectBoundaries = [
+  const effectBoundaries = [
   'session?.role !== "teacher" || !isAppStateReady || attendanceOnlyMode',
-  "const preExamLessonsToSync = generatedLessonPlan.filter(",
-  'item.lesson?.lessonType === "preExam"',
-  'item.status === "create" || item.status === "update"',
+  "const preExamLessonsToSync =",
+  "selectGeneratedPreExamLessonsToSync(generatedLessonPlan)",
   "if (preExamLessonsToSync.length === 0) return",
   "saveGeneratedLessonsFromPlan(preExamLessonsToSync)",
   "[attendanceOnlyMode, generatedLessonPlan, isAppStateReady, session?.role]"
@@ -110,6 +125,17 @@ for (const boundary of effectBoundaries) {
     `generated pre-exam sync effect order changed: ${boundary}`
   );
   previousIndex = boundaryIndex;
+}
+for (const helperBoundary of [
+  "export function selectGeneratedPreExamLessonsToSync(planItems = [])",
+  "return planItems.filter(",
+  'item.lesson?.lessonType === "preExam"',
+  'item.status === "create" || item.status === "update"'
+]) {
+  assert.ok(
+    helperSource.includes(helperBoundary),
+    `missing extracted pre-exam sync selector: ${helperBoundary}`
+  );
 }
 
 console.log(
