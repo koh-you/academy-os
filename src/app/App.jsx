@@ -241,6 +241,7 @@ import {
 } from "../domains/lessons/lessonJournalCommentComposerModel.js";
 import { LessonJournalCommentComposerView } from "../domains/lessons/LessonJournalCommentComposerView.jsx";
 import { polishLessonJournalCommentDraft } from "../domains/lessons/lessonJournalCommentPolishController.js";
+import { saveLessonJournalCommentDraft } from "../domains/lessons/lessonJournalCommentSaveController.js";
 import { useLessonJournalCommentComposerDraft } from "../domains/lessons/useLessonJournalCommentComposerDraft.js";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
@@ -17138,27 +17139,18 @@ function CommentComposerModal({
   }
 
   async function handleSaveDraftClick() {
-    const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
-    const nextRecord = { ...(record ?? {}), [field]: draftComment };
-    const recordToSave = {
-      ...createEmptyRecord(lesson, student),
-      ...nextRecord,
-      lessonStudentRecordId: recordId,
-      lessonId: lesson.lessonId,
-      studentId: student.studentId,
-      [field]: draftComment,
-      ...(field === "teacherComment" ? { teacherCommentSendStatus: "" } : {}),
-      ...(field === "studentComment" ? { studentCommentSendStatus: "" } : {}),
-      updatedBy: "instructor_owner_001",
-      updatedAt: new Date().toISOString()
-    };
     setDraftSaveState("saving");
-    const saved = await onSaveRecord?.(recordId, lesson, student, recordToSave, {
-      skipNotificationRefresh: true,
-      skipRelatedHomeworks: true,
-      verifyFields: [field]
+    const result = await saveLessonJournalCommentDraft({
+      createEmptyRecord,
+      createRecordId: createLessonStudentRecordId,
+      draftComment,
+      field,
+      lesson,
+      record,
+      saveRecord: onSaveRecord,
+      student
     });
-    if (saved === false) {
+    if (!result.ok) {
       setDraftSaveState("failed");
       return false;
     }

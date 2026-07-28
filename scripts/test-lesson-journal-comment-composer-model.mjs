@@ -161,7 +161,7 @@ for (const retainedAction of [
   "async function handleSaveDraftClick()",
   "function handleSendClick()",
   "requestPolish: onPolishComment",
-  "onSaveRecord?.(",
+  "saveRecord: onSaveRecord",
   "onSendComment("
 ]) {
   assert.ok(modalSource.includes(retainedAction), `comment action must remain in App: ${retainedAction}`);

@@ -113,7 +113,7 @@ for (const binding of [
 for (const retainedAction of [
   "async function handleSaveDraftClick()",
   "function handleSendClick()",
-  "onSaveRecord?.(",
+  "saveRecord: onSaveRecord",
   "onSendComment("
 ]) {
   assert.ok(modalSource.includes(retainedAction), `non-polish action must remain in App: ${retainedAction}`);

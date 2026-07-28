@@ -1370,6 +1370,13 @@
 - AI 가상검수: draft 우선 TARGET, source fallback TARGET, preview fallback CONTROL과 성공·명시 실패·빈 결과를 가상 request로 실행해 field·원천·`persist: false`·상태 문구와 입력 record 불변을 대조한다. 전용 fixture, 수업일지 inventory, build, diff check와 현재 rebase 중간 scenario 기준선을 통과한 뒤 커밋을 재적용한다. 전체 production 검증은 rebase 완료 뒤 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위는 comment composer의 최종 문구 단건 저장·재조회 action을 주입형 controller로 분리하는 작업이다.
 
+## 2026-07-28 P1. App.jsx 17E-5 알림톡 최종 문구 저장 controller 분리
+
+- 코드: comment composer의 record ID, 빈 record 기본값+기존 record 병합, 현재 학부모/학생 최종 문구와 해당 발송상태 초기화, 작성자·시각, `skipNotificationRefresh`·`skipRelatedHomeworks`·`verifyFields` 저장 option을 `lessonJournalCommentSaveController.js`로 분리했다.
+- 경계: controller는 주입받은 기존 `onSaveRecord`만 호출하며 이 callback의 Supabase 저장·대상행 재조회 계약은 변경하지 않는다. React 저장 상태와 저장본 ref 반영, AI 수정, 예약/즉시 발송 handler는 계속 `App.jsx`가 소유하고 `notification_jobs`·Solapi 실행은 0건이다.
+- AI 가상검수: 학부모 저장 성공 TARGET, 학생 저장 실패 TARGET, callback 없음 CONTROL을 가상 실행해 record ID·현재 field·현재 발송상태 초기화·다른 audience 상태 보존·재조회 option·입력 record 불변을 대조한다. 전용 fixture, 수업일지 inventory, build, diff check와 현재 rebase 중간 scenario 기준선을 통과한 뒤 커밋을 재적용한다. 전체 production 검증은 rebase 완료 뒤 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위는 comment composer의 발송 callback payload builder를 순수 모델로 분리하는 작업이다.
+
 ## 2026-07-28 P1. App.jsx 17D-2 수업일지 학생 표 shell 분리
 
 - 코드: 수업일지 학생 표의 panel, 읽기/편집 class, 학생·메모·출결·교재·진도·숙제·과제·알림톡 10개 고정 열 제목을 `lessonJournalTableModel.js`와 `LessonJournalTable.jsx`로 분리했다.

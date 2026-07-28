@@ -72,9 +72,10 @@
 24. `17E-2` 완료: comment composer의 최종 문구·원천 메모·저장/발송 버튼·미리보기 JSX를 callback-only view로 분리했다.
 25. `17E-3` 완료: comment composer의 원천 토글, local draft·저장 기준 ref·AI 결과 동기화 effect를 외부 side effect 없는 전용 hook으로 분리했다.
 26. `17E-4` 완료: comment composer의 AI 수정 원천 우선순위·`persist: false` request·성공/실패 결과 정규화를 주입형 controller로 분리했다.
-27. 다음: comment composer의 최종 문구 단건 저장·재조회 action을 주입형 controller로 분리
-28. 다중 원천 저장은 TARGET/CONTROL·부분 성공 fixture 뒤 주입형 controller로 분리
-29. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
+27. `17E-5` 완료: comment composer의 최종 문구 record payload·현재 audience 발송상태 초기화·단건 저장/재조회 option을 주입형 controller로 분리했다.
+28. 다음: comment composer의 발송 callback payload builder를 순수 모델로 분리
+29. 다중 원천 저장은 TARGET/CONTROL·부분 성공 fixture 뒤 주입형 controller로 분리
+30. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -116,6 +117,7 @@
 - `17E-2` gate: `17E-1`의 실제 수신 TARGET·발송 안 함 CONTROL을 재사용하고 원천 토글·draft 변경·AI·저장·발송 callback, 저장/발송 disabled, 미리보기 표시 순서를 정적으로 대조한다.
 - `17E-3` gate: 가져온 초기 메모 TARGET·저장 문구 CONTROL, AI 수정 중→완료 TARGET과 무변경 CONTROL, 저장본 대비 변경/동일 draft로 초기화·동기화·dirty 판정을 대조하고 hook에 외부 request callback이 없는지 검사한다.
 - `17E-4` gate: draft 우선 TARGET, source fallback TARGET, preview fallback CONTROL, AI 성공·명시 실패·빈 결과를 가상 request로 실행해 field·원천·`persist: false`·상태 문구를 대조하고 저장/발송 action이 App에 남는지 검사한다.
+- `17E-5` gate: 학부모 저장 성공 TARGET, 학생 저장 실패 TARGET, callback 없음 CONTROL을 가상 실행해 record ID·현재 field·현재 발송상태 초기화·다른 audience 보존·재조회 option·입력 불변과 App save 상태 전환을 대조한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
 - recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.
 - 학생 포털 실제 쓰기와 Solapi 특강 템플릿 검수는 사용자 지시로 목록에서 제거됐고, 교사 bearer/Storage 소유권 보안은 구현·배포 검증 완료다.

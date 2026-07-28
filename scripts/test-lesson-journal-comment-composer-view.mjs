@@ -91,7 +91,7 @@ for (const retainedControllerContract of [
   "async function handleSaveDraftClick()",
   "function handleSendClick()",
   "requestPolish: onPolishComment",
-  "onSaveRecord?.(",
+  "saveRecord: onSaveRecord",
   "onSendComment("
 ]) {
   assert.ok(
