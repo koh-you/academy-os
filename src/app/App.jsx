@@ -1506,8 +1506,8 @@ function removeCookieValue(name) {
 
 function normalizeTeacherSessionForStorage(session) {
   if (session?.role !== "teacher") return null;
-  const { actorId, name, role } = session;
-  return { actorId, name, role };
+  const { actorId, name, role, sessionToken, teacherId } = session;
+  return { actorId, name, role, sessionToken, teacherId };
 }
 
 function encodeTeacherSession(session) {
@@ -6797,7 +6797,13 @@ export function App() {
         const result = await postJson("/api/auth/login", { role, loginId, password });
         if (result.authenticated) {
           setIsPortalDataReady(false);
-          const teacherSession = { role: "teacher", actorId: "instructor_owner_001", name: result.account?.name || account.name || teacherAccount.name };
+          const teacherSession = {
+            role: "teacher",
+            actorId: "instructor_owner_001",
+            name: result.account?.name || account.name || teacherAccount.name,
+            teacherId: result.account?.teacherId || "",
+            sessionToken: result.account?.sessionToken || ""
+          };
           setSession(teacherSession);
           persistTeacherSession(teacherSession);
           setActiveView("lessons");
@@ -9375,6 +9381,7 @@ export function App() {
             rows={examPrepRows}
             students={students}
             onConfirmExamPostSubmission={handleConfirmExamPostSubmission}
+            onOpenExamPostFile={(file) => handleOpenExamPostFile(session?.sessionToken, file)}
             onEnsureExamCycleRows={(examCycle, classTemplateId) =>
               setExamPrepRows((current) => {
                 const nextRowsToAdd = buildExamPrepRowsFromStudents(students, examCycle, classTemplateId, current);
@@ -10314,7 +10321,7 @@ export function App() {
       [submissionId]: { message: "Supabase에 확인 상태를 저장하고 다시 확인하는 중입니다.", state: "saving" }
     }));
     try {
-      const result = await confirmTeacherExamPostSubmission(submissionId, teacherConfirmed);
+      const result = await confirmTeacherExamPostSubmission(session?.sessionToken, submissionId, teacherConfirmed);
       setExamPostSubmissions(result.submissions);
       setExamPostConfirmSaveStates((current) => ({
         ...current,
@@ -17251,6 +17258,7 @@ function ExamPrepCenter({
   students,
   templates,
   onConfirmExamPostSubmission,
+  onOpenExamPostFile,
   onEnsureExamCycleRows,
   onSetExamPostTargetStudentIds,
   onSetTallySubmissions,
