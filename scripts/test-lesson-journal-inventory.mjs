@@ -198,6 +198,10 @@ const homeworkBulkApiSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalHomeworkBulkApi.js", import.meta.url),
   "utf8"
 );
+const makeupTaskRequestSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalMakeupTaskRequest.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -306,7 +310,7 @@ const saveHandlerSource = section(
   "async function handleSaveLessonJournalDrafts",
   "async function handleSaveRecord"
 );
-const savePersistenceSource = `${saveHandlerSource}\n${draftSaveOutcomeSource}\n${draftPersistenceControllerSource}\n${recordBulkApiSource}\n${homeworkBulkApiSource}`;
+const savePersistenceSource = `${saveHandlerSource}\n${draftSaveOutcomeSource}\n${draftPersistenceControllerSource}\n${recordBulkApiSource}\n${homeworkBulkApiSource}\n${makeupTaskRequestSource}`;
 for (const persistenceContract of [
   "saveLessonJournalHomeworksWithVerification",
   "saveLessonJournalMakeupTasksWithVerification",
@@ -1068,6 +1072,42 @@ assert.ok(
     !homeworkBulkApiSource.includes("setHomeworks") &&
     !homeworkBulkApiSource.includes("localStorage"),
   "homework bulk API adapter must own fingerprint verification without App state"
+);
+for (const extractedMakeupTaskRequestContract of [
+  "createLessonJournalMakeupTaskRequests",
+  "currentTasks.find",
+  'existingTask.status === "done" ? "scheduled" : existingTask.status',
+  "touchedAt: timestamps[index]",
+  "createdAt: timestamps[index]"
+]) {
+  assert.ok(
+    makeupTaskRequestSource.includes(extractedMakeupTaskRequestContract),
+    `missing extracted 17F-7 contract: ${extractedMakeupTaskRequestContract}`
+  );
+}
+const makeupSaveHelperSource = section(
+  appSource,
+  "async function saveLessonJournalMakeupTasksWithVerification",
+  "async function handleSaveLessonJournalDrafts"
+);
+for (const injectedMakeupTaskRequestContract of [
+  "createLessonJournalMakeupTaskRequests({",
+  "currentTasks: makeupTasks",
+  "idSeed: Date.now()",
+  "timestamps: taskDrafts.map(() => new Date().toISOString())",
+  "postMakeupTasks(requestedTasks)"
+]) {
+  assert.ok(
+    makeupSaveHelperSource.includes(injectedMakeupTaskRequestContract),
+    `missing App-owned 17F-7 binding: ${injectedMakeupTaskRequestContract}`
+  );
+}
+assert.ok(
+  !makeupTaskRequestSource.includes("Date.now") &&
+    !makeupTaskRequestSource.includes("new Date") &&
+    !makeupTaskRequestSource.includes("postMakeupTasks") &&
+    !makeupTaskRequestSource.includes("Supabase"),
+  "makeup task request builder must stay deterministic and persistence-free"
 );
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");

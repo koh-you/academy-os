@@ -1434,6 +1434,13 @@
 - AI 가상검수: homework 2건 TARGET과 역순·추가 row 응답으로 payload·반환 순서·원본 불변을 대조하고, fingerprint 8개 필드 각각의 불일치, 누락 row, source 불일치, 빈 CONTROL 무호출, 네트워크 실패를 가상 실행했다. 전용 fixture, 수업일지 inventory, 정적 시나리오 517/517, `npm run test:production`, `npm run build`, `git diff --check` 통과.
 - 사람 gate: 새 항목 없음. 다음 의미 단위는 등원보충 draft의 기존 task 병합·신규 ID/기본값 request builder를 순수 모델로 분리하는 작업이다.
 
+## 2026-07-28 P1. App.jsx 17F-7 수업일지 등원보충 request builder 분리
+
+- 코드: 등원보충 draft와 기존 task의 학생·source·task type 일치 병합, 기존 ID·상태 승계, 완료 task의 scheduled 복귀, 신규 ID·날짜·기본값 구성을 `lessonJournalMakeupTaskRequest.js` 순수 builder로 분리했다.
+- 경계: ID seed·오늘 날짜·task별 ISO timestamp는 App에서 주입한다. 실제 `postMakeupTasks`, Supabase identity 재조회 검증, React 상태 반영은 기존 경계에 남겼다.
+- AI 가상검수: 완료/작성 중 기존 task, 신규 task, 명시 override CONTROL을 고정 시각으로 생성해 ID·상태·timestamp·기본값·spread 우선순위·입력 불변을 대조했고, source가 다른 동일 학생은 신규 task가 되는지 확인했다. 전용 fixture, 수업일지 inventory, 정적 시나리오 518/518, `npm run test:production`, `npm run build`, `git diff --check` 통과.
+- 사람 gate: 새 항목 없음. 다음 의미 단위는 등원보충 requested task 저장·Supabase identity 재조회 대조를 주입형 API adapter로 분리하는 작업이다.
+
 ## 2026-07-28 P1. App.jsx 17D-2 수업일지 학생 표 shell 분리
 
 - 코드: 수업일지 학생 표의 panel, 읽기/편집 class, 학생·메모·출결·교재·진도·숙제·과제·알림톡 10개 고정 열 제목을 `lessonJournalTableModel.js`와 `LessonJournalTable.jsx`로 분리했다.

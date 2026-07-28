@@ -225,6 +225,7 @@ import { executeLessonJournalDraftPersistence } from "../domains/lessons/lessonJ
 import { createLessonJournalDraftPersistencePlan } from "../domains/lessons/lessonJournalDraftPersistencePlan.js";
 import { createLessonJournalDraftSaveRequest } from "../domains/lessons/lessonJournalDraftSaveRequest.js";
 import { saveLessonJournalHomeworksWithVerification } from "../domains/lessons/lessonJournalHomeworkBulkApi.js";
+import { createLessonJournalMakeupTaskRequests } from "../domains/lessons/lessonJournalMakeupTaskRequest.js";
 import { saveLessonJournalRecordsWithVerification } from "../domains/lessons/lessonJournalRecordBulkApi.js";
 import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
 import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
@@ -9073,32 +9074,12 @@ export function App() {
 
   async function saveLessonJournalMakeupTasksWithVerification(taskDrafts = []) {
     if (!taskDrafts.length) return [];
-    const taskIdSeed = Date.now();
-    const requestedTasks = taskDrafts.map((task, index) => {
-      const existingTask = makeupTasks.find((item) => (
-        item.studentId === task.studentId &&
-        item.sourceId === task.sourceId &&
-        item.taskType === task.taskType
-      ));
-      return existingTask
-        ? {
-            ...existingTask,
-            ...task,
-            makeupTaskId: existingTask.makeupTaskId,
-            status: existingTask.status === "done" ? "scheduled" : existingTask.status,
-            touchedAt: new Date().toISOString()
-          }
-        : {
-            makeupTaskId: `makeup_${taskIdSeed}_${task.studentId}_${index}`,
-            status: "draft",
-            scheduledDate: today,
-            scheduledTime: "",
-            notificationDraft: "",
-            attemptCount: 0,
-            childHomeworkIds: [],
-            createdAt: new Date().toISOString(),
-            ...task
-          };
+    const requestedTasks = createLessonJournalMakeupTaskRequests({
+      currentTasks: makeupTasks,
+      idSeed: Date.now(),
+      taskDrafts,
+      timestamps: taskDrafts.map(() => new Date().toISOString()),
+      today
     });
     const verification = await postMakeupTasks(requestedTasks);
     if (verification.source !== "supabase") {
