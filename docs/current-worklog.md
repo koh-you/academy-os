@@ -1398,6 +1398,13 @@
 - AI 가상검수: record 2건·homework 1건·makeup 1건 TARGET, 빈 CONTROL, 저장 차단 상태이지만 draft를 보존하는 CONTROL로 key 순서·원본 불변·changeCount·저장 차단을 대조한다. 전용 fixture, 수업일지 inventory, build, diff check와 현재 rebase 중간 scenario 기준선을 통과한 뒤 커밋을 재적용한다. 전체 production 검증은 rebase 완료 뒤 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위는 상위 `handleSaveLessonJournalDrafts`의 homework 변경 plan을 순수 builder로 분리하는 작업이다.
 
+## 2026-07-28 P1. App.jsx 17F-2 수업일지 draft persistence plan 분리
+
+- 코드: 명시 homework 제목 draft 적용, 유효 record 저장본 작성자·시각 보강, 과제 판정에 따른 previous homework와 연결 source homework의 status·teacherStatus·assignmentStatus·checkedAt·updatedAt·dueDate 변경을 `lessonJournalDraftPersistencePlan.js` 순수 builder로 분리했다.
+- 경계: builder는 `nextHomeworks`, 중복 제거된 `changedHomeworks`, `recordsToSave`만 반환한다. homework/makeup/record 실제 저장·Supabase 재조회, React/localStorage 반영, 부분 성공 메시지는 계속 App 상위 handler가 소유한다.
+- AI 가상검수: 명시 homework 변경 TARGET, record 과제 판정으로 previous/source 두 homework가 함께 바뀌는 TARGET, `not_entered`·학생 없음·record ID 없음 CONTROL을 가상 실행해 변경 순서·상태·시각·dueDate·원본 불변을 대조한다. 전용 fixture, 수업일지 inventory, build, diff check와 현재 rebase 중간 scenario 기준선을 통과한 뒤 커밋을 재적용한다. 전체 production 검증은 rebase 완료 뒤 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위는 homework/makeup/record 단계별 부분 성공 결과 모델과 재시도 contract를 가상 fixture로 고정하는 작업이다.
+
 ## 2026-07-28 P1. App.jsx 17D-2 수업일지 학생 표 shell 분리
 
 - 코드: 수업일지 학생 표의 panel, 읽기/편집 class, 학생·메모·출결·교재·진도·숙제·과제·알림톡 10개 고정 열 제목을 `lessonJournalTableModel.js`와 `LessonJournalTable.jsx`로 분리했다.

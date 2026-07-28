@@ -221,6 +221,7 @@ import {
   normalizeAttendanceSettings
 } from "../domains/lessons/attendanceSettings.js";
 import { useAttendanceRecordSync } from "../domains/lessons/useAttendanceRecordSync.js";
+import { createLessonJournalDraftPersistencePlan } from "../domains/lessons/lessonJournalDraftPersistencePlan.js";
 import { createLessonJournalDraftSaveRequest } from "../domains/lessons/lessonJournalDraftSaveRequest.js";
 import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
 import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
@@ -9143,76 +9144,23 @@ export function App() {
 
   async function handleSaveLessonJournalDrafts(lesson, recordDrafts = [], homeworkDrafts = [], makeupTaskDrafts = []) {
     if (!lesson?.lessonId) return { ok: false, message: "수업일지 · 저장 실패 · 수업 ID 없음" };
-    let nextHomeworks = homeworksRef.current;
-    const changedHomeworkMap = new Map();
-
-    homeworkDrafts.forEach((draft) => {
-      const student = students.find((item) => item.studentId === draft.studentId);
-      if (!student) return;
-      const result = buildHomeworkDraftUpdate(nextHomeworks, lesson, student, draft.homeworkType, draft.title ?? "");
-      nextHomeworks = result.homeworks;
-      result.changedHomeworks.forEach((homework) => {
-        changedHomeworkMap.set(homework.homeworkId, homework);
-      });
-    });
-
-    const recordsToSave = recordDrafts
-      .filter((record) => record?.lessonStudentRecordId)
-      .map((record) => ({
-        ...record,
-        updatedBy: "instructor_owner_001",
-        updatedAt: new Date().toISOString()
-      }));
-
-    recordsToSave.forEach((record) => {
-      const assignmentStatus = record.assignmentStatus ?? record.incompleteHomework ?? "";
-      if (!assignmentStatus) return;
-      if (isAssignmentStatusUnrecorded(assignmentStatus)) return;
-      const student = students.find((item) => item.studentId === record.studentId);
-      if (!student) return;
-      const previousHomework = getLessonHomework(nextHomeworks, lesson, student, "previous", lessons);
-      if (!previousHomework?.homeworkId || !previousHomework.title?.trim()) return;
-      const existing = nextHomeworks.find((homework) => homework.homeworkId === previousHomework.homeworkId);
-      if (!existing) return;
-      const homeworkStatus = getHomeworkStatusFromAssignmentStatus(assignmentStatus);
-      const normalizedAssignmentStatus = normalizeAssignmentStatusValue(assignmentStatus);
-      const checkedFields = {
-        status: homeworkStatus.status,
-        teacherStatus: homeworkStatus.teacherStatus,
-        assignmentStatus: normalizedAssignmentStatus,
-        incompleteHomework: normalizedAssignmentStatus,
-        checkedAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      const nextHomework = {
-        ...existing,
-        ...checkedFields,
-        dueDate: existing.dueDate || lesson.date
-      };
-      const sourceHomework = nextHomeworks.find(
-        (homework) =>
-          homework.homeworkType === "next" &&
-          homework.studentId === student.studentId &&
-          homework.lessonId === (existing.linkedFromLessonId || previousHomework.linkedFromLessonId) &&
-          String(homework.title ?? "").trim() === String(existing.title ?? "").trim()
-      );
-      const updatedSourceHomework = sourceHomework
-        ? {
-            ...sourceHomework,
-            ...checkedFields,
-            dueDate: sourceHomework.dueDate || lesson.date
-          }
-        : null;
-      changedHomeworkMap.set(nextHomework.homeworkId, nextHomework);
-      if (updatedSourceHomework) {
-        changedHomeworkMap.set(updatedSourceHomework.homeworkId, updatedSourceHomework);
+    const persistencePlan = createLessonJournalDraftPersistencePlan({
+      currentHomeworks: homeworksRef.current,
+      homeworkDrafts,
+      lesson,
+      lessons,
+      recordDrafts,
+      students,
+      dependencies: {
+        buildHomeworkDraftUpdate,
+        getHomeworkStatusFromAssignmentStatus,
+        getLessonHomework,
+        isAssignmentStatusUnrecorded,
+        normalizeAssignmentStatusValue
       }
-      nextHomeworks = nextHomeworks.map((homework) => {
-        if (homework.homeworkId === nextHomework.homeworkId) return nextHomework;
-        if (updatedSourceHomework && homework.homeworkId === updatedSourceHomework.homeworkId) return updatedSourceHomework;
-        return homework;
-      });
     });
+    let nextHomeworks = persistencePlan.nextHomeworks;
+    const recordsToSave = persistencePlan.recordsToSave;
 
     const savingStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "saving"]));
     if (recordsToSave.length) {
@@ -9221,7 +9169,7 @@ export function App() {
 
     const completedSources = [];
     try {
-      const verifiedHomeworks = await saveLessonJournalHomeworksWithVerification([...changedHomeworkMap.values()]);
+      const verifiedHomeworks = await saveLessonJournalHomeworksWithVerification(persistencePlan.changedHomeworks);
       if (verifiedHomeworks.length) {
         const verifiedById = new Map(verifiedHomeworks.map((homework) => [homework.homeworkId, homework]));
         nextHomeworks = nextHomeworks.map((homework) => verifiedById.get(homework.homeworkId) ?? homework);

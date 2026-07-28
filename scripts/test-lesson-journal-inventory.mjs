@@ -178,6 +178,10 @@ const draftSaveRequestSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalDraftSaveRequest.js", import.meta.url),
   "utf8"
 );
+const draftPersistencePlanSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalDraftPersistencePlan.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -914,6 +918,30 @@ assert.ok(
 assert.ok(
   !journalSource.includes("Object.values(journalRecordDrafts)"),
   "LessonJournalDetail must not retain direct draft map serialization"
+);
+for (const extractedDraftPersistencePlanContract of [
+  "createLessonJournalDraftPersistencePlan",
+  "buildHomeworkDraftUpdate(",
+  "const recordsToSave = recordDrafts",
+  "isAssignmentStatusUnrecorded(assignmentStatus)",
+  "getHomeworkStatusFromAssignmentStatus(assignmentStatus)",
+  "normalizeAssignmentStatusValue(assignmentStatus)",
+  "changedHomeworks: [...changedHomeworkMap.values()]",
+  "nextHomeworks",
+  "recordsToSave"
+]) {
+  assert.ok(
+    draftPersistencePlanSource.includes(extractedDraftPersistencePlanContract),
+    `missing extracted 17F-2 contract: ${extractedDraftPersistencePlanContract}`
+  );
+}
+assert.ok(
+  appSource.includes("createLessonJournalDraftPersistencePlan({"),
+  "App save handler must compose the extracted persistence plan"
+);
+assert.ok(
+  !appSource.includes("const changedHomeworkMap = new Map()"),
+  "App save handler must not retain the extracted homework change map"
 );
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");
