@@ -20,3 +20,4 @@ MVP 기준:
 - `LessonModalActions.jsx`는 App이 소유한 저장 상태와 submit·close callback으로 저장 안내와 하단 action만 렌더링합니다.
 - App의 `LessonModal` controller는 local React draft와 위 controlled component 조립, 주입된 `onSubmit` 호출만 소유하며 외부 저장 API를 직접 호출하지 않습니다.
 - `lessonCalendarKeyboardModel.js`는 편집 대상·수업일지 열림 예외와 달력 keyboard action만 순수하게 판정합니다.
+- `useLessonCalendarKeyboardNavigation.js`는 window keydown 등록·해제, 기본 동작 차단과 기존 달력 callback dispatch만 소유합니다.

@@ -219,8 +219,8 @@ import {
   shouldIgnoreLessonAttendance
 } from "../domains/lessons/lessonClosure.js";
 import { LessonCalendarView } from "../domains/lessons/LessonCalendarView.jsx";
-import { getLessonCalendarKeyboardAction } from "../domains/lessons/lessonCalendarKeyboardModel.js";
 import { createLessonCalendarViewModel } from "../domains/lessons/lessonCalendarModel.js";
+import { useLessonCalendarKeyboardNavigation } from "../domains/lessons/useLessonCalendarKeyboardNavigation.js";
 import {
   createLessonModalSubmitPayload,
   getLessonModalValidationError
@@ -15366,26 +15366,7 @@ function TeacherLessonHubV2({
 }) {
   const [lessonTypeFilter, setLessonTypeFilter] = useState("all");
   const selectedCalendarDayRef = useRef(null);
-  useEffect(() => {
-    function handleKeyDown(event) {
-      const action = getLessonCalendarKeyboardAction({
-        event,
-        isLessonJournalOpen,
-        selectedLessonId
-      });
-      if (!action) return;
-      event.preventDefault();
-      if (action.type === "copy") onCopyLesson();
-      if (action.type === "paste") onPasteLesson();
-      if (action.type === "undo") onUndoLessonAction();
-      if (action.type === "delete") onDeleteSelectedLesson();
-      if (action.type === "open") onOpenLessonJournal(action.lessonId);
-      if (action.type === "move") onMoveDate(action.dayOffset);
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [
+  useLessonCalendarKeyboardNavigation({
     isLessonJournalOpen,
     onCopyLesson,
     onDeleteSelectedLesson,
@@ -15394,7 +15375,7 @@ function TeacherLessonHubV2({
     onPasteLesson,
     onUndoLessonAction,
     selectedLessonId
-  ]);
+  });
 
   useEffect(() => {
     const selectedDay = selectedCalendarDayRef.current;

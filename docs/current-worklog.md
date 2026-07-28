@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-28 P1. 15E-2 수업 달력 keyboard navigation hook 분리 — AI gate 통과
+
+- 코드: window keydown 등록·해제, action 존재 시 기본 동작 차단, 복사·붙여넣기·undo·삭제·수업 열기·날짜 이동 callback dispatch를 `src/domains/lessons/useLessonCalendarKeyboardNavigation.js`로 이동했다.
+- 경계: key 판정은 15E-1 순수 모델을 그대로 사용한다. 실제 callback 구현, 수업 저장·삭제, Supabase, 출결, 알림/Solapi는 App 소유를 유지하며 새 hook은 외부 API를 알지 못한다.
+- 자동검증: 합성 action callback 순서·인자, App listener 제거, hook listener cleanup·금지 의존성을 전용 fixture로 검사한다. 최신 `origin/main` 통합 뒤 전체 production scenario와 build도 다시 검증한다.
+- 사람 gate: 없음. 운영 원천이나 화면 결과를 바꾸지 않는 listener 소유권 이동이다. 다음은 15F 저장 orchestration 코드를 옮기기 전에 현재 bulk 저장·재조회 계약을 inventory와 fixture로 고정하는 AI-only 사전 단계다.
+
 ## 2026-07-27 P1. 15E-1 수업 달력 keyboard action 모델 분리 — AI gate 통과
 
 - 코드: input/textarea/select/button/link/summary/role-button/contentEditable 예외, 수업일지 열림 차단, Ctrl/Cmd C·V·Z, Delete, 선택 수업 Enter, 방향키 날짜 이동 판정을 `src/domains/lessons/lessonCalendarKeyboardModel.js`로 이동했다. App effect는 action을 받아 기존 callback을 dispatch한다.
