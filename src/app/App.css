@@ -7816,6 +7816,117 @@ button:disabled {
   white-space: pre-wrap;
 }
 
+.parentResponseContextPanel {
+  display: grid;
+  gap: 16px;
+}
+
+.parentResponseContextTools {
+  align-items: end;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.parentResponseContextTools label {
+  display: grid;
+  gap: 6px;
+  min-width: min(100%, 320px);
+}
+
+.parentResponseContextTools p {
+  color: #64748b;
+  font-size: 13px;
+  margin: 0;
+  max-width: 560px;
+}
+
+.parentResponseContextList {
+  display: grid;
+  gap: 12px;
+}
+
+.parentResponseContextCard {
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.parentResponseContextMeta,
+.parentResponseContextActions {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.parentResponseContextMeta > div {
+  display: grid;
+  gap: 2px;
+}
+
+.parentResponseContextMeta span,
+.parentResponseContextActions > span {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.parentResponseContextCard dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  margin: 0;
+}
+
+.parentResponseContextCard dl div {
+  display: grid;
+  gap: 2px;
+}
+
+.parentResponseContextCard dt {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.parentResponseContextCard dd {
+  margin: 0;
+}
+
+.parentResponseContextBody {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.parentResponseContextBody small {
+  color: #64748b;
+  font-weight: 800;
+}
+
+.parentResponseContextBody p {
+  margin: 8px 0 0;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 720px) {
+  .parentResponseContextTools,
+  .parentResponseContextMeta,
+  .parentResponseContextActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .parentResponseContextTools label {
+    min-width: 0;
+  }
+
+  .parentResponseContextActions > button {
+    width: 100%;
+  }
+}
+
 .notificationJobTypeCell {
   display: grid;
   gap: 4px;
@@ -19472,24 +19583,62 @@ body.attendanceOnlyBody {
 }
 
 @media (max-width: 640px) {
+  .sidebar {
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .brandBlock {
+    padding: 0 2px 12px;
+  }
+
+  .brandBlock strong {
+    font-size: 20px;
+  }
+
+  .brandBlock > span {
+    font-size: 14px;
+  }
+
+  .sidebarToggle,
+  .sideStatus > span,
+  .sideStatus > strong {
+    display: none;
+  }
+
+  .sideStatus {
+    margin-top: 0;
+  }
+
+  .logoutButton {
+    min-height: 42px;
+  }
+
   .sideNav {
     grid-template-columns: 1fr;
   }
 
   .sideNav .sideGroup {
-    display: none;
-  }
-
-  .sideNav .sideGroup[data-mobile-menu="operations"] {
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .sideNav .sideGroup[data-mobile-menu="operations"] > button:not([data-mobile-notification="true"]) {
-    display: none;
-  }
-
-  .sideNav .sideGroup[data-mobile-menu="operations"] > p {
+  .sideNav .sideGroup > p {
+    grid-column: 1 / -1;
     padding-inline: 12px;
+  }
+
+  .sideNav .sideGroup > button {
+    font-size: 13px;
+    gap: 7px;
+    min-height: 42px;
+    padding-inline: 8px;
+  }
+
+  .sideNav .sideGroup > button span {
+    flex: 0 0 28px;
+    height: 28px;
+    width: 28px;
   }
 
   .teacherOperatingMemoHeader,
@@ -19501,6 +19650,132 @@ body.attendanceOnlyBody {
   .teacherOperatingMemoActions {
     align-items: center;
     justify-content: flex-end;
+  }
+
+  .mainPanel {
+    padding: 12px;
+  }
+
+  .mainPanel > * {
+    min-width: 0;
+  }
+
+  .pageTop,
+  .sectionHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pageActions {
+    flex-wrap: wrap;
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .notificationCenterPage {
+    gap: 12px;
+  }
+
+  .notificationCenterPage .pageTop {
+    align-items: flex-start;
+    min-height: 0;
+    padding: 12px;
+  }
+
+  .notificationCenterPage .pageTop h1 {
+    font-size: 22px;
+  }
+
+  .notificationPanel {
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .noticeWorkspaceTabs {
+    flex-wrap: nowrap;
+    margin-inline: -2px;
+    overflow-x: auto;
+    padding: 2px 2px 7px;
+    scrollbar-width: thin;
+  }
+
+  .noticeWorkspaceTabs button {
+    flex: 0 0 auto;
+    min-height: 40px;
+    padding: 8px 11px;
+    white-space: nowrap;
+  }
+
+  .noticeTargetPanel .noticeModeTabs.compact {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .noticeTargetPanel .noticeModeTabs.compact button {
+    min-height: 42px;
+  }
+
+  .noticeTargetPanel .noticeStudentPicker {
+    max-height: min(48dvh, 420px);
+  }
+
+  .noticeTargetPanel .noticeListHeader,
+  .noticeTargetPanel .noticeListHeader > div:last-child {
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .noticeTargetPanel .noticeListHeader > div:last-child {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .noticeTargetPanel .noticeListHeader > div:last-child button,
+  .noticeSendActions button {
+    min-height: 42px;
+    width: 100%;
+  }
+
+  .noticeSendActions {
+    align-items: stretch;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .notificationQueueActions {
+    align-items: stretch;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: stretch;
+  }
+
+  .notificationQueueActions .solapiResultSyncControl {
+    grid-column: 1 / -1;
+    justify-content: space-between;
+  }
+
+  .notificationQueueActions button,
+  .notificationQueueActions .countBadge {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .notificationTable {
+    overflow-x: auto;
+  }
+
+  .notificationTableHead,
+  .notificationTableRow {
+    min-width: 900px;
+  }
+
+  .parentResponseContextPanel .sectionHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .parentResponseContextCard {
+    padding: 12px;
   }
 }
 
