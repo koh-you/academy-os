@@ -56,6 +56,8 @@ import {
   getSupplementStudentReminderJob,
   sortNotificationJobsForCurrentStatus
 } from "../domains/notifications/notificationJobSelectors.js";
+import { ParentResponseContextPanel } from "../domains/notifications/ParentResponseContextPanel.jsx";
+import { getParentResponseContexts } from "../domains/notifications/parentResponseContext.js";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import {
   createCanceledAbsenceMakeupTask,
@@ -11733,6 +11735,7 @@ function NotificationCenter({
   const pendingJobs = managedNotificationJobs.filter((job) => job.status === "send_unconfirmed").concat(pastScheduledJobs);
   const failedJobs = managedNotificationJobs.filter((job) => job.status === "failed");
   const archivedJobs = managedNotificationJobs.filter((job) => job.status === "draft" || job.status === "dry_run" || job.status === "canceled");
+  const parentResponseContextCount = getParentResponseContexts(managedNotificationJobs, students).length;
   const filteredNotificationJobs = {
     all: managedNotificationJobs.slice(0, 40),
     scheduled: scheduledJobs,
@@ -12301,16 +12304,17 @@ function NotificationCenter({
           개별 발송
         </button>
         {[
+          ["parent_context", "학부모 응대", parentResponseContextCount],
           ["scheduled", "예약", scheduledJobs.length],
           ["sent", "발송 완료", sentJobs.length],
           ["pending", "확인 필요", pendingJobs.length],
           ["all", "전체 기록", managedNotificationJobs.length]
         ].map(([id, label, count]) => (
           <button
-            aria-selected={activeNoticeWorkspace === "history" && jobFilter === id}
-            className={activeNoticeWorkspace === "history" && jobFilter === id ? "active" : ""}
+            aria-selected={id === "parent_context" ? activeNoticeWorkspace === "parent_context" : activeNoticeWorkspace === "history" && jobFilter === id}
+            className={id === "parent_context" ? activeNoticeWorkspace === "parent_context" ? "active" : "" : activeNoticeWorkspace === "history" && jobFilter === id ? "active" : ""}
             key={id}
-            onClick={() => selectJobFilter(id)}
+            onClick={() => id === "parent_context" ? setActiveNoticeWorkspace("parent_context") : selectJobFilter(id)}
             role="tab"
             type="button"
           >
@@ -12468,6 +12472,14 @@ function NotificationCenter({
           </div>
         </div>
       </section>
+      ) : null}
+      {activeNoticeWorkspace === "parent_context" ? (
+        <ParentResponseContextPanel
+          formatDateTime={formatKoreaTimeLabel}
+          notificationJobs={managedNotificationJobs}
+          onCopy={copyTextToClipboard}
+          students={students}
+        />
       ) : null}
       {activeNoticeWorkspace === "history" ? (
       <section className="notificationPanel notificationQueuePanel">
