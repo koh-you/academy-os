@@ -1433,6 +1433,14 @@
 - AI 가상검수: 미검사+제목 TARGET, source label fallback TARGET, 숙제 없음 CONTROL, 후속 선택지 없음 CONTROL, 후속 선택지 있음 TARGET으로 patch/field action·helper 조기 호출·입력 불변을 대조한다. 전용 fixture·정적 시나리오·build·diff 검사를 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17I-5`는 현재 record draft 선택과 makeup draft 제거의 map selector/transition을 순수 모델로 분리하고 React setter는 App에 유지한다.
 
+## 2026-07-28 P1. App.jsx 17I-5 수업일지 draft map selector/transition 분리
+
+- 코드: record ID에 현재 draft가 있으면 저장 record보다 우선하는 nullish selector와, 해당 record ID의 등원보충 draft만 제거하는 immutable map transition을 `lessonJournalDraftMap.js`로 분리했다.
+- 동작 보존: record draft의 `false` 같은 nullish가 아닌 값은 그대로 선택하고 `null/undefined`만 base record로 fallback한다. makeup draft가 없거나 falsy이면 기존 map identity를 그대로 반환하고, 실제 row가 있을 때만 새 map을 만들어 TARGET key만 삭제한다.
+- 경계: record ID 생성과 React `setJournalMakeupTaskDrafts` 호출은 계속 `App.jsx`가 소유한다. 실제 저장·Supabase·알림톡 side effect는 이동하지 않았다.
+- AI 가상검수: TARGET record draft/base CONTROL/null/false 선택, TARGET makeup 삭제와 CONTROL row 보존, 없는/falsy row의 같은 map identity, 입력 불변을 대조한다. 전용 fixture·정적 시나리오·build·diff 검사를 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17I-6`은 record 단일 field 변경에서 과제 상태 동기화와 학부모/학생 comment 발송상태 초기화 patch를 순수 builder로 분리한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

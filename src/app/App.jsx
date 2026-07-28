@@ -239,6 +239,10 @@ import {
 } from "../domains/lessons/lessonJournalHomeworkDraft.js";
 import { createLessonJournalHomeworkFollowupPlan } from "../domains/lessons/lessonJournalHomeworkFollowupPlan.js";
 import { createLessonJournalAssignmentStatusPlan } from "../domains/lessons/lessonJournalAssignmentStatusPlan.js";
+import {
+  getLessonJournalEditableRecord,
+  removeLessonJournalMakeupTaskDraft
+} from "../domains/lessons/lessonJournalDraftMap.js";
 import { saveLessonJournalMakeupTasksWithVerification } from "../domains/lessons/lessonJournalMakeupTaskBulkApi.js";
 import { createLessonJournalMakeupTaskRequests } from "../domains/lessons/lessonJournalMakeupTaskRequest.js";
 import { saveLessonJournalRecordsWithVerification } from "../domains/lessons/lessonJournalRecordBulkApi.js";
@@ -16162,7 +16166,11 @@ function LessonJournalDetail({
   }
 
   function getEditableRecord(recordId, baseRecord) {
-    return journalRecordDrafts[recordId] ?? baseRecord;
+    return getLessonJournalEditableRecord({
+      baseRecord,
+      currentDrafts: journalRecordDrafts,
+      recordId
+    });
   }
 
   function updateJournalRecordDraft(student, baseRecord, field, value) {
@@ -16220,12 +16228,12 @@ function LessonJournalDetail({
 
   function removeJournalMakeupTaskDraft(student) {
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
-    setJournalMakeupTaskDrafts((current) => {
-      if (!current[recordId]) return current;
-      const next = { ...current };
-      delete next[recordId];
-      return next;
-    });
+    setJournalMakeupTaskDrafts((current) => (
+      removeLessonJournalMakeupTaskDraft({
+        currentDrafts: current,
+        recordId
+      })
+    ));
   }
 
   function applyHomeworkFollowupMethod(student, baseRecord, previousHomework, method) {
