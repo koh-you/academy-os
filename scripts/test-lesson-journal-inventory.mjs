@@ -2,6 +2,10 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const saveViewModelSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalSaveViewModel.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -54,12 +58,11 @@ for (const localState of [
 }
 
 for (const draftContract of [
-  "const journalRecordDraftCount = Object.keys(journalRecordDrafts).length",
-  "const journalHomeworkDraftCount = Object.keys(journalHomeworkDrafts).length",
-  "const journalMakeupTaskDraftCount = Object.keys(journalMakeupTaskDrafts).length",
-  "const hasJournalDraftChanges =",
-  "const journalStickySaveState =",
-  "const journalStickySaveMessage =",
+  "createLessonJournalSaveViewModel({",
+  "draftChangeCount: journalDraftChangeCount",
+  "hasDraftChanges: hasJournalDraftChanges",
+  "stickySaveMessage: journalStickySaveMessage",
+  "stickySaveState: journalStickySaveState",
   "async function saveJournalDrafts()",
   "Object.values(journalRecordDrafts)",
   "Object.values(journalHomeworkDrafts)",
@@ -118,13 +121,30 @@ for (const persistenceContract of [
   assert.ok(saveHandlerSource.includes(persistenceContract), `missing journal persistence: ${persistenceContract}`);
 }
 
-for (const reservedNextUnit of [
-  "const lessonJournalSaveStatus = (() =>",
-  "const journalRecordDraftCount =",
-  "const journalStickySaveState =",
-  "const journalStickySaveMessage ="
+for (const extractedSaveContract of [
+  "recordSaveStates.includes(\"saving\")",
+  "recordSaveStates.includes(\"dirty\")",
+  "recordSaveStates.includes(\"failed\")",
+  "Object.keys(recordDrafts ?? {}).length",
+  "Object.keys(homeworkDrafts ?? {}).length",
+  "Object.keys(makeupTaskDrafts ?? {}).length",
+  "저장 전 변경 ${draftChangeCount}건"
 ]) {
-  assert.ok(journalSource.includes(reservedNextUnit), `missing 17A-1 source: ${reservedNextUnit}`);
+  assert.ok(
+    saveViewModelSource.includes(extractedSaveContract),
+    `missing extracted 17A-1 contract: ${extractedSaveContract}`
+  );
+}
+
+for (const reservedNextUnit of [
+  "const lessonStudentIdSet = new Set",
+  "const scheduledParentCount =",
+  "const issueReservationJobs =",
+  "const reservationInspectLabels =",
+  "function getStudentReservationStatus(",
+  "function getVisibleReservationStudents()"
+]) {
+  assert.ok(journalSource.includes(reservedNextUnit), `missing 17A-2 source: ${reservedNextUnit}`);
 }
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");

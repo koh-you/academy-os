@@ -221,6 +221,7 @@ import {
   normalizeAttendanceSettings
 } from "../domains/lessons/attendanceSettings.js";
 import { useAttendanceRecordSync } from "../domains/lessons/useAttendanceRecordSync.js";
+import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -16045,13 +16046,6 @@ function LessonJournalDetail({
   const lessonRecordSaveStates = lessonStudents
     .map((student) => saveStates[createLessonStudentRecordId(lesson.lessonId, student.studentId)])
     .filter(Boolean);
-  const lessonJournalSaveStatus = (() => {
-    if (lessonRecordSaveStates.includes("saving")) return { label: "저장 중...", tone: "saving" };
-    if (lessonRecordSaveStates.includes("dirty")) return { label: "저장 대기...", tone: "dirty" };
-    if (lessonRecordSaveStates.includes("failed")) return { label: "저장 실패", tone: "failed" };
-    if (lessonRecordSaveStates.includes("saved")) return { label: "저장 완료", tone: "saved" };
-    return { label: "", tone: "idle" };
-  })();
   const defaultScheduleHintText = isDefaultScheduleExpired
     ? `기본 예약 시간 지남 · ${defaultAlimtalkTimeLabel}`
     : `기본 예약 ${defaultAlimtalkTimeLabel}`;
@@ -16078,23 +16072,18 @@ function LessonJournalDetail({
     setReservationApplyState("idle");
   }, [lessonNotificationPlan?.mode, lessonNotificationPlan?.scheduledAt]);
 
-  const journalRecordDraftCount = Object.keys(journalRecordDrafts).length;
-  const journalHomeworkDraftCount = Object.keys(journalHomeworkDrafts).length;
-  const journalMakeupTaskDraftCount = Object.keys(journalMakeupTaskDrafts).length;
-  const hasJournalDraftChanges = journalRecordDraftCount > 0 || journalHomeworkDraftCount > 0 || journalMakeupTaskDraftCount > 0;
-  const journalDraftChangeCount = journalRecordDraftCount + journalHomeworkDraftCount + journalMakeupTaskDraftCount;
-  const journalStickySaveState = journalManualSaveMessage.includes("저장 실패")
-    ? "failed"
-    : journalManualSaveMessage.includes("저장 중")
-      ? "saving"
-      : hasJournalDraftChanges
-        ? "dirty"
-        : journalManualSaveMessage.includes("저장 완료")
-          ? "saved"
-          : lessonJournalSaveStatus.tone;
-  const journalStickySaveMessage = hasJournalDraftChanges
-    ? `저장 전 변경 ${journalDraftChangeCount}건`
-    : journalManualSaveMessage || lessonJournalSaveStatus.label || "편집을 시작하면 변경 내용이 여기에 표시됩니다.";
+  const {
+    draftChangeCount: journalDraftChangeCount,
+    hasDraftChanges: hasJournalDraftChanges,
+    stickySaveMessage: journalStickySaveMessage,
+    stickySaveState: journalStickySaveState
+  } = createLessonJournalSaveViewModel({
+    homeworkDrafts: journalHomeworkDrafts,
+    makeupTaskDrafts: journalMakeupTaskDrafts,
+    manualSaveMessage: journalManualSaveMessage,
+    recordDrafts: journalRecordDrafts,
+    recordSaveStates: lessonRecordSaveStates
+  });
   const activeLessonReservationJobs = lessonNotificationJobs.filter(isActiveNotificationJobStatus);
   const solapiResultRefreshTargetJobs = auditedLessonNotificationJobs.filter((job) =>
     job.provider === "solapi" &&

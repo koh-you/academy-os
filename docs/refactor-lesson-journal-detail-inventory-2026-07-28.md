@@ -46,8 +46,8 @@
 
 ## 첫 안전 분리 순서
 
-1. `17A-1` 수업일지 draft 수·저장 상태·하단 고정바 문구 순수 모델
-2. `17A-2` 예약 audit count/filter/display 순수 모델
+1. `17A-1` 완료: 수업일지 draft 수·저장 상태·하단 고정바 문구를 `lessonJournalSaveViewModel.js` 순수 모델로 분리했다.
+2. 다음 `17A-2`: 예약 audit count/filter/display 순수 모델
 3. `17A-3` 이전 준비메모 선택 순수 selector
 4. 표시용 하위 panel/component를 controlled callback 경계로 한 번에 하나씩 분리
 5. 다중 원천 저장은 TARGET/CONTROL·부분 성공 fixture 뒤 주입형 controller로 분리
