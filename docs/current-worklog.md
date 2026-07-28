@@ -1842,6 +1842,12 @@
 - AI 검수: TARGET/CONTROL 참조 보존과 중복 TARGET saved map, App inline reduce/Object.fromEntries 0건, helper side effect 0건을 전용 closeout fixture·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 없음. 다음 `17AA-1`은 reconcile 결과 처리 전체 경계를 aggregate audit하고, 새 이동 후보는 audit 결과에서 가장 낮은 위험의 순수 계산 하나만 고른다.
 
+## 2026-07-28 P3. App.jsx 17AA-1 notification job reconcile boundary aggregate audit
+
+- audit: reconcile의 payload 1개와 record merge/saved-state 2개, 총 순수 계산 3개를 TARGET/CONTROL로 재검증했다. 실제 90초 Solapi reconcile request, notification job merge, ref/React/localStorage/save-state 반영과 callback 3곳은 계속 `App.jsx`에 남아 있으며 추가 이동 대상이 아니다.
+- AI 검수: payload ID 배열 참조, TARGET record 교체·신규 추가·CONTROL 참조 보존, 입력 불변, 전체 effect 순서와 helper side effect 0건을 전용 aggregate audit·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 없음. reconcile 경계는 완료했다. 다음 `17AB-1`은 바로 앞의 `saveGeneratedLessonsFromPlan`에서 `create`/`update` plan item만 lesson으로 고르는 순수 selector를 inventory하며 실제 `/api/lessons/bulk` 저장과 React 상태는 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
