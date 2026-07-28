@@ -23,3 +23,4 @@ MVP 기준:
 - `useLessonCalendarKeyboardNavigation.js`는 window keydown 등록·해제, 기본 동작 차단과 기존 달력 callback dispatch만 소유합니다.
 - `lessonModalSaveSnapshot.js`는 수업 modal 저장 후 Supabase 재조회 값을 비교할 필드·시간·명단·학생별 특강 일정을 순수 정규화합니다.
 - `lessonModalPayloadBuilders.js`는 신규·수정 수업과 선택형 휴강 보충의 저장 payload를 주입된 요일·색상 resolver로 순수 조립합니다.
+- `lessonModalSaveVerification.js`는 Supabase 재조회 결과에서 예상 수업을 찾아 snapshot 일치 여부를 순수 판정합니다.

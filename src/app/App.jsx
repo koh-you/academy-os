@@ -236,6 +236,7 @@ import {
   buildUpdatedLessonModalLessons
 } from "../domains/lessons/lessonModalPayloadBuilders.js";
 import { getLessonModalSaveSnapshot } from "../domains/lessons/lessonModalSaveSnapshot.js";
+import { verifyLessonModalSaveResults } from "../domains/lessons/lessonModalSaveVerification.js";
 import { LessonModalActions } from "../domains/lessons/LessonModalActions.jsx";
 import { LessonModalBasics } from "../domains/lessons/LessonModalBasics.jsx";
 import { LessonModalClosurePanel } from "../domains/lessons/LessonModalClosurePanel.jsx";
@@ -7257,15 +7258,9 @@ export function App() {
       throw new Error("저장 결과를 Supabase에서 다시 확인하지 못했습니다.");
     }
     const persistedLessons = Array.isArray(verification.lessons) ? verification.lessons : [];
-    const verifiedLessons = expectedLessons.map((expectedLesson) => {
-      const persistedLesson = persistedLessons.find((lesson) => lesson.lessonId === expectedLesson.lessonId);
-      if (!persistedLesson) {
-        throw new Error(`저장 후 수업일지를 찾지 못했습니다: ${expectedLesson.className}`);
-      }
-      if (getLessonModalSaveSnapshot(persistedLesson) !== getLessonModalSaveSnapshot(expectedLesson)) {
-        throw new Error(`저장 후 Supabase 값이 일치하지 않습니다: ${expectedLesson.className}`);
-      }
-      return persistedLesson;
+    const verifiedLessons = verifyLessonModalSaveResults({
+      expectedLessons,
+      persistedLessons
     });
     setLessons(filterActiveLessons(persistedLessons));
     return verifiedLessons;

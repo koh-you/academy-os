@@ -37,7 +37,7 @@ assertOrdered(saveBoundary, [
   'getJsonWithTimeout(',
   '`/api/lessons?verify=lesson-modal-${Date.now()}`',
   'if (verification.source !== "supabase")',
-  "getLessonModalSaveSnapshot(persistedLesson) !== getLessonModalSaveSnapshot(expectedLesson)",
+  "verifyLessonModalSaveResults({",
   "setLessons(filterActiveLessons(persistedLessons))",
   "return verifiedLessons"
 ]);
