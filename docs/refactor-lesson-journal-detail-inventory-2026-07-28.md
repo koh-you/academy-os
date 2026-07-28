@@ -121,8 +121,9 @@
 73. `17K-3` 완료: App 원천 조회·알림 제외 guard·builder 주입과 외부 action 경계를 closeout audit으로 고정했다.
 74. `17L-1` 완료: 휴강 제외와 학생별 학부모→학생 job 목록 조합을 순수 batch model로 분리했다.
 75. `17L-2` 완료: 학생/학부모 대상별 record 알림 제외 판정을 순수 selector로 분리했다.
-76. 다음 `17L-3`: 현재 record 선택의 ref 원천·빈 record fallback 경계를 inventory한다.
-77. `notification_jobs` 조회·OS job 취소·provider 예약 반영·발송결과 reconcile orchestration은 App callback에 남기고 순수 표시·판정만 분리
+76. `17L-3` 완료: 현재 record 선택의 ref 원천·빈 record nullish fallback 경계를 inventory했다.
+77. 다음 `17L-4`: 주입된 records에서 저장 record 우선·빈 record fallback을 판정하는 순수 selector를 분리한다.
+78. `notification_jobs` 조회·OS job 취소·provider 예약 반영·발송결과 reconcile orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -208,6 +209,7 @@
 - `17K-3` gate: App wrapper의 record ID/record/homework/supplement/test/settings/현재시각 원천과 11개 순수 dependency 주입을 고정한다. wrapper와 builder의 API·setter·persist/reserve 부재, 학부모→학생 호출 순서와 App-owned reserve/cancel/plan action 3개가 한 번씩 남는지 검사한다.
 - `17L-1` gate: 휴강 TARGET은 job builder를 호출하지 않고 빈 배열을 반환하며, 일반 수업의 두 학생은 학부모→학생 순서로 호출하는지 가상 실행한다. 대상별 null/false/빈 문자열 제거, 결과 object identity·입력 불변과 batch model의 외부 side effect 부재를 검사한다.
 - `17L-2` gate: truthy 객체/숫자 TARGET, false/0/빈 문자열 CONTROL, null/undefined record와 student/parent/기타 target을 가상 입력으로 대조한다. student만 학생 flag를 읽고 나머지는 학부모 flag를 읽는 기존 fallback과 입력 불변, selector의 외부 side effect 부재를 검사한다.
+- `17L-3` gate: `recordsRef.current`를 직접 읽는 helper 정의 1개와 job builder·알림 제외 변경 consumer 2개를 정적으로 고정한다. 저장 record 선택 뒤 null/undefined일 때만 `createEmptyRecord`를 호출하는 `??` 계약과 selector 범위의 API·setter·persist/reserve 부재를 검사한다.
 - `17J-9` gate: 8개 순수 파일의 export 함수 13개와 App binding을 대조하고 네트워크·React·현재시각·Supabase/Solapi side effect 부재를 검사한다. 예약 조회·결과 reconcile·OS job 취소·bulk 예약·취소 저장·plan 적용 10개 action과 API/setter가 App에 한 번씩 남고 raw provider group audit는 없는지 고정한다.
 - `17I-7` gate: local draft action 10개와 순수 binding 9개가 `LessonJournalDetail`에 한 번씩 있는지, 현재시각·세 draft map setter·저장 메시지·상위 저장 callback이 App에 남는지 검사한다. 다섯 순수 모델에 React·네트워크·시계·API/localStorage가 없고 전체 async 5개 중 local draft 저장이 1개인지 고정한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.

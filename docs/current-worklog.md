@@ -1554,6 +1554,13 @@
 - AI 검수: 객체/숫자 truthy TARGET, false/0/빈 문자열 CONTROL, null/undefined record와 student/parent/기타 target을 실행해 대상별 flag·fallback·입력 불변을 확장 fixture·정적 시나리오·build·diff 검사로 대조한다.
 - 사람 gate: 새 항목 없음. 다음 `17L-3`은 현재 record 선택의 `recordsRef.current` 원천과 빈 record fallback 경계를 inventory하고 자동검증 가능한 순수 selector 범위를 정한다.
 
+## 2026-07-28 P1. App.jsx 17L-3 lesson notification 현재 record 원천 inventory
+
+- 결과: 예약 job 생성과 학생별 알림 제외 변경이 모두 `recordsRef.current`를 최신 동기 원천으로 읽고, `findLessonStudentRecord` 결과가 null/undefined일 때만 `createEmptyRecord`를 사용하는 경계를 고정했다.
+- 보존 이유: render 시점의 `records` 배열로 바꾸면 저장 직후 예약 시 오래된 record를 읽을 수 있으므로 다음 분리에서도 ref 읽기는 App에 남기고, 주입된 배열의 선택/fallback 계산만 순수화한다.
+- AI 검수: helper 정의 1개, consumer 2개, `??` fallback과 selector 범위의 API·setter·persist/reserve 부재를 inventory fixture·정적 시나리오·build·diff 검사로 확인한다.
+- 사람 gate: 새 항목 없음. 다음 `17L-4`는 주입된 records에서 저장 record 우선·빈 record fallback을 판정하는 순수 selector를 분리하고 `recordsRef.current` 읽기는 App wrapper에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
