@@ -13364,6 +13364,52 @@ textarea.profileEditInput {
   resize: vertical;
 }
 
+.teacherOperatingMemoPanel {
+  background: #f8fbff;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 14px;
+}
+
+.teacherOperatingMemoHeader,
+.teacherOperatingMemoActions,
+.teacherOperatingMemoSaveRow {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.teacherOperatingMemoHeader strong {
+  color: #172554;
+}
+
+.teacherOperatingMemoHeader p,
+.teacherOperatingMemoSaveRow span {
+  color: #64748b;
+  font-size: 13px;
+  margin: 3px 0 0;
+}
+
+.teacherOperatingMemoContent,
+.teacherOperatingMemoEmpty {
+  color: #0f172a;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.teacherOperatingMemoEmpty {
+  color: #64748b;
+}
+
+.teacherOperatingMemoInput {
+  min-height: 132px;
+}
+
 .profileLoginEdit {
   display: grid;
   gap: 8px;

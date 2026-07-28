@@ -23,6 +23,7 @@ export const storageKeys = {
   studentQuestions: "academy-os.studentQuestions.v1",
   examPostSubmissions: "academy-os.examPostSubmissions.v1",
   studentConsultations: "academy-os.studentConsultations.v1",
+  teacherOperatingMemos: "academy-os.teacherOperatingMemos.v1",
   resourceMaterials: "academy-os.resourceMaterials.v1",
   lessonResearchItems: "academy-os.lessonResearchItems.v1",
   specialLectureGuides: "academy-os.specialLectureGuides.v1",

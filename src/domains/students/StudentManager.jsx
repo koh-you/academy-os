@@ -261,6 +261,8 @@ export function StudentManager({
   studentConsultationSaveState = "idle",
   studentConsultations = [],
   studentProfileSaveStates = {},
+  teacherOperatingMemos = {},
+  teacherOperatingMemoSaveStates = {},
   homeworks = [],
   intakeApplicants = [],
   lessons = [],
@@ -278,6 +280,7 @@ export function StudentManager({
   onSaveAcademyReminder,
   onSaveScore,
   onSaveStudentProfile,
+  onSaveTeacherOperatingMemo,
   onSaveStudentConsultation,
   onAuditWithdrawnStudentDeletion,
   onDeleteStudent,
@@ -986,6 +989,7 @@ export function StudentManager({
             onSaveAcademyReminder={onSaveAcademyReminder}
             onSaveScore={onSaveScore}
             onSaveStudentProfile={onSaveStudentProfile}
+            onSaveTeacherOperatingMemo={onSaveTeacherOperatingMemo}
             onSaveStudentConsultation={onSaveStudentConsultation}
             scores={selectedScores}
             academyTestSaveState={academyTestSaveState}
@@ -993,6 +997,8 @@ export function StudentManager({
             studentConsultationSaveState={studentConsultationSaveState}
             consultations={selectedConsultations}
             tallySubmissions={getStudentTallySubmissions(selectedStudent, intakeApplicants)}
+            teacherOperatingMemo={teacherOperatingMemos[selectedStudent.studentId] ?? ""}
+            teacherOperatingMemoSaveState={teacherOperatingMemoSaveStates[selectedStudent.studentId] ?? "idle"}
             studentProfileSaveState={studentProfileSaveStates[selectedStudent.studentId] ?? "idle"}
             student={selectedStudent}
           />
@@ -1229,18 +1235,24 @@ function StudentProfileModal({
   onSaveAcademyReminder,
   onSaveScore,
   onSaveStudentProfile,
+  onSaveTeacherOperatingMemo,
   onSaveStudentConsultation,
   scores,
   scoreRecordSaveState = "idle",
   studentConsultationSaveState = "idle",
   studentProfileSaveState = "idle",
   student,
+  teacherOperatingMemo = "",
+  teacherOperatingMemoSaveState = "idle",
   tallySubmissions = []
 }) {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileDraft, setProfileDraft] = useState(() => createStudentProfileDraft(student));
   const [profileSaveError, setProfileSaveError] = useState("");
   const [profileActionError, setProfileActionError] = useState("");
+  const [isEditingTeacherOperatingMemo, setIsEditingTeacherOperatingMemo] = useState(false);
+  const [teacherOperatingMemoDraft, setTeacherOperatingMemoDraft] = useState(teacherOperatingMemo);
+  const [teacherOperatingMemoError, setTeacherOperatingMemoError] = useState("");
   const [scoreDrafts, setScoreDrafts] = useState({});
   const [academyTestDrafts, setAcademyTestDrafts] = useState({});
   const [consultationDrafts, setConsultationDrafts] = useState({});
@@ -1254,6 +1266,9 @@ function StudentProfileModal({
     setProfileDraft(createStudentProfileDraft(student));
     setProfileSaveError("");
     setProfileActionError("");
+    setIsEditingTeacherOperatingMemo(false);
+    setTeacherOperatingMemoDraft(teacherOperatingMemo);
+    setTeacherOperatingMemoError("");
     setScoreDrafts({});
     setAcademyTestDrafts({});
     setConsultationDrafts({});
@@ -1264,6 +1279,10 @@ function StudentProfileModal({
   }, [student.studentId]);
 
   useEffect(() => {
+    if (!isEditingTeacherOperatingMemo) setTeacherOperatingMemoDraft(teacherOperatingMemo);
+  }, [isEditingTeacherOperatingMemo, teacherOperatingMemo]);
+
+  useEffect(() => {
     if (!isEditingProfile) {
       setProfileDraft(createStudentProfileDraft(student));
     }
@@ -1272,6 +1291,16 @@ function StudentProfileModal({
   function clearProfileErrors() {
     setProfileSaveError("");
     setProfileActionError("");
+  }
+
+  async function saveTeacherOperatingMemo() {
+    setTeacherOperatingMemoError("");
+    try {
+      await onSaveTeacherOperatingMemo?.(student.studentId, teacherOperatingMemoDraft);
+      setIsEditingTeacherOperatingMemo(false);
+    } catch (error) {
+      setTeacherOperatingMemoError(error?.message || "강사 운영 메모 저장에 실패했습니다.");
+    }
   }
 
   async function runProfileAction(label, action) {
@@ -1583,6 +1612,30 @@ function StudentProfileModal({
                 </article>
               )) : <p className="muted">이 학생과 이름·연락처 또는 학교·학년이 일치하는 Tally 제출 원천이 없습니다.</p>}
             </details>
+            <section className="teacherOperatingMemoPanel">
+              <div className="teacherOperatingMemoHeader">
+                <div>
+                  <strong>강사 운영 메모</strong>
+                  <p>진도, 교재, 특이사항, 다음 수업 계획을 교사용으로만 기록합니다.</p>
+                </div>
+                <div className="teacherOperatingMemoActions">
+                  {teacherOperatingMemoSaveState !== "idle" ? <InlineSaveStatus label="강사 메모" saveState={teacherOperatingMemoSaveState} /> : null}
+                  {isEditingTeacherOperatingMemo ? (
+                    <button className="softButton compact" disabled={teacherOperatingMemoSaveState === "saving"} onClick={() => { setTeacherOperatingMemoDraft(teacherOperatingMemo); setTeacherOperatingMemoError(""); setIsEditingTeacherOperatingMemo(false); }} type="button">취소</button>
+                  ) : <button className="softButton compact" onClick={() => setIsEditingTeacherOperatingMemo(true)} type="button">메모 수정</button>}
+                </div>
+              </div>
+              {isEditingTeacherOperatingMemo ? (
+                <>
+                  <textarea className="profileEditInput teacherOperatingMemoInput" rows="5" value={teacherOperatingMemoDraft} onChange={(event) => { setTeacherOperatingMemoDraft(event.target.value); setTeacherOperatingMemoError(""); }} placeholder="예) 3-2 진도: 개념플러스유형, 쎈 완료. 다음 수업은 RPM 진행." />
+                  <div className="teacherOperatingMemoSaveRow">
+                    <button className="primaryButton compact" disabled={teacherOperatingMemoSaveState === "saving"} onClick={saveTeacherOperatingMemo} type="button">강사 운영 메모 저장</button>
+                    <span>학생·학부모 포털과 알림톡에는 노출되지 않습니다.</span>
+                  </div>
+                </>
+              ) : <p className={teacherOperatingMemo ? "teacherOperatingMemoContent" : "teacherOperatingMemoEmpty"}>{teacherOperatingMemo || "작성된 강사 운영 메모가 없습니다."}</p>}
+              {teacherOperatingMemoError ? <p className="profileSaveError" role="alert">강사 운영 메모 저장 실패 · {teacherOperatingMemoError}</p> : null}
+            </section>
             <div className="studentProfileGrid">
               {renderProfileField("학교", "schoolName")}
               {renderProfileField("학년", "grade")}

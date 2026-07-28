@@ -5422,6 +5422,7 @@ export function App() {
   const [examPostSubmissions, setExamPostSubmissions] = useStoredState(storageKeys.examPostSubmissions, []);
   const [examPostTargetStudentIds, setExamPostTargetStudentIds] = useStoredState(storageKeys.examPostTargetStudentIds, {});
   const [studentConsultations, setStudentConsultations] = useStoredState(storageKeys.studentConsultations, []);
+  const [teacherOperatingMemos, setTeacherOperatingMemos] = useStoredState(storageKeys.teacherOperatingMemos, {});
   const [schoolEvents, setSchoolEvents] = useStoredState(
     storageKeys.schoolEvents,
     createDefaultSchoolEvents(sampleData.examPrepRows ?? [])
@@ -5494,6 +5495,7 @@ export function App() {
   const examPostConfirmMutationIdsRef = useRef(new Set());
   const [examPrepRowSaveStates, setExamPrepRowSaveStates] = useState({});
   const [studentProfileSaveStates, setStudentProfileSaveStates] = useState({});
+  const [teacherOperatingMemoSaveStates, setTeacherOperatingMemoSaveStates] = useState({});
   const [studentIntakeSaveStates, setStudentIntakeSaveStates] = useState({});
   const [studentIntakeRegistrationStates, setStudentIntakeRegistrationStates] = useState({});
   const [studentIntakeRegistrationMessages, setStudentIntakeRegistrationMessages] = useState({});
@@ -5525,6 +5527,7 @@ export function App() {
   const examPrepRowSaveRequestRef = useRef({});
   const examPrepDeleteRequestIdsRef = useRef(new Set());
   const studentProfileSaveRequestRef = useRef({});
+  const teacherOperatingMemoSaveRequestRef = useRef({});
   const studentIntakeSaveRequestRef = useRef({});
   const isApplyingRemoteAppStateRef = useRef(false);
   const attendanceOnlyMode = isAttendanceOnlyRoute();
@@ -5789,6 +5792,11 @@ export function App() {
           }
           if (Array.isArray(states.studentQuestions)) setStudentQuestions(states.studentQuestions);
           if (Array.isArray(states.studentConsultations)) setStudentConsultations(states.studentConsultations);
+          if (states.teacherOperatingMemos && typeof states.teacherOperatingMemos === "object" && !Array.isArray(states.teacherOperatingMemos)) {
+            setTeacherOperatingMemos(states.teacherOperatingMemos);
+          } else {
+            setTeacherOperatingMemos({});
+          }
           if (Array.isArray(states.specialLectureGuides)) setSpecialLectureGuides(normalizeSpecialLectureGuides(states.specialLectureGuides));
           if (states[monthlySettlementStateKey]) {
             setMonthlyInstructorSettlements(normalizeMonthlySettlementState(states[monthlySettlementStateKey]));
@@ -8110,6 +8118,51 @@ export function App() {
     }
   }
 
+  async function handleSaveTeacherOperatingMemo(studentId, memoDraft) {
+    if (!studentId) throw new Error("저장할 학생을 찾지 못했습니다.");
+    const requestId = (teacherOperatingMemoSaveRequestRef.current[studentId] ?? 0) + 1;
+    teacherOperatingMemoSaveRequestRef.current[studentId] = requestId;
+    setTeacherOperatingMemoSaveStates((current) => ({ ...current, [studentId]: "saving" }));
+    const memo = String(memoDraft ?? "").trim();
+    try {
+      const currentResult = await getJsonWithTimeout(
+        "/api/app-state",
+        15000,
+        "강사 운영 메모의 현재 저장본을 확인하지 못했습니다. 다시 저장하지 말고 잠시 뒤 새로고침해 주세요."
+      );
+      const currentMemos = currentResult.states?.teacherOperatingMemos;
+      const nextMemos = {
+        ...(currentMemos && typeof currentMemos === "object" && !Array.isArray(currentMemos) ? currentMemos : {}),
+        [studentId]: memo
+      };
+      await postJsonWithTimeout(
+        "/api/app-state",
+        { states: { teacherOperatingMemos: nextMemos } },
+        15000,
+        "강사 운영 메모 저장 요청이 15초를 넘었습니다. 저장 상태를 확인한 뒤 다시 시도해 주세요."
+      );
+      const verifiedResult = await getJsonWithTimeout(
+        "/api/app-state",
+        15000,
+        "강사 운영 메모 저장 확인이 15초를 넘었습니다. 다시 저장하지 말고 잠시 뒤 새로고침해 주세요."
+      );
+      const verifiedMemos = verifiedResult.states?.teacherOperatingMemos;
+      if (!verifiedMemos || String(verifiedMemos[studentId] ?? "") !== memo) {
+        throw new Error("Supabase 재조회 값이 저장 요청과 다릅니다: 강사 운영 메모");
+      }
+      setTeacherOperatingMemos(verifiedMemos);
+      if (teacherOperatingMemoSaveRequestRef.current[studentId] === requestId) {
+        setTeacherOperatingMemoSaveStates((current) => ({ ...current, [studentId]: "saved" }));
+      }
+    } catch (error) {
+      console.error(error);
+      if (teacherOperatingMemoSaveRequestRef.current[studentId] === requestId) {
+        setTeacherOperatingMemoSaveStates((current) => ({ ...current, [studentId]: "failed" }));
+      }
+      throw error;
+    }
+  }
+
   function persistScoreRecords(nextScoreRecords) {
     const requestId = scoreRecordSaveRequestRef.current + 1;
     scoreRecordSaveRequestRef.current = requestId;
@@ -10023,6 +10076,8 @@ export function App() {
             studentConsultationSaveState={studentConsultationSaveState}
             studentConsultations={studentConsultations}
             studentProfileSaveStates={studentProfileSaveStates}
+            teacherOperatingMemos={teacherOperatingMemos}
+            teacherOperatingMemoSaveStates={teacherOperatingMemoSaveStates}
             students={students}
             specialLectureApplications={specialLectureApplications}
             templates={classTemplates}
@@ -10035,6 +10090,7 @@ export function App() {
             onSaveAcademyReminder={handleSaveAcademyReminder}
             onSaveScore={handleSaveScoreRecord}
             onSaveStudentProfile={handleSaveStudentProfile}
+            onSaveTeacherOperatingMemo={handleSaveTeacherOperatingMemo}
             onSaveStudentConsultation={handleSaveStudentConsultation}
             onDeleteStudent={handleDeleteStudent}
             onAuditWithdrawnStudentDeletion={handleAuditWithdrawnStudentDeletion}
