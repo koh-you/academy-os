@@ -229,6 +229,7 @@ import {
   mergeVerifiedLessonJournalMakeupTasks,
   mergeVerifiedLessonJournalRecords
 } from "../domains/lessons/lessonJournalDraftPersistenceState.js";
+import { createLessonJournalRecordDraft } from "../domains/lessons/lessonJournalRecordDraft.js";
 import { createLessonJournalDraftSaveRequest } from "../domains/lessons/lessonJournalDraftSaveRequest.js";
 import { saveLessonJournalHomeworksWithVerification } from "../domains/lessons/lessonJournalHomeworkBulkApi.js";
 import { saveLessonJournalMakeupTasksWithVerification } from "../domains/lessons/lessonJournalMakeupTaskBulkApi.js";
@@ -16197,19 +16198,18 @@ function LessonJournalDetail({
 
   function updateJournalRecordDraftPatch(student, baseRecord, patch = {}) {
     if (!journalEditMode) return;
-    const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
     const nowIso = new Date().toISOString();
-    const nextRecord = {
-      ...createEmptyRecord(lesson, student),
-      ...(journalRecordDrafts[recordId] ?? baseRecord ?? {}),
-      lessonStudentRecordId: recordId,
-      lessonId: lesson.lessonId,
-      studentId: student.studentId,
-      ...patch,
-      updatedBy: "instructor_owner_001",
+    const { record, recordId } = createLessonJournalRecordDraft({
+      baseRecord,
+      createEmptyRecord,
+      createRecordId: createLessonStudentRecordId,
+      currentDrafts: journalRecordDrafts,
+      lesson,
+      patch,
+      student,
       updatedAt: nowIso
-    };
-    setJournalRecordDrafts((current) => ({ ...current, [recordId]: nextRecord }));
+    });
+    setJournalRecordDrafts((current) => ({ ...current, [recordId]: record }));
     setJournalManualSaveMessage("수업일지 · 저장 필요");
   }
 

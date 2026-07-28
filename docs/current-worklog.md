@@ -1401,6 +1401,14 @@
 - AI 검수: 5개 순수 모델의 네트워크·시계·React·Supabase/localStorage 부재, reservation hook의 provider callback 부재, App의 단일 OS timeout 조회·확인창·OS 취소·예약 반영·결과 reconcile callback을 정적으로 대조했다. raw Solapi group 상태·조회·취소는 0개이며 closeout fixture와 정적 시나리오를 실행했고 외부 호출은 0건이다.
 - 사람 gate: 실제 provider orchestration을 이번 단계에서 이동하지 않았으므로 새 항목 없음. 다음 저위험 의미 단위 `17I-1`은 record draft의 base/draft/patch 병합과 timestamp/ID metadata 생성을 순수 builder로 분리하고 React setter·현재시각 생성은 App에 유지한다.
 
+## 2026-07-28 P1. App.jsx 17I-1 수업일지 record draft builder 분리
+
+- 코드: 학생/수업 deterministic record ID, 빈 record 기본값, 현재 draft 또는 base record, 변경 patch, 작성자·수정시각을 기존 spread 순서로 조합하는 계산을 `lessonJournalRecordDraft.js` 순수 builder로 분리했다.
+- 동작 보존: 현재 draft가 있으면 base record를 추가 병합하지 않는 기존 `currentDraft ?? baseRecord` 선택을 유지했다. patch가 identity 필드를 덮을 수 있고 최종 `updatedBy/updatedAt`가 patch 값을 다시 덮는 기존 우선순위도 기능 변경 없이 fixture로 고정했다.
+- 경계: 편집 모드 guard, 현재시각 생성, record draft React map 반영과 `저장 필요` 메시지는 계속 `App.jsx`가 소유한다. 실제 저장·Supabase 재조회·localStorage 반영은 이동하지 않았다.
+- AI 가상검수: 빈 기본값+base+현재 TARGET draft+identity patch, base fallback CONTROL, 빈 record CONTROL로 helper 호출 횟수·최종 우선순위·입력 불변을 대조했다. 전용 fixture와 정적 시나리오를 실행했고 외부 호출은 0건이다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17I-2`는 homework draft key·표시 title fallback·업데이트 row 조합을 순수 모델로 분리하고 편집 guard·React setter는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
