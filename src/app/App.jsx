@@ -74,7 +74,8 @@ import { createLessonReservationPayloadSnapshot } from "../domains/lessons/lesso
 import {
   createLessonNotificationJobId,
   isActiveNotificationJobStatus,
-  isLessonRecordNotificationMuted
+  isLessonRecordNotificationMuted,
+  selectLessonStudentRecord
 } from "../domains/lessons/lessonNotificationJobSelectors.js";
 import { createLessonNotificationJob } from "../domains/lessons/lessonNotificationJobBuilder.js";
 import { createLessonNotificationJobBatch } from "../domains/lessons/lessonNotificationJobBatch.js";
@@ -8408,7 +8409,13 @@ export function App() {
   }
 
   function getLessonStudentRecord(lesson, student) {
-    return findLessonStudentRecord(recordsRef.current, lesson, student) ?? createEmptyRecord(lesson, student);
+    return selectLessonStudentRecord({
+      createEmptyRecord,
+      findRecord: findLessonStudentRecord,
+      lesson,
+      records: recordsRef.current,
+      student
+    });
   }
 
   function buildLessonNotificationJob(lesson, student, target, scheduledDate, mode) {
@@ -8453,7 +8460,7 @@ export function App() {
     const updatedAt = new Date().toISOString();
     const recordsToSave = lessonStudentsForRecords.map((student) => {
       const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
-      const record = findLessonStudentRecord(recordsRef.current, lesson, student) ?? createEmptyRecord(lesson, student);
+      const record = getLessonStudentRecord(lesson, student);
       return {
         ...record,
         lessonStudentRecordId: recordId,

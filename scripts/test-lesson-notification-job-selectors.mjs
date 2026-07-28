@@ -3,7 +3,8 @@ import { readFile } from "node:fs/promises";
 import {
   createLessonNotificationJobId,
   isActiveNotificationJobStatus,
-  isLessonRecordNotificationMuted
+  isLessonRecordNotificationMuted,
+  selectLessonStudentRecord
 } from "../src/domains/lessons/lessonNotificationJobSelectors.js";
 
 assert.equal(
@@ -95,6 +96,110 @@ assert.equal(isLessonRecordNotificationMuted(null, "student"), false);
 assert.equal(isLessonRecordNotificationMuted(undefined, "parent"), false);
 assert.deepEqual(mutedRecord, mutedSnapshot);
 
+const storedRecord = {
+  lessonStudentRecordId: "record_TARGET",
+  teacherComment: "저장된 TARGET"
+};
+const targetRecords = [storedRecord];
+const targetLesson = {
+  lessonId: "lesson_TARGET"
+};
+const targetStudent = {
+  studentId: "student_TARGET"
+};
+const targetInputsSnapshot = structuredClone({
+  lesson: targetLesson,
+  records: targetRecords,
+  student: targetStudent
+});
+const targetCalls = [];
+const selectedStoredRecord = selectLessonStudentRecord({
+  createEmptyRecord() {
+    targetCalls.push("create");
+    throw new Error("stored TARGET must not create a fallback record");
+  },
+  findRecord(records, lesson, student) {
+    targetCalls.push({
+      lesson,
+      records,
+      student,
+      type: "find"
+    });
+    return storedRecord;
+  },
+  lesson: targetLesson,
+  records: targetRecords,
+  student: targetStudent
+});
+assert.strictEqual(selectedStoredRecord, storedRecord);
+assert.equal(targetCalls.length, 1);
+assert.equal(targetCalls[0].type, "find");
+assert.strictEqual(targetCalls[0].records, targetRecords);
+assert.strictEqual(targetCalls[0].lesson, targetLesson);
+assert.strictEqual(targetCalls[0].student, targetStudent);
+assert.deepEqual(
+  {
+    lesson: targetLesson,
+    records: targetRecords,
+    student: targetStudent
+  },
+  targetInputsSnapshot
+);
+
+for (const missingRecord of [null, undefined]) {
+  const fallbackRecord = {
+    lessonStudentRecordId: `record_fallback_${String(missingRecord)}`
+  };
+  const fallbackCalls = [];
+  const selectedFallback = selectLessonStudentRecord({
+    createEmptyRecord(lesson, student) {
+      fallbackCalls.push({
+        lesson,
+        student,
+        type: "create"
+      });
+      return fallbackRecord;
+    },
+    findRecord(records, lesson, student) {
+      fallbackCalls.push({
+        lesson,
+        records,
+        student,
+        type: "find"
+      });
+      return missingRecord;
+    },
+    lesson: targetLesson,
+    records: targetRecords,
+    student: targetStudent
+  });
+  assert.strictEqual(selectedFallback, fallbackRecord);
+  assert.deepEqual(
+    fallbackCalls.map((call) => call.type),
+    ["find", "create"]
+  );
+  assert.strictEqual(fallbackCalls[1].lesson, targetLesson);
+  assert.strictEqual(fallbackCalls[1].student, targetStudent);
+}
+
+for (const preservedControl of [false, 0, ""]) {
+  let fallbackCallCount = 0;
+  const selectedControl = selectLessonStudentRecord({
+    createEmptyRecord() {
+      fallbackCallCount += 1;
+      return storedRecord;
+    },
+    findRecord() {
+      return preservedControl;
+    },
+    lesson: targetLesson,
+    records: targetRecords,
+    student: targetStudent
+  });
+  assert.strictEqual(selectedControl, preservedControl);
+  assert.equal(fallbackCallCount, 0);
+}
+
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
 const selectorSource = await readFile(
   new URL("../src/domains/lessons/lessonNotificationJobSelectors.js", import.meta.url),
@@ -104,10 +209,14 @@ for (const binding of [
   "createLessonNotificationJobId,",
   "isActiveNotificationJobStatus",
   "isLessonRecordNotificationMuted",
+  "selectLessonStudentRecord",
   "return createLessonNotificationJobId(lessonId, studentId, target)",
   "return isActiveNotificationJobStatus(job)",
   "lessonNotificationJobs.filter(isActiveNotificationJobStatus)",
   "createNotificationJobId: createLessonNotificationJobId",
+  "return selectLessonStudentRecord({",
+  "findRecord: findLessonStudentRecord",
+  "records: recordsRef.current",
   "if (isLessonRecordNotificationMuted(record, target)) return null",
   "if (isLessonRecordNotificationMuted(record, target)) return;"
 ]) {
@@ -116,6 +225,11 @@ for (const binding of [
 assert.ok(!appSource.includes("function createLessonNotificationJobId("));
 assert.ok(!appSource.includes("function isActiveNotificationJobStatus("));
 assert.ok(!appSource.includes("function isRecordNotificationMuted("));
+assert.ok(
+  !appSource.includes(
+    "findLessonStudentRecord(recordsRef.current, lesson, student) ?? createEmptyRecord(lesson, student)"
+  )
+);
 
 for (const sourceToken of [
   "const inactiveLessonNotificationJobStatuses",
@@ -126,7 +240,9 @@ for (const sourceToken of [
   "export function isLessonRecordNotificationMuted(record, target)",
   'target === "student"',
   "Boolean(record?.notificationMutedStudent)",
-  "Boolean(record?.notificationMutedParent)"
+  "Boolean(record?.notificationMutedParent)",
+  "export function selectLessonStudentRecord({",
+  "return findRecord(records, lesson, student) ?? createEmptyRecord(lesson, student)"
 ]) {
   assert.ok(selectorSource.includes(sourceToken), `missing lesson job rule: ${sourceToken}`);
 }

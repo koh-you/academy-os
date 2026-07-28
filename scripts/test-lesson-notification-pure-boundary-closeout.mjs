@@ -30,7 +30,8 @@ for (const pureBinding of [
   "createLessonReservationPayloadSnapshot",
   "createLessonNotificationJobId",
   "isActiveNotificationJobStatus",
-  "isLessonRecordNotificationMuted"
+  "isLessonRecordNotificationMuted",
+  "selectLessonStudentRecord"
 ]) {
   assert.ok(appSource.includes(pureBinding), `missing pure notification binding: ${pureBinding}`);
 }
@@ -40,7 +41,7 @@ const exportedFunctionCount = pureModelSources.reduce(
     count + (source.match(/\bexport function\s+\w+\s*\(/g) ?? []).length,
   0
 );
-assert.equal(exportedFunctionCount, 14);
+assert.equal(exportedFunctionCount, 15);
 
 for (const modelSource of pureModelSources) {
   for (const forbiddenSideEffect of [

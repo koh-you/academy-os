@@ -14,7 +14,7 @@ const selectorSource = appSource.slice(selectorStart, selectorEnd);
 
 assert.ok(
   selectorSource.includes(
-    "findLessonStudentRecord(recordsRef.current, lesson, student) ?? createEmptyRecord(lesson, student)"
+    "return selectLessonStudentRecord({"
   )
 );
 assert.equal(
@@ -23,8 +23,25 @@ assert.equal(
 );
 assert.equal(
   appSource.split("getLessonStudentRecord(lesson, student)").length - 1,
-  3,
-  "definition and two current-record consumers must remain"
+  4,
+  "definition and three current-record consumers must remain"
+);
+for (const selectorBinding of [
+  "createEmptyRecord,",
+  "findRecord: findLessonStudentRecord,",
+  "lesson,",
+  "records: recordsRef.current,",
+  "student"
+]) {
+  assert.ok(
+    selectorSource.includes(selectorBinding),
+    `missing current record selector binding: ${selectorBinding}`
+  );
+}
+assert.ok(
+  !appSource.includes(
+    "findLessonStudentRecord(recordsRef.current, lesson, student) ?? createEmptyRecord(lesson, student)"
+  )
 );
 
 const builderStart = appSource.indexOf(

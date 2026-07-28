@@ -22,3 +22,13 @@ export function isLessonRecordNotificationMuted(record, target) {
     ? Boolean(record?.notificationMutedStudent)
     : Boolean(record?.notificationMutedParent);
 }
+
+export function selectLessonStudentRecord({
+  createEmptyRecord,
+  findRecord,
+  lesson,
+  records,
+  student
+}) {
+  return findRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
+}

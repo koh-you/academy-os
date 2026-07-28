@@ -52,4 +52,5 @@
 3. `17L-1` 완료: 휴강 short-circuit와 학생별 학부모→학생 job 조합을 `lessonNotificationJobBatch.js` 순수 model로 분리했다.
 4. `17L-2` 완료: record의 학생/학부모 알림 제외 flag 선택을 `lessonNotificationJobSelectors.js` 순수 selector로 분리했다.
 5. `17L-3` 완료: 현재 record는 React render snapshot이 아니라 `recordsRef.current`에서 찾고 nullish일 때만 빈 record를 만드는 경계임을 inventory했다.
-6. 실제 reserve/cancel/reconcile orchestration은 사람 gate 없이 이동하지 않는다.
+6. `17L-4` 완료: `recordsRef.current`는 App wrapper에서 주입하고 저장 record 우선·빈 record nullish fallback 계산은 `lessonNotificationJobSelectors.js`로 분리했다.
+7. 실제 reserve/cancel/reconcile orchestration은 사람 gate 없이 이동하지 않는다.
