@@ -9998,7 +9998,9 @@ export function App() {
         scheduledAt: scheduledDate,
         status: logStatus === "dry_run" ? "draft" : logStatus
       };
-      setNotificationJobs((current) => [notificationJob, ...current.filter((job) => job.notificationJobId !== notificationJob.notificationJobId)]);
+      setNotificationJobs((current) =>
+        upsertNotificationJobList(current, notificationJob)
+      );
       postJson("/api/notification-jobs", {
         notificationJob
       }).catch((error) => console.error(error));
@@ -10020,7 +10022,9 @@ export function App() {
         recipient: target === "student" ? student.studentPhone : student.parentPhone,
         scheduledAt: scheduledDate
       };
-      setNotificationJobs((current) => [failedJob, ...current.filter((job) => job.notificationJobId !== failedJob.notificationJobId)]);
+      setNotificationJobs((current) =>
+        upsertNotificationJobList(current, failedJob)
+      );
       postJson("/api/notification-jobs", {
         notificationJob: failedJob
       }).catch((persistError) => console.error(persistError));

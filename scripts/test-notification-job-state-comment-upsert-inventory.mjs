@@ -71,17 +71,17 @@ const successInline =
   "setNotificationJobs((current) => [notificationJob, ...current.filter((job) => job.notificationJobId !== notificationJob.notificationJobId)])";
 const failureInline =
   "setNotificationJobs((current) => [failedJob, ...current.filter((job) => job.notificationJobId !== failedJob.notificationJobId)])";
-assert.equal(functionSource.split(successInline).length - 1, 1);
-assert.equal(functionSource.split(failureInline).length - 1, 1);
+assert.equal(functionSource.split(successInline).length - 1, 0);
+assert.equal(functionSource.split(failureInline).length - 1, 0);
 assert.equal(
   functionSource.split("upsertNotificationJobList(current, notificationJob)")
     .length - 1,
-  0
+  1
 );
 assert.equal(
   functionSource.split("upsertNotificationJobList(current, failedJob)").length -
     1,
-  0
+  1
 );
 
 const successLogIndex = functionSource.indexOf(
@@ -92,22 +92,27 @@ const successJobIndex = functionSource.indexOf(
   successLogIndex
 );
 const successSetterIndex = functionSource.indexOf(
-  successInline,
+  "setNotificationJobs((current) =>",
   successJobIndex
+);
+const successHelperIndex = functionSource.indexOf(
+  "upsertNotificationJobList(current, notificationJob)",
+  successSetterIndex
 );
 const successPersistIndex = functionSource.indexOf(
   'postJson("/api/notification-jobs", {',
-  successSetterIndex
+  successHelperIndex
 );
 const successStatusIndex = functionSource.indexOf(
   "applySendStatus(completeStatus, { persist: true })",
   successPersistIndex
 );
 assert.ok(
-  successLogIndex >= 0 &&
+    successLogIndex >= 0 &&
     successJobIndex > successLogIndex &&
     successSetterIndex > successJobIndex &&
-    successPersistIndex > successSetterIndex &&
+    successHelperIndex > successSetterIndex &&
+    successPersistIndex > successHelperIndex &&
     successStatusIndex > successPersistIndex
 );
 const failureLogIndex = functionSource.indexOf(
@@ -118,22 +123,27 @@ const failureJobIndex = functionSource.indexOf(
   failureLogIndex
 );
 const failureSetterIndex = functionSource.indexOf(
-  failureInline,
+  "setNotificationJobs((current) =>",
   failureJobIndex
+);
+const failureHelperIndex = functionSource.indexOf(
+  "upsertNotificationJobList(current, failedJob)",
+  failureSetterIndex
 );
 const failurePersistIndex = functionSource.indexOf(
   'postJson("/api/notification-jobs", {',
-  failureSetterIndex
+  failureHelperIndex
 );
 const failureStatusIndex = functionSource.indexOf(
   "applySendStatus(`실패 · ${error.message}`, { persist: true })",
   failurePersistIndex
 );
 assert.ok(
-  failureLogIndex >= 0 &&
+    failureLogIndex >= 0 &&
     failureJobIndex > failureLogIndex &&
     failureSetterIndex > failureJobIndex &&
-    failurePersistIndex > failureSetterIndex &&
+    failureHelperIndex > failureSetterIndex &&
+    failurePersistIndex > failureHelperIndex &&
     failureStatusIndex > failurePersistIndex
 );
 

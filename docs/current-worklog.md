@@ -1739,6 +1739,13 @@
 - AI 검수: 중복 TARGET 2건과 CONTROL에 성공 TARGET·실패 TARGET을 각각 가상 적용해 inline과 helper 결과·입력 불변을 대조한다. 성공 log→job→setter→persist→상태 및 실패 log→job→setter→persist→상태 순서를 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 없음. 다음 `17T-2`는 두 inline 계산만 기존 `upsertNotificationJobList` 재사용으로 교체하고 fetch/API/Solapi 경계는 이동하지 않는다.
 
+## 2026-07-28 P2. App.jsx 17T-2 lesson comment notification job upsert helper 재사용
+
+- 코드: 수업 코멘트 알림 성공 job과 실패 job의 inline 상태 upsert를 각각 `upsertNotificationJobList(current, notificationJob)`과 `upsertNotificationJobList(current, failedJob)`으로 교체했다. 새 helper와 새 외부 경계는 만들지 않았다.
+- 동작 보존: 같은 ID의 기존 중복 row를 모두 제거하고 새 성공/실패 row를 선두에 두며 CONTROL 순서를 유지한다. 발송 fetch, payload·job 구성, log, React setter, `/api/notification-jobs` 저장과 상태 문구 순서는 App에 유지했다.
+- AI 검수: 중복 TARGET/CONTROL에 성공·실패 row를 가상 적용하고 두 경로의 log→job→setter/helper→persist→상태 순서와 helper side effect 부재를 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 없음. 다음 `17T-3`은 성공/실패 재사용 호출 수와 발송·저장 side-effect 경계를 closeout한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
