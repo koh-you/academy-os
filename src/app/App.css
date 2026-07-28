@@ -70,7 +70,8 @@ button {
   box-shadow: 0 28px 70px rgba(15, 23, 42, 0.22);
   display: grid;
   gap: 18px;
-  max-width: 560px;
+  max-width: min(560px, calc(100vw - 32px));
+  min-width: 0;
   padding: 44px 40px 38px;
   position: relative;
   width: 100%;
@@ -109,6 +110,7 @@ button {
   display: grid;
   gap: 5px;
   grid-template-columns: repeat(3, 1fr);
+  min-width: 0;
   padding: 5px;
 }
 
@@ -119,6 +121,7 @@ button {
   color: #94a3b8;
   font-weight: 900;
   min-height: 50px;
+  min-width: 0;
 }
 
 .loginTabs button.active {
@@ -133,6 +136,7 @@ button {
   border-radius: 8px;
   min-height: 58px;
   padding: 0 20px;
+  width: 100%;
 }
 
 @media (max-width: 640px) {
