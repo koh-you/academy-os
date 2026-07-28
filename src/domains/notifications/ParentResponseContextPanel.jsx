@@ -14,14 +14,6 @@ export function ParentResponseContextPanel({ formatDateTime, notificationJobs = 
       .some((value) => String(value ?? "").toLowerCase().includes(keyword))
   );
 
-  function formatSentAt(value) {
-    try {
-      return formatDateTime(value) || "발송 시각 미입력";
-    } catch {
-      return "발송 시각 미입력";
-    }
-  }
-
   async function copyChannelLookup(context) {
     try {
       const copied = await onCopy?.(buildParentChannelLookupText(context));
@@ -57,7 +49,7 @@ export function ParentResponseContextPanel({ formatDateTime, notificationJobs = 
               <div className="parentResponseContextMeta">
                 <div>
                   <strong>{context.studentName}</strong>
-                  <span>{context.lessonDate || "수업일 미입력"} · {formatSentAt(context.sentAt)}</span>
+                  <span>{context.lessonDate || "수업일 미입력"} · {formatDateTime(context.sentAt)}</span>
                 </div>
                 <span className="statusPill status-sent">발송 완료</span>
               </div>

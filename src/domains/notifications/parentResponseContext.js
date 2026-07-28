@@ -15,10 +15,8 @@ export function getParentResponseContextBody(job = {}) {
 }
 
 export function getParentResponseContexts(notificationJobs = [], students = []) {
-  const safeStudents = Array.isArray(students) ? students : [];
-  const safeNotificationJobs = Array.isArray(notificationJobs) ? notificationJobs : [];
-  const studentsById = new Map(safeStudents.map((student) => [student.studentId, student]));
-  return safeNotificationJobs
+  const studentsById = new Map(students.map((student) => [student.studentId, student]));
+  return notificationJobs
     .filter((job) => job.status === "sent")
     .filter((job) => parentResponseNotificationTypes.has(job.notificationType))
     .filter((job) => (job.target || job.payload?.target || "parent") === "parent")
