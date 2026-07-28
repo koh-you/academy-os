@@ -166,6 +166,10 @@ const commentSaveControllerSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalCommentSaveController.js", import.meta.url),
   "utf8"
 );
+const commentSendPayloadSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalCommentSendPayload.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -836,6 +840,27 @@ assert.ok(
 assert.ok(
   !commentComposerSource.includes("const recordToSave = {"),
   "CommentComposerModal must not retain the extracted save payload"
+);
+for (const extractedCommentSendPayloadContract of [
+  "createLessonJournalCommentSendPayload",
+  "manualCommentBody: draftComment",
+  "manualPreviewBody: generatedPreviewText",
+  "resendReason:",
+  "sendTiming",
+  "[field]: draftComment"
+]) {
+  assert.ok(
+    commentSendPayloadSource.includes(extractedCommentSendPayloadContract),
+    `missing extracted 17E-6 contract: ${extractedCommentSendPayloadContract}`
+  );
+}
+assert.ok(
+  commentComposerSource.includes("createLessonJournalCommentSendPayload({"),
+  "CommentComposerModal must compose the extracted send payload"
+);
+assert.ok(
+  !commentComposerSource.includes("manualCommentBody: draftComment"),
+  "CommentComposerModal must not retain the extracted send options"
 );
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");

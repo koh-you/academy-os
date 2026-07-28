@@ -1377,6 +1377,13 @@
 - AI 가상검수: 학부모 저장 성공 TARGET, 학생 저장 실패 TARGET, callback 없음 CONTROL을 가상 실행해 record ID·현재 field·현재 발송상태 초기화·다른 audience 상태 보존·재조회 option·입력 record 불변을 대조한다. 전용 fixture, 수업일지 inventory, build, diff check와 현재 rebase 중간 scenario 기준선을 통과한 뒤 커밋을 재적용한다. 전체 production 검증은 rebase 완료 뒤 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위는 comment composer의 발송 callback payload builder를 순수 모델로 분리하는 작업이다.
 
+## 2026-07-28 P1. App.jsx 17E-6 알림톡 발송 payload 분리
+
+- 코드: comment composer의 현재 audience 최종 문구 record, delay, dry-run/test recipient flag, 최종 문구·생성 미리보기, 예약시각 경과 수동 재발송 사유와 sendTiming option을 `lessonJournalCommentSendPayload.js`의 순수 builder로 분리했다.
+- 경계: builder는 payload만 반환한다. 미저장 차단과 실제 `onSendComment` 호출은 계속 `App.jsx`가 소유하며 `/api/notification-jobs/*`, Supabase, Solapi 예약·즉시 발송 orchestration은 이동하지 않았다.
+- AI 가상검수: 학부모 30분 예약 TARGET, 학생 dry-run 수동 재발송 TARGET, 기본 CONTROL로 record field·delay·수신 flag·최종/미리보기 문구·재발송 사유·sendTiming과 입력 record 불변을 대조한다. 전용 fixture, 수업일지 inventory, build, diff check와 현재 rebase 중간 scenario 기준선을 통과한 뒤 커밋을 재적용한다. 전체 production 검증은 rebase 완료 뒤 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위는 comment composer 전체 shell을 domain component로 이동할 수 있는지 callback 경계를 audit하는 작업이다.
+
 ## 2026-07-28 P1. App.jsx 17D-2 수업일지 학생 표 shell 분리
 
 - 코드: 수업일지 학생 표의 panel, 읽기/편집 class, 학생·메모·출결·교재·진도·숙제·과제·알림톡 10개 고정 열 제목을 `lessonJournalTableModel.js`와 `LessonJournalTable.jsx`로 분리했다.

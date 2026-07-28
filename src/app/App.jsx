@@ -242,6 +242,7 @@ import {
 import { LessonJournalCommentComposerView } from "../domains/lessons/LessonJournalCommentComposerView.jsx";
 import { polishLessonJournalCommentDraft } from "../domains/lessons/lessonJournalCommentPolishController.js";
 import { saveLessonJournalCommentDraft } from "../domains/lessons/lessonJournalCommentSaveController.js";
+import { createLessonJournalCommentSendPayload } from "../domains/lessons/lessonJournalCommentSendPayload.js";
 import { useLessonJournalCommentComposerDraft } from "../domains/lessons/useLessonJournalCommentComposerDraft.js";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
@@ -17160,16 +17161,18 @@ function CommentComposerModal({
 
   function handleSendClick() {
     if (hasUnsavedDraft) return;
-    const nextRecord = { ...(record ?? {}), [field]: draftComment };
-    onSendComment(lesson, student, nextRecord, audience, {
-      delayMinutes: sendDelayMinutes,
+    const payload = createLessonJournalCommentSendPayload({
+      draftComment,
+      field,
       forceDryRun,
       forceTestRecipient,
-      manualCommentBody: draftComment,
-      manualPreviewBody: generatedPreviewText,
-      resendReason: isManualResendAvailable ? "예약 시간 경과 후 수동 재발송" : "",
+      generatedPreviewText,
+      isManualResendAvailable,
+      record,
+      sendDelayMinutes,
       sendTiming
     });
+    onSendComment(lesson, student, payload.record, audience, payload.options);
   }
 
   return (
