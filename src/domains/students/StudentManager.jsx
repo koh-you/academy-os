@@ -3,6 +3,7 @@ import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { parseStudentScheduleOverride } from "../../shared/utils/studentSchedule.js";
 import { buildStudentHandoverPdfModel, getStudentHandoverTitle, openStudentHandoverPdf } from "./studentHandoverPdf.js";
+import { sortWithdrawnStudents } from "./studentListSort.js";
 
 const withdrawalReasonOptions = [
   { value: "graduation", label: "졸업" },
@@ -279,6 +280,7 @@ export function StudentManager({
   const [handoverStudentId, setHandoverStudentId] = useState("");
   const [handoverComment, setHandoverComment] = useState("");
   const [selectedWithdrawnStudentIds, setSelectedWithdrawnStudentIds] = useState(() => new Set());
+  const [withdrawnStudentSort, setWithdrawnStudentSort] = useState("name");
   const selectedClassTemplate = templates.find(
     (template) => template.classTemplateId === selectedClassTemplateId
   );
@@ -302,10 +304,11 @@ export function StudentManager({
     ));
   const activeStudents = students.filter((student) => !isWithdrawnStudent(student));
   const withdrawnStudents = students.filter(isWithdrawnStudent);
+  const sortedWithdrawnStudents = sortWithdrawnStudents(withdrawnStudents, withdrawnStudentSort);
   const selectedWithdrawnStudents = withdrawnStudents.filter((student) => selectedWithdrawnStudentIds.has(student.studentId));
   const visibleStudents =
     activeTab === "withdrawn"
-      ? withdrawnStudents
+      ? sortedWithdrawnStudents
       : activeTab === "class"
         ? selectedClassTemplateId === "unassigned"
           ? activeStudents.filter((student) => !student.defaultClassTemplateId)
@@ -735,6 +738,15 @@ export function StudentManager({
 
       {activeTab === "withdrawn" ? (
         <>
+          <div className="studentListToolbar withdrawnStudentSort">
+            <label>
+              정렬
+              <select aria-label="퇴원생 정렬" onChange={(event) => setWithdrawnStudentSort(event.target.value)} value={withdrawnStudentSort}>
+                <option value="name">이름순</option>
+                <option value="withdrawn_date">퇴원일순 (최근)</option>
+              </select>
+            </label>
+          </div>
           <div className="studentListTable">
           <div className="studentListRow studentListHead withdrawnStudentRow">
             <span>선택</span>
