@@ -90,6 +90,14 @@ const editableFieldsModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalEditableFieldsModel.js", import.meta.url),
   "utf8"
 );
+const assignmentStatusCellSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalAssignmentStatusCell.jsx", import.meta.url),
+  "utf8"
+);
+const assignmentStatusCellModelSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalAssignmentStatusCellModel.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -454,6 +462,26 @@ for (const extractedEditableFieldsContract of [
   assert.ok(
     `${editableFieldsSource}\n${editableFieldsModelSource}`.includes(extractedEditableFieldsContract),
     `missing extracted 17C-5 contract: ${extractedEditableFieldsContract}`
+  );
+}
+assert.ok(
+  journalSource.includes("<LessonJournalAssignmentStatusCell"),
+  "LessonJournalDetail must compose the extracted assignment status cell"
+);
+assert.ok(
+  !journalSource.includes('className="assignmentStatusCell"'),
+  "LessonJournalDetail must not retain the assignment status cell markup"
+);
+for (const extractedAssignmentStatusContract of [
+  "createLessonJournalAssignmentStatusCellModel",
+  "onAssignmentStatusChange(event.target.value)",
+  "onApplyHomeworkFollowupMethod(method.id)",
+  "showHomeworkFollowupActions",
+  "pendingHomeworkFollowupText"
+]) {
+  assert.ok(
+    `${assignmentStatusCellSource}\n${assignmentStatusCellModelSource}`.includes(extractedAssignmentStatusContract),
+    `missing extracted 17C-6 contract: ${extractedAssignmentStatusContract}`
   );
 }
 

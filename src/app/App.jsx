@@ -233,6 +233,7 @@ import { createLessonJournalMemoIndicatorModel } from "../domains/lessons/lesson
 import { LessonJournalStudentIdentity } from "../domains/lessons/LessonJournalStudentIdentity.jsx";
 import { LessonJournalAttendanceButton } from "../domains/lessons/LessonJournalAttendanceButton.jsx";
 import { LessonJournalEditableFields } from "../domains/lessons/LessonJournalEditableFields.jsx";
+import { LessonJournalAssignmentStatusCell } from "../domains/lessons/LessonJournalAssignmentStatusCell.jsx";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -16679,9 +16680,6 @@ function LessonJournalDetail({
             const referencePreparationMemo = referenceRecord?.preparationMemo?.trim() ?? "";
             const previousHomeworkFollowup = getHomeworkFollowupFromRecord(previousRecord ?? {})
               ?? getHomeworkFollowupFromRecord(referenceRecord ?? {});
-            const pendingHomeworkFollowup = previousHomeworkFollowup?.method === "next_lesson"
-              ? previousHomeworkFollowup
-              : null;
             const {
               hasCurrentMemo,
               memoButtonDescription,
@@ -16702,10 +16700,6 @@ function LessonJournalDetail({
             const isStudentNotificationOff = isLessonNotificationOff || record.notificationMutedStudent;
             const assignmentStatusValue = normalizeAssignmentStatusValue(record.assignmentStatus ?? record.incompleteHomework ?? "");
             const homeworkFollowupOptions = getHomeworkFollowupOptionsForAssignmentStatus(assignmentStatusValue);
-            const shouldShowHomeworkFollowupActions =
-              journalEditMode &&
-              Boolean(effectivePreviousHomework?.title) &&
-              homeworkFollowupOptions.length > 0;
             const selectedHomeworkFollowupMethod = getHomeworkFollowupMethodFromRecord(record);
 
             return (
@@ -16761,38 +16755,20 @@ function LessonJournalDetail({
                   recordId={recordId}
                   student={student}
                 />
-                <div className="assignmentStatusCell">
-                  <select
-                    aria-label={`${student.name} 숙제 상태`}
-                    className="assignmentStatusSelect"
-                    disabled={!journalEditMode}
-                    value={assignmentStatusValue}
-                    onChange={(event) => handleAssignmentStatusChange(student, record, effectivePreviousHomework, event.target.value)}
-                  >
-                    {assignmentStatusOptions.map((option) => (
-                      <option key={option.value || "empty"} value={option.value}>{option.label}</option>
-                    ))}
-                  </select>
-                  {shouldShowHomeworkFollowupActions ? (
-                    <div className="homeworkFollowupActions" aria-label="숙제보충 처리 방식">
-                      {homeworkFollowupOptions.map((method) => (
-                        <button
-                          className={selectedHomeworkFollowupMethod === method.id ? "active" : ""}
-                          key={method.id}
-                          onClick={() => applyHomeworkFollowupMethod(student, record, effectivePreviousHomework, method.id)}
-                          type="button"
-                        >
-                          {method.label}
-                        </button>
-                      ))}
-                    </div>
-                  ) : null}
-                  {pendingHomeworkFollowup ? (
-                    <span className="homeworkFollowupCheck">
-                      확인할 숙제 · {pendingHomeworkFollowup.text}
-                    </span>
-                  ) : null}
-                </div>
+                <LessonJournalAssignmentStatusCell
+                  assignmentStatusAriaLabel={`${student.name} 숙제 상태`}
+                  assignmentStatusOptions={assignmentStatusOptions}
+                  assignmentStatusValue={assignmentStatusValue}
+                  homeworkFollowupOptions={homeworkFollowupOptions}
+                  journalEditMode={journalEditMode}
+                  onApplyHomeworkFollowupMethod={(method) =>
+                    applyHomeworkFollowupMethod(student, record, effectivePreviousHomework, method)}
+                  onAssignmentStatusChange={(value) =>
+                    handleAssignmentStatusChange(student, record, effectivePreviousHomework, value)}
+                  previousHomeworkFollowup={previousHomeworkFollowup}
+                  previousHomeworkTitle={effectivePreviousHomework?.title}
+                  selectedHomeworkFollowupMethod={selectedHomeworkFollowupMethod}
+                />
                 <div className="journalCommentCell">
                   <button
                     className={`commentOpenButton comment-${parentCommentState}${isParentNotificationOff ? " notification-off" : ""}`}

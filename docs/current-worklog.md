@@ -1321,6 +1321,13 @@
 - UI/문구: 보충관리의 학생·학부모 다음 정각 일정 안내도 당일 학생 11시 리마인더와 같은 `제목 → 빈 줄 → 일시 → 보강 대상/밀린 숙제 → 사유 → 확인할 숙제` 순서로 생성한다. 결석보강은 `결석 보강`, 숙제보충은 `숙제 보충` 제목을 사용하며, 일정 변경 알림에는 그 뒤에 변경 사유·변경 전 일정·변경 후 일정만 추가한다.
 - 원천/부작용: Supabase `app_state.aiSettings.notificationTemplates`의 기존 기본 일정 템플릿은 런타임에서 새 기본 형식으로 해석한다. 교사가 직접 수정·저장한 개별 학생/학부모 최종 문구와 기존 `notification_jobs` 예약·발송 본문은 바꾸지 않는다. 새 예약·발송·취소나 Solapi 호출은 실행하지 않는다.
 - AI 검증: 보충 일정 알림 정적 계약을 새 라벨 형식으로 갱신하고, `npm run build`, `git diff --check`, `npm run test:production`을 실행한다. 기존 수업 모달 `90a` 정적 검사 1건은 이번 문구 변경과 무관한 기준선 실패로 유지된다.
+## 2026-07-28 P1. App.jsx 17C-6 수업일지 과제 상태·숙제보충 표시 분리
+
+- 코드: 과제 상태 select, 숙제보충 방법 버튼, 다음 수업에 확인할 숙제 표시를 `lessonJournalAssignmentStatusCellModel.js`와 `LessonJournalAssignmentStatusCell.jsx`로 분리했다.
+- 경계: 상태 변경은 App이 바인딩한 `handleAssignmentStatusChange`, 보충 방법 선택은 `applyHomeworkFollowupMethod` callback으로만 전달한다. record/homework/makeup task draft와 저장은 계속 `App.jsx`가 소유하며 실제 API·Supabase·Solapi 호출은 0건이다.
+- AI 가상검수: 편집 모드+지난 숙제+다음 수업 확인 TARGET, 읽기 모드+수업 후 보충 CONTROL, 지난 숙제 없음 CONTROL로 버튼 노출·active 선택·확인 숙제 문구와 select aria label을 대조한다. 전용 fixture, 수업일지 inventory, build, diff check와 rebase 중 production scenario 기준을 확인한다.
+- 사람 gate: 0건. 다음 의미 단위는 학부모·학생 알림 상태와 composer/알림 제외 callback 표시다.
+
 ## 2026-07-28 P1. App.jsx 17C-5 수업일지 교재·진도·숙제 편집 묶음 분리
 
 - 코드: 교재·진도·지난 숙제·다음 숙제 네 칸의 순서, value, 직전 수업/학생 교재 fallback placeholder를 `lessonJournalEditableFieldsModel.js`로 옮기고 `LessonJournalEditableFields.jsx`가 네 공통 편집 카드를 DOM wrapper 없이 구성하게 했다.
