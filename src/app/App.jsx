@@ -231,6 +231,7 @@ import { LessonJournalNotificationBar } from "../domains/lessons/LessonJournalNo
 import { LessonJournalReservationModal } from "../domains/lessons/LessonJournalReservationModal.jsx";
 import { createLessonJournalMemoIndicatorModel } from "../domains/lessons/lessonJournalMemoIndicatorModel.js";
 import { LessonJournalStudentIdentity } from "../domains/lessons/LessonJournalStudentIdentity.jsx";
+import { LessonJournalAttendanceButton } from "../domains/lessons/LessonJournalAttendanceButton.jsx";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -16788,17 +16789,15 @@ function LessonJournalDetail({
                     {priorMemoNeedsAttention ? <span aria-hidden="true" className="prepMemoAttentionMark">!</span> : null}
                   </button>
                 </div>
-                <button
-                  className={`attendanceBadge attendance-${attendanceDisplay.statusClass ?? record.attendanceStatus ?? "pending"}`}
-                  disabled={isClosureLesson}
-                  onClick={() => onOpenAttendance({ lesson: attendanceLesson, record, student })}
-                  type="button"
-                >
-                  <span>{attendanceDisplay.label}</span>
-                  {attendanceDisplay.detail ? <small>{attendanceDisplay.detail}</small> : null}
-                  {attendanceDisplay.dateMismatch ? <small className="attendanceMismatchText">확인 필요</small> : null}
-                  {checkoutMissing ? <small className="checkoutMissingText">하원 미체크</small> : null}
-                </button>
+                <LessonJournalAttendanceButton
+                  attendanceDisplay={attendanceDisplay}
+                  attendanceLesson={attendanceLesson}
+                  checkoutMissing={checkoutMissing}
+                  isClosureLesson={isClosureLesson}
+                  onOpenAttendance={onOpenAttendance}
+                  record={record}
+                  student={student}
+                />
                 <EditableMemoCard
                   ariaLabel={`${student.name} 강의 교재`}
                   disabled={!journalEditMode}

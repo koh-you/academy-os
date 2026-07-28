@@ -56,10 +56,11 @@
 8. `17B-5` 완료: 예약 확인 modal의 요약·학생/학부모 상태·OS 이슈 표시를 callback-only `LessonJournalReservationModal`로 분리하고 조회·예약·취소 orchestration은 App에 유지했다.
 9. `17C-1` 완료: 학생별 수업메모 버튼의 현재 메모·직전/참고 메모·확인 완료·작성창 가져오기 표시 계산을 `lessonJournalMemoIndicatorModel.js`로 분리했다.
 10. `17C-2` 완료: 학생 이름·학년·학교·특강/프로필 개별 시간과 학생 포털 미리보기 callback을 `LessonJournalStudentIdentity`로 분리했다.
-11. 다음: 출결 버튼을 기존 `onOpenAttendance`만 받는 callback-only component로 분리
-12. 이후: 교재·진도·숙제는 local draft callback, 과제 상태·보충 선택은 기존 controller, 학부모·학생 알림은 composer/알림 제외 callback을 주입하는 순서로 분리
-13. 다중 원천 저장은 TARGET/CONTROL·부분 성공 fixture 뒤 주입형 controller로 분리
-14. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
+11. `17C-3` 완료: 출결 상태·날짜 불일치·하원 미체크·휴강 비활성 표시와 기존 `onOpenAttendance` callback을 `LessonJournalAttendanceButton`으로 분리했다.
+12. 다음: 교재·진도·지난/다음 숙제 `EditableMemoCard` 묶음을 App-owned local draft callback만 받는 component로 분리
+13. 이후: 과제 상태·보충 선택은 기존 controller, 학부모·학생 알림은 composer/알림 제외 callback을 주입하는 순서로 분리
+14. 다중 원천 저장은 TARGET/CONTROL·부분 성공 fixture 뒤 주입형 controller로 분리
+15. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -67,7 +68,7 @@
 | --- | --- | --- | --- |
 | 학생 | 학생 이름·학년·학교, 특강/프로필 개별 시간 | 학생 포털 미리보기 open callback | `17C-2` read-only shell 완료 |
 | 수업메모 | 현재 record, 직전/참고 record selector, 확인 cutoff, 작성창 가져오기 flag | 메모 modal open callback | `17C-1` 순수 표시 모델 완료 |
-| 출결 | 적용된 학생별 수업시간, 출결 record, 휴강 여부 | `onOpenAttendance` callback 뒤 별도 저장/알림 선택 | callback-only 버튼으로만 분리 |
+| 출결 | 적용된 학생별 수업시간, 출결 record, 휴강 여부 | `onOpenAttendance` callback 뒤 별도 저장/알림 선택 | `17C-3` callback-only 버튼 완료 |
 | 교재·진도 | record와 직전 수업 fallback | `journalRecordDrafts`, `editingMemoKey` | local draft callback을 App에 유지 |
 | 지난·다음 숙제 | `homeworks`, 연결 수업, homework draft | `journalHomeworkDrafts` | local draft callback을 App에 유지 |
 | 과제 상태·보충 | record 상태, 지난 숙제, 보충 방법·대기 확인 | record/homework/makeup task draft controller | 표시와 선택 callback만 분리 |
@@ -85,6 +86,7 @@
 - `17B-5` gate: 가상 OS 학부모/학생 예약, 취소/실패, loading/빈 CONTROL 상태로 요약·필터·버튼 문구를 판정하고 실제 조회·예약·OS 취소는 App callback으로만 연결되는지 검사한다.
 - `17C-1` gate: 가상 현재 메모, 직전/참고 메모, 확인 cutoff, 학생/학부모 작성창 flag 조합으로 수업메모 버튼 설명과 주의 표시를 판정한다.
 - `17C-2` gate: 가상 official/adjusted/profile/일반 수업시간과 학생 기본정보 누락 조합으로 학년·학교 fallback, 시간 표시·class를 판정하고 포털 미리보기는 callback으로만 연결되는지 검사한다.
+- `17C-3` gate: 가상 정상 출결+날짜 불일치+하원 미체크 TARGET, 휴강 CONTROL, record status fallback, 빈 CONTROL로 class·상세·비활성·경고 표시를 판정하고 출결 저장은 기존 callback 뒤에 유지되는지 검사한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
 - recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.
 - 학생 포털 실제 쓰기와 Solapi 특강 템플릿 검수는 사용자 지시로 목록에서 제거됐고, 교사 bearer/Storage 소유권 보안은 구현·배포 검증 완료다.

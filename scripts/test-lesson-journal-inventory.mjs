@@ -66,6 +66,14 @@ const studentIdentityModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalStudentIdentityModel.js", import.meta.url),
   "utf8"
 );
+const attendanceButtonSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalAttendanceButton.jsx", import.meta.url),
+  "utf8"
+);
+const attendanceButtonModelSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalAttendanceButtonModel.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -371,6 +379,26 @@ for (const extractedStudentIdentityContract of [
   assert.ok(
     `${studentIdentitySource}\n${studentIdentityModelSource}`.includes(extractedStudentIdentityContract),
     `missing extracted 17C-2 contract: ${extractedStudentIdentityContract}`
+  );
+}
+assert.ok(
+  journalSource.includes("<LessonJournalAttendanceButton"),
+  "LessonJournalDetail must compose the extracted attendance button"
+);
+assert.ok(
+  !journalSource.includes('className={`attendanceBadge attendance-'),
+  "LessonJournalDetail must not retain the attendance button markup"
+);
+for (const extractedAttendanceButtonContract of [
+  "createLessonJournalAttendanceButtonModel",
+  "onOpenAttendance({ lesson: attendanceLesson, record, student })",
+  "attendanceMismatchText",
+  "checkoutMissingText",
+  "disabled={model.disabled}"
+]) {
+  assert.ok(
+    `${attendanceButtonSource}\n${attendanceButtonModelSource}`.includes(extractedAttendanceButtonContract),
+    `missing extracted 17C-3 contract: ${extractedAttendanceButtonContract}`
   );
 }
 
