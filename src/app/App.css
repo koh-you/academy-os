@@ -19471,6 +19471,39 @@ body.attendanceOnlyBody {
   }
 }
 
+@media (max-width: 640px) {
+  .sideNav {
+    grid-template-columns: 1fr;
+  }
+
+  .sideNav .sideGroup {
+    display: none;
+  }
+
+  .sideNav .sideGroup[data-mobile-menu="operations"] {
+    display: grid;
+  }
+
+  .sideNav .sideGroup[data-mobile-menu="operations"] > button:not([data-mobile-notification="true"]) {
+    display: none;
+  }
+
+  .sideNav .sideGroup[data-mobile-menu="operations"] > p {
+    padding-inline: 12px;
+  }
+
+  .teacherOperatingMemoHeader,
+  .teacherOperatingMemoSaveRow {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .teacherOperatingMemoActions {
+    align-items: center;
+    justify-content: flex-end;
+  }
+}
+
 @media (min-width: 768px) and (max-width: 1100px) {
   .studentPortalTabletFirst .portalHeader {
     align-items: center;

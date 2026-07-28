@@ -5388,6 +5388,17 @@ export function App() {
   const [activeView, setActiveView] = useState("lessons");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [session, setSession] = useState(() => readStoredTeacherSession());
+
+  useEffect(() => {
+    if (session?.role !== "teacher" || typeof window === "undefined") return undefined;
+    const mobileViewport = window.matchMedia("(max-width: 640px)");
+    const openMobileNotificationWorkspace = () => {
+      if (mobileViewport.matches) setActiveView("notifications");
+    };
+    openMobileNotificationWorkspace();
+    mobileViewport.addEventListener?.("change", openMobileNotificationWorkspace);
+    return () => mobileViewport.removeEventListener?.("change", openMobileNotificationWorkspace);
+  }, [session?.role]);
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedLessonId, setSelectedLessonId] = useState("");
   const [lessonClipboard, setLessonClipboard] = useState(null);
@@ -15566,11 +15577,12 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle, su
       </div>
       <nav className="sideNav">
         {menuGroups.map((group) => (
-          <div className="sideGroup" key={group.title}>
+          <div className="sideGroup" data-mobile-menu={group.title === "운영" ? "operations" : "hidden"} key={group.title}>
             <p>{group.title}</p>
             {group.items.map((item) => (
               <button
                 className={activeView === item.id ? "active" : ""}
+                data-mobile-notification={item.id === "notifications" ? "true" : undefined}
                 key={item.id}
                 onClick={() => onChangeView(item.id)}
                 title={isCollapsed ? item.label : undefined}
