@@ -217,6 +217,7 @@ import { checkKioskAttendanceAction } from "../domains/lessons/attendanceKioskCh
 import { previewKioskAttendanceAction } from "../domains/lessons/attendanceKioskPreviewController.js";
 import { AttendanceModal } from "../domains/lessons/AttendanceModal.jsx";
 import { mergeRemoteAttendanceRecord } from "../domains/lessons/attendanceSync.js";
+import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import {
   getLessonClosureBlockingNotificationJobs,
   getLessonClosureRoster,
@@ -8358,30 +8359,15 @@ export function App() {
   }
 
   async function saveAttendanceRecord(lesson, student, values, updatedBy = "instructor_owner_001", options = {}) {
-    const hasManualCheckOutTime = Boolean(String(values.checkOutTime ?? "").trim());
-    const shouldSaveCheckOut =
-      values.attendanceStatus === "checkout" ||
-      (hasManualCheckOutTime && !["absent", "excused", "pending"].includes(values.attendanceStatus));
-    const nextAttendanceStatus = shouldSaveCheckOut ? "checkout" : values.attendanceStatus;
-    const result = await checkAttendanceRequest({
-      action: shouldSaveCheckOut
-        ? "checkout"
-        : ["absent", "excused", "pending"].includes(nextAttendanceStatus)
-        ? "status"
-        : "checkin",
-      actorId: updatedBy,
-      attendanceReason: values.attendanceReason,
-      attendanceStatus: nextAttendanceStatus,
-      checkInTime: values.checkInTime,
-      checkOutTime: values.checkOutTime,
-      date: lesson.date,
-      lateMinutes: values.lateMinutes,
+    const { nextAttendanceStatus, payload } = createManualAttendanceRequestPayload({
       lateGraceMinutes: attendanceSettings.lateGraceMinutes,
-      lessonId: lesson.lessonId,
-      sendAlimtalk: Boolean(options.sendAlimtalk),
-      source: "manual",
-      studentId: student.studentId
+      lesson,
+      options,
+      student,
+      updatedBy,
+      values
     });
+    const result = await checkAttendanceRequest(payload);
     const nextRecord = result.record;
     if (!nextRecord) throw new Error("출결 저장 결과가 없습니다.");
     if (result.lesson) {

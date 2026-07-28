@@ -57,5 +57,6 @@
 - `16D-1` 완료: check/preview endpoint·30초 timeout·오류 문구 계약을 `attendanceApi.js`에 분리하고 App에서 공통 request client를 주입한다.
 - `16D-2` 완료: 날짜 변경 차단·PIN 검증·preview payload·오류 변환을 `attendanceKioskPreviewController.js`로 분리했다.
 - `16D-3` 완료: kiosk check payload와 반환 lesson→record→event 적용 순서를 `attendanceKioskCheckController.js`로 분리하고 TARGET/CONTROL 가상 state로 검증했다.
-- 다음 `16E-1`: 수동 출결의 checkout/status/checkin action과 request payload를 순수 builder로 분리한다.
+- `16E-1` 완료: 수동 출결의 checkout/status/checkin action과 request payload를 `manualAttendancePayload.js` 순수 builder로 분리했다. present/late/absent/excused/pending/checkout 및 수동 하원 시각 조합을 가상 데이터로 검증했다.
+- 다음 `16E-2`: 수동 출결 request 이후 lesson→record→notification job 적용과 결석 예약 부분 실패 판정을 주입형 controller로 분리한다.
 - 실제 polling effect, React state, 출결 저장·알림톡은 App에 남긴다.

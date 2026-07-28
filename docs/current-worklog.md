@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-28 P1. 16E-1 수동 출결 request payload builder 분리 — AI gate 통과
+
+- 코드: 수업일지 수동 출결의 하원 시각 우선순위, checkout/status/checkin action, 출결 상태와 API payload 생성을 `manualAttendancePayload.js`로 이동했다. App은 현재 설정·lesson·student·modal 값을 builder에 넘기고 기존 attendance API를 호출한다.
+- 가상 데이터: present·late·absent·excused·pending·checkout과 수동 하원 시각 조합을 만들었다. 등원/지각에 하원 시각이 있으면 checkout, 결석·인정결석·대기는 하원 시각이 있어도 status를 유지하며, actor·날짜·lesson/student ID·시각·사유·유예시간·발송 선택의 정확한 payload를 대조했다.
+- 경계: 실제 API, Supabase `lesson_student_records`·`attendance_events`·`notification_jobs`, Solapi 호출은 0건이다. request 이후 React state와 부분 실패 판정은 App에 남겼다.
+- AI 검증: 전용 fixture, production 전체 체인, scenario 501/501, build, `git diff --check`를 통과했다. 사람 gate는 없다. 다음 16E-2는 반환 lesson→record→notification job 적용과 결석 예약 부분 실패를 주입형 controller로 분리한다.
+
 ## 2026-07-28 P1. 16D-3 kiosk check controller 분리 — AI gate 통과
 
 - 코드: 날짜/PIN 차단, check payload, 성공 응답의 lesson→record→attendance event log 적용 순서와 오류 변환을 `attendanceKioskCheckController.js`로 이동했다. App은 request와 세 state adapter만 주입한다.
