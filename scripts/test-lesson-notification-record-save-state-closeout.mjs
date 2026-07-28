@@ -45,7 +45,9 @@ assert.equal(
   3
 );
 assert.equal(
-  functionSource.split("patchLessonRecordNotificationStatusRequest({").length - 1,
+  functionSource.split(
+    "patchLessonRecordNotificationStatusRequest(createLessonNotificationRecordStatusPayload(record))"
+  ).length - 1,
   1
 );
 assert.ok(!functionSource.includes("Object.fromEntries(recordsToSave.map("));
@@ -53,7 +55,8 @@ assert.ok(!functionSource.includes("Object.fromEntries(recordsToSave.map("));
 const orderedBoundaries = [
   'const savingStates = createLessonJournalRecordSaveStates(recordsToSave, "saving")',
   "setSaveStates((currentStates) => ({ ...currentStates, ...savingStates }))",
-  "Promise.all(recordsToSave.map((record) => patchLessonRecordNotificationStatusRequest({",
+  "Promise.all(recordsToSave.map((record) =>",
+  "patchLessonRecordNotificationStatusRequest(createLessonNotificationRecordStatusPayload(record))",
   ".then(() => {",
   'const savedStates = createLessonJournalRecordSaveStates(recordsToSave, "saved")',
   "setSaveStates((currentStates) => ({ ...currentStates, ...savedStates }))",

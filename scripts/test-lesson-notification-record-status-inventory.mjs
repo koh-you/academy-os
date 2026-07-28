@@ -60,9 +60,8 @@ for (const persistenceRule of [
   "recordsRef.current = nextRecords",
   "setRecords(nextRecords)",
   'createLessonJournalRecordSaveStates(recordsToSave, "saving")',
-  "Promise.all(recordsToSave.map((record) => patchLessonRecordNotificationStatusRequest({",
-  "teacherCommentSendStatus: record.teacherCommentSendStatus",
-  "studentCommentSendStatus: record.studentCommentSendStatus",
+  "Promise.all(recordsToSave.map((record) =>",
+  "patchLessonRecordNotificationStatusRequest(createLessonNotificationRecordStatusPayload(record))",
   'createLessonJournalRecordSaveStates(recordsToSave, "saved")',
   'createLessonJournalRecordSaveStates(recordsToSave, "failed")'
 ]) {

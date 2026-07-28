@@ -60,7 +60,8 @@ assert.equal(
 assert.ok(!functionSource.includes("Object.fromEntries(recordsToSave.map("));
 for (const AppOwnedBoundary of [
   "setSaveStates((currentStates) => ({ ...currentStates, ...savingStates }))",
-  "Promise.all(recordsToSave.map((record) => patchLessonRecordNotificationStatusRequest({",
+  "Promise.all(recordsToSave.map((record) =>",
+  "patchLessonRecordNotificationStatusRequest(createLessonNotificationRecordStatusPayload(record))",
   "setSaveStates((currentStates) => ({ ...currentStates, ...savedStates }))",
   "console.error(error)",
   "setSaveStates((currentStates) => ({ ...currentStates, ...failedStates }))"

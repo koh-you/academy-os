@@ -1617,6 +1617,13 @@
 - AI 검수: 서로 다른 ID·학부모/학생 상태와 제외 필드를 가진 TARGET/CONTROL 가상 record를 기존 inline 계약으로 변환해 정확한 6필드·대상 격리·제외 필드 미포함·입력 불변을 대조한다. 전용 fixture·정적 시나리오·build·`git diff --check`를 실행한다.
 - 사람 gate: 새 항목 없음. 다음 `17N-2`는 이 6필드 계산만 `createLessonNotificationRecordStatusPayload(record)` 순수 helper로 분리하며 실제 patch request와 React effect는 App에 유지한다.
 
+## 2026-07-28 P1. App.jsx 17N-2 lesson notification record API payload 분리
+
+- 코드: record 상태 API 직전의 6필드 계산을 `lessonNotificationRecordStatusPayload.js`의 `createLessonNotificationRecordStatusPayload(record)`로 분리했다. App은 records 순회, patch request, `Promise.all`, React 저장상태와 성공·실패 처리를 계속 소유한다.
+- 동작 보존: 원본 record에서 기존 6필드만 같은 값으로 복사하고 추가 필드는 포함하지 않는다. 누락 필드는 기존 object literal과 같이 `undefined` key로 남으며 입력 record는 변경하지 않는다.
+- AI 검수: 서로 다른 ID·학부모/학생 상태와 제외 필드를 가진 TARGET/CONTROL 가상 record, 빈 입력을 실행해 6필드·대상 격리·입력 불변을 대조한다. helper side effect 부재와 App-owned API/React effect를 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 새 항목 없음. 다음 `17N-3`은 순수 payload helper와 App-owned patch request 경계를 closeout audit한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

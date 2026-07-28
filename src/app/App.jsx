@@ -79,6 +79,7 @@ import {
 } from "../domains/lessons/lessonNotificationJobSelectors.js";
 import { createLessonNotificationJob } from "../domains/lessons/lessonNotificationJobBuilder.js";
 import { createLessonNotificationJobBatch } from "../domains/lessons/lessonNotificationJobBatch.js";
+import { createLessonNotificationRecordStatusPayload } from "../domains/lessons/lessonNotificationRecordStatusPayload.js";
 import { createLessonNotificationRecordStatusRows } from "../domains/lessons/lessonNotificationRecordStatusRows.js";
 import {
   applySupplementScheduleNotificationsRequest,
@@ -8482,14 +8483,9 @@ export function App() {
     setRecords(nextRecords);
     const savingStates = createLessonJournalRecordSaveStates(recordsToSave, "saving");
     setSaveStates((currentStates) => ({ ...currentStates, ...savingStates }));
-    Promise.all(recordsToSave.map((record) => patchLessonRecordNotificationStatusRequest({
-      lessonId: record.lessonId,
-      lessonStudentRecordId: record.lessonStudentRecordId,
-      studentId: record.studentId,
-      teacherCommentSendStatus: record.teacherCommentSendStatus,
-      studentCommentSendStatus: record.studentCommentSendStatus,
-      updatedBy: record.updatedBy
-    })))
+    Promise.all(recordsToSave.map((record) =>
+      patchLessonRecordNotificationStatusRequest(createLessonNotificationRecordStatusPayload(record))
+    ))
       .then(() => {
         const savedStates = createLessonJournalRecordSaveStates(recordsToSave, "saved");
         setSaveStates((currentStates) => ({ ...currentStates, ...savedStates }));
