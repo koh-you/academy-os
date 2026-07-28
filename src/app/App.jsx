@@ -8703,12 +8703,9 @@ export function App() {
       .filter((job) => job.lessonId === lesson.lessonId && job.studentId === student.studentId && !nextJobIds.has(job.notificationJobId))
       .filter(isActiveNotificationJob)
       .map((job) => ({ ...job, status: "canceled", error: "알림 제외", updatedAt: new Date().toISOString() }));
-    const replacedJobIds = new Set([...nextJobIds, ...canceledJobs.map((job) => job.notificationJobId)]);
-    setNotificationJobs((current) => [
-      ...nextJobs,
-      ...canceledJobs,
-      ...current.filter((job) => !replacedJobIds.has(job.notificationJobId))
-    ]);
+    setNotificationJobs((current) =>
+      mergeNotificationJobLists(current, [...nextJobs, ...canceledJobs])
+    );
     nextJobs.forEach((notificationJob) => {
       reserveLessonNotificationJob(notificationJob, "수업일지 학생별 예약 갱신").catch((error) => console.error(error));
     });

@@ -2,25 +2,6 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { mergeNotificationJobLists } from "../src/domains/notifications/notificationJobState.js";
 
-function applyExistingStudentNotificationJobMerge({
-  canceledJobs,
-  currentJobs,
-  nextJobs
-}) {
-  const nextJobIds = new Set(nextJobs.map((job) => job.notificationJobId));
-  const replacedJobIds = new Set([
-    ...nextJobIds,
-    ...canceledJobs.map((job) => job.notificationJobId)
-  ]);
-  return [
-    ...nextJobs,
-    ...canceledJobs,
-    ...currentJobs.filter(
-      (job) => !replacedJobIds.has(job.notificationJobId)
-    )
-  ];
-}
-
 const currentJobs = [
   {
     notificationJobId: "job_TARGET_NEXT",
@@ -72,29 +53,26 @@ const canceledJobs = [
 const currentSnapshot = structuredClone(currentJobs);
 const nextSnapshot = structuredClone(nextJobs);
 const canceledSnapshot = structuredClone(canceledJobs);
-const incomingJobs = [...nextJobs, ...canceledJobs];
 
-const existingResult = applyExistingStudentNotificationJobMerge({
-  canceledJobs,
-  currentJobs,
-  nextJobs
-});
-assert.deepEqual(existingResult, [
-  nextJobs[0],
-  nextJobs[1],
-  canceledJobs[0],
-  currentJobs[2],
-  currentJobs[3]
-]);
 assert.deepEqual(
-  mergeNotificationJobLists(currentJobs, incomingJobs),
-  existingResult
+  mergeNotificationJobLists(currentJobs, [...nextJobs, ...canceledJobs]),
+  [
+    nextJobs[0],
+    nextJobs[1],
+    canceledJobs[0],
+    currentJobs[2],
+    currentJobs[3]
+  ]
 );
 assert.deepEqual(currentJobs, currentSnapshot);
 assert.deepEqual(nextJobs, nextSnapshot);
 assert.deepEqual(canceledJobs, canceledSnapshot);
 
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const helperSource = await readFile(
+  new URL("../src/domains/notifications/notificationJobState.js", import.meta.url),
+  "utf8"
+);
 const functionStart = appSource.indexOf(
   "function refreshLessonNotificationJobsForRecord(record, lessonForRecord = null)"
 );
@@ -104,21 +82,25 @@ const functionEnd = appSource.indexOf(
 );
 assert.ok(functionStart >= 0 && functionEnd > functionStart);
 const functionSource = appSource.slice(functionStart, functionEnd);
-for (const existingBoundary of [
+
+for (const AppOwnedBoundary of [
   "const nextJobs = buildLessonNotificationJobs(lesson, [student], scheduledDate, planMode)",
   "const nextJobIds = new Set(nextJobs.map((job) => job.notificationJobId))",
   "job.lessonId === lesson.lessonId && job.studentId === student.studentId && !nextJobIds.has(job.notificationJobId)",
   ".filter(isActiveNotificationJob)",
   "updatedAt: new Date().toISOString()",
   "setNotificationJobs((current) =>",
-  "mergeNotificationJobLists(current, [...nextJobs, ...canceledJobs])"
+  "mergeNotificationJobLists(current, [...nextJobs, ...canceledJobs])",
+  'reserveLessonNotificationJob(notificationJob, "수업일지 학생별 예약 갱신")',
+  'persistCanceledNotificationJob(notificationJob, "알림 제외")'
 ]) {
   assert.ok(
-    functionSource.includes(existingBoundary),
-    `missing student notification merge boundary: ${existingBoundary}`
+    functionSource.includes(AppOwnedBoundary),
+    `student notification merge boundary moved from App: ${AppOwnedBoundary}`
   );
 }
 assert.ok(!functionSource.includes("const replacedJobIds = new Set("));
+assert.ok(!functionSource.includes("current.filter("));
 const setterIndex = functionSource.indexOf("setNotificationJobs((current) =>");
 const helperIndex = functionSource.indexOf(
   "mergeNotificationJobLists(current, [...nextJobs, ...canceledJobs])",
@@ -138,13 +120,24 @@ assert.ok(
     reserveIndex > helperIndex &&
     cancelIndex > reserveIndex
 );
-assert.equal(
-  appSource.split(
-    "mergeNotificationJobLists(current, [...nextJobs, ...canceledJobs])"
-  ).length - 1,
-  1
-);
+for (const forbiddenHelperEffect of [
+  "useState",
+  "useEffect",
+  "fetch(",
+  "postJson",
+  "/api/",
+  "new Date",
+  "Date.now",
+  "localStorage",
+  "setNotificationJobs",
+  "notification_jobs",
+  "Solapi",
+  "Promise.all"
+]) {
+  assert.ok(
+    !helperSource.includes(forbiddenHelperEffect),
+    `student notification merge reuse crossed a side effect: ${forbiddenHelperEffect}`
+  );
+}
 
-console.log(
-  "notification job student merge inventory TARGET/CONTROL fixtures passed"
-);
+console.log("notification job student merge TARGET/CONTROL fixtures passed");

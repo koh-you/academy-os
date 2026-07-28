@@ -1719,6 +1719,13 @@
 - AI 검수: 교체 TARGET, 취소 TARGET, incoming 중복, 같은 수업 다른 학생 CONTROL, 다른 수업 CONTROL로 기존 inline과 순수 helper 결과·입력 불변을 대조한다. setter→학생별 예약→취소 순서를 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 없음. 다음 `17S-2`는 새 helper를 만들지 않고 이 inline 계산만 기존 `mergeNotificationJobLists` 재사용으로 교체한다.
 
+## 2026-07-28 P2. App.jsx 17S-2 student notification job state merge helper 재사용
+
+- 코드: 학생 1명 예약 갱신의 `nextJobs + canceledJobs + 기존 ID filter` inline 계산을 `mergeNotificationJobLists(current, [...nextJobs, ...canceledJobs])` 재사용으로 교체했다. 새 helper나 새 외부 경계는 만들지 않았다.
+- 동작 보존: incoming 중복과 순서, 같은 수업 다른 학생 활성 row, 다른 수업 row를 보존하고 새·취소 ID의 기존 row만 제거한다. 학생/수업 대상 filter, 취소 row·`updatedAt`, React setter와 학생별 예약→취소 API/Solapi 순서는 App에 남는다.
+- AI 검수: 교체·취소 TARGET, 같은 수업 다른 학생 CONTROL, 다른 수업 CONTROL 가상 목록으로 helper 결과와 입력 불변을 검증하고 App의 inline Set/filter 제거와 실행 순서를 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 없음. 다음 `17S-3`은 재사용 호출 수와 학생별 예약·취소 side-effect 경계를 closeout한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

@@ -131,7 +131,7 @@ assert.equal(
   appSource.split(
     "const replacedJobIds = new Set([...nextJobIds, ...canceledJobs.map((job) => job.notificationJobId)])"
   ).length - 1,
-  1
+  0
 );
 assert.equal(
   appSource.split("mergeLessonNotificationJobLists({").length - 1,
