@@ -237,6 +237,7 @@ import {
   createLessonJournalHomeworkDraftKey,
   getLessonJournalHomeworkDraftTitle
 } from "../domains/lessons/lessonJournalHomeworkDraft.js";
+import { createLessonJournalHomeworkFollowupPlan } from "../domains/lessons/lessonJournalHomeworkFollowupPlan.js";
 import { saveLessonJournalMakeupTasksWithVerification } from "../domains/lessons/lessonJournalMakeupTaskBulkApi.js";
 import { createLessonJournalMakeupTaskRequests } from "../domains/lessons/lessonJournalMakeupTaskRequest.js";
 import { saveLessonJournalRecordsWithVerification } from "../domains/lessons/lessonJournalRecordBulkApi.js";
@@ -16230,55 +16231,28 @@ function LessonJournalDetail({
 
   function applyHomeworkFollowupMethod(student, baseRecord, previousHomework, method) {
     if (!journalEditMode || !previousHomework) return;
-    const homeworkTitle = previousHomework.title || previousHomework.sourceLabel || "지난 숙제";
-    const clearFollowupPatch = getHomeworkFollowupPatch(baseRecord);
-    const commonPatch = {
-      assignmentStatus: normalizeAssignmentStatusValue(baseRecord.assignmentStatus ?? baseRecord.incompleteHomework ?? ""),
-      incompleteHomework: normalizeAssignmentStatusValue(baseRecord.assignmentStatus ?? baseRecord.incompleteHomework ?? ""),
-      teacherCommentSendStatus: "",
-      studentCommentSendStatus: ""
-    };
+    const plan = createLessonJournalHomeworkFollowupPlan({
+      baseRecord,
+      getFollowupPatch: getHomeworkFollowupPatch,
+      lesson,
+      method,
+      normalizeAssignmentStatus: normalizeAssignmentStatusValue,
+      previousHomework,
+      student
+    });
 
-    if (method === "arrival_makeup") {
+    if (plan.makeupTask) {
       const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
-      const makeupTask = {
-        taskType: "homework_makeup",
-        studentId: student.studentId,
-        sourceId: previousHomework.homeworkId,
-        sourceHomeworkId: previousHomework.homeworkId,
-        sourceLessonId: previousHomework.lessonId || lesson.lessonId,
-        sourceDate: previousHomework.assignedDate || lesson.date,
-        sourceDueDate: previousHomework.dueDate || lesson.date,
-        sourceLabel: homeworkTitle,
-        reason: "등원보충 필요 숙제",
-        supplementHomeworkNote: homeworkTitle,
-        supplementMethod: "arrival_makeup"
-      };
-      setJournalMakeupTaskDrafts((current) => ({ ...current, [recordId]: makeupTask }));
-      updateJournalRecordDraftPatch(student, baseRecord, {
-        ...commonPatch,
-        needsMakeup: true,
-        ...clearFollowupPatch,
-        prepParentVisible: Boolean(clearFollowupPatch.preparationMemo && baseRecord.prepParentVisible),
-        prepStudentVisible: Boolean(clearFollowupPatch.preparationMemo && baseRecord.prepStudentVisible)
-      });
-      setJournalManualSaveMessage("수업일지 · 등원보충 초안 · 변경 저장 후 Supabase 반영");
-      return;
+      setJournalMakeupTaskDrafts((current) => ({
+        ...current,
+        [recordId]: plan.makeupTask
+      }));
+    } else if (plan.removeMakeupTask) {
+      removeJournalMakeupTaskDraft(student);
     }
 
-    removeJournalMakeupTaskDraft(student);
-    updateJournalRecordDraftPatch(student, baseRecord, {
-      ...commonPatch,
-      needsMakeup: false,
-      ...getHomeworkFollowupPatch(baseRecord, method, previousHomework),
-      prepParentVisible: true,
-      prepStudentVisible: true
-    });
-    setJournalManualSaveMessage(
-      method === "next_lesson"
-        ? "수업일지 · 다음 정규수업 확인 문구를 오늘 알림톡에 반영합니다."
-        : "수업일지 · 수업 후 보충 문구를 오늘 알림톡에 반영합니다."
-    );
+    updateJournalRecordDraftPatch(student, baseRecord, plan.recordPatch);
+    setJournalManualSaveMessage(plan.message);
   }
 
   function getHomeworkDraftKey(student, homeworkType) {
