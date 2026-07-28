@@ -1778,6 +1778,13 @@
 - AI 검수: 수업+history 우선순위, history 0건, active 가상 입력의 상태·문구·입력 불변을 재검증하고 App inline 문구 0건, helper의 네트워크·React·시각·Supabase·Solapi side effect 0건을 전용 closeout fixture·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 없음. 다음 `17W-1`은 `refreshNotificationJobs`의 lesson/history/active query parameter 계산을 inventory하고 실제 조회는 App에 유지한다.
 
+## 2026-07-28 P1. App.jsx 17W-1 notification job load query inventory
+
+- 결과: `lessonId`가 있으면 scope보다 우선해 `lessonId`→`limit=200`, 그 외 history는 `limit=300`과 선택 날짜의 KST 일 경계를 `scheduledFrom`/`scheduledTo`로 추가하고, active 및 예상 밖 scope는 `limit=300`→`status=draft,scheduled,failed,send_unconfirmed` 순서로 query를 만든다.
+- 외부 경계: silent loading guard, `getJsonWithTimeout`, timeout 문구, 결과 목록 반영, ready/failed 상태는 App에 유지한다. 실제 조회·운영 데이터·외부 발송은 실행하지 않았다.
+- AI 검수: 공백·슬래시가 있는 수업 ID+history 우선순위, 날짜 지정/미지정 history, active, 예상 밖 scope, 기본 인자를 가상 실행해 URL 인코딩과 parameter 순서·입력 불변을 전용 fixture·정적 시나리오·build·`git diff --check`로 대조한다.
+- 사람 gate: 없음. 다음 `17W-2`는 query string 계산만 순수 helper로 분리하고 실제 request와 React 상태는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
