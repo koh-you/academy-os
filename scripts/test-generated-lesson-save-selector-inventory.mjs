@@ -116,7 +116,7 @@ assert.equal(
 );
 for (const AppOwnedCaller of [
   "saveGeneratedLessonsFromPlan(generatedLessonPlan)",
-  "saveGeneratedLessonsFromPlan(generatedLessonPlan.filter(",
+  "selectGeneratedLessonPlanItemsByKey(",
   "saveGeneratedLessonsFromPlan(preExamLessonsToSync)"
 ]) {
   assert.ok(

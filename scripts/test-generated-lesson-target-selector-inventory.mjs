@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { selectGeneratedLessonPlanItemsByKey } from "../src/domains/lessons/generatedLessonTargetSelector.js";
 
 function selectExistingGeneratedLessonPlanItemsByKey(
   planItems = [],
@@ -56,10 +57,17 @@ const selected = selectExistingGeneratedLessonPlanItemsByKey(
   planItems,
   "generated_TARGET_SHARED"
 );
+const extractedSelected = selectGeneratedLessonPlanItemsByKey(
+  planItems,
+  "generated_TARGET_SHARED"
+);
 
 assert.deepEqual(selected, [firstTarget, secondTarget]);
+assert.deepEqual(extractedSelected, selected);
 assert.equal(selected[0], firstTarget);
 assert.equal(selected[1], secondTarget);
+assert.equal(extractedSelected[0], firstTarget);
+assert.equal(extractedSelected[1], secondTarget);
 assert.deepEqual(planItems, inputSnapshot);
 assert.deepEqual(
   selectExistingGeneratedLessonPlanItemsByKey(
@@ -93,8 +101,9 @@ const handlerSource = appSource.slice(handlerStart, handlerEnd);
 const boundaries = [
   "function handleApplyGeneratedLesson(generatedKey)",
   "saveGeneratedLessonsFromPlan(",
-  "generatedLessonPlan.filter(",
-  "(item) => item.generatedKey === generatedKey"
+  "selectGeneratedLessonPlanItemsByKey(",
+  "generatedLessonPlan,",
+  "generatedKey"
 ];
 let previousIndex = -1;
 for (const boundary of boundaries) {
@@ -113,9 +122,10 @@ assert.equal(
   1
 );
 assert.equal(
-  handlerSource.split("generatedLessonPlan.filter(").length - 1,
+  handlerSource.split("selectGeneratedLessonPlanItemsByKey(").length - 1,
   1
 );
+assert.ok(!handlerSource.includes("generatedLessonPlan.filter("));
 assert.ok(!handlerSource.includes("saveGeneratedLessons("));
 assert.ok(!handlerSource.includes("fetch("));
 assert.ok(!handlerSource.includes("/api/"));
