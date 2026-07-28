@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { selectGeneratedLessonsToSave } from "../src/domains/lessons/generatedLessonSaveSelector.js";
 
 function selectExistingGeneratedLessonsToSave(planItems = []) {
   return planItems
@@ -51,16 +52,27 @@ const planItems = [
 ];
 const inputSnapshot = structuredClone(planItems);
 const lessonsToSave = selectExistingGeneratedLessonsToSave(planItems);
+const extractedLessonsToSave = selectGeneratedLessonsToSave(planItems);
 
 assert.deepEqual(lessonsToSave, [createLesson, updateLesson]);
+assert.deepEqual(extractedLessonsToSave, lessonsToSave);
 assert.equal(lessonsToSave[0], createLesson);
 assert.equal(lessonsToSave[1], updateLesson);
+assert.equal(extractedLessonsToSave[0], createLesson);
+assert.equal(extractedLessonsToSave[1], updateLesson);
 assert.deepEqual(planItems, inputSnapshot);
 assert.deepEqual(selectExistingGeneratedLessonsToSave([]), []);
 assert.deepEqual(selectExistingGeneratedLessonsToSave(), []);
 
 const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
+  "utf8"
+);
+const helperSource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedLessonSaveSelector.js",
+    import.meta.url
+  ),
   "utf8"
 );
 const functionStart = appSource.indexOf(
@@ -73,9 +85,7 @@ const functionEnd = appSource.indexOf(
 assert.ok(functionStart >= 0 && functionEnd > functionStart);
 const functionSource = appSource.slice(functionStart, functionEnd);
 for (const selectorBoundary of [
-  "const lessonsToSave = planItems",
-  '.filter((item) => item.status === "create" || item.status === "update")',
-  ".map((item) => item.lesson)",
+  "const lessonsToSave = selectGeneratedLessonsToSave(planItems)",
   "saveGeneratedLessons(lessonsToSave)"
 ]) {
   assert.ok(
@@ -86,6 +96,19 @@ for (const selectorBoundary of [
 assert.ok(!functionSource.includes("postJsonWithTimeout("));
 assert.ok(!functionSource.includes("setLessons("));
 assert.ok(!functionSource.includes("setGeneratedLessonSaveStatus("));
+assert.ok(!functionSource.includes(".filter((item) => item.status"));
+assert.ok(!functionSource.includes(".map((item) => item.lesson)"));
+
+for (const helperRule of [
+  "export function selectGeneratedLessonsToSave(planItems = [])",
+  '.filter((item) => item.status === "create" || item.status === "update")',
+  ".map((item) => item.lesson)"
+]) {
+  assert.ok(
+    helperSource.includes(helperRule),
+    `missing extracted generated lesson selector rule: ${helperRule}`
+  );
+}
 
 assert.equal(
   appSource.split("saveGeneratedLessonsFromPlan(").length - 1,

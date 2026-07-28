@@ -95,6 +95,7 @@ import { createLessonNotificationJob } from "../domains/lessons/lessonNotificati
 import { createLessonNotificationJobBatch } from "../domains/lessons/lessonNotificationJobBatch.js";
 import { createLessonNotificationRecordStatusPayload } from "../domains/lessons/lessonNotificationRecordStatusPayload.js";
 import { createLessonNotificationRecordStatusRows } from "../domains/lessons/lessonNotificationRecordStatusRows.js";
+import { selectGeneratedLessonsToSave } from "../domains/lessons/generatedLessonSaveSelector.js";
 import {
   applySupplementScheduleNotificationsRequest,
   cancelActiveSupplementScheduleNoticesRequest,
@@ -6387,9 +6388,7 @@ export function App() {
   }
 
   function saveGeneratedLessonsFromPlan(planItems) {
-    const lessonsToSave = planItems
-      .filter((item) => item.status === "create" || item.status === "update")
-      .map((item) => item.lesson);
+    const lessonsToSave = selectGeneratedLessonsToSave(planItems);
     saveGeneratedLessons(lessonsToSave);
   }
 

@@ -189,9 +189,7 @@ const nextCandidateSource = appSource.slice(
   nextCandidateEnd
 );
 for (const candidateRule of [
-  "const lessonsToSave = planItems",
-  '.filter((item) => item.status === "create" || item.status === "update")',
-  ".map((item) => item.lesson)",
+  "const lessonsToSave = selectGeneratedLessonsToSave(planItems)",
   "saveGeneratedLessons(lessonsToSave)"
 ]) {
   assert.ok(

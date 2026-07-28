@@ -1854,6 +1854,12 @@
 - AI 가상검수: create TARGET→persisted CONTROL→update TARGET→suppressed/missing CONTROL을 섞어 TARGET 두 lesson만 원래 순서·참조로 선택되고 입력이 불변임을 확인한다. 빈 배열/default도 검증한다. 전용 inventory fixture와 시나리오 601/601, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AB-2`는 selector만 `generatedLessonSaveSelector.js`로 분리하고 `saveGeneratedLessons` 호출과 모든 저장 side effect는 App에 유지한다.
 
+## 2026-07-28 P3. App.jsx 17AB-2 generated lesson save selector extraction
+
+- 코드: `selectGeneratedLessonsToSave`를 lessons domain으로 분리하고 `saveGeneratedLessonsFromPlan`은 결과를 기존 `saveGeneratedLessons`에 전달한다. 전체/단건/재시도/preExam caller, optimistic lesson merge, 저장 상태와 20초 bulk request는 그대로 App 소유다.
+- AI 가상검수: create/update TARGET 순서·객체 참조·입력 불변·빈 입력을 재실행하고 App inline filter/map 0건, helper의 React·network·Storage·Supabase·Solapi side effect 0건을 대조한다. 전용 fixture와 시나리오 602/602, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AB-3`은 helper export/import/call 각 1개와 App-owned bulk save 경계를 closeout한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
