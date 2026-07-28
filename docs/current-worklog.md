@@ -1902,6 +1902,12 @@
 - AI 가상검수: TARGET/CONTROL 2건과 빈/default 입력의 세 상태 객체·배열 참조·정확한 문구·입력 불변을 재실행하고 helper side effect 0건 및 App async 순서를 대조한다. aggregate audit도 총 5개 순수 계산으로 갱신했다. 전용 fixture와 시나리오 609/609, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AE-3`은 상태 helper export 3개, import 1개, App call 각 1개와 setter/request 경계를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17AE-3 generated lesson save status boundary closeout
+
+- 완료: status module import 1개, export 3개, saving/saved/failed App call 각 1개와 setter 3곳을 고정했다. guard→optimistic merge→saving setter→20초 request→응답 merge→saved setter→catch→failed setter 순서를 closeout했다.
+- AI 검수: TARGET/CONTROL 참조와 세 문구를 재실행하고 App inline message/state 0건, status helper side effect 0건을 확인한다. 전용 closeout fixture와 시나리오 610/610, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AF-1`은 generated lesson save selector/state/status와 App-owned bulk request 경계를 최종 aggregate audit한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
