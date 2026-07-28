@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-28 P1. 16B-3 수동 출결 지각분 계산 helper 분리 — AI gate 통과
+
+- 코드: 수업 시작·등원 시각을 분 단위로 정규화하고 유예시간을 뺀 지각분을 계산하는 helper를 `attendanceModalModel.js`로 이동했다.
+- 가상 데이터: 19:00 수업의 19:04/19:10 등원, 5분/10분/잘못된 0분 유예, 수업 전 등원, invalid·빈 시각을 검사했다.
+- 경계: modal UI, API, 저장·알림 side effect는 변경하지 않았다.
+- 사람 gate: 없음. 순수 계산 위치 이동이다. 다음 16B-4는 주입형 `AttendanceModal` 컴포넌트 분리다.
+
 ## 2026-07-28 P1. 16B-2 수동 출결 modal 순수 판정 모델 분리 — AI gate 통과
 
 - 코드: 태블릿 출결 존재 판정, pending 출결의 수동 modal 초기 status, 저장값 변경 감지를 `src/domains/lessons/attendanceModalModel.js`로 이동했다.

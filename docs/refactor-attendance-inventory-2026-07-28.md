@@ -50,5 +50,6 @@
 
 - `16B-1` 완료: `attendanceSyncFields`와 `mergeRemoteAttendanceRecord`를 `attendanceSync.js` 순수 모델로 분리했다. 가상 remote/local record로 dirty/saving/failed 비출결 draft 보존과 saved/idle 전체 원격 반영을 검사한다.
 - `16B-2` 완료: 수동 출결 modal의 태블릿 기록 판정, 초기 status, ISO/시각 정규화 기반 변경 감지를 `attendanceModalModel.js`로 분리했다.
-- 다음 `16B-3`: 모달의 수업 시작·등원 시각·유예시간 기반 지각분 계산 helper를 같은 순수 모델로 이동한다.
+- `16B-3` 완료: 모달의 수업 시작·등원 시각·유예시간 기반 지각분 계산 helper를 같은 순수 모델로 이동하고 정상·지각·invalid 시각을 fixture로 고정했다.
+- 다음 `16B-4`: local state와 2단계 확인 UI, 주입 `onSave`만 소유하는 `AttendanceModal` 컴포넌트를 분리한다.
 - 실제 polling effect, API, React state, 출결 저장·알림톡은 App에 남긴다.

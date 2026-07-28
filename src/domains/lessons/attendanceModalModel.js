@@ -1,4 +1,33 @@
-import { formatKoreaTimeFromIso } from "./attendance.js";
+import {
+  formatKoreaTimeFromIso,
+  normalizeTimeInput
+} from "./attendance.js";
+
+function getAttendanceClockMinutes(value = "") {
+  const time = normalizeTimeInput(value);
+  if (!time) return null;
+  const [hour, minute] = time.split(":").map(Number);
+  return hour * 60 + minute;
+}
+
+export function calculateLateMinutesFromLessonTime(
+  lesson = {},
+  checkInTime = "",
+  graceMinutes = 5
+) {
+  const startMinutes = getAttendanceClockMinutes(lesson.startTime);
+  const checkInMinutes = getAttendanceClockMinutes(checkInTime);
+  if (startMinutes === null || checkInMinutes === null) return "";
+  const normalizedGraceMinutes = Number(graceMinutes);
+  return Math.max(
+    0,
+    checkInMinutes -
+      startMinutes -
+      (Number.isFinite(normalizedGraceMinutes) && normalizedGraceMinutes > 0
+        ? normalizedGraceMinutes
+        : 5)
+  );
+}
 
 export function hasTabletAttendanceRecord(record = {}) {
   return Boolean(

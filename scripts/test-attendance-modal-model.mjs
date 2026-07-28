@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import {
+  calculateLateMinutesFromLessonTime,
   getManualAttendanceInitialStatus,
   hasAttendanceModalChanges,
   hasTabletAttendanceRecord
@@ -10,6 +11,14 @@ const source = await readFile(
   new URL("../src/domains/lessons/attendanceModalModel.js", import.meta.url),
   "utf8"
 );
+
+assert.equal(calculateLateMinutesFromLessonTime({ startTime: "19:00" }, "19:04", 5), 0);
+assert.equal(calculateLateMinutesFromLessonTime({ startTime: "19:00" }, "19:10", 5), 5);
+assert.equal(calculateLateMinutesFromLessonTime({ startTime: "19:00" }, "19:10", 10), 0);
+assert.equal(calculateLateMinutesFromLessonTime({ startTime: "19:00" }, "18:50", 5), 0);
+assert.equal(calculateLateMinutesFromLessonTime({ startTime: "19:00" }, "19:10", 0), 5);
+assert.equal(calculateLateMinutesFromLessonTime({ startTime: "invalid" }, "19:10", 5), "");
+assert.equal(calculateLateMinutesFromLessonTime({ startTime: "19:00" }, "", 5), "");
 
 assert.equal(hasTabletAttendanceRecord({}), false);
 for (const record of [

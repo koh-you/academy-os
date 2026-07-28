@@ -210,6 +210,7 @@ import {
   normalizeTimeInput
 } from "../domains/lessons/attendance.js";
 import {
+  calculateLateMinutesFromLessonTime,
   getManualAttendanceInitialStatus,
   hasAttendanceModalChanges,
   hasTabletAttendanceRecord
@@ -570,21 +571,6 @@ function getActiveStudentIdsFromSelection(studentIds = [], students = []) {
   return sortStudentsByName(students
     .filter((student) => isActiveStudent(student) && selectedStudentIds.has(student.studentId)))
     .map((student) => student.studentId);
-}
-
-function getAttendanceClockMinutes(value = "") {
-  const time = normalizeTimeInput(value);
-  if (!time) return null;
-  const [hour, minute] = time.split(":").map(Number);
-  return hour * 60 + minute;
-}
-
-function calculateLateMinutesFromLessonTime(lesson = {}, checkInTime = "", graceMinutes = 5) {
-  const startMinutes = getAttendanceClockMinutes(lesson.startTime);
-  const checkInMinutes = getAttendanceClockMinutes(checkInTime);
-  if (startMinutes === null || checkInMinutes === null) return "";
-  const normalizedGraceMinutes = Number(graceMinutes);
-  return Math.max(0, checkInMinutes - startMinutes - (Number.isFinite(normalizedGraceMinutes) && normalizedGraceMinutes > 0 ? normalizedGraceMinutes : 5));
 }
 
 function formatAttendanceForMessage(recordOrPayload = {}) {
