@@ -54,6 +54,10 @@ const reservationModalModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalReservationModalModel.js", import.meta.url),
   "utf8"
 );
+const memoIndicatorModelSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalMemoIndicatorModel.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -323,6 +327,22 @@ for (const removedRawSolapiContract of ["onCancelSolapiGroup", "solapiGroups", "
   assert.ok(
     !reservationModalSource.includes(removedRawSolapiContract),
     `17B-5 must not restore raw Solapi audit: ${removedRawSolapiContract}`
+  );
+}
+assert.ok(
+  journalSource.includes("createLessonJournalMemoIndicatorModel({"),
+  "LessonJournalDetail must compose the extracted memo indicator model"
+);
+for (const extractedMemoIndicatorContract of [
+  "hasCurrentMemo",
+  "priorMemoNeedsAttention",
+  "현재 메모 작성됨",
+  "이전 메모 확인 완료",
+  "학생·학부모 작성창으로 가져오기"
+]) {
+  assert.ok(
+    memoIndicatorModelSource.includes(extractedMemoIndicatorContract),
+    `missing extracted 17C-1 contract: ${extractedMemoIndicatorContract}`
   );
 }
 

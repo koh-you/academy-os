@@ -229,6 +229,7 @@ import { LessonJournalClosureNotice } from "../domains/lessons/LessonJournalClos
 import { LessonJournalReminderPanel } from "../domains/lessons/LessonJournalReminderPanel.jsx";
 import { LessonJournalNotificationBar } from "../domains/lessons/LessonJournalNotificationBar.jsx";
 import { LessonJournalReservationModal } from "../domains/lessons/LessonJournalReservationModal.jsx";
+import { createLessonJournalMemoIndicatorModel } from "../domains/lessons/lessonJournalMemoIndicatorModel.js";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -16732,25 +16733,18 @@ function LessonJournalDetail({
             const pendingHomeworkFollowup = previousHomeworkFollowup?.method === "next_lesson"
               ? previousHomeworkFollowup
               : null;
-            const hasCheckedPriorPrepMemo = Boolean(previousMemoContext.acknowledgedMemoCutoffDate);
-            const hasCurrentMemo = Boolean(record.preparationMemo?.trim());
-            const priorMemoNeedsAttention = Boolean(previousPreparationMemo || referencePreparationMemo);
-            const priorMemoAttentionLabel = previousPreparationMemo ? "직전 메모 확인" : "참고 메모 확인";
-            const memoButtonDescription = [
-              hasCurrentMemo ? "현재 메모 작성됨" : "현재 메모 미작성",
+            const {
+              hasCurrentMemo,
+              memoButtonDescription,
               priorMemoNeedsAttention
-                ? priorMemoAttentionLabel
-                : hasCheckedPriorPrepMemo
-                  ? "이전 메모 확인 완료"
-                  : "이전 메모 없음",
-              record.prepStudentVisible && record.prepParentVisible
-                ? "학생·학부모 작성창으로 가져오기"
-                : record.prepStudentVisible
-                  ? "학생 작성창으로 가져오기"
-                  : record.prepParentVisible
-                    ? "학부모 작성창으로 가져오기"
-                    : "작성창 가져오기 안 함"
-            ].join(" · ");
+            } = createLessonJournalMemoIndicatorModel({
+              acknowledgedMemoCutoffDate: previousMemoContext.acknowledgedMemoCutoffDate,
+              preparationMemo: record.preparationMemo,
+              prepParentVisible: record.prepParentVisible,
+              prepStudentVisible: record.prepStudentVisible,
+              previousPreparationMemo,
+              referencePreparationMemo
+            });
             const parentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "parent");
             const studentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "student");
             const parentCommentState = getCommentButtonState(record.teacherComment, parentCommentSendStatus);
