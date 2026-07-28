@@ -98,6 +98,14 @@ const assignmentStatusCellModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalAssignmentStatusCellModel.js", import.meta.url),
   "utf8"
 );
+const notificationCommentCellSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalNotificationCommentCell.jsx", import.meta.url),
+  "utf8"
+);
+const notificationCommentCellModelSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalNotificationCommentCellModel.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -482,6 +490,30 @@ for (const extractedAssignmentStatusContract of [
   assert.ok(
     `${assignmentStatusCellSource}\n${assignmentStatusCellModelSource}`.includes(extractedAssignmentStatusContract),
     `missing extracted 17C-6 contract: ${extractedAssignmentStatusContract}`
+  );
+}
+assert.equal(
+  (journalSource.match(/<LessonJournalNotificationCommentCell/g) ?? []).length,
+  2,
+  "LessonJournalDetail must compose parent and student notification comment cells"
+);
+assert.ok(
+  !journalSource.includes('className="journalCommentCell"'),
+  "LessonJournalDetail must not retain notification comment cell markup"
+);
+for (const extractedNotificationCommentContract of [
+  "createLessonJournalNotificationCommentCellModel",
+  "onClick={onOpen}",
+  "onClick={onToggleMute}",
+  "muteButtonClassName",
+  "openButtonClassName",
+  "statusClassName"
+]) {
+  assert.ok(
+    `${notificationCommentCellSource}\n${notificationCommentCellModelSource}`.includes(
+      extractedNotificationCommentContract
+    ),
+    `missing extracted 17C-7 contract: ${extractedNotificationCommentContract}`
   );
 }
 

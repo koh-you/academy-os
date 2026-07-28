@@ -234,6 +234,7 @@ import { LessonJournalStudentIdentity } from "../domains/lessons/LessonJournalSt
 import { LessonJournalAttendanceButton } from "../domains/lessons/LessonJournalAttendanceButton.jsx";
 import { LessonJournalEditableFields } from "../domains/lessons/LessonJournalEditableFields.jsx";
 import { LessonJournalAssignmentStatusCell } from "../domains/lessons/LessonJournalAssignmentStatusCell.jsx";
+import { LessonJournalNotificationCommentCell } from "../domains/lessons/LessonJournalNotificationCommentCell.jsx";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -16696,8 +16697,6 @@ function LessonJournalDetail({
             const studentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "student");
             const parentCommentState = getCommentButtonState(record.teacherComment, parentCommentSendStatus);
             const studentCommentState = getCommentButtonState(record.studentComment, studentCommentSendStatus);
-            const isParentNotificationOff = isLessonNotificationOff || record.notificationMutedParent;
-            const isStudentNotificationOff = isLessonNotificationOff || record.notificationMutedStudent;
             const assignmentStatusValue = normalizeAssignmentStatusValue(record.assignmentStatus ?? record.incompleteHomework ?? "");
             const homeworkFollowupOptions = getHomeworkFollowupOptionsForAssignmentStatus(assignmentStatusValue);
             const selectedHomeworkFollowupMethod = getHomeworkFollowupMethodFromRecord(record);
@@ -16769,54 +16768,26 @@ function LessonJournalDetail({
                   previousHomeworkTitle={effectivePreviousHomework?.title}
                   selectedHomeworkFollowupMethod={selectedHomeworkFollowupMethod}
                 />
-                <div className="journalCommentCell">
-                  <button
-                    className={`commentOpenButton comment-${parentCommentState}${isParentNotificationOff ? " notification-off" : ""}`}
-                    onClick={() => openCommentComposer("parent", student, record, effectivePreviousHomework, effectiveNextHomework)}
-                    type="button"
-                  >
-                    학부모 알림톡
-                  </button>
-                  <small className={`commentStatusText comment-${parentCommentState}`}>
-                    {getCommentStatusLabel(record.teacherComment, parentCommentSendStatus)}
-                  </small>
-                  <button
-                    className={[
-                      "notificationMuteButton",
-                      record.notificationMutedParent ? "active" : "",
-                      isLessonNotificationOff && !record.notificationMutedParent ? "planOff" : ""
-                    ].filter(Boolean).join(" ")}
-                    onClick={() => onToggleStudentNotificationMute?.(lesson, student, "parent")}
-                    title={isLessonNotificationOff ? "현재 수업 발송 계획이 알림톡 없음입니다." : ""}
-                    type="button"
-                  >
-                    {record.notificationMutedParent ? "제외 해제" : "알림 제외"}
-                  </button>
-                </div>
-                <div className="journalCommentCell">
-                  <button
-                    className={`commentOpenButton comment-${studentCommentState}${isStudentNotificationOff ? " notification-off" : ""}`}
-                    onClick={() => openCommentComposer("student", student, record, effectivePreviousHomework, effectiveNextHomework)}
-                    type="button"
-                  >
-                    학생 알림톡
-                  </button>
-                  <small className={`commentStatusText comment-${studentCommentState}`}>
-                    {getCommentStatusLabel(record.studentComment, studentCommentSendStatus)}
-                  </small>
-                  <button
-                    className={[
-                      "notificationMuteButton",
-                      record.notificationMutedStudent ? "active" : "",
-                      isLessonNotificationOff && !record.notificationMutedStudent ? "planOff" : ""
-                    ].filter(Boolean).join(" ")}
-                    onClick={() => onToggleStudentNotificationMute?.(lesson, student, "student")}
-                    title={isLessonNotificationOff ? "현재 수업 발송 계획이 알림톡 없음입니다." : ""}
-                    type="button"
-                  >
-                    {record.notificationMutedStudent ? "제외 해제" : "알림 제외"}
-                  </button>
-                </div>
+                <LessonJournalNotificationCommentCell
+                  audienceLabel="학부모"
+                  commentState={parentCommentState}
+                  isLessonNotificationOff={isLessonNotificationOff}
+                  isNotificationMuted={record.notificationMutedParent}
+                  onOpen={() =>
+                    openCommentComposer("parent", student, record, effectivePreviousHomework, effectiveNextHomework)}
+                  onToggleMute={() => onToggleStudentNotificationMute?.(lesson, student, "parent")}
+                  statusLabel={getCommentStatusLabel(record.teacherComment, parentCommentSendStatus)}
+                />
+                <LessonJournalNotificationCommentCell
+                  audienceLabel="학생"
+                  commentState={studentCommentState}
+                  isLessonNotificationOff={isLessonNotificationOff}
+                  isNotificationMuted={record.notificationMutedStudent}
+                  onOpen={() =>
+                    openCommentComposer("student", student, record, effectivePreviousHomework, effectiveNextHomework)}
+                  onToggleMute={() => onToggleStudentNotificationMute?.(lesson, student, "student")}
+                  statusLabel={getCommentStatusLabel(record.studentComment, studentCommentSendStatus)}
+                />
               </div>
             );
           })}

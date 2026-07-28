@@ -60,9 +60,10 @@
 12. `17C-4` 완료: textarea 자동 높이·초점·키보드 blur와 읽기 전용 fallback을 가진 공통 `EditableMemoCard`를 `LessonJournalEditableMemoCard`로 분리했다.
 13. `17C-5` 완료: 교재·진도·지난/다음 숙제 네 입력을 App-owned record/homework draft callback만 받는 `LessonJournalEditableFields`로 묶었다.
 14. `17C-6` 완료: 과제 상태 select, 숙제보충 방법 버튼, 다음 수업 확인 숙제 표시를 기존 assignment/homework followup callback만 받는 `LessonJournalAssignmentStatusCell`로 분리했다.
-15. 다음: 학부모·학생 알림 상태·composer/알림 제외 callback을 controlled component로 분리
-16. 다중 원천 저장은 TARGET/CONTROL·부분 성공 fixture 뒤 주입형 controller로 분리
-17. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
+15. `17C-7` 완료: 학부모·학생 알림의 작성/발송 상태, 수업 계획·개별 제외 표시와 composer/알림 제외 callback을 `LessonJournalNotificationCommentCell`로 분리했다.
+16. 다음: 이미 분리된 학생 정보·메모·출결·편집·과제·알림 cell을 조합하는 학생 행 shell 경계를 검토
+17. 다중 원천 저장은 TARGET/CONTROL·부분 성공 fixture 뒤 주입형 controller로 분리
+18. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -74,7 +75,7 @@
 | 교재·진도 | record와 직전 수업 fallback | `journalRecordDrafts`, `editingMemoKey` | `17C-4~5` 표시·callback 분리 완료 |
 | 지난·다음 숙제 | `homeworks`, 연결 수업, homework draft | `journalHomeworkDrafts` | `17C-4~5` 표시·callback 분리 완료 |
 | 과제 상태·보충 | record 상태, 지난 숙제, 보충 방법·대기 확인 | record/homework/makeup task draft controller | `17C-6` 표시·선택 callback 분리 완료 |
-| 학부모·학생 알림 | 저장 문구, job status, 수업 계획·개별 제외 | composer open, notification mute callback | 예약·취소·발송을 이동하지 않음 |
+| 학부모·학생 알림 | 저장 문구, job status, 수업 계획·개별 제외 | composer open, notification mute callback | `17C-7` 표시·callback 분리 완료 |
 
 ## AI 자동검증과 사람 gate
 
@@ -92,6 +93,7 @@
 - `17C-4` gate: 가상 편집·초점 TARGET, 잠긴 빈 CONTROL, 공백 값 CONTROL로 input/read class·placeholder fallback을 판정하고 자동 높이·Escape/Ctrl+Enter blur·local callback 계약을 정적으로 검사한다.
 - `17C-5` gate: 가상 현재/직전 교재·진도와 지난/다음 숙제 TARGET, legacy 진도·학생 교재 fallback CONTROL로 네 field 순서·value·placeholder·aria label·record/homework callback 라우팅을 판정한다.
 - `17C-6` gate: 가상 편집 모드+지난 숙제+다음 수업 확인 TARGET, 읽기 모드+수업 후 보충 CONTROL, 지난 숙제 없음 CONTROL로 보충 버튼·선택 상태·확인 숙제 표시와 select aria label을 판정하고 상태 변경·보충 적용은 App callback에 유지되는지 검사한다.
+- `17C-7` gate: 가상 발송 완료, 작성됨, 실패, 수업 전체 알림 없음, 학생별 제외 조합으로 작성 버튼·상태·알림 제외 class/문구를 판정하고 composer 열기와 알림 제외 저장은 App callback에 유지되는지 검사한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
 - recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.
 - 학생 포털 실제 쓰기와 Solapi 특강 템플릿 검수는 사용자 지시로 목록에서 제거됐고, 교사 bearer/Storage 소유권 보안은 구현·배포 검증 완료다.
