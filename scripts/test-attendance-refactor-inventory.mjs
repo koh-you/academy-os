@@ -10,6 +10,10 @@ const attendanceSyncControllerSource = await readFile(
   new URL("../src/domains/lessons/attendanceSyncController.js", import.meta.url),
   "utf8"
 );
+const attendanceSyncHookSource = await readFile(
+  new URL("../src/domains/lessons/useAttendanceRecordSync.js", import.meta.url),
+  "utf8"
+);
 const manualAttendanceSaveControllerSource = await readFile(
   new URL("../src/domains/lessons/manualAttendanceSaveController.js", import.meta.url),
   "utf8"
@@ -27,11 +31,6 @@ function assertOrdered(source, values) {
   }
 }
 
-for (const request of [
-  "window.setInterval(syncAttendanceRecords, 7_000)"
-]) {
-  assert.ok(appSource.includes(request), `missing attendance client request: ${request}`);
-}
 assert.ok(
   attendanceSyncControllerSource.includes(
     '`/api/lesson-records?date=${encodeURIComponent(syncDate)}`'
@@ -43,16 +42,27 @@ for (const request of ['"/api/attendance/check"', '"/api/attendance/preview"']) 
 }
 
 assertOrdered(appSource, [
-  'import { syncAttendanceRecordsAction } from "../domains/lessons/attendanceSyncController.js"',
-  "async function syncAttendanceRecords()",
-  "syncAttendanceRecordsAction({",
-  "window.setInterval(syncAttendanceRecords, 7_000)"
+  'import { useAttendanceRecordSync } from "../domains/lessons/useAttendanceRecordSync.js"',
+  "useAttendanceRecordSync({"
 ]);
 assert.equal(
   appSource.includes("mergeRemoteAttendanceRecord("),
   false,
   "attendance sync merge and orchestration must stay outside App"
 );
+for (const lifecycleContract of [
+  "attendanceSyncIntervalMs = 7_000",
+  "async function syncAttendanceRecords()",
+  "syncAttendanceRecordsAction({",
+  "windowTarget.setInterval(",
+  'windowTarget.addEventListener("focus"',
+  'documentTarget.addEventListener("visibilitychange"'
+]) {
+  assert.ok(
+    attendanceSyncHookSource.includes(lifecycleContract),
+    `missing attendance sync lifecycle: ${lifecycleContract}`
+  );
+}
 
 assertOrdered(serverSource, [
   "async function handleAttendanceCheck(payload = {})",

@@ -9,6 +9,10 @@ const saveControllerSource = await readFile(
   new URL("../src/domains/lessons/lessonModalSaveController.js", import.meta.url),
   "utf8"
 );
+const attendanceSyncHookSource = await readFile(
+  new URL("../src/domains/lessons/useAttendanceRecordSync.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -101,7 +105,6 @@ for (const required of [
 }
 
 for (const reservedAppBoundary of [
-  "async function syncAttendanceRecords()",
   "async function handleAttendancePinPreview(",
   "async function handleAttendancePinCheck(",
   "function LessonJournalDetail("
@@ -111,6 +114,11 @@ for (const reservedAppBoundary of [
     `next roadmap boundary must remain in App: ${reservedAppBoundary}`
   );
 }
+assert.ok(
+  appSource.includes("useAttendanceRecordSync({") &&
+    attendanceSyncHookSource.includes("async function syncAttendanceRecords()"),
+  "attendance polling must remain connected through its extracted hook boundary"
+);
 
 for (const forbidden of [
   "/api/",

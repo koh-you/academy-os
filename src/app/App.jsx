@@ -216,7 +216,7 @@ import { AttendanceKiosk } from "../domains/lessons/AttendanceKiosk.jsx";
 import { checkKioskAttendanceAction } from "../domains/lessons/attendanceKioskCheckController.js";
 import { previewKioskAttendanceAction } from "../domains/lessons/attendanceKioskPreviewController.js";
 import { AttendanceModal } from "../domains/lessons/AttendanceModal.jsx";
-import { syncAttendanceRecordsAction } from "../domains/lessons/attendanceSyncController.js";
+import { useAttendanceRecordSync } from "../domains/lessons/useAttendanceRecordSync.js";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -6782,49 +6782,17 @@ export function App() {
     };
   }, [attendanceOnlyMode, isAppStateReady]);
 
-  useEffect(() => {
-    const shouldSyncTeacherLessonView = session?.role === "teacher" && activeView === "lessons";
-    if (!isAppStateReady || (!attendanceOnlyMode && !shouldSyncTeacherLessonView)) return undefined;
-    let disposed = false;
-    let inFlight = false;
-    const syncDate = attendanceOnlyMode ? getKoreaDateString() : selectedDate;
-
-    async function syncAttendanceRecords() {
-      if (disposed || inFlight || document.visibilityState === "hidden") return;
-      inFlight = true;
-      try {
-        await syncAttendanceRecordsAction({
-          getSaveState: (recordId) => saveStatesRef.current[recordId],
-          isDisposed: () => disposed,
-          onRecords: (updater) => {
-            setRecords((currentRecords) => {
-              const nextRecords = updater(currentRecords);
-              if (nextRecords !== currentRecords) {
-                recordsRef.current = nextRecords;
-              }
-              return nextRecords;
-            });
-          },
-          onStatus: setAttendanceSyncStatus,
-          request: getJsonWithTimeout,
-          syncDate
-        });
-      } finally {
-        inFlight = false;
-      }
-    }
-
-    syncAttendanceRecords();
-    const intervalId = window.setInterval(syncAttendanceRecords, 7_000);
-    window.addEventListener("focus", syncAttendanceRecords);
-    document.addEventListener("visibilitychange", syncAttendanceRecords);
-    return () => {
-      disposed = true;
-      window.clearInterval(intervalId);
-      window.removeEventListener("focus", syncAttendanceRecords);
-      document.removeEventListener("visibilitychange", syncAttendanceRecords);
-    };
-  }, [activeView, attendanceOnlyMode, isAppStateReady, selectedDate, session?.role, setRecords]);
+  useAttendanceRecordSync({
+    enabled:
+      isAppStateReady &&
+      (attendanceOnlyMode || (session?.role === "teacher" && activeView === "lessons")),
+    recordsRef,
+    request: getJsonWithTimeout,
+    saveStatesRef,
+    setRecords,
+    setStatus: setAttendanceSyncStatus,
+    syncDate: attendanceOnlyMode ? getKoreaDateString() : selectedDate
+  });
 
   async function handleLogin(role, loginId, password) {
     if (role === "teacher") {
