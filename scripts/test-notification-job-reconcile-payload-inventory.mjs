@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { createNotificationJobReconcilePayload } from "../src/domains/notifications/notificationJobReconcilePayload.js";
 
 function createExistingNotificationJobReconcilePayload({
   date = "",
@@ -29,6 +30,7 @@ const input = {
 };
 const inputSnapshot = structuredClone(input);
 const payload = createExistingNotificationJobReconcilePayload(input);
+const extractedPayload = createNotificationJobReconcilePayload(input);
 
 assert.deepEqual(payload, {
   date: "2026-07-28",
@@ -39,6 +41,8 @@ assert.deepEqual(payload, {
   limit: 500
 });
 assert.equal(payload.notificationJobIds, notificationJobIds);
+assert.deepEqual(extractedPayload, payload);
+assert.equal(extractedPayload.notificationJobIds, notificationJobIds);
 assert.deepEqual(input, inputSnapshot);
 assert.deepEqual(createExistingNotificationJobReconcilePayload(), {
   date: "",
@@ -50,6 +54,10 @@ assert.deepEqual(createExistingNotificationJobReconcilePayload(), {
 });
 
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const helperSource = await readFile(
+  new URL("../src/domains/notifications/notificationJobReconcilePayload.js", import.meta.url),
+  "utf8"
+);
 const functionStart = appSource.indexOf(
   'async function handleReconcileSolapiNotificationResults({ lessonId = "", date = "", notificationJobIds = [], scheduledFrom = "", scheduledTo = "" } = {})'
 );
@@ -62,7 +70,12 @@ const functionSource = appSource.slice(functionStart, functionEnd);
 for (const requestBoundary of [
   "const result = await postJsonWithTimeout(",
   '"/api/notification-jobs/reconcile-solapi"',
-  "{ date, lessonId, notificationJobIds, scheduledFrom, scheduledTo, limit: 500 }",
+  "createNotificationJobReconcilePayload({",
+  "date,",
+  "lessonId,",
+  "notificationJobIds,",
+  "scheduledFrom,",
+  "scheduledTo",
   "90000",
   '"Solapi 발송결과 조회가 90초를 넘었습니다. 예약 확인에서 다시 시도해 주세요."',
   "mergeNotificationJobsIntoState(result.notificationJobs ?? [])",
@@ -98,6 +111,25 @@ assert.equal(
   ).length - 1,
   3
 );
-assert.ok(!appSource.includes("createNotificationJobReconcilePayload"));
+for (const helperRule of [
+  "export function createNotificationJobReconcilePayload({",
+  'date = "",',
+  'lessonId = "",',
+  "notificationJobIds = [],",
+  'scheduledFrom = "",',
+  'scheduledTo = ""',
+  "return {",
+  "date,",
+  "lessonId,",
+  "notificationJobIds,",
+  "scheduledFrom,",
+  "scheduledTo,",
+  "limit: 500"
+]) {
+  assert.ok(
+    helperSource.includes(helperRule),
+    `missing reconcile payload helper rule: ${helperRule}`
+  );
+}
 
 console.log("notification job reconcile payload inventory fixtures passed");

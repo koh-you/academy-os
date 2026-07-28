@@ -72,6 +72,7 @@ import { ParentResponseContextPanel } from "../domains/notifications/ParentRespo
 import { getParentResponseContexts } from "../domains/notifications/parentResponseContext.js";
 import { createNotificationJobsQueryString } from "../domains/notifications/notificationJobLoadQuery.js";
 import { createNotificationJobsReadyStatus } from "../domains/notifications/notificationJobLoadStatus.js";
+import { createNotificationJobReconcilePayload } from "../domains/notifications/notificationJobReconcilePayload.js";
 import { formatNotificationJobStatusLabel } from "../domains/notifications/notificationJobStatusFormatter.js";
 import {
   canDeleteNotificationJobForDisplay,
@@ -6473,7 +6474,13 @@ export function App() {
   async function handleReconcileSolapiNotificationResults({ lessonId = "", date = "", notificationJobIds = [], scheduledFrom = "", scheduledTo = "" } = {}) {
     const result = await postJsonWithTimeout(
       "/api/notification-jobs/reconcile-solapi",
-      { date, lessonId, notificationJobIds, scheduledFrom, scheduledTo, limit: 500 },
+      createNotificationJobReconcilePayload({
+        date,
+        lessonId,
+        notificationJobIds,
+        scheduledFrom,
+        scheduledTo
+      }),
       90000,
       "Solapi 발송결과 조회가 90초를 넘었습니다. 예약 확인에서 다시 시도해 주세요."
     );

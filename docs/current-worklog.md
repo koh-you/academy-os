@@ -1811,6 +1811,13 @@
 - AI 검수: TARGET/CONTROL ID 배열, 전체 기간 필드, 추가 무시 필드와 기본 입력을 가상 실행해 정확한 payload·참조·입력 불변을 확인하고 request→job merge→record merge→return 순서를 전용 fixture·정적 시나리오·build·`git diff --check`로 대조한다.
 - 사람 gate: 없음. 다음 `17Y-2`는 6필드 payload 계산만 순수 helper로 분리하고 reconcile request·응답 효과는 App에 유지한다.
 
+## 2026-07-28 P2. App.jsx 17Y-2 notification job reconcile payload 분리
+
+- 코드: reconcile의 `date`·`lessonId`·`notificationJobIds`·`scheduledFrom`·`scheduledTo`·고정 `limit=500` payload를 `notificationJobReconcilePayload.js`의 `createNotificationJobReconcilePayload`로 분리했다.
+- 외부 경계: 90초 `postJsonWithTimeout`, 응답 job 병합, record reduce·React·localStorage·save state, 세 callback과 result 반환은 App에 유지했다. payload 필드·순서·ID 배열 참조는 기존과 같다.
+- AI 검수: 전체 TARGET/CONTROL 입력, 추가 필드, 기본값을 가상 실행해 payload·참조·입력 불변을 확인하고 helper side effect 0건 및 App request/response 순서를 전용 fixture·정적 시나리오·build·`git diff --check`로 대조한다.
+- 사람 gate: 없음. 다음 `17Y-3`은 payload helper export/import/call 수와 reconcile side-effect 경계를 closeout한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
