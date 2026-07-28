@@ -224,6 +224,7 @@ import { useAttendanceRecordSync } from "../domains/lessons/useAttendanceRecordS
 import { executeLessonJournalDraftPersistence } from "../domains/lessons/lessonJournalDraftPersistenceController.js";
 import { createLessonJournalDraftPersistencePlan } from "../domains/lessons/lessonJournalDraftPersistencePlan.js";
 import { createLessonJournalDraftSaveRequest } from "../domains/lessons/lessonJournalDraftSaveRequest.js";
+import { saveLessonJournalHomeworksWithVerification } from "../domains/lessons/lessonJournalHomeworkBulkApi.js";
 import { saveLessonJournalRecordsWithVerification } from "../domains/lessons/lessonJournalRecordBulkApi.js";
 import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
 import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
@@ -9070,35 +9071,6 @@ export function App() {
     return true;
   }
 
-  function getLessonJournalHomeworkSaveFingerprint(homework = {}) {
-    return JSON.stringify({
-      assignmentStatus: homework.assignmentStatus ?? "",
-      checkedAt: homework.checkedAt ?? "",
-      dueDate: homework.dueDate ?? "",
-      homeworkId: homework.homeworkId ?? "",
-      incompleteHomework: homework.incompleteHomework ?? "",
-      status: homework.status ?? "",
-      teacherStatus: homework.teacherStatus ?? "",
-      title: homework.title ?? ""
-    });
-  }
-
-  async function saveLessonJournalHomeworksWithVerification(homeworksToSave = []) {
-    if (!homeworksToSave.length) return [];
-    const verification = await postJson("/api/homeworks/bulk", { homeworks: homeworksToSave });
-    if (verification.source !== "supabase") {
-      throw new Error("숙제를 Supabase에서 다시 확인하지 못했습니다.");
-    }
-    const verifiedById = new Map((verification.homeworks ?? []).map((homework) => [homework.homeworkId, homework]));
-    return homeworksToSave.map((homework) => {
-      const verified = verifiedById.get(homework.homeworkId);
-      if (!verified || getLessonJournalHomeworkSaveFingerprint(verified) !== getLessonJournalHomeworkSaveFingerprint(homework)) {
-        throw new Error(`숙제 저장 후 Supabase 재조회 값이 일치하지 않습니다: ${homework.homeworkId}`);
-      }
-      return verified;
-    });
-  }
-
   async function saveLessonJournalMakeupTasksWithVerification(taskDrafts = []) {
     if (!taskDrafts.length) return [];
     const taskIdSeed = Date.now();
@@ -9172,7 +9144,10 @@ export function App() {
     return executeLessonJournalDraftPersistence({
       hasRecords: recordsToSave.length > 0,
       persistHomeworks: async () => {
-        const verifiedHomeworks = await saveLessonJournalHomeworksWithVerification(persistencePlan.changedHomeworks);
+        const verifiedHomeworks = await saveLessonJournalHomeworksWithVerification({
+          homeworks: persistencePlan.changedHomeworks,
+          request: postJson
+        });
         if (verifiedHomeworks.length) {
           const verifiedById = new Map(verifiedHomeworks.map((homework) => [homework.homeworkId, homework]));
           nextHomeworks = nextHomeworks.map((homework) => verifiedById.get(homework.homeworkId) ?? homework);

@@ -194,6 +194,10 @@ const recordBulkApiSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalRecordBulkApi.js", import.meta.url),
   "utf8"
 );
+const homeworkBulkApiSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalHomeworkBulkApi.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -302,7 +306,7 @@ const saveHandlerSource = section(
   "async function handleSaveLessonJournalDrafts",
   "async function handleSaveRecord"
 );
-const savePersistenceSource = `${saveHandlerSource}\n${draftSaveOutcomeSource}\n${draftPersistenceControllerSource}\n${recordBulkApiSource}`;
+const savePersistenceSource = `${saveHandlerSource}\n${draftSaveOutcomeSource}\n${draftPersistenceControllerSource}\n${recordBulkApiSource}\n${homeworkBulkApiSource}`;
 for (const persistenceContract of [
   "saveLessonJournalHomeworksWithVerification",
   "saveLessonJournalMakeupTasksWithVerification",
@@ -1034,6 +1038,36 @@ assert.ok(
     !recordBulkApiSource.includes("setRecords") &&
     !recordBulkApiSource.includes("setSaveStates"),
   "record bulk API adapter must not own React or local storage updates"
+);
+for (const extractedHomeworkBulkApiContract of [
+  "createLessonJournalHomeworkSaveFingerprint",
+  "saveLessonJournalHomeworksWithVerification",
+  'request("/api/homeworks/bulk", { homeworks })',
+  'verification.source !== "supabase"',
+  "return homeworks.map"
+]) {
+  assert.ok(
+    homeworkBulkApiSource.includes(extractedHomeworkBulkApiContract),
+    `missing extracted 17F-6 contract: ${extractedHomeworkBulkApiContract}`
+  );
+}
+for (const injectedHomeworkBulkApiContract of [
+  "saveLessonJournalHomeworksWithVerification({",
+  "homeworks: persistencePlan.changedHomeworks",
+  "request: postJson",
+  "homeworksRef.current = nextHomeworks",
+  "setHomeworks(nextHomeworks)"
+]) {
+  assert.ok(
+    saveHandlerSource.includes(injectedHomeworkBulkApiContract),
+    `missing App-owned 17F-6 binding: ${injectedHomeworkBulkApiContract}`
+  );
+}
+assert.ok(
+  !appSource.includes("function getLessonJournalHomeworkSaveFingerprint(") &&
+    !homeworkBulkApiSource.includes("setHomeworks") &&
+    !homeworkBulkApiSource.includes("localStorage"),
+  "homework bulk API adapter must own fingerprint verification without App state"
 );
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");
