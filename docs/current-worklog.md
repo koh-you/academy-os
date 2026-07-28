@@ -1706,6 +1706,12 @@
 - AI 검수: 새 TARGET 중복·취소 TARGET·stale 활성·같은 수업 종료 CONTROL·다른 수업 활성 CONTROL의 기존 inline 결과와 helper 결과를 대조하고 두 호출 경계를 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 없음. 다음 `17R-3`은 helper export/import/call 수와 두 예약·취소 orchestration 경계를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17R-3 lesson notification job state merge boundary closeout
+
+- 완료: `mergeLessonNotificationJobLists` export 1개, notification state 모듈 import 1개, App 호출 2개를 고정하고 기본/지연 계획의 setter→상태→예약→취소 및 수동 시각 예약의 setter→예약→취소→상태 순서를 closeout했다.
+- AI 검수: 중복 TARGET, stale 활성, 같은 수업 종료 CONTROL, 다른 수업 활성 CONTROL 가상 목록으로 병합·입력 불변을 재검증하고 helper의 React·시각·API·Supabase·Solapi side effect 0건을 전용 closeout fixture·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 없음. 다음 `17S-1`은 학생 1명 예약 갱신의 더 단순한 `nextJobs + canceledJobs + ID filter` 상태 계산을 inventory한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
