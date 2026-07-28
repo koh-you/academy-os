@@ -1848,6 +1848,12 @@
 - AI 검수: payload ID 배열 참조, TARGET record 교체·신규 추가·CONTROL 참조 보존, 입력 불변, 전체 effect 순서와 helper side effect 0건을 전용 aggregate audit·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 없음. reconcile 경계는 완료했다. 다음 `17AB-1`은 바로 앞의 `saveGeneratedLessonsFromPlan`에서 `create`/`update` plan item만 lesson으로 고르는 순수 selector를 inventory하며 실제 `/api/lessons/bulk` 저장과 React 상태는 이동하지 않는다.
 
+## 2026-07-28 P3. App.jsx 17AB-1 generated lesson save selector inventory
+
+- inventory: `saveGeneratedLessonsFromPlan`이 plan 순서를 유지하면서 `status === "create" || "update"`인 item의 lesson 참조만 고르는 계약을 고정했다. 전체 적용·단건 적용·재시도·preExam 자동 동기화의 App caller와 실제 optimistic merge, 저장 상태, `/api/lessons/bulk` 요청은 이동하지 않는다.
+- AI 가상검수: create TARGET→persisted CONTROL→update TARGET→suppressed/missing CONTROL을 섞어 TARGET 두 lesson만 원래 순서·참조로 선택되고 입력이 불변임을 확인한다. 빈 배열/default도 검증한다. 전용 inventory fixture와 시나리오 601/601, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AB-2`는 selector만 `generatedLessonSaveSelector.js`로 분리하고 `saveGeneratedLessons` 호출과 모든 저장 side effect는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
