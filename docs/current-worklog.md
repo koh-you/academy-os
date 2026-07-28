@@ -1335,6 +1335,13 @@
 - AI 가상검수: 직전 메모 TARGET, 반 이동 참고 메모 TARGET, 확인 완료 CONTROL, 빈 CONTROL로 원천 우선순위·숨김·확인 가능·표시 문구를 대조한다. 전용 fixture, 수업일지 inventory, build, diff check와 현재 rebase 중간 scenario 기준선을 통과한 뒤 커밋을 재적용한다. 전체 production 검증은 rebase 완료 뒤 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위는 preparation memo의 표시 JSX를 callback-only view로 분리하는 작업이다.
 
+## 2026-07-28 P1. App.jsx 17D-5 준비메모 callback-only view 분리
+
+- 코드: 준비메모 modal의 이전 메모·확인 완료·빈 상태, 강사용 draft, 학생/학부모 작성창 공개 flag, 저장 상태 JSX를 `LessonJournalPreparationMemoView.jsx`로 분리했다.
+- 경계: local state, snapshot 비교, 확인 저장, 실패 복구, 저장 후 닫기와 `onSaveRecord` 호출은 계속 `App.jsx`가 소유하고 view는 전달받은 callback만 호출한다. API·Supabase·알림/Solapi 실행은 0건이다.
+- AI 가상검수: 직전 메모 TARGET과 확인 완료 CONTROL을 재사용하고 세 입력 callback 라우팅, 확인 callback, 저장 disabled·문구·오류 표시, 기존 DOM 순서를 대조한다. 전용 fixture, 수업일지 inventory, build, diff check와 현재 rebase 중간 scenario 기준선을 통과한 뒤 커밋을 재적용한다. 전체 production 검증은 rebase 완료 뒤 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위는 comment composer의 audience·예약 계획·안전 상태 계산 순수 view model이다.
+
 ## 2026-07-28 P1. App.jsx 17D-2 수업일지 학생 표 shell 분리
 
 - 코드: 수업일지 학생 표의 panel, 읽기/편집 class, 학생·메모·출결·교재·진도·숙제·과제·알림톡 10개 고정 열 제목을 `lessonJournalTableModel.js`와 `LessonJournalTable.jsx`로 분리했다.

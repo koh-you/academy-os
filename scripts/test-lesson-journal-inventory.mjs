@@ -142,6 +142,10 @@ const preparationMemoModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalPreparationMemoModel.js", import.meta.url),
   "utf8"
 );
+const preparationMemoViewSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalPreparationMemoView.jsx", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -671,6 +675,28 @@ for (const extractedPreparationMemoContract of [
   assert.ok(
     preparationMemoModelSource.includes(extractedPreparationMemoContract),
     `missing extracted 17D-4 contract: ${extractedPreparationMemoContract}`
+  );
+}
+assert.ok(
+  journalSource.includes("<LessonJournalPreparationMemoView"),
+  "PreparationMemoModal must compose the extracted callback-only view"
+);
+assert.ok(
+  !journalSource.includes('className="prepMemoColumns"'),
+  "PreparationMemoModal must not retain the preparation memo view markup"
+);
+for (const extractedPreparationMemoViewContract of [
+  "LessonJournalPreparationMemoView",
+  "hasCheckedPriorMemo && !visiblePriorMemo",
+  'onUpdateDraft("preparationMemo", event.target.value)',
+  'onUpdateDraft("prepStudentVisible", event.target.checked)',
+  'onUpdateDraft("prepParentVisible", event.target.checked)',
+  "onCheckPriorMemo()",
+  "onClick={onSave}"
+]) {
+  assert.ok(
+    preparationMemoViewSource.includes(extractedPreparationMemoViewContract),
+    `missing extracted 17D-5 contract: ${extractedPreparationMemoViewContract}`
   );
 }
 
