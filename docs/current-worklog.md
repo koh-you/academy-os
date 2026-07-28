@@ -1491,6 +1491,13 @@
 - AI 검수: 13개 가상 응답 형태와 null/undefined/빈 CONTROL, 모든 경로가 함께 있는 우선순위 TARGET을 실행해 반환값·입력 불변을 대조한다. 전용 fixture·정적 시나리오·build·diff 검사를 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17J-6`은 lesson 예약 payload fingerprint 정규화·직렬화를 순수 모델로 분리하고 실제 예약 비교/반영 action은 App에 유지한다.
 
+## 2026-07-28 P1. App.jsx 17J-6 lesson 예약 payload fingerprint 분리
+
+- 코드: 예약 동일성 판단에 쓰는 20개 payload 필드, nullish legacy fallback, message/phone 정규화, 예약시각 UTC ISO 정규화와 JSON 직렬화를 `lessonReservationPayloadFingerprint.js`로 분리했다.
+- 보존 경계: App의 기존 message/phone normalizer를 주입하며 유효한 명시 예약시각만 UTC ISO로 바꾼다. 이 함수는 예약 job을 생성·조회·변경하지 않고 예상 payload와 저장 job의 비교용 문자열만 반환한다.
+- AI 검수: 전체 가상 TARGET payload, legacy reason/message·학부모 번호·잘못된 날짜 CONTROL, 빈 payload를 실행해 20개 필드 순서·nullish fallback·normalizer 호출 순서·입력 불변을 대조한다. 전용 fixture·정적 시나리오·build·diff 검사를 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17J-7`은 lesson 예약 payload snapshot 조합을 helper 주입형 순수 builder로 분리하고 실제 예약 action은 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

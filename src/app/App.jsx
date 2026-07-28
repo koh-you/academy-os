@@ -69,6 +69,7 @@ import {
   getNotificationJobProviderReferenceForDisplay
 } from "../domains/notifications/notificationJobDisplaySelectors.js";
 import { getNotificationProviderReference } from "../domains/notifications/notificationProviderReference.js";
+import { createLessonReservationPayloadFingerprint } from "../domains/lessons/lessonReservationPayloadFingerprint.js";
 import {
   applySupplementScheduleNotificationsRequest,
   cancelActiveSupplementScheduleNoticesRequest,
@@ -1162,32 +1163,10 @@ function buildLessonReservationPayloadSnapshot({
 }
 
 function getLessonReservationPayloadFingerprint(payload = {}) {
-  const scheduledDateSource = String(payload.scheduledDate ?? "").trim();
-  const scheduledDateTimestamp = Date.parse(scheduledDateSource);
-  const normalizedScheduledDate = scheduledDateSource && Number.isFinite(scheduledDateTimestamp)
-    ? new Date(scheduledDateTimestamp).toISOString()
-    : scheduledDateSource;
-  return JSON.stringify({
-    assignmentStatus: String(payload.assignmentStatus ?? ""),
-    attendanceReason: String(payload.attendanceReason ?? payload.reason ?? ""),
-    attendanceStatus: String(payload.attendanceStatus ?? ""),
-    checkInTime: String(payload.checkInTime ?? ""),
-    checkOutTime: String(payload.checkOutTime ?? ""),
-    commentBodyOverride: normalizeMessageText(payload.commentBodyOverride ?? payload.message ?? ""),
-    homeworkFollowupNotice: normalizeMessageText(payload.homeworkFollowupNotice ?? ""),
-    lateMinutes: String(payload.lateMinutes ?? ""),
-    lessonContent: normalizeMessageText(payload.lessonContent ?? ""),
-    lessonMaterial: normalizeMessageText(payload.lessonMaterial ?? ""),
-    nextHomework: normalizeMessageText(payload.nextHomework ?? ""),
-    preparationNotice: normalizeMessageText(payload.preparationNotice ?? ""),
-    previousHomework: normalizeMessageText(payload.previousHomework ?? ""),
-    recipient: normalizePhoneNumber(payload.recipient ?? (payload.target === "student" ? payload.studentPhone : payload.parentPhone) ?? ""),
-    scheduledDate: normalizedScheduledDate,
-    scheduleMode: String(payload.scheduleMode ?? ""),
-    studentId: String(payload.studentId ?? ""),
-    supplementSchedule: normalizeMessageText(payload.supplementSchedule ?? ""),
-    testResult: normalizeMessageText(payload.testResult ?? ""),
-    target: String(payload.target ?? "")
+  return createLessonReservationPayloadFingerprint({
+    normalizeMessage: normalizeMessageText,
+    normalizePhone: normalizePhoneNumber,
+    payload
   });
 }
 
