@@ -31,7 +31,8 @@
 - `15F-2` 완료: 신규 수업·선택형 휴강 보충 payload를 `lessonModalPayloadBuilders.js`로 이동했다. App은 ID·학생·요일·색상 의존성을 계산해 주입한다.
 - `15F-3` 완료: preflight와 학생 명단 확정은 App에 유지하고, 수정 수업·선택형 휴강 보충 payload 조립만 순수 builder로 이동했다. 최신 원천의 teacher·특강 metadata와 기존 topic/source/status 보존을 fixture로 고정했다.
 - `15F-4` 완료: 저장 재조회 뒤 expected/persisted lesson의 ID·snapshot 대조와 누락/불일치 오류를 `lessonModalSaveVerification.js` 순수 모델로 분리했다.
-- 다음 고위험 단위: 남은 POST/GET/state orchestration을 이동하려면 명단에서 제외되는 격리 학생의 알림 job 취소·수업기록 삭제와 유지 학생 보존을 실제 원천에서 대조하는 사람 gate가 필요하다.
+- `15F-5` 완료: 운영 원천 대신 메모리 가상 TARGET/CONTROL lesson·record·job을 생성해 TARGET 발송 전 job 취소·record 삭제와 CONTROL/sent/다른 수업 보존을 서버 필터 계약과 대조했다.
+- 다음 단위: 15F-6에서 POST/GET을 주입받는 controller를 분리하고, React state 적용은 App callback에 유지한다.
 - 실제 POST/GET orchestration, closure preflight, React state 교체, 제외 학생 알림·기록 정리는 별도 fixture와 사람 gate가 정해질 때까지 App/API 경계에 둔다.
 
 ## Gate

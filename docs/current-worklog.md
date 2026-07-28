@@ -1442,12 +1442,19 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-28 P1. 15F-5 수업 명단 제거 TARGET/CONTROL 가상 gate — AI 자동검증 통과
+
+- 가상 데이터: 메모리 격리 수업에 TARGET/CONTROL, 두 학생의 수업기록, TARGET의 `scheduled`·`queued`·`pending_send`·`sent` job, CONTROL 예약, 다른 수업의 TARGET 기록·예약을 생성했다.
+- 결과: TARGET 제거 뒤 TARGET의 발송 전 3개 job만 canceled, 해당 수업 TARGET record만 삭제됐다. CONTROL record/job, TARGET sent 이력, 다른 수업 TARGET record/job은 보존됐다.
+- 코드 대조: 가상 실행 조건을 `api/routes/coreData.js`의 실제 pending status, allowed student filter, bulk 저장 후 cleanup 호출과 정적으로 대조했다.
+- 외부 side effect: 운영 Supabase·Solapi 호출 0건. 사람 gate 없이 통과 처리하며 다음 15F-6 주입형 POST/GET controller 분리로 진행한다.
+
 ## 2026-07-28 P1. 15F-4 수업 modal 저장 재조회 검증 모델 분리 — AI gate 통과
 
 - 코드: expected lesson 순서대로 persisted row를 찾고 snapshot 일치 여부를 판정하는 `src/domains/lessons/lessonModalSaveVerification.js`를 분리했다.
 - 동작 보존: 누락 시 `저장 후 수업일지를 찾지 못했습니다`, 값 차이 시 `저장 후 Supabase 값이 일치하지 않습니다` 오류를 그대로 유지하고, 성공 시 실제 persisted row를 expected 순서로 반환한다.
 - 자동검증: 서버 전용 추가 필드·시간 표기·학생 순서가 달라도 통과하고, ID 누락·저장 필드 차이는 정확한 반 이름과 함께 실패하는 fixture를 추가했다.
-- 사람 gate: 이번 순수 모델 이동에는 없음. 다만 15F의 다음 실제 POST/GET orchestration 이동은 서버에서 제외 학생 알림 취소·수업기록 삭제를 유발하므로 격리 명단 제거/유지 사람 gate 전에는 진행하지 않는다.
+- 사람 gate: 없음. 다음 경계는 15F-5 가상 TARGET/CONTROL gate로 자동검증한다.
 
 ## 2026-07-28 P1. 15F-3 기존 수업 수정 payload builder 분리 — AI gate 통과
 
