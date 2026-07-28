@@ -46,6 +46,14 @@ const notificationBarModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalNotificationBarModel.js", import.meta.url),
   "utf8"
 );
+const reservationModalSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalReservationModal.jsx", import.meta.url),
+  "utf8"
+);
+const reservationModalModelSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalReservationModalModel.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -288,6 +296,33 @@ for (const extractedNotificationBarContract of [
   assert.ok(
     `${notificationBarSource}\n${notificationBarModelSource}`.includes(extractedNotificationBarContract),
     `missing extracted 17B-4 contract: ${extractedNotificationBarContract}`
+  );
+}
+assert.ok(
+  journalSource.includes("<LessonJournalReservationModal"),
+  "LessonJournalDetail must compose the extracted reservation modal"
+);
+assert.ok(
+  !journalSource.includes('className="reservationSummaryGrid"'),
+  "LessonJournalDetail must not retain the reservation modal markup"
+);
+for (const extractedReservationModalContract of [
+  "createLessonJournalReservationModalModel",
+  "onCancelReservationJob(job)",
+  "onClick={onRefreshReservationAudit}",
+  "onClick={onRefreshSolapiSendResults}",
+  "onClick={onScheduleTodayTwoPm}",
+  "DataTableShell"
+]) {
+  assert.ok(
+    `${reservationModalSource}\n${reservationModalModelSource}`.includes(extractedReservationModalContract),
+    `missing extracted 17B-5 contract: ${extractedReservationModalContract}`
+  );
+}
+for (const removedRawSolapiContract of ["onCancelSolapiGroup", "solapiGroups", "solapiMessages"]) {
+  assert.ok(
+    !reservationModalSource.includes(removedRawSolapiContract),
+    `17B-5 must not restore raw Solapi audit: ${removedRawSolapiContract}`
   );
 }
 

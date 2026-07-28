@@ -228,6 +228,7 @@ import { LessonJournalHeader } from "../domains/lessons/LessonJournalHeader.jsx"
 import { LessonJournalClosureNotice } from "../domains/lessons/LessonJournalClosureNotice.jsx";
 import { LessonJournalReminderPanel } from "../domains/lessons/LessonJournalReminderPanel.jsx";
 import { LessonJournalNotificationBar } from "../domains/lessons/LessonJournalNotificationBar.jsx";
+import { LessonJournalReservationModal } from "../domains/lessons/LessonJournalReservationModal.jsx";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -16573,47 +16574,6 @@ function LessonJournalDetail({
     }
   }
 
-  function toggleReservationInspectMode(mode) {
-    setReservationInspectMode((current) => current === mode ? "all" : mode);
-  }
-
-  function renderReservationSummaryButton(mode, label, count) {
-    const active = reservationInspectMode === mode;
-    return (
-      <MetricCard
-        active={active}
-        className="reservationSummaryCard"
-        density="compact"
-        label={label}
-        onClick={() => toggleReservationInspectMode(mode)}
-        tone={mode === "issues" ? "warning" : "default"}
-        value={`${count}건`}
-      />
-    );
-  }
-
-  function renderReservationStatusCell(job, isMuted = false) {
-    if (isMuted) return <span className="reservationStatusCell muted">알림 제외</span>;
-    const providerReference = getSolapiNotificationJobProviderReference(job);
-    return (
-      <span className="reservationStatusCell">
-        <small className="reservationStatusSource">Academy OS 상태</small>
-        <span>{formatNotificationJobStatus(job)}</span>
-        {providerReference ? <small>Solapi 그룹 · {providerReference}</small> : null}
-        {canCancelNotificationJob(job) ? (
-          <button
-            className="dangerSoftButton compact"
-            disabled={cancelingReservationJobId === job.notificationJobId}
-            onClick={() => cancelReservationJob(job)}
-            type="button"
-          >
-            {cancelingReservationJobId === job.notificationJobId ? "취소 중" : "취소"}
-          </button>
-        ) : null}
-      </span>
-    );
-  }
-
   function getEffectiveCommentSendStatus(record, student, target) {
     const jobStatus = formatNotificationJobStatus(getStudentReservationStatus(student, target));
     if (jobStatus && jobStatus !== "없음") return jobStatus;
@@ -16677,114 +16637,39 @@ function LessonJournalDetail({
       />
 
       {reservationModalOpen ? (
-        <Modal
-          className="reservationStatusModal"
-          title="알림톡 예약 확인"
-          subtitle={`${lesson.date} · ${lesson.className}`}
+        <LessonJournalReservationModal
+          auditedLessonNotificationJobs={auditedLessonNotificationJobs}
+          canceledJobCount={canceledJobCount}
+          cancelingReservationJobId={cancelingReservationJobId}
+          canRefreshSolapiResults={canRefreshSolapiResults}
+          canScheduleTodayTwoPm={canScheduleTodayTwoPm}
+          createEmptyRecord={createEmptyRecord}
+          failedJobCount={failedJobCount}
+          findLessonStudentRecord={findLessonStudentRecord}
+          formatNotificationJobStatus={formatNotificationJobStatus}
+          getNotificationJobProviderReference={getSolapiNotificationJobProviderReference}
+          getStudentReservationStatus={getStudentReservationStatus}
+          hasSolapiResultRefreshTarget={hasSolapiResultRefreshTarget}
+          issueReservationJobs={issueReservationJobs}
+          lesson={lesson}
+          onCancelReservationJob={cancelReservationJob}
           onClose={() => setReservationModalOpen(false)}
-        >
-          <div className="reservationSummaryGrid">
-            {renderReservationSummaryButton("parentScheduled", "OS 학부모 예약", scheduledParentCount)}
-            {renderReservationSummaryButton("studentScheduled", "OS 학생 예약", scheduledStudentCount)}
-            {renderReservationSummaryButton("issues", "취소/실패", canceledJobCount + failedJobCount)}
-          </div>
-          <div className="reservationModalActions">
-            <span>{reservationAudit.message || "예약 기준: Academy OS 예약 기록"}</span>
-            <button
-              className="softButton compact"
-              disabled={reservationAudit.state === "loading"}
-              onClick={refreshReservationAudit}
-              type="button"
-            >
-              {reservationAudit.state === "loading" ? "조회 중" : "OS 새로고침"}
-            </button>
-            {hasSolapiResultRefreshTarget ? (
-              <button
-                className="softButton compact"
-                disabled={!canRefreshSolapiResults}
-                onClick={refreshSolapiSendResults}
-                type="button"
-              >
-                {solapiResultRefreshState === "loading" ? "확인 중" : "솔라피 발송결과"}
-              </button>
-            ) : null}
-            {reservationInspectMode !== "all" ? (
-              <button className="softButton compact" onClick={() => setReservationInspectMode("all")} type="button">
-                전체 보기
-              </button>
-            ) : null}
-            {canScheduleTodayTwoPm ? (
-              <button
-                className="sendButton"
-                onClick={() => onScheduleLessonNotificationsAt?.(lesson.lessonId, todayTwoPmIso)}
-                type="button"
-              >
-                오늘 14:00 일괄예약
-              </button>
-            ) : null}
-          </div>
-          {orphanScheduledJobs.length ? (
-            <div className="reservationWarningBox">
-              <strong>명단 밖 예약 {orphanScheduledJobs.length}건</strong>
-              <span>현재 수업일지 명단에 없는 학생 예약입니다. 확인 후 취소하세요.</span>
-              {orphanScheduledJobs.map((job) => (
-                <button
-                  className="dangerSoftButton compact"
-                  disabled={cancelingReservationJobId === job.notificationJobId}
-                  key={job.notificationJobId}
-                  onClick={() => cancelReservationJob(job)}
-                  type="button"
-                >
-                  {job.payload?.studentName || job.studentId} · {getNotificationJobLabel(job.notificationType)} 취소
-                </button>
-              ))}
-            </div>
-          ) : null}
-          <div className="reservationInspectHeader">
-            <strong>{reservationInspectLabels[reservationInspectMode] ?? "전체 예약"}</strong>
-            <span>OS 예약 {auditedLessonNotificationJobs.length}건</span>
-          </div>
-          <DataTableShell className="reservationStatusTable" label="학생별 알림 예약 상태">
-            <div className="reservationStatusRow head">
-              <span>학생</span>
-              <span>학부모</span>
-              <span>학생</span>
-            </div>
-            {visibleReservationStudents.length ? visibleReservationStudents.map((student) => {
-              const record = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
-              const parentJob = getStudentReservationStatus(student, "parent");
-              const studentJob = getStudentReservationStatus(student, "student");
-              return (
-                <div className="reservationStatusRow" key={student.studentId}>
-                  <strong>{student.name}</strong>
-                  {renderReservationStatusCell(parentJob, record.notificationMutedParent)}
-                  {renderReservationStatusCell(studentJob, record.notificationMutedStudent)}
-                </div>
-              );
-            }) : (
-              <EmptyState as="p" className="emptyState compact">해당 조건의 학생 예약이 없습니다.</EmptyState>
-            )}
-          </DataTableShell>
-          {shouldShowIssueAudit ? (
-            <section className="reservationIssueList">
-              <div className="reservationAuditHeader">
-                <strong>OS 취소/실패</strong>
-                <span>{issueReservationJobs.length}건</span>
-              </div>
-              <div className="reservationAuditList">
-                {issueReservationJobs.length ? issueReservationJobs.map((job) => (
-                  <article key={job.notificationJobId}>
-                    <strong>{job.payload?.studentName || students.find((student) => student.studentId === job.studentId)?.name || job.studentId || "학생"}</strong>
-                    <span>{getNotificationJobLabel(job.notificationType)} · {formatNotificationJobStatus(job)}</span>
-                    <small>{job.notificationJobId}</small>
-                  </article>
-                )) : (
-                  <EmptyState as="p" className="emptyState compact">취소/실패한 OS 예약이 없습니다.</EmptyState>
-                )}
-              </div>
-            </section>
-          ) : null}
-        </Modal>
+          onRefreshReservationAudit={refreshReservationAudit}
+          onRefreshSolapiSendResults={refreshSolapiSendResults}
+          onScheduleTodayTwoPm={() => onScheduleLessonNotificationsAt?.(lesson.lessonId, todayTwoPmIso)}
+          onSetReservationInspectMode={setReservationInspectMode}
+          orphanScheduledJobs={orphanScheduledJobs}
+          records={records}
+          reservationAudit={reservationAudit}
+          reservationInspectLabels={reservationInspectLabels}
+          reservationInspectMode={reservationInspectMode}
+          scheduledParentCount={scheduledParentCount}
+          scheduledStudentCount={scheduledStudentCount}
+          shouldShowIssueAudit={shouldShowIssueAudit}
+          solapiResultRefreshState={solapiResultRefreshState}
+          students={students}
+          visibleReservationStudents={visibleReservationStudents}
+        />
       ) : null}
 
       <section className="panel journalTablePanel">

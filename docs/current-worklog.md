@@ -1333,6 +1333,12 @@
 - UI: 점멸 보고가 있던 수업일지 달력 상단의 월 이동, 수업 종류 필터, 출결 동기화 상태, 수업 등록·월 정규수업 열기 버튼 줄을 숨겼다. 달력과 기존 수업 카드는 그대로 표시한다.
 - 원천/부작용: CSS 표시만 변경하며 수업, 출결, 필터 상태, 알림/Solapi 원천을 읽거나 저장하지 않는다.
 - AI 검증: `npm run build`, `git diff --check`를 실행한다. 실제 달력에서 상단 제어줄이 사라지고 수업 카드가 계속 보이는지 확인한다.
+## 2026-07-28 P1. App.jsx 17B-5 수업일지 예약 확인 모달 표시 shell 분리
+
+- 코드: 수업일지 예약 확인 모달의 요약 카드, 학생·학부모 OS 작업 상태, 명단 밖 예약과 취소/실패 이력을 `lessonJournalReservationModalModel.js`와 `LessonJournalReservationModal.jsx`로 분리했다.
+- 경계: 모달은 계산된 OS audit 결과와 callback만 받는다. OS 원천 조회, 오늘 14시 예약, OS 작업 취소, Solapi 발송 결과 반영 함수와 React 상태는 계속 `App.jsx`가 소유한다. 최신 main에서 제거된 원시 Solapi 그룹·메시지 조회와 그룹 취소 UI는 복원하지 않았다.
+- AI 가상검수: TARGET 학부모 예약 2건·학생 예약 1건·취소/실패 3건과 CONTROL loading·예약 0건을 대조했다. 전용 fixture, 수업일지 inventory, build, diff check를 통과했고 production scenario는 rebase 중 기준 10건 외 추가 실패가 없다.
+- 사람 gate: 0건. 완료한 11B 실제 예약·취소를 반복하지 않으며 다음 의미 단위는 학생별 수업일지 행의 표시·local draft callback 경계 inventory다.
 
 ## 2026-07-28 P1. App.jsx 17B-4 수업일지 발송 상태·예약 설정 bar 분리
 
