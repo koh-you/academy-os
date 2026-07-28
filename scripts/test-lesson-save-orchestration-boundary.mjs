@@ -44,9 +44,10 @@ assertOrdered(saveBoundary, [
 
 const addBoundary = section(appSource, "async function handleAddLesson", "async function handleUpdateLesson");
 for (const value of [
-  "const lessonsToSave = [lesson]",
-  "if (closureMakeupLessonId)",
-  "lessonsToSave.push({",
+  "const lessonsToSave = buildNewLessonModalLessons({",
+  "resolveDayKey: getDayKey",
+  "resolveLessonColor: getStandardLessonColor",
+  "const [lesson] = lessonsToSave",
   "const verifiedLessons = await saveLessonModalLessons(lessonsToSave, onProgress)"
 ]) {
   assert.ok(addBoundary.includes(value), `missing add contract: ${value}`);

@@ -28,7 +28,8 @@
 ## 다음 안전 단위
 
 - `15F-1` 완료: `getLessonModalSaveSnapshot`을 순수 도메인 helper로 이동하고 시간·명단·일정 key 순서의 동일성과 저장 필드 불일치를 fixture로 고정했다.
-- `15F-2` 후보: 생성·휴강 보충 payload 조립을 순수 builder로 분리한다.
+- `15F-2` 완료: 신규 수업·선택형 휴강 보충 payload를 `lessonModalPayloadBuilders.js`로 이동했다. App은 ID·학생·요일·색상 의존성을 계산해 주입한다.
+- `15F-3` 후보: 기존 수업 수정 payload의 보존 필드, 비활성 과거 학생, 휴강 전환 결과를 먼저 fixture로 고정한다.
 - 실제 POST/GET orchestration, closure preflight, React state 교체, 제외 학생 알림·기록 정리는 별도 fixture와 사람 gate가 정해질 때까지 App/API 경계에 둔다.
 
 ## Gate
