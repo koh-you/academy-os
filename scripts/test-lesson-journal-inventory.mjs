@@ -30,6 +30,14 @@ const closureNoticeModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalClosureNoticeModel.js", import.meta.url),
   "utf8"
 );
+const reminderPanelSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalReminderPanel.jsx", import.meta.url),
+  "utf8"
+);
+const reminderPanelModelSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalReminderPanelModel.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -232,6 +240,25 @@ for (const extractedClosureContract of [
   assert.ok(
     `${closureNoticeSource}\n${closureNoticeModelSource}`.includes(extractedClosureContract),
     `missing extracted 17B-2 contract: ${extractedClosureContract}`
+  );
+}
+assert.ok(
+  journalSource.includes("<LessonJournalReminderPanel"),
+  "LessonJournalDetail must compose the extracted reminder panel"
+);
+assert.ok(
+  !journalSource.includes('<section className="panel lessonReminderPanel">'),
+  "LessonJournalDetail must not retain the reminder panel shell"
+);
+for (const extractedReminderContract of [
+  "createLessonJournalReminderPanelModel",
+  "수업 관련 운영 알림",
+  "대시보드 원본 알림 중 오늘 수업 학생과 연결된 항목입니다.",
+  "{children}"
+]) {
+  assert.ok(
+    `${reminderPanelSource}\n${reminderPanelModelSource}`.includes(extractedReminderContract),
+    `missing extracted 17B-3 contract: ${extractedReminderContract}`
   );
 }
 

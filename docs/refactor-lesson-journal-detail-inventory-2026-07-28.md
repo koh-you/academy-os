@@ -51,9 +51,10 @@
 3. `17A-3` 완료: 이전 준비메모의 같은 반 직전 record, 반 이동 fallback, 확인 완료 cutoff, 최근 참고 record 선택을 `lessonJournalPreviousMemoSelector.js` 순수 selector로 분리했다.
 4. `17B-1` 완료: 수업명·일시·학생 수·주제와 뒤로가기/시험대비/수정/취소 callback만 갖는 상단 `LessonJournalHeader` controlled component를 분리했다.
 5. `17B-2` 완료: 휴강·휴강 보충의 설명, 연결 보충/원 휴강 표시와 알림 미발송 안내를 `LessonJournalClosureNotice` 표시 component로 분리했다.
-6. 다음: 운영 알림처럼 읽기 전용 표시 panel을 한 단위씩 분리
-7. 다중 원천 저장은 TARGET/CONTROL·부분 성공 fixture 뒤 주입형 controller로 분리
-8. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
+6. `17B-3` 완료: 현재 수업 관련 운영 알림의 표시 조건·제목·설명·count와 기존 읽기 전용 목록 child를 `LessonJournalReminderPanel` shell로 분리했다.
+7. 다음: 발송 상태·예약 설정 action bar를 side-effect callback만 주입하는 controlled component로 분리
+8. 다중 원천 저장은 TARGET/CONTROL·부분 성공 fixture 뒤 주입형 controller로 분리
+9. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## AI 자동검증과 사람 gate
 
@@ -62,6 +63,7 @@
 - `17A-3` gate: 가상 TARGET/CONTROL 수업·학생·record로 같은 반 직전 메모, 확인 완료 cutoff, 최근 참고 메모, 정규 반 이동 fallback, 특강 격리, 취소·휴강 제외, `allRecords` 우선 원천을 판정한다.
 - `17B-1` gate: 가상 lesson의 수업명·날짜·시간·학생 수·주제 fallback과 `NavigationHeader` 접근성 경계를 판정하고, extracted header가 기존 4개 callback에만 연결되는지 정적으로 검사한다.
 - `17B-2` gate: 일반 수업 숨김, 휴강의 연결 보충 있음/없음, 휴강 보충의 원 휴강 있음/없음 5개 가상 상태와 display-only 경계를 판정한다.
+- `17B-3` gate: 가상 운영 알림 0건/2건의 숨김·count를 판정하고, 기존 `AcademyReminderList`가 children으로 그대로 연결되며 shell은 `SectionHeader`와 읽기 전용 표시만 소유하는지 검사한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
 - recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.
 - 학생 포털 실제 쓰기와 Solapi 특강 템플릿 검수는 사용자 지시로 목록에서 제거됐고, 교사 bearer/Storage 소유권 보안은 구현·배포 검증 완료다.

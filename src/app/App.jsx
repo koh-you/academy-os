@@ -226,6 +226,7 @@ import { createLessonJournalReservationAuditModel } from "../domains/lessons/les
 import { selectPreviousLessonMemoContext } from "../domains/lessons/lessonJournalPreviousMemoSelector.js";
 import { LessonJournalHeader } from "../domains/lessons/LessonJournalHeader.jsx";
 import { LessonJournalClosureNotice } from "../domains/lessons/LessonJournalClosureNotice.jsx";
+import { LessonJournalReminderPanel } from "../domains/lessons/LessonJournalReminderPanel.jsx";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -16639,18 +16640,9 @@ function LessonJournalDetail({
         linkedClosureMakeupLesson={linkedClosureMakeupLesson}
       />
 
-      {lessonAcademyReminders.length > 0 ? (
-        <section className="panel lessonReminderPanel">
-          <SectionHeader
-            density="slim"
-            description="대시보드 원본 알림 중 오늘 수업 학생과 연결된 항목입니다."
-            meta={<span className="countBadge">{lessonAcademyReminders.length}건</span>}
-            title="수업 관련 운영 알림"
-            titleAs="strong"
-          />
-          <AcademyReminderList reminders={lessonAcademyReminders} students={students} templates={templates} />
-        </section>
-      ) : null}
+      <LessonJournalReminderPanel reminderCount={lessonAcademyReminders.length}>
+        <AcademyReminderList reminders={lessonAcademyReminders} students={students} templates={templates} />
+      </LessonJournalReminderPanel>
 
       <section className="panel lessonSaveSummary" aria-label="발송 상태와 작업">
         <div aria-label="알림톡 상태" className="lessonNotificationStatusRow" role="region" tabIndex={0}>
