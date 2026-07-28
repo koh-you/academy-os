@@ -1872,6 +1872,12 @@
 - AI 가상검수: 기존 TARGET 두 번 patch, 신규 TARGET 추가 후 재patch, CONTROL 위치·참조 보존, 입력 불변, 빈 입력에서도 새 배열과 기존 원소 참조 보존을 확인한다. 전용 inventory fixture와 시나리오 604/604, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AC-2`는 목록 계산만 `generatedLessonState.js`로 분리하고 `setLessons` callback 및 bulk 저장 효과는 App에 유지한다.
 
+## 2026-07-28 P3. App.jsx 17AC-2 generated lesson state merge extraction
+
+- 코드: ID 기준 merge/append 계산을 `mergeGeneratedLessonLists`로 분리하고 `mergeGeneratedLessonsIntoState`의 `setLessons` callback은 App에 유지했다. 저장 요청 전 optimistic 반영과 서버 응답 lessons 반영 모두 같은 기존 wrapper를 사용한다.
+- AI 가상검수: 기존/신규 TARGET 반복 patch, CONTROL 위치·참조, 필드 누적, 입력 불변, 빈 입력의 새 배열 계약을 재실행하고 helper side effect 0건 및 App setter/저장 경계를 대조한다. 전용 fixture와 시나리오 605/605, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AC-3`은 helper export/import/call 수와 optimistic/server-result 두 적용 경계를 closeout한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

@@ -96,6 +96,7 @@ import { createLessonNotificationJobBatch } from "../domains/lessons/lessonNotif
 import { createLessonNotificationRecordStatusPayload } from "../domains/lessons/lessonNotificationRecordStatusPayload.js";
 import { createLessonNotificationRecordStatusRows } from "../domains/lessons/lessonNotificationRecordStatusRows.js";
 import { selectGeneratedLessonsToSave } from "../domains/lessons/generatedLessonSaveSelector.js";
+import { mergeGeneratedLessonLists } from "../domains/lessons/generatedLessonState.js";
 import {
   applySupplementScheduleNotificationsRequest,
   cancelActiveSupplementScheduleNoticesRequest,
@@ -6342,15 +6343,7 @@ export function App() {
   }
 
   function mergeGeneratedLessonsIntoState(lessonsToSave) {
-    setLessons((current) => {
-      const next = [...current];
-      lessonsToSave.forEach((lesson) => {
-        const index = next.findIndex((item) => item.lessonId === lesson.lessonId);
-        if (index >= 0) next[index] = { ...next[index], ...lesson };
-        else next.push(lesson);
-      });
-      return next;
-    });
+    setLessons((current) => mergeGeneratedLessonLists(current, lessonsToSave));
   }
 
   function saveGeneratedLessons(lessonsToSave) {

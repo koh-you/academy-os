@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { mergeGeneratedLessonLists } from "../src/domains/lessons/generatedLessonState.js";
 
 function mergeExistingGeneratedLessonLists(
   currentLessons = [],
@@ -58,6 +59,10 @@ const nextLessons = mergeExistingGeneratedLessonLists(
   currentLessons,
   lessonsToSave
 );
+const extractedNextLessons = mergeGeneratedLessonLists(
+  currentLessons,
+  lessonsToSave
+);
 
 assert.deepEqual(nextLessons, [
   {
@@ -76,7 +81,10 @@ assert.deepEqual(nextLessons, [
   }
 ]);
 assert.notEqual(nextLessons, currentLessons);
+assert.deepEqual(extractedNextLessons, nextLessons);
+assert.notEqual(extractedNextLessons, currentLessons);
 assert.equal(nextLessons[1], currentControl);
+assert.equal(extractedNextLessons[1], currentControl);
 assert.deepEqual(currentLessons, currentSnapshot);
 assert.deepEqual(lessonsToSave, saveSnapshot);
 const emptyResult = mergeExistingGeneratedLessonLists(currentLessons, []);
@@ -89,6 +97,13 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
+const helperSource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedLessonState.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const functionStart = appSource.indexOf(
   "function mergeGeneratedLessonsIntoState(lessonsToSave)"
 );
@@ -99,13 +114,7 @@ const functionEnd = appSource.indexOf(
 assert.ok(functionStart >= 0 && functionEnd > functionStart);
 const functionSource = appSource.slice(functionStart, functionEnd);
 for (const mergeBoundary of [
-  "setLessons((current) => {",
-  "const next = [...current]",
-  "lessonsToSave.forEach((lesson) => {",
-  "const index = next.findIndex((item) => item.lessonId === lesson.lessonId)",
-  "if (index >= 0) next[index] = { ...next[index], ...lesson }",
-  "else next.push(lesson)",
-  "return next"
+  "setLessons((current) => mergeGeneratedLessonLists(current, lessonsToSave))"
 ]) {
   assert.ok(
     functionSource.includes(mergeBoundary),
@@ -114,6 +123,22 @@ for (const mergeBoundary of [
 }
 assert.ok(!functionSource.includes("postJsonWithTimeout("));
 assert.ok(!functionSource.includes("setGeneratedLessonSaveStatus("));
+assert.ok(!functionSource.includes("lessonsToSave.forEach("));
+for (const helperRule of [
+  "export function mergeGeneratedLessonLists(",
+  "const nextLessons = [...currentLessons]",
+  "lessonsToSave.forEach((lesson) => {",
+  "const index = nextLessons.findIndex(",
+  "(item) => item.lessonId === lesson.lessonId",
+  "nextLessons[index] = { ...nextLessons[index], ...lesson }",
+  "nextLessons.push(lesson)",
+  "return nextLessons"
+]) {
+  assert.ok(
+    helperSource.includes(helperRule),
+    `missing extracted generated lesson merge rule: ${helperRule}`
+  );
+}
 assert.equal(
   appSource.split("mergeGeneratedLessonsIntoState(").length - 1,
   3
