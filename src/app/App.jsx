@@ -222,6 +222,7 @@ import {
 } from "../domains/lessons/attendanceSettings.js";
 import { useAttendanceRecordSync } from "../domains/lessons/useAttendanceRecordSync.js";
 import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
+import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -16023,26 +16024,24 @@ function LessonJournalDetail({
     ? (Array.isArray(lessons) ? lessons : []).find((item) => item.sourceLabel === `연결 휴강 보충 · ${lesson.lessonId}`)
     : null;
   const lessonAcademyReminders = getAcademyRemindersForLesson(academyReminders, lesson, lessonStudents);
-  const lessonStudentIdSet = new Set(lessonStudents.map((student) => student.studentId));
-  const scheduledParentCount = auditedLessonNotificationJobs.filter((job) => job.notificationType === "parent_comment" && job.status === "scheduled").length;
-  const scheduledStudentCount = auditedLessonNotificationJobs.filter((job) => job.notificationType === "student_comment" && job.status === "scheduled").length;
-  const sentParentCount = auditedLessonNotificationJobs.filter((job) => job.notificationType === "parent_comment" && job.status === "sent").length;
-  const sentStudentCount = auditedLessonNotificationJobs.filter((job) => job.notificationType === "student_comment" && job.status === "sent").length;
-  const canceledJobCount = auditedLessonNotificationJobs.filter((job) => job.status === "canceled").length;
-  const failedJobCount = auditedLessonNotificationJobs.filter((job) => job.status === "failed").length;
-  const orphanScheduledJobs = auditedLessonNotificationJobs
-    .filter((job) => canCancelNotificationJob(job) && job.studentId && !lessonStudentIdSet.has(job.studentId))
-    .sort(sortNotificationJobsForCurrentStatus);
-  const issueReservationJobs = auditedLessonNotificationJobs
-    .filter((job) => job.status === "canceled" || job.status === "failed")
-    .sort(sortNotificationJobsForCurrentStatus);
-  const reservationInspectLabels = {
-    all: "전체 예약",
-    issues: "취소/실패",
-    parentScheduled: "OS 학부모 예약",
-    studentScheduled: "OS 학생 예약"
-  };
-  const shouldShowIssueAudit = reservationInspectMode === "issues";
+  const {
+    canceledJobCount,
+    failedJobCount,
+    getStudentReservationStatus,
+    issueReservationJobs,
+    orphanScheduledJobs,
+    reservationInspectLabels,
+    scheduledParentCount,
+    scheduledStudentCount,
+    sentParentCount,
+    sentStudentCount,
+    shouldShowIssueAudit,
+    visibleReservationStudents
+  } = createLessonJournalReservationAuditModel({
+    auditedJobs: auditedLessonNotificationJobs,
+    lessonStudents,
+    reservationInspectMode
+  });
   const lessonRecordSaveStates = lessonStudents
     .map((student) => saveStates[createLessonStudentRecordId(lesson.lessonId, student.studentId)])
     .filter(Boolean);
@@ -16456,13 +16455,6 @@ function LessonJournalDetail({
     };
   }
 
-  function getStudentReservationStatus(student, target) {
-    const notificationType = target === "student" ? "student_comment" : "parent_comment";
-    return auditedLessonNotificationJobs
-      .filter((job) => job.studentId === student.studentId && job.notificationType === notificationType)
-      .sort(sortNotificationJobsForCurrentStatus)[0] ?? null;
-  }
-
   function getEditableRecord(recordId, baseRecord) {
     return journalRecordDrafts[recordId] ?? baseRecord;
   }
@@ -16661,22 +16653,6 @@ function LessonJournalDetail({
 
   function toggleReservationInspectMode(mode) {
     setReservationInspectMode((current) => current === mode ? "all" : mode);
-  }
-
-  function hasReservationIssue(job) {
-    return job?.status === "canceled" || job?.status === "failed";
-  }
-
-  function getVisibleReservationStudents() {
-    if (reservationInspectMode === "all") return lessonStudents;
-    return lessonStudents.filter((student) => {
-      const parentJob = getStudentReservationStatus(student, "parent");
-      const studentJob = getStudentReservationStatus(student, "student");
-      if (reservationInspectMode === "parentScheduled") return parentJob?.status === "scheduled";
-      if (reservationInspectMode === "studentScheduled") return studentJob?.status === "scheduled";
-      if (reservationInspectMode === "issues") return hasReservationIssue(parentJob) || hasReservationIssue(studentJob);
-      return true;
-    });
   }
 
   function renderReservationSummaryButton(mode, label, count) {
@@ -16926,7 +16902,7 @@ function LessonJournalDetail({
               <span>학부모</span>
               <span>학생</span>
             </div>
-            {getVisibleReservationStudents().length ? getVisibleReservationStudents().map((student) => {
+            {visibleReservationStudents.length ? visibleReservationStudents.map((student) => {
               const record = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
               const parentJob = getStudentReservationStatus(student, "parent");
               const studentJob = getStudentReservationStatus(student, "student");

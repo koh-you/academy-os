@@ -6,6 +6,10 @@ const saveViewModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalSaveViewModel.js", import.meta.url),
   "utf8"
 );
+const reservationAuditModelSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalReservationAuditModel.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -136,15 +140,31 @@ for (const extractedSaveContract of [
   );
 }
 
-for (const reservedNextUnit of [
-  "const lessonStudentIdSet = new Set",
-  "const scheduledParentCount =",
-  "const issueReservationJobs =",
-  "const reservationInspectLabels =",
-  "function getStudentReservationStatus(",
-  "function getVisibleReservationStudents()"
+for (const extractedReservationContract of [
+  "scheduledParentCount",
+  "scheduledStudentCount",
+  "orphanScheduledJobs",
+  "issueReservationJobs",
+  "visibleReservationStudents",
+  "reservationInspectMode === \"issues\""
 ]) {
-  assert.ok(journalSource.includes(reservedNextUnit), `missing 17A-2 source: ${reservedNextUnit}`);
+  assert.ok(
+    reservationAuditModelSource.includes(extractedReservationContract),
+    `missing extracted 17A-2 contract: ${extractedReservationContract}`
+  );
+}
+assert.ok(
+  journalSource.includes("createLessonJournalReservationAuditModel({"),
+  "LessonJournalDetail must compose the extracted reservation audit model"
+);
+
+for (const reservedNextUnit of [
+  "function getPreviousLessonMemoContext(student)",
+  "const acknowledgedMemoCutoff =",
+  "const previousLessonRecordInCurrentGroup =",
+  "const referenceMemoRecord ="
+]) {
+  assert.ok(journalSource.includes(reservedNextUnit), `missing 17A-3 source: ${reservedNextUnit}`);
 }
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");

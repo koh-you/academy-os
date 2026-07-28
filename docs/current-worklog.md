@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-28 P1. 17A-2 수업일지 예약 audit 표시 모델 분리 — AI gate 통과
+
+- 코드: OS job의 학생/학부모 scheduled·sent와 canceled·failed count, 명단 밖 취소 가능 job, 현재 학생별 job 우선순위와 all/parent/student/issues 학생 필터를 `lessonJournalReservationAuditModel.js`로 이동했다.
+- 가상 데이터: TARGET/CONTROL 학생과 명단 밖 job, scheduled/sent/failed/canceled 상태를 만들고 all/parent/student/issues/unknown 모드 결과를 대조했다. 최신 main에서 제거된 Solapi 원시 group/message 표시 계산은 모듈에 넣지 않았다.
+- 경계: OS 예약 audit 표시 계산만 이동했다. OS 조회·job 취소·예약 반영과 결과 reconcile 함수는 기존 App callback에 남아 있으며 실제 API/Supabase/Solapi 호출은 0건이다.
+- AI 검증: 전용 fixture, 로드맵 17 inventory chain, build, `git diff --check`로 최신 main 계약을 확인한다. 사람 gate는 0건이다. 다음 17A-3은 이전 준비메모 선택 순수 selector다.
+
 ## 2026-07-28 P1. 17A-1 수업일지 draft/save-status 순수 모델 분리 — AI gate 통과
 
 - 코드: 학생별 record 저장상태 우선순위, record/homework/makeup-task draft 수와 합계, 변경 유무, 하단 sticky bar 상태·문구를 `lessonJournalSaveViewModel.js`로 이동했다. `LessonJournalDetail`은 현재 local state를 모델에 넘기고 기존 변수명으로 결과를 사용한다.
