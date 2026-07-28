@@ -1,4 +1,23 @@
 :root {
+  --academy-page-bg: #edf4ff;
+  --academy-surface: #ffffff;
+  --academy-surface-muted: #f8fafc;
+  --academy-border: #d8e3f8;
+  --academy-border-strong: #cbd8ee;
+  --academy-text: #0f172a;
+  --academy-muted: #64748b;
+  --academy-primary: #17213d;
+  --academy-primary-hover: #243252;
+  --academy-focus: #2563eb;
+  --academy-radius: 8px;
+  --academy-radius-pill: 999px;
+  --academy-shadow: 0 12px 28px rgba(30, 64, 175, 0.06);
+  --academy-sidebar-shadow: 10px 0 30px rgba(30, 64, 175, 0.08);
+  --academy-space-1: 8px;
+  --academy-space-2: 12px;
+  --academy-space-3: 16px;
+  --academy-space-4: 24px;
+  --academy-touch-target: 44px;
   --status-neutral-bg: #f8fafc;
   --status-neutral-border: #e2e8f0;
   --status-neutral-text: #64748b;
@@ -17,8 +36,8 @@
   --status-destructive-bg: #fff1f2;
   --status-destructive-border: #fecdd3;
   --status-destructive-text: #dc2626;
-  background: #edf4ff;
-  color: #0f172a;
+  background: var(--academy-page-bg);
+  color: var(--academy-text);
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -50,6 +69,15 @@ textarea {
 
 button {
   cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.35);
+  outline-offset: 2px;
 }
 
 .visuallyHiddenInput {
@@ -212,24 +240,29 @@ button {
 .appFrame {
   --academy-sidebar-width: 294px;
   display: grid;
-  grid-template-columns: 294px minmax(0, 1fr);
+  grid-template-columns: var(--academy-sidebar-width) minmax(0, 1fr);
   min-height: 100vh;
   transition: grid-template-columns 180ms ease;
 }
 
 .appFrame.sidebarCollapsed {
   --academy-sidebar-width: 86px;
-  grid-template-columns: 86px minmax(0, 1fr);
+  grid-template-columns: var(--academy-sidebar-width) minmax(0, 1fr);
 }
 
 .sidebar {
   background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
-  border-right: 1px solid #d8e3f8;
-  box-shadow: 10px 0 30px rgba(30, 64, 175, 0.08);
+  border-right: 1px solid var(--academy-border);
+  box-shadow: var(--academy-sidebar-shadow);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--academy-space-3);
+  max-height: 100vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 18px 20px;
+  position: sticky;
+  top: 0;
   transition: padding 180ms ease;
 }
 
@@ -239,7 +272,7 @@ button {
 }
 
 .brandBlock {
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--status-neutral-border);
   display: grid;
   gap: 5px;
   padding: 6px 4px 18px;
@@ -256,17 +289,17 @@ button {
 .sidebarToggle {
   align-items: center;
   background: #ffffff;
-  border: 1px solid #d8e3f8;
-  border-radius: 8px;
-  color: #64748b;
+  border: 1px solid var(--academy-border);
+  border-radius: var(--academy-radius);
+  color: var(--academy-muted);
   cursor: pointer;
   display: inline-flex;
   font-size: 26px;
   font-weight: 900;
-  height: 42px;
+  height: var(--academy-touch-target);
   justify-content: center;
   line-height: 1;
-  width: 42px;
+  width: var(--academy-touch-target);
 }
 
 .sidebarToggle:hover {
@@ -303,7 +336,7 @@ button {
 
 .sideNav {
   display: grid;
-  gap: 8px;
+  gap: var(--academy-space-1);
   width: 100%;
 }
 
@@ -477,16 +510,16 @@ button {
 
 .mainPanel {
   min-width: 0;
-  padding: 12px 24px 28px 16px;
+  padding: var(--academy-space-2) var(--academy-space-4) 28px var(--academy-space-3);
 }
 
 .pageTop,
 .panel,
 .calendarShell {
-  background: #ffffff;
-  border: 1px solid #d8e3f8;
-  border-radius: 8px;
-  box-shadow: 0 12px 28px rgba(30, 64, 175, 0.06);
+  background: var(--academy-surface);
+  border: 1px solid var(--academy-border);
+  border-radius: var(--academy-radius);
+  box-shadow: var(--academy-shadow);
 }
 
 .pageTop {
@@ -725,21 +758,21 @@ button {
 .iconButton {
   align-items: center;
   background: #ffffff;
-  border: 1px solid #d8e3f8;
-  border-radius: 8px;
-  color: #64748b;
+  border: 1px solid var(--academy-border);
+  border-radius: var(--academy-radius);
+  color: var(--academy-muted);
   display: inline-flex;
   font-size: 24px;
   font-weight: 800;
-  height: 42px;
+  height: var(--academy-touch-target);
   justify-content: center;
-  width: 42px;
+  width: var(--academy-touch-target);
 }
 
 .primaryButton {
-  background: #17213d;
+  background: var(--academy-primary);
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--academy-radius);
   color: #ffffff;
   font-size: 16px;
   font-weight: 900;
@@ -749,10 +782,10 @@ button {
 
 .secondaryButton {
   align-items: center;
-  background: #f8fafc;
-  border: 1px solid #cbd8ee;
-  border-radius: 8px;
-  color: #17213d;
+  background: var(--academy-surface-muted);
+  border: 1px solid var(--academy-border-strong);
+  border-radius: var(--academy-radius);
+  color: var(--academy-primary);
   display: inline-flex;
   font-size: 14px;
   font-weight: 900;
@@ -772,6 +805,17 @@ button {
 
 .primaryButton.full {
   width: 100%;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: var(--academy-primary-hover);
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled,
+.iconButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .saveStateBadge {
@@ -7843,7 +7887,7 @@ button:disabled {
 
 .parentResponseContextList {
   display: grid;
-  gap: 12px;
+  gap: var(--academy-space-2);
 }
 
 .parentResponseContextCard {
@@ -7896,7 +7940,7 @@ button:disabled {
 
 .parentResponseContextBody {
   background: #f8fafc;
-  border-radius: 8px;
+  border-radius: var(--academy-radius);
   padding: 12px;
 }
 
@@ -9188,7 +9232,7 @@ button:disabled {
   display: grid;
   gap: 8px;
   grid-template-columns: auto minmax(90px, 0.35fr) minmax(180px, 1fr);
-  min-height: 44px;
+  min-height: var(--academy-touch-target);
   padding: 8px 10px;
 }
 
@@ -19392,6 +19436,9 @@ body.attendanceOnlyBody {
   }
 
   .sidebar {
+    max-height: none;
+    overflow-y: visible;
+    overscroll-behavior: auto;
     position: static;
   }
 
@@ -19666,7 +19713,7 @@ body.attendanceOnlyBody {
     flex-direction: column;
   }
 
-  .pageActions {
+.pageActions {
     flex-wrap: wrap;
     margin-left: 0;
     width: 100%;
@@ -20226,7 +20273,7 @@ body.attendanceOnlyBody {
 
 .monthlyRegularLessonOpenRows {
   display: grid;
-  gap: 8px;
+  gap: var(--academy-space-1);
 }
 
 .monthlyRegularLessonOpenRows article {
