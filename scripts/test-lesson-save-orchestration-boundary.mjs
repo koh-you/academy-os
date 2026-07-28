@@ -30,14 +30,13 @@ const saveBoundary = section(
   "async function handleOpenMonthlyRegularLessons"
 );
 assertOrdered(saveBoundary, [
-  'postJsonWithTimeout(',
+  "saveLessonModalLessonsWithVerification({",
+  "lessonDrafts",
+  "onProgress",
+  "saveLessons: (expectedLessons) => postJsonWithTimeout(",
   '"/api/lessons/bulk"',
-  'if (saveResult.source !== "supabase")',
-  'onProgress?.("saving", "Supabase 반영 확인 중")',
-  'getJsonWithTimeout(',
+  "readLessons: () => getJsonWithTimeout(",
   '`/api/lessons?verify=lesson-modal-${Date.now()}`',
-  'if (verification.source !== "supabase")',
-  "verifyLessonModalSaveResults({",
   "setLessons(filterActiveLessons(persistedLessons))",
   "return verifiedLessons"
 ]);

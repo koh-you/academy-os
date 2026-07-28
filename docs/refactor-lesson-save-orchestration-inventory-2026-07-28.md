@@ -32,10 +32,11 @@
 - `15F-3` 완료: preflight와 학생 명단 확정은 App에 유지하고, 수정 수업·선택형 휴강 보충 payload 조립만 순수 builder로 이동했다. 최신 원천의 teacher·특강 metadata와 기존 topic/source/status 보존을 fixture로 고정했다.
 - `15F-4` 완료: 저장 재조회 뒤 expected/persisted lesson의 ID·snapshot 대조와 누락/불일치 오류를 `lessonModalSaveVerification.js` 순수 모델로 분리했다.
 - `15F-5` 완료: 운영 원천 대신 메모리 가상 TARGET/CONTROL lesson·record·job을 생성해 TARGET 발송 전 job 취소·record 삭제와 CONTROL/sent/다른 수업 보존을 서버 필터 계약과 대조했다.
-- 다음 단위: 15F-6에서 POST/GET을 주입받는 controller를 분리하고, React state 적용은 App callback에 유지한다.
-- 실제 POST/GET orchestration, closure preflight, React state 교체, 제외 학생 알림·기록 정리는 별도 fixture와 사람 gate가 정해질 때까지 App/API 경계에 둔다.
+- `15F-6` 완료: `saveLessonModalLessonsWithVerification`가 저장·Supabase 원천 확인·진행 표시·재조회·payload 대조 순서를 소유하고 실제 POST/GET 함수를 주입받는다. 실제 URL·timeout 문구와 React state 교체는 App에 유지했다.
+- 다음 단위: 15F-7에서 App에 남은 실제 request·closure preflight·state 적용과 복사/붙여넣기/undo/취소 경계를 closeout audit한다.
+- 실제 POST/GET request, closure preflight, React state 교체, 제외 학생 알림·기록 정리는 App/API 경계에 둔다.
 
 ## Gate
 
-- AI gate: 정적 fixture가 POST → Supabase source 확인 → GET → snapshot 대조 → state 교체 순서와 서버 side effect를 검사한다.
-- 사람 gate: 없음. 이번 단위는 코드 이동이나 운영 쓰기가 없는 inventory다.
+- AI gate: 가상 request fixture가 저장 → Supabase source 확인 → 진행 표시 → 재조회 → snapshot 대조 순서와 성공·빈 입력·임시 원천·재조회 실패·불일치 분기를 검사한다. 정적 fixture는 App request/state 및 서버 side effect 경계를 검사한다.
+- 사람 gate: 없음. 실제 운영 request나 데이터를 사용하지 않는 orchestration 소유권 이동이다.

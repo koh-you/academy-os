@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-28 P1. 15F-6 수업 modal 주입형 저장 controller 분리 — AI gate 통과
+
+- 코드: `saveLessonModalLessonsWithVerification`를 `src/domains/lessons/lessonModalSaveController.js`로 분리해 유효 draft 확정, 저장 요청, Supabase 원천 확인, 진행 표시, 재조회, persisted payload 대조 순서를 소유하게 했다.
+- 경계: 실제 `/api/lessons/bulk` POST와 `/api/lessons?verify=...` GET, timeout 문구, 재조회한 활성 lessons의 React state 적용은 App에 그대로 유지했다. 서버의 제외 학생 알림 취소·수업기록 삭제도 이동하지 않았다.
+- 자동검증: 메모리 가상 저장/재조회 함수를 주입해 성공 호출 순서와 invalid draft 제외, 빈 입력 request 0건, 임시 저장 원천에서 재조회 차단, 재조회 원천 실패, persisted 값 불일치를 모두 검증했다.
+- 사람 gate: 없음. 운영 Supabase·Solapi 호출 0건이며 화면·문구·payload를 바꾸지 않았다. 다음은 15F-7 closeout audit이다.
+
 ## 2026-07-28 P1. 15F-5 수업 명단 제거 TARGET/CONTROL 가상 gate — AI 자동검증 통과
 
 - 가상 데이터: 메모리 격리 수업에 TARGET/CONTROL, 두 학생의 수업기록, TARGET의 `scheduled`·`queued`·`pending_send`·`sent` job, CONTROL 예약, 다른 수업의 TARGET 기록·예약을 생성했다.

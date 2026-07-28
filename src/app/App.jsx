@@ -235,8 +235,8 @@ import {
   buildNewLessonModalLessons,
   buildUpdatedLessonModalLessons
 } from "../domains/lessons/lessonModalPayloadBuilders.js";
+import { saveLessonModalLessonsWithVerification } from "../domains/lessons/lessonModalSaveController.js";
 import { getLessonModalSaveSnapshot } from "../domains/lessons/lessonModalSaveSnapshot.js";
-import { verifyLessonModalSaveResults } from "../domains/lessons/lessonModalSaveVerification.js";
 import { LessonModalActions } from "../domains/lessons/LessonModalActions.jsx";
 import { LessonModalBasics } from "../domains/lessons/LessonModalBasics.jsx";
 import { LessonModalClosurePanel } from "../domains/lessons/LessonModalClosurePanel.jsx";
@@ -7237,31 +7237,22 @@ export function App() {
   }
 
   async function saveLessonModalLessons(lessonDrafts = [], onProgress = null) {
-    const expectedLessons = lessonDrafts.filter((lesson) => lesson?.lessonId && lesson?.date);
-    if (!expectedLessons.length) throw new Error("저장할 수업일지가 없습니다.");
-    const saveResult = await postJsonWithTimeout(
-      "/api/lessons/bulk",
-      { lessons: expectedLessons },
-      20000,
-      "수업일지 저장이 20초를 넘었습니다. 중복 등록하지 말고 잠시 뒤 달력을 확인해 주세요."
-    );
-    if (saveResult.source !== "supabase") {
-      throw new Error("수업일지가 Supabase가 아닌 임시 원천에 저장되어 완료할 수 없습니다.");
-    }
-    onProgress?.("saving", "Supabase 반영 확인 중");
-    const verification = await getJsonWithTimeout(
-      `/api/lessons?verify=lesson-modal-${Date.now()}`,
-      20000,
-      "수업일지 저장 확인이 20초를 넘었습니다. 다시 누르지 말고 잠시 뒤 새로고침해 주세요."
-    );
-    if (verification.source !== "supabase") {
-      throw new Error("저장 결과를 Supabase에서 다시 확인하지 못했습니다.");
-    }
-    const persistedLessons = Array.isArray(verification.lessons) ? verification.lessons : [];
-    const verifiedLessons = verifyLessonModalSaveResults({
-      expectedLessons,
-      persistedLessons
-    });
+    const { persistedLessons, verifiedLessons } =
+      await saveLessonModalLessonsWithVerification({
+        lessonDrafts,
+        onProgress,
+        saveLessons: (expectedLessons) => postJsonWithTimeout(
+          "/api/lessons/bulk",
+          { lessons: expectedLessons },
+          20000,
+          "수업일지 저장이 20초를 넘었습니다. 중복 등록하지 말고 잠시 뒤 달력을 확인해 주세요."
+        ),
+        readLessons: () => getJsonWithTimeout(
+          `/api/lessons?verify=lesson-modal-${Date.now()}`,
+          20000,
+          "수업일지 저장 확인이 20초를 넘었습니다. 다시 누르지 말고 잠시 뒤 새로고침해 주세요."
+        )
+      });
     setLessons(filterActiveLessons(persistedLessons));
     return verifiedLessons;
   }

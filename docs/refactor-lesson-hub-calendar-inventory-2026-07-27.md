@@ -113,11 +113,11 @@ Supabase lessons
    - 15F-3 완료: closure preflight와 활성·과거 학생 명단 확정은 App에 둔 채 기존 수업 수정 payload 조립을 같은 builder로 옮겼다. 최신 원천의 teacher·특강 track/meta·기타 필드를 보존하고 UI-only generated flag만 기존처럼 제거한다.
    - 15F-4 완료: expected lesson 순서대로 persisted row를 찾고 snapshot 일치·누락·불일치 오류를 판정하는 로직을 `lessonModalSaveVerification.js` 순수 모델로 옮겼다.
    - 15F-5 완료: TARGET/CONTROL 가상 수업·수업기록·알림 job을 메모리에 만들고 TARGET 제거 뒤 발송 전 TARGET job·record만 정리되며 CONTROL·sent 이력·다른 수업 데이터가 보존되는 것을 서버 실제 필터와 대조했다.
-   - 생성·수정 bulk 저장은 기존 read-after-write 계약을 먼저 fixture로 고정한다.
+   - 15F-6 완료: 저장·Supabase 원천 확인·진행 표시·재조회·snapshot 대조 순서를 `lessonModalSaveController.js`로 옮기고 실제 request 함수를 주입받게 했다. App은 URL·timeout·React state 적용을 계속 소유한다.
    - 복사·붙여넣기·undo·취소는 위 유지보수 진단이 main에서 해결되고 격리 gate를 통과하기 전 이동하지 않는다.
 
 ## 이번 inventory의 gate
 
 - AI 검수: 활성/비활성 참조 수, 저장 원천, 외부 side effect, low-risk 첫 후보를 정적 분석으로 확인한다.
 - 사람 검수: 없음. 화면·운영 데이터·외부 서비스를 변경하지 않았다.
-- 다음 단계: 15F-6에서 가상 gate를 기준으로 bulk POST/GET 순서를 주입형 controller로 분리한다. React state 교체와 실제 request 구현은 App에 둔다.
+- 다음 단계: 15F-7 closeout audit에서 로드맵 15의 잔여 고위험 경계를 명시하고 로드맵 16 출결 inventory 착수 조건을 정한다.
