@@ -54,12 +54,17 @@ const componentSource = await readFile(
   new URL("../src/domains/lessons/LessonJournalAttendanceButton.jsx", import.meta.url),
   "utf8"
 );
+const rowSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalStudentRow.jsx", import.meta.url),
+  "utf8"
+);
 const journalStart = appSource.indexOf("function LessonJournalDetail({");
 const journalEnd = appSource.indexOf("function CommentComposerModal({", journalStart);
 const journalSource = appSource.slice(journalStart, journalEnd);
 
-assert.match(journalSource, /<LessonJournalAttendanceButton/);
-assert.match(journalSource, /onOpenAttendance=\{onOpenAttendance\}/);
+assert.match(journalSource, /<LessonJournalStudentRow/);
+assert.match(rowSource, /<LessonJournalAttendanceButton/);
+assert.match(journalSource, /onOpenAttendance,/);
 assert.doesNotMatch(journalSource, /className=\{`attendanceBadge attendance-/);
 assert.match(componentSource, /onOpenAttendance\(\{ lesson: attendanceLesson, record, student \}\)/);
 for (const contract of [

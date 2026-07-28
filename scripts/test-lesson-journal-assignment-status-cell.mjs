@@ -47,12 +47,17 @@ const componentSource = await readFile(
   new URL("../src/domains/lessons/LessonJournalAssignmentStatusCell.jsx", import.meta.url),
   "utf8"
 );
+const rowSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalStudentRow.jsx", import.meta.url),
+  "utf8"
+);
 const journalStart = appSource.indexOf("function LessonJournalDetail({");
 const journalEnd = appSource.indexOf("function CommentComposerModal({", journalStart);
 const journalSource = appSource.slice(journalStart, journalEnd);
 
-assert.match(journalSource, /<LessonJournalAssignmentStatusCell/);
-assert.match(journalSource, /assignmentStatusAriaLabel=\{`\$\{student\.name\} 숙제 상태`\}/);
+assert.match(journalSource, /<LessonJournalStudentRow/);
+assert.match(journalSource, /assignmentStatusAriaLabel: `\$\{student\.name\} 숙제 상태`/);
+assert.match(rowSource, /<LessonJournalAssignmentStatusCell/);
 assert.match(journalSource, /handleAssignmentStatusChange\(student, record, effectivePreviousHomework, value\)/);
 assert.match(journalSource, /applyHomeworkFollowupMethod\(student, record, effectivePreviousHomework, method\)/);
 assert.doesNotMatch(journalSource, /className="assignmentStatusCell"/);

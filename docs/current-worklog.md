@@ -1321,6 +1321,13 @@
 - UI/문구: 보충관리의 학생·학부모 다음 정각 일정 안내도 당일 학생 11시 리마인더와 같은 `제목 → 빈 줄 → 일시 → 보강 대상/밀린 숙제 → 사유 → 확인할 숙제` 순서로 생성한다. 결석보강은 `결석 보강`, 숙제보충은 `숙제 보충` 제목을 사용하며, 일정 변경 알림에는 그 뒤에 변경 사유·변경 전 일정·변경 후 일정만 추가한다.
 - 원천/부작용: Supabase `app_state.aiSettings.notificationTemplates`의 기존 기본 일정 템플릿은 런타임에서 새 기본 형식으로 해석한다. 교사가 직접 수정·저장한 개별 학생/학부모 최종 문구와 기존 `notification_jobs` 예약·발송 본문은 바꾸지 않는다. 새 예약·발송·취소나 Solapi 호출은 실행하지 않는다.
 - AI 검증: 보충 일정 알림 정적 계약을 새 라벨 형식으로 갱신하고, `npm run build`, `git diff --check`, `npm run test:production`을 실행한다. 기존 수업 모달 `90a` 정적 검사 1건은 이번 문구 변경과 무관한 기준선 실패로 유지된다.
+## 2026-07-28 P1. App.jsx 17C-9 수업일지 학생 행 조합 shell 분리
+
+- 코드: 앞서 분리한 학생 정보, 수업메모, 출결, 교재·진도·숙제, 과제 상태, 학부모·학생 알림 cell을 기존 순서대로 조합하는 `LessonJournalStudentRow.jsx`를 분리했다.
+- 경계: App은 학생별 record·이전 수업·숙제·알림 상태를 계속 계산하고 7개 의미별 props 묶음과 기존 callback을 전달한다. 새 row는 props를 각 cell에 순서대로 전달할 뿐 React state, 저장, API, `notification_jobs`, Solapi 동작을 소유하지 않으며 실제 외부 호출은 0건이다.
+- AI 가상검수: `17C-1~8`의 TARGET/CONTROL fixture를 재실행하고 학생 정보→메모→출결→편집→과제→학부모→학생 알림 순서, App-owned draft/composer/mute callback 인자, `journalRow` class와 과제 select aria label 보존을 대조한다. 전용 composition fixture, 수업일지 inventory, build, diff check와 rebase 중 production scenario 기준을 확인한다.
+- 사람 gate: 0건. 다음 의미 단위는 학생 행 밖 하단 저장 bar와 local modal shell의 남은 표시 경계다.
+
 ## 2026-07-28 P1. App.jsx 17C-8 수업일지 수업메모 버튼 분리
 
 - 코드: 학생별 수업메모의 현재 작성 여부, 직전/참고 메모 주의 표시, 작성창 가져오기 설명을 기존 `lessonJournalMemoIndicatorModel.js`로 계산하고 렌더링하는 `LessonJournalPrepMemoButton.jsx`를 분리했다.

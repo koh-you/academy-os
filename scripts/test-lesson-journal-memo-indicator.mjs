@@ -50,16 +50,21 @@ const componentSource = await readFile(
   new URL("../src/domains/lessons/LessonJournalPrepMemoButton.jsx", import.meta.url),
   "utf8"
 );
+const rowSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalStudentRow.jsx", import.meta.url),
+  "utf8"
+);
 const journalStart = appSource.indexOf("function LessonJournalDetail({");
 const journalEnd = appSource.indexOf("function CommentComposerModal({", journalStart);
 const journalSource = appSource.slice(journalStart, journalEnd);
 
-assert.match(journalSource, /<LessonJournalPrepMemoButton/);
-assert.match(journalSource, /acknowledgedMemoCutoffDate=\{previousMemoContext\.acknowledgedMemoCutoffDate\}/);
-assert.match(journalSource, /preparationMemo=\{record\.preparationMemo\}/);
-assert.match(journalSource, /previousPreparationMemo=\{previousPreparationMemo\}/);
-assert.match(journalSource, /referencePreparationMemo=\{referencePreparationMemo\}/);
-assert.match(journalSource, /onOpen=\{\(\) => setPrepMemoModal\(\{/);
+assert.match(journalSource, /<LessonJournalStudentRow/);
+assert.match(rowSource, /<LessonJournalPrepMemoButton/);
+assert.match(journalSource, /acknowledgedMemoCutoffDate: previousMemoContext\.acknowledgedMemoCutoffDate/);
+assert.match(journalSource, /preparationMemo: record\.preparationMemo/);
+assert.match(journalSource, /previousPreparationMemo,/);
+assert.match(journalSource, /referencePreparationMemo,/);
+assert.match(journalSource, /onOpen: \(\) => setPrepMemoModal\(\{/);
 assert.doesNotMatch(journalSource, /className="prepMemoButton"/);
 assert.doesNotMatch(journalSource, /const priorMemoAttentionLabel =/);
 for (const componentContract of [

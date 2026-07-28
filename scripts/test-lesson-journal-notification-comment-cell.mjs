@@ -61,15 +61,20 @@ const componentSource = await readFile(
   new URL("../src/domains/lessons/LessonJournalNotificationCommentCell.jsx", import.meta.url),
   "utf8"
 );
+const rowSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalStudentRow.jsx", import.meta.url),
+  "utf8"
+);
 const journalStart = appSource.indexOf("function LessonJournalDetail({");
 const journalEnd = appSource.indexOf("function CommentComposerModal({", journalStart);
 const journalSource = appSource.slice(journalStart, journalEnd);
 
 assert.equal(
-  (journalSource.match(/<LessonJournalNotificationCommentCell/g) ?? []).length,
+  (rowSource.match(/<LessonJournalNotificationCommentCell/g) ?? []).length,
   2,
   "parent and student notification cells must both use the extracted component"
 );
+assert.match(journalSource, /<LessonJournalStudentRow/);
 assert.match(
   journalSource,
   /openCommentComposer\("parent", student, record, effectivePreviousHomework, effectiveNextHomework\)/

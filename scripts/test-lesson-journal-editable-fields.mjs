@@ -67,11 +67,16 @@ const componentSource = await readFile(
   new URL("../src/domains/lessons/LessonJournalEditableFields.jsx", import.meta.url),
   "utf8"
 );
+const rowSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalStudentRow.jsx", import.meta.url),
+  "utf8"
+);
 const journalStart = appSource.indexOf("function LessonJournalDetail({");
 const journalEnd = appSource.indexOf("function CommentComposerModal({", journalStart);
 const journalSource = appSource.slice(journalStart, journalEnd);
 
-assert.match(journalSource, /<LessonJournalEditableFields/);
+assert.match(journalSource, /<LessonJournalStudentRow/);
+assert.match(rowSource, /<LessonJournalEditableFields/);
 assert.match(journalSource, /updateJournalRecordDraft\(student, record, field, value\)/);
 assert.match(journalSource, /updateJournalHomeworkDraft\(student, homeworkType, value\)/);
 assert.equal((journalSource.match(/<LessonJournalEditableMemoCard/g) ?? []).length, 0);

@@ -110,6 +110,10 @@ const notificationCommentCellModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalNotificationCommentCellModel.js", import.meta.url),
   "utf8"
 );
+const studentRowSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalStudentRow.jsx", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -398,8 +402,8 @@ for (const extractedMemoIndicatorContract of [
   );
 }
 assert.ok(
-  journalSource.includes("<LessonJournalStudentIdentity"),
-  "LessonJournalDetail must compose the extracted student identity"
+  studentRowSource.includes("<LessonJournalStudentIdentity"),
+  "student row must compose the extracted student identity"
 );
 assert.ok(
   !journalSource.includes('className="studentCell compact"'),
@@ -418,8 +422,8 @@ for (const extractedStudentIdentityContract of [
   );
 }
 assert.ok(
-  journalSource.includes("<LessonJournalAttendanceButton"),
-  "LessonJournalDetail must compose the extracted attendance button"
+  studentRowSource.includes("<LessonJournalAttendanceButton"),
+  "student row must compose the extracted attendance button"
 );
 assert.ok(
   !journalSource.includes('className={`attendanceBadge attendance-'),
@@ -455,13 +459,13 @@ for (const extractedEditableMemoCardContract of [
   );
 }
 assert.ok(
-  journalSource.includes("<LessonJournalEditableFields"),
-  "LessonJournalDetail must compose the extracted editable fields"
+  studentRowSource.includes("<LessonJournalEditableFields"),
+  "student row must compose the extracted editable fields"
 );
 assert.equal(
-  (journalSource.match(/<LessonJournalEditableMemoCard/g) ?? []).length,
+  (studentRowSource.match(/<LessonJournalEditableMemoCard/g) ?? []).length,
   0,
-  "LessonJournalDetail must not compose the four memo cards directly"
+  "student row must not compose the four memo cards directly"
 );
 for (const extractedEditableFieldsContract of [
   "createLessonJournalEditableFieldsModel",
@@ -477,8 +481,8 @@ for (const extractedEditableFieldsContract of [
   );
 }
 assert.ok(
-  journalSource.includes("<LessonJournalAssignmentStatusCell"),
-  "LessonJournalDetail must compose the extracted assignment status cell"
+  studentRowSource.includes("<LessonJournalAssignmentStatusCell"),
+  "student row must compose the extracted assignment status cell"
 );
 assert.ok(
   !journalSource.includes('className="assignmentStatusCell"'),
@@ -497,9 +501,9 @@ for (const extractedAssignmentStatusContract of [
   );
 }
 assert.equal(
-  (journalSource.match(/<LessonJournalNotificationCommentCell/g) ?? []).length,
+  (studentRowSource.match(/<LessonJournalNotificationCommentCell/g) ?? []).length,
   2,
-  "LessonJournalDetail must compose parent and student notification comment cells"
+  "student row must compose parent and student notification comment cells"
 );
 assert.ok(
   !journalSource.includes('className="journalCommentCell"'),
@@ -521,8 +525,8 @@ for (const extractedNotificationCommentContract of [
   );
 }
 assert.ok(
-  journalSource.includes("<LessonJournalPrepMemoButton"),
-  "LessonJournalDetail must compose the extracted prep memo button"
+  studentRowSource.includes("<LessonJournalPrepMemoButton"),
+  "student row must compose the extracted prep memo button"
 );
 assert.ok(
   !journalSource.includes('className="prepMemoButton"'),
@@ -539,6 +543,25 @@ for (const extractedPrepMemoButtonContract of [
     `${prepMemoButtonSource}\n${memoIndicatorModelSource}`.includes(extractedPrepMemoButtonContract),
     `missing extracted 17C-8 contract: ${extractedPrepMemoButtonContract}`
   );
+}
+assert.ok(
+  journalSource.includes("<LessonJournalStudentRow"),
+  "LessonJournalDetail must compose the extracted student row"
+);
+assert.ok(
+  studentRowSource.includes('className="journalRow"'),
+  "student row must retain the existing row class"
+);
+for (const groupedRowProp of [
+  "assignmentStatusCellProps",
+  "attendanceButtonProps",
+  "editableFieldsProps",
+  "parentNotificationCommentProps",
+  "prepMemoButtonProps",
+  "studentIdentityProps",
+  "studentNotificationCommentProps"
+]) {
+  assert.ok(studentRowSource.includes(groupedRowProp), `missing extracted 17C-9 prop group: ${groupedRowProp}`);
 }
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");

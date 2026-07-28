@@ -229,12 +229,7 @@ import { LessonJournalClosureNotice } from "../domains/lessons/LessonJournalClos
 import { LessonJournalReminderPanel } from "../domains/lessons/LessonJournalReminderPanel.jsx";
 import { LessonJournalNotificationBar } from "../domains/lessons/LessonJournalNotificationBar.jsx";
 import { LessonJournalReservationModal } from "../domains/lessons/LessonJournalReservationModal.jsx";
-import { LessonJournalPrepMemoButton } from "../domains/lessons/LessonJournalPrepMemoButton.jsx";
-import { LessonJournalStudentIdentity } from "../domains/lessons/LessonJournalStudentIdentity.jsx";
-import { LessonJournalAttendanceButton } from "../domains/lessons/LessonJournalAttendanceButton.jsx";
-import { LessonJournalEditableFields } from "../domains/lessons/LessonJournalEditableFields.jsx";
-import { LessonJournalAssignmentStatusCell } from "../domains/lessons/LessonJournalAssignmentStatusCell.jsx";
-import { LessonJournalNotificationCommentCell } from "../domains/lessons/LessonJournalNotificationCommentCell.jsx";
+import { LessonJournalStudentRow } from "../domains/lessons/LessonJournalStudentRow.jsx";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -16690,15 +16685,60 @@ function LessonJournalDetail({
             const selectedHomeworkFollowupMethod = getHomeworkFollowupMethodFromRecord(record);
 
             return (
-              <div className="journalRow" key={student.studentId}>
-                <LessonJournalStudentIdentity
-                  attendanceLesson={attendanceLesson}
-                  onOpenStudentPreview={setStudentPreviewId}
-                  student={student}
-                />
-                <LessonJournalPrepMemoButton
-                  acknowledgedMemoCutoffDate={previousMemoContext.acknowledgedMemoCutoffDate}
-                  onOpen={() => setPrepMemoModal({
+              <LessonJournalStudentRow
+                assignmentStatusCellProps={{
+                  assignmentStatusAriaLabel: `${student.name} 숙제 상태`,
+                  assignmentStatusOptions,
+                  assignmentStatusValue,
+                  homeworkFollowupOptions,
+                  journalEditMode,
+                  onApplyHomeworkFollowupMethod: (method) =>
+                    applyHomeworkFollowupMethod(student, record, effectivePreviousHomework, method),
+                  onAssignmentStatusChange: (value) =>
+                    handleAssignmentStatusChange(student, record, effectivePreviousHomework, value),
+                  previousHomeworkFollowup,
+                  previousHomeworkTitle: effectivePreviousHomework?.title,
+                  selectedHomeworkFollowupMethod
+                }}
+                attendanceButtonProps={{
+                  attendanceDisplay,
+                  attendanceLesson,
+                  checkoutMissing,
+                  isClosureLesson,
+                  onOpenAttendance,
+                  record,
+                  student
+                }}
+                editableFieldsProps={{
+                  editingMemoKey,
+                  journalEditMode,
+                  nextHomeworkTitle,
+                  onEdit: setEditingMemoKey,
+                  onUpdateHomeworkDraft: (homeworkType, value) =>
+                    updateJournalHomeworkDraft(student, homeworkType, value),
+                  onUpdateRecordDraft: (field, value) =>
+                    updateJournalRecordDraft(student, record, field, value),
+                  previousHomeworkTitle,
+                  previousLessonContent,
+                  previousLessonMaterial,
+                  record,
+                  recordId,
+                  student
+                }}
+                key={student.studentId}
+                parentNotificationCommentProps={{
+                  audienceLabel: "학부모",
+                  commentState: parentCommentState,
+                  isLessonNotificationOff,
+                  isNotificationMuted: record.notificationMutedParent,
+                  onOpen: () =>
+                    openCommentComposer("parent", student, record, effectivePreviousHomework, effectiveNextHomework),
+                  onToggleMute: () => onToggleStudentNotificationMute?.(lesson, student, "parent"),
+                  statusLabel: getCommentStatusLabel(record.teacherComment, parentCommentSendStatus)
+                }}
+                prepMemoButtonProps={{
+                  acknowledgedMemoCutoffDate: previousMemoContext.acknowledgedMemoCutoffDate,
+                  onOpen: () => setPrepMemoModal({
                     acknowledgedMemoCutoff: previousMemoContext.acknowledgedMemoCutoff,
                     nextHomework,
                     previousHomework,
@@ -16707,74 +16747,30 @@ function LessonJournalDetail({
                     record,
                     referenceRecord,
                     student
-                  })}
-                  preparationMemo={record.preparationMemo}
-                  prepParentVisible={record.prepParentVisible}
-                  prepStudentVisible={record.prepStudentVisible}
-                  previousPreparationMemo={previousPreparationMemo}
-                  referencePreparationMemo={referencePreparationMemo}
-                  studentName={student.name}
-                />
-                <LessonJournalAttendanceButton
-                  attendanceDisplay={attendanceDisplay}
-                  attendanceLesson={attendanceLesson}
-                  checkoutMissing={checkoutMissing}
-                  isClosureLesson={isClosureLesson}
-                  onOpenAttendance={onOpenAttendance}
-                  record={record}
-                  student={student}
-                />
-                <LessonJournalEditableFields
-                  editingMemoKey={editingMemoKey}
-                  onEdit={setEditingMemoKey}
-                  journalEditMode={journalEditMode}
-                  nextHomeworkTitle={nextHomeworkTitle}
-                  onUpdateHomeworkDraft={(homeworkType, value) =>
-                    updateJournalHomeworkDraft(student, homeworkType, value)}
-                  onUpdateRecordDraft={(field, value) =>
-                    updateJournalRecordDraft(student, record, field, value)}
-                  previousHomeworkTitle={previousHomeworkTitle}
-                  previousLessonContent={previousLessonContent}
-                  previousLessonMaterial={previousLessonMaterial}
-                  record={record}
-                  recordId={recordId}
-                  student={student}
-                />
-                <LessonJournalAssignmentStatusCell
-                  assignmentStatusAriaLabel={`${student.name} 숙제 상태`}
-                  assignmentStatusOptions={assignmentStatusOptions}
-                  assignmentStatusValue={assignmentStatusValue}
-                  homeworkFollowupOptions={homeworkFollowupOptions}
-                  journalEditMode={journalEditMode}
-                  onApplyHomeworkFollowupMethod={(method) =>
-                    applyHomeworkFollowupMethod(student, record, effectivePreviousHomework, method)}
-                  onAssignmentStatusChange={(value) =>
-                    handleAssignmentStatusChange(student, record, effectivePreviousHomework, value)}
-                  previousHomeworkFollowup={previousHomeworkFollowup}
-                  previousHomeworkTitle={effectivePreviousHomework?.title}
-                  selectedHomeworkFollowupMethod={selectedHomeworkFollowupMethod}
-                />
-                <LessonJournalNotificationCommentCell
-                  audienceLabel="학부모"
-                  commentState={parentCommentState}
-                  isLessonNotificationOff={isLessonNotificationOff}
-                  isNotificationMuted={record.notificationMutedParent}
-                  onOpen={() =>
-                    openCommentComposer("parent", student, record, effectivePreviousHomework, effectiveNextHomework)}
-                  onToggleMute={() => onToggleStudentNotificationMute?.(lesson, student, "parent")}
-                  statusLabel={getCommentStatusLabel(record.teacherComment, parentCommentSendStatus)}
-                />
-                <LessonJournalNotificationCommentCell
-                  audienceLabel="학생"
-                  commentState={studentCommentState}
-                  isLessonNotificationOff={isLessonNotificationOff}
-                  isNotificationMuted={record.notificationMutedStudent}
-                  onOpen={() =>
-                    openCommentComposer("student", student, record, effectivePreviousHomework, effectiveNextHomework)}
-                  onToggleMute={() => onToggleStudentNotificationMute?.(lesson, student, "student")}
-                  statusLabel={getCommentStatusLabel(record.studentComment, studentCommentSendStatus)}
-                />
-              </div>
+                  }),
+                  preparationMemo: record.preparationMemo,
+                  prepParentVisible: record.prepParentVisible,
+                  prepStudentVisible: record.prepStudentVisible,
+                  previousPreparationMemo,
+                  referencePreparationMemo,
+                  studentName: student.name
+                }}
+                studentIdentityProps={{
+                  attendanceLesson,
+                  onOpenStudentPreview: setStudentPreviewId,
+                  student
+                }}
+                studentNotificationCommentProps={{
+                  audienceLabel: "학생",
+                  commentState: studentCommentState,
+                  isLessonNotificationOff,
+                  isNotificationMuted: record.notificationMutedStudent,
+                  onOpen: () =>
+                    openCommentComposer("student", student, record, effectivePreviousHomework, effectiveNextHomework),
+                  onToggleMute: () => onToggleStudentNotificationMute?.(lesson, student, "student"),
+                  statusLabel: getCommentStatusLabel(record.studentComment, studentCommentSendStatus)
+                }}
+              />
             );
           })}
         </DataTableShell>
