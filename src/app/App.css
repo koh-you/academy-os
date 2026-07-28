@@ -7887,7 +7887,7 @@ button:disabled {
 
 .parentResponseContextList {
   display: grid;
-  gap: var(--academy-space-2);
+  gap: 12px;
 }
 
 .parentResponseContextCard {
@@ -7940,7 +7940,7 @@ button:disabled {
 
 .parentResponseContextBody {
   background: #f8fafc;
-  border-radius: var(--academy-radius);
+  border-radius: 8px;
   padding: 12px;
 }
 
@@ -9232,7 +9232,7 @@ button:disabled {
   display: grid;
   gap: 8px;
   grid-template-columns: auto minmax(90px, 0.35fr) minmax(180px, 1fr);
-  min-height: var(--academy-touch-target);
+  min-height: 44px;
   padding: 8px 10px;
 }
 
@@ -19713,7 +19713,7 @@ body.attendanceOnlyBody {
     flex-direction: column;
   }
 
-.pageActions {
+  .pageActions {
     flex-wrap: wrap;
     margin-left: 0;
     width: 100%;
@@ -20273,7 +20273,7 @@ body.attendanceOnlyBody {
 
 .monthlyRegularLessonOpenRows {
   display: grid;
-  gap: var(--academy-space-1);
+  gap: 8px;
 }
 
 .monthlyRegularLessonOpenRows article {
