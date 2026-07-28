@@ -230,6 +230,7 @@ import { LessonJournalReminderPanel } from "../domains/lessons/LessonJournalRemi
 import { LessonJournalNotificationBar } from "../domains/lessons/LessonJournalNotificationBar.jsx";
 import { LessonJournalReservationModal } from "../domains/lessons/LessonJournalReservationModal.jsx";
 import { LessonJournalStudentRow } from "../domains/lessons/LessonJournalStudentRow.jsx";
+import { LessonJournalSaveBar } from "../domains/lessons/LessonJournalSaveBar.jsx";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -16776,23 +16777,14 @@ function LessonJournalDetail({
         </DataTableShell>
       </section>
 
-      {journalEditMode || journalManualSaveMessage ? (
-        <StickySaveBar
-          className="lessonJournalStickySaveBar"
-          label="수업일지"
-          message={journalStickySaveMessage}
-          saveState={journalStickySaveState}
-        >
-          <button
-            className="saveDraftButton"
-            disabled={!journalEditMode || !hasJournalDraftChanges || journalStickySaveState === "saving"}
-            onClick={saveJournalDrafts}
-            type="button"
-          >
-            {journalStickySaveState === "saving" ? "저장 중" : "변경 저장"}
-          </button>
-        </StickySaveBar>
-      ) : null}
+      <LessonJournalSaveBar
+        hasDraftChanges={hasJournalDraftChanges}
+        isEditMode={journalEditMode}
+        manualSaveMessage={journalManualSaveMessage}
+        message={journalStickySaveMessage}
+        onSave={saveJournalDrafts}
+        saveState={journalStickySaveState}
+      />
 
       {commentModal ? (
         <CommentComposerModal

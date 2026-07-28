@@ -114,6 +114,14 @@ const studentRowSource = await readFile(
   new URL("../src/domains/lessons/LessonJournalStudentRow.jsx", import.meta.url),
   "utf8"
 );
+const saveBarSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalSaveBar.jsx", import.meta.url),
+  "utf8"
+);
+const saveBarModelSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalSaveBarModel.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -562,6 +570,27 @@ for (const groupedRowProp of [
   "studentNotificationCommentProps"
 ]) {
   assert.ok(studentRowSource.includes(groupedRowProp), `missing extracted 17C-9 prop group: ${groupedRowProp}`);
+}
+assert.ok(
+  journalSource.includes("<LessonJournalSaveBar"),
+  "LessonJournalDetail must compose the extracted save bar"
+);
+assert.ok(
+  !journalSource.includes('className="lessonJournalStickySaveBar"'),
+  "LessonJournalDetail must not retain the save bar markup"
+);
+for (const extractedSaveBarContract of [
+  "createLessonJournalSaveBarModel",
+  "buttonDisabled",
+  "buttonLabel",
+  "shouldShow",
+  "onClick={onSave}",
+  'className="lessonJournalStickySaveBar"'
+]) {
+  assert.ok(
+    `${saveBarSource}\n${saveBarModelSource}`.includes(extractedSaveBarContract),
+    `missing extracted 17D-1 contract: ${extractedSaveBarContract}`
+  );
 }
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");
