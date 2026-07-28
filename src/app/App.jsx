@@ -5200,6 +5200,23 @@ const defaultAiPrompts = {
   ].join("\n")
 };
 
+const legacySupplementScheduleNotificationTemplates = {
+  supplementScheduleConfirmNotice: [
+    "#{일정제목} 일정이 확정되었습니다.",
+    "",
+    "#{보충내역}",
+    "일정: #{보강일정}"
+  ].join("\n"),
+  supplementScheduleChangeNotice: [
+    "#{일정제목} 일정이 변경되었습니다.",
+    "",
+    "#{보충내역}",
+    "#{변경사유}",
+    "#{변경전}",
+    "변경 후: #{보강일정}"
+  ].join("\n")
+};
+
 const defaultNotificationTemplates = {
   lessonNextHomeworkFollowup: "- 다음 수업 때 #{숙제}를 함께 확인하겠습니다.",
   lessonStayAfterHomeworkFollowup: "- 오늘 수업 후 #{숙제} 보충을 마무리합니다.",
@@ -5220,18 +5237,25 @@ const defaultNotificationTemplates = {
     "#{보충메모}"
   ].join("\n"),
   supplementScheduleConfirmNotice: [
-    "#{일정제목} 일정이 확정되었습니다.",
+    "#{안내제목}",
     "",
-    "#{보충내역}",
-    "일정: #{보강일정}"
+    "#{보강일정}",
+    "#{보강대상}",
+    "#{결석사유줄}",
+    "#{확인숙제줄}",
+    "#{보충메모}"
   ].join("\n"),
   supplementScheduleChangeNotice: [
-    "#{일정제목} 일정이 변경되었습니다.",
+    "#{안내제목}",
     "",
-    "#{보충내역}",
+    "#{보강일정}",
+    "#{보강대상}",
+    "#{결석사유줄}",
+    "#{확인숙제줄}",
+    "#{보충메모}",
     "#{변경사유}",
     "#{변경전}",
-    "변경 후: #{보강일정}"
+    "변경 후 일정: #{변경후일정}"
   ].join("\n")
 };
 
@@ -5274,7 +5298,7 @@ const notificationTemplateRows = [
     key: "supplementScheduleConfirmNotice",
     source: "Supabase app_state.aiSettings.notificationTemplates",
     title: "보충 일정 확정 안내",
-    variables: "#{일정제목}, #{보충내역}, #{보강일정}"
+    variables: "#{안내제목}, #{보강일정}, #{보강대상}, #{결석사유줄}, #{확인숙제줄}, #{보충메모}"
   },
   {
     audience: "학생/학부모",
@@ -5282,7 +5306,7 @@ const notificationTemplateRows = [
     key: "supplementScheduleChangeNotice",
     source: "Supabase app_state.aiSettings.notificationTemplates",
     title: "보충 일정 변경 안내",
-    variables: "#{일정제목}, #{보충내역}, #{변경사유}, #{변경전}, #{보강일정}"
+    variables: "#{안내제목}, #{보강일정}, #{보강대상}, #{결석사유줄}, #{확인숙제줄}, #{보충메모}, #{변경사유}, #{변경전}, #{변경후일정}"
   }
 ];
 
@@ -5316,7 +5340,9 @@ function normalizeNotificationTemplates(templates = {}) {
   const sourceTemplates = templates && typeof templates === "object" ? templates : {};
   return Object.keys(defaultNotificationTemplates).reduce((normalized, templateKey) => ({
     ...normalized,
-    [templateKey]: sourceTemplates[templateKey] ?? defaultNotificationTemplates[templateKey]
+    [templateKey]: sourceTemplates[templateKey] === legacySupplementScheduleNotificationTemplates[templateKey]
+      ? defaultNotificationTemplates[templateKey]
+      : sourceTemplates[templateKey] ?? defaultNotificationTemplates[templateKey]
   }), {});
 }
 
@@ -9067,7 +9093,7 @@ export function App() {
     const studentJob = buildSupplementScheduleNoticeJob({
       academyName: academyBrandName,
       previousScheduleText,
-      reminderBody: getSupplementScheduleNoticeDraft(task, "student", previousScheduleText, aiSettings.notificationTemplates),
+      reminderBody: getSupplementScheduleNoticeDraft(task, "student", previousScheduleText, aiSettings.notificationTemplates, student),
       scheduledAt,
       scheduleTitle,
       student,
@@ -9077,7 +9103,7 @@ export function App() {
     const parentJob = buildSupplementScheduleNoticeJob({
       academyName: academyBrandName,
       previousScheduleText,
-      reminderBody: getSupplementScheduleNoticeDraft(task, "parent", previousScheduleText, aiSettings.notificationTemplates),
+      reminderBody: getSupplementScheduleNoticeDraft(task, "parent", previousScheduleText, aiSettings.notificationTemplates, student),
       scheduledAt,
       scheduleTitle,
       student,
@@ -9140,7 +9166,7 @@ export function App() {
     const notificationJob = buildSupplementScheduleNoticeJob({
       academyName: academyBrandName,
       previousScheduleText: "",
-      reminderBody: getSupplementScheduleNoticeDraft(task, target, "", aiSettings.notificationTemplates),
+      reminderBody: getSupplementScheduleNoticeDraft(task, target, "", aiSettings.notificationTemplates, student),
       scheduledAt,
       scheduleTitle: getSupplementStudentReminderTitle(task),
       student,
@@ -24680,7 +24706,8 @@ function createSupplementTaskDraft(task = {}, student = null, notificationTempla
   const generatedScheduleNotificationDraft = buildSupplementScheduleNoticeBody(
     taskWithDefaultMethod,
     "",
-    notificationTemplates
+    notificationTemplates,
+    student
   );
   const studentScheduleNotificationDraft = isSupplementTeacherEditedField(task, "studentScheduleNotificationDraft")
     ? String(task.studentScheduleNotificationDraft ?? "")
@@ -24853,11 +24880,11 @@ function SupplementStudentModal({
           if (isTeacherFinal) return;
           const previousGeneratedDraft = config.controlType === "studentReminder"
             ? createNotificationDraft(previousTaskValues, [student], normalizedNotificationTemplates)
-            : buildSupplementScheduleNoticeBody(previousTaskValues, "", normalizedNotificationTemplates);
+            : buildSupplementScheduleNoticeBody(previousTaskValues, "", normalizedNotificationTemplates, student);
           if (normalizeSupplementDraftValue(previousValues[config.field]) !== normalizeSupplementDraftValue(previousGeneratedDraft)) return;
           values[config.field] = config.controlType === "studentReminder"
             ? createNotificationDraft(nextTaskValues, [student], normalizedNotificationTemplates)
-            : buildSupplementScheduleNoticeBody(nextTaskValues, "", normalizedNotificationTemplates);
+            : buildSupplementScheduleNoticeBody(nextTaskValues, "", normalizedNotificationTemplates, student);
         });
       }
       const diff = getSupplementTaskDraftDiff(task, values, student, normalizedNotificationTemplates);
@@ -24904,7 +24931,7 @@ function SupplementStudentModal({
     const resolvedNotificationDrafts = supplementNotificationDraftConfigs.reduce((result, config) => {
       const generatedDraft = config.controlType === "studentReminder"
         ? createNotificationDraft(taskWithDraftValues, [student], normalizedNotificationTemplates)
-        : buildSupplementScheduleNoticeBody(taskWithDraftValues, "", normalizedNotificationTemplates);
+        : buildSupplementScheduleNoticeBody(taskWithDraftValues, "", normalizedNotificationTemplates, student);
       result[config.field] = supplementTeacherEditedFields.includes(config.field)
         ? String(draftValues[config.field] ?? "")
         : generatedDraft;
@@ -25221,7 +25248,8 @@ function SupplementStudentModal({
           notificationControlTask,
           notificationControl.controlType === "parentSchedule" ? "parent" : "student",
           "",
-          normalizedNotificationTemplates
+          normalizedNotificationTemplates,
+          student
         )
     : "";
   const notificationControlPreview = notificationControlTask && notificationControl
@@ -29239,32 +29267,39 @@ function formatSupplementScheduleDateTime(taskOrDate = {}, maybeTime = "") {
   return formatSupplementDateTimeText(date, time) || "미확정";
 }
 
-function buildSupplementScheduleNoticeBody(task = {}, previousScheduleText = "", notificationTemplates = {}) {
+function buildSupplementScheduleNoticeBody(task = {}, previousScheduleText = "", notificationTemplates = {}, student = null) {
   const templates = normalizeNotificationTemplates(notificationTemplates);
-  const scheduleTitle = getSupplementStudentReminderTitle(task) || followUpTypeLabel(task.taskType);
   const isScheduleChange = Boolean(normalizeMessageText(previousScheduleText));
   const templateKey = isScheduleChange ? "supplementScheduleChangeNotice" : "supplementScheduleConfirmNotice";
-  const changeDetailSource = Object.prototype.hasOwnProperty.call(task, "scheduleChangeDetail")
-    ? task.scheduleChangeDetail
-    : getSupplementScheduleChangeDetailSeed(task);
-  const changeDetail = normalizeMessageText(changeDetailSource).trim();
+  const studentName = student?.name || task.studentName || "학생";
+  const isAbsenceMakeup = task.taskType === "absence_makeup";
+  const title = `${studentName} 학생 ${isAbsenceMakeup ? "결석 보강" : "숙제 보충"} 안내입니다.`;
+  const scheduleLine = `일시: ${formatSupplementScheduleDateTime(task)}`;
+  const makeupTargetLine = isAbsenceMakeup
+    ? formatTemplateLine("보강 대상", getAbsenceMakeupSourceText(task))
+    : formatTemplateLine("밀린 숙제", getHomeworkMakeupHomeworkText(task));
+  const absenceReasonLine = isAbsenceMakeup ? formatSupplementDraftReasonLine(task) : "";
+  const homeworkCheckLine = isAbsenceMakeup ? formatSupplementDraftHomeworkLine(task) : "";
+  const progressMemo = normalizeMessageText(task.supplementProgressMemo).trim();
   const changeReason = normalizeMessageText(task.scheduleChangeReason || "").trim();
-  const nextScheduleText = formatSupplementScheduleDateTime(task);
   return renderNotificationTemplate(templates[templateKey], {
-    "변경사유": isScheduleChange && changeReason ? `변경 사유:\n${changeReason}` : "",
-    "변경전": isScheduleChange && previousScheduleText ? `변경 전: ${previousScheduleText}` : "",
-    "보강일정": nextScheduleText,
-    "보충내역": changeDetail ? `보충 내역:\n${changeDetail}` : "",
-    "상태": isScheduleChange ? "변경" : "확정",
-    "일정라벨": isScheduleChange ? "변경 후" : "일정",
-    "일정제목": scheduleTitle
+    "결석사유줄": absenceReasonLine,
+    "변경사유": isScheduleChange && changeReason ? `변경 사유: ${changeReason}` : "",
+    "변경전": isScheduleChange && previousScheduleText ? `변경 전 일정: ${previousScheduleText}` : "",
+    "변경후일정": formatSupplementScheduleDateTime(task),
+    "보강대상": makeupTargetLine,
+    "보강일정": scheduleLine,
+    "보충메모": progressMemo ? `보충 메모: ${progressMemo}` : "",
+    "안내제목": title,
+    "일정제목": getSupplementStudentReminderTitle(task) || followUpTypeLabel(task.taskType),
+    "확인숙제줄": homeworkCheckLine
   });
 }
 
-function getSupplementScheduleNoticeDraft(task = {}, target = "student", previousScheduleText = "", notificationTemplates = {}) {
+function getSupplementScheduleNoticeDraft(task = {}, target = "student", previousScheduleText = "", notificationTemplates = {}, student = null) {
   const field = target === "parent" ? "parentScheduleNotificationDraft" : "studentScheduleNotificationDraft";
   if (isSupplementTeacherEditedField(task, field)) return String(task[field] ?? "");
-  return buildSupplementScheduleNoticeBody(task, previousScheduleText, notificationTemplates);
+  return buildSupplementScheduleNoticeBody(task, previousScheduleText, notificationTemplates, student);
 }
 
 function getSupplementNotificationControlDisplay(job = null) {
