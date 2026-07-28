@@ -1984,6 +1984,12 @@
 - AI 가상검수: preExam create/update TARGET과 다른 type/status CONTROL로 추출 전후 subset·순서·참조·입력 불변을 대조한다. 전용 extraction fixture와 시나리오 622/622, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AJ-3`은 import·호출·export 1개와 App-owned effect guard/save/dependency 경계를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17AJ-3 generated pre-exam sync selector closeout
+
+- closeout: `generatedPreExamSyncSelector.js` import 1개·호출 1개·export 1개와 App effect의 teacher/app-state/attendance guard, 빈 결과 중단, 기존 bulk save 호출 및 dependency 순서를 고정했다.
+- AI 가상검수: preExam create/update TARGET과 lesson 누락·examPrep update·preExam synced CONTROL을 다시 실행해 subset·순서·참조·입력 불변을 확인하고 helper side effect 0건을 대조한다. 전용 closeout fixture와 시나리오 623/623, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AK-1`은 수동 적용 handler가 generated key로 선택하는 plan subset을 inventory하되 bulk save 호출은 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
