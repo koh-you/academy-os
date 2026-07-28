@@ -1449,6 +1449,13 @@
 - 유지보수 진단: Supabase 재조회에서 task row 자체가 누락돼도 기존 비교 순서 때문에 오류 상세가 task ID가 아니라 첫 identity field인 `studentId`로 표시된다. 저장 차단은 정상이며 이번 리팩터링에서는 문구를 바꾸지 않았다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위는 검증된 homework/makeup/record 응답의 state merge와 record save-state map을 순수 모델로 분리하는 작업이다.
 
+## 2026-07-28 P1. App.jsx 17F-9 수업일지 검증 응답 state model 분리
+
+- 코드: 검증된 homework를 계획 배열에 overlay하고, makeup task·record를 기존 upsert 계약으로 병합하며, record별 `saving/saved/failed` map을 만드는 계산을 `lessonJournalDraftPersistenceState.js` 순수 모델로 분리했다.
+- 경계: App은 기존 `upsertById`·`upsertLessonStudentRecord`를 주입하고 React setter·ref·localStorage 반영을 계속 소유한다. 외부 저장 순서와 API 계약은 바꾸지 않았다.
+- AI 가상검수: 중복 verified homework의 마지막 값 우선·추가 row 격리, 기존/신규 makeup·record의 upsert 호출 순서, 입력 불변, 중복 record ID save-state, 빈 CONTROL을 대조했다. 전용 fixture, 수업일지 inventory, 정적 시나리오 520/520, `npm run test:production`, `npm run build`, `git diff --check` 통과.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17G-1`은 수업일지 edit/draft/manual message의 lesson 전환 초기화 lifecycle을 전용 hook으로 분리하는 작업이다.
+
 ## 2026-07-28 P1. App.jsx 17D-2 수업일지 학생 표 shell 분리
 
 - 코드: 수업일지 학생 표의 panel, 읽기/편집 class, 학생·메모·출결·교재·진도·숙제·과제·알림톡 10개 고정 열 제목을 `lessonJournalTableModel.js`와 `LessonJournalTable.jsx`로 분리했다.

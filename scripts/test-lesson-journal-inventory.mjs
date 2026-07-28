@@ -206,6 +206,10 @@ const makeupTaskBulkApiSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalMakeupTaskBulkApi.js", import.meta.url),
   "utf8"
 );
+const draftPersistenceStateSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalDraftPersistenceState.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -314,7 +318,7 @@ const saveHandlerSource = section(
   "async function handleSaveLessonJournalDrafts",
   "async function handleSaveRecord"
 );
-const savePersistenceSource = `${saveHandlerSource}\n${draftSaveOutcomeSource}\n${draftPersistenceControllerSource}\n${recordBulkApiSource}\n${homeworkBulkApiSource}\n${makeupTaskRequestSource}\n${makeupTaskBulkApiSource}`;
+const savePersistenceSource = `${saveHandlerSource}\n${draftSaveOutcomeSource}\n${draftPersistenceControllerSource}\n${recordBulkApiSource}\n${homeworkBulkApiSource}\n${makeupTaskRequestSource}\n${makeupTaskBulkApiSource}\n${draftPersistenceStateSource}`;
 for (const persistenceContract of [
   "saveLessonJournalHomeworksWithVerification",
   "saveLessonJournalMakeupTasksWithVerification",
@@ -1137,6 +1141,42 @@ assert.ok(
     !makeupTaskBulkApiSource.includes("setMakeupTasks") &&
     !makeupTaskBulkApiSource.includes("localStorage"),
   "makeup task bulk API adapter must own identity verification without App state"
+);
+for (const extractedDraftPersistenceStateContract of [
+  "mergeVerifiedLessonJournalHomeworks",
+  "mergeVerifiedLessonJournalMakeupTasks",
+  "mergeVerifiedLessonJournalRecords",
+  "createLessonJournalRecordSaveStates",
+  "verifiedHomeworks.map",
+  "verifiedTasks.reduce",
+  "verifiedRecords.reduce",
+  "Object.fromEntries"
+]) {
+  assert.ok(
+    draftPersistenceStateSource.includes(extractedDraftPersistenceStateContract),
+    `missing extracted 17F-9 contract: ${extractedDraftPersistenceStateContract}`
+  );
+}
+for (const injectedDraftPersistenceStateContract of [
+  'createLessonJournalRecordSaveStates(recordsToSave, "saving")',
+  "mergeVerifiedLessonJournalHomeworks({",
+  "mergeVerifiedLessonJournalMakeupTasks({",
+  "mergeVerifiedLessonJournalRecords({",
+  'createLessonJournalRecordSaveStates(recordsToSave, "saved")',
+  'createLessonJournalRecordSaveStates(recordsToSave, "failed")'
+]) {
+  assert.ok(
+    saveHandlerSource.includes(injectedDraftPersistenceStateContract),
+    `missing App-owned 17F-9 binding: ${injectedDraftPersistenceStateContract}`
+  );
+}
+assert.ok(
+  !draftPersistenceStateSource.includes("setHomeworks") &&
+    !draftPersistenceStateSource.includes("setMakeupTasks") &&
+    !draftPersistenceStateSource.includes("setRecords") &&
+    !draftPersistenceStateSource.includes("localStorage") &&
+    !draftPersistenceStateSource.includes("/api/"),
+  "draft persistence state model must stay pure and effect-free"
 );
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");

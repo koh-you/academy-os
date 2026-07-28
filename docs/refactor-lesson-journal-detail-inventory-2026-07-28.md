@@ -88,8 +88,10 @@
 40. 실제 `makeup_tasks` 저장·재조회 검증과 React 반영은 App에 유지했다.
 41. `17F-8` 완료: 등원보충 requested task 저장·Supabase identity 재조회 대조를 주입형 API adapter로 분리했다.
 42. 검증된 `makeup_tasks`의 React 상태 반영은 App에 유지했다.
-43. 다음: 검증된 homework/makeup/record 응답의 state merge와 record save-state map을 순수 모델로 분리
-44. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
+43. `17F-9` 완료: 검증된 homework/makeup/record 응답의 state merge와 record save-state map을 순수 모델로 분리했다.
+44. React setter·ref·localStorage 반영은 App에 유지했다.
+45. 다음 `17G-1`: 수업일지 edit/draft/manual message의 lesson 전환 초기화 lifecycle을 전용 hook으로 분리
+46. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -143,6 +145,7 @@
 - `17F-6` gate: 가상 homework 2건과 역순·추가 row Supabase 응답으로 요청 payload·요청 순서 반환·원본 불변을 대조하고, fingerprint 8개 필드 각각의 불일치, 누락 row, source 불일치, 빈 CONTROL 무호출, 네트워크 실패를 판정한다. App은 검증 결과의 ref/state 반영만 소유하는지 정적으로 검사한다.
 - `17F-7` gate: 완료된 기존 task, draft 기존 task, 신규 task, 명시 override 신규 CONTROL을 고정 ID seed·날짜·개별 timestamp로 생성해 기존 ID·상태 승계, `done -> scheduled`, 신규 기본값, spread 우선순위, 입력 불변을 대조한다. source가 다른 동일 학생 CONTROL은 신규 task가 되는지 확인하고 builder에서 시계·API·Supabase 참조가 없는지 검사한다.
 - `17F-8` gate: 가상 requested task 2건과 역순·추가 row Supabase 응답으로 request 인자·요청 순서 반환·원본 불변을 대조하고, identity 6개 필드 각각의 불일치, 누락 row, source 불일치, 빈 CONTROL 무호출, 네트워크 실패를 판정한다. 누락 row가 기존 로직상 첫 identity mismatch인 `studentId`로 보고되는 동작도 기능 변경 없이 고정한다.
+- `17F-9` gate: 계획 homework와 중복 verified homework, 기존·신규 makeup task, 기존·신규 record를 가상 upsert dependency로 병합해 순서·추가 row 격리·마지막 verified 우선·호출 순서·입력 불변을 대조한다. 중복 record ID의 save-state map과 빈 CONTROL을 판정하고 React setter·ref·localStorage는 App에 남는지 검사한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
 - recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.
 - 학생 포털 실제 쓰기와 Solapi 특강 템플릿 검수는 사용자 지시로 목록에서 제거됐고, 교사 bearer/Storage 소유권 보안은 구현·배포 검증 완료다.

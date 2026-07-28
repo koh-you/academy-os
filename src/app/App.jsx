@@ -223,6 +223,12 @@ import {
 import { useAttendanceRecordSync } from "../domains/lessons/useAttendanceRecordSync.js";
 import { executeLessonJournalDraftPersistence } from "../domains/lessons/lessonJournalDraftPersistenceController.js";
 import { createLessonJournalDraftPersistencePlan } from "../domains/lessons/lessonJournalDraftPersistencePlan.js";
+import {
+  createLessonJournalRecordSaveStates,
+  mergeVerifiedLessonJournalHomeworks,
+  mergeVerifiedLessonJournalMakeupTasks,
+  mergeVerifiedLessonJournalRecords
+} from "../domains/lessons/lessonJournalDraftPersistenceState.js";
 import { createLessonJournalDraftSaveRequest } from "../domains/lessons/lessonJournalDraftSaveRequest.js";
 import { saveLessonJournalHomeworksWithVerification } from "../domains/lessons/lessonJournalHomeworkBulkApi.js";
 import { saveLessonJournalMakeupTasksWithVerification } from "../domains/lessons/lessonJournalMakeupTaskBulkApi.js";
@@ -9093,7 +9099,7 @@ export function App() {
     let nextHomeworks = persistencePlan.nextHomeworks;
     const recordsToSave = persistencePlan.recordsToSave;
 
-    const savingStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "saving"]));
+    const savingStates = createLessonJournalRecordSaveStates(recordsToSave, "saving");
     if (recordsToSave.length) {
       setSaveStates((currentStates) => ({ ...currentStates, ...savingStates }));
     }
@@ -9106,8 +9112,10 @@ export function App() {
           request: postJson
         });
         if (verifiedHomeworks.length) {
-          const verifiedById = new Map(verifiedHomeworks.map((homework) => [homework.homeworkId, homework]));
-          nextHomeworks = nextHomeworks.map((homework) => verifiedById.get(homework.homeworkId) ?? homework);
+          nextHomeworks = mergeVerifiedLessonJournalHomeworks({
+            plannedHomeworks: nextHomeworks,
+            verifiedHomeworks
+          });
           homeworksRef.current = nextHomeworks;
           setHomeworks(nextHomeworks);
         }
@@ -9126,10 +9134,11 @@ export function App() {
           request: postMakeupTasks
         });
         if (verifiedTasks.length) {
-          setMakeupTasks((current) => verifiedTasks.reduce(
-            (tasks, task) => upsertById(tasks, task, "makeupTaskId"),
-            current
-          ));
+          setMakeupTasks((currentTasks) => mergeVerifiedLessonJournalMakeupTasks({
+            currentTasks,
+            verifiedTasks,
+            upsertTask: (tasks, task) => upsertById(tasks, task, "makeupTaskId")
+          }));
         }
         return verifiedTasks.length;
       },
@@ -9139,20 +9148,21 @@ export function App() {
           request: postJson,
           matchesRecord: hasMatchingVerifiedLessonRecordFields
         });
-        const nextRecords = verifiedRecords.reduce(
-          (currentRecords, record) => upsertLessonStudentRecord(currentRecords, record),
-          recordsRef.current
-        );
+        const nextRecords = mergeVerifiedLessonJournalRecords({
+          currentRecords: recordsRef.current,
+          verifiedRecords,
+          upsertRecord: upsertLessonStudentRecord
+        });
         recordsRef.current = nextRecords;
         setRecords(nextRecords);
         writeStorageValue(window.localStorage, storageKeys.records, JSON.stringify(nextRecords));
-        const savedStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "saved"]));
+        const savedStates = createLessonJournalRecordSaveStates(recordsToSave, "saved");
         setSaveStates((currentStates) => ({ ...currentStates, ...savedStates }));
         return verifiedRecords.length;
       },
       onFailure: (error) => {
         console.error(error);
-        const failedStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "failed"]));
+        const failedStates = createLessonJournalRecordSaveStates(recordsToSave, "failed");
         if (recordsToSave.length) {
           setSaveStates((currentStates) => ({ ...currentStates, ...failedStates }));
         }
