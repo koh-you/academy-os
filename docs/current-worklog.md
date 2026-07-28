@@ -1321,6 +1321,14 @@
 - UI/문구: 보충관리의 학생·학부모 다음 정각 일정 안내도 당일 학생 11시 리마인더와 같은 `제목 → 빈 줄 → 일시 → 보강 대상/밀린 숙제 → 사유 → 확인할 숙제` 순서로 생성한다. 결석보강은 `결석 보강`, 숙제보충은 `숙제 보충` 제목을 사용하며, 일정 변경 알림에는 그 뒤에 변경 사유·변경 전 일정·변경 후 일정만 추가한다.
 - 원천/부작용: Supabase `app_state.aiSettings.notificationTemplates`의 기존 기본 일정 템플릿은 런타임에서 새 기본 형식으로 해석한다. 교사가 직접 수정·저장한 개별 학생/학부모 최종 문구와 기존 `notification_jobs` 예약·발송 본문은 바꾸지 않는다. 새 예약·발송·취소나 Solapi 호출은 실행하지 않는다.
 - AI 검증: 보충 일정 알림 정적 계약을 새 라벨 형식으로 갱신하고, `npm run build`, `git diff --check`, `npm run test:production`을 실행한다. 기존 수업 모달 `90a` 정적 검사 1건은 이번 문구 변경과 무관한 기준선 실패로 유지된다.
+
+## 2026-07-28 P1. App.jsx 리팩터링 브랜치 최신 main 통합
+
+- Git: `codex/refactor-supplement-11b`의 기존 리팩터링 커밋을 최신 `origin/main` `d018ca2e` 위로 rebase했다. App.jsx 추출 경계와 main의 보충 알림 형식 변경을 모두 보존하고, 전용 브랜치만 갱신한다.
+- 충돌 보존: 추출된 보충 알림 orchestration, task draft, 학생 modal에서 학생 일정·학부모 일정 문구 생성 시 `student`를 끝 인자로 계속 전달한다. 교사 최종 수정본, 학생별 이름, 11시 알림·다음 정각 예약·취소 경계는 바꾸지 않았다.
+- AI 가상검수: 가상 학생·학부모 TARGET/CONTROL과 주입형 예약 callback으로 학생 일정, 학부모 일정, 학생 11시 payload의 대상 분리·중복 방지·수정본 보존을 검증했다. 최신 main 문구 계약과 추출된 다중 파일 경계를 함께 읽도록 정적 시나리오를 보강했고 520/520, `npm run test:production`, `npm run build`, `git diff --check`가 통과했다. 운영 API·Supabase·Solapi 호출은 0건이다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17G-1`은 수업일지 edit/draft/manual message의 lesson 전환 초기화 lifecycle을 전용 hook으로 분리하는 작업이다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
