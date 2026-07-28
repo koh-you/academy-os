@@ -1052,11 +1052,11 @@ function normalizeExamPrepRowReviewDraft(row = {}) {
 }
 
 const appStateAutosaveRisk = {
-  title: "app_state 전체 snapshot 저장",
-  storage: "Supabase app_state: aiSettings, attendanceSettings, lessonResearchItems, wrongProblems 등 sharedAppState 묶음",
-  risk: "작은 입력도 공통 snapshot 저장 요청으로 이어집니다. 오래된 탭이나 저장 실패가 끼면 화면 하나의 수정이 다른 데이터 묶음까지 함께 덮을 수 있습니다.",
-  stopCondition: "저장 실패가 뜨거나, 새로고침 뒤 이전 값이 보이거나, 이 화면과 무관한 데이터가 같이 바뀌면 다음 입력을 멈춥니다.",
-  recommendation: "학생 상담/성적/시험지처럼 독립성이 큰 데이터부터 key별 저장으로 분리하고, 남은 묶음은 updatedAt/version 충돌 확인을 붙입니다."
+  title: "app_state key별 자동저장",
+  storage: "Supabase app_state: aiSettings, attendanceSettings, lessonResearchItems, wrongProblems 등 변경된 key만 500ms debounce로 저장",
+  risk: "전체 snapshot 저장은 제거됐습니다. 다만 같은 key를 여러 탭에서 빠르게 고치거나, 이전 요청이 더 늦게 도착하면 최신값을 덮을 수 있습니다. 저장 뒤 재조회·version 대조도 아직 없습니다.",
+  stopCondition: "저장 실패가 뜨거나, 새로고침 뒤 이전 값이 보이거나, 다른 탭의 같은 설정이 되돌아가면 다음 입력을 멈춥니다.",
+  recommendation: "독립성이 큰 데이터는 계속 명시 저장·재조회 흐름으로 분리하고, 남은 자동저장 key에는 updatedAt/version 충돌 확인을 붙입니다."
 };
 
 const examPrepAutosaveRisk = {
