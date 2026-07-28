@@ -139,7 +139,7 @@ const saveFunctionSource = appSource.slice(
 );
 for (const sideEffectBoundary of [
   "mergeGeneratedLessonsIntoState(lessonsToSave)",
-  "setGeneratedLessonSaveStatus({",
+  "setGeneratedLessonSaveStatus(",
   '"/api/lessons/bulk"',
   "postJsonWithTimeout(",
   ".then((result)",

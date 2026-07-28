@@ -99,7 +99,7 @@ const optimisticIndex = saveSource.indexOf(
   "mergeGeneratedLessonsIntoState(lessonsToSave)"
 );
 const savingIndex = saveSource.indexOf(
-  "setGeneratedLessonSaveStatus({",
+  "createGeneratedLessonSavingStatus(lessonsToSave)",
   optimisticIndex
 );
 const requestIndex = saveSource.indexOf(
@@ -119,10 +119,13 @@ const resultMergeIndex = saveSource.indexOf(
   resultGuardIndex
 );
 const savedIndex = saveSource.indexOf(
-  'state: "saved"',
+  "createGeneratedLessonSavedStatus(lessonsToSave)",
   resultMergeIndex
 );
-const failedIndex = saveSource.indexOf('state: "failed"', savedIndex);
+const failedIndex = saveSource.indexOf(
+  "createGeneratedLessonFailedStatus(lessonsToSave, error.message)",
+  savedIndex
+);
 assert.ok(
   optimisticIndex >= 0 &&
     savingIndex > optimisticIndex &&

@@ -86,16 +86,16 @@ const saveSource = appSource.slice(saveStart, saveEnd);
 const orderedEffects = [
   "if (lessonsToSave.length === 0) return",
   "mergeGeneratedLessonsIntoState(lessonsToSave)",
-  "setGeneratedLessonSaveStatus({",
-  'state: "saving"',
+  "setGeneratedLessonSaveStatus(",
+  "createGeneratedLessonSavingStatus(lessonsToSave)",
   "postJsonWithTimeout(",
   '"/api/lessons/bulk"',
   "20000",
   ".then((result)",
   "mergeGeneratedLessonsIntoState(result.lessons)",
-  'state: "saved"',
+  "createGeneratedLessonSavedStatus(lessonsToSave)",
   ".catch((error)",
-  'state: "failed"'
+  "createGeneratedLessonFailedStatus(lessonsToSave, error.message)"
 ];
 let previousIndex = -1;
 for (const boundary of orderedEffects) {

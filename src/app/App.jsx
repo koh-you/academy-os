@@ -96,6 +96,11 @@ import { createLessonNotificationJobBatch } from "../domains/lessons/lessonNotif
 import { createLessonNotificationRecordStatusPayload } from "../domains/lessons/lessonNotificationRecordStatusPayload.js";
 import { createLessonNotificationRecordStatusRows } from "../domains/lessons/lessonNotificationRecordStatusRows.js";
 import { selectGeneratedLessonsToSave } from "../domains/lessons/generatedLessonSaveSelector.js";
+import {
+  createGeneratedLessonFailedStatus,
+  createGeneratedLessonSavedStatus,
+  createGeneratedLessonSavingStatus
+} from "../domains/lessons/generatedLessonSaveStatus.js";
 import { mergeGeneratedLessonLists } from "../domains/lessons/generatedLessonState.js";
 import {
   applySupplementScheduleNotificationsRequest,
@@ -6349,11 +6354,9 @@ export function App() {
   function saveGeneratedLessons(lessonsToSave) {
     if (lessonsToSave.length === 0) return;
     mergeGeneratedLessonsIntoState(lessonsToSave);
-    setGeneratedLessonSaveStatus({
-      lessons: lessonsToSave,
-      message: `자동 수업 ${lessonsToSave.length}건 저장 중...`,
-      state: "saving"
-    });
+    setGeneratedLessonSaveStatus(
+      createGeneratedLessonSavingStatus(lessonsToSave)
+    );
     postJsonWithTimeout(
       "/api/lessons/bulk",
       { lessons: lessonsToSave },
@@ -6364,19 +6367,15 @@ export function App() {
         if (Array.isArray(result.lessons) && result.lessons.length > 0) {
           mergeGeneratedLessonsIntoState(result.lessons);
         }
-        setGeneratedLessonSaveStatus({
-          lessons: [],
-          message: `자동 수업 ${lessonsToSave.length}건 저장 완료`,
-          state: "saved"
-        });
+        setGeneratedLessonSaveStatus(
+          createGeneratedLessonSavedStatus(lessonsToSave)
+        );
       })
       .catch((error) => {
         console.error(error);
-        setGeneratedLessonSaveStatus({
-          lessons: lessonsToSave,
-          message: `자동 수업 저장 실패 · ${error.message}`,
-          state: "failed"
-        });
+        setGeneratedLessonSaveStatus(
+          createGeneratedLessonFailedStatus(lessonsToSave, error.message)
+        );
       });
   }
 

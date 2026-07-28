@@ -155,7 +155,7 @@ assert.ok(saveStart >= 0 && saveEnd > saveStart);
 const saveSource = appSource.slice(saveStart, saveEnd);
 for (const AppOwnedEffect of [
   "mergeGeneratedLessonsIntoState(lessonsToSave)",
-  "setGeneratedLessonSaveStatus({",
+  "setGeneratedLessonSaveStatus(",
   '"/api/lessons/bulk"',
   "mergeGeneratedLessonsIntoState(result.lessons)"
 ]) {

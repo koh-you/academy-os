@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { selectGeneratedLessonsToSave } from "../src/domains/lessons/generatedLessonSaveSelector.js";
+import {
+  createGeneratedLessonFailedStatus,
+  createGeneratedLessonSavedStatus,
+  createGeneratedLessonSavingStatus
+} from "../src/domains/lessons/generatedLessonSaveStatus.js";
 import { mergeGeneratedLessonLists } from "../src/domains/lessons/generatedLessonState.js";
 
 const currentTarget = {
@@ -33,6 +38,12 @@ const nextLessons = mergeGeneratedLessonLists(
   currentLessons,
   lessonsToSave
 );
+const savingStatus = createGeneratedLessonSavingStatus(lessonsToSave);
+const savedStatus = createGeneratedLessonSavedStatus(lessonsToSave);
+const failedStatus = createGeneratedLessonFailedStatus(
+  lessonsToSave,
+  "TARGET_ERROR"
+);
 
 assert.deepEqual(lessonsToSave, [targetPatch, newTarget]);
 assert.equal(lessonsToSave[0], targetPatch);
@@ -49,6 +60,12 @@ assert.deepEqual(nextLessons, [
 ]);
 assert.equal(nextLessons[1], currentControl);
 assert.equal(nextLessons[2], newTarget);
+assert.equal(savingStatus.lessons, lessonsToSave);
+assert.equal(savingStatus.state, "saving");
+assert.deepEqual(savedStatus.lessons, []);
+assert.equal(savedStatus.state, "saved");
+assert.equal(failedStatus.lessons, lessonsToSave);
+assert.equal(failedStatus.state, "failed");
 assert.deepEqual({ currentLessons, planItems }, inputSnapshot);
 
 const appSource = await readFile(
@@ -69,14 +86,23 @@ const stateSource = await readFile(
   ),
   "utf8"
 );
+const statusSource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedLessonSaveStatus.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 for (const modulePath of [
   'from "../domains/lessons/generatedLessonSaveSelector.js"',
+  'from "../domains/lessons/generatedLessonSaveStatus.js"',
   'from "../domains/lessons/generatedLessonState.js"'
 ]) {
   assert.equal(appSource.split(modulePath).length - 1, 1);
 }
 assert.equal(selectorSource.split("export function ").length - 1, 1);
 assert.equal(stateSource.split("export function ").length - 1, 1);
+assert.equal(statusSource.split("export function ").length - 1, 3);
 assert.equal(
   appSource.split("selectGeneratedLessonsToSave(planItems)").length - 1,
   1
@@ -102,17 +128,17 @@ const orderedBoundaries = [
   "function saveGeneratedLessons(lessonsToSave)",
   "if (lessonsToSave.length === 0) return",
   "mergeGeneratedLessonsIntoState(lessonsToSave)",
-  "setGeneratedLessonSaveStatus({",
-  'state: "saving"',
+  "setGeneratedLessonSaveStatus(",
+  "createGeneratedLessonSavingStatus(lessonsToSave)",
   "postJsonWithTimeout(",
   '"/api/lessons/bulk"',
   "20000",
   ".then((result)",
   "if (Array.isArray(result.lessons) && result.lessons.length > 0)",
   "mergeGeneratedLessonsIntoState(result.lessons)",
-  'state: "saved"',
+  "createGeneratedLessonSavedStatus(lessonsToSave)",
   ".catch((error)",
-  'state: "failed"'
+  "createGeneratedLessonFailedStatus(lessonsToSave, error.message)"
 ];
 let previousIndex = -1;
 for (const boundary of orderedBoundaries) {
@@ -126,7 +152,7 @@ for (const boundary of orderedBoundaries) {
 assert.ok(!boundarySource.includes("lessonsToSave.forEach("));
 assert.ok(!boundarySource.includes(".filter((item) => item.status"));
 
-for (const helperSource of [selectorSource, stateSource]) {
+for (const helperSource of [selectorSource, stateSource, statusSource]) {
   for (const forbiddenHelperEffect of [
     "useState",
     "useEffect",
@@ -147,22 +173,6 @@ for (const helperSource of [selectorSource, stateSource]) {
       `generated lesson save aggregate helper crossed a side effect: ${forbiddenHelperEffect}`
     );
   }
-}
-
-for (const nextCandidate of [
-  "lessons: lessonsToSave,",
-  "message: `자동 수업 ${lessonsToSave.length}건 저장 중...`,",
-  'state: "saving"',
-  "lessons: [],",
-  "message: `자동 수업 ${lessonsToSave.length}건 저장 완료`,",
-  'state: "saved"',
-  "message: `자동 수업 저장 실패 · ${error.message}`,",
-  'state: "failed"'
-]) {
-  assert.ok(
-    boundarySource.includes(nextCandidate),
-    `generated lesson save status candidate changed: ${nextCandidate}`
-  );
 }
 
 console.log("generated lesson save boundary aggregate audit passed");

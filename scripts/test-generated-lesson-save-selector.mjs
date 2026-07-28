@@ -46,7 +46,7 @@ for (const appBoundary of [
   "const lessonsToSave = selectGeneratedLessonsToSave(planItems)",
   "saveGeneratedLessons(lessonsToSave)",
   "mergeGeneratedLessonsIntoState(lessonsToSave)",
-  "setGeneratedLessonSaveStatus({",
+  "setGeneratedLessonSaveStatus(",
   '"/api/lessons/bulk"',
   "postJsonWithTimeout("
 ]) {
