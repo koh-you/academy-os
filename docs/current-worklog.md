@@ -1818,6 +1818,12 @@
 - AI 검수: 전체 TARGET/CONTROL 입력, 추가 필드, 기본값을 가상 실행해 payload·참조·입력 불변을 확인하고 helper side effect 0건 및 App request/response 순서를 전용 fixture·정적 시나리오·build·`git diff --check`로 대조한다.
 - 사람 gate: 없음. 다음 `17Y-3`은 payload helper export/import/call 수와 reconcile side-effect 경계를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17Y-3 notification job reconcile payload boundary closeout
+
+- 완료: `createNotificationJobReconcilePayload` export/import/call 각 1개와 90초 request→job merge→record reduce→ref/React/localStorage→save state→return, callback 3곳을 closeout했다.
+- AI 검수: 전체 필드와 ID 배열 참조·입력 불변을 재검증하고 App inline 6필드 object 0건, helper의 네트워크·React·Storage·Supabase·Solapi side effect 0건을 전용 closeout fixture·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 없음. 다음 `17Z-1`은 reconcile 응답 records의 순수 reduce와 saved-state map 계산을 각각 inventory하고 실제 ref/React/localStorage 반영은 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
