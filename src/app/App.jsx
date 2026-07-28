@@ -216,6 +216,10 @@ import { AttendanceKiosk } from "../domains/lessons/AttendanceKiosk.jsx";
 import { checkKioskAttendanceAction } from "../domains/lessons/attendanceKioskCheckController.js";
 import { previewKioskAttendanceAction } from "../domains/lessons/attendanceKioskPreviewController.js";
 import { AttendanceModal } from "../domains/lessons/AttendanceModal.jsx";
+import {
+  defaultAttendanceSettings,
+  normalizeAttendanceSettings
+} from "../domains/lessons/attendanceSettings.js";
 import { useAttendanceRecordSync } from "../domains/lessons/useAttendanceRecordSync.js";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
@@ -5121,10 +5125,6 @@ const defaultAiSettings = {
   prompts: defaultAiPrompts
 };
 
-const defaultAttendanceSettings = {
-  lateGraceMinutes: 5
-};
-
 function hasBrokenPromptEncoding(prompt = "") {
   const text = String(prompt ?? "");
   const replacementCount = (text.match(/\uFFFD/g) || []).length;
@@ -5156,18 +5156,6 @@ function normalizeAiSettings(settings = {}) {
     ...(settings ?? {}),
     notificationTemplates: normalizeNotificationTemplates(settings?.notificationTemplates),
     prompts: normalizeAiPrompts(settings?.prompts)
-  };
-}
-
-function normalizeAttendanceSettings(settings = {}) {
-  const rawLateGraceMinutes = settings?.lateGraceMinutes ?? defaultAttendanceSettings.lateGraceMinutes;
-  const lateGraceMinutes = Number(rawLateGraceMinutes);
-  return {
-    ...defaultAttendanceSettings,
-    ...(settings ?? {}),
-    lateGraceMinutes: Number.isFinite(lateGraceMinutes) && lateGraceMinutes > 0
-      ? lateGraceMinutes
-      : defaultAttendanceSettings.lateGraceMinutes
   };
 }
 

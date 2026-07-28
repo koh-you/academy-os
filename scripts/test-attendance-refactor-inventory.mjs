@@ -14,6 +14,10 @@ const attendanceSyncHookSource = await readFile(
   new URL("../src/domains/lessons/useAttendanceRecordSync.js", import.meta.url),
   "utf8"
 );
+const attendanceSettingsSource = await readFile(
+  new URL("../src/domains/lessons/attendanceSettings.js", import.meta.url),
+  "utf8"
+);
 const manualAttendanceSaveControllerSource = await readFile(
   new URL("../src/domains/lessons/manualAttendanceSaveController.js", import.meta.url),
   "utf8"
@@ -49,6 +53,16 @@ assert.equal(
   appSource.includes("mergeRemoteAttendanceRecord("),
   false,
   "attendance sync merge and orchestration must stay outside App"
+);
+assert.ok(
+  appSource.includes('from "../domains/lessons/attendanceSettings.js"') &&
+    attendanceSettingsSource.includes("function normalizeAttendanceSettings"),
+  "attendance settings normalization must stay in its extracted model"
+);
+assert.equal(
+  appSource.includes("function normalizeAttendanceSettings("),
+  false,
+  "App must not own attendance settings normalization"
 );
 for (const lifecycleContract of [
   "attendanceSyncIntervalMs = 7_000",

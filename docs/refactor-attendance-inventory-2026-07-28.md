@@ -61,5 +61,6 @@
 - `16E-2` 완료: 수동 출결 request 이후 lesson→record→notification job 적용과 결석 예약 부분 실패 판정을 `manualAttendanceSaveController.js` 주입형 controller로 분리했다. TARGET/CONTROL state, scheduled/dry-run/failed/missing record/request failure를 가상 데이터로 검증했다.
 - `16F-1` 완료: 7초 출결 증분 동기화의 날짜 범위 request·remote record 병합·상태 전이를 `attendanceSyncController.js`로 분리했다. dirty TARGET/CONTROL, disposed 응답, request 실패와 malformed 응답을 가상 데이터로 검증했다.
 - `16F-2` 완료: polling interval과 focus/visibility listener, immediate sync, in-flight/hidden/disposed 차단과 cleanup을 `useAttendanceRecordSync.js`로 분리했다.
-- 다음 `16G`: App에 남은 출결 코드가 React state adapter·화면 조립·유지보수/보안 gate 대상뿐인지 closeout audit fixture로 고정한다.
+- `16G-1` 완료: 기본 지각 유예시간과 저장 설정 정규화를 `attendanceSettings.js` 순수 모델로 분리하고 숫자 문자열·0·음수·빈값·NaN·Infinity·추가 설정 보존을 검증했다.
+- 다음 `16G-2`: App에 남은 출결 코드가 React state adapter·화면 조립·다른 로드맵 또는 유지보수/보안 gate 대상뿐인지 closeout audit fixture로 고정한다.
 - 출결 서버 저장·알림톡은 동작을 바꾸지 않았으며, 실제 polling request와 React state는 주입된 기존 adapter를 그대로 사용한다.
