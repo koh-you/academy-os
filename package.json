@@ -14,6 +14,7 @@
     "preview": "vite preview --host 127.0.0.1",
     "dispatch:notifications": "node scripts/dispatch-due-notifications.cjs",
     "slack:daily-schedule": "node scripts/send-slack-daily-schedule.cjs",
+    "slack:reserve-daily-schedule": "node scripts/reserve-slack-daily-schedule.cjs",
     "check:encoding": "node scripts/check-encoding.cjs",
     "inventory:exam-blog": "node scripts/inventory-exam-analysis-blog-images.mjs",
     "verify:exam-blog-inventory": "node scripts/verify-exam-analysis-blog-manifest.mjs",

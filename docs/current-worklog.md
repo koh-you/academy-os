@@ -8526,3 +8526,15 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - UI: 퇴원 사유가 `반이동`(`class_move`)인 학생은 인수인계서 모달, PDF 문서 제목, 브라우저 인쇄 탭 제목을 모두 `반이동생 인수인계서`로 표시한다. 졸업·퇴원·기타 사유는 기존 `퇴원생 인수인계서`를 유지한다.
 - 원천/부작용: 학생의 이미 저장된 퇴원 사유를 읽기만 하며, 학생·수업·출결·숙제·Tally·알림/Solapi를 저장하거나 변경하지 않는다.
 - AI 검증: `npm run test:student-handover-pdf`, `npm run build`, `git diff --check`를 실행한다. 운영 화면에서는 반이동 학생과 일반 퇴원 학생 각각에서 제목과 PDF 인쇄 창 제목을 확인한다.
+
+## 2026-07-28 P0. 저장·새로고침·출결·Solapi 성능 보강과 Slack 서버 예약
+
+- 사용자 문제: Slack 09:00 요약이 cron 지연으로 11시 전후 도착하고, 화면 저장·새로고침·출결 반영·Solapi 예약 업데이트가 모두 느리며 매번 수동 새로고침이 필요했다.
+- Slack 원인/구현: 기존 Incoming Webhook은 실제 cron 호출 시각에 즉시 전송하므로 지연된 실행을 보정할 수 없다. `chat.scheduleMessage` 기반 Slack Bot 예약 함수, `POST /api/notifications/slack-today-schedule/reserve`, deterministic `notification_jobs` 저장, 기존 예약 취소 후 강제 재예약, dispatch token 보호, 다음 날 KST 09:00 예약 스크립트를 추가했다. Bot Token/채널 ID/dispatch token이 없는 현 운영 환경을 임의 변경하지 않았고 실제 Slack 예약·발송도 실행하지 않았다.
+- 출결 구현: 교사 수업 화면과 출결 전용 화면에서 현재 날짜 수업기록만 focus 즉시 및 7초 간격으로 API 재조회한다. 서버 출결 필드만 병합하며 `dirty/saving/failed` 로컬 수업일지 입력은 덮어쓰지 않는다. 캘린더 상단에 최신 확인 시각·확인 중·연결 지연 상태를 표시한다.
+- 저장 구현: 수업일지 수업기록을 학생별 단건 POST에서 `/api/lesson-records/bulk` 한 번으로 바꿨다. 서버는 명단 소속·기존 출결/숙제후속 보존을 일괄 확인하고 upsert 뒤 대상 lesson/student 행만 다시 읽어 필드 일치 여부를 검증한다. 숙제·등원보충도 전체 테이블 대신 변경 ID만 재조회한다.
+- 새로고침 구현: 초기 알림 이력 1,000건 조회를 제거하고 활성 상태 300건만 로드하며, 전체 이력은 알림관리 진입 시 최근 300건을 불러온다. `/api/app-state`는 같은 데이터를 중복하던 `stateRows`를 기본 응답에서 제외하고, 프론트 자동저장은 전체 app_state 대신 변경 key만 500ms debounce로 보낸다.
+- Solapi 구현: 수업일지 반 전체 예약을 브라우저 단건 반복에서 bulk endpoint 한 번으로 바꿨다. 서버는 공통 수업 맥락을 한 번 만들고 동시성 4로 예약하며, 예약 직후 provider 본문을 반복 조회하던 대기를 제거하고 기존 발송결과 대조에서 최종 provider 상태를 확인한다. 실제 Solapi 예약·발송은 실행하지 않았다.
+- Realtime 판단: 진짜 Supabase Realtime은 교사 브라우저가 `lesson_student_records` 변경을 구독하는 구조지만, 현재 교사 bearer·RLS 소유권 보안 gate가 남아 있어 직접 구독을 열지 않았다. 이번 날짜 범위 증분 동기화를 안전한 1단계로 사용하고, 인증 gate 뒤 table/event/filter를 좁힌 Realtime과 polling fallback을 붙인다.
+- 상세 설계/운영 gate: `docs/performance-optimization-2026-07-28.md`, Slack 설정은 `docs/slack-integration-guide.md`를 기준으로 한다.
+- 외부 side effect: 운영 Supabase 데이터, notification_jobs, Slack, Solapi, Tally, Storage, AI 호출을 변경하거나 실행하지 않았다. Solapi 특강 템플릿도 연결·시험 발송하지 않았다.

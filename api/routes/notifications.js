@@ -460,6 +460,7 @@ export function getNotificationStatus() {
     testRecipient: compactPhoneNumber(process.env.ALIMTALK_TEST_RECIPIENT ?? DEFAULT_TEST_RECIPIENT),
     solapiConfigured: REQUIRED_SOLAPI_ENV.every(configState),
     slackConfigured: configState("SLACK_WEBHOOK_URL"),
+    slackSchedulingConfigured: ["SLACK_BOT_TOKEN", "SLACK_CHANNEL_ID"].every(configState),
     templatesConfigured: {
       attendance: configState(TEMPLATE_ENV.attendance),
       dailyReport: configState(TEMPLATE_ENV.dailyReport),
@@ -754,4 +755,70 @@ export async function sendSlackDailyScheduleSummary(payload) {
   if (!response.ok) throw new Error(`Slack webhook failed: ${response.status} ${response.statusText}`);
 
   return { dryRun: false, status: response.status, text };
+}
+
+async function callSlackApi(method, body = {}) {
+  const token = requiredEnv("SLACK_BOT_TOKEN");
+  const response = await fetch(`https://slack.com/api/${method}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    body: JSON.stringify(body)
+  });
+  const result = await response.json();
+  if (!response.ok || !result.ok) {
+    throw new Error(`Slack ${method} failed: ${result.error || `${response.status} ${response.statusText}`}`);
+  }
+  return result;
+}
+
+export async function scheduleSlackDailyScheduleSummary(payload) {
+  const text =
+    payload.text ??
+    buildSlackDailyScheduleSummary({
+      date: payload.date,
+      reminders: payload.reminders,
+      retests: payload.retests,
+      supplements: payload.supplements
+    });
+  const scheduledAt = new Date(payload.scheduledAt);
+  if (Number.isNaN(scheduledAt.getTime())) throw new Error("Slack 예약 시각이 올바르지 않습니다.");
+  if (scheduledAt.getTime() <= Date.now()) throw new Error("Slack 예약 시각은 현재보다 이후여야 합니다.");
+  const channel = envValue("SLACK_CHANNEL_ID");
+  if (isSlackDryRun()) {
+    return {
+      channel,
+      dryRun: true,
+      postAt: Math.floor(scheduledAt.getTime() / 1000),
+      scheduledAt: scheduledAt.toISOString(),
+      scheduledMessageId: "",
+      text
+    };
+  }
+  if (!channel) throw new Error("SLACK_CHANNEL_ID environment variable is required.");
+  const result = await callSlackApi("chat.scheduleMessage", {
+    channel,
+    post_at: Math.floor(scheduledAt.getTime() / 1000),
+    text
+  });
+  return {
+    channel: result.channel || channel,
+    dryRun: false,
+    postAt: result.post_at,
+    scheduledAt: scheduledAt.toISOString(),
+    scheduledMessageId: result.scheduled_message_id,
+    text
+  };
+}
+
+export async function cancelScheduledSlackMessage({ channel, scheduledMessageId }) {
+  if (!channel || !scheduledMessageId) return { canceled: false, skipped: true };
+  if (isSlackDryRun()) return { canceled: false, dryRun: true, skipped: true };
+  const result = await callSlackApi("chat.deleteScheduledMessage", {
+    channel,
+    scheduled_message_id: scheduledMessageId
+  });
+  return { canceled: true, channel, result, scheduledMessageId };
 }

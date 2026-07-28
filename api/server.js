@@ -66,6 +66,7 @@ import {
   upsertStudent,
   upsertStudents,
   upsertLessonStudentRecord,
+  upsertLessonStudentRecords,
   upsertTestSessionWithAttempts,
   auditWithdrawnStudentDeletion,
   deleteTestSession
@@ -110,6 +111,8 @@ import {
   getNotificationStatus,
   listSolapiGroups,
   listSolapiMessages,
+  cancelScheduledSlackMessage,
+  scheduleSlackDailyScheduleSummary,
   sendAttendanceAlimtalk,
   sendDailyReportAlimtalk,
   sendLessonCommentAlimtalk,
@@ -1884,44 +1887,6 @@ function getProviderMessageId(result) {
   );
 }
 
-function getProviderRenderedMessageTextFromResponse(result = {}) {
-  const collections = [
-    result?.response?.messageList,
-    result?.response?.messages,
-    result?.messageList,
-    result?.messages
-  ];
-  for (const collection of collections) {
-    const messages = Array.isArray(collection)
-      ? collection
-      : collection && typeof collection === "object"
-        ? Object.values(collection)
-        : [];
-    const renderedText = messages.find((message) => typeof message?.text === "string")?.text;
-    if (renderedText) return renderedText.trim();
-  }
-  return "";
-}
-
-async function getProviderRenderedMessageText(result = {}) {
-  const responseText = getProviderRenderedMessageTextFromResponse(result);
-  if (responseText || result?.dryRun) return responseText;
-
-  const groupId = getProviderMessageId(result);
-  if (!groupId) return "";
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    try {
-      const listed = await listSolapiMessages({ groupId, limit: 10 });
-      const providerText = String(listed.messages?.find((message) => typeof message?.text === "string")?.text ?? "").trim();
-      if (providerText) return providerText;
-    } catch {
-      // The reservation itself succeeded; keep its local preview if the provider read-back is temporarily unavailable.
-    }
-    if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 250));
-  }
-  return "";
-}
-
 function getKoreaDayUtcRange(dateText = "") {
   const date = String(dateText || "").trim();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { startIso: "", endIso: "" };
@@ -2770,10 +2735,13 @@ async function sendScheduledNotificationJobToSolapi(job, { forceDryRun = false }
   });
 }
 
-async function reserveNotificationJobInSolapi(job, { forceDryRun = false, reason = "Solapi 예약 갱신" } = {}) {
+async function reserveNotificationJobInSolapi(
+  job,
+  { dispatchContext = null, forceDryRun = false, reason = "Solapi 예약 갱신" } = {}
+) {
   if (!job?.notificationJobId) throw new Error("예약할 알림톡 job ID가 필요합니다.");
   const context = lessonCommentNotificationTypes.has(job.notificationType)
-    ? await createLessonNotificationDispatchContext([job])
+    ? dispatchContext ?? await createLessonNotificationDispatchContext([job])
     : null;
   const prepared = refreshLessonCommentJobBeforeSend(job, context);
   if (prepared.action === "cancel") {
@@ -2814,7 +2782,7 @@ async function reserveNotificationJobInSolapi(job, { forceDryRun = false, reason
 
   const result = await sendScheduledNotificationJobToSolapi(reservingJob, { forceDryRun });
   const status = result?.dryRun ? "dry_run" : "scheduled";
-  const providerPreviewBody = await getProviderRenderedMessageText(result);
+  const providerPreviewBody = "";
   const latest = await getNotificationJob(nextJob.notificationJobId);
   if (latest.notificationJob?.status === "canceled") {
     const reservedGroupId = getProviderMessageId(result);
@@ -2862,6 +2830,59 @@ async function reserveNotificationJobInSolapi(job, { forceDryRun = false, reason
     reserved: status === "scheduled",
     solapiCancellation,
     source: "solapi"
+  };
+}
+
+async function reserveNotificationJobsInSolapi(
+  jobs = [],
+  { concurrency = 4, forceDryRun = false, reason = "Solapi 일괄 예약 갱신" } = {}
+) {
+  const requestedJobs = Array.isArray(jobs) ? jobs.filter((job) => job?.notificationJobId) : [];
+  if (requestedJobs.length === 0) {
+    return { failedCount: 0, notificationJobs: [], reservedCount: 0, reusedCount: 0, results: [] };
+  }
+  const contextJobs = requestedJobs.filter((job) => lessonCommentNotificationTypes.has(job.notificationType));
+  const dispatchContext = contextJobs.length > 0
+    ? await createLessonNotificationDispatchContext(contextJobs)
+    : null;
+  const results = new Array(requestedJobs.length);
+  let cursor = 0;
+  const workerCount = Math.max(1, Math.min(6, Number(concurrency) || 4, requestedJobs.length));
+  await Promise.all(Array.from({ length: workerCount }, async () => {
+    while (cursor < requestedJobs.length) {
+      const index = cursor;
+      cursor += 1;
+      try {
+        results[index] = await reserveNotificationJobInSolapi(requestedJobs[index], {
+          dispatchContext,
+          forceDryRun,
+          reason
+        });
+      } catch (error) {
+        const failedJob = {
+          ...requestedJobs[index],
+          error: error.message,
+          provider: "academy-os",
+          status: "failed",
+          updatedAt: new Date().toISOString()
+        };
+        await upsertNotificationJob(failedJob);
+        results[index] = {
+          error: error.message,
+          notificationJob: failedJob,
+          reserved: false,
+          source: "supabase"
+        };
+      }
+    }
+  }));
+  const notificationJobs = results.map((result) => result.notificationJob).filter(Boolean);
+  return {
+    failedCount: notificationJobs.filter((job) => job.status === "failed").length,
+    notificationJobs,
+    reservedCount: results.filter((result) => result.reserved).length,
+    reusedCount: results.filter((result) => result.reused).length,
+    results
   };
 }
 
@@ -5496,7 +5517,7 @@ function formatAcademyReminderSlackItem(reminder = {}, students = []) {
   };
 }
 
-async function sendTodayTeacherScheduleSlack({ date = getKoreaDateString(), force = false, notifyEmpty = true } = {}) {
+async function getTodayTeacherScheduleSlackPayload(date = getKoreaDateString()) {
   const [{ lessons }, { students }, { academyReminders }] = await Promise.all([
     listLessons({ date }),
     listStudents(),
@@ -5513,7 +5534,11 @@ async function sendTodayTeacherScheduleSlack({ date = getKoreaDateString(), forc
   const retests = activeLessons
     .filter(isRetestLesson)
     .map((lesson) => formatTeacherScheduleItem(lesson, students ?? []));
+  return { date, reminders, retests, supplements };
+}
 
+async function sendTodayTeacherScheduleSlack({ date = getKoreaDateString(), force = false, notifyEmpty = true } = {}) {
+  const { reminders, retests, supplements } = await getTodayTeacherScheduleSlackPayload(date);
   if (!notifyEmpty && reminders.length === 0 && supplements.length === 0 && retests.length === 0) {
     return { skipped: true, date, reminders, supplements, retests };
   }
@@ -5538,6 +5563,64 @@ async function sendTodayTeacherScheduleSlack({ date = getKoreaDateString(), forc
     result
   });
   return { date, result, reminders, retests, supplements };
+}
+
+async function reserveTodayTeacherScheduleSlack({
+  date = getKoreaDateString(),
+  force = false,
+  notifyEmpty = true,
+  scheduledAt = `${date}T00:00:00.000Z`
+} = {}) {
+  const schedulePayload = await getTodayTeacherScheduleSlackPayload(date);
+  const { reminders, retests, supplements } = schedulePayload;
+  if (!notifyEmpty && reminders.length === 0 && supplements.length === 0 && retests.length === 0) {
+    return { skipped: true, date, reminders, supplements, retests };
+  }
+
+  const notificationJobId = `slack_daily_summary_${date}`;
+  const existingJob = (await getNotificationJob(notificationJobId)).notificationJob;
+  if (existingJob?.status === "sent") {
+    return { skipped: true, reason: "already_sent", date, reminders, retests, supplements };
+  }
+  if (!force && existingJob?.status === "scheduled") {
+    return {
+      skipped: true,
+      reason: "already_scheduled",
+      date,
+      notificationJob: existingJob,
+      reminders,
+      retests,
+      supplements
+    };
+  }
+  if (force && existingJob?.status === "scheduled") {
+    await cancelScheduledSlackMessage({
+      channel: existingJob.result?.channel || existingJob.recipient,
+      scheduledMessageId: existingJob.result?.scheduledMessageId || existingJob.providerMessageId
+    });
+  }
+
+  const result = await scheduleSlackDailyScheduleSummary({
+    date,
+    reminders,
+    retests,
+    scheduledAt,
+    supplements
+  });
+  const saved = await upsertNotificationJob({
+    notificationJobId,
+    notificationType: "slack_daily_summary",
+    target: "slack",
+    recipient: result.channel || "SLACK_CHANNEL_ID",
+    scheduledAt: result.scheduledAt,
+    payload: schedulePayload,
+    previewBody: result.text,
+    status: result.dryRun ? "dry_run" : "scheduled",
+    provider: "slack_bot",
+    providerMessageId: result.scheduledMessageId,
+    result
+  });
+  return { ...schedulePayload, notificationJob: saved.notificationJob, result };
 }
 
 const server = http.createServer(async (request, response) => {
@@ -5743,7 +5826,12 @@ const server = http.createServer(async (request, response) => {
   if (request.method === "GET" && requestUrl.pathname === "/api/app-state") {
     try {
       const result = await listAppState();
-      sendJson(request, response, 200, { ok: true, ...result });
+      const { stateRows, ...summary } = result;
+      sendJson(request, response, 200, {
+        ok: true,
+        ...summary,
+        ...(requestUrl.searchParams.get("includeRows") === "true" ? { stateRows } : {})
+      });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
     }
@@ -6704,6 +6792,17 @@ const server = http.createServer(async (request, response) => {
     return;
   }
 
+  if (request.method === "POST" && requestUrl.pathname === "/api/lesson-records/bulk") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await upsertLessonStudentRecords(payload.records ?? []);
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
   if (request.method === "GET" && requestUrl.pathname === "/api/school-events") {
     try {
       const result = await listSchoolEvents();
@@ -7053,6 +7152,48 @@ const server = http.createServer(async (request, response) => {
         notifyEmpty: payload.notifyEmpty !== false
       });
       sendJson(request, response, 200, { ok: true, provider: "slack", result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/reserve-bulk") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await reserveNotificationJobsInSolapi(payload.notificationJobs ?? payload.jobs ?? [], {
+        concurrency: payload.concurrency || 4,
+        forceDryRun: Boolean(payload.forceDryRun),
+        reason: payload.reason || "수업일지 일괄 예약"
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/notifications/slack-today-schedule/reserve") {
+    try {
+      const payload = await readJsonBody(request);
+      const dispatchAuth = getDispatchAuthState(request, payload);
+      if (!dispatchAuth.configured || !dispatchAuth.ok) {
+        sendJson(request, response, dispatchAuth.configured ? 401 : 503, {
+          ok: false,
+          error: dispatchAuth.configured
+            ? "Invalid notification dispatch token."
+            : "NOTIFICATION_DISPATCH_TOKEN is required for Slack scheduling."
+        });
+        return;
+      }
+      const date = payload.date || getKoreaDateString(payload.now || new Date());
+      const result = await reserveTodayTeacherScheduleSlack({
+        date,
+        force: payload.force === true,
+        notifyEmpty: payload.notifyEmpty !== false,
+        scheduledAt: payload.scheduledAt || `${date}T00:00:00.000Z`
+      });
+      sendJson(request, response, 200, { ok: true, provider: "slack_bot", result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
     }

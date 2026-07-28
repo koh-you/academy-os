@@ -2496,7 +2496,16 @@ export async function upsertMakeupTasks(makeupTasks) {
   }
 
   const rows = await upsertRows("makeup_tasks", makeupTasks.map(toMakeupTaskRow));
-  return { source: databaseSource, makeupTasks: rows.map(fromMakeupTaskRow) };
+  const makeupTaskIds = [...new Set(makeupTasks.map((task) => task.makeupTaskId).filter(Boolean))];
+  const makeupTaskIdFilter = makeupTaskIds.map((makeupTaskId) => encodeURIComponent(makeupTaskId)).join(",");
+  const verifiedRows = makeupTaskIdFilter
+    ? await listRows(
+        "makeup_tasks",
+        `select=*&makeup_task_id=in.(${makeupTaskIdFilter})`,
+        { requireServiceRole: true }
+      )
+    : rows;
+  return { source: databaseSource, makeupTasks: verifiedRows.map(fromMakeupTaskRow) };
 }
 
 export async function deleteMakeupTask(makeupTaskId) {
@@ -3132,6 +3141,11 @@ async function requeryVerifiedLessonStudentRecord(expectedRecord = {}) {
   );
   if (!rows[0]) throw new Error("수업기록 저장 후 Supabase 재조회에서 행을 찾지 못했습니다.");
   const savedRecord = fromLessonRecordRow(rows[0]);
+  assertVerifiedLessonStudentRecord(expectedRecord, savedRecord);
+  return savedRecord;
+}
+
+function assertVerifiedLessonStudentRecord(expectedRecord = {}, savedRecord = {}) {
   const fields = lessonRecordRequeryVerificationFields.filter((field) => (
     Object.prototype.hasOwnProperty.call(expectedRecord, field)
   ));
@@ -3142,7 +3156,6 @@ async function requeryVerifiedLessonStudentRecord(expectedRecord = {}) {
   if (mismatch) {
     throw new Error(`수업기록 저장 후 Supabase 재조회 값이 일치하지 않습니다: ${mismatch}`);
   }
-  return savedRecord;
 }
 
 export async function upsertLessonStudentRecord(record) {
@@ -3241,6 +3254,79 @@ export async function upsertLessonStudentRecord(record) {
   return { source: databaseSource, record: await requeryVerifiedLessonStudentRecord(recordToSave) };
 }
 
+export async function upsertLessonStudentRecords(records = []) {
+  const requestedRecords = Array.isArray(records)
+    ? records.filter((record) => record?.lessonId && record?.studentId)
+    : [];
+  if (requestedRecords.length === 0) {
+    return { source: isSupabaseConfigured() ? databaseSource : fallbackSource, records: [] };
+  }
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, records: requestedRecords };
+  }
+
+  const lessonIds = [...new Set(requestedRecords.map((record) => record.lessonId))];
+  const lessonIdFilter = lessonIds.map((lessonId) => encodeURIComponent(lessonId)).join(",");
+  const [lessonRows, existingRows] = await Promise.all([
+    listRows(
+      "lessons",
+      `select=lesson_id,student_ids&lesson_id=in.(${lessonIdFilter})`,
+      { requireServiceRole: true }
+    ),
+    listRows(
+      "lesson_student_records",
+      `select=*&lesson_id=in.(${lessonIdFilter})`,
+      { requireServiceRole: true }
+    )
+  ]);
+  const lessonStudentIds = new Map(lessonRows.map((row) => [
+    row.lesson_id,
+    new Set(Array.isArray(row.student_ids) ? row.student_ids : [])
+  ]));
+  const existingByIdentity = new Map(existingRows.map((row) => [
+    `${row.lesson_id}::${row.student_id}`,
+    fromLessonRecordRow(row)
+  ]));
+
+  const recordsToSave = requestedRecords.map((record) => {
+    const rosterStudentIds = lessonStudentIds.get(record.lessonId);
+    if (!rosterStudentIds) throw new Error(`수업기록 저장 대상 수업을 찾지 못했습니다: ${record.lessonId}`);
+    if (!rosterStudentIds.has(record.studentId)) {
+      throw new Error("수업 명단에 없는 학생의 수업일지는 저장할 수 없습니다.");
+    }
+    const existingRecord = existingByIdentity.get(`${record.lessonId}::${record.studentId}`) ?? null;
+    const stableRecord = existingRecord
+      ? { ...record, lessonStudentRecordId: existingRecord.lessonStudentRecordId }
+      : record;
+    const attendanceStableRecord = mergeExistingAttendanceForNonAttendanceSave(stableRecord, existingRecord);
+    return mergeExistingHomeworkFollowupForSave(attendanceStableRecord, existingRecord);
+  });
+
+  await upsertRows(
+    "lesson_student_records",
+    recordsToSave.map(toLessonRecordRow),
+    { onConflict: "lesson_id,student_id" }
+  );
+  const verifiedRows = await listRows(
+    "lesson_student_records",
+    `select=*&lesson_id=in.(${lessonIdFilter})`,
+    { requireServiceRole: true }
+  );
+  const verifiedByIdentity = new Map(verifiedRows.map((row) => [
+    `${row.lesson_id}::${row.student_id}`,
+    fromLessonRecordRow(row)
+  ]));
+  const verifiedRecords = recordsToSave.map((record) => {
+    const verifiedRecord = verifiedByIdentity.get(`${record.lessonId}::${record.studentId}`);
+    if (!verifiedRecord) {
+      throw new Error(`수업기록 저장 후 Supabase 재조회에서 행을 찾지 못했습니다: ${record.lessonStudentRecordId}`);
+    }
+    assertVerifiedLessonStudentRecord(record, verifiedRecord);
+    return verifiedRecord;
+  });
+  return { source: databaseSource, records: verifiedRecords };
+}
+
 export async function upsertHomework(homework) {
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
     return { source: fallbackSource, homework };
@@ -3325,7 +3411,16 @@ export async function upsertHomeworks(homeworks) {
       throw error;
     }
   }
-  return { source: databaseSource, homeworks: rows.map(fromHomeworkRow) };
+  const homeworkIds = [...new Set(homeworks.map((homework) => homework.homeworkId).filter(Boolean))];
+  const homeworkIdFilter = homeworkIds.map((homeworkId) => encodeURIComponent(homeworkId)).join(",");
+  const verifiedRows = homeworkIdFilter
+    ? await listRows(
+        "homeworks",
+        `select=*&homework_id=in.(${homeworkIdFilter})`,
+        { requireServiceRole: true }
+      )
+    : rows;
+  return { source: databaseSource, homeworks: verifiedRows.map(fromHomeworkRow) };
 }
 
 export async function seedCoreData() {

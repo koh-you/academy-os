@@ -539,6 +539,26 @@ function getPreparationNoticeForTarget(record = {}, target = "parent") {
   return shouldIncludePrepMemo ? removeHomeworkFollowupMemoLines(record?.preparationMemo) : "";
 }
 
+const attendanceSyncFields = [
+  "attendanceStatus",
+  "attendanceReason",
+  "checkInAt",
+  "checkInTime",
+  "checkOutAt",
+  "checkOutTime",
+  "lateMinutes",
+  "updatedBy"
+];
+
+function mergeRemoteAttendanceRecord(localRecord = null, remoteRecord = {}, saveState = "saved") {
+  if (!localRecord) return remoteRecord;
+  if (!["dirty", "saving", "failed"].includes(saveState)) return remoteRecord;
+  return attendanceSyncFields.reduce(
+    (record, field) => ({ ...record, [field]: remoteRecord[field] }),
+    localRecord
+  );
+}
+
 function getHomeworkFollowupNoticeForTarget(record = {}, target = "parent", notificationTemplates = {}) {
   return formatHomeworkFollowupForNotice(record, notificationTemplates);
 }
@@ -5417,6 +5437,11 @@ export function App() {
   const [isAppStateReady, setIsAppStateReady] = useState(false);
   const [isPortalDataReady, setIsPortalDataReady] = useState(false);
   const [attendanceReloadKey, setAttendanceReloadKey] = useState(0);
+  const [attendanceSyncStatus, setAttendanceSyncStatus] = useState({
+    lastSyncedAt: "",
+    message: "출결 서버 확인 대기",
+    state: "idle"
+  });
   const [saveStates, setSaveStates] = useState({});
   const [appStateSaveState, setAppStateSaveState] = useState("idle");
   const [problemBookSaveState, setProblemBookSaveState] = useState("idle");
@@ -5458,12 +5483,14 @@ export function App() {
   const [selectedReportLessonId, setSelectedReportLessonId] = useState("");
   const recordsRef = useRef(records);
   const homeworksRef = useRef(homeworks);
+  const saveStatesRef = useRef(saveStates);
   const autoSaveTimersRef = useRef(new Map());
   const dirtyHomeworkIdsRef = useRef(new Set());
   const initialMakeupTasksRef = useRef(makeupTasks);
   const initialExamPrepRowsRef = useRef(examPrepRows);
   const initialSchoolEventsRef = useRef(schoolEvents);
   const appStateSaveRequestRef = useRef(0);
+  const appStateSaveTimerRef = useRef(null);
   const problemBookSaveRequestRef = useRef(0);
   const problemBookSaveTimerRef = useRef(null);
   const scoreRecordSaveRequestRef = useRef(0);
@@ -5505,6 +5532,7 @@ export function App() {
     wrongProblems
   ]);
   const initialSharedAppStateRef = useRef(sharedAppState);
+  const persistedSharedAppStateRef = useRef({});
 
   useEffect(() => {
     let isMounted = true;
@@ -5707,6 +5735,14 @@ export function App() {
         }
         if (appStateResult.ok && appStateResult.states && Object.keys(appStateResult.states).length > 0) {
           const states = appStateResult.states;
+          persistedSharedAppStateRef.current = Object.fromEntries(
+            Object.keys(initialSharedAppStateRef.current).map((key) => [
+              key,
+              Object.prototype.hasOwnProperty.call(states, key)
+                ? states[key]
+                : initialSharedAppStateRef.current[key]
+            ])
+          );
           isApplyingRemoteAppStateRef.current = true;
           if (Array.isArray(states.academyTests)) setAcademyTests(states.academyTests);
           if (states.aiSettings) setAiSettings(states.aiSettings);
@@ -5750,6 +5786,7 @@ export function App() {
             setIsAppStateReady(true);
           }, 0);
         } else if (appStateResult.ok) {
+          persistedSharedAppStateRef.current = initialSharedAppStateRef.current;
           postAppState(initialSharedAppStateRef.current).catch((error) => console.error(error));
           setIsAppStateReady(true);
         }
@@ -5805,17 +5842,42 @@ export function App() {
 
   useEffect(() => {
     if (session?.role !== "teacher" || !isAppStateReady || isApplyingRemoteAppStateRef.current) return;
+    const changedStates = Object.fromEntries(
+      Object.entries(sharedAppState).filter(([key, value]) => (
+        JSON.stringify(persistedSharedAppStateRef.current[key]) !== JSON.stringify(value)
+      ))
+    );
+    if (Object.keys(changedStates).length === 0) {
+      setAppStateSaveState("saved");
+      return;
+    }
+    if (appStateSaveTimerRef.current) {
+      window.clearTimeout(appStateSaveTimerRef.current);
+    }
     const requestId = appStateSaveRequestRef.current + 1;
     appStateSaveRequestRef.current = requestId;
     setAppStateSaveState("saving");
-    postAppState(sharedAppState)
-      .then(() => {
-        if (appStateSaveRequestRef.current === requestId) setAppStateSaveState("saved");
-      })
-      .catch((error) => {
-        console.error(error);
-        if (appStateSaveRequestRef.current === requestId) setAppStateSaveState("failed");
-      });
+    appStateSaveTimerRef.current = window.setTimeout(() => {
+      appStateSaveTimerRef.current = null;
+      postAppState(changedStates)
+        .then(() => {
+          persistedSharedAppStateRef.current = {
+            ...persistedSharedAppStateRef.current,
+            ...changedStates
+          };
+          if (appStateSaveRequestRef.current === requestId) setAppStateSaveState("saved");
+        })
+        .catch((error) => {
+          console.error(error);
+          if (appStateSaveRequestRef.current === requestId) setAppStateSaveState("failed");
+        });
+    }, 500);
+    return () => {
+      if (appStateSaveTimerRef.current) {
+        window.clearTimeout(appStateSaveTimerRef.current);
+        appStateSaveTimerRef.current = null;
+      }
+    };
   }, [isAppStateReady, sharedAppState, session?.role]);
 
   useEffect(() => () => {
@@ -6506,19 +6568,37 @@ export function App() {
     saveGeneratedLessonsFromPlan(preExamLessonsToSync);
   }, [attendanceOnlyMode, generatedLessonPlan, isAppStateReady, session?.role]);
 
-  async function refreshNotificationJobs() {
+  async function refreshNotificationJobs({ lessonId = "", scope = "active" } = {}) {
     setNotificationJobsStatus({ state: "loading", message: "알림 기록을 불러오는 중입니다." });
     try {
+      const query = new URLSearchParams();
+      if (lessonId) {
+        query.set("lessonId", lessonId);
+        query.set("limit", "200");
+      } else if (scope === "history") {
+        query.set("limit", "300");
+      } else {
+        query.set("limit", "300");
+        query.set("status", "draft,scheduled,failed,send_unconfirmed");
+      }
       const result = await getJsonWithTimeout(
-        "/api/notification-jobs?limit=1000",
+        `/api/notification-jobs?${query.toString()}`,
         12000,
         "알림 기록 조회가 12초를 넘었습니다. 발송 기능은 사용할 수 있고, 기록만 새로고침으로 다시 확인해 주세요."
       );
       if (result.ok && Array.isArray(result.notificationJobs)) {
-        setNotificationJobs(result.notificationJobs);
+        if (scope === "active" && !lessonId) {
+          setNotificationJobs(result.notificationJobs);
+        } else {
+          mergeNotificationJobsIntoState(result.notificationJobs);
+        }
         setNotificationJobsStatus({
           state: "ready",
-          message: `알림 기록 ${result.notificationJobs.length}건을 불러왔습니다.`
+          message: lessonId
+            ? `현재 수업 알림 ${result.notificationJobs.length}건을 확인했습니다.`
+            : scope === "history"
+              ? `최근 알림 기록 ${result.notificationJobs.length}건을 불러왔습니다.`
+              : `처리 중·확인 필요 알림 ${result.notificationJobs.length}건을 불러왔습니다.`
         });
       }
     } catch (error) {
@@ -6603,12 +6683,32 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    refreshNotificationJobs();
-  }, []);
+    if (session?.role !== "teacher" || !isAppStateReady || attendanceOnlyMode) return;
+    refreshNotificationJobs({ scope: "active" });
+  }, [attendanceOnlyMode, isAppStateReady, session?.role]);
+
+  useEffect(() => {
+    if (session?.role !== "teacher" || !isAppStateReady || activeView !== "notifications") return;
+    refreshNotificationJobs({ scope: "history" });
+  }, [activeView, isAppStateReady, session?.role]);
+
+  useEffect(() => {
+    if (
+      session?.role !== "teacher" ||
+      !isAppStateReady ||
+      !isLessonJournalOpen ||
+      !selectedLessonId
+    ) return;
+    refreshNotificationJobs({ lessonId: selectedLessonId, scope: "lesson" });
+  }, [isAppStateReady, isLessonJournalOpen, selectedLessonId, session?.role]);
 
   useEffect(() => {
     recordsRef.current = records;
   }, [records]);
+
+  useEffect(() => {
+    saveStatesRef.current = saveStates;
+  }, [saveStates]);
 
   useEffect(() => {
     homeworksRef.current = homeworks;
@@ -6807,6 +6907,80 @@ export function App() {
       document.removeEventListener("visibilitychange", refreshAttendanceDataIfDateChanged);
     };
   }, [attendanceOnlyMode, isAppStateReady]);
+
+  useEffect(() => {
+    const shouldSyncTeacherLessonView = session?.role === "teacher" && activeView === "lessons";
+    if (!isAppStateReady || (!attendanceOnlyMode && !shouldSyncTeacherLessonView)) return undefined;
+    let disposed = false;
+    let inFlight = false;
+    const syncDate = attendanceOnlyMode ? getKoreaDateString() : selectedDate;
+
+    async function syncAttendanceRecords() {
+      if (disposed || inFlight || document.visibilityState === "hidden") return;
+      inFlight = true;
+      setAttendanceSyncStatus((current) => ({
+        ...current,
+        message: "출결 서버 확인 중",
+        state: "syncing"
+      }));
+      try {
+        const result = await getJsonWithTimeout(
+          `/api/lesson-records?date=${encodeURIComponent(syncDate)}`,
+          8000,
+          "출결 동기화가 지연되고 있습니다."
+        );
+        if (disposed) return;
+        const remoteRecords = Array.isArray(result.records) ? result.records : [];
+        setRecords((currentRecords) => {
+          const currentById = new Map(currentRecords.map((record) => [record.lessonStudentRecordId, record]));
+          let hasChanges = false;
+          remoteRecords.forEach((remoteRecord) => {
+            if (!remoteRecord?.lessonStudentRecordId) return;
+            const localRecord = currentById.get(remoteRecord.lessonStudentRecordId) ?? null;
+            const mergedRecord = mergeRemoteAttendanceRecord(
+              localRecord,
+              remoteRecord,
+              saveStatesRef.current[remoteRecord.lessonStudentRecordId]
+            );
+            if (!localRecord || JSON.stringify(localRecord) !== JSON.stringify(mergedRecord)) {
+              currentById.set(remoteRecord.lessonStudentRecordId, mergedRecord);
+              hasChanges = true;
+            }
+          });
+          if (!hasChanges) return currentRecords;
+          const nextRecords = [...currentById.values()];
+          recordsRef.current = nextRecords;
+          return nextRecords;
+        });
+        setAttendanceSyncStatus({
+          lastSyncedAt: new Date().toISOString(),
+          message: "출결 최신 상태",
+          state: "synced"
+        });
+      } catch (error) {
+        if (!disposed) {
+          setAttendanceSyncStatus((current) => ({
+            ...current,
+            message: error.message || "출결 동기화 실패",
+            state: "failed"
+          }));
+        }
+      } finally {
+        inFlight = false;
+      }
+    }
+
+    syncAttendanceRecords();
+    const intervalId = window.setInterval(syncAttendanceRecords, 7_000);
+    window.addEventListener("focus", syncAttendanceRecords);
+    document.addEventListener("visibilitychange", syncAttendanceRecords);
+    return () => {
+      disposed = true;
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", syncAttendanceRecords);
+      document.removeEventListener("visibilitychange", syncAttendanceRecords);
+    };
+  }, [activeView, attendanceOnlyMode, isAppStateReady, selectedDate, session?.role, setRecords]);
 
   async function handleLogin(role, loginId, password) {
     if (role === "teacher") {
@@ -8537,9 +8711,15 @@ export function App() {
   function persistLessonNotificationPlans(nextPlans) {
     if (session?.role !== "teacher") return;
     postAppState({
-      ...sharedAppState,
       lessonNotificationPlans: nextPlans
-    }).catch((error) => console.error(error));
+    })
+      .then(() => {
+        persistedSharedAppStateRef.current = {
+          ...persistedSharedAppStateRef.current,
+          lessonNotificationPlans: nextPlans
+        };
+      })
+      .catch((error) => console.error(error));
   }
 
   function handleUpdateLessonNotificationPlan(lessonId, mode) {
@@ -8741,6 +8921,30 @@ export function App() {
 
   async function reserveLessonNotificationJob(notificationJob, reason = "수업일지 예약") {
     return reserveNotificationJob(notificationJob, reason);
+  }
+
+  async function reserveLessonNotificationJobs(notificationJobsToReserve = [], reason = "수업일지 일괄 예약") {
+    if (!notificationJobsToReserve.length) return [];
+    try {
+      const result = await postJson("/api/notification-jobs/reserve-bulk", {
+        concurrency: 4,
+        notificationJobs: notificationJobsToReserve,
+        reason
+      });
+      const reservedJobs = Array.isArray(result.notificationJobs) ? result.notificationJobs : [];
+      mergeNotificationJobsIntoState(reservedJobs);
+      return reservedJobs;
+    } catch (error) {
+      const failedJobs = notificationJobsToReserve.map((notificationJob) => ({
+        ...notificationJob,
+        error: `Solapi 일괄 예약 확인 실패: ${error.message}`,
+        provider: "academy-os",
+        status: "failed",
+        updatedAt: new Date().toISOString()
+      }));
+      mergeNotificationJobsIntoState(failedJobs);
+      return failedJobs;
+    }
   }
 
   async function reserveSupplementStudentReminder(task) {
@@ -9143,9 +9347,7 @@ export function App() {
       )
     ]);
     updateLessonNotificationRecordStatuses(lesson, `예약 중 · ${scheduledLabel}`);
-    const reservedJobs = await Promise.all(nextJobs.map((notificationJob) =>
-      reserveLessonNotificationJob(notificationJob, "수업일지 반 전체 예약")
-    ));
+    const reservedJobs = await reserveLessonNotificationJobs(nextJobs, "수업일지 반 전체 예약");
     await Promise.all(canceledJobs.map((notificationJob) => persistCanceledNotificationJob(notificationJob, "알림 제외")));
     return {
       ok: !reservedJobs.some((job) => job?.status === "failed"),
@@ -9178,9 +9380,7 @@ export function App() {
         !(job.lessonId === lesson.lessonId && isActiveNotificationJob(job))
       )
     ]);
-    nextJobs.forEach((notificationJob) => {
-      reserveLessonNotificationJob(notificationJob, "수업일지 수동 시각 예약").catch((error) => console.error(error));
-    });
+    reserveLessonNotificationJobs(nextJobs, "수업일지 수동 시각 예약").catch((error) => console.error(error));
     canceledJobs.forEach((notificationJob) => {
       persistCanceledNotificationJob(notificationJob, "알림 제외").catch((error) => console.error(error));
     });
@@ -9373,12 +9573,10 @@ export function App() {
 
   async function saveLessonJournalHomeworksWithVerification(homeworksToSave = []) {
     if (!homeworksToSave.length) return [];
-    await postJson("/api/homeworks/bulk", { homeworks: homeworksToSave });
-    const verification = await getJsonWithTimeout(
-      `/api/homeworks?verify=lesson-journal-${Date.now()}`,
-      15000,
-      "숙제 저장 후 Supabase 확인이 15초를 넘었습니다. 수업일지 수정본을 유지합니다."
-    );
+    const verification = await postJson("/api/homeworks/bulk", { homeworks: homeworksToSave });
+    if (verification.source !== "supabase") {
+      throw new Error("숙제를 Supabase에서 다시 확인하지 못했습니다.");
+    }
     const verifiedById = new Map((verification.homeworks ?? []).map((homework) => [homework.homeworkId, homework]));
     return homeworksToSave.map((homework) => {
       const verified = verifiedById.get(homework.homeworkId);
@@ -9418,12 +9616,10 @@ export function App() {
             ...task
           };
     });
-    await postMakeupTasks(requestedTasks);
-    const verification = await getJsonWithTimeout(
-      `/api/makeup-tasks?verify=lesson-journal-${taskIdSeed}-${Date.now()}`,
-      12000,
-      "등원보충 저장 후 Supabase 확인이 지연되고 있습니다. 수업일지 수정본을 유지합니다."
-    );
+    const verification = await postMakeupTasks(requestedTasks);
+    if (verification.source !== "supabase") {
+      throw new Error("등원보충을 Supabase에서 다시 확인하지 못했습니다.");
+    }
     const verifiedById = new Map((verification.makeupTasks ?? []).map((task) => [task.makeupTaskId, task]));
     return requestedTasks.map((requestedTask) => {
       const verifiedTask = verifiedById.get(requestedTask.makeupTaskId);
@@ -9534,20 +9730,29 @@ export function App() {
         completedSources.push(`등원보충 ${verifiedTasks.length}건`);
       }
 
-      const results = await Promise.all(recordsToSave.map((record) => {
-        const student = students.find((item) => item.studentId === record.studentId) ?? null;
-        return handleSaveRecord(record.lessonStudentRecordId, lesson, student, record, {
-          skipNotificationRefresh: true,
-          skipRelatedHomeworks: true
+      if (recordsToSave.length) {
+        const recordResult = await postJson("/api/lesson-records/bulk", { records: recordsToSave });
+        if (recordResult.source !== "supabase") {
+          throw new Error("수업기록을 Supabase에서 다시 확인하지 못했습니다.");
+        }
+        const verifiedRecords = Array.isArray(recordResult.records) ? recordResult.records : [];
+        const verifiedById = new Map(verifiedRecords.map((record) => [record.lessonStudentRecordId, record]));
+        recordsToSave.forEach((record) => {
+          const verified = verifiedById.get(record.lessonStudentRecordId);
+          if (!verified || !hasMatchingVerifiedLessonRecordFields(record, verified)) {
+            throw new Error(`수업기록 저장 후 Supabase 재조회 값이 일치하지 않습니다: ${record.lessonStudentRecordId}`);
+          }
         });
-      }));
-      const savedRecordCount = results.filter(Boolean).length;
-      if (savedRecordCount) completedSources.push(`수업기록 ${savedRecordCount}건`);
-      if (!results.every(Boolean)) {
-        return {
-          ok: false,
-          message: `수업일지 · 부분 저장 · ${completedSources.join(" · ") || "저장 확인 없음"} · 실패한 수업기록 수정본 유지`
-        };
+        const nextRecords = verifiedRecords.reduce(
+          (currentRecords, record) => upsertLessonStudentRecord(currentRecords, record),
+          recordsRef.current
+        );
+        recordsRef.current = nextRecords;
+        setRecords(nextRecords);
+        writeStorageValue(window.localStorage, storageKeys.records, JSON.stringify(nextRecords));
+        const savedStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "saved"]));
+        setSaveStates((currentStates) => ({ ...currentStates, ...savedStates }));
+        completedSources.push(`수업기록 ${verifiedRecords.length}건`);
       }
       return { ok: true, message: `수업일지 · 저장 완료 · ${completedSources.join(" · ") || "변경 없음"}` };
     } catch (error) {
@@ -9669,6 +9874,7 @@ export function App() {
             aiSettings={aiSettings}
             allRecords={records}
             attendanceSettings={attendanceSettings}
+            attendanceSyncStatus={attendanceSyncStatus}
             generatedLessonSaveStatus={generatedLessonSaveStatus}
             integrationStatus={integrationStatus}
             lessonNotificationPlans={lessonNotificationPlans}
@@ -9955,7 +10161,7 @@ export function App() {
             onSaveSpecialLectureGuides={handleSaveSpecialLectureGuides}
             onUpdateLessonNotificationPlan={handleUpdateLessonNotificationPlan}
             students={students}
-            onRefresh={refreshNotificationJobs}
+            onRefresh={() => refreshNotificationJobs({ scope: "history" })}
           />
         ) : null}
 
@@ -9991,7 +10197,7 @@ export function App() {
             onUpdateSpecialLectureApplication={handleUpdateSpecialLectureApplication}
             records={records}
             students={students}
-            onRefresh={refreshNotificationJobs}
+            onRefresh={() => refreshNotificationJobs({ scope: "active" })}
           />
         ) : null}
 
@@ -15912,6 +16118,7 @@ function TeacherLessonHubV2({
   aiSettings,
   allRecords = [],
   attendanceSettings = defaultAttendanceSettings,
+  attendanceSyncStatus = { lastSyncedAt: "", message: "출결 서버 확인 대기", state: "idle" },
   generatedLessonSaveStatus = { lessons: [], message: "", state: "idle" },
   integrationStatus,
   isMonthlyRegularLessonOpened = false,
@@ -16199,6 +16406,18 @@ function TeacherLessonHubV2({
           ))}
           <span>{visibleLessonCount}개</span>
         </div>
+        <span
+          className={`attendanceSyncPill ${attendanceSyncStatus.state}`}
+          title={attendanceSyncStatus.message}
+        >
+          {attendanceSyncStatus.state === "syncing"
+            ? "출결 확인 중"
+            : attendanceSyncStatus.state === "failed"
+              ? "출결 연결 지연"
+              : attendanceSyncStatus.lastSyncedAt
+                ? `출결 최신 ${formatKoreaTimeFromIso(attendanceSyncStatus.lastSyncedAt)}`
+                : "출결 동기화 대기"}
+        </span>
         <button className="primaryButton" onClick={onAddLesson} type="button">+ 수업 등록</button>
         {!isMonthlyRegularLessonOpened && monthlyRegularLessonOpenPlan.lessonsToCreate.length > 0 ? (
           <button
@@ -21381,6 +21600,12 @@ function NotificationSettingsSection({ integrationStatus }) {
           <span><StatusDot active={!notificationStatus?.allowRealStudentRecipients} /> 학생 실제번호 잠금 {notificationStatus?.allowRealStudentRecipients ? "OFF" : "ON"}</span>
           <span><StatusDot active={!notificationStatus?.allowRealParentRecipients} /> 학부모 실제번호 잠금 {notificationStatus?.allowRealParentRecipients ? "OFF" : "ON"}</span>
           <span>테스트 수신번호: {notificationStatus?.testRecipient || "미설정"}</span>
+        </article>
+        <article>
+          <strong>Slack 일정</strong>
+          <span><StatusDot active={notificationStatus?.slackConfigured} /> 즉시 Webhook</span>
+          <span><StatusDot active={notificationStatus?.slackSchedulingConfigured} /> 예약 Bot API</span>
+          <span>{notificationStatus?.slackSchedulingConfigured ? "Slack 서버 예약 사용 가능" : "Bot Token·채널 ID 설정 필요"}</span>
         </article>
         <article>
           <strong>AI API</strong>
