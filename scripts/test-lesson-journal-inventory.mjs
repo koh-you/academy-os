@@ -38,6 +38,14 @@ const reminderPanelModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalReminderPanelModel.js", import.meta.url),
   "utf8"
 );
+const notificationBarSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalNotificationBar.jsx", import.meta.url),
+  "utf8"
+);
+const notificationBarModelSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalNotificationBarModel.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -259,6 +267,27 @@ for (const extractedReminderContract of [
   assert.ok(
     `${reminderPanelSource}\n${reminderPanelModelSource}`.includes(extractedReminderContract),
     `missing extracted 17B-3 contract: ${extractedReminderContract}`
+  );
+}
+assert.ok(
+  journalSource.includes("<LessonJournalNotificationBar"),
+  "LessonJournalDetail must compose the extracted notification bar"
+);
+assert.ok(
+  !journalSource.includes('<section className="panel lessonSaveSummary"'),
+  "LessonJournalDetail must not retain the notification bar markup"
+);
+for (const extractedNotificationBarContract of [
+  "createLessonJournalNotificationBarModel",
+  "onUpdateLessonNotificationPlan?.(lessonId, event.target.value)",
+  "onClick={onOpenReservationAudit}",
+  "onClick={onRefreshSolapiSendResults}",
+  "onClick={onApplySolapiReservationPlan}",
+  "disabled={!canApplySolapiReservation}"
+]) {
+  assert.ok(
+    `${notificationBarSource}\n${notificationBarModelSource}`.includes(extractedNotificationBarContract),
+    `missing extracted 17B-4 contract: ${extractedNotificationBarContract}`
   );
 }
 

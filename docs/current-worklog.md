@@ -1334,6 +1334,13 @@
 - 원천/부작용: CSS 표시만 변경하며 수업, 출결, 필터 상태, 알림/Solapi 원천을 읽거나 저장하지 않는다.
 - AI 검증: `npm run build`, `git diff --check`를 실행한다. 실제 달력에서 상단 제어줄이 사라지고 수업 카드가 계속 보이는지 확인한다.
 
+## 2026-07-28 P1. App.jsx 17B-4 수업일지 발송 상태·예약 설정 bar 분리
+
+- 코드: 수업일지의 발송 계획 상태, 하원 미체크 학생 안내, 예약 모드 선택, 수정·예약 확인·발송 결과·Solapi 반영 버튼 표시를 `lessonJournalNotificationBarModel.js`와 `LessonJournalNotificationBar.jsx`로 분리했다.
+- 경계: 새 컴포넌트는 계산된 상태와 callback만 받는다. `notification_jobs` 조회·예약·취소, Solapi 결과 조회·예약 반영, React 상태 전이는 계속 `App.jsx`가 소유하며 실제 API·Supabase·Solapi 호출은 0건이다.
+- AI 가상검수: TARGET/CONTROL fixture로 수정 가능/불가, 발송 결과 조회 가능/불가, Solapi 반영 표시/숨김, 하원 미체크 0명/복수 학생과 최신 main의 상태·작업 region 접근성을 대조한다. 전용 fixture, 수업일지 inventory, build, `git diff --check`를 실행한다.
+- 사람 gate: 0건. 실제 예약·취소 동작과 문구를 바꾸지 않은 callback-only 표시 경계이며 완료한 11B 실제 검수를 반복하지 않는다. 다음 의미 단위는 예약 확인 모달의 표시 shell이다.
+
 ## 2026-07-28 P1. 인수인계서 생성 시각·원천 안내 제거
 
 - UI: 인수인계서 PDF에서 제목 아래 `PDF 생성일` 줄과 최하단의 원천 읽기 전용 안내 문구를 제거했다. 제목, 학생 기본정보, 수업·숙제, 교사 인계 코멘트는 그대로 출력한다.

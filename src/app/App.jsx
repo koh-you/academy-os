@@ -227,6 +227,7 @@ import { selectPreviousLessonMemoContext } from "../domains/lessons/lessonJourna
 import { LessonJournalHeader } from "../domains/lessons/LessonJournalHeader.jsx";
 import { LessonJournalClosureNotice } from "../domains/lessons/LessonJournalClosureNotice.jsx";
 import { LessonJournalReminderPanel } from "../domains/lessons/LessonJournalReminderPanel.jsx";
+import { LessonJournalNotificationBar } from "../domains/lessons/LessonJournalNotificationBar.jsx";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -16644,80 +16645,36 @@ function LessonJournalDetail({
         <AcademyReminderList reminders={lessonAcademyReminders} students={students} templates={templates} />
       </LessonJournalReminderPanel>
 
-      <section className="panel lessonSaveSummary" aria-label="발송 상태와 작업">
-        <div aria-label="알림톡 상태" className="lessonNotificationStatusRow" role="region" tabIndex={0}>
-          <strong>발송 상태</strong>
-          <span className={`lessonNotificationPlanStatus ${notificationPlanMode}`} title={notificationPlanSummaryText}>
-            {notificationPlanSummaryText}
-          </span>
-          {checkoutMissingStudents.length > 0 ? (
-            <span className="checkoutMissingSummary" title={checkoutMissingStudents.map((student) => student.name).join(", ")}>
-              하원 미체크 {checkoutMissingStudents.length}명
-            </span>
-          ) : null}
-          <span
-            aria-live="polite"
-            className={`solapiReservationSync ${solapiReservationSyncStatus.state}`}
-            title={solapiReservationSyncStatus.detail}
-          >
-            {solapiReservationSyncStatus.label}
-          </span>
-        </div>
-        <div aria-label="알림톡 예약 작업" className="lessonNotificationActionRow" role="region" tabIndex={0}>
-          {!journalEditMode ? (
-            <button className="schedulePlanButton" onClick={startJournalEditMode} type="button">
-              수정 시작
-            </button>
-          ) : null}
-          <label className="lessonNotificationPlanSelect">
-            <span>예약 설정</span>
-            <select
-              aria-label="알림톡 예약 설정"
-              disabled={isClosureLesson}
-              onChange={(event) => onUpdateLessonNotificationPlan?.(lesson.lessonId, event.target.value)}
-              value={notificationPlanMode}
-            >
-              {notificationPlanMode === "manual" ? (
-                <option value="manual">수동 예약 · {lessonNotificationPlan?.scheduledAt ? formatKoreaTimeLabel(lessonNotificationPlan.scheduledAt) : "시각 미정"}</option>
-              ) : null}
-              <option disabled={isDefaultScheduleExpired} value="default">기본 예약 · {defaultAlimtalkTimeLabel}</option>
-              <option disabled={isDelayedScheduleExpired} value="delay30">30분 지연 · {delayedAlimtalkTimeLabel}</option>
-              <option value="none">알림톡 없음</option>
-            </select>
-          </label>
-          <button
-            className="schedulePlanButton check"
-            onClick={() => {
-              setReservationInspectMode("all");
-              setReservationModalOpen(true);
-            }}
-            type="button"
-          >
-            예약 확인
-          </button>
-          {hasSolapiResultRefreshTarget ? (
-            <button
-              className={solapiResultRefreshState === "failed" ? "dangerSoftButton" : "schedulePlanButton check"}
-              disabled={!canRefreshSolapiResults}
-              onClick={refreshSolapiSendResults}
-              title={solapiResultRefreshTitle}
-              type="button"
-            >
-              {solapiResultRefreshState === "loading" ? "확인 중" : "발송 결과"}
-            </button>
-          ) : null}
-          {canApplySolapiReservation || reservationApplyState === "applying" ? (
-            <button
-              className="sendButton"
-              disabled={!canApplySolapiReservation}
-              onClick={applySolapiReservationPlan}
-              type="button"
-            >
-              {solapiApplyButtonLabel}
-            </button>
-          ) : null}
-        </div>
-      </section>
+      <LessonJournalNotificationBar
+        canApplySolapiReservation={canApplySolapiReservation}
+        canRefreshSolapiResults={canRefreshSolapiResults}
+        checkoutMissingStudents={checkoutMissingStudents}
+        defaultAlimtalkTimeLabel={defaultAlimtalkTimeLabel}
+        delayedAlimtalkTimeLabel={delayedAlimtalkTimeLabel}
+        formatKoreaTimeLabel={formatKoreaTimeLabel}
+        hasSolapiResultRefreshTarget={hasSolapiResultRefreshTarget}
+        isClosureLesson={isClosureLesson}
+        isDefaultScheduleExpired={isDefaultScheduleExpired}
+        isDelayedScheduleExpired={isDelayedScheduleExpired}
+        journalEditMode={journalEditMode}
+        lessonId={lesson.lessonId}
+        lessonNotificationPlan={lessonNotificationPlan}
+        notificationPlanMode={notificationPlanMode}
+        notificationPlanSummaryText={notificationPlanSummaryText}
+        onApplySolapiReservationPlan={applySolapiReservationPlan}
+        onOpenReservationAudit={() => {
+          setReservationInspectMode("all");
+          setReservationModalOpen(true);
+        }}
+        onRefreshSolapiSendResults={refreshSolapiSendResults}
+        onStartJournalEditMode={startJournalEditMode}
+        onUpdateLessonNotificationPlan={onUpdateLessonNotificationPlan}
+        reservationApplyState={reservationApplyState}
+        solapiApplyButtonLabel={solapiApplyButtonLabel}
+        solapiReservationSyncStatus={solapiReservationSyncStatus}
+        solapiResultRefreshState={solapiResultRefreshState}
+        solapiResultRefreshTitle={solapiResultRefreshTitle}
+      />
 
       {reservationModalOpen ? (
         <Modal
