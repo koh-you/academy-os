@@ -58,6 +58,14 @@ const memoIndicatorModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalMemoIndicatorModel.js", import.meta.url),
   "utf8"
 );
+const studentIdentitySource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalStudentIdentity.jsx", import.meta.url),
+  "utf8"
+);
+const studentIdentityModelSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalStudentIdentityModel.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -343,6 +351,26 @@ for (const extractedMemoIndicatorContract of [
   assert.ok(
     memoIndicatorModelSource.includes(extractedMemoIndicatorContract),
     `missing extracted 17C-1 contract: ${extractedMemoIndicatorContract}`
+  );
+}
+assert.ok(
+  journalSource.includes("<LessonJournalStudentIdentity"),
+  "LessonJournalDetail must compose the extracted student identity"
+);
+assert.ok(
+  !journalSource.includes('className="studentCell compact"'),
+  "LessonJournalDetail must not retain the student identity markup"
+);
+for (const extractedStudentIdentityContract of [
+  "createLessonJournalStudentIdentityModel",
+  "studentPortalPreviewButton",
+  "onOpenStudentPreview(student.studentId)",
+  "specialLectureStudentTime",
+  "studentScheduleType"
+]) {
+  assert.ok(
+    `${studentIdentitySource}\n${studentIdentityModelSource}`.includes(extractedStudentIdentityContract),
+    `missing extracted 17C-2 contract: ${extractedStudentIdentityContract}`
   );
 }
 

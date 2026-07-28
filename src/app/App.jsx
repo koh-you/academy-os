@@ -230,6 +230,7 @@ import { LessonJournalReminderPanel } from "../domains/lessons/LessonJournalRemi
 import { LessonJournalNotificationBar } from "../domains/lessons/LessonJournalNotificationBar.jsx";
 import { LessonJournalReservationModal } from "../domains/lessons/LessonJournalReservationModal.jsx";
 import { createLessonJournalMemoIndicatorModel } from "../domains/lessons/lessonJournalMemoIndicatorModel.js";
+import { LessonJournalStudentIdentity } from "../domains/lessons/LessonJournalStudentIdentity.jsx";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -16761,31 +16762,11 @@ function LessonJournalDetail({
 
             return (
               <div className="journalRow" key={student.studentId}>
-                <span className="studentCell compact">
-                  <span className="journalStudentTopLine">
-                    <strong>{student.name}</strong>
-                    <button
-                      aria-label={`${student.name} 학생 화면 보기`}
-                      className="studentPortalPreviewButton"
-                      onClick={() => setStudentPreviewId(student.studentId)}
-                      type="button"
-                    >
-                      👤
-                    </button>
-                  </span>
-                  <small>{student.grade || "고1"} · {student.schoolName || "학교 미입력"}</small>
-                  {attendanceLesson.studentScheduleType === "official" ||
-                  attendanceLesson.studentScheduleType === "adjusted" ||
-                  attendanceLesson.studentScheduleType === "profile" ? (
-                    <small className={[
-                      "specialLectureStudentTime",
-                      attendanceLesson.studentScheduleType === "adjusted" ? "adjusted" : "",
-                      attendanceLesson.studentScheduleType === "profile" ? "profile" : ""
-                    ].filter(Boolean).join(" ")}>
-                      {attendanceLesson.startTime}-{attendanceLesson.endTime}
-                    </small>
-                  ) : null}
-                </span>
+                <LessonJournalStudentIdentity
+                  attendanceLesson={attendanceLesson}
+                  onOpenStudentPreview={setStudentPreviewId}
+                  student={student}
+                />
                 <div className="journalPrepCell">
                   <button
                     aria-label={`${student.name} 수업메모 · ${memoButtonDescription}`}
