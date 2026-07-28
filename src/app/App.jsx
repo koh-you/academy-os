@@ -247,6 +247,12 @@ import {
   removeLessonJournalMakeupTaskDraft
 } from "../domains/lessons/lessonJournalDraftMap.js";
 import { getLessonJournalEffectiveCommentSendStatus } from "../domains/lessons/lessonJournalCommentSendStatus.js";
+import {
+  getLessonJournalCommentButtonState,
+  getLessonJournalCommentSendState,
+  getLessonJournalCommentStatusLabel,
+  getLessonJournalDisplayCommentSendStatus
+} from "../domains/lessons/lessonJournalCommentStatusModel.js";
 import { saveLessonJournalMakeupTasksWithVerification } from "../domains/lessons/lessonJournalMakeupTaskBulkApi.js";
 import { createLessonJournalMakeupTaskRequests } from "../domains/lessons/lessonJournalMakeupTaskRequest.js";
 import { saveLessonJournalRecordsWithVerification } from "../domains/lessons/lessonJournalRecordBulkApi.js";
@@ -1050,37 +1056,38 @@ function parseKoreaShortScheduleLabel(text = "") {
 }
 
 function getDisplayCommentSendStatus(sendStatus = "") {
-  const normalizedStatus = normalizeMessageText(sendStatus);
-  if (!normalizedStatus.includes("예약 중")) return normalizedStatus;
-  const scheduledDate = parseKoreaShortScheduleLabel(normalizedStatus);
-  if (!scheduledDate || !isNotificationSchedulePast(scheduledDate)) return normalizedStatus;
-  return `예약 시각 지남 · 확인 필요 · ${normalizedStatus.replace(/^예약 중\s*·\s*/, "")}`;
+  return getLessonJournalDisplayCommentSendStatus({
+    isSchedulePast: isNotificationSchedulePast,
+    normalizeStatus: normalizeMessageText,
+    parseScheduleLabel: parseKoreaShortScheduleLabel,
+    sendStatus
+  });
 }
 
 function getCommentSendState(sendStatus = "") {
-  const normalizedStatus = getDisplayCommentSendStatus(sendStatus);
-  if (!normalizedStatus) return "";
-  if (normalizedStatus === "내용 없음") return "";
-  if (normalizedStatus.includes("확인 필요") || normalizedStatus.includes("시각 지남")) return "failed";
-  if (normalizedStatus.includes("실패")) return "failed";
-  if (normalizedStatus.includes("발송 중") || normalizedStatus.includes("예약 중")) return "pending";
-  if (normalizedStatus.includes("완료") || normalizedStatus.includes("기록됨")) return "sent";
-  return "draft";
+  return getLessonJournalCommentSendState({
+    getDisplayStatus: getDisplayCommentSendStatus,
+    sendStatus
+  });
 }
 
 function getCommentButtonState(comment = "", sendStatus = "") {
-  const sendState = getCommentSendState(sendStatus);
-  if (sendState) return sendState;
-  return normalizeMessageText(comment) ? "draft" : "empty";
+  return getLessonJournalCommentButtonState({
+    comment,
+    getSendState: getCommentSendState,
+    normalizeText: normalizeMessageText,
+    sendStatus
+  });
 }
 
 function getCommentStatusLabel(comment = "", sendStatus = "") {
-  const displayStatus = getDisplayCommentSendStatus(sendStatus);
-  const sendState = getCommentSendState(displayStatus);
-  if (sendState === "failed") return displayStatus || "발송 실패";
-  if (sendState === "pending") return displayStatus;
-  if (sendState === "sent") return displayStatus;
-  return normalizeMessageText(comment) ? "작성됨 · 발송 전" : "미작성";
+  return getLessonJournalCommentStatusLabel({
+    comment,
+    getDisplayStatus: getDisplayCommentSendStatus,
+    getSendState: getCommentSendState,
+    normalizeText: normalizeMessageText,
+    sendStatus
+  });
 }
 
 function formatNotificationJobStatus(job) {
