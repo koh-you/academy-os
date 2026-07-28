@@ -74,6 +74,14 @@ const attendanceButtonModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalAttendanceButtonModel.js", import.meta.url),
   "utf8"
 );
+const editableMemoCardSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalEditableMemoCard.jsx", import.meta.url),
+  "utf8"
+);
+const editableMemoCardModelSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalEditableMemoCardModel.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -399,6 +407,28 @@ for (const extractedAttendanceButtonContract of [
   assert.ok(
     `${attendanceButtonSource}\n${attendanceButtonModelSource}`.includes(extractedAttendanceButtonContract),
     `missing extracted 17C-3 contract: ${extractedAttendanceButtonContract}`
+  );
+}
+assert.equal(
+  (journalSource.match(/<LessonJournalEditableMemoCard/g) ?? []).length,
+  4,
+  "LessonJournalDetail must compose four extracted editable memo cards"
+);
+assert.ok(
+  !appSource.includes("function EditableMemoCard("),
+  "App must not retain the editable memo card implementation"
+);
+for (const extractedEditableMemoCardContract of [
+  "createLessonJournalEditableMemoCardModel",
+  "textarea.scrollHeight",
+  "if (model.shouldFocus) textarea.focus()",
+  "event.key === \"Escape\"",
+  "event.ctrlKey || event.metaKey",
+  "onFocus={() => onEdit(editKey)}"
+]) {
+  assert.ok(
+    `${editableMemoCardSource}\n${editableMemoCardModelSource}`.includes(extractedEditableMemoCardContract),
+    `missing extracted 17C-4 contract: ${extractedEditableMemoCardContract}`
   );
 }
 

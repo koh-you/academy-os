@@ -232,6 +232,7 @@ import { LessonJournalReservationModal } from "../domains/lessons/LessonJournalR
 import { createLessonJournalMemoIndicatorModel } from "../domains/lessons/lessonJournalMemoIndicatorModel.js";
 import { LessonJournalStudentIdentity } from "../domains/lessons/LessonJournalStudentIdentity.jsx";
 import { LessonJournalAttendanceButton } from "../domains/lessons/LessonJournalAttendanceButton.jsx";
+import { LessonJournalEditableMemoCard } from "../domains/lessons/LessonJournalEditableMemoCard.jsx";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -15861,60 +15862,6 @@ function SupplementMakeupLessonDetail({
   );
 }
 
-function EditableMemoCard({ ariaLabel, className = "", disabled = false, editKey, editingKey, onChange, onEdit, placeholder, value }) {
-  const textareaRef = useRef(null);
-  const isEditable = !disabled;
-  const shouldFocus = isEditable && editingKey === editKey;
-  const displayValue = value?.trim() ? value : "";
-
-  useEffect(() => {
-    if (!isEditable || !textareaRef.current) return;
-    const textarea = textareaRef.current;
-    textarea.style.height = "auto";
-    textarea.style.height = `${textarea.scrollHeight}px`;
-    if (shouldFocus) textarea.focus();
-  }, [isEditable, shouldFocus, value]);
-
-  function handleChange(event) {
-    const textarea = event.target;
-    textarea.style.height = "auto";
-    textarea.style.height = `${textarea.scrollHeight}px`;
-    onChange(textarea.value);
-  }
-
-  if (isEditable) {
-    return (
-      <textarea
-        aria-label={ariaLabel}
-        className={`journalMemoCardInput ${className}`.trim()}
-        onChange={handleChange}
-        onFocus={() => onEdit(editKey)}
-        onKeyDown={(event) => {
-          if (event.key === "Escape" || (event.key === "Enter" && (event.ctrlKey || event.metaKey))) {
-            event.currentTarget.blur();
-          }
-        }}
-        placeholder={placeholder}
-        ref={textareaRef}
-        rows="1"
-        value={value ?? ""}
-      />
-    );
-  }
-
-  return (
-    <button
-      className={`journalMemoCardRead ${displayValue ? "" : "empty"} ${disabled ? "locked" : ""} ${className}`.trim()}
-      onClick={() => {
-        if (!disabled) onEdit(editKey);
-      }}
-      type="button"
-    >
-      {displayValue || placeholder}
-    </button>
-  );
-}
-
 function LessonJournalFallback({ error, lesson, onBack, onDeleteLesson, onEditLesson, students = [] }) {
   const lessonStudents = getLessonJournalStudents(lesson, students);
   return (
@@ -16798,7 +16745,7 @@ function LessonJournalDetail({
                   record={record}
                   student={student}
                 />
-                <EditableMemoCard
+                <LessonJournalEditableMemoCard
                   ariaLabel={`${student.name} 강의 교재`}
                   disabled={!journalEditMode}
                   editKey={`${recordId}:lessonMaterial`}
@@ -16808,7 +16755,7 @@ function LessonJournalDetail({
                   placeholder={previousLessonMaterial || student.textbook || student.currentTextbook || "강의 교재"}
                   value={record.lessonMaterial ?? ""}
                 />
-                <EditableMemoCard
+                <LessonJournalEditableMemoCard
                   ariaLabel={`${student.name} 오늘 강의 내용`}
                   disabled={!journalEditMode}
                   editKey={`${recordId}:lessonProgress`}
@@ -16818,7 +16765,7 @@ function LessonJournalDetail({
                   placeholder={previousLessonContent || "오늘 강의 내용"}
                   value={getLessonContent(record)}
                 />
-                <EditableMemoCard
+                <LessonJournalEditableMemoCard
                   ariaLabel={`${student.name} 지난 숙제`}
                   disabled={!journalEditMode}
                   editKey={`${recordId}:previousHomework`}
@@ -16828,7 +16775,7 @@ function LessonJournalDetail({
                   placeholder="지난 숙제"
                   value={previousHomeworkTitle}
                 />
-                <EditableMemoCard
+                <LessonJournalEditableMemoCard
                   ariaLabel={`${student.name} 다음 숙제`}
                   disabled={!journalEditMode}
                   editKey={`${recordId}:nextHomework`}

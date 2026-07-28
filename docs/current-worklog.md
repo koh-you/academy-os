@@ -1321,6 +1321,13 @@
 - UI/문구: 보충관리의 학생·학부모 다음 정각 일정 안내도 당일 학생 11시 리마인더와 같은 `제목 → 빈 줄 → 일시 → 보강 대상/밀린 숙제 → 사유 → 확인할 숙제` 순서로 생성한다. 결석보강은 `결석 보강`, 숙제보충은 `숙제 보충` 제목을 사용하며, 일정 변경 알림에는 그 뒤에 변경 사유·변경 전 일정·변경 후 일정만 추가한다.
 - 원천/부작용: Supabase `app_state.aiSettings.notificationTemplates`의 기존 기본 일정 템플릿은 런타임에서 새 기본 형식으로 해석한다. 교사가 직접 수정·저장한 개별 학생/학부모 최종 문구와 기존 `notification_jobs` 예약·발송 본문은 바꾸지 않는다. 새 예약·발송·취소나 Solapi 호출은 실행하지 않는다.
 - AI 검증: 보충 일정 알림 정적 계약을 새 라벨 형식으로 갱신하고, `npm run build`, `git diff --check`, `npm run test:production`을 실행한다. 기존 수업 모달 `90a` 정적 검사 1건은 이번 문구 변경과 무관한 기준선 실패로 유지된다.
+## 2026-07-28 P1. App.jsx 17C-4 수업일지 편집 메모 카드 분리
+
+- 코드: 교재·진도·지난/다음 숙제가 공통으로 쓰는 textarea 자동 높이·초점, Escape/Ctrl+Enter blur, 읽기 전용 fallback을 `lessonJournalEditableMemoCardModel.js`와 `LessonJournalEditableMemoCard.jsx`로 분리했다.
+- 경계: 새 컴포넌트는 value와 `onChange`·`onEdit` callback만 사용한다. record/homework draft state와 저장 함수는 계속 `App.jsx`가 소유하며 저장 원천·알림 side effect는 바뀌지 않았다. 실제 API·Supabase·Solapi 호출은 0건이다.
+- AI 가상검수: 편집+현재 초점 TARGET, 잠긴 빈 CONTROL, 공백값 CONTROL로 input/read class·placeholder fallback·focus를 대조하고 자동 높이·키보드 blur·aria label 계약을 정적으로 검사한다. 전용 fixture, 수업일지 inventory, build, diff check와 rebase 중 production scenario 기준을 확인한다.
+- 사람 gate: 0건. 다음 의미 단위는 네 입력을 App-owned local draft callback만 받는 표시 묶음으로 분리하는 작업이다.
+
 ## 2026-07-28 P1. App.jsx 17C-3 수업일지 출결 상태 버튼 분리
 
 - 코드: 학생 행의 출결 상태·상세, 날짜 불일치, 하원 미체크, 휴강 비활성 표시를 `lessonJournalAttendanceButtonModel.js`와 `LessonJournalAttendanceButton.jsx`로 분리했다.
