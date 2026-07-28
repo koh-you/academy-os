@@ -1357,6 +1357,13 @@
 - AI 검수: 함수 본문을 범위 추출해 local state/effect/async 함수 수와 직접 API/callback 위치를 자동 대조하고 정적 시나리오 524/524, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17H-1`은 외부 호출 없이 예약 동기화 상태만 계산하는 `getSolapiReservationSyncStatus`를 가상 job fixture가 있는 순수 모델로 분리한다.
 
+## 2026-07-28 P1. App.jsx 17H-1 수업일지 Solapi 예약 동기화 상태 모델 분리
+
+- 코드: 적용 중·실패·수업일지 미저장·알림 없음·수동 시각 누락·예약 시각 경과·발송결과 대기/완료/실패·대상 없음·예약 누락/초과/내용 변경·완전 일치 판정을 `lessonJournalReservationSyncModel.js` 순수 모델로 분리했다.
+- 경계: 예상 예약 item 생성은 기존 App callback을 필요한 분기에서만 지연 호출해 이전 실행 순서를 보존한다. 실제 OS audit 조회·OS job 취소·provider 예약 반영·결과 reconcile과 버튼 action은 계속 `App.jsx`가 소유한다. 최신 main에서 제거한 raw Solapi group/message 조회·group 취소 UI/API는 다시 도입하지 않았다.
+- AI 가상검수: 위 상태 전 분기와 TARGET 누락 1·초과 1·fingerprint 변경 1, assignment 미입력 fingerprint 정규화 완전 일치 CONTROL을 실행하고 입력 job/item 불변과 조기 분기의 예상 item 미생성을 대조했다. 전용 fixture, 정적 시나리오 525/525, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다. 운영 API·Supabase·Solapi 호출은 0건이다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17H-2`는 학생·학부모 예상 예약 ID/fingerprint item 생성만 순수 builder로 분리하고 실제 예약은 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

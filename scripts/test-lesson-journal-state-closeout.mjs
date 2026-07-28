@@ -74,8 +74,7 @@ assert.ok(!detailSource.includes('/api/solapi/groups/cancel'));
 
 for (const nextPureBoundary of [
   "function getExpectedSolapiReservationItems()",
-  "function getSolapiReservationSyncStatus()",
-  "const solapiReservationSyncStatus = getSolapiReservationSyncStatus();"
+  "const solapiReservationSyncStatus = createLessonJournalReservationSyncStatus({"
 ]) {
   assert.ok(detailSource.includes(nextPureBoundary), `missing next pure reservation boundary: ${nextPureBoundary}`);
 }
