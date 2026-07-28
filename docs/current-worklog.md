@@ -1752,6 +1752,12 @@
 - AI 검수: 중복 TARGET/CONTROL 가상 목록으로 성공·실패 선두 교체와 입력 불변을 재확인하고 실제 발송 fetch·React·저장 API·상태 처리는 App, 순수 목록 계산은 helper에만 있음을 전용 closeout fixture·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 없음. 다음 `17U-1`은 notification job 상태 helper 모듈의 네 계산과 App 호출부를 종합 audit해 다음 저위험 경계를 선정한다.
 
+## 2026-07-28 P1. App.jsx 17U-1 notification job state module aggregate audit
+
+- 결과: `notificationJobState.js`에는 upsert, 유효 row 선택, ID batch 병합, 수업 전체 병합, 현재 위치 치환의 순수 export 5개가 있다. App의 `setNotificationJobs` 11곳 중 10곳은 이 계산들에 연결됐고, 나머지 1곳은 `scope=active` 서버 snapshot을 그대로 교체하는 의도적 직접 assignment라 분리할 계산이 없다.
+- AI 검수: TARGET/CONTROL 가상 목록으로 다섯 helper의 교체·필터·수업 범위·순서·입력 불변을 한 번에 재검증하고, helper export/call 수와 React/API/Supabase/Solapi side effect 0건을 전용 aggregate fixture·정적 시나리오·build·`git diff --check`로 대조한다.
+- 사람 gate: 없음. notification job 목록 상태 계산 묶음은 이 지점에서 종료한다. 다음 `17V-1`은 `refreshNotificationJobs`의 조회 완료 상태 문구 분기를 inventory하고 네트워크·React 상태는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
