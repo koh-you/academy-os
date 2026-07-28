@@ -238,6 +238,7 @@ import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJourn
 import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
 import { selectPreviousLessonMemoContext } from "../domains/lessons/lessonJournalPreviousMemoSelector.js";
 import { useLessonJournalDraftLifecycle } from "../domains/lessons/useLessonJournalDraftLifecycle.js";
+import { useLessonJournalReservationState } from "../domains/lessons/useLessonJournalReservationState.js";
 import { LessonJournalHeader } from "../domains/lessons/LessonJournalHeader.jsx";
 import { LessonJournalClosureNotice } from "../domains/lessons/LessonJournalClosureNotice.jsx";
 import { LessonJournalReminderPanel } from "../domains/lessons/LessonJournalReminderPanel.jsx";
@@ -15851,16 +15852,24 @@ function LessonJournalDetail({
     setJournalManualSaveMessage,
     setJournalRecordDrafts
   } = useLessonJournalDraftLifecycle(lesson.lessonId);
-  const [reservationModalOpen, setReservationModalOpen] = useState(false);
-  const [reservationAudit, setReservationAudit] = useState({
-    message: "",
-    osJobs: null,
-    state: "idle"
+  const {
+    cancelingReservationJobId,
+    reservationApplyState,
+    reservationAudit,
+    reservationInspectMode,
+    reservationModalOpen,
+    setCancelingReservationJobId,
+    setReservationApplyState,
+    setReservationAudit,
+    setReservationInspectMode,
+    setReservationModalOpen,
+    setSolapiResultRefreshState,
+    solapiResultRefreshState
+  } = useLessonJournalReservationState({
+    lessonId: lesson.lessonId,
+    notificationPlanMode: lessonNotificationPlan?.mode,
+    notificationPlanScheduledAt: lessonNotificationPlan?.scheduledAt
   });
-  const [reservationInspectMode, setReservationInspectMode] = useState("all");
-  const [cancelingReservationJobId, setCancelingReservationJobId] = useState("");
-  const [reservationApplyState, setReservationApplyState] = useState("idle");
-  const [solapiResultRefreshState, setSolapiResultRefreshState] = useState("idle");
   const [editingMemoKey, setEditingMemoKey] = useState("");
   const [studentPreviewId, setStudentPreviewId] = useState("");
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
@@ -15917,15 +15926,6 @@ function LessonJournalDetail({
   });
   const isSupplementMakeupLesson = isSupplementMakeupTaskLesson(lesson, linkedMakeupTask);
   const isExamPrepLessonCurrent = isExamPrepLesson(lesson);
-
-  useEffect(() => {
-    setReservationApplyState("idle");
-    setSolapiResultRefreshState("idle");
-  }, [lesson.lessonId]);
-
-  useEffect(() => {
-    setReservationApplyState("idle");
-  }, [lessonNotificationPlan?.mode, lessonNotificationPlan?.scheduledAt]);
 
   const {
     draftChangeCount: journalDraftChangeCount,

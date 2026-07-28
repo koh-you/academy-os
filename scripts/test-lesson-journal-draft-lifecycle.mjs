@@ -99,12 +99,11 @@ for (const hookContract of [
   assert.ok(lifecycleSource.includes(hookContract), `missing lifecycle hook contract: ${hookContract}`);
 }
 for (const reservationBoundary of [
-  'const [reservationApplyState, setReservationApplyState] = useState("idle")',
-  'const [solapiResultRefreshState, setSolapiResultRefreshState] = useState("idle")',
-  'setReservationApplyState("idle")',
-  'setSolapiResultRefreshState("idle")'
+  "useLessonJournalReservationState({",
+  "reservationApplyState,",
+  "solapiResultRefreshState"
 ]) {
-  assert.ok(detailSource.includes(reservationBoundary), `reservation state must remain in App: ${reservationBoundary}`);
+  assert.ok(detailSource.includes(reservationBoundary), `reservation state binding must stay outside the draft hook: ${reservationBoundary}`);
   assert.ok(!lifecycleSource.includes(reservationBoundary), `draft hook must not own reservation state: ${reservationBoundary}`);
 }
 for (const forbiddenSideEffect of [

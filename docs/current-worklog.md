@@ -1336,6 +1336,13 @@
 - AI 가상검수: 수업 A에 record/homework/makeup TARGET draft와 저장 필요 메시지를 만든 뒤 수업 B 초기 상태와 CONTROL 격리, 새 객체 identity, 수업 A 원본 불변을 대조했다. 전용 fixture, 수업일지 inventory, 정적 시나리오 521/521, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다. 운영 API·Supabase·Solapi 호출은 0건이다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17G-2`는 예약 modal/audit의 local React 상태만 별도 hook으로 묶을 수 있는지 먼저 inventory하고, 외부 예약·취소·결과조회 action은 이동하지 않는다.
 
+## 2026-07-28 P1. App.jsx 17G-2 수업일지 예약 화면 local state hook 분리
+
+- 코드: 예약 확인 modal 열림, OS audit 응답, 표시 필터, 취소 중 OS job ID, 예약 반영·발송결과 조회 상태와 기존 reset effect를 `useLessonJournalReservationState.js`로 분리했다.
+- 경계: OS 원천 조회·job 취소, 예약 계획 반영, 발송결과 reconcile 함수와 직접 API/callback 호출은 모두 `App.jsx`에 남겼다. hook은 local React 상태만 소유하며 최신 main에서 제거한 raw Solapi group/message·group cancel 상태를 다시 도입하지 않았다.
+- AI 가상검수: 가상 OS job이 있는 TARGET audit와 빈 CONTROL을 만들어 초기값·객체 격리·입력 불변을 대조하고, 수업/예약계획 전환의 적용·결과조회 상태 reset과 App-owned action 경계를 정적으로 검사한다. 운영 API·Supabase·Solapi 호출은 0건이다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17G-3`은 comment/preparation modal, 편집 memo key, 학생 미리보기 ID의 local overlay 선택 상태를 묶을 수 있는지 inventory한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
