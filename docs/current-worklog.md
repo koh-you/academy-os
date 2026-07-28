@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-28 P1. 15F-7 lesson hub/calendar closeout audit — AI gate 통과
+
+- audit: 달력 view/model, keyboard hook, modal controlled components·draft model, 신규/수정 payload, save snapshot·persisted verification·주입형 controller 연결을 전용 fixture로 대조했다.
+- 고위험 잔류 경계: 실제 lessons/homeworks/records request, React state 적용, 휴강 preflight, 복사·붙여넣기·undo·취소는 App/API에 그대로 있다. 출결 입력과 `LessonJournalDetail`도 로드맵 16·17 전용 단위로 남겼다.
+- 자동검증: `scripts/test-lesson-hub-closeout-boundary.mjs`가 위 추출·잔류 경계를 검사하며 운영 데이터와 외부 서비스를 호출하지 않는다.
+- 사람 gate: 없음. 코드 동작을 옮기지 않는 closeout audit다. 로드맵 15를 닫고 다음 16A 출결 inventory로 진행한다.
+
 ## 2026-07-28 P1. 15F-6 수업 modal 주입형 저장 controller 분리 — AI gate 통과
 
 - 코드: `saveLessonModalLessonsWithVerification`를 `src/domains/lessons/lessonModalSaveController.js`로 분리해 유효 draft 확정, 저장 요청, Supabase 원천 확인, 진행 표시, 재조회, persisted payload 대조 순서를 소유하게 했다.

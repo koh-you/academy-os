@@ -9,7 +9,7 @@
 | 구간 | 직접 원천·요청 | 완료 판정 | 파생·외부 side effect | 15F 판단 |
 | --- | --- | --- | --- | --- |
 | `getLessonModalSaveSnapshot` | 없음 | 저장 대상 필드의 정규화 JSON 비교 | 없음 | 15F-1 `lessonModalSaveSnapshot.js` 분리 완료 |
-| `saveLessonModalLessons` | `POST /api/lessons/bulk` | 응답 `source=supabase` 확인 후 `GET /api/lessons?verify=...`, ID 존재와 snapshot 전필드 일치 | 재조회한 전체 활성 lessons로 React state 교체 | 요청·재조회 순서를 먼저 fixture로 유지 |
+| `saveLessonModalLessons` + `saveLessonModalLessonsWithVerification` | App의 `POST /api/lessons/bulk`, `GET /api/lessons?verify=...` 주입 | controller가 응답 `source=supabase`, ID 존재와 snapshot 전필드 일치 확인 | App이 재조회한 전체 활성 lessons로 React state 교체 | 15F-6 주입형 순서 controller 분리 완료 |
 | `handleAddLesson` | 주 수업 1건, 선택형 휴강 보충 1건을 위 bulk 흐름에 전달 | `saveLessonModalLessons` 반환값 | 선택 날짜·수업 ID 변경 | payload builder만 순수 분리 후보 |
 | `handleUpdateLesson` | 일반 수정은 bulk, 휴강 전환은 먼저 `GET /api/lessons/closure-preflight` | 최신 원천 snapshot·차단 알림·bulk 재조회 확인 | 과거 학생 보존, 생성 수업 manual override, 선택 날짜·수업 ID 변경 | 휴강 preflight와 저장 orchestration은 고위험 경계에 유지 |
 | 서버 `upsertLessons` | Supabase `lessons`, conflict key `lesson_id` | upsert 반환 row | 제외 학생의 발송 가능 알림 취소, 제외 학생 `lesson_student_records` 삭제 | 단순 lessons 저장이 아닌 다중 원천 side effect이므로 별도 gate 전 이동 금지 |
@@ -33,7 +33,8 @@
 - `15F-4` 완료: 저장 재조회 뒤 expected/persisted lesson의 ID·snapshot 대조와 누락/불일치 오류를 `lessonModalSaveVerification.js` 순수 모델로 분리했다.
 - `15F-5` 완료: 운영 원천 대신 메모리 가상 TARGET/CONTROL lesson·record·job을 생성해 TARGET 발송 전 job 취소·record 삭제와 CONTROL/sent/다른 수업 보존을 서버 필터 계약과 대조했다.
 - `15F-6` 완료: `saveLessonModalLessonsWithVerification`가 저장·Supabase 원천 확인·진행 표시·재조회·payload 대조 순서를 소유하고 실제 POST/GET 함수를 주입받는다. 실제 URL·timeout 문구와 React state 교체는 App에 유지했다.
-- 다음 단위: 15F-7에서 App에 남은 실제 request·closure preflight·state 적용과 복사/붙여넣기/undo/취소 경계를 closeout audit한다.
+- `15F-7` 완료: closeout fixture로 추출 모듈 연결과 App에 남아야 할 실제 request·closure preflight·state 적용·복사/붙여넣기/undo/취소, 다음 로드맵의 출결·`LessonJournalDetail` 경계를 고정했다.
+- 다음 단위: 로드맵 16A 출결 inventory.
 - 실제 POST/GET request, closure preflight, React state 교체, 제외 학생 알림·기록 정리는 App/API 경계에 둔다.
 
 ## Gate

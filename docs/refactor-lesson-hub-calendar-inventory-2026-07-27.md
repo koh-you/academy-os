@@ -106,7 +106,7 @@ Supabase lessons
 5. **15E — 키보드 탐색 hook — 완료**
    - 15E-1 완료: 입력 요소 예외, 수업일지 열림 차단, Ctrl/Cmd C·V·Z, Delete, Enter, 방향키 action 판정을 `lessonCalendarKeyboardModel.js` 순수 모델로 분리했다.
    - 15E-2 완료: window keydown 등록·해제, action이 있을 때만 `preventDefault`, 기존 callback dispatch를 `useLessonCalendarKeyboardNavigation.js`로 옮겼다. callback이 소유한 복사·붙여넣기·undo·삭제·열기·날짜 이동 동작과 저장 경계는 변경하지 않았다.
-6. **15F 이후 — 저장 orchestration**
+6. **15F — 저장 orchestration — 완료**
    - 15F-0 완료: `docs/refactor-lesson-save-orchestration-inventory-2026-07-28.md`에 modal bulk POST → Supabase source 확인 → 전체 lessons 재조회 → snapshot 대조 → React state 교체 순서와 서버의 제외 학생 알림 취소·수업기록 삭제 side effect를 기록하고 fixture로 고정했다.
    - 15F-1 완료: 저장 후 대조 필드·시간·명단·학생별 특강 일정 정규화를 `lessonModalSaveSnapshot.js` 순수 helper로 옮겼다. modal 저장과 보강 취소 재조회가 같은 helper를 사용한다.
    - 15F-2 완료: 신규 수업과 선택형 휴강 보충의 payload 조립을 `lessonModalPayloadBuilders.js`로 옮겼다. App은 template·학생·ID와 기존 요일·색상 resolver를 주입하고 실제 bulk 저장을 계속 소유한다.
@@ -114,10 +114,11 @@ Supabase lessons
    - 15F-4 완료: expected lesson 순서대로 persisted row를 찾고 snapshot 일치·누락·불일치 오류를 판정하는 로직을 `lessonModalSaveVerification.js` 순수 모델로 옮겼다.
    - 15F-5 완료: TARGET/CONTROL 가상 수업·수업기록·알림 job을 메모리에 만들고 TARGET 제거 뒤 발송 전 TARGET job·record만 정리되며 CONTROL·sent 이력·다른 수업 데이터가 보존되는 것을 서버 실제 필터와 대조했다.
    - 15F-6 완료: 저장·Supabase 원천 확인·진행 표시·재조회·snapshot 대조 순서를 `lessonModalSaveController.js`로 옮기고 실제 request 함수를 주입받게 했다. App은 URL·timeout·React state 적용을 계속 소유한다.
+   - 15F-7 closeout 완료: 추출된 달력·키보드·모달·저장 경계를 정적으로 대조하고, 실제 request·closure preflight·React state·복사/붙여넣기/undo/취소와 다음 로드맵의 출결·`LessonJournalDetail`이 App에 남아 있음을 fixture로 고정했다.
    - 복사·붙여넣기·undo·취소는 위 유지보수 진단이 main에서 해결되고 격리 gate를 통과하기 전 이동하지 않는다.
 
 ## 이번 inventory의 gate
 
 - AI 검수: 활성/비활성 참조 수, 저장 원천, 외부 side effect, low-risk 첫 후보를 정적 분석으로 확인한다.
 - 사람 검수: 없음. 화면·운영 데이터·외부 서비스를 변경하지 않았다.
-- 다음 단계: 15F-7 closeout audit에서 로드맵 15의 잔여 고위험 경계를 명시하고 로드맵 16 출결 inventory 착수 조건을 정한다.
+- 다음 단계: 로드맵 16A 출결 inventory에서 태블릿/수업일지 출결 저장과 등하원 알림톡 경계를 먼저 기록한다.
