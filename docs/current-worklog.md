@@ -1343,6 +1343,13 @@
 - AI 가상검수: 가상 OS job이 있는 TARGET audit와 빈 CONTROL을 만들어 초기값·객체 격리·입력 불변을 대조하고, 수업/예약계획 전환의 적용·결과조회 상태 reset과 App-owned action 경계를 정적으로 검사한다. 운영 API·Supabase·Solapi 호출은 0건이다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17G-3`은 comment/preparation modal, 편집 memo key, 학생 미리보기 ID의 local overlay 선택 상태를 묶을 수 있는지 inventory한다.
 
+## 2026-07-28 P1. App.jsx 17G-3 수업일지 overlay 선택 state hook 분리
+
+- 코드: 알림톡 작성 modal payload, 준비메모 modal payload, 현재 편집 memo key, 학생 미리보기 ID의 local state와 setter를 `useLessonJournalOverlayState.js`로 분리했다.
+- 경계: 현재 동작과 같이 수업 전환 자동 reset을 새로 추가하지 않았다. comment draft 생성, 최신 record 선택, modal prop 조합, 준비메모·학생 미리보기 열기/닫기와 AI 수정·저장·발송 callback은 계속 `App.jsx`가 소유한다.
+- AI 가상검수: 서로 다른 TARGET/CONTROL 학생으로 comment/preparation modal과 미리보기, 편집 key를 동시에 구성해 초기값·입력 불변을 대조했다. 전용 fixture, 정적 시나리오 523/523, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다. 운영 API·Supabase·Solapi 호출은 0건이다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17G-4`는 `LessonJournalDetail`의 local `useState` 제거 완료와 남은 effect/action 경계를 closeout audit한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

@@ -238,6 +238,7 @@ import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJourn
 import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
 import { selectPreviousLessonMemoContext } from "../domains/lessons/lessonJournalPreviousMemoSelector.js";
 import { useLessonJournalDraftLifecycle } from "../domains/lessons/useLessonJournalDraftLifecycle.js";
+import { useLessonJournalOverlayState } from "../domains/lessons/useLessonJournalOverlayState.js";
 import { useLessonJournalReservationState } from "../domains/lessons/useLessonJournalReservationState.js";
 import { LessonJournalHeader } from "../domains/lessons/LessonJournalHeader.jsx";
 import { LessonJournalClosureNotice } from "../domains/lessons/LessonJournalClosureNotice.jsx";
@@ -15838,8 +15839,16 @@ function LessonJournalDetail({
   testAttempts = [],
   testSessions = []
 }) {
-  const [commentModal, setCommentModal] = useState(null);
-  const [prepMemoModal, setPrepMemoModal] = useState(null);
+  const {
+    commentModal,
+    editingMemoKey,
+    prepMemoModal,
+    setCommentModal,
+    setEditingMemoKey,
+    setPrepMemoModal,
+    setStudentPreviewId,
+    studentPreviewId
+  } = useLessonJournalOverlayState();
   const {
     journalEditMode,
     journalHomeworkDrafts,
@@ -15870,8 +15879,6 @@ function LessonJournalDetail({
     notificationPlanMode: lessonNotificationPlan?.mode,
     notificationPlanScheduledAt: lessonNotificationPlan?.scheduledAt
   });
-  const [editingMemoKey, setEditingMemoKey] = useState("");
-  const [studentPreviewId, setStudentPreviewId] = useState("");
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
   const linkedMakeupTask = makeupTasks.find((task) => task.makeupTaskId === lesson.sourceMakeupTaskId || task.linkedLessonId === lesson.lessonId);

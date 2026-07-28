@@ -92,8 +92,9 @@
 44. React setter·ref·localStorage 반영은 App에 유지했다.
 45. `17G-1` 완료: 수업일지 edit/draft/manual message의 lesson 전환 초기화 lifecycle을 전용 hook으로 분리했다.
 46. `17G-2` 완료: 예약 modal/audit의 local React 상태와 reset effect를 전용 hook으로 분리했다.
-47. 다음 `17G-3`: comment/preparation modal, 편집 memo key, 학생 미리보기 ID의 local overlay 선택 상태를 inventory한다.
-48. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
+47. `17G-3` 완료: comment/preparation modal, 편집 memo key, 학생 미리보기 ID의 local overlay 선택 상태를 전용 hook으로 분리했다.
+48. 다음 `17G-4`: `LessonJournalDetail`의 local `useState` 제거 완료와 남은 effect/action 경계를 closeout audit한다.
+49. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -150,6 +151,7 @@
 - `17F-9` gate: 계획 homework와 중복 verified homework, 기존·신규 makeup task, 기존·신규 record를 가상 upsert dependency로 병합해 순서·추가 row 격리·마지막 verified 우선·호출 순서·입력 불변을 대조한다. 중복 record ID의 save-state map과 빈 CONTROL을 판정하고 React setter·ref·localStorage는 App에 남는지 검사한다.
 - `17G-1` gate: 가상 수업 A에 record/homework/makeup draft와 저장 필요 메시지를 만든 뒤 수업 B의 편집 종료·빈 draft·빈 메시지 초기 상태, 새 객체 identity, 수업 A 원본 불변을 대조한다. 예약 modal/audit와 Solapi 반영·결과 조회 state는 App에 남고 hook에 API·Supabase·localStorage·알림/Solapi 참조가 없는지 정적으로 검사한다.
 - `17G-2` gate: 가상 OS job이 있는 TARGET audit와 빈 CONTROL로 초기값·객체 격리·입력 불변을 대조한다. 수업 전환 시 적용·결과조회 상태, 예약계획 전환 시 적용 상태만 reset하는 기존 effect를 고정하고 OS 조회·취소·예약 반영·결과 reconcile action과 직접 API가 App에 남는지 검사한다. 최신 main에서 제거한 raw Solapi group/message·group cancel 상태는 다시 도입하지 않는다.
+- `17G-3` gate: 서로 다른 TARGET/CONTROL 학생으로 comment modal, preparation modal, 편집 memo key, 학생 미리보기 ID를 구성해 초기값·입력 불변을 대조한다. 수업 전환 reset을 새로 추가하지 않으며 draft 생성·최신 record 선택·modal prop 조합·AI/저장/발송 callback은 App에 남고 hook에 effect나 외부 side effect가 없는지 검사한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
 - recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.
 - 학생 포털 실제 쓰기와 Solapi 특강 템플릿 검수는 사용자 지시로 목록에서 제거됐고, 교사 bearer/Storage 소유권 보안은 구현·배포 검증 완료다.

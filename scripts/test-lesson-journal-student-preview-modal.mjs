@@ -48,7 +48,7 @@ const journalEnd = appSource.indexOf("function PreparationMemoModal({", journalS
 const journalSource = appSource.slice(journalStart, journalEnd);
 
 for (const appContract of [
-  "const [studentPreviewId, setStudentPreviewId] = useState",
+  "} = useLessonJournalOverlayState();",
   "<LessonJournalStudentPreviewModal",
   "PortalComponent={StudentPortalV2}",
   "studentPreviewId={studentPreviewId}",
