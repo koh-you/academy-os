@@ -190,6 +190,10 @@ const draftPersistenceControllerSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalDraftPersistenceController.js", import.meta.url),
   "utf8"
 );
+const recordBulkApiSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalRecordBulkApi.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -298,12 +302,12 @@ const saveHandlerSource = section(
   "async function handleSaveLessonJournalDrafts",
   "async function handleSaveRecord"
 );
-const savePersistenceSource = `${saveHandlerSource}\n${draftSaveOutcomeSource}\n${draftPersistenceControllerSource}`;
+const savePersistenceSource = `${saveHandlerSource}\n${draftSaveOutcomeSource}\n${draftPersistenceControllerSource}\n${recordBulkApiSource}`;
 for (const persistenceContract of [
   "saveLessonJournalHomeworksWithVerification",
   "saveLessonJournalMakeupTasksWithVerification",
-  'postJson("/api/lesson-records/bulk"',
-  'recordResult.source !== "supabase"',
+  'request("/api/lesson-records/bulk"',
+  'result.source !== "supabase"',
   "hasMatchingVerifiedLessonRecordFields",
   "completedSources.push",
   "부분 저장",
@@ -999,6 +1003,37 @@ for (const injectedDraftPersistenceContract of [
 assert.ok(
   !draftPersistenceControllerSource.includes('postJson("/api/lesson-records/bulk"'),
   "persistence controller must not own the lesson record API"
+);
+for (const extractedRecordBulkApiContract of [
+  "saveLessonJournalRecordsWithVerification",
+  'request("/api/lesson-records/bulk", { records })',
+  'result.source !== "supabase"',
+  "matchesRecord(record, verified)",
+  "return verifiedRecords"
+]) {
+  assert.ok(
+    recordBulkApiSource.includes(extractedRecordBulkApiContract),
+    `missing extracted 17F-5 contract: ${extractedRecordBulkApiContract}`
+  );
+}
+for (const injectedRecordBulkApiContract of [
+  "saveLessonJournalRecordsWithVerification({",
+  "records: recordsToSave",
+  "request: postJson",
+  "matchesRecord: hasMatchingVerifiedLessonRecordFields",
+  "recordsRef.current = nextRecords",
+  "writeStorageValue(window.localStorage"
+]) {
+  assert.ok(
+    saveHandlerSource.includes(injectedRecordBulkApiContract),
+    `missing App-owned 17F-5 binding: ${injectedRecordBulkApiContract}`
+  );
+}
+assert.ok(
+  !recordBulkApiSource.includes("localStorage") &&
+    !recordBulkApiSource.includes("setRecords") &&
+    !recordBulkApiSource.includes("setSaveStates"),
+  "record bulk API adapter must not own React or local storage updates"
 );
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");

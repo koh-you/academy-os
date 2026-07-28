@@ -1420,6 +1420,13 @@
 - AI 가상검수: 3원천 전체 성공 TARGET, 변경 없는 CONTROL, homework 첫 단계 실패, makeup 두 번째 단계 실패, record 세 번째 단계 실패를 실행해 정확한 호출 순서·후속 단계 중단·완료 원천 문구·failure callback error를 대조한다. 전용 fixture, 수업일지 inventory, build, diff check와 현재 rebase 중간 scenario 기준선을 통과한 뒤 커밋을 재적용한다. 전체 production 검증은 rebase 완료 뒤 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위는 수업기록 bulk 저장·Supabase 재조회 대조를 주입형 API adapter로 분리하는 작업이다.
 
+## 2026-07-28 P1. App.jsx 17F-5 수업일지 record bulk API 분리
+
+- 코드: `/api/lesson-records/bulk` 요청, Supabase source 확인, 요청 record별 재조회 row 존재·필드 일치 검증을 `lessonJournalRecordBulkApi.js` 주입형 adapter로 분리했다.
+- 경계: App은 `postJson`과 기존 필드 비교기를 주입하고, 검증된 records의 ref/state·localStorage·저장 상태 반영을 계속 소유한다. 실제 운영 API나 Supabase에는 검수 중 접근하지 않았다.
+- AI 가상검수: record 2건 TARGET과 추가 반환 row로 요청 payload·반환 순서·원본 불변을 대조하고, 빈 CONTROL 무호출, source 불일치, 누락 row, 필드 불일치, 네트워크 실패를 가상 실행했다. 전용 fixture, 수업일지 inventory, 정적 시나리오 516/516, `npm run test:production`, `npm run build`, `git diff --check` 통과.
+- 사람 gate: 새 항목 없음. 다음 의미 단위는 수업일지 숙제 bulk 저장 fingerprint·Supabase 재조회 대조를 주입형 API adapter로 분리하는 작업이다.
+
 ## 2026-07-28 P1. App.jsx 17D-2 수업일지 학생 표 shell 분리
 
 - 코드: 수업일지 학생 표의 panel, 읽기/편집 class, 학생·메모·출결·교재·진도·숙제·과제·알림톡 10개 고정 열 제목을 `lessonJournalTableModel.js`와 `LessonJournalTable.jsx`로 분리했다.

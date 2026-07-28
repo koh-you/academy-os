@@ -212,7 +212,8 @@ for (const binding of [
 for (const retainedSideEffect of [
   "saveLessonJournalHomeworksWithVerification(",
   "saveLessonJournalMakeupTasksWithVerification(",
-  'postJson("/api/lesson-records/bulk"',
+  "saveLessonJournalRecordsWithVerification({",
+  "request: postJson",
   "setHomeworks(nextHomeworks)",
   "setMakeupTasks(",
   "setRecords(nextRecords)"

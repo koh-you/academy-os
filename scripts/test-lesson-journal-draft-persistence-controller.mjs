@@ -114,6 +114,10 @@ const controllerSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalDraftPersistenceController.js", import.meta.url),
   "utf8"
 );
+const recordApiSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalRecordBulkApi.js", import.meta.url),
+  "utf8"
+);
 const handlerStart = appSource.indexOf("async function handleSaveLessonJournalDrafts(");
 const handlerEnd = appSource.indexOf("async function handleSaveRecord(", handlerStart);
 const handlerSource = appSource.slice(handlerStart, handlerEnd);
@@ -140,7 +144,8 @@ assert.ok(
 for (const appOwnedSideEffect of [
   "saveLessonJournalHomeworksWithVerification(",
   "saveLessonJournalMakeupTasksWithVerification(",
-  'postJson("/api/lesson-records/bulk"',
+  "saveLessonJournalRecordsWithVerification({",
+  "request: postJson",
   "homeworksRef.current = nextHomeworks",
   "recordsRef.current = nextRecords",
   "setSaveStates("
@@ -148,5 +153,9 @@ for (const appOwnedSideEffect of [
   assert.ok(handlerSource.includes(appOwnedSideEffect), `side effect must remain injected by App: ${appOwnedSideEffect}`);
   assert.ok(!controllerSource.includes(appOwnedSideEffect), `controller must not own App side effect: ${appOwnedSideEffect}`);
 }
+assert.ok(
+  recordApiSource.includes('request("/api/lesson-records/bulk", { records })'),
+  "injected record API adapter must retain the bulk route"
+);
 
 console.log("lesson journal persistence controller TARGET/CONTROL fixtures passed");

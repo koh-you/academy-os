@@ -80,8 +80,10 @@
 32. `17F-3` 완료: homework/makeup/record 단계별 성공·부분 성공·실패 문구를 순수 outcome 모델로 분리하고, 실패 시 전체 draft를 유지해 모든 원천을 재요청하는 현재 재시도 contract를 fixture로 고정했다.
 33. `17F-4` 완료: 다중 원천 저장의 순차 실행과 단계별 부분 성공 outcome 조합을 주입형 controller로 분리했다.
 34. 단계별 Supabase 재조회·React 반영 callback은 App에 유지했다.
-35. 다음: 수업기록 bulk 저장·재조회 대조를 주입형 API adapter로 분리
-36. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
+35. `17F-5` 완료: 수업기록 bulk 저장·Supabase 재조회 대조를 주입형 API adapter로 분리했다.
+36. 수업기록 React ref/state·localStorage·저장 상태 반영은 App에 유지했다.
+37. 다음: 수업일지 숙제 bulk 저장 fingerprint·재조회 대조를 주입형 API adapter로 분리
+38. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -131,6 +133,7 @@
 - `17F-2` gate: 명시 homework 변경 TARGET, record의 과제 판정으로 previous/source 두 homework를 함께 갱신하는 TARGET, `not_entered`·학생 없음·record ID 없음 CONTROL을 가상 실행해 변경 순서·status/teacherStatus·checkedAt/updatedAt·dueDate·원본 불변을 대조한다.
 - `17F-3` gate: 변경 없음 성공, 3원천 전체 성공, homework 첫 단계 실패, homework 성공 후 makeup 실패, homework+makeup 성공 후 record 실패를 대조한다. 현재는 실패 시 완료 원천 ID를 저장하지 않고 모든 draft를 보존하므로 재시도 시 성공했던 원천도 다시 요청한다. 이 동작은 리팩터링에서 바꾸지 않고 별도 저장 신뢰성 개선 후보로 기록한다.
 - `17F-4` gate: 숙제·등원보충·수업기록 전체 성공 TARGET, 변경 없는 CONTROL, 1·2·3단계 각각의 실패 TARGET을 가상 callback으로 실행해 호출 순서·후속 단계 중단·부분 성공 문구·failure callback error를 대조한다. 실제 API·Supabase·React 반영은 controller가 직접 참조하지 않고 App callback으로 주입하는지 정적으로 검사한다.
+- `17F-5` gate: 가상 record 2건과 Supabase 재조회 응답으로 endpoint payload·반환 순서·원본 불변을 대조하고, 빈 CONTROL 무호출, Supabase source 불일치, 누락 row, 필드 불일치, 네트워크 실패를 각각 판정한다. React ref/state·localStorage 반영은 App에 남는지 정적으로 검사한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
 - recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.
 - 학생 포털 실제 쓰기와 Solapi 특강 템플릿 검수는 사용자 지시로 목록에서 제거됐고, 교사 bearer/Storage 소유권 보안은 구현·배포 검증 완료다.

@@ -224,6 +224,7 @@ import { useAttendanceRecordSync } from "../domains/lessons/useAttendanceRecordS
 import { executeLessonJournalDraftPersistence } from "../domains/lessons/lessonJournalDraftPersistenceController.js";
 import { createLessonJournalDraftPersistencePlan } from "../domains/lessons/lessonJournalDraftPersistencePlan.js";
 import { createLessonJournalDraftSaveRequest } from "../domains/lessons/lessonJournalDraftSaveRequest.js";
+import { saveLessonJournalRecordsWithVerification } from "../domains/lessons/lessonJournalRecordBulkApi.js";
 import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
 import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
 import { selectPreviousLessonMemoContext } from "../domains/lessons/lessonJournalPreviousMemoSelector.js";
@@ -9191,17 +9192,10 @@ export function App() {
         return verifiedTasks.length;
       },
       persistRecords: async () => {
-        const recordResult = await postJson("/api/lesson-records/bulk", { records: recordsToSave });
-        if (recordResult.source !== "supabase") {
-          throw new Error("수업기록을 Supabase에서 다시 확인하지 못했습니다.");
-        }
-        const verifiedRecords = Array.isArray(recordResult.records) ? recordResult.records : [];
-        const verifiedById = new Map(verifiedRecords.map((record) => [record.lessonStudentRecordId, record]));
-        recordsToSave.forEach((record) => {
-          const verified = verifiedById.get(record.lessonStudentRecordId);
-          if (!verified || !hasMatchingVerifiedLessonRecordFields(record, verified)) {
-            throw new Error(`수업기록 저장 후 Supabase 재조회 값이 일치하지 않습니다: ${record.lessonStudentRecordId}`);
-          }
+        const verifiedRecords = await saveLessonJournalRecordsWithVerification({
+          records: recordsToSave,
+          request: postJson,
+          matchesRecord: hasMatchingVerifiedLessonRecordFields
         });
         const nextRecords = verifiedRecords.reduce(
           (currentRecords, record) => upsertLessonStudentRecord(currentRecords, record),
