@@ -213,6 +213,7 @@ import {
   createAttendanceRequestBindings
 } from "../domains/lessons/attendanceApi.js";
 import { AttendanceKiosk } from "../domains/lessons/AttendanceKiosk.jsx";
+import { checkKioskAttendanceAction } from "../domains/lessons/attendanceKioskCheckController.js";
 import { previewKioskAttendanceAction } from "../domains/lessons/attendanceKioskPreviewController.js";
 import { AttendanceModal } from "../domains/lessons/AttendanceModal.jsx";
 import { mergeRemoteAttendanceRecord } from "../domains/lessons/attendanceSync.js";
@@ -6920,59 +6921,30 @@ export function App() {
   }
 
   async function handleAttendancePinCheck(phoneLast4, options = {}) {
-    if (attendanceOnlyMode && attendanceLoadedDateRef.current !== getKoreaDateString()) {
-      setIsAppStateReady(false);
-      setAttendanceReloadKey((current) => current + 1);
-      return { ok: false, message: "날짜가 바뀌어 출결 데이터를 다시 불러오는 중입니다. 잠시 후 다시 입력해 주세요." };
-    }
-
-    const digits = String(phoneLast4).replaceAll(/\D/g, "").slice(-4);
-    if (digits.length !== 4) {
-      return { ok: false, message: "휴대폰 번호 뒤 4자리를 입력해 주세요." };
-    }
-
-    try {
-      const result = await checkAttendanceRequest({
-        action: options.action,
-        attendanceStatus: options.attendanceStatus,
-        checkInTime: options.checkInTime,
-        checkOutTime: options.checkOutTime,
-        phoneLast4: digits,
-        lateMinutes: options.lateMinutes,
-        lateGraceMinutes: attendanceSettings.lateGraceMinutes,
-        lessonId: options.lessonId,
-        sendAlimtalk: true,
-        source: "kiosk",
-        studentId: options.studentId
-      });
-      if (result.lesson) {
-        setLessons((current) => upsertById(current, result.lesson, "lessonId"));
-      }
-      if (result.record) {
-        const nextRecords = upsertLessonStudentRecord(recordsRef.current, result.record);
+    return checkKioskAttendanceAction({
+      attendanceOnlyMode,
+      currentDate: getKoreaDateString(),
+      lateGraceMinutes: attendanceSettings.lateGraceMinutes,
+      loadedDate: attendanceLoadedDateRef.current,
+      onAttendanceEvent: (notificationLog) => {
+        setNotificationLogs((current) => [notificationLog, ...current]);
+      },
+      onDateChanged: () => {
+        setIsAppStateReady(false);
+        setAttendanceReloadKey((current) => current + 1);
+      },
+      onLesson: (lesson) => {
+        setLessons((current) => upsertById(current, lesson, "lessonId"));
+      },
+      onRecord: (record) => {
+        const nextRecords = upsertLessonStudentRecord(recordsRef.current, record);
         recordsRef.current = nextRecords;
         setRecords(nextRecords);
-      }
-      if (result.attendanceEvent) {
-        setNotificationLogs((current) => [
-          {
-            notificationLogId: result.attendanceEvent.attendanceEventId || `attendance_kiosk_${Date.now()}_${result.student?.studentId || "student"}`,
-            channel: "attendance_kiosk",
-            createdAt: result.attendanceEvent.createdAt || new Date().toISOString(),
-            lessonId: result.lesson?.lessonId,
-            message: `[출결체크] ${result.message} · ${result.checkedTime || ""}`.trim(),
-            provider: "academy-os",
-            status: result.alimtalk?.status || "saved",
-            studentId: result.student?.studentId,
-            target: "parent"
-          },
-          ...current
-        ]);
-      }
-      return { ok: true, ...result };
-    } catch (error) {
-      return { ok: false, message: error.message || "출결 저장에 실패했습니다. 선생님께 말씀해 주세요." };
-    }
+      },
+      options,
+      phoneLast4,
+      request: checkAttendanceRequest
+    });
   }
 
   if (attendanceOnlyMode) {

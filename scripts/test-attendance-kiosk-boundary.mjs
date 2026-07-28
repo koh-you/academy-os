@@ -65,7 +65,8 @@ for (const appBoundary of [
   "async function handleAttendancePinCheck(",
   "previewKioskAttendanceAction({",
   "request: previewAttendanceRequest",
-  "const result = await checkAttendanceRequest",
+  "checkKioskAttendanceAction({",
+  "request: checkAttendanceRequest",
   "recordsRef.current = nextRecords",
   "setNotificationLogs((current)"
 ]) {
