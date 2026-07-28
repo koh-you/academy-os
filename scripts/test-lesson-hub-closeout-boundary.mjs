@@ -30,7 +30,8 @@ for (const extractedBoundary of [
   'from "../domains/lessons/LessonModalActions.jsx"',
   'from "../domains/lessons/LessonModalBasics.jsx"',
   'from "../domains/lessons/LessonModalClosurePanel.jsx"',
-  'from "../domains/lessons/LessonModalStudentPicker.jsx"'
+  'from "../domains/lessons/LessonModalStudentPicker.jsx"',
+  'from "../domains/lessons/AttendanceKiosk.jsx"'
 ]) {
   assert.ok(appSource.includes(extractedBoundary), `missing extracted boundary: ${extractedBoundary}`);
 }
@@ -103,7 +104,6 @@ for (const reservedAppBoundary of [
   "async function syncAttendanceRecords()",
   "async function handleAttendancePinPreview(",
   "async function handleAttendancePinCheck(",
-  "function AttendanceKiosk(",
   "function LessonJournalDetail("
 ]) {
   assert.ok(
