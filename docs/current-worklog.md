@@ -1792,6 +1792,12 @@
 - AI 검수: 공백·슬래시 수업 ID, 날짜 지정/미지정 history, active, 예상 밖 scope, 기본 인자를 가상 실행해 query와 입력 불변을 검증하고 helper side effect 0건 및 App request 순서를 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 없음. 다음 `17W-3`은 query helper export/import/call 수와 request·React 경계를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17W-3 notification job load query boundary closeout
+
+- 완료: `createNotificationJobsQueryString` export/import/call 각 1개와 silent loading→선택 날짜 범위 계산→query helper→timeout request→목록 반영→ready→failed 경계를 closeout했다.
+- AI 검수: 수업 ID 인코딩, 날짜 지정/미지정 history, active 가상 입력의 query·입력 불변을 재검증하고 App inline `URLSearchParams`/`query.set` 0건, helper의 네트워크·React·시각·Supabase·Solapi side effect 0건을 전용 closeout fixture·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 없음. 다음 `17X-1`은 notification job load의 query/status 순수 helper와 App request/list 경계를 종합 audit해 다음 저위험 후보를 선정한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
