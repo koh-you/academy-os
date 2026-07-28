@@ -54,5 +54,6 @@
 - `16B-4` 완료: local state와 2단계 확인 UI, 주입 `onSave`만 소유하는 `AttendanceModal.jsx`를 분리했다.
 - `16C-1` 완료: kiosk 결과·preview action label, 다중 수업 선택 후보와 상세 문구를 `attendanceKioskModel.js`로 분리하고 가상 응답으로 검증했다.
 - `16C-2` 완료: local pin/preview/result/submitting state와 주입 preview/check callback만 소유하는 `AttendanceKiosk.jsx`를 분리했다.
-- 다음 `16D-1`: check/preview endpoint·timeout 계약만 소유하는 출결 API request adapter를 분리하고 가상 request client로 검증한다.
-- 실제 polling effect, API, React state, 출결 저장·알림톡은 App에 남긴다.
+- `16D-1` 완료: check/preview endpoint·30초 timeout·오류 문구 계약을 `attendanceApi.js`에 분리하고 App에서 공통 request client를 주입한다.
+- 다음 `16D-2`: 날짜 변경 차단·PIN 검증·preview payload·오류 변환만 소유하는 kiosk preview controller를 분리한다.
+- 실제 polling effect, React state, 출결 저장·알림톡은 App에 남긴다.

@@ -2,6 +2,10 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const attendanceApiSource = await readFile(
+  new URL("../src/domains/lessons/attendanceApi.js", import.meta.url),
+  "utf8"
+);
 const serverSource = await readFile(new URL("../api/server.js", import.meta.url), "utf8");
 const coreDataSource = await readFile(new URL("../api/routes/coreData.js", import.meta.url), "utf8");
 const schemaSource = await readFile(new URL("../supabase/schema.sql", import.meta.url), "utf8");
@@ -16,12 +20,13 @@ function assertOrdered(source, values) {
 }
 
 for (const request of [
-  '"/api/attendance/check"',
-  '"/api/attendance/preview"',
   '`/api/lesson-records?date=${encodeURIComponent(syncDate)}`',
   "window.setInterval(syncAttendanceRecords, 7_000)"
 ]) {
   assert.ok(appSource.includes(request), `missing attendance client request: ${request}`);
+}
+for (const request of ['"/api/attendance/check"', '"/api/attendance/preview"']) {
+  assert.ok(attendanceApiSource.includes(request), `missing attendance API request: ${request}`);
 }
 
 assertOrdered(appSource, [

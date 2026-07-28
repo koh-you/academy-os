@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-28 P1. 16D-1 출결 API request adapter 분리 — AI gate 통과
+
+- 코드: check/preview endpoint, 30초 timeout과 기존 오류 문구를 `src/domains/lessons/attendanceApi.js`로 이동했다. App은 `postJsonWithTimeout`을 factory에 주입해 기존 호출 이름과 payload를 유지한다.
+- 가상 데이터: kiosk check payload와 lesson 선택 preview payload를 가상 request client로 전달해 URL·payload identity·timeout·문구·성공 반환·오류 전파를 대조했다.
+- 경계: adapter는 React state, Supabase, notification_jobs, Solapi 상태를 소유하지 않으며 검증 중 실제 API/운영 데이터/발송 호출은 0건이다.
+- 사람 gate: 없음. transport 계약 위치만 이동한다. 다음 16D-2는 kiosk preview controller다.
+
 ## 2026-07-28 P1. 16C-2 출결 kiosk 컴포넌트 분리 — AI gate 통과
 
 - 코드: `AttendanceKiosk`를 `src/domains/lessons/AttendanceKiosk.jsx`로 이동했다. PIN 입력, preview/result/submitting local state, 복수 수업 선택, 확인 modal과 기존 문구를 그대로 유지한다.

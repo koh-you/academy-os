@@ -209,6 +209,9 @@ import {
   hasMissingCheckOut,
   normalizeTimeInput
 } from "../domains/lessons/attendance.js";
+import {
+  createAttendanceRequestBindings
+} from "../domains/lessons/attendanceApi.js";
 import { AttendanceKiosk } from "../domains/lessons/AttendanceKiosk.jsx";
 import { AttendanceModal } from "../domains/lessons/AttendanceModal.jsx";
 import { mergeRemoteAttendanceRecord } from "../domains/lessons/attendanceSync.js";
@@ -373,6 +376,11 @@ import {
   testPaperPreparationOptions,
   testPaperProgressOptions
 } from "./appConfig.js";
+
+const {
+  checkAttendanceRequest,
+  previewAttendanceRequest
+} = createAttendanceRequestBindings({ request: postJsonWithTimeout });
 
 function getAssignmentStatusForMessage(record, previousHomework) {
   const recordStatus = normalizeAssignmentStatusValue(record?.assignmentStatus ?? record?.incompleteHomework ?? "");
@@ -4017,24 +4025,6 @@ function generateExamAnalysisOutputDraftRequest(payload) {
     payload,
     120000,
     "시험분석 산출물 AI 초안 생성이 지연되고 있습니다."
-  );
-}
-
-function checkAttendanceRequest(payload) {
-  return postJsonWithTimeout(
-    "/api/attendance/check",
-    payload,
-    30000,
-    "출결 저장과 알림톡 처리가 지연되고 있습니다."
-  );
-}
-
-function previewAttendanceRequest(payload) {
-  return postJsonWithTimeout(
-    "/api/attendance/preview",
-    payload,
-    30000,
-    "출결 확인이 지연되고 있습니다."
   );
 }
 
