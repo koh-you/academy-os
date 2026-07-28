@@ -1824,6 +1824,12 @@
 - AI 검수: 전체 필드와 ID 배열 참조·입력 불변을 재검증하고 App inline 6필드 object 0건, helper의 네트워크·React·Storage·Supabase·Solapi side effect 0건을 전용 closeout fixture·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 없음. 다음 `17Z-1`은 reconcile 응답 records의 순수 reduce와 saved-state map 계산을 각각 inventory하고 실제 ref/React/localStorage 반영은 이동하지 않는다.
 
+## 2026-07-28 P3. App.jsx 17Z-1 notification job reconcile record state inventory
+
+- inventory: reconcile 응답 record를 기존 목록에 순서대로 upsert하는 계산과 `lessonStudentRecordId`가 있는 응답만 `saved`로 만드는 계산을 하나의 순수 response model 후보로 고정했다. 실제 `upsertLessonStudentRecord`는 의존성으로 주입할 수 있으며, API 요청·notification job merge·ref/React state·localStorage·save-state setter·return은 계속 `App.jsx` 경계다.
+- AI 가상검수: 기존 TARGET 교체→신규 TARGET 추가→ID 없는 응답→같은 TARGET 재교체 순서와 CONTROL 보존, saved ID 필터, 입력 불변, 빈 응답의 기존 배열 참조 보존을 전용 inventory fixture·정적 시나리오·build·`git diff --check`로 검증한다.
+- 사람 gate: 없음. 다음 `17Z-2`는 이 두 계산만 순수 helper로 분리하고 실제 ref/React/localStorage 반영 순서를 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
