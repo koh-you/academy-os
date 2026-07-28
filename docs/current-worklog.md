@@ -1765,6 +1765,13 @@
 - AI 검수: 수업 TARGET, 수업+history 우선순위 TARGET, history 0건, active, 예상 밖 scope CONTROL로 상태 object를 가상 생성하고 조회 결과 적용 뒤 ready 상태가 설정되는 순서를 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 없음. 다음 `17V-2`는 ready 상태 object 계산만 순수 helper로 분리하고 조회·React 상태 경계는 App에 유지한다.
 
+## 2026-07-28 P2. App.jsx 17V-2 notification job load ready status 분리
+
+- 코드: 수업별·history·active 조회 완료 상태 object 계산을 `notificationJobLoadStatus.js`의 `createNotificationJobsReadyStatus`로 분리했다. App은 조회된 job 수와 `lessonId`, `scope`만 넘겨 ready 상태를 설정한다.
+- 외부 경계: loading/failed 상태와 silent guard, query와 timeout, 조회 API, active snapshot 교체와 scoped merge, React setter는 App에 유지한다. 상태 문구와 분기 우선순위는 기존과 같다.
+- AI 검수: 수업 TARGET, 수업+history 우선순위, history 0건, active, 예상 밖 scope, 기본 인자를 가상 실행해 상태·문구·입력 불변을 확인하고 helper side effect 0건과 App 실행 순서를 전용 fixture·정적 시나리오·build·`git diff --check`로 대조한다.
+- 사람 gate: 없음. 다음 `17V-3`은 helper export/import/call 수와 조회·React 경계를 closeout한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

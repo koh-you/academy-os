@@ -70,6 +70,7 @@ import {
 } from "../domains/notifications/notificationJobState.js";
 import { ParentResponseContextPanel } from "../domains/notifications/ParentResponseContextPanel.jsx";
 import { getParentResponseContexts } from "../domains/notifications/parentResponseContext.js";
+import { createNotificationJobsReadyStatus } from "../domains/notifications/notificationJobLoadStatus.js";
 import { formatNotificationJobStatusLabel } from "../domains/notifications/notificationJobStatusFormatter.js";
 import {
   canDeleteNotificationJobForDisplay,
@@ -6447,14 +6448,13 @@ export function App() {
           mergeNotificationJobsIntoState(result.notificationJobs);
         }
         if (!silent) {
-          setNotificationJobsStatus({
-            state: "ready",
-            message: lessonId
-              ? `현재 수업 알림 ${result.notificationJobs.length}건을 확인했습니다.`
-              : scope === "history"
-                ? `최근 알림 기록 ${result.notificationJobs.length}건을 불러왔습니다.`
-                : `처리 중·확인 필요 알림 ${result.notificationJobs.length}건을 불러왔습니다.`
-          });
+          setNotificationJobsStatus(
+            createNotificationJobsReadyStatus({
+              count: result.notificationJobs.length,
+              lessonId,
+              scope
+            })
+          );
         }
       }
     } catch (error) {
