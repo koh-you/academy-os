@@ -1645,6 +1645,13 @@
 - AI 검수: 중복 TARGET 2건·CONTROL·신규 job·빈 목록을 가상 실행해 교체/삽입/순서/입력 불변을 대조한다. App-owned guard/setter/callback과 helper side effect 부재를 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 없음. 다음 `17O-3`은 순수 목록 helper와 App-owned React setter/예약 callback 경계를 closeout audit한다.
 
+## 2026-07-28 P1. App.jsx 17O-3 notification job state upsert 경계 closeout
+
+- 결과: 무제한 목록 helper의 import/export/call을 각각 1개로 고정하고 유효 ID guard가 helper 호출보다 먼저 실행되는 경계를 closeout audit했다. 실제 목록·API·문구 동작 변경은 없다.
+- 외부 경계: React `setNotificationJobs`와 취소·출결·예약·실패 저장의 `onNotificationJob` callback 네 곳은 App에 남는다. helper에는 API, `notification_jobs`, Solapi side effect가 없다.
+- AI 검수: 중복 TARGET/CONTROL 가상 목록의 교체·입력 불변과 import/export/call 수, guard→setter 순서, callback 네 곳, helper side effect 부재를 전용 closeout fixture·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 없음. 다음 `17P-1`은 `mergeNotificationJobsIntoState`의 유효 job 필터·ID Set·batch 선두 병합 계산을 inventory하며 React setter와 bulk 예약/reconcile API는 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
