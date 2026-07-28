@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-28 P0. 교사 bearer 세션·시험 후 제출 Storage 소유권 보강 (배포 검증 대기)
+
+- 구현: 교사 로그인 성공 시 서버 HMAC 서명·8시간 만료의 교사 세션 토큰을 발급하고 기존 자동로그인 저장소에도 함께 보관한다. `시험 후 제출 확인 처리`는 이 bearer 토큰 없이는 서버가 401로 차단한다. 기존 자동로그인 상태는 화면을 계속 볼 수 있지만, 확인 처리와 제출 파일 열람은 한 번 로그아웃 후 다시 로그인해야 한다.
+- Storage: 시험 후 제출 파일 열람 API는 더 이상 경로만으로 signed URL을 돌려주지 않는다. 등록된 `examPostSubmissions` 첨부인지 먼저 대조한 뒤, 교사는 열람하고 학생/학부모는 본인 학생 ID의 첨부만 열 수 있다. 브라우저 직접 링크/302를 없애고 인증 GET으로 짧은 signed URL을 받아 새 창으로 연다.
+- 범위: 이번 단위는 시험 후 제출 확인과 `exam-submissions` 버킷 파일 열람으로 한정한다. 학생 숙제·질문·시험제출 실제 쓰기와 다른 Storage 경로, Solapi 특강 템플릿 연결은 아직 사람 gate 범위 밖이다. Supabase 운영 데이터, 파일, 알림 예약/발송, Solapi를 구현·검증 중 수정하지 않았다.
+- AI 검증: `npm run test:teacher-session-security`, `npm run build`, `git diff --check` 통과. 전체 `npm run test:production`은 새 보안 계약까지 실행하며, 기존 무관한 수업 모달 정적 검사 `90a` 한 건이 기준선 실패로 남아 있다.
+- 배포 gate: 현재 Vercel 자동 배포가 `Deployment rate limited — retry in 24 hours`로 막혀 있다. 최신 커밋이 실제 배포된 뒤에만 교사 재로그인·제출 확인·본인/타인 파일 열람 차단을 사람이 검증한다.
+
 ## 2026-07-28 P1. 모바일 Academy OS 전체 메뉴·공통 화면 최적화
 
 - 방향 정정: 모바일을 알림관리 전용으로 제한하지 않는다. 수업일지, 특강·숙제·보충, 학생·반, 시험, 연구실, 정산·알림·설정까지 전체 OS 메뉴를 모바일에서 유지한다.

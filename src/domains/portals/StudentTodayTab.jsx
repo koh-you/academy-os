@@ -32,6 +32,7 @@ export function StudentTodayTab({
   todayHomeworks = [],
   onAddQuestion,
   onDeleteQuestion,
+  onOpenExamPostFile,
   onStudentCheckHomework,
   onSubmitExamPostSubmission,
   onUpdateQuestion
@@ -43,6 +44,7 @@ export function StudentTodayTab({
       <StudentSupplementSchedules getTypeLabel={getSupplementTypeLabel} schedules={supplementSchedules} />
 
       <StudentExamPostSubmissionPanel
+        onOpenExamPostFile={onOpenExamPostFile}
         onSubmitExamPostSubmission={onSubmitExamPostSubmission}
         referenceDate={referenceDate}
         saveStates={studentExamPostSaveStates}

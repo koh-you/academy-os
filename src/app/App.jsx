@@ -1603,8 +1603,8 @@ function removeCookieValue(name) {
 
 function normalizeTeacherSessionForStorage(session) {
   if (session?.role !== "teacher") return null;
-  const { actorId, name, role } = session;
-  return { actorId, name, role };
+  const { actorId, name, role, sessionToken, teacherId } = session;
+  return { actorId, name, role, sessionToken, teacherId };
 }
 
 function encodeTeacherSession(session) {
@@ -7025,7 +7025,13 @@ export function App() {
         const result = await postJson("/api/auth/login", { role, loginId, password });
         if (result.authenticated) {
           setIsPortalDataReady(false);
-          const teacherSession = { role: "teacher", actorId: "instructor_owner_001", name: result.account?.name || account.name || teacherAccount.name };
+          const teacherSession = {
+            role: "teacher",
+            actorId: "instructor_owner_001",
+            name: result.account?.name || account.name || teacherAccount.name,
+            teacherId: result.account?.teacherId || "",
+            sessionToken: result.account?.sessionToken || ""
+          };
           setSession(teacherSession);
           persistTeacherSession(teacherSession);
           setActiveView("lessons");
@@ -7199,6 +7205,7 @@ export function App() {
         onStudentAddQuestion={handleStudentAddQuestion}
         onStudentCheckHomework={handleStudentCheckHomework}
         onStudentDeleteQuestion={handleStudentDeleteQuestion}
+        onOpenExamPostFile={(file) => handleOpenExamPostFile(session.sessionToken, file)}
         onSubmitExamPostSubmission={handleSubmitExamPostSubmission}
         onStudentUpdateQuestion={handleStudentUpdateQuestion}
       />
@@ -10124,6 +10131,7 @@ export function App() {
             rows={examPrepRows}
             students={students}
             onConfirmExamPostSubmission={handleConfirmExamPostSubmission}
+            onOpenExamPostFile={(file) => handleOpenExamPostFile(session?.sessionToken, file)}
             onEnsureExamCycleRows={(examCycle, classTemplateId) =>
               setExamPrepRows((current) => {
                 const nextRowsToAdd = buildExamPrepRowsFromStudents(students, examCycle, classTemplateId, current);
@@ -11062,7 +11070,7 @@ export function App() {
       [submissionId]: { message: "Supabase에 확인 상태를 저장하고 다시 확인하는 중입니다.", state: "saving" }
     }));
     try {
-      const result = await confirmTeacherExamPostSubmission(submissionId, teacherConfirmed);
+      const result = await confirmTeacherExamPostSubmission(session?.sessionToken, submissionId, teacherConfirmed);
       setExamPostSubmissions(result.submissions);
       setExamPostConfirmSaveStates((current) => ({
         ...current,
@@ -11077,6 +11085,18 @@ export function App() {
       return { ok: false, error };
     } finally {
       examPostConfirmMutationIdsRef.current.delete(submissionId);
+    }
+  }
+
+  async function handleOpenExamPostFile(sessionToken, file) {
+    try {
+      const signedUrl = await getExamPostFileOpenUrl(sessionToken, file);
+      if (!signedUrl) throw new Error("열 파일을 찾지 못했습니다.");
+      window.open(signedUrl, "_blank", "noopener,noreferrer");
+      return { ok: true };
+    } catch (error) {
+      window.alert(error.message || "시험 후 제출 파일을 열지 못했습니다.");
+      return { ok: false, error };
     }
   }
 
@@ -20677,6 +20697,7 @@ function ExamPrepCenter({
   students,
   templates,
   onConfirmExamPostSubmission,
+  onOpenExamPostFile,
   onEnsureExamCycleRows,
   onSetExamPostTargetStudentIds,
   onSetTallySubmissions,
@@ -20984,6 +21005,7 @@ function ExamPrepCenter({
           submissions={examPostSubmissions}
           students={classStudents}
           onConfirmExamPostSubmission={onConfirmExamPostSubmission}
+          onOpenExamPostFile={onOpenExamPostFile}
           onSetExamPostTargetStudentIds={onSetExamPostTargetStudentIds}
         />
       ) : null}
@@ -21207,6 +21229,7 @@ function ExamPostSubmissionManager({
   students = [],
   submissions = [],
   onConfirmExamPostSubmission,
+  onOpenExamPostFile,
   onSetExamPostTargetStudentIds
 }) {
   const targets = students.flatMap((student) => buildExamPostTargetsForStudent(student, rows, submissions, examPostTargetStudentIds));
@@ -21341,15 +21364,15 @@ function ExamPostSubmissionManager({
                   {submission.fileAttachments?.length ? (
                     <div className="examPostFileList">
                       {submission.fileAttachments.map((file, index) => (
-                        <a
+                        <button
                           className={file.uploadStatus === "failed" ? "examPostFile failed" : "examPostFile"}
-                          href={file.uploadStatus === "failed" ? undefined : getExamPostFileOpenUrl(file)}
                           key={`${submission.submissionId}_${file.fileName}_${index}`}
-                          rel="noreferrer"
-                          target="_blank"
+                          disabled={file.uploadStatus === "failed"}
+                          onClick={() => onOpenExamPostFile?.(file)}
+                          type="button"
                         >
                           {file.uploadStatus === "failed" ? "업로드 실패" : "파일 보기"} · {file.fileName}
-                        </a>
+                        </button>
                       ))}
                     </div>
                   ) : (
@@ -23757,6 +23780,7 @@ function StudentPortalV2({
   onStudentAddQuestion,
   onStudentCheckHomework,
   onStudentDeleteQuestion,
+  onOpenExamPostFile,
   onSubmitExamPostSubmission,
   onStudentUpdateQuestion,
 }) {
@@ -23857,6 +23881,7 @@ function StudentPortalV2({
         lessons,
         onAddQuestion: onStudentAddQuestion,
         onDeleteQuestion: onStudentDeleteQuestion,
+        onOpenExamPostFile,
         onStudentCheckHomework,
         onSubmitExamPostSubmission,
         onUpdateQuestion: onStudentUpdateQuestion,

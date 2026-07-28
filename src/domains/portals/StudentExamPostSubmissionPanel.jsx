@@ -7,7 +7,6 @@ import {
   examPostStudyDifficultyOptions
 } from "../exams/postSubmissionOptions.js";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
-import { getExamPostFileOpenUrl } from "./examPostApi.js";
 
 function getDateDiffInDays(fromDate, toDate) {
   const from = new Date(`${fromDate}T00:00:00+09:00`);
@@ -36,6 +35,7 @@ export function StudentExamPostSubmissionPanel({
   targets = [],
   selectedStudent,
   onSubmitExamPostSubmission,
+  onOpenExamPostFile,
   referenceDate,
   saveStates = {},
   writeEnabled = false
@@ -191,15 +191,15 @@ export function StudentExamPostSubmissionPanel({
           {submittedFiles.length ? (
             <div className="examPostFileList">
               {submittedFiles.map((file, index) => (
-                <a
+                <button
                   className={file.uploadStatus === "failed" ? "examPostFile failed" : "examPostFile"}
-                  href={file.uploadStatus === "failed" ? undefined : getExamPostFileOpenUrl(file)}
                   key={`${file.fileName}_${index}`}
-                  rel="noreferrer"
-                  target="_blank"
+                  disabled={file.uploadStatus === "failed"}
+                  onClick={() => onOpenExamPostFile?.(file)}
+                  type="button"
                 >
                   {file.uploadStatus === "failed" ? "업로드 실패" : "파일 보기"} · {file.fileName}
-                </a>
+                </button>
               ))}
             </div>
           ) : null}

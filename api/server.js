@@ -1294,16 +1294,35 @@ function createPortalSessionToken(account) {
   return `${payload}.${signSessionPayload(payload)}`;
 }
 
-function verifyPortalSessionToken(token = "") {
+function createTeacherSessionToken(account) {
+  const payload = encodeBase64Url({
+    role: "teacher",
+    teacherId: account.teacherId,
+    name: account.name,
+    exp: Date.now() + 1000 * 60 * 60 * 8
+  });
+  return `${payload}.${signSessionPayload(payload)}`;
+}
+
+function verifySignedSessionToken(token = "") {
   const [payload, signature] = String(token).split(".");
-  if (!payload || !signature || signSessionPayload(payload) !== signature) return null;
+  if (!payload || !signature || !timingSafeEqualText(signSessionPayload(payload), signature)) return null;
   try {
     const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
-    if (!session.studentId || !["student", "parent"].includes(session.role) || Number(session.exp) < Date.now()) return null;
-    return session;
+    return Number(session.exp) >= Date.now() ? session : null;
   } catch {
     return null;
   }
+}
+
+function verifyPortalSessionToken(token = "") {
+  const session = verifySignedSessionToken(token);
+  return session?.studentId && ["student", "parent"].includes(session.role) ? session : null;
+}
+
+function verifyTeacherSessionToken(token = "") {
+  const session = verifySignedSessionToken(token);
+  return session?.teacherId && session.role === "teacher" ? session : null;
 }
 
 async function authenticateStudentOrParent(role, loginId, password) {
@@ -1781,7 +1800,12 @@ async function savePortalExamPostSubmission(session, payload = {}) {
   });
 }
 
-async function confirmExamPostSubmission(payload = {}) {
+async function confirmExamPostSubmission(teacherSession, payload = {}) {
+  if (!teacherSession?.teacherId || teacherSession.role !== "teacher") {
+    const error = new Error("교사 세션 인증이 필요합니다.");
+    error.statusCode = 401;
+    throw error;
+  }
   return withPortalExamPostMutationLock(async () => {
     const submissionId = String(payload.submissionId ?? "").trim();
     if (!submissionId) {
@@ -5680,7 +5704,14 @@ const server = http.createServer(async (request, response) => {
       sendJson(request, response, 200, {
         ok: true,
         authenticated: Boolean(account),
-        account: account ? { loginId: account.loginId, name: account.name, teacherId: account.teacherId } : null
+        account: account
+          ? {
+              loginId: account.loginId,
+              name: account.name,
+              teacherId: account.teacherId,
+              sessionToken: createTeacherSessionToken(account)
+            }
+          : null
       });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
@@ -5778,8 +5809,14 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-post-submissions/confirm") {
     try {
+      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
+      const teacherSession = verifyTeacherSessionToken(token);
+      if (!teacherSession) {
+        sendJson(request, response, 401, { ok: false, error: "교사 세션 인증이 필요합니다. 다시 로그인해 주세요." });
+        return;
+      }
       const payload = await readJsonBody(request);
-      const result = await confirmExamPostSubmission(payload);
+      const result = await confirmExamPostSubmission(teacherSession, payload);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, Number(error.statusCode) || 500, { ok: false, error: error.message });
@@ -6232,13 +6269,36 @@ const server = http.createServer(async (request, response) => {
     try {
       const bucketId = requestUrl.searchParams.get("bucket") || "exam-submissions";
       const storagePath = requestUrl.searchParams.get("path") || "";
-      if (!storagePath) throw new Error("파일 경로가 없습니다.");
+      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
+      const teacherSession = verifyTeacherSessionToken(token);
+      const portalSession = teacherSession ? null : verifyPortalSessionToken(token);
+      if (!teacherSession && !portalSession) {
+        sendJson(request, response, 401, { ok: false, error: "파일 열람 세션 인증이 필요합니다. 다시 로그인해 주세요." });
+        return;
+      }
+      if (bucketId !== "exam-submissions" || !storagePath) {
+        sendJson(request, response, 400, { ok: false, error: "시험 후 제출 파일 경로가 필요합니다." });
+        return;
+      }
+      const appStateResult = await listAppState();
+      const submissions = Array.isArray(appStateResult.states?.examPostSubmissions)
+        ? appStateResult.states.examPostSubmissions
+        : [];
+      const submission = submissions.find((item) =>
+        (item.fileAttachments ?? []).some((attachment) =>
+          attachment.bucketId === bucketId && attachment.storagePath === storagePath
+        )
+      );
+      if (!submission) {
+        sendJson(request, response, 404, { ok: false, error: "등록된 시험 후 제출 파일을 찾지 못했습니다." });
+        return;
+      }
+      if (portalSession && submission.studentId !== portalSession.studentId) {
+        sendJson(request, response, 403, { ok: false, error: "본인의 시험 후 제출 파일만 열람할 수 있습니다." });
+        return;
+      }
       const signedUrl = await createSignedStorageUrl(bucketId, storagePath);
-      response.writeHead(302, {
-        "Access-Control-Allow-Origin": getCorsOrigin(request),
-        Location: signedUrl
-      });
-      response.end();
+      sendJson(request, response, 200, { ok: true, signedUrl });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
     }

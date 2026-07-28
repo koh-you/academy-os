@@ -76,6 +76,21 @@ export async function getJsonWithTimeout(path, timeoutMs = 12000, timeoutMessage
   }
 }
 
+export async function getJsonWithHeaders(path, headers = {}) {
+  const response = await fetch(apiUrl(path), {
+    cache: "no-store",
+    headers
+  });
+  const result = await response.json();
+  if (!response.ok || result.ok === false) {
+    const error = new Error(result.error || `API 조회 실패: ${response.status}`);
+    error.responseReceived = true;
+    error.statusCode = response.status;
+    throw error;
+  }
+  return result;
+}
+
 export async function postJsonWithTimeout(path, body, timeoutMs = 30000, timeoutMessage = "") {
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
