@@ -1798,6 +1798,12 @@
 - AI 검수: 수업 ID 인코딩, 날짜 지정/미지정 history, active 가상 입력의 query·입력 불변을 재검증하고 App inline `URLSearchParams`/`query.set` 0건, helper의 네트워크·React·시각·Supabase·Solapi side effect 0건을 전용 closeout fixture·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 없음. 다음 `17X-1`은 notification job load의 query/status 순수 helper와 App request/list 경계를 종합 audit해 다음 저위험 후보를 선정한다.
 
+## 2026-07-28 P1. App.jsx 17X-1 notification job load boundary aggregate audit
+
+- 결과: `refreshNotificationJobs`의 query string과 ready 상태 object는 각각 순수 helper 1개로 분리됐고, silent loading/failed 상태·선택 날짜의 KST 범위 계산·timeout request·active snapshot 교체·scoped merge는 App 경계에 남아 있다. 이 함수 안에 추가로 분리할 의미 있는 순수 계산은 없다.
+- AI 검수: 수업+history, 날짜 지정 history 0건, active 가상 입력을 두 helper에 함께 적용해 query·문구·입력 불변을 재검증하고 import/export/call 각 1개와 두 helper의 네트워크·React·Supabase·Solapi side effect 0건을 전용 aggregate fixture·정적 시나리오·build·`git diff --check`로 대조한다.
+- 사람 gate: 없음. notification job load 묶음은 종료한다. 다음 `17Y-1`은 `handleReconcileSolapiNotificationResults`의 요청 payload와 결과 목록 반영 경계를 inventory하되 실제 reconcile API/Solapi는 호출하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
