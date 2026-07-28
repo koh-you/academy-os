@@ -232,6 +232,7 @@ import { LessonJournalReservationModal } from "../domains/lessons/LessonJournalR
 import { LessonJournalStudentRow } from "../domains/lessons/LessonJournalStudentRow.jsx";
 import { LessonJournalSaveBar } from "../domains/lessons/LessonJournalSaveBar.jsx";
 import { LessonJournalTable } from "../domains/lessons/LessonJournalTable.jsx";
+import { LessonJournalStudentPreviewModal } from "../domains/lessons/LessonJournalStudentPreviewModal.jsx";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -16816,30 +16817,17 @@ function LessonJournalDetail({
         />
       ) : null}
 
-      {studentPreviewId ? (
-        <Modal
-          backdropClassName="studentPortalPreviewBackdrop"
-          className="studentPortalPreviewModal"
-          title="학생 화면 미리보기"
-          subtitle="강사가 보는 학생 포털 화면입니다."
-          onClose={() => setStudentPreviewId("")}
-        >
-          <StudentPortalV2
-            homeworks={homeworks}
-            lessons={lessons}
-            materials={materials}
-            makeupTasks={makeupTasks}
-            records={records}
-            reportSnapshots={[]}
-            scoreRecords={[]}
-            sessionStudentId={studentPreviewId}
-            students={students.filter((student) => student.studentId === studentPreviewId)}
-            previewMode
-            onLogout={() => setStudentPreviewId("")}
-            onStudentCheckHomework={() => {}}
-          />
-        </Modal>
-      ) : null}
+      <LessonJournalStudentPreviewModal
+        PortalComponent={StudentPortalV2}
+        homeworks={homeworks}
+        lessons={lessons}
+        makeupTasks={makeupTasks}
+        materials={materials}
+        onClose={() => setStudentPreviewId("")}
+        records={records}
+        studentPreviewId={studentPreviewId}
+        students={students}
+      />
     </section>
   );
 }

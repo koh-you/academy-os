@@ -65,9 +65,10 @@
 17. `17C-9` 완료: 학생 정보·메모·출결·편집·과제·학부모/학생 알림 cell의 기존 DOM 순서를 `LessonJournalStudentRow` presentational shell로 묶었다.
 18. `17D-1` 완료: 하단 고정 저장 bar의 표시, 버튼 disabled, 저장 중 문구를 순수 모델과 `LessonJournalSaveBar`로 분리했다.
 19. `17D-2` 완료: 학생 표 panel, 읽기/편집 class, 10개 고정 열 제목을 순수 모델과 `LessonJournalTable` shell로 분리했다.
-20. 다음: comment/preparation/student preview local modal shell의 남은 표시 경계를 검토
-21. 다중 원천 저장은 TARGET/CONTROL·부분 성공 fixture 뒤 주입형 controller로 분리
-22. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
+20. `17D-3` 완료: 학생 화면 미리보기의 학생 ID 격리 모델과 modal/portal prop shell을 `LessonJournalStudentPreviewModal`로 분리했다.
+21. 다음: preparation memo의 이전 메모 표시·확인 상태를 순수 view model로 분리
+22. 다중 원천 저장은 TARGET/CONTROL·부분 성공 fixture 뒤 주입형 controller로 분리
+23. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -102,6 +103,7 @@
 - `17C-9` gate: `17C-1~8`의 TARGET/CONTROL fixture를 모두 재실행하고 학생 정보→메모→출결→4개 편집칸→과제 상태→학부모→학생 알림의 DOM 순서와 App-owned callback 인자를 정적으로 대조한다.
 - `17D-1` gate: 가상 편집 중 변경 있음/없음, 저장 중, 편집 종료 뒤 완료 메시지, 완전 숨김 상태로 표시·disabled·버튼 문구를 판정하고 실제 save callback은 App에 유지되는지 검사한다.
 - `17D-2` gate: 읽기/편집 TARGET·CONTROL로 table class를 판정하고 10개 열 제목 순서, 학생 map children 전달, App-owned 계산·callback 유지 여부를 검사한다.
+- `17D-3` gate: 가상 TARGET·CONTROL 학생 목록과 preview ID로 선택 학생 한 명·닫힘·없는 ID를 판정하고, App-owned preview state와 주입된 포털 component, 읽기 전용 callback 경계를 정적으로 검사한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
 - recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.
 - 학생 포털 실제 쓰기와 Solapi 특강 템플릿 검수는 사용자 지시로 목록에서 제거됐고, 교사 bearer/Storage 소유권 보안은 구현·배포 검증 완료다.

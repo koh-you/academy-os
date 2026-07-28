@@ -130,6 +130,14 @@ const tableModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalTableModel.js", import.meta.url),
   "utf8"
 );
+const studentPreviewModalSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalStudentPreviewModal.jsx", import.meta.url),
+  "utf8"
+);
+const studentPreviewModelSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalStudentPreviewModel.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -618,6 +626,26 @@ for (const extractedTableContract of [
   assert.ok(
     `${tableSource}\n${tableModelSource}`.includes(extractedTableContract),
     `missing extracted 17D-2 contract: ${extractedTableContract}`
+  );
+}
+assert.ok(
+  journalSource.includes("<LessonJournalStudentPreviewModal"),
+  "LessonJournalDetail must compose the extracted student preview shell"
+);
+assert.ok(
+  !journalSource.includes('backdropClassName="studentPortalPreviewBackdrop"'),
+  "LessonJournalDetail must not retain the student preview modal markup"
+);
+for (const extractedStudentPreviewContract of [
+  "createLessonJournalStudentPreviewModel",
+  "previewStudents",
+  "PortalComponent",
+  "students={model.previewStudents}",
+  "onLogout={onClose}"
+]) {
+  assert.ok(
+    `${studentPreviewModalSource}\n${studentPreviewModelSource}`.includes(extractedStudentPreviewContract),
+    `missing extracted 17D-3 contract: ${extractedStudentPreviewContract}`
   );
 }
 
