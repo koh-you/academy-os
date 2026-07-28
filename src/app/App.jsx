@@ -240,6 +240,7 @@ import {
   createLessonJournalCommentComposerModel
 } from "../domains/lessons/lessonJournalCommentComposerModel.js";
 import { LessonJournalCommentComposerView } from "../domains/lessons/LessonJournalCommentComposerView.jsx";
+import { polishLessonJournalCommentDraft } from "../domains/lessons/lessonJournalCommentPolishController.js";
 import { useLessonJournalCommentComposerDraft } from "../domains/lessons/useLessonJournalCommentComposerDraft.js";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
@@ -17113,17 +17114,27 @@ function CommentComposerModal({
   }
 
   async function handlePolishClick() {
-    const nextRecord = { ...(record ?? {}), [field]: draftComment };
-    const rawText = normalizeMessageText(draftComment) || normalizeMessageText(sourceText) || normalizeMessageText(generatedPreviewText);
     setLocalAiStatus("AI 수정 중");
-    const result = await onPolishComment(lesson, student, nextRecord, audience, aiProvider, aiModel, { persist: false, rawText });
-    if (result?.ok && result.polishedText) {
+    const result = await polishLessonJournalCommentDraft({
+      aiModel,
+      aiProvider,
+      audience,
+      draftComment,
+      generatedPreviewText,
+      lesson,
+      normalizeText: normalizeMessageText,
+      record,
+      requestPolish: onPolishComment,
+      sourceText,
+      student
+    });
+    if (result.ok) {
       setDraftComment(result.polishedText);
       setDraftSaveState("dirty");
-      setLocalAiStatus(`완료 · ${result.provider}`);
+      setLocalAiStatus(result.statusLabel);
       return;
     }
-    setLocalAiStatus(`실패 · ${result?.error || "AI 수정 실패"}`);
+    setLocalAiStatus(result.statusLabel);
   }
 
   async function handleSaveDraftClick() {

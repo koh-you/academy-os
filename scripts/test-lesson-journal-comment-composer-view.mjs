@@ -90,7 +90,7 @@ for (const retainedControllerContract of [
   "async function handlePolishClick()",
   "async function handleSaveDraftClick()",
   "function handleSendClick()",
-  "onPolishComment(",
+  "requestPolish: onPolishComment",
   "onSaveRecord?.(",
   "onSendComment("
 ]) {

@@ -158,6 +158,10 @@ const commentComposerDraftSource = await readFile(
   new URL("../src/domains/lessons/useLessonJournalCommentComposerDraft.js", import.meta.url),
   "utf8"
 );
+const commentPolishControllerSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalCommentPolishController.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -785,6 +789,27 @@ assert.ok(
 assert.ok(
   !commentComposerSource.includes("const lastSavedDraftRef = useRef"),
   "CommentComposerModal must not retain the extracted saved draft ref"
+);
+for (const extractedCommentPolishContract of [
+  "polishLessonJournalCommentDraft",
+  "normalizeText(draftComment)",
+  "normalizeText(sourceText)",
+  "normalizeText(generatedPreviewText)",
+  "persist: false",
+  "statusLabel"
+]) {
+  assert.ok(
+    commentPolishControllerSource.includes(extractedCommentPolishContract),
+    `missing extracted 17E-4 contract: ${extractedCommentPolishContract}`
+  );
+}
+assert.ok(
+  commentComposerSource.includes("polishLessonJournalCommentDraft({"),
+  "CommentComposerModal must invoke the extracted polish controller"
+);
+assert.ok(
+  !commentComposerSource.includes("const rawText = normalizeMessageText(draftComment)"),
+  "CommentComposerModal must not retain the extracted polish request payload"
 );
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");
