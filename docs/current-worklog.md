@@ -1505,6 +1505,13 @@
 - AI 검수: 학생 미기재 TARGET과 학부모 완료 CONTROL을 가상 실행해 comment/번호 선택, 이전 숙제·보충 안내만 생략, 다음 숙제 유지, 출결 nullish 기본값, 줄바꿈, helper 호출 순서·입력 불변을 대조한다. 전용 fixture·정적 시나리오·build·diff 검사를 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17J-8`은 lesson notification job ID와 active 상태 판정을 순수 selector로 분리하고 실제 job 저장·취소는 이동하지 않는다.
 
+## 2026-07-28 P1. App.jsx 17J-8 lesson notification job selector 분리
+
+- 코드: `lesson_comment_{lessonId}_{studentId}_{target}` deterministic ID와 sent/dry_run/failed/canceled를 제외한 active job 상태 판정을 `lessonNotificationJobSelectors.js`로 분리했다.
+- 보존 경계: App의 기존 화면 wrapper, 예상 예약 item 생성, active job filtering이 같은 순수 함수를 사용한다. job 저장·취소·React 상태·provider 예약은 이동하지 않았다.
+- AI 검수: 문자/숫자/nullish ID TARGET/CONTROL과 inactive 4상태, active 6상태·빈 job을 실행해 문자열·판정·입력 불변을 대조한다. 전용 fixture·정적 시나리오·build·diff 검사를 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17J-9`는 comment/job 표시·payload 순수 경계와 App-owned provider action을 closeout audit하고 실제 orchestration은 더 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

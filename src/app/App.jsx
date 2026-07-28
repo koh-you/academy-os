@@ -72,6 +72,10 @@ import { getNotificationProviderReference } from "../domains/notifications/notif
 import { createLessonReservationPayloadFingerprint } from "../domains/lessons/lessonReservationPayloadFingerprint.js";
 import { createLessonReservationPayloadSnapshot } from "../domains/lessons/lessonReservationPayloadSnapshot.js";
 import {
+  createLessonNotificationJobId,
+  isActiveNotificationJobStatus
+} from "../domains/lessons/lessonNotificationJobSelectors.js";
+import {
   applySupplementScheduleNotificationsRequest,
   cancelActiveSupplementScheduleNoticesRequest,
   cancelSupplementNotificationControlRequest,
@@ -1111,14 +1115,6 @@ function canDeleteNotificationJob(job) {
     isSchedulePast: isNotificationSchedulePast,
     job
   });
-}
-
-function createLessonNotificationJobId(lessonId, studentId, target) {
-  return `lesson_comment_${lessonId}_${studentId}_${target}`;
-}
-
-function isActiveNotificationJobStatus(job = {}) {
-  return !["sent", "dry_run", "failed", "canceled"].includes(job.status);
 }
 
 function buildLessonReservationPayloadSnapshot({
