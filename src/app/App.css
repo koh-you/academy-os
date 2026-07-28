@@ -3339,8 +3339,7 @@ button {
 }
 
 .teacherCalendarTop {
-  min-height: 62px;
-  padding: 10px 14px;
+  display: none;
 }
 
 .teacherCalendarShell {
