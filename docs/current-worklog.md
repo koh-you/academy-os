@@ -1686,6 +1686,12 @@
 - AI 검수: 중복 TARGET/CONTROL/현재에 없는 incoming 가상 목록으로 기존 inline 결과와 helper 결과를 대조하고 세 호출의 guard→setter→helper→persist 순서를 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 없음. 다음 `17Q-3`은 helper export/import/call 수와 세 취소 side-effect 경계를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17Q-3 notification job cancellation replacement boundary closeout
+
+- 완료: `replaceNotificationJobListRows` export 1개, notification state 모듈 import 1개, App helper 호출 3개를 고정하고 수업 전체 취소·ID 집합 취소·`알림톡 없음`의 guard→setter→helper→수업기록 상태/persist 순서를 closeout했다.
+- AI 검수: 중복 TARGET/CONTROL 가상 목록으로 incoming 첫 row 치환과 입력 불변을 재검증하고 App inline 계산 0건, helper의 React·시각·API·Supabase·Solapi side effect 0건을 전용 closeout fixture·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 없음. 다음 `17R-1`은 예약 갱신 경로의 `nextJobs + canceledJobs + current filter` 상태 계산 두 곳을 inventory하되 예약·취소 orchestration은 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
