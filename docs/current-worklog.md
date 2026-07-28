@@ -1394,6 +1394,13 @@
 - AI 가상검수: 중복 TARGET OS job+CONTROL job과 `osJobs=null` 실패 상태를 구성해 순서·객체 identity·입력 불변을 대조했다. 전용 fixture와 정적 시나리오를 실행했고 실제 취소·API·Supabase·Solapi 호출은 0건이다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17H-6`은 `LessonJournalDetail` 예약 경계의 순수 모델과 App-owned 조회·취소·예약·결과 reconcile action을 closeout audit하고, 실제 provider orchestration은 더 이동하지 않는다.
 
+## 2026-07-28 P1. App.jsx 17H-6 수업일지 예약 경계 closeout
+
+- 결과: 예상 예약 item, 동기화 상태, 버튼/가능 조건, 조회 응답, 취소 성공 전환은 모두 외부 side effect 없는 순수 모델에 있다. 예약 modal의 local state만 전용 hook이 소유한다.
+- 고정 경계: OS 예약 조회, OS job 취소, provider 예약 계획 반영, 발송결과 reconcile의 async action 4개는 `LessonJournalDetail`에 정확히 한 번씩 남는다. 수업일지 다중 원천 저장 action 1개와 합쳐 내부 async 함수는 총 5개다.
+- AI 검수: 5개 순수 모델의 네트워크·시계·React·Supabase/localStorage 부재, reservation hook의 provider callback 부재, App의 단일 OS timeout 조회·확인창·OS 취소·예약 반영·결과 reconcile callback을 정적으로 대조했다. raw Solapi group 상태·조회·취소는 0개이며 closeout fixture와 정적 시나리오를 실행했고 외부 호출은 0건이다.
+- 사람 gate: 실제 provider orchestration을 이번 단계에서 이동하지 않았으므로 새 항목 없음. 다음 저위험 의미 단위 `17I-1`은 record draft의 base/draft/patch 병합과 timestamp/ID metadata 생성을 순수 builder로 분리하고 React setter·현재시각 생성은 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
