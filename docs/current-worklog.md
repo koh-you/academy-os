@@ -1512,6 +1512,13 @@
 - AI 검수: 문자/숫자/nullish ID TARGET/CONTROL과 inactive 4상태, active 6상태·빈 job을 실행해 문자열·판정·입력 불변을 대조한다. 전용 fixture·정적 시나리오·build·diff 검사를 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17J-9`는 comment/job 표시·payload 순수 경계와 App-owned provider action을 closeout audit하고 실제 orchestration은 더 이동하지 않는다.
 
+## 2026-07-28 P1. App.jsx 17J-9 lesson notification 순수 경계 closeout
+
+- 결과: comment effective status, comment 표시/상태/라벨, job 상태 formatter·삭제/provider 표시, provider 응답 reference, 예약 payload fingerprint/snapshot, lesson job ID·active 판정을 8개 순수 파일의 export 함수 13개로 분리했다.
+- 고정 경계: notification job 조회·결과 reconcile·취소, bulk 예약, 취소 저장, lesson plan 적용과 수업일지 예약 audit·OS job 취소·예약 반영·결과 조회 10개 action은 계속 App에 남는다. main에서 제거한 raw Solapi group audit·취소는 되살리지 않는다.
+- AI 검수: 8개 순수 파일의 App binding과 React·네트워크·현재시각·API/Supabase/Solapi 부재, App-owned action·API/setter 잔존과 raw provider 경계 부재를 closeout fixture·정적 시나리오·build·diff 검사로 확인한다.
+- 사람 gate: 새 항목 없음. 다음 `17K-1`은 lesson notification job builder의 입력·출력·시계·외부 action 경계를 inventory하고, 순수 builder로 자동검증 가능한 범위만 다음 이동 후보로 정한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
