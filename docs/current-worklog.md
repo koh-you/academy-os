@@ -1908,6 +1908,12 @@
 - AI 검수: TARGET/CONTROL 참조와 세 문구를 재실행하고 App inline message/state 0건, status helper side effect 0건을 확인한다. 전용 closeout fixture와 시나리오 610/610, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AF-1`은 generated lesson save selector/state/status와 App-owned bulk request 경계를 최종 aggregate audit한다.
 
+## 2026-07-28 P3. App.jsx 17AF-1 generated lesson save final aggregate audit
+
+- audit: selector 1개, ID merge 1개, saving/saved/failed factory 3개, 총 순수 계산 5개를 TARGET/CONTROL로 재검증했다. App은 `setLessons`, 세 status setter, 20초 bulk request, Promise 분기와 네 caller를 계속 소유하며 generated lesson save 경계는 완료했다.
+- AI 검수: update/create 선택→기존 patch/신규 append→세 상태 객체까지 전 흐름의 참조·문구·입력 불변을 실행하고 helper side effect 0건, App effect 순서를 대조한다. 전용 final audit와 시나리오 611/611, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AG-1`은 `generatedLessonPlanRows`가 현재 `examCycle` row만 원래 순서로 고르는 순수 계산을 inventory하며 useMemo와 이후 repair/save effect는 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
