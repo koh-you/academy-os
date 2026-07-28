@@ -1589,6 +1589,13 @@
 - AI 검수: 기존 TARGET/CONTROL row fixture에 더해 import/export/call 수, API payload·저장 순서·네 호출 문구와 순수 builder의 side effect 부재를 전용 closeout fixture·정적 시나리오·build·diff 검사로 확인한다.
 - 사람 gate: 새 항목 없음. 다음 `17M-1`은 세 번 반복되는 `saving`/`saved`/`failed` record 상태 map 계산의 순수 분리 범위를 inventory하며 API 실행과 React setter는 이동하지 않는다.
 
+## 2026-07-28 P1. App.jsx 17M-1 lesson notification record save-state map inventory
+
+- 결과: 알림 record 저장 함수의 `saving`/`saved`/`failed` inline `Object.fromEntries` 3개가 기존 수업일지 저장용 `createLessonJournalRecordSaveStates`와 같은 `lessonStudentRecordId → status` 계약임을 확인했다.
+- 재사용 경계: 새 helper를 만들지 않고 이미 검증된 `lessonJournalDraftPersistenceState.js` 순수 helper를 다음 단위에서 재사용한다. React `setSaveStates`, record 상태 API, success/failure callback 순서는 App에 유지한다.
+- AI 검수: 중복 TARGET ID와 CONTROL ID를 포함한 가상 records에 세 상태를 적용해 inline 결과와 기존 helper 결과, 빈 배열·입력 불변을 전용 fixture·정적 시나리오·build·diff 검사로 대조한다.
+- 사람 gate: 새 항목 없음. 다음 `17M-2`는 inline map 3개를 기존 `createLessonJournalRecordSaveStates(recordsToSave, status)` 호출로 통일하며 API와 React setter는 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
