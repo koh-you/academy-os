@@ -76,6 +76,7 @@ import {
   isActiveNotificationJobStatus
 } from "../domains/lessons/lessonNotificationJobSelectors.js";
 import { createLessonNotificationJob } from "../domains/lessons/lessonNotificationJobBuilder.js";
+import { createLessonNotificationJobBatch } from "../domains/lessons/lessonNotificationJobBatch.js";
 import {
   applySupplementScheduleNotificationsRequest,
   cancelActiveSupplementScheduleNoticesRequest,
@@ -8735,13 +8736,14 @@ export function App() {
   }
 
   function buildLessonNotificationJobs(lesson, lessonStudents, scheduledDate, mode) {
-    if (getIsClosureLesson(lesson)) return [];
-    return lessonStudents
-      .flatMap((student) => [
-        buildLessonNotificationJob(lesson, student, "parent", scheduledDate, mode),
-        buildLessonNotificationJob(lesson, student, "student", scheduledDate, mode)
-      ])
-      .filter(Boolean);
+    return createLessonNotificationJobBatch({
+      buildJob: buildLessonNotificationJob,
+      isClosureLesson: getIsClosureLesson,
+      lesson,
+      mode,
+      scheduledDate,
+      students: lessonStudents
+    });
   }
 
   async function applyLessonNotificationPlan(lessonId, mode) {

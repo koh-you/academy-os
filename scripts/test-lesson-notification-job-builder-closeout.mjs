@@ -6,6 +6,10 @@ const builderSource = await readFile(
   new URL("../src/domains/lessons/lessonNotificationJobBuilder.js", import.meta.url),
   "utf8"
 );
+const batchSource = await readFile(
+  new URL("../src/domains/lessons/lessonNotificationJobBatch.js", import.meta.url),
+  "utf8"
+);
 const wrapperStart = appSource.indexOf(
   "function buildLessonNotificationJob(lesson, student, target, scheduledDate, mode)"
 );
@@ -97,11 +101,11 @@ for (const forbiddenBuilderEffect of [
 }
 
 assert.equal(
-  appSource.split('buildLessonNotificationJob(lesson, student, "parent", scheduledDate, mode)').length - 1,
+  batchSource.split('buildJob(lesson, student, "parent", scheduledDate, mode)').length - 1,
   1
 );
 assert.equal(
-  appSource.split('buildLessonNotificationJob(lesson, student, "student", scheduledDate, mode)').length - 1,
+  batchSource.split('buildJob(lesson, student, "student", scheduledDate, mode)').length - 1,
   1
 );
 for (const appOwnedAction of [

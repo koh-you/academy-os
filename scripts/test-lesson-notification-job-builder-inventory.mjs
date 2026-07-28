@@ -6,6 +6,10 @@ const pureBuilderSource = await readFile(
   new URL("../src/domains/lessons/lessonNotificationJobBuilder.js", import.meta.url),
   "utf8"
 );
+const batchSource = await readFile(
+  new URL("../src/domains/lessons/lessonNotificationJobBatch.js", import.meta.url),
+  "utf8"
+);
 const builderStart = appSource.indexOf(
   "function buildLessonNotificationJob(lesson, student, target, scheduledDate, mode)"
 );
@@ -104,11 +108,11 @@ assert.equal(
 );
 assert.ok(!pureBuilderSource.includes("new Date"));
 assert.equal(
-  appSource.split('buildLessonNotificationJob(lesson, student, "parent", scheduledDate, mode)').length - 1,
+  batchSource.split('buildJob(lesson, student, "parent", scheduledDate, mode)').length - 1,
   1
 );
 assert.equal(
-  appSource.split('buildLessonNotificationJob(lesson, student, "student", scheduledDate, mode)').length - 1,
+  batchSource.split('buildJob(lesson, student, "student", scheduledDate, mode)').length - 1,
   1
 );
 

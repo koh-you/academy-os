@@ -49,4 +49,5 @@
 
 1. `17K-2` 완료: 조회가 끝난 record/homework/schedule/test 입력과 고정 `nowIso`를 받는 최종 job builder를 `lessonNotificationJobBuilder.js`로 분리했다.
 2. `17K-3` 완료: App의 원천 조회·알림 제외 guard·helper 주입 wrapper와 외부 action 경계를 closeout audit으로 고정했다.
-3. 실제 reserve/cancel/reconcile orchestration은 사람 gate 없이 이동하지 않는다.
+3. `17L-1` 완료: 휴강 short-circuit와 학생별 학부모→학생 job 조합을 `lessonNotificationJobBatch.js` 순수 model로 분리했다.
+4. 실제 reserve/cancel/reconcile orchestration은 사람 gate 없이 이동하지 않는다.
