@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { mergeLessonNotificationJobLists } from "../src/domains/notifications/notificationJobState.js";
 
 function applyExistingLessonNotificationJobMerge({
   canceledJobs,
@@ -89,36 +90,52 @@ const currentSnapshot = structuredClone(currentJobs);
 const nextSnapshot = structuredClone(nextJobs);
 const canceledSnapshot = structuredClone(canceledJobs);
 
+const existingResult = applyExistingLessonNotificationJobMerge({
+  canceledJobs,
+  currentJobs,
+  isActiveJob,
+  lessonId: "lesson_TARGET",
+  nextJobs
+});
+assert.deepEqual(existingResult, [
+  nextJobs[0],
+  nextJobs[1],
+  canceledJobs[0],
+  currentJobs[3],
+  currentJobs[4],
+  currentJobs[5]
+]);
 assert.deepEqual(
-  applyExistingLessonNotificationJobMerge({
+  mergeLessonNotificationJobLists({
     canceledJobs,
     currentJobs,
     isActiveJob,
     lessonId: "lesson_TARGET",
     nextJobs
   }),
-  [
-    nextJobs[0],
-    nextJobs[1],
-    canceledJobs[0],
-    currentJobs[3],
-    currentJobs[4],
-    currentJobs[5]
-  ]
+  existingResult
 );
 assert.deepEqual(currentJobs, currentSnapshot);
 assert.deepEqual(nextJobs, nextSnapshot);
 assert.deepEqual(canceledJobs, canceledSnapshot);
 
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const helperSource = await readFile(
+  new URL("../src/domains/notifications/notificationJobState.js", import.meta.url),
+  "utf8"
+);
 const fullLessonFilter =
   "!(job.lessonId === lesson.lessonId && isActiveNotificationJob(job))";
-assert.equal(appSource.split(fullLessonFilter).length - 1, 2);
+assert.equal(appSource.split(fullLessonFilter).length - 1, 0);
 assert.equal(
   appSource.split(
     "const replacedJobIds = new Set([...nextJobIds, ...canceledJobs.map((job) => job.notificationJobId)])"
   ).length - 1,
-  3
+  1
+);
+assert.equal(
+  appSource.split("mergeLessonNotificationJobLists({").length - 1,
+  2
 );
 
 const applyPlanStart = appSource.indexOf(
@@ -146,12 +163,13 @@ for (const [label, functionSource] of [
 ]) {
   for (const mergeBoundary of [
     "const nextJobIds = new Set(nextJobs.map((job) => job.notificationJobId))",
-    "const replacedJobIds = new Set([...nextJobIds, ...canceledJobs.map((job) => job.notificationJobId)])",
-    "setNotificationJobs((current) => [",
-    "...nextJobs,",
-    "...canceledJobs,",
-    "!replacedJobIds.has(job.notificationJobId)",
-    fullLessonFilter
+    "setNotificationJobs((current) =>",
+    "mergeLessonNotificationJobLists({",
+    "canceledJobs,",
+    "currentJobs: current,",
+    "isActiveJob: isActiveNotificationJob,",
+    "lessonId: lesson.lessonId,",
+    "nextJobs"
   ]) {
     assert.ok(
       functionSource.includes(mergeBoundary),
@@ -160,7 +178,7 @@ for (const [label, functionSource] of [
   }
 }
 const applySetterIndex = applyPlanSource.indexOf(
-  "setNotificationJobs((current) => ["
+  "setNotificationJobs((current) =>"
 );
 const applyStatusIndex = applyPlanSource.indexOf(
   "updateLessonNotificationRecordStatuses(",
@@ -181,7 +199,7 @@ assert.ok(
     applyCancelIndex > applyReserveIndex
 );
 const scheduleSetterIndex = scheduleSource.indexOf(
-  "setNotificationJobs((current) => ["
+  "setNotificationJobs((current) =>"
 );
 const scheduleReserveIndex = scheduleSource.indexOf(
   "reserveLessonNotificationJobs(nextJobs,",
@@ -201,7 +219,24 @@ assert.ok(
     scheduleCancelIndex > scheduleReserveIndex &&
     scheduleStatusIndex > scheduleCancelIndex
 );
-assert.ok(!appSource.includes("mergeLessonNotificationJobLists"));
+for (const helperRule of [
+  "export function mergeLessonNotificationJobLists({",
+  "canceledJobs = [],",
+  "currentJobs = [],",
+  "isActiveJob = () => false,",
+  'lessonId = "",',
+  "nextJobs = []",
+  "const replacedJobIds = new Set([",
+  "...nextJobs.map((job) => job.notificationJobId)",
+  "...canceledJobs.map((job) => job.notificationJobId)",
+  "...currentJobs.filter(",
+  "!(job.lessonId === lessonId && isActiveJob(job))"
+]) {
+  assert.ok(
+    helperSource.includes(helperRule),
+    `missing lesson merge helper rule: ${helperRule}`
+  );
+}
 
 console.log(
   "notification job lesson merge inventory TARGET/CONTROL fixtures passed"

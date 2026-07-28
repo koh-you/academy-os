@@ -62,6 +62,7 @@ import {
   sortNotificationJobsForCurrentStatus
 } from "../domains/notifications/notificationJobSelectors.js";
 import {
+  mergeLessonNotificationJobLists,
   mergeNotificationJobLists,
   replaceNotificationJobListRows,
   selectValidNotificationJobs,
@@ -8783,15 +8784,15 @@ export function App() {
       .filter((job) => job.lessonId === lesson.lessonId && !nextJobIds.has(job.notificationJobId))
       .filter(isActiveNotificationJob)
       .map((job) => ({ ...job, status: "canceled", error: "알림 제외", updatedAt: new Date().toISOString() }));
-    const replacedJobIds = new Set([...nextJobIds, ...canceledJobs.map((job) => job.notificationJobId)]);
-    setNotificationJobs((current) => [
-      ...nextJobs,
-      ...canceledJobs,
-      ...current.filter((job) =>
-        !replacedJobIds.has(job.notificationJobId) &&
-        !(job.lessonId === lesson.lessonId && isActiveNotificationJob(job))
-      )
-    ]);
+    setNotificationJobs((current) =>
+      mergeLessonNotificationJobLists({
+        canceledJobs,
+        currentJobs: current,
+        isActiveJob: isActiveNotificationJob,
+        lessonId: lesson.lessonId,
+        nextJobs
+      })
+    );
     updateLessonNotificationRecordStatuses(lesson, `예약 중 · ${scheduledLabel}`);
     const reservedJobs = await reserveLessonNotificationJobs(nextJobs, "수업일지 반 전체 예약");
     await Promise.all(canceledJobs.map((notificationJob) => persistCanceledNotificationJob(notificationJob, "알림 제외")));
@@ -8816,16 +8817,16 @@ export function App() {
       .filter((job) => job.lessonId === lesson.lessonId && !nextJobIds.has(job.notificationJobId))
       .filter(isActiveNotificationJob)
       .map((job) => ({ ...job, status: "canceled", error: "알림 제외", updatedAt: new Date().toISOString() }));
-    const replacedJobIds = new Set([...nextJobIds, ...canceledJobs.map((job) => job.notificationJobId)]);
     const scheduledLabel = formatKoreaTimeLabel(scheduledDate);
-    setNotificationJobs((current) => [
-      ...nextJobs,
-      ...canceledJobs,
-      ...current.filter((job) =>
-        !replacedJobIds.has(job.notificationJobId) &&
-        !(job.lessonId === lesson.lessonId && isActiveNotificationJob(job))
-      )
-    ]);
+    setNotificationJobs((current) =>
+      mergeLessonNotificationJobLists({
+        canceledJobs,
+        currentJobs: current,
+        isActiveJob: isActiveNotificationJob,
+        lessonId: lesson.lessonId,
+        nextJobs
+      })
+    );
     reserveLessonNotificationJobs(nextJobs, "수업일지 수동 시각 예약").catch((error) => console.error(error));
     canceledJobs.forEach((notificationJob) => {
       persistCanceledNotificationJob(notificationJob, "알림 제외").catch((error) => console.error(error));

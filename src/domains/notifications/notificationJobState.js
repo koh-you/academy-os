@@ -19,6 +19,28 @@ export function mergeNotificationJobLists(currentJobs = [], nextJobs = []) {
   ];
 }
 
+export function mergeLessonNotificationJobLists({
+  canceledJobs = [],
+  currentJobs = [],
+  isActiveJob = () => false,
+  lessonId = "",
+  nextJobs = []
+} = {}) {
+  const replacedJobIds = new Set([
+    ...nextJobs.map((job) => job.notificationJobId),
+    ...canceledJobs.map((job) => job.notificationJobId)
+  ]);
+  return [
+    ...nextJobs,
+    ...canceledJobs,
+    ...currentJobs.filter(
+      (job) =>
+        !replacedJobIds.has(job.notificationJobId) &&
+        !(job.lessonId === lessonId && isActiveJob(job))
+    )
+  ];
+}
+
 export function replaceNotificationJobListRows(
   currentJobs = [],
   replacementJobs = []
