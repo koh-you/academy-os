@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-28 P1. 16G-2 출결 closeout audit — 로드맵 16 완료
+
+- closeout: App의 출결 잔여 코드를 kiosk preview/check와 수동 저장의 React state adapter, `AttendanceKiosk`·`AttendanceModal` controlled 조립, 출결 전용 초기 데이터 load로 분류했다. 독립 계산·표시 모델·request payload/API adapter·성공 결과 적용·polling lifecycle·설정 정규화는 분리 파일에 있고 App 재정의가 없음을 검사한다.
+- 다른 경계: `formatAttendanceForMessage`·`formatAttendanceStatusForMessage`·`createAttendanceNotificationText`는 수업일지/알림 문구 경계, `isAttendanceOnlyRoute`와 `SettingsCenter`는 App shell/settings 경계로 명시해 로드맵 16에 섞지 않았다.
+- 보류 진단: 출결 전용 초기화의 `/api/students` 전체 조회·전용 인증 부재, 서버 `attendanceSettings` 미로딩, 수동 즉시발송 실패 표시, kiosk 비동기 실패 표시는 maintenance/보안 작업으로 남아 있다. closeout fixture가 앞의 두 원천 문제를 계속 가시화한다.
+- AI 검증: closeout fixture, 출결 전체 fixture chain, production 전체 체인, scenario 501/501, build, `git diff --check`를 통과했다. 실제 API/Supabase/Solapi 호출은 0건이고 사람 gate는 없다. 다음은 로드맵 17 `LessonJournalDetail` read-only inventory다.
+
 ## 2026-07-28 P1. 16G-1 출결 설정 모델 분리 — AI gate 통과
 
 - 코드: 기본 `lateGraceMinutes=5`와 Supabase/local 설정 정규화를 `attendanceSettings.js` 순수 모델로 이동했다. App의 초기 상태, 서버 app_state 반영, 설정 화면과 수업/출결 화면의 기존 import 사용은 유지했다.
