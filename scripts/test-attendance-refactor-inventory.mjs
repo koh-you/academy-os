@@ -1,0 +1,82 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+
+const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const serverSource = await readFile(new URL("../api/server.js", import.meta.url), "utf8");
+const coreDataSource = await readFile(new URL("../api/routes/coreData.js", import.meta.url), "utf8");
+const schemaSource = await readFile(new URL("../supabase/schema.sql", import.meta.url), "utf8");
+
+function assertOrdered(source, values) {
+  let cursor = -1;
+  for (const value of values) {
+    const next = source.indexOf(value, cursor + 1);
+    assert.ok(next > cursor, `missing or out-of-order attendance contract: ${value}`);
+    cursor = next;
+  }
+}
+
+for (const request of [
+  '"/api/attendance/check"',
+  '"/api/attendance/preview"',
+  '`/api/lesson-records?date=${encodeURIComponent(syncDate)}`',
+  "window.setInterval(syncAttendanceRecords, 7_000)"
+]) {
+  assert.ok(appSource.includes(request), `missing attendance client request: ${request}`);
+}
+
+assertOrdered(appSource, [
+  "const attendanceSyncFields = [",
+  "function mergeRemoteAttendanceRecord(",
+  'if (!["dirty", "saving", "failed"].includes(saveState)) return remoteRecord',
+  "async function syncAttendanceRecords()",
+  "mergeRemoteAttendanceRecord(",
+  "window.setInterval(syncAttendanceRecords, 7_000)"
+]);
+
+assertOrdered(serverSource, [
+  "async function handleAttendanceCheck(payload = {})",
+  "const previewOnly = payload.previewOnly === true",
+  "if (!(lesson.studentIds ?? []).includes(student.studentId))",
+  "if (!previewOnly) await upsertLesson(lesson)",
+  "if (previewOnly) {",
+  "const savedResult = await upsertLessonStudentRecord(nextRecord)",
+  "const shouldQueueKioskAlimtalk = sendAlimtalk && source === \"kiosk\"",
+  "const shouldReserveManualAbsenceAlimtalk = sendAlimtalk && source === \"manual\" && nextStatus === \"absent\"",
+  "reserveNotificationJobInSolapi(notificationJob",
+  "const eventResult = await tryRecordAttendanceEvent(attendanceEventPayload)",
+  "queueKioskAttendanceAlimtalk(attendanceEventPayload, alimtalkPayload)"
+]);
+
+for (const persistenceContract of [
+  'listRows("lesson_student_records"',
+  'upsertRows("lesson_student_records"',
+  "mergeExistingAttendanceForNonAttendanceSave(stableRecord, existingRecord)",
+  'upsertRows("attendance_events"',
+  'upsertRows("notification_jobs"'
+]) {
+  assert.ok(coreDataSource.includes(persistenceContract), `missing attendance persistence: ${persistenceContract}`);
+}
+
+for (const tableContract of [
+  "create table if not exists lesson_student_records",
+  "create table if not exists attendance_events",
+  "create table if not exists notification_jobs",
+  "unique (lesson_id, student_id)"
+]) {
+  assert.ok(schemaSource.includes(tableContract), `missing attendance schema: ${tableContract}`);
+}
+
+assert.ok(
+  /options\.sendAlimtalk\s*&&\s*nextAttendanceStatus === "absent"/.test(appSource),
+  "manual absence partial failure must remain explicitly surfaced"
+);
+assert.ok(
+  appSource.includes('fetch(apiUrl("/api/students"))') &&
+    !appSource.slice(
+      appSource.indexOf("if (attendanceOnlyMode) {"),
+      appSource.indexOf("if (session && [\"student\", \"parent\"].includes(session.role))")
+    ).includes("states.attendanceSettings"),
+  "kiosk settings/source diagnostic must remain visible until maintenance fixes it"
+);
+
+console.log("attendance roadmap inventory boundary passed");

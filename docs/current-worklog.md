@@ -1442,6 +1442,14 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-28 P1. 16A 출결 원천·side effect inventory — AI gate 통과
+
+- inventory: `docs/refactor-attendance-inventory-2026-07-28.md`에 출결 전용 화면 초기화, 날짜 범위 7초 polling, kiosk preview/check, 수업일지 수동 저장·즉시발송·결석 다음 정각 예약, 일반 수업일지 bulk 저장의 출결 보존 계약을 정리했다.
+- 저장 원천: 직접 row는 `lesson_student_records`, 이력은 `attendance_events`, 수동 결석 예약은 `notification_jobs`다. kiosk 반 매칭 시 `lessons.student_ids`가 보강될 수 있고 kiosk/수동 즉시 경로는 Solapi 외부 발송이 있다.
+- 자동검증: 정적 fixture가 preview write 차단, record 저장, kiosk queue, 수동 결석 예약, event audit, dirty draft 병합, bulk 비출결 저장의 기존 출결 필드 보존 경계를 검사한다. 운영 Supabase·Solapi 호출은 0건이다.
+- 유지보수/보안 진단: 출결 전용 화면의 전체 학생 조회·서버 `attendanceSettings` 미로딩·전용 credential 부재, 수동 즉시발송 실패 시 modal 종료 가능성, kiosk 비동기 발송 실패의 즉시 표시 부재를 기록했다. 기능 수정은 리팩터링에 섞지 않는다.
+- 사람 gate: 없음. 코드 이동·운영 쓰기 없는 inventory다. 다음 16B-1은 7초 polling의 순수 merge 모델을 가상 remote/local 데이터로 분리한다.
+
 ## 2026-07-28 P1. 15F-7 lesson hub/calendar closeout audit — AI gate 통과
 
 - audit: 달력 view/model, keyboard hook, modal controlled components·draft model, 신규/수정 payload, save snapshot·persisted verification·주입형 controller 연결을 전용 fixture로 대조했다.
