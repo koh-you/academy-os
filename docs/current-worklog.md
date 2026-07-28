@@ -1971,6 +1971,12 @@
 - AI 가상검수: 보존 TARGET, legacy·primary/compatibility 중복 CONTROL, identity 없는 TARGET, 자동 TARGET을 다시 실행해 참조·순서·입력 불변을 확인하고 App 주입 순서와 helper 병합 순서 및 side effect 0건을 대조한다. 전용 closeout fixture와 시나리오 620/620, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AJ-1`은 자동 저장 effect가 고르는 `preExam` create/update subset을 inventory하되 effect와 bulk save 호출은 이동하지 않는다.
 
+## 2026-07-28 P3. App.jsx 17AJ-1 generated pre-exam sync selector inventory
+
+- inventory: 자동 저장 effect가 generated plan에서 `preExam`이면서 `create` 또는 `update`인 항목만 원래 순서·참조로 고르는 계약을 고정했다. teacher/app-state/attendance guard, 빈 배열 guard와 bulk save 호출은 App effect 경계다.
+- AI 가상검수: preExam create/update TARGET, examPrep create·preExam synced/protected CONTROL을 섞어 subset·순서·참조·입력 불변을 검증한다. 전용 inventory fixture와 시나리오 621/621, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AJ-2`는 subset selector만 `generatedPreExamSyncSelector.js`로 분리하고 effect guard·save 호출·dependency는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
