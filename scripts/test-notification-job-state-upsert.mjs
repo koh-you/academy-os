@@ -56,10 +56,11 @@ const functionSource = appSource.slice(functionStart, functionEnd);
 
 assert.equal(
   appSource.split(
-    'import { upsertNotificationJobList } from "../domains/notifications/notificationJobState.js"'
+    'from "../domains/notifications/notificationJobState.js"'
   ).length - 1,
   1
 );
+assert.ok(appSource.includes("upsertNotificationJobList"));
 assert.ok(functionSource.includes("if (!notificationJob?.notificationJobId) return"));
 assert.ok(
   functionSource.includes(

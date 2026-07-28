@@ -61,7 +61,11 @@ import {
   canCancelNotificationJob,
   sortNotificationJobsForCurrentStatus
 } from "../domains/notifications/notificationJobSelectors.js";
-import { upsertNotificationJobList } from "../domains/notifications/notificationJobState.js";
+import {
+  mergeNotificationJobLists,
+  selectValidNotificationJobs,
+  upsertNotificationJobList
+} from "../domains/notifications/notificationJobState.js";
 import { ParentResponseContextPanel } from "../domains/notifications/ParentResponseContextPanel.jsx";
 import { getParentResponseContexts } from "../domains/notifications/parentResponseContext.js";
 import { formatNotificationJobStatusLabel } from "../domains/notifications/notificationJobStatusFormatter.js";
@@ -6460,13 +6464,9 @@ export function App() {
   }
 
   function mergeNotificationJobsIntoState(nextJobs = []) {
-    const validJobs = nextJobs.filter((job) => job?.notificationJobId);
+    const validJobs = selectValidNotificationJobs(nextJobs);
     if (!validJobs.length) return;
-    const nextJobIds = new Set(validJobs.map((job) => job.notificationJobId));
-    setNotificationJobs((current) => [
-      ...validJobs,
-      ...current.filter((job) => !nextJobIds.has(job.notificationJobId))
-    ]);
+    setNotificationJobs((current) => mergeNotificationJobLists(current, validJobs));
   }
 
   async function handleReconcileSolapiNotificationResults({ lessonId = "", date = "", notificationJobIds = [], scheduledFrom = "", scheduledTo = "" } = {}) {

@@ -5,24 +5,6 @@ import {
   selectValidNotificationJobs
 } from "../src/domains/notifications/notificationJobState.js";
 
-function applyExistingBatchMerge(currentJobs, nextJobs) {
-  const validJobs = nextJobs.filter((job) => job?.notificationJobId);
-  if (!validJobs.length) {
-    return {
-      nextJobs: currentJobs,
-      skipped: true
-    };
-  }
-  const nextJobIds = new Set(validJobs.map((job) => job.notificationJobId));
-  return {
-    nextJobs: [
-      ...validJobs,
-      ...currentJobs.filter((job) => !nextJobIds.has(job.notificationJobId))
-    ],
-    skipped: false
-  };
-}
-
 const currentJobs = [
   {
     notificationJobId: "job_TARGET",
@@ -62,28 +44,17 @@ const nextJobs = [
 const currentSnapshot = structuredClone(currentJobs);
 const nextSnapshot = structuredClone(nextJobs);
 
-const existingResult = applyExistingBatchMerge(currentJobs, nextJobs);
-assert.deepEqual(existingResult, {
-  nextJobs: [
-    nextJobs[1],
-    nextJobs[3],
-    nextJobs[4],
-    currentJobs[1],
-    currentJobs[3]
-  ],
-  skipped: false
-});
 const validJobs = selectValidNotificationJobs(nextJobs);
 assert.deepEqual(validJobs, [nextJobs[1], nextJobs[3], nextJobs[4]]);
-assert.deepEqual(
-  mergeNotificationJobLists(currentJobs, validJobs),
-  existingResult.nextJobs
-);
-const invalidOnlyJobs = [null, {}, { notificationJobId: "" }];
-const invalidResult = applyExistingBatchMerge(currentJobs, invalidOnlyJobs);
-assert.equal(invalidResult.skipped, true);
-assert.equal(invalidResult.nextJobs, currentJobs);
-assert.deepEqual(selectValidNotificationJobs(invalidOnlyJobs), []);
+assert.deepEqual(mergeNotificationJobLists(currentJobs, validJobs), [
+  nextJobs[1],
+  nextJobs[3],
+  nextJobs[4],
+  currentJobs[1],
+  currentJobs[3]
+]);
+assert.deepEqual(selectValidNotificationJobs([null, {}, { notificationJobId: "" }]), []);
+assert.deepEqual(mergeNotificationJobLists([], validJobs), validJobs);
 assert.deepEqual(currentJobs, currentSnapshot);
 assert.deepEqual(nextJobs, nextSnapshot);
 
@@ -102,16 +73,19 @@ const functionEnd = appSource.indexOf(
 assert.ok(functionStart >= 0 && functionEnd > functionStart);
 const functionSource = appSource.slice(functionStart, functionEnd);
 
-for (const existingBoundary of [
+for (const AppOwnedBoundary of [
   "const validJobs = selectValidNotificationJobs(nextJobs)",
   "if (!validJobs.length) return",
   "setNotificationJobs((current) => mergeNotificationJobLists(current, validJobs))"
 ]) {
   assert.ok(
-    functionSource.includes(existingBoundary),
-    `missing batch notification state boundary: ${existingBoundary}`
+    functionSource.includes(AppOwnedBoundary),
+    `batch notification React boundary moved from App: ${AppOwnedBoundary}`
   );
 }
+assert.ok(!functionSource.includes("nextJobs.filter("));
+assert.ok(!functionSource.includes("new Set("));
+assert.ok(!functionSource.includes("current.filter("));
 for (const AppOwnedCallSite of [
   "mergeNotificationJobsIntoState(result.notificationJobs)",
   "mergeNotificationJobsIntoState(result.notificationJobs ?? [])",
@@ -120,21 +94,26 @@ for (const AppOwnedCallSite of [
 ]) {
   assert.ok(
     appSource.includes(AppOwnedCallSite),
-    `missing App-owned batch merge call site: ${AppOwnedCallSite}`
+    `batch notification call site moved from App: ${AppOwnedCallSite}`
   );
 }
-for (const helperRule of [
-  "export function selectValidNotificationJobs(notificationJobs = [])",
-  "return notificationJobs.filter((job) => job?.notificationJobId)",
-  "export function mergeNotificationJobLists(currentJobs = [], nextJobs = [])",
-  "const nextJobIds = new Set(nextJobs.map((job) => job.notificationJobId))",
-  "...nextJobs,",
-  "...currentJobs.filter((job) => !nextJobIds.has(job.notificationJobId))"
+for (const forbiddenHelperEffect of [
+  "useState",
+  "useEffect",
+  "fetch(",
+  "postJson",
+  "/api/",
+  "new Date",
+  "Date.now",
+  "localStorage",
+  "setNotificationJobs",
+  "notification_jobs",
+  "Solapi"
 ]) {
   assert.ok(
-    helperSource.includes(helperRule),
-    `missing extracted batch notification state rule: ${helperRule}`
+    !helperSource.includes(forbiddenHelperEffect),
+    `notification job batch helper crossed a side effect: ${forbiddenHelperEffect}`
   );
 }
 
-console.log("notification job state batch inventory TARGET/CONTROL fixtures passed");
+console.log("notification job state batch TARGET/CONTROL fixtures passed");
