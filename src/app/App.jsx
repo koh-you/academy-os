@@ -237,6 +237,7 @@ import { saveLessonJournalRecordsWithVerification } from "../domains/lessons/les
 import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
 import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
 import { selectPreviousLessonMemoContext } from "../domains/lessons/lessonJournalPreviousMemoSelector.js";
+import { useLessonJournalDraftLifecycle } from "../domains/lessons/useLessonJournalDraftLifecycle.js";
 import { LessonJournalHeader } from "../domains/lessons/LessonJournalHeader.jsx";
 import { LessonJournalClosureNotice } from "../domains/lessons/LessonJournalClosureNotice.jsx";
 import { LessonJournalReminderPanel } from "../domains/lessons/LessonJournalReminderPanel.jsx";
@@ -15838,11 +15839,18 @@ function LessonJournalDetail({
 }) {
   const [commentModal, setCommentModal] = useState(null);
   const [prepMemoModal, setPrepMemoModal] = useState(null);
-  const [journalEditMode, setJournalEditMode] = useState(false);
-  const [journalRecordDrafts, setJournalRecordDrafts] = useState({});
-  const [journalHomeworkDrafts, setJournalHomeworkDrafts] = useState({});
-  const [journalMakeupTaskDrafts, setJournalMakeupTaskDrafts] = useState({});
-  const [journalManualSaveMessage, setJournalManualSaveMessage] = useState("");
+  const {
+    journalEditMode,
+    journalHomeworkDrafts,
+    journalMakeupTaskDrafts,
+    journalManualSaveMessage,
+    journalRecordDrafts,
+    setJournalEditMode,
+    setJournalHomeworkDrafts,
+    setJournalMakeupTaskDrafts,
+    setJournalManualSaveMessage,
+    setJournalRecordDrafts
+  } = useLessonJournalDraftLifecycle(lesson.lessonId);
   const [reservationModalOpen, setReservationModalOpen] = useState(false);
   const [reservationAudit, setReservationAudit] = useState({
     message: "",
@@ -15911,11 +15919,6 @@ function LessonJournalDetail({
   const isExamPrepLessonCurrent = isExamPrepLesson(lesson);
 
   useEffect(() => {
-    setJournalEditMode(false);
-    setJournalRecordDrafts({});
-    setJournalHomeworkDrafts({});
-    setJournalMakeupTaskDrafts({});
-    setJournalManualSaveMessage("");
     setReservationApplyState("idle");
     setSolapiResultRefreshState("idle");
   }, [lesson.lessonId]);
