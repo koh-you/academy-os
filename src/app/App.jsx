@@ -239,6 +239,7 @@ import {
   createLessonJournalCommentAudienceModel,
   createLessonJournalCommentComposerModel
 } from "../domains/lessons/lessonJournalCommentComposerModel.js";
+import { LessonJournalCommentComposerView } from "../domains/lessons/LessonJournalCommentComposerView.jsx";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -17043,21 +17044,7 @@ function CommentComposerModal({
   const lastSavedDraftRef = useRef(comment);
   const previousAiStatusRef = useRef(aiStatus);
   const hasUnsavedDraft = draftComment !== lastSavedDraftRef.current;
-  const {
-    actionLabel,
-    canSendNowToRealRecipient,
-    forceDryRun,
-    forceTestRecipient,
-    isManualResendAvailable,
-    isNotificationMuted,
-    isParent,
-    planMode,
-    previewTitle,
-    sendDelayMinutes,
-    sendTiming,
-    title,
-    visibleDraftSaveState
-  } = createLessonJournalCommentComposerModel({
+  const commentComposerModel = createLessonJournalCommentComposerModel({
     audience,
     audienceModel: commentAudienceModel,
     draftSaveState,
@@ -17074,6 +17061,13 @@ function CommentComposerModal({
       normalizeSaveState
     }
   });
+  const {
+    forceDryRun,
+    forceTestRecipient,
+    isManualResendAvailable,
+    sendDelayMinutes,
+    sendTiming
+  } = commentComposerModel;
   const sourceText = buildCommentSourceText({
     audience,
     lesson,
@@ -17180,76 +17174,23 @@ function CommentComposerModal({
   }
 
   return (
-    <Modal className="commentComposerModal" title={title} subtitle={`${lesson.date} · ${lesson.className}`} onClose={handleClose}>
-      <div className="commentComposerGrid">
-        <section className="commentDraftPanel">
-          <SectionHeader
-            density="slim"
-            eyebrow="FINAL"
-            meta={<span className="countBadge">{isParent ? "학부모용" : "학생용"}</span>}
-            title="최종 알림톡 문구"
-          />
-          <div className="commentSourceToggle">
-            <button
-              aria-controls="comment-source-preview"
-              aria-expanded={isSourceOpen}
-              className="softButton mini"
-              onClick={() => setIsSourceOpen((current) => !current)}
-              type="button"
-            >
-              {isSourceOpen ? "원본 메모 접기" : "원본 메모 보기"}
-            </button>
-            <span>수업메모와 일정 정보는 AI 수정 참고용으로 보관됩니다.</span>
-          </div>
-          {isSourceOpen ? (
-            <pre className="templatePreviewText commentSourcePreview" id="comment-source-preview">{sourceText}</pre>
-          ) : null}
-          <textarea
-            aria-label={isParent ? "학부모 최종 알림톡 문구" : "학생 최종 알림톡 문구"}
-            className="commentComposerTextarea"
-            value={draftComment}
-            onChange={(event) => setDraftComment(event.target.value)}
-            placeholder={isParent ? "학부모님께 실제로 보낼 최종 문구를 적어주세요." : "학생에게 실제로 보낼 최종 문구를 적어주세요."}
-          />
-          <div className="commentComposerStatusRow">
-            <InlineSaveStatus label="최종 문구" saveState={visibleDraftSaveState} />
-            <small className="muted">{localAiStatus}</small>
-          </div>
-          <div className="commentComposerActions">
-            <button
-              className="softButton"
-              disabled={localAiStatus === "AI 수정 중"}
-              onClick={handlePolishClick}
-              type="button"
-            >
-              {localAiStatus === "AI 수정 중" ? "AI 수정 중..." : "AI 수정"}
-            </button>
-            <button
-              className="saveDraftButton"
-              disabled={!hasUnsavedDraft || draftSaveState === "saving"}
-              onClick={handleSaveDraftClick}
-              type="button"
-            >
-              {draftSaveState === "saving" ? "저장 중" : "최종 문구 저장"}
-            </button>
-            <button
-              className="sendButton"
-              disabled={hasUnsavedDraft || isNotificationMuted || (planMode === "none" && !isManualResendAvailable)}
-              onClick={handleSendClick}
-              title={hasUnsavedDraft ? "최종 문구 저장 후 예약/발송할 수 있습니다." : ""}
-              type="button"
-            >
-              {hasUnsavedDraft ? "저장 후 가능" : actionLabel}
-            </button>
-          </div>
-        </section>
-
-        <section className="commentPreviewPanel">
-          <SectionHeader density="slim" eyebrow="PREVIEW" title={previewTitle} />
-          <pre className="templatePreviewText commentTemplatePreview">{generatedPreviewText}</pre>
-        </section>
-      </div>
-    </Modal>
+    <LessonJournalCommentComposerView
+      draftComment={draftComment}
+      draftSaveState={draftSaveState}
+      generatedPreviewText={generatedPreviewText}
+      hasUnsavedDraft={hasUnsavedDraft}
+      isSourceOpen={isSourceOpen}
+      lesson={lesson}
+      localAiStatus={localAiStatus}
+      model={commentComposerModel}
+      onChangeDraft={setDraftComment}
+      onClose={handleClose}
+      onPolish={handlePolishClick}
+      onSave={handleSaveDraftClick}
+      onSend={handleSendClick}
+      onToggleSource={() => setIsSourceOpen((current) => !current)}
+      sourceText={sourceText}
+    />
   );
 }
 

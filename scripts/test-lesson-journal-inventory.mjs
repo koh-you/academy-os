@@ -150,6 +150,10 @@ const commentComposerModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalCommentComposerModel.js", import.meta.url),
   "utf8"
 );
+const commentComposerViewSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalCommentComposerView.jsx", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -728,5 +732,32 @@ assert.ok(
   !commentComposerSource.includes("const currentPlanLabel ="),
   "CommentComposerModal must not retain the extracted plan label calculation"
 );
+for (const extractedCommentComposerViewContract of [
+  "LessonJournalCommentComposerView",
+  "onClick={onToggleSource}",
+  "onChange={(event) => onChangeDraft(event.target.value)}",
+  "onClick={onPolish}",
+  "onClick={onSave}",
+  "onClick={onSend}",
+  'aria-controls="comment-source-preview"',
+  "aria-expanded={isSourceOpen}",
+  'aria-label={isParent ? "학부모 최종 알림톡 문구" : "학생 최종 알림톡 문구"}',
+  "{generatedPreviewText}"
+]) {
+  assert.ok(
+    commentComposerViewSource.includes(extractedCommentComposerViewContract),
+    `missing extracted 17E-2 contract: ${extractedCommentComposerViewContract}`
+  );
+}
+assert.ok(
+  commentComposerSource.includes("<LessonJournalCommentComposerView"),
+  "CommentComposerModal must compose the extracted callback-only view"
+);
+assert.ok(
+  !commentComposerSource.includes('className="commentComposerGrid"'),
+  "CommentComposerModal must not retain the extracted comment composer markup"
+);
+assert.ok(!commentComposerViewSource.includes("currentSchedulePlan"));
+assert.ok(!commentComposerViewSource.includes("alimtalkSafetyBox"));
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");

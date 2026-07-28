@@ -69,9 +69,10 @@
 21. `17D-4` 완료: preparation memo의 직전/참고 원천, 확인 cutoff, 숨김·제목·날짜 계산을 순수 view model로 분리했다.
 22. `17D-5` 완료: preparation memo의 이전 메모·draft·공개 flag·저장 상태 JSX를 callback-only view로 분리했다.
 23. `17E-1` 완료: comment composer의 audience·예약 계획·안전 상태·버튼/저장 상태 문구를 순수 view model로 분리했다.
-24. 다음: comment composer의 표시 JSX를 callback-only view로 분리
-25. 다중 원천 저장은 TARGET/CONTROL·부분 성공 fixture 뒤 주입형 controller로 분리
-26. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
+24. `17E-2` 완료: comment composer의 최종 문구·원천 메모·저장/발송 버튼·미리보기 JSX를 callback-only view로 분리했다.
+25. 다음: comment composer의 local draft/effect/action controller 경계를 inventory하고 안전한 다음 분리 단위를 결정
+26. 다중 원천 저장은 TARGET/CONTROL·부분 성공 fixture 뒤 주입형 controller로 분리
+27. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -110,6 +111,7 @@
 - `17D-4` gate: 가상 직전 메모 TARGET, 참고 메모 TARGET, 확인 완료 CONTROL, 빈 CONTROL로 원천 우선순위·record ID/날짜·숨김·확인 가능·표시 제목을 판정하고 저장/닫기 callback이 App에 남는지 검사한다.
 - `17D-5` gate: `17D-4` TARGET·CONTROL을 재사용해 이전 메모/확인 완료/빈 표시 분기와 메모·학생 공개·학부모 공개 callback 라우팅, 저장 disabled·문구·오류 표시를 정적으로 대조한다.
 - `17E-1` gate: 가상 학부모 기본 예약 TARGET, 학생 30분 지연 시각 경과 TARGET, 발송 안 함 CONTROL로 field·실제/테스트 수신·sendTiming·버튼·저장 상태를 판정하고 AI/저장/발송 action이 App에 남는지 검사한다.
+- `17E-2` gate: `17E-1`의 실제 수신 TARGET·발송 안 함 CONTROL을 재사용하고 원천 토글·draft 변경·AI·저장·발송 callback, 저장/발송 disabled, 미리보기 표시 순서를 정적으로 대조한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
 - recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.
 - 학생 포털 실제 쓰기와 Solapi 특강 템플릿 검수는 사용자 지시로 목록에서 제거됐고, 교사 bearer/Storage 소유권 보안은 구현·배포 검증 완료다.
