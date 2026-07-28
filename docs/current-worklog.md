@@ -1652,6 +1652,13 @@
 - AI 검수: 중복 TARGET/CONTROL 가상 목록의 교체·입력 불변과 import/export/call 수, guard→setter 순서, callback 네 곳, helper side effect 부재를 전용 closeout fixture·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 없음. 다음 `17P-1`은 `mergeNotificationJobsIntoState`의 유효 job 필터·ID Set·batch 선두 병합 계산을 inventory하며 React setter와 bulk 예약/reconcile API는 이동하지 않는다.
 
+## 2026-07-28 P1. App.jsx 17P-1 notification job batch state merge inventory
+
+- 결과: batch 상태 병합은 유효 `notificationJobId` row만 고른 뒤 그 ID Set으로 기존 목록의 같은 ID를 제거하고, 새 batch를 입력 순서 그대로 맨 앞에 붙인다. 새 batch 내부의 같은 ID 중복은 제거하지 않으며 유효 row가 없으면 React setter 자체를 호출하지 않는 계약을 inventory했다.
+- 외부 경계: 초기/이력 load, Solapi reconcile, bulk 예약 성공·실패의 네 호출 지점과 React setter는 App에 유지한다. API·Supabase·Solapi를 실행하거나 운영 데이터를 변경하지 않았다.
+- AI 검수: 무효 row, TARGET 교체, batch 내부 중복 2건, 기존 중복 제거와 CONTROL A/B 순서 보존, 무효-only guard, 입력 불변을 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 없음. 다음 `17P-2`는 유효 job 선택과 batch 목록 병합 계산만 `notificationJobState.js` 순수 helper로 분리하고 React guard/setter와 API 호출 지점은 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
