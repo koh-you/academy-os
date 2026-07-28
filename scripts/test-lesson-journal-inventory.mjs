@@ -10,6 +10,10 @@ const reservationAuditModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalReservationAuditModel.js", import.meta.url),
   "utf8"
 );
+const previousMemoSelectorSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalPreviousMemoSelector.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -158,13 +162,24 @@ assert.ok(
   "LessonJournalDetail must compose the extracted reservation audit model"
 );
 
-for (const reservedNextUnit of [
-  "function getPreviousLessonMemoContext(student)",
+for (const extractedPreviousMemoContract of [
   "const acknowledgedMemoCutoff =",
   "const previousLessonRecordInCurrentGroup =",
-  "const referenceMemoRecord ="
+  "const referenceMemoRecord =",
+  "referenceRecord: visiblePreviousMemoRecord ? null : referenceMemoRecord ?? null"
 ]) {
-  assert.ok(journalSource.includes(reservedNextUnit), `missing 17A-3 source: ${reservedNextUnit}`);
+  assert.ok(
+    previousMemoSelectorSource.includes(extractedPreviousMemoContract),
+    `missing extracted 17A-3 contract: ${extractedPreviousMemoContract}`
+  );
 }
+assert.ok(
+  journalSource.includes("selectPreviousLessonMemoContext({"),
+  "LessonJournalDetail must compose the extracted previous memo selector"
+);
+assert.ok(
+  !journalSource.includes("function getPreviousLessonMemoContext(student)"),
+  "LessonJournalDetail must not retain the previous memo selector implementation"
+);
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");

@@ -223,6 +223,7 @@ import {
 import { useAttendanceRecordSync } from "../domains/lessons/useAttendanceRecordSync.js";
 import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
 import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
+import { selectPreviousLessonMemoContext } from "../domains/lessons/lessonJournalPreviousMemoSelector.js";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -16372,89 +16373,6 @@ function LessonJournalDetail({
     return records.find((item) => item.lessonStudentRecordId === recordId) ?? commentModal.record;
   }
 
-  function getPreviousLessonMemoContext(student) {
-    const sourceRecords = allRecords.length ? allRecords : records;
-    const lessonById = new Map(lessons.map((item) => [item.lessonId, item]));
-    const getRecordLessonDate = (record) => {
-      const sourceLesson = lessonById.get(record.lessonId);
-      if (sourceLesson?.date) return sourceLesson.date;
-      return String(record.lessonStudentRecordId ?? "").match(/\d{4}-\d{2}-\d{2}/)?.[0] ?? "";
-    };
-    const getRecordLessonSortValue = (record) => {
-      const sourceLesson = lessonById.get(record.lessonId);
-      return `${getRecordLessonDate(record)} ${sourceLesson?.startTime ?? ""}`;
-    };
-    const recordMatchesCurrentLessonGroup = (record) => {
-      const sourceLesson = lessonById.get(record.lessonId);
-      if (!sourceLesson) return !isSpecialLectureLesson(lesson);
-      return isSameLessonGroup(lesson, sourceLesson);
-    };
-    const acknowledgedMemoCutoff = sourceRecords
-      .filter((item) =>
-        item.studentId === student.studentId &&
-        item.prepMemoCheckedAt &&
-        item.prepMemoCheckedSourceDate &&
-        getRecordLessonDate(item) <= lesson.date
-      )
-      .sort((recordA, recordB) => (
-        String(recordB.prepMemoCheckedSourceDate).localeCompare(String(recordA.prepMemoCheckedSourceDate)) ||
-        String(recordB.prepMemoCheckedAt).localeCompare(String(recordA.prepMemoCheckedAt))
-      ))[0] ?? null;
-    const acknowledgedMemoCutoffDate = acknowledgedMemoCutoff?.prepMemoCheckedSourceDate ?? "";
-    const isMemoRecordAcknowledged = (record) => {
-      const recordDate = getRecordLessonDate(record);
-      return Boolean(acknowledgedMemoCutoffDate && recordDate && recordDate <= acknowledgedMemoCutoffDate);
-    };
-    const previousLessons = lessons
-      .filter((item) =>
-        item.lessonId !== lesson.lessonId &&
-        item.date < lesson.date &&
-        item.status !== "canceled" &&
-        !getIsClosureLesson(item) &&
-        item.studentIds?.includes(student.studentId) &&
-        isSameLessonGroup(lesson, item)
-      )
-      .sort((lessonA, lessonB) => (
-        `${lessonB.date} ${lessonB.startTime ?? ""}`.localeCompare(`${lessonA.date} ${lessonA.startTime ?? ""}`)
-      ));
-
-    const previousLessonRecordInCurrentGroup = previousLessons
-      .map((previousLesson) =>
-        sourceRecords.find((item) => item.lessonId === previousLesson.lessonId && item.studentId === student.studentId)
-      )
-      .find(Boolean);
-    const bridgedPreviousLesson = previousLessons.length === 0
-      ? findPreviousLessonForStudent(lessons, lesson, student.studentId, { allowRegularClassFallback: true })
-      : null;
-    const bridgedPreviousLessonRecord = bridgedPreviousLesson
-      ? sourceRecords.find((item) => item.lessonId === bridgedPreviousLesson.lessonId && item.studentId === student.studentId) ?? null
-      : null;
-    const previousLessonRecord = previousLessonRecordInCurrentGroup ?? bridgedPreviousLessonRecord;
-    const visiblePreviousMemoRecord = previousLessonRecord?.preparationMemo?.trim() && !isMemoRecordAcknowledged(previousLessonRecord)
-      ? previousLessonRecord
-      : null;
-
-    const referenceMemoRecord = sourceRecords
-      .filter((item) =>
-        item.lessonId !== lesson.lessonId &&
-        item.studentId === student.studentId &&
-        item.preparationMemo?.trim() &&
-        getRecordLessonDate(item) < lesson.date
-        && recordMatchesCurrentLessonGroup(item)
-        && !isMemoRecordAcknowledged(item)
-        && item.lessonId !== previousLessonRecord?.lessonId
-      )
-      .sort((recordA, recordB) => getRecordLessonSortValue(recordB).localeCompare(getRecordLessonSortValue(recordA)))[0];
-
-    return {
-      acknowledgedMemoCutoff,
-      acknowledgedMemoCutoffDate,
-      previousMemoRecord: visiblePreviousMemoRecord,
-      previousRecord: previousLessonRecord ?? null,
-      referenceRecord: visiblePreviousMemoRecord ? null : referenceMemoRecord ?? null
-    };
-  }
-
   function getEditableRecord(recordId, baseRecord) {
     return journalRecordDrafts[recordId] ?? baseRecord;
   }
@@ -16971,7 +16889,17 @@ function LessonJournalDetail({
             const effectiveNextHomework = nextHomeworkTitle !== (nextHomework?.title ?? "")
               ? { ...(nextHomework ?? {}), title: nextHomeworkTitle }
               : nextHomework;
-            const previousMemoContext = getPreviousLessonMemoContext(student);
+            const previousMemoContext = selectPreviousLessonMemoContext({
+              allRecords,
+              currentLesson: lesson,
+              findPreviousLessonForStudent,
+              isClosureLesson: getIsClosureLesson,
+              isSameLessonGroup,
+              isSpecialLectureLesson,
+              lessons,
+              records,
+              student
+            });
             const previousRecord = previousMemoContext.previousRecord;
             const record = getLessonRecordWithPreviousDefaults(editableRecord, previousRecord);
             const attendanceDisplay = isClosureLesson

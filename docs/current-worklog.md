@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-28 P1. 17A-3 수업일지 이전 준비메모 selector 분리 — AI gate 통과
+
+- 코드: 같은 반 직전 record, 반 이동 시 직전 정규수업 fallback, 준비메모 확인 완료 cutoff, 직전 record에 메모가 없을 때 최근 참고 record 선택을 `lessonJournalPreviousMemoSelector.js` 순수 selector로 이동했다.
+- 가상 데이터: TARGET/CONTROL 학생과 정규·특강·취소·휴강 수업, 직전·과거·확인 완료 record를 만들고 같은 반 직전 메모, 최근 참고 메모, 반 이동 fallback, 특강/정규 격리, 취소·휴강 제외, `allRecords` 우선 원천을 대조했다.
+- 경계: 읽기 전용 선택 계산만 이동했다. 수업기록·숙제·보충 저장, `notification_jobs`, Solapi 예약·취소·발송·조회와 운영 데이터 호출은 0건이다.
+- AI 검증: 전용 fixture, 로드맵 17 inventory chain, build, `git diff --check`로 읽기 전용 selector 경계를 확인한다. 실제 외부 호출은 0건이고 사람 gate는 0건이다. 다음은 표시용 controlled panel/component를 한 단위씩 분리한다.
+
 ## 2026-07-28 P1. 17A-2 수업일지 예약 audit 표시 모델 분리 — AI gate 통과
 
 - 코드: OS job의 학생/학부모 scheduled·sent와 canceled·failed count, 명단 밖 취소 가능 job, 현재 학생별 job 우선순위와 all/parent/student/issues 학생 필터를 `lessonJournalReservationAuditModel.js`로 이동했다.

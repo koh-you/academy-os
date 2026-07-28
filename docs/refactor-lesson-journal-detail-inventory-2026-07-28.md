@@ -48,8 +48,8 @@
 
 1. `17A-1` 완료: 수업일지 draft 수·저장 상태·하단 고정바 문구를 `lessonJournalSaveViewModel.js` 순수 모델로 분리했다.
 2. `17A-2` 완료: 예약 audit count/filter/display를 `lessonJournalReservationAuditModel.js` 순수 모델로 분리했다.
-3. 다음 `17A-3`: 이전 준비메모 선택 순수 selector
-4. 표시용 하위 panel/component를 controlled callback 경계로 한 번에 하나씩 분리
+3. `17A-3` 완료: 이전 준비메모의 같은 반 직전 record, 반 이동 fallback, 확인 완료 cutoff, 최근 참고 record 선택을 `lessonJournalPreviousMemoSelector.js` 순수 selector로 분리했다.
+4. 다음: 표시용 하위 panel/component를 controlled callback 경계로 한 번에 하나씩 분리
 5. 다중 원천 저장은 TARGET/CONTROL·부분 성공 fixture 뒤 주입형 controller로 분리
 6. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
@@ -57,6 +57,7 @@
 
 - inventory gate: 정적 source fixture로 입력, local state, 저장 callback, 직접 API, 상위 Supabase 저장 handler를 확인한다.
 - 다음 저위험 모델: deterministic 가상 draft/save-state로 자동 판정한다.
+- `17A-3` gate: 가상 TARGET/CONTROL 수업·학생·record로 같은 반 직전 메모, 확인 완료 cutoff, 최근 참고 메모, 정규 반 이동 fallback, 특강 격리, 취소·휴강 제외, `allRecords` 우선 원천을 판정한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
 - recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.
 - 학생 포털 실제 쓰기와 Solapi 특강 템플릿 검수는 사용자 지시로 목록에서 제거됐고, 교사 bearer/Storage 소유권 보안은 구현·배포 검증 완료다.
