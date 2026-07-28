@@ -1519,6 +1519,13 @@
 - AI 검수: 8개 순수 파일의 App binding과 React·네트워크·현재시각·API/Supabase/Solapi 부재, App-owned action·API/setter 잔존과 raw provider 경계 부재를 closeout fixture·정적 시나리오·build·diff 검사로 확인한다.
 - 사람 gate: 새 항목 없음. 다음 `17K-1`은 lesson notification job builder의 입력·출력·시계·외부 action 경계를 inventory하고, 순수 builder로 자동검증 가능한 범위만 다음 이동 후보로 정한다.
 
+## 2026-07-28 P1. App.jsx 17K-1 lesson notification job builder inventory
+
+- 문서: `docs/refactor-lesson-notification-job-builder-inventory-2026-07-28.md`에 `buildLessonNotificationJob`의 직접 인자, record/homework/supplement/test/settings 원천, helper, payload/job 반환 필드, 단일 현재시각과 상위 호출자를 기록했다.
+- 경계: builder 자체에는 외부 side effect가 없고 현재시각만 직접 생성한다. 실제 bulk 예약·취소 저장·plan 적용은 App에 남아 있으며 이번 단계에서는 코드나 운영 원천을 이동하지 않았다.
+- AI 검수: builder 범위를 추출해 입력 helper, payload/job 필드, `new Date().toISOString()` 1회, 학부모→학생 호출 1회씩과 API·Supabase·Solapi·setter·persist/reserve 부재를 inventory fixture·정적 시나리오·build·diff 검사로 확인한다.
+- 사람 gate: 새 항목 없음. 다음 `17K-2`는 조회 완료 입력과 고정 `nowIso`를 받는 최종 job 순수 builder만 분리하고 App의 원천 조회와 실제 reserve/cancel action은 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

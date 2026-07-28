@@ -116,8 +116,9 @@
 68. `17J-7` 완료: lesson 예약 payload snapshot 조합을 helper 주입형 순수 builder로 분리했다.
 69. `17J-8` 완료: lesson notification job ID와 active 상태 판정을 순수 selector로 분리했다.
 70. `17J-9` 완료: comment/job 표시·payload 8개 순수 경계와 App-owned provider action을 closeout audit으로 고정했다.
-71. 다음 `17K-1`: lesson notification job builder의 입력·출력·시계·외부 action 경계를 inventory한다.
-72. `notification_jobs` 조회·OS job 취소·provider 예약 반영·발송결과 reconcile orchestration은 App callback에 남기고 순수 표시·판정만 분리
+71. `17K-1` 완료: lesson notification job builder의 입력·출력·시계·외부 action 경계를 별도 inventory로 고정했다.
+72. 다음 `17K-2`: 조회 완료 입력과 `nowIso`를 받는 최종 notification job 순수 builder를 분리한다.
+73. `notification_jobs` 조회·OS job 취소·provider 예약 반영·발송결과 reconcile orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -197,6 +198,8 @@
 - `17J-6` gate: 전체 TARGET payload, legacy reason/message·학부모 번호·잘못된 날짜 CONTROL, 빈 payload를 가상 입력으로 대조한다. 20개 fingerprint 필드 순서와 nullish fallback, 유효 시각 UTC ISO/잘못된 시각 trim, message/phone normalizer 호출 순서·입력 불변을 검사한다.
 - `17J-7` gate: 학생 미기재 TARGET과 학부모 완료 CONTROL payload를 가상 입력으로 대조한다. 학생/학부모 comment·번호 선택, 미기재 때 이전 숙제·보충 안내만 제거하고 다음 숙제 유지, 출결 nullish 기본값, 일정/시험 줄바꿈, helper 호출 순서·입력 불변을 검사한다.
 - `17J-8` gate: 문자·숫자·nullish lesson/student/target의 deterministic ID와 inactive 4상태, active 6상태·빈 job을 가상 입력으로 대조한다. 입력 불변과 selector의 외부 side effect 부재, App의 전역/화면 wrapper와 예상 item 연결을 검사한다.
+- `17J-9` gate: 8개 순수 파일의 export 함수 13개와 App binding을 대조하고 네트워크·React·현재시각·Supabase/Solapi side effect 부재를 검사한다. 예약 조회·결과 reconcile·취소·bulk 예약·취소 저장·plan 적용 11개 action과 API/setter가 App에 한 번씩 남는지 고정한다.
+- `17K-1` gate: builder의 직접 인자와 record/homework/supplement/test/settings 원천, payload/job 필드, 단일 현재시각, 학부모→학생 호출 순서를 정적으로 고정한다. builder 내부에 API·Supabase·Solapi·React setter·persist/reserve action이 없고 실제 action 3개가 App에 남는지 검사한다.
 - `17J-9` gate: 8개 순수 파일의 export 함수 13개와 App binding을 대조하고 네트워크·React·현재시각·Supabase/Solapi side effect 부재를 검사한다. 예약 조회·결과 reconcile·OS job 취소·bulk 예약·취소 저장·plan 적용 10개 action과 API/setter가 App에 한 번씩 남고 raw provider group audit는 없는지 고정한다.
 - `17I-7` gate: local draft action 10개와 순수 binding 9개가 `LessonJournalDetail`에 한 번씩 있는지, 현재시각·세 draft map setter·저장 메시지·상위 저장 callback이 App에 남는지 검사한다. 다섯 순수 모델에 React·네트워크·시계·API/localStorage가 없고 전체 async 5개 중 local draft 저장이 1개인지 고정한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
