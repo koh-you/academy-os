@@ -1830,6 +1830,12 @@
 - AI 가상검수: 기존 TARGET 교체→신규 TARGET 추가→ID 없는 응답→같은 TARGET 재교체 순서와 CONTROL 보존, saved ID 필터, 입력 불변, 빈 응답의 기존 배열 참조 보존을 전용 inventory fixture·정적 시나리오·build·`git diff --check`로 검증한다.
 - 사람 gate: 없음. 다음 `17Z-2`는 이 두 계산만 순수 helper로 분리하고 실제 ref/React/localStorage 반영 순서를 유지한다.
 
+## 2026-07-28 P3. App.jsx 17Z-2 notification job reconcile record state extraction
+
+- 코드: 순차 record upsert를 `mergeNotificationJobReconcileRecords`, 유효 record ID의 `saved` map 계산을 `createNotificationJobReconcileSavedStates`로 분리했다. 전자는 기존 `upsertLessonStudentRecord`를 주입받고, App은 계산 사이의 ref→React state→localStorage→saved-state setter 순서를 그대로 소유한다.
+- AI 가상검수: TARGET 두 번 교체·신규/ID 없는 응답·CONTROL 보존·빈 배열 참조·saved ID 중복 축약·입력 불변과 helper side effect 0건을 전용 fixture·정적 시나리오·build·`git diff --check`로 대조한다.
+- 사람 gate: 없음. 다음 `17Z-3`은 helper export/import/call 수와 App-owned effect 순서를 closeout한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

@@ -1,5 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import {
+  createNotificationJobReconcileSavedStates,
+  mergeNotificationJobReconcileRecords
+} from "../src/domains/notifications/notificationJobReconcileRecordState.js";
 
 function createExistingNotificationJobReconcileRecordState({
   currentRecords = [],
@@ -85,6 +89,17 @@ const result = createExistingNotificationJobReconcileRecordState({
     return upsertFixtureRecord(records, record);
   }
 });
+const extractedCalls = [];
+const extractedNextRecords = mergeNotificationJobReconcileRecords({
+  currentRecords,
+  records: responseRecords,
+  upsertRecord(records, record) {
+    extractedCalls.push(record);
+    return upsertFixtureRecord(records, record);
+  }
+});
+const extractedSavedStates =
+  createNotificationJobReconcileSavedStates(responseRecords);
 
 assert.deepEqual(result.nextRecords, [
   responseRecords[3],
@@ -97,7 +112,10 @@ assert.deepEqual(result.savedStates, {
   record_TARGET: "saved",
   record_NEW: "saved"
 });
+assert.deepEqual(extractedNextRecords, result.nextRecords);
+assert.deepEqual(extractedSavedStates, result.savedStates);
 assert.deepEqual(calls, responseRecords);
+assert.deepEqual(extractedCalls, responseRecords);
 assert.deepEqual(currentRecords, currentSnapshot);
 assert.deepEqual(responseRecords, responseSnapshot);
 
@@ -113,6 +131,13 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
+const helperSource = await readFile(
+  new URL(
+    "../src/domains/notifications/notificationJobReconcileRecordState.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const functionStart = appSource.indexOf(
   'async function handleReconcileSolapiNotificationResults({ lessonId = "", date = "", notificationJobIds = [], scheduledFrom = "", scheduledTo = "" } = {})'
 );
@@ -125,12 +150,11 @@ const functionSource = appSource.slice(functionStart, functionEnd);
 
 for (const calculationBoundary of [
   "if (Array.isArray(result.records) && result.records.length)",
-  "const nextRecords = result.records.reduce(",
-  "(currentRecords, record) => upsertLessonStudentRecord(currentRecords, record)",
-  "recordsRef.current",
-  "const savedStates = Object.fromEntries(",
-  ".filter((record) => record?.lessonStudentRecordId)",
-  '.map((record) => [record.lessonStudentRecordId, "saved"])',
+  "const nextRecords = mergeNotificationJobReconcileRecords({",
+  "currentRecords: recordsRef.current",
+  "records: result.records",
+  "upsertRecord: upsertLessonStudentRecord",
+  "const savedStates = createNotificationJobReconcileSavedStates(result.records)",
   "if (Object.keys(savedStates).length)"
 ]) {
   assert.ok(
@@ -140,7 +164,7 @@ for (const calculationBoundary of [
 }
 
 const reduceIndex = functionSource.indexOf(
-  "const nextRecords = result.records.reduce("
+  "const nextRecords = mergeNotificationJobReconcileRecords({"
 );
 const refIndex = functionSource.indexOf(
   "recordsRef.current = nextRecords",
@@ -152,7 +176,7 @@ const storageIndex = functionSource.indexOf(
   stateIndex
 );
 const savedStatesIndex = functionSource.indexOf(
-  "const savedStates = Object.fromEntries(",
+  "const savedStates = createNotificationJobReconcileSavedStates(result.records)",
   storageIndex
 );
 const saveStateSetterIndex = functionSource.indexOf(
@@ -167,6 +191,21 @@ assert.ok(
     savedStatesIndex > storageIndex &&
     saveStateSetterIndex > savedStatesIndex
 );
+for (const helperRule of [
+  "export function mergeNotificationJobReconcileRecords({",
+  "return records.reduce(",
+  "(accumulatedRecords, record) => upsertRecord(accumulatedRecords, record)",
+  "currentRecords",
+  "export function createNotificationJobReconcileSavedStates(records = [])",
+  "return Object.fromEntries(",
+  ".filter((record) => record?.lessonStudentRecordId)",
+  '.map((record) => [record.lessonStudentRecordId, "saved"])'
+]) {
+  assert.ok(
+    helperSource.includes(helperRule),
+    `missing extracted reconcile record calculation: ${helperRule}`
+  );
+}
 
 console.log(
   "notification job reconcile record state inventory TARGET/CONTROL fixtures passed"

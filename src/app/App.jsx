@@ -73,6 +73,10 @@ import { getParentResponseContexts } from "../domains/notifications/parentRespon
 import { createNotificationJobsQueryString } from "../domains/notifications/notificationJobLoadQuery.js";
 import { createNotificationJobsReadyStatus } from "../domains/notifications/notificationJobLoadStatus.js";
 import { createNotificationJobReconcilePayload } from "../domains/notifications/notificationJobReconcilePayload.js";
+import {
+  createNotificationJobReconcileSavedStates,
+  mergeNotificationJobReconcileRecords
+} from "../domains/notifications/notificationJobReconcileRecordState.js";
 import { formatNotificationJobStatusLabel } from "../domains/notifications/notificationJobStatusFormatter.js";
 import {
   canDeleteNotificationJobForDisplay,
@@ -6486,18 +6490,15 @@ export function App() {
     );
     mergeNotificationJobsIntoState(result.notificationJobs ?? []);
     if (Array.isArray(result.records) && result.records.length) {
-      const nextRecords = result.records.reduce(
-        (currentRecords, record) => upsertLessonStudentRecord(currentRecords, record),
-        recordsRef.current
-      );
+      const nextRecords = mergeNotificationJobReconcileRecords({
+        currentRecords: recordsRef.current,
+        records: result.records,
+        upsertRecord: upsertLessonStudentRecord
+      });
       recordsRef.current = nextRecords;
       setRecords(nextRecords);
       writeStorageValue(window.localStorage, storageKeys.records, JSON.stringify(nextRecords));
-      const savedStates = Object.fromEntries(
-        result.records
-          .filter((record) => record?.lessonStudentRecordId)
-          .map((record) => [record.lessonStudentRecordId, "saved"])
-      );
+      const savedStates = createNotificationJobReconcileSavedStates(result.records);
       if (Object.keys(savedStates).length) {
         setSaveStates((currentStates) => ({ ...currentStates, ...savedStates }));
       }

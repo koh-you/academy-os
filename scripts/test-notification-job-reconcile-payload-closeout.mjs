@@ -67,7 +67,7 @@ const recordGuardIndex = functionSource.indexOf(
   jobMergeIndex
 );
 const recordReduceIndex = functionSource.indexOf(
-  "result.records.reduce(",
+  "mergeNotificationJobReconcileRecords({",
   recordGuardIndex
 );
 const refIndex = functionSource.indexOf(
@@ -80,7 +80,7 @@ const storageIndex = functionSource.indexOf(
   stateIndex
 );
 const savedStatesIndex = functionSource.indexOf(
-  "const savedStates = Object.fromEntries(",
+  "const savedStates = createNotificationJobReconcileSavedStates(result.records)",
   storageIndex
 );
 const saveStateSetterIndex = functionSource.indexOf(
