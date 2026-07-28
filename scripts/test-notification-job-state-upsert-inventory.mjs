@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { upsertLocalNoticeJobList } from "../src/domains/notifications/notificationCenterModel.js";
+import { upsertNotificationJobList } from "../src/domains/notifications/notificationJobState.js";
 
 function applyExistingInlineUpsert(currentJobs, notificationJob) {
   return [
@@ -27,6 +28,7 @@ const currentSnapshot = structuredClone(currentJobs);
 const targetSnapshot = structuredClone(targetJob);
 
 const replacedJobs = applyExistingInlineUpsert(currentJobs, targetJob);
+assert.deepEqual(upsertNotificationJobList(currentJobs, targetJob), replacedJobs);
 assert.equal(replacedJobs.length, 82);
 assert.deepEqual(replacedJobs[0], targetJob);
 assert.equal(
@@ -39,6 +41,7 @@ assert.deepEqual(
 );
 
 const insertedJobs = applyExistingInlineUpsert(currentJobs, newJob);
+assert.deepEqual(upsertNotificationJobList(currentJobs, newJob), insertedJobs);
 assert.equal(insertedJobs.length, 83);
 assert.deepEqual(insertedJobs[0], newJob);
 assert.deepEqual(currentJobs, currentSnapshot);
@@ -67,9 +70,7 @@ const functionSource = appSource.slice(functionStart, functionEnd);
 
 for (const existingBoundary of [
   "if (!notificationJob?.notificationJobId) return",
-  "setNotificationJobs((current) => [",
-  "notificationJob,",
-  "...current.filter((job) => job.notificationJobId !== notificationJob.notificationJobId)"
+  "setNotificationJobs((current) => upsertNotificationJobList(current, notificationJob))"
 ]) {
   assert.ok(
     functionSource.includes(existingBoundary),
@@ -77,6 +78,5 @@ for (const existingBoundary of [
   );
 }
 assert.ok(appSource.includes("onNotificationJob: upsertNotificationJobState"));
-assert.ok(!appSource.includes("upsertNotificationJobList"));
 
 console.log("notification job state upsert inventory TARGET/CONTROL fixtures passed");

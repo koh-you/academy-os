@@ -61,6 +61,7 @@ import {
   canCancelNotificationJob,
   sortNotificationJobsForCurrentStatus
 } from "../domains/notifications/notificationJobSelectors.js";
+import { upsertNotificationJobList } from "../domains/notifications/notificationJobState.js";
 import { ParentResponseContextPanel } from "../domains/notifications/ParentResponseContextPanel.jsx";
 import { getParentResponseContexts } from "../domains/notifications/parentResponseContext.js";
 import { formatNotificationJobStatusLabel } from "../domains/notifications/notificationJobStatusFormatter.js";
@@ -8499,10 +8500,7 @@ export function App() {
 
   function upsertNotificationJobState(notificationJob) {
     if (!notificationJob?.notificationJobId) return;
-    setNotificationJobs((current) => [
-      notificationJob,
-      ...current.filter((job) => job.notificationJobId !== notificationJob.notificationJobId)
-    ]);
+    setNotificationJobs((current) => upsertNotificationJobList(current, notificationJob));
   }
 
   async function reserveNotificationJob(notificationJob, reason = "알림톡 예약") {
