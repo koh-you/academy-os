@@ -6,6 +6,10 @@ const attendanceApiSource = await readFile(
   new URL("../src/domains/lessons/attendanceApi.js", import.meta.url),
   "utf8"
 );
+const manualAttendanceSaveControllerSource = await readFile(
+  new URL("../src/domains/lessons/manualAttendanceSaveController.js", import.meta.url),
+  "utf8"
+);
 const serverSource = await readFile(new URL("../api/server.js", import.meta.url), "utf8");
 const coreDataSource = await readFile(new URL("../api/routes/coreData.js", import.meta.url), "utf8");
 const schemaSource = await readFile(new URL("../supabase/schema.sql", import.meta.url), "utf8");
@@ -75,7 +79,10 @@ for (const tableContract of [
 }
 
 assert.ok(
-  /options\.sendAlimtalk\s*&&\s*nextAttendanceStatus === "absent"/.test(appSource),
+  appSource.includes("saveManualAttendanceAction({") &&
+    /options\.sendAlimtalk\s*&&\s*nextAttendanceStatus === "absent"/.test(
+      manualAttendanceSaveControllerSource
+    ),
   "manual absence partial failure must remain explicitly surfaced"
 );
 assert.ok(

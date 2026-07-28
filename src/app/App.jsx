@@ -218,6 +218,7 @@ import { previewKioskAttendanceAction } from "../domains/lessons/attendanceKiosk
 import { AttendanceModal } from "../domains/lessons/AttendanceModal.jsx";
 import { mergeRemoteAttendanceRecord } from "../domains/lessons/attendanceSync.js";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
+import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
   getLessonClosureBlockingNotificationJobs,
   getLessonClosureRoster,
@@ -8367,25 +8368,21 @@ export function App() {
       updatedBy,
       values
     });
-    const result = await checkAttendanceRequest(payload);
-    const nextRecord = result.record;
-    if (!nextRecord) throw new Error("출결 저장 결과가 없습니다.");
-    if (result.lesson) {
-      setLessons((current) => upsertById(current, result.lesson, "lessonId"));
-    }
-    const nextRecords = upsertLessonStudentRecord(recordsRef.current, nextRecord);
-    recordsRef.current = nextRecords;
-    setRecords(nextRecords);
-    const attendanceNotificationJob = result.alimtalk?.result?.notificationJob;
-    if (attendanceNotificationJob) upsertNotificationJobState(attendanceNotificationJob);
-    if (
-      options.sendAlimtalk &&
-      nextAttendanceStatus === "absent" &&
-      !["scheduled", "dry_run"].includes(attendanceNotificationJob?.status)
-    ) {
-      throw new Error(`결석 출결은 저장됐지만 다음 정각 알림톡 예약에 실패했습니다. ${result.alimtalk?.error || attendanceNotificationJob?.error || "알림관리에서 상태를 확인해 주세요."}`);
-    }
-    return { alimtalk: result.alimtalk, record: nextRecord, saved: true };
+    return saveManualAttendanceAction({
+      nextAttendanceStatus,
+      onLesson: (nextLesson) => {
+        setLessons((current) => upsertById(current, nextLesson, "lessonId"));
+      },
+      onNotificationJob: upsertNotificationJobState,
+      onRecord: (nextRecord) => {
+        const nextRecords = upsertLessonStudentRecord(recordsRef.current, nextRecord);
+        recordsRef.current = nextRecords;
+        setRecords(nextRecords);
+      },
+      options,
+      payload,
+      request: checkAttendanceRequest
+    });
   }
 
   function handleChangeRecord(lesson, student, field, value) {
