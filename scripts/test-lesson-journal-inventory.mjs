@@ -146,6 +146,10 @@ const preparationMemoViewSource = await readFile(
   new URL("../src/domains/lessons/LessonJournalPreparationMemoView.jsx", import.meta.url),
   "utf8"
 );
+const commentComposerModelSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalCommentComposerModel.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -159,6 +163,11 @@ const journalSource = section(
   appSource,
   "function LessonJournalDetail({",
   "function CommentComposerModal({"
+);
+const commentComposerSource = section(
+  appSource,
+  "function CommentComposerModal({",
+  "function ReportModal({"
 );
 
 for (const inputContract of [
@@ -699,5 +708,25 @@ for (const extractedPreparationMemoViewContract of [
     `missing extracted 17D-5 contract: ${extractedPreparationMemoViewContract}`
   );
 }
+for (const extractedCommentComposerContract of [
+  "createLessonJournalCommentAudienceModel",
+  "createLessonJournalCommentComposerModel",
+  "isManualResendAvailable",
+  "forceTestRecipient",
+  "visibleDraftSaveState"
+]) {
+  assert.ok(
+    commentComposerModelSource.includes(extractedCommentComposerContract),
+    `missing extracted 17E-1 contract: ${extractedCommentComposerContract}`
+  );
+}
+assert.ok(
+  commentComposerSource.includes("createLessonJournalCommentComposerModel({"),
+  "CommentComposerModal must compose the extracted state model"
+);
+assert.ok(
+  !commentComposerSource.includes("const currentPlanLabel ="),
+  "CommentComposerModal must not retain the extracted plan label calculation"
+);
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");

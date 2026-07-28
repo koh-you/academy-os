@@ -235,6 +235,10 @@ import { LessonJournalTable } from "../domains/lessons/LessonJournalTable.jsx";
 import { LessonJournalStudentPreviewModal } from "../domains/lessons/LessonJournalStudentPreviewModal.jsx";
 import { createLessonJournalPreparationMemoModel } from "../domains/lessons/lessonJournalPreparationMemoModel.js";
 import { LessonJournalPreparationMemoView } from "../domains/lessons/LessonJournalPreparationMemoView.jsx";
+import {
+  createLessonJournalCommentAudienceModel,
+  createLessonJournalCommentComposerModel
+} from "../domains/lessons/lessonJournalCommentComposerModel.js";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -17024,47 +17028,52 @@ function CommentComposerModal({
   testResultLines = []
 }) {
   const [isSourceOpen, setIsSourceOpen] = useState(false);
-  const planMode = ["default", "delay30", "none"].includes(initialSendTiming) ? initialSendTiming : "default";
-  const sendDelayMinutes = planMode === "delay30" ? 30 : 0;
-  const isManualResendAvailable = isLessonAlimtalkScheduleExpired(lesson, sendDelayMinutes);
-  const sendTiming = isManualResendAvailable ? "now" : planMode === "none" ? "none" : "scheduled";
-  const isParent = audience === "parent";
-  const field = isParent ? "teacherComment" : "studentComment";
-  const comment = record?.[field] ?? "";
-  const aiStatus = isParent ? record?.teacherCommentAiStatus : record?.studentCommentAiStatus;
+  const commentAudienceModel = createLessonJournalCommentAudienceModel({
+    audience,
+    record
+  });
+  const {
+    aiStatus,
+    comment,
+    field
+  } = commentAudienceModel;
   const [draftComment, setDraftComment] = useState(initialCommentDraft ?? comment);
   const [localAiStatus, setLocalAiStatus] = useState(aiStatus || "AI 대기");
   const [draftSaveState, setDraftSaveState] = useState("idle");
   const lastSavedDraftRef = useRef(comment);
   const previousAiStatusRef = useRef(aiStatus);
-  const normalizedDraftSaveState = normalizeSaveState(saveState);
   const hasUnsavedDraft = draftComment !== lastSavedDraftRef.current;
-  const visibleDraftSaveState =
-    hasUnsavedDraft && !["dirty", "saving"].includes(normalizeSaveState(draftSaveState))
-      ? "dirty"
-      : normalizeSaveState(draftSaveState) !== "idle"
-        ? normalizeSaveState(draftSaveState)
-        : normalizedDraftSaveState;
-  const title = isParent ? `${student.name} 학부모 알림톡` : `${student.name} 학생 알림톡`;
-  const previewTitle = isParent ? "학부모 알림톡 미리보기" : "학생 알림톡 미리보기";
-  const isNotificationMuted = isParent ? Boolean(record?.notificationMutedParent) : Boolean(record?.notificationMutedStudent);
-  const notificationStatus = integrationStatus?.notifications;
-  const audienceNotificationStatus = getAlimtalkAudienceStatus(notificationStatus, audience);
-  const forceDryRun = false;
-  const canSendNowToRealRecipient =
-    !audienceNotificationStatus?.dryRun &&
-    audienceNotificationStatus?.allowRealRecipients;
-  const forceTestRecipient = !canSendNowToRealRecipient;
-  const actionLabel =
-    isNotificationMuted
-      ? "알림 제외"
-      : isManualResendAvailable
-        ? "수동 재발송"
-      : planMode === "none"
-      ? "발송 안 함"
-      : planMode === "delay30"
-        ? "30분 지연 예약"
-        : "예약 발송";
+  const {
+    actionLabel,
+    canSendNowToRealRecipient,
+    forceDryRun,
+    forceTestRecipient,
+    isManualResendAvailable,
+    isNotificationMuted,
+    isParent,
+    planMode,
+    previewTitle,
+    sendDelayMinutes,
+    sendTiming,
+    title,
+    visibleDraftSaveState
+  } = createLessonJournalCommentComposerModel({
+    audience,
+    audienceModel: commentAudienceModel,
+    draftSaveState,
+    hasUnsavedDraft,
+    initialSendTiming,
+    integrationStatus,
+    lesson,
+    record,
+    saveState,
+    student,
+    dependencies: {
+      getAudienceStatus: getAlimtalkAudienceStatus,
+      isLessonScheduleExpired: isLessonAlimtalkScheduleExpired,
+      normalizeSaveState
+    }
+  });
   const sourceText = buildCommentSourceText({
     audience,
     lesson,

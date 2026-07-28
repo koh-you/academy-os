@@ -1342,6 +1342,13 @@
 - AI 가상검수: 직전 메모 TARGET과 확인 완료 CONTROL을 재사용하고 세 입력 callback 라우팅, 확인 callback, 저장 disabled·문구·오류 표시, 기존 DOM 순서를 대조한다. 전용 fixture, 수업일지 inventory, build, diff check와 현재 rebase 중간 scenario 기준선을 통과한 뒤 커밋을 재적용한다. 전체 production 검증은 rebase 완료 뒤 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위는 comment composer의 audience·예약 계획·안전 상태 계산 순수 view model이다.
 
+## 2026-07-28 P1. App.jsx 17E-1 알림톡 작성창 상태 모델 분리
+
+- 코드: comment composer의 학부모/학생 field, 기본/30분/발송 안 함 계획, 예약 시각 경과·수동 재발송, 실제/테스트 수신 판정, 버튼·저장 상태 문구를 `lessonJournalCommentComposerModel.js`로 분리했다. 최신 `main`에서 제거된 예약 계획 문구·안전 안내 UI는 다시 도입하지 않았다.
+- 경계: AI 수정, 최종 문구 저장·재조회, 예약/즉시 발송과 React local state/effect는 계속 `App.jsx`가 소유한다. 시간·환경 상태 helper를 주입하는 순수 모델이며 API·Supabase·`notification_jobs`·Solapi 호출은 0건이다.
+- AI 가상검수: 실제 학부모 기본 예약 TARGET, 테스트 학생 30분 지연 시각 경과 TARGET, 발송 안 함 CONTROL로 field·sendTiming·버튼·수신 판정·저장 상태를 대조한다. 전용 fixture, 수업일지 inventory, build, diff check와 현재 rebase 중간 scenario 기준선을 통과한 뒤 커밋을 재적용한다. 전체 production 검증은 rebase 완료 뒤 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위는 comment composer의 표시 JSX를 callback-only view로 분리하는 작업이다.
+
 ## 2026-07-28 P1. App.jsx 17D-2 수업일지 학생 표 shell 분리
 
 - 코드: 수업일지 학생 표의 panel, 읽기/편집 class, 학생·메모·출결·교재·진도·숙제·과제·알림톡 10개 고정 열 제목을 `lessonJournalTableModel.js`와 `LessonJournalTable.jsx`로 분리했다.
