@@ -1575,6 +1575,13 @@
 - AI 검수: row plan에 setter/API/Solapi가 없고 persistence 구간에 ref→React state→saving→API→saved/failed 순서가 유지되는지 전용 fixture·정적 시나리오·build·diff 검사로 확인한다.
 - 사람 gate: 새 항목 없음. 다음 `17L-6`은 활성 학생별 예약 상태 row 계산만 고정 `updatedAt`과 helper 주입형 순수 builder로 분리하며 ref/state/API 저장은 App에 유지한다.
 
+## 2026-07-28 P1. App.jsx 17L-6 lesson notification record 상태 row builder 분리
+
+- 코드: App에서 먼저 고른 활성 학생, 고정 `updatedAt`, record ID/current record helper를 받아 예약 상태 저장 row를 만드는 계산을 `lessonNotificationRecordStatusRows.js`로 분리했다. App은 기존 순서대로 활성 학생 선택→현재시각 생성→builder 호출 뒤 빈 배열 guard·ref/state·API 저장을 수행한다.
+- 동작 보존: 기존 record 전체를 보존한 뒤 lesson/학생/record identity, 학부모·학생 상태, 고정 owner, updatedAt만 덮어쓴다. 학부모 제외는 교사 comment 상태에, 학생 제외는 학생 comment 상태에만 `알림 제외`를 적용한다.
+- AI 검수: 학부모 제외 TARGET과 학생 제외 CONTROL 가상 row를 만들어 필드 덮어쓰기·기존 필드/중첩 identity 보존·ID→record helper 순서·입력 불변과 빈 학생 배열의 helper 무호출을 전용 fixture·정적 시나리오·build·diff 검사로 확인한다.
+- 사람 gate: 새 항목 없음. 다음 `17L-7`은 순수 row builder와 App-owned ref/state/API 저장 경계를 closeout audit하고 실제 `notification_jobs`/Solapi orchestration은 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

@@ -21,16 +21,12 @@ assert.equal(
 for (const rowRule of [
   "const lessonStudentsForRecords = getActiveLessonStudents(lesson, students)",
   "const updatedAt = new Date().toISOString()",
-  "const recordsToSave = lessonStudentsForRecords.map((student) => {",
-  "const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId)",
-  "const record = getLessonStudentRecord(lesson, student)",
-  "...record,",
-  "lessonStudentRecordId: recordId,",
-  "lessonId: lesson.lessonId,",
-  "studentId: student.studentId,",
-  'teacherCommentSendStatus: record.notificationMutedParent ? "알림 제외" : statusText',
-  'studentCommentSendStatus: record.notificationMutedStudent ? "알림 제외" : statusText',
-  'updatedBy: "instructor_owner_001",',
+  "const recordsToSave = createLessonNotificationRecordStatusRows({",
+  "createRecordId: createLessonStudentRecordId,",
+  "getRecord: getLessonStudentRecord,",
+  "lesson,",
+  "statusText,",
+  "students: lessonStudentsForRecords,",
   "updatedAt"
 ]) {
   assert.ok(functionSource.includes(rowRule), `missing status row rule: ${rowRule}`);

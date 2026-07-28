@@ -79,6 +79,7 @@ import {
 } from "../domains/lessons/lessonNotificationJobSelectors.js";
 import { createLessonNotificationJob } from "../domains/lessons/lessonNotificationJobBuilder.js";
 import { createLessonNotificationJobBatch } from "../domains/lessons/lessonNotificationJobBatch.js";
+import { createLessonNotificationRecordStatusRows } from "../domains/lessons/lessonNotificationRecordStatusRows.js";
 import {
   applySupplementScheduleNotificationsRequest,
   cancelActiveSupplementScheduleNoticesRequest,
@@ -8458,19 +8459,13 @@ export function App() {
   function updateLessonNotificationRecordStatuses(lesson, statusText) {
     const lessonStudentsForRecords = getActiveLessonStudents(lesson, students);
     const updatedAt = new Date().toISOString();
-    const recordsToSave = lessonStudentsForRecords.map((student) => {
-      const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
-      const record = getLessonStudentRecord(lesson, student);
-      return {
-        ...record,
-        lessonStudentRecordId: recordId,
-        lessonId: lesson.lessonId,
-        studentId: student.studentId,
-        teacherCommentSendStatus: record.notificationMutedParent ? "알림 제외" : statusText,
-        studentCommentSendStatus: record.notificationMutedStudent ? "알림 제외" : statusText,
-        updatedBy: "instructor_owner_001",
-        updatedAt
-      };
+    const recordsToSave = createLessonNotificationRecordStatusRows({
+      createRecordId: createLessonStudentRecordId,
+      getRecord: getLessonStudentRecord,
+      lesson,
+      statusText,
+      students: lessonStudentsForRecords,
+      updatedAt
     });
     if (recordsToSave.length === 0) return;
     const nextRecords = recordsToSave.reduce(

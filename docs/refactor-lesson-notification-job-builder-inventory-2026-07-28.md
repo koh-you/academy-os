@@ -54,4 +54,5 @@
 5. `17L-3` 완료: 현재 record는 React render snapshot이 아니라 `recordsRef.current`에서 찾고 nullish일 때만 빈 record를 만드는 경계임을 inventory했다.
 6. `17L-4` 완료: `recordsRef.current`는 App wrapper에서 주입하고 저장 record 우선·빈 record nullish fallback 계산은 `lessonNotificationJobSelectors.js`로 분리했다.
 7. `17L-5` 완료: 예약 결과 문구를 수업기록에 일괄 반영하는 row plan과 React ref/state·record API 저장 경계를 inventory했다.
-8. 실제 reserve/cancel/reconcile orchestration은 사람 gate 없이 이동하지 않는다.
+8. `17L-6` 완료: 활성 학생별 record 상태 row 조합을 `lessonNotificationRecordStatusRows.js` 순수 builder로 분리하고 시계·최신 ref·저장은 App에 유지했다.
+9. 실제 reserve/cancel/reconcile orchestration은 사람 gate 없이 이동하지 않는다.

@@ -23,8 +23,12 @@ assert.equal(
 );
 assert.equal(
   appSource.split("getLessonStudentRecord(lesson, student)").length - 1,
-  4,
-  "definition and three current-record consumers must remain"
+  3,
+  "definition and two direct current-record consumers must remain"
+);
+assert.ok(
+  appSource.includes("getRecord: getLessonStudentRecord,"),
+  "record status row builder must receive the shared current-record selector"
 );
 for (const selectorBinding of [
   "createEmptyRecord,",
