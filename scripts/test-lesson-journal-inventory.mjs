@@ -14,6 +14,14 @@ const previousMemoSelectorSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalPreviousMemoSelector.js", import.meta.url),
   "utf8"
 );
+const journalHeaderSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalHeader.jsx", import.meta.url),
+  "utf8"
+);
+const journalHeaderModelSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalHeaderModel.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -181,5 +189,22 @@ assert.ok(
   !journalSource.includes("function getPreviousLessonMemoContext(student)"),
   "LessonJournalDetail must not retain the previous memo selector implementation"
 );
+assert.ok(journalSource.includes("<LessonJournalHeader"), "LessonJournalDetail must compose the extracted header");
+assert.ok(
+  !journalSource.includes('<header className="pageTop lessonJournalHeader">'),
+  "LessonJournalDetail must not retain the header markup"
+);
+for (const extractedHeaderContract of [
+  "createLessonJournalHeaderModel",
+  "onClick={onBack}",
+  "onClick={onOpenExamPrep}",
+  "onClick={() => onEditLesson(lesson)}",
+  "onClick={() => onDeleteLesson(lesson.lessonId)}"
+]) {
+  assert.ok(
+    `${journalHeaderSource}\n${journalHeaderModelSource}`.includes(extractedHeaderContract),
+    `missing extracted 17B-1 contract: ${extractedHeaderContract}`
+  );
+}
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");

@@ -224,6 +224,7 @@ import { useAttendanceRecordSync } from "../domains/lessons/useAttendanceRecordS
 import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
 import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
 import { selectPreviousLessonMemoContext } from "../domains/lessons/lessonJournalPreviousMemoSelector.js";
+import { LessonJournalHeader } from "../domains/lessons/LessonJournalHeader.jsx";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -16619,18 +16620,14 @@ function LessonJournalDetail({
 
   return (
     <section className="lessonJournalPage">
-      <NavigationHeader
-        actions={(
-          <>
-            <button className="softButton" onClick={() => onEditLesson(lesson)} type="button">수업 수정</button>
-            <button className="dangerButton" onClick={() => onDeleteLesson(lesson.lessonId)} type="button">수업 취소 처리</button>
-          </>
-        )}
-        className="lessonJournalHeader"
-        context={<span className="shortcutHint">{lesson.lessonTopic || "수업일지"}</span>}
-        description={`${lesson.date} · ${formatLessonTimeRange(lesson)} · ${lessonStudents.length}명`}
-        leading={<button aria-label="수업 목록으로 돌아가기" className="iconButton" onClick={onBack} type="button">‹</button>}
-        titleNode={<button className="linkTitleButton" onClick={onOpenExamPrep} type="button">{lesson.className}</button>}
+      <LessonJournalHeader
+        formatLessonTimeRange={formatLessonTimeRange}
+        lesson={lesson}
+        onBack={onBack}
+        onDeleteLesson={onDeleteLesson}
+        onEditLesson={onEditLesson}
+        onOpenExamPrep={onOpenExamPrep}
+        studentCount={lessonStudents.length}
       />
 
       {isClosureLesson || isClosureMakeupLesson ? (
