@@ -231,7 +231,10 @@ import {
   createLessonModalTemplateChangePatch,
   createLessonModalTypeChangePatch
 } from "../domains/lessons/lessonModalDraftTransitions.js";
-import { buildNewLessonModalLessons } from "../domains/lessons/lessonModalPayloadBuilders.js";
+import {
+  buildNewLessonModalLessons,
+  buildUpdatedLessonModalLessons
+} from "../domains/lessons/lessonModalPayloadBuilders.js";
 import { getLessonModalSaveSnapshot } from "../domains/lessons/lessonModalSaveSnapshot.js";
 import { LessonModalActions } from "../domains/lessons/LessonModalActions.jsx";
 import { LessonModalBasics } from "../domains/lessons/LessonModalBasics.jsx";
@@ -7415,49 +7418,17 @@ export function App() {
     const closureMakeupLessonId = formValues.lessonType === "closure" && formValues.closureMakeupEnabled
       ? formValues.closureMakeupLessonId || createLessonId(formValues.closureMakeupDate, `${formValues.name}-휴강-보충`)
       : "";
-    const lesson = {
-      ...latestSourceLesson,
-      isExamPrepAutoLesson: undefined,
-      isVirtualGeneratedLesson: undefined,
+    const lessonsToSave = buildUpdatedLessonModalLessons({
       classTemplateId,
-      className: formValues.name,
-      lessonType: formValues.lessonType,
-      lessonTopic: formValues.lessonType === "closure" ? "휴강" : editingLesson?.lessonTopic || "",
-      date: formValues.date,
-      dayOfWeek: getDayKey(formValues.date),
-      startTime: formValues.startTime,
-      endTime: formValues.endTime,
-      color: getStandardLessonColor({ ...editingLesson, lessonType: formValues.lessonType, classTemplateId, className: formValues.name }),
-      studentIds,
-      sourceLabel: formValues.lessonType === "closure"
-        ? closureMakeupLessonId
-          ? `연결 휴강 보충 · ${closureMakeupLessonId}`
-          : editingLesson?.lessonType === "closure"
-            ? editingLesson.sourceLabel || "휴강 보충 없음"
-            : "휴강 보충 없음"
-        : editingLesson?.sourceLabel || "",
-      status: editingLesson?.status ?? "scheduled"
-    };
-
-    const lessonsToSave = [lesson];
-    if (closureMakeupLessonId) {
-      lessonsToSave.push({
-        lessonId: closureMakeupLessonId,
-        classTemplateId,
-        className: `${formValues.name} · 휴강 보충`,
-        lessonType: "makeup",
-        lessonTopic: "휴강 보충",
-        date: formValues.closureMakeupDate,
-        dayOfWeek: getDayKey(formValues.closureMakeupDate),
-        startTime: formValues.closureMakeupStartTime,
-        endTime: formValues.closureMakeupEndTime,
-        color: getStandardLessonColor({ lessonType: "makeup", classTemplateId, className: `${formValues.name} · 휴강 보충` }),
-        teacherId: "instructor_owner_001",
-        studentIds,
-        sourceLabel: `원 휴강 수업 · ${lesson.lessonId}`,
-        status: "scheduled"
-      });
-    }
+      closureMakeupLessonId,
+      editingLesson,
+      formValues,
+      latestSourceLesson,
+      resolveDayKey: getDayKey,
+      resolveLessonColor: getStandardLessonColor,
+      studentIds
+    });
+    const [lesson] = lessonsToSave;
 
     const [persistedLesson] = await saveLessonModalLessons(lessonsToSave, onProgress);
     markGeneratedLessonManualOverride(editingLesson);

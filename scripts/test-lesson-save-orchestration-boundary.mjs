@@ -59,6 +59,9 @@ assertOrdered(updateBoundary, [
   "`/api/lessons/closure-preflight?lessonId=",
   "getLessonClosureSourceSnapshot(preflight.lesson)",
   "getLessonClosureRoster(latestSourceLesson, editableStudentIds)",
+  "buildUpdatedLessonModalLessons({",
+  "resolveDayKey: getDayKey",
+  "resolveLessonColor: getStandardLessonColor",
   "await saveLessonModalLessons(lessonsToSave, onProgress)",
   "markGeneratedLessonManualOverride(editingLesson)"
 ]);

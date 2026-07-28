@@ -1442,6 +1442,14 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-28 P1. 15F-3 기존 수업 수정 payload builder 분리 — AI gate 통과
+
+- 코드: closure preflight 이후 확정된 최신 수업 원천·학생 명단을 받아 수정 수업과 선택형 휴강 보충 payload를 `lessonModalPayloadBuilders.js`에서 순수 조립한다.
+- 보존 계약: 최신 원천의 teacher, 특강 guide/session/track metadata와 기타 필드는 유지하고 UI-only generated flag만 기존처럼 제거한다. 일반 수정은 기존 topic/source/status를, 휴강은 `휴강` topic과 보충 연결 source를 유지한다.
+- 경계: closure preflight, 활성·비활성 과거 학생 합산, 차단 알림 판정, bulk POST/GET, manual override와 선택 상태는 App에 남았다.
+- 자동검증: 일반 수정·휴강 전환·연결 보충·기존 휴강 source 보존과 과거 학생 포함 명단을 deterministic fixture로 대조했다.
+- 사람 gate: 없음. 확정된 입력의 순수 payload 조립만 이동했다. 다음은 재조회 expected/persisted 대조의 순수 모델 후보를 검토한다.
+
 ## 2026-07-28 P1. 15F-2 신규 수업·선택형 휴강 보충 payload builder 분리 — AI gate 통과
 
 - 코드: 신규 수업 1건과 선택 시 연결 휴강 보충 1건의 class/type/topic/date/time/color/teacher/roster/source/status 조립을 `src/domains/lessons/lessonModalPayloadBuilders.js`로 이동했다.
