@@ -1350,6 +1350,13 @@
 - AI 가상검수: 서로 다른 TARGET/CONTROL 학생으로 comment/preparation modal과 미리보기, 편집 key를 동시에 구성해 초기값·입력 불변을 대조했다. 전용 fixture, 정적 시나리오 523/523, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다. 운영 API·Supabase·Solapi 호출은 0건이다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17G-4`는 `LessonJournalDetail`의 local `useState` 제거 완료와 남은 effect/action 경계를 closeout audit한다.
 
+## 2026-07-28 P1. App.jsx 17G-4 수업일지 local state closeout audit
+
+- 결과: `LessonJournalDetail` 내부 local `useState`는 0개이며 draft lifecycle, 예약 화면 state, overlay 선택 state의 세 hook으로 분리됐다. 남은 `useEffect`는 예약 확인 modal이 열릴 때 현재 OS 원천을 조회하는 1개뿐이다.
+- 보존 경계: 남은 async 함수는 예약 audit 조회, OS 예약 취소, 다중 draft 저장, Solapi 예약 반영, 발송결과 reconcile의 5개다. 직접 API와 외부 callback은 모두 App에 남아 있으며 이 closeout은 코드를 이동하거나 운영 원천을 수정하지 않는다. 최신 main에서 제거한 raw Solapi group/message 조회·group 취소 UI/API는 다시 도입하지 않았다.
+- AI 검수: 함수 본문을 범위 추출해 local state/effect/async 함수 수와 직접 API/callback 위치를 자동 대조하고 정적 시나리오 524/524, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17H-1`은 외부 호출 없이 예약 동기화 상태만 계산하는 `getSolapiReservationSyncStatus`를 가상 job fixture가 있는 순수 모델로 분리한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
