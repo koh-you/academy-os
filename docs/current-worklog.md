@@ -1449,6 +1449,13 @@
 - AI 가상검수: assignment TARGET, 학부모 comment TARGET, 학생 comment CONTROL, 일반 진도 빈 문자열 CONTROL로 patch 모양을 대조하고 App 연결과 모델의 외부 side effect 부재를 확인한다. 기존 record draft fixture·정적 시나리오·build·diff 검사를 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17I-7`은 record/homework/makeup local draft action의 분리 경계와 App-owned React/저장 action을 closeout audit으로 고정한다.
 
+## 2026-07-28 P1. App.jsx 17I-7 수업일지 local draft action closeout
+
+- 결과: record 전체/단일 field patch, assignment/followup plan, homework key/title/row, 현재 record 선택과 makeup row 삭제 계산은 다섯 순수 모델에 있다. App에는 이 모델을 현재 lesson/student/draft에 연결하는 action wrapper만 남겼다.
+- 고정 경계: 현재시각 생성, record/homework/makeup React map setter, 편집·저장 메시지, `onSaveLessonJournalDrafts` 호출은 계속 `LessonJournalDetail`이 소유한다. 수업일지 전체 async 함수 5개 중 local draft 저장은 `saveJournalDrafts` 1개이고 나머지 4개는 기존 예약 경계다.
+- AI 검수: local draft action 10개가 App에 한 번씩 존재하는지, 순수 binding 9개와 App-owned setter/callback을 대조하고 다섯 모델의 React·네트워크·시계·API/localStorage 부재를 정적으로 확인한다. closeout fixture·정적 시나리오·build·diff 검사를 실행한다.
+- 사람 gate: 새 항목 없음. 다음 저위험 의미 단위 `17J-1`은 예약 job 상태 우선·저장 comment 상태 fallback 표시를 순수 selector로 분리하고 실제 조회·예약은 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
