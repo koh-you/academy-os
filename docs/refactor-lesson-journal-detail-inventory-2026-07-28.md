@@ -107,8 +107,9 @@
 59. `17I-5` 완료: 현재 record draft 선택과 makeup draft 제거의 map selector/transition을 순수 모델로 분리했다.
 60. `17I-6` 완료: record 단일 field 변경의 과제 상태 동기화와 comment 발송상태 초기화 patch를 순수 builder로 분리했다.
 61. `17I-7` 완료: record/homework/makeup local draft action과 App-owned React/저장 경계를 closeout audit으로 고정했다.
-62. 다음 `17J-1`: 예약 job 상태 우선·저장 comment 상태 fallback 표시를 순수 selector로 분리한다.
-63. `notification_jobs` 조회·OS job 취소·provider 예약 반영·발송결과 reconcile orchestration은 App callback에 남기고 순수 표시·판정만 분리
+62. `17J-1` 완료: 예약 job 상태 우선·저장 comment 상태 fallback 표시를 순수 selector로 분리했다.
+63. 다음 `17J-2`: comment 발송상태의 표시 정규화·버튼 상태·라벨 계산 경계를 inventory한다.
+64. `notification_jobs` 조회·OS job 취소·provider 예약 반영·발송결과 reconcile orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -179,6 +180,8 @@
 - `17I-4` gate: 미검사+제목 TARGET, source label fallback TARGET, 숙제 없음 CONTROL, 후속 선택지 없음 CONTROL, 후속 선택지 있음 TARGET으로 patch/field action, helper 호출 순서·조기 종료, 입력 불변을 대조한다. makeup draft 제거와 record patch/field·메시지 React setter는 App에 남고 모델에 외부 side effect가 없는지 검사한다.
 - `17I-5` gate: 현재 TARGET record draft/base CONTROL/null/false 선택, TARGET makeup draft 삭제와 CONTROL 보존, 없는/falsy row의 map identity를 대조한다. 입력 map·row identity 불변과 App-owned record ID 생성·React setter, 모델의 외부 side effect 부재를 검사한다.
 - `17I-6` gate: assignment status TARGET, 학부모 comment TARGET, 학생 comment CONTROL, 일반 field 빈 문자열 CONTROL로 단일 field patch와 추가 동기화/초기화 field를 대조한다. 편집 guard·전체 record 병합·현재시각·React setter는 App에 남고 builder에 외부 side effect가 없는지 검사한다.
+- `17I-7` gate: local draft action 10개와 순수 binding 9개가 `LessonJournalDetail`에 한 번씩 있는지, 현재시각·세 draft map setter·저장 메시지·상위 저장 callback이 App에 남는지 검사한다. 다섯 순수 모델에 React·네트워크·시계·API/localStorage가 없고 전체 async 6개 중 local draft 저장이 1개인지 고정한다.
+- `17J-1` gate: 가상 예약 job TARGET, 저장된 학부모·학생 상태 CONTROL, `"없음"`·빈 job 표시 fallback, 기타 target을 대조한다. job 조회→format의 호출 순서, job 우선 시 저장 상태 formatter 미호출, 입력 불변과 selector의 네트워크·시계·React side effect 부재를 검사한다.
 - `17I-7` gate: local draft action 10개와 순수 binding 9개가 `LessonJournalDetail`에 한 번씩 있는지, 현재시각·세 draft map setter·저장 메시지·상위 저장 callback이 App에 남는지 검사한다. 다섯 순수 모델에 React·네트워크·시계·API/localStorage가 없고 전체 async 5개 중 local draft 저장이 1개인지 고정한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
 - recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.

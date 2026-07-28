@@ -1456,6 +1456,13 @@
 - AI 검수: local draft action 10개가 App에 한 번씩 존재하는지, 순수 binding 9개와 App-owned setter/callback을 대조하고 다섯 모델의 React·네트워크·시계·API/localStorage 부재를 정적으로 확인한다. closeout fixture·정적 시나리오·build·diff 검사를 실행한다.
 - 사람 gate: 새 항목 없음. 다음 저위험 의미 단위 `17J-1`은 예약 job 상태 우선·저장 comment 상태 fallback 표시를 순수 selector로 분리하고 실제 조회·예약은 이동하지 않는다.
 
+## 2026-07-28 P1. App.jsx 17J-1 수업일지 comment 발송상태 selector 분리
+
+- 코드: 현재 학생별 예약 job을 먼저 조회·표시하고 유효 job이 없을 때만 저장된 학생/학부모 comment 발송상태를 표시하는 우선순위를 `lessonJournalCommentSendStatus.js` 순수 selector로 분리했다.
+- 보존 경계: `notification_jobs` 조회 결과와 학생별 현재 job selector, 예약 job formatter, 저장 상태의 시각 경과 formatter는 기존 App 함수로 주입한다. 실제 조회·예약·취소·Solapi orchestration과 React 상태는 이동하지 않았다.
+- AI 검수: 가상 예약 job TARGET, 저장된 학생·학부모 상태 CONTROL, `"없음"`·빈 job fallback, 기타 target을 실행해 호출 순서·job 우선 시 fallback 미호출·입력 불변을 대조한다. 전용 fixture·정적 시나리오·build·diff 검사를 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17J-2`는 comment 발송상태의 표시 정규화·버튼 상태·라벨 계산 경계를 inventory하고, 시간 판정은 주입 가능한 순수 경계로만 분리한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

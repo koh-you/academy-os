@@ -246,6 +246,7 @@ import {
   getLessonJournalEditableRecord,
   removeLessonJournalMakeupTaskDraft
 } from "../domains/lessons/lessonJournalDraftMap.js";
+import { getLessonJournalEffectiveCommentSendStatus } from "../domains/lessons/lessonJournalCommentSendStatus.js";
 import { saveLessonJournalMakeupTasksWithVerification } from "../domains/lessons/lessonJournalMakeupTaskBulkApi.js";
 import { createLessonJournalMakeupTaskRequests } from "../domains/lessons/lessonJournalMakeupTaskRequest.js";
 import { saveLessonJournalRecordsWithVerification } from "../domains/lessons/lessonJournalRecordBulkApi.js";
@@ -16354,10 +16355,14 @@ function LessonJournalDetail({
   }
 
   function getEffectiveCommentSendStatus(record, student, target) {
-    const jobStatus = formatNotificationJobStatus(getStudentReservationStatus(student, target));
-    if (jobStatus && jobStatus !== "없음") return jobStatus;
-    const persistedStatus = target === "student" ? record.studentCommentSendStatus : record.teacherCommentSendStatus;
-    return getDisplayCommentSendStatus(persistedStatus);
+    return getLessonJournalEffectiveCommentSendStatus({
+      formatJobStatus: formatNotificationJobStatus,
+      getDisplayStatus: getDisplayCommentSendStatus,
+      getReservationStatus: getStudentReservationStatus,
+      record,
+      student,
+      target
+    });
   }
 
   return (
