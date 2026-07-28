@@ -9938,6 +9938,9 @@ export function App() {
 
   function handleChangeView(nextView) {
     setActiveView(nextView);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ behavior: "auto", left: 0, top: 0 });
+    }
     if (nextView === "lessons") {
       setIsLessonJournalOpen(false);
     }
