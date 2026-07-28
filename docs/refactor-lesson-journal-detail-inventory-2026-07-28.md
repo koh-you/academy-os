@@ -113,8 +113,9 @@
 65. `17J-4` 완료: notification job 삭제 가능·provider reference 표시 selector를 분리하고 기존 취소 가능 selector·상태 class 모델과 함께 순수 표시 경계를 고정했다.
 66. `17J-5` 완료: 중첩 provider 응답에서 group/message reference를 읽는 순수 selector를 분리했다.
 67. `17J-6` 완료: lesson 예약 payload fingerprint 정규화·직렬화를 순수 모델로 분리했다.
-68. 다음 `17J-7`: lesson 예약 payload snapshot 조합을 helper 주입형 순수 builder로 분리한다.
-69. `notification_jobs` 조회·OS job 취소·provider 예약 반영·발송결과 reconcile orchestration은 App callback에 남기고 순수 표시·판정만 분리
+68. `17J-7` 완료: lesson 예약 payload snapshot 조합을 helper 주입형 순수 builder로 분리했다.
+69. 다음 `17J-8`: lesson notification job ID와 active 상태 판정을 순수 selector로 분리한다.
+70. `notification_jobs` 조회·OS job 취소·provider 예약 반영·발송결과 reconcile orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -192,6 +193,7 @@
 - `17J-4` gate: 삭제 가능한 notice 4상태, 비 notice CONTROL, 과거·미래·시각 없는 send_unconfirmed, null job을 가상 입력으로 판정한다. 직접 providerMessageId 우선과 중첩 result fallback의 조기 반환·입력 불변을 대조하고 취소 가능·상태 class가 이미 순수 domain 경계인지 함께 검사한다.
 - `17J-5` gate: provider 응답의 response groupInfo 2경로, 성공/실패 message list, camel/snake message/group, 이중 result response 3경로, root group/message와 빈 CONTROL을 가상 입력으로 대조한다. 모든 값이 있을 때의 우선순위와 입력 불변, selector의 외부 side effect 부재를 검사한다.
 - `17J-6` gate: 전체 TARGET payload, legacy reason/message·학부모 번호·잘못된 날짜 CONTROL, 빈 payload를 가상 입력으로 대조한다. 20개 fingerprint 필드 순서와 nullish fallback, 유효 시각 UTC ISO/잘못된 시각 trim, message/phone normalizer 호출 순서·입력 불변을 검사한다.
+- `17J-7` gate: 학생 미기재 TARGET과 학부모 완료 CONTROL payload를 가상 입력으로 대조한다. 학생/학부모 comment·번호 선택, 미기재 때 이전 숙제·보충 안내만 제거하고 다음 숙제 유지, 출결 nullish 기본값, 일정/시험 줄바꿈, helper 호출 순서·입력 불변을 검사한다.
 - `17I-7` gate: local draft action 10개와 순수 binding 9개가 `LessonJournalDetail`에 한 번씩 있는지, 현재시각·세 draft map setter·저장 메시지·상위 저장 callback이 App에 남는지 검사한다. 다섯 순수 모델에 React·네트워크·시계·API/localStorage가 없고 전체 async 5개 중 local draft 저장이 1개인지 고정한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
 - recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.

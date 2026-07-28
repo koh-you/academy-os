@@ -1498,6 +1498,13 @@
 - AI 검수: 전체 가상 TARGET payload, legacy reason/message·학부모 번호·잘못된 날짜 CONTROL, 빈 payload를 실행해 20개 필드 순서·nullish fallback·normalizer 호출 순서·입력 불변을 대조한다. 전용 fixture·정적 시나리오·build·diff 검사를 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17J-7`은 lesson 예약 payload snapshot 조합을 helper 주입형 순수 builder로 분리하고 실제 예약 action은 이동하지 않는다.
 
+## 2026-07-28 P1. App.jsx 17J-7 lesson 예약 payload snapshot 분리
+
+- 코드: 학생/학부모 comment·번호 선택, 과제 상태, 출결, 수업 내용·교재, 이전/다음 숙제, 보충 일정·시험 결과와 예약 메타데이터를 조합하는 로직을 `lessonReservationPayloadSnapshot.js` 순수 builder로 분리했다.
+- 보존 경계: comment 중복 제거, 과제 상태/미기재 판정, 보충 안내, 수업 내용·교재 계산은 기존 App helper를 주입한다. builder는 읽기 전용 snapshot만 반환하고 job 생성·저장·Solapi 예약을 하지 않는다.
+- AI 검수: 학생 미기재 TARGET과 학부모 완료 CONTROL을 가상 실행해 comment/번호 선택, 이전 숙제·보충 안내만 생략, 다음 숙제 유지, 출결 nullish 기본값, 줄바꿈, helper 호출 순서·입력 불변을 대조한다. 전용 fixture·정적 시나리오·build·diff 검사를 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17J-8`은 lesson notification job ID와 active 상태 판정을 순수 selector로 분리하고 실제 job 저장·취소는 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

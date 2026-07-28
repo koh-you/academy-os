@@ -70,6 +70,7 @@ import {
 } from "../domains/notifications/notificationJobDisplaySelectors.js";
 import { getNotificationProviderReference } from "../domains/notifications/notificationProviderReference.js";
 import { createLessonReservationPayloadFingerprint } from "../domains/lessons/lessonReservationPayloadFingerprint.js";
+import { createLessonReservationPayloadSnapshot } from "../domains/lessons/lessonReservationPayloadSnapshot.js";
 import {
   applySupplementScheduleNotificationsRequest,
   cancelActiveSupplementScheduleNoticesRequest,
@@ -1133,33 +1134,25 @@ function buildLessonReservationPayloadSnapshot({
   supplementSchedules = [],
   testResultLines = []
 }) {
-  const sourceField = audience === "student" ? "studentComment" : "teacherComment";
-  const commentBody = compactDuplicateMessageBlocks(record?.[sourceField] ?? "");
-  const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
-  const omitPreviousHomework = isAssignmentStatusUnrecorded(assignmentStatus);
-  const homeworkFollowupNotice = omitPreviousHomework ? "" : getHomeworkFollowupNoticeForTarget(record, audience, notificationTemplates);
-  return {
-    assignmentStatus,
-    attendanceReason: record?.attendanceReason ?? "",
-    attendanceStatus: record?.attendanceStatus ?? "pending",
-    checkInTime: record?.checkInTime ?? "",
-    checkOutTime: record?.checkOutTime ?? "",
-    commentBodyOverride: commentBody,
-    lateMinutes: record?.lateMinutes ?? "",
-    lessonContent: getLessonContent(record),
-    lessonMaterial: getLessonMaterial(record, student),
-    homeworkFollowupNotice,
-    nextHomework: nextHomework?.title ?? "",
-    preparationNotice: "",
-    previousHomework: omitPreviousHomework ? "" : previousHomework?.title ?? "",
-    recipient: audience === "student" ? student.studentPhone : student.parentPhone,
+  return createLessonReservationPayloadSnapshot({
+    audience,
+    compactMessage: compactDuplicateMessageBlocks,
+    getAssignmentStatus: getAssignmentStatusForMessage,
+    getHomeworkFollowupNotice: getHomeworkFollowupNoticeForTarget,
+    getLessonContent,
+    getLessonMaterial,
+    isAssignmentStatusUnrecorded,
+    lesson,
+    mode,
+    nextHomework,
+    notificationTemplates,
+    previousHomework,
+    record,
     scheduledDate,
-    scheduleMode: mode,
-    studentId: student.studentId,
-    supplementSchedule: supplementSchedules.join("\n"),
-    testResult: testResultLines.join("\n"),
-    target: audience
-  };
+    student,
+    supplementSchedules,
+    testResultLines
+  });
 }
 
 function getLessonReservationPayloadFingerprint(payload = {}) {
