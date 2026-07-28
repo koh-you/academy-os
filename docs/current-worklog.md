@@ -1692,6 +1692,13 @@
 - AI 검수: 중복 TARGET/CONTROL 가상 목록으로 incoming 첫 row 치환과 입력 불변을 재검증하고 App inline 계산 0건, helper의 React·시각·API·Supabase·Solapi side effect 0건을 전용 closeout fixture·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 없음. 다음 `17R-1`은 예약 갱신 경로의 `nextJobs + canceledJobs + current filter` 상태 계산 두 곳을 inventory하되 예약·취소 orchestration은 이동하지 않는다.
 
+## 2026-07-28 P1. App.jsx 17R-1 lesson notification job state merge inventory
+
+- 결과: 기본/지연 계획 적용과 수동 시각 예약의 두 경로가 `nextJobs`, `canceledJobs`, 보존할 기존 row 순서로 상태를 병합한다. 새·취소 ID와 같은 기존 row 및 같은 수업의 남은 활성 row는 제거하고, 같은 수업의 종료 row와 다른 수업 row는 보존하며 incoming batch 내부 중복은 그대로 두는 계약을 inventory했다.
+- 범위: 학생 1명 예약 갱신의 더 단순한 병합은 별도 후보로 남긴다. `nextJobs`/취소 row 생성, `updatedAt`, React setter, 수업기록 상태, 예약·취소 API/Solapi orchestration 순서는 App에서 이동하지 않았다.
+- AI 검수: 새 TARGET 중복 2건, 취소 TARGET, 같은 수업 stale 활성, 같은 수업 종료 CONTROL, 다른 수업 활성 CONTROL을 가상 실행해 선두 순서·필터·입력 불변을 대조한다. 두 inline 경계와 각 setter→상태/예약/취소 순서를 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 없음. 다음 `17R-2`는 이 두 수업 전체 목록 병합 계산만 순수 helper로 분리하고 predicate와 React/API/Solapi 경계는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
