@@ -52,5 +52,6 @@
 - `16B-2` 완료: 수동 출결 modal의 태블릿 기록 판정, 초기 status, ISO/시각 정규화 기반 변경 감지를 `attendanceModalModel.js`로 분리했다.
 - `16B-3` 완료: 모달의 수업 시작·등원 시각·유예시간 기반 지각분 계산 helper를 같은 순수 모델로 이동하고 정상·지각·invalid 시각을 fixture로 고정했다.
 - `16B-4` 완료: local state와 2단계 확인 UI, 주입 `onSave`만 소유하는 `AttendanceModal.jsx`를 분리했다.
-- 다음 `16C-1`: kiosk 결과·preview action label과 표시값을 가상 result/candidate 데이터로 검증하는 순수 모델을 분리한다.
+- `16C-1` 완료: kiosk 결과·preview action label, 다중 수업 선택 후보와 상세 문구를 `attendanceKioskModel.js`로 분리하고 가상 응답으로 검증했다.
+- 다음 `16C-2`: local pin/preview/result state와 주입 callback만 소유하는 `AttendanceKiosk` 컴포넌트를 분리한다.
 - 실제 polling effect, API, React state, 출결 저장·알림톡은 App에 남긴다.

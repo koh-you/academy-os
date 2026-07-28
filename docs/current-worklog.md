@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-28 P1. 16C-1 출결 kiosk 표시 모델 분리 — AI gate 통과
+
+- 코드: action label과 result/preview 상세, 다중 수업 선택 여부·candidate 목록을 `src/domains/lessons/attendanceKioskModel.js`로 이동했다.
+- 가상 데이터: 이미 하원·하원·지각 등원·결석·인정결석·등원, 성공 상세, 다중 수업 선택, 실패 제목/메시지를 모두 검사했다.
+- 경계: kiosk local state와 preview/check callback, App의 실제 API·record/log state, 서버 저장·발송은 그대로다.
+- 사람 gate: 없음. 운영 호출 0건인 표시 모델 분리다. 다음 16C-2는 kiosk 컴포넌트다.
+
 ## 2026-07-28 P1. 16B-4 수동 출결 modal 컴포넌트 분리 — AI gate 통과
 
 - 코드: `AttendanceModal`을 `src/domains/lessons/AttendanceModal.jsx`로 이동했다. local 입력·confirm step·저장 중/오류 상태와 기존 문구를 그대로 유지한다.

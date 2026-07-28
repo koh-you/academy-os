@@ -210,6 +210,7 @@ import {
   normalizeTimeInput
 } from "../domains/lessons/attendance.js";
 import { AttendanceModal } from "../domains/lessons/AttendanceModal.jsx";
+import { createAttendanceKioskDisplayModel } from "../domains/lessons/attendanceKioskModel.js";
 import { mergeRemoteAttendanceRecord } from "../domains/lessons/attendanceSync.js";
 import {
   getLessonClosureBlockingNotificationJobs,
@@ -17961,16 +17962,6 @@ function CommentComposerModal({
   );
 }
 
-function getAttendanceActionLabel(result = {}) {
-  if (result.mode === "completed") return "이미 하원";
-  if (result.mode === "checkOut") return "하원";
-  const status = result.record?.attendanceStatus ?? "";
-  if (status === "late") return "지각 등원";
-  if (status === "absent") return "결석";
-  if (status === "excused") return "인정결석";
-  return "등원";
-}
-
 function AttendanceKiosk({
   isLoading = false,
   isStandalone = false,
@@ -18079,22 +18070,18 @@ function AttendanceKiosk({
     setPin((current) => `${current}${value}`.replaceAll(/\D/g, "").slice(0, 4));
   }
 
-  const resultTitle = result?.ok ? getAttendanceActionLabel(result) : "출결 체크 실패";
-  const resultDetail = result?.ok
-    ? `${result.student?.name ?? ""} · ${formatLessonDisplayName(result.lesson)} · ${result.checkedTime || ""}`
-    : result?.message;
-  const previewRequiresLessonSelection = Boolean(pendingPreview?.requiresLessonSelection || pendingPreview?.mode === "selectLesson");
-  const previewLessonCandidates = Array.isArray(pendingPreview?.lessonCandidates) ? pendingPreview.lessonCandidates : [];
-  const previewActionLabel = pendingPreview
-    ? previewRequiresLessonSelection
-      ? "수업 선택"
-      : getAttendanceActionLabel(pendingPreview)
-    : "";
-  const previewDetail = pendingPreview?.ok
-    ? previewRequiresLessonSelection
-      ? `${pendingPreview.student?.name ?? ""} · 수업 선택 · ${pendingPreview.checkedTime || ""}`
-      : `${pendingPreview.student?.name ?? ""} · ${formatLessonDisplayName(pendingPreview.lesson)} · ${pendingPreview.checkedTime || ""}`
-    : "";
+  const {
+    previewActionLabel,
+    previewDetail,
+    previewLessonCandidates,
+    previewRequiresLessonSelection,
+    resultDetail,
+    resultTitle
+  } = createAttendanceKioskDisplayModel({
+    formatLessonDisplayName,
+    pendingPreview,
+    result
+  });
 
   return (
     <section className={isStandalone ? "attendanceKioskPage standalone" : "attendanceKioskPage"}>
