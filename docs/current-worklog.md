@@ -1952,6 +1952,12 @@
 - AI 가상검수: preExam·synced CONTROL과 create/update TARGET을 다시 실행해 선택·새 객체·메타데이터·입력 불변을 확인하고 selector→identity key→legacy/중복 제외→기존+자동 순서 및 helper side effect 0건을 대조한다. 전용 closeout fixture와 시나리오 617/617, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AI-1`은 달력 identity 중복 제거와 기존+자동 병합 순수 계산 자체를 inventory하고 save/repair effect와 달력 UI는 이동하지 않는다.
 
+## 2026-07-28 P3. App.jsx 17AI-1 generated lesson calendar merge inventory
+
+- inventory: 자동 표시 lesson의 모든 identity key를 모아 legacy 시험대비 수업과 identity가 겹치는 기존 수업을 제외한 뒤, 보존된 기존 수업 뒤에 자동 표시 수업을 원래 순서로 붙이는 순수 계산을 확정했다. identity/legacy 판정 함수는 App 경계에서 주입 가능한 의존성이다.
+- AI 가상검수: 보존 TARGET, legacy CONTROL, primary/compatibility identity 중복 CONTROL, identity 없는 TARGET, 자동 create/update TARGET을 섞어 결과 순서·원본 참조·입력 불변을 검증한다. 전용 inventory fixture와 시나리오 618/618, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AI-2`는 병합 계산만 `generatedLessonCalendarMerge.js`로 분리하고 identity/legacy helpers, useMemo와 달력 UI는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
