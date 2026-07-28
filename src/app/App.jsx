@@ -95,6 +95,7 @@ import { createLessonNotificationJob } from "../domains/lessons/lessonNotificati
 import { createLessonNotificationJobBatch } from "../domains/lessons/lessonNotificationJobBatch.js";
 import { createLessonNotificationRecordStatusPayload } from "../domains/lessons/lessonNotificationRecordStatusPayload.js";
 import { createLessonNotificationRecordStatusRows } from "../domains/lessons/lessonNotificationRecordStatusRows.js";
+import { selectGeneratedLessonPlanRows } from "../domains/lessons/generatedLessonPlanSelectors.js";
 import { selectGeneratedLessonsToSave } from "../domains/lessons/generatedLessonSaveSelector.js";
 import {
   createGeneratedLessonFailedStatus,
@@ -6289,7 +6290,7 @@ export function App() {
   }, [lessons, setHomeworks, setRecords]);
 
   const generatedLessonPlanRows = useMemo(
-    () => examPrepRows.filter((row) => (row.examCycle || currentExamCycle) === currentExamCycle),
+    () => selectGeneratedLessonPlanRows(examPrepRows, currentExamCycle),
     [examPrepRows]
   );
 

@@ -219,8 +219,7 @@ const nextCandidateSource = appSource.slice(
   nextCandidateEnd
 );
 for (const candidateRule of [
-  "() => examPrepRows.filter(",
-  "(row.examCycle || currentExamCycle) === currentExamCycle",
+  "() => selectGeneratedLessonPlanRows(examPrepRows, currentExamCycle)",
   "[examPrepRows]"
 ]) {
   assert.ok(

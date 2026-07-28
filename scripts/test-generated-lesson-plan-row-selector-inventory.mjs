@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { selectGeneratedLessonPlanRows } from "../src/domains/lessons/generatedLessonPlanSelectors.js";
 
 function selectExistingGeneratedLessonPlanRows(
   rows = [],
@@ -48,12 +49,17 @@ const selectedRows = selectExistingGeneratedLessonPlanRows(
   rows,
   currentCycle
 );
+const extractedRows = selectGeneratedLessonPlanRows(rows, currentCycle);
 
 assert.deepEqual(selectedRows, [
   explicitTarget,
   missingCycleTarget,
   emptyCycleTarget
 ]);
+assert.deepEqual(extractedRows, selectedRows);
+assert.equal(extractedRows[0], explicitTarget);
+assert.equal(extractedRows[1], missingCycleTarget);
+assert.equal(extractedRows[2], emptyCycleTarget);
 assert.equal(selectedRows[0], explicitTarget);
 assert.equal(selectedRows[1], missingCycleTarget);
 assert.equal(selectedRows[2], emptyCycleTarget);
@@ -69,6 +75,13 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
+const helperSource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedLessonPlanSelectors.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const selectorStart = appSource.indexOf(
   "const generatedLessonPlanRows = useMemo("
 );
@@ -80,13 +93,24 @@ assert.ok(selectorStart >= 0 && selectorEnd > selectorStart);
 const selectorSource = appSource.slice(selectorStart, selectorEnd);
 for (const selectorBoundary of [
   "const generatedLessonPlanRows = useMemo(",
-  "() => examPrepRows.filter(",
-  "(row.examCycle || currentExamCycle) === currentExamCycle",
+  "() => selectGeneratedLessonPlanRows(examPrepRows, currentExamCycle)",
   "[examPrepRows]"
 ]) {
   assert.ok(
     selectorSource.includes(selectorBoundary),
     `missing generated lesson plan row selector boundary: ${selectorBoundary}`
+  );
+}
+for (const helperBoundary of [
+  "export function selectGeneratedLessonPlanRows(",
+  "rows = []",
+  'currentExamCycle = ""',
+  "return rows.filter(",
+  "(row.examCycle || currentExamCycle) === currentExamCycle"
+]) {
+  assert.ok(
+    helperSource.includes(helperBoundary),
+    `missing extracted generated lesson row selector: ${helperBoundary}`
   );
 }
 for (const forbiddenEffect of [
