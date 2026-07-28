@@ -1712,6 +1712,13 @@
 - AI 검수: 중복 TARGET, stale 활성, 같은 수업 종료 CONTROL, 다른 수업 활성 CONTROL 가상 목록으로 병합·입력 불변을 재검증하고 helper의 React·시각·API·Supabase·Solapi side effect 0건을 전용 closeout fixture·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 없음. 다음 `17S-1`은 학생 1명 예약 갱신의 더 단순한 `nextJobs + canceledJobs + ID filter` 상태 계산을 inventory한다.
 
+## 2026-07-28 P1. App.jsx 17S-1 student notification job state merge inventory
+
+- 결과: 학생 1명 예약 갱신은 `nextJobs`, `canceledJobs`, 같은 ID가 아닌 기존 row 순서로 병합한다. 같은 수업의 다른 학생 활성 row도 ID가 다르면 보존하며 incoming batch 중복은 유지하는 계약을 inventory했다.
+- 재사용 판정: 기존 `mergeNotificationJobLists(currentJobs, [...nextJobs, ...canceledJobs])`가 inline 계산과 동일한 결과임을 가상 대조했다. 대상 학생·수업 filter, 취소 row와 `updatedAt`, React setter, 학생별 예약·취소 API/Solapi 순서는 App에 유지한다.
+- AI 검수: 교체 TARGET, 취소 TARGET, incoming 중복, 같은 수업 다른 학생 CONTROL, 다른 수업 CONTROL로 기존 inline과 순수 helper 결과·입력 불변을 대조한다. setter→학생별 예약→취소 순서를 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 없음. 다음 `17S-2`는 새 helper를 만들지 않고 이 inline 계산만 기존 `mergeNotificationJobLists` 재사용으로 교체한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
