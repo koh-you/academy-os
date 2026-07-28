@@ -26,3 +26,15 @@ export function createLessonJournalRecordDraft({
     recordId
   };
 }
+
+export function createLessonJournalRecordFieldPatch({
+  field,
+  value
+}) {
+  return {
+    [field]: value,
+    ...(field === "assignmentStatus" ? { incompleteHomework: value } : {}),
+    ...(field === "teacherComment" ? { teacherCommentSendStatus: "" } : {}),
+    ...(field === "studentComment" ? { studentCommentSendStatus: "" } : {})
+  };
+}

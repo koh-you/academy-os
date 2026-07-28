@@ -105,8 +105,9 @@
 57. `17I-3` 완료: 등원보충/다음 정규수업 확인/수업 후 보충 선택의 record patch·makeup task·안내 메시지 plan을 순수 모델로 분리했다.
 58. `17I-4` 완료: 과제 상태 변경의 미검사 자동 후속·후속 선택 유지·후속 제거 record patch plan을 순수 모델로 분리했다.
 59. `17I-5` 완료: 현재 record draft 선택과 makeup draft 제거의 map selector/transition을 순수 모델로 분리했다.
-60. 다음 `17I-6`: record 단일 field 변경의 과제 상태 동기화와 comment 발송상태 초기화 patch를 순수 builder로 분리한다.
-61. `notification_jobs` 조회·OS job 취소·provider 예약 반영·발송결과 reconcile orchestration은 App callback에 남기고 순수 표시·판정만 분리
+60. `17I-6` 완료: record 단일 field 변경의 과제 상태 동기화와 comment 발송상태 초기화 patch를 순수 builder로 분리했다.
+61. 다음 `17I-7`: record/homework/makeup local draft action과 App-owned React/저장 경계를 closeout audit으로 고정한다.
+62. `notification_jobs` 조회·OS job 취소·provider 예약 반영·발송결과 reconcile orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -176,6 +177,7 @@
 - `17I-3` gate: 등원보충 TARGET, 원천 ID·날짜·숙제 제목 fallback TARGET, 다음 정규수업 CONTROL, 수업 후 보충 CONTROL로 makeup task·record patch·안내 메시지와 helper 호출 순서·입력 불변을 대조한다. 편집/이전 숙제 guard와 React draft map 추가·삭제, record patch·메시지 setter는 App에 남고 모델에 외부 side effect가 없는지 검사한다.
 - `17I-4` gate: 미검사+제목 TARGET, source label fallback TARGET, 숙제 없음 CONTROL, 후속 선택지 없음 CONTROL, 후속 선택지 있음 TARGET으로 patch/field action, helper 호출 순서·조기 종료, 입력 불변을 대조한다. makeup draft 제거와 record patch/field·메시지 React setter는 App에 남고 모델에 외부 side effect가 없는지 검사한다.
 - `17I-5` gate: 현재 TARGET record draft/base CONTROL/null/false 선택, TARGET makeup draft 삭제와 CONTROL 보존, 없는/falsy row의 map identity를 대조한다. 입력 map·row identity 불변과 App-owned record ID 생성·React setter, 모델의 외부 side effect 부재를 검사한다.
+- `17I-6` gate: assignment status TARGET, 학부모 comment TARGET, 학생 comment CONTROL, 일반 field 빈 문자열 CONTROL로 단일 field patch와 추가 동기화/초기화 field를 대조한다. 편집 guard·전체 record 병합·현재시각·React setter는 App에 남고 builder에 외부 side effect가 없는지 검사한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
 - recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.
 - 학생 포털 실제 쓰기와 Solapi 특강 템플릿 검수는 사용자 지시로 목록에서 제거됐고, 교사 bearer/Storage 소유권 보안은 구현·배포 검증 완료다.

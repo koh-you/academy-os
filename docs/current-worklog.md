@@ -1441,6 +1441,14 @@
 - AI 가상검수: TARGET record draft/base CONTROL/null/false 선택, TARGET makeup 삭제와 CONTROL row 보존, 없는/falsy row의 같은 map identity, 입력 불변을 대조한다. 전용 fixture·정적 시나리오·build·diff 검사를 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17I-6`은 record 단일 field 변경에서 과제 상태 동기화와 학부모/학생 comment 발송상태 초기화 patch를 순수 builder로 분리한다.
 
+## 2026-07-28 P1. App.jsx 17I-6 수업일지 record 단일 field patch 분리
+
+- 코드: 일반 field 갱신, 과제 상태의 `incompleteHomework` 동기화, 학부모/학생 comment 수정 시 해당 발송상태 초기화를 `lessonJournalRecordDraft.js`의 `createLessonJournalRecordFieldPatch` 순수 builder로 분리했다.
+- 동작 보존: assignment/comment가 아닌 field는 전달한 key 하나만 포함한다. 빈 문자열·undefined도 그대로 보존하며, assignment와 두 comment의 추가 field만 기존 조건대로 생성한다.
+- 경계: 편집 guard, record draft 전체 병합·현재시각·React map 반영·저장 필요 메시지는 계속 `App.jsx`가 소유한다. Supabase 저장·알림톡 side effect는 이동하지 않았다.
+- AI 가상검수: assignment TARGET, 학부모 comment TARGET, 학생 comment CONTROL, 일반 진도 빈 문자열 CONTROL로 patch 모양을 대조하고 App 연결과 모델의 외부 side effect 부재를 확인한다. 기존 record draft fixture·정적 시나리오·build·diff 검사를 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17I-7`은 record/homework/makeup local draft action의 분리 경계와 App-owned React/저장 action을 closeout audit으로 고정한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

@@ -229,7 +229,10 @@ import {
   mergeVerifiedLessonJournalMakeupTasks,
   mergeVerifiedLessonJournalRecords
 } from "../domains/lessons/lessonJournalDraftPersistenceState.js";
-import { createLessonJournalRecordDraft } from "../domains/lessons/lessonJournalRecordDraft.js";
+import {
+  createLessonJournalRecordDraft,
+  createLessonJournalRecordFieldPatch
+} from "../domains/lessons/lessonJournalRecordDraft.js";
 import { createLessonJournalDraftSaveRequest } from "../domains/lessons/lessonJournalDraftSaveRequest.js";
 import { saveLessonJournalHomeworksWithVerification } from "../domains/lessons/lessonJournalHomeworkBulkApi.js";
 import {
@@ -16174,12 +16177,14 @@ function LessonJournalDetail({
   }
 
   function updateJournalRecordDraft(student, baseRecord, field, value) {
-    updateJournalRecordDraftPatch(student, baseRecord, {
-      [field]: value,
-      ...(field === "assignmentStatus" ? { incompleteHomework: value } : {}),
-      ...(field === "teacherComment" ? { teacherCommentSendStatus: "" } : {}),
-      ...(field === "studentComment" ? { studentCommentSendStatus: "" } : {})
-    });
+    updateJournalRecordDraftPatch(
+      student,
+      baseRecord,
+      createLessonJournalRecordFieldPatch({
+        field,
+        value
+      })
+    );
   }
 
   function handleAssignmentStatusChange(student, baseRecord, previousHomework, value) {

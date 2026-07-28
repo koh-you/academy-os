@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { createLessonJournalRecordDraft } from "../src/domains/lessons/lessonJournalRecordDraft.js";
+import {
+  createLessonJournalRecordDraft,
+  createLessonJournalRecordFieldPatch
+} from "../src/domains/lessons/lessonJournalRecordDraft.js";
 
 const lesson = {
   lessonId: "lesson_TARGET",
@@ -127,6 +130,46 @@ assert.deepEqual(
   }
 );
 
+assert.deepEqual(
+  createLessonJournalRecordFieldPatch({
+    field: "assignmentStatus",
+    value: "not_done"
+  }),
+  {
+    assignmentStatus: "not_done",
+    incompleteHomework: "not_done"
+  }
+);
+assert.deepEqual(
+  createLessonJournalRecordFieldPatch({
+    field: "teacherComment",
+    value: "TARGET 학부모 문구"
+  }),
+  {
+    teacherComment: "TARGET 학부모 문구",
+    teacherCommentSendStatus: ""
+  }
+);
+assert.deepEqual(
+  createLessonJournalRecordFieldPatch({
+    field: "studentComment",
+    value: "CONTROL 학생 문구"
+  }),
+  {
+    studentComment: "CONTROL 학생 문구",
+    studentCommentSendStatus: ""
+  }
+);
+assert.deepEqual(
+  createLessonJournalRecordFieldPatch({
+    field: "progressText",
+    value: ""
+  }),
+  {
+    progressText: ""
+  }
+);
+
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
 const modelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalRecordDraft.js", import.meta.url),
@@ -137,7 +180,12 @@ const detailEnd = appSource.indexOf("\nfunction PreparationMemoModal(", detailSt
 const detailSource = appSource.slice(detailStart, detailEnd);
 
 for (const binding of [
-  'import { createLessonJournalRecordDraft } from "../domains/lessons/lessonJournalRecordDraft.js"',
+  "createLessonJournalRecordDraft,",
+  "createLessonJournalRecordFieldPatch",
+  "function updateJournalRecordDraft(student, baseRecord, field, value)",
+  "createLessonJournalRecordFieldPatch({",
+  "field,",
+  "value",
   "function updateJournalRecordDraftPatch(student, baseRecord, patch = {})",
   "if (!journalEditMode) return",
   "const nowIso = new Date().toISOString()",
@@ -152,6 +200,7 @@ for (const binding of [
 }
 assert.ok(!detailSource.includes("const nextRecord = {"));
 assert.ok(!detailSource.includes("...(journalRecordDrafts[recordId] ?? baseRecord ?? {})"));
+assert.ok(!detailSource.includes('...(field === "assignmentStatus" ? { incompleteHomework: value } : {})'));
 
 for (const forbiddenSideEffect of [
   "useState",
