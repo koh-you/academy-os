@@ -1364,6 +1364,13 @@
 - AI 가상검수: 위 상태 전 분기와 TARGET 누락 1·초과 1·fingerprint 변경 1, assignment 미입력 fingerprint 정규화 완전 일치 CONTROL을 실행하고 입력 job/item 불변과 조기 분기의 예상 item 미생성을 대조했다. 전용 fixture, 정적 시나리오 525/525, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다. 운영 API·Supabase·Solapi 호출은 0건이다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17H-2`는 학생·학부모 예상 예약 ID/fingerprint item 생성만 순수 builder로 분리하고 실제 예약은 이동하지 않는다.
 
+## 2026-07-28 P1. App.jsx 17H-2 수업일지 예상 예약 item builder 분리
+
+- 코드: 알림 없음·예약시각 없음 조기 종료, 기본/30분/수동 예약시각, 학생별 record fallback과 이전·다음 숙제·보충·시험결과 수집, 학부모/학생 개별 제외, 최종 payload fingerprint·deterministic job ID 생성을 `lessonJournalExpectedReservationItems.js` 순수 builder로 분리했다.
+- 경계: 기존 helper는 App에서 주입하고 이전 숙제에는 `lessons`를 전달하지만 다음 숙제에는 전달하지 않는 호출 형태와 학생→학부모/학생 순서를 그대로 보존했다. 실제 `notification_jobs` 저장·OS job 취소·provider 예약 반영·결과 reconcile은 이동하지 않았고 raw Solapi group UI/API도 추가하지 않았다.
+- AI 가상검수: TARGET 학생은 학생 알림 제외, CONTROL 학생은 record fallback 뒤 학부모 제외로 구성해 최종 parent/student item 2건, 30분 시각, payload 입력, 호출 순서·원본 불변을 대조했다. 알림 없음·수동시각 없음 무호출, 수동시각 직접 사용, 기본 0분 CONTROL도 확인했다. 전용 fixture, 정적 시나리오 526/526, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17H-3`은 예약 계획 요약·버튼 문구·적용/결과조회 가능 여부의 순수 view model을 분리한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

@@ -237,6 +237,7 @@ import { saveLessonJournalRecordsWithVerification } from "../domains/lessons/les
 import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
 import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
 import { createLessonJournalReservationSyncStatus } from "../domains/lessons/lessonJournalReservationSyncModel.js";
+import { createLessonJournalExpectedReservationItems } from "../domains/lessons/lessonJournalExpectedReservationItems.js";
 import { selectPreviousLessonMemoContext } from "../domains/lessons/lessonJournalPreviousMemoSelector.js";
 import { useLessonJournalDraftLifecycle } from "../domains/lessons/useLessonJournalDraftLifecycle.js";
 import { useLessonJournalOverlayState } from "../domains/lessons/useLessonJournalOverlayState.js";
@@ -15972,38 +15973,27 @@ function LessonJournalDetail({
   const hasSolapiResultRefreshTarget = solapiResultRefreshTargetJobs.length > 0;
 
   function getExpectedSolapiReservationItems() {
-    if (notificationPlanMode === "none") return [];
-    const scheduledDate = notificationPlanMode === "manual"
-      ? lessonNotificationPlan?.scheduledAt
-      : getLessonAlimtalkScheduledDate(lesson, notificationPlanMode === "delay30" ? 30 : 0, { allowPastFallback: false });
-    if (!scheduledDate) return [];
-    return lessonStudents.flatMap((student) => {
-      const record = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
-      const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
-      const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
-      const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId, { lesson, mode: "lesson_comment" });
-      const testResultLines = getLessonTestResultLines(testSessions, testAttempts, lesson, student);
-      return ["parent", "student"].flatMap((audience) => {
-        if (audience === "parent" && record.notificationMutedParent) return [];
-        if (audience === "student" && record.notificationMutedStudent) return [];
-        const payloadSnapshot = buildLessonReservationPayloadSnapshot({
-          audience,
-          lesson,
-          mode: notificationPlanMode,
-          nextHomework,
-          notificationTemplates: aiSettings.notificationTemplates,
-          previousHomework,
-          record,
-          scheduledDate,
-          student,
-          supplementSchedules,
-          testResultLines
-        });
-        return [{
-          fingerprint: getLessonReservationPayloadFingerprint(payloadSnapshot),
-          notificationJobId: createLessonNotificationJobId(lesson.lessonId, student.studentId, audience)
-        }];
-      });
+    return createLessonJournalExpectedReservationItems({
+      buildPayloadSnapshot: buildLessonReservationPayloadSnapshot,
+      createEmptyRecord,
+      createNotificationJobId: createLessonNotificationJobId,
+      findRecord: findLessonStudentRecord,
+      getHomework: getLessonHomework,
+      getPayloadFingerprint: getLessonReservationPayloadFingerprint,
+      getScheduledDate: getLessonAlimtalkScheduledDate,
+      getSupplementSchedules: getStudentSupplementSchedules,
+      getTestResultLines: getLessonTestResultLines,
+      homeworks,
+      lesson,
+      lessons,
+      makeupTasks,
+      notificationPlanMode,
+      notificationPlanScheduledAt: lessonNotificationPlan?.scheduledAt,
+      notificationTemplates: aiSettings.notificationTemplates,
+      records,
+      students: lessonStudents,
+      testAttempts,
+      testSessions
     });
   }
 

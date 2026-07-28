@@ -95,8 +95,9 @@
 47. `17G-3` 완료: comment/preparation modal, 편집 memo key, 학생 미리보기 ID의 local overlay 선택 상태를 전용 hook으로 분리했다.
 48. `17G-4` 완료: `LessonJournalDetail`의 local `useState` 0개와 남은 effect 1개·async side-effect 함수 5개 경계를 closeout audit으로 고정했다.
 49. `17H-1` 완료: 외부 호출 없이 예약 동기화 상태만 계산하는 `getSolapiReservationSyncStatus`를 순수 모델로 분리했다.
-50. 다음 `17H-2`: 학생·학부모 예상 예약 ID/fingerprint item 생성을 순수 builder로 분리한다.
-51. `notification_jobs` 조회·OS job 취소·provider 예약 반영·발송결과 reconcile orchestration은 App callback에 남기고 순수 표시·판정만 분리
+50. `17H-2` 완료: 학생·학부모 예상 예약 ID/fingerprint item 생성을 순수 builder로 분리했다.
+51. 다음 `17H-3`: 예약 계획 요약·버튼 문구·적용/결과조회 가능 여부의 순수 view model을 분리한다.
+52. `notification_jobs` 조회·OS job 취소·provider 예약 반영·발송결과 reconcile orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -156,6 +157,7 @@
 - `17G-3` gate: 서로 다른 TARGET/CONTROL 학생으로 comment modal, preparation modal, 편집 memo key, 학생 미리보기 ID를 구성해 초기값·입력 불변을 대조한다. 수업 전환 reset을 새로 추가하지 않으며 draft 생성·최신 record 선택·modal prop 조합·AI/저장/발송 callback은 App에 남고 hook에 effect나 외부 side effect가 없는지 검사한다.
 - `17G-4` gate: `LessonJournalDetail` 함수 범위를 추출해 local `useState` 0개, 예약 modal 조회 effect 1개, 남은 async 함수 5개를 정확히 대조한다. 세 local state hook에는 직접 API가 없고 예약 조회·OS job 취소·draft 저장·예약 반영·결과 reconcile은 계속 App에 남는지 검사한다. 최신 main에서 제거한 raw Solapi group/message·group cancel 상태와 API는 다시 도입하지 않는다.
 - `17H-1` gate: 적용 중/실패/미저장/알림 없음/수동 시각 없음/예약 시각 경과 후 결과 대기·실패·완료/대상 없음/누락·초과·fingerprint 변경/완전 일치 전 분기를 가상 OS job으로 판정한다. 조기 분기에서는 예상 item builder를 호출하지 않고, 실제 조회·OS job 취소·provider 예약 반영·결과 reconcile action은 App에 남는지 검사한다. raw Solapi group/message UI와 group cancel API는 다시 도입하지 않는다.
+- `17H-2` gate: TARGET 학생의 학생 알림 제외, CONTROL 학생의 record fallback+학부모 제외를 함께 구성해 학생별 이전/다음 숙제·보충·시험결과 payload와 parent/student item 순서, deterministic ID/fingerprint, 30분 예약시각을 대조한다. 알림 없음·수동시각 없음 무호출, 수동시각 직접 사용, 기본 0분 CONTROL과 입력 불변도 검사한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
 - recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.
 - 학생 포털 실제 쓰기와 Solapi 특강 템플릿 검수는 사용자 지시로 목록에서 제거됐고, 교사 bearer/Storage 소유권 보안은 구현·배포 검증 완료다.
