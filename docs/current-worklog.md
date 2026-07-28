@@ -8521,3 +8521,8 @@ AGENTS.md와 docs/current-worklog.md를 먼저 읽고 작업 큐를 확인해주
 - 이번 작업 결과: `docs/ui-ux-stabilization-plan-2026-06-21.md`를 추가했다. 같은 내용을 로컬 산출물 `output/pdf/ui-ux-stabilization-plan-2026-06-21.pdf`로 생성하고 PDF 렌더링 PNG를 확인했다.
 - Git 주의: repo 규칙상 PDF는 commit하지 않고 로컬 산출물로만 보관한다.
 - SQL 주의: 문서 생성만 했으므로 Supabase SQL Editor 작업 필요 없음.
+## 2026-07-28 P1. 반이동생 인수인계서 제목 구분
+
+- UI: 퇴원 사유가 `반이동`(`class_move`)인 학생은 인수인계서 모달, PDF 문서 제목, 브라우저 인쇄 탭 제목을 모두 `반이동생 인수인계서`로 표시한다. 졸업·퇴원·기타 사유는 기존 `퇴원생 인수인계서`를 유지한다.
+- 원천/부작용: 학생의 이미 저장된 퇴원 사유를 읽기만 하며, 학생·수업·출결·숙제·Tally·알림/Solapi를 저장하거나 변경하지 않는다.
+- AI 검증: `npm run test:student-handover-pdf`, `npm run build`, `git diff --check`를 실행한다. 운영 화면에서는 반이동 학생과 일반 퇴원 학생 각각에서 제목과 PDF 인쇄 창 제목을 확인한다.

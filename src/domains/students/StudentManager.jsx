@@ -2,7 +2,7 @@ import { Component, useEffect, useState } from "react";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { parseStudentScheduleOverride } from "../../shared/utils/studentSchedule.js";
-import { buildStudentHandoverPdfModel, openStudentHandoverPdf } from "./studentHandoverPdf.js";
+import { buildStudentHandoverPdfModel, getStudentHandoverTitle, openStudentHandoverPdf } from "./studentHandoverPdf.js";
 
 const withdrawalReasonOptions = [
   { value: "graduation", label: "졸업" },
@@ -1008,7 +1008,7 @@ export function StudentManager({
       ) : null}
 
       {handoverStudent ? (
-        <ModalComponent className="studentHandoverModal" onClose={() => setHandoverStudentId("")} subtitle="수업·출결·숙제와 Tally 접수정보를 읽어 PDF 인쇄 창을 엽니다. 원천 데이터는 수정하지 않습니다." title={`${handoverStudent.name} 퇴원생 인수인계서`}>
+        <ModalComponent className="studentHandoverModal" onClose={() => setHandoverStudentId("")} subtitle="수업·출결·숙제와 Tally 접수정보를 읽어 PDF 인쇄 창을 엽니다. 원천 데이터는 수정하지 않습니다." title={`${handoverStudent.name} ${getStudentHandoverTitle(handoverStudent)}`}>
           <div className="deleteConfirmBody">
             <p className="muted">등원일부터 퇴원일({String(handoverStudent.withdrawnAt || "").slice(0, 10) || "미입력"})까지의 수업만 포함합니다.</p>
             <label>교사 인계 코멘트<textarea value={handoverComment} onChange={(event) => setHandoverComment(event.target.value)} placeholder="재등록 시 참고사항, 보호자 전달사항 등을 입력하세요. 이 코멘트는 이번 PDF에만 포함되며 저장하지 않습니다." rows={7} /></label>
