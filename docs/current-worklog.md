@@ -1804,6 +1804,13 @@
 - AI 검수: 수업+history, 날짜 지정 history 0건, active 가상 입력을 두 helper에 함께 적용해 query·문구·입력 불변을 재검증하고 import/export/call 각 1개와 두 helper의 네트워크·React·Supabase·Solapi side effect 0건을 전용 aggregate fixture·정적 시나리오·build·`git diff --check`로 대조한다.
 - 사람 gate: 없음. notification job load 묶음은 종료한다. 다음 `17Y-1`은 `handleReconcileSolapiNotificationResults`의 요청 payload와 결과 목록 반영 경계를 inventory하되 실제 reconcile API/Solapi는 호출하지 않는다.
 
+## 2026-07-28 P1. App.jsx 17Y-1 notification job reconcile payload inventory
+
+- 결과: reconcile 요청 payload는 `date`, `lessonId`, `notificationJobIds`, `scheduledFrom`, `scheduledTo`, 고정 `limit=500`의 6필드이며 함수 기본값은 빈 문자열·빈 ID 배열이다. 입력의 추가 필드는 전달하지 않고 ID 배열 참조는 그대로 유지한다.
+- 외부 경계: 90초 timeout의 `/api/notification-jobs/reconcile-solapi` 요청, 응답 job 병합, record reduce·localStorage·save state, 세 callback 연결과 result 반환은 App에 유지한다. 실제 API/Solapi를 호출하지 않았다.
+- AI 검수: TARGET/CONTROL ID 배열, 전체 기간 필드, 추가 무시 필드와 기본 입력을 가상 실행해 정확한 payload·참조·입력 불변을 확인하고 request→job merge→record merge→return 순서를 전용 fixture·정적 시나리오·build·`git diff --check`로 대조한다.
+- 사람 gate: 없음. 다음 `17Y-2`는 6필드 payload 계산만 순수 helper로 분리하고 reconcile request·응답 효과는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
