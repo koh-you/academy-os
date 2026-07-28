@@ -1758,6 +1758,13 @@
 - AI 검수: TARGET/CONTROL 가상 목록으로 다섯 helper의 교체·필터·수업 범위·순서·입력 불변을 한 번에 재검증하고, helper export/call 수와 React/API/Supabase/Solapi side effect 0건을 전용 aggregate fixture·정적 시나리오·build·`git diff --check`로 대조한다.
 - 사람 gate: 없음. notification job 목록 상태 계산 묶음은 이 지점에서 종료한다. 다음 `17V-1`은 `refreshNotificationJobs`의 조회 완료 상태 문구 분기를 inventory하고 네트워크·React 상태는 App에 유지한다.
 
+## 2026-07-28 P1. App.jsx 17V-1 notification job load ready status inventory
+
+- 결과: 조회 완료 상태는 `lessonId`가 있으면 scope보다 우선해 `현재 수업 알림 N건`, 그 외 `history`면 `최근 알림 기록 N건`, 나머지 scope는 `처리 중·확인 필요 알림 N건`으로 표시하며 state는 항상 `ready`다. 0건도 같은 형식으로 표시한다.
+- 외부 경계: loading/failed 상태, silent refresh guard, query 구성, 조회 API, active snapshot 교체와 scoped merge, React `setNotificationJobsStatus` 호출 순서는 App에 유지한다. 운영 데이터와 외부 발송은 실행하지 않았다.
+- AI 검수: 수업 TARGET, 수업+history 우선순위 TARGET, history 0건, active, 예상 밖 scope CONTROL로 상태 object를 가상 생성하고 조회 결과 적용 뒤 ready 상태가 설정되는 순서를 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 없음. 다음 `17V-2`는 ready 상태 object 계산만 순수 helper로 분리하고 조회·React 상태 경계는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
