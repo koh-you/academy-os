@@ -233,6 +233,7 @@ import { LessonJournalStudentRow } from "../domains/lessons/LessonJournalStudent
 import { LessonJournalSaveBar } from "../domains/lessons/LessonJournalSaveBar.jsx";
 import { LessonJournalTable } from "../domains/lessons/LessonJournalTable.jsx";
 import { LessonJournalStudentPreviewModal } from "../domains/lessons/LessonJournalStudentPreviewModal.jsx";
+import { createLessonJournalPreparationMemoModel } from "../domains/lessons/lessonJournalPreparationMemoModel.js";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -16861,35 +16862,27 @@ function PreparationMemoModal({
   });
   const [localSaveError, setLocalSaveError] = useState("");
   const [isClosingAfterSave, setIsClosingAfterSave] = useState(false);
-  const previousMemo = previousRecord?.preparationMemo?.trim() ?? "";
-  const previousLessonLabel = previousLesson
-    ? `${previousLesson.date} · ${previousLesson.className}`
-    : "직전 수업";
-  const referenceMemo = referenceRecord?.preparationMemo?.trim() ?? "";
-  const referenceLessonLabel = referenceLesson
-    ? `${referenceLesson.date} · ${referenceLesson.className}`
-    : "최근 참고 수업";
-  const priorMemoSourceRecord = previousMemo ? previousRecord : referenceMemo ? referenceRecord : null;
-  const priorMemoSourceLesson = previousMemo ? previousLesson : referenceMemo ? referenceLesson : null;
-  const priorMemoSourceRecordId = getLessonStudentRecordIdentity(priorMemoSourceRecord);
-  const priorMemoSourceDate = priorMemoSourceLesson?.date || getLessonStudentRecordDate(priorMemoSourceRecord);
-  const effectiveCheckedSourceDate = localCheckedMemo.sourceDate || currentRecord.prepMemoCheckedSourceDate || "";
-  const isPriorMemoChecked = Boolean(
-    priorMemoSourceDate &&
-    effectiveCheckedSourceDate &&
-    priorMemoSourceDate <= effectiveCheckedSourceDate
-  );
-  const visiblePreviousMemo = isPriorMemoChecked ? "" : previousMemo;
-  const visibleReferenceMemo = isPriorMemoChecked ? "" : referenceMemo;
-  const priorMemoKind = previousMemo ? "previous" : referenceMemo ? "reference" : "";
-  const visiblePriorMemo = visiblePreviousMemo || visibleReferenceMemo;
-  const visiblePriorLessonLabel = visiblePreviousMemo ? previousLessonLabel : referenceLessonLabel;
-  const priorMemoEyebrow = priorMemoKind === "reference" ? "REFERENCE" : "PREVIOUS";
-  const priorMemoTitle = priorMemoKind === "reference" ? "최근 참고 메모" : "직전 수업메모";
-  const checkedMemoDate = localCheckedMemo.sourceDate || acknowledgedMemoCutoff?.prepMemoCheckedSourceDate || "";
-  const checkedMemoAt = localCheckedMemo.checkedAt || acknowledgedMemoCutoff?.prepMemoCheckedAt || "";
-  const hasCheckedPriorMemo = Boolean(checkedMemoDate || isPriorMemoChecked);
-  const canCheckPriorMemo = Boolean(priorMemoSourceRecordId && priorMemoSourceDate && !isPriorMemoChecked);
+  const {
+    canCheckPriorMemo,
+    checkedMemoAt,
+    checkedMemoDate,
+    hasCheckedPriorMemo,
+    priorMemoEyebrow,
+    priorMemoKind,
+    priorMemoSourceDate,
+    priorMemoSourceRecordId,
+    priorMemoTitle,
+    visiblePriorLessonLabel,
+    visiblePriorMemo
+  } = createLessonJournalPreparationMemoModel({
+    acknowledgedMemoCutoff,
+    currentRecord,
+    localCheckedMemo,
+    previousLesson,
+    previousRecord,
+    referenceLesson,
+    referenceRecord
+  });
 
   function createMemoSnapshot(checkedMemo = localCheckedMemo) {
     return JSON.stringify({
@@ -23470,18 +23463,6 @@ function createEmptyRecord(lesson, student) {
     needsMakeup: false,
     needsRetest: false
   };
-}
-
-function getLessonStudentRecordIdentity(record = null) {
-  if (!record) return "";
-  if (record.lessonStudentRecordId) return record.lessonStudentRecordId;
-  if (record.lessonId && record.studentId) return createLessonStudentRecordId(record.lessonId, record.studentId);
-  return "";
-}
-
-function getLessonStudentRecordDate(record = null) {
-  if (!record) return "";
-  return String(record.lessonStudentRecordId ?? "").match(/\d{4}-\d{2}-\d{2}/)?.[0] ?? "";
 }
 
 function upsertById(items, nextItem, idKey) {

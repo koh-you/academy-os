@@ -138,6 +138,10 @@ const studentPreviewModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalStudentPreviewModel.js", import.meta.url),
   "utf8"
 );
+const preparationMemoModelSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalPreparationMemoModel.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -646,6 +650,27 @@ for (const extractedStudentPreviewContract of [
   assert.ok(
     `${studentPreviewModalSource}\n${studentPreviewModelSource}`.includes(extractedStudentPreviewContract),
     `missing extracted 17D-3 contract: ${extractedStudentPreviewContract}`
+  );
+}
+assert.ok(
+  journalSource.includes("createLessonJournalPreparationMemoModel({"),
+  "PreparationMemoModal must compose the extracted preparation memo model"
+);
+assert.ok(
+  !journalSource.includes("const previousMemo = previousRecord?.preparationMemo"),
+  "PreparationMemoModal must not retain the prior memo calculation"
+);
+for (const extractedPreparationMemoContract of [
+  "createLessonJournalPreparationMemoModel",
+  "getLessonStudentRecordIdentity",
+  "getLessonStudentRecordDate",
+  "priorMemoSourceRecordId",
+  "isPriorMemoChecked",
+  "canCheckPriorMemo"
+]) {
+  assert.ok(
+    preparationMemoModelSource.includes(extractedPreparationMemoContract),
+    `missing extracted 17D-4 contract: ${extractedPreparationMemoContract}`
   );
 }
 
