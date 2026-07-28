@@ -1356,6 +1356,13 @@
 - AI 가상검수: `17E-1`의 실제 학부모 TARGET과 발송 안 함 CONTROL을 재사용하고 토글·draft·AI·저장·발송 callback, disabled 조건, 접근성 연결과 미리보기 DOM 순서를 대조한다. 전용 fixture, 수업일지 inventory, build, diff check와 현재 rebase 중간 scenario 기준선을 통과한 뒤 커밋을 재적용한다. 전체 production 검증은 rebase 완료 뒤 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위는 comment composer의 local draft/effect/action controller 경계를 inventory해 side effect 없는 분리 가능 범위를 결정하는 작업이다.
 
+## 2026-07-28 P1. App.jsx 17E-3 알림톡 작성창 local draft hook 분리
+
+- 코드: comment composer의 원천 메모 열림 상태, local draft·AI 상태·저장 상태, 마지막 저장 문구 ref, 학생/대상 변경 초기화와 AI 수정 완료 동기화 effect를 `useLessonJournalCommentComposerDraft.js`로 분리했다.
+- 경계: hook은 브라우저 local React 상태만 관리한다. AI request, 최종 문구 저장·Supabase 재조회, 예약/즉시 발송 handler와 외부 callback 호출은 계속 `App.jsx`가 소유하며 API·Supabase·`notification_jobs`·Solapi 실행은 0건이다.
+- AI 가상검수: 가져온 초기 메모 TARGET과 저장 문구 CONTROL, AI 수정 중→완료 TARGET/무변경 CONTROL, 저장본 대비 변경·동일 draft를 생성해 초기화·동기화·dirty 판정과 App-owned action 경계를 대조한다. 전용 fixture, 수업일지 inventory, build, diff check와 현재 rebase 중간 scenario 기준선을 통과한 뒤 커밋을 재적용한다. 전체 production 검증은 rebase 완료 뒤 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위는 comment composer의 AI 수정 request action을 주입형 controller로 분리하는 작업이다.
+
 ## 2026-07-28 P1. App.jsx 17D-2 수업일지 학생 표 shell 분리
 
 - 코드: 수업일지 학생 표의 panel, 읽기/편집 class, 학생·메모·출결·교재·진도·숙제·과제·알림톡 10개 고정 열 제목을 `lessonJournalTableModel.js`와 `LessonJournalTable.jsx`로 분리했다.

@@ -154,6 +154,10 @@ const commentComposerViewSource = await readFile(
   new URL("../src/domains/lessons/LessonJournalCommentComposerView.jsx", import.meta.url),
   "utf8"
 );
+const commentComposerDraftSource = await readFile(
+  new URL("../src/domains/lessons/useLessonJournalCommentComposerDraft.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -759,5 +763,28 @@ assert.ok(
 );
 assert.ok(!commentComposerViewSource.includes("currentSchedulePlan"));
 assert.ok(!commentComposerViewSource.includes("alimtalkSafetyBox"));
+for (const extractedCommentComposerDraftContract of [
+  "createLessonJournalCommentDraftSnapshot",
+  "getLessonJournalCommentAiTransitionDraft",
+  "hasLessonJournalCommentDraftChange",
+  "useLessonJournalCommentComposerDraft",
+  "lastSavedDraftRef.current = nextComment",
+  "previousAiStatusRef.current = aiStatus",
+  "markDraftSaved",
+  "toggleSource"
+]) {
+  assert.ok(
+    commentComposerDraftSource.includes(extractedCommentComposerDraftContract),
+    `missing extracted 17E-3 contract: ${extractedCommentComposerDraftContract}`
+  );
+}
+assert.ok(
+  commentComposerSource.includes("useLessonJournalCommentComposerDraft({"),
+  "CommentComposerModal must compose the extracted local draft hook"
+);
+assert.ok(
+  !commentComposerSource.includes("const lastSavedDraftRef = useRef"),
+  "CommentComposerModal must not retain the extracted saved draft ref"
+);
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");

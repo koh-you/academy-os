@@ -240,6 +240,7 @@ import {
   createLessonJournalCommentComposerModel
 } from "../domains/lessons/lessonJournalCommentComposerModel.js";
 import { LessonJournalCommentComposerView } from "../domains/lessons/LessonJournalCommentComposerView.jsx";
+import { useLessonJournalCommentComposerDraft } from "../domains/lessons/useLessonJournalCommentComposerDraft.js";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -17028,7 +17029,6 @@ function CommentComposerModal({
   supplementSchedules = [],
   testResultLines = []
 }) {
-  const [isSourceOpen, setIsSourceOpen] = useState(false);
   const commentAudienceModel = createLessonJournalCommentAudienceModel({
     audience,
     record
@@ -17038,12 +17038,26 @@ function CommentComposerModal({
     comment,
     field
   } = commentAudienceModel;
-  const [draftComment, setDraftComment] = useState(initialCommentDraft ?? comment);
-  const [localAiStatus, setLocalAiStatus] = useState(aiStatus || "AI 대기");
-  const [draftSaveState, setDraftSaveState] = useState("idle");
-  const lastSavedDraftRef = useRef(comment);
-  const previousAiStatusRef = useRef(aiStatus);
-  const hasUnsavedDraft = draftComment !== lastSavedDraftRef.current;
+  const {
+    draftComment,
+    draftSaveState,
+    hasUnsavedDraft,
+    isSourceOpen,
+    localAiStatus,
+    markDraftSaved,
+    setDraftComment,
+    setDraftSaveState,
+    setLocalAiStatus,
+    toggleSource
+  } = useLessonJournalCommentComposerDraft({
+    aiStatus,
+    audience,
+    comment,
+    field,
+    initialCommentDraft,
+    record,
+    studentId: student.studentId
+  });
   const commentComposerModel = createLessonJournalCommentComposerModel({
     audience,
     audienceModel: commentAudienceModel,
@@ -17091,23 +17105,6 @@ function CommentComposerModal({
     supplementSchedules,
     testResultLines
   });
-  useEffect(() => {
-    const nextComment = record?.[field] ?? "";
-    setDraftComment(initialCommentDraft ?? nextComment);
-    lastSavedDraftRef.current = nextComment;
-    previousAiStatusRef.current = aiStatus;
-    setDraftSaveState("idle");
-    setLocalAiStatus(aiStatus || "AI 대기");
-  }, [audience, student.studentId]);
-
-  useEffect(() => {
-    const previousAiStatus = previousAiStatusRef.current;
-    previousAiStatusRef.current = aiStatus;
-    if (previousAiStatus === "AI 수정 중" && aiStatus && aiStatus !== "AI 수정 중") {
-      setDraftComment(record?.[field] ?? "");
-    }
-  }, [aiStatus, field, record]);
-
   function handleClose() {
     if (hasUnsavedDraft && typeof window !== "undefined" && !window.confirm("저장하지 않은 최종 문구가 있습니다. 닫을까요?")) {
       return;
@@ -17154,8 +17151,7 @@ function CommentComposerModal({
       setDraftSaveState("failed");
       return false;
     }
-    lastSavedDraftRef.current = draftComment;
-    setDraftSaveState("saved");
+    markDraftSaved(draftComment);
     return true;
   }
 
@@ -17188,7 +17184,7 @@ function CommentComposerModal({
       onPolish={handlePolishClick}
       onSave={handleSaveDraftClick}
       onSend={handleSendClick}
-      onToggleSource={() => setIsSourceOpen((current) => !current)}
+      onToggleSource={toggleSource}
       sourceText={sourceText}
     />
   );

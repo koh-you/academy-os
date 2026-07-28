@@ -82,7 +82,7 @@ for (const appContract of [
   "onPolish={handlePolishClick}",
   "onSave={handleSaveDraftClick}",
   "onSend={handleSendClick}",
-  "onToggleSource={() => setIsSourceOpen((current) => !current)}"
+  "onToggleSource={toggleSource}"
 ]) {
   assert.ok(modalSource.includes(appContract), `missing comment composer view binding: ${appContract}`);
 }
