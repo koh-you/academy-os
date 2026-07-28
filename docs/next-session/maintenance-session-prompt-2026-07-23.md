@@ -5,6 +5,22 @@
 ```text
 Academy OS 운영 유지보수 전용 세션입니다.
 
+## 내일 첫 저장 신뢰성 작업 — 이 항목이 다른 새 기능보다 우선
+
+최신 기준 문서는 `docs/save-persistence-audit-2026-07-28.md`이며, 시작 전 최신 `origin/main`과 현재 커밋을 다시 확인한다. 화면의 옛 `app_state 전체 snapshot 저장` 경고는 이미 해결되어 `app_state key별 자동저장`으로 교체됐다. 다음 구현은 반드시 한 단위만 진행한다.
+
+`app_state` 동일 key 요청 역전·다중 탭 충돌 방지 + 저장 후 재조회/version 대조
+
+- 대상 화면: 설정, 수업연구, 오답관리의 남은 `app_state` 자동저장.
+- 직접 원천: 변경 key별 Supabase `app_state`.
+- 현재 구조: 변경 key만 500ms debounce로 POST하고 `저장 중/완료/실패`를 보이지만, 같은 key의 요청 도착 순서와 다중 탭 충돌, 저장 후 GET 대조가 없다.
+- 목표 계약: `local draft -> key별 dirty -> 안전한 debounce/latest request 또는 CAS -> API 완료 -> Supabase 재조회/version 대조 -> 현재 영역 저장 완료/실패`. 실패 시 draft는 유지하며 다른 key를 덮지 않는다.
+- 금지: 전체 app_state snapshot 저장 복귀, `notification_jobs`/Solapi 예약·발송·취소, 운영 데이터 일괄 수정, 시험정보·학사일정·수업일지 저장 구조를 같은 단위에 섞는 것.
+- AI 검증: deterministic fixture로 같은 key의 빠른 A→B 입력과 다른 key 동시 저장, 이전 요청의 늦은 응답, 재조회 불일치를 검사한다. build와 production test를 실행한다.
+- 사람 gate: 배포 후 설정·수업연구·오답관리에서 각각 작은 테스트값 하나를 바꾸고 `저장 중 → 저장 완료 → 새로고침 유지`를 확인한다. 두 탭에서 같은 key를 바꿨을 때 되돌림/실패가 보이면 다음 단계로 진행하지 않는다.
+
+이 단위를 닫은 뒤에만 다음 순서로 진행한다: ① 시험정보 행 local draft/CAS·재조회, ② 학사일정 연동의 시험정보·직전수업 최종 대조, ③ 수업일지 다중 행 부분 실패와 수업 복사·되돌리기.
+
 현재 리팩터링, 운영 유지보수, 시험분석이 서로 다른 세션에서 움직이고 있으며 앞으로 코딩 에이전트를 더 확장할 계획입니다. 이 세션은 사용자 요청의 버그 수정, 저장 신뢰성, UI 및 운영 기능과 검수된 브랜치의 main 통합만 담당합니다. App.jsx 의미 단위 분리와 시험분석 전용 기능 개발은 구현하지 마세요.
 
 세션 및 Git 소유권:
@@ -29,8 +45,9 @@ Academy OS 운영 유지보수 전용 세션입니다.
 3. docs/next-session/README.md
 4. docs/next-session/maintenance-session-prompt-2026-07-23.md
 5. docs/save-persistence-audit-2026-07-20.md
-6. docs/home-codex-setup.md
-7. 관련 화면 코드/API/SQL
+6. docs/save-persistence-audit-2026-07-28.md
+7. docs/home-codex-setup.md
+8. 관련 화면 코드/API/SQL
 
 읽은 뒤 코드를 수정하기 전에 사용자에게 아래를 짧게 먼저 보여주세요:
 - 현재 main 최신 commit과 clean/dirty 상태
@@ -52,7 +69,7 @@ Academy OS 운영 유지보수 전용 세션입니다.
 완료 답변 전에는 임시 특강 알림톡 구조를 유지하고 템플릿 ID/변수 연결, 테스트 발송, 링크/문구 검수를 하지 마세요.
 
 현재 main 기준:
-- 이 프롬프트 작성 시 최신 main은 `0ced3d32 Add safe special lecture cancellation flow`입니다. 시작할 때 반드시 다시 확인하고 최신 `origin/main`이 다르면 최신 상태를 기준으로 판단하세요.
+- 이 프롬프트 갱신 시 최신 main은 `1c7fc61c4 docs: refresh autosave risk audit`입니다. 시작할 때 반드시 다시 확인하고 최신 `origin/main`이 다르면 최신 상태를 기준으로 판단하세요.
 - 수업메모 저장 검증 기능 commit은 `5b6b98c2`, 배포 marker는 `05ed38b0`, 배포 기록은 `a8890a02`입니다.
 - 시험분석 GPT Image 프롬프트 제작실 I1~I7은 `c75b1820`에서 main에 통합됐습니다. 실제 화면/Supabase 사람 gate는 시험분석 전용 세션에서 진행하며 유지보수 세션이 기능을 확장하지 않습니다.
 - 특강 부분·전체 취소 흐름은 `0ced3d32`에서 구현됐고 운영 화면 사람 gate 대기입니다.

@@ -1,10 +1,12 @@
 # Next Session Handoff
 
+> **2026-07-28 내일 유지보수 첫 작업 — 저장 신뢰성 보강:** 최신 main은 `1c7fc61c4 docs: refresh autosave risk audit`이다. 먼저 `docs/save-persistence-audit-2026-07-28.md`를 읽고, 화면의 옛 `app_state 전체 snapshot 저장` 경고는 이미 제거·교체됐음을 확인한다. 다음 구현은 한 번에 하나만: `app_state` 같은 key의 요청 역전·다중 탭 충돌 방지와 저장 후 재조회/version 대조다. 설정·수업연구·오답관리의 실제 원천은 변경 key별 `app_state`이며, local draft/500ms debounce/API 완료/재조회/현재 영역 상태를 하나의 계약으로 설계한다. 시험정보 행·학사일정 연동·수업일지 다중 행은 그 다음 순서이며, Solapi·notification_jobs·운영 데이터 변경은 이 첫 단위에서 금지한다.
+
 > 2026-07-27 14C-3 시험정보 삭제 사람 gate 통과: 배포된 운영 화면에서 격리 TARGET만 삭제되고 CONTROL row·CONTROL 시험대비 수업 4건·일반 수업 1건이 보존되며 새로고침 후 유지되는 것을 확인했다. AI의 Supabase 재조회도 일치했고 관련 수업기록·숙제·알림은 0건이었다. 검수 fixture는 모두 정리해 시험정보 39건·수업 108건의 생성 전 snapshot으로 복귀했다. 14C-3 때문에 App.jsx 리팩터링을 더 막지 말고, 최신 `origin/main` rebase 후 다음 의미 단위를 진행한다.
 
 > 2026-07-23 운영 유지보수 최신 인수인계: 바로 붙여넣을 프롬프트는 `docs/next-session/maintenance-session-prompt-2026-07-23.md`다. 현재 유지보수·리팩터링·시험분석을 각각 독립 worktree/branch로 분리하고, 향후 코딩 에이전트도 task owner/worktree/branch/허용 파일/side effect/사람 gate 계약을 가진 뒤 전용 브랜치만 사용한다. main 통합 owner는 항상 하나만 둔다.
 
-> 현재 main 기준은 `0ced3d32 Add safe special lecture cancellation flow`이다. 수업메모 전체 필드 Supabase 재조회 검증은 `5b6b98c2`, 배포 marker는 `05ed38b0`, 기록은 `a8890a02`다. 다음 유지보수 첫 gate는 수업메모·작성창 체크·이전 확인 저장 후 새로고침 유지이며, 통과 후에만 이전 메모 확인 범위/복구 보강을 시작한다. 특강 부분·전체 취소와 시험분석 GPT Image 프롬프트 제작실도 각각 사람 gate 대기다. 새 세션은 시작 시 최신 `origin/main`을 다시 확인한다.
+> 과거 수업메모 gate는 저장 신뢰성 점검 기록으로 보존한다. 다음 유지보수 첫 구현 우선순위는 위의 `app_state` key별 자동저장 경쟁 방지·재조회 대조이며, 새 세션은 시작 시 최신 `origin/main`을 다시 확인한다.
 
 > 2026-07-21 시험분석 방향 정정 및 Gate 1~6 완료: Academy OS 안에 GPT Image 생성 API·버전 DB·Storage 제작실을 먼저 만드는 것이 아니다. 30페이지·893건을 전수 목록화하고 24개 관련 글·221개 첨부/215개 고유 이미지를 역할·레이아웃·자산 방식으로 전수 분류했다. 중·고등 시퀀스, 역할 라이브러리, Academy OS 확정 JSON에서 `마스터 -> 1번 -> 2번 -> ... -> 장별 수정 프롬프트`를 만드는 로컬 생성기와 예제를 완성했다. 다음 구현 Gate는 교사 확정 입력/저장 계약을 Academy OS에 연결하는 것이며, 별도 승인 전 이미지 API·DB·Storage 제작실은 만들지 않는다. 최신 기준은 `docs/academy-os-exam-slide-prompt-rules-gate6-2026-07-21.md`다.
 
