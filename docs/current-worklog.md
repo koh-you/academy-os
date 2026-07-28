@@ -1624,6 +1624,13 @@
 - AI 검수: 서로 다른 ID·학부모/학생 상태와 제외 필드를 가진 TARGET/CONTROL 가상 record, 빈 입력을 실행해 6필드·대상 격리·입력 불변을 대조한다. helper side effect 부재와 App-owned API/React effect를 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 새 항목 없음. 다음 `17N-3`은 순수 payload helper와 App-owned patch request 경계를 closeout audit한다.
 
+## 2026-07-28 P1. App.jsx 17N-3 lesson notification record API payload 경계 closeout
+
+- 결과: payload helper의 import/export/call을 각각 1개로 고정하고 정확한 6필드 계산 뒤 App-owned patch request가 실행되는 경계를 closeout audit했다. 실제 소스 이동이나 API·상태·문구 변경은 없다.
+- 외부 경계: App의 `saving → Promise.all/patch → saved/failed` 순서와 `/api/lesson-records/notification-status` wrapper를 유지한다. helper에는 React, API, `notification_jobs`, Solapi side effect가 없다.
+- AI 검수: TARGET/CONTROL 가상 record의 key 순서·대상 격리·추가필드 제외·입력 불변을 대조하고 import/export/call 수, App-owned effect 순서와 helper side effect 부재를 전용 closeout fixture·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 새 항목 없음. 다음 `17O-1`은 `upsertNotificationJobState`의 `notificationJobId` 기반 현재 목록 교체 계산을 inventory하며 React setter와 예약 API callback은 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
