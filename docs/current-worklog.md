@@ -1672,6 +1672,13 @@
 - AI 검수: 중복 TARGET과 CONTROL 가상 목록으로 batch 내부 중복 유지·기존 TARGET 제거·CONTROL 보존·입력 불변을 재검증하고, App에 inline filter/Set 계산이 남지 않았으며 helper에 React/API/Supabase/Solapi side effect가 없음을 전용 closeout fixture·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 없음. 다음 `17Q-1`은 App에 남은 notification job 상태 변경 경계를 다시 inventory해 낮은 위험의 다음 순수 계산 후보를 한 단위만 선정한다.
 
+## 2026-07-28 P1. App.jsx 17Q-1 notification job cancellation replacement inventory
+
+- 결과: 수업 전체 취소, job ID 집합 취소, `알림톡 없음` 계획의 세 경로가 현재 목록 순서·길이를 유지하면서 같은 `notificationJobId`의 취소 row로 치환하는 동일 계산을 사용한다. 현재 중복 ID는 모두 incoming 첫 일치 row로 바뀌고, 현재 목록에 없는 incoming row는 추가되지 않는 계약을 inventory했다.
+- 외부 경계: 취소 대상 filter, 상태·사유·`updatedAt` 생성, 빈 목록 guard, React setter, `persistCanceledNotificationJob`와 Solapi/API orchestration은 App에 유지한다. 운영 데이터·실제 발송·취소는 실행하지 않았다.
+- AI 검수: 중복 TARGET 현재 row 2건, CONTROL, incoming TARGET 중복 2건, 현재에 없는 incoming row를 가상 실행해 첫 일치·순서·길이·입력 불변을 대조한다. 세 inline 계산과 각 guard→setter→persist 순서를 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 없음. 다음 `17Q-2`는 이 목록 치환 계산만 `notificationJobState.js` 순수 helper로 분리하고 취소 row 생성·React/API/Solapi 경계는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
