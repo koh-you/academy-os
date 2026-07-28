@@ -222,6 +222,7 @@ import {
 } from "../domains/lessons/attendanceSettings.js";
 import { useAttendanceRecordSync } from "../domains/lessons/useAttendanceRecordSync.js";
 import { createLessonJournalDraftPersistencePlan } from "../domains/lessons/lessonJournalDraftPersistencePlan.js";
+import { createLessonJournalDraftSaveOutcome } from "../domains/lessons/lessonJournalDraftSaveOutcome.js";
 import { createLessonJournalDraftSaveRequest } from "../domains/lessons/lessonJournalDraftSaveRequest.js";
 import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
 import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
@@ -9211,17 +9212,17 @@ export function App() {
         setSaveStates((currentStates) => ({ ...currentStates, ...savedStates }));
         completedSources.push(`수업기록 ${verifiedRecords.length}건`);
       }
-      return { ok: true, message: `수업일지 · 저장 완료 · ${completedSources.join(" · ") || "변경 없음"}` };
+      return createLessonJournalDraftSaveOutcome({ completedSources });
     } catch (error) {
       console.error(error);
       const failedStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "failed"]));
       if (recordsToSave.length) {
         setSaveStates((currentStates) => ({ ...currentStates, ...failedStates }));
       }
-      return {
-        ok: false,
-        message: `수업일지 · ${completedSources.length ? `부분 저장 · ${completedSources.join(" · ")} · ` : ""}저장 실패 · ${error.message || "수정본 유지"}`
-      };
+      return createLessonJournalDraftSaveOutcome({
+        completedSources,
+        error
+      });
     }
   }
 

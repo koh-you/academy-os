@@ -77,9 +77,10 @@
 29. `17E-7` 완료: comment composer의 model·local hook·AI/저장 controller·발송 payload·view 조합 shell을 domain component로 이동하고 App에는 기존 helper 주입 wrapper만 남겼다.
 30. `17F-1` 완료: `LessonJournalDetail`의 record/homework/makeup draft map을 안정된 배열 request로 직렬화하는 순수 모델을 분리하고 현재 다중 원천 저장 순서를 고정했다.
 31. `17F-2` 완료: App 상위 `handleSaveLessonJournalDrafts`의 명시 homework draft, record 저장본, 과제 판정에 연결된 previous/source homework 변경 집합을 순수 persistence plan으로 분리했다.
-32. 다음: homework/makeup/record 단계별 부분 성공 결과 모델과 재시도 contract를 가상 fixture로 고정
-33. 다중 원천 저장 controller는 단계별 TARGET/CONTROL·부분 성공 fixture 뒤 분리
-34. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
+32. `17F-3` 완료: homework/makeup/record 단계별 성공·부분 성공·실패 문구를 순수 outcome 모델로 분리하고, 실패 시 전체 draft를 유지해 모든 원천을 재요청하는 현재 재시도 contract를 fixture로 고정했다.
+33. 다음: 다중 원천 저장의 순차 실행을 주입형 controller로 분리
+34. controller 분리 후에도 단계별 Supabase 재조회·React 반영 callback은 App에 유지
+35. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -127,6 +128,7 @@
 - `17F-1` gate: record 2건·homework 1건·makeup 1건 TARGET, 빈 CONTROL, `hasDraftChanges=false`이지만 draft를 보존하는 CONTROL로 key 순서·원본 불변·changeCount·저장 차단 여부를 대조한다.
 - 현재 실제 다중 원천 저장 순서는 `homeworks bulk+재조회 -> makeup_tasks+재조회 -> lesson_records bulk+재조회`다. 뒤 단계 실패 시 앞 단계는 이미 저장되어 `부분 저장`으로 반환되므로, controller 이동 전 각 단계 성공/실패 조합과 재시도 중복 방지 fixture가 필요하다.
 - `17F-2` gate: 명시 homework 변경 TARGET, record의 과제 판정으로 previous/source 두 homework를 함께 갱신하는 TARGET, `not_entered`·학생 없음·record ID 없음 CONTROL을 가상 실행해 변경 순서·status/teacherStatus·checkedAt/updatedAt·dueDate·원본 불변을 대조한다.
+- `17F-3` gate: 변경 없음 성공, 3원천 전체 성공, homework 첫 단계 실패, homework 성공 후 makeup 실패, homework+makeup 성공 후 record 실패를 대조한다. 현재는 실패 시 완료 원천 ID를 저장하지 않고 모든 draft를 보존하므로 재시도 시 성공했던 원천도 다시 요청한다. 이 동작은 리팩터링에서 바꾸지 않고 별도 저장 신뢰성 개선 후보로 기록한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
 - recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.
 - 학생 포털 실제 쓰기와 Solapi 특강 템플릿 검수는 사용자 지시로 목록에서 제거됐고, 교사 bearer/Storage 소유권 보안은 구현·배포 검증 완료다.

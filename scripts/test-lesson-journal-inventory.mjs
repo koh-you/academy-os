@@ -182,6 +182,10 @@ const draftPersistencePlanSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalDraftPersistencePlan.js", import.meta.url),
   "utf8"
 );
+const draftSaveOutcomeSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalDraftSaveOutcome.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -290,6 +294,7 @@ const saveHandlerSource = section(
   "async function handleSaveLessonJournalDrafts",
   "async function handleSaveRecord"
 );
+const savePersistenceSource = `${saveHandlerSource}\n${draftSaveOutcomeSource}`;
 for (const persistenceContract of [
   "saveLessonJournalHomeworksWithVerification",
   "saveLessonJournalMakeupTasksWithVerification",
@@ -300,7 +305,7 @@ for (const persistenceContract of [
   "부분 저장",
   "setSaveStates"
 ]) {
-  assert.ok(saveHandlerSource.includes(persistenceContract), `missing journal persistence: ${persistenceContract}`);
+  assert.ok(savePersistenceSource.includes(persistenceContract), `missing journal persistence: ${persistenceContract}`);
 }
 
 for (const extractedSaveContract of [
@@ -942,6 +947,26 @@ assert.ok(
 assert.ok(
   !appSource.includes("const changedHomeworkMap = new Map()"),
   "App save handler must not retain the extracted homework change map"
+);
+for (const extractedDraftSaveOutcomeContract of [
+  "createLessonJournalDraftSaveOutcome",
+  "completedSources.join(\" · \")",
+  "부분 저장",
+  "저장 실패",
+  'error?.message || "수정본 유지"'
+]) {
+  assert.ok(
+    draftSaveOutcomeSource.includes(extractedDraftSaveOutcomeContract),
+    `missing extracted 17F-3 contract: ${extractedDraftSaveOutcomeContract}`
+  );
+}
+assert.ok(
+  appSource.includes("createLessonJournalDraftSaveOutcome({ completedSources })"),
+  "App save handler must compose the extracted success outcome"
+);
+assert.ok(
+  !appSource.includes("message: `수업일지 · ${completedSources.length"),
+  "App save handler must not retain the partial-save message composition"
 );
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");

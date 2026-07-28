@@ -1405,6 +1405,14 @@
 - AI 가상검수: 명시 homework 변경 TARGET, record 과제 판정으로 previous/source 두 homework가 함께 바뀌는 TARGET, `not_entered`·학생 없음·record ID 없음 CONTROL을 가상 실행해 변경 순서·상태·시각·dueDate·원본 불변을 대조한다. 전용 fixture, 수업일지 inventory, build, diff check와 현재 rebase 중간 scenario 기준선을 통과한 뒤 커밋을 재적용한다. 전체 production 검증은 rebase 완료 뒤 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위는 homework/makeup/record 단계별 부분 성공 결과 모델과 재시도 contract를 가상 fixture로 고정하는 작업이다.
 
+## 2026-07-28 P1. App.jsx 17F-3 수업일지 부분 저장 outcome 분리
+
+- 코드: 다중 원천 저장의 전체 성공·변경 없음·첫 단계 실패·뒤 단계 부분 성공 실패 문구를 `lessonJournalDraftSaveOutcome.js` 순수 모델로 분리했다.
+- 경계: 실제 순차 저장과 Supabase 재조회, React 반영은 계속 App 상위 handler가 소유한다. 실패 시 완료 원천 ID를 별도 저장하지 않고 `LessonJournalDetail`이 record/homework/makeup draft 전체를 유지해 재시도 때 성공했던 원천도 다시 요청하는 기존 동작도 그대로 보존했다.
+- AI 가상검수: 변경 없음 성공, 3원천 전체 성공, homework 첫 단계 실패, homework 성공 후 makeup 실패, homework+makeup 성공 후 record 실패, Error 객체가 아닌 CONTROL을 대조하고 실패 guard 뒤에서만 draft가 비워지는 정적 순서를 확인한다. 전용 fixture, 수업일지 inventory, build, diff check와 현재 rebase 중간 scenario 기준선을 통과한 뒤 커밋을 재적용한다. 전체 production 검증은 rebase 완료 뒤 실행한다.
+- 유지보수 진단: 부분 저장 후 재시도가 이미 성공한 원천까지 다시 요청하는 것은 멱등 저장으로 대체로 흡수되지만, 완료 원천별 재시도 생략/재조회 확인은 저장 신뢰성 보강 세션의 별도 개선 후보다. 이번 리팩터링에서는 구현하지 않는다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위는 다중 원천 저장 순차 실행을 주입형 controller로 분리하는 작업이다.
+
 ## 2026-07-28 P1. App.jsx 17D-2 수업일지 학생 표 shell 분리
 
 - 코드: 수업일지 학생 표의 panel, 읽기/편집 class, 학생·메모·출결·교재·진도·숙제·과제·알림톡 10개 고정 열 제목을 `lessonJournalTableModel.js`와 `LessonJournalTable.jsx`로 분리했다.
