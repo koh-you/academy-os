@@ -1933,6 +1933,12 @@
 - AI 가상검수: 명시 current TARGET, 누락·빈 cycle TARGET, 과거·미래 CONTROL의 선택·참조·순서·입력 불변을 다시 실행하고 selector→repair→persist→plan 순서 및 helper side effect 0건을 대조한다. 전용 closeout fixture와 시나리오 614/614, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AH-1`은 generated lesson plan을 소비하는 순수 display/status 계산 후보를 inventory하되 React state와 repair/persist/save effect는 이동하지 않는다.
 
+## 2026-07-28 P3. App.jsx 17AH-1 generated lesson display selector inventory
+
+- inventory: generated plan에서 `preExam`을 제외한 `create`·`update`만 달력 표시 lesson으로 복사하고 자동/가상/generated key 표시 메타데이터를 붙이는 순수 계산을 다음 후보로 확정했다. 뒤의 기존 lesson 중복 제거와 달력 병합은 별도 경계다.
+- AI 가상검수: preExam create CONTROL, examPrep create/update TARGET, synced/protected CONTROL을 섞어 선택 순서·새 객체·가상 여부·메타데이터·입력 불변을 검증한다. 전용 inventory fixture와 시나리오 615/615, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AH-2`는 표시 selector만 `generatedLessonDisplaySelectors.js`로 분리하고 calendar merge와 모든 save/repair effect는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
