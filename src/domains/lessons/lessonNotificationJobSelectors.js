@@ -16,3 +16,9 @@ export function createLessonNotificationJobId(
 export function isActiveNotificationJobStatus(job = {}) {
   return !inactiveLessonNotificationJobStatuses.has(job.status);
 }
+
+export function isLessonRecordNotificationMuted(record, target) {
+  return target === "student"
+    ? Boolean(record?.notificationMutedStudent)
+    : Boolean(record?.notificationMutedParent);
+}

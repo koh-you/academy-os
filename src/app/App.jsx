@@ -73,7 +73,8 @@ import { createLessonReservationPayloadFingerprint } from "../domains/lessons/le
 import { createLessonReservationPayloadSnapshot } from "../domains/lessons/lessonReservationPayloadSnapshot.js";
 import {
   createLessonNotificationJobId,
-  isActiveNotificationJobStatus
+  isActiveNotificationJobStatus,
+  isLessonRecordNotificationMuted
 } from "../domains/lessons/lessonNotificationJobSelectors.js";
 import { createLessonNotificationJob } from "../domains/lessons/lessonNotificationJobBuilder.js";
 import { createLessonNotificationJobBatch } from "../domains/lessons/lessonNotificationJobBatch.js";
@@ -8406,10 +8407,6 @@ export function App() {
     return createLessonNotificationJobId(lessonId, studentId, target);
   }
 
-  function isRecordNotificationMuted(record, target) {
-    return target === "student" ? Boolean(record?.notificationMutedStudent) : Boolean(record?.notificationMutedParent);
-  }
-
   function getLessonStudentRecord(lesson, student) {
     return findLessonStudentRecord(recordsRef.current, lesson, student) ?? createEmptyRecord(lesson, student);
   }
@@ -8417,7 +8414,7 @@ export function App() {
   function buildLessonNotificationJob(lesson, student, target, scheduledDate, mode) {
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
     const record = getLessonStudentRecord(lesson, student);
-    if (isRecordNotificationMuted(record, target)) return null;
+    if (isLessonRecordNotificationMuted(record, target)) return null;
     const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
     const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
     const audience = target === "student" ? "student" : "parent";
@@ -9870,7 +9867,7 @@ export function App() {
 
   async function handleSendLessonComment(lesson, student, record, target, options = {}) {
     if (options.sendTiming === "none") return;
-    if (isRecordNotificationMuted(record, target)) return;
+    if (isLessonRecordNotificationMuted(record, target)) return;
     const sourceField = target === "student" ? "studentComment" : "teacherComment";
     const message = normalizeMessageText(record?.[sourceField]);
     const preparationNotice = "";

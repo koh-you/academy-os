@@ -1547,6 +1547,13 @@
 - AI 검수: 가상 휴강 TARGET과 일반 수업 학생 2명 CONTROL을 실행해 휴강 조기 종료, 학부모→학생 호출 순서, null/false/빈 문자열 제거, 결과 identity·입력 불변을 전용 fixture·정적 시나리오·build·diff 검사로 대조한다.
 - 사람 gate: 새 항목 없음. 다음 `17L-2`는 학생/학부모 대상별 record 알림 제외 판정을 순수 selector로 분리하고 실제 job 저장·취소는 이동하지 않는다.
 
+## 2026-07-28 P1. App.jsx 17L-2 lesson record 알림 제외 selector 분리
+
+- 코드: `target === "student"`일 때만 `notificationMutedStudent`, 학부모와 기타 target은 `notificationMutedParent`의 truthy 여부를 읽는 규칙을 `lessonNotificationJobSelectors.js`에 추가했다.
+- 연결: 단건 예약 job 생성 guard와 수동 comment 발송 guard가 같은 selector를 사용한다. record 저장, 알림 제외 토글, 예약 취소·재예약은 변경하지 않았다.
+- AI 검수: 객체/숫자 truthy TARGET, false/0/빈 문자열 CONTROL, null/undefined record와 student/parent/기타 target을 실행해 대상별 flag·fallback·입력 불변을 확장 fixture·정적 시나리오·build·diff 검사로 대조한다.
+- 사람 gate: 새 항목 없음. 다음 `17L-3`은 현재 record 선택의 `recordsRef.current` 원천과 빈 record fallback 경계를 inventory하고 자동검증 가능한 순수 selector 범위를 정한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

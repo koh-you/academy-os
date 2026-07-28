@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import {
   createLessonNotificationJobId,
-  isActiveNotificationJobStatus
+  isActiveNotificationJobStatus,
+  isLessonRecordNotificationMuted
 } from "../src/domains/lessons/lessonNotificationJobSelectors.js";
 
 assert.equal(
@@ -51,6 +52,49 @@ for (const status of [
 assert.equal(isActiveNotificationJobStatus({}), true);
 assert.equal(isActiveNotificationJobStatus(), true);
 
+const mutedRecord = {
+  notificationMutedParent: {
+    reason: "가상 학부모 제외 TARGET"
+  },
+  notificationMutedStudent: 1
+};
+const mutedSnapshot = structuredClone(mutedRecord);
+assert.equal(
+  isLessonRecordNotificationMuted(mutedRecord, "student"),
+  true
+);
+assert.equal(
+  isLessonRecordNotificationMuted(mutedRecord, "parent"),
+  true
+);
+assert.equal(
+  isLessonRecordNotificationMuted(mutedRecord, "control"),
+  true
+);
+assert.equal(
+  isLessonRecordNotificationMuted(
+    {
+      notificationMutedParent: 0,
+      notificationMutedStudent: ""
+    },
+    "student"
+  ),
+  false
+);
+assert.equal(
+  isLessonRecordNotificationMuted(
+    {
+      notificationMutedParent: false,
+      notificationMutedStudent: true
+    },
+    "parent"
+  ),
+  false
+);
+assert.equal(isLessonRecordNotificationMuted(null, "student"), false);
+assert.equal(isLessonRecordNotificationMuted(undefined, "parent"), false);
+assert.deepEqual(mutedRecord, mutedSnapshot);
+
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
 const selectorSource = await readFile(
   new URL("../src/domains/lessons/lessonNotificationJobSelectors.js", import.meta.url),
@@ -59,22 +103,30 @@ const selectorSource = await readFile(
 for (const binding of [
   "createLessonNotificationJobId,",
   "isActiveNotificationJobStatus",
+  "isLessonRecordNotificationMuted",
   "return createLessonNotificationJobId(lessonId, studentId, target)",
   "return isActiveNotificationJobStatus(job)",
   "lessonNotificationJobs.filter(isActiveNotificationJobStatus)",
-  "createNotificationJobId: createLessonNotificationJobId"
+  "createNotificationJobId: createLessonNotificationJobId",
+  "if (isLessonRecordNotificationMuted(record, target)) return null",
+  "if (isLessonRecordNotificationMuted(record, target)) return;"
 ]) {
   assert.ok(appSource.includes(binding), `missing lesson job selector binding: ${binding}`);
 }
 assert.ok(!appSource.includes("function createLessonNotificationJobId("));
 assert.ok(!appSource.includes("function isActiveNotificationJobStatus("));
+assert.ok(!appSource.includes("function isRecordNotificationMuted("));
 
 for (const sourceToken of [
   "const inactiveLessonNotificationJobStatuses",
   "export function createLessonNotificationJobId(",
   "`lesson_comment_${lessonId}_${studentId}_${target}`",
   "export function isActiveNotificationJobStatus(job = {})",
-  "!inactiveLessonNotificationJobStatuses.has(job.status)"
+  "!inactiveLessonNotificationJobStatuses.has(job.status)",
+  "export function isLessonRecordNotificationMuted(record, target)",
+  'target === "student"',
+  "Boolean(record?.notificationMutedStudent)",
+  "Boolean(record?.notificationMutedParent)"
 ]) {
   assert.ok(selectorSource.includes(sourceToken), `missing lesson job rule: ${sourceToken}`);
 }

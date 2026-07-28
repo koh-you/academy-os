@@ -24,7 +24,7 @@ const builderSource = `${wrapperSource}\n${pureBuilderSource}`;
 for (const sourceBinding of [
   "createLessonStudentRecordId(lesson.lessonId, student.studentId)",
   "getLessonStudentRecord(lesson, student)",
-  "isRecordNotificationMuted(record, target)",
+  "isLessonRecordNotificationMuted(record, target)",
   'getLessonHomework(homeworks, lesson, student, "previous", lessons)',
   'getLessonHomework(homeworks, lesson, student, "next")',
   'target === "student" ? "student" : "parent"',

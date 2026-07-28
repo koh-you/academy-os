@@ -270,7 +270,7 @@ const wrapperSource = appSource.slice(wrapperStart, wrapperEnd);
 for (const wrapperBinding of [
   "createLessonStudentRecordId(lesson.lessonId, student.studentId)",
   "getLessonStudentRecord(lesson, student)",
-  "isRecordNotificationMuted(record, target)",
+  "isLessonRecordNotificationMuted(record, target)",
   'getLessonHomework(homeworks, lesson, student, "previous", lessons)',
   'getLessonHomework(homeworks, lesson, student, "next")',
   "getStudentSupplementSchedules(makeupTasks, student.studentId",
