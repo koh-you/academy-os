@@ -1386,6 +1386,14 @@
 - AI 가상검수: 2개 OS job 성공 TARGET과 빈 응답 CONTROL로 결과·배열 identity·입력 불변을 대조했다. 전용 fixture와 정적 시나리오를 실행하며 운영 API·Supabase·Solapi 호출은 0건이다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17H-5`는 OS 예약 1건 취소 성공 뒤 audit 배열을 갱신하는 순수 state transition을 분리한다. 확인창·취소 API·현재 시각 주입·React setter는 App에 유지한다.
 
+## 2026-07-28 P1. App.jsx 17H-5 수업일지 예약 취소 audit transition 분리
+
+- 코드: OS 예약 취소 응답을 audit 첫 행에 교체 삽입하는 전환을 `lessonJournalReservationAuditTransitions.js` 순수 모델로 분리했다.
+- 동작 보존: 같은 OS job ID의 기존·중복 행을 제거하고 취소 응답 1건을 맨 앞에 둔다. audit가 `idle`일 때만 `ready`로 바꾸며 `failed/ready`는 유지한다.
+- 경계: 확인창, OS 취소 callback, 취소 중 ID, 실패 처리와 `finally` 초기화는 계속 `App.jsx`가 소유한다. 최신 main에서 제거한 Solapi group transition·취소 API·시계 생성은 다시 도입하지 않았다.
+- AI 가상검수: 중복 TARGET OS job+CONTROL job과 `osJobs=null` 실패 상태를 구성해 순서·객체 identity·입력 불변을 대조했다. 전용 fixture와 정적 시나리오를 실행했고 실제 취소·API·Supabase·Solapi 호출은 0건이다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17H-6`은 `LessonJournalDetail` 예약 경계의 순수 모델과 App-owned 조회·취소·예약·결과 reconcile action을 closeout audit하고, 실제 provider orchestration은 더 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

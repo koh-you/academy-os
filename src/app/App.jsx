@@ -237,6 +237,7 @@ import { saveLessonJournalRecordsWithVerification } from "../domains/lessons/les
 import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
 import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
 import { createLessonJournalReservationAuditResult } from "../domains/lessons/lessonJournalReservationAuditResult.js";
+import { applyCanceledLessonJournalReservationJob } from "../domains/lessons/lessonJournalReservationAuditTransitions.js";
 import { createLessonJournalReservationControlModel } from "../domains/lessons/lessonJournalReservationControlModel.js";
 import { createLessonJournalReservationSyncStatus } from "../domains/lessons/lessonJournalReservationSyncModel.js";
 import { createLessonJournalExpectedReservationItems } from "../domains/lessons/lessonJournalExpectedReservationItems.js";
@@ -16080,17 +16081,12 @@ function LessonJournalDetail({
     try {
       const result = await onCancelNotificationJob?.(job, "수업일지 예약 확인에서 취소");
       if (result?.notificationJob) {
-        setReservationAudit((current) => ({
-          ...current,
-          message: "예약 1건을 취소했습니다.",
-          osJobs: Array.isArray(current.osJobs)
-            ? [
-                result.notificationJob,
-                ...current.osJobs.filter((item) => item.notificationJobId !== result.notificationJob.notificationJobId)
-              ]
-            : current.osJobs,
-          state: current.state === "idle" ? "ready" : current.state
-        }));
+        setReservationAudit((currentAudit) =>
+          applyCanceledLessonJournalReservationJob({
+            currentAudit,
+            notificationJob: result.notificationJob
+          })
+        );
       } else {
         await refreshReservationAudit();
       }
