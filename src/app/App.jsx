@@ -229,7 +229,7 @@ import { LessonJournalClosureNotice } from "../domains/lessons/LessonJournalClos
 import { LessonJournalReminderPanel } from "../domains/lessons/LessonJournalReminderPanel.jsx";
 import { LessonJournalNotificationBar } from "../domains/lessons/LessonJournalNotificationBar.jsx";
 import { LessonJournalReservationModal } from "../domains/lessons/LessonJournalReservationModal.jsx";
-import { createLessonJournalMemoIndicatorModel } from "../domains/lessons/lessonJournalMemoIndicatorModel.js";
+import { LessonJournalPrepMemoButton } from "../domains/lessons/LessonJournalPrepMemoButton.jsx";
 import { LessonJournalStudentIdentity } from "../domains/lessons/LessonJournalStudentIdentity.jsx";
 import { LessonJournalAttendanceButton } from "../domains/lessons/LessonJournalAttendanceButton.jsx";
 import { LessonJournalEditableFields } from "../domains/lessons/LessonJournalEditableFields.jsx";
@@ -16681,18 +16681,6 @@ function LessonJournalDetail({
             const referencePreparationMemo = referenceRecord?.preparationMemo?.trim() ?? "";
             const previousHomeworkFollowup = getHomeworkFollowupFromRecord(previousRecord ?? {})
               ?? getHomeworkFollowupFromRecord(referenceRecord ?? {});
-            const {
-              hasCurrentMemo,
-              memoButtonDescription,
-              priorMemoNeedsAttention
-            } = createLessonJournalMemoIndicatorModel({
-              acknowledgedMemoCutoffDate: previousMemoContext.acknowledgedMemoCutoffDate,
-              preparationMemo: record.preparationMemo,
-              prepParentVisible: record.prepParentVisible,
-              prepStudentVisible: record.prepStudentVisible,
-              previousPreparationMemo,
-              referencePreparationMemo
-            });
             const parentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "parent");
             const studentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "student");
             const parentCommentState = getCommentButtonState(record.teacherComment, parentCommentSendStatus);
@@ -16708,27 +16696,25 @@ function LessonJournalDetail({
                   onOpenStudentPreview={setStudentPreviewId}
                   student={student}
                 />
-                <div className="journalPrepCell">
-                  <button
-                    aria-label={`${student.name} 수업메모 · ${memoButtonDescription}`}
-                    className="prepMemoButton"
-                    onClick={() => setPrepMemoModal({
-                      acknowledgedMemoCutoff: previousMemoContext.acknowledgedMemoCutoff,
-                      nextHomework,
-                      previousHomework,
-                      previousMemoRecord,
-                      previousRecord,
-                      record,
-                      referenceRecord,
-                      student
-                    })}
-                    type="button"
-                  >
-                    <span>수업메모</span>
-                    {hasCurrentMemo ? <span aria-hidden="true" className="prepMemoWrittenMark">✓</span> : null}
-                    {priorMemoNeedsAttention ? <span aria-hidden="true" className="prepMemoAttentionMark">!</span> : null}
-                  </button>
-                </div>
+                <LessonJournalPrepMemoButton
+                  acknowledgedMemoCutoffDate={previousMemoContext.acknowledgedMemoCutoffDate}
+                  onOpen={() => setPrepMemoModal({
+                    acknowledgedMemoCutoff: previousMemoContext.acknowledgedMemoCutoff,
+                    nextHomework,
+                    previousHomework,
+                    previousMemoRecord,
+                    previousRecord,
+                    record,
+                    referenceRecord,
+                    student
+                  })}
+                  preparationMemo={record.preparationMemo}
+                  prepParentVisible={record.prepParentVisible}
+                  prepStudentVisible={record.prepStudentVisible}
+                  previousPreparationMemo={previousPreparationMemo}
+                  referencePreparationMemo={referencePreparationMemo}
+                  studentName={student.name}
+                />
                 <LessonJournalAttendanceButton
                   attendanceDisplay={attendanceDisplay}
                   attendanceLesson={attendanceLesson}

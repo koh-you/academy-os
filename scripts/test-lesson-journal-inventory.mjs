@@ -58,6 +58,10 @@ const memoIndicatorModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalMemoIndicatorModel.js", import.meta.url),
   "utf8"
 );
+const prepMemoButtonSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalPrepMemoButton.jsx", import.meta.url),
+  "utf8"
+);
 const studentIdentitySource = await readFile(
   new URL("../src/domains/lessons/LessonJournalStudentIdentity.jsx", import.meta.url),
   "utf8"
@@ -378,8 +382,8 @@ for (const removedRawSolapiContract of ["onCancelSolapiGroup", "solapiGroups", "
   );
 }
 assert.ok(
-  journalSource.includes("createLessonJournalMemoIndicatorModel({"),
-  "LessonJournalDetail must compose the extracted memo indicator model"
+  prepMemoButtonSource.includes("createLessonJournalMemoIndicatorModel({"),
+  "prep memo button must compose the extracted memo indicator model"
 );
 for (const extractedMemoIndicatorContract of [
   "hasCurrentMemo",
@@ -514,6 +518,26 @@ for (const extractedNotificationCommentContract of [
       extractedNotificationCommentContract
     ),
     `missing extracted 17C-7 contract: ${extractedNotificationCommentContract}`
+  );
+}
+assert.ok(
+  journalSource.includes("<LessonJournalPrepMemoButton"),
+  "LessonJournalDetail must compose the extracted prep memo button"
+);
+assert.ok(
+  !journalSource.includes('className="prepMemoButton"'),
+  "LessonJournalDetail must not retain the prep memo button markup"
+);
+for (const extractedPrepMemoButtonContract of [
+  "createLessonJournalMemoIndicatorModel",
+  "memoButtonDescription",
+  "hasCurrentMemo",
+  "priorMemoNeedsAttention",
+  "onClick={onOpen}"
+]) {
+  assert.ok(
+    `${prepMemoButtonSource}\n${memoIndicatorModelSource}`.includes(extractedPrepMemoButtonContract),
+    `missing extracted 17C-8 contract: ${extractedPrepMemoButtonContract}`
   );
 }
 

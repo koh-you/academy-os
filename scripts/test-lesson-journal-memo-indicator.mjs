@@ -46,13 +46,32 @@ const modelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalMemoIndicatorModel.js", import.meta.url),
   "utf8"
 );
+const componentSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalPrepMemoButton.jsx", import.meta.url),
+  "utf8"
+);
 const journalStart = appSource.indexOf("function LessonJournalDetail({");
 const journalEnd = appSource.indexOf("function CommentComposerModal({", journalStart);
 const journalSource = appSource.slice(journalStart, journalEnd);
 
-assert.match(journalSource, /createLessonJournalMemoIndicatorModel\(\{/);
-assert.match(journalSource, /aria-label=\{`\$\{student\.name\} 수업메모 · \$\{memoButtonDescription\}`\}/);
+assert.match(journalSource, /<LessonJournalPrepMemoButton/);
+assert.match(journalSource, /acknowledgedMemoCutoffDate=\{previousMemoContext\.acknowledgedMemoCutoffDate\}/);
+assert.match(journalSource, /preparationMemo=\{record\.preparationMemo\}/);
+assert.match(journalSource, /previousPreparationMemo=\{previousPreparationMemo\}/);
+assert.match(journalSource, /referencePreparationMemo=\{referencePreparationMemo\}/);
+assert.match(journalSource, /onOpen=\{\(\) => setPrepMemoModal\(\{/);
+assert.doesNotMatch(journalSource, /className="prepMemoButton"/);
 assert.doesNotMatch(journalSource, /const priorMemoAttentionLabel =/);
+for (const componentContract of [
+  "createLessonJournalMemoIndicatorModel",
+  "aria-label={`${studentName} 수업메모 · ${memoButtonDescription}`}",
+  'className="prepMemoButton"',
+  'className="prepMemoWrittenMark"',
+  'className="prepMemoAttentionMark"',
+  "onClick={onOpen}"
+]) {
+  assert.ok(componentSource.includes(componentContract), `missing prep memo button contract: ${componentContract}`);
+}
 for (const contract of [
   "현재 메모 작성됨",
   "직전 메모 확인",
@@ -64,6 +83,7 @@ for (const contract of [
 }
 for (const forbiddenSideEffect of ["fetch(", "postJson", "/api/", "useState", "useEffect"]) {
   assert.ok(!modelSource.includes(forbiddenSideEffect), `memo indicator must stay pure: ${forbiddenSideEffect}`);
+  assert.ok(!componentSource.includes(forbiddenSideEffect), `prep memo button must stay callback-only: ${forbiddenSideEffect}`);
 }
 
 console.log("lesson journal memo indicator TARGET/CONTROL fixtures passed");
