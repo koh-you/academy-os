@@ -32,6 +32,7 @@ body {
   font-size: 16px;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 button,
@@ -59,8 +60,8 @@ button {
   background: rgba(15, 23, 42, 0.38);
   display: flex;
   justify-content: center;
-  min-height: 100vh;
-  padding: 24px;
+  min-height: 100dvh;
+  padding: max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
 }
 
 .loginCard {
@@ -72,7 +73,7 @@ button {
   max-width: 560px;
   padding: 44px 40px 38px;
   position: relative;
-  width: min(560px, 100%);
+  width: 100%;
 }
 
 .loginClose {
@@ -132,6 +133,41 @@ button {
   border-radius: 8px;
   min-height: 58px;
   padding: 0 20px;
+}
+
+@media (max-width: 640px) {
+  .loginCard {
+    gap: 14px;
+    padding: 28px 20px 24px;
+  }
+
+  .loginClose {
+    font-size: 24px;
+    height: 42px;
+    right: 16px;
+    top: 16px;
+    width: 42px;
+  }
+
+  .loginEyebrow {
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+
+  .loginCard h1 {
+    font-size: 32px;
+    margin-bottom: 4px;
+  }
+
+  .loginTabs button {
+    font-size: 14px;
+    min-height: 46px;
+  }
+
+  .loginCard input {
+    min-height: 54px;
+    padding: 0 16px;
+  }
 }
 
 .loginError {
