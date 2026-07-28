@@ -21,3 +21,4 @@ MVP 기준:
 - App의 `LessonModal` controller는 local React draft와 위 controlled component 조립, 주입된 `onSubmit` 호출만 소유하며 외부 저장 API를 직접 호출하지 않습니다.
 - `lessonCalendarKeyboardModel.js`는 편집 대상·수업일지 열림 예외와 달력 keyboard action만 순수하게 판정합니다.
 - `useLessonCalendarKeyboardNavigation.js`는 window keydown 등록·해제, 기본 동작 차단과 기존 달력 callback dispatch만 소유합니다.
+- `lessonModalSaveSnapshot.js`는 수업 modal 저장 후 Supabase 재조회 값을 비교할 필드·시간·명단·학생별 특강 일정을 순수 정규화합니다.

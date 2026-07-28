@@ -108,6 +108,7 @@ Supabase lessons
    - 15E-2 완료: window keydown 등록·해제, action이 있을 때만 `preventDefault`, 기존 callback dispatch를 `useLessonCalendarKeyboardNavigation.js`로 옮겼다. callback이 소유한 복사·붙여넣기·undo·삭제·열기·날짜 이동 동작과 저장 경계는 변경하지 않았다.
 6. **15F 이후 — 저장 orchestration**
    - 15F-0 완료: `docs/refactor-lesson-save-orchestration-inventory-2026-07-28.md`에 modal bulk POST → Supabase source 확인 → 전체 lessons 재조회 → snapshot 대조 → React state 교체 순서와 서버의 제외 학생 알림 취소·수업기록 삭제 side effect를 기록하고 fixture로 고정했다.
+   - 15F-1 완료: 저장 후 대조 필드·시간·명단·학생별 특강 일정 정규화를 `lessonModalSaveSnapshot.js` 순수 helper로 옮겼다. modal 저장과 보강 취소 재조회가 같은 helper를 사용한다.
    - 생성·수정 bulk 저장은 기존 read-after-write 계약을 먼저 fixture로 고정한다.
    - 복사·붙여넣기·undo·취소는 위 유지보수 진단이 main에서 해결되고 격리 gate를 통과하기 전 이동하지 않는다.
 
@@ -115,4 +116,4 @@ Supabase lessons
 
 - AI 검수: 활성/비활성 참조 수, 저장 원천, 외부 side effect, low-risk 첫 후보를 정적 분석으로 확인한다.
 - 사람 검수: 없음. 화면·운영 데이터·외부 서비스를 변경하지 않았다.
-- 다음 단계: 15F-1에서 side effect가 없는 `getLessonModalSaveSnapshot`만 순수 helper로 이동한다. 저장 callback과 Supabase side effect는 이동하지 않는다.
+- 다음 단계: 15F-2에서 생성·선택형 휴강 보충 lesson payload 조립을 순수 builder로 분리할 수 있는지 fixture부터 고정한다. 저장 callback과 Supabase side effect는 이동하지 않는다.

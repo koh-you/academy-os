@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-28 P1. 15F-1 수업 modal 저장 snapshot helper 분리 — AI gate 통과
+
+- 코드: 저장 후 Supabase 재조회 대조에 쓰는 필드 선택, 시간 정규화, 중복 제거·정렬 명단, 학생별 특강 일정 key 정렬을 `src/domains/lessons/lessonModalSaveSnapshot.js`로 이동했다.
+- 동작 보존: modal bulk 저장과 보강 취소 검증이 같은 helper를 계속 사용한다. POST/GET, React state, 서버의 알림 취소·수업기록 삭제는 이동하지 않았다.
+- 자동검증: 시간 표현, 학생 순서·중복, 일정 key 순서, 기본 status, transient 필드의 동일 처리와 실제 저장 필드 차이를 deterministic fixture로 검사한다. helper의 API·React·Supabase·알림 의존성도 0으로 고정했다.
+- 사람 gate: 없음. 순수 비교 함수의 위치만 이동했다. 다음은 생성·선택형 휴강 보충 payload builder의 입력·출력 계약을 먼저 fixture로 고정한다.
+
 ## 2026-07-28 P1. 15F-0 수업 modal 저장 orchestration inventory·fixture — AI gate 통과
 
 - inventory: `docs/refactor-lesson-save-orchestration-inventory-2026-07-28.md`에 생성·수정 modal의 bulk POST, Supabase 원천 확인, 전체 lessons 재조회, ID·snapshot 대조, React state 교체 순서를 기록했다.

@@ -231,6 +231,7 @@ import {
   createLessonModalTemplateChangePatch,
   createLessonModalTypeChangePatch
 } from "../domains/lessons/lessonModalDraftTransitions.js";
+import { getLessonModalSaveSnapshot } from "../domains/lessons/lessonModalSaveSnapshot.js";
 import { LessonModalActions } from "../domains/lessons/LessonModalActions.jsx";
 import { LessonModalBasics } from "../domains/lessons/LessonModalBasics.jsx";
 import { LessonModalClosurePanel } from "../domains/lessons/LessonModalClosurePanel.jsx";
@@ -7228,34 +7229,6 @@ export function App() {
     setSelectedDate(lesson.date);
     setSelectedLessonId(lessonId);
     setIsLessonJournalOpen(true);
-  }
-
-  function getLessonModalSaveSnapshot(lesson = {}) {
-    return JSON.stringify({
-      className: lesson.className || "",
-      classTemplateId: lesson.classTemplateId || "",
-      color: lesson.color || "",
-      date: lesson.date || "",
-      endTime: normalizeTimeInput(lesson.endTime),
-      lessonId: lesson.lessonId || "",
-      lessonTrackId: lesson.lessonTrackId || "",
-      lessonTrackType: lesson.lessonTrackType || "",
-      lessonTopic: lesson.lessonTopic || "",
-      lessonType: lesson.lessonType || "",
-      sourceMakeupTaskId: lesson.sourceMakeupTaskId || "",
-      sourceSchoolEventId: lesson.sourceSchoolEventId || "",
-      sourceLabel: lesson.sourceLabel || "",
-      specialLectureGuideId: lesson.specialLectureGuideId || "",
-      specialLectureSessionId: lesson.specialLectureSessionId || "",
-      specialLectureSessionIndex: lesson.specialLectureSessionIndex ?? null,
-      specialLectureStudentSchedules: Object.fromEntries(
-        Object.entries(lesson.specialLectureStudentSchedules ?? {})
-          .sort(([leftStudentId], [rightStudentId]) => leftStudentId.localeCompare(rightStudentId))
-      ),
-      startTime: normalizeTimeInput(lesson.startTime),
-      status: lesson.status || "scheduled",
-      studentIds: [...new Set(lesson.studentIds ?? [])].sort()
-    });
   }
 
   async function saveLessonModalLessons(lessonDrafts = [], onProgress = null) {

@@ -8,7 +8,7 @@
 
 | 구간 | 직접 원천·요청 | 완료 판정 | 파생·외부 side effect | 15F 판단 |
 | --- | --- | --- | --- | --- |
-| `getLessonModalSaveSnapshot` | 없음 | 저장 대상 필드의 정규화 JSON 비교 | 없음 | 15F-1 순수 helper 분리 가능 |
+| `getLessonModalSaveSnapshot` | 없음 | 저장 대상 필드의 정규화 JSON 비교 | 없음 | 15F-1 `lessonModalSaveSnapshot.js` 분리 완료 |
 | `saveLessonModalLessons` | `POST /api/lessons/bulk` | 응답 `source=supabase` 확인 후 `GET /api/lessons?verify=...`, ID 존재와 snapshot 전필드 일치 | 재조회한 전체 활성 lessons로 React state 교체 | 요청·재조회 순서를 먼저 fixture로 유지 |
 | `handleAddLesson` | 주 수업 1건, 선택형 휴강 보충 1건을 위 bulk 흐름에 전달 | `saveLessonModalLessons` 반환값 | 선택 날짜·수업 ID 변경 | payload builder만 순수 분리 후보 |
 | `handleUpdateLesson` | 일반 수정은 bulk, 휴강 전환은 먼저 `GET /api/lessons/closure-preflight` | 최신 원천 snapshot·차단 알림·bulk 재조회 확인 | 과거 학생 보존, 생성 수업 manual override, 선택 날짜·수업 ID 변경 | 휴강 preflight와 저장 orchestration은 고위험 경계에 유지 |
@@ -27,7 +27,7 @@
 
 ## 다음 안전 단위
 
-- `15F-1`: `getLessonModalSaveSnapshot`을 순수 도메인 helper로 이동하고 동일/불일치 fixture를 추가한다.
+- `15F-1` 완료: `getLessonModalSaveSnapshot`을 순수 도메인 helper로 이동하고 시간·명단·일정 key 순서의 동일성과 저장 필드 불일치를 fixture로 고정했다.
 - `15F-2` 후보: 생성·휴강 보충 payload 조립을 순수 builder로 분리한다.
 - 실제 POST/GET orchestration, closure preflight, React state 교체, 제외 학생 알림·기록 정리는 별도 fixture와 사람 gate가 정해질 때까지 App/API 경계에 둔다.
 
