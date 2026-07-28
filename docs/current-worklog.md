@@ -1746,6 +1746,12 @@
 - AI 검수: 중복 TARGET/CONTROL에 성공·실패 row를 가상 적용하고 두 경로의 log→job→setter/helper→persist→상태 순서와 helper side effect 부재를 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 없음. 다음 `17T-3`은 성공/실패 재사용 호출 수와 발송·저장 side-effect 경계를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17T-3 lesson comment notification job upsert boundary closeout
+
+- 완료: `upsertNotificationJobList` export/import 1개와 코멘트 함수 내부 성공·실패 호출 각 1개를 고정하고 두 경로의 log→job→setter/helper→`/api/notification-jobs` 저장→상태 순서를 closeout했다.
+- AI 검수: 중복 TARGET/CONTROL 가상 목록으로 성공·실패 선두 교체와 입력 불변을 재확인하고 실제 발송 fetch·React·저장 API·상태 처리는 App, 순수 목록 계산은 helper에만 있음을 전용 closeout fixture·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 없음. 다음 `17U-1`은 notification job 상태 helper 모듈의 네 계산과 App 호출부를 종합 audit해 다음 저위험 경계를 선정한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
