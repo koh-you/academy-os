@@ -144,28 +144,39 @@ const requestSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalMakeupTaskRequest.js", import.meta.url),
   "utf8"
 );
-const helperStart = appSource.indexOf("async function saveLessonJournalMakeupTasksWithVerification(");
-const helperEnd = appSource.indexOf("async function handleSaveLessonJournalDrafts(", helperStart);
-const helperSource = appSource.slice(helperStart, helperEnd);
+const apiSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalMakeupTaskBulkApi.js", import.meta.url),
+  "utf8"
+);
+const handlerStart = appSource.indexOf("async function handleSaveLessonJournalDrafts(");
+const handlerEnd = appSource.indexOf("async function handleSaveRecord(", handlerStart);
+const helperSource = appSource.slice(handlerStart, handlerEnd);
 
 for (const injectedSource of [
   "createLessonJournalMakeupTaskRequests({",
   "currentTasks: makeupTasks",
   "idSeed: Date.now()",
-  "taskDrafts,",
-  "timestamps: taskDrafts.map(() => new Date().toISOString())",
+  "taskDrafts: makeupTaskDrafts",
+  "timestamps: makeupTaskDrafts.map(() => new Date().toISOString())",
   "today"
 ]) {
   assert.ok(helperSource.includes(injectedSource), `missing makeup request source: ${injectedSource}`);
 }
 for (const AppOwnedSideEffect of [
-  "postMakeupTasks(requestedTasks)",
-  'verification.source !== "supabase"',
-  "verifiedById",
-  "identityFields"
+  "saveLessonJournalMakeupTasksWithVerification({",
+  "request: postMakeupTasks",
+  "setMakeupTasks("
 ]) {
   assert.ok(helperSource.includes(AppOwnedSideEffect), `makeup persistence must remain in App: ${AppOwnedSideEffect}`);
   assert.ok(!requestSource.includes(AppOwnedSideEffect), `request builder must not persist: ${AppOwnedSideEffect}`);
+}
+for (const apiVerification of [
+  'verification.source !== "supabase"',
+  "verifiedById",
+  "lessonJournalMakeupTaskIdentityFields"
+]) {
+  assert.ok(apiSource.includes(apiVerification), `makeup API must preserve verification: ${apiVerification}`);
+  assert.ok(!requestSource.includes(apiVerification), `request builder must not verify persistence: ${apiVerification}`);
 }
 for (const forbiddenRuntimeSource of [
   "Date.now",

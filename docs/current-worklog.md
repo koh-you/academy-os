@@ -1441,6 +1441,14 @@
 - AI 가상검수: 완료/작성 중 기존 task, 신규 task, 명시 override CONTROL을 고정 시각으로 생성해 ID·상태·timestamp·기본값·spread 우선순위·입력 불변을 대조했고, source가 다른 동일 학생은 신규 task가 되는지 확인했다. 전용 fixture, 수업일지 inventory, 정적 시나리오 518/518, `npm run test:production`, `npm run build`, `git diff --check` 통과.
 - 사람 gate: 새 항목 없음. 다음 의미 단위는 등원보충 requested task 저장·Supabase identity 재조회 대조를 주입형 API adapter로 분리하는 작업이다.
 
+## 2026-07-28 P1. App.jsx 17F-8 수업일지 등원보충 bulk API 분리
+
+- 코드: `postMakeupTasks` 요청, Supabase source 확인, requested task별 재조회 row와 학생·source·source homework·task type·방법·메모 6개 identity 대조를 `lessonJournalMakeupTaskBulkApi.js` 주입형 adapter로 분리했다.
+- 경계: App은 request builder 결과와 `postMakeupTasks`를 adapter에 주입하고 검증된 task를 React `makeupTasks`에 반영한다. 실제 운영 API나 Supabase에는 검수 중 접근하지 않았다.
+- AI 가상검수: task 2건 TARGET과 역순·추가 row 응답으로 request 인자·반환 순서·원본 불변을 대조하고, 6개 identity 각각의 불일치, 누락 row, source 불일치, 빈 CONTROL 무호출, 네트워크 실패를 가상 실행했다. 전용 fixture, 수업일지 inventory, 정적 시나리오 519/519, `npm run test:production`, `npm run build`, `git diff --check` 통과.
+- 유지보수 진단: Supabase 재조회에서 task row 자체가 누락돼도 기존 비교 순서 때문에 오류 상세가 task ID가 아니라 첫 identity field인 `studentId`로 표시된다. 저장 차단은 정상이며 이번 리팩터링에서는 문구를 바꾸지 않았다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위는 검증된 homework/makeup/record 응답의 state merge와 record save-state map을 순수 모델로 분리하는 작업이다.
+
 ## 2026-07-28 P1. App.jsx 17D-2 수업일지 학생 표 shell 분리
 
 - 코드: 수업일지 학생 표의 panel, 읽기/편집 class, 학생·메모·출결·교재·진도·숙제·과제·알림톡 10개 고정 열 제목을 `lessonJournalTableModel.js`와 `LessonJournalTable.jsx`로 분리했다.

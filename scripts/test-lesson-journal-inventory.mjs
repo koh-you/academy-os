@@ -202,6 +202,10 @@ const makeupTaskRequestSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalMakeupTaskRequest.js", import.meta.url),
   "utf8"
 );
+const makeupTaskBulkApiSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalMakeupTaskBulkApi.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -310,7 +314,7 @@ const saveHandlerSource = section(
   "async function handleSaveLessonJournalDrafts",
   "async function handleSaveRecord"
 );
-const savePersistenceSource = `${saveHandlerSource}\n${draftSaveOutcomeSource}\n${draftPersistenceControllerSource}\n${recordBulkApiSource}\n${homeworkBulkApiSource}\n${makeupTaskRequestSource}`;
+const savePersistenceSource = `${saveHandlerSource}\n${draftSaveOutcomeSource}\n${draftPersistenceControllerSource}\n${recordBulkApiSource}\n${homeworkBulkApiSource}\n${makeupTaskRequestSource}\n${makeupTaskBulkApiSource}`;
 for (const persistenceContract of [
   "saveLessonJournalHomeworksWithVerification",
   "saveLessonJournalMakeupTasksWithVerification",
@@ -1085,20 +1089,16 @@ for (const extractedMakeupTaskRequestContract of [
     `missing extracted 17F-7 contract: ${extractedMakeupTaskRequestContract}`
   );
 }
-const makeupSaveHelperSource = section(
-  appSource,
-  "async function saveLessonJournalMakeupTasksWithVerification",
-  "async function handleSaveLessonJournalDrafts"
-);
 for (const injectedMakeupTaskRequestContract of [
   "createLessonJournalMakeupTaskRequests({",
   "currentTasks: makeupTasks",
   "idSeed: Date.now()",
-  "timestamps: taskDrafts.map(() => new Date().toISOString())",
-  "postMakeupTasks(requestedTasks)"
+  "taskDrafts: makeupTaskDrafts",
+  "timestamps: makeupTaskDrafts.map(() => new Date().toISOString())",
+  "request: postMakeupTasks"
 ]) {
   assert.ok(
-    makeupSaveHelperSource.includes(injectedMakeupTaskRequestContract),
+    saveHandlerSource.includes(injectedMakeupTaskRequestContract),
     `missing App-owned 17F-7 binding: ${injectedMakeupTaskRequestContract}`
   );
 }
@@ -1108,6 +1108,35 @@ assert.ok(
     !makeupTaskRequestSource.includes("postMakeupTasks") &&
     !makeupTaskRequestSource.includes("Supabase"),
   "makeup task request builder must stay deterministic and persistence-free"
+);
+for (const extractedMakeupTaskBulkApiContract of [
+  "lessonJournalMakeupTaskIdentityFields",
+  "saveLessonJournalMakeupTasksWithVerification",
+  "await request(requestedTasks)",
+  'verification.source !== "supabase"',
+  "return requestedTasks.map"
+]) {
+  assert.ok(
+    makeupTaskBulkApiSource.includes(extractedMakeupTaskBulkApiContract),
+    `missing extracted 17F-8 contract: ${extractedMakeupTaskBulkApiContract}`
+  );
+}
+for (const injectedMakeupTaskBulkApiContract of [
+  "saveLessonJournalMakeupTasksWithVerification({",
+  "requestedTasks,",
+  "request: postMakeupTasks",
+  "setMakeupTasks("
+]) {
+  assert.ok(
+    saveHandlerSource.includes(injectedMakeupTaskBulkApiContract),
+    `missing App-owned 17F-8 binding: ${injectedMakeupTaskBulkApiContract}`
+  );
+}
+assert.ok(
+  !appSource.includes("async function saveLessonJournalMakeupTasksWithVerification(") &&
+    !makeupTaskBulkApiSource.includes("setMakeupTasks") &&
+    !makeupTaskBulkApiSource.includes("localStorage"),
+  "makeup task bulk API adapter must own identity verification without App state"
 );
 
 console.log("LessonJournalDetail roadmap 17 inventory boundary passed");

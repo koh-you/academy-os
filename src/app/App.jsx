@@ -225,6 +225,7 @@ import { executeLessonJournalDraftPersistence } from "../domains/lessons/lessonJ
 import { createLessonJournalDraftPersistencePlan } from "../domains/lessons/lessonJournalDraftPersistencePlan.js";
 import { createLessonJournalDraftSaveRequest } from "../domains/lessons/lessonJournalDraftSaveRequest.js";
 import { saveLessonJournalHomeworksWithVerification } from "../domains/lessons/lessonJournalHomeworkBulkApi.js";
+import { saveLessonJournalMakeupTasksWithVerification } from "../domains/lessons/lessonJournalMakeupTaskBulkApi.js";
 import { createLessonJournalMakeupTaskRequests } from "../domains/lessons/lessonJournalMakeupTaskRequest.js";
 import { saveLessonJournalRecordsWithVerification } from "../domains/lessons/lessonJournalRecordBulkApi.js";
 import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
@@ -9072,31 +9073,6 @@ export function App() {
     return true;
   }
 
-  async function saveLessonJournalMakeupTasksWithVerification(taskDrafts = []) {
-    if (!taskDrafts.length) return [];
-    const requestedTasks = createLessonJournalMakeupTaskRequests({
-      currentTasks: makeupTasks,
-      idSeed: Date.now(),
-      taskDrafts,
-      timestamps: taskDrafts.map(() => new Date().toISOString()),
-      today
-    });
-    const verification = await postMakeupTasks(requestedTasks);
-    if (verification.source !== "supabase") {
-      throw new Error("등원보충을 Supabase에서 다시 확인하지 못했습니다.");
-    }
-    const verifiedById = new Map((verification.makeupTasks ?? []).map((task) => [task.makeupTaskId, task]));
-    return requestedTasks.map((requestedTask) => {
-      const verifiedTask = verifiedById.get(requestedTask.makeupTaskId);
-      const identityFields = ["studentId", "sourceId", "sourceHomeworkId", "taskType", "supplementMethod", "supplementHomeworkNote"];
-      const mismatch = identityFields.find((field) => String(verifiedTask?.[field] ?? "") !== String(requestedTask[field] ?? ""));
-      if (!verifiedTask || mismatch) {
-        throw new Error(`등원보충 저장 후 Supabase 재조회 값이 일치하지 않습니다: ${mismatch || requestedTask.makeupTaskId}`);
-      }
-      return verifiedTask;
-    });
-  }
-
   async function handleSaveLessonJournalDrafts(lesson, recordDrafts = [], homeworkDrafts = [], makeupTaskDrafts = []) {
     if (!lesson?.lessonId) return { ok: false, message: "수업일지 · 저장 실패 · 수업 ID 없음" };
     const persistencePlan = createLessonJournalDraftPersistencePlan({
@@ -9138,7 +9114,17 @@ export function App() {
         return verifiedHomeworks.length;
       },
       persistMakeupTasks: async () => {
-        const verifiedTasks = await saveLessonJournalMakeupTasksWithVerification(makeupTaskDrafts);
+        const requestedTasks = createLessonJournalMakeupTaskRequests({
+          currentTasks: makeupTasks,
+          idSeed: Date.now(),
+          taskDrafts: makeupTaskDrafts,
+          timestamps: makeupTaskDrafts.map(() => new Date().toISOString()),
+          today
+        });
+        const verifiedTasks = await saveLessonJournalMakeupTasksWithVerification({
+          requestedTasks,
+          request: postMakeupTasks
+        });
         if (verifiedTasks.length) {
           setMakeupTasks((current) => verifiedTasks.reduce(
             (tasks, task) => upsertById(tasks, task, "makeupTaskId"),
