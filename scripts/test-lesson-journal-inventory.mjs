@@ -122,6 +122,14 @@ const saveBarModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalSaveBarModel.js", import.meta.url),
   "utf8"
 );
+const tableSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalTable.jsx", import.meta.url),
+  "utf8"
+);
+const tableModelSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalTableModel.js", import.meta.url),
+  "utf8"
+);
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -590,6 +598,26 @@ for (const extractedSaveBarContract of [
   assert.ok(
     `${saveBarSource}\n${saveBarModelSource}`.includes(extractedSaveBarContract),
     `missing extracted 17D-1 contract: ${extractedSaveBarContract}`
+  );
+}
+assert.ok(
+  journalSource.includes("<LessonJournalTable"),
+  "LessonJournalDetail must compose the extracted table shell"
+);
+assert.ok(
+  !journalSource.includes('className="journalRow journalHead"'),
+  "LessonJournalDetail must not retain the table heading markup"
+);
+for (const extractedTableContract of [
+  "createLessonJournalTableModel",
+  "lessonJournalTableColumns",
+  '"journalTable editing"',
+  "model.columns.map",
+  "{children}"
+]) {
+  assert.ok(
+    `${tableSource}\n${tableModelSource}`.includes(extractedTableContract),
+    `missing extracted 17D-2 contract: ${extractedTableContract}`
   );
 }
 

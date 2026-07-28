@@ -231,6 +231,7 @@ import { LessonJournalNotificationBar } from "../domains/lessons/LessonJournalNo
 import { LessonJournalReservationModal } from "../domains/lessons/LessonJournalReservationModal.jsx";
 import { LessonJournalStudentRow } from "../domains/lessons/LessonJournalStudentRow.jsx";
 import { LessonJournalSaveBar } from "../domains/lessons/LessonJournalSaveBar.jsx";
+import { LessonJournalTable } from "../domains/lessons/LessonJournalTable.jsx";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -16620,23 +16621,7 @@ function LessonJournalDetail({
         />
       ) : null}
 
-      <section className="panel journalTablePanel">
-        <DataTableShell
-          className={journalEditMode ? "journalTable editing" : "journalTable"}
-          label="수업일지 학생 기록"
-        >
-          <div className="journalRow journalHead">
-            <span>학생</span>
-            <span>수업메모</span>
-            <span>출결</span>
-            <span>강의 교재</span>
-            <span>강의 내용</span>
-            <span>지난 숙제</span>
-            <span>다음 숙제</span>
-            <span>과제 상태</span>
-            <span>학부모 알림톡</span>
-            <span>학생 알림톡</span>
-          </div>
+      <LessonJournalTable isEditMode={journalEditMode}>
           {lessonStudents.map((student) => {
             const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
             const persistedRecord = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
@@ -16774,8 +16759,7 @@ function LessonJournalDetail({
               />
             );
           })}
-        </DataTableShell>
-      </section>
+      </LessonJournalTable>
 
       <LessonJournalSaveBar
         hasDraftChanges={hasJournalDraftChanges}
