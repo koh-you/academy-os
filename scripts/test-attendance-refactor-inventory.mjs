@@ -6,6 +6,10 @@ const attendanceApiSource = await readFile(
   new URL("../src/domains/lessons/attendanceApi.js", import.meta.url),
   "utf8"
 );
+const attendanceSyncControllerSource = await readFile(
+  new URL("../src/domains/lessons/attendanceSyncController.js", import.meta.url),
+  "utf8"
+);
 const manualAttendanceSaveControllerSource = await readFile(
   new URL("../src/domains/lessons/manualAttendanceSaveController.js", import.meta.url),
   "utf8"
@@ -24,25 +28,30 @@ function assertOrdered(source, values) {
 }
 
 for (const request of [
-  '`/api/lesson-records?date=${encodeURIComponent(syncDate)}`',
   "window.setInterval(syncAttendanceRecords, 7_000)"
 ]) {
   assert.ok(appSource.includes(request), `missing attendance client request: ${request}`);
 }
+assert.ok(
+  attendanceSyncControllerSource.includes(
+    '`/api/lesson-records?date=${encodeURIComponent(syncDate)}`'
+  ),
+  "missing date-scoped attendance sync request"
+);
 for (const request of ['"/api/attendance/check"', '"/api/attendance/preview"']) {
   assert.ok(attendanceApiSource.includes(request), `missing attendance API request: ${request}`);
 }
 
 assertOrdered(appSource, [
-  'import { mergeRemoteAttendanceRecord } from "../domains/lessons/attendanceSync.js"',
+  'import { syncAttendanceRecordsAction } from "../domains/lessons/attendanceSyncController.js"',
   "async function syncAttendanceRecords()",
-  "mergeRemoteAttendanceRecord(",
+  "syncAttendanceRecordsAction({",
   "window.setInterval(syncAttendanceRecords, 7_000)"
 ]);
 assert.equal(
-  appSource.includes("function mergeRemoteAttendanceRecord("),
+  appSource.includes("mergeRemoteAttendanceRecord("),
   false,
-  "attendance sync merge implementation must stay outside App"
+  "attendance sync merge and orchestration must stay outside App"
 );
 
 assertOrdered(serverSource, [

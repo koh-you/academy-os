@@ -216,7 +216,7 @@ import { AttendanceKiosk } from "../domains/lessons/AttendanceKiosk.jsx";
 import { checkKioskAttendanceAction } from "../domains/lessons/attendanceKioskCheckController.js";
 import { previewKioskAttendanceAction } from "../domains/lessons/attendanceKioskPreviewController.js";
 import { AttendanceModal } from "../domains/lessons/AttendanceModal.jsx";
-import { mergeRemoteAttendanceRecord } from "../domains/lessons/attendanceSync.js";
+import { syncAttendanceRecordsAction } from "../domains/lessons/attendanceSyncController.js";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
 import {
@@ -6792,53 +6792,23 @@ export function App() {
     async function syncAttendanceRecords() {
       if (disposed || inFlight || document.visibilityState === "hidden") return;
       inFlight = true;
-      setAttendanceSyncStatus((current) => ({
-        ...current,
-        message: "출결 서버 확인 중",
-        state: "syncing"
-      }));
       try {
-        const result = await getJsonWithTimeout(
-          `/api/lesson-records?date=${encodeURIComponent(syncDate)}`,
-          8000,
-          "출결 동기화가 지연되고 있습니다."
-        );
-        if (disposed) return;
-        const remoteRecords = Array.isArray(result.records) ? result.records : [];
-        setRecords((currentRecords) => {
-          const currentById = new Map(currentRecords.map((record) => [record.lessonStudentRecordId, record]));
-          let hasChanges = false;
-          remoteRecords.forEach((remoteRecord) => {
-            if (!remoteRecord?.lessonStudentRecordId) return;
-            const localRecord = currentById.get(remoteRecord.lessonStudentRecordId) ?? null;
-            const mergedRecord = mergeRemoteAttendanceRecord(
-              localRecord,
-              remoteRecord,
-              saveStatesRef.current[remoteRecord.lessonStudentRecordId]
-            );
-            if (!localRecord || JSON.stringify(localRecord) !== JSON.stringify(mergedRecord)) {
-              currentById.set(remoteRecord.lessonStudentRecordId, mergedRecord);
-              hasChanges = true;
-            }
-          });
-          if (!hasChanges) return currentRecords;
-          const nextRecords = [...currentById.values()];
-          recordsRef.current = nextRecords;
-          return nextRecords;
+        await syncAttendanceRecordsAction({
+          getSaveState: (recordId) => saveStatesRef.current[recordId],
+          isDisposed: () => disposed,
+          onRecords: (updater) => {
+            setRecords((currentRecords) => {
+              const nextRecords = updater(currentRecords);
+              if (nextRecords !== currentRecords) {
+                recordsRef.current = nextRecords;
+              }
+              return nextRecords;
+            });
+          },
+          onStatus: setAttendanceSyncStatus,
+          request: getJsonWithTimeout,
+          syncDate
         });
-        setAttendanceSyncStatus({
-          lastSyncedAt: new Date().toISOString(),
-          message: "출결 최신 상태",
-          state: "synced"
-        });
-      } catch (error) {
-        if (!disposed) {
-          setAttendanceSyncStatus((current) => ({
-            ...current,
-            message: error.message || "출결 동기화 실패",
-            state: "failed"
-          }));
-        }
       } finally {
         inFlight = false;
       }

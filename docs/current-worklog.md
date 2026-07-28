@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-28 P1. 16F-1 출결 증분 동기화 controller 분리 — AI gate 통과
+
+- 코드: 날짜 범위 `/api/lesson-records` request 계약, remote record collection 병합, syncing/synced/failed 상태 전이를 `attendanceSyncController.js`로 이동했다. 7초 interval과 focus/visibility listener, in-flight/disposed lifecycle 및 실제 React setter는 App에 남겼다.
+- TARGET/CONTROL 가상 데이터: dirty TARGET은 원격 출결 필드만 반영하고 미저장 수업내용·교사 코멘트를 보존했다. CONTROL과 신규 row, 변경 없는 배열 참조를 대조하고 request URL·8초 timeout·오류 문구·적용 순서를 고정했다. disposed 응답은 records/success 상태 적용 0건, request 실패는 마지막 성공 시각을 보존한 failed 상태, 잘못된 records 응답은 빈 목록 성공으로 판정했다.
+- 경계: 모든 request와 상태 setter는 가상 함수이며 실제 API/Supabase/Solapi 호출은 0건이다. 출결 저장·발송·예약과 maintenance 진단은 변경하지 않았다.
+- AI 검증: 출결 전체 fixture chain, production 전체 체인, scenario 501/501, build, `git diff --check`를 통과했다. 사람 gate는 없다. 다음 16F-2는 polling timer와 focus/visibility listener lifecycle hook이다.
+
 ## 2026-07-28 P1. 16E-2 수동 출결 저장 controller 분리 — AI gate 통과
 
 - 코드: 수동 출결 request 실행, 반환 lesson→record→notification job 적용 순서, record 누락 차단, 결석 예약의 `scheduled`·`dry_run` 성공과 부분 실패 판정을 `manualAttendanceSaveController.js`로 이동했다. App은 API request와 React state adapter만 주입한다.
