@@ -1,0 +1,62 @@
+# LessonJournalDetail refactor inventory — 2026-07-28
+
+## 범위
+
+로드맵 17에서 `LessonJournalDetail`을 옮기기 전에 정규 수업일지의 표시·local draft·다중 원천 저장과 알림톡 예약/취소 경계를 고정한다. 결석보충·숙제보충 상세는 `SupplementMakeupLessonDetail`, 시험대비 상세는 `ExamPrepLessonDetail`로 이미 조기 분기되므로 이번 inventory의 주 대상은 정규·특강 수업일지다.
+
+이 inventory와 fixture는 소스만 읽는다. 운영 API, Supabase, `notification_jobs`, Solapi 발송·예약·취소를 호출하지 않는다.
+
+## 입력·읽기 원천
+
+| 영역 | 컴포넌트 입력·직접 읽기 | 용도 | 쓰기 여부 |
+| --- | --- | --- | --- |
+| 수업·학생 | `lesson`, `lessons`, `students`, `templates` | 현재 수업 명단, 이전 수업, 반/특강 경계, 학생별 표시 | 컴포넌트 내부 쓰기 없음 |
+| 수업기록 | `records`, `allRecords`, `saveStates` | 교재·진도·출결·과제상태·준비메모·학생/학부모 코멘트, 이전 메모 | local draft 후 상위 callback |
+| 숙제 | `homeworks` | 지난/다음 숙제, 연결 원천, 숙제 확인 상태 | local draft 후 상위 callback |
+| 보충 | `makeupTasks` | 학생별 확정 일정 문구, 등원보충 초안, 연결 보충 상세 | local draft 또는 상위 callback |
+| 시험·자료·리마인더 | `testSessions`, `testAttempts`, `materials`, `academyTests`, `academyReminders` | 시험 결과 문구, 자료/시험/학원 할 일 표시 | 읽기 전용 |
+| 알림 계획·OS 작업 | `lessonNotificationPlan`, `notificationJobs` | 예약 모드, 학생/학부모 현재 job, 누락·잔여·내용변경 판정 | 상위 callback 또는 OS job audit |
+| provider 결과 | `notificationJobs`의 provider reference와 상위 reconcile callback | 발송결과 확인 대상·완료·실패 표시 | 컴포넌트가 Solapi 원시 group/message를 직접 읽지 않음 |
+
+## local draft와 UI state
+
+| state 묶음 | 필드 | 완료·초기화 계약 |
+| --- | --- | --- |
+| 수업일지 편집 | `journalEditMode`, `journalRecordDrafts`, `journalHomeworkDrafts`, `journalMakeupTaskDrafts`, `journalManualSaveMessage`, `editingMemoKey` | lesson ID 변경 시 모두 초기화. 저장 성공 때만 draft를 비우고, 실패·부분 저장이면 수정본 유지 |
+| 코멘트·준비메모 | `commentModal`, `prepMemoModal`, `studentPreviewId` | 학생·대상별 현재 record를 다시 읽고 상위 저장/AI/발송 callback 사용 |
+| 예약 audit | `reservationModalOpen`, `reservationAudit`, `reservationInspectMode` | 모달을 열 때 OS job을 조회하고 전체·예약·취소/실패를 구분 |
+| 외부 반영 진행 | `reservationApplyState`, `solapiResultRefreshState`, `cancelingReservationJobId` | 중복 클릭을 막고 성공·실패 문구와 OS job 표시를 갱신 |
+
+## 저장 원천과 side effect
+
+| 동작 | 직접 원천·호출 | 성공 판정 | 외부 side effect·위험 |
+| --- | --- | --- | --- |
+| 수업일지 변경 저장 | `onSaveLessonJournalDrafts` → App `handleSaveLessonJournalDrafts` | 숙제·등원보충·수업기록을 각각 Supabase 재조회 대조. 성공한 원천 수를 메시지에 남김 | `homeworks`, `makeup_tasks`, `lesson_student_records`의 순차 다중 원천 저장. 앞 원천 성공 뒤 뒤 원천 실패가 가능 |
+| 수업기록 단건 저장 | `onSaveRecord` → App `handleSaveRecord` | 반환 record와 필요 필드 재조회 대조 | 연결 숙제 bulk 저장 가능. 옵션에 따라 알림 예약 refresh 가능 |
+| 숙제 수정 | `onUpdateHomework` | 상위 저장 adapter 판정 | `homeworks` 변경 |
+| 등원보충 상태·일정·완료 | `onUpdateMakeupTask`, `onScheduleMakeupTask`, `onPassMakeupTask` | 상위 보충 controller 판정 | `makeup_tasks`, 연결 lesson, 예약 알림 가능 |
+| 코멘트 AI/저장/발송 | `onPolishComment`, `onSaveRecord`, `onSendComment` | 저장된 최종 record를 기준으로 상위 adapter 판정 | AI API, record 저장, Solapi 즉시/예약 발송 가능 |
+| 학생별 알림 제외 | `onToggleStudentNotificationMute` | record 저장·재조회 | 현재 예약 갱신/취소와 연결 가능 |
+| 알림 모드·수동 시각 | `onUpdateLessonNotificationPlan`, `onScheduleLessonNotificationsAt` | app_state 계획 저장 후 별도 실제 반영 | 계획 저장과 실제 `notification_jobs`/Solapi 반영은 분리 |
+| 실제 예약 반영 | `onApplyLessonNotificationPlan` | 기대 job ID·payload fingerprint와 활성 provider reference 대조 | `notification_jobs` 생성/갱신/취소와 Solapi 예약/취소 |
+| 발송결과 reconcile | `onReconcileSolapiNotificationResults` | provider 결과를 OS job 상태에 반영 | Solapi 조회와 `notification_jobs` 상태 쓰기 |
+| OS job 취소 | `onCancelNotificationJob` | 반환 job 또는 audit 재조회 | OS job·Solapi 예약 취소 |
+
+상위 저장 handler는 성공한 숙제·등원보충을 되돌리지 않고 `부분 저장`으로 보고한다. 이 보상 없는 순차 계약은 기능 변경 없이 그대로 보존해야 하며, 이동 전에 TARGET/CONTROL과 각 단계 실패 fixture가 필요하다.
+
+## 첫 안전 분리 순서
+
+1. `17A-1` 수업일지 draft 수·저장 상태·하단 고정바 문구 순수 모델
+2. `17A-2` 예약 audit count/filter/display 순수 모델
+3. `17A-3` 이전 준비메모 선택 순수 selector
+4. 표시용 하위 panel/component를 controlled callback 경계로 한 번에 하나씩 분리
+5. 다중 원천 저장은 TARGET/CONTROL·부분 성공 fixture 뒤 주입형 controller로 분리
+6. `notification_jobs`/Solapi 예약·취소·발송결과 orchestration은 App callback에 남기고 순수 표시·판정만 분리
+
+## AI 자동검증과 사람 gate
+
+- inventory gate: 정적 source fixture로 입력, local state, 저장 callback, 직접 API, 상위 Supabase 저장 handler를 확인한다.
+- 다음 저위험 모델: deterministic 가상 draft/save-state로 자동 판정한다.
+- 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
+- recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.
+- 학생 포털 실제 쓰기와 Solapi 특강 템플릿 검수는 사용자 지시로 목록에서 제거됐고, 교사 bearer/Storage 소유권 보안은 구현·배포 검증 완료다.

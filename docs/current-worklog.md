@@ -1442,6 +1442,13 @@
 2. `교사 bearer + Storage 소유권 보안 gate` — 별도 고위험 작업으로 남아 있으며 현재 통과가 아니다.
 3. `Solapi 특강 템플릿 외부 검수` — 완료 확인 전 연결/테스트 발송 금지. 이 리팩터링 세션의 구현 범위는 아니다.
 
+## 2026-07-28 P1. 로드맵 17 LessonJournalDetail inventory — AI gate 통과
+
+- 문서: `docs/refactor-lesson-journal-detail-inventory-2026-07-28.md`에 입력 원천, local draft/state, 직접 API와 상위 callback, Supabase 저장 완료 판정, `notification_jobs`/Solapi side effect를 표로 고정했다.
+- 핵심 경계: 수업일지 변경 저장은 숙제→등원보충→수업기록 순차 다중 원천이며 성공한 앞 원천을 되돌리지 않고 부분 저장을 보고한다. 최신 main 기준 예약 audit은 OS job만 직접 읽고, 제거된 Solapi 원시 group/message 조회·직접 group 취소 UI는 복원하지 않는다. 실제 예약 반영·결과 reconcile·OS job 취소는 상위 App callback이다.
+- 분리 순서: 17A-1 draft 수·저장 상태·sticky bar 순수 모델부터 시작하고, 예약 audit 표시 모델·이전 준비메모 selector·controlled panel을 뒤따른다. 다중 원천 저장은 TARGET/CONTROL 부분 실패 fixture 뒤 분리하며 `notification_jobs`/Solapi orchestration은 App callback에 남긴다.
+- AI 검증: source inventory fixture, build, `git diff --check`로 최신 main 경계를 확인한다. 실제 API/Supabase/Solapi 호출은 0건이고 사람 gate는 0건이다.
+
 ## 2026-07-28 P1. 16G-2 출결 closeout audit — 로드맵 16 완료
 
 - closeout: App의 출결 잔여 코드를 kiosk preview/check와 수동 저장의 React state adapter, `AttendanceKiosk`·`AttendanceModal` controlled 조립, 출결 전용 초기 데이터 load로 분류했다. 독립 계산·표시 모델·request payload/API adapter·성공 결과 적용·polling lifecycle·설정 정규화는 분리 파일에 있고 App 재정의가 없음을 검사한다.
