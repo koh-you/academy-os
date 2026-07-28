@@ -109,8 +109,9 @@
 61. `17I-7` 완료: record/homework/makeup local draft action과 App-owned React/저장 경계를 closeout audit으로 고정했다.
 62. `17J-1` 완료: 예약 job 상태 우선·저장 comment 상태 fallback 표시를 순수 selector로 분리했다.
 63. `17J-2` 완료: comment 발송상태의 표시 정규화·버튼 상태·라벨 계산을 시각 판정 주입형 순수 모델로 분리했다.
-64. 다음 `17J-3`: notification job 자체의 상태 표시 formatter를 시간·시각 formatter 주입형 순수 모델로 분리한다.
-65. `notification_jobs` 조회·OS job 취소·provider 예약 반영·발송결과 reconcile orchestration은 App callback에 남기고 순수 표시·판정만 분리
+64. `17J-3` 완료: notification job 자체의 상태 표시 formatter를 시간·시각 formatter 주입형 순수 모델로 분리했다.
+65. 다음 `17J-4`: notification job 취소 가능·삭제 가능·provider reference·상태 class 표시 helper 경계를 inventory한다.
+66. `notification_jobs` 조회·OS job 취소·provider 예약 반영·발송결과 reconcile orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -184,6 +185,7 @@
 - `17I-7` gate: local draft action 10개와 순수 binding 9개가 `LessonJournalDetail`에 한 번씩 있는지, 현재시각·세 draft map setter·저장 메시지·상위 저장 callback이 App에 남는지 검사한다. 다섯 순수 모델에 React·네트워크·시계·API/localStorage가 없고 전체 async 6개 중 local draft 저장이 1개인지 고정한다.
 - `17J-1` gate: 가상 예약 job TARGET, 저장된 학부모·학생 상태 CONTROL, `"없음"`·빈 job 표시 fallback, 기타 target을 대조한다. job 조회→format의 호출 순서, job 우선 시 저장 상태 formatter 미호출, 입력 불변과 selector의 네트워크·시계·React side effect 부재를 검사한다.
 - `17J-2` gate: 일반·잘못된 예약시각·미래·경과 예약상태와 빈/내용 없음/확인 필요/실패/발송 중/예약 중/완료/기록됨/draft를 가상 입력으로 판정한다. comment 유무의 버튼 상태와 상태 라벨, 조기 반환 시 normalize 미호출, formatter 호출 순서, 시간 판정 주입과 모델 side effect 부재를 검사한다.
+- `17J-3` gate: null, 미래·경과 scheduled, sent/dry_run/send_unconfirmed/pending_send/failed/canceled/draft/unknown job을 가상 입력으로 판정한다. scheduled에서 시각 formatter→경과 판정 호출 순서, 비예약 상태의 dependency 미호출, 입력 불변과 formatter의 시계·네트워크·React side effect 부재를 검사한다.
 - `17I-7` gate: local draft action 10개와 순수 binding 9개가 `LessonJournalDetail`에 한 번씩 있는지, 현재시각·세 draft map setter·저장 메시지·상위 저장 callback이 App에 남는지 검사한다. 다섯 순수 모델에 React·네트워크·시계·API/localStorage가 없고 전체 async 5개 중 local draft 저장이 1개인지 고정한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
 - recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.

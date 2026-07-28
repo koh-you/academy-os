@@ -1470,6 +1470,13 @@
 - AI 검수: 일반 상태, 잘못된 예약시각, 미래·경과 예약 TARGET/CONTROL과 모든 상태 분류, comment 유무를 가상 실행해 조기 반환·formatter 호출 순서·입력 불변을 대조한다. 전용 fixture·정적 시나리오·build·diff 검사를 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17J-3`은 notification job 자체의 상태 표시 formatter를 시간·시각 formatter 주입형 순수 모델로 분리하고 실제 provider 동작은 이동하지 않는다.
 
+## 2026-07-28 P1. App.jsx 17J-3 notification job 상태 formatter 분리
+
+- 코드: null, 예약 중/시각 경과, 발송 완료, 테스트 기록, 발송 확인 필요, 발송 대기, 실패, 취소, 초안과 기타 job 상태의 한국어 표시 계산을 `notificationJobStatusFormatter.js`로 분리했다.
+- 보존 경계: 한국 시각 label formatter와 현재시각 기반 예약 경과 판정은 App helper로 주입한다. formatter는 job을 읽기만 하며 조회·예약·취소·provider 결과 반영을 수행하지 않는다.
+- AI 검수: 가상 미래/경과 scheduled TARGET과 모든 비예약 CONTROL 상태, error 유무, 빈 예약 label을 실행해 반환 문자열·의존성 호출 순서·비예약 조기 반환·입력 불변을 대조한다. 전용 fixture·정적 시나리오·build·diff 검사를 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17J-4`는 notification job 취소 가능·삭제 가능·provider reference·상태 class 표시 helper 경계를 inventory하고 외부 action은 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
