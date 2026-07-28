@@ -1726,6 +1726,12 @@
 - AI 검수: 교체·취소 TARGET, 같은 수업 다른 학생 CONTROL, 다른 수업 CONTROL 가상 목록으로 helper 결과와 입력 불변을 검증하고 App의 inline Set/filter 제거와 실행 순서를 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 없음. 다음 `17S-3`은 재사용 호출 수와 학생별 예약·취소 side-effect 경계를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17S-3 student notification job state merge boundary closeout
+
+- 완료: `mergeNotificationJobLists` export 1개, notification state 모듈 import 1개, 학생별 batch 재사용 호출 1개를 고정하고 대상 filter·취소 row 생성→setter/helper→학생별 예약→취소 순서를 closeout했다.
+- AI 검수: incoming 중복 TARGET, 같은 수업 다른 학생 CONTROL, 다른 수업 CONTROL을 가상 실행해 순서·보존·입력 불변을 재확인하고 helper의 React·시각·API·Supabase·Solapi side effect 0건을 전용 closeout fixture·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 없음. 다음 `17T-1`은 단건 알림 성공·실패 저장 경로 두 곳의 inline upsert가 기존 `upsertNotificationJobList`와 같은지 inventory한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
