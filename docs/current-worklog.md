@@ -1533,6 +1533,13 @@
 - AI 검수: 학생 TARGET과 학부모 CONTROL을 고정 시각으로 생성해 전체 payload/job, 대상별 type·번호, nullish 출결 기본값, helper 호출 순서, snapshot·preview 인자와 입력 불변을 전용 fixture·정적 시나리오·build·diff 검사로 대조한다.
 - 사람 gate: 새 항목 없음. 다음 `17K-3`은 App 원천 조회·알림 제외 guard·builder 주입과 외부 action 경계를 closeout audit한다.
 
+## 2026-07-28 P1. App.jsx 17K-3 lesson notification job builder closeout
+
+- 결과: App wrapper는 record ID/현재 record/homework/보충/시험/설정 원천 조회, 대상별 알림 제외, audience와 현재시각만 소유하고 11개 helper를 순수 final builder에 주입한다.
+- 고정 경계: wrapper와 builder에는 API·React setter·persist/reserve가 없다. 학생별 batch는 기존 학부모→학생 순서를 유지하고 실제 bulk reserve·취소 저장·plan 적용 3개 action은 App에 한 번씩 남는다.
+- AI 검수: source wrapper 범위와 순수 builder를 정적으로 추출해 원천·dependency·단일 clock·금지 side effect·상위 호출 순서·외부 action 잔존을 closeout fixture·정적 시나리오·build·diff 검사로 확인한다.
+- 사람 gate: 새 항목 없음. 다음 `17L-1`은 휴강 제외와 학생별 학부모→학생 job 목록 조합만 순수 batch model로 분리하고 실제 예약은 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

@@ -48,5 +48,5 @@
 ## 다음 분리 계획
 
 1. `17K-2` 완료: 조회가 끝난 record/homework/schedule/test 입력과 고정 `nowIso`를 받는 최종 job builder를 `lessonNotificationJobBuilder.js`로 분리했다.
-2. 다음 `17K-3`: App의 원천 조회·알림 제외 guard·helper 주입 wrapper를 closeout audit한다.
+2. `17K-3` 완료: App의 원천 조회·알림 제외 guard·helper 주입 wrapper와 외부 action 경계를 closeout audit으로 고정했다.
 3. 실제 reserve/cancel/reconcile orchestration은 사람 gate 없이 이동하지 않는다.
