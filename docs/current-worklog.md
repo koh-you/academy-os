@@ -1484,6 +1484,13 @@
 - AI 검수: 가상 notice 4상태, 비 notice CONTROL, 과거·미래·시각 없는 send_unconfirmed와 직접/fallback provider reference를 실행해 조기 반환·grace 0 인자·입력 불변을 대조한다. 전용 fixture·정적 시나리오·build·diff 검사를 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17J-5`는 중첩 provider 응답에서 group/message reference를 읽는 순수 selector를 분리하며 provider 조회·취소는 이동하지 않는다.
 
+## 2026-07-28 P1. App.jsx 17J-5 provider 응답 reference selector 분리
+
+- 코드: Solapi/provider 응답의 `response.groupInfo`, 성공·실패 message list, camel/snake message/group ID, 이중 `result.response`, root group/message에서 첫 reference를 선택하는 helper를 `notificationProviderReference.js`로 분리했다.
+- 보존 경계: 기존 13개 fallback 경로와 우선순서를 그대로 유지한다. App의 예약 결과 처리와 job 표시가 같은 selector를 사용하지만 실제 provider 요청·결과 reconcile·취소는 이동하지 않았다.
+- AI 검수: 13개 가상 응답 형태와 null/undefined/빈 CONTROL, 모든 경로가 함께 있는 우선순위 TARGET을 실행해 반환값·입력 불변을 대조한다. 전용 fixture·정적 시나리오·build·diff 검사를 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17J-6`은 lesson 예약 payload fingerprint 정규화·직렬화를 순수 모델로 분리하고 실제 예약 비교/반영 action은 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
