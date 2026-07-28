@@ -236,6 +236,7 @@ import { createLessonJournalMakeupTaskRequests } from "../domains/lessons/lesson
 import { saveLessonJournalRecordsWithVerification } from "../domains/lessons/lessonJournalRecordBulkApi.js";
 import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
 import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
+import { createLessonJournalReservationControlModel } from "../domains/lessons/lessonJournalReservationControlModel.js";
 import { createLessonJournalReservationSyncStatus } from "../domains/lessons/lessonJournalReservationSyncModel.js";
 import { createLessonJournalExpectedReservationItems } from "../domains/lessons/lessonJournalExpectedReservationItems.js";
 import { selectPreviousLessonMemoContext } from "../domains/lessons/lessonJournalPreviousMemoSelector.js";
@@ -16014,35 +16015,27 @@ function LessonJournalDetail({
     notificationPlanMode,
     notificationPlanScheduledAt: lessonNotificationPlan?.scheduledAt
   });
-  const notificationPlanSummaryText = notificationPlanMode === "none"
-    ? "알림톡 없음"
-    : notificationPlanMode === "delay30"
-      ? `${isDelayedScheduleExpired ? "30분 지연 시간 지남" : "30분 지연"} · ${delayedAlimtalkTimeLabel}`
-      : notificationPlanMode === "manual"
-        ? `수동 예약 · ${lessonNotificationPlan?.scheduledAt ? formatKoreaTimeLabel(lessonNotificationPlan.scheduledAt) : "시각 미정"}`
-        : defaultScheduleHintText;
-  const solapiApplyButtonLabel =
-    reservationApplyState === "applying"
-      ? "Solapi 반영 중"
-      : notificationPlanMode === "none"
-        ? "Solapi 취소 반영"
-        : solapiReservationSyncStatus.state === "needs"
-          ? "Solapi 예약 업데이트"
-          : "Solapi 예약 반영";
-  const canApplySolapiReservation =
-    Boolean(onApplyLessonNotificationPlan) &&
-    !hasJournalDraftChanges &&
-    reservationApplyState !== "applying" &&
-    solapiReservationSyncStatus.state !== "resultDue" &&
-    (solapiReservationSyncStatus.state === "needs" || reservationApplyState === "failed");
-  const canRefreshSolapiResults =
-    Boolean(onReconcileSolapiNotificationResults) &&
-    !hasJournalDraftChanges &&
-    solapiResultRefreshState !== "loading" &&
-    hasSolapiResultRefreshTarget;
-  const solapiResultRefreshTitle = solapiResultRefreshTargetJobs.length
-    ? `Solapi 발송 원천 ${solapiResultRefreshTargetJobs.length}건을 OS 상태에 반영합니다.`
-    : "지난 예약의 Solapi 발송결과를 OS 상태에 반영합니다.";
+  const {
+    canApplySolapiReservation,
+    canRefreshSolapiResults,
+    notificationPlanSummaryText,
+    solapiApplyButtonLabel,
+    solapiResultRefreshTitle
+  } = createLessonJournalReservationControlModel({
+    defaultScheduleHintText,
+    delayedScheduleLabel: delayedAlimtalkTimeLabel,
+    formatManualScheduledAt: formatKoreaTimeLabel,
+    hasApplyHandler: Boolean(onApplyLessonNotificationPlan),
+    hasDraftChanges: hasJournalDraftChanges,
+    hasRefreshHandler: Boolean(onReconcileSolapiNotificationResults),
+    isDelayedScheduleExpired,
+    notificationPlanMode,
+    notificationPlanScheduledAt: lessonNotificationPlan?.scheduledAt,
+    reservationApplyState,
+    resultRefreshState: solapiResultRefreshState,
+    resultRefreshTargetCount: solapiResultRefreshTargetJobs.length,
+    syncStatus: solapiReservationSyncStatus
+  });
 
   function startJournalEditMode() {
     setJournalEditMode(true);

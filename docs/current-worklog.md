@@ -1371,6 +1371,13 @@
 - AI 가상검수: TARGET 학생은 학생 알림 제외, CONTROL 학생은 record fallback 뒤 학부모 제외로 구성해 최종 parent/student item 2건, 30분 시각, payload 입력, 호출 순서·원본 불변을 대조했다. 알림 없음·수동시각 없음 무호출, 수동시각 직접 사용, 기본 0분 CONTROL도 확인했다. 전용 fixture, 정적 시나리오 526/526, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17H-3`은 예약 계획 요약·버튼 문구·적용/결과조회 가능 여부의 순수 view model을 분리한다.
 
+## 2026-07-28 P1. App.jsx 17H-3 수업일지 예약 제어 view model 분리
+
+- 코드: 기본·30분 지연·수동·알림 없음 계획 요약, Solapi 반영/업데이트/취소 버튼 문구, 예약 반영 가능 여부, 발송결과 조회 가능 여부와 도움말을 `lessonJournalReservationControlModel.js` 순수 모델로 분리했다.
+- 경계: 실제 OS audit 조회, OS job 취소, provider 예약 계획 반영, 발송결과 reconcile과 React 상태 전환은 계속 `App.jsx`가 소유한다. 새 모델은 전달받은 상태와 callback 존재 여부만 계산하며 raw Solapi group/message UI·group 취소 API를 다시 도입하지 않는다.
+- AI 가상검수: 기본·30분 지연·경과·수동 시각 있음/없음·알림 없음, applying/needs/failed/resultDue/draft, 결과조회 대상 0/2건과 loading/handler 없음 TARGET·CONTROL을 대조했다. App-owned action 4개와 외부 side effect 부재를 정적으로 검사하고 전용 fixture와 시나리오 527/527을 통과했다. 운영 API·Supabase·Solapi 호출은 0건이다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17H-4`는 예약 audit 조회 결과의 성공·부분 실패·전체 실패를 React 상태로 만들기 전 순수 응답 정규화로 분리할 수 있는지 inventory한다. 네트워크 요청과 취소 action은 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
